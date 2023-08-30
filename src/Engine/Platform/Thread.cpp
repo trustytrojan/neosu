@@ -7,11 +7,11 @@
 
 #include "Thread.h"
 
+#include <pthread.h>
+
 #include "ConVar.h"
 #include "Engine.h"
 #include "HorizonThread.h"
-
-#include <pthread.h>
 
 // pthread implementation of Thread
 class PosixThread : public BaseThread {

@@ -7,13 +7,13 @@
 
 #include "ResourceManager.h"
 
+#include <mutex>
+
 #include "ConVar.h"
 #include "Engine.h"
 #include "Environment.h"
 #include "Thread.h"
 #include "Timer.h"
-
-#include <mutex>
 #include "WinMinGW.Mutex.h"
 
 static std::mutex g_resourceManagerMutex;             // internal lock for nested async loads
@@ -392,8 +392,8 @@ McFont *ResourceManager::loadFont(std::string filepath, std::string resourceName
     return fnt;
 }
 
-Sound *ResourceManager::loadSoundAbs(std::string filepath, std::string resourceName, bool stream, bool overlayable, bool threeD,
-                                     bool loop, bool prescan) {
+Sound *ResourceManager::loadSoundAbs(std::string filepath, std::string resourceName, bool stream, bool overlayable,
+                                     bool threeD, bool loop, bool prescan) {
     // check if it already exists
     if(resourceName.length() > 0) {
         Resource *temp = checkIfExistsAndHandle(resourceName);

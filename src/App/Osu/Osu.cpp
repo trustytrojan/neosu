@@ -102,6 +102,7 @@ ConVar osu_hud_volume_duration("osu_hud_volume_duration", 1.0f, FCVAR_NONE);
 ConVar osu_hud_volume_size_multiplier("osu_hud_volume_size_multiplier", 1.5f, FCVAR_NONE);
 
 ConVar osu_speed_override("osu_speed_override", -1.0f, FCVAR_NONVANILLA);
+ConVar osu_animation_speed_override("osu_animation_speed_override", -1.0f, FCVAR_CHEAT);
 
 ConVar osu_pause_on_focus_loss("osu_pause_on_focus_loss", true, FCVAR_NONE);
 ConVar osu_quick_retry_delay("osu_quick_retry_delay", 0.27f, FCVAR_NONE);
@@ -290,6 +291,7 @@ Osu::Osu(int instanceID) {
     ConVars::sv_cheats.setCallback(fastdelegate::MakeDelegate(this, &Osu::onCheatsChange));
 
     osu_speed_override.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSpeedChange));
+    osu_animation_speed_override.setCallback(fastdelegate::MakeDelegate(this, &Osu::onAnimationSpeedChange));
 
     m_osu_playfield_rotation->setCallback(fastdelegate::MakeDelegate(this, &Osu::onPlayfieldChange));
     m_osu_playfield_stretch_x->setCallback(fastdelegate::MakeDelegate(this, &Osu::onPlayfieldChange));
@@ -1898,6 +1900,14 @@ float Osu::getSpeedMultiplier() {
     return speedMultiplier;
 }
 
+float Osu::getAnimationSpeedMultiplier() {
+    float animationSpeedMultiplier = getSpeedMultiplier();
+
+    if(osu_animation_speed_override.getFloat() >= 0.0f) return std::max(osu_animation_speed_override.getFloat(), 0.05f);
+
+    return animationSpeedMultiplier;
+}
+
 bool Osu::isInPlayMode() { return (m_songBrowser2 != NULL && m_songBrowser2->hasSelectedAndIsPlaying()); }
 
 bool Osu::isNotInPlayModeOrPaused() {
@@ -2190,10 +2200,20 @@ void Osu::onSkinChange(UString oldValue, UString newValue) {
     m_bSkinLoadScheduled = true;
 }
 
+void Osu::updateAnimationSpeed() {
+    if(getSkin() != NULL && getSelectedBeatmap() != NULL) {
+        float speed = getAnimationSpeedMultiplier() / getSpeedMultiplier();
+        getSkin()->setAnimationSpeed(speed >= 0.0f ? speed : 0.0f);
+    }
+}
+
+void Osu::onAnimationSpeedChange(UString oldValue, UString newValue) { updateAnimationSpeed(); }
+
 void Osu::onSpeedChange(UString oldValue, UString newValue) {
     float speed = newValue.toFloat();
     if(getSelectedBeatmap() != NULL) {
         getSelectedBeatmap()->setSpeed(speed >= 0.0f ? speed : getSpeedMultiplier());
+        updateAnimationSpeed();
     }
 
     if(m_modSelector != nullptr) {

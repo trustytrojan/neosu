@@ -355,7 +355,7 @@ void OsuSkin::update() {
     const long curMusicPos =
         m_osu->getSelectedBeatmap() != NULL ? m_osu->getSelectedBeatmap()->getCurMusicPosWithOffsets() : 0;
     for(int i = 0; i < m_images.size(); i++) {
-        m_images[i]->update(useEngineTimeForAnimations, curMusicPos);
+        m_images[i]->update(m_animationSpeedMultiplier, useEngineTimeForAnimations, curMusicPos);
     }
 }
 
@@ -1446,7 +1446,7 @@ void OsuSkin::checkLoadSound(Sound **addressOfPointer, std::string skinElementNa
     randomizeFilePath();
 
     auto try_load_sound = [=](std::string base_path, std::string resource_name, bool loop) {
-        const char* extensions[] = {".wav", ".mp3", ".ogg"};
+        const char *extensions[] = {".wav", ".mp3", ".ogg"};
         for(int i = 0; i < 3; i++) {
             std::string path = base_path;
             path.append(extensions[i]);
@@ -1455,15 +1455,17 @@ void OsuSkin::checkLoadSound(Sound **addressOfPointer, std::string skinElementNa
                 if(osu_skin_async.getBool()) {
                     engine->getResourceManager()->requestNextLoadAsync();
                 }
-                return engine->getResourceManager()->loadSoundAbs(path, resource_name, !isSample, isOverlayable, false, loop);
+                return engine->getResourceManager()->loadSoundAbs(path, resource_name, !isSample, isOverlayable, false,
+                                                                  loop);
             }
         }
 
-        return (Sound*)nullptr;
+        return (Sound *)nullptr;
     };
 
     // load default skin
-    std::string defaultpath = env->getOS() == Environment::OS::OS_HORIZON ? "romfs:/materials/" : MCENGINE_DATA_DIR "./materials/";
+    std::string defaultpath =
+        env->getOS() == Environment::OS::OS_HORIZON ? "romfs:/materials/" : MCENGINE_DATA_DIR "./materials/";
     defaultpath.append(OSUSKIN_DEFAULT_SKIN_PATH);
     defaultpath.append(skinElementName);
     std::string defaultResourceName = resourceName;

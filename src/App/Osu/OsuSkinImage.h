@@ -31,10 +31,11 @@ class OsuSkinImage {
     virtual void drawRaw(Graphics *g, Vector2 pos,
                          float scale);  // for objects which scale depending on external factors (e.g. hitobjects,
                                         // depending on the diameter defined by the CS)
-    virtual void update(bool useEngineTimeForAnimations = true, long curMusicPos = 0);
+    virtual void update(float speedMultiplier, bool useEngineTimeForAnimations = true, long curMusicPos = 0);
 
     void setAnimationFramerate(float fps) { m_fFrameDuration = 1.0f / clamp<float>(fps, 1.0f, 9999.0f); }
-    void setAnimationTimeOffset(long offset);  // set this every frame (before drawing) to a fixed point in time
+    void setAnimationTimeOffset(float speedMultiplier,
+                                long offset);  // set this every frame (before drawing) to a fixed point in time
                                                // relative to curMusicPos where we become visible
     void setAnimationFrameForce(
         int frame);  // force set a frame, before drawing (e.g. for hitresults in OsuUIRankingScreenRankingPanel)

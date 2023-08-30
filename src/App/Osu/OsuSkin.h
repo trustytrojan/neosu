@@ -36,6 +36,9 @@ class OsuSkin {
     void loadBeatmapOverride(std::string filepath);
     void reloadSounds();
 
+    void setAnimationSpeed(float animationSpeed) { m_animationSpeedMultiplier = animationSpeed; }
+    float getAnimationSpeed() { return m_animationSpeedMultiplier; }
+
     // samples
     void setSampleSet(int sampleSet);
     void setSampleVolume(float volume, bool force = false);
@@ -366,6 +369,7 @@ class OsuSkin {
     Osu *m_osu;
     bool m_bReady;
     bool m_bIsDefaultSkin;
+    float m_animationSpeedMultiplier;
     std::string m_sName;
     std::string m_sFilePath;
     std::string m_sSkinIniFilePath;

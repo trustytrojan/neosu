@@ -132,7 +132,7 @@ class Engine {
 
     // debugging/console
     void setConsole(Console *console) { m_console = console; }
-	 inline ConsoleBox *getConsoleBox() const { return m_consoleBox; }
+    inline ConsoleBox *getConsoleBox() const { return m_consoleBox; }
     inline Console *getConsole() const { return m_console; }
     inline CBaseUIContainer *getGUI() const { return m_guiContainer; }
 

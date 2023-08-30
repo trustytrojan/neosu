@@ -7,6 +7,8 @@
 
 #include "Console.h"
 
+#include <mutex>
+
 #include "CBaseUIButton.h"
 #include "CBaseUIContainer.h"
 #include "CBaseUILabel.h"
@@ -16,8 +18,6 @@
 #include "ConVar.h"
 #include "Engine.h"
 #include "ResourceManager.h"
-
-#include <mutex>
 #include "WinMinGW.Mutex.h"
 
 #define CFG_FOLDER MCENGINE_DATA_DIR "cfg/"

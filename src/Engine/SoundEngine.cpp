@@ -63,7 +63,8 @@ ConVar win_snd_wasapi_period_size(
 ConVar win_snd_wasapi_exclusive("win_snd_wasapi_exclusive", false, FCVAR_NONE,
                                 "whether to use exclusive device mode to further reduce latency");
 
-ConVar asio_buffer_size("asio_buffer_size", -1, FCVAR_NONE, "buffer size in samples (usually 44100 samples per second)");
+ConVar asio_buffer_size("asio_buffer_size", -1, FCVAR_NONE,
+                        "buffer size in samples (usually 44100 samples per second)");
 
 ConVar osu_universal_offset_hardcoded("osu_universal_offset_hardcoded", 0.0f, FCVAR_NONE);
 
@@ -120,7 +121,8 @@ SoundEngine::SoundEngine() {
     auto mixer_version = BASS_Mixer_GetVersion();
     debugLog("SoundEngine: BASSMIX version = 0x%08x\n", mixer_version);
     if(HIWORD(mixer_version) != BASSVERSION) {
-        engine->showMessageErrorFatal("Fatal Sound Error", "An incorrect version of the BASSMIX library file was loaded!");
+        engine->showMessageErrorFatal("Fatal Sound Error",
+                                      "An incorrect version of the BASSMIX library file was loaded!");
         engine->shutdown();
         return;
     }
@@ -129,7 +131,8 @@ SoundEngine::SoundEngine() {
     auto asio_version = BASS_ASIO_GetVersion();
     debugLog("SoundEngine: BASSASIO version = 0x%08x\n", asio_version);
     if(HIWORD(asio_version) != BASSASIOVERSION) {
-        engine->showMessageErrorFatal("Fatal Sound Error", "An incorrect version of the BASSASIO library file was loaded!");
+        engine->showMessageErrorFatal("Fatal Sound Error",
+                                      "An incorrect version of the BASSASIO library file was loaded!");
         engine->shutdown();
         return;
     }
@@ -137,7 +140,8 @@ SoundEngine::SoundEngine() {
     auto wasapi_version = BASS_WASAPI_GetVersion();
     debugLog("SoundEngine: BASSWASAPI version = 0x%08x\n", wasapi_version);
     if(HIWORD(wasapi_version) != BASSVERSION) {
-        engine->showMessageErrorFatal("Fatal Sound Error", "An incorrect version of the BASSWASAPI library file was loaded!");
+        engine->showMessageErrorFatal("Fatal Sound Error",
+                                      "An incorrect version of the BASSWASAPI library file was loaded!");
         engine->shutdown();
         return;
     }
@@ -311,8 +315,8 @@ void SoundEngine::updateOutputDevices(bool printInfo) {
         soundDevice.name.append(" [WASAPI]");
         m_outputDevices.push_back(soundDevice);
 
-        debugLog("WASAPI: Device %i = \"%s\", enabled = %i, default = %i\n", d, wasapiDeviceInfo.name,
-                 (int)isEnabled, (int)isDefault);
+        debugLog("WASAPI: Device %i = \"%s\", enabled = %i, default = %i\n", d, wasapiDeviceInfo.name, (int)isEnabled,
+                 (int)isDefault);
     }
 #endif
 }
@@ -405,7 +409,8 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
 #ifdef _WIN32
         if(!BASS_ASIO_Init(device.id, 0)) {
             m_bReady = false;
-            engine->showMessageError("Sound Error", UString::format("BASS_ASIO_Init() failed (%i)!", BASS_ASIO_ErrorGetCode()));
+            engine->showMessageError("Sound Error",
+                                     UString::format("BASS_ASIO_Init() failed (%i)!", BASS_ASIO_ErrorGetCode()));
             return false;
         }
 
@@ -437,20 +442,23 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
 
         if(!BASS_ASIO_ChannelEnableBASS(false, 0, g_bassOutputMixer, true)) {
             m_bReady = false;
-            engine->showMessageError("Sound Error", UString::format("BASS_ASIO_ChannelEnableBASS() failed (code %i)!", BASS_ASIO_ErrorGetCode()));
+            engine->showMessageError("Sound Error", UString::format("BASS_ASIO_ChannelEnableBASS() failed (code %i)!",
+                                                                    BASS_ASIO_ErrorGetCode()));
             return false;
         }
 
         if(!BASS_ASIO_Start(bufsize, 0)) {
             m_bReady = false;
-            engine->showMessageError("Sound Error", UString::format("BASS_ASIO_Start() failed (code %i)!", BASS_ASIO_ErrorGetCode()));
+            engine->showMessageError("Sound Error",
+                                     UString::format("BASS_ASIO_Start() failed (code %i)!", BASS_ASIO_ErrorGetCode()));
             return false;
         }
 
         double wanted_latency = 1000.0 * asio_buffer_size.getFloat() / sample_rate;
         double actual_latency = 1000.0 * (double)BASS_ASIO_GetLatency(false) / sample_rate;
         osu_universal_offset_hardcoded.setValue(-(actual_latency + 25.0f));
-        debugLog("ASIO: wanted %f ms, got %f ms latency. Sample rate: %f Hz\n", wanted_latency, actual_latency, sample_rate);
+        debugLog("ASIO: wanted %f ms, got %f ms latency. Sample rate: %f Hz\n", wanted_latency, actual_latency,
+                 sample_rate);
 #endif
     }
 
@@ -533,9 +541,7 @@ SoundEngine::~SoundEngine() {
     }
 }
 
-void SoundEngine::restart() {
-    setOutputDevice(m_currentOutputDevice);
-}
+void SoundEngine::restart() { setOutputDevice(m_currentOutputDevice); }
 
 void SoundEngine::update() {}
 
@@ -610,8 +616,7 @@ bool SoundEngine::play3d(Sound *snd, Vector3 pos) {
 
     BASS_3DVECTOR bassPos = BASS_3DVECTOR(pos.x, pos.y, pos.z);
     if(!BASS_ChannelSet3DPosition(channel, &bassPos, NULL, NULL)) {
-        debugLog("SoundEngine::play3d() couldn't BASS_ChannelSet3DPosition(), errorcode %i\n",
-                 BASS_ErrorGetCode());
+        debugLog("SoundEngine::play3d() couldn't BASS_ChannelSet3DPosition(), errorcode %i\n", BASS_ErrorGetCode());
         return false;
     }
 
@@ -661,7 +666,8 @@ bool SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
 
     unsigned long prevMusicPositionMS = 0;
     if(bancho.osu != nullptr) {
-        if(!bancho.osu->isInPlayMode() && bancho.osu->getSelectedBeatmap() != NULL && bancho.osu->getSelectedBeatmap()->getMusic() != NULL)
+        if(!bancho.osu->isInPlayMode() && bancho.osu->getSelectedBeatmap() != NULL &&
+           bancho.osu->getSelectedBeatmap()->getMusic() != NULL)
             prevMusicPositionMS = bancho.osu->getSelectedBeatmap()->getMusic()->getPositionMS();
     }
 

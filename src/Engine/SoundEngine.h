@@ -8,8 +8,8 @@
 #ifndef SOUNDENGINE_H
 #define SOUNDENGINE_H
 
-#include "cbase.h"
 #include "Sound.h"
+#include "cbase.h"
 
 enum class OutputDriver {
     NONE,
@@ -42,7 +42,10 @@ class SoundEngine {
 
     bool isASIO() { return m_currentOutputDevice.driver == OutputDriver::BASS_ASIO; }
     bool isWASAPI() { return m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI; }
-    bool isMixing() { return m_currentOutputDevice.driver == OutputDriver::BASS_ASIO || m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI; }
+    bool isMixing() {
+        return m_currentOutputDevice.driver == OutputDriver::BASS_ASIO ||
+               m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI;
+    }
 
     bool setOutputDevice(OUTPUT_DEVICE device);
     void setVolume(float volume);
@@ -62,7 +65,6 @@ class SoundEngine {
     void onFreqChanged(UString oldValue, UString newValue);
 
    private:
-
     std::vector<OUTPUT_DEVICE> m_outputDevices;
 
     OUTPUT_DEVICE m_currentOutputDevice;

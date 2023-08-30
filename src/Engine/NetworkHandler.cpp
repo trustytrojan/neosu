@@ -7,12 +7,12 @@
 
 #include "NetworkHandler.h"
 
+#include <curl/curl.h>
+
 #include <sstream>
 
 #include "ConVar.h"
 #include "Engine.h"
-
-#include <curl/curl.h>
 
 #define MC_PROTOCOL_VERSION 1
 #define MC_PROTOCOL_TIMEOUT 10000

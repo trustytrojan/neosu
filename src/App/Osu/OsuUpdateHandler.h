@@ -8,8 +8,9 @@
 #ifndef OSUUPDATECHECKER_H
 #define OSUUPDATECHECKER_H
 
-#include "cbase.h"
 #include <pthread.h>
+
+#include "cbase.h"
 
 class OsuUpdateHandler {
    public:

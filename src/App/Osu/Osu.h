@@ -156,6 +156,7 @@ class Osu : public App, public MouseListener {
     float getScoreMultiplier();
     float getRawSpeedMultiplier();  // without override
     float getSpeedMultiplier();     // with override
+    float getAnimationSpeedMultiplier();
 
     inline bool getModAuto() const { return m_bModAuto; }
     inline bool getModAutopilot() const { return m_bModAutopilot; }
@@ -215,6 +216,8 @@ class Osu : public App, public MouseListener {
 
     void onSkinReload();
     void onSkinChange(UString oldValue, UString newValue);
+    void onAnimationSpeedChange(UString oldValue, UString newValue);
+    void updateAnimationSpeed();
 
     void onSpeedChange(UString oldValue, UString newValue);
 

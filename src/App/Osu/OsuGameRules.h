@@ -51,7 +51,7 @@ class OsuGameRules {
     {
         const float fade_out_time = osu_hitobject_fade_out_time.getFloat();
         const float multiplier_min = osu_hitobject_fade_out_time_speed_multiplier_min.getFloat();
-        return fade_out_time * (1.0f / std::max(beatmap->getSpeedMultiplier(), multiplier_min));
+        return fade_out_time * (1.0f / std::max(beatmap->getOsu()->getAnimationSpeedMultiplier(), multiplier_min));
     }
 
     static inline long getFadeInTime() { return (long)osu_hitobject_fade_in_time.getInt(); }

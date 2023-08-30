@@ -17,9 +17,7 @@ ConVar file_size_max("file_size_max", 1024, FCVAR_NONE,
 ConVar *File::debug = &debug_file;
 ConVar *File::size_max = &file_size_max;
 
-File::File(std::string filePath, TYPE type) {
-    m_file = new StdFile(filePath, type);
-}
+File::File(std::string filePath, TYPE type) { m_file = new StdFile(filePath, type); }
 
 File::~File() { SAFE_DELETE(m_file); }
 

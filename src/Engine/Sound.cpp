@@ -1,13 +1,13 @@
+#include "Sound.h"
+
 #include <sstream>
 
 #include "Bancho.h"
 #include "ConVar.h"
+#include "Engine.h"
 #include "File.h"
 #include "Osu.h"
-#include "ConVar.h"
-#include "Engine.h"
 #include "ResourceManager.h"
-#include "Sound.h"
 #include "SoundEngine.h"
 
 ConVar snd_play_interp_duration(
@@ -21,7 +21,8 @@ ConVar snd_wav_file_min_size("snd_wav_file_min_size", 51, FCVAR_NONE,
                              "minimum file size in bytes for WAV files to be considered valid (everything below will "
                              "fail to load), this is a workaround for BASS crashes");
 
-Sound::Sound(std::string filepath, bool stream, bool overlayable, bool threeD, bool loop, bool prescan) : Resource(filepath) {
+Sound::Sound(std::string filepath, bool stream, bool overlayable, bool threeD, bool loop, bool prescan)
+    : Resource(filepath) {
     m_sample = 0;
     m_stream = 0;
     m_bStream = stream;
@@ -112,7 +113,7 @@ void Sound::initAsync() {
 
     // HACKHACK: workaround for BASS crashes on malformed WAV files
     {
-        const int minWavFileSize = snd_wav_file_min_size.getInt(); 
+        const int minWavFileSize = snd_wav_file_min_size.getInt();
         if(minWavFileSize > 0) {
             auto fileExtensionLowerCase = UString(env->getFileExtensionFromFilePath(m_sFilePath).c_str());
             fileExtensionLowerCase.lowerCase();
@@ -133,7 +134,8 @@ void Sound::initAsync() {
 
         m_stream = BASS_StreamCreateFile(false, m_sFilePath.c_str(), 0, 0, flags);
         if(!m_stream) {
-            debugLog("BASS_StreamCreateFile() returned error %d on file %s\n", BASS_ErrorGetCode(), m_sFilePath.c_str());
+            debugLog("BASS_StreamCreateFile() returned error %d on file %s\n", BASS_ErrorGetCode(),
+                     m_sFilePath.c_str());
             return;
         }
 
@@ -148,7 +150,8 @@ void Sound::initAsync() {
         auto flags = BASS_SAMPLE_FLOAT | BASS_SAMPLE_OVER_POS;
         if(m_bIs3d) flags |= BASS_SAMPLE_3D | BASS_SAMPLE_MONO;
 
-        m_sample = BASS_SampleLoad(false, m_sFilePath.c_str(), 0, 0, m_bIsOverlayable ? MAX_OVERLAPPING_SAMPLES : 1, flags);
+        m_sample =
+            BASS_SampleLoad(false, m_sFilePath.c_str(), 0, 0, m_bIsOverlayable ? MAX_OVERLAPPING_SAMPLES : 1, flags);
         if(!m_sample) {
             debugLog("BASS_SampleLoad() returned error %d on file %s\n", BASS_ErrorGetCode(), m_sFilePath.c_str());
             return;
@@ -198,7 +201,7 @@ void Sound::setPosition(double percent) {
         m_fLastPlayTime = 0.0;
     }
 
-    if(!BASS_ChannelSetPosition(m_stream, (QWORD)(length*percent), BASS_POS_BYTE)) {
+    if(!BASS_ChannelSetPosition(m_stream, (QWORD)(length * percent), BASS_POS_BYTE)) {
         if(Osu::debug->getBool()) {
             debugLog("Sound::setPosition( %f ) BASS_ChannelSetPosition() error %i on file %s\n", percent,
                      BASS_ErrorGetCode(), m_sFilePath.c_str());
@@ -223,8 +226,8 @@ void Sound::setPositionMS(unsigned long ms) {
 
     if(!BASS_ChannelSetPosition(m_stream, position, BASS_POS_BYTE)) {
         if(Osu::debug->getBool()) {
-            debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms, BASS_ErrorGetCode(),
-                     m_sFilePath.c_str());
+            debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
+                     BASS_ErrorGetCode(), m_sFilePath.c_str());
         }
     }
 }
@@ -351,9 +354,7 @@ unsigned long Sound::getLengthMS() {
     return static_cast<unsigned long>(lengthInMilliSeconds);
 }
 
-float Sound::getSpeed() {
-    return m_fSpeed;
-}
+float Sound::getSpeed() { return m_fSpeed; }
 
 float Sound::getFrequency() {
     auto default_freq = convar->getConVarByName("snd_freq")->getFloat();
