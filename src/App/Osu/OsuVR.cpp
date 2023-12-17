@@ -974,7 +974,7 @@ void OsuVR::save()
 {
 	debugLog("Osu: Saving VR config file ...\n");
 
-	UString userVRConfigFile = "cfg/";
+	UString userVRConfigFile = MCENGINE_DATA_DIR "cfg/";
 	userVRConfigFile.append(OSUVR_CONFIG_FILE_NAME);
 	userVRConfigFile.append(".cfg");
 

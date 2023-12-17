@@ -393,7 +393,7 @@ void OsuUpdateHandler::_installUpdate(UString zipFilePath)
 	}
 
 	// repair/create missing/new dirs
-	UString cfgDir = "cfg/";
+	UString cfgDir = MCENGINE_DATA_DIR "cfg/";
 	bool cfgDirExists = env->directoryExists(cfgDir);
 	for (int i=0; i<dirs.size(); i++)
 	{
