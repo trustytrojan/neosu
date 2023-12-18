@@ -240,7 +240,6 @@ OsuHUD::OsuHUD(Osu *osu) : OsuScreen(osu)
 	m_fposu_draw_scorebarbg_on_top_ref = convar->getConVarByName("fposu_draw_scorebarbg_on_top");
 	m_osu_playfield_stretch_x_ref = convar->getConVarByName("osu_playfield_stretch_x");
 	m_osu_playfield_stretch_y_ref = convar->getConVarByName("osu_playfield_stretch_y");
-	m_osu_mp_win_condition_accuracy_ref = convar->getConVarByName("osu_mp_win_condition_accuracy");
 	m_osu_background_dim_ref = convar->getConVarByName("osu_background_dim");
 	m_osu_skip_intro_enabled_ref = convar->getConVarByName("osu_skip_intro_enabled");
 	m_osu_skip_breaks_enabled_ref = convar->getConVarByName("osu_skip_breaks_enabled");
@@ -2126,7 +2125,7 @@ void OsuHUD::drawScoreBoardInt(Graphics *g, const std::vector<OsuHUD::SCORE_ENTR
 		g->popTransform();
 
 		// draw accuracy
-		if (m_osu->isInMultiplayer() && (!m_osu->isInPlayMode() || m_osu_mp_win_condition_accuracy_ref->getBool()))
+		if (m_osu->isInMultiplayer() && (!m_osu->isInPlayMode() || bancho.win_condition == Accuracy))
 		{
 			const float accScale = comboScale;
 			g->pushTransform();

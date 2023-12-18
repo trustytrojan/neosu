@@ -197,7 +197,6 @@ private:
 	ConVar *m_fposu_draw_scorebarbg_on_top_ref;
 	ConVar *m_osu_playfield_stretch_x_ref;
 	ConVar *m_osu_playfield_stretch_y_ref;
-	ConVar *m_osu_mp_win_condition_accuracy_ref;
 	ConVar *m_osu_background_dim_ref;
 	ConVar *m_osu_skip_intro_enabled_ref;
 	ConVar *m_osu_skip_breaks_enabled_ref;

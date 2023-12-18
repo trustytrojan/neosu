@@ -121,14 +121,6 @@ private:
 	static unsigned long long sortHackCounter;
 	static ConVar *m_cl_cmdrate;
 
-	void onClientcastCommand(UString command);
-	void onBroadcastCommand(UString command);
-	void onClientCommandInt(UString string, bool executeLocallyToo);
-
-	void onMPForceClientBeatmapDownload();
-	void onMPSelectBeatmap(UString md5hash);
-	void onMPRequestBeatmapDownload();
-
 	void onBeatmapDownloadFinished(const BeatmapDownloadState &dl);
 
 private:

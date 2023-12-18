@@ -29,16 +29,6 @@
 
 #include "OsuUISongBrowserInfoLabel.h"
 
-ConVar osu_mp_freemod("osu_mp_freemod", false);
-ConVar osu_mp_freemod_all("osu_mp_freemod_all", true, "allow everything, or only standard osu mods");
-ConVar osu_mp_win_condition_accuracy("osu_mp_win_condition_accuracy", false);
-ConVar osu_mp_allow_client_beatmap_select("osu_mp_sv_allow_client_beatmap_select", true);
-ConVar osu_mp_broadcastcommand("osu_mp_broadcastcommand");
-ConVar osu_mp_clientcastcommand("osu_mp_clientcastcommand");
-ConVar osu_mp_broadcastforceclientbeatmapdownload("osu_mp_broadcastforceclientbeatmapdownload");
-ConVar osu_mp_select_beatmap("osu_mp_select_beatmap");
-ConVar osu_mp_request_beatmap_download("osu_mp_request_beatmap_download");
-
 unsigned long long OsuMultiplayer::sortHackCounter = 0;
 ConVar *OsuMultiplayer::m_cl_cmdrate = NULL;
 
@@ -49,39 +39,11 @@ OsuMultiplayer::OsuMultiplayer(Osu *osu)
 	if (m_cl_cmdrate == NULL)
 		m_cl_cmdrate = convar->getConVarByName("cl_cmdrate", false);
 
-	// convar callbacks
-	osu_mp_broadcastcommand.setCallback( fastdelegate::MakeDelegate(this, &OsuMultiplayer::onBroadcastCommand) );
-	osu_mp_clientcastcommand.setCallback( fastdelegate::MakeDelegate(this, &OsuMultiplayer::onClientcastCommand) );
-
-	osu_mp_broadcastforceclientbeatmapdownload.setCallback( fastdelegate::MakeDelegate(this, &OsuMultiplayer::onMPForceClientBeatmapDownload) );
-	osu_mp_select_beatmap.setCallback( fastdelegate::MakeDelegate(this, &OsuMultiplayer::onMPSelectBeatmap) );
-	osu_mp_request_beatmap_download.setCallback( fastdelegate::MakeDelegate(this, &OsuMultiplayer::onMPRequestBeatmapDownload) );
-
 	m_fNextPlayerCmd = 0.0f;
 
 	m_bMPSelectBeatmapScheduled = false;
 
 	m_iLastClientBeatmapSelectID = 0;
-
-	/*
-	PLAYER ply;
-	ply.name = "Player1";
-	ply.missingBeatmap = false;
-	ply.score = 1000000;
-	ply.accuracy = 0.9123456f;
-	ply.combo = 420;
-	ply.dead = false;
-	m_clientPlayers.push_back(ply);
-	ply.name = "Player2";
-	ply.missingBeatmap = true;
-	ply.combo = 1;
-	m_clientPlayers.push_back(ply);
-	ply.name = "Player420";
-	ply.missingBeatmap = false;
-	ply.dead = true;
-	ply.combo = 23;
-	m_clientPlayers.push_back(ply);
-	*/
 }
 
 OsuMultiplayer::~OsuMultiplayer()
@@ -328,7 +290,7 @@ bool OsuMultiplayer::onClientReceiveInt(uint32_t id, void *data, uint32_t size, 
 			    bool operator() (PLAYER const &a, PLAYER const &b) const
 			    {
 			    	// strict weak ordering!
-			    	if (osu_mp_win_condition_accuracy.getBool())
+			    	if(bancho.win_condition == Accuracy)
 			    	{
 			    		if (a.accuracy == b.accuracy)
 			    		{
@@ -443,7 +405,7 @@ void OsuMultiplayer::setBeatmap(std::string md5hash)
 
 bool OsuMultiplayer::isInMultiplayer()
 {
-	return bancho.is_connected;
+	return bancho.match_id > 0;
 }
 
 bool OsuMultiplayer::isMissingBeatmap()
@@ -483,34 +445,6 @@ float OsuMultiplayer::getDownloadBeatmapPercentage() const
 	const size_t totalDownloadedBytes = m_downloads[0].numDownloadedOsuFileBytes + m_downloads[0].numDownloadedMusicFileBytes + m_downloads[0].numDownloadedBackgroundFileBytes;
 
 	return ((float)totalDownloadedBytes / (float)m_downloads[0].totalDownloadBytes);
-}
-
-void OsuMultiplayer::onBroadcastCommand(UString command)
-{
-	onClientCommandInt(command, false);
-}
-
-void OsuMultiplayer::onClientcastCommand(UString command)
-{
-	onClientCommandInt(command, true);
-}
-
-void OsuMultiplayer::onClientCommandInt(UString string, bool executeLocallyToo)
-{
-}
-
-void OsuMultiplayer::onMPForceClientBeatmapDownload()
-{
-}
-
-void OsuMultiplayer::onMPSelectBeatmap(UString md5hash)
-{
-	setBeatmap(std::string(md5hash.toUtf8()));
-}
-
-void OsuMultiplayer::onMPRequestBeatmapDownload()
-{
-	onClientBeatmapDownloadRequest();
 }
 
 void OsuMultiplayer::onBeatmapDownloadFinished(const BeatmapDownloadState &dl)
