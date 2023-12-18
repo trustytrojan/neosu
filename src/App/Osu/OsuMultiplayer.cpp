@@ -35,6 +35,7 @@ ConVar *OsuMultiplayer::m_cl_cmdrate = NULL;
 OsuMultiplayer::OsuMultiplayer(Osu *osu)
 {
 	m_osu = osu;
+	bancho.osu = osu;
 
 	if (m_cl_cmdrate == NULL)
 		m_cl_cmdrate = convar->getConVarByName("cl_cmdrate", false);

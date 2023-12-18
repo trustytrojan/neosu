@@ -5,6 +5,7 @@
 // $NoKeywords: $osu
 //===============================================================================//
 
+#include "Bancho.h"
 #include "OsuDatabase.h"
 #include "Osu.h"
 
@@ -131,6 +132,15 @@ ConVar osu_hide_cursor_during_gameplay("osu_hide_cursor_during_gameplay", false)
 ConVar osu_alt_f4_quits_even_while_playing("osu_alt_f4_quits_even_while_playing", true);
 ConVar osu_win_disable_windows_key_while_playing("osu_win_disable_windows_key_while_playing", true);
 
+ConVar osu_server("osu_server", "cho.osudev.local");
+ConVar osu_username("osu_username", "kiwecc");
+ConVar osu_password("osu_password", "");
+
+void reconnect(UString oldValue, UString newValue) {
+	Packet login_packet = build_login_packet((char *)osu_username.getString().toUtf8(), (char *)newValue.toUtf8());
+	send_packet(&login_packet);
+}
+
 ConVar *Osu::version = &osu_version;
 ConVar *Osu::debug = &osu_debug;
 ConVar *Osu::ui_scale = &osu_ui_scale;
@@ -143,6 +153,8 @@ Osu::Osu(Osu2 *osu2, int instanceID)
 
 	m_osu2 = osu2;
 	m_iInstanceID = instanceID;
+
+	osu_password.setCallback(reconnect);
 
 	// convar refs
 	m_osu_folder_ref = convar->getConVarByName("osu_folder");
