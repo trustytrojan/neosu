@@ -815,8 +815,6 @@ void OsuBeatmapStandard::onModUpdate(bool rebuildSliderVertexBuffers, bool recom
 	if (Osu::debug->getBool())
 		debugLog("OsuBeatmapStandard::onModUpdate() @ %f\n", engine->getTime());
 
-	m_osu->getMultiplayer()->onServerModUpdate();
-
 	updatePlayfieldMetrics();
 	updateHitobjectMetrics();
 
@@ -1268,8 +1266,6 @@ void OsuBeatmapStandard::onBeforeLoad()
 {
 	debugLog("OsuBeatmapStandard::onBeforeLoad()\n");
 
-	m_osu->getMultiplayer()->onServerPlayStateChange(OsuMultiplayer::STATE::START, 0, false, m_selectedDifficulty2);
-
 	// some hitobjects already need this information to be up-to-date before their constructor is called
 	updatePlayfieldMetrics();
 	updateHitobjectMetrics();
@@ -1448,16 +1444,11 @@ void OsuBeatmapStandard::onBeforeStop(bool quit)
 void OsuBeatmapStandard::onStop(bool quit)
 {
 	debugLog("OsuBeatmapStandard::onStop()\n");
-
-	if (quit)
-		m_osu->getMultiplayer()->onServerPlayStateChange(OsuMultiplayer::STATE::STOP);
 }
 
 void OsuBeatmapStandard::onPaused(bool first)
 {
 	debugLog("OsuBeatmapStandard::onPaused()\n");
-
-	m_osu->getMultiplayer()->onServerPlayStateChange(OsuMultiplayer::STATE::PAUSE);
 
 	if (first)
 	{
@@ -1471,15 +1462,11 @@ void OsuBeatmapStandard::onPaused(bool first)
 void OsuBeatmapStandard::onUnpaused()
 {
 	debugLog("OsuBeatmapStandard::onUnpaused()\n");
-
-	m_osu->getMultiplayer()->onServerPlayStateChange(OsuMultiplayer::STATE::UNPAUSE);
 }
 
 void OsuBeatmapStandard::onRestart(bool quick)
 {
 	debugLog("OsuBeatmapStandard::onRestart()\n");
-
-	m_osu->getMultiplayer()->onServerPlayStateChange(OsuMultiplayer::STATE::RESTART, 0, quick);
 }
 
 void OsuBeatmapStandard::updateAutoCursorPos()

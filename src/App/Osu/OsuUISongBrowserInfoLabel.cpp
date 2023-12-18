@@ -298,15 +298,6 @@ void OsuUISongBrowserInfoLabel::setFromMissingBeatmap(long beatmapId)
 
 void OsuUISongBrowserInfoLabel::onClicked()
 {
-	// deprecated due to "Web" button
-	/*
-	if (m_iBeatmapId > 0)
-	{
-		env->openURLInDefaultBrowser(UString::format("https://osu.ppy.sh/b/%ld", m_iBeatmapId));
-		m_osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
-	}
-	*/
-
 	if (m_osu->getMultiplayer()->isInMultiplayer() && m_osu->getMultiplayer()->isMissingBeatmap() && !m_osu->getMultiplayer()->isDownloadingBeatmap())
 	{
 		m_osu->getNotificationOverlay()->addNotification("Requesting download from peer, please wait ...", 0xffffffff, false, 0.75f);

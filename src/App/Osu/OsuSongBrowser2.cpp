@@ -1790,8 +1790,6 @@ void OsuSongBrowser2::onSelectionChange(OsuUISongBrowserButton *button, bool reb
 
 void OsuSongBrowser2::onDifficultySelected(OsuDatabaseBeatmap *diff2, bool play, bool mp)
 {
-	m_osu->getMultiplayer()->onServerPlayStateChange(OsuMultiplayer::STATE::SELECT, 0, false, diff2);
-
 	// legacy logic (deselect = unload)
 	const bool wasSelectedBeatmapNULL = (m_selectedBeatmap == NULL);
 	if (m_selectedBeatmap != NULL)

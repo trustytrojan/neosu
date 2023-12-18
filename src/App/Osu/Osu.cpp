@@ -701,18 +701,6 @@ void Osu::draw(Graphics *g)
 			m_hud->drawCursor(g, engine->getMouse()->getPos());
 	}
 
-	// TODO: TEMP:
-	/*
-	if (m_multiplayer->isInMultiplayer() && m_multiplayer->isServer())
-	{
-		for (int i=0; i<m_multiplayer->getServerPlayers()->size(); i++)
-		{
-			OsuMultiplayer::PLAYER *ply = &(*m_multiplayer->getServerPlayers())[i];
-			m_hud->drawCursor(g, ply->input.cursorPos, 0.5f);
-		}
-	}
-	*/
-
 	m_tooltipOverlay->draw(g);
 	m_notificationOverlay->draw(g);
 
@@ -882,7 +870,7 @@ void Osu::update()
 		// scrubbing/seeking
 		if (m_bSeekKey)
 		{
-			if (!isInMultiplayer() || m_multiplayer->isServer())
+			if (!isInMultiplayer())
 			{
 				m_bSeeking = true;
 				const float mousePosX = (int)engine->getMouse()->getPos().x;
@@ -948,12 +936,10 @@ void Osu::update()
 
 			if (getSelectedBeatmap()->isInSkippableSection() && !getSelectedBeatmap()->isPaused() && !isLoading)
 			{
-				if (!isInMultiplayer() || m_multiplayer->isServer())
+				if (!isInMultiplayer())
 				{
 					if ((osu_skip_intro_enabled.getBool() && getSelectedBeatmap()->getHitObjectIndexForCurrentTime() < 1) || (osu_skip_breaks_enabled.getBool() && getSelectedBeatmap()->getHitObjectIndexForCurrentTime() > 0))
 					{
-						m_multiplayer->onServerPlayStateChange(OsuMultiplayer::STATE::SKIP);
-
 						getSelectedBeatmap()->skipEmptySection();
 					}
 				}
@@ -968,7 +954,7 @@ void Osu::update()
 		{
 			m_fQuickRetryTime = 0.0f;
 
-			if (!isInMultiplayer() || m_multiplayer->isServer())
+			if (!isInMultiplayer())
 			{
 				getSelectedBeatmap()->restart(true);
 				getSelectedBeatmap()->update();
@@ -1405,7 +1391,7 @@ void Osu::onKeyDown(KeyboardEvent &key)
 			}
 
 			// quick save/load
-			if (!isInMultiplayer() || m_multiplayer->isServer())
+			if (!isInMultiplayer())
 			{
 				if (key == (KEYCODE)OsuKeyBindings::QUICK_SAVE.getInt())
 					m_fQuickSaveTime = getSelectedBeatmap()->getPercentFinished();
@@ -1421,7 +1407,7 @@ void Osu::onKeyDown(KeyboardEvent &key)
 			}
 
 			// quick seek
-			if (!isInMultiplayer() || m_multiplayer->isServer())
+			if (!isInMultiplayer())
 			{
 				const bool backward = (key == (KEYCODE)OsuKeyBindings::SEEK_TIME_BACKWARD.getInt());
 				const bool forward = (key == (KEYCODE)OsuKeyBindings::SEEK_TIME_FORWARD.getInt());
@@ -1492,7 +1478,7 @@ void Osu::onKeyDown(KeyboardEvent &key)
 			// toggle pause menu
 			if ((key == (KEYCODE)OsuKeyBindings::GAME_PAUSE.getInt() || key == KEY_ESCAPE) && !m_bEscape)
 			{
-				if (!isInMultiplayer() || m_multiplayer->isServer() || m_iMultiplayerClientNumEscPresses > 1)
+				if (!isInMultiplayer() || m_iMultiplayerClientNumEscPresses > 1)
 				{
 					if (m_iMultiplayerClientNumEscPresses > 1)
 					{

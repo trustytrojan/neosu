@@ -5,13 +5,13 @@
 // $NoKeywords: $osuhud
 //===============================================================================//
 
+#include "Bancho.h"
 #include "OsuHUD.h"
 
 #include "Engine.h"
 #include "Environment.h"
 #include "ConVar.h"
 #include "Mouse.h"
-#include "NetworkHandler.h"
 #include "ResourceManager.h"
 #include "AnimationHandler.h"
 #include "VertexArrayObject.h"
@@ -1943,7 +1943,7 @@ void OsuHUD::drawScoreBoardMP(Graphics *g)
 		scoreEntry.missingBeatmap = (*m_osu->getMultiplayer()->getPlayers())[i].missingBeatmap;
 		scoreEntry.downloadingBeatmap = (*m_osu->getMultiplayer()->getPlayers())[i].downloadingBeatmap;
 		scoreEntry.dead = (*m_osu->getMultiplayer()->getPlayers())[i].dead;
-		scoreEntry.highlight = ((*m_osu->getMultiplayer()->getPlayers())[i].id == engine->getNetworkHandler()->getLocalClientID());
+		scoreEntry.highlight = ((*m_osu->getMultiplayer()->getPlayers())[i].id == bancho.user_id);
 
 		scoreEntries.push_back(std::move(scoreEntry));
 	}

@@ -1651,8 +1651,6 @@ void OsuBeatmap::seekPercent(double percent)
 {
 	if (m_selectedDifficulty2 == NULL || (!m_bIsPlaying && !m_bIsPaused) || m_music == NULL || m_bFailed) return;
 
-	m_osu->getMultiplayer()->onServerPlayStateChange(OsuMultiplayer::SEEK, (unsigned long)(m_music->getLengthMS() * percent));
-
 	m_bWasSeekFrame = true;
 	m_fWaitTime = 0.0f;
 
@@ -1693,8 +1691,6 @@ void OsuBeatmap::seekPercentPlayable(double percent)
 void OsuBeatmap::seekMS(unsigned long ms)
 {
 	if (m_selectedDifficulty2 == NULL || (!m_bIsPlaying && !m_bIsPaused) || m_music == NULL || m_bFailed) return;
-
-	m_osu->getMultiplayer()->onServerPlayStateChange(OsuMultiplayer::SEEK, ms);
 
 	m_bWasSeekFrame = true;
 	m_fWaitTime = 0.0f;
