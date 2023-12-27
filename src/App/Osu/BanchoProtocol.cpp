@@ -136,7 +136,8 @@ void free_room(Room *room) {
 
 void write_bytes(Packet *packet, uint8_t *bytes, size_t n) {
   if (packet->pos + n > packet->size) {
-    packet->memory = (unsigned char *)realloc(packet->memory, packet->size + n + 128);
+    packet->memory =
+        (unsigned char *)realloc(packet->memory, packet->size + n + 128);
     packet->size += n + 128;
     if (!packet->memory)
       return;

@@ -226,6 +226,8 @@ public:
 	inline const std::vector<SCORE_SORTING_METHOD> &getScoreSortingMethods() const {return m_scoreSortingMethods;}
 
 	inline unsigned long long getAndIncrementScoreSortHackCounter() {return m_iSortHackCounter++;}
+	
+	std::unordered_map<std::string, std::vector<Score>> m_online_scores;
 
 private:
 	friend class OsuDatabaseLoader;

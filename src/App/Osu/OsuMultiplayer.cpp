@@ -6,6 +6,7 @@
 //===============================================================================//
 
 #include "Bancho.h"
+#include "BanchoNetworking.h"
 #include "OsuMultiplayer.h"
 
 #include "Engine.h"
@@ -63,9 +64,8 @@ void OsuMultiplayer::update()
 		}
 	}
 
-	if (!isInMultiplayer()) return;
-
-	// TODO @kiwec: add code below
+	receive_api_responses();
+	receive_bancho_packets();
 }
 
 bool OsuMultiplayer::onClientReceiveInt(uint32_t id, void *data, uint32_t size, bool forceAcceptOnServer)

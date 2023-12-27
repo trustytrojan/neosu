@@ -325,6 +325,7 @@ private:
 	// score browser
 	std::vector<OsuUISongBrowserScoreButton*> m_scoreButtonCache;
 	CBaseUIScrollView *m_scoreBrowser;
+	CBaseUIElement *m_scoreBrowserScoresStillLoadingElement;
 	CBaseUIElement *m_scoreBrowserNoRecordsYetElement;
 
 	// song browser

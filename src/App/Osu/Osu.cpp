@@ -6,6 +6,8 @@
 //===============================================================================//
 
 #include "Bancho.h"
+#include "BanchoNetworking.h"
+
 #include "OsuDatabase.h"
 #include "Osu.h"
 
@@ -138,7 +140,7 @@ ConVar osu_password("osu_password", "");
 
 void reconnect(UString oldValue, UString newValue) {
 	Packet login_packet = build_login_packet((char *)osu_username.getString().toUtf8(), (char *)newValue.toUtf8());
-	send_packet(&login_packet);
+	send_packet(login_packet);
 }
 
 ConVar *Osu::version = &osu_version;
@@ -153,8 +155,6 @@ Osu::Osu(Osu2 *osu2, int instanceID)
 
 	m_osu2 = osu2;
 	m_iInstanceID = instanceID;
-
-	osu_password.setCallback(reconnect);
 
 	// convar refs
 	m_osu_folder_ref = convar->getConVarByName("osu_folder");
@@ -533,6 +533,12 @@ Osu::Osu(Osu2 *osu2, int instanceID)
 		m_mainMenu->setVisible(true);
 
 	m_updateHandler->checkForUpdates();
+
+	// Init online functionality (multiplayer/leaderboards/etc)
+	init_networking_thread();
+	osu_password.setCallback(reconnect); // TODO @kiwec: make proper UI in options menu instead
+	Packet login_packet = build_login_packet((char *)osu_username.getString().toUtf8(), (char *)osu_password.getString().toUtf8());
+	send_packet(login_packet);
 
 	/*
 	// DEBUG: immediately start diff of a beatmap

@@ -1,5 +1,4 @@
 #include <blkid/blkid.h>
-#include <curl/curl.h>
 #include <linux/limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,18 +11,21 @@
 #include "MD5.h"
 #include "OsuNotificationOverlay.h"
 
-
 Bancho bancho;
-CURL *curl = NULL;
-char *cho_token = NULL;
-char cho_token_header[1024] = {0};
 
+std::string md5(uint8_t *msg, size_t msg_len) {
+  MD5 hasher;
+  hasher.update(msg, msg_len);
+  hasher.finalize();
 
-void md5(uint8_t *initial_msg, size_t initial_len, uint8_t *digest) {
-    MD5 hasher;
-    hasher.update(initial_msg, initial_len);
-    hasher.finalize();
-    memcpy(digest, hasher.getDigest(), 16);
+  std::string hash = "";
+  uint8_t *digest = hasher.getDigest();
+  for (int i = 0; i < 16; i++) {
+    hash += "0123456789abcdef"[digest[i] >> 4];
+    hash += "0123456789abcdef"[digest[i] & 0xf];
+  }
+
+  return hash;
 }
 
 char *get_disk_uuid() {
@@ -43,32 +45,12 @@ char *get_disk_uuid() {
   return NULL;
 }
 
-static size_t curl_write(void *contents, size_t size, size_t nmemb,
-                         void *userp) {
-  size_t realsize = size * nmemb;
-  Packet *mem = (Packet *)userp;
-
-  uint8_t *ptr = (uint8_t *)realloc(mem->memory, mem->size + realsize + 1);
-  if (!ptr) {
-    /* out of memory! */
-    debugLog("not enough memory (realloc returned NULL)\n");
-    return 0;
-  }
-
-  mem->memory = ptr;
-  memcpy(&(mem->memory[mem->size]), contents, realsize);
-  mem->size += realsize;
-  mem->memory[mem->size] = 0;
-
-  return realsize;
-}
-
-void handle_packet(Packet *packet, uint16_t packet_id, uint32_t packet_len) {
-  if (packet_id == 5) {
+void handle_packet(Packet *packet) {
+  if (packet->id == 5) {
     // USER_ID
     bancho.user_id = read_int(packet);
     debugLog("Received user ID %d.\n", bancho.user_id);
-  } else if (packet_id == 7) {
+  } else if (packet->id == 7) {
     // SEND_MESSAGE
     char *sender = read_string(packet);
     char *text = read_string(packet);
@@ -78,10 +60,10 @@ void handle_packet(Packet *packet, uint16_t packet_id, uint32_t packet_len) {
     free(sender);
     free(text);
     free(recipient);
-  } else if (packet_id == 8) {
+  } else if (packet->id == 8) {
     // PONG
     // (nothing to do)
-  } else if (packet_id == 11) {
+  } else if (packet->id == 11) {
     // USER_STATS
     int32_t stats_user_id = read_int(packet);
     uint8_t action = read_byte(packet);
@@ -95,73 +77,75 @@ void handle_packet(Packet *packet, uint16_t packet_id, uint32_t packet_len) {
     int64_t total_score = read_int64(packet);
     int32_t global_rank = read_int(packet);
     uint16_t pp = read_short(packet);
-    debugLog("Received stats for user %d (ranked #%d) [%s]\n", stats_user_id, global_rank, info_text);
+    debugLog("Received stats for user %d (ranked #%d) [%s]\n", stats_user_id,
+             global_rank, info_text);
     free(info_text);
     free(map_md5);
-  } else if (packet_id == 12) {
+  } else if (packet->id == 12) {
     // USER_LOGOUT
     int32_t logged_out_id = read_int(packet);
     int8_t zero = read_byte(packet);
     debugLog("Logged out.\n");
-  } else if (packet_id == 13) {
+  } else if (packet->id == 13) {
     // SPECTATOR_JOINED
     int32_t spectator_id = read_int(packet);
     debugLog("Spectator joined: user id %d\n", spectator_id);
-  } else if (packet_id == 14) {
+  } else if (packet->id == 14) {
     // SPECTATOR_LEFT
     int32_t spectator_id = read_int(packet);
     debugLog("Spectator left: user id %d\n", spectator_id);
-  } else if (packet_id == 19) {
+  } else if (packet->id == 19) {
     // VERSION_UPDATE
     // (nothing to do?)
-  } else if (packet_id == 22) {
+  } else if (packet->id == 22) {
     // SPECTATOR_CANT_SPECTATE
     int32_t spectator_id = read_int(packet);
     debugLog("Spectator can't spectate: user id %d\n", spectator_id);
-  } else if (packet_id == 23) {
+  } else if (packet->id == 23) {
     // GET_ATTENTION
     debugLog("ATTENTION!!!! (is this for flashing taskbar?)\n");
-  } else if (packet_id == 24) {
+  } else if (packet->id == 24) {
     // NOTIFICATION
     char *notification = read_string(packet);
     bancho.osu->getNotificationOverlay()->addNotification(notification);
     free(notification);
-  } else if (packet_id == 26) {
+  } else if (packet->id == 26) {
     // ROOM UPDATED
     Room *room = read_room(packet);
     debugLog("UPDATED Room %s: %d players\n", room->name, room->nb_players);
     free_room(room);
-  } else if (packet_id == 27) {
+  } else if (packet->id == 27) {
     // ROOM CREATED
     Room *room = read_room(packet);
     debugLog("CREATED Room %s: %d players\n", room->name, room->nb_players);
     free_room(room);
-  } else if (packet_id == 28) {
+  } else if (packet->id == 28) {
     // ROOM CLOSED
     int32_t room_id = read_int(packet);
     debugLog("CLOSED Room #%d\n", room_id);
-  } else if (packet_id == 36) {
+  } else if (packet->id == 36) {
     // MATCH_JOIN_SUCCESS
     Room *room = read_room(packet);
     debugLog("JOINED Room %s: %d players\n", room->name, room->nb_players);
     free_room(room);
-  } else if (packet_id == 37) {
+  } else if (packet->id == 37) {
     // MATCH_JOIN_FAIL
     debugLog("FAILED to join room!\n");
-  } else if (packet_id == 42) {
+  } else if (packet->id == 42) {
     // FELLOW_SPECTATOR_JOINED
     uint32_t spectator_id = read_int(packet);
     debugLog("Fellow spectator joined with user id %d\n", spectator_id);
-  } else if (packet_id == 43) {
+  } else if (packet->id == 43) {
     // FELLOW_SPECTATOR_LEFT
     uint32_t spectator_id = read_int(packet);
     debugLog("Fellow spectator left with user id %d\n", spectator_id);
-  } else if (packet_id == 46) {
+  } else if (packet->id == 46) {
     // MATCH_START
     Room *room = read_room(packet);
-    debugLog("MATCH STARTED IN Room %s: %d players\n", room->name, room->nb_players);
+    debugLog("MATCH STARTED IN Room %s: %d players\n", room->name,
+             room->nb_players);
     free_room(room);
-  } else if (packet_id == 48) {
+  } else if (packet->id == 48) {
     // MATCH_SCORE_UPDATE
     int32_t time = read_int(packet);
     uint8_t id = read_byte(packet);
@@ -179,69 +163,72 @@ void handle_packet(Packet *packet, uint16_t packet_id, uint32_t packet_len) {
     uint8_t tag = read_byte(packet);
     uint8_t is_scorev2 = read_byte(packet);
     // NOTE: where is voteskip here?
-  } else if (packet_id == 50) {
+  } else if (packet->id == 50) {
     // MATCH_TRANSFER_HOST
     debugLog("Host transferred!\n");
-  } else if (packet_id == 53) {
+  } else if (packet->id == 53) {
     // MATCH_ALL_PLAYERS_LOADED
     debugLog("All players loaded!\n");
-  } else if (packet_id == 57) {
+  } else if (packet->id == 57) {
     // MATCH_PLAYER_FAILED
     int32_t slot_id = read_int(packet);
     debugLog("Player in slot %d has failed.\n", slot_id);
-  } else if (packet_id == 58) {
+  } else if (packet->id == 58) {
     // MATCH_COMPLETE
     debugLog("Match complete!\n");
-  } else if (packet_id == 61) {
+  } else if (packet->id == 61) {
     // MATCH_SKIP
     debugLog("Skipping!\n");
-  } else if (packet_id == 64) {
+  } else if (packet->id == 64) {
     // CHANNEL_JOIN_SUCCESS
     char *name = read_string(packet);
     debugLog("Success in joining channel %s.\n", name);
     free(name);
-  } else if (packet_id == 65) {
+  } else if (packet->id == 65) {
     // CHANNEL_INFO
     char *channel_name = read_string(packet);
     char *channel_topic = read_string(packet);
     int32_t nb_members = read_int(packet);
-    debugLog("Channel '%s' (%d members) has topic: %s\n", channel_name, nb_members, channel_topic);
+    debugLog("Channel '%s' (%d members) has topic: %s\n", channel_name,
+             nb_members, channel_topic);
     free(channel_name);
     free(channel_topic);
-  } else if (packet_id == 66) {
+  } else if (packet->id == 66) {
     // CHANNEL_KICK
     char *name = read_string(packet);
     debugLog("Kicked from channel %s.\n", name);
     free(name);
-  } else if (packet_id == 67) {
+  } else if (packet->id == 67) {
     // CHANNEL_AUTO_JOIN
     char *channel_name = read_string(packet);
     char *channel_topic = read_string(packet);
     int32_t nb_members = read_int(packet);
-    debugLog("Auto-joined channel '%s' (%d members) with topic: %s\n", channel_name, nb_members, channel_topic);
+    debugLog("Auto-joined channel '%s' (%d members) with topic: %s\n",
+             channel_name, nb_members, channel_topic);
     free(channel_name);
     free(channel_topic);
-  } else if (packet_id == 71) {
+  } else if (packet->id == 71) {
     // PRIVILEGES
     int privileges = read_int(packet);
     debugLog("Privileges: %d\n", privileges);
-  } else if (packet_id == 75) {
+  } else if (packet->id == 75) {
     // PROTOCOL_VERSION
     int protocol_version = read_int(packet);
     if (protocol_version != 19) {
       bancho.user_id = 0;
-      cho_token = strdup("client-too-old");
+      bancho.osu->getNotificationOverlay()->addNotification(
+          "Server uses an unsupported protocol version.");
     }
-  } else if (packet_id == 76) {
+  } else if (packet->id == 76) {
     // MAIN_MENU_ICON
     char *icon = read_string(packet);
     debugLog("Main menu icon: %s\n", icon);
     free(icon);
-  } else if (packet_id == 81) {
+  } else if (packet->id == 81) {
     // MATCH_PLAYER_SKIPPED
     int32_t user_id = read_int(packet);
     debugLog("User %d has voted to skip.\n", user_id);
-  } else if (packet_id == 83) {
+  } else if (packet->id == 83) {
     // USER_PRESENCE
     int32_t presence_user_id = read_int(packet);
     char *presence_username = read_string(packet);
@@ -252,14 +239,14 @@ void handle_packet(Packet *packet, uint16_t packet_id, uint32_t packet_len) {
     float presence_latitude = read_float(packet);
     int32_t presence_global_rank = read_int(packet);
     debugLog("%s (user %d) is rank #%d, coords %f:%f\n", presence_username,
-           presence_user_id, presence_global_rank, presence_longitude,
-           presence_latitude);
+             presence_user_id, presence_global_rank, presence_longitude,
+             presence_latitude);
     free(presence_username);
-  } else if (packet_id == 86) {
+  } else if (packet->id == 86) {
     // RESTART
     int32_t ms = read_int(packet);
     debugLog("Restart: %d ms\n", ms);
-  } else if (packet_id == 88) {
+  } else if (packet->id == 88) {
     // MATCH_INVITE
     char *sender = read_string(packet);
     char *text = read_string(packet);
@@ -269,22 +256,22 @@ void handle_packet(Packet *packet, uint16_t packet_id, uint32_t packet_len) {
     free(sender);
     free(text);
     free(recipient);
-  } else if (packet_id == 89) {
+  } else if (packet->id == 89) {
     // XXX: handle CHANNEL_INFO_END
-  } else if (packet_id == 91) {
+  } else if (packet->id == 91) {
     // MATCH_CHANGE_PASSWORD
     char *new_password = read_string(packet);
     debugLog("Room changed password to %s\n", new_password);
     free(new_password);
-  } else if (packet_id == 92) {
+  } else if (packet->id == 92) {
     // SILENCE_END
     int32_t delta = read_int(packet);
     debugLog("Silence ends in %d seconds.\n", delta);
-  } else if (packet_id == 94) {
+  } else if (packet->id == 94) {
     // USER_SILENCED
     int32_t user_id = read_int(packet);
     debugLog("User #%d silenced.\n", user_id);
-  } else if (packet_id == 100) {
+  } else if (packet->id == 100) {
     // USER_DM_BLOCKED
     char *_1 = read_string(packet);
     char *_2 = read_string(packet);
@@ -294,7 +281,7 @@ void handle_packet(Packet *packet, uint16_t packet_id, uint32_t packet_len) {
     free(_1);
     free(_2);
     free(blocked);
-  } else if (packet_id == 101) {
+  } else if (packet->id == 101) {
     // TARGET_IS_SILENCED
     char *_1 = read_string(packet);
     char *_2 = read_string(packet);
@@ -304,93 +291,24 @@ void handle_packet(Packet *packet, uint16_t packet_id, uint32_t packet_len) {
     free(_1);
     free(_2);
     free(blocked);
-  } else if (packet_id == 102) {
+  } else if (packet->id == 102) {
     // VERSION_UPDATE_FORCED
     bancho.user_id = 0;
-    cho_token = strdup("client-too-old");
-  } else if (packet_id == 103) {
+    bancho.osu->getNotificationOverlay()->addNotification(
+        "Server uses an unsupported protocol version.");
+  } else if (packet->id == 103) {
     // SWITCH_SERVER
     int32_t idle_time = read_int(packet);
     // XXX: handle this
-  } else if (packet_id == 104) {
+  } else if (packet->id == 104) {
     // ACCOUNT_RESTRICTED
     debugLog("ACCOUNT RESTRICTED.\n");
-  } else if (packet_id == 106) {
+  } else if (packet->id == 106) {
     // MATCH_ABORT
     debugLog("Match aborted!\n");
   } else {
-    debugLog("Unknown packet ID %d (%d bytes)!\n", packet_id, packet_len);
+    debugLog("Unknown packet ID %d (%d bytes)!\n", packet->id, packet->size);
   }
-}
-
-void handle_packets(Packet *packet_list) {
-  while (packet_list->pos < packet_list->size) {
-    uint16_t packet_id = read_short(packet_list);
-    packet_list->pos++;
-    uint32_t packet_len = read_int(packet_list);
-
-    Packet packet = {
-        .memory = packet_list->memory + packet_list->pos,
-        .size = packet_len,
-        .pos = 0,
-    };
-    packet_list->pos += packet_len;
-
-    handle_packet(&packet, packet_id, packet_len);
-  }
-}
-
-int send_packet(Packet *packet) {
-  if (!curl) {
-    curl = curl_easy_init();
-    if (!curl) {
-      cho_token = strdup("curl-error");
-      return 0;
-    }
-  }
-
-  Packet response = {0};
-  response.memory = (uint8_t *)malloc(2048);
-
-  struct curl_slist *chunk = NULL;
-  if (bancho.user_id > 0) {
-    chunk = curl_slist_append(chunk, cho_token_header);
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
-
-    // For all packets except the LOGIN packet, we have a header with packet id
-    // and length Update the length now.
-    uint32_t final_pos = packet->pos;
-    packet->pos = 3;
-    write_int(packet, final_pos - 7);
-    packet->pos = final_pos;
-  }
-
-  // XXX: hardcoded endpoint
-  curl_easy_setopt(curl, CURLOPT_URL, "https://c.cho.osudev.local/");
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, packet->memory);
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, packet->pos);
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
-
-  curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
-
-  CURLcode res = curl_easy_perform(curl);
-  if (res == CURLE_OK) {
-    struct curl_header *header;
-    if (CURLHE_OK ==
-        curl_easy_header(curl, "cho-token", 0, CURLH_HEADER, -1, &header)) {
-      cho_token = strdup(header->value);
-      snprintf(cho_token_header, 1023, "osu-token: %s", cho_token);
-    }
-
-    handle_packets(&response);
-  }
-
-  curl_easy_reset(curl);
-  free(packet->memory);
-  free(response.memory);
-  curl_slist_free_all(chunk);
-  return res == CURLE_OK;
 }
 
 Packet build_login_packet(char *username, char *password) {
@@ -401,9 +319,8 @@ Packet build_login_packet(char *username, char *password) {
   write_bytes(&packet, (uint8_t *)username, strlen(username));
   write_byte(&packet, '\n');
 
-  uint8_t password_md5[16] = {0};
-  md5((uint8_t *)password, strlen(password), password_md5);
-  write_md5_bytes_as_hex(&packet, password_md5);
+  std::string password_md5 = md5((uint8_t *)password, strlen(password));
+  write_bytes(&packet, (uint8_t *)password_md5.c_str(), password_md5.size());
   write_byte(&packet, '\n');
 
   const char *osu_version = "b20231102.5";
@@ -419,34 +336,32 @@ Packet build_login_packet(char *username, char *password) {
   write_byte(&packet, '|');
 
   char osu_path[PATH_MAX] = {0};
-  uint8_t osu_path_md5[16] = {0};
   readlink("/proc/self/exe", osu_path, PATH_MAX - 1);
-  md5((uint8_t *)osu_path, strlen(osu_path), osu_path_md5);
-  write_md5_bytes_as_hex(&packet, osu_path_md5);
+  std::string osu_path_md5 = md5((uint8_t *)osu_path, strlen(osu_path));
+  write_bytes(&packet, (uint8_t *)osu_path_md5.c_str(), osu_path_md5.size());
   write_byte(&packet, ':');
 
   // XXX: Should get MAC addresses from network adapters
   const char *adapters = "runningunderwine";
-  uint8_t adapters_md5[16] = {0};
-  md5((uint8_t *)adapters, strlen(adapters), adapters_md5);
+  std::string adapters_md5 = md5((uint8_t *)adapters, strlen(adapters));
   write_bytes(&packet, (uint8_t *)adapters, strlen(adapters));
   write_byte(&packet, ':');
-  write_md5_bytes_as_hex(&packet, adapters_md5);
+  write_bytes(&packet, (uint8_t *)adapters_md5.c_str(), adapters_md5.size());
   write_byte(&packet, ':');
 
-  uint8_t disk_md5[16] = {0};
   char *uuid = get_disk_uuid();
+  std::string disk_md5 = "00000000000000000000000000000000";
   if (uuid) {
-    md5((uint8_t *)uuid, strlen(uuid), disk_md5);
+    disk_md5 = md5((uint8_t *)uuid, strlen(uuid));
     free(uuid);
   }
 
   // XXX: Should be per-install unique ID.
   // I'm lazy so just sending disk signature twice.
-  write_md5_bytes_as_hex(&packet, disk_md5);
+  write_bytes(&packet, (uint8_t *)disk_md5.c_str(), disk_md5.size());
   write_byte(&packet, ':');
 
-  write_md5_bytes_as_hex(&packet, disk_md5);
+  write_bytes(&packet, (uint8_t *)disk_md5.c_str(), disk_md5.size());
   write_byte(&packet, ':');
 
   // Allow PMs from strangers

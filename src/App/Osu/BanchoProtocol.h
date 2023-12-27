@@ -20,9 +20,11 @@ enum Action {
 };
 
 typedef struct {
+  uint16_t id;
   uint8_t *memory;
   size_t size;
   size_t pos;
+  uint8_t *extra;
 } Packet;
 
 typedef struct {

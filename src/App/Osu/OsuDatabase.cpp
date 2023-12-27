@@ -584,6 +584,11 @@ void OsuDatabase::sortScores(std::string beatmapMD5Hash)
 {
 	if (beatmapMD5Hash.length() != 32 || m_scores[beatmapMD5Hash].size() < 2) return;
 
+	if(m_osu_songbrowser_scores_sortingtype_ref->getString() == "Online Leaderboard") {
+		// Online scores are already sorted
+		return;
+	}
+
 	for (int i=0; i<m_scoreSortingMethods.size(); i++)
 	{
 		if (m_osu_songbrowser_scores_sortingtype_ref->getString() == m_scoreSortingMethods[i].name)

@@ -5,6 +5,7 @@
 // $NoKeywords: $osusb
 //===============================================================================//
 
+#include "BanchoLeaderboard.h"
 #include "OsuDatabase.h"
 #include "OsuSongBrowser2.h"
 
@@ -164,6 +165,57 @@ private:
 	std::vector<OsuUISongBrowserSongButton*> m_songButtons;
 };
 
+
+class OsuUISongBrowserScoresStillLoadingElement : public CBaseUILabel
+{
+public:
+	OsuUISongBrowserScoresStillLoadingElement(Osu *osu, UString text) : CBaseUILabel(0, 0, 0, 0, "", text)
+	{
+		m_osu = osu;
+		m_sIconString.insert(0, OsuIcons::GLOBE);
+	}
+
+	virtual void drawText(Graphics *g)
+	{
+		// draw icon
+		const float iconScale = 0.6f;
+		McFont *iconFont = m_osu->getFontIcons();
+		int iconWidth = 0;
+		g->pushTransform();
+		{
+			const float scale = (m_vSize.y / iconFont->getHeight())*iconScale;
+			const float paddingLeft = scale*15;
+
+			iconWidth = paddingLeft + iconFont->getStringWidth(m_sIconString)*scale;
+
+			g->scale(scale, scale);
+			g->translate((int)(m_vPos.x + paddingLeft), (int)(m_vPos.y + m_vSize.y/2 + iconFont->getHeight()*scale/2));
+			g->setColor(0xffffffff);
+			g->drawString(iconFont, m_sIconString);
+		}
+		g->popTransform();
+
+		// draw text
+		const float textScale = 0.4f;
+		McFont *textFont = m_osu->getSongBrowserFont();
+		g->pushTransform();
+		{
+			const float stringWidth = textFont->getStringWidth(m_sText);
+
+			const float scale = ((m_vSize.x - iconWidth) / stringWidth)*textScale;
+
+			g->scale(scale, scale);
+			g->translate((int)(m_vPos.x + iconWidth + (m_vSize.x - iconWidth)/2 - stringWidth*scale/2), (int)(m_vPos.y + m_vSize.y/2 + textFont->getHeight()*scale/2));
+			g->setColor(0xff02c3e5);
+			g->drawString(textFont, m_sText);
+		}
+		g->popTransform();
+	}
+
+private:
+	Osu *m_osu;
+	UString m_sIconString;
+};
 
 
 class OsuUISongBrowserNoRecordsSetElement : public CBaseUILabel
@@ -564,6 +616,7 @@ OsuSongBrowser2::OsuSongBrowser2(Osu *osu) : OsuScreenBackable(osu)
 	m_scoreBrowser->setHorizontalScrolling(false);
 	m_scoreBrowser->setScrollbarSizeMultiplier(0.25f);
 	m_scoreBrowser->setScrollResistance((m_osu->isInVRMode() || env->getOS() == Environment::OS::OS_HORIZON) ? convar->getConVarByName("ui_scrollview_resistance")->getInt() : 15); // a bit shitty this check + convar, but works well enough
+	m_scoreBrowserScoresStillLoadingElement = new OsuUISongBrowserScoresStillLoadingElement(m_osu, "Loading...");
 	m_scoreBrowserNoRecordsYetElement = new OsuUISongBrowserNoRecordsSetElement(m_osu, "No records set!");
 	m_scoreBrowser->getContainer()->addBaseUIElement(m_scoreBrowserNoRecordsYetElement);
 
@@ -662,6 +715,7 @@ OsuSongBrowser2::~OsuSongBrowser2()
 	{
 		delete m_scoreButtonCache[i];
 	}
+	SAFE_DELETE(m_scoreBrowserScoresStillLoadingElement);
 	SAFE_DELETE(m_scoreBrowserNoRecordsYetElement);
 
 	for (size_t i=0; i<m_sortingMethods.size(); i++)
@@ -2939,6 +2993,8 @@ void OsuSongBrowser2::updateScoreBrowserLayout()
 		scoreButton->setSize(m_scoreBrowser->getSize().x, scoreHeight);
 		scoreButton->setRelPos(scoreBrowserExtraPaddingRight, i*scoreButton->getSize().y + 5 * dpiScale);
 	}
+	m_scoreBrowserScoresStillLoadingElement->setSize(m_scoreBrowser->getSize().x*0.9f, scoreHeight*0.75f);
+	m_scoreBrowserScoresStillLoadingElement->setRelPos(m_scoreBrowser->getSize().x/2 - m_scoreBrowserScoresStillLoadingElement->getSize().x/2, (m_scoreBrowser->getSize().y/2)*0.65f - m_scoreBrowserScoresStillLoadingElement->getSize().y/2);
 	m_scoreBrowserNoRecordsYetElement->setSize(m_scoreBrowser->getSize().x*0.9f, scoreHeight*0.75f);
 	m_scoreBrowserNoRecordsYetElement->setRelPos(m_scoreBrowser->getSize().x/2 - m_scoreBrowserNoRecordsYetElement->getSize().x/2, (m_scoreBrowser->getSize().y/2)*0.65f - m_scoreBrowserNoRecordsYetElement->getSize().y/2);
 	m_scoreBrowser->getContainer()->update_pos();
@@ -2951,7 +3007,30 @@ void OsuSongBrowser2::rebuildScoreButtons()
 	m_scoreBrowser->getContainer()->empty();
 
 	const bool validBeatmap = (m_selectedBeatmap != NULL && m_selectedBeatmap->getSelectedDifficulty2() != NULL);
-	const int numScores = (validBeatmap ? ((*m_db->getScores())[m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash()]).size() : 0);
+
+	auto m_osu_songbrowser_scores_sortingtype_ref = convar->getConVarByName("osu_songbrowser_scores_sortingtype");
+	bool is_online = m_osu_songbrowser_scores_sortingtype_ref->getString() == "Online Leaderboard";
+
+	std::vector<OsuDatabase::Score> scores;
+	if(validBeatmap) {
+		if (is_online) {
+		    if (auto search = m_db->m_online_scores.find(m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash()); search != m_db->m_online_scores.end()) {
+		        scores = search->second;
+
+		        // We have already fetched the scores so there's no point in showing "Loading...".
+		        // When there are no online scores for this map, let's treat it as if we are
+		        // offline in order to show "No records set!" instead.
+		        is_online = false;
+		    } else {
+		    	// We haven't fetched the scores yet, do so now
+		    	fetch_online_scores(m_selectedBeatmap->getSelectedDifficulty2());
+		    }
+		} else {
+			scores = (*m_db->getScores())[m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash()];
+		}
+	}
+
+	const int numScores = scores.size();
 
 	// top up cache as necessary
 	if (numScores > m_scoreButtonCache.size())
@@ -2966,10 +3045,13 @@ void OsuSongBrowser2::rebuildScoreButtons()
 	}
 
 	// and build the ui
-	if (numScores < 1)
-		m_scoreBrowser->getContainer()->addBaseUIElement(m_scoreBrowserNoRecordsYetElement, m_scoreBrowserNoRecordsYetElement->getRelPos().x, m_scoreBrowserNoRecordsYetElement->getRelPos().y);
-	else
-	{
+	if (numScores < 1) {
+		if(is_online) {
+			m_scoreBrowser->getContainer()->addBaseUIElement(m_scoreBrowserScoresStillLoadingElement, m_scoreBrowserScoresStillLoadingElement->getRelPos().x, m_scoreBrowserScoresStillLoadingElement->getRelPos().y);
+		} else {
+			m_scoreBrowser->getContainer()->addBaseUIElement(m_scoreBrowserNoRecordsYetElement, m_scoreBrowserNoRecordsYetElement->getRelPos().x, m_scoreBrowserNoRecordsYetElement->getRelPos().y);
+		}
+	} else {
 		// sort
 		m_db->sortScores(m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash());
 
@@ -2979,7 +3061,7 @@ void OsuSongBrowser2::rebuildScoreButtons()
 		{
 			OsuUISongBrowserScoreButton *button = m_scoreButtonCache[i];
 			button->setName(UString(m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash().c_str()));
-			button->setScore((*m_db->getScores())[m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash()][i], m_selectedBeatmap->getSelectedDifficulty2(), i+1);
+			button->setScore(scores[i], m_selectedBeatmap->getSelectedDifficulty2(), i+1);
 			scoreButtons.push_back(button);
 		}
 
@@ -3501,6 +3583,10 @@ void OsuSongBrowser2::onSortScoresClicked(CBaseUIButton *button)
 	m_contextMenu->setRelPos(button->getRelPos());
 	m_contextMenu->begin(button->getSize().x);
 	{
+		CBaseUIButton *button = m_contextMenu->addButton("Online Leaderboard");
+		if (osu_songbrowser_scores_sortingtype.getString() == "Online Leaderboard")
+			button->setTextBrightColor(0xff00ff00);
+
 		const std::vector<OsuDatabase::SCORE_SORTING_METHOD> &scoreSortingMethods = m_db->getScoreSortingMethods();
 		for (size_t i=0; i<scoreSortingMethods.size(); i++)
 		{

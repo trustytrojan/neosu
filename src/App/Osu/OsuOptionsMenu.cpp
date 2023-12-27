@@ -3968,6 +3968,9 @@ void OsuOptionsMenu::save()
 	std::vector<ConVar*> manualConVars;
 	std::vector<ConVar*> removeConCommands;
 
+	manualConVars.push_back(convar->getConVarByName("osu_server"));
+	manualConVars.push_back(convar->getConVarByName("osu_username"));
+	manualConVars.push_back(convar->getConVarByName("osu_password"));
 	manualConVars.push_back(convar->getConVarByName("osu_songbrowser_sortingtype"));
 	manualConVars.push_back(convar->getConVarByName("osu_songbrowser_scores_sortingtype"));
 	manualConVars.push_back(m_osu_notelock_type_ref);
