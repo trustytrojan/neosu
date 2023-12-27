@@ -14,7 +14,10 @@
 // TODO @kiwec: some sort of cache
 
 OsuDatabase::Score parse_score(char *score_line) {
-  OsuDatabase::Score score;
+  OsuDatabase::Score score = {0};
+  score.isLegacyScore = true;
+  score.isImportedLegacyScore = true;
+  score.speedMultiplier = 1.0;
 
   char *saveptr = NULL;
   char *str = strtok_r(score_line, "|", &saveptr);
@@ -103,7 +106,9 @@ void fetch_online_scores(OsuDatabaseBeatmap *beatmap) {
   std::string beatmap_hash = beatmap->getMD5Hash();
   path += "&c=" + beatmap_hash;
 
-  const char *osu_file_path = beatmap->getFilePath().toUtf8();
+  UString ustr_osu_file_path =
+      beatmap->getFilePath(); // have to keep UString in scope to use toUtf8()
+  const char *osu_file_path = ustr_osu_file_path.toUtf8();
   for (const char *p = osu_file_path; *p; p++) {
     if (*p == '/') {
       osu_file_path = p + 1;
@@ -120,102 +125,102 @@ void fetch_online_scores(OsuDatabaseBeatmap *beatmap) {
     curl_easy_cleanup(curl);
     return;
   }
-  path += "&f=" + std::string(encoded_filename);
+  path += "&f=";
+  path += encoded_filename;
   curl_free(encoded_filename);
   curl_easy_cleanup(curl);
 
   path += "&m=0&i=" + std::to_string(beatmap->getSetID());
   path += "&mods=0&h=&a=0";
 
-  auto cv_username = convar->getConVarByName("osu_username");
-  path += "&us=" + std::string(cv_username->getString().toUtf8());
+  UString cv_username =
+      convar->getConVarByName("osu_username")
+          ->getString(); // have to keep UString in scope to use toUtf8()
+  path += "&us=" + std::string(cv_username.toUtf8());
 
-  auto cv_password = convar->getConVarByName("osu_password");
-  const char *pw = cv_password->getString().toUtf8();
+  UString cv_password =
+      convar->getConVarByName("osu_password")
+          ->getString(); // have to keep UString in scope to use toUtf8()
+  const char *pw = cv_password.toUtf8();
   std::string password_hash = md5((uint8_t *)pw, strlen(pw));
   path += "&ha=" + password_hash;
 
   APIRequest request = {
       .type = GET_MAP_LEADERBOARD,
       .path = path,
-      .extra = (uint8_t*)strdup(beatmap_hash.c_str()),
+      .extra = (uint8_t *)strdup(beatmap_hash.c_str()),
   };
 
   send_api_request(request);
 }
 
+// Since strtok_r SUCKS I'll just make my own
+// Returns the token start, and edits str to after the token end (unless '\0').
+char *strtok_x(char d, char **str) {
+  char *old = *str;
+  while (**str != '\0' && **str != d) {
+    (*str)++;
+  }
+  if (**str != '\0') {
+    **str = '\0';
+    (*str)++;
+  }
+  return old;
+}
+
 void process_leaderboard_response(Packet response) {
   // TODO @kiwec: strengthen this to handle error cases
 
+  debugLog("process_leaderboard_response: %s\n", response.memory);
+
   OnlineMapInfo info = {0};
 
-  char *saveptr = NULL;
-  char *str = strtok_r((char *)response.memory, "|", &saveptr);
-  if (!str)
-    return;
-  info.ranked_status = strtoul(str, NULL, 10);
+  char *body = (char *)response.memory;
 
-  str = strtok_r(NULL, "|", &saveptr);
-  if (!str)
-    return;
-  if (!strcmp(str, "true"))
-    info.server_has_osz2 = true;
-  else if (strcmp(str, "false") != 0)
-    return;
+  char *ranked_status = strtok_x('|', &body);
+  info.ranked_status = strtoul(ranked_status, NULL, 10);
 
-  str = strtok_r(NULL, "|", &saveptr);
-  if (!str)
-    return;
-  info.beatmap_id = strtoul(str, NULL, 10);
+  char *server_has_osz2 = strtok_x('|', &body);
+  info.server_has_osz2 = !strcmp(server_has_osz2, "true");
 
-  str = strtok_r(NULL, "|", &saveptr);
-  if (!str)
-    return;
-  info.beatmap_set_id = strtoul(str, NULL, 10);
+  char *beatmap_id = strtok_x('|', &body);
+  info.beatmap_id = strtoul(beatmap_id, NULL, 10);
 
-  str = strtok_r(NULL, "|", &saveptr);
-  if (!str)
-    return;
-  info.nb_scores = strtoul(str, NULL, 10);
+  char *beatmap_set_id = strtok_x('|', &body);
+  info.beatmap_set_id = strtoul(beatmap_set_id, NULL, 10);
 
-  str = strtok_r(NULL, "|", &saveptr);
-  if (!str)
-    return;
-  // Do nothing with fa_track_id
+  char *nb_scores = strtok_x('|', &body);
+  info.nb_scores = strtoul(nb_scores, NULL, 10);
 
-  str = strtok_r(NULL, "\n", &saveptr);
-  if (!str)
-    return;
-  // Do nothing with fa_license_text
+  char *fa_track_id = strtok_x('|', &body);
+  (void)fa_track_id;
 
-  str = strtok_r(NULL, "\n", &saveptr);
-  if (!str)
-    return;
-  // Ignore line
+  char *fa_license_text = strtok_x('\n', &body);
+  (void)fa_license_text;
 
-  str = strtok_r(NULL, "\n", &saveptr);
-  if (!str)
-    return;
-  // Do nothing with map name
+  // I'm guessing this is online offset, but idk
+  char *online_offset = strtok_x('\n', &body);
+  (void)online_offset;
 
-  str = strtok_r(NULL, "\n", &saveptr);
-  if (!str)
-    return;
-  // Do nothing with star rating
+  char *map_name = strtok_x('\n', &body);
+  (void)map_name;
 
-  str = strtok_r(NULL, "\n", &saveptr);
-  if (!str)
-    return;
-  // Do nothing with PB score
+  char *online_star_rating = strtok_x('\n', &body);
+  (void)online_star_rating;
+
+  char *pb_score = strtok_x('\n', &body);
+  (void)pb_score;
 
   std::vector<OsuDatabase::Score> scores;
-  while ((str = strtok_r(NULL, "\n", &saveptr))) {
-    scores.push_back(parse_score(str));
+  char *score_line = NULL;
+  while ((score_line = strtok_x('\n', &body))[0] != '\0') {
+    scores.push_back(parse_score(score_line));
   }
 
   debugLog("Got response for beatmap %d\n", info.beatmap_id);
 
-  std::string beatmap_hash = (char*)response.extra;
-  bancho.osu->getSongBrowser()->getDatabase()->m_online_scores[beatmap_hash] = scores;
+  std::string beatmap_hash = (char *)response.extra;
+  bancho.osu->getSongBrowser()->getDatabase()->m_online_scores[beatmap_hash] =
+      scores;
   bancho.osu->getSongBrowser()->rebuildScoreButtons();
 }

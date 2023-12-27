@@ -5,6 +5,7 @@
 #include "BanchoLeaderboard.h"
 #include "BanchoNetworking.h"
 #include "BanchoProtocol.h"
+#include "ConVar.h"
 #include "Engine.h"
 
 #ifdef MCENGINE_FEATURE_PTHREADS
@@ -13,14 +14,13 @@
 
 pthread_t networking_thread;
 
-// TODO: hardcoded for now
-std::string endpoint = "cho.osudev.local";
-
 // Bancho protocol
 pthread_mutex_t outgoing_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t incoming_mutex = PTHREAD_MUTEX_INITIALIZER;
 std::vector<Packet> outgoing_queue;
 std::vector<Packet> incoming_queue;
+
+// TODO @kiwec: reset this when server logs us out
 std::string auth_header = "";
 
 // osu! private API
@@ -56,7 +56,12 @@ static void send_api_request(CURL *curl, APIRequest outgoing) {
   response.extra = outgoing.extra;
   response.memory = (uint8_t *)malloc(2048);
 
-  std::string query_url = "https://osu." + endpoint + outgoing.path;
+  UString cv_endpoint =
+      convar->getConVarByName("osu_server")
+          ->getString(); // have to keep UString in scope to use toUtf8()
+  std::string query_url = "https://osu." + std::string(cv_endpoint.toUtf8()) + outgoing.path;
+  debugLog("Sending request: %s\n", query_url.c_str());
+
   curl_easy_setopt(curl, CURLOPT_URL, query_url.c_str());
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
@@ -89,13 +94,18 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
     outgoing.pos = final_pos;
   }
 
-  std::string query_url = "https://c." + endpoint + "/";
+  UString cv_endpoint =
+      convar->getConVarByName("osu_server")
+          ->getString(); // have to keep UString in scope to use toUtf8()
+  std::string query_url = "https://c." + std::string(cv_endpoint.toUtf8()) + "/";
   curl_easy_setopt(curl, CURLOPT_URL, query_url.c_str());
   curl_easy_setopt(curl, CURLOPT_POSTFIELDS, outgoing.memory);
   curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, outgoing.pos);
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
   curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
+
+  debugLog("Sending %d bytes: %s\n", outgoing.pos, (char *)outgoing.memory);
 
   CURLcode res = curl_easy_perform(curl);
   CURLHcode hres;
@@ -184,6 +194,8 @@ static void *do_networking(void *data) {
 #endif
 
 static void handle_api_response(Packet packet) {
+  debugLog("Received API response of type %d\n", packet.id);
+
   if (packet.id == GET_MAP_LEADERBOARD) {
     process_leaderboard_response(packet);
   } else {
@@ -221,7 +233,8 @@ void receive_bancho_packets() {
 
 void send_api_request(APIRequest request) {
   if (bancho.user_id == 0) {
-    debugLog("Cannot send API request of type %d since we are not logged in.\n", request.type);
+    debugLog("Cannot send API request of type %d since we are not logged in.\n",
+             request.type);
     return;
   }
 

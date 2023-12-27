@@ -3008,8 +3008,8 @@ void OsuSongBrowser2::rebuildScoreButtons()
 
 	const bool validBeatmap = (m_selectedBeatmap != NULL && m_selectedBeatmap->getSelectedDifficulty2() != NULL);
 
-	auto m_osu_songbrowser_scores_sortingtype_ref = convar->getConVarByName("osu_songbrowser_scores_sortingtype");
-	bool is_online = m_osu_songbrowser_scores_sortingtype_ref->getString() == "Online Leaderboard";
+	auto cv_sortingtype = convar->getConVarByName("osu_songbrowser_scores_sortingtype");
+	bool is_online = cv_sortingtype->getString() == UString("Online Leaderboard");
 
 	std::vector<OsuDatabase::Score> scores;
 	if(validBeatmap) {
@@ -3046,7 +3046,7 @@ void OsuSongBrowser2::rebuildScoreButtons()
 
 	// and build the ui
 	if (numScores < 1) {
-		if(is_online) {
+		if(validBeatmap && is_online) {
 			m_scoreBrowser->getContainer()->addBaseUIElement(m_scoreBrowserScoresStillLoadingElement, m_scoreBrowserScoresStillLoadingElement->getRelPos().x, m_scoreBrowserScoresStillLoadingElement->getRelPos().y);
 		} else {
 			m_scoreBrowser->getContainer()->addBaseUIElement(m_scoreBrowserNoRecordsYetElement, m_scoreBrowserNoRecordsYetElement->getRelPos().x, m_scoreBrowserNoRecordsYetElement->getRelPos().y);
@@ -3584,7 +3584,7 @@ void OsuSongBrowser2::onSortScoresClicked(CBaseUIButton *button)
 	m_contextMenu->begin(button->getSize().x);
 	{
 		CBaseUIButton *button = m_contextMenu->addButton("Online Leaderboard");
-		if (osu_songbrowser_scores_sortingtype.getString() == "Online Leaderboard")
+		if (osu_songbrowser_scores_sortingtype.getString() == UString("Online Leaderboard"))
 			button->setTextBrightColor(0xff00ff00);
 
 		const std::vector<OsuDatabase::SCORE_SORTING_METHOD> &scoreSortingMethods = m_db->getScoreSortingMethods();

@@ -139,7 +139,10 @@ ConVar osu_username("osu_username", "kiwecc");
 ConVar osu_password("osu_password", "");
 
 void reconnect(UString oldValue, UString newValue) {
-	Packet login_packet = build_login_packet((char *)osu_username.getString().toUtf8(), (char *)newValue.toUtf8());
+	UString user = osu_username.getString(); // have to keep UString in scope to use toUtf8()
+	UString pw = osu_password.getString(); // have to keep UString in scope to use toUtf8()
+
+	Packet login_packet = build_login_packet((char *)user.toUtf8(), (char *)pw.toUtf8());
 	send_packet(login_packet);
 }
 
@@ -537,8 +540,7 @@ Osu::Osu(Osu2 *osu2, int instanceID)
 	// Init online functionality (multiplayer/leaderboards/etc)
 	init_networking_thread();
 	osu_password.setCallback(reconnect); // TODO @kiwec: make proper UI in options menu instead
-	Packet login_packet = build_login_packet((char *)osu_username.getString().toUtf8(), (char *)osu_password.getString().toUtf8());
-	send_packet(login_packet);
+	reconnect("", "");
 
 	/*
 	// DEBUG: immediately start diff of a beatmap

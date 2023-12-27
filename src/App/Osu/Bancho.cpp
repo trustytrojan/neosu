@@ -18,14 +18,15 @@ std::string md5(uint8_t *msg, size_t msg_len) {
   hasher.update(msg, msg_len);
   hasher.finalize();
 
-  std::string hash = "";
   uint8_t *digest = hasher.getDigest();
+
+  char hash[33] = {0};
   for (int i = 0; i < 16; i++) {
-    hash += "0123456789abcdef"[digest[i] >> 4];
-    hash += "0123456789abcdef"[digest[i] & 0xf];
+    hash[i * 2] = "0123456789abcdef"[digest[i] >> 4];
+    hash[i * 2 + 1] = "0123456789abcdef"[digest[i] & 0xf];
   }
 
-  return hash;
+  return std::string(hash, 32);
 }
 
 char *get_disk_uuid() {
