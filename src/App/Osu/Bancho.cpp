@@ -6,8 +6,8 @@
 #include <unistd.h>
 
 #include "Bancho.h"
-#include "BanchoProtocol.h"
 #include "BanchoNetworking.h"
+#include "BanchoProtocol.h"
 #include "Engine.h"
 #include "MD5.h"
 #include "OsuNotificationOverlay.h"
@@ -48,12 +48,10 @@ char *get_disk_uuid() {
 }
 
 void handle_packet(Packet *packet) {
-  if (packet->id == 5) {
-    // USER_ID
+  if (packet->id == USER_ID) {
     bancho.user_id = read_int(packet);
     debugLog("Received user ID %d.\n", bancho.user_id);
-  } else if (packet->id == 7) {
-    // SEND_MESSAGE
+  } else if (packet->id == SEND_MESSAGE) {
     char *sender = read_string(packet);
     char *text = read_string(packet);
     char *recipient = read_string(packet);
@@ -62,11 +60,9 @@ void handle_packet(Packet *packet) {
     free(sender);
     free(text);
     free(recipient);
-  } else if (packet->id == 8) {
-    // PONG
+  } else if (packet->id == PONG) {
     // (nothing to do)
-  } else if (packet->id == 11) {
-    // USER_STATS
+  } else if (packet->id == USER_STATS) {
     int32_t stats_user_id = read_int(packet);
     uint8_t action = read_byte(packet);
     char *info_text = read_string(packet);
@@ -83,72 +79,56 @@ void handle_packet(Packet *packet) {
              global_rank, info_text);
     free(info_text);
     free(map_md5);
-  } else if (packet->id == 12) {
-    // USER_LOGOUT
+  } else if (packet->id == USER_LOGOUT) {
     int32_t logged_out_id = read_int(packet);
     int8_t zero = read_byte(packet);
     debugLog("Logged out.\n");
-  } else if (packet->id == 13) {
-    // SPECTATOR_JOINED
+  } else if (packet->id == SPECTATOR_JOINED) {
     int32_t spectator_id = read_int(packet);
     debugLog("Spectator joined: user id %d\n", spectator_id);
-  } else if (packet->id == 14) {
-    // SPECTATOR_LEFT
+  } else if (packet->id == SPECTATOR_LEFT) {
     int32_t spectator_id = read_int(packet);
     debugLog("Spectator left: user id %d\n", spectator_id);
-  } else if (packet->id == 19) {
-    // VERSION_UPDATE
+  } else if (packet->id == VERSION_UPDATE) {
     // (nothing to do?)
-  } else if (packet->id == 22) {
-    // SPECTATOR_CANT_SPECTATE
+  } else if (packet->id == SPECTATOR_CANT_SPECTATE) {
     int32_t spectator_id = read_int(packet);
     debugLog("Spectator can't spectate: user id %d\n", spectator_id);
-  } else if (packet->id == 23) {
-    // GET_ATTENTION
+  } else if (packet->id == GET_ATTENTION) {
     debugLog("ATTENTION!!!! (is this for flashing taskbar?)\n");
-  } else if (packet->id == 24) {
-    // NOTIFICATION
+  } else if (packet->id == NOTIFICATION) {
     char *notification = read_string(packet);
     bancho.osu->getNotificationOverlay()->addNotification(notification);
     free(notification);
-  } else if (packet->id == 26) {
-    // ROOM UPDATED
+  } else if (packet->id == ROOM_UPDATED) {
     Room *room = read_room(packet);
     debugLog("UPDATED Room %s: %d players\n", room->name, room->nb_players);
     free_room(room);
-  } else if (packet->id == 27) {
-    // ROOM CREATED
+  } else if (packet->id == ROOM_CREATED) {
     Room *room = read_room(packet);
     debugLog("CREATED Room %s: %d players\n", room->name, room->nb_players);
     free_room(room);
-  } else if (packet->id == 28) {
-    // ROOM CLOSED
+  } else if (packet->id == ROOM_CLOSED) {
     int32_t room_id = read_int(packet);
     debugLog("CLOSED Room #%d\n", room_id);
-  } else if (packet->id == 36) {
-    // MATCH_JOIN_SUCCESS
+  } else if (packet->id == ROOM_JOIN_SUCCESS) {
     Room *room = read_room(packet);
     debugLog("JOINED Room %s: %d players\n", room->name, room->nb_players);
     free_room(room);
-  } else if (packet->id == 37) {
-    // MATCH_JOIN_FAIL
+  } else if (packet->id == ROOM_JOIN_FAIL) {
     debugLog("FAILED to join room!\n");
-  } else if (packet->id == 42) {
-    // FELLOW_SPECTATOR_JOINED
+  } else if (packet->id == FELLOW_SPECTATOR_JOINED) {
     uint32_t spectator_id = read_int(packet);
     debugLog("Fellow spectator joined with user id %d\n", spectator_id);
-  } else if (packet->id == 43) {
-    // FELLOW_SPECTATOR_LEFT
+  } else if (packet->id == FELLOW_SPECTATOR_LEFT) {
     uint32_t spectator_id = read_int(packet);
     debugLog("Fellow spectator left with user id %d\n", spectator_id);
-  } else if (packet->id == 46) {
-    // MATCH_START
+  } else if (packet->id == IN_MATCH_START) {
     Room *room = read_room(packet);
     debugLog("MATCH STARTED IN Room %s: %d players\n", room->name,
              room->nb_players);
     free_room(room);
-  } else if (packet->id == 48) {
-    // MATCH_SCORE_UPDATE
+  } else if (packet->id == IN_MATCH_SCORE_UPDATE) {
     int32_t time = read_int(packet);
     uint8_t id = read_byte(packet);
     uint16_t num300 = read_short(packet);
@@ -165,29 +145,22 @@ void handle_packet(Packet *packet) {
     uint8_t tag = read_byte(packet);
     uint8_t is_scorev2 = read_byte(packet);
     // NOTE: where is voteskip here?
-  } else if (packet->id == 50) {
-    // MATCH_TRANSFER_HOST
+  } else if (packet->id == IN_MATCH_TRANSFER_HOST) {
     debugLog("Host transferred!\n");
-  } else if (packet->id == 53) {
-    // MATCH_ALL_PLAYERS_LOADED
+  } else if (packet->id == MATCH_ALL_PLAYERS_LOADED) {
     debugLog("All players loaded!\n");
-  } else if (packet->id == 57) {
-    // MATCH_PLAYER_FAILED
+  } else if (packet->id == MATCH_PLAYER_FAILED) {
     int32_t slot_id = read_int(packet);
     debugLog("Player in slot %d has failed.\n", slot_id);
-  } else if (packet->id == 58) {
-    // MATCH_COMPLETE
+  } else if (packet->id == IN_MATCH_COMPLETE) {
     debugLog("Match complete!\n");
-  } else if (packet->id == 61) {
-    // MATCH_SKIP
+  } else if (packet->id == MATCH_SKIP) {
     debugLog("Skipping!\n");
-  } else if (packet->id == 64) {
-    // CHANNEL_JOIN_SUCCESS
+  } else if (packet->id == CHANNEL_JOIN_SUCCESS) {
     char *name = read_string(packet);
     debugLog("Success in joining channel %s.\n", name);
     free(name);
-  } else if (packet->id == 65) {
-    // CHANNEL_INFO
+  } else if (packet->id == CHANNEL_INFO) {
     char *channel_name = read_string(packet);
     char *channel_topic = read_string(packet);
     int32_t nb_members = read_int(packet);
@@ -195,13 +168,11 @@ void handle_packet(Packet *packet) {
              nb_members, channel_topic);
     free(channel_name);
     free(channel_topic);
-  } else if (packet->id == 66) {
-    // CHANNEL_KICK
+  } else if (packet->id == CHANNEL_KICK) {
     char *name = read_string(packet);
     debugLog("Kicked from channel %s.\n", name);
     free(name);
-  } else if (packet->id == 67) {
-    // CHANNEL_AUTO_JOIN
+  } else if (packet->id == CHANNEL_AUTO_JOIN) {
     char *channel_name = read_string(packet);
     char *channel_topic = read_string(packet);
     int32_t nb_members = read_int(packet);
@@ -209,29 +180,25 @@ void handle_packet(Packet *packet) {
              channel_name, nb_members, channel_topic);
     free(channel_name);
     free(channel_topic);
-  } else if (packet->id == 71) {
-    // PRIVILEGES
+  } else if (packet->id == PRIVILEGES) {
     int privileges = read_int(packet);
     debugLog("Privileges: %d\n", privileges);
-  } else if (packet->id == 75) {
-    // PROTOCOL_VERSION
+  } else if (packet->id == PROTOCOL_VERSION) {
     int protocol_version = read_int(packet);
     if (protocol_version != 19) {
       disconnect();
       bancho.osu->getNotificationOverlay()->addNotification(
           "Server uses an unsupported protocol version.");
     }
-  } else if (packet->id == 76) {
-    // MAIN_MENU_ICON
+  } else if (packet->id == MAIN_MENU_ICON) {
     char *icon = read_string(packet);
     debugLog("Main menu icon: %s\n", icon);
+    // TODO @kiwec: handle this
     free(icon);
-  } else if (packet->id == 81) {
-    // MATCH_PLAYER_SKIPPED
+  } else if (packet->id == MATCH_PLAYER_SKIPPED) {
     int32_t user_id = read_int(packet);
     debugLog("User %d has voted to skip.\n", user_id);
-  } else if (packet->id == 83) {
-    // USER_PRESENCE
+  } else if (packet->id == USER_PRESENCE) {
     int32_t presence_user_id = read_int(packet);
     char *presence_username = read_string(packet);
     uint8_t presence_utc_offset = read_byte(packet);
@@ -244,14 +211,12 @@ void handle_packet(Packet *packet) {
              presence_user_id, presence_global_rank, presence_longitude,
              presence_latitude);
     free(presence_username);
-  } else if (packet->id == 86) {
-    // RESTART
+  } else if (packet->id == RESTART) {
     int32_t ms = read_int(packet);
     debugLog("Restart: %d ms\n", ms);
     reconnect();
     // TODO @kiwec: wait 'ms' milliseconds before reconnecting
-  } else if (packet->id == 88) {
-    // MATCH_INVITE
+  } else if (packet->id == MATCH_INVITE) {
     char *sender = read_string(packet);
     char *text = read_string(packet);
     char *recipient = read_string(packet);
@@ -260,23 +225,19 @@ void handle_packet(Packet *packet) {
     free(sender);
     free(text);
     free(recipient);
-  } else if (packet->id == 89) {
-    // XXX: handle CHANNEL_INFO_END
-  } else if (packet->id == 91) {
-    // MATCH_CHANGE_PASSWORD
+  } else if (packet->id == CHANNEL_INFO_END) {
+    // XXX: handle this
+  } else if (packet->id == IN_MATCH_CHANGE_PASSWORD) {
     char *new_password = read_string(packet);
     debugLog("Room changed password to %s\n", new_password);
     free(new_password);
-  } else if (packet->id == 92) {
-    // SILENCE_END
+  } else if (packet->id == SILENCE_END) {
     int32_t delta = read_int(packet);
     debugLog("Silence ends in %d seconds.\n", delta);
-  } else if (packet->id == 94) {
-    // USER_SILENCED
+  } else if (packet->id == USER_SILENCED) {
     int32_t user_id = read_int(packet);
     debugLog("User #%d silenced.\n", user_id);
-  } else if (packet->id == 100) {
-    // USER_DM_BLOCKED
+  } else if (packet->id == USER_DM_BLOCKED) {
     char *_1 = read_string(packet);
     char *_2 = read_string(packet);
     char *blocked = read_string(packet);
@@ -285,8 +246,7 @@ void handle_packet(Packet *packet) {
     free(_1);
     free(_2);
     free(blocked);
-  } else if (packet->id == 101) {
-    // TARGET_IS_SILENCED
+  } else if (packet->id == TARGET_IS_SILENCED) {
     char *_1 = read_string(packet);
     char *_2 = read_string(packet);
     char *blocked = read_string(packet);
@@ -295,20 +255,16 @@ void handle_packet(Packet *packet) {
     free(_1);
     free(_2);
     free(blocked);
-  } else if (packet->id == 102) {
-    // VERSION_UPDATE_FORCED
+  } else if (packet->id == VERSION_UPDATE_FORCED) {
     disconnect();
     bancho.osu->getNotificationOverlay()->addNotification(
         "Server uses an unsupported protocol version.");
-  } else if (packet->id == 103) {
-    // SWITCH_SERVER
+  } else if (packet->id == SWITCH_SERVER) {
     int32_t idle_time = read_int(packet);
     // XXX: handle this
-  } else if (packet->id == 104) {
-    // ACCOUNT_RESTRICTED
+  } else if (packet->id == ACCOUNT_RESTRICTED) {
     debugLog("ACCOUNT RESTRICTED.\n");
-  } else if (packet->id == 106) {
-    // MATCH_ABORT
+  } else if (packet->id == MATCH_ABORT) {
     debugLog("Match aborted!\n");
   } else {
     debugLog("Unknown packet ID %d (%d bytes)!\n", packet->id, packet->size);
@@ -424,21 +380,4 @@ Packet build_login_packet(char *username, char *password) {
 //     write_header(&packet, 4);
 //     send_packet(&packet);
 //   }
-// }
-
-// int main() {
-//   Packet login =
-//       build_login_packet(getenv("OSU_USERNAME"), getenv("OSU_PASSWORD"));
-//   send_packet(&login);
-
-//   if (bancho.user_id == 0) {
-//     debugLog(stderr, "Failed to login: %s\n", cho_token);
-//   } else {
-//     debugLog("Logged in successfully as user id %d!\n", bancho.user_id);
-//     debugLog("Login token: %s\n", cho_token);
-//   }
-
-//   send_stuff();
-
-//   return 0;
 // }

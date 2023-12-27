@@ -203,9 +203,3 @@ void write_md5_bytes_as_hex(Packet *packet, unsigned char *md5) {
     write_byte(packet, "0123456789abcdef"[md5[i] & 0xf]);
   }
 }
-
-void write_header(Packet *packet, uint16_t packet_id) {
-  write_short(packet, packet_id);
-  write_byte(packet, 0);
-  write_int(packet, 0);
-}

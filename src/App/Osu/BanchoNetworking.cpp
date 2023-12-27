@@ -19,9 +19,13 @@ pthread_t networking_thread;
 
 // Bancho protocol
 pthread_mutex_t outgoing_mutex = PTHREAD_MUTEX_INITIALIZER;
+bool try_logging_in = false;
+Packet login_packet = {0};
+Packet outgoing = {0};
 pthread_mutex_t incoming_mutex = PTHREAD_MUTEX_INITIALIZER;
-std::vector<Packet> outgoing_queue;
 std::vector<Packet> incoming_queue;
+time_t last_packet_tms = {0};
+double seconds_between_pings = 1.0;
 
 std::string auth_header = "";
 
@@ -30,25 +34,37 @@ pthread_mutex_t api_requests_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t api_responses_mutex = PTHREAD_MUTEX_INITIALIZER;
 std::vector<APIRequest> api_request_queue;
 std::vector<Packet> api_response_queue;
-time_t last_api_call_tms = {0};
-
 
 void disconnect() {
+  try_logging_in = false;
   bancho.user_id = 0;
+
+  // TODO @kiwec: send a logout packet first?
+  // TODO @kiwec: don't set auth_header here, enqueue a disconnect packet
+  // instead?
+
   auth_header = "";
 }
 
 void reconnect() {
   disconnect();
 
-  UString user = convar->getConVarByName("name")->getString(); // have to keep UString in scope to use toUtf8()
-  UString pw = convar->getConVarByName("osu_password")->getString(); // have to keep UString in scope to use toUtf8()
+  UString user =
+      convar->getConVarByName("name")
+          ->getString(); // have to keep UString in scope to use toUtf8()
+  UString pw =
+      convar->getConVarByName("osu_password")
+          ->getString(); // have to keep UString in scope to use toUtf8()
 
   // No password: don't try to log in
-  if(pw.length() == 0) return;
+  if (pw.length() == 0)
+    return;
 
-  Packet login_packet = build_login_packet((char *)user.toUtf8(), (char *)pw.toUtf8());
-  send_packet(login_packet);
+  pthread_mutex_lock(&outgoing_mutex);
+  free(login_packet.memory);
+  login_packet = build_login_packet((char *)user.toUtf8(), (char *)pw.toUtf8());
+  try_logging_in = true;
+  pthread_mutex_unlock(&outgoing_mutex);
 }
 
 static size_t curl_write(void *contents, size_t size, size_t nmemb,
@@ -77,17 +93,18 @@ static void send_api_request(CURL *curl, APIRequest outgoing) {
   response.extra = outgoing.extra;
   response.memory = (uint8_t *)malloc(2048);
 
+  // TODO @kiwec: convar not thread safe
   UString cv_endpoint =
       convar->getConVarByName("osu_server")
           ->getString(); // have to keep UString in scope to use toUtf8()
-  std::string query_url = "https://osu." + std::string(cv_endpoint.toUtf8()) + outgoing.path;
+  std::string query_url =
+      "https://osu." + std::string(cv_endpoint.toUtf8()) + outgoing.path;
   debugLog("Sending request: %s\n", query_url.c_str());
 
   curl_easy_setopt(curl, CURLOPT_URL, query_url.c_str());
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
 
-  last_api_call_tms = time(NULL);
   CURLcode res = curl_easy_perform(curl);
   if (res == CURLE_OK) {
     pthread_mutex_lock(&api_responses_mutex);
@@ -106,19 +123,14 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
   if (!auth_header.empty()) {
     chunk = curl_slist_append(chunk, auth_header.c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
-
-    // For all packets except the LOGIN packet, we have a header that includes
-    // packet length (which we need to update now).
-    uint32_t final_pos = outgoing.pos;
-    outgoing.pos = 3;
-    write_int(&outgoing, final_pos - 7);
-    outgoing.pos = final_pos;
   }
 
+  // TODO @kiwec: convar not thread safe
   UString cv_endpoint =
       convar->getConVarByName("osu_server")
           ->getString(); // have to keep UString in scope to use toUtf8()
-  std::string query_url = "https://c." + std::string(cv_endpoint.toUtf8()) + "/";
+  std::string query_url =
+      "https://c." + std::string(cv_endpoint.toUtf8()) + "/";
   curl_easy_setopt(curl, CURLOPT_URL, query_url.c_str());
   curl_easy_setopt(curl, CURLOPT_POSTFIELDS, outgoing.memory);
   curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, outgoing.pos);
@@ -126,17 +138,19 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
   curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
 
-  if(auth_header.empty()) {
+  if (auth_header.empty()) {
     debugLog("Logging in...\n");
   } else {
     debugLog("Sending %d bytes of packet type %d\n", outgoing.pos, outgoing.id);
   }
 
+  last_packet_tms = time(NULL);
   CURLcode res = curl_easy_perform(curl);
   CURLHcode hres;
   if (res != CURLE_OK) {
     // TODO @kiwec: if log in packet, display error to user
-    debugLog("Failed to send packet, cURL error %d\n%s\n", res, query_url.c_str());
+    debugLog("Failed to send packet, cURL error %d\n%s\n", res,
+             query_url.c_str());
     goto end;
   }
 
@@ -168,6 +182,7 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
     incoming_queue.push_back(incoming);
     pthread_mutex_unlock(&incoming_mutex);
 
+    seconds_between_pings = 1.0;
     response.pos += packet_len;
   }
 
@@ -180,7 +195,7 @@ end:
 static void *do_networking(void *data) {
   (void)data;
 
-  last_api_call_tms = time(NULL);
+  last_packet_tms = time(NULL);
 
   CURL *curl = curl_easy_init();
   if (!curl) {
@@ -189,31 +204,48 @@ static void *do_networking(void *data) {
   }
 
   while (true) {
-    if (difftime(time(NULL), last_api_call_tms) > 1.0) {
-      pthread_mutex_lock(&api_requests_mutex);
-      if (api_request_queue.empty()) {
-        pthread_mutex_unlock(&api_requests_mutex);
-      } else {
-        APIRequest outgoing = api_request_queue.front();
-        api_request_queue.erase(api_request_queue.begin());
-        pthread_mutex_unlock(&api_requests_mutex);
+    pthread_mutex_lock(&api_requests_mutex);
+    if (api_request_queue.empty()) {
+      pthread_mutex_unlock(&api_requests_mutex);
+    } else {
+      APIRequest outgoing = api_request_queue.front();
+      api_request_queue.erase(api_request_queue.begin());
+      pthread_mutex_unlock(&api_requests_mutex);
 
-        send_api_request(curl, outgoing);
-      }
+      send_api_request(curl, outgoing);
     }
 
     pthread_mutex_lock(&outgoing_mutex);
-    if (outgoing_queue.empty()) {
-      pthread_mutex_unlock(&outgoing_mutex);
-      usleep(1000);
-    } else {
-      Packet outgoing = outgoing_queue.front();
-      outgoing_queue.erase(outgoing_queue.begin());
+    if (try_logging_in) {
+      send_bancho_packet(curl, login_packet);
+      try_logging_in = false;
+    }
+
+    if (outgoing.pos == 0) {
       pthread_mutex_unlock(&outgoing_mutex);
 
-      send_bancho_packet(curl, outgoing);
-      free(outgoing.memory);
+      // If we haven't sent anything in a while, we need to poll for new data
+      if (difftime(time(NULL), last_packet_tms) > seconds_between_pings) {
+        Packet nothing = {0};
+        send_bancho_packet(curl, nothing);
+
+        // Polling gets slower over time, but resets when we receive new data
+        if (seconds_between_pings < 30.0) {
+          seconds_between_pings += 1.0;
+        }
+      }
+    } else {
+      Packet out = outgoing;
+      outgoing = {0};
+      pthread_mutex_unlock(&outgoing_mutex);
+
+      send_bancho_packet(curl, out);
+      free(out.memory);
     }
+
+    // osu! doesn't need fast networking. In fact, we want to avoid spamming the
+    // servers... So we batch requests and send them once a second at most.
+    sleep(1);
   }
 
   // unreachable
@@ -276,7 +308,14 @@ void send_api_request(APIRequest request) {
 void send_packet(Packet packet) {
 #ifdef MCENGINE_FEATURE_PTHREADS
   pthread_mutex_lock(&outgoing_mutex);
-  outgoing_queue.push_back(packet);
+
+  // We're not sending it immediately, instead we just add it to the pile of
+  // packets to send
+  write_short(&outgoing, packet.id);
+  write_byte(&outgoing, 0);
+  write_int(&outgoing, packet.pos);
+  write_bytes(&outgoing, packet.memory, packet.pos);
+
   pthread_mutex_unlock(&outgoing_mutex);
 #else
   free(packet.memory);
