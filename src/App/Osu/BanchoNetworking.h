@@ -12,6 +12,9 @@ struct APIRequest {
   uint8_t *extra;
 };
 
+void disconnect();
+void reconnect();
+
 // Send an API request.
 void send_api_request(APIRequest request);
 

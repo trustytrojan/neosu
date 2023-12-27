@@ -14,13 +14,15 @@
 
 pthread_t networking_thread;
 
+// TODO @kiwec: improve the way the client logs in and manages logged in state
+// Right now if log in fails or expires, things explode
+
 // Bancho protocol
 pthread_mutex_t outgoing_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t incoming_mutex = PTHREAD_MUTEX_INITIALIZER;
 std::vector<Packet> outgoing_queue;
 std::vector<Packet> incoming_queue;
 
-// TODO @kiwec: reset this when server logs us out
 std::string auth_header = "";
 
 // osu! private API
@@ -29,6 +31,25 @@ pthread_mutex_t api_responses_mutex = PTHREAD_MUTEX_INITIALIZER;
 std::vector<APIRequest> api_request_queue;
 std::vector<Packet> api_response_queue;
 time_t last_api_call_tms = {0};
+
+
+void disconnect() {
+  bancho.user_id = 0;
+  auth_header = "";
+}
+
+void reconnect() {
+  disconnect();
+
+  UString user = convar->getConVarByName("name")->getString(); // have to keep UString in scope to use toUtf8()
+  UString pw = convar->getConVarByName("osu_password")->getString(); // have to keep UString in scope to use toUtf8()
+
+  // No password: don't try to log in
+  if(pw.length() == 0) return;
+
+  Packet login_packet = build_login_packet((char *)user.toUtf8(), (char *)pw.toUtf8());
+  send_packet(login_packet);
+}
 
 static size_t curl_write(void *contents, size_t size, size_t nmemb,
                          void *userp) {
@@ -105,12 +126,19 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
   curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
 
-  debugLog("Sending %d bytes: %s\n", outgoing.pos, (char *)outgoing.memory);
+  if(auth_header.empty()) {
+    debugLog("Logging in...\n");
+  } else {
+    debugLog("Sending %d bytes of packet type %d\n", outgoing.pos, outgoing.id);
+  }
 
   CURLcode res = curl_easy_perform(curl);
   CURLHcode hres;
-  if (res != CURLE_OK)
+  if (res != CURLE_OK) {
+    // TODO @kiwec: if log in packet, display error to user
+    debugLog("Failed to send packet, cURL error %d\n%s\n", res, query_url.c_str());
     goto end;
+  }
 
   // Update auth token if applicable
   struct curl_header *header;

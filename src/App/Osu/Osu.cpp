@@ -27,6 +27,8 @@
 #include "RenderTarget.h"
 #include "Shader.h"
 
+#include "CBaseUITextbox.h"
+#include "CBaseUIScrollView.h"
 #include "CWindowManager.h"
 //#include "DebugMonitor.h"
 
@@ -134,17 +136,9 @@ ConVar osu_hide_cursor_during_gameplay("osu_hide_cursor_during_gameplay", false)
 ConVar osu_alt_f4_quits_even_while_playing("osu_alt_f4_quits_even_while_playing", true);
 ConVar osu_win_disable_windows_key_while_playing("osu_win_disable_windows_key_while_playing", true);
 
-ConVar osu_server("osu_server", "cho.osudev.local");
-ConVar osu_username("osu_username", "kiwecc");
+ConVar osu_server("osu_server", "ripple.moe");
+ConVar osu_username("name", "Guest");
 ConVar osu_password("osu_password", "");
-
-void reconnect(UString oldValue, UString newValue) {
-	UString user = osu_username.getString(); // have to keep UString in scope to use toUtf8()
-	UString pw = osu_password.getString(); // have to keep UString in scope to use toUtf8()
-
-	Packet login_packet = build_login_packet((char *)user.toUtf8(), (char *)pw.toUtf8());
-	send_packet(login_packet);
-}
 
 ConVar *Osu::version = &osu_version;
 ConVar *Osu::debug = &osu_debug;
@@ -224,7 +218,6 @@ Osu::Osu(Osu2 *osu2, int instanceID)
 	if (m_iInstanceID < 2)
 		engine->getMouse()->addListener(this);
 
-	convar->getConVarByName("name")->setValue("Guest");
 	convar->getConVarByName("console_overlay")->setValue(0.0f);
 	convar->getConVarByName("vsync")->setValue(0.0f);
 	convar->getConVarByName("fps_max")->setValue(420.0f);
@@ -539,8 +532,14 @@ Osu::Osu(Osu2 *osu2, int instanceID)
 
 	// Init online functionality (multiplayer/leaderboards/etc)
 	init_networking_thread();
-	osu_password.setCallback(reconnect); // TODO @kiwec: make proper UI in options menu instead
-	reconnect("", "");
+	if(osu_password.getString().length() == 0) {
+		// Copy normal osu! behavior and ask for login details on startup
+		m_optionsMenu->setVisible(true);
+		m_optionsMenu->m_options->scrollToElement(m_optionsMenu->sectionOnline, 0, 100 * getUIScale(this));
+		m_optionsMenu->m_nameTextbox->focus();
+	} else {
+		reconnect();
+	}
 
 	/*
 	// DEBUG: immediately start diff of a beatmap

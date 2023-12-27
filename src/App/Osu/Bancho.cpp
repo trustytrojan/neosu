@@ -7,6 +7,7 @@
 
 #include "Bancho.h"
 #include "BanchoProtocol.h"
+#include "BanchoNetworking.h"
 #include "Engine.h"
 #include "MD5.h"
 #include "OsuNotificationOverlay.h"
@@ -216,7 +217,7 @@ void handle_packet(Packet *packet) {
     // PROTOCOL_VERSION
     int protocol_version = read_int(packet);
     if (protocol_version != 19) {
-      bancho.user_id = 0;
+      disconnect();
       bancho.osu->getNotificationOverlay()->addNotification(
           "Server uses an unsupported protocol version.");
     }
@@ -247,6 +248,8 @@ void handle_packet(Packet *packet) {
     // RESTART
     int32_t ms = read_int(packet);
     debugLog("Restart: %d ms\n", ms);
+    reconnect();
+    // TODO @kiwec: wait 'ms' milliseconds before reconnecting
   } else if (packet->id == 88) {
     // MATCH_INVITE
     char *sender = read_string(packet);
@@ -294,7 +297,7 @@ void handle_packet(Packet *packet) {
     free(blocked);
   } else if (packet->id == 102) {
     // VERSION_UPDATE_FORCED
-    bancho.user_id = 0;
+    disconnect();
     bancho.osu->getNotificationOverlay()->addNotification(
         "Server uses an unsupported protocol version.");
   } else if (packet->id == 103) {

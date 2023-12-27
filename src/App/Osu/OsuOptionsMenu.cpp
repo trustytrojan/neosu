@@ -5,6 +5,7 @@
 // $NoKeywords: $
 //===============================================================================//
 
+#include "BanchoNetworking.h"
 #include "OsuOptionsMenu.h"
 
 #include "SoundEngine.h"
@@ -559,8 +560,6 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu)
 	if (env->getOS() != Environment::OS::OS_HORIZON)
 		addCheckbox("Load osu! scores.db (read-only)", "If you have an existing osu! installation,\nalso load and display your achieved scores from there.", convar->getConVarByName("osu_scores_legacy_enabled"));
 
-	addSubSection("Player (Name)");
-	m_nameTextbox = addTextbox(convar->getConVarByName("name")->getString(), convar->getConVarByName("name"));
 	addSpacer();
 	addCheckbox("Include Relax/Autopilot for total weighted pp/acc", "NOTE: osu! does not allow this (since these mods are unranked).\nShould relax/autopilot scores be included in the weighted pp/acc calculation?", convar->getConVarByName("osu_user_include_relax_and_autopilot_for_stats"));
 	addCheckbox("Disable osu!lazer star/pp Relax/Autopilot nerfs", "Disabled: osu!lazer algorithm default. Relax/Autopilot scores are nerfed.\nEnabled: McOsu default. All Relax/Autopilot nerfs are disabled.", convar->getConVarByName("osu_stars_and_pp_lazer_relax_autopilot_nerf_disabled"));
@@ -1172,11 +1171,25 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu)
 
 	//**************************************************************************************************************************//
 
-	CBaseUIElement *sectionOnline = NULL;
+	sectionOnline = addSection("Online");
+
+	addSubSection("Online server");
+	addLabel("If the server admins don't explicitly allow McOsu,")->setTextColor(0xff666666);
+	addLabel("you might get banned!")->setTextColor(0xff666666);
+	addLabel("");
+	m_serverTextbox = addTextbox(convar->getConVarByName("osu_server")->getString(), convar->getConVarByName("osu_server"));
+
+	addSubSection("Login details (username/password)");
+	m_nameTextbox = addTextbox(convar->getConVarByName("name")->getString(), convar->getConVarByName("name"));
+	m_passwordTextbox = addTextbox(convar->getConVarByName("osu_password")->getString(), convar->getConVarByName("osu_password"));
+	m_passwordTextbox->is_password = true;
+	OsuUIButton *logInButton = addButton("Log in");
+	logInButton->setClickCallback( fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onLogInClicked) );
+	logInButton->setColor(0xff00ff00);
+	logInButton->setTextColor(0xffffffff);
+
 	if (env->getOS() != Environment::OS::OS_HORIZON)
 	{
-		sectionOnline = addSection("Online");
-
 		addSubSection("Integration");
 		addCheckbox("Rich Presence (Discord + Steam)", "Shows your current game state in your friends' friendslists.\ne.g.: Playing Gavin G - Reach Out [Cherry Blossom's Insane]", convar->getConVarByName("osu_rich_presence"));
 	}
@@ -1546,8 +1559,24 @@ void OsuOptionsMenu::update()
 	// apply textbox changes on enter key
 	if (m_osuFolderTextbox->hitEnter())
 		updateOsuFolder();
-	if (m_nameTextbox->hitEnter())
-		updateName();
+
+	convar->getConVarByName("name")->setValue(m_nameTextbox->getText());
+	convar->getConVarByName("osu_password")->setValue(m_passwordTextbox->getText());
+	convar->getConVarByName("osu_server")->setValue(m_serverTextbox->getText());
+	if (m_nameTextbox->hitEnter()){
+		convar->getConVarByName("name")->setValue(m_nameTextbox->getText());
+		m_nameTextbox->stealFocus();
+		m_passwordTextbox->focus();
+	}
+	if(m_passwordTextbox->hitEnter()) {
+		m_passwordTextbox->stealFocus();
+		reconnect();
+	}
+	if(m_serverTextbox->hitEnter()) {
+		m_serverTextbox->stealFocus();
+		reconnect();
+	}
+
 	if (m_dpiTextbox != NULL && m_dpiTextbox->hitEnter())
 		updateFposuDPI();
 	if (m_cm360Textbox != NULL && m_cm360Textbox->hitEnter())
@@ -2319,12 +2348,6 @@ void OsuOptionsMenu::updateOsuFolder()
 	convar->getConVarByName("osu_folder")->setValue(newOsuFolder);
 }
 
-void OsuOptionsMenu::updateName()
-{
-	m_nameTextbox->stealFocus();
-	convar->getConVarByName("name")->setValue(m_nameTextbox->getText());
-}
-
 void OsuOptionsMenu::updateFposuDPI()
 {
 	if (m_dpiTextbox == NULL) return;
@@ -2835,6 +2858,11 @@ void OsuOptionsMenu::onAudioCompatibilityModeChange(CBaseUICheckbox *checkbox)
 	engine->getSound()->setOutputDeviceForce(engine->getSound()->getOutputDevice());
 	checkbox->setChecked(m_win_snd_fallback_dsound_ref->getBool(), false);
 	m_osu->getSkin()->reloadSounds();
+}
+
+void OsuOptionsMenu::onLogInClicked()
+{
+	reconnect();
 }
 
 void OsuOptionsMenu::onDownloadOsuClicked()
@@ -4002,7 +4030,6 @@ void OsuOptionsMenu::save()
 	}
 
 	updateOsuFolder();
-	updateName();
 	updateFposuDPI();
 	updateFposuCMper360();
 
@@ -4017,9 +4044,6 @@ void OsuOptionsMenu::save()
 	std::vector<ConVar*> manualConVars;
 	std::vector<ConVar*> removeConCommands;
 
-	manualConVars.push_back(convar->getConVarByName("osu_server"));
-	manualConVars.push_back(convar->getConVarByName("osu_username"));
-	manualConVars.push_back(convar->getConVarByName("osu_password"));
 	manualConVars.push_back(convar->getConVarByName("osu_songbrowser_sortingtype"));
 	manualConVars.push_back(convar->getConVarByName("osu_songbrowser_scores_sortingtype"));
 	manualConVars.push_back(m_osu_notelock_type_ref);

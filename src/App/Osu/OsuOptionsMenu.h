@@ -68,7 +68,7 @@ public:
 
 	bool shouldDrawVRDummyHUD();
 
-private:
+public:
 	static const char *OSU_CONFIG_FILE_NAME;
 
 	struct OPTIONS_ELEMENT
@@ -107,7 +107,6 @@ private:
 	void scheduleSearchUpdate();
 
 	void updateOsuFolder();
-	void updateName();
 	void updateFposuDPI();
 	void updateFposuCMper360();
 	void updateVRRenderTargetResolutionLabel();
@@ -136,6 +135,7 @@ private:
 	void onOutputDeviceResetUpdate();
 	void onOutputDeviceRestart();
 	void onAudioCompatibilityModeChange(CBaseUICheckbox *checkbox);
+	void onLogInClicked();
 	void onDownloadOsuClicked();
 	void onManuallyManageBeatmapsClicked();
 	void onCM360CalculatorLinkClicked();
@@ -246,7 +246,6 @@ private:
 	CBaseUIElement *m_resolutionSelectButton;
 	CBaseUILabel *m_resolutionLabel;
 	CBaseUITextbox *m_osuFolderTextbox;
-	CBaseUITextbox *m_nameTextbox;
 	CBaseUIElement *m_outputDeviceSelectButton;
 	CBaseUILabel *m_outputDeviceLabel;
 	OsuOptionsMenuResetButton *m_outputDeviceResetButton;
@@ -276,6 +275,11 @@ private:
 	CBaseUIElement *m_hpDrainSelectButton;
 	CBaseUILabel *m_hpDrainSelectLabel;
 	OsuOptionsMenuResetButton *m_hpDrainSelectResetButton;
+
+	CBaseUIElement *sectionOnline;
+	CBaseUITextbox *m_nameTextbox;
+	CBaseUITextbox *m_passwordTextbox;
+	CBaseUITextbox *m_serverTextbox;
 
 	ConVar *m_waitingKey;
 	ConVar *m_osu_slider_curve_points_separation_ref;
