@@ -73,73 +73,61 @@ void OsuPauseMenu::draw(Graphics *g)
 	const bool isAnimating = anim->isAnimating(&m_fDimAnim);
 	if (!m_bVisible && !isAnimating) return;
 
-	if (m_bVisible || isAnimating)
+	// draw dim
+	if (osu_pause_dim_background.getBool())
 	{
-		// draw dim
-		if (osu_pause_dim_background.getBool())
-		{
-			g->setColor(COLORf(m_fDimAnim * osu_pause_dim_alpha.getFloat(), 0.078f, 0.078f, 0.078f));
-			g->fillRect(0, 0, m_osu->getScreenWidth(), m_osu->getScreenHeight());
-		}
+		g->setColor(COLORf(m_fDimAnim * osu_pause_dim_alpha.getFloat(), 0.078f, 0.078f, 0.078f));
+		g->fillRect(0, 0, m_osu->getScreenWidth(), m_osu->getScreenHeight());
+	}
 
-		// draw background image
-		if ((m_bVisible || isAnimating))
-		{
-			Image *image = NULL;
-			if (m_bContinueEnabled)
-				image = m_osu->getSkin()->getPauseOverlay();
-			else
-				image = m_osu->getSkin()->getFailBackground();
+	// draw background image
+	if ((m_bVisible || isAnimating))
+	{
+		Image *image = NULL;
+		if (m_bContinueEnabled)
+			image = m_osu->getSkin()->getPauseOverlay();
+		else
+			image = m_osu->getSkin()->getFailBackground();
 
-			if (image != m_osu->getSkin()->getMissingTexture())
+		if (image != m_osu->getSkin()->getMissingTexture())
+		{
+			const float scale = Osu::getImageScaleToFillResolution(image, m_osu->getScreenSize());
+			const Vector2 centerTrans = (m_osu->getScreenSize() / 2);
+
+			g->setColor(COLORf(m_fDimAnim, 1.0f, 1.0f, 1.0f));
+			g->pushTransform();
 			{
-				const float scale = Osu::getImageScaleToFillResolution(image, m_osu->getScreenSize());
-				const Vector2 centerTrans = (m_osu->getScreenSize() / 2);
-
-				g->setColor(COLORf(m_fDimAnim, 1.0f, 1.0f, 1.0f));
-				g->pushTransform();
-				{
-					g->scale(scale, scale);
-					g->translate((int)centerTrans.x, (int)centerTrans.y);
-					g->drawImage(image);
-				}
-				g->popTransform();
+				g->scale(scale, scale);
+				g->translate((int)centerTrans.x, (int)centerTrans.y);
+				g->drawImage(image);
 			}
-		}
-
-		// draw buttons
-		for (int i=0; i<m_buttons.size(); i++)
-		{
-			m_buttons[i]->setAlpha(1.0f - (1.0f - m_fDimAnim)*(1.0f - m_fDimAnim)*(1.0f - m_fDimAnim));
-		}
-		m_container->draw(g);
-
-		// draw selection arrows
-		if (m_selectedButton != NULL)
-		{
-			const Color arrowColor = COLOR(255, 0, 114, 255);
-			float animation = fmod((float)(engine->getTime()-m_fWarningArrowsAnimStartTime)*3.2f, 2.0f);
-			if (animation > 1.0f)
-				animation = 2.0f - animation;
-
-			animation =  -animation*(animation-2); // quad out
-			const float offset = m_osu->getUIScale(m_osu, 20.0f + 45.0f*animation);
-
-			g->setColor(arrowColor);
-			g->setAlpha(m_fWarningArrowsAnimAlpha * m_fDimAnim);
-			m_osu->getHUD()->drawWarningArrow(g, Vector2(m_fWarningArrowsAnimX, m_fWarningArrowsAnimY) + Vector2(0, m_selectedButton->getSize().y/2) - Vector2(offset, 0), false, false);
-			m_osu->getHUD()->drawWarningArrow(g, Vector2(m_osu->getScreenWidth() - m_fWarningArrowsAnimX, m_fWarningArrowsAnimY) + Vector2(0, m_selectedButton->getSize().y/2) + Vector2(offset, 0), true, false);
+			g->popTransform();
 		}
 	}
 
-	if (!m_bVisible) return;
+	// draw buttons
+	for (int i=0; i<m_buttons.size(); i++)
+	{
+		m_buttons[i]->setAlpha(1.0f - (1.0f - m_fDimAnim)*(1.0f - m_fDimAnim)*(1.0f - m_fDimAnim));
+	}
+	m_container->draw(g);
 
-	/*
-	g->setColor(0xffff0000);
-	g->drawLine(0, m_osu->getScreenHeight()/3.0f, m_osu->getScreenWidth(), m_osu->getScreenHeight()/3.0f);
-	g->drawLine(0, (m_osu->getScreenHeight()/3.0f)*2, m_osu->getScreenWidth(), (m_osu->getScreenHeight()/3.0f)*2);
-	g->drawLine(0, (m_osu->getScreenHeight()/3.0f)*3, m_osu->getScreenWidth(), (m_osu->getScreenHeight()/3.0f)*3);
-	*/
+	// draw selection arrows
+	if (m_selectedButton != NULL)
+	{
+		const Color arrowColor = COLOR(255, 0, 114, 255);
+		float animation = fmod((float)(engine->getTime()-m_fWarningArrowsAnimStartTime)*3.2f, 2.0f);
+		if (animation > 1.0f)
+			animation = 2.0f - animation;
+
+		animation =  -animation*(animation-2); // quad out
+		const float offset = m_osu->getUIScale(m_osu, 20.0f + 45.0f*animation);
+
+		g->setColor(arrowColor);
+		g->setAlpha(m_fWarningArrowsAnimAlpha * m_fDimAnim);
+		m_osu->getHUD()->drawWarningArrow(g, Vector2(m_fWarningArrowsAnimX, m_fWarningArrowsAnimY) + Vector2(0, m_selectedButton->getSize().y/2) - Vector2(offset, 0), false, false);
+		m_osu->getHUD()->drawWarningArrow(g, Vector2(m_osu->getScreenWidth() - m_fWarningArrowsAnimX, m_fWarningArrowsAnimY) + Vector2(0, m_selectedButton->getSize().y/2) + Vector2(offset, 0), true, false);
+	}
 }
 
 void OsuPauseMenu::update()

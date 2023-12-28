@@ -32,6 +32,7 @@
 #include "CWindowManager.h"
 //#include "DebugMonitor.h"
 
+#include "OsuChat.h"
 #include "Osu2.h"
 #include "OsuVR.h"
 #include "OsuMultiplayer.h"
@@ -494,10 +495,12 @@ Osu::Osu(Osu2 *osu2, int instanceID)
 	m_editor = new OsuEditor(this);
 	m_steamWorkshop = new OsuSteamWorkshop(this);
 	m_fposu = new OsuModFPoSu(this);
+	m_chat = new OsuChat(this);
 
 	// the order in this vector will define in which order events are handled/consumed
 	m_screens.push_back(m_notificationOverlay);
 	m_screens.push_back(m_optionsMenu);
+	m_screens.push_back(m_chat);
 	m_screens.push_back(m_userStatsScreen);
 	m_screens.push_back(m_rankingScreen);
 	m_screens.push_back(m_modSelector);
@@ -645,6 +648,7 @@ void Osu::draw(Graphics *g)
 		m_pauseMenu->draw(g);
 		m_modSelector->draw(g);
 		m_optionsMenu->draw(g);
+		m_chat->draw(g);
 
 		if (osu_draw_fps.getBool() && !isFPoSu)
 			m_hud->drawFps(g);
@@ -708,6 +712,8 @@ void Osu::draw(Graphics *g)
 
 		if (isInMultiplayer())
 			m_hud->drawScoreBoardMP(g);
+
+		m_chat->draw(g);
 
 		if (osu_draw_fps.getBool())
 			m_hud->drawFps(g);
@@ -1297,6 +1303,10 @@ void Osu::onKeyDown(KeyboardEvent &key)
 		}
 	}
 
+	// F8 toggle chat
+	if (key == (KEYCODE)OsuKeyBindings::TOGGLE_CHAT.getInt())
+		m_chat->setVisible(!m_chat->isVisible());
+
 	// screenshots
 	if (key == (KEYCODE)OsuKeyBindings::SAVE_SCREENSHOT.getInt())
 		saveScreenshot();
@@ -1315,7 +1325,7 @@ void Osu::onKeyDown(KeyboardEvent &key)
 	// local hotkeys (and gameplay keys)
 
 	// while playing (and not in options)
-	if (isInPlayMode() && !m_optionsMenu->isVisible())
+	if (isInPlayMode() && !m_optionsMenu->isVisible() && !m_chat->isVisible())
 	{
 		// while playing and not paused
 		if (!getSelectedBeatmap()->isPaused())
@@ -2323,6 +2333,8 @@ bool Osu::onShutdown()
 	// save everything
 	m_optionsMenu->save();
 	m_songBrowser2->getDatabase()->save();
+
+	disconnect();
 
 	// the only time where a shutdown could be problematic is while an update is being installed, so we block it here
 	return m_updateHandler == NULL || m_updateHandler->getStatus() != OsuUpdateHandler::STATUS::STATUS_INSTALLING_UPDATE;

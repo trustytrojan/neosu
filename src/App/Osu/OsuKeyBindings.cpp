@@ -34,6 +34,7 @@ ConVar OsuKeyBindings::SEEK_TIME_FORWARD("osu_key_seek_time_forward", (int)KEY_R
 ConVar OsuKeyBindings::QUICK_RETRY("osu_key_quick_retry", (int)KEY_BACKSPACE);
 ConVar OsuKeyBindings::QUICK_SAVE("osu_key_quick_save", (int)KEY_F6);
 ConVar OsuKeyBindings::QUICK_LOAD("osu_key_quick_load", (int)KEY_F7);
+ConVar OsuKeyBindings::TOGGLE_CHAT("osu_key_toggle_chat", (int)KEY_F8);
 ConVar OsuKeyBindings::SAVE_SCREENSHOT("osu_key_save_screenshot", (int)KEY_F12);
 ConVar OsuKeyBindings::DISABLE_MOUSE_BUTTONS("osu_key_disable_mouse_buttons", (int)KEY_F10);
 ConVar OsuKeyBindings::BOSS_KEY("osu_key_boss", (int)KEY_INSERT);
@@ -81,6 +82,7 @@ std::vector<ConVar*> OsuKeyBindings::ALL = {
 	&OsuKeyBindings::QUICK_RETRY,
 	&OsuKeyBindings::QUICK_SAVE,
 	&OsuKeyBindings::QUICK_LOAD,
+	&OsuKeyBindings::TOGGLE_CHAT,
 	&OsuKeyBindings::SAVE_SCREENSHOT,
 	&OsuKeyBindings::DISABLE_MOUSE_BUTTONS,
 	&OsuKeyBindings::BOSS_KEY,

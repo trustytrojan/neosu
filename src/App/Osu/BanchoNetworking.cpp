@@ -140,8 +140,10 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
 
   if (auth_header.empty()) {
     debugLog("Logging in...\n");
-  } else {
+  } else if(outgoing.pos > 0) {
     debugLog("Sending %d bytes of packet type %d\n", outgoing.pos, outgoing.id);
+  } else {
+    debugLog("Polling for bancho updates...\n");
   }
 
   last_packet_tms = time(NULL);

@@ -13,6 +13,7 @@
 
 class CWindowManager;
 
+class OsuChat;
 class Osu2;
 class OsuVR;
 class OsuMultiplayer;
@@ -70,7 +71,6 @@ public:
 		MANIA
 	};
 
-public:
 	Osu(Osu2 *osu2 = NULL, int instanceID = 0);
 	virtual ~Osu();
 
@@ -204,7 +204,6 @@ public:
 	void updateMouseSettings();
 	void updateWindowsKeyDisable();
 
-private:
 	static Vector2 g_vInternalResolution;
 
 	void updateModsForConVarTemplate(UString oldValue, UString newValue) {updateMods();}
@@ -274,6 +273,7 @@ private:
 	OsuMultiplayer *m_multiplayer;
 	OsuMainMenu *m_mainMenu;
 	OsuOptionsMenu *m_optionsMenu;
+	OsuChat *m_chat;
 	OsuSongBrowser2 *m_songBrowser2;
 	OsuBackgroundImageHandler *m_backgroundImageHandler;
 	OsuModSelector *m_modSelector;

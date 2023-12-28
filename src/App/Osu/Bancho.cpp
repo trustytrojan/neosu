@@ -5,12 +5,15 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "Engine.h"
+#include "MD5.h"
+
 #include "Bancho.h"
 #include "BanchoNetworking.h"
 #include "BanchoProtocol.h"
-#include "Engine.h"
-#include "MD5.h"
+#include "OsuChat.h"
 #include "OsuNotificationOverlay.h"
+
 
 Bancho bancho;
 
@@ -51,12 +54,18 @@ void handle_packet(Packet *packet) {
   if (packet->id == USER_ID) {
     bancho.user_id = read_int(packet);
     debugLog("Received user ID %d.\n", bancho.user_id);
-  } else if (packet->id == SEND_MESSAGE) {
+  } else if (packet->id == RECV_MESSAGE) {
     char *sender = read_string(packet);
     char *text = read_string(packet);
     char *recipient = read_string(packet);
     int32_t sender_id = read_int(packet);
-    debugLog("%s (%s): %s\n", sender, recipient, text);
+
+    bancho.osu->m_chat->addMessage(recipient, ChatMessage{
+      .author_id = sender_id,
+      .author_name = UString(sender),
+      .text = UString(text),
+    });
+
     free(sender);
     free(text);
     free(recipient);
@@ -158,6 +167,7 @@ void handle_packet(Packet *packet) {
     debugLog("Skipping!\n");
   } else if (packet->id == CHANNEL_JOIN_SUCCESS) {
     char *name = read_string(packet);
+    bancho.osu->m_chat->addChannel(name);
     debugLog("Success in joining channel %s.\n", name);
     free(name);
   } else if (packet->id == CHANNEL_INFO) {

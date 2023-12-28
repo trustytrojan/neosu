@@ -21,7 +21,7 @@ enum Action {
 
 enum IncomingPackets {
   USER_ID = 5,
-  SEND_MESSAGE = 7,
+  RECV_MESSAGE = 7,
   PONG = 8,
   USER_STATS = 11,
   USER_LOGOUT = 12,

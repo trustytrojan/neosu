@@ -28,6 +28,7 @@
 #include "CBaseUITextbox.h"
 
 #include "Osu.h"
+#include "OsuChat.h"
 #include "OsuVR.h"
 #include "OsuHUD.h"
 #include "OsuSkin.h"
@@ -955,6 +956,7 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu)
 	addKeyBindButton("Quick Save", &OsuKeyBindings::QUICK_SAVE);
 	addKeyBindButton("Quick Load", &OsuKeyBindings::QUICK_LOAD);
 	addSubSection("Keys - Universal", keyboardSectionTags);
+	addKeyBindButton("Toggle chat", &OsuKeyBindings::TOGGLE_CHAT);
 	addKeyBindButton("Save Screenshot", &OsuKeyBindings::SAVE_SCREENSHOT);
 	addKeyBindButton("Increase Volume", &OsuKeyBindings::INCREASE_VOLUME);
 	addKeyBindButton("Decrease Volume", &OsuKeyBindings::DECREASE_VOLUME);
@@ -1791,11 +1793,14 @@ void OsuOptionsMenu::setVisibleInt(bool visible, bool fromOnBack)
 	if (visible && m_osu->isInPlayMode() && m_osu_mod_fposu_ref->getBool() && !m_fposuCategoryButton->isActiveCategory())
 		onCategoryClicked(m_fposuCategoryButton);
 
-	// reset reset counters
 	if (visible)
 	{
+		// reset reset counters
 		m_iNumResetAllKeyBindingsPressed = 0;
 		m_iNumResetEverythingPressed = 0;
+
+		// close chat
+		m_osu->m_chat->setVisible(false);
 	}
 }
 
@@ -2862,6 +2867,7 @@ void OsuOptionsMenu::onAudioCompatibilityModeChange(CBaseUICheckbox *checkbox)
 
 void OsuOptionsMenu::onLogInClicked()
 {
+	engine->getSound()->play(m_osu->getSkin()->getMenuHit());
 	reconnect();
 }
 
