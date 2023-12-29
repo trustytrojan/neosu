@@ -12,6 +12,7 @@ enum WinCondition {
 struct Bancho {
   Osu *osu = nullptr;
   uint32_t user_id = 0;
+  UString username;
 
   // Multiplayer rooms
   uint32_t match_id = 0;

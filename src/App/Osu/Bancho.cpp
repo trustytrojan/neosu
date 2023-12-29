@@ -60,6 +60,7 @@ void handle_packet(Packet *packet) {
     char *recipient = read_string(packet);
     int32_t sender_id = read_int(packet);
 
+    debugLog("<%s>: %s\n", sender, text);
     bancho.osu->m_chat->addMessage(recipient, ChatMessage{
       .author_id = sender_id,
       .author_name = UString(sender),
@@ -341,53 +342,3 @@ Packet build_login_packet(char *username, char *password) {
   write_byte(&packet, '\n');
   return packet;
 }
-
-// void send_stuff() {
-//   {
-//     // CHANGE_ACTION
-//     enum Action action = Testing;
-//     char *status = "hmmmmmmmm...";
-//     char *map_md5 = "real map md5 trust me";
-//     int32_t map_id = 42;
-//     uint32_t mods = 0;
-//     uint8_t mode = 0;
-
-//     Packet packet = {0};
-//     write_header(&packet, 0);
-//     write_byte(&packet, action);
-//     write_string(&packet, status);
-//     write_string(&packet, map_md5);
-//     write_int(&packet, mods);
-//     write_byte(&packet, mode);
-//     write_int(&packet, map_id);
-
-//     send_packet(&packet);
-//   }
-
-//   {
-//     // CHANNEL_JOIN
-//     Packet packet = {0};
-//     write_header(&packet, 63);
-//     write_string(&packet, "#osu");
-//     send_packet(&packet);
-//   }
-
-//   {
-//     // SEND_PUBLIC_MESSAGE
-//     Packet packet = {0};
-//     write_header(&packet, 1);
-//     write_string(&packet, "kiwec");
-//     write_string(&packet, "Hello world!");
-//     write_string(&packet, "#osu");
-//     write_int(&packet, 3);
-
-//     send_packet(&packet);
-//   }
-
-//   {
-//     // PING
-//     Packet packet = {0};
-//     write_header(&packet, 4);
-//     send_packet(&packet);
-//   }
-// }

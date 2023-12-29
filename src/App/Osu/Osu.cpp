@@ -537,9 +537,7 @@ Osu::Osu(Osu2 *osu2, int instanceID)
 	init_networking_thread();
 	if(osu_password.getString().length() == 0) {
 		// Copy normal osu! behavior and ask for login details on startup
-		m_optionsMenu->setVisible(true);
-		m_optionsMenu->m_options->scrollToElement(m_optionsMenu->sectionOnline, 0, 100 * getUIScale(this));
-		m_optionsMenu->m_nameTextbox->focus();
+		m_optionsMenu->askForLoginDetails();
 	} else {
 		reconnect();
 	}

@@ -106,6 +106,7 @@ public:
 	void setVisibleInt(bool visible, bool fromOnBack = false);
 	void scheduleSearchUpdate();
 
+	void askForLoginDetails();
 	void updateOsuFolder();
 	void updateFposuDPI();
 	void updateFposuCMper360();

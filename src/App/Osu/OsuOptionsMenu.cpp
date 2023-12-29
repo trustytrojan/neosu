@@ -2333,6 +2333,12 @@ void OsuOptionsMenu::scheduleSearchUpdate()
 		m_contextMenu->setVisible2(false);
 }
 
+void OsuOptionsMenu::askForLoginDetails() {
+	setVisible(true);
+	m_options->scrollToElement(sectionOnline, 0, 100 * m_osu->getUIScale(m_osu));
+	m_nameTextbox->focus();
+}
+
 void OsuOptionsMenu::updateOsuFolder()
 {
 	m_osuFolderTextbox->stealFocus();

@@ -36,14 +36,16 @@ std::vector<APIRequest> api_request_queue;
 std::vector<Packet> api_response_queue;
 
 void disconnect() {
-  try_logging_in = false;
-  bancho.user_id = 0;
-
   // TODO @kiwec: send a logout packet first?
   // TODO @kiwec: don't set auth_header here, enqueue a disconnect packet
   // instead?
 
+  pthread_mutex_lock(&outgoing_mutex);
+  try_logging_in = false;
   auth_header = "";
+  pthread_mutex_unlock(&outgoing_mutex);
+
+  bancho.user_id = 0;
 }
 
 void reconnect() {
@@ -59,6 +61,8 @@ void reconnect() {
   // No password: don't try to log in
   if (pw.length() == 0)
     return;
+
+  bancho.username = user;
 
   pthread_mutex_lock(&outgoing_mutex);
   free(login_packet.memory);
@@ -140,10 +144,8 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
 
   if (auth_header.empty()) {
     debugLog("Logging in...\n");
-  } else if(outgoing.pos > 0) {
-    debugLog("Sending %d bytes of packet type %d\n", outgoing.pos, outgoing.id);
   } else {
-    debugLog("Polling for bancho updates...\n");
+    debugLog("Sending %d bytes of packet type %d\n", outgoing.pos, outgoing.id);
   }
 
   last_packet_tms = time(NULL);
@@ -217,32 +219,32 @@ static void *do_networking(void *data) {
       send_api_request(curl, outgoing);
     }
 
+    bool should_ping = difftime(time(NULL), last_packet_tms) > seconds_between_pings;
+
     pthread_mutex_lock(&outgoing_mutex);
     if (try_logging_in) {
       send_bancho_packet(curl, login_packet);
       try_logging_in = false;
+    } else if(should_ping && outgoing.pos == 0) {
+      write_short(&outgoing, PING);
+      write_byte(&outgoing, 0);
+      write_int(&outgoing, 0);
+
+      // Polling gets slower over time, but resets when we receive new data
+      if (seconds_between_pings < 30.0) {
+        seconds_between_pings += 1.0;
+      }
     }
 
-    if (outgoing.pos == 0) {
-      pthread_mutex_unlock(&outgoing_mutex);
-
-      // If we haven't sent anything in a while, we need to poll for new data
-      if (difftime(time(NULL), last_packet_tms) > seconds_between_pings) {
-        Packet nothing = {0};
-        send_bancho_packet(curl, nothing);
-
-        // Polling gets slower over time, but resets when we receive new data
-        if (seconds_between_pings < 30.0) {
-          seconds_between_pings += 1.0;
-        }
-      }
-    } else {
+    if(outgoing.pos > 0) {
       Packet out = outgoing;
       outgoing = {0};
       pthread_mutex_unlock(&outgoing_mutex);
 
       send_bancho_packet(curl, out);
       free(out.memory);
+    } else {
+      pthread_mutex_unlock(&outgoing_mutex);
     }
 
     // osu! doesn't need fast networking. In fact, we want to avoid spamming the

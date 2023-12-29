@@ -6,15 +6,15 @@
 
 
 // TODO @kiwec: grab mouse clicks (need to add conditions everywhere in the code)
-// TODO @kiwec: handle having no channels open (display something in the background)
-// TODO @kiwec: draw background behind buttons
+// TODO @kiwec: fix scrolling
+
 // TODO @kiwec: do something when username is clicked
 // TODO @kiwec: limit to 100 messages / channel
-// TODO @kiwec: auto-scrolling + always open at bottom (latest message)
 // TODO @kiwec: optimize
 
 class CBaseUIButton;
 class McFont;
+class OsuChat;
 class OsuUIButton;
 
 
@@ -25,12 +25,10 @@ struct ChatMessage {
 };
 
 struct OsuChatChannel {
-    OsuChatChannel(Osu* osu, CBaseUIContainer* container, UString name_arg);
+    OsuChatChannel(OsuChat* chat, UString name_arg);
     ~OsuChatChannel();
 
-    Osu* m_osu;
-    CBaseUIContainer* m_container;
-    McFont* font;
+    OsuChat* m_chat;
     CBaseUIScrollView* ui;
     OsuUIButton *btn;
     UString name;
@@ -65,6 +63,7 @@ struct OsuChat : public OsuScreen
     OsuChatChannel* m_selected_channel = nullptr;
     std::vector<OsuChatChannel*> m_channels;
     CBaseUIContainer *m_container;
+    CBaseUIContainer *m_button_container;
     CBaseUITextbox *m_input_box;
 
     McFont* font;

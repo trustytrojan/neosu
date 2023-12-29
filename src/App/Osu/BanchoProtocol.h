@@ -70,6 +70,7 @@ enum IncomingPackets {
 };
 
 enum OutgoingPackets {
+  SEND_PUBLIC_MESSAGE = 1,
   PING = 4,
   START_SPECTATING = 16,
   STOP_SPECTATING = 17,
