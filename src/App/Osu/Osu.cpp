@@ -33,6 +33,7 @@
 //#include "DebugMonitor.h"
 
 #include "OsuChat.h"
+#include "OsuMultiplayerScreen.h"
 #include "Osu2.h"
 #include "OsuVR.h"
 #include "OsuMultiplayer.h"
@@ -496,6 +497,7 @@ Osu::Osu(Osu2 *osu2, int instanceID)
 	m_steamWorkshop = new OsuSteamWorkshop(this);
 	m_fposu = new OsuModFPoSu(this);
 	m_chat = new OsuChat(this);
+	m_multiMenu = new OsuMultiplayerScreen(this);
 
 	// the order in this vector will define in which order events are handled/consumed
 	m_screens.push_back(m_notificationOverlay);
@@ -507,6 +509,7 @@ Osu::Osu(Osu2 *osu2, int instanceID)
 	m_screens.push_back(m_pauseMenu);
 	m_screens.push_back(m_hud);
 	m_screens.push_back(m_songBrowser2);
+	m_screens.push_back(m_multiMenu);
 	m_screens.push_back(m_vrTutorial);
 	m_screens.push_back(m_changelog);
 	m_screens.push_back(m_editor);
@@ -696,6 +699,8 @@ void Osu::draw(Graphics *g)
 	}
 	else // if we are not playing
 	{
+		m_multiMenu->draw(g);
+
 		if (m_songBrowser2 != NULL)
 			m_songBrowser2->draw(g);
 

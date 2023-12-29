@@ -88,7 +88,7 @@ private:
 
 	void onMainMenuButtonPressed();
 	void onPlayButtonPressed();
-	void onEditButtonPressed();
+	void onMultiplayerButtonPressed();
 	void onOptionsButtonPressed();
 	void onExitButtonPressed();
 

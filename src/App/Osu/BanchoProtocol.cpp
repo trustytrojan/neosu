@@ -70,7 +70,7 @@ char *read_string(Packet *packet) {
 }
 
 Room *read_room(Packet *packet) {
-  Room *room = (Room *)malloc(sizeof(Room));
+  Room *room = (Room *)calloc(sizeof(Room), 1);
   room->id = read_short(packet);
   room->in_progress = read_byte(packet);
   room->match_type = read_byte(packet);
@@ -83,7 +83,12 @@ Room *read_room(Packet *packet) {
 
   room->nb_players = 0;
   for (int i = 0; i < 16; i++) {
-    room->slots[i].status = read_int(packet);
+    room->slots[i].status = read_byte(packet);
+  }
+  for (int i = 0; i < 16; i++) {
+    room->slots[i].team = read_byte(packet);
+  }
+  for(int s = 0; s < 16; s++) {
     // open = 1
     // locked = 2
     // not_ready = 4
@@ -93,28 +98,21 @@ Room *read_room(Packet *packet) {
     // complete = 64
     // quit = 128
     // slot_has_player = not_ready | ready | no_map | playing | complete
-    int slot_has_player = (room->slots[i].status & 0b01111100) != 0;
-    if (slot_has_player) {
+    bool slot_has_player = (room->slots[s].status & 0b01111100) != 0;
+    if(slot_has_player) {
+      room->slots[s].player_id = read_int(packet);
       room->nb_players++;
     }
   }
-  for (int i = 0; i < 16; i++) {
-    room->slots[i].team = read_int(packet); // XXX: test this
-  }
-  for (int i = 0; i < room->nb_players; i++) {
-    room->player_ids[i] = read_int(packet);
-  }
 
   room->host_id = read_int(packet);
-
-  // XXX: test these
-  room->mode = read_int(packet);
-  room->win_condition = read_int(packet);
-  room->team_type = read_int(packet);
-  room->freemods = read_int(packet);
+  room->mode = read_byte(packet);
+  room->win_condition = read_byte(packet);
+  room->team_type = read_byte(packet);
+  room->freemods = read_byte(packet);
   if (room->freemods) {
     for (int i = 0; i < 16; i++) {
-      room->slot_mods[i] = read_int(packet);
+      room->slots[i].mods = read_int(packet);
     }
   }
 
@@ -182,7 +180,7 @@ void write_float(Packet *packet, float f) {
   write_bytes(packet, (uint8_t *)&f, 4);
 }
 
-void write_string(Packet *packet, char *str) {
+void write_string(Packet *packet, const char *str) {
   if (!str || str[0] == '\0') {
     uint8_t zero = 0;
     write_byte(packet, zero);
@@ -195,11 +193,4 @@ void write_string(Packet *packet, char *str) {
   uint32_t len = strlen(str);
   write_uleb128(packet, len);
   write_bytes(packet, (uint8_t *)str, len);
-}
-
-void write_md5_bytes_as_hex(Packet *packet, unsigned char *md5) {
-  for (int i = 0; i < 16; i++) {
-    write_byte(packet, "0123456789abcdef"[md5[i] >> 4]);
-    write_byte(packet, "0123456789abcdef"[md5[i] & 0xf]);
-  }
 }

@@ -2130,7 +2130,7 @@ void OsuHUD::drawScoreBoardInt(Graphics *g, const std::vector<OsuHUD::SCORE_ENTR
 		g->popTransform();
 
 		// draw accuracy
-		if (m_osu->isInMultiplayer() && (!m_osu->isInPlayMode() || bancho.win_condition == Accuracy))
+		if (m_osu->isInMultiplayer() && (!m_osu->isInPlayMode() || bancho.win_condition == ACCURACY))
 		{
 			const float accScale = comboScale;
 			g->pushTransform();

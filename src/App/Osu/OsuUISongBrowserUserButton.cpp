@@ -5,6 +5,8 @@
 // $NoKeywords: $
 //===============================================================================//
 
+#include "Bancho.h"
+#include "BanchoUsers.h"
 #include "OsuUISongBrowserUserButton.h"
 
 #include "Engine.h"
@@ -248,6 +250,19 @@ void OsuUISongBrowserUserButton::update()
 void OsuUISongBrowserUserButton::updateUserStats()
 {
 	OsuDatabase::PlayerStats stats = m_osu->getSongBrowser()->getDatabase()->calculatePlayerStats(m_sText);
+
+	if(bancho.user_id > 0) {
+		UserInfo *my = get_user_info(bancho.user_id);
+		stats = OsuDatabase::PlayerStats{
+			.name = my->name,
+			.pp = (float)my->pp,
+			.accuracy = my->accuracy,
+			.numScoresWithPP = 0,
+			.level = 0, // TODO @kiwec
+			.percentToNextLevel = 0.f, // TODO @kiwec
+			.totalScore = (uint32_t)my->total_score,
+		};
+	}
 
 	const bool changedPP = (m_fPP != stats.pp);
 	const bool changed = (changedPP || m_fAcc != stats.accuracy || m_iLevel != stats.level || m_fPercentToNextLevel != stats.percentToNextLevel);

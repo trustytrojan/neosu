@@ -291,7 +291,7 @@ bool OsuMultiplayer::onClientReceiveInt(uint32_t id, void *data, uint32_t size, 
 			    bool operator() (PLAYER const &a, PLAYER const &b) const
 			    {
 			    	// strict weak ordering!
-			    	if(bancho.win_condition == Accuracy)
+			    	if(bancho.win_condition == ACCURACY)
 			    	{
 			    		if (a.accuracy == b.accuracy)
 			    		{

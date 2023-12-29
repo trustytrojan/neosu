@@ -7,7 +7,8 @@
 
 // TODO @kiwec: grab mouse clicks (need to add conditions everywhere in the code)
 // TODO @kiwec: fix scrolling
-
+// TODO @kiwec: Add timestamps
+// TODO @kiwec: Add channel connection info like osu!stable does
 // TODO @kiwec: do something when username is clicked
 // TODO @kiwec: limit to 100 messages / channel
 // TODO @kiwec: optimize

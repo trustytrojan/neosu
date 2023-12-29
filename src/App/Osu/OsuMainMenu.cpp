@@ -5,6 +5,8 @@
 // $NoKeywords: $osumain
 //===============================================================================//
 
+#include "Bancho.h"
+#include "OsuMultiplayerScreen.h"
 #include "OsuUpdateHandler.h"
 
 #include "Engine.h"
@@ -358,8 +360,8 @@ OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu)
 
 	m_container->addBaseUIElement(m_mainButton);
 
-	addMainMenuButton("Play")->setClickCallback( fastdelegate::MakeDelegate(this, &OsuMainMenu::onPlayButtonPressed) );
-	//addMainMenuButton("Edit")->setClickCallback( fastdelegate::MakeDelegate(this, &OsuMainMenu::onEditButtonPressed) );
+	addMainMenuButton("Singleplayer")->setClickCallback( fastdelegate::MakeDelegate(this, &OsuMainMenu::onPlayButtonPressed) );
+	addMainMenuButton("Multiplayer")->setClickCallback( fastdelegate::MakeDelegate(this, &OsuMainMenu::onMultiplayerButtonPressed) );
 	addMainMenuButton((m_osu->isInVRMode() ? "Options" : "Options (CTRL + O)"))->setClickCallback( fastdelegate::MakeDelegate(this, &OsuMainMenu::onOptionsButtonPressed) );
 	addMainMenuButton("Exit")->setClickCallback( fastdelegate::MakeDelegate(this, &OsuMainMenu::onExitButtonPressed) );
 
@@ -1652,9 +1654,15 @@ void OsuMainMenu::onPlayButtonPressed()
 	m_osu->toggleSongBrowser();
 }
 
-void OsuMainMenu::onEditButtonPressed()
+void OsuMainMenu::onMultiplayerButtonPressed()
 {
-	m_osu->toggleEditor();
+	if(bancho.user_id == 0) {
+		m_osu->m_optionsMenu->askForLoginDetails();
+		return;
+	}
+
+	setVisible(false);
+	m_osu->m_multiMenu->setVisible(true);
 }
 
 void OsuMainMenu::onOptionsButtonPressed()

@@ -191,7 +191,14 @@ void OsuChat::onKeyDown(KeyboardEvent &key) {
     if(key.getKeyCode() == KEY_W) {
         // Ctrl+W: Close current channel
         key.consume();
-        if(m_selected_channel != nullptr) {
+        if(m_selected_channel != nullptr && m_selected_channel->name != UString("#lobby")) {
+            if(m_selected_channel->name[0] == '#') {
+                Packet packet = {0};
+                packet.id = CHANNEL_PART;
+                write_string(&packet, m_selected_channel->name.toUtf8());
+                send_packet(packet);
+            }
+
             removeChannel(m_selected_channel->name);
         }
     } else if(key.getKeyCode() == 65056) { // KEY_TAB doesn't work... idk why

@@ -5,6 +5,7 @@
 // $NoKeywords: $osusb
 //===============================================================================//
 
+#include "Bancho.h"
 #include "BanchoLeaderboard.h"
 #include "OsuDatabase.h"
 #include "OsuSongBrowser2.h"
@@ -4142,6 +4143,9 @@ void OsuSongBrowser2::onModeChange2(UString text, int id)
 
 void OsuSongBrowser2::onUserButtonClicked()
 {
+	// Not allowed to switch user while online
+	if(bancho.user_id > 0) return;
+
 	engine->getSound()->play(m_osu->getSkin()->getMenuClick());
 
 	std::vector<UString> names = m_db->getPlayerNamesWithScoresForUserSwitcher();

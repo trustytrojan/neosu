@@ -107,7 +107,6 @@ public:
 		GROUP_COLLECTIONS
 	};
 
-public:
 	friend class OsuSongBrowserBackgroundSearchMatcher;
 
 	OsuSongBrowser2(Osu *osu);
@@ -168,7 +167,6 @@ public:
 
 	inline GROUP getGroupingMode() const {return m_group;}
 
-private:
 	enum class SORT
 	{
 		SORT_ARTIST,
@@ -195,7 +193,6 @@ private:
 		int id;
 	};
 
-private:
 	static bool searchMatcher(const OsuDatabaseBeatmap *databaseBeatmap, const std::vector<UString> &searchStringTokens);
 	static bool findSubstringInDifficulty(const OsuDatabaseBeatmap *diff, const UString &searchString);
 

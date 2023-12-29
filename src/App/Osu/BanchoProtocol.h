@@ -3,20 +3,34 @@
 #include <stdint.h>
 
 enum Action {
-  Idle = 0,
-  Afk = 1,
-  Playing = 2,
-  Editing = 3,
-  Modding = 4,
-  Multiplayer = 5,
-  Watching = 6,
-  Unknown = 7,
-  Testing = 8,
-  Submitting = 9,
-  Paused = 10,
-  Lobby = 11,
-  Multiplaying = 12,
-  OsuDirect = 13,
+  IDLE = 0,
+  AFK = 1,
+  PLAYING = 2,
+  EDITING = 3,
+  MODDING = 4,
+  MULTIPLAYER = 5,
+  WATCHING = 6,
+  UNKNOWN = 7,
+  TESTING = 8,
+  SUBMITTING = 9,
+  PAUSED = 10,
+  LOBBY = 11,
+  MULTIPLAYING = 12,
+  OSU_DIRECT = 13,
+};
+
+enum WinCondition {
+  SCOREV1 = 0,
+  ACCURACY = 1,
+  COMBO = 2,
+  SCOREV2 = 3,
+};
+
+enum GameMode {
+  STANDARD = 0,
+  TAIKO = 1,
+  CATCH = 2,
+  MANIA = 3,
 };
 
 enum IncomingPackets {
@@ -47,7 +61,7 @@ enum IncomingPackets {
   MATCH_SKIP = 61,
   CHANNEL_JOIN_SUCCESS = 64,
   CHANNEL_INFO = 65,
-  CHANNEL_KICK = 66,
+  LEFT_CHANNEL = 66,
   CHANNEL_AUTO_JOIN = 67,
   PRIVILEGES = 71,
   FRIENDS_LIST = 72,
@@ -127,8 +141,10 @@ typedef struct {
 } Packet;
 
 typedef struct {
-  uint32_t status;
-  uint32_t team;
+  uint8_t status;
+  uint8_t team;
+  uint32_t player_id;
+  uint32_t mods;
 } Slot;
 
 typedef struct {
@@ -145,18 +161,14 @@ typedef struct {
   char *map_md5;
   int32_t map_id;
 
-  uint32_t mode;
-  uint32_t win_condition;
-  uint32_t team_type;
-  uint32_t freemods;
+  uint8_t mode;
+  uint8_t win_condition;
+  uint8_t team_type;
+  uint8_t freemods;
 
   int32_t host_id;
   uint8_t nb_players;
   Slot slots[16];
-  uint32_t slot_mods[16];
-
-  // NOTE: player indexes don't match slot indexes
-  uint32_t player_ids[16];
 } Room;
 
 void read_bytes(Packet *packet, uint8_t *bytes, size_t n);
@@ -178,5 +190,4 @@ void write_int(Packet *packet, uint32_t i);
 void write_int64(Packet *packet, uint64_t i);
 void write_uleb128(Packet *packet, uint32_t num);
 void write_float(Packet *packet, float f);
-void write_string(Packet *packet, char *str);
-void write_md5_bytes_as_hex(Packet *packet, unsigned char *md5);
+void write_string(Packet *packet, const char *str);

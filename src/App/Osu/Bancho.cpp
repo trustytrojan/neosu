@@ -11,11 +11,34 @@
 #include "Bancho.h"
 #include "BanchoNetworking.h"
 #include "BanchoProtocol.h"
+#include "BanchoUsers.h"
+#include "Osu.h"
 #include "OsuChat.h"
 #include "OsuNotificationOverlay.h"
+#include "OsuMultiplayerScreen.h"
+#include "OsuSongBrowser2.h"
+#include "OsuUISongBrowserUserButton.h"
 
 
 Bancho bancho;
+
+// TODO @kiwec: display these as joinable channels somewhere
+std::unordered_map<std::string, Channel*> chat_channels;
+
+void update_channel(std::string name, UString topic, int32_t nb_members) {
+  Channel* chan;
+  auto it = chat_channels.find(name);
+  if(it == chat_channels.end()) {
+    chan = new Channel();
+    chan->name = UString(name.c_str());
+    chat_channels[name] = chan;
+  } else {
+    chan = it->second;
+  }
+
+  chan->topic = topic;
+  chan->nb_members = nb_members;
+}
 
 std::string md5(uint8_t *msg, size_t msg_len) {
   MD5 hasher;
@@ -58,9 +81,8 @@ void handle_packet(Packet *packet) {
     char *sender = read_string(packet);
     char *text = read_string(packet);
     char *recipient = read_string(packet);
-    int32_t sender_id = read_int(packet);
+    uint32_t sender_id = read_int(packet);
 
-    debugLog("<%s>: %s\n", sender, text);
     bancho.osu->m_chat->addMessage(recipient, ChatMessage{
       .author_id = sender_id,
       .author_name = UString(sender),
@@ -77,22 +99,33 @@ void handle_packet(Packet *packet) {
     uint8_t action = read_byte(packet);
     char *info_text = read_string(packet);
     char *map_md5 = read_string(packet);
-    uint8_t mode = read_byte(packet);
-    int32_t map_id = read_int(packet);
-    int64_t ranked_score = read_int64(packet);
-    float accuracy = read_float(packet);
-    int32_t plays = read_int(packet);
-    int64_t total_score = read_int64(packet);
-    int32_t global_rank = read_int(packet);
-    uint16_t pp = read_short(packet);
-    debugLog("Received stats for user %d (ranked #%d) [%s]\n", stats_user_id,
-             global_rank, info_text);
+
+    UserInfo *user = get_user_info(stats_user_id);
+    user->action = (Action)action;
+    user->info_text = UString(info_text);
+    user->map_md5 = UString(map_md5);
     free(info_text);
     free(map_md5);
+
+    user->mode = (GameMode)read_byte(packet);
+    user->map_id = read_int(packet);
+    user->ranked_score = read_int64(packet);
+    user->accuracy = read_float(packet);
+    user->plays = read_int(packet);
+    user->total_score = read_int64(packet);
+    user->global_rank = read_int(packet);
+    user->pp = read_short(packet);
+
+    if(stats_user_id == bancho.user_id) {
+      bancho.osu->m_songBrowser2->m_userButton->updateUserStats();
+    }
   } else if (packet->id == USER_LOGOUT) {
     int32_t logged_out_id = read_int(packet);
-    int8_t zero = read_byte(packet);
-    debugLog("Logged out.\n");
+    read_byte(packet);
+    if(logged_out_id == bancho.user_id) {
+      debugLog("Logged out.\n");
+      disconnect();
+    }
   } else if (packet->id == SPECTATOR_JOINED) {
     int32_t spectator_id = read_int(packet);
     debugLog("Spectator joined: user id %d\n", spectator_id);
@@ -112,15 +145,13 @@ void handle_packet(Packet *packet) {
     free(notification);
   } else if (packet->id == ROOM_UPDATED) {
     Room *room = read_room(packet);
-    debugLog("UPDATED Room %s: %d players\n", room->name, room->nb_players);
-    free_room(room);
+    bancho.osu->m_multiMenu->updateRoom(room);
   } else if (packet->id == ROOM_CREATED) {
     Room *room = read_room(packet);
-    debugLog("CREATED Room %s: %d players\n", room->name, room->nb_players);
-    free_room(room);
+    bancho.osu->m_multiMenu->addRoom(room);
   } else if (packet->id == ROOM_CLOSED) {
     int32_t room_id = read_int(packet);
-    debugLog("CLOSED Room #%d\n", room_id);
+    bancho.osu->m_multiMenu->removeRoom(room_id);
   } else if (packet->id == ROOM_JOIN_SUCCESS) {
     Room *room = read_room(packet);
     debugLog("JOINED Room %s: %d players\n", room->name, room->nb_players);
@@ -175,20 +206,18 @@ void handle_packet(Packet *packet) {
     char *channel_name = read_string(packet);
     char *channel_topic = read_string(packet);
     int32_t nb_members = read_int(packet);
-    debugLog("Channel '%s' (%d members) has topic: %s\n", channel_name,
-             nb_members, channel_topic);
+    update_channel(channel_name, UString(channel_topic), nb_members);
     free(channel_name);
     free(channel_topic);
-  } else if (packet->id == CHANNEL_KICK) {
+  } else if (packet->id == LEFT_CHANNEL) {
     char *name = read_string(packet);
-    debugLog("Kicked from channel %s.\n", name);
+    bancho.osu->m_chat->removeChannel(name);
     free(name);
   } else if (packet->id == CHANNEL_AUTO_JOIN) {
     char *channel_name = read_string(packet);
     char *channel_topic = read_string(packet);
     int32_t nb_members = read_int(packet);
-    debugLog("Auto-joined channel '%s' (%d members) with topic: %s\n",
-             channel_name, nb_members, channel_topic);
+    update_channel(channel_name, UString(channel_topic), nb_members);
     free(channel_name);
     free(channel_topic);
   } else if (packet->id == PRIVILEGES) {
@@ -212,15 +241,16 @@ void handle_packet(Packet *packet) {
   } else if (packet->id == USER_PRESENCE) {
     int32_t presence_user_id = read_int(packet);
     char *presence_username = read_string(packet);
-    uint8_t presence_utc_offset = read_byte(packet);
-    uint8_t presence_country_code = read_byte(packet);
-    uint8_t presence_privileges = read_byte(packet);
-    float presence_longitude = read_float(packet);
-    float presence_latitude = read_float(packet);
-    int32_t presence_global_rank = read_int(packet);
-    debugLog("%s (user %d) is rank #%d, coords %f:%f\n", presence_username,
-             presence_user_id, presence_global_rank, presence_longitude,
-             presence_latitude);
+
+    UserInfo *user = get_user_info(presence_user_id);
+    user->name = UString(presence_username);
+    user->utc_offset = read_byte(packet);
+    user->country = read_byte(packet);
+    user->privileges = read_byte(packet);
+    user->longitude = read_float(packet);
+    user->latitude = read_float(packet);
+    user->global_rank = read_int(packet);
+
     free(presence_username);
   } else if (packet->id == RESTART) {
     int32_t ms = read_int(packet);
@@ -232,12 +262,14 @@ void handle_packet(Packet *packet) {
     char *text = read_string(packet);
     char *recipient = read_string(packet);
     int32_t sender_id = read_int(packet);
+    (void)sender_id;
     debugLog("(match invite) %s (%s): %s\n", sender, recipient, text);
+    // TODO @kiwec: make a clickable link in chat?
     free(sender);
     free(text);
     free(recipient);
   } else if (packet->id == CHANNEL_INFO_END) {
-    // XXX: handle this
+    // (nothing to do)
   } else if (packet->id == IN_MATCH_CHANGE_PASSWORD) {
     char *new_password = read_string(packet);
     debugLog("Room changed password to %s\n", new_password);
@@ -249,30 +281,23 @@ void handle_packet(Packet *packet) {
     int32_t user_id = read_int(packet);
     debugLog("User #%d silenced.\n", user_id);
   } else if (packet->id == USER_DM_BLOCKED) {
-    char *_1 = read_string(packet);
-    char *_2 = read_string(packet);
+    free(read_string(packet));
+    free(read_string(packet));
     char *blocked = read_string(packet);
-    int32_t _3 = read_int(packet);
+    read_int(packet);
     debugLog("Blocked %s.\n", blocked);
-    free(_1);
-    free(_2);
     free(blocked);
   } else if (packet->id == TARGET_IS_SILENCED) {
-    char *_1 = read_string(packet);
-    char *_2 = read_string(packet);
+    free(read_string(packet));
+    free(read_string(packet));
     char *blocked = read_string(packet);
-    int32_t _3 = read_int(packet);
+    read_int(packet);
     debugLog("Silenced %s.\n", blocked);
-    free(_1);
-    free(_2);
     free(blocked);
   } else if (packet->id == VERSION_UPDATE_FORCED) {
     disconnect();
     bancho.osu->getNotificationOverlay()->addNotification(
         "Server uses an unsupported protocol version.");
-  } else if (packet->id == SWITCH_SERVER) {
-    int32_t idle_time = read_int(packet);
-    // XXX: handle this
   } else if (packet->id == ACCOUNT_RESTRICTED) {
     debugLog("ACCOUNT RESTRICTED.\n");
   } else if (packet->id == MATCH_ABORT) {
