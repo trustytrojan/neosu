@@ -9,6 +9,7 @@
 #define OSURICHPRESENCE_H
 
 #include "cbase.h"
+#include "BanchoProtocol.h"
 
 class ConVar;
 
@@ -23,6 +24,8 @@ public:
 	static void onPlayEnd(Osu *osu, bool quit);
 
 	static void onRichPresenceChange(UString oldValue, UString newValue);
+	static void setStatus(Osu *osu, UString status, bool force = false);
+	static void setBanchoStatus(Osu *osu, const char* info_text, Action action);
 
 private:
 	static const UString KEY_STEAM_STATUS;
@@ -31,7 +34,6 @@ private:
 
 	static ConVar *m_name_ref;
 
-	static void setStatus(Osu *osu, UString status, bool force = false);
 
 	static void onRichPresenceEnable();
 	static void onRichPresenceDisable();

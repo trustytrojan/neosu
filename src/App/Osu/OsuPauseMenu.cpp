@@ -26,6 +26,7 @@
 #include "OsuModSelector.h"
 #include "OsuOptionsMenu.h"
 #include "OsuHUD.h"
+#include "OsuRichPresence.h"
 
 #include "OsuUIPauseMenuButton.h"
 
@@ -415,6 +416,17 @@ void OsuPauseMenu::setVisible(bool visible)
 		setContinueEnabled(!m_osu->getSelectedBeatmap()->hasFailed());
 	else
 		setContinueEnabled(true);
+
+	if(visible) {
+		if(m_bContinueEnabled) {
+			OsuRichPresence::setStatus(m_osu, "Paused");
+			OsuRichPresence::setBanchoStatus(m_osu, "Taking a break", PAUSED);
+		} else {
+			OsuRichPresence::setBanchoStatus(m_osu, "Failed", SUBMITTING);
+		}
+	} else {
+		OsuRichPresence::onPlayStart(m_osu);
+	}
 
 	// HACKHACK: force disable mod selection screen in case it was open and the beatmap ended/failed
 	m_osu->getModSelector()->setVisible(false);

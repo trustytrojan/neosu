@@ -4,6 +4,7 @@
 #include "OsuChat.h"
 #include "OsuMainMenu.h"
 #include "OsuMultiplayerScreen.h"
+#include "OsuRichPresence.h"
 
 #include "CBaseUIContainer.h"
 #include "Engine.h"
@@ -69,6 +70,9 @@ void OsuMultiplayerScreen::setVisible(bool visible) {
         packet.id = CHANNEL_JOIN;
         write_string(&packet, "#lobby");
         send_packet(packet);
+
+        // LOBBY presence is broken so we send MULTIPLAYER
+        OsuRichPresence::setBanchoStatus(m_osu, "Looking to play", MULTIPLAYER);
     } else {
         Packet packet = {0};
         packet.id = EXIT_ROOM_LIST;
@@ -80,7 +84,7 @@ void OsuMultiplayerScreen::setVisible(bool visible) {
         send_packet(packet);
 
         for(auto room : rooms) {
-            free(room);
+            delete room;
         }
         rooms.clear();
 
@@ -136,7 +140,7 @@ void OsuMultiplayerScreen::updateRoom(Room* room) {
         if(old_room->id == room->id) {
             auto it = std::find(rooms.begin(), rooms.end(), old_room);
             rooms.erase(it);
-            free_room(old_room);
+            delete old_room;
             rooms.push_back(room);
             debug_print_room(room);
             return;
@@ -153,7 +157,7 @@ void OsuMultiplayerScreen::removeRoom(uint32_t room_id) {
       if(room->id == room_id) {
         auto it = std::find(rooms.begin(), rooms.end(), room);
         rooms.erase(it);
-        free_room(room);
+        delete room;
         break;
       }
     }

@@ -2598,6 +2598,27 @@ void Osu::onNotification(UString args)
 }
 
 
+uint32_t Osu::getModsFlag() {
+	uint32_t mods = 0;
+	if(m_bModNF) mods |= (1 << 0);
+	if(m_bModEZ) mods |= (1 << 1);
+	if(m_bModTD) mods |= (1 << 2);
+	if(m_bModHD) mods |= (1 << 3);
+	if(m_bModHR) mods |= (1 << 4);
+	if(m_bModSD) mods |= (1 << 5);
+	if(m_bModDT) mods |= (1 << 6);
+	if(m_bModRelax) mods |= (1 << 7);
+	if(m_bModHT) mods |= (1 << 8);
+	if(m_bModNC) mods |= (1 << 9);
+	// No flashlight mod
+	if(m_bModAuto) mods |= (1 << 11);
+	if(m_bModSpunout) mods |= (1 << 12);
+	if(m_bModAutopilot) mods |= (1 << 13);
+	if(m_bModSS) mods |= (1 << 14);
+	if(m_bModTarget) mods |= (1 << 23);
+	if(m_bModScorev2) mods |= (1 << 29);
+	return mods;
+}
 
 float Osu::getImageScaleToFitResolution(Vector2 size, Vector2 resolution)
 {

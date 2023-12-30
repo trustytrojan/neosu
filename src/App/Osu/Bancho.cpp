@@ -89,9 +89,9 @@ void handle_packet(Packet *packet) {
       .text = UString(text),
     });
 
-    free(sender);
-    free(text);
-    free(recipient);
+    delete sender;
+    delete text;
+    delete recipient;
   } else if (packet->id == PONG) {
     // (nothing to do)
   } else if (packet->id == USER_STATS) {
@@ -104,8 +104,8 @@ void handle_packet(Packet *packet) {
     user->action = (Action)action;
     user->info_text = UString(info_text);
     user->map_md5 = UString(map_md5);
-    free(info_text);
-    free(map_md5);
+    delete info_text;
+    delete map_md5;
 
     user->mode = (GameMode)read_byte(packet);
     user->map_id = read_int(packet);
@@ -142,7 +142,7 @@ void handle_packet(Packet *packet) {
   } else if (packet->id == NOTIFICATION) {
     char *notification = read_string(packet);
     bancho.osu->getNotificationOverlay()->addNotification(notification);
-    free(notification);
+    delete notification;
   } else if (packet->id == ROOM_UPDATED) {
     Room *room = read_room(packet);
     bancho.osu->m_multiMenu->updateRoom(room);
@@ -155,7 +155,7 @@ void handle_packet(Packet *packet) {
   } else if (packet->id == ROOM_JOIN_SUCCESS) {
     Room *room = read_room(packet);
     debugLog("JOINED Room %s: %d players\n", room->name, room->nb_players);
-    free_room(room);
+    delete room;
   } else if (packet->id == ROOM_JOIN_FAIL) {
     debugLog("FAILED to join room!\n");
   } else if (packet->id == FELLOW_SPECTATOR_JOINED) {
@@ -168,7 +168,7 @@ void handle_packet(Packet *packet) {
     Room *room = read_room(packet);
     debugLog("MATCH STARTED IN Room %s: %d players\n", room->name,
              room->nb_players);
-    free_room(room);
+    delete room;
   } else if (packet->id == IN_MATCH_SCORE_UPDATE) {
     int32_t time = read_int(packet);
     uint8_t id = read_byte(packet);
@@ -201,25 +201,25 @@ void handle_packet(Packet *packet) {
     char *name = read_string(packet);
     bancho.osu->m_chat->addChannel(name);
     debugLog("Success in joining channel %s.\n", name);
-    free(name);
+    delete name;
   } else if (packet->id == CHANNEL_INFO) {
     char *channel_name = read_string(packet);
     char *channel_topic = read_string(packet);
     int32_t nb_members = read_int(packet);
     update_channel(channel_name, UString(channel_topic), nb_members);
-    free(channel_name);
-    free(channel_topic);
+    delete channel_name;
+    delete channel_topic;
   } else if (packet->id == LEFT_CHANNEL) {
     char *name = read_string(packet);
     bancho.osu->m_chat->removeChannel(name);
-    free(name);
+    delete name;
   } else if (packet->id == CHANNEL_AUTO_JOIN) {
     char *channel_name = read_string(packet);
     char *channel_topic = read_string(packet);
     int32_t nb_members = read_int(packet);
     update_channel(channel_name, UString(channel_topic), nb_members);
-    free(channel_name);
-    free(channel_topic);
+    delete channel_name;
+    delete channel_topic;
   } else if (packet->id == PRIVILEGES) {
     int privileges = read_int(packet);
     debugLog("Privileges: %d\n", privileges);
@@ -234,7 +234,7 @@ void handle_packet(Packet *packet) {
     char *icon = read_string(packet);
     debugLog("Main menu icon: %s\n", icon);
     // TODO @kiwec: handle this
-    free(icon);
+    delete icon;
   } else if (packet->id == MATCH_PLAYER_SKIPPED) {
     int32_t user_id = read_int(packet);
     debugLog("User %d has voted to skip.\n", user_id);
@@ -251,7 +251,7 @@ void handle_packet(Packet *packet) {
     user->latitude = read_float(packet);
     user->global_rank = read_int(packet);
 
-    free(presence_username);
+    delete presence_username;
   } else if (packet->id == RESTART) {
     int32_t ms = read_int(packet);
     debugLog("Restart: %d ms\n", ms);
@@ -265,15 +265,15 @@ void handle_packet(Packet *packet) {
     (void)sender_id;
     debugLog("(match invite) %s (%s): %s\n", sender, recipient, text);
     // TODO @kiwec: make a clickable link in chat?
-    free(sender);
-    free(text);
-    free(recipient);
+    delete sender;
+    delete text;
+    delete recipient;
   } else if (packet->id == CHANNEL_INFO_END) {
     // (nothing to do)
   } else if (packet->id == IN_MATCH_CHANGE_PASSWORD) {
     char *new_password = read_string(packet);
     debugLog("Room changed password to %s\n", new_password);
-    free(new_password);
+    delete new_password;
   } else if (packet->id == SILENCE_END) {
     int32_t delta = read_int(packet);
     debugLog("Silence ends in %d seconds.\n", delta);
@@ -281,19 +281,19 @@ void handle_packet(Packet *packet) {
     int32_t user_id = read_int(packet);
     debugLog("User #%d silenced.\n", user_id);
   } else if (packet->id == USER_DM_BLOCKED) {
-    free(read_string(packet));
-    free(read_string(packet));
+    delete read_string(packet);
+    delete read_string(packet);
     char *blocked = read_string(packet);
     read_int(packet);
     debugLog("Blocked %s.\n", blocked);
-    free(blocked);
+    delete blocked;
   } else if (packet->id == TARGET_IS_SILENCED) {
-    free(read_string(packet));
-    free(read_string(packet));
+    delete read_string(packet);
+    delete read_string(packet);
     char *blocked = read_string(packet);
     read_int(packet);
     debugLog("Silenced %s.\n", blocked);
-    free(blocked);
+    delete blocked;
   } else if (packet->id == VERSION_UPDATE_FORCED) {
     disconnect();
     bancho.osu->getNotificationOverlay()->addNotification(
@@ -345,11 +345,10 @@ Packet build_login_packet(char *username, char *password) {
   write_bytes(&packet, (uint8_t *)adapters_md5.c_str(), adapters_md5.size());
   write_byte(&packet, ':');
 
-  char *uuid = get_disk_uuid();
+  static char *uuid = get_disk_uuid();
   std::string disk_md5 = "00000000000000000000000000000000";
   if (uuid) {
     disk_md5 = md5((uint8_t *)uuid, strlen(uuid));
-    free(uuid);
   }
 
   // XXX: Should be per-install unique ID.

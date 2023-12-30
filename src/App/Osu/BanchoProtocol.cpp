@@ -3,6 +3,13 @@
 
 #include "BanchoProtocol.h"
 
+Room::~Room() {
+  if(name) delete name;
+  if(password) delete password;
+  if(map_name) delete map_name;
+  if(map_md5) delete map_md5;
+}
+
 void read_bytes(Packet *packet, uint8_t *bytes, size_t n) {
   if (packet->pos + n > packet->size) {
     packet->pos = packet->size + 1;
@@ -63,14 +70,14 @@ char *read_string(Packet *packet) {
 
   // XXX: Don't return null-terminated string
   uint32_t len = read_uleb128(packet);
-  uint8_t *str = (uint8_t *)malloc(len + 1);
+  uint8_t *str = new uint8_t[len + 1];
   read_bytes(packet, str, len);
   str[len] = '\0';
   return (char *)str;
 }
 
 Room *read_room(Packet *packet) {
-  Room *room = (Room *)calloc(sizeof(Room), 1);
+  Room *room = new Room();
   room->id = read_short(packet);
   room->in_progress = read_byte(packet);
   room->match_type = read_byte(packet);
@@ -119,17 +126,6 @@ Room *read_room(Packet *packet) {
   room->seed = read_int(packet);
 
   return room;
-}
-
-void free_room(Room *room) {
-  if (!room)
-    return;
-
-  free(room->name);
-  free(room->password);
-  free(room->map_name);
-  free(room->map_md5);
-  free(room);
 }
 
 void write_bytes(Packet *packet, uint8_t *bytes, size_t n) {

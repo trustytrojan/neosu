@@ -43,6 +43,8 @@ void disconnect() {
   pthread_mutex_lock(&outgoing_mutex);
   try_logging_in = false;
   auth_header = "";
+  delete outgoing.memory;
+  outgoing = {0};
   pthread_mutex_unlock(&outgoing_mutex);
 
   bancho.user_id = 0;
@@ -63,10 +65,11 @@ void reconnect() {
     return;
 
   bancho.username = user;
+  Packet new_login_packet = build_login_packet((char *)user.toUtf8(), (char *)pw.toUtf8());
 
   pthread_mutex_lock(&outgoing_mutex);
-  free(login_packet.memory);
-  login_packet = build_login_packet((char *)user.toUtf8(), (char *)pw.toUtf8());
+  delete login_packet.memory;
+  login_packet = new_login_packet;
   try_logging_in = true;
   pthread_mutex_unlock(&outgoing_mutex);
 }
@@ -91,18 +94,18 @@ static size_t curl_write(void *contents, size_t size, size_t nmemb,
   return realsize;
 }
 
-static void send_api_request(CURL *curl, APIRequest outgoing) {
+static void send_api_request(CURL *curl, APIRequest api_out) {
   Packet response = {0};
-  response.id = outgoing.type;
-  response.extra = outgoing.extra;
-  response.memory = (uint8_t *)malloc(2048);
+  response.id = api_out.type;
+  response.extra = api_out.extra;
+  response.memory = new uint8_t[2048];
 
   // TODO @kiwec: convar not thread safe
   UString cv_endpoint =
       convar->getConVarByName("osu_server")
           ->getString(); // have to keep UString in scope to use toUtf8()
   std::string query_url =
-      "https://osu." + std::string(cv_endpoint.toUtf8()) + outgoing.path;
+      "https://osu." + std::string(cv_endpoint.toUtf8()) + api_out.path;
   debugLog("Sending request: %s\n", query_url.c_str());
 
   curl_easy_setopt(curl, CURLOPT_URL, query_url.c_str());
@@ -170,7 +173,7 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
 
     Packet incoming = {
         .id = packet_id,
-        .memory = (uint8_t *)malloc(packet_len),
+        .memory = new uint8_t[packet_len],
         .size = packet_len,
         .pos = 0,
     };
@@ -186,7 +189,7 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
 
 end:
   curl_easy_reset(curl);
-  free(response.memory);
+  delete response.memory;
   curl_slist_free_all(chunk);
 }
 
@@ -206,26 +209,32 @@ static void *do_networking(void *data) {
     if (api_request_queue.empty()) {
       pthread_mutex_unlock(&api_requests_mutex);
     } else {
-      APIRequest outgoing = api_request_queue.front();
+      APIRequest api_out = api_request_queue.front();
       api_request_queue.erase(api_request_queue.begin());
       pthread_mutex_unlock(&api_requests_mutex);
 
-      send_api_request(curl, outgoing);
+      send_api_request(curl, api_out);
     }
 
     bool should_ping = difftime(time(NULL), last_packet_tms) > seconds_between_pings;
+    // TODO @kiwec: if(is_in_lobby_list || is_multiplaying) should_ping = true;
+    // needs proper mutex handling
 
     pthread_mutex_lock(&outgoing_mutex);
     if (try_logging_in) {
-      send_bancho_packet(curl, login_packet);
+      Packet login = login_packet;
+      login_packet = {0};
       try_logging_in = false;
+      pthread_mutex_unlock(&outgoing_mutex);
+      send_bancho_packet(curl, login);
+      delete login.memory;
+      pthread_mutex_lock(&outgoing_mutex);
     } else if(should_ping && outgoing.pos == 0) {
       write_short(&outgoing, PING);
       write_byte(&outgoing, 0);
       write_int(&outgoing, 0);
 
       // Polling gets slower over time, but resets when we receive new data
-      // TODO @kiwec: client seems to pool every second while in a lobby
       if (seconds_between_pings < 30.0) {
         seconds_between_pings += 1.0;
       }
@@ -237,7 +246,7 @@ static void *do_networking(void *data) {
       pthread_mutex_unlock(&outgoing_mutex);
 
       send_bancho_packet(curl, out);
-      free(out.memory);
+      delete out.memory;
     } else {
       pthread_mutex_unlock(&outgoing_mutex);
     }
@@ -270,8 +279,8 @@ void receive_api_responses() {
     Packet incoming = api_response_queue.front();
     api_response_queue.erase(api_response_queue.begin());
     handle_api_response(incoming);
-    free(incoming.memory);
-    free(incoming.extra);
+    delete incoming.memory;
+    delete incoming.extra;
   }
   pthread_mutex_unlock(&api_responses_mutex);
 #endif
@@ -284,7 +293,7 @@ void receive_bancho_packets() {
     Packet incoming = incoming_queue.front();
     incoming_queue.erase(incoming_queue.begin());
     handle_packet(&incoming);
-    free(incoming.memory);
+    delete incoming.memory;
   }
   pthread_mutex_unlock(&incoming_mutex);
 #endif
@@ -304,8 +313,19 @@ void send_api_request(APIRequest request) {
 #endif
 }
 
-void send_packet(Packet packet) {
+void send_packet(Packet& packet) {
 #ifdef MCENGINE_FEATURE_PTHREADS
+  if(bancho.user_id == 0) {
+    // Don't queue any packets until we're logged in
+    return;
+  }
+
+  // debugLog("Sending packet of type %hu: ", packet.id);
+  // for (int i = 0; i < packet.pos; i++) {
+  //     debugLog("%02x ", packet.memory[i]);
+  // }
+  // debugLog("\n");
+
   pthread_mutex_lock(&outgoing_mutex);
 
   // We're not sending it immediately, instead we just add it to the pile of
@@ -317,7 +337,7 @@ void send_packet(Packet packet) {
 
   pthread_mutex_unlock(&outgoing_mutex);
 #else
-  free(packet.memory);
+  delete packet.memory;
 #endif
 }
 

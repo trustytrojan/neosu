@@ -13,6 +13,7 @@
 #include "SteamworksInterface.h"
 #include "DiscordInterface.h"
 
+#include "BanchoNetworking.h"
 #include "Osu.h"
 #include "OsuScore.h"
 #include "OsuSongBrowser2.h"
@@ -32,14 +33,45 @@ const UString OsuRichPresence::KEY_STEAM_STATUS = "status";
 const UString OsuRichPresence::KEY_DISCORD_STATUS = "state";
 const UString OsuRichPresence::KEY_DISCORD_DETAILS = "details";
 
+void OsuRichPresence::setBanchoStatus(Osu *osu, const char* info_text, Action action) {
+	if(osu == NULL) return;
+
+	std::string map_md5 = "";
+	uint32_t map_id = 0;
+
+    auto selected_beatmap = osu->getSelectedBeatmap();
+    if(selected_beatmap != nullptr) {
+    	auto diff = selected_beatmap->getSelectedDifficulty2();
+    	if(diff != nullptr) {
+    		map_md5 = diff->getMD5Hash();
+   			map_id = diff->getID();
+    	}
+    }
+
+    char fancy_text[1024] = {0};
+    snprintf(fancy_text, 1023, "in McOsu\n%s", info_text);
+
+    Packet packet = {0};
+    packet.id = CHANGE_ACTION;
+    write_byte(&packet, action);
+    write_string(&packet, fancy_text);
+    write_string(&packet, map_md5.c_str());
+    write_int(&packet, osu->getModsFlag());
+    write_byte(&packet, 0); // osu!std
+    write_int(&packet, map_id);
+    send_packet(packet);
+}
+
 void OsuRichPresence::onMainMenu(Osu *osu)
 {
 	setStatus(osu, "Main Menu");
+	setBanchoStatus(osu, "Main Menu", AFK);
 }
 
 void OsuRichPresence::onSongBrowser(Osu *osu)
 {
 	setStatus(osu, "Song Selection");
+	setBanchoStatus(osu, "Song Selection", IDLE);
 
 	// also update window title
 	if (osu_rich_presence_dynamic_windowtitle.getBool())
@@ -57,6 +89,7 @@ void OsuRichPresence::onPlayStart(Osu *osu)
 	playingInfo.append("]");
 
 	setStatus(osu, playingInfo);
+	setBanchoStatus(osu, playingInfo.toUtf8(), PLAYING);
 
 	// also update window title
 	if (osu_rich_presence_dynamic_windowtitle.getBool())
@@ -98,6 +131,7 @@ void OsuRichPresence::onPlayEnd(Osu *osu, bool quit)
 			scoreInfo.append(UString::format(" %.2f*", osu->getScore()->getStarsTomTotal()));
 
 			setStatus(osu, scoreInfo);
+			setBanchoStatus(osu, scoreInfo.toUtf8(), SUBMITTING);
 		}
 	}
 }

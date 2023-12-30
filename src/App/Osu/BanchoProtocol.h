@@ -14,7 +14,7 @@ enum Action {
   TESTING = 8,
   SUBMITTING = 9,
   PAUSED = 10,
-  LOBBY = 11,
+  TESTING2 = 11, // Was LOBBY but shows as "Testing" in-game
   MULTIPLAYING = 12,
   OSU_DIRECT = 13,
 };
@@ -84,6 +84,7 @@ enum IncomingPackets {
 };
 
 enum OutgoingPackets {
+  CHANGE_ACTION = 0,
   SEND_PUBLIC_MESSAGE = 1,
   PING = 4,
   START_SPECTATING = 16,
@@ -141,35 +142,37 @@ typedef struct {
 } Packet;
 
 typedef struct {
-  uint8_t status;
-  uint8_t team;
-  uint32_t player_id;
-  uint32_t mods;
+  uint8_t status = 0;
+  uint8_t team = 0;
+  uint32_t player_id = 0;
+  uint32_t mods = 0;
 } Slot;
 
-typedef struct {
-  uint16_t id;
-  uint8_t in_progress;
-  uint8_t match_type;
-  uint32_t mods;
-  uint32_t seed;
+struct Room {
+  ~Room();
 
-  char *name;
-  char *password;
+  uint16_t id = 0;
+  uint8_t in_progress = 0;
+  uint8_t match_type = 0;
+  uint32_t mods = 0;
+  uint32_t seed = 0;
 
-  char *map_name;
-  char *map_md5;
-  int32_t map_id;
+  char *name = NULL;
+  char *password = NULL;
 
-  uint8_t mode;
-  uint8_t win_condition;
-  uint8_t team_type;
-  uint8_t freemods;
+  char *map_name = NULL;
+  char *map_md5 = NULL;
+  int32_t map_id = 0;
 
-  int32_t host_id;
-  uint8_t nb_players;
+  uint8_t mode = 0;
+  uint8_t win_condition = 0;
+  uint8_t team_type = 0;
+  uint8_t freemods = 0;
+
+  int32_t host_id = 0;
+  uint8_t nb_players = 0;
   Slot slots[16];
-} Room;
+};
 
 void read_bytes(Packet *packet, uint8_t *bytes, size_t n);
 uint8_t read_byte(Packet *packet);
@@ -181,7 +184,6 @@ float read_float(Packet *packet);
 char *read_string(Packet *packet);
 
 Room *read_room(Packet *packet);
-void free_room(Room *room);
 
 void write_bytes(Packet *packet, uint8_t *bytes, size_t n);
 void write_byte(Packet *packet, uint8_t b);
