@@ -19,6 +19,7 @@
 #include "CBaseUIContainer.h"
 
 #include "Osu.h"
+#include "OsuChat.h"
 #include "OsuSkin.h"
 #include "OsuBeatmap.h"
 #include "OsuKeyBindings.h"
@@ -436,6 +437,7 @@ void OsuPauseMenu::setVisible(bool visible)
 	m_osu->updateWindowsKeyDisable();
 
 	anim->moveQuadOut(&m_fDimAnim, (m_bVisible ? 1.0f : 0.0f), osu_pause_anim_duration.getFloat() * (m_bVisible ? 1.0f - m_fDimAnim : m_fDimAnim), true);
+	m_osu->m_chat->updateVisibility();
 }
 
 void OsuPauseMenu::setContinueEnabled(bool continueEnabled)

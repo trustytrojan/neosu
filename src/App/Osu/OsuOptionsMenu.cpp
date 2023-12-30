@@ -1778,6 +1778,7 @@ void OsuOptionsMenu::setVisibleInt(bool visible, bool fromOnBack)
 	}
 
 	m_bVisible = visible;
+	m_osu->m_chat->updateVisibility();
 
 	if (visible)
 		updateLayout();
@@ -1798,9 +1799,6 @@ void OsuOptionsMenu::setVisibleInt(bool visible, bool fromOnBack)
 		// reset reset counters
 		m_iNumResetAllKeyBindingsPressed = 0;
 		m_iNumResetEverythingPressed = 0;
-
-		// close chat
-		m_osu->m_chat->setVisible(false);
 	}
 }
 

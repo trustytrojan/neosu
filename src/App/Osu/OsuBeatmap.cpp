@@ -18,6 +18,7 @@
 #include "ConVar.h"
 
 #include "Osu.h"
+#include "OsuChat.h"
 #include "OsuVR.h"
 #include "OsuMultiplayer.h"
 #include "OsuHUD.h"
@@ -909,6 +910,8 @@ void OsuBeatmap::update()
 			m_bIsInSkippableSection = true;
 		else
 			m_bIsInSkippableSection = false;
+
+		m_osu->m_chat->updateVisibility();
 	}
 
 	// warning arrow logic
@@ -1139,6 +1142,7 @@ void OsuBeatmap::skipEmptySection()
 {
 	if (!m_bIsInSkippableSection) return;
 	m_bIsInSkippableSection = false;
+	m_osu->m_chat->updateVisibility();
 
 	const float offset = 2500.0f;
 	float offsetMultiplier = m_osu->getSpeedMultiplier();

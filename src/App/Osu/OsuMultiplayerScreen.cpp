@@ -1,6 +1,7 @@
 #include "BanchoNetworking.h"
 #include "BanchoUsers.h"
 #include "Osu.h"
+#include "OsuChat.h"
 #include "OsuMainMenu.h"
 #include "OsuMultiplayerScreen.h"
 
@@ -85,6 +86,8 @@ void OsuMultiplayerScreen::setVisible(bool visible) {
 
         m_osu->m_mainMenu->setVisible(true);
     }
+
+    m_osu->m_chat->updateVisibility();
 }
 
 void OsuMultiplayerScreen::updateLayout(Vector2 newResolution) {

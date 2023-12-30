@@ -8,10 +8,12 @@
 // TODO @kiwec: grab mouse clicks (need to add conditions everywhere in the code)
 // TODO @kiwec: fix scrolling
 // TODO @kiwec: Add timestamps
-// TODO @kiwec: Add channel connection info like osu!stable does
 // TODO @kiwec: do something when username is clicked
 // TODO @kiwec: limit to 100 messages / channel
 // TODO @kiwec: optimize
+
+// TODO @kiwec: Add channel connection info like osu!stable does
+// Eg. use #osu as main (closeable) channel, always add it when logging it
 
 class CBaseUIButton;
 class McFont;
@@ -52,7 +54,6 @@ struct OsuChat : public OsuScreen
     virtual void onKeyUp(KeyboardEvent &e);
     virtual void onChar(KeyboardEvent &e);
     virtual void onResolutionChange(Vector2 newResolution);
-    virtual void setVisible(bool visible);
 
     void switchToChannel(OsuChatChannel* chan);
     void addChannel(UString channel_name);
@@ -60,6 +61,10 @@ struct OsuChat : public OsuScreen
     void removeChannel(UString channel_name);
     void updateLayout(Vector2 newResolution);
     void updateButtonLayout(Vector2 screen);
+
+    virtual void setVisible(bool visible);
+    bool isVisibilityForced();
+    void updateVisibility();
 
     OsuChatChannel* m_selected_channel = nullptr;
     std::vector<OsuChatChannel*> m_channels;
@@ -69,4 +74,5 @@ struct OsuChat : public OsuScreen
 
     McFont* font;
     float m_fAnimation = 0.f;
+    bool user_wants_chat = false;
 };

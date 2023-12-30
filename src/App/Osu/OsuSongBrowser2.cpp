@@ -26,6 +26,7 @@
 #include "CBaseUILabel.h"
 
 #include "Osu.h"
+#include "OsuChat.h"
 #include "OsuMultiplayer.h"
 #include "OsuHUD.h"
 #include "OsuIcons.h"
@@ -1753,6 +1754,8 @@ void OsuSongBrowser2::setVisible(bool visible)
 	}
 	else
 		m_contextMenu->setVisible2(false);
+
+	m_osu->m_chat->updateVisibility();
 }
 
 void OsuSongBrowser2::onPlayEnd(bool quit)

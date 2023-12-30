@@ -14,7 +14,10 @@
 #include "Bancho.h"
 #include "BanchoNetworking.h"
 #include "Osu.h"
+#include "OsuBeatmap.h"
+#include "OsuMultiplayerScreen.h"
 #include "OsuOptionsMenu.h"
+#include "OsuPauseMenu.h"
 #include "OsuSkin.h"
 #include "OsuUIButton.h"
 
@@ -24,7 +27,7 @@ OsuChatChannel::OsuChatChannel(OsuChat* chat, UString name_arg) {
     name = name_arg;
 
     ui = new CBaseUIScrollView(0, 0, 0, 0, "");
-    ui->setDrawFrame(true);
+    ui->setDrawFrame(false);
     ui->setDrawBackground(true);
     ui->setBackgroundColor(0xdd000000);
     ui->setHorizontalScrolling(false);
@@ -89,6 +92,9 @@ OsuChat::OsuChat(Osu *osu) : OsuScreen(osu) {
     m_button_container = new CBaseUIContainer(0, 0, 0, 0, "");
 
     m_input_box = new CBaseUITextbox(0, 0, 0, 0, "");
+    m_input_box->setDrawFrame(false);
+    m_input_box->setDrawBackground(true);
+    m_input_box->setBackgroundColor(0xdd000000);
     m_container->addBaseUIElement(m_input_box);
 
     updateLayout(m_osu->getScreenSize());
@@ -152,10 +158,14 @@ void OsuChat::onKeyDown(KeyboardEvent &key) {
     if(!m_bVisible) return;
 
     if(key.getKeyCode() == KEY_ESCAPE) {
+        if(isVisibilityForced()) return;
+
         key.consume();
-        setVisible(false);
-        return;
-    } else if(key.getKeyCode() == KEY_ENTER) {
+        user_wants_chat = false;
+        updateVisibility();
+    }
+
+    if(key.getKeyCode() == KEY_ENTER) {
         key.consume();
         if(m_selected_channel != nullptr) {
             Packet packet = {0};
@@ -306,20 +316,18 @@ void OsuChat::removeChannel(UString channel_name) {
 void OsuChat::updateLayout(Vector2 newResolution) {
     m_container->setSize(newResolution);
 
-    const float screen_height = newResolution.y - 1;
-    const float screen_width = newResolution.x - 1;
     const float chat_height = newResolution.y * 0.66f;
     const float input_box_height = 30.f;
 
     for(auto chan : m_channels) {
         chan->updateLayout(
             Vector2{0.f, chat_height},
-            Vector2{screen_width, (screen_height - chat_height) - input_box_height}
+            Vector2{newResolution.x, (newResolution.y - chat_height) - input_box_height}
         );
     }
 
-    m_input_box->setPos(Vector2{0.f, screen_height - input_box_height});
-    m_input_box->setSize(Vector2{screen_width, input_box_height});
+    m_input_box->setPos(Vector2{0.f, newResolution.y - (input_box_height + 2.f)});
+    m_input_box->setSize(Vector2{newResolution.x, input_box_height});
 
     if(m_selected_channel == nullptr && !m_channels.empty()) {
         m_selected_channel = m_channels[0];
@@ -389,10 +397,33 @@ void OsuChat::onResolutionChange(Vector2 newResolution) {
     updateLayout(newResolution);
 }
 
+bool OsuChat::isVisibilityForced() {
+    // TODO: force_show when in a multi room, except when selecting a song
+    return m_osu->m_multiMenu->isVisible();
+}
+
+void OsuChat::updateVisibility() {
+    if(isVisibilityForced()) {
+        setVisible(true);
+        return;
+    }
+
+    auto selected_beatmap = m_osu->getSelectedBeatmap();
+    bool can_skip = (selected_beatmap != nullptr) && (selected_beatmap->isInSkippableSection());
+    bool is_clicking_circles = m_osu->isInPlayMode() && !can_skip && !m_osu->m_bModAuto && !m_osu->m_pauseMenu->isVisible();
+    bool force_hide = m_osu->m_optionsMenu->isVisible() || is_clicking_circles;
+    if(force_hide) {
+        setVisible(false);
+        return;
+    }
+
+    setVisible(user_wants_chat);
+}
+
 void OsuChat::setVisible(bool visible) {
     if(visible == m_bVisible) return;
 
-    if(bancho.user_id == 0) {
+    if(visible && bancho.user_id == 0) {
         m_osu->m_optionsMenu->askForLoginDetails();
         return;
     }

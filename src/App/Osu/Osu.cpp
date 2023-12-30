@@ -1307,8 +1307,10 @@ void Osu::onKeyDown(KeyboardEvent &key)
 	}
 
 	// F8 toggle chat
-	if (key == (KEYCODE)OsuKeyBindings::TOGGLE_CHAT.getInt())
-		m_chat->setVisible(!m_chat->isVisible());
+	if (key == (KEYCODE)OsuKeyBindings::TOGGLE_CHAT.getInt()) {
+		m_chat->user_wants_chat = !m_chat->user_wants_chat;
+		m_chat->updateVisibility();
+	}
 
 	// screenshots
 	if (key == (KEYCODE)OsuKeyBindings::SAVE_SCREENSHOT.getInt())
