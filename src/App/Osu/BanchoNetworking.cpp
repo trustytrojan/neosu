@@ -245,6 +245,12 @@ static void *do_networking(void *data) {
       outgoing = {0};
       pthread_mutex_unlock(&outgoing_mutex);
 
+      // DEBUG: If we're not sending the right amount of bytes, bancho.py just
+      // chugs along! To try to detect it faster, we'll send two packets per request.
+      write_short(&out, PING);
+      write_byte(&out, 0);
+      write_int(&out, 0);
+
       send_bancho_packet(curl, out);
       delete out.memory;
     } else {

@@ -31,6 +31,7 @@ OsuChatChannel::OsuChatChannel(OsuChat* chat, UString name_arg) {
     ui->setDrawBackground(true);
     ui->setBackgroundColor(0xdd000000);
     ui->setHorizontalScrolling(false);
+    ui->setDrawScrollbars(true);
 
     btn = new OsuUIButton(bancho.osu, 0, 0, 0, 0, "button", name);
     btn->setUseDefaultSkin();

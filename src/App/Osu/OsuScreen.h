@@ -32,10 +32,10 @@ public:
 
 	inline bool isVisible() const {return m_bVisible;}
 
+	Osu *m_osu;
+
 protected:
 	bool m_bVisible;
-
-	Osu *m_osu;
 };
 
 #endif

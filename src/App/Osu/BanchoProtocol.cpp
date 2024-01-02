@@ -104,6 +104,11 @@ Room *read_room(Packet *packet) {
     // playing = 32
     // complete = 64
     // quit = 128
+
+    if(!(room->slots[s].status & 0b00000010)) {
+      room->nb_open_slots++;
+    }
+
     // slot_has_player = not_ready | ready | no_map | playing | complete
     bool slot_has_player = (room->slots[s].status & 0b01111100) != 0;
     if(slot_has_player) {

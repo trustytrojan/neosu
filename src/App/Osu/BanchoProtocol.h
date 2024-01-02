@@ -171,6 +171,7 @@ struct Room {
 
   int32_t host_id = 0;
   uint8_t nb_players = 0;
+  uint8_t nb_open_slots = 0;
   Slot slots[16];
 };
 

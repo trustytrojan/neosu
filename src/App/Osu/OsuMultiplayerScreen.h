@@ -4,6 +4,24 @@
 #include "CBaseUIScrollView.h"
 #include "OsuScreen.h"
 
+
+class CBaseUIButton;
+class OsuMultiplayerScreen;
+class Room;
+
+// NOTE: We make a CBaseUIScrollView but won't enable scrolling.
+//       It's just to draw the frame! ^_^
+struct RoomUIElement : CBaseUIScrollView {
+    RoomUIElement(OsuMultiplayerScreen* multi, Room* room, float x, float y, float width, float height);
+
+    CBaseUIScrollView* ui;
+    OsuMultiplayerScreen* m_multi;
+    uint32_t room_id;
+
+    void updateLayout(Vector2 pos, Vector2 size);
+    void onRoomJoinButtonClick(CBaseUIButton* btn);
+};
+
 struct OsuMultiplayerScreen : public OsuScreen
 {
     OsuMultiplayerScreen(Osu *osu);
@@ -25,5 +43,6 @@ struct OsuMultiplayerScreen : public OsuScreen
 
     std::vector<Room*> rooms;
     CBaseUIContainer *m_container;
+    CBaseUIScrollView *m_list;
     McFont* font;
 };
