@@ -225,7 +225,7 @@ void Osu2::update()
 			for (int i=0; i<m_slaves.size(); i++)
 			{
 				if (m_bPrevPlayingState)
-					m_slaves[i]->getSongBrowser()->onDifficultySelected(m_slaves[i]->getSongBrowser()->getSelectedBeatmap()->getSelectedDifficulty2(), true, false);
+					m_slaves[i]->getSongBrowser()->onDifficultySelected(m_slaves[i]->getSongBrowser()->getSelectedBeatmap()->getSelectedDifficulty2(), true);
 				else
 					m_slaves[i]->getSongBrowser()->getSelectedBeatmap()->stop(true);
 			}

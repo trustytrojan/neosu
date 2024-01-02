@@ -22,7 +22,7 @@ class OsuUIButton;
 
 
 struct ChatMessage {
-    uint32_t author_id;
+    int32_t author_id;
     UString author_name;
     UString text;
 };

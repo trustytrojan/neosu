@@ -14,7 +14,8 @@
 class CWindowManager;
 
 class OsuChat;
-class OsuMultiplayerScreen;
+class OsuLobby;
+class OsuRoom;
 class Osu2;
 class OsuVR;
 class OsuMultiplayer;
@@ -275,7 +276,8 @@ public:
 	OsuMainMenu *m_mainMenu;
 	OsuOptionsMenu *m_optionsMenu;
 	OsuChat *m_chat;
-	OsuMultiplayerScreen *m_multiMenu;
+	OsuLobby *m_lobby;
+	OsuRoom *m_room;
 	OsuSongBrowser2 *m_songBrowser2;
 	OsuBackgroundImageHandler *m_backgroundImageHandler;
 	OsuModSelector *m_modSelector;

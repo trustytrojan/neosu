@@ -15,10 +15,12 @@
 #include "BanchoNetworking.h"
 #include "Osu.h"
 #include "OsuBeatmap.h"
-#include "OsuMultiplayerScreen.h"
+#include "OsuLobby.h"
 #include "OsuOptionsMenu.h"
 #include "OsuPauseMenu.h"
+#include "OsuRoom.h"
 #include "OsuSkin.h"
+#include "OsuSongBrowser2.h"
 #include "OsuUIButton.h"
 
 
@@ -49,26 +51,39 @@ void OsuChatChannel::onChannelButtonClick(CBaseUIButton* btn) {
 }
 
 void OsuChatChannel::add_message(ChatMessage msg) {
+    const float line_height = 20;
     bool is_at_bottom = ui->getScrollPosY() == -ui->getScrollSize().y;
-    float name_width = m_chat->font->getStringWidth(msg.author_name);
-    float name_height = 20;
 
-    UString text_str = ": ";
+    bool is_system_message = msg.author_name.length() == 0;
+
+    UString text_str = "";
+    float name_width = m_chat->font->getStringWidth(msg.author_name);
+    if(!is_system_message) {
+        CBaseUILabel *username = new CBaseUILabel(10, y_total, name_width, line_height, "", msg.author_name);
+        username->setDrawFrame(false);
+        username->setDrawBackground(false);
+        username->setTextColor(0xff2596be);
+        ui->getContainer()->addBaseUIElement(username);
+
+        // TODO @kiwec: make name clickable, do something when name is clicked
+
+        text_str.append(": ");
+    }
+
     text_str.append(msg.text);
     float text_width = m_chat->font->getStringWidth(text_str);
-    float text_height = name_height; // TODO @kiwec: text wrapping
+    float text_height = line_height; // TODO @kiwec: text wrapping
 
-    CBaseUILabel *username = new CBaseUILabel(10, y_total, name_width, name_height, "", msg.author_name);
-    username->setDrawFrame(false);
-    username->setDrawBackground(false);
-    username->setTextColor(0xff2596be);
-    ui->getContainer()->addBaseUIElement(username);
     CBaseUILabel *text = new CBaseUILabel(10 + name_width, y_total, text_width, text_height, "", text_str);
     text->setDrawFrame(false);
     text->setDrawBackground(false);
+    if(is_system_message) {
+        // TODO @kiwec: use prettier color
+        text->setTextColor(0xfff73729);
+    }
     ui->getContainer()->addBaseUIElement(text);
 
-    y_total += name_height;
+    y_total += line_height;
 
     if(is_at_bottom) {
         ui->scrollToBottom();
@@ -273,7 +288,7 @@ void OsuChat::addChannel(UString channel_name) {
 }
 
 void OsuChat::addMessage(UString channel_name, ChatMessage msg) {
-    if(channel_name[0] != '#' && msg.author_name != bancho.username) {
+    if(msg.author_id > 0 && channel_name[0] != '#' && msg.author_name != bancho.username) {
         // If it's a PM, the channel title should be the one who sent the message
         channel_name = msg.author_name;
     }
@@ -399,8 +414,8 @@ void OsuChat::onResolutionChange(Vector2 newResolution) {
 }
 
 bool OsuChat::isVisibilityForced() {
-    // TODO: force_show when in a multi room, except when selecting a song
-    return m_osu->m_multiMenu->isVisible();
+    bool sitting_in_room = m_osu->m_room->isVisible() && !m_osu->m_songBrowser2->isVisible();
+    return m_osu->m_lobby->isVisible() || sitting_in_room;
 }
 
 void OsuChat::updateVisibility() {
@@ -424,7 +439,7 @@ void OsuChat::updateVisibility() {
 void OsuChat::setVisible(bool visible) {
     if(visible == m_bVisible) return;
 
-    if(visible && bancho.user_id == 0) {
+    if(visible && bancho.user_id <= 0) {
         m_osu->m_optionsMenu->askForLoginDetails();
         return;
     }

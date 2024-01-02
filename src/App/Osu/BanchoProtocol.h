@@ -1,6 +1,7 @@
 #pragma once
 #include <stddef.h>
 #include <stdint.h>
+#include "UString.h"
 
 enum Action {
   IDLE = 0,
@@ -52,12 +53,12 @@ enum IncomingPackets {
   ROOM_JOIN_FAIL = 37,
   FELLOW_SPECTATOR_JOINED = 42,
   FELLOW_SPECTATOR_LEFT = 43,
-  IN_MATCH_START = 46,
-  IN_MATCH_SCORE_UPDATE = 48,
-  IN_MATCH_TRANSFER_HOST = 50,
+  MATCH_STARTED = 46,
+  MATCH_SCORE_UPDATED = 48,
+  HOST_CHANGED = 50,
   MATCH_ALL_PLAYERS_LOADED = 53,
   MATCH_PLAYER_FAILED = 57,
-  IN_MATCH_COMPLETE = 58,
+  MATCH_FINISHED = 58,
   MATCH_SKIP = 61,
   CHANNEL_JOIN_SUCCESS = 64,
   CHANNEL_INFO = 65,
@@ -72,7 +73,7 @@ enum IncomingPackets {
   RESTART = 86,
   ROOM_INVITE = 88,
   CHANNEL_INFO_END = 89,
-  IN_MATCH_CHANGE_PASSWORD = 91,
+  ROOM_PASSWORD_CHANGED = 91,
   SILENCE_END = 92,
   USER_SILENCED = 94,
   USER_DM_BLOCKED = 100,
@@ -102,9 +103,9 @@ enum OutgoingPackets {
   MATCH_READY = 39,
   MATCH_LOCK = 40,
   MATCH_CHANGE_SETTINGS = 41,
-  OUT_MATCH_START = 44,
-  OUT_MATCH_SCORE_UPDATE = 47,
-  OUT_MATCH_COMPLETE = 49,
+  START_MATCH = 44,
+  UPDATE_MATCH_SCORE = 47,
+  FINISH_MATCH = 49,
   MATCH_CHANGE_MODS = 51,
   MATCH_LOAD_COMPLETE = 52,
   MATCH_NO_BEATMAP = 54,
@@ -114,7 +115,7 @@ enum OutgoingPackets {
   MATCH_SKIP_REQUEST = 60,
   CHANNEL_JOIN = 63,
   BEATMAP_INFO_REQUEST = 68,
-  OUT_MATCH_TRANSFER_HOST = 70,
+  TRANSFER_HOST = 70,
   FRIEND_ADD = 73,
   FRIEND_REMOVE = 74,
   MATCH_CHANGE_TEAM = 77,
@@ -124,7 +125,7 @@ enum OutgoingPackets {
   IRC_ONLY = 84,
   USER_STATS_REQUEST = 85,
   MATCH_INVITE = 87,
-  OUT_MATCH_CHANGE_PASSWORD = 90,
+  CHANGE_ROOM_PASSWORD = 90,
   TOURNAMENT_MATCH_INFO_REQUEST = 93,
   USER_PRESENCE_REQUEST = 97,
   USER_PRESENCE_REQUEST_ALL = 98,
@@ -141,15 +142,48 @@ typedef struct {
   uint8_t *extra;
 } Packet;
 
-typedef struct {
-  uint8_t status = 0;
+struct Slot {
+  // From ROOM_CREATED, ROOM_UPDATED
+  uint8_t status = 0; // bitfield of [quit, complete, playing, no_map, ready, not_ready, locked, open]
   uint8_t team = 0;
   uint32_t player_id = 0;
   uint32_t mods = 0;
-} Slot;
+
+  // From MATCH_PLAYER_SKIPPED
+  bool skipped = false;
+
+  // From MATCH_PLAYER_FAILED
+  bool died = false;
+
+  // From MATCH_SCORE_UPDATED
+  int32_t last_update_tms = 0;
+  uint16_t num300 = 0;
+  uint16_t num100 = 0;
+  uint16_t num50 = 0;
+  uint16_t num_geki = 0;
+  uint16_t num_katu = 0;
+  uint16_t num_miss = 0;
+  int32_t total_score = 0;
+  uint16_t current_combo = 0;
+  uint16_t max_combo = 0;
+  uint8_t is_perfect = 0;
+  uint8_t current_hp = 0;
+  uint8_t tag = 0;
+  uint8_t is_scorev2 = 0;
+
+  // locked
+  bool is_locked() { return (status & 0b00000010); }
+
+  // playing
+  bool is_player_playing() { return (status & 0b00100000); }
+
+  // not_ready | ready | no_map | playing | complete
+  bool has_player() { return (status & 0b01111100); }
+};
 
 struct Room {
-  ~Room();
+  Room();
+  Room(Packet *packet);
 
   uint16_t id = 0;
   uint8_t in_progress = 0;
@@ -157,11 +191,11 @@ struct Room {
   uint32_t mods = 0;
   uint32_t seed = 0;
 
-  char *name = NULL;
-  char *password = NULL;
+  UString name = "";
+  UString password = "";
 
-  char *map_name = NULL;
-  char *map_md5 = NULL;
+  UString map_name = "";
+  UString map_md5 = "";
   int32_t map_id = 0;
 
   uint8_t mode = 0;
@@ -182,9 +216,7 @@ uint32_t read_int(Packet *packet);
 uint64_t read_int64(Packet *packet);
 uint32_t read_uleb128(Packet *packet);
 float read_float(Packet *packet);
-char *read_string(Packet *packet);
-
-Room *read_room(Packet *packet);
+UString read_string(Packet *packet);
 
 void write_bytes(Packet *packet, uint8_t *bytes, size_t n);
 void write_byte(Packet *packet, uint8_t b);

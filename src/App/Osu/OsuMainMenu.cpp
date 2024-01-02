@@ -6,7 +6,7 @@
 //===============================================================================//
 
 #include "Bancho.h"
-#include "OsuMultiplayerScreen.h"
+#include "OsuLobby.h"
 #include "OsuUpdateHandler.h"
 
 #include "Engine.h"
@@ -1656,13 +1656,13 @@ void OsuMainMenu::onPlayButtonPressed()
 
 void OsuMainMenu::onMultiplayerButtonPressed()
 {
-	if(bancho.user_id == 0) {
+	if(bancho.user_id <= 0) {
 		m_osu->m_optionsMenu->askForLoginDetails();
 		return;
 	}
 
 	setVisible(false);
-	m_osu->m_multiMenu->setVisible(true);
+	m_osu->m_lobby->setVisible(true);
 }
 
 void OsuMainMenu::onOptionsButtonPressed()

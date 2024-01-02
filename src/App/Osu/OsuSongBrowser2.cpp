@@ -1846,7 +1846,7 @@ void OsuSongBrowser2::onSelectionChange(OsuUISongBrowserButton *button, bool reb
 		rebuildSongButtons();
 }
 
-void OsuSongBrowser2::onDifficultySelected(OsuDatabaseBeatmap *diff2, bool play, bool mp)
+void OsuSongBrowser2::onDifficultySelected(OsuDatabaseBeatmap *diff2, bool play)
 {
 	// legacy logic (deselect = unload)
 	const bool wasSelectedBeatmapNULL = (m_selectedBeatmap == NULL);
@@ -1885,7 +1885,7 @@ void OsuSongBrowser2::onDifficultySelected(OsuDatabaseBeatmap *diff2, bool play,
 	if (play)
 	{
 		bool clientPlayStateChangeRequestBeatmapSent = false;
-		if (m_osu->isInMultiplayer() && !mp)
+		if (m_osu->isInMultiplayer())
 		{
 			// clients may also select beatmaps (the server can then decide if it wants to broadcast or ignore it)
 			clientPlayStateChangeRequestBeatmapSent = m_osu->getMultiplayer()->onClientPlayStateChangeRequestBeatmap(diff2);
@@ -1920,11 +1920,6 @@ void OsuSongBrowser2::onDifficultySelected(OsuDatabaseBeatmap *diff2, bool play,
 
 	// trigger dynamic star calc (including current mods etc.)
 	recalculateStarsForSelectedBeatmap();
-}
-
-void OsuSongBrowser2::onDifficultySelectedMP(OsuDatabaseBeatmap *diff2, bool play)
-{
-	onDifficultySelected(diff2, play, true);
 }
 
 void OsuSongBrowser2::selectBeatmapMP(OsuDatabaseBeatmap *diff2)
@@ -3018,7 +3013,8 @@ void OsuSongBrowser2::rebuildScoreButtons()
 	std::vector<OsuDatabase::Score> scores;
 	if(validBeatmap) {
 		if (is_online) {
-		    if (auto search = m_db->m_online_scores.find(m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash()); search != m_db->m_online_scores.end()) {
+			auto search = m_db->m_online_scores.find(m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash());
+		    if (search != m_db->m_online_scores.end()) {
 		        scores = search->second;
 
 		        // We have already fetched the scores so there's no point in showing "Loading...".

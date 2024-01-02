@@ -126,8 +126,7 @@ public:
 	void onPlayEnd(bool quit = true); // called when a beatmap is finished playing (or the player quit)
 
 	void onSelectionChange(OsuUISongBrowserButton *button, bool rebuild);
-	void onDifficultySelected(OsuDatabaseBeatmap *diff2, bool play = false, bool mp = false);
-	void onDifficultySelectedMP(OsuDatabaseBeatmap *diff2, bool play = false);
+	void onDifficultySelected(OsuDatabaseBeatmap *diff2, bool play = false);
 	void selectBeatmapMP(OsuDatabaseBeatmap *diff2);
 
 	void onScoreContextMenu(OsuUISongBrowserScoreButton *scoreButton, int id);

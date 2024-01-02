@@ -15,6 +15,7 @@
 
 #include "BanchoNetworking.h"
 #include "Osu.h"
+#include "OsuRoom.h"
 #include "OsuScore.h"
 #include "OsuSongBrowser2.h"
 #include "OsuDatabase.h"
@@ -49,7 +50,7 @@ void OsuRichPresence::setBanchoStatus(Osu *osu, const char* info_text, Action ac
     }
 
     char fancy_text[1024] = {0};
-    snprintf(fancy_text, 1023, "in McOsu\n%s", info_text);
+    snprintf(fancy_text, 1023, "[McOsu]\n%s", info_text);
 
     Packet packet = {0};
     packet.id = CHANGE_ACTION;
@@ -71,7 +72,12 @@ void OsuRichPresence::onMainMenu(Osu *osu)
 void OsuRichPresence::onSongBrowser(Osu *osu)
 {
 	setStatus(osu, "Song Selection");
-	setBanchoStatus(osu, "Song Selection", IDLE);
+
+	if(osu->m_room->isVisible()) {
+		setBanchoStatus(osu, "Picking a map", MULTIPLAYER);
+	} else {
+		setBanchoStatus(osu, "Song selection", IDLE);
+	}
 
 	// also update window title
 	if (osu_rich_presence_dynamic_windowtitle.getBool())

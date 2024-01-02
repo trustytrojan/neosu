@@ -2,8 +2,9 @@
 #include "BanchoUsers.h"
 #include "Osu.h"
 #include "OsuChat.h"
+#include "OsuLobby.h"
 #include "OsuMainMenu.h"
-#include "OsuMultiplayerScreen.h"
+#include "OsuNotificationOverlay.h"
 #include "OsuRichPresence.h"
 #include "OsuUIButton.h"
 
@@ -15,7 +16,7 @@
 #include "ResourceManager.h"
 
 
-RoomUIElement::RoomUIElement(OsuMultiplayerScreen* multi, Room* room, float x, float y, float width, float height) : CBaseUIScrollView(x, y, width, height, "") {
+RoomUIElement::RoomUIElement(OsuLobby* multi, Room* room, float x, float y, float width, float height) : CBaseUIScrollView(x, y, width, height, "") {
     // NOTE: We can't store the room pointer, since it might expire later
     m_multi = multi;
     room_id = room->id;
@@ -45,12 +46,18 @@ RoomUIElement::RoomUIElement(OsuMultiplayerScreen* multi, Room* room, float x, f
 }
 
 void RoomUIElement::onRoomJoinButtonClick(CBaseUIButton* btn) {
-    // TODO @kiwec
-    debugLog("Should join room #%d\n", room_id);
+    Packet packet = {0};
+    packet.id = JOIN_ROOM;
+    write_int(&packet, room_id);
+    write_string(&packet, ""); // TODO @kiwec: password support
+    send_packet(packet);
+
+    // TODO @kiwec: disable button, show loading indicator
+    m_multi->m_osu->getNotificationOverlay()->addNotification("Joining room...");
 }
 
 
-OsuMultiplayerScreen::OsuMultiplayerScreen(Osu *osu) : OsuScreen(osu) {
+OsuLobby::OsuLobby(Osu *osu) : OsuScreen(osu) {
     font = engine->getResourceManager()->getFont("FONT_DEFAULT");
 
     m_container = new CBaseUIContainer(0, 0, 0, 0, "");
@@ -65,18 +72,18 @@ OsuMultiplayerScreen::OsuMultiplayerScreen(Osu *osu) : OsuScreen(osu) {
     updateLayout(m_osu->getScreenSize());
 }
 
-void OsuMultiplayerScreen::draw(Graphics *g) {
+void OsuLobby::draw(Graphics *g) {
     if (!m_bVisible) return;
 
     m_container->draw(g);
 }
 
-void OsuMultiplayerScreen::update() {
+void OsuLobby::update() {
     if (!m_bVisible) return;
     m_container->update();
 }
 
-void OsuMultiplayerScreen::onKeyDown(KeyboardEvent &key) {
+void OsuLobby::onKeyDown(KeyboardEvent &key) {
     if(!m_bVisible) return;
 
     if(key.getKeyCode() == KEY_ESCAPE) {
@@ -88,23 +95,23 @@ void OsuMultiplayerScreen::onKeyDown(KeyboardEvent &key) {
     // XXX: search bar
 }
 
-void OsuMultiplayerScreen::onKeyUp(KeyboardEvent &key) {
+void OsuLobby::onKeyUp(KeyboardEvent &key) {
     if(!m_bVisible) return;
 
     // XXX: search bar
 }
 
-void OsuMultiplayerScreen::onChar(KeyboardEvent &key) {
+void OsuLobby::onChar(KeyboardEvent &key) {
     if(!m_bVisible) return;
 
     // XXX: search bar
 }
 
-void OsuMultiplayerScreen::onResolutionChange(Vector2 newResolution) {
+void OsuLobby::onResolutionChange(Vector2 newResolution) {
     updateLayout(newResolution);
 }
 
-void OsuMultiplayerScreen::setVisible(bool visible) {
+void OsuLobby::setVisible(bool visible) {
     if(visible == m_bVisible) return;
     m_bVisible = visible;
 
@@ -141,7 +148,7 @@ void OsuMultiplayerScreen::setVisible(bool visible) {
     m_osu->m_chat->updateVisibility();
 }
 
-void OsuMultiplayerScreen::updateLayout(Vector2 newResolution) {
+void OsuLobby::updateLayout(Vector2 newResolution) {
     m_list->clear();
 
     m_container->setSize(newResolution);
@@ -170,30 +177,32 @@ void OsuMultiplayerScreen::updateLayout(Vector2 newResolution) {
     }
 }
 
-void OsuMultiplayerScreen::addRoom(Room* room) {
+void OsuLobby::addRoom(Room* room) {
     rooms.push_back(room);
     updateLayout(m_container->getSize());
 }
 
-void OsuMultiplayerScreen::updateRoom(Room* room) {
-    // Yes, we replace the room just like that. Don't hold pointers, they will expire.
+void OsuLobby::updateRoom(Room room) {
     for(auto old_room : rooms) {
-        if(old_room->id == room->id) {
-            auto it = std::find(rooms.begin(), rooms.end(), old_room);
-            rooms.erase(it);
-            delete old_room;
-            rooms.push_back(room);
+        if(old_room->id == room.id) {
+            *old_room = room;
             updateLayout(m_container->getSize());
+
+            // TODO @kiwec: if we're in this room, we should send MATCH_HAS_BEATMAP / MATCH_NO_BEATMAP
+            // TODO @kiwec: especially important, send MATCH_NO_BEATMAP if the gamemode isn't osu!std
+
             return;
         }
     }
 
     // On bancho.py, if a player creates a room when we're already in the lobby,
     // we won't receive a ROOM_CREATED but only a ROOM_UPDATED packet.
-    addRoom(room);
+    auto new_room = new Room();
+    *new_room = room;
+    addRoom(new_room);
 }
 
-void OsuMultiplayerScreen::removeRoom(uint32_t room_id) {
+void OsuLobby::removeRoom(uint32_t room_id) {
     for(auto room : rooms) {
       if(room->id == room_id) {
         auto it = std::find(rooms.begin(), rooms.end(), room);
@@ -204,4 +213,8 @@ void OsuMultiplayerScreen::removeRoom(uint32_t room_id) {
     }
 
     updateLayout(m_container->getSize());
+}
+
+void OsuLobby::on_room_join_failed() {
+    // TODO @kiwec
 }

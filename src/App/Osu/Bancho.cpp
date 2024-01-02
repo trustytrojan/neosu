@@ -15,7 +15,8 @@
 #include "Osu.h"
 #include "OsuChat.h"
 #include "OsuNotificationOverlay.h"
-#include "OsuMultiplayerScreen.h"
+#include "OsuLobby.h"
+#include "OsuRoom.h"
 #include "OsuSongBrowser2.h"
 #include "OsuUISongBrowserUserButton.h"
 
@@ -25,13 +26,14 @@ Bancho bancho;
 // TODO @kiwec: display these as joinable channels somewhere
 std::unordered_map<std::string, Channel*> chat_channels;
 
-void update_channel(std::string name, UString topic, int32_t nb_members) {
+void update_channel(UString name, UString topic, int32_t nb_members) {
   Channel* chan;
-  auto it = chat_channels.find(name);
+  auto name_str = std::string(name.toUtf8());
+  auto it = chat_channels.find(name_str);
   if(it == chat_channels.end()) {
     chan = new Channel();
-    chan->name = UString(name.c_str());
-    chat_channels[name] = chan;
+    chan->name = name;
+    chat_channels[name_str] = chan;
   } else {
     chan = it->second;
   }
@@ -76,37 +78,33 @@ char *get_disk_uuid() {
 void handle_packet(Packet *packet) {
   if (packet->id == USER_ID) {
     bancho.user_id = read_int(packet);
-    debugLog("Received user ID %d.\n", bancho.user_id);
+    if(bancho.user_id > 0) {
+      debugLog("Logged in as user #%d.\n", bancho.user_id);
+    } else {
+      debugLog("Failed to log in, server returned code %d.\n", bancho.user_id);
+      // TODO @kiwec: also display error string returned in cho-token header
+    }
   } else if (packet->id == RECV_MESSAGE) {
-    char *sender = read_string(packet);
-    char *text = read_string(packet);
-    char *recipient = read_string(packet);
-    uint32_t sender_id = read_int(packet);
+    UString sender = read_string(packet);
+    UString text = read_string(packet);
+    UString recipient = read_string(packet);
+    int32_t sender_id = read_int(packet);
 
     bancho.osu->m_chat->addMessage(recipient, ChatMessage{
       .author_id = sender_id,
-      .author_name = UString(sender),
-      .text = UString(text),
+      .author_name = sender,
+      .text = text,
     });
-
-    delete sender;
-    delete text;
-    delete recipient;
   } else if (packet->id == PONG) {
     // (nothing to do)
   } else if (packet->id == USER_STATS) {
     int32_t stats_user_id = read_int(packet);
     uint8_t action = read_byte(packet);
-    char *info_text = read_string(packet);
-    char *map_md5 = read_string(packet);
 
     UserInfo *user = get_user_info(stats_user_id);
     user->action = (Action)action;
-    user->info_text = UString(info_text);
-    user->map_md5 = UString(map_md5);
-    delete info_text;
-    delete map_md5;
-
+    user->info_text = read_string(packet);
+    user->map_md5 = read_string(packet);
     user->mode = (GameMode)read_byte(packet);
     user->map_id = read_int(packet);
     user->ranked_score = read_int64(packet);
@@ -129,100 +127,95 @@ void handle_packet(Packet *packet) {
   } else if (packet->id == SPECTATOR_JOINED) {
     int32_t spectator_id = read_int(packet);
     debugLog("Spectator joined: user id %d\n", spectator_id);
+    // TODO @kiwec: display spectators
   } else if (packet->id == SPECTATOR_LEFT) {
     int32_t spectator_id = read_int(packet);
     debugLog("Spectator left: user id %d\n", spectator_id);
+    // TODO @kiwec: update spectators
   } else if (packet->id == VERSION_UPDATE) {
-    // (nothing to do?)
+    // TODO @kiwec: (nothing to do?)
   } else if (packet->id == SPECTATOR_CANT_SPECTATE) {
     int32_t spectator_id = read_int(packet);
     debugLog("Spectator can't spectate: user id %d\n", spectator_id);
+    // TODO @kiwec: update spectators ("doesn't have map" list)
   } else if (packet->id == GET_ATTENTION) {
     debugLog("ATTENTION!!!! (is this for flashing taskbar?)\n");
+    // TODO @kiwec: find out when this is called (prob when multi starts?)
   } else if (packet->id == NOTIFICATION) {
-    char *notification = read_string(packet);
+    UString notification = read_string(packet);
     bancho.osu->getNotificationOverlay()->addNotification(notification);
-    delete notification;
+    // TODO @kiwec: don't do McOsu style notifications, since:
+    // 1) they can't do multiline text
+    // 2) they don't stack, if the server sends >1 you only see the latest
+    // Maybe log them in the chat + display in top right like ppy client?
   } else if (packet->id == ROOM_UPDATED) {
-    Room *room = read_room(packet);
-    bancho.osu->m_multiMenu->updateRoom(room);
+    auto room = Room(packet);
+    if(bancho.osu->m_lobby->isVisible()) {
+      bancho.osu->m_lobby->updateRoom(room);
+    } else if(room.id == bancho.room.id) {
+      bancho.osu->m_room->on_room_updated(room);
+    }
   } else if (packet->id == ROOM_CREATED) {
-    Room *room = read_room(packet);
-    bancho.osu->m_multiMenu->addRoom(room);
+    auto room = new Room(packet);
+    bancho.osu->m_lobby->addRoom(room);
   } else if (packet->id == ROOM_CLOSED) {
     int32_t room_id = read_int(packet);
-    bancho.osu->m_multiMenu->removeRoom(room_id);
+    bancho.osu->m_lobby->removeRoom(room_id);
   } else if (packet->id == ROOM_JOIN_SUCCESS) {
-    Room *room = read_room(packet);
-    debugLog("JOINED Room %s: %d players\n", room->name, room->nb_players);
-    delete room;
+    auto room = Room(packet);
+    bancho.osu->m_room->on_room_joined(room);
   } else if (packet->id == ROOM_JOIN_FAIL) {
-    debugLog("FAILED to join room!\n");
+    bancho.osu->getNotificationOverlay()->addNotification("Failed to join room.");
+    bancho.osu->m_lobby->on_room_join_failed();
   } else if (packet->id == FELLOW_SPECTATOR_JOINED) {
     uint32_t spectator_id = read_int(packet);
-    debugLog("Fellow spectator joined with user id %d\n", spectator_id);
+    (void)spectator_id; // (spectating not implemented; nothing to do)
   } else if (packet->id == FELLOW_SPECTATOR_LEFT) {
     uint32_t spectator_id = read_int(packet);
-    debugLog("Fellow spectator left with user id %d\n", spectator_id);
-  } else if (packet->id == IN_MATCH_START) {
-    Room *room = read_room(packet);
-    debugLog("MATCH STARTED IN Room %s: %d players\n", room->name,
-             room->nb_players);
-    delete room;
-  } else if (packet->id == IN_MATCH_SCORE_UPDATE) {
-    int32_t time = read_int(packet);
-    uint8_t id = read_byte(packet);
-    uint16_t num300 = read_short(packet);
-    uint16_t num100 = read_short(packet);
-    uint16_t num50 = read_short(packet);
-    uint16_t num_geki = read_short(packet);
-    uint16_t num_katu = read_short(packet);
-    uint16_t num_miss = read_short(packet);
-    int32_t total_score = read_int(packet);
-    uint16_t current_combo = read_short(packet);
-    uint16_t max_combo = read_short(packet);
-    uint8_t is_perfect = read_byte(packet);
-    uint8_t current_hp = read_byte(packet);
-    uint8_t tag = read_byte(packet);
-    uint8_t is_scorev2 = read_byte(packet);
-    // NOTE: where is voteskip here?
-  } else if (packet->id == IN_MATCH_TRANSFER_HOST) {
-    debugLog("Host transferred!\n");
+    (void)spectator_id; // (spectating not implemented; nothing to do)
+  } else if (packet->id == MATCH_STARTED) {
+    auto room = Room(packet);
+    bancho.osu->m_room->on_match_started(room);
+  } else if (packet->id == MATCH_SCORE_UPDATED) {
+    bancho.osu->m_room->on_match_score_updated(packet);
+  } else if (packet->id == HOST_CHANGED) {
+    debugLog("Host changed!\n");
+    // TODO @kiwec: nothing to do?
   } else if (packet->id == MATCH_ALL_PLAYERS_LOADED) {
-    debugLog("All players loaded!\n");
+    bancho.osu->m_room->on_all_players_loaded();
   } else if (packet->id == MATCH_PLAYER_FAILED) {
     int32_t slot_id = read_int(packet);
-    debugLog("Player in slot %d has failed.\n", slot_id);
-  } else if (packet->id == IN_MATCH_COMPLETE) {
-    debugLog("Match complete!\n");
+    bancho.osu->m_room->on_player_failed(slot_id);
+    // TODO @kiwec: isn't this player ragequit? not death?
+  } else if (packet->id == MATCH_FINISHED) {
+    bancho.osu->m_room->on_match_finished();
   } else if (packet->id == MATCH_SKIP) {
-    debugLog("Skipping!\n");
+    bancho.osu->m_room->on_all_players_skipped();
   } else if (packet->id == CHANNEL_JOIN_SUCCESS) {
-    char *name = read_string(packet);
+    UString name = read_string(packet);
     bancho.osu->m_chat->addChannel(name);
-    debugLog("Success in joining channel %s.\n", name);
-    delete name;
+    bancho.osu->m_chat->addMessage(name, ChatMessage{
+      .author_id = 0,
+      .author_name = UString(""),
+      .text = UString("Joined channel."),
+    });
   } else if (packet->id == CHANNEL_INFO) {
-    char *channel_name = read_string(packet);
-    char *channel_topic = read_string(packet);
+    UString channel_name = read_string(packet);
+    UString channel_topic = read_string(packet);
     int32_t nb_members = read_int(packet);
-    update_channel(channel_name, UString(channel_topic), nb_members);
-    delete channel_name;
-    delete channel_topic;
+    update_channel(channel_name, channel_topic, nb_members);
   } else if (packet->id == LEFT_CHANNEL) {
-    char *name = read_string(packet);
+    UString name = read_string(packet);
     bancho.osu->m_chat->removeChannel(name);
-    delete name;
   } else if (packet->id == CHANNEL_AUTO_JOIN) {
-    char *channel_name = read_string(packet);
-    char *channel_topic = read_string(packet);
+    UString channel_name = read_string(packet);
+    UString channel_topic = read_string(packet);
     int32_t nb_members = read_int(packet);
-    update_channel(channel_name, UString(channel_topic), nb_members);
-    delete channel_name;
-    delete channel_topic;
+    update_channel(channel_name, channel_topic, nb_members);
   } else if (packet->id == PRIVILEGES) {
     int privileges = read_int(packet);
     debugLog("Privileges: %d\n", privileges);
+    // TODO @kiwec: do something with this?
   } else if (packet->id == PROTOCOL_VERSION) {
     int protocol_version = read_int(packet);
     if (protocol_version != 19) {
@@ -231,16 +224,16 @@ void handle_packet(Packet *packet) {
           "Server uses an unsupported protocol version.");
     }
   } else if (packet->id == MAIN_MENU_ICON) {
-    char *icon = read_string(packet);
+    UString icon = read_string(packet);
     debugLog("Main menu icon: %s\n", icon);
     // TODO @kiwec: handle this
-    delete icon;
+    // for that, we need to download & cache images somewhere. would be useful for avatars too
   } else if (packet->id == MATCH_PLAYER_SKIPPED) {
     int32_t user_id = read_int(packet);
-    debugLog("User %d has voted to skip.\n", user_id);
+    bancho.osu->m_room->on_player_skip(user_id);
   } else if (packet->id == USER_PRESENCE) {
     int32_t presence_user_id = read_int(packet);
-    char *presence_username = read_string(packet);
+    UString presence_username = read_string(packet);
 
     UserInfo *user = get_user_info(presence_user_id);
     user->name = UString(presence_username);
@@ -251,57 +244,57 @@ void handle_packet(Packet *packet) {
     user->latitude = read_float(packet);
     user->global_rank = read_int(packet);
 
-    delete presence_username;
+    // TODO @kiwec: update UIs that display this info?
   } else if (packet->id == RESTART) {
     int32_t ms = read_int(packet);
     debugLog("Restart: %d ms\n", ms);
     reconnect();
     // TODO @kiwec: wait 'ms' milliseconds before reconnecting
   } else if (packet->id == MATCH_INVITE) {
-    char *sender = read_string(packet);
-    char *text = read_string(packet);
-    char *recipient = read_string(packet);
+    UString sender = read_string(packet);
+    UString text = read_string(packet);
+    UString recipient = read_string(packet);
     int32_t sender_id = read_int(packet);
     (void)sender_id;
     debugLog("(match invite) %s (%s): %s\n", sender, recipient, text);
     // TODO @kiwec: make a clickable link in chat?
-    delete sender;
-    delete text;
-    delete recipient;
   } else if (packet->id == CHANNEL_INFO_END) {
     // (nothing to do)
-  } else if (packet->id == IN_MATCH_CHANGE_PASSWORD) {
-    char *new_password = read_string(packet);
+  } else if (packet->id == ROOM_PASSWORD_CHANGED) {
+    UString new_password = read_string(packet);
     debugLog("Room changed password to %s\n", new_password);
-    delete new_password;
+    // TODO @kiwec
   } else if (packet->id == SILENCE_END) {
     int32_t delta = read_int(packet);
     debugLog("Silence ends in %d seconds.\n", delta);
+    // TODO @kiwec
   } else if (packet->id == USER_SILENCED) {
     int32_t user_id = read_int(packet);
     debugLog("User #%d silenced.\n", user_id);
+    // TODO @kiwec
   } else if (packet->id == USER_DM_BLOCKED) {
-    delete read_string(packet);
-    delete read_string(packet);
-    char *blocked = read_string(packet);
+    read_string(packet);
+    read_string(packet);
+    UString blocked = read_string(packet);
     read_int(packet);
     debugLog("Blocked %s.\n", blocked);
-    delete blocked;
+    // TODO @kiwec
   } else if (packet->id == TARGET_IS_SILENCED) {
-    delete read_string(packet);
-    delete read_string(packet);
-    char *blocked = read_string(packet);
+    read_string(packet);
+    read_string(packet);
+    UString blocked = read_string(packet);
     read_int(packet);
     debugLog("Silenced %s.\n", blocked);
-    delete blocked;
+    // TODO @kiwec
   } else if (packet->id == VERSION_UPDATE_FORCED) {
     disconnect();
     bancho.osu->getNotificationOverlay()->addNotification(
         "Server uses an unsupported protocol version.");
   } else if (packet->id == ACCOUNT_RESTRICTED) {
     debugLog("ACCOUNT RESTRICTED.\n");
+    // TODO @kiwec
   } else if (packet->id == MATCH_ABORT) {
-    debugLog("Match aborted!\n");
+    bancho.osu->m_room->on_match_aborted();
   } else {
     debugLog("Unknown packet ID %d (%d bytes)!\n", packet->id, packet->size);
   }

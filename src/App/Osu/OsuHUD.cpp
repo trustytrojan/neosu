@@ -6,6 +6,10 @@
 //===============================================================================//
 
 #include "Bancho.h"
+#include "BanchoUsers.h"
+#include "OsuLobby.h"
+#include "OsuRoom.h"
+
 #include "OsuHUD.h"
 
 #include "Engine.h"
@@ -1927,30 +1931,40 @@ void OsuHUD::drawScoreBoard(Graphics *g, std::string &beatmapMD5Hash, OsuScore *
 
 void OsuHUD::drawScoreBoardMP(Graphics *g)
 {
-	const int numPlayers = m_osu->getMultiplayer()->getPlayers()->size();
+	if(bancho.room.id == 0) return;
 
 	static std::vector<SCORE_ENTRY> scoreEntries;
 	scoreEntries.clear();
-	scoreEntries.reserve(numPlayers);
+    for(int i = 0; i < 16; i++) {
+    	auto slot = &bancho.room.slots[i];
+        if(!slot->is_player_playing()) continue;
 
-	for (int i=0; i<numPlayers; i++)
-	{
+		auto user_info = get_user_info(slot->player_id, false);
+
+    	// TODO @kiwec: draw player avatar
+    	(void)slot->player_id;
+
+        // TODO @kiwec: sort by score, and if someone is from the future don't
+        // show their new score until we are in sync
+        // would need to keep track of score updates, even ppy client doesn't do it lol
+        (void)slot->last_update_tms;
+
 		SCORE_ENTRY scoreEntry;
-
-		scoreEntry.name = (*m_osu->getMultiplayer()->getPlayers())[i].name;
+		scoreEntry.name = user_info->name;
 
 		scoreEntry.index = -1;
-		scoreEntry.combo = (*m_osu->getMultiplayer()->getPlayers())[i].combo;
-		scoreEntry.score = (*m_osu->getMultiplayer()->getPlayers())[i].score;
-		scoreEntry.accuracy = (*m_osu->getMultiplayer()->getPlayers())[i].accuracy;
+		scoreEntry.combo = slot->current_combo;
+		scoreEntry.score = slot->total_score;
 
-		scoreEntry.missingBeatmap = (*m_osu->getMultiplayer()->getPlayers())[i].missingBeatmap;
-		scoreEntry.downloadingBeatmap = (*m_osu->getMultiplayer()->getPlayers())[i].downloadingBeatmap;
-		scoreEntry.dead = (*m_osu->getMultiplayer()->getPlayers())[i].dead;
-		scoreEntry.highlight = ((*m_osu->getMultiplayer()->getPlayers())[i].id == bancho.user_id);
+		// hit_score != total_score: total_score also accounts for spinner bonus & mods
+		uint64_t hit_score = 300 * slot->num300 + 100 * slot->num100 + 50 * slot->num50;
+		uint64_t max_score = 300 * (slot->num300 + slot->num100 + slot->num50 + slot->num_miss);
+		scoreEntry.accuracy = hit_score / max_score;
 
+		scoreEntry.dead = (slot->current_hp == 0); // TODO @kiwec: wrong?
+		scoreEntry.highlight = (slot->player_id == bancho.user_id);
 		scoreEntries.push_back(std::move(scoreEntry));
-	}
+    }
 
 	drawScoreBoardInt(g, scoreEntries);
 }
@@ -2130,7 +2144,7 @@ void OsuHUD::drawScoreBoardInt(Graphics *g, const std::vector<OsuHUD::SCORE_ENTR
 		g->popTransform();
 
 		// draw accuracy
-		if (m_osu->isInMultiplayer() && (!m_osu->isInPlayMode() || bancho.win_condition == ACCURACY))
+		if (m_osu->isInMultiplayer() && bancho.room.win_condition == ACCURACY)
 		{
 			const float accScale = comboScale;
 			g->pushTransform();

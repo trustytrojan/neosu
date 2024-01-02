@@ -7,12 +7,12 @@ class Osu;
 
 struct Bancho {
   Osu *osu = nullptr;
-  uint32_t user_id = 0;
+  int32_t user_id = 0;
   UString username;
+  Room room;
 
-  // Multiplayer rooms
-  uint32_t match_id = 0;
-  WinCondition win_condition = SCOREV1;
+  bool is_online() { return user_id > 0; }
+  bool is_multiplayer() { return room.id > 0; }
 };
 
 struct Channel {

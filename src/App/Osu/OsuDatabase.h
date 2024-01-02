@@ -209,8 +209,8 @@ public:
 	PlayerStats calculatePlayerStats(UString playerName);
 	static float getWeightForIndex(int i);
 	static float getBonusPPForNumScores(int numScores);
-	unsigned long long getRequiredScoreForLevel(int level);
-	int getLevelForScore(unsigned long long score, int maxLevel = 120);
+	static unsigned long long getRequiredScoreForLevel(int level);
+	static int getLevelForScore(unsigned long long score, int maxLevel = 120);
 
 	inline float getProgress() const {return m_fLoadingProgress.load();}
 	inline bool isFinished() const {return (getProgress() >= 1.0f);}

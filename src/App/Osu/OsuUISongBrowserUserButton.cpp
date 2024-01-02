@@ -253,13 +253,22 @@ void OsuUISongBrowserUserButton::updateUserStats()
 
 	if(bancho.user_id > 0) {
 		UserInfo *my = get_user_info(bancho.user_id);
+
+		int level = OsuDatabase::getLevelForScore(my->total_score);
+		float percentToNextLevel = 1.f;
+		uint32_t score_for_current_level = OsuDatabase::getRequiredScoreForLevel(level);
+		uint32_t score_for_next_level = OsuDatabase::getRequiredScoreForLevel(level + 1);
+		if(score_for_next_level > score_for_current_level) {
+			percentToNextLevel = (my->total_score - score_for_current_level) / (score_for_next_level - score_for_current_level);
+		}
+
 		stats = OsuDatabase::PlayerStats{
 			.name = my->name,
 			.pp = (float)my->pp,
 			.accuracy = my->accuracy,
 			.numScoresWithPP = 0,
-			.level = 0, // TODO @kiwec
-			.percentToNextLevel = 0.f, // TODO @kiwec
+			.level = level,
+			.percentToNextLevel = percentToNextLevel,
 			.totalScore = (uint32_t)my->total_score,
 		};
 	}

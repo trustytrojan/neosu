@@ -3,11 +3,51 @@
 
 #include "BanchoProtocol.h"
 
-Room::~Room() {
-  if(name) delete name;
-  if(password) delete password;
-  if(map_name) delete map_name;
-  if(map_md5) delete map_md5;
+Room::Room() {
+  // 0-initialized room means we're not in multiplayer at the moment
+}
+
+Room::Room(Packet *packet) {
+  id = read_short(packet);
+  in_progress = read_byte(packet);
+  match_type = read_byte(packet);
+  mods = read_int(packet);
+  name = read_string(packet);
+  password = read_string(packet);
+  map_name = read_string(packet);
+  map_id = read_int(packet);
+  map_md5 = read_string(packet);
+
+  nb_players = 0;
+  for (int i = 0; i < 16; i++) {
+    slots[i].status = read_byte(packet);
+  }
+  for (int i = 0; i < 16; i++) {
+    slots[i].team = read_byte(packet);
+  }
+  for(int s = 0; s < 16; s++) {
+    if(!slots[s].is_locked()) {
+      nb_open_slots++;
+    }
+
+    if(slots[s].has_player()) {
+      slots[s].player_id = read_int(packet);
+      nb_players++;
+    }
+  }
+
+  host_id = read_int(packet);
+  mode = read_byte(packet);
+  win_condition = read_byte(packet);
+  team_type = read_byte(packet);
+  freemods = read_byte(packet);
+  if (freemods) {
+    for (int i = 0; i < 16; i++) {
+      slots[i].mods = read_int(packet);
+    }
+  }
+
+  seed = read_int(packet);
 }
 
 void read_bytes(Packet *packet, uint8_t *bytes, size_t n) {
@@ -63,74 +103,20 @@ float read_float(Packet *packet) {
   return f;
 }
 
-char *read_string(Packet *packet) {
+UString read_string(Packet *packet) {
   uint8_t empty_check = read_byte(packet);
   if (empty_check == 0)
     return strdup("");
 
-  // XXX: Don't return null-terminated string
   uint32_t len = read_uleb128(packet);
   uint8_t *str = new uint8_t[len + 1];
   read_bytes(packet, str, len);
   str[len] = '\0';
-  return (char *)str;
-}
 
-Room *read_room(Packet *packet) {
-  Room *room = new Room();
-  room->id = read_short(packet);
-  room->in_progress = read_byte(packet);
-  room->match_type = read_byte(packet);
-  room->mods = read_int(packet);
-  room->name = read_string(packet);
-  room->password = read_string(packet);
-  room->map_name = read_string(packet);
-  room->map_id = read_int(packet);
-  room->map_md5 = read_string(packet);
+  auto ustr = UString((const char*)str);
+  delete str;
 
-  room->nb_players = 0;
-  for (int i = 0; i < 16; i++) {
-    room->slots[i].status = read_byte(packet);
-  }
-  for (int i = 0; i < 16; i++) {
-    room->slots[i].team = read_byte(packet);
-  }
-  for(int s = 0; s < 16; s++) {
-    // open = 1
-    // locked = 2
-    // not_ready = 4
-    // ready = 8
-    // no_map = 16
-    // playing = 32
-    // complete = 64
-    // quit = 128
-
-    if(!(room->slots[s].status & 0b00000010)) {
-      room->nb_open_slots++;
-    }
-
-    // slot_has_player = not_ready | ready | no_map | playing | complete
-    bool slot_has_player = (room->slots[s].status & 0b01111100) != 0;
-    if(slot_has_player) {
-      room->slots[s].player_id = read_int(packet);
-      room->nb_players++;
-    }
-  }
-
-  room->host_id = read_int(packet);
-  room->mode = read_byte(packet);
-  room->win_condition = read_byte(packet);
-  room->team_type = read_byte(packet);
-  room->freemods = read_byte(packet);
-  if (room->freemods) {
-    for (int i = 0; i < 16; i++) {
-      room->slots[i].mods = read_int(packet);
-    }
-  }
-
-  room->seed = read_int(packet);
-
-  return room;
+  return ustr;
 }
 
 void write_bytes(Packet *packet, uint8_t *bytes, size_t n) {
