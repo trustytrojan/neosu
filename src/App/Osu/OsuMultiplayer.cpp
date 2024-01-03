@@ -71,19 +71,43 @@ void OsuMultiplayer::onClientStatusUpdate(bool missingBeatmap, bool waiting, boo
 	// TODO @kiwec: send status update packet
 }
 
-void OsuMultiplayer::onClientScoreChange(int combo, float accuracy, unsigned long long score, bool dead, bool reliable)
+void OsuMultiplayer::onClientScoreChange()
 {
-	// TODO @kiwec: send score change packet
+	if(!isInMultiplayer()) return;
+
+	Packet packet = {0};
+	packet.id = UPDATE_MATCH_SCORE;
+
+	write_int(&packet, (int32_t)m_osu->getSelectedBeatmap()->getTime());
+
+	uint8_t slot_id = 0;
+	for(uint8_t i = 0; i < 16; i++) {
+		if(bancho.room.slots[i].player_id == bancho.user_id) {
+			slot_id = i;
+			break;
+		}
+	}
+	write_byte(&packet, slot_id);
+
+	write_short(&packet, (uint16_t)m_osu->getScore()->getNum300s());
+	write_short(&packet, (uint16_t)m_osu->getScore()->getNum100s());
+	write_short(&packet, (uint16_t)m_osu->getScore()->getNum50s());
+	write_short(&packet, (uint16_t)m_osu->getScore()->getNum300gs());
+	write_short(&packet, (uint16_t)m_osu->getScore()->getNum100ks());
+	write_short(&packet, (uint16_t)m_osu->getScore()->getNumMisses());
+	write_int(&packet, (int32_t)m_osu->getScore()->getScore());
+	write_short(&packet, (uint16_t)m_osu->getScore()->getCombo());
+	write_short(&packet, (uint16_t)m_osu->getScore()->getComboMax());
+	write_byte(&packet, m_osu->getScore()->getNumSliderBreaks() == 0 && m_osu->getScore()->getNumMisses() == 0); // TODO @kiwec: is this correct?
+	write_byte(&packet, m_osu->getSelectedBeatmap()->getHealth() * 100); // TODO @kiwec: currently doing 0-100, might be 0-255
+	write_byte(&packet, 0); // 4P, not supported
+	write_byte(&packet, m_osu->getModScorev2());
+	send_packet(packet);
 }
 
 bool OsuMultiplayer::onClientPlayStateChangeRequestBeatmap(OsuDatabaseBeatmap *beatmap)
 {
 	return false;
-}
-
-void OsuMultiplayer::onClientBeatmapDownloadRequest()
-{
-	// TODO @kiwec: start downloading beatmap
 }
 
 void OsuMultiplayer::setBeatmap(OsuDatabaseBeatmap *beatmap)

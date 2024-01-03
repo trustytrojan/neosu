@@ -629,8 +629,7 @@ unsigned long long OsuScore::getScore()
 
 void OsuScore::onScoreChange()
 {
-	if (m_osu->getMultiplayer() != NULL)
-		m_osu->getMultiplayer()->onClientScoreChange(getCombo(), getAccuracy(), getScore(), isDead());
+	m_osu->getMultiplayer()->onClientScoreChange();
 
 	// only used to block local scores for people who think they are very clever by quickly disabling auto just before the end of a beatmap
 	m_bIsUnranked |= (m_osu->getModAuto() || (m_osu->getModAutopilot() && m_osu->getModRelax()));

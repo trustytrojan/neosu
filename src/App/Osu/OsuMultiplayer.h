@@ -25,9 +25,8 @@ public:
 
 	// clientside game events
 	void onClientStatusUpdate(bool missingBeatmap, bool waiting = true, bool downloadingBeatmap = false);
-	void onClientScoreChange(int combo, float accuracy, unsigned long long score, bool dead, bool reliable = false);
+	void onClientScoreChange();
 	bool onClientPlayStateChangeRequestBeatmap(OsuDatabaseBeatmap *beatmap);
-	void onClientBeatmapDownloadRequest();
 
 	// tourney events
 	void setBeatmap(OsuDatabaseBeatmap *beatmap);

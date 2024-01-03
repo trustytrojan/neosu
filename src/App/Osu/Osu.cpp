@@ -1870,9 +1870,11 @@ void Osu::onPlayEnd(bool quit)
 		{
 			if (isInMultiplayer())
 			{
-				// score packets while playing are sent unreliably, but at the end we want to have reliably synced values across all players
-				// also, at the end, we display the maximum achieved combo instead of the current one
-				m_multiplayer->onClientScoreChange(m_score->getComboMax(), m_score->getAccuracy(), m_score->getScore(), m_score->isDead(), true);
+				m_multiplayer->onClientScoreChange();
+
+				Packet packet = {0};
+				packet.id = FINISH_MATCH;
+				send_packet(packet);
 			}
 
 			m_rankingScreen->setScore(m_score);
