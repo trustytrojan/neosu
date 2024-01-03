@@ -24,7 +24,6 @@ public:
 	void update();
 
 	// clientside game events
-	void onClientStatusUpdate(bool missingBeatmap, bool waiting = true, bool downloadingBeatmap = false);
 	void onClientScoreChange();
 	bool onClientPlayStateChangeRequestBeatmap(OsuDatabaseBeatmap *beatmap);
 
@@ -32,15 +31,7 @@ public:
 	void setBeatmap(OsuDatabaseBeatmap *beatmap);
 	void setBeatmap(std::string md5hash);
 
-	bool isInMultiplayer();
-
-	bool isMissingBeatmap(); // are we missing the serverside beatmap
 	bool isWaitingForPlayers();	// are we waiting for any player
-	bool isWaitingForClient();	// is the waiting state set for the local player
-
-	inline bool isDownloadingBeatmap() const {return false;} // TODO @kiwec
-
-	float getDownloadBeatmapPercentage() const;
 
 private:
 	struct BeatmapDownloadState

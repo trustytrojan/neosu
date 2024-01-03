@@ -15,6 +15,9 @@
 #include "Mouse.h"
 #include "ConVar.h"
 
+#include "Bancho.h"
+#include "BanchoProtocol.h"
+#include "BanchoNetworking.h"
 #include "Osu.h"
 #include "OsuVR.h"
 #include "OsuMultiplayer.h"
@@ -200,7 +203,7 @@ void OsuBeatmapStandard::draw(Graphics *g)
 		}
 		g->popTransform();
 	}
-	else if (m_osu->isInMultiplayer() && m_osu->getMultiplayer()->isWaitingForPlayers())
+	else if (bancho.is_playing_a_multi_map() && m_osu->getMultiplayer()->isWaitingForPlayers())
 	{
 		if (!m_bIsPreLoading && !isLoadingStarCache()) // usability
 		{
@@ -766,12 +769,17 @@ void OsuBeatmapStandard::update()
 	}
 
 	// notify all other players (including ourself) once we've finished loading
-	if (m_osu->isInMultiplayer())
+	if (bancho.is_playing_a_multi_map())
 	{
 		if (!isLoadingInt()) // if local loading has finished
 		{
-			if (m_osu->getMultiplayer()->isWaitingForClient()) // if we are still in the waiting state
-				m_osu->getMultiplayer()->onClientStatusUpdate(false, false);
+			if(!bancho.room.player_loaded) {
+				bancho.room.player_loaded = true;
+
+				Packet packet = {0};
+				packet.id = MATCH_LOAD_COMPLETE;
+				send_packet(packet);
+			}
 		}
 	}
 
@@ -913,7 +921,7 @@ void OsuBeatmapStandard::onModUpdate(bool rebuildSliderVertexBuffers, bool recom
 
 bool OsuBeatmapStandard::isLoading()
 {
-	return (isLoadingInt() || (m_osu->isInMultiplayer() && m_osu->getMultiplayer()->isWaitingForPlayers()));
+	return (isLoadingInt() || (bancho.is_playing_a_multi_map() && m_osu->getMultiplayer()->isWaitingForPlayers()));
 }
 
 Vector2 OsuBeatmapStandard::pixels2OsuCoords(Vector2 pixelCoords) const

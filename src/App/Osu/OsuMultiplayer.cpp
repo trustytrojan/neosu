@@ -6,13 +6,12 @@
 //===============================================================================//
 
 // Let's commit the full TODO list, why not?
-// TODO @kiwec: make OsuRoom
+// TODO @kiwec: test OsuRoom
 // TODO @kiwec: logout on quit. needs a rework of the networking logic. disconnect != logout
 // TODO @kiwec: show loading while logging in
 // TODO @kiwec: add "personal best" in online score list
 // TODO @kiwec: hardcode server list with capabilities (eg, does the server allow score submission)
 //              or, fetch it when starting the game, just like it checks for updates
-// TODO @kiwec: send X-McOsu-Version header when logging in
 // TODO @kiwec: enable/disable some features based on what headers the servers sends back on login
 // TODO @kiwec: fetch avatars and display in leaderboards, score browser, lobby list, etc
 // TODO @kiwec: once logged in, gray out user/pw/server fields and switch log in button to log out button
@@ -66,14 +65,9 @@ void OsuMultiplayer::update() {
 	receive_bancho_packets();
 }
 
-void OsuMultiplayer::onClientStatusUpdate(bool missingBeatmap, bool waiting, bool downloadingBeatmap)
-{
-	// TODO @kiwec: send status update packet
-}
-
 void OsuMultiplayer::onClientScoreChange()
 {
-	if(!isInMultiplayer()) return;
+	if(!bancho.is_playing_a_multi_map()) return;
 
 	Packet packet = {0};
 	packet.id = UPDATE_MATCH_SCORE;
@@ -123,37 +117,12 @@ void OsuMultiplayer::setBeatmap(std::string md5hash)
 	// TODO @kiwec
 }
 
-bool OsuMultiplayer::isInMultiplayer()
-{
-	return bancho.room.id > 0;
-}
-
-bool OsuMultiplayer::isMissingBeatmap()
-{
-	// TODO @kiwec
-	return true;
-}
-
 bool OsuMultiplayer::isWaitingForPlayers() {
 	return !bancho.room.all_players_loaded;
 }
 
-bool OsuMultiplayer::isWaitingForClient()
-{
-	// TODO @kiwec
-	return true;
-}
-
-float OsuMultiplayer::getDownloadBeatmapPercentage() const
-{
-	return 0.f; // TODO @kiwec
-}
-
 void OsuMultiplayer::onBeatmapDownloadFinished(const BeatmapDownloadState &dl)
 {
-	// update client state to no-longer-downloading
-	onClientStatusUpdate(true, true, false);
-
 	// TODO: validate inputs
 
 	// create folder structure

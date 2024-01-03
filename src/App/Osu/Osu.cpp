@@ -73,7 +73,7 @@
 
 // release configuration
 bool Osu::autoUpdater = false;
-ConVar osu_version("osu_version", 33.07f);
+ConVar osu_version("osu_version", 34.00f);
 #ifdef MCENGINE_FEATURE_OPENVR
 ConVar osu_release_stream("osu_release_stream", "vr");
 #else
@@ -539,6 +539,13 @@ Osu::Osu(Osu2 *osu2, int instanceID)
 
 	m_updateHandler->checkForUpdates();
 
+    if(!env->directoryExists(MCENGINE_DATA_DIR "avatars")) {
+        env->createDirectory(MCENGINE_DATA_DIR "avatars");
+    }
+    if(!env->directoryExists(MCENGINE_DATA_DIR "maps")) {
+        env->createDirectory(MCENGINE_DATA_DIR "maps");
+    }
+
 	// Init online functionality (multiplayer/leaderboards/etc)
 	init_networking_thread();
 	if(osu_password.getString().length() == 0) {
@@ -897,7 +904,7 @@ void Osu::update()
 		// scrubbing/seeking
 		if (m_bSeekKey)
 		{
-			if (!isInMultiplayer())
+			if (!bancho.is_playing_a_multi_map())
 			{
 				m_bSeeking = true;
 				const float mousePosX = (int)engine->getMouse()->getPos().x;
@@ -963,7 +970,7 @@ void Osu::update()
 
 			if (getSelectedBeatmap()->isInSkippableSection() && !getSelectedBeatmap()->isPaused() && !isLoading)
 			{
-				if (!isInMultiplayer())
+				if (!bancho.is_playing_a_multi_map())
 				{
 					if ((osu_skip_intro_enabled.getBool() && getSelectedBeatmap()->getHitObjectIndexForCurrentTime() < 1) || (osu_skip_breaks_enabled.getBool() && getSelectedBeatmap()->getHitObjectIndexForCurrentTime() > 0))
 					{
@@ -981,7 +988,7 @@ void Osu::update()
 		{
 			m_fQuickRetryTime = 0.0f;
 
-			if (!isInMultiplayer())
+			if (!bancho.is_playing_a_multi_map())
 			{
 				getSelectedBeatmap()->restart(true);
 				getSelectedBeatmap()->update();
@@ -1419,7 +1426,7 @@ void Osu::onKeyDown(KeyboardEvent &key)
 			}
 
 			// quick save/load
-			if (!isInMultiplayer())
+			if (!bancho.is_playing_a_multi_map())
 			{
 				if (key == (KEYCODE)OsuKeyBindings::QUICK_SAVE.getInt())
 					m_fQuickSaveTime = getSelectedBeatmap()->getPercentFinished();
@@ -1435,7 +1442,7 @@ void Osu::onKeyDown(KeyboardEvent &key)
 			}
 
 			// quick seek
-			if (!isInMultiplayer())
+			if (!bancho.is_playing_a_multi_map())
 			{
 				const bool backward = (key == (KEYCODE)OsuKeyBindings::SEEK_TIME_BACKWARD.getInt());
 				const bool forward = (key == (KEYCODE)OsuKeyBindings::SEEK_TIME_FORWARD.getInt());
@@ -1506,7 +1513,7 @@ void Osu::onKeyDown(KeyboardEvent &key)
 			// toggle pause menu
 			if ((key == (KEYCODE)OsuKeyBindings::GAME_PAUSE.getInt() || key == KEY_ESCAPE) && !m_bEscape)
 			{
-				if (!isInMultiplayer() || m_iMultiplayerClientNumEscPresses > 1)
+				if (!bancho.is_playing_a_multi_map() || m_iMultiplayerClientNumEscPresses > 1)
 				{
 					if (m_iMultiplayerClientNumEscPresses > 1)
 					{
@@ -1868,8 +1875,10 @@ void Osu::onPlayEnd(bool quit)
 	{
 		if (!osu_mod_endless.getBool())
 		{
-			if (isInMultiplayer())
+			if (bancho.is_playing_a_multi_map())
 			{
+				// TODO @kiwec: we should not be sending this here, but instead send it earlier,
+				//              and wait for all players to finish before we switch to the score screen
 				m_multiplayer->onClientScoreChange();
 
 				Packet packet = {0};
@@ -2033,11 +2042,6 @@ bool Osu::isNotInPlayModeOrPaused()
 bool Osu::isInVRMode()
 {
 	return (osu_vr.getBool() && openvr->isReady());
-}
-
-bool Osu::isInMultiplayer()
-{
-	return m_multiplayer->isInMultiplayer();
 }
 
 bool Osu::shouldFallBackToLegacySliderRenderer()
@@ -2280,7 +2284,7 @@ void Osu::onFocusLost()
 {
 	if (isInPlayMode() && !getSelectedBeatmap()->isPaused() && osu_pause_on_focus_loss.getBool())
 	{
-		if (!isInMultiplayer())
+		if (!bancho.is_playing_a_multi_map())
 		{
 			getSelectedBeatmap()->pause(false);
 			m_pauseMenu->setVisible(true);

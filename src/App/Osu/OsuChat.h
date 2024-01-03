@@ -10,6 +10,7 @@
 // TODO @kiwec: do something when username is clicked
 // TODO @kiwec: limit to 100 messages / channel
 // TODO @kiwec: optimize
+// TODO @kiwec: add a button to join channels. see "chat_channels" in Bancho.cpp
 
 // TODO @kiwec: Add channel connection info like osu!stable does
 // Eg. use #osu as main (closeable) channel, always add it when logging it

@@ -22,8 +22,6 @@
 
 
 Bancho bancho;
-
-// TODO @kiwec: display these as joinable channels somewhere
 std::unordered_map<std::string, Channel*> chat_channels;
 
 void update_channel(UString name, UString topic, int32_t nb_members) {
@@ -80,6 +78,12 @@ void handle_packet(Packet *packet) {
     bancho.user_id = read_int(packet);
     if(bancho.user_id > 0) {
       debugLog("Logged in as user #%d.\n", bancho.user_id);
+
+      auto avatar_dir = UString::format(MCENGINE_DATA_DIR "avatars/%s", bancho.endpoint.toUtf8());
+      if(!env->directoryExists(avatar_dir)) {
+        env->createDirectory(avatar_dir);
+      }
+
     } else {
       debugLog("Failed to log in, server returned code %d.\n", bancho.user_id);
       // TODO @kiwec: also display error string returned in cho-token header
@@ -133,14 +137,15 @@ void handle_packet(Packet *packet) {
     debugLog("Spectator left: user id %d\n", spectator_id);
     // TODO @kiwec: update spectators
   } else if (packet->id == VERSION_UPDATE) {
-    // TODO @kiwec: (nothing to do?)
+    disconnect();
+    bancho.osu->getNotificationOverlay()->addNotification(
+        "Server uses an unsupported protocol version.");
   } else if (packet->id == SPECTATOR_CANT_SPECTATE) {
     int32_t spectator_id = read_int(packet);
     debugLog("Spectator can't spectate: user id %d\n", spectator_id);
     // TODO @kiwec: update spectators ("doesn't have map" list)
   } else if (packet->id == GET_ATTENTION) {
-    debugLog("ATTENTION!!!! (is this for flashing taskbar?)\n");
-    // TODO @kiwec: find out when this is called (prob when multi starts?)
+    // TODO @kiwec: force window focus, or flash icon in taskbar
   } else if (packet->id == NOTIFICATION) {
     UString notification = read_string(packet);
     bancho.osu->getNotificationOverlay()->addNotification(notification);
@@ -213,9 +218,8 @@ void handle_packet(Packet *packet) {
     int32_t nb_members = read_int(packet);
     update_channel(channel_name, channel_topic, nb_members);
   } else if (packet->id == PRIVILEGES) {
-    int privileges = read_int(packet);
-    debugLog("Privileges: %d\n", privileges);
-    // TODO @kiwec: do something with this?
+    read_int(packet);
+    // (nothing to do)
   } else if (packet->id == PROTOCOL_VERSION) {
     int protocol_version = read_int(packet);
     if (protocol_version != 19) {

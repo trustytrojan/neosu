@@ -17,6 +17,7 @@
 #include "Timer.h"
 #include "ConVar.h"
 
+#include "Bancho.h"
 #include "Osu.h"
 #include "OsuChat.h"
 #include "OsuVR.h"
@@ -1481,7 +1482,7 @@ void OsuBeatmap::pause(bool quitIfWaiting)
 	if (m_selectedDifficulty2 == NULL) return;
 
 	const bool isFirstPause = !m_bContinueScheduled;
-	const bool forceContinueWithoutSchedule = m_osu->isInMultiplayer();
+	const bool forceContinueWithoutSchedule = bancho.is_playing_a_multi_map();
 
 	// NOTE: this assumes that no beatmap ever goes far beyond the end of the music
 	// NOTE: if pure virtual audio time is ever supported (playing without SoundEngine) then this needs to be adapted
@@ -1592,7 +1593,7 @@ void OsuBeatmap::fail()
 {
 	if (m_bFailed) return;
 
-	if (!m_osu->isInMultiplayer() && osu_drain_kill.getBool())
+	if (!bancho.is_playing_a_multi_map() && osu_drain_kill.getBool())
 	{
 		engine->getSound()->play(getSkin()->getFailsound());
 

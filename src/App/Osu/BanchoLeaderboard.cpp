@@ -11,8 +11,6 @@
 #include "OsuDatabase.h"
 #include "OsuSongBrowser2.h"
 
-// TODO @kiwec: some sort of cache
-
 OsuDatabase::Score parse_score(char *score_line) {
   OsuDatabase::Score score = {0};
   score.isLegacyScore = true;

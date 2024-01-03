@@ -355,8 +355,8 @@ void OsuHUD::draw(Graphics *g)
 
 		if (osu_draw_scoreboard.getBool())
 		{
-			if (m_osu->isInMultiplayer())
-				drawScoreBoardMP(g);
+			if (bancho.is_playing_a_multi_map())
+				drawScoreBoardMP(g); // TODO @kiwec: also draw scoreboard on result screen
 			else if (beatmap->getSelectedDifficulty2() != NULL)
 				drawScoreBoard(g, (std::string&)beatmap->getSelectedDifficulty2()->getMD5Hash(), m_osu->getScore());
 		}
@@ -710,8 +710,8 @@ void OsuHUD::drawVR(Graphics *g, Matrix4 &mvp, OsuVR *vr)
 
 			if (osu_draw_scoreboard.getBool())
 			{
-				if (m_osu->isInMultiplayer())
-					drawScoreBoardMP(g);
+				if (bancho.is_playing_a_multi_map())
+					drawScoreBoardMP(g); // TODO @kiwec: don't allow VR multiplayer?
 				else if (beatmap->getSelectedDifficulty2() != NULL)
 					drawScoreBoard(g, (std::string&)beatmap->getSelectedDifficulty2()->getMD5Hash(), m_osu->getScore());
 			}
@@ -2144,7 +2144,7 @@ void OsuHUD::drawScoreBoardInt(Graphics *g, const std::vector<OsuHUD::SCORE_ENTR
 		g->popTransform();
 
 		// draw accuracy
-		if (m_osu->isInMultiplayer() && bancho.room.win_condition == ACCURACY)
+		if (bancho.is_playing_a_multi_map() && bancho.room.win_condition == ACCURACY)
 		{
 			const float accScale = comboScale;
 			g->pushTransform();

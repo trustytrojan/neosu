@@ -20,6 +20,8 @@ pthread_t networking_thread;
 // TODO @kiwec: improve the way the client logs in and manages logged in state
 // Right now if log in fails or expires, things explode
 
+// TODO @kiwec: we should be able to cancel pending API requests, eg for leaderboards
+
 // Bancho protocol
 pthread_mutex_t outgoing_mutex = PTHREAD_MUTEX_INITIALIZER;
 bool try_logging_in = false;
@@ -68,6 +70,7 @@ void reconnect() {
     return;
 
   bancho.username = user;
+  bancho.endpoint = convar->getConVarByName("osu_server")->getString();
   Packet new_login_packet = build_login_packet((char *)user.toUtf8(), (char *)pw.toUtf8());
 
   pthread_mutex_lock(&outgoing_mutex);
@@ -103,15 +106,10 @@ static void send_api_request(CURL *curl, APIRequest api_out) {
   response.extra = api_out.extra;
   response.memory = new uint8_t[2048];
 
-  // TODO @kiwec: convar not thread safe
-  UString cv_endpoint =
-      convar->getConVarByName("osu_server")
-          ->getString(); // have to keep UString in scope to use toUtf8()
-  std::string query_url =
-      "https://osu." + std::string(cv_endpoint.toUtf8()) + api_out.path;
-  debugLog("Sending request: %s\n", query_url.c_str());
+  auto query_url = UString::format("https://osu.%s%s", bancho.endpoint.toUtf8(), api_out.path.c_str());
+  debugLog("Sending request: %s\n", query_url.toUtf8());
 
-  curl_easy_setopt(curl, CURLOPT_URL, query_url.c_str());
+  curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
 
@@ -132,16 +130,12 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
   struct curl_slist *chunk = NULL;
   if (!auth_header.empty()) {
     chunk = curl_slist_append(chunk, auth_header.c_str());
+    chunk = curl_slist_append(chunk, "x-mcosu-ver: " MCOSU_VERSION);
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
   }
 
-  // TODO @kiwec: convar not thread safe
-  UString cv_endpoint =
-      convar->getConVarByName("osu_server")
-          ->getString(); // have to keep UString in scope to use toUtf8()
-  std::string query_url =
-      "https://c." + std::string(cv_endpoint.toUtf8()) + "/";
-  curl_easy_setopt(curl, CURLOPT_URL, query_url.c_str());
+  auto query_url = UString::format("https://c.%s/", bancho.endpoint.toUtf8());
+  curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
   curl_easy_setopt(curl, CURLOPT_POSTFIELDS, outgoing.memory);
   curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, outgoing.pos);
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
@@ -154,7 +148,7 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
   if (res != CURLE_OK) {
     // TODO @kiwec: if log in packet, display error to user
     debugLog("Failed to send packet, cURL error %d\n%s\n", res,
-             query_url.c_str());
+             query_url.toUtf8());
     goto end;
   }
 

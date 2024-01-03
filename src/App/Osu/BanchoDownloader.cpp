@@ -203,9 +203,6 @@ BeatmapDownloadStatus download_mapset(uint32_t set_id) {
     }
 
     // Check if we already have downloaded it
-    if(!env->directoryExists(MCENGINE_DATA_DIR "maps")) {
-        env->createDirectory(MCENGINE_DATA_DIR "maps");
-    }
     auto map_dir = UString::format(MCENGINE_DATA_DIR "maps/%d", set_id);
     if(env->directoryExists(map_dir)) {
         status.progress = 1.f;

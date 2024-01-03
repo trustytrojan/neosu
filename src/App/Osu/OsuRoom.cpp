@@ -193,6 +193,7 @@ void OsuRoom::on_map_change() {
 
 void OsuRoom::on_room_joined(Room room) {
     bancho.room = room;
+    on_map_change();
 
     // Currently we can only join rooms from the lobby.
     // If we add ability to join from links, you would need to hide all other
@@ -209,7 +210,11 @@ void OsuRoom::on_room_joined(Room room) {
 void OsuRoom::on_room_updated(Room room) {
     // TODO @kiwec: don't update the room while we're playing? or at least not the slots?
     //              need to check if server sends those while we're playing first
+    bool map_changed = bancho.room.map_id != room.map_id;
     bancho.room = room;
+    if(map_changed) {
+        on_map_change();
+    }
 
     // TODO @kiwec
 
@@ -218,10 +223,15 @@ void OsuRoom::on_room_updated(Room room) {
 
 void OsuRoom::on_match_started(Room room) {
     bancho.room = room;
+    if(m_beatmap == nullptr || room.map_id != m_beatmap->getID()) {
+        debugLog("We received MATCH_STARTED without being ready, wtf!\n");
+        return;
+    }
 
-    // OsuRichPresence::setBanchoStatus(m_osu, /* TODO map name */, MULTIPLAYER);
+    auto map_name = UString::format("%s [%s]", m_beatmap->getTitle(), m_beatmap->getDifficultyName());
+    OsuRichPresence::setBanchoStatus(m_osu, map_name.toUtf8(), MULTIPLAYER);
 
-    // TODO @kiwec
+    // TODO @kiwec: display beatmap, then send MATCH_LOAD_COMPLETE, then wait for all players loaded
 }
 
 void OsuRoom::on_match_score_updated(Packet* packet) {
@@ -259,6 +269,7 @@ void OsuRoom::on_player_failed(int32_t slot_id) {
 }
 
 void OsuRoom::on_match_finished() {
+    // This is called when the SERVER tells us the match is over. That only happens once every player has finished.
     // TODO @kiwec
 }
 
