@@ -161,6 +161,7 @@ Osu::Osu(Osu2 *osu2, int instanceID)
 	m_osu_folder_sub_skins_ref = convar->getConVarByName("osu_folder_sub_skins");
 	m_osu_draw_hud_ref = convar->getConVarByName("osu_draw_hud");
 	m_osu_draw_scoreboard = convar->getConVarByName("osu_draw_scoreboard");
+	m_osu_draw_scoreboard_mp = convar->getConVarByName("osu_draw_scoreboard_mp");
 	m_osu_draw_cursor_ripples_ref = convar->getConVarByName("osu_draw_cursor_ripples");
 	m_osu_mod_fps_ref = convar->getConVarByName("osu_mod_fps");
 	m_osu_mod_minimize_ref = convar->getConVarByName("osu_mod_minimize");
@@ -1409,8 +1410,13 @@ void Osu::onKeyDown(KeyboardEvent &key)
 				}
 				else
 				{
-					m_osu_draw_scoreboard->setValue(!m_osu_draw_scoreboard->getBool());
-					m_notificationOverlay->addNotification(m_osu_draw_scoreboard->getBool() ? "Scoreboard is shown." : "Scoreboard is hidden.", 0xffffffff, false, 0.1f);
+					if(bancho.is_playing_a_multi_map()) {
+						m_osu_draw_scoreboard_mp->setValue(!m_osu_draw_scoreboard_mp->getBool());
+						m_notificationOverlay->addNotification(m_osu_draw_scoreboard_mp->getBool() ? "Scoreboard is shown." : "Scoreboard is hidden.", 0xffffffff, false, 0.1f);
+					} else {
+						m_osu_draw_scoreboard->setValue(!m_osu_draw_scoreboard->getBool());
+						m_notificationOverlay->addNotification(m_osu_draw_scoreboard->getBool() ? "Scoreboard is shown." : "Scoreboard is hidden.", 0xffffffff, false, 0.1f);
+					}
 
 					key.consume();
 				}

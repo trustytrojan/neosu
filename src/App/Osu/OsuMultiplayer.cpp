@@ -16,7 +16,6 @@
 // TODO @kiwec: fetch avatars and display in leaderboards, score browser, lobby list, etc
 // TODO @kiwec: once logged in, gray out user/pw/server fields and switch log in button to log out button
 // TODO @kiwec: comb over every single option, and every single convar and make sure no cheats are possible in multiplayer
-// TODO @kiwec: make separate convar for toggling scoreboard in mp (ppy client sucks for removing this!!!)
 // TODO @kiwec: reviving in multi is a mystery. how do the clients know when somebody revived? is it just health > 0?
 // TODO @kiwec: what's the flow for a match ending because all the players in a team died?
 // TODO @kiwec: make webpage for https://mcosu.kiwec.net/

@@ -1055,7 +1055,8 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu)
 	addCheckbox("Draw HitErrorBar UR", "Unstable Rate", convar->getConVarByName("osu_draw_hiterrorbar_ur"));
 	addCheckbox("Draw ScoreBar", "Health/HP Bar.", convar->getConVarByName("osu_draw_scorebar"));
 	addCheckbox("Draw ScoreBar-bg", "Some skins abuse this as the playfield background image.\nIt is actually just the background image for the Health/HP Bar.", convar->getConVarByName("osu_draw_scorebarbg"));
-	addCheckbox("Draw ScoreBoard", convar->getConVarByName("osu_draw_scoreboard"));
+	addCheckbox("Draw ScoreBoard in singleplayer", convar->getConVarByName("osu_draw_scoreboard"));
+	addCheckbox("Draw ScoreBoard in multiplayer", convar->getConVarByName("osu_draw_scoreboard_mp"));
 	addCheckbox("Draw Key Overlay", convar->getConVarByName("osu_draw_inputoverlay"));
 	addCheckbox("Draw Scrubbing Timeline", convar->getConVarByName("osu_draw_scrubbing_timeline"));
 	addCheckbox("Draw Miss Window on HitErrorBar", convar->getConVarByName("osu_hud_hiterrorbar_showmisswindow"));

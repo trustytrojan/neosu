@@ -206,6 +206,7 @@ ConVar osu_draw_scrubbing_timeline_breaks("osu_draw_scrubbing_timeline_breaks", 
 ConVar osu_draw_scrubbing_timeline_strain_graph("osu_draw_scrubbing_timeline_strain_graph", false);
 ConVar osu_draw_continue("osu_draw_continue", true);
 ConVar osu_draw_scoreboard("osu_draw_scoreboard", true);
+ConVar osu_draw_scoreboard_mp("osu_draw_scoreboard_mp", true);
 ConVar osu_draw_inputoverlay("osu_draw_inputoverlay", true);
 
 ConVar osu_draw_statistics_misses("osu_draw_statistics_misses", false);
@@ -353,13 +354,12 @@ void OsuHUD::draw(Graphics *g)
 				drawInputOverlay(g, m_osu->getScore()->getKeyCount(1), m_osu->getScore()->getKeyCount(2), m_osu->getScore()->getKeyCount(3), m_osu->getScore()->getKeyCount(4));
 		}
 
-		if (osu_draw_scoreboard.getBool())
-		{
-			if (bancho.is_playing_a_multi_map())
-				drawScoreBoardMP(g); // TODO @kiwec: also draw scoreboard on result screen
-			else if (beatmap->getSelectedDifficulty2() != NULL)
-				drawScoreBoard(g, (std::string&)beatmap->getSelectedDifficulty2()->getMD5Hash(), m_osu->getScore());
-		}
+        if(osu_draw_scoreboard.getBool() && !bancho.is_playing_a_multi_map() && beatmap->getSelectedDifficulty2() != NULL) {
+			drawScoreBoard(g, (std::string&)beatmap->getSelectedDifficulty2()->getMD5Hash(), m_osu->getScore());
+        }
+        if(osu_draw_scoreboard_mp.getBool() && bancho.is_playing_a_multi_map()) {
+			drawScoreBoardMP(g); // TODO @kiwec: also draw scoreboard on result screen
+        }
 
 		if (!m_osu->isSkipScheduled() && beatmap->isInSkippableSection() && ((m_osu_skip_intro_enabled_ref->getBool() && beatmap->getHitObjectIndexForCurrentTime() < 1) || (m_osu_skip_breaks_enabled_ref->getBool() && beatmap->getHitObjectIndexForCurrentTime() > 0)))
 			drawSkip(g);
@@ -660,7 +660,7 @@ void OsuHUD::drawDummy(Graphics *g)
 	scoreEntry.downloadingBeatmap = false;
 	scoreEntry.dead = false;
 	scoreEntry.highlight = true;
-	if (osu_draw_scoreboard.getBool())
+	if ((osu_draw_scoreboard.getBool() && !bancho.is_playing_a_multi_map()) || (osu_draw_scoreboard_mp.getBool() && bancho.is_playing_a_multi_map()))
 	{
 		static std::vector<SCORE_ENTRY> scoreEntries;
 		scoreEntries.clear();
@@ -708,13 +708,12 @@ void OsuHUD::drawVR(Graphics *g, Matrix4 &mvp, OsuVR *vr)
 			if (osu_draw_scorebar.getBool())
 				drawHPBar(g, m_fHealth, osu_hud_scorebar_hide_during_breaks.getBool() ? (1.0f - beatmap->getBreakBackgroundFadeAnim()) : 1.0f, m_fScoreBarBreakAnim);
 
-			if (osu_draw_scoreboard.getBool())
-			{
-				if (bancho.is_playing_a_multi_map())
-					drawScoreBoardMP(g); // TODO @kiwec: don't allow VR multiplayer?
-				else if (beatmap->getSelectedDifficulty2() != NULL)
-					drawScoreBoard(g, (std::string&)beatmap->getSelectedDifficulty2()->getMD5Hash(), m_osu->getScore());
-			}
+            if(osu_draw_scoreboard.getBool() && !bancho.is_playing_a_multi_map()) {
+                drawScoreBoard(g, (std::string&)beatmap->getSelectedDifficulty2()->getMD5Hash(), m_osu->getScore());
+            }
+            if(osu_draw_scoreboard_mp.getBool() && bancho.is_playing_a_multi_map()) {
+                drawScoreBoardMP(g); // TODO @kiwec: don't allow VR multiplayer?
+            }
 
 			if (!m_osu->isSkipScheduled() && beatmap->isInSkippableSection() && ((m_osu_skip_intro_enabled_ref->getBool() && beatmap->getHitObjectIndexForCurrentTime() < 1) || (m_osu_skip_breaks_enabled_ref->getBool() && beatmap->getHitObjectIndexForCurrentTime() > 0)))
 				drawSkip(g);
@@ -788,7 +787,7 @@ void OsuHUD::drawVRDummy(Graphics *g, Matrix4 &mvp, OsuVR *vr)
 		scoreEntry.downloadingBeatmap = false;
 		scoreEntry.dead = false;
 		scoreEntry.highlight = true;
-		if (osu_draw_scoreboard.getBool())
+		if ((osu_draw_scoreboard.getBool() && !bancho.is_playing_a_multi_map()) || (osu_draw_scoreboard_mp.getBool() && bancho.is_playing_a_multi_map()))
 		{
 			static std::vector<SCORE_ENTRY> scoreEntries;
 			scoreEntries.clear();
