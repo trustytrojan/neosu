@@ -165,7 +165,6 @@ void OsuLobby::updateLayout(Vector2 newResolution) {
     // TODO @kiwec: display something when no rooms exist
     // TODO @kiwec: create room button
     // TODO @kiwec: back to main menu button
-    // TODO @kiwec: why scrolling goes back to origin?
 
     float y = 200;
     const float room_height = 105;
@@ -175,6 +174,8 @@ void OsuLobby::updateLayout(Vector2 newResolution) {
         m_list->getContainer()->addBaseUIElement(room_ui);
         y += room_height + 20;
     }
+
+    m_list->setScrollSizeToContent();
 }
 
 void OsuLobby::addRoom(Room* room) {
