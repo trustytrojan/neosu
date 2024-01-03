@@ -5,10 +5,11 @@
 
 // TODO @kiwec: Don't hardcode this
 // User agent sent when downloading beatmaps
-#define MCOSU_USER_AGENT "Mozilla/5.0 (compatible; McOsu/33.07; +https://mcosu.kiwec.net/)"
+#define MCOSU_USER_AGENT "Mozilla/5.0 (compatible; McOsu/34.00; +https://mcosu.kiwec.net/)"
 
 enum APIRequestType {
   GET_MAP_LEADERBOARD,
+  GET_BEATMAPSET_INFO,
 };
 
 struct APIRequest {
@@ -32,7 +33,3 @@ void receive_bancho_packets();
 
 // Initialize networking thread. Should be called once when starting McOsu.
 void init_networking_thread();
-
-// TODO @kiwec: map downloads on a separate thread
-// see https://curl.se/libcurl/c/CURLOPT_XFERINFOFUNCTION.html
-void download_beatmap(CURL* curl, uint32_t set_id);

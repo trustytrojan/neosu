@@ -20,6 +20,7 @@
 // TODO @kiwec: make separate convar for toggling scoreboard in mp (ppy client sucks for removing this!!!)
 // TODO @kiwec: reviving in multi is a mystery. how do the clients know when somebody revived? is it just health > 0?
 // TODO @kiwec: what's the flow for a match ending because all the players in a team died?
+// TODO @kiwec: make webpage for https://mcosu.kiwec.net/
 
 #include "Bancho.h"
 #include "BanchoNetworking.h"
@@ -43,8 +44,6 @@
 #include "OsuMainMenu.h"
 #include "OsuSongBrowser2.h"
 #include "OsuNotificationOverlay.h"
-
-#include "OsuUISongBrowserInfoLabel.h"
 
 unsigned long long OsuMultiplayer::sortHackCounter = 0;
 
@@ -111,10 +110,8 @@ bool OsuMultiplayer::isMissingBeatmap()
 	return true;
 }
 
-bool OsuMultiplayer::isWaitingForPlayers()
-{
-	// TODO @kiwec
-	return true;
+bool OsuMultiplayer::isWaitingForPlayers() {
+	return !bancho.room.all_players_loaded;
 }
 
 bool OsuMultiplayer::isWaitingForClient()

@@ -51,8 +51,6 @@ public:
 	long getBeatmapID() const {return m_iBeatmapId;}
 
 private:
-	virtual void onClicked();
-
 	UString buildTitleString();
 	UString buildSubTitleString();
 	UString buildSongInfoString();

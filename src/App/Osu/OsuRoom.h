@@ -3,6 +3,9 @@
 #include "CBaseUIScrollView.h"
 #include "OsuScreen.h"
 
+class CBaseUILabel;
+class OsuDatabaseBeatmap;
+
 struct OsuRoom : public OsuScreen {
     OsuRoom(Osu *osu);
 
@@ -14,6 +17,8 @@ struct OsuRoom : public OsuScreen {
 
     void updateLayout(Vector2 newResolution);
 
+    static void process_beatmapset_info_response(Packet packet);
+    void on_map_change();
     void on_room_joined(Room room);
     void on_room_updated(Room room);
     void on_match_started(Room room);
@@ -25,7 +30,13 @@ struct OsuRoom : public OsuScreen {
     void on_player_skip(int32_t user_id);
     void on_match_aborted();
 
-    CBaseUIContainer *m_container;
-    CBaseUIScrollView *m_slotlist;
-    McFont* font;
+    uint32_t downloading_set_id = 0;
+
+    OsuDatabaseBeatmap* m_beatmap = nullptr;
+    CBaseUIContainer *m_container = nullptr;
+    CBaseUIScrollView *m_slotlist = nullptr;
+    CBaseUIScrollView *m_map = nullptr;
+    CBaseUILabel *m_map_title = nullptr;
+    CBaseUILabel *m_map_extra = nullptr;
+    McFont* font = nullptr;
 };

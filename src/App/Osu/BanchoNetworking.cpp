@@ -8,6 +8,7 @@
 #include "BanchoProtocol.h"
 #include "ConVar.h"
 #include "Engine.h"
+#include "OsuRoom.h"
 
 #ifdef MCENGINE_FEATURE_PTHREADS
 #include <curl/curl.h>
@@ -207,9 +208,6 @@ static void *do_networking(void *data) {
     return NULL;
   }
 
-  // download_beatmap(curl, 2050081);
-  download_beatmap(curl, 18980); // it has subfolder, i wanna test
-
   while (true) {
     pthread_mutex_lock(&api_requests_mutex);
     if (api_request_queue.empty()) {
@@ -282,6 +280,8 @@ static void handle_api_response(Packet packet) {
 
   if (packet.id == GET_MAP_LEADERBOARD) {
     process_leaderboard_response(packet);
+  } else if(packet.id == GET_BEATMAPSET_INFO) {
+    OsuRoom::process_beatmapset_info_response(packet);
   } else {
     // NOTE: API Response type is same as API Request type
     debugLog("No handler for API response type %d!\n", packet.id);
@@ -366,102 +366,4 @@ void init_networking_thread() {
              ret);
   }
 #endif
-}
-
-void download_beatmap(CURL *curl, uint32_t set_id) {
-  // TODO @kiwec: make multithreaded (lol)
-  // TODO @kiwec: Support multiple beatmap mirrors, pick randomly, retry with another if it fails
-
-  if(!env->directoryExists(MCENGINE_DATA_DIR "maps")) {
-    env->createDirectory(MCENGINE_DATA_DIR "maps");
-  }
-
-  auto extract_to = UString::format(MCENGINE_DATA_DIR "maps/%d", set_id);
-  if(env->directoryExists(extract_to)) {
-    // TODO @kiwec: return immediately, we already downloaded the map!
-    debugLog("%s already exists\n", extract_to.toUtf8());
-  } else {
-    env->createDirectory(extract_to);
-    debugLog("Creating %s\n", extract_to.toUtf8());
-  }
-
-  Packet response = {0};
-  response.memory = new uint8_t[2048];
-
-  std::string query_url = "https://api.osu.direct/d/" + std::to_string(set_id);
-  debugLog("Downloading beatmap %s\n", query_url.c_str());
-  curl_easy_setopt(curl, CURLOPT_URL, query_url.c_str());
-  curl_easy_setopt(curl, CURLOPT_USERAGENT, MCOSU_USER_AGENT);
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
-
-  // TODO @kiwec: get progress information
-  curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
-
-  CURLcode res = curl_easy_perform(curl);
-  if(res != CURLE_OK) {
-    // TODO @kiwec: handle error
-    debugLog("Failed to download beatmap: %s\n", curl_easy_strerror(res));
-    return;
-  }
-
-  curl_easy_reset(curl);
-
-  debugLog("Unzipping beatmapset %d (%d bytes)\n", set_id, response.size);
-  mz_zip_archive zip = {0};
-  if (!mz_zip_reader_init_mem(&zip, response.memory, response.size, 0)) {
-    // TODO @kiwec: handle error
-    debugLog("Failed to open .osz file\n");
-    return;
-  }
-
-  mz_uint num_files = mz_zip_reader_get_num_files(&zip);
-  if (num_files <= 0) {
-    // TODO @kiwec: handle error
-    debugLog("0 files in zip\n");
-    return;
-  }
-  mz_zip_archive_file_stat file_stat;
-  for(mz_uint i = 0; i < num_files; i++) {
-    if(!mz_zip_reader_file_stat(&zip, i, &file_stat)) continue;
-    if(!mz_zip_reader_is_file_a_directory(&zip, i)) continue;
-    UString new_dir = UString::format("%s/%s", extract_to.toUtf8(), file_stat.m_filename);
-    debugLog("Creating dir %s\n", file_stat.m_filename);
-    env->createDirectory(new_dir);
-  }
-  for(mz_uint i = 0; i < num_files; i++) {
-    if(!mz_zip_reader_file_stat(&zip, i, &file_stat)) continue;
-    if(mz_zip_reader_is_file_a_directory(&zip, i)) continue;
-
-    char* saveptr = NULL;
-    char* folder = strtok_r(file_stat.m_filename, "/", &saveptr);
-    UString file_path = extract_to;
-    while(folder != NULL) {
-      if(!strcmp(folder, "..")) {
-        // Bro...
-        goto skip_file;
-      }
-
-      file_path.append("/");
-      file_path.append(folder);
-      folder = strtok_r(NULL, "/", &saveptr);
-
-      if(folder != NULL) {
-        if(!env->directoryExists(file_path)) {
-          env->createDirectory(file_path);
-        }
-      }
-    }
-
-    debugLog("Extracting %s\n", file_path.toUtf8());
-    if(!mz_zip_reader_extract_to_file(&zip, i, file_path.toUtf8(), 0)) {
-      // TODO @kiwec: handle error (or ignore, and handle error later)
-      debugLog("Failed to extract %s\n", file_path.toUtf8());
-    }
-
-skip_file:;
-  }
-
-  mz_zip_reader_end(&zip);
-  delete response.memory;
 }

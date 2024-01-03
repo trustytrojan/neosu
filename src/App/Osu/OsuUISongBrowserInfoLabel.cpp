@@ -78,7 +78,7 @@ void OsuUISongBrowserInfoLabel::draw(Graphics *g)
 	}
 
 	// build strings
-	const UString titleText = (m_osu->getMultiplayer()->isDownloadingBeatmap() ? UString::format("DOWNLOADING: %i %%", (int)(m_osu->getMultiplayer()->getDownloadBeatmapPercentage() * 100.0f)) : buildTitleString());
+	const UString titleText = buildTitleString();
 	const UString subTitleText = buildSubTitleString();
 	const UString songInfoText = buildSongInfoString();
 	const UString diffInfoText = buildDiffInfoString();
@@ -294,17 +294,6 @@ void OsuUISongBrowserInfoLabel::setFromMissingBeatmap(long beatmapId)
 
 	setLocalOffset(0);
 	setOnlineOffset(0);
-}
-
-void OsuUISongBrowserInfoLabel::onClicked()
-{
-	if (m_osu->getMultiplayer()->isInMultiplayer() && m_osu->getMultiplayer()->isMissingBeatmap() && !m_osu->getMultiplayer()->isDownloadingBeatmap())
-	{
-		m_osu->getNotificationOverlay()->addNotification("Requesting download from peer, please wait ...", 0xffffffff, false, 0.75f);
-		m_osu->getMultiplayer()->onClientBeatmapDownloadRequest();
-	}
-
-	CBaseUIButton::onClicked();
 }
 
 UString OsuUISongBrowserInfoLabel::buildTitleString()

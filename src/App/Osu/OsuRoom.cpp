@@ -1,8 +1,10 @@
 #include "Bancho.h"
+#include "BanchoDownloader.h"
 #include "BanchoNetworking.h"
 #include "BanchoUsers.h"
 #include "Osu.h"
 #include "OsuChat.h"
+#include "OsuDatabase.h"
 #include "OsuLobby.h"
 #include "OsuMainMenu.h"
 #include "OsuRoom.h"
@@ -30,11 +32,46 @@ OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
     m_slotlist->setHorizontalScrolling(false);
     m_container->addBaseUIElement(m_slotlist);
 
+    m_map = new CBaseUIScrollView(0, 0, 0, 0, "");
+    m_map->setDrawFrame(true);
+    m_map->setDrawBackground(false);
+    m_map->setBlockScrolling(true);
+    m_container->addBaseUIElement(m_map);
+
+    m_map_title = new CBaseUILabel(0, 0, 300, 20, "", "(no map selected)");
+    m_map_title->setFont(font);
+    m_map_title->setSizeToContent(0, 0);
+    m_map_title->setDrawFrame(false);
+    m_map_title->setDrawBackground(false);
+    m_map->getContainer()->addBaseUIElement(m_map_title);
+
+    m_map_extra = new CBaseUILabel(0, 0, 300, 20, "", "");
+    m_map_extra->setFont(font);
+    m_map_extra->setSizeToContent(0, 0);
+    m_map_extra->setDrawFrame(false);
+    m_map_extra->setDrawBackground(false);
+    m_map->getContainer()->addBaseUIElement(m_map_extra);
+
     updateLayout(m_osu->getScreenSize());
 }
 
 void OsuRoom::draw(Graphics *g) {
     if (!m_bVisible) return;
+
+    if(downloading_set_id != 0 && m_beatmap == nullptr) {
+        auto status = download_mapset(downloading_set_id);
+        if(status.status == FAILURE) {
+            downloading_set_id = 0;
+            m_map_extra->setText("FAILED TO DOWNLOAD BEATMAP");
+            // TODO @kiwec
+        } else if(status.status == DOWNLOADING) {
+            auto text = UString::format("Downloading... %d%", status.progress * 100);
+            m_map_extra->setText(text.toUtf8());
+        } else if(status.status == SUCCESS) {
+            // TODO @kiwec: trying loading map
+        }
+    }
+
     m_container->draw(g);
 }
 
@@ -78,6 +115,80 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
     // m_slotlist->setSize();
 
     // TODO @kiwec: draw the rest of the room
+}
+
+void OsuRoom::process_beatmapset_info_response(Packet packet) {
+    if(packet.size == 0) {
+        // TODO @kiwec
+        return;
+    }
+
+    // {set_id}.osz|{artist}|{title}|{creator}|{status}|10.0|{last_update}|{set_id}|0|0|0|0|0
+    char *saveptr = NULL;
+    char *str = strtok_r((char*)packet.memory, "|", &saveptr);
+    if (!str) return;
+    // Do nothing with beatmapset filename
+
+    str = strtok_r(NULL, "|", &saveptr);
+    if(!str) return;
+    // Do nothing with beatmap artist
+
+    str = strtok_r(NULL, "|", &saveptr);
+    if(!str) return;
+    // Do nothing with beatmap title
+
+    str = strtok_r(NULL, "|", &saveptr);
+    if(!str) return;
+    // Do nothing with beatmap creator
+
+    str = strtok_r(NULL, "|", &saveptr);
+    if(!str) return;
+    // Do nothing with beatmap status
+
+    str = strtok_r(NULL, "|", &saveptr);
+    if(!str) return;
+    // Do nothing with beatmap rating
+
+    str = strtok_r(NULL, "|", &saveptr);
+    if(!str) return;
+    // Do nothing with beatmap last update
+
+    str = strtok_r(NULL, "|", &saveptr);
+    if(!str) return;
+    bancho.osu->m_room->downloading_set_id = strtoul(str, NULL, 10);
+
+    // Do nothing with the rest
+}
+
+void OsuRoom::on_map_change() {
+    // TODO @kiwec: call this when map changes
+
+    if(bancho.room.map_id == 0) {
+        m_map_title->setText("(no map selected)");
+        m_map_extra->setText("");
+    } else {
+        std::string hash = bancho.room.map_md5.toUtf8(); // lol
+        m_beatmap = m_osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(hash);
+        if(m_beatmap == nullptr) {
+            // Request beatmap info - automatically starts download
+            std::string path = "/web/osu-search-set.php?b=" + std::to_string(bancho.room.map_id);
+            APIRequest request = {
+                .type = GET_BEATMAPSET_INFO,
+                .path = path,
+            };
+            send_api_request(request);
+
+            m_map_title->setText(bancho.room.map_name);
+            m_map_extra->setText("Downloading... 0%");
+        } else {
+            m_map_title->setText(bancho.room.map_name);
+            m_map_extra->setText(m_beatmap->getArtist());
+            // TODO @kiwec: getAudioFileName() / make map music play automatically
+            // TODO @kiwec: getBackgroundImageFileName() / display map image
+        }
+    }
+
+    updateLayout(m_osu->getScreenSize());
 }
 
 void OsuRoom::on_room_joined(Room room) {
@@ -139,7 +250,7 @@ void OsuRoom::on_match_score_updated(Packet* packet) {
 }
 
 void OsuRoom::on_all_players_loaded() {
-    // TODO @kiwec
+    bancho.room.all_players_loaded = true;
 }
 
 void OsuRoom::on_player_failed(int32_t slot_id) {

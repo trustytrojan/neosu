@@ -548,8 +548,6 @@ Osu::Osu(Osu2 *osu2, int instanceID)
 		reconnect();
 	}
 
-	while(true){}
-
 	/*
 	// DEBUG: immediately start diff of a beatmap
 	{
