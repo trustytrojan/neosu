@@ -1884,17 +1884,11 @@ void OsuSongBrowser2::onDifficultySelected(OsuDatabaseBeatmap *diff2, bool play)
 	// start playing
 	if (play)
 	{
-		bool clientPlayStateChangeRequestBeatmapSent = false;
-		if (bancho.is_in_a_multi_room())
-		{
-			// clients may also select beatmaps (the server can then decide if it wants to broadcast or ignore it)
-			clientPlayStateChangeRequestBeatmapSent = m_osu->getMultiplayer()->onClientPlayStateChangeRequestBeatmap(diff2);
-		}
-
-		if (!clientPlayStateChangeRequestBeatmapSent)
-		{
+		if(bancho.is_in_a_multi_room()) {
+			// TODO @kiwec: change map in bancho.room, then send MATCH_CHANGE_SETTINGS packet
+		} else {
 			// CTRL + click = auto
-			if (!bancho.is_in_a_multi_room() && engine->getKeyboard()->isControlDown())
+			if (engine->getKeyboard()->isControlDown())
 				m_osu->getModSelector()->enableAuto();
 
 			m_osu->onBeforePlayStart();

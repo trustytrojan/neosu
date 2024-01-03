@@ -16,7 +16,6 @@ class CWindowManager;
 class OsuChat;
 class OsuLobby;
 class OsuRoom;
-class Osu2;
 class OsuVR;
 class OsuMultiplayer;
 class OsuMainMenu;
@@ -73,7 +72,7 @@ public:
 		MANIA
 	};
 
-	Osu(Osu2 *osu2 = NULL, int instanceID = 0);
+	Osu(int instanceID = 0);
 	virtual ~Osu();
 
 	virtual void draw(Graphics *g);
@@ -270,7 +269,6 @@ public:
 	ConVar *m_osu_vr_draw_desktop_playfield_ref;
 
 	// interfaces
-	Osu2 *m_osu2;
 	OsuVR *m_vr;
 	OsuMultiplayer *m_multiplayer;
 	OsuMainMenu *m_mainMenu;

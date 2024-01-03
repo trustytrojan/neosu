@@ -27,10 +27,6 @@ public:
 	void onClientScoreChange();
 	bool onClientPlayStateChangeRequestBeatmap(OsuDatabaseBeatmap *beatmap);
 
-	// tourney events
-	void setBeatmap(OsuDatabaseBeatmap *beatmap);
-	void setBeatmap(std::string md5hash);
-
 private:
 	struct BeatmapDownloadState
 	{

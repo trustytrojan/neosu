@@ -35,7 +35,6 @@
 #include "OsuChat.h"
 #include "OsuLobby.h"
 #include "OsuRoom.h"
-#include "Osu2.h"
 #include "OsuVR.h"
 #include "OsuMultiplayer.h"
 #include "OsuMainMenu.h"
@@ -149,11 +148,10 @@ ConVar *Osu::ui_scale = &osu_ui_scale;
 Vector2 Osu::g_vInternalResolution;
 Vector2 Osu::osuBaseResolution = Vector2(640.0f, 480.0f);
 
-Osu::Osu(Osu2 *osu2, int instanceID)
+Osu::Osu(int instanceID)
 {
 	srand(time(NULL));
 
-	m_osu2 = osu2;
 	m_iInstanceID = instanceID;
 
 	// convar refs
@@ -756,8 +754,8 @@ void Osu::draw(Graphics *g)
 		Vector2 offset = Vector2(engine->getGraphics()->getResolution().x/2 - g_vInternalResolution.x/2, engine->getGraphics()->getResolution().y/2 - g_vInternalResolution.y/2);
 		if (m_iInstanceID > 0)
 		{
-			const int numHorizontalInstances = 2 + (m_osu2->getNumInstances() > 4 ? 1 : 0);
-			const int numVerticalInstances = 1 + (m_osu2->getNumInstances() > 2 ? 1 : 0) + (m_osu2->getNumInstances() > 8 ? 1 : 0);
+			const int numHorizontalInstances = 2;
+			const int numVerticalInstances = 1;
 
 			float emptySpaceX = engine->getGraphics()->getResolution().x - numHorizontalInstances*g_vInternalResolution.x;
 			float emptySpaceY = engine->getGraphics()->getResolution().y - numVerticalInstances*g_vInternalResolution.y;

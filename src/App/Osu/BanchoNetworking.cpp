@@ -158,6 +158,10 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
   if (hres == CURLHE_OK) {
     auth_header = "osu-token: " + std::string(header->value);
   }
+  hres = curl_easy_header(curl, "x-mcosu-features", 0, CURLH_HEADER, -1, &header);
+  if (hres == CURLHE_OK) {
+    bancho.submit_scores = strstr(header->value, "submit=true") != NULL;
+  }
 
   while (response.pos < response.size) {
     uint16_t packet_id = read_short(&response);

@@ -68,7 +68,10 @@ void OsuRoom::draw(Graphics *g) {
             auto text = UString::format("Downloading... %d%", status.progress * 100);
             m_map_extra->setText(text.toUtf8());
         } else if(status.status == SUCCESS) {
-            // TODO @kiwec: trying loading map
+            auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d", downloading_set_id);
+            m_osu->m_songBrowser2->getDatabase()->addBeatmap(mapset_path);
+            downloading_set_id = 0;
+            on_map_change();
         }
     }
 
@@ -170,6 +173,8 @@ void OsuRoom::process_beatmapset_info_response(Packet packet) {
 }
 
 void OsuRoom::on_map_change() {
+    // TODO @kiwec: handle non-std maps
+
     if(bancho.room.map_id == 0) {
         m_map_title->setText("(no map selected)");
         m_map_extra->setText("");
@@ -188,11 +193,9 @@ void OsuRoom::on_map_change() {
             m_map_title->setText(bancho.room.map_name);
             m_map_extra->setText("Downloading... 0%");
         } else {
-            // TODO @kiwec: set m_osu->m_selectedBeatmap, m_osu->m_selectedDifficulty2 (see how they're set first)
-
+            m_osu->m_songBrowser2->onDifficultySelected(beatmap, false);
             m_map_title->setText(bancho.room.map_name);
             m_map_extra->setText(beatmap->getArtist());
-            // TODO @kiwec: getAudioFileName() / make map music play automatically
             // TODO @kiwec: getBackgroundImageFileName() / display map image
         }
     }
@@ -217,15 +220,13 @@ void OsuRoom::on_room_joined(Room room) {
 }
 
 void OsuRoom::on_room_updated(Room room) {
-    // TODO @kiwec: don't update the room while we're playing? or at least not the slots?
-    //              need to check if server sends those while we're playing first
+    if(bancho.is_playing_a_multi_map() || !bancho.is_in_a_multi_room()) return;
+
     bool map_changed = bancho.room.map_id != room.map_id;
     bancho.room = room;
     if(map_changed) {
         on_map_change();
     }
-
-    // TODO @kiwec
 
     updateLayout(m_osu->getScreenSize());
 }

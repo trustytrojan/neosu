@@ -402,6 +402,9 @@ OsuDatabase::~OsuDatabase()
 
 void OsuDatabase::update()
 {
+	// TODO @kiwec: raw-load the already downloaded beatmaps
+	// TODO @kiwec: ...or, store the data in a db to load them faster
+
 	// loadRaw() logic
 	if (m_bRawBeatmapLoadScheduled)
 	{

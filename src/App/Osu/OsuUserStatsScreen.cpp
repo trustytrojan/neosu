@@ -541,7 +541,6 @@ void OsuUserStatsScreen::onUserButtonChange(UString text, int id)
 void OsuUserStatsScreen::onScoreClicked(CBaseUIButton *button)
 {
 	m_osu->toggleSongBrowser();
-	m_osu->getMultiplayer()->setBeatmap(((OsuUISongBrowserScoreButton*)button)->getScore().md5hash);
 	m_osu->getSongBrowser()->highlightScore(((OsuUISongBrowserScoreButton*)button)->getScore().unixTimestamp);
 }
 

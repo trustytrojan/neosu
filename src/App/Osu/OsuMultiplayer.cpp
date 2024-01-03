@@ -12,7 +12,6 @@
 // TODO @kiwec: add "personal best" in online score list
 // TODO @kiwec: hardcode server list with capabilities (eg, does the server allow score submission)
 //              or, fetch it when starting the game, just like it checks for updates
-// TODO @kiwec: enable/disable some features based on what headers the servers sends back on login
 // TODO @kiwec: fetch avatars and display in leaderboards, score browser, lobby list, etc
 // TODO @kiwec: once logged in, gray out user/pw/server fields and switch log in button to log out button
 // TODO @kiwec: comb over every single option, and every single convar and make sure no cheats are possible in multiplayer
@@ -54,10 +53,6 @@ OsuMultiplayer::OsuMultiplayer(Osu *osu)
 OsuMultiplayer::~OsuMultiplayer()
 {
 }
-
-// TODO @kiwec: on map select, make sure we check
-// m_osu->getSongBrowser()->getDatabase()->isFinished()
-// before we call setBeatmap()
 
 void OsuMultiplayer::update() {
 	receive_api_responses();
@@ -101,19 +96,6 @@ void OsuMultiplayer::onClientScoreChange()
 bool OsuMultiplayer::onClientPlayStateChangeRequestBeatmap(OsuDatabaseBeatmap *beatmap)
 {
 	return false;
-}
-
-void OsuMultiplayer::setBeatmap(OsuDatabaseBeatmap *beatmap)
-{
-	if (beatmap == NULL) return;
-	setBeatmap(beatmap->getMD5Hash());
-}
-
-void OsuMultiplayer::setBeatmap(std::string md5hash)
-{
-	if (md5hash.length() < 32) return;
-
-	// TODO @kiwec
 }
 
 void OsuMultiplayer::onBeatmapDownloadFinished(const BeatmapDownloadState &dl)
