@@ -16,6 +16,7 @@ struct OsuRoom : public OsuScreen {
     virtual void setVisible(bool visible); // does nothing
 
     void updateLayout(Vector2 newResolution);
+    void ragequit();
 
     static void process_beatmapset_info_response(Packet packet);
     void on_map_change();
@@ -32,7 +33,6 @@ struct OsuRoom : public OsuScreen {
 
     uint32_t downloading_set_id = 0;
 
-    OsuDatabaseBeatmap* m_beatmap = nullptr;
     CBaseUIContainer *m_container = nullptr;
     CBaseUIScrollView *m_slotlist = nullptr;
     CBaseUIScrollView *m_map = nullptr;

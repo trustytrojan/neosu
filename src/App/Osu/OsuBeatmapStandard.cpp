@@ -203,7 +203,7 @@ void OsuBeatmapStandard::draw(Graphics *g)
 		}
 		g->popTransform();
 	}
-	else if (bancho.is_playing_a_multi_map() && m_osu->getMultiplayer()->isWaitingForPlayers())
+	else if (bancho.is_playing_a_multi_map() && !bancho.room.all_players_loaded)
 	{
 		if (!m_bIsPreLoading && !isLoadingStarCache()) // usability
 		{
@@ -921,7 +921,7 @@ void OsuBeatmapStandard::onModUpdate(bool rebuildSliderVertexBuffers, bool recom
 
 bool OsuBeatmapStandard::isLoading()
 {
-	return (isLoadingInt() || (bancho.is_playing_a_multi_map() && m_osu->getMultiplayer()->isWaitingForPlayers()));
+	return (isLoadingInt() || (bancho.is_playing_a_multi_map() && !bancho.room.all_players_loaded));
 }
 
 Vector2 OsuBeatmapStandard::pixels2OsuCoords(Vector2 pixelCoords) const

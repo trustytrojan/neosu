@@ -18,11 +18,13 @@
 #include "ConVar.h"
 
 #include "Bancho.h"
+#include "BanchoNetworking.h"
 #include "Osu.h"
 #include "OsuChat.h"
 #include "OsuVR.h"
 #include "OsuMultiplayer.h"
 #include "OsuHUD.h"
+#include "OsuRoom.h"
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
 #include "OsuBackgroundImageHandler.h"
@@ -1586,7 +1588,19 @@ void OsuBeatmap::stop(bool quit)
 
 	onStop(quit);
 
-	m_osu->onPlayEnd(quit);
+	if(bancho.is_playing_a_multi_map()) {
+		if(quit) {
+			m_osu->m_room->ragequit();
+			m_osu->onPlayEnd(true);
+		} else {
+			m_osu->m_multiplayer->onClientScoreChange();
+			Packet packet = {0};
+			packet.id = FINISH_MATCH;
+			send_packet(packet);
+		}
+	} else {
+		m_osu->onPlayEnd(quit);
+	}
 }
 
 void OsuBeatmap::fail()

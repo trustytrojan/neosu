@@ -31,8 +31,6 @@ public:
 	void setBeatmap(OsuDatabaseBeatmap *beatmap);
 	void setBeatmap(std::string md5hash);
 
-	bool isWaitingForPlayers();	// are we waiting for any player
-
 private:
 	struct BeatmapDownloadState
 	{

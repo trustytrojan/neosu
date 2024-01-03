@@ -58,7 +58,7 @@ OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
 void OsuRoom::draw(Graphics *g) {
     if (!m_bVisible) return;
 
-    if(downloading_set_id != 0 && m_beatmap == nullptr) {
+    if(downloading_set_id != 0 && m_osu->getSelectedBeatmap() == NULL) {
         auto status = download_mapset(downloading_set_id);
         if(status.status == FAILURE) {
             downloading_set_id = 0;
@@ -85,11 +85,7 @@ void OsuRoom::onKeyDown(KeyboardEvent &key) {
 
     if(key.getKeyCode() == KEY_ESCAPE) {
         key.consume();
-
-        // Exit straight to main menu
-        m_bVisible = false;
-        m_osu->m_mainMenu->setVisible(true);
-        m_osu->m_chat->updateVisibility();
+        ragequit();
         return;
     }
 }
@@ -115,6 +111,19 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
     // m_slotlist->setSize();
 
     // TODO @kiwec: draw the rest of the room
+}
+
+// Exit to main menu
+void OsuRoom::ragequit() {
+    if(!bancho.is_in_a_multi_room()) return;
+
+    Packet packet = {0};
+    packet.id = EXIT_ROOM;
+    send_packet(packet);
+
+    m_bVisible = false;
+    m_osu->m_mainMenu->setVisible(true);
+    m_osu->m_chat->updateVisibility();
 }
 
 void OsuRoom::process_beatmapset_info_response(Packet packet) {
@@ -161,15 +170,13 @@ void OsuRoom::process_beatmapset_info_response(Packet packet) {
 }
 
 void OsuRoom::on_map_change() {
-    // TODO @kiwec: call this when map changes
-
     if(bancho.room.map_id == 0) {
         m_map_title->setText("(no map selected)");
         m_map_extra->setText("");
     } else {
         std::string hash = bancho.room.map_md5.toUtf8(); // lol
-        m_beatmap = m_osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(hash);
-        if(m_beatmap == nullptr) {
+        auto beatmap = m_osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(hash);
+        if(beatmap == nullptr) {
             // Request beatmap info - automatically starts download
             std::string path = "/web/osu-search-set.php?b=" + std::to_string(bancho.room.map_id);
             APIRequest request = {
@@ -181,8 +188,10 @@ void OsuRoom::on_map_change() {
             m_map_title->setText(bancho.room.map_name);
             m_map_extra->setText("Downloading... 0%");
         } else {
+            // TODO @kiwec: set m_osu->m_selectedBeatmap, m_osu->m_selectedDifficulty2 (see how they're set first)
+
             m_map_title->setText(bancho.room.map_name);
-            m_map_extra->setText(m_beatmap->getArtist());
+            m_map_extra->setText(beatmap->getArtist());
             // TODO @kiwec: getAudioFileName() / make map music play automatically
             // TODO @kiwec: getBackgroundImageFileName() / display map image
         }
@@ -223,15 +232,17 @@ void OsuRoom::on_room_updated(Room room) {
 
 void OsuRoom::on_match_started(Room room) {
     bancho.room = room;
-    if(m_beatmap == nullptr || room.map_id != m_beatmap->getID()) {
+    if(m_osu->getSelectedBeatmap() == nullptr) {
         debugLog("We received MATCH_STARTED without being ready, wtf!\n");
         return;
     }
 
-    auto map_name = UString::format("%s [%s]", m_beatmap->getTitle(), m_beatmap->getDifficultyName());
+    auto map_name = UString::format("%s [%s]", m_osu->getSelectedBeatmap()->getTitle(), m_osu->getSelectedBeatmap()->getSelectedDifficulty2()->getDifficultyName());
     OsuRichPresence::setBanchoStatus(m_osu, map_name.toUtf8(), MULTIPLAYER);
 
-    // TODO @kiwec: display beatmap, then send MATCH_LOAD_COMPLETE, then wait for all players loaded
+    m_bVisible = false;
+    // TODO @kiwec: onbeforeplay etc?
+    m_osu->getSelectedBeatmap()->play();
 }
 
 void OsuRoom::on_match_score_updated(Packet* packet) {
@@ -268,13 +279,14 @@ void OsuRoom::on_player_failed(int32_t slot_id) {
     bancho.room.slots[slot_id].died = true;
 }
 
+// All players have finished.
 void OsuRoom::on_match_finished() {
-    // This is called when the SERVER tells us the match is over. That only happens once every player has finished.
-    // TODO @kiwec
+    if(!bancho.is_playing_a_multi_map()) return;
+    m_osu->onPlayEnd(false, false);
 }
 
 void OsuRoom::on_all_players_skipped() {
-    // TODO @kiwec
+    bancho.room.all_players_skipped = true;
 }
 
 void OsuRoom::on_player_skip(int32_t user_id) {
@@ -287,5 +299,6 @@ void OsuRoom::on_player_skip(int32_t user_id) {
 }
 
 void OsuRoom::on_match_aborted() {
-    // TODO @kiwec
+    if(!bancho.is_playing_a_multi_map()) return;
+    m_osu->onPlayEnd(false, true);
 }

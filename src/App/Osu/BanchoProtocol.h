@@ -191,6 +191,7 @@ struct Room {
   uint32_t mods = 0;
   uint32_t seed = 0;
   bool all_players_loaded = false;
+  bool all_players_skipped = false;
   bool player_loaded = false;
 
   UString name = "";

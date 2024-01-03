@@ -101,7 +101,7 @@ public:
 
 	void onBeforePlayStart();			// called just before OsuBeatmap->play()
 	void onPlayStart();					// called when a beatmap has successfully started playing
-	void onPlayEnd(bool quit = true);	// called when a beatmap is finished playing (or the player quit)
+	void onPlayEnd(bool quit = true, bool aborted = false);	// called when a beatmap is finished playing (or the player quit)
 
 	void toggleModSelection(bool waitForF1KeyUp = false);
 	void toggleSongBrowser();

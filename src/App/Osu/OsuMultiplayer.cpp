@@ -117,10 +117,6 @@ void OsuMultiplayer::setBeatmap(std::string md5hash)
 	// TODO @kiwec
 }
 
-bool OsuMultiplayer::isWaitingForPlayers() {
-	return !bancho.room.all_players_loaded;
-}
-
 void OsuMultiplayer::onBeatmapDownloadFinished(const BeatmapDownloadState &dl)
 {
 	// TODO: validate inputs

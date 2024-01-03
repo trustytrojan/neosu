@@ -970,12 +970,15 @@ void Osu::update()
 
 			if (getSelectedBeatmap()->isInSkippableSection() && !getSelectedBeatmap()->isPaused() && !isLoading)
 			{
-				if (!bancho.is_playing_a_multi_map())
-				{
-					if ((osu_skip_intro_enabled.getBool() && getSelectedBeatmap()->getHitObjectIndexForCurrentTime() < 1) || (osu_skip_breaks_enabled.getBool() && getSelectedBeatmap()->getHitObjectIndexForCurrentTime() > 0))
-					{
-						getSelectedBeatmap()->skipEmptySection();
-					}
+				bool can_skip_intro = (osu_skip_intro_enabled.getBool() && getSelectedBeatmap()->getHitObjectIndexForCurrentTime() < 1);
+				bool can_skip_break = (osu_skip_breaks_enabled.getBool() && getSelectedBeatmap()->getHitObjectIndexForCurrentTime() > 0);
+				if (!bancho.is_playing_a_multi_map()) {
+					can_skip_intro = bancho.room.all_players_skipped;
+					can_skip_break = false;
+				}
+
+				if(can_skip_intro || can_skip_break) {
+					getSelectedBeatmap()->skipEmptySection();
 				}
 			}
 
@@ -1863,7 +1866,7 @@ void Osu::onPlayStart()
 	OsuRichPresence::onPlayStart(this);
 }
 
-void Osu::onPlayEnd(bool quit)
+void Osu::onPlayEnd(bool quit, bool aborted)
 {
 	debugLog("Osu::onPlayEnd()\n");
 
@@ -1875,17 +1878,6 @@ void Osu::onPlayEnd(bool quit)
 	{
 		if (!osu_mod_endless.getBool())
 		{
-			if (bancho.is_playing_a_multi_map())
-			{
-				// TODO @kiwec: we should not be sending this here, but instead send it earlier,
-				//              and wait for all players to finish before we switch to the score screen
-				m_multiplayer->onClientScoreChange();
-
-				Packet packet = {0};
-				packet.id = FINISH_MATCH;
-				send_packet(packet);
-			}
-
 			m_rankingScreen->setScore(m_score);
 			m_rankingScreen->setBeatmapInfo(getSelectedBeatmap(), getSelectedBeatmap()->getSelectedDifficulty2());
 
@@ -1910,15 +1902,17 @@ void Osu::onPlayEnd(bool quit)
 	if (m_songBrowser2 != NULL)
 		m_songBrowser2->onPlayEnd(quit);
 
-	if (quit)
-	{
-		if (m_iInstanceID < 2)
-			toggleSongBrowser();
-		else
-			m_mainMenu->setVisible(true);
+	if(!bancho.is_playing_a_multi_map()) {
+		if (quit) {
+			if (m_iInstanceID < 2) {
+				toggleSongBrowser();
+			} else {
+				m_mainMenu->setVisible(true);
+			}
+		} else {
+			toggleRankingScreen();
+		}
 	}
-	else
-		toggleRankingScreen();
 
 	updateConfineCursor();
 	updateWindowsKeyDisable();
