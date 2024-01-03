@@ -502,9 +502,9 @@ Osu::Osu(Osu2 *osu2, int instanceID)
 	m_room = new OsuRoom(this);
 
 	// the order in this vector will define in which order events are handled/consumed
+	m_screens.push_back(m_chat);
 	m_screens.push_back(m_notificationOverlay);
 	m_screens.push_back(m_optionsMenu);
-	m_screens.push_back(m_chat);
 	m_screens.push_back(m_userStatsScreen);
 	m_screens.push_back(m_rankingScreen);
 	m_screens.push_back(m_modSelector);
@@ -1096,14 +1096,9 @@ void Osu::update()
 	}
 
 	// handle mousewheel volume change
-	if ((m_songBrowser2 != NULL && (!m_songBrowser2->isVisible() || engine->getKeyboard()->isAltDown() || m_hud->isVolumeOverlayBusy()))
-			&& (!m_optionsMenu->isVisible() || !m_optionsMenu->isMouseInside() || engine->getKeyboard()->isAltDown())
-			&& !m_vrTutorial->isVisible()
-			&& (!m_userStatsScreen->isVisible() || engine->getKeyboard()->isAltDown() || m_hud->isVolumeOverlayBusy())
-			&& (!m_changelog->isVisible() || engine->getKeyboard()->isAltDown())
-			&& (!m_modSelector->isMouseInScrollView() || engine->getKeyboard()->isAltDown()))
-	{
-		if ((!(isInPlayMode() && !m_pauseMenu->isVisible()) && !m_rankingScreen->isVisible()) || (isInPlayMode() && !osu_disable_mousewheel.getBool()) || engine->getKeyboard()->isAltDown())
+	bool a_scrollable_is_visible = m_songBrowser2->isVisible() || m_optionsMenu->isVisible() || m_chat->isVisible() || m_lobby->isVisible() || m_room->isVisible() || m_vrTutorial->isVisible() || m_userStatsScreen->isVisible() || m_changelog->isVisible() || m_modSelector->isMouseInScrollView() || m_rankingScreen->isVisible();
+	if(!a_scrollable_is_visible || engine->getKeyboard()->isAltDown() || m_hud->isVolumeOverlayBusy()) {
+		if ((!(isInPlayMode() && !m_pauseMenu->isVisible())) || (isInPlayMode() && !osu_disable_mousewheel.getBool()) || engine->getKeyboard()->isAltDown())
 		{
 			if (wheelDelta != 0)
 			{

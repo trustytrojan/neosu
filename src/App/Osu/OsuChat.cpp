@@ -52,7 +52,9 @@ void OsuChatChannel::onChannelButtonClick(CBaseUIButton* btn) {
 
 void OsuChatChannel::add_message(ChatMessage msg) {
     const float line_height = 20;
-    bool is_at_bottom = ui->getScrollPosY() == -ui->getScrollSize().y;
+
+    // TODO @kiwec: this stops following if chat is too fast :/
+    bool was_at_bottom = (ui->getSize().y - ui->getScrollPosY()) >= ui->getScrollSize().y;
 
     bool is_system_message = msg.author_name.length() == 0;
 
@@ -84,8 +86,9 @@ void OsuChatChannel::add_message(ChatMessage msg) {
     ui->getContainer()->addBaseUIElement(text);
 
     y_total += line_height;
+    ui->setScrollSizeToContent();
 
-    if(is_at_bottom) {
+    if(was_at_bottom) {
         ui->scrollToBottom();
     }
 }
@@ -167,23 +170,29 @@ void OsuChat::update() {
     if (!m_bVisible) return;
     m_container->update();
     m_button_container->update();
+    if(m_selected_channel) {
+        m_selected_channel->ui->update();
+    }
     m_input_box->focus();
 }
 
 void OsuChat::onKeyDown(KeyboardEvent &key) {
     if(!m_bVisible) return;
 
+    // Escape: close chat
     if(key.getKeyCode() == KEY_ESCAPE) {
         if(isVisibilityForced()) return;
 
         key.consume();
         user_wants_chat = false;
         updateVisibility();
+        return;
     }
 
+    // Return: send message
     if(key.getKeyCode() == KEY_ENTER) {
         key.consume();
-        if(m_selected_channel != nullptr) {
+        if(m_selected_channel != nullptr && m_input_box->getText().length() > 0) {
             Packet packet = {0};
             packet.id = m_selected_channel->name[0] == '#' ? SEND_PUBLIC_MESSAGE : SEND_PRIVATE_MESSAGE;
             write_string(&packet, (char*)bancho.username.toUtf8());
@@ -206,16 +215,8 @@ void OsuChat::onKeyDown(KeyboardEvent &key) {
         return;
     }
 
-    // Typing in chat - capture keypresses
-    if(!key.isConsumed() && !engine->getKeyboard()->isControlDown()) {
-        m_input_box->onKeyDown(key);
-        key.consume();
-        return;
-    }
-
-    // We're holding down Ctrl, check for chat navigation shortcuts
-    if(key.getKeyCode() == KEY_W) {
-        // Ctrl+W: Close current channel
+    // Ctrl+W: Close current channel
+    if(engine->getKeyboard()->isControlDown() && key.getKeyCode() == KEY_W) {
         key.consume();
         if(m_selected_channel != nullptr && m_selected_channel->name != UString("#lobby")) {
             if(m_selected_channel->name[0] == '#') {
@@ -227,7 +228,12 @@ void OsuChat::onKeyDown(KeyboardEvent &key) {
 
             removeChannel(m_selected_channel->name);
         }
-    } else if(key.getKeyCode() == 65056) { // KEY_TAB doesn't work... idk why
+        return;
+    }
+
+    // Ctrl+Tab: Switch channels
+    // KEY_TAB doesn't work... idk why
+    if(engine->getKeyboard()->isControlDown() && key.getKeyCode() == 65056) {
         key.consume();
         if(m_selected_channel == nullptr) return;
         int chan_index = m_channels.size();
@@ -247,6 +253,14 @@ void OsuChat::onKeyDown(KeyboardEvent &key) {
             auto new_chan = m_channels[(chan_index + 1) % m_channels.size()];
             switchToChannel(new_chan);
         }
+        return;
+    }
+
+    // Typing in chat: capture keypresses
+    if(!engine->getKeyboard()->isControlDown() && !engine->getKeyboard()->isAltDown()) {
+        m_input_box->onKeyDown(key);
+        key.consume();
+        return;
     }
 }
 
