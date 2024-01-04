@@ -11,6 +11,7 @@
 
 
 class CBaseUIButton;
+class CBaseUILabel;
 class OsuLobby;
 class Room;
 
@@ -51,5 +52,6 @@ struct OsuLobby : public OsuScreen
     std::vector<Room*> rooms;
     CBaseUIContainer *m_container;
     CBaseUIScrollView *m_list;
+    CBaseUILabel *m_noRoomsOpenElement;
     McFont* font;
 };

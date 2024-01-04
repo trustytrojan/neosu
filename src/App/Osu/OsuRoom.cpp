@@ -126,6 +126,7 @@ void OsuRoom::ragequit() {
 
     m_bVisible = false;
     m_osu->m_mainMenu->setVisible(true);
+    m_osu->m_chat->removeChannel("#multiplayer");
     m_osu->m_chat->updateVisibility();
 }
 
@@ -216,6 +217,7 @@ void OsuRoom::on_room_joined(Room room) {
 
     // TODO @kiwec: update status when playing a map
     OsuRichPresence::setBanchoStatus(m_osu, room.name.toUtf8(), MULTIPLAYER);
+    m_osu->m_chat->addChannel("#multiplayer");
     m_osu->m_chat->updateVisibility();
 }
 
@@ -284,6 +286,7 @@ void OsuRoom::on_player_failed(int32_t slot_id) {
 void OsuRoom::on_match_finished() {
     if(!bancho.is_playing_a_multi_map()) return;
     m_osu->onPlayEnd(false, false);
+    m_bVisible = true;
 }
 
 void OsuRoom::on_all_players_skipped() {

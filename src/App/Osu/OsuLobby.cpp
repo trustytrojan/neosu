@@ -56,7 +56,6 @@ void RoomUIElement::onRoomJoinButtonClick(CBaseUIButton* btn) {
     m_multi->m_osu->getNotificationOverlay()->addNotification("Joining room...");
 }
 
-
 OsuLobby::OsuLobby(Osu *osu) : OsuScreen(osu) {
     font = engine->getResourceManager()->getFont("FONT_DEFAULT");
 
@@ -68,6 +67,11 @@ OsuLobby::OsuLobby(Osu *osu) : OsuScreen(osu) {
     m_list->setBackgroundColor(0xdd000000);
     m_list->setHorizontalScrolling(false);
     m_container->addBaseUIElement(m_list);
+
+    m_noRoomsOpenElement = new CBaseUILabel(0, 0, 0, 0, "", "There are no matches available.");
+    m_noRoomsOpenElement->setTextJustification(CBaseUILabel::TEXT_JUSTIFICATION::TEXT_JUSTIFICATION_CENTERED);
+    m_noRoomsOpenElement->setSizeToContent(20, 20);
+    m_container->addBaseUIElement(m_noRoomsOpenElement);
 
     updateLayout(m_osu->getScreenSize());
 }
@@ -154,15 +158,19 @@ void OsuLobby::updateLayout(Vector2 newResolution) {
     m_container->setSize(newResolution);
     m_list->setSize(newResolution);
 
+    m_noRoomsOpenElement->setVisible(rooms.empty());
+    m_noRoomsOpenElement->setPos(
+        newResolution.x / 2 - m_noRoomsOpenElement->getSize().x / 2,
+        newResolution.y / 3 - m_noRoomsOpenElement->getSize().y / 2
+    );
 
     auto heading = new CBaseUILabel(50, 30, 300, 40, "", "Multiplayer rooms");
     heading->setFont(m_osu->getTitleFont());
     heading->setSizeToContent(0, 0);
     heading->setDrawFrame(false);
     heading->setDrawBackground(false);
-    m_list->getContainer()->addBaseUIElement(heading);
+    m_container->addBaseUIElement(heading);
 
-    // TODO @kiwec: display something when no rooms exist
     // TODO @kiwec: create room button
     // TODO @kiwec: back to main menu button
 
