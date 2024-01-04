@@ -36,7 +36,6 @@
 #include "OsuLobby.h"
 #include "OsuRoom.h"
 #include "OsuVR.h"
-#include "OsuMultiplayer.h"
 #include "OsuMainMenu.h"
 #include "OsuOptionsMenu.h"
 #include "OsuSongBrowser2.h"
@@ -332,7 +331,6 @@ Osu::Osu(int instanceID)
 	m_backgroundImageHandler = NULL;
 	m_modSelector = NULL;
 	m_updateHandler = NULL;
-	m_multiplayer = NULL;
 
 	m_bF1 = false;
 	m_bUIToggleCheck = false;
@@ -481,7 +479,6 @@ Osu::Osu(int instanceID)
 	// load subsystems, add them to the screens array
 	m_tooltipOverlay = new OsuTooltipOverlay(this);
 	m_vr = new OsuVR(this);
-	m_multiplayer = new OsuMultiplayer(this);
 	m_mainMenu = new OsuMainMenu(this);
 	m_optionsMenu = new OsuOptionsMenu(this);
 	m_songBrowser2 = new OsuSongBrowser2(this);
@@ -596,7 +593,6 @@ Osu::~Osu()
 
 	SAFE_DELETE(m_score);
 	SAFE_DELETE(m_vr);
-	SAFE_DELETE(m_multiplayer);
 	SAFE_DELETE(m_skin);
 	SAFE_DELETE(m_backgroundImageHandler);
 }
@@ -1134,7 +1130,8 @@ void Osu::update()
 	}
 
 	// multiplayer update
-	m_multiplayer->update();
+	receive_api_responses();
+	receive_bancho_packets();
 
 	// skin async loading
 	if (m_bSkinLoadScheduled)

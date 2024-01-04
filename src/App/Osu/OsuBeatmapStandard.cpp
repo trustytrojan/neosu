@@ -20,7 +20,6 @@
 #include "BanchoNetworking.h"
 #include "Osu.h"
 #include "OsuVR.h"
-#include "OsuMultiplayer.h"
 #include "OsuHUD.h"
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"

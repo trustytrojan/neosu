@@ -27,7 +27,6 @@
 
 #include "Osu.h"
 #include "OsuChat.h"
-#include "OsuMultiplayer.h"
 #include "OsuHUD.h"
 #include "OsuIcons.h"
 #include "OsuSkin.h"
@@ -1914,50 +1913,6 @@ void OsuSongBrowser2::onDifficultySelected(OsuDatabaseBeatmap *diff2, bool play)
 
 	// trigger dynamic star calc (including current mods etc.)
 	recalculateStarsForSelectedBeatmap();
-}
-
-void OsuSongBrowser2::selectBeatmapMP(OsuDatabaseBeatmap *diff2)
-{
-	// force exit search
-	if (m_sSearchString.length() > 0)
-	{
-		m_sSearchString = "";
-		osu_songbrowser_search_hardcoded_filter.setValue(m_sSearchString); // safety
-		onSearchUpdate();
-	}
-
-	// force no grouping
-	if (m_group != GROUP::GROUP_NO_GROUPING)
-		onGroupChange("", 0);
-
-	OsuUISongBrowserButton *matchingButton = NULL;
-	for (size_t i=0; i<m_songButtons.size(); i++)
-	{
-		if (m_songButtons[i]->getDatabaseBeatmap() == diff2)
-		{
-			matchingButton = m_songButtons[i];
-			break;
-		}
-
-		const std::vector<OsuUISongBrowserButton*> &children = m_songButtons[i]->getChildren();
-		for (size_t c=0; c<children.size(); c++)
-		{
-			if (children[c]->getDatabaseBeatmap() == diff2)
-			{
-				matchingButton = children[c];
-				break;
-			}
-		}
-
-		if (matchingButton != NULL)
-			break;
-	}
-
-	if (matchingButton != NULL)
-	{
-		if (!matchingButton->isSelected())
-			matchingButton->select();
-	}
 }
 
 void OsuSongBrowser2::refreshBeatmaps()

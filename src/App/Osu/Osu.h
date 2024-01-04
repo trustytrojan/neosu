@@ -17,7 +17,6 @@ class OsuChat;
 class OsuLobby;
 class OsuRoom;
 class OsuVR;
-class OsuMultiplayer;
 class OsuMainMenu;
 class OsuPauseMenu;
 class OsuOptionsMenu;
@@ -131,7 +130,6 @@ public:
 	OsuBeatmap *getSelectedBeatmap();
 
 	inline OsuVR *getVR() const {return m_vr;}
-	inline OsuMultiplayer *getMultiplayer() const {return m_multiplayer;}
 	inline OsuOptionsMenu *getOptionsMenu() const {return m_optionsMenu;}
 	inline OsuSongBrowser2 *getSongBrowser() const {return m_songBrowser2;}
 	inline OsuBackgroundImageHandler *getBackgroundImageHandler() const {return m_backgroundImageHandler;}
@@ -270,7 +268,6 @@ public:
 
 	// interfaces
 	OsuVR *m_vr;
-	OsuMultiplayer *m_multiplayer;
 	OsuMainMenu *m_mainMenu;
 	OsuOptionsMenu *m_optionsMenu;
 	OsuChat *m_chat;

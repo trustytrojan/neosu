@@ -22,7 +22,6 @@
 #include "Osu.h"
 #include "OsuChat.h"
 #include "OsuVR.h"
-#include "OsuMultiplayer.h"
 #include "OsuHUD.h"
 #include "OsuRoom.h"
 #include "OsuSkin.h"
@@ -1593,7 +1592,7 @@ void OsuBeatmap::stop(bool quit)
 			m_osu->m_room->ragequit();
 			m_osu->onPlayEnd(true);
 		} else {
-			m_osu->m_multiplayer->onClientScoreChange();
+			m_osu->m_room->onClientScoreChange();
 			Packet packet = {0};
 			packet.id = FINISH_MATCH;
 			send_packet(packet);

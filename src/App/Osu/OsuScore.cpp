@@ -10,8 +10,8 @@
 #include "Engine.h"
 #include "ConVar.h"
 
+#include "BanchoProtocol.h"
 #include "Osu.h"
-#include "OsuMultiplayer.h"
 #include "OsuBeatmap.h"
 #include "OsuDatabaseBeatmap.h"
 #include "OsuBeatmapStandard.h"
@@ -19,6 +19,7 @@
 #include "OsuHUD.h"
 #include "OsuGameRules.h"
 #include "OsuReplay.h"
+#include "OsuRoom.h"
 #include "OsuHitObject.h"
 
 ConVar osu_hiterrorbar_misses("osu_hiterrorbar_misses", true);
@@ -629,7 +630,7 @@ unsigned long long OsuScore::getScore()
 
 void OsuScore::onScoreChange()
 {
-	m_osu->getMultiplayer()->onClientScoreChange();
+	m_osu->m_room->onClientScoreChange();
 
 	// only used to block local scores for people who think they are very clever by quickly disabling auto just before the end of a beatmap
 	m_bIsUnranked |= (m_osu->getModAuto() || (m_osu->getModAutopilot() && m_osu->getModRelax()));

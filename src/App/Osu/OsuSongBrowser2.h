@@ -127,7 +127,6 @@ public:
 
 	void onSelectionChange(OsuUISongBrowserButton *button, bool rebuild);
 	void onDifficultySelected(OsuDatabaseBeatmap *diff2, bool play = false);
-	void selectBeatmapMP(OsuDatabaseBeatmap *diff2);
 
 	void onScoreContextMenu(OsuUISongBrowserScoreButton *scoreButton, int id);
 	void onSongButtonContextMenu(OsuUISongBrowserSongButton *songButton, UString text, int id);

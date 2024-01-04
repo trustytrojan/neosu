@@ -21,6 +21,21 @@
 #include "OsuUISongBrowserUserButton.h"
 
 
+// Let's commit the full TODO list, why not?
+// TODO @kiwec: test OsuRoom
+// TODO @kiwec: logout on quit. needs a rework of the networking logic. disconnect != logout
+// TODO @kiwec: show loading while logging in
+// TODO @kiwec: add "personal best" in online score list
+// TODO @kiwec: hardcode server list with capabilities (eg, does the server allow score submission)
+//              or, fetch it when starting the game, just like it checks for updates
+// TODO @kiwec: fetch avatars and display in leaderboards, score browser, lobby list, etc
+// TODO @kiwec: once logged in, gray out user/pw/server fields and switch log in button to log out button
+// TODO @kiwec: comb over every single option, and every single convar and make sure no cheats are possible in multiplayer
+// TODO @kiwec: reviving in multi is a mystery. how do the clients know when somebody revived? is it just health > 0?
+// TODO @kiwec: what's the flow for a match ending because all the players in a team died?
+// TODO @kiwec: make webpage for https://mcosu.kiwec.net/
+
+
 Bancho bancho;
 std::unordered_map<std::string, Channel*> chat_channels;
 

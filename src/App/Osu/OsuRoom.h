@@ -30,6 +30,7 @@ struct OsuRoom : public OsuScreen {
     void on_all_players_skipped();
     void on_player_skip(int32_t user_id);
     void on_match_aborted();
+    void onClientScoreChange();
 
     uint32_t downloading_set_id = 0;
 

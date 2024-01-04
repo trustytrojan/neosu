@@ -27,7 +27,6 @@
 #include "OsuSongBrowser2.h"
 #include "OsuModSelector.h"
 #include "OsuTooltipOverlay.h"
-#include "OsuMultiplayer.h"
 #include "OsuDatabase.h"
 #include "OsuDatabaseBeatmap.h"
 

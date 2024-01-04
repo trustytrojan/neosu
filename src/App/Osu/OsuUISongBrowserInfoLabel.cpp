@@ -20,7 +20,6 @@
 #include "OsuTooltipOverlay.h"
 #include "OsuSongBrowser2.h"
 #include "OsuGameRules.h"
-#include "OsuMultiplayer.h"
 
 #include "OsuOptionsMenu.h"
 

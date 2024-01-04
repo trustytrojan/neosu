@@ -25,7 +25,6 @@
 
 #include "Osu.h"
 #include "OsuVR.h"
-#include "OsuMultiplayer.h"
 #include "OsuModFPoSu.h"
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
