@@ -30,6 +30,7 @@ public:
 	virtual void onMouseOutside();
 
 	void animateClickColor();
+	bool is_loading = false;
 
 private:
 	virtual void onClicked();

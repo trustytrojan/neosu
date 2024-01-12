@@ -14,10 +14,12 @@
 #include "BanchoUsers.h"
 #include "Osu.h"
 #include "OsuChat.h"
-#include "OsuNotificationOverlay.h"
 #include "OsuLobby.h"
+#include "OsuNotificationOverlay.h"
+#include "OsuOptionsMenu.h"
 #include "OsuRoom.h"
 #include "OsuSongBrowser2.h"
+#include "OsuUIButton.h"
 #include "OsuUISongBrowserUserButton.h"
 
 
@@ -93,6 +95,9 @@ void handle_packet(Packet *packet) {
     bancho.user_id = read_int(packet);
     if(bancho.user_id > 0) {
       debugLog("Logged in as user #%d.\n", bancho.user_id);
+      bancho.osu->m_optionsMenu->logInButton->setText("Disconnect");
+      bancho.osu->m_optionsMenu->logInButton->setColor(0xffff0000);
+      bancho.osu->m_optionsMenu->logInButton->is_loading = false;
 
       auto avatar_dir = UString::format(MCENGINE_DATA_DIR "avatars/%s", bancho.endpoint.toUtf8());
       if(!env->directoryExists(avatar_dir)) {
@@ -101,6 +106,9 @@ void handle_packet(Packet *packet) {
 
     } else {
       debugLog("Failed to log in, server returned code %d.\n", bancho.user_id);
+      bancho.osu->m_optionsMenu->logInButton->setText("Log in");
+      bancho.osu->m_optionsMenu->logInButton->setColor(0xff00ff00);
+      bancho.osu->m_optionsMenu->logInButton->is_loading = false;
       // TODO @kiwec: also display error string returned in cho-token header
     }
   } else if (packet->id == RECV_MESSAGE) {

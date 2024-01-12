@@ -8,7 +8,9 @@
 #include "BanchoProtocol.h"
 #include "ConVar.h"
 #include "Engine.h"
+#include "OsuOptionsMenu.h"
 #include "OsuRoom.h"
+#include "OsuUIButton.h"
 
 #ifdef MCENGINE_FEATURE_PTHREADS
 #include <curl/curl.h>
@@ -53,6 +55,9 @@ void disconnect() {
   pthread_mutex_unlock(&outgoing_mutex);
 
   bancho.user_id = 0;
+  bancho.osu->m_optionsMenu->logInButton->setText("Log in");
+  bancho.osu->m_optionsMenu->logInButton->setColor(0xff00ff00);
+  bancho.osu->m_optionsMenu->logInButton->is_loading = false;
 }
 
 void reconnect() {
@@ -62,7 +67,7 @@ void reconnect() {
       convar->getConVarByName("name")
           ->getString(); // have to keep UString in scope to use toUtf8()
   UString pw =
-      convar->getConVarByName("osu_password")
+      convar->getConVarByName("mp_password")
           ->getString(); // have to keep UString in scope to use toUtf8()
 
   // No password: don't try to log in
@@ -70,7 +75,8 @@ void reconnect() {
     return;
 
   bancho.username = user;
-  bancho.endpoint = convar->getConVarByName("osu_server")->getString();
+  bancho.endpoint = convar->getConVarByName("mp_server")->getString();
+  bancho.osu->m_optionsMenu->logInButton->is_loading = true;
   Packet new_login_packet = build_login_packet((char *)user.toUtf8(), (char *)pw.toUtf8());
 
   pthread_mutex_lock(&outgoing_mutex);
@@ -219,6 +225,7 @@ static void *do_networking(void *data) {
     }
 
     bool should_ping = difftime(time(NULL), last_packet_tms) > seconds_between_pings;
+    if(bancho.user_id == 0) should_ping = false;
     // TODO @kiwec: if(is_in_lobby_list || is_multiplaying) should_ping = true;
     // needs proper mutex handling
 

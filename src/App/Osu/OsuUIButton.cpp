@@ -7,6 +7,7 @@
 
 #include "OsuUIButton.h"
 
+#include "Engine.h"
 #include "ResourceManager.h"
 #include "AnimationHandler.h"
 
@@ -44,10 +45,11 @@ void OsuUIButton::draw(Graphics *g)
 
 	float middleWidth = m_vSize.x - leftWidth - rightWidth;
 
-	char red = std::max((unsigned int)(COLOR_GET_Ri(m_color)*m_fBrightness), (unsigned int)(m_fAnim*255.0f));
-	char green = std::max((unsigned int)(COLOR_GET_Gi(m_color)*m_fBrightness), (unsigned int)(m_fAnim*255.0f));
-	char blue = std::max((unsigned int)(COLOR_GET_Bi(m_color)*m_fBrightness), (unsigned int)(m_fAnim*255.0f));
-	g->setColor(COLOR(clamp<int>(COLOR_GET_Ai(m_color) + (isMouseInside() ? (int)(m_fAlphaAddOnHover*255.0f) : 0), 0, 255), red, green, blue));
+	auto color = is_loading ? 0xff333333 : m_color;
+	char red = std::max((unsigned int)(COLOR_GET_Ri(color)*m_fBrightness), (unsigned int)(m_fAnim*255.0f));
+	char green = std::max((unsigned int)(COLOR_GET_Gi(color)*m_fBrightness), (unsigned int)(m_fAnim*255.0f));
+	char blue = std::max((unsigned int)(COLOR_GET_Bi(color)*m_fBrightness), (unsigned int)(m_fAnim*255.0f));
+	g->setColor(COLOR(clamp<int>(COLOR_GET_Ai(color) + (isMouseInside() ? (int)(m_fAlphaAddOnHover*255.0f) : 0), 0, 255), red, green, blue));
 
 	buttonLeft->bind();
 	{
@@ -67,7 +69,18 @@ void OsuUIButton::draw(Graphics *g)
 	}
 	buttonRight->unbind();
 
-	drawText(g);
+	if(is_loading) {
+		const float scale = Osu::getImageScale(m_osu, m_osu->getSkin()->getLoadingSpinner(), 29);
+		g->setColor(0xffffffff);
+		g->pushTransform();
+		g->rotate(engine->getTime()*180, 0, 0, 1);
+		g->scale(scale, scale);
+		g->translate(m_vPos.x + m_vSize.x/2.0f, m_vPos.y + m_vSize.y/2.0f);
+		g->drawImage(m_osu->getSkin()->getLoadingSpinner());
+		g->popTransform();
+	} else {
+		drawText(g);
+	}
 }
 
 void OsuUIButton::update()
@@ -102,6 +115,8 @@ void OsuUIButton::onMouseOutside()
 
 void OsuUIButton::onClicked()
 {
+	if(is_loading) return;
+
 	CBaseUIButton::onClicked();
 
 	animateClickColor();

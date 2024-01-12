@@ -137,9 +137,9 @@ ConVar osu_hide_cursor_during_gameplay("osu_hide_cursor_during_gameplay", false)
 ConVar osu_alt_f4_quits_even_while_playing("osu_alt_f4_quits_even_while_playing", true);
 ConVar osu_win_disable_windows_key_while_playing("osu_win_disable_windows_key_while_playing", true);
 
-ConVar osu_server("osu_server", "ripple.moe");
+ConVar mp_server("mp_server", "ripple.moe");
 ConVar osu_username("name", "Guest");
-ConVar osu_password("osu_password", "");
+ConVar mp_password("mp_password", "");
 
 ConVar *Osu::version = &osu_version;
 ConVar *Osu::debug = &osu_debug;
@@ -543,13 +543,8 @@ Osu::Osu(int instanceID)
     }
 
 	// Init online functionality (multiplayer/leaderboards/etc)
+	bancho.osu = this;
 	init_networking_thread();
-	if(osu_password.getString().length() == 0) {
-		// Copy normal osu! behavior and ask for login details on startup
-		m_optionsMenu->askForLoginDetails();
-	} else {
-		reconnect();
-	}
 
 	/*
 	// DEBUG: immediately start diff of a beatmap

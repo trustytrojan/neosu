@@ -278,9 +278,10 @@ public:
 	OsuOptionsMenuResetButton *m_hpDrainSelectResetButton;
 
 	CBaseUIElement *sectionOnline;
+	CBaseUITextbox *m_serverTextbox;
 	CBaseUITextbox *m_nameTextbox;
 	CBaseUITextbox *m_passwordTextbox;
-	CBaseUITextbox *m_serverTextbox;
+	OsuUIButton *logInButton;
 
 	ConVar *m_waitingKey;
 	ConVar *m_osu_slider_curve_points_separation_ref;

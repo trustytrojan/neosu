@@ -5,6 +5,7 @@
 // $NoKeywords: $
 //===============================================================================//
 
+#include "Bancho.h"
 #include "BanchoNetworking.h"
 #include "OsuOptionsMenu.h"
 
@@ -1180,13 +1181,13 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu)
 	addLabel("If the server admins don't explicitly allow McOsu,")->setTextColor(0xff666666);
 	addLabel("you might get banned!")->setTextColor(0xff666666);
 	addLabel("");
-	m_serverTextbox = addTextbox(convar->getConVarByName("osu_server")->getString(), convar->getConVarByName("osu_server"));
+	m_serverTextbox = addTextbox(convar->getConVarByName("mp_server")->getString(), convar->getConVarByName("mp_server"));
 
 	addSubSection("Login details (username/password)");
 	m_nameTextbox = addTextbox(convar->getConVarByName("name")->getString(), convar->getConVarByName("name"));
-	m_passwordTextbox = addTextbox(convar->getConVarByName("osu_password")->getString(), convar->getConVarByName("osu_password"));
+	m_passwordTextbox = addTextbox(convar->getConVarByName("mp_password")->getString(), convar->getConVarByName("mp_password"));
 	m_passwordTextbox->is_password = true;
-	OsuUIButton *logInButton = addButton("Log in");
+	logInButton = addButton("Log in");
 	logInButton->setClickCallback( fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onLogInClicked) );
 	logInButton->setColor(0xff00ff00);
 	logInButton->setTextColor(0xffffffff);
@@ -1564,8 +1565,8 @@ void OsuOptionsMenu::update()
 		updateOsuFolder();
 
 	convar->getConVarByName("name")->setValue(m_nameTextbox->getText());
-	convar->getConVarByName("osu_password")->setValue(m_passwordTextbox->getText());
-	convar->getConVarByName("osu_server")->setValue(m_serverTextbox->getText());
+	convar->getConVarByName("mp_password")->setValue(m_passwordTextbox->getText());
+	convar->getConVarByName("mp_server")->setValue(m_serverTextbox->getText());
 	if (m_nameTextbox->hitEnter()){
 		convar->getConVarByName("name")->setValue(m_nameTextbox->getText());
 		m_nameTextbox->stealFocus();
@@ -2872,8 +2873,14 @@ void OsuOptionsMenu::onAudioCompatibilityModeChange(CBaseUICheckbox *checkbox)
 
 void OsuOptionsMenu::onLogInClicked()
 {
+	if(logInButton->is_loading) return;
 	engine->getSound()->play(m_osu->getSkin()->getMenuHit());
-	reconnect();
+
+	if(bancho.user_id > 0) {
+		disconnect();
+	} else {
+		reconnect();
+	}
 }
 
 void OsuOptionsMenu::onDownloadOsuClicked()

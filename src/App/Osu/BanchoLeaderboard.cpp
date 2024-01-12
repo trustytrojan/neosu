@@ -137,7 +137,7 @@ void fetch_online_scores(OsuDatabaseBeatmap *beatmap) {
   path += "&us=" + std::string(cv_username.toUtf8());
 
   UString cv_password =
-      convar->getConVarByName("osu_password")
+      convar->getConVarByName("mp_password")
           ->getString(); // have to keep UString in scope to use toUtf8()
   const char *pw = cv_password.toUtf8();
   std::string password_hash = md5((uint8_t *)pw, strlen(pw));
