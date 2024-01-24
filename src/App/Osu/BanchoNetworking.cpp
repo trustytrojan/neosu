@@ -63,21 +63,24 @@ void disconnect() {
 void reconnect() {
   disconnect();
 
-  UString user =
-      convar->getConVarByName("name")
-          ->getString(); // have to keep UString in scope to use toUtf8()
-  UString pw =
-      convar->getConVarByName("mp_password")
-          ->getString(); // have to keep UString in scope to use toUtf8()
+  // Disable autologin, in case there's an error while logging in
+  // Will be reenabled after the login succeeds
+  convar->getConVarByName("mp_autologin")->setValue(false);
 
-  // No password: don't try to log in
-  if (pw.length() == 0)
+  UString cv_password = convar->getConVarByName("mp_password")->getString();
+  if(cv_password.length() == 0) {
+    // No password: don't try to log in
     return;
+  }
 
-  bancho.username = user;
+  const char* pw = cv_password.toUtf8(); // cv_password needs to stay in scope!
+  bancho.pw_md5 = md5((uint8_t *)pw, strlen(pw));
+
+  bancho.username = convar->getConVarByName("name")->getString();
   bancho.endpoint = convar->getConVarByName("mp_server")->getString();
+
   bancho.osu->m_optionsMenu->logInButton->is_loading = true;
-  Packet new_login_packet = build_login_packet((char *)user.toUtf8(), (char *)pw.toUtf8());
+  Packet new_login_packet = build_login_packet();
 
   pthread_mutex_lock(&outgoing_mutex);
   delete login_packet.memory;
@@ -166,7 +169,7 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
   }
   hres = curl_easy_header(curl, "x-mcosu-features", 0, CURLH_HEADER, -1, &header);
   if (hres == CURLHE_OK) {
-    bancho.submit_scores = strstr(header->value, "submit=true") != NULL;
+    bancho.submit_scores = strstr(header->value, "submit=1") != NULL;
   }
 
   while (response.pos < response.size) {

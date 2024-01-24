@@ -10,6 +10,7 @@ struct Bancho {
   UString endpoint;
   int32_t user_id = 0;
   UString username;
+  UString pw_md5;
   Room room;
 
   // TODO @kiwec: implement score submission
@@ -34,11 +35,11 @@ struct Channel {
   uint32_t nb_members;
 };
 
-std::string md5(uint8_t *msg, size_t msg_len);
+UString md5(uint8_t *msg, size_t msg_len);
 
 void handle_packet(Packet *packet);
 
-Packet build_login_packet(char *username, char *password);
+Packet build_login_packet();
 
 extern Bancho bancho;
 extern std::unordered_map<std::string, Channel*> chat_channels;

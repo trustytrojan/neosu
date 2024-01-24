@@ -186,6 +186,8 @@ void OsuRoom::on_map_change() {
         if(beatmap == nullptr) {
             // Request beatmap info - automatically starts download
             std::string path = "/web/osu-search-set.php?b=" + std::to_string(bancho.room.map_id);
+            path += "&u=" + std::string(bancho.username.toUtf8());
+            path += "&h=" + std::string(bancho.pw_md5.toUtf8());
             APIRequest request = {
                 .type = GET_BEATMAPSET_INFO,
                 .path = path,

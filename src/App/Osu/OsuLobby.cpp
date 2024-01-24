@@ -93,6 +93,7 @@ void OsuLobby::onKeyDown(KeyboardEvent &key) {
     if(key.getKeyCode() == KEY_ESCAPE) {
         key.consume();
         setVisible(false);
+        m_osu->m_mainMenu->setVisible(true);
         return;
     }
 
@@ -145,8 +146,6 @@ void OsuLobby::setVisible(bool visible) {
             delete room;
         }
         rooms.clear();
-
-        m_osu->m_mainMenu->setVisible(true);
     }
 
     m_osu->m_chat->updateVisibility();

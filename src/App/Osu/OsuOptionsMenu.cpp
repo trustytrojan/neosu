@@ -4064,6 +4064,7 @@ void OsuOptionsMenu::save()
 
 	manualConVars.push_back(convar->getConVarByName("osu_songbrowser_sortingtype"));
 	manualConVars.push_back(convar->getConVarByName("osu_songbrowser_scores_sortingtype"));
+	manualConVars.push_back(convar->getConVarByName("mp_autologin"));
 	manualConVars.push_back(m_osu_notelock_type_ref);
 	manualConVars.push_back(m_osu_drain_type_ref);
 	if (m_osu->isInVRMode())

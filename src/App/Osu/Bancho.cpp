@@ -12,6 +12,7 @@
 #include "BanchoNetworking.h"
 #include "BanchoProtocol.h"
 #include "BanchoUsers.h"
+#include "ConVar.h"
 #include "Osu.h"
 #include "OsuChat.h"
 #include "OsuLobby.h"
@@ -36,6 +37,7 @@
 // TODO @kiwec: reviving in multi is a mystery. how do the clients know when somebody revived? is it just health > 0?
 // TODO @kiwec: what's the flow for a match ending because all the players in a team died?
 // TODO @kiwec: make webpage for https://mcosu.kiwec.net/
+// TODO @kiwec: disable user/pw/endpoint fields when logging in / once logged in
 
 
 Bancho bancho;
@@ -57,7 +59,7 @@ void update_channel(UString name, UString topic, int32_t nb_members) {
   chan->nb_members = nb_members;
 }
 
-std::string md5(uint8_t *msg, size_t msg_len) {
+UString md5(uint8_t *msg, size_t msg_len) {
   MD5 hasher;
   hasher.update(msg, msg_len);
   hasher.finalize();
@@ -70,7 +72,7 @@ std::string md5(uint8_t *msg, size_t msg_len) {
     hash[i * 2 + 1] = "0123456789abcdef"[digest[i] & 0xf];
   }
 
-  return std::string(hash, 32);
+  return UString(hash);
 }
 
 char *get_disk_uuid() {
@@ -98,12 +100,12 @@ void handle_packet(Packet *packet) {
       bancho.osu->m_optionsMenu->logInButton->setText("Disconnect");
       bancho.osu->m_optionsMenu->logInButton->setColor(0xffff0000);
       bancho.osu->m_optionsMenu->logInButton->is_loading = false;
+      convar->getConVarByName("mp_autologin")->setValue(true);
 
       auto avatar_dir = UString::format(MCENGINE_DATA_DIR "avatars/%s", bancho.endpoint.toUtf8());
       if(!env->directoryExists(avatar_dir)) {
         env->createDirectory(avatar_dir);
       }
-
     } else {
       debugLog("Failed to log in, server returned code %d.\n", bancho.user_id);
       bancho.osu->m_optionsMenu->logInButton->setText("Log in");
@@ -252,7 +254,7 @@ void handle_packet(Packet *packet) {
     }
   } else if (packet->id == MAIN_MENU_ICON) {
     UString icon = read_string(packet);
-    debugLog("Main menu icon: %s\n", icon);
+    debugLog("Main menu icon: %s\n", icon.toUtf8());
     // TODO @kiwec: handle this
     // for that, we need to download & cache images somewhere. would be useful for avatars too
   } else if (packet->id == MATCH_PLAYER_SKIPPED) {
@@ -263,7 +265,7 @@ void handle_packet(Packet *packet) {
     UString presence_username = read_string(packet);
 
     UserInfo *user = get_user_info(presence_user_id);
-    user->name = UString(presence_username);
+    user->name = presence_username;
     user->utc_offset = read_byte(packet);
     user->country = read_byte(packet);
     user->privileges = read_byte(packet);
@@ -277,6 +279,7 @@ void handle_packet(Packet *packet) {
     debugLog("Restart: %d ms\n", ms);
     reconnect();
     // TODO @kiwec: wait 'ms' milliseconds before reconnecting
+    // TODO @kiwec: if login failure, don't reconnect
   } else if (packet->id == MATCH_INVITE) {
     UString sender = read_string(packet);
     UString text = read_string(packet);
@@ -327,16 +330,15 @@ void handle_packet(Packet *packet) {
   }
 }
 
-Packet build_login_packet(char *username, char *password) {
+Packet build_login_packet() {
   // Request format:
   // username\npasswd_md5\nosu_version|utc_offset|display_city|client_hashes|pm_private\n
   Packet packet = {0};
 
-  write_bytes(&packet, (uint8_t *)username, strlen(username));
+  write_bytes(&packet, (uint8_t *)bancho.username.toUtf8(), bancho.username.length());
   write_byte(&packet, '\n');
 
-  std::string password_md5 = md5((uint8_t *)password, strlen(password));
-  write_bytes(&packet, (uint8_t *)password_md5.c_str(), password_md5.size());
+  write_bytes(&packet, (uint8_t *)bancho.pw_md5.toUtf8(), bancho.pw_md5.length());
   write_byte(&packet, '\n');
 
   const char *osu_version = "b20231102.5";
@@ -353,30 +355,30 @@ Packet build_login_packet(char *username, char *password) {
 
   char osu_path[PATH_MAX] = {0};
   readlink("/proc/self/exe", osu_path, PATH_MAX - 1);
-  std::string osu_path_md5 = md5((uint8_t *)osu_path, strlen(osu_path));
-  write_bytes(&packet, (uint8_t *)osu_path_md5.c_str(), osu_path_md5.size());
+  UString osu_path_md5 = md5((uint8_t *)osu_path, strlen(osu_path));
+  write_bytes(&packet, (uint8_t *)osu_path_md5.toUtf8(), osu_path_md5.length());
   write_byte(&packet, ':');
 
   // XXX: Should get MAC addresses from network adapters
   const char *adapters = "runningunderwine";
-  std::string adapters_md5 = md5((uint8_t *)adapters, strlen(adapters));
+  UString adapters_md5 = md5((uint8_t *)adapters, strlen(adapters));
   write_bytes(&packet, (uint8_t *)adapters, strlen(adapters));
   write_byte(&packet, ':');
-  write_bytes(&packet, (uint8_t *)adapters_md5.c_str(), adapters_md5.size());
+  write_bytes(&packet, (uint8_t *)adapters_md5.toUtf8(), adapters_md5.length());
   write_byte(&packet, ':');
 
   static char *uuid = get_disk_uuid();
-  std::string disk_md5 = "00000000000000000000000000000000";
+  UString disk_md5 = UString("00000000000000000000000000000000");
   if (uuid) {
     disk_md5 = md5((uint8_t *)uuid, strlen(uuid));
   }
 
   // XXX: Should be per-install unique ID.
   // I'm lazy so just sending disk signature twice.
-  write_bytes(&packet, (uint8_t *)disk_md5.c_str(), disk_md5.size());
+  write_bytes(&packet, (uint8_t *)disk_md5.toUtf8(), disk_md5.length());
   write_byte(&packet, ':');
 
-  write_bytes(&packet, (uint8_t *)disk_md5.c_str(), disk_md5.size());
+  write_bytes(&packet, (uint8_t *)disk_md5.toUtf8(), disk_md5.length());
   write_byte(&packet, ':');
 
   // Allow PMs from strangers

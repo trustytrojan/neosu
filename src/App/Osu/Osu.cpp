@@ -140,6 +140,7 @@ ConVar osu_win_disable_windows_key_while_playing("osu_win_disable_windows_key_wh
 ConVar mp_server("mp_server", "ripple.moe");
 ConVar osu_username("name", "Guest");
 ConVar mp_password("mp_password", "");
+ConVar mp_autologin("mp_autologin", false);
 
 ConVar *Osu::version = &osu_version;
 ConVar *Osu::debug = &osu_debug;
@@ -545,6 +546,9 @@ Osu::Osu(int instanceID)
 	// Init online functionality (multiplayer/leaderboards/etc)
 	bancho.osu = this;
 	init_networking_thread();
+	if(mp_autologin.getBool()) {
+		reconnect();
+	}
 
 	/*
 	// DEBUG: immediately start diff of a beatmap

@@ -130,18 +130,8 @@ void fetch_online_scores(OsuDatabaseBeatmap *beatmap) {
 
   path += "&m=0&i=" + std::to_string(beatmap->getSetID());
   path += "&mods=0&h=&a=0";
-
-  UString cv_username =
-      convar->getConVarByName("name")
-          ->getString(); // have to keep UString in scope to use toUtf8()
-  path += "&us=" + std::string(cv_username.toUtf8());
-
-  UString cv_password =
-      convar->getConVarByName("mp_password")
-          ->getString(); // have to keep UString in scope to use toUtf8()
-  const char *pw = cv_password.toUtf8();
-  std::string password_hash = md5((uint8_t *)pw, strlen(pw));
-  path += "&ha=" + password_hash;
+  path += "&us=" + std::string(bancho.username.toUtf8());
+  path += "&ha=" + std::string(bancho.pw_md5.toUtf8());
 
   APIRequest request = {
       .type = GET_MAP_LEADERBOARD,
