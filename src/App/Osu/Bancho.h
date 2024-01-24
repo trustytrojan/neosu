@@ -17,7 +17,10 @@ struct Bancho {
   bool submit_scores = false;
 
   bool is_online() { return user_id > 0; }
-  bool is_in_a_multi_room() { return room.id > 0; }
+
+  // Room ID can be 0 on private servers! So we check if the room has players instead.
+  bool is_in_a_multi_room() { return room.nb_players > 0; }
+
   bool is_playing_a_multi_map() {
     if(!is_in_a_multi_room()) return false;
     for(int i = 0; i < 16; i++) {

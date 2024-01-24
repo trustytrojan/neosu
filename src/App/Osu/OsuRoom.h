@@ -5,6 +5,8 @@
 
 class CBaseUILabel;
 class OsuDatabaseBeatmap;
+class OsuMainMenuPauseButton;
+class OsuUIButton;
 
 struct OsuRoom : public OsuScreen {
     OsuRoom(Osu *osu);
@@ -31,6 +33,7 @@ struct OsuRoom : public OsuScreen {
     void on_player_skip(int32_t user_id);
     void on_match_aborted();
     void onClientScoreChange();
+    void onReadyButtonClick();
 
     uint32_t downloading_set_id = 0;
 
@@ -39,5 +42,7 @@ struct OsuRoom : public OsuScreen {
     CBaseUIScrollView *m_map = nullptr;
     CBaseUILabel *m_map_title = nullptr;
     CBaseUILabel *m_map_extra = nullptr;
+    OsuUIButton *m_ready_btn = nullptr;
+    OsuMainMenuPauseButton *m_pauseButton = nullptr;
     McFont* font = nullptr;
 };

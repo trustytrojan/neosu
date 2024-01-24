@@ -1929,7 +1929,7 @@ void OsuHUD::drawScoreBoard(Graphics *g, std::string &beatmapMD5Hash, OsuScore *
 
 void OsuHUD::drawScoreBoardMP(Graphics *g)
 {
-	if(bancho.room.id == 0) return;
+	if(!bancho.is_in_a_multi_room()) return;
 
 	static std::vector<SCORE_ENTRY> scoreEntries;
 	scoreEntries.clear();

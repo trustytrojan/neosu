@@ -25,9 +25,14 @@ void update_download_progress(void *clientp, curl_off_t dltotal, curl_off_t dlno
     (void)ultotal;
     (void)ulnow;
 
+
     pthread_mutex_lock(&downloading_mapsets_mutex);
     auto dt = (DownloadThread*)clientp;
-    dt->progress = dlnow / dltotal;
+    if(dltotal == 0) {
+        dt->progress = 0.f;
+    } else {
+        dt->progress = dlnow / dltotal;
+    }
     pthread_mutex_unlock(&downloading_mapsets_mutex);
 }
 

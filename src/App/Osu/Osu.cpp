@@ -704,6 +704,7 @@ void Osu::draw(Graphics *g)
 	else // if we are not playing
 	{
 		m_lobby->draw(g);
+		m_room->draw(g);
 
 		if (m_songBrowser2 != NULL)
 			m_songBrowser2->draw(g);

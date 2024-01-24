@@ -332,7 +332,14 @@ void send_api_request(APIRequest request) {
 
 #ifdef MCENGINE_FEATURE_PTHREADS
   pthread_mutex_lock(&api_requests_mutex);
+
+  // Jank way to do things... remove outdated requests now
+  api_request_queue.erase(std::remove_if(api_request_queue.begin(), api_request_queue.end(), [request](APIRequest r) {
+    return r.type = request.type;
+  }), api_request_queue.end());
+
   api_request_queue.push_back(request);
+
   pthread_mutex_unlock(&api_requests_mutex);
 #endif
 }

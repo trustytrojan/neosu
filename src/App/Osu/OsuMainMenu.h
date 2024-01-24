@@ -8,6 +8,7 @@
 #ifndef OSUMENUMAIN_H
 #define OSUMENUMAIN_H
 
+#include "CBaseUIButton.h"
 #include "OsuScreen.h"
 #include "MouseListener.h"
 
@@ -18,15 +19,29 @@ class OsuDatabaseBeatmap;
 
 class OsuHitObject;
 
-class OsuMainMenuPauseButton;
 class OsuMainMenuMainButton;
 class OsuMainMenuButton;
 class OsuUIButton;
 
-class CBaseUIButton;
 class CBaseUIContainer;
 
 class ConVar;
+
+
+class OsuMainMenuPauseButton : public CBaseUIButton
+{
+public:
+    OsuMainMenuPauseButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text) : CBaseUIButton(xPos, yPos, xSize, ySize, name, text)
+    {
+        m_bIsPaused = true;
+    }
+
+    virtual void draw(Graphics *g);
+    void setPaused(bool paused) {m_bIsPaused = paused;}
+
+private:
+    bool m_bIsPaused;
+};
 
 class OsuMainMenu : public OsuScreen, public MouseListener
 {
@@ -40,6 +55,7 @@ public:
 public:
 	friend class OsuMainMenuMainButton;
 	friend class OsuMainMenuButton;
+	void onPausePressed();
 
 	OsuMainMenu(Osu *osu);
 	virtual ~OsuMainMenu();
@@ -92,7 +108,6 @@ private:
 	void onOptionsButtonPressed();
 	void onExitButtonPressed();
 
-	void onPausePressed();
 	void onUpdatePressed();
 	void onSteamWorkshopPressed();
 	void onGithubPressed();

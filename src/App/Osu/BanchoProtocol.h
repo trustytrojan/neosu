@@ -124,7 +124,7 @@ enum OutgoingPackets {
   SET_AWAY_MESSAGE = 82,
   IRC_ONLY = 84,
   USER_STATS_REQUEST = 85,
-  MATCH_INVITE = 87,
+  MATCH_INVITE = 88,
   CHANGE_ROOM_PASSWORD = 90,
   TOURNAMENT_MATCH_INFO_REQUEST = 93,
   USER_PRESENCE_REQUEST = 97,
@@ -173,6 +173,9 @@ struct Slot {
 
   // locked
   bool is_locked() { return (status & 0b00000010); }
+
+  // ready
+  bool is_ready() { return (status & 0b00001000); }
 
   // playing
   bool is_player_playing() { return (status & 0b00100000); }

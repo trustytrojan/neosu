@@ -9,6 +9,7 @@
 #include "OsuMainMenu.h"
 #include "OsuRoom.h"
 #include "OsuRichPresence.h"
+#include "OsuSkin.h"
 #include "OsuSongBrowser2.h"
 #include "OsuUIButton.h"
 
@@ -18,6 +19,7 @@
 #include "Engine.h"
 #include "Keyboard.h"
 #include "ResourceManager.h"
+#include "SoundEngine.h"
 
 
 OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
@@ -25,32 +27,50 @@ OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
 
     m_container = new CBaseUIContainer(0, 0, 0, 0, "");
 
-    m_slotlist = new CBaseUIScrollView(0, 0, 0, 0, "");
-    m_slotlist->setDrawFrame(false);
+    auto heading = new CBaseUILabel(50, 30, 300, 40, "", "Multiplayer");
+    heading->setFont(m_osu->getTitleFont());
+    heading->setSizeToContent(0, 0);
+    heading->setDrawFrame(false);
+    m_container->addBaseUIElement(heading);
+    heading->setDrawBackground(false);
+
+    m_slotlist = new CBaseUIScrollView(30, 140, 400, 300, "");
+    m_slotlist->setDrawFrame(true);
     m_slotlist->setDrawBackground(true);
     m_slotlist->setBackgroundColor(0xdd000000);
     m_slotlist->setHorizontalScrolling(false);
     m_container->addBaseUIElement(m_slotlist);
 
-    m_map = new CBaseUIScrollView(0, 0, 0, 0, "");
+    m_map = new CBaseUIScrollView(440, 140, 500, 100, "");
     m_map->setDrawFrame(true);
     m_map->setDrawBackground(false);
     m_map->setBlockScrolling(true);
     m_container->addBaseUIElement(m_map);
 
-    m_map_title = new CBaseUILabel(0, 0, 300, 20, "", "(no map selected)");
+    m_map_title = new CBaseUILabel(10, 10, 300, 20, "", "(no map selected)");
     m_map_title->setFont(font);
     m_map_title->setSizeToContent(0, 0);
     m_map_title->setDrawFrame(false);
     m_map_title->setDrawBackground(false);
     m_map->getContainer()->addBaseUIElement(m_map_title);
 
-    m_map_extra = new CBaseUILabel(0, 0, 300, 20, "", "");
+    m_map_extra = new CBaseUILabel(10, 40, 300, 20, "", "");
     m_map_extra->setFont(font);
     m_map_extra->setSizeToContent(0, 0);
     m_map_extra->setDrawFrame(false);
     m_map_extra->setDrawBackground(false);
     m_map->getContainer()->addBaseUIElement(m_map_extra);
+
+    m_ready_btn = new OsuUIButton(osu, 550, 390, 300, 50, "", "Ready!");
+    m_ready_btn->setUseDefaultSkin();
+    m_ready_btn->setColor(0xff00ff00);
+    m_ready_btn->setClickCallback( fastdelegate::MakeDelegate(this, &OsuRoom::onReadyButtonClick) );
+    m_ready_btn->is_loading = true;
+    m_container->addBaseUIElement(m_ready_btn);
+
+    m_pauseButton = new OsuMainMenuPauseButton(0, 0, 0, 0, "", "");
+    m_pauseButton->setClickCallback( fastdelegate::MakeDelegate(osu->m_mainMenu, &OsuMainMenu::onPausePressed) );
+    m_container->addBaseUIElement(m_pauseButton);
 
     updateLayout(m_osu->getScreenSize());
 }
@@ -63,14 +83,17 @@ void OsuRoom::draw(Graphics *g) {
         if(status.status == FAILURE) {
             downloading_set_id = 0;
             m_map_extra->setText("FAILED TO DOWNLOAD BEATMAP");
+            m_map_extra->setSizeToContent(0, 0);
             // TODO @kiwec
         } else if(status.status == DOWNLOADING) {
-            auto text = UString::format("Downloading... %d%", status.progress * 100);
+            auto text = UString::format("Downloading... %d%%", status.progress * 100);
             m_map_extra->setText(text.toUtf8());
+            m_map_extra->setSizeToContent(0, 0);
         } else if(status.status == SUCCESS) {
-            auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d", downloading_set_id);
+            auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d/", downloading_set_id);
             m_osu->m_songBrowser2->getDatabase()->addBeatmap(mapset_path);
             m_osu->m_songBrowser2->updateSongButtonSorting();
+            debugLog("Finished loading beatmapset %d.\n", downloading_set_id);
             downloading_set_id = 0;
             on_map_change();
         }
@@ -81,6 +104,12 @@ void OsuRoom::draw(Graphics *g) {
 
 void OsuRoom::update() {
     if (!m_bVisible) return;
+
+    if (m_osu->getSelectedBeatmap() != NULL)
+        m_pauseButton->setPaused(!m_osu->getSelectedBeatmap()->isPreviewMusicPlaying());
+    else
+        m_pauseButton->setPaused(true);
+
     m_container->update();
 }
 
@@ -105,35 +134,55 @@ void OsuRoom::setVisible(bool visible) {
 void OsuRoom::updateLayout(Vector2 newResolution) {
     m_container->setSize(newResolution);
 
-    auto heading = new CBaseUILabel(50, 30, 300, 40, "", "Multiplayer");
-    heading->setFont(m_osu->getTitleFont());
-    heading->setSizeToContent(0, 0);
-    heading->setDrawFrame(false);
-    heading->setDrawBackground(false);
+    // TODO @kiwec: draw room mods, freemod status
+    // TODO @kiwec: draw more room info
 
-    // m_slotlist->setPos();
-    // m_slotlist->setSize();
+    m_slotlist->clear();
+    int y_total = 10;
+    for(int i = 0; i < 16; i++) {
+        if(bancho.room.slots[i].has_player()) {
+            auto user_info = get_user_info(bancho.room.slots[i].player_id);
+            auto user_box = new CBaseUILabel(10, y_total, 290, 20, "", user_info->name);
+            user_box->setDrawFrame(false);
+            m_slotlist->getContainer()->addBaseUIElement(user_box);
+            // TODO @kiwec: draw mods
+            // TODO @kiwec: draw player ranking/presence?
+            y_total += 30;
+        }
+    }
 
-    // TODO @kiwec: draw the rest of the room
+    bool is_ready = false;
+    for(uint8_t i = 0; i < 16; i++) {
+        if(bancho.room.slots[i].player_id == bancho.user_id) {
+            is_ready = bancho.room.slots[i].is_ready();
+            break;
+        }
+    }
+    m_ready_btn->setText(is_ready ? "Not ready" : "Ready!");
+    m_ready_btn->setColor(is_ready ? 0xffff0000 : 0xff00ff00);
+
+    const float dpiScale = Osu::getUIScale(m_osu);
+    m_pauseButton->setSize(30 * dpiScale, 30 * dpiScale);
+    m_pauseButton->setRelPos(m_osu->getScreenWidth() - m_pauseButton->getSize().x*2 - 10 * dpiScale, m_pauseButton->getSize().y + 10 * dpiScale);
 }
 
 // Exit to main menu
 void OsuRoom::ragequit() {
-    if(!bancho.is_in_a_multi_room()) return;
-
-    Packet packet = {0};
-    packet.id = EXIT_ROOM;
-    send_packet(packet);
-
     m_bVisible = false;
     m_osu->m_mainMenu->setVisible(true);
     m_osu->m_chat->removeChannel("#multiplayer");
     m_osu->m_chat->updateVisibility();
+
+    if(bancho.is_in_a_multi_room()) {
+        Packet packet = {0};
+        packet.id = EXIT_ROOM;
+        send_packet(packet);
+    }
 }
 
 void OsuRoom::process_beatmapset_info_response(Packet packet) {
     if(packet.size == 0) {
-        // TODO @kiwec
+        // TODO @kiwec: this happens when there's no matching set for the given beatmap id
         return;
     }
 
@@ -170,18 +219,31 @@ void OsuRoom::process_beatmapset_info_response(Packet packet) {
     str = strtok_r(NULL, "|", &saveptr);
     if(!str) return;
     bancho.osu->m_room->downloading_set_id = strtoul(str, NULL, 10);
+    debugLog("Downloading set id %d\n", bancho.osu->m_room->downloading_set_id);
 
     // Do nothing with the rest
 }
 
 void OsuRoom::on_map_change() {
     // TODO @kiwec: handle non-std maps
+    m_ready_btn->is_loading = true;
+
+    // Deselect current map
+    if(m_osu->getSelectedBeatmap() != nullptr) {
+        m_pauseButton->setPaused(true);
+        m_osu->m_songBrowser2->m_selectedBeatmap->deselect();
+        m_osu->m_songBrowser2->m_selectedBeatmap = nullptr;
+    }
 
     if(bancho.room.map_id == 0) {
         m_map_title->setText("(no map selected)");
+        m_map_title->setSizeToContent(0, 0);
         m_map_extra->setText("");
+        m_map_extra->setSizeToContent(0, 0);
     } else {
         std::string hash = bancho.room.map_md5.toUtf8(); // lol
+
+        // TODO @kiwec: init beatmap db if not loaded already! (happens when u multi without loading songs first)
         auto beatmap = m_osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(hash);
         if(beatmap == nullptr) {
             // Request beatmap info - automatically starts download
@@ -195,12 +257,19 @@ void OsuRoom::on_map_change() {
             send_api_request(request);
 
             m_map_title->setText(bancho.room.map_name);
-            m_map_extra->setText("Downloading... 0%");
+            m_map_title->setSizeToContent(0, 0);
+            m_map_extra->setText("Loading...");
+            m_map_extra->setSizeToContent(0, 0);
         } else {
             m_osu->m_songBrowser2->onDifficultySelected(beatmap, false);
             m_map_title->setText(bancho.room.map_name);
-            m_map_extra->setText(beatmap->getArtist());
+            m_map_title->setSizeToContent(0, 0);
+            m_map_extra->setText("Enjoy :D"); // TODO @kiwec: display star rating or something instead?
+            m_map_extra->setSizeToContent(0, 0);
             // TODO @kiwec: getBackgroundImageFileName() / display map image
+
+            // TODO @kiwec: only set is_loading to false once map is FULLY loaded incl. music etc
+            m_ready_btn->is_loading = false;
         }
     }
 
@@ -209,11 +278,19 @@ void OsuRoom::on_map_change() {
 
 void OsuRoom::on_room_joined(Room room) {
     bancho.room = room;
+    debugLog("Joined room #%d\nPlayers:\n", room.id);
+    for(int i = 0; i < 16; i++) {
+        if(room.slots[i].has_player()) {
+            auto user_info = get_user_info(room.slots[i].player_id);
+            debugLog("- %s\n", user_info->name.toUtf8());
+        }
+    }
+
     on_map_change();
 
     // Currently we can only join rooms from the lobby.
     // If we add ability to join from links, you would need to hide all other
-    // screens, kick the player out of the song we're currently playing, etc.
+    // screens, kick the player out of the song they're currently playing, etc.
     m_osu->m_lobby->setVisible(false);
     m_bVisible = true;
     updateLayout(m_osu->getScreenSize());
@@ -339,5 +416,22 @@ void OsuRoom::onClientScoreChange() {
     write_byte(&packet, m_osu->getSelectedBeatmap()->getHealth() * 100); // TODO @kiwec: currently doing 0-100, might be 0-255
     write_byte(&packet, 0); // 4P, not supported
     write_byte(&packet, m_osu->getModScorev2());
+    send_packet(packet);
+}
+
+void OsuRoom::onReadyButtonClick() {
+    if(m_ready_btn->is_loading) return;
+    engine->getSound()->play(m_osu->getSkin()->getMenuHit());
+
+    bool is_ready = false;
+    for(uint8_t i = 0; i < 16; i++) {
+        if(bancho.room.slots[i].player_id == bancho.user_id) {
+            is_ready = bancho.room.slots[i].is_ready();
+            break;
+        }
+    }
+
+    Packet packet = {0};
+    packet.id = is_ready ? MATCH_NOT_READY : MATCH_READY;
     send_packet(packet);
 }

@@ -116,92 +116,77 @@ private:
 	OsuMainMenu *m_mainMenu;
 };
 
-class OsuMainMenuPauseButton : public CBaseUIButton
+void OsuMainMenuPauseButton::draw(Graphics *g)
 {
-public:
-	OsuMainMenuPauseButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text) : CBaseUIButton(xPos, yPos, xSize, ySize, name, text)
-	{
-		m_bIsPaused = true;
-	}
+    int third = m_vSize.x/3;
 
-	virtual void draw(Graphics *g)
-	{
-		int third = m_vSize.x/3;
+    g->setColor(0xffffffff);
 
-		g->setColor(0xffffffff);
+    if (!m_bIsPaused)
+    {
+        g->fillRect(m_vPos.x, m_vPos.y, third, m_vSize.y + 1);
+        g->fillRect(m_vPos.x + 2*third, m_vPos.y, third, m_vSize.y + 1);
+    }
+    else
+    {
+        g->setColor(0xffffffff);
+        VertexArrayObject vao;
 
-		if (!m_bIsPaused)
-		{
-			g->fillRect(m_vPos.x, m_vPos.y, third, m_vSize.y + 1);
-			g->fillRect(m_vPos.x + 2*third, m_vPos.y, third, m_vSize.y + 1);
-		}
-		else
-		{
-			g->setColor(0xffffffff);
-			VertexArrayObject vao;
+        const int smoothPixels = 2;
 
-			const int smoothPixels = 2;
+        // center triangle
+        vao.addVertex(m_vPos.x, m_vPos.y + smoothPixels);
+        vao.addColor(0xffffffff);
+        vao.addVertex(m_vPos.x + m_vSize.x, m_vPos.y + m_vSize.y/2);
+        vao.addColor(0xffffffff);
+        vao.addVertex(m_vPos.x, m_vPos.y + m_vSize.y - smoothPixels);
+        vao.addColor(0xffffffff);
 
-			// center triangle
-			vao.addVertex(m_vPos.x, m_vPos.y + smoothPixels);
-			vao.addColor(0xffffffff);
-			vao.addVertex(m_vPos.x + m_vSize.x, m_vPos.y + m_vSize.y/2);
-			vao.addColor(0xffffffff);
-			vao.addVertex(m_vPos.x, m_vPos.y + m_vSize.y - smoothPixels);
-			vao.addColor(0xffffffff);
+        // top smooth
+        vao.addVertex(m_vPos.x, m_vPos.y + smoothPixels);
+        vao.addColor(0xffffffff);
+        vao.addVertex(m_vPos.x, m_vPos.y);
+        vao.addColor(0x00000000);
+        vao.addVertex(m_vPos.x + m_vSize.x, m_vPos.y + m_vSize.y/2);
+        vao.addColor(0xffffffff);
 
-			// top smooth
-			vao.addVertex(m_vPos.x, m_vPos.y + smoothPixels);
-			vao.addColor(0xffffffff);
-			vao.addVertex(m_vPos.x, m_vPos.y);
-			vao.addColor(0x00000000);
-			vao.addVertex(m_vPos.x + m_vSize.x, m_vPos.y + m_vSize.y/2);
-			vao.addColor(0xffffffff);
+        vao.addVertex(m_vPos.x, m_vPos.y);
+        vao.addColor(0x00000000);
+        vao.addVertex(m_vPos.x + m_vSize.x, m_vPos.y + m_vSize.y/2);
+        vao.addColor(0xffffffff);
+        vao.addVertex(m_vPos.x + m_vSize.x, m_vPos.y + m_vSize.y/2 - smoothPixels);
+        vao.addColor(0x00000000);
 
-			vao.addVertex(m_vPos.x, m_vPos.y);
-			vao.addColor(0x00000000);
-			vao.addVertex(m_vPos.x + m_vSize.x, m_vPos.y + m_vSize.y/2);
-			vao.addColor(0xffffffff);
-			vao.addVertex(m_vPos.x + m_vSize.x, m_vPos.y + m_vSize.y/2 - smoothPixels);
-			vao.addColor(0x00000000);
+        // bottom smooth
+        vao.addVertex(m_vPos.x, m_vPos.y + m_vSize.y - smoothPixels);
+        vao.addColor(0xffffffff);
+        vao.addVertex(m_vPos.x, m_vPos.y + m_vSize.y);
+        vao.addColor(0x00000000);
+        vao.addVertex(m_vPos.x + m_vSize.x, m_vPos.y + m_vSize.y/2);
+        vao.addColor(0xffffffff);
 
-			// bottom smooth
-			vao.addVertex(m_vPos.x, m_vPos.y + m_vSize.y - smoothPixels);
-			vao.addColor(0xffffffff);
-			vao.addVertex(m_vPos.x, m_vPos.y + m_vSize.y);
-			vao.addColor(0x00000000);
-			vao.addVertex(m_vPos.x + m_vSize.x, m_vPos.y + m_vSize.y/2);
-			vao.addColor(0xffffffff);
+        vao.addVertex(m_vPos.x, m_vPos.y + m_vSize.y);
+        vao.addColor(0x00000000);
+        vao.addVertex(m_vPos.x + m_vSize.x, m_vPos.y + m_vSize.y/2);
+        vao.addColor(0xffffffff);
+        vao.addVertex(m_vPos.x + m_vSize.x, m_vPos.y + m_vSize.y/2 + smoothPixels);
+        vao.addColor(0x00000000);
 
-			vao.addVertex(m_vPos.x, m_vPos.y + m_vSize.y);
-			vao.addColor(0x00000000);
-			vao.addVertex(m_vPos.x + m_vSize.x, m_vPos.y + m_vSize.y/2);
-			vao.addColor(0xffffffff);
-			vao.addVertex(m_vPos.x + m_vSize.x, m_vPos.y + m_vSize.y/2 + smoothPixels);
-			vao.addColor(0x00000000);
+        g->drawVAO(&vao);
+    }
 
-			g->drawVAO(&vao);
-		}
-
-		// draw hover rects
-		g->setColor(m_frameColor);
-		if (m_bMouseInside && m_bEnabled)
-		{
-			if (!m_bActive && !engine->getMouse()->isLeftDown())
-				drawHoverRect(g, 3);
-			else if (m_bActive)
-				drawHoverRect(g, 3);
-		}
-		if (m_bActive && m_bEnabled)
-			drawHoverRect(g, 6);
-	}
-
-	void setPaused(bool paused) {m_bIsPaused = paused;}
-
-private:
-	bool m_bIsPaused;
-};
-
+    // draw hover rects
+    g->setColor(m_frameColor);
+    if (m_bMouseInside && m_bEnabled)
+    {
+        if (!m_bActive && !engine->getMouse()->isLeftDown())
+            drawHoverRect(g, 3);
+        else if (m_bActive)
+            drawHoverRect(g, 3);
+    }
+    if (m_bActive && m_bEnabled)
+        drawHoverRect(g, 6);
+}
 
 
 ConVar osu_toggle_preview_music("osu_toggle_preview_music");

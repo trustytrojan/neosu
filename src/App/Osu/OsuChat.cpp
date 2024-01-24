@@ -296,6 +296,8 @@ void OsuChat::addChannel(UString channel_name) {
 
     if(m_selected_channel == nullptr && m_channels.size() == 1) {
         switchToChannel(chan);
+    } else if(channel_name == UString("#multiplayer") || channel_name == UString("#lobby")) {
+        switchToChannel(chan);
     }
 
     updateLayout(engine->getScreenSize());
@@ -341,6 +343,7 @@ void OsuChat::removeChannel(UString channel_name) {
     }
 
     delete chan;
+    updateButtonLayout(m_container->getSize());
 }
 
 void OsuChat::updateLayout(Vector2 newResolution) {
@@ -365,6 +368,7 @@ void OsuChat::updateLayout(Vector2 newResolution) {
     }
 
     updateButtonLayout(newResolution);
+    updateButtonLayout(newResolution); // idk
 }
 
 void OsuChat::updateButtonLayout(Vector2 screen) {
@@ -372,9 +376,12 @@ void OsuChat::updateButtonLayout(Vector2 screen) {
     const float button_height = 26;
     float total_x = initial_x;
 
+    std::sort(m_channels.begin(), m_channels.end(), [](OsuChatChannel* a, OsuChatChannel* b) {
+        return a->name < b->name;
+    });
+
     // Look, I really tried. But for some reason setRelPos() doesn't work until we change
     // the screen resolution once. So I'll just compute absolute position manually.
-    // TODO @kiwec: now it is broken AFTER switching resolution lol
     float button_container_height = button_height + 2;
     for(auto chan : m_channels) {
         OsuUIButton* btn = chan->btn;
