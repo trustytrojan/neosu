@@ -1592,7 +1592,7 @@ void OsuBeatmap::stop(bool quit)
 			m_osu->m_room->ragequit();
 			m_osu->onPlayEnd(true);
 		} else {
-			m_osu->m_room->onClientScoreChange();
+			m_osu->m_room->onClientScoreChange(true);
 			Packet packet = {0};
 			packet.id = FINISH_MATCH;
 			send_packet(packet);

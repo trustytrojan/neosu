@@ -1844,10 +1844,20 @@ void OsuHUD::drawWarningArrows(Graphics *g, float hitcircleDiameter)
 void OsuHUD::drawScoreBoard(Graphics *g, std::string &beatmapMD5Hash, OsuScore *currentScore)
 {
 	const int maxVisibleDatabaseScores = m_osu->isInVRDraw() ? 3 : 4;
+    auto m_db = m_osu->getSongBrowser()->getDatabase();
+	const std::vector<OsuDatabase::Score> *scores = &((*m_db->getScores())[beatmapMD5Hash]);
 
-	const std::vector<OsuDatabase::Score> *scores = &((*m_osu->getSongBrowser()->getDatabase()->getScores())[beatmapMD5Hash]);
+    auto cv_sortingtype = convar->getConVarByName("osu_songbrowser_scores_sortingtype");
+    bool is_online = cv_sortingtype->getString() == UString("Online Leaderboard");
+    if(is_online) {
+        // XXX: shouldn't be called every frame... but mcosu also does it ¯\_(ツ)_/¯
+        auto search = m_db->m_online_scores.find(beatmapMD5Hash);
+        if (search != m_db->m_online_scores.end()) {
+            scores = &search->second;
+        }
+    }
+
 	const int numScores = scores->size();
-
 	if (numScores < 1) return;
 
 	static std::vector<SCORE_ENTRY> scoreEntries;
@@ -1931,6 +1941,22 @@ void OsuHUD::drawScoreBoardMP(Graphics *g)
 {
 	if(!bancho.is_in_a_multi_room()) return;
 
+    // Update local player slot instantly
+    for(int i = 0; i < 16; i++) {
+        auto slot = &bancho.room.slots[i];
+        if(slot->player_id == bancho.user_id) {
+            // Not including fields that won't be used for the HUD
+            slot->num300 = (uint16_t)m_osu->getScore()->getNum300s();
+            slot->num100 = (uint16_t)m_osu->getScore()->getNum100s();
+            slot->num50 = (uint16_t)m_osu->getScore()->getNum50s();
+            slot->num_miss = (uint16_t)m_osu->getScore()->getNumMisses();
+            slot->current_combo = (uint16_t)m_osu->getScore()->getCombo();
+            slot->total_score = (int32_t)m_osu->getScore()->getScore();
+            slot->current_hp = m_osu->getSelectedBeatmap()->getHealth() * 100; // TODO @kiwec: currently doing 0-100, might be 0-255
+            break;
+        }
+    }
+
 	static std::vector<SCORE_ENTRY> scoreEntries;
 	scoreEntries.clear();
     for(int i = 0; i < 16; i++) {
@@ -1942,11 +1968,6 @@ void OsuHUD::drawScoreBoardMP(Graphics *g)
     	// TODO @kiwec: draw player avatar
     	(void)slot->player_id;
 
-        // TODO @kiwec: sort by score, and if someone is from the future don't
-        // show their new score until we are in sync
-        // would need to keep track of score updates, even ppy client doesn't do it lol
-        (void)slot->last_update_tms;
-
 		SCORE_ENTRY scoreEntry;
 		scoreEntry.name = user_info->name;
 
@@ -1957,8 +1978,10 @@ void OsuHUD::drawScoreBoardMP(Graphics *g)
 		// hit_score != total_score: total_score also accounts for spinner bonus & mods
 		uint64_t hit_score = 300 * slot->num300 + 100 * slot->num100 + 50 * slot->num50;
 		uint64_t max_score = 300 * (slot->num300 + slot->num100 + slot->num50 + slot->num_miss);
-		scoreEntry.accuracy = hit_score / max_score;
+		scoreEntry.accuracy = max_score > 0 ? hit_score / max_score : 0.f;
 
+        scoreEntry.missingBeatmap = false;
+        scoreEntry.downloadingBeatmap = false;
 		scoreEntry.dead = (slot->current_hp == 0); // TODO @kiwec: wrong?
 		scoreEntry.highlight = (slot->player_id == bancho.user_id);
 		scoreEntries.push_back(std::move(scoreEntry));

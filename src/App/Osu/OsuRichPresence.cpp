@@ -13,6 +13,7 @@
 #include "SteamworksInterface.h"
 #include "DiscordInterface.h"
 
+#include "Bancho.h"
 #include "BanchoNetworking.h"
 #include "Osu.h"
 #include "OsuRoom.h"
@@ -95,7 +96,7 @@ void OsuRichPresence::onPlayStart(Osu *osu)
 	playingInfo.append("]");
 
 	setStatus(osu, playingInfo);
-	setBanchoStatus(osu, playingInfo.toUtf8(), PLAYING);
+	setBanchoStatus(osu, playingInfo.toUtf8(), bancho.is_in_a_multi_room() ? MULTIPLAYER : PLAYING);
 
 	// also update window title
 	if (osu_rich_presence_dynamic_windowtitle.getBool())

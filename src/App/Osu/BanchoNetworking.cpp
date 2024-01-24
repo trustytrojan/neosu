@@ -22,8 +22,6 @@ pthread_t networking_thread;
 // TODO @kiwec: improve the way the client logs in and manages logged in state
 // Right now if log in fails or expires, things explode
 
-// TODO @kiwec: we should be able to cancel pending API requests, eg for leaderboards
-
 // Bancho protocol
 pthread_mutex_t outgoing_mutex = PTHREAD_MUTEX_INITIALIZER;
 bool try_logging_in = false;
@@ -229,7 +227,7 @@ static void *do_networking(void *data) {
 
     bool should_ping = difftime(time(NULL), last_packet_tms) > seconds_between_pings;
     if(bancho.user_id == 0) should_ping = false;
-    // TODO @kiwec: if(is_in_lobby_list || is_multiplaying) should_ping = true;
+    // TODO @kiwec: if(is_in_lobby_list) should_ping = true;
     // needs proper mutex handling
 
     pthread_mutex_lock(&outgoing_mutex);
@@ -269,13 +267,7 @@ static void *do_networking(void *data) {
       pthread_mutex_unlock(&outgoing_mutex);
     }
 
-    // TODO @kiwec: this sucks. just because the ppy client does it that way,
-    //   doesn't mean we also should... at least, we should send requests instantly
-    //   if we haven't in the last second.
-
-    // osu! doesn't need fast networking. In fact, we want to avoid spamming the
-    // servers... So we batch requests and send them once a second at most.
-    sleep(1);
+    usleep(1000); // wait 1ms
   }
 
   // unreachable

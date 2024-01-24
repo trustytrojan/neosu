@@ -180,6 +180,9 @@ struct Slot {
   // playing
   bool is_player_playing() { return (status & 0b00100000); }
 
+  // no_map
+  bool is_missing_beatmap() { return (status & 0b00010000); }
+
   // not_ready | ready | no_map | playing | complete
   bool has_player() { return (status & 0b01111100); }
 };

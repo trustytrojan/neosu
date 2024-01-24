@@ -159,8 +159,6 @@ char *strtok_x(char d, char **str) {
 void process_leaderboard_response(Packet response) {
   // TODO @kiwec: strengthen this to handle error cases
 
-  debugLog("process_leaderboard_response: %s\n", response.memory);
-
   OnlineMapInfo info = {0};
 
   char *body = (char *)response.memory;

@@ -169,6 +169,7 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
 // Exit to main menu
 void OsuRoom::ragequit() {
     m_bVisible = false;
+    bancho.match_started = false;
     m_osu->m_mainMenu->setVisible(true);
     m_osu->m_chat->removeChannel("#multiplayer");
     m_osu->m_chat->updateVisibility();
@@ -318,37 +319,39 @@ void OsuRoom::on_match_started(Room room) {
         return;
     }
 
-    auto map_name = UString::format("%s [%s]", m_osu->getSelectedBeatmap()->getTitle(), m_osu->getSelectedBeatmap()->getSelectedDifficulty2()->getDifficultyName());
-    OsuRichPresence::setBanchoStatus(m_osu, map_name.toUtf8(), MULTIPLAYER);
+    last_packet_tms = time(NULL);
 
-    m_bVisible = false;
-    // TODO @kiwec: onbeforeplay etc?
-    m_osu->getSelectedBeatmap()->play();
+    m_osu->onBeforePlayStart();
+    if(m_osu->getSelectedBeatmap()->play()) {
+        m_bVisible = false;
+        bancho.match_started = true;
+        m_osu->m_songBrowser2->m_bHasSelectedAndIsPlaying = true;
+        m_osu->onPlayStart();
+    } else {
+        ragequit(); // map failed to load
+    }
 }
-
+;
 void OsuRoom::on_match_score_updated(Packet* packet) {
     int32_t update_tms = read_int(packet);
-    uint8_t player_id = read_byte(packet);
+    uint8_t slot_id = read_byte(packet);
+    if(slot_id > 15) return;
 
-    for(int i = 0; i < 16; i++) {
-        if(bancho.room.slots[i].player_id != player_id) continue;
-
-        bancho.room.slots[i].last_update_tms = update_tms;
-        bancho.room.slots[i].num300 = read_short(packet);
-        bancho.room.slots[i].num100 = read_short(packet);
-        bancho.room.slots[i].num50 = read_short(packet);
-        bancho.room.slots[i].num_geki = read_short(packet);
-        bancho.room.slots[i].num_katu = read_short(packet);
-        bancho.room.slots[i].num_miss = read_short(packet);
-        bancho.room.slots[i].total_score = read_int(packet);
-        bancho.room.slots[i].current_combo = read_short(packet);
-        bancho.room.slots[i].max_combo = read_short(packet);
-        bancho.room.slots[i].is_perfect = read_byte(packet);
-        bancho.room.slots[i].current_hp = read_byte(packet);
-        bancho.room.slots[i].tag = read_byte(packet);
-        bancho.room.slots[i].is_scorev2 = read_byte(packet);
-        return;
-    }
+    auto slot = &bancho.room.slots[slot_id];
+    slot->last_update_tms = update_tms;
+    slot->num300 = read_short(packet);
+    slot->num100 = read_short(packet);
+    slot->num50 = read_short(packet);
+    slot->num_geki = read_short(packet);
+    slot->num_katu = read_short(packet);
+    slot->num_miss = read_short(packet);
+    slot->total_score = read_int(packet);
+    slot->current_combo = read_short(packet);
+    slot->max_combo = read_short(packet);
+    slot->is_perfect = read_byte(packet);
+    slot->current_hp = read_byte(packet);
+    slot->tag = read_byte(packet);
+    slot->is_scorev2 = read_byte(packet);
 }
 
 void OsuRoom::on_all_players_loaded() {
@@ -365,6 +368,7 @@ void OsuRoom::on_match_finished() {
     if(!bancho.is_playing_a_multi_map()) return;
     m_osu->onPlayEnd(false, false);
     m_bVisible = true;
+    bancho.match_started = false;
 }
 
 void OsuRoom::on_all_players_skipped() {
@@ -383,10 +387,16 @@ void OsuRoom::on_player_skip(int32_t user_id) {
 void OsuRoom::on_match_aborted() {
     if(!bancho.is_playing_a_multi_map()) return;
     m_osu->onPlayEnd(false, true);
+    m_bVisible = true;
+    bancho.match_started = false;
 }
 
-void OsuRoom::onClientScoreChange() {
+void OsuRoom::onClientScoreChange(bool force) {
     if(!bancho.is_playing_a_multi_map()) return;
+
+    // Update at most once every 250ms
+    bool should_update = difftime(time(NULL), last_packet_tms) > 0.25;
+    if(!should_update && !force) return;
 
     Packet packet = {0};
     packet.id = UPDATE_MATCH_SCORE;
@@ -416,6 +426,8 @@ void OsuRoom::onClientScoreChange() {
     write_byte(&packet, 0); // 4P, not supported
     write_byte(&packet, m_osu->getModScorev2());
     send_packet(packet);
+
+    last_packet_tms = time(NULL);
 }
 
 void OsuRoom::onReadyButtonClick() {

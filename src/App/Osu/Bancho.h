@@ -21,15 +21,8 @@ struct Bancho {
   // Room ID can be 0 on private servers! So we check if the room has players instead.
   bool is_in_a_multi_room() { return room.nb_players > 0; }
 
-  bool is_playing_a_multi_map() {
-    if(!is_in_a_multi_room()) return false;
-    for(int i = 0; i < 16; i++) {
-      if(room.slots[i].player_id == user_id) {
-        return room.slots[i].is_player_playing();
-      }
-    }
-    return false;
-  }
+  bool match_started = false;
+  bool is_playing_a_multi_map() { return match_started; }
 };
 
 struct Channel {

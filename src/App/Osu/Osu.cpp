@@ -1522,6 +1522,7 @@ void Osu::onKeyDown(KeyboardEvent &key)
 					if (m_iMultiplayerClientNumEscPresses > 1)
 					{
 						getSelectedBeatmap()->stop(true);
+						m_room->ragequit();
 					}
 					else
 					{

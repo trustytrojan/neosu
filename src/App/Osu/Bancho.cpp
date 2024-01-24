@@ -36,8 +36,7 @@
 // TODO @kiwec: make webpage for https://mcosu.kiwec.net/
 // TODO @kiwec: disable user/pw/endpoint fields when logging in / once logged in
 // TODO @kiwec: mark DMs as read when they're visible on screen
-// TODO @kiwec: display global leaderboard when playing singleplayer
-// TODO @kiwec: display room leaderboard when playing multi
+// TODO @kiwec: PLEASE polish multiplayer room UI
 
 
 Bancho bancho;
@@ -206,7 +205,7 @@ void handle_packet(Packet *packet) {
   } else if (packet->id == MATCH_STARTED) {
     auto room = Room(packet);
     bancho.osu->m_room->on_match_started(room);
-  } else if (packet->id == MATCH_SCORE_UPDATED) {
+  } else if (packet->id == UPDATE_MATCH_SCORE || packet->id == MATCH_SCORE_UPDATED) {
     bancho.osu->m_room->on_match_score_updated(packet);
   } else if (packet->id == HOST_CHANGED) {
     debugLog("Host changed!\n");
