@@ -25,13 +25,12 @@ void update_download_progress(void *clientp, curl_off_t dltotal, curl_off_t dlno
     (void)ultotal;
     (void)ulnow;
 
-
     pthread_mutex_lock(&downloading_mapsets_mutex);
     auto dt = (DownloadThread*)clientp;
     if(dltotal == 0) {
         dt->progress = 0.f;
-    } else {
-        dt->progress = dlnow / dltotal;
+    } else if(dlnow > 0) {
+        dt->progress = (float)dlnow / (float)dltotal;
     }
     pthread_mutex_unlock(&downloading_mapsets_mutex);
 }
@@ -91,6 +90,7 @@ void* run_mapset_download_thread(void* arg) {
         auto extract_to = UString::format(MCENGINE_DATA_DIR "maps/%d", dt->id);
 
         auto query_url = UString::format(mirrors[i], dt->id);
+        debugLog("Downloading %s\n", query_url.toUtf8());
         curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
         curl_easy_setopt(curl, CURLOPT_USERAGENT, MCOSU_USER_AGENT);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);

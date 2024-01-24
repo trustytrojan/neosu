@@ -86,7 +86,7 @@ void OsuRoom::draw(Graphics *g) {
             m_map_extra->setSizeToContent(0, 0);
             // TODO @kiwec
         } else if(status.status == DOWNLOADING) {
-            auto text = UString::format("Downloading... %d%%", status.progress * 100);
+            auto text = UString::format("Downloading... %.2f%%", status.progress * 100.f);
             m_map_extra->setText(text.toUtf8());
             m_map_extra->setSizeToContent(0, 0);
         } else if(status.status == SUCCESS) {
@@ -219,7 +219,6 @@ void OsuRoom::process_beatmapset_info_response(Packet packet) {
     str = strtok_r(NULL, "|", &saveptr);
     if(!str) return;
     bancho.osu->m_room->downloading_set_id = strtoul(str, NULL, 10);
-    debugLog("Downloading set id %d\n", bancho.osu->m_room->downloading_set_id);
 
     // Do nothing with the rest
 }

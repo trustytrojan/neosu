@@ -284,8 +284,6 @@ static void *do_networking(void *data) {
 #endif
 
 static void handle_api_response(Packet packet) {
-  debugLog("Received API response of type %d\n", packet.id);
-
   if (packet.id == GET_MAP_LEADERBOARD) {
     process_leaderboard_response(packet);
   } else if(packet.id == GET_BEATMAPSET_INFO) {
