@@ -357,7 +357,7 @@ void OsuHUD::draw(Graphics *g)
 			drawScoreBoard(g, (std::string&)beatmap->getSelectedDifficulty2()->getMD5Hash(), m_osu->getScore());
         }
         if(osu_draw_scoreboard_mp.getBool() && bancho.is_playing_a_multi_map()) {
-			drawScoreBoardMP(g); // TODO @kiwec: also draw scoreboard on result screen
+			drawScoreBoardMP(g);
         }
 
 		if (!m_osu->isSkipScheduled() && beatmap->isInSkippableSection() && ((m_osu_skip_intro_enabled_ref->getBool() && beatmap->getHitObjectIndexForCurrentTime() < 1) || (m_osu_skip_breaks_enabled_ref->getBool() && beatmap->getHitObjectIndexForCurrentTime() > 0)))
@@ -711,7 +711,7 @@ void OsuHUD::drawVR(Graphics *g, Matrix4 &mvp, OsuVR *vr)
                 drawScoreBoard(g, (std::string&)beatmap->getSelectedDifficulty2()->getMD5Hash(), m_osu->getScore());
             }
             if(osu_draw_scoreboard_mp.getBool() && bancho.is_playing_a_multi_map()) {
-                drawScoreBoardMP(g); // TODO @kiwec: don't allow VR multiplayer?
+                drawScoreBoardMP(g);
             }
 
 			if (!m_osu->isSkipScheduled() && beatmap->isInSkippableSection() && ((m_osu_skip_intro_enabled_ref->getBool() && beatmap->getHitObjectIndexForCurrentTime() < 1) || (m_osu_skip_breaks_enabled_ref->getBool() && beatmap->getHitObjectIndexForCurrentTime() > 0)))
@@ -1952,7 +1952,7 @@ void OsuHUD::drawScoreBoardMP(Graphics *g)
             slot->num_miss = (uint16_t)m_osu->getScore()->getNumMisses();
             slot->current_combo = (uint16_t)m_osu->getScore()->getCombo();
             slot->total_score = (int32_t)m_osu->getScore()->getScore();
-            slot->current_hp = m_osu->getSelectedBeatmap()->getHealth() * 100; // TODO @kiwec: currently doing 0-100, might be 0-255
+            slot->current_hp = m_osu->getSelectedBeatmap()->getHealth() * 200;
             break;
         }
     }
@@ -1982,7 +1982,7 @@ void OsuHUD::drawScoreBoardMP(Graphics *g)
 
         scoreEntry.missingBeatmap = false;
         scoreEntry.downloadingBeatmap = false;
-		scoreEntry.dead = (slot->current_hp == 0); // TODO @kiwec: wrong?
+		scoreEntry.dead = (slot->current_hp == 0);
 		scoreEntry.highlight = (slot->player_id == bancho.user_id);
 		scoreEntries.push_back(std::move(scoreEntry));
     }

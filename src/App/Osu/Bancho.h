@@ -13,7 +13,9 @@ struct Bancho {
   UString pw_md5;
   Room room;
 
-  // TODO @kiwec: implement score submission
+  // XXX: Score submission is not implemented. No servers want to deal with that. (yet)
+  //      I have plenty of ideas on how to allow open source clients to work, but
+  //      that would require running my own server, so don't count on it.
   bool submit_scores = false;
 
   bool is_online() { return user_id > 0; }

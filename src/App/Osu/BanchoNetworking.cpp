@@ -8,6 +8,7 @@
 #include "BanchoProtocol.h"
 #include "ConVar.h"
 #include "Engine.h"
+#include "OsuLobby.h"
 #include "OsuOptionsMenu.h"
 #include "OsuRoom.h"
 #include "OsuUIButton.h"
@@ -111,11 +112,10 @@ static void send_api_request(CURL *curl, APIRequest api_out) {
   Packet response = {0};
   response.id = api_out.type;
   response.extra = api_out.extra;
+  response.extra_int = api_out.extra_int;
   response.memory = new uint8_t[2048];
 
   auto query_url = UString::format("https://osu.%s%s", bancho.endpoint.toUtf8(), api_out.path.c_str());
-  debugLog("Sending request: %s\n", query_url.toUtf8());
-
   curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
@@ -225,10 +225,10 @@ static void *do_networking(void *data) {
       send_api_request(curl, api_out);
     }
 
+    if(bancho.osu->m_lobby->isVisible()) seconds_between_pings = 1;
+    if(bancho.is_in_a_multi_room() && seconds_between_pings > 3) seconds_between_pings = 3;
     bool should_ping = difftime(time(NULL), last_packet_tms) > seconds_between_pings;
     if(bancho.user_id == 0) should_ping = false;
-    // TODO @kiwec: if(is_in_lobby_list) should_ping = true;
-    // needs proper mutex handling
 
     pthread_mutex_lock(&outgoing_mutex);
     if (try_logging_in) {

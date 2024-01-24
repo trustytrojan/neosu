@@ -140,6 +140,7 @@ typedef struct {
   size_t size;
   size_t pos;
   uint8_t *extra;
+  uint32_t extra_int; // lazy
 } Packet;
 
 struct Slot {

@@ -22,7 +22,7 @@ struct OsuRoom : public OsuScreen {
     void ragequit();
 
     static void process_beatmapset_info_response(Packet packet);
-    void on_map_change();
+    void on_map_change(bool download = true);
     void on_room_joined(Room room);
     void on_room_updated(Room room);
     void on_match_started(Room room);
@@ -36,7 +36,7 @@ struct OsuRoom : public OsuScreen {
     void onClientScoreChange(bool force = false);
     void onReadyButtonClick();
 
-    uint32_t downloading_set_id = 0;
+    std::unordered_map<uint32_t, uint32_t> mapset_by_mapid;
 
     CBaseUIContainer *m_container = nullptr;
     CBaseUIScrollView *m_slotlist = nullptr;

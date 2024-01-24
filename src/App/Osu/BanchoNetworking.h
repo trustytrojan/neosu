@@ -17,6 +17,7 @@ struct APIRequest {
   APIRequestType type;
   std::string path;
   uint8_t *extra;
+  uint32_t extra_int; // lazy
 };
 
 void disconnect();

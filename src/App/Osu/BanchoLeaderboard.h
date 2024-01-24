@@ -3,7 +3,7 @@
 #include "OsuDatabaseBeatmap.h"
 
 struct OnlineMapInfo {
-  int ranked_status;
+  long ranked_status;
   bool server_has_osz2;
   uint32_t beatmap_id;
   uint32_t beatmap_set_id;

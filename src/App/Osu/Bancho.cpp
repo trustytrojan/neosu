@@ -37,6 +37,8 @@
 // TODO @kiwec: disable user/pw/endpoint fields when logging in / once logged in
 // TODO @kiwec: mark DMs as read when they're visible on screen
 // TODO @kiwec: PLEASE polish multiplayer room UI
+// TODO @kiwec: results screen
+// TODO @kiwec: handle being room host: toggle freemod, edit mods, select map, win condition, team mode, password, kick players, lock slots
 
 
 Bancho bancho;
@@ -156,6 +158,7 @@ void handle_packet(Packet *packet) {
     int32_t spectator_id = read_int(packet);
     debugLog("Spectator joined: user id %d\n", spectator_id);
     // TODO @kiwec: display spectators
+    // TODO @kiwec: send packets so spectators can spectate
   } else if (packet->id == SPECTATOR_LEFT) {
     int32_t spectator_id = read_int(packet);
     debugLog("Spectator left: user id %d\n", spectator_id);

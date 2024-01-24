@@ -52,7 +52,8 @@ void RoomUIElement::onRoomJoinButtonClick(CBaseUIButton* btn) {
     write_string(&packet, ""); // TODO @kiwec: password support
     send_packet(packet);
 
-    // TODO @kiwec: disable button, show loading indicator
+    auto osu_btn = (OsuUIButton*)btn;
+    osu_btn->is_loading = true;
     m_multi->m_osu->getNotificationOverlay()->addNotification("Joining room...");
 }
 
@@ -132,6 +133,10 @@ void OsuLobby::setVisible(bool visible) {
 
         // LOBBY presence is broken so we send MULTIPLAYER
         OsuRichPresence::setBanchoStatus(m_osu, "Looking to play", MULTIPLAYER);
+
+        // XXX: Could call refreshBeatmaps() here so we load them if not already done so.
+        //      Would need to edit it a bit to work outside of songBrowser2, + display loading progress.
+        //      Ideally, you'd do this in the background and still be able to browse rooms.
     } else {
         Packet packet = {0};
         packet.id = EXIT_ROOM_LIST;
@@ -195,10 +200,6 @@ void OsuLobby::updateRoom(Room room) {
         if(old_room->id == room.id) {
             *old_room = room;
             updateLayout(m_container->getSize());
-
-            // TODO @kiwec: if we're in this room, we should send MATCH_HAS_BEATMAP / MATCH_NO_BEATMAP
-            // TODO @kiwec: especially important, send MATCH_NO_BEATMAP if the gamemode isn't osu!std
-
             return;
         }
     }

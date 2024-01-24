@@ -78,28 +78,38 @@ OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
 void OsuRoom::draw(Graphics *g) {
     if (!m_bVisible) return;
 
-    if(downloading_set_id != 0 && m_osu->getSelectedBeatmap() == NULL) {
-        auto status = download_mapset(downloading_set_id);
-        if(status.status == FAILURE) {
-            downloading_set_id = 0;
-            m_map_extra->setText("FAILED TO DOWNLOAD BEATMAP");
-            m_map_extra->setSizeToContent(0, 0);
-            // TODO @kiwec
-        } else if(status.status == DOWNLOADING) {
-            auto text = UString::format("Downloading... %.2f%%", status.progress * 100.f);
-            m_map_extra->setText(text.toUtf8());
-            m_map_extra->setSizeToContent(0, 0);
-        } else if(status.status == SUCCESS) {
-            auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d/", downloading_set_id);
-            m_osu->m_songBrowser2->getDatabase()->addBeatmap(mapset_path);
-            m_osu->m_songBrowser2->updateSongButtonSorting();
-            debugLog("Finished loading beatmapset %d.\n", downloading_set_id);
-            downloading_set_id = 0;
-            on_map_change();
-        }
+    m_container->draw(g);
+
+    // Not technically drawing below this line, just checking for map download progress
+    if(m_osu->getSelectedBeatmap() != NULL) return;
+    if(bancho.room.map_id == 0) return;
+    auto search = mapset_by_mapid.find(bancho.room.map_id);
+    if (search == mapset_by_mapid.end()) return;
+
+    uint32_t set_id = search->second;
+    if(set_id == 0) {
+        m_map_extra->setText("Could not find beatmapset ID from given map ID.");
+        m_map_extra->setSizeToContent(0, 0);
+        return;
     }
 
-    m_container->draw(g);
+    auto status = download_mapset(set_id);
+    if(status.status == FAILURE) {
+        m_map_extra->setText("Failed to download beatmap set :(");
+        m_map_extra->setSizeToContent(0, 0);
+        bancho.room.map_id = 0; // don't try downloading it again
+    } else if(status.status == DOWNLOADING) {
+        auto text = UString::format("Downloading... %.2f%%", status.progress * 100.f);
+        m_map_extra->setText(text.toUtf8());
+        m_map_extra->setSizeToContent(0, 0);
+    } else if(status.status == SUCCESS) {
+        auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_id);
+        // XXX: Make a permanent database for auto-downloaded songs, so we can load them like osu!.db's
+        m_osu->m_songBrowser2->getDatabase()->addBeatmap(mapset_path);
+        m_osu->m_songBrowser2->updateSongButtonSorting();
+        debugLog("Finished loading beatmapset %d.\n", set_id);
+        on_map_change(false);
+    }
 }
 
 void OsuRoom::update() {
@@ -146,7 +156,7 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
             user_box->setDrawFrame(false);
             m_slotlist->getContainer()->addBaseUIElement(user_box);
             // TODO @kiwec: draw mods
-            // TODO @kiwec: draw player ranking/presence?
+            // TODO @kiwec: draw player ranking/presence?, [playing]/[no map]
             y_total += 30;
         }
     }
@@ -182,8 +192,9 @@ void OsuRoom::ragequit() {
 }
 
 void OsuRoom::process_beatmapset_info_response(Packet packet) {
+    uint32_t map_id = packet.extra_int;
     if(packet.size == 0) {
-        // TODO @kiwec: this happens when there's no matching set for the given beatmap id
+        bancho.osu->m_room->mapset_by_mapid[map_id] = 0;
         return;
     }
 
@@ -219,13 +230,12 @@ void OsuRoom::process_beatmapset_info_response(Packet packet) {
 
     str = strtok_r(NULL, "|", &saveptr);
     if(!str) return;
-    bancho.osu->m_room->downloading_set_id = strtoul(str, NULL, 10);
+    bancho.osu->m_room->mapset_by_mapid[map_id] = strtoul(str, NULL, 10);
 
     // Do nothing with the rest
 }
 
-void OsuRoom::on_map_change() {
-    // TODO @kiwec: handle non-std maps
+void OsuRoom::on_map_change(bool download) {
     m_ready_btn->is_loading = true;
 
     // Deselect current map
@@ -242,10 +252,20 @@ void OsuRoom::on_map_change() {
         m_map_extra->setSizeToContent(0, 0);
     } else {
         std::string hash = bancho.room.map_md5.toUtf8(); // lol
-
-        // TODO @kiwec: init beatmap db if not loaded already! (happens when u multi without loading songs first)
         auto beatmap = m_osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(hash);
-        if(beatmap == nullptr) {
+        if(beatmap != nullptr) {
+            m_osu->m_songBrowser2->onDifficultySelected(beatmap, false);
+            m_map_title->setText(bancho.room.map_name);
+            m_map_title->setSizeToContent(0, 0);
+            m_map_extra->setText("Enjoy :D"); // TODO @kiwec: display star rating or something instead?
+            m_map_extra->setSizeToContent(0, 0);
+            // TODO @kiwec: getBackgroundImageFileName() / display map image
+            m_ready_btn->is_loading = false;
+
+            Packet packet = {0};
+            packet.id = MATCH_HAS_BEATMAP;
+            send_packet(packet);
+        } else if(download) {
             // Request beatmap info - automatically starts download
             std::string path = "/web/osu-search-set.php?b=" + std::to_string(bancho.room.map_id);
             path += "&u=" + std::string(bancho.username.toUtf8());
@@ -253,6 +273,7 @@ void OsuRoom::on_map_change() {
             APIRequest request = {
                 .type = GET_BEATMAPSET_INFO,
                 .path = path,
+                .extra_int = (uint32_t)bancho.room.map_id,
             };
             send_api_request(request);
 
@@ -260,16 +281,18 @@ void OsuRoom::on_map_change() {
             m_map_title->setSizeToContent(0, 0);
             m_map_extra->setText("Loading...");
             m_map_extra->setSizeToContent(0, 0);
-        } else {
-            m_osu->m_songBrowser2->onDifficultySelected(beatmap, false);
-            m_map_title->setText(bancho.room.map_name);
-            m_map_title->setSizeToContent(0, 0);
-            m_map_extra->setText("Enjoy :D"); // TODO @kiwec: display star rating or something instead?
-            m_map_extra->setSizeToContent(0, 0);
-            // TODO @kiwec: getBackgroundImageFileName() / display map image
 
-            // TODO @kiwec: only set is_loading to false once map is FULLY loaded incl. music etc
-            m_ready_btn->is_loading = false;
+            Packet packet = {0};
+            packet.id = MATCH_NO_BEATMAP;
+            send_packet(packet);
+        } else {
+            m_map_extra->setText("Failed to load map. Is it catch/taiko/mania?");
+            m_map_extra->setSizeToContent(0, 0);
+            bancho.room.map_id = 0; // prevents trying to load it again
+
+            Packet packet = {0};
+            packet.id = MATCH_NO_BEATMAP;
+            send_packet(packet);
         }
     }
 
@@ -286,7 +309,7 @@ void OsuRoom::on_room_joined(Room room) {
         }
     }
 
-    on_map_change();
+    on_map_change(true);
 
     // Currently we can only join rooms from the lobby.
     // If we add ability to join from links, you would need to hide all other
@@ -306,7 +329,7 @@ void OsuRoom::on_room_updated(Room room) {
     bool map_changed = bancho.room.map_id != room.map_id;
     bancho.room = room;
     if(map_changed) {
-        on_map_change();
+        on_map_change(true);
     }
 
     updateLayout(m_osu->getScreenSize());
@@ -379,6 +402,7 @@ void OsuRoom::on_player_skip(int32_t user_id) {
     for(int i = 0; i < 16; i++) {
         if(bancho.room.slots[i].player_id == user_id) {
             bancho.room.slots[i].skipped = true;
+            // TODO @kiwec: display in OsuHUD
             break;
         }
     }
@@ -421,8 +445,8 @@ void OsuRoom::onClientScoreChange(bool force) {
     write_int(&packet, (int32_t)m_osu->getScore()->getScore());
     write_short(&packet, (uint16_t)m_osu->getScore()->getCombo());
     write_short(&packet, (uint16_t)m_osu->getScore()->getComboMax());
-    write_byte(&packet, m_osu->getScore()->getNumSliderBreaks() == 0 && m_osu->getScore()->getNumMisses() == 0); // TODO @kiwec: is this correct?
-    write_byte(&packet, m_osu->getSelectedBeatmap()->getHealth() * 100); // TODO @kiwec: currently doing 0-100, might be 0-255
+    write_byte(&packet, m_osu->getScore()->getNumSliderBreaks() == 0 && m_osu->getScore()->getNumMisses() == 0 && m_osu->getScore()->getNum50s() == 0 && m_osu->getScore()->getNum100s() == 0);
+    write_byte(&packet, m_osu->getSelectedBeatmap()->getHealth() * 200);
     write_byte(&packet, 0); // 4P, not supported
     write_byte(&packet, m_osu->getModScorev2());
     send_packet(packet);

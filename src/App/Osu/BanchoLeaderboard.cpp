@@ -157,14 +157,16 @@ char *strtok_x(char d, char **str) {
 }
 
 void process_leaderboard_response(Packet response) {
-  // TODO @kiwec: strengthen this to handle error cases
-
+  // NOTE: We're not doing anything with the "info" struct.
+  //       Server can return partial responses in some cases, so make sure
+  //       you actually received the data if you plan on using it.
   OnlineMapInfo info = {0};
-
+  std::string beatmap_hash = (char *)response.extra;
+  std::vector<OsuDatabase::Score> scores;
   char *body = (char *)response.memory;
 
   char *ranked_status = strtok_x('|', &body);
-  info.ranked_status = strtoul(ranked_status, NULL, 10);
+  info.ranked_status = strtol(ranked_status, NULL, 10);
 
   char *server_has_osz2 = strtok_x('|', &body);
   info.server_has_osz2 = !strcmp(server_has_osz2, "true");
@@ -197,16 +199,12 @@ void process_leaderboard_response(Packet response) {
   char *pb_score = strtok_x('\n', &body);
   (void)pb_score;
 
-  std::vector<OsuDatabase::Score> scores;
   char *score_line = NULL;
   while ((score_line = strtok_x('\n', &body))[0] != '\0') {
     scores.push_back(parse_score(score_line));
   }
 
-  debugLog("Got response for beatmap %d\n", info.beatmap_id);
-
-  std::string beatmap_hash = (char *)response.extra;
-  bancho.osu->getSongBrowser()->getDatabase()->m_online_scores[beatmap_hash] =
-      scores;
+  debugLog("Received online leaderbord for Beatmap ID %d\n", info.beatmap_id);
+  bancho.osu->getSongBrowser()->getDatabase()->m_online_scores[beatmap_hash] = scores;
   bancho.osu->getSongBrowser()->rebuildScoreButtons();
 }

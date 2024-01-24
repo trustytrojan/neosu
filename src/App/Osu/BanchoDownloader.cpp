@@ -191,14 +191,6 @@ BeatmapDownloadStatus download_mapset(uint32_t set_id) {
             status.progress = dt->progress;
             status.status = dt->status;
             is_downloading = true;
-
-            // TODO @kiwec: don't let client retry immediately
-            if(dt->status == FAILURE) {
-                auto it = std::find(downloading_mapsets.begin(), downloading_mapsets.end(), dt);
-                downloading_mapsets.erase(it);
-                delete dt;
-            }
-
             break;
         }
     }
