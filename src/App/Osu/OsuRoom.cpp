@@ -3,6 +3,7 @@
 #include "BanchoNetworking.h"
 #include "BanchoUsers.h"
 #include "Osu.h"
+#include "OsuBackgroundImageHandler.h"
 #include "OsuChat.h"
 #include "OsuDatabase.h"
 #include "OsuLobby.h"
@@ -27,12 +28,12 @@ OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
 
     m_container = new CBaseUIContainer(0, 0, 0, 0, "");
 
-    auto heading = new CBaseUILabel(50, 30, 300, 40, "", "Multiplayer");
+    heading = new CBaseUILabel(50, 30, 300, 40, "", "Multiplayer");
     heading->setFont(m_osu->getTitleFont());
     heading->setSizeToContent(0, 0);
     heading->setDrawFrame(false);
-    m_container->addBaseUIElement(heading);
     heading->setDrawBackground(false);
+    m_container->addBaseUIElement(heading);
 
     m_slotlist = new CBaseUIScrollView(30, 140, 400, 300, "");
     m_slotlist->setDrawFrame(true);
@@ -43,8 +44,8 @@ OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
 
     m_map = new CBaseUIScrollView(440, 140, 500, 100, "");
     m_map->setDrawFrame(true);
-    m_map->setDrawBackground(false);
-    m_map->setBlockScrolling(true);
+    m_map->setDrawBackground(true);
+    m_map->setBackgroundColor(0xdd000000);
     m_container->addBaseUIElement(m_map);
 
     m_map_title = new CBaseUILabel(10, 10, 300, 20, "", "(no map selected)");
@@ -78,6 +79,8 @@ OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
 void OsuRoom::draw(Graphics *g) {
     if (!m_bVisible) return;
 
+    // XXX: Add convar for toggling room backgrounds
+    OsuSongBrowser2::drawSelectedBeatmapBackgroundImage(g, m_osu, 1.0);
     m_container->draw(g);
 
     // Not technically drawing below this line, just checking for map download progress
@@ -144,6 +147,8 @@ void OsuRoom::setVisible(bool visible) {
 void OsuRoom::updateLayout(Vector2 newResolution) {
     m_container->setSize(newResolution);
 
+    heading->setText(bancho.room.name);
+
     // TODO @kiwec: draw room mods, freemod status
     // TODO @kiwec: draw more room info
 
@@ -154,6 +159,8 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
             auto user_info = get_user_info(bancho.room.slots[i].player_id);
             auto user_box = new CBaseUILabel(10, y_total, 290, 20, "", user_info->name);
             user_box->setDrawFrame(false);
+            user_box->setDrawBackground(false);
+            user_box->setTextColor(bancho.room.slots[i].is_ready() ? 0xff00ff00 : 0xffffffff);
             m_slotlist->getContainer()->addBaseUIElement(user_box);
             // TODO @kiwec: draw mods
             // TODO @kiwec: draw player ranking/presence?, [playing]/[no map]
@@ -173,7 +180,7 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
 
     const float dpiScale = Osu::getUIScale(m_osu);
     m_pauseButton->setSize(30 * dpiScale, 30 * dpiScale);
-    m_pauseButton->setRelPos(m_osu->getScreenWidth() - m_pauseButton->getSize().x*2 - 10 * dpiScale, m_pauseButton->getSize().y + 10 * dpiScale);
+    m_pauseButton->setPos(m_osu->getScreenWidth() - m_pauseButton->getSize().x*2 - 10 * dpiScale, m_pauseButton->getSize().y + 10 * dpiScale);
 }
 
 // Exit to main menu

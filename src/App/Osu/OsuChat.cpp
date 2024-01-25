@@ -435,7 +435,7 @@ void OsuChat::onResolutionChange(Vector2 newResolution) {
 }
 
 bool OsuChat::isVisibilityForced() {
-    bool sitting_in_room = m_osu->m_room->isVisible() && !m_osu->m_songBrowser2->isVisible();
+    bool sitting_in_room = m_osu->m_room->isVisible() && !m_osu->m_songBrowser2->isVisible() && !bancho.is_playing_a_multi_map();
     return m_osu->m_lobby->isVisible() || sitting_in_room;
 }
 

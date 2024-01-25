@@ -176,7 +176,6 @@ void OsuLobby::updateLayout(Vector2 newResolution) {
     m_container->addBaseUIElement(heading);
 
     // TODO @kiwec: create room button
-    // TODO @kiwec: back to main menu button
 
     float y = 200;
     const float room_height = 105;

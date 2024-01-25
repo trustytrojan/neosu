@@ -37,8 +37,9 @@
 // TODO @kiwec: disable user/pw/endpoint fields when logging in / once logged in
 // TODO @kiwec: mark DMs as read when they're visible on screen
 // TODO @kiwec: PLEASE polish multiplayer room UI
-// TODO @kiwec: results screen
+// TODO @kiwec: results screen (show singleplayer score result, keep leaderboard HUD shown)
 // TODO @kiwec: handle being room host: toggle freemod, edit mods, select map, win condition, team mode, password, kick players, lock slots
+// TODO @kiwec: allow options menu in multi lobby, multi room
 
 
 Bancho bancho;
