@@ -1965,6 +1965,8 @@ void OsuHUD::drawScoreBoardMP(Graphics *g)
 
 		auto user_info = get_user_info(slot->player_id, false);
 
+        // TODO @kiwec: draw player skip status
+
     	// TODO @kiwec: draw player avatar
     	(void)slot->player_id;
 

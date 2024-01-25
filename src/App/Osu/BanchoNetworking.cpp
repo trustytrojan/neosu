@@ -60,6 +60,13 @@ void disconnect() {
 }
 
 void reconnect() {
+  if(bancho.osu->m_iInstanceID > 0) {
+    // XXX: To handle multiple instances you would have to do some complex IPC
+    //      Would be great to be able to use McOsu as tournament spectator client...
+    //      But that's not in scope right now.
+    return;
+  }
+
   disconnect();
 
   // Disable autologin, in case there's an error while logging in

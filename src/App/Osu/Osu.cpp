@@ -948,8 +948,15 @@ void Osu::update()
 
 					const bool isCursorInsideSkipButton = m_hud->getSkipClickRect().contains(engine->getMouse()->getPos());
 
-					if (isCursorInsideSkipButton || isAnyVRKeyDown)
-						m_bSkipScheduled = true;
+					if (isCursorInsideSkipButton || isAnyVRKeyDown) {
+						if(!m_bSkipScheduled) {
+							m_bSkipScheduled = true;
+
+							Packet packet = {0};
+							packet.id = MATCH_SKIP_REQUEST;
+							send_packet(packet);
+						}
+					}
 				}
 			}
 			else
@@ -967,7 +974,7 @@ void Osu::update()
 			{
 				bool can_skip_intro = (osu_skip_intro_enabled.getBool() && getSelectedBeatmap()->getHitObjectIndexForCurrentTime() < 1);
 				bool can_skip_break = (osu_skip_breaks_enabled.getBool() && getSelectedBeatmap()->getHitObjectIndexForCurrentTime() > 0);
-				if (!bancho.is_playing_a_multi_map()) {
+				if (bancho.is_playing_a_multi_map()) {
 					can_skip_intro = bancho.room.all_players_skipped;
 					can_skip_break = false;
 				}
