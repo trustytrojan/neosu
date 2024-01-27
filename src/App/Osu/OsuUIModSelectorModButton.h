@@ -20,9 +20,8 @@ public:
 	OsuUIModSelectorModButton(Osu *osu, OsuModSelector* osuModSelector, float xPos, float yPos, float xSize, float ySize, UString name);
 
 	virtual void draw(Graphics *g);
-	virtual void update();
-
-	void click() {onMouseDownInside();}
+	virtual void mouse_update(bool *propagate_clicks);
+	virtual void onClicked();
 
 	void resetState();
 
@@ -35,7 +34,6 @@ public:
 	inline bool isOn() const {return m_bOn;}
 
 private:
-	virtual void onMouseDownInside();
 	virtual void onFocusStolen();
 
 	void setOn(bool on);

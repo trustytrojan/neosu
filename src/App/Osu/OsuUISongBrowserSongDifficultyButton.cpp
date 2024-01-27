@@ -162,10 +162,10 @@ void OsuUISongBrowserSongDifficultyButton::draw(Graphics *g)
 	}
 }
 
-void OsuUISongBrowserSongDifficultyButton::update()
+void OsuUISongBrowserSongDifficultyButton::mouse_update(bool *propagate_clicks)
 {
-	OsuUISongBrowserSongButton::update();
 	if (!m_bVisible) return;
+	OsuUISongBrowserSongButton::mouse_update(propagate_clicks);
 
 	// dynamic settings (moved from constructor to here)
 	const bool newOffsetPercentSelectionState = (m_bSelected || !isIndependentDiffButton());

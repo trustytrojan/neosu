@@ -231,10 +231,10 @@ void OsuUISongBrowserUserButton::draw(Graphics *g)
 	}
 }
 
-void OsuUISongBrowserUserButton::update()
+void OsuUISongBrowserUserButton::mouse_update(bool *propagate_clicks)
 {
-	CBaseUIButton::update();
 	if (!m_bVisible) return;
+	CBaseUIButton::mouse_update(propagate_clicks);
 
 	if (isMouseInside() && m_vTooltipLines.size() > 0)
 	{

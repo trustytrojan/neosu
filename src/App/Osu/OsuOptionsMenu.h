@@ -41,7 +41,7 @@ public:
 	virtual ~OsuOptionsMenu();
 
 	virtual void draw(Graphics *g);
-	virtual void update();
+	virtual void mouse_update(bool *propagate_clicks);
 
 	virtual void onKeyDown(KeyboardEvent &e);
 	virtual void onKeyUp(KeyboardEvent &e);

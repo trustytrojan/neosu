@@ -20,7 +20,7 @@ public:
 	OsuUISongBrowserUserButton(Osu *osu);
 
 	virtual void draw(Graphics *g);
-	virtual void update();
+	virtual void mouse_update(bool *propagate_clicks);
 
 	void updateUserStats();
 

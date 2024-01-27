@@ -21,7 +21,7 @@ public:
 	virtual ~OsuUISongBrowserSongButton();
 
 	virtual void draw(Graphics *g);
-	virtual void update();
+	virtual void mouse_update(bool *propagate_clicks);
 
 	void triggerContextMenu(Vector2 pos);
 

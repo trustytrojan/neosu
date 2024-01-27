@@ -162,13 +162,6 @@ public:
 
 	inline bool isVisible2() const {return m_bVisible2;}
 
-private:
-	virtual void onMouseDownInside()
-	{
-		CBaseUIButton::onMouseDownInside();
-		onClicked();
-	}
-
 	bool m_bVisible2;
 	float m_fAlpha;
 };
@@ -413,17 +406,17 @@ void OsuRankingScreen::drawModImage(Graphics *g, OsuSkinImage *image, Vector2 &p
 		max.y = pos.y + image->getSize().y/2;
 }
 
-void OsuRankingScreen::update()
+void OsuRankingScreen::mouse_update(bool *propagate_clicks)
 {
-	OsuScreenBackable::update();
 	if (!m_bVisible) return;
+	OsuScreenBackable::mouse_update(propagate_clicks);
 
 	// HACKHACK:
 	if (m_osu->getOptionsMenu()->isMouseInside())
 		engine->getMouse()->resetWheelDelta();
 
 	// update and focus handling
-	m_container->update();
+	m_container->mouse_update(propagate_clicks);
 
 	if (m_osu->getOptionsMenu()->isMouseInside())
 		stealFocus();

@@ -362,10 +362,10 @@ void OsuUserStatsScreen::draw(Graphics *g)
 	OsuScreenBackable::draw(g);
 }
 
-void OsuUserStatsScreen::update()
+void OsuUserStatsScreen::mouse_update(bool *propagate_clicks)
 {
-	OsuScreenBackable::update();
 	if (!m_bVisible) return;
+	OsuScreenBackable::mouse_update(propagate_clicks);
 
 	if (m_bRecalculatingPP)
 	{
@@ -384,8 +384,8 @@ void OsuUserStatsScreen::update()
 			return; // don't update rest of UI while recalcing
 	}
 
-	m_contextMenu->update();
-	m_container->update();
+	m_contextMenu->mouse_update(propagate_clicks);
+	m_container->mouse_update(propagate_clicks);
 
 	if (m_contextMenu->isMouseInside())
 		m_scores->stealFocus();

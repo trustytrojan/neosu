@@ -52,10 +52,10 @@ public:
 		m_osu = osu;
 	}
 
-	virtual void update()
+	virtual void mouse_update(bool *propagate_clicks)
 	{
-		CBaseUIButton::update();
 		if (!m_bVisible) return;
+		CBaseUIButton::mouse_update(propagate_clicks);
 
 		if (isMouseInside() && m_sTooltipText.length() > 0)
 		{
@@ -470,7 +470,7 @@ void OsuModSelector::draw(Graphics *g)
 	g->popTransform();
 }
 
-void OsuModSelector::update()
+void OsuModSelector::mouse_update(bool *propagate_clicks)
 {
 	// HACKHACK: updating while invisible is stupid, but the only quick solution for still animating otherwise stuck sliders while closed
 	if (!m_bVisible)
@@ -478,7 +478,7 @@ void OsuModSelector::update()
 		for (int i=0; i<m_overrideSliders.size(); i++)
 		{
 			if (m_overrideSliders[i].slider->hasChanged())
-				m_overrideSliders[i].slider->update();
+				m_overrideSliders[i].slider->mouse_update(propagate_clicks);
 		}
 		if (m_bScheduledHide)
 		{
@@ -500,7 +500,7 @@ void OsuModSelector::update()
 	// update experimental mods, they take focus precedence over everything else
 	if (m_bExperimentalVisible)
 	{
-		m_experimentalContainer->update();
+		m_experimentalContainer->mouse_update(propagate_clicks);
 		if (m_experimentalContainer->isMouseInside())
 		{
 			if (!m_container->isActive())
@@ -513,8 +513,8 @@ void OsuModSelector::update()
 		m_experimentalContainer->stealFocus();
 
 	// update
-	m_container->update();
-	m_overrideSliderContainer->update();
+	m_container->mouse_update(propagate_clicks);
+	m_overrideSliderContainer->mouse_update(propagate_clicks);
 
 	// override slider tooltips (ALT)
 	if (m_bShowOverrideSliderALTHint)

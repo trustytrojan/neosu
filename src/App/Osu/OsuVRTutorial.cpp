@@ -60,12 +60,11 @@ void OsuVRTutorial::draw(Graphics *g)
 	OsuScreenBackable::draw(g);
 }
 
-void OsuVRTutorial::update()
+void OsuVRTutorial::mouse_update(bool *propagate_clicks)
 {
-	OsuScreenBackable::update();
 	if (!m_bVisible) return;
-
-	m_container->update();
+	OsuScreenBackable::mouse_update(propagate_clicks);
+	m_container->mouse_update(propagate_clicks);
 
 	float minPosToUnlockBackButton = m_tutorialImage1->getSize().y*0.75f;
 	if (m_scrollView->getScrollPosY() < -minPosToUnlockBackButton && !m_backButton->isVisible())

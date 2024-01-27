@@ -252,10 +252,10 @@ public:
 		m_textColorUnbound = 0xffbb0000;
 	}
 
-	virtual void update()
+	virtual void mouse_update(bool *propagate_clicks)
 	{
-		CBaseUILabel::update();
 		if (!m_bVisible) return;
+		CBaseUILabel::mouse_update(propagate_clicks);
 
 		const KEYCODE keyCode = (KEYCODE)m_key->getInt();
 
@@ -375,10 +375,10 @@ public:
 		g->fillGradient(m_vPos.x, m_vPos.y, fullColorBlockSize, m_vSize.y, left, middle, left, middle);
 	}
 
-	virtual void update()
+	virtual void mouse_update(bool *propagate_clicks)
 	{
-		CBaseUIButton::update();
 		if (!m_bVisible || !m_bEnabled) return;
+		CBaseUIButton::mouse_update(propagate_clicks);
 
 		if (isMouseInside())
 		{
@@ -1397,10 +1397,8 @@ void OsuOptionsMenu::draw(Graphics *g)
 	}
 }
 
-void OsuOptionsMenu::update()
+void OsuOptionsMenu::mouse_update(bool *propagate_clicks)
 {
-	OsuScreenBackable::update();
-
 	// workshop background refresh takes some time, open context menu after loading is finished
 	// do this even if options menu is invisible (but only show context menu if visible after finished)
 	if (m_bWorkshopSkinSelectScheduled)
@@ -1415,6 +1413,7 @@ void OsuOptionsMenu::update()
 	}
 
 	if (!m_bVisible) return;
+	OsuScreenBackable::mouse_update(propagate_clicks);
 
 	if (m_bDPIScalingScrollToSliderScheduled)
 	{
@@ -1425,7 +1424,7 @@ void OsuOptionsMenu::update()
 	if (m_osu->getHUD()->isVolumeOverlayBusy() || m_backButton->isActive())
 		m_container->stealFocus();
 
-	m_container->update();
+	m_container->mouse_update(propagate_clicks);
 
 	// force context menu focus
 	if (m_contextMenu->isVisible())

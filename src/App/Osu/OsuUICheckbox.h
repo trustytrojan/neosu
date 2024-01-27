@@ -17,7 +17,7 @@ class OsuUICheckbox : public CBaseUICheckbox
 public:
 	OsuUICheckbox(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name, UString text);
 
-	virtual void update();
+	virtual void mouse_update(bool *propagate_clicks);
 
 	void setTooltipText(UString text);
 

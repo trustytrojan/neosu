@@ -19,10 +19,10 @@ OsuUICheckbox::OsuUICheckbox(Osu *osu, float xPos, float yPos, float xSize, floa
 	m_bFocusStolenDelay = false;
 }
 
-void OsuUICheckbox::update()
+void OsuUICheckbox::mouse_update(bool *propagate_clicks)
 {
-	CBaseUICheckbox::update();
 	if (!m_bVisible) return;
+	CBaseUICheckbox::mouse_update(propagate_clicks);
 
 	if (isMouseInside() && m_tooltipTextLines.size() > 0 && !m_bFocusStolenDelay)
 	{

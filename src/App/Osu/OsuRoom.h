@@ -13,7 +13,7 @@ struct OsuRoom : public OsuScreen {
     OsuRoom(Osu *osu);
 
     virtual void draw(Graphics *g);
-    virtual void update();
+    virtual void mouse_update(bool *propagate_clicks);
     virtual void onKeyDown(KeyboardEvent &e);
     virtual void onResolutionChange(Vector2 newResolution);
     virtual void setVisible(bool visible); // does nothing

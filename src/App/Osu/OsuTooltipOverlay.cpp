@@ -91,7 +91,7 @@ void OsuTooltipOverlay::draw(Graphics *g)
 	}
 }
 
-void OsuTooltipOverlay::update()
+void OsuTooltipOverlay::mouse_update(bool *propagate_clicks)
 {
 	if (m_bDelayFadeout)
 		m_bDelayFadeout = false;

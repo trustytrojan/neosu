@@ -17,7 +17,7 @@ class OsuUIUserStatsScreenLabel : public CBaseUILabel
 public:
 	OsuUIUserStatsScreenLabel(Osu *osu, float xPos=0, float yPos=0, float xSize=0, float ySize=0, UString name="", UString text="");
 
-	virtual void update();
+	virtual void mouse_update(bool *propagate_clicks);
 
 	void setTooltipText(UString text) {m_tooltipTextLines = text.split("\n");}
 

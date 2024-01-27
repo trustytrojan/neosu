@@ -70,10 +70,10 @@ void OsuUIModSelectorModButton::draw(Graphics *g)
 	}
 }
 
-void OsuUIModSelectorModButton::update()
+void OsuUIModSelectorModButton::mouse_update(bool *propagate_clicks)
 {
-	CBaseUIButton::update();
 	if (!m_bVisible) return;
+	CBaseUIButton::mouse_update(propagate_clicks);
 
 	// handle tooltips
 	if (isMouseInside() && m_bAvailable && m_states.size() > 0 && !m_bFocusStolenDelay)
@@ -95,9 +95,8 @@ void OsuUIModSelectorModButton::resetState()
 	setState(0);
 }
 
-void OsuUIModSelectorModButton::onMouseDownInside()
+void OsuUIModSelectorModButton::onClicked()
 {
-	CBaseUIButton::onMouseDownInside();
 	if (!m_bAvailable) return;
 
 	// increase state, wrap around, switch on and off

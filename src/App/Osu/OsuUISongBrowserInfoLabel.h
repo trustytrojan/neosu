@@ -22,7 +22,7 @@ public:
 	OsuUISongBrowserInfoLabel(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name);
 
 	void draw(Graphics *g);
-	void update();
+	virtual void mouse_update(bool *propagate_clicks);
 
 	void setFromBeatmap(OsuBeatmap *beatmap, OsuDatabaseBeatmap *diff2);
 	void setFromMissingBeatmap(long beatmapId);

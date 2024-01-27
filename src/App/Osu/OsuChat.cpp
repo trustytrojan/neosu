@@ -166,12 +166,12 @@ void OsuChat::draw(Graphics *g) {
     }
 }
 
-void OsuChat::update() {
+void OsuChat::mouse_update(bool *propagate_clicks) {
     if (!m_bVisible) return;
-    m_container->update();
-    m_button_container->update();
+    m_container->mouse_update(propagate_clicks);
+    m_button_container->mouse_update(propagate_clicks);
     if(m_selected_channel) {
-        m_selected_channel->ui->update();
+        m_selected_channel->ui->mouse_update(propagate_clicks);
     }
     m_input_box->focus();
 }

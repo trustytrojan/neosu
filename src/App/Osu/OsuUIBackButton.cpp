@@ -56,10 +56,10 @@ void OsuUIBackButton::draw(Graphics *g)
 	}
 }
 
-void OsuUIBackButton::update()
+void OsuUIBackButton::mouse_update(bool *propagate_clicks)
 {
-	CBaseUIButton::update();
 	if (!m_bVisible) return;
+	CBaseUIButton::mouse_update(propagate_clicks);
 }
 
 void OsuUIBackButton::onMouseInside()

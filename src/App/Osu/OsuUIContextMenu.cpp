@@ -26,10 +26,10 @@ OsuUIContextMenuButton::OsuUIContextMenuButton(Osu *osu, float xPos, float yPos,
 	m_iID = id;
 }
 
-void OsuUIContextMenuButton::update()
+void OsuUIContextMenuButton::mouse_update(bool *propagate_clicks)
 {
-	CBaseUIButton::update();
 	if (!m_bVisible) return;
+	CBaseUIButton::mouse_update(propagate_clicks);
 
 	if (isMouseInside() && m_tooltipTextLines.size() > 0)
 	{
@@ -116,12 +116,12 @@ void OsuUIContextMenu::draw(Graphics *g)
 		g->pop3DScene();
 }
 
-void OsuUIContextMenu::update()
+void OsuUIContextMenu::mouse_update(bool *propagate_clicks)
 {
-	CBaseUIElement::update();
 	if (!m_bVisible || !m_bVisible2) return;
+	CBaseUIElement::mouse_update(propagate_clicks);
 
-	m_container->update();
+	m_container->mouse_update(propagate_clicks);
 
 	if (m_containedTextbox != NULL)
 	{

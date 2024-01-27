@@ -497,7 +497,7 @@ void OsuHUD::draw(Graphics *g)
 	}
 }
 
-void OsuHUD::update()
+void OsuHUD::mouse_update(bool *propagate_clicks)
 {
 	OsuBeatmap *beatmap = m_osu->getSelectedBeatmap();
 
@@ -563,7 +563,7 @@ void OsuHUD::update()
 	m_volumeEffects->setEnabled(m_volumeMaster->isEnabled());
 	m_volumeMusic->setEnabled(m_volumeMaster->isEnabled());
 	m_volumeSliderOverlayContainer->setSize(m_osu->getScreenSize());
-	m_volumeSliderOverlayContainer->update();
+	m_volumeSliderOverlayContainer->mouse_update(propagate_clicks);
 
 	if (!m_volumeMaster->isBusy())
 		m_volumeMaster->setValue(m_osu_volume_master_ref->getFloat(), false);

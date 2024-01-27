@@ -15,10 +15,10 @@ OsuUIUserStatsScreenLabel::OsuUIUserStatsScreenLabel(Osu *osu, float xPos, float
 	m_osu = osu;
 }
 
-void OsuUIUserStatsScreenLabel::update()
+void OsuUIUserStatsScreenLabel::mouse_update(bool *propagate_clicks)
 {
-	CBaseUILabel::update();
 	if (!m_bVisible) return;
+	CBaseUILabel::mouse_update(propagate_clicks);
 
 	if (isMouseInside())
 	{

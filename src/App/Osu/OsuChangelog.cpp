@@ -508,16 +508,16 @@ void OsuChangelog::draw(Graphics *g)
 	OsuScreenBackable::draw(g);
 }
 
-void OsuChangelog::update()
+void OsuChangelog::mouse_update(bool *propagate_clicks)
 {
-	OsuScreenBackable::update();
 	if (!m_bVisible) return;
+	OsuScreenBackable::mouse_update(propagate_clicks);
 
 	// HACKHACK:
 	if (m_osu->getHUD()->isVolumeOverlayBusy() || m_osu->getOptionsMenu()->isMouseInside())
 		engine->getMouse()->resetWheelDelta();
 
-	m_container->update();
+	m_container->mouse_update(propagate_clicks);
 
 	if (m_osu->getHUD()->isVolumeOverlayBusy() || m_osu->getOptionsMenu()->isMouseInside())
 	{

@@ -97,10 +97,10 @@ void OsuUISongBrowserSongButton::draw(Graphics *g)
 	drawSubTitle(g);
 }
 
-void OsuUISongBrowserSongButton::update()
+void OsuUISongBrowserSongButton::mouse_update(bool *propagate_clicks)
 {
-	OsuUISongBrowserButton::update();
 	if (!m_bVisible) return;
+	OsuUISongBrowserButton::mouse_update(propagate_clicks);
 
 	// HACKHACK: calling these two every frame is a bit insane, but too lazy to write delta detection logic atm. (UI desync is not a problem since parent buttons are invisible while selected, so no resorting happens in that state)
 	sortChildren();

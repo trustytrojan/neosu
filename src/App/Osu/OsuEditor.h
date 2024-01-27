@@ -17,7 +17,7 @@ public:
 	virtual ~OsuEditor();
 
 	virtual void draw(Graphics *g);
-	virtual void update();
+	virtual void mouse_update(bool *propagate_clicks);
 
 	virtual void onResolutionChange(Vector2 newResolution);
 

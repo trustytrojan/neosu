@@ -30,7 +30,7 @@ public:
 	virtual ~OsuUIContextMenu();
 
 	virtual void draw(Graphics *g);
-	virtual void update();
+	virtual void mouse_update(bool *propagate_clicks);
 
 	virtual void onKeyUp(KeyboardEvent &e);
 	virtual void onKeyDown(KeyboardEvent &e);
@@ -86,7 +86,7 @@ public:
 	OsuUIContextMenuButton(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name, UString text, int id);
 	virtual ~OsuUIContextMenuButton() {;}
 
-	virtual void update();
+	virtual void mouse_update(bool *propagate_clicks);
 
 	inline int getID() const {return m_iID;}
 

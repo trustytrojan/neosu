@@ -36,7 +36,7 @@ public:
 	virtual ~OsuUISongBrowserScoreButton();
 
 	void draw(Graphics *g);
-	void update();
+	void mouse_update(bool *propagate_clicks);
 
 	void highlight();
 	void resetHighlight();

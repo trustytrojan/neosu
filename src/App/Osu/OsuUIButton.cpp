@@ -83,10 +83,10 @@ void OsuUIButton::draw(Graphics *g)
 	}
 }
 
-void OsuUIButton::update()
+void OsuUIButton::mouse_update(bool *propagate_clicks)
 {
-	CBaseUIButton::update();
 	if (!m_bVisible) return;
+	CBaseUIButton::mouse_update(propagate_clicks);
 
 	if (isMouseInside() && m_tooltipTextLines.size() > 0 && !m_bFocusStolenDelay)
 	{

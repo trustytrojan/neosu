@@ -97,10 +97,7 @@ public:
 
 	void onMouseInside();
 	void onMouseOutside();
-	void onMouseDownInside();
-
-private:
-	virtual void onClicked();
+	void onMouseDownInside(bool *propagate_clicks);
 
 	OsuMainMenu *m_mainMenu;
 };
@@ -110,7 +107,7 @@ class OsuMainMenuButton : public CBaseUIButton
 public:
 	OsuMainMenuButton(OsuMainMenu *mainMenu, float xPos, float yPos, float xSize, float ySize, UString name, UString text);
 
-	void onMouseDownInside();
+	void onMouseDownInside(bool *propagate_clicks);
 
 private:
 	OsuMainMenu *m_mainMenu;
@@ -1152,7 +1149,7 @@ void OsuMainMenu::draw(Graphics *g)
 	*/
 }
 
-void OsuMainMenu::update()
+void OsuMainMenu::mouse_update(bool *propagate_clicks)
 {
 	if (!m_bVisible) return;
 
@@ -1166,12 +1163,12 @@ void OsuMainMenu::update()
 
 	// update and focus handling
 	// the main button always gets top focus
-	m_mainButton->update();
+	m_mainButton->mouse_update(propagate_clicks);
 	if (m_mainButton->isMouseInside())
 		m_container->stealFocus();
 
-	m_container->update();
-	m_updateAvailableButton->update();
+	m_container->mouse_update(propagate_clicks);
+	m_updateAvailableButton->mouse_update(propagate_clicks);
 
 	if (m_osu->getOptionsMenu()->isMouseInside())
 		m_container->stealFocus();
@@ -1735,14 +1732,14 @@ void OsuMainMenuMainButton::draw(Graphics *g)
 	///CBaseUIButton::draw(g);
 }
 
-void OsuMainMenuMainButton::onMouseDownInside()
+void OsuMainMenuMainButton::onMouseDownInside(bool *propagate_clicks)
 {
 	anim->moveQuadInOut(&m_mainMenu->m_fSizeAddAnim, 0.0f, 0.06f, 0.0f, false);
 	anim->moveQuadInOut(&m_mainMenu->m_fSizeAddAnim, 0.12f, 0.06f, 0.07f, false);
 
 	m_mainMenu->onMainMenuButtonPressed();
 
-	CBaseUIButton::onMouseDownInside();
+	CBaseUIButton::onMouseDownInside(propagate_clicks);
 }
 
 void OsuMainMenuMainButton::onMouseInside()
@@ -1759,22 +1756,16 @@ void OsuMainMenuMainButton::onMouseOutside()
 	CBaseUIButton::onMouseOutside();
 }
 
-void OsuMainMenuMainButton::onClicked()
-{
-	onMouseDownInside();
-}
-
-
 
 OsuMainMenuButton::OsuMainMenuButton(OsuMainMenu *mainMenu, float xPos, float yPos, float xSize, float ySize, UString name, UString text) : CBaseUIButton(xPos, yPos, xSize, ySize, name, text)
 {
 	m_mainMenu = mainMenu;
 }
 
-void OsuMainMenuButton::onMouseDownInside()
+void OsuMainMenuButton::onMouseDownInside(bool *propagate_clicks)
 {
 	if (m_mainMenu->m_mainButton->isMouseInside()) return;
 
 	engine->getSound()->play(m_mainMenu->getOsu()->getSkin()->getMenuHit());
-	CBaseUIButton::onMouseDownInside();
+	CBaseUIButton::onMouseDownInside(propagate_clicks);
 }

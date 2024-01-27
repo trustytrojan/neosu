@@ -83,9 +83,9 @@ void OsuLobby::draw(Graphics *g) {
     m_container->draw(g);
 }
 
-void OsuLobby::update() {
+void OsuLobby::mouse_update(bool *propagate_clicks) {
     if (!m_bVisible) return;
-    m_container->update();
+    m_container->mouse_update(propagate_clicks);
 }
 
 void OsuLobby::onKeyDown(KeyboardEvent &key) {
@@ -185,6 +185,8 @@ void OsuLobby::updateLayout(Vector2 newResolution) {
         m_list->getContainer()->addBaseUIElement(room_ui);
         y += room_height + 20;
     }
+
+    // TODO @kiwec: add padding so user can scroll to bottom without chat being in the way
 
     m_list->setScrollSizeToContent();
 }

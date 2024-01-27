@@ -115,7 +115,7 @@ void OsuRoom::draw(Graphics *g) {
     }
 }
 
-void OsuRoom::update() {
+void OsuRoom::mouse_update(bool *propagate_clicks) {
     if (!m_bVisible) return;
 
     if (m_osu->getSelectedBeatmap() != NULL)
@@ -123,7 +123,7 @@ void OsuRoom::update() {
     else
         m_pauseButton->setPaused(true);
 
-    m_container->update();
+    m_container->mouse_update(propagate_clicks);
 }
 
 void OsuRoom::onKeyDown(KeyboardEvent &key) {

@@ -880,11 +880,13 @@ void Osu::update()
 	if (isInPlayMode() && m_osu_mod_fposu_ref->getBool())
 		m_fposu->update();
 
-	m_windowManager->update();
+	bool propagate_clicks = true;
+	m_windowManager->mouse_update(&propagate_clicks);
 
 	for (int i=0; i<m_screens.size(); i++)
 	{
-		m_screens[i]->update();
+		m_screens[i]->mouse_update(&propagate_clicks);
+		if(!propagate_clicks) break;
 	}
 
 	// main beatmap update

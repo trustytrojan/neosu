@@ -382,10 +382,10 @@ void OsuUISongBrowserScoreButton::draw(Graphics *g)
 	}
 }
 
-void OsuUISongBrowserScoreButton::update()
+void OsuUISongBrowserScoreButton::mouse_update(bool *propagate_clicks)
 {
-	CBaseUIButton::update();
 	if (!m_bVisible) return;
+	CBaseUIButton::mouse_update(propagate_clicks);
 
 	// HACKHACK: this should really be part of the UI base
 	// right click detection

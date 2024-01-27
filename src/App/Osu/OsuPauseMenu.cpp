@@ -132,12 +132,12 @@ void OsuPauseMenu::draw(Graphics *g)
 	}
 }
 
-void OsuPauseMenu::update()
+void OsuPauseMenu::mouse_update(bool *propagate_clicks)
 {
 	if (!m_bVisible) return;
 
 	// update and focus handling
-	m_container->update();
+	m_container->mouse_update(propagate_clicks);
 
 	if (m_osu->getOptionsMenu()->isMouseInside())
 		m_container->stealFocus();

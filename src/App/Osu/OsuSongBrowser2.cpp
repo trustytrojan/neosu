@@ -1120,7 +1120,7 @@ void OsuSongBrowser2::drawSelectedBeatmapBackgroundImage(Graphics *g, Osu *osu, 
 	}
 }
 
-void OsuSongBrowser2::update()
+void OsuSongBrowser2::mouse_update(bool *propagate_clicks)
 {
 	// HACKHACK: temporarily putting this on top as to support recalc while inPlayMode() (and songbrowser is invisible) for drawing strain graph in scrubbing timeline (and total stars statistics, and max total pp statistics)
 	// handle background star calculation (1)
@@ -1138,8 +1138,8 @@ void OsuSongBrowser2::update()
 	if (m_bottombar->isMouseInside() && !isMouseInsideValidBackButtonHitbox)
 		OsuScreenBackable::stealFocus();
 
-	OsuScreenBackable::update();
 	if (!m_bVisible) return;
+	OsuScreenBackable::mouse_update(propagate_clicks);
 
 	// refresh logic (blocks every other call in the update() function below it!)
 	if (m_bBeatmapRefreshScheduled)
@@ -1160,13 +1160,13 @@ void OsuSongBrowser2::update()
 		engine->getMouse()->resetWheelDelta();
 
 	// update and focus handling
-	m_contextMenu->update();
-	m_songBrowser->update();
+	m_contextMenu->mouse_update(propagate_clicks);
+	m_songBrowser->mouse_update(propagate_clicks);
 	m_songBrowser->getContainer()->update_pos(); // necessary due to constant animations
-	m_bottombar->update();
-	m_scoreBrowser->update();
-	m_topbarLeft->update();
-	m_topbarRight->update();
+	m_bottombar->mouse_update(propagate_clicks);
+	m_scoreBrowser->mouse_update(propagate_clicks);
+	m_topbarLeft->mouse_update(propagate_clicks);
+	m_topbarRight->mouse_update(propagate_clicks);
 
 	if (m_contextMenu->isMouseInside() || m_osu->getHUD()->isVolumeOverlayBusy() || (m_backButton->isMouseInside() && isMouseInsideValidBackButtonHitbox))
 	{

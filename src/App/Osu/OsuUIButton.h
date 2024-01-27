@@ -18,7 +18,7 @@ public:
 	OsuUIButton(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name, UString text);
 
 	virtual void draw(Graphics *g);
-	virtual void update();
+	virtual void mouse_update(bool *propagate_clicks);
 
 	void setColor(Color color) {m_color = color; m_backupColor = color;}
 	void setUseDefaultSkin() {m_bDefaultSkin = true;}

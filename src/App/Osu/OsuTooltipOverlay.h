@@ -19,7 +19,7 @@ public:
 	virtual ~OsuTooltipOverlay();
 
 	virtual void draw(Graphics *g);
-	virtual void update();
+	virtual void mouse_update(bool *propagate_clicks);
 
 	void begin();
 	void addLine(UString text);

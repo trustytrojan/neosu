@@ -32,10 +32,10 @@ void OsuEditor::draw(Graphics *g)
 	OsuScreenBackable::draw(g);
 }
 
-void OsuEditor::update()
+void OsuEditor::mouse_update(bool *propagate_clicks)
 {
-	OsuScreenBackable::update();
 	if (!m_bVisible) return;
+	OsuScreenBackable::mouse_update(propagate_clicks);
 
 	// update stuff if visible
 }

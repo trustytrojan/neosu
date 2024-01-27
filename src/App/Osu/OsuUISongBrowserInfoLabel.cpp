@@ -190,10 +190,10 @@ void OsuUISongBrowserInfoLabel::draw(Graphics *g)
 	}
 }
 
-void OsuUISongBrowserInfoLabel::update()
+void OsuUISongBrowserInfoLabel::mouse_update(bool *propagate_clicks)
 {
-	CBaseUIButton::update();
 	if (!m_bVisible) return;
+	CBaseUIButton::mouse_update(propagate_clicks);
 
 	// detail info tooltip when hovering over diff info
 	if (isMouseInside() && !m_osu->getOptionsMenu()->isMouseInside())

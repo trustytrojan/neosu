@@ -125,7 +125,7 @@ void OsuUISongBrowserButton::drawMenuButtonBackground(Graphics *g)
 	g->popTransform();
 }
 
-void OsuUISongBrowserButton::update()
+void OsuUISongBrowserButton::mouse_update(bool *propagate_clicks)
 {
 	// HACKHACK: absolutely disgusting
 	// temporarily fool CBaseUIElement with modified position and size
@@ -136,7 +136,7 @@ void OsuUISongBrowserButton::update()
 		m_vPos = getActualPos();
 		m_vSize = getActualSize();
 		{
-			CBaseUIButton::update();
+			CBaseUIButton::mouse_update(propagate_clicks);
 		}
 		m_vPos = posBackup;
 		m_vSize = sizeBackup;

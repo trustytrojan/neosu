@@ -18,7 +18,7 @@ public:
 	OsuUIBackButton(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name);
 
 	virtual void draw(Graphics *g);
-	virtual void update();
+	virtual void mouse_update(bool *propagate_clicks);
 
 	virtual void onMouseInside();
 	virtual void onMouseOutside();
