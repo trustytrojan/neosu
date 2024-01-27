@@ -62,9 +62,10 @@ struct OsuChat : public OsuScreen
     void updateLayout(Vector2 newResolution);
     void updateButtonLayout(Vector2 screen);
 
-    virtual void setVisible(bool visible);
+    virtual CBaseUIContainer* setVisible(bool visible);
     bool isVisibilityForced();
     void updateVisibility();
+    bool isMouseInChat();
 
     OsuChatChannel* m_selected_channel = nullptr;
     std::vector<OsuChatChannel*> m_channels;

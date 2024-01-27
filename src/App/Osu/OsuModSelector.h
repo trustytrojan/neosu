@@ -43,7 +43,7 @@ public:
 
 	virtual void onResolutionChange(Vector2 newResolution);
 
-	virtual void setVisible(bool visible);
+	virtual CBaseUIContainer* setVisible(bool visible);
 
 	void enableAuto();
 	void toggleAuto();

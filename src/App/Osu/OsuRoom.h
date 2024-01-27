@@ -16,7 +16,7 @@ struct OsuRoom : public OsuScreen {
     virtual void mouse_update(bool *propagate_clicks);
     virtual void onKeyDown(KeyboardEvent &e);
     virtual void onResolutionChange(Vector2 newResolution);
-    virtual void setVisible(bool visible); // does nothing
+    virtual CBaseUIContainer* setVisible(bool visible); // does nothing
 
     void updateLayout(Vector2 newResolution);
     void ragequit();

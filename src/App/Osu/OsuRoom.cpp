@@ -140,8 +140,9 @@ void OsuRoom::onResolutionChange(Vector2 newResolution) {
     updateLayout(newResolution);
 }
 
-void OsuRoom::setVisible(bool visible) {
+CBaseUIContainer* OsuRoom::setVisible(bool visible) {
     abort(); // surprise!
+    return this;
 }
 
 void OsuRoom::updateLayout(Vector2 newResolution) {

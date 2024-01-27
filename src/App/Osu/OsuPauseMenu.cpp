@@ -139,9 +139,6 @@ void OsuPauseMenu::mouse_update(bool *propagate_clicks)
 	// update and focus handling
 	m_container->mouse_update(propagate_clicks);
 
-	if (m_osu->getOptionsMenu()->isMouseInside())
-		m_container->stealFocus();
-
 	if (m_bScheduledVisibilityChange)
 	{
 		m_bScheduledVisibilityChange = false;
@@ -408,7 +405,7 @@ void OsuPauseMenu::onResolutionChange(Vector2 newResolution)
 	updateLayout();
 }
 
-void OsuPauseMenu::setVisible(bool visible)
+CBaseUIContainer* OsuPauseMenu::setVisible(bool visible)
 {
 	m_bVisible = visible;
 
@@ -431,10 +428,6 @@ void OsuPauseMenu::setVisible(bool visible)
 	// HACKHACK: force disable mod selection screen in case it was open and the beatmap ended/failed
 	m_osu->getModSelector()->setVisible(false);
 
-	// HACKHACK: workaround for BaseUI framework deficiency (missing mouse events. if a mouse button is being held, and then suddenly a BaseUIElement gets put under it and set visible, and then the mouse button is released, that "incorrectly" fires onMouseUpInside/onClicked/etc.)
-	if (visible)
-		m_container->stealFocus();
-
 	// reset
 	m_selectedButton = NULL;
 	m_bInitialWarningArrowFlyIn = true;
@@ -450,6 +443,7 @@ void OsuPauseMenu::setVisible(bool visible)
 
 	anim->moveQuadOut(&m_fDimAnim, (m_bVisible ? 1.0f : 0.0f), osu_pause_anim_duration.getFloat() * (m_bVisible ? 1.0f - m_fDimAnim : m_fDimAnim), true);
 	m_osu->m_chat->updateVisibility();
+	return this;
 }
 
 void OsuPauseMenu::setContinueEnabled(bool continueEnabled)

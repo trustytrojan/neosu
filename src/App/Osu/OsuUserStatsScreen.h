@@ -31,7 +31,7 @@ public:
 	virtual void draw(Graphics *g);
 	virtual void mouse_update(bool *propagate_clicks);
 
-	virtual void setVisible(bool visible);
+	virtual CBaseUIContainer* setVisible(bool visible);
 
 	void onScoreContextMenu(OsuUISongBrowserScoreButton *scoreButton, int id);
 

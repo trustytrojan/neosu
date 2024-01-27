@@ -40,7 +40,7 @@ struct OsuLobby : public OsuScreen
     virtual void onResolutionChange(Vector2 newResolution);
 
     // /!\ Side-effect: sends bancho packets when changing state
-    virtual void setVisible(bool visible);
+    virtual CBaseUIContainer* setVisible(bool visible);
 
     void addRoom(Room* room);
     void updateRoom(Room room);

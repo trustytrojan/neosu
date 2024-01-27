@@ -21,6 +21,7 @@
 #include "OsuGameRules.h"
 #include "OsuNotificationOverlay.h"
 #include "OsuSteamWorkshop.h"
+#include "OsuVolumeOverlay.h"
 
 #include <string.h>
 
@@ -30,7 +31,6 @@
 
 ConVar osu2_sound_source_id("osu2_sound_source_id", 1, "which instance/player/client should play hitsounds (e.g. master top left is always 1)");
 
-ConVar osu_volume_effects("osu_volume_effects", 1.0f);
 ConVar osu_skin_async("osu_skin_async", true, "load in background without blocking");
 ConVar osu_skin_hd("osu_skin_hd", true, "load and use @2x versions of skin images, if available");
 ConVar osu_skin_mipmaps("osu_skin_mipmaps", false, "generate mipmaps for every skin image (only useful on lower game resolutions, requires more vram)");
@@ -305,7 +305,7 @@ OsuSkin::OsuSkin(Osu *osu, UString name, UString filepath, bool isDefaultSkin, b
 
 	// custom
 	m_iSampleSet = 1;
-	m_iSampleVolume = (int)(osu_volume_effects.getFloat()*100.0f);
+	m_iSampleVolume = (int)(convar->getConVarByName("osu_volume_effects")->getFloat()*100.0f);
 
 	m_bIsRandom = osu_skin_random.getBool();
 	m_bIsRandomElements = osu_skin_random_elements.getBool();
@@ -314,7 +314,6 @@ OsuSkin::OsuSkin(Osu *osu, UString name, UString filepath, bool isDefaultSkin, b
 	load();
 
 	// convar callbacks
-	osu_volume_effects.setCallback( fastdelegate::MakeDelegate(this, &OsuSkin::onEffectVolumeChange) );
 	osu_ignore_beatmap_sample_volume.setCallback( fastdelegate::MakeDelegate(this, &OsuSkin::onIgnoreBeatmapSampleVolumeChange) );
 	osu_export_skin.setCallback( fastdelegate::MakeDelegate(this, &OsuSkin::onExport) );
 	osu_skin_export.setCallback( fastdelegate::MakeDelegate(this, &OsuSkin::onExport) );
@@ -348,7 +347,7 @@ void OsuSkin::update()
 		m_bReady = true;
 
 		// force effect volume update
-		onEffectVolumeChange("", UString::format("%f", osu_volume_effects.getFloat()));
+		m_osu->m_volumeOverlay->onEffectVolumeChange();
 	}
 
 	// shitty check to not animate while paused with hitobjects in background
@@ -1153,23 +1152,9 @@ bool OsuSkin::parseSkinINI(UString filepath)
 	return true;
 }
 
-void OsuSkin::onEffectVolumeChange(UString oldValue, UString newValue)
-{
-	float volume = newValue.toFloat();
-
-	for (int i=0; i<m_sounds.size(); i++)
-	{
-		m_sounds[i]->setVolume(volume);
-	}
-
-	// restore sample volumes
-	setSampleVolume(clamp<float>((float)m_iSampleVolume / 100.0f, 0.0f, 1.0f), true);
-}
-
 void OsuSkin::onIgnoreBeatmapSampleVolumeChange(UString oldValue, UString newValue)
 {
-	// restore sample volumes
-	setSampleVolume(clamp<float>((float)m_iSampleVolume / 100.0f, 0.0f, 1.0f), true);
+	resetSampleVolume();
 }
 
 void OsuSkin::onExport(UString folderName)
@@ -1256,11 +1241,16 @@ void OsuSkin::setSampleSet(int sampleSet)
 	m_iSampleSet = sampleSet;
 }
 
+void OsuSkin::resetSampleVolume() {
+    setSampleVolume(clamp<float>((float)m_iSampleVolume / 100.0f, 0.0f, 1.0f), true);
+}
+
 void OsuSkin::setSampleVolume(float volume, bool force)
 {
-	if (osu_ignore_beatmap_sample_volume.getBool() && (int)(osu_volume_effects.getFloat() * 100.0f) == m_iSampleVolume) return;
+	auto osu_volume_effects = convar->getConVarByName("osu_volume_effects");
+	if (osu_ignore_beatmap_sample_volume.getBool() && (int)(osu_volume_effects->getFloat() * 100.0f) == m_iSampleVolume) return;
 
-	const float newSampleVolume = (!osu_ignore_beatmap_sample_volume.getBool() ? volume : 1.0f) * osu_volume_effects.getFloat();
+	const float newSampleVolume = (!osu_ignore_beatmap_sample_volume.getBool() ? volume : 1.0f) * osu_volume_effects->getFloat();
 
 	if (!force && m_iSampleVolume == (int)(newSampleVolume * 100.0f)) return;
 

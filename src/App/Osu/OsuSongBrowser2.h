@@ -121,7 +121,7 @@ public:
 
 	virtual void onResolutionChange(Vector2 newResolution);
 
-	virtual void setVisible(bool visible);
+	virtual CBaseUIContainer* setVisible(bool visible);
 
 	void onPlayEnd(bool quit = true); // called when a beatmap is finished playing (or the player quit)
 

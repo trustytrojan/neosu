@@ -32,6 +32,7 @@
 #include "CWindowManager.h"
 //#include "DebugMonitor.h"
 
+#include "OsuVolumeOverlay.h"
 #include "OsuChat.h"
 #include "OsuLobby.h"
 #include "OsuRoom.h"
@@ -67,7 +68,6 @@
 
 #include "OsuHitObject.h"
 
-#include "OsuUIVolumeSlider.h"
 
 // release configuration
 bool Osu::autoUpdater = false;
@@ -95,8 +95,11 @@ ConVar osu_skin_reload("osu_skin_reload");
 
 ConVar osu_volume_master("osu_volume_master", 1.0f);
 ConVar osu_volume_master_inactive("osu_volume_master_inactive", 0.25f);
+ConVar osu_volume_effects("osu_volume_effects", 1.0f);
 ConVar osu_volume_music("osu_volume_music", 0.4f);
 ConVar osu_volume_change_interval("osu_volume_change_interval", 0.05f);
+ConVar osu_hud_volume_duration("osu_hud_volume_duration", 1.0f);
+ConVar osu_hud_volume_size_multiplier("osu_hud_volume_size_multiplier", 1.5f);
 
 ConVar osu_speed_override("osu_speed_override", -1.0f);
 ConVar osu_pitch_override("osu_pitch_override", -1.0f);
@@ -169,7 +172,6 @@ Osu::Osu(int instanceID)
 	m_osu_playfield_stretch_x = convar->getConVarByName("osu_playfield_stretch_x");
 	m_osu_playfield_stretch_y = convar->getConVarByName("osu_playfield_stretch_y");
 	m_fposu_draw_cursor_trail_ref = convar->getConVarByName("fposu_draw_cursor_trail");
-	m_osu_volume_effects_ref = convar->getConVarByName("osu_volume_effects");
 	m_osu_mod_mafham_ref = convar->getConVarByName("osu_mod_mafham");
 	m_osu_mod_fposu_ref = convar->getConVarByName("osu_mod_fposu");
 	m_snd_change_check_interval_ref = convar->getConVarByName("snd_change_check_interval");
@@ -216,7 +218,6 @@ Osu::Osu(int instanceID)
 	env->setCursorVisible(false);
 
 	engine->getConsoleBox()->setRequireShiftToActivate(true);
-	engine->getSound()->setVolume(osu_volume_master.getFloat());
 	if (m_iInstanceID < 2)
 		engine->getMouse()->addListener(this);
 
@@ -261,7 +262,6 @@ Osu::Osu(int instanceID)
 		convar->getConVarByName("osu_mod_mafham_render_chunksize")->setValue(12.0f);
 		convar->getConVarByName("osu_mod_touchdevice")->setDefaultFloat(1.0f);
 		convar->getConVarByName("osu_mod_touchdevice")->setValue(1.0f);
-		convar->getConVarByName("osu_volume_music")->setValue(0.3f);
 		convar->getConVarByName("osu_universal_offset_hardcoded")->setValue(-45.0f);
 		convar->getConVarByName("osu_key_quick_retry")->setValue(15.0f);			// L, SDL_SCANCODE_L
 		convar->getConVarByName("osu_key_seek_time")->setValue(21.0f);				// R, SDL_SCANCODE_R
@@ -300,8 +300,6 @@ Osu::Osu(int instanceID)
 	osu_skin.setCallback( fastdelegate::MakeDelegate(this, &Osu::onSkinChange) );
 	osu_skin_reload.setCallback( fastdelegate::MakeDelegate(this, &Osu::onSkinReload) );
 
-	osu_volume_master.setCallback( fastdelegate::MakeDelegate(this, &Osu::onMasterVolumeChange) );
-	osu_volume_music.setCallback( fastdelegate::MakeDelegate(this, &Osu::onMusicVolumeChange) );
 	osu_speed_override.setCallback( fastdelegate::MakeDelegate(this, &Osu::onSpeedChange) );
 	osu_pitch_override.setCallback( fastdelegate::MakeDelegate(this, &Osu::onPitchChange) );
 
@@ -393,8 +391,6 @@ Osu::Osu(int instanceID)
 	m_skinScheduledToLoad = NULL;
 	m_bFontReloadScheduled = false;
 	m_bFireResolutionChangedScheduled = false;
-	m_bVolumeInactiveToActiveScheduled = false;
-	m_fVolumeInactiveToActiveAnim = 0.0f;
 	m_bFireDelayedFontReloadAndResolutionChangeToFixDesyncedUIScaleScheduled = false;
 
 	// debug
@@ -478,6 +474,7 @@ Osu::Osu(int instanceID)
 	}
 
 	// load subsystems, add them to the screens array
+	m_volumeOverlay = new OsuVolumeOverlay(this);
 	m_tooltipOverlay = new OsuTooltipOverlay(this);
 	m_vr = new OsuVR(this);
 	m_mainMenu = new OsuMainMenu(this);
@@ -499,6 +496,7 @@ Osu::Osu(int instanceID)
 	m_room = new OsuRoom(this);
 
 	// the order in this vector will define in which order events are handled/consumed
+	m_screens.push_back(m_volumeOverlay);
 	m_screens.push_back(m_chat);
 	m_screens.push_back(m_notificationOverlay);
 	m_screens.push_back(m_optionsMenu);
@@ -562,7 +560,6 @@ Osu::Osu(int instanceID)
 		OsuDatabaseBeatmap *debugDiff = new OsuDatabaseBeatmap(this, beatmapPath, debugFolder);
 
 		m_songBrowser2->onDifficultySelected(debugDiff, true);
-		//convar->getConVarByName("osu_volume_master")->setValue(1.0f);
 		// WARNING: this will leak memory (one OsuDatabaseBeatmap object), but who cares (since debug only)
 	}
 	*/
@@ -658,8 +655,6 @@ void Osu::draw(Graphics *g)
 		if (osu_draw_fps.getBool() && !isFPoSu)
 			m_hud->drawFps(g);
 
-		m_hud->drawVolumeChange(g);
-
 		m_windowManager->draw(g);
 
 		if (isFPoSu && m_osu_draw_cursor_ripples_ref->getBool())
@@ -722,8 +717,6 @@ void Osu::draw(Graphics *g)
 		if (osu_draw_fps.getBool())
 			m_hud->drawFps(g);
 
-		m_hud->drawVolumeChange(g);
-
 		m_windowManager->draw(g);
 
 		if (!isInVRMode() || (m_vr->isVirtualCursorOnScreen() || engine->hasFocus()))
@@ -732,6 +725,7 @@ void Osu::draw(Graphics *g)
 
 	m_tooltipOverlay->draw(g);
 	m_notificationOverlay->draw(g);
+	m_volumeOverlay->draw(g);
 
 	// loading spinner for some async tasks
 	if ((m_bSkinLoadScheduled && m_skin != m_skinScheduledToLoad) || m_optionsMenu->isWorkshopLoading() || m_steamWorkshop->isUploading())
@@ -869,8 +863,6 @@ void Osu::drawVR(Graphics *g)
 
 void Osu::update()
 {
-	const int wheelDelta = engine->getMouse()->getWheelDeltaVertical(); // HACKHACK: songbrowser focus
-
 	if (m_skin != NULL)
 		m_skin->update();
 
@@ -881,8 +873,6 @@ void Osu::update()
 		m_fposu->update();
 
 	bool propagate_clicks = true;
-	m_windowManager->mouse_update(&propagate_clicks);
-
 	for (int i=0; i<m_screens.size(); i++)
 	{
 		m_screens[i]->mouse_update(&propagate_clicks);
@@ -934,7 +924,7 @@ void Osu::update()
 		}
 
 		// skip button clicking
-		if (getSelectedBeatmap()->isInSkippableSection() && !getSelectedBeatmap()->isPaused() && !m_bSeeking && !m_hud->isVolumeOverlayBusy())
+		if (getSelectedBeatmap()->isInSkippableSection() && !getSelectedBeatmap()->isPaused() && !m_bSeeking && !m_volumeOverlay->isBusy())
 		{
 			const bool isAnyOsuKeyDown = (m_bKeyboardKey1Down || m_bKeyboardKey12Down || m_bKeyboardKey2Down || m_bKeyboardKey22Down || m_bMouseKey1Down || m_bMouseKey2Down);
 			const bool isAnyVRKeyDown = isInVRMode() && !m_vr->isUIActive() && (openvr->getLeftController()->isButtonPressed(OpenVRController::BUTTON::BUTTON_STEAMVR_TOUCHPAD) || openvr->getRightController()->isButtonPressed(OpenVRController::BUTTON::BUTTON_STEAMVR_TOUCHPAD)
@@ -954,9 +944,11 @@ void Osu::update()
 						if(!m_bSkipScheduled) {
 							m_bSkipScheduled = true;
 
-							Packet packet = {0};
-							packet.id = MATCH_SKIP_REQUEST;
-							send_packet(packet);
+							if(bancho.is_playing_a_multi_map()) {
+								Packet packet = {0};
+								packet.id = MATCH_SKIP_REQUEST;
+								send_packet(packet);
+							}
 						}
 					}
 				}
@@ -1109,23 +1101,6 @@ void Osu::update()
 		}
 	}
 
-	// handle mousewheel volume change
-	bool a_scrollable_is_visible = m_songBrowser2->isVisible() || m_optionsMenu->isVisible() || m_chat->isVisible() || m_lobby->isVisible() || m_room->isVisible() || m_vrTutorial->isVisible() || m_userStatsScreen->isVisible() || m_changelog->isVisible() || m_modSelector->isMouseInScrollView() || m_rankingScreen->isVisible();
-	if(!a_scrollable_is_visible || engine->getKeyboard()->isAltDown() || m_hud->isVolumeOverlayBusy()) {
-		if ((!(isInPlayMode() && !m_pauseMenu->isVisible())) || (isInPlayMode() && !osu_disable_mousewheel.getBool()) || engine->getKeyboard()->isAltDown())
-		{
-			if (wheelDelta != 0)
-			{
-				const int multiplier = std::max(1, std::abs(wheelDelta) / 120);
-
-				if (wheelDelta > 0)
-					volumeUp(multiplier);
-				else
-					volumeDown(multiplier);
-			}
-		}
-	}
-
 	// TODO: shitty override, but it works well enough for now => see OsuVR.cpp
 	// it's a bit of a hack, because using cursor visibility to work around SetCursorPos() affecting the windows cursor in the Mouse class
 	if (isInVRMode() && !env->isCursorVisible())
@@ -1167,16 +1142,6 @@ void Osu::update()
 				m_notificationOverlay->addNotification(m_skin->getName().length() > 0 ? UString::format("Skin reloaded! (%s)", m_skin->getName().toUtf8()) : "Skin reloaded!", 0xffffffff, false, 0.75f);
 			}
 		}
-	}
-
-	// volume inactive to active animation
-	if (m_bVolumeInactiveToActiveScheduled && m_fVolumeInactiveToActiveAnim > 0.0f)
-	{
-		engine->getSound()->setVolume(lerp<float>(osu_volume_master_inactive.getFloat() * osu_volume_master.getFloat(), osu_volume_master.getFloat(), m_fVolumeInactiveToActiveAnim));
-
-		// check if we're done
-		if (m_fVolumeInactiveToActiveAnim == 1.0f)
-			m_bVolumeInactiveToActiveScheduled = false;
 	}
 
 	// (must be before m_bFontReloadScheduled and m_bFireResolutionChangedScheduled are handled!)
@@ -1263,6 +1228,14 @@ void Osu::onKeyDown(KeyboardEvent &key)
 {
 	// global hotkeys
 
+	// global hotkey
+	if (key == KEY_O && engine->getKeyboard()->isControlDown())
+	{
+		toggleOptionsMenu();
+		key.consume();
+		return;
+	}
+
 	// special hotkeys
 	// reload & recompile shaders
 	if (engine->getKeyboard()->isAltDown() && engine->getKeyboard()->isControlDown() && key == KEY_R)
@@ -1285,18 +1258,6 @@ void Osu::onKeyDown(KeyboardEvent &key)
 	if (engine->getKeyboard()->isAltDown() && engine->getKeyboard()->isControlDown() && key == KEY_S)
 	{
 		onSkinReload();
-		key.consume();
-	}
-
-	// arrow keys volume (alt)
-	if (engine->getKeyboard()->isAltDown() && key == (KEYCODE)OsuKeyBindings::INCREASE_VOLUME.getInt())
-	{
-		volumeUp();
-		key.consume();
-	}
-	if (engine->getKeyboard()->isAltDown() && key == (KEYCODE)OsuKeyBindings::DECREASE_VOLUME.getInt())
-	{
-		volumeDown();
 		key.consume();
 	}
 
@@ -1462,29 +1423,24 @@ void Osu::onKeyDown(KeyboardEvent &key)
 
 				if (backward || forward)
 				{
-					const bool isVolumeOverlayVisibleOrBusy = (m_hud->isVolumeOverlayVisible() || m_hud->isVolumeOverlayBusy());
+					const unsigned long lengthMS = getSelectedBeatmap()->getLength();
+					const float percentFinished = getSelectedBeatmap()->getPercentFinished();
 
-					if (!isVolumeOverlayVisibleOrBusy)
+					if (lengthMS > 0)
 					{
-						const unsigned long lengthMS = getSelectedBeatmap()->getLength();
-						const float percentFinished = getSelectedBeatmap()->getPercentFinished();
+						double seekedPercent = 0.0;
+						if (backward)
+							seekedPercent -= (double)osu_seek_delta.getInt() * (1.0 / (double)lengthMS) * 1000.0;
+						else if (forward)
+							seekedPercent += (double)osu_seek_delta.getInt() * (1.0 / (double)lengthMS) * 1000.0;
 
-						if (lengthMS > 0)
+						if (seekedPercent != 0.0f)
 						{
-							double seekedPercent = 0.0;
-							if (backward)
-								seekedPercent -= (double)osu_seek_delta.getInt() * (1.0 / (double)lengthMS) * 1000.0;
-							else if (forward)
-								seekedPercent += (double)osu_seek_delta.getInt() * (1.0 / (double)lengthMS) * 1000.0;
+							// special case: allow cancelling the failing animation here
+							if (getSelectedBeatmap()->hasFailed())
+								getSelectedBeatmap()->cancelFailing();
 
-							if (seekedPercent != 0.0f)
-							{
-								// special case: allow cancelling the failing animation here
-								if (getSelectedBeatmap()->hasFailed())
-									getSelectedBeatmap()->cancelFailing();
-
-								getSelectedBeatmap()->seekPercent(percentFinished + seekedPercent);
-							}
+							getSelectedBeatmap()->seekPercent(percentFinished + seekedPercent);
 						}
 					}
 				}
@@ -1587,26 +1543,6 @@ void Osu::onKeyDown(KeyboardEvent &key)
 				m_notificationOverlay->addNotification(UString::format("osu!mania speed set to %gx (fixed)", maniaSpeed->getFloat()));
 			}
 			*/
-		}
-
-		// if playing or not playing
-
-		// volume
-		if (key == (KEYCODE)OsuKeyBindings::INCREASE_VOLUME.getInt())
-			volumeUp();
-		if (key == (KEYCODE)OsuKeyBindings::DECREASE_VOLUME.getInt())
-			volumeDown();
-
-		// volume slider selection
-		if (m_hud->isVolumeOverlayVisible())
-		{
-			if (key != (KEYCODE)OsuKeyBindings::INCREASE_VOLUME.getInt() && key != (KEYCODE)OsuKeyBindings::DECREASE_VOLUME.getInt())
-			{
-				if (key == KEY_LEFT)
-					m_hud->selectVolumeNext();
-				if (key == KEY_RIGHT)
-					m_hud->selectVolumePrev();
-			}
 		}
 	}
 }
@@ -1767,30 +1703,6 @@ void Osu::toggleChangelog()
 void Osu::toggleEditor()
 {
 	m_bToggleEditorScheduled = true;
-}
-
-void Osu::onVolumeChange(int multiplier)
-{
-	// sanity reset
-	m_bVolumeInactiveToActiveScheduled = false;
-	anim->deleteExistingAnimation(&m_fVolumeInactiveToActiveAnim);
-	m_fVolumeInactiveToActiveAnim = 0.0f;
-
-	// chose which volume to change, depending on the volume overlay, default is master
-	ConVar *volumeConVar = &osu_volume_master;
-	if (m_hud->getVolumeMusicSlider()->isSelected())
-		volumeConVar = &osu_volume_music;
-	else if (m_hud->getVolumeEffectsSlider()->isSelected())
-		volumeConVar = m_osu_volume_effects_ref;
-
-	// change the volume
-	if (m_hud->isVolumeOverlayVisible())
-	{
-		float newVolume = clamp<float>(volumeConVar->getFloat() + osu_volume_change_interval.getFloat()*multiplier, 0.0f, 1.0f);
-		volumeConVar->setValue(newVolume);
-	}
-
-	m_hud->animateVolumeChange();
 }
 
 void Osu::onAudioOutputDeviceChange()
@@ -2276,13 +2188,7 @@ void Osu::onFocusGained()
 	}
 
 	updateWindowsKeyDisable();
-
-#ifndef MCENGINE_FEATURE_BASS_WASAPI // NOTE: wasapi exclusive mode controls the system volume, so don't bother
-
-	m_fVolumeInactiveToActiveAnim = 0.0f;
-	anim->moveLinear(&m_fVolumeInactiveToActiveAnim, 1.0f, 0.3f, 0.1f, true);
-
-#endif
+	m_volumeOverlay->gainFocus();
 }
 
 void Osu::onFocusLost()
@@ -2298,34 +2204,14 @@ void Osu::onFocusLost()
 	}
 
 	updateWindowsKeyDisable();
+	m_volumeOverlay->loseFocus();
 
 	// release cursor clip
 	env->setCursorClip(false, McRect());
-
-#ifndef MCENGINE_FEATURE_BASS_WASAPI // NOTE: wasapi exclusive mode controls the system volume, so don't bother
-
-	m_bVolumeInactiveToActiveScheduled = true;
-
-	anim->deleteExistingAnimation(&m_fVolumeInactiveToActiveAnim);
-	m_fVolumeInactiveToActiveAnim = 0.0f;
-
-	engine->getSound()->setVolume(osu_volume_master_inactive.getFloat() * osu_volume_master.getFloat());
-
-#endif
 }
 
-void Osu::onMinimized()
-{
-#ifndef MCENGINE_FEATURE_BASS_WASAPI // NOTE: wasapi exclusive mode controls the system volume, so don't bother
-
-	m_bVolumeInactiveToActiveScheduled = true;
-
-	anim->deleteExistingAnimation(&m_fVolumeInactiveToActiveAnim);
-	m_fVolumeInactiveToActiveAnim = 0.0f;
-
-	engine->getSound()->setVolume(osu_volume_master_inactive.getFloat() * osu_volume_master.getFloat());
-
-#endif
+void Osu::onMinimized() {
+	m_volumeOverlay->loseFocus();
 }
 
 bool Osu::onShutdown()
@@ -2396,20 +2282,6 @@ void Osu::onSkinChange(UString oldValue, UString newValue)
 		m_skin = m_skinScheduledToLoad;
 
 	m_bSkinLoadScheduled = true;
-}
-
-void Osu::onMasterVolumeChange(UString oldValue, UString newValue)
-{
-	if (m_bVolumeInactiveToActiveScheduled) return; // not very clean, but w/e
-
-	float newVolume = newValue.toFloat();
-	engine->getSound()->setVolume(newVolume);
-}
-
-void Osu::onMusicVolumeChange(UString oldValue, UString newValue)
-{
-	if (getSelectedBeatmap() != NULL)
-		getSelectedBeatmap()->setVolume(newValue.toFloat());
 }
 
 void Osu::onSpeedChange(UString oldValue, UString newValue)

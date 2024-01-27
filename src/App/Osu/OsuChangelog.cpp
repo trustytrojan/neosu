@@ -512,26 +512,19 @@ void OsuChangelog::mouse_update(bool *propagate_clicks)
 {
 	if (!m_bVisible) return;
 	OsuScreenBackable::mouse_update(propagate_clicks);
-
-	// HACKHACK:
-	if (m_osu->getHUD()->isVolumeOverlayBusy() || m_osu->getOptionsMenu()->isMouseInside())
-		engine->getMouse()->resetWheelDelta();
-
-	m_container->mouse_update(propagate_clicks);
-
-	if (m_osu->getHUD()->isVolumeOverlayBusy() || m_osu->getOptionsMenu()->isMouseInside())
-	{
-		stealFocus();
-		m_container->stealFocus();
+	if(*propagate_clicks) {
+		m_container->mouse_update(propagate_clicks);
 	}
 }
 
-void OsuChangelog::setVisible(bool visible)
+CBaseUIContainer* OsuChangelog::setVisible(bool visible)
 {
 	OsuScreenBackable::setVisible(visible);
 
 	if (m_bVisible)
 		updateLayout();
+
+	return this;
 }
 
 void OsuChangelog::updateLayout()

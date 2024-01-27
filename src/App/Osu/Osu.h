@@ -13,6 +13,7 @@
 
 class CWindowManager;
 
+class OsuVolumeOverlay;
 class OsuChat;
 class OsuLobby;
 class OsuRoom;
@@ -110,9 +111,6 @@ public:
 	void toggleChangelog();
 	void toggleEditor();
 
-	void volumeUp(int multiplier = 1) {onVolumeChange(multiplier);}
-	void volumeDown(int multiplier = 1) {onVolumeChange(-multiplier);}
-
 	void saveScreenshot();
 
 	void setSkin(UString skin) {onSkinChange("", skin);}
@@ -205,7 +203,6 @@ public:
 	static Vector2 g_vInternalResolution;
 
 	void updateModsForConVarTemplate(UString oldValue, UString newValue) {updateMods();}
-	void onVolumeChange(int multiplier);
 	void onAudioOutputDeviceChange();
 
 	void rebuildRenderTargets();
@@ -218,8 +215,6 @@ public:
 	void onSkinReload();
 	void onSkinChange(UString oldValue, UString newValue);
 
-	void onMasterVolumeChange(UString oldValue, UString newValue);
-	void onMusicVolumeChange(UString oldValue, UString newValue);
 	void onSpeedChange(UString oldValue, UString newValue);
 	void onPitchChange(UString oldValue, UString newValue);
 
@@ -257,7 +252,6 @@ public:
 	ConVar *m_osu_playfield_stretch_x;
 	ConVar *m_osu_playfield_stretch_y;
 	ConVar *m_fposu_draw_cursor_trail_ref;
-	ConVar *m_osu_volume_effects_ref;
 	ConVar *m_osu_mod_mafham_ref;
 	ConVar *m_osu_mod_fposu_ref;
 	ConVar *m_snd_change_check_interval_ref;
@@ -267,6 +261,7 @@ public:
 	ConVar *m_osu_vr_draw_desktop_playfield_ref;
 
 	// interfaces
+	OsuVolumeOverlay *m_volumeOverlay;
 	OsuVR *m_vr;
 	OsuMainMenu *m_mainMenu;
 	OsuOptionsMenu *m_optionsMenu;
@@ -382,8 +377,6 @@ public:
 	OsuSkin *m_skinScheduledToLoad;
 	bool m_bFontReloadScheduled;
 	bool m_bFireResolutionChangedScheduled;
-	bool m_bVolumeInactiveToActiveScheduled;
-	float m_fVolumeInactiveToActiveAnim;
 	bool m_bFireDelayedFontReloadAndResolutionChangeToFixDesyncedUIScaleScheduled;
 };
 

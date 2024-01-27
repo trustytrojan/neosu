@@ -24,6 +24,7 @@
 #include "OsuGameRules.h"
 #include "OsuKeyBindings.h"
 #include "OsuNotificationOverlay.h"
+#include "OsuVolumeOverlay.h"
 
 #include "OsuVRUIImageButton.h"
 #include "OsuVRUIImageCheckbox.h"
@@ -1103,7 +1104,7 @@ void OsuVR::onOffsetDownClicked()
 void OsuVR::onVolumeSliderChange(OsuVRUISlider *slider)
 {
 	m_osu_volume_master_ref->setValue(slider->getFloat());
-	m_osu->getHUD()->animateVolumeChange();
+	m_osu->m_volumeOverlay->animate();
 }
 
 void OsuVR::onScrubbingSliderChange(OsuVRUISlider *slider)

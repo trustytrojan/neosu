@@ -25,7 +25,7 @@ public:
 
 	virtual void onKeyDown(KeyboardEvent &e);
 
-	virtual void setVisible(bool visible);
+	virtual CBaseUIContainer* setVisible(bool visible);
 
 private:
 	virtual void updateLayout();

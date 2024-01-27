@@ -38,9 +38,9 @@ void OsuScreenBackable::draw(Graphics *g)
 
 void OsuScreenBackable::mouse_update(bool *propagate_clicks)
 {
-	if (!m_bVisible) return;
-
-	m_backButton->mouse_update(propagate_clicks);
+	if(m_bVisible) {
+		m_backButton->mouse_update(propagate_clicks);
+	}
 }
 
 void OsuScreenBackable::onKeyDown(KeyboardEvent &e)
@@ -66,11 +66,6 @@ void OsuScreenBackable::onChar(KeyboardEvent &e)
 	if (!m_bVisible) return;
 
 	e.consume();
-}
-
-void OsuScreenBackable::stealFocus()
-{
-	m_backButton->stealFocus();
 }
 
 void OsuScreenBackable::updateLayout()

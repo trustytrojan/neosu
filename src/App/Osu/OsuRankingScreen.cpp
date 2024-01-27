@@ -418,12 +418,6 @@ void OsuRankingScreen::mouse_update(bool *propagate_clicks)
 	// update and focus handling
 	m_container->mouse_update(propagate_clicks);
 
-	if (m_osu->getOptionsMenu()->isMouseInside())
-		stealFocus();
-
-	if (m_osu->getOptionsMenu()->isBusy() || m_backButton->isActive())
-		m_container->stealFocus();
-
 	// tooltip (pp + accuracy + unstable rate)
 	if (!m_osu->getOptionsMenu()->isMouseInside() && !m_bIsLegacyScore && engine->getMouse()->getPos().x < m_osu->getScreenWidth() * 0.5f)
 	{
@@ -477,7 +471,7 @@ void OsuRankingScreen::mouse_update(bool *propagate_clicks)
 	m_rankingScrollDownInfoButton->setAlpha(m_fRankingScrollDownInfoButtonAlphaAnim);
 }
 
-void OsuRankingScreen::setVisible(bool visible)
+CBaseUIContainer* OsuRankingScreen::setVisible(bool visible)
 {
 	OsuScreenBackable::setVisible(visible);
 
@@ -488,6 +482,8 @@ void OsuRankingScreen::setVisible(bool visible)
 
 		updateLayout();
 	}
+
+	return this;
 }
 
 void OsuRankingScreen::setScore(OsuScore *score)

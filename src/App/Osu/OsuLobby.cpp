@@ -117,8 +117,8 @@ void OsuLobby::onResolutionChange(Vector2 newResolution) {
     updateLayout(newResolution);
 }
 
-void OsuLobby::setVisible(bool visible) {
-    if(visible == m_bVisible) return;
+CBaseUIContainer* OsuLobby::setVisible(bool visible) {
+    if(visible == m_bVisible) return this;
     m_bVisible = visible;
 
     if(visible) {
@@ -154,6 +154,7 @@ void OsuLobby::setVisible(bool visible) {
     }
 
     m_osu->m_chat->updateVisibility();
+    return this;
 }
 
 void OsuLobby::updateLayout(Vector2 newResolution) {

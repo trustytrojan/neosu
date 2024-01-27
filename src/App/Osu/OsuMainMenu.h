@@ -19,7 +19,7 @@ class OsuDatabaseBeatmap;
 
 class OsuHitObject;
 
-class OsuMainMenuMainButton;
+class OsuMainMenuCubeButton;
 class OsuMainMenuButton;
 class OsuUIButton;
 
@@ -52,10 +52,10 @@ public:
 	static void openSteamWorkshopInGameOverlay(Osu *osu, bool launchInSteamIfOverlayDisabled = false);
 	static void openSteamWorkshopInDefaultBrowser(bool launchInSteam = false);
 
-public:
-	friend class OsuMainMenuMainButton;
+	friend class OsuMainMenuCubeButton;
 	friend class OsuMainMenuButton;
 	void onPausePressed();
+	void onCubePressed();
 
 	OsuMainMenu(Osu *osu);
 	virtual ~OsuMainMenu();
@@ -74,7 +74,7 @@ public:
 
 	virtual void onResolutionChange(Vector2 newResolution);
 
-	virtual void setVisible(bool visible);
+	virtual CBaseUIContainer* setVisible(bool visible);
 
 	void setStartupAnim(bool startupAnim) {m_bStartupAnim = startupAnim; m_fStartupAnim = m_fStartupAnim2 = (m_bStartupAnim ? 0.0f : 1.0f);}
 
@@ -102,7 +102,6 @@ private:
 
 	OsuMainMenuButton *addMainMenuButton(UString text);
 
-	void onMainMenuButtonPressed();
 	void onPlayButtonPressed();
 	void onMultiplayerButtonPressed();
 	void onOptionsButtonPressed();
@@ -128,7 +127,7 @@ private:
 	float m_fMainMenuButtonCloseTime;
 
 	CBaseUIContainer *m_container;
-	OsuMainMenuMainButton *m_mainButton;
+	OsuMainMenuCubeButton *m_cube;
 	std::vector<OsuMainMenuButton*> m_menuElements;
 
 	OsuMainMenuPauseButton *m_pauseButton;

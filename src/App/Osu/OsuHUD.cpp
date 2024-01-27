@@ -44,8 +44,6 @@
 #include "OsuHitObject.h"
 #include "OsuCircle.h"
 
-#include "OsuUIVolumeSlider.h"
-
 #include "OpenGLES2Interface.h"
 
 ConVar osu_automatic_cursor_size("osu_automatic_cursor_size", false);
@@ -162,8 +160,6 @@ ConVar osu_hud_statistics_ur_offset_x("osu_hud_statistics_ur_offset_x", 0.0f);
 ConVar osu_hud_statistics_ur_offset_y("osu_hud_statistics_ur_offset_y", 0.0f);
 ConVar osu_hud_statistics_hitdelta_offset_x("osu_hud_statistics_hitdelta_offset_x", 0.0f);
 ConVar osu_hud_statistics_hitdelta_offset_y("osu_hud_statistics_hitdelta_offset_y", 0.0f);
-ConVar osu_hud_volume_duration("osu_hud_volume_duration", 1.0f);
-ConVar osu_hud_volume_size_multiplier("osu_hud_volume_size_multiplier", 1.5f);
 ConVar osu_hud_scoreboard_scale("osu_hud_scoreboard_scale", 1.0f);
 ConVar osu_hud_scoreboard_offset_y_percent("osu_hud_scoreboard_offset_y_percent", 0.11f);
 ConVar osu_hud_scoreboard_use_menubuttonbackground("osu_hud_scoreboard_use_menubuttonbackground", true);
@@ -238,10 +234,6 @@ OsuHUD::OsuHUD(Osu *osu) : OsuScreen(osu)
 	// convar refs
 	m_name_ref = convar->getConVarByName("name");
 	m_host_timescale_ref = convar->getConVarByName("host_timescale");
-	m_osu_volume_master_ref = convar->getConVarByName("osu_volume_master");
-	m_osu_volume_effects_ref = convar->getConVarByName("osu_volume_effects");
-	m_osu_volume_music_ref = convar->getConVarByName("osu_volume_music");
-	m_osu_volume_change_interval_ref = convar->getConVarByName("osu_volume_change_interval");
 	m_osu_mod_target_300_percent_ref = convar->getConVarByName("osu_mod_target_300_percent");
 	m_osu_mod_target_100_percent_ref = convar->getConVarByName("osu_mod_target_100_percent");
 	m_osu_mod_target_50_percent_ref = convar->getConVarByName("osu_mod_target_50_percent");
@@ -252,9 +244,6 @@ OsuHUD::OsuHUD(Osu *osu) : OsuScreen(osu)
 	m_osu_background_dim_ref = convar->getConVarByName("osu_background_dim");
 	m_osu_skip_intro_enabled_ref = convar->getConVarByName("osu_skip_intro_enabled");
 	m_osu_skip_breaks_enabled_ref = convar->getConVarByName("osu_skip_breaks_enabled");
-
-	// convar callbacks
-	osu_hud_volume_size_multiplier.setCallback( fastdelegate::MakeDelegate(this, &OsuHUD::onVolumeOverlaySizeChange) );
 
 	// resources
 	m_tempFont = engine->getResourceManager()->getFont("FONT_DEFAULT");
@@ -295,35 +284,6 @@ OsuHUD::OsuHUD(Osu *osu) : OsuScreen(osu)
 	m_fComboAnim1 = 0.0f;
 	m_fComboAnim2 = 0.0f;
 
-	m_fVolumeChangeTime = 0.0f;
-	m_fVolumeChangeFade = 1.0f;
-	m_fLastVolume = m_osu_volume_master_ref->getFloat();
-	m_volumeSliderOverlayContainer = new CBaseUIContainer();
-
-	m_volumeMaster = new OsuUIVolumeSlider(m_osu, 0, 0, 450, 75, "");
-	m_volumeMaster->setType(OsuUIVolumeSlider::TYPE::MASTER);
-	m_volumeMaster->setBlockSize(m_volumeMaster->getSize().y + 7, m_volumeMaster->getSize().y);
-	m_volumeMaster->setAllowMouseWheel(false);
-	m_volumeMaster->setAnimated(false);
-	m_volumeMaster->setSelected(true);
-	m_volumeSliderOverlayContainer->addBaseUIElement(m_volumeMaster);
-	m_volumeEffects = new OsuUIVolumeSlider(m_osu, 0, 0, m_volumeMaster->getSize().x, m_volumeMaster->getSize().y/1.5f, "");
-	m_volumeEffects->setType(OsuUIVolumeSlider::TYPE::EFFECTS);
-	m_volumeEffects->setBlockSize((m_volumeMaster->getSize().y + 7)/1.5f, m_volumeMaster->getSize().y/1.5f);
-	m_volumeEffects->setAllowMouseWheel(false);
-	m_volumeEffects->setKeyDelta(m_osu_volume_change_interval_ref->getFloat());
-	m_volumeEffects->setAnimated(false);
-	m_volumeSliderOverlayContainer->addBaseUIElement(m_volumeEffects);
-	m_volumeMusic = new OsuUIVolumeSlider(m_osu, 0, 0, m_volumeMaster->getSize().x, m_volumeMaster->getSize().y/1.5f, "");
-	m_volumeMusic->setType(OsuUIVolumeSlider::TYPE::MUSIC);
-	m_volumeMusic->setBlockSize((m_volumeMaster->getSize().y + 7)/1.5f, m_volumeMaster->getSize().y/1.5f);
-	m_volumeMusic->setAllowMouseWheel(false);
-	m_volumeMusic->setKeyDelta(m_osu_volume_change_interval_ref->getFloat());
-	m_volumeMusic->setAnimated(false);
-	m_volumeSliderOverlayContainer->addBaseUIElement(m_volumeMusic);
-
-	onVolumeOverlaySizeChange(UString::format("%f", osu_hud_volume_size_multiplier.getFloat()), UString::format("%f", osu_hud_volume_size_multiplier.getFloat()));
-
 	m_fCursorExpandAnim = 1.0f;
 
 	m_fHealth = 1.0f;
@@ -331,10 +291,7 @@ OsuHUD::OsuHUD(Osu *osu) : OsuScreen(osu)
 	m_fKiScaleAnim = 0.8f;
 }
 
-OsuHUD::~OsuHUD()
-{
-	SAFE_DELETE(m_volumeSliderOverlayContainer);
-}
+OsuHUD::~OsuHUD() {}
 
 void OsuHUD::draw(Graphics *g)
 {
@@ -556,83 +513,6 @@ void OsuHUD::mouse_update(bool *propagate_clicks)
 	{
 		if (m_cursorRipples.size() > 0 && engine->getTime() > m_cursorRipples[0].time)
 			m_cursorRipples.erase(m_cursorRipples.begin());
-	}
-
-	// volume overlay
-	m_volumeMaster->setEnabled(m_fVolumeChangeTime > engine->getTime());
-	m_volumeEffects->setEnabled(m_volumeMaster->isEnabled());
-	m_volumeMusic->setEnabled(m_volumeMaster->isEnabled());
-	m_volumeSliderOverlayContainer->setSize(m_osu->getScreenSize());
-	m_volumeSliderOverlayContainer->mouse_update(propagate_clicks);
-
-	if (!m_volumeMaster->isBusy())
-		m_volumeMaster->setValue(m_osu_volume_master_ref->getFloat(), false);
-	else
-	{
-		m_osu_volume_master_ref->setValue(m_volumeMaster->getFloat());
-		m_fLastVolume = m_volumeMaster->getFloat();
-	}
-
-	if (!m_volumeMusic->isBusy())
-		m_volumeMusic->setValue(m_osu_volume_music_ref->getFloat(), false);
-	else
-		m_osu_volume_music_ref->setValue(m_volumeMusic->getFloat());
-
-	if (!m_volumeEffects->isBusy())
-		m_volumeEffects->setValue(m_osu_volume_effects_ref->getFloat(), false);
-	else
-		m_osu_volume_effects_ref->setValue(m_volumeEffects->getFloat());
-
-	// force focus back to master if no longer active
-	if (engine->getTime() > m_fVolumeChangeTime && !m_volumeMaster->isSelected())
-	{
-		m_volumeMusic->setSelected(false);
-		m_volumeEffects->setSelected(false);
-		m_volumeMaster->setSelected(true);
-	}
-
-	// keep overlay alive as long as the user is doing something
-	// switch selection if cursor moves inside one of the sliders
-	if (m_volumeSliderOverlayContainer->isBusy() || (m_volumeMaster->isEnabled() && (m_volumeMaster->isMouseInside() || m_volumeEffects->isMouseInside() || m_volumeMusic->isMouseInside())))
-	{
-		animateVolumeChange();
-
-		const std::vector<CBaseUIElement*> &elements = m_volumeSliderOverlayContainer->getElements();
-		for (int i=0; i<elements.size(); i++)
-		{
-			if (((OsuUIVolumeSlider*)elements[i])->checkWentMouseInside())
-			{
-				for (int c=0; c<elements.size(); c++)
-				{
-					if (c != i)
-						((OsuUIVolumeSlider*)elements[c])->setSelected(false);
-				}
-				((OsuUIVolumeSlider*)elements[i])->setSelected(true);
-			}
-		}
-	}
-}
-
-void OsuHUD::onResolutionChange(Vector2 newResolution)
-{
-	updateLayout();
-}
-
-void OsuHUD::updateLayout()
-{
-	// volume overlay
-	{
-		const float dpiScale = Osu::getUIScale(m_osu);
-		const float sizeMultiplier = osu_hud_volume_size_multiplier.getFloat() * dpiScale;
-
-		m_volumeMaster->setSize(300*sizeMultiplier, 50*sizeMultiplier);
-		m_volumeMaster->setBlockSize(m_volumeMaster->getSize().y + 7 * dpiScale, m_volumeMaster->getSize().y);
-
-		m_volumeEffects->setSize(m_volumeMaster->getSize().x, m_volumeMaster->getSize().y/1.5f);
-		m_volumeEffects->setBlockSize((m_volumeMaster->getSize().y + 7 * dpiScale)/1.5f, m_volumeMaster->getSize().y/1.5f);
-
-		m_volumeMusic->setSize(m_volumeMaster->getSize().x, m_volumeMaster->getSize().y/1.5f);
-		m_volumeMusic->setBlockSize((m_volumeMaster->getSize().y + 7 * dpiScale)/1.5f, m_volumeMaster->getSize().y/1.5f);
 	}
 }
 
@@ -1283,36 +1163,6 @@ void OsuHUD::drawBeatmapImportSpinner(Graphics *g)
 		g->drawImage(m_osu->getSkin()->getBeatmapImportSpinner());
 	}
 	g->popTransform();
-}
-
-void OsuHUD::drawVolumeChange(Graphics *g)
-{
-	if (engine->getTime() > m_fVolumeChangeTime) return;
-
-	const float dpiScale = Osu::getUIScale(m_osu);
-	const float sizeMultiplier = osu_hud_volume_size_multiplier.getFloat() * dpiScale;
-
-	// legacy
-	/*
-	g->setColor(COLOR((char)(68*m_fVolumeChangeFade), 255, 255, 255));
-	g->fillRect(0, m_osu->getScreenHeight()*(1.0f - m_fLastVolume), m_osu->getScreenWidth(), m_osu->getScreenHeight()*m_fLastVolume);
-	*/
-
-	if (m_fVolumeChangeFade != 1.0f)
-	{
-		g->push3DScene(McRect(m_volumeMaster->getPos().x, m_volumeMaster->getPos().y, m_volumeMaster->getSize().x, (m_osu->getScreenHeight() - m_volumeMaster->getPos().y)*2.05f));
-		g->rotate3DScene(-(1.0f - m_fVolumeChangeFade)*90, 0, 0);
-		g->translate3DScene(0, (m_fVolumeChangeFade*60 - 60) * sizeMultiplier / 1.5f, ((m_fVolumeChangeFade)*500 - 500) * sizeMultiplier / 1.5f);
-	}
-
-	m_volumeMaster->setPos(m_osu->getScreenSize() - m_volumeMaster->getSize() - Vector2(m_volumeMaster->getMinimumExtraTextWidth(), m_volumeMaster->getSize().y));
-	m_volumeEffects->setPos(m_volumeMaster->getPos() - Vector2(0, m_volumeEffects->getSize().y + 20 * sizeMultiplier));
-	m_volumeMusic->setPos(m_volumeEffects->getPos() - Vector2(0, m_volumeMusic->getSize().y + 20 * sizeMultiplier));
-
-	m_volumeSliderOverlayContainer->draw(g);
-
-	if (m_fVolumeChangeFade != 1.0f)
-		g->pop3DScene();
 }
 
 void OsuHUD::drawScoreNumber(Graphics *g, unsigned long long number, float scale, bool drawLeadingZeroes)
@@ -3237,11 +3087,6 @@ float OsuHUD::getScoreScale()
 	return m_osu->getImageScale(m_osu, m_osu->getSkin()->getScore0(), 13*1.5f) * osu_hud_scale.getFloat() * osu_hud_score_scale.getFloat();
 }
 
-void OsuHUD::onVolumeOverlaySizeChange(UString oldValue, UString newValue)
-{
-	updateLayout();
-}
-
 void OsuHUD::animateCombo()
 {
 	m_fComboAnim1 = 0.0f;
@@ -3336,24 +3181,6 @@ void OsuHUD::animateInputoverlay(int key, bool down)
 		// color
 		anim->moveLinear(animColor, 0.0f, osu_hud_inputoverlay_anim_color_duration.getFloat(), true);
 	}
-}
-
-void OsuHUD::animateVolumeChange()
-{
-	const bool active = m_fVolumeChangeTime > engine->getTime();
-
-	m_fVolumeChangeTime = engine->getTime() + osu_hud_volume_duration.getFloat() + 0.2f;
-
-	if (!active)
-	{
-		m_fVolumeChangeFade = 0.0f;
-		anim->moveQuadOut(&m_fVolumeChangeFade, 1.0f, 0.15f, true);
-	}
-	else
-		anim->moveQuadOut(&m_fVolumeChangeFade, 1.0f, 0.1f * (1.0f - m_fVolumeChangeFade), true);
-
-	anim->moveQuadOut(&m_fVolumeChangeFade, 0.0f, 0.20f, osu_hud_volume_duration.getFloat(), false);
-	anim->moveQuadOut(&m_fLastVolume, m_osu_volume_master_ref->getFloat(), 0.15f, 0.0f, true);
 }
 
 void OsuHUD::addCursorRipple(Vector2 pos)
@@ -3458,38 +3285,6 @@ void OsuHUD::addCursorTrailPosition(std::vector<CURSORTRAIL> &trail, Vector2 pos
 	}
 }
 
-void OsuHUD::selectVolumePrev()
-{
-	const std::vector<CBaseUIElement*> &elements = m_volumeSliderOverlayContainer->getElements();
-	for (int i=0; i<elements.size(); i++)
-	{
-		if (((OsuUIVolumeSlider*)elements[i])->isSelected())
-		{
-			const int prevIndex = (i == 0 ? elements.size()-1 : i-1);
-			((OsuUIVolumeSlider*)elements[i])->setSelected(false);
-			((OsuUIVolumeSlider*)elements[prevIndex])->setSelected(true);
-			break;
-		}
-	}
-	animateVolumeChange();
-}
-
-void OsuHUD::selectVolumeNext()
-{
-	const std::vector<CBaseUIElement*> &elements = m_volumeSliderOverlayContainer->getElements();
-	for (int i=0; i<elements.size(); i++)
-	{
-		if (((OsuUIVolumeSlider*)elements[i])->isSelected())
-		{
-			const int nextIndex = (i == elements.size()-1 ? 0 : i+1);
-			((OsuUIVolumeSlider*)elements[i])->setSelected(false);
-			((OsuUIVolumeSlider*)elements[nextIndex])->setSelected(true);
-			break;
-		}
-	}
-	animateVolumeChange();
-}
-
 void OsuHUD::resetHitErrorBar()
 {
 	m_hiterrors.clear();
@@ -3499,16 +3294,4 @@ McRect OsuHUD::getSkipClickRect()
 {
 	const float skipScale = osu_hud_scale.getFloat();
 	return McRect(m_osu->getScreenWidth() - m_osu->getSkin()->getPlaySkip()->getSize().x*skipScale, m_osu->getScreenHeight() - m_osu->getSkin()->getPlaySkip()->getSize().y*skipScale, m_osu->getSkin()->getPlaySkip()->getSize().x*skipScale, m_osu->getSkin()->getPlaySkip()->getSize().y*skipScale);
-}
-
-bool OsuHUD::isVolumeOverlayVisible()
-{
-	return engine->getTime() < m_fVolumeChangeTime;
-}
-
-bool OsuHUD::isVolumeOverlayBusy()
-{
-	return (m_volumeMaster->isEnabled() && (m_volumeMaster->isBusy() || m_volumeMaster->isMouseInside()))
-		|| (m_volumeEffects->isEnabled() && (m_volumeEffects->isBusy() || m_volumeEffects->isMouseInside()))
-		|| (m_volumeMusic->isEnabled() && (m_volumeMusic->isBusy() || m_volumeMusic->isMouseInside()));
 }

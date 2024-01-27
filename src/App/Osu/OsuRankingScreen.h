@@ -39,7 +39,7 @@ public:
 	virtual void draw(Graphics *g);
 	virtual void mouse_update(bool *propagate_clicks);
 
-	virtual void setVisible(bool visible);
+	virtual CBaseUIContainer* setVisible(bool visible);
 
 	void setScore(OsuScore *score);
 	void setScore(OsuDatabase::Score score, UString dateTime);

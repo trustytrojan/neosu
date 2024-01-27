@@ -88,16 +88,15 @@ static const char *s_sliderTextBeatmap = "osu file format v14\r\n"
 
 
 
-class OsuMainMenuMainButton : public CBaseUIButton
+class OsuMainMenuCubeButton : public CBaseUIButton
 {
 public:
-	OsuMainMenuMainButton(OsuMainMenu *mainMenu, float xPos, float yPos, float xSize, float ySize, UString name, UString text);
+	OsuMainMenuCubeButton(OsuMainMenu *mainMenu, float xPos, float yPos, float xSize, float ySize, UString name, UString text);
 
 	virtual void draw(Graphics *g);
 
 	void onMouseInside();
 	void onMouseOutside();
-	void onMouseDownInside(bool *propagate_clicks);
 
 	OsuMainMenu *m_mainMenu;
 };
@@ -338,9 +337,10 @@ OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu)
 	m_bDidUserUpdateFromOlderVersion = m_bDrawVersionNotificationArrow; // (same logic atm)
 
 	m_container = new CBaseUIContainer(-1, 0, m_osu->getScreenWidth(), m_osu->getScreenHeight(), "");
-	m_mainButton = new OsuMainMenuMainButton(this, 0, 0, 1, 1, "", "");
 
-	m_container->addBaseUIElement(m_mainButton);
+	m_cube = new OsuMainMenuCubeButton(this, 0, 0, 1, 1, "", "");
+    m_cube->setClickCallback( fastdelegate::MakeDelegate(this, &OsuMainMenu::onCubePressed) );
+	m_container->addBaseUIElement(m_cube);
 
 	addMainMenuButton("Singleplayer")->setClickCallback( fastdelegate::MakeDelegate(this, &OsuMainMenu::onPlayButtonPressed) );
 	addMainMenuButton("Multiplayer")->setClickCallback( fastdelegate::MakeDelegate(this, &OsuMainMenu::onMultiplayerButtonPressed) );
@@ -1155,23 +1155,9 @@ void OsuMainMenu::mouse_update(bool *propagate_clicks)
 
 	updateLayout();
 
-	if (m_osu->getHUD()->isVolumeOverlayBusy())
-		m_container->stealFocus();
-
-	if (m_osu->getOptionsMenu()->isMouseInside())
-		m_container->stealFocus();
-
 	// update and focus handling
-	// the main button always gets top focus
-	m_mainButton->mouse_update(propagate_clicks);
-	if (m_mainButton->isMouseInside())
-		m_container->stealFocus();
-
 	m_container->mouse_update(propagate_clicks);
 	m_updateAvailableButton->mouse_update(propagate_clicks);
-
-	if (m_osu->getOptionsMenu()->isMouseInside())
-		m_container->stealFocus();
 
 	// handle automatic menu closing
 	if (m_fMainMenuButtonCloseTime != 0.0f && engine->getTime() > m_fMainMenuButtonCloseTime)
@@ -1216,7 +1202,7 @@ void OsuMainMenu::mouse_update(bool *propagate_clicks)
 
 	if (m_bInMainMenuRandomAnim && m_iMainMenuRandomAnimType == 1 && anim->isAnimating(&m_fMainMenuAnim))
 	{
-		Vector2 mouseDelta = (m_mainButton->getPos() + m_mainButton->getSize()/2) - engine->getMouse()->getPos();
+		Vector2 mouseDelta = (m_cube->getPos() + m_cube->getSize()/2) - engine->getMouse()->getPos();
 		mouseDelta.x = clamp<float>(mouseDelta.x, -engine->getScreenSize().x/2, engine->getScreenSize().x/2);
 		mouseDelta.y = clamp<float>(mouseDelta.y, -engine->getScreenSize().y/2, engine->getScreenSize().y/2);
 		mouseDelta.x /= engine->getScreenSize().x;
@@ -1241,7 +1227,7 @@ void OsuMainMenu::mouse_update(bool *propagate_clicks)
 		if (!m_bMainMenuAnimFriendScheduled)
 			m_fMainMenuAnimFriendPercent = 0.0f;
 
-		Vector2 mouseDelta = (m_mainButton->getPos() + m_mainButton->getSize()/2) - engine->getMouse()->getPos();
+		Vector2 mouseDelta = (m_cube->getPos() + m_cube->getSize()/2) - engine->getMouse()->getPos();
 		mouseDelta.x = clamp<float>(mouseDelta.x, -engine->getScreenSize().x/2, engine->getScreenSize().x/2);
 		mouseDelta.y = clamp<float>(mouseDelta.y, -engine->getScreenSize().y/2, engine->getScreenSize().y/2);
 		mouseDelta.x /= engine->getScreenSize().x;
@@ -1328,7 +1314,7 @@ void OsuMainMenu::onKeyDown(KeyboardEvent &e)
 
 	if (osu_main_menu_shuffle.getBool())
 	{
-		if (!m_osu->getHUD()->isVolumeOverlayBusy() && !m_osu->getOptionsMenu()->isMouseInside())
+		if (!m_osu->getOptionsMenu()->isMouseInside())
 		{
 			if (e == KEY_RIGHT || e == KEY_F2)
 				m_osu->getSongBrowser()->selectRandomBeatmap(false);
@@ -1338,7 +1324,7 @@ void OsuMainMenu::onKeyDown(KeyboardEvent &e)
 	if (!m_bMenuElementsVisible)
 	{
 		if (e == KEY_P || e == KEY_ENTER)
-			m_mainButton->click();
+			m_cube->click();
 	}
 	else
 	{
@@ -1380,7 +1366,7 @@ void OsuMainMenu::onResolutionChange(Vector2 newResolution)
 	setMenuElementsVisible(m_bMenuElementsVisible);
 }
 
-void OsuMainMenu::setVisible(bool visible)
+CBaseUIContainer* OsuMainMenu::setVisible(bool visible)
 {
 	m_bVisible = visible;
 
@@ -1404,6 +1390,8 @@ void OsuMainMenu::setVisible(bool visible)
 		anim->moveQuadOut(&m_fStartupAnim, 1.0f, osu_main_menu_startup_anim_duration.getFloat(), (float)engine->getTimeReal());
 		anim->moveQuartOut(&m_fStartupAnim2, 1.0f, osu_main_menu_startup_anim_duration.getFloat()*6.0f, (float)engine->getTimeReal() + osu_main_menu_startup_anim_duration.getFloat()*0.5f);
 	}
+
+	return this;
 }
 
 void OsuMainMenu::updateLayout()
@@ -1413,6 +1401,9 @@ void OsuMainMenu::updateLayout()
 	m_vCenter = m_osu->getScreenSize()/2.0f;
 	const float size = Osu::getUIScale(m_osu, 324.0f);
 	m_vSize = Vector2(size, size);
+
+	m_cube->setRelPos(m_vCenter - m_vSize/2.0f - Vector2(m_fCenterOffsetAnim, 0.0f));
+	m_cube->setSize(m_vSize);
 
 	m_pauseButton->setSize(30 * dpiScale, 30 * dpiScale);
 	m_pauseButton->setRelPos(m_osu->getScreenWidth() - m_pauseButton->getSize().x*2 - 10 * dpiScale, m_pauseButton->getSize().y + 10 * dpiScale);
@@ -1431,9 +1422,6 @@ void OsuMainMenu::updateLayout()
 	m_versionButton->setSizeToContent(8 * dpiScale, 8 * dpiScale);
 	m_versionButton->setRelPos(-1, m_osu->getScreenSize().y - m_versionButton->getSize().y);
 
-	m_mainButton->setRelPos(m_vCenter - m_vSize/2.0f - Vector2(m_fCenterOffsetAnim, 0.0f));
-	m_mainButton->setSize(m_vSize);
-
 	int numButtons = m_menuElements.size();
 	int menuElementHeight = m_vSize.y / numButtons;
 	int menuElementPadding = numButtons > 3 ? m_vSize.y*0.04f : m_vSize.y*0.075f;
@@ -1441,14 +1429,14 @@ void OsuMainMenu::updateLayout()
 	int menuElementExtraWidth = m_vSize.x*0.06f;
 
 	float offsetPercent = m_fCenterOffsetAnim / (m_vSize.x/2.0f);
-	float curY = m_mainButton->getRelPos().y + (m_vSize.y - menuElementHeight*numButtons - (numButtons-1)*menuElementPadding)/2.0f;
+	float curY = m_cube->getRelPos().y + (m_vSize.y - menuElementHeight*numButtons - (numButtons-1)*menuElementPadding)/2.0f;
 	for (int i=0; i<m_menuElements.size(); i++)
 	{
 		curY += (i > 0 ? menuElementHeight+menuElementPadding : 0.0f);
 
 		m_menuElements[i]->onResized(); // HACKHACK: framework, setSize() does not update string metrics
-		m_menuElements[i]->setRelPos(m_mainButton->getRelPos().x + m_mainButton->getSize().x*offsetPercent - menuElementExtraWidth*offsetPercent + menuElementExtraWidth*(1.0f - offsetPercent), curY);
-		m_menuElements[i]->setSize(m_mainButton->getSize().x + menuElementExtraWidth*offsetPercent - 2.0f*menuElementExtraWidth*(1.0f - offsetPercent), menuElementHeight);
+		m_menuElements[i]->setRelPos(m_cube->getRelPos().x + m_cube->getSize().x*offsetPercent - menuElementExtraWidth*offsetPercent + menuElementExtraWidth*(1.0f - offsetPercent), curY);
+		m_menuElements[i]->setSize(m_cube->getSize().x + menuElementExtraWidth*offsetPercent - 2.0f*menuElementExtraWidth*(1.0f - offsetPercent), menuElementHeight);
 		m_menuElements[i]->setTextColor(COLORf(offsetPercent, 1.0f, 1.0f, 1.0f));
 		m_menuElements[i]->setFrameColor(COLORf(offsetPercent, 1.0f, 1.0f, 1.0f));
 		m_menuElements[i]->setBackgroundColor(COLORf(offsetPercent, 0.0f, 0.0f, 0.0f));
@@ -1579,9 +1567,12 @@ OsuMainMenuButton *OsuMainMenu::addMainMenuButton(UString text)
 	return button;
 }
 
-void OsuMainMenu::onMainMenuButtonPressed()
+void OsuMainMenu::onCubePressed()
 {
 	engine->getSound()->play(m_osu->getSkin()->getMenuHit());
+
+	anim->moveQuadInOut(&m_fSizeAddAnim, 0.0f, 0.06f, 0.0f, false);
+	anim->moveQuadInOut(&m_fSizeAddAnim, 0.12f, 0.06f, 0.07f, false);
 
 	// if the menu is already visible, this counts as pressing the play button
 	if (m_bMenuElementsVisible)
@@ -1595,11 +1586,11 @@ void OsuMainMenu::onMainMenuButtonPressed()
 	{
 		m_bInMainMenuRandomAnim = false;
 
-		Vector2 mouseDelta = (m_mainButton->getPos() + m_mainButton->getSize()/2) - engine->getMouse()->getPos();
-		mouseDelta.x = clamp<float>(mouseDelta.x, -m_mainButton->getSize().x/2, m_mainButton->getSize().x/2);
-		mouseDelta.y = clamp<float>(mouseDelta.y, -m_mainButton->getSize().y/2, m_mainButton->getSize().y/2);
-		mouseDelta.x /= m_mainButton->getSize().x;
-		mouseDelta.y /= m_mainButton->getSize().y;
+		Vector2 mouseDelta = (m_cube->getPos() + m_cube->getSize()/2) - engine->getMouse()->getPos();
+		mouseDelta.x = clamp<float>(mouseDelta.x, -m_cube->getSize().x/2, m_cube->getSize().x/2);
+		mouseDelta.y = clamp<float>(mouseDelta.y, -m_cube->getSize().y/2, m_cube->getSize().y/2);
+		mouseDelta.x /= m_cube->getSize().x;
+		mouseDelta.y /= m_cube->getSize().y;
 
 		const Vector2 pushAngle = Vector2(mouseDelta.y, -mouseDelta.x) * Vector2(0.15f, 0.15f);
 
@@ -1721,35 +1712,25 @@ void OsuMainMenu::onVersionPressed()
 
 
 
-OsuMainMenuMainButton::OsuMainMenuMainButton(OsuMainMenu *mainMenu, float xPos, float yPos, float xSize, float ySize, UString name, UString text) : CBaseUIButton(xPos, yPos, xSize, ySize, name, text)
+OsuMainMenuCubeButton::OsuMainMenuCubeButton(OsuMainMenu *mainMenu, float xPos, float yPos, float xSize, float ySize, UString name, UString text) : CBaseUIButton(xPos, yPos, xSize, ySize, name, text)
 {
 	m_mainMenu = mainMenu;
 }
 
-void OsuMainMenuMainButton::draw(Graphics *g)
+void OsuMainMenuCubeButton::draw(Graphics *g)
 {
 	// draw nothing
 	///CBaseUIButton::draw(g);
 }
 
-void OsuMainMenuMainButton::onMouseDownInside(bool *propagate_clicks)
-{
-	anim->moveQuadInOut(&m_mainMenu->m_fSizeAddAnim, 0.0f, 0.06f, 0.0f, false);
-	anim->moveQuadInOut(&m_mainMenu->m_fSizeAddAnim, 0.12f, 0.06f, 0.07f, false);
-
-	m_mainMenu->onMainMenuButtonPressed();
-
-	CBaseUIButton::onMouseDownInside(propagate_clicks);
-}
-
-void OsuMainMenuMainButton::onMouseInside()
+void OsuMainMenuCubeButton::onMouseInside()
 {
 	anim->moveQuadInOut(&m_mainMenu->m_fSizeAddAnim, 0.12f, 0.15f, 0.0f, true);
 
 	CBaseUIButton::onMouseInside();
 }
 
-void OsuMainMenuMainButton::onMouseOutside()
+void OsuMainMenuCubeButton::onMouseOutside()
 {
 	anim->moveQuadInOut(&m_mainMenu->m_fSizeAddAnim, 0.0f, 0.15f, 0.0f, true);
 
@@ -1764,7 +1745,7 @@ OsuMainMenuButton::OsuMainMenuButton(OsuMainMenu *mainMenu, float xPos, float yP
 
 void OsuMainMenuButton::onMouseDownInside(bool *propagate_clicks)
 {
-	if (m_mainMenu->m_mainButton->isMouseInside()) return;
+	if (m_mainMenu->m_cube->isMouseInside()) return;
 
 	engine->getSound()->play(m_mainMenu->getOsu()->getSkin()->getMenuHit());
 	CBaseUIButton::onMouseDownInside(propagate_clicks);

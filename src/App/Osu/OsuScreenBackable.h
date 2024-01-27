@@ -28,8 +28,6 @@ public:
 
 	virtual void onResolutionChange(Vector2 newResolution);
 
-	virtual void stealFocus();
-
 protected:
 	virtual void onBack() = 0;
 

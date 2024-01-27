@@ -490,27 +490,11 @@ void OsuModSelector::mouse_update(bool *propagate_clicks)
 		return;
 	}
 
-	if (m_osu->getHUD()->isVolumeOverlayBusy() || m_osu->getOptionsMenu()->isMouseInside())
-	{
-		m_container->stealFocus();
-		m_overrideSliderContainer->stealFocus();
-		m_experimentalContainer->stealFocus();
-	}
-
 	// update experimental mods, they take focus precedence over everything else
 	if (m_bExperimentalVisible)
 	{
 		m_experimentalContainer->mouse_update(propagate_clicks);
-		if (m_experimentalContainer->isMouseInside())
-		{
-			if (!m_container->isActive())
-				m_container->stealFocus();
-			if (!m_overrideSliderContainer->isActive())
-				m_overrideSliderContainer->stealFocus();
-		}
 	}
-	else
-		m_experimentalContainer->stealFocus();
 
 	// update
 	m_container->mouse_update(propagate_clicks);
@@ -673,7 +657,7 @@ void OsuModSelector::onKeyUp(KeyboardEvent &key)
 		m_bWaitForF1KeyUp = false;
 }
 
-void OsuModSelector::setVisible(bool visible)
+CBaseUIContainer* OsuModSelector::setVisible(bool visible)
 {
 	if (visible && !m_bVisible)
 	{
@@ -726,6 +710,7 @@ void OsuModSelector::setVisible(bool visible)
 	}
 
 	m_bVisible = visible;
+	return this;
 }
 
 bool OsuModSelector::isInCompactMode()

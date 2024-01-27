@@ -9,33 +9,23 @@
 #define OSUSCREEN_H
 
 #include "cbase.h"
-#include "KeyboardListener.h"
+#include "CBaseUIContainer.h"
 
 class Osu;
+class KeyboardEvent;
 
-class OsuScreen : public KeyboardListener
+class OsuScreen : public CBaseUIContainer
 {
 public:
-	OsuScreen(Osu *osu);
+	OsuScreen(Osu *osu) {
+		m_osu = osu;
+		m_bVisible = false;
+	}
 	virtual ~OsuScreen() {;}
-
-	virtual void draw(Graphics *g) {;}
-	virtual void mouse_update(bool *propagate_clicks) {;}
-
-	virtual void onKeyDown(KeyboardEvent &e);
-	virtual void onKeyUp(KeyboardEvent &e) {;}
-	virtual void onChar(KeyboardEvent &e) {;}
 
 	virtual void onResolutionChange(Vector2 newResolution) {;}
 
-	virtual void setVisible(bool visible) {m_bVisible = visible;}
-
-	inline bool isVisible() const {return m_bVisible;}
-
 	Osu *m_osu;
-
-protected:
-	bool m_bVisible;
 };
 
 #endif

@@ -1413,7 +1413,12 @@ void OsuOptionsMenu::mouse_update(bool *propagate_clicks)
 	}
 
 	if (!m_bVisible) return;
+
 	OsuScreenBackable::mouse_update(propagate_clicks);
+	if(!*propagate_clicks) return;
+
+	m_container->mouse_update(propagate_clicks);
+	if(!*propagate_clicks) return;
 
 	if (m_bDPIScalingScrollToSliderScheduled)
 	{
@@ -1421,24 +1426,10 @@ void OsuOptionsMenu::mouse_update(bool *propagate_clicks)
 		m_options->scrollToElement(m_uiScaleSlider, 0, 200 * Osu::getUIScale(m_osu));
 	}
 
-	if (m_osu->getHUD()->isVolumeOverlayBusy() || m_backButton->isActive())
-		m_container->stealFocus();
-
-	m_container->mouse_update(propagate_clicks);
-
 	// force context menu focus
-	if (m_contextMenu->isVisible())
-	{
-		const std::vector<CBaseUIElement*> &elements = m_options->getContainer()->getElements();
-		for (int i=0; i<elements.size(); i++)
-		{
-			CBaseUIElement *e = (elements[i]);
-
-			if (e == m_contextMenu)
-				continue;
-
-			e->stealFocus();
-		}
+	if (m_contextMenu->isVisible()) {
+		m_contextMenu->mouse_update(propagate_clicks);
+		if(!*propagate_clicks) return;
 	}
 
 	// flash osu!folder textbox red if incorrect
@@ -1752,9 +1743,10 @@ void OsuOptionsMenu::onKey(KeyboardEvent &e)
 	}
 }
 
-void OsuOptionsMenu::setVisible(bool visible)
+CBaseUIContainer* OsuOptionsMenu::setVisible(bool visible)
 {
 	setVisibleInt(visible, false);
+	return this;
 }
 
 void OsuOptionsMenu::setVisibleInt(bool visible, bool fromOnBack)

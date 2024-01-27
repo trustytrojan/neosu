@@ -1133,11 +1133,6 @@ void OsuSongBrowser2::mouse_update(bool *propagate_clicks)
 		recalculateStarsForSelectedBeatmap(force);
 	}
 
-	// HACKHACK: workaround for very wide back button skin images overlapping bottombar button hitboxes
-	const bool isMouseInsideValidBackButtonHitbox = (engine->getMouse()->getPos().x < m_osu->getSkin()->getMenuBack2()->getSizeBase().x);
-	if (m_bottombar->isMouseInside() && !isMouseInsideValidBackButtonHitbox)
-		OsuScreenBackable::stealFocus();
-
 	if (!m_bVisible) return;
 	OsuScreenBackable::mouse_update(propagate_clicks);
 
@@ -1155,10 +1150,6 @@ void OsuSongBrowser2::mouse_update(bool *propagate_clicks)
 		return;
 	}
 
-	// HACKHACK: mouse wheel handling order
-	if (m_osu->getHUD()->isVolumeOverlayBusy() || m_osu->getOptionsMenu()->isMouseInside())
-		engine->getMouse()->resetWheelDelta();
-
 	// update and focus handling
 	m_contextMenu->mouse_update(propagate_clicks);
 	m_songBrowser->mouse_update(propagate_clicks);
@@ -1167,38 +1158,6 @@ void OsuSongBrowser2::mouse_update(bool *propagate_clicks)
 	m_scoreBrowser->mouse_update(propagate_clicks);
 	m_topbarLeft->mouse_update(propagate_clicks);
 	m_topbarRight->mouse_update(propagate_clicks);
-
-	if (m_contextMenu->isMouseInside() || m_osu->getHUD()->isVolumeOverlayBusy() || (m_backButton->isMouseInside() && isMouseInsideValidBackButtonHitbox))
-	{
-		m_topbarLeft->stealFocus();
-		m_topbarRight->stealFocus();
-		m_songBrowser->stealFocus();
-		m_bottombar->stealFocus();
-		if (!m_scoreBrowser->isBusy())
-			m_scoreBrowser->stealFocus();
-	}
-
-	if (m_contextMenu->isMouseInside())
-		stealFocus();
-
-	if (m_bottombar->isMouseInside())
-	{
-		if (!m_scoreBrowser->isBusy())
-			m_scoreBrowser->stealFocus();
-	}
-
-	if (m_osu->getOptionsMenu()->isMouseInside())
-	{
-		stealFocus();
-		m_scoreBrowser->stealFocus();
-		m_bottombar->stealFocus();
-		m_contextMenu->stealFocus();
-		m_songInfo->stealFocus();
-		m_topbarLeft->stealFocus();
-	}
-
-	if (m_osu->getOptionsMenu()->isBusy())
-		m_songBrowser->stealFocus();
 
 	// handle right click absolute scrolling
 	{
@@ -1723,7 +1682,7 @@ void OsuSongBrowser2::onResolutionChange(Vector2 newResolution)
 	OsuScreenBackable::onResolutionChange(newResolution);
 }
 
-void OsuSongBrowser2::setVisible(bool visible)
+CBaseUIContainer* OsuSongBrowser2::setVisible(bool visible)
 {
 	m_bVisible = visible;
 	m_bShiftPressed = false; // seems to get stuck sometimes otherwise
@@ -1755,6 +1714,7 @@ void OsuSongBrowser2::setVisible(bool visible)
 		m_contextMenu->setVisible2(false);
 
 	m_osu->m_chat->updateVisibility();
+	return this;
 }
 
 void OsuSongBrowser2::onPlayEnd(bool quit)

@@ -81,12 +81,14 @@ void OsuVRTutorial::onKeyDown(KeyboardEvent &e)
 		OsuScreenBackable::onKeyDown(e);
 }
 
-void OsuVRTutorial::setVisible(bool visible)
+CBaseUIContainer* OsuVRTutorial::setVisible(bool visible)
 {
 	OsuScreenBackable::setVisible(visible);
 
 	if (m_bVisible)
 		updateLayout();
+
+	return this;
 }
 
 void OsuVRTutorial::updateLayout()

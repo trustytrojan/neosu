@@ -26,7 +26,6 @@ public:
 	static ConVar *m_osu_skin_async;
 	static ConVar *m_osu_skin_hd;
 
-public:
 	OsuSkin(Osu *osu, UString name, UString filepath, bool isDefaultSkin = false, bool isWorkshopSkin = false);
 	virtual ~OsuSkin();
 
@@ -42,6 +41,7 @@ public:
 	// samples
 	void setSampleSet(int sampleSet);
 	void setSampleVolume(float volume, bool force = false);
+	void resetSampleVolume();
 
 	void playHitCircleSound(int sampleType, float pan = 0.0f);
 	void playSliderTickSound(float pan = 0.0f);
@@ -336,7 +336,6 @@ public:
 	inline bool isDefaultSkin() const {return m_bIsDefaultSkin;}
 	inline int getSampleSet() const {return m_iSampleSet;}
 
-private:
 	static ConVar *m_osu_skin_ref;
 	static ConVar *m_osu_mod_fposu_ref;
 

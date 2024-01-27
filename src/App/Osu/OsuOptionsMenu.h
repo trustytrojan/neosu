@@ -51,7 +51,7 @@ public:
 
 	virtual void onKey(KeyboardEvent &e);
 
-	virtual void setVisible(bool visible);
+	virtual CBaseUIContainer* setVisible(bool visible);
 
 	void save();
 

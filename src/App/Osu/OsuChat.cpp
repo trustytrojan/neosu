@@ -457,12 +457,12 @@ void OsuChat::updateVisibility() {
     setVisible(user_wants_chat);
 }
 
-void OsuChat::setVisible(bool visible) {
-    if(visible == m_bVisible) return;
+CBaseUIContainer* OsuChat::setVisible(bool visible) {
+    if(visible == m_bVisible) return this;
 
     if(visible && bancho.user_id <= 0) {
         m_osu->m_optionsMenu->askForLoginDetails();
-        return;
+        return this;
     }
 
     m_bVisible = visible;
@@ -472,4 +472,12 @@ void OsuChat::setVisible(bool visible) {
     } else {
         anim->moveQuadOut(&m_fAnimation, 0.0f, 0.25f*m_fAnimation, true);
     }
+
+    return this;
+}
+
+bool OsuChat::isMouseInChat() {
+    if(!isVisible()) return false;
+    if(m_selected_channel == nullptr) return false;
+    return m_input_box->isMouseInside() || m_selected_channel->ui->isMouseInside();
 }
