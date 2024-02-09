@@ -873,10 +873,8 @@ void Osu::update()
 		m_fposu->update();
 
 	bool propagate_clicks = true;
-	for (int i=0; i<m_screens.size(); i++)
-	{
+	for (int i=0; i<m_screens.size() && propagate_clicks; i++) {
 		m_screens[i]->mouse_update(&propagate_clicks);
-		if(!propagate_clicks) break;
 	}
 
 	// main beatmap update
@@ -2090,8 +2088,6 @@ void Osu::reloadFonts()
 
 void Osu::updateMouseSettings()
 {
-	debugLog("Osu::updateMouseSettings()\n");
-
 	// mouse scaling & offset
 	Vector2 offset = Vector2(0, 0);
 	Vector2 scale = Vector2(1, 1);
@@ -2115,8 +2111,6 @@ void Osu::updateMouseSettings()
 
 void Osu::updateWindowsKeyDisable()
 {
-	debugLog("Osu::updateWindowsKeyDisable()\n");
-
 	if (isInVRMode()) return;
 
 	if (osu_win_disable_windows_key_while_playing.getBool())
@@ -2348,8 +2342,6 @@ void Osu::onLetterboxingChange(UString oldValue, UString newValue)
 
 void Osu::updateConfineCursor()
 {
-	debugLog("Osu::updateConfineCursor()\n");
-
 	if (isInVRMode() || m_iInstanceID > 0) return;
 
 	if ((osu_confine_cursor_fullscreen.getBool() && env->isFullscreen())

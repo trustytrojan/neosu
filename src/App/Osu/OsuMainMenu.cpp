@@ -106,7 +106,7 @@ class OsuMainMenuButton : public CBaseUIButton
 public:
 	OsuMainMenuButton(OsuMainMenu *mainMenu, float xPos, float yPos, float xSize, float ySize, UString name, UString text);
 
-	void onMouseDownInside(bool *propagate_clicks);
+	void onMouseDownInside();
 
 private:
 	OsuMainMenu *m_mainMenu;
@@ -1743,10 +1743,10 @@ OsuMainMenuButton::OsuMainMenuButton(OsuMainMenu *mainMenu, float xPos, float yP
 	m_mainMenu = mainMenu;
 }
 
-void OsuMainMenuButton::onMouseDownInside(bool *propagate_clicks)
+void OsuMainMenuButton::onMouseDownInside()
 {
 	if (m_mainMenu->m_cube->isMouseInside()) return;
 
 	engine->getSound()->play(m_mainMenu->getOsu()->getSkin()->getMenuHit());
-	CBaseUIButton::onMouseDownInside(propagate_clicks);
+	CBaseUIButton::onMouseDownInside();
 }
