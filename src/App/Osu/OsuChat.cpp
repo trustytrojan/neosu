@@ -129,13 +129,19 @@ void OsuChat::draw(Graphics *g) {
     }
 
     if(m_selected_channel == nullptr) {
-        const float chat_y = m_container->getSize().y * 0.66f;
-        const float chat_height = m_container->getSize().y - chat_y;
+        const float chat_h = round(m_container->getSize().y * 0.3f);
+        const float chat_y = m_container->getSize().y - chat_h;
+        float chat_w = m_container->getSize().x;
+        if(isVisibilityForced()) {
+            // In the lobby and in multi rooms (e.g. when visibility is forced), don't
+            // take the full horizontal width to allow for cleaner UI designs.
+            chat_w = round(chat_w * 0.6);
+        }
 
         g->setColor(COLOR(isAnimating ? 150 : 100, 0, 10, 50)); // dirty hack, idk how opengl works
-        g->fillRect(0, chat_y - 20, m_container->getSize().x, 20);
+        g->fillRect(0, chat_y - (button_height + 2.f), chat_w, (button_height + 2.f));
         g->setColor(COLOR(150, 0, 0, 0));
-        g->fillRect(0, chat_y, m_container->getSize().x, chat_height);
+        g->fillRect(0, chat_y, chat_w, chat_h);
     } else {
         g->setColor(COLOR(isAnimating ? 150 : 100, 0, 10, 50)); // dirty hack, idk how opengl works
         g->fillRect(
@@ -347,20 +353,26 @@ void OsuChat::removeChannel(UString channel_name) {
 }
 
 void OsuChat::updateLayout(Vector2 newResolution) {
+    // In the lobby and in multi rooms (e.g. when visibility is forced), don't
+    // take the full horizontal width to allow for cleaner UI designs.
+    if(isVisibilityForced()) {
+        newResolution.x = round(newResolution.x * 0.6);
+    }
+
     m_container->setSize(newResolution);
 
-    const float chat_height = newResolution.y * 0.66f;
-    const float input_box_height = 30.f;
-
+    const float chat_w = newResolution.x;
+    const float chat_h = round(newResolution.y * 0.3f) - input_box_height;
+    const float chat_y = newResolution.y - (chat_h + input_box_height);
     for(auto chan : m_channels) {
         chan->updateLayout(
-            Vector2{0.f, chat_height},
-            Vector2{newResolution.x, (newResolution.y - chat_height) - input_box_height}
+            Vector2{0.f, chat_y},
+            Vector2{chat_w, chat_h}
         );
     }
 
-    m_input_box->setPos(Vector2{0.f, newResolution.y - (input_box_height + 2.f)});
-    m_input_box->setSize(Vector2{newResolution.x, input_box_height});
+    m_input_box->setPos(Vector2{0.f, chat_y + chat_h});
+    m_input_box->setSize(Vector2{chat_w, input_box_height});
 
     if(m_selected_channel == nullptr && !m_channels.empty()) {
         m_selected_channel = m_channels[0];
@@ -373,7 +385,6 @@ void OsuChat::updateLayout(Vector2 newResolution) {
 
 void OsuChat::updateButtonLayout(Vector2 screen) {
     const float initial_x = 2;
-    const float button_height = 26;
     float total_x = initial_x;
 
     std::sort(m_channels.begin(), m_channels.end(), [](OsuChatChannel* a, OsuChatChannel* b) {
@@ -396,7 +407,7 @@ void OsuChat::updateButtonLayout(Vector2 screen) {
         total_x += button_width;
     }
 
-    const float chat_height = screen.y * 0.66f;
+    const float chat_y = round(screen.y * 0.7f);
     float total_y = 0.f;
     total_x = initial_x;
     for(auto chan : m_channels) {
@@ -409,7 +420,7 @@ void OsuChat::updateButtonLayout(Vector2 screen) {
             total_y += button_height;
         }
 
-        btn->setPos(total_x, chat_height - button_container_height + total_y);
+        btn->setPos(total_x, chat_y - button_container_height + total_y);
         // Buttons are drawn a bit smaller than they should, so we up the size here
         btn->setSize(button_width + 2, button_height + 2);
 
@@ -426,7 +437,7 @@ void OsuChat::updateButtonLayout(Vector2 screen) {
         total_x += button_width;
     }
 
-    m_button_container->setPos(0, chat_height - button_container_height);
+    m_button_container->setPos(0, chat_y - button_container_height);
     m_button_container->setSize(screen.x, button_container_height);
 }
 
@@ -435,6 +446,7 @@ void OsuChat::onResolutionChange(Vector2 newResolution) {
 }
 
 bool OsuChat::isVisibilityForced() {
+    if(m_osu->m_room == nullptr || m_osu->m_lobby == nullptr || m_osu->m_songBrowser2 == nullptr) return false;
     bool sitting_in_room = m_osu->m_room->isVisible() && !m_osu->m_songBrowser2->isVisible() && !bancho.is_playing_a_multi_map();
     return m_osu->m_lobby->isVisible() || sitting_in_room;
 }

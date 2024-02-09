@@ -75,4 +75,7 @@ struct OsuChat : public OsuScreen
     McFont* font;
     float m_fAnimation = 0.f;
     bool user_wants_chat = false;
+
+    const float input_box_height = 30.f;
+    const float button_height = 26.f;
 };

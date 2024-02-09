@@ -264,10 +264,10 @@ public:
 	OsuVR *m_vr;
 	OsuMainMenu *m_mainMenu;
 	OsuOptionsMenu *m_optionsMenu;
-	OsuChat *m_chat;
-	OsuLobby *m_lobby;
-	OsuRoom *m_room;
-	OsuSongBrowser2 *m_songBrowser2;
+	OsuChat *m_chat = nullptr;
+	OsuLobby *m_lobby = nullptr;
+	OsuRoom *m_room = nullptr;
+	OsuSongBrowser2 *m_songBrowser2 = nullptr;
 	OsuBackgroundImageHandler *m_backgroundImageHandler;
 	OsuModSelector *m_modSelector;
 	OsuRankingScreen *m_rankingScreen;
