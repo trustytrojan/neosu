@@ -1170,24 +1170,45 @@ void Osu::updateMods()
 {
 	debugLog("Osu::updateMods()\n");
 
-	m_bModAuto = osu_mods.getString().find("auto") != -1;
-	m_bModAutopilot = osu_mods.getString().find("autopilot") != -1;
-	m_bModRelax = osu_mods.getString().find("relax") != -1;
-	m_bModSpunout = osu_mods.getString().find("spunout") != -1;
-	m_bModTarget = osu_mods.getString().find("practicetarget") != -1;
-	m_bModScorev2 = osu_mods.getString().find("v2") != -1;
-	m_bModDT = osu_mods.getString().find("dt") != -1;
-	m_bModNC = osu_mods.getString().find("nc") != -1;
-	m_bModNF = osu_mods.getString().find("nf") != -1;
-	m_bModHT = osu_mods.getString().find("ht") != -1;
-	m_bModDC = osu_mods.getString().find("dc") != -1;
-	m_bModHD = osu_mods.getString().find("hd") != -1;
-	m_bModHR = osu_mods.getString().find("hr") != -1;
-	m_bModEZ = osu_mods.getString().find("ez") != -1;
-	m_bModSD = osu_mods.getString().find("sd") != -1;
-	m_bModSS = osu_mods.getString().find("ss") != -1;
-	m_bModNM = osu_mods.getString().find("nm") != -1;
-	m_bModTD = osu_mods.getString().find("nerftd") != -1;
+	if(bancho.is_in_a_multi_room()) {
+		m_bModNF = bancho.room.mods & (1 << 0);
+		m_bModEZ = bancho.room.mods & (1 << 1);
+		m_bModTD = bancho.room.mods & (1 << 2);
+		m_bModHD = bancho.room.mods & (1 << 3);
+		m_bModHR = bancho.room.mods & (1 << 4);
+		m_bModSD = bancho.room.mods & (1 << 5);
+		m_bModDT = bancho.room.mods & (1 << 6);
+		m_bModRelax = bancho.room.mods & (1 << 7);
+		m_bModHT = bancho.room.mods & (1 << 8);
+		m_bModNC = bancho.room.mods & (1 << 9);
+		m_bModAuto = bancho.room.mods & (1 << 11);
+		m_bModSpunout = bancho.room.mods & (1 << 12);
+		m_bModAutopilot = bancho.room.mods & (1 << 13);
+		m_bModSS = bancho.room.mods & (1 << 14);
+		m_bModTarget = bancho.room.mods & (1 << 23);
+		m_bModScorev2 = bancho.room.mods & (1 << 29);
+		m_bModDC = false;
+		m_bModNM = bancho.room.mods == 0;
+	} else {
+		m_bModAuto = osu_mods.getString().find("auto") != -1;
+		m_bModAutopilot = osu_mods.getString().find("autopilot") != -1;
+		m_bModRelax = osu_mods.getString().find("relax") != -1;
+		m_bModSpunout = osu_mods.getString().find("spunout") != -1;
+		m_bModTarget = osu_mods.getString().find("practicetarget") != -1;
+		m_bModScorev2 = osu_mods.getString().find("v2") != -1;
+		m_bModDT = osu_mods.getString().find("dt") != -1;
+		m_bModNC = osu_mods.getString().find("nc") != -1;
+		m_bModNF = osu_mods.getString().find("nf") != -1;
+		m_bModHT = osu_mods.getString().find("ht") != -1;
+		m_bModDC = osu_mods.getString().find("dc") != -1;
+		m_bModHD = osu_mods.getString().find("hd") != -1;
+		m_bModHR = osu_mods.getString().find("hr") != -1;
+		m_bModEZ = osu_mods.getString().find("ez") != -1;
+		m_bModSD = osu_mods.getString().find("sd") != -1;
+		m_bModSS = osu_mods.getString().find("ss") != -1;
+		m_bModNM = osu_mods.getString().find("nm") != -1;
+		m_bModTD = osu_mods.getString().find("nerftd") != -1;
+	}
 
 	// static overrides
 	onSpeedChange("", osu_speed_override.getString());

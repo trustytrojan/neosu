@@ -12,6 +12,7 @@
 #include "OsuRoom.h"
 #include "OsuRichPresence.h"
 #include "OsuSkin.h"
+#include "OsuSkinImage.h"
 #include "OsuSongBrowser2.h"
 #include "OsuUIButton.h"
 
@@ -83,6 +84,30 @@ void OsuRoom::draw(Graphics *g) {
     // XXX: Add convar for toggling room backgrounds
     OsuSongBrowser2::drawSelectedBeatmapBackgroundImage(g, m_osu, 1.0);
     m_container->draw(g);
+
+    g->setColor(0xffffffff);
+    Vector2 modPos = Vector2{800, 800};
+    std::vector<OsuSkinImage*> mods;
+    if(bancho.room.mods & (1 << 0)) mods.push_back(m_osu->getSkin()->getSelectionModNoFail());
+    if(bancho.room.mods & (1 << 1)) mods.push_back(m_osu->getSkin()->getSelectionModEasy());
+    if(bancho.room.mods & (1 << 2)) mods.push_back(m_osu->getSkin()->getSelectionModTD());
+    if(bancho.room.mods & (1 << 3)) mods.push_back(m_osu->getSkin()->getSelectionModHidden());
+    if(bancho.room.mods & (1 << 4)) mods.push_back(m_osu->getSkin()->getSelectionModHardRock());
+    if(bancho.room.mods & (1 << 5)) mods.push_back(m_osu->getSkin()->getSelectionModSuddenDeath());
+    if(bancho.room.mods & (1 << 7)) mods.push_back(m_osu->getSkin()->getSelectionModRelax());
+    if(bancho.room.mods & (1 << 8)) mods.push_back(m_osu->getSkin()->getSelectionModHalfTime());
+    if(bancho.room.mods & (1 << 9)) mods.push_back(m_osu->getSkin()->getSelectionModNightCore());
+    else if(bancho.room.mods & (1 << 6)) mods.push_back(m_osu->getSkin()->getSelectionModDoubleTime());
+    if(bancho.room.mods & (1 << 11)) mods.push_back(m_osu->getSkin()->getSelectionModAutoplay());
+    if(bancho.room.mods & (1 << 12)) mods.push_back(m_osu->getSkin()->getSelectionModSpunOut());
+    if(bancho.room.mods & (1 << 13)) mods.push_back(m_osu->getSkin()->getSelectionModAutopilot());
+    if(bancho.room.mods & (1 << 14)) mods.push_back(m_osu->getSkin()->getSelectionModPerfect());
+    if(bancho.room.mods & (1 << 23)) mods.push_back(m_osu->getSkin()->getSelectionModTarget());
+    if(bancho.room.mods & (1 << 29)) mods.push_back(m_osu->getSkin()->getSelectionModScorev2());
+    for(auto mod : mods) {
+        mod->draw(g, modPos);
+        modPos.x -= mod->getSize().x + 10;
+    }
 
     // Not technically drawing below this line, just checking for map download progress
     if(m_osu->getSelectedBeatmap() != NULL) return;

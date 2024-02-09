@@ -36,7 +36,6 @@
 // TODO @kiwec: allow options menu in multi lobby, multi room
 // TODO @kiwec: fix being unable to adjust volume
 // TODO @kiwec: fix being unable to play singleplayer maps after joining a room (does it think we're still in a room?)
-// TODO @kiwec: add mods to multi room, handle mods
 
 
 Bancho bancho;
