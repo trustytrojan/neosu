@@ -177,14 +177,12 @@ void OsuVolumeOverlay::mouse_update(bool *propagate_clicks) {
     }
 
     // scroll wheel events (should be separate from mouse_update events, but... oh well...)
-    if(canChangeVolume()) {
-        const int wheelDelta = engine->getMouse()->getWheelDeltaVertical();
-        if(wheelDelta != 0) {
-            if(wheelDelta > 0) {
-                volumeUp(wheelDelta);
-            } else {
-                volumeDown(-wheelDelta);
-            }
+    const int wheelDelta = engine->getMouse()->getWheelDeltaVertical() / 120;
+    if(canChangeVolume() && wheelDelta != 0) {
+        if(wheelDelta > 0) {
+            volumeUp(wheelDelta);
+        } else {
+            volumeDown(-wheelDelta);
         }
     }
 }
@@ -307,11 +305,9 @@ void OsuVolumeOverlay::onVolumeChange(int multiplier) {
         volumeConVar = osu_volume_effects;
 
     // change the volume
-    if (isVisible()) {
-        float newVolume = clamp<float>(volumeConVar->getFloat() + osu_volume_change_interval->getFloat()*multiplier, 0.0f, 1.0f);
-        volumeConVar->setValue(newVolume);
-        animate();
-    }
+    float newVolume = clamp<float>(volumeConVar->getFloat() + osu_volume_change_interval->getFloat()*multiplier, 0.0f, 1.0f);
+    volumeConVar->setValue(newVolume);
+    animate();
 }
 
 void OsuVolumeOverlay::onMasterVolumeChange(UString oldValue, UString newValue) {

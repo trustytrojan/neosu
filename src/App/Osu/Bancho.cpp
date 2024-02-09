@@ -34,8 +34,8 @@
 // TODO @kiwec: PLEASE polish multiplayer room UI
 // TODO @kiwec: handle being room host: toggle freemod, edit mods, select map, win condition, team mode, password, kick players, lock slots
 // TODO @kiwec: allow options menu in multi lobby, multi room
-// TODO @kiwec: fix being unable to adjust volume
 // TODO @kiwec: fix being unable to play singleplayer maps after joining a room (does it think we're still in a room?)
+// TODO @kiwec: handle freemod / allow user to pick mods in multi room
 
 
 Bancho bancho;
