@@ -25,55 +25,96 @@
 #include "SoundEngine.h"
 
 
+void OsuUIModList::draw(Graphics *g) {
+    std::vector<OsuSkinImage*> mods;
+    if(bancho.room.mods & (1 << 0)) mods.push_back(bancho.osu->getSkin()->getSelectionModNoFail());
+    if(bancho.room.mods & (1 << 1)) mods.push_back(bancho.osu->getSkin()->getSelectionModEasy());
+    if(bancho.room.mods & (1 << 2)) mods.push_back(bancho.osu->getSkin()->getSelectionModTD());
+    if(bancho.room.mods & (1 << 3)) mods.push_back(bancho.osu->getSkin()->getSelectionModHidden());
+    if(bancho.room.mods & (1 << 4)) mods.push_back(bancho.osu->getSkin()->getSelectionModHardRock());
+    if(bancho.room.mods & (1 << 5)) mods.push_back(bancho.osu->getSkin()->getSelectionModSuddenDeath());
+    if(bancho.room.mods & (1 << 7)) mods.push_back(bancho.osu->getSkin()->getSelectionModRelax());
+    if(bancho.room.mods & (1 << 8)) mods.push_back(bancho.osu->getSkin()->getSelectionModHalfTime());
+    if(bancho.room.mods & (1 << 9)) mods.push_back(bancho.osu->getSkin()->getSelectionModNightCore());
+    else if(bancho.room.mods & (1 << 6)) mods.push_back(bancho.osu->getSkin()->getSelectionModDoubleTime());
+    if(bancho.room.mods & (1 << 11)) mods.push_back(bancho.osu->getSkin()->getSelectionModAutoplay());
+    if(bancho.room.mods & (1 << 12)) mods.push_back(bancho.osu->getSkin()->getSelectionModSpunOut());
+    if(bancho.room.mods & (1 << 13)) mods.push_back(bancho.osu->getSkin()->getSelectionModAutopilot());
+    if(bancho.room.mods & (1 << 14)) mods.push_back(bancho.osu->getSkin()->getSelectionModPerfect());
+    if(bancho.room.mods & (1 << 23)) mods.push_back(bancho.osu->getSkin()->getSelectionModTarget());
+    if(bancho.room.mods & (1 << 29)) mods.push_back(bancho.osu->getSkin()->getSelectionModScorev2());
+
+    g->setColor(0xffffffff);
+    Vector2 modPos = m_vPos;
+    for(auto mod : mods) {
+        Vector2 fixed_pos = modPos + (mod->getSize() / 2);
+        mod->draw(g, fixed_pos);
+
+        modPos.x += mod->getSize().x + 10;
+    }
+}
+
+bool OsuUIModList::isVisible() {
+    return bancho.room.mods != 0;
+}
+
+
+#define INIT_LABEL(label_name, default_text, is_big) do {             \
+    label_name = new CBaseUILabel(0, 0, 0, 0, "label", default_text); \
+    label_name->setFont(is_big ? lfont : font);                       \
+    label_name->setSizeToContent(0, 0);                               \
+    label_name->setDrawFrame(false);                                  \
+    label_name->setDrawBackground(false);                             \
+    m_settings->getContainer()->addBaseUIElement(label_name);         \
+} while(0)
+
 OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
     font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    lfont = osu->getSubTitleFont();
 
     m_container = new CBaseUIContainer(0, 0, 0, 0, "");
 
-    heading = new CBaseUILabel(50, 30, 300, 40, "", "Multiplayer");
-    heading->setFont(m_osu->getTitleFont());
-    heading->setSizeToContent(0, 0);
-    heading->setDrawFrame(false);
-    heading->setDrawBackground(false);
-    m_container->addBaseUIElement(heading);
+    m_pauseButton = new OsuMainMenuPauseButton(0, 0, 0, 0, "pause_btn", "");
+    m_pauseButton->setClickCallback( fastdelegate::MakeDelegate(osu->m_mainMenu, &OsuMainMenu::onPausePressed) );
+    m_container->addBaseUIElement(m_pauseButton);
 
-    m_slotlist = new CBaseUIScrollView(30, 140, 400, 300, "");
+    m_settings = new CBaseUIScrollView(0, 0, 0, 0, "room_settings");
+    m_settings->setDrawFrame(false); // it's off by 1 pixel, turn it OFF
+    m_settings->setDrawBackground(true);
+    m_settings->setBackgroundColor(0xdd000000);
+    m_container->addBaseUIElement(m_settings);
+
+    INIT_LABEL(m_room_name, "Multiplayer room", true);
+    // TODO @kiwec: when host, change room name to input field
+    // TODO @kiwec: when host, display room password box
+
+    CBaseUILabel* map_label;
+    INIT_LABEL(map_label, "Beatmap", true);
+    INIT_LABEL(m_map_title, "(no map selected)", false);
+    // TODO @kiwec: when map is loaded, display more info than just the title
+    // TODO @kiwec: when host, button to change beatmap
+
+    CBaseUILabel* mods_label;
+    INIT_LABEL(mods_label, "Mods", true);
+    m_mods = new OsuUIModList();
+    m_settings->getContainer()->addBaseUIElement(m_mods);
+    // TODO @kiwec: when freemod, button to select mods
+    // TODO @kiwec: when host, checkbox to allow freemods or not
+    INIT_LABEL(m_no_mods_selected, "No mods selected.", false);
+
+    m_slotlist = new CBaseUIScrollView(30, 140, 400, 300, "slot_list");
     m_slotlist->setDrawFrame(true);
     m_slotlist->setDrawBackground(true);
     m_slotlist->setBackgroundColor(0xdd000000);
     m_slotlist->setHorizontalScrolling(false);
     m_container->addBaseUIElement(m_slotlist);
 
-    m_map = new CBaseUIScrollView(440, 140, 500, 100, "");
-    m_map->setDrawFrame(true);
-    m_map->setDrawBackground(true);
-    m_map->setBackgroundColor(0xdd000000);
-    m_container->addBaseUIElement(m_map);
-
-    m_map_title = new CBaseUILabel(10, 10, 300, 20, "", "(no map selected)");
-    m_map_title->setFont(font);
-    m_map_title->setSizeToContent(0, 0);
-    m_map_title->setDrawFrame(false);
-    m_map_title->setDrawBackground(false);
-    m_map->getContainer()->addBaseUIElement(m_map_title);
-
-    m_map_extra = new CBaseUILabel(10, 40, 300, 20, "", "");
-    m_map_extra->setFont(font);
-    m_map_extra->setSizeToContent(0, 0);
-    m_map_extra->setDrawFrame(false);
-    m_map_extra->setDrawBackground(false);
-    m_map->getContainer()->addBaseUIElement(m_map_extra);
-
-    m_ready_btn = new OsuUIButton(osu, 550, 390, 300, 50, "", "Ready!");
+    m_ready_btn = new OsuUIButton(osu, 550, 390, 300, 50, "ready_btn", "Ready!");
     m_ready_btn->setUseDefaultSkin();
     m_ready_btn->setColor(0xff00ff00);
     m_ready_btn->setClickCallback( fastdelegate::MakeDelegate(this, &OsuRoom::onReadyButtonClick) );
     m_ready_btn->is_loading = true;
     m_container->addBaseUIElement(m_ready_btn);
-
-    m_pauseButton = new OsuMainMenuPauseButton(0, 0, 0, 0, "", "");
-    m_pauseButton->setClickCallback( fastdelegate::MakeDelegate(osu->m_mainMenu, &OsuMainMenu::onPausePressed) );
-    m_container->addBaseUIElement(m_pauseButton);
 
     updateLayout(m_osu->getScreenSize());
 }
@@ -85,30 +126,6 @@ void OsuRoom::draw(Graphics *g) {
     OsuSongBrowser2::drawSelectedBeatmapBackgroundImage(g, m_osu, 1.0);
     m_container->draw(g);
 
-    g->setColor(0xffffffff);
-    Vector2 modPos = Vector2{800, 800};
-    std::vector<OsuSkinImage*> mods;
-    if(bancho.room.mods & (1 << 0)) mods.push_back(m_osu->getSkin()->getSelectionModNoFail());
-    if(bancho.room.mods & (1 << 1)) mods.push_back(m_osu->getSkin()->getSelectionModEasy());
-    if(bancho.room.mods & (1 << 2)) mods.push_back(m_osu->getSkin()->getSelectionModTD());
-    if(bancho.room.mods & (1 << 3)) mods.push_back(m_osu->getSkin()->getSelectionModHidden());
-    if(bancho.room.mods & (1 << 4)) mods.push_back(m_osu->getSkin()->getSelectionModHardRock());
-    if(bancho.room.mods & (1 << 5)) mods.push_back(m_osu->getSkin()->getSelectionModSuddenDeath());
-    if(bancho.room.mods & (1 << 7)) mods.push_back(m_osu->getSkin()->getSelectionModRelax());
-    if(bancho.room.mods & (1 << 8)) mods.push_back(m_osu->getSkin()->getSelectionModHalfTime());
-    if(bancho.room.mods & (1 << 9)) mods.push_back(m_osu->getSkin()->getSelectionModNightCore());
-    else if(bancho.room.mods & (1 << 6)) mods.push_back(m_osu->getSkin()->getSelectionModDoubleTime());
-    if(bancho.room.mods & (1 << 11)) mods.push_back(m_osu->getSkin()->getSelectionModAutoplay());
-    if(bancho.room.mods & (1 << 12)) mods.push_back(m_osu->getSkin()->getSelectionModSpunOut());
-    if(bancho.room.mods & (1 << 13)) mods.push_back(m_osu->getSkin()->getSelectionModAutopilot());
-    if(bancho.room.mods & (1 << 14)) mods.push_back(m_osu->getSkin()->getSelectionModPerfect());
-    if(bancho.room.mods & (1 << 23)) mods.push_back(m_osu->getSkin()->getSelectionModTarget());
-    if(bancho.room.mods & (1 << 29)) mods.push_back(m_osu->getSkin()->getSelectionModScorev2());
-    for(auto mod : mods) {
-        mod->draw(g, modPos);
-        modPos.x -= mod->getSize().x + 10;
-    }
-
     // Not technically drawing below this line, just checking for map download progress
     if(m_osu->getSelectedBeatmap() != NULL) return;
     if(bancho.room.map_id == 0) return;
@@ -117,20 +134,20 @@ void OsuRoom::draw(Graphics *g) {
 
     uint32_t set_id = search->second;
     if(set_id == 0) {
-        m_map_extra->setText("Could not find beatmapset ID from given map ID.");
-        m_map_extra->setSizeToContent(0, 0);
+        m_map_title->setText("Could not find beatmapset ID from given map ID.");
+        m_map_title->setSizeToContent(0, 0);
         return;
     }
 
     auto status = download_mapset(set_id);
     if(status.status == FAILURE) {
-        m_map_extra->setText("Failed to download beatmap set :(");
-        m_map_extra->setSizeToContent(0, 0);
+        m_map_title->setText("Failed to download beatmap set :(");
+        m_map_title->setSizeToContent(0, 0);
         bancho.room.map_id = 0; // don't try downloading it again
     } else if(status.status == DOWNLOADING) {
         auto text = UString::format("Downloading... %.2f%%", status.progress * 100.f);
-        m_map_extra->setText(text.toUtf8());
-        m_map_extra->setSizeToContent(0, 0);
+        m_map_title->setText(text.toUtf8());
+        m_map_title->setSizeToContent(0, 0);
     } else if(status.status == SUCCESS) {
         auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_id);
         // XXX: Make a permanent database for auto-downloaded songs, so we can load them like osu!.db's
@@ -174,11 +191,32 @@ CBaseUIContainer* OsuRoom::setVisible(bool visible) {
 void OsuRoom::updateLayout(Vector2 newResolution) {
     m_container->setSize(newResolution);
 
-    heading->setText(bancho.room.name);
+    m_settings->setPos(round(newResolution.x * 0.6), 0);
+    m_settings->setSize(round(newResolution.x * 0.4), newResolution.y);
 
-    // TODO @kiwec: draw room mods, freemod status
-    // TODO @kiwec: draw more room info
+    const float dpiScale = Osu::getUIScale(m_osu);
+    m_pauseButton->setSize(30 * dpiScale, 30 * dpiScale);
+    m_pauseButton->setPos(round(newResolution.x * 0.6) - m_pauseButton->getSize().x*2 - 10 * dpiScale, m_pauseButton->getSize().y + 10 * dpiScale);
 
+    m_room_name->setText(bancho.room.name);
+    m_room_name->setSizeToContent();
+
+    m_mods->setSize(300, m_osu->getSkin()->getSelectionModNoFail()->getSize().y);
+    m_no_mods_selected->setVisible(!m_mods->isVisible());
+
+    float settings_y = 10;
+    for(auto& element : m_settings->getContainer()->getElements()) {
+        if(element->isVisible()) {
+            element->setRelPos(10, settings_y);
+            settings_y += element->getSize().y + 20;
+        } else {
+            // HACK: Still getting drawn despite isVisible() being false. idk
+            element->setRelPos(-999, -999);
+        }
+    }
+    m_settings->getContainer()->update_pos(); // HACK: force container to update contents
+
+    // TODO @kiwec: cleaner player list
     m_slotlist->clear();
     int y_total = 10;
     for(int i = 0; i < 16; i++) {
@@ -189,7 +227,6 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
             user_box->setDrawBackground(false);
             user_box->setTextColor(bancho.room.slots[i].is_ready() ? 0xff00ff00 : 0xffffffff);
             m_slotlist->getContainer()->addBaseUIElement(user_box);
-            // TODO @kiwec: draw mods
             // TODO @kiwec: draw player ranking/presence?, [playing]/[no map]
             y_total += 30;
         }
@@ -204,10 +241,6 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
     }
     m_ready_btn->setText(is_ready ? "Not ready" : "Ready!");
     m_ready_btn->setColor(is_ready ? 0xffff0000 : 0xff00ff00);
-
-    const float dpiScale = Osu::getUIScale(m_osu);
-    m_pauseButton->setSize(30 * dpiScale, 30 * dpiScale);
-    m_pauseButton->setPos(m_osu->getScreenWidth() - m_pauseButton->getSize().x*2 - 10 * dpiScale, m_pauseButton->getSize().y + 10 * dpiScale);
 }
 
 // Exit to main menu
@@ -282,8 +315,6 @@ void OsuRoom::on_map_change(bool download) {
     if(bancho.room.map_id == 0) {
         m_map_title->setText("(no map selected)");
         m_map_title->setSizeToContent(0, 0);
-        m_map_extra->setText("");
-        m_map_extra->setSizeToContent(0, 0);
     } else {
         std::string hash = bancho.room.map_md5.toUtf8(); // lol
         auto beatmap = m_osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(hash);
@@ -291,9 +322,6 @@ void OsuRoom::on_map_change(bool download) {
             m_osu->m_songBrowser2->onDifficultySelected(beatmap, false);
             m_map_title->setText(bancho.room.map_name);
             m_map_title->setSizeToContent(0, 0);
-            m_map_extra->setText("Enjoy :D"); // TODO @kiwec: display star rating or something instead?
-            m_map_extra->setSizeToContent(0, 0);
-            // TODO @kiwec: getBackgroundImageFileName() / display map image
             m_ready_btn->is_loading = false;
 
             Packet packet = {0};
@@ -311,17 +339,15 @@ void OsuRoom::on_map_change(bool download) {
             };
             send_api_request(request);
 
-            m_map_title->setText(bancho.room.map_name);
+            m_map_title->setText("Loading...");
             m_map_title->setSizeToContent(0, 0);
-            m_map_extra->setText("Loading...");
-            m_map_extra->setSizeToContent(0, 0);
 
             Packet packet = {0};
             packet.id = MATCH_NO_BEATMAP;
             send_packet(packet);
         } else {
-            m_map_extra->setText("Failed to load map. Is it catch/taiko/mania?");
-            m_map_extra->setSizeToContent(0, 0);
+            m_map_title->setText("Failed to load map. Is it catch/taiko/mania?");
+            m_map_title->setSizeToContent(0, 0);
             bancho.room.map_id = 0; // prevents trying to load it again
 
             Packet packet = {0};

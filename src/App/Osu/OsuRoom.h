@@ -9,6 +9,13 @@ class OsuDatabaseBeatmap;
 class OsuMainMenuPauseButton;
 class OsuUIButton;
 
+
+struct OsuUIModList : public CBaseUIContainer {
+    OsuUIModList() : CBaseUIContainer(0, 0, 0, 0, "mod_list") {}
+    virtual void draw(Graphics *g);
+    virtual bool isVisible() override;
+};
+
 struct OsuRoom : public OsuScreen {
     OsuRoom(Osu *osu);
 
@@ -38,14 +45,19 @@ struct OsuRoom : public OsuScreen {
 
     std::unordered_map<uint32_t, uint32_t> mapset_by_mapid;
 
-    CBaseUILabel *heading = nullptr;
     CBaseUIContainer *m_container = nullptr;
+    CBaseUIScrollView *m_settings = nullptr;
     CBaseUIScrollView *m_slotlist = nullptr;
     CBaseUIScrollView *m_map = nullptr;
+    CBaseUILabel *m_room_name = nullptr;
     CBaseUILabel *m_map_title = nullptr;
-    CBaseUILabel *m_map_extra = nullptr;
+
+    OsuUIModList *m_mods = nullptr;
+    CBaseUILabel *m_no_mods_selected = nullptr;
+
     OsuUIButton *m_ready_btn = nullptr;
     OsuMainMenuPauseButton *m_pauseButton = nullptr;
     McFont* font = nullptr;
+    McFont* lfont = nullptr;
     time_t last_packet_tms = {0};
 };
