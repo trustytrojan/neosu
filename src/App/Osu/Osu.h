@@ -105,7 +105,6 @@ public:
 	void toggleModSelection(bool waitForF1KeyUp = false);
 	void toggleSongBrowser();
 	void toggleOptionsMenu();
-	void toggleRankingScreen();
 	void toggleUserStatsScreen();
 	void toggleVRTutorial();
 	void toggleChangelog();

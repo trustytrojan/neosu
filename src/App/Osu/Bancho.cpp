@@ -32,7 +32,6 @@
 // TODO @kiwec: make webpage for https://mcosu.kiwec.net/
 // TODO @kiwec: mark DMs as read when they're visible on screen
 // TODO @kiwec: PLEASE polish multiplayer room UI
-// TODO @kiwec: results screen (show singleplayer score result, keep leaderboard HUD shown)
 // TODO @kiwec: handle being room host: toggle freemod, edit mods, select map, win condition, team mode, password, kick players, lock slots
 // TODO @kiwec: allow options menu in multi lobby, multi room
 // TODO @kiwec: fix being unable to adjust volume

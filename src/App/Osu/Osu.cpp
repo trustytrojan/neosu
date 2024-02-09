@@ -1678,11 +1678,6 @@ void Osu::toggleOptionsMenu()
 	m_bOptionsMenuFullscreen = m_mainMenu->isVisible();
 }
 
-void Osu::toggleRankingScreen()
-{
-	m_bToggleRankingScreenScheduled = true;
-}
-
 void Osu::toggleUserStatsScreen()
 {
 	m_bToggleUserStatsScreenScheduled = true;
@@ -1823,6 +1818,7 @@ void Osu::onPlayEnd(bool quit, bool aborted)
 	if (m_songBrowser2 != NULL)
 		m_songBrowser2->onPlayEnd(quit);
 
+	// When playing in multiplayer, screens are toggled in OsuRoom
 	if(!bancho.is_playing_a_multi_map()) {
 		if (quit) {
 			if (m_iInstanceID < 2) {
@@ -1831,7 +1827,7 @@ void Osu::onPlayEnd(bool quit, bool aborted)
 				m_mainMenu->setVisible(true);
 			}
 		} else {
-			toggleRankingScreen();
+			m_rankingScreen->setVisible(true);
 		}
 	}
 

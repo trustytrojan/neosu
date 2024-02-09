@@ -8,6 +8,7 @@
 #include "OsuDatabase.h"
 #include "OsuLobby.h"
 #include "OsuMainMenu.h"
+#include "OsuRankingScreen.h"
 #include "OsuRoom.h"
 #include "OsuRichPresence.h"
 #include "OsuSkin.h"
@@ -398,6 +399,7 @@ void OsuRoom::on_player_failed(int32_t slot_id) {
 void OsuRoom::on_match_finished() {
     if(!bancho.is_playing_a_multi_map()) return;
     m_osu->onPlayEnd(false, false);
+    m_osu->m_rankingScreen->setVisible(true);
     m_bVisible = true;
     bancho.match_started = false;
 }

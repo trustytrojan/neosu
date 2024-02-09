@@ -20,6 +20,7 @@
 #include "CBaseUIImage.h"
 #include "CBaseUILabel.h"
 
+#include "Bancho.h"
 #include "Osu.h"
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
@@ -673,7 +674,11 @@ void OsuRankingScreen::onBack()
 	if (m_osu->getSkin()->getApplause() != NULL && m_osu->getSkin()->getApplause()->isPlaying())
 		engine->getSound()->stop(m_osu->getSkin()->getApplause());
 
-	m_osu->toggleRankingScreen();
+	setVisible(false);
+	if(!bancho.is_in_a_multi_room()) {
+		if (m_osu->m_songBrowser2 != NULL && m_osu->m_iInstanceID < 2)
+			m_osu->m_songBrowser2->setVisible(true);
+	}
 }
 
 void OsuRankingScreen::onScrollDownClicked()

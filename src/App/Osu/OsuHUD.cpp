@@ -8,6 +8,7 @@
 #include "Bancho.h"
 #include "BanchoUsers.h"
 #include "OsuLobby.h"
+#include "OsuRankingScreen.h"
 #include "OsuRoom.h"
 
 #include "OsuHUD.h"
@@ -313,7 +314,10 @@ void OsuHUD::draw(Graphics *g)
         if(osu_draw_scoreboard.getBool() && !bancho.is_playing_a_multi_map() && beatmap->getSelectedDifficulty2() != NULL) {
 			drawScoreBoard(g, (std::string&)beatmap->getSelectedDifficulty2()->getMD5Hash(), m_osu->getScore());
         }
-        if(osu_draw_scoreboard_mp.getBool() && bancho.is_playing_a_multi_map()) {
+
+        bool playing_mp = osu_draw_scoreboard_mp.getBool() && bancho.is_playing_a_multi_map();
+        bool seeing_mp_results = bancho.is_in_a_multi_room() && m_osu->m_rankingScreen->isVisible(); // TODO @kiwec: doesn't work
+        if(playing_mp || seeing_mp_results) {
 			drawScoreBoardMP(g);
         }
 
