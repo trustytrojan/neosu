@@ -70,7 +70,6 @@ struct OsuChat : public OsuScreen
 
     OsuChatChannel* m_selected_channel = nullptr;
     std::vector<OsuChatChannel*> m_channels;
-    CBaseUIContainer *m_container;
     CBaseUIContainer *m_button_container;
     CBaseUITextbox *m_input_box;
 

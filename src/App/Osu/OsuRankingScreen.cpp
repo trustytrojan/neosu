@@ -173,22 +173,21 @@ OsuRankingScreen::OsuRankingScreen(Osu *osu) : OsuScreenBackable(osu)
 {
 	m_osu_scores_enabled = convar->getConVarByName("osu_scores_enabled");
 
-	m_container = new CBaseUIContainer(0, 0, 0, 0, "");
 	m_rankings = new CBaseUIScrollView(-1, 0, 0, 0, "");
 	m_rankings->setHorizontalScrolling(false);
 	m_rankings->setVerticalScrolling(true);
 	m_rankings->setDrawFrame(false);
 	m_rankings->setDrawBackground(false);
 	m_rankings->setDrawScrollbars(true);
-	m_container->addBaseUIElement(m_rankings);
+	addBaseUIElement(m_rankings);
 
 	m_songInfo = new OsuUIRankingScreenInfoLabel(m_osu, 5, 5, 0, 0, "");
-	m_container->addBaseUIElement(m_songInfo);
+	addBaseUIElement(m_songInfo);
 
 	m_rankingTitle = new CBaseUIImage(m_osu->getSkin()->getRankingTitle()->getName(), 0, 0, 0, 0, "");
 	m_rankingTitle->setDrawBackground(false);
 	m_rankingTitle->setDrawFrame(false);
-	m_container->addBaseUIElement(m_rankingTitle);
+	addBaseUIElement(m_rankingTitle);
 
 	m_rankingPanel = new OsuUIRankingScreenRankingPanel(osu);
 	m_rankingPanel->setDrawBackground(false);
@@ -220,7 +219,7 @@ OsuRankingScreen::OsuRankingScreen(Osu *osu) : OsuScreenBackable(osu)
 	iconString.append("   ");
 	iconString.insert(iconString.length(), OsuIcons::ARROW_DOWN);
 	m_rankingScrollDownInfoButton->setText(iconString);
-	m_container->addBaseUIElement(m_rankingScrollDownInfoButton);
+	addBaseUIElement(m_rankingScrollDownInfoButton);
 	m_fRankingScrollDownInfoButtonAlphaAnim = 1.0f;
 
 	setGrade(OsuScore::GRADE::GRADE_D);
@@ -261,11 +260,6 @@ OsuRankingScreen::OsuRankingScreen(Osu *osu) : OsuScreenBackable(osu)
 	m_bIsLegacyScore = false;
 	m_bIsImportedLegacyScore = false;
 	m_bIsUnranked = false;
-}
-
-OsuRankingScreen::~OsuRankingScreen()
-{
-	SAFE_DELETE(m_container);
 }
 
 void OsuRankingScreen::draw(Graphics *g)
@@ -416,9 +410,6 @@ void OsuRankingScreen::mouse_update(bool *propagate_clicks)
 	if (m_osu->getOptionsMenu()->isMouseInside())
 		engine->getMouse()->resetWheelDelta();
 
-	// update and focus handling
-	m_container->mouse_update(propagate_clicks);
-
 	// tooltip (pp + accuracy + unstable rate)
 	if (!m_osu->getOptionsMenu()->isMouseInside() && !m_bIsLegacyScore && engine->getMouse()->getPos().x < m_osu->getScreenWidth() * 0.5f)
 	{
@@ -465,8 +456,8 @@ void OsuRankingScreen::mouse_update(bool *propagate_clicks)
 	anim->moveQuadOut(&m_vPPCursorMagnetAnimation.y, target.y, 0.20f, true);
 
 	// button transparency
-	const float transparencyStart = m_container->getPos().y + m_container->getSize().y;
-	const float transparencyEnd = m_container->getPos().y + m_container->getSize().y + m_rankingIndex->getSize().y/2;
+	const float transparencyStart = getPos().y + getSize().y;
+	const float transparencyEnd = getPos().y + getSize().y + m_rankingIndex->getSize().y/2;
 	const float alpha = clamp<float>((m_rankingIndex->getPos().y + (transparencyEnd - transparencyStart) - transparencyStart)/(transparencyEnd - transparencyStart), 0.0f, 1.0f);
 	anim->moveLinear(&m_fRankingScrollDownInfoButtonAlphaAnim, alpha, 0.075*m_fRankingScrollDownInfoButtonAlphaAnim, true);
 	m_rankingScrollDownInfoButton->setAlpha(m_fRankingScrollDownInfoButtonAlphaAnim);
@@ -630,18 +621,18 @@ void OsuRankingScreen::updateLayout()
 
 	const float uiScale = Osu::ui_scale->getFloat();
 
-	m_container->setSize(m_osu->getScreenSize());
+	setSize(m_osu->getScreenSize());
 
 	m_rankingTitle->setImage(m_osu->getSkin()->getRankingTitle());
 	m_rankingTitle->setScale(Osu::getImageScale(m_osu, m_rankingTitle->getImage(), 75.0f) * uiScale, Osu::getImageScale(m_osu, m_rankingTitle->getImage(), 75.0f) * uiScale);
 	m_rankingTitle->setSize(m_rankingTitle->getImage()->getWidth()*m_rankingTitle->getScale().x, m_rankingTitle->getImage()->getHeight()*m_rankingTitle->getScale().y);
-	m_rankingTitle->setRelPos(m_container->getSize().x - m_rankingTitle->getSize().x - m_osu->getUIScale(m_osu, 20.0f), 0);
+	m_rankingTitle->setRelPos(getSize().x - m_rankingTitle->getSize().x - m_osu->getUIScale(m_osu, 20.0f), 0);
 
 	m_songInfo->setSize(m_osu->getScreenWidth(), std::max(m_songInfo->getMinimumHeight(), m_rankingTitle->getSize().y*osu_rankingscreen_topbar_height_percent.getFloat()));
 
 	m_rankings->setSize(m_osu->getScreenSize().x + 2, m_osu->getScreenSize().y - m_songInfo->getSize().y + 3);
 	m_rankings->setRelPosY(m_songInfo->getSize().y - 1);
-	m_container->update_pos();
+	update_pos();
 
 	// NOTE: no uiScale for rankingPanel and rankingGrade, doesn't really work due to legacy layout expectations
 	const Vector2 hardcodedOsuRankingPanelImageSize = Vector2(622, 505) * (m_osu->getSkin()->isRankingPanel2x() ? 2.0f : 1.0f);
@@ -656,12 +647,12 @@ void OsuRankingScreen::updateLayout()
 	m_rankingBottom->setSize(m_rankings->getSize().x + 2, m_osu->getScreenHeight()*0.2f);
 	m_rankingBottom->setRelPosY(m_rankingIndex->getRelPos().y + m_rankingIndex->getSize().y);
 
-	m_rankingScrollDownInfoButton->setSize(m_container->getSize().x*0.2f * uiScale, m_container->getSize().y*0.1f * uiScale);
-	m_rankingScrollDownInfoButton->setRelPos(m_container->getPos().x + m_container->getSize().x/2 - m_rankingScrollDownInfoButton->getSize().x/2, m_container->getSize().y - m_rankingScrollDownInfoButton->getSize().y);
+	m_rankingScrollDownInfoButton->setSize(getSize().x*0.2f * uiScale, getSize().y*0.1f * uiScale);
+	m_rankingScrollDownInfoButton->setRelPos(getPos().x + getSize().x/2 - m_rankingScrollDownInfoButton->getSize().x/2, getSize().y - m_rankingScrollDownInfoButton->getSize().y);
 
 	setGrade(m_grade);
 
-	m_container->update_pos();
+	update_pos();
 	m_rankings->getContainer()->update_pos();
 	m_rankings->setScrollSizeToContent(0);
 }

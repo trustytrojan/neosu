@@ -59,32 +59,19 @@ void RoomUIElement::onRoomJoinButtonClick(CBaseUIButton* btn) {
 OsuLobby::OsuLobby(Osu *osu) : OsuScreen(osu) {
     font = engine->getResourceManager()->getFont("FONT_DEFAULT");
 
-    m_container = new CBaseUIContainer(0, 0, 0, 0, "");
-
     m_list = new CBaseUIScrollView(0, 0, 0, 0, "");
     m_list->setDrawFrame(false);
     m_list->setDrawBackground(true);
     m_list->setBackgroundColor(0xdd000000);
     m_list->setHorizontalScrolling(false);
-    m_container->addBaseUIElement(m_list);
+    addBaseUIElement(m_list);
 
     m_noRoomsOpenElement = new CBaseUILabel(0, 0, 0, 0, "", "There are no matches available.");
     m_noRoomsOpenElement->setTextJustification(CBaseUILabel::TEXT_JUSTIFICATION::TEXT_JUSTIFICATION_CENTERED);
     m_noRoomsOpenElement->setSizeToContent(20, 20);
-    m_container->addBaseUIElement(m_noRoomsOpenElement);
+    addBaseUIElement(m_noRoomsOpenElement);
 
     updateLayout(m_osu->getScreenSize());
-}
-
-void OsuLobby::draw(Graphics *g) {
-    if (!m_bVisible) return;
-
-    m_container->draw(g);
-}
-
-void OsuLobby::mouse_update(bool *propagate_clicks) {
-    if (!m_bVisible) return;
-    m_container->mouse_update(propagate_clicks);
 }
 
 void OsuLobby::onKeyDown(KeyboardEvent &key) {
@@ -159,7 +146,7 @@ CBaseUIContainer* OsuLobby::setVisible(bool visible) {
 void OsuLobby::updateLayout(Vector2 newResolution) {
     m_list->clear();
 
-    m_container->setSize(newResolution);
+    setSize(newResolution);
     m_list->setSize(newResolution);
 
     m_noRoomsOpenElement->setVisible(rooms.empty());
@@ -173,7 +160,7 @@ void OsuLobby::updateLayout(Vector2 newResolution) {
     heading->setSizeToContent(0, 0);
     heading->setDrawFrame(false);
     heading->setDrawBackground(false);
-    m_container->addBaseUIElement(heading);
+    addBaseUIElement(heading);
 
     // TODO @kiwec: create room button
 
@@ -191,14 +178,14 @@ void OsuLobby::updateLayout(Vector2 newResolution) {
 
 void OsuLobby::addRoom(Room* room) {
     rooms.push_back(room);
-    updateLayout(m_container->getSize());
+    updateLayout(getSize());
 }
 
 void OsuLobby::updateRoom(Room room) {
     for(auto old_room : rooms) {
         if(old_room->id == room.id) {
             *old_room = room;
-            updateLayout(m_container->getSize());
+            updateLayout(getSize());
             return;
         }
     }
@@ -220,10 +207,10 @@ void OsuLobby::removeRoom(uint32_t room_id) {
       }
     }
 
-    updateLayout(m_container->getSize());
+    updateLayout(getSize());
 }
 
 void OsuLobby::on_room_join_failed() {
     // Updating layout will reset is_loading to false
-    updateLayout(m_container->getSize());
+    updateLayout(getSize());
 }

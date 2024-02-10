@@ -126,7 +126,6 @@ private:
 	bool m_bMenuElementsVisible;
 	float m_fMainMenuButtonCloseTime;
 
-	CBaseUIContainer *m_container;
 	OsuMainMenuCubeButton *m_cube;
 	std::vector<OsuMainMenuButton*> m_menuElements;
 

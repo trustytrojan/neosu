@@ -21,7 +21,6 @@ public:
 	OsuChangelog(Osu *osu);
 	virtual ~OsuChangelog();
 
-	virtual void draw(Graphics *g);
 	virtual void mouse_update(bool *propagate_clicks);
 
 	virtual CBaseUIContainer* setVisible(bool visible);
@@ -30,7 +29,6 @@ private:
 	virtual void updateLayout();
 	virtual void onBack();
 
-	CBaseUIContainer *m_container;
 	CBaseUIScrollView *m_scrollView;
 
 	struct CHANGELOG

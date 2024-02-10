@@ -155,7 +155,7 @@ OsuModSelector::OsuModSelector(Osu *osu) : OsuScreen(osu)
 	m_fExperimentalAnimation = 0.0f;
 	m_bScheduledHide = false;
 	m_bExperimentalVisible = false;
-	m_container = new CBaseUIContainer(0, 0, m_osu->getScreenWidth(), m_osu->getScreenHeight(), "");
+	setSize(m_osu->getScreenWidth(), m_osu->getScreenHeight());
 	m_overrideSliderContainer = new CBaseUIContainer(0, 0, m_osu->getScreenWidth(), m_osu->getScreenHeight(), "");
 	m_experimentalContainer = new CBaseUIScrollView(-1, 0, m_osu->getScreenWidth(), m_osu->getScreenHeight(), "");
 	m_experimentalContainer->setHorizontalScrolling(false);
@@ -188,7 +188,7 @@ OsuModSelector::OsuModSelector(Osu *osu) : OsuScreen(osu)
 			imageButton->setDrawBackground(false);
 			imageButton->setVisible(false);
 
-			m_container->addBaseUIElement(imageButton);
+			addBaseUIElement(imageButton);
 			m_modButtons.push_back(imageButton);
 		}
 	}
@@ -260,7 +260,7 @@ OsuModSelector::OsuModSelector(Osu *osu) : OsuScreen(osu)
 	m_scoreMultiplierLabel->setDrawFrame(false);
 	m_scoreMultiplierLabel->setDrawBackground(false);
 	m_scoreMultiplierLabel->setCenterText(true);
-	m_container->addBaseUIElement(m_scoreMultiplierLabel);
+	addBaseUIElement(m_scoreMultiplierLabel);
 
 	// build action buttons
 	m_resetModsButton = addActionButton("1. Reset All Mods");
@@ -345,7 +345,6 @@ void OsuModSelector::updateExperimentalButtons(bool initial)
 
 OsuModSelector::~OsuModSelector()
 {
-	SAFE_DELETE(m_container);
 	SAFE_DELETE(m_overrideSliderContainer);
 	SAFE_DELETE(m_experimentalContainer);
 }
@@ -406,7 +405,7 @@ void OsuModSelector::draw(Graphics *g)
 			g->translate(0, (1.0f - m_fAnimation)*modGridButtonsSize.y);
 			g->setColor(backgroundColor);
 			g->fillRect(modGridButtonsStart.x - margin, modGridButtonsStart.y - margin, modGridButtonsSize.x + 2*margin, modGridButtonsSize.y + 2*margin);
-			m_container->draw(g);
+			OsuScreen::draw(g);
 		}
 		g->popTransform();
 
@@ -455,7 +454,7 @@ void OsuModSelector::draw(Graphics *g)
 			g->popTransform();
 		}
 
-		m_container->draw(g);
+		OsuScreen::draw(g);
 		m_overrideSliderContainer->draw(g);
 	}
 
@@ -497,7 +496,7 @@ void OsuModSelector::mouse_update(bool *propagate_clicks)
 	}
 
 	// update
-	m_container->mouse_update(propagate_clicks);
+	OsuScreen::mouse_update(propagate_clicks);
 	m_overrideSliderContainer->mouse_update(propagate_clicks);
 
 	// override slider tooltips (ALT)
@@ -1060,7 +1059,7 @@ OsuUIButton *OsuModSelector::addActionButton(UString text)
 {
 	OsuUIButton *actionButton = new OsuUIButton(m_osu, 50, 50, 100, 100, text, text);
 	m_actionButtons.push_back(actionButton);
-	m_container->addBaseUIElement(actionButton);
+	addBaseUIElement(actionButton);
 
 	return actionButton;
 }
@@ -1464,7 +1463,7 @@ void OsuModSelector::onCheckboxChange(CBaseUICheckbox *checkbox)
 
 void OsuModSelector::onResolutionChange(Vector2 newResolution)
 {
-	m_container->setSize(newResolution);
+	setSize(newResolution);
 	m_overrideSliderContainer->setSize(newResolution);
 	m_experimentalContainer->setSizeY(newResolution.y + 1);
 

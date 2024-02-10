@@ -23,14 +23,14 @@
 
 OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu)
 {
-	m_container = new CBaseUIContainer(-1, -1, 0, 0, "");
+	setPos(-1, -1);
 	m_scrollView = new CBaseUIScrollView(-1, -1, 0, 0, "");
 	m_scrollView->setVerticalScrolling(true);
 	m_scrollView->setHorizontalScrolling(true);
 	m_scrollView->setDrawBackground(false);
 	m_scrollView->setDrawFrame(false);
 	m_scrollView->setScrollResistance(0);
-	m_container->addBaseUIElement(m_scrollView);
+	addBaseUIElement(m_scrollView);
 
 	std::vector<CHANGELOG> changelogs;
 
@@ -501,26 +501,12 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu)
 OsuChangelog::~OsuChangelog()
 {
 	m_changelogs.clear();
-
-	SAFE_DELETE(m_container);
-}
-
-void OsuChangelog::draw(Graphics *g)
-{
-	if (!m_bVisible) return;
-
-	m_container->draw(g);
-
-	OsuScreenBackable::draw(g);
 }
 
 void OsuChangelog::mouse_update(bool *propagate_clicks)
 {
 	if (!m_bVisible) return;
 	OsuScreenBackable::mouse_update(propagate_clicks);
-	if(*propagate_clicks) {
-		m_container->mouse_update(propagate_clicks);
-	}
 }
 
 CBaseUIContainer* OsuChangelog::setVisible(bool visible)
@@ -539,7 +525,7 @@ void OsuChangelog::updateLayout()
 
 	const float dpiScale = Osu::getUIScale(m_osu);
 
-	m_container->setSize(m_osu->getScreenSize() + Vector2(2, 2));
+	setSize(m_osu->getScreenSize() + Vector2(2, 2));
 	m_scrollView->setSize(m_osu->getScreenSize() + Vector2(2, 2));
 
 	float yCounter = 0;

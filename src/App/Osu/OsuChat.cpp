@@ -88,7 +88,7 @@ void OsuChatChannel::add_message(ChatMessage msg) {
     float line_width = x;
     for(int i = 0; i < msg.text.length(); i++) {
         float char_width = m_chat->font->getGlyphMetrics(msg.text[i]).advance_x;
-        if(line_width + char_width + 20 >= m_chat->m_container->getSize().x) {
+        if(line_width + char_width + 20 >= m_chat->getSize().x) {
             CBaseUILabel *text = new CBaseUILabel(x, y_total, line_width, line_height, "", text_str);
             text->setDrawFrame(false);
             text->setDrawBackground(false);
@@ -139,14 +139,13 @@ void OsuChatChannel::updateLayout(Vector2 pos, Vector2 size) {
 OsuChat::OsuChat(Osu *osu) : OsuScreen(osu) {
     font = engine->getResourceManager()->getFont("FONT_DEFAULT");
 
-    m_container = new CBaseUIContainer(0, 0, 0, 0, "");
     m_button_container = new CBaseUIContainer(0, 0, 0, 0, "");
 
     m_input_box = new CBaseUITextbox(0, 0, 0, 0, "");
     m_input_box->setDrawFrame(false);
     m_input_box->setDrawBackground(true);
     m_input_box->setBackgroundColor(0xdd000000);
-    m_container->addBaseUIElement(m_input_box);
+    addBaseUIElement(m_input_box);
 
     updateLayout(m_osu->getScreenSize());
 }
@@ -161,9 +160,9 @@ void OsuChat::draw(Graphics *g) {
     }
 
     if(m_selected_channel == nullptr) {
-        const float chat_h = round(m_container->getSize().y * 0.3f);
-        const float chat_y = m_container->getSize().y - chat_h;
-        float chat_w = m_container->getSize().x;
+        const float chat_h = round(getSize().y * 0.3f);
+        const float chat_y = getSize().y - chat_h;
+        float chat_w = getSize().x;
         if(isVisibilityForced()) {
             // In the lobby and in multi rooms (e.g. when visibility is forced), don't
             // take the full horizontal width to allow for cleaner UI designs.
@@ -182,7 +181,7 @@ void OsuChat::draw(Graphics *g) {
         );
         m_button_container->draw(g);
 
-        m_container->draw(g);
+        OsuScreen::draw(g);
         if(m_selected_channel != nullptr) {
             m_selected_channel->ui->draw(g);
         }
@@ -192,10 +191,10 @@ void OsuChat::draw(Graphics *g) {
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
         m_osu->getSliderFrameBuffer()->disable();
 
-        g->push3DScene(McRect(0, 0, m_container->getSize().x, m_container->getSize().y));
+        g->push3DScene(McRect(0, 0, getSize().x, getSize().y));
         {
             g->rotate3DScene(-(1.0f - m_fAnimation)*90, 0, 0);
-            g->translate3DScene(0, -(1.0f - m_fAnimation)*m_container->getSize().y*1.25f, -(1.0f - m_fAnimation)*700);
+            g->translate3DScene(0, -(1.0f - m_fAnimation)*getSize().y*1.25f, -(1.0f - m_fAnimation)*700);
 
             m_osu->getSliderFrameBuffer()->setColor(COLORf(m_fAnimation, 1.0f, 1.0f, 1.0f));
             m_osu->getSliderFrameBuffer()->draw(g, 0, 0);
@@ -206,7 +205,7 @@ void OsuChat::draw(Graphics *g) {
 
 void OsuChat::mouse_update(bool *propagate_clicks) {
     if (!m_bVisible) return;
-    m_container->mouse_update(propagate_clicks);
+    OsuScreen::mouse_update(propagate_clicks);
     m_button_container->mouse_update(propagate_clicks);
     if(m_selected_channel) {
         m_selected_channel->ui->mouse_update(propagate_clicks);
@@ -320,7 +319,7 @@ void OsuChat::switchToChannel(OsuChatChannel* chan) {
     m_selected_channel->read = true;
 
     // Update button colors
-    updateButtonLayout(m_container->getSize());
+    updateButtonLayout(getSize());
 }
 
 void OsuChat::addChannel(UString channel_name) {
@@ -353,7 +352,7 @@ void OsuChat::addMessage(UString channel_name, ChatMessage msg) {
         chan->add_message(msg);
         if(chan != m_selected_channel && chan->read) {
             chan->read = false;
-            updateButtonLayout(m_container->getSize());
+            updateButtonLayout(getSize());
         }
         return;
     }
@@ -380,7 +379,7 @@ void OsuChat::removeChannel(UString channel_name) {
     }
 
     delete chan;
-    updateButtonLayout(m_container->getSize());
+    updateButtonLayout(getSize());
 }
 
 void OsuChat::updateLayout(Vector2 newResolution) {
@@ -390,7 +389,7 @@ void OsuChat::updateLayout(Vector2 newResolution) {
         newResolution.x = round(newResolution.x * 0.6);
     }
 
-    m_container->setSize(newResolution);
+    setSize(newResolution);
 
     const float chat_w = newResolution.x;
     const float chat_h = round(newResolution.y * 0.3f) - input_box_height;

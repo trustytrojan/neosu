@@ -75,18 +75,16 @@ OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
     font = engine->getResourceManager()->getFont("FONT_DEFAULT");
     lfont = osu->getSubTitleFont();
 
-    m_container = new CBaseUIContainer(0, 0, 0, 0, "");
-
     m_pauseButton = new OsuMainMenuPauseButton(0, 0, 0, 0, "pause_btn", "");
     m_pauseButton->setClickCallback( fastdelegate::MakeDelegate(osu->m_mainMenu, &OsuMainMenu::onPausePressed) );
-    m_container->addBaseUIElement(m_pauseButton);
+    addBaseUIElement(m_pauseButton);
 
     m_settings = new CBaseUIScrollView(0, 0, 0, 0, "room_settings");
     m_settings->setDrawFrame(false); // it's off by 1 pixel, turn it OFF
     m_settings->setDrawBackground(true);
     m_settings->setBackgroundColor(0xdd000000);
     m_settings->setHorizontalScrolling(false);
-    m_container->addBaseUIElement(m_settings);
+    addBaseUIElement(m_settings);
 
     INIT_LABEL(m_room_name, "Multiplayer room", true);
     INIT_LABEL(m_host, "Host: None", false);
@@ -143,13 +141,13 @@ OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
     player_list_label->setSizeToContent(0, 0);
     player_list_label->setDrawFrame(false);
     player_list_label->setDrawBackground(false);
-    m_container->addBaseUIElement(player_list_label);
+    addBaseUIElement(player_list_label);
     m_slotlist = new CBaseUIScrollView(50, 90, 0, 0, "slot_list");
     m_slotlist->setDrawFrame(true);
     m_slotlist->setDrawBackground(true);
     m_slotlist->setBackgroundColor(0xdd000000);
     m_slotlist->setHorizontalScrolling(false);
-    m_container->addBaseUIElement(m_slotlist);
+    addBaseUIElement(m_slotlist);
 
     updateLayout(m_osu->getScreenSize());
 }
@@ -159,7 +157,7 @@ void OsuRoom::draw(Graphics *g) {
 
     // XXX: Add convar for toggling room backgrounds
     OsuSongBrowser2::drawSelectedBeatmapBackgroundImage(g, m_osu, 1.0);
-    m_container->draw(g);
+    OsuScreen::draw(g);
 
     // Not technically drawing below this line, just checking for map download progress
     if(m_osu->getSelectedBeatmap() != NULL) return;
@@ -230,7 +228,7 @@ void OsuRoom::mouse_update(bool *propagate_clicks) {
     else
         m_pauseButton->setPaused(true);
 
-    m_container->mouse_update(propagate_clicks);
+    OsuScreen::mouse_update(propagate_clicks);
 }
 
 void OsuRoom::onKeyDown(KeyboardEvent &key) {
@@ -248,19 +246,17 @@ void OsuRoom::onKeyDown(KeyboardEvent &key) {
         return;
     }
 
-    m_container->onKeyDown(key);
+    OsuScreen::onKeyDown(key);
 }
 
 void OsuRoom::onKeyUp(KeyboardEvent &key) {
     if(!m_bVisible || m_osu->m_songBrowser2->isVisible()) return;
-
-    m_container->onKeyUp(key);
+    OsuScreen::onKeyUp(key);
 }
 
 void OsuRoom::onChar(KeyboardEvent &key) {
     if(!m_bVisible || m_osu->m_songBrowser2->isVisible()) return;
-
-    m_container->onChar(key);
+    OsuScreen::onChar(key);
 }
 
 void OsuRoom::onResolutionChange(Vector2 newResolution) {
@@ -273,7 +269,7 @@ CBaseUIContainer* OsuRoom::setVisible(bool visible) {
 }
 
 void OsuRoom::updateLayout(Vector2 newResolution) {
-    m_container->setSize(newResolution);
+    setSize(newResolution);
 
     m_settings->setPos(round(newResolution.x * 0.6), 0);
     m_settings->setSize(round(newResolution.x * 0.4), newResolution.y);

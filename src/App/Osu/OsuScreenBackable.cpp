@@ -32,15 +32,16 @@ OsuScreenBackable::~OsuScreenBackable()
 void OsuScreenBackable::draw(Graphics *g)
 {
 	if (!m_bVisible) return;
-
+	OsuScreen::draw(g);
 	m_backButton->draw(g);
 }
 
 void OsuScreenBackable::mouse_update(bool *propagate_clicks)
 {
-	if(m_bVisible) {
-		m_backButton->mouse_update(propagate_clicks);
-	}
+	if(!m_bVisible) return;
+	m_backButton->mouse_update(propagate_clicks);
+	if(!*propagate_clicks) return;
+	OsuScreen::mouse_update(propagate_clicks);
 }
 
 void OsuScreenBackable::onKeyDown(KeyboardEvent &e)
@@ -48,24 +49,11 @@ void OsuScreenBackable::onKeyDown(KeyboardEvent &e)
 	OsuScreen::onKeyDown(e);
 	if (!m_bVisible || e.isConsumed()) return;
 
-	if (e == KEY_ESCAPE || e == (KEYCODE)OsuKeyBindings::GAME_PAUSE.getInt())
+	if (e == KEY_ESCAPE || e == (KEYCODE)OsuKeyBindings::GAME_PAUSE.getInt()) {
 		onBack();
-
-	e.consume();
-}
-
-void OsuScreenBackable::onKeyUp(KeyboardEvent &e)
-{
-	if (!m_bVisible) return;
-
-	e.consume();
-}
-
-void OsuScreenBackable::onChar(KeyboardEvent &e)
-{
-	if (!m_bVisible) return;
-
-	e.consume();
+		e.consume();
+		return;
+	}
 }
 
 void OsuScreenBackable::updateLayout()

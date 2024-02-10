@@ -21,11 +21,7 @@ public:
 
 	virtual void draw(Graphics *g);
 	virtual void mouse_update(bool *propagate_clicks);
-
 	virtual void onKeyDown(KeyboardEvent &e);
-	virtual void onKeyUp(KeyboardEvent &e);
-	virtual void onChar(KeyboardEvent &e);
-
 	virtual void onResolutionChange(Vector2 newResolution);
 
 protected:

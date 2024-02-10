@@ -114,7 +114,6 @@ private:
 	float m_fExperimentalAnimation;
 	bool m_bScheduledHide;
 	bool m_bExperimentalVisible;
-	CBaseUIContainer *m_container;
 	CBaseUIContainer *m_overrideSliderContainer;
 	CBaseUIScrollView *m_experimentalContainer;
 

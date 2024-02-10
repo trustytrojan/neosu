@@ -34,7 +34,6 @@ class OsuRankingScreen : public OsuScreenBackable
 {
 public:
 	OsuRankingScreen(Osu *osu);
-	virtual ~OsuRankingScreen();
 
 	virtual void draw(Graphics *g);
 	virtual void mouse_update(bool *propagate_clicks);
@@ -62,7 +61,6 @@ private:
 
 	ConVar *m_osu_scores_enabled;
 
-	CBaseUIContainer *m_container;
 	CBaseUIScrollView *m_rankings;
 
 	OsuUIRankingScreenInfoLabel *m_songInfo;

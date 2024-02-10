@@ -18,9 +18,7 @@ class OsuVRTutorial : public OsuScreenBackable
 {
 public:
 	OsuVRTutorial(Osu *osu);
-	virtual ~OsuVRTutorial();
 
-	virtual void draw(Graphics *g);
 	virtual void mouse_update(bool *propagate_clicks);
 
 	virtual void onKeyDown(KeyboardEvent &e);
@@ -31,7 +29,6 @@ private:
 	virtual void updateLayout();
 	virtual void onBack();
 
-	CBaseUIContainer *m_container;
 	CBaseUIScrollView *m_scrollView;
 	CBaseUIImage *m_tutorialImage1;
 	CBaseUIImage *m_tutorialImage2;

@@ -58,8 +58,6 @@ private:
 
 	ConVar *m_name_ref;
 
-	CBaseUIContainer *m_container;
-
 	OsuUIContextMenu *m_contextMenu;
 
 	OsuUIUserStatsScreenLabel *m_ppVersionInfoLabel;

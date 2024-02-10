@@ -277,8 +277,6 @@ OsuUserStatsScreen::OsuUserStatsScreen(Osu *osu) : OsuScreenBackable(osu)
 {
 	m_name_ref = convar->getConVarByName("name");
 
-	m_container = new CBaseUIContainer();
-
 	m_contextMenu = new OsuUIContextMenu(m_osu);
 	m_contextMenu->setVisible(true);
 
@@ -289,18 +287,18 @@ OsuUserStatsScreen::OsuUserStatsScreen(Osu *osu) : OsuScreenBackable(osu)
 	m_ppVersionInfoLabel->setTextColor(0x77888888/*0xbbbb0000*/);
 	m_ppVersionInfoLabel->setDrawBackground(false);
 	m_ppVersionInfoLabel->setDrawFrame(false);
-	m_container->addBaseUIElement(m_ppVersionInfoLabel);
+	addBaseUIElement(m_ppVersionInfoLabel);
 
 	m_userButton = new OsuUISongBrowserUserButton(m_osu);
 	m_userButton->addTooltipLine("Click to change [User]");
 	m_userButton->setClickCallback( fastdelegate::MakeDelegate(this, &OsuUserStatsScreen::onUserClicked) );
-	m_container->addBaseUIElement(m_userButton);
+	addBaseUIElement(m_userButton);
 
 	m_scores = new CBaseUIScrollView();
 	m_scores->setBackgroundColor(0xff222222);
 	m_scores->setHorizontalScrolling(false);
 	m_scores->setVerticalScrolling(true);
-	m_container->addBaseUIElement(m_scores);
+	addBaseUIElement(m_scores);
 
 	m_menuButton = new OsuUserStatsScreenMenuButton();
 	m_menuButton->setFont(m_osu->getFontIcons());
@@ -309,7 +307,7 @@ OsuUserStatsScreen::OsuUserStatsScreen(Osu *osu) : OsuScreenBackable(osu)
 		m_menuButton->setText(iconString);
 	}
 	m_menuButton->setClickCallback( fastdelegate::MakeDelegate(this, &OsuUserStatsScreen::onMenuClicked) );
-	m_container->addBaseUIElement(m_menuButton);
+	addBaseUIElement(m_menuButton);
 
 	m_bRecalculatingPP = false;
 	m_backgroundPPRecalculator = NULL;
@@ -325,8 +323,6 @@ OsuUserStatsScreen::~OsuUserStatsScreen()
 		engine->getResourceManager()->destroyResource(m_backgroundPPRecalculator);
 		m_backgroundPPRecalculator = NULL;
 	}
-
-	SAFE_DELETE(m_container);
 }
 
 void OsuUserStatsScreen::draw(Graphics *g)
@@ -356,10 +352,8 @@ void OsuUserStatsScreen::draw(Graphics *g)
 		return;
 	}
 
-	m_container->draw(g);
-	m_contextMenu->draw(g);
-
 	OsuScreenBackable::draw(g);
+	m_contextMenu->draw(g);
 }
 
 void OsuUserStatsScreen::mouse_update(bool *propagate_clicks)
@@ -385,7 +379,6 @@ void OsuUserStatsScreen::mouse_update(bool *propagate_clicks)
 	}
 
 	m_contextMenu->mouse_update(propagate_clicks);
-	m_container->mouse_update(propagate_clicks);
 
 	updateLayout();
 }
@@ -846,7 +839,7 @@ void OsuUserStatsScreen::updateLayout()
 
 	const float dpiScale = Osu::getUIScale(m_osu);
 
-	m_container->setSize(m_osu->getScreenSize());
+	setSize(m_osu->getScreenSize());
 
 	const int scoreListHeight = m_osu->getScreenHeight()*0.8f;
 	m_scores->setSize(m_osu->getScreenWidth()*0.6f, scoreListHeight);

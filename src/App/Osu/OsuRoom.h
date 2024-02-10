@@ -56,7 +56,6 @@ struct OsuRoom : public OsuScreen {
 
     std::unordered_map<uint32_t, uint32_t> mapset_by_mapid;
 
-    CBaseUIContainer *m_container = nullptr;
     CBaseUIScrollView *m_settings = nullptr;
     CBaseUIScrollView *m_slotlist = nullptr;
     CBaseUIScrollView *m_map = nullptr;

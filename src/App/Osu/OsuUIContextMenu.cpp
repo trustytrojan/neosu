@@ -58,16 +58,19 @@ OsuUIContextMenuTextbox::OsuUIContextMenuTextbox(float xPos, float yPos, float x
 
 
 
-OsuUIContextMenu::OsuUIContextMenu(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name, CBaseUIScrollView *parent) : CBaseUIElement(xPos, yPos, xSize, ySize, name)
+OsuUIContextMenu::OsuUIContextMenu(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name, CBaseUIScrollView *parent) : CBaseUIScrollView(xPos, yPos, xSize, ySize, name)
 {
 	m_osu = osu;
 	m_parent = parent;
 
-	m_container = new CBaseUIScrollView(xPos, yPos, xSize, ySize, name);
-	m_container->setHorizontalScrolling(false);
-	m_container->setDrawBackground(false);
-	m_container->setDrawFrame(false);
-	m_container->setScrollbarSizeMultiplier(0.5f);
+	setPos(xPos, yPos);
+	setSize(xSize, ySize);
+	setName(name);
+
+	setHorizontalScrolling(false);
+	setDrawBackground(false);
+	setDrawFrame(false);
+	setScrollbarSizeMultiplier(0.5f);
 
 	m_containedTextbox = NULL;
 
@@ -83,11 +86,6 @@ OsuUIContextMenu::OsuUIContextMenu(Osu *osu, float xPos, float yPos, float xSize
 
 	m_bBigStyle = false;
 	m_bClampUnderflowAndOverflowAndEnableScrollingIfNecessary = false;
-}
-
-OsuUIContextMenu::~OsuUIContextMenu()
-{
-	SAFE_DELETE(m_container);
 }
 
 void OsuUIContextMenu::draw(Graphics *g)
@@ -110,7 +108,7 @@ void OsuUIContextMenu::draw(Graphics *g)
 	g->setAlpha(m_fAnimation*m_fAnimation);
 	g->drawRect(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y);
 
-	m_container->draw(g);
+	CBaseUIScrollView::draw(g);
 
 	if (m_fAnimation > 0.0f && m_fAnimation < 1.0f)
 		g->pop3DScene();
@@ -119,9 +117,7 @@ void OsuUIContextMenu::draw(Graphics *g)
 void OsuUIContextMenu::mouse_update(bool *propagate_clicks)
 {
 	if (!m_bVisible || !m_bVisible2) return;
-	CBaseUIElement::mouse_update(propagate_clicks);
-
-	m_container->mouse_update(propagate_clicks);
+	CBaseUIScrollView::mouse_update(propagate_clicks);
 
 	if (m_containedTextbox != NULL)
 	{
@@ -151,14 +147,14 @@ void OsuUIContextMenu::onKeyUp(KeyboardEvent &e)
 {
 	if (!m_bVisible || !m_bVisible2) return;
 
-	m_container->onKeyUp(e);
+	CBaseUIScrollView::onKeyUp(e);
 }
 
 void OsuUIContextMenu::onKeyDown(KeyboardEvent &e)
 {
 	if (!m_bVisible || !m_bVisible2) return;
 
-	m_container->onKeyDown(e);
+	CBaseUIScrollView::onKeyDown(e);
 
 	// also force ENTER event if context menu textbox has lost focus (but context menu is still visible, e.g. if the user clicks inside the context menu but outside the textbox)
 	if (m_containedTextbox != NULL)
@@ -185,7 +181,7 @@ void OsuUIContextMenu::onChar(KeyboardEvent &e)
 {
 	if (!m_bVisible || !m_bVisible2) return;
 
-	m_container->onChar(e);
+	CBaseUIScrollView::onChar(e);
 }
 
 void OsuUIContextMenu::begin(int minWidth, bool bigStyle)
@@ -202,12 +198,12 @@ void OsuUIContextMenu::begin(int minWidth, bool bigStyle)
 	// HACKHACK: callbacks from the same context menu which call begin() to create a new context menu may crash because begin() deletes the object the callback is currently being called from
 	// HACKHACK: so, instead we just keep a list of things to delete whenever we get to the next update() tick
 	{
-		const std::vector<CBaseUIElement*> &oldElementsWeCanNotDeleteYet = m_container->getContainer()->getElements();
+		const std::vector<CBaseUIElement*> &oldElementsWeCanNotDeleteYet = getContainer()->getElements();
 		m_selfDeletionCrashWorkaroundScheduledElementDeleteHack.insert(m_selfDeletionCrashWorkaroundScheduledElementDeleteHack.end(), oldElementsWeCanNotDeleteYet.begin(), oldElementsWeCanNotDeleteYet.end());
-		m_container->getContainer()->empty(); // ensure nothing is deleted yet
+		getContainer()->empty(); // ensure nothing is deleted yet
 	}
 
-	m_container->clear();
+	clear();
 
 	m_containedTextbox = NULL;
 }
@@ -228,7 +224,7 @@ OsuUIContextMenuButton *OsuUIContextMenu::addButton(UString text, int id)
 		button->setDrawFrame(false);
 		button->setDrawBackground(false);
 	}
-	m_container->getContainer()->addBaseUIElement(button);
+	getContainer()->addBaseUIElement(button);
 
 	if (button->getSize().x+2*margin > m_iWidthCounter)
 	{
@@ -256,7 +252,7 @@ OsuUIContextMenuTextbox *OsuUIContextMenu::addTextbox(UString text, int id)
 
 		textbox->setActive(true);
 	}
-	m_container->getContainer()->addBaseUIElement(textbox);
+	getContainer()->addBaseUIElement(textbox);
 
 	m_iYCounter += buttonHeight;
 	setSizeY(m_iYCounter + 2*margin);
@@ -274,7 +270,7 @@ void OsuUIContextMenu::end(bool invertAnimation, bool clampUnderflowAndOverflowA
 
 	const int margin = 9 * Osu::getUIScale(m_osu);
 
-	const std::vector<CBaseUIElement*> &elements = m_container->getContainer()->getElements();
+	const std::vector<CBaseUIElement*> &elements = getContainer()->getElements();
 	for (size_t i=0; i<elements.size(); i++)
 	{
 		(elements[i])->setSizeX(m_iWidthCounter - 2*margin);
@@ -282,7 +278,7 @@ void OsuUIContextMenu::end(bool invertAnimation, bool clampUnderflowAndOverflowA
 
 	// scrollview handling and edge cases
 	{
-		m_container->setVerticalScrolling(false);
+		setVerticalScrolling(false);
 
 		if (m_bClampUnderflowAndOverflowAndEnableScrollingIfNecessary)
 		{
@@ -294,7 +290,7 @@ void OsuUIContextMenu::end(bool invertAnimation, bool clampUnderflowAndOverflowA
 				setPosY(m_vPos.y + underflow);
 				setSizeY(m_vSize.y - underflow);
 
-				m_container->setVerticalScrolling(true);
+				setVerticalScrolling(true);
 			}
 
 			if (m_vPos.y + m_vSize.y > m_osu->getScreenHeight())
@@ -303,11 +299,11 @@ void OsuUIContextMenu::end(bool invertAnimation, bool clampUnderflowAndOverflowA
 
 				setSizeY(m_vSize.y - overflow - 1);
 
-				m_container->setVerticalScrolling(true);
+				setVerticalScrolling(true);
 			}
 		}
 
-		m_container->setScrollSizeToContent();
+		setScrollSizeToContent();
 	}
 
 	setVisible2(true);
@@ -329,23 +325,18 @@ void OsuUIContextMenu::setVisible2(bool visible2)
 
 void OsuUIContextMenu::onResized()
 {
-	m_container->setSize(m_vSize);
+	setSize(m_vSize);
 }
 
 void OsuUIContextMenu::onMoved()
 {
-	m_container->setRelPos(m_vPos);
-	m_container->setPos(m_vPos);
+	setRelPos(m_vPos);
+	setPos(m_vPos);
 }
 
 void OsuUIContextMenu::onMouseDownOutside()
 {
 	setVisible2(false);
-}
-
-void OsuUIContextMenu::onFocusStolen()
-{
-	m_container->stealFocus();
 }
 
 void OsuUIContextMenu::onClick(CBaseUIButton *button)

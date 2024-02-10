@@ -336,11 +336,12 @@ OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu)
 	}
 	m_bDidUserUpdateFromOlderVersion = m_bDrawVersionNotificationArrow; // (same logic atm)
 
-	m_container = new CBaseUIContainer(-1, 0, m_osu->getScreenWidth(), m_osu->getScreenHeight(), "");
+	setPos(-1, 0);
+	setSize(m_osu->getScreenWidth(), m_osu->getScreenHeight());
 
 	m_cube = new OsuMainMenuCubeButton(this, 0, 0, 1, 1, "", "");
     m_cube->setClickCallback( fastdelegate::MakeDelegate(this, &OsuMainMenu::onCubePressed) );
-	m_container->addBaseUIElement(m_cube);
+	addBaseUIElement(m_cube);
 
 	addMainMenuButton("Singleplayer")->setClickCallback( fastdelegate::MakeDelegate(this, &OsuMainMenu::onPlayButtonPressed) );
 	addMainMenuButton("Multiplayer")->setClickCallback( fastdelegate::MakeDelegate(this, &OsuMainMenu::onMultiplayerButtonPressed) );
@@ -349,7 +350,7 @@ OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu)
 
 	m_pauseButton = new OsuMainMenuPauseButton(0, 0, 0, 0, "", "");
 	m_pauseButton->setClickCallback( fastdelegate::MakeDelegate(this, &OsuMainMenu::onPausePressed) );
-	m_container->addBaseUIElement(m_pauseButton);
+	addBaseUIElement(m_pauseButton);
 
 	m_updateAvailableButton = new OsuUIButton(m_osu, 0, 0, 0, 0, "", Osu::debug->getBool() ? "Debug mode, update check disabled" : "Checking for updates ...");
 	m_updateAvailableButton->setUseDefaultSkin();
@@ -363,7 +364,7 @@ OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu)
 	m_steamWorkshopButton->setColor(0xff108fe8);
 	m_steamWorkshopButton->setTextColor(0xffffffff);
 	m_steamWorkshopButton->setVisible(osu_draw_main_menu_workshop_button.getBool());
-	m_container->addBaseUIElement(m_steamWorkshopButton);
+	addBaseUIElement(m_steamWorkshopButton);
 
 	m_githubButton = new OsuUIButton(m_osu, 0, 0, 0, 0, "", "Github");
 	m_githubButton->setUseDefaultSkin();
@@ -373,7 +374,7 @@ OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu)
 	m_githubButton->setTextDarkColor(0x11ffffff);
 	m_githubButton->setAlphaAddOnHover(0.5f);
 	m_githubButton->setVisible(false);
-	m_container->addBaseUIElement(m_githubButton);
+	addBaseUIElement(m_githubButton);
 
 	m_versionButton = new CBaseUIButton(0, 0, 0, 0, "", "");
 	UString versionString = MCOSU_VERSION_TEXT;
@@ -383,7 +384,7 @@ OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu)
 	m_versionButton->setDrawBackground(false);
 	m_versionButton->setDrawFrame(false);
 	m_versionButton->setClickCallback( fastdelegate::MakeDelegate(this, &OsuMainMenu::onVersionPressed) );
-	m_container->addBaseUIElement(m_versionButton);
+	addBaseUIElement(m_versionButton);
 
 	m_mainMenuSliderTextDatabaseBeatmap = NULL;
 	m_mainMenuSliderTextBeatmapStandard = NULL;
@@ -434,7 +435,6 @@ OsuMainMenu::~OsuMainMenu()
 	anim->deleteExistingAnimation(&m_fStartupAnim);
 	anim->deleteExistingAnimation(&m_fStartupAnim2);
 
-	SAFE_DELETE(m_container);
 	SAFE_DELETE(m_updateAvailableButton);
 
 	// if the user didn't click on the update notification during this session, quietly remove it so it's not annoying
@@ -628,7 +628,7 @@ void OsuMainMenu::draw(Graphics *g)
 	}
 
 	// draw container
-	m_container->draw(g);
+	OsuScreen::draw(g);
 
 	// draw update check button
 	{
@@ -1156,7 +1156,7 @@ void OsuMainMenu::mouse_update(bool *propagate_clicks)
 	updateLayout();
 
 	// update and focus handling
-	m_container->mouse_update(propagate_clicks);
+	OsuScreen::mouse_update(propagate_clicks);
 	m_updateAvailableButton->mouse_update(propagate_clicks);
 
 	// handle automatic menu closing
@@ -1442,8 +1442,8 @@ void OsuMainMenu::updateLayout()
 		m_menuElements[i]->setBackgroundColor(COLORf(offsetPercent, 0.0f, 0.0f, 0.0f));
 	}
 
-	m_container->setSize(m_osu->getScreenSize() + Vector2(1,1));
-	m_container->update_pos();
+	setSize(m_osu->getScreenSize() + Vector2(1,1));
+	update_pos();
 }
 
 void OsuMainMenu::animMainButton()
@@ -1563,7 +1563,7 @@ OsuMainMenuButton *OsuMainMenu::addMainMenuButton(UString text)
 	button->setVisible(false);
 
 	m_menuElements.push_back(button);
-	m_container->addBaseUIElement(button);
+	addBaseUIElement(button);
 	return button;
 }
 

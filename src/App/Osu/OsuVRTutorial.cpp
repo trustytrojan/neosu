@@ -22,14 +22,14 @@
 
 OsuVRTutorial::OsuVRTutorial(Osu *osu) : OsuScreenBackable(osu)
 {
-	m_container = new CBaseUIContainer(-1, -1, 0, 0, "");
+	setPos(-1, -1);
 	m_scrollView = new CBaseUIScrollView(-1, -1, 0, 0, "");
 	m_scrollView->setHorizontalScrolling(false);
 	m_scrollView->setScrollbarColor(0xff000000);
 	m_scrollView->setDrawBackground(false);
 	m_scrollView->setDrawFrame(false);
 	m_scrollView->setScrollResistance(0);
-	m_container->addBaseUIElement(m_scrollView);
+	addBaseUIElement(m_scrollView);
 
 	// load/execute VR stuff only in VR builds
 	if (m_osu->isInVRMode())
@@ -46,25 +46,10 @@ OsuVRTutorial::OsuVRTutorial(Osu *osu) : OsuScreenBackable(osu)
 	m_backButton->setVisible(false);
 }
 
-OsuVRTutorial::~OsuVRTutorial()
-{
-	SAFE_DELETE(m_container);
-}
-
-void OsuVRTutorial::draw(Graphics *g)
-{
-	if (!m_bVisible) return;
-
-	m_container->draw(g);
-
-	OsuScreenBackable::draw(g);
-}
-
 void OsuVRTutorial::mouse_update(bool *propagate_clicks)
 {
 	if (!m_bVisible) return;
 	OsuScreenBackable::mouse_update(propagate_clicks);
-	m_container->mouse_update(propagate_clicks);
 
 	float minPosToUnlockBackButton = m_tutorialImage1->getSize().y*0.75f;
 	if (m_scrollView->getScrollPosY() < -minPosToUnlockBackButton && !m_backButton->isVisible())
@@ -95,7 +80,7 @@ void OsuVRTutorial::updateLayout()
 {
 	OsuScreenBackable::updateLayout();
 
-	m_container->setSize(m_osu->getScreenSize() + Vector2(2,2));
+	setSize(m_osu->getScreenSize() + Vector2(2,2));
 	m_scrollView->setSize(m_osu->getScreenSize() + Vector2(2,2));
 
 	// TODO: this scaling shit should be part of CBaseUIImage, clean up sometime

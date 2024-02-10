@@ -10,16 +10,16 @@
 
 #include "CBaseUIButton.h"
 #include "CBaseUITextbox.h"
+#include "CBaseUIScrollView.h"
 
 class CBaseUIContainer;
-class CBaseUIScrollView;
 
 class Osu;
 
 class OsuUIContextMenuButton;
 class OsuUIContextMenuTextbox;
 
-class OsuUIContextMenu : public CBaseUIElement
+class OsuUIContextMenu : public CBaseUIScrollView
 {
 public:
 	static void clampToBottomScreenEdge(OsuUIContextMenu *menu);
@@ -27,7 +27,6 @@ public:
 
 public:
 	OsuUIContextMenu(Osu *osu, float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "", CBaseUIScrollView *parent = NULL);
-	virtual ~OsuUIContextMenu();
 
 	virtual void draw(Graphics *g);
 	virtual void mouse_update(bool *propagate_clicks);
@@ -53,14 +52,12 @@ private:
 	virtual void onResized();
 	virtual void onMoved();
 	virtual void onMouseDownOutside();
-	virtual void onFocusStolen();
 
 	void onClick(CBaseUIButton *button);
 	void onHitEnter(OsuUIContextMenuTextbox *textbox);
 
 	Osu *m_osu;
 
-	CBaseUIScrollView *m_container;
 	CBaseUIScrollView *m_parent;
 
 	OsuUIContextMenuTextbox *m_containedTextbox;

@@ -82,6 +82,7 @@ public:
 	virtual void onKeyDown(KeyboardEvent &e);
 	virtual void onKeyUp(KeyboardEvent &e);
 	virtual void onChar(KeyboardEvent &e);
+	virtual void stealFocus();
 
 	void onLeftChange(bool down);
 	void onMiddleChange(bool down){;}

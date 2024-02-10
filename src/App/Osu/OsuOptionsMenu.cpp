@@ -506,14 +506,14 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu)
 	m_drainTypes.push_back("osu!lazer 2020");
 	m_drainTypes.push_back("osu!lazer 2018");
 
-	m_container = new CBaseUIContainer(-1, 0, 0, 0, "");
+	setPos(-1, 0);
 
 	m_options = new CBaseUIScrollView(0, -1, 0, 0, "");
 	m_options->setDrawFrame(true);
 	m_options->setDrawBackground(true);
 	m_options->setBackgroundColor(0xdd000000);
 	m_options->setHorizontalScrolling(false);
-	m_container->addBaseUIElement(m_options);
+	addBaseUIElement(m_options);
 
 	m_categories = new CBaseUIScrollView(0, -1, 0, 0, "");
 	m_categories->setDrawFrame(true);
@@ -522,13 +522,13 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu)
 	m_categories->setHorizontalScrolling(false);
 	m_categories->setVerticalScrolling(true);
 	m_categories->setScrollResistance(30); // since all categories are always visible anyway
-	m_container->addBaseUIElement(m_categories);
+	addBaseUIElement(m_categories);
 
 	m_contextMenu = new OsuUIContextMenu(m_osu, 50, 50, 150, 0, "", m_options);
 
 	m_search = new OsuUISearchOverlay(m_osu, 0, 0, 0, 0, "");
 	m_search->setOffsetRight(20);
-	m_container->addBaseUIElement(m_search);
+	addBaseUIElement(m_search);
 
 	m_spacer = new CBaseUILabel(0, 0, 1, 40, "", "");
 	m_spacer->setDrawBackground(false);
@@ -1253,11 +1253,6 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu)
 		onHighQualitySlidersConVarChange("", osu_options_high_quality_sliders.getString());
 }
 
-OsuOptionsMenu::~OsuOptionsMenu()
-{
-	SAFE_DELETE(m_container);
-}
-
 void OsuOptionsMenu::draw(Graphics *g)
 {
 	const bool isAnimating = anim->isAnimating(&m_fAnimation);
@@ -1302,7 +1297,7 @@ void OsuOptionsMenu::draw(Graphics *g)
 		}
 	}
 
-	m_container->draw(g);
+	OsuScreenBackable::draw(g);
 
 	if (m_hudSizeSlider->isActive()
 		|| m_hudComboScaleSlider->isActive()
@@ -1414,16 +1409,13 @@ void OsuOptionsMenu::mouse_update(bool *propagate_clicks)
 
 	if (!m_bVisible) return;
 
-	OsuScreenBackable::mouse_update(propagate_clicks);
-	if(!*propagate_clicks) return;
-
 	// force context menu focus
 	if (m_contextMenu->isVisible()) {
 		m_contextMenu->mouse_update(propagate_clicks);
 		if(!*propagate_clicks) return;
 	}
 
-	m_container->mouse_update(propagate_clicks);
+	OsuScreenBackable::mouse_update(propagate_clicks);
 	if(!*propagate_clicks) return;
 
 	if (m_bDPIScalingScrollToSliderScheduled)
@@ -1581,7 +1573,7 @@ void OsuOptionsMenu::onKeyDown(KeyboardEvent &e)
 {
 	if (!m_bVisible) return;
 
-	m_container->onKeyDown(e);
+	OsuScreenBackable::onKeyDown(e);
 	if (e.isConsumed()) return;
 
 	if (e == KEY_ESCAPE || e == (KEYCODE)OsuKeyBindings::GAME_PAUSE.getInt())
@@ -1655,19 +1647,11 @@ void OsuOptionsMenu::onKeyDown(KeyboardEvent &e)
 	e.consume();
 }
 
-void OsuOptionsMenu::onKeyUp(KeyboardEvent &e)
-{
-	if (!m_bVisible) return;
-
-	m_container->onKeyUp(e);
-	if (e.isConsumed()) return;
-}
-
 void OsuOptionsMenu::onChar(KeyboardEvent &e)
 {
 	if (!m_bVisible) return;
 
-	m_container->onChar(e);
+	OsuScreenBackable::onChar(e);
 	if (e.isConsumed()) return;
 
 	// handle searching
@@ -1901,7 +1885,7 @@ void OsuOptionsMenu::updateLayout()
 
 	const float dpiScale = Osu::getUIScale(m_osu);
 
-	m_container->setSize(m_osu->getScreenSize());
+	setSize(m_osu->getScreenSize());
 
 	// options panel
 	const float optionsScreenWidthPercent = 0.5f;
@@ -2298,7 +2282,7 @@ void OsuOptionsMenu::updateLayout()
 	m_categories->getContainer()->update_pos();
 	m_categories->setScrollSizeToContent();
 
-	m_container->update_pos();
+	update_pos();
 }
 
 void OsuOptionsMenu::onBack()

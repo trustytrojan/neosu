@@ -19,7 +19,6 @@ class OsuPauseMenu : public OsuScreen
 {
 public:
 	OsuPauseMenu(Osu *osu);
-	virtual ~OsuPauseMenu();
 
 	virtual void draw(Graphics *g);
 	virtual void mouse_update(bool *propagate_clicks);
@@ -47,7 +46,6 @@ private:
 
 	OsuUIPauseMenuButton *addButton(std::function<Image*()> getImageFunc);
 
-	CBaseUIContainer *m_container;
 	bool m_bScheduledVisibilityChange;
 	bool m_bScheduledVisibility;
 

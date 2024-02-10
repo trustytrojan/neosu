@@ -52,7 +52,7 @@ OsuPauseMenu::OsuPauseMenu(Osu *osu) : OsuScreen(osu)
 
 	m_fDimAnim = 0.0f;
 
-	m_container = new CBaseUIContainer(0, 0, m_osu->getScreenWidth(), m_osu->getScreenHeight(), "");
+	setSize(m_osu->getScreenWidth(), m_osu->getScreenHeight());
 
 	OsuUIPauseMenuButton *continueButton = addButton([this]() -> Image *{return m_osu->getSkin()->getPauseContinue();});
 	OsuUIPauseMenuButton *retryButton = addButton([this]() -> Image *{return m_osu->getSkin()->getPauseRetry();});
@@ -63,11 +63,6 @@ OsuPauseMenu::OsuPauseMenu(Osu *osu) : OsuScreen(osu)
 	backButton->setClickCallback( fastdelegate::MakeDelegate(this, &OsuPauseMenu::onBackClicked) );
 
 	updateLayout();
-}
-
-OsuPauseMenu::~OsuPauseMenu()
-{
-	SAFE_DELETE(m_container);
 }
 
 void OsuPauseMenu::draw(Graphics *g)
@@ -112,7 +107,7 @@ void OsuPauseMenu::draw(Graphics *g)
 	{
 		m_buttons[i]->setAlpha(1.0f - (1.0f - m_fDimAnim)*(1.0f - m_fDimAnim)*(1.0f - m_fDimAnim));
 	}
-	m_container->draw(g);
+	OsuScreen::draw(g);
 
 	// draw selection arrows
 	if (m_selectedButton != NULL)
@@ -137,7 +132,7 @@ void OsuPauseMenu::mouse_update(bool *propagate_clicks)
 	if (!m_bVisible) return;
 
 	// update and focus handling
-	m_container->mouse_update(propagate_clicks);
+	OsuScreen::mouse_update(propagate_clicks);
 
 	if (m_bScheduledVisibilityChange)
 	{
@@ -401,7 +396,7 @@ void OsuPauseMenu::updateLayout()
 
 void OsuPauseMenu::onResolutionChange(Vector2 newResolution)
 {
-	m_container->setSize(newResolution);
+	setSize(newResolution);
 	updateLayout();
 }
 
@@ -456,7 +451,7 @@ void OsuPauseMenu::setContinueEnabled(bool continueEnabled)
 OsuUIPauseMenuButton *OsuPauseMenu::addButton(std::function<Image*()> getImageFunc)
 {
 	OsuUIPauseMenuButton *button = new OsuUIPauseMenuButton(m_osu, getImageFunc, 0, 0, 0, 0, "");
-	m_container->addBaseUIElement(button);
+	addBaseUIElement(button);
 	m_buttons.push_back(button);
 	return button;
 }

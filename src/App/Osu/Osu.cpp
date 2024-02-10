@@ -1651,6 +1651,12 @@ void Osu::onKeyUp(KeyboardEvent &key)
 	m_fposu->onKeyUp(key);
 }
 
+void Osu::stealFocus() {
+	for(auto screen : m_screens) {
+		screen->stealFocus();
+	}
+}
+
 void Osu::onChar(KeyboardEvent &e)
 {
 	for (int i=0; i<m_screens.size(); i++)

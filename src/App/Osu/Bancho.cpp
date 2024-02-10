@@ -31,7 +31,6 @@
 // TODO @kiwec: mark DMs as read when they're visible on screen
 // TODO @kiwec: PLEASE polish lobby UI
 // TODO @kiwec: handle freemod / allow user to pick mods in multi room
-// TODO @kiwec: fix textboxes sharing focus
 // TODO @kiwec: make PopupScreen to enter password when joining/editing room
 // TODO @kiwec: build on windows
 
