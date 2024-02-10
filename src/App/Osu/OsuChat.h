@@ -5,7 +5,6 @@
 #include "OsuScreen.h"
 
 
-// TODO @kiwec: Add timestamps
 // TODO @kiwec: do something when username is clicked
 // TODO @kiwec: limit to 100 messages / channel
 // TODO @kiwec: optimize
@@ -23,6 +22,7 @@ class OsuUIButton;
 
 
 struct ChatMessage {
+    time_t tms;
     int32_t author_id;
     UString author_name;
     UString text;

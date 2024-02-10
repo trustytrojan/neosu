@@ -35,8 +35,14 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu)
 	std::vector<CHANGELOG> changelogs;
 
 	CHANGELOG alpha317;
-	// TODO @kiwec: update changelog
 	alpha317.title = UString::format("34.00 (Build Date: %s, %s)", __DATE__, __TIME__); // (09.01.2022 - ?)
+	alpha317.changes.push_back("- Added ability to connect to servers using Bancho protocol");
+	alpha317.changes.push_back("- Added ability to see, join and play in multiplayer rooms");
+	alpha317.changes.push_back("- Added online leaderboards");
+	alpha317.changes.push_back("- Added chat");
+	alpha317.changes.push_back("- Added automatic map downloads for multiplayer rooms");
+	alpha317.changes.push_back("");
+	alpha317.changes.push_back("");
 	alpha317.changes.push_back("- Reenabled IME support to fix blocking keyboard language switching hotkeys (add \"-noime\" launch arg to get the old behavior back in case of problems)");
 	alpha317.changes.push_back("- Improved console autocomplete");
 	alpha317.changes.push_back("- Fixed pie progressbar fill being invisible under certain conditions");

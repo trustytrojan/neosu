@@ -152,8 +152,6 @@ OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
     m_container->addBaseUIElement(m_slotlist);
 
     updateLayout(m_osu->getScreenSize());
-
-    // TODO @kiwec: find out why textboxes are not showing
 }
 
 void OsuRoom::draw(Graphics *g) {
@@ -178,7 +176,8 @@ void OsuRoom::draw(Graphics *g) {
     if (search == mapset_by_mapid.end()) return;
     uint32_t set_id = search->second;
     if(set_id == 0) {
-        m_map_title->setText("Could not find beatmapset ID from given map ID.");
+        auto error_str = UString::format("Could not find beatmapset for map ID %d.\n", bancho.room.map_id);
+        m_map_title->setText(error_str);
         m_map_title->setSizeToContent(0, 0);
         m_map_attributes->setVisible(false);
         m_map_stars->setVisible(false);
@@ -187,7 +186,8 @@ void OsuRoom::draw(Graphics *g) {
 
     auto status = download_mapset(set_id);
     if(status.status == FAILURE) {
-        m_map_title->setText("Failed to download beatmap set :(");
+        auto error_str = UString::format("Failed to download beatmapset %d :(", set_id);
+        m_map_title->setText(error_str);
         m_map_title->setSizeToContent(0, 0);
         m_map_attributes->setVisible(false);
         m_map_stars->setVisible(false);
@@ -434,6 +434,7 @@ void OsuRoom::process_beatmapset_info_response(Packet packet) {
 }
 
 void OsuRoom::on_map_change(bool download) {
+    debugLog("Map changed to ID %d, MD5 %s: %s\n", bancho.room.map_id, bancho.room.map_md5.toUtf8(), bancho.room.map_name.toUtf8());
     m_ready_btn->is_loading = true;
 
     // Deselect current map

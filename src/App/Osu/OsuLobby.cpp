@@ -38,11 +38,11 @@ RoomUIElement::RoomUIElement(OsuLobby* multi, Room* room, float x, float y, floa
     slots_ui->setDrawBackground(false);
     getContainer()->addBaseUIElement(slots_ui);
 
-    auto btn = new OsuUIButton(multi->m_osu, 10, 65, 120, 30, "", "Join room");
-    btn->setUseDefaultSkin();
-    btn->setColor(0xff00ff00);
-    btn->setClickCallback( fastdelegate::MakeDelegate(this, &RoomUIElement::onRoomJoinButtonClick) );
-    getContainer()->addBaseUIElement(btn);
+    join_btn = new OsuUIButton(multi->m_osu, 10, 65, 120, 30, "", "Join room");
+    join_btn->setUseDefaultSkin();
+    join_btn->setColor(0xff00ff00);
+    join_btn->setClickCallback( fastdelegate::MakeDelegate(this, &RoomUIElement::onRoomJoinButtonClick) );
+    getContainer()->addBaseUIElement(join_btn);
 }
 
 void RoomUIElement::onRoomJoinButtonClick(CBaseUIButton* btn) {
@@ -52,8 +52,7 @@ void RoomUIElement::onRoomJoinButtonClick(CBaseUIButton* btn) {
     write_string(&packet, ""); // TODO @kiwec: password support
     send_packet(packet);
 
-    auto osu_btn = (OsuUIButton*)btn;
-    osu_btn->is_loading = true;
+    join_btn->is_loading = true;
     m_multi->m_osu->getNotificationOverlay()->addNotification("Joining room...");
 }
 
@@ -187,8 +186,6 @@ void OsuLobby::updateLayout(Vector2 newResolution) {
         y += room_height + 20;
     }
 
-    // TODO @kiwec: add padding so user can scroll to bottom without chat being in the way
-
     m_list->setScrollSizeToContent();
 }
 
@@ -227,5 +224,6 @@ void OsuLobby::removeRoom(uint32_t room_id) {
 }
 
 void OsuLobby::on_room_join_failed() {
-    // TODO @kiwec
+    // Updating layout will reset is_loading to false
+    updateLayout(m_container->getSize());
 }

@@ -52,6 +52,7 @@ void OsuChatChannel::onChannelButtonClick(CBaseUIButton* btn) {
 
 void OsuChatChannel::add_message(ChatMessage msg) {
     const float line_height = 20;
+    const Color system_color = 0xffffff00;
 
     // TODO @kiwec: this stops following if chat is too fast :/
     bool was_at_bottom = (ui->getSize().y - ui->getScrollPosY()) >= ui->getScrollSize().y;
@@ -59,31 +60,60 @@ void OsuChatChannel::add_message(ChatMessage msg) {
     bool is_system_message = msg.author_name.length() == 0;
 
     UString text_str = "";
-    float name_width = m_chat->font->getStringWidth(msg.author_name);
+    float x = 10;
+
+    struct tm *tm = localtime(&msg.tms);
+    auto timestamp_str = UString::format("%02d:%02d ", tm->tm_hour, tm->tm_min);
+    float time_width = m_chat->font->getStringWidth(timestamp_str);
+    CBaseUILabel *timestamp = new CBaseUILabel(x, y_total, time_width, line_height, "", timestamp_str);
+    timestamp->setDrawFrame(false);
+    timestamp->setDrawBackground(false);
+    ui->getContainer()->addBaseUIElement(timestamp);
+    x += time_width;
+
     if(!is_system_message) {
-        CBaseUILabel *username = new CBaseUILabel(10, y_total, name_width, line_height, "", msg.author_name);
+        float name_width = m_chat->font->getStringWidth(msg.author_name);
+        CBaseUILabel *username = new CBaseUILabel(x, y_total, name_width, line_height, "", msg.author_name);
         username->setDrawFrame(false);
         username->setDrawBackground(false);
         username->setTextColor(0xff2596be);
         ui->getContainer()->addBaseUIElement(username);
+        x += name_width;
 
         // TODO @kiwec: make name clickable, do something when name is clicked
 
         text_str.append(": ");
     }
 
-    text_str.append(msg.text);
-    float text_width = m_chat->font->getStringWidth(text_str);
-    float text_height = line_height; // TODO @kiwec: text wrapping
+    float line_width = x;
+    for(int i = 0; i < msg.text.length(); i++) {
+        float char_width = m_chat->font->getGlyphMetrics(msg.text[i]).advance_x;
+        if(line_width + char_width + 20 >= m_chat->m_container->getSize().x) {
+            CBaseUILabel *text = new CBaseUILabel(x, y_total, line_width, line_height, "", text_str);
+            text->setDrawFrame(false);
+            text->setDrawBackground(false);
+            if(is_system_message) {
+                text->setTextColor(system_color);
+            }
+            ui->getContainer()->addBaseUIElement(text);
+            x = 10;
+            y_total += line_height;
+            line_width = x;
+            text_str = "";
+        } else {
+            text_str.append(msg.text[i]);
+            line_width += char_width;
+        }
+    }
 
-    CBaseUILabel *text = new CBaseUILabel(10 + name_width, y_total, text_width, text_height, "", text_str);
+    CBaseUILabel *text = new CBaseUILabel(x, y_total, line_width, line_height, "", text_str);
     text->setDrawFrame(false);
     text->setDrawBackground(false);
     if(is_system_message) {
-        // TODO @kiwec: use prettier color
-        text->setTextColor(0xfff73729);
+        text->setTextColor(system_color);
     }
     ui->getContainer()->addBaseUIElement(text);
+    x += line_width;
 
     y_total += line_height;
     ui->setScrollSizeToContent();
@@ -211,12 +241,11 @@ void OsuChat::onKeyDown(KeyboardEvent &key) {
 
             // Server doesn't echo the message back
             addMessage(m_selected_channel->name, ChatMessage{
+                .tms = time(NULL),
                 .author_id = bancho.user_id,
                 .author_name = bancho.username,
                 .text = m_input_box->getText(),
             });
-
-            // TODO @kiwec: handle cases where the message is rejected
 
             m_input_box->clear();
         }

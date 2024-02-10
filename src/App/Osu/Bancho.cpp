@@ -27,13 +27,13 @@
 // Let's commit the full TODO list, why not?
 // TODO @kiwec: logout on quit. needs a rework of the networking logic. disconnect != logout
 // TODO @kiwec: add "personal best" in online score list
-// TODO @kiwec: fetch avatars and display in leaderboards, score browser, lobby list, etc
 // TODO @kiwec: comb over every single option, and every single convar and make sure no cheats are possible in multiplayer
-// TODO @kiwec: make webpage for https://mcosu.kiwec.net/
 // TODO @kiwec: mark DMs as read when they're visible on screen
 // TODO @kiwec: PLEASE polish lobby UI
 // TODO @kiwec: handle freemod / allow user to pick mods in multi room
 // TODO @kiwec: fix textboxes sharing focus
+// TODO @kiwec: make PopupScreen to enter password when joining/editing room
+// TODO @kiwec: build on windows
 
 
 Bancho bancho;
@@ -116,6 +116,7 @@ void handle_packet(Packet *packet) {
     int32_t sender_id = read_int(packet);
 
     bancho.osu->m_chat->addMessage(recipient, ChatMessage{
+      .tms = time(NULL),
       .author_id = sender_id,
       .author_name = sender,
       .text = text,
@@ -152,12 +153,9 @@ void handle_packet(Packet *packet) {
   } else if (packet->id == SPECTATOR_JOINED) {
     int32_t spectator_id = read_int(packet);
     debugLog("Spectator joined: user id %d\n", spectator_id);
-    // TODO @kiwec: display spectators
-    // TODO @kiwec: send packets so spectators can spectate
   } else if (packet->id == SPECTATOR_LEFT) {
     int32_t spectator_id = read_int(packet);
     debugLog("Spectator left: user id %d\n", spectator_id);
-    // TODO @kiwec: update spectators
   } else if (packet->id == VERSION_UPDATE) {
     disconnect();
     bancho.osu->getNotificationOverlay()->addNotification(
@@ -165,9 +163,8 @@ void handle_packet(Packet *packet) {
   } else if (packet->id == SPECTATOR_CANT_SPECTATE) {
     int32_t spectator_id = read_int(packet);
     debugLog("Spectator can't spectate: user id %d\n", spectator_id);
-    // TODO @kiwec: update spectators ("doesn't have map" list)
   } else if (packet->id == GET_ATTENTION) {
-    // TODO @kiwec: force window focus, or flash icon in taskbar
+    // (nothing to do)
   } else if (packet->id == NOTIFICATION) {
     UString notification = read_string(packet);
     bancho.osu->getNotificationOverlay()->addNotification(notification);
@@ -206,8 +203,7 @@ void handle_packet(Packet *packet) {
   } else if (packet->id == UPDATE_MATCH_SCORE || packet->id == MATCH_SCORE_UPDATED) {
     bancho.osu->m_room->on_match_score_updated(packet);
   } else if (packet->id == HOST_CHANGED) {
-    debugLog("Host changed!\n");
-    // TODO @kiwec: nothing to do?
+    // (nothing to do)
   } else if (packet->id == MATCH_ALL_PLAYERS_LOADED) {
     bancho.osu->m_room->on_all_players_loaded();
   } else if (packet->id == MATCH_PLAYER_FAILED) {
@@ -222,6 +218,7 @@ void handle_packet(Packet *packet) {
     UString name = read_string(packet);
     bancho.osu->m_chat->addChannel(name);
     bancho.osu->m_chat->addMessage(name, ChatMessage{
+      .tms = time(NULL),
       .author_id = 0,
       .author_name = UString(""),
       .text = UString("Joined channel."),
@@ -252,8 +249,6 @@ void handle_packet(Packet *packet) {
   } else if (packet->id == MAIN_MENU_ICON) {
     UString icon = read_string(packet);
     debugLog("Main menu icon: %s\n", icon.toUtf8());
-    // TODO @kiwec: handle this
-    // for that, we need to download & cache images somewhere. would be useful for avatars too
   } else if (packet->id == MATCH_PLAYER_SKIPPED) {
     int32_t user_id = read_int(packet);
     bancho.osu->m_room->on_player_skip(user_id);

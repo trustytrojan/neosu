@@ -9,10 +9,10 @@
 #include "CBaseUIScrollView.h"
 #include "OsuScreen.h"
 
-
 class CBaseUIButton;
 class CBaseUILabel;
 class OsuLobby;
+class OsuUIButton;
 class Room;
 
 // NOTE: We make a CBaseUIScrollView but won't enable scrolling.
@@ -20,6 +20,7 @@ class Room;
 struct RoomUIElement : CBaseUIScrollView {
     RoomUIElement(OsuLobby* multi, Room* room, float x, float y, float width, float height);
 
+    OsuUIButton* join_btn;
     CBaseUIScrollView* ui;
     OsuLobby* m_multi;
     int32_t room_id;

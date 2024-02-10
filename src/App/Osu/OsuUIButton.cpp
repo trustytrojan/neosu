@@ -70,8 +70,7 @@ void OsuUIButton::draw(Graphics *g)
 	buttonRight->unbind();
 
 	if(is_loading) {
-		// TODO @kiwec: scaling is incorrect depending on screen resolution?
-		const float scale = Osu::getImageScale(m_osu, m_osu->getSkin()->getLoadingSpinner(), m_vSize.y * 0.8);
+		const float scale = (m_vSize.y * 0.8) / m_osu->getSkin()->getLoadingSpinner()->getSize().y;
 		g->setColor(0xffffffff);
 		g->pushTransform();
 		g->rotate(engine->getTime()*180, 0, 0, 1);
