@@ -4,10 +4,13 @@
 #include "CBaseUIScrollView.h"
 #include "OsuScreen.h"
 
+class CBaseUICheckbox;
 class CBaseUILabel;
+class CBaseUITextbox;
 class OsuDatabaseBeatmap;
 class OsuMainMenuPauseButton;
 class OsuUIButton;
+class OsuUICheckbox;
 
 
 struct OsuUIModList : public CBaseUIContainer {
@@ -22,6 +25,8 @@ struct OsuRoom : public OsuScreen {
     virtual void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);
     virtual void onKeyDown(KeyboardEvent &e);
+    virtual void onKeyUp(KeyboardEvent &e);
+    virtual void onChar(KeyboardEvent &e);
     virtual void onResolutionChange(Vector2 newResolution);
     virtual CBaseUIContainer* setVisible(bool visible); // does nothing
 
@@ -43,19 +48,34 @@ struct OsuRoom : public OsuScreen {
     void onClientScoreChange(bool force = false);
     void onReadyButtonClick();
 
+    // Host only
+    void onStartGameClicked();
+    void onSelectModsClicked();
+    void onSelectMapClicked();
+    void onFreemodCheckboxChanged(CBaseUICheckbox *checkbox);
+
     std::unordered_map<uint32_t, uint32_t> mapset_by_mapid;
 
     CBaseUIContainer *m_container = nullptr;
     CBaseUIScrollView *m_settings = nullptr;
     CBaseUIScrollView *m_slotlist = nullptr;
     CBaseUIScrollView *m_map = nullptr;
+    CBaseUILabel *m_host = nullptr;
     CBaseUILabel *m_room_name = nullptr;
+    CBaseUILabel *m_room_name_iptl = nullptr;
+    CBaseUITextbox *m_room_name_ipt = nullptr;
+    // CBaseUILabel *m_room_password_iptl = nullptr;
+    // CBaseUITextbox *m_room_password_ipt = nullptr;
     CBaseUILabel *m_map_title = nullptr;
-
+    CBaseUILabel *m_map_attributes = nullptr;
+    CBaseUILabel *m_map_stars = nullptr;
+    OsuUIButton *m_select_map_btn = nullptr;
+    OsuUIButton *m_select_mods_btn = nullptr;
+    OsuUICheckbox *m_freemod = nullptr;
     OsuUIModList *m_mods = nullptr;
     CBaseUILabel *m_no_mods_selected = nullptr;
-
     OsuUIButton *m_ready_btn = nullptr;
+
     OsuMainMenuPauseButton *m_pauseButton = nullptr;
     McFont* font = nullptr;
     McFont* lfont = nullptr;

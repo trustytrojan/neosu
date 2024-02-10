@@ -178,6 +178,9 @@ struct Slot {
   // ready
   bool is_ready() { return (status & 0b00001000); }
 
+  // no_map
+  bool no_map() { return (status & 0b00010000); }
+
   // playing
   bool is_player_playing() { return (status & 0b00100000); }
 
@@ -217,6 +220,17 @@ struct Room {
   uint8_t nb_players = 0;
   uint8_t nb_open_slots = 0;
   Slot slots[16];
+
+  bool all_players_ready() {
+    for(int i = 0; i < 16; i++) {
+      if(slots[i].has_player() && !slots[i].is_ready()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  void pack(Packet *packet);
 };
 
 void read_bytes(Packet *packet, uint8_t *bytes, size_t n);

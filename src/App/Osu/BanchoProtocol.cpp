@@ -50,6 +50,42 @@ Room::Room(Packet *packet) {
   seed = read_int(packet);
 }
 
+void Room::pack(Packet *packet) {
+  write_short(packet, id);
+  write_byte(packet, in_progress);
+  write_byte(packet, match_type);
+  write_int(packet, mods);
+  write_string(packet, name.toUtf8());
+  write_string(packet, password.toUtf8());
+  write_string(packet, map_name.toUtf8());
+  write_int(packet, map_id);
+  write_string(packet, map_md5.toUtf8());
+  for (int i = 0; i < 16; i++) {
+    write_byte(packet, slots[i].status);
+  }
+  for (int i = 0; i < 16; i++) {
+    write_byte(packet, slots[i].team);
+  }
+  for(int s = 0; s < 16; s++) {
+    if(slots[s].has_player()) {
+      write_int(packet, slots[s].player_id);
+    }
+  }
+
+  write_int(packet, host_id);
+  write_byte(packet, mode);
+  write_byte(packet, win_condition);
+  write_byte(packet, team_type);
+  write_byte(packet, freemods);
+  if (freemods) {
+    for (int i = 0; i < 16; i++) {
+      write_int(packet, slots[i].mods);
+    }
+  }
+
+  write_int(packet, seed);
+}
+
 void read_bytes(Packet *packet, uint8_t *bytes, size_t n) {
   if (packet->pos + n > packet->size) {
     packet->pos = packet->size + 1;

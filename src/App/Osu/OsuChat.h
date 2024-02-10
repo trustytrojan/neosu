@@ -11,6 +11,8 @@
 // TODO @kiwec: optimize
 // TODO @kiwec: add a button to join channels. see "chat_channels" in Bancho.cpp
 
+// TODO @kiwec: fix chat width not getting updated when going from room to main menu
+
 // TODO @kiwec: Add channel connection info like osu!stable does
 // Eg. use #osu as main (closeable) channel, always add it when logging it
 

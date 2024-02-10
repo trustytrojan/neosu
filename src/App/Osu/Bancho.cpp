@@ -31,11 +31,9 @@
 // TODO @kiwec: comb over every single option, and every single convar and make sure no cheats are possible in multiplayer
 // TODO @kiwec: make webpage for https://mcosu.kiwec.net/
 // TODO @kiwec: mark DMs as read when they're visible on screen
-// TODO @kiwec: PLEASE polish multiplayer room UI
-// TODO @kiwec: handle being room host: toggle freemod, edit mods, select map, win condition, team mode, password, kick players, lock slots
-// TODO @kiwec: allow options menu in multi lobby, multi room
-// TODO @kiwec: fix being unable to play singleplayer maps after joining a room (does it think we're still in a room?)
+// TODO @kiwec: PLEASE polish lobby UI
 // TODO @kiwec: handle freemod / allow user to pick mods in multi room
+// TODO @kiwec: fix textboxes sharing focus
 
 
 Bancho bancho;

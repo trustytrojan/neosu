@@ -7,7 +7,9 @@
 
 #include "Bancho.h"
 #include "BanchoLeaderboard.h"
+#include "BanchoNetworking.h"
 #include "OsuDatabase.h"
+#include "OsuRoom.h"
 #include "OsuSongBrowser2.h"
 
 #include "Engine.h"
@@ -1709,6 +1711,20 @@ CBaseUIContainer* OsuSongBrowser2::setVisible(bool visible)
 		// HACKHACK: workaround for BaseUI framework deficiency (missing mouse events. if a mouse button is being held, and then suddenly a BaseUIElement gets put under it and set visible, and then the mouse button is released, that "incorrectly" fires onMouseUpInside/onClicked/etc.)
 		engine->getMouse()->onLeftChange(false);
 		engine->getMouse()->onRightChange(false);
+
+		// Select button matching current song preview
+		// TODO @kiwec: does not work on first load
+        const std::vector<CBaseUIElement*> &elements = m_songBrowser->getContainer()->getElements();
+        for (size_t i=0; i<elements.size(); i++) {
+            OsuUISongBrowserSongButton *btn = dynamic_cast<OsuUISongBrowserSongButton*>(elements[i]);
+            if(btn == nullptr) continue;
+            if(btn->getDatabaseBeatmap() == nullptr) continue;
+            if(btn->getDatabaseBeatmap() != m_selectedBeatmap->getSelectedDifficulty2()) continue;
+
+            btn->deselect(); // if we select() it when already selected, it would start playing!
+            btn->select();
+            break;
+        }
 	}
 	else
 		m_contextMenu->setVisible2(false);
@@ -1841,10 +1857,20 @@ void OsuSongBrowser2::onDifficultySelected(OsuDatabaseBeatmap *diff2, bool play)
 	m_songInfo->setFromBeatmap(m_selectedBeatmap, diff2);
 
 	// start playing
-	if (play)
-	{
+	if (play) {
 		if(bancho.is_in_a_multi_room()) {
-			// TODO @kiwec: change map in bancho.room, then send MATCH_CHANGE_SETTINGS packet
+			bancho.room.map_name = UString::format("%s - %s [%s]", diff2->getArtist().toUtf8(), diff2->getTitle().toUtf8(), diff2->getDifficultyName().toUtf8());
+			bancho.room.map_md5 = UString(diff2->getMD5Hash().c_str());
+			bancho.room.map_id = diff2->getID();
+
+			Packet packet = {0};
+			packet.id = MATCH_CHANGE_SETTINGS;
+		    bancho.room.pack(&packet);
+		    send_packet(packet);
+
+		    m_osu->m_room->on_map_change(false);
+
+		    setVisible(false);
 		} else {
 			// CTRL + click = auto
 			if (engine->getKeyboard()->isControlDown())

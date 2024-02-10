@@ -1417,6 +1417,12 @@ void OsuOptionsMenu::mouse_update(bool *propagate_clicks)
 	OsuScreenBackable::mouse_update(propagate_clicks);
 	if(!*propagate_clicks) return;
 
+	// force context menu focus
+	if (m_contextMenu->isVisible()) {
+		m_contextMenu->mouse_update(propagate_clicks);
+		if(!*propagate_clicks) return;
+	}
+
 	m_container->mouse_update(propagate_clicks);
 	if(!*propagate_clicks) return;
 
@@ -1424,12 +1430,6 @@ void OsuOptionsMenu::mouse_update(bool *propagate_clicks)
 	{
 		m_bDPIScalingScrollToSliderScheduled = false;
 		m_options->scrollToElement(m_uiScaleSlider, 0, 200 * Osu::getUIScale(m_osu));
-	}
-
-	// force context menu focus
-	if (m_contextMenu->isVisible()) {
-		m_contextMenu->mouse_update(propagate_clicks);
-		if(!*propagate_clicks) return;
 	}
 
 	// flash osu!folder textbox red if incorrect

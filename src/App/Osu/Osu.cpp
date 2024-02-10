@@ -140,7 +140,7 @@ ConVar osu_hide_cursor_during_gameplay("osu_hide_cursor_during_gameplay", false)
 ConVar osu_alt_f4_quits_even_while_playing("osu_alt_f4_quits_even_while_playing", true);
 ConVar osu_win_disable_windows_key_while_playing("osu_win_disable_windows_key_while_playing", true);
 
-ConVar mp_server("mp_server", "ripple.moe");
+ConVar mp_server("mp_server", "akatsuki.gg");
 ConVar osu_username("name", "Guest");
 ConVar mp_password("mp_password", "");
 ConVar mp_autologin("mp_autologin", false);
@@ -497,6 +497,7 @@ Osu::Osu(int instanceID)
 
 	// the order in this vector will define in which order events are handled/consumed
 	m_screens.push_back(m_volumeOverlay);
+	m_screens.push_back(m_room);
 	m_screens.push_back(m_chat);
 	m_screens.push_back(m_notificationOverlay);
 	m_screens.push_back(m_optionsMenu);
@@ -507,7 +508,6 @@ Osu::Osu(int instanceID)
 	m_screens.push_back(m_hud);
 	m_screens.push_back(m_songBrowser2);
 	m_screens.push_back(m_lobby);
-	m_screens.push_back(m_room);
 	m_screens.push_back(m_vrTutorial);
 	m_screens.push_back(m_changelog);
 	m_screens.push_back(m_editor);
@@ -1024,7 +1024,12 @@ void Osu::update()
 		if (m_songBrowser2 != NULL)
 			m_songBrowser2->setVisible(!m_songBrowser2->isVisible());
 
-		m_mainMenu->setVisible(!(m_songBrowser2 != NULL && m_songBrowser2->isVisible()));
+		if(bancho.is_in_a_multi_room()) {
+			// TODO @kiwec: we didn't select a map; revert to previously selected song
+		} else {
+			m_mainMenu->setVisible(!(m_songBrowser2 != NULL && m_songBrowser2->isVisible()));
+		}
+
 		updateConfineCursor();
 	}
 	if (m_bToggleOptionsMenuScheduled)
@@ -1297,8 +1302,15 @@ void Osu::onKeyDown(KeyboardEvent &key)
 
 	// F8 toggle chat
 	if (key == (KEYCODE)OsuKeyBindings::TOGGLE_CHAT.getInt()) {
-		m_chat->user_wants_chat = !m_chat->user_wants_chat;
-		m_chat->updateVisibility();
+		// When options menu is open, instead of toggling chat, close options menu and open chat
+		if(bancho.is_online() && m_optionsMenu->isVisible()) {
+			m_optionsMenu->setVisible(false);
+			m_chat->user_wants_chat = true;
+			m_chat->updateVisibility();
+		} else {
+			m_chat->user_wants_chat = !m_chat->user_wants_chat;
+			m_chat->updateVisibility();
+		}
 	}
 
 	// screenshots

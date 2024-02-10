@@ -102,6 +102,8 @@ void OsuChatChannel::updateLayout(Vector2 pos, Vector2 size) {
     for(auto msg : messages) {
         add_message(msg);
     }
+
+    ui->setScrollSizeToContent();
 }
 
 OsuChat::OsuChat(Osu *osu) : OsuScreen(osu) {
@@ -448,7 +450,8 @@ void OsuChat::onResolutionChange(Vector2 newResolution) {
 bool OsuChat::isVisibilityForced() {
     if(m_osu->m_room == nullptr || m_osu->m_lobby == nullptr || m_osu->m_songBrowser2 == nullptr) return false;
     bool sitting_in_room = m_osu->m_room->isVisible() && !m_osu->m_songBrowser2->isVisible() && !bancho.is_playing_a_multi_map();
-    return m_osu->m_lobby->isVisible() || sitting_in_room;
+    bool sitting_in_lobby = m_osu->m_lobby->isVisible();
+    return (sitting_in_room || sitting_in_lobby) && !m_osu->m_optionsMenu->isVisible();
 }
 
 void OsuChat::updateVisibility() {
