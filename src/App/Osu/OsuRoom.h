@@ -52,6 +52,8 @@ struct OsuRoom : public OsuScreen {
     void onStartGameClicked();
     void onSelectModsClicked();
     void onSelectMapClicked();
+    void onChangePasswordClicked();
+    void set_new_password(UString new_password);
     void onFreemodCheckboxChanged(CBaseUICheckbox *checkbox);
 
     std::unordered_map<uint32_t, uint32_t> mapset_by_mapid;
@@ -63,8 +65,7 @@ struct OsuRoom : public OsuScreen {
     CBaseUILabel *m_room_name = nullptr;
     CBaseUILabel *m_room_name_iptl = nullptr;
     CBaseUITextbox *m_room_name_ipt = nullptr;
-    // CBaseUILabel *m_room_password_iptl = nullptr;
-    // CBaseUITextbox *m_room_password_ipt = nullptr;
+    OsuUIButton *m_change_password_btn = nullptr;
     CBaseUILabel *m_map_title = nullptr;
     CBaseUILabel *m_map_attributes = nullptr;
     CBaseUILabel *m_map_stars = nullptr;

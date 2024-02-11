@@ -8,6 +8,7 @@
 #include "OsuDatabase.h"
 #include "OsuLobby.h"
 #include "OsuMainMenu.h"
+#include "OsuPromptScreen.h"
 #include "OsuRankingScreen.h"
 #include "OsuRoom.h"
 #include "OsuRichPresence.h"
@@ -94,10 +95,11 @@ OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
     m_room_name_ipt->setText("Multiplayer room");
     m_settings->getContainer()->addBaseUIElement(m_room_name_ipt);
 
-    // INIT_LABEL(m_room_password_iptl, "Room password", false);
-    // m_room_password_ipt = new CBaseUITextbox(0, 0, m_settings->getSize().x, 40, "");
-    // m_room_password_ipt->is_password = true;
-    // m_settings->getContainer()->addBaseUIElement(m_room_password_ipt);
+    m_change_password_btn = new OsuUIButton(osu, 0, 0, 190, 40, "change_password_btn", "Change password");
+    m_change_password_btn->setColor(0xff0e94b5);
+    m_change_password_btn->setUseDefaultSkin();
+    m_change_password_btn->setClickCallback( fastdelegate::MakeDelegate(this, &OsuRoom::onChangePasswordClicked) );
+    m_settings->getContainer()->addBaseUIElement(m_change_password_btn);
 
     CBaseUILabel* map_label;
     INIT_LABEL(map_label, "Beatmap", true);
@@ -107,7 +109,7 @@ OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
     INIT_LABEL(m_map_stars, "", false);
     m_map_stars->setVisible(false);
 
-    m_select_map_btn = new OsuUIButton(osu, 0, 0, 150, 40, "select_map_btn", "Select map");
+    m_select_map_btn = new OsuUIButton(osu, 0, 0, 130, 40, "select_map_btn", "Select map");
     m_select_map_btn->setColor(0xff0e94b5);
     m_select_map_btn->setUseDefaultSkin();
     m_select_map_btn->setClickCallback( fastdelegate::MakeDelegate(this, &OsuRoom::onSelectMapClicked) );
@@ -115,7 +117,7 @@ OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
 
     CBaseUILabel* mods_label;
     INIT_LABEL(mods_label, "Mods", true);
-    m_select_mods_btn = new OsuUIButton(osu, 0, 0, 170, 40, "select_mods_btn", "Select mods [F1]");
+    m_select_mods_btn = new OsuUIButton(osu, 0, 0, 180, 40, "select_mods_btn", "Select mods [F1]");
     m_select_mods_btn->setColor(0xff0e94b5);
     m_select_mods_btn->setUseDefaultSkin();
     m_select_mods_btn->setClickCallback( fastdelegate::MakeDelegate(this, &OsuRoom::onSelectModsClicked) );
@@ -174,7 +176,7 @@ void OsuRoom::draw(Graphics *g) {
     if (search == mapset_by_mapid.end()) return;
     uint32_t set_id = search->second;
     if(set_id == 0) {
-        auto error_str = UString::format("Could not find beatmapset for map ID %d.\n", bancho.room.map_id);
+        auto error_str = UString::format("Could not find beatmapset for map ID %d", bancho.room.map_id);
         m_map_title->setText(error_str);
         m_map_title->setSizeToContent(0, 0);
         m_map_attributes->setVisible(false);
@@ -211,11 +213,9 @@ void OsuRoom::mouse_update(bool *propagate_clicks) {
 
     const bool is_host = bancho.room.host_id == bancho.user_id;
     const bool room_name_changed = m_room_name_ipt->getText() != bancho.room.name;
-    // const bool room_password_changed = m_room_password_ipt->getText() != bancho.room.password;
     if(is_host && room_name_changed) {
         // XXX: should only update 500ms after last input
         bancho.room.name = m_room_name_ipt->getText();
-        // bancho.room.password = m_room_password_ipt->getText();
 
         Packet packet = {0};
         packet.id = MATCH_CHANGE_SETTINGS;
@@ -297,10 +297,7 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
     m_room_name_ipt->setSize(m_settings->getSize().x - 20, 40);
     m_room_name_ipt->setVisible(is_host);
 
-    // TODO @kiwec: need a "set password" button instead
-    // m_room_password_iptl->setVisible(is_host);
-    // m_room_password_ipt->setSize(m_settings->getSize().x, 40);
-    // m_room_password_ipt->setVisible(is_host);
+    m_change_password_btn->setVisible(is_host);
 
     m_select_map_btn->setVisible(is_host);
 
@@ -701,6 +698,20 @@ void OsuRoom::onSelectMapClicked() {
     send_packet(packet);
 
     m_osu->m_songBrowser2->setVisible(true);
+}
+
+void OsuRoom::onChangePasswordClicked() {
+    m_osu->m_prompt->prompt("New password:", fastdelegate::MakeDelegate(this, &OsuRoom::set_new_password));
+}
+
+void OsuRoom::set_new_password(UString new_password) {
+    bancho.room.has_password = new_password.length() > 0;
+    bancho.room.password = new_password;
+
+    Packet packet = {0};
+    packet.id = CHANGE_ROOM_PASSWORD;
+    bancho.room.pack(&packet);
+    send_packet(packet);
 }
 
 void OsuRoom::onFreemodCheckboxChanged(CBaseUICheckbox *checkbox) {
