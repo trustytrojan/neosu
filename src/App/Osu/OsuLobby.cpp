@@ -5,6 +5,7 @@
 #include "OsuLobby.h"
 #include "OsuMainMenu.h"
 #include "OsuNotificationOverlay.h"
+#include "OsuPromptScreen.h"
 #include "OsuRichPresence.h"
 #include "OsuUIButton.h"
 
@@ -20,6 +21,7 @@ RoomUIElement::RoomUIElement(OsuLobby* multi, Room* room, float x, float y, floa
     // NOTE: We can't store the room pointer, since it might expire later
     m_multi = multi;
     room_id = room->id;
+    has_password = room->has_password;
 
     setBlockScrolling(true);
     setDrawFrame(true);
@@ -43,17 +45,17 @@ RoomUIElement::RoomUIElement(OsuLobby* multi, Room* room, float x, float y, floa
     join_btn->setColor(0xff00ff00);
     join_btn->setClickCallback( fastdelegate::MakeDelegate(this, &RoomUIElement::onRoomJoinButtonClick) );
     getContainer()->addBaseUIElement(join_btn);
+
+    // TODO @kiwec: display something to show when the room is passworded
 }
 
 void RoomUIElement::onRoomJoinButtonClick(CBaseUIButton* btn) {
-    Packet packet = {0};
-    packet.id = JOIN_ROOM;
-    write_int(&packet, room_id);
-    write_string(&packet, ""); // TODO @kiwec: password support
-    send_packet(packet);
-
-    join_btn->is_loading = true;
-    m_multi->m_osu->getNotificationOverlay()->addNotification("Joining room...");
+    if(has_password) {
+        m_multi->room_to_join = room_id;
+        m_multi->m_osu->m_prompt->prompt("Room password:", fastdelegate::MakeDelegate(m_multi, &OsuLobby::on_room_join_with_password));
+    } else {
+        m_multi->joinRoom(room_id, "");
+    }
 }
 
 OsuLobby::OsuLobby(Osu *osu) : OsuScreen(osu) {
@@ -181,6 +183,23 @@ void OsuLobby::addRoom(Room* room) {
     updateLayout(getSize());
 }
 
+void OsuLobby::joinRoom(uint32_t id, UString password) {
+    Packet packet = {0};
+    packet.id = JOIN_ROOM;
+    write_int(&packet, id);
+    write_string(&packet, password.toUtf8());
+    send_packet(packet);
+
+    for(CBaseUIElement *elm : m_list->getContainer()->getElements()) {
+        auto room = (RoomUIElement*)elm;
+        if(room->room_id != id) continue;
+        room->join_btn->is_loading = true;
+        break;
+    }
+
+    m_osu->getNotificationOverlay()->addNotification("Joining room...");
+}
+
 void OsuLobby::updateRoom(Room room) {
     for(auto old_room : rooms) {
         if(old_room->id == room.id) {
@@ -208,6 +227,10 @@ void OsuLobby::removeRoom(uint32_t room_id) {
     }
 
     updateLayout(getSize());
+}
+
+void OsuLobby::on_room_join_with_password(UString password) {
+    joinRoom(room_to_join, password);
 }
 
 void OsuLobby::on_room_join_failed() {

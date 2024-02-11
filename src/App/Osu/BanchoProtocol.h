@@ -206,6 +206,7 @@ struct Room {
 
   UString name = "";
   UString password = "";
+  bool has_password = false;
 
   UString map_name = "";
   UString map_md5 = "";

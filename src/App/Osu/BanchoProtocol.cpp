@@ -13,7 +13,14 @@ Room::Room(Packet *packet) {
   match_type = read_byte(packet);
   mods = read_int(packet);
   name = read_string(packet);
-  password = read_string(packet);
+
+  has_password = read_byte(packet) > 0;
+  if(has_password) {
+    // Discard password. It should be an empty string, but just in case, read it properly.
+    packet->pos--;
+    read_string(packet);
+  }
+
   map_name = read_string(packet);
   map_id = read_int(packet);
   map_md5 = read_string(packet);
@@ -142,7 +149,7 @@ float read_float(Packet *packet) {
 UString read_string(Packet *packet) {
   uint8_t empty_check = read_byte(packet);
   if (empty_check == 0)
-    return strdup("");
+    return UString("");
 
   uint32_t len = read_uleb128(packet);
   uint8_t *str = new uint8_t[len + 1];

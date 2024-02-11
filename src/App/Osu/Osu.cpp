@@ -50,6 +50,7 @@
 #include "OsuTooltipOverlay.h"
 #include "OsuGameRules.h"
 #include "OsuPauseMenu.h"
+#include "OsuPromptScreen.h"
 #include "OsuScore.h"
 #include "OsuSkin.h"
 #include "OsuIcons.h"
@@ -494,9 +495,11 @@ Osu::Osu(int instanceID)
 	m_chat = new OsuChat(this);
 	m_lobby = new OsuLobby(this);
 	m_room = new OsuRoom(this);
+	m_prompt = new OsuPromptScreen(this);
 
 	// the order in this vector will define in which order events are handled/consumed
 	m_screens.push_back(m_volumeOverlay);
+	m_screens.push_back(m_prompt);
 	m_screens.push_back(m_room);
 	m_screens.push_back(m_chat);
 	m_screens.push_back(m_notificationOverlay);
@@ -651,6 +654,7 @@ void Osu::draw(Graphics *g)
 		m_modSelector->draw(g);
 		m_optionsMenu->draw(g);
 		m_chat->draw(g);
+		m_prompt->draw(g);
 
 		if (osu_draw_fps.getBool() && !isFPoSu)
 			m_hud->drawFps(g);
@@ -713,6 +717,7 @@ void Osu::draw(Graphics *g)
 		m_rankingScreen->draw(g);
 		m_optionsMenu->draw(g);
 		m_chat->draw(g);
+		m_prompt->draw(g);
 
 		if (osu_draw_fps.getBool())
 			m_hud->drawFps(g);
