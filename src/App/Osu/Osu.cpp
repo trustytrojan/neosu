@@ -500,13 +500,13 @@ Osu::Osu(int instanceID)
 	// the order in this vector will define in which order events are handled/consumed
 	m_screens.push_back(m_volumeOverlay);
 	m_screens.push_back(m_prompt);
+	m_screens.push_back(m_modSelector);
 	m_screens.push_back(m_room);
 	m_screens.push_back(m_chat);
 	m_screens.push_back(m_notificationOverlay);
 	m_screens.push_back(m_optionsMenu);
 	m_screens.push_back(m_userStatsScreen);
 	m_screens.push_back(m_rankingScreen);
-	m_screens.push_back(m_modSelector);
 	m_screens.push_back(m_pauseMenu);
 	m_screens.push_back(m_hud);
 	m_screens.push_back(m_songBrowser2);
@@ -708,7 +708,6 @@ void Osu::draw(Graphics *g)
 		if (m_songBrowser2 != NULL)
 			m_songBrowser2->draw(g);
 
-		m_modSelector->draw(g);
 		m_mainMenu->draw(g);
 		m_vrTutorial->draw(g);
 		m_changelog->draw(g);
@@ -717,6 +716,7 @@ void Osu::draw(Graphics *g)
 		m_rankingScreen->draw(g);
 		m_optionsMenu->draw(g);
 		m_chat->draw(g);
+		m_modSelector->draw(g);
 		m_prompt->draw(g);
 
 		if (osu_draw_fps.getBool())
@@ -1007,14 +1007,13 @@ void Osu::update()
 	if (m_bToggleModSelectionScheduled)
 	{
 		m_bToggleModSelectionScheduled = false;
-
-		if (!isInPlayMode())
-		{
-			if (m_songBrowser2 != NULL)
-				m_songBrowser2->setVisible(m_modSelector->isVisible());
-		}
-
 		m_modSelector->setVisible(!m_modSelector->isVisible());
+
+		if(bancho.is_in_a_multi_room()) {
+			m_room->setVisible(!m_modSelector->isVisible());
+		} else if (!isInPlayMode() && m_songBrowser2 != NULL) {
+			m_songBrowser2->setVisible(!m_modSelector->isVisible());
+		}
 	}
 	if (m_bToggleSongBrowserScheduled)
 	{
@@ -1178,8 +1177,6 @@ void Osu::update()
 
 void Osu::updateMods()
 {
-	debugLog("Osu::updateMods()\n");
-
 	if(bancho.is_in_a_multi_room()) {
 		m_bModNF = bancho.room.mods & (1 << 0);
 		m_bModEZ = bancho.room.mods & (1 << 1);
@@ -1199,6 +1196,27 @@ void Osu::updateMods()
 		m_bModScorev2 = bancho.room.mods & (1 << 29);
 		m_bModDC = false;
 		m_bModNM = bancho.room.mods == 0;
+
+		if(bancho.room.freemods) {
+			for(int i = 0; i < 16; i++) {
+				if(bancho.room.slots[i].player_id != bancho.user_id) continue;
+
+				m_bModNF = bancho.room.slots[i].mods & (1 << 0);
+				m_bModEZ = bancho.room.slots[i].mods & (1 << 1);
+				m_bModTD = bancho.room.slots[i].mods & (1 << 2);
+				m_bModHD = bancho.room.slots[i].mods & (1 << 3);
+				m_bModHR = bancho.room.slots[i].mods & (1 << 4);
+				m_bModSD = bancho.room.slots[i].mods & (1 << 5);
+				m_bModRelax = bancho.room.slots[i].mods & (1 << 7);
+				m_bModAuto = bancho.room.slots[i].mods & (1 << 11);
+				m_bModSpunout = bancho.room.slots[i].mods & (1 << 12);
+				m_bModAutopilot = bancho.room.slots[i].mods & (1 << 13);
+				m_bModSS = bancho.room.slots[i].mods & (1 << 14);
+				m_bModTarget = bancho.room.slots[i].mods & (1 << 23);
+				m_bModScorev2 = bancho.room.slots[i].mods & (1 << 29);
+				m_bModNM &= bancho.room.slots[i].mods == 0;
+			}
+		}
 	} else {
 		m_bModAuto = osu_mods.getString().find("auto") != -1;
 		m_bModAutopilot = osu_mods.getString().find("autopilot") != -1;
@@ -1429,7 +1447,8 @@ void Osu::onKeyDown(KeyboardEvent &key)
 				&& ((KEY_F1 != (KEYCODE)OsuKeyBindings::LEFT_CLICK.getInt() && KEY_F1 != (KEYCODE)OsuKeyBindings::LEFT_CLICK_2.getInt()) || (!m_bKeyboardKey1Down && !m_bKeyboardKey12Down))
 				&& ((KEY_F1 != (KEYCODE)OsuKeyBindings::RIGHT_CLICK.getInt() && KEY_F1 != (KEYCODE)OsuKeyBindings::RIGHT_CLICK_2.getInt() ) || (!m_bKeyboardKey2Down && !m_bKeyboardKey22Down))
 				&& !m_bF1
-				&& !getSelectedBeatmap()->hasFailed()) // only if not failed though
+				&& !getSelectedBeatmap()->hasFailed()
+				&& !bancho.is_playing_a_multi_map()) // only if not failed though
 			{
 				m_bF1 = true;
 				toggleModSelection(true);

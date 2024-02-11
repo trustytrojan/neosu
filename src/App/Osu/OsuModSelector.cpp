@@ -17,6 +17,8 @@
 #include "VertexArrayObject.h"
 #include "ConVar.h"
 
+#include "Bancho.h"
+#include "BanchoNetworking.h"
 #include "Osu.h"
 #include "OsuHUD.h"
 #include "OsuSkin.h"
@@ -264,7 +266,7 @@ OsuModSelector::OsuModSelector(Osu *osu) : OsuScreen(osu)
 
 	// build action buttons
 	m_resetModsButton = addActionButton("1. Reset All Mods");
-	m_resetModsButton->setClickCallback( fastdelegate::MakeDelegate(this, &OsuModSelector::resetMods) );
+	m_resetModsButton->setClickCallback( fastdelegate::MakeDelegate(this, &OsuModSelector::resetModsUserInitiated) );
 	m_resetModsButton->setColor(0xffff3800);
 	m_closeButton = addActionButton("2. Close");
 	m_closeButton->setClickCallback( fastdelegate::MakeDelegate(this, &OsuModSelector::close) );
@@ -305,6 +307,18 @@ void OsuModSelector::updateButtons(bool initial)
 	{
 		getModButtonOnGrid(2, 1)->setAvailable(false);
 		getModButtonOnGrid(2, 0)->setAvailable(false);
+	}
+
+	if(bancho.is_in_a_multi_room()) {
+		if(bancho.room.freemods && !bancho.room.is_host()) {
+			getModButtonOnGrid(2, 0)->setAvailable(false); // Disable DC/HT
+			getModButtonOnGrid(2, 1)->setAvailable(false); // Disable DT/NC
+			getModButtonOnGrid(4, 0)->setAvailable(false); // Disable ScoreV2
+			getModButtonOnGrid(4, 2)->setAvailable(false); // Disable Target
+		}
+
+		getModButtonOnGrid(4, 0)->setAvailable(false); // Disable nightmare mod
+		getModButtonOnGrid(3, 2)->setAvailable(false); // Disable auto mod
 	}
 }
 
@@ -359,9 +373,37 @@ void OsuModSelector::draw(Graphics *g)
 
 	const float experimentalModsAnimationTranslation = -(m_experimentalContainer->getSize().x + 2.0f)*(1.0f - m_fExperimentalAnimation);
 
-	// if we are in compact mode, draw some backgrounds under the override sliders & mod grid buttons
-	if (isInCompactMode())
-	{
+	if(bancho.is_in_a_multi_room()) {
+		// get mod button element bounds
+		Vector2 modGridButtonsStart = Vector2(m_osu->getScreenWidth(), m_osu->getScreenHeight());
+		Vector2 modGridButtonsSize = Vector2(0, m_osu->getScreenHeight());
+		for (int i=0; i<m_modButtons.size(); i++) {
+			CBaseUIButton *button = m_modButtons[i];
+
+			if (button->getPos().x < modGridButtonsStart.x)
+				modGridButtonsStart.x = button->getPos().x;
+			if (button->getPos().y < modGridButtonsStart.y)
+				modGridButtonsStart.y = button->getPos().y;
+
+			if (button->getPos().x + button->getSize().x > modGridButtonsSize.x)
+				modGridButtonsSize.x = button->getPos().x + button->getSize().x;
+			if (button->getPos().y < modGridButtonsSize.y)
+				modGridButtonsSize.y = button->getPos().y;
+		}
+		modGridButtonsSize.x -= modGridButtonsStart.x;
+
+		// draw mod grid buttons
+		g->pushTransform();
+		{
+			g->translate(0, (1.0f - m_fAnimation)*modGridButtonsSize.y);
+			g->setColor(backgroundColor);
+			g->fillRect(modGridButtonsStart.x - margin, modGridButtonsStart.y - margin, modGridButtonsSize.x + 2*margin, modGridButtonsSize.y + 2*margin);
+			OsuScreen::draw(g);
+		}
+		g->popTransform();
+	} else if (isInCompactMode()) {
+		// if we are in compact mode, draw some backgrounds under the override sliders & mod grid buttons
+
 		// get override slider element bounds
 		Vector2 overrideSlidersStart = Vector2(m_osu->getScreenWidth(), 0);
 		Vector2 overrideSlidersSize;
@@ -459,14 +501,16 @@ void OsuModSelector::draw(Graphics *g)
 	}
 
 	// draw experimental mods
-	g->pushTransform();
-	{
-		g->translate(experimentalModsAnimationTranslation, 0);
-		g->setColor(backgroundColor);
-		g->fillRect(m_experimentalContainer->getPos().x - margin, m_experimentalContainer->getPos().y - margin, m_experimentalContainer->getSize().x + 2*margin*m_fExperimentalAnimation, m_experimentalContainer->getSize().y + 2*margin);
-		m_experimentalContainer->draw(g);
+	if(!bancho.is_in_a_multi_room()) {
+		g->pushTransform();
+		{
+			g->translate(experimentalModsAnimationTranslation, 0);
+			g->setColor(backgroundColor);
+			g->fillRect(m_experimentalContainer->getPos().x - margin, m_experimentalContainer->getPos().y - margin, m_experimentalContainer->getSize().x + 2*margin*m_fExperimentalAnimation, m_experimentalContainer->getSize().y + 2*margin);
+			m_experimentalContainer->draw(g);
+		}
+		g->popTransform();
 	}
-	g->popTransform();
 }
 
 void OsuModSelector::mouse_update(bool *propagate_clicks)
@@ -497,55 +541,59 @@ void OsuModSelector::mouse_update(bool *propagate_clicks)
 
 	// update
 	OsuScreen::mouse_update(propagate_clicks);
-	m_overrideSliderContainer->mouse_update(propagate_clicks);
 
-	// override slider tooltips (ALT)
-	if (m_bShowOverrideSliderALTHint)
-	{
-		for (int i=0; i<m_overrideSliders.size(); i++)
+	if(!bancho.is_in_a_multi_room()) {
+		m_overrideSliderContainer->mouse_update(propagate_clicks);
+
+		// override slider tooltips (ALT)
+		if (m_bShowOverrideSliderALTHint)
 		{
-			if (m_overrideSliders[i].slider->isBusy())
+			for (int i=0; i<m_overrideSliders.size(); i++)
 			{
-				m_osu->getTooltipOverlay()->begin();
+				if (m_overrideSliders[i].slider->isBusy())
 				{
-					m_osu->getTooltipOverlay()->addLine("Hold [ALT] to slide in 0.01 increments.");
-				}
-				m_osu->getTooltipOverlay()->end();
+					m_osu->getTooltipOverlay()->begin();
+					{
+						m_osu->getTooltipOverlay()->addLine("Hold [ALT] to slide in 0.01 increments.");
+					}
+					m_osu->getTooltipOverlay()->end();
 
-				if (engine->getKeyboard()->isAltDown())
-					m_bShowOverrideSliderALTHint = false;
+					if (engine->getKeyboard()->isAltDown())
+						m_bShowOverrideSliderALTHint = false;
+				}
 			}
 		}
-	}
 
-	// some experimental mod tooltip overrides
-	if (m_experimentalModRandomCheckbox->isChecked() && m_osu->getSelectedBeatmap() != NULL)
-		m_experimentalModRandomCheckbox->setTooltipText(UString::format("Seed = %i", m_osu->getSelectedBeatmap()->getRandomSeed()));
+		// some experimental mod tooltip overrides
+		if (m_experimentalModRandomCheckbox->isChecked() && m_osu->getSelectedBeatmap() != NULL)
+			m_experimentalModRandomCheckbox->setTooltipText(UString::format("Seed = %i", m_osu->getSelectedBeatmap()->getRandomSeed()));
 
-	// handle experimental mods visibility
-	bool experimentalModEnabled = false;
-	for (int i=0; i<m_experimentalMods.size(); i++)
-	{
-		CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox*>(m_experimentalMods[i].element);
-		if (checkboxPointer != NULL && checkboxPointer->isChecked())
+		// handle experimental mods visibility
+		bool experimentalModEnabled = false;
+		for (int i=0; i<m_experimentalMods.size(); i++)
 		{
-			experimentalModEnabled = true;
-			break;
+			CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox*>(m_experimentalMods[i].element);
+			if (checkboxPointer != NULL && checkboxPointer->isChecked())
+			{
+				experimentalModEnabled = true;
+				break;
+			}
 		}
-	}
-	McRect experimentalTrigger = McRect(0, 0, m_bExperimentalVisible ? m_experimentalContainer->getSize().x : m_osu->getScreenWidth()*0.05f, m_osu->getScreenHeight());
-	if (experimentalTrigger.contains(engine->getMouse()->getPos()))
-	{
-		if (!m_bExperimentalVisible)
+
+		McRect experimentalTrigger = McRect(0, 0, m_bExperimentalVisible ? m_experimentalContainer->getSize().x : m_osu->getScreenWidth()*0.05f, m_osu->getScreenHeight());
+		if (experimentalTrigger.contains(engine->getMouse()->getPos()))
 		{
-			m_bExperimentalVisible = true;
-			anim->moveQuadOut(&m_fExperimentalAnimation, 1.0f, (1.0f - m_fExperimentalAnimation)*0.11f, 0.0f, true);
+			if (!m_bExperimentalVisible)
+			{
+				m_bExperimentalVisible = true;
+				anim->moveQuadOut(&m_fExperimentalAnimation, 1.0f, (1.0f - m_fExperimentalAnimation)*0.11f, 0.0f, true);
+			}
 		}
-	}
-	else if (m_bExperimentalVisible && !m_experimentalContainer->isMouseInside() && !m_experimentalContainer->isActive() && !experimentalModEnabled)
-	{
-		m_bExperimentalVisible = false;
-		anim->moveQuadIn(&m_fExperimentalAnimation, 0.0f, m_fExperimentalAnimation*0.11f, 0.0f, true);
+		else if (m_bExperimentalVisible && !m_experimentalContainer->isMouseInside() && !m_experimentalContainer->isActive() && !experimentalModEnabled)
+		{
+			m_bExperimentalVisible = false;
+			anim->moveQuadIn(&m_fExperimentalAnimation, 0.0f, m_fExperimentalAnimation*0.11f, 0.0f, true);
+		}
 	}
 
 	// delayed onModUpdate() triggers when changing some values
@@ -612,7 +660,7 @@ void OsuModSelector::onKeyDown(KeyboardEvent &key)
 	m_overrideSliderContainer->onKeyDown(key);
 
 	if (key == KEY_1)
-		resetMods();
+		resetModsUserInitiated();
 
 	if (((key == KEY_F1 || key == (KEYCODE)OsuKeyBindings::TOGGLE_MODSELECT.getInt()) && !m_bWaitForF1KeyUp) || key == KEY_2 || key == (KEYCODE)OsuKeyBindings::GAME_PAUSE.getInt() || key == KEY_ESCAPE || key == KEY_ENTER)
 		close();
@@ -962,6 +1010,7 @@ void OsuModSelector::updateExperimentalLayout()
 	m_experimentalContainer->setPosY(-1);
 	m_experimentalContainer->setScrollSizeToContent(1 * dpiScale);
 	m_experimentalContainer->getContainer()->update_pos();
+	m_experimentalContainer->setVisible(!bancho.is_in_a_multi_room());
 }
 
 void OsuModSelector::updateModConVar()
@@ -1101,8 +1150,33 @@ OsuUICheckbox *OsuModSelector::addExperimentalCheckbox(UString text, UString too
 	return checkbox;
 }
 
-void OsuModSelector::resetMods()
-{
+void OsuModSelector::resetModsUserInitiated() {
+	resetMods();
+
+	m_resetModsButton->animateClickColor();
+
+	if(bancho.is_in_a_multi_room()) {
+		for(int i = 0; i < 16; i++) {
+			if(bancho.room.slots[i].player_id != bancho.user_id) continue;
+
+			if(bancho.room.is_host()) {
+				bancho.room.mods = getModFlags();
+			} else {
+				enableModsFromFlags(bancho.room.mods);
+			}
+
+			bancho.room.slots[i].mods = bancho.room.mods;
+
+			Packet packet = {0};
+			packet.id = MATCH_CHANGE_MODS;
+			write_int(&packet, bancho.room.slots[i].mods);
+		    send_packet(packet);
+			break;
+		}
+	}
+}
+
+void OsuModSelector::resetMods() {
 	for (int i=0; i<m_overrideSliders.size(); i++)
 	{
 		if (m_overrideSliders[i].lock != NULL)
@@ -1134,8 +1208,43 @@ void OsuModSelector::resetMods()
 				cvar->setValue(0.0f);
 		}
 	}
+}
 
-	m_resetModsButton->animateClickColor();
+uint32_t OsuModSelector::getModFlags() {
+	uint32_t flags = 0;
+	if(m_modButtonNofail->isOn()) flags |= (1 << 0);
+    if(m_modButtonEasy->isOn()) flags |= (1 << 1);
+    if(m_modButtonTD->isOn()) flags |= (1 << 2);
+    if(m_modButtonHidden->isOn()) flags |= (1 << 3);
+    if(m_modButtonHardrock->isOn()) flags |= (1 << 4);
+    if(m_modButtonSuddendeath->isOn()) flags |= (1 << 5);
+    if(m_modButtonDoubletime->isOn()) flags |= (1 << 6);
+    if(m_modButtonRelax->isOn()) flags |= (1 << 7);
+    if(m_modButtonHalftime->isOn()) flags |= (1 << 8);
+    if(m_modButtonSpunout->isOn()) flags |= (1 << 12);
+    if(m_modButtonAutopilot->isOn()) flags |= (1 << 13);
+    if(getModButtonOnGrid(1, 1)->isOn()) flags |= (1 << 14); // SS
+    if(getModButtonOnGrid(4, 2)->isOn()) flags |= (1 << 23); // Target
+    if(m_modButtonScoreV2->isOn()) flags |= (1 << 29);
+    return flags;
+}
+
+void OsuModSelector::enableModsFromFlags(uint32_t flags) {
+	// XXX: Enable nightcore (flags & (1 << 9))
+	m_modButtonNofail->setOn(flags & (1 << 0));
+    m_modButtonEasy->setOn(flags & (1 << 1));
+    m_modButtonTD->setOn(flags & (1 << 2));
+    m_modButtonHidden->setOn(flags & (1 << 3));
+    m_modButtonHardrock->setOn(flags & (1 << 4));
+    m_modButtonSuddendeath->setOn(flags & (1 << 5));
+    m_modButtonDoubletime->setOn(flags & (1 << 6));
+    m_modButtonRelax->setOn(flags & (1 << 7));
+    m_modButtonHalftime->setOn(flags & (1 << 8));
+    m_modButtonSpunout->setOn(flags & (1 << 12));
+    m_modButtonAutopilot->setOn(flags & (1 << 13));
+    getModButtonOnGrid(1, 1)->setOn(flags & (1 << 14)); // SS
+    getModButtonOnGrid(4, 2)->setOn(flags & (1 << 23)); // Target
+    m_modButtonScoreV2->setOn(flags & (1 << 29));
 }
 
 void OsuModSelector::close()

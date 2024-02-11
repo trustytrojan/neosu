@@ -30,7 +30,6 @@
 // TODO @kiwec: comb over every single option, and every single convar and make sure no cheats are possible in multiplayer
 // TODO @kiwec: mark DMs as read when they're visible on screen
 // TODO @kiwec: PLEASE polish lobby UI
-// TODO @kiwec: handle freemod / allow user to pick mods in multi room
 // TODO @kiwec: build on windows
 
 

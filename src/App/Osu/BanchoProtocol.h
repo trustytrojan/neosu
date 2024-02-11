@@ -231,6 +231,7 @@ struct Room {
     return true;
   }
 
+  bool is_host();
   void pack(Packet *packet);
 };
 

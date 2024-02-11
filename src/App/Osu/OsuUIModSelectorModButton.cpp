@@ -12,6 +12,8 @@
 #include "AnimationHandler.h"
 #include "SoundEngine.h"
 
+#include "Bancho.h"
+#include "BanchoNetworking.h"
 #include "Osu.h"
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
@@ -114,6 +116,28 @@ void OsuUIModSelectorModButton::onClicked()
 
 	// set new state
 	setState(m_iState);
+
+	if(bancho.is_in_a_multi_room()) {
+		for(int i = 0; i < 16; i++) {
+			if(bancho.room.slots[i].player_id != bancho.user_id) continue;
+
+			bancho.room.slots[i].mods = m_osuModSelector->getModFlags();
+			if(bancho.room.is_host()) {
+				bancho.room.mods = m_osuModSelector->getModFlags();
+				if(bancho.room.freemods) {
+					// When freemod is enabled, we only want to force DT, HT, Target or ScoreV2.
+					bancho.room.mods &= (1 << 6) | (1 << 8) | (1 << 23) | (1 << 29);
+				}
+			}
+
+			debugLog("Sending mod change to server.\n");
+			Packet packet = {0};
+			packet.id = MATCH_CHANGE_MODS;
+			write_int(&packet, bancho.room.slots[i].mods);
+		    send_packet(packet);
+			break;
+		}
+	}
 }
 
 void OsuUIModSelectorModButton::onFocusStolen()

@@ -32,18 +32,18 @@ public:
 	UString getActiveModName();
 	inline int getState() const {return m_iState;}
 	inline bool isOn() const {return m_bOn;}
+	void setOn(bool on);
 
 private:
 	virtual void onFocusStolen();
 
-	void setOn(bool on);
 	void setState(int state, bool updateModConVar = true);
 
 	Osu *m_osu;
 	OsuModSelector *m_osuModSelector;
 
-	bool m_bAvailable;
 	bool m_bOn;
+	bool m_bAvailable;
 	int m_iState;
 	float m_fEnabledScaleMultiplier;
 	float m_fEnabledRotationDeg;

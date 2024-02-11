@@ -8,6 +8,7 @@
 #include "OsuDatabase.h"
 #include "OsuLobby.h"
 #include "OsuMainMenu.h"
+#include "OsuModSelector.h"
 #include "OsuPromptScreen.h"
 #include "OsuRankingScreen.h"
 #include "OsuRoom.h"
@@ -31,35 +32,42 @@
 
 void OsuUIModList::draw(Graphics *g) {
     std::vector<OsuSkinImage*> mods;
-    if(bancho.room.mods & (1 << 0)) mods.push_back(bancho.osu->getSkin()->getSelectionModNoFail());
-    if(bancho.room.mods & (1 << 1)) mods.push_back(bancho.osu->getSkin()->getSelectionModEasy());
-    if(bancho.room.mods & (1 << 2)) mods.push_back(bancho.osu->getSkin()->getSelectionModTD());
-    if(bancho.room.mods & (1 << 3)) mods.push_back(bancho.osu->getSkin()->getSelectionModHidden());
-    if(bancho.room.mods & (1 << 4)) mods.push_back(bancho.osu->getSkin()->getSelectionModHardRock());
-    if(bancho.room.mods & (1 << 5)) mods.push_back(bancho.osu->getSkin()->getSelectionModSuddenDeath());
-    if(bancho.room.mods & (1 << 7)) mods.push_back(bancho.osu->getSkin()->getSelectionModRelax());
-    if(bancho.room.mods & (1 << 8)) mods.push_back(bancho.osu->getSkin()->getSelectionModHalfTime());
-    if(bancho.room.mods & (1 << 9)) mods.push_back(bancho.osu->getSkin()->getSelectionModNightCore());
-    else if(bancho.room.mods & (1 << 6)) mods.push_back(bancho.osu->getSkin()->getSelectionModDoubleTime());
-    if(bancho.room.mods & (1 << 11)) mods.push_back(bancho.osu->getSkin()->getSelectionModAutoplay());
-    if(bancho.room.mods & (1 << 12)) mods.push_back(bancho.osu->getSkin()->getSelectionModSpunOut());
-    if(bancho.room.mods & (1 << 13)) mods.push_back(bancho.osu->getSkin()->getSelectionModAutopilot());
-    if(bancho.room.mods & (1 << 14)) mods.push_back(bancho.osu->getSkin()->getSelectionModPerfect());
-    if(bancho.room.mods & (1 << 23)) mods.push_back(bancho.osu->getSkin()->getSelectionModTarget());
-    if(bancho.room.mods & (1 << 29)) mods.push_back(bancho.osu->getSkin()->getSelectionModScorev2());
+    if(*m_flags & (1 << 0)) mods.push_back(bancho.osu->getSkin()->getSelectionModNoFail());
+    if(*m_flags & (1 << 1)) mods.push_back(bancho.osu->getSkin()->getSelectionModEasy());
+    if(*m_flags & (1 << 2)) mods.push_back(bancho.osu->getSkin()->getSelectionModTD());
+    if(*m_flags & (1 << 3)) mods.push_back(bancho.osu->getSkin()->getSelectionModHidden());
+    if(*m_flags & (1 << 4)) mods.push_back(bancho.osu->getSkin()->getSelectionModHardRock());
+    if(*m_flags & (1 << 5)) mods.push_back(bancho.osu->getSkin()->getSelectionModSuddenDeath());
+    if(*m_flags & (1 << 7)) mods.push_back(bancho.osu->getSkin()->getSelectionModRelax());
+    if(*m_flags & (1 << 8)) mods.push_back(bancho.osu->getSkin()->getSelectionModHalfTime());
+    if(*m_flags & (1 << 9)) mods.push_back(bancho.osu->getSkin()->getSelectionModNightCore());
+    else if(*m_flags & (1 << 6)) mods.push_back(bancho.osu->getSkin()->getSelectionModDoubleTime());
+    if(*m_flags & (1 << 11)) mods.push_back(bancho.osu->getSkin()->getSelectionModAutoplay());
+    if(*m_flags & (1 << 12)) mods.push_back(bancho.osu->getSkin()->getSelectionModSpunOut());
+    if(*m_flags & (1 << 13)) mods.push_back(bancho.osu->getSkin()->getSelectionModAutopilot());
+    if(*m_flags & (1 << 14)) mods.push_back(bancho.osu->getSkin()->getSelectionModPerfect());
+    if(*m_flags & (1 << 23)) mods.push_back(bancho.osu->getSkin()->getSelectionModTarget());
+    if(*m_flags & (1 << 29)) mods.push_back(bancho.osu->getSkin()->getSelectionModScorev2());
 
     g->setColor(0xffffffff);
     Vector2 modPos = m_vPos;
     for(auto mod : mods) {
-        Vector2 fixed_pos = modPos + (mod->getSize() / 2);
-        mod->draw(g, fixed_pos);
+        float target_height = getSize().y;
+        float scaling_factor = target_height / mod->getSize().y;
+        float target_width = mod->getSize().x * scaling_factor;
 
-        modPos.x += mod->getSize().x + 10;
+        Vector2 fixed_pos = modPos;
+        fixed_pos.x += (target_width / 2);
+        fixed_pos.y += (target_height / 2);
+        mod->draw(g, fixed_pos, scaling_factor);
+
+        // Overlap mods a bit, just like peppy's client does
+        modPos.x += target_width * 0.6;
     }
 }
 
 bool OsuUIModList::isVisible() {
-    return bancho.room.mods != 0;
+    return *m_flags != 0;
 }
 
 
@@ -127,7 +135,7 @@ OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
     m_freemod->setDrawBackground(false);
     m_freemod->setChangeCallback( fastdelegate::MakeDelegate(this, &OsuRoom::onFreemodCheckboxChanged) );
     m_settings->getContainer()->addBaseUIElement(m_freemod);
-    m_mods = new OsuUIModList();
+    m_mods = new OsuUIModList(&bancho.room.mods);
     m_settings->getContainer()->addBaseUIElement(m_mods);
     INIT_LABEL(m_no_mods_selected, "No mods selected.", false);
 
@@ -211,9 +219,8 @@ void OsuRoom::draw(Graphics *g) {
 void OsuRoom::mouse_update(bool *propagate_clicks) {
     if (!m_bVisible || m_osu->m_songBrowser2->isVisible()) return;
 
-    const bool is_host = bancho.room.host_id == bancho.user_id;
     const bool room_name_changed = m_room_name_ipt->getText() != bancho.room.name;
-    if(is_host && room_name_changed) {
+    if(bancho.room.is_host() && room_name_changed) {
         // XXX: should only update 500ms after last input
         bancho.room.name = m_room_name_ipt->getText();
 
@@ -242,7 +249,10 @@ void OsuRoom::onKeyDown(KeyboardEvent &key) {
 
     if(key.getKeyCode() == KEY_F1) {
         key.consume();
-        // TODO @kiwec: select mods, if we're allowed to
+        if(bancho.room.freemods || bancho.room.is_host()) {
+            m_osu->m_modSelector->setVisible(!m_osu->m_modSelector->isVisible());
+            m_bVisible = !m_osu->m_modSelector->isVisible();
+        }
         return;
     }
 
@@ -264,7 +274,8 @@ void OsuRoom::onResolutionChange(Vector2 newResolution) {
 }
 
 CBaseUIContainer* OsuRoom::setVisible(bool visible) {
-    abort(); // surprise!
+    // NOTE: Calling setVisible(false) does not quit the room! Call ragequit() instead.
+    m_bVisible = visible;
     return this;
 }
 
@@ -278,7 +289,7 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
     m_pauseButton->setSize(30 * dpiScale, 30 * dpiScale);
     m_pauseButton->setPos(round(newResolution.x * 0.6) - m_pauseButton->getSize().x*2 - 10 * dpiScale, m_pauseButton->getSize().y + 10 * dpiScale);
 
-    const bool is_host = bancho.room.host_id == bancho.user_id;
+    const bool is_host = bancho.room.is_host();
     UString host_str = "Host: None";
     if(bancho.room.host_id > 0) {
         auto host = get_user_info(bancho.room.host_id);
@@ -291,7 +302,6 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
     m_room_name->setSizeToContent();
     if(!is_host) {
         m_room_name_ipt->setText(bancho.room.name);
-        // m_room_password_ipt->setText(bancho.room.password);
     }
     m_room_name_iptl->setVisible(is_host);
     m_room_name_ipt->setSize(m_settings->getSize().x - 20, 40);
@@ -301,10 +311,11 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
 
     m_select_map_btn->setVisible(is_host);
 
-    m_select_mods_btn->setVisible(is_host); // TODO @kiwec: (is_host || bancho.room.freemods)
+    m_select_mods_btn->setVisible(is_host || bancho.room.freemods);
     m_freemod->setChecked(bancho.room.freemods);
     m_freemod->setVisible(is_host);
-    m_mods->setSize(300, m_osu->getSkin()->getSelectionModNoFail()->getSize().y);
+    m_mods->m_flags = &bancho.room.mods;
+    m_mods->setSize(300, 90);
     m_no_mods_selected->setVisible(!m_mods->isVisible());
 
     float settings_y = 10;
@@ -331,7 +342,8 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
                 username = UString::format("[playing] %s", user_info->name.toUtf8());
             }
 
-            auto user_box = new CBaseUILabel(10, y_total, 290, 20, "", username);
+            auto user_box = new CBaseUILabel(10, y_total, 290, 30, "", username);
+            user_box->setFont(lfont);
             user_box->setDrawFrame(false);
             user_box->setDrawBackground(false);
 
@@ -342,10 +354,17 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
                 color = 0xffdd0000;
             }
             user_box->setTextColor(color);
-
+            user_box->setSizeToContent();
             m_slotlist->getContainer()->addBaseUIElement(user_box);
+
+            auto user_mods = new OsuUIModList(&bancho.room.slots[i].mods);
+            user_mods->setPos(user_box->getSize().x + 30, y_total - 10);
+            user_mods->setSize(350, user_box->getSize().y + 20);
+            m_slotlist->getContainer()->addBaseUIElement(user_mods);
+
             // TODO @kiwec: context menu to set as host, kick etc
-            y_total += 30;
+
+            y_total += user_box->getSize().y + 20;
         }
     }
 
@@ -377,6 +396,9 @@ void OsuRoom::ragequit() {
         Packet packet = {0};
         packet.id = EXIT_ROOM;
         send_packet(packet);
+
+        m_osu->m_modSelector->resetMods();
+        m_osu->m_modSelector->updateButtons();
     }
 
     bancho.room = Room();
@@ -512,12 +534,15 @@ void OsuRoom::on_room_joined(Room room) {
     // If we add ability to join from links, you would need to hide all other
     // screens, kick the player out of the song they're currently playing, etc.
     m_osu->m_lobby->setVisible(false);
-    m_bVisible = true;
     updateLayout(m_osu->getScreenSize());
+    m_bVisible = true;
 
     OsuRichPresence::setBanchoStatus(m_osu, room.name.toUtf8(), MULTIPLAYER);
     m_osu->m_chat->addChannel("#multiplayer");
     m_osu->m_chat->updateVisibility();
+
+    m_osu->m_modSelector->resetMods();
+    m_osu->m_modSelector->enableModsFromFlags(bancho.room.mods);
 }
 
 void OsuRoom::on_room_updated(Room room) {
@@ -528,6 +553,17 @@ void OsuRoom::on_room_updated(Room room) {
     if(map_changed) {
         on_map_change(true);
     }
+
+    uint32_t player_mods = 0;
+    for(int i = 0; i < 16; i++) {
+        if(bancho.room.slots[i].player_id == bancho.user_id) {
+            player_mods = bancho.room.slots[i].mods;
+            break;
+        }
+    }
+    m_osu->m_modSelector->updateButtons();
+    m_osu->m_modSelector->resetMods();
+    m_osu->m_modSelector->enableModsFromFlags(bancho.room.mods | player_mods);
 
     updateLayout(m_osu->getScreenSize());
 }
@@ -656,8 +692,7 @@ void OsuRoom::onReadyButtonClick() {
     if(m_ready_btn->is_loading) return;
     engine->getSound()->play(m_osu->getSkin()->getMenuHit());
 
-    const bool is_host = bancho.room.host_id == bancho.user_id;
-    if(is_host) {
+    if(bancho.room.is_host()) {
         Packet packet = {0};
         packet.id = START_MATCH;
         send_packet(packet);
@@ -679,13 +714,12 @@ void OsuRoom::onReadyButtonClick() {
 
 void OsuRoom::onSelectModsClicked() {
     engine->getSound()->play(m_osu->getSkin()->getMenuHit());
-
-    // TODO @kiwec
+    m_osu->m_modSelector->setVisible(true);
+    m_bVisible = false;
 }
 
 void OsuRoom::onSelectMapClicked() {
-    const bool is_host = bancho.room.host_id == bancho.user_id;
-    if(!is_host) return;
+    if(!bancho.room.is_host()) return;
 
     engine->getSound()->play(m_osu->getSkin()->getMenuHit());
 
@@ -715,8 +749,7 @@ void OsuRoom::set_new_password(UString new_password) {
 }
 
 void OsuRoom::onFreemodCheckboxChanged(CBaseUICheckbox *checkbox) {
-    const bool is_host = bancho.room.host_id == bancho.user_id;
-    if(!is_host) return;
+    if(!bancho.room.is_host()) return;
 
     bancho.room.freemods = checkbox->isChecked();
 

@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "Bancho.h"
 #include "BanchoProtocol.h"
 
 Room::Room() {
@@ -91,6 +92,10 @@ void Room::pack(Packet *packet) {
   }
 
   write_int(packet, seed);
+}
+
+bool Room::is_host() {
+  return host_id == bancho.user_id;
 }
 
 void read_bytes(Packet *packet, uint8_t *bytes, size_t n) {

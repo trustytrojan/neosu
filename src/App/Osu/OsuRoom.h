@@ -14,7 +14,12 @@ class OsuUICheckbox;
 
 
 struct OsuUIModList : public CBaseUIContainer {
-    OsuUIModList() : CBaseUIContainer(0, 0, 0, 0, "mod_list") {}
+    OsuUIModList(uint32_t *flags) : CBaseUIContainer(0, 0, 0, 0, "mod_list") {
+        m_flags = flags;
+    }
+
+    uint32_t *m_flags;
+
     virtual void draw(Graphics *g);
     virtual bool isVisible() override;
 };

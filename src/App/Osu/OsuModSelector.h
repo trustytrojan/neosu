@@ -47,7 +47,10 @@ public:
 
 	void enableAuto();
 	void toggleAuto();
+	void resetModsUserInitiated();
 	void resetMods();
+	uint32_t getModFlags();
+	void enableModsFromFlags(uint32_t flags);
 
 	void setWaitForF1KeyUp(bool waitForF1KeyUp) {m_bWaitForF1KeyUp = waitForF1KeyUp;}
 
@@ -56,6 +59,7 @@ public:
 	bool isMouseInScrollView();
 	bool isMouseInside();
 
+	void updateButtons(bool initial = false);
 	void updateModConVar();
 
 private:
@@ -85,7 +89,6 @@ private:
 		ConVar *cvar;
 	};
 
-	void updateButtons(bool initial = false);
 	void updateScoreMultiplierLabelText();
 	void updateExperimentalButtons(bool initial);
 	void updateLayout();

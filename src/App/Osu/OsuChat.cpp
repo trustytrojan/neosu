@@ -16,6 +16,7 @@
 #include "Osu.h"
 #include "OsuBeatmap.h"
 #include "OsuLobby.h"
+#include "OsuModSelector.h"
 #include "OsuOptionsMenu.h"
 #include "OsuPauseMenu.h"
 #include "OsuRoom.h"
@@ -491,7 +492,7 @@ void OsuChat::updateVisibility() {
     auto selected_beatmap = m_osu->getSelectedBeatmap();
     bool can_skip = (selected_beatmap != nullptr) && (selected_beatmap->isInSkippableSection());
     bool is_clicking_circles = m_osu->isInPlayMode() && !can_skip && !m_osu->m_bModAuto && !m_osu->m_pauseMenu->isVisible();
-    bool force_hide = m_osu->m_optionsMenu->isVisible() || is_clicking_circles;
+    bool force_hide = m_osu->m_optionsMenu->isVisible() || m_osu->m_modSelector->isVisible() || is_clicking_circles;
     if(force_hide) {
         setVisible(false);
         return;

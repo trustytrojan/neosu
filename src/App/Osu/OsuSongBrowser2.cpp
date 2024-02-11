@@ -1714,17 +1714,19 @@ CBaseUIContainer* OsuSongBrowser2::setVisible(bool visible)
 
 		// Select button matching current song preview
 		// TODO @kiwec: does not work on first load
-        const std::vector<CBaseUIElement*> &elements = m_songBrowser->getContainer()->getElements();
-        for (size_t i=0; i<elements.size(); i++) {
-            OsuUISongBrowserSongButton *btn = dynamic_cast<OsuUISongBrowserSongButton*>(elements[i]);
-            if(btn == nullptr) continue;
-            if(btn->getDatabaseBeatmap() == nullptr) continue;
-            if(btn->getDatabaseBeatmap() != m_selectedBeatmap->getSelectedDifficulty2()) continue;
+		if(m_selectedBeatmap != nullptr) {
+	        const std::vector<CBaseUIElement*> &elements = m_songBrowser->getContainer()->getElements();
+	        for (size_t i=0; i<elements.size(); i++) {
+	            OsuUISongBrowserSongButton *btn = dynamic_cast<OsuUISongBrowserSongButton*>(elements[i]);
+	            if(btn == nullptr) continue;
+	            if(btn->getDatabaseBeatmap() == nullptr) continue;
+	            if(btn->getDatabaseBeatmap() != m_selectedBeatmap->getSelectedDifficulty2()) continue;
 
-            btn->deselect(); // if we select() it when already selected, it would start playing!
-            btn->select();
-            break;
-        }
+	            btn->deselect(); // if we select() it when already selected, it would start playing!
+	            btn->select();
+	            break;
+	        }
+		}
 	}
 	else
 		m_contextMenu->setVisible2(false);
