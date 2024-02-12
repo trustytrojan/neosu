@@ -20,8 +20,6 @@
 
 pthread_t networking_thread;
 
-// TODO @kiwec: improve the way the client logs in and manages logged in state
-// Right now if log in fails or expires, things explode
 
 // Bancho protocol
 pthread_mutex_t outgoing_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -42,21 +40,43 @@ std::vector<APIRequest> api_request_queue;
 std::vector<Packet> api_response_queue;
 
 void disconnect() {
-  // TODO @kiwec: send a logout packet first?
-  // TODO @kiwec: don't set auth_header here, enqueue a disconnect packet
-  // instead?
-
   pthread_mutex_lock(&outgoing_mutex);
+
+  // Logout
+  // This is a blocking call, but we *do* want this to block when quitting the game.
+  if (bancho.is_online()) {
+    Packet packet = {0};
+    write_short(&packet, LOGOUT);
+    write_byte(&packet, 0);
+    write_int(&packet, 0);
+
+    CURL *curl = curl_easy_init();
+    struct curl_slist *chunk = NULL;
+    chunk = curl_slist_append(chunk, auth_header.c_str());
+    chunk = curl_slist_append(chunk, "x-mcosu-ver: " MCOSU_VERSION);
+    auto query_url = UString::format("https://c.%s/", bancho.endpoint.toUtf8());
+    curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, packet.memory);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, packet.pos);
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
+    curl_easy_perform(curl);
+    curl_slist_free_all(chunk);
+    curl_easy_cleanup(curl);
+
+    delete packet.memory;
+  }
+
   try_logging_in = false;
   auth_header = "";
   delete outgoing.memory;
   outgoing = {0};
-  pthread_mutex_unlock(&outgoing_mutex);
-
   bancho.user_id = 0;
   bancho.osu->m_optionsMenu->logInButton->setText("Log in");
   bancho.osu->m_optionsMenu->logInButton->setColor(0xff00ff00);
   bancho.osu->m_optionsMenu->logInButton->is_loading = false;
+
+  pthread_mutex_unlock(&outgoing_mutex);
 }
 
 void reconnect() {
@@ -220,7 +240,7 @@ static void *do_networking(void *data) {
     return NULL;
   }
 
-  while (true) {
+  while (bancho.osu != nullptr) {
     pthread_mutex_lock(&api_requests_mutex);
     if (api_request_queue.empty()) {
       pthread_mutex_unlock(&api_requests_mutex);
@@ -232,7 +252,7 @@ static void *do_networking(void *data) {
       send_api_request(curl, api_out);
     }
 
-    if(bancho.osu->m_lobby->isVisible()) seconds_between_pings = 1;
+    if(bancho.osu && bancho.osu->m_lobby->isVisible()) seconds_between_pings = 1;
     if(bancho.is_in_a_multi_room() && seconds_between_pings > 3) seconds_between_pings = 3;
     bool should_ping = difftime(time(NULL), last_packet_tms) > seconds_between_pings;
     if(bancho.user_id == 0) should_ping = false;

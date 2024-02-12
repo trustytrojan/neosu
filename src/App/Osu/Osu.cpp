@@ -574,6 +574,8 @@ Osu::Osu(int instanceID)
 
 Osu::~Osu()
 {
+	bancho.osu = nullptr;
+
 	// "leak" OsuUpdateHandler object, but not relevant since shutdown:
 	// this is the only way of handling instant user shutdown requests properly, there is no solution for active working threads besides letting the OS kill them when the main threads exits.
 	// we must not delete the update handler object, because the thread is potentially still accessing members during shutdown

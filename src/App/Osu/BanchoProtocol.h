@@ -87,6 +87,7 @@ enum IncomingPackets {
 enum OutgoingPackets {
   CHANGE_ACTION = 0,
   SEND_PUBLIC_MESSAGE = 1,
+  LOGOUT = 2,
   PING = 4,
   START_SPECTATING = 16,
   STOP_SPECTATING = 17,

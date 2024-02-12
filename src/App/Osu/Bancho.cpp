@@ -25,7 +25,6 @@
 
 
 // Let's commit the full TODO list, why not?
-// TODO @kiwec: logout on quit. needs a rework of the networking logic. disconnect != logout
 // TODO @kiwec: add "personal best" in online score list
 // TODO @kiwec: comb over every single option, and every single convar and make sure no cheats are possible in multiplayer
 // TODO @kiwec: mark DMs as read when they're visible on screen
@@ -261,8 +260,6 @@ void handle_packet(Packet *packet) {
     user->longitude = read_float(packet);
     user->latitude = read_float(packet);
     user->global_rank = read_int(packet);
-
-    // TODO @kiwec: update UIs that display this info?
   } else if (packet->id == RESTART) {
     int32_t ms = read_int(packet);
     debugLog("Restart: %d ms\n", ms);
@@ -282,7 +279,7 @@ void handle_packet(Packet *packet) {
   } else if (packet->id == ROOM_PASSWORD_CHANGED) {
     UString new_password = read_string(packet);
     debugLog("Room changed password to %s\n", new_password);
-    // TODO @kiwec
+    bancho.room.password = new_password;
   } else if (packet->id == SILENCE_END) {
     int32_t delta = read_int(packet);
     debugLog("Silence ends in %d seconds.\n", delta);
@@ -290,28 +287,25 @@ void handle_packet(Packet *packet) {
   } else if (packet->id == USER_SILENCED) {
     int32_t user_id = read_int(packet);
     debugLog("User #%d silenced.\n", user_id);
-    // TODO @kiwec
   } else if (packet->id == USER_DM_BLOCKED) {
     read_string(packet);
     read_string(packet);
     UString blocked = read_string(packet);
     read_int(packet);
     debugLog("Blocked %s.\n", blocked);
-    // TODO @kiwec
   } else if (packet->id == TARGET_IS_SILENCED) {
     read_string(packet);
     read_string(packet);
     UString blocked = read_string(packet);
     read_int(packet);
     debugLog("Silenced %s.\n", blocked);
-    // TODO @kiwec
   } else if (packet->id == VERSION_UPDATE_FORCED) {
     disconnect();
     bancho.osu->getNotificationOverlay()->addNotification(
         "Server uses an unsupported protocol version.");
   } else if (packet->id == ACCOUNT_RESTRICTED) {
-    debugLog("ACCOUNT RESTRICTED.\n");
-    // TODO @kiwec
+    bancho.osu->getNotificationOverlay()->addNotification("Account restricted.");
+    disconnect();
   } else if (packet->id == MATCH_ABORT) {
     bancho.osu->m_room->on_match_aborted();
   } else {
