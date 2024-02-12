@@ -1964,6 +1964,9 @@ float Osu::getScoreMultiplier()
 	if (m_bModSpunout)
 		multiplier *= 0.90f;
 
+	if(m_bModRelax || m_bModAutopilot)
+		multiplier *= 0.f;
+
 	return multiplier;
 }
 

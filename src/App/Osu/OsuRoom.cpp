@@ -114,17 +114,17 @@ OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
 
     CBaseUILabel* map_label;
     INIT_LABEL(map_label, "Beatmap", true);
-    INIT_LABEL(m_map_title, "(no map selected)", false);
-    INIT_LABEL(m_map_attributes, "", false);
-    m_map_attributes->setVisible(false);
-    INIT_LABEL(m_map_stars, "", false);
-    m_map_stars->setVisible(false);
 
     m_select_map_btn = new OsuUIButton(osu, 0, 0, 130, 40, "select_map_btn", "Select map");
     m_select_map_btn->setColor(0xff0e94b5);
     m_select_map_btn->setUseDefaultSkin();
     m_select_map_btn->setClickCallback( fastdelegate::MakeDelegate(this, &OsuRoom::onSelectMapClicked) );
     m_settings->getContainer()->addBaseUIElement(m_select_map_btn);
+
+    INIT_LABEL(m_map_title, "(no map selected)", false);
+    INIT_LABEL(m_map_stars, "", false);
+    INIT_LABEL(m_map_attributes, "", false);
+    INIT_LABEL(m_map_attributes2, "", false);
 
     CBaseUILabel* mods_label;
     INIT_LABEL(mods_label, "Mods", true);
@@ -178,8 +178,7 @@ void OsuRoom::draw(Graphics *g) {
     if(bancho.room.map_id == -1) {
         m_map_title->setText("Host is selecting a map...");
         m_map_title->setSizeToContent(0, 0);
-        m_map_attributes->setVisible(false);
-        m_map_stars->setVisible(false);
+        m_ready_btn->is_loading = true;
         return;
     }
 
@@ -190,8 +189,7 @@ void OsuRoom::draw(Graphics *g) {
         auto error_str = UString::format("Could not find beatmapset for map ID %d", bancho.room.map_id);
         m_map_title->setText(error_str);
         m_map_title->setSizeToContent(0, 0);
-        m_map_attributes->setVisible(false);
-        m_map_stars->setVisible(false);
+        m_ready_btn->is_loading = true;
         return;
     }
 
@@ -200,15 +198,13 @@ void OsuRoom::draw(Graphics *g) {
         auto error_str = UString::format("Failed to download beatmapset %d :(", set_id);
         m_map_title->setText(error_str);
         m_map_title->setSizeToContent(0, 0);
-        m_map_attributes->setVisible(false);
-        m_map_stars->setVisible(false);
+        m_ready_btn->is_loading = true;
         bancho.room.map_id = 0; // don't try downloading it again
     } else if(status.status == DOWNLOADING) {
         auto text = UString::format("Downloading... %.2f%%", status.progress * 100.f);
         m_map_title->setText(text.toUtf8());
         m_map_title->setSizeToContent(0, 0);
-        m_map_attributes->setVisible(false);
-        m_map_stars->setVisible(false);
+        m_ready_btn->is_loading = true;
     } else if(status.status == SUCCESS) {
         auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_id);
         // XXX: Make a permanent database for auto-downloaded songs, so we can load them like osu!.db's
@@ -312,6 +308,11 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
 
     m_change_password_btn->setVisible(is_host);
 
+    m_map_title->setVisible(true);
+    m_map_attributes->setVisible(!m_ready_btn->is_loading);
+    m_map_attributes2->setVisible(!m_ready_btn->is_loading);
+    m_map_stars->setVisible(!m_ready_btn->is_loading);
+
     m_select_map_btn->setVisible(is_host);
 
     m_select_mods_btn->setVisible(is_host || bancho.room.freemods);
@@ -319,7 +320,24 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
     m_freemod->setVisible(is_host);
     m_mods->m_flags = &bancho.room.mods;
     m_mods->setSize(300, 90);
-    m_no_mods_selected->setVisible(!m_mods->isVisible());
+    m_no_mods_selected->setVisible(bancho.room.mods == 0);
+    
+    bool is_ready = false;
+    for(uint8_t i = 0; i < 16; i++) {
+        if(bancho.room.slots[i].player_id == bancho.user_id) {
+            is_ready = bancho.room.slots[i].is_ready();
+            break;
+        }
+    }
+    if(is_host) {
+        m_ready_btn->setText("Start game");
+        m_ready_btn->setColor(0xff00ff00);
+    } else {
+        m_ready_btn->setText(is_ready ? "Not ready" : "Ready!");
+        m_ready_btn->setColor(is_ready ? 0xffff0000 : 0xff00ff00);
+    }
+    m_ready_btn->setVisible(true); // wtf...
+    m_settings->setScrollSizeToContent();
 
     float settings_y = 10;
     for(auto& element : m_settings->getContainer()->getElements()) {
@@ -331,7 +349,6 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
             element->setRelPos(-999, -999);
         }
     }
-    m_settings->setScrollSizeToContent();
 
     // XXX: improve slot list, display user presence with avatars instead
     m_slotlist->setSize(newResolution.x * 0.6 - 200, newResolution.y * 0.6 - 110);
@@ -368,21 +385,6 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
         }
     }
     m_slotlist->setScrollSizeToContent();
-
-    bool is_ready = false;
-    for(uint8_t i = 0; i < 16; i++) {
-        if(bancho.room.slots[i].player_id == bancho.user_id) {
-            is_ready = bancho.room.slots[i].is_ready();
-            break;
-        }
-    }
-    if(is_host) {
-        m_ready_btn->setText("Start game");
-        m_ready_btn->setColor(0xffff0000);
-    } else {
-        m_ready_btn->setText(is_ready ? "Not ready" : "Ready!");
-        m_ready_btn->setColor(is_ready ? 0xffff0000 : 0xff00ff00);
-    }
 }
 
 // Exit to main menu
@@ -463,8 +465,7 @@ void OsuRoom::on_map_change(bool download) {
     if(bancho.room.map_id == 0) {
         m_map_title->setText("(no map selected)");
         m_map_title->setSizeToContent(0, 0);
-        m_map_attributes->setVisible(false);
-        m_map_stars->setVisible(false);
+        m_ready_btn->is_loading = true;
     } else {
         std::string hash = bancho.room.map_md5.toUtf8(); // lol
         auto beatmap = m_osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(hash);
@@ -472,12 +473,16 @@ void OsuRoom::on_map_change(bool download) {
             m_osu->m_songBrowser2->onDifficultySelected(beatmap, false);
             m_map_title->setText(bancho.room.map_name);
             m_map_title->setSizeToContent(0, 0);
-            auto attributes = UString::format("AR: %f, CS: %f, HP: %f, OD: %f, Length: %ds, BPM: %d (%d - %d)", beatmap->getAR(), beatmap->getCS(), beatmap->getHP(), beatmap->getOD(), beatmap->getLengthMS() / 1000, beatmap->getMostCommonBPM(), beatmap->getMinBPM(), beatmap->getMaxBPM());
+            auto attributes = UString::format("AR: %.1f, CS: %.1f, HP: %.1f, OD: %.1f", beatmap->getAR(), beatmap->getCS(), beatmap->getHP(), beatmap->getOD());
             m_map_attributes->setText(attributes);
-            m_map_attributes->setVisible(true);
-            auto stars = UString::format("Star rating: %f*", beatmap->getStarsNomod());
+            m_map_attributes->setSizeToContent(0, 0);
+            auto attributes2 = UString::format("Length: %d seconds, BPM: %d (%d - %d)", beatmap->getLengthMS() / 1000, beatmap->getMostCommonBPM(), beatmap->getMinBPM(), beatmap->getMaxBPM());
+            m_map_attributes2->setText(attributes2);
+            m_map_attributes2->setSizeToContent(0, 0);
+
+            auto stars = UString::format("Star rating: %.2f*", beatmap->getStarsNomod());
             m_map_stars->setText(stars);
-            m_map_stars->setVisible(true);
+            m_map_stars->setSizeToContent(0, 0);
             m_ready_btn->is_loading = false;
 
             Packet packet = {0};
@@ -497,8 +502,7 @@ void OsuRoom::on_map_change(bool download) {
 
             m_map_title->setText("Loading...");
             m_map_title->setSizeToContent(0, 0);
-            m_map_attributes->setVisible(false);
-            m_map_stars->setVisible(false);
+            m_ready_btn->is_loading = true;
 
             Packet packet = {0};
             packet.id = MATCH_NO_BEATMAP;
@@ -506,8 +510,7 @@ void OsuRoom::on_map_change(bool download) {
         } else {
             m_map_title->setText("Failed to load map. Is it catch/taiko/mania?");
             m_map_title->setSizeToContent(0, 0);
-            m_map_attributes->setVisible(false);
-            m_map_stars->setVisible(false);
+            m_ready_btn->is_loading = true;
             bancho.room.map_id = 0; // prevents trying to load it again
 
             Packet packet = {0};
@@ -608,7 +611,14 @@ void OsuRoom::on_match_score_updated(Packet* packet) {
     slot->is_perfect = read_byte(packet);
     slot->current_hp = read_byte(packet);
     slot->tag = read_byte(packet);
-    slot->is_scorev2 = read_byte(packet);
+
+    bool is_scorev2 = read_byte(packet);
+    if(is_scorev2) {
+        slot->sv2_combo = read_float64(packet);
+        slot->sv2_bonus = read_float64(packet);
+    }
+
+    debugLog("Combo: %f, Bonus: %f\n", slot->sv2_combo, slot->sv2_bonus);
 }
 
 void OsuRoom::on_all_players_loaded() {
@@ -758,4 +768,7 @@ void OsuRoom::onFreemodCheckboxChanged(CBaseUICheckbox *checkbox) {
     packet.id = MATCH_CHANGE_SETTINGS;
     bancho.room.pack(&packet);
     send_packet(packet);
+    
+    // TODO @kiwec: this is not updating correctly, idk why
+    updateLayout(m_osu->getScreenSize());
 }

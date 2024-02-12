@@ -15,6 +15,7 @@
 #include "Bancho.h"
 #include "BanchoNetworking.h"
 #include "Osu.h"
+#include "OsuRoom.h"
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
 #include "OsuModSelector.h"
@@ -135,6 +136,8 @@ void OsuUIModSelectorModButton::onClicked()
 			packet.id = MATCH_CHANGE_MODS;
 			write_int(&packet, bancho.room.slots[i].mods);
 		    send_packet(packet);
+
+		    m_osu->m_room->on_room_updated(bancho.room);
 			break;
 		}
 	}

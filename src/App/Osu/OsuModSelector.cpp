@@ -21,6 +21,7 @@
 #include "BanchoNetworking.h"
 #include "Osu.h"
 #include "OsuHUD.h"
+#include "OsuRoom.h"
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
 #include "OsuIcons.h"
@@ -1171,6 +1172,8 @@ void OsuModSelector::resetModsUserInitiated() {
 			packet.id = MATCH_CHANGE_MODS;
 			write_int(&packet, bancho.room.slots[i].mods);
 		    send_packet(packet);
+
+		    m_osu->m_room->updateLayout(m_osu->getScreenSize());
 			break;
 		}
 	}

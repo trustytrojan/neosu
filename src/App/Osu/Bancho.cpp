@@ -164,7 +164,7 @@ void handle_packet(Packet *packet) {
     user->mode = (GameMode)read_byte(packet);
     user->map_id = read_int(packet);
     user->ranked_score = read_int64(packet);
-    user->accuracy = read_float(packet);
+    user->accuracy = read_float32(packet);
     user->plays = read_int(packet);
     user->total_score = read_int64(packet);
     user->global_rank = read_int(packet);
@@ -297,8 +297,8 @@ void handle_packet(Packet *packet) {
     user->utc_offset = read_byte(packet);
     user->country = read_byte(packet);
     user->privileges = read_byte(packet);
-    user->longitude = read_float(packet);
-    user->latitude = read_float(packet);
+    user->longitude = read_float32(packet);
+    user->latitude = read_float32(packet);
     user->global_rank = read_int(packet);
   } else if (packet->id == RESTART) {
     int32_t ms = read_int(packet);

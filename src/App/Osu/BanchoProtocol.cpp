@@ -145,9 +145,15 @@ uint32_t read_uleb128(Packet *packet) {
   return result;
 }
 
-float read_float(Packet *packet) {
+float read_float32(Packet *packet) {
   float f = 0;
   read_bytes(packet, (uint8_t *)&f, 4);
+  return f;
+}
+
+double read_float64(Packet *packet) {
+  double f = 0;
+  read_bytes(packet, (uint8_t *)&f, 8);
   return f;
 }
 
@@ -211,8 +217,12 @@ void write_uleb128(Packet *packet, uint32_t num) {
   }
 }
 
-void write_float(Packet *packet, float f) {
+void write_float32(Packet *packet, float f) {
   write_bytes(packet, (uint8_t *)&f, 4);
+}
+
+void write_float64(Packet *packet, double f) {
+  write_bytes(packet, (uint8_t *)&f, 8);
 }
 
 void write_string(Packet *packet, const char *str) {

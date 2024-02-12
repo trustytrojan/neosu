@@ -171,7 +171,8 @@ struct Slot {
   uint8_t is_perfect = 0;
   uint8_t current_hp = 0;
   uint8_t tag = 0;
-  uint8_t is_scorev2 = 0;
+  double sv2_combo = 0.0;
+  double sv2_bonus = 0.0;
 
   // locked
   bool is_locked() { return (status & 0b00000010); }
@@ -214,7 +215,7 @@ struct Room {
   int32_t map_id = 0;
 
   uint8_t mode = 0;
-  uint8_t win_condition = 0;
+  uint8_t win_condition = 0; // TODO @kiwec: handle all win conditions. scorev2 important for packet sending!
   uint8_t team_type = 0;
   uint8_t freemods = 0;
 
@@ -242,7 +243,8 @@ uint16_t read_short(Packet *packet);
 uint32_t read_int(Packet *packet);
 uint64_t read_int64(Packet *packet);
 uint32_t read_uleb128(Packet *packet);
-float read_float(Packet *packet);
+float read_float32(Packet *packet);
+double read_float64(Packet *packet);
 UString read_string(Packet *packet);
 
 void write_bytes(Packet *packet, uint8_t *bytes, size_t n);
@@ -251,5 +253,6 @@ void write_short(Packet *packet, uint16_t s);
 void write_int(Packet *packet, uint32_t i);
 void write_int64(Packet *packet, uint64_t i);
 void write_uleb128(Packet *packet, uint32_t num);
-void write_float(Packet *packet, float f);
+void write_float32(Packet *packet, float f);
+void write_float64(Packet *packet, double f);
 void write_string(Packet *packet, const char *str);

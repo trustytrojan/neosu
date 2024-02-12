@@ -1811,6 +1811,8 @@ void OsuHUD::drawScoreBoardMP(Graphics *g)
         }
     }
 
+    // TODO @kiwec: leaderboard is not sorted/does not reorder during gameplay
+
 	static std::vector<SCORE_ENTRY> scoreEntries;
 	scoreEntries.clear();
     for(int i = 0; i < 16; i++) {
@@ -1828,13 +1830,14 @@ void OsuHUD::drawScoreBoardMP(Graphics *g)
 		scoreEntry.name = user_info->name;
 
 		scoreEntry.index = -1;
-		scoreEntry.combo = slot->current_combo;
+		scoreEntry.combo = slot->current_combo; // TODO @kiwec: looks like "max_combo" ingame, sv2 specific?
 		scoreEntry.score = slot->total_score;
 
 		// hit_score != total_score: total_score also accounts for spinner bonus & mods
 		uint64_t hit_score = 300 * slot->num300 + 100 * slot->num100 + 50 * slot->num50;
 		uint64_t max_score = 300 * (slot->num300 + slot->num100 + slot->num50 + slot->num_miss);
-		scoreEntry.accuracy = max_score > 0 ? hit_score / max_score : 0.f;
+		scoreEntry.accuracy = max_score > 0 ? hit_score / max_score : 0.f; // TODO @kiwec: accuracy stuck at 0%, sv2 specific?
+		// TODO @kiwec: only draw accuracy in the HUD when set to accuracy win condition, + don't draw regular score then
 
         scoreEntry.missingBeatmap = false;
         scoreEntry.downloadingBeatmap = false;

@@ -73,6 +73,7 @@ struct OsuRoom : public OsuScreen {
     OsuUIButton *m_change_password_btn = nullptr;
     CBaseUILabel *m_map_title = nullptr;
     CBaseUILabel *m_map_attributes = nullptr;
+    CBaseUILabel *m_map_attributes2 = nullptr;
     CBaseUILabel *m_map_stars = nullptr;
     OsuUIButton *m_select_map_btn = nullptr;
     OsuUIButton *m_select_mods_btn = nullptr;
