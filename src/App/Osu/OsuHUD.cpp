@@ -1821,7 +1821,7 @@ void OsuHUD::drawScoreBoardMP(Graphics *g)
 
         // TODO @kiwec: draw player skip status
 
-    	// TODO @kiwec: draw player avatar
+    	// XXX: draw player avatar
     	(void)slot->player_id;
 
 		SCORE_ENTRY scoreEntry;

@@ -5,7 +5,6 @@
 #include "OsuScreen.h"
 
 
-// TODO @kiwec: do something when username is clicked
 // TODO @kiwec: limit to 100 messages / channel
 // TODO @kiwec: optimize
 // TODO @kiwec: fix chat width not getting updated when going from room to main menu
@@ -53,7 +52,7 @@ struct OsuChat : public OsuScreen
     virtual void onResolutionChange(Vector2 newResolution);
 
     void switchToChannel(OsuChatChannel* chan);
-    void addChannel(UString channel_name);
+    void addChannel(UString channel_name, bool switch_to = false);
     void addMessage(UString channel_name, ChatMessage msg);
     void removeChannel(UString channel_name);
     void updateLayout(Vector2 newResolution);

@@ -18,6 +18,7 @@ class OsuChat;
 class OsuLobby;
 class OsuRoom;
 class OsuPromptScreen;
+class OsuUIUserContextMenuScreen;
 class OsuVR;
 class OsuMainMenu;
 class OsuPauseMenu;
@@ -270,6 +271,7 @@ public:
 	OsuLobby *m_lobby = nullptr;
 	OsuRoom *m_room = nullptr;
 	OsuPromptScreen *m_prompt = nullptr;
+	OsuUIUserContextMenuScreen *m_user_actions = nullptr;
 	OsuSongBrowser2 *m_songBrowser2 = nullptr;
 	OsuBackgroundImageHandler *m_backgroundImageHandler;
 	OsuModSelector *m_modSelector;

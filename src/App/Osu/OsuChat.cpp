@@ -24,6 +24,7 @@
 #include "OsuSkin.h"
 #include "OsuSongBrowser2.h"
 #include "OsuUIButton.h"
+#include "OsuUIUserContextMenu.h"
 
 
 OsuChatChannel::OsuChatChannel(OsuChat* chat, UString name_arg) {
@@ -75,14 +76,13 @@ void OsuChatChannel::add_message(ChatMessage msg) {
 
     if(!is_system_message) {
         float name_width = m_chat->font->getStringWidth(msg.author_name);
-        CBaseUILabel *username = new CBaseUILabel(x, y_total, name_width, line_height, "", msg.author_name);
-        username->setDrawFrame(false);
-        username->setDrawBackground(false);
-        username->setTextColor(0xff2596be);
-        ui->getContainer()->addBaseUIElement(username);
-        x += name_width;
 
-        // TODO @kiwec: make name clickable, do something when name is clicked
+        auto user_box = new OsuUIUserLabel(m_chat->m_osu, msg.author_id, msg.author_name);
+        user_box->setTextColor(0xff2596be);
+        user_box->setPos(x, y_total);
+        user_box->setSize(name_width, line_height);
+        ui->getContainer()->addBaseUIElement(user_box);
+        x += name_width;
 
         text_str.append(": ");
     }
@@ -331,9 +331,14 @@ void OsuChat::switchToChannel(OsuChatChannel* chan) {
     updateButtonLayout(getSize());
 }
 
-void OsuChat::addChannel(UString channel_name) {
+void OsuChat::addChannel(UString channel_name, bool switch_to) {
     for(auto chan : m_channels) {
-        if(chan->name == channel_name) return;
+        if(chan->name == channel_name) {
+            if(switch_to) {
+                switchToChannel(chan);
+            }
+            return;
+        }
     }
 
     OsuChatChannel* chan = new OsuChatChannel(this, channel_name);
@@ -342,6 +347,8 @@ void OsuChat::addChannel(UString channel_name) {
     if(m_selected_channel == nullptr && m_channels.size() == 1) {
         switchToChannel(chan);
     } else if(channel_name == UString("#multiplayer") || channel_name == UString("#lobby")) {
+        switchToChannel(chan);
+    } else if(switch_to) {
         switchToChannel(chan);
     }
 

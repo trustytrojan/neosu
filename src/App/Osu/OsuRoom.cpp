@@ -19,6 +19,7 @@
 #include "OsuUIButton.h"
 #include "OsuUICheckbox.h"
 #include "OsuUISongBrowserSongButton.h"
+#include "OsuUIUserContextMenu.h"
 
 #include "CBaseUIButton.h"
 #include "CBaseUIContainer.h"
@@ -81,6 +82,8 @@ bool OsuUIModList::isVisible() {
 } while(0)
 
 OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
+    // XXX: Place buttons to the right of the large labels
+
     font = engine->getResourceManager()->getFont("FONT_DEFAULT");
     lfont = osu->getSubTitleFont();
 
@@ -96,7 +99,7 @@ OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
     addBaseUIElement(m_settings);
 
     INIT_LABEL(m_room_name, "Multiplayer room", true);
-    INIT_LABEL(m_host, "Host: None", false);
+    INIT_LABEL(m_host, "Host: None", false); // XXX: make it an OsuUIUserLabel
 
     INIT_LABEL(m_room_name_iptl, "Room name", false);
     m_room_name_ipt = new CBaseUITextbox(0, 0, m_settings->getSize().x, 40, "");
@@ -342,10 +345,9 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
                 username = UString::format("[playing] %s", user_info->name.toUtf8());
             }
 
-            auto user_box = new CBaseUILabel(10, y_total, 290, 30, "", username);
+            auto user_box = new OsuUIUserLabel(m_osu, bancho.room.slots[i].player_id, username);
             user_box->setFont(lfont);
-            user_box->setDrawFrame(false);
-            user_box->setDrawBackground(false);
+            user_box->setPos(10, y_total);
 
             auto color = 0xffffffff;
             if(bancho.room.slots[i].is_ready()) {
@@ -362,11 +364,10 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
             user_mods->setSize(350, user_box->getSize().y + 20);
             m_slotlist->getContainer()->addBaseUIElement(user_mods);
 
-            // TODO @kiwec: context menu to set as host, kick etc
-
             y_total += user_box->getSize().y + 20;
         }
     }
+    m_slotlist->setScrollSizeToContent();
 
     bool is_ready = false;
     for(uint8_t i = 0; i < 16; i++) {

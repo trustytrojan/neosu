@@ -269,6 +269,12 @@ void handle_packet(Packet *packet) {
   } else if (packet->id == PRIVILEGES) {
     read_int(packet);
     // (nothing to do)
+  } else if (packet->id == FRIENDS_LIST) {
+    uint16_t nb_friends = read_short(packet);
+    for(int i = 0; i < nb_friends; i++) {
+      auto user = get_user_info(read_int(packet));
+      user->is_friend = true;
+    }
   } else if (packet->id == PROTOCOL_VERSION) {
     int protocol_version = read_int(packet);
     if (protocol_version != 19) {

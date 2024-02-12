@@ -5,6 +5,7 @@
 
 struct UserInfo {
   uint32_t user_id = 0;
+  bool is_friend = false;
 
   // Presence (via USER_PRESENCE_REQUEST or USER_PRESENCE_REQUEST_ALL)
   UString name;
