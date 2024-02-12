@@ -1,3 +1,4 @@
+#include "Bancho.h"
 #include "BanchoNetworking.h"
 #include "BanchoUsers.h"
 #include "Osu.h"
@@ -46,7 +47,12 @@ RoomUIElement::RoomUIElement(OsuLobby* multi, Room* room, float x, float y, floa
     join_btn->setClickCallback( fastdelegate::MakeDelegate(this, &RoomUIElement::onRoomJoinButtonClick) );
     getContainer()->addBaseUIElement(join_btn);
 
-    // TODO @kiwec: display something to show when the room is passworded
+    if(room->has_password) {
+        auto pwlabel = new CBaseUILabel(135, 64, 150, 30, "", "(password required)");
+        pwlabel->setDrawFrame(false);
+        pwlabel->setDrawBackground(false);
+        getContainer()->addBaseUIElement(pwlabel);
+    }
 }
 
 void RoomUIElement::onRoomJoinButtonClick(CBaseUIButton* btn) {
@@ -61,17 +67,25 @@ void RoomUIElement::onRoomJoinButtonClick(CBaseUIButton* btn) {
 OsuLobby::OsuLobby(Osu *osu) : OsuScreen(osu) {
     font = engine->getResourceManager()->getFont("FONT_DEFAULT");
 
+    auto heading = new CBaseUILabel(50, 30, 300, 40, "", "Multiplayer rooms");
+    heading->setFont(m_osu->getTitleFont());
+    heading->setSizeToContent(0, 0);
+    heading->setDrawFrame(false);
+    heading->setDrawBackground(false);
+    addBaseUIElement(heading);
+
+    m_create_room_btn = new OsuUIButton(osu, 0, 0, 200, 50, "", "Create new room");
+    m_create_room_btn->setUseDefaultSkin();
+    m_create_room_btn->setColor(0xff00ff00);
+    m_create_room_btn->setClickCallback( fastdelegate::MakeDelegate(this, &OsuLobby::on_create_room_clicked) );
+    addBaseUIElement(m_create_room_btn);
+
     m_list = new CBaseUIScrollView(0, 0, 0, 0, "");
     m_list->setDrawFrame(false);
     m_list->setDrawBackground(true);
     m_list->setBackgroundColor(0xdd000000);
     m_list->setHorizontalScrolling(false);
     addBaseUIElement(m_list);
-
-    m_noRoomsOpenElement = new CBaseUILabel(0, 0, 0, 0, "", "There are no matches available.");
-    m_noRoomsOpenElement->setTextJustification(CBaseUILabel::TEXT_JUSTIFICATION::TEXT_JUSTIFICATION_CENTERED);
-    m_noRoomsOpenElement->setSizeToContent(20, 20);
-    addBaseUIElement(m_noRoomsOpenElement);
 
     updateLayout(m_osu->getScreenSize());
 }
@@ -146,31 +160,35 @@ CBaseUIContainer* OsuLobby::setVisible(bool visible) {
 }
 
 void OsuLobby::updateLayout(Vector2 newResolution) {
-    m_list->clear();
-
     setSize(newResolution);
-    m_list->setSize(newResolution);
 
-    m_noRoomsOpenElement->setVisible(rooms.empty());
-    m_noRoomsOpenElement->setPos(
-        newResolution.x / 2 - m_noRoomsOpenElement->getSize().x / 2,
-        newResolution.y / 3 - m_noRoomsOpenElement->getSize().y / 2
+    m_list->clear();
+    m_list->setPos(round(newResolution.x * 0.6), 0);
+    m_list->setSize(round(newResolution.x * 0.4), newResolution.y);
+
+    if(rooms.empty()) {
+        auto noRoomsOpenElement = new CBaseUILabel(0, 0, 0, 0, "", "There are no matches available.");
+        noRoomsOpenElement->setTextJustification(CBaseUILabel::TEXT_JUSTIFICATION::TEXT_JUSTIFICATION_CENTERED);
+        noRoomsOpenElement->setSizeToContent(20, 20);
+        noRoomsOpenElement->setPos(
+            m_list->getSize().x / 2 - noRoomsOpenElement->getSize().x / 2,
+            m_list->getSize().y / 2 - noRoomsOpenElement->getSize().y / 2
+        );
+        m_list->getContainer()->addBaseUIElement(noRoomsOpenElement);
+    }
+
+    float heading_ratio = 70 / newResolution.y;
+    float chat_ratio = 0.3;
+    float free_ratio = 1.f - (heading_ratio + chat_ratio);
+    m_create_room_btn->setPos(
+        round(newResolution.x * 0.3) - m_create_room_btn->getSize().x / 2,
+        70 + round(newResolution.y * free_ratio / 2) - m_create_room_btn->getSize().y / 2
     );
 
-    auto heading = new CBaseUILabel(50, 30, 300, 40, "", "Multiplayer rooms");
-    heading->setFont(m_osu->getTitleFont());
-    heading->setSizeToContent(0, 0);
-    heading->setDrawFrame(false);
-    heading->setDrawBackground(false);
-    addBaseUIElement(heading);
-
-    // TODO @kiwec: create room button
-
-    float y = 200;
+    float y = 10;
     const float room_height = 105;
-    const float room_width = 600;
     for(auto room : rooms) {
-        auto room_ui = new RoomUIElement(this, room, newResolution.x / 2 - (room_width / 2), y, room_width, room_height);
+        auto room_ui = new RoomUIElement(this, room, 10, y, m_list->getSize().x - 20, room_height);
         m_list->getContainer()->addBaseUIElement(room_ui);
         y += room_height + 20;
     }
@@ -227,6 +245,24 @@ void OsuLobby::removeRoom(uint32_t room_id) {
     }
 
     updateLayout(getSize());
+}
+
+void OsuLobby::on_create_room_clicked() {
+    bancho.room = Room();
+    bancho.room.name = "New room"; // XXX: doesn't work
+    bancho.room.host_id = bancho.user_id;
+    for(int i = 0; i < 16; i++) {
+        bancho.room.slots[i].status = 1; // open slot
+    }
+    bancho.room.slots[0].status = 4; // not ready
+    bancho.room.slots[0].player_id = bancho.user_id;
+
+    Packet packet = {0};
+    packet.id = CREATE_ROOM;
+    bancho.room.pack(&packet);
+    send_packet(packet);
+
+    m_osu->getNotificationOverlay()->addNotification("Creating room...");
 }
 
 void OsuLobby::on_room_join_with_password(UString password) {

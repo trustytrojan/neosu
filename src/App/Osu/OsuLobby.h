@@ -10,7 +10,6 @@
 #include "OsuScreen.h"
 
 class CBaseUIButton;
-class CBaseUILabel;
 class OsuLobby;
 class OsuUIButton;
 class Room;
@@ -48,12 +47,14 @@ struct OsuLobby : public OsuScreen
     void removeRoom(uint32_t room_id);
     void updateLayout(Vector2 newResolution);
 
+    void on_create_room_clicked();
+
     void on_room_join_with_password(UString password);
     void on_room_join_failed();
 
     std::vector<Room*> rooms;
+    OsuUIButton *m_create_room_btn;
     CBaseUIScrollView *m_list;
-    CBaseUILabel *m_noRoomsOpenElement;
     int32_t room_to_join;
     McFont* font;
 };
