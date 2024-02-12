@@ -8,6 +8,7 @@
 #include "BanchoProtocol.h"
 #include "ConVar.h"
 #include "Engine.h"
+#include "OsuChat.h"
 #include "OsuLobby.h"
 #include "OsuOptionsMenu.h"
 #include "OsuRoom.h"
@@ -76,6 +77,8 @@ void disconnect() {
   bancho.osu->m_optionsMenu->logInButton->setText("Log in");
   bancho.osu->m_optionsMenu->logInButton->setColor(0xff00ff00);
   bancho.osu->m_optionsMenu->logInButton->is_loading = false;
+
+  bancho.osu->m_chat->onDisconnect();
 
   pthread_mutex_unlock(&outgoing_mutex);
 }

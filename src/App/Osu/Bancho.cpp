@@ -28,12 +28,12 @@
 // TODO @kiwec: add "personal best" in online score list
 // TODO @kiwec: comb over every single option, and every single convar and make sure no cheats are possible in multiplayer
 // TODO @kiwec: mark DMs as read when they're visible on screen
-// TODO @kiwec: PLEASE polish lobby UI
 // TODO @kiwec: build on windows
 
 
 Bancho bancho;
 std::unordered_map<std::string, Channel*> chat_channels;
+bool print_new_channels = true;
 
 void update_channel(UString name, UString topic, int32_t nb_members) {
   Channel* chan;
@@ -44,12 +44,14 @@ void update_channel(UString name, UString topic, int32_t nb_members) {
     chan->name = name;
     chat_channels[name_str] = chan;
 
-    bancho.osu->m_chat->addMessage("#osu", ChatMessage{
-      .tms = time(NULL),
-      .author_id = 0,
-      .author_name = UString(""),
-      .text = UString::format("%s (%d): %s", name.toUtf8(), nb_members, topic.toUtf8()),
-    });
+    if(print_new_channels) {
+      bancho.osu->m_chat->addMessage("#osu", ChatMessage{
+        .tms = time(NULL),
+        .author_id = 0,
+        .author_name = UString(""),
+        .text = UString::format("%s (%d): %s", name.toUtf8(), nb_members, topic.toUtf8()),
+      });
+    }
   } else {
     chan = it->second;
   }
@@ -100,6 +102,7 @@ void handle_packet(Packet *packet) {
       bancho.osu->m_optionsMenu->logInButton->setColor(0xffff0000);
       bancho.osu->m_optionsMenu->logInButton->is_loading = false;
       convar->getConVarByName("mp_autologin")->setValue(true);
+      print_new_channels = true;
 
       auto avatar_dir = UString::format(MCENGINE_DATA_DIR "avatars/%s", bancho.endpoint.toUtf8());
       if(!env->directoryExists(avatar_dir)) {
@@ -305,12 +308,7 @@ void handle_packet(Packet *packet) {
     debugLog("(match invite) %s (%s): %s\n", sender, recipient, text);
     // TODO @kiwec: make a clickable link in chat?
   } else if (packet->id == CHANNEL_INFO_END) {
-    bancho.osu->m_chat->addMessage("#osu", ChatMessage{
-      .tms = time(NULL),
-      .author_id = 0,
-      .author_name = UString(""),
-      .text = UString("End of channel list."),
-    });
+    print_new_channels = false;
     bancho.osu->m_chat->join("#osu");
   } else if (packet->id == ROOM_PASSWORD_CHANGED) {
     UString new_password = read_string(packet);

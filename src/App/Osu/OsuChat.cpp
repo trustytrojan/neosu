@@ -491,6 +491,17 @@ void OsuChat::join(UString channel_name) {
     send_packet(packet);
 }
 
+void OsuChat::onDisconnect() {
+    for(auto chan : m_channels) {
+        delete chan;
+    }
+    m_channels.clear();
+    m_selected_channel = nullptr;
+    updateLayout(m_osu->getScreenSize());
+
+    updateVisibility();
+}
+
 void OsuChat::onResolutionChange(Vector2 newResolution) {
     updateLayout(newResolution);
 }
@@ -512,6 +523,7 @@ void OsuChat::updateVisibility() {
     bool can_skip = (selected_beatmap != nullptr) && (selected_beatmap->isInSkippableSection());
     bool is_clicking_circles = m_osu->isInPlayMode() && !can_skip && !m_osu->m_bModAuto && !m_osu->m_pauseMenu->isVisible();
     bool force_hide = m_osu->m_optionsMenu->isVisible() || m_osu->m_modSelector->isVisible() || is_clicking_circles;
+    if(!bancho.is_online()) force_hide = true;
     if(force_hide) {
         setVisible(false);
         return;
