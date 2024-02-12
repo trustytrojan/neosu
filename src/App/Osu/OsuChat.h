@@ -8,12 +8,8 @@
 // TODO @kiwec: do something when username is clicked
 // TODO @kiwec: limit to 100 messages / channel
 // TODO @kiwec: optimize
-// TODO @kiwec: add a button to join channels. see "chat_channels" in Bancho.cpp
-
 // TODO @kiwec: fix chat width not getting updated when going from room to main menu
 
-// TODO @kiwec: Add channel connection info like osu!stable does
-// Eg. use #osu as main (closeable) channel, always add it when logging it
 
 class CBaseUIButton;
 class McFont;
@@ -63,10 +59,15 @@ struct OsuChat : public OsuScreen
     void updateLayout(Vector2 newResolution);
     void updateButtonLayout(Vector2 screen);
 
+    void join(UString channel_name);
+
     virtual CBaseUIContainer* setVisible(bool visible);
     bool isVisibilityForced();
     void updateVisibility();
     bool isMouseInChat();
+
+    void askWhatChannelToJoin(CBaseUIButton *btn);
+    OsuUIButton *join_channel_btn;
 
     OsuChatChannel* m_selected_channel = nullptr;
     std::vector<OsuChatChannel*> m_channels;

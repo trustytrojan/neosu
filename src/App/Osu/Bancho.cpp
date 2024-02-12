@@ -43,6 +43,13 @@ void update_channel(UString name, UString topic, int32_t nb_members) {
     chan = new Channel();
     chan->name = name;
     chat_channels[name_str] = chan;
+
+    bancho.osu->m_chat->addMessage("#osu", ChatMessage{
+      .tms = time(NULL),
+      .author_id = 0,
+      .author_name = UString(""),
+      .text = UString::format("%s (%d): %s", name.toUtf8(), nb_members, topic.toUtf8()),
+    });
   } else {
     chan = it->second;
   }
@@ -298,7 +305,13 @@ void handle_packet(Packet *packet) {
     debugLog("(match invite) %s (%s): %s\n", sender, recipient, text);
     // TODO @kiwec: make a clickable link in chat?
   } else if (packet->id == CHANNEL_INFO_END) {
-    // (nothing to do)
+    bancho.osu->m_chat->addMessage("#osu", ChatMessage{
+      .tms = time(NULL),
+      .author_id = 0,
+      .author_name = UString(""),
+      .text = UString("End of channel list."),
+    });
+    bancho.osu->m_chat->join("#osu");
   } else if (packet->id == ROOM_PASSWORD_CHANGED) {
     UString new_password = read_string(packet);
     debugLog("Room changed password to %s\n", new_password);

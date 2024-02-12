@@ -19,6 +19,7 @@
 #include "OsuModSelector.h"
 #include "OsuOptionsMenu.h"
 #include "OsuPauseMenu.h"
+#include "OsuPromptScreen.h"
 #include "OsuRoom.h"
 #include "OsuSkin.h"
 #include "OsuSongBrowser2.h"
@@ -141,6 +142,13 @@ OsuChat::OsuChat(Osu *osu) : OsuScreen(osu) {
     font = engine->getResourceManager()->getFont("FONT_DEFAULT");
 
     m_button_container = new CBaseUIContainer(0, 0, 0, 0, "");
+
+    join_channel_btn = new OsuUIButton(osu, 0, 0, 0, 0, "button", "+");
+    join_channel_btn->setUseDefaultSkin();
+    join_channel_btn->setColor(0xffffff55);
+    join_channel_btn->setSize(button_height + 2, button_height + 2);
+    join_channel_btn->setClickCallback( fastdelegate::MakeDelegate(this, &OsuChat::askWhatChannelToJoin) );
+    m_button_container->addBaseUIElement(join_channel_btn);
 
     m_input_box = new CBaseUITextbox(0, 0, 0, 0, "");
     m_input_box->setDrawFrame(false);
@@ -430,7 +438,7 @@ void OsuChat::updateButtonLayout(Vector2 screen) {
         float button_width = font->getStringWidth(btn->getText()) + 20;
 
         // Wrap channel buttons
-        if(total_x + button_width > screen.x) {
+        if(total_x + button_width > screen.x - 20) {
             total_x = initial_x;
             button_container_height += button_height;
         }
@@ -446,7 +454,7 @@ void OsuChat::updateButtonLayout(Vector2 screen) {
         float button_width = font->getStringWidth(btn->getText()) + 20;
 
         // Wrap channel buttons
-        if(total_x + button_width > screen.x) {
+        if(total_x + button_width > screen.x - 20) {
             total_x = initial_x;
             total_y += button_height;
         }
@@ -468,8 +476,19 @@ void OsuChat::updateButtonLayout(Vector2 screen) {
         total_x += button_width;
     }
 
+    join_channel_btn->setPos(total_x, chat_y - button_container_height + total_y);
     m_button_container->setPos(0, chat_y - button_container_height);
     m_button_container->setSize(screen.x, button_container_height);
+}
+
+void OsuChat::join(UString channel_name) {
+    // XXX: Open the channel immediately, without letting the user send messages in it.
+    //      Would require a way to signal if a channel is joined or not.
+    //      Would allow to keep open the tabs of the channels we got kicked out of.
+    Packet packet = {0};
+    packet.id = CHANNEL_JOIN;
+    write_string(&packet, channel_name.toUtf8());
+    send_packet(packet);
 }
 
 void OsuChat::onResolutionChange(Vector2 newResolution) {
@@ -524,4 +543,9 @@ bool OsuChat::isMouseInChat() {
     if(!isVisible()) return false;
     if(m_selected_channel == nullptr) return false;
     return m_input_box->isMouseInside() || m_selected_channel->ui->isMouseInside();
+}
+
+void OsuChat::askWhatChannelToJoin(CBaseUIButton *btn) {
+    // XXX: Could display nicer UI with full channel list (chat_channels in Bancho.cpp)
+    m_osu->m_prompt->prompt("Type in the channel you want to join (e.g. '#osu'):", fastdelegate::MakeDelegate(this, &OsuChat::join));
 }
