@@ -99,11 +99,35 @@ void handle_packet(Packet *packet) {
         env->createDirectory(avatar_dir);
       }
     } else {
-      debugLog("Failed to log in, server returned code %d.\n", bancho.user_id);
+      convar->getConVarByName("mp_autologin")->setValue(false);
       bancho.osu->m_optionsMenu->logInButton->setText("Log in");
       bancho.osu->m_optionsMenu->logInButton->setColor(0xff00ff00);
       bancho.osu->m_optionsMenu->logInButton->is_loading = false;
-      // TODO @kiwec: also display error string returned in cho-token header
+
+      debugLog("Failed to log in, server returned code %d.\n", bancho.user_id);
+      UString errmsg = UString::format("Failed to log in: %s (code %d)\n", cho_token, bancho.user_id);
+      if(bancho.user_id == -2) {
+        errmsg = "Client version is too old to connect to this server.";
+      } else if(bancho.user_id == -3 || bancho.user_id == -4) {
+        errmsg = "You are banned from this server.";
+      } else if(bancho.user_id == -6) {
+        errmsg = "You need to buy supporter to connect to this server.";
+      } else if(bancho.user_id == -7) {
+        errmsg = "You need to reset your password to connect to this server.";
+      } else if(bancho.user_id == -8) {
+        errmsg = "Open the verification link sent to your email, then log in again.";
+      } else {
+        if(cho_token == UString("user-already-logged-in")) {
+          errmsg = "Already logged in on another client.";
+        } else if(cho_token == UString("unknown-username")) {
+          errmsg = UString::format("No account by the username '%s' exists.", bancho.username);
+        } else if(cho_token == UString("incorrect-password")) {
+          errmsg = "Incorrect password.";
+        } else if(cho_token == UString("contact-staff")) {
+          errmsg = "Please contact an administrator of the server.";
+        }
+      }
+      bancho.osu->getNotificationOverlay()->addNotification(errmsg);
     }
   } else if (packet->id == RECV_MESSAGE) {
     UString sender = read_string(packet);
@@ -265,7 +289,6 @@ void handle_packet(Packet *packet) {
     debugLog("Restart: %d ms\n", ms);
     reconnect();
     // TODO @kiwec: wait 'ms' milliseconds before reconnecting
-    // TODO @kiwec: if login failure, don't reconnect
   } else if (packet->id == MATCH_INVITE) {
     UString sender = read_string(packet);
     UString text = read_string(packet);

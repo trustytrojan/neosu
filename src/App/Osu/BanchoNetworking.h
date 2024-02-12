@@ -35,3 +35,5 @@ void receive_bancho_packets();
 
 // Initialize networking thread. Should be called once when starting McOsu.
 void init_networking_thread();
+
+extern UString cho_token;

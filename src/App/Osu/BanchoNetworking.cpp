@@ -32,6 +32,7 @@ time_t last_packet_tms = {0};
 double seconds_between_pings = 1.0;
 
 std::string auth_header = "";
+UString cho_token = "";
 
 // osu! private API
 pthread_mutex_t api_requests_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -191,6 +192,7 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
   hres = curl_easy_header(curl, "cho-token", 0, CURLH_HEADER, -1, &header);
   if (hres == CURLHE_OK) {
     auth_header = "osu-token: " + std::string(header->value);
+    cho_token = UString(header->value);
   }
   hres = curl_easy_header(curl, "x-mcosu-features", 0, CURLH_HEADER, -1, &header);
   if (hres == CURLHE_OK) {
