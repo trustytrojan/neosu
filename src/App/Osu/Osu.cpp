@@ -538,6 +538,7 @@ Osu::Osu(int instanceID)
 	else
 		m_mainMenu->setVisible(true);
 
+	// TODO @kiwec: comment out this line
 	m_updateHandler->checkForUpdates();
 
     if(!env->directoryExists(MCENGINE_DATA_DIR "avatars")) {

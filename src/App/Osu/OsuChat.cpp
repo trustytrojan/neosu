@@ -319,9 +319,39 @@ void OsuChat::onChar(KeyboardEvent &key) {
     key.consume();
 }
 
+void OsuChat::mark_as_read(OsuChatChannel* chan) {
+    if(!m_bVisible) return;
+
+    // XXX: Only mark as read after 500ms
+    chan->read = true;
+
+    CURL *curl = curl_easy_init();
+    if (!curl) {
+        debugLog("Failed to initialize cURL in OsuChat::mark_as_read()!\n");
+        return;
+    }
+    char *channel_urlencoded = curl_easy_escape(curl, chan->name.toUtf8(), 0);
+        if (!channel_urlencoded) {
+        debugLog("Failed to encode channel name!\n");
+        curl_easy_cleanup(curl);
+        return;
+    }
+
+    APIRequest request = {
+        .type = MARK_AS_READ,
+        .path = UString::format("/web/osu-markasread.php?u=%s&h=%s&channel=%s", bancho.username.toUtf8(), bancho.pw_md5.toUtf8(), channel_urlencoded),
+    };
+    send_api_request(request);
+
+    curl_free(channel_urlencoded);
+    curl_easy_cleanup(curl);
+}
+
 void OsuChat::switchToChannel(OsuChatChannel* chan) {
     m_selected_channel = chan;
-    m_selected_channel->read = true;
+    if(!chan->read) {
+        mark_as_read(m_selected_channel);
+    }
 
     // Update button colors
     updateButtonLayout(getSize());
@@ -362,8 +392,10 @@ void OsuChat::addMessage(UString channel_name, ChatMessage msg) {
         if(chan->name != channel_name) continue;
         chan->messages.push_back(msg);
         chan->add_message(msg);
-        if(chan != m_selected_channel && chan->read) {
-            chan->read = false;
+        chan->read = false;
+        if(chan == m_selected_channel) {
+            mark_as_read(chan);
+        } else {
             updateButtonLayout(getSize());
         }
         return;

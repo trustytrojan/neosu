@@ -216,7 +216,7 @@ struct Room {
   int32_t map_id = 0;
 
   uint8_t mode = 0;
-  uint8_t win_condition = 0; // TODO @kiwec: handle all win conditions. scorev2 important for packet sending!
+  uint8_t win_condition = 0;
   uint8_t team_type = 0;
   uint8_t freemods = 0;
 

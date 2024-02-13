@@ -50,6 +50,7 @@ struct OsuChat : public OsuScreen
     virtual void onChar(KeyboardEvent &e);
     virtual void onResolutionChange(Vector2 newResolution);
 
+    void mark_as_read(OsuChatChannel* chan);
     void switchToChannel(OsuChatChannel* chan);
     void addChannel(UString channel_name, bool switch_to = false);
     void addMessage(UString channel_name, ChatMessage msg);

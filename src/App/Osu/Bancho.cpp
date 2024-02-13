@@ -25,9 +25,7 @@
 
 
 // Let's commit the full TODO list, why not?
-// TODO @kiwec: add "personal best" in online score list
 // TODO @kiwec: comb over every single option, and every single convar and make sure no cheats are possible in multiplayer
-// TODO @kiwec: mark DMs as read when they're visible on screen
 // TODO @kiwec: build on windows
 
 
@@ -198,10 +196,10 @@ void handle_packet(Packet *packet) {
   } else if (packet->id == NOTIFICATION) {
     UString notification = read_string(packet);
     bancho.osu->getNotificationOverlay()->addNotification(notification);
-    // TODO @kiwec: don't do McOsu style notifications, since:
+    // XXX: don't do McOsu style notifications, since:
     // 1) they can't do multiline text
     // 2) they don't stack, if the server sends >1 you only see the latest
-    // Maybe log them in the chat + display in top right like ppy client?
+    // Maybe log them in the chat + display in bottom right like ppy client?
   } else if (packet->id == ROOM_UPDATED) {
     auto room = Room(packet);
     if(bancho.osu->m_lobby->isVisible()) {
@@ -239,7 +237,6 @@ void handle_packet(Packet *packet) {
   } else if (packet->id == MATCH_PLAYER_FAILED) {
     int32_t slot_id = read_int(packet);
     bancho.osu->m_room->on_player_failed(slot_id);
-    // TODO @kiwec: isn't this player ragequit? not death?
   } else if (packet->id == MATCH_FINISHED) {
     bancho.osu->m_room->on_match_finished();
   } else if (packet->id == MATCH_SKIP) {
@@ -317,15 +314,19 @@ void handle_packet(Packet *packet) {
     int32_t ms = read_int(packet);
     debugLog("Restart: %d ms\n", ms);
     reconnect();
-    // TODO @kiwec: wait 'ms' milliseconds before reconnecting
+    // XXX: wait 'ms' milliseconds before reconnecting
   } else if (packet->id == MATCH_INVITE) {
     UString sender = read_string(packet);
     UString text = read_string(packet);
     UString recipient = read_string(packet);
+    (void)recipient;
     int32_t sender_id = read_int(packet);
-    (void)sender_id;
-    debugLog("(match invite) %s (%s): %s\n", sender, recipient, text);
-    // TODO @kiwec: make a clickable link in chat?
+    bancho.osu->m_chat->addMessage(recipient, ChatMessage{
+      .tms = time(NULL),
+      .author_id = sender_id,
+      .author_name = sender,
+      .text = text,
+    });
   } else if (packet->id == CHANNEL_INFO_END) {
     print_new_channels = false;
     bancho.osu->m_chat->join("#osu");
@@ -336,7 +337,7 @@ void handle_packet(Packet *packet) {
   } else if (packet->id == SILENCE_END) {
     int32_t delta = read_int(packet);
     debugLog("Silence ends in %d seconds.\n", delta);
-    // TODO @kiwec
+    // XXX: Prevent user from sending messages while silenced
   } else if (packet->id == USER_SILENCED) {
     int32_t user_id = read_int(packet);
     debugLog("User #%d silenced.\n", user_id);

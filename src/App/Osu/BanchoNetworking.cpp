@@ -146,7 +146,7 @@ static void send_api_request(CURL *curl, APIRequest api_out) {
   response.extra_int = api_out.extra_int;
   response.memory = new uint8_t[2048];
 
-  auto query_url = UString::format("https://osu.%s%s", bancho.endpoint.toUtf8(), api_out.path.c_str());
+  auto query_url = UString::format("https://osu.%s%s", bancho.endpoint.toUtf8(), api_out.path.toUtf8());
   curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
@@ -184,9 +184,12 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
   CURLcode res = curl_easy_perform(curl);
   CURLHcode hres;
   if (res != CURLE_OK) {
-    // TODO @kiwec: if log in packet, display error to user
-    debugLog("Failed to send packet, cURL error %d\n%s\n", res,
-             query_url.toUtf8());
+    debugLog("Failed to send packet, cURL error %d: %s\n", res, curl_easy_strerror(res));
+    if(auth_header.empty()) {
+      // XXX: Not thread safe, playing with fire here
+      auto errmsg = UString::format("Failed to log in: %s", curl_easy_strerror(res));
+      bancho.osu->getNotificationOverlay()->addNotification(errmsg);
+    }
     goto end;
   }
 
@@ -312,6 +315,8 @@ static void handle_api_response(Packet packet) {
     process_leaderboard_response(packet);
   } else if(packet.id == GET_BEATMAPSET_INFO) {
     OsuRoom::process_beatmapset_info_response(packet);
+  } else if(packet.id == MARK_AS_READ) {
+    // (nothing to do)
   } else {
     // NOTE: API Response type is same as API Request type
     debugLog("No handler for API response type %d!\n", packet.id);

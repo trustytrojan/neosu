@@ -11,11 +11,12 @@
 enum APIRequestType {
   GET_MAP_LEADERBOARD,
   GET_BEATMAPSET_INFO,
+  MARK_AS_READ,
 };
 
 struct APIRequest {
   APIRequestType type;
-  std::string path;
+  UString path;
   uint8_t *extra;
   uint32_t extra_int; // lazy
 };

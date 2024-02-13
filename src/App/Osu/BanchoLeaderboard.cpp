@@ -99,13 +99,12 @@ OsuDatabase::Score parse_score(char *score_line) {
 }
 
 void fetch_online_scores(OsuDatabaseBeatmap *beatmap) {
-  std::string path = "/web/osu-osz2-getscores.php?s=0&vv=4&v=1";
+  auto path = UString("/web/osu-osz2-getscores.php?s=0&vv=4&v=1");
 
   std::string beatmap_hash = beatmap->getMD5Hash();
-  path += "&c=" + beatmap_hash;
+  path.append(UString::format("&c=%s", beatmap->getMD5Hash().c_str()).toUtf8());
 
-  UString ustr_osu_file_path =
-      beatmap->getFilePath(); // have to keep UString in scope to use toUtf8()
+  UString ustr_osu_file_path = beatmap->getFilePath(); // have to keep UString in scope to use toUtf8()
   const char *osu_file_path = ustr_osu_file_path.toUtf8();
   for (const char *p = osu_file_path; *p; p++) {
     if (*p == '/') {
@@ -123,15 +122,10 @@ void fetch_online_scores(OsuDatabaseBeatmap *beatmap) {
     curl_easy_cleanup(curl);
     return;
   }
-  path += "&f=";
-  path += encoded_filename;
+  path.append(UString::format("&f=%s", encoded_filename).toUtf8());
   curl_free(encoded_filename);
   curl_easy_cleanup(curl);
-
-  path += "&m=0&i=" + std::to_string(beatmap->getSetID());
-  path += "&mods=0&h=&a=0";
-  path += "&us=" + std::string(bancho.username.toUtf8());
-  path += "&ha=" + std::string(bancho.pw_md5.toUtf8());
+  path.append(UString::format("&m=0&i=%d&mods=0&h=&a=0&us=%s&ha=%s", beatmap->getSetID(), bancho.username.toUtf8(), bancho.pw_md5.toUtf8()).toUtf8());
 
   APIRequest request = {
       .type = GET_MAP_LEADERBOARD,
@@ -204,6 +198,8 @@ void process_leaderboard_response(Packet response) {
     scores.push_back(parse_score(score_line));
   }
 
+  // XXX: We should also separately display either the "personal best" the server sent us,
+  //      or the local best, depending on which score is better.
   debugLog("Received online leaderbord for Beatmap ID %d\n", info.beatmap_id);
   bancho.osu->getSongBrowser()->getDatabase()->m_online_scores[beatmap_hash] = scores;
   bancho.osu->getSongBrowser()->rebuildScoreButtons();
