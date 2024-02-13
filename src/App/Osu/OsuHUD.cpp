@@ -1796,7 +1796,8 @@ void OsuHUD::drawScoreBoardMP(Graphics *g)
     	auto slot = &slots[i];
         if(!slot->is_player_playing() && !slot->has_finished_playing()) continue;
 
-        if(slot->player_id == bancho.user_id && m_osu->getSelectedBeatmap() != nullptr) {
+        auto beatmap = m_osu->getSelectedBeatmap();
+        if(slot->player_id == bancho.user_id && beatmap != nullptr) {
     		// Update local player slot instantly
             // (not including fields that won't be used for the HUD)
             slot->num300 = (uint16_t)m_osu->getScore()->getNum300s();
@@ -1805,18 +1806,23 @@ void OsuHUD::drawScoreBoardMP(Graphics *g)
             slot->num_miss = (uint16_t)m_osu->getScore()->getNumMisses();
             slot->current_combo = (uint16_t)m_osu->getScore()->getCombo();
             slot->total_score = (int32_t)m_osu->getScore()->getScore();
-            slot->current_hp = m_osu->getSelectedBeatmap()->getHealth() * 200;
+            slot->current_hp = beatmap->getHealth() * 200;
         }
 
 		auto user_info = get_user_info(slot->player_id, false);
-
-        // TODO @kiwec: draw player skip status
 
     	// XXX: draw player avatar
     	(void)slot->player_id;
 
 		SCORE_ENTRY scoreEntry;
 		scoreEntry.name = user_info->name;
+
+		if(beatmap != nullptr && beatmap->isInSkippableSection() && beatmap->getHitObjectIndexForCurrentTime() < 1) {
+			if(slot->skipped) {
+				// XXX: Draw pretty "Skip" image instead
+				scoreEntry.name = UString::format("%s [skip]", user_info->name.toUtf8());
+			}
+		}
 
 		scoreEntry.index = -1;
 		scoreEntry.combo = slot->current_combo;

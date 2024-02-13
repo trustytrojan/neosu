@@ -647,7 +647,6 @@ void OsuRoom::on_player_skip(int32_t user_id) {
     for(int i = 0; i < 16; i++) {
         if(bancho.room.slots[i].player_id == user_id) {
             bancho.room.slots[i].skipped = true;
-            // TODO @kiwec: display in OsuHUD
             break;
         }
     }

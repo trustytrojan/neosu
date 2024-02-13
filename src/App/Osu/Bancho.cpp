@@ -288,6 +288,19 @@ void handle_packet(Packet *packet) {
   } else if (packet->id == MATCH_PLAYER_SKIPPED) {
     int32_t user_id = read_int(packet);
     bancho.osu->m_room->on_player_skip(user_id);
+
+    // I'm not sure the server ever sends MATCH_SKIP... So, double-checking here.
+    bool all_players_skipped = true;
+    for(int i = 0; i < 16; i++) {
+      if(bancho.room.slots[i].is_player_playing()) {
+        if(!bancho.room.slots[i].skipped) {
+          all_players_skipped = false;
+        }
+      }
+    }
+    if(all_players_skipped) {
+      bancho.osu->m_room->on_all_players_skipped();
+    }
   } else if (packet->id == USER_PRESENCE) {
     int32_t presence_user_id = read_int(packet);
     UString presence_username = read_string(packet);
