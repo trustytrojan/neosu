@@ -450,6 +450,9 @@ void OsuRoom::process_beatmapset_info_response(Packet packet) {
 }
 
 void OsuRoom::on_map_change(bool download) {
+    // Results screen has map background and such showing, so prevent map from changing while we're on it.
+    if(m_osu->m_rankingScreen->isVisible()) return;
+
     debugLog("Map changed to ID %d, MD5 %s: %s\n", bancho.room.map_id, bancho.room.map_md5.toUtf8(), bancho.room.map_name.toUtf8());
     m_ready_btn->is_loading = true;
 
