@@ -604,8 +604,8 @@ void OsuRoom::on_match_score_updated(Packet* packet) {
     slot->num_katu = read_short(packet);
     slot->num_miss = read_short(packet);
     slot->total_score = read_int(packet);
-    slot->current_combo = read_short(packet);
     slot->max_combo = read_short(packet);
+    slot->current_combo = read_short(packet);
     slot->is_perfect = read_byte(packet);
     slot->current_hp = read_byte(packet);
     slot->tag = read_byte(packet);
@@ -615,8 +615,6 @@ void OsuRoom::on_match_score_updated(Packet* packet) {
         slot->sv2_combo = read_float64(packet);
         slot->sv2_bonus = read_float64(packet);
     }
-
-    debugLog("Combo: %f, Bonus: %f\n", slot->sv2_combo, slot->sv2_bonus);
 }
 
 void OsuRoom::on_all_players_loaded() {

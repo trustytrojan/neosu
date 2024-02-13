@@ -1785,11 +1785,20 @@ void OsuHUD::drawScoreBoardMP(Graphics *g)
 {
 	if(!bancho.is_in_a_multi_room()) return;
 
-    // Update local player slot instantly
+    auto slots = bancho.room.slots;
+    if(!bancho.is_playing_a_multi_map()) {
+    	slots = bancho.last_scores;
+    }
+
+	static std::vector<SCORE_ENTRY> scoreEntries;
+	scoreEntries.clear();
     for(int i = 0; i < 16; i++) {
-        auto slot = &bancho.room.slots[i];
-        if(slot->player_id == bancho.user_id) {
-            // Not including fields that won't be used for the HUD
+    	auto slot = &slots[i];
+        if(!slot->is_player_playing() && !slot->has_finished_playing()) continue;
+
+        if(slot->player_id == bancho.user_id && m_osu->getSelectedBeatmap() != nullptr) {
+    		// Update local player slot instantly
+            // (not including fields that won't be used for the HUD)
             slot->num300 = (uint16_t)m_osu->getScore()->getNum300s();
             slot->num100 = (uint16_t)m_osu->getScore()->getNum100s();
             slot->num50 = (uint16_t)m_osu->getScore()->getNum50s();
@@ -1797,23 +1806,7 @@ void OsuHUD::drawScoreBoardMP(Graphics *g)
             slot->current_combo = (uint16_t)m_osu->getScore()->getCombo();
             slot->total_score = (int32_t)m_osu->getScore()->getScore();
             slot->current_hp = m_osu->getSelectedBeatmap()->getHealth() * 200;
-            break;
         }
-    }
-
-    // TODO @kiwec: leaderboard is not sorted/does not reorder during gameplay
-
-	static std::vector<SCORE_ENTRY> scoreEntries;
-	scoreEntries.clear();
-    for(int i = 0; i < 16; i++) {
-    	Slot* slot;
-    	if(bancho.is_playing_a_multi_map()) {
-    		slot = &bancho.room.slots[i];
-    	} else {
-    		slot = &bancho.last_scores[i];
-    	}
-
-        if(!slot->is_player_playing() && !slot->has_finished_playing()) continue;
 
 		auto user_info = get_user_info(slot->player_id, false);
 
@@ -1826,19 +1819,37 @@ void OsuHUD::drawScoreBoardMP(Graphics *g)
 		scoreEntry.name = user_info->name;
 
 		scoreEntry.index = -1;
-		scoreEntry.combo = slot->current_combo; // TODO @kiwec: looks like "max_combo" ingame, sv2 specific?
+		scoreEntry.combo = slot->current_combo;
 		scoreEntry.score = slot->total_score;
 
 		// hit_score != total_score: total_score also accounts for spinner bonus & mods
 		uint64_t hit_score = 300 * slot->num300 + 100 * slot->num100 + 50 * slot->num50;
 		uint64_t max_score = 300 * (slot->num300 + slot->num100 + slot->num50 + slot->num_miss);
-		scoreEntry.accuracy = max_score > 0 ? hit_score / max_score : 0.f; // TODO @kiwec: accuracy stuck at 0%, sv2 specific?
-		// TODO @kiwec: only draw accuracy in the HUD when set to accuracy win condition, + don't draw regular score then
+		scoreEntry.accuracy = max_score > 0 ? hit_score / max_score : 0.f;
 
 		scoreEntry.dead = (slot->current_hp == 0);
 		scoreEntry.highlight = (slot->player_id == bancho.user_id);
 		scoreEntries.push_back(std::move(scoreEntry));
     }
+
+    // Sort scores
+	std::sort(scoreEntries.begin(), scoreEntries.end(), [](SCORE_ENTRY a, SCORE_ENTRY b) {
+		if(bancho.room.win_condition == ACCURACY) {
+			return a.accuracy > b.accuracy;
+		} else if(bancho.room.win_condition == COMBO) {
+			// NOTE: I'm aware that 'combo' in SCORE_ENTRY represents the current combo.
+			//       That's how the win condition actually works, though. lol
+			return a.combo > b.combo;
+		} else {
+			return a.score > b.score;
+		}
+	});
+
+	// Update indices
+	int i = 0;
+	for(auto& entry : scoreEntries) {
+		entry.index = i++;
+	}
 
 	drawScoreBoardInt(g, scoreEntries);
 }
@@ -1989,13 +2000,9 @@ void OsuHUD::drawScoreBoardInt(Graphics *g, const std::vector<OsuHUD::SCORE_ENTR
 			g->pushTransform();
 			{
 				const float scale = (height / accFont->getHeight())*accScale;
-
 				UString accString = UString::format("%.2f%%", scoreEntries[i].accuracy*100.0f);
-				const float stringWidth = accFont->getStringWidth(accString);
-
 				g->scale(scale, scale);
-				g->translate(x + width - stringWidth*scale - padding*1.35f, y + accFont->getHeight()*scale + 2*padding);
-				///if (drawTextShadow)
+				g->translate(x + padding*1.35f, y + height - 2*padding);
 				{
 					g->translate(1, 1);
 					g->setColor(textShadowColor);
@@ -2008,7 +2015,7 @@ void OsuHUD::drawScoreBoardInt(Graphics *g, const std::vector<OsuHUD::SCORE_ENTR
 			g->popTransform();
 		} else {
 			// draw score
-			const float scoreScale = 0.26f;
+			const float scoreScale = comboScale;
 			g->pushTransform();
 			{
 				const float scale = (height / scoreFont->getHeight())*scoreScale;
