@@ -37,6 +37,7 @@ OsuChatChannel::OsuChatChannel(OsuChat* chat, UString name_arg) {
     ui->setBackgroundColor(0xdd000000);
     ui->setHorizontalScrolling(false);
     ui->setDrawScrollbars(true);
+    ui->sticky = true;
 
     btn = new OsuUIButton(bancho.osu, 0, 0, 0, 0, "button", name);
     btn->setUseDefaultSkin();
@@ -57,11 +58,6 @@ void OsuChatChannel::add_message(ChatMessage msg) {
     const float line_height = 20;
     const Color system_color = 0xffffff00;
 
-    // TODO @kiwec: this stops following if chat is too fast :/
-    bool was_at_bottom = (ui->getSize().y - ui->getScrollPosY()) >= ui->getScrollSize().y;
-
-    bool is_system_message = msg.author_name.length() == 0;
-
     UString text_str = "";
     float x = 10;
 
@@ -74,6 +70,7 @@ void OsuChatChannel::add_message(ChatMessage msg) {
     ui->getContainer()->addBaseUIElement(timestamp);
     x += time_width;
 
+    bool is_system_message = msg.author_name.length() == 0;
     if(!is_system_message) {
         float name_width = m_chat->font->getStringWidth(msg.author_name);
 
@@ -87,6 +84,9 @@ void OsuChatChannel::add_message(ChatMessage msg) {
         text_str.append(": ");
     }
 
+    // XXX: Handle links, open them in the browser on click
+    // XXX: Handle map links, on click auto-download, add to song browser and select
+    // XXX: Handle lobby invite links, on click join the lobby (even if passworded)
     float line_width = x;
     for(int i = 0; i < msg.text.length(); i++) {
         float char_width = m_chat->font->getGlyphMetrics(msg.text[i]).advance_x;
@@ -119,10 +119,6 @@ void OsuChatChannel::add_message(ChatMessage msg) {
 
     y_total += line_height;
     ui->setScrollSizeToContent();
-
-    if(was_at_bottom) {
-        ui->scrollToBottom();
-    }
 }
 
 void OsuChatChannel::updateLayout(Vector2 pos, Vector2 size) {
