@@ -7,7 +7,6 @@
 
 // TODO @kiwec: limit to 100 messages / channel
 // TODO @kiwec: optimize
-// TODO @kiwec: fix chat width not getting updated when going from room to main menu
 
 
 class CBaseUIButton;
@@ -77,6 +76,7 @@ struct OsuChat : public OsuScreen
     McFont* font;
     float m_fAnimation = 0.f;
     bool user_wants_chat = false;
+    bool visibility_was_forced = false;
 
     const float input_box_height = 30.f;
     const float button_height = 26.f;

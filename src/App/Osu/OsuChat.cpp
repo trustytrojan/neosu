@@ -513,26 +513,30 @@ bool OsuChat::isVisibilityForced() {
     if(m_osu->m_room == nullptr || m_osu->m_lobby == nullptr || m_osu->m_songBrowser2 == nullptr) return false;
     bool sitting_in_room = m_osu->m_room->isVisible() && !m_osu->m_songBrowser2->isVisible() && !bancho.is_playing_a_multi_map();
     bool sitting_in_lobby = m_osu->m_lobby->isVisible();
-    return (sitting_in_room || sitting_in_lobby) && !m_osu->m_optionsMenu->isVisible();
+    bool is_forced = (sitting_in_room || sitting_in_lobby);
+
+    if(is_forced != visibility_was_forced) {
+        // Chat width changed: update the layout now
+        visibility_was_forced = is_forced;
+        updateLayout(m_osu->getScreenSize());
+    }
+    return is_forced;
 }
 
 void OsuChat::updateVisibility() {
-    if(isVisibilityForced()) {
-        setVisible(true);
-        return;
-    }
-
     auto selected_beatmap = m_osu->getSelectedBeatmap();
     bool can_skip = (selected_beatmap != nullptr) && (selected_beatmap->isInSkippableSection());
     bool is_clicking_circles = m_osu->isInPlayMode() && !can_skip && !m_osu->m_bModAuto && !m_osu->m_pauseMenu->isVisible();
     bool force_hide = m_osu->m_optionsMenu->isVisible() || m_osu->m_modSelector->isVisible() || is_clicking_circles;
     if(!bancho.is_online()) force_hide = true;
+
     if(force_hide) {
         setVisible(false);
-        return;
+    } else if(isVisibilityForced()) {
+        setVisible(true);
+    } else {
+        setVisible(user_wants_chat);
     }
-
-    setVisible(user_wants_chat);
 }
 
 CBaseUIContainer* OsuChat::setVisible(bool visible) {

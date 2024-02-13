@@ -1713,7 +1713,6 @@ CBaseUIContainer* OsuSongBrowser2::setVisible(bool visible)
 		engine->getMouse()->onRightChange(false);
 
 		// Select button matching current song preview
-		// TODO @kiwec: does not work on first load
 		if(m_selectedBeatmap != nullptr) {
 	        const std::vector<CBaseUIElement*> &elements = m_songBrowser->getContainer()->getElements();
 	        for (size_t i=0; i<elements.size(); i++) {
