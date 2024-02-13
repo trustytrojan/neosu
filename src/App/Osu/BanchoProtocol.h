@@ -185,6 +185,7 @@ struct Slot {
 
   // playing
   bool is_player_playing() { return (status & 0b00100000); }
+  bool has_finished_playing() { return (status & 0b01000000); }
 
   // no_map
   bool is_missing_beatmap() { return (status & 0b00010000); }

@@ -25,6 +25,8 @@ struct Bancho {
 
   bool match_started = false;
   bool is_playing_a_multi_map() { return match_started; }
+
+  Slot last_scores[16];
 };
 
 struct Channel {

@@ -391,20 +391,18 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
 void OsuRoom::ragequit() {
     m_bVisible = false;
     bancho.match_started = false;
+
+    Packet packet = {0};
+    packet.id = EXIT_ROOM;
+    send_packet(packet);
+
+    m_osu->m_modSelector->resetMods();
+    m_osu->m_modSelector->updateButtons();
+
+    bancho.room = Room();
     m_osu->m_mainMenu->setVisible(true);
     m_osu->m_chat->removeChannel("#multiplayer");
     m_osu->m_chat->updateVisibility();
-
-    if(bancho.is_in_a_multi_room()) {
-        Packet packet = {0};
-        packet.id = EXIT_ROOM;
-        send_packet(packet);
-
-        m_osu->m_modSelector->resetMods();
-        m_osu->m_modSelector->updateButtons();
-    }
-
-    bancho.room = Room();
 }
 
 void OsuRoom::process_beatmapset_info_response(Packet packet) {
@@ -633,10 +631,11 @@ void OsuRoom::on_player_failed(int32_t slot_id) {
 // All players have finished.
 void OsuRoom::on_match_finished() {
     if(!bancho.is_playing_a_multi_map()) return;
+    memcpy(bancho.last_scores, bancho.room.slots, sizeof(bancho.room.slots));
     m_osu->onPlayEnd(false, false);
-    m_osu->m_rankingScreen->setVisible(true);
-    m_bVisible = true;
     bancho.match_started = false;
+    m_osu->m_rankingScreen->setVisible(true);
+    m_osu->m_chat->updateVisibility();
 }
 
 void OsuRoom::on_all_players_skipped() {

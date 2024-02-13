@@ -22,6 +22,8 @@
 
 #include "Bancho.h"
 #include "Osu.h"
+#include "OsuChat.h"
+#include "OsuRoom.h"
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
 #include "OsuIcons.h"
@@ -467,12 +469,15 @@ CBaseUIContainer* OsuRankingScreen::setVisible(bool visible)
 {
 	OsuScreenBackable::setVisible(visible);
 
-	if (m_bVisible)
-	{
+	if (m_bVisible) {
 		m_backButton->resetAnimation();
 		m_rankings->scrollToY(0, false);
 
 		updateLayout();
+	} else if(bancho.is_in_a_multi_room()) {
+		// We backed out of the ranking screen, display the room again
+		m_osu->m_room->setVisible(true);
+    	m_osu->m_chat->updateVisibility();
 	}
 
 	return this;

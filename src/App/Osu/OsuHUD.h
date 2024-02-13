@@ -118,9 +118,6 @@ private:
 		int combo;
 		unsigned long long score;
 		float accuracy;
-
-		bool missingBeatmap;
-		bool downloadingBeatmap;
 		bool dead;
 		bool highlight;
 	};

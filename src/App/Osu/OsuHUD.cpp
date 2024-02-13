@@ -316,8 +316,7 @@ void OsuHUD::draw(Graphics *g)
         }
 
         bool playing_mp = osu_draw_scoreboard_mp.getBool() && bancho.is_playing_a_multi_map();
-        bool seeing_mp_results = bancho.is_in_a_multi_room() && m_osu->m_rankingScreen->isVisible(); // TODO @kiwec: doesn't work
-        if(playing_mp || seeing_mp_results) {
+        if(playing_mp) {
 			drawScoreBoardMP(g);
         }
 
@@ -539,8 +538,6 @@ void OsuHUD::drawDummy(Graphics *g)
 	scoreEntry.combo = 420;
 	scoreEntry.score = 12345678;
 	scoreEntry.accuracy = 1.0f;
-	scoreEntry.missingBeatmap = false;
-	scoreEntry.downloadingBeatmap = false;
 	scoreEntry.dead = false;
 	scoreEntry.highlight = true;
 	if ((osu_draw_scoreboard.getBool() && !bancho.is_playing_a_multi_map()) || (osu_draw_scoreboard_mp.getBool() && bancho.is_playing_a_multi_map()))
@@ -666,8 +663,6 @@ void OsuHUD::drawVRDummy(Graphics *g, Matrix4 &mvp, OsuVR *vr)
 		scoreEntry.combo = 1234;
 		scoreEntry.score = 12345678;
 		scoreEntry.accuracy = 1.0f;
-		scoreEntry.missingBeatmap = false;
-		scoreEntry.downloadingBeatmap = false;
 		scoreEntry.dead = false;
 		scoreEntry.highlight = true;
 		if ((osu_draw_scoreboard.getBool() && !bancho.is_playing_a_multi_map()) || (osu_draw_scoreboard_mp.getBool() && bancho.is_playing_a_multi_map()))
@@ -1731,9 +1726,6 @@ void OsuHUD::drawScoreBoard(Graphics *g, std::string &beatmapMD5Hash, OsuScore *
 		scoreEntry.combo = (*scores)[i].comboMax;
 		scoreEntry.score = (*scores)[i].score;
 		scoreEntry.accuracy = OsuScore::calculateAccuracy((*scores)[i].num300s, (*scores)[i].num100s, (*scores)[i].num50s, (*scores)[i].numMisses);
-
-		scoreEntry.missingBeatmap = false;
-		scoreEntry.downloadingBeatmap = false;
 		scoreEntry.dead = false;
 		scoreEntry.highlight = false;
 
@@ -1764,8 +1756,6 @@ void OsuHUD::drawScoreBoard(Graphics *g, std::string &beatmapMD5Hash, OsuScore *
 				}
 			}
 
-			currentScoreEntry.missingBeatmap = false;
-			currentScoreEntry.downloadingBeatmap = false;
 			currentScoreEntry.dead = currentScore->isDead();
 			currentScoreEntry.highlight = true;
 
@@ -1816,8 +1806,14 @@ void OsuHUD::drawScoreBoardMP(Graphics *g)
 	static std::vector<SCORE_ENTRY> scoreEntries;
 	scoreEntries.clear();
     for(int i = 0; i < 16; i++) {
-    	auto slot = &bancho.room.slots[i];
-        if(!slot->is_player_playing()) continue;
+    	Slot* slot;
+    	if(bancho.is_playing_a_multi_map()) {
+    		slot = &bancho.room.slots[i];
+    	} else {
+    		slot = &bancho.last_scores[i];
+    	}
+
+        if(!slot->is_player_playing() && !slot->has_finished_playing()) continue;
 
 		auto user_info = get_user_info(slot->player_id, false);
 
@@ -1839,8 +1835,6 @@ void OsuHUD::drawScoreBoardMP(Graphics *g)
 		scoreEntry.accuracy = max_score > 0 ? hit_score / max_score : 0.f; // TODO @kiwec: accuracy stuck at 0%, sv2 specific?
 		// TODO @kiwec: only draw accuracy in the HUD when set to accuracy win condition, + don't draw regular score then
 
-        scoreEntry.missingBeatmap = false;
-        scoreEntry.downloadingBeatmap = false;
 		scoreEntry.dead = (slot->current_hp == 0);
 		scoreEntry.highlight = (slot->player_id == bancho.user_id);
 		scoreEntries.push_back(std::move(scoreEntry));
@@ -1867,7 +1861,6 @@ void OsuHUD::drawScoreBoardInt(Graphics *g, const std::vector<OsuHUD::SCORE_ENTR
 	const Color backgroundColorHighlight = 0x55777777;
 	const Color backgroundColorTop = 0x551b6a8c;
 	const Color backgroundColorDead = 0x55660000;
-	const Color backgroundColorMissingBeatmap = 0x55aa0000;
 
 	const Color indexColor = 0x11ffffff;
 	const Color indexColorHighlight = 0x22ffffff;
@@ -1875,7 +1868,6 @@ void OsuHUD::drawScoreBoardInt(Graphics *g, const std::vector<OsuHUD::SCORE_ENTR
 	const Color nameScoreColor = 0xffaaaaaa;
 	const Color nameScoreColorHighlight = 0xffffffff;
 	const Color nameScoreColorTop = 0xffeeeeee;
-	const Color nameScoreColorDownloading = 0xffeeee00;
 	const Color nameScoreColorDead = 0xffee0000;
 
 	const Color comboAccuracyColor = 0xff5d9ca1;
@@ -1907,7 +1899,7 @@ void OsuHUD::drawScoreBoardInt(Graphics *g, const std::vector<OsuHUD::SCORE_ENTR
 		}
 
 		// draw background
-		g->setColor((scoreEntries[i].missingBeatmap ? backgroundColorMissingBeatmap : (scoreEntries[i].dead ? backgroundColorDead : (scoreEntries[i].highlight ? backgroundColorHighlight : (i == 0 ? backgroundColorTop : backgroundColor)))));
+		g->setColor(scoreEntries[i].dead ? backgroundColorDead : (scoreEntries[i].highlight ? backgroundColorHighlight : (i == 0 ? backgroundColorTop : backgroundColor)));
 		if (useMenuButtonBackground && !m_osu->isInVRDraw()) // NOTE: in vr you would see the other 3/4ths of menu-button-background sticking out left, just fallback to fillRect for now
 		{
 			const float backgroundScale = 0.62f + 0.005f;
@@ -1941,67 +1933,34 @@ void OsuHUD::drawScoreBoardInt(Graphics *g, const std::vector<OsuHUD::SCORE_ENTR
 		g->popTransform();
 
 		// draw name
-		const bool isDownloadingOrHasNoMap = (scoreEntries[i].downloadingBeatmap || scoreEntries[i].missingBeatmap);
 		const float nameScale = 0.315f;
-		if (!isDownloadingOrHasNoMap)
-		{
-			g->pushTransform();
-			{
-				const bool isInPlayModeAndAlsoNotInVR = m_osu->isInPlayMode() && !m_osu->isInVRMode();
-
-				if (isInPlayModeAndAlsoNotInVR)
-					g->pushClipRect(McRect(x, y, width - 2*padding, height));
-
-				UString nameString = scoreEntries[i].name;
-				if (scoreEntries[i].downloadingBeatmap)
-					nameString.append(" [downloading]");
-				else if (scoreEntries[i].missingBeatmap)
-					nameString.append(" [no map]");
-
-				const float scale = (height / nameFont->getHeight())*nameScale;
-
-				g->scale(scale, scale);
-				g->translate(x + padding, y + padding + nameFont->getHeight()*scale);
-				if (drawTextShadow)
-				{
-					g->translate(1, 1);
-					g->setColor(textShadowColor);
-					g->drawString(nameFont, nameString);
-					g->translate(-1, -1);
-				}
-				g->setColor((scoreEntries[i].dead || scoreEntries[i].missingBeatmap ? (scoreEntries[i].downloadingBeatmap ? nameScoreColorDownloading : nameScoreColorDead) : (scoreEntries[i].highlight ? nameScoreColorHighlight : (i == 0 ? nameScoreColorTop : nameScoreColor))));
-				g->drawString(nameFont, nameString);
-
-				if (isInPlayModeAndAlsoNotInVR)
-					g->popClipRect();
-			}
-			g->popTransform();
-		}
-
-		// draw score
-		const float scoreScale = 0.26f;
 		g->pushTransform();
 		{
-			const float scale = (height / scoreFont->getHeight())*scoreScale;
+			const bool isInPlayModeAndAlsoNotInVR = m_osu->isInPlayMode() && !m_osu->isInVRMode();
 
-			UString scoreString = UString::format("%llu", scoreEntries[i].score);
+			if (isInPlayModeAndAlsoNotInVR)
+				g->pushClipRect(McRect(x, y, width - 2*padding, height));
 
+			const float scale = (height / nameFont->getHeight())*nameScale;
 			g->scale(scale, scale);
-			g->translate(x + padding*1.35f, y + height - 2*padding);
+			g->translate(x + padding, y + padding + nameFont->getHeight()*scale);
 			if (drawTextShadow)
 			{
 				g->translate(1, 1);
 				g->setColor(textShadowColor);
-				g->drawString(scoreFont, scoreString);
+				g->drawString(nameFont, scoreEntries[i].name);
 				g->translate(-1, -1);
 			}
-			g->setColor((scoreEntries[i].dead ? nameScoreColorDead : (scoreEntries[i].highlight ? nameScoreColorHighlight : (i == 0 ? nameScoreColorTop : nameScoreColor))));
-			g->drawString(scoreFont, scoreString);
+			g->setColor(scoreEntries[i].dead ? nameScoreColorDead : (scoreEntries[i].highlight ? nameScoreColorHighlight : (i == 0 ? nameScoreColorTop : nameScoreColor)));
+			g->drawString(nameFont, scoreEntries[i].name);
+
+			if (isInPlayModeAndAlsoNotInVR)
+				g->popClipRect();
 		}
 		g->popTransform();
 
 		// draw combo
-		const float comboScale = scoreScale;
+		const float comboScale = 0.26f;
 		g->pushTransform();
 		{
 			const float scale = (height / comboFont->getHeight())*comboScale;
@@ -2047,47 +2006,29 @@ void OsuHUD::drawScoreBoardInt(Graphics *g, const std::vector<OsuHUD::SCORE_ENTR
 				g->drawString(accFont, accString);
 			}
 			g->popTransform();
-		}
-
-
-
-		// HACKHACK: code duplication
-		if (isDownloadingOrHasNoMap)
-		{
+		} else {
+			// draw score
+			const float scoreScale = 0.26f;
 			g->pushTransform();
 			{
-				const bool isInPlayModeAndAlsoNotInVR = m_osu->isInPlayMode() && !m_osu->isInVRMode();
+				const float scale = (height / scoreFont->getHeight())*scoreScale;
 
-				if (isInPlayModeAndAlsoNotInVR)
-					g->pushClipRect(McRect(x, y, width - 2*padding, height));
-
-				UString nameString = scoreEntries[i].name;
-				if (scoreEntries[i].downloadingBeatmap)
-					nameString.append(" [downloading]");
-				else if (scoreEntries[i].missingBeatmap)
-					nameString.append(" [no map]");
-
-				const float scale = (height / nameFont->getHeight())*nameScale;
+				UString scoreString = UString::format("%llu", scoreEntries[i].score);
 
 				g->scale(scale, scale);
-				g->translate(x + padding, y + padding + nameFont->getHeight()*scale);
+				g->translate(x + padding*1.35f, y + height - 2*padding);
 				if (drawTextShadow)
 				{
 					g->translate(1, 1);
 					g->setColor(textShadowColor);
-					g->drawString(nameFont, nameString);
+					g->drawString(scoreFont, scoreString);
 					g->translate(-1, -1);
 				}
-				g->setColor((scoreEntries[i].dead || scoreEntries[i].missingBeatmap ? (scoreEntries[i].downloadingBeatmap ? nameScoreColorDownloading : nameScoreColorDead) : (scoreEntries[i].highlight ? nameScoreColorHighlight : (i == 0 ? nameScoreColorTop : nameScoreColor))));
-				g->drawString(nameFont, nameString);
-
-				if (isInPlayModeAndAlsoNotInVR)
-					g->popClipRect();
+				g->setColor((scoreEntries[i].dead ? nameScoreColorDead : (scoreEntries[i].highlight ? nameScoreColorHighlight : (i == 0 ? nameScoreColorTop : nameScoreColor))));
+				g->drawString(scoreFont, scoreString);
 			}
 			g->popTransform();
 		}
-
-
 
 		if (m_osu->isInVRDraw())
 		{

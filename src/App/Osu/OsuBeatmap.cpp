@@ -1589,8 +1589,8 @@ void OsuBeatmap::stop(bool quit)
 
 	if(bancho.is_playing_a_multi_map()) {
 		if(quit) {
-			m_osu->m_room->ragequit();
 			m_osu->onPlayEnd(true);
+			m_osu->m_room->ragequit();
 		} else {
 			m_osu->m_room->onClientScoreChange(true);
 			Packet packet = {0};
