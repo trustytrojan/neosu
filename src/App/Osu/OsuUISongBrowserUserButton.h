@@ -13,6 +13,7 @@
 class ConVar;
 
 class Osu;
+class OsuUIAvatar;
 
 class OsuUISongBrowserUserButton : public CBaseUIButton
 {
@@ -25,6 +26,8 @@ public:
 	void updateUserStats();
 
 	void addTooltipLine(UString text) {m_vTooltipLines.push_back(text);}
+
+	OsuUIAvatar *m_avatar = nullptr;
 
 private:
 	virtual void onMouseInside();

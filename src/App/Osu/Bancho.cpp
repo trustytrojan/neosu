@@ -20,6 +20,7 @@
 #include "OsuOptionsMenu.h"
 #include "OsuRoom.h"
 #include "OsuSongBrowser2.h"
+#include "OsuUIAvatar.h"
 #include "OsuUIButton.h"
 #include "OsuUISongBrowserUserButton.h"
 
@@ -106,6 +107,14 @@ void handle_packet(Packet *packet) {
       if(!env->directoryExists(avatar_dir)) {
         env->createDirectory(avatar_dir);
       }
+
+      // close your eyes
+      if(bancho.osu->m_songBrowser2->m_userButton->m_avatar) {
+        delete bancho.osu->m_songBrowser2->m_userButton->m_avatar;
+        bancho.osu->m_songBrowser2->m_userButton->m_avatar = nullptr;
+      }
+      bancho.osu->m_songBrowser2->m_userButton->m_avatar = new OsuUIAvatar(bancho.user_id, 0.f, 0.f, 0.f, 0.f);
+      bancho.osu->m_songBrowser2->m_userButton->m_avatar->on_screen = true;
     } else {
       convar->getConVarByName("mp_autologin")->setValue(false);
       bancho.osu->m_optionsMenu->logInButton->setText("Log in");

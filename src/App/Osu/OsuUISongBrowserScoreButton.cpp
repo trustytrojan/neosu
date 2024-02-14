@@ -128,7 +128,7 @@ void OsuUISongBrowserScoreButton::draw(Graphics *g)
 	const int yPos = (int)m_vPos.y; // avoid max shimmering
 
 	// index number
-	if(m_avatar && m_osu->m_songBrowser2) {
+	if(m_avatar) {
 		const float margin = m_vSize.y * 0.1;
 		m_avatar->setPos(m_vPos.x + margin, m_vPos.y + margin);
 		m_avatar->setSize(m_vSize.y - (2 * margin), m_vSize.y - (2 * margin));

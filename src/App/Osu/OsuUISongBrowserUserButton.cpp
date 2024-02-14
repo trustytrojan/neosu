@@ -21,6 +21,7 @@
 #include "OsuTooltipOverlay.h"
 #include "OsuSongBrowser2.h"
 #include "OsuDatabase.h"
+#include "OsuUIAvatar.h"
 
 // NOTE: selected username is stored in m_sText
 
@@ -44,8 +45,6 @@ OsuUISongBrowserUserButton::OsuUISongBrowserUserButton(Osu *osu) : CBaseUIButton
 	m_fPPDeltaAnim = 0.0f;
 
 	m_fHoverAnim = 0.0f;
-
-	// TODO @kiwec: display avatar, update on reconnect
 }
 
 void OsuUISongBrowserUserButton::draw(Graphics *g)
@@ -68,34 +67,23 @@ void OsuUISongBrowserUserButton::draw(Graphics *g)
 	g->fillRect(m_vPos.x + iconBorder + 1, m_vPos.y + iconBorder + 1, iconWidth, iconHeight);
 
 	// draw user icon
-	/*
-	McFont *iconFont = m_osu->getFontIcons();
-	g->setColor(0xffffffff);
-	g->pushTransform();
-	{
-		UString iconString; iconString.insert(0, OsuIcons::USER);
-		const float stringWidth = iconFont->getStringWidth(iconString);
-		const float stringHeight = iconFont->getStringHeight(iconString);
-		const float iconScale = (iconHeight / stringHeight)*0.5f;
-
-		g->scale(iconScale, iconScale);
-		g->translate(m_vPos.x + iconBorder + iconWidth/2 - (stringWidth/2)*iconScale, m_vPos.y + m_vSize.y/2 + (stringHeight/2)*iconScale);
-		g->drawString(iconFont, iconString);
+	if(m_avatar) {
+		m_avatar->setPos(m_vPos.x + iconBorder + 1, m_vPos.y + iconBorder + 1);
+		m_avatar->setSize(iconWidth, iconHeight);
+		m_avatar->draw(g);
+	} else {
+		g->setColor(0xffffffff);
+		g->pushClipRect(McRect(m_vPos.x + iconBorder + 1, m_vPos.y + iconBorder + 2, iconWidth, iconHeight));
+		g->pushTransform();
+		{
+			const float scale = Osu::getImageScaleToFillResolution(m_osu->getSkin()->getUserIcon(), Vector2(iconWidth, iconHeight));
+			g->scale(scale, scale);
+			g->translate(m_vPos.x + iconBorder + iconWidth/2 + 1, m_vPos.y + iconBorder + iconHeight/2 + 1);
+			g->drawImage(m_osu->getSkin()->getUserIcon());
+		}
+		g->popTransform();
+		g->popClipRect();
 	}
-	g->popTransform();
-	*/
-
-	g->setColor(0xffffffff);
-	g->pushClipRect(McRect(m_vPos.x + iconBorder + 1, m_vPos.y + iconBorder + 2, iconWidth, iconHeight));
-	g->pushTransform();
-	{
-		const float scale = Osu::getImageScaleToFillResolution(m_osu->getSkin()->getUserIcon(), Vector2(iconWidth, iconHeight));
-		g->scale(scale, scale);
-		g->translate(m_vPos.x + iconBorder + iconWidth/2 + 1, m_vPos.y + iconBorder + iconHeight/2 + 1);
-		g->drawImage(m_osu->getSkin()->getUserIcon());
-	}
-	g->popTransform();
-	g->popClipRect();
 
 	// draw username
 	McFont *usernameFont = m_osu->getSongBrowserFont();
@@ -236,17 +224,13 @@ void OsuUISongBrowserUserButton::draw(Graphics *g)
 void OsuUISongBrowserUserButton::mouse_update(bool *propagate_clicks)
 {
 	if (!m_bVisible) return;
-	CBaseUIButton::mouse_update(propagate_clicks);
 
-	if (isMouseInside() && m_vTooltipLines.size() > 0)
-	{
-		m_osu->getTooltipOverlay()->begin();
-		for (int i=0; i<m_vTooltipLines.size(); i++)
-		{
-			m_osu->getTooltipOverlay()->addLine(m_vTooltipLines[i]);
-		}
-		m_osu->getTooltipOverlay()->end();
+	if(m_avatar) {
+		m_avatar->mouse_update(propagate_clicks);
+		if(!*propagate_clicks) return;
 	}
+
+	CBaseUIButton::mouse_update(propagate_clicks);
 }
 
 void OsuUISongBrowserUserButton::updateUserStats()
