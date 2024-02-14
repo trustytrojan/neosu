@@ -12,14 +12,13 @@
 #include "OsuLobby.h"
 #include "OsuOptionsMenu.h"
 #include "OsuRoom.h"
+#include "OsuUIAvatar.h"
 #include "OsuUIButton.h"
 
 #ifdef MCENGINE_FEATURE_PTHREADS
 #include <curl/curl.h>
 #include <pthread.h>
 #include "File.h"
-
-pthread_t networking_thread;
 
 
 // Bancho protocol
@@ -81,6 +80,10 @@ void disconnect() {
   bancho.osu->m_chat->onDisconnect();
 
   pthread_mutex_unlock(&outgoing_mutex);
+
+  pthread_mutex_lock(&avatars_mtx);
+  avatar_downloading_thread_id++;
+  pthread_mutex_unlock(&avatars_mtx);
 }
 
 void reconnect() {
@@ -117,6 +120,15 @@ void reconnect() {
   login_packet = new_login_packet;
   try_logging_in = true;
   pthread_mutex_unlock(&outgoing_mutex);
+
+  pthread_mutex_lock(&avatars_mtx);
+  avatar_downloading_thread_id++;
+  pthread_t dummy = 0;
+  int ret = pthread_create(&dummy, NULL, avatar_downloading_thread, NULL);
+  if (ret) {
+    debugLog("Failed to start avatar downloading thread: pthread_create() returned %i\n", ret);
+  }
+  pthread_mutex_unlock(&avatars_mtx);
 }
 
 static size_t curl_write(void *contents, size_t size, size_t nmemb,
@@ -305,7 +317,6 @@ static void *do_networking(void *data) {
     usleep(1000); // wait 1ms
   }
 
-  // unreachable
   return NULL;
 }
 #endif
@@ -401,7 +412,8 @@ void send_packet(Packet& packet) {
 
 void init_networking_thread() {
 #ifdef MCENGINE_FEATURE_PTHREADS
-  int ret = pthread_create(&networking_thread, NULL, do_networking, NULL);
+  pthread_t dummy = 0;
+  int ret = pthread_create(&dummy, NULL, do_networking, NULL);
   if (ret) {
     debugLog("Failed to start networking thread: pthread_create() returned "
              "code %i\n",

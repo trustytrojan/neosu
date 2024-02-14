@@ -16,6 +16,7 @@
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
 #include "OsuSongBrowser2.h"
+#include "OsuUIAvatar.h"
 #include "OsuUIButton.h"
 #include "OsuUICheckbox.h"
 #include "OsuUISongBrowserSongButton.h"
@@ -171,6 +172,17 @@ void OsuRoom::draw(Graphics *g) {
     // XXX: Add convar for toggling room backgrounds
     OsuSongBrowser2::drawSelectedBeatmapBackgroundImage(g, m_osu, 1.0);
     OsuScreen::draw(g);
+
+    // Update avatar visibility status
+    for(auto elm : m_slotlist->getContainer()->getElements()) {
+        if(elm->getName() == UString("avatar")) {
+            // NOTE: Not checking horizontal visibility
+            auto avatar = (OsuUIAvatar*)elm;
+            bool is_below_top = avatar->getPos().y + avatar->getSize().y >= m_slotlist->getPos().y;
+            bool is_above_bottom = avatar->getPos().y <= m_slotlist->getPos().y + m_slotlist->getSize().y;
+            avatar->on_screen = is_below_top && is_above_bottom;
+        }
+    }
 
     // Not technically drawing below this line, just checking for map download progress
     if(m_osu->getSelectedBeatmap() != NULL) return;
@@ -362,9 +374,13 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
                 username = UString::format("[playing] %s", user_info->name.toUtf8());
             }
 
+            const float SLOT_HEIGHT = 40.f;
+            auto avatar = new OsuUIAvatar(bancho.room.slots[i].player_id, 10, y_total, SLOT_HEIGHT, SLOT_HEIGHT);
+            m_slotlist->getContainer()->addBaseUIElement(avatar);
+
             auto user_box = new OsuUIUserLabel(m_osu, bancho.room.slots[i].player_id, username);
             user_box->setFont(lfont);
-            user_box->setPos(10, y_total);
+            user_box->setPos(avatar->getRelPos().x + avatar->getSize().x + 10, y_total);
 
             auto color = 0xffffffff;
             if(bancho.room.slots[i].is_ready()) {
@@ -374,14 +390,15 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
             }
             user_box->setTextColor(color);
             user_box->setSizeToContent();
+            user_box->setSize(user_box->getSize().x, SLOT_HEIGHT);
             m_slotlist->getContainer()->addBaseUIElement(user_box);
 
             auto user_mods = new OsuUIModList(&bancho.room.slots[i].mods);
-            user_mods->setPos(user_box->getSize().x + 30, y_total - 10);
-            user_mods->setSize(350, user_box->getSize().y + 20);
+            user_mods->setPos(user_box->getPos().x + user_box->getSize().x + 30, y_total);
+            user_mods->setSize(350, SLOT_HEIGHT);
             m_slotlist->getContainer()->addBaseUIElement(user_mods);
 
-            y_total += user_box->getSize().y + 20;
+            y_total += SLOT_HEIGHT + 5;
         }
     }
     m_slotlist->setScrollSizeToContent();
