@@ -398,6 +398,9 @@ void OsuChat::addMessage(UString channel_name, ChatMessage msg) {
         } else {
             updateButtonLayout(getSize());
         }
+        if(chan->messages.size() > 100) {
+            chan->messages.erase(chan->messages.begin());
+        }
         return;
     }
 }

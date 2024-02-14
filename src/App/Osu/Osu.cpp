@@ -1040,7 +1040,16 @@ void Osu::update()
 			m_songBrowser2->setVisible(!m_songBrowser2->isVisible());
 
 		if(bancho.is_in_a_multi_room()) {
-			// TODO @kiwec: we didn't select a map; revert to previously selected song
+			// We didn't select a map; revert to previously selected one
+			if(m_songBrowser2->m_lastSelectedBeatmap != nullptr) {
+				m_room->m_pauseButton->setPaused(true);
+				if(m_songBrowser2->m_selectedBeatmap != nullptr) {
+			        m_songBrowser2->m_selectedBeatmap->deselect();
+			        m_songBrowser2->m_selectedBeatmap = nullptr;
+				}
+
+            	m_songBrowser2->onDifficultySelected(m_songBrowser2->m_lastSelectedBeatmap, false);
+			}
 		} else {
 			m_mainMenu->setVisible(!(m_songBrowser2 != NULL && m_songBrowser2->isVisible()));
 		}

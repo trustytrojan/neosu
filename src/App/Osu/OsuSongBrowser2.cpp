@@ -1714,6 +1714,8 @@ CBaseUIContainer* OsuSongBrowser2::setVisible(bool visible)
 
 		// Select button matching current song preview
 		if(m_selectedBeatmap != nullptr) {
+			m_lastSelectedBeatmap = m_selectedBeatmap->getSelectedDifficulty2();
+
 	        const std::vector<CBaseUIElement*> &elements = m_songBrowser->getContainer()->getElements();
 	        for (size_t i=0; i<elements.size(); i++) {
 	            OsuUISongBrowserSongButton *btn = dynamic_cast<OsuUISongBrowserSongButton*>(elements[i]);

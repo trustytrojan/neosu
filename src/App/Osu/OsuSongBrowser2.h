@@ -364,6 +364,7 @@ public:
 	bool m_bPreviousRandomBeatmapScheduled;
 
 	// behaviour
+	OsuDatabaseBeatmap *m_lastSelectedBeatmap = nullptr;
 	OsuBeatmap *m_selectedBeatmap;
 	bool m_bHasSelectedAndIsPlaying;
 	float m_fPulseAnimation;

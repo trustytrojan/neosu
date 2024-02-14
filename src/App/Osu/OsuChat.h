@@ -5,10 +5,6 @@
 #include "OsuScreen.h"
 
 
-// TODO @kiwec: limit to 100 messages / channel
-// TODO @kiwec: optimize
-
-
 class CBaseUIButton;
 class McFont;
 class OsuChat;

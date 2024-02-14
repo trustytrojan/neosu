@@ -783,7 +783,6 @@ void OsuRoom::onFreemodCheckboxChanged(CBaseUICheckbox *checkbox) {
     packet.id = MATCH_CHANGE_SETTINGS;
     bancho.room.pack(&packet);
     send_packet(packet);
-    
-    // TODO @kiwec: this is not updating correctly, idk why
-    updateLayout(m_osu->getScreenSize());
+
+    on_room_updated(bancho.room);
 }
