@@ -3,7 +3,6 @@
 #include <curl/curl.h>
 #include <string>
 
-// TODO @kiwec: Don't hardcode this
 // User agent sent when downloading beatmaps
 #define MCOSU_VERSION "34.00-dev"
 #define MCOSU_USER_AGENT "Mozilla/5.0 (compatible; McOsu/" MCOSU_VERSION "; +https://mcosu.kiwec.net/)"

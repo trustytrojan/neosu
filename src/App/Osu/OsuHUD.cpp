@@ -10,6 +10,7 @@
 #include "OsuLobby.h"
 #include "OsuRankingScreen.h"
 #include "OsuRoom.h"
+#include "OsuUIAvatar.h"
 
 #include "OsuHUD.h"
 
@@ -1809,12 +1810,10 @@ void OsuHUD::drawScoreBoardMP(Graphics *g)
             slot->current_hp = beatmap->getHealth() * 200;
         }
 
-		auto user_info = get_user_info(slot->player_id, false);
-
-    	// XXX: draw player avatar
-    	(void)slot->player_id;
-
 		SCORE_ENTRY scoreEntry;
+		scoreEntry.player_id = slot->player_id;
+
+		auto user_info = get_user_info(slot->player_id, false);
 		scoreEntry.name = user_info->name;
 
 		if(beatmap != nullptr && beatmap->isInSkippableSection() && beatmap->getHitObjectIndexForCurrentTime() < 1) {
@@ -1897,7 +1896,7 @@ void OsuHUD::drawScoreBoardInt(Graphics *g, const std::vector<OsuHUD::SCORE_ENTR
 
 	const float scale = osu_hud_scoreboard_scale.getFloat() * osu_hud_scale.getFloat();
 	const float height = m_osu->getScreenHeight() * 0.07f * scale;
-	const float width = height*2.6f; // was 2.75f
+	const float width = height*2.6f; // was 2.75f ; does not include avatar_width
 	const float margin = height*0.1f;
 	const float padding = height*0.05f;
 
@@ -1907,8 +1906,15 @@ void OsuHUD::drawScoreBoardInt(Graphics *g, const std::vector<OsuHUD::SCORE_ENTR
 	const float startPosY = clamp<float>(m_osu->getScreenHeight()/2 - (scoreEntries.size()*height + (scoreEntries.size()-1)*margin)/2 + osu_hud_scoreboard_offset_y_percent.getFloat()*m_osu->getScreenHeight(), 0.0f, minStartPosY);
 	for (int i=0; i<scoreEntries.size(); i++)
 	{
-		const float x = startPosX;
+		float x = startPosX;
 		const float y = startPosY + i*(height + margin);
+
+		float avatar_height = height;
+		float avatar_width = avatar_height;
+		if(scoreEntries[i].player_id == 0) {
+			avatar_height = 0.f;
+			avatar_width = 0.f;
+		}
 
 		if (m_osu->isInVRDraw())
 		{
@@ -1920,10 +1926,10 @@ void OsuHUD::drawScoreBoardInt(Graphics *g, const std::vector<OsuHUD::SCORE_ENTR
 		if (useMenuButtonBackground && !m_osu->isInVRDraw()) // NOTE: in vr you would see the other 3/4ths of menu-button-background sticking out left, just fallback to fillRect for now
 		{
 			const float backgroundScale = 0.62f + 0.005f;
-			backgroundImage->draw(g, Vector2(x + (backgroundImage->getSizeBase().x/2)*backgroundScale*scale - (470*oScale)*backgroundScale*scale, y + height/2), backgroundScale*scale);
+			backgroundImage->draw(g, Vector2(x + avatar_width + (backgroundImage->getSizeBase().x/2)*backgroundScale*scale - (470*oScale)*backgroundScale*scale, y + height/2), backgroundScale*scale);
 		}
 		else
-			g->fillRect(x, y, width, height);
+			g->fillRect(x, y, width + avatar_width, height);
 
 		if (m_osu->isInVRDraw())
 		{
@@ -1931,6 +1937,15 @@ void OsuHUD::drawScoreBoardInt(Graphics *g, const std::vector<OsuHUD::SCORE_ENTR
 
 			g->pushTransform();
 			g->translate(0, 0, 0.1f);
+		}
+
+		// draw avatar
+		// NOTE: This is calling engine->loadImage() every frame, idk how slow that is
+		if(avatar_width > 0) {
+			auto avatar = OsuUIAvatar(scoreEntries[i].player_id, x, y, avatar_width, avatar_height);
+			avatar.on_screen = true;
+			avatar.draw(g); // XXX: Doesn't download but will still show as loading if not downloaded
+			x += avatar_width;
 		}
 
 		// draw index

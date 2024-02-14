@@ -362,7 +362,7 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
         }
     }
 
-    // XXX: improve slot list, display user presence with avatars instead
+    // XXX: Display detailed user presence
     m_slotlist->setSize(newResolution.x * 0.6 - 200, newResolution.y * 0.6 - 110);
     m_slotlist->clear();
     int y_total = 10;
@@ -603,6 +603,7 @@ void OsuRoom::on_match_started(Room room) {
         bancho.match_started = true;
         m_osu->m_songBrowser2->m_bHasSelectedAndIsPlaying = true;
         m_osu->onPlayStart();
+        m_osu->m_chat->updateVisibility();
     } else {
         ragequit(); // map failed to load
     }

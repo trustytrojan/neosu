@@ -113,6 +113,7 @@ private:
 	struct SCORE_ENTRY
 	{
 		UString name;
+		uint32_t player_id = 0;
 
 		int index;
 		int combo;
