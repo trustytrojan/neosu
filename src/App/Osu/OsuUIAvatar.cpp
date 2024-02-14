@@ -147,8 +147,6 @@ loop:
 OsuUIAvatar::OsuUIAvatar(uint32_t player_id, float xPos, float yPos, float xSize, float ySize) : CBaseUIButton(xPos, yPos, xSize, ySize, "avatar", "") {
     m_player_id = player_id;
 
-    // XXX: Pick a better placeholder image and remove the if(!is_loading) in draw()
-    avatar = bancho.osu->getSkin()->getMissingTexture();
     avatar_path = UString::format(MCENGINE_DATA_DIR "avatars/%s/%d.png", bancho.endpoint.toUtf8(), player_id);
     setClickCallback( fastdelegate::MakeDelegate(this, &OsuUIAvatar::onAvatarClicked) );
 
@@ -165,7 +163,6 @@ OsuUIAvatar::OsuUIAvatar(uint32_t player_id, float xPos, float yPos, float xSize
     }
 
     if(exists) {
-        is_loading = false;
         avatar = engine->getResourceManager()->loadImageAbs(avatar_path, avatar_path);
     }
 }
@@ -173,28 +170,12 @@ OsuUIAvatar::OsuUIAvatar(uint32_t player_id, float xPos, float yPos, float xSize
 void OsuUIAvatar::draw(Graphics *g) {
     if(!on_screen) return; // Comment when you need to debug on_screen logic
 
-    if(!is_loading) {
+    if(avatar != nullptr) {
         g->pushTransform();
         g->setColor(0xffffffff);
         g->scale(m_vSize.x / avatar->getWidth(), m_vSize.y / avatar->getHeight());
         g->translate(m_vPos.x + m_vSize.x/2.0f, m_vPos.y + m_vSize.y/2.0f);
         g->drawImage(avatar);
-        g->popTransform();
-    }
-
-    if(is_loading) {
-        g->pushTransform();
-        g->setColor(0xdd000000);
-        g->drawQuad((int)m_vPos.x, (int)m_vPos.y, (int)m_vSize.x, (int)m_vSize.y);
-        g->popTransform();
-
-        const float scale = (m_vSize.y * 0.6) / bancho.osu->getSkin()->getLoadingSpinner()->getSize().y;
-        g->pushTransform();
-        g->setColor(0x99ffffff);
-        g->rotate(engine->getTime()*180, 0, 0, 1);
-        g->scale(scale, scale);
-        g->translate(m_vPos.x + m_vSize.x/2.0f, m_vPos.y + m_vSize.y/2.0f);
-        g->drawImage(bancho.osu->getSkin()->getLoadingSpinner());
         g->popTransform();
     }
 
@@ -215,7 +196,7 @@ void OsuUIAvatar::draw(Graphics *g) {
 void OsuUIAvatar::mouse_update(bool *propagate_clicks) {
     CBaseUIButton::mouse_update(propagate_clicks);
 
-    if(is_loading && m_player_id != 0) {
+    if(avatar == nullptr && m_player_id != 0) {
         pthread_mutex_lock(&avatars_mtx);
 
         // Check if it has finished downloading
@@ -223,11 +204,10 @@ void OsuUIAvatar::mouse_update(bool *propagate_clicks) {
         if(it != avatars_loaded.end()) {
             avatars_loaded.erase(it);
             avatar = engine->getResourceManager()->loadImageAbs(avatar_path, avatar_path);
-            is_loading = false;
         }
 
         // Check if avatar is on screen and *still* not downloaded yet
-        if(is_loading && on_screen) {
+        if(avatar == nullptr && on_screen) {
             // Request download if not done so already
             auto it = std::find(avatars_to_load.begin(), avatars_to_load.end(), m_player_id);
             if(it == avatars_to_load.end()) {

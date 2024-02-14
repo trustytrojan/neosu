@@ -13,7 +13,6 @@ struct OsuUIAvatar : public CBaseUIButton {
     uint32_t m_player_id;
     UString avatar_path;
     Image *avatar = nullptr;
-    bool is_loading = true;
     bool on_screen = false;
 };
 
