@@ -44,6 +44,8 @@ OsuUISongBrowserUserButton::OsuUISongBrowserUserButton(Osu *osu) : CBaseUIButton
 	m_fPPDeltaAnim = 0.0f;
 
 	m_fHoverAnim = 0.0f;
+
+	// TODO @kiwec: display avatar, update on reconnect
 }
 
 void OsuUISongBrowserUserButton::draw(Graphics *g)

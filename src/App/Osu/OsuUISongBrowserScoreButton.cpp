@@ -31,6 +31,7 @@
 #include "OsuDatabaseBeatmap.h"
 #include "OsuGameRules.h"
 
+#include "OsuUIAvatar.h"
 #include "OsuUIContextMenu.h"
 
 #include <chrono>
@@ -127,6 +128,19 @@ void OsuUISongBrowserScoreButton::draw(Graphics *g)
 	const int yPos = (int)m_vPos.y; // avoid max shimmering
 
 	// index number
+	if(m_avatar && m_osu->m_songBrowser2) {
+		const float margin = m_vSize.y * 0.1;
+		m_avatar->setPos(m_vPos.x + margin, m_vPos.y + margin);
+		m_avatar->setSize(m_vSize.y - (2 * margin), m_vSize.y - (2 * margin));
+
+    	// Update avatar visibility status
+    	// NOTE: Not checking horizontal visibility
+    	auto m_scoreBrowser = m_osu->m_songBrowser2->m_scoreBrowser;
+        bool is_below_top = m_avatar->getPos().y + m_avatar->getSize().y >= m_scoreBrowser->getPos().y;
+        bool is_above_bottom = m_avatar->getPos().y <= m_scoreBrowser->getPos().y + m_scoreBrowser->getSize().y;
+        m_avatar->on_screen = is_below_top && is_above_bottom;
+		m_avatar->draw(g);
+	}
 	const float indexNumberScale = 0.35f;
 	const float indexNumberWidthPercent = (m_style == STYLE::TOP_RANKS ? 0.075f : 0.15f);
 	McFont *indexNumberFont = m_osu->getSongBrowserFontBold();
@@ -385,6 +399,12 @@ void OsuUISongBrowserScoreButton::draw(Graphics *g)
 void OsuUISongBrowserScoreButton::mouse_update(bool *propagate_clicks)
 {
 	if (!m_bVisible) return;
+
+	if(m_avatar) {
+		m_avatar->mouse_update(propagate_clicks);
+		if(!*propagate_clicks) return;
+	}
+
 	CBaseUIButton::mouse_update(propagate_clicks);
 
 	// HACKHACK: this should really be part of the UI base
@@ -722,6 +742,14 @@ void OsuUISongBrowserScoreButton::setScore(const OsuDatabase::Score &score, cons
 	const bool modFlashlight = score.modsLegacy & OsuReplay::Mods::Flashlight;
 
 	const bool fullCombo = (!score.isImportedLegacyScore && !score.isLegacyScore && score.maxPossibleCombo > 0 && score.numMisses == 0 && score.numSliderBreaks == 0); // NOTE: allows dropped sliderends
+
+	if(m_avatar) {
+		delete m_avatar;
+		m_avatar = nullptr;
+	}
+	if(score.player_id != 0) {
+		m_avatar = new OsuUIAvatar(score.player_id, m_vPos.x, m_vPos.y, m_vSize.y, m_vSize.y);
+	}
 
 	// display
 	m_scoreGrade = OsuScore::calculateGrade(score.num300s, score.num100s, score.num50s, score.numMisses, modHidden, modFlashlight);

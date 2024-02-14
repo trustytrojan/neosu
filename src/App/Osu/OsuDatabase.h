@@ -47,6 +47,7 @@ public:
 		uint64_t unixTimestamp;
 
 		// default
+		uint32_t player_id = 0;
 		UString playerName;
 
 		int num300s;

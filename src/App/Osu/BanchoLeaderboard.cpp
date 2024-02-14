@@ -12,7 +12,7 @@
 #include "OsuSongBrowser2.h"
 
 OsuDatabase::Score parse_score(char *score_line) {
-  OsuDatabase::Score score = {0};
+  OsuDatabase::Score score;
   score.isLegacyScore = true;
   score.isImportedLegacyScore = true;
   score.speedMultiplier = 1.0;
@@ -81,7 +81,7 @@ OsuDatabase::Score parse_score(char *score_line) {
   str = strtok_r(NULL, "|", &saveptr);
   if (!str)
     return score;
-  // Do nothing with user ID
+  score.player_id = strtoul(str, NULL, 10);
 
   str = strtok_r(NULL, "|", &saveptr);
   if (!str)

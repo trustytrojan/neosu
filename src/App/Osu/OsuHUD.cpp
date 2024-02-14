@@ -1721,6 +1721,7 @@ void OsuHUD::drawScoreBoard(Graphics *g, std::string &beatmapMD5Hash, OsuScore *
 	{
 		SCORE_ENTRY scoreEntry;
 
+		scoreEntry.player_id = (*scores)[i].player_id;
 		scoreEntry.name = (*scores)[i].playerName;
 
 		scoreEntry.index = -1;

@@ -65,6 +65,8 @@ void* avatar_downloading_thread(void *arg) {
     }
 
     std::vector<uint32_t> blacklist;
+    blacklist.push_back(0); // make sure we don't try to load user id 0
+
     while(thread_id == avatar_downloading_thread_id) {
 loop:
         usleep(100000); // wait 100ms between every download
@@ -213,7 +215,7 @@ void OsuUIAvatar::draw(Graphics *g) {
 void OsuUIAvatar::mouse_update(bool *propagate_clicks) {
     CBaseUIButton::mouse_update(propagate_clicks);
 
-    if(is_loading) {
+    if(is_loading && m_player_id != 0) {
         pthread_mutex_lock(&avatars_mtx);
 
         // Check if it has finished downloading

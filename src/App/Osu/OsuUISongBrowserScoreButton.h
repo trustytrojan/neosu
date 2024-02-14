@@ -16,6 +16,7 @@
 class Osu;
 class OsuSkinImage;
 
+class OsuUIAvatar;
 class OsuUIContextMenu;
 
 class OsuUISongBrowserScoreButton : public CBaseUIButton
@@ -31,7 +32,6 @@ public:
 		TOP_RANKS
 	};
 
-public:
 	OsuUISongBrowserScoreButton(Osu *osu, OsuUIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize, UString name, STYLE style = STYLE::SCORE_BROWSER);
 	virtual ~OsuUISongBrowserScoreButton();
 
@@ -51,6 +51,8 @@ public:
 
 	inline UString getDateTime() const {return m_sScoreDateTime;}
 	inline int getIndex() const {return m_iScoreIndexNumber;}
+
+	OsuUIAvatar *m_avatar = nullptr;
 
 private:
 	static ConVar *m_osu_scores_sort_by_pp_ref;
