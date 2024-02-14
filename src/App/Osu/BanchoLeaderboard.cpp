@@ -6,6 +6,7 @@
 #include "Bancho.h"
 #include "BanchoLeaderboard.h"
 #include "BanchoNetworking.h"
+#include "BanchoUsers.h"
 #include "ConVar.h"
 #include "Engine.h"
 #include "OsuDatabase.h"
@@ -94,6 +95,14 @@ OsuDatabase::Score parse_score(char *score_line) {
   score.unixTimestamp = strtoul(str, NULL, 10);
 
   // And we do nothing with has_replay
+
+  // Set username for given user id, since we now know both
+  auto user = get_user_info(score.player_id);
+  user->name = score.playerName;
+
+  // Mark as a player. Setting this also makes the has_user_info check pass,
+  // which unlocks context menu actions such as sending private messages. 
+  user->privileges |= 1;
 
   return score;
 }
