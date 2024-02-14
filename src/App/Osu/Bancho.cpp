@@ -25,8 +25,6 @@
 #include "OsuUISongBrowserUserButton.h"
 
 
-// Let's commit the full TODO list, why not?
-// TODO @kiwec: comb over every single option, and every single convar and make sure no cheats are possible in multiplayer
 // TODO @kiwec: build on windows
 
 

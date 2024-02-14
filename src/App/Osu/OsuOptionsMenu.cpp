@@ -1326,50 +1326,6 @@ void OsuOptionsMenu::draw(Graphics *g)
 	if (m_cursorSizeSlider->getFloat() < 0.15f)
 		engine->getMouse()->drawDebug(g);
 
-	/*
-	if (m_sliderQualitySlider->isActive())
-	{
-		Vector2 startPos = Vector2(50, 50);
-		Vector2 size = Vector2((int)(m_osu->getUIScale(m_osu, 250.0f)), (int)(m_osu->getUIScale(m_osu, 250.0f)));
-		const float hitcircleDiameter = m_osu->getUIScale(m_osu, 75.0f);
-		const float length = size.x - hitcircleDiameter;
-		const float pointDist = m_osu_slider_curve_points_separation->getFloat()*2;
-		const int numPoints = length / pointDist;
-		std::vector<Vector2> pointsMouth;
-		std::vector<Vector2> pointsEyeLeft;
-		std::vector<Vector2> pointsEyeRight;
-		for (int i=0; i<numPoints+1; i++)
-		{
-			int heightAdd = i;
-			if (i > numPoints/2)
-				heightAdd = numPoints-i;
-			float heightAddPercent = (float)heightAdd / (float)(numPoints/2.0f);
-			float temp = 1.0f - heightAddPercent;
-			temp *= temp;
-			heightAddPercent = 1.0f - temp;
-
-			if (i*pointDist < length/3 - hitcircleDiameter/6)
-				pointsEyeLeft.push_back(Vector2(startPos.x + hitcircleDiameter/2 + i*pointDist, startPos.y + hitcircleDiameter/2 - (i*pointDist - (length/3 - hitcircleDiameter/6))));
-			else if (i*pointDist > 2*(length/3) + hitcircleDiameter/6)
-				pointsEyeRight.push_back(Vector2(startPos.x + hitcircleDiameter/2 + i*pointDist, startPos.y + hitcircleDiameter/2));
-
-			Vector2 mouthOffset = Vector2(0, size.y/2);
-			pointsMouth.push_back(Vector2(startPos.x + hitcircleDiameter/2 + i*pointDist, startPos.y + hitcircleDiameter/2 + heightAddPercent*(size.y/2 - hitcircleDiameter)) + mouthOffset);
-		}
-
-		g->setColor(0xff999999);
-		g->fillRect(startPos.x - 5, startPos.y - 5, size.x + 8, size.y + 10);
-		g->setColor(0xffffffff);
-		g->fillRect(startPos.x, startPos.y, size.x/2, size.y);
-		g->setColor(0xff000000);
-		g->fillRect(startPos.x + size.x/2 - 1, startPos.y, size.x/2, size.y);
-
-		OsuSliderRenderer::draw(g, m_osu, pointsEyeLeft, hitcircleDiameter);
-		OsuSliderRenderer::draw(g, m_osu, pointsEyeRight, hitcircleDiameter);
-		OsuSliderRenderer::draw(g, m_osu, pointsMouth, hitcircleDiameter);
-	}
-	*/
-
 	if (isAnimating)
 	{
 		// HACKHACK:

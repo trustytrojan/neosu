@@ -277,7 +277,7 @@ void OsuBeatmap::drawVR(Graphics *g, Matrix4 &mvp, OsuVR *vr)
 
 void OsuBeatmap::drawDebug(Graphics *g)
 {
-	if (osu_debug_draw_timingpoints.getBool())
+	if (osu_debug_draw_timingpoints.getBool() && !bancho.is_in_a_multi_room())
 	{
 		McFont *debugFont = engine->getResourceManager()->getFont("FONT_DEFAULT");
 		g->setColor(0xffffffff);
@@ -433,7 +433,8 @@ void OsuBeatmap::update()
 		if (m_hitobjects.size() > 0 && m_iCurMusicPos > m_hitobjects[0]->getTime())
 		{
 			const float percentFinished = ((double)(m_iCurMusicPos - m_hitobjects[0]->getTime()) / (double)(m_hitobjects[m_hitobjects.size()-1]->getTime() + m_hitobjects[m_hitobjects.size()-1]->getDuration() - m_hitobjects[0]->getTime()));
-			const float speed = m_osu->getSpeedMultiplier() + percentFinished*m_osu->getSpeedMultiplier()*(osu_mod_timewarp_multiplier.getFloat()-1.0f);
+			float warp_multiplier = std::max(osu_mod_timewarp_multiplier.getFloat(), 1.f);
+			const float speed = m_osu->getSpeedMultiplier() + percentFinished*m_osu->getSpeedMultiplier()*(warp_multiplier-1.0f);
 			m_music->setSpeed(speed);
 		}
 	}
@@ -585,8 +586,12 @@ void OsuBeatmap::update()
 		const long pvs = !OsuGameRules::osu_mod_mafham.getBool() ? getPVS() : (m_hitobjects.size() > 0 ? (m_hitobjects[clamp<int>(m_iCurrentHitObjectIndex + OsuGameRules::osu_mod_mafham_render_livesize.getInt() + 1, 0, m_hitobjects.size()-1)]->getTime() - m_iCurMusicPosWithOffsets + 1500) : getPVS());
 		const bool usePVS = m_osu_pvs->getBool();
 
-		const int notelockType = osu_notelock_type.getInt();
-		const long tolerance2B = (long)osu_notelock_stable_tolerance2b.getInt();
+		int notelockType = osu_notelock_type.getInt();
+		long tolerance2B = (long)osu_notelock_stable_tolerance2b.getInt();
+		if(bancho.is_in_a_multi_room()) {
+			notelockType = 2;
+			tolerance2B = 3;
+		}
 
 		m_iCurrentHitObjectIndex = 0; // reset below here, since it's needed for mafham pvs
 
@@ -1025,7 +1030,10 @@ void OsuBeatmap::update()
 	// hp drain & failing
 	if (osu_drain_type.getInt() > 0)
 	{
-		const int drainType = osu_drain_type.getInt();
+		int drainType = osu_drain_type.getInt();
+		if(bancho.is_in_a_multi_room()) {
+			drainType = 2;
+		}
 
 		// handle constant drain
 		if (drainType == 2 || drainType == 3) // osu!stable + osu!lazer 2020
@@ -1066,7 +1074,7 @@ void OsuBeatmap::update()
 						{
 							OsuBeatmapStandard *standardPointer = dynamic_cast<OsuBeatmapStandard*>(this);
 							if (standardPointer != NULL && standardPointer->isSpinnerActive())
-								spinnerDrainNerf = (double)osu_drain_stable_spinner_nerf.getFloat();
+								spinnerDrainNerf = bancho.is_in_a_multi_room() ? 0.25f : (double)osu_drain_stable_spinner_nerf.getFloat();
 						}
 
 						addHealth(-m_fDrainRate * engine->getFrameTime() * (double)getSpeedMultiplier() * spinnerDrainNerf, false);
@@ -1819,7 +1827,7 @@ float OsuBeatmap::getAR() const
 	if (m_selectedDifficulty2 == NULL) return 5.0f;
 
 	float AR = getRawAR();
-	{
+	if(!bancho.is_in_a_multi_room()) {
 		if (osu_ar_override.getFloat() >= 0.0f)
 			AR = osu_ar_override.getFloat();
 
@@ -1846,7 +1854,7 @@ float OsuBeatmap::getCS() const
 	if (m_selectedDifficulty2 == NULL) return 5.0f;
 
 	float CS = clamp<float>(m_selectedDifficulty2->getCS() * m_osu->getCSDifficultyMultiplier(), 0.0f, 10.0f);
-	{
+	if(!bancho.is_in_a_multi_room()) {
 		if (osu_cs_override.getFloat() >= 0.0f)
 			CS = osu_cs_override.getFloat();
 
@@ -1873,7 +1881,7 @@ float OsuBeatmap::getHP() const
 	if (m_selectedDifficulty2 == NULL) return 5.0f;
 
 	float HP = clamp<float>(m_selectedDifficulty2->getHP() * m_osu->getDifficultyMultiplier(), 0.0f, 10.0f);
-	if (osu_hp_override.getFloat() >= 0.0f)
+	if (osu_hp_override.getFloat() >= 0.0f && !bancho.is_in_a_multi_room())
 		HP = osu_hp_override.getFloat();
 
 	return HP;
@@ -1889,11 +1897,13 @@ float OsuBeatmap::getRawOD() const
 float OsuBeatmap::getOD() const
 {
 	float OD = getRawOD();
-	if (osu_od_override.getFloat() >= 0.0f)
-		OD = osu_od_override.getFloat();
+	if(!bancho.is_in_a_multi_room()) {
+		if (osu_od_override.getFloat() >= 0.0f)
+			OD = osu_od_override.getFloat();
 
-	if (osu_od_override_lock.getBool())
-		OD = OsuGameRules::getRawConstantOverallDifficultyForSpeedMultiplier(OsuGameRules::getRawHitWindow300(OD), (m_music != NULL && m_bIsPlaying ? getSpeedMultiplier() : m_osu->getSpeedMultiplier()));
+		if (osu_od_override_lock.getBool())
+			OD = OsuGameRules::getRawConstantOverallDifficultyForSpeedMultiplier(OsuGameRules::getRawHitWindow300(OD), (m_music != NULL && m_bIsPlaying ? getSpeedMultiplier() : m_osu->getSpeedMultiplier()));
+	}
 
 	return OD;
 }
@@ -1970,7 +1980,7 @@ OsuScore::HIT OsuBeatmap::addHitResult(OsuHitObject *hitObject, OsuScore::HIT hi
 	{
 		if (hit == OsuScore::HIT::HIT_MISS)
 		{
-			if (osu_mod_suddendeath_restart.getBool())
+			if (osu_mod_suddendeath_restart.getBool() && !bancho.is_in_a_multi_room())
 				restart();
 			else
 				fail();
@@ -2062,7 +2072,11 @@ void OsuBeatmap::addScorePoints(int points, bool isSpinner)
 
 void OsuBeatmap::addHealth(double percent, bool isFromHitResult)
 {
-	if (osu_drain_type.getInt() < 1) return;
+	int drainType = osu_drain_type.getInt();
+	if(bancho.is_in_a_multi_room()) {
+		drainType = 2;
+	}
+	if (drainType < 1) return;
 
 	// never drain before first hitobject
 	if (m_hitobjects.size() > 0 && m_iCurMusicPosWithOffsets < m_hitobjects[0]->getTime()) return;
@@ -2087,8 +2101,6 @@ void OsuBeatmap::addHealth(double percent, bool isFromHitResult)
 		if (m_fHealth > 0.9)
 			m_osu->getHUD()->animateKiExplode();
 	}
-
-	const int drainType = osu_drain_type.getInt();
 
 	switch (drainType)
 	{
@@ -2115,6 +2127,7 @@ void OsuBeatmap::addHealth(double percent, bool isFromHitResult)
 
 			// special case: set health to 160/200 (osu!stable behavior, seems fine for all drains)
 			m_fHealth = osu_drain_stable_hpbar_recovery.getFloat() / m_osu_drain_stable_hpbar_maximum_ref->getFloat();
+			if(bancho.is_in_a_multi_room()) m_fHealth = 160.f / 200.f;
 			m_fHealth2 = (float)m_fHealth;
 
 			anim->deleteExistingAnimation(&m_fHealth2);

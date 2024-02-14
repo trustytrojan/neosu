@@ -78,7 +78,12 @@ OsuSpinner::~OsuSpinner()
 void OsuSpinner::draw(Graphics *g)
 {
 	OsuHitObject::draw(g);
-	const long fadeOutTimeMS = (long)(OsuGameRules::getFadeOutTime(m_beatmap) * 1000.0f * OsuGameRules::osu_spinner_fade_out_time_multiplier.getFloat());
+	float fadeOutMultiplier = OsuGameRules::osu_spinner_fade_out_time_multiplier.getFloat();
+	if(bancho.is_in_a_multi_room()) {
+		fadeOutMultiplier = 0.7f;
+	}
+
+	const long fadeOutTimeMS = (long)(OsuGameRules::getFadeOutTime(m_beatmap) * 1000.0f * fadeOutMultiplier);
 	const long deltaEnd = m_iDelta + m_iObjectDuration;
 	if ((m_bFinished || !m_bVisible) && (deltaEnd > 0 || (deltaEnd < -fadeOutTimeMS))) return;
 

@@ -202,6 +202,11 @@ void OsuSlider::draw(Graphics *g)
 {
 	if (m_points.size() <= 0) return;
 
+	float foscale = OsuGameRules::osu_circle_fade_out_scale.getFloat();
+	if(bancho.is_in_a_multi_room()) {
+		foscale = 0.4f;
+	}
+
 	OsuSkin *skin = m_beatmap->getSkin();
 
 	const bool isCompletelyFinished = m_bStartFinished && m_bEndFinished && m_bFinished;
@@ -391,7 +396,7 @@ void OsuSlider::draw(Graphics *g)
 
 		g->pushTransform();
 		{
-			g->scale((1.0f + scale*OsuGameRules::osu_circle_fade_out_scale.getFloat()), (1.0f + scale*OsuGameRules::osu_circle_fade_out_scale.getFloat()));
+			g->scale((1.0f + scale*foscale), (1.0f + scale*foscale));
 			if (m_iCurRepeat < 1)
 			{
 				m_beatmap->getSkin()->getHitCircleOverlay2()->setAnimationTimeOffset(!m_beatmap->isInMafhamRenderChunk() ? m_iTime - m_iApproachTime : m_beatmap->getCurMusicPosWithOffsets());
@@ -419,7 +424,7 @@ void OsuSlider::draw(Graphics *g)
 
 		g->pushTransform();
 		{
-			g->scale((1.0f + scale*OsuGameRules::osu_circle_fade_out_scale.getFloat()), (1.0f + scale*OsuGameRules::osu_circle_fade_out_scale.getFloat()));
+			g->scale((1.0f + scale*foscale), (1.0f + scale*foscale));
 			{
 				m_beatmap->getSkin()->getHitCircleOverlay2()->setAnimationTimeOffset(!m_beatmap->isInMafhamRenderChunk() ? m_iTime - m_iFadeInTime : m_beatmap->getCurMusicPosWithOffsets());
 				m_beatmap->getSkin()->getSliderEndCircleOverlay2()->setAnimationTimeOffset(!m_beatmap->isInMafhamRenderChunk() ? m_iTime - m_iFadeInTime : m_beatmap->getCurMusicPosWithOffsets());
@@ -461,26 +466,6 @@ void OsuSlider::draw(Graphics *g)
 void OsuSlider::draw2(Graphics *g)
 {
 	draw2(g, true, false);
-
-	// TEMP: DEBUG:
-	/*
-	if (m_bVisible)
-	{
-		const long lenienceHackEndTime = std::max(m_iTime + m_iObjectDuration / 2, (m_iTime + m_iObjectDuration) - (long)osu_slider_end_inside_check_offset.getInt());
-		Vector2 pos = m_beatmap->osuCoords2Pixels(getRawPosAt(lenienceHackEndTime));
-
-		const int size = 30;
-		g->setColor(!m_bHeldTillEndForLenienceHackCheck ? 0xff00ff00 : 0xffff0000);
-		g->drawLine(pos.x - size, pos.y - size, pos.x + size, pos.y + size);
-		g->drawLine(pos.x + size, pos.y - size, pos.x - size, pos.y + size);
-
-		const long lenience300EndTime = m_iTime + m_iObjectDuration - (long)OsuGameRules::getHitWindow300(m_beatmap);
-		pos = m_beatmap->osuCoords2Pixels(getRawPosAt(lenience300EndTime));
-		g->setColor(0xff0000ff);
-		g->drawLine(pos.x - size, pos.y - size, pos.x + size, pos.y + size);
-		g->drawLine(pos.x + size, pos.y - size, pos.x - size, pos.y + size);
-	}
-	*/
 }
 
 void OsuSlider::draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCircle)
@@ -568,6 +553,11 @@ void OsuSlider::draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproac
 
 void OsuSlider::drawVR(Graphics *g, Matrix4 &mvp, OsuVR *vr)
 {
+	float foscale = OsuGameRules::osu_circle_fade_out_scale.getFloat();
+	if(bancho.is_in_a_multi_room()) {
+		foscale = 0.4f;
+	}
+
 	// HACKHACK: code duplication aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaah
 	if (m_points.size() <= 0) return;
 
@@ -750,7 +740,7 @@ void OsuSlider::drawVR(Graphics *g, Matrix4 &mvp, OsuVR *vr)
 
 		g->pushTransform();
 		{
-			g->scale((1.0f+scale*OsuGameRules::osu_circle_fade_out_scale.getFloat()), (1.0f+scale*OsuGameRules::osu_circle_fade_out_scale.getFloat()));
+			g->scale((1.0f+scale*foscale), (1.0f+scale*foscale));
 			if (m_iCurRepeat < 1)
 			{
 				m_beatmap->getSkin()->getHitCircleOverlay2()->setAnimationTimeOffset(!m_beatmap->isInMafhamRenderChunk() ? m_iTime - m_iApproachTime : m_beatmap->getCurMusicPosWithOffsets());
@@ -778,7 +768,7 @@ void OsuSlider::drawVR(Graphics *g, Matrix4 &mvp, OsuVR *vr)
 
 		g->pushTransform();
 		{
-			g->scale((1.0f+scale*OsuGameRules::osu_circle_fade_out_scale.getFloat()), (1.0f+scale*OsuGameRules::osu_circle_fade_out_scale.getFloat()));
+			g->scale((1.0f+scale*foscale), (1.0f+scale*foscale));
 			{
 				m_beatmap->getSkin()->getHitCircleOverlay2()->setAnimationTimeOffset(!m_beatmap->isInMafhamRenderChunk() ? m_iTime - m_iFadeInTime : m_beatmap->getCurMusicPosWithOffsets());
 				m_beatmap->getSkin()->getSliderEndCircleOverlay2()->setAnimationTimeOffset(!m_beatmap->isInMafhamRenderChunk() ? m_iTime - m_iFadeInTime : m_beatmap->getCurMusicPosWithOffsets());
@@ -970,7 +960,13 @@ void OsuSlider::update(long curPos)
 
 		// fade out over the duration of the slider, starting exactly when the default fadein finishes
 		const long hiddenSliderBodyFadeOutStart = std::min(m_iTime, m_iTime - m_iApproachTime + m_iFadeInTime); // min() ensures that the fade always starts at m_iTime (even if the fadeintime is longer than the approachtime)
-		const long hiddenSliderBodyFadeOutEnd = m_iTime + (long)(osu_mod_hd_slider_fade_percent.getFloat()*m_fSliderTime);
+
+		float fade_percent = osu_mod_hd_slider_fade_percent.getFloat();
+		if(bancho.is_in_a_multi_room()) {
+			fade_percent = 1.f;
+		}
+
+		const long hiddenSliderBodyFadeOutEnd = m_iTime + (long)(fade_percent*m_fSliderTime);
 		if (curPos >= hiddenSliderBodyFadeOutStart)
 		{
 			m_fBodyAlpha = clamp<float>(((float)(hiddenSliderBodyFadeOutEnd - curPos) / (float)(hiddenSliderBodyFadeOutEnd - hiddenSliderBodyFadeOutStart)), 0.0f, 1.0f);
@@ -1159,7 +1155,11 @@ void OsuSlider::update(long curPos)
 
 		// slider tail lenience bullshit: see https://github.com/ppy/osu/blob/master/osu.Game.Rulesets.Osu/Objects/Slider.cs#L123
 		// being "inside the slider" (for the end of the slider) is NOT checked at the exact end of the slider, but somewhere random before, because fuck you
-		const long lenienceHackEndTime = std::max(m_iTime + m_iObjectDuration / 2, (m_iTime + m_iObjectDuration) - (long)osu_slider_end_inside_check_offset.getInt());
+		long offset = (long)osu_slider_end_inside_check_offset.getInt();
+		if(bancho.is_in_a_multi_room()) {
+			offset = 36;
+		}
+		const long lenienceHackEndTime = std::max(m_iTime + m_iObjectDuration / 2, (m_iTime + m_iObjectDuration) - offset);
 		const bool isTrackingCorrectly = (isClickHeldSlider() || m_beatmap->getOsu()->getModRelax()) && m_bCursorInside;
 		if (isTrackingCorrectly)
 		{
@@ -1575,7 +1575,7 @@ void OsuSlider::onHit(OsuScore::HIT result, long delta, bool startOrEnd, float t
 		{
 			OsuScore::HIT resultForHealth = OsuScore::HIT::HIT_SLIDER30;
 
-			if (m_osu_drain_type_ref->getInt() == 1) // VR
+			if (m_osu_drain_type_ref->getInt() == 1 && !bancho.is_in_a_multi_room()) // VR
 			{
 				resultForHealth = result;
 			}
@@ -1600,7 +1600,7 @@ void OsuSlider::onHit(OsuScore::HIT result, long delta, bool startOrEnd, float t
 		if (!isEndResultFromStrictTrackingMod)
 		{
 			// special case: osu!lazer 2020 only returns 1 judgement for the whole slider, but via the startcircle. i.e. we are not allowed to drain again here in mcosu logic (because startcircle judgement is handled at the end here)
-			const bool isLazer2020Drain = (m_osu_drain_type_ref->getInt() == 3); // osu!lazer 2020
+			const bool isLazer2020Drain = (m_osu_drain_type_ref->getInt() == 3 && !bancho.is_in_a_multi_room()); // osu!lazer 2020
 
 			addHitResult(result, delta, m_bIsEndOfCombo, getRawPosAt(m_iTime + m_iObjectDuration), -1.0f, 0.0f, true, !m_bHeldTillEnd, isLazer2020Drain); // end of combo, ignore in hiterrorbar, depending on heldTillEnd increase combo or not, increase score, increase health depending on drain type
 

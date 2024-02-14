@@ -416,12 +416,17 @@ void OsuScore::addKeyCount(int key)
 
 double OsuScore::getHealthIncrease(OsuBeatmap *beatmap, HIT hit)
 {
-	return getHealthIncrease(hit, beatmap->getHP(), beatmap->getHPMultiplierNormal(), beatmap->getHPMultiplierComboEnd(), (double)osu_drain_stable_hpbar_maximum.getFloat());
+	double foo = (double)osu_drain_stable_hpbar_maximum.getFloat();
+	if(bancho.is_in_a_multi_room()) foo = 200.f;
+	return getHealthIncrease(hit, beatmap->getHP(), beatmap->getHPMultiplierNormal(), beatmap->getHPMultiplierComboEnd(), foo);
 }
 
 double OsuScore::getHealthIncrease(OsuScore::HIT hit, double HP, double hpMultiplierNormal, double hpMultiplierComboEnd, double hpBarMaximumForNormalization)
 {
-	const int drainType = m_osu_drain_type_ref->getInt();
+	int drainType = m_osu_drain_type_ref->getInt();
+	if(bancho.is_in_a_multi_room()) {
+		drainType = 2;
+	}
 
 	if (drainType == 1) // VR
 	{

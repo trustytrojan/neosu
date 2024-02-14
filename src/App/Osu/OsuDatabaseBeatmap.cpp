@@ -160,8 +160,12 @@ OsuDatabaseBeatmap::PRIMITIVE_CONTAINER OsuDatabaseBeatmap::loadPrimitiveObjects
 		c.version = 14;
 	}
 
-	const float sliderSanityRange = m_osu_slider_curve_max_length_ref->getFloat(); // infinity sanity check, same as before
-	const int sliderMaxRepeatRange = osu_slider_max_repeats.getInt(); // NOTE: osu! will refuse to play any beatmap which has sliders with more than 9000 repeats, here we just clamp it instead
+	float sliderSanityRange = m_osu_slider_curve_max_length_ref->getFloat(); // infinity sanity check, same as before
+	int sliderMaxRepeatRange = osu_slider_max_repeats.getInt(); // NOTE: osu! will refuse to play any beatmap which has sliders with more than 9000 repeats, here we just clamp it instead
+	if(bancho.is_in_a_multi_room()) {
+		sliderSanityRange = 65536/2;
+		sliderMaxRepeatRange = 9000;
+	}
 
 
 
@@ -582,7 +586,11 @@ void OsuDatabaseBeatmap::calculateSliderTimesClicksTicks(int beatmapVersion, std
 			const float minTickPixelDistanceFromEnd = 0.01f * SliderHelper::getSliderVelocity(s, timingInfo, sliderMultiplier, sliderTickRate);
 			const float tickPixelLength = (beatmapVersion < 8 ? SliderHelper::getSliderTickDistance(sliderMultiplier, sliderTickRate) : SliderHelper::getSliderTickDistance(sliderMultiplier, sliderTickRate) / SliderHelper::getTimingPointMultiplierForSlider(s, timingInfo));
 			const float tickDurationPercentOfSliderLength = tickPixelLength / (s.pixelLength == 0.0f ? 1.0f : s.pixelLength);
-			const int tickCount = std::min((int)std::ceil(s.pixelLength / tickPixelLength) - 1, osu_slider_max_ticks.getInt()); // NOTE: hard sanity limit number of ticks per slider
+			int max_ticks = osu_slider_max_ticks.getInt();
+			if(bancho.is_in_a_multi_room()) {
+				max_ticks = 2048;
+			}
+			const int tickCount = std::min((int)std::ceil(s.pixelLength / tickPixelLength) - 1, max_ticks); // NOTE: hard sanity limit number of ticks per slider
 
 			if (tickCount > 0 && !timingInfo.isNaN && !std::isnan(s.pixelLength) && !std::isnan(tickPixelLength)) // don't generate ticks for NaN timingpoints and infinite values
 			{
@@ -606,7 +614,10 @@ void OsuDatabaseBeatmap::calculateSliderTimesClicksTicks(int beatmapVersion, std
 		// NOTE: only necessary since the latest pp changes (Xexxar)
 		if (m_osu_stars_xexxar_angles_sliders_ref->getBool())
 		{
-			const long osuSliderEndInsideCheckOffset = (long)m_osu_slider_end_inside_check_offset_ref->getInt();
+			long osuSliderEndInsideCheckOffset = (long)m_osu_slider_end_inside_check_offset_ref->getInt();
+			if(bancho.is_in_a_multi_room()) {
+				osuSliderEndInsideCheckOffset = 36;
+			}
 
 			// 1) "skip the head circle"
 
@@ -1408,7 +1419,7 @@ OsuDatabaseBeatmap::LOAD_GAMEPLAY_RESULT OsuDatabaseBeatmap::loadGameplay(OsuDat
 			{
 				HITCIRCLE &h = c.hitcircles[i];
 
-				if (osu_mod_random.getBool())
+				if (osu_mod_random.getBool() && !bancho.is_in_a_multi_room())
 				{
 					h.x = clamp<int>(h.x - (int)(((Helper::pcgHash(result.randomSeed + h.x) % OsuGameRules::OSU_COORD_WIDTH) / 8.0f) * osu_mod_random_circle_offset_x_percent.getFloat()), 0, OsuGameRules::OSU_COORD_WIDTH);
 					h.y = clamp<int>(h.y - (int)(((Helper::pcgHash(result.randomSeed + h.y) % OsuGameRules::OSU_COORD_HEIGHT) / 8.0f) * osu_mod_random_circle_offset_y_percent.getFloat()), 0, OsuGameRules::OSU_COORD_HEIGHT);
@@ -1463,10 +1474,10 @@ OsuDatabaseBeatmap::LOAD_GAMEPLAY_RESULT OsuDatabaseBeatmap::loadGameplay(OsuDat
 			{
 				SLIDER &s = c.sliders[i];
 
-				if (osu_mod_strict_tracking.getBool() && osu_mod_strict_tracking_remove_slider_ticks.getBool())
+				if (osu_mod_strict_tracking.getBool() && osu_mod_strict_tracking_remove_slider_ticks.getBool() && !bancho.is_in_a_multi_room())
 					s.ticks.clear();
 
-				if (osu_mod_random.getBool())
+				if (osu_mod_random.getBool() && !bancho.is_in_a_multi_room())
 				{
 					for (int p=0; p<s.points.size(); p++)
 					{
@@ -1475,7 +1486,7 @@ OsuDatabaseBeatmap::LOAD_GAMEPLAY_RESULT OsuDatabaseBeatmap::loadGameplay(OsuDat
 					}
 				}
 
-				if (osu_mod_reverse_sliders.getBool())
+				if (osu_mod_reverse_sliders.getBool() && !bancho.is_in_a_multi_room())
 					std::reverse(s.points.begin(), s.points.end());
 
 				result.hitobjects.push_back(new OsuSlider(s.type, s.repeat, s.pixelLength, s.points, s.hitSounds, s.ticks, s.sliderTime, s.sliderTimeWithoutRepeats, s.time, s.sampleType, s.number, false, s.colorCounter, s.colorOffset, beatmapStandard));
@@ -1488,7 +1499,7 @@ OsuDatabaseBeatmap::LOAD_GAMEPLAY_RESULT OsuDatabaseBeatmap::loadGameplay(OsuDat
 			{
 				SPINNER &s = c.spinners[i];
 
-				if (osu_mod_random.getBool())
+				if (osu_mod_random.getBool() && !bancho.is_in_a_multi_room())
 				{
 					s.x = clamp<int>(s.x - (int)(((Helper::pcgHash(result.randomSeed + s.x) % OsuGameRules::OSU_COORD_WIDTH) / 1.25f) * (Helper::pcgHash(result.randomSeed + s.x) % 2 == 0 ? 1.0f : -1.0f) * osu_mod_random_spinner_offset_x_percent.getFloat()), 0, OsuGameRules::OSU_COORD_WIDTH);
 					s.y = clamp<int>(s.y - (int)(((Helper::pcgHash(result.randomSeed + s.y) % OsuGameRules::OSU_COORD_HEIGHT) / 1.25f) * (Helper::pcgHash(result.randomSeed + s.y) % 2 == 0 ? 1.0f : -1.0f) * osu_mod_random_spinner_offset_y_percent.getFloat()), 0, OsuGameRules::OSU_COORD_HEIGHT);

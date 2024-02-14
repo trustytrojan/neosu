@@ -2650,25 +2650,34 @@ void OsuHUD::drawTargetHeatmap(Graphics *g, float hitcircleDiameter)
 	{
 		const float delta = m_targets[i].delta;
 
+		float p300 = m_osu_mod_target_300_percent_ref->getFloat();
+		float p100 = m_osu_mod_target_100_percent_ref->getFloat();
+		float p50 = m_osu_mod_target_50_percent_ref->getFloat();
+		if(bancho.is_in_a_multi_room()) {
+			p300 = 0.5f;
+			p100 = 0.7f;
+			p50 = 0.95f;
+		}
+
 		const float overlap = 0.15f;
 		Color color;
-		if (delta < m_osu_mod_target_300_percent_ref->getFloat()-overlap)
+		if (delta < p300-overlap)
 			color = color300;
-		else if (delta < m_osu_mod_target_300_percent_ref->getFloat()+overlap)
+		else if (delta < p300+overlap)
 		{
-			const float factor300 = (m_osu_mod_target_300_percent_ref->getFloat() + overlap - delta) / (2.0f*overlap);
+			const float factor300 = (p300 + overlap - delta) / (2.0f*overlap);
 			const float factor100 = 1.0f - factor300;
 			color = COLORf(1.0f, COLOR_GET_Rf(color300)*factor300 + COLOR_GET_Rf(color100)*factor100, COLOR_GET_Gf(color300)*factor300 + COLOR_GET_Gf(color100)*factor100, COLOR_GET_Bf(color300)*factor300 + COLOR_GET_Bf(color100)*factor100);
 		}
-		else if (delta < m_osu_mod_target_100_percent_ref->getFloat()-overlap)
+		else if (delta < p100-overlap)
 			color = color100;
-		else if (delta < m_osu_mod_target_100_percent_ref->getFloat()+overlap)
+		else if (delta < p100+overlap)
 		{
-			const float factor100 = (m_osu_mod_target_100_percent_ref->getFloat() + overlap - delta) / (2.0f*overlap);
+			const float factor100 = (p100 + overlap - delta) / (2.0f*overlap);
 			const float factor50 = 1.0f - factor100;
 			color = COLORf(1.0f, COLOR_GET_Rf(color100)*factor100 + COLOR_GET_Rf(color50)*factor50, COLOR_GET_Gf(color100)*factor100 + COLOR_GET_Gf(color50)*factor50, COLOR_GET_Bf(color100)*factor100 + COLOR_GET_Bf(color50)*factor50);
 		}
-		else if (delta < m_osu_mod_target_50_percent_ref->getFloat())
+		else if (delta < p50)
 			color = color50;
 		else
 			color = colorMiss;

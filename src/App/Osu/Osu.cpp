@@ -1875,7 +1875,7 @@ void Osu::onPlayEnd(bool quit, bool aborted)
 
 	if (!quit)
 	{
-		if (!osu_mod_endless.getBool())
+		if (bancho.is_in_a_multi_room() || !osu_mod_endless.getBool())
 		{
 			m_rankingScreen->setScore(m_score);
 			m_rankingScreen->setBeatmapInfo(getSelectedBeatmap(), getSelectedBeatmap()->getSelectedDifficulty2());
@@ -2004,7 +2004,7 @@ float Osu::getSpeedMultiplier()
 {
 	float speedMultiplier = getRawSpeedMultiplier();
 
-	if (osu_speed_override.getFloat() >= 0.0f)
+	if (osu_speed_override.getFloat() >= 0.0f && !bancho.is_in_a_multi_room())
 		return std::max(osu_speed_override.getFloat(), 0.05f);
 
 	return speedMultiplier;

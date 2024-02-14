@@ -249,7 +249,7 @@ void OsuBeatmapStandard::draw(Graphics *g)
 	if (m_osu_draw_hitobjects_ref->getBool())
 		drawHitObjects(g);
 
-	if (osu_mandala.getBool())
+	if (osu_mandala.getBool() && !bancho.is_in_a_multi_room())
 	{
 		for (int i=0; i<osu_mandala_num.getInt(); i++)
 		{
@@ -535,7 +535,7 @@ void OsuBeatmapStandard::drawHitObjects(Graphics *g)
 	const long pvs = getPVS();
 	const bool usePVS = m_osu_pvs->getBool();
 
-	if (!OsuGameRules::osu_mod_mafham.getBool())
+	if (bancho.is_in_a_multi_room() || !OsuGameRules::osu_mod_mafham.getBool())
 	{
 		if (!osu_draw_reverse_order.getBool())
 		{
@@ -988,7 +988,7 @@ Vector2 OsuBeatmapStandard::osuCoords2Pixels(Vector2 coords) const
 		coords.y = coords3.y;
 	}
 
-	if (osu_mandala.getBool())
+	if (osu_mandala.getBool() && !bancho.is_in_a_multi_room())
 	{
 		coords.x -= OsuGameRules::OSU_COORD_WIDTH/2;
 		coords.y -= OsuGameRules::OSU_COORD_HEIGHT/2;
@@ -1696,6 +1696,11 @@ void OsuBeatmapStandard::updateHitobjectMetrics()
 {
 	OsuSkin *skin = m_osu->getSkin();
 
+	float followcircle_size_multiplier = OsuGameRules::osu_slider_followcircle_size_multiplier.getFloat();
+	if(bancho.is_in_a_multi_room()) {
+		followcircle_size_multiplier = 2.4f;
+	}
+
 	m_fRawHitcircleDiameter = OsuGameRules::getRawHitCircleDiameter(getCS());
 	m_fXMultiplier = OsuGameRules::getHitCircleXMultiplier(m_osu);
 	m_fHitcircleDiameter = OsuGameRules::getHitCircleDiameter(this);
@@ -1705,8 +1710,8 @@ void OsuBeatmapStandard::updateHitobjectMetrics()
 	m_fNumberScale = (m_fRawHitcircleDiameter / (160.0f * (skin->isDefault12x() ? 2.0f : 1.0f))) * osuCoordScaleMultiplier * osu_number_scale_multiplier.getFloat();
 	m_fHitcircleOverlapScale = (m_fRawHitcircleDiameter / (160.0f)) * osuCoordScaleMultiplier * osu_number_scale_multiplier.getFloat();
 
-	m_fRawSliderFollowCircleDiameter = getRawHitcircleDiameter() * (m_osu->getModNM() || osu_mod_jigsaw2.getBool() ? (1.0f*(1.0f - osu_mod_jigsaw_followcircle_radius_factor.getFloat()) + osu_mod_jigsaw_followcircle_radius_factor.getFloat()*OsuGameRules::osu_slider_followcircle_size_multiplier.getFloat()) : OsuGameRules::osu_slider_followcircle_size_multiplier.getFloat());
-	m_fSliderFollowCircleDiameter = getHitcircleDiameter() * (m_osu->getModNM() || osu_mod_jigsaw2.getBool() ? (1.0f*(1.0f - osu_mod_jigsaw_followcircle_radius_factor.getFloat()) + osu_mod_jigsaw_followcircle_radius_factor.getFloat()*OsuGameRules::osu_slider_followcircle_size_multiplier.getFloat()) : OsuGameRules::osu_slider_followcircle_size_multiplier.getFloat());
+	m_fRawSliderFollowCircleDiameter = getRawHitcircleDiameter() * (m_osu->getModNM() || osu_mod_jigsaw2.getBool() ? (1.0f*(1.0f - osu_mod_jigsaw_followcircle_radius_factor.getFloat()) + osu_mod_jigsaw_followcircle_radius_factor.getFloat()*followcircle_size_multiplier) : followcircle_size_multiplier);
+	m_fSliderFollowCircleDiameter = getHitcircleDiameter() * (m_osu->getModNM() || osu_mod_jigsaw2.getBool() ? (1.0f*(1.0f - osu_mod_jigsaw_followcircle_radius_factor.getFloat()) + osu_mod_jigsaw_followcircle_radius_factor.getFloat()*followcircle_size_multiplier) : followcircle_size_multiplier);
 }
 
 void OsuBeatmapStandard::updateSliderVertexBuffers()
@@ -1892,7 +1897,10 @@ void OsuBeatmapStandard::computeDrainRate()
 
 	debugLog("OsuBeatmapStandard: Calculating drain ...\n");
 
-	const int drainType = m_osu_drain_type_ref->getInt();
+	int drainType = m_osu_drain_type_ref->getInt();
+	if(bancho.is_in_a_multi_room()) {
+		drainType = 2;
+	}
 
 	if (drainType == 2) // osu!stable
 	{
@@ -1960,7 +1968,9 @@ void OsuBeatmapStandard::computeDrainRate()
 			double hpMultiplierNormal;
 			double hpMultiplierComboEnd;
 		};
-		TestPlayer testPlayer((double)m_osu_drain_stable_hpbar_maximum_ref->getFloat());
+		double foo = (double)m_osu_drain_stable_hpbar_maximum_ref->getFloat();
+		if(bancho.is_in_a_multi_room()) foo = 200.f;
+		TestPlayer testPlayer(foo);
 
 		const double HP = getHP();
 		const int version = m_selectedDifficulty2->getVersion();

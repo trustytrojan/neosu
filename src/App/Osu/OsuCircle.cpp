@@ -408,13 +408,17 @@ void OsuCircle::draw(Graphics *g)
 		scale = -scale*(scale-2.0f); // quad out scale
 
 		const bool drawNumber = m_beatmap->getSkin()->getVersion() > 1.0f ? false : true;
+		float foscale = OsuGameRules::osu_circle_fade_out_scale.getFloat();
+		if(bancho.is_in_a_multi_room()) {
+			foscale = 0.4f;
+		}
 
 		g->pushTransform();
-			g->scale((1.0f+scale*OsuGameRules::osu_circle_fade_out_scale.getFloat()), (1.0f+scale*OsuGameRules::osu_circle_fade_out_scale.getFloat()));
-			{
-				m_beatmap->getSkin()->getHitCircleOverlay2()->setAnimationTimeOffset(!m_beatmap->isInMafhamRenderChunk() ? m_iTime - m_iApproachTime : m_beatmap->getCurMusicPosWithOffsets());
-				drawCircle(g, m_beatmap, m_vRawPos, m_iComboNumber, m_iColorCounter, m_iColorOffset, 1.0f, alpha, alpha, drawNumber);
-			}
+		g->scale((1.0f+scale*foscale), (1.0f+scale*foscale));
+		{
+			m_beatmap->getSkin()->getHitCircleOverlay2()->setAnimationTimeOffset(!m_beatmap->isInMafhamRenderChunk() ? m_iTime - m_iApproachTime : m_beatmap->getCurMusicPosWithOffsets());
+			drawCircle(g, m_beatmap, m_vRawPos, m_iComboNumber, m_iColorCounter, m_iColorOffset, 1.0f, alpha, alpha, drawNumber);
+		}
 		g->popTransform();
 	}
 

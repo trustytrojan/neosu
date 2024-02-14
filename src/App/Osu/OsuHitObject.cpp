@@ -412,13 +412,24 @@ void OsuHitObject::update(long curPos)
 		if (m_beatmap->getOsu()->getModHD())
 		{
 			// hidden hitobject body fadein
-			const long hiddenFadeInStart = m_iTime - (long)(m_iApproachTime * osu_mod_hd_circle_fadein_start_percent.getFloat());
-			const long hiddenFadeInEnd = m_iTime - (long)(m_iApproachTime * osu_mod_hd_circle_fadein_end_percent.getFloat());
+			float fin_start_percent = osu_mod_hd_circle_fadein_start_percent.getFloat();
+			float fin_end_percent = osu_mod_hd_circle_fadein_end_percent.getFloat();
+			float fout_start_percent = osu_mod_hd_circle_fadeout_start_percent.getFloat();
+			float fout_end_percent = osu_mod_hd_circle_fadeout_end_percent.getFloat();
+			if(bancho.is_in_a_multi_room()) {
+				fin_start_percent = 1.f;
+				fin_end_percent = 0.6f;
+				fout_start_percent = 0.6f;
+				fout_end_percent = 0.3f;
+			}
+
+			const long hiddenFadeInStart = m_iTime - (long)(m_iApproachTime * fin_start_percent);
+			const long hiddenFadeInEnd = m_iTime - (long)(m_iApproachTime * fin_end_percent);
 			m_fAlpha = clamp<float>(1.0f - ((float)(hiddenFadeInEnd - curPos) / (float)(hiddenFadeInEnd - hiddenFadeInStart)), 0.0f, 1.0f);
 
 			// hidden hitobject body fadeout
-			const long hiddenFadeOutStart = m_iTime - (long)(m_iApproachTime * osu_mod_hd_circle_fadeout_start_percent.getFloat());
-			const long hiddenFadeOutEnd = m_iTime - (long)(m_iApproachTime * osu_mod_hd_circle_fadeout_end_percent.getFloat());
+			const long hiddenFadeOutStart = m_iTime - (long)(m_iApproachTime * fout_start_percent);
+			const long hiddenFadeOutEnd = m_iTime - (long)(m_iApproachTime * fout_end_percent);
 			if (curPos >= hiddenFadeOutStart)
 				m_fAlpha = clamp<float>(((float)(hiddenFadeOutEnd - curPos) / (float)(hiddenFadeOutEnd - hiddenFadeOutStart)), 0.0f, 1.0f);
 		}
@@ -441,11 +452,20 @@ void OsuHitObject::addHitResult(OsuScore::HIT result, long delta, bool isEndOfCo
 {
 	if (m_beatmap->getOsu()->getModTarget() && result != OsuScore::HIT::HIT_MISS && targetDelta >= 0.0f)
 	{
-		if (targetDelta < osu_mod_target_300_percent.getFloat() && (result == OsuScore::HIT::HIT_300 || result == OsuScore::HIT::HIT_100))
+		float p300 = osu_mod_target_300_percent.getFloat();
+		float p100 = osu_mod_target_100_percent.getFloat();
+		float p50 = osu_mod_target_50_percent.getFloat();
+		if(bancho.is_in_a_multi_room()) {
+			p300 = 0.5f;
+			p100 = 0.7f;
+			p50 = 0.95f;
+		}
+
+		if (targetDelta < p300 && (result == OsuScore::HIT::HIT_300 || result == OsuScore::HIT::HIT_100))
 			result = OsuScore::HIT::HIT_300;
-		else if (targetDelta < osu_mod_target_100_percent.getFloat())
+		else if (targetDelta < p100)
 			result = OsuScore::HIT::HIT_100;
-		else if (targetDelta < osu_mod_target_50_percent.getFloat())
+		else if (targetDelta < p50)
 			result = OsuScore::HIT::HIT_50;
 		else
 			result = OsuScore::HIT::HIT_MISS;
