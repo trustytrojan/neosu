@@ -244,6 +244,7 @@ void handle_packet(Packet *packet) {
     user->action = (Action)action;
     user->info_text = read_string(packet);
     user->map_md5 = read_string(packet);
+    user->mods = read_int(packet);
     user->mode = (GameMode)read_byte(packet);
     user->map_id = read_int(packet);
     user->ranked_score = read_int64(packet);

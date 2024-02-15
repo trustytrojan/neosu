@@ -22,6 +22,7 @@ struct UserInfo {
   UString info_text = UString("Loading...");
   UString map_md5;
   int32_t map_id = 0;
+  uint32_t mods = 0;
   int64_t total_score = 0;
   int64_t ranked_score = 0;
   int32_t plays = 0;

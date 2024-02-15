@@ -1869,10 +1869,11 @@ float OsuBeatmap::getCS() const
 				CS *= percent;
 			}
 		}
-
-		if (osu_cs_cap_sanity.getBool())
-			CS = std::min(CS, 12.1429f);
 	}
+
+	if (bancho.is_in_a_multi_room() || osu_cs_cap_sanity.getBool())
+		CS = std::min(CS, 12.1429f);
+
 	return CS;
 }
 
