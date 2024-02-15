@@ -322,6 +322,9 @@ public:
 	CBaseUIScrollView *m_scoreBrowser;
 	CBaseUIElement *m_scoreBrowserScoresStillLoadingElement;
 	CBaseUIElement *m_scoreBrowserNoRecordsYetElement;
+	CBaseUIContainer *m_localBestContainer;
+	CBaseUILabel *m_localBestLabel;
+	OsuUISongBrowserScoreButton *m_localBestButton = nullptr;
 
 	// song browser
 	CBaseUIScrollView *m_songBrowser;

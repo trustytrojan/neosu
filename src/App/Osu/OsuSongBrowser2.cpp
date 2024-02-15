@@ -615,13 +615,21 @@ OsuSongBrowser2::OsuSongBrowser2(Osu *osu) : OsuScreenBackable(osu)
 	m_scoreBrowser = new CBaseUIScrollView(0, 0, 0, 0, "");
 	m_scoreBrowser->setDrawBackground(false);
 	m_scoreBrowser->setDrawFrame(false);
-	m_scoreBrowser->setClipping(false);
 	m_scoreBrowser->setHorizontalScrolling(false);
 	m_scoreBrowser->setScrollbarSizeMultiplier(0.25f);
 	m_scoreBrowser->setScrollResistance((m_osu->isInVRMode() || env->getOS() == Environment::OS::OS_HORIZON) ? convar->getConVarByName("ui_scrollview_resistance")->getInt() : 15); // a bit shitty this check + convar, but works well enough
 	m_scoreBrowserScoresStillLoadingElement = new OsuUISongBrowserScoresStillLoadingElement(m_osu, "Loading...");
 	m_scoreBrowserNoRecordsYetElement = new OsuUISongBrowserNoRecordsSetElement(m_osu, "No records set!");
 	m_scoreBrowser->getContainer()->addBaseUIElement(m_scoreBrowserNoRecordsYetElement);
+
+	m_localBestContainer = new CBaseUIContainer(0, 0, 0, 0, "");
+	m_localBestContainer->setVisible(false);
+	addBaseUIElement(m_localBestContainer);
+	m_localBestLabel = new CBaseUILabel(0, 0, 0, 0, "", "Personal Best (from local scores)");
+	m_localBestLabel->setDrawBackground(false);
+	m_localBestLabel->setDrawFrame(false);
+	m_localBestLabel->setTextJustification(CBaseUILabel::TEXT_JUSTIFICATION::TEXT_JUSTIFICATION_CENTERED);
+	m_localBestLabel->setFont(osu->getSubTitleFont());
 
 	// build songbrowser
 	m_songBrowser = new CBaseUIScrollView(0, 0, 0, 0, "");
@@ -2923,6 +2931,26 @@ void OsuSongBrowser2::updateScoreBrowserLayout()
 		if (scoreHeight*ratio > scoreButtonWidthMax)
 			scoreHeight = m_scoreBrowser->getSize().x / ratio;
 	}
+
+	if(m_localBestContainer->isVisible()) {
+		float local_best_size = scoreHeight + 40;
+		m_scoreBrowser->setSize(m_scoreBrowser->getSize().x, m_scoreBrowser->getSize().y - local_best_size);
+		m_scoreBrowser->setScrollSizeToContent();
+		m_localBestContainer->setPos(m_scoreBrowser->getPos().x, m_scoreBrowser->getPos().y + m_scoreBrowser->getSize().y);
+		m_localBestContainer->setSize(m_scoreBrowser->getPos().x, local_best_size);
+		m_localBestLabel->setPos(m_scoreBrowser->getPos().x, m_localBestContainer->getPos().y);
+		m_localBestLabel->setSize(m_scoreBrowser->getSize().x, 40);
+		if(m_localBestButton) {
+			m_localBestButton->setPos(m_scoreBrowser->getPos().x, m_scoreBrowser->getPos().y + m_scoreBrowser->getSize().y + 40);
+			m_localBestButton->setSize(m_scoreBrowser->getSize().x, scoreHeight);
+		}
+		m_scoreBrowserNoRecordsYetElement->setSize(m_scoreBrowser->getSize().x*0.9f, scoreHeight*0.75f);
+		m_scoreBrowserNoRecordsYetElement->setPos(
+			m_scoreBrowser->getSize().x/2 - m_scoreBrowserNoRecordsYetElement->getSize().x/2,
+			m_localBestContainer->getPos().y + 45
+		);
+	}
+
 	const std::vector<CBaseUIElement*> &elements = m_scoreBrowser->getContainer()->getElements();
 	for (size_t i=0; i<elements.size(); i++)
 	{
@@ -2932,8 +2960,10 @@ void OsuSongBrowser2::updateScoreBrowserLayout()
 	}
 	m_scoreBrowserScoresStillLoadingElement->setSize(m_scoreBrowser->getSize().x*0.9f, scoreHeight*0.75f);
 	m_scoreBrowserScoresStillLoadingElement->setRelPos(m_scoreBrowser->getSize().x/2 - m_scoreBrowserScoresStillLoadingElement->getSize().x/2, (m_scoreBrowser->getSize().y/2)*0.65f - m_scoreBrowserScoresStillLoadingElement->getSize().y/2);
-	m_scoreBrowserNoRecordsYetElement->setSize(m_scoreBrowser->getSize().x*0.9f, scoreHeight*0.75f);
-	m_scoreBrowserNoRecordsYetElement->setRelPos(m_scoreBrowser->getSize().x/2 - m_scoreBrowserNoRecordsYetElement->getSize().x/2, (m_scoreBrowser->getSize().y/2)*0.65f - m_scoreBrowserNoRecordsYetElement->getSize().y/2);
+	if(!m_localBestContainer->isVisible()) {
+		m_scoreBrowserNoRecordsYetElement->setSize(m_scoreBrowser->getSize().x*0.9f, scoreHeight*0.75f);
+		m_scoreBrowserNoRecordsYetElement->setRelPos(m_scoreBrowser->getSize().x/2 - m_scoreBrowserNoRecordsYetElement->getSize().x/2, (m_scoreBrowser->getSize().y/2)*0.65f - m_scoreBrowserNoRecordsYetElement->getSize().y/2);
+	}
 	m_scoreBrowser->getContainer()->update_pos();
 	m_scoreBrowser->setScrollSizeToContent();
 }
@@ -2942,6 +2972,8 @@ void OsuSongBrowser2::rebuildScoreButtons()
 {
 	// reset
 	m_scoreBrowser->getContainer()->empty();
+	m_localBestContainer->empty();
+	m_localBestContainer->setVisible(false);
 
 	const bool validBeatmap = (m_selectedBeatmap != NULL && m_selectedBeatmap->getSelectedDifficulty2() != NULL);
 
@@ -2954,6 +2986,30 @@ void OsuSongBrowser2::rebuildScoreButtons()
 			auto search = m_db->m_online_scores.find(m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash());
 		    if (search != m_db->m_online_scores.end()) {
 		        scores = search->second;
+
+		        auto local_scores = (*m_db->getScores())[m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash()];
+		        auto local_best = std::max_element(local_scores.begin(), local_scores.end(), [](OsuDatabase::Score const &a, OsuDatabase::Score const &b) {
+		        	return a.score < b.score;
+		        });
+		        if(local_best == local_scores.end()) {
+		        	if(!scores.empty()) {
+		        		// We only want to display "No scores" if there are online scores present
+		        		// Otherwise, it would be displayed twice
+						m_localBestContainer->addBaseUIElement(m_localBestLabel);
+						m_localBestContainer->addBaseUIElement(m_scoreBrowserNoRecordsYetElement);
+						m_localBestContainer->setVisible(true);
+		        	}
+		        } else {
+			        SAFE_DELETE(m_localBestButton);
+					m_localBestButton = new OsuUISongBrowserScoreButton(m_osu, m_contextMenu, 0, 0, 0, 0, "");
+					m_localBestButton->setClickCallback( fastdelegate::MakeDelegate(this, &OsuSongBrowser2::onScoreClicked) );
+					m_localBestButton->setName(UString(m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash().c_str()));
+					m_localBestButton->setScore(*local_best, m_selectedBeatmap->getSelectedDifficulty2());
+					m_localBestButton->resetHighlight();
+					m_localBestContainer->addBaseUIElement(m_localBestLabel);
+					m_localBestContainer->addBaseUIElement(m_localBestButton);
+					m_localBestContainer->setVisible(true);
+		        }
 
 		        // We have already fetched the scores so there's no point in showing "Loading...".
 		        // When there are no online scores for this map, let's treat it as if we are
