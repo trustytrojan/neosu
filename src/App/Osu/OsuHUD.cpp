@@ -1741,7 +1741,7 @@ void OsuHUD::drawScoreBoard(Graphics *g, std::string &beatmapMD5Hash, OsuScore *
 			SCORE_ENTRY currentScoreEntry;
 
 			currentScoreEntry.name = (isUnranked ? "McOsu" : m_name_ref->getString());
-
+			currentScoreEntry.player_id = bancho.user_id;
 			currentScoreEntry.combo = currentScore->getComboMax();
 			currentScoreEntry.score = currentScore->getScore();
 			currentScoreEntry.accuracy = currentScore->getAccuracy();
