@@ -19,6 +19,7 @@
 #include "OsuUIAvatar.h"
 #include "OsuUIButton.h"
 #include "OsuUICheckbox.h"
+#include "OsuUIContextMenu.h"
 #include "OsuUISongBrowserSongButton.h"
 #include "OsuUIUserContextMenu.h"
 
@@ -28,6 +29,7 @@
 #include "CBaseUITextbox.h"
 #include "Engine.h"
 #include "Keyboard.h"
+#include "Mouse.h"
 #include "ResourceManager.h"
 #include "SoundEngine.h"
 
@@ -113,6 +115,13 @@ OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
     m_change_password_btn->setClickCallback( fastdelegate::MakeDelegate(this, &OsuRoom::onChangePasswordClicked) );
     m_settings->getContainer()->addBaseUIElement(m_change_password_btn);
 
+    INIT_LABEL(m_win_condition, "Win condition: Score", false);
+    m_change_win_condition_btn = new OsuUIButton(osu, 0, 0, 240, 40, "change_win_condition_btn", "Win condition: Score");
+    m_change_win_condition_btn->setColor(0xff0e94b5);
+    m_change_win_condition_btn->setUseDefaultSkin();
+    m_change_win_condition_btn->setClickCallback( fastdelegate::MakeDelegate(this, &OsuRoom::onChangeWinConditionClicked) );
+    m_settings->getContainer()->addBaseUIElement(m_change_win_condition_btn);
+
     CBaseUILabel* map_label;
     INIT_LABEL(map_label, "Beatmap", true);
 
@@ -162,6 +171,10 @@ OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
     m_slotlist->setBackgroundColor(0xdd000000);
     m_slotlist->setHorizontalScrolling(false);
     addBaseUIElement(m_slotlist);
+
+    // the context menu gets added last (drawn on top of everything)
+    m_contextMenu = new OsuUIContextMenu(m_osu, 50, 50, 150, 0, "", m_settings);
+    m_settings->getContainer()->addBaseUIElement(m_contextMenu);
 
     updateLayout(m_osu->getScreenSize());
 }
@@ -246,6 +259,9 @@ void OsuRoom::mouse_update(bool *propagate_clicks) {
     else
         m_pauseButton->setPaused(true);
 
+    m_contextMenu->mouse_update(propagate_clicks);
+    if(!*propagate_clicks) return;
+
     OsuScreen::mouse_update(propagate_clicks);
 }
 
@@ -319,6 +335,20 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
     m_room_name_ipt->setVisible(is_host);
 
     m_change_password_btn->setVisible(is_host);
+
+    m_win_condition->setVisible(!is_host);
+    if(bancho.room.win_condition == SCOREV1) {
+        m_win_condition->setText("Win condition: Score");
+    } else if(bancho.room.win_condition == ACCURACY) {
+        m_win_condition->setText("Win condition: Accuracy");
+    } else if(bancho.room.win_condition == COMBO) {
+        m_win_condition->setText("Win condition: Combo");
+    } else if(bancho.room.win_condition == SCOREV2) {
+        m_win_condition->setText("Win condition: ScoreV2");
+    }
+
+    m_change_win_condition_btn->setVisible(is_host);
+    m_change_win_condition_btn->setText(m_win_condition->getText());
 
     m_map_title->setVisible(true);
     m_map_attributes->setVisible(!m_ready_btn->is_loading);
@@ -762,6 +792,30 @@ void OsuRoom::onSelectMapClicked() {
 
 void OsuRoom::onChangePasswordClicked() {
     m_osu->m_prompt->prompt("New password:", fastdelegate::MakeDelegate(this, &OsuRoom::set_new_password));
+}
+
+void OsuRoom::onChangeWinConditionClicked() {
+    m_contextMenu->setVisible(false);
+    m_contextMenu->begin();
+    m_contextMenu->addButton("Score V1", SCOREV1);
+    m_contextMenu->addButton("Score V2", SCOREV2);
+    m_contextMenu->addButton("Accuracy", ACCURACY);
+    m_contextMenu->addButton("Combo", COMBO);
+    m_contextMenu->end(false, false);
+    m_contextMenu->setPos(engine->getMouse()->getPos());
+    m_contextMenu->setClickCallback( fastdelegate::MakeDelegate(this, &OsuRoom::onWinConditionSelected) );
+    m_contextMenu->setVisible(true);
+}
+
+void OsuRoom::onWinConditionSelected(UString win_condition_str, int win_condition) {
+    bancho.room.win_condition = win_condition;
+
+    Packet packet = {0};
+    packet.id = MATCH_CHANGE_SETTINGS;
+    bancho.room.pack(&packet);
+    send_packet(packet);
+
+    updateLayout(m_osu->getScreenSize());
 }
 
 void OsuRoom::set_new_password(UString new_password) {

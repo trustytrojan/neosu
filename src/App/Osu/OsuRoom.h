@@ -11,6 +11,7 @@ class OsuDatabaseBeatmap;
 class OsuMainMenuPauseButton;
 class OsuUIButton;
 class OsuUICheckbox;
+class OsuUIContextMenu;
 
 
 struct OsuUIModList : public CBaseUIContainer {
@@ -58,6 +59,8 @@ struct OsuRoom : public OsuScreen {
     void onSelectModsClicked();
     void onSelectMapClicked();
     void onChangePasswordClicked();
+    void onChangeWinConditionClicked();
+    void onWinConditionSelected(UString win_condition_str, int win_condition);
     void set_new_password(UString new_password);
     void onFreemodCheckboxChanged(CBaseUICheckbox *checkbox);
 
@@ -71,6 +74,8 @@ struct OsuRoom : public OsuScreen {
     CBaseUILabel *m_room_name_iptl = nullptr;
     CBaseUITextbox *m_room_name_ipt = nullptr;
     OsuUIButton *m_change_password_btn = nullptr;
+    CBaseUILabel *m_win_condition = nullptr;
+    OsuUIButton *m_change_win_condition_btn = nullptr;
     CBaseUILabel *m_map_title = nullptr;
     CBaseUILabel *m_map_attributes = nullptr;
     CBaseUILabel *m_map_attributes2 = nullptr;
@@ -81,6 +86,7 @@ struct OsuRoom : public OsuScreen {
     OsuUIModList *m_mods = nullptr;
     CBaseUILabel *m_no_mods_selected = nullptr;
     OsuUIButton *m_ready_btn = nullptr;
+    OsuUIContextMenu *m_contextMenu = nullptr;
 
     OsuMainMenuPauseButton *m_pauseButton = nullptr;
     McFont* font = nullptr;
