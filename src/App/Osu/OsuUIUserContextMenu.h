@@ -35,7 +35,6 @@ class OsuUIUserLabel : public CBaseUILabel {
 public:
     OsuUIUserLabel(Osu *osu, uint32_t user_id, UString username);
 
-    virtual bool shouldGrabClick() { return true; } // XXX: feels like shit in scrollviews
     virtual void onMouseUpInside();
 
     uint32_t m_user_id;

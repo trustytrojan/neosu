@@ -38,9 +38,6 @@ public:
 	void draw(Graphics *g);
 	void mouse_update(bool *propagate_clicks);
 
-	// Intentionally not grabbing clicks, or else we can't scroll by click-dragging
-    virtual bool shouldGrabClick() override { return false; };
-
 	void highlight();
 	void resetHighlight();
 
