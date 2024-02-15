@@ -16,6 +16,7 @@
 #include "CBaseUIScrollView.h"
 
 #include "Osu.h"
+#include "OsuKeyBindings.h"
 #include "OsuTooltipOverlay.h"
 
 
@@ -169,7 +170,7 @@ void OsuUIContextMenu::onKeyDown(KeyboardEvent &e)
 	// hide on ESC
 	if (!e.isConsumed())
 	{
-		if (e == KEY_ESCAPE)
+		if (e == KEY_ESCAPE || e == (KEYCODE)OsuKeyBindings::GAME_PAUSE.getInt())
 		{
 			e.consume();
 			setVisible2(false);

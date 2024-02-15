@@ -1366,10 +1366,8 @@ void OsuOptionsMenu::mouse_update(bool *propagate_clicks)
 	if (!m_bVisible) return;
 
 	// force context menu focus
-	if (m_contextMenu->isVisible()) {
-		m_contextMenu->mouse_update(propagate_clicks);
-		if(!*propagate_clicks) return;
-	}
+	m_contextMenu->mouse_update(propagate_clicks);
+	if(!*propagate_clicks) return;
 
 	OsuScreenBackable::mouse_update(propagate_clicks);
 	if(!*propagate_clicks) return;
@@ -1529,23 +1527,11 @@ void OsuOptionsMenu::onKeyDown(KeyboardEvent &e)
 {
 	if (!m_bVisible) return;
 
-	OsuScreenBackable::onKeyDown(e);
-	if (e.isConsumed()) return;
+	m_contextMenu->onKeyDown(e);
+	if(e.isConsumed()) return;
 
-	if (e == KEY_ESCAPE || e == (KEYCODE)OsuKeyBindings::GAME_PAUSE.getInt())
-	{
-		if (m_contextMenu->isVisible())
-		{
-			e.consume();
-
-			m_contextMenu->setVisible2(false);
-			return;
-		}
-	}
-
-	// searching text delete & escape key handling
-	if (m_sSearchString.length() > 0)
-	{
+	// searching text delete
+	if (m_sSearchString.length() > 0) {
 		switch (e.getKeyCode())
 		{
 		case KEY_DELETE:
@@ -1567,40 +1553,39 @@ void OsuOptionsMenu::onKeyDown(KeyboardEvent &e)
 							foundNonSpaceChar = true;
 
 						m_sSearchString.erase(m_sSearchString.length()-1, 1);
+						e.consume();
+						scheduleSearchUpdate();
+						return;
 					}
-				}
-				else
+				} else {
 					m_sSearchString = m_sSearchString.substr(0, m_sSearchString.length()-1);
-				scheduleSearchUpdate();
+					e.consume();
+					scheduleSearchUpdate();
+					return;
+				}
 			}
 			break;
+
 		case KEY_ESCAPE:
 			m_sSearchString = "";
 			scheduleSearchUpdate();
-			break;
+			e.consume();
+			return;
 		}
-	}
-	else
-	{
-		if (e == KEY_ESCAPE || e == (KEYCODE)OsuKeyBindings::GAME_PAUSE.getInt())
-			onBack();
 	}
 
 	// paste clipboard support
-	if (e == KEY_V)
-	{
-		if (engine->getKeyboard()->isControlDown())
-		{
-			const UString clipstring = env->getClipBoardText();
-			if (clipstring.length() > 0)
-			{
-				m_sSearchString.append(clipstring);
-				scheduleSearchUpdate();
-			}
+	if (engine->getKeyboard()->isControlDown() && e == KEY_V) {
+		const UString clipstring = env->getClipBoardText();
+		if (clipstring.length() > 0) {
+			m_sSearchString.append(clipstring);
+			scheduleSearchUpdate();
+			e.consume();
+			return;
 		}
 	}
 
-	e.consume();
+	OsuScreenBackable::onKeyDown(e);
 }
 
 void OsuOptionsMenu::onChar(KeyboardEvent &e)
