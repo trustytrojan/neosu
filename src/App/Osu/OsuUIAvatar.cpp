@@ -72,6 +72,10 @@ loop:
         curl_easy_setopt(curl, CURLOPT_USERAGENT, MCOSU_USER_AGENT);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
+#ifdef _WIN32
+        // ABSOLUTELY RETARDED, FUCK WINDOWS
+        curl_easy_setopt(curl, CURLOPT_CAINFO, "curl-ca-bundle.crt");
+#endif
         CURLcode res = curl_easy_perform(curl);
         if(res != CURLE_OK) {
             debugLog("Failed to download %s: %s\n", img_url.toUtf8(), curl_easy_strerror(res));

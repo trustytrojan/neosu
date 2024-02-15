@@ -78,6 +78,10 @@ void* run_mapset_download_thread(void* arg) {
         curl_easy_setopt(curl, CURLOPT_XFERINFODATA, dt);
         curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, update_download_progress);
         curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+#ifdef _WIN32
+        // ABSOLUTELY RETARDED, FUCK WINDOWS
+        curl_easy_setopt(curl, CURLOPT_CAINFO, "curl-ca-bundle.crt");
+#endif
         CURLcode res = curl_easy_perform(curl);
         if(res != CURLE_OK) {
             debugLog("Failed to download %s: %s\n", query_url.toUtf8(), curl_easy_strerror(res));

@@ -59,6 +59,10 @@ void disconnect() {
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, packet.pos);
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
+#ifdef _WIN32
+    // ABSOLUTELY RETARDED, FUCK WINDOWS
+    curl_easy_setopt(curl, CURLOPT_CAINFO, "curl-ca-bundle.crt");
+#endif
     curl_easy_perform(curl);
     curl_slist_free_all(chunk);
     curl_easy_cleanup(curl);
@@ -159,6 +163,10 @@ static void send_api_request(CURL *curl, APIRequest api_out) {
   curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
+#ifdef _WIN32
+  // ABSOLUTELY RETARDED, FUCK WINDOWS
+  curl_easy_setopt(curl, CURLOPT_CAINFO, "curl-ca-bundle.crt");
+#endif
 
   CURLcode res = curl_easy_perform(curl);
   if (res == CURLE_OK) {
@@ -188,6 +196,10 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
   curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
+#ifdef _WIN32
+  // ABSOLUTELY RETARDED, FUCK WINDOWS
+  curl_easy_setopt(curl, CURLOPT_CAINFO, "curl-ca-bundle.crt");
+#endif
 
   last_packet_tms = time(NULL);
   CURLcode res = curl_easy_perform(curl);
