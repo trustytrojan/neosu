@@ -481,14 +481,11 @@ void OsuSlider::draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproac
 		{
 			// HACKHACK: very dirty code
 			bool sliderRepeatStartCircleFinished = m_iRepeat < 2;
-			bool sliderRepeatEndCircleFinished = false;
 			for (int i=0; i<m_clicks.size(); i++)
 			{
 				if (m_clicks[i].type == 0)
 				{
-					if (m_clicks[i].sliderend)
-						sliderRepeatEndCircleFinished = m_clicks[i].finished;
-					else
+					if (!m_clicks[i].sliderend)
 						sliderRepeatStartCircleFinished = m_clicks[i].finished;
 				}
 			}

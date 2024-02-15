@@ -1,7 +1,7 @@
 #pragma once
 #include "BanchoProtocol.h"
-#include <curl/curl.h>
 #include <string>
+#include <curl/curl.h>
 
 // User agent sent when downloading beatmaps
 #define MCOSU_VERSION "34.00-dev"
@@ -35,5 +35,7 @@ void receive_bancho_packets();
 
 // Initialize networking thread. Should be called once when starting McOsu.
 void init_networking_thread();
+
+size_t curl_write(void *contents, size_t size, size_t nmemb, void *userp);
 
 extern UString cho_token;

@@ -1,5 +1,13 @@
+#ifdef _WIN32
+#include <windows.h>
+#include <wbemidl.h>
+#include <stdio.h>
+#include <comutil.h>
+#else
 #include <blkid/blkid.h>
 #include <linux/limits.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,9 +31,6 @@
 #include "OsuUIAvatar.h"
 #include "OsuUIButton.h"
 #include "OsuUISongBrowserUserButton.h"
-
-
-// TODO @kiwec: build on windows
 
 
 Bancho bancho;
@@ -74,6 +79,78 @@ UString md5(uint8_t *msg, size_t msg_len) {
 }
 
 char *get_disk_uuid() {
+#ifdef _WIN32
+  // ChatGPT'd, this looks absolutely insane but might just be regular Windows API...
+  CoInitializeEx(0, COINIT_MULTITHREADED);
+  CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
+
+  IWbemLocator* pLoc = NULL;
+  auto hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID*)&pLoc);
+  if (FAILED(hres)) {
+    debugLog("Failed to create IWbemLocator object. Error code = 0x%x\n", hres);
+    return NULL;
+  }
+
+  IWbemServices* pSvc = NULL;
+  BSTR bstr_root = SysAllocString(L"ROOT\\CIMV2");
+  hres = pLoc->ConnectServer(bstr_root, NULL, NULL, 0, 0, 0, 0, &pSvc);
+  if (FAILED(hres)) {
+    debugLog("Could not connect. Error code = 0x%x\n", hres);
+    pLoc->Release();
+    SysFreeString(bstr_root);
+    return NULL;
+  }
+  SysFreeString(bstr_root);
+
+  hres = CoSetProxyBlanket(pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
+  if (FAILED(hres)) {
+    debugLog("Could not set proxy blanket. Error code = 0x%x\n", hres);
+    pSvc->Release();
+    pLoc->Release();
+    return NULL;
+  }
+
+  char *uuid = NULL;
+  IEnumWbemClassObject* pEnumerator = NULL;
+  BSTR bstr_wql = SysAllocString(L"WQL");
+  BSTR bstr_sql = SysAllocString(L"SELECT * FROM Win32_DiskDrive");
+  hres = pSvc->ExecQuery(bstr_wql, bstr_sql, WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
+  if (FAILED(hres)) {
+    debugLog("Query for hard drive UUID failed. Error code = 0x%x\n", hres);
+    pSvc->Release();
+    pLoc->Release();
+    SysFreeString(bstr_wql);
+    SysFreeString(bstr_sql);
+    return NULL;
+  }
+  SysFreeString(bstr_wql);
+  SysFreeString(bstr_sql);
+
+  IWbemClassObject* pclsObj = NULL;
+  ULONG uReturn = 0;
+  while (pEnumerator && uuid == NULL) {
+    HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
+    if (0 == uReturn) {
+      break;
+    }
+
+    VARIANT vtProp;
+    hr = pclsObj->Get(L"SerialNumber", 0, &vtProp, 0, 0);
+    if (SUCCEEDED(hr)) {
+      UString w_uuid = vtProp.bstrVal;
+      uuid = strdup(w_uuid.toUtf8());
+      VariantClear(&vtProp);
+    }
+
+    pclsObj->Release();
+  }
+
+  pSvc->Release();
+  pLoc->Release();
+  pEnumerator->Release();
+
+  return uuid;
+#else
   blkid_cache cache;
   blkid_get_cache(&cache, NULL);
 
@@ -88,6 +165,7 @@ char *get_disk_uuid() {
 
   blkid_put_cache(cache);
   return NULL;
+#endif
 }
 
 void handle_packet(Packet *packet) {
@@ -398,7 +476,12 @@ Packet build_login_packet() {
   write_byte(&packet, '|');
 
   char osu_path[PATH_MAX] = {0};
+#ifdef _WIN32
+  GetModuleFileName(NULL, osu_path, PATH_MAX);
+#else
   readlink("/proc/self/exe", osu_path, PATH_MAX - 1);
+#endif
+
   UString osu_path_md5 = md5((uint8_t *)osu_path, strlen(osu_path));
   write_bytes(&packet, (uint8_t *)osu_path_md5.toUtf8(), osu_path_md5.length());
   write_byte(&packet, ':');

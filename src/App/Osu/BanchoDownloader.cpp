@@ -35,26 +35,6 @@ void update_download_progress(void *clientp, curl_off_t dltotal, curl_off_t dlno
     pthread_mutex_unlock(&downloading_mapsets_mutex);
 }
 
-static size_t curl_write(void *contents, size_t size, size_t nmemb,
-                         void *userp) {
-  size_t realsize = size * nmemb;
-  Packet *mem = (Packet *)userp;
-
-  uint8_t *ptr = (uint8_t *)realloc(mem->memory, mem->size + realsize + 1);
-  if (!ptr) {
-    /* out of memory! */
-    debugLog("not enough memory (realloc returned NULL)\n");
-    return 0;
-  }
-
-  mem->memory = ptr;
-  memcpy(&(mem->memory[mem->size]), contents, realsize);
-  mem->size += realsize;
-  mem->memory[mem->size] = 0;
-
-  return realsize;
-}
-
 void* run_mapset_download_thread(void* arg) {
     DownloadThread* dt = (DownloadThread*)arg;
     downloading_mapsets.push_back(dt);

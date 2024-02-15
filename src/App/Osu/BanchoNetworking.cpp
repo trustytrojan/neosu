@@ -15,8 +15,6 @@
 #include "OsuUIAvatar.h"
 #include "OsuUIButton.h"
 
-#ifdef MCENGINE_FEATURE_PTHREADS
-#include <curl/curl.h>
 #include <pthread.h>
 #include "File.h"
 
@@ -131,8 +129,7 @@ void reconnect() {
   pthread_mutex_unlock(&avatars_mtx);
 }
 
-static size_t curl_write(void *contents, size_t size, size_t nmemb,
-                         void *userp) {
+size_t curl_write(void *contents, size_t size, size_t nmemb, void *userp) {
   size_t realsize = size * nmemb;
   Packet *mem = (Packet *)userp;
 
@@ -319,7 +316,6 @@ static void *do_networking(void *data) {
 
   return NULL;
 }
-#endif
 
 static void handle_api_response(Packet packet) {
   if (packet.id == GET_MAP_LEADERBOARD) {
@@ -335,7 +331,6 @@ static void handle_api_response(Packet packet) {
 }
 
 void receive_api_responses() {
-#ifdef MCENGINE_FEATURE_PTHREADS
   pthread_mutex_lock(&api_responses_mutex);
   while (!api_response_queue.empty()) {
     Packet incoming = api_response_queue.front();
@@ -345,11 +340,9 @@ void receive_api_responses() {
     delete incoming.extra;
   }
   pthread_mutex_unlock(&api_responses_mutex);
-#endif
 }
 
 void receive_bancho_packets() {
-#ifdef MCENGINE_FEATURE_PTHREADS
   pthread_mutex_lock(&incoming_mutex);
   while (!incoming_queue.empty()) {
     Packet incoming = incoming_queue.front();
@@ -358,7 +351,6 @@ void receive_bancho_packets() {
     delete incoming.memory;
   }
   pthread_mutex_unlock(&incoming_mutex);
-#endif
 }
 
 void send_api_request(APIRequest request) {
@@ -368,7 +360,6 @@ void send_api_request(APIRequest request) {
     return;
   }
 
-#ifdef MCENGINE_FEATURE_PTHREADS
   pthread_mutex_lock(&api_requests_mutex);
 
   // Jank way to do things... remove outdated requests now
@@ -379,11 +370,9 @@ void send_api_request(APIRequest request) {
   api_request_queue.push_back(request);
 
   pthread_mutex_unlock(&api_requests_mutex);
-#endif
 }
 
 void send_packet(Packet& packet) {
-#ifdef MCENGINE_FEATURE_PTHREADS
   if(bancho.user_id <= 0) {
     // Don't queue any packets until we're logged in
     return;
@@ -405,13 +394,9 @@ void send_packet(Packet& packet) {
   write_bytes(&outgoing, packet.memory, packet.pos);
 
   pthread_mutex_unlock(&outgoing_mutex);
-#else
-  delete packet.memory;
-#endif
 }
 
 void init_networking_thread() {
-#ifdef MCENGINE_FEATURE_PTHREADS
   pthread_t dummy = 0;
   int ret = pthread_create(&dummy, NULL, do_networking, NULL);
   if (ret) {
@@ -419,5 +404,4 @@ void init_networking_thread() {
              "code %i\n",
              ret);
   }
-#endif
 }
