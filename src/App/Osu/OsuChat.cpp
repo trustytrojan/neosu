@@ -40,6 +40,7 @@ OsuChatChannel::OsuChatChannel(OsuChat* chat, UString name_arg) {
     ui->sticky = true;
 
     btn = new OsuUIButton(bancho.osu, 0, 0, 0, 0, "button", name);
+    btn->grabs_clicks = true;
     btn->setUseDefaultSkin();
     btn->setClickCallback( fastdelegate::MakeDelegate(this, &OsuChatChannel::onChannelButtonClick) );
     m_chat->m_button_container->addBaseUIElement(btn);
