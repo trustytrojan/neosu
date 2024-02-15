@@ -1041,14 +1041,18 @@ void Osu::update()
 
 		if(bancho.is_in_a_multi_room()) {
 			// We didn't select a map; revert to previously selected one
-			if(m_songBrowser2->m_lastSelectedBeatmap != nullptr) {
-				m_room->m_pauseButton->setPaused(true);
-				if(m_songBrowser2->m_selectedBeatmap != nullptr) {
-			        m_songBrowser2->m_selectedBeatmap->deselect();
-			        m_songBrowser2->m_selectedBeatmap = nullptr;
-				}
+			auto diff2 = m_songBrowser2->m_lastSelectedBeatmap;
+			if(diff2 != nullptr) {
+				bancho.room.map_name = UString::format("%s - %s [%s]", diff2->getArtist().toUtf8(), diff2->getTitle().toUtf8(), diff2->getDifficultyName().toUtf8());
+				bancho.room.map_md5 = UString(diff2->getMD5Hash().c_str());
+				bancho.room.map_id = diff2->getID();
 
-            	m_songBrowser2->onDifficultySelected(m_songBrowser2->m_lastSelectedBeatmap, false);
+				Packet packet = {0};
+				packet.id = MATCH_CHANGE_SETTINGS;
+			    bancho.room.pack(&packet);
+			    send_packet(packet);
+
+			    m_room->on_map_change(false);
 			}
 		} else {
 			m_mainMenu->setVisible(!(m_songBrowser2 != NULL && m_songBrowser2->isVisible()));
