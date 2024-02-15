@@ -15,6 +15,7 @@
 #include "Bancho.h"
 #include "BanchoNetworking.h"
 #include "Osu.h"
+#include "OsuRichPresence.h"
 #include "OsuRoom.h"
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
@@ -117,6 +118,10 @@ void OsuUIModSelectorModButton::onClicked()
 
 	// set new state
 	setState(m_iState);
+
+	if(bancho.is_online()) {
+		OsuRichPresence::updateBanchoMods();
+	}
 
 	if(bancho.is_in_a_multi_room()) {
 		for(int i = 0; i < 16; i++) {

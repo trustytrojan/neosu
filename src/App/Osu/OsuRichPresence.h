@@ -26,6 +26,7 @@ public:
 	static void onRichPresenceChange(UString oldValue, UString newValue);
 	static void setStatus(Osu *osu, UString status, bool force = false);
 	static void setBanchoStatus(Osu *osu, const char* info_text, Action action);
+	static void updateBanchoMods();
 
 private:
 	static const UString KEY_STEAM_STATUS;
@@ -33,7 +34,6 @@ private:
 	static const UString KEY_DISCORD_DETAILS;
 
 	static ConVar *m_name_ref;
-
 
 	static void onRichPresenceEnable();
 	static void onRichPresenceDisable();

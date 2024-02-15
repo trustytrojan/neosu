@@ -16,6 +16,7 @@
 #include "Bancho.h"
 #include "BanchoNetworking.h"
 #include "Osu.h"
+#include "OsuModSelector.h"
 #include "OsuRoom.h"
 #include "OsuScore.h"
 #include "OsuSongBrowser2.h"
@@ -35,6 +36,9 @@ const UString OsuRichPresence::KEY_STEAM_STATUS = "status";
 const UString OsuRichPresence::KEY_DISCORD_STATUS = "state";
 const UString OsuRichPresence::KEY_DISCORD_DETAILS = "details";
 
+UString last_status = "[McOsu]\nWaking up";
+Action last_action = IDLE;
+
 void OsuRichPresence::setBanchoStatus(Osu *osu, const char* info_text, Action action) {
 	if(osu == NULL) return;
 
@@ -53,15 +57,47 @@ void OsuRichPresence::setBanchoStatus(Osu *osu, const char* info_text, Action ac
     char fancy_text[1024] = {0};
     snprintf(fancy_text, 1023, "[McOsu]\n%s", info_text);
 
+	last_status = fancy_text;
+	last_action = action;
+
     Packet packet = {0};
     packet.id = CHANGE_ACTION;
     write_byte(&packet, action);
     write_string(&packet, fancy_text);
     write_string(&packet, map_md5.c_str());
-    write_int(&packet, osu->getModsFlag());
+    write_int(&packet, osu->m_modSelector->getModFlags());
     write_byte(&packet, 0); // osu!std
     write_int(&packet, map_id);
     send_packet(packet);
+}
+
+void OsuRichPresence::updateBanchoMods() {
+	std::string map_md5 = "";
+	uint32_t map_id = 0;
+
+    auto selected_beatmap = bancho.osu->getSelectedBeatmap();
+    if(selected_beatmap != nullptr) {
+    	auto diff = selected_beatmap->getSelectedDifficulty2();
+    	if(diff != nullptr) {
+    		map_md5 = diff->getMD5Hash();
+   			map_id = diff->getID();
+    	}
+    }
+
+    Packet packet = {0};
+    packet.id = CHANGE_ACTION;
+    write_byte(&packet, last_action);
+    write_string(&packet, last_status.toUtf8());
+    write_string(&packet, map_md5.c_str());
+    write_int(&packet, bancho.osu->m_modSelector->getModFlags());
+    write_byte(&packet, 0); // osu!std
+    write_int(&packet, map_id);
+    send_packet(packet);
+
+    // Servers like akatsuki send different leaderboards based on what mods
+    // you have selected. Reset leaderboard when switching mods.
+    bancho.osu->m_songBrowser2->m_db->m_online_scores.clear();
+    bancho.osu->m_songBrowser2->rebuildScoreButtons();
 }
 
 void OsuRichPresence::onMainMenu(Osu *osu)

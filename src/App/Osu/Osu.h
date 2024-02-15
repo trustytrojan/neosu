@@ -319,7 +319,6 @@ public:
 	bool m_bModSS;
 	bool m_bModNM;
 	bool m_bModTD;
-	uint32_t getModsFlag();
 
 	std::vector<ConVar*> m_experimentalMods;
 

@@ -29,6 +29,7 @@
 #include "OsuDatabaseBeatmap.h"
 #include "OsuTooltipOverlay.h"
 #include "OsuOptionsMenu.h"
+#include "OsuRichPresence.h"
 #include "OsuSongBrowser2.h"
 #include "OsuKeyBindings.h"
 #include "OsuGameRules.h"
@@ -1155,6 +1156,10 @@ void OsuModSelector::resetModsUserInitiated() {
 	resetMods();
 
 	m_resetModsButton->animateClickColor();
+
+	if(bancho.is_online()) {
+		OsuRichPresence::updateBanchoMods();
+	}
 
 	if(bancho.is_in_a_multi_room()) {
 		for(int i = 0; i < 16; i++) {
