@@ -1215,7 +1215,7 @@ void Osu::updateMods()
 		m_bModTarget = bancho.room.mods & (1 << 23);
 		m_bModScorev2 = bancho.room.mods & (1 << 29);
 		m_bModDC = false;
-		m_bModNM = bancho.room.mods == 0;
+		m_bModNM = false; // that's nightmare mod not nomod!
 
 		if(bancho.room.freemods) {
 			for(int i = 0; i < 16; i++) {
@@ -1234,7 +1234,6 @@ void Osu::updateMods()
 				m_bModSS = bancho.room.slots[i].mods & (1 << 14);
 				m_bModTarget = bancho.room.slots[i].mods & (1 << 23);
 				m_bModScorev2 = bancho.room.slots[i].mods & (1 << 29);
-				m_bModNM &= bancho.room.slots[i].mods == 0;
 			}
 		}
 	} else {
