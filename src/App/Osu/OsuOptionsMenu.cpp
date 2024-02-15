@@ -2484,7 +2484,7 @@ void OsuOptionsMenu::onSkinSelect()
 			if (skinFolders[i] == m_osu_skin_ref->getString())
 				button->setTextBrightColor(0xff00ff00);
 		}
-		m_contextMenu->end(false, false);
+		m_contextMenu->end(false, true);
 		m_contextMenu->setClickCallback( fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onSkinSelect2) );
 	}
 	else
