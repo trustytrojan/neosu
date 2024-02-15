@@ -9,6 +9,7 @@
 #include "ConVar.h"
 #include "Engine.h"
 #include "OsuDatabase.h"
+#include "OsuModSelector.h"
 #include "OsuSongBrowser2.h"
 
 OsuDatabase::Score parse_score(char *score_line) {
@@ -133,7 +134,7 @@ void fetch_online_scores(OsuDatabaseBeatmap *beatmap) {
   path.append(UString::format("&f=%s", encoded_filename).toUtf8());
   curl_free(encoded_filename);
   curl_easy_cleanup(curl);
-  path.append(UString::format("&m=0&i=%d&mods=0&h=&a=0&us=%s&ha=%s", beatmap->getSetID(), bancho.username.toUtf8(), bancho.pw_md5.toUtf8()).toUtf8());
+  path.append(UString::format("&m=0&i=%d&mods=%d&h=&a=0&us=%s&ha=%s", beatmap->getSetID(), bancho.osu->m_modSelector->getModFlags(), bancho.username.toUtf8(), bancho.pw_md5.toUtf8()).toUtf8());
 
   APIRequest request = {
       .type = GET_MAP_LEADERBOARD,
