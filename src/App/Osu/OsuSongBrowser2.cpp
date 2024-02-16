@@ -2960,12 +2960,15 @@ void OsuSongBrowser2::updateScoreBrowserLayout()
 	}
 	m_scoreBrowserScoresStillLoadingElement->setSize(m_scoreBrowser->getSize().x*0.9f, scoreHeight*0.75f);
 	m_scoreBrowserScoresStillLoadingElement->setRelPos(m_scoreBrowser->getSize().x/2 - m_scoreBrowserScoresStillLoadingElement->getSize().x/2, (m_scoreBrowser->getSize().y/2)*0.65f - m_scoreBrowserScoresStillLoadingElement->getSize().y/2);
+	m_scoreBrowser->getContainer()->update_pos();
+	m_scoreBrowser->setScrollSizeToContent();
+
 	if(!m_localBestContainer->isVisible()) {
 		m_scoreBrowserNoRecordsYetElement->setSize(m_scoreBrowser->getSize().x*0.9f, scoreHeight*0.75f);
 		m_scoreBrowserNoRecordsYetElement->setRelPos(m_scoreBrowser->getSize().x/2 - m_scoreBrowserNoRecordsYetElement->getSize().x/2, (m_scoreBrowser->getSize().y/2)*0.65f - m_scoreBrowserNoRecordsYetElement->getSize().y/2);
+		m_scoreBrowser->getContainer()->update_pos();
+		m_scoreBrowser->setScrollSizeToContent();
 	}
-	m_scoreBrowser->getContainer()->update_pos();
-	m_scoreBrowser->setScrollSizeToContent();
 }
 
 void OsuSongBrowser2::rebuildScoreButtons()
@@ -2982,19 +2985,21 @@ void OsuSongBrowser2::rebuildScoreButtons()
 
 	std::vector<OsuDatabase::Score> scores;
 	if(validBeatmap) {
+        auto local_scores = (*m_db->getScores())[m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash()];
+        auto local_best = std::max_element(local_scores.begin(), local_scores.end(), [](OsuDatabase::Score const &a, OsuDatabase::Score const &b) {
+        	return a.score < b.score;
+        });
+
 		if (is_online) {
 			auto search = m_db->m_online_scores.find(m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash());
 		    if (search != m_db->m_online_scores.end()) {
 		        scores = search->second;
 
-		        auto local_scores = (*m_db->getScores())[m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash()];
-		        auto local_best = std::max_element(local_scores.begin(), local_scores.end(), [](OsuDatabase::Score const &a, OsuDatabase::Score const &b) {
-		        	return a.score < b.score;
-		        });
 		        if(local_best == local_scores.end()) {
 		        	if(!scores.empty()) {
 		        		// We only want to display "No scores" if there are online scores present
 		        		// Otherwise, it would be displayed twice
+			        	SAFE_DELETE(m_localBestButton);
 						m_localBestContainer->addBaseUIElement(m_localBestLabel);
 						m_localBestContainer->addBaseUIElement(m_scoreBrowserNoRecordsYetElement);
 						m_localBestContainer->setVisible(true);
@@ -3018,9 +3023,22 @@ void OsuSongBrowser2::rebuildScoreButtons()
 		    } else {
 		    	// We haven't fetched the scores yet, do so now
 		    	fetch_online_scores(m_selectedBeatmap->getSelectedDifficulty2());
+
+		    	// Display local best while scores are loading
+		    	if(local_best != local_scores.end()) {
+			        SAFE_DELETE(m_localBestButton);
+					m_localBestButton = new OsuUISongBrowserScoreButton(m_osu, m_contextMenu, 0, 0, 0, 0, "");
+					m_localBestButton->setClickCallback( fastdelegate::MakeDelegate(this, &OsuSongBrowser2::onScoreClicked) );
+					m_localBestButton->setName(UString(m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash().c_str()));
+					m_localBestButton->setScore(*local_best, m_selectedBeatmap->getSelectedDifficulty2());
+					m_localBestButton->resetHighlight();
+					m_localBestContainer->addBaseUIElement(m_localBestLabel);
+					m_localBestContainer->addBaseUIElement(m_localBestButton);
+					m_localBestContainer->setVisible(true);
+		    	}
 		    }
 		} else {
-			scores = (*m_db->getScores())[m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash()];
+			scores = local_scores;
 		}
 	}
 
