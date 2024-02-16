@@ -12,6 +12,7 @@
 #include "OsuLobby.h"
 #include "OsuOptionsMenu.h"
 #include "OsuRoom.h"
+#include "OsuSongBrowser2.h"
 #include "OsuUIAvatar.h"
 #include "OsuUIButton.h"
 
@@ -80,6 +81,11 @@ void disconnect() {
   bancho.osu->m_optionsMenu->logInButton->is_loading = false;
 
   bancho.osu->m_chat->onDisconnect();
+
+  // XXX: We should toggle between "offline" sorting options and "online" ones
+  //      Online ones would be "Local scores", "Global", "Country", "Selected mods" etc
+  //      While offline ones would be "By score", "By pp", etc
+  bancho.osu->m_songBrowser2->onSortScoresChange(UString("Sort By Score"), 0);
 
   pthread_mutex_unlock(&outgoing_mutex);
 

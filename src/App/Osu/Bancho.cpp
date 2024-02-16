@@ -191,6 +191,11 @@ void handle_packet(Packet *packet) {
       }
       bancho.osu->m_songBrowser2->m_userButton->m_avatar = new OsuUIAvatar(bancho.user_id, 0.f, 0.f, 0.f, 0.f);
       bancho.osu->m_songBrowser2->m_userButton->m_avatar->on_screen = true;
+
+      // XXX: We should toggle between "offline" sorting options and "online" ones
+      //      Online ones would be "Local scores", "Global", "Country", "Selected mods" etc
+      //      While offline ones would be "By score", "By pp", etc
+      bancho.osu->m_songBrowser2->onSortScoresChange(UString("Online Leaderboard"), 0);
     } else {
       convar->getConVarByName("mp_autologin")->setValue(false);
       bancho.osu->m_optionsMenu->logInButton->setText("Log in");
