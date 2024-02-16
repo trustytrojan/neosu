@@ -1574,8 +1574,10 @@ void OsuOptionsMenu::onKeyDown(KeyboardEvent &e)
 		}
 	}
 
+	OsuScreenBackable::onKeyDown(e);
+
 	// paste clipboard support
-	if (engine->getKeyboard()->isControlDown() && e == KEY_V) {
+	if (!e.isConsumed() && engine->getKeyboard()->isControlDown() && e == KEY_V) {
 		const UString clipstring = env->getClipBoardText();
 		if (clipstring.length() > 0) {
 			m_sSearchString.append(clipstring);
@@ -1585,7 +1587,6 @@ void OsuOptionsMenu::onKeyDown(KeyboardEvent &e)
 		}
 	}
 
-	OsuScreenBackable::onKeyDown(e);
 }
 
 void OsuOptionsMenu::onChar(KeyboardEvent &e)
