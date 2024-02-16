@@ -305,6 +305,14 @@ void OsuModSelector::updateButtons(bool initial)
 	setModButtonOnGrid(4, 2, 0, initial && m_osu->getModTarget(), "practicetarget", "Accuracy is based on the distance to the center of all hitobjects.\n300s still require at least being in the hit window of a 100 in addition to the rule above.", [this]() -> OsuSkinImage *{return m_osu->getSkin()->getSelectionModTarget();});
 	m_modButtonScoreV2 = setModButtonOnGrid(5, 2, 0, initial && m_osu->getModScorev2(), "v2", "Try the future scoring system.\n** UNRANKED **", [this]() -> OsuSkinImage *{return m_osu->getSkin()->getSelectionModScorev2();});
 
+	// Enable all mods that we disable conditionally below
+	getModButtonOnGrid(2, 0)->setAvailable(true);
+	getModButtonOnGrid(2, 1)->setAvailable(true);
+	getModButtonOnGrid(3, 2)->setAvailable(true);
+	getModButtonOnGrid(4, 2)->setAvailable(true);
+	getModButtonOnGrid(4, 0)->setAvailable(true);
+	getModButtonOnGrid(5, 2)->setAvailable(true);
+
 	if (env->getOS() == Environment::OS::OS_HORIZON)
 	{
 		getModButtonOnGrid(2, 1)->setAvailable(false);
@@ -318,7 +326,7 @@ void OsuModSelector::updateButtons(bool initial)
 			getModButtonOnGrid(4, 2)->setAvailable(false); // Disable Target
 		}
 
-		getModButtonOnGrid(4, 0)->setAvailable(false); // Disable ScoreV2 (we use win condition instead)
+		getModButtonOnGrid(5, 2)->setAvailable(false); // Disable ScoreV2 (we use win condition instead)
 		getModButtonOnGrid(4, 0)->setAvailable(false); // Disable nightmare mod
 		getModButtonOnGrid(3, 2)->setAvailable(false); // Disable auto mod
 	}
