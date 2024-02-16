@@ -315,10 +315,10 @@ void OsuModSelector::updateButtons(bool initial)
 		if(bancho.room.freemods && !bancho.room.is_host()) {
 			getModButtonOnGrid(2, 0)->setAvailable(false); // Disable DC/HT
 			getModButtonOnGrid(2, 1)->setAvailable(false); // Disable DT/NC
-			getModButtonOnGrid(4, 0)->setAvailable(false); // Disable ScoreV2
 			getModButtonOnGrid(4, 2)->setAvailable(false); // Disable Target
 		}
 
+		getModButtonOnGrid(4, 0)->setAvailable(false); // Disable ScoreV2 (we use win condition instead)
 		getModButtonOnGrid(4, 0)->setAvailable(false); // Disable nightmare mod
 		getModButtonOnGrid(3, 2)->setAvailable(false); // Disable auto mod
 	}
