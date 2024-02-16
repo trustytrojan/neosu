@@ -1587,6 +1587,8 @@ void OsuOptionsMenu::onKeyDown(KeyboardEvent &e)
 		}
 	}
 
+	// Consuming all keys so they're not forwarded to main menu or chat when searching for a setting
+	e.consume();
 }
 
 void OsuOptionsMenu::onChar(KeyboardEvent &e)
