@@ -464,7 +464,7 @@ Packet build_login_packet() {
   write_bytes(&packet, (uint8_t *)bancho.pw_md5.toUtf8(), bancho.pw_md5.length());
   write_byte(&packet, '\n');
 
-  const char *osu_version = "b20231102.5";
+  const char *osu_version = "b20240123";
   write_bytes(&packet, (uint8_t *)osu_version, strlen(osu_version));
   write_byte(&packet, '|');
 

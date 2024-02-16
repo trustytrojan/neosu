@@ -142,7 +142,7 @@ ConVar osu_hide_cursor_during_gameplay("osu_hide_cursor_during_gameplay", false)
 ConVar osu_alt_f4_quits_even_while_playing("osu_alt_f4_quits_even_while_playing", true);
 ConVar osu_win_disable_windows_key_while_playing("osu_win_disable_windows_key_while_playing", true);
 
-ConVar mp_server("mp_server", "akatsuki.gg");
+ConVar mp_server("mp_server", "ez-pp.farm");
 ConVar osu_username("name", "Guest");
 ConVar mp_password("mp_password", "");
 ConVar mp_autologin("mp_autologin", false);
