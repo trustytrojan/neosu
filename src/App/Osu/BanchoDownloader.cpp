@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include "miniz.h"
 
+#include "Bancho.h"
 #include "BanchoProtocol.h"
 #include "BanchoNetworking.h"
 
@@ -72,7 +73,7 @@ void* run_mapset_download_thread(void* arg) {
         auto query_url = UString::format(mirrors[i], dt->id);
         debugLog("Downloading %s\n", query_url.toUtf8());
         curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
-        curl_easy_setopt(curl, CURLOPT_USERAGENT, MCOSU_USER_AGENT);
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, bancho.user_agent.toUtf8());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
         curl_easy_setopt(curl, CURLOPT_XFERINFODATA, dt);

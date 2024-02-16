@@ -51,9 +51,10 @@ void disconnect() {
     write_int(&packet, 0);
 
     CURL *curl = curl_easy_init();
+    auto version_header = UString::format("x-mcosu-ver: %s", bancho.mcosu_version.toUtf8());
     struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, auth_header.c_str());
-    chunk = curl_slist_append(chunk, "x-mcosu-ver: " MCOSU_VERSION);
+    chunk = curl_slist_append(chunk, version_header.toUtf8());
     auto query_url = UString::format("https://c.%s/", bancho.endpoint.toUtf8());
     curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, packet.memory);
@@ -190,8 +191,9 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
 
   struct curl_slist *chunk = NULL;
   if (!auth_header.empty()) {
+    auto version_header = UString::format("x-mcosu-ver: %s", bancho.mcosu_version.toUtf8());
     chunk = curl_slist_append(chunk, auth_header.c_str());
-    chunk = curl_slist_append(chunk, "x-mcosu-ver: " MCOSU_VERSION);
+    chunk = curl_slist_append(chunk, version_header.toUtf8());
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
   }
 

@@ -69,7 +69,7 @@ loop:
         Packet response = {0};
         response.memory = new uint8_t[2048];
         curl_easy_setopt(curl, CURLOPT_URL, img_url.toUtf8());
-        curl_easy_setopt(curl, CURLOPT_USERAGENT, MCOSU_USER_AGENT);
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, bancho.user_agent.toUtf8());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
 #ifdef _WIN32

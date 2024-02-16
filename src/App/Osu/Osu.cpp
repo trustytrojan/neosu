@@ -157,6 +157,9 @@ Osu::Osu(int instanceID)
 {
 	srand(time(NULL));
 
+	bancho.mcosu_version = UString::format("%.2f-" MCOSU_STREAM, osu_version.getFloat());
+	bancho.user_agent = UString::format("Mozilla/5.0 (compatible; McOsu/%s; +" MCOSU_UPDATE_URL "/)", bancho.mcosu_version.toUtf8());
+
 	m_iInstanceID = instanceID;
 
 	// convar refs

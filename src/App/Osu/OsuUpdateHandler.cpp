@@ -5,6 +5,11 @@
 // $NoKeywords: $osuupdchk
 //===============================================================================//
 
+#ifndef _WIN32
+#include <sys/types.h>
+#include <sys/stat.h>
+#endif
+
 #include "OsuUpdateHandler.h"
 
 #include "Engine.h"
@@ -16,10 +21,9 @@
 #include "JSON.h"
 #include "miniz.h"
 
+#include "BanchoNetworking.h"
 #include "Osu.h"
 
-const char *OsuUpdateHandler::GITHUB_API_RELEASE_URL = "https://api.github.com/repos/McKay42/McOsu/releases";
-const char *OsuUpdateHandler::GITHUB_RELEASE_DOWNLOAD_URL = "https://github.com/McKay42/McOsu/releases";
 const char *OsuUpdateHandler::TEMP_UPDATE_DOWNLOAD_FILEPATH = "update.zip";
 
 ConVar *OsuUpdateHandler::m_osu_release_stream_ref = NULL;
@@ -42,22 +46,10 @@ void *OsuUpdateHandler::run(void *data)
 	if (handler->_m_bKYS) return NULL; // cancellation point
 
 	// continue if we have one. reset the thread in both cases after we're done
-	if (handler->isUpdateAvailable())
+	if (handler->m_status != STATUS::STATUS_UP_TO_DATE)
 	{
-		// get the newest release to install
-		UString downloadUrl = "";
-		float latestVersion = Osu::version->getFloat();
-		for (int i=0; i<handler->m_releases.size(); i++)
-		{
-			if (handler->m_releases[i].os == env->getOS() && handler->m_releases[i].stream == handler->getReleaseStream() && handler->m_releases[i].version > latestVersion)
-			{
-				latestVersion = handler->m_releases[i].version;
-				downloadUrl = handler->m_releases[i].downloadURL;
-			}
-		}
-
 		// try to download and install the update
-		if (handler->_downloadUpdate(downloadUrl))
+		if (handler->_downloadUpdate())
 		{
 			if (handler->_m_bKYS) return NULL; // cancellation point
 
@@ -89,6 +81,7 @@ OsuUpdateHandler::OsuUpdateHandler()
 #ifdef MCENGINE_FEATURE_PTHREADS
 
 	m_updateThread = 0;
+	update_url = "";
 
 #endif
 
@@ -157,135 +150,34 @@ void OsuUpdateHandler::checkForUpdates()
 #endif
 }
 
-bool OsuUpdateHandler::isUpdateAvailable()
-{
-	for (int i=0; i<m_releases.size(); i++)
-	{
-		if (m_releases[i].os == env->getOS() && m_releases[i].stream == getReleaseStream() && m_releases[i].version > Osu::version->getFloat())
-			return true;
-	}
-	return false;
-}
-
 void OsuUpdateHandler::_requestUpdate()
 {
 	debugLog("OsuUpdateHandler::requestUpdate()\n");
 	m_status = STATUS::STATUS_CHECKING_FOR_UPDATE;
 
-	if (m_releases.size() > 0 && isUpdateAvailable()) return; // don't need to get twice
-
-	m_releases.clear();
-	std::vector<GITHUB_RELEASE_BUILD> asyncReleases;
-
-	UString gitReleases = engine->getNetworkHandler()->httpGet(GITHUB_API_RELEASE_URL);
-
-	//	[array
-	//		{object
-	//			"tag_name" : "22",
-	//			"target_commitish": "master"
-	//			"assets" : [array
-	//							{object
-	//								"browser_download_url": "https://github.com/McKay42/McOsu/releases/download/22/McOsu.Alpha.22.zip"
-	//							}
-	//			]
-	//		},
-	//		{
-	//		},
-	//		{
-	//		}
-	//	]
-
-	JSONValue *value = JSON::Parse(gitReleases.toUtf8());
-	if (value != NULL)
-	{
-		JSONArray root;
-		if (value->IsArray() == false)
-			printf("OsuUpdateChecker: Invalid JSON array.\n");
-		else
-		{
-			root = value->AsArray();
-			for (int i=0; i<root.size(); i++)
-			{
-				if (root[i]->IsObject())
-				{
-					JSONObject release = root[i]->AsObject();
-
-					if (release.find(L"tag_name") != release.end() && release[L"tag_name"]->IsString() && release.find(L"target_commitish") != release.end() && release[L"target_commitish"]->IsString())
-					{
-						// get release version, branch, stream and OS
-						UString versionString = UString(release[L"tag_name"]->AsString().c_str());
-
-						Environment::OS os = stringToOS(versionString);
-						if (os == Environment::OS::OS_NULL)
-						{
-							printf("OsuUpdateChecker: Invalid OS in version \"%s\".\n", versionString.toUtf8());
-							continue;
-						}
-
-						STREAM stream = stringToStream(versionString);
-						if (stream == STREAM::STREAM_NULL)
-						{
-							printf("OsuUpdateChecker: Invalid stream in version \"%s\".\n", versionString.toUtf8());
-							continue;
-						}
-
-						float version = versionString.toFloat();
-						UString branch = UString(release[L"target_commitish"]->AsString().c_str());
-
-						// we are only interested in the master branch
-						if (branch == "master")
-						{
-							if (release.find(L"assets") != release.end() && release[L"assets"]->IsArray())
-							{
-								JSONArray assets = release[L"assets"]->AsArray();
-								for (int a=0; a<assets.size(); a++)
-								{
-									if (assets[a]->IsObject())
-									{
-										JSONObject asset = assets[a]->AsObject();
-
-										if (asset.find(L"browser_download_url") != asset.end() && asset[L"browser_download_url"]->IsString())
-										{
-											// get download URL
-											UString downloadURL = UString(asset[L"browser_download_url"]->AsString().c_str());
-
-											// we now have everything
-											GITHUB_RELEASE_BUILD b;
-											b.os = os;
-											b.stream = stream;
-											b.version = version;
-											b.downloadURL = downloadURL;
-											asyncReleases.push_back(b);
-										}
-									}
-									else
-										printf("OsuUpdateChecker: Invalid JSON asset object.\n");
-								}
-							}
-						}
-					}
-				}
-				else
-					printf("OsuUpdateChecker: Invalid JSON object.\n");
-			}
-		}
-		delete value;
-	}
-
-	m_releases = asyncReleases;
-
-	debugLog("OsuUpdateChecker: Found %i releases.\n", m_releases.size());
-	for (int i=0; i<m_releases.size(); i++)
-	{
-		debugLog("OsuUpdateChecker: Release #%i: version = %g, downloadURL = %s\n", i, m_releases[i].version, m_releases[i].downloadURL.toUtf8());
-	}
-
-	if (!isUpdateAvailable())
+	UString latestVersion = engine->getNetworkHandler()->httpGet(MCOSU_UPDATE_URL "/latest-version.txt");
+	float fLatestVersion = strtof(latestVersion.toUtf8(), NULL);
+	float current_version = convar->getConVarByName("osu_version")->getFloat();
+	if(current_version >= fLatestVersion) {
+		// We're already up to date
 		m_status = STATUS::STATUS_UP_TO_DATE;
+		debugLog("We're already up to date (current v%.2f, latest v%.2f)\n", current_version, fLatestVersion);
+		return;
+	}
+
+#ifdef _WIN32
+	const char *os = "windows";
+#else
+	const char *os = "linux";
+#endif
+	debugLog("Downloading latest update... (current v%.2f, latest v%.2f)\n", current_version, fLatestVersion);
+	update_url = UString::format(MCOSU_UPDATE_URL "/mcosu-multiplayer-%s-v%.2f.zip", os, fLatestVersion);
 }
 
-bool OsuUpdateHandler::_downloadUpdate(UString url)
+bool OsuUpdateHandler::_downloadUpdate()
 {
+	UString url = update_url;
+
 	debugLog("OsuUpdateHandler::downloadUpdate( %s )\n", url.toUtf8());
 	m_status = STATUS::STATUS_DOWNLOADING_UPDATE;
 
@@ -444,6 +336,10 @@ void OsuUpdateHandler::_installUpdate(UString zipFilePath)
 	}
 
 	mz_zip_reader_end(&zip_archive);
+
+#ifndef _WIN32
+	chmod(executablePath.toUtf8(), S_IRWXU);
+#endif
 
 	m_status = STATUS::STATUS_SUCCESS_INSTALLATION;
 }

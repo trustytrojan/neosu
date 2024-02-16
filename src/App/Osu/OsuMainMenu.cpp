@@ -636,6 +636,7 @@ void OsuMainMenu::draw(Graphics *g)
 		{
 			g->push3DScene(McRect(m_updateAvailableButton->getPos().x, m_updateAvailableButton->getPos().y, m_updateAvailableButton->getSize().x, m_updateAvailableButton->getSize().y));
 			g->rotate3DScene(m_fUpdateButtonAnim*360.0f, 0, 0);
+			m_steamWorkshopButton->setVisible(false);
 		}
 		m_updateAvailableButton->draw(g);
 		if (m_osu->getUpdateHandler()->getStatus() == OsuUpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION)

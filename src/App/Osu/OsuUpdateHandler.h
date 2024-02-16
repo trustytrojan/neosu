@@ -19,9 +19,6 @@
 class OsuUpdateHandler
 {
 public:
-	static const char *GITHUB_API_RELEASE_URL;
-	static const char *GITHUB_RELEASE_DOWNLOAD_URL;
-
 	enum class STATUS
 	{
 		STATUS_UP_TO_DATE,
@@ -32,10 +29,8 @@ public:
 		STATUS_ERROR
 	};
 
-public:
 	static void *run(void *data);
 
-public:
 	OsuUpdateHandler();
 	virtual ~OsuUpdateHandler();
 
@@ -45,7 +40,7 @@ public:
 	void checkForUpdates();
 
 	inline STATUS getStatus() const {return m_status;}
-	bool isUpdateAvailable();
+	UString update_url;
 
 private:
 	static const char *TEMP_UPDATE_DOWNLOAD_FILEPATH;
@@ -53,7 +48,7 @@ private:
 
 	// async
 	void _requestUpdate();
-	bool _downloadUpdate(UString url);
+	bool _downloadUpdate();
 	void _installUpdate(UString zipFilePath);
 
 #ifdef MCENGINE_FEATURE_PTHREADS
@@ -75,15 +70,6 @@ private:
 	STREAM stringToStream(UString streamString);
 	Environment::OS stringToOS(UString osString);
 	STREAM getReleaseStream();
-
-	struct GITHUB_RELEASE_BUILD
-	{
-		Environment::OS os;
-		STREAM stream;
-		float version;
-		UString downloadURL;
-	};
-	std::vector<GITHUB_RELEASE_BUILD> m_releases;
 
 	// status
 	STATUS m_status;

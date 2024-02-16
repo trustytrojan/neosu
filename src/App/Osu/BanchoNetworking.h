@@ -4,8 +4,8 @@
 #include <curl/curl.h>
 
 // User agent sent when downloading beatmaps
-#define MCOSU_VERSION "34.00-dev"
-#define MCOSU_USER_AGENT "Mozilla/5.0 (compatible; McOsu/" MCOSU_VERSION "; +https://mcosu.kiwec.net/)"
+#define MCOSU_STREAM "dev"
+#define MCOSU_UPDATE_URL "https://mcosu.kiwec.net"
 
 enum APIRequestType {
   GET_MAP_LEADERBOARD,

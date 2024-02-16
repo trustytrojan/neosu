@@ -6,6 +6,9 @@
 class Osu;
 
 struct Bancho {
+  UString mcosu_version;
+  UString user_agent;
+
   Osu *osu = nullptr;
   UString endpoint;
   int32_t user_id = 0;
