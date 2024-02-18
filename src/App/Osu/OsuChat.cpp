@@ -379,7 +379,7 @@ void OsuChat::addChannel(UString channel_name, bool switch_to) {
         switchToChannel(chan);
     }
 
-    updateLayout(engine->getScreenSize());
+    updateLayout(m_osu->getScreenSize());
 }
 
 void OsuChat::addMessage(UString channel_name, ChatMessage msg) {
