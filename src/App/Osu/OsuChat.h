@@ -55,6 +55,7 @@ struct OsuChat : public OsuScreen
     void updateButtonLayout(Vector2 screen);
 
     void join(UString channel_name);
+    void leave(UString channel_name);
     void onDisconnect();
 
     virtual CBaseUIContainer* setVisible(bool visible);

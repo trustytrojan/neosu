@@ -161,6 +161,7 @@ void OsuChat::draw(Graphics *g) {
     if (!m_bVisible && !isAnimating) return;
 
     if (isAnimating) {
+        // XXX: Setting BLEND_MODE_PREMUL_ALPHA is not enough, transparency is still incorrect
         m_osu->getSliderFrameBuffer()->enable();
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_PREMUL_ALPHA);
     }
@@ -175,12 +176,12 @@ void OsuChat::draw(Graphics *g) {
             chat_w = round(chat_w * 0.6);
         }
 
-        g->setColor(COLOR(isAnimating ? 150 : 100, 0, 10, 50)); // dirty hack, idk how opengl works
+        g->setColor(COLOR(100, 0, 10, 50));
         g->fillRect(0, chat_y - (button_height + 2.f), chat_w, (button_height + 2.f));
         g->setColor(COLOR(150, 0, 0, 0));
         g->fillRect(0, chat_y, chat_w, chat_h);
     } else {
-        g->setColor(COLOR(isAnimating ? 150 : 100, 0, 10, 50)); // dirty hack, idk how opengl works
+        g->setColor(COLOR(100, 0, 10, 50));
         g->fillRect(
             m_button_container->getPos().x, m_button_container->getPos().y,
             m_button_container->getSize().x, m_button_container->getSize().y
@@ -194,9 +195,9 @@ void OsuChat::draw(Graphics *g) {
     }
 
     if (isAnimating) {
-        g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
         m_osu->getSliderFrameBuffer()->disable();
 
+        g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
         g->push3DScene(McRect(0, 0, getSize().x, getSize().y));
         {
             g->rotate3DScene(-(1.0f - m_fAnimation)*90, 0, 0);
@@ -236,6 +237,11 @@ void OsuChat::onKeyDown(KeyboardEvent &key) {
     if(key.getKeyCode() == KEY_ENTER) {
         key.consume();
         if(m_selected_channel != nullptr && m_input_box->getText().length() > 0) {
+            if(m_input_box->getText() == UString("/close")) {
+                leave(m_selected_channel->name);
+                return;
+            }
+
             Packet packet = {0};
             packet.id = m_selected_channel->name[0] == '#' ? SEND_PUBLIC_MESSAGE : SEND_PRIVATE_MESSAGE;
             write_string(&packet, (char*)bancho.username.toUtf8());
@@ -260,15 +266,8 @@ void OsuChat::onKeyDown(KeyboardEvent &key) {
     // Ctrl+W: Close current channel
     if(engine->getKeyboard()->isControlDown() && key.getKeyCode() == KEY_W) {
         key.consume();
-        if(m_selected_channel != nullptr && m_selected_channel->name != UString("#lobby")) {
-            if(m_selected_channel->name[0] == '#') {
-                Packet packet = {0};
-                packet.id = CHANNEL_PART;
-                write_string(&packet, m_selected_channel->name.toUtf8());
-                send_packet(packet);
-            }
-
-            removeChannel(m_selected_channel->name);
+        if(m_selected_channel != nullptr) {
+            leave(m_selected_channel->name);
         }
         return;
     }
@@ -528,6 +527,21 @@ void OsuChat::join(UString channel_name) {
     packet.id = CHANNEL_JOIN;
     write_string(&packet, channel_name.toUtf8());
     send_packet(packet);
+}
+
+void OsuChat::leave(UString channel_name) {
+    bool send_leave_packet = channel_name[0] == '#';
+    if(channel_name == UString("#lobby")) send_leave_packet = false;
+    if(channel_name == UString("#multiplayer")) send_leave_packet = false;
+
+    if(send_leave_packet) {
+        Packet packet = {0};
+        packet.id = CHANNEL_PART;
+        write_string(&packet, channel_name.toUtf8());
+        send_packet(packet);
+    }
+
+    removeChannel(channel_name);
 }
 
 void OsuChat::onDisconnect() {
