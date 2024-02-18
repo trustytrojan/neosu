@@ -1164,6 +1164,7 @@ OsuUICheckbox *OsuModSelector::addExperimentalCheckbox(UString text, UString too
 void OsuModSelector::resetModsUserInitiated() {
 	resetMods();
 
+	engine->getSound()->play(m_osu->getSkin()->getCheckOff());
 	m_resetModsButton->animateClickColor();
 
 	if(bancho.is_online()) {
@@ -1248,20 +1249,20 @@ uint32_t OsuModSelector::getModFlags() {
 
 void OsuModSelector::enableModsFromFlags(uint32_t flags) {
 	// XXX: Enable nightcore (flags & (1 << 9))
-	m_modButtonNofail->setOn(flags & (1 << 0));
-    m_modButtonEasy->setOn(flags & (1 << 1));
-    m_modButtonTD->setOn(flags & (1 << 2));
-    m_modButtonHidden->setOn(flags & (1 << 3));
-    m_modButtonHardrock->setOn(flags & (1 << 4));
-    m_modButtonSuddendeath->setOn(flags & (1 << 5));
-    m_modButtonDoubletime->setOn(flags & (1 << 6));
-    m_modButtonRelax->setOn(flags & (1 << 7));
-    m_modButtonHalftime->setOn(flags & (1 << 8));
-    m_modButtonSpunout->setOn(flags & (1 << 12));
-    m_modButtonAutopilot->setOn(flags & (1 << 13));
-    getModButtonOnGrid(1, 1)->setOn(flags & (1 << 14)); // SS
-    getModButtonOnGrid(4, 2)->setOn(flags & (1 << 23)); // Target
-    m_modButtonScoreV2->setOn(flags & (1 << 29));
+	m_modButtonNofail->setOn(flags & (1 << 0), true);
+    m_modButtonEasy->setOn(flags & (1 << 1), true);
+    m_modButtonTD->setOn(flags & (1 << 2), true);
+    m_modButtonHidden->setOn(flags & (1 << 3), true);
+    m_modButtonHardrock->setOn(flags & (1 << 4), true);
+    m_modButtonSuddendeath->setOn(flags & (1 << 5), true);
+    m_modButtonDoubletime->setOn(flags & (1 << 6), true);
+    m_modButtonRelax->setOn(flags & (1 << 7), true);
+    m_modButtonHalftime->setOn(flags & (1 << 8), true);
+    m_modButtonSpunout->setOn(flags & (1 << 12), true);
+    m_modButtonAutopilot->setOn(flags & (1 << 13), true);
+    getModButtonOnGrid(1, 1)->setOn(flags & (1 << 14), true); // SS
+    getModButtonOnGrid(4, 2)->setOn(flags & (1 << 23), true); // Target
+    m_modButtonScoreV2->setOn(flags & (1 << 29), true);
 }
 
 void OsuModSelector::close()

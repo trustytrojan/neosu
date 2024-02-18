@@ -32,7 +32,7 @@ public:
 	UString getActiveModName();
 	inline int getState() const {return m_iState;}
 	inline bool isOn() const {return m_bOn;}
-	void setOn(bool on);
+	void setOn(bool on, bool silent = false);
 
 private:
 	virtual void onFocusStolen();

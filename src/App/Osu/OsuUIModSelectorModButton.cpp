@@ -95,7 +95,7 @@ void OsuUIModSelectorModButton::mouse_update(bool *propagate_clicks)
 
 void OsuUIModSelectorModButton::resetState()
 {
-	setOn(false);
+	setOn(false, true);
 	setState(0);
 }
 
@@ -169,13 +169,16 @@ void OsuUIModSelectorModButton::setBaseScale(float xScale, float yScale)
 	}
 }
 
-void OsuUIModSelectorModButton::setOn(bool on)
+void OsuUIModSelectorModButton::setOn(bool on, bool silent)
 {
 	if (!m_bAvailable) return;
 
 	bool prevState = m_bOn;
 	m_bOn = on;
-	const float animationDuration = 0.05f;
+	float animationDuration = 0.05f;
+	if(silent) {
+		animationDuration = 0.f;
+	}
 
 	if (m_bOn)
 	{
@@ -198,7 +201,9 @@ void OsuUIModSelectorModButton::setOn(bool on)
 			anim->moveLinear(&m_vScale.y, m_vBaseScale.y * m_fEnabledScaleMultiplier, animationDuration, true);
 		}
 
-		engine->getSound()->play(m_osu->getSkin()->getCheckOn());
+		if(!silent) {
+			engine->getSound()->play(m_osu->getSkin()->getCheckOn());
+		}
 	}
 	else
 	{
@@ -206,8 +211,10 @@ void OsuUIModSelectorModButton::setOn(bool on)
 		anim->moveLinear(&m_vScale.x, m_vBaseScale.x, animationDuration, true);
 		anim->moveLinear(&m_vScale.y, m_vBaseScale.y, animationDuration, true);
 
-		if (prevState && !m_bOn) // only play sound on specific change
+		if (prevState && !m_bOn && !silent) {
+			// only play sound on specific change
 			engine->getSound()->play(m_osu->getSkin()->getCheckOff());
+		}
 	}
 }
 
@@ -247,7 +254,7 @@ void OsuUIModSelectorModButton::setState(unsigned int state, bool initialState, 
 	if (initialState)
 	{
 		setState(state, false);
-		setOn(true);
+		setOn(true, true);
 	}
 }
 
