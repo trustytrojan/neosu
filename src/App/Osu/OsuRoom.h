@@ -37,6 +37,7 @@ struct OsuRoom : public OsuScreen {
     virtual CBaseUIContainer* setVisible(bool visible); // does nothing
 
     void updateLayout(Vector2 newResolution);
+    void updateSettingsLayout(Vector2 newResolution);
     void ragequit();
 
     static void process_beatmapset_info_response(Packet packet);
@@ -66,6 +67,8 @@ struct OsuRoom : public OsuScreen {
 
     std::unordered_map<uint32_t, uint32_t> mapset_by_mapid;
 
+    CBaseUILabel *map_label = nullptr;
+    CBaseUILabel *mods_label = nullptr;
     CBaseUIScrollView *m_settings = nullptr;
     CBaseUIScrollView *m_slotlist = nullptr;
     CBaseUIScrollView *m_map = nullptr;

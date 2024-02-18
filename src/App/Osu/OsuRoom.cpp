@@ -81,12 +81,21 @@ bool OsuUIModList::isVisible() {
     label_name->setSizeToContent(0, 0);                               \
     label_name->setDrawFrame(false);                                  \
     label_name->setDrawBackground(false);                             \
-    m_settings->getContainer()->addBaseUIElement(label_name);         \
 } while(0)
 
-OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
-    // XXX: Place buttons to the right of the large labels
+#define ADD_ELEMENT(element) do {                          \
+    element->setPos(10, settings_y);                       \
+    m_settings->getContainer()->addBaseUIElement(element); \
+    settings_y += element->getSize().y + 20;               \
+} while(0)
 
+#define ADD_BUTTON(button, label) do {                              \
+    button->setPos(label->getSize().x + 20, label->getPos().y - 7); \
+    m_settings->getContainer()->addBaseUIElement(button);           \
+} while(0)
+
+
+OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
     font = engine->getResourceManager()->getFont("FONT_DEFAULT");
     lfont = osu->getSubTitleFont();
 
@@ -107,49 +116,39 @@ OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
     INIT_LABEL(m_room_name_iptl, "Room name", false);
     m_room_name_ipt = new CBaseUITextbox(0, 0, m_settings->getSize().x, 40, "");
     m_room_name_ipt->setText("Multiplayer room");
-    m_settings->getContainer()->addBaseUIElement(m_room_name_ipt);
 
     m_change_password_btn = new OsuUIButton(osu, 0, 0, 190, 40, "change_password_btn", "Change password");
     m_change_password_btn->setColor(0xff0e94b5);
     m_change_password_btn->setUseDefaultSkin();
     m_change_password_btn->setClickCallback( fastdelegate::MakeDelegate(this, &OsuRoom::onChangePasswordClicked) );
-    m_settings->getContainer()->addBaseUIElement(m_change_password_btn);
 
     INIT_LABEL(m_win_condition, "Win condition: Score", false);
     m_change_win_condition_btn = new OsuUIButton(osu, 0, 0, 240, 40, "change_win_condition_btn", "Win condition: Score");
-    m_change_win_condition_btn->setColor(0xff0e94b5);
+    m_change_win_condition_btn->setColor(0xff00ff00);
     m_change_win_condition_btn->setUseDefaultSkin();
     m_change_win_condition_btn->setClickCallback( fastdelegate::MakeDelegate(this, &OsuRoom::onChangeWinConditionClicked) );
-    m_settings->getContainer()->addBaseUIElement(m_change_win_condition_btn);
 
-    CBaseUILabel* map_label;
     INIT_LABEL(map_label, "Beatmap", true);
-
     m_select_map_btn = new OsuUIButton(osu, 0, 0, 130, 40, "select_map_btn", "Select map");
     m_select_map_btn->setColor(0xff0e94b5);
     m_select_map_btn->setUseDefaultSkin();
     m_select_map_btn->setClickCallback( fastdelegate::MakeDelegate(this, &OsuRoom::onSelectMapClicked) );
-    m_settings->getContainer()->addBaseUIElement(m_select_map_btn);
 
     INIT_LABEL(m_map_title, "(no map selected)", false);
     INIT_LABEL(m_map_stars, "", false);
     INIT_LABEL(m_map_attributes, "", false);
     INIT_LABEL(m_map_attributes2, "", false);
 
-    CBaseUILabel* mods_label;
     INIT_LABEL(mods_label, "Mods", true);
     m_select_mods_btn = new OsuUIButton(osu, 0, 0, 180, 40, "select_mods_btn", "Select mods [F1]");
     m_select_mods_btn->setColor(0xff0e94b5);
     m_select_mods_btn->setUseDefaultSkin();
     m_select_mods_btn->setClickCallback( fastdelegate::MakeDelegate(this, &OsuRoom::onSelectModsClicked) );
-    m_settings->getContainer()->addBaseUIElement(m_select_mods_btn);
     m_freemod = new OsuUICheckbox(m_osu, 0, 0, 200, 50, "allow_freemod", "Freemod");
     m_freemod->setDrawFrame(false);
     m_freemod->setDrawBackground(false);
     m_freemod->setChangeCallback( fastdelegate::MakeDelegate(this, &OsuRoom::onFreemodCheckboxChanged) );
-    m_settings->getContainer()->addBaseUIElement(m_freemod);
     m_mods = new OsuUIModList(&bancho.room.mods);
-    m_settings->getContainer()->addBaseUIElement(m_mods);
     INIT_LABEL(m_no_mods_selected, "No mods selected.", false);
 
     m_ready_btn = new OsuUIButton(osu, 0, 0, 300, 50, "start_game_btn", "Start game");
@@ -157,7 +156,6 @@ OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
     m_ready_btn->setUseDefaultSkin();
     m_ready_btn->setClickCallback( fastdelegate::MakeDelegate(this, &OsuRoom::onReadyButtonClick) );
     m_ready_btn->is_loading = true;
-    m_settings->getContainer()->addBaseUIElement(m_ready_btn);
 
     auto player_list_label = new CBaseUILabel(50, 50, 0, 0, "label", "Player list");
     player_list_label->setFont(lfont);
@@ -172,9 +170,8 @@ OsuRoom::OsuRoom(Osu *osu) : OsuScreen(osu) {
     m_slotlist->setHorizontalScrolling(false);
     addBaseUIElement(m_slotlist);
 
-    // the context menu gets added last (drawn on top of everything)
     m_contextMenu = new OsuUIContextMenu(m_osu, 50, 50, 150, 0, "", m_settings);
-    m_settings->getContainer()->addBaseUIElement(m_contextMenu);
+    addBaseUIElement(m_contextMenu);
 
     updateLayout(m_osu->getScreenSize());
 }
@@ -306,37 +303,41 @@ CBaseUIContainer* OsuRoom::setVisible(bool visible) {
     return this;
 }
 
-void OsuRoom::updateLayout(Vector2 newResolution) {
-    setSize(newResolution);
+void OsuRoom::updateSettingsLayout(Vector2 newResolution) {
+    const bool is_host = bancho.room.is_host();
+    int settings_y = 10;
 
+    m_settings->getContainer()->empty();
     m_settings->setPos(round(newResolution.x * 0.6), 0);
     m_settings->setSize(round(newResolution.x * 0.4), newResolution.y);
 
-    const float dpiScale = Osu::getUIScale(m_osu);
-    m_pauseButton->setSize(30 * dpiScale, 30 * dpiScale);
-    m_pauseButton->setPos(round(newResolution.x * 0.6) - m_pauseButton->getSize().x*2 - 10 * dpiScale, m_pauseButton->getSize().y + 10 * dpiScale);
-
-    const bool is_host = bancho.room.is_host();
-    UString host_str = "Host: None";
-    if(bancho.room.host_id > 0) {
-        auto host = get_user_info(bancho.room.host_id);
-        host_str = UString::format("Host: %s", host->name.toUtf8());
-    }
-    m_host->setText(host_str);
-    m_host->setVisible(!is_host);
-
+    // Room name (title)
     m_room_name->setText(bancho.room.name);
     m_room_name->setSizeToContent();
-    if(!is_host) {
-        m_room_name_ipt->setText(bancho.room.name);
+    ADD_ELEMENT(m_room_name);
+    if(is_host) {
+        ADD_BUTTON(m_change_password_btn, m_room_name);
     }
-    m_room_name_iptl->setVisible(is_host);
-    m_room_name_ipt->setSize(m_settings->getSize().x - 20, 40);
-    m_room_name_ipt->setVisible(is_host);
 
-    m_change_password_btn->setVisible(is_host);
+    // Host name
+    if(!is_host) {
+        UString host_str = "Host: None";
+        if(bancho.room.host_id > 0) {
+            auto host = get_user_info(bancho.room.host_id);
+            host_str = UString::format("Host: %s", host->name.toUtf8());
+        }
+        m_host->setText(host_str);
+        ADD_ELEMENT(m_host);
+    }
 
-    m_win_condition->setVisible(!is_host);
+    if(is_host) {
+        // Room name (input)
+        ADD_ELEMENT(m_room_name_iptl);
+        m_room_name_ipt->setSize(m_settings->getSize().x - 20, 40);
+        ADD_ELEMENT(m_room_name_ipt);
+    }
+
+    // Win condition
     if(bancho.room.win_condition == SCOREV1) {
         m_win_condition->setText("Win condition: Score");
     } else if(bancho.room.win_condition == ACCURACY) {
@@ -346,24 +347,45 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
     } else if(bancho.room.win_condition == SCOREV2) {
         m_win_condition->setText("Win condition: ScoreV2");
     }
+    if(is_host) {
+        m_change_win_condition_btn->setText(m_win_condition->getText());
+        ADD_ELEMENT(m_change_win_condition_btn);
+    } else {
+        ADD_ELEMENT(m_win_condition);
+    }
 
-    m_change_win_condition_btn->setVisible(is_host);
-    m_change_win_condition_btn->setText(m_win_condition->getText());
+    // Beatmap
+    settings_y += 10;
+    ADD_ELEMENT(map_label);
+    if(is_host) {
+        ADD_BUTTON(m_select_map_btn, map_label);
+    }
+    ADD_ELEMENT(m_map_title);
+    if(!m_ready_btn->is_loading) {
+        ADD_ELEMENT(m_map_stars);
+        ADD_ELEMENT(m_map_attributes);
+        ADD_ELEMENT(m_map_attributes2);
+    }
 
-    m_map_title->setVisible(true);
-    m_map_attributes->setVisible(!m_ready_btn->is_loading);
-    m_map_attributes2->setVisible(!m_ready_btn->is_loading);
-    m_map_stars->setVisible(!m_ready_btn->is_loading);
+    // Mods
+    settings_y += 10;
+    ADD_ELEMENT(mods_label);
+    if(is_host || bancho.room.freemods) {
+        ADD_BUTTON(m_select_mods_btn, mods_label);
+    }
+    if(is_host) {
+        m_freemod->setChecked(bancho.room.freemods);
+        ADD_ELEMENT(m_freemod);
+    }
+    if(bancho.room.mods == 0) {
+        ADD_ELEMENT(m_no_mods_selected);
+    } else {
+        m_mods->m_flags = &bancho.room.mods;
+        m_mods->setSize(300, 90);
+        ADD_ELEMENT(m_mods);
+    }
 
-    m_select_map_btn->setVisible(is_host);
-
-    m_select_mods_btn->setVisible(is_host || bancho.room.freemods);
-    m_freemod->setChecked(bancho.room.freemods);
-    m_freemod->setVisible(is_host);
-    m_mods->m_flags = &bancho.room.mods;
-    m_mods->setSize(300, 90);
-    m_no_mods_selected->setVisible(bancho.room.mods == 0);
-    
+    // Ready button
     int nb_ready = 0;
     bool is_ready = false;
     for(uint8_t i = 0; i < 16; i++) {
@@ -385,19 +407,18 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
         m_ready_btn->setText(is_ready ? "Not ready" : "Ready!");
         m_ready_btn->setColor(is_ready ? 0xffff0000 : 0xff00ff00);
     }
-    m_ready_btn->setVisible(true); // wtf...
-    m_settings->setScrollSizeToContent();
+    ADD_ELEMENT(m_ready_btn);
 
-    float settings_y = 10;
-    for(auto& element : m_settings->getContainer()->getElements()) {
-        if(element->isVisible()) {
-            element->setRelPos(10, settings_y);
-            settings_y += element->getSize().y + 20;
-        } else {
-            // HACK: Still getting drawn despite isVisible() being false. idk
-            element->setRelPos(-999, -999);
-        }
-    }
+    m_settings->setScrollSizeToContent();
+}
+
+void OsuRoom::updateLayout(Vector2 newResolution) {
+    setSize(newResolution);
+    updateSettingsLayout(newResolution);
+
+    const float dpiScale = Osu::getUIScale(m_osu);
+    m_pauseButton->setSize(30 * dpiScale, 30 * dpiScale);
+    m_pauseButton->setPos(round(newResolution.x * 0.6) - m_pauseButton->getSize().x*2 - 10 * dpiScale, m_pauseButton->getSize().y + 10 * dpiScale);
 
     // XXX: Display detailed user presence
     m_slotlist->setSize(newResolution.x * 0.6 - 200, newResolution.y * 0.6 - 110);
@@ -605,10 +626,15 @@ void OsuRoom::on_room_joined(Room room) {
 void OsuRoom::on_room_updated(Room room) {
     if(bancho.is_playing_a_multi_map() || !bancho.is_in_a_multi_room()) return;
 
+    bool was_host = bancho.room.is_host();
     bool map_changed = bancho.room.map_id != room.map_id;
     bancho.room = room;
     if(map_changed) {
         on_map_change(true);
+    }
+
+    if(!was_host && bancho.room.is_host()) {
+        m_room_name_ipt->setText(bancho.room.name);
     }
 
     uint32_t player_mods = 0;

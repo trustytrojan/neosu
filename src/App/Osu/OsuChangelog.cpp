@@ -36,6 +36,7 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu)
 
 	CHANGELOG alpha317;
 	alpha317.title = UString::format("34.01 (Build Date: %s, %s)", __DATE__, __TIME__); // (09.01.2022 - ?)
+	alpha317.changes.push_back("- Fixed room settings not updating immediately");
 	alpha317.changes.push_back("- Fixed login failing with \"No account by the username '?' exists.\"");
 	alpha317.changes.push_back("- Added \"Force Start\" button to avoid host accidentally starting the match");
 	alpha317.changes.push_back("- Made tab button switch between endpoint, username and password fields in options menu");
