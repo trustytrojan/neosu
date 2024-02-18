@@ -358,14 +358,6 @@ OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu)
 	m_updateAvailableButton->setColor(0x2200ff00);
 	m_updateAvailableButton->setTextColor(0x22ffffff);
 
-	m_steamWorkshopButton = new OsuUIButton(m_osu, 0, 0, 0, 0, "", "Steam Workshop");
-	m_steamWorkshopButton->setUseDefaultSkin();
-	m_steamWorkshopButton->setClickCallback( fastdelegate::MakeDelegate(this, &OsuMainMenu::onSteamWorkshopPressed) );
-	m_steamWorkshopButton->setColor(0xff108fe8);
-	m_steamWorkshopButton->setTextColor(0xffffffff);
-	m_steamWorkshopButton->setVisible(osu_draw_main_menu_workshop_button.getBool());
-	addBaseUIElement(m_steamWorkshopButton);
-
 	m_githubButton = new OsuUIButton(m_osu, 0, 0, 0, 0, "", "Github");
 	m_githubButton->setUseDefaultSkin();
 	m_githubButton->setClickCallback( fastdelegate::MakeDelegate(this, &OsuMainMenu::onGithubPressed) );
@@ -636,7 +628,6 @@ void OsuMainMenu::draw(Graphics *g)
 		{
 			g->push3DScene(McRect(m_updateAvailableButton->getPos().x, m_updateAvailableButton->getPos().y, m_updateAvailableButton->getSize().x, m_updateAvailableButton->getSize().y));
 			g->rotate3DScene(m_fUpdateButtonAnim*360.0f, 0, 0);
-			m_steamWorkshopButton->setVisible(false);
 		}
 		m_updateAvailableButton->draw(g);
 		if (m_osu->getUpdateHandler()->getStatus() == OsuUpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION)
@@ -1411,10 +1402,6 @@ void OsuMainMenu::updateLayout()
 
 	m_updateAvailableButton->setSize(375 * dpiScale, 50 * dpiScale);
 	m_updateAvailableButton->setPos(m_osu->getScreenWidth()/2 - m_updateAvailableButton->getSize().x/2, m_osu->getScreenHeight() - m_updateAvailableButton->getSize().y - 10 * dpiScale);
-
-	m_steamWorkshopButton->onResized(); // HACKHACK: framework, setSize() does not update string metrics
-	m_steamWorkshopButton->setSize(m_updateAvailableButton->getSize());
-	m_steamWorkshopButton->setRelPos(m_updateAvailableButton->getPos().x, m_osu->getScreenHeight() - m_steamWorkshopButton->getSize().y - 4 * dpiScale);
 
 	m_githubButton->setSize(100 * dpiScale, 50 * dpiScale);
 	m_githubButton->setRelPos(5 * dpiScale, m_osu->getScreenHeight()/2.0f - m_githubButton->getSize().y/2.0f);
