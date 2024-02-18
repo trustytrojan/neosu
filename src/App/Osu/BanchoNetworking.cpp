@@ -398,6 +398,11 @@ void send_packet(Packet& packet) {
     return;
   }
 
+  if(ConVars::sv_cheats.getBool()) {
+    disconnect();
+    return;
+  }
+
   // debugLog("Sending packet of type %hu: ", packet.id);
   // for (int i = 0; i < packet.pos; i++) {
   //     debugLog("%02x ", packet.memory[i]);
