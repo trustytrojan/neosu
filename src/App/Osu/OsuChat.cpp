@@ -507,7 +507,7 @@ void OsuChat::updateButtonLayout(Vector2 screen) {
             if(chan->read) {
                 btn->setColor(0xff38439f);
             } else {
-                btn->setColor(0xff5c7ffe);
+                btn->setColor(0xff88a0f7);
             }
         }
 
