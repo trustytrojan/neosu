@@ -36,20 +36,26 @@
 
 void OsuUIModList::draw(Graphics *g) {
     std::vector<OsuSkinImage*> mods;
+
+    if(*m_flags & (1 << 9)) mods.push_back(bancho.osu->getSkin()->getSelectionModNightCore());
+    else if(*m_flags & (1 << 6)) mods.push_back(bancho.osu->getSkin()->getSelectionModDoubleTime());
+
+    bool ht_enabled = *m_flags & (1 << 8);
+    if(ht_enabled && bancho.prefer_daycore) mods.push_back(bancho.osu->getSkin()->getSelectionModDayCore());
+    else if(ht_enabled) mods.push_back(bancho.osu->getSkin()->getSelectionModHalfTime());
+
+    if(*m_flags & (1 << 14)) mods.push_back(bancho.osu->getSkin()->getSelectionModPerfect());
+    else if(*m_flags & (1 << 5)) mods.push_back(bancho.osu->getSkin()->getSelectionModSuddenDeath());
+
     if(*m_flags & (1 << 0)) mods.push_back(bancho.osu->getSkin()->getSelectionModNoFail());
     if(*m_flags & (1 << 1)) mods.push_back(bancho.osu->getSkin()->getSelectionModEasy());
     if(*m_flags & (1 << 2)) mods.push_back(bancho.osu->getSkin()->getSelectionModTD());
     if(*m_flags & (1 << 3)) mods.push_back(bancho.osu->getSkin()->getSelectionModHidden());
     if(*m_flags & (1 << 4)) mods.push_back(bancho.osu->getSkin()->getSelectionModHardRock());
-    if(*m_flags & (1 << 5)) mods.push_back(bancho.osu->getSkin()->getSelectionModSuddenDeath());
     if(*m_flags & (1 << 7)) mods.push_back(bancho.osu->getSkin()->getSelectionModRelax());
-    if(*m_flags & (1 << 8)) mods.push_back(bancho.osu->getSkin()->getSelectionModHalfTime());
-    if(*m_flags & (1 << 9)) mods.push_back(bancho.osu->getSkin()->getSelectionModNightCore());
-    else if(*m_flags & (1 << 6)) mods.push_back(bancho.osu->getSkin()->getSelectionModDoubleTime());
     if(*m_flags & (1 << 11)) mods.push_back(bancho.osu->getSkin()->getSelectionModAutoplay());
     if(*m_flags & (1 << 12)) mods.push_back(bancho.osu->getSkin()->getSelectionModSpunOut());
     if(*m_flags & (1 << 13)) mods.push_back(bancho.osu->getSkin()->getSelectionModAutopilot());
-    if(*m_flags & (1 << 14)) mods.push_back(bancho.osu->getSkin()->getSelectionModPerfect());
     if(*m_flags & (1 << 23)) mods.push_back(bancho.osu->getSkin()->getSelectionModTarget());
     if(*m_flags & (1 << 29)) mods.push_back(bancho.osu->getSkin()->getSelectionModScorev2());
 

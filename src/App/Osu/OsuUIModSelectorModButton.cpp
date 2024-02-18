@@ -124,6 +124,14 @@ void OsuUIModSelectorModButton::onClicked()
 	}
 
 	if(bancho.is_in_a_multi_room()) {
+		// Since osu!stable doesn't have daycore, here's a hack to still allow
+		// it to be selected client-side.
+		if(m_states[m_iState].modName == UString("dc")) {
+			bancho.prefer_daycore = true;
+		} else if(m_states[m_iState].modName == UString("ht")) {
+			bancho.prefer_daycore = false;
+		}
+
 		for(int i = 0; i < 16; i++) {
 			if(bancho.room.slots[i].player_id != bancho.user_id) continue;
 
@@ -131,8 +139,8 @@ void OsuUIModSelectorModButton::onClicked()
 			if(bancho.room.is_host()) {
 				bancho.room.mods = m_osuModSelector->getModFlags();
 				if(bancho.room.freemods) {
-					// When freemod is enabled, we only want to force DT, HT, Target or ScoreV2.
-					bancho.room.mods &= (1 << 6) | (1 << 8) | (1 << 23) | (1 << 29);
+					// When freemod is enabled, we only want to force DT, HT, or Target.
+					bancho.room.mods &= (1 << 6) | (1 << 8) | (1 << 23);
 				}
 			}
 

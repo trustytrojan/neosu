@@ -40,6 +40,7 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu)
 	alpha317.changes.push_back("- Added abilitiy to close chat channels with /close");
 	alpha317.changes.push_back("- Added \"Force Start\" button to avoid host accidentally starting the match");
 	alpha317.changes.push_back("- Made tab button switch between endpoint, username and password fields in options menu");
+	alpha317.changes.push_back("- Fixed Daycore, Nightcore and Perfect mod selection");
 	alpha317.changes.push_back("- Fixed mod selection sound playing twice");
 	alpha317.changes.push_back("- Fixed client not realizing when it gets kicked from a room");
 	alpha317.changes.push_back("- Fixed room settings not updating immediately");

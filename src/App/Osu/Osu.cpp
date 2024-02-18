@@ -1214,23 +1214,33 @@ void Osu::update()
 void Osu::updateMods()
 {
 	if(bancho.is_in_a_multi_room()) {
+		m_bModNC = bancho.room.mods & (1 << 9);
+		if(m_bModNC) {
+			m_bModDT = false;
+		} else if(bancho.room.mods & (1 << 6)) {
+			m_bModDT = true;
+		}
+
+		m_bModHT = bancho.room.mods & (1 << 8);
+		m_bModDC = false;
+		if(m_bModHT && bancho.prefer_daycore) {
+			m_bModHT = false;
+			m_bModDC = true;
+		}
+
 		m_bModNF = bancho.room.mods & (1 << 0);
 		m_bModEZ = bancho.room.mods & (1 << 1);
 		m_bModTD = bancho.room.mods & (1 << 2);
 		m_bModHD = bancho.room.mods & (1 << 3);
 		m_bModHR = bancho.room.mods & (1 << 4);
 		m_bModSD = bancho.room.mods & (1 << 5);
-		m_bModDT = bancho.room.mods & (1 << 6);
 		m_bModRelax = bancho.room.mods & (1 << 7);
-		m_bModHT = bancho.room.mods & (1 << 8);
-		m_bModNC = bancho.room.mods & (1 << 9);
 		m_bModAuto = bancho.room.mods & (1 << 11);
 		m_bModSpunout = bancho.room.mods & (1 << 12);
 		m_bModAutopilot = bancho.room.mods & (1 << 13);
 		m_bModSS = bancho.room.mods & (1 << 14);
 		m_bModTarget = bancho.room.mods & (1 << 23);
 		m_bModScorev2 = bancho.room.win_condition == SCOREV2;
-		m_bModDC = false;
 		m_bModNM = false; // that's nightmare mod not nomod!
 
 		if(bancho.room.freemods) {

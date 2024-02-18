@@ -1164,6 +1164,7 @@ OsuUICheckbox *OsuModSelector::addExperimentalCheckbox(UString text, UString too
 void OsuModSelector::resetModsUserInitiated() {
 	resetMods();
 
+	bancho.prefer_daycore = false;
 	engine->getSound()->play(m_osu->getSkin()->getCheckOff());
 	m_resetModsButton->animateClickColor();
 
@@ -1230,39 +1231,60 @@ void OsuModSelector::resetMods() {
 
 uint32_t OsuModSelector::getModFlags() {
 	uint32_t flags = 0;
+
+    if(m_modButtonDoubletime->isOn()) flags |= (1 << 6); // DT
+    if(m_modButtonDoubletime->getState() == 1) flags |= (1 << 9); // NC
+
+    if(m_modButtonSuddendeath->isOn() && m_modButtonSuddendeath->getState() == 0) flags |= (1 << 5); // SD
+    if(m_modButtonSuddendeath->isOn() && m_modButtonSuddendeath->getState() == 1) flags |= (1 << 14); // PF
+
 	if(m_modButtonNofail->isOn()) flags |= (1 << 0);
     if(m_modButtonEasy->isOn()) flags |= (1 << 1);
     if(m_modButtonTD->isOn()) flags |= (1 << 2);
     if(m_modButtonHidden->isOn()) flags |= (1 << 3);
     if(m_modButtonHardrock->isOn()) flags |= (1 << 4);
-    if(m_modButtonSuddendeath->isOn()) flags |= (1 << 5);
-    if(m_modButtonDoubletime->isOn()) flags |= (1 << 6);
     if(m_modButtonRelax->isOn()) flags |= (1 << 7);
     if(m_modButtonHalftime->isOn()) flags |= (1 << 8);
     if(m_modButtonSpunout->isOn()) flags |= (1 << 12);
     if(m_modButtonAutopilot->isOn()) flags |= (1 << 13);
-    if(getModButtonOnGrid(1, 1)->isOn()) flags |= (1 << 14); // SS
     if(getModButtonOnGrid(4, 2)->isOn()) flags |= (1 << 23); // Target
-    if(m_modButtonScoreV2->isOn()) flags |= (1 << 29);
+
     return flags;
 }
 
 void OsuModSelector::enableModsFromFlags(uint32_t flags) {
-	// XXX: Enable nightcore (flags & (1 << 9))
+	bool dt_enabled = flags & (1 << 6);
+	bool nc_enabled = flags & (1 << 9);
+	if(dt_enabled || nc_enabled) {
+		m_modButtonDoubletime->setOn(true, true);
+		if(nc_enabled) {
+			m_modButtonDoubletime->setState(1, true);
+		}
+	}
+
+	if(flags & (1 << 14)) { // PF
+		m_modButtonSuddendeath->setOn(true, true);
+		m_modButtonSuddendeath->setState(1, true);
+	} else if(flags & (1 << 5)) { // SD
+		m_modButtonSuddendeath->setOn(true, true);
+		m_modButtonSuddendeath->setState(0, true);
+	}
+
+	bool ht_enabled = flags & (1 << 8);
+	if(ht_enabled) {
+    	m_modButtonHalftime->setOn(true, true);
+    	m_modButtonHalftime->setState(bancho.prefer_daycore ? 1 : 0, true);
+	}
+
 	m_modButtonNofail->setOn(flags & (1 << 0), true);
     m_modButtonEasy->setOn(flags & (1 << 1), true);
     m_modButtonTD->setOn(flags & (1 << 2), true);
     m_modButtonHidden->setOn(flags & (1 << 3), true);
     m_modButtonHardrock->setOn(flags & (1 << 4), true);
-    m_modButtonSuddendeath->setOn(flags & (1 << 5), true);
-    m_modButtonDoubletime->setOn(flags & (1 << 6), true);
     m_modButtonRelax->setOn(flags & (1 << 7), true);
-    m_modButtonHalftime->setOn(flags & (1 << 8), true);
     m_modButtonSpunout->setOn(flags & (1 << 12), true);
     m_modButtonAutopilot->setOn(flags & (1 << 13), true);
-    getModButtonOnGrid(1, 1)->setOn(flags & (1 << 14), true); // SS
     getModButtonOnGrid(4, 2)->setOn(flags & (1 << 23), true); // Target
-    m_modButtonScoreV2->setOn(flags & (1 << 29), true);
 }
 
 void OsuModSelector::close()
