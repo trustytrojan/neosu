@@ -539,15 +539,6 @@ void OsuMainMenu::draw(Graphics *g)
 	{
 		UString bannerText = MCOSU_BANNER_TEXT;
 
-#ifdef MCENGINE_FEATURE_BASS_WASAPI
-
-		bannerText = UString::format(convar->getConVarByName("win_snd_wasapi_exclusive")->getBool() ?
-				"-- WASAPI Exclusive Mode! win_snd_wasapi_buffer_size = %i ms --" :
-				"-- WASAPI Shared Mode! win_snd_wasapi_buffer_size = %i ms --",
-				(int)(std::round(convar->getConVarByName("win_snd_wasapi_buffer_size")->getFloat()*1000.0f)));
-
-#endif
-
 		if (osu_main_menu_banner_always_text.getString().length() > 0)
 			bannerText = osu_main_menu_banner_always_text.getString();
 		else if (m_bDidUserUpdateFromOlderVersion && osu_main_menu_banner_ifupdatedfromoldversion_text.getString().length() > 0)
