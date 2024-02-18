@@ -362,7 +362,6 @@ Osu::Osu(int instanceID)
 	m_bToggleSongBrowserScheduled = false;
 	m_bToggleOptionsMenuScheduled = false;
 	m_bOptionsMenuFullscreen = true;
-	m_bToggleRankingScreenScheduled = false;
 	m_bToggleUserStatsScreenScheduled = false;
 	m_bToggleVRTutorialScheduled = false;
 	m_bToggleChangelogScheduled = false;
@@ -1083,14 +1082,6 @@ void Osu::update()
 		m_optionsMenu->setVisible(!m_optionsMenu->isVisible());
 		if (fullscreen || wasFullscreen)
 			m_mainMenu->setVisible(!m_optionsMenu->isVisible());
-	}
-	if (m_bToggleRankingScreenScheduled)
-	{
-		m_bToggleRankingScreenScheduled = false;
-
-		m_rankingScreen->setVisible(!m_rankingScreen->isVisible());
-		if (m_songBrowser2 != NULL && m_iInstanceID < 2)
-			m_songBrowser2->setVisible(!m_rankingScreen->isVisible());
 	}
 	if (m_bToggleUserStatsScreenScheduled)
 	{
@@ -1847,7 +1838,6 @@ void Osu::onBeforePlayStart()
 		m_modSelector->setVisible(false);
 		m_optionsMenu->setVisible(false);
 		m_pauseMenu->setVisible(false);
-		m_rankingScreen->setVisible(false);
 	}
 
 	// HACKHACK: stuck key quickfix

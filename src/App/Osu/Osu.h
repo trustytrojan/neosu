@@ -354,7 +354,6 @@ public:
 	bool m_bToggleSongBrowserScheduled;
 	bool m_bToggleOptionsMenuScheduled;
 	bool m_bOptionsMenuFullscreen;
-	bool m_bToggleRankingScreenScheduled;
 	bool m_bToggleUserStatsScreenScheduled;
 	bool m_bToggleVRTutorialScheduled;
 	bool m_bToggleChangelogScheduled;

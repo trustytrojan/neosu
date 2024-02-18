@@ -463,10 +463,10 @@ Packet build_login_packet() {
   // username\npasswd_md5\nosu_version|utc_offset|display_city|client_hashes|pm_private\n
   Packet packet = {0};
 
-  write_bytes(&packet, (uint8_t *)bancho.username.toUtf8(), bancho.username.length());
+  write_bytes(&packet, (uint8_t *)bancho.username.toUtf8(), bancho.username.lengthUtf8());
   write_byte(&packet, '\n');
 
-  write_bytes(&packet, (uint8_t *)bancho.pw_md5.toUtf8(), bancho.pw_md5.length());
+  write_bytes(&packet, (uint8_t *)bancho.pw_md5.toUtf8(), bancho.pw_md5.lengthUtf8());
   write_byte(&packet, '\n');
 
   const char *osu_version = "b20240123";
@@ -489,7 +489,7 @@ Packet build_login_packet() {
 #endif
 
   UString osu_path_md5 = md5((uint8_t *)osu_path, strlen(osu_path));
-  write_bytes(&packet, (uint8_t *)osu_path_md5.toUtf8(), osu_path_md5.length());
+  write_bytes(&packet, (uint8_t *)osu_path_md5.toUtf8(), osu_path_md5.lengthUtf8());
   write_byte(&packet, ':');
 
   // XXX: Should get MAC addresses from network adapters
@@ -497,7 +497,7 @@ Packet build_login_packet() {
   UString adapters_md5 = md5((uint8_t *)adapters, strlen(adapters));
   write_bytes(&packet, (uint8_t *)adapters, strlen(adapters));
   write_byte(&packet, ':');
-  write_bytes(&packet, (uint8_t *)adapters_md5.toUtf8(), adapters_md5.length());
+  write_bytes(&packet, (uint8_t *)adapters_md5.toUtf8(), adapters_md5.lengthUtf8());
   write_byte(&packet, ':');
 
   static char *uuid = get_disk_uuid();
@@ -508,10 +508,10 @@ Packet build_login_packet() {
 
   // XXX: Should be per-install unique ID.
   // I'm lazy so just sending disk signature twice.
-  write_bytes(&packet, (uint8_t *)disk_md5.toUtf8(), disk_md5.length());
+  write_bytes(&packet, (uint8_t *)disk_md5.toUtf8(), disk_md5.lengthUtf8());
   write_byte(&packet, ':');
 
-  write_bytes(&packet, (uint8_t *)disk_md5.toUtf8(), disk_md5.length());
+  write_bytes(&packet, (uint8_t *)disk_md5.toUtf8(), disk_md5.lengthUtf8());
   write_byte(&packet, ':');
 
   // Allow PMs from strangers
