@@ -1530,6 +1530,21 @@ void OsuOptionsMenu::onKeyDown(KeyboardEvent &e)
 	m_contextMenu->onKeyDown(e);
 	if(e.isConsumed()) return;
 
+    // KEY_TAB doesn't work... idk why
+    if(e.getKeyCode() == 65056) {
+		if(m_serverTextbox->isActive()) {
+			m_serverTextbox->stealFocus();
+			m_nameTextbox->focus();
+			e.consume();
+			return;
+		} else if(m_nameTextbox->isActive()) {
+			m_nameTextbox->stealFocus();
+			m_passwordTextbox->focus();
+			e.consume();
+			return;
+		}
+	}
+
 	// searching text delete
 	if (m_sSearchString.length() > 0) {
 		switch (e.getKeyCode())
