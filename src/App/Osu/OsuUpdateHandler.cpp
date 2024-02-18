@@ -18,7 +18,6 @@
 #include "ConVar.h"
 #include "File.h"
 
-#include "JSON.h"
 #include "miniz.h"
 
 #include "BanchoNetworking.h"

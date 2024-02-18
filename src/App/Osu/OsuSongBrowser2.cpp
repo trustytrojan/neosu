@@ -61,31 +61,31 @@
 
 
 
-ConVar osu_gamemode("osu_gamemode", "std");
+ConVar osu_gamemode("osu_gamemode", "std", FCVAR_NONE);
 
-ConVar osu_songbrowser_sortingtype("osu_songbrowser_sortingtype", "By Date Added");
-ConVar osu_songbrowser_scores_sortingtype("osu_songbrowser_scores_sortingtype", "Sort By Score");
+ConVar osu_songbrowser_sortingtype("osu_songbrowser_sortingtype", "By Date Added", FCVAR_NONE);
+ConVar osu_songbrowser_scores_sortingtype("osu_songbrowser_scores_sortingtype", "Sort By Score", FCVAR_NONE);
 
-ConVar osu_songbrowser_topbar_left_percent("osu_songbrowser_topbar_left_percent", 0.93f);
-ConVar osu_songbrowser_topbar_left_width_percent("osu_songbrowser_topbar_left_width_percent", 0.265f);
-ConVar osu_songbrowser_topbar_middle_width_percent("osu_songbrowser_topbar_middle_width_percent", 0.15f);
-ConVar osu_songbrowser_topbar_right_height_percent("osu_songbrowser_topbar_right_height_percent", 0.5f);
-ConVar osu_songbrowser_topbar_right_percent("osu_songbrowser_topbar_right_percent", 0.378f);
-ConVar osu_songbrowser_bottombar_percent("osu_songbrowser_bottombar_percent", 0.116f);
+ConVar osu_songbrowser_topbar_left_percent("osu_songbrowser_topbar_left_percent", 0.93f, FCVAR_NONE);
+ConVar osu_songbrowser_topbar_left_width_percent("osu_songbrowser_topbar_left_width_percent", 0.265f, FCVAR_NONE);
+ConVar osu_songbrowser_topbar_middle_width_percent("osu_songbrowser_topbar_middle_width_percent", 0.15f, FCVAR_NONE);
+ConVar osu_songbrowser_topbar_right_height_percent("osu_songbrowser_topbar_right_height_percent", 0.5f, FCVAR_NONE);
+ConVar osu_songbrowser_topbar_right_percent("osu_songbrowser_topbar_right_percent", 0.378f, FCVAR_NONE);
+ConVar osu_songbrowser_bottombar_percent("osu_songbrowser_bottombar_percent", 0.116f, FCVAR_NONE);
 
-ConVar osu_draw_songbrowser_background_image("osu_draw_songbrowser_background_image", true);
-ConVar osu_draw_songbrowser_menu_background_image("osu_draw_songbrowser_menu_background_image", true);
-ConVar osu_draw_songbrowser_strain_graph("osu_draw_songbrowser_strain_graph", false);
-ConVar osu_songbrowser_scorebrowser_enabled("osu_songbrowser_scorebrowser_enabled", true);
-ConVar osu_songbrowser_background_fade_in_duration("osu_songbrowser_background_fade_in_duration", 0.1f);
+ConVar osu_draw_songbrowser_background_image("osu_draw_songbrowser_background_image", true, FCVAR_NONE);
+ConVar osu_draw_songbrowser_menu_background_image("osu_draw_songbrowser_menu_background_image", true, FCVAR_NONE);
+ConVar osu_draw_songbrowser_strain_graph("osu_draw_songbrowser_strain_graph", false, FCVAR_NONE);
+ConVar osu_songbrowser_scorebrowser_enabled("osu_songbrowser_scorebrowser_enabled", true, FCVAR_NONE);
+ConVar osu_songbrowser_background_fade_in_duration("osu_songbrowser_background_fade_in_duration", 0.1f, FCVAR_NONE);
 
-ConVar osu_songbrowser_search_delay("osu_songbrowser_search_delay", 0.5f, "delay until search update when entering text");
+ConVar osu_songbrowser_search_delay("osu_songbrowser_search_delay", 0.5f, FCVAR_NONE, "delay until search update when entering text");
 void _osu_songbrowser_search_hardcoded_filter(UString oldValue, UString newValue);
-ConVar osu_songbrowser_search_hardcoded_filter("osu_songbrowser_search_hardcoded_filter", "", "allows forcing the specified search filter to be active all the time", _osu_songbrowser_search_hardcoded_filter);
-ConVar osu_songbrowser_background_star_calculation("osu_songbrowser_background_star_calculation", true, "precalculate stars for all loaded beatmaps while in songbrowser");
-ConVar osu_songbrowser_dynamic_star_recalc("osu_songbrowser_dynamic_star_recalc", true, "dynamically recalculate displayed star value of currently selected beatmap in songbrowser");
+ConVar osu_songbrowser_search_hardcoded_filter("osu_songbrowser_search_hardcoded_filter", "", FCVAR_NONE, "allows forcing the specified search filter to be active all the time", _osu_songbrowser_search_hardcoded_filter);
+ConVar osu_songbrowser_background_star_calculation("osu_songbrowser_background_star_calculation", true, FCVAR_NONE, "precalculate stars for all loaded beatmaps while in songbrowser");
+ConVar osu_songbrowser_dynamic_star_recalc("osu_songbrowser_dynamic_star_recalc", true, FCVAR_NONE, "dynamically recalculate displayed star value of currently selected beatmap in songbrowser");
 
-ConVar osu_debug_background_star_calc("osu_debug_background_star_calc", false, "prints the name of the beatmap about to get its stars calculated (cmd/terminal window only, no in-game log!)");
+ConVar osu_debug_background_star_calc("osu_debug_background_star_calc", false, FCVAR_NONE, "prints the name of the beatmap about to get its stars calculated (cmd/terminal window only, no in-game log!)");
 
 void _osu_songbrowser_search_hardcoded_filter(UString oldValue, UString newValue)
 {
@@ -3122,35 +3122,27 @@ bool OsuSongBrowser2::checkHandleKillDynamicStarCalculator(bool timeout)
 {
 	if (!m_dynamicStarCalculator->isDead())
 	{
-		if (timeout)
+		m_dynamicStarCalculator->kill();
+
+		if (!timeout)
 		{
-			// this is a bit stupid, but it does allow everything to keep running in the meantime
-			const bool isAsyncReady = m_dynamicStarCalculator->isAsyncReady();
-
-			if (isAsyncReady)
-				m_dynamicStarCalculator->kill();
-
-			return isAsyncReady;
-		}
-		else
-		{
-			m_dynamicStarCalculator->kill();
-
 			const double startTime = engine->getTimeReal();
 			while (!m_dynamicStarCalculator->isAsyncReady())
 			{
-				if (timeout && engine->getTimeReal() - startTime > 2)
+				env->sleep(1);
+
+				if (engine->getTimeReal() - startTime > 20.0)
 				{
 					debugLog("WARNING: Ignoring stuck DynamicStarCalculator thread!\n");
 					break;
 				}
 			}
-
-			return m_dynamicStarCalculator->isAsyncReady();
 		}
+
+		return m_dynamicStarCalculator->isAsyncReady();
 	}
 	else
-		return true;
+		return (!engine->getResourceManager()->isLoadingResource(m_dynamicStarCalculator) || m_dynamicStarCalculator->isAsyncReady());
 }
 
 void OsuSongBrowser2::checkHandleKillBackgroundSearchMatcher()
@@ -4439,9 +4431,7 @@ void OsuSongBrowser2::highlightScore(uint64_t unixTimestamp)
 void OsuSongBrowser2::recalculateStarsForSelectedBeatmap(bool force)
 {
 	if (!osu_songbrowser_dynamic_star_recalc.getBool()) return;
-
 	if (m_selectedBeatmap == NULL || m_selectedBeatmap->getSelectedDifficulty2() == NULL) return;
-	if (!force && m_selectedBeatmap->getSelectedDifficulty2() == m_dynamicStarCalculator->getBeatmapDifficulty()) return;
 
 	// HACKHACK: temporarily deactivated, see OsuSongBrowser2::update(), but only if drawing scrubbing timeline strain graph is enabled (or "Draw Stats: Stars* (Total)", or "Draw Stats: pp (SS)")
 	if (!m_osu_draw_scrubbing_timeline_strain_graph_ref->getBool() && !m_osu_draw_statistics_perfectpp_ref->getBool() && !m_osu_draw_statistics_totalstars_ref->getBool())

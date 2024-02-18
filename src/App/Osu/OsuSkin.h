@@ -244,6 +244,7 @@ public:
 	inline Image *getUserIcon() {return m_userIcon;}
 	inline Image *getBackgroundCube() {return m_backgroundCube;}
 	inline Image *getMenuBackground() {return m_menuBackground;}
+	inline Image *getSkybox() {return m_skybox;}
 
 	inline Sound *getSpinnerBonus() {return m_spinnerBonus;}
 	inline Sound *getSpinnerSpinSound() {return m_spinnerSpinSound;}
@@ -555,6 +556,7 @@ public:
 	Image *m_userIcon;
 	Image *m_backgroundCube;
 	Image *m_menuBackground;
+	Image *m_skybox;
 
 	// sounds
 	Sound *m_normalHitNormal;

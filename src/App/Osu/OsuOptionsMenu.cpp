@@ -53,17 +53,17 @@
 #include <iostream>
 #include <fstream>
 
-ConVar osu_options_save_on_back("osu_options_save_on_back", true);
-ConVar osu_options_high_quality_sliders("osu_options_high_quality_sliders", false);
+ConVar osu_options_save_on_back("osu_options_save_on_back", true, FCVAR_NONE);
+ConVar osu_options_high_quality_sliders("osu_options_high_quality_sliders", false, FCVAR_NONE);
 ConVar osu_mania_keylayout_wizard("osu_mania_keylayout_wizard");
-ConVar osu_options_slider_preview_use_legacy_renderer("osu_options_slider_preview_use_legacy_renderer", false, "apparently newer AMD drivers with old gpus are crashing here with the legacy renderer? was just me being lazy anyway, so now there is a vao render path as it should be");
+ConVar osu_options_slider_preview_use_legacy_renderer("osu_options_slider_preview_use_legacy_renderer", false, FCVAR_NONE, "apparently newer AMD drivers with old gpus are crashing here with the legacy renderer? was just me being lazy anyway, so now there is a vao render path as it should be");
 
 void _osuOptionsSliderQualityWrapper(UString oldValue, UString newValue)
 {
 	float value = lerp<float>(1.0f, 2.5f, 1.0f - newValue.toFloat());
 	convar->getConVarByName("osu_slider_curve_points_separation")->setValue(value);
 };
-ConVar osu_options_slider_quality("osu_options_slider_quality", 0.0f, _osuOptionsSliderQualityWrapper);
+ConVar osu_options_slider_quality("osu_options_slider_quality", 0.0f, FCVAR_NONE, _osuOptionsSliderQualityWrapper);
 
 const char *OsuOptionsMenu::OSU_CONFIG_FILE_NAME = ""; // set dynamically below in the constructor
 
@@ -94,18 +94,23 @@ public:
 			float approachCircleAlpha = approachAlpha;
 			approachAlpha = 1.0f;
 
-			OsuCircle::drawCircle(g, m_osu->getSkin(), m_vPos + Vector2(0, m_vSize.y/2) + Vector2(m_vSize.x*(1.0f/5.0f), 0.0f), hitcircleDiameter, numberScale, overlapScale, 1, 42, 0, approachScale, approachAlpha, approachAlpha, true, false);
+			const int number = 1;
+			const int colorCounter = 42;
+			const int colorOffset = 0;
+			const float colorRGBMultiplier = 1.0f;
+
+			OsuCircle::drawCircle(g, m_osu->getSkin(), m_vPos + Vector2(0, m_vSize.y/2) + Vector2(m_vSize.x*(1.0f/5.0f), 0.0f), hitcircleDiameter, numberScale, overlapScale, number, colorCounter, colorOffset, colorRGBMultiplier, approachScale, approachAlpha, approachAlpha, true, false);
 			OsuCircle::drawHitResult(g, m_osu->getSkin(), hitcircleDiameter, hitcircleDiameter, m_vPos + Vector2(0, m_vSize.y/2) + Vector2(m_vSize.x*(2.0f/5.0f), 0.0f), OsuScore::HIT::HIT_100, 0.45f, 0.33f);
 			OsuCircle::drawHitResult(g, m_osu->getSkin(), hitcircleDiameter, hitcircleDiameter, m_vPos + Vector2(0, m_vSize.y/2) + Vector2(m_vSize.x*(3.0f/5.0f), 0.0f), OsuScore::HIT::HIT_50, 0.45f, 0.66f);
 			OsuCircle::drawHitResult(g, m_osu->getSkin(), hitcircleDiameter, hitcircleDiameter, m_vPos + Vector2(0, m_vSize.y/2) + Vector2(m_vSize.x*(4.0f/5.0f), 0.0f), OsuScore::HIT::HIT_MISS, 0.45f, 1.0f);
-			OsuCircle::drawApproachCircle(g, m_osu->getSkin(), m_vPos + Vector2(0, m_vSize.y/2) + Vector2(m_vSize.x*(1.0f/5.0f), 0.0f), m_osu->getSkin()->getComboColorForCounter(42, 0), hitcircleDiameter, approachScale, approachCircleAlpha, false, false);
+			OsuCircle::drawApproachCircle(g, m_osu->getSkin(), m_vPos + Vector2(0, m_vSize.y/2) + Vector2(m_vSize.x*(1.0f/5.0f), 0.0f), m_osu->getSkin()->getComboColorForCounter(colorCounter, colorOffset), hitcircleDiameter, approachScale, approachCircleAlpha, false, false);
 		}
 		else if (m_iMode == 1)
 		{
 			const int numNumbers = 6;
 			for (int i=1; i<numNumbers+1; i++)
 			{
-				OsuCircle::drawHitCircleNumber(g, skin, numberScale, overlapScale, m_vPos + Vector2(0, m_vSize.y/2) + Vector2(m_vSize.x*((float)i/(numNumbers+1.0f)), 0.0f), i-1, 1.0f);
+				OsuCircle::drawHitCircleNumber(g, skin, numberScale, overlapScale, m_vPos + Vector2(0, m_vSize.y/2) + Vector2(m_vSize.x*((float)i/(numNumbers+1.0f)), 0.0f), i-1, 1.0f, 1.0f);
 			}
 		}
 		else if (m_iMode == 2)
@@ -195,8 +200,18 @@ public:
 
 		if (points.size() > 0)
 		{
-			OsuCircle::drawCircle(g, m_osu->getSkin(), points[numPoints/2] + (!useLegacyRenderer ? m_vPos : Vector2(0, 0)), hitcircleDiameter, numberScale, overlapScale, 2, 420, 0, approachScale, approachAlpha, approachAlpha, true, false);
-			OsuCircle::drawApproachCircle(g, m_osu->getSkin(), points[numPoints/2] + (!useLegacyRenderer ? m_vPos : Vector2(0, 0)), m_osu->getSkin()->getComboColorForCounter(420, 0), hitcircleDiameter, approachScale, approachCircleAlpha, false, false);
+			// draw regular circle with animated approach circle beneath slider
+			{
+				const int number = 2;
+				const int colorCounter = 420;
+				const int colorOffset = 0;
+				const float colorRGBMultiplier = 1.0f;
+
+				OsuCircle::drawCircle(g, m_osu->getSkin(), points[numPoints/2] + (!useLegacyRenderer ? m_vPos : Vector2(0, 0)), hitcircleDiameter, numberScale, overlapScale, number, colorCounter, colorOffset, colorRGBMultiplier, approachScale, approachAlpha, approachAlpha, true, false);
+				OsuCircle::drawApproachCircle(g, m_osu->getSkin(), points[numPoints/2] + (!useLegacyRenderer ? m_vPos : Vector2(0, 0)), m_osu->getSkin()->getComboColorForCounter(420, 0), hitcircleDiameter, approachScale, approachCircleAlpha, false, false);
+			}
+
+			// draw slider body
 			{
 				// recursive shared usage of the same RenderTarget is invalid, therefore we block slider rendering while the options menu is animating
 				if (m_bDrawSliderHack)
@@ -225,8 +240,17 @@ public:
 					}
 				}
 			}
-			OsuCircle::drawSliderStartCircle(g, m_osu->getSkin(), points[0] + (!useLegacyRenderer ? m_vPos : Vector2(0, 0)), hitcircleDiameter, numberScale, overlapScale, 1, 420, 0);
-			OsuCircle::drawSliderEndCircle(g, m_osu->getSkin(), points[points.size()-1] + (!useLegacyRenderer ? m_vPos : Vector2(0, 0)), hitcircleDiameter, numberScale, overlapScale, 0, 0, 0, 1.0f, 1.0f, 0.0f, false, false);
+
+			// and slider head/tail circles
+			{
+				const int number = 1;
+				const int colorCounter = 420;
+				const int colorOffset = 0;
+				const float colorRGBMultiplier = 1.0f;
+
+				OsuCircle::drawSliderStartCircle(g, m_osu->getSkin(), points[0] + (!useLegacyRenderer ? m_vPos : Vector2(0, 0)), hitcircleDiameter, numberScale, overlapScale, number, colorCounter, colorOffset, colorRGBMultiplier);
+				OsuCircle::drawSliderEndCircle(g, m_osu->getSkin(), points[points.size()-1] + (!useLegacyRenderer ? m_vPos : Vector2(0, 0)), hitcircleDiameter, numberScale, overlapScale, number, colorCounter, colorOffset, colorRGBMultiplier, 1.0f, 1.0f, 0.0f, false, false);
+			}
 		}
 	}
 
@@ -605,7 +629,7 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu)
 		m_resolutionSelectButton = resolutionSelect.elements[0];
 		m_fullscreenCheckbox = addCheckbox("Fullscreen");
 		m_fullscreenCheckbox->setChangeCallback( fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onFullscreenChange) );
-		addCheckbox("Borderless", "If enabled: plz enjoy input lag.", convar->getConVarByName("fullscreen_windowed_borderless"))->setChangeCallback( fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onBorderlessWindowedChange) );
+		addCheckbox("Borderless", "May cause extra input lag if enabled.\nDepends on your operating system version/updates.", convar->getConVarByName("fullscreen_windowed_borderless"))->setChangeCallback( fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onBorderlessWindowedChange) );
 		addCheckbox("Keep Aspect Ratio", "Black borders instead of a stretched image.\nOnly relevant if fullscreen is enabled, and letterboxing is disabled.\nUse the two position sliders below to move the viewport around.", convar->getConVarByName("osu_resolution_keep_aspect_ratio"));
 		addCheckbox("Letterboxing", "Useful to get the low latency of fullscreen with a smaller game resolution.\nUse the two position sliders below to move the viewport around.", convar->getConVarByName("osu_letterboxing"));
 		m_letterboxingOffsetXSlider = addSlider("Horizontal position", -1.0f, 1.0f, convar->getConVarByName("osu_letterboxing_offset_x"), 170)->setChangeCallback( fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onSliderChangeLetterboxingOffset) )->setKeyDelta(0.01f)->setAnimated(false);
@@ -1139,9 +1163,9 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu)
 	CBaseUIElement *sectionFposu = addSection("FPoSu (3D)");
 
 	addSubSection("FPoSu - General");
-	addCheckbox("FPoSu", "The real 3D FPS mod.\nPlay from a first person shooter perspective in a 3D environment.\nThis is only intended for mouse! (Enable \"Tablet/Absolute Mode\" for tablets.)", convar->getConVarByName("osu_mod_fposu"));
-	addCheckbox("Curved play area", convar->getConVarByName("fposu_curved"));
-	addCheckbox("Background cube", convar->getConVarByName("fposu_cube"));
+	addCheckbox("FPoSu", (env->getOS() == Environment::OS::OS_WINDOWS ? "The real 3D FPS mod.\nPlay from a first person shooter perspective in a 3D environment.\nThis is only intended for mouse! (Enable \"Tablet/Absolute Mode\" for tablets.)" : "The real 3D FPS mod.\nPlay from a first person shooter perspective in a 3D environment.\nThis is only intended for mouse!"), convar->getConVarByName("osu_mod_fposu"));
+	addCheckbox("[Beta] 4D Mode", (env->getOS() == Environment::OS::OS_WINDOWS ? "Actual 3D circles instead of \"just\" a flat playfield in 3D.\nNOTE: Not compatible with \"Tablet/Absolute Mode\"." : "Actual 3D circles instead of \"just\" a flat playfield in 3D."), convar->getConVarByName("fposu_3d"));
+	addCheckbox("[Beta] 4D Mode - Spheres", "Combocolored lit 3D spheres instead of flat 3D circles.\nOnly relevant if \"[Beta] 4D Mode\" is enabled.", convar->getConVarByName("fposu_3d_spheres"));
 	addLabel("");
 	addLabel("NOTE: Use CTRL + O during gameplay to get here!")->setTextColor(0xff555555);
 	addLabel("");
@@ -1157,7 +1181,17 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu)
 	zoomedFovSlider->setChangeCallback( fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onSliderChangeTwoDecimalPlaces) );
 	zoomedFovSlider->setKeyDelta(0.01f);
 	addCheckbox("Zoom Key Toggle", "Enabled: Zoom key toggles zoom.\nDisabled: Zoom while zoom key is held.", convar->getConVarByName("fposu_zoom_toggle"));
-
+	addSubSection("FPoSu - Playfield");
+	addCheckbox("Curved play area", convar->getConVarByName("fposu_curved"));
+	addCheckbox("Background cube", convar->getConVarByName("fposu_cube"));
+	addCheckbox("Skybox", "NOTE: Overrides \"Background cube\".\nSee skybox_example.png for cubemap layout.", convar->getConVarByName("fposu_skybox"));
+	CBaseUISlider *playfieldScaleSlider = addSlider("[Beta] 4D Mode - Scale", 0.1f, 10.0f, convar->getConVarByName("fposu_3d_playfield_scale"), 0.0f, true);
+	playfieldScaleSlider->setChangeCallback( fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onSliderChangePercent) );
+	playfieldScaleSlider->setKeyDelta(0.01f);
+	CBaseUISlider *spheresAASlider = addSlider("[Beta] 4D Mode - Spheres - MSAA", 0.0f, 16.0f, convar->getConVarByName("fposu_3d_spheres_aa"));
+	spheresAASlider->setChangeCallback( fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onSliderChangeVRAntiAliasing) );
+	spheresAASlider->setKeyDelta(2.0f);
+	spheresAASlider->setAnimated(false);
 	if (env->getOS() == Environment::OS::OS_WINDOWS)
 	{
 		addSubSection("FPoSu - Mouse");
@@ -1171,6 +1205,11 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu)
 		addCheckbox("Invert Vertical", convar->getConVarByName("fposu_invert_vertical"));
 		addCheckbox("Invert Horizontal", convar->getConVarByName("fposu_invert_horizontal"));
 		addCheckbox("Tablet/Absolute Mode (!)", "WARNING: Do NOT enable this if you are using a mouse!\nIf this is enabled, then DPI and cm per 360 will be ignored!", convar->getConVarByName("fposu_absolute_mode"));
+	}
+	else if (env->getOS() == Environment::OS::OS_LINUX)
+	{
+		addSubSection("[Beta] FPoSu 4D Mode - Mouse");
+		addSlider("Sensitivity:", (env->getOS() == Environment::OS::OS_HORIZON ? 1.0f : 0.1f), 6.0f, convar->getConVarByName("mouse_sensitivity"))->setKeyDelta(0.01f);
 	}
 
 	//**************************************************************************************************************************//
@@ -3281,6 +3320,8 @@ void OsuOptionsMenu::onSliderChangeVRAntiAliasing(CBaseUISlider *slider)
 		{
 			if (m_elements[i].elements[e] == slider)
 			{
+				const int prevAA = (m_elements[i].cvar != NULL ? m_elements[i].cvar->getInt() : -1);
+
 				int number = std::round(slider->getFloat()); // round to int
 				int aa = 0;
 				if (number > 8)
@@ -3292,8 +3333,11 @@ void OsuOptionsMenu::onSliderChangeVRAntiAliasing(CBaseUISlider *slider)
 				else if (number > 0)
 					aa = 2;
 
-				if (m_elements[i].cvar != NULL)
-					m_elements[i].cvar->setValue(aa);
+				if (aa != prevAA)
+				{
+					if (m_elements[i].cvar != NULL)
+						m_elements[i].cvar->setValue(aa);
+				}
 
 				if (m_elements[i].elements.size() == 3)
 				{

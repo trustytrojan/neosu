@@ -17,9 +17,9 @@
 
 #include "OsuSliderCurves.h"
 
-ConVar osu_stars_xexxar_angles_sliders("osu_stars_xexxar_angles_sliders", true, "completely enables/disables the new star/pp calc algorithm");
-ConVar osu_stars_slider_curve_points_separation("osu_stars_slider_curve_points_separation", 20.0f, "massively reduce curve accuracy for star calculations to save memory/performance");
-ConVar osu_stars_and_pp_lazer_relax_autopilot_nerf_disabled("osu_stars_and_pp_lazer_relax_autopilot_nerf_disabled", true, "generally disables all nerfs for relax/autopilot in both star/pp algorithms. since mcosu has always allowed these, the default is to not nerf them.");
+ConVar osu_stars_xexxar_angles_sliders("osu_stars_xexxar_angles_sliders", true, FCVAR_NONE, "completely enables/disables the new star/pp calc algorithm");
+ConVar osu_stars_slider_curve_points_separation("osu_stars_slider_curve_points_separation", 20.0f, FCVAR_NONE, "massively reduce curve accuracy for star calculations to save memory/performance");
+ConVar osu_stars_and_pp_lazer_relax_autopilot_nerf_disabled("osu_stars_and_pp_lazer_relax_autopilot_nerf_disabled", true, FCVAR_NONE, "generally disables all nerfs for relax/autopilot in both star/pp algorithms. since mcosu has always allowed these, the default is to not nerf them.");
 
 
 
@@ -229,7 +229,14 @@ float OsuDifficultyHitObject::getT(long pos, bool raw)
 
 ConVar *OsuDifficultyCalculator::m_osu_slider_scorev2_ref = NULL;
 
-double OsuDifficultyCalculator::calculateStarDiffForHitObjects(std::vector<OsuDifficultyHitObject> &sortedHitObjects, float CS, float OD, float speedMultiplier, bool relax, bool touchDevice, double *aim, double* aimSliderFactor, double *speed, double* speedNotes, int upToObjectIndex, std::vector<double> *outAimStrains, std::vector<double> *outSpeedStrains)
+double OsuDifficultyCalculator::calculateStarDiffForHitObjects(std::vector<OsuDifficultyHitObject> &sortedHitObjects, float CS, float OD, float speedMultiplier, bool relax, bool touchDevice, double *aim, double* aimSliderFactor, double *speed, double *speedNotes, int upToObjectIndex, std::vector<double> *outAimStrains, std::vector<double> *outSpeedStrains)
+{
+	std::atomic<bool> dead;
+	dead = false;
+	return calculateStarDiffForHitObjects(sortedHitObjects, CS, OD, speedMultiplier, relax, touchDevice, aim, aimSliderFactor, speed, speedNotes, upToObjectIndex, outAimStrains, outSpeedStrains, dead);
+}
+
+double OsuDifficultyCalculator::calculateStarDiffForHitObjects(std::vector<OsuDifficultyHitObject> &sortedHitObjects, float CS, float OD, float speedMultiplier, bool relax, bool touchDevice, double *aim, double* aimSliderFactor, double *speed, double* speedNotes, int upToObjectIndex, std::vector<double> *outAimStrains, std::vector<double> *outSpeedStrains, const std::atomic<bool> &dead)
 {
 	// NOTE: depends on speed multiplier + CS + OD + relax + touchDevice
 
@@ -936,6 +943,9 @@ double OsuDifficultyCalculator::calculateStarDiffForHitObjects(std::vector<OsuDi
 	diffObjects.reserve((upToObjectIndex < 0) ? sortedHitObjects.size() : upToObjectIndex+1);
 	for (size_t i=0; i<sortedHitObjects.size() && (upToObjectIndex < 0 || i < upToObjectIndex+1); i++) // respect upToObjectIndex!
 	{
+		if (dead.load())
+			return 0.0;
+
 		diffObjects.push_back(DiffObject(&sortedHitObjects[i], radius_scaling_factor, diffObjects, (int)i - 1)); // this already initializes the angle to NaN
 	}
 
@@ -947,6 +957,9 @@ double OsuDifficultyCalculator::calculateStarDiffForHitObjects(std::vector<OsuDi
 		const float starsSliderCurvePointsSeparation = osu_stars_slider_curve_points_separation.getFloat();
 		for (size_t i=0; i<numDiffObjects; i++)
 		{
+			if (dead.load())
+				return 0.0;
+
 			// see setDistances() @ https://github.com/ppy/osu/blob/master/osu.Game.Rulesets.Osu/Difficulty/Preprocessing/OsuDifficultyHitObject.cs
 
 			if (i > 0)
