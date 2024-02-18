@@ -364,15 +364,22 @@ void OsuRoom::updateLayout(Vector2 newResolution) {
     m_mods->setSize(300, 90);
     m_no_mods_selected->setVisible(bancho.room.mods == 0);
     
+    int nb_ready = 0;
     bool is_ready = false;
     for(uint8_t i = 0; i < 16; i++) {
-        if(bancho.room.slots[i].player_id == bancho.user_id) {
-            is_ready = bancho.room.slots[i].is_ready();
-            break;
+        if(bancho.room.slots[i].has_player() && bancho.room.slots[i].is_ready()) {
+            nb_ready++;
+            if(bancho.room.slots[i].player_id == bancho.user_id) {
+                is_ready = true;
+            }
         }
     }
-    if(is_host) {
-        m_ready_btn->setText("Start game");
+    if(is_host && is_ready) {
+        auto force_start_str = UString::format("Force start (%d/%d)", nb_ready, bancho.room.nb_players);
+        if(bancho.room.all_players_ready()) {
+            force_start_str = UString("Start game");
+        }
+        m_ready_btn->setText(force_start_str);
         m_ready_btn->setColor(0xff00ff00);
     } else {
         m_ready_btn->setText(is_ready ? "Not ready" : "Ready!");
@@ -748,13 +755,6 @@ void OsuRoom::onReadyButtonClick() {
     if(m_ready_btn->is_loading) return;
     engine->getSound()->play(m_osu->getSkin()->getMenuHit());
 
-    if(bancho.room.is_host()) {
-        Packet packet = {0};
-        packet.id = START_MATCH;
-        send_packet(packet);
-        return;
-    }
-
     bool is_ready = false;
     for(uint8_t i = 0; i < 16; i++) {
         if(bancho.room.slots[i].player_id == bancho.user_id) {
@@ -763,9 +763,15 @@ void OsuRoom::onReadyButtonClick() {
         }
     }
 
-    Packet packet = {0};
-    packet.id = is_ready ? MATCH_NOT_READY : MATCH_READY;
-    send_packet(packet);
+    if(bancho.room.is_host() && is_ready) {
+        Packet packet = {0};
+        packet.id = START_MATCH;
+        send_packet(packet);
+    } else {
+        Packet packet = {0};
+        packet.id = is_ready ? MATCH_NOT_READY : MATCH_READY;
+        send_packet(packet);
+    }
 }
 
 void OsuRoom::onSelectModsClicked() {
