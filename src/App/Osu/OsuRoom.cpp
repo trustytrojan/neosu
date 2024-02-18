@@ -402,7 +402,7 @@ void OsuRoom::updateSettingsLayout(Vector2 newResolution) {
             }
         }
     }
-    if(is_host && is_ready) {
+    if(is_host && is_ready && nb_ready > 1) {
         auto force_start_str = UString::format("Force start (%d/%d)", nb_ready, bancho.room.nb_players);
         if(bancho.room.all_players_ready()) {
             force_start_str = UString("Start game");
@@ -794,15 +794,17 @@ void OsuRoom::onReadyButtonClick() {
     if(m_ready_btn->is_loading) return;
     engine->getSound()->play(m_osu->getSkin()->getMenuHit());
 
+    int nb_ready = 0;
     bool is_ready = false;
     for(uint8_t i = 0; i < 16; i++) {
-        if(bancho.room.slots[i].player_id == bancho.user_id) {
-            is_ready = bancho.room.slots[i].is_ready();
-            break;
+        if(bancho.room.slots[i].has_player() && bancho.room.slots[i].is_ready()) {
+            nb_ready++;
+            if(bancho.room.slots[i].player_id == bancho.user_id) {
+                is_ready = true;
+            }
         }
     }
-
-    if(bancho.room.is_host() && is_ready) {
+    if(bancho.room.is_host() && is_ready && nb_ready > 1) {
         Packet packet = {0};
         packet.id = START_MATCH;
         send_packet(packet);

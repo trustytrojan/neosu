@@ -39,6 +39,7 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu)
 	alpha317.title = UString::format("34.01 (Build Date: %s, %s)", __DATE__, __TIME__); // (09.01.2022 - ?)
 	alpha317.changes.push_back("- Added abilitiy to close chat channels with /close");
 	alpha317.changes.push_back("- Added \"Force Start\" button to avoid host accidentally starting the match");
+	alpha317.changes.push_back("- Disabled force start when there are only two players in the room");
 	alpha317.changes.push_back("- Made tab button switch between endpoint, username and password fields in options menu");
 	alpha317.changes.push_back("- Fixed Daycore, Nightcore and Perfect mod selection");
 	alpha317.changes.push_back("- Fixed mod selection sound playing twice");
