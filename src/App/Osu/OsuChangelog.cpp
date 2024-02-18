@@ -37,6 +37,7 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu)
 
 	CHANGELOG alpha317;
 	alpha317.title = UString::format("34.01 (Build Date: %s, %s)", __DATE__, __TIME__); // (09.01.2022 - ?)
+	alpha317.changes.push_back("- Fixed client not realizing when it gets kicked from a room");
 	alpha317.changes.push_back("- Added abilitiy to close chat channels with /close");
 	alpha317.changes.push_back("- Fixed room settings not updating immediately");
 	alpha317.changes.push_back("- Fixed login failing with \"No account by the username '?' exists.\"");

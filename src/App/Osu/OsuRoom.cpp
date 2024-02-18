@@ -629,6 +629,20 @@ void OsuRoom::on_room_updated(Room room) {
     bool was_host = bancho.room.is_host();
     bool map_changed = bancho.room.map_id != room.map_id;
     bancho.room = room;
+
+    Slot *player_slot = nullptr;
+    for(int i = 0; i < 16; i++) {
+        if(bancho.room.slots[i].player_id == bancho.user_id) {
+            player_slot = &bancho.room.slots[i];
+            break;
+        }
+    }
+    if(player_slot == nullptr) {
+        // Player got kicked
+        ragequit();
+        return;
+    }
+
     if(map_changed) {
         on_map_change(true);
     }
@@ -637,16 +651,9 @@ void OsuRoom::on_room_updated(Room room) {
         m_room_name_ipt->setText(bancho.room.name);
     }
 
-    uint32_t player_mods = 0;
-    for(int i = 0; i < 16; i++) {
-        if(bancho.room.slots[i].player_id == bancho.user_id) {
-            player_mods = bancho.room.slots[i].mods;
-            break;
-        }
-    }
     m_osu->m_modSelector->updateButtons();
     m_osu->m_modSelector->resetMods();
-    m_osu->m_modSelector->enableModsFromFlags(bancho.room.mods | player_mods);
+    m_osu->m_modSelector->enableModsFromFlags(bancho.room.mods | player_slot->mods);
 
     updateLayout(m_osu->getScreenSize());
 }
