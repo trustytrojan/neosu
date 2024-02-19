@@ -62,11 +62,11 @@ void Room::pack(Packet *packet) {
   write_short(packet, id);
   write_byte(packet, in_progress);
   write_byte(packet, match_type);
-  write_int(packet, mods);
+  write_int32(packet, mods);
   write_string(packet, name.toUtf8());
   write_string(packet, password.toUtf8());
   write_string(packet, map_name.toUtf8());
-  write_int(packet, map_id);
+  write_int32(packet, map_id);
   write_string(packet, map_md5.toUtf8());
   for (int i = 0; i < 16; i++) {
     write_byte(packet, slots[i].status);
@@ -76,22 +76,22 @@ void Room::pack(Packet *packet) {
   }
   for(int s = 0; s < 16; s++) {
     if(slots[s].has_player()) {
-      write_int(packet, slots[s].player_id);
+      write_int32(packet, slots[s].player_id);
     }
   }
 
-  write_int(packet, host_id);
+  write_int32(packet, host_id);
   write_byte(packet, mode);
   write_byte(packet, win_condition);
   write_byte(packet, team_type);
   write_byte(packet, freemods);
   if (freemods) {
     for (int i = 0; i < 16; i++) {
-      write_int(packet, slots[i].mods);
+      write_int32(packet, slots[i].mods);
     }
   }
 
-  write_int(packet, seed);
+  write_int32(packet, seed);
 }
 
 bool Room::is_host() {
@@ -192,7 +192,7 @@ void write_short(Packet *packet, uint16_t s) {
   write_bytes(packet, (uint8_t *)&s, 2);
 }
 
-void write_int(Packet *packet, uint32_t i) {
+void write_int32(Packet *packet, uint32_t i) {
   write_bytes(packet, (uint8_t *)&i, 4);
 }
 

@@ -48,7 +48,7 @@ void disconnect() {
     Packet packet = {0};
     write_short(&packet, LOGOUT);
     write_byte(&packet, 0);
-    write_int(&packet, 0);
+    write_int32(&packet, 0);
 
     CURL *curl = curl_easy_init();
     auto version_header = UString::format("x-mcosu-ver: %s", bancho.mcosu_version.toUtf8());
@@ -166,8 +166,17 @@ static void send_api_request(CURL *curl, APIRequest api_out) {
   response.extra_int = api_out.extra_int;
   response.memory = new uint8_t[2048];
 
+  struct curl_slist *chunk = NULL;
   auto query_url = UString::format("https://osu.%s%s", bancho.endpoint.toUtf8(), api_out.path.toUtf8());
   curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
+  if(api_out.type == SUBMIT_SCORE) {
+    auto token_header = UString::format("token: %s", cho_token.toUtf8());
+    chunk = curl_slist_append(chunk, token_header.toUtf8());
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+  }
+  if(api_out.mime != nullptr) {
+    curl_easy_setopt(curl, CURLOPT_MIMEPOST, api_out.mime);
+  }
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
 #ifdef _WIN32
@@ -183,6 +192,7 @@ static void send_api_request(CURL *curl, APIRequest api_out) {
   }
 
   curl_easy_reset(curl);
+  curl_slist_free_all(chunk);
 }
 
 static void send_bancho_packet(CURL *curl, Packet outgoing) {
@@ -287,6 +297,9 @@ static void *do_networking(void *data) {
       pthread_mutex_unlock(&api_requests_mutex);
 
       send_api_request(curl, api_out);
+      if(api_out.mime != nullptr) {
+        curl_mime_free(api_out.mime);
+      }
     }
 
     if(bancho.osu && bancho.osu->m_lobby->isVisible()) seconds_between_pings = 1;
@@ -306,7 +319,7 @@ static void *do_networking(void *data) {
     } else if(should_ping && outgoing.pos == 0) {
       write_short(&outgoing, PING);
       write_byte(&outgoing, 0);
-      write_int(&outgoing, 0);
+      write_int32(&outgoing, 0);
 
       // Polling gets slower over time, but resets when we receive new data
       if (seconds_between_pings < 30.0) {
@@ -323,7 +336,7 @@ static void *do_networking(void *data) {
       // chugs along! To try to detect it faster, we'll send two packets per request.
       write_short(&out, PING);
       write_byte(&out, 0);
-      write_int(&out, 0);
+      write_int32(&out, 0);
 
       send_bancho_packet(curl, out);
       delete out.memory;
@@ -344,6 +357,9 @@ static void handle_api_response(Packet packet) {
     OsuRoom::process_beatmapset_info_response(packet);
   } else if(packet.id == MARK_AS_READ) {
     // (nothing to do)
+  } else if(packet.id == SUBMIT_SCORE) {
+    // TODO @kiwec: handle response
+    debugLog("Score submit result: %s\n", packet.memory);
   } else {
     // NOTE: API Response type is same as API Request type
     debugLog("No handler for API response type %d!\n", packet.id);
@@ -415,7 +431,7 @@ void send_packet(Packet& packet) {
   // packets to send
   write_short(&outgoing, packet.id);
   write_byte(&outgoing, 0);
-  write_int(&outgoing, packet.pos);
+  write_int32(&outgoing, packet.pos);
   write_bytes(&outgoing, packet.memory, packet.pos);
 
   pthread_mutex_unlock(&outgoing_mutex);

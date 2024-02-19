@@ -9,7 +9,9 @@
 #define OSUBEATMAP_H
 
 #include "cbase.h"
+#include "Timer.h"
 
+#include "BanchoProtocol.h"
 #include "OsuScore.h"
 #include "OsuDatabaseBeatmap.h"
 
@@ -35,7 +37,6 @@ public:
 		int maniaColumn;
 	};
 
-public:
 	OsuBeatmap(Osu *osu);
 	virtual ~OsuBeatmap();
 
@@ -88,7 +89,6 @@ public:
 	void setPitch(float pitch);
 	void seekPercent(double percent);
 	void seekPercentPlayable(double percent);
-	void seekMS(unsigned long ms);
 
 	inline Sound *getMusic() const {return m_music;}
 	unsigned long getTime() const;
@@ -115,6 +115,12 @@ public:
 	inline double getSpeedNotesForUpToHitObjectIndex(int upToHitObjectIndex) const {return (m_speedNotesForNumHitObjects.size() > 0 && upToHitObjectIndex > -1 ? m_speedNotesForNumHitObjects[clamp<int>(upToHitObjectIndex, 0, m_speedNotesForNumHitObjects.size()-1)] : 0);}
 	inline const std::vector<double> &getAimStrains() const {return m_aimStrains;}
 	inline const std::vector<double> &getSpeedStrains() const {return m_speedStrains;}
+
+	// replay recording (see OsuBeatmapStandard)
+	Packet replay_data = {0};
+	uint64_t last_event_ms = 0;
+	int32_t current_keys = 0;
+	int32_t last_keys = 0;
 
 	// used by OsuHitObject children and OsuModSelector
 	inline Osu *getOsu() const {return m_osu;}

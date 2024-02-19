@@ -67,6 +67,9 @@ public:
 	// hud
 	inline bool isSpinnerActive() const {return m_bIsSpinnerActive;}
 
+	// replay recording
+	void write_frame();
+
 private:
 	static ConVar *m_osu_draw_statistics_pp_ref;
 	static ConVar *m_osu_draw_statistics_livestars_ref;

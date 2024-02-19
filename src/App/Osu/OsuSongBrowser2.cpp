@@ -43,7 +43,6 @@
 
 #include "OsuDatabaseBeatmap.h"
 
-#include "OsuBeatmapExample.h"
 #include "OsuBeatmapStandard.h"
 #include "OsuBeatmapMania.h"
 

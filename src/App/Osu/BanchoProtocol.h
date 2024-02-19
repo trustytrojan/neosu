@@ -251,7 +251,7 @@ UString read_string(Packet *packet);
 void write_bytes(Packet *packet, uint8_t *bytes, size_t n);
 void write_byte(Packet *packet, uint8_t b);
 void write_short(Packet *packet, uint16_t s);
-void write_int(Packet *packet, uint32_t i);
+void write_int32(Packet *packet, uint32_t i);
 void write_int64(Packet *packet, uint64_t i);
 void write_uleb128(Packet *packet, uint32_t num);
 void write_float32(Packet *packet, float f);

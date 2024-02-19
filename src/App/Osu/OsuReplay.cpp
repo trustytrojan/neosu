@@ -7,17 +7,12 @@
 
 #include "OsuReplay.h"
 
-OsuReplay::OsuReplay()
-{
-}
+#include "BanchoProtocol.h"
 
-OsuReplay::~OsuReplay()
-{
-}
 
 OsuReplay::BEATMAP_VALUES OsuReplay::getBeatmapValuesForModsLegacy(int modsLegacy, float legacyAR, float legacyCS, float legacyOD, float legacyHP)
 {
-	BEATMAP_VALUES v;
+	OsuReplay::BEATMAP_VALUES v;
 
 	// HACKHACK: code duplication, see Osu::getRawSpeedMultiplier()
 	v.speedMultiplier = 1.0f;

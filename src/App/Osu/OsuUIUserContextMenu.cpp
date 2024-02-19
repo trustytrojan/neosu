@@ -100,12 +100,12 @@ void OsuUIUserContextMenuScreen::on_action(UString text, int user_action) {
     if(user_action == UA_TRANSFER_HOST) {
         Packet packet = {0};
         packet.id = TRANSFER_HOST;
-        write_int(&packet, slot_number);
+        write_int32(&packet, slot_number);
         send_packet(packet);
     } else if(user_action == KICK) {
         Packet packet = {0};
         packet.id = MATCH_LOCK;
-        write_int(&packet, slot_number);
+        write_int32(&packet, slot_number);
         send_packet(packet); // kick by locking the slot
         send_packet(packet); // unlock the slot
     } else if(user_action == START_CHAT) {
@@ -121,14 +121,14 @@ void OsuUIUserContextMenuScreen::on_action(UString text, int user_action) {
     } else if(user_action == UA_ADD_FRIEND) {
         Packet packet = {0};
         packet.id = FRIEND_ADD;
-        write_int(&packet, m_user_id);
+        write_int32(&packet, m_user_id);
         send_packet(packet);
 
         user_info->is_friend = true;
     } else if(user_action == UA_REMOVE_FRIEND) {
         Packet packet = {0};
         packet.id = FRIEND_REMOVE;
-        write_int(&packet, m_user_id);
+        write_int32(&packet, m_user_id);
         send_packet(packet);
 
         user_info->is_friend = false;

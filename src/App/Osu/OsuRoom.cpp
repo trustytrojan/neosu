@@ -576,6 +576,7 @@ void OsuRoom::on_map_change(bool download) {
             APIRequest request = {
                 .type = GET_BEATMAPSET_INFO,
                 .path = path,
+                .mime = NULL,
                 .extra_int = (uint32_t)bancho.room.map_id,
             };
             send_api_request(request);
@@ -761,7 +762,7 @@ void OsuRoom::onClientScoreChange(bool force) {
     Packet packet = {0};
     packet.id = UPDATE_MATCH_SCORE;
 
-    write_int(&packet, (int32_t)m_osu->getSelectedBeatmap()->getTime());
+    write_int32(&packet, (int32_t)m_osu->getSelectedBeatmap()->getTime());
 
     uint8_t slot_id = 0;
     for(uint8_t i = 0; i < 16; i++) {
@@ -778,7 +779,7 @@ void OsuRoom::onClientScoreChange(bool force) {
     write_short(&packet, (uint16_t)m_osu->getScore()->getNum300gs());
     write_short(&packet, (uint16_t)m_osu->getScore()->getNum100ks());
     write_short(&packet, (uint16_t)m_osu->getScore()->getNumMisses());
-    write_int(&packet, (int32_t)m_osu->getScore()->getScore());
+    write_int32(&packet, (int32_t)m_osu->getScore()->getScore());
     write_short(&packet, (uint16_t)m_osu->getScore()->getCombo());
     write_short(&packet, (uint16_t)m_osu->getScore()->getComboMax());
     write_byte(&packet, m_osu->getScore()->getNumSliderBreaks() == 0 && m_osu->getScore()->getNumMisses() == 0 && m_osu->getScore()->getNum50s() == 0 && m_osu->getScore()->getNum100s() == 0);

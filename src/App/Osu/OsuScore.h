@@ -53,7 +53,7 @@ public:
 		GRADE_C,
 		GRADE_D,
 		GRADE_F,
-		GRADE_N
+		GRADE_N // means "no grade"
 	};
 
 	static float calculateAccuracy(int num300s, int num100s, int num50s, int numMisses);

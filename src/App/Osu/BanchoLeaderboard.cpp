@@ -139,6 +139,7 @@ void fetch_online_scores(OsuDatabaseBeatmap *beatmap) {
   APIRequest request = {
       .type = GET_MAP_LEADERBOARD,
       .path = path,
+      .mime = NULL,
       .extra = (uint8_t *)strdup(beatmap_hash.c_str()),
   };
 

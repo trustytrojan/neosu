@@ -204,7 +204,7 @@ void OsuLobby::addRoom(Room* room) {
 void OsuLobby::joinRoom(uint32_t id, UString password) {
     Packet packet = {0};
     packet.id = JOIN_ROOM;
-    write_int(&packet, id);
+    write_int32(&packet, id);
     write_string(&packet, password.toUtf8());
     send_packet(packet);
 

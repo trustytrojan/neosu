@@ -7,7 +7,6 @@ class Osu;
 
 struct Bancho {
   UString mcosu_version;
-  UString user_agent;
 
   Osu *osu = nullptr;
   UString endpoint;
@@ -18,8 +17,11 @@ struct Bancho {
 
   bool prefer_daycore = false;
 
-  // XXX: Score submission is not implemented (yet).
   bool submit_scores = false;
+  UString user_agent;
+  UString client_hashes;
+  UString disk_uuid;
+  UString install_id;
 
   bool is_online() { return user_id > 0; }
 

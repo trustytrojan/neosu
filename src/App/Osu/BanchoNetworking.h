@@ -3,19 +3,24 @@
 #include <string>
 #include <curl/curl.h>
 
-// User agent sent when downloading beatmaps
 #define MCOSU_STREAM "dev"
 #define MCOSU_UPDATE_URL "https://mcosu.kiwec.net"
+
+// NOTE: Full version can be something like "b20200201.2cuttingedge"
+#define OSU_VERSION "b20240123"
+#define OSU_VERSION_DATEONLY 20240123
 
 enum APIRequestType {
   GET_MAP_LEADERBOARD,
   GET_BEATMAPSET_INFO,
   MARK_AS_READ,
+  SUBMIT_SCORE,
 };
 
 struct APIRequest {
   APIRequestType type;
   UString path;
+  curl_mime *mime;
   uint8_t *extra;
   uint32_t extra_int; // lazy
 };

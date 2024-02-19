@@ -65,9 +65,9 @@ void OsuRichPresence::setBanchoStatus(Osu *osu, const char* info_text, Action ac
     write_byte(&packet, action);
     write_string(&packet, fancy_text);
     write_string(&packet, map_md5.c_str());
-    write_int(&packet, osu->m_modSelector->getModFlags());
+    write_int32(&packet, osu->m_modSelector->getModFlags());
     write_byte(&packet, 0); // osu!std
-    write_int(&packet, map_id);
+    write_int32(&packet, map_id);
     send_packet(packet);
 }
 
@@ -89,9 +89,9 @@ void OsuRichPresence::updateBanchoMods() {
     write_byte(&packet, last_action);
     write_string(&packet, last_status.toUtf8());
     write_string(&packet, map_md5.c_str());
-    write_int(&packet, bancho.osu->m_modSelector->getModFlags());
+    write_int32(&packet, bancho.osu->m_modSelector->getModFlags());
     write_byte(&packet, 0); // osu!std
-    write_int(&packet, map_id);
+    write_int32(&packet, map_id);
     send_packet(packet);
 
     // Servers like akatsuki send different leaderboards based on what mods

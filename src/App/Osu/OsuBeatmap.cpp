@@ -14,13 +14,13 @@
 #include "AnimationHandler.h"
 #include "Keyboard.h"
 #include "Mouse.h"
-#include "Timer.h"
 #include "ConVar.h"
 
 #include "Bancho.h"
 #include "BanchoNetworking.h"
 #include "Osu.h"
 #include "OsuChat.h"
+#include "OsuKeyBindings.h"
 #include "OsuVR.h"
 #include "OsuHUD.h"
 #include "OsuRoom.h"
@@ -32,6 +32,7 @@
 #include "OsuNotificationOverlay.h"
 #include "OsuModSelector.h"
 #include "OsuMainMenu.h"
+#include "OsuReplay.h"
 
 #include "OsuDatabaseBeatmap.h"
 
@@ -422,8 +423,9 @@ void OsuBeatmap::update()
 			m_bContinueScheduled = false;
 			m_bIsPaused = false;
 
-			if (!isEarlyNoteContinue)
+			if (!isEarlyNoteContinue) {
 				engine->getSound()->play(m_music);
+			}
 
 			m_bIsPlaying = true; // usually this should be checked with the result of the above play() call, but since we are continuing we can assume that everything works
 
@@ -1235,6 +1237,12 @@ void OsuBeatmap::keyPressed1(bool mouse)
 
 	if ((!m_osu->getModAuto() && !m_osu->getModRelax()) || !osu_auto_and_relax_block_user_input.getBool())
 		m_clicks.push_back(click);
+
+	if(mouse) {
+		current_keys = current_keys | OsuReplay::M1;
+	} else {
+		current_keys = current_keys | OsuReplay::K1;
+	}
 }
 
 void OsuBeatmap::keyPressed2(bool mouse)
@@ -1270,6 +1278,12 @@ void OsuBeatmap::keyPressed2(bool mouse)
 
 	if ((!m_osu->getModAuto() && !m_osu->getModRelax()) || !osu_auto_and_relax_block_user_input.getBool())
 		m_clicks.push_back(click);
+
+	if(mouse) {
+		current_keys = current_keys | OsuReplay::M2;
+	} else {
+		current_keys = current_keys | OsuReplay::K2;
+	}
 }
 
 void OsuBeatmap::keyReleased1(bool mouse)
@@ -1281,6 +1295,12 @@ void OsuBeatmap::keyReleased1(bool mouse)
 	m_osu->getHUD()->animateInputoverlay(3, false);
 
 	m_bClick1Held = false;
+
+	if(mouse) {
+		current_keys = current_keys & ~OsuReplay::M1;
+	} else {
+		current_keys = current_keys & ~OsuReplay::K1;
+	}
 }
 
 void OsuBeatmap::keyReleased2(bool mouse)
@@ -1292,6 +1312,12 @@ void OsuBeatmap::keyReleased2(bool mouse)
 	m_osu->getHUD()->animateInputoverlay(4, false);
 
 	m_bClick2Held = false;
+
+	if(mouse) {
+		current_keys = current_keys & ~OsuReplay::M2;
+	} else {
+		current_keys = current_keys & ~OsuReplay::K2;
+	}
 }
 
 void OsuBeatmap::select()
@@ -1559,8 +1585,9 @@ void OsuBeatmap::pause(bool quitIfWaiting)
 	{
 		if (m_osu->getModAuto() || m_osu->getModAutopilot() || m_bIsInSkippableSection || forceContinueWithoutSchedule) // under certain conditions, immediately continue the beatmap without waiting for the user to click
 		{
-			if (!m_bIsWaiting) // only force play() if we were not early waiting
+			if (!m_bIsWaiting) { // only force play() if we were not early waiting
 				engine->getSound()->play(m_music);
+			}
 
 			m_bIsPlaying = true;
 			m_bIsPaused = false;
@@ -1744,28 +1771,6 @@ void OsuBeatmap::seekPercentPlayable(double percent)
 		actualPlayPercent = (((double)m_hitobjects[m_hitobjects.size()-1]->getTime() + (double)m_hitobjects[m_hitobjects.size()-1]->getDuration()) * percent) / (double)m_music->getLengthMS();
 
 	seekPercent(actualPlayPercent);
-}
-
-void OsuBeatmap::seekMS(unsigned long ms)
-{
-	if (m_selectedDifficulty2 == NULL || (!m_bIsPlaying && !m_bIsPaused) || m_music == NULL || m_bFailed) return;
-
-	m_bWasSeekFrame = true;
-	m_fWaitTime = 0.0f;
-
-	m_music->setPositionMS(ms);
-	m_music->setVolume(m_osu_volume_music_ref->getFloat());
-
-	resetHitObjects(m_music->getPositionMS());
-	resetScoreInt();
-
-	m_iPreviousSectionPassFailTime = -1;
-
-	if (m_bIsWaiting)
-	{
-		m_bIsWaiting = false;
-		engine->getSound()->play(m_music);
-	}
 }
 
 unsigned long OsuBeatmap::getTime() const
@@ -2336,6 +2341,11 @@ void OsuBeatmap::resetHitObjects(long curPos)
 
 void OsuBeatmap::resetScoreInt()
 {
+	SAFE_DELETE(replay_data.memory);
+	replay_data = {0};
+	last_event_ms = 0;
+	current_keys = 0;
+
 	m_fHealth = 1.0;
 	m_fHealth2 = 1.0f;
 	m_bFailed = false;

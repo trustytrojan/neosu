@@ -9,6 +9,8 @@
 #define OSUDATABASE_H
 
 #include "cbase.h"
+#include "BanchoProtocol.h"
+#include "OsuScore.h"
 
 class Timer;
 class ConVar;
@@ -46,9 +48,14 @@ public:
 		int version;
 		uint64_t unixTimestamp;
 
-		// default
 		uint32_t player_id = 0;
 		UString playerName;
+		bool passed = false;
+		bool ragequit = false;
+		OsuScore::GRADE grade = OsuScore::GRADE::GRADE_N;
+		OsuDatabaseBeatmap *diff2;
+		uint64_t play_time_ms = 0;
+		Packet replay_data = {0};
 
 		int num300s;
 		int num100s;

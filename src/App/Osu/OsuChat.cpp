@@ -247,7 +247,7 @@ void OsuChat::onKeyDown(KeyboardEvent &key) {
             write_string(&packet, (char*)bancho.username.toUtf8());
             write_string(&packet, (char*)m_input_box->getText().toUtf8());
             write_string(&packet, (char*)m_selected_channel->name.toUtf8());
-            write_int(&packet, bancho.user_id);
+            write_int32(&packet, bancho.user_id);
             send_packet(packet);
 
             // Server doesn't echo the message back
@@ -340,6 +340,7 @@ void OsuChat::mark_as_read(OsuChatChannel* chan) {
     APIRequest request = {
         .type = MARK_AS_READ,
         .path = UString::format("/web/osu-markasread.php?u=%s&h=%s&channel=%s", bancho.username.toUtf8(), bancho.pw_md5.toUtf8(), channel_urlencoded),
+        .mime = NULL,
     };
     send_api_request(request);
 

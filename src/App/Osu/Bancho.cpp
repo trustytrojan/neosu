@@ -78,7 +78,7 @@ UString md5(uint8_t *msg, size_t msg_len) {
   return UString(hash);
 }
 
-char *get_disk_uuid() {
+UString get_disk_uuid() {
 #ifdef _WIN32
   // ChatGPT'd, this looks absolutely insane but might just be regular Windows API...
   CoInitializeEx(0, COINIT_MULTITHREADED);
@@ -88,7 +88,7 @@ char *get_disk_uuid() {
   auto hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID*)&pLoc);
   if (FAILED(hres)) {
     debugLog("Failed to create IWbemLocator object. Error code = 0x%x\n", hres);
-    return NULL;
+    return UString("error getting disk uuid");
   }
 
   IWbemServices* pSvc = NULL;
@@ -98,7 +98,7 @@ char *get_disk_uuid() {
     debugLog("Could not connect. Error code = 0x%x\n", hres);
     pLoc->Release();
     SysFreeString(bstr_root);
-    return NULL;
+    return UString("error getting disk uuid");
   }
   SysFreeString(bstr_root);
 
@@ -107,10 +107,10 @@ char *get_disk_uuid() {
     debugLog("Could not set proxy blanket. Error code = 0x%x\n", hres);
     pSvc->Release();
     pLoc->Release();
-    return NULL;
+    return UString("error getting disk uuid");
   }
 
-  char *uuid = NULL;
+  UString uuid = "";
   IEnumWbemClassObject* pEnumerator = NULL;
   BSTR bstr_wql = SysAllocString(L"WQL");
   BSTR bstr_sql = SysAllocString(L"SELECT * FROM Win32_DiskDrive");
@@ -121,14 +121,14 @@ char *get_disk_uuid() {
     pLoc->Release();
     SysFreeString(bstr_wql);
     SysFreeString(bstr_sql);
-    return NULL;
+    return UString("error getting disk uuid");
   }
   SysFreeString(bstr_wql);
   SysFreeString(bstr_sql);
 
   IWbemClassObject* pclsObj = NULL;
   ULONG uReturn = 0;
-  while (pEnumerator && uuid == NULL) {
+  while (pEnumerator && uuid.length() == 0) {
     HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
     if (0 == uReturn) {
       break;
@@ -137,8 +137,7 @@ char *get_disk_uuid() {
     VARIANT vtProp;
     hr = pclsObj->Get(L"SerialNumber", 0, &vtProp, 0, 0);
     if (SUCCEEDED(hr)) {
-      UString w_uuid = vtProp.bstrVal;
-      uuid = strdup(w_uuid.toUtf8());
+      uuid = vtProp.bstrVal;
       VariantClear(&vtProp);
     }
 
@@ -160,11 +159,17 @@ char *get_disk_uuid() {
     const char *devname = blkid_dev_devname(device);
     char *uuid = blkid_get_tag_value(cache, "UUID", devname);
     blkid_put_cache(cache);
-    return uuid;
+
+    UString w_uuid = UString(uuid);
+
+    // Not sure if we own the string here or not, leak too small to matter anyway
+    // free(uuid);
+
+    return w_uuid;
   }
 
   blkid_put_cache(cache);
-  return NULL;
+  return UString("error getting disk uuid");
 #endif
 }
 
@@ -469,12 +474,16 @@ Packet build_login_packet() {
   write_bytes(&packet, (uint8_t *)bancho.pw_md5.toUtf8(), bancho.pw_md5.lengthUtf8());
   write_byte(&packet, '\n');
 
-  const char *osu_version = "b20240123";
-  write_bytes(&packet, (uint8_t *)osu_version, strlen(osu_version));
+  write_bytes(&packet, (uint8_t *)OSU_VERSION, strlen(OSU_VERSION));
   write_byte(&packet, '|');
 
-  // XXX: Get actual UTC offset
-  write_byte(&packet, '1');
+  // UTC offset
+  char tz[6] = {0};
+  auto now = time(NULL);
+  struct tm *timeinfo = localtime(&now);
+  strftime(tz, sizeof(tz), "%z", timeinfo);
+  if(tz[0] == '-') write_byte(&packet, '-');
+  write_byte(&packet, tz[2]);
   write_byte(&packet, '|');
 
   // Don't dox the user's city
@@ -489,30 +498,29 @@ Packet build_login_packet() {
 #endif
 
   UString osu_path_md5 = md5((uint8_t *)osu_path, strlen(osu_path));
-  write_bytes(&packet, (uint8_t *)osu_path_md5.toUtf8(), osu_path_md5.lengthUtf8());
-  write_byte(&packet, ':');
 
   // XXX: Should get MAC addresses from network adapters
+  // NOTE: Not sure how the MD5 is computed - does it include final "." ?
   const char *adapters = "runningunderwine";
   UString adapters_md5 = md5((uint8_t *)adapters, strlen(adapters));
-  write_bytes(&packet, (uint8_t *)adapters, strlen(adapters));
-  write_byte(&packet, ':');
-  write_bytes(&packet, (uint8_t *)adapters_md5.toUtf8(), adapters_md5.lengthUtf8());
-  write_byte(&packet, ':');
 
-  static char *uuid = get_disk_uuid();
-  UString disk_md5 = UString("00000000000000000000000000000000");
-  if (uuid) {
-    disk_md5 = md5((uint8_t *)uuid, strlen(uuid));
-  }
+  // XXX: Should remove '|' from the disk UUID just to be safe
+  bancho.disk_uuid = get_disk_uuid();
+  UString disk_md5 = md5((uint8_t *)bancho.disk_uuid.toUtf8(), bancho.disk_uuid.lengthUtf8());
 
-  // XXX: Should be per-install unique ID.
-  // I'm lazy so just sending disk signature twice.
-  write_bytes(&packet, (uint8_t *)disk_md5.toUtf8(), disk_md5.lengthUtf8());
-  write_byte(&packet, ':');
+  // XXX: Not implemented, I'm lazy so just reusing disk signature
+  bancho.install_id = bancho.disk_uuid;
+  UString install_md5 = md5((uint8_t *)bancho.install_id.toUtf8(), bancho.install_id.lengthUtf8());;
 
-  write_bytes(&packet, (uint8_t *)disk_md5.toUtf8(), disk_md5.lengthUtf8());
-  write_byte(&packet, ':');
+  bancho.client_hashes = UString::format(
+    "%s:%s.:%s:%s:%s:",
+    osu_path_md5.toUtf8(),
+    adapters,
+    adapters_md5.toUtf8(),
+    install_md5.toUtf8(),
+    disk_md5.toUtf8()
+  );
+  write_bytes(&packet, (uint8_t *)bancho.client_hashes.toUtf8(), bancho.client_hashes.lengthUtf8());
 
   // Allow PMs from strangers
   write_byte(&packet, '|');

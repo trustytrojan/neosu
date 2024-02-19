@@ -18,6 +18,7 @@
 #include "Bancho.h"
 #include "BanchoProtocol.h"
 #include "BanchoNetworking.h"
+#include "BanchoSubmitter.h"
 #include "Osu.h"
 #include "OsuVR.h"
 #include "OsuHUD.h"
@@ -940,6 +941,29 @@ void OsuBeatmapStandard::update()
 		if (m_bInBreak || m_bIsInSkippableSection || m_bIsSpinnerActive || m_iCurrentHitObjectIndex < 1)
 			m_iAllowAnyNextKeyForFullAlternateUntilHitObjectIndex = m_iCurrentHitObjectIndex + 1;
 	}
+
+	bool is_recording = m_bIsPlaying && !m_bFailed;
+	if(is_recording) {
+		// 16.67 ms between each frame (60 fps)
+		// Since the timer is based on the music (and not real time), divide by speed multiplier.
+		const uint64_t MAX_MS_BETWEEN_FRAMES = 1000.0 / (60.0 * m_osu->getSpeedMultiplier());
+
+		if(last_keys != current_keys) {
+			write_frame();
+		} else if(last_event_ms + MAX_MS_BETWEEN_FRAMES <= m_iCurMusicPosWithOffsets) {
+			write_frame();
+		}
+	}
+}
+
+void OsuBeatmapStandard::write_frame() {
+	Vector2 pos = pixels2OsuCoords(getCursorPos());
+	write_int64(&replay_data, m_iCurMusicPosWithOffsets - last_event_ms);
+	write_float32(&replay_data, pos.x);
+	write_float32(&replay_data, pos.y);
+	write_int32(&replay_data, current_keys);
+	last_event_ms = m_iCurMusicPosWithOffsets;
+	last_keys = current_keys;
 }
 
 void OsuBeatmapStandard::onModUpdate(bool rebuildSliderVertexBuffers, bool recomputeDrainRate)
@@ -1619,144 +1643,142 @@ void OsuBeatmapStandard::onBeforeStop(bool quit)
 {
 	debugLog("OsuBeatmapStandard::onBeforeStop()\n");
 
+	// TODO @kiwec: is this also called when restarting a map?
+
 	// kill any running star cache loader
 	stopStarCacheLoader();
 
-	if (!quit) // if the ranking screen is going to be shown
-	{
-		// calculate final pp
-		debugLog("OsuBeatmapStandard::onBeforeStop() calculating pp ...\n");
-		double aim = 0.0;
-		double aimSliderFactor = 0.0;
-		double speed = 0.0;
-		double speedNotes = 0.0;
+	// calculate stars
+	double aim = 0.0;
+	double aimSliderFactor = 0.0;
+	double speed = 0.0;
+	double speedNotes = 0.0;
+	const UString &osuFilePath = m_selectedDifficulty2->getFilePath();
+	const Osu::GAMEMODE gameMode = Osu::GAMEMODE::STD;
+	const float AR = getAR();
+	const float CS = getCS();
+	const float OD = getOD();
+	const float speedMultiplier = m_osu->getSpeedMultiplier(); // NOTE: not this->getSpeedMultiplier()!
+	const bool relax = m_osu->getModRelax();
+	const bool touchDevice = m_osu->getModTD();
 
-		// calculate stars
-		const UString &osuFilePath = m_selectedDifficulty2->getFilePath();
-		const Osu::GAMEMODE gameMode = Osu::GAMEMODE::STD;
-		const float AR = getAR();
-		const float CS = getCS();
-		const float OD = getOD();
-		const float speedMultiplier = m_osu->getSpeedMultiplier(); // NOTE: not this->getSpeedMultiplier()!
-		const bool relax = m_osu->getModRelax();
-		const bool touchDevice = m_osu->getModTD();
+	OsuDatabaseBeatmap::LOAD_DIFFOBJ_RESULT diffres = OsuDatabaseBeatmap::loadDifficultyHitObjects(osuFilePath, gameMode, AR, CS, speedMultiplier);
+	const double totalStars = OsuDifficultyCalculator::calculateStarDiffForHitObjects(diffres.diffobjects, CS, OD, speedMultiplier, relax, touchDevice, &aim, &aimSliderFactor, &speed, &speedNotes);
 
-		OsuDatabaseBeatmap::LOAD_DIFFOBJ_RESULT diffres = OsuDatabaseBeatmap::loadDifficultyHitObjects(osuFilePath, gameMode, AR, CS, speedMultiplier);
-		const double totalStars = OsuDifficultyCalculator::calculateStarDiffForHitObjects(diffres.diffobjects, CS, OD, speedMultiplier, relax, touchDevice, &aim, &aimSliderFactor, &speed, &speedNotes);
+	m_fAimStars = (float)aim;
+	m_fSpeedStars = (float)speed;
 
-		m_fAimStars = (float)aim;
-		m_fSpeedStars = (float)speed;
+	// calculate final pp
+	const int numHitObjects = m_hitobjects.size();
+	const int numCircles = m_selectedDifficulty2->getNumCircles();
+	const int numSliders = m_selectedDifficulty2->getNumSliders();
+	const int numSpinners = m_selectedDifficulty2->getNumSpinners();
+	const int maxPossibleCombo = m_iMaxPossibleCombo;
+	const int highestCombo = m_osu->getScore()->getComboMax();
+	const int numMisses = m_osu->getScore()->getNumMisses();
+	const int num300s = m_osu->getScore()->getNum300s();
+	const int num100s = m_osu->getScore()->getNum100s();
+	const int num50s = m_osu->getScore()->getNum50s();
+	const float pp = OsuDifficultyCalculator::calculatePPv2(m_osu, this, aim, aimSliderFactor, speed, speedNotes, numHitObjects, numCircles, numSliders, numSpinners, maxPossibleCombo, highestCombo, numMisses, num300s, num100s, num50s);
+	m_osu->getScore()->setStarsTomTotal(totalStars);
+	m_osu->getScore()->setStarsTomAim(m_fAimStars);
+	m_osu->getScore()->setStarsTomSpeed(m_fSpeedStars);
+	m_osu->getScore()->setPPv2(pp);
 
-		const int numHitObjects = m_hitobjects.size();
-		const int numCircles = m_selectedDifficulty2->getNumCircles();
-		const int numSliders = m_selectedDifficulty2->getNumSliders();
-		const int numSpinners = m_selectedDifficulty2->getNumSpinners();
-		const int maxPossibleCombo = m_iMaxPossibleCombo;
-		const int highestCombo = m_osu->getScore()->getComboMax();
-		const int numMisses = m_osu->getScore()->getNumMisses();
-		const int num300s = m_osu->getScore()->getNum300s();
-		const int num100s = m_osu->getScore()->getNum100s();
-		const int num50s = m_osu->getScore()->getNum50s();
-		const float pp = OsuDifficultyCalculator::calculatePPv2(m_osu, this, aim, aimSliderFactor, speed, speedNotes, numHitObjects, numCircles, numSliders, numSpinners, maxPossibleCombo, highestCombo, numMisses, num300s, num100s, num50s);
-		m_osu->getScore()->setStarsTomTotal(totalStars);
-		m_osu->getScore()->setStarsTomAim(m_fAimStars);
-		m_osu->getScore()->setStarsTomSpeed(m_fSpeedStars);
-		m_osu->getScore()->setPPv2(pp);
-		debugLog("OsuBeatmapStandard::onBeforeStop() done.\n");
+	// save local score, but only under certain conditions
+	const bool isComplete = (num300s + num100s + num50s + numMisses >= numHitObjects);
+	const bool isZero = (m_osu->getScore()->getScore() < 1);
+	const bool isCheated = (m_osu->getModAuto() || (m_osu->getModAutopilot() && m_osu->getModRelax())) || m_osu->getScore()->isUnranked();
 
-		// save local score, but only under certain conditions
-		const bool isComplete = (num300s + num100s + num50s + numMisses >= numHitObjects);
-		const bool isZero = (m_osu->getScore()->getScore() < 1);
-		const bool isUnranked = (m_osu->getModAuto() || (m_osu->getModAutopilot() && m_osu->getModRelax())) || m_osu->getScore()->isUnranked();
+	OsuDatabase::Score score;
+	score.isLegacyScore = false;
+	score.isImportedLegacyScore = false;
+	score.version = OsuScore::VERSION;
+	score.unixTimestamp = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
-		//debugLog("isComplete = %i, isZero = %i, isUnranked = %i\n", (int)isComplete, (int)isZero, (int)isUnranked);
-
-		int scoreIndex = -1;
-		if (isComplete && !isZero && !isUnranked && !m_osu->getScore()->hasDied())
-		{
-			const int scoreVersion = OsuScore::VERSION;
-
-			debugLog("OsuBeatmapStandard::onBeforeStop() saving score ...\n");
-			{
-				OsuDatabase::Score score;
-
-				score.isLegacyScore = false;
-
-				//if (scoreVersion > 20190103)
-				{
-					score.isImportedLegacyScore = false;
-				}
-
-				score.version = scoreVersion;
-				score.unixTimestamp = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-
-				// default
-				score.playerName = convar->getConVarByName("name")->getString();
-
-				score.num300s = m_osu->getScore()->getNum300s();
-				score.num100s = m_osu->getScore()->getNum100s();
-				score.num50s = m_osu->getScore()->getNum50s();
-				score.numGekis = m_osu->getScore()->getNum300gs();
-				score.numKatus = m_osu->getScore()->getNum100ks();
-				score.numMisses = m_osu->getScore()->getNumMisses();
-				score.score = m_osu->getScore()->getScore();
-				score.comboMax = m_osu->getScore()->getComboMax();
-				score.perfect = (maxPossibleCombo > 0 && score.comboMax > 0 && score.comboMax >= maxPossibleCombo);
-				score.modsLegacy = m_osu->getScore()->getModsLegacy();
-				{
-					// special case: manual slider accuracy has been enabled (affects pp but not score), so force scorev2 for potential future score recalculations
-					// NOTE: I forgot to add this before 20210103, so all old scores which were played without scorev2 but with osu_slider_scorev2 will get downgraded slighly :(
-					score.modsLegacy |= (m_osu_slider_scorev2_ref->getBool() ? OsuReplay::Mods::ScoreV2 : 0);
-				}
-
-				// custom
-				score.numSliderBreaks = m_osu->getScore()->getNumSliderBreaks();
-				score.pp = pp;
-				score.unstableRate = m_osu->getScore()->getUnstableRate();
-				score.hitErrorAvgMin = m_osu->getScore()->getHitErrorAvgMin();
-				score.hitErrorAvgMax = m_osu->getScore()->getHitErrorAvgMax();
-				score.starsTomTotal = totalStars;
-				score.starsTomAim = aim;
-				score.starsTomSpeed = speed;
-				score.speedMultiplier = m_osu->getSpeedMultiplier();
-				score.CS = CS;
-				score.AR = AR;
-				score.OD = getOD();
-				score.HP = getHP();
-
-				//if (scoreVersion > 20180722)
-				{
-					score.maxPossibleCombo = maxPossibleCombo;
-					score.numHitObjects = numHitObjects;
-					score.numCircles = numCircles;
-				}
-
-				std::vector<ConVar*> allExperimentalMods = m_osu->getExperimentalMods();
-				for (int i=0; i<allExperimentalMods.size(); i++)
-				{
-					if (allExperimentalMods[i]->getBool())
-					{
-						score.experimentalModsConVars.append(allExperimentalMods[i]->getName());
-						score.experimentalModsConVars.append(";");
-					}
-				}
-
-				score.md5hash = m_selectedDifficulty2->getMD5Hash(); // NOTE: necessary for "Use Mods"
-
-				// save it
-				scoreIndex = m_osu->getSongBrowser()->getDatabase()->addScore(m_selectedDifficulty2->getMD5Hash(), score);
-				if (scoreIndex == -1)
-					m_osu->getNotificationOverlay()->addNotification(UString::format("Failed saving score! md5hash.length() = %i", m_selectedDifficulty2->getMD5Hash().length()), 0xffff0000, false, 3.0f);
-			}
-			debugLog("OsuBeatmapStandard::onBeforeStop() done.\n");
-		}
-		m_osu->getScore()->setIndex(scoreIndex);
-		m_osu->getScore()->setComboFull(maxPossibleCombo); // used in OsuRankingScreen/OsuUIRankingScreenRankingPanel
-
-		// special case: incomplete scores should NEVER show pp, even if auto
-		if (!isComplete)
-			m_osu->getScore()->setPPv2(0.0f);
+	if(bancho.is_online()) {
+		score.player_id = bancho.user_id;
+		score.playerName = bancho.username;
+	} else {
+		score.playerName = convar->getConVarByName("name")->getString();
 	}
+	score.passed = isComplete && !isZero && !m_osu->getScore()->hasDied();
+	score.grade = score.passed ? m_osu->getScore()->getGrade() : OsuScore::GRADE::GRADE_F;
+	score.diff2 = m_selectedDifficulty2;
+	score.ragequit = quit; // TODO @kiwec: this is probably incorrect
+	score.play_time_ms = m_iCurMusicPos / m_osu->getSpeedMultiplier();
+
+	score.num300s = m_osu->getScore()->getNum300s();
+	score.num100s = m_osu->getScore()->getNum100s();
+	score.num50s = m_osu->getScore()->getNum50s();
+	score.numGekis = m_osu->getScore()->getNum300gs();
+	score.numKatus = m_osu->getScore()->getNum100ks();
+	score.numMisses = m_osu->getScore()->getNumMisses();
+	score.score = m_osu->getScore()->getScore();
+	score.comboMax = m_osu->getScore()->getComboMax();
+	score.perfect = (maxPossibleCombo > 0 && score.comboMax > 0 && score.comboMax >= maxPossibleCombo);
+	score.numSliderBreaks = m_osu->getScore()->getNumSliderBreaks();
+	score.pp = pp;
+	score.unstableRate = m_osu->getScore()->getUnstableRate();
+	score.hitErrorAvgMin = m_osu->getScore()->getHitErrorAvgMin();
+	score.hitErrorAvgMax = m_osu->getScore()->getHitErrorAvgMax();
+	score.starsTomTotal = totalStars;
+	score.starsTomAim = aim;
+	score.starsTomSpeed = speed;
+	score.speedMultiplier = m_osu->getSpeedMultiplier();
+	score.CS = CS;
+	score.AR = AR;
+	score.OD = getOD();
+	score.HP = getHP();
+	score.maxPossibleCombo = maxPossibleCombo;
+	score.numHitObjects = numHitObjects;
+	score.numCircles = numCircles;
+	score.modsLegacy = m_osu->getScore()->getModsLegacy();
+	{
+		// special case: manual slider accuracy has been enabled (affects pp but not score), so force scorev2 for potential future score recalculations
+		// NOTE: I forgot to add this before 20210103, so all old scores which were played without scorev2 but with osu_slider_scorev2 will get downgraded slighly :(
+		score.modsLegacy |= (m_osu_slider_scorev2_ref->getBool() ? OsuReplay::Mods::ScoreV2 : 0);
+	}
+
+	std::vector<ConVar*> allExperimentalMods = m_osu->getExperimentalMods();
+	for (int i=0; i<allExperimentalMods.size(); i++)
+	{
+		if (allExperimentalMods[i]->getBool())
+		{
+			score.experimentalModsConVars.append(allExperimentalMods[i]->getName());
+			score.experimentalModsConVars.append(";");
+		}
+	}
+
+	score.md5hash = m_selectedDifficulty2->getMD5Hash(); // NOTE: necessary for "Use Mods"
+
+	int scoreIndex = -1;
+
+	if(!isCheated) {
+		if(bancho.submit_scores) {
+			score.replay_data = replay_data;
+			replay_data = {0};
+			submit_score(score);
+			delete score.replay_data.memory;
+		}
+
+		if(score.passed) {
+			scoreIndex = m_osu->getSongBrowser()->getDatabase()->addScore(m_selectedDifficulty2->getMD5Hash(), score);
+			if (scoreIndex == -1) {
+				m_osu->getNotificationOverlay()->addNotification(UString::format("Failed saving score! md5hash.length() = %i", m_selectedDifficulty2->getMD5Hash().length()), 0xffff0000, false, 3.0f);
+			}
+		}
+	}
+
+	m_osu->getScore()->setIndex(scoreIndex);
+	m_osu->getScore()->setComboFull(maxPossibleCombo); // used in OsuRankingScreen/OsuUIRankingScreenRankingPanel
+
+	// special case: incomplete scores should NEVER show pp, even if auto
+	if (!isComplete) {
+		m_osu->getScore()->setPPv2(0.0f);
+	}
+
+	debugLog("OsuBeatmapStandard::onBeforeStop() done.\n");
 }
 
 void OsuBeatmapStandard::onStop(bool quit)
