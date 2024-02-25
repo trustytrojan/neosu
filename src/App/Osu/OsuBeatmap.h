@@ -11,9 +11,9 @@
 #include "cbase.h"
 #include "Timer.h"
 
-#include "BanchoProtocol.h"
 #include "OsuScore.h"
 #include "OsuDatabaseBeatmap.h"
+#include "UString.h"
 
 class Sound;
 class ConVar;
@@ -117,7 +117,7 @@ public:
 	inline const std::vector<double> &getSpeedStrains() const {return m_speedStrains;}
 
 	// replay recording (see OsuBeatmapStandard)
-	Packet replay_data = {0};
+	UString replay_data;
 	uint64_t last_event_ms = 0;
 	int32_t current_keys = 0;
 	int32_t last_keys = 0;

@@ -13,7 +13,7 @@
 
 
 void submit_score(OsuDatabase::Score score) {
-    if(score.replay_data.pos < 24) {
+    if(score.replay_data.lengthUtf8() == 0) {
         debugLog("Replay too small to submit!\n");
         return;
     }
@@ -149,48 +149,22 @@ void submit_score(OsuDatabase::Score score) {
         delete score_data_b64;
     }
     {
-        Packet full_replay = {0};
-        write_byte(&full_replay, 0); // gamemode, always std
-        write_int32(&full_replay, OSU_VERSION_DATEONLY);
-        write_string(&full_replay, score.diff2->getMD5Hash().c_str());
-        write_string(&full_replay, bancho.username.toUtf8());
-
-        // TODO @kiwec: don't know if this is correct
-        auto replay_md5 = md5(score.replay_data.memory, score.replay_data.pos);
-        write_string(&full_replay, replay_md5.toUtf8());
-
-        write_short(&full_replay, score.num300s);
-        write_short(&full_replay, score.num100s);
-        write_short(&full_replay, score.num50s);
-        write_short(&full_replay, score.numGekis);
-        write_short(&full_replay, score.numKatus);
-        write_short(&full_replay, score.numMisses);
-        write_int32(&full_replay, score.score);
-        write_short(&full_replay, score.comboMax);
-        write_byte(&full_replay, score.perfect ? 1 : 0);
-        write_int32(&full_replay, score.modsLegacy);
-
-        // TODO @kiwec: life bar graph
-        write_string(&full_replay, "");
-
-        write_int64(&full_replay, score.unixTimestamp * 10);
+        int32_t seed;
+        getrandom(&seed, sizeof(seed), 0);
+        auto seed_frame = UString::format("-12345|0|0|%d", seed);
+        score.replay_data.append(seed_frame);
 
         // XXX: Don't compress on main thread?
         std::vector<uint8_t> compressed_replay;
         plz::PocketLzma p { plz::Preset::Fast };
-        p.compress(score.replay_data.memory, score.replay_data.pos, compressed_replay);
-
-        write_int32(&full_replay, compressed_replay.size());
-        write_bytes(&full_replay, compressed_replay.data(), compressed_replay.size());
+        p.compress((const uint8_t*)score.replay_data.toUtf8(), score.replay_data.lengthUtf8(), compressed_replay);
 
         part = curl_mime_addpart(request.mime);
         curl_mime_filename(part, "mcosu-replay.osr");
         curl_mime_name(part, "score");
-        curl_mime_data(part, (const char*)full_replay.memory, full_replay.pos);
-        delete full_replay.memory;
+        curl_mime_data(part, (const char*)compressed_replay.data(), compressed_replay.size());
     }
 
-    // TODO @kiwec: append "token" header, bancho.py accepts the score without it
     send_api_request(request);
 
     curl_easy_cleanup(curl);

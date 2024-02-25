@@ -106,7 +106,7 @@ ConVar osu_quick_retry_time("osu_quick_retry_time", 2000.0f, FCVAR_NONE, "Timefr
 ConVar osu_end_delay_time("osu_end_delay_time", 750.0f, FCVAR_NONE, "Duration in ms which is added at the end of a beatmap after the last hitobject is finished but before the ranking screen is automatically shown");
 ConVar osu_end_skip("osu_end_skip", true, FCVAR_NONE, "whether the beatmap jumps to the ranking screen as soon as the last hitobject plus lenience has passed");
 ConVar osu_end_skip_time("osu_end_skip_time", 400.0f, FCVAR_NONE, "Duration in ms which is added to the endTime of the last hitobject, after which pausing the game will immediately jump to the ranking screen");
-ConVar osu_skip_time("osu_skip_time", 5000.0f, FCVAR_NONE, "Timeframe in ms within a beatmap which allows skipping if it doesn't contain any hitobjects");
+ConVar osu_skip_time("osu_skip_time", 5000.0f, FCVAR_CHEAT, "Timeframe in ms within a beatmap which allows skipping if it doesn't contain any hitobjects");
 ConVar osu_fail_time("osu_fail_time", 2.25f, FCVAR_NONE, "Timeframe in s for the slowdown effect after failing, before the pause menu is shown");
 ConVar osu_notelock_type("osu_notelock_type", 2, FCVAR_NONE, "which notelock algorithm to use (0 = None, 1 = McOsu, 2 = osu!stable, 3 = osu!lazer 2020)");
 ConVar osu_notelock_stable_tolerance2b("osu_notelock_stable_tolerance2b", 3, FCVAR_NONE, "time tolerance in milliseconds to allow hitting simultaneous objects close together (e.g. circle at end of slider)");
@@ -2341,8 +2341,7 @@ void OsuBeatmap::resetHitObjects(long curPos)
 
 void OsuBeatmap::resetScoreInt()
 {
-	SAFE_DELETE(replay_data.memory);
-	replay_data = {0};
+	replay_data = "";
 	last_event_ms = 0;
 	current_keys = 0;
 

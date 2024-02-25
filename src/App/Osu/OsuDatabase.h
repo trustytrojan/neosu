@@ -9,8 +9,8 @@
 #define OSUDATABASE_H
 
 #include "cbase.h"
-#include "BanchoProtocol.h"
 #include "OsuScore.h"
+#include "UString.h"
 
 class Timer;
 class ConVar;
@@ -55,7 +55,7 @@ public:
 		OsuScore::GRADE grade = OsuScore::GRADE::GRADE_N;
 		OsuDatabaseBeatmap *diff2;
 		uint64_t play_time_ms = 0;
-		Packet replay_data = {0};
+		UString replay_data = "";
 
 		int num300s;
 		int num100s;
