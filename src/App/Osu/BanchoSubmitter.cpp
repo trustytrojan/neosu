@@ -149,9 +149,9 @@ void submit_score(OsuDatabase::Score score) {
         delete score_data_b64;
     }
     {
-        int32_t seed;
+        uint16_t seed;
         getrandom(&seed, sizeof(seed), 0);
-        auto seed_frame = UString::format("-12345|0|0|%d", seed);
+        auto seed_frame = UString::format("-12345|0|0|%u", seed);
         score.replay_data.append(seed_frame);
 
         // XXX: Don't compress on main thread?
