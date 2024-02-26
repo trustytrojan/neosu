@@ -186,7 +186,7 @@ void OsuMainMenuPauseButton::draw(Graphics *g)
 
 ConVar osu_toggle_preview_music("osu_toggle_preview_music");
 
-ConVar osu_draw_menu_background("osu_draw_menu_background", true, FCVAR_NONE);
+ConVar osu_draw_menu_background("osu_draw_menu_background", false, FCVAR_NONE);
 ConVar osu_draw_main_menu_workshop_button("osu_draw_main_menu_workshop_button", true, FCVAR_NONE);
 ConVar osu_main_menu_startup_anim_duration("osu_main_menu_startup_anim_duration", 0.25f, FCVAR_NONE);
 ConVar osu_main_menu_use_slider_text("osu_main_menu_use_slider_text", true, FCVAR_NONE);
@@ -194,7 +194,6 @@ ConVar osu_main_menu_slider_text_alpha("osu_main_menu_slider_text_alpha", 1.0f, 
 ConVar osu_main_menu_slider_text_scale("osu_main_menu_slider_text_scale", 1.0f, FCVAR_NONE);
 ConVar osu_main_menu_slider_text_offset_x("osu_main_menu_slider_text_offset_x", 15.0f, FCVAR_NONE);
 ConVar osu_main_menu_slider_text_offset_y("osu_main_menu_slider_text_offset_y", 0.0f, FCVAR_NONE);
-ConVar osu_main_menu_shuffle("osu_main_menu_shuffle", false, FCVAR_NONE);
 ConVar osu_main_menu_alpha("osu_main_menu_alpha", 1.0f, FCVAR_NONE);
 ConVar osu_main_menu_friend("osu_main_menu_friend", true, FCVAR_NONE);
 
@@ -304,7 +303,6 @@ OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu)
 	m_fStartupAnim = 0.0f;
 	m_fStartupAnim2 = 0.0f;
 
-	m_fPrevShuffleTime = 0.0f;
 	m_fBackgroundFadeInTime = 0.0f;
 
 	// check if the user has never clicked the changelog for this update
@@ -463,29 +461,27 @@ void OsuMainMenu::draw(Graphics *g)
 		}
 	}
 
-	if (osu_main_menu_shuffle.getBool())
+	// XXX: Should do fade transition between beatmap backgrounds when switching to next song
+	if (m_osu->getSelectedBeatmap() != NULL)
 	{
-		if (m_osu->getSelectedBeatmap() != NULL)
+		float alpha = 1.0f;
+		if (m_osu_songbrowser_background_fade_in_duration_ref->getFloat() > 0.0f)
 		{
-			float alpha = 1.0f;
-			if (m_osu_songbrowser_background_fade_in_duration_ref->getFloat() > 0.0f)
-			{
-				// handle fadein trigger after handler is finished loading
-				const bool ready = m_osu->getSelectedBeatmap() != NULL
-					&& m_osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL
-					&& m_osu->getBackgroundImageHandler()->getLoadBackgroundImage(m_osu->getSelectedBeatmap()->getSelectedDifficulty2()) != NULL
-					&& m_osu->getBackgroundImageHandler()->getLoadBackgroundImage(m_osu->getSelectedBeatmap()->getSelectedDifficulty2())->isReady();
+			// handle fadein trigger after handler is finished loading
+			const bool ready = m_osu->getSelectedBeatmap() != NULL
+				&& m_osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL
+				&& m_osu->getBackgroundImageHandler()->getLoadBackgroundImage(m_osu->getSelectedBeatmap()->getSelectedDifficulty2()) != NULL
+				&& m_osu->getBackgroundImageHandler()->getLoadBackgroundImage(m_osu->getSelectedBeatmap()->getSelectedDifficulty2())->isReady();
 
-				if (!ready)
-					m_fBackgroundFadeInTime = engine->getTime();
-				else if (m_fBackgroundFadeInTime > 0.0f && engine->getTime() > m_fBackgroundFadeInTime)
-				{
-					alpha = clamp<float>((engine->getTime() - m_fBackgroundFadeInTime)/m_osu_songbrowser_background_fade_in_duration_ref->getFloat(), 0.0f, 1.0f);
-					alpha = 1.0f - (1.0f - alpha)*(1.0f - alpha);
-				}
+			if (!ready)
+				m_fBackgroundFadeInTime = engine->getTime();
+			else if (m_fBackgroundFadeInTime > 0.0f && engine->getTime() > m_fBackgroundFadeInTime)
+			{
+				alpha = clamp<float>((engine->getTime() - m_fBackgroundFadeInTime)/m_osu_songbrowser_background_fade_in_duration_ref->getFloat(), 0.0f, 1.0f);
+				alpha = 1.0f - (1.0f - alpha)*(1.0f - alpha);
 			}
-			OsuSongBrowser2::drawSelectedBeatmapBackgroundImage(g, m_osu, alpha);
 		}
+		OsuSongBrowser2::drawSelectedBeatmapBackgroundImage(g, m_osu, alpha);
 	}
 
 	// main button stuff
@@ -1295,24 +1291,14 @@ void OsuMainMenu::mouse_update(bool *propagate_clicks)
 	}
 
 	// handle pause button pause detection
-	if (m_osu->getSelectedBeatmap() != NULL)
-		m_pauseButton->setPaused(!m_osu->getSelectedBeatmap()->isPreviewMusicPlaying());
-	else
-		m_pauseButton->setPaused(true);
-
-	// handle shuffle while idle
-	if (osu_main_menu_shuffle.getBool())
-	{
-		if (m_osu->getSelectedBeatmap() != NULL)
-		{
-			if (!m_osu->getSelectedBeatmap()->isPreviewMusicPlaying())
-			{
-				if (engine->getTime() > m_fPrevShuffleTime)
-				{
-					m_fPrevShuffleTime = engine->getTime() + 1.0f;
-					m_osu->getSongBrowser()->selectRandomBeatmap(false);
-				}
-			}
+	if (m_osu->getSelectedBeatmap() != NULL && m_osu->getSelectedBeatmap()->isPreviewMusicPlaying()) {
+		m_osu->getSelectedBeatmap()->getMusic()->setLoop(false);
+		m_pauseButton->setPaused(false);
+	} else {
+		if(shuffling) {
+			m_osu->getSongBrowser()->selectRandomBeatmap(false);
+		} else {
+			m_pauseButton->setPaused(true);
 		}
 	}
 }
@@ -1322,13 +1308,9 @@ void OsuMainMenu::onKeyDown(KeyboardEvent &e)
 	OsuScreen::onKeyDown(e); // only used for options menu
 	if (!m_bVisible || e.isConsumed()) return;
 
-	if (osu_main_menu_shuffle.getBool())
-	{
-		if (!m_osu->getOptionsMenu()->isMouseInside())
-		{
-			if (e == KEY_RIGHT || e == KEY_F2)
-				m_osu->getSongBrowser()->selectRandomBeatmap(false);
-		}
+	if (!m_osu->getOptionsMenu()->isMouseInside()) {
+		if (e == KEY_RIGHT || e == KEY_F2)
+			m_osu->getSongBrowser()->selectRandomBeatmap(false);
 	}
 
 	if (e == KEY_C || e == KEY_F4)
@@ -1382,6 +1364,8 @@ void OsuMainMenu::onResolutionChange(Vector2 newResolution)
 CBaseUIContainer* OsuMainMenu::setVisible(bool visible)
 {
 	m_bVisible = visible;
+
+	shuffling = m_osu->getSelectedBeatmap() != NULL && m_osu->getSelectedBeatmap()->isPreviewMusicPlaying();
 
 	if (!m_bVisible)
 	{
@@ -1664,10 +1648,12 @@ void OsuMainMenu::onPausePressed()
 {
 	if (m_osu->getInstanceID() > 1) return;
 
-	osu_main_menu_shuffle.setValue(0.0f);
-
-	if (m_osu->getSelectedBeatmap() != NULL)
+	if (m_osu->getSelectedBeatmap() != NULL) {
 		m_osu->getSelectedBeatmap()->pausePreviewMusic();
+		shuffling = false;
+	} else {
+		shuffling = true;
+	}
 }
 
 void OsuMainMenu::onUpdatePressed()

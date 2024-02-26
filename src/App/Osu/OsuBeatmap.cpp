@@ -152,8 +152,6 @@ ConVar *OsuBeatmap::m_osu_mod_fposu_ref = NULL;
 ConVar *OsuBeatmap::m_fposu_3d_ref = NULL;
 ConVar *OsuBeatmap::m_fposu_draw_scorebarbg_on_top_ref = NULL;
 
-ConVar *OsuBeatmap::m_osu_main_menu_shuffle_ref = NULL;
-
 OsuBeatmap::OsuBeatmap(Osu *osu)
 {
 	// convar refs
@@ -178,9 +176,6 @@ OsuBeatmap::OsuBeatmap(Osu *osu)
 		m_fposu_3d_ref = convar->getConVarByName("fposu_3d");
 	if (m_fposu_draw_scorebarbg_on_top_ref == NULL)
 		m_fposu_draw_scorebarbg_on_top_ref = convar->getConVarByName("fposu_draw_scorebarbg_on_top");
-
-	if (m_osu_main_menu_shuffle_ref == NULL)
-		m_osu_main_menu_shuffle_ref = convar->getConVarByName("osu_main_menu_shuffle");
 
 	// vars
 	m_osu = osu;
@@ -2252,7 +2247,7 @@ void OsuBeatmap::handlePreviewPlay()
 			if (m_music->getFrequency() < m_fMusicFrequencyBackup) // player has died, reset frequency
 				m_music->setFrequency(m_fMusicFrequencyBackup);
 
-			if (m_osu_main_menu_shuffle_ref->getBool() && m_osu->getMainMenu()->isVisible())
+			if (m_osu->getMainMenu()->isVisible())
 				m_music->setPositionMS(0);
 			else if (m_iContinueMusicPos != 0)
 				m_music->setPositionMS(m_iContinueMusicPos);

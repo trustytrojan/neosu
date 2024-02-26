@@ -117,6 +117,7 @@ private:
 	float m_fUpdateButtonAnimTime;
 	float m_fUpdateButtonAnim;
 	bool m_bHasClickedUpdate;
+	bool shuffling = false;
 
 	Vector2 m_vSize;
 	Vector2 m_vCenter;
