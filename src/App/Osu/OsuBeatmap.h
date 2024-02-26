@@ -118,9 +118,9 @@ public:
 
 	// replay recording (see OsuBeatmapStandard)
 	UString replay_data;
-	uint64_t last_event_ms = 0;
-	int32_t current_keys = 0;
-	int32_t last_keys = 0;
+	long last_event_ms = 0;
+	uint8_t current_keys = 0;
+	uint8_t last_keys = 0;
 
 	// used by OsuHitObject children and OsuModSelector
 	inline Osu *getOsu() const {return m_osu;}

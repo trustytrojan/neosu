@@ -17,14 +17,15 @@ namespace OsuReplay
 		float y; // 0 - 384
 
 		// M1 = 1, M2 = 2, K1 = 4, K2 = 8, Smoke = 16
-		int32_t key_flags;
+		uint8_t key_flags;
 	};
 
 	enum KeyFlags {
-		M1 = (1 << 1),
-		M2 = (1 << 2),
-		K1 = (1 << 4),
-		K2 = (1 << 8),
+		M1 = 1,
+		M2 = 2,
+		K1 = 4,
+		K2 = 8,
+		Smoke = 16,
 	};
 
 	struct BEATMAP_VALUES

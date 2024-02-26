@@ -928,32 +928,7 @@ void OsuBeatmapStandard::update()
 			m_iAllowAnyNextKeyForFullAlternateUntilHitObjectIndex = m_iCurrentHitObjectIndex + 1;
 	}
 
-	// Just started the map, initialize replay
-	if(replay_data.lengthUtf8() == 0) {
-		replay_data.append("0|256|-500|0,");
-
-		const float offset = 2500.0f;
-		float offsetMultiplier = m_osu->getSpeedMultiplier();
-		{
-			// only compensate if not within "normal" osu mod range (would make the game feel too different regarding time from skip until first hitobject)
-			if (offsetMultiplier >= 0.74f && offsetMultiplier <= 1.51f)
-				offsetMultiplier = 1.0f;
-
-			// don't compensate speed increases at all actually
-			if (offsetMultiplier > 1.0f)
-				offsetMultiplier = 1.0f;
-
-			// and cap slowdowns at sane value (~ spinner fadein start)
-			if (offsetMultiplier <= 0.2f)
-				offsetMultiplier = 0.2f;
-		}
-		long map_start = std::max(m_iNextHitObjectTime - (long)(offset * offsetMultiplier), (long)0);
-		auto start_frame = UString::format("%d|256|-500|0,", map_start);
-		replay_data.append(start_frame);
-		last_event_ms = map_start;
-	}
-
-	bool is_recording = m_bIsPlaying && !m_bFailed && last_event_ms <= m_iCurMusicPosWithOffsets;
+	bool is_recording = m_bIsPlaying && !m_bFailed;
 	if(is_recording) {
 		// 16.67 ms between each frame (60 fps)
 		// Since the timer is based on the music (and not real time), divide by speed multiplier.
@@ -968,8 +943,11 @@ void OsuBeatmapStandard::update()
 }
 
 void OsuBeatmapStandard::write_frame() {
+	long delta = m_iCurMusicPosWithOffsets - last_event_ms;
+	if(delta < 0) return;
+
 	Vector2 pos = pixels2OsuCoords(getCursorPos());
-	auto frame = UString::format("%u|%f|%f|%u,", m_iCurMusicPosWithOffsets - last_event_ms, pos.x, pos.y, current_keys);
+	auto frame = UString::format("%ld|%.4f|%.4f|%hhu,", delta, pos.x, pos.y, current_keys);
 	replay_data.append(frame);
 	last_event_ms = m_iCurMusicPosWithOffsets;
 	last_keys = current_keys;

@@ -149,14 +149,11 @@ void submit_score(OsuDatabase::Score score) {
         delete score_data_b64;
     }
     {
-        uint16_t seed;
-        getrandom(&seed, sizeof(seed), 0);
-        auto seed_frame = UString::format("-12345|0|0|%u", seed);
-        score.replay_data.append(seed_frame);
+        score.replay_data.append("-12345|0|0|0,");
 
         // XXX: Don't compress on main thread?
         std::vector<uint8_t> compressed_replay;
-        plz::PocketLzma p { plz::Preset::Fast };
+        plz::PocketLzma p { plz::Preset::BestCompression };
         p.compress((const uint8_t*)score.replay_data.toUtf8(), score.replay_data.lengthUtf8(), compressed_replay);
 
         part = curl_mime_addpart(request.mime);
