@@ -217,7 +217,9 @@ void OsuChat::mouse_update(bool *propagate_clicks) {
     if(m_selected_channel) {
         m_selected_channel->ui->mouse_update(propagate_clicks);
     }
-    m_input_box->focus();
+
+    // Focus without placing the cursor at the end of the field
+    m_input_box->focus(false);
 }
 
 void OsuChat::onKeyDown(KeyboardEvent &key) {
@@ -578,6 +580,9 @@ void OsuChat::updateVisibility() {
     auto selected_beatmap = m_osu->getSelectedBeatmap();
     bool can_skip = (selected_beatmap != nullptr) && (selected_beatmap->isInSkippableSection());
     bool is_clicking_circles = m_osu->isInPlayMode() && !can_skip && !m_osu->m_bModAuto && !m_osu->m_pauseMenu->isVisible();
+    if(bancho.is_playing_a_multi_map() && !bancho.room.all_players_loaded) {
+        is_clicking_circles = false;
+    }
     bool force_hide = m_osu->m_optionsMenu->isVisible() || m_osu->m_modSelector->isVisible() || is_clicking_circles;
     if(!bancho.is_online()) force_hide = true;
 

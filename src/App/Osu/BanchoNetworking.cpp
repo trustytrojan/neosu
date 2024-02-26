@@ -9,6 +9,7 @@
 #include "ConVar.h"
 #include "Engine.h"
 #include "OsuChat.h"
+#include "OsuDatabase.h"
 #include "OsuLobby.h"
 #include "OsuOptionsMenu.h"
 #include "OsuRoom.h"
@@ -77,6 +78,7 @@ void disconnect() {
   delete outgoing.memory;
   outgoing = {0};
   bancho.user_id = 0;
+  bancho.submit_scores = false;
   bancho.osu->m_optionsMenu->logInButton->setText("Log in");
   bancho.osu->m_optionsMenu->logInButton->setColor(0xff00ff00);
   bancho.osu->m_optionsMenu->logInButton->is_loading = false;
@@ -242,6 +244,7 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
   hres = curl_easy_header(curl, "x-mcosu-features", 0, CURLH_HEADER, -1, &header);
   if (hres == CURLHE_OK) {
     bancho.submit_scores = strstr(header->value, "submit=1") != NULL;
+    debugLog("Score submission: %d\n", bancho.submit_scores);
   }
 
   while (response.pos < response.size) {
@@ -305,7 +308,7 @@ static void *do_networking(void *data) {
     if(bancho.osu && bancho.osu->m_lobby->isVisible()) seconds_between_pings = 1;
     if(bancho.is_in_a_multi_room() && seconds_between_pings > 3) seconds_between_pings = 3;
     bool should_ping = difftime(time(NULL), last_packet_tms) > seconds_between_pings;
-    if(bancho.user_id == 0) should_ping = false;
+    if(bancho.user_id <= 0) should_ping = false;
 
     pthread_mutex_lock(&outgoing_mutex);
     if (try_logging_in) {
@@ -360,6 +363,10 @@ static void handle_api_response(Packet packet) {
   } else if(packet.id == SUBMIT_SCORE) {
     // TODO @kiwec: handle response
     debugLog("Score submit result: %s\n", packet.memory);
+
+    // Reset leaderboards so new score will appear
+    bancho.osu->m_songBrowser2->m_db->m_online_scores.clear();
+    bancho.osu->m_songBrowser2->rebuildScoreButtons();
   } else {
     // NOTE: API Response type is same as API Request type
     debugLog("No handler for API response type %d!\n", packet.id);

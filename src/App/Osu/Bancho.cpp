@@ -407,10 +407,15 @@ void handle_packet(Packet *packet) {
     user->latitude = read_float32(packet);
     user->global_rank = read_int(packet);
   } else if (packet->id == RESTART) {
-    int32_t ms = read_int(packet);
-    debugLog("Restart: %d ms\n", ms);
-    reconnect();
     // XXX: wait 'ms' milliseconds before reconnecting
+    int32_t ms = read_int(packet);
+    (void)ms;
+
+    // Some servers send "restart" packets when password is incorrect
+    // So, don't retry unless actually logged in
+    if(bancho.is_online()) {
+      reconnect();
+    }
   } else if (packet->id == MATCH_INVITE) {
     UString sender = read_string(packet);
     UString text = read_string(packet);

@@ -66,9 +66,9 @@ ConVar fposu_noclipspeed("fposu_noclipspeed", 2.0f, FCVAR_NONE);
 ConVar fposu_noclipaccelerate("fposu_noclipaccelerate", 20.0f, FCVAR_NONE);
 ConVar fposu_noclipfriction("fposu_noclipfriction", 10.0f, FCVAR_NONE);
 
-ConVar fposu_3d("fposu_3d", true, FCVAR_NONE);
+ConVar fposu_3d("fposu_3d", false, FCVAR_CHEAT);
 ConVar fposu_3d_playfield_scale("fposu_3d_playfield_scale", 1.0f, FCVAR_NONE);
-ConVar fposu_3d_spheres("fposu_3d_spheres", true, FCVAR_NONE, "whether to draw combocolored lit 3d spheres instead of flat skin image quads");
+ConVar fposu_3d_spheres("fposu_3d_spheres", false, FCVAR_CHEAT, "whether to draw combocolored lit 3d spheres instead of flat skin image quads");
 ConVar fposu_3d_spheres_aa("fposu_3d_spheres_aa", 4, FCVAR_NONE, "MSAA factor, valid values are: 0, 2, 4, 8, 16");
 ConVar fposu_3d_spheres_light_ambient("fposu_3d_spheres_light_ambient", 0.15f, FCVAR_NONE);
 ConVar fposu_3d_spheres_light_brightness("fposu_3d_spheres_light_brightness", 1.15f, FCVAR_NONE);

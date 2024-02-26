@@ -202,7 +202,7 @@ void OsuUIAvatar::mouse_update(bool *propagate_clicks) {
 }
 
 void OsuUIAvatar::onAvatarClicked(CBaseUIButton *btn) {
-    if(bancho.is_playing_a_multi_map()) {
+    if(bancho.osu->isInPlayMode()) {
         // Don't want context menu to pop up while playing a map
         return;
     }

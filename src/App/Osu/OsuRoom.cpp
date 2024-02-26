@@ -715,6 +715,7 @@ void OsuRoom::on_match_score_updated(Packet* packet) {
 
 void OsuRoom::on_all_players_loaded() {
     bancho.room.all_players_loaded = true;
+    m_osu->m_chat->updateVisibility();
 }
 
 void OsuRoom::on_player_failed(int32_t slot_id) {

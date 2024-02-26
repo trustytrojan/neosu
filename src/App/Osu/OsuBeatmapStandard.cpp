@@ -964,9 +964,10 @@ void OsuBeatmapStandard::update()
 		long map_start = std::max(m_iNextHitObjectTime - (long)(offset * offsetMultiplier), (long)0);
 		auto start_frame = UString::format("%d|256|-500|0,", map_start);
 		replay_data.append(start_frame);
+		last_event_ms = map_start;
 	}
 
-	bool is_recording = m_bIsPlaying && !m_bFailed;
+	bool is_recording = m_bIsPlaying && !m_bFailed && last_event_ms <= m_iCurMusicPosWithOffsets;
 	if(is_recording) {
 		// 16.67 ms between each frame (60 fps)
 		// Since the timer is based on the music (and not real time), divide by speed multiplier.

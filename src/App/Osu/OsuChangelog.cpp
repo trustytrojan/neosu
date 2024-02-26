@@ -36,7 +36,16 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu)
 	std::vector<CHANGELOG> changelogs;
 
 	CHANGELOG alpha317;
-	alpha317.title = UString::format("34.01 (Build Date: %s, %s)", __DATE__, __TIME__); // (09.01.2022 - ?)
+	alpha317.title = UString::format("34.02 (Build Date: %s, %s)", __DATE__, __TIME__); // (09.01.2022 - ?)
+	alpha317.changes.push_back("- Added score submission (for servers that allow it via the x-mcosu-features header)");
+	alpha317.changes.push_back("- Fixed \"No records set!\" banner display");
+	alpha317.changes.push_back("- Fixed \"Server has restarded\" loop after a login error");
+	alpha317.changes.push_back("- Fixed chat being force-hid during breaks and before map start");
+	alpha317.changes.push_back("- Fixed chat not supporting expected keyboard navigation");
+	alpha317.changes.push_back("- Fixed text selection for password field");
+	alpha317.changes.push_back("");
+	alpha317.changes.push_back("");
+	alpha317.changes.push_back("34.01");
 	alpha317.changes.push_back("- Added ability to close chat channels with /close");
 	alpha317.changes.push_back("- Added \"Force Start\" button to avoid host accidentally starting the match");
 	alpha317.changes.push_back("- Disabled force start when there are only two players in the room");

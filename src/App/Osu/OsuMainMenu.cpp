@@ -50,8 +50,7 @@
 #define MCOSU_VERSION_TEXT "Version"
 #define MCOSU_BANNER_TEXT ""
 UString OsuMainMenu::MCOSU_MAIN_BUTTON_TEXT = UString("McOsu");
-UString OsuMainMenu::MCOSU_MAIN_BUTTON_SUBTEXT = UString("Practice Client");
-#define MCOSU_MAIN_BUTTON_BACK_TEXT "by McKay"
+UString OsuMainMenu::MCOSU_MAIN_BUTTON_SUBTEXT = UString("Multiplayer Client");
 
 #define MCOSU_NEWVERSION_NOTIFICATION_TRIGGER_FILE "version.txt"
 
@@ -1104,18 +1103,6 @@ void OsuMainMenu::draw(Graphics *g)
 		}
 		g->rotate3DScene(90, 0, 0);
 		g->offset3DScene(0, 0, 0);
-
-		// back text
-		g->setColor(0xffffffff);
-		g->setAlpha(osu_main_menu_alpha.getFloat());
-		g->setAlpha((1.0f - m_fMainMenuAnimFriendPercent)*(1.0f - m_fMainMenuAnimFriendPercent)*(1.0f - m_fMainMenuAnimFriendPercent));
-		g->pushTransform();
-		{
-			g->scale(fontScale, fontScale);
-			g->translate(m_vCenter.x - m_fCenterOffsetAnim - (titleFont->getStringWidth(MCOSU_MAIN_BUTTON_BACK_TEXT)/2.0f)*fontScale, m_vCenter.y + ((titleFont->getHeight()*fontScale)/2.25f)*4.0f, -1.0f);
-			g->drawString(titleFont, MCOSU_MAIN_BUTTON_BACK_TEXT);
-		}
-		g->popTransform();
 
 		g->pop3DScene();
 

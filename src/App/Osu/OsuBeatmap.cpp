@@ -943,6 +943,12 @@ void OsuBeatmap::update()
 			m_bIsInSkippableSection = false;
 
 		m_osu->m_chat->updateVisibility();
+
+		// While we want to allow the chat to pop up during breaks, we don't
+		// want to be able to skip after the start in multiplayer rooms
+		if(bancho.is_playing_a_multi_map() && m_iCurrentHitObjectIndex > 0) {
+			m_bIsInSkippableSection = false;
+		}
 	}
 
 	// warning arrow logic

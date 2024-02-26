@@ -2959,19 +2959,19 @@ void OsuSongBrowser2::updateScoreBrowserLayout()
 	}
 	m_scoreBrowserScoresStillLoadingElement->setSize(m_scoreBrowser->getSize().x*0.9f, scoreHeight*0.75f);
 	m_scoreBrowserScoresStillLoadingElement->setRelPos(m_scoreBrowser->getSize().x/2 - m_scoreBrowserScoresStillLoadingElement->getSize().x/2, (m_scoreBrowser->getSize().y/2)*0.65f - m_scoreBrowserScoresStillLoadingElement->getSize().y/2);
+	if(!m_localBestContainer->isVisible()) {
+		m_scoreBrowserNoRecordsYetElement->setSize(m_scoreBrowserScoresStillLoadingElement->getSize());
+		m_scoreBrowserNoRecordsYetElement->setRelPos(m_scoreBrowserScoresStillLoadingElement->getRelPos());
+	}
 	m_scoreBrowser->getContainer()->update_pos();
 	m_scoreBrowser->setScrollSizeToContent();
 
-	if(!m_localBestContainer->isVisible()) {
-		m_scoreBrowserNoRecordsYetElement->setSize(m_scoreBrowser->getSize().x*0.9f, scoreHeight*0.75f);
-		m_scoreBrowserNoRecordsYetElement->setRelPos(m_scoreBrowser->getSize().x/2 - m_scoreBrowserNoRecordsYetElement->getSize().x/2, (m_scoreBrowser->getSize().y/2)*0.65f - m_scoreBrowserNoRecordsYetElement->getSize().y/2);
-		m_scoreBrowser->getContainer()->update_pos();
-		m_scoreBrowser->setScrollSizeToContent();
-	}
 }
 
 void OsuSongBrowser2::rebuildScoreButtons()
 {
+	// XXX: When online, it would be nice to scroll to the current user's highscore
+
 	// reset
 	m_scoreBrowser->getContainer()->empty();
 	m_localBestContainer->empty();
@@ -3060,7 +3060,7 @@ void OsuSongBrowser2::rebuildScoreButtons()
 		if(validBeatmap && is_online) {
 			m_scoreBrowser->getContainer()->addBaseUIElement(m_scoreBrowserScoresStillLoadingElement, m_scoreBrowserScoresStillLoadingElement->getRelPos().x, m_scoreBrowserScoresStillLoadingElement->getRelPos().y);
 		} else {
-			m_scoreBrowser->getContainer()->addBaseUIElement(m_scoreBrowserNoRecordsYetElement, m_scoreBrowserNoRecordsYetElement->getRelPos().x, m_scoreBrowserNoRecordsYetElement->getRelPos().y);
+			m_scoreBrowser->getContainer()->addBaseUIElement(m_scoreBrowserNoRecordsYetElement);
 		}
 	} else {
 		// sort
