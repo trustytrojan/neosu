@@ -47,7 +47,7 @@ void* avatar_downloading_thread(void *arg) {
 
     while(thread_id == avatar_downloading_thread_id) {
 loop:
-        usleep(100000); // wait 100ms between every download
+        env->sleep(100000); // wait 100ms between every download
 
         pthread_mutex_lock(&avatars_mtx);
         if (avatars_to_load.empty()) {
@@ -83,8 +83,8 @@ loop:
             int response_code;
             curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
             if(response_code == 429) {
-                // Fetching avatars too quickly, try again later
-                sleep(5);
+                // Fetching avatars too quickly, try again 5s later
+                env->sleep(5000000);
             } else {
                 // Failed to load avatar, don't try to fetch it again
                 blacklist.push_back(avatar_id);

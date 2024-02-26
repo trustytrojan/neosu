@@ -348,7 +348,7 @@ static void *do_networking(void *data) {
       pthread_mutex_unlock(&outgoing_mutex);
     }
 
-    usleep(1000); // wait 1ms
+    env->sleep(1000); // wait 1ms
   }
 
   return NULL;
