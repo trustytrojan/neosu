@@ -725,10 +725,7 @@ void OsuCircle::draw(Graphics *g)
 		scale = -scale*(scale-2.0f); // quad out scale
 
 		const bool drawNumber = m_beatmap->getSkin()->getVersion() > 1.0f ? false : true;
-		float foscale = OsuGameRules::osu_circle_fade_out_scale.getFloat();
-		if(bancho.is_in_a_multi_room()) {
-			foscale = 0.4f;
-		}
+		const float foscale = OsuGameRules::osu_circle_fade_out_scale.getFloat();
 
 		g->pushTransform();
 		{

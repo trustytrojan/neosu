@@ -182,6 +182,7 @@ void handle_packet(Packet *packet) {
       bancho.osu->m_optionsMenu->logInButton->setColor(0xffff0000);
       bancho.osu->m_optionsMenu->logInButton->is_loading = false;
       convar->getConVarByName("mp_autologin")->setValue(true);
+      ConVars::sv_cheats.setValue(false);
       print_new_channels = true;
 
       auto avatar_dir = UString::format(MCENGINE_DATA_DIR "avatars/%s", bancho.endpoint.toUtf8());

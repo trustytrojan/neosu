@@ -8,7 +8,6 @@
 #ifndef OSUGAMERULES_H
 #define OSUGAMERULES_H
 
-#include "Bancho.h"
 #include "Osu.h"
 #include "OsuBeatmap.h"
 
@@ -57,21 +56,12 @@ public:
 
 	static float getFadeOutTime(OsuBeatmap *beatmap) // this scales the fadeout duration with the current speed multiplier
 	{
-		float fade_out_time = osu_hitobject_fade_out_time.getFloat();
-		float multiplier_min = osu_hitobject_fade_out_time_speed_multiplier_min.getFloat();
-		if(bancho.is_in_a_multi_room()) {
-			fade_out_time = 0.293f;
-			multiplier_min = 0.5f;
-		}
-
+		const float fade_out_time = osu_hitobject_fade_out_time.getFloat();
+		const float multiplier_min = osu_hitobject_fade_out_time_speed_multiplier_min.getFloat();
 		return fade_out_time * (1.0f / std::max(beatmap->getSpeedMultiplier(), multiplier_min));
 	}
 
 	static inline long getFadeInTime() {
-		if(bancho.is_in_a_multi_room()) {
-			return 400;
-		}
-
 		return (long)osu_hitobject_fade_in_time.getInt();
 	}
 
@@ -115,47 +105,38 @@ public:
 	static ConVar osu_hitwindow_miss;
 
 	// ignore all mods and overrides
-	static inline float getRawMinApproachTime()
-	{
-		return bancho.is_in_a_multi_room() ? 1800.f : osu_approachtime_min.getFloat();
+	static inline float getRawMinApproachTime() {
+		return osu_approachtime_min.getFloat();
 	}
-	static inline float getRawMidApproachTime()
-	{
-		return bancho.is_in_a_multi_room() ? 1200.f : osu_approachtime_mid.getFloat();
+	static inline float getRawMidApproachTime() {
+		return osu_approachtime_mid.getFloat();
 	}
-	static inline float getRawMaxApproachTime()
-	{
-		return bancho.is_in_a_multi_room() ? 450.f : osu_approachtime_max.getFloat();
+	static inline float getRawMaxApproachTime() {
+		return osu_approachtime_max.getFloat();
 	}
 
 	// respect mods and overrides
-	static inline float getMinApproachTime()
-	{
-		if(bancho.is_in_a_multi_room()) return getRawMinApproachTime();
+	static inline float getMinApproachTime() {
 		return getRawMinApproachTime() * (osu_mod_millhioref.getBool() ? osu_mod_millhioref_multiplier.getFloat() : 1.0f);
 	}
-	static inline float getMidApproachTime()
-	{
-		if(bancho.is_in_a_multi_room()) return getRawMidApproachTime();
+	static inline float getMidApproachTime() {
 		return getRawMidApproachTime() * (osu_mod_millhioref.getBool() ? osu_mod_millhioref_multiplier.getFloat() : 1.0f);
 	}
-	static inline float getMaxApproachTime()
-	{
-		if(bancho.is_in_a_multi_room()) return getRawMaxApproachTime();
+	static inline float getMaxApproachTime() {
 		return getRawMaxApproachTime() * (osu_mod_millhioref.getBool() ? osu_mod_millhioref_multiplier.getFloat() : 1.0f);
 	}
 
-	static inline float getMinHitWindow300() {return bancho.is_in_a_multi_room() ? 80 : osu_hitwindow_300_min.getFloat();}
-	static inline float getMidHitWindow300() {return bancho.is_in_a_multi_room() ? 50 : osu_hitwindow_300_mid.getFloat();}
-	static inline float getMaxHitWindow300() {return bancho.is_in_a_multi_room() ? 20 : osu_hitwindow_300_max.getFloat();}
+	static inline float getMinHitWindow300() {return osu_hitwindow_300_min.getFloat();}
+	static inline float getMidHitWindow300() {return osu_hitwindow_300_mid.getFloat();}
+	static inline float getMaxHitWindow300() {return osu_hitwindow_300_max.getFloat();}
 
-	static inline float getMinHitWindow100() {return bancho.is_in_a_multi_room() ? 140 : osu_hitwindow_100_min.getFloat();}
-	static inline float getMidHitWindow100() {return bancho.is_in_a_multi_room() ? 100 : osu_hitwindow_100_mid.getFloat();}
-	static inline float getMaxHitWindow100() {return bancho.is_in_a_multi_room() ? 60 : osu_hitwindow_100_max.getFloat();}
+	static inline float getMinHitWindow100() {return osu_hitwindow_100_min.getFloat();}
+	static inline float getMidHitWindow100() {return osu_hitwindow_100_mid.getFloat();}
+	static inline float getMaxHitWindow100() {return osu_hitwindow_100_max.getFloat();}
 
-	static inline float getMinHitWindow50() {return bancho.is_in_a_multi_room() ? 200 : osu_hitwindow_50_min.getFloat();}
-	static inline float getMidHitWindow50() {return bancho.is_in_a_multi_room() ? 150 : osu_hitwindow_50_mid.getFloat();}
-	static inline float getMaxHitWindow50() {return bancho.is_in_a_multi_room() ? 100 : osu_hitwindow_50_max.getFloat();}
+	static inline float getMinHitWindow50() {return osu_hitwindow_50_min.getFloat();}
+	static inline float getMidHitWindow50() {return osu_hitwindow_50_mid.getFloat();}
+	static inline float getMaxHitWindow50() {return osu_hitwindow_50_max.getFloat();}
 
 	// AR 5 -> 1200 ms
 	static float mapDifficultyRange(float scaledDiff, float min, float mid, float max)
@@ -256,14 +237,10 @@ public:
 	{
 		return osu_mod_mafham.getBool() ? beatmap->getLength()*2 : mapDifficultyRange(beatmap->getRawAR(), getMinApproachTime(), getMidApproachTime(), getMaxApproachTime());
 	}
-	static float getApproachTimeForStacking(float AR)
-	{
-		if(bancho.is_in_a_multi_room()) return mapDifficultyRange(AR, getMinApproachTime(), getMidApproachTime(), getMaxApproachTime());
+	static float getApproachTimeForStacking(float AR) {
 		return mapDifficultyRange(osu_stacking_ar_override.getFloat() < 0.0f ? AR : osu_stacking_ar_override.getFloat(), getMinApproachTime(), getMidApproachTime(), getMaxApproachTime());
 	}
-	static float getApproachTimeForStacking(OsuBeatmap *beatmap)
-	{
-		if(bancho.is_in_a_multi_room()) return mapDifficultyRange(beatmap->getAR(), getMinApproachTime(), getMidApproachTime(), getMaxApproachTime());
+	static float getApproachTimeForStacking(OsuBeatmap *beatmap) {
 		return mapDifficultyRange(osu_stacking_ar_override.getFloat() < 0.0f ? beatmap->getAR() : osu_stacking_ar_override.getFloat(), getMinApproachTime(), getMidApproachTime(), getMaxApproachTime());
 	}
 
@@ -290,9 +267,7 @@ public:
 		return mapDifficultyRange(beatmap->getOD(), getMinHitWindow50(), getMidHitWindow50(), getMaxHitWindow50());
 	}
 
-	static inline float getHitWindowMiss(OsuBeatmap *beatmap)
-	{
-		if(bancho.is_in_a_multi_room()) return 400.f;
+	static inline float getHitWindowMiss(OsuBeatmap *beatmap) {
 		return osu_hitwindow_miss.getFloat(); // opsu is using this here: (500.0f - (beatmap->getOD() * 10.0f)), while osu is just using 400 absolute ms hardcoded, not sure why
 	}
 

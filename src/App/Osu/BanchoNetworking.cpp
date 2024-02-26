@@ -82,6 +82,7 @@ void disconnect() {
   bancho.osu->m_optionsMenu->logInButton->setText("Log in");
   bancho.osu->m_optionsMenu->logInButton->setColor(0xff00ff00);
   bancho.osu->m_optionsMenu->logInButton->is_loading = false;
+  ConVars::sv_cheats.setValue(true);
 
   bancho.osu->m_chat->onDisconnect();
 
@@ -418,11 +419,6 @@ void send_api_request(APIRequest request) {
 void send_packet(Packet& packet) {
   if(bancho.user_id <= 0) {
     // Don't queue any packets until we're logged in
-    return;
-  }
-
-  if(ConVars::sv_cheats.getBool()) {
-    disconnect();
     return;
   }
 

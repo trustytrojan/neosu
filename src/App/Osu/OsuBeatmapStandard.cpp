@@ -89,7 +89,7 @@ ConVar osu_mod_shirone("osu_mod_shirone", false, FCVAR_NONE);
 ConVar osu_mod_shirone_combo("osu_mod_shirone_combo", 20.0f, FCVAR_NONE);
 ConVar osu_mod_mafham_render_chunksize("osu_mod_mafham_render_chunksize", 15, FCVAR_NONE, "render this many hitobjects per frame chunk into the scene buffer (spreads rendering across many frames to minimize lag)");
 
-ConVar osu_mandala("osu_mandala", false, FCVAR_NONE);
+ConVar osu_mandala("osu_mandala", false, FCVAR_CHEAT);
 ConVar osu_mandala_num("osu_mandala_num", 7, FCVAR_NONE);
 
 ConVar osu_debug_hiterrorbar_misaims("osu_debug_hiterrorbar_misaims", false, FCVAR_NONE);
@@ -243,7 +243,7 @@ void OsuBeatmapStandard::draw(Graphics *g)
 	if (m_osu_draw_hitobjects_ref->getBool())
 		drawHitObjects(g);
 
-	if (osu_mandala.getBool() && !bancho.is_in_a_multi_room())
+	if (osu_mandala.getBool())
 	{
 		for (int i=0; i<osu_mandala_num.getInt(); i++)
 		{
@@ -251,20 +251,6 @@ void OsuBeatmapStandard::draw(Graphics *g)
 			drawHitObjects(g);
 		}
 	}
-
-	/*
-	if (m_bFailed)
-	{
-		const float failTimePercentInv = 1.0f - m_fFailAnim; // goes from 0 to 1 over the duration of osu_fail_time
-
-		Vector2 playfieldBorderTopLeft = Vector2((int)(m_vPlayfieldCenter.x - m_vPlayfieldSize.x/2 - m_fHitcircleDiameter/2), (int)(m_vPlayfieldCenter.y - m_vPlayfieldSize.y/2 - m_fHitcircleDiameter/2));
-		Vector2 playfieldBorderSize = Vector2((int)(m_vPlayfieldSize.x + m_fHitcircleDiameter), (int)(m_vPlayfieldSize.y + m_fHitcircleDiameter));
-
-		g->setColor(0xff000000);
-		g->setAlpha(failTimePercentInv);
-		g->fillRect(playfieldBorderTopLeft.x, playfieldBorderTopLeft.y, playfieldBorderSize.x, playfieldBorderSize.y);
-	}
-	*/
 
 	// debug stuff
 	if (osu_debug_hiterrorbar_misaims.getBool())
@@ -661,7 +647,7 @@ void OsuBeatmapStandard::drawHitObjects(Graphics *g)
 	const long pvs = getPVS();
 	const bool usePVS = m_osu_pvs->getBool();
 
-	if (bancho.is_in_a_multi_room() || !OsuGameRules::osu_mod_mafham.getBool())
+	if (!OsuGameRules::osu_mod_mafham.getBool())
 	{
 		if (!osu_draw_reverse_order.getBool())
 		{
@@ -1160,7 +1146,7 @@ Vector2 OsuBeatmapStandard::osuCoords2Pixels(Vector2 coords) const
 		coords.y = coords3.y;
 	}
 
-	if (osu_mandala.getBool() && !bancho.is_in_a_multi_room())
+	if (osu_mandala.getBool())
 	{
 		coords.x -= OsuGameRules::OSU_COORD_WIDTH/2;
 		coords.y -= OsuGameRules::OSU_COORD_HEIGHT/2;
@@ -2050,11 +2036,6 @@ void OsuBeatmapStandard::updateHitobjectMetrics()
 {
 	OsuSkin *skin = m_osu->getSkin();
 
-	float followcircle_size_multiplier = OsuGameRules::osu_slider_followcircle_size_multiplier.getFloat();
-	if(bancho.is_in_a_multi_room()) {
-		followcircle_size_multiplier = 2.4f;
-	}
-
 	m_fRawHitcircleDiameter = OsuGameRules::getRawHitCircleDiameter(getCS());
 	m_fXMultiplier = OsuGameRules::getHitCircleXMultiplier(m_osu);
 	m_fHitcircleDiameter = OsuGameRules::getHitCircleDiameter(this);
@@ -2063,6 +2044,7 @@ void OsuBeatmapStandard::updateHitobjectMetrics()
 	m_fNumberScale = (m_fRawHitcircleDiameter / (160.0f * (skin->isDefault12x() ? 2.0f : 1.0f))) * osuCoordScaleMultiplier * osu_number_scale_multiplier.getFloat();
 	m_fHitcircleOverlapScale = (m_fRawHitcircleDiameter / (160.0f)) * osuCoordScaleMultiplier * osu_number_scale_multiplier.getFloat();
 
+	const float followcircle_size_multiplier = OsuGameRules::osu_slider_followcircle_size_multiplier.getFloat();
 	const float sliderFollowCircleDiameterMultiplier = (m_osu->getModNM() || osu_mod_jigsaw2.getBool() ? (1.0f*(1.0f - osu_mod_jigsaw_followcircle_radius_factor.getFloat()) + osu_mod_jigsaw_followcircle_radius_factor.getFloat()*followcircle_size_multiplier) : followcircle_size_multiplier);
 	m_fRawSliderFollowCircleDiameter = m_fRawHitcircleDiameter * sliderFollowCircleDiameterMultiplier;
 	m_fSliderFollowCircleDiameter = getHitcircleDiameter() * sliderFollowCircleDiameterMultiplier;
@@ -2251,11 +2233,7 @@ void OsuBeatmapStandard::computeDrainRate()
 
 	debugLog("OsuBeatmapStandard: Calculating drain ...\n");
 
-	int drainType = m_osu_drain_type_ref->getInt();
-	if(bancho.is_in_a_multi_room()) {
-		drainType = 2;
-	}
-
+	const int drainType = m_osu_drain_type_ref->getInt();
 	if (drainType == 2) // osu!stable
 	{
 		// see https://github.com/ppy/osu-iPhone/blob/master/Classes/OsuPlayer.m
@@ -2323,7 +2301,6 @@ void OsuBeatmapStandard::computeDrainRate()
 			double hpMultiplierComboEnd;
 		};
 		double foo = (double)m_osu_drain_stable_hpbar_maximum_ref->getFloat();
-		if(bancho.is_in_a_multi_room()) foo = 200.f;
 		TestPlayer testPlayer(foo);
 
 		const double HP = getHP();

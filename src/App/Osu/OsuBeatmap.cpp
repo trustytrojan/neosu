@@ -63,15 +63,15 @@ ConVar osu_combobreak_sound_combo("osu_combobreak_sound_combo", 20, FCVAR_NONE, 
 ConVar osu_beatmap_preview_mods_live("osu_beatmap_preview_mods_live", false, FCVAR_NONE, "whether to immediately apply all currently selected mods while browsing beatmaps (e.g. speed/pitch)");
 ConVar osu_beatmap_preview_music_loop("osu_beatmap_preview_music_loop", true, FCVAR_NONE);
 
-ConVar osu_ar_override("osu_ar_override", -1.0f, FCVAR_NONE, "use this to override between AR 0 and AR 12.5+. active if value is more than or equal to 0.");
-ConVar osu_ar_overridenegative("osu_ar_overridenegative", 0.0f, FCVAR_NONE, "use this to override below AR 0. active if value is less than 0, disabled otherwise. this override always overrides the other override.");
-ConVar osu_cs_override("osu_cs_override", -1.0f, FCVAR_NONE, "use this to override between CS 0 and CS 12.1429. active if value is more than or equal to 0.");
-ConVar osu_cs_overridenegative("osu_cs_overridenegative", 0.0f, FCVAR_NONE, "use this to override below CS 0. active if value is less than 0, disabled otherwise. this override always overrides the other override.");
-ConVar osu_cs_cap_sanity("osu_cs_cap_sanity", true, FCVAR_NONE);
-ConVar osu_hp_override("osu_hp_override", -1.0f, FCVAR_NONE);
-ConVar osu_od_override("osu_od_override", -1.0f, FCVAR_NONE);
-ConVar osu_ar_override_lock("osu_ar_override_lock", false, FCVAR_NONE, "always force constant AR even through speed changes");
-ConVar osu_od_override_lock("osu_od_override_lock", false, FCVAR_NONE, "always force constant OD even through speed changes");
+ConVar osu_ar_override("osu_ar_override", -1.0f, FCVAR_CHEAT, "use this to override between AR 0 and AR 12.5+. active if value is more than or equal to 0.");
+ConVar osu_ar_overridenegative("osu_ar_overridenegative", 0.0f, FCVAR_CHEAT, "use this to override below AR 0. active if value is less than 0, disabled otherwise. this override always overrides the other override.");
+ConVar osu_cs_override("osu_cs_override", -1.0f, FCVAR_CHEAT, "use this to override between CS 0 and CS 12.1429. active if value is more than or equal to 0.");
+ConVar osu_cs_overridenegative("osu_cs_overridenegative", 0.0f, FCVAR_CHEAT, "use this to override below CS 0. active if value is less than 0, disabled otherwise. this override always overrides the other override.");
+ConVar osu_cs_cap_sanity("osu_cs_cap_sanity", true, FCVAR_CHEAT);
+ConVar osu_hp_override("osu_hp_override", -1.0f, FCVAR_CHEAT);
+ConVar osu_od_override("osu_od_override", -1.0f, FCVAR_CHEAT);
+ConVar osu_ar_override_lock("osu_ar_override_lock", false, FCVAR_CHEAT, "always force constant AR even through speed changes");
+ConVar osu_od_override_lock("osu_od_override_lock", false, FCVAR_CHEAT, "always force constant OD even through speed changes");
 
 ConVar osu_background_dim("osu_background_dim", 0.9f, FCVAR_NONE);
 ConVar osu_background_fade_after_load("osu_background_fade_after_load", true, FCVAR_NONE);
@@ -91,14 +91,14 @@ ConVar osu_auto_and_relax_block_user_input("osu_auto_and_relax_block_user_input"
 
 ConVar osu_mod_timewarp("osu_mod_timewarp", false, FCVAR_NONE);
 ConVar osu_mod_timewarp_multiplier("osu_mod_timewarp_multiplier", 1.5f, FCVAR_NONE);
-ConVar osu_mod_minimize("osu_mod_minimize", false, FCVAR_NONE);
-ConVar osu_mod_minimize_multiplier("osu_mod_minimize_multiplier", 0.5f, FCVAR_NONE);
+ConVar osu_mod_minimize("osu_mod_minimize", false, FCVAR_CHEAT);
+ConVar osu_mod_minimize_multiplier("osu_mod_minimize_multiplier", 0.5f, FCVAR_CHEAT);
 ConVar osu_mod_jigsaw1("osu_mod_jigsaw1", false, FCVAR_NONE);
-ConVar osu_mod_artimewarp("osu_mod_artimewarp", false, FCVAR_NONE);
+ConVar osu_mod_artimewarp("osu_mod_artimewarp", false, FCVAR_CHEAT);
 ConVar osu_mod_artimewarp_multiplier("osu_mod_artimewarp_multiplier", 0.5f, FCVAR_NONE);
-ConVar osu_mod_arwobble("osu_mod_arwobble", false, FCVAR_NONE);
-ConVar osu_mod_arwobble_strength("osu_mod_arwobble_strength", 1.0f, FCVAR_NONE);
-ConVar osu_mod_arwobble_interval("osu_mod_arwobble_interval", 7.0f, FCVAR_NONE);
+ConVar osu_mod_arwobble("osu_mod_arwobble", false, FCVAR_CHEAT);
+ConVar osu_mod_arwobble_strength("osu_mod_arwobble_strength", 1.0f, FCVAR_CHEAT);
+ConVar osu_mod_arwobble_interval("osu_mod_arwobble_interval", 7.0f, FCVAR_CHEAT);
 ConVar osu_mod_fullalternate("osu_mod_fullalternate", false, FCVAR_NONE);
 
 ConVar osu_early_note_time("osu_early_note_time", 1500.0f, FCVAR_NONE, "Timeframe in ms at the beginning of a beatmap which triggers a starting delay for easier reading");
@@ -108,11 +108,11 @@ ConVar osu_end_skip("osu_end_skip", true, FCVAR_NONE, "whether the beatmap jumps
 ConVar osu_end_skip_time("osu_end_skip_time", 400.0f, FCVAR_NONE, "Duration in ms which is added to the endTime of the last hitobject, after which pausing the game will immediately jump to the ranking screen");
 ConVar osu_skip_time("osu_skip_time", 5000.0f, FCVAR_CHEAT, "Timeframe in ms within a beatmap which allows skipping if it doesn't contain any hitobjects");
 ConVar osu_fail_time("osu_fail_time", 2.25f, FCVAR_NONE, "Timeframe in s for the slowdown effect after failing, before the pause menu is shown");
-ConVar osu_notelock_type("osu_notelock_type", 2, FCVAR_NONE, "which notelock algorithm to use (0 = None, 1 = McOsu, 2 = osu!stable, 3 = osu!lazer 2020)");
-ConVar osu_notelock_stable_tolerance2b("osu_notelock_stable_tolerance2b", 3, FCVAR_NONE, "time tolerance in milliseconds to allow hitting simultaneous objects close together (e.g. circle at end of slider)");
+ConVar osu_notelock_type("osu_notelock_type", 2, FCVAR_CHEAT, "which notelock algorithm to use (0 = None, 1 = McOsu, 2 = osu!stable, 3 = osu!lazer 2020)");
+ConVar osu_notelock_stable_tolerance2b("osu_notelock_stable_tolerance2b", 3, FCVAR_CHEAT, "time tolerance in milliseconds to allow hitting simultaneous objects close together (e.g. circle at end of slider)");
 ConVar osu_mod_suddendeath_restart("osu_mod_suddendeath_restart", false, FCVAR_NONE, "osu! has this set to false (i.e. you fail after missing). if set to true, then behave like SS/PF, instantly restarting the map");
 
-ConVar osu_drain_type("osu_drain_type", 2, FCVAR_NONE, "which hp drain algorithm to use (0 = None, 1 = VR, 2 = osu!stable, 3 = osu!lazer 2020, 4 = osu!lazer 2018)");
+ConVar osu_drain_type("osu_drain_type", 2, FCVAR_CHEAT, "which hp drain algorithm to use (0 = None, 1 = VR, 2 = osu!stable, 3 = osu!lazer 2020, 4 = osu!lazer 2018)");
 ConVar osu_drain_kill("osu_drain_kill", true, FCVAR_NONE, "whether to kill the player upon failing");
 ConVar osu_drain_kill_notification_duration("osu_drain_kill_notification_duration", 1.0f, FCVAR_NONE, "how long to display the \"You have failed, but you can keep playing!\" notification (0 = disabled)");
 
@@ -124,12 +124,12 @@ ConVar osu_drain_stable_break_after("osu_drain_stable_break_after", false, FCVAR
 ConVar osu_drain_lazer_passive_fail("osu_drain_lazer_passive_fail", false, FCVAR_NONE, "whether to fail the player instantly if health = 0, or only once a negative judgement occurs");
 ConVar osu_drain_lazer_break_before("osu_drain_lazer_break_before", false, FCVAR_NONE, "drain after last hitobject before a break actually starts");
 ConVar osu_drain_lazer_break_after("osu_drain_lazer_break_after", false, FCVAR_NONE, "drain after a break before the next hitobject can be clicked");
-ConVar osu_drain_stable_spinner_nerf("osu_drain_stable_spinner_nerf", 0.25f, FCVAR_NONE, "drain gets multiplied with this while a spinner is active");
-ConVar osu_drain_stable_hpbar_recovery("osu_drain_stable_hpbar_recovery", 160.0f, FCVAR_NONE, "hp gets set to this value when failing with ez and causing a recovery");
+ConVar osu_drain_stable_spinner_nerf("osu_drain_stable_spinner_nerf", 0.25f, FCVAR_CHEAT, "drain gets multiplied with this while a spinner is active");
+ConVar osu_drain_stable_hpbar_recovery("osu_drain_stable_hpbar_recovery", 160.0f, FCVAR_CHEAT, "hp gets set to this value when failing with ez and causing a recovery");
 
 ConVar osu_play_hitsound_on_click_while_playing("osu_play_hitsound_on_click_while_playing", false, FCVAR_NONE);
 
-ConVar osu_debug_draw_timingpoints("osu_debug_draw_timingpoints", false, FCVAR_NONE);
+ConVar osu_debug_draw_timingpoints("osu_debug_draw_timingpoints", false, FCVAR_CHEAT);
 
 ConVar *OsuBeatmap::m_snd_speed_compensate_pitch_ref = NULL;
 ConVar *OsuBeatmap::m_win_snd_fallback_dsound_ref = NULL;
@@ -300,7 +300,7 @@ void OsuBeatmap::draw3D2(Graphics *g)
 
 void OsuBeatmap::drawDebug(Graphics *g)
 {
-	if (osu_debug_draw_timingpoints.getBool() && !bancho.is_in_a_multi_room())
+	if (osu_debug_draw_timingpoints.getBool())
 	{
 		McFont *debugFont = engine->getResourceManager()->getFont("FONT_DEFAULT");
 		g->setColor(0xffffffff);
@@ -610,12 +610,8 @@ void OsuBeatmap::update()
 		const long pvs = !OsuGameRules::osu_mod_mafham.getBool() ? getPVS() : (m_hitobjects.size() > 0 ? (m_hitobjects[clamp<int>(m_iCurrentHitObjectIndex + OsuGameRules::osu_mod_mafham_render_livesize.getInt() + 1, 0, m_hitobjects.size()-1)]->getTime() - m_iCurMusicPosWithOffsets + 1500) : getPVS());
 		const bool usePVS = m_osu_pvs->getBool();
 
-		int notelockType = osu_notelock_type.getInt();
-		long tolerance2B = (long)osu_notelock_stable_tolerance2b.getInt();
-		if(bancho.is_in_a_multi_room()) {
-			notelockType = 2;
-			tolerance2B = 3;
-		}
+		const int notelockType = osu_notelock_type.getInt();
+		const long tolerance2B = (long)osu_notelock_stable_tolerance2b.getInt();
 
 		m_iCurrentHitObjectIndex = 0; // reset below here, since it's needed for mafham pvs
 
@@ -1060,10 +1056,7 @@ void OsuBeatmap::update()
 	// hp drain & failing
 	if (osu_drain_type.getInt() > 0)
 	{
-		int drainType = osu_drain_type.getInt();
-		if(bancho.is_in_a_multi_room()) {
-			drainType = 2;
-		}
+		const int drainType = osu_drain_type.getInt();
 
 		// handle constant drain
 		if (drainType == 2 || drainType == 3) // osu!stable + osu!lazer 2020
@@ -1104,7 +1097,7 @@ void OsuBeatmap::update()
 						{
 							OsuBeatmapStandard *standardPointer = dynamic_cast<OsuBeatmapStandard*>(this);
 							if (standardPointer != NULL && standardPointer->isSpinnerActive())
-								spinnerDrainNerf = bancho.is_in_a_multi_room() ? 0.25f : (double)osu_drain_stable_spinner_nerf.getFloat();
+								spinnerDrainNerf = (double)osu_drain_stable_spinner_nerf.getFloat();
 						}
 
 						addHealth(-m_fDrainRate * engine->getFrameTime() * (double)getSpeedMultiplier() * spinnerDrainNerf, false);
@@ -1870,25 +1863,25 @@ float OsuBeatmap::getAR() const
 	if (m_selectedDifficulty2 == NULL) return 5.0f;
 
 	float AR = getRawAR();
-	if(!bancho.is_in_a_multi_room()) {
-		if (osu_ar_override.getFloat() >= 0.0f)
-			AR = osu_ar_override.getFloat();
 
-		if (osu_ar_overridenegative.getFloat() < 0.0f)
-			AR = osu_ar_overridenegative.getFloat();
+	if (osu_ar_override.getFloat() >= 0.0f)
+		AR = osu_ar_override.getFloat();
 
-		if (osu_ar_override_lock.getBool())
-			AR = OsuGameRules::getRawConstantApproachRateForSpeedMultiplier(OsuGameRules::getRawApproachTime(AR), (m_music != NULL && m_bIsPlaying ? getSpeedMultiplier() : m_osu->getSpeedMultiplier()));
+	if (osu_ar_overridenegative.getFloat() < 0.0f)
+		AR = osu_ar_overridenegative.getFloat();
 
-		if (osu_mod_artimewarp.getBool() && m_hitobjects.size() > 0)
-		{
-			const float percent = 1.0f - ((double)(m_iCurMusicPos - m_hitobjects[0]->getTime()) / (double)(m_hitobjects[m_hitobjects.size()-1]->getTime() + m_hitobjects[m_hitobjects.size()-1]->getDuration() - m_hitobjects[0]->getTime()))*(1.0f - osu_mod_artimewarp_multiplier.getFloat());
-			AR *= percent;
-		}
+	if (osu_ar_override_lock.getBool())
+		AR = OsuGameRules::getRawConstantApproachRateForSpeedMultiplier(OsuGameRules::getRawApproachTime(AR), (m_music != NULL && m_bIsPlaying ? getSpeedMultiplier() : m_osu->getSpeedMultiplier()));
 
-		if (osu_mod_arwobble.getBool())
-			AR += std::sin((m_iCurMusicPos/1000.0f)*osu_mod_arwobble_interval.getFloat())*osu_mod_arwobble_strength.getFloat();
+	if (osu_mod_artimewarp.getBool() && m_hitobjects.size() > 0)
+	{
+		const float percent = 1.0f - ((double)(m_iCurMusicPos - m_hitobjects[0]->getTime()) / (double)(m_hitobjects[m_hitobjects.size()-1]->getTime() + m_hitobjects[m_hitobjects.size()-1]->getDuration() - m_hitobjects[0]->getTime()))*(1.0f - osu_mod_artimewarp_multiplier.getFloat());
+		AR *= percent;
 	}
+
+	if (osu_mod_arwobble.getBool())
+		AR += std::sin((m_iCurMusicPos/1000.0f)*osu_mod_arwobble_interval.getFloat())*osu_mod_arwobble_strength.getFloat();
+
 	return AR;
 }
 
@@ -1897,24 +1890,23 @@ float OsuBeatmap::getCS() const
 	if (m_selectedDifficulty2 == NULL) return 5.0f;
 
 	float CS = clamp<float>(m_selectedDifficulty2->getCS() * m_osu->getCSDifficultyMultiplier(), 0.0f, 10.0f);
-	if(!bancho.is_in_a_multi_room()) {
-		if (osu_cs_override.getFloat() >= 0.0f)
-			CS = osu_cs_override.getFloat();
 
-		if (osu_cs_overridenegative.getFloat() < 0.0f)
-			CS = osu_cs_overridenegative.getFloat();
+	if (osu_cs_override.getFloat() >= 0.0f)
+		CS = osu_cs_override.getFloat();
 
-		if (osu_mod_minimize.getBool() && m_hitobjects.size() > 0)
+	if (osu_cs_overridenegative.getFloat() < 0.0f)
+		CS = osu_cs_overridenegative.getFloat();
+
+	if (osu_mod_minimize.getBool() && m_hitobjects.size() > 0)
+	{
+		if (m_hitobjects.size() > 0)
 		{
-			if (m_hitobjects.size() > 0)
-			{
-				const float percent = 1.0f + ((double)(m_iCurMusicPos - m_hitobjects[0]->getTime()) / (double)(m_hitobjects[m_hitobjects.size()-1]->getTime() + m_hitobjects[m_hitobjects.size()-1]->getDuration() - m_hitobjects[0]->getTime()))*osu_mod_minimize_multiplier.getFloat();
-				CS *= percent;
-			}
+			const float percent = 1.0f + ((double)(m_iCurMusicPos - m_hitobjects[0]->getTime()) / (double)(m_hitobjects[m_hitobjects.size()-1]->getTime() + m_hitobjects[m_hitobjects.size()-1]->getDuration() - m_hitobjects[0]->getTime()))*osu_mod_minimize_multiplier.getFloat();
+			CS *= percent;
 		}
 	}
 
-	if (bancho.is_in_a_multi_room() || osu_cs_cap_sanity.getBool())
+	if (osu_cs_cap_sanity.getBool())
 		CS = std::min(CS, 12.1429f);
 
 	return CS;
@@ -1925,7 +1917,7 @@ float OsuBeatmap::getHP() const
 	if (m_selectedDifficulty2 == NULL) return 5.0f;
 
 	float HP = clamp<float>(m_selectedDifficulty2->getHP() * m_osu->getDifficultyMultiplier(), 0.0f, 10.0f);
-	if (osu_hp_override.getFloat() >= 0.0f && !bancho.is_in_a_multi_room())
+	if (osu_hp_override.getFloat() >= 0.0f)
 		HP = osu_hp_override.getFloat();
 
 	return HP;
@@ -1941,13 +1933,12 @@ float OsuBeatmap::getRawOD() const
 float OsuBeatmap::getOD() const
 {
 	float OD = getRawOD();
-	if(!bancho.is_in_a_multi_room()) {
-		if (osu_od_override.getFloat() >= 0.0f)
-			OD = osu_od_override.getFloat();
 
-		if (osu_od_override_lock.getBool())
-			OD = OsuGameRules::getRawConstantOverallDifficultyForSpeedMultiplier(OsuGameRules::getRawHitWindow300(OD), (m_music != NULL && m_bIsPlaying ? getSpeedMultiplier() : m_osu->getSpeedMultiplier()));
-	}
+	if (osu_od_override.getFloat() >= 0.0f)
+		OD = osu_od_override.getFloat();
+
+	if (osu_od_override_lock.getBool())
+		OD = OsuGameRules::getRawConstantOverallDifficultyForSpeedMultiplier(OsuGameRules::getRawHitWindow300(OD), (m_music != NULL && m_bIsPlaying ? getSpeedMultiplier() : m_osu->getSpeedMultiplier()));
 
 	return OD;
 }
@@ -2116,10 +2107,7 @@ void OsuBeatmap::addScorePoints(int points, bool isSpinner)
 
 void OsuBeatmap::addHealth(double percent, bool isFromHitResult)
 {
-	int drainType = osu_drain_type.getInt();
-	if(bancho.is_in_a_multi_room()) {
-		drainType = 2;
-	}
+	const int drainType = osu_drain_type.getInt();
 	if (drainType < 1) return;
 
 	// never drain before first hitobject
@@ -2171,7 +2159,6 @@ void OsuBeatmap::addHealth(double percent, bool isFromHitResult)
 
 			// special case: set health to 160/200 (osu!stable behavior, seems fine for all drains)
 			m_fHealth = osu_drain_stable_hpbar_recovery.getFloat() / m_osu_drain_stable_hpbar_maximum_ref->getFloat();
-			if(bancho.is_in_a_multi_room()) m_fHealth = 160.f / 200.f;
 			m_fHealth2 = (float)m_fHealth;
 
 			anim->deleteExistingAnimation(&m_fHealth2);

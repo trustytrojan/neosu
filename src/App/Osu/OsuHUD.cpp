@@ -2654,17 +2654,11 @@ void OsuHUD::drawTargetHeatmap(Graphics *g, float hitcircleDiameter)
 	for (int i=0; i<m_targets.size(); i++)
 	{
 		const float delta = m_targets[i].delta;
-
-		float p300 = m_osu_mod_target_300_percent_ref->getFloat();
-		float p100 = m_osu_mod_target_100_percent_ref->getFloat();
-		float p50 = m_osu_mod_target_50_percent_ref->getFloat();
-		if(bancho.is_in_a_multi_room()) {
-			p300 = 0.5f;
-			p100 = 0.7f;
-			p50 = 0.95f;
-		}
-
+		const float p300 = m_osu_mod_target_300_percent_ref->getFloat();
+		const float p100 = m_osu_mod_target_100_percent_ref->getFloat();
+		const float p50 = m_osu_mod_target_50_percent_ref->getFloat();
 		const float overlap = 0.15f;
+
 		Color color;
 		if (delta < p300-overlap)
 			color = color300;

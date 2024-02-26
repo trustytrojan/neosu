@@ -49,14 +49,14 @@ ConVar osu_vr_approach_circles_on_top("osu_vr_approach_circles_on_top", false, F
 
 ConVar osu_timingpoints_force("osu_timingpoints_force", true, FCVAR_NONE, "Forces the correct sample type and volume to be used, by getting the active timingpoint through iteration EVERY TIME a hitsound is played (performance!)");
 
-ConVar osu_mod_hd_circle_fadein_start_percent("osu_mod_hd_circle_fadein_start_percent", 1.0f, FCVAR_NONE, "hiddenFadeInStartTime = circleTime - approachTime * osu_mod_hd_circle_fadein_start_percent");
-ConVar osu_mod_hd_circle_fadein_end_percent("osu_mod_hd_circle_fadein_end_percent", 0.6f, FCVAR_NONE, "hiddenFadeInEndTime = circleTime - approachTime * osu_mod_hd_circle_fadein_end_percent");
-ConVar osu_mod_hd_circle_fadeout_start_percent("osu_mod_hd_circle_fadeout_start_percent", 0.6f, FCVAR_NONE, "hiddenFadeOutStartTime = circleTime - approachTime * osu_mod_hd_circle_fadeout_start_percent");
-ConVar osu_mod_hd_circle_fadeout_end_percent("osu_mod_hd_circle_fadeout_end_percent", 0.3f, FCVAR_NONE, "hiddenFadeOutEndTime = circleTime - approachTime * osu_mod_hd_circle_fadeout_end_percent");
+ConVar osu_mod_hd_circle_fadein_start_percent("osu_mod_hd_circle_fadein_start_percent", 1.0f, FCVAR_CHEAT, "hiddenFadeInStartTime = circleTime - approachTime * osu_mod_hd_circle_fadein_start_percent");
+ConVar osu_mod_hd_circle_fadein_end_percent("osu_mod_hd_circle_fadein_end_percent", 0.6f, FCVAR_CHEAT, "hiddenFadeInEndTime = circleTime - approachTime * osu_mod_hd_circle_fadein_end_percent");
+ConVar osu_mod_hd_circle_fadeout_start_percent("osu_mod_hd_circle_fadeout_start_percent", 0.6f, FCVAR_CHEAT, "hiddenFadeOutStartTime = circleTime - approachTime * osu_mod_hd_circle_fadeout_start_percent");
+ConVar osu_mod_hd_circle_fadeout_end_percent("osu_mod_hd_circle_fadeout_end_percent", 0.3f, FCVAR_CHEAT, "hiddenFadeOutEndTime = circleTime - approachTime * osu_mod_hd_circle_fadeout_end_percent");
 
-ConVar osu_mod_target_300_percent("osu_mod_target_300_percent", 0.5f, FCVAR_NONE);
-ConVar osu_mod_target_100_percent("osu_mod_target_100_percent", 0.7f, FCVAR_NONE);
-ConVar osu_mod_target_50_percent("osu_mod_target_50_percent", 0.95f, FCVAR_NONE);
+ConVar osu_mod_target_300_percent("osu_mod_target_300_percent", 0.5f, FCVAR_CHEAT);
+ConVar osu_mod_target_100_percent("osu_mod_target_100_percent", 0.7f, FCVAR_CHEAT);
+ConVar osu_mod_target_50_percent("osu_mod_target_50_percent", 0.95f, FCVAR_CHEAT);
 
 ConVar osu_mod_mafham_ignore_hittable_dim("osu_mod_mafham_ignore_hittable_dim", true, FCVAR_NONE, "having hittable dim enabled makes it possible to \"read\" the beatmap by looking at the un-dim animations (thus making it a lot easier)");
 
@@ -481,17 +481,10 @@ void OsuHitObject::update(long curPos)
 		if (m_beatmap->getOsu()->getModHD())
 		{
 			// hidden hitobject body fadein
-			float fin_start_percent = osu_mod_hd_circle_fadein_start_percent.getFloat();
-			float fin_end_percent = osu_mod_hd_circle_fadein_end_percent.getFloat();
-			float fout_start_percent = osu_mod_hd_circle_fadeout_start_percent.getFloat();
-			float fout_end_percent = osu_mod_hd_circle_fadeout_end_percent.getFloat();
-			if(bancho.is_in_a_multi_room()) {
-				fin_start_percent = 1.f;
-				fin_end_percent = 0.6f;
-				fout_start_percent = 0.6f;
-				fout_end_percent = 0.3f;
-			}
-
+			const float fin_start_percent = osu_mod_hd_circle_fadein_start_percent.getFloat();
+			const float fin_end_percent = osu_mod_hd_circle_fadein_end_percent.getFloat();
+			const float fout_start_percent = osu_mod_hd_circle_fadeout_start_percent.getFloat();
+			const float fout_end_percent = osu_mod_hd_circle_fadeout_end_percent.getFloat();
 			const long hiddenFadeInStart = m_iTime - (long)(m_iApproachTime * fin_start_percent);
 			const long hiddenFadeInEnd = m_iTime - (long)(m_iApproachTime * fin_end_percent);
 			m_fAlpha = clamp<float>(1.0f - ((float)(hiddenFadeInEnd - curPos) / (float)(hiddenFadeInEnd - hiddenFadeInStart)), 0.0f, 1.0f);
@@ -530,14 +523,9 @@ void OsuHitObject::addHitResult(OsuScore::HIT result, long delta, bool isEndOfCo
 {
 	if (m_beatmap->getOsu()->getModTarget() && result != OsuScore::HIT::HIT_MISS && targetDelta >= 0.0f)
 	{
-		float p300 = osu_mod_target_300_percent.getFloat();
-		float p100 = osu_mod_target_100_percent.getFloat();
-		float p50 = osu_mod_target_50_percent.getFloat();
-		if(bancho.is_in_a_multi_room()) {
-			p300 = 0.5f;
-			p100 = 0.7f;
-			p50 = 0.95f;
-		}
+		const float p300 = osu_mod_target_300_percent.getFloat();
+		const float p100 = osu_mod_target_100_percent.getFloat();
+		const float p50 = osu_mod_target_50_percent.getFloat();
 
 		if (targetDelta < p300 && (result == OsuScore::HIT::HIT_300 || result == OsuScore::HIT::HIT_100))
 			result = OsuScore::HIT::HIT_300;

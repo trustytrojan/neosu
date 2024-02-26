@@ -8,13 +8,12 @@
 
 #include "OsuSliderCurves.h"
 
-#include "Bancho.h"
 #include "Engine.h"
 #include "ConVar.h"
 
-ConVar osu_slider_curve_points_separation("osu_slider_curve_points_separation", 2.5f, FCVAR_NONE, "slider body curve approximation step width in osu!pixels, don't set this lower than around 1.5");
-ConVar osu_slider_curve_max_points("osu_slider_curve_max_points", 9999.0f, FCVAR_NONE, "maximum number of allowed interpolated curve points. quality will be forced to go down if a slider has more steps than this");
-ConVar osu_slider_curve_max_length("osu_slider_curve_max_length", 65536/2, FCVAR_NONE, "maximum slider length in osu!pixels (i.e. pixelLength). also used to clamp all (control-)point coordinates to sane values.");
+ConVar osu_slider_curve_points_separation("osu_slider_curve_points_separation", 2.5f, FCVAR_CHEAT, "slider body curve approximation step width in osu!pixels, don't set this lower than around 1.5");
+ConVar osu_slider_curve_max_points("osu_slider_curve_max_points", 9999.0f, FCVAR_CHEAT, "maximum number of allowed interpolated curve points. quality will be forced to go down if a slider has more steps than this");
+ConVar osu_slider_curve_max_length("osu_slider_curve_max_length", 65536/2, FCVAR_CHEAT, "maximum slider length in osu!pixels (i.e. pixelLength). also used to clamp all (control-)point coordinates to sane values.");
 
 
 
@@ -24,10 +23,7 @@ ConVar osu_slider_curve_max_length("osu_slider_curve_max_length", 65536/2, FCVAR
 
 OsuSliderCurve *OsuSliderCurve::createCurve(char osuSliderCurveType, std::vector<Vector2> controlPoints, float pixelLength)
 {
-	float points_separation = osu_slider_curve_points_separation.getFloat();
-	if(bancho.is_in_a_multi_room()) {
-		points_separation = 2.5f;
-	}
+	const float points_separation = osu_slider_curve_points_separation.getFloat();
 	return createCurve(osuSliderCurveType, controlPoints, pixelLength, points_separation);
 }
 
@@ -204,10 +200,7 @@ Vector2 OsuSliderCurveTypeCentripetalCatmullRom::pointAt(float t)
 
 OsuSliderCurveEqualDistanceMulti::OsuSliderCurveEqualDistanceMulti(std::vector<Vector2> controlPoints, float pixelLength, float curvePointsSeparation) : OsuSliderCurve(controlPoints, pixelLength)
 {
-	int max_points = osu_slider_curve_max_points.getInt();
-	if(bancho.is_in_a_multi_room()) {
-		max_points = 9999;
-	}
+	const int max_points = osu_slider_curve_max_points.getInt();
 	m_iNCurve = std::min((int)(m_fPixelLength / clamp<float>(curvePointsSeparation, 1.0f, 100.0f)), max_points);
 }
 
@@ -651,10 +644,7 @@ OsuSliderCurveCircumscribedCircle::OsuSliderCurveCircumscribedCircle(std::vector
 	m_fStartAngle = (float)((m_fCalculationStartAngle + (m_fCalculationStartAngle > m_fCalculationEndAngle ? -PI/2.0f : PI/2.0f)) * 180.0f / PI);
 
 	// calculate points
-	float max_points = osu_slider_curve_max_points.getInt();
-	if(bancho.is_in_a_multi_room()) {
-		max_points = 9999.0f;
-	}
+	const float max_points = osu_slider_curve_max_points.getInt();
 	const float steps = std::min(m_fPixelLength / (clamp<float>(curvePointsSeparation, 1.0f, 100.0f)), max_points);
 	const int intSteps = (int)std::round(steps) + 2; // must guarantee an int range of 0 to steps!
 	for (int i=0; i<intSteps; i++)
@@ -683,10 +673,7 @@ void OsuSliderCurveCircumscribedCircle::updateStackPosition(float stackMulStackO
 
 Vector2 OsuSliderCurveCircumscribedCircle::pointAt(float t)
 {
-	float sanityRange = osu_slider_curve_max_length.getFloat(); // NOTE: added to fix some aspire problems (endless drawFollowPoints and star calc etc.)
-	if(bancho.is_in_a_multi_room()) {
-		sanityRange = 65536/2;
-	}
+	const float sanityRange = osu_slider_curve_max_length.getFloat(); // NOTE: added to fix some aspire problems (endless drawFollowPoints and star calc etc.)
 	const float ang = lerp(m_fCalculationStartAngle, m_fCalculationEndAngle, t);
 
 	return Vector2(clamp<float>(std::cos(ang) * m_fRadius + m_vCircleCenter.x, -sanityRange, sanityRange),
@@ -695,10 +682,7 @@ Vector2 OsuSliderCurveCircumscribedCircle::pointAt(float t)
 
 Vector2 OsuSliderCurveCircumscribedCircle::originalPointAt(float t)
 {
-	float sanityRange = osu_slider_curve_max_length.getFloat(); // NOTE: added to fix some aspire problems (endless drawFollowPoints and star calc etc.)
-	if(bancho.is_in_a_multi_room()) {
-		sanityRange = 65536/2;
-	}
+	const float sanityRange = osu_slider_curve_max_length.getFloat(); // NOTE: added to fix some aspire problems (endless drawFollowPoints and star calc etc.)
 	const float ang = lerp(m_fCalculationStartAngle, m_fCalculationEndAngle, t);
 
 	return Vector2(clamp<float>(std::cos(ang) * m_fRadius + m_vOriginalCircleCenter.x, -sanityRange, sanityRange),

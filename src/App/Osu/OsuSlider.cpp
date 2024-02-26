@@ -34,10 +34,10 @@
 ConVar osu_slider_ball_tint_combo_color("osu_slider_ball_tint_combo_color", true, FCVAR_NONE);
 
 ConVar osu_snaking_sliders("osu_snaking_sliders", true, FCVAR_NONE);
-ConVar osu_mod_hd_slider_fade_percent("osu_mod_hd_slider_fade_percent", 1.0f, FCVAR_NONE);
+ConVar osu_mod_hd_slider_fade_percent("osu_mod_hd_slider_fade_percent", 1.0f, FCVAR_CHEAT);
 ConVar osu_mod_hd_slider_fast_fade("osu_mod_hd_slider_fast_fade", false, FCVAR_NONE);
 
-ConVar osu_slider_end_inside_check_offset("osu_slider_end_inside_check_offset", 36, FCVAR_NONE, "offset in milliseconds going backwards from the end point, at which \"being inside the slider\" is checked. (osu bullshit behavior)");
+ConVar osu_slider_end_inside_check_offset("osu_slider_end_inside_check_offset", 36, FCVAR_CHEAT, "offset in milliseconds going backwards from the end point, at which \"being inside the slider\" is checked. (osu bullshit behavior)");
 ConVar osu_slider_end_miss_breaks_combo("osu_slider_end_miss_breaks_combo", false, FCVAR_NONE, "should a missed sliderend break combo (aka cause a regular sliderbreak)");
 ConVar osu_slider_break_epilepsy("osu_slider_break_epilepsy", false, FCVAR_NONE);
 ConVar osu_slider_scorev2("osu_slider_scorev2", false, FCVAR_NONE);
@@ -204,11 +204,7 @@ void OsuSlider::draw(Graphics *g)
 {
 	if (m_points.size() <= 0) return;
 
-	float foscale = OsuGameRules::osu_circle_fade_out_scale.getFloat();
-	if(bancho.is_in_a_multi_room()) {
-		foscale = 0.4f;
-	}
-
+	const float foscale = OsuGameRules::osu_circle_fade_out_scale.getFloat();
 	OsuSkin *skin = m_beatmap->getSkin();
 
 	const bool isCompletelyFinished = m_bStartFinished && m_bEndFinished && m_bFinished;
@@ -556,10 +552,7 @@ void OsuSlider::draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproac
 
 void OsuSlider::drawVR(Graphics *g, Matrix4 &mvp, OsuVR *vr)
 {
-	float foscale = OsuGameRules::osu_circle_fade_out_scale.getFloat();
-	if(bancho.is_in_a_multi_room()) {
-		foscale = 0.4f;
-	}
+	const float foscale = OsuGameRules::osu_circle_fade_out_scale.getFloat();
 
 	// HACKHACK: code duplication aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaah
 	if (m_points.size() <= 0) return;
@@ -1418,12 +1411,7 @@ void OsuSlider::update(long curPos)
 
 		// fade out over the duration of the slider, starting exactly when the default fadein finishes
 		const long hiddenSliderBodyFadeOutStart = std::min(m_iTime, m_iTime - m_iApproachTime + m_iFadeInTime); // min() ensures that the fade always starts at m_iTime (even if the fadeintime is longer than the approachtime)
-
-		float fade_percent = osu_mod_hd_slider_fade_percent.getFloat();
-		if(bancho.is_in_a_multi_room()) {
-			fade_percent = 1.f;
-		}
-
+		const float fade_percent = osu_mod_hd_slider_fade_percent.getFloat();
 		const long hiddenSliderBodyFadeOutEnd = m_iTime + (long)(fade_percent*m_fSliderTime);
 		if (curPos >= hiddenSliderBodyFadeOutStart)
 		{
@@ -1613,10 +1601,7 @@ void OsuSlider::update(long curPos)
 
 		// slider tail lenience bullshit: see https://github.com/ppy/osu/blob/master/osu.Game.Rulesets.Osu/Objects/Slider.cs#L123
 		// being "inside the slider" (for the end of the slider) is NOT checked at the exact end of the slider, but somewhere random before, because fuck you
-		long offset = (long)osu_slider_end_inside_check_offset.getInt();
-		if(bancho.is_in_a_multi_room()) {
-			offset = 36;
-		}
+		const long offset = (long)osu_slider_end_inside_check_offset.getInt();
 		const long lenienceHackEndTime = std::max(m_iTime + m_iObjectDuration / 2, (m_iTime + m_iObjectDuration) - offset);
 		const bool isTrackingCorrectly = (isClickHeldSlider() || m_beatmap->getOsu()->getModRelax()) && m_bCursorInside;
 		if (isTrackingCorrectly)
@@ -2033,7 +2018,7 @@ void OsuSlider::onHit(OsuScore::HIT result, long delta, bool startOrEnd, float t
 		{
 			OsuScore::HIT resultForHealth = OsuScore::HIT::HIT_SLIDER30;
 
-			if (m_osu_drain_type_ref->getInt() == 1 && !bancho.is_in_a_multi_room()) // VR
+			if (m_osu_drain_type_ref->getInt() == 1) // VR
 			{
 				resultForHealth = result;
 			}
@@ -2058,7 +2043,7 @@ void OsuSlider::onHit(OsuScore::HIT result, long delta, bool startOrEnd, float t
 		if (!isEndResultFromStrictTrackingMod)
 		{
 			// special case: osu!lazer 2020 only returns 1 judgement for the whole slider, but via the startcircle. i.e. we are not allowed to drain again here in mcosu logic (because startcircle judgement is handled at the end here)
-			const bool isLazer2020Drain = (m_osu_drain_type_ref->getInt() == 3 && !bancho.is_in_a_multi_room()); // osu!lazer 2020
+			const bool isLazer2020Drain = (m_osu_drain_type_ref->getInt() == 3); // osu!lazer 2020
 
 			addHitResult(result, delta, m_bIsEndOfCombo, getRawPosAt(m_iTime + m_iObjectDuration), -1.0f, 0.0f, true, !m_bHeldTillEnd, isLazer2020Drain); // end of combo, ignore in hiterrorbar, depending on heldTillEnd increase combo or not, increase score, increase health depending on drain type
 

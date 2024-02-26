@@ -103,7 +103,7 @@ ConVar osu_volume_change_interval("osu_volume_change_interval", 0.05f, FCVAR_NON
 ConVar osu_hud_volume_duration("osu_hud_volume_duration", 1.0f, FCVAR_NONE);
 ConVar osu_hud_volume_size_multiplier("osu_hud_volume_size_multiplier", 1.5f, FCVAR_NONE);
 
-ConVar osu_speed_override("osu_speed_override", -1.0f, FCVAR_NONE);
+ConVar osu_speed_override("osu_speed_override", -1.0f, FCVAR_CHEAT);
 ConVar osu_pitch_override("osu_pitch_override", -1.0f, FCVAR_NONE);
 
 ConVar osu_pause_on_focus_loss("osu_pause_on_focus_loss", true, FCVAR_NONE);
@@ -117,7 +117,7 @@ ConVar osu_mods("osu_mods", "", FCVAR_NONE);
 ConVar osu_mod_touchdevice("osu_mod_touchdevice", false, FCVAR_NONE, "used for force applying touch pp nerf always");
 ConVar osu_mod_fadingcursor("osu_mod_fadingcursor", false, FCVAR_NONE);
 ConVar osu_mod_fadingcursor_combo("osu_mod_fadingcursor_combo", 50.0f, FCVAR_NONE);
-ConVar osu_mod_endless("osu_mod_endless", false, FCVAR_NONE);
+ConVar osu_mod_endless("osu_mod_endless", false, FCVAR_CHEAT);
 
 ConVar osu_notification("osu_notification");
 ConVar osu_notification_color_r("osu_notification_color_r", 255, FCVAR_NONE);
@@ -305,6 +305,8 @@ Osu::Osu(int instanceID)
 	}
 
 	// convar callbacks
+	ConVars::sv_cheats.setCallback( fastdelegate::MakeDelegate(this, &Osu::onCheatsChange) );
+
 	osu_skin.setCallback( fastdelegate::MakeDelegate(this, &Osu::onSkinChange) );
 	osu_skin_reload.setCallback( fastdelegate::MakeDelegate(this, &Osu::onSkinReload) );
 
@@ -1892,7 +1894,7 @@ void Osu::onPlayEnd(bool quit, bool aborted)
 
 	if (!quit)
 	{
-		if (bancho.is_in_a_multi_room() || !osu_mod_endless.getBool())
+		if (!osu_mod_endless.getBool())
 		{
 			m_rankingScreen->setScore(m_score);
 			m_rankingScreen->setBeatmapInfo(getSelectedBeatmap(), getSelectedBeatmap()->getSelectedDifficulty2());
@@ -2021,7 +2023,7 @@ float Osu::getSpeedMultiplier()
 {
 	float speedMultiplier = getRawSpeedMultiplier();
 
-	if (osu_speed_override.getFloat() >= 0.0f && !bancho.is_in_a_multi_room())
+	if (osu_speed_override.getFloat() >= 0.0f)
 		return std::max(osu_speed_override.getFloat(), 0.05f);
 
 	return speedMultiplier;
@@ -2242,6 +2244,12 @@ void Osu::updateWindowsKeyDisable()
 void Osu::fireResolutionChanged()
 {
 	onResolutionChanged(g_vInternalResolution);
+}
+
+void Osu::onCheatsChange(UString oldValue, UString newValue) {
+	if(bancho.is_online() && ConVars::sv_cheats.getBool()) {
+		ConVars::sv_cheats.setValue(false);
+	}
 }
 
 void Osu::onInternalResolutionChanged(UString oldValue, UString args)
