@@ -1817,7 +1817,10 @@ void OsuHUD::drawScoreBoardMP(Graphics *g)
 		auto user_info = get_user_info(slot->player_id, false);
 		scoreEntry.name = user_info->name;
 
-		if(beatmap != nullptr && beatmap->isInSkippableSection() && beatmap->getHitObjectIndexForCurrentTime() < 1) {
+        if(slot->has_quit()) {
+            slot->current_hp = 0;
+            scoreEntry.name = UString::format("%s [quit]", user_info->name.toUtf8());
+        } else if(beatmap != nullptr && beatmap->isInSkippableSection() && beatmap->getHitObjectIndexForCurrentTime() < 1) {
 			if(slot->skipped) {
 				// XXX: Draw pretty "Skip" image instead
 				scoreEntry.name = UString::format("%s [skip]", user_info->name.toUtf8());

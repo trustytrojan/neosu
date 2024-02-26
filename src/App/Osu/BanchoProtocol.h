@@ -190,6 +190,9 @@ struct Slot {
   // no_map
   bool is_missing_beatmap() { return (status & 0b00010000); }
 
+  // quit
+  bool has_quit() { return (status & 0b10000000); }
+
   // not_ready | ready | no_map | playing | complete
   bool has_player() { return (status & 0b01111100); }
 };

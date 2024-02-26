@@ -38,6 +38,7 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu)
 	CHANGELOG alpha317;
 	alpha317.title = UString::format("34.02 (Build Date: %s, %s)", __DATE__, __TIME__); // (09.01.2022 - ?)
 	alpha317.changes.push_back("- Added score submission (for servers that allow it via the x-mcosu-features header)");
+	alpha317.changes.push_back("- Added [quit] indicator next to users who quit a match");
 	alpha317.changes.push_back("- Fixed \"No records set!\" banner display");
 	alpha317.changes.push_back("- Fixed \"Server has restarded\" loop after a login error");
 	alpha317.changes.push_back("- Fixed chat being force-hid during breaks and before map start");
