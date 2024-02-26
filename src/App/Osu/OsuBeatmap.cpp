@@ -1235,7 +1235,7 @@ void OsuBeatmap::keyPressed1(bool mouse)
 	if(mouse) {
 		current_keys = current_keys | OsuReplay::M1;
 	} else {
-		current_keys = current_keys | OsuReplay::K1;
+		current_keys = current_keys | OsuReplay::M1 | OsuReplay::K1;
 	}
 }
 
@@ -1276,7 +1276,7 @@ void OsuBeatmap::keyPressed2(bool mouse)
 	if(mouse) {
 		current_keys = current_keys | OsuReplay::M2;
 	} else {
-		current_keys = current_keys | OsuReplay::K2;
+		current_keys = current_keys | OsuReplay::M2 | OsuReplay::K2;
 	}
 }
 
@@ -1290,11 +1290,7 @@ void OsuBeatmap::keyReleased1(bool mouse)
 
 	m_bClick1Held = false;
 
-	if(mouse) {
-		current_keys = current_keys & ~OsuReplay::M1;
-	} else {
-		current_keys = current_keys & ~OsuReplay::K1;
-	}
+	current_keys = current_keys & ~(OsuReplay::M1 | OsuReplay::K1);
 }
 
 void OsuBeatmap::keyReleased2(bool mouse)
@@ -1307,11 +1303,7 @@ void OsuBeatmap::keyReleased2(bool mouse)
 
 	m_bClick2Held = false;
 
-	if(mouse) {
-		current_keys = current_keys & ~OsuReplay::M2;
-	} else {
-		current_keys = current_keys & ~OsuReplay::K2;
-	}
+	current_keys = current_keys & ~(OsuReplay::M2 | OsuReplay::K2);
 }
 
 void OsuBeatmap::select()
