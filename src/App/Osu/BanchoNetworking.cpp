@@ -203,12 +203,12 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
   response.memory = (uint8_t *)malloc(2048);
 
   struct curl_slist *chunk = NULL;
+  auto version_header = UString::format("x-mcosu-ver: %s", bancho.mcosu_version.toUtf8());
+  chunk = curl_slist_append(chunk, version_header.toUtf8());
   if (!auth_header.empty()) {
-    auto version_header = UString::format("x-mcosu-ver: %s", bancho.mcosu_version.toUtf8());
     chunk = curl_slist_append(chunk, auth_header.c_str());
-    chunk = curl_slist_append(chunk, version_header.toUtf8());
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
   }
+  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
 
   auto query_url = UString::format("https://c.%s/", bancho.endpoint.toUtf8());
   curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());

@@ -45,6 +45,7 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu)
 	alpha317.changes.push_back("- Fixed chat being force-hid during breaks and before map start");
 	alpha317.changes.push_back("- Fixed chat not supporting expected keyboard navigation");
 	alpha317.changes.push_back("- Fixed text selection for password field");
+	alpha317.changes.push_back("- Fixed version header not being sent on login");
 	alpha317.changes.push_back("");
 	alpha317.changes.push_back("");
 	alpha317.changes.push_back("34.01");
