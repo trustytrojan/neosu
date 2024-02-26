@@ -984,7 +984,12 @@ void OsuMainMenu::draw(Graphics *g)
 	}
 
 	// subtitle
-	if (MCOSU_MAIN_BUTTON_SUBTEXT.length() > 0)
+	UString subtext = MCOSU_MAIN_BUTTON_SUBTEXT;
+	if(bancho.is_online()) {
+		subtext = bancho.endpoint;
+	}
+
+	if (subtext.length() > 0)
 	{
 		float invertedPulse = 1.0f - pulse;
 
@@ -998,10 +1003,45 @@ void OsuMainMenu::draw(Graphics *g)
 		g->pushTransform();
 		{
 			g->scale(fontScale, fontScale);
-			g->translate(m_vCenter.x - m_fCenterOffsetAnim - (smallFont->getStringWidth(MCOSU_MAIN_BUTTON_SUBTEXT)/2.0f)*fontScale, m_vCenter.y + (mainButtonRect.getHeight()/2.0f)/2.0f + (smallFont->getHeight()*fontScale)/2.0f, -1.0f);
-			g->drawString(smallFont, MCOSU_MAIN_BUTTON_SUBTEXT);
+			g->translate(m_vCenter.x - m_fCenterOffsetAnim - (smallFont->getStringWidth(subtext)/2.0f)*fontScale, m_vCenter.y + (mainButtonRect.getHeight()/2.0f)/2.0f + (smallFont->getHeight()*fontScale)/2.0f, -1.0f);
+			g->drawString(smallFont, subtext);
 		}
 		g->popTransform();
+
+		if(bancho.is_online()) {
+			UString score_submission("Scores: ");
+			UString submission_status(bancho.submit_scores ? "ENABLED" : "DISABLED");
+
+			auto full_text = score_submission;
+			full_text.append(submission_status);
+			float x_start = m_vCenter.x - m_fCenterOffsetAnim - smallFont->getStringWidth(full_text)/2.f*fontScale;
+
+			g->pushTransform();
+			{
+				if (haveTimingpoints)
+					g->setColor(COLORf(1.0f, 0.10f + 0.15f*invertedPulse, 0.10f + 0.15f*invertedPulse, 0.10f + 0.15f*invertedPulse));
+				else
+					g->setColor(0xff444444);
+
+				g->scale(fontScale, fontScale);
+				g->translate(x_start, m_vCenter.y + (mainButtonRect.getHeight()/2.0f)/2.0f + 2*(smallFont->getHeight()*fontScale), -1.0f);
+				g->drawString(smallFont, score_submission);
+			}
+			g->popTransform();
+
+			g->pushTransform();
+			{
+				if (haveTimingpoints)
+					g->setColor(COLORf(1.0f, (bancho.submit_scores ? 0.1 : 0.3) + 0.15f*invertedPulse, (bancho.submit_scores ? 0.3 : 0.1) + 0.15f*invertedPulse, 0.10f + 0.15f*invertedPulse));
+				else
+					g->setColor(bancho.submit_scores ? 0xff44bb44 : 0xffbb4444);
+
+				g->scale(fontScale, fontScale);
+				g->translate(x_start + smallFont->getStringWidth(score_submission)*fontScale, m_vCenter.y + (mainButtonRect.getHeight()/2.0f)/2.0f + 2*(smallFont->getHeight()*fontScale), -1.0f);
+				g->drawString(smallFont, submission_status);
+			}
+			g->popTransform();
+		}
 	}
 
 	if ((m_fMainMenuAnim > 0.0f && m_fMainMenuAnim != 1.0f) || (haveTimingpoints && m_fMainMenuAnimFriendPercent > 0.0f))
