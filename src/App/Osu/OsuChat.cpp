@@ -275,8 +275,8 @@ void OsuChat::onKeyDown(KeyboardEvent &key) {
     }
 
     // Ctrl+Tab: Switch channels
-    // KEY_TAB doesn't work... idk why
-    if(engine->getKeyboard()->isControlDown() && key.getKeyCode() == 65056) {
+    // KEY_TAB doesn't work on Linux
+    if(engine->getKeyboard()->isControlDown() && (key.getKeyCode() == 65056 || key.getKeyCode() == KEY_TAB)) {
         key.consume();
         if(m_selected_channel == nullptr) return;
         int chan_index = m_channels.size();

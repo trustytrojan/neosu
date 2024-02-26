@@ -1,4 +1,8 @@
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <sys/random.h>
+#endif
 
 #include "base64.h"
 #include "Bancho.h"
@@ -26,7 +30,14 @@ void submit_score(OsuDatabase::Score score) {
     strftime(score_time, sizeof(score_time), "%y%m%d%H%M%S", timeinfo);
 
     uint8_t iv[32];
+#ifdef _WIN32
+    HCRYPTPROV hCryptProv;
+    CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
+    CryptGenRandom(hCryptProv, sizeof(iv), iv);
+    CryptReleaseContext(hCryptProv, 0);
+#else
     getrandom(iv, sizeof(iv), 0);
+#endif
 
     APIRequest request = {
         .type = SUBMIT_SCORE,

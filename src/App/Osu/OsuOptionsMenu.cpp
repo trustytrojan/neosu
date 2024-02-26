@@ -1569,8 +1569,8 @@ void OsuOptionsMenu::onKeyDown(KeyboardEvent &e)
 	m_contextMenu->onKeyDown(e);
 	if(e.isConsumed()) return;
 
-    // KEY_TAB doesn't work... idk why
-    if(e.getKeyCode() == 65056) {
+    // KEY_TAB doesn't work on Linux
+    if(e.getKeyCode() == 65056 || e.getKeyCode() == KEY_TAB) {
 		if(m_serverTextbox->isActive()) {
 			m_serverTextbox->stealFocus();
 			m_nameTextbox->focus();

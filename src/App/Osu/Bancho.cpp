@@ -484,12 +484,15 @@ Packet build_login_packet() {
   write_byte(&packet, '|');
 
   // UTC offset
-  char tz[6] = {0};
-  auto now = time(NULL);
-  struct tm *timeinfo = localtime(&now);
-  strftime(tz, sizeof(tz), "%z", timeinfo);
-  if(tz[0] == '-') write_byte(&packet, '-');
-  write_byte(&packet, tz[2]);
+  time_t now = time(NULL);
+  auto gmt = gmtime(&now);
+  auto local_time = localtime(&now);
+  int utc_offset = difftime(mktime(local_time), mktime(gmt)) / 3600;
+  if(utc_offset < 0) {
+    write_byte(&packet, '-');
+    utc_offset *= -1;
+  }
+  write_byte(&packet, '0' + utc_offset);
   write_byte(&packet, '|');
 
   // Don't dox the user's city
