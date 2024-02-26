@@ -300,7 +300,7 @@ void OsuChat::onKeyDown(KeyboardEvent &key) {
     }
 
     // Typing in chat: capture keypresses
-    if(!engine->getKeyboard()->isControlDown() && !engine->getKeyboard()->isAltDown()) {
+    if(!engine->getKeyboard()->isAltDown()) {
         m_input_box->onKeyDown(key);
         key.consume();
         return;
