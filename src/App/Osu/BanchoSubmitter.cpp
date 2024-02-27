@@ -17,11 +17,6 @@
 
 
 void submit_score(OsuDatabase::Score score) {
-    if(score.replay_data.lengthUtf8() == 0) {
-        debugLog("Replay too small to submit!\n");
-        return;
-    }
-
     debugLog("Submitting score...\n");
     const char* GRADES[] = {"XH", "SH", "X", "S", "A", "B", "C", "D", "F", "N"};
 
@@ -165,12 +160,28 @@ void submit_score(OsuDatabase::Score score) {
         // XXX: Don't compress on main thread?
         std::vector<uint8_t> compressed_replay;
         plz::PocketLzma p { plz::Preset::BestCompression };
-        p.compress((const uint8_t*)score.replay_data.toUtf8(), score.replay_data.lengthUtf8(), compressed_replay);
+        plz::StatusCode status = p.compress(
+            (const uint8_t*)score.replay_data.toUtf8(),
+            score.replay_data.lengthUtf8(),
+            compressed_replay
+        );
+        if(status != plz::StatusCode::Ok) {
+            debugLog("Failed to compress replay: error %d\n", status);
+            curl_mime_free(request.mime);
+            return;
+        }
 
         part = curl_mime_addpart(request.mime);
         curl_mime_filename(part, "mcosu-replay.osr");
         curl_mime_name(part, "score");
         curl_mime_data(part, (const char*)compressed_replay.data(), compressed_replay.size());
+
+        if(compressed_replay.size() <= 24) {
+            debugLog("Replay too small to submit! Compressed size: %d bytes\n", compressed_replay.size());
+            debugLog("Replay frames: %s\n", score.replay_data.toUtf8());
+            curl_mime_free(request.mime);
+            return;
+        }
     }
 
     send_api_request(request);

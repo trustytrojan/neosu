@@ -194,6 +194,9 @@ static void send_api_request(CURL *curl, APIRequest api_out) {
     pthread_mutex_unlock(&api_responses_mutex);
   }
 
+  if(api_out.mime) {
+    curl_mime_free(api_out.mime);
+  }
   curl_easy_reset(curl);
   curl_slist_free_all(chunk);
 }
