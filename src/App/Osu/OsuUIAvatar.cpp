@@ -64,7 +64,7 @@ loop:
         }
         pthread_mutex_unlock(&avatars_mtx);
 
-        auto img_url = UString::format("https://a.%s/%d.png", endpoint.toUtf8(), avatar_id);
+        auto img_url = UString::format("https://a.%s/%d", endpoint.toUtf8(), avatar_id);
         debugLog("Downloading %s\n", img_url.toUtf8());
         Packet response = {0};
         response.memory = new uint8_t[2048];
@@ -98,7 +98,7 @@ loop:
             }
         }
 
-        auto img_path = UString::format(MCENGINE_DATA_DIR "avatars/%s/%d.png", endpoint.toUtf8(), avatar_id);
+        auto img_path = UString::format(MCENGINE_DATA_DIR "avatars/%s/%d", endpoint.toUtf8(), avatar_id);
         FILE *file = fopen(img_path.toUtf8(), "wb");
         if(file != NULL) {
             fwrite(response.memory, response.size, 1, file);
@@ -129,7 +129,7 @@ loop:
 OsuUIAvatar::OsuUIAvatar(uint32_t player_id, float xPos, float yPos, float xSize, float ySize) : CBaseUIButton(xPos, yPos, xSize, ySize, "avatar", "") {
     m_player_id = player_id;
 
-    avatar_path = UString::format(MCENGINE_DATA_DIR "avatars/%s/%d.png", bancho.endpoint.toUtf8(), player_id);
+    avatar_path = UString::format(MCENGINE_DATA_DIR "avatars/%s/%d", bancho.endpoint.toUtf8(), player_id);
     setClickCallback( fastdelegate::MakeDelegate(this, &OsuUIAvatar::onAvatarClicked) );
 
     struct stat attr;

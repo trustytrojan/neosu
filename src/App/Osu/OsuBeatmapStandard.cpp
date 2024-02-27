@@ -1630,8 +1630,6 @@ void OsuBeatmapStandard::onBeforeStop(bool quit)
 {
 	debugLog("OsuBeatmapStandard::onBeforeStop()\n");
 
-	// TODO @kiwec: is this also called when restarting a map?
-
 	// kill any running star cache loader
 	stopStarCacheLoader();
 
@@ -1692,7 +1690,7 @@ void OsuBeatmapStandard::onBeforeStop(bool quit)
 	score.passed = isComplete && !isZero && !m_osu->getScore()->hasDied();
 	score.grade = score.passed ? m_osu->getScore()->getGrade() : OsuScore::GRADE::GRADE_F;
 	score.diff2 = m_selectedDifficulty2;
-	score.ragequit = quit; // TODO @kiwec: this is probably incorrect
+	score.ragequit = quit;
 	score.play_time_ms = m_iCurMusicPos / m_osu->getSpeedMultiplier();
 
 	score.num300s = m_osu->getScore()->getNum300s();

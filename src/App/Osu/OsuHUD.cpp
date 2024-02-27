@@ -1695,6 +1695,10 @@ void OsuHUD::updateScoreBoardAvatars() {
 	std::vector<uint32_t> player_ids;
 	m_avatars.empty();
 
+	if(bancho.is_online()) {
+		player_ids.push_back(bancho.user_id);
+	}
+
 	if(bancho.is_in_a_multi_room()) {
 		for(int i = 0; i < 16; i++) {
 			if(bancho.room.slots[i].has_player()) {

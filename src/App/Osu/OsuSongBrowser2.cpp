@@ -2911,8 +2911,9 @@ void OsuSongBrowser2::updateScoreBrowserLayout()
 
 	const int scoreBrowserExtraPaddingRight = 5 * dpiScale; // duplication, see above
 	const int scoreButtonWidthMax = m_topbarLeft->getSize().x + 2 * dpiScale;
+	const float browserHeight = m_bottombar->getPos().y - (m_topbarLeft->getPos().y + m_topbarLeft->getSize().y) + 2 * dpiScale;
 	m_scoreBrowser->setPos(m_topbarLeft->getPos().x - 2 * dpiScale, m_topbarLeft->getPos().y + m_topbarLeft->getSize().y);
-	m_scoreBrowser->setSize(scoreButtonWidthMax + scoreBrowserExtraPaddingRight, m_bottombar->getPos().y - (m_topbarLeft->getPos().y + m_topbarLeft->getSize().y) + 2 * dpiScale);
+	m_scoreBrowser->setSize(scoreButtonWidthMax + scoreBrowserExtraPaddingRight, browserHeight);
 	int scoreHeight = 100;
 	{
 		Image *menuButtonBackground = m_osu->getSkin()->getMenuButtonBackground();
@@ -2933,21 +2934,16 @@ void OsuSongBrowser2::updateScoreBrowserLayout()
 
 	if(m_localBestContainer->isVisible()) {
 		float local_best_size = scoreHeight + 40;
-		m_scoreBrowser->setSize(m_scoreBrowser->getSize().x, m_scoreBrowser->getSize().y - local_best_size);
+		m_scoreBrowser->setSize(m_scoreBrowser->getSize().x, browserHeight - local_best_size);
 		m_scoreBrowser->setScrollSizeToContent();
 		m_localBestContainer->setPos(m_scoreBrowser->getPos().x, m_scoreBrowser->getPos().y + m_scoreBrowser->getSize().y);
 		m_localBestContainer->setSize(m_scoreBrowser->getPos().x, local_best_size);
-		m_localBestLabel->setPos(m_scoreBrowser->getPos().x, m_localBestContainer->getPos().y);
+		m_localBestLabel->setRelPos(m_scoreBrowser->getPos().x, 0);
 		m_localBestLabel->setSize(m_scoreBrowser->getSize().x, 40);
 		if(m_localBestButton) {
-			m_localBestButton->setPos(m_scoreBrowser->getPos().x, m_scoreBrowser->getPos().y + m_scoreBrowser->getSize().y + 40);
+			m_localBestButton->setRelPos(m_scoreBrowser->getPos().x, 40);
 			m_localBestButton->setSize(m_scoreBrowser->getSize().x, scoreHeight);
 		}
-		m_scoreBrowserNoRecordsYetElement->setSize(m_scoreBrowser->getSize().x*0.9f, scoreHeight*0.75f);
-		m_scoreBrowserNoRecordsYetElement->setPos(
-			m_scoreBrowser->getSize().x/2 - m_scoreBrowserNoRecordsYetElement->getSize().x/2,
-			m_localBestContainer->getPos().y + 45
-		);
 	}
 
 	const std::vector<CBaseUIElement*> &elements = m_scoreBrowser->getContainer()->getElements();
@@ -2958,11 +2954,20 @@ void OsuSongBrowser2::updateScoreBrowserLayout()
 		scoreButton->setRelPos(scoreBrowserExtraPaddingRight, i*scoreButton->getSize().y + 5 * dpiScale);
 	}
 	m_scoreBrowserScoresStillLoadingElement->setSize(m_scoreBrowser->getSize().x*0.9f, scoreHeight*0.75f);
-	m_scoreBrowserScoresStillLoadingElement->setRelPos(m_scoreBrowser->getSize().x/2 - m_scoreBrowserScoresStillLoadingElement->getSize().x/2, (m_scoreBrowser->getSize().y/2)*0.65f - m_scoreBrowserScoresStillLoadingElement->getSize().y/2);
-	if(!m_localBestContainer->isVisible()) {
-		m_scoreBrowserNoRecordsYetElement->setSize(m_scoreBrowserScoresStillLoadingElement->getSize());
-		m_scoreBrowserNoRecordsYetElement->setRelPos(m_scoreBrowserScoresStillLoadingElement->getRelPos());
+	m_scoreBrowserScoresStillLoadingElement->setRelPos(m_scoreBrowser->getSize().x/2 - m_scoreBrowserScoresStillLoadingElement->getSize().x/2, (browserHeight/2)*0.65f - m_scoreBrowserScoresStillLoadingElement->getSize().y/2);
+	m_scoreBrowserNoRecordsYetElement->setSize(m_scoreBrowser->getSize().x*0.9f, scoreHeight*0.75f);
+	if(elements[0] == m_scoreBrowserNoRecordsYetElement) {
+		m_scoreBrowserNoRecordsYetElement->setRelPos(
+			m_scoreBrowser->getSize().x/2 - m_scoreBrowserScoresStillLoadingElement->getSize().x/2,
+			(browserHeight/2)*0.65f - m_scoreBrowserScoresStillLoadingElement->getSize().y/2
+		);
+	} else {
+		m_scoreBrowserNoRecordsYetElement->setRelPos(
+			m_scoreBrowser->getSize().x/2 - m_scoreBrowserScoresStillLoadingElement->getSize().x/2,
+			45
+		);
 	}
+	m_localBestContainer->update_pos();
 	m_scoreBrowser->getContainer()->update_pos();
 	m_scoreBrowser->setScrollSizeToContent();
 
@@ -3060,7 +3065,7 @@ void OsuSongBrowser2::rebuildScoreButtons()
 		if(validBeatmap && is_online) {
 			m_scoreBrowser->getContainer()->addBaseUIElement(m_scoreBrowserScoresStillLoadingElement, m_scoreBrowserScoresStillLoadingElement->getRelPos().x, m_scoreBrowserScoresStillLoadingElement->getRelPos().y);
 		} else {
-			m_scoreBrowser->getContainer()->addBaseUIElement(m_scoreBrowserNoRecordsYetElement);
+			m_scoreBrowser->getContainer()->addBaseUIElement(m_scoreBrowserNoRecordsYetElement, m_scoreBrowserScoresStillLoadingElement->getRelPos().x, m_scoreBrowserScoresStillLoadingElement->getRelPos().y);
 		}
 	} else {
 		// sort

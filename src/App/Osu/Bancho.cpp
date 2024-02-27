@@ -191,10 +191,7 @@ void handle_packet(Packet *packet) {
       }
 
       // close your eyes
-      if(bancho.osu->m_songBrowser2->m_userButton->m_avatar) {
-        delete bancho.osu->m_songBrowser2->m_userButton->m_avatar;
-        bancho.osu->m_songBrowser2->m_userButton->m_avatar = nullptr;
-      }
+      SAFE_DELETE(bancho.osu->m_songBrowser2->m_userButton->m_avatar);
       bancho.osu->m_songBrowser2->m_userButton->m_avatar = new OsuUIAvatar(bancho.user_id, 0.f, 0.f, 0.f, 0.f);
       bancho.osu->m_songBrowser2->m_userButton->m_avatar->on_screen = true;
 
@@ -431,6 +428,7 @@ void handle_packet(Packet *packet) {
     });
   } else if (packet->id == CHANNEL_INFO_END) {
     print_new_channels = false;
+    bancho.osu->m_chat->join("#announce");
     bancho.osu->m_chat->join("#osu");
   } else if (packet->id == ROOM_PASSWORD_CHANGED) {
     UString new_password = read_string(packet);
