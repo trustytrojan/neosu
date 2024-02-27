@@ -7,6 +7,7 @@
 
 #include "OsuChangelog.h"
 
+#include "ConVar.h"
 #include "Engine.h"
 #include "ResourceManager.h"
 #include "SoundEngine.h"
@@ -36,7 +37,7 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu)
 	std::vector<CHANGELOG> changelogs;
 
 	CHANGELOG alpha317;
-	alpha317.title = UString::format("34.02 (Build Date: %s, %s)", __DATE__, __TIME__); // (09.01.2022 - ?)
+	alpha317.title = UString::format("%.2f (Build Date: %s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__); // (09.01.2022 - ?)
 	alpha317.changes.push_back("- Added score submission (for servers that allow it via the x-mcosu-features header)");
 	alpha317.changes.push_back("- Added [quit] indicator next to users who quit a match");
 	alpha317.changes.push_back("- Made main menu shuffle through songs instead of looping over the same one");
