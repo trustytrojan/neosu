@@ -1691,6 +1691,35 @@ void OsuHUD::drawWarningArrows(Graphics *g, float hitcircleDiameter)
 	drawWarningArrow(g, Vector2(m_osu->getScreenWidth() - m_osu->getUIScale(m_osu, 28), OsuGameRules::getPlayfieldCenter(m_osu).y - OsuGameRules::getPlayfieldSize(m_osu).y/2 + part*2 + part*13), true);
 }
 
+void OsuHUD::updateScoreBoardAvatars() {
+	std::vector<uint32_t> player_ids;
+	m_avatars.empty();
+
+	if(bancho.is_in_a_multi_room()) {
+		for(int i = 0; i < 16; i++) {
+			if(bancho.room.slots[i].has_player()) {
+				player_ids.push_back(bancho.room.slots[i].player_id);
+			}
+		}
+	} else {
+		auto beatmap = m_osu->getSelectedBeatmap();
+		if(!beatmap) return;
+
+		auto md5 = beatmap->getSelectedDifficulty2()->getMD5Hash();
+		auto db = m_osu->getSongBrowser()->getDatabase();
+		auto search = db->m_online_scores.find(md5);
+        if (search != db->m_online_scores.end()) {
+			for(auto score : search->second) {
+				player_ids.push_back(score.player_id);
+			}
+        }
+	}
+
+	for(auto id : player_ids) {
+		m_avatars.push_back(new OsuUIAvatar(id, 0, 0, 0, 0));
+	}
+}
+
 void OsuHUD::drawScoreBoard(Graphics *g, std::string &beatmapMD5Hash, OsuScore *currentScore)
 {
 	const int maxVisibleDatabaseScores = m_osu->isInVRDraw() ? 3 : 4;
@@ -1715,6 +1744,11 @@ void OsuHUD::drawScoreBoard(Graphics *g, std::string &beatmapMD5Hash, OsuScore *
 	scoreEntries.reserve(numScores);
 
 	const bool isUnranked = (m_osu->getModAuto() || (m_osu->getModAutopilot() && m_osu->getModRelax()));
+
+	for(auto avatar : m_avatars) {
+		avatar->on_screen = false;
+		avatar->setVisible(false);
+	}
 
 	bool injectCurrentScore = true;
 	for (int i=0; i<numScores && i<maxVisibleDatabaseScores; i++)
@@ -1791,6 +1825,11 @@ void OsuHUD::drawScoreBoardMP(Graphics *g)
     if(!bancho.is_playing_a_multi_map()) {
     	slots = bancho.last_scores;
     }
+
+	for(auto avatar : m_avatars) {
+		avatar->on_screen = false;
+		avatar->setVisible(false);
+	}
 
 	static std::vector<SCORE_ENTRY> scoreEntries;
 	scoreEntries.clear();
@@ -1944,11 +1983,18 @@ void OsuHUD::drawScoreBoardInt(Graphics *g, const std::vector<OsuHUD::SCORE_ENTR
 		}
 
 		// draw avatar
-		// NOTE: This is calling engine->loadImage() every frame, idk how slow that is
 		if(avatar_width > 0) {
-			auto avatar = OsuUIAvatar(scoreEntries[i].player_id, x, y, avatar_width, avatar_height);
-			avatar.on_screen = true;
-			avatar.draw(g); // XXX: Doesn't download but will still show as loading if not downloaded
+			for(auto avatar : m_avatars) {
+				if(avatar->m_player_id == scoreEntries[i].player_id) {
+					avatar->on_screen = true;
+					avatar->setPos(x, y);
+					avatar->setSize(avatar_width, avatar_height);
+					avatar->setVisible(true);
+					avatar->draw(g); // XXX: Doesn't download but will still show as loading if not downloaded
+					break;
+				}
+			}
+
 			x += avatar_width;
 		}
 

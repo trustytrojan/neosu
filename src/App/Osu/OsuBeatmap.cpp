@@ -1463,6 +1463,8 @@ bool OsuBeatmap::play()
 	m_bIsWaiting = true;
 	m_fWaitTime = engine->getTimeReal();
 
+	m_osu->m_hud->updateScoreBoardAvatars();
+
 	// NOTE: loading failures are handled dynamically in update(), so temporarily assume everything has worked in here
 	m_bIsPlaying = true;
 	return m_bIsPlaying;

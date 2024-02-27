@@ -11,6 +11,7 @@
 #include "OsuScreen.h"
 
 class Osu;
+class OsuUIAvatar;
 class OsuVR;
 class OsuScore;
 class OsuBeatmapStandard;
@@ -54,6 +55,7 @@ public:
 	void drawComboSimple(Graphics *g, int combo, float scale = 1.0f); // used by OsuRankingScreen
 	void drawAccuracySimple(Graphics *g, float accuracy, float scale = 1.0f); // used by OsuRankingScreen
 	void drawWarningArrow(Graphics *g, Vector2 pos, bool flipVertically, bool originLeft = true);
+	void updateScoreBoardAvatars();
 	void drawScoreBoard(Graphics *g, std::string &beatmapMD5Hash, OsuScore *currentScore);
 	void drawScoreBoardMP(Graphics *g);
 	void drawScorebarBg(Graphics *g, float alpha, float breakAnim);
@@ -218,6 +220,8 @@ private:
 
 	// target heatmap
 	std::vector<TARGET> m_targets;
+
+	std::vector<OsuUIAvatar*> m_avatars;
 
 	// health
 	double m_fHealth;
