@@ -4,6 +4,8 @@
 #include <sys/random.h>
 #endif
 
+#include <lzma.h>
+
 #include "base64.h"
 #include "Bancho.h"
 #include "BanchoAes.h"
@@ -12,13 +14,12 @@
 #include "Engine.h"
 #include "OsuDatabaseBeatmap.h"
 
-#define POCKETLZMA_LZMA_C_DEFINE
-#include "pocketlzma.hpp"
-
 
 void submit_score(OsuDatabase::Score score) {
     debugLog("Submitting score...\n");
     const char* GRADES[] = {"XH", "SH", "X", "S", "A", "B", "C", "D", "F", "N"};
+
+    uint8_t *compressed_data = NULL;
 
     char score_time[80];
     struct tm *timeinfo = localtime((const time_t*)&score.unixTimestamp);
@@ -157,34 +158,57 @@ void submit_score(OsuDatabase::Score score) {
     {
         score.replay_data.append("-12345|0|0|0,");
 
-        // XXX: Don't compress on main thread?
-        std::vector<uint8_t> compressed_replay;
-        plz::PocketLzma p { plz::Preset::BestCompression };
-        plz::StatusCode status = p.compress(
-            (const uint8_t*)score.replay_data.toUtf8(),
-            score.replay_data.lengthUtf8(),
-            compressed_replay
-        );
-        if(status != plz::StatusCode::Ok) {
-            debugLog("Failed to compress replay: error %d\n", status);
-            curl_mime_free(request.mime);
-            return;
+        size_t s_compressed_data = score.replay_data.lengthUtf8();
+        compressed_data = (uint8_t*)malloc(s_compressed_data);
+        lzma_stream stream = LZMA_STREAM_INIT;
+        lzma_ret ret = lzma_easy_encoder(&stream, 6, LZMA_CHECK_CRC64);
+        if(ret != LZMA_OK) {
+            debugLog("Failed to initialize lzma stream: error %d\n", ret);
+            goto err;
+        }
+
+        stream.avail_in = score.replay_data.lengthUtf8();
+        stream.next_in = (const uint8_t*)score.replay_data.toUtf8();
+        stream.avail_out = s_compressed_data;
+        stream.next_out = compressed_data;
+        do {
+            ret = lzma_code(&stream, LZMA_FINISH);
+            if(ret == LZMA_OK) {
+                s_compressed_data *= 2;
+                compressed_data = (uint8_t*)realloc(compressed_data, s_compressed_data);
+                stream.avail_out = s_compressed_data - stream.total_out;
+                stream.next_out = compressed_data + stream.total_out;
+            } else if(ret != LZMA_STREAM_END) {
+                debugLog("Error while compressing replay: error %d\n", ret);
+                lzma_end(&stream);
+                goto err;
+            }
+        } while(ret != LZMA_STREAM_END);
+
+        s_compressed_data = stream.total_out;
+        lzma_end(&stream);
+
+        if(s_compressed_data <= 24) {
+            debugLog("Replay too small to submit! Compressed size: %d bytes\n", s_compressed_data);
+            debugLog("Replay frames: %s\n", score.replay_data.toUtf8());
+            goto err;
         }
 
         part = curl_mime_addpart(request.mime);
         curl_mime_filename(part, "mcosu-replay.osr");
         curl_mime_name(part, "score");
-        curl_mime_data(part, (const char*)compressed_replay.data(), compressed_replay.size());
+        curl_mime_data(part, (const char*)compressed_data, s_compressed_data);
+        free(compressed_data);
 
-        if(compressed_replay.size() <= 24) {
-            debugLog("Replay too small to submit! Compressed size: %d bytes\n", compressed_replay.size());
-            debugLog("Replay frames: %s\n", score.replay_data.toUtf8());
-            curl_mime_free(request.mime);
-            return;
-        }
+        debugLog("Replay size: %d bytes (%d compressed)\n", score.replay_data.lengthUtf8(), s_compressed_data);
     }
 
     send_api_request(request);
+    curl_easy_cleanup(curl);
+    return;
 
+err:
+    free(compressed_data);
+    curl_mime_free(request.mime);
     curl_easy_cleanup(curl);
 }
