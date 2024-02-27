@@ -161,9 +161,11 @@ void submit_score(OsuDatabase::Score score) {
         size_t s_compressed_data = score.replay_data.lengthUtf8();
         compressed_data = (uint8_t*)malloc(s_compressed_data);
         lzma_stream stream = LZMA_STREAM_INIT;
-        lzma_ret ret = lzma_easy_encoder(&stream, 6, LZMA_CHECK_CRC64);
+        lzma_options_lzma options = {0};
+        lzma_lzma_preset(&options, LZMA_PRESET_DEFAULT);
+        lzma_ret ret = lzma_alone_encoder(&stream, &options);
         if(ret != LZMA_OK) {
-            debugLog("Failed to initialize lzma stream: error %d\n", ret);
+            debugLog("Failed to initialize lzma encoder: error %d\n", ret);
             goto err;
         }
 
