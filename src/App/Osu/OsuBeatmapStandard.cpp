@@ -931,8 +931,7 @@ void OsuBeatmapStandard::update()
 	bool is_recording = m_bIsPlaying && !m_bFailed;
 	if(is_recording) {
 		// 16.67 ms between each frame (60 fps)
-		// Since the timer is based on the music (and not real time), divide by speed multiplier.
-		const uint64_t MAX_MS_BETWEEN_FRAMES = 1000.0 / (60.0 * m_osu->getSpeedMultiplier());
+		const uint64_t MAX_MS_BETWEEN_FRAMES = 1000.0 / 60.0;
 
 		if(last_keys != current_keys) {
 			write_frame();
