@@ -47,9 +47,9 @@
 
 #ifndef FASTDELEGATE_H
 #define FASTDELEGATE_H
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Weverything"
+#endif
 
 #include <memory.h> // to allow <,> comparisons
 
@@ -64,7 +64,7 @@
 // It will not work on systems where sizeof(dataptr) < sizeof(codeptr). 
 // Thus, it will not work for DOS compilers using the medium model.
 // It will also probably fail on some DSP systems.
-#define FASTDELEGATE_USESTATICFUNCTIONHACK
+//#define FASTDELEGATE_USESTATICFUNCTIONHACK
 
 // Uncomment the next line to allow function declarator syntax.
 // It is automatically enabled for those compilers where it is known to work.

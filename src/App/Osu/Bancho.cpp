@@ -206,7 +206,7 @@ void handle_packet(Packet *packet) {
       bancho.osu->m_optionsMenu->logInButton->is_loading = false;
 
       debugLog("Failed to log in, server returned code %d.\n", bancho.user_id);
-      UString errmsg = UString::format("Failed to log in: %s (code %d)\n", cho_token, bancho.user_id);
+      UString errmsg = UString::format("Failed to log in: %s (code %d)\n", cho_token.toUtf8(), bancho.user_id);
       if(bancho.user_id == -2) {
         errmsg = "Client version is too old to connect to this server.";
       } else if(bancho.user_id == -3 || bancho.user_id == -4) {
@@ -221,7 +221,7 @@ void handle_packet(Packet *packet) {
         if(cho_token == UString("user-already-logged-in")) {
           errmsg = "Already logged in on another client.";
         } else if(cho_token == UString("unknown-username")) {
-          errmsg = UString::format("No account by the username '%s' exists.", bancho.username);
+          errmsg = UString::format("No account by the username '%s' exists.", bancho.username.toUtf8());
         } else if(cho_token == UString("incorrect-password")) {
           errmsg = "Incorrect password.";
         } else if(cho_token == UString("contact-staff")) {
@@ -432,7 +432,7 @@ void handle_packet(Packet *packet) {
     bancho.osu->m_chat->join("#osu");
   } else if (packet->id == ROOM_PASSWORD_CHANGED) {
     UString new_password = read_string(packet);
-    debugLog("Room changed password to %s\n", new_password);
+    debugLog("Room changed password to %s\n", new_password.toUtf8());
     bancho.room.password = new_password;
   } else if (packet->id == SILENCE_END) {
     int32_t delta = read_int(packet);
@@ -446,13 +446,13 @@ void handle_packet(Packet *packet) {
     read_string(packet);
     UString blocked = read_string(packet);
     read_int(packet);
-    debugLog("Blocked %s.\n", blocked);
+    debugLog("Blocked %s.\n", blocked.toUtf8());
   } else if (packet->id == TARGET_IS_SILENCED) {
     read_string(packet);
     read_string(packet);
     UString blocked = read_string(packet);
     read_int(packet);
-    debugLog("Silenced %s.\n", blocked);
+    debugLog("Silenced %s.\n", blocked.toUtf8());
   } else if (packet->id == VERSION_UPDATE_FORCED) {
     disconnect();
     bancho.osu->getNotificationOverlay()->addNotification(

@@ -11,7 +11,7 @@ CXXFLAGS += -Isrc/App -Isrc/App/Osu -Isrc/Engine -Isrc/GUI -Isrc/GUI/Windows -Is
 CXXFLAGS += -DMCENGINE_USE_SYSTEM_FREETYPE
 CXXFLAGS += -g3
 
-LDFLAGS = -ldiscord-rpc -lsteam_api -lbass -lbass_fx -lpthread
+LDFLAGS = -ldiscord-rpc -lsteam_api -lbass -lbass_fx -lpthread -lstdc++
 LDFLAGS += `pkgconf --static --libs $(LIBS)` `curl-config --static-libs --libs`
 
 

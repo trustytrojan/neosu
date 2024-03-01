@@ -38,7 +38,7 @@ public:
 		};
 
 		TYPE type;
-		int time;
+		long time;
 
 		unsigned long long sortHack;
 	};
