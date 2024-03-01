@@ -1057,7 +1057,7 @@ void Osu::update()
 			auto diff2 = m_songBrowser2->m_lastSelectedBeatmap;
 			if(diff2 != nullptr) {
 				bancho.room.map_name = UString::format("%s - %s [%s]", diff2->getArtist().toUtf8(), diff2->getTitle().toUtf8(), diff2->getDifficultyName().toUtf8());
-				bancho.room.map_md5 = UString(diff2->getMD5Hash().c_str());
+				bancho.room.map_md5 = diff2->getMD5Hash();
 				bancho.room.map_id = diff2->getID();
 
 				Packet packet = {0};
@@ -2397,7 +2397,7 @@ void Osu::onSkinChange(UString oldValue, UString newValue)
 		newValue = osu_skin_workshop_title.getString();
 	}
 
-	m_skinScheduledToLoad = new OsuSkin(this, newValue, skinFolder, (newValue == "default" || newValue == "defaultvr"), isWorkshopSkin);
+	m_skinScheduledToLoad = new OsuSkin(this, newValue, skinFolder, (newValue == UString("default") || newValue == UString("defaultvr")), isWorkshopSkin);
 
 	// initial load
 	if (m_skin == NULL)

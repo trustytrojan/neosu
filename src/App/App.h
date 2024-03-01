@@ -19,15 +19,25 @@ public:
 	App() {;}
 	virtual ~App() {;}
 
-	virtual void draw(Graphics *g) {;}
+	virtual void draw(Graphics *g) {
+		(void)g;
+	}
 	virtual void update() {;}
 
-	virtual void onKeyDown(KeyboardEvent &e) {;}
-	virtual void onKeyUp(KeyboardEvent &e) {;}
-	virtual void onChar(KeyboardEvent &e) {;}
+	virtual void onKeyDown(KeyboardEvent &e) {
+		(void)e;
+	}
+	virtual void onKeyUp(KeyboardEvent &e) {
+		(void)e;
+	}
+	virtual void onChar(KeyboardEvent &e) {
+		(void)e;
+	}
 	virtual void stealFocus() {;}
 
-	virtual void onResolutionChanged(Vector2 newResolution) {;}
+	virtual void onResolutionChanged(Vector2 newResolution) {
+		(void)newResolution;
+	}
 	virtual void onDPIChanged() {;}
 
 	virtual void onFocusGained() {;}

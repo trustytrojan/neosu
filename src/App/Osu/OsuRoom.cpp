@@ -534,7 +534,7 @@ void OsuRoom::on_map_change(bool download) {
     // Results screen has map background and such showing, so prevent map from changing while we're on it.
     if(m_osu->m_rankingScreen->isVisible()) return;
 
-    debugLog("Map changed to ID %d, MD5 %s: %s\n", bancho.room.map_id, bancho.room.map_md5.toUtf8(), bancho.room.map_name.toUtf8());
+    debugLog("Map changed to ID %d, MD5 %s: %s\n", bancho.room.map_id, bancho.room.map_md5.hash, bancho.room.map_name.toUtf8());
     m_ready_btn->is_loading = true;
 
     // Deselect current map
@@ -549,8 +549,7 @@ void OsuRoom::on_map_change(bool download) {
         m_map_title->setSizeToContent(0, 0);
         m_ready_btn->is_loading = true;
     } else {
-        std::string hash = bancho.room.map_md5.toUtf8(); // lol
-        auto beatmap = m_osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(hash);
+        auto beatmap = m_osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(bancho.room.map_md5);
         if(beatmap != nullptr) {
             m_osu->m_songBrowser2->onDifficultySelected(beatmap, false);
             m_map_title->setText(bancho.room.map_name);
@@ -687,7 +686,7 @@ void OsuRoom::on_match_started(Room room) {
 }
 
 void OsuRoom::on_match_score_updated(Packet* packet) {
-    int32_t update_tms = read_int(packet);
+    int32_t update_tms = read_int32(packet);
     uint8_t slot_id = read_byte(packet);
     if(slot_id > 15) return;
 
@@ -699,7 +698,7 @@ void OsuRoom::on_match_score_updated(Packet* packet) {
     slot->num_geki = read_short(packet);
     slot->num_katu = read_short(packet);
     slot->num_miss = read_short(packet);
-    slot->total_score = read_int(packet);
+    slot->total_score = read_int32(packet);
     slot->max_combo = read_short(packet);
     slot->current_combo = read_short(packet);
     slot->is_perfect = read_byte(packet);

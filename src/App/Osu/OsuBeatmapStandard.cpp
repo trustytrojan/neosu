@@ -1747,7 +1747,7 @@ void OsuBeatmapStandard::onBeforeStop(bool quit)
 		if(score.passed) {
 			scoreIndex = m_osu->getSongBrowser()->getDatabase()->addScore(m_selectedDifficulty2->getMD5Hash(), score);
 			if (scoreIndex == -1) {
-				m_osu->getNotificationOverlay()->addNotification(UString::format("Failed saving score! md5hash.length() = %i", m_selectedDifficulty2->getMD5Hash().length()), 0xffff0000, false, 3.0f);
+				m_osu->getNotificationOverlay()->addNotification("Failed saving score!", 0xffff0000, false, 3.0f);
 			}
 		}
 	}

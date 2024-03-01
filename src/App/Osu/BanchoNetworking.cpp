@@ -254,7 +254,7 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
   while (response.pos < response.size) {
     uint16_t packet_id = read_short(&response);
     response.pos++;
-    uint32_t packet_len = read_int(&response);
+    uint32_t packet_len = read_int32(&response);
     if (packet_len > 10485760) {
       debugLog("Received a packet over 10Mb! Dropping response.\n");
       goto end;

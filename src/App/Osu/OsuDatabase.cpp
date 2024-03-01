@@ -7,6 +7,7 @@
 
 #include "OsuDatabase.h"
 
+#include "Bancho.h" // md5
 #include "Engine.h"
 #include "ConVar.h"
 #include "Timer.h"
@@ -14,7 +15,6 @@
 #include "ResourceManager.h"
 
 #include "Osu.h"
-#include "OsuFile.h"
 #include "OsuReplay.h"
 #include "OsuScore.h"
 #include "OsuNotificationOverlay.h"
@@ -27,10 +27,6 @@
 
 ConVar osu_folder("osu_folder", "C:/Program Files (x86)/osu!/", FCVAR_NONE);
 
-#elif defined __linux__
-
-ConVar osu_folder("osu_folder", "/home/pg/Desktop/osu!/", FCVAR_NONE);
-
 #elif defined __APPLE__
 
 ConVar osu_folder("osu_folder", "/osu!/", FCVAR_NONE);
@@ -41,7 +37,7 @@ ConVar osu_folder("osu_folder", "sdmc:/switch/McOsu/", FCVAR_NONE);
 
 #else
 
-#error "put correct default folder convar here"
+ConVar osu_folder("osu_folder", "", FCVAR_NONE);
 
 #endif
 
@@ -49,7 +45,7 @@ ConVar osu_folder_sub_songs("osu_folder_sub_songs", "Songs/", FCVAR_NONE);
 ConVar osu_folder_sub_skins("osu_folder_sub_skins", "Skins/", FCVAR_NONE);
 
 ConVar osu_database_enabled("osu_database_enabled", true, FCVAR_NONE);
-ConVar osu_database_version("osu_database_version", 20191114, FCVAR_NONE, "maximum supported osu!.db version, above this will use fallback loader");
+ConVar osu_database_version("osu_database_version", 20240123, FCVAR_NONE, "maximum supported osu!.db version, above this will use fallback loader");
 ConVar osu_database_ignore_version_warnings("osu_database_ignore_version_warnings", false, FCVAR_NONE);
 ConVar osu_database_ignore_version("osu_database_ignore_version", false, FCVAR_NONE, "ignore upper version limit and force load the db file (may crash)");
 ConVar osu_database_stars_cache_enabled("osu_database_stars_cache_enabled", false, FCVAR_NONE);
@@ -70,6 +66,40 @@ ConVar osu_user_include_relax_and_autopilot_for_stats("osu_user_include_relax_an
 ConVar osu_user_switcher_include_legacy_scores_for_names("osu_user_switcher_include_legacy_scores_for_names", true, FCVAR_NONE);
 
 
+TIMINGPOINT read_timing_point(Packet *packet) {
+	const double bpm = read_float64(packet);
+	const double offset = read_float64(packet);
+	const bool timingChange = (bool)read_byte(packet);
+	return (struct TIMINGPOINT) {bpm, offset, timingChange};
+}
+
+Packet load_db(UString path) {
+	Packet db = {0};
+
+	FILE *dbfile = fopen(path.toUtf8(), "rb");
+	if(dbfile != NULL) {
+		size_t dblen = ftell(dbfile);
+		rewind(dbfile);
+
+		db.memory = (uint8_t*)malloc(dblen);
+		db.size = dblen;
+		fread(db.memory, dblen, 1, dbfile);
+		fclose(dbfile);
+	}
+
+	return db;
+}
+
+bool save_db(Packet *db, UString path) {
+	FILE *dbfile = fopen(path.toUtf8(), "wb");
+	if(dbfile == NULL) {
+		return false;
+	}
+
+	fwrite(&db->memory, db->pos, 1, dbfile);
+	fclose(dbfile);
+	return true;
+}
 
 struct SortScoreByScore : public OsuDatabase::SCORE_SORTING_COMPARATOR
 {
@@ -303,10 +333,10 @@ protected:
 		// check if osu database exists, load file completely
 		UString osuDbFilePath = osu_folder.getString();
 		osuDbFilePath.append("osu!.db");
-		OsuFile db = OsuFile(osuDbFilePath);
 
 		// load database
-		if (db.isReady() && osu_database_enabled.getBool())
+		Packet db = load_db(osuDbFilePath);
+		if (db.size > 0 && osu_database_enabled.getBool())
 		{
 			m_bNeedCleanup = true;
 			m_toCleanup.swap(m_db->m_databaseBeatmaps);
@@ -492,14 +522,8 @@ OsuDatabaseBeatmap *OsuDatabase::addBeatmap(UString beatmapFolderPath)
 	return beatmap;
 }
 
-int OsuDatabase::addScore(std::string beatmapMD5Hash, OsuDatabase::Score score)
+int OsuDatabase::addScore(MD5Hash beatmapMD5Hash, OsuDatabase::Score score)
 {
-	if (beatmapMD5Hash.length() != 32)
-	{
-		debugLog("ERROR: OsuDatabase::addScore() has invalid md5hash.length() = %i!\n", beatmapMD5Hash.length());
-		return -1;
-	}
-
 	addScoreRaw(beatmapMD5Hash, score);
 	sortScores(beatmapMD5Hash);
 
@@ -519,7 +543,7 @@ int OsuDatabase::addScore(std::string beatmapMD5Hash, OsuDatabase::Score score)
 	return -1;
 }
 
-void OsuDatabase::addScoreRaw(const std::string &beatmapMD5Hash, const OsuDatabase::Score &score)
+void OsuDatabase::addScoreRaw(const MD5Hash &beatmapMD5Hash, const OsuDatabase::Score &score)
 {
 	m_scores[beatmapMD5Hash].push_back(score);
 
@@ -556,14 +580,8 @@ void OsuDatabase::addScoreRaw(const std::string &beatmapMD5Hash, const OsuDataba
 	}
 }
 
-void OsuDatabase::deleteScore(std::string beatmapMD5Hash, uint64_t scoreUnixTimestamp)
+void OsuDatabase::deleteScore(MD5Hash beatmapMD5Hash, uint64_t scoreUnixTimestamp)
 {
-	if (beatmapMD5Hash.length() != 32)
-	{
-		debugLog("WARNING: OsuDatabase::deleteScore() called with invalid md5hash.length() = %i\n", beatmapMD5Hash.length());
-		return;
-	}
-
 	for (int i=0; i<m_scores[beatmapMD5Hash].size(); i++)
 	{
 		if (m_scores[beatmapMD5Hash][i].unixTimestamp == scoreUnixTimestamp)
@@ -580,9 +598,9 @@ void OsuDatabase::deleteScore(std::string beatmapMD5Hash, uint64_t scoreUnixTime
 	}
 }
 
-void OsuDatabase::sortScores(std::string beatmapMD5Hash)
+void OsuDatabase::sortScores(MD5Hash beatmapMD5Hash)
 {
-	if (beatmapMD5Hash.length() != 32 || m_scores[beatmapMD5Hash].size() < 2) return;
+	if (m_scores[beatmapMD5Hash].size() < 2) return;
 
 	if(m_osu_songbrowser_scores_sortingtype_ref->getString() == UString("Online Leaderboard")) {
 		// Online scores are already sorted
@@ -701,10 +719,8 @@ void OsuDatabase::deleteCollection(UString collectionName)
 	}
 }
 
-void OsuDatabase::addBeatmapToCollection(UString collectionName, std::string beatmapMD5Hash, bool doSaveImmediatelyIfEnabled)
+void OsuDatabase::addBeatmapToCollection(UString collectionName, MD5Hash beatmapMD5Hash, bool doSaveImmediatelyIfEnabled)
 {
-	if (beatmapMD5Hash.length() != 32) return;
-
 	for (size_t i=0; i<m_collections.size(); i++)
 	{
 		if (m_collections[i].name == collectionName)
@@ -782,10 +798,8 @@ void OsuDatabase::addBeatmapToCollection(UString collectionName, std::string bea
 	}
 }
 
-void OsuDatabase::removeBeatmapFromCollection(UString collectionName, std::string beatmapMD5Hash, bool doSaveImmediatelyIfEnabled)
+void OsuDatabase::removeBeatmapFromCollection(UString collectionName, MD5Hash beatmapMD5Hash, bool doSaveImmediatelyIfEnabled)
 {
-	if (beatmapMD5Hash.length() != 32) return;
-
 	for (size_t i=0; i<m_collections.size(); i++)
 	{
 		if (m_collections[i].name == collectionName)
@@ -840,7 +854,7 @@ void OsuDatabase::removeBeatmapFromCollection(UString collectionName, std::strin
 
 std::vector<UString> OsuDatabase::getPlayerNamesWithPPScores()
 {
-	std::vector<std::string> keys;
+	std::vector<MD5Hash> keys;
 	keys.reserve(m_scores.size());
 
 	for (auto kv : m_scores)
@@ -850,25 +864,25 @@ std::vector<UString> OsuDatabase::getPlayerNamesWithPPScores()
 
 	// bit of a useless double string conversion going on here, but whatever
 
-	std::unordered_set<std::string> tempNames;
+	std::unordered_set<UString> tempNames;
 	for (auto &key : keys)
 	{
 		for (Score &score : m_scores[key])
 		{
 			if (!score.isLegacyScore)
-				tempNames.insert(std::string(score.playerName.toUtf8()));
+				tempNames.insert(UString(score.playerName.toUtf8()));
 		}
 	}
 
 	// always add local user, even if there were no scores
-	tempNames.insert(std::string(m_name_ref->getString().toUtf8()));
+	tempNames.insert(UString(m_name_ref->getString().toUtf8()));
 
 	std::vector<UString> names;
 	names.reserve(tempNames.size());
 	for (auto k : tempNames)
 	{
 		if (k.length() > 0)
-			names.push_back(UString(k.c_str()));
+			names.push_back(k);
 	}
 
 	return names;
@@ -880,26 +894,26 @@ std::vector<UString> OsuDatabase::getPlayerNamesWithScoresForUserSwitcher()
 
 	// bit of a useless double string conversion going on here, but whatever
 
-	std::unordered_set<std::string> tempNames;
+	std::unordered_set<UString> tempNames;
 	for (auto kv : m_scores)
 	{
-		const std::string &key = kv.first;
+		const MD5Hash &key = kv.first;
 		for (Score &score : m_scores[key])
 		{
 			if (!score.isLegacyScore || includeLegacyNames)
-				tempNames.insert(std::string(score.playerName.toUtf8()));
+				tempNames.insert(UString(score.playerName.toUtf8()));
 		}
 	}
 
 	// always add local user, even if there were no scores
-	tempNames.insert(std::string(m_name_ref->getString().toUtf8()));
+	tempNames.insert(UString(m_name_ref->getString().toUtf8()));
 
 	std::vector<UString> names;
 	names.reserve(tempNames.size());
 	for (auto k : tempNames)
 	{
 		if (k.length() > 0)
-			names.push_back(UString(k.c_str()));
+			names.push_back(k);
 	}
 
 	return names;
@@ -910,7 +924,7 @@ OsuDatabase::PlayerPPScores OsuDatabase::getPlayerPPScores(UString playerName)
 	std::vector<Score*> scores;
 
 	// collect all scores with pp data
-	std::vector<std::string> keys;
+	std::vector<MD5Hash> keys;
 	keys.reserve(m_scores.size());
 
 	for (auto kv : m_scores)
@@ -1081,12 +1095,8 @@ int OsuDatabase::getLevelForScore(unsigned long long score, int maxLevel)
 	}
 }
 
-OsuDatabaseBeatmap *OsuDatabase::getBeatmap(const std::string &md5hash)
+OsuDatabaseBeatmap *OsuDatabase::getBeatmap(const MD5Hash &md5hash)
 {
-	const size_t md5hashLength = md5hash.length();
-
-	if (md5hashLength != 32) return NULL;
-
 	for (size_t i=0; i<m_databaseBeatmaps.size(); i++)
 	{
 		OsuDatabaseBeatmap *beatmap = m_databaseBeatmaps[i];
@@ -1094,32 +1104,17 @@ OsuDatabaseBeatmap *OsuDatabase::getBeatmap(const std::string &md5hash)
 		for (size_t d=0; d<diffs.size(); d++)
 		{
 			const OsuDatabaseBeatmap *diff = diffs[d];
-
-			const size_t diffmd5hashLength = diff->getMD5Hash().length();
-			bool uuidMatches = (diffmd5hashLength > 0 && diffmd5hashLength == md5hashLength);
-			for (size_t u=0; u<32 && u<diffmd5hashLength && u<md5hashLength; u++)
-			{
-				if (diff->getMD5Hash()[u] != md5hash[u])
-				{
-					uuidMatches = false;
-					break;
-				}
-			}
-
-			if (uuidMatches)
+			if(diff->getMD5Hash() == md5hash) {
 				return beatmap;
+			}
 		}
 	}
 
 	return NULL;
 }
 
-OsuDatabaseBeatmap *OsuDatabase::getBeatmapDifficulty(const std::string &md5hash)
+OsuDatabaseBeatmap *OsuDatabase::getBeatmapDifficulty(const MD5Hash &md5hash)
 {
-	const size_t md5hashLength = md5hash.length();
-
-	if (md5hashLength != 32) return NULL;
-
 	// TODO: optimize db accesses by caching a hashmap from md5hash -> OsuBeatmap*, currently it just does a loop over all diffs of all beatmaps (for every call)
 	for (size_t i=0; i<m_databaseBeatmaps.size(); i++)
 	{
@@ -1128,20 +1123,9 @@ OsuDatabaseBeatmap *OsuDatabase::getBeatmapDifficulty(const std::string &md5hash
 		for (size_t d=0; d<diffs.size(); d++)
 		{
 			OsuDatabaseBeatmap *diff = diffs[d];
-
-			const size_t diffmd5hashLength = diff->getMD5Hash().length();
-			bool uuidMatches = (diffmd5hashLength > 0);
-			for (size_t u=0; u<32 && u<diffmd5hashLength && u<md5hashLength; u++)
-			{
-				if (diff->getMD5Hash()[u] != md5hash[u])
-				{
-					uuidMatches = false;
-					break;
-				}
-			}
-
-			if (uuidMatches)
+			if(diff->getMD5Hash() == md5hash) {
 				return diff;
+			}
 		}
 	}
 
@@ -1165,7 +1149,7 @@ UString OsuDatabase::parseLegacyCfgBeatmapDirectoryParameter()
 		{
 			UString uCurLine = file.readLine();
 			const char *curLineChar = uCurLine.toUtf8();
-			std::string curLine(curLineChar);
+			UString curLine(curLineChar);
 
 			memset(stringBuffer, '\0', 1024);
 			if (sscanf(curLineChar, " BeatmapDirectory = %1023[^\n]", stringBuffer) == 1)
@@ -1282,7 +1266,7 @@ void OsuDatabase::scheduleLoadRaw()
 	m_bIsFirstLoad = false;
 }
 
-void OsuDatabase::loadDB(OsuFile *db, bool &fallbackToRawLoad)
+void OsuDatabase::loadDB(Packet *db, bool &fallbackToRawLoad)
 {
 	// reset
 	m_collections.clear();
@@ -1291,12 +1275,6 @@ void OsuDatabase::loadDB(OsuFile *db, bool &fallbackToRawLoad)
 		debugLog("WARNING: OsuDatabase::loadDB() called without cleared m_beatmaps!!!\n");
 
 	m_databaseBeatmaps.clear();
-
-	if (!db->isReady())
-	{
-		debugLog("Database: Couldn't read, database not ready!\n");
-		return;
-	}
 
 	// get BeatmapDirectory parameter from osu!.<OS_USERNAME>.cfg
 	// fallback to /Songs/ if it doesn't exist
@@ -1314,22 +1292,14 @@ void OsuDatabase::loadDB(OsuFile *db, bool &fallbackToRawLoad)
 	m_importTimer->start();
 
 	// read header
-	m_iVersion = db->readInt();
-	m_iFolderCount = db->readInt();
-	db->readBool();
-	db->readDateTime();
-	UString playerName = db->readString();
-	m_iNumBeatmapsToLoad = db->readInt();
+	m_iVersion = read_int32(db);
+	m_iFolderCount = read_int32(db);
+	read_byte(db);
+	read_int64(db) /* timestamp */;
+	UString playerName = read_string(db);
+	m_iNumBeatmapsToLoad = read_int32(db);
 
 	debugLog("Database: version = %i, folderCount = %i, playerName = %s, numDiffs = %i\n", m_iVersion, m_iFolderCount, playerName.toUtf8(), m_iNumBeatmapsToLoad);
-
-	if (m_iVersion < 20140609)
-	{
-		debugLog("Database: Version is below 20140609, not supported.\n");
-		m_osu->getNotificationOverlay()->addNotification("osu!.db version too old, update osu! and try again!", 0xffff0000);
-		m_fLoadingProgress = 1.0f;
-		return;
-	}
 
 	if (m_iVersion < 20170222)
 	{
@@ -1367,8 +1337,8 @@ void OsuDatabase::loadDB(OsuFile *db, bool &fallbackToRawLoad)
 	};
 	std::vector<BeatmapSet> beatmapSets;
 	std::unordered_map<int, size_t> setIDToIndex;
-	std::unordered_map<std::string, OsuDatabaseBeatmap*> hashToDiff2;
-	std::unordered_map<std::string, OsuDatabaseBeatmap*> hashToBeatmap;
+	std::unordered_map<MD5Hash, OsuDatabaseBeatmap*> hashToDiff2;
+	std::unordered_map<MD5Hash, OsuDatabaseBeatmap*> hashToBeatmap;
 	for (int i=0; i<m_iNumBeatmapsToLoad; i++)
 	{
 		if (m_bInterruptLoad.load()) break; // cancellation point
@@ -1384,42 +1354,39 @@ void OsuDatabase::loadDB(OsuFile *db, bool &fallbackToRawLoad)
 			// no idea why peppy decided to change the wiki version from 20191107 to 20191106, because that's not what stable is doing.
 			// the correct version is still 20191107
 
-			/*unsigned int size = */db->readInt(); // size in bytes of the beatmap entry
+			/*unsigned int size = */read_int32(db); // size in bytes of the beatmap entry
 		}
 
-		UString artistName = db->readString().trim();
-		UString artistNameUnicode = db->readString();
-		UString songTitle = db->readString().trim();
-		UString songTitleUnicode = db->readString();
-		UString creatorName = db->readString().trim();
-		UString difficultyName = db->readString().trim();
-		UString audioFileName = db->readString();
-		std::string md5hash = db->readStdString();
-		UString osuFileName = db->readString();
-		/*unsigned char rankedStatus = */db->readByte();
-		unsigned short numCircles = db->readShort();
-		unsigned short numSliders = db->readShort();
-		unsigned short numSpinners = db->readShort();
-		long long lastModificationTime = db->readLongLong();
-		float AR = db->readFloat();
-		float CS = db->readFloat();
-		float HP = db->readFloat();
-		float OD = db->readFloat();
-		double sliderMultiplier = db->readDouble();
+		UString artistName = read_string(db).trim();
+		UString artistNameUnicode = read_string(db);
+		UString songTitle = read_string(db).trim();
+		UString songTitleUnicode = read_string(db);
+		UString creatorName = read_string(db).trim();
+		UString difficultyName = read_string(db).trim();
+		UString audioFileName = read_string(db);
+		auto hash_str = read_string(db);
+		MD5Hash md5hash = hash_str.toUtf8();
+		UString osuFileName = read_string(db);
+		/*unsigned char rankedStatus = */read_byte(db);
+		unsigned short numCircles = read_short(db);
+		unsigned short numSliders = read_short(db);
+		unsigned short numSpinners = read_short(db);
+		long long lastModificationTime = read_int64(db);
+		float AR = read_float32(db);
+		float CS = read_float32(db);
+		float HP = read_float32(db);
+		float OD = read_float32(db);
+		double sliderMultiplier = read_float64(db);
 
-		//debugLog("Database: Entry #%i: artist = %s, songtitle = %s, creator = %s, diff = %s, audiofilename = %s, md5hash = %s, osufilename = %s\n", i, artistName.toUtf8(), songTitle.toUtf8(), creatorName.toUtf8(), difficultyName.toUtf8(), audioFileName.toUtf8(), md5hash.c_str(), osuFileName.toUtf8());
-		//debugLog("rankedStatus = %i, numCircles = %i, numSliders = %i, numSpinners = %i, lastModificationTime = %ld\n", (int)rankedStatus, numCircles, numSliders, numSpinners, lastModificationTime);
-		//debugLog("AR = %f, CS = %f, HP = %f, OD = %f, sliderMultiplier = %f\n", AR, CS, HP, OD, sliderMultiplier);
-
-		unsigned int numOsuStandardStarRatings = db->readInt();
+		unsigned int numOsuStandardStarRatings = read_int32(db);
 		//debugLog("%i star ratings for osu!standard\n", numOsuStandardStarRatings);
 		float numOsuStandardStars = 0.0f;
 		for (int s=0; s<numOsuStandardStarRatings; s++)
 		{
-			db->readByte(); // ObjType
-			unsigned int mods = db->readInt();
-			db->readByte(); // ObjType
-			double starRating = db->readDouble();
+			read_byte(db); // ObjType
+			unsigned int mods = read_int32(db);
+			read_byte(db); // ObjType
+			double starRating = read_float64(db);
 			//debugLog("%f stars for %u\n", starRating, mods);
 
 			if (mods == 0)
@@ -1436,86 +1403,86 @@ void OsuDatabase::loadDB(OsuFile *db, bool &fallbackToRawLoad)
 		}
 
 
-		unsigned int numTaikoStarRatings = db->readInt();
+		unsigned int numTaikoStarRatings = read_int32(db);
 		//debugLog("%i star ratings for taiko\n", numTaikoStarRatings);
 		for (int s=0; s<numTaikoStarRatings; s++)
 		{
-			db->readByte(); // ObjType
-			db->readInt();
-			db->readByte(); // ObjType
-			db->readDouble();
+			read_byte(db); // ObjType
+			read_int32(db);
+			read_byte(db); // ObjType
+			read_float64(db);
 		}
 
-		unsigned int numCtbStarRatings = db->readInt();
+		unsigned int numCtbStarRatings = read_int32(db);
 		//debugLog("%i star ratings for ctb\n", numCtbStarRatings);
 		for (int s=0; s<numCtbStarRatings; s++)
 		{
-			db->readByte(); // ObjType
-			db->readInt();
-			db->readByte(); // ObjType
-			db->readDouble();
+			read_byte(db); // ObjType
+			read_int32(db);
+			read_byte(db); // ObjType
+			read_float64(db);
 		}
 
-		unsigned int numManiaStarRatings = db->readInt();
+		unsigned int numManiaStarRatings = read_int32(db);
 		//debugLog("%i star ratings for mania\n", numManiaStarRatings);
 		for (int s=0; s<numManiaStarRatings; s++)
 		{
-			db->readByte(); // ObjType
-			db->readInt();
-			db->readByte(); // ObjType
-			db->readDouble();
+			read_byte(db); // ObjType
+			read_int32(db);
+			read_byte(db); // ObjType
+			read_float64(db);
 		}
 
-		/*unsigned int drainTime = */db->readInt(); // seconds
-		int duration = db->readInt(); // milliseconds
+		/*unsigned int drainTime = */read_int32(db); // seconds
+		int duration = read_int32(db); // milliseconds
 		duration = duration >= 0 ? duration : 0; // sanity clamp
-		int previewTime = db->readInt();
+		int previewTime = read_int32(db);
 
 		//debugLog("drainTime = %i sec, duration = %i ms, previewTime = %i ms\n", drainTime, duration, previewTime);
 
-		unsigned int numTimingPoints = db->readInt();
+		unsigned int numTimingPoints = read_int32(db);
 		//debugLog("%i timingpoints\n", numTimingPoints);
-		std::vector<OsuFile::TIMINGPOINT> timingPoints;
+		std::vector<TIMINGPOINT> timingPoints;
 		for (int t=0; t<numTimingPoints; t++)
 		{
-			timingPoints.push_back(db->readTimingPoint());
+			timingPoints.push_back(read_timing_point(db));
 		}
 
-		int beatmapID = db->readInt(); // fucking bullshit, this is NOT an unsigned integer as is described on the wiki, it can and is -1 sometimes
-		int beatmapSetID = db->readInt(); // same here
-		/*unsigned int threadID = */db->readInt();
+		int beatmapID = read_int32(db); // fucking bullshit, this is NOT an unsigned integer as is described on the wiki, it can and is -1 sometimes
+		int beatmapSetID = read_int32(db); // same here
+		/*unsigned int threadID = */read_int32(db);
 
-		/*unsigned char osuStandardGrade = */db->readByte();
-		/*unsigned char taikoGrade = */db->readByte();
-		/*unsigned char ctbGrade = */db->readByte();
-		/*unsigned char maniaGrade = */db->readByte();
+		/*unsigned char osuStandardGrade = */read_byte(db);
+		/*unsigned char taikoGrade = */read_byte(db);
+		/*unsigned char ctbGrade = */read_byte(db);
+		/*unsigned char maniaGrade = */read_byte(db);
 		//debugLog("beatmapID = %i, beatmapSetID = %i, threadID = %i, osuStandardGrade = %i, taikoGrade = %i, ctbGrade = %i, maniaGrade = %i\n", beatmapID, beatmapSetID, threadID, osuStandardGrade, taikoGrade, ctbGrade, maniaGrade);
 
-		short localOffset = db->readShort();
-		float stackLeniency = db->readFloat();
-		unsigned char mode = db->readByte();
+		short localOffset = read_short(db);
+		float stackLeniency = read_float32(db);
+		unsigned char mode = read_byte(db);
 		//debugLog("localOffset = %i, stackLeniency = %f, mode = %i\n", localOffset, stackLeniency, mode);
 
-		UString songSource = db->readString().trim();
-		UString songTags = db->readString().trim();
+		UString songSource = read_string(db).trim();
+		UString songTags = read_string(db).trim();
 		//debugLog("songSource = %s, songTags = %s\n", songSource.toUtf8(), songTags.toUtf8());
 
-		short onlineOffset = db->readShort();
-		UString songTitleFont = db->readString();
-		/*bool unplayed = */db->readBool();
-		/*long long lastTimePlayed = */db->readLongLong();
-		/*bool isOsz2 = */db->readBool();
-		UString path = db->readString().trim(); // somehow, some beatmaps may have spaces at the start/end of their path, breaking the Windows API (e.g. https://osu.ppy.sh/s/215347), therefore the trim
-		/*long long lastOnlineCheck = */db->readLongLong();
+		short onlineOffset = read_short(db);
+		UString songTitleFont = read_string(db);
+		/*bool unplayed = */read_byte(db);
+		/*long long lastTimePlayed = */read_int64(db);
+		/*bool isOsz2 = */read_byte(db);
+		UString path = read_string(db).trim(); // somehow, some beatmaps may have spaces at the start/end of their path, breaking the Windows API (e.g. https://osu.ppy.sh/s/215347), therefore the trim
+		/*long long lastOnlineCheck = */read_int64(db);
 		//debugLog("onlineOffset = %i, songTitleFont = %s, unplayed = %i, lastTimePlayed = %lu, isOsz2 = %i, path = %s, lastOnlineCheck = %lu\n", onlineOffset, songTitleFont.toUtf8(), (int)unplayed, lastTimePlayed, (int)isOsz2, path.toUtf8(), lastOnlineCheck);
 
-		/*bool ignoreBeatmapSounds = */db->readBool();
-		/*bool ignoreBeatmapSkin = */db->readBool();
-		/*bool disableStoryboard = */db->readBool();
-		/*bool disableVideo = */db->readBool();
-		/*bool visualOverride = */db->readBool();
-		/*int lastEditTime = */db->readInt();
-		/*unsigned char maniaScrollSpeed = */db->readByte();
+		/*bool ignoreBeatmapSounds = */read_byte(db);
+		/*bool ignoreBeatmapSkin = */read_byte(db);
+		/*bool disableStoryboard = */read_byte(db);
+		/*bool disableVideo = */read_byte(db);
+		/*bool visualOverride = */read_byte(db);
+		/*int lastEditTime = */read_int32(db);
+		/*unsigned char maniaScrollSpeed = */read_byte(db);
 		//debugLog("ignoreBeatmapSounds = %i, ignoreBeatmapSkin = %i, disableStoryboard = %i, disableVideo = %i, visualOverride = %i, maniaScrollSpeed = %i\n", (int)ignoreBeatmapSounds, (int)ignoreBeatmapSkin, (int)disableStoryboard, (int)disableVideo, (int)visualOverride, maniaScrollSpeed);
 
 		// HACKHACK: workaround for linux and macos: it can happen that nested beatmaps are stored in the database, and that osu! stores that filepath with a backslash (because windows)
@@ -1541,7 +1508,7 @@ void OsuDatabase::loadDB(OsuFile *db, bool &fallbackToRawLoad)
 		// skip invalid/corrupt entries
 		// the good way would be to check if the .osu file actually exists on disk, but that is slow af, ain't nobody got time for that
 		// so, since I've seen some concrete examples of what happens in such cases, we just exclude those
-		if (artistName.length() < 1 && songTitle.length() < 1 && creatorName.length() < 1 && difficultyName.length() < 1 && md5hash.length() < 1)
+		if (artistName.length() < 1 && songTitle.length() < 1 && creatorName.length() < 1 && difficultyName.length() < 1 && md5hash.hash[0] == 0)
 			continue;
 
 		// fill diff with data
@@ -1588,10 +1555,10 @@ void OsuDatabase::loadDB(OsuFile *db, bool &fallbackToRawLoad)
 				// calculate bpm range
 				float minBeatLength = 0;
 				float maxBeatLength = std::numeric_limits<float>::max();
-				std::vector<OsuFile::TIMINGPOINT> uninheritedTimingpoints;
+				std::vector<TIMINGPOINT> uninheritedTimingpoints;
 				for (int j=0; j<timingPoints.size(); j++)
 				{
-					const OsuFile::TIMINGPOINT &t = timingPoints[j];
+					const TIMINGPOINT &t = timingPoints[j];
 
 					if (t.msPerBeat >= 0) // NOT inherited
 					{
@@ -1616,7 +1583,7 @@ void OsuDatabase::loadDB(OsuFile *db, bool &fallbackToRawLoad)
 
 				struct MostCommonBPMHelper
 				{
-					static int calculateMostCommonBPM(const std::vector<OsuFile::TIMINGPOINT> &uninheritedTimingpoints, long lastTime)
+					static int calculateMostCommonBPM(const std::vector<TIMINGPOINT> &uninheritedTimingpoints, long lastTime)
 					{
 						if (uninheritedTimingpoints.size() < 1) return 0;
 
@@ -1633,7 +1600,7 @@ void OsuDatabase::loadDB(OsuFile *db, bool &fallbackToRawLoad)
 						tuples.reserve(uninheritedTimingpoints.size());
 						for (size_t i=0; i<uninheritedTimingpoints.size(); i++)
 						{
-							const OsuFile::TIMINGPOINT &t = uninheritedTimingpoints[i];
+							const TIMINGPOINT &t = uninheritedTimingpoints[i];
 
 							Tuple tuple;
 							{
@@ -1770,14 +1737,13 @@ void OsuDatabase::loadDB(OsuFile *db, bool &fallbackToRawLoad)
 			}
 
 			// and add an entry in our hashmap
-			if (diff2->getMD5Hash().length() == 32)
-				hashToDiff2[diff2->getMD5Hash()] = diff2;
+			hashToDiff2[diff2->getMD5Hash()] = diff2;
 		}
 	}
 
 	// we now have a collection of BeatmapSets (where one set is equal to one beatmap and all of its diffs), build the actual OsuBeatmap objects
 	// first, build all beatmaps which have a valid setID (trusting the values from the osu database)
-	std::unordered_map<std::string, OsuDatabaseBeatmap*> titleArtistToBeatmap;
+	std::unordered_map<UString, OsuDatabaseBeatmap*> titleArtistToBeatmap;
 	for (int i=0; i<beatmapSets.size(); i++)
 	{
 		if (m_bInterruptLoad.load()) break; // cancellation point
@@ -1793,16 +1759,15 @@ void OsuDatabase::loadDB(OsuFile *db, bool &fallbackToRawLoad)
 				// and add an entry in our hashmap
 				for (int d=0; d<beatmapSets[i].diffs2.size(); d++)
 				{
-					const std::string &md5hash = beatmapSets[i].diffs2[d]->getMD5Hash();
-					if (md5hash.length() == 32)
-						hashToBeatmap[md5hash] = bm;
+					const MD5Hash &md5hash = beatmapSets[i].diffs2[d]->getMD5Hash();
+					hashToBeatmap[md5hash] = bm;
 				}
 
 				// and in the other hashmap
 				UString titleArtist = bm->getTitle();
 				titleArtist.append(bm->getArtist());
 				if (titleArtist.length() > 0)
-					titleArtistToBeatmap[std::string(titleArtist.toUtf8())] = bm;
+					titleArtistToBeatmap[UString(titleArtist.toUtf8())] = bm;
 			}
 		}
 	}
@@ -1832,7 +1797,7 @@ void OsuDatabase::loadDB(OsuFile *db, bool &fallbackToRawLoad)
 					titleArtistCreator.append(diff2->getCreator());
 					if (titleArtistCreator.length() > 0)
 					{
-						const auto result = titleArtistToBeatmap.find(std::string(titleArtistCreator.toUtf8()));
+						const auto result = titleArtistToBeatmap.find(UString(titleArtistCreator.toUtf8()));
 						if (result != titleArtistToBeatmap.end())
 						{
 							existsAlready = true;
@@ -1841,8 +1806,7 @@ void OsuDatabase::loadDB(OsuFile *db, bool &fallbackToRawLoad)
 							const_cast<std::vector<OsuDatabaseBeatmap*>&>(result->second->getDifficulties()).push_back(diff2);
 
 							// and add an entry in our hashmap
-							if (diff2->getMD5Hash().length() == 32)
-								hashToBeatmap[diff2->getMD5Hash()] = result->second;
+							hashToBeatmap[diff2->getMD5Hash()] = result->second;
 						}
 					}
 
@@ -1859,9 +1823,8 @@ void OsuDatabase::loadDB(OsuFile *db, bool &fallbackToRawLoad)
 						// and add an entry in our hashmap
 						for (int d=0; d<diffs2.size(); d++)
 						{
-							const std::string &md5hash = diffs2[d]->getMD5Hash();
-							if (md5hash.length() == 32)
-								hashToBeatmap[md5hash] = bm;
+							const MD5Hash &md5hash = diffs2[d]->getMD5Hash();
+							hashToBeatmap[md5hash] = bm;
 						}
 					}
 				}
@@ -1902,40 +1865,32 @@ void OsuDatabase::loadStars()
 	const UString starsFilePath = "stars.cache";
 	const int starsCacheVersion = 20221108;
 
-	OsuFile cache(starsFilePath, false);
-	if (cache.isReady())
+	Packet cache = load_db(starsFilePath);
+	if (cache.size > 0)
 	{
 		m_starsCache.clear();
 
-		const int cacheVersion = cache.readInt();
+		const int cacheVersion = read_int32(&cache);
 
 		if (cacheVersion <= starsCacheVersion)
 		{
-			const std::string md5Hash = cache.readStdString();
+			read_string(&cache); // ignore md5
+			const int64_t numStarsCacheEntries = read_int64(&cache);
 
-			if (OsuFile::md5(cache.getReadPointer(), cache.getFileSize() - (size_t)(cache.getReadPointer() - cache.getBuffer())) == md5Hash)
+			debugLog("Stars cache: version = %i, numStarsCacheEntries = %i\n", cacheVersion, numStarsCacheEntries);
+
+			for (int64_t i=0; i<numStarsCacheEntries; i++)
 			{
-				const int64_t numStarsCacheEntries = cache.readLongLong();
+				auto hash_str = read_string(&cache);
+				const MD5Hash beatmapMD5Hash = hash_str.toUtf8();
+				const float starsNomod = read_float32(&cache);
 
-				debugLog("Stars cache: version = %i, numStarsCacheEntries = %i\n", cacheVersion, numStarsCacheEntries);
-
-				for (int64_t i=0; i<numStarsCacheEntries; i++)
+				STARS_CACHE_ENTRY entry;
 				{
-					const std::string beatmapMD5Hash = cache.readStdString();
-					const float starsNomod = cache.readFloat();
-
-					if (beatmapMD5Hash.length() == 32) // sanity
-					{
-						STARS_CACHE_ENTRY entry;
-						{
-							entry.starsNomod = starsNomod;
-						}
-						m_starsCache[beatmapMD5Hash] = entry;
-					}
+					entry.starsNomod = starsNomod;
 				}
+				m_starsCache[beatmapMD5Hash] = entry;
 			}
-			else
-				debugLog("Stars cache is corrupt, ignoring.\n");
 		}
 		else
 			debugLog("Invalid stars cache version, ignoring.\n");
@@ -1953,70 +1908,43 @@ void OsuDatabase::saveStars()
 	const UString starsFilePath = "stars.cache";
 	const int starsCacheVersion = 20221108;
 
-	//const double startTime = engine->getTimeReal();
+	// count
+	int64_t numStarsCacheEntries = 0;
+	for (OsuDatabaseBeatmap *beatmap : m_databaseBeatmaps)
 	{
-		// count
-		int64_t numStarsCacheEntries = 0;
-		for (OsuDatabaseBeatmap *beatmap : m_databaseBeatmaps)
+		for (OsuDatabaseBeatmap *diff2 : beatmap->getDifficulties())
 		{
-			for (OsuDatabaseBeatmap *diff2 : beatmap->getDifficulties())
-			{
-				if (diff2->getMD5Hash().size() == 32 && diff2->getStarsNomod() > 0.0f && diff2->getStarsNomod() != 0.0001f)
-					numStarsCacheEntries++;
-			}
+			if (diff2->getStarsNomod() > 0.0f && diff2->getStarsNomod() != 0.0001f)
+				numStarsCacheEntries++;
 		}
-
-		if (numStarsCacheEntries < 1)
-		{
-			debugLog("No stars cached, nothing to write.\n");
-			return;
-		}
-
-		OsuFile cache(starsFilePath, true);
-		if (cache.isReady())
-		{
-			// HACKHACK: code duplication is absolutely stupid, just so we can calculate the MD5 hash. but I'm too lazy to make it cleaner right now ffs
-			OsuFile tempForHash("", false, true);
-			{
-				tempForHash.writeLongLong(numStarsCacheEntries);
-
-				for (OsuDatabaseBeatmap *beatmap : m_databaseBeatmaps)
-				{
-					for (OsuDatabaseBeatmap *diff2 : beatmap->getDifficulties())
-					{
-						if (diff2->getMD5Hash().size() == 32 && diff2->getStarsNomod() > 0.0f && diff2->getStarsNomod() != 0.0001f)
-						{
-							tempForHash.writeStdString(diff2->getMD5Hash());
-							tempForHash.writeFloat(diff2->getStarsNomod());
-						}
-					}
-				}
-			}
-			const std::string md5Hash = (tempForHash.getWriteBuffer().size() > 0 ? OsuFile::md5((const unsigned char*)&tempForHash.getWriteBuffer()[0], tempForHash.getWriteBuffer().size()) : "");
-
-			// write
-			{
-				cache.writeInt(starsCacheVersion);
-				cache.writeStdString(md5Hash);
-				cache.writeLongLong(numStarsCacheEntries);
-
-				for (OsuDatabaseBeatmap *beatmap : m_databaseBeatmaps)
-				{
-					for (OsuDatabaseBeatmap *diff2 : beatmap->getDifficulties())
-					{
-						if (diff2->getMD5Hash().size() == 32 && diff2->getStarsNomod() > 0.0f && diff2->getStarsNomod() != 0.0001f)
-						{
-							cache.writeStdString(diff2->getMD5Hash());
-							cache.writeFloat(diff2->getStarsNomod());
-						}
-					}
-				}
-			}
-		}
-		else
-			debugLog("Couldn't write stars.cache!\n");
 	}
-	//debugLog("Took %f seconds.\n", (engine->getTimeReal() - startTime));
+
+	if (numStarsCacheEntries < 1)
+	{
+		debugLog("No stars cached, nothing to write.\n");
+		return;
+	}
+
+	// write
+	Packet cache = {0};
+	write_int32(&cache, starsCacheVersion);
+	write_string(&cache, "00000000000000000000000000000000");
+	write_int64(&cache, numStarsCacheEntries);
+	for (OsuDatabaseBeatmap *beatmap : m_databaseBeatmaps)
+	{
+		for (OsuDatabaseBeatmap *diff2 : beatmap->getDifficulties())
+		{
+			if (diff2->getStarsNomod() > 0.0f && diff2->getStarsNomod() != 0.0001f)
+			{
+				write_string(&cache, diff2->getMD5Hash().hash);
+				write_float32(&cache, diff2->getStarsNomod());
+			}
+		}
+	}
+
+	if(!save_db(&cache, starsFilePath)) {
+		debugLog("Couldn't write stars.cache!\n");
+	}
 }
 
 void OsuDatabase::loadScores()
@@ -2036,187 +1964,153 @@ void OsuDatabase::loadScores()
 		const int maxSupportedCustomDbVersion = osu_scores_custom_version.getInt();
 		const unsigned char hackIsImportedLegacyScoreFlag = 0xA9; // TODO: remove this once all builds on steam (even previous-version) have loading version cap logic
 
-		int makeBackupType = 0;
-		const int backupLessThanVersion = 20210103;
-		const int backupMoreThanVersion = 20210105;
-
 		const UString scoresFilePath = (m_osu->isInVRMode() ? "scoresvr.db" : "scores.db");
-		{
-			OsuFile db(scoresFilePath, false);
-			if (db.isReady())
+		Packet db = load_db(scoresFilePath);
+		if(db.size > 0) {
+			customScoresFileSize = db.size;
+
+			const int dbVersion = read_int32(&db);
+			const int numBeatmaps = read_int32(&db);
+			debugLog("Custom scores: version = %i, numBeatmaps = %i\n", dbVersion, numBeatmaps);
+
+			if (dbVersion <= maxSupportedCustomDbVersion)
 			{
-				customScoresFileSize = db.getFileSize();
-
-				const int dbVersion = db.readInt();
-				const int numBeatmaps = db.readInt();
-
-				if (dbVersion > backupMoreThanVersion)
-					makeBackupType = 2;
-				else if (dbVersion < backupLessThanVersion)
-					makeBackupType = 1;
-
-				debugLog("Custom scores: version = %i, numBeatmaps = %i\n", dbVersion, numBeatmaps);
-
-				if (dbVersion <= maxSupportedCustomDbVersion)
+				int scoreCounter = 0;
+				for (int b=0; b<numBeatmaps; b++)
 				{
-					int scoreCounter = 0;
-					for (int b=0; b<numBeatmaps; b++)
+					auto hash_str = read_string(&db);
+					const int numScores = read_int32(&db);
+
+					if (hash_str.lengthUtf8() < 32)
 					{
-						const std::string md5hash = db.readStdString();
-						const int numScores = db.readInt();
+						debugLog("WARNING: Invalid score with md5hash.length() = %i!\n", hash_str.lengthUtf8());
+						continue;
+					}
+					else if (hash_str.lengthUtf8() > 32)
+					{
+						debugLog("ERROR: Corrupt score database/entry detected, stopping.\n");
+						break;
+					}
 
-						if (md5hash.length() < 32)
+					if (Osu::debug->getBool()) {
+						debugLog("Beatmap[%i]: md5hash = %s, numScores = %i\n", b, hash_str.toUtf8(), numScores);
+					}
+
+					const MD5Hash md5hash = hash_str.toUtf8();
+					for (int s=0; s<numScores; s++)
+					{
+						const unsigned char gamemode = read_byte(&db); // NOTE: abused as isImportedLegacyScore flag (because I forgot to add a version cap to old builds)
+						const int scoreVersion = read_int32(&db);
+						bool isImportedLegacyScore = false;
+						if (dbVersion == 20210103 && scoreVersion > 20190103)
 						{
-							debugLog("WARNING: Invalid score with md5hash.length() = %i!\n", md5hash.length());
-							continue;
+							isImportedLegacyScore = read_byte(&db);
 						}
-						else if (md5hash.length() > 32)
+						else if (dbVersion > 20210103 && scoreVersion > 20190103)
 						{
-							debugLog("ERROR: Corrupt score database/entry detected, stopping.\n");
-							break;
+							// HACKHACK: for explanation see hackIsImportedLegacyScoreFlag
+							isImportedLegacyScore = (gamemode & hackIsImportedLegacyScoreFlag);
+						}
+						const uint64_t unixTimestamp = read_int64(&db);
+
+						// default
+						const UString playerName = read_string(&db);
+
+						const short num300s = read_short(&db);
+						const short num100s = read_short(&db);
+						const short num50s = read_short(&db);
+						const short numGekis = read_short(&db);
+						const short numKatus = read_short(&db);
+						const short numMisses = read_short(&db);
+
+						const unsigned long long score = read_int64(&db);
+						const short maxCombo = read_short(&db);
+						const int modsLegacy = read_int32(&db);
+
+						// custom
+						const short numSliderBreaks = read_short(&db);
+						const float pp = read_float32(&db);
+						const float unstableRate = read_float32(&db);
+						const float hitErrorAvgMin = read_float32(&db);
+						const float hitErrorAvgMax = read_float32(&db);
+						const float starsTomTotal = read_float32(&db);
+						const float starsTomAim = read_float32(&db);
+						const float starsTomSpeed = read_float32(&db);
+						const float speedMultiplier = read_float32(&db);
+						const float CS = read_float32(&db);
+						const float AR = read_float32(&db);
+						const float OD = read_float32(&db);
+						const float HP = read_float32(&db);
+
+						int maxPossibleCombo = -1;
+						int numHitObjects = -1;
+						int numCircles = -1;
+						if (scoreVersion > 20180722)
+						{
+							maxPossibleCombo = read_int32(&db);
+							numHitObjects = read_int32(&db);
+							numCircles = read_int32(&db);
 						}
 
-						if (Osu::debug->getBool())
-							debugLog("Beatmap[%i]: md5hash = %s, numScores = %i\n", b, md5hash.c_str(), numScores);
+						const UString experimentalMods = read_string(&db);
 
-						for (int s=0; s<numScores; s++)
+						if (gamemode == 0x0 || (dbVersion > 20210103 && scoreVersion > 20190103)) // gamemode filter (osu!standard) // HACKHACK: for explanation see hackIsImportedLegacyScoreFlag
 						{
-							const unsigned char gamemode = db.readByte(); // NOTE: abused as isImportedLegacyScore flag (because I forgot to add a version cap to old builds)
-							const int scoreVersion = db.readInt();
-							bool isImportedLegacyScore = false;
-							if (dbVersion == 20210103 && scoreVersion > 20190103)
-							{
-								isImportedLegacyScore = db.readBool();
-							}
-							else if (dbVersion > 20210103 && scoreVersion > 20190103)
-							{
-								// HACKHACK: for explanation see hackIsImportedLegacyScoreFlag
-								isImportedLegacyScore = (gamemode & hackIsImportedLegacyScoreFlag);
-							}
-							const uint64_t unixTimestamp = db.readLongLong();
+							Score sc;
+
+							sc.isLegacyScore = false;
+							sc.isImportedLegacyScore = isImportedLegacyScore;
+							sc.version = scoreVersion;
+							sc.unixTimestamp = unixTimestamp;
 
 							// default
-							const UString playerName = db.readString();
+							sc.playerName = playerName;
 
-							const short num300s = db.readShort();
-							const short num100s = db.readShort();
-							const short num50s = db.readShort();
-							const short numGekis = db.readShort();
-							const short numKatus = db.readShort();
-							const short numMisses = db.readShort();
-
-							const unsigned long long score = db.readLongLong();
-							const short maxCombo = db.readShort();
-							const int modsLegacy = db.readInt();
+							sc.num300s = num300s;
+							sc.num100s = num100s;
+							sc.num50s = num50s;
+							sc.numGekis = numGekis;
+							sc.numKatus = numKatus;
+							sc.numMisses = numMisses;
+							sc.score = score;
+							sc.comboMax = maxCombo;
+							sc.perfect = (maxPossibleCombo > 0 && sc.comboMax > 0 && sc.comboMax >= maxPossibleCombo);
+							sc.modsLegacy = modsLegacy;
 
 							// custom
-							const short numSliderBreaks = db.readShort();
-							const float pp = db.readFloat();
-							const float unstableRate = db.readFloat();
-							const float hitErrorAvgMin = db.readFloat();
-							const float hitErrorAvgMax = db.readFloat();
-							const float starsTomTotal = db.readFloat();
-							const float starsTomAim = db.readFloat();
-							const float starsTomSpeed = db.readFloat();
-							const float speedMultiplier = db.readFloat();
-							const float CS = db.readFloat();
-							const float AR = db.readFloat();
-							const float OD = db.readFloat();
-							const float HP = db.readFloat();
+							sc.numSliderBreaks = numSliderBreaks;
+							sc.pp = pp;
+							sc.unstableRate = unstableRate;
+							sc.hitErrorAvgMin = hitErrorAvgMin;
+							sc.hitErrorAvgMax = hitErrorAvgMax;
+							sc.starsTomTotal = starsTomTotal;
+							sc.starsTomAim = starsTomAim;
+							sc.starsTomSpeed = starsTomSpeed;
+							sc.speedMultiplier = speedMultiplier;
+							sc.CS = CS;
+							sc.AR = AR;
+							sc.OD = OD;
+							sc.HP = HP;
+							sc.maxPossibleCombo = maxPossibleCombo;
+							sc.numHitObjects = numHitObjects;
+							sc.numCircles = numCircles;
+							sc.experimentalModsConVars = experimentalMods;
 
-							int maxPossibleCombo = -1;
-							int numHitObjects = -1;
-							int numCircles = -1;
-							if (scoreVersion > 20180722)
-							{
-								maxPossibleCombo = db.readInt();
-								numHitObjects = db.readInt();
-								numCircles = db.readInt();
-							}
+							// runtime
+							sc.sortHack = m_iSortHackCounter++;
+							sc.md5hash = md5hash;
 
-							const UString experimentalMods = db.readString();
-
-							if (gamemode == 0x0 || (dbVersion > 20210103 && scoreVersion > 20190103)) // gamemode filter (osu!standard) // HACKHACK: for explanation see hackIsImportedLegacyScoreFlag
-							{
-								Score sc;
-
-								sc.isLegacyScore = false;
-								sc.isImportedLegacyScore = isImportedLegacyScore;
-								sc.version = scoreVersion;
-								sc.unixTimestamp = unixTimestamp;
-
-								// default
-								sc.playerName = playerName;
-
-								sc.num300s = num300s;
-								sc.num100s = num100s;
-								sc.num50s = num50s;
-								sc.numGekis = numGekis;
-								sc.numKatus = numKatus;
-								sc.numMisses = numMisses;
-								sc.score = score;
-								sc.comboMax = maxCombo;
-								sc.perfect = (maxPossibleCombo > 0 && sc.comboMax > 0 && sc.comboMax >= maxPossibleCombo);
-								sc.modsLegacy = modsLegacy;
-
-								// custom
-								sc.numSliderBreaks = numSliderBreaks;
-								sc.pp = pp;
-								sc.unstableRate = unstableRate;
-								sc.hitErrorAvgMin = hitErrorAvgMin;
-								sc.hitErrorAvgMax = hitErrorAvgMax;
-								sc.starsTomTotal = starsTomTotal;
-								sc.starsTomAim = starsTomAim;
-								sc.starsTomSpeed = starsTomSpeed;
-								sc.speedMultiplier = speedMultiplier;
-								sc.CS = CS;
-								sc.AR = AR;
-								sc.OD = OD;
-								sc.HP = HP;
-								sc.maxPossibleCombo = maxPossibleCombo;
-								sc.numHitObjects = numHitObjects;
-								sc.numCircles = numCircles;
-								sc.experimentalModsConVars = experimentalMods;
-
-								// runtime
-								sc.sortHack = m_iSortHackCounter++;
-								sc.md5hash = md5hash;
-
-								addScoreRaw(md5hash, sc);
-								scoreCounter++;
-							}
+							addScoreRaw(md5hash, sc);
+							scoreCounter++;
 						}
 					}
-					debugLog("Loaded %i individual scores.\n", scoreCounter);
 				}
-				else
-					debugLog("Newer scores.db version is not backwards compatible with old clients.\n");
+				debugLog("Loaded %i individual scores.\n", scoreCounter);
+			} else {
+				debugLog("Newer scores.db version is not backwards compatible with old clients.\n");
 			}
-			else
-				debugLog("No custom scores found.\n");
-		}
-
-		// one-time-backup for special occasions (sanity)
-		if (makeBackupType > 0)
-		{
-			File originalScoresFile(scoresFilePath);
-			if (originalScoresFile.canRead())
-			{
-				UString backupScoresFilePath = scoresFilePath;
-				const int forcedBackupCounter = 3;
-				backupScoresFilePath.append(UString::format(".%i_%i.backup", (makeBackupType < 2 ? backupLessThanVersion : maxSupportedCustomDbVersion), forcedBackupCounter));
-
-				if (!env->fileExists(backupScoresFilePath)) // NOTE: avoid overwriting when people switch betas
-				{
-					File backupScoresFile(backupScoresFilePath, File::TYPE::WRITE);
-					if (backupScoresFile.canWrite())
-					{
-						const char *originalScoresFileBytes = originalScoresFile.readFile();
-						if (originalScoresFileBytes != NULL)
-							backupScoresFile.write(originalScoresFileBytes, originalScoresFile.getFileSize());
-					}
-				}
-			}
+		} else {
+			debugLog("No custom scores found.\n");
 		}
 	}
 
@@ -2226,71 +2120,75 @@ void OsuDatabase::loadScores()
 		UString scoresPath = osu_folder.getString();
 		scoresPath.append("scores.db");
 
-		OsuFile db(scoresPath, false);
-		if (db.isReady())
-		{
-			if (db.getFileSize() != customScoresFileSize) // HACKHACK: heuristic sanity check (some people have their osu!folder point directly to McOsu, which would break legacy score db loading here since there is no magic number)
+		Packet db = load_db(scoresPath);
+		if(db.size > 0) {
+			// HACKHACK: heuristic sanity check (some people have their
+			// osu!folder point directly to McOsu, which would break legacy
+			// score db loading here since there is no magic number)
+			if (db.size != customScoresFileSize)
 			{
-				const int dbVersion = db.readInt();
-				const int numBeatmaps = db.readInt();
+				const int dbVersion = read_int32(&db);
+				const int numBeatmaps = read_int32(&db);
 
 				debugLog("Legacy scores: version = %i, numBeatmaps = %i\n", dbVersion, numBeatmaps);
 
 				int scoreCounter = 0;
 				for (int b=0; b<numBeatmaps; b++)
 				{
-					const std::string md5hash = db.readStdString();
+					auto hash_str = read_string(&db);
 
-					if (md5hash.length() < 32)
+					if (hash_str.lengthUtf8() < 32)
 					{
-						debugLog("WARNING: Invalid score with md5hash.length() = %i!\n", md5hash.length());
+						debugLog("WARNING: Invalid score with md5hash.length() = %i!\n", hash_str.lengthUtf8());
 						continue;
 					}
-					else if (md5hash.length() > 32)
+					else if (hash_str.lengthUtf8() > 32)
 					{
 						debugLog("ERROR: Corrupt score database/entry detected, stopping.\n");
 						break;
 					}
 
-					const int numScores = db.readInt();
+					const MD5Hash md5hash = hash_str.toUtf8();
+					const int numScores = read_int32(&db);
 
 					if (Osu::debug->getBool())
-						debugLog("Beatmap[%i]: md5hash = %s, numScores = %i\n", b, md5hash.c_str(), numScores);
+						debugLog("Beatmap[%i]: md5hash = %s, numScores = %i\n", b, md5hash.toUtf8(), numScores);
 
 					for (int s=0; s<numScores; s++)
 					{
-						const unsigned char gamemode = db.readByte();
-						const int scoreVersion = db.readInt();
-						const UString beatmapHash = db.readString();
+						const unsigned char gamemode = read_byte(&db);
+						const int scoreVersion = read_int32(&db);
+						const UString beatmapHash = read_string(&db);
 
-						const UString playerName = db.readString();
-						const UString replayHash = db.readString();
+						const UString playerName = read_string(&db);
+						const UString replayHash = read_string(&db);
 
-						const short num300s = db.readShort();
-						const short num100s = db.readShort();
-						const short num50s = db.readShort();
-						const short numGekis = db.readShort();
-						const short numKatus = db.readShort();
-						const short numMisses = db.readShort();
+						const short num300s = read_short(&db);
+						const short num100s = read_short(&db);
+						const short num50s = read_short(&db);
+						const short numGekis = read_short(&db);
+						const short numKatus = read_short(&db);
+						const short numMisses = read_short(&db);
 
-						const int score = db.readInt();
-						const short maxCombo = db.readShort();
-						const bool perfect = db.readBool();
+						const int score = read_int32(&db);
+						const short maxCombo = read_short(&db);
+						const bool perfect = read_byte(&db);
 
-						const int mods = db.readInt();
-						const UString hpGraphString = db.readString();
-						const long long ticksWindows = db.readLongLong();
+						const int mods = read_int32(&db);
+						const UString hpGraphString = read_string(&db);
+						const long long ticksWindows = read_int64(&db);
 
-						db.readByteArray(); // replayCompressed
+						uint32_t replay_len = read_int32(&db);
+						db.pos += replay_len; // replayCompressed
 
 						/*long long onlineScoreID = 0;*/
 						if (scoreVersion >= 20140721)
-							/*onlineScoreID = */db.readLongLong();
+							/*onlineScoreID = */read_int64(&db);
 						else if (scoreVersion >= 20121008)
-							/*onlineScoreID = */db.readInt();
+							/*onlineScoreID = */read_int32(&db);
 
 						if (mods & OsuReplay::Mods::Target)
-							/*double totalAccuracy = */db.readDouble();
+							/*double totalAccuracy = */read_float64(&db);
 
 						if (gamemode == 0x0) // gamemode filter (osu!standard)
 						{
@@ -2382,111 +2280,109 @@ void OsuDatabase::saveScores()
 	{
 		debugLog("Osu: Saving scores ...\n");
 
-		OsuFile db((m_osu->isInVRMode() ? "scoresvr.db" : "scores.db"), true);
-		if (db.isReady())
+		Packet db = {0};
+
+		const double startTime = engine->getTimeReal();
+
+		// count number of beatmaps with valid scores
+		int numBeatmaps = 0;
+		for (std::unordered_map<MD5Hash, std::vector<Score>>::iterator it = m_scores.begin(); it != m_scores.end(); ++it)
 		{
-			const double startTime = engine->getTimeReal();
-
-			// count number of beatmaps with valid scores
-			int numBeatmaps = 0;
-			for (std::unordered_map<std::string, std::vector<Score>>::iterator it = m_scores.begin(); it != m_scores.end(); ++it)
+			for (int i=0; i<it->second.size(); i++)
 			{
-				for (int i=0; i<it->second.size(); i++)
+				if (!it->second[i].isLegacyScore)
 				{
-					if (!it->second[i].isLegacyScore)
-					{
-						numBeatmaps++;
-						break;
-					}
+					numBeatmaps++;
+					break;
 				}
 			}
-
-			// write header
-			db.writeInt(dbVersion);
-			db.writeInt(numBeatmaps);
-
-			// write scores for each beatmap
-			for (std::unordered_map<std::string, std::vector<Score>>::iterator it = m_scores.begin(); it != m_scores.end(); ++it)
-			{
-				int numNonLegacyScores = 0;
-				for (int i=0; i<it->second.size(); i++)
-				{
-					if (!it->second[i].isLegacyScore)
-						numNonLegacyScores++;
-				}
-
-				if (numNonLegacyScores > 0)
-				{
-					db.writeStdString(it->first);	// md5hash
-					db.writeInt(numNonLegacyScores);// numScores
-
-					for (int i=0; i<it->second.size(); i++)
-					{
-						if (!it->second[i].isLegacyScore)
-						{
-							db.writeByte((it->second[i].version > 20190103 ? (it->second[i].isImportedLegacyScore ? hackIsImportedLegacyScoreFlag : 0) : 0)); // gamemode (hardcoded atm) // NOTE: abused as isImportedLegacyScore flag (because I forgot to add a version cap to old builds)
-							db.writeInt(it->second[i].version);
-							// HACKHACK: for explanation see hackIsImportedLegacyScoreFlag
-							/*
-							if (it->second[i].version > 20190103)
-							{
-								db.writeBool(it->second[i].isImportedLegacyScore);
-							}
-							*/
-							db.writeLongLong(it->second[i].unixTimestamp);
-
-							// default
-							db.writeString(it->second[i].playerName);
-
-							db.writeShort(it->second[i].num300s);
-							db.writeShort(it->second[i].num100s);
-							db.writeShort(it->second[i].num50s);
-							db.writeShort(it->second[i].numGekis);
-							db.writeShort(it->second[i].numKatus);
-							db.writeShort(it->second[i].numMisses);
-
-							db.writeLongLong(it->second[i].score);
-							db.writeShort(it->second[i].comboMax);
-							db.writeInt(it->second[i].modsLegacy);
-
-							// custom
-							db.writeShort(it->second[i].numSliderBreaks);
-							db.writeFloat(it->second[i].pp);
-							db.writeFloat(it->second[i].unstableRate);
-							db.writeFloat(it->second[i].hitErrorAvgMin);
-							db.writeFloat(it->second[i].hitErrorAvgMax);
-							db.writeFloat(it->second[i].starsTomTotal);
-							db.writeFloat(it->second[i].starsTomAim);
-							db.writeFloat(it->second[i].starsTomSpeed);
-							db.writeFloat(it->second[i].speedMultiplier);
-							db.writeFloat(it->second[i].CS);
-							db.writeFloat(it->second[i].AR);
-							db.writeFloat(it->second[i].OD);
-							db.writeFloat(it->second[i].HP);
-
-							if (it->second[i].version > 20180722)
-							{
-								db.writeInt(it->second[i].maxPossibleCombo);
-								db.writeInt(it->second[i].numHitObjects);
-								db.writeInt(it->second[i].numCircles);
-							}
-
-							db.writeString(it->second[i].experimentalModsConVars);
-						}
-					}
-				}
-			}
-
-			db.write();
-
-			debugLog("Took %f seconds.\n", (engine->getTimeReal() - startTime));
 		}
-		else
+
+		// write header
+		write_int32(&db, dbVersion);
+		write_int32(&db, numBeatmaps);
+
+		// write scores for each beatmap
+		for (std::unordered_map<MD5Hash, std::vector<Score>>::iterator it = m_scores.begin(); it != m_scores.end(); ++it)
+		{
+			int numNonLegacyScores = 0;
+			for (int i=0; i<it->second.size(); i++)
+			{
+				if (!it->second[i].isLegacyScore)
+					numNonLegacyScores++;
+			}
+
+			if (numNonLegacyScores > 0)
+			{
+				write_string(&db, it->first.hash);	// md5hash
+				write_int32(&db, numNonLegacyScores);// numScores
+
+				for (int i=0; i<it->second.size(); i++)
+				{
+					if (!it->second[i].isLegacyScore)
+					{
+						write_byte(&db, (it->second[i].version > 20190103 ? (it->second[i].isImportedLegacyScore ? hackIsImportedLegacyScoreFlag : 0) : 0)); // gamemode (hardcoded atm) // NOTE: abused as isImportedLegacyScore flag (because I forgot to add a version cap to old builds)
+						write_int32(&db, it->second[i].version);
+						// HACKHACK: for explanation see hackIsImportedLegacyScoreFlag
+						/*
+						if (it->second[i].version > 20190103)
+						{
+							db.writeBool(it->second[i].isImportedLegacyScore);
+						}
+						*/
+						write_int64(&db, it->second[i].unixTimestamp);
+
+						// default
+						write_string(&db, it->second[i].playerName);
+
+						write_short(&db, it->second[i].num300s);
+						write_short(&db, it->second[i].num100s);
+						write_short(&db, it->second[i].num50s);
+						write_short(&db, it->second[i].numGekis);
+						write_short(&db, it->second[i].numKatus);
+						write_short(&db, it->second[i].numMisses);
+
+						write_int64(&db, it->second[i].score);
+						write_short(&db, it->second[i].comboMax);
+						write_int32(&db, it->second[i].modsLegacy);
+
+						// custom
+						write_short(&db, it->second[i].numSliderBreaks);
+						write_float32(&db, it->second[i].pp);
+						write_float32(&db, it->second[i].unstableRate);
+						write_float32(&db, it->second[i].hitErrorAvgMin);
+						write_float32(&db, it->second[i].hitErrorAvgMax);
+						write_float32(&db, it->second[i].starsTomTotal);
+						write_float32(&db, it->second[i].starsTomAim);
+						write_float32(&db, it->second[i].starsTomSpeed);
+						write_float32(&db, it->second[i].speedMultiplier);
+						write_float32(&db, it->second[i].CS);
+						write_float32(&db, it->second[i].AR);
+						write_float32(&db, it->second[i].OD);
+						write_float32(&db, it->second[i].HP);
+
+						if (it->second[i].version > 20180722)
+						{
+							write_int32(&db, it->second[i].maxPossibleCombo);
+							write_int32(&db, it->second[i].numHitObjects);
+							write_int32(&db, it->second[i].numCircles);
+						}
+
+						write_string(&db, it->second[i].experimentalModsConVars);
+					}
+				}
+			}
+		}
+
+		if(!save_db(&db, (m_osu->isInVRMode() ? "scoresvr.db" : "scores.db"))) {
 			debugLog("Couldn't write scores.db!\n");
+		}
+
+		debugLog("Took %f seconds.\n", (engine->getTimeReal() - startTime));
 	}
 }
 
-void OsuDatabase::loadCollections(UString collectionFilePath, bool isLegacy, const std::unordered_map<std::string, OsuDatabaseBeatmap*> &hashToDiff2, const std::unordered_map<std::string, OsuDatabaseBeatmap*> &hashToBeatmap)
+void OsuDatabase::loadCollections(UString collectionFilePath, bool isLegacy, const std::unordered_map<MD5Hash, OsuDatabaseBeatmap*> &hashToDiff2, const std::unordered_map<MD5Hash, OsuDatabaseBeatmap*> &hashToBeatmap)
 {
 	bool wasInterrupted = false;
 
@@ -2539,11 +2435,11 @@ void OsuDatabase::loadCollections(UString collectionFilePath, bool isLegacy, con
 		}
 	};
 
-	OsuFile collectionFile(collectionFilePath);
-	if (collectionFile.isReady())
+	Packet collectionFile = load_db(collectionFilePath);
+	if (collectionFile.size > 0)
 	{
-		const int version = collectionFile.readInt();
-		const int numCollections = collectionFile.readInt();
+		const int version = read_int32(&collectionFile);
+		const int numCollections = read_int32(&collectionFile);
 
 		debugLog("Collection: version = %i, numCollections = %i\n", version, numCollections);
 
@@ -2558,8 +2454,8 @@ void OsuDatabase::loadCollections(UString collectionFilePath, bool isLegacy, con
 
 				m_fLoadingProgress = 0.75f + 0.24f*((float)(i+1)/(float)numCollections);
 
-				UString name = collectionFile.readString();
-				const int numBeatmaps = collectionFile.readInt();
+				UString name = read_string(&collectionFile);
+				const int numBeatmaps = read_int32(&collectionFile);
 
 				if (Osu::debug->getBool())
 					debugLog("Raw Collection #%i: name = %s, numBeatmaps = %i\n", i, name.toUtf8(), numBeatmaps);
@@ -2572,14 +2468,13 @@ void OsuDatabase::loadCollections(UString collectionFilePath, bool isLegacy, con
 				{
 					if (m_bInterruptLoad.load()) {wasInterrupted = true; break;} // cancellation point
 
-					std::string md5hash = collectionFile.readStdString();
+					auto hash_str = read_string(&collectionFile);
+					MD5Hash md5hash = hash_str.toUtf8();
 
-					CollectionEntry entry;
-					{
-						entry.isLegacyEntry = isLegacy;
-
-						entry.hash = md5hash;
-					}
+					CollectionEntry entry = {
+						.isLegacyEntry = isLegacy,
+						.hash = md5hash,
+					};
 					c.hashes.push_back(entry);
 				}
 
@@ -2594,12 +2489,9 @@ void OsuDatabase::loadCollections(UString collectionFilePath, bool isLegacy, con
 						if (m_bInterruptLoad.load()) {wasInterrupted = true; break;} // cancellation point
 
 						// new: use hashmap
-						if (c.hashes[h].hash.length() == 32)
-						{
-							const auto result = hashToDiff2.find(c.hashes[h].hash);
-							if (result != hashToDiff2.end())
-								matchingDiffs2.push_back(result->second);
-						}
+						const auto result = hashToDiff2.find(c.hashes[h].hash);
+						if (result != hashToDiff2.end())
+							matchingDiffs2.push_back(result->second);
 					}
 
 					// we now have an array of all OsuBeatmapDifficulty objects within this collection
@@ -2615,13 +2507,10 @@ void OsuDatabase::loadCollections(UString collectionFilePath, bool isLegacy, con
 
 						// find the OsuBeatmap object corresponding to this diff
 						OsuDatabaseBeatmap *beatmap = NULL;
-						if (diff2->getMD5Hash().length() == 32)
-						{
-							// new: use hashmap
-							const auto result = hashToBeatmap.find(diff2->getMD5Hash());
-							if (result != hashToBeatmap.end())
-								beatmap = result->second;
-						}
+						// new: use hashmap
+						const auto result = hashToBeatmap.find(diff2->getMD5Hash());
+						if (result != hashToBeatmap.end())
+							beatmap = result->second;
 
 						CollectionLoadingHelper::addBeatmapsEntryForBeatmapAndDiff2(c, beatmap, diff2, m_bInterruptLoad, wasInterrupted);
 					}
@@ -2645,13 +2534,13 @@ void OsuDatabase::loadCollections(UString collectionFilePath, bool isLegacy, con
 							{
 								for (size_t e=0; e<c.hashes.size(); e++)
 								{
-									const std::string &toBeAddedEntryHash = c.hashes[e].hash;
+									const MD5Hash &toBeAddedEntryHash = c.hashes[e].hash;
 
 									bool entryAlreadyExists = false;
 									{
 										for (size_t ee=0; ee<existingCollection.hashes.size(); ee++)
 										{
-											const std::string &existingEntryHash = existingCollection.hashes[ee].hash;
+											const MD5Hash &existingEntryHash = existingCollection.hashes[ee].hash;
 											if (existingEntryHash == toBeAddedEntryHash)
 											{
 												entryAlreadyExists = true;
@@ -2685,13 +2574,10 @@ void OsuDatabase::loadCollections(UString collectionFilePath, bool isLegacy, con
 												{
 													// find the OsuBeatmap object corresponding to this diff
 													OsuDatabaseBeatmap *beatmap = NULL;
-													if (diff2->getMD5Hash().length() == 32)
-													{
-														// new: use hashmap
-														const auto result = hashToBeatmap.find(diff2->getMD5Hash());
-														if (result != hashToBeatmap.end())
-															beatmap = result->second;
-													}
+													// new: use hashmap
+													const auto result = hashToBeatmap.find(diff2->getMD5Hash());
+													if (result != hashToBeatmap.end())
+														beatmap = result->second;
 
 													CollectionLoadingHelper::addBeatmapsEntryForBeatmapAndDiff2(existingCollection, beatmap, diff2, m_bInterruptLoad, wasInterrupted);
 												}
@@ -2762,81 +2648,78 @@ void OsuDatabase::saveCollections()
 	{
 		debugLog("Osu: Saving collections ...\n");
 
-		OsuFile db("collections.db", true);
-		if (db.isReady())
-		{
-			const double startTime = engine->getTimeReal();
+		Packet db = {0};
+		const double startTime = engine->getTimeReal();
 
-			// check how much we actually have to save
-			// note that we are only saving non-legacy collections and entries (i.e. things which were added/deleted inside mcosu)
-			// reason being that it is more annoying to have osu!-side collections modifications be completely ignored (because we would make a full copy initially)
-			// if a collection or entry is deleted in osu!, then you would expect it to also be deleted here
-			// but, if a collection or entry is added in mcosu, then deleting the collection in osu! should only delete all osu!-side entries
-			int32_t numNonLegacyCollectionsOrCollectionsWithNonLegacyEntries = 0;
+		// check how much we actually have to save
+		// note that we are only saving non-legacy collections and entries (i.e. things which were added/deleted inside mcosu)
+		// reason being that it is more annoying to have osu!-side collections modifications be completely ignored (because we would make a full copy initially)
+		// if a collection or entry is deleted in osu!, then you would expect it to also be deleted here
+		// but, if a collection or entry is added in mcosu, then deleting the collection in osu! should only delete all osu!-side entries
+		int32_t numNonLegacyCollectionsOrCollectionsWithNonLegacyEntries = 0;
+		for (size_t c=0; c<m_collections.size(); c++)
+		{
+			if (!m_collections[c].isLegacyCollection)
+				numNonLegacyCollectionsOrCollectionsWithNonLegacyEntries++;
+			else
+			{
+				// does this legacy collection have any non-legacy entries?
+				for (size_t h=0; h<m_collections[c].hashes.size(); h++)
+				{
+					if (!m_collections[c].hashes[h].isLegacyEntry)
+					{
+						numNonLegacyCollectionsOrCollectionsWithNonLegacyEntries++;
+						break;
+					}
+				}
+			}
+		}
+
+		write_int32(&db, dbVersion);
+		write_int32(&db, numNonLegacyCollectionsOrCollectionsWithNonLegacyEntries);
+
+		if (numNonLegacyCollectionsOrCollectionsWithNonLegacyEntries > 0)
+		{
 			for (size_t c=0; c<m_collections.size(); c++)
 			{
-				if (!m_collections[c].isLegacyCollection)
-					numNonLegacyCollectionsOrCollectionsWithNonLegacyEntries++;
-				else
+				bool hasNonLegacyEntries = false;
 				{
-					// does this legacy collection have any non-legacy entries?
 					for (size_t h=0; h<m_collections[c].hashes.size(); h++)
 					{
 						if (!m_collections[c].hashes[h].isLegacyEntry)
 						{
-							numNonLegacyCollectionsOrCollectionsWithNonLegacyEntries++;
+							hasNonLegacyEntries = true;
 							break;
 						}
 					}
 				}
-			}
 
-			db.writeInt(dbVersion);
-			db.writeInt(numNonLegacyCollectionsOrCollectionsWithNonLegacyEntries);
-
-			if (numNonLegacyCollectionsOrCollectionsWithNonLegacyEntries > 0)
-			{
-				for (size_t c=0; c<m_collections.size(); c++)
+				if (!m_collections[c].isLegacyCollection || hasNonLegacyEntries)
 				{
-					bool hasNonLegacyEntries = false;
+					int32_t numNonLegacyEntries = 0;
+					for (size_t h=0; h<m_collections[c].hashes.size(); h++)
 					{
-						for (size_t h=0; h<m_collections[c].hashes.size(); h++)
-						{
-							if (!m_collections[c].hashes[h].isLegacyEntry)
-							{
-								hasNonLegacyEntries = true;
-								break;
-							}
-						}
+						if (!m_collections[c].hashes[h].isLegacyEntry)
+							numNonLegacyEntries++;
 					}
 
-					if (!m_collections[c].isLegacyCollection || hasNonLegacyEntries)
+					write_string(&db, m_collections[c].name);
+					write_int32(&db, numNonLegacyEntries);
+
+					for (size_t h=0; h<m_collections[c].hashes.size(); h++)
 					{
-						int32_t numNonLegacyEntries = 0;
-						for (size_t h=0; h<m_collections[c].hashes.size(); h++)
-						{
-							if (!m_collections[c].hashes[h].isLegacyEntry)
-								numNonLegacyEntries++;
-						}
-
-						db.writeString(m_collections[c].name);
-						db.writeInt(numNonLegacyEntries);
-
-						for (size_t h=0; h<m_collections[c].hashes.size(); h++)
-						{
-							if (!m_collections[c].hashes[h].isLegacyEntry)
-								db.writeStdString(m_collections[c].hashes[h].hash);
-						}
+						if (!m_collections[c].hashes[h].isLegacyEntry)
+							write_string(&db, m_collections[c].hashes[h].hash.hash);
 					}
 				}
 			}
-
-			db.write();
-
-			debugLog("Took %f seconds.\n", (engine->getTimeReal() - startTime));
 		}
-		else
+
+		if(!save_db(&db, "collections.db")) {
 			debugLog("Couldn't write collections.db!\n");
+		}
+
+		debugLog("Took %f seconds.\n", (engine->getTimeReal() - startTime));
 	}
 }
 
@@ -2857,7 +2740,7 @@ OsuDatabaseBeatmap *OsuDatabase::loadRawBeatmap(UString beatmapPath)
 			fullFilePath.append(beatmapFiles[i]);
 
 			// load diffs
-			if (ext == "osu")
+			if (ext == UString("osu"))
 			{
 				OsuDatabaseBeatmap *diff2 = new OsuDatabaseBeatmap(m_osu, fullFilePath, beatmapPath);
 
@@ -2899,11 +2782,8 @@ OsuDatabaseBeatmap *OsuDatabase::loadRawBeatmap(UString beatmapPath)
 			for (size_t i=0; i<diffs2.size(); i++)
 			{
 				OsuDatabaseBeatmap *diff2 = diffs2[i];
-				if (diff2->getMD5Hash().length() == 32)
-				{
-					m_rawHashToDiff2[diff2->getMD5Hash()] = diff2;
-					m_rawHashToBeatmap[diff2->getMD5Hash()] = beatmap;
-				}
+				m_rawHashToDiff2[diff2->getMD5Hash()] = diff2;
+				m_rawHashToBeatmap[diff2->getMD5Hash()] = beatmap;
 			}
 		}
 	}
@@ -2989,7 +2869,7 @@ void OsuDatabase::onScoresExport()
 					}
 				}
 
-				out << beatmapScores.first; // md5 hash
+				out << beatmapScores.first.toUtf8(); // md5 hash
 				out << ",";
 				out << id;
 				out << ",";
@@ -3003,7 +2883,7 @@ void OsuDatabase::onScoresExport()
 				out << score.unixTimestamp;
 				out << ",";
 
-				out << std::string(score.playerName.toUtf8());
+				out << score.playerName.toUtf8();
 				out << ",";
 
 				out << score.num300s;
@@ -3060,7 +2940,7 @@ void OsuDatabase::onScoresExport()
 				out << ",";
 				out << score.numCircles;
 				out << ",";
-				out << std::string(score.experimentalModsConVars.toUtf8());
+				out << score.experimentalModsConVars.toUtf8();
 
 				out << "\n";
 			}

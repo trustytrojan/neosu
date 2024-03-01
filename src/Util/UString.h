@@ -10,6 +10,26 @@
 
 #include "cbase.h"
 
+class UString;
+
+struct MD5Hash {
+	char hash[33];
+
+	MD5Hash() {
+		hash[0] = 0;
+	}
+
+	MD5Hash(const char* str) {
+		strncpy(hash, str, 32);
+		hash[32] = 0;
+	}
+
+	inline const char *toUtf8() const {return hash;}
+	MD5Hash &operator = (const MD5Hash &other);
+	bool operator == (const MD5Hash &other) const;
+	bool operator == (const UString &other) const;
+};
+
 class UString
 {
 public:
@@ -27,6 +47,8 @@ public:
 	void clear();
 
 	// get
+	operator char*() const { return mUtf8; }
+    operator wchar_t*() const { return mUnicode; }
 	inline int length() const {return mLength;}
 	inline int lengthUtf8() const {return mLengthUtf8;}
 	inline const char *toUtf8() const {return mUtf8;}
@@ -125,5 +147,23 @@ private:
 	wchar_t *mUnicode;
 	char *mUtf8;
 };
+
+namespace std {
+	template <>
+	struct hash<UString> {
+		size_t operator()(const UString& str) const {
+			std::string tmp(str.toUtf8(), str.lengthUtf8());
+			return std::hash<std::string>()(tmp);
+		}
+	};
+
+	template <>
+	struct hash<MD5Hash> {
+		size_t operator()(const MD5Hash& md5) const {
+			std::string_view tmp(md5.hash, 32);
+			return std::hash<std::string_view>()(tmp);
+		}
+	};
+}
 
 #endif

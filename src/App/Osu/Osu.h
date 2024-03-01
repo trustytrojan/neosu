@@ -87,11 +87,17 @@ public:
 	virtual void stealFocus();
 
 	void onLeftChange(bool down);
-	void onMiddleChange(bool down){;}
+	void onMiddleChange(bool down){
+		(void)down;
+	}
 	void onRightChange(bool down);
 
-	void onWheelVertical(int delta){;}
-	void onWheelHorizontal(int delta){;}
+	void onWheelVertical(int delta){
+		(void)delta;
+	}
+	void onWheelHorizontal(int delta){
+		(void)delta;
+	}
 
 	virtual void onResolutionChanged(Vector2 newResolution);
 	virtual void onDPIChanged();
@@ -204,7 +210,10 @@ public:
 
 	static Vector2 g_vInternalResolution;
 
-	void updateModsForConVarTemplate(UString oldValue, UString newValue) {updateMods();}
+	void updateModsForConVarTemplate(UString oldValue, UString newValue) {
+		(void)oldValue; (void)newValue;
+		updateMods();
+	}
 	void onAudioOutputDeviceChange();
 
 	void rebuildRenderTargets();

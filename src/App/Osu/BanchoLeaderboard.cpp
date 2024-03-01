@@ -110,8 +110,8 @@ OsuDatabase::Score parse_score(char *score_line) {
 void fetch_online_scores(OsuDatabaseBeatmap *beatmap) {
   auto path = UString("/web/osu-osz2-getscores.php?s=0&vv=4&v=1");
 
-  std::string beatmap_hash = beatmap->getMD5Hash();
-  path.append(UString::format("&c=%s", beatmap->getMD5Hash().c_str()).toUtf8());
+  auto beatmap_hash = beatmap->getMD5Hash();
+  path.append(UString::format("&c=%s", beatmap_hash.toUtf8()));
 
   UString ustr_osu_file_path = beatmap->getFilePath(); // have to keep UString in scope to use toUtf8()
   const char *osu_file_path = ustr_osu_file_path.toUtf8();
@@ -140,7 +140,7 @@ void fetch_online_scores(OsuDatabaseBeatmap *beatmap) {
       .type = GET_MAP_LEADERBOARD,
       .path = path,
       .mime = NULL,
-      .extra = (uint8_t *)strdup(beatmap_hash.c_str()),
+      .extra = (uint8_t *)strdup(beatmap_hash.toUtf8()),
   };
 
   send_api_request(request);
@@ -165,7 +165,7 @@ void process_leaderboard_response(Packet response) {
   //       Server can return partial responses in some cases, so make sure
   //       you actually received the data if you plan on using it.
   OnlineMapInfo info = {0};
-  std::string beatmap_hash = (char *)response.extra;
+  MD5Hash beatmap_hash = (char *)response.extra;
   std::vector<OsuDatabase::Score> scores;
   char *body = (char *)response.memory;
 

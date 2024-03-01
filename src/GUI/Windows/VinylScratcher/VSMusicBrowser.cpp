@@ -517,7 +517,7 @@ void VSMusicBrowser::updateFolder(UString baseFolder, size_t fromDepth)
 		int elementCounter = 0;
 		for (const UString &folder : folders)
 		{
-			if (folder == "." || folder == "..") continue;
+			if (folder == UString(".") || folder == UString("..")) continue;
 
 			UString completeName = baseFolder;
 			completeName.append(folder);
@@ -543,7 +543,7 @@ void VSMusicBrowser::updateFolder(UString baseFolder, size_t fromDepth)
 		// then add all files
 		for (const UString &file : files)
 		{
-			if (file == "." || file == "..") continue;
+			if (file == UString(".") || file == UString("..")) continue;
 
 			UString completeName = baseFolder;
 			completeName.append(file);

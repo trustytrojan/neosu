@@ -35,8 +35,8 @@ struct OsuChatChannel {
     void onChannelButtonClick(CBaseUIButton* btn);
 };
 
-struct OsuChat : public OsuScreen
-{
+class OsuChat : public OsuScreen {
+public:
     OsuChat(Osu *osu);
 
     virtual void draw(Graphics *g);

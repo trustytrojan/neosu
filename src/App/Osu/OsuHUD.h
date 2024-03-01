@@ -56,7 +56,7 @@ public:
 	void drawAccuracySimple(Graphics *g, float accuracy, float scale = 1.0f); // used by OsuRankingScreen
 	void drawWarningArrow(Graphics *g, Vector2 pos, bool flipVertically, bool originLeft = true);
 	void updateScoreBoardAvatars();
-	void drawScoreBoard(Graphics *g, std::string &beatmapMD5Hash, OsuScore *currentScore);
+	void drawScoreBoard(Graphics *g, const MD5Hash &beatmapMD5Hash, OsuScore *currentScore);
 	void drawScoreBoardMP(Graphics *g);
 	void drawScorebarBg(Graphics *g, float alpha, float breakAnim);
 	void drawSectionPass(Graphics *g, float alpha);

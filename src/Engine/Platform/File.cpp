@@ -181,9 +181,9 @@ UString StdFile::readLine()
 	UString uString = UString(m_sBuffer.c_str());
 	if (uString.length() > 0)
 	{
-		const wchar_t &lastChar = uString[uString.length() - 1];
+		const wchar_t &lastChar = uString[uString.lengthUtf8() - 1];
 		if (lastChar == L'\n' || lastChar == L'\r')
-			uString = uString.substr(0, uString.length() - 1);
+			uString = uString.substr(0, uString.lengthUtf8() - 1);
 	}
 
 	return uString;

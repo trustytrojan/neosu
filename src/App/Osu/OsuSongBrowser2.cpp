@@ -1870,7 +1870,7 @@ void OsuSongBrowser2::onDifficultySelected(OsuDatabaseBeatmap *diff2, bool play)
 	if (play) {
 		if(bancho.is_in_a_multi_room()) {
 			bancho.room.map_name = UString::format("%s - %s [%s]", diff2->getArtist().toUtf8(), diff2->getTitle().toUtf8(), diff2->getDifficultyName().toUtf8());
-			bancho.room.map_md5 = UString(diff2->getMD5Hash().c_str());
+			bancho.room.map_md5 = diff2->getMD5Hash();
 			bancho.room.map_id = diff2->getID();
 
 			Packet packet = {0};
@@ -3010,9 +3010,9 @@ void OsuSongBrowser2::rebuildScoreButtons()
 		        	}
 		        } else {
 			        SAFE_DELETE(m_localBestButton);
-					m_localBestButton = new OsuUISongBrowserScoreButton(m_osu, m_contextMenu, 0, 0, 0, 0, "");
+					m_localBestButton = new OsuUISongBrowserScoreButton(m_osu, m_contextMenu, 0, 0, 0, 0);
 					m_localBestButton->setClickCallback( fastdelegate::MakeDelegate(this, &OsuSongBrowser2::onScoreClicked) );
-					m_localBestButton->setName(UString(m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash().c_str()));
+					m_localBestButton->map_hash = m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash();
 					m_localBestButton->setScore(*local_best, m_selectedBeatmap->getSelectedDifficulty2());
 					m_localBestButton->resetHighlight();
 					m_localBestContainer->addBaseUIElement(m_localBestLabel);
@@ -3031,9 +3031,9 @@ void OsuSongBrowser2::rebuildScoreButtons()
 		    	// Display local best while scores are loading
 		    	if(local_best != local_scores.end()) {
 			        SAFE_DELETE(m_localBestButton);
-					m_localBestButton = new OsuUISongBrowserScoreButton(m_osu, m_contextMenu, 0, 0, 0, 0, "");
+					m_localBestButton = new OsuUISongBrowserScoreButton(m_osu, m_contextMenu, 0, 0, 0, 0);
 					m_localBestButton->setClickCallback( fastdelegate::MakeDelegate(this, &OsuSongBrowser2::onScoreClicked) );
-					m_localBestButton->setName(UString(m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash().c_str()));
+					m_localBestButton->map_hash = m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash();
 					m_localBestButton->setScore(*local_best, m_selectedBeatmap->getSelectedDifficulty2());
 					m_localBestButton->resetHighlight();
 					m_localBestContainer->addBaseUIElement(m_localBestLabel);
@@ -3054,7 +3054,7 @@ void OsuSongBrowser2::rebuildScoreButtons()
 		const int numNewButtons = numScores - m_scoreButtonCache.size();
 		for (size_t i=0; i<numNewButtons; i++)
 		{
-			OsuUISongBrowserScoreButton *scoreButton = new OsuUISongBrowserScoreButton(m_osu, m_contextMenu, 0, 0, 0, 0, "");
+			OsuUISongBrowserScoreButton *scoreButton = new OsuUISongBrowserScoreButton(m_osu, m_contextMenu, 0, 0, 0, 0);
 			scoreButton->setClickCallback( fastdelegate::MakeDelegate(this, &OsuSongBrowser2::onScoreClicked) );
 			m_scoreButtonCache.push_back(scoreButton);
 		}
@@ -3076,7 +3076,7 @@ void OsuSongBrowser2::rebuildScoreButtons()
 		for (size_t i=0; i<numScores; i++)
 		{
 			OsuUISongBrowserScoreButton *button = m_scoreButtonCache[i];
-			button->setName(UString(m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash().c_str()));
+			button->map_hash = m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash();
 			button->setScore(scores[i], m_selectedBeatmap->getSelectedDifficulty2(), i+1);
 			scoreButtons.push_back(button);
 		}
@@ -4117,10 +4117,10 @@ void OsuSongBrowser2::onModeChange(UString text)
 
 void OsuSongBrowser2::onModeChange2(UString text, int id)
 {
-	if (id != 2 && text != "fposu")
+	if (id != 2 && text != UString("fposu"))
 		m_osu_mod_fposu_ref->setValue(0.0f);
 
-	if (id == 0 || text == "std")
+	if (id == 0 || text == UString("std"))
 	{
 		if (m_osu->getGamemode() != Osu::GAMEMODE::STD)
 		{
@@ -4128,7 +4128,7 @@ void OsuSongBrowser2::onModeChange2(UString text, int id)
 			refreshBeatmaps();
 		}
 	}
-	else if (id == 1 || text == "mania")
+	else if (id == 1 || text == UString("mania"))
 	{
 		if (m_osu->getGamemode() != Osu::GAMEMODE::MANIA)
 		{
@@ -4136,7 +4136,7 @@ void OsuSongBrowser2::onModeChange2(UString text, int id)
 			refreshBeatmaps();
 		}
 	}
-	else if (id == 2 || text == "fposu")
+	else if (id == 2 || text == UString("fposu"))
 	{
 		m_osu_mod_fposu_ref->setValue(1.0f);
 
@@ -4215,7 +4215,7 @@ void OsuSongBrowser2::onScoreContextMenu(OsuUISongBrowserScoreButton *scoreButto
 
 	if (id == 2)
 	{
-		m_db->deleteScore(std::string(scoreButton->getName().toUtf8()), scoreButton->getScoreUnixTimestamp());
+		m_db->deleteScore(scoreButton->map_hash, scoreButton->getScoreUnixTimestamp());
 
 		rebuildScoreButtons();
 		m_userButton->updateUserStats();
@@ -4228,9 +4228,9 @@ void OsuSongBrowser2::onSongButtonContextMenu(OsuUISongBrowserSongButton *songBu
 
 	struct CollectionManagementHelper
 	{
-		static std::vector<std::string> getBeatmapSetHashesForSongButton(OsuUISongBrowserSongButton *songButton, OsuDatabase *db)
+		static std::vector<MD5Hash> getBeatmapSetHashesForSongButton(OsuUISongBrowserSongButton *songButton, OsuDatabase *db)
 		{
-			std::vector<std::string> beatmapSetHashes;
+			std::vector<MD5Hash> beatmapSetHashes;
 			{
 				const std::vector<OsuUISongBrowserButton*> &songButtonChildren = songButton->getChildren();
 				if (songButtonChildren.size() > 0)
@@ -4271,7 +4271,7 @@ void OsuSongBrowser2::onSongButtonContextMenu(OsuUISongBrowserSongButton *songBu
 		{
 			// add set to collection
 
-			const std::vector<std::string> beatmapSetHashes = CollectionManagementHelper::getBeatmapSetHashesForSongButton(songButton, m_db);
+			const std::vector<MD5Hash> beatmapSetHashes = CollectionManagementHelper::getBeatmapSetHashesForSongButton(songButton, m_db);
 			for (size_t i=0; i<beatmapSetHashes.size(); i++)
 			{
 				m_db->addBeatmapToCollection(text, beatmapSetHashes[i], false); // (don't save here every time) (this will ignore already added parts of the set, so nothing to worry about)
@@ -4318,7 +4318,7 @@ void OsuSongBrowser2::onSongButtonContextMenu(OsuUISongBrowserSongButton *songBu
 				}
 			}
 
-			const std::vector<std::string> beatmapSetHashes = CollectionManagementHelper::getBeatmapSetHashesForSongButton(songButton, m_db);
+			const std::vector<MD5Hash> beatmapSetHashes = CollectionManagementHelper::getBeatmapSetHashesForSongButton(songButton, m_db);
 			for (size_t i=0; i<beatmapSetHashes.size(); i++)
 			{
 				m_db->removeBeatmapFromCollection(collectionName, beatmapSetHashes[i], false); // (don't save here every time)
@@ -4347,7 +4347,7 @@ void OsuSongBrowser2::onSongButtonContextMenu(OsuUISongBrowserSongButton *songBu
 				{
 					// id == -4 means add set to the just-created new collection
 
-					const std::vector<std::string> beatmapSetHashes = CollectionManagementHelper::getBeatmapSetHashesForSongButton(songButton, m_db);
+					const std::vector<MD5Hash> beatmapSetHashes = CollectionManagementHelper::getBeatmapSetHashesForSongButton(songButton, m_db);
 					for (size_t i=0; i<beatmapSetHashes.size(); i++)
 					{
 						m_db->addBeatmapToCollection(text, beatmapSetHashes[i], false); // (don't save here every time)

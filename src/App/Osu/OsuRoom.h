@@ -14,27 +14,29 @@ class OsuUICheckbox;
 class OsuUIContextMenu;
 
 
-struct OsuUIModList : public CBaseUIContainer {
+class OsuUIModList : public CBaseUIContainer {
+public:
     OsuUIModList(uint32_t *flags) : CBaseUIContainer(0, 0, 0, 0, "mod_list") {
         m_flags = flags;
     }
 
     uint32_t *m_flags;
 
-    virtual void draw(Graphics *g);
+    virtual void draw(Graphics *g) override;
     virtual bool isVisible() override;
 };
 
-struct OsuRoom : public OsuScreen {
+class OsuRoom : public OsuScreen {
+public:
     OsuRoom(Osu *osu);
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
-    virtual void onKeyDown(KeyboardEvent &e);
-    virtual void onKeyUp(KeyboardEvent &e);
-    virtual void onChar(KeyboardEvent &e);
-    virtual void onResolutionChange(Vector2 newResolution);
-    virtual CBaseUIContainer* setVisible(bool visible); // does nothing
+    virtual void draw(Graphics *g) override;
+    virtual void mouse_update(bool *propagate_clicks) override;
+    virtual void onKeyDown(KeyboardEvent &e) override;
+    virtual void onKeyUp(KeyboardEvent &e) override;
+    virtual void onChar(KeyboardEvent &e) override;
+    virtual void onResolutionChange(Vector2 newResolution) override;
+    virtual CBaseUIContainer* setVisible(bool visible) override; // does nothing
 
     void updateLayout(Vector2 newResolution);
     void updateSettingsLayout(Vector2 newResolution);

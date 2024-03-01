@@ -116,7 +116,7 @@ public:
 
 	// actions
 	void stealFocus() {m_bMouseInsideCheck = true; m_bActive = false; onFocusStolen();}
-	virtual void updateLayout() {if(m_parent != nullptr) m_parent->updateLayout();}
+	void updateLayout() {if(m_parent != nullptr) m_parent->updateLayout();}
 
 protected:
 	// events

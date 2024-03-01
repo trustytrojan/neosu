@@ -92,7 +92,7 @@ private:
 
 	virtual void initAsync()
 	{
-		std::unordered_map<std::string, std::vector<OsuDatabase::Score>> *scores = m_osu->getSongBrowser()->getDatabase()->getScores();
+		std::unordered_map<MD5Hash, std::vector<OsuDatabase::Score>> *scores = m_osu->getSongBrowser()->getDatabase()->getScores();
 
 		// count number of scores to recalculate for UI
 		size_t numScoresToRecalculate = 0;
@@ -108,7 +108,7 @@ private:
 		}
 		m_iNumScoresToRecalculate = numScoresToRecalculate;
 
-		printf("PPRecalc will recalculate %i scores ...\n", (int)numScoresToRecalculate);
+		debugLog("PPRecalc will recalculate %i scores ...\n", (int)numScoresToRecalculate);
 
 		// actually recalculate them
 		for (auto &kv : *scores)
@@ -121,7 +121,7 @@ private:
 				{
 					if (m_bInterrupted.load())
 						break;
-					if (score.md5hash.length() < 1)
+					if (score.md5hash.hash[0] == 0)
 						continue;
 
 					// NOTE: avoid importing the same score twice
@@ -148,7 +148,7 @@ private:
 					if (diff2 == NULL)
 					{
 						if (Osu::debug->getBool())
-							printf("PPRecalc couldn't find %s\n", score.md5hash.c_str());
+							debugLog("PPRecalc couldn't find %s\n", score.md5hash.toUtf8());
 
 						continue;
 					}
@@ -173,7 +173,7 @@ private:
 					if (diffres.diffobjects.size() < 1)
 					{
 						if (Osu::debug->getBool())
-							printf("PPRecalc couldn't load %s\n", osuFilePath.toUtf8());
+							debugLog("PPRecalc couldn't load %s\n", osuFilePath.toUtf8());
 
 						continue;
 					}
@@ -214,7 +214,6 @@ private:
 					}
 
 					// 5) overwrite score with new pp data (and handle imports)
-					const float oldPP = score.pp;
 					if (pp > 0.0f)
 					{
 						score.pp = pp;
@@ -245,12 +244,6 @@ private:
 					}
 
 					m_iNumScoresRecalculated++;
-
-					if (Osu::debug->getBool())
-					{
-						printf("[%s] original = %f, new = %f, delta = %f\n", score.md5hash.c_str(), oldPP, score.pp, (score.pp - oldPP));
-						printf("at %i/%i\n", m_iNumScoresRecalculated.load(), m_iNumScoresToRecalculate.load());
-					}
 				}
 			}
 
@@ -447,7 +440,8 @@ void OsuUserStatsScreen::rebuildScoreButtons(UString playerName)
 			title.append("]");
 		}
 
-		OsuUISongBrowserScoreButton *button = new OsuUISongBrowserScoreButton(m_osu, m_contextMenu, 0, 0, 300, 100, UString(scores[i]->md5hash.c_str()), OsuUISongBrowserScoreButton::STYLE::TOP_RANKS);
+		OsuUISongBrowserScoreButton *button = new OsuUISongBrowserScoreButton(m_osu, m_contextMenu, 0, 0, 300, 100, OsuUISongBrowserScoreButton::STYLE::TOP_RANKS);
+		button->map_hash = scores[i]->md5hash;
 		button->setScore(*scores[i], NULL, scores.size()-i, title, weight);
 		button->setClickCallback( fastdelegate::MakeDelegate(this, &OsuUserStatsScreen::onScoreClicked) );
 
@@ -705,7 +699,7 @@ void OsuUserStatsScreen::onCopyAllScoresConfirmed(UString text, int id)
 
 	debugLog("Copying all scores from \"%s\" into \"%s\"\n", m_sCopyAllScoresFromUser.toUtf8(), playerNameToCopyInto.toUtf8());
 
-	std::unordered_map<std::string, std::vector<OsuDatabase::Score>> *scores = m_osu->getSongBrowser()->getDatabase()->getScores();
+	std::unordered_map<MD5Hash, std::vector<OsuDatabase::Score>> *scores = m_osu->getSongBrowser()->getDatabase()->getScores();
 
 	std::vector<OsuDatabase::Score> tempScoresToCopy;
 	for (auto &kv : *scores)
@@ -753,7 +747,7 @@ void OsuUserStatsScreen::onCopyAllScoresConfirmed(UString text, int id)
 		if (tempScoresToCopy.size() > 0)
 		{
 			if (Osu::debug->getBool())
-				debugLog("Copying %i for %s\n", (int)tempScoresToCopy.size(), kv.first.c_str());
+				debugLog("Copying %i for %s\n", (int)tempScoresToCopy.size(), kv.first.toUtf8());
 
 			for (size_t i=0; i<tempScoresToCopy.size(); i++)
 			{
@@ -805,7 +799,7 @@ void OsuUserStatsScreen::onDeleteAllScoresConfirmed(UString text, int id)
 
 	debugLog("Deleting all scores for \"%s\"\n", playerName.toUtf8());
 
-	std::unordered_map<std::string, std::vector<OsuDatabase::Score>> *scores = m_osu->getSongBrowser()->getDatabase()->getScores();
+	std::unordered_map<MD5Hash, std::vector<OsuDatabase::Score>> *scores = m_osu->getSongBrowser()->getDatabase()->getScores();
 
 	// delete every score matching the current playerName
 	for (auto &kv : *scores)

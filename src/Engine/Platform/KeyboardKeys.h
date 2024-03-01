@@ -8,7 +8,7 @@
 #ifndef KEYBOARDKEYS_H
 #define KEYBOARDKEYS_H
 
-#if defined MCENGINE_FEATURE_SDL
+#if defined(MCENGINE_FEATURE_SDL)
 
 #include "SDL.h"
 
@@ -109,7 +109,7 @@
 #define KEY_PAGEUP			SDL_SCANCODE_PAGEUP
 #define KEY_PAGEDOWN		SDL_SCANCODE_PAGEDOWN
 
-#elifdef _WIN32
+#elif defined(_WIN32)
 
 #include <windows.h>
 

@@ -12,7 +12,7 @@ struct Bancho {
   UString endpoint;
   int32_t user_id = 0;
   UString username;
-  UString pw_md5;
+  MD5Hash pw_md5;
   Room room;
 
   bool prefer_daycore = false;
@@ -40,7 +40,7 @@ struct Channel {
   uint32_t nb_members;
 };
 
-UString md5(uint8_t *msg, size_t msg_len);
+MD5Hash md5(uint8_t *msg, size_t msg_len);
 
 void handle_packet(Packet *packet);
 

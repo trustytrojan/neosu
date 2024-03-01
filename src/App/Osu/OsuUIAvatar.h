@@ -2,7 +2,8 @@
 #include <pthread.h>
 #include "CBaseUIButton.h"
 
-struct OsuUIAvatar : public CBaseUIButton {
+class OsuUIAvatar : public CBaseUIButton {
+public:
     OsuUIAvatar(uint32_t player_id, float xPos, float yPos, float xSize, float ySize);
 
     virtual void draw(Graphics *g);

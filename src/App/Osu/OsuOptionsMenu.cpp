@@ -2534,7 +2534,7 @@ void OsuOptionsMenu::onSkinSelect()
 
 		for (int i=0; i<skinFolders.size(); i++)
 		{
-			if (skinFolders[i] == "." || skinFolders[i] == "..") // is this universal in every file system? too lazy to check. should probably fix this in the engine and not here
+			if (skinFolders[i] == UString(".") || skinFolders[i] == UString("..")) // is this universal in every file system? too lazy to check. should probably fix this in the engine and not here
 				continue;
 
 			CBaseUIButton *button = m_contextMenu->addButton(skinFolders[i]);
@@ -4170,7 +4170,7 @@ void OsuOptionsMenu::save()
 
 	// hardcoded (!)
 	out << "monitor " << env->getMonitor() << "\n";
-	if (engine->getSound()->getOutputDevice() != "Default")
+	if (engine->getSound()->getOutputDevice() != UString("Default"))
 		out << "snd_output_device " << engine->getSound()->getOutputDevice().toUtf8() << "\n";
 	if (m_fullscreenCheckbox != NULL && !m_fullscreenCheckbox->isChecked())
 		out << "windowed " << engine->getScreenWidth() << "x" << engine->getScreenHeight() << "\n";

@@ -151,7 +151,7 @@ public:
 
 	inline const std::vector<OsuDatabaseBeatmap*> &getDifficulties() const {return m_difficulties;}
 
-	inline const std::string &getMD5Hash() const {return m_sMD5Hash;}
+	inline const MD5Hash &getMD5Hash() const {return m_sMD5Hash;}
 
 	TIMING_INFO getTimingInfoForTime(unsigned long positionMS);
 	static TIMING_INFO getTimingInfoForTimeAndTimingPoints(unsigned long positionMS, std::vector<TIMINGPOINT> &timingpoints);
@@ -391,7 +391,7 @@ private:
 
 	std::vector<OsuDatabaseBeatmap*> m_difficulties;
 
-	std::string m_sMD5Hash;
+	MD5Hash m_sMD5Hash;
 
 
 
@@ -457,9 +457,9 @@ public:
 	inline const std::vector<double> &getAimStrains() const {return m_aimStrains;}
 	inline const std::vector<double> &getSpeedStrains() const {return m_speedStrains;}
 
-	inline const int getNumObjects() const {return m_iNumObjects.load();}
-	inline const int getNumCircles() const {return m_iNumCircles.load();}
-	inline const int getNumSpinners() const {return m_iNumSpinners.load();}
+	inline int getNumObjects() const {return m_iNumObjects.load();}
+	inline int getNumCircles() const {return m_iNumCircles.load();}
+	inline int getNumSpinners() const {return m_iNumSpinners.load();}
 
 private:
 	virtual void init();

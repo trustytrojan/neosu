@@ -313,7 +313,7 @@ void OsuHUD::draw(Graphics *g)
 		}
 
         if(osu_draw_scoreboard.getBool() && !bancho.is_playing_a_multi_map() && beatmap->getSelectedDifficulty2() != NULL) {
-			drawScoreBoard(g, (std::string&)beatmap->getSelectedDifficulty2()->getMD5Hash(), m_osu->getScore());
+			drawScoreBoard(g, beatmap->getSelectedDifficulty2()->getMD5Hash(), m_osu->getScore());
         }
 
         bool playing_mp = osu_draw_scoreboard_mp.getBool() && bancho.is_playing_a_multi_map();
@@ -590,7 +590,7 @@ void OsuHUD::drawVR(Graphics *g, Matrix4 &mvp, OsuVR *vr)
 				drawHPBar(g, m_fHealth, osu_hud_scorebar_hide_during_breaks.getBool() ? (1.0f - beatmap->getBreakBackgroundFadeAnim()) : 1.0f, m_fScoreBarBreakAnim);
 
             if(osu_draw_scoreboard.getBool() && !bancho.is_playing_a_multi_map()) {
-                drawScoreBoard(g, (std::string&)beatmap->getSelectedDifficulty2()->getMD5Hash(), m_osu->getScore());
+                drawScoreBoard(g, beatmap->getSelectedDifficulty2()->getMD5Hash(), m_osu->getScore());
             }
             if(osu_draw_scoreboard_mp.getBool() && bancho.is_playing_a_multi_map()) {
                 drawScoreBoardMP(g);
@@ -1724,7 +1724,7 @@ void OsuHUD::updateScoreBoardAvatars() {
 	}
 }
 
-void OsuHUD::drawScoreBoard(Graphics *g, std::string &beatmapMD5Hash, OsuScore *currentScore)
+void OsuHUD::drawScoreBoard(Graphics *g, const MD5Hash &beatmapMD5Hash, OsuScore *currentScore)
 {
 	const int maxVisibleDatabaseScores = m_osu->isInVRDraw() ? 3 : 4;
     auto m_db = m_osu->getSongBrowser()->getDatabase();

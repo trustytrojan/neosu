@@ -43,12 +43,6 @@ OsuUISongBrowserSongButton::OsuUISongBrowserSongButton(Osu *osu, OsuSongBrowser2
 	setHideIfSelected(true);
 
 	// labels
-	/*
-	m_sTitle = "Title";
-	m_sArtist = "Artist";
-	m_sMapper = "Mapper";
-	*/
-
 	m_fThumbnailFadeInTime = 0.0f;
 	m_fTextOffset = 0.0f;
 	m_fGradeOffset = 0.0f;

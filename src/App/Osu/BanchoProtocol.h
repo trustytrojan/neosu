@@ -197,7 +197,8 @@ struct Slot {
   bool has_player() { return (status & 0b01111100); }
 };
 
-struct Room {
+class Room {
+public:
   Room();
   Room(Packet *packet);
 
@@ -215,7 +216,7 @@ struct Room {
   bool has_password = false;
 
   UString map_name = "";
-  UString map_md5 = "";
+  MD5Hash map_md5;
   int32_t map_id = 0;
 
   uint8_t mode = 0;
@@ -244,7 +245,7 @@ struct Room {
 void read_bytes(Packet *packet, uint8_t *bytes, size_t n);
 uint8_t read_byte(Packet *packet);
 uint16_t read_short(Packet *packet);
-uint32_t read_int(Packet *packet);
+uint32_t read_int32(Packet *packet);
 uint64_t read_int64(Packet *packet);
 uint32_t read_uleb128(Packet *packet);
 float read_float32(Packet *packet);

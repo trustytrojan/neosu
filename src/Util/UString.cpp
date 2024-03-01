@@ -31,6 +31,19 @@
 constexpr char UString::nullString[];
 constexpr wchar_t UString::nullWString[];
 
+
+MD5Hash& MD5Hash::operator = (const MD5Hash &other) {
+	memcpy(hash, other.hash, 32);
+	hash[32] = 0;
+	return *this;
+}
+bool MD5Hash::operator == (const MD5Hash &other) const {
+	return memcmp(hash, other.hash, 32) == 0;
+}
+bool MD5Hash::operator == (const UString &other) const {
+	return strncmp(hash, other.toUtf8(), 32) == 0;
+}
+
 UString::UString()
 {
 	mLength = 0;

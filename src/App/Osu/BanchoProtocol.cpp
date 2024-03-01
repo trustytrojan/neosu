@@ -12,7 +12,7 @@ Room::Room(Packet *packet) {
   id = read_short(packet);
   in_progress = read_byte(packet);
   match_type = read_byte(packet);
-  mods = read_int(packet);
+  mods = read_int32(packet);
   name = read_string(packet);
 
   has_password = read_byte(packet) > 0;
@@ -23,8 +23,10 @@ Room::Room(Packet *packet) {
   }
 
   map_name = read_string(packet);
-  map_id = read_int(packet);
-  map_md5 = read_string(packet);
+  map_id = read_int32(packet);
+
+  auto hash_str = read_string(packet);
+  map_md5 = hash_str.toUtf8();
 
   nb_players = 0;
   for (int i = 0; i < 16; i++) {
@@ -39,23 +41,23 @@ Room::Room(Packet *packet) {
     }
 
     if(slots[s].has_player()) {
-      slots[s].player_id = read_int(packet);
+      slots[s].player_id = read_int32(packet);
       nb_players++;
     }
   }
 
-  host_id = read_int(packet);
+  host_id = read_int32(packet);
   mode = read_byte(packet);
   win_condition = read_byte(packet);
   team_type = read_byte(packet);
   freemods = read_byte(packet);
   if (freemods) {
     for (int i = 0; i < 16; i++) {
-      slots[i].mods = read_int(packet);
+      slots[i].mods = read_int32(packet);
     }
   }
 
-  seed = read_int(packet);
+  seed = read_int32(packet);
 }
 
 void Room::pack(Packet *packet) {
@@ -119,7 +121,7 @@ uint16_t read_short(Packet *packet) {
   return s;
 }
 
-uint32_t read_int(Packet *packet) {
+uint32_t read_int32(Packet *packet) {
   uint32_t i = 0;
   read_bytes(packet, (uint8_t *)&i, 4);
   return i;
@@ -168,7 +170,7 @@ UString read_string(Packet *packet) {
   str[len] = '\0';
 
   auto ustr = UString((const char*)str);
-  delete str;
+  delete[] str;
 
   return ustr;
 }

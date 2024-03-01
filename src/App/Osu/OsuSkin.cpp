@@ -424,7 +424,7 @@ void OsuSkin::load()
 
 				for (int i=0; i<skinFolders.size(); i++)
 				{
-					if (skinFolders[i] == "." || skinFolders[i] == "..") // is this universal in every file system? too lazy to check. should probably fix this in the engine and not here
+					if (skinFolders[i] == UString(".") || skinFolders[i] == UString("..")) // is this universal in every file system? too lazy to check. should probably fix this in the engine and not here
 						continue;
 
 					UString randomSkinFolder = skinFolder;
@@ -969,7 +969,7 @@ void OsuSkin::load()
 	debugLog("OsuSkin: HitCircleOverlap = %i\n", m_iHitCircleOverlap);
 
 	// delayed error notifications due to resource loading potentially blocking engine time
-	if (!parseSkinIni1Status && parseSkinIni2Status && m_osu_skin_ref->getString() != "default" && m_osu_skin_ref->getString() != "defaultvr")
+	if (!parseSkinIni1Status && parseSkinIni2Status && m_osu_skin_ref->getString() != UString("default") && m_osu_skin_ref->getString() != UString("defaultvr"))
 		m_osu->getNotificationOverlay()->addNotification("Error: Couldn't load skin.ini!", 0xffff0000);
 	else if (!parseSkinIni2Status)
 		m_osu->getNotificationOverlay()->addNotification("Error: Couldn't load DEFAULT skin.ini!!!", 0xffff0000);

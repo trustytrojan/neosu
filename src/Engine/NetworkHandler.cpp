@@ -19,7 +19,7 @@
 #define MC_PROTOCOL_VERSION 1
 #define MC_PROTOCOL_TIMEOUT 10000
 
-ConVar _name_("name", "McKay", FCVAR_NONE);
+ConVar _name_("name", "Guest", FCVAR_NONE);
 
 #ifdef MCENGINE_FEATURE_NETWORKING
 

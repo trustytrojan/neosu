@@ -29,8 +29,8 @@ struct RoomUIElement : CBaseUIScrollView {
     void onRoomJoinButtonClick(CBaseUIButton* btn);
 };
 
-struct OsuLobby : public OsuScreen
-{
+class OsuLobby : public OsuScreen {
+public:
     OsuLobby(Osu *osu);
 
     virtual void onKeyDown(KeyboardEvent &e);

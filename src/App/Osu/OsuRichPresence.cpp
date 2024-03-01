@@ -42,7 +42,7 @@ Action last_action = IDLE;
 void OsuRichPresence::setBanchoStatus(Osu *osu, const char* info_text, Action action) {
 	if(osu == NULL) return;
 
-	std::string map_md5 = "";
+	MD5Hash map_md5("");
 	uint32_t map_id = 0;
 
     auto selected_beatmap = osu->getSelectedBeatmap();
@@ -64,7 +64,7 @@ void OsuRichPresence::setBanchoStatus(Osu *osu, const char* info_text, Action ac
     packet.id = CHANGE_ACTION;
     write_byte(&packet, action);
     write_string(&packet, fancy_text);
-    write_string(&packet, map_md5.c_str());
+    write_string(&packet, map_md5.hash);
     write_int32(&packet, osu->m_modSelector->getModFlags());
     write_byte(&packet, 0); // osu!std
     write_int32(&packet, map_id);
@@ -72,7 +72,7 @@ void OsuRichPresence::setBanchoStatus(Osu *osu, const char* info_text, Action ac
 }
 
 void OsuRichPresence::updateBanchoMods() {
-	std::string map_md5 = "";
+	MD5Hash map_md5("");
 	uint32_t map_id = 0;
 
     auto selected_beatmap = bancho.osu->getSelectedBeatmap();
@@ -88,7 +88,7 @@ void OsuRichPresence::updateBanchoMods() {
     packet.id = CHANGE_ACTION;
     write_byte(&packet, last_action);
     write_string(&packet, last_status.toUtf8());
-    write_string(&packet, map_md5.c_str());
+    write_string(&packet, map_md5.hash);
     write_int32(&packet, bancho.osu->m_modSelector->getModFlags());
     write_byte(&packet, 0); // osu!std
     write_int32(&packet, map_id);

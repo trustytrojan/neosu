@@ -23,7 +23,9 @@ public:
 	}
 	virtual ~OsuScreen() {;}
 
-	virtual void onResolutionChange(Vector2 newResolution) {;}
+	virtual void onResolutionChange(Vector2 newResolution) {
+		(void)newResolution;
+	}
 
 	Osu *m_osu;
 };

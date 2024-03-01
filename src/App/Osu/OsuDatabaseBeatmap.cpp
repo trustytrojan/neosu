@@ -7,12 +7,12 @@
 
 #include "OsuDatabaseBeatmap.h"
 
+#include "Bancho.h" // md5
 #include "Engine.h"
 #include "ConVar.h"
 #include "File.h"
 
 #include "Osu.h"
-#include "OsuFile.h"
 #include "OsuSkin.h"
 #include "OsuBeatmap.h"
 #include "OsuBeatmapStandard.h"
@@ -1013,7 +1013,6 @@ bool OsuDatabaseBeatmap::loadMetadata(OsuDatabaseBeatmap *databaseBeatmap)
 		debugLog("OsuDatabaseBeatmap::loadMetadata() : %s\n", databaseBeatmap->m_sFilePath.toUtf8());
 
 	// generate MD5 hash (loads entire file, very slow)
-	databaseBeatmap->m_sMD5Hash.clear();
 	{
 		File file(!databaseBeatmap->m_bFilePathIsInMemoryBeatmap ? databaseBeatmap->m_sFilePath : "");
 
@@ -1035,8 +1034,10 @@ bool OsuDatabaseBeatmap::loadMetadata(OsuDatabaseBeatmap *databaseBeatmap)
 			}
 		}
 
-		if (beatmapFile != NULL)
-			databaseBeatmap->m_sMD5Hash = OsuFile::md5((unsigned char*)beatmapFile, beatmapFileSize);
+		if (beatmapFile != NULL) {
+			auto hash = md5((uint8_t*)beatmapFile, beatmapFileSize);
+			databaseBeatmap->m_sMD5Hash = MD5Hash(hash.toUtf8());
+		}
 	}
 
 	// open osu file again, but this time for parsing

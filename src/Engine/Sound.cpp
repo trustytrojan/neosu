@@ -117,7 +117,7 @@ void Sound::initAsync()
 		{
 			UString fileExtensionLowerCase = env->getFileExtensionFromFilePath(m_sFilePath);
 			fileExtensionLowerCase.lowerCase();
-			if (fileExtensionLowerCase == "wav")
+			if (fileExtensionLowerCase == UString("wav"))
 			{
 				File wavFile(m_sFilePath);
 				if (wavFile.getFileSize() < (size_t)minWavFileSize)

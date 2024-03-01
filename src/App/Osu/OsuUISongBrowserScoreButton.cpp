@@ -45,7 +45,7 @@ ConVar *OsuUISongBrowserScoreButton::m_osu_od_override_ref = NULL;
 ConVar *OsuUISongBrowserScoreButton::m_osu_hp_override_ref = NULL;
 UString OsuUISongBrowserScoreButton::recentScoreIconString;
 
-OsuUISongBrowserScoreButton::OsuUISongBrowserScoreButton(Osu *osu, OsuUIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize, UString name, STYLE style) : CBaseUIButton(xPos, yPos, xSize, ySize, name, "")
+OsuUISongBrowserScoreButton::OsuUISongBrowserScoreButton(Osu *osu, OsuUIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize, STYLE style) : CBaseUIButton(xPos, yPos, xSize, ySize, "", "")
 {
 	m_osu = osu;
 	m_contextMenu = contextMenu;
@@ -79,16 +79,6 @@ OsuUISongBrowserScoreButton::OsuUISongBrowserScoreButton(Osu *osu, OsuUIContextM
 	m_iScoreUnixTimestamp = 0;
 
 	m_scoreGrade = OsuScore::GRADE::GRADE_D;
-	/*
-	m_sScoreUsername = "McKay";
-	m_sScoreScore = "Score: 123,456,789 (123x)";
-	m_sScoreAccuracy = "98.97%";
-	m_sScoreMods = "HD,HR";
-
-	m_sScoreScorePPWeightedPP = "233pp";
-	m_sScoreScorePPWeightedWeight = "   weighted 95% (221pp)";
-	m_sScoreWeight = "weighted 95%";
-	*/
 }
 
 OsuUISongBrowserScoreButton::~OsuUISongBrowserScoreButton()

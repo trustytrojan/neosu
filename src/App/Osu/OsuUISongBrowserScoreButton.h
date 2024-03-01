@@ -32,7 +32,7 @@ public:
 		TOP_RANKS
 	};
 
-	OsuUISongBrowserScoreButton(Osu *osu, OsuUIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize, UString name, STYLE style = STYLE::SCORE_BROWSER);
+	OsuUISongBrowserScoreButton(Osu *osu, OsuUIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize, STYLE style = STYLE::SCORE_BROWSER);
 	virtual ~OsuUISongBrowserScoreButton();
 
 	void draw(Graphics *g);
@@ -53,6 +53,7 @@ public:
 	inline int getIndex() const {return m_iScoreIndexNumber;}
 
 	OsuUIAvatar *m_avatar = nullptr;
+	MD5Hash map_hash;
 
 private:
 	static ConVar *m_osu_scores_sort_by_pp_ref;

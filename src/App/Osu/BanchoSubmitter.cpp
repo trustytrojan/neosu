@@ -78,7 +78,7 @@ void submit_score(OsuDatabase::Score score) {
     {
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "bmk");
-        curl_mime_data(part, score.diff2->getMD5Hash().c_str(), CURL_ZERO_TERMINATED);
+        curl_mime_data(part, score.diff2->getMD5Hash().toUtf8(), CURL_ZERO_TERMINATED);
     }
     {
         auto unique_ids = UString::format("%s|%s", bancho.install_id.toUtf8(), bancho.disk_uuid.toUtf8());
@@ -89,7 +89,7 @@ void submit_score(OsuDatabase::Score score) {
     {
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "pass");
-        curl_mime_data(part, bancho.pw_md5.toUtf8(), bancho.pw_md5.lengthUtf8());
+        curl_mime_data(part, bancho.pw_md5.hash, 32);
     }
     {
         auto osu_version = UString::format("%d", OSU_VERSION_DATEONLY);
@@ -114,21 +114,23 @@ void submit_score(OsuDatabase::Score score) {
         delete client_hashes_b64;
     }
     {
-        auto score_data = UString::format("%s", score.diff2->getMD5Hash().c_str());
+        UString score_data;
+        score_data.append(score.diff2->getMD5Hash().hash);
         score_data.append(UString::format(":%s", bancho.username.toUtf8()));
         {
             auto idiot_check = UString::format("chickenmcnuggets%d", score.num300s + score.num100s);
             idiot_check.append(UString::format("o15%d%d", score.num50s, score.numGekis));
             idiot_check.append(UString::format("smustard%d%d", score.numKatus, score.numMisses));
-            idiot_check.append(UString::format("uu%s", score.diff2->getMD5Hash().c_str()));
+            idiot_check.append(UString::format("uu%s", score.diff2->getMD5Hash().toUtf8()));
             idiot_check.append(UString::format("%d%s", score.comboMax, score.perfect ? "True" : "False"));
             idiot_check.append(UString::format("%s%d%s", bancho.username.toUtf8(), score.score, GRADES[(int)score.grade]));
             idiot_check.append(UString::format("%dQ%s", score.modsLegacy, score.passed ? "True" : "False"));
             idiot_check.append(UString::format("0%d%s", OSU_VERSION_DATEONLY, score_time));
             idiot_check.append(bancho.client_hashes);
 
+            auto idiot_hash = md5((uint8_t*)idiot_check.toUtf8(), idiot_check.lengthUtf8());
             score_data.append(":");
-            score_data.append(md5((uint8_t*)idiot_check.toUtf8(), idiot_check.lengthUtf8()));
+            score_data.append(idiot_hash.hash);
         }
         score_data.append(UString::format(":%d", score.num300s));
         score_data.append(UString::format(":%d", score.num100s));
