@@ -4599,73 +4599,77 @@ void OsuSongBrowser2::recreateCollectionsButtons()
 		}
 	}
 
+	Timer t;
+	t.start();
+
 	const std::vector<OsuDatabase::Collection> &collections = m_db->getCollections();
-	for (size_t i=0; i<collections.size(); i++)
-	{
-		std::vector<OsuUISongBrowserButton*> children;
-		{
-			for (size_t b=0; b<collections[i].beatmaps.size(); b++)
-			{
-				const OsuDatabaseBeatmap *collectionBeatmap = collections[i].beatmaps[b].first;
-				const std::vector<OsuDatabaseBeatmap*> &colDiffs = collections[i].beatmaps[b].second;
-				for (size_t sb=0; sb<m_songButtons.size(); sb++)
-				{
-					// first: search direct buttons on collection beatmap
-					bool isMatchingSongButton = (m_songButtons[sb]->getDatabaseBeatmap() == collectionBeatmap);
-					if (!isMatchingSongButton)
-					{
-						// second: search direct buttons on collection diffs (e.g. standalone diffs which still have a wrapper beatmap)
-						for (size_t c=0; c<colDiffs.size(); c++)
-						{
-							isMatchingSongButton = (m_songButtons[sb]->getDatabaseBeatmap() == colDiffs[c]);
-							if (isMatchingSongButton)
-								break;
-						}
 
-						if (!isMatchingSongButton)
-						{
-							// third: search child buttons
-							const std::vector<OsuUISongBrowserButton*> &songButtonChildren = m_songButtons[sb]->getChildren();
-							for (size_t sbc=0; sbc<songButtonChildren.size(); sbc++)
-							{
-								// check set match
-								if (songButtonChildren[sbc]->getDatabaseBeatmap() == collectionBeatmap)
-								{
-									isMatchingSongButton = true;
-									break;
-								}
-							}
+	std::vector<std::vector<OsuUISongBrowserButton*>> collection_button_children;
+	for(int i = 0; i < collections.size(); i++) {
+		collection_button_children.push_back(std::vector<OsuUISongBrowserButton*>());
+	}
+
+	for(auto& song_button : m_songButtons) {
+		for(int i = 0; i < collections.size(); i++) {
+			for(auto& pair : collections[i].beatmaps) {
+				const OsuDatabaseBeatmap *collectionBeatmap = pair.first;
+				const std::vector<OsuDatabaseBeatmap*> &colDiffs = pair.second;
+
+				// first: search direct buttons on collection beatmap
+				auto song_beatmap = song_button->getDatabaseBeatmap();
+				bool isMatchingSongButton = (song_beatmap == collectionBeatmap);
+
+				// second: search direct buttons on collection diffs (e.g. standalone diffs which still have a wrapper beatmap)
+				if(!isMatchingSongButton) {
+					for(auto& diff : colDiffs) {
+						if(song_beatmap == diff) {
+							isMatchingSongButton = true;
+							break;
+						}
+					}
+				}
+
+				// third: search child buttons
+				if(!isMatchingSongButton) {
+					const std::vector<OsuUISongBrowserButton*> &songButtonChildren = song_button->getChildren();
+					for(OsuUISongBrowserButton* sbc : songButtonChildren) {
+						// check set match
+						if (sbc->getDatabaseBeatmap() == collectionBeatmap) {
+							isMatchingSongButton = true;
+							break;
+						}
+					}
+				}
+
+				if(isMatchingSongButton) {
+					const std::vector<OsuUISongBrowserButton*> &songButtonChildren = song_button->getChildren();
+					std::vector<OsuUISongBrowserButton*> matchingDiffs;
+
+					for(OsuUISongBrowserButton* sbc : songButtonChildren) {
+						for(auto& diff : colDiffs) {
+							if (sbc->getDatabaseBeatmap() == diff)
+								matchingDiffs.push_back(sbc);
 						}
 					}
 
-					if (isMatchingSongButton)
-					{
-						const std::vector<OsuUISongBrowserButton*> &diffChildren = m_songButtons[sb]->getChildren();
-
-						std::vector<OsuUISongBrowserButton*> matchingDiffs;
-						for (size_t d=0; d<diffChildren.size(); d++)
-						{
-							OsuUISongBrowserButton *songButtonPointer = diffChildren[d];
-							for (size_t cd=0; cd<colDiffs.size(); cd++)
-							{
-								if (songButtonPointer->getDatabaseBeatmap() == colDiffs[cd])
-									matchingDiffs.push_back(songButtonPointer);
-							}
-						}
-
-						// new: only add matched diff buttons, instead of the set button
-						// however, if all diffs match, then add the set button instead (user added all diffs of beatmap into collection)
-						if (diffChildren.size() == matchingDiffs.size())
-							children.push_back(m_songButtons[sb]); // TODO: this is more of a convenience workaround until dynamic regrouping is implemented
-						else
-							children.insert(children.end(), matchingDiffs.begin(), matchingDiffs.end());
-
-						break;
-					}
+					// new: only add matched diff buttons, instead of the set button
+					// however, if all diffs match, then add the set button instead (user added all diffs of beatmap into collection)
+					if (songButtonChildren.size() == matchingDiffs.size())
+						collection_button_children[i].push_back(song_button); // TODO: this is more of a convenience workaround until dynamic regrouping is implemented
+					else
+						collection_button_children[i].insert(collection_button_children[i].end(), matchingDiffs.begin(), matchingDiffs.end());
 				}
 			}
 		}
-		OsuUISongBrowserCollectionButton *collectionButton = new OsuUISongBrowserCollectionButton(m_osu, this, m_songBrowser, m_contextMenu, 250, 250 + m_beatmaps.size()*50, 200, 50, "", collections[i].name, children);
-		m_collectionButtons.push_back(collectionButton);
 	}
+
+	for(int i = 0; i < collections.size(); i++) {
+		if(!collection_button_children[i].empty()) {
+			OsuUISongBrowserCollectionButton *collectionButton = new OsuUISongBrowserCollectionButton(m_osu, this, m_songBrowser, m_contextMenu, 250, 250 + m_beatmaps.size()*50, 200, 50, "", collections[i].name, collection_button_children[i]);
+			m_collectionButtons.push_back(collectionButton);
+		}
+	}
+
+	t.update();
+	debugLog("recreateCollectionsButtons(): %f seconds\n", t.getElapsedTime());
 }
