@@ -38,6 +38,10 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu)
 
 	CHANGELOG alpha317;
 	alpha317.title = UString::format("%.2f (Build Date: %s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__); // (09.01.2022 - ?)
+	alpha317.changes.push_back("- Fixed scores of 0 getting submitted");
+	alpha317.changes.push_back("");
+	alpha317.changes.push_back("");
+	alpha317.changes.push_back("34.03");
 	alpha317.changes.push_back("- Fixed replays having incorrect tickrate when using speed modifying mods");
 	alpha317.changes.push_back("");
 	alpha317.changes.push_back("");
