@@ -10,7 +10,7 @@
 #include "Engine.h"
 #include "ResourceManager.h"
 
-CBaseUIImageButton::CBaseUIImageButton(UString imageResourceName, float xPos, float yPos, float xSize, float ySize, UString name) : CBaseUIButton(xPos, yPos, xSize, ySize, name, "")
+CBaseUIImageButton::CBaseUIImageButton(std::string imageResourceName, float xPos, float yPos, float xSize, float ySize, UString name) : CBaseUIButton(xPos, yPos, xSize, ySize, name, "")
 {
 	setImageResourceName(imageResourceName);
 
@@ -46,7 +46,7 @@ void CBaseUIImageButton::draw(Graphics *g)
 	}
 }
 
-CBaseUIImageButton *CBaseUIImageButton::setImageResourceName(UString imageResourceName)
+CBaseUIImageButton *CBaseUIImageButton::setImageResourceName(std::string imageResourceName)
 {
 	m_sImageResourceName = imageResourceName;
 

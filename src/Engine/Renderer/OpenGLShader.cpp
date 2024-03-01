@@ -14,7 +14,7 @@
 
 #include "OpenGLHeaders.h"
 
-OpenGLShader::OpenGLShader(UString vertexShader, UString fragmentShader, bool source) : Shader()
+OpenGLShader::OpenGLShader(std::string vertexShader, std::string fragmentShader, bool source) : Shader()
 {
 	m_sVsh = vertexShader;
 	m_sFsh = fragmentShader;
@@ -204,12 +204,12 @@ int OpenGLShader::getAndCacheUniformLocation(const UString &name)
 	return id;
 }
 
-bool OpenGLShader::compile(UString vertexShader, UString fragmentShader, bool source)
+bool OpenGLShader::compile(std::string vertexShader, std::string fragmentShader, bool source)
 {
 	// load & compile shaders
-	debugLog("OpenGLShader: Compiling %s ...\n", (source ? "vertex source" : vertexShader.toUtf8()));
+	debugLog("OpenGLShader: Compiling %s ...\n", (source ? "vertex source" : vertexShader.c_str()));
 	m_iVertexShader = source ? createShaderFromString(vertexShader, GL_VERTEX_SHADER_ARB) : createShaderFromFile(vertexShader, GL_VERTEX_SHADER_ARB);
-	debugLog("OpenGLShader: Compiling %s ...\n", (source ? "fragment source" : fragmentShader.toUtf8()));
+	debugLog("OpenGLShader: Compiling %s ...\n", (source ? "fragment source" : fragmentShader.c_str()));
 	m_iFragmentShader = source ? createShaderFromString(fragmentShader, GL_FRAGMENT_SHADER_ARB) : createShaderFromFile(fragmentShader, GL_FRAGMENT_SHADER_ARB);
 
 	if (m_iVertexShader == 0 || m_iFragmentShader == 0)
@@ -254,7 +254,7 @@ bool OpenGLShader::compile(UString vertexShader, UString fragmentShader, bool so
 	return true;
 }
 
-int OpenGLShader::createShaderFromString(UString shaderSource, int shaderType)
+int OpenGLShader::createShaderFromString(std::string shaderSource, int shaderType)
 {
 	const int shader = glCreateShaderObjectARB(shaderType);
 
@@ -265,7 +265,7 @@ int OpenGLShader::createShaderFromString(UString shaderSource, int shaderType)
 	}
 
 	// compile shader
-	const char *shaderSourceChar = shaderSource.toUtf8();
+	const char *shaderSourceChar = shaderSource.c_str();
 	glShaderSourceARB(shader, 1, &shaderSourceChar, NULL);
 	glCompileShaderARB(shader);
 
@@ -293,28 +293,26 @@ int OpenGLShader::createShaderFromString(UString shaderSource, int shaderType)
 	return shader;
 }
 
-int OpenGLShader::createShaderFromFile(UString fileName, int shaderType)
+int OpenGLShader::createShaderFromFile(std::string fileName, int shaderType)
 {
 	// load file
-	std::ifstream inFile(fileName.toUtf8());
+	std::ifstream inFile(fileName.c_str());
 	if (!inFile)
 	{
-		engine->showMessageError("OpenGLShader Error", fileName);
+		engine->showMessageError("OpenGLShader Error", fileName.c_str());
 		return 0;
 	}
 	std::string line;
 	std::string shaderSource;
-	int linecount = 0;
 	while (inFile.good())
 	{
 		std::getline(inFile, line);
 		shaderSource += line + "\n\0";
-		linecount++;
 	}
 	shaderSource += "\n\0";
 	inFile.close();
 
-	UString shaderSourcePtr = UString(shaderSource.c_str());
+	std::string shaderSourcePtr = shaderSource;
 
 	return createShaderFromString(shaderSourcePtr, shaderType);
 }

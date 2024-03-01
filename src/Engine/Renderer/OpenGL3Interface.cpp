@@ -85,7 +85,7 @@ void OpenGL3Interface::init()
 
 	//setWireframe(true);
 
-	UString texturedGenericV =	"#version 130\n"
+	std::string texturedGenericV =	"#version 130\n"
 								"\n"
 								"in vec3 position;\n"
 								"in vec2 uv;\n"
@@ -109,7 +109,7 @@ void OpenGL3Interface::init()
 								"}\n"
 								"\n";
 
-	UString texturedGenericP =	"#version 130\n"
+	std::string texturedGenericP =	"#version 130\n"
 								"\n"
 								"out vec4 color;\n"
 								"in vec2 texcoords;\n"
@@ -790,7 +790,7 @@ void OpenGL3Interface::onResolutionChange(Vector2 newResolution)
 	}
 }
 
-Image *OpenGL3Interface::createImage(UString filePath, bool mipmapped, bool keepInSystemMemory)
+Image *OpenGL3Interface::createImage(std::string filePath, bool mipmapped, bool keepInSystemMemory)
 {
 	return new OpenGLImage(filePath, mipmapped, keepInSystemMemory);
 }
@@ -805,12 +805,12 @@ RenderTarget *OpenGL3Interface::createRenderTarget(int x, int y, int width, int 
 	return new OpenGLRenderTarget(x, y, width, height, multiSampleType);
 }
 
-Shader *OpenGL3Interface::createShaderFromFile(UString vertexShaderFilePath, UString fragmentShaderFilePath)
+Shader *OpenGL3Interface::createShaderFromFile(std::string vertexShaderFilePath, std::string fragmentShaderFilePath)
 {
 	return new OpenGLShader(vertexShaderFilePath, fragmentShaderFilePath, false);
 }
 
-Shader *OpenGL3Interface::createShaderFromSource(UString vertexShader, UString fragmentShader)
+Shader *OpenGL3Interface::createShaderFromSource(std::string vertexShader, std::string fragmentShader)
 {
 	return new OpenGLShader(vertexShader, fragmentShader, true);
 }

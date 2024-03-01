@@ -20,7 +20,7 @@ class VSMusicBrowserButton;
 class VSMusicBrowser : public CBaseUIElement
 {
 public:
-	typedef fastdelegate::FastDelegate2<UString, bool> FileClickedCallback;
+	typedef fastdelegate::FastDelegate2<std::string, bool> FileClickedCallback;
 
 public:
 	VSMusicBrowser(int x, int y, int xSize, int ySize, McFont *font);
@@ -55,7 +55,7 @@ private:
 	};
 
 private:
-	void updateFolder(UString baseFolder, size_t fromDepth);
+	void updateFolder(std::string baseFolder, size_t fromDepth);
 	void updateDrives();
 	void updatePlayingSelection(bool fromInvalidSelection = false);
 
@@ -72,9 +72,9 @@ private:
 	CBaseUIScrollView *m_mainContainer;
 	std::vector<COLUMN> m_columns;
 
-	UString m_activeSong;
-	UString m_previousActiveSong;
-	std::vector<UString> m_playlist;
+	std::string m_activeSong;
+	std::string m_previousActiveSong;
+	std::vector<std::string> m_playlist;
 };
 
 #endif

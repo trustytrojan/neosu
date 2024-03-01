@@ -273,7 +273,7 @@ void VulkanGraphicsInterface::onResolutionChange(Vector2 newResolution)
 	m_vResolution = newResolution;
 }
 
-Image *VulkanGraphicsInterface::createImage(UString filePath, bool mipmapped, bool keepInSystemMemory)
+Image *VulkanGraphicsInterface::createImage(std::string filePath, bool mipmapped, bool keepInSystemMemory)
 {
 	return new NullImage(filePath, mipmapped, keepInSystemMemory);
 }
@@ -288,12 +288,12 @@ RenderTarget *VulkanGraphicsInterface::createRenderTarget(int x, int y, int widt
 	return new NullRenderTarget(x, y, width, height, multiSampleType);
 }
 
-Shader *VulkanGraphicsInterface::createShaderFromFile(UString vertexShaderFilePath, UString fragmentShaderFilePath)
+Shader *VulkanGraphicsInterface::createShaderFromFile(std::string vertexShaderFilePath, std::string fragmentShaderFilePath)
 {
 	return new NullShader(vertexShaderFilePath, fragmentShaderFilePath, false);
 }
 
-Shader *VulkanGraphicsInterface::createShaderFromSource(UString vertexShader, UString fragmentShader)
+Shader *VulkanGraphicsInterface::createShaderFromSource(std::string vertexShader, std::string fragmentShader)
 {
 	return new NullShader(vertexShader, fragmentShader, true);
 }

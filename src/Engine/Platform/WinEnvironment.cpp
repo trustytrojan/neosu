@@ -151,12 +151,12 @@ UString WinEnvironment::getExecutablePath()
 	return UString("");
 }
 
-bool WinEnvironment::fileExists(UString filename)
+bool WinEnvironment::fileExists(std::string filename)
 {
 	WIN32_FIND_DATAW FindFileData;
 	HANDLE handle = FindFirstFileW(filename.wc_str(), &FindFileData);
 	if (handle == INVALID_HANDLE_VALUE)
-		return std::ifstream(filename.toUtf8()).good();
+		return std::ifstream(filename.c_str()).good();
 	else
 	{
 		FindClose(handle);
@@ -164,23 +164,23 @@ bool WinEnvironment::fileExists(UString filename)
 	}
 }
 
-bool WinEnvironment::directoryExists(UString filename)
+bool WinEnvironment::directoryExists(std::string filename)
 {
 	DWORD dwAttrib = GetFileAttributesW(filename.wc_str());
 	return (dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
-bool WinEnvironment::createDirectory(UString directoryName)
+bool WinEnvironment::createDirectory(std::string directoryName)
 {
 	return CreateDirectoryW(directoryName.wc_str(), NULL);
 }
 
-bool WinEnvironment::renameFile(UString oldFileName, UString newFileName)
+bool WinEnvironment::renameFile(std::string oldFileName, std::string newFileName)
 {
 	return MoveFileW(oldFileName.wc_str(), newFileName.wc_str());
 }
 
-bool WinEnvironment::deleteFile(UString filePath)
+bool WinEnvironment::deleteFile(std::string filePath)
 {
 	return DeleteFileW(filePath.wc_str());
 }
@@ -252,7 +252,7 @@ UString WinEnvironment::openFileWindow(const char *filetypefilters, UString titl
 	fn.lpstrFileTitle = NULL;
 	fn.nMaxFileTitle = 0;
 	fn.lpstrTitle = title.length() > 1 ? title.toUtf8() : NULL;
-	fn.lpstrInitialDir = initialpath.length() > 1 ? initialpath.toUtf8() : NULL;
+	fn.lpstrInitialDir = initialpath.length() > 1 ? initialpath.c_str() : NULL;
 	fn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR | OFN_ENABLESIZING;
 
 	// open the dialog
@@ -289,7 +289,7 @@ UString WinEnvironment::openFolderWindow(UString title, UString initialpath)
 	fn.nFilterIndex = 1;
 	fn.lpstrFileTitle = NULL;
 	fn.lpstrTitle = title.length() > 1 ? title.toUtf8() : NULL;
-	fn.lpstrInitialDir = initialpath.length() > 1 ? initialpath.toUtf8() : NULL;
+	fn.lpstrInitialDir = initialpath.length() > 1 ? initialpath.c_str() : NULL;
 	fn.Flags = OFN_PATHMUSTEXIST | OFN_ENABLESIZING;
 
 	// open the dialog
@@ -415,23 +415,23 @@ std::vector<UString> WinEnvironment::getLogicalDrives()
 	return drives;
 }
 
-UString WinEnvironment::getFolderFromFilePath(UString filepath)
+std::string WinEnvironment::getFolderFromFilePath(std::string filepath)
 {
-	char *aString = (char*)filepath.toUtf8();
+	char *aString = (char*)filepath.c_str();
 	path_strip_filename(aString);
 	return aString;
 }
 
-UString WinEnvironment::getFileExtensionFromFilePath(UString filepath, bool includeDot)
+std::string WinEnvironment::getFileExtensionFromFilePath(std::string filepath, bool includeDot)
 {
 	int idx = filepath.findLast(".");
 	if (idx != -1)
 		return filepath.substr(idx+1);
 	else
-		return UString("");
+		return std::string("");
 }
 
-UString WinEnvironment::getFileNameFromFilePath(UString filePath)
+std::string WinEnvironment::getFileNameFromFilePath(std::string filePath)
 {
 	// TODO: use PathStripPath
 	if (filePath.length() < 1) return filePath;

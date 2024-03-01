@@ -126,20 +126,20 @@ UString MacOSEnvironment::getUsername()
 
 UString MacOSEnvironment::getUserDataPath()
 {
-	UString path = "/Users/";
+	std::string path = "/Users/";
 	path.append(getUsername());
 	return path;
 }
 
-bool MacOSEnvironment::fileExists(UString filename)
+bool MacOSEnvironment::fileExists(std::string filename)
 {
-	///return std::ifstream(filename.toUtf8()).good();
-	return (access(filename.toUtf8(), R_OK) >= 0);
+	///return std::ifstream(filename.c_str()).good();
+	return (access(filename.c_str(), R_OK) >= 0);
 }
 
-bool MacOSEnvironment::directoryExists(UString directoryName)
+bool MacOSEnvironment::directoryExists(std::string directoryName)
 {
-	DIR *dir = opendir(directoryName.toUtf8());
+	DIR *dir = opendir(directoryName.c_str());
 	if (dir)
 	{
 		closedir(dir);
@@ -154,19 +154,19 @@ bool MacOSEnvironment::directoryExists(UString directoryName)
 	return false;
 }
 
-bool MacOSEnvironment::createDirectory(UString directoryName)
+bool MacOSEnvironment::createDirectory(std::string directoryName)
 {
-	return mkdir(directoryName.toUtf8(), DEFFILEMODE) != -1;
+	return mkdir(directoryName.c_str(), DEFFILEMODE) != -1;
 }
 
-bool MacOSEnvironment::renameFile(UString oldFileName, UString newFileName)
+bool MacOSEnvironment::renameFile(std::string oldFileName, std::string newFileName)
 {
-	return rename(oldFileName.toUtf8(), newFileName.toUtf8()) != -1;
+	return rename(oldFileName.c_str(), newFileName.c_str()) != -1;
 }
 
-bool MacOSEnvironment::deleteFile(UString filePath)
+bool MacOSEnvironment::deleteFile(std::string filePath)
 {
-	return remove(filePath.toUtf8()) == 0;
+	return remove(filePath.c_str()) == 0;
 }
 
 std::vector<UString> MacOSEnvironment::getFilesInFolder(UString folder)
@@ -250,15 +250,15 @@ std::vector<UString> MacOSEnvironment::getLogicalDrives()
 	return drives;
 }
 
-UString MacOSEnvironment::getFolderFromFilePath(UString filepath)
+UString MacOSEnvironment::getFolderFromFilePath(std::string filepath)
 {
 	if (directoryExists(filepath)) // indirect check if this is already a valid directory (and not a file)
 		return filepath;
 	else
-		return UString(dirname((char*)filepath.toUtf8()));
+		return UString(dirname((char*)filepath.c_str()));
 }
 
-UString MacOSEnvironment::getFileExtensionFromFilePath(UString filepath, bool includeDot)
+UString MacOSEnvironment::getFileExtensionFromFilePath(std::string filepath, bool includeDot)
 {
 	int idx = filepath.findLast(".");
 	if (idx != -1)
@@ -267,7 +267,7 @@ UString MacOSEnvironment::getFileExtensionFromFilePath(UString filepath, bool in
 		return UString("");
 }
 
-UString MacOSEnvironment::getFileNameFromFilePath(UString filePath)
+std::string MacOSEnvironment::getFileNameFromFilePath(std::string filePath)
 {
 	if (filePath.length() < 1) return filePath;
 

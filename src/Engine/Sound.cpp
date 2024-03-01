@@ -5,6 +5,7 @@
 // $NoKeywords: $snd $os
 //===============================================================================//
 
+#include <format>
 #include "Sound.h"
 #include "ConVar.h"
 #include "File.h"
@@ -44,7 +45,7 @@ ConVar snd_wav_file_min_size("snd_wav_file_min_size", 51, FCVAR_NONE, "minimum f
 
 
 
-Sound::Sound(UString filepath, bool stream, bool threeD, bool loop, bool prescan) : Resource(filepath)
+Sound::Sound(std::string filepath, bool stream, bool threeD, bool loop, bool prescan) : Resource(filepath)
 {
 	m_HSTREAM = 0;
 	m_HSTREAMBACKUP = 0;
@@ -88,10 +89,10 @@ void Sound::init()
 	if (m_HSTREAM == 0 && m_iWasapiSampleBufferSize < 1)
 	{
 		UString msg = "Couldn't load sound \"";
-		msg.append(m_sFilePath);
+		msg.append(m_sFilePath.c_str());
 		msg.append(UString::format("\", stream = %i, errorcode = %i", (int)m_bStream, BASS_ErrorGetCode()));
 		msg.append(", file = ");
-		msg.append(m_sFilePath);
+		msg.append(m_sFilePath.c_str());
 		msg.append("\n");
 		debugLog(0xffdd3333, "%s", msg.toUtf8());
 	}
@@ -108,21 +109,21 @@ void Sound::init()
 void Sound::initAsync()
 {
 	if (ResourceManager::debug_rm->getBool())
-		debugLog("Resource Manager: Loading %s\n", m_sFilePath.toUtf8());
+		debugLog("Resource Manager: Loading %s\n", m_sFilePath.c_str());
 
 	// HACKHACK: workaround for BASS crashes on malformed WAV files
 	{
 		const int minWavFileSize = snd_wav_file_min_size.getInt();
 		if (minWavFileSize > 0)
 		{
-			UString fileExtensionLowerCase = env->getFileExtensionFromFilePath(m_sFilePath);
+			auto fileExtensionLowerCase = UString(env->getFileExtensionFromFilePath(m_sFilePath).c_str());
 			fileExtensionLowerCase.lowerCase();
 			if (fileExtensionLowerCase == UString("wav"))
 			{
 				File wavFile(m_sFilePath);
 				if (wavFile.getFileSize() < (size_t)minWavFileSize)
 				{
-					printf("Sound: Ignoring malformed/corrupt WAV file (%i) %s\n", (int)wavFile.getFileSize(), m_sFilePath.toUtf8());
+					printf("Sound: Ignoring malformed/corrupt WAV file (%i) %s\n", (int)wavFile.getFileSize(), m_sFilePath.c_str());
 					return;
 				}
 			}
@@ -150,11 +151,11 @@ void Sound::initAsync()
 
 #elif defined __linux__
 
-		m_HSTREAM = BASS_StreamCreateFile(FALSE, m_sFilePath.toUtf8(), 0, 0, (m_bPrescan ? BASS_STREAM_PRESCAN : 0) | BASS_STREAM_DECODE | extraStreamCreateFileFlags);
+		m_HSTREAM = BASS_StreamCreateFile(FALSE, m_sFilePath.c_str(), 0, 0, (m_bPrescan ? BASS_STREAM_PRESCAN : 0) | BASS_STREAM_DECODE | extraStreamCreateFileFlags);
 
 #else
 
-		m_HSTREAM = BASS_StreamCreateFile(FALSE, m_sFilePath.toUtf8(), 0, 0, (m_bPrescan ? BASS_STREAM_PRESCAN : 0) | BASS_STREAM_DECODE | extraStreamCreateFileFlags);
+		m_HSTREAM = BASS_StreamCreateFile(FALSE, m_sFilePath.c_str(), 0, 0, (m_bPrescan ? BASS_STREAM_PRESCAN : 0) | BASS_STREAM_DECODE | extraStreamCreateFileFlags);
 
 #endif
 
@@ -184,7 +185,7 @@ void Sound::initAsync()
 			}
 		}
 		else
-			printf("Sound Error: Couldn't file.canRead() on file %s\n", m_sFilePath.toUtf8());
+			printf("Sound Error: Couldn't file.canRead() on file %s\n", m_sFilePath.c_str());
 
 #else
 
@@ -195,18 +196,18 @@ void Sound::initAsync()
 
 #elif defined __linux__
 
-		m_HSTREAM = BASS_SampleLoad(FALSE, m_sFilePath.toUtf8(), 0, 0, 5, (m_bIsLooped ? BASS_SAMPLE_LOOP : 0 ) | (m_bIs3d ? BASS_SAMPLE_3D | BASS_SAMPLE_MONO : 0) | BASS_SAMPLE_OVER_POS);
+		m_HSTREAM = BASS_SampleLoad(FALSE, m_sFilePath.c_str(), 0, 0, 5, (m_bIsLooped ? BASS_SAMPLE_LOOP : 0 ) | (m_bIs3d ? BASS_SAMPLE_3D | BASS_SAMPLE_MONO : 0) | BASS_SAMPLE_OVER_POS);
 
 #else
 
-		m_HSTREAM = BASS_SampleLoad(FALSE, m_sFilePath.toUtf8(), 0, 0, 5, (m_bIsLooped ? BASS_SAMPLE_LOOP : 0 ) | (m_bIs3d ? BASS_SAMPLE_3D | BASS_SAMPLE_MONO : 0) | BASS_SAMPLE_OVER_POS);
+		m_HSTREAM = BASS_SampleLoad(FALSE, m_sFilePath.c_str(), 0, 0, 5, (m_bIsLooped ? BASS_SAMPLE_LOOP : 0 ) | (m_bIs3d ? BASS_SAMPLE_3D | BASS_SAMPLE_MONO : 0) | BASS_SAMPLE_OVER_POS);
 
 #endif
 
 		m_HSTREAMBACKUP = m_HSTREAM; // needed for proper cleanup for FX HSAMPLES
 
 		if (m_HSTREAM == 0)
-			printf("Sound Error: BASS_SampleLoad() error %i on file %s\n", BASS_ErrorGetCode(), m_sFilePath.toUtf8());
+			printf("Sound Error: BASS_SampleLoad() error %i on file %s\n", BASS_ErrorGetCode(), m_sFilePath.c_str());
 	}
 
 	m_bAsyncReady = true;
@@ -214,12 +215,12 @@ void Sound::initAsync()
 #elif defined(MCENGINE_FEATURE_SDL) && defined(MCENGINE_FEATURE_SDL_MIXER)
 
 	if (m_bStream)
-		m_mixChunkOrMixMusic = Mix_LoadMUS(m_sFilePath.toUtf8());
+		m_mixChunkOrMixMusic = Mix_LoadMUS(m_sFilePath.c_str());
 	else
-		m_mixChunkOrMixMusic = Mix_LoadWAV(m_sFilePath.toUtf8());
+		m_mixChunkOrMixMusic = Mix_LoadWAV(m_sFilePath.c_str());
 
 	if (m_mixChunkOrMixMusic == NULL)
-		printf(m_bStream ? "Sound Error: Mix_LoadMUS() error %s on file %s\n" : "Sound Error: Mix_LoadWAV() error %s on file %s\n", SDL_GetError(), m_sFilePath.toUtf8());
+		printf(m_bStream ? "Sound Error: Mix_LoadMUS() error %s on file %s\n" : "Sound Error: Mix_LoadWAV() error %s on file %s\n", SDL_GetError(), m_sFilePath.c_str());
 
 	m_bAsyncReady = (m_mixChunkOrMixMusic != NULL);
 
@@ -278,13 +279,13 @@ Sound::SOUNDHANDLE Sound::getHandle()
 
 		if (m_HCHANNEL == 0)
 		{
-			UString msg = "Couldn't BASS_SampleGetChannel \"";
+			std::string msg = "Couldn't BASS_SampleGetChannel \"";
 			msg.append(m_sFilePath);
-			msg.append(UString::format("\", stream = %i, errorcode = %i", (int)m_bStream, BASS_ErrorGetCode()));
+			msg.append(std::format("\", stream = {}, errorcode = {}", (int)m_bStream, BASS_ErrorGetCode()));
 			msg.append(", file = ");
 			msg.append(m_sFilePath);
 			msg.append("\n");
-			debugLog(0xffdd3333, "%s", msg.toUtf8());
+			debugLog(0xffdd3333, "%s", msg.c_str());
 		}
 		else
 			BASS_ChannelSetAttribute(m_HCHANNEL, BASS_ATTRIB_VOL, m_fVolume);
@@ -386,7 +387,7 @@ void Sound::setPosition(double percent)
 
 	const BOOL res = BASS_ChannelSetPosition(handle, (QWORD)((double)(length)*percent), BASS_POS_BYTE);
 	if (!res && debug_snd.getBool())
-		debugLog("Sound::setPosition( %f ) BASS_ChannelSetPosition() error %i on file %s\n", percent, BASS_ErrorGetCode(), m_sFilePath.toUtf8());
+		debugLog("Sound::setPosition( %f ) BASS_ChannelSetPosition() error %i on file %s\n", percent, BASS_ErrorGetCode(), m_sFilePath.c_str());
 
 #elif defined(MCENGINE_FEATURE_SDL) && defined(MCENGINE_FEATURE_SDL_MIXER) && defined(SDL_MIXER_X)
 
@@ -445,7 +446,7 @@ void Sound::setPositionMS(unsigned long ms, bool internal)
 
 	const BOOL res = BASS_ChannelSetPosition(handle, position, BASS_POS_BYTE);
 	if (!res && !internal && debug_snd.getBool())
-		debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms, BASS_ErrorGetCode(), m_sFilePath.toUtf8());
+		debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms, BASS_ErrorGetCode(), m_sFilePath.c_str());
 
 #elif defined(MCENGINE_FEATURE_SDL) && defined(MCENGINE_FEATURE_SDL_MIXER)
 
@@ -843,7 +844,7 @@ bool Sound::isFinished()
 #endif
 }
 
-void Sound::rebuild(UString newFilePath)
+void Sound::rebuild(std::string newFilePath)
 {
 	m_sFilePath = newFilePath;
 

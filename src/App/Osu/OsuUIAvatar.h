@@ -12,7 +12,7 @@ public:
     void onAvatarClicked(CBaseUIButton *btn);
 
     uint32_t m_player_id;
-    UString avatar_path;
+    std::string avatar_path;
     Image *avatar = nullptr;
     bool on_screen = false;
 };

@@ -32,6 +32,16 @@ constexpr char UString::nullString[];
 constexpr wchar_t UString::nullWString[];
 
 
+void trim(std::string* str) {
+	while(!str->empty() && str->front() == ' ') {
+		str->erase(0, 1);
+	}
+	while(!str->empty() && str->back() == ' ') {
+		str->pop_back();
+	}
+}
+
+
 MD5Hash& MD5Hash::operator = (const MD5Hash &other) {
 	memcpy(hash, other.hash, 32);
 	hash[32] = 0;

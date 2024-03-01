@@ -26,16 +26,15 @@ public:
 	static ConVar *m_osu_skin_async;
 	static ConVar *m_osu_skin_hd;
 
-	OsuSkin(Osu *osu, UString name, UString filepath, bool isDefaultSkin = false, bool isWorkshopSkin = false);
+	OsuSkin(Osu *osu, UString name, std::string filepath, bool isDefaultSkin = false);
 	virtual ~OsuSkin();
 
 	void update();
 
 	bool isReady();
-	inline bool isWorkshopSkin() const {return m_bIsWorkshopSkin;}
 
 	void load();
-	void loadBeatmapOverride(UString filepath);
+	void loadBeatmapOverride(std::string filepath);
 	void reloadSounds();
 
 	// samples
@@ -56,8 +55,8 @@ public:
 	void randomizeFilePath();
 
 	// drawable helpers
-	inline UString getName() {return m_sName;}
-	inline UString getFilePath() {return m_sFilePath;}
+	inline std::string getName() {return m_sName;}
+	inline std::string getFilePath() {return m_sFilePath;}
 	inline Osu *getOsu() {return m_osu;}
 
 	// raw
@@ -323,13 +322,13 @@ public:
 	inline bool getHitCircleOverlayAboveNumber() {return m_bHitCircleOverlayAboveNumber;}
 	inline bool isSliderTrackOverridden() {return m_bSliderTrackOverride;}
 
-	inline UString getComboPrefix() {return m_sComboPrefix;}
+	inline std::string getComboPrefix() {return m_sComboPrefix;}
 	inline int getComboOverlap() {return m_iComboOverlap;}
 
-	inline UString getScorePrefix() {return m_sScorePrefix;}
+	inline std::string getScorePrefix() {return m_sScorePrefix;}
 	inline int getScoreOverlap() {return m_iScoreOverlap;}
 
-	inline UString getHitCirclePrefix() {return m_sHitCirclePrefix;}
+	inline std::string getHitCirclePrefix() {return m_sHitCirclePrefix;}
 	inline int getHitCircleOverlap() {return m_iHitCircleOverlap;}
 
 	// custom
@@ -348,25 +347,23 @@ public:
 		float hardcodedVolumeMultiplier; // some samples in osu have hardcoded multipliers which can not be modified (i.e. you can NEVER reach 100% volume with them)
 	};
 
-	bool parseSkinINI(UString filepath);
+	bool parseSkinINI(std::string filepath);
 
-	bool compareFilenameWithSkinElementName(UString filename, UString skinElementName);
+	bool compareFilenameWithSkinElementName(std::string filename, std::string skinElementName);
 
-	OsuSkinImage *createOsuSkinImage(UString skinElementName, Vector2 baseSizeForScaling2x, float osuSize, bool ignoreDefaultSkin = false, UString animationSeparator = "-");
-	void checkLoadImage(Image **addressOfPointer, UString skinElementName, UString resourceName, bool ignoreDefaultSkin = false, UString fileExtension = "png", bool forceLoadMipmaps = false);
-	void checkLoadSound(Sound **addressOfPointer, UString skinElementName, UString resourceName, bool isOverlayable = false, bool isSample = false, bool loop = false, float hardcodedVolumeMultiplier = -1.0f);
+	OsuSkinImage *createOsuSkinImage(std::string skinElementName, Vector2 baseSizeForScaling2x, float osuSize, bool ignoreDefaultSkin = false, std::string animationSeparator = "-");
+	void checkLoadImage(Image **addressOfPointer, std::string skinElementName, std::string resourceName, bool ignoreDefaultSkin = false, std::string fileExtension = "png", bool forceLoadMipmaps = false);
+	void checkLoadSound(Sound **addressOfPointer, std::string skinElementName, std::string resourceName, bool isOverlayable = false, bool isSample = false, bool loop = false, float hardcodedVolumeMultiplier = -1.0f);
 
 	void onEffectVolumeChange(UString oldValue, UString newValue);
 	void onIgnoreBeatmapSampleVolumeChange(UString oldValue, UString newValue);
-	void onExport(UString folderName);
 
 	Osu *m_osu;
 	bool m_bReady;
 	bool m_bIsDefaultSkin;
-	bool m_bIsWorkshopSkin;
-	UString m_sName;
-	UString m_sFilePath;
-	UString m_sSkinIniFilePath;
+	std::string m_sName;
+	std::string m_sFilePath;
+	std::string m_sSkinIniFilePath;
 	std::vector<Resource*> m_resources;
 	std::vector<Sound*> m_sounds;
 	std::vector<SOUND_SAMPLE> m_soundSamples;
@@ -666,24 +663,24 @@ public:
 	bool m_bHitCircleOverlayAboveNumber;
 	bool m_bSliderTrackOverride;
 
-	UString m_sComboPrefix;
+	std::string m_sComboPrefix;
 	int m_iComboOverlap;
 
-	UString m_sScorePrefix;
+	std::string m_sScorePrefix;
 	int m_iScoreOverlap;
 
-	UString m_sHitCirclePrefix;
+	std::string m_sHitCirclePrefix;
 	int m_iHitCircleOverlap;
 
 	// custom
 	int m_iSampleSet;
 	int m_iSampleVolume;
 
-	std::vector<UString> filepathsForRandomSkin;
+	std::vector<std::string> filepathsForRandomSkin;
 	bool m_bIsRandom;
 	bool m_bIsRandomElements;
 
-	std::vector<UString> m_filepathsForExport;
+	std::vector<std::string> m_filepathsForExport;
 };
 
 #endif

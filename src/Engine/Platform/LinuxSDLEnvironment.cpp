@@ -56,9 +56,9 @@ UString LinuxSDLEnvironment::getUserDataPath()
 		return UString("");
 }
 
-bool LinuxSDLEnvironment::directoryExists(UString directoryName)
+bool LinuxSDLEnvironment::directoryExists(std::string directoryName)
 {
-	DIR *dir = opendir(directoryName.toUtf8());
+	DIR *dir = opendir(directoryName.c_str());
 	if (dir)
 	{
 		closedir(dir);
@@ -73,9 +73,9 @@ bool LinuxSDLEnvironment::directoryExists(UString directoryName)
 	return false;
 }
 
-bool LinuxSDLEnvironment::createDirectory(UString directoryName)
+bool LinuxSDLEnvironment::createDirectory(std::string directoryName)
 {
-	return mkdir(directoryName.toUtf8(), DEFFILEMODE) != -1;
+	return mkdir(directoryName.c_str(), DEFFILEMODE) != -1;
 }
 
 std::vector<UString> LinuxSDLEnvironment::getFilesInFolder(UString folder)
@@ -159,12 +159,12 @@ std::vector<UString> LinuxSDLEnvironment::getLogicalDrives()
 	return drives;
 }
 
-UString LinuxSDLEnvironment::getFolderFromFilePath(UString filepath)
+UString LinuxSDLEnvironment::getFolderFromFilePath(std::string filepath)
 {
 	if (directoryExists(filepath)) // indirect check if this is already a valid directory (and not a file)
 		return filepath;
 	else
-		return UString(dirname((char*)filepath.toUtf8()));
+		return UString(dirname((char*)filepath.c_str()));
 }
 
 

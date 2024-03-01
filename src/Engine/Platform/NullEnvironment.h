@@ -27,56 +27,56 @@ public:
 	void sleep(unsigned int us) {
 		(void)us;
 	}
-	UString getExecutablePath() {return "";}
+	std::string getExecutablePath() {return "";}
 	void openURLInDefaultBrowser(UString url) {
 		(void)url;
 	}
 
 	// user
 	UString getUsername() {return "<NULL>";}
-	UString getUserDataPath() {return "<NULL>";}
+	std::string getUserDataPath() {return "<NULL>";}
 
 	// file IO
-	bool fileExists(UString filename) {
+	bool fileExists(std::string filename) {
 		(void)filename;
 		return false;
 	}
-	bool directoryExists(UString directoryName) {
+	bool directoryExists(std::string directoryName) {
 		(void)directoryName;
 		return false;
 	}
-	bool createDirectory(UString directoryName) {
+	bool createDirectory(std::string directoryName) {
 		(void)directoryName;
 		return false;
 	}
-	bool renameFile(UString oldFileName, UString newFileName) {
+	bool renameFile(std::string oldFileName, std::string newFileName) {
 		(void)oldFileName;
 		(void)newFileName;
 		return false;
 	}
-	bool deleteFile(UString filePath) {
+	bool deleteFile(std::string filePath) {
 		(void)filePath;
 		return false;
 	}
-	std::vector<UString> getFilesInFolder(UString folder) {
+	std::vector<std::string> getFilesInFolder(std::string folder) {
 		(void)folder;
-		return std::vector<UString>();
+		return std::vector<std::string>();
 	}
-	std::vector<UString> getFoldersInFolder(UString folder) {
+	std::vector<std::string> getFoldersInFolder(std::string folder) {
 		(void)folder;
-		return std::vector<UString>();
+		return std::vector<std::string>();
 	}
 	std::vector<UString> getLogicalDrives() {return std::vector<UString>();}
-	UString getFolderFromFilePath(UString filepath) {
+	std::string getFolderFromFilePath(std::string filepath) {
 		(void)filepath;
 		return "";
 	}
-	UString getFileExtensionFromFilePath(UString filepath, bool includeDot = false) {
+	std::string getFileExtensionFromFilePath(std::string filepath, bool includeDot = false) {
 		(void)filepath;
 		(void)includeDot;
 		return "";
 }
-	UString getFileNameFromFilePath(UString filePath) {
+	std::string getFileNameFromFilePath(std::string filePath) {
 		(void)filePath;
 		return "";
 }

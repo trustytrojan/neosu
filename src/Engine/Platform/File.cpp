@@ -21,7 +21,7 @@ ConVar file_size_max("file_size_max", 1024, FCVAR_NONE, "maximum filesize sanity
 ConVar *File::debug = &debug_file;
 ConVar *File::size_max = &file_size_max;
 
-File::File(UString filePath, TYPE type)
+File::File(std::string filePath, TYPE type)
 {
 	m_file = NULL;
 
@@ -82,7 +82,7 @@ size_t File::getFileSize() const
 
 
 // std implementation of File
-StdFile::StdFile(UString filePath, File::TYPE type)
+StdFile::StdFile(std::string filePath, File::TYPE type)
 {
 	m_sFilePath = filePath;
 	m_bRead = (type == File::TYPE::READ);
@@ -92,12 +92,12 @@ StdFile::StdFile(UString filePath, File::TYPE type)
 
 	if (m_bRead)
 	{
-		m_ifstream.open(filePath.toUtf8(), std::ios::in | std::ios::binary);
+		m_ifstream.open(filePath.c_str(), std::ios::in | std::ios::binary);
 
 		// check if we could open it at all
 		if (!m_ifstream.good())
 		{
-			debugLog("File Error: Couldn't open() file %s\n", filePath.toUtf8());
+			debugLog("File Error: Couldn't open() file %s\n", filePath.c_str());
 			return;
 		}
 
@@ -124,7 +124,7 @@ StdFile::StdFile(UString filePath, File::TYPE type)
 		std::getline(m_ifstream, tempLine);
 		if (!m_ifstream.good() && m_iFileSize < 1)
 		{
-			debugLog("File Error: File %s is a directory.\n", filePath.toUtf8());
+			debugLog("File Error: File %s is a directory.\n", filePath.c_str());
 			return;
 		}
 		m_ifstream.clear(); // clear potential error state due to the check above
@@ -132,18 +132,18 @@ StdFile::StdFile(UString filePath, File::TYPE type)
 	}
 	else // WRITE
 	{
-		m_ofstream.open(filePath.toUtf8(), std::ios::out | std::ios::trunc | std::ios::binary);
+		m_ofstream.open(filePath.c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
 
 		// check if we could open it at all
 		if (!m_ofstream.good())
 		{
-			debugLog("File Error: Couldn't open() file %s\n", filePath.toUtf8());
+			debugLog("File Error: Couldn't open() file %s\n", filePath.c_str());
 			return;
 		}
 	}
 
 	if (File::debug->getBool())
-		debugLog("StdFile: Opening %s\n", filePath.toUtf8());
+		debugLog("StdFile: Opening %s\n", filePath.c_str());
 
 	m_bReady = true;
 }
@@ -192,7 +192,7 @@ UString StdFile::readLine()
 const char *StdFile::readFile()
 {
 	if (File::debug->getBool())
-		debugLog("StdFile::readFile() on %s\n", m_sFilePath.toUtf8());
+		debugLog("StdFile::readFile() on %s\n", m_sFilePath.c_str());
 
 	if (m_fullBuffer.size() > 0)
 		return &m_fullBuffer[0];

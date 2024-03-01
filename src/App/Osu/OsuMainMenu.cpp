@@ -16,7 +16,6 @@
 #include "SoundEngine.h"
 #include "ResourceManager.h"
 #include "AnimationHandler.h"
-#include "SteamworksInterface.h"
 #include "VertexArrayObject.h"
 #include "ConVar.h"
 #include "File.h"
@@ -187,7 +186,6 @@ void OsuMainMenuPauseButton::draw(Graphics *g)
 ConVar osu_toggle_preview_music("osu_toggle_preview_music");
 
 ConVar osu_draw_menu_background("osu_draw_menu_background", false, FCVAR_NONE);
-ConVar osu_draw_main_menu_workshop_button("osu_draw_main_menu_workshop_button", true, FCVAR_NONE);
 ConVar osu_main_menu_startup_anim_duration("osu_main_menu_startup_anim_duration", 0.25f, FCVAR_NONE);
 ConVar osu_main_menu_use_slider_text("osu_main_menu_use_slider_text", true, FCVAR_NONE);
 ConVar osu_main_menu_slider_text_alpha("osu_main_menu_slider_text_alpha", 1.0f, FCVAR_NONE);
@@ -210,30 +208,6 @@ ConVar *OsuMainMenu::m_osu_universal_offset_hardcoded_fallback_dsound_ref = NULL
 ConVar *OsuMainMenu::m_osu_slider_border_feather_ref = NULL;
 ConVar *OsuMainMenu::m_osu_mod_random_ref = NULL;
 ConVar *OsuMainMenu::m_osu_songbrowser_background_fade_in_duration_ref = NULL;
-
-void OsuMainMenu::openSteamWorkshopInGameOverlay(Osu *osu, bool launchInSteamIfOverlayDisabled)
-{
-	if (!steam->isGameOverlayEnabled())
-	{
-		if (engine->getTime() > 10.0f)
-		{
-			osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
-			openSteamWorkshopInDefaultBrowser(launchInSteamIfOverlayDisabled);
-		}
-		else
-			osu->getNotificationOverlay()->addNotification(UString::format("Steam Overlay not ready or disabled, try again (%i/10) ...", (int)std::min(engine->getTime(), 10.0)), 0xffffff00);
-	}
-	else
-		steam->openURLInGameOverlay("https://steamcommunity.com/app/607260/workshop/");
-}
-
-void OsuMainMenu::openSteamWorkshopInDefaultBrowser(bool launchInSteam)
-{
-	if (launchInSteam)
-		env->openURLInDefaultBrowser("steam://url/SteamWorkshopPage/607260");
-	else
-		env->openURLInDefaultBrowser("https://steamcommunity.com/app/607260/workshop/");
-}
 
 OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu)
 {
@@ -380,7 +354,7 @@ OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu)
 	m_fMainMenuSliderTextRawHitCircleDiameter = 1.0f;
 	if (osu_main_menu_use_slider_text.getBool())
 	{
-		m_mainMenuSliderTextDatabaseBeatmap = new OsuDatabaseBeatmap(m_osu, UString(s_sliderTextBeatmap), "", true);
+		m_mainMenuSliderTextDatabaseBeatmap = new OsuDatabaseBeatmap(m_osu, s_sliderTextBeatmap, "", true);
 		m_mainMenuSliderTextBeatmapStandard = new OsuBeatmapStandard(m_osu);
 
 		// HACKHACK: temporary workaround to avoid this breaking the main menu logo text sliders (1/2)
@@ -1664,22 +1638,6 @@ void OsuMainMenu::onUpdatePressed()
 		engine->restart();
 	else if (m_osu->getUpdateHandler()->getStatus() == OsuUpdateHandler::STATUS::STATUS_ERROR)
 		m_osu->getUpdateHandler()->checkForUpdates();
-}
-
-void OsuMainMenu::onSteamWorkshopPressed()
-{
-	if (m_osu->getInstanceID() > 1) return;
-
-	if (!steam->isReady())
-	{
-		m_osu->getNotificationOverlay()->addNotification("Error: Steam is not running.", 0xffff0000, false, 5.0f);
-		openSteamWorkshopInDefaultBrowser();
-		return;
-	}
-
-	openSteamWorkshopInGameOverlay(m_osu);
-
-	m_osu->getOptionsMenu()->openAndScrollToSkinSection();
 }
 
 void OsuMainMenu::onGithubPressed()

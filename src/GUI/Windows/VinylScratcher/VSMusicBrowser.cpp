@@ -184,12 +184,9 @@ struct VSMusicBrowserNaturalSortStringComparator
 			return (current1 == lhsEnd);
 	}
 
-	bool operator() (UString const &a, UString const &b) const
+	bool operator() (std::string const &a, std::string const &b) const
 	{
-		const std::string aa = a.toUtf8();
-		const std::string bb = b.toUtf8();
-
-		return compareStringsNatural(aa, bb);
+		return compareStringsNatural(a, b);
 	}
 };
 
@@ -401,7 +398,7 @@ void VSMusicBrowser::onButtonClicked(CBaseUIButton *button)
 				if (btn->isDirectory())
 				{
 					// rebuild it
-					updateFolder(btn->getName(), i);
+					updateFolder(std::string(btn->getName().toUtf8()), i);
 
 					// reset selection flag of all buttons in THIS column except the one we just clicked
 					for (size_t r=0; r<m_columns[i].buttons.size(); r++)
@@ -413,7 +410,7 @@ void VSMusicBrowser::onButtonClicked(CBaseUIButton *button)
 				else if (m_fileClickedCallback != NULL)
 				{
 					// rebuild playlist, but only if this click would result in a successful play
-					if (VinylScratcher::tryPlayFile(btn->getName()))
+					if (VinylScratcher::tryPlayFile(std::string(btn->getName().toUtf8())))
 					{
 						fromInvalidSelection = false;
 
@@ -421,12 +418,12 @@ void VSMusicBrowser::onButtonClicked(CBaseUIButton *button)
 						for (size_t p=0; p<m_columns[i].buttons.size(); p++)
 						{
 							if (!m_columns[i].buttons[p]->isDirectory())
-								m_playlist.push_back(m_columns[i].buttons[p]->getName());
+								m_playlist.push_back(m_columns[i].buttons[p]->getName().toUtf8());
 						}
 					}
 
 					// fire play event
-					m_fileClickedCallback(btn->getName(), false);
+					m_fileClickedCallback(std::string(btn->getName().toUtf8()), false);
 				}
 
 				break;
@@ -446,7 +443,7 @@ void VSMusicBrowser::updatePlayingSelection(bool fromInvalidSelection)
 		{
 			VSMusicBrowserButton *button = m_columns[i].buttons[b];
 
-			if (button->getName() != m_activeSong)
+			if (button->getName() != UString(m_activeSong.c_str()))
 			{
 				button->setTextColor(m_defaultTextColor);
 				button->setPlaying(false);
@@ -468,7 +465,7 @@ void VSMusicBrowser::updatePlayingSelection(bool fromInvalidSelection)
 	}
 }
 
-void VSMusicBrowser::updateFolder(UString baseFolder, size_t fromDepth)
+void VSMusicBrowser::updateFolder(std::string baseFolder, size_t fromDepth)
 {
 	if (m_columns.size() < 1) return;
 
@@ -506,8 +503,8 @@ void VSMusicBrowser::updateFolder(UString baseFolder, size_t fromDepth)
 		float maxWidthCounter = 1;
 
 		// go through the file system
-		std::vector<UString> folders = env->getFoldersInFolder(baseFolder);
-		std::vector<UString> files = env->getFilesInFolder(baseFolder);
+		std::vector<std::string> folders = env->getFoldersInFolder(baseFolder);
+		std::vector<std::string> files = env->getFilesInFolder(baseFolder);
 
 		// sort both lists naturally
 		std::sort(folders.begin(), folders.end(), VSMusicBrowserNaturalSortStringComparator());
@@ -515,15 +512,15 @@ void VSMusicBrowser::updateFolder(UString baseFolder, size_t fromDepth)
 
 		// first, add all folders
 		int elementCounter = 0;
-		for (const UString &folder : folders)
+		for (const std::string &folder : folders)
 		{
-			if (folder == UString(".") || folder == UString("..")) continue;
+			if (folder.compare(".") == 0 || folder.compare("..") == 0) continue;
 
-			UString completeName = baseFolder;
+			std::string completeName = baseFolder;
 			completeName.append(folder);
 			completeName.append("/");
 
-			VSMusicBrowserButton *folderButton = new VSMusicBrowserButton(border, border + elementCounter*height, 50 * dpiScale, height, completeName, folder);
+			VSMusicBrowserButton *folderButton = new VSMusicBrowserButton(border, border + elementCounter*height, 50 * dpiScale, height, UString(completeName.c_str()), UString(folder.c_str()));
 			folderButton->setClickCallback(fastdelegate::MakeDelegate(this, &VSMusicBrowser::onButtonClicked));
 			folderButton->setTextColor(m_defaultTextColor);
 			folderButton->setFrameColor(frameColor);
@@ -541,14 +538,14 @@ void VSMusicBrowser::updateFolder(UString baseFolder, size_t fromDepth)
 		}
 
 		// then add all files
-		for (const UString &file : files)
+		for (const std::string &file : files)
 		{
-			if (file == UString(".") || file == UString("..")) continue;
+			if (file.compare(".") == 0 || file.compare("..") == 0) continue;
 
-			UString completeName = baseFolder;
+			std::string completeName = baseFolder;
 			completeName.append(file);
 
-			VSMusicBrowserButton *fileButton = new VSMusicBrowserButton(border, border + elementCounter*height, 50 * dpiScale, height, completeName, file);
+			VSMusicBrowserButton *fileButton = new VSMusicBrowserButton(border, border + elementCounter*height, 50 * dpiScale, height, UString(completeName.c_str()), UString(file.c_str()));
 			fileButton->setClickCallback(fastdelegate::MakeDelegate(this, &VSMusicBrowser::onButtonClicked));
 			fileButton->setDrawBackground(false);
 			fileButton->setTextColor(m_defaultTextColor);

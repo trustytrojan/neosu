@@ -19,7 +19,7 @@
 
 //#define MCENGINE_D3D11_CREATE_SHADER_DEBUG
 
-DirectX11Shader::DirectX11Shader(UString vertexShader, UString fragmentShader, bool source)
+DirectX11Shader::DirectX11Shader(std::string vertexShader, std::string fragmentShader, bool source)
 {
 	m_sVsh = vertexShader;
 	m_sFsh = fragmentShader;
@@ -226,13 +226,13 @@ void DirectX11Shader::setUniformMatrix4fv(UString name, float *v)
 	dx11->getDeviceContext()->Unmap(m_constantBuffer, 0);
 }
 
-bool DirectX11Shader::compile(UString vertexShader, UString fragmentShader, bool source)
+bool DirectX11Shader::compile(std::string vertexShader, std::string fragmentShader, bool source)
 {
 	if (!source)
 	{
 		// vs
 		{
-			std::ifstream inFile(vertexShader.toUtf8());
+			std::ifstream inFile(vertexShader.c_str());
 			if (!inFile)
 			{
 				engine->showMessageError("DirectX11Shader Error", vertexShader);
@@ -246,7 +246,7 @@ bool DirectX11Shader::compile(UString vertexShader, UString fragmentShader, bool
 
 		// ps
 		{
-			std::ifstream inFile(fragmentShader.toUtf8());
+			std::ifstream inFile(fragmentShader.c_str());
 			if (!inFile)
 			{
 				engine->showMessageError("DirectX11Shader Error", fragmentShader);
@@ -285,11 +285,11 @@ bool DirectX11Shader::compile(UString vertexShader, UString fragmentShader, bool
 	HRESULT hr1, hr2;
 
 	// compile
-	debugLog("DirectX11Shader: Compiling %s ...\n", (source ? "vertex source" : vertexShader.toUtf8()));
-	hr1 = D3DCompile(vertexShader.toUtf8(), vertexShader.length(), "VS", defines, NULL, vsEntryPoint, vsProfile, flags, 0, &vs, &vsError);
+	debugLog("DirectX11Shader: Compiling %s ...\n", (source ? "vertex source" : vertexShader.c_str()));
+	hr1 = D3DCompile(vertexShader.c_str(), vertexShader.length(), "VS", defines, NULL, vsEntryPoint, vsProfile, flags, 0, &vs, &vsError);
 
-	debugLog("DirectX11Shader: Compiling %s ...\n", (source ? "pixel source" : fragmentShader.toUtf8()));
-	hr2 = D3DCompile(fragmentShader.toUtf8(), fragmentShader.length(), "PS", defines, NULL, psEntryPoint, psProfile, flags, 0, &ps, &psError);
+	debugLog("DirectX11Shader: Compiling %s ...\n", (source ? "pixel source" : fragmentShader.c_str()));
+	hr2 = D3DCompile(fragmentShader.c_str(), fragmentShader.length(), "PS", defines, NULL, psEntryPoint, psProfile, flags, 0, &ps, &psError);
 
 	if (FAILED(hr1) || FAILED(hr2) || vs == NULL || ps == NULL)
 	{

@@ -1,3 +1,4 @@
+#include <format>
 #include "Bancho.h"
 #include "BanchoDownloader.h"
 #include "BanchoNetworking.h"
@@ -234,7 +235,7 @@ void OsuRoom::draw(Graphics *g) {
         m_map_title->setSizeToContent(0, 0);
         m_ready_btn->is_loading = true;
     } else if(status.status == SUCCESS) {
-        auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_id);
+        auto mapset_path = std::format(MCENGINE_DATA_DIR "maps/{}/", set_id);
         // XXX: Make a permanent database for auto-downloaded songs, so we can load them like osu!.db's
         m_osu->m_songBrowser2->getDatabase()->addBeatmap(mapset_path);
         m_osu->m_songBrowser2->updateSongButtonSorting();

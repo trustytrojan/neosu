@@ -37,8 +37,8 @@ public:
 	};
 
 public:
-	McFont(UString filepath, int fontSize = 16, bool antialiasing = true, int fontDPI = 96);
-	McFont(UString filepath, std::vector<wchar_t> characters, int fontSize = 16, bool antialiasing = true, int fontDPI = 96);
+	McFont(std::string filepath, int fontSize = 16, bool antialiasing = true, int fontDPI = 96);
+	McFont(std::string filepath, std::vector<wchar_t> characters, int fontSize = 16, bool antialiasing = true, int fontDPI = 96);
 	virtual ~McFont() {destroy();}
 
 	void drawString(Graphics *g, UString text);

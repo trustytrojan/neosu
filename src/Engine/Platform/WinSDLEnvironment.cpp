@@ -69,13 +69,13 @@ UString WinSDLEnvironment::getUserDataPath()
 	return UString("");
 }
 
-bool WinSDLEnvironment::directoryExists(UString directoryName)
+bool WinSDLEnvironment::directoryExists(std::string directoryName)
 {
 	DWORD dwAttrib = GetFileAttributesW(directoryName.wc_str());
 	return (dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
-bool WinSDLEnvironment::createDirectory(UString directoryName)
+bool WinSDLEnvironment::createDirectory(std::string directoryName)
 {
 	return CreateDirectoryW(directoryName.wc_str(), NULL);
 }
@@ -197,14 +197,14 @@ std::vector<UString> WinSDLEnvironment::getLogicalDrives()
 	return drives;
 }
 
-UString WinSDLEnvironment::getFolderFromFilePath(UString filepath)
+std::string WinSDLEnvironment::getFolderFromFilePath(std::string filepath)
 {
-	char *aString = (char*)filepath.toUtf8();
+	char *aString = (char*)filepath.c_str();
 	path_strip_filename(aString);
 	return aString;
 }
 
-UString WinSDLEnvironment::getFileNameFromFilePath(UString filePath)
+std::string WinSDLEnvironment::getFileNameFromFilePath(std::string filePath)
 {
 	// TODO: use PathStripPath
 	if (filePath.length() < 1) return filePath;
@@ -236,7 +236,7 @@ UString WinSDLEnvironment::openFileWindow(const char *filetypefilters, UString t
 	fn.lpstrFileTitle = NULL;
 	fn.nMaxFileTitle = 0;
 	fn.lpstrTitle = title.length() > 1 ? title.toUtf8() : NULL;
-	fn.lpstrInitialDir = initialpath.length() > 1 ? initialpath.toUtf8() : NULL;
+	fn.lpstrInitialDir = initialpath.length() > 1 ? initialpath.c_str() : NULL;
 	fn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR | OFN_ENABLESIZING;
 
 	// open the dialog
@@ -273,7 +273,7 @@ UString WinSDLEnvironment::openFolderWindow(UString title, UString initialpath)
 	fn.nFilterIndex = 1;
 	fn.lpstrFileTitle = NULL;
 	fn.lpstrTitle = title.length() > 1 ? title.toUtf8() : NULL;
-	fn.lpstrInitialDir = initialpath.length() > 1 ? initialpath.toUtf8() : NULL;
+	fn.lpstrInitialDir = initialpath.length() > 1 ? initialpath.c_str() : NULL;
 	fn.Flags = OFN_PATHMUSTEXIST | OFN_ENABLESIZING;
 
 	// open the dialog

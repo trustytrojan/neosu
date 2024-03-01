@@ -64,7 +64,7 @@ ConVar *OsuDatabaseBeatmap::m_osu_stars_stacking_ref = NULL;
 ConVar *OsuDatabaseBeatmap::m_osu_debug_pp_ref = NULL;
 ConVar *OsuDatabaseBeatmap::m_osu_slider_end_inside_check_offset_ref = NULL;
 
-OsuDatabaseBeatmap::OsuDatabaseBeatmap(Osu *osu, UString filePath, UString folder, bool filePathIsInMemoryBeatmap)
+OsuDatabaseBeatmap::OsuDatabaseBeatmap(Osu *osu, std::string filePath, std::string folder, bool filePathIsInMemoryBeatmap)
 {
 	m_osu = osu;
 
@@ -148,14 +148,14 @@ OsuDatabaseBeatmap::~OsuDatabaseBeatmap()
 	}
 }
 
-OsuDatabaseBeatmap::PRIMITIVE_CONTAINER OsuDatabaseBeatmap::loadPrimitiveObjects(const UString &osuFilePath, Osu::GAMEMODE gameMode, bool filePathIsInMemoryBeatmap)
+OsuDatabaseBeatmap::PRIMITIVE_CONTAINER OsuDatabaseBeatmap::loadPrimitiveObjects(const std::string &osuFilePath, Osu::GAMEMODE gameMode, bool filePathIsInMemoryBeatmap)
 {
 	std::atomic<bool> dead;
 	dead = false;
 	return loadPrimitiveObjects(osuFilePath, gameMode, filePathIsInMemoryBeatmap, dead);
 }
 
-OsuDatabaseBeatmap::PRIMITIVE_CONTAINER OsuDatabaseBeatmap::loadPrimitiveObjects(const UString &osuFilePath, Osu::GAMEMODE gameMode, bool filePathIsInMemoryBeatmap, const std::atomic<bool> &dead)
+OsuDatabaseBeatmap::PRIMITIVE_CONTAINER OsuDatabaseBeatmap::loadPrimitiveObjects(const std::string &osuFilePath, Osu::GAMEMODE gameMode, bool filePathIsInMemoryBeatmap, const std::atomic<bool> &dead)
 {
 	PRIMITIVE_CONTAINER c;
 	{
@@ -181,7 +181,7 @@ OsuDatabaseBeatmap::PRIMITIVE_CONTAINER OsuDatabaseBeatmap::loadPrimitiveObjects
 			return c;
 		}
 
-		std::istringstream ss(filePathIsInMemoryBeatmap ? osuFilePath.toUtf8() : ""); // eh
+		std::istringstream ss(filePathIsInMemoryBeatmap ? osuFilePath.c_str() : ""); // eh
 
 		// load the actual beatmap
 		unsigned long long timingPointSortHack = 0;
@@ -395,18 +395,18 @@ OsuDatabaseBeatmap::PRIMITIVE_CONTAINER OsuDatabaseBeatmap::loadPrimitiveObjects
 							std::vector<UString> tokens = curLineString.split(",");
 							if (tokens.size() < 8)
 							{
-								debugLog("Invalid slider in beatmap: %s\n\ncurLine = %s\n", osuFilePath.toUtf8(), curLineChar);
+								debugLog("Invalid slider in beatmap: %s\n\ncurLine = %s\n", osuFilePath.c_str(), curLineChar);
 								continue;
-								//engine->showMessageError("Error", UString::format("Invalid slider in beatmap: %s\n\ncurLine = %s", m_sFilePath.toUtf8(), curLine));
+								//engine->showMessageError("Error", UString::format("Invalid slider in beatmap: %s\n\ncurLine = %s", m_sFilePath.c_str(), curLine));
 								//return false;
 							}
 
 							std::vector<UString> sliderTokens = tokens[5].split("|");
 							if (sliderTokens.size() < 1) // partially allow bullshit sliders (no controlpoints!), e.g. https://osu.ppy.sh/beatmapsets/791900#osu/1676490
 							{
-								debugLog("Invalid slider tokens: %s\n\nIn beatmap: %s\n", curLineChar, osuFilePath.toUtf8());
+								debugLog("Invalid slider tokens: %s\n\nIn beatmap: %s\n", curLineChar, osuFilePath.c_str());
 								continue;
-								//engine->showMessageError("Error", UString::format("Invalid slider tokens: %s\n\nIn beatmap: %s", curLineChar, m_sFilePath.toUtf8()));
+								//engine->showMessageError("Error", UString::format("Invalid slider tokens: %s\n\nIn beatmap: %s", curLineChar, m_sFilePath.c_str()));
 								//return false;
 							}
 
@@ -420,9 +420,9 @@ OsuDatabaseBeatmap::PRIMITIVE_CONTAINER OsuDatabaseBeatmap::loadPrimitiveObjects
 								// not a very elegant check, but it does the job
 								if (sliderXY.size() != 2 || sliderXY[0].find("E") != -1 || sliderXY[0].find("e") != -1 || sliderXY[1].find("E") != -1 || sliderXY[1].find("e") != -1)
 								{
-									debugLog("Invalid slider positions: %s\n\nIn Beatmap: %s\n", curLineChar, osuFilePath.toUtf8());
+									debugLog("Invalid slider positions: %s\n\nIn Beatmap: %s\n", curLineChar, osuFilePath.c_str());
 									continue;
-									//engine->showMessageError("Error", UString::format("Invalid slider positions: %s\n\nIn beatmap: %s", curLine, m_sFilePath.toUtf8()));
+									//engine->showMessageError("Error", UString::format("Invalid slider positions: %s\n\nIn beatmap: %s", curLine, m_sFilePath.c_str()));
 									//return false;
 								}
 
@@ -478,9 +478,9 @@ OsuDatabaseBeatmap::PRIMITIVE_CONTAINER OsuDatabaseBeatmap::loadPrimitiveObjects
 							std::vector<UString> tokens = curLineString.split(",");
 							if (tokens.size() < 6)
 							{
-								debugLog("Invalid spinner in beatmap: %s\n\ncurLine = %s\n", osuFilePath.toUtf8(), curLineChar);
+								debugLog("Invalid spinner in beatmap: %s\n\ncurLine = %s\n", osuFilePath.c_str(), curLineChar);
 								continue;
-								//engine->showMessageError("Error", UString::format("Invalid spinner in beatmap: %s\n\ncurLine = %s", m_sFilePath.toUtf8(), curLine));
+								//engine->showMessageError("Error", UString::format("Invalid spinner in beatmap: %s\n\ncurLine = %s", m_sFilePath.c_str(), curLine));
 								//return false;
 							}
 
@@ -501,14 +501,14 @@ OsuDatabaseBeatmap::PRIMITIVE_CONTAINER OsuDatabaseBeatmap::loadPrimitiveObjects
 
 							if (tokens.size() < 6)
 							{
-								debugLog("Invalid hold note in beatmap: %s\n\ncurLine = %s\n", osuFilePath.toUtf8(), curLineChar);
+								debugLog("Invalid hold note in beatmap: %s\n\ncurLine = %s\n", osuFilePath.c_str(), curLineChar);
 								continue;
 							}
 
 							std::vector<UString> holdNoteTokens = tokens[5].split(":");
 							if (holdNoteTokens.size() < 1)
 							{
-								debugLog("Invalid hold note in beatmap: %s\n\ncurLine = %s\n", osuFilePath.toUtf8(), curLineChar);
+								debugLog("Invalid hold note in beatmap: %s\n\ncurLine = %s\n", osuFilePath.c_str(), curLineChar);
 								continue;
 							}
 
@@ -704,14 +704,14 @@ OsuDatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT OsuDatabaseBeatma
 	return r;
 }
 
-OsuDatabaseBeatmap::LOAD_DIFFOBJ_RESULT OsuDatabaseBeatmap::loadDifficultyHitObjects(const UString &osuFilePath, Osu::GAMEMODE gameMode, float AR, float CS, float speedMultiplier, bool calculateStarsInaccurately)
+OsuDatabaseBeatmap::LOAD_DIFFOBJ_RESULT OsuDatabaseBeatmap::loadDifficultyHitObjects(const std::string &osuFilePath, Osu::GAMEMODE gameMode, float AR, float CS, float speedMultiplier, bool calculateStarsInaccurately)
 {
 	std::atomic<bool> dead;
 	dead = false;
 	return loadDifficultyHitObjects(osuFilePath, gameMode, AR, CS, speedMultiplier, calculateStarsInaccurately, dead);
 }
 
-OsuDatabaseBeatmap::LOAD_DIFFOBJ_RESULT OsuDatabaseBeatmap::loadDifficultyHitObjects(const UString &osuFilePath, Osu::GAMEMODE gameMode, float AR, float CS, float speedMultiplier, bool calculateStarsInaccurately, const std::atomic<bool> &dead)
+OsuDatabaseBeatmap::LOAD_DIFFOBJ_RESULT OsuDatabaseBeatmap::loadDifficultyHitObjects(const std::string &osuFilePath, Osu::GAMEMODE gameMode, float AR, float CS, float speedMultiplier, bool calculateStarsInaccurately, const std::atomic<bool> &dead)
 {
 	LOAD_DIFFOBJ_RESULT result = LOAD_DIFFOBJ_RESULT();
 
@@ -1010,7 +1010,7 @@ bool OsuDatabaseBeatmap::loadMetadata(OsuDatabaseBeatmap *databaseBeatmap)
 	databaseBeatmap->m_timingpoints = std::vector<TIMINGPOINT>();
 
 	if (Osu::debug->getBool())
-		debugLog("OsuDatabaseBeatmap::loadMetadata() : %s\n", databaseBeatmap->m_sFilePath.toUtf8());
+		debugLog("OsuDatabaseBeatmap::loadMetadata() : %s\n", databaseBeatmap->m_sFilePath.c_str());
 
 	// generate MD5 hash (loads entire file, very slow)
 	{
@@ -1029,8 +1029,8 @@ bool OsuDatabaseBeatmap::loadMetadata(OsuDatabaseBeatmap *databaseBeatmap)
 			}
 			else
 			{
-				beatmapFile = databaseBeatmap->m_sFilePath.toUtf8();
-				beatmapFileSize = databaseBeatmap->m_sFilePath.lengthUtf8();
+				beatmapFile = databaseBeatmap->m_sFilePath.c_str();
+				beatmapFileSize = databaseBeatmap->m_sFilePath.size();
 			}
 		}
 
@@ -1046,11 +1046,11 @@ bool OsuDatabaseBeatmap::loadMetadata(OsuDatabaseBeatmap *databaseBeatmap)
 		File file(!databaseBeatmap->m_bFilePathIsInMemoryBeatmap ? databaseBeatmap->m_sFilePath : "");
 		if (!file.canRead() && !databaseBeatmap->m_bFilePathIsInMemoryBeatmap)
 		{
-			debugLog("Osu Error: Couldn't read file %s\n", databaseBeatmap->m_sFilePath.toUtf8());
+			debugLog("Osu Error: Couldn't read file %s\n", databaseBeatmap->m_sFilePath.c_str());
 			return false;
 		}
 
-		std::istringstream ss(databaseBeatmap->m_bFilePathIsInMemoryBeatmap ? databaseBeatmap->m_sFilePath.toUtf8() : ""); // eh
+		std::istringstream ss(databaseBeatmap->m_bFilePathIsInMemoryBeatmap ? databaseBeatmap->m_sFilePath.c_str() : ""); // eh
 
 		// load metadata only
 		int curBlock = -1;
@@ -1108,8 +1108,8 @@ bool OsuDatabaseBeatmap::loadMetadata(OsuDatabaseBeatmap *databaseBeatmap)
 						memset(stringBuffer, '\0', 1024);
 						if (sscanf(curLineChar, " AudioFilename : %1023[^\n]", stringBuffer) == 1)
 						{
-							databaseBeatmap->m_sAudioFileName = UString(stringBuffer);
-							databaseBeatmap->m_sAudioFileName = databaseBeatmap->m_sAudioFileName.trim();
+							databaseBeatmap->m_sAudioFileName = stringBuffer;
+							trim(&databaseBeatmap->m_sAudioFileName);
 						}
 
 						sscanf(curLineChar, " StackLeniency : %f \n", &databaseBeatmap->m_fStackLeniency);
@@ -1151,15 +1151,15 @@ bool OsuDatabaseBeatmap::loadMetadata(OsuDatabaseBeatmap *databaseBeatmap)
 						memset(stringBuffer, '\0', 1024);
 						if (sscanf(curLineChar, " Source :%1023[^\n]", stringBuffer) == 1)
 						{
-							databaseBeatmap->m_sSource = UString(stringBuffer);
-							databaseBeatmap->m_sSource = databaseBeatmap->m_sSource.trim();
+							databaseBeatmap->m_sSource = stringBuffer;
+							trim(&databaseBeatmap->m_sSource);
 						}
 
 						memset(stringBuffer, '\0', 1024);
 						if (sscanf(curLineChar, " Tags :%1023[^\n]", stringBuffer) == 1)
 						{
-							databaseBeatmap->m_sTags = UString(stringBuffer);
-							databaseBeatmap->m_sTags = databaseBeatmap->m_sTags.trim();
+							databaseBeatmap->m_sTags = stringBuffer;
+							trim(&databaseBeatmap->m_sTags);
 						}
 
 						sscanf(curLineChar, " BeatmapID : %ld \n", &databaseBeatmap->m_iID);
@@ -1592,7 +1592,7 @@ OsuDatabaseBeatmap::LOAD_GAMEPLAY_RESULT OsuDatabaseBeatmap::loadGameplay(OsuDat
 			// debug
 			if (m_osu_debug_pp_ref->getBool())
 			{
-				const UString &osuFilePath = databaseBeatmap->m_sFilePath;
+				const std::string &osuFilePath = databaseBeatmap->m_sFilePath;
 				const Osu::GAMEMODE gameMode = Osu::GAMEMODE::STD;
 				const float AR = beatmap->getAR();
 				const float CS = beatmap->getCS();
@@ -1922,7 +1922,7 @@ OsuDatabaseBeatmap::TIMING_INFO OsuDatabaseBeatmap::getTimingInfoForTimeAndTimin
 
 
 
-OsuDatabaseBeatmapBackgroundImagePathLoader::OsuDatabaseBeatmapBackgroundImagePathLoader(const UString &filePath) : Resource()
+OsuDatabaseBeatmapBackgroundImagePathLoader::OsuDatabaseBeatmapBackgroundImagePathLoader(const std::string &filePath) : Resource()
 {
 	m_sFilePath = filePath;
 }

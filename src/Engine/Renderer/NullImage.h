@@ -13,7 +13,7 @@
 class NullImage : public Image
 {
 public:
-	NullImage(UString filePath, bool mipmapped = false, bool keepInSystemMemory = false) : Image(filePath, mipmapped, keepInSystemMemory) {;}
+	NullImage(std::string filePath, bool mipmapped = false, bool keepInSystemMemory = false) : Image(filePath, mipmapped, keepInSystemMemory) {;}
 	NullImage(int width, int height, bool mipmapped = false, bool keepInSystemMemory = false) : Image(width, height, mipmapped, keepInSystemMemory) {;}
 	virtual ~NullImage() {destroy();}
 

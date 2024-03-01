@@ -10,7 +10,6 @@
 #include "Engine.h"
 #include "ConVar.h"
 #include "Environment.h"
-#include "SteamworksInterface.h"
 #include "DiscordInterface.h"
 
 #include "Bancho.h"
@@ -182,9 +181,6 @@ void OsuRichPresence::onPlayEnd(Osu *osu, bool quit)
 void OsuRichPresence::setStatus(Osu *osu, UString status, bool force)
 {
 	if (!osu_rich_presence.getBool() && !force) return;
-
-	// steam
-	steam->setRichPresence(KEY_STEAM_STATUS, status);
 
 	// discord
 	discord->setRichPresence("largeImageKey", "logo_512", true);

@@ -13,7 +13,7 @@
 class OsuVRUIImageButton : public OsuVRUIButton
 {
 public:
-	OsuVRUIImageButton(OsuVR *vr, float x, float y, float width, float height, UString imageResourceName);
+	OsuVRUIImageButton(OsuVR *vr, float x, float y, float width, float height, std::string imageResourceName);
 
 	virtual void drawVR(Graphics *g, Matrix4 &mvp);
 	virtual void update(Vector2 cursorPos);
@@ -24,7 +24,7 @@ private:
 
 	void updateImageResource();
 
-	UString m_sImageResourceName;
+	std::string m_sImageResourceName;
 	Image *m_image;
 
 	float m_fAnimation;

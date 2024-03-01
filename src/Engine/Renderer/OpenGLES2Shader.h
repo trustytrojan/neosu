@@ -15,7 +15,7 @@
 class OpenGLES2Shader : public Shader
 {
 public:
-	OpenGLES2Shader(UString vertexShader, UString fragmentShader, bool source);
+	OpenGLES2Shader(std::string vertexShader, std::string fragmentShader, bool source);
 	virtual ~OpenGLES2Shader() {destroy();}
 
 	virtual void enable();
@@ -42,11 +42,11 @@ private:
 	virtual void initAsync();
 	virtual void destroy();
 
-	bool compile(UString vertexShader, UString fragmentShader, bool source);
-	int createShaderFromString(UString shaderSource, int shaderType);
-	int createShaderFromFile(UString fileName, int shaderType);
+	bool compile(std::string vertexShader, std::string fragmentShader, bool source);
+	int createShaderFromString(std::string shaderSource, int shaderType);
+	int createShaderFromFile(std::string fileName, int shaderType);
 
-	UString m_sVsh, m_sFsh;
+	std::string m_sVsh, m_sFsh;
 
 	bool m_bSource;
 	int m_iVertexShader;

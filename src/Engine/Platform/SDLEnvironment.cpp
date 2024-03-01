@@ -135,9 +135,9 @@ UString SDLEnvironment::getUserDataPath()
 		return UString("");
 }
 
-bool SDLEnvironment::fileExists(UString filename)
+bool SDLEnvironment::fileExists(std::string filename)
 {
-	SDL_RWops *file = SDL_RWFromFile(filename.toUtf8(), "r");
+	SDL_RWops *file = SDL_RWFromFile(filename.c_str(), "r");
 	if (file != NULL)
 	{
 		SDL_RWclose(file);
@@ -147,26 +147,26 @@ bool SDLEnvironment::fileExists(UString filename)
 		return false;
 }
 
-bool SDLEnvironment::directoryExists(UString directoryName)
+bool SDLEnvironment::directoryExists(std::string directoryName)
 {
 	debugLog("WARNING: SDLEnvironment::directoryExists() not available in SDL!\n");
 	return false;
 }
 
-bool SDLEnvironment::createDirectory(UString directoryName)
+bool SDLEnvironment::createDirectory(std::string directoryName)
 {
 	debugLog("WARNING: SDLEnvironment::createDirectory() not available in SDL!\n");
 	return false;
 }
 
-bool SDLEnvironment::renameFile(UString oldFileName, UString newFileName)
+bool SDLEnvironment::renameFile(std::string oldFileName, std::string newFileName)
 {
-	return std::rename(oldFileName.toUtf8(), newFileName.toUtf8());
+	return std::rename(oldFileName.c_str(), newFileName.c_str());
 }
 
-bool SDLEnvironment::deleteFile(UString filePath)
+bool SDLEnvironment::deleteFile(std::string filePath)
 {
-	return std::remove(filePath.toUtf8()) == 0;
+	return std::remove(filePath.c_str()) == 0;
 }
 
 std::vector<UString> SDLEnvironment::getFilesInFolder(UString folder)
@@ -187,13 +187,13 @@ std::vector<UString> SDLEnvironment::getLogicalDrives()
 	return std::vector<UString>();
 }
 
-UString SDLEnvironment::getFolderFromFilePath(UString filepath)
+std::string SDLEnvironment::getFolderFromFilePath(std::string filepath)
 {
 	debugLog("WARNING: SDLEnvironment::getFolderFromFilePath() not available in SDL!\n");
 	return filepath;
 }
 
-UString SDLEnvironment::getFileExtensionFromFilePath(UString filepath, bool includeDot)
+std::string SDLEnvironment::getFileExtensionFromFilePath(std::string filepath, bool includeDot)
 {
 	const int idx = filepath.findLast(".");
 	if (idx != -1)
@@ -202,7 +202,7 @@ UString SDLEnvironment::getFileExtensionFromFilePath(UString filepath, bool incl
 		return UString("");
 }
 
-UString SDLEnvironment::getFileNameFromFilePath(UString filePath)
+std::string SDLEnvironment::getFileNameFromFilePath(std::string filePath)
 {
 	if (filePath.length() < 1) return filePath;
 

@@ -62,7 +62,6 @@ public:
 	inline bool isFullscreen() const {return m_bFullscreen;}
 	bool isMouseInside();
 	bool isBusy();
-	inline bool isWorkshopLoading() const {return m_bWorkshopSkinSelectScheduled;}
 
 	bool shouldDrawVRDummyHUD();
 
@@ -120,10 +119,6 @@ public:
 	void onRawInputToAbsoluteWindowChange(CBaseUICheckbox *checkbox);
 	void onSkinSelect();
 	void onSkinSelect2(UString skinName, int id = -1);
-	void onSkinSelectWorkshop();
-	void onSkinSelectWorkshop2();
-	void onSkinSelectWorkshop3();
-	void onSkinSelectWorkshop4(UString skinName, int id);
 	void onSkinReload();
 	void onSkinRandom();
 	void onResolutionSelect();
@@ -240,7 +235,6 @@ public:
 	CBaseUISlider *m_cursorSizeSlider;
 	CBaseUILabel *m_skinLabel;
 	CBaseUIElement *m_skinSelectLocalButton;
-	CBaseUIElement *m_skinSelectWorkshopButton;
 	CBaseUIElement *m_resolutionSelectButton;
 	CBaseUILabel *m_resolutionLabel;
 	CBaseUITextbox *m_osuFolderTextbox;
@@ -286,9 +280,6 @@ public:
 	ConVar *m_osu_letterboxing_offset_y_ref;
 	ConVar *m_osu_mod_fposu_ref;
 	ConVar *m_osu_skin_ref;
-	ConVar *m_osu_skin_is_from_workshop_ref;
-	ConVar *m_osu_skin_workshop_title_ref;
-	ConVar *m_osu_skin_workshop_id_ref;
 	ConVar *m_osu_skin_random_ref;
 	ConVar *m_osu_ui_scale_ref;
 	ConVar *m_win_snd_fallback_dsound_ref;
@@ -303,7 +294,6 @@ public:
 	float m_fOsuFolderTextboxInvalidAnim;
 	float m_fVibrationStrengthExampleTimer;
 	bool m_bLetterboxingOffsetUpdateScheduled;
-	bool m_bWorkshopSkinSelectScheduled;
 	bool m_bUIScaleChangeScheduled;
 	bool m_bUIScaleScrollToSliderScheduled;
 	bool m_bDPIScalingScrollToSliderScheduled;

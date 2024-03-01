@@ -1360,7 +1360,7 @@ bool OsuBeatmap::play()
 			case 1:
 				{
 					UString errorMessage = "Error: Couldn't load beatmap metadata :(";
-					debugLog("Osu Error: Couldn't load beatmap metadata %s\n", m_selectedDifficulty2->getFilePath().toUtf8());
+					debugLog("Osu Error: Couldn't load beatmap metadata %s\n", m_selectedDifficulty2->getFilePath().c_str());
 
 					if (m_osu != NULL)
 						m_osu->getNotificationOverlay()->addNotification(errorMessage, 0xffff0000);
@@ -1370,7 +1370,7 @@ bool OsuBeatmap::play()
 			case 2:
 				{
 					UString errorMessage = "Error: Couldn't load beatmap file :(";
-					debugLog("Osu Error: Couldn't load beatmap file %s\n", m_selectedDifficulty2->getFilePath().toUtf8());
+					debugLog("Osu Error: Couldn't load beatmap file %s\n", m_selectedDifficulty2->getFilePath().c_str());
 
 					if (m_osu != NULL)
 						m_osu->getNotificationOverlay()->addNotification(errorMessage, 0xffff0000);
@@ -1380,7 +1380,7 @@ bool OsuBeatmap::play()
 			case 3:
 				{
 					UString errorMessage = "Error: No timingpoints in beatmap :(";
-					debugLog("Osu Error: No timingpoints in beatmap %s\n", m_selectedDifficulty2->getFilePath().toUtf8());
+					debugLog("Osu Error: No timingpoints in beatmap %s\n", m_selectedDifficulty2->getFilePath().c_str());
 
 					if (m_osu != NULL)
 						m_osu->getNotificationOverlay()->addNotification(errorMessage, 0xffff0000);
@@ -1390,7 +1390,7 @@ bool OsuBeatmap::play()
 			case 4:
 				{
 					UString errorMessage = "Error: No hitobjects in beatmap :(";
-					debugLog("Osu Error: No hitobjects in beatmap %s\n", m_selectedDifficulty2->getFilePath().toUtf8());
+					debugLog("Osu Error: No hitobjects in beatmap %s\n", m_selectedDifficulty2->getFilePath().c_str());
 
 					if (m_osu != NULL)
 						m_osu->getNotificationOverlay()->addNotification(errorMessage, 0xffff0000);
@@ -1400,7 +1400,7 @@ bool OsuBeatmap::play()
 			case 5:
 				{
 					UString errorMessage = "Error: Too many hitobjects in beatmap :(";
-					debugLog("Osu Error: Too many hitobjects in beatmap %s\n", m_selectedDifficulty2->getFilePath().toUtf8());
+					debugLog("Osu Error: Too many hitobjects in beatmap %s\n", m_selectedDifficulty2->getFilePath().c_str());
 
 					if (m_osu != NULL)
 						m_osu->getNotificationOverlay()->addNotification(errorMessage, 0xffff0000);

@@ -11,7 +11,7 @@
 #include "Engine.h"
 #include "ConVar.h"
 
-WinFile::WinFile(UString filePath, File::TYPE type)
+WinFile::WinFile(std::string filePath, File::TYPE type)
 {
 	m_sFilePath = filePath;
 	m_bReady = false;
@@ -46,7 +46,7 @@ WinFile::WinFile(UString filePath, File::TYPE type)
 		if (m_handle == INVALID_HANDLE_VALUE)
 		{
 			m_handle = NULL;
-			debugLog("File Error: Couldn't CreateFileW(%s), GetLastError() = %i\n", filePath.toUtf8(), GetLastError());
+			debugLog("File Error: Couldn't CreateFileW(%s), GetLastError() = %i\n", filePath.c_str(), GetLastError());
 			return;
 		}
 
@@ -54,12 +54,12 @@ WinFile::WinFile(UString filePath, File::TYPE type)
 		m_iFileSize = GetFileSize(m_handle, 0);
 		if (m_iFileSize < 1)
 		{
-			debugLog("File Error: FileSize of \"%s\" is < 1\n", filePath.toUtf8());
+			debugLog("File Error: FileSize of \"%s\" is < 1\n", filePath.c_str());
 			return;
 		}
 		else if (m_iFileSize > 1024*1024*File::size_max->getInt()) // size sanity check
 		{
-			debugLog("File Error: FileSize of \"%s\" is > %i MB!!!\n", filePath.toUtf8(), File::size_max->getInt());
+			debugLog("File Error: FileSize of \"%s\" is > %i MB!!!\n", filePath.c_str(), File::size_max->getInt());
 			return;
 		}
 	}
@@ -79,13 +79,13 @@ WinFile::WinFile(UString filePath, File::TYPE type)
 		if (m_handle == INVALID_HANDLE_VALUE)
 		{
 			m_handle = NULL;
-			debugLog("File Error: Couldn't CreateFileW(%s), GetLastError() = %i\n", filePath.toUtf8(), GetLastError());
+			debugLog("File Error: Couldn't CreateFileW(%s), GetLastError() = %i\n", filePath.c_str(), GetLastError());
 			return;
 		}
 	}
 
 	if (File::debug->getBool())
-		debugLog("WinFile: Opening %s, m_iFileSize = %i\n", filePath.toUtf8(), m_iFileSize);
+		debugLog("WinFile: Opening %s, m_iFileSize = %i\n", filePath.c_str(), m_iFileSize);
 
 	m_bReady = true;
 }
@@ -261,7 +261,7 @@ UString WinFile::readLine()
 const char *WinFile::readFile()
 {
 	if (File::debug->getBool())
-		debugLog("WinFile::readFile() on %s\n", m_sFilePath.toUtf8());
+		debugLog("WinFile::readFile() on %s\n", m_sFilePath.c_str());
 
 	if (checkReadForFullBuffer() || m_bEOF)
 		return m_fullBuffer;

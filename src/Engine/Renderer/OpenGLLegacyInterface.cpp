@@ -727,7 +727,7 @@ void OpenGLLegacyInterface::onResolutionChange(Vector2 newResolution)
 	}
 }
 
-Image *OpenGLLegacyInterface::createImage(UString filePath, bool mipmapped, bool keepInSystemMemory)
+Image *OpenGLLegacyInterface::createImage(std::string filePath, bool mipmapped, bool keepInSystemMemory)
 {
 	return new OpenGLImage(filePath, mipmapped, keepInSystemMemory);
 }
@@ -742,12 +742,12 @@ RenderTarget *OpenGLLegacyInterface::createRenderTarget(int x, int y, int width,
 	return new OpenGLRenderTarget(x, y, width, height, multiSampleType);
 }
 
-Shader *OpenGLLegacyInterface::createShaderFromFile(UString vertexShaderFilePath, UString fragmentShaderFilePath)
+Shader *OpenGLLegacyInterface::createShaderFromFile(std::string vertexShaderFilePath, std::string fragmentShaderFilePath)
 {
 	return new OpenGLShader(vertexShaderFilePath, fragmentShaderFilePath, false);
 }
 
-Shader *OpenGLLegacyInterface::createShaderFromSource(UString vertexShader, UString fragmentShader)
+Shader *OpenGLLegacyInterface::createShaderFromSource(std::string vertexShader, std::string fragmentShader)
 {
 	return new OpenGLShader(vertexShader, fragmentShader, true);
 }

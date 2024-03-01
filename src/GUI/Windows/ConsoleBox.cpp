@@ -582,7 +582,7 @@ void ConsoleBox::processCommand(UString command)
 	Console::processCommand(command);
 }
 
-void ConsoleBox::execConfigFile(UString filename)
+void ConsoleBox::execConfigFile(std::string filename)
 {
 	Console::execConfigFile(filename);
 }

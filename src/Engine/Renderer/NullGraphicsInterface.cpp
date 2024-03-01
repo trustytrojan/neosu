@@ -13,7 +13,7 @@
 #include "NullRenderTarget.h"
 #include "NullShader.h"
 
-Image *NullGraphicsInterface::createImage(UString filePath, bool mipmapped, bool keepInSystemMemory)
+Image *NullGraphicsInterface::createImage(std::string filePath, bool mipmapped, bool keepInSystemMemory)
 {
 	return new NullImage(filePath, mipmapped, keepInSystemMemory);
 }
@@ -28,12 +28,12 @@ RenderTarget *NullGraphicsInterface::createRenderTarget(int x, int y, int width,
 	return new NullRenderTarget(x, y, width, height, multiSampleType);
 }
 
-Shader *NullGraphicsInterface::createShaderFromFile(UString vertexShaderFilePath, UString fragmentShaderFilePath)
+Shader *NullGraphicsInterface::createShaderFromFile(std::string vertexShaderFilePath, std::string fragmentShaderFilePath)
 {
 	return new NullShader(vertexShaderFilePath, fragmentShaderFilePath, false);
 }
 
-Shader *NullGraphicsInterface::createShaderFromSource(UString vertexShader, UString fragmentShader)
+Shader *NullGraphicsInterface::createShaderFromSource(std::string vertexShader, std::string fragmentShader)
 {
 	return new NullShader(vertexShader, fragmentShader, true);
 }

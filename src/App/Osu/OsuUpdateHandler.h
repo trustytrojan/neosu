@@ -49,7 +49,7 @@ private:
 	// async
 	void _requestUpdate();
 	bool _downloadUpdate();
-	void _installUpdate(UString zipFilePath);
+	void _installUpdate(std::string zipFilePath);
 
 #ifdef MCENGINE_FEATURE_PTHREADS
 

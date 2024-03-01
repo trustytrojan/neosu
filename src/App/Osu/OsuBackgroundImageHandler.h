@@ -36,9 +36,9 @@ private:
 		float evictionTime;
 		unsigned long evictionTimeFrameCount;
 
-		UString osuFilePath;
-		UString folder;
-		UString backgroundImageFileName;
+		std::string osuFilePath;
+		std::string folder;
+		std::string backgroundImageFileName;
 
 		OsuDatabaseBeatmapBackgroundImagePathLoader *backgroundImagePathLoader;
 		Image *image;

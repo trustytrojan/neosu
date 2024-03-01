@@ -39,22 +39,22 @@ void jpegErrorExit(j_common_ptr cinfo)
 	longjmp(err->setjmp_buffer, 1);
 }
 
-void Image::saveToImage(unsigned char *data, unsigned int width, unsigned int height, UString filepath)
+void Image::saveToImage(unsigned char *data, unsigned int width, unsigned int height, std::string filepath)
 {
-	debugLog("Saving image to %s ...\n", filepath.toUtf8());
+	debugLog("Saving image to %s ...\n", filepath.c_str());
 
-	const unsigned error = lodepng::encode(filepath.toUtf8(), data, width, height, LodePNGColorType::LCT_RGB, 8);
+	const unsigned error = lodepng::encode(filepath.c_str(), data, width, height, LodePNGColorType::LCT_RGB, 8);
 	if (error)
 	{
-		debugLog("PNG error %i on file %s", error, filepath.toUtf8());
+		debugLog("PNG error %i on file %s", error, filepath.c_str());
 		UString errorMessage = UString::format("PNG error %i on file ", error);
-		errorMessage.append(filepath);
+		errorMessage.append(filepath.c_str());
 		engine->showMessageError(errorMessage, lodepng_error_text(error));
 		return;
 	}
 }
 
-Image::Image(UString filepath, bool mipmapped, bool keepInSystemMemory) : Resource(filepath)
+Image::Image(std::string filepath, bool mipmapped, bool keepInSystemMemory) : Resource(filepath)
 {
 	m_bMipmapped = mipmapped;
 	m_bKeepInSystemMemory = keepInSystemMemory;
@@ -109,7 +109,7 @@ bool Image::loadRawImage()
 
 		if (!env->fileExists(m_sFilePath))
 		{
-			printf("Image Error: Couldn't find file %s\n", m_sFilePath.toUtf8());
+			printf("Image Error: Couldn't find file %s\n", m_sFilePath.c_str());
 			return false;
 		}
 
@@ -120,12 +120,12 @@ bool Image::loadRawImage()
 		File file(m_sFilePath);
 		if (!file.canRead())
 		{
-			printf("Image Error: Couldn't canRead() file %s\n", m_sFilePath.toUtf8());
+			printf("Image Error: Couldn't canRead() file %s\n", m_sFilePath.c_str());
 			return false;
 		}
 		if (file.getFileSize() < 4)
 		{
-			printf("Image Error: FileSize is < 4 in file %s\n", m_sFilePath.toUtf8());
+			printf("Image Error: FileSize is < 4 in file %s\n", m_sFilePath.c_str());
 			return false;
 		}
 
@@ -135,7 +135,7 @@ bool Image::loadRawImage()
 		const char *data = file.readFile();
 		if (data == NULL)
 		{
-			printf("Image Error: Couldn't readFile() file %s\n", m_sFilePath.toUtf8());
+			printf("Image Error: Couldn't readFile() file %s\n", m_sFilePath.c_str());
 			return false;
 		}
 
@@ -178,7 +178,7 @@ bool Image::loadRawImage()
 			if (setjmp(err.setjmp_buffer))
 			{
 			    jpeg_destroy_decompress(&cinfo);
-			    printf("Image Error: JPEG error (see above) in file %s\n", m_sFilePath.toUtf8());
+			    printf("Image Error: JPEG error (see above) in file %s\n", m_sFilePath.c_str());
 			    return false;
 			}
 
@@ -191,7 +191,7 @@ bool Image::loadRawImage()
 			if (headerRes != JPEG_HEADER_OK)
 			{
 				jpeg_destroy_decompress(&cinfo);
-				printf("Image Error: JPEG read_header() error %i in file %s\n", headerRes, m_sFilePath.toUtf8());
+				printf("Image Error: JPEG read_header() error %i in file %s\n", headerRes, m_sFilePath.c_str());
 				return false;
 			}
 
@@ -207,7 +207,7 @@ bool Image::loadRawImage()
 			if (m_iWidth > 8192 || m_iHeight > 8192)
 			{
 				jpeg_destroy_decompress(&cinfo);
-				printf("Image Error: JPEG image size is too big (%i x %i) in file %s\n", m_iWidth, m_iHeight, m_sFilePath.toUtf8());
+				printf("Image Error: JPEG image size is too big (%i x %i) in file %s\n", m_iWidth, m_iHeight, m_sFilePath.c_str());
 				return false;
 			}
 
@@ -246,13 +246,13 @@ bool Image::loadRawImage()
 
 			if (error)
 			{
-				printf("Image Error: PNG error %i (%s) in file %s\n", error, lodepng_error_text(error), m_sFilePath.toUtf8());
+				printf("Image Error: PNG error %i (%s) in file %s\n", error, lodepng_error_text(error), m_sFilePath.c_str());
 				return false;
 			}
 		}
 		else
 		{
-			printf("Image Error: Neither PNG nor JPEG in file %s\n", m_sFilePath.toUtf8());
+			printf("Image Error: Neither PNG nor JPEG in file %s\n", m_sFilePath.c_str());
 			return false;
 		}
 	}
@@ -265,16 +265,16 @@ bool Image::loadRawImage()
 	// size sanity check
 	if (m_rawImage.size() < (m_iWidth * m_iHeight * m_iNumChannels))
 	{
-		printf("Image Error: Loaded image has only %lu/%i bytes in file %s\n", (unsigned long)m_rawImage.size(), m_iWidth * m_iHeight * m_iNumChannels, m_sFilePath.toUtf8());
-		//engine->showMessageError("Image Error", UString::format("Loaded image has only %i/%i bytes in file %s", m_rawImage.size(), m_iWidth*m_iHeight*m_iNumChannels, m_sFilePath.toUtf8()));
+		printf("Image Error: Loaded image has only %lu/%i bytes in file %s\n", (unsigned long)m_rawImage.size(), m_iWidth * m_iHeight * m_iNumChannels, m_sFilePath.c_str());
+		//engine->showMessageError("Image Error", UString::format("Loaded image has only %i/%i bytes in file %s", m_rawImage.size(), m_iWidth*m_iHeight*m_iNumChannels, m_sFilePath.c_str()));
 		return false;
 	}
 
 	// supported channels sanity check
 	if (m_iNumChannels != 4 && m_iNumChannels != 3 && m_iNumChannels != 1)
 	{
-		printf("Image Error: Unsupported number of color channels (%i) in file %s", m_iNumChannels, m_sFilePath.toUtf8());
-		//engine->showMessageError("Image Error", UString::format("Unsupported number of color channels (%i) in file %s", m_iNumChannels, m_sFilePath.toUtf8()));
+		printf("Image Error: Unsupported number of color channels (%i) in file %s", m_iNumChannels, m_sFilePath.c_str());
+		//engine->showMessageError("Image Error", UString::format("Unsupported number of color channels (%i) in file %s", m_iNumChannels, m_sFilePath.c_str()));
 		return false;
 	}
 
@@ -299,7 +299,7 @@ bool Image::loadRawImage()
 	}
 	if (!foundNonTransparentPixel)
 	{
-		printf("Image: Ignoring empty transparent image %s\n", m_sFilePath.toUtf8());
+		printf("Image: Ignoring empty transparent image %s\n", m_sFilePath.c_str());
 		return false;
 	}
 
@@ -383,7 +383,7 @@ void Image::setPixels(const char *data, size_t size, TYPE type)
 			m_iHeight = height;
 
 			if (error)
-				printf("Image Error: PNG error %i (%s) in file %s\n", error, lodepng_error_text(error), m_sFilePath.toUtf8());
+				printf("Image Error: PNG error %i (%s) in file %s\n", error, lodepng_error_text(error), m_sFilePath.c_str());
 		}
 		break;
 

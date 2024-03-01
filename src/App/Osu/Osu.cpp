@@ -5,6 +5,7 @@
 // $NoKeywords: $osu
 //===============================================================================//
 
+#include <format>
 #include "Bancho.h"
 #include "BanchoNetworking.h"
 
@@ -21,7 +22,6 @@
 #include "SoundEngine.h"
 #include "Console.h"
 #include "ConVar.h"
-#include "SteamworksInterface.h"
 #include "OpenVRInterface.h"
 #include "OpenVRController.h"
 #include "RenderTarget.h"
@@ -60,7 +60,6 @@
 #include "OsuChangelog.h"
 #include "OsuEditor.h"
 #include "OsuRichPresence.h"
-#include "OsuSteamWorkshop.h"
 #include "OsuModFPoSu.h"
 
 #include "OsuBeatmap.h"
@@ -90,9 +89,6 @@ ConVar osu_confine_cursor_windowed("osu_confine_cursor_windowed", false, FCVAR_N
 ConVar osu_confine_cursor_fullscreen("osu_confine_cursor_fullscreen", true, FCVAR_NONE);
 
 ConVar osu_skin("osu_skin", "", FCVAR_NONE); // set dynamically below in the constructor
-ConVar osu_skin_is_from_workshop("osu_skin_is_from_workshop", false, FCVAR_NONE, "determines whether osu_skin contains a relative folder name, or a full absolute path (for workshop skins)");
-ConVar osu_skin_workshop_title("osu_skin_workshop_title", "", FCVAR_NONE, "holds the title/name of the currently selected workshop skin, because osu_skin is already used up for the absolute path then");
-ConVar osu_skin_workshop_id("osu_skin_workshop_id", "0", FCVAR_NONE, "holds the id of the currently selected workshop skin");
 ConVar osu_skin_reload("osu_skin_reload");
 
 ConVar osu_volume_master("osu_volume_master", 1.0f, FCVAR_NONE);
@@ -239,10 +235,6 @@ Osu::Osu(int instanceID)
 
 	osu_resolution.setValue(UString::format("%ix%i", engine->getScreenWidth(), engine->getScreenHeight()));
 
-	// init steam rich presence localization
-	steam->setRichPresence("steam_display", "#Status");
-	steam->setRichPresence("status", "...");
-
 #ifdef MCENGINE_FEATURE_SOUND
 
 	// starting with bass 2020 2.4.15.2 which has all offset problems fixed, this is the non-dsound backend compensation
@@ -296,12 +288,12 @@ Osu::Osu(int instanceID)
 	}
 
 	// generate default osu! appdata user path
-	UString userDataPath = env->getUserDataPath();
+	std::string userDataPath = env->getUserDataPath();
 	if (userDataPath.length() > 1)
 	{
-		UString defaultOsuFolder = userDataPath;
+		std::string defaultOsuFolder = userDataPath;
 		defaultOsuFolder.append(env->getOS() == Environment::OS::OS_WINDOWS ? "\\osu!\\" : "/osu!/");
-		m_osu_folder_ref->setValue(defaultOsuFolder);
+		m_osu_folder_ref->setValue(defaultOsuFolder.c_str());
 	}
 
 	// convar callbacks
@@ -498,7 +490,6 @@ Osu::Osu(int instanceID)
 	m_vrTutorial = new OsuVRTutorial(this);
 	m_changelog = new OsuChangelog(this);
 	m_editor = new OsuEditor(this);
-	m_steamWorkshop = new OsuSteamWorkshop(this);
 	m_fposu = new OsuModFPoSu(this);
 	m_chat = new OsuChat(this);
 	m_lobby = new OsuLobby(this);
@@ -602,7 +593,6 @@ Osu::~Osu()
 		SAFE_DELETE(m_screens[i]);
 	}
 
-	SAFE_DELETE(m_steamWorkshop);
 	SAFE_DELETE(m_fposu);
 
 	SAFE_DELETE(m_score);
@@ -767,7 +757,7 @@ void Osu::draw(Graphics *g)
 	m_volumeOverlay->draw(g);
 
 	// loading spinner for some async tasks
-	if ((m_bSkinLoadScheduled && m_skin != m_skinScheduledToLoad) || m_optionsMenu->isWorkshopLoading() || m_steamWorkshop->isUploading())
+	if ((m_bSkinLoadScheduled && m_skin != m_skinScheduledToLoad))
 	{
 		m_hud->drawLoadingSmall(g);
 	}
@@ -1175,7 +1165,7 @@ void Osu::update()
 			{
 				m_bSkinLoadWasReload = false;
 
-				m_notificationOverlay->addNotification(m_skin->getName().length() > 0 ? UString::format("Skin reloaded! (%s)", m_skin->getName().toUtf8()) : "Skin reloaded!", 0xffffffff, false, 0.75f);
+				m_notificationOverlay->addNotification(m_skin->getName().length() > 0 ? UString::format("Skin reloaded! (%s)", m_skin->getName().c_str()) : "Skin reloaded!", 0xffffffff, false, 0.75f);
 			}
 		}
 	}
@@ -1816,12 +1806,12 @@ void Osu::saveScreenshot()
 {
 	engine->getSound()->play(m_skin->getShutter());
 	int screenshotNumber = 0;
-	while (env->fileExists(UString::format("screenshots/screenshot%i.png", screenshotNumber)))
+	while (env->fileExists(std::format("screenshots/screenshot{}.png", screenshotNumber)))
 	{
 		screenshotNumber++;
 	}
 	std::vector<unsigned char> pixels = engine->getGraphics()->getScreenshot();
-	Image::saveToImage(&pixels[0], engine->getGraphics()->getResolution().x, engine->getGraphics()->getResolution().y, UString::format("screenshots/screenshot%i.png", screenshotNumber));
+	Image::saveToImage(&pixels[0], engine->getGraphics()->getResolution().x, engine->getGraphics()->getResolution().y, std::format("screenshots/screenshot{}.png", screenshotNumber));
 }
 
 
@@ -2376,28 +2366,9 @@ void Osu::onSkinChange(UString oldValue, UString newValue)
 	skinFolder.append(m_osu_folder_sub_skins_ref->getString());
 	skinFolder.append(newValue);
 	skinFolder.append("/");
+	std::string sf = skinFolder.toUtf8();
 
-	// reset playtime tracking
-	steam->stopWorkshopPlaytimeTrackingForAllItems();
-
-	// workshop skins use absolute paths
-	const bool isWorkshopSkin = osu_skin_is_from_workshop.getBool();
-	if (isWorkshopSkin)
-	{
-		skinFolder = newValue;
-
-		// ensure that the skinFolder ends with a slash
-		if (skinFolder[skinFolder.length()-1] != L'/' && skinFolder[skinFolder.length()-1] != L'\\')
-			skinFolder.append("/");
-
-		// start playtime tracking
-		steam->startWorkshopItemPlaytimeTracking((uint64_t)osu_skin_workshop_id.getString().toLong());
-
-		// set correct name of workshop skin
-		newValue = osu_skin_workshop_title.getString();
-	}
-
-	m_skinScheduledToLoad = new OsuSkin(this, newValue, skinFolder, (newValue == UString("default") || newValue == UString("defaultvr")), isWorkshopSkin);
+	m_skinScheduledToLoad = new OsuSkin(this, newValue, sf, (newValue == UString("default") || newValue == UString("defaultvr")));
 
 	// initial load
 	if (m_skin == NULL)

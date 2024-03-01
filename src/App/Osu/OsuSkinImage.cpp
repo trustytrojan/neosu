@@ -5,6 +5,7 @@
 // $NoKeywords: $osuskimg
 //===============================================================================//
 
+#include <format>
 #include "OsuSkinImage.h"
 
 #include "Engine.h"
@@ -19,7 +20,7 @@ ConVar osu_skin_animation_fps_override("osu_skin_animation_fps_override", -1.0f,
 
 ConVar *OsuSkinImage::m_osu_skin_mipmaps_ref = NULL;
 
-OsuSkinImage::OsuSkinImage(OsuSkin *skin, UString skinElementName, Vector2 baseSizeForScaling2x, float osuSize, UString animationSeparator, bool ignoreDefaultSkin)
+OsuSkinImage::OsuSkinImage(OsuSkin *skin, std::string skinElementName, Vector2 baseSizeForScaling2x, float osuSize, std::string animationSeparator, bool ignoreDefaultSkin)
 {
 	m_skin = skin;
 	m_vBaseSizeForScaling2x = baseSizeForScaling2x;
@@ -69,9 +70,9 @@ OsuSkinImage::OsuSkinImage(OsuSkin *skin, UString skinElementName, Vector2 baseS
 		m_fFrameDuration = 1.0f / (float)m_images.size();
 }
 
-bool OsuSkinImage::load(UString skinElementName, UString animationSeparator, bool ignoreDefaultSkin)
+bool OsuSkinImage::load(std::string skinElementName, std::string animationSeparator, bool ignoreDefaultSkin)
 {
-	UString animatedSkinElementStartName = skinElementName;
+	std::string animatedSkinElementStartName = skinElementName;
 	animatedSkinElementStartName.append(animationSeparator);
 	animatedSkinElementStartName.append("0");
 	if (loadImage(animatedSkinElementStartName, ignoreDefaultSkin)) // try loading the first animated element (if this exists then we continue loading until the first missing frame)
@@ -79,9 +80,9 @@ bool OsuSkinImage::load(UString skinElementName, UString animationSeparator, boo
 		int frame = 1;
 		while (true)
 		{
-			UString currentAnimatedSkinElementFrameName = skinElementName;
+			std::string currentAnimatedSkinElementFrameName = skinElementName;
 			currentAnimatedSkinElementFrameName.append(animationSeparator);
-			currentAnimatedSkinElementFrameName.append(UString::format("%i", frame));
+			currentAnimatedSkinElementFrameName.append(std::format("{}", frame));
 
 			if (!loadImage(currentAnimatedSkinElementFrameName, ignoreDefaultSkin))
 				break; // stop loading on the first missing frame
@@ -102,22 +103,22 @@ bool OsuSkinImage::load(UString skinElementName, UString animationSeparator, boo
 	return m_images.size() > 0; // if any image was found
 }
 
-bool OsuSkinImage::loadImage(UString skinElementName, bool ignoreDefaultSkin)
+bool OsuSkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin)
 {
-	UString filepath1 = m_skin->getFilePath();
+	std::string filepath1 = m_skin->getFilePath();
 	filepath1.append(skinElementName);
 	filepath1.append("@2x.png");
 
-	UString filepath2 = m_skin->getFilePath();
+	std::string filepath2 = m_skin->getFilePath();
 	filepath2.append(skinElementName);
 	filepath2.append(".png");
 
-	UString defaultFilePath1 = UString(env->getOS() == Environment::OS::OS_HORIZON ? "romfs:/materials/" : "./materials/");
+	std::string defaultFilePath1 = env->getOS() == Environment::OS::OS_HORIZON ? "romfs:/materials/" : "./materials/";
 	defaultFilePath1.append(OsuSkin::OSUSKIN_DEFAULT_SKIN_PATH);
 	defaultFilePath1.append(skinElementName);
 	defaultFilePath1.append("@2x.png");
 
-	UString defaultFilePath2 = UString(env->getOS() == Environment::OS::OS_HORIZON ? "romfs:/materials/" : "./materials/");
+	std::string defaultFilePath2 = env->getOS() == Environment::OS::OS_HORIZON ? "romfs:/materials/" : "./materials/";
 	defaultFilePath2.append(OsuSkin::OSUSKIN_DEFAULT_SKIN_PATH);
 	defaultFilePath2.append(skinElementName);
 	defaultFilePath2.append(".png");

@@ -13,7 +13,7 @@
 class OsuVRUIImageCheckbox : public OsuVRUIButton
 {
 public:
-	OsuVRUIImageCheckbox(OsuVR *vr, float x, float y, float width, float height, UString imageResourceNameChecked, UString imageResourceNameUnchecked);
+	OsuVRUIImageCheckbox(OsuVR *vr, float x, float y, float width, float height, std::string imageResourceNameChecked, std::string imageResourceNameUnchecked);
 
 	virtual void drawVR(Graphics *g, Matrix4 &mvp);
 	virtual void update(Vector2 cursorPos);
@@ -32,8 +32,8 @@ private:
 
 	bool m_bChecked;
 
-	UString m_sImageResourceNameChecked;
-	UString m_sImageResourceNameUnchecked;
+	std::string m_sImageResourceNameChecked;
+	std::string m_sImageResourceNameUnchecked;
 	Image *m_imageChecked;
 	Image *m_imageUnchecked;
 

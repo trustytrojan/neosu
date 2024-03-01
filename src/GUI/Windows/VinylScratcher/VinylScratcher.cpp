@@ -88,7 +88,8 @@ void VinylScratcher::mouse_update(bool *propagate_clicks)
 	if (m_fReverseMessageTimer != 0.0f && engine->getTime() > m_fReverseMessageTimer)
 	{
 		m_fReverseMessageTimer = 0.0f;
-		m_titleBar->setTitle(m_stream->getFilePath().length() > 1 ? env->getFileNameFromFilePath(m_stream->getFilePath()) : "Ready", true);
+		auto title = UString(m_stream->getFilePath().length() > 1 ? env->getFileNameFromFilePath(m_stream->getFilePath()).c_str() : "Ready");
+		m_titleBar->setTitle(title, true);
 	}
 
 	// update seekbar
@@ -140,7 +141,7 @@ void VinylScratcher::onFinished()
 	m_vs_percent_ref->setValue(0.0f);
 }
 
-void VinylScratcher::onFileClicked(UString filepath, bool reverse)
+void VinylScratcher::onFileClicked(std::string filepath, bool reverse)
 {
 	// check if the file is valid and can be played, if it's valid then play it
 	if (tryPlayFile(filepath))
@@ -153,7 +154,8 @@ void VinylScratcher::onFileClicked(UString filepath, bool reverse)
 		if (engine->getSound()->play(m_stream))
 		{
 			m_controlBar->getPlayButton()->setText("II");
-			m_titleBar->setTitle(env->getFileNameFromFilePath(filepath), reverse);
+			auto title = UString(env->getFileNameFromFilePath(filepath).c_str());
+			m_titleBar->setTitle(title, reverse);
 
 			if (m_fReverseMessageTimer > 0.0f)
 				m_fReverseMessageTimer = 0.0f;
@@ -218,7 +220,7 @@ void VinylScratcher::onResized()
 
 
 
-bool VinylScratcher::tryPlayFile(UString filepath)
+bool VinylScratcher::tryPlayFile(std::string filepath)
 {
 	m_stream2->rebuild(filepath);
 

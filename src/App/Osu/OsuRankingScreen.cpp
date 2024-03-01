@@ -597,7 +597,8 @@ void OsuRankingScreen::setScore(OsuDatabase::Score score, UString dateTime)
 	m_enabledExperimentalMods.clear();
 	if (score.experimentalModsConVars.length() > 0)
 	{
-		std::vector<UString> experimentalMods = score.experimentalModsConVars.split(";");
+		auto cv = UString(score.experimentalModsConVars.c_str());
+		std::vector<UString> experimentalMods = cv.split(";");
 		for (int i=0; i<experimentalMods.size(); i++)
 		{
 			if (experimentalMods[i].length() > 0)

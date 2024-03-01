@@ -1198,12 +1198,12 @@ OsuModFPoSu3DModel::OsuModFPoSu3DModel(const UString &objFilePathOrContents, Ima
 			UString fileContents;
 			if (!source)
 			{
-				UString filePath = "models/";
+				std::string filePath = "models/";
 				filePath.append(objFilePathOrContents);
 
 				std::string stdFileContents;
 				{
-					std::ifstream f(filePath.toUtf8(), std::ios::in | std::ios::binary);
+					std::ifstream f(filePath.c_str(), std::ios::in | std::ios::binary);
 					if (f.good())
 					{
 						f.seekg(0, std::ios::end);

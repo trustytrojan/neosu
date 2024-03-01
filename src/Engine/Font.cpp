@@ -35,7 +35,7 @@ static unsigned char *unpackMonoBitmap(FT_Bitmap bitmap);
 
 const wchar_t McFont::UNKNOWN_CHAR;
 
-McFont::McFont(UString filepath, int fontSize, bool antialiasing, int fontDPI) : Resource(filepath)
+McFont::McFont(std::string filepath, int fontSize, bool antialiasing, int fontDPI) : Resource(filepath)
 {
 	// the default set of wchar_t glyphs (ASCII table of non-whitespace glyphs, including cyrillics)
 	std::vector<wchar_t> characters;
@@ -47,7 +47,7 @@ McFont::McFont(UString filepath, int fontSize, bool antialiasing, int fontDPI) :
 	constructor(characters, fontSize, antialiasing, fontDPI);
 }
 
-McFont::McFont(UString filepath, std::vector<wchar_t> characters, int fontSize, bool antialiasing, int fontDPI) : Resource(filepath)
+McFont::McFont(std::string filepath, std::vector<wchar_t> characters, int fontSize, bool antialiasing, int fontDPI) : Resource(filepath)
 {
 	constructor(characters, fontSize, antialiasing, fontDPI);
 }
@@ -79,7 +79,7 @@ void McFont::constructor(std::vector<wchar_t> characters, int fontSize, bool ant
 
 void McFont::init()
 {
-	debugLog("Resource Manager: Loading %s\n", m_sFilePath.toUtf8());
+	debugLog("Resource Manager: Loading %s\n", m_sFilePath.c_str());
 
 	// init freetype
 	FT_Library library;
@@ -91,7 +91,7 @@ void McFont::init()
 
 	// load font file
 	FT_Face face;
-	if (FT_New_Face(library, m_sFilePath.toUtf8(), 0, &face))
+	if (FT_New_Face(library, m_sFilePath.c_str(), 0, &face))
 	{
 		engine->showMessageError("Font Error", "Couldn't load font file!\nFT_New_Face() failed.");
 		FT_Done_FreeType(library);

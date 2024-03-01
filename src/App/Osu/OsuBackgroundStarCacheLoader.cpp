@@ -44,7 +44,7 @@ void OsuBackgroundStarCacheLoader::initAsync()
 		m_beatmap->m_speedStarsForNumHitObjects.clear();
 		m_beatmap->m_speedNotesForNumHitObjects.clear();
 
-		const UString &osuFilePath = diff2->getFilePath();
+		const std::string &osuFilePath = diff2->getFilePath();
 		const Osu::GAMEMODE gameMode = m_beatmap->getOsu()->getGamemode();
 		const float AR = m_beatmap->getAR();
 		const float CS = m_beatmap->getCS();

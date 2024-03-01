@@ -29,8 +29,8 @@ struct TIMINGPOINT
 };
 TIMINGPOINT read_timing_point(Packet *packet);
 
-Packet load_db(UString path);
-bool save_db(Packet *db, UString path);
+Packet load_db(std::string path);
+bool save_db(Packet *db, std::string path);
 
 class OsuDatabase
 {
@@ -63,7 +63,7 @@ public:
 		OsuScore::GRADE grade = OsuScore::GRADE::GRADE_N;
 		OsuDatabaseBeatmap *diff2;
 		uint64_t play_time_ms = 0;
-		UString replay_data = "";
+		UString replay_data = ""; // TODO @kiwec: use Packet
 
 		int num300s;
 		int num100s;
@@ -91,7 +91,7 @@ public:
 		int maxPossibleCombo;
 		int numHitObjects;
 		int numCircles;
-		UString experimentalModsConVars;
+		std::string experimentalModsConVars;
 
 		// runtime
 		unsigned long long sortHack;
@@ -204,7 +204,7 @@ public:
 	void cancel();
 	void save();
 
-	OsuDatabaseBeatmap *addBeatmap(UString beatmapFolderPath);
+	OsuDatabaseBeatmap *addBeatmap(std::string beatmapFolderPath);
 
 	int addScore(MD5Hash beatmapMD5Hash, OsuDatabase::Score score);
 	void deleteScore(MD5Hash beatmapMD5Hash, uint64_t scoreUnixTimestamp);
@@ -253,7 +253,7 @@ private:
 
 	void addScoreRaw(const MD5Hash &beatmapMD5Hash, const OsuDatabase::Score &score);
 
-	UString parseLegacyCfgBeatmapDirectoryParameter();
+	std::string parseLegacyCfgBeatmapDirectoryParameter();
 	void scheduleLoadRaw();
 	void loadDB(Packet *db, bool &fallbackToRawLoad);
 
@@ -263,10 +263,10 @@ private:
 	void loadScores();
 	void saveScores();
 
-	void loadCollections(UString collectionFilePath, bool isLegacy, const std::unordered_map<MD5Hash, OsuDatabaseBeatmap*> &hashToDiff2, const std::unordered_map<MD5Hash, OsuDatabaseBeatmap*> &hashToBeatmap);
+	void loadCollections(std::string collectionFilePath, bool isLegacy, const std::unordered_map<MD5Hash, OsuDatabaseBeatmap*> &hashToDiff2, const std::unordered_map<MD5Hash, OsuDatabaseBeatmap*> &hashToBeatmap);
 	void saveCollections();
 
-	OsuDatabaseBeatmap *loadRawBeatmap(UString beatmapPath); // only used for raw loading without db
+	OsuDatabaseBeatmap *loadRawBeatmap(std::string beatmapPath); // only used for raw loading without db
 
 	void onScoresRename(UString args);
 	void onScoresExport();
@@ -302,9 +302,9 @@ private:
 	// raw load
 	bool m_bRawBeatmapLoadScheduled;
 	int m_iCurRawBeatmapLoadIndex;
-	UString m_sRawBeatmapLoadOsuSongFolder;
-	std::vector<UString> m_rawBeatmapFolders;
-	std::vector<UString> m_rawLoadBeatmapFolders;
+	std::string m_sRawBeatmapLoadOsuSongFolder;
+	std::vector<std::string> m_rawBeatmapFolders;
+	std::vector<std::string> m_rawLoadBeatmapFolders;
 	std::unordered_map<MD5Hash, OsuDatabaseBeatmap*> m_rawHashToDiff2;
 	std::unordered_map<MD5Hash, OsuDatabaseBeatmap*> m_rawHashToBeatmap;
 

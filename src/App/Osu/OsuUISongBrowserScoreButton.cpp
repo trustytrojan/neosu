@@ -664,7 +664,8 @@ void OsuUISongBrowserScoreButton::onUseModsClicked()
 
 		// experimental mods
 		{
-			const std::vector<UString> experimentalMods = m_score.experimentalModsConVars.split(";");
+			auto cv = UString(m_score.experimentalModsConVars.c_str());
+			const std::vector<UString> experimentalMods = cv.split(";");
 			for (size_t i=0; i<experimentalMods.size(); i++)
 			{
 				ConVar *cvar = convar->getConVarByName(experimentalMods[i], false);
@@ -754,7 +755,8 @@ void OsuUISongBrowserScoreButton::setScore(const OsuDatabase::Score &score, cons
 		if (m_sScoreMods.length() > 0)
 			m_sScoreMods.append(",");
 
-		std::vector<UString> experimentalMods = score.experimentalModsConVars.split(";");
+		auto cv = UString(score.experimentalModsConVars.c_str());
+		std::vector<UString> experimentalMods = cv.split(";");
 		for (int i=0; i<experimentalMods.size(); i++)
 		{
 			if (experimentalMods[i].length() > 0)
@@ -837,7 +839,8 @@ void OsuUISongBrowserScoreButton::setScore(const OsuDatabase::Score &score, cons
 	m_tooltipLines.push_back(tooltipMods);
 	if (score.experimentalModsConVars.length() > 0)
 	{
-		std::vector<UString> experimentalMods = score.experimentalModsConVars.split(";");
+		auto cv = UString(score.experimentalModsConVars.c_str());
+		std::vector<UString> experimentalMods = cv.split(";");
 		for (int i=0; i<experimentalMods.size(); i++)
 		{
 			if (experimentalMods[i].length() > 0)

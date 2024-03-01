@@ -13,7 +13,7 @@
 class SWImage : public Image
 {
 public:
-	SWImage(UString filepath, bool mipmapped = false, bool keepInSystemMemory = false);
+	SWImage(std::string filepath, bool mipmapped = false, bool keepInSystemMemory = false);
 	SWImage(int width, int height, bool mipmapped = false, bool keepInSystemMemory = false);
 	virtual ~SWImage() {destroy();}
 

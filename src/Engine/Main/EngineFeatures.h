@@ -94,9 +94,4 @@
  */
 //#define MCENGINE_FEATURE_DISCORD
 
-/*
- * Steam
- */
-//#define MCENGINE_FEATURE_STEAMWORKS
-
 #endif

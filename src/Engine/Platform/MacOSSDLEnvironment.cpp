@@ -48,12 +48,12 @@ UString MacOSSDLEnvironment::getUserDataPath()
 	return m_environment->getUserDataPath();
 }
 
-bool MacOSSDLEnvironment::directoryExists(UString directoryName)
+bool MacOSSDLEnvironment::directoryExists(std::string directoryName)
 {
 	return m_environment->directoryExists(directoryName);
 }
 
-bool MacOSSDLEnvironment::createDirectory(UString directoryName)
+bool MacOSSDLEnvironment::createDirectory(std::string directoryName)
 {
 	return m_environment->createDirectory(directoryName);
 }
@@ -73,7 +73,7 @@ std::vector<UString> MacOSSDLEnvironment::getLogicalDrives()
 	return m_environment->getLogicalDrives();
 }
 
-UString MacOSSDLEnvironment::getFolderFromFilePath(UString filepath)
+UString MacOSSDLEnvironment::getFolderFromFilePath(std::string filepath)
 {
 	return m_environment->getFolderFromFilePath(filepath);
 }

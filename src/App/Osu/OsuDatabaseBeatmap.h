@@ -54,9 +54,6 @@ public:
 		int endTime;
 	};
 
-
-
-public:
 	// custom structs
 
 	struct LOAD_DIFFOBJ_RESULT
@@ -107,17 +104,14 @@ public:
 		bool isNaN;
 	};
 
-
-
-public:
-	OsuDatabaseBeatmap(Osu *osu, UString filePath, UString folder, bool filePathIsInMemoryBeatmap = false);
+	OsuDatabaseBeatmap(Osu *osu, std::string filePath, std::string folder, bool filePathIsInMemoryBeatmap = false);
 	OsuDatabaseBeatmap(Osu *osu, std::vector<OsuDatabaseBeatmap*> &difficulties);
 	~OsuDatabaseBeatmap();
 
 
 
-	static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const UString &osuFilePath, Osu::GAMEMODE gameMode, float AR, float CS, float speedMultiplier, bool calculateStarsInaccurately = false);
-	static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const UString &osuFilePath, Osu::GAMEMODE gameMode, float AR, float CS, float speedMultiplier, bool calculateStarsInaccurately, const std::atomic<bool> &dead);
+	static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string &osuFilePath, Osu::GAMEMODE gameMode, float AR, float CS, float speedMultiplier, bool calculateStarsInaccurately = false);
+	static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string &osuFilePath, Osu::GAMEMODE gameMode, float AR, float CS, float speedMultiplier, bool calculateStarsInaccurately, const std::atomic<bool> &dead);
 	static bool loadMetadata(OsuDatabaseBeatmap *databaseBeatmap);
 	static LOAD_GAMEPLAY_RESULT loadGameplay(OsuDatabaseBeatmap *databaseBeatmap, OsuBeatmap *beatmap);
 
@@ -144,8 +138,8 @@ public:
 
 	inline Osu *getOsu() const {return m_osu;}
 
-	inline UString getFolder() const {return m_sFolder;}
-	inline UString getFilePath() const {return m_sFilePath;}
+	inline std::string getFolder() const {return m_sFolder;}
+	inline std::string getFilePath() const {return m_sFilePath;}
 
 	inline unsigned long long getSortHack() const {return m_iSortHack;}
 
@@ -156,9 +150,6 @@ public:
 	TIMING_INFO getTimingInfoForTime(unsigned long positionMS);
 	static TIMING_INFO getTimingInfoForTimeAndTimingPoints(unsigned long positionMS, std::vector<TIMINGPOINT> &timingpoints);
 
-
-
-public:
 	// raw metadata
 
 	inline int getVersion() const {return m_iVersion;}
@@ -170,10 +161,10 @@ public:
 	inline const UString &getArtist() const {return m_sArtist;}
 	inline const UString &getCreator() const {return m_sCreator;}
 	inline const UString &getDifficultyName() const {return m_sDifficultyName;}
-	inline const UString &getSource() const {return m_sSource;}
-	inline const UString &getTags() const {return m_sTags;}
-	inline const UString &getBackgroundImageFileName() const {return m_sBackgroundImageFileName;}
-	inline const UString &getAudioFileName() const {return m_sAudioFileName;}
+	inline const std::string &getSource() const {return m_sSource;}
+	inline const std::string &getTags() const {return m_sTags;}
+	inline const std::string &getBackgroundImageFileName() const {return m_sBackgroundImageFileName;}
+	inline const std::string &getAudioFileName() const {return m_sAudioFileName;}
 
 	inline unsigned long getLengthMS() const {return m_iLengthMS;}
 	inline int getPreviewTime() const {return m_iPreviewTime;}
@@ -193,8 +184,8 @@ public:
 
 	// redundant data
 
-	inline const UString &getFullSoundFilePath() const {return m_sFullSoundFilePath;}
-	inline const UString &getFullBackgroundImageFilePath() const {return m_sFullBackgroundImageFilePath;}
+	inline const std::string &getFullSoundFilePath() const {return m_sFullSoundFilePath;}
+	inline const std::string &getFullBackgroundImageFilePath() const {return m_sFullBackgroundImageFilePath;}
 
 
 
@@ -234,10 +225,10 @@ private:
 	UString m_sArtist;
 	UString m_sCreator;
 	UString m_sDifficultyName;	// difficulty name ("Version")
-	UString m_sSource;			// only used by search
-	UString m_sTags;			// only used by search
-	UString m_sBackgroundImageFileName;
-	UString m_sAudioFileName;
+	std::string m_sSource;			// only used by search
+	std::string m_sTags;			// only used by search
+	std::string m_sBackgroundImageFileName;
+	std::string m_sAudioFileName;
 
 	unsigned long m_iLengthMS;
 	int m_iPreviewTime;
@@ -257,8 +248,8 @@ private:
 
 	// redundant data (technically contained in metadata, but precomputed anyway)
 
-	UString m_sFullSoundFilePath;
-	UString m_sFullBackgroundImageFilePath;
+	std::string m_sFullSoundFilePath;
+	std::string m_sFullBackgroundImageFilePath;
 
 
 
@@ -284,9 +275,6 @@ private:
 	long m_iLocalOffset;
 	long m_iOnlineOffset;
 
-
-
-private:
 	// primitive objects
 
 	struct HITCIRCLE
@@ -355,9 +343,6 @@ private:
 		int errorCode;
 	};
 
-
-
-private:
 	// class internal data (custom)
 
 	friend class OsuDatabase;
@@ -374,8 +359,8 @@ private:
 
 
 
-	static PRIMITIVE_CONTAINER loadPrimitiveObjects(const UString &osuFilePath, Osu::GAMEMODE gameMode, bool filePathIsInMemoryBeatmap = false);
-	static PRIMITIVE_CONTAINER loadPrimitiveObjects(const UString &osuFilePath, Osu::GAMEMODE gameMode, bool filePathIsInMemoryBeatmap, const std::atomic<bool> &dead);
+	static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string &osuFilePath, Osu::GAMEMODE gameMode, bool filePathIsInMemoryBeatmap = false);
+	static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string &osuFilePath, Osu::GAMEMODE gameMode, bool filePathIsInMemoryBeatmap, const std::atomic<bool> &dead);
 	static CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT calculateSliderTimesClicksTicks(int beatmapVersion, std::vector<SLIDER> &sliders, std::vector<TIMINGPOINT> &timingpoints, float sliderMultiplier, float sliderTickRate);
 	static CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT calculateSliderTimesClicksTicks(int beatmapVersion, std::vector<SLIDER> &sliders, std::vector<TIMINGPOINT> &timingpoints, float sliderMultiplier, float sliderTickRate, const std::atomic<bool> &dead);
 
@@ -383,8 +368,8 @@ private:
 
 	Osu *m_osu;
 
-	UString m_sFolder;		// path to folder containing .osu file (e.g. "/path/to/beatmapfolder/")
-	UString m_sFilePath;	// path to .osu file (e.g. "/path/to/beatmapfolder/beatmap.osu")
+	std::string m_sFolder;		// path to folder containing .osu file (e.g. "/path/to/beatmapfolder/")
+	std::string m_sFilePath;	// path to .osu file (e.g. "/path/to/beatmapfolder/beatmap.osu")
 	bool m_bFilePathIsInMemoryBeatmap;
 
 	unsigned long long m_iSortHack;
@@ -418,18 +403,17 @@ private:
 class OsuDatabaseBeatmapBackgroundImagePathLoader : public Resource
 {
 public:
-	OsuDatabaseBeatmapBackgroundImagePathLoader(const UString &filePath);
+	OsuDatabaseBeatmapBackgroundImagePathLoader(const std::string &filePath);
 
-	inline const UString &getLoadedBackgroundImageFileName() const {return m_sLoadedBackgroundImageFileName;}
+	inline const std::string &getLoadedBackgroundImageFileName() const {return m_sLoadedBackgroundImageFileName;}
 
 private:
 	virtual void init();
 	virtual void initAsync();
 	virtual void destroy() {;}
 
-	UString m_sFilePath;
-
-	UString m_sLoadedBackgroundImageFileName;
+	std::string m_sFilePath;
+	std::string m_sLoadedBackgroundImageFileName;
 };
 
 

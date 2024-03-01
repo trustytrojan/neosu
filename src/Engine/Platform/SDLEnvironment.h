@@ -33,25 +33,25 @@ public:
 	virtual void shutdown();
 	virtual void restart();
 	virtual void sleep(unsigned int us); // NOTE: inaccurate
-	virtual UString getExecutablePath();
+	virtual std::string getExecutablePath();
 	virtual void openURLInDefaultBrowser(UString url); // NOTE: non-SDL
 
 	// user
 	virtual UString getUsername(); // NOTE: non-SDL
-	virtual UString getUserDataPath();
+	virtual std::string getUserDataPath();
 
 	// file IO
-	virtual bool fileExists(UString filename);
-	virtual bool directoryExists(UString directoryName); // NOTE: non-SDL
-	virtual bool createDirectory(UString directoryName); // NOTE: non-SDL
-	virtual bool renameFile(UString oldFileName, UString newFileName);
-	virtual bool deleteFile(UString filePath);
+	virtual bool fileExists(std::string filename);
+	virtual bool directoryExists(std::string directoryName); // NOTE: non-SDL
+	virtual bool createDirectory(std::string directoryName); // NOTE: non-SDL
+	virtual bool renameFile(std::string oldFileName, std::string newFileName);
+	virtual bool deleteFile(std::string filePath);
 	virtual std::vector<UString> getFilesInFolder(UString folder);		// NOTE: non-SDL
 	virtual std::vector<UString> getFoldersInFolder(UString folder);	// NOTE: non-SDL
 	virtual std::vector<UString> getLogicalDrives();					// NOTE: non-SDL
-	virtual UString getFolderFromFilePath(UString filepath);			// NOTE: non-SDL
-	virtual UString getFileExtensionFromFilePath(UString filepath, bool includeDot = false);
-	virtual UString getFileNameFromFilePath(UString filePath);			// NOTE: non-SDL
+	virtual std::string getFolderFromFilePath(std::string filepath);			// NOTE: non-SDL
+	virtual UString getFileExtensionFromFilePath(std::string filepath, bool includeDot = false);
+	virtual std::string getFileNameFromFilePath(std::string filePath);			// NOTE: non-SDL
 
 	// clipboard
 	virtual UString getClipBoardText();

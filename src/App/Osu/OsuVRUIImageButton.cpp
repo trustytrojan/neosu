@@ -13,7 +13,7 @@
 
 #include "OsuVR.h"
 
-OsuVRUIImageButton::OsuVRUIImageButton(OsuVR *vr, float x, float y, float width, float height, UString imageResourceName) : OsuVRUIButton(vr, x, y, width, height)
+OsuVRUIImageButton::OsuVRUIImageButton(OsuVR *vr, float x, float y, float width, float height, std::string imageResourceName) : OsuVRUIButton(vr, x, y, width, height)
 {
 	m_sImageResourceName = imageResourceName;
 	updateImageResource();

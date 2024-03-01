@@ -13,7 +13,7 @@
 class CBaseUIImage : public CBaseUIElement
 {
 public:
-	CBaseUIImage(UString imageResourceName="", float xPos=0, float yPos=0, float xSize=0, float ySize=0, UString name="");
+	CBaseUIImage(std::string imageResourceName="", float xPos=0, float yPos=0, float xSize=0, float ySize=0, UString name="");
 	virtual ~CBaseUIImage(){;}
 
 	ELEMENT_BODY(CBaseUIImage)

@@ -14,7 +14,7 @@
 
 #include "OpenGLHeaders.h"
 
-OpenGLES2Shader::OpenGLES2Shader(UString vertexShader, UString fragmentShader, bool source) : Shader()
+OpenGLES2Shader::OpenGLES2Shader(std::string vertexShader, std::string fragmentShader, bool source) : Shader()
 {
 	m_sVsh = vertexShader;
 	m_sFsh = fragmentShader;
@@ -181,12 +181,12 @@ bool OpenGLES2Shader::isActive()
 	return (m_bReady && currentProgram == m_iProgram);
 }
 
-bool OpenGLES2Shader::compile(UString vertexShader, UString fragmentShader, bool source)
+bool OpenGLES2Shader::compile(std::string vertexShader, std::string fragmentShader, bool source)
 {
 	// load & compile shaders
-	debugLog("OpenGLES2Shader: Compiling %s ...\n", (source ? "vertex source" : vertexShader.toUtf8()));
+	debugLog("OpenGLES2Shader: Compiling %s ...\n", (source ? "vertex source" : vertexShader.c_str()));
 	m_iVertexShader = source ? createShaderFromString(vertexShader, GL_VERTEX_SHADER) : createShaderFromFile(vertexShader, GL_VERTEX_SHADER);
-	debugLog("OpenGLES2Shader: Compiling %s ...\n", (source ? "fragment source" : fragmentShader.toUtf8()));
+	debugLog("OpenGLES2Shader: Compiling %s ...\n", (source ? "fragment source" : fragmentShader.c_str()));
 	m_iFragmentShader = source ? createShaderFromString(fragmentShader, GL_FRAGMENT_SHADER) : createShaderFromFile(fragmentShader, GL_FRAGMENT_SHADER);
 
 	if (m_iVertexShader == 0 || m_iFragmentShader == 0)
@@ -231,7 +231,7 @@ bool OpenGLES2Shader::compile(UString vertexShader, UString fragmentShader, bool
 	return true;
 }
 
-int OpenGLES2Shader::createShaderFromString(UString shaderSource, int shaderType)
+int OpenGLES2Shader::createShaderFromString(std::string shaderSource, int shaderType)
 {
 	const GLint shader = glCreateShader(shaderType);
 
@@ -242,7 +242,7 @@ int OpenGLES2Shader::createShaderFromString(UString shaderSource, int shaderType
 	}
 
 	// compile shader
-	const char *shaderSourceChar = shaderSource.toUtf8();
+	const char *shaderSourceChar = shaderSource.c_str();
 	glShaderSource(shader, 1, &shaderSourceChar, NULL);
 	glCompileShader(shader);
 
@@ -269,10 +269,10 @@ int OpenGLES2Shader::createShaderFromString(UString shaderSource, int shaderType
 	return shader;
 }
 
-int OpenGLES2Shader::createShaderFromFile(UString fileName, int shaderType)
+int OpenGLES2Shader::createShaderFromFile(std::string fileName, int shaderType)
 {
 	// load file
-	std::ifstream inFile(fileName.toUtf8());
+	std::ifstream inFile(fileName.c_str());
 	if (!inFile)
 	{
 		engine->showMessageError("OpenGLES2Shader Error", fileName);
@@ -290,7 +290,7 @@ int OpenGLES2Shader::createShaderFromFile(UString fileName, int shaderType)
 	shaderSource += "\n\0";
 	inFile.close();
 
-	UString shaderSourcePtr = UString(shaderSource.c_str());
+	std::string shaderSourcePtr = shaderSource;
 
 	return createShaderFromString(shaderSourcePtr, shaderType);
 }

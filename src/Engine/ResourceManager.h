@@ -77,25 +77,25 @@ public:
 	void requestNextLoadUnmanaged();
 
 	// images
-	Image *loadImage(UString filepath, UString resourceName, bool mipmapped = false, bool keepInSystemMemory = false);
-	Image *loadImageUnnamed(UString filepath, bool mipmapped = false, bool keepInSystemMemory = false);
-	Image *loadImageAbs(UString absoluteFilepath, UString resourceName, bool mipmapped = false, bool keepInSystemMemory = false);
-	Image *loadImageAbsUnnamed(UString absoluteFilepath, bool mipmapped = false, bool keepInSystemMemory = false);
+	Image *loadImage(std::string filepath, std::string resourceName, bool mipmapped = false, bool keepInSystemMemory = false);
+	Image *loadImageUnnamed(std::string filepath, bool mipmapped = false, bool keepInSystemMemory = false);
+	Image *loadImageAbs(std::string absoluteFilepath, std::string resourceName, bool mipmapped = false, bool keepInSystemMemory = false);
+	Image *loadImageAbsUnnamed(std::string absoluteFilepath, bool mipmapped = false, bool keepInSystemMemory = false);
 	Image *createImage(unsigned int width, unsigned int height, bool mipmapped = false, bool keepInSystemMemory = false);
 
 	// fonts
-	McFont *loadFont(UString filepath, UString resourceName, int fontSize = 16, bool antialiasing = true, int fontDPI = 96);
-	McFont *loadFont(UString filepath, UString resourceName, std::vector<wchar_t> characters, int fontSize = 16, bool antialiasing = true, int fontDPI = 96);
+	McFont *loadFont(std::string filepath, std::string resourceName, int fontSize = 16, bool antialiasing = true, int fontDPI = 96);
+	McFont *loadFont(std::string filepath, std::string resourceName, std::vector<wchar_t> characters, int fontSize = 16, bool antialiasing = true, int fontDPI = 96);
 
 	// sounds
-	Sound *loadSound(UString filepath, UString resourceName, bool stream = false, bool threeD = false, bool loop = false, bool prescan = false);
-	Sound *loadSoundAbs(UString filepath, UString resourceName, bool stream = false, bool threeD = false, bool loop = false, bool prescan = false);
+	Sound *loadSound(std::string filepath, std::string resourceName, bool stream = false, bool threeD = false, bool loop = false, bool prescan = false);
+	Sound *loadSoundAbs(std::string filepath, std::string resourceName, bool stream = false, bool threeD = false, bool loop = false, bool prescan = false);
 
 	// shaders
-	Shader *loadShader(UString vertexShaderFilePath, UString fragmentShaderFilePath, UString resourceName);
-	Shader *loadShader(UString vertexShaderFilePath, UString fragmentShaderFilePath);
-	Shader *createShader(UString vertexShader, UString fragmentShader, UString resourceName);
-	Shader *createShader(UString vertexShader, UString fragmentShader);
+	Shader *loadShader(std::string vertexShaderFilePath, std::string fragmentShaderFilePath, std::string resourceName);
+	Shader *loadShader(std::string vertexShaderFilePath, std::string fragmentShaderFilePath);
+	Shader *createShader(std::string vertexShader, std::string fragmentShader, std::string resourceName);
+	Shader *createShader(std::string vertexShader, std::string fragmentShader);
 
 	// rendertargets
 	RenderTarget *createRenderTarget(int x, int y, int width, int height, Graphics::MULTISAMPLE_TYPE multiSampleType = Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X);
@@ -108,10 +108,10 @@ public:
 	VertexArrayObject *createVertexArrayObject(Graphics::PRIMITIVE primitive = Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES, Graphics::USAGE_TYPE usage = Graphics::USAGE_TYPE::USAGE_STATIC, bool keepInSystemMemory = false);
 
 	// resource access by name
-	Image *getImage(UString resourceName) const;
-	McFont *getFont(UString resourceName) const;
-	Sound *getSound(UString resourceName) const;
-	Shader *getShader(UString resourceName) const;
+	Image *getImage(std::string resourceName) const;
+	McFont *getFont(std::string resourceName) const;
+	Sound *getSound(std::string resourceName) const;
+	Shader *getShader(std::string resourceName) const;
 
 	inline const std::vector<Resource*> &getResources() const {return m_vResources;}
 	inline size_t getNumThreads() const {return m_threads.size();}
@@ -123,8 +123,8 @@ public:
 
 private:
 	void loadResource(Resource *res, bool load);
-	void doesntExistWarning(UString resourceName) const;
-	Resource *checkIfExistsAndHandle(UString resourceName);
+	void doesntExistWarning(std::string resourceName) const;
+	Resource *checkIfExistsAndHandle(std::string resourceName);
 
 	void resetFlags();
 

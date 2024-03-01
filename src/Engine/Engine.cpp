@@ -16,7 +16,6 @@
 
 #endif
 
-#include "SteamworksInterface.h"
 #include "AnimationHandler.h"
 #include "DiscordInterface.h"
 #include "OpenCLInterface.h"
@@ -190,7 +189,6 @@ Engine::Engine(Environment *environment, const char *args)
 		m_openCL = new OpenCLInterface();
 		m_openVR = new OpenVRInterface();
 		m_networkHandler = new NetworkHandler();
-		m_steam = new SteamworksInterface();
 		m_discord = new DiscordInterface();
 
 		// default launch overrides
@@ -239,9 +237,6 @@ Engine::~Engine()
 
 	debugLog("Engine: Freeing network handler...\n");
 	SAFE_DELETE(m_networkHandler);
-
-	debugLog("Engine: Freeing Steam...\n");
-	SAFE_DELETE(m_steam);
 
 	debugLog("Engine: Freeing Discord...\n");
 	SAFE_DELETE(m_discord);

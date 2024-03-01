@@ -251,6 +251,8 @@ uint32_t read_uleb128(Packet *packet);
 float read_float32(Packet *packet);
 double read_float64(Packet *packet);
 UString read_string(Packet *packet);
+std::string read_stdstring(Packet *packet);
+void skip_string(Packet *packet);
 
 void write_bytes(Packet *packet, uint8_t *bytes, size_t n);
 void write_byte(Packet *packet, uint8_t b);

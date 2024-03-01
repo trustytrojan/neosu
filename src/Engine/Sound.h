@@ -20,7 +20,7 @@ public:
 	typedef unsigned long SOUNDHANDLE;
 
 public:
-	Sound(UString filepath, bool stream, bool threeD, bool loop, bool prescan);
+	Sound(std::string filepath, bool stream, bool threeD, bool loop, bool prescan);
 	virtual ~Sound() {destroy();}
 
 	void setPosition(double percent);
@@ -52,7 +52,7 @@ public:
 	inline bool isLooped() const {return m_bIsLooped;}
 	inline bool isOverlayable() const {return m_bIsOverlayable;}
 
-	void rebuild(UString newFilePath);
+	void rebuild(std::string newFilePath);
 
 	// ILLEGAL:
 	void setHandle(SOUNDHANDLE handle) {m_HCHANNEL = handle;}

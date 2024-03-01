@@ -17,7 +17,7 @@
 
 #include "OpenGLHeaders.h"
 
-OpenGLImage::OpenGLImage(UString filepath, bool mipmapped, bool keepInSystemMemory) : Image(filepath, mipmapped, keepInSystemMemory)
+OpenGLImage::OpenGLImage(std::string filepath, bool mipmapped, bool keepInSystemMemory) : Image(filepath, mipmapped, keepInSystemMemory)
 {
 	m_GLTexture = 0;
 	m_iTextureUnitBackup = 0;
@@ -110,8 +110,8 @@ void OpenGLImage::init()
 	if (GLerror != 0)
 	{
 		m_GLTexture = 0;
-		debugLog("OpenGL Image Error: %i on file %s!\n", GLerror, m_sFilePath.toUtf8());
-		engine->showMessageError("Image Error", UString::format("OpenGL Image error %i on file %s", GLerror, m_sFilePath.toUtf8()));
+		debugLog("OpenGL Image Error: %i on file %s!\n", GLerror, m_sFilePath.c_str());
+		engine->showMessageError("Image Error", UString::format("OpenGL Image error %i on file %s", GLerror, m_sFilePath.c_str()));
 		return;
 	}
 
@@ -131,7 +131,7 @@ void OpenGLImage::initAsync()
 	if (!m_bCreatedImage)
 	{
 		if (ResourceManager::debug_rm->getBool())
-			debugLog("Resource Manager: Loading %s\n", m_sFilePath.toUtf8());
+			debugLog("Resource Manager: Loading %s\n", m_sFilePath.c_str());
 
 		m_bAsyncReady = loadRawImage();
 	}
@@ -231,7 +231,7 @@ void OpenGLImage::handleGLErrors()
 {
 	int GLerror = glGetError();
 	if (GLerror != 0)
-		debugLog("OpenGL Image Error: %i on file %s!\n", GLerror, m_sFilePath.toUtf8());
+		debugLog("OpenGL Image Error: %i on file %s!\n", GLerror, m_sFilePath.c_str());
 }
 
 #endif

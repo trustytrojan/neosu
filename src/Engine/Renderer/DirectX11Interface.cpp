@@ -247,7 +247,7 @@ void DirectX11Interface::init()
 	m_deviceContext->OMSetBlendState(m_blendState, NULL, D3D11_DEFAULT_SAMPLE_MASK);
 
 	// create default shader
-	UString vertexShader =
+	std::string vertexShader =
 		"cbuffer ModelViewProjectionConstantBuffer : register(b0)\n"
 		"{\n"
 		"	float4x4 mvp;		// world matrix for object\n"
@@ -1343,7 +1343,7 @@ void DirectX11Interface::disableFullscreen()
 	m_bIsFullscreenBorderlessWindowed = false;
 }
 
-Image *DirectX11Interface::createImage(UString filePath, bool mipmapped, bool keepInSystemMemory)
+Image *DirectX11Interface::createImage(std::string filePath, bool mipmapped, bool keepInSystemMemory)
 {
 	return new DirectX11Image(filePath, mipmapped, keepInSystemMemory);
 }
@@ -1358,12 +1358,12 @@ RenderTarget *DirectX11Interface::createRenderTarget(int x, int y, int width, in
 	return new DirectX11RenderTarget(x, y, width, height, multiSampleType);
 }
 
-Shader *DirectX11Interface::createShaderFromFile(UString vertexShaderFilePath, UString fragmentShaderFilePath)
+Shader *DirectX11Interface::createShaderFromFile(std::string vertexShaderFilePath, std::string fragmentShaderFilePath)
 {
 	return new DirectX11Shader(vertexShaderFilePath, fragmentShaderFilePath, false);
 }
 
-Shader *DirectX11Interface::createShaderFromSource(UString vertexShader, UString fragmentShader)
+Shader *DirectX11Interface::createShaderFromSource(std::string vertexShader, std::string fragmentShader)
 {
 	return new DirectX11Shader(vertexShader, fragmentShader, true);
 }

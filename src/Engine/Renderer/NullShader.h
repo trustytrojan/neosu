@@ -13,7 +13,7 @@
 class NullShader : public Shader
 {
 public:
-	NullShader(UString vertexShader, UString fragmentShader, bool source) : Shader() {;}
+	NullShader(std::string vertexShader, std::string fragmentShader, bool source) : Shader() {;}
 	virtual ~NullShader() {destroy();}
 
 	virtual void enable() {;}

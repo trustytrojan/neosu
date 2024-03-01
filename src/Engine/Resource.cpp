@@ -9,15 +9,15 @@
 #include "Engine.h"
 #include "Environment.h"
 
-Resource::Resource(UString filepath)
+Resource::Resource(std::string filepath)
 {
 	m_sFilePath = filepath;
 
-	if (filepath.length() > 0 && !env->fileExists(filepath))
+	if (m_sFilePath.length() > 0 && !env->fileExists(m_sFilePath))
 	{
 		UString errorMessage = "File does not exist: ";
-		errorMessage.append(filepath);
-		debugLog("Resource Warning: File %s does not exist!\n", filepath.toUtf8());
+		errorMessage.append(m_sFilePath.c_str());
+		debugLog("Resource Warning: File %s does not exist!\n", m_sFilePath.c_str());
 		///engine->showMessageError("Resource Error", errorMessage);
 
 		// HACKHACK: workaround retry different case variations due to linux fs case sensitivity
@@ -29,20 +29,14 @@ Resource::Resource(UString filepath)
 			// try loading a toUpper() version of the file extension
 
 			// search backwards from end to first dot, then toUpper() forwards till end of string
-			char *utf8String = (char*)filepath.toUtf8();
-			for (int s=filepath.lengthUtf8(); s>=0; s--)
-			{
-				if (utf8String[s] == '.')
-				{
-					for (int i=s+1; i<filepath.lengthUtf8(); i++)
-					{
-						utf8String[i] = std::toupper(utf8String[i]);
+			for(int s = m_sFilePath.size(); s >= 0; s--) {
+				if(m_sFilePath[s] == '.') {
+					for(int i = s+1; i < m_sFilePath.size(); i++) {
+						m_sFilePath[i] = std::toupper(m_sFilePath[i]);
 					}
-
 					break;
 				}
 			}
-			m_sFilePath = UString(utf8String);
 
 			if (!env->fileExists(m_sFilePath))
 			{
@@ -50,36 +44,29 @@ Resource::Resource(UString filepath)
 
 				// search backwards from end to first dot, then toLower() everything until first slash
 				bool foundFilenameStart = false;
-				for (int s=filepath.lengthUtf8(); s>=0; s--)
-				{
-					if (foundFilenameStart)
-					{
-						if (utf8String[s] == '/')
-							break;
-
-						utf8String[s] = std::tolower(utf8String[s]);
+				for(int s = m_sFilePath.size(); s >= 0; s--) {
+					if(foundFilenameStart) {
+						if(m_sFilePath[s] == '/') break;
+						m_sFilePath[s] = std::tolower(m_sFilePath[s]);
 					}
 
-					if (utf8String[s] == '.')
+					if(m_sFilePath[s] == '.') {
 						foundFilenameStart = true;
+					}
 				}
-
-				m_sFilePath = UString(utf8String);
 
 				if (!env->fileExists(m_sFilePath))
 				{
 					// last chance, try with toLower() filename + extension
 
 					// toLower() backwards until first slash
-					for (int s=filepath.lengthUtf8(); s>=0; s--)
-					{
-						if (utf8String[s] == '/')
+					for(int s = m_sFilePath.size(); s >= 0; s--) {
+						if(m_sFilePath[s] == '/') {
 							break;
+						}
 
-						utf8String[s] = std::tolower(utf8String[s]);
+						m_sFilePath[s] = std::tolower(m_sFilePath[s]);
 					}
-
-					m_sFilePath = UString(utf8String);
 				}
 			}
 		}

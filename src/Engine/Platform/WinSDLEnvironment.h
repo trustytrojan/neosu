@@ -29,16 +29,16 @@ public:
 
 	// user
 	virtual UString getUsername();
-	virtual UString getUserDataPath();
+	virtual std::string getUserDataPath();
 
 	// file IO
-	virtual bool directoryExists(UString directoryName);
-	virtual bool createDirectory(UString directoryName);
+	virtual bool directoryExists(std::string directoryName);
+	virtual bool createDirectory(std::string directoryName);
 	virtual std::vector<UString> getFilesInFolder(UString folder);
 	virtual std::vector<UString> getFoldersInFolder(UString folder);
 	virtual std::vector<UString> getLogicalDrives();
-	virtual UString getFolderFromFilePath(UString filepath);
-	virtual UString getFileNameFromFilePath(UString filePath);
+	virtual std::string getFolderFromFilePath(std::string filepath);
+	virtual std::string getFileNameFromFilePath(std::string filePath);
 
 	// dialogs & message boxes
 	virtual UString openFileWindow(const char *filetypefilters, UString title, UString initialpath);

@@ -15,7 +15,7 @@
 class OpenGLImage : public Image
 {
 public:
-	OpenGLImage(UString filepath, bool mipmapped = false, bool keepInSystemMemory = false);
+	OpenGLImage(std::string filepath, bool mipmapped = false, bool keepInSystemMemory = false);
 	OpenGLImage(int width, int height, bool mipmapped = false, bool keepInSystemMemory = false);
 	virtual ~OpenGLImage() {destroy();}
 

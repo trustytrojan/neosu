@@ -24,7 +24,7 @@ public:
 	};
 
 public:
-	OsuSkinImage(OsuSkin *skin, UString skinElementName, Vector2 baseSizeForScaling2x, float osuSize, UString animationSeparator = "-", bool ignoreDefaultSkin = false);
+	OsuSkinImage(OsuSkin *skin, std::string skinElementName, Vector2 baseSizeForScaling2x, float osuSize, std::string animationSeparator = "-", bool ignoreDefaultSkin = false);
 	virtual ~OsuSkinImage();
 
 	virtual void draw(Graphics *g, Vector2 pos, float scale = 1.0f); // for objects scaled automatically to the current resolution
@@ -56,13 +56,13 @@ public:
 	inline bool isMissingTexture() const {return m_bIsMissingTexture;}
 	inline bool isFromDefaultSkin() const {return m_bIsFromDefaultSkin;}
 
-	inline std::vector<UString> getFilepathsForExport() const {return m_filepathsForExport;}
+	inline std::vector<std::string> getFilepathsForExport() const {return m_filepathsForExport;}
 
 private:
 	static ConVar *m_osu_skin_mipmaps_ref;
 
-	bool load(UString skinElementName, UString animationSeparator, bool ignoreDefaultSkin);
-	bool loadImage(UString skinElementName, bool ignoreDefaultSkin);
+	bool load(std::string skinElementName, std::string animationSeparator, bool ignoreDefaultSkin);
+	bool loadImage(std::string skinElementName, bool ignoreDefaultSkin);
 
 	float getScale();
 	float getImageScale();
@@ -90,7 +90,7 @@ private:
 
 	// custom
 	float m_fDrawClipWidthPercent;
-	std::vector<UString> m_filepathsForExport;
+	std::vector<std::string> m_filepathsForExport;
 };
 
 #endif

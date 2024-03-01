@@ -20,7 +20,7 @@ class Console : public CBaseUIWindow
 {
 public:
 	static void processCommand(UString command);
-	static void execConfigFile(UString filename);
+	static void execConfigFile(std::string filename);
 
 public:
 	Console();

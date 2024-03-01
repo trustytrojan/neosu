@@ -38,7 +38,7 @@ public:
 	virtual std::vector<UString> getFilesInFolder(UString folder);
 	virtual std::vector<UString> getFoldersInFolder(UString folder);
 	virtual std::vector<UString> getLogicalDrives();
-	virtual UString getFolderFromFilePath(UString filepath);
+	virtual std::string getFolderFromFilePath(std::string filepath);
 
 	// window
 	int getDPI() {return 96;}

@@ -1,3 +1,4 @@
+#include <format>
 #include <stdlib.h>
 #include <string.h>
 #include <vector>
@@ -108,30 +109,27 @@ OsuDatabase::Score parse_score(char *score_line) {
 }
 
 void fetch_online_scores(OsuDatabaseBeatmap *beatmap) {
-  auto path = UString("/web/osu-osz2-getscores.php?s=0&vv=4&v=1");
+  UString path = "/web/osu-osz2-getscores.php?s=0&vv=4&v=1";
+  path.append(UString::format("&c=%s", beatmap->getMD5Hash().hash));
 
-  auto beatmap_hash = beatmap->getMD5Hash();
-  path.append(UString::format("&c=%s", beatmap_hash.toUtf8()));
-
-  UString ustr_osu_file_path = beatmap->getFilePath(); // have to keep UString in scope to use toUtf8()
-  const char *osu_file_path = ustr_osu_file_path.toUtf8();
-  for (const char *p = osu_file_path; *p; p++) {
-    if (*p == '/') {
-      osu_file_path = p + 1;
-    }
+  std::string osu_file_path = beatmap->getFilePath();
+  auto path_end = osu_file_path.find_last_of('/');
+  if(path_end != std::string::npos) {
+    osu_file_path.erase(0, path_end + 1);
   }
+
   CURL *curl = curl_easy_init();
   if (!curl) {
     debugLog("Failed to initialize cURL in fetch_online_scores()!\n");
     return;
   }
-  char *encoded_filename = curl_easy_escape(curl, osu_file_path, 0);
+  char *encoded_filename = curl_easy_escape(curl, osu_file_path.c_str(), 0);
   if (!encoded_filename) {
     debugLog("Failed to encode map filename!\n");
     curl_easy_cleanup(curl);
     return;
   }
-  path.append(UString::format("&f=%s", encoded_filename).toUtf8());
+  path.append(UString::format("&f=%s", encoded_filename));
   curl_free(encoded_filename);
   curl_easy_cleanup(curl);
   path.append(UString::format("&m=0&i=%d&mods=%d&h=&a=0&us=%s&ha=%s", beatmap->getSetID(), bancho.osu->m_modSelector->getModFlags(), bancho.username.toUtf8(), bancho.pw_md5.toUtf8()).toUtf8());
@@ -140,7 +138,7 @@ void fetch_online_scores(OsuDatabaseBeatmap *beatmap) {
       .type = GET_MAP_LEADERBOARD,
       .path = path,
       .mime = NULL,
-      .extra = (uint8_t *)strdup(beatmap_hash.toUtf8()),
+      .extra = (uint8_t *)strdup(beatmap->getMD5Hash().hash),
   };
 
   send_api_request(request);

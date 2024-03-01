@@ -26,7 +26,7 @@ public:
 	};
 
 public:
-	File(UString filePath, TYPE type = TYPE::READ);
+	File(std::string filePath, TYPE type = TYPE::READ);
 	virtual ~File();
 
 	bool canRead() const;
@@ -66,7 +66,7 @@ public:
 class StdFile : public BaseFile
 {
 public:
-	StdFile(UString filePath, File::TYPE type);
+	StdFile(std::string filePath, File::TYPE type);
 	virtual ~StdFile();
 
 	bool canRead() const;
@@ -80,7 +80,7 @@ public:
 	size_t getFileSize() const;
 
 private:
-	UString m_sFilePath;
+	std::string m_sFilePath;
 
 	bool m_bReady;
 	bool m_bRead;

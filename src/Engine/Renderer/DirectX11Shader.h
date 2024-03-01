@@ -17,7 +17,7 @@
 class DirectX11Shader : public Shader
 {
 public:
-	DirectX11Shader(UString vertexShader, UString fragmentShader, bool source);
+	DirectX11Shader(std::string vertexShader, std::string fragmentShader, bool source);
 	virtual ~DirectX11Shader() {destroy();}
 
 	virtual void enable();
@@ -48,9 +48,9 @@ private:
 	virtual void initAsync();
 	virtual void destroy();
 
-	bool compile(UString vertexShader, UString fragmentShader, bool source);
+	bool compile(std::string vertexShader, std::string fragmentShader, bool source);
 
-	UString m_sVsh, m_sFsh;
+	std::string m_sVsh, m_sFsh;
 
 	bool m_bSource;
 

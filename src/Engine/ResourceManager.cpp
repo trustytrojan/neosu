@@ -320,7 +320,7 @@ void ResourceManager::destroyResource(Resource *rs)
 	}
 
 	if (debug_rm->getBool())
-		debugLog("ResourceManager: Destroying %s\n", rs->getName().toUtf8());
+		debugLog("ResourceManager: Destroying %s\n", rs->getName().c_str());
 
 #ifdef MCENGINE_FEATURE_MULTITHREADING
 
@@ -346,7 +346,7 @@ void ResourceManager::destroyResource(Resource *rs)
 			if (m_loadingWork[w].resource.atomic.load() == rs)
 			{
 				if (debug_rm->getBool())
-					debugLog("Resource Manager: Scheduled async destroy of %s\n", rs->getName().toUtf8());
+					debugLog("Resource Manager: Scheduled async destroy of %s\n", rs->getName().c_str());
 
 				if (rm_interrupt_on_destroy.getBool())
 					rs->interruptLoad();
@@ -396,7 +396,7 @@ void ResourceManager::requestNextLoadUnmanaged()
 	m_nextLoadUnmanagedStack.push(true);
 }
 
-Image *ResourceManager::loadImage(UString filepath, UString resourceName, bool mipmapped, bool keepInSystemMemory)
+Image *ResourceManager::loadImage(std::string filepath, std::string resourceName, bool mipmapped, bool keepInSystemMemory)
 {
 	// check if it already exists
 	if (resourceName.length() > 0)
@@ -416,7 +416,7 @@ Image *ResourceManager::loadImage(UString filepath, UString resourceName, bool m
 	return img;
 }
 
-Image *ResourceManager::loadImageUnnamed(UString filepath, bool mipmapped, bool keepInSystemMemory)
+Image *ResourceManager::loadImageUnnamed(std::string filepath, bool mipmapped, bool keepInSystemMemory)
 {
 	filepath.insert(0, PATH_DEFAULT_IMAGES);
 	Image *img = engine->getGraphics()->createImage(filepath, mipmapped, keepInSystemMemory);
@@ -426,7 +426,7 @@ Image *ResourceManager::loadImageUnnamed(UString filepath, bool mipmapped, bool 
 	return img;
 }
 
-Image *ResourceManager::loadImageAbs(UString absoluteFilepath, UString resourceName, bool mipmapped, bool keepInSystemMemory)
+Image *ResourceManager::loadImageAbs(std::string absoluteFilepath, std::string resourceName, bool mipmapped, bool keepInSystemMemory)
 {
 	// check if it already exists
 	if (resourceName.length() > 0)
@@ -445,7 +445,7 @@ Image *ResourceManager::loadImageAbs(UString absoluteFilepath, UString resourceN
 	return img;
 }
 
-Image *ResourceManager::loadImageAbsUnnamed(UString absoluteFilepath, bool mipmapped, bool keepInSystemMemory)
+Image *ResourceManager::loadImageAbsUnnamed(std::string absoluteFilepath, bool mipmapped, bool keepInSystemMemory)
 {
 	Image *img = engine->getGraphics()->createImage(absoluteFilepath, mipmapped, keepInSystemMemory);
 
@@ -469,7 +469,7 @@ Image *ResourceManager::createImage(unsigned int width, unsigned int height, boo
 	return img;
 }
 
-McFont *ResourceManager::loadFont(UString filepath, UString resourceName, int fontSize, bool antialiasing, int fontDPI)
+McFont *ResourceManager::loadFont(std::string filepath, std::string resourceName, int fontSize, bool antialiasing, int fontDPI)
 {
 	// check if it already exists
 	if (resourceName.length() > 0)
@@ -489,7 +489,7 @@ McFont *ResourceManager::loadFont(UString filepath, UString resourceName, int fo
 	return fnt;
 }
 
-McFont *ResourceManager::loadFont(UString filepath, UString resourceName, std::vector<wchar_t> characters, int fontSize, bool antialiasing, int fontDPI)
+McFont *ResourceManager::loadFont(std::string filepath, std::string resourceName, std::vector<wchar_t> characters, int fontSize, bool antialiasing, int fontDPI)
 {
 	// check if it already exists
 	if (resourceName.length() > 0)
@@ -509,7 +509,7 @@ McFont *ResourceManager::loadFont(UString filepath, UString resourceName, std::v
 	return fnt;
 }
 
-Sound *ResourceManager::loadSound(UString filepath, UString resourceName, bool stream, bool threeD, bool loop, bool prescan)
+Sound *ResourceManager::loadSound(std::string filepath, std::string resourceName, bool stream, bool threeD, bool loop, bool prescan)
 {
 	// check if it already exists
 	if (resourceName.length() > 0)
@@ -529,7 +529,7 @@ Sound *ResourceManager::loadSound(UString filepath, UString resourceName, bool s
 	return snd;
 }
 
-Sound *ResourceManager::loadSoundAbs(UString filepath, UString resourceName, bool stream, bool threeD, bool loop, bool prescan)
+Sound *ResourceManager::loadSoundAbs(std::string filepath, std::string resourceName, bool stream, bool threeD, bool loop, bool prescan)
 {
 	// check if it already exists
 	if (resourceName.length() > 0)
@@ -548,7 +548,7 @@ Sound *ResourceManager::loadSoundAbs(UString filepath, UString resourceName, boo
 	return snd;
 }
 
-Shader *ResourceManager::loadShader(UString vertexShaderFilePath, UString fragmentShaderFilePath, UString resourceName)
+Shader *ResourceManager::loadShader(std::string vertexShaderFilePath, std::string fragmentShaderFilePath, std::string resourceName)
 {
 	// check if it already exists
 	if (resourceName.length() > 0)
@@ -569,7 +569,7 @@ Shader *ResourceManager::loadShader(UString vertexShaderFilePath, UString fragme
 	return shader;
 }
 
-Shader *ResourceManager::loadShader(UString vertexShaderFilePath, UString fragmentShaderFilePath)
+Shader *ResourceManager::loadShader(std::string vertexShaderFilePath, std::string fragmentShaderFilePath)
 {
 	vertexShaderFilePath.insert(0, PATH_DEFAULT_SHADERS);
 	fragmentShaderFilePath.insert(0, PATH_DEFAULT_SHADERS);
@@ -580,7 +580,7 @@ Shader *ResourceManager::loadShader(UString vertexShaderFilePath, UString fragme
 	return shader;
 }
 
-Shader *ResourceManager::createShader(UString vertexShader, UString fragmentShader, UString resourceName)
+Shader *ResourceManager::createShader(std::string vertexShader, std::string fragmentShader, std::string resourceName)
 {
 	// check if it already exists
 	if (resourceName.length() > 0)
@@ -599,7 +599,7 @@ Shader *ResourceManager::createShader(UString vertexShader, UString fragmentShad
 	return shader;
 }
 
-Shader *ResourceManager::createShader(UString vertexShader, UString fragmentShader)
+Shader *ResourceManager::createShader(std::string vertexShader, std::string fragmentShader)
 {
 	Shader *shader = engine->getGraphics()->createShaderFromSource(vertexShader, fragmentShader);
 
@@ -611,7 +611,8 @@ Shader *ResourceManager::createShader(UString vertexShader, UString fragmentShad
 RenderTarget *ResourceManager::createRenderTarget(int x, int y, int width, int height, Graphics::MULTISAMPLE_TYPE multiSampleType)
 {
 	RenderTarget *rt = engine->getGraphics()->createRenderTarget(x, y, width, height, multiSampleType);
-	rt->setName(UString::format("_RT_%ix%i", width, height));
+	auto name = UString::format("_RT_%ix%i", width, height);
+	rt->setName(name.toUtf8());
 
 	loadResource(rt, true);
 
@@ -626,7 +627,8 @@ RenderTarget *ResourceManager::createRenderTarget(int width, int height, Graphic
 TextureAtlas *ResourceManager::createTextureAtlas(int width, int height)
 {
 	TextureAtlas *ta = new TextureAtlas(width, height);
-	ta->setName(UString::format("_TA_%ix%i", width, height));
+	auto name = UString::format("_TA_%ix%i", width, height);
+	ta->setName(name.toUtf8());
 
 	loadResource(ta, false);
 
@@ -642,7 +644,7 @@ VertexArrayObject *ResourceManager::createVertexArrayObject(Graphics::PRIMITIVE 
 	return vao;
 }
 
-Image *ResourceManager::getImage(UString resourceName) const
+Image *ResourceManager::getImage(std::string resourceName) const
 {
 	for (size_t i=0; i<m_vResources.size(); i++)
 	{
@@ -654,7 +656,7 @@ Image *ResourceManager::getImage(UString resourceName) const
 	return NULL;
 }
 
-McFont *ResourceManager::getFont(UString resourceName) const
+McFont *ResourceManager::getFont(std::string resourceName) const
 {
 	for (size_t i=0; i<m_vResources.size(); i++)
 	{
@@ -666,7 +668,7 @@ McFont *ResourceManager::getFont(UString resourceName) const
 	return NULL;
 }
 
-Sound *ResourceManager::getSound(UString resourceName) const
+Sound *ResourceManager::getSound(std::string resourceName) const
 {
 	for (size_t i=0; i<m_vResources.size(); i++)
 	{
@@ -678,7 +680,7 @@ Sound *ResourceManager::getSound(UString resourceName) const
 	return NULL;
 }
 
-Shader *ResourceManager::getShader(UString resourceName) const
+Shader *ResourceManager::getShader(std::string resourceName) const
 {
 	for (size_t i=0; i<m_vResources.size(); i++)
 	{
@@ -787,25 +789,25 @@ void ResourceManager::loadResource(Resource *res, bool load)
 	}
 }
 
-void ResourceManager::doesntExistWarning(UString resourceName) const
+void ResourceManager::doesntExistWarning(std::string resourceName) const
 {
 	if (rm_warnings.getBool())
 	{
 		UString errormsg = "Resource \"";
-		errormsg.append(resourceName);
+		errormsg.append(resourceName.c_str());
 		errormsg.append("\" does not exist!");
 		engine->showMessageWarning("RESOURCE MANAGER: ", errormsg);
 	}
 }
 
-Resource *ResourceManager::checkIfExistsAndHandle(UString resourceName)
+Resource *ResourceManager::checkIfExistsAndHandle(std::string resourceName)
 {
 	for (size_t i=0; i<m_vResources.size(); i++)
 	{
 		if (m_vResources[i]->getName() == resourceName)
 		{
 			if (rm_warnings.getBool())
-				debugLog("RESOURCE MANAGER: Resource \"%s\" already loaded!\n", resourceName.toUtf8());
+				debugLog("RESOURCE MANAGER: Resource \"%s\" already loaded!\n", resourceName.c_str());
 
 			// handle flags (reset them)
 			resetFlags();

@@ -19,7 +19,7 @@ class DirectX11Interface;
 class DirectX11Image : public Image
 {
 public:
-	DirectX11Image(UString filepath, bool mipmapped = false, bool keepInSystemMemory = false);
+	DirectX11Image(std::string filepath, bool mipmapped = false, bool keepInSystemMemory = false);
 	DirectX11Image(int width, int height, bool mipmapped = false, bool keepInSystemMemory = false);
 	virtual ~DirectX11Image() {destroy();}
 

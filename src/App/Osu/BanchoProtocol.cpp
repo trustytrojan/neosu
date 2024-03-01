@@ -175,6 +175,31 @@ UString read_string(Packet *packet) {
   return ustr;
 }
 
+std::string read_stdstring(Packet *packet) {
+  uint8_t empty_check = read_byte(packet);
+  if (empty_check == 0)
+    return std::string();
+
+  uint32_t len = read_uleb128(packet);
+  uint8_t *str = new uint8_t[len + 1];
+  read_bytes(packet, str, len);
+
+  std::string str_out((const char*)str, len);
+  delete[] str;
+
+  return str_out;
+}
+
+void skip_string(Packet *packet) {
+  uint8_t empty_check = read_byte(packet);
+  if(empty_check == 0) {
+    return;
+  }
+
+  uint32_t len = read_uleb128(packet);
+  packet->pos += len;
+}
+
 void write_bytes(Packet *packet, uint8_t *bytes, size_t n) {
   if (packet->pos + n > packet->size) {
     packet->memory =

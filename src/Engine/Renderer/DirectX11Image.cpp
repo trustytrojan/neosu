@@ -16,7 +16,7 @@
 #include "DirectX11Interface.h"
 #include "DirectX11Shader.h"
 
-DirectX11Image::DirectX11Image(UString filepath, bool mipmapped, bool keepInSystemMemory) : Image(filepath, mipmapped, keepInSystemMemory)
+DirectX11Image::DirectX11Image(std::string filepath, bool mipmapped, bool keepInSystemMemory) : Image(filepath, mipmapped, keepInSystemMemory)
 {
 	m_texture = NULL;
 	m_shaderResourceView = NULL;
@@ -79,8 +79,8 @@ void DirectX11Image::init()
 		hr = g->getDevice()->CreateTexture2D(&textureDesc, (m_rawImage.size() >= m_iWidth*m_iHeight*m_iNumChannels ? &initData : NULL), &m_texture);
 		if (FAILED(hr) || m_texture == NULL)
 		{
-			debugLog("DirectX Image Error: Couldn't CreateTexture2D(%ld, %x, %x) on file %s!\n", hr, hr, MAKE_DXGI_HRESULT(hr), m_sFilePath.toUtf8());
-			engine->showMessageError("Image Error", UString::format("DirectX Image error, couldn't CreateTexture2D(%ld, %x, %x) on file %s", hr, hr, MAKE_DXGI_HRESULT(hr), m_sFilePath.toUtf8()));
+			debugLog("DirectX Image Error: Couldn't CreateTexture2D(%ld, %x, %x) on file %s!\n", hr, hr, MAKE_DXGI_HRESULT(hr), m_sFilePath.c_str());
+			engine->showMessageError("Image Error", UString::format("DirectX Image error, couldn't CreateTexture2D(%ld, %x, %x) on file %s", hr, hr, MAKE_DXGI_HRESULT(hr), m_sFilePath.c_str()));
 			return;
 		}
 	}
@@ -111,8 +111,8 @@ void DirectX11Image::init()
 			m_texture->Release();
 			m_texture = NULL;
 
-			debugLog("DirectX Image Error: Couldn't CreateShaderResourceView(%ld, %x, %x) on file %s!\n", hr, hr, MAKE_DXGI_HRESULT(hr), m_sFilePath.toUtf8());
-			engine->showMessageError("Image Error", UString::format("DirectX Image error, couldn't CreateShaderResourceView(%ld, %x, %x) on file %s", hr, hr, MAKE_DXGI_HRESULT(hr), m_sFilePath.toUtf8()));
+			debugLog("DirectX Image Error: Couldn't CreateShaderResourceView(%ld, %x, %x) on file %s!\n", hr, hr, MAKE_DXGI_HRESULT(hr), m_sFilePath.c_str());
+			engine->showMessageError("Image Error", UString::format("DirectX Image error, couldn't CreateShaderResourceView(%ld, %x, %x) on file %s", hr, hr, MAKE_DXGI_HRESULT(hr), m_sFilePath.c_str()));
 
 			return;
 		}
@@ -140,7 +140,7 @@ void DirectX11Image::init()
 	if (m_samplerState == NULL)
 	{
 		debugLog("DirectX Image Error: Couldn't CreateSamplerState() on file %s!\n");
-		engine->showMessageError("Image Error", UString::format("Couldn't CreateSamplerState() on file %s!", m_sFilePath.toUtf8()));
+		engine->showMessageError("Image Error", UString::format("Couldn't CreateSamplerState() on file %s!", m_sFilePath.c_str()));
 		return;
 	}
 
@@ -158,7 +158,7 @@ void DirectX11Image::initAsync()
 	if (!m_bCreatedImage)
 	{
 		if (ResourceManager::debug_rm->getBool())
-			debugLog("Resource Manager: Loading %s\n", m_sFilePath.toUtf8());
+			debugLog("Resource Manager: Loading %s\n", m_sFilePath.c_str());
 
 		m_bAsyncReady = loadRawImage();
 

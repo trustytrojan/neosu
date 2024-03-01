@@ -1,3 +1,4 @@
+#include <format>
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -28,7 +29,7 @@ void* avatar_downloading_thread(void *arg) {
     pthread_mutex_unlock(&avatars_mtx);
 
     UString endpoint = bancho.endpoint;
-    auto server_dir = UString::format(MCENGINE_DATA_DIR "avatars/%s", endpoint.toUtf8());
+    auto server_dir = std::format(MCENGINE_DATA_DIR "avatars/{}", endpoint.toUtf8());
     if(!env->directoryExists(server_dir)) {
         if(!env->directoryExists(MCENGINE_DATA_DIR "avatars")) {
             env->createDirectory(MCENGINE_DATA_DIR "avatars");
@@ -98,8 +99,8 @@ loop:
             }
         }
 
-        auto img_path = UString::format(MCENGINE_DATA_DIR "avatars/%s/%d", endpoint.toUtf8(), avatar_id);
-        FILE *file = fopen(img_path.toUtf8(), "wb");
+        auto img_path = std::format(MCENGINE_DATA_DIR "avatars/{}/{}", endpoint.toUtf8(), avatar_id);
+        FILE *file = fopen(img_path.c_str(), "wb");
         if(file != NULL) {
             fwrite(response.memory, response.size, 1, file);
             fflush(file);
@@ -133,7 +134,7 @@ OsuUIAvatar::OsuUIAvatar(uint32_t player_id, float xPos, float yPos, float xSize
     setClickCallback( fastdelegate::MakeDelegate(this, &OsuUIAvatar::onAvatarClicked) );
 
     struct stat attr;
-    bool exists = (stat(avatar_path.toUtf8(), &attr) == 0);
+    bool exists = (stat(avatar_path.c_str(), &attr) == 0);
     if(exists) {
         // File exists, but if it's more than 7 days old assume it's expired
         time_t now = time(NULL);

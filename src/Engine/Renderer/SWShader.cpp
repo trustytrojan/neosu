@@ -7,7 +7,7 @@
 
 #include "SWShader.h"
 
-SWShader::SWShader(UString vertexShader, UString fragmentShader, bool source)
+SWShader::SWShader(std::string vertexShader, std::string fragmentShader, bool source)
 {
 	// TODO:
 }

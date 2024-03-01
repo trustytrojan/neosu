@@ -40,7 +40,7 @@ public:
 	void onResolutionChange(Vector2 newResolution);
 
 	void processCommand(UString command);
-	void execConfigFile(UString filename);
+	void execConfigFile(std::string filename);
 
 	void log(UString text, Color textColor = 0xffffffff);
 

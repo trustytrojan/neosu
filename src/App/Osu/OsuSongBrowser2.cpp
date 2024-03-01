@@ -1313,7 +1313,7 @@ void OsuSongBrowser2::mouse_update(bool *propagate_clicks)
 						m_backgroundStarCalculator->revive();
 
 						if (osu_debug_background_star_calc.getBool())
-							printf("diffToCalc = %s\n", diffToCalc->getFilePath().toUtf8());
+							debugLog("diffToCalc = %s\n", diffToCalc->getFilePath().c_str());
 
 						// start new calc (nomod stars)
 						{
@@ -2725,13 +2725,15 @@ bool OsuSongBrowser2::findSubstringInDifficulty(const OsuDatabaseBeatmap *diff, 
 
 	if (diff->getSource().length() > 0)
 	{
-		if (diff->getSource().findIgnoreCase(searchString) != -1)
+		auto source = UString(diff->getSource().c_str());
+		if (source.findIgnoreCase(searchString) != -1)
 			return true;
 	}
 
 	if (diff->getTags().length() > 0)
 	{
-		if (diff->getTags().findIgnoreCase(searchString) != -1)
+		auto tags = UString(diff->getTags().c_str());
+		if (tags.findIgnoreCase(searchString) != -1)
 			return true;
 	}
 

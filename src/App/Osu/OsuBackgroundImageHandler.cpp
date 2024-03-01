@@ -130,7 +130,7 @@ void OsuBackgroundImageHandler::handleLoadPathForEntry(ENTRY &entry)
 
 void OsuBackgroundImageHandler::handleLoadImageForEntry(ENTRY &entry)
 {
-	UString fullBackgroundImageFilePath = entry.folder;
+	std::string fullBackgroundImageFilePath = entry.folder;
 	fullBackgroundImageFilePath.append(entry.backgroundImageFileName);
 
 	// start image load

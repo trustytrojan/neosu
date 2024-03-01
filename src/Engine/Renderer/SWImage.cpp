@@ -14,7 +14,7 @@
 
 #include "SWGraphicsInterface.h"
 
-SWImage::SWImage(UString filepath, bool mipmapped, bool keepInSystemMemory) : Image(filepath, mipmapped, keepInSystemMemory)
+SWImage::SWImage(std::string filepath, bool mipmapped, bool keepInSystemMemory) : Image(filepath, mipmapped, keepInSystemMemory)
 {
 	m_iTextureUnitBackup = 0;
 }
@@ -35,7 +35,7 @@ void SWImage::initAsync()
 	if (!m_bCreatedImage)
 	{
 		if (ResourceManager::debug_rm->getBool())
-			printf("Resource Manager: Loading %s\n", m_sFilePath.toUtf8());
+			printf("Resource Manager: Loading %s\n", m_sFilePath.c_str());
 	}
 
 	m_bAsyncReady = loadRawImage();

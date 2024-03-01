@@ -12,6 +12,8 @@
 
 class UString;
 
+void trim(std::string* str);
+
 struct MD5Hash {
 	char hash[33];
 

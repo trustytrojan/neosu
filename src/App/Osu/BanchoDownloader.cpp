@@ -1,5 +1,6 @@
 #include "BanchoDownloader.h"
 
+#include <format>
 #include <curl/curl.h>
 #include <pthread.h>
 #include "miniz.h"
@@ -68,7 +69,7 @@ void* run_mapset_download_thread(void* arg) {
         mz_zip_archive zip = {0};
         mz_zip_archive_file_stat file_stat;
         mz_uint num_files = 0;
-        auto extract_to = UString::format(MCENGINE_DATA_DIR "maps/%d", dt->id);
+        auto extract_to = std::format(MCENGINE_DATA_DIR "maps/{}", dt->id);
 
         auto query_url = UString::format(mirrors[i], dt->id);
         debugLog("Downloading %s\n", query_url.toUtf8());
@@ -108,7 +109,7 @@ void* run_mapset_download_thread(void* arg) {
 
             char* saveptr = NULL;
             char* folder = strtok_r(file_stat.m_filename, "/", &saveptr);
-            UString file_path = extract_to;
+            std::string file_path = extract_to;
             while(folder != NULL) {
                 if(!strcmp(folder, "..")) {
                     // Bro...
@@ -125,7 +126,7 @@ void* run_mapset_download_thread(void* arg) {
                 }
             }
 
-            mz_zip_reader_extract_to_file(&zip, i, file_path.toUtf8(), 0);
+            mz_zip_reader_extract_to_file(&zip, i, file_path.c_str(), 0);
 
         skip_file:;
             // When a file can't be extracted we just ignore it (as long as the archive is valid).
@@ -185,7 +186,7 @@ BeatmapDownloadStatus download_mapset(uint32_t set_id) {
     }
 
     // Check if we already have downloaded it
-    auto map_dir = UString::format(MCENGINE_DATA_DIR "maps/%d", set_id);
+    auto map_dir = std::format(MCENGINE_DATA_DIR "maps/{}", set_id);
     if(env->directoryExists(map_dir)) {
         status.progress = 1.f;
         status.status = SUCCESS;

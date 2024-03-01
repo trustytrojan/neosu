@@ -82,7 +82,7 @@ void OpenGLES2Interface::init()
 
 	//setWireframe(true);
 
-	UString texturedGenericV =	"#version 100\n"
+	std::string texturedGenericV =	"#version 100\n"
 								"\n"
 								"attribute vec3 position;\n"
 								"attribute vec2 uv;\n"
@@ -101,7 +101,7 @@ void OpenGLES2Interface::init()
 								"}\n"
 								"\n";
 
-	UString texturedGenericP =	"#version 100\n"
+	std::string texturedGenericP =	"#version 100\n"
 								"precision mediump float;\n"
 								"\n"
 								"varying vec2 texcoords;\n"
@@ -679,7 +679,7 @@ void OpenGLES2Interface::onResolutionChange(Vector2 newResolution)
 	}
 }
 
-Image *OpenGLES2Interface::createImage(UString filePath, bool mipmapped, bool keepInSystemMemory)
+Image *OpenGLES2Interface::createImage(std::string filePath, bool mipmapped, bool keepInSystemMemory)
 {
 	return new OpenGLImage(filePath, mipmapped, keepInSystemMemory);
 }
@@ -694,12 +694,12 @@ RenderTarget *OpenGLES2Interface::createRenderTarget(int x, int y, int width, in
 	return new OpenGLRenderTarget(x, y, width, height, multiSampleType);
 }
 
-Shader *OpenGLES2Interface::createShaderFromFile(UString vertexShaderFilePath, UString fragmentShaderFilePath)
+Shader *OpenGLES2Interface::createShaderFromFile(std::string vertexShaderFilePath, std::string fragmentShaderFilePath)
 {
 	return new OpenGLES2Shader(vertexShaderFilePath, fragmentShaderFilePath, false);
 }
 
-Shader *OpenGLES2Interface::createShaderFromSource(UString vertexShader, UString fragmentShader)
+Shader *OpenGLES2Interface::createShaderFromSource(std::string vertexShader, std::string fragmentShader)
 {
 	return new OpenGLES2Shader(vertexShader, fragmentShader, true);
 }

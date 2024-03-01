@@ -17,7 +17,7 @@
 class WinFile : public BaseFile
 {
 public:
-	WinFile(UString filePath, File::TYPE type);
+	WinFile(std::string filePath, File::TYPE type);
 	virtual ~WinFile();
 
 	bool canRead() const;
@@ -36,7 +36,7 @@ private:
 	bool checkReadForLineBuffer();
 	bool checkReadForFullBuffer();
 
-	UString m_sFilePath;
+	std::string m_sFilePath;
 
 	bool m_bReady;
 	bool m_bCanRead;

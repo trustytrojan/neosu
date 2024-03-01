@@ -42,25 +42,25 @@ public:
 	virtual void shutdown() = 0;
 	virtual void restart() = 0;
 	virtual void sleep(unsigned int us) = 0;
-	virtual UString getExecutablePath() = 0;
+	virtual std::string getExecutablePath() = 0;
 	virtual void openURLInDefaultBrowser(UString url) = 0;
 
 	// user
 	virtual UString getUsername() = 0;
-	virtual UString getUserDataPath() = 0;
+	virtual std::string getUserDataPath() = 0;
 
 	// file IO
-	virtual bool fileExists(UString fileName) = 0;
-	virtual bool directoryExists(UString directoryName) = 0;
-	virtual bool createDirectory(UString directoryName) = 0;
-	virtual bool renameFile(UString oldFileName, UString newFileName) = 0;
-	virtual bool deleteFile(UString filePath) = 0;
-	virtual std::vector<UString> getFilesInFolder(UString folder) = 0;
-	virtual std::vector<UString> getFoldersInFolder(UString folder) = 0;
+	virtual bool fileExists(std::string fileName) = 0;
+	virtual bool directoryExists(std::string directoryName) = 0;
+	virtual bool createDirectory(std::string directoryName) = 0;
+	virtual bool renameFile(std::string oldFileName, std::string newFileName) = 0;
+	virtual bool deleteFile(std::string filePath) = 0;
+	virtual std::vector<std::string> getFilesInFolder(std::string folder) = 0;
+	virtual std::vector<std::string> getFoldersInFolder(std::string folder) = 0;
 	virtual std::vector<UString> getLogicalDrives() = 0;
-	virtual UString getFolderFromFilePath(UString filepath) = 0;
-	virtual UString getFileExtensionFromFilePath(UString filepath, bool includeDot = false) = 0;
-	virtual UString getFileNameFromFilePath(UString filePath) = 0;
+	virtual std::string getFolderFromFilePath(std::string filepath) = 0;
+	virtual std::string getFileExtensionFromFilePath(std::string filepath, bool includeDot = false) = 0;
+	virtual std::string getFileNameFromFilePath(std::string filePath) = 0;
 
 	// clipboard
 	virtual UString getClipBoardText() = 0;

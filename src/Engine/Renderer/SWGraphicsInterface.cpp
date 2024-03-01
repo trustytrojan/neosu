@@ -539,7 +539,7 @@ void SWGraphicsInterface::onResolutionChange(Vector2 newResolution)
 	}
 }
 
-Image *SWGraphicsInterface::createImage(UString filePath, bool mipmapped, bool keepInSystemMemory)
+Image *SWGraphicsInterface::createImage(std::string filePath, bool mipmapped, bool keepInSystemMemory)
 {
 	return new SWImage(filePath, mipmapped, true); // NOTE: always keep in system memory
 }
@@ -554,12 +554,12 @@ RenderTarget *SWGraphicsInterface::createRenderTarget(int x, int y, int width, i
 	return new SWRenderTarget(x, y, width, height, multiSampleType);
 }
 
-Shader *SWGraphicsInterface::createShaderFromFile(UString vertexShaderFilePath, UString fragmentShaderFilePath)
+Shader *SWGraphicsInterface::createShaderFromFile(std::string vertexShaderFilePath, std::string fragmentShaderFilePath)
 {
 	return new SWShader(vertexShaderFilePath, fragmentShaderFilePath, false);
 }
 
-Shader *SWGraphicsInterface::createShaderFromSource(UString vertexShader, UString fragmentShader)
+Shader *SWGraphicsInterface::createShaderFromSource(std::string vertexShader, std::string fragmentShader)
 {
 	return new SWShader(vertexShader, fragmentShader, true);
 }

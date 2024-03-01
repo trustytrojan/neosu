@@ -818,7 +818,7 @@ bool SoundEngine::play(Sound *snd, float pan, float pitch)
 		const bool ret = (channel > -1);
 
 		if (!ret)
-			debugLog(snd->isStream() ? "SoundEngine::play() couldn't Mix_PlayMusic(), error on %s!\n" : "SoundEngine::play() couldn't Mix_PlayChannel(), error on %s!\n", snd->getFilePath().toUtf8());
+			debugLog(snd->isStream() ? "SoundEngine::play() couldn't Mix_PlayMusic(), error on %s!\n" : "SoundEngine::play() couldn't Mix_PlayChannel(), error on %s!\n", snd->getFilePath().c_str());
 		else
 		{
 			snd->setHandle(channel);

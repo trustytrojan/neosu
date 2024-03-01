@@ -31,7 +31,6 @@ class OsuUserStatsScreen;
 class OsuUpdateHandler;
 class OsuNotificationOverlay;
 class OsuTooltipOverlay;
-class OsuSteamWorkshop;
 class OsuBeatmap;
 class OsuScreen;
 class OsuScore;
@@ -150,7 +149,6 @@ public:
 	inline OsuRankingScreen *getRankingScreen() const {return m_rankingScreen;}
 	inline OsuScore *getScore() const {return m_score;}
 	inline OsuUpdateHandler *getUpdateHandler() const {return m_updateHandler;}
-	inline OsuSteamWorkshop *getSteamWorkshop() const {return m_steamWorkshop;}
 	inline OsuUserStatsScreen *getUserStatsScreen() const {return m_userStatsScreen;}
 
 	inline RenderTarget *getPlayfieldBuffer() const {return m_playfieldBuffer;}
@@ -303,7 +301,6 @@ public:
 	OsuChangelog *m_changelog;
 	OsuEditor *m_editor;
 	OsuUpdateHandler *m_updateHandler;
-	OsuSteamWorkshop *m_steamWorkshop;
 	OsuModFPoSu *m_fposu;
 
 	std::vector<OsuScreen*> m_screens;

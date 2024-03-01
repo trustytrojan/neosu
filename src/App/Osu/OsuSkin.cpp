@@ -11,7 +11,6 @@
 #include "Environment.h"
 #include "ResourceManager.h"
 #include "SoundEngine.h"
-#include "SteamworksInterface.h"
 #include "ConVar.h"
 #include "File.h"
 
@@ -20,7 +19,6 @@
 #include "OsuBeatmap.h"
 #include "OsuGameRules.h"
 #include "OsuNotificationOverlay.h"
-#include "OsuSteamWorkshop.h"
 #include "OsuVolumeOverlay.h"
 
 #include <string.h>
@@ -48,9 +46,6 @@ ConVar osu_sound_panning_multiplier("osu_sound_panning_multiplier", 1.0f, FCVAR_
 ConVar osu_ignore_beatmap_combo_colors("osu_ignore_beatmap_combo_colors", false, FCVAR_NONE);
 ConVar osu_ignore_beatmap_sample_volume("osu_ignore_beatmap_sample_volume", false, FCVAR_NONE);
 
-ConVar osu_export_skin("osu_export_skin");
-ConVar osu_skin_export("osu_skin_export");
-
 const char *OsuSkin::OSUSKIN_DEFAULT_SKIN_PATH = ""; // set dynamically below in the constructor
 Image *OsuSkin::m_missingTexture = NULL;
 
@@ -60,13 +55,12 @@ ConVar *OsuSkin::m_osu_skin_hd = &osu_skin_hd;
 ConVar *OsuSkin::m_osu_skin_ref = NULL;
 ConVar *OsuSkin::m_osu_mod_fposu_ref = NULL;
 
-OsuSkin::OsuSkin(Osu *osu, UString name, UString filepath, bool isDefaultSkin, bool isWorkshopSkin)
+OsuSkin::OsuSkin(Osu *osu, UString name, std::string filepath, bool isDefaultSkin)
 {
 	m_osu = osu;
 	m_sName = name;
 	m_sFilePath = filepath;
 	m_bIsDefaultSkin = isDefaultSkin;
-	m_bIsWorkshopSkin = isWorkshopSkin;
 
 	m_bReady = false;
 
@@ -316,8 +310,6 @@ OsuSkin::OsuSkin(Osu *osu, UString name, UString filepath, bool isDefaultSkin, b
 
 	// convar callbacks
 	osu_ignore_beatmap_sample_volume.setCallback( fastdelegate::MakeDelegate(this, &OsuSkin::onIgnoreBeatmapSampleVolumeChange) );
-	osu_export_skin.setCallback( fastdelegate::MakeDelegate(this, &OsuSkin::onExport) );
-	osu_skin_export.setCallback( fastdelegate::MakeDelegate(this, &OsuSkin::onExport) );
 }
 
 OsuSkin::~OsuSkin()
@@ -390,44 +382,22 @@ void OsuSkin::load()
 		filepathsForRandomSkin.clear();
 		if (m_bIsRandom || m_bIsRandomElements)
 		{
-			std::vector<UString> skinNames;
-
-			// steam workshop items
-			if (steam->isReady())
-			{
-				if (!m_osu->getSteamWorkshop()->isReady())
-					m_osu->getSteamWorkshop()->refresh(false, false);
-
-				if (m_osu->getSteamWorkshop()->isReady())
-				{
-					const std::vector<OsuSteamWorkshop::SUBSCRIBED_ITEM> &subscribedItems = m_osu->getSteamWorkshop()->getSubscribedItems();
-
-					for (int i=0; i<subscribedItems.size(); i++)
-					{
-						UString randomSkinFolder = subscribedItems[i].installInfo;
-
-						// ensure that the skinFolder ends with a slash
-						if (randomSkinFolder[randomSkinFolder.length()-1] != L'/' && randomSkinFolder[randomSkinFolder.length()-1] != L'\\')
-							randomSkinFolder.append("/");
-
-						filepathsForRandomSkin.push_back(randomSkinFolder);
-						skinNames.push_back(subscribedItems[i].title);
-					}
-				}
-			}
+			std::vector<std::string> skinNames;
 
 			// regular skins
 			{
-				UString skinFolder = convar->getConVarByName("osu_folder")->getString();
-				skinFolder.append(convar->getConVarByName("osu_folder_sub_skins")->getString());
-				std::vector<UString> skinFolders = env->getFoldersInFolder(skinFolder);
+				auto osu_folder = convar->getConVarByName("osu_folder")->getString();
+				auto osu_folder_sub_skins = convar->getConVarByName("osu_folder_sub_skins")->getString();
+				std::string skinFolder = osu_folder.toUtf8();
+				skinFolder.append(osu_folder_sub_skins.toUtf8());
+				std::vector<std::string> skinFolders = env->getFoldersInFolder(skinFolder);
 
 				for (int i=0; i<skinFolders.size(); i++)
 				{
-					if (skinFolders[i] == UString(".") || skinFolders[i] == UString("..")) // is this universal in every file system? too lazy to check. should probably fix this in the engine and not here
+					if (skinFolders[i].compare(".") == 0 || skinFolders[i].compare("..") == 0) // is this universal in every file system? too lazy to check. should probably fix this in the engine and not here
 						continue;
 
-					UString randomSkinFolder = skinFolder;
+					std::string randomSkinFolder = skinFolder;
 					randomSkinFolder.append(skinFolders[i]);
 					randomSkinFolder.append("/");
 
@@ -506,8 +476,8 @@ void OsuSkin::load()
 
 	randomizeFilePath();
 	{
-		UString hitCirclePrefix = m_sHitCirclePrefix.length() > 0 ? m_sHitCirclePrefix : "default";
-		UString hitCircleStringFinal = hitCirclePrefix; hitCircleStringFinal.append("-0");
+		std::string hitCirclePrefix = m_sHitCirclePrefix.length() > 0 ? m_sHitCirclePrefix : "default";
+		std::string hitCircleStringFinal = hitCirclePrefix; hitCircleStringFinal.append("-0");
 		checkLoadImage(&m_default0, hitCircleStringFinal, "OSU_SKIN_DEFAULT0");
 		if (m_default0 == m_missingTexture) checkLoadImage(&m_default0, "default-0", "OSU_SKIN_DEFAULT0"); // special cases: fallback to default skin hitcircle numbers if the defined prefix doesn't point to any valid files
 		hitCircleStringFinal = hitCirclePrefix; hitCircleStringFinal.append("-1");
@@ -541,8 +511,8 @@ void OsuSkin::load()
 
 	randomizeFilePath();
 	{
-		UString scorePrefix = m_sScorePrefix.length() > 0 ? m_sScorePrefix : "score";
-		UString scoreStringFinal = scorePrefix; scoreStringFinal.append("-0");
+		std::string scorePrefix = m_sScorePrefix.length() > 0 ? m_sScorePrefix : "score";
+		std::string scoreStringFinal = scorePrefix; scoreStringFinal.append("-0");
 		checkLoadImage(&m_score0, scoreStringFinal, "OSU_SKIN_SCORE0");
 		if (m_score0 == m_missingTexture) checkLoadImage(&m_score0, "score-0", "OSU_SKIN_SCORE0"); // special cases: fallback to default skin score numbers if the defined prefix doesn't point to any valid files
 		scoreStringFinal = scorePrefix; scoreStringFinal.append("-1");
@@ -588,8 +558,8 @@ void OsuSkin::load()
 
 	randomizeFilePath();
 	{
-		UString comboPrefix = m_sComboPrefix.length() > 0 ? m_sComboPrefix : "score"; // yes, "score" is the default value for the combo prefix
-		UString comboStringFinal = comboPrefix; comboStringFinal.append("-0");
+		std::string comboPrefix = m_sComboPrefix.length() > 0 ? m_sComboPrefix : "score"; // yes, "score" is the default value for the combo prefix
+		std::string comboStringFinal = comboPrefix; comboStringFinal.append("-0");
 		checkLoadImage(&m_combo0, comboStringFinal, "OSU_SKIN_COMBO0");
 		if (m_combo0 == m_missingTexture) checkLoadImage(&m_combo0, "score-0", "OSU_SKIN_COMBO0"); // special cases: fallback to default skin combo numbers if the defined prefix doesn't point to any valid files
 		comboStringFinal = comboPrefix; comboStringFinal.append("-1");
@@ -986,9 +956,9 @@ void OsuSkin::load()
 	}
 }
 
-void OsuSkin::loadBeatmapOverride(UString filepath)
+void OsuSkin::loadBeatmapOverride(std::string filepath)
 {
-	//debugLog("OsuSkin::loadBeatmapOverride( %s )\n", filepath.toUtf8());
+	//debugLog("OsuSkin::loadBeatmapOverride( %s )\n", filepath.c_str());
 	// TODO: beatmap skin support
 }
 
@@ -1000,12 +970,12 @@ void OsuSkin::reloadSounds()
 	}
 }
 
-bool OsuSkin::parseSkinINI(UString filepath)
+bool OsuSkin::parseSkinINI(std::string filepath)
 {
 	File file(filepath);
 	if (!file.canRead())
 	{
-		debugLog("OsuSkin Error: Couldn't load %s\n", filepath.toUtf8());
+		debugLog("OsuSkin Error: Couldn't load %s\n", filepath.c_str());
 		return false;
 	}
 
@@ -1105,10 +1075,8 @@ bool OsuSkin::parseSkinINI(UString filepath)
 
 						for (int i=0; i<m_sComboPrefix.length(); i++)
 						{
-							if (m_sComboPrefix[i] == L'\\')
-							{
-								m_sComboPrefix.erase(i, 1);
-								m_sComboPrefix.insert(i, L'/');
+							if (m_sComboPrefix[i] == '\\') {
+								m_sComboPrefix[i] = '/';
 							}
 						}
 					}
@@ -1121,10 +1089,8 @@ bool OsuSkin::parseSkinINI(UString filepath)
 
 						for (int i=0; i<m_sScorePrefix.length(); i++)
 						{
-							if (m_sScorePrefix[i] == L'\\')
-							{
-								m_sScorePrefix.erase(i, 1);
-								m_sScorePrefix.insert(i, L'/');
+							if (m_sScorePrefix[i] == '\\') {
+								m_sScorePrefix[i] = '/';
 							}
 						}
 					}
@@ -1137,10 +1103,8 @@ bool OsuSkin::parseSkinINI(UString filepath)
 
 						for (int i=0; i<m_sHitCirclePrefix.length(); i++)
 						{
-							if (m_sHitCirclePrefix[i] == L'\\')
-							{
-								m_sHitCirclePrefix.erase(i, 1);
-								m_sHitCirclePrefix.insert(i, L'/');
+							if (m_sHitCirclePrefix[i] == '\\') {
+								m_sHitCirclePrefix[i] = '/';
 							}
 						}
 					}
@@ -1158,82 +1122,6 @@ bool OsuSkin::parseSkinINI(UString filepath)
 void OsuSkin::onIgnoreBeatmapSampleVolumeChange(UString oldValue, UString newValue)
 {
 	resetSampleVolume();
-}
-
-void OsuSkin::onExport(UString folderName)
-{
-	if (folderName.length() < 1)
-	{
-		m_osu->getNotificationOverlay()->addNotification("Usage: osu_skin_export MyExportedSkinName", 0xffffffff, false, 3.0f);
-		return;
-	}
-
-	UString exportFolder = convar->getConVarByName("osu_folder")->getString();
-	exportFolder.append(convar->getConVarByName("osu_folder_sub_skins")->getString());
-	exportFolder.append(folderName);
-	exportFolder.append("/");
-
-	if (env->directoryExists(exportFolder))
-	{
-		m_osu->getNotificationOverlay()->addNotification("Error: Folder already exists. Use a different name.", 0xffffff00, false, 3.0f);
-		return;
-	}
-
-	if (!env->createDirectory(exportFolder))
-	{
-		m_osu->getNotificationOverlay()->addNotification(UString::format("Error: Couldn't create folder.", exportFolder.toUtf8()), 0xffff0000, false, 3.0f);
-		return;
-	}
-
-	if (!env->directoryExists(exportFolder))
-	{
-		m_osu->getNotificationOverlay()->addNotification(UString::format("Error: Folder does not exist.", exportFolder.toUtf8()), 0xffff0000, false, 3.0f);
-		return;
-	}
-
-	struct FILE_TO_COPY
-	{
-		UString filePath;
-		UString fileNameWithExtension;
-	};
-
-	std::vector<FILE_TO_COPY> filesToCopy;
-
-	// skin.ini
-	filesToCopy.push_back({m_sSkinIniFilePath, "skin.ini"});
-
-	// checkLoadImage + checkLoadSound + createOsuSkinImage
-	for (const UString &filepath : m_filepathsForExport)
-	{
-		if (filepath.length() < 3) continue;
-
-		const int lastPathSeparatorIndex = filepath.findLast("/");
-		if (lastPathSeparatorIndex > -1)
-		{
-			const UString fileNameWithExtension = filepath.substr(lastPathSeparatorIndex + 1);
-			if (fileNameWithExtension.length() > 0)
-				filesToCopy.push_back({filepath, fileNameWithExtension});
-		}
-	}
-
-	for (const FILE_TO_COPY &fileToCopy : filesToCopy)
-	{
-		UString outputFilePath = exportFolder;
-		outputFilePath.append(fileToCopy.fileNameWithExtension);
-
-		debugLog("Copying \"%s\" to \"%s\"\n", fileToCopy.filePath.toUtf8(), outputFilePath.toUtf8());
-
-		File inputFile(fileToCopy.filePath, File::TYPE::READ);
-		File outputFile(outputFilePath, File::TYPE::WRITE);
-
-		if (inputFile.canRead() && outputFile.canWrite())
-			outputFile.write(inputFile.readFile(), inputFile.getFileSize());
-		else
-			debugLog("Error: Couldn't copy %s\n", fileToCopy.filePath.toUtf8());
-	}
-
-	debugLog("Done.\n");
-	m_osu->getNotificationOverlay()->addNotification("Done.", 0xff00ff00, false, 2.0f);
 }
 
 void OsuSkin::setSampleSet(int sampleSet)
@@ -1438,41 +1326,41 @@ void OsuSkin::randomizeFilePath()
 		m_sFilePath = filepathsForRandomSkin[rand() % filepathsForRandomSkin.size()];
 }
 
-OsuSkinImage *OsuSkin::createOsuSkinImage(UString skinElementName, Vector2 baseSizeForScaling2x, float osuSize, bool ignoreDefaultSkin, UString animationSeparator)
+OsuSkinImage *OsuSkin::createOsuSkinImage(std::string skinElementName, Vector2 baseSizeForScaling2x, float osuSize, bool ignoreDefaultSkin, std::string animationSeparator)
 {
 	OsuSkinImage *skinImage = new OsuSkinImage(this, skinElementName, baseSizeForScaling2x, osuSize, animationSeparator, ignoreDefaultSkin);
 	m_images.push_back(skinImage);
 
-	const std::vector<UString> &filepathsForExport = skinImage->getFilepathsForExport();
+	const std::vector<std::string> &filepathsForExport = skinImage->getFilepathsForExport();
 	m_filepathsForExport.insert(m_filepathsForExport.end(), filepathsForExport.begin(), filepathsForExport.end());
 
 	return skinImage;
 }
 
-void OsuSkin::checkLoadImage(Image **addressOfPointer, UString skinElementName, UString resourceName, bool ignoreDefaultSkin, UString fileExtension, bool forceLoadMipmaps)
+void OsuSkin::checkLoadImage(Image **addressOfPointer, std::string skinElementName, std::string resourceName, bool ignoreDefaultSkin, std::string fileExtension, bool forceLoadMipmaps)
 {
 	if (*addressOfPointer != m_missingTexture) return; // we are already loaded
 
 	// NOTE: only the default skin is loaded with a resource name (it must never be unloaded by other instances), and it is NOT added to the resources vector
 
-	UString defaultFilePath1 = UString(env->getOS() == Environment::OS::OS_HORIZON ? "romfs:/materials/" : MCENGINE_DATA_DIR "/materials/");
+	std::string defaultFilePath1 = env->getOS() == Environment::OS::OS_HORIZON ? "romfs:/materials/" : MCENGINE_DATA_DIR "/materials/";
 	defaultFilePath1.append(OSUSKIN_DEFAULT_SKIN_PATH);
 	defaultFilePath1.append(skinElementName);
 	defaultFilePath1.append("@2x.");
 	defaultFilePath1.append(fileExtension);
 
-	UString defaultFilePath2 = UString(env->getOS() == Environment::OS::OS_HORIZON ? "romfs:/materials/" : MCENGINE_DATA_DIR "/materials/");
+	std::string defaultFilePath2 = env->getOS() == Environment::OS::OS_HORIZON ? "romfs:/materials/" : MCENGINE_DATA_DIR "/materials/";
 	defaultFilePath2.append(OSUSKIN_DEFAULT_SKIN_PATH);
 	defaultFilePath2.append(skinElementName);
 	defaultFilePath2.append(".");
 	defaultFilePath2.append(fileExtension);
 
-	UString filepath1 = m_sFilePath;
+	std::string filepath1 = m_sFilePath;
 	filepath1.append(skinElementName);
 	filepath1.append("@2x.");
 	filepath1.append(fileExtension);
 
-	UString filepath2 = m_sFilePath;
+	std::string filepath2 = m_sFilePath;
 	filepath2.append(skinElementName);
 	filepath2.append(".");
 	filepath2.append(fileExtension);
@@ -1491,7 +1379,7 @@ void OsuSkin::checkLoadImage(Image **addressOfPointer, UString skinElementName, 
 		{
 			if (existsDefaultFilePath1)
 			{
-				UString defaultResourceName = resourceName;
+				std::string defaultResourceName = resourceName;
 				defaultResourceName.append("_DEFAULT"); // so we don't load the default skin twice
 
 				if (osu_skin_async.getBool())
@@ -1504,7 +1392,7 @@ void OsuSkin::checkLoadImage(Image **addressOfPointer, UString skinElementName, 
 			{
 				if (existsDefaultFilePath2)
 				{
-					UString defaultResourceName = resourceName;
+					std::string defaultResourceName = resourceName;
 					defaultResourceName.append("_DEFAULT"); // so we don't load the default skin twice
 
 					if (osu_skin_async.getBool())
@@ -1556,7 +1444,7 @@ void OsuSkin::checkLoadImage(Image **addressOfPointer, UString skinElementName, 
 	{
 		if (existsDefaultFilePath2)
 		{
-			UString defaultResourceName = resourceName;
+			std::string defaultResourceName = resourceName;
 			defaultResourceName.append("_DEFAULT"); // so we don't load the default skin twice
 
 			if (osu_skin_async.getBool())
@@ -1597,7 +1485,7 @@ void OsuSkin::checkLoadImage(Image **addressOfPointer, UString skinElementName, 
 	}
 }
 
-void OsuSkin::checkLoadSound(Sound **addressOfPointer, UString skinElementName, UString resourceName, bool isOverlayable, bool isSample, bool loop, float hardcodedVolumeMultiplier)
+void OsuSkin::checkLoadSound(Sound **addressOfPointer, std::string skinElementName, std::string resourceName, bool isOverlayable, bool isSample, bool loop, float hardcodedVolumeMultiplier)
 {
 	if (*addressOfPointer != NULL) return; // we are already loaded
 
@@ -1608,28 +1496,28 @@ void OsuSkin::checkLoadSound(Sound **addressOfPointer, UString skinElementName, 
 
 	// load default skin
 
-	UString defaultpath1 = UString(env->getOS() == Environment::OS::OS_HORIZON ? "romfs:/materials/" : MCENGINE_DATA_DIR "./materials/");
+	std::string defaultpath1 = env->getOS() == Environment::OS::OS_HORIZON ? "romfs:/materials/" : MCENGINE_DATA_DIR "./materials/";
 	{
 		defaultpath1.append(OSUSKIN_DEFAULT_SKIN_PATH);
 		defaultpath1.append(skinElementName);
 		defaultpath1.append(".wav");
 	}
 
-	UString defaultpath2 = UString(env->getOS() == Environment::OS::OS_HORIZON ? "romfs:/materials/" : MCENGINE_DATA_DIR "./materials/");
+	std::string defaultpath2 = env->getOS() == Environment::OS::OS_HORIZON ? "romfs:/materials/" : MCENGINE_DATA_DIR "./materials/";
 	{
 		defaultpath2.append(OSUSKIN_DEFAULT_SKIN_PATH);
 		defaultpath2.append(skinElementName);
 		defaultpath2.append(".mp3");
 	}
 
-	UString defaultpath3 = UString(env->getOS() == Environment::OS::OS_HORIZON ? "romfs:/materials/" : MCENGINE_DATA_DIR "./materials/");
+	std::string defaultpath3 = env->getOS() == Environment::OS::OS_HORIZON ? "romfs:/materials/" : MCENGINE_DATA_DIR "./materials/";
 	{
 		defaultpath3.append(OSUSKIN_DEFAULT_SKIN_PATH);
 		defaultpath3.append(skinElementName);
 		defaultpath3.append(".ogg");
 	}
 
-	UString defaultResourceName = resourceName;
+	std::string defaultResourceName = resourceName;
 	defaultResourceName.append("_DEFAULT");
 	if (env->fileExists(defaultpath1))
 	{
@@ -1659,15 +1547,15 @@ void OsuSkin::checkLoadSound(Sound **addressOfPointer, UString skinElementName, 
 	if (!isSample || osu_skin_use_skin_hitsounds.getBool())
 	{
 		// check if mp3 or wav exist
-		UString filepath1 = m_sFilePath;
+		std::string filepath1 = m_sFilePath;
 		filepath1.append(skinElementName);
 		filepath1.append(".wav");
 
-		UString filepath2 = m_sFilePath;
+		std::string filepath2 = m_sFilePath;
 		filepath2.append(skinElementName);
 		filepath2.append(".mp3");
 
-		UString filepath3 = m_sFilePath;
+		std::string filepath3 = m_sFilePath;
 		filepath3.append(skinElementName);
 		filepath3.append(".ogg");
 
@@ -1724,13 +1612,12 @@ void OsuSkin::checkLoadSound(Sound **addressOfPointer, UString skinElementName, 
 		m_filepathsForExport.push_back((*addressOfPointer)->getFilePath());
 	}
 	else
-		debugLog("OsuSkin Warning: NULL sound %s!\n", skinElementName.toUtf8());
+		debugLog("OsuSkin Warning: NULL sound %s!\n", skinElementName.c_str());
 }
 
-bool OsuSkin::compareFilenameWithSkinElementName(UString filename, UString skinElementName)
+bool OsuSkin::compareFilenameWithSkinElementName(std::string filename, std::string skinElementName)
 {
 	if (filename.length() == 0 || skinElementName.length() == 0) return false;
-
-	return filename.substr(0, filename.findLast(".")) == skinElementName;
+	return filename.substr(0, filename.find_last_of('.')) == skinElementName;
 }
 

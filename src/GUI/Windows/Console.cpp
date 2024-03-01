@@ -209,7 +209,7 @@ void Console::processCommand(UString command)
 	}
 }
 
-void Console::execConfigFile(UString filename)
+void Console::execConfigFile(std::string filename)
 {
 	// handle extension
 	filename.insert(0, CFG_FOLDER);
@@ -217,10 +217,10 @@ void Console::execConfigFile(UString filename)
 		filename.append(".cfg");
 
 	// open it
-	std::ifstream inFile(filename.toUtf8());
+	std::ifstream inFile(filename.c_str());
 	if (!inFile.good())
 	{
-		debugLog("Console::execConfigFile() error, file \"%s\" not found!\n", filename.toUtf8());
+		debugLog("Console::execConfigFile() error, file \"%s\" not found!\n", filename.c_str());
 		return;
 	}
 
@@ -328,7 +328,7 @@ void Console::onResized()
 
 void _exec(UString args)
 {
-	Console::execConfigFile(args);
+	Console::execConfigFile(args.toUtf8());
 }
 
 void _echo(UString args)

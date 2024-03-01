@@ -13,7 +13,7 @@
 class SWShader : public Shader
 {
 public:
-	SWShader(UString vertexShader, UString fragmentShader, bool source);
+	SWShader(std::string vertexShader, std::string fragmentShader, bool source);
 	virtual ~SWShader() {destroy();}
 
 	virtual void enable();

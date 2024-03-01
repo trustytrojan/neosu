@@ -210,16 +210,16 @@ bool OsuUpdateHandler::_downloadUpdate()
 	return true;
 }
 
-void OsuUpdateHandler::_installUpdate(UString zipFilePath)
+void OsuUpdateHandler::_installUpdate(std::string zipFilePath)
 {
-	debugLog("OsuUpdateHandler::installUpdate( %s )\n", zipFilePath.toUtf8());
+	debugLog("OsuUpdateHandler::installUpdate( %s )\n", zipFilePath.c_str());
 	m_status = STATUS::STATUS_INSTALLING_UPDATE;
 
 	// setting the status in every error check return is retarded
 
 	if (!env->fileExists(zipFilePath))
 	{
-		debugLog("OsuUpdateHandler::installUpdate() error, \"%s\" does not exist!\n", zipFilePath.toUtf8());
+		debugLog("OsuUpdateHandler::installUpdate() error, \"%s\" does not exist!\n", zipFilePath.c_str());
 		m_status = STATUS::STATUS_ERROR;
 		return;
 	}
@@ -261,11 +261,11 @@ void OsuUpdateHandler::_installUpdate(UString zipFilePath)
 	// get main dir name (assuming that the first file is the main subdirectory)
 	mz_zip_archive_file_stat file_stat;
 	mz_zip_reader_file_stat(&zip_archive, 0, &file_stat);
-	UString mainDirectory = UString(file_stat.m_filename);
+	std::string mainDirectory = file_stat.m_filename;
 
 	// split raw dirs and files
-	std::vector<UString> files;
-	std::vector<UString> dirs;
+	std::vector<std::string> files;
+	std::vector<std::string> dirs;
 	for (int i=1; i<mz_zip_reader_get_num_files(&zip_archive); i++)
 	{
 		mz_zip_archive_file_stat file_stat;
@@ -276,26 +276,26 @@ void OsuUpdateHandler::_installUpdate(UString zipFilePath)
 		}
 
 		if (mz_zip_reader_is_file_a_directory(&zip_archive, i))
-			dirs.push_back(UString(file_stat.m_filename));
+			dirs.push_back(file_stat.m_filename);
 		else
-			files.push_back(UString(file_stat.m_filename));
+			files.push_back(file_stat.m_filename);
 
 		debugLog("OsuUpdateHandler: Filename: \"%s\", isDir: %i, uncompressed size: %u, compressed size: %u\n", file_stat.m_filename, (int)mz_zip_reader_is_file_a_directory(&zip_archive, i), (unsigned int)file_stat.m_uncomp_size, (unsigned int)file_stat.m_comp_size);
 	}
 
 	// repair/create missing/new dirs
-	UString cfgDir = MCENGINE_DATA_DIR "cfg/";
+	std::string cfgDir = MCENGINE_DATA_DIR "cfg/";
 	bool cfgDirExists = env->directoryExists(cfgDir);
 	for (int i=0; i<dirs.size(); i++)
 	{
 		int mainDirectoryOffset = dirs[i].find(mainDirectory);
 		if (mainDirectoryOffset == 0 && dirs[i].length() - mainDirectoryOffset > 0 && mainDirectoryOffset + mainDirectory.length() < dirs[i].length())
 		{
-			UString newDir = dirs[i].substr(mainDirectoryOffset + mainDirectory.length());
+			std::string newDir = dirs[i].substr(mainDirectoryOffset + mainDirectory.length());
 
 			if (!env->directoryExists(newDir))
 			{
-				debugLog("OsuUpdateHandler: Creating directory %s\n", newDir.toUtf8());
+				debugLog("OsuUpdateHandler: Creating directory %s\n", newDir.c_str());
 				env->createDirectory(newDir);
 			}
 		}
@@ -303,10 +303,10 @@ void OsuUpdateHandler::_installUpdate(UString zipFilePath)
 
 	// on windows it's impossible to overwrite a running executable, but we can simply rename/move it
 	// this is not necessary on other operating systems, but it doesn't break anything so
-	UString executablePath = env->getExecutablePath();
+	std::string executablePath = env->getExecutablePath();
 	if (executablePath.length() > 0)
 	{
-		UString oldExecutablePath = executablePath;
+		std::string oldExecutablePath = executablePath;
 		oldExecutablePath.append(".old");
 		env->deleteFile(oldExecutablePath); // must delete potentially existing file from previous update, otherwise renaming will not work
 		env->renameFile(executablePath, oldExecutablePath);
@@ -318,7 +318,7 @@ void OsuUpdateHandler::_installUpdate(UString zipFilePath)
 		// ignore cfg directory (don't want to overwrite user settings), except if it doesn't exist
 		if (files[i].find(cfgDir) != -1 && cfgDirExists)
 		{
-			debugLog("OsuUpdateHandler: Ignoring file \"%s\"\n", files[i].toUtf8());
+			debugLog("OsuUpdateHandler: Ignoring file \"%s\"\n", files[i].c_str());
 			continue;
 		}
 
@@ -326,18 +326,18 @@ void OsuUpdateHandler::_installUpdate(UString zipFilePath)
 
 		if (mainDirectoryOffset == 0 && files[i].length() - mainDirectoryOffset > 0 && mainDirectoryOffset + mainDirectory.length() < files[i].length())
 		{
-			UString outFilePath = files[i].substr(mainDirectoryOffset + mainDirectory.length());
-			debugLog("OsuUpdateHandler: Writing %s\n", outFilePath.toUtf8());
-			mz_zip_reader_extract_file_to_file(&zip_archive, files[i].toUtf8(), outFilePath.toUtf8(), 0);
+			std::string outFilePath = files[i].substr(mainDirectoryOffset + mainDirectory.length());
+			debugLog("OsuUpdateHandler: Writing %s\n", outFilePath.c_str());
+			mz_zip_reader_extract_file_to_file(&zip_archive, files[i].c_str(), outFilePath.c_str(), 0);
 		}
 		else if (mainDirectoryOffset != 0)
-			debugLog("OsuUpdateHandler::installUpdate() warning, ignoring file \"%s\" because it's not in the main dir!\n", files[i].toUtf8());
+			debugLog("OsuUpdateHandler::installUpdate() warning, ignoring file \"%s\" because it's not in the main dir!\n", files[i].c_str());
 	}
 
 	mz_zip_reader_end(&zip_archive);
 
 #ifndef _WIN32
-	chmod(executablePath.toUtf8(), S_IRWXU);
+	chmod(executablePath.c_str(), S_IRWXU);
 #endif
 
 	m_status = STATUS::STATUS_SUCCESS_INSTALLATION;

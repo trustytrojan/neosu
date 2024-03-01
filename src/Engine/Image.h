@@ -13,7 +13,7 @@
 class Image : public Resource
 {
 public:
-	static void saveToImage(unsigned char *data, unsigned int width, unsigned int height, UString filepath);
+	static void saveToImage(unsigned char *data, unsigned int width, unsigned int height, std::string filepath);
 
 	enum class TYPE
 	{
@@ -23,7 +23,7 @@ public:
 	};
 
 public:
-	Image(UString filepath, bool mipmapped = false, bool keepInSystemMemory = false);
+	Image(std::string filepath, bool mipmapped = false, bool keepInSystemMemory = false);
 	Image(int width, int height, bool mipmapped = false, bool keepInSystemMemory = false);
 	virtual ~Image() {;}
 

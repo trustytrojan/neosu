@@ -1637,7 +1637,7 @@ void OsuBeatmapStandard::onBeforeStop(bool quit)
 	double aimSliderFactor = 0.0;
 	double speed = 0.0;
 	double speedNotes = 0.0;
-	const UString &osuFilePath = m_selectedDifficulty2->getFilePath();
+	const std::string &osuFilePath = m_selectedDifficulty2->getFilePath();
 	const Osu::GAMEMODE gameMode = Osu::GAMEMODE::STD;
 	const float AR = getAR();
 	const float CS = getCS();

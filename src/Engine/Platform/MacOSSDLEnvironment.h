@@ -29,15 +29,15 @@ public:
 
 	// user
 	UString getUsername();
-	UString getUserDataPath();
+	std::string getUserDataPath();
 
 	// file IO
-	bool directoryExists(UString directoryName);
-	bool createDirectory(UString directoryName);
+	bool directoryExists(std::string directoryName);
+	bool createDirectory(std::string directoryName);
 	std::vector<UString> getFilesInFolder(UString folder);
 	std::vector<UString> getFoldersInFolder(UString folder);
 	std::vector<UString> getLogicalDrives();
-	UString getFolderFromFilePath(UString filepath);
+	std::string getFolderFromFilePath(std::string filepath);
 
 	// dialogs & message boxes
 	UString openFileWindow(const char *filetypefilters, UString title, UString initialpath);

@@ -25,7 +25,6 @@ class OpenVRInterface;
 class VulkanInterface;
 class ResourceManager;
 class AnimationHandler;
-class SteamworksInterface;
 class DiscordInterface;
 
 class CBaseUIContainer;
@@ -151,7 +150,6 @@ private:
 	NetworkHandler *m_networkHandler;
 	ResourceManager *m_resourceManager;
 	AnimationHandler *m_animationHandler;
-	SteamworksInterface *m_steam;
 	DiscordInterface *m_discord;
 
 	// input devices

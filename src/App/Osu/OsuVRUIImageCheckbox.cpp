@@ -13,7 +13,7 @@
 
 #include "OsuVR.h"
 
-OsuVRUIImageCheckbox::OsuVRUIImageCheckbox(OsuVR *vr, float x, float y, float width, float height, UString imageResourceNameChecked, UString imageResourceNameUnchecked) : OsuVRUIButton(vr, x, y, width, height)
+OsuVRUIImageCheckbox::OsuVRUIImageCheckbox(OsuVR *vr, float x, float y, float width, float height, std::string imageResourceNameChecked, std::string imageResourceNameUnchecked) : OsuVRUIButton(vr, x, y, width, height)
 {
 	m_sImageResourceNameChecked = imageResourceNameChecked;
 	m_sImageResourceNameUnchecked = imageResourceNameUnchecked;
