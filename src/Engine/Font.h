@@ -56,7 +56,7 @@ public:
 	float getStringHeight(UString text) const;
 
 	const GLYPH_METRICS &getGlyphMetrics(wchar_t ch) const;
-	const bool hasGlyph(wchar_t ch) const;
+	bool hasGlyph(wchar_t ch) const;
 
 	// ILLEGAL:
 	inline TextureAtlas *getTextureAtlas() const {return m_textureAtlas;}

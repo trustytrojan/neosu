@@ -63,7 +63,7 @@ VulkanGraphicsInterface::VulkanGraphicsInterface() : NullGraphicsInterface()
 
 	// TODO: put all OS-specific code in WinVulkanInterface/LinuxVulkanInterface etc.
 	// OS specific surface selection
-#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__CYGWIN__) || defined(__CYGWIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__)
+#ifdef _WIN32
 
 	VkWin32SurfaceCreateInfoKHR surfaceCreateInfo;
 	surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;

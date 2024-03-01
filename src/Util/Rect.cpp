@@ -78,14 +78,3 @@ bool McRect::intersects(const McRect &rect) const
 
 	return (minx < maxx && miny < maxy);
 }
-
-McRect &McRect::operator = (const McRect &rect)
-{
-	m_fMinX = rect.m_fMinX;
-	m_fMaxX = rect.m_fMaxX;
-	m_fMinY = rect.m_fMinY;
-	m_fMaxY = rect.m_fMaxY;
-
-	return *this;
-}
-

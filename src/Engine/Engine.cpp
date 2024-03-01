@@ -820,7 +820,7 @@ void Engine::setFrameTime(double delta)
 		m_dFrameTime = clamp<double>(delta, 0.0001, 1.0);
 }
 
-double const Engine::getTimeReal()
+double Engine::getTimeReal()
 {
 	m_timer->update();
 	return m_timer->getElapsedTime();
@@ -1019,6 +1019,7 @@ void _version(void)
 
 void _debugCorporeal(UString oldValue, UString args)
 {
+	(void)oldValue;
 	bool corporeal = !(args.toFloat() > 0.0f);
 	debugLog("setting it to %i\n", (int)corporeal);
 	env->setWindowGhostCorporeal(corporeal);

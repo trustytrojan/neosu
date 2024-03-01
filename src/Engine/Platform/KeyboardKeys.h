@@ -109,7 +109,7 @@
 #define KEY_PAGEUP			SDL_SCANCODE_PAGEUP
 #define KEY_PAGEDOWN		SDL_SCANCODE_PAGEDOWN
 
-#elif defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__CYGWIN__) || defined(__CYGWIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__)
+#elifdef _WIN32
 
 #include <windows.h>
 

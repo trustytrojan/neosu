@@ -277,7 +277,7 @@ const McFont::GLYPH_METRICS &McFont::getGlyphMetrics(wchar_t ch) const
 	}
 }
 
-const bool McFont::hasGlyph(wchar_t ch) const
+bool McFont::hasGlyph(wchar_t ch) const
 {
 	return (m_vGlyphMetrics.find(ch) != m_vGlyphMetrics.end());
 }

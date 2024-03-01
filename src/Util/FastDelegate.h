@@ -48,7 +48,10 @@
 #ifndef FASTDELEGATE_H
 #define FASTDELEGATE_H
 #ifdef __clang__
+#pragma GCC diagnostic push
 #pragma clang diagnostic ignored "-Weverything"
+#elif __GNUC__
+#pragma GCC diagnostic ignored "-Wextra"
 #endif
 
 #include <memory.h> // to allow <,> comparisons
@@ -2103,6 +2106,10 @@ FastDelegate8<Param1, Param2, Param3, Param4, Param5, Param6, Param7, Param8, FA
 #undef FASTDLGT_RETTYPE
 
 } // namespace fastdelegate
+
+#ifdef __clang__
+#pragma GCC diagnostic pop
+#endif
 
 #endif // !defined(FASTDELEGATE_H)
 

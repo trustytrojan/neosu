@@ -65,11 +65,6 @@
 #endif
 
 /*
- * XInput gamepads
- */
-//#define MCENGINE_FEATURE_GAMEPAD
-
-/*
  * OpenCL
  */
 //#define MCENGINE_FEATURE_OPENCL

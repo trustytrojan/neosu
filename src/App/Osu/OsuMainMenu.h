@@ -65,12 +65,20 @@ public:
 
 	virtual void onKeyDown(KeyboardEvent &e);
 
-	virtual void onLeftChange(bool down){;}
+	virtual void onLeftChange(bool down){
+		(void)down;
+	}
 	virtual void onMiddleChange(bool down);
-	virtual void onRightChange(bool down){;}
+	virtual void onRightChange(bool down){
+		(void)down;
+	}
 
-	virtual void onWheelVertical(int delta){;}
-	virtual void onWheelHorizontal(int delta){;}
+	virtual void onWheelVertical(int delta){
+		(void)delta;
+	}
+	virtual void onWheelHorizontal(int delta){
+		(void)delta;
+	}
 
 	virtual void onResolutionChange(Vector2 newResolution);
 

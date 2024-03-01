@@ -133,6 +133,12 @@
 
 #include "miniz.h"
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wmisleading-indentation"
+#pragma GCC diagnostic ignored "-Wattributes"
+#pragma GCC diagnostic ignored "-Wextra"
+#endif
+
 #ifndef MINIZ_HEADER_FILE_ONLY
 
 typedef unsigned char mz_validate_uint16[sizeof(mz_uint16)==2 ? 1 : -1];

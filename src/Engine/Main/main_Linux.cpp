@@ -90,6 +90,8 @@ int xi2opcode;
 
 void WndProc(int type, int xcookieType, int xcookieExtension)
 {
+	(void)xcookieType; (void)xcookieExtension;
+
 	switch (type)
 	{
 	case ConfigureNotify:

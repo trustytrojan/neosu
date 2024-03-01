@@ -9,7 +9,7 @@
 #include "ConVar.h"
 #include "Engine.h"
 
-#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__CYGWIN__) || defined(__CYGWIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__)
+#ifdef _WIN32
 
 #include "WinFile.h"
 
@@ -25,7 +25,7 @@ File::File(UString filePath, TYPE type)
 {
 	m_file = NULL;
 
-#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__CYGWIN__) || defined(__CYGWIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__)
+#ifdef _WIN32
 
 	m_file = new WinFile(filePath, type);
 

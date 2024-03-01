@@ -121,7 +121,7 @@ public:
 	// vars
 	void setFrameTime(double delta);
 	inline double getTime() const {return m_dTime;}
-	double const getTimeReal();
+	double getTimeReal();
 	inline double getTimeRunning() const {return m_dRunTime;}
 	inline double getFrameTime() const {return m_dFrameTime;}
 	inline unsigned long getFrameCount() const {return m_iFrameCount;}

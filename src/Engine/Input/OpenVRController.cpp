@@ -87,9 +87,9 @@ void OpenVRController::updateMatrixPose(Matrix4 &deviceToAbsoluteTracking)
 void OpenVRController::updateDebug(float triggerValue)
 {
 #if defined(MCENGINE_FEATURE_OPENVR)
-
 	m_rAxis[vr::EVRButtonId::k_EButton_SteamVR_Trigger - vr::EVRButtonId::k_EButton_Axis0].x = triggerValue;
-
+#else
+	(void)triggerValue;
 #endif
 }
 
@@ -131,16 +131,17 @@ void OpenVRController::triggerHapticPulse(unsigned short durationMicroSec, OpenV
 	else
 		m_hmd->TriggerHapticPulse(m_hmd->GetTrackedDeviceIndexForControllerRole(roleIdToOpenVR(m_role)), buttonIdToOpenVR(button) - vr::EVRButtonId::k_EButton_Axis0, durationMicroSec);
 
+#else
+	(void)button;
 #endif
 }
 
 bool OpenVRController::isButtonPressed(OpenVRController::BUTTON button)
 {
 #if defined(MCENGINE_FEATURE_OPENVR)
-
 	return m_ulButtonPressed & vr::ButtonMaskFromId(buttonIdToOpenVR(button));
-
 #else
+	(void)button;
 	return false;
 #endif
 }

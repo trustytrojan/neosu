@@ -41,9 +41,6 @@ public:
 	inline void setMinX(float minx) {m_fMinX = minx;}
 	inline void setMinY(float miny) {m_fMinY = miny;}
 
-	// operators
-	McRect &operator = (const McRect &rect);
-
 private:
 	float m_fMinX;
 	float m_fMinY;

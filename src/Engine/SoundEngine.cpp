@@ -238,7 +238,7 @@ SoundEngine::SoundEngine()
 	m_outputDevices.push_back(defaultOutputDevice);
 
 	// add all other output devices
-	updateOutputDevices(false, true);
+	updateOutputDevices(true);
 
 	// load plugins
 	/*
@@ -288,7 +288,7 @@ SoundEngine::SoundEngine()
 #endif
 }
 
-void SoundEngine::updateOutputDevices(bool handleOutputDeviceChanges, bool printInfo)
+void SoundEngine::updateOutputDevices(bool printInfo)
 {
 #ifdef MCENGINE_FEATURE_SOUND
 
@@ -468,7 +468,7 @@ bool SoundEngine::initializeOutputDevice(int id)
 	const unsigned int flags = /* BASS_DEVICE_3D | */ runtimeFlags;
 	bool ret = false;
 
-#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__CYGWIN__) || defined(__CYGWIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__)
+#ifdef _WIN32
 
 	int idForBassInit = id;
 
@@ -664,7 +664,7 @@ void SoundEngine::update()
 		if (engine->getTime() > m_fPrevOutputDeviceChangeCheckTime)
 		{
 			m_fPrevOutputDeviceChangeCheckTime = engine->getTime() + snd_change_check_interval.getFloat();
-			///updateOutputDevices(true, false); // NOTE: commented for now, since it's not yet finished anyway
+			///updateOutputDevices(false); // NOTE: commented for now, since it's not yet finished anyway
 		}
 	}
 	*/
@@ -1069,6 +1069,8 @@ void SoundEngine::set3dPosition(Vector3 headPos, Vector3 viewDir, Vector3 viewUp
 
 void SoundEngine::onFreqChanged(UString oldValue, UString newValue)
 {
+	(void)oldValue;
+	(void)newValue;
 	restart();
 }
 
@@ -1141,6 +1143,7 @@ void *_soundEngineThread(void *data)
 
 void _volume(UString oldValue, UString newValue)
 {
+	(void)oldValue;
 	engine->getSound()->setVolume(newValue.toFloat());
 }
 

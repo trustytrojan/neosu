@@ -58,7 +58,7 @@ private:
 		UString name;
 	};
 
-	void updateOutputDevices(bool handleOutputDeviceChanges, bool printInfo);
+	void updateOutputDevices(bool printInfo);
 	bool initializeOutputDevice(int id = -1);
 
 	void onFreqChanged(UString oldValue, UString newValue);

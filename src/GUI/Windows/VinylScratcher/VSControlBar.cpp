@@ -244,6 +244,7 @@ void VSControlBar::onShuffleCheckboxChanged(CBaseUICheckbox *box)
 
 void VSControlBar::onVolumeChanged(UString oldValue, UString newValue)
 {
+	(void)oldValue; (void)newValue;
 	m_volume->setValue(vs_volume.getFloat());
 }
 

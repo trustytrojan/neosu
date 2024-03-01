@@ -2247,6 +2247,7 @@ void Osu::fireResolutionChanged()
 }
 
 void Osu::onCheatsChange(UString oldValue, UString newValue) {
+	(void)oldValue; (void)newValue;
 	if(bancho.is_online() && ConVars::sv_cheats.getBool()) {
 		ConVars::sv_cheats.setValue(false);
 	}

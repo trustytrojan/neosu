@@ -17,7 +17,9 @@ public:
 	virtual ~NullContextMenu() {;}
 
 	void begin() {;}
-	void addItem(UString text, int returnValue) {;}
+	void addItem(UString text, int returnValue) {
+		(void)text; (void)returnValue;
+	}
 	void addSeparator() {;}
 	int end() {return -1;}
 };

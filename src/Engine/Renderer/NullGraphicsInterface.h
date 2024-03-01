@@ -24,52 +24,108 @@ public:
 	virtual void clearDepthBuffer() {;}
 
 	// color
-	virtual void setColor(Color color) {;}
-	virtual void setAlpha(float alpha) {;}
+	virtual void setColor(Color color) {
+		(void)color;
+	}
+	virtual void setAlpha(float alpha) {
+		(void)alpha;
+	}
 
 	// 2d primitive drawing
-	virtual void drawPixels(int x, int y, int width, int height, Graphics::DRAWPIXELS_TYPE type, const void *pixels) {;}
-	virtual void drawPixel(int x, int y) {;}
-	virtual void drawLine(int x1, int y1, int x2, int y2) {;}
-	virtual void drawLine(Vector2 pos1, Vector2 pos2) {;}
-	virtual void drawRect(int x, int y, int width, int height) {;}
-	virtual void drawRect(int x, int y, int width, int height, Color top, Color right, Color bottom, Color left) {;}
+	virtual void drawPixels(int x, int y, int width, int height, Graphics::DRAWPIXELS_TYPE type, const void *pixels) {
+		(void)x; (void)y; (void)width; (void)height; (void)type; (void)pixels;
+	}
+	virtual void drawPixel(int x, int y) {
+		(void)x; (void)y;
+	}
+	virtual void drawLine(int x1, int y1, int x2, int y2) {
+		(void)x1; (void)y1; (void)x2; (void)y2;
+	}
+	virtual void drawLine(Vector2 pos1, Vector2 pos2) {
+		(void)pos1; (void)pos2;
+	}
+	virtual void drawRect(int x, int y, int width, int height) {
+		(void)x; (void)y; (void)width; (void)height;
+	}
+	virtual void drawRect(int x, int y, int width, int height, Color top, Color right, Color bottom, Color left) {
+		(void)x; (void)y; (void)width; (void)height; (void)top; (void)right; (void)bottom; (void)left;
+	}
 
-	virtual void fillRect(int x, int y, int width, int height) {;}
-	virtual void fillRoundedRect(int x, int y, int width, int height, int radius) {;}
-	virtual void fillGradient(int x, int y, int width, int height, Color topLeftColor, Color topRightColor, Color bottomLeftColor, Color bottomRightColor) {;}
+	virtual void fillRect(int x, int y, int width, int height) {
+		(void)x; (void)y; (void)width; (void)height;
+	}
+	virtual void fillRoundedRect(int x, int y, int width, int height, int radius) {
+		(void)x; (void)y; (void)width; (void)height; (void)radius;
+	}
+	virtual void fillGradient(int x, int y, int width, int height, Color topLeftColor, Color topRightColor, Color bottomLeftColor, Color bottomRightColor) {
+		(void)x; (void)y; (void)width; (void)height; (void)topLeftColor; (void)topRightColor; (void)bottomLeftColor; (void)bottomRightColor;
+	}
 
-	virtual void drawQuad(int x, int y, int width, int height) {;}
-	virtual void drawQuad(Vector2 topLeft, Vector2 topRight, Vector2 bottomRight, Vector2 bottomLeft, Color topLeftColor, Color topRightColor, Color bottomRightColor, Color bottomLeftColor) {;}
+	virtual void drawQuad(int x, int y, int width, int height) {
+		(void)x; (void)y; (void)width; (void)height;
+	}
+	virtual void drawQuad(Vector2 topLeft, Vector2 topRight, Vector2 bottomRight, Vector2 bottomLeft, Color topLeftColor, Color topRightColor, Color bottomRightColor, Color bottomLeftColor) {
+		(void)topLeft; (void)topRight; (void)bottomRight; (void)bottomLeft; (void)topLeftColor; (void)topRightColor; (void)bottomRightColor; (void)bottomLeftColor;
+	}
 
 	// 2d resource drawing
-	virtual void drawImage(Image *image) {;}
+	virtual void drawImage(Image *image) {
+		(void)image;
+	}
 	virtual void drawString(McFont *font, UString text);
 
 	// 3d type drawing
-	virtual void drawVAO(VertexArrayObject *vao) {;}
+	virtual void drawVAO(VertexArrayObject *vao) {
+		(void)vao;
+	}
 
 	// DEPRECATED: 2d clipping
-	virtual void setClipRect(McRect clipRect) {;}
-	virtual void pushClipRect(McRect clipRect) {;}
+	virtual void setClipRect(McRect clipRect) {
+		(void)clipRect;
+	}
+	virtual void pushClipRect(McRect clipRect) {
+		(void)clipRect;
+	}
 	virtual void popClipRect() {;}
 
 	// stencil
 	virtual void pushStencil() {;}
-	virtual void fillStencil(bool inside) {;}
+	virtual void fillStencil(bool inside) {
+		(void)inside;
+	}
 	virtual void popStencil() {;}
 
 	// renderer settings
-	virtual void setClipping(bool enabled) {;}
-	virtual void setAlphaTesting(bool enabled) {;}
-	virtual void setAlphaTestFunc(COMPARE_FUNC alphaFunc, float ref) {;}
-	virtual void setBlending(bool enabled) {;}
-	virtual void setBlendMode(BLEND_MODE blendMode) {;}
-	virtual void setDepthBuffer(bool enabled) {;}
-	virtual void setCulling(bool culling) {;}
-	virtual void setVSync(bool vsync) {;}
-	virtual void setAntialiasing(bool aa) {;}
-	virtual void setWireframe(bool enabled) {;}
+	virtual void setClipping(bool enabled) {
+		(void)enabled;
+	}
+	virtual void setAlphaTesting(bool enabled) {
+		(void)enabled;
+	}
+	virtual void setAlphaTestFunc(COMPARE_FUNC alphaFunc, float ref) {
+		(void)alphaFunc; (void)ref;
+	}
+	virtual void setBlending(bool enabled) {
+		(void)enabled;
+	}
+	virtual void setBlendMode(BLEND_MODE blendMode) {
+		(void)blendMode;
+	}
+	virtual void setDepthBuffer(bool enabled) {
+		(void)enabled;
+	}
+	virtual void setCulling(bool culling) {
+		(void)culling;
+	}
+	virtual void setVSync(bool vsync) {
+		(void)vsync;
+	}
+	virtual void setAntialiasing(bool aa) {
+		(void)aa;
+	}
+	virtual void setWireframe(bool enabled) {
+		(void)enabled;
+	}
 
 	// renderer actions
 	virtual void flush() {;}
@@ -96,7 +152,9 @@ public:
 
 protected:
 	virtual void init() {;}
-	virtual void onTransformUpdate(Matrix4 &projectionMatrix, Matrix4 &worldMatrix) {;}
+	virtual void onTransformUpdate(Matrix4 &projectionMatrix, Matrix4 &worldMatrix) {
+		(void)projectionMatrix; (void)worldMatrix;
+	}
 
 private:
 	// renderer

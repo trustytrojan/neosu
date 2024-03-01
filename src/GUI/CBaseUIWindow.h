@@ -25,7 +25,9 @@ public:
 	ELEMENT_BODY(CBaseUIWindow)
 
 	virtual void draw(Graphics *g);
-	virtual void drawCustomContent(Graphics *g) {;}
+	virtual void drawCustomContent(Graphics *g) {
+		(void)g;
+	}
 	virtual void mouse_update(bool *propagate_clicks);
 
 	virtual void onKeyDown(KeyboardEvent &e);

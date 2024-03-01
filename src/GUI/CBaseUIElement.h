@@ -86,9 +86,15 @@ public:
 	bool grabs_clicks = false;
 
 	// keyboard input
-	virtual void onKeyUp(KeyboardEvent &e) {;}
-	virtual void onKeyDown(KeyboardEvent &e) {;}
-	virtual void onChar(KeyboardEvent &e) {;}
+	virtual void onKeyUp(KeyboardEvent &e) {
+		(void)e;
+	}
+	virtual void onKeyDown(KeyboardEvent &e) {
+		(void)e;
+	}
+	virtual void onChar(KeyboardEvent &e) {
+		(void)e;
+	}
 
 	// getters
 	inline const Vector2& getPos() const {return m_vPos;}

@@ -10,12 +10,8 @@
 
 #include "Gamepad.h"
 
-#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__CYGWIN__) || defined(__CYGWIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__)
-#ifdef MCENGINE_FEATURE_GAMEPAD
-
+#ifdef _WIN32
 #include <xinput.h>
-
-#endif
 #endif
 
 class XInputGamepad : public Gamepad
@@ -44,12 +40,8 @@ private:
 	void updateButtonStates();
 	void checkHandleButtonChangeEvents(bool &previous, bool current, GAMEPADBUTTON b);
 
-#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__CYGWIN__) || defined(__CYGWIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__)
-#ifdef MCENGINE_FEATURE_GAMEPAD
-
+#ifdef _WIN32
 	XINPUT_STATE m_state;
-
-#endif
 #endif
 
 	int m_iPort;
