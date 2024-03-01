@@ -1,1 +1,2 @@
-/src/App/Osu/meson.build
+build/
+obj/
