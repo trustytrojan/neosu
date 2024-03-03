@@ -46,7 +46,7 @@ WinFile::WinFile(std::string filePath, File::TYPE type)
 		if (m_handle == INVALID_HANDLE_VALUE)
 		{
 			m_handle = NULL;
-			debugLog("File Error: Couldn't CreateFileW(%s), GetLastError() = %i\n", filePath.c_str(), GetLastError());
+			debugLog("File Error: Couldn't CreateFile(%s), GetLastError() = %i\n", filePath.c_str(), GetLastError());
 			return;
 		}
 
@@ -79,7 +79,7 @@ WinFile::WinFile(std::string filePath, File::TYPE type)
 		if (m_handle == INVALID_HANDLE_VALUE)
 		{
 			m_handle = NULL;
-			debugLog("File Error: Couldn't CreateFileW(%s), GetLastError() = %i\n", filePath.c_str(), GetLastError());
+			debugLog("File Error: Couldn't CreateFile(%s), GetLastError() = %i\n", filePath.c_str(), GetLastError());
 			return;
 		}
 	}

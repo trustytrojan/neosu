@@ -71,7 +71,7 @@
 
 
 // release configuration
-bool Osu::autoUpdater = true;
+ConVar auto_update("auto_update", true, FCVAR_NONE);
 ConVar osu_version("osu_version", 34.04f, FCVAR_NONE);
 #ifdef MCENGINE_FEATURE_OPENVR
 ConVar osu_release_stream("osu_release_stream", "vr", FCVAR_NONE);
