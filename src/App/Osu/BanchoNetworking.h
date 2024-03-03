@@ -3,7 +3,9 @@
 #include <string>
 #include <curl/curl.h>
 
+#ifndef MCOSU_STREAM
 #define MCOSU_STREAM "dev"
+#endif
 #define MCOSU_UPDATE_URL "https://mcosu.kiwec.net"
 
 // NOTE: Full version can be something like "b20200201.2cuttingedge"

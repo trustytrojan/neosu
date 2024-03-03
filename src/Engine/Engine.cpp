@@ -87,7 +87,6 @@ public:
 
 
 
-void _version(void);
 void _host_timescale_( UString oldValue, UString newValue );
 ConVar host_timescale("host_timescale", 1.0f, FCVAR_CHEAT, "Scale by which the engine measures elapsed time, affects engine->getTime()", _host_timescale_);
 void _host_timescale_( UString oldValue, UString newValue )
@@ -132,7 +131,6 @@ Engine::Engine(Environment *environment, const char *args)
 
 	// print debug information
 	debugLog("-= Engine Startup =-\n");
-	_version();
 	debugLog("Engine: args = %s\n", m_sArgs.toUtf8());
 
 	// timing
@@ -1007,11 +1005,6 @@ void _center(void)
 	engine->center();
 }
 
-void _version(void)
-{
-	debugLog("McEngine v4 - Build Date: %s, %s\n", __DATE__, __TIME__);
-}
-
 void _debugCorporeal(UString oldValue, UString args)
 {
 	(void)oldValue;
@@ -1048,7 +1041,6 @@ ConVar _maximize_("maximize", FCVAR_NONE, _maximize);
 ConVar _resizable_toggle_("resizable_toggle", FCVAR_NONE, _toggleresizable);
 ConVar _focus_("focus", FCVAR_NONE, _focus);
 ConVar _center_("center", FCVAR_NONE, _center);
-ConVar _version_("version", FCVAR_NONE, _version);
 ConVar _corporeal_("debug_ghost", FCVAR_NONE, false, _debugCorporeal);
 ConVar _errortest_("errortest", FCVAR_NONE, _errortest);
 ConVar _crash_("crash", FCVAR_NONE, _crash);

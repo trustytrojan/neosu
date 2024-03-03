@@ -4,6 +4,12 @@ setlocal enabledelayedexpansion
 set CXX=g++
 set LD=g++
 
+rem Install ccache for faster builds
+where ccache >nul 2>nul
+if %errorlevel% equ 0 (
+	set CXX=ccache %CXX%
+)
+
 set CXXFLAGS=-std=c++17 -O3 -Wall -fmessage-length=0 -Wno-sign-compare -Wno-unused-local-typedefs -Wno-reorder -Wno-switch -IC:\mingw32\include
 set CXXFLAGS=%CXXFLAGS% -D__GXX_EXPERIMENTAL_CXX0X__
 set CXXFLAGS=%CXXFLAGS% -Isrc/App -Isrc/App/Osu -Isrc/Engine -Isrc/GUI -Isrc/GUI/Windows -Isrc/GUI/Windows/VinylScratcher -Isrc/Engine/Input -Isrc/Engine/Platform -Isrc/Engine/Main -Isrc/Engine/Renderer -Isrc/Util
@@ -57,14 +63,21 @@ for /r "src" %%i in (*.cpp) do (
 	<nul set /p "=!obj:\=/! " >> build_flags.txt
 	%CXX% %CXXFLAGS% -c %%i -o !obj!
 	if !ERRORLEVEL! neq 0 (
+		pause
 		goto END
 	)
 )
 
 rem BUILD EXECUTABLE
 <nul set /p "=!LDFLAGS! " >> build_flags.txt
+<nul set /p "=-mwindows " >> build_flags.txt
 %LD% @build_flags.txt
-del /q "build_flags.txt"
+if !ERRORLEVEL! neq 0 (
+	pause
+) else (
+	del /q "build_flags.txt"
+	cd build
+	start McOsu
+)
 
 :END
-pause
