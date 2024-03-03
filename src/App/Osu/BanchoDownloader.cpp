@@ -1,6 +1,6 @@
 #include "BanchoDownloader.h"
 
-#include <format>
+#include <sstream>
 #include <curl/curl.h>
 #include <pthread.h>
 #include "miniz.h"
@@ -69,7 +69,10 @@ void* run_mapset_download_thread(void* arg) {
         mz_zip_archive zip = {0};
         mz_zip_archive_file_stat file_stat;
         mz_uint num_files = 0;
-        auto extract_to = std::format(MCENGINE_DATA_DIR "maps/{}", dt->id);
+        std::stringstream ss;
+        ss << MCENGINE_DATA_DIR "maps/";
+        ss << dt->id;
+        auto extract_to = ss.str();
 
         auto query_url = UString::format(mirrors[i], dt->id);
         debugLog("Downloading %s\n", query_url.toUtf8());
@@ -186,7 +189,9 @@ BeatmapDownloadStatus download_mapset(uint32_t set_id) {
     }
 
     // Check if we already have downloaded it
-    auto map_dir = std::format(MCENGINE_DATA_DIR "maps/{}", set_id);
+    std::stringstream ss;
+    ss << MCENGINE_DATA_DIR "maps/" << set_id;
+    auto map_dir = ss.str();
     if(env->directoryExists(map_dir)) {
         status.progress = 1.f;
         status.status = SUCCESS;

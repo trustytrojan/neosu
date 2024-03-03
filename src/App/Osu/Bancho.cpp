@@ -1,4 +1,5 @@
 #ifdef _WIN32
+#include <sstream>
 #include <windows.h>
 #include <wbemidl.h>
 #include <stdio.h>
@@ -8,7 +9,6 @@
 #include <linux/limits.h>
 #endif
 
-#include <format>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -185,7 +185,10 @@ void handle_packet(Packet *packet) {
       ConVars::sv_cheats.setValue(false);
       print_new_channels = true;
 
-      auto avatar_dir = std::format(MCENGINE_DATA_DIR "avatars/{}", bancho.endpoint.toUtf8());
+      std::stringstream ss;
+      ss << MCENGINE_DATA_DIR "avatars/";
+      ss << bancho.endpoint.toUtf8();
+      auto avatar_dir = ss.str();
       if(!env->directoryExists(avatar_dir)) {
         env->createDirectory(avatar_dir);
       }

@@ -4,6 +4,14 @@ This is a third-party fork of [McOsu](https://store.steampowered.com/app/607260/
 
 If you need help, contact `kiwec` on Discord, either by direct message or via [his server](https://discord.com/invite/YWPBFSpH8v).
 
+### Building (windows)
+
+Required dependencies:
+
+- [MinGW32](https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/installer/mingw-w64-install.exe)
+
+Once those are installed, just run `build.bat`.
+
 ### Building (linux)
 
 Required dependencies:
@@ -20,8 +28,4 @@ Required dependencies:
 - xi
 - zlib
 
-Once those are installed, just run:
-
-```
-make -j
-```
+Once those are installed, just run `make -j8`.

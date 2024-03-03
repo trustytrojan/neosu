@@ -22,6 +22,7 @@
 #include "OsuDatabaseBeatmap.h"
 
 #include <fstream>
+#include <string.h>
 
 #ifdef _WIN32
 

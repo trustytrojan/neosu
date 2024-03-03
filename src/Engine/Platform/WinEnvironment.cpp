@@ -131,30 +131,30 @@ UString WinEnvironment::getUsername()
 	return UString("");
 }
 
-UString WinEnvironment::getUserDataPath()
+std::string WinEnvironment::getUserDataPath()
 {
-	wchar_t path[PATH_MAX];
+	char path[PATH_MAX];
 
-	if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path)))
-		return UString(path);
+	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path)))
+		return std::string(path);
 
-	return UString("");
+	return std::string("");
 }
 
-UString WinEnvironment::getExecutablePath()
+std::string WinEnvironment::getExecutablePath()
 {
-	wchar_t path[MAX_PATH];
+	char path[MAX_PATH];
 
-	if (GetModuleFileNameW(NULL, path, MAX_PATH))
-		return UString(path);
+	if (GetModuleFileName(NULL, path, MAX_PATH))
+		return std::string(path);
 
-	return UString("");
+	return std::string("");
 }
 
 bool WinEnvironment::fileExists(std::string filename)
 {
-	WIN32_FIND_DATAW FindFileData;
-	HANDLE handle = FindFirstFileW(filename.wc_str(), &FindFileData);
+	WIN32_FIND_DATA FindFileData;
+	HANDLE handle = FindFirstFile(filename.c_str(), &FindFileData);
 	if (handle == INVALID_HANDLE_VALUE)
 		return std::ifstream(filename.c_str()).good();
 	else
@@ -166,23 +166,23 @@ bool WinEnvironment::fileExists(std::string filename)
 
 bool WinEnvironment::directoryExists(std::string filename)
 {
-	DWORD dwAttrib = GetFileAttributesW(filename.wc_str());
+	DWORD dwAttrib = GetFileAttributes(filename.c_str());
 	return (dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
 bool WinEnvironment::createDirectory(std::string directoryName)
 {
-	return CreateDirectoryW(directoryName.wc_str(), NULL);
+	return CreateDirectory(directoryName.c_str(), NULL);
 }
 
 bool WinEnvironment::renameFile(std::string oldFileName, std::string newFileName)
 {
-	return MoveFileW(oldFileName.wc_str(), newFileName.wc_str());
+	return MoveFile(oldFileName.c_str(), newFileName.c_str());
 }
 
 bool WinEnvironment::deleteFile(std::string filePath)
 {
-	return DeleteFileW(filePath.wc_str());
+	return DeleteFile(filePath.c_str());
 }
 
 UString WinEnvironment::getClipBoardText()
@@ -252,7 +252,7 @@ UString WinEnvironment::openFileWindow(const char *filetypefilters, UString titl
 	fn.lpstrFileTitle = NULL;
 	fn.nMaxFileTitle = 0;
 	fn.lpstrTitle = title.length() > 1 ? title.toUtf8() : NULL;
-	fn.lpstrInitialDir = initialpath.length() > 1 ? initialpath.c_str() : NULL;
+	fn.lpstrInitialDir = initialpath.length() > 1 ? initialpath.toUtf8() : NULL;
 	fn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR | OFN_ENABLESIZING;
 
 	// open the dialog
@@ -289,7 +289,7 @@ UString WinEnvironment::openFolderWindow(UString title, UString initialpath)
 	fn.nFilterIndex = 1;
 	fn.lpstrFileTitle = NULL;
 	fn.lpstrTitle = title.length() > 1 ? title.toUtf8() : NULL;
-	fn.lpstrInitialDir = initialpath.length() > 1 ? initialpath.c_str() : NULL;
+	fn.lpstrInitialDir = initialpath.length() > 1 ? initialpath.toUtf8() : NULL;
 	fn.Flags = OFN_PATHMUSTEXIST | OFN_ENABLESIZING;
 
 	// open the dialog
@@ -298,18 +298,18 @@ UString WinEnvironment::openFolderWindow(UString title, UString initialpath)
 	return fn.lpstrFile;
 }
 
-std::vector<UString> WinEnvironment::getFilesInFolder(UString folder)
+std::vector<std::string> WinEnvironment::getFilesInFolder(std::string folder)
 {
 	folder.append("*.*");
-	WIN32_FIND_DATAW data;
-	std::wstring buffer;
-	std::vector<UString> files;
+	WIN32_FIND_DATA data;
+	std::string buffer;
+	std::vector<std::string> files;
 
-	HANDLE handle = FindFirstFileW(folder.wc_str(), &data);
+	HANDLE handle = FindFirstFile(folder.c_str(), &data);
 
 	while (true)
 	{
-		std::wstring filename(data.cFileName);
+		std::string filename(data.cFileName);
 
 		if (filename != buffer)
 		{
@@ -329,7 +329,7 @@ std::vector<UString> WinEnvironment::getFilesInFolder(UString folder)
 				}
 			}
 
-			FindNextFileW(handle, &data);
+			FindNextFile(handle, &data);
 		}
 		else
 			break;
@@ -339,18 +339,18 @@ std::vector<UString> WinEnvironment::getFilesInFolder(UString folder)
 	return files;
 }
 
-std::vector<UString> WinEnvironment::getFoldersInFolder(UString folder)
+std::vector<std::string> WinEnvironment::getFoldersInFolder(std::string folder)
 {
 	folder.append("*.*");
-	WIN32_FIND_DATAW data;
-	std::wstring buffer;
-	std::vector<UString> folders;
+	WIN32_FIND_DATA data;
+	std::string buffer;
+	std::vector<std::string> folders;
 
-	HANDLE handle = FindFirstFileW(folder.wc_str(), &data);
+	HANDLE handle = FindFirstFile(folder.c_str(), &data);
 
 	while (true)
 	{
-		std::wstring filename(data.cFileName);
+		std::string filename(data.cFileName);
 
 		if (filename != buffer)
 		{
@@ -370,7 +370,7 @@ std::vector<UString> WinEnvironment::getFoldersInFolder(UString folder)
 				}
 			}
 
-			FindNextFileW(handle, &data);
+			FindNextFile(handle, &data);
 		}
 		else
 			break;
@@ -424,7 +424,7 @@ std::string WinEnvironment::getFolderFromFilePath(std::string filepath)
 
 std::string WinEnvironment::getFileExtensionFromFilePath(std::string filepath, bool includeDot)
 {
-	int idx = filepath.findLast(".");
+	int idx = filepath.find_last_of('.');
 	if (idx != -1)
 		return filepath.substr(idx+1);
 	else
@@ -436,7 +436,7 @@ std::string WinEnvironment::getFileNameFromFilePath(std::string filePath)
 	// TODO: use PathStripPath
 	if (filePath.length() < 1) return filePath;
 
-	const size_t lastSlashIndex = filePath.findLast("/");
+	const size_t lastSlashIndex = filePath.find_last_of('/');
 	if (lastSlashIndex != std::string::npos)
 		return filePath.substr(lastSlashIndex + 1);
 

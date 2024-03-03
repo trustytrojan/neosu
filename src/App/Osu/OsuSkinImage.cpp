@@ -5,7 +5,6 @@
 // $NoKeywords: $osuskimg
 //===============================================================================//
 
-#include <format>
 #include "OsuSkinImage.h"
 
 #include "Engine.h"
@@ -82,7 +81,7 @@ bool OsuSkinImage::load(std::string skinElementName, std::string animationSepara
 		{
 			std::string currentAnimatedSkinElementFrameName = skinElementName;
 			currentAnimatedSkinElementFrameName.append(animationSeparator);
-			currentAnimatedSkinElementFrameName.append(std::format("{}", frame));
+			currentAnimatedSkinElementFrameName.append(std::to_string(frame));
 
 			if (!loadImage(currentAnimatedSkinElementFrameName, ignoreDefaultSkin))
 				break; // stop loading on the first missing frame

@@ -17,13 +17,9 @@ void trim(std::string* str);
 struct MD5Hash {
 	char hash[33];
 
+	MD5Hash(const char* str);
 	MD5Hash() {
 		hash[0] = 0;
-	}
-
-	MD5Hash(const char* str) {
-		strncpy(hash, str, 32);
-		hash[32] = 0;
 	}
 
 	inline const char *toUtf8() const {return hash;}

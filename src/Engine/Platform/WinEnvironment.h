@@ -50,11 +50,11 @@ public:
 	bool createDirectory(std::string directoryName);
 	bool renameFile(std::string oldFileName, std::string newFileName);
 	bool deleteFile(std::string filePath);
-	std::vector<UString> getFilesInFolder(UString folder);
-	std::vector<UString> getFoldersInFolder(UString folder);
+	std::vector<std::string> getFilesInFolder(std::string folder);
+	std::vector<std::string> getFoldersInFolder(std::string folder);
 	std::vector<UString> getLogicalDrives();
 	std::string getFolderFromFilePath(std::string filepath);
-	UString getFileExtensionFromFilePath(std::string filepath, bool includeDot = false);
+	std::string getFileExtensionFromFilePath(std::string filepath, bool includeDot = false);
 	std::string getFileNameFromFilePath(std::string filePath);
 
 	// clipboard

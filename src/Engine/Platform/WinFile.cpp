@@ -35,7 +35,7 @@ WinFile::WinFile(std::string filePath, File::TYPE type)
 		m_bEOF = false;
 
 		// open file handle
-		m_handle = CreateFileW(filePath.wc_str(), // file to open
+		m_handle = CreateFile(filePath.c_str(), // file to open
 				GENERIC_READ,					// open for reading
 				FILE_SHARE_READ,				// share for reading
 				NULL,							// default security
@@ -68,7 +68,7 @@ WinFile::WinFile(std::string filePath, File::TYPE type)
 		m_bCanWrite = true;
 
 		// open file handle
-		m_handle = CreateFileW(filePath.wc_str(), // file to open
+		m_handle = CreateFile(filePath.c_str(), // file to open
 				GENERIC_WRITE,					// open for writing
 				0,								// exclusive access (not shared)
 				NULL,							// default security

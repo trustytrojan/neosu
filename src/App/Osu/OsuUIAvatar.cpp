@@ -1,4 +1,4 @@
-#include <format>
+#include <sstream>
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -29,7 +29,10 @@ void* avatar_downloading_thread(void *arg) {
     pthread_mutex_unlock(&avatars_mtx);
 
     UString endpoint = bancho.endpoint;
-    auto server_dir = std::format(MCENGINE_DATA_DIR "avatars/{}", endpoint.toUtf8());
+
+    std::stringstream ss;
+    ss << MCENGINE_DATA_DIR "avatars/" << endpoint.toUtf8();
+    auto server_dir = ss.str();
     if(!env->directoryExists(server_dir)) {
         if(!env->directoryExists(MCENGINE_DATA_DIR "avatars")) {
             env->createDirectory(MCENGINE_DATA_DIR "avatars");
@@ -99,7 +102,9 @@ loop:
             }
         }
 
-        auto img_path = std::format(MCENGINE_DATA_DIR "avatars/{}/{}", endpoint.toUtf8(), avatar_id);
+        std::stringstream ss2;
+        ss2 << server_dir << "/" << std::to_string(avatar_id);
+        auto img_path = ss2.str();
         FILE *file = fopen(img_path.c_str(), "wb");
         if(file != NULL) {
             fwrite(response.memory, response.size, 1, file);

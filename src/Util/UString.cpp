@@ -41,6 +41,10 @@ void trim(std::string* str) {
 	}
 }
 
+MD5Hash::MD5Hash(const char* str) {
+	strncpy(hash, str, 32);
+	hash[32] = 0;
+}
 
 MD5Hash& MD5Hash::operator = (const MD5Hash &other) {
 	memcpy(hash, other.hash, 32);

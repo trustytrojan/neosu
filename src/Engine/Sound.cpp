@@ -5,7 +5,7 @@
 // $NoKeywords: $snd $os
 //===============================================================================//
 
-#include <format>
+#include <sstream>
 #include "Sound.h"
 #include "ConVar.h"
 #include "File.h"
@@ -138,27 +138,12 @@ void Sound::initAsync()
 		DWORD extraStreamCreateFileFlags = 0;
 		DWORD extraFXTempoCreateFlags = 0;
 
-#ifdef _WIN32
-
 #ifdef MCENGINE_FEATURE_BASS_WASAPI
-
 		extraStreamCreateFileFlags |= BASS_SAMPLE_FLOAT;
 		extraFXTempoCreateFlags |= BASS_STREAM_DECODE;
-
 #endif
 
-		m_HSTREAM = BASS_StreamCreateFile(FALSE, m_sFilePath.wc_str(), 0, 0, (m_bPrescan ? BASS_STREAM_PRESCAN : 0) | BASS_STREAM_DECODE | BASS_UNICODE | extraStreamCreateFileFlags);
-
-#elif defined __linux__
-
 		m_HSTREAM = BASS_StreamCreateFile(FALSE, m_sFilePath.c_str(), 0, 0, (m_bPrescan ? BASS_STREAM_PRESCAN : 0) | BASS_STREAM_DECODE | extraStreamCreateFileFlags);
-
-#else
-
-		m_HSTREAM = BASS_StreamCreateFile(FALSE, m_sFilePath.c_str(), 0, 0, (m_bPrescan ? BASS_STREAM_PRESCAN : 0) | BASS_STREAM_DECODE | extraStreamCreateFileFlags);
-
-#endif
-
 		m_HSTREAM = BASS_FX_TempoCreate(m_HSTREAM, BASS_FX_FREESOURCE | extraFXTempoCreateFlags);
 
 		BASS_ChannelSetAttribute(m_HSTREAM, BASS_ATTRIB_TEMPO_OPTION_USE_QUICKALGO, true);
@@ -170,10 +155,7 @@ void Sound::initAsync()
 	else // not a stream
 	{
 
-#ifdef _WIN32
-
 #ifdef MCENGINE_FEATURE_BASS_WASAPI
-
 		File file(m_sFilePath);
 		if (file.canRead())
 		{
@@ -186,24 +168,9 @@ void Sound::initAsync()
 		}
 		else
 			printf("Sound Error: Couldn't file.canRead() on file %s\n", m_sFilePath.c_str());
-
-#else
-
-		m_HSTREAM = BASS_SampleLoad(FALSE, m_sFilePath.wc_str(), 0, 0, 5, (m_bIsLooped ? BASS_SAMPLE_LOOP : 0 ) | (m_bIs3d ? BASS_SAMPLE_3D | BASS_SAMPLE_MONO : 0) | BASS_SAMPLE_OVER_POS | BASS_UNICODE);
-
 #endif
 
-
-#elif defined __linux__
-
 		m_HSTREAM = BASS_SampleLoad(FALSE, m_sFilePath.c_str(), 0, 0, 5, (m_bIsLooped ? BASS_SAMPLE_LOOP : 0 ) | (m_bIs3d ? BASS_SAMPLE_3D | BASS_SAMPLE_MONO : 0) | BASS_SAMPLE_OVER_POS);
-
-#else
-
-		m_HSTREAM = BASS_SampleLoad(FALSE, m_sFilePath.c_str(), 0, 0, 5, (m_bIsLooped ? BASS_SAMPLE_LOOP : 0 ) | (m_bIs3d ? BASS_SAMPLE_3D | BASS_SAMPLE_MONO : 0) | BASS_SAMPLE_OVER_POS);
-
-#endif
-
 		m_HSTREAMBACKUP = m_HSTREAM; // needed for proper cleanup for FX HSAMPLES
 
 		if (m_HSTREAM == 0)
@@ -277,18 +244,11 @@ Sound::SOUNDHANDLE Sound::getHandle()
 		m_HCHANNEL = BASS_SampleGetChannel(m_HSTREAMBACKUP, FALSE);
 		m_HCHANNELBACKUP = m_HCHANNEL;
 
-		if (m_HCHANNEL == 0)
-		{
-			std::string msg = "Couldn't BASS_SampleGetChannel \"";
-			msg.append(m_sFilePath);
-			msg.append(std::format("\", stream = {}, errorcode = {}", (int)m_bStream, BASS_ErrorGetCode()));
-			msg.append(", file = ");
-			msg.append(m_sFilePath);
-			msg.append("\n");
-			debugLog(0xffdd3333, "%s", msg.c_str());
-		}
-		else
+		if (m_HCHANNEL == 0) {
+			debugLog(0xffdd3333, "Couldn't BASS_SampleGetChannel \"%s\", stream = %d, errorcode = %d\n", m_sFilePath, (int)m_bStream, BASS_ErrorGetCode());
+		} else {
 			BASS_ChannelSetAttribute(m_HCHANNEL, BASS_ATTRIB_VOL, m_fVolume);
+		}
 
 		return m_HCHANNEL;
 	}

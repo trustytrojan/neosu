@@ -5,7 +5,7 @@
 // $NoKeywords: $osu
 //===============================================================================//
 
-#include <format>
+#include <sstream>
 #include "Bancho.h"
 #include "BanchoNetworking.h"
 
@@ -1806,12 +1806,17 @@ void Osu::saveScreenshot()
 {
 	engine->getSound()->play(m_skin->getShutter());
 	int screenshotNumber = 0;
-	while (env->fileExists(std::format("screenshots/screenshot{}.png", screenshotNumber)))
-	{
-		screenshotNumber++;
-	}
+    std::string screenshot_path;
+    do {
+	    std::stringstream ss;
+	    ss << "screenshots/screenshot" << screenshotNumber << ".png";
+	    screenshot_path = ss.str();
+
+	    screenshotNumber++;
+    } while (env->fileExists(screenshot_path));
+
 	std::vector<unsigned char> pixels = engine->getGraphics()->getScreenshot();
-	Image::saveToImage(&pixels[0], engine->getGraphics()->getResolution().x, engine->getGraphics()->getResolution().y, std::format("screenshots/screenshot{}.png", screenshotNumber));
+	Image::saveToImage(&pixels[0], engine->getGraphics()->getResolution().x, engine->getGraphics()->getResolution().y, screenshot_path);
 }
 
 
