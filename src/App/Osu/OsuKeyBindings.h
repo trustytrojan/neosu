@@ -61,12 +61,6 @@ public:
 	static ConVar MOD_SCOREV2;
 
 	static std::vector<ConVar*> ALL;
-	static std::vector<std::vector<ConVar*>> MANIA;
-
-private:
-	static std::vector<ConVar*> createManiaConVarSet(int k);
-	static std::vector<std::vector<ConVar*>> createManiaConVarSets();
-	static void setDefaultManiaKeys(std::vector<std::vector<ConVar*>> mania);
 };
 
 #endif

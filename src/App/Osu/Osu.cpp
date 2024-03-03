@@ -65,7 +65,6 @@
 #include "OsuBeatmap.h"
 #include "OsuDatabaseBeatmap.h"
 #include "OsuBeatmapStandard.h"
-#include "OsuBeatmapMania.h"
 
 #include "OsuHitObject.h"
 
@@ -1612,22 +1611,6 @@ void Osu::onKeyDown(KeyboardEvent &key)
 				getSelectedBeatmap()->getSelectedDifficulty2()->setLocalOffset(getSelectedBeatmap()->getSelectedDifficulty2()->getLocalOffset() + offsetAdd);
 				m_notificationOverlay->addNotification(UString::format("Local beatmap offset set to %ld ms", getSelectedBeatmap()->getSelectedDifficulty2()->getLocalOffset()));
 			}
-
-			// mania scroll speed
-			/*
-			if (key == (KEYCODE)OsuKeyBindings::INCREASE_SPEED.getInt())
-			{
-				ConVar *maniaSpeed = convar->getConVarByName("osu_mania_speed");
-				maniaSpeed->setValue(clamp<float>(std::round((maniaSpeed->getFloat() + 0.05f) * 100.0f) / 100.0f, 0.05f, 10.0f));
-				m_notificationOverlay->addNotification(UString::format("osu!mania speed set to %gx (fixed)", maniaSpeed->getFloat()));
-			}
-			if (key == (KEYCODE)OsuKeyBindings::DECREASE_SPEED.getInt())
-			{
-				ConVar *maniaSpeed = convar->getConVarByName("osu_mania_speed");
-				maniaSpeed->setValue(clamp<float>(std::round((maniaSpeed->getFloat() - 0.05f) * 100.0f) / 100.0f, 0.05f, 10.0f));
-				m_notificationOverlay->addNotification(UString::format("osu!mania speed set to %gx (fixed)", maniaSpeed->getFloat()));
-			}
-			*/
 		}
 	}
 }

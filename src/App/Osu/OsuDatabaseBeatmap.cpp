@@ -16,7 +16,6 @@
 #include "OsuSkin.h"
 #include "OsuBeatmap.h"
 #include "OsuBeatmapStandard.h"
-#include "OsuBeatmapMania.h"
 #include "OsuGameRules.h"
 #include "OsuNotificationOverlay.h"
 
@@ -25,7 +24,6 @@
 #include "OsuSlider.h"
 #include "OsuSliderCurves.h"
 #include "OsuSpinner.h"
-#include "OsuManiaNote.h"
 
 #include <sstream>
 #include <iostream>
@@ -1474,7 +1472,6 @@ OsuDatabaseBeatmap::LOAD_GAMEPLAY_RESULT OsuDatabaseBeatmap::loadGameplay(OsuDat
 
 	// build hitobjects from the primitive data we loaded from the osu file
 	OsuBeatmapStandard *beatmapStandard = dynamic_cast<OsuBeatmapStandard*>(beatmap);
-	OsuBeatmapMania *beatmapMania = dynamic_cast<OsuBeatmapMania*>(beatmap);
 	{
 		struct Helper
 		{
@@ -1611,37 +1608,6 @@ OsuDatabaseBeatmap::LOAD_GAMEPLAY_RESULT OsuDatabaseBeatmap::loadGameplay(OsuDat
 				double pp = OsuDifficultyCalculator::calculatePPv2(beatmap->getOsu(), beatmap, aim, aimSliderFactor, speed, speedNotes, databaseBeatmap->m_iNumObjects, databaseBeatmap->m_iNumCircles, databaseBeatmap->m_iNumSliders, databaseBeatmap->m_iNumSpinners, maxPossibleCombo);
 
 				engine->showMessageInfo("PP", UString::format("pp = %f, stars = %f, aimstars = %f, speedstars = %f, %i circles, %i sliders, %i spinners, %i hitobjects, maxcombo = %i", pp, stars, aim, speed, databaseBeatmap->m_iNumCircles, databaseBeatmap->m_iNumSliders, databaseBeatmap->m_iNumSpinners, databaseBeatmap->m_iNumObjects, maxPossibleCombo));
-			}
-		}
-		else if (beatmapMania != NULL)
-		{
-			struct ManiaHelper
-			{
-				static int getColumn(int availableColumns, float position, bool allowSpecial = false)
-				{
-					if (allowSpecial && availableColumns == 8)
-					{
-						const float local_x_divisor = 512.0f / 7;
-						return clamp<int>((int)std::floor(position / local_x_divisor), 0, 6) + 1;
-					}
-
-					const float localXDivisor = 512.0f / availableColumns;
-					return clamp<int>((int)std::floor(position / localXDivisor), 0, availableColumns - 1);
-				}
-			};
-
-			const int availableColumns = beatmapMania->getNumColumns();
-
-			for (int i=0; i<c.hitcircles.size(); i++)
-			{
-				HITCIRCLE &h = c.hitcircles[i];
-				result.hitobjects.push_back(new OsuManiaNote(ManiaHelper::getColumn(availableColumns, h.x), h.maniaEndTime > 0 ? (h.maniaEndTime - h.time) : 0, h.time, h.sampleType, h.number, h.colorCounter, beatmapMania));
-			}
-
-			for (int i=0; i<c.sliders.size(); i++)
-			{
-				SLIDER &s = c.sliders[i];
-				result.hitobjects.push_back(new OsuManiaNote(ManiaHelper::getColumn(availableColumns, s.x), s.sliderTime, s.time, s.sampleType, s.number, s.colorCounter, beatmapMania));
 			}
 		}
 	}

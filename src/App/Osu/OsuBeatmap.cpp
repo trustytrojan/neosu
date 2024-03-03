@@ -1985,6 +1985,31 @@ OsuDatabaseBeatmap::BREAK OsuBeatmap::getBreakForTimeRange(long startMS, long po
 
 OsuScore::HIT OsuBeatmap::addHitResult(OsuHitObject *hitObject, OsuScore::HIT hit, long delta, bool isEndOfCombo, bool ignoreOnHitErrorBar, bool hitErrorBarOnly, bool ignoreCombo, bool ignoreScore, bool ignoreHealth)
 {
+	// Frames are already written on every keypress/release.
+	// For some edge cases, we need to write extra frames to avoid replaybugs.
+	{
+		bool should_write_frame = false;
+
+		// Slider interactions
+		// Surely buzz sliders won't be an issue... Clueless
+		should_write_frame |= (hit == OsuScore::HIT::HIT_SLIDER10);
+		should_write_frame |= (hit == OsuScore::HIT::HIT_SLIDER30);
+		should_write_frame |= (hit == OsuScore::HIT::HIT_MISS_SLIDERBREAK);
+
+		// Relax: no keypresses, instead we write on every hitresult
+		if(m_osu->getModRelax()) {
+			should_write_frame |= (hit == OsuScore::HIT::HIT_50);
+			should_write_frame |= (hit == OsuScore::HIT::HIT_100);
+			should_write_frame |= (hit == OsuScore::HIT::HIT_300);
+			should_write_frame |= (hit == OsuScore::HIT::HIT_MISS);
+		}
+
+		OsuBeatmapStandard* beatmap = (OsuBeatmapStandard*)m_osu->getSelectedBeatmap();
+		if(should_write_frame && !hitErrorBarOnly && beatmap != nullptr) {
+			beatmap->write_frame();
+		}
+	}
+
 	// handle perfect & sudden death
 	if (m_osu->getModSS())
 	{

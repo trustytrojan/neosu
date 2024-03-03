@@ -53,7 +53,6 @@
 
 ConVar osu_options_save_on_back("osu_options_save_on_back", true, FCVAR_NONE);
 ConVar osu_options_high_quality_sliders("osu_options_high_quality_sliders", false, FCVAR_NONE);
-ConVar osu_mania_keylayout_wizard("osu_mania_keylayout_wizard");
 ConVar osu_options_slider_preview_use_legacy_renderer("osu_options_slider_preview_use_legacy_renderer", false, FCVAR_NONE, "apparently newer AMD drivers with old gpus are crashing here with the legacy renderer? was just me being lazy anyway, so now there is a vao render path as it should be");
 
 void _osuOptionsSliderQualityWrapper(UString oldValue, UString newValue)
@@ -458,7 +457,6 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu)
 	// convar callbacks
 	convar->getConVarByName("osu_skin_use_skin_hitsounds")->setCallback( fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onUseSkinsSoundSamplesChange) );
 	osu_options_high_quality_sliders.setCallback( fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onHighQualitySlidersConVarChange) );
-	osu_mania_keylayout_wizard.setCallback( fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onKeyBindingManiaPressedInt) );
 
 	if (m_osu->isInVRMode())
 		OSU_CONFIG_FILE_NAME = "osuvr";
@@ -506,9 +504,6 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu)
 
 	m_iNumResetAllKeyBindingsPressed = 0;
 	m_iNumResetEverythingPressed = 0;
-
-	m_iManiaK = 0;
-	m_iManiaKey = 0;
 
 	m_fSearchOnCharKeybindHackTime = 0.0f;
 
@@ -986,7 +981,6 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu)
 	addKeyBindButton("Spunout", &OsuKeyBindings::MOD_SPUNOUT);
 	addKeyBindButton("Auto", &OsuKeyBindings::MOD_AUTO);
 	addKeyBindButton("Score V2", &OsuKeyBindings::MOD_SCOREV2);
-	///addButton("osu!mania layout")->setClickCallback( fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onKeyBindingManiaPressed) );
 
 	//**************************************************************************************************************************//
 
@@ -1654,43 +1648,6 @@ void OsuOptionsMenu::onKey(KeyboardEvent &e)
 	{
 		m_waitingKey->setValue((float)e.getKeyCode());
 		m_waitingKey = NULL;
-	}
-	else // mania layout logic
-	{
-		if (e.getKeyCode() != (KEYCODE)0) // if not the first call
-		{
-			if (m_iManiaK > -1 && m_iManiaK < 10 && m_iManiaKey > -1 && m_iManiaKey <= m_iManiaK)
-				OsuKeyBindings::MANIA[m_iManiaK][m_iManiaKey]->setValue(e.getKeyCode());
-
-			// go to next key
-			m_iManiaKey++;
-			if (m_iManiaKey > m_iManiaK)
-			{
-				m_iManiaKey = 0;
-				m_iManiaK++;
-			}
-		}
-
-		if (m_iManiaK > -1 && m_iManiaK < 10)
-		{
-			UString notificationText = UString::format("%ik:", (m_iManiaK+1));
-			int curKey = 0;
-			for (int i=m_iManiaK-m_iManiaKey; i<m_iManiaK; i++)
-			{
-				notificationText.append(" [x]");
-				curKey++;
-			}
-			for (int i=0; i<=m_iManiaK-m_iManiaKey; i++)
-			{
-				if (curKey == m_iManiaKey)
-					notificationText.append(" ([?])");
-				else
-					notificationText.append(" []");
-
-				curKey++;
-			}
-			m_osu->getNotificationOverlay()->addNotification(notificationText, 0xffffffff, true);
-		}
 	}
 }
 
@@ -3128,21 +3085,6 @@ void OsuOptionsMenu::onKeyBindingsResetAllPressed(CBaseUIButton *button)
 		else
 			m_osu->getNotificationOverlay()->addNotification(UString::format("Press %i more time to confirm!", remainingUntilReset), 0xffffff00);
 	}
-}
-
-void OsuOptionsMenu::onKeyBindingManiaPressedInt()
-{
-	onKeyBindingManiaPressed(NULL);
-}
-
-void OsuOptionsMenu::onKeyBindingManiaPressed(CBaseUIButton *button)
-{
-	m_waitingKey = NULL;
-	m_iManiaK = 0;
-	m_iManiaKey = 0;
-
-	KeyboardEvent e(0);
-	onKey(e);
 }
 
 void OsuOptionsMenu::onSliderChangeVRSuperSampling(CBaseUISlider *slider)

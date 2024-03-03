@@ -34,10 +34,8 @@
 #include "OsuBeatmap.h"
 #include "OsuDatabaseBeatmap.h"
 #include "OsuBeatmapStandard.h"
-#include "OsuBeatmapMania.h"
 
 #include "OsuGameRules.h"
-#include "OsuGameRulesMania.h"
 
 #include "OsuScore.h"
 #include "OsuSongBrowser2.h"
@@ -301,7 +299,6 @@ void OsuHUD::draw(Graphics *g)
 	if (beatmap == NULL) return; // sanity check
 
 	OsuBeatmapStandard *beatmapStd = dynamic_cast<OsuBeatmapStandard*>(beatmap);
-	OsuBeatmapMania *beatmapMania = dynamic_cast<OsuBeatmapMania*>(beatmap);
 
 	if (osu_draw_hud.getBool())
 	{
@@ -367,8 +364,6 @@ void OsuHUD::draw(Graphics *g)
 			{
 				if (beatmapStd != NULL)
 					drawHitErrorBar(g, OsuGameRules::getHitWindow300(beatmap), OsuGameRules::getHitWindow100(beatmap), OsuGameRules::getHitWindow50(beatmap), OsuGameRules::getHitWindowMiss(beatmap), m_osu->getScore()->getUnstableRate());
-				else if (beatmapMania != NULL)
-					drawHitErrorBar(g, OsuGameRulesMania::getHitWindow300(beatmap), OsuGameRulesMania::getHitWindow100(beatmap), OsuGameRulesMania::getHitWindow50(beatmap), OsuGameRulesMania::getHitWindowMiss(beatmap), m_osu->getScore()->getUnstableRate());
 			}
 		}
 
@@ -403,8 +398,6 @@ void OsuHUD::draw(Graphics *g)
 			{
 				if (beatmapStd != NULL)
 					drawHitErrorBar(g, OsuGameRules::getHitWindow300(beatmap), OsuGameRules::getHitWindow100(beatmap), OsuGameRules::getHitWindow50(beatmap), OsuGameRules::getHitWindowMiss(beatmap), m_osu->getScore()->getUnstableRate());
-				else if (beatmapMania != NULL)
-					drawHitErrorBar(g, OsuGameRulesMania::getHitWindow300(beatmap), OsuGameRulesMania::getHitWindow100(beatmap), OsuGameRulesMania::getHitWindow50(beatmap), OsuGameRulesMania::getHitWindowMiss(beatmap), m_osu->getScore()->getUnstableRate());
 			}
 		}
 	}

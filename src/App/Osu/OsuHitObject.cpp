@@ -16,9 +16,7 @@
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
 #include "OsuGameRules.h"
-#include "OsuGameRulesMania.h"
 #include "OsuBeatmapStandard.h"
-#include "OsuBeatmapMania.h"
 #include "OsuHUD.h"
 
 ConVar osu_hitresult_draw_300s("osu_hitresult_draw_300s", false, FCVAR_NONE);
@@ -335,7 +333,6 @@ void OsuHitObject::drawHitResultAnim(Graphics *g, const HITRESULTANIM &hitresult
 		&& (hitresultanim.time + osu_hitresult_duration_max.getFloat()*(1.0f / m_beatmap->getOsu()->getSpeedMultiplier())) > engine->getTime())
 	{
 		OsuBeatmapStandard *beatmapStd = dynamic_cast<OsuBeatmapStandard*>(m_beatmap);
-		const OsuBeatmapMania *beatmapMania = dynamic_cast<OsuBeatmapMania*>(m_beatmap);
 
 		OsuSkin *skin = m_beatmap->getSkin();
 		{
@@ -360,8 +357,6 @@ void OsuHitObject::drawHitResultAnim(Graphics *g, const HITRESULTANIM &hitresult
 
 			if (beatmapStd != NULL)
 				drawHitResult(g, beatmapStd, beatmapStd->osuCoords2Pixels(hitresultanim.rawPos), hitresultanim.result, animPercentInv, clamp<float>((float)hitresultanim.delta / OsuGameRules::getHitWindow50(beatmapStd), -1.0f, 1.0f));
-			else if (beatmapMania != NULL)
-				drawHitResult(g, skin, 200.0f, 150.0f, hitresultanim.rawPos, hitresultanim.result, animPercentInv, clamp<float>((float)hitresultanim.delta / OsuGameRulesMania::getHitWindow50(beatmapMania), -1.0f, 1.0f));
 		}
 	}
 }

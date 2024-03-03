@@ -225,6 +225,8 @@ void handle_packet(Packet *packet) {
           errmsg = "Already logged in on another client.";
         } else if(cho_token == UString("unknown-username")) {
           errmsg = UString::format("No account by the username '%s' exists.", bancho.username.toUtf8());
+        } else if(cho_token == UString("incorrect-credentials")) {
+          errmsg = "This username is not registered.";
         } else if(cho_token == UString("incorrect-password")) {
           errmsg = "Incorrect password.";
         } else if(cho_token == UString("contact-staff")) {

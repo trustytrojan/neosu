@@ -44,7 +44,6 @@
 #include "OsuDatabaseBeatmap.h"
 
 #include "OsuBeatmapStandard.h"
-#include "OsuBeatmapMania.h"
 
 #include "OsuUIBackButton.h"
 #include "OsuUIContextMenu.h"
@@ -1843,11 +1842,6 @@ void OsuSongBrowser2::onDifficultySelected(OsuDatabaseBeatmap *diff2, bool play)
 	{
 		SAFE_DELETE(m_selectedBeatmap);
 		m_selectedBeatmap = new OsuBeatmapStandard(m_osu);
-	}
-	else if (m_osu->getGamemode() == Osu::GAMEMODE::MANIA && dynamic_cast<OsuBeatmapMania*>(m_selectedBeatmap) == NULL)
-	{
-		SAFE_DELETE(m_selectedBeatmap);
-		m_selectedBeatmap = new OsuBeatmapMania(m_osu);
 	}
 
 	// remember it
@@ -4052,8 +4046,6 @@ void OsuSongBrowser2::onSelectionMode()
 		OsuUIContextMenuButton *standardButton = m_contextMenu->addButton("Standard", 0);
 		standardButton->setTextLeft(false);
 		standardButton->setTooltipText("Standard 2D circle clicking.");
-		//CBaseUIButton *maniaButton = m_contextMenu->addButton("Mania", 1);
-		//maniaButton->setTextLeft(false);
 		OsuUIContextMenuButton *fposuButton = m_contextMenu->addButton("FPoSu", 2);
 		fposuButton->setTextLeft(false);
 		fposuButton->setTooltipText("The real 3D FPS mod.\nPlay from a first person shooter perspective in a 3D environment.\nThis is only intended for mouse! (Enable \"Tablet/Absolute Mode\" for tablets.)");
@@ -4064,8 +4056,6 @@ void OsuSongBrowser2::onSelectionMode()
 				activeButton = fposuButton;
 			else if (m_osu->getGamemode() == Osu::GAMEMODE::STD)
 				activeButton = standardButton;
-			//else if (m_osu->getGamemode() == Osu::GAMEMODE::MANIA)
-			//	activeButton = maniaButton;
 		}
 		if (activeButton != NULL)
 			activeButton->setTextBrightColor(0xff00ff00);
@@ -4127,14 +4117,6 @@ void OsuSongBrowser2::onModeChange2(UString text, int id)
 		if (m_osu->getGamemode() != Osu::GAMEMODE::STD)
 		{
 			m_osu->setGamemode(Osu::GAMEMODE::STD);
-			refreshBeatmaps();
-		}
-	}
-	else if (id == 1 || text == UString("mania"))
-	{
-		if (m_osu->getGamemode() != Osu::GAMEMODE::MANIA)
-		{
-			m_osu->setGamemode(Osu::GAMEMODE::MANIA);
 			refreshBeatmaps();
 		}
 	}

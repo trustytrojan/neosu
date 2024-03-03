@@ -155,8 +155,6 @@ public:
 	void onKeyBindingButtonPressed(CBaseUIButton *button);
 	void onKeyUnbindButtonPressed(CBaseUIButton *button);
 	void onKeyBindingsResetAllPressed(CBaseUIButton *button);
-	void onKeyBindingManiaPressedInt();
-	void onKeyBindingManiaPressed(CBaseUIButton *button);
 	void onSliderChangeVRSuperSampling(CBaseUISlider *slider);
 	void onSliderChangeVRAntiAliasing(CBaseUISlider *slider);
 	void onSliderChangeSliderQuality(CBaseUISlider *slider);
@@ -302,10 +300,6 @@ public:
 
 	int m_iNumResetAllKeyBindingsPressed;
 	int m_iNumResetEverythingPressed;
-
-	// mania layout
-	int m_iManiaK;
-	int m_iManiaKey;
 
 	// search
 	UString m_sSearchString;
