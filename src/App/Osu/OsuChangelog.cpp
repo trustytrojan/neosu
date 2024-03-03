@@ -38,10 +38,11 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu)
 
 	CHANGELOG latest;
 	latest.title = UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
-	latest.changes.push_back("- Replay frames will now be written for slider ticks/ends");
-	latest.changes.push_back("- When using Relax, replay frames will now also be written for every hitcircle");
+	latest.changes.push_back("- Fixed replays having incorrect tickrate when using speed modifying mods (again)");
 	latest.changes.push_back("- Fixed auto-updater not working");
 	latest.changes.push_back("- Fixed scores getting submitted for 0-score plays");
+	latest.changes.push_back("- Replay frames will now be written for slider ticks/ends");
+	latest.changes.push_back("- When using Relax, replay frames will now also be written for every hitcircle");
 	latest.changes.push_back("- Improved beatmap database loading performance");
 	latest.changes.push_back("- Improved build process");
 	changelogs.push_back(latest);

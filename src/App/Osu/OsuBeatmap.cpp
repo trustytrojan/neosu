@@ -2349,6 +2349,7 @@ void OsuBeatmap::resetHitObjects(long curPos)
 void OsuBeatmap::resetScoreInt()
 {
 	replay_data = "0|256|-500|0,-1|256|-500|0,";
+	last_event_time = engine->getTimeReal();
 	last_event_ms = 0;
 	current_keys = 0;
 	last_keys = 0;

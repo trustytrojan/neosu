@@ -118,6 +118,7 @@ public:
 
 	// replay recording (see OsuBeatmapStandard)
 	UString replay_data;
+	double last_event_time = 0.0;
 	long last_event_ms = 0;
 	uint8_t current_keys = 0;
 	uint8_t last_keys = 0;

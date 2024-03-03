@@ -930,12 +930,9 @@ void OsuBeatmapStandard::update()
 
 	bool is_recording = m_bIsPlaying && !m_bFailed;
 	if(is_recording) {
-		// 16.67 ms between each frame (60 fps)
-		const uint64_t MAX_MS_BETWEEN_FRAMES = 1000 / 60;
-
 		if(last_keys != current_keys) {
 			write_frame();
-		} else if(last_event_ms + MAX_MS_BETWEEN_FRAMES <= m_iCurMusicPosWithOffsets) {
+		} else if(last_event_time + 0.01666666666 <= engine->getTimeReal()) {
 			write_frame();
 		}
 	}
@@ -948,6 +945,7 @@ void OsuBeatmapStandard::write_frame() {
 	Vector2 pos = pixels2OsuCoords(getCursorPos());
 	auto frame = UString::format("%ld|%.4f|%.4f|%hhu,", delta, pos.x, pos.y, current_keys);
 	replay_data.append(frame);
+	last_event_time = m_fLastRealTimeForInterpolationDelta;
 	last_event_ms = m_iCurMusicPosWithOffsets;
 	last_keys = current_keys;
 }

@@ -565,7 +565,7 @@ int OsuScore::getModsLegacy()
 	modsLegacy |= (m_osu->getModTarget() ? OsuReplay::Mods::Target : 0);
 	modsLegacy |= (m_osu->getModScorev2() ? OsuReplay::Mods::ScoreV2 : 0);
 	modsLegacy |= (m_osu->getModDT() ? OsuReplay::Mods::DoubleTime : 0);
-	modsLegacy |= (m_osu->getModNC() ? OsuReplay::Mods::Nightcore : 0);
+	modsLegacy |= (m_osu->getModNC() ? (OsuReplay::Mods::DoubleTime | OsuReplay::Mods::Nightcore) : 0);
 	modsLegacy |= (m_osu->getModNF() ? OsuReplay::Mods::NoFail : 0);
 	modsLegacy |= (m_osu->getModHT() ? OsuReplay::Mods::HalfTime : 0);
 	modsLegacy |= (m_osu->getModDC() ? OsuReplay::Mods::HalfTime : 0);

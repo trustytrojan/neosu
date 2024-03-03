@@ -926,14 +926,14 @@ UString OsuUISongBrowserScoreButton::getModsStringForDisplay(int mods)
 		modsString.append("HR,");
 	if (mods & OsuReplay::Mods::SuddenDeath)
 		modsString.append("SD,");
-	if (mods & OsuReplay::Mods::DoubleTime)
+	if (mods & OsuReplay::Mods::Nightcore)
+		modsString.append("NC,");
+	else if (mods & OsuReplay::Mods::DoubleTime)
 		modsString.append("DT,");
 	if (mods & OsuReplay::Mods::Relax)
 		modsString.append("Relax,");
 	if (mods & OsuReplay::Mods::HalfTime)
 		modsString.append("HT,");
-	if (mods & OsuReplay::Mods::Nightcore)
-		modsString.append("NC,");
 	if (mods & OsuReplay::Mods::Flashlight)
 		modsString.append("FL,");
 	if (mods & OsuReplay::Mods::Autoplay)
