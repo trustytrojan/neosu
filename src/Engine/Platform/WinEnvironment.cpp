@@ -58,6 +58,8 @@ WinEnvironment::WinEnvironment(HWND hwnd, HINSTANCE hinstance) : Environment()
 	// convar callbacks
 	convar->getConVarByName("win_processpriority")->setCallback( fastdelegate::MakeDelegate(this, &WinEnvironment::onProcessPriorityChange) );
 	convar->getConVarByName("win_disable_windows_key")->setCallback( fastdelegate::MakeDelegate(this, &WinEnvironment::onDisableWindowsKeyChange) );
+
+	setProcessPriority(convar->getConVarByName("win_processpriority")->getInt());
 }
 
 WinEnvironment::~WinEnvironment()

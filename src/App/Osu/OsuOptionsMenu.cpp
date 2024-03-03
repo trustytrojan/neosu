@@ -596,7 +596,7 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu)
 	addCheckbox("VSync", "If enabled: plz enjoy input lag.", convar->getConVarByName("vsync"));
 
 	if (env->getOS() == Environment::OS::OS_WINDOWS)
-		addCheckbox("High Priority (!)", "WARNING: Only enable this if nothing else works!\nSets the process priority to High.\nMay fix microstuttering and other weird problems.\nTry to fix your broken computer/OS/drivers first!", convar->getConVarByName("win_processpriority"));
+		addCheckbox("High Priority", "Sets the game process priority to high", convar->getConVarByName("win_processpriority"));
 
 	addCheckbox("Show FPS Counter", convar->getConVarByName("osu_draw_fps"));
 	if (env->getOS() != Environment::OS::OS_HORIZON)

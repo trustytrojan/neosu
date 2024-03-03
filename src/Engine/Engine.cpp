@@ -102,7 +102,7 @@ ConVar debug_engine("debug_engine", false, FCVAR_NONE);
 ConVar minimize_on_focus_lost_if_fullscreen("minimize_on_focus_lost_if_fullscreen", true, FCVAR_NONE);
 ConVar minimize_on_focus_lost_if_borderless_windowed_fullscreen("minimize_on_focus_lost_if_borderless_windowed_fullscreen", false, FCVAR_NONE);
 ConVar _win_realtimestylus("win_realtimestylus", false, FCVAR_NONE, "if compiled on Windows, enables native RealTimeStylus support for tablet clicks");
-ConVar _win_processpriority("win_processpriority", 0, FCVAR_NONE, "if compiled on Windows, sets the main process priority (0 = normal, 1 = high)");
+ConVar _win_processpriority("win_processpriority", 1, FCVAR_NONE, "if compiled on Windows, sets the main process priority (0 = normal, 1 = high)");
 ConVar _win_disable_windows_key("win_disable_windows_key", false, FCVAR_NONE, "if compiled on Windows, set to 0/1 to disable/enable all windows keys via low level keyboard hook");
 
 ConVar *win_realtimestylus = &_win_realtimestylus; // extern
