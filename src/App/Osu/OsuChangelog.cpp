@@ -38,14 +38,19 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu)
 
 	CHANGELOG latest;
 	latest.title = UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
-	latest.changes.push_back("- Fixed replays having incorrect tickrate when using speed modifying mods (again)");
-	latest.changes.push_back("- Fixed auto-updater not working");
-	latest.changes.push_back("- Fixed scores getting submitted for 0-score plays");
-	latest.changes.push_back("- Replay frames will now be written for slider ticks/ends");
-	latest.changes.push_back("- When using Relax, replay frames will now also be written for every hitcircle");
-	latest.changes.push_back("- Improved beatmap database loading performance");
-	latest.changes.push_back("- Improved build process");
+	latest.changes.push_back("- Disabled ability to fail when using Relax while online");
 	changelogs.push_back(latest);
+
+	CHANGELOG v34_04;
+	v34_04.title = "34.04 (2024-03-03)";
+	v34_04.changes.push_back("- Fixed replays having incorrect tickrate when using speed modifying mods (again)");
+	v34_04.changes.push_back("- Fixed auto-updater not working");
+	v34_04.changes.push_back("- Fixed scores getting submitted for 0-score plays");
+	v34_04.changes.push_back("- Replay frames will now be written for slider ticks/ends");
+	v34_04.changes.push_back("- When using Relax, replay frames will now also be written for every hitcircle");
+	v34_04.changes.push_back("- Improved beatmap database loading performance");
+	v34_04.changes.push_back("- Improved build process");
+	changelogs.push_back(v34_04);
 
 	CHANGELOG v34_03;
 	v34_03.title = "34.03 (2024-02-29)";

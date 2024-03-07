@@ -113,7 +113,7 @@ ConVar osu_notelock_stable_tolerance2b("osu_notelock_stable_tolerance2b", 3, FCV
 ConVar osu_mod_suddendeath_restart("osu_mod_suddendeath_restart", false, FCVAR_NONE, "osu! has this set to false (i.e. you fail after missing). if set to true, then behave like SS/PF, instantly restarting the map");
 
 ConVar osu_drain_type("osu_drain_type", 2, FCVAR_CHEAT, "which hp drain algorithm to use (0 = None, 1 = VR, 2 = osu!stable, 3 = osu!lazer 2020, 4 = osu!lazer 2018)");
-ConVar osu_drain_kill("osu_drain_kill", true, FCVAR_NONE, "whether to kill the player upon failing");
+ConVar osu_drain_kill("osu_drain_kill", true, FCVAR_CHEAT, "whether to kill the player upon failing");
 ConVar osu_drain_kill_notification_duration("osu_drain_kill_notification_duration", 1.0f, FCVAR_NONE, "how long to display the \"You have failed, but you can keep playing!\" notification (0 = disabled)");
 
 ConVar osu_drain_vr_duration("osu_drain_vr_duration", 0.35f, FCVAR_NONE);
@@ -1660,6 +1660,9 @@ void OsuBeatmap::stop(bool quit)
 void OsuBeatmap::fail()
 {
 	if (m_bFailed) return;
+
+	// Change behavior of relax mod when online
+	if(bancho.is_online() && m_osu->getModRelax()) return;
 
 	if (!bancho.is_playing_a_multi_map() && osu_drain_kill.getBool())
 	{
