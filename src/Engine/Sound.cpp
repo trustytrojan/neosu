@@ -5,6 +5,9 @@
 // $NoKeywords: $snd $os
 //===============================================================================//
 
+#include "Bancho.h"
+#include "Osu.h"
+
 #include <sstream>
 #include "Sound.h"
 #include "ConVar.h"
@@ -37,7 +40,6 @@
 
 ConVar debug_snd("debug_snd", false, FCVAR_NONE);
 
-ConVar snd_speed_compensate_pitch("snd_speed_compensate_pitch", true, FCVAR_NONE, "automatically keep pitch constant if speed changes");
 ConVar snd_play_interp_duration("snd_play_interp_duration", 0.75f, FCVAR_NONE, "smooth over freshly started channel position jitter with engine time over this duration in seconds");
 ConVar snd_play_interp_ratio("snd_play_interp_ratio", 0.50f, FCVAR_NONE, "percentage of snd_play_interp_duration to use 100% engine time over audio time (some devices report 0 for very long)");
 
@@ -245,7 +247,7 @@ Sound::SOUNDHANDLE Sound::getHandle()
 		m_HCHANNELBACKUP = m_HCHANNEL;
 
 		if (m_HCHANNEL == 0) {
-			debugLog(0xffdd3333, "Couldn't BASS_SampleGetChannel \"%s\", stream = %d, errorcode = %d\n", m_sFilePath, (int)m_bStream, BASS_ErrorGetCode());
+			debugLog(0xffdd3333, "Couldn't BASS_SampleGetChannel \"%s\", stream = %d, errorcode = %d\n", m_sFilePath.c_str(), (int)m_bStream, BASS_ErrorGetCode());
 		} else {
 			BASS_ChannelSetAttribute(m_HCHANNEL, BASS_ATTRIB_VOL, m_fVolume);
 		}
@@ -471,58 +473,43 @@ void Sound::setSpeed(float speed)
 {
 	if (!m_bReady) return;
 
-#ifdef MCENGINE_FEATURE_SOUND
-
 	speed = clamp<float>(speed, 0.05f, 50.0f);
 
-	const SOUNDHANDLE handle = getHandle();
-
 	float originalFreq = 44100.0f;
+	const SOUNDHANDLE handle = getHandle();
 	BASS_ChannelGetAttribute(handle, BASS_ATTRIB_FREQ, &originalFreq);
 
-	BASS_ChannelSetAttribute(handle, (snd_speed_compensate_pitch.getBool() ? BASS_ATTRIB_TEMPO : BASS_ATTRIB_TEMPO_FREQ), (snd_speed_compensate_pitch.getBool() ? (speed-1.0f)*100.0f : speed*originalFreq));
+	BASS_ChannelSetAttribute(handle, BASS_ATTRIB_TEMPO, 1.0f);
+	BASS_ChannelSetAttribute(handle, BASS_ATTRIB_TEMPO_FREQ, originalFreq);
 
-	m_fActualSpeedForDisabledPitchCompensation = speed; // NOTE: currently only used for correctly returning getSpeed() if snd_speed_compensate_pitch is disabled
+	bool nightcoring = bancho.osu->getModNC() || bancho.osu->getModDC();	
+	if(nightcoring) {
+		BASS_ChannelSetAttribute(handle, BASS_ATTRIB_TEMPO_FREQ, speed * originalFreq);
+	} else {
+		BASS_ChannelSetAttribute(handle, BASS_ATTRIB_TEMPO, (speed - 1.0f) * 100.0f);
+	}
 
-#endif
+	m_fActualSpeedForDisabledPitchCompensation = speed;
 }
 
 void Sound::setPitch(float pitch)
 {
 	if (!m_bReady) return;
 
-#ifdef MCENGINE_FEATURE_SOUND
-
-	/*
-	if (!m_bStream)
-	{
-		debugLog("Sound::setPitch() invalid call, this sound is not a stream!\n");
-		return;
-	}
-	*/
-
 	pitch = clamp<float>(pitch, 0.0f, 2.0f);
 
 	const SOUNDHANDLE handle = getHandle();
-
 	BASS_ChannelSetAttribute(handle, BASS_ATTRIB_TEMPO_PITCH, (pitch - 1.0f)*60.0f);
-
-#endif
 }
 
 void Sound::setFrequency(float frequency)
 {
 	if (!m_bReady) return;
 
-#ifdef MCENGINE_FEATURE_SOUND
-
 	frequency = (frequency > 99.0f ? clamp<float>(frequency, 100.0f, 100000.0f) : 0.0f);
 
 	const SOUNDHANDLE handle = getHandle();
-
 	BASS_ChannelSetAttribute(handle, BASS_ATTRIB_FREQ, frequency);
-
-#endif
 }
 
 void Sound::setPan(float pan)
@@ -555,13 +542,8 @@ void Sound::setLoop(bool loop)
 
 	m_bIsLooped = loop;
 
-#ifdef MCENGINE_FEATURE_SOUND
-
 	const SOUNDHANDLE handle = getHandle();
-
 	BASS_ChannelFlags(handle, m_bIsLooped ? BASS_SAMPLE_LOOP : 0, BASS_SAMPLE_LOOP);
-
-#endif
 }
 
 float Sound::getPosition()
@@ -687,79 +669,37 @@ float Sound::getSpeed()
 {
 	if (!m_bReady) return 1.0f;
 
-#ifdef MCENGINE_FEATURE_SOUND
-
-	/*
-	if (!m_bStream)
-	{
-		debugLog("Sound::getSpeed() invalid call, this sound is not a stream!\n");
-		return 0.0f;
+	// BASS will always return 1.0x speed when not compensating pitch, since
+	// we're only changing playback frequency in that case.
+	bool nightcoring = bancho.osu->getModNC() || bancho.osu->getModDC();
+	if(nightcoring) {
+		return m_fActualSpeedForDisabledPitchCompensation;
 	}
-	*/
-
-	if (!snd_speed_compensate_pitch.getBool())
-		return m_fActualSpeedForDisabledPitchCompensation; // NOTE: special case, disabled pitch compensation means bass will return 1.0x always, since the playback frequency is the only thing being actually modified.
-
-	const SOUNDHANDLE handle = getHandle();
 
 	float speed = 0.0f;
+	const SOUNDHANDLE handle = getHandle();
 	BASS_ChannelGetAttribute(handle, BASS_ATTRIB_TEMPO, &speed);
-
 	return ((speed / 100.0f) + 1.0f);
-
-#else
-
-	return 1.0f;
-
-#endif
 }
 
 float Sound::getPitch()
 {
 	if (!m_bReady) return 1.0f;
 
-#ifdef MCENGINE_FEATURE_SOUND
-
-	/*
-	if (!m_bStream)
-	{
-		debugLog("Sound::getPitch() invalid call, this sound is not a stream!\n");
-		return 0.0f;
-	}
-	*/
-
-	const SOUNDHANDLE handle = getHandle();
-
 	float pitch = 0.0f;
+	const SOUNDHANDLE handle = getHandle();
 	BASS_ChannelGetAttribute(handle, BASS_ATTRIB_TEMPO_PITCH, &pitch);
-
 	return ((pitch / 60.0f) + 1.0f);
-
-#else
-
-	return 1.0f;
-
-#endif
 }
 
 float Sound::getFrequency()
 {
 	if (!m_bReady) return 44100.0f;
 
-#ifdef MCENGINE_FEATURE_SOUND
-
-	const SOUNDHANDLE handle = getHandle();
-
 	float frequency = 44100.0f;
+	const SOUNDHANDLE handle = getHandle();
 	BASS_ChannelGetAttribute(handle, BASS_ATTRIB_FREQ, &frequency);
-
 	return frequency;
-
-#else
-
-	return 44100.0f;
-
-#endif
 }
 
 bool Sound::isPlaying()

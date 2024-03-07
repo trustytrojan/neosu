@@ -552,6 +552,12 @@ void OsuChat::onDisconnect() {
         delete chan;
     }
     m_channels.clear();
+
+    for(auto chan : chat_channels) {
+        delete chan.second;
+    }
+    chat_channels.clear();
+
     m_selected_channel = nullptr;
     updateLayout(m_osu->getScreenSize());
 

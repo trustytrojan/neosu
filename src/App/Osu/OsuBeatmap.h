@@ -86,7 +86,6 @@ public:
 	void unloadMusic() {unloadMusicInt();}
 	void setVolume(float volume);
 	void setSpeed(float speed);
-	void setPitch(float pitch);
 	void seekPercent(double percent);
 	void seekPercentPlayable(double percent);
 
@@ -182,7 +181,6 @@ public:
 	inline float getBreakBackgroundFadeAnim() const {return m_fBreakBackgroundFade;}
 
 protected:
-	static ConVar *m_snd_speed_compensate_pitch_ref;
 	static ConVar *m_win_snd_fallback_dsound_ref;
 
 	static ConVar *m_osu_pvs;

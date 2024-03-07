@@ -961,10 +961,8 @@ void OsuBeatmapStandard::onModUpdate(bool rebuildSliderVertexBuffers, bool recom
 	if (recomputeDrainRate)
 		computeDrainRate();
 
-	if (m_music != NULL)
-	{
+	if (m_music != NULL) {
 		m_music->setSpeed(m_osu->getSpeedMultiplier());
-		m_music->setPitch(m_osu->getPitchMultiplier());
 	}
 
 	// recalculate slider vertexbuffers

@@ -31,7 +31,6 @@ private:
 
 	void onChangeClicked(CBaseUIButton *button);
 
-	CBaseUIContainer *m_container;
 	CBaseUIScrollView *m_scrollView;
 
 	struct CHANGELOG

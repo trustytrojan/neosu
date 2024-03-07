@@ -166,7 +166,6 @@ public:
 	float getScoreMultiplier();
 	float getRawSpeedMultiplier();	// without override
 	float getSpeedMultiplier();		// with override
-	float getPitchMultiplier();
 
 	inline bool getModAuto() const {return m_bModAuto;}
 	inline bool getModAutopilot() const {return m_bModAutopilot;}
@@ -226,7 +225,6 @@ public:
 	void onSkinChange(UString oldValue, UString newValue);
 
 	void onSpeedChange(UString oldValue, UString newValue);
-	void onPitchChange(UString oldValue, UString newValue);
 
 	void onPlayfieldChange(UString oldValue, UString newValue);
 

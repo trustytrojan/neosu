@@ -70,12 +70,12 @@ void disconnect() {
     curl_slist_free_all(chunk);
     curl_easy_cleanup(curl);
 
-    delete packet.memory;
+    delete[] packet.memory;
   }
 
   try_logging_in = false;
   auth_header = "";
-  delete outgoing.memory;
+  delete[] outgoing.memory;
   outgoing = {0};
   bancho.user_id = 0;
   bancho.submit_scores = false;

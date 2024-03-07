@@ -71,7 +71,7 @@
 
 // release configuration
 ConVar auto_update("auto_update", true, FCVAR_NONE);
-ConVar osu_version("osu_version", 34.04f, FCVAR_NONE);
+ConVar osu_version("osu_version", 34.05f, FCVAR_NONE);
 #ifdef MCENGINE_FEATURE_OPENVR
 ConVar osu_release_stream("osu_release_stream", "vr", FCVAR_NONE);
 #else
@@ -99,7 +99,6 @@ ConVar osu_hud_volume_duration("osu_hud_volume_duration", 1.0f, FCVAR_NONE);
 ConVar osu_hud_volume_size_multiplier("osu_hud_volume_size_multiplier", 1.5f, FCVAR_NONE);
 
 ConVar osu_speed_override("osu_speed_override", -1.0f, FCVAR_CHEAT);
-ConVar osu_pitch_override("osu_pitch_override", -1.0f, FCVAR_NONE);
 
 ConVar osu_pause_on_focus_loss("osu_pause_on_focus_loss", true, FCVAR_NONE);
 ConVar osu_quick_retry_delay("osu_quick_retry_delay", 0.27f, FCVAR_NONE);
@@ -302,7 +301,6 @@ Osu::Osu(int instanceID)
 	osu_skin_reload.setCallback( fastdelegate::MakeDelegate(this, &Osu::onSkinReload) );
 
 	osu_speed_override.setCallback( fastdelegate::MakeDelegate(this, &Osu::onSpeedChange) );
-	osu_pitch_override.setCallback( fastdelegate::MakeDelegate(this, &Osu::onPitchChange) );
 
 	m_osu_playfield_rotation->setCallback( fastdelegate::MakeDelegate(this, &Osu::onPlayfieldChange) );
 	m_osu_playfield_stretch_x->setCallback( fastdelegate::MakeDelegate(this, &Osu::onPlayfieldChange) );
@@ -1266,7 +1264,6 @@ void Osu::updateMods()
 
 	// static overrides
 	onSpeedChange("", osu_speed_override.getString());
-	onPitchChange("", osu_pitch_override.getString());
 
 	// autopilot overrides auto
 	if (m_bModAutopilot)
@@ -2007,22 +2004,6 @@ float Osu::getSpeedMultiplier()
 	return speedMultiplier;
 }
 
-float Osu::getPitchMultiplier()
-{
-	float pitchMultiplier = 1.0f;
-
-	if (m_bModDC)
-		pitchMultiplier = 0.92f;
-
-	if (m_bModNC)
-		pitchMultiplier = 1.1166f;
-
-	if (osu_pitch_override.getFloat() > 0.0f)
-		return osu_pitch_override.getFloat();
-
-	return pitchMultiplier;
-}
-
 bool Osu::isInPlayMode()
 {
 	return (m_songBrowser2 != NULL && m_songBrowser2->hasSelectedAndIsPlaying());
@@ -2371,15 +2352,6 @@ void Osu::onSpeedChange(UString oldValue, UString newValue)
 	{
 		float speed = newValue.toFloat();
 		getSelectedBeatmap()->setSpeed(speed >= 0.0f ? speed : getSpeedMultiplier());
-	}
-}
-
-void Osu::onPitchChange(UString oldValue, UString newValue)
-{
-	if (getSelectedBeatmap() != NULL)
-	{
-		float pitch = newValue.toFloat();
-		getSelectedBeatmap()->setPitch(pitch > 0.0f ? pitch : getPitchMultiplier());
 	}
 }
 

@@ -131,7 +131,6 @@ ConVar osu_play_hitsound_on_click_while_playing("osu_play_hitsound_on_click_whil
 
 ConVar osu_debug_draw_timingpoints("osu_debug_draw_timingpoints", false, FCVAR_CHEAT);
 
-ConVar *OsuBeatmap::m_snd_speed_compensate_pitch_ref = NULL;
 ConVar *OsuBeatmap::m_win_snd_fallback_dsound_ref = NULL;
 
 ConVar *OsuBeatmap::m_osu_pvs = &osu_pvs;
@@ -155,8 +154,6 @@ ConVar *OsuBeatmap::m_fposu_draw_scorebarbg_on_top_ref = NULL;
 OsuBeatmap::OsuBeatmap(Osu *osu)
 {
 	// convar refs
-	if (m_snd_speed_compensate_pitch_ref == NULL)
-		m_snd_speed_compensate_pitch_ref = convar->getConVarByName("snd_speed_compensate_pitch");
 	if (m_win_snd_fallback_dsound_ref == NULL)
 		m_win_snd_fallback_dsound_ref = convar->getConVarByName("win_snd_fallback_dsound");
 
@@ -1717,12 +1714,6 @@ void OsuBeatmap::setSpeed(float speed)
 		m_music->setSpeed(speed);
 }
 
-void OsuBeatmap::setPitch(float pitch)
-{
-	if (m_music != NULL)
-		m_music->setPitch(pitch);
-}
-
 void OsuBeatmap::seekPercent(double percent)
 {
 	if (m_selectedDifficulty2 == NULL || (!m_bIsPlaying && !m_bIsPaused) || m_music == NULL || m_bFailed) return;
@@ -2277,6 +2268,7 @@ void OsuBeatmap::handlePreviewPlay()
 				m_music->setPositionMS(m_selectedDifficulty2->getPreviewTime() < 0 ? (unsigned long)(m_music->getLengthMS() * 0.40f) : m_selectedDifficulty2->getPreviewTime());
 
 			m_music->setVolume(m_osu_volume_music_ref->getFloat());
+			m_music->setSpeed(m_osu->getSpeedMultiplier());
 		}
 	}
 
@@ -2439,9 +2431,12 @@ unsigned long OsuBeatmap::getMusicPositionMSInterpolated()
 
 			// calculate final return value
 			returnPos = (unsigned long)std::round(m_fInterpolatedMusicPos);
-			if (speed < 1.0f && osu_compensate_music_speed.getBool() && m_snd_speed_compensate_pitch_ref->getBool())
-				returnPos += (unsigned long)(((1.0f - speed) / 0.75f) * 5); // osu (new)
-				///returnPos += (unsigned long)((1.0f / speed) * 9); // Mc (old)
+
+
+			bool nightcoring = m_osu->getModNC() || m_osu->getModDC();
+			if (speed < 1.0f && osu_compensate_music_speed.getBool() && !nightcoring) {
+				returnPos += (unsigned long)(((1.0f - speed) / 0.75f) * 5);
+			}
 		}
 		else // no interpolation
 		{
