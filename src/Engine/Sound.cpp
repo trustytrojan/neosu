@@ -162,7 +162,7 @@ void Sound::initAsync()
 			m_iWasapiSampleBufferSize = file.getFileSize();
 			if (m_iWasapiSampleBufferSize > 0)
 			{
-				m_wasapiSampleBuffer = new char[file.getFileSize()];
+				m_wasapiSampleBuffer = new uint8_t[file.getFileSize()];
 				memcpy(m_wasapiSampleBuffer, file.readFile(), file.getFileSize());
 			}
 		}

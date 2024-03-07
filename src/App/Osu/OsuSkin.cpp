@@ -982,10 +982,7 @@ bool OsuSkin::parseSkinINI(std::string filepath)
 	int curBlock = 0; // NOTE: was -1, but osu incorrectly defaults to [General] and loads properties even before the actual section start (just for this first section though)
 	while (file.canRead())
 	{
-		UString uCurLine = file.readLine();
-		const char *curLineChar = uCurLine.toUtf8();
-		std::string curLine(curLineChar);
-
+		std::string curLine = file.readLine();
 		if (curLine.find("//") > 2) // ignore comments // TODO: this is incorrect, but it works well enough
 		{
 			if (curLine.find("[General]") != std::string::npos)
@@ -1004,7 +1001,7 @@ bool OsuSkin::parseSkinINI(std::string filepath)
 					char stringBuffer[1024];
 
 					memset(stringBuffer, '\0', 1024);
-					if (sscanf(curLineChar, " Version : %1023[^\n]", stringBuffer) == 1)
+					if (sscanf(curLine.c_str(), " Version : %1023[^\n]", stringBuffer) == 1)
 					{
 						UString versionString = UString(stringBuffer);
 						if (versionString.find("latest") != -1 || versionString.find("User") != -1)
@@ -1013,27 +1010,27 @@ bool OsuSkin::parseSkinINI(std::string filepath)
 							m_fVersion = versionString.toFloat();
 					}
 
-					if (sscanf(curLineChar, " CursorRotate : %i \n", &val) == 1)
+					if (sscanf(curLine.c_str(), " CursorRotate : %i \n", &val) == 1)
 						m_bCursorRotate = val > 0 ? true : false;
-					if (sscanf(curLineChar, " CursorCentre : %i \n", &val) == 1)
+					if (sscanf(curLine.c_str(), " CursorCentre : %i \n", &val) == 1)
 						m_bCursorCenter = val > 0 ? true : false;
-					if (sscanf(curLineChar, " CursorExpand : %i \n", &val) == 1)
+					if (sscanf(curLine.c_str(), " CursorExpand : %i \n", &val) == 1)
 						m_bCursorExpand = val > 0 ? true : false;
-					if (sscanf(curLineChar, " SliderBallFlip : %i \n", &val) == 1)
+					if (sscanf(curLine.c_str(), " SliderBallFlip : %i \n", &val) == 1)
 						m_bSliderBallFlip = val > 0 ? true : false;
-					if (sscanf(curLineChar, " AllowSliderBallTint : %i \n", &val) == 1)
+					if (sscanf(curLine.c_str(), " AllowSliderBallTint : %i \n", &val) == 1)
 						m_bAllowSliderBallTint = val > 0 ? true : false;
-					if (sscanf(curLineChar, " HitCircleOverlayAboveNumber : %i \n", &val) == 1)
+					if (sscanf(curLine.c_str(), " HitCircleOverlayAboveNumber : %i \n", &val) == 1)
 						m_bHitCircleOverlayAboveNumber = val > 0 ? true : false;
-					if (sscanf(curLineChar, " HitCircleOverlayAboveNumer : %i \n", &val) == 1)
+					if (sscanf(curLine.c_str(), " HitCircleOverlayAboveNumer : %i \n", &val) == 1)
 						m_bHitCircleOverlayAboveNumber = val > 0 ? true : false;
-					if (sscanf(curLineChar, " SliderStyle : %i \n", &val) == 1)
+					if (sscanf(curLine.c_str(), " SliderStyle : %i \n", &val) == 1)
 					{
 						m_iSliderStyle = val;
 						if (m_iSliderStyle != 1 && m_iSliderStyle != 2)
 							m_iSliderStyle = 2;
 					}
-					if (sscanf(curLineChar, " AnimationFramerate : %f \n", &floatVal) == 1)
+					if (sscanf(curLine.c_str(), " AnimationFramerate : %f \n", &floatVal) == 1)
 						m_fAnimationFramerate = floatVal < 0 ? 0.0f : floatVal;
 				}
 				break;
@@ -1042,24 +1039,24 @@ bool OsuSkin::parseSkinINI(std::string filepath)
 					int comboNum;
 					int r,g,b;
 
-					if (sscanf(curLineChar, " Combo %i : %i , %i , %i \n", &comboNum, &r, &g, &b) == 4)
+					if (sscanf(curLine.c_str(), " Combo %i : %i , %i , %i \n", &comboNum, &r, &g, &b) == 4)
 						m_comboColors.push_back(COLOR(255, r, g, b));
-					if (sscanf(curLineChar, " SpinnerApproachCircle : %i , %i , %i \n", &r, &g, &b) == 3)
+					if (sscanf(curLine.c_str(), " SpinnerApproachCircle : %i , %i , %i \n", &r, &g, &b) == 3)
 						m_spinnerApproachCircleColor = COLOR(255, r, g, b);
-					if (sscanf(curLineChar, " SliderBorder: %i , %i , %i \n", &r, &g, &b) == 3)
+					if (sscanf(curLine.c_str(), " SliderBorder: %i , %i , %i \n", &r, &g, &b) == 3)
 						m_sliderBorderColor = COLOR(255, r, g, b);
-					if (sscanf(curLineChar, " SliderTrackOverride : %i , %i , %i \n", &r, &g, &b) == 3)
+					if (sscanf(curLine.c_str(), " SliderTrackOverride : %i , %i , %i \n", &r, &g, &b) == 3)
 					{
 						m_sliderTrackOverride = COLOR(255, r, g, b);
 						m_bSliderTrackOverride = true;
 					}
-					if (sscanf(curLineChar, " SliderBall : %i , %i , %i \n", &r, &g, &b) == 3)
+					if (sscanf(curLine.c_str(), " SliderBall : %i , %i , %i \n", &r, &g, &b) == 3)
 						m_sliderBallColor = COLOR(255, r, g, b);
-					if (sscanf(curLineChar, " SongSelectActiveText : %i , %i , %i \n", &r, &g, &b) == 3)
+					if (sscanf(curLine.c_str(), " SongSelectActiveText : %i , %i , %i \n", &r, &g, &b) == 3)
 						m_songSelectActiveText = COLOR(255, r, g, b);
-					if (sscanf(curLineChar, " SongSelectInactiveText : %i , %i , %i \n", &r, &g, &b) == 3)
+					if (sscanf(curLine.c_str(), " SongSelectInactiveText : %i , %i , %i \n", &r, &g, &b) == 3)
 						m_songSelectInactiveText = COLOR(255, r, g, b);
-					if (sscanf(curLineChar, " InputOverlayText : %i , %i , %i \n", &r, &g, &b) == 3)
+					if (sscanf(curLine.c_str(), " InputOverlayText : %i , %i , %i \n", &r, &g, &b) == 3)
 						m_inputOverlayText = COLOR(255, r, g, b);
 				}
 				break;
@@ -1069,7 +1066,7 @@ bool OsuSkin::parseSkinINI(std::string filepath)
 					char stringBuffer[1024];
 
 					memset(stringBuffer, '\0', 1024);
-					if (sscanf(curLineChar, " ComboPrefix : %1023[^\n]", stringBuffer) == 1)
+					if (sscanf(curLine.c_str(), " ComboPrefix : %1023[^\n]", stringBuffer) == 1)
 					{
 						m_sComboPrefix = UString(stringBuffer);
 
@@ -1080,10 +1077,10 @@ bool OsuSkin::parseSkinINI(std::string filepath)
 							}
 						}
 					}
-					if (sscanf(curLineChar, " ComboOverlap : %i \n", &val) == 1)
+					if (sscanf(curLine.c_str(), " ComboOverlap : %i \n", &val) == 1)
 						m_iComboOverlap = val;
 
-					if (sscanf(curLineChar, " ScorePrefix : %1023[^\n]", stringBuffer) == 1)
+					if (sscanf(curLine.c_str(), " ScorePrefix : %1023[^\n]", stringBuffer) == 1)
 					{
 						m_sScorePrefix = UString(stringBuffer);
 
@@ -1094,10 +1091,10 @@ bool OsuSkin::parseSkinINI(std::string filepath)
 							}
 						}
 					}
-					if (sscanf(curLineChar, " ScoreOverlap : %i \n", &val) == 1)
+					if (sscanf(curLine.c_str(), " ScoreOverlap : %i \n", &val) == 1)
 						m_iScoreOverlap = val;
 
-					if (sscanf(curLineChar, " HitCirclePrefix : %1023[^\n]", stringBuffer) == 1)
+					if (sscanf(curLine.c_str(), " HitCirclePrefix : %1023[^\n]", stringBuffer) == 1)
 					{
 						m_sHitCirclePrefix = UString(stringBuffer);
 
@@ -1108,7 +1105,7 @@ bool OsuSkin::parseSkinINI(std::string filepath)
 							}
 						}
 					}
-					if (sscanf(curLineChar, " HitCircleOverlap : %i \n", &val) == 1)
+					if (sscanf(curLine.c_str(), " HitCircleOverlap : %i \n", &val) == 1)
 						m_iHitCircleOverlap = val;
 				}
 				break;

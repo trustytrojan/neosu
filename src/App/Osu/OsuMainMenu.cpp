@@ -290,7 +290,7 @@ OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu)
 			File versionFile(MCOSU_NEWVERSION_NOTIFICATION_TRIGGER_FILE);
 			if (versionFile.canRead())
 			{
-				float version = versionFile.readLine().toFloat();
+				float version = std::stof(versionFile.readLine());
 				if (version < Osu::version->getFloat() - 0.0001f)
 					m_bDrawVersionNotificationArrow = true;
 

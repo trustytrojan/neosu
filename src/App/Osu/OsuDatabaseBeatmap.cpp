@@ -191,25 +191,16 @@ OsuDatabaseBeatmap::PRIMITIVE_CONTAINER OsuDatabaseBeatmap::loadPrimitiveObjects
 		std::string curLine;
 		while (!filePathIsInMemoryBeatmap ? file.canRead() : static_cast<bool>(std::getline(ss, curLine)))
 		{
-			if (dead.load())
-			{
+			if (dead.load()) {
 				c.errorCode = 6;
 				return c;
 			}
 
-			UString uCurLine;
-			char *curLineChar = NULL;
-			{
-				if (!filePathIsInMemoryBeatmap)
-				{
-					uCurLine = file.readLine();
-					curLineChar = (char*)uCurLine.toUtf8();
-					curLine = std::string(curLineChar);
-				}
-				else
-					curLineChar = (char*)curLine.c_str();
+			if (!filePathIsInMemoryBeatmap) {
+				curLine = file.readLine();
 			}
 
+			const char *curLineChar = curLine.c_str();
 			const int commentIndex = curLine.find("//");
 			if (commentIndex == std::string::npos || commentIndex != 0) // ignore comments, but only if at the beginning of a line (e.g. allow Artist:DJ'TEKINA//SOMETHING)
 			{
@@ -1014,7 +1005,7 @@ bool OsuDatabaseBeatmap::loadMetadata(OsuDatabaseBeatmap *databaseBeatmap)
 	{
 		File file(!databaseBeatmap->m_bFilePathIsInMemoryBeatmap ? databaseBeatmap->m_sFilePath : "");
 
-		const char *beatmapFile = NULL;
+		const uint8_t *beatmapFile = NULL;
 		size_t beatmapFileSize = 0;
 		{
 			if (!databaseBeatmap->m_bFilePathIsInMemoryBeatmap)
@@ -1027,7 +1018,7 @@ bool OsuDatabaseBeatmap::loadMetadata(OsuDatabaseBeatmap *databaseBeatmap)
 			}
 			else
 			{
-				beatmapFile = databaseBeatmap->m_sFilePath.c_str();
+				beatmapFile = (uint8_t*)databaseBeatmap->m_sFilePath.c_str();
 				beatmapFileSize = databaseBeatmap->m_sFilePath.size();
 			}
 		}
@@ -1057,19 +1048,11 @@ bool OsuDatabaseBeatmap::loadMetadata(OsuDatabaseBeatmap *databaseBeatmap)
 		std::string curLine;
 		while (!databaseBeatmap->m_bFilePathIsInMemoryBeatmap ? file.canRead() : static_cast<bool>(std::getline(ss, curLine)))
 		{
-			UString uCurLine;
-			char *curLineChar = NULL;
-			{
-				if (!databaseBeatmap->m_bFilePathIsInMemoryBeatmap)
-				{
-					uCurLine = file.readLine();
-					curLineChar = (char*)uCurLine.toUtf8();
-					curLine = std::string(curLineChar);
-				}
-				else
-					curLineChar = (char*)curLine.c_str();
+			if (!databaseBeatmap->m_bFilePathIsInMemoryBeatmap) {
+				curLine = file.readLine();
 			}
 
+			const char *curLineChar = curLine.c_str();
 			const int commentIndex = curLine.find("//");
 			if (commentIndex == std::string::npos || commentIndex != 0) // ignore comments, but only if at the beginning of a line (e.g. allow Artist:DJ'TEKINA//SOMETHING)
 			{
@@ -1909,10 +1892,7 @@ void OsuDatabaseBeatmapBackgroundImagePathLoader::initAsync()
 	char stringBuffer[1024];
 	while (file.canRead())
 	{
-		UString uCurLine = file.readLine();
-		const char *curLineChar = uCurLine.toUtf8();
-		std::string curLine(curLineChar);
-
+		std::string curLine = file.readLine();
 		const int commentIndex = curLine.find("//");
 		if (commentIndex == std::string::npos || commentIndex != 0) // ignore comments, but only if at the beginning of a line (e.g. allow Artist:DJ'TEKINA//SOMETHING)
 		{
@@ -1931,7 +1911,7 @@ void OsuDatabaseBeatmapBackgroundImagePathLoader::initAsync()
 				{
 					memset(stringBuffer, '\0', 1024);
 					int type, startTime;
-					if (sscanf(curLineChar, " %i , %i , \"%1023[^\"]\"", &type, &startTime, stringBuffer) == 3)
+					if (sscanf(curLine.c_str(), " %i , %i , \"%1023[^\"]\"", &type, &startTime, stringBuffer) == 3)
 					{
 						if (type == 0)
 							m_sLoadedBackgroundImageFileName = UString(stringBuffer);

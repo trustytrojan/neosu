@@ -1151,12 +1151,9 @@ std::string OsuDatabase::parseLegacyCfgBeatmapDirectoryParameter()
 		char stringBuffer[1024];
 		while (file.canRead())
 		{
-			UString uCurLine = file.readLine();
-			const char *curLineChar = uCurLine.toUtf8();
-			UString curLine(curLineChar);
-
+			std::string curLine = file.readLine();
 			memset(stringBuffer, '\0', 1024);
-			if (sscanf(curLineChar, " BeatmapDirectory = %1023[^\n]", stringBuffer) == 1)
+			if (sscanf(curLine.c_str(), " BeatmapDirectory = %1023[^\n]", stringBuffer) == 1)
 			{
 				std::string beatmapDirectory = stringBuffer;
 				trim(&beatmapDirectory);
@@ -2631,7 +2628,7 @@ void OsuDatabase::loadCollections(std::string collectionFilePath, bool isLegacy,
 				File backupCollectionsFile(backupCollectionsFilePath, File::TYPE::WRITE);
 				if (backupCollectionsFile.canWrite())
 				{
-					const char *originalCollectionsFileBytes = originalCollectionsFile.readFile();
+					const uint8_t *originalCollectionsFileBytes = originalCollectionsFile.readFile();
 					if (originalCollectionsFileBytes != NULL)
 						backupCollectionsFile.write(originalCollectionsFileBytes, originalCollectionsFile.getFileSize());
 				}

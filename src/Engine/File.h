@@ -32,12 +32,11 @@ public:
 	bool canRead() const;
 	bool canWrite() const;
 
-	void write(const char *buffer, size_t size);
+	void write(const uint8_t *buffer, size_t size);
 
-	UString readLine();
-	UString readString();
-	const char *readFile(); // WARNING: this is NOT a null-terminated string! DO NOT USE THIS with UString/std::string!
-
+	std::string readLine();
+	std::string readString();
+	const uint8_t *readFile(); // WARNING: this is NOT a null-terminated string! DO NOT USE THIS with UString/std::string!
 	size_t getFileSize() const;
 
 private:
@@ -52,11 +51,10 @@ public:
 	virtual bool canRead() const = 0;
 	virtual bool canWrite() const = 0;
 
-	virtual void write(const char *buffer, size_t size) = 0;
+	virtual void write(const uint8_t *buffer, size_t size) = 0;
 
-	virtual UString readLine() = 0;
-	virtual const char *readFile() = 0;
-
+	virtual std::string readLine() = 0;
+	virtual const uint8_t *readFile() = 0;
 	virtual size_t getFileSize() const = 0;
 };
 
@@ -72,11 +70,10 @@ public:
 	bool canRead() const;
 	bool canWrite() const;
 
-	void write(const char *buffer, size_t size);
+	void write(const uint8_t *buffer, size_t size);
 
-	UString readLine();
-	const char *readFile();
-
+	std::string readLine();
+	const uint8_t *readFile();
 	size_t getFileSize() const;
 
 private:
@@ -87,11 +84,10 @@ private:
 
 	std::ifstream m_ifstream;
 	std::ofstream m_ofstream;
-	std::string m_sBuffer;
 	size_t m_iFileSize;
 
 	// full reader
-	std::vector<char> m_fullBuffer;
+	std::vector<uint8_t> m_fullBuffer;
 };
 
 #endif

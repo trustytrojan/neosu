@@ -3885,10 +3885,7 @@ void OsuOptionsMenu::save()
 		{
 			while (in.canRead())
 			{
-				UString uLine = in.readLine();
-				const char *lineChar = uLine.toUtf8();
-				std::string line(lineChar);
-
+				std::string line = in.readLine();
 				bool keepLine = true;
 				for (int i=0; i<m_elements.size(); i++)
 				{

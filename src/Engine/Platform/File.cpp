@@ -51,25 +51,25 @@ bool File::canWrite() const
 	return m_file->canWrite();
 }
 
-void File::write(const char *buffer, size_t size)
+void File::write(const uint8_t *buffer, size_t size)
 {
 	m_file->write(buffer, size);
 }
 
-UString File::readLine()
+std::string File::readLine()
 {
 	return m_file->readLine();
 }
 
-UString File::readString()
+std::string File::readString()
 {
 	const int size = getFileSize();
-	if (size < 1) return "";
+	if (size < 1) return std::string();
 
-	return UString(readFile(), size);
+	return std::string((const char*)readFile(), size);
 }
 
-const char *File::readFile()
+const uint8_t *File::readFile()
 {
 	return m_file->readFile();
 }
@@ -164,32 +164,28 @@ bool StdFile::canWrite() const
 	return m_bReady && m_ofstream.good() && !m_bRead;
 }
 
-void StdFile::write(const char *buffer, size_t size)
+void StdFile::write(const uint8_t *buffer, size_t size)
 {
 	if (!canWrite()) return;
 
-	m_ofstream.write(buffer, size);
+	m_ofstream.write((const char*)buffer, size);
 }
 
-UString StdFile::readLine()
+std::string StdFile::readLine()
 {
 	if (!canRead()) return "";
 
-	m_bRead = (bool)std::getline(m_ifstream, m_sBuffer);
+	std::string line;
+	m_bRead = (bool)std::getline(m_ifstream, line);
 
-	// HACKHACK: remove \n or \r for \r\n, because std::getline() sucks
-	UString uString = UString(m_sBuffer.c_str());
-	if (uString.length() > 0)
-	{
-		const wchar_t &lastChar = uString[uString.lengthUtf8() - 1];
-		if (lastChar == L'\n' || lastChar == L'\r')
-			uString = uString.substr(0, uString.lengthUtf8() - 1);
-	}
+	// std::getline keeps line delimiters in the output for some reason
+	if(!line.empty() && line.back() == '\n') line.pop_back();
+	if(!line.empty() && line.back() == '\r') line.pop_back();
 
-	return uString;
+	return line;
 }
 
-const char *StdFile::readFile()
+const uint8_t *StdFile::readFile()
 {
 	if (File::debug->getBool())
 		debugLog("StdFile::readFile() on %s\n", m_sFilePath.c_str());
@@ -200,7 +196,7 @@ const char *StdFile::readFile()
 	if (!m_bReady || !canRead()) return NULL;
 
 	m_fullBuffer.resize(m_iFileSize);
-	return (m_ifstream.read(m_fullBuffer.data(), m_iFileSize) ? &m_fullBuffer[0] : NULL);
+	return (m_ifstream.read((char*)m_fullBuffer.data(), m_iFileSize) ? &m_fullBuffer[0] : NULL);
 }
 
 size_t StdFile::getFileSize() const
