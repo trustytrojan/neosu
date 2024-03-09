@@ -9,14 +9,21 @@
 #define SOUNDENGINE_H
 
 #include "cbase.h"
-
-class Sound;
+#include "Sound.h"
 
 enum class OutputDriver {
     NONE,
     BASS,
     BASS_WASAPI,
     BASS_ASIO,
+};
+
+struct OUTPUT_DEVICE {
+    int id;
+    bool enabled;
+    bool isDefault;
+    UString name;
+    OutputDriver driver;
 };
 
 class SoundEngine {
@@ -45,18 +52,12 @@ class SoundEngine {
     inline const UString &getOutputDevice() const { return m_currentOutputDevice.name; }
     inline float getVolume() const { return m_fVolume; }
 
-   private:
-    struct OUTPUT_DEVICE {
-        int id;
-        bool enabled;
-        bool isDefault;
-        UString name;
-        OutputDriver driver;
-    };
-
     void updateOutputDevices(bool printInfo);
     bool initializeOutputDevice(OUTPUT_DEVICE device);
 
+    Sound::SOUNDHANDLE g_wasapiOutputMixer = 0;
+
+   private:
     void onFreqChanged(UString oldValue, UString newValue);
 
     std::function<void()> m_outputDeviceChangeCallback = nullptr;

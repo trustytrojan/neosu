@@ -832,13 +832,11 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
             ->setClickCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onOutputDeviceRestart));
     } else {
         OPTIONS_ELEMENT outputDeviceSelect = addButton("Select Output Device", "Default", true);
-        ((CBaseUIButton *)outputDeviceSelect.elements[0])
-            ->setClickCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onOutputDeviceSelect));
-        outputDeviceSelect.resetButton->setClickCallback(
-            fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onOutputDeviceResetClicked));
-
         m_outputDeviceResetButton = outputDeviceSelect.resetButton;
-        m_outputDeviceSelectButton = outputDeviceSelect.elements[0];
+        m_outputDeviceResetButton->setClickCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onOutputDeviceResetClicked));
+        m_outputDeviceSelectButton = (OsuUIButton *)outputDeviceSelect.elements[0];
+        m_outputDeviceSelectButton->setClickCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onOutputDeviceSelect));
+
         m_outputDeviceLabel = (CBaseUILabel *)outputDeviceSelect.elements[1];
 
         // Dirty...
@@ -2710,13 +2708,37 @@ void OsuOptionsMenu::onOutputDeviceSelect2(UString outputDeviceName, int id) {
 }
 
 void OsuOptionsMenu::onOutputDeviceResetClicked() {
-    if(engine->getSound()->getOutputDevices().size() > 0)
-        onOutputDeviceSelect2(engine->getSound()->getOutputDevices()[0]);
+    unsigned long prevMusicPositionMS = 0;
+    if(!m_osu->isInPlayMode() && m_osu->getSelectedBeatmap() != NULL && m_osu->getSelectedBeatmap()->getMusic() != NULL)
+        prevMusicPositionMS = m_osu->getSelectedBeatmap()->getMusic()->getPositionMS();
+
+    OUTPUT_DEVICE defaultOutputDevice;
+    defaultOutputDevice.id = -1;
+    defaultOutputDevice.name = "Default";
+    defaultOutputDevice.enabled = true;
+    defaultOutputDevice.isDefault = false;  // custom -1 can never have default
+    defaultOutputDevice.driver = OutputDriver::BASS;
+
+    engine->getSound()->initializeOutputDevice(defaultOutputDevice);
+    m_outputDeviceLabel->setText(engine->getSound()->getOutputDevice());
+    m_osu->getSkin()->reloadSounds();
+
+    // and update reset button as usual
+    onOutputDeviceResetUpdate();
+
+    // start playing music again after audio device changed
+    if(!m_osu->isInPlayMode() && m_osu->getSelectedBeatmap() != NULL &&
+       m_osu->getSelectedBeatmap()->getMusic() != NULL) {
+        m_osu->getSelectedBeatmap()->unloadMusic();
+        m_osu->getSelectedBeatmap()->select();  // (triggers preview music play)
+        m_osu->getSelectedBeatmap()->getMusic()->setPositionMS(prevMusicPositionMS);
+    }
 }
 
 void OsuOptionsMenu::onOutputDeviceResetUpdate() {
-    if(m_outputDeviceResetButton != NULL)
-        m_outputDeviceResetButton->setEnabled(engine->getSound()->getOutputDevices().size() > 0);
+    if(m_outputDeviceResetButton != NULL) {
+        m_outputDeviceResetButton->setEnabled(engine->getSound()->getOutputDevice() != UString("Default"));
+    }
 }
 
 void OsuOptionsMenu::onOutputDeviceRestart() { engine->getSound()->restart(); }

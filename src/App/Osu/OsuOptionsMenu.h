@@ -236,7 +236,7 @@ class OsuOptionsMenu : public OsuScreenBackable, public OsuNotificationOverlayKe
     CBaseUIElement *m_resolutionSelectButton;
     CBaseUILabel *m_resolutionLabel;
     CBaseUITextbox *m_osuFolderTextbox;
-    CBaseUIElement *m_outputDeviceSelectButton;
+    OsuUIButton *m_outputDeviceSelectButton;
     CBaseUILabel *m_outputDeviceLabel;
     OsuOptionsMenuResetButton *m_outputDeviceResetButton;
     CBaseUISlider *m_wasapiBufferSizeSlider;

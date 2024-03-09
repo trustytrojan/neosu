@@ -570,8 +570,10 @@ void OsuDatabase::sortScores(MD5Hash beatmapMD5Hash) {
         }
     }
 
-    debugLog("ERROR: Invalid score sortingtype \"%s\"\n",
-             m_osu_songbrowser_scores_sortingtype_ref->getString().toUtf8());
+    if(convar->getConVarByName("osu_debug")->getBool()) {
+        debugLog("ERROR: Invalid score sortingtype \"%s\"\n",
+                 m_osu_songbrowser_scores_sortingtype_ref->getString().toUtf8());
+    }
 }
 
 bool OsuDatabase::addCollection(UString collectionName) {

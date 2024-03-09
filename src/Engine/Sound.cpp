@@ -7,6 +7,7 @@
 
 #include "Sound.h"
 
+#define NOBASSOVERLOADS
 #include <bass.h>
 #include <bass_fx.h>
 #include <bassmix.h>
@@ -76,8 +77,9 @@ void Sound::init() {
         msg.append(m_sFilePath.c_str());
         msg.append("\n");
         debugLog(0xffdd3333, "%s", msg.toUtf8());
-    } else
+    } else {
         m_bReady = true;
+    }
 }
 
 void Sound::initAsync() {
@@ -85,7 +87,7 @@ void Sound::initAsync() {
 
     // HACKHACK: workaround for BASS crashes on malformed WAV files
     {
-        const int minWavFileSize = snd_wav_file_min_size.getInt();
+        const int minWavFileSize = snd_wav_file_min_size.getInt(); 
         if(minWavFileSize > 0) {
             auto fileExtensionLowerCase = UString(env->getFileExtensionFromFilePath(m_sFilePath).c_str());
             fileExtensionLowerCase.lowerCase();
@@ -102,22 +104,12 @@ void Sound::initAsync() {
 
     // create the sound
     if(m_bStream) {
-        DWORD extraStreamCreateFileFlags = BASS_SAMPLE_FLOAT;
-        DWORD extraFXTempoCreateFlags = BASS_STREAM_DECODE;
-
         m_HSTREAM = BASS_StreamCreateFile(
-            FALSE, m_sFilePath.c_str(), 0, 0,
-            (m_bPrescan ? BASS_STREAM_PRESCAN : 0) | BASS_STREAM_DECODE | extraStreamCreateFileFlags);
-        m_HSTREAM = BASS_FX_TempoCreate(m_HSTREAM, BASS_FX_FREESOURCE | extraFXTempoCreateFlags);
-
-        BASS_ChannelSetAttribute(m_HSTREAM, BASS_ATTRIB_TEMPO_OPTION_USE_QUICKALGO, true);
-        BASS_ChannelSetAttribute(m_HSTREAM, BASS_ATTRIB_TEMPO_OPTION_OVERLAP_MS, 4.0f);
-        BASS_ChannelSetAttribute(m_HSTREAM, BASS_ATTRIB_TEMPO_OPTION_SEQUENCE_MS, 30.0f);
-
+            false, m_sFilePath.c_str(), 0, 0,
+            (m_bPrescan ? BASS_STREAM_PRESCAN : 0) | BASS_STREAM_DECODE | BASS_SAMPLE_FLOAT);
+        m_HSTREAM = BASS_FX_TempoCreate(m_HSTREAM, BASS_FX_FREESOURCE | (engine->getSound()->isWASAPI() ? BASS_STREAM_DECODE : 0));
         m_HCHANNELBACKUP = m_HSTREAM;
-    } else  // not a stream
-    {
-#ifdef _WIN32
+    } else {
         File file(m_sFilePath);
         if(file.canRead()) {
             m_iWasapiSampleBufferSize = file.getFileSize();
@@ -125,17 +117,20 @@ void Sound::initAsync() {
                 m_wasapiSampleBuffer = new uint8_t[file.getFileSize()];
                 memcpy(m_wasapiSampleBuffer, file.readFile(), file.getFileSize());
             }
-        } else
+        } else {
             printf("Sound Error: Couldn't file.canRead() on file %s\n", m_sFilePath.c_str());
-#endif
+        }
 
-        m_HSTREAM = BASS_SampleLoad(FALSE, m_sFilePath.c_str(), 0, 0, 5,
-                                    (m_bIsLooped ? BASS_SAMPLE_LOOP : 0) |
-                                        (m_bIs3d ? BASS_SAMPLE_3D | BASS_SAMPLE_MONO : 0) | BASS_SAMPLE_OVER_POS);
+        m_HSTREAM = BASS_SampleLoad(
+            true, m_wasapiSampleBuffer, 0, m_iWasapiSampleBufferSize, 5,
+            BASS_SAMPLE_FLOAT | (m_bIsLooped ? BASS_SAMPLE_LOOP : 0) |
+            (m_bIs3d ? BASS_SAMPLE_3D | BASS_SAMPLE_MONO : 0) | BASS_SAMPLE_OVER_POS
+        );
         m_HSTREAMBACKUP = m_HSTREAM;  // needed for proper cleanup for FX HSAMPLES
 
-        if(m_HSTREAM == 0)
+        if(m_HSTREAM == 0) {
             printf("Sound Error: BASS_SampleLoad() error %i on file %s\n", BASS_ErrorGetCode(), m_sFilePath.c_str());
+        }
     }
 
     m_bAsyncReady = true;
@@ -160,21 +155,20 @@ Sound::SOUNDHANDLE Sound::getHandle() {
     if(engine->getSound()->isWASAPI()) {
         m_HCHANNEL = BASS_StreamCreateFile(
             true, m_wasapiSampleBuffer, 0, m_iWasapiSampleBufferSize,
-            BASS_SAMPLE_FLOAT | BASS_STREAM_DECODE | BASS_UNICODE | (m_bIsLooped ? BASS_SAMPLE_LOOP : 0));
-
+            BASS_SAMPLE_FLOAT | BASS_STREAM_DECODE | (m_bIsLooped ? BASS_SAMPLE_LOOP : 0));
         if(m_HCHANNEL == 0) {
             debugLog("BASS_StreamCreateFile() error %i\n", BASS_ErrorGetCode());
-        } else {
-            BASS_ChannelSetAttribute(m_HCHANNEL, BASS_ATTRIB_VOL, m_fVolume);
-            m_danglingWasapiStreams.push_back(m_HCHANNEL);
+            return 0;
         }
 
+        BASS_ChannelSetAttribute(m_HCHANNEL, BASS_ATTRIB_VOL, m_fVolume);
+        m_danglingWasapiStreams.push_back(m_HCHANNEL);
         return m_HCHANNEL;
     }
 
     if(m_HCHANNEL != 0 && !m_bIsOverlayable) return m_HCHANNEL;
 
-    m_HCHANNEL = BASS_SampleGetChannel(m_HSTREAMBACKUP, FALSE);
+    m_HCHANNEL = BASS_SampleGetChannel(m_HSTREAMBACKUP, 0);
     m_HCHANNELBACKUP = m_HCHANNEL;
 
     if(m_HCHANNEL == 0) {

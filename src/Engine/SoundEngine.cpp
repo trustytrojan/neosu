@@ -11,6 +11,7 @@
 
 #include "SoundEngine.h"
 
+#define NOBASSOVERLOADS
 #include <bass.h>
 #include <bassmix.h>
 #include <basswasapi.h>
@@ -30,8 +31,6 @@
 #ifndef BASS_CONFIG_MP3_OLDGAPS
 #define BASS_CONFIG_MP3_OLDGAPS 68
 #endif
-
-Sound::SOUNDHANDLE g_wasapiOutputMixer = 0;
 
 ConVar snd_output_device("snd_output_device", "Default", FCVAR_NONE);
 ConVar snd_restart("snd_restart");
@@ -64,8 +63,8 @@ ConVar win_snd_wasapi_exclusive("win_snd_wasapi_exclusive", false, FCVAR_NONE,
 ConVar osu_universal_offset_hardcoded("osu_universal_offset_hardcoded", 0.0f, FCVAR_NONE);
 
 DWORD CALLBACK OutputWasapiProc(void *buffer, DWORD length, void *user) {
-    if(g_wasapiOutputMixer != 0) {
-        const int c = BASS_ChannelGetData(g_wasapiOutputMixer, buffer, length);
+    if(engine->getSound()->g_wasapiOutputMixer != 0) {
+        const int c = BASS_ChannelGetData(engine->getSound()->g_wasapiOutputMixer, buffer, length);
 
         if(c < 0) return 0;
 
@@ -388,20 +387,7 @@ bool SoundEngine::play(Sound *snd, float pan, float pitch) {
     if(!allowPlayFrame) return false;
 
     Sound::SOUNDHANDLE handle = snd->getHandle();
-
-    // HACKHACK: force add to output mixer
-    if(isWASAPI() && handle != 0) {
-#ifdef _WIN32
-        if(BASS_Mixer_ChannelGetMixer(handle) == 0) {
-            if(!BASS_Mixer_StreamAddChannel(
-                   g_wasapiOutputMixer, handle,
-                   (!snd->isStream() ? BASS_STREAM_AUTOFREE : 0) | BASS_MIXER_DOWNMIX | BASS_MIXER_NORAMPIN))
-                debugLog("BASS_Mixer_StreamAddChannel() failed (%i)!", BASS_ErrorGetCode());
-        }
-#endif
-    }
-
-    if(BASS_ChannelIsActive(handle) != BASS_ACTIVE_PLAYING) {
+    if(handle != 0) {
         BASS_ChannelSetAttribute(handle, BASS_ATTRIB_PAN, pan);
         BASS_ChannelSetAttribute(handle, BASS_ATTRIB_NORAMP, snd->isStream() ? 0 : 1);
         BASS_ChannelFlags(handle, (snd->isStream() && snd->isLooped()) ? BASS_SAMPLE_LOOP : 0, BASS_SAMPLE_LOOP);
@@ -414,12 +400,24 @@ bool SoundEngine::play(Sound *snd, float pan, float pitch) {
             BASS_ChannelSetAttribute(handle, BASS_ATTRIB_FREQ, std::pow(2.0f, (semitonesShift / 12.0f)) * freq);
         }
 
-        if(!BASS_ChannelPlay(handle, true)) {
-            debugLog("SoundEngine::play() couldn't BASS_ChannelPlay(), errorcode %i\n", BASS_ErrorGetCode());
-            return false;
+        if(isWASAPI()) {
+            if(!BASS_Mixer_StreamAddChannel(
+                   g_wasapiOutputMixer, handle,
+                   (snd->isStream() ? 0 : BASS_STREAM_AUTOFREE) | BASS_MIXER_DOWNMIX | BASS_MIXER_NORAMPIN)) {
+                debugLog("BASS_Mixer_StreamAddChannel() failed (%i)!", BASS_ErrorGetCode());
+                return false;
+            }
         }
 
-        snd->setLastPlayTime(engine->getTime());
+        if(BASS_ChannelIsActive(handle) != BASS_ACTIVE_PLAYING) {
+            if(!BASS_ChannelPlay(handle, true)) {
+                debugLog("SoundEngine::play() couldn't BASS_ChannelPlay(), errorcode %i\n", BASS_ErrorGetCode());
+                return false;
+            }
+
+            snd->setLastPlayTime(engine->getTime());
+        }
+
         return true;
     }
 
