@@ -8,24 +8,16 @@
 #include "Font.h"
 
 #include <ft2build.h>
-
-#include "ConVar.h"
-#include "Engine.h"
-#include "ResourceManager.h"
-#include "VertexArrayObject.h"
-#ifdef MCENGINE_USE_SYSTEM_FREETYPE
 #include <freetype/freetype.h>
 #include <freetype/ftbitmap.h>
 #include <freetype/ftglyph.h>
 #include <freetype/ftoutln.h>
 #include <freetype/fttrigon.h>
-#else
-#include <freetype.h>
-#include <ftbitmap.h>
-#include <ftglyph.h>
-#include <ftoutln.h>
-#include <fttrigon.h>
-#endif
+
+#include "ConVar.h"
+#include "Engine.h"
+#include "ResourceManager.h"
+#include "VertexArrayObject.h"
 
 ConVar r_drawstring_max_string_length("r_drawstring_max_string_length", 65536, FCVAR_CHEAT,
                                       "maximum number of characters per call, sanity/memory buffer limit");
