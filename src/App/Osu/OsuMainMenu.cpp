@@ -361,6 +361,11 @@ OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu) {
 }
 
 OsuMainMenu::~OsuMainMenu() {
+    for(auto slider : m_mainMenuSliderTextBeatmapHitObjects) {
+        delete slider;
+    }
+    m_mainMenuSliderTextBeatmapHitObjects.clear();
+
     anim->deleteExistingAnimation(&m_fUpdateButtonAnim);
 
     anim->deleteExistingAnimation(&m_fMainMenuAnimFriendEyeFollowX);

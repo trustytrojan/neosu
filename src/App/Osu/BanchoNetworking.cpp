@@ -353,6 +353,8 @@ static void *do_networking(void *data) {
         env->sleep(1000);  // wait 1ms
     }
 
+    curl_easy_cleanup(curl);
+
     return NULL;
 }
 

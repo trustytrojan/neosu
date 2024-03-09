@@ -45,13 +45,13 @@ class OsuNotificationOverlay : public OsuScreen {
 
    private:
     struct NOTIFICATION {
-        UString text;
-        Color textColor;
+        UString text = "";
+        Color textColor = COLOR(255, 255, 255, 255);
 
-        float time;
-        float alpha;
-        float backgroundAnim;
-        float fallAnim;
+        float time = 0.f;
+        float alpha = 0.f;
+        float backgroundAnim = 0.f;
+        float fallAnim = 0.f;
     };
 
     void drawNotificationText(Graphics *g, NOTIFICATION &n);

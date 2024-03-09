@@ -121,7 +121,7 @@ class OsuMainMenu : public OsuScreen, public MouseListener {
     float m_fCenterOffsetAnim;
 
     bool m_bMenuElementsVisible;
-    float m_fMainMenuButtonCloseTime;
+    float m_fMainMenuButtonCloseTime = 0.f;
 
     OsuMainMenuCubeButton *m_cube;
     std::vector<OsuMainMenuButton *> m_menuElements;

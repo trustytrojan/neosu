@@ -1676,7 +1676,7 @@ void OsuHUD::drawWarningArrows(Graphics *g, float hitcircleDiameter) {
 
 void OsuHUD::updateScoreBoardAvatars() {
     std::vector<uint32_t> player_ids;
-    m_avatars.empty();
+    m_avatars.clear();
 
     if(bancho.is_online()) {
         player_ids.push_back(bancho.user_id);
