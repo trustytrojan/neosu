@@ -78,6 +78,7 @@ class OsuOptionsMenu : public OsuScreenBackable, public OsuNotificationOverlayKe
 
             allowOverscale = false;
             allowUnderscale = false;
+            wasapi_only = false;
         }
 
         OsuOptionsMenuResetButton *resetButton;
@@ -87,6 +88,8 @@ class OsuOptionsMenu : public OsuScreenBackable, public OsuNotificationOverlayKe
 
         float label1Width;
         float relSizeDPI;
+
+        bool wasapi_only;
 
         bool allowOverscale;
         bool allowUnderscale;
@@ -125,7 +128,6 @@ class OsuOptionsMenu : public OsuScreenBackable, public OsuNotificationOverlayKe
     void onOutputDeviceResetClicked();
     void onOutputDeviceResetUpdate();
     void onOutputDeviceRestart();
-    void onAudioCompatibilityModeChange(CBaseUICheckbox *checkbox);
     void onLogInClicked();
     void onDownloadOsuClicked();
     void onManuallyManageBeatmapsClicked();
@@ -278,7 +280,6 @@ class OsuOptionsMenu : public OsuScreenBackable, public OsuNotificationOverlayKe
     ConVar *m_osu_skin_ref;
     ConVar *m_osu_skin_random_ref;
     ConVar *m_osu_ui_scale_ref;
-    ConVar *m_win_snd_fallback_dsound_ref;
     ConVar *m_win_snd_wasapi_buffer_size_ref;
     ConVar *m_win_snd_wasapi_period_size_ref;
     ConVar *m_osu_notelock_type_ref;

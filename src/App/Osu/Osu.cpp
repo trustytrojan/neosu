@@ -234,22 +234,6 @@ Osu::Osu(int instanceID) {
 
     osu_resolution.setValue(UString::format("%ix%i", engine->getScreenWidth(), engine->getScreenHeight()));
 
-#ifdef MCENGINE_FEATURE_SOUND
-
-    // starting with bass 2020 2.4.15.2 which has all offset problems fixed, this is the non-dsound backend compensation
-    // NOTE: this depends on BASS_CONFIG_UPDATEPERIOD/BASS_CONFIG_DEV_BUFFER
-    convar->getConVarByName("osu_universal_offset_hardcoded")->setValue(15.0f);
-
-#endif
-
-#ifdef MCENGINE_FEATURE_BASS_WASAPI
-
-    // since we use the newer bass/fx dlls for wasapi builds anyway (which have different time handling)
-    // NOTE: this overwrites the above modification
-    convar->getConVarByName("osu_universal_offset_hardcoded")->setValue(-25.0f);
-
-#endif
-
     // OS specific engine settings/overrides
     if(env->getOS() == Environment::OS::OS_HORIZON) {
         convar->getConVarByName("fps_max")->setValue(60.0f);
@@ -260,7 +244,6 @@ Osu::Osu(int instanceID) {
         convar->getConVarByName("osu_mod_mafham_render_chunksize")->setValue(12.0f);
         convar->getConVarByName("osu_mod_touchdevice")->setDefaultFloat(1.0f);
         convar->getConVarByName("osu_mod_touchdevice")->setValue(1.0f);
-        convar->getConVarByName("osu_universal_offset_hardcoded")->setValue(-45.0f);
         convar->getConVarByName("osu_key_quick_retry")->setValue(15.0f);            // L, SDL_SCANCODE_L
         convar->getConVarByName("osu_key_seek_time")->setValue(21.0f);              // R, SDL_SCANCODE_R
         convar->getConVarByName("osu_key_decrease_local_offset")->setValue(29.0f);  // ZL, SDL_SCANCODE_Z

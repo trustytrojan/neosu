@@ -219,12 +219,6 @@ void HorizonSDLEnvironment::update() {
         debugLog("HorizonSDLEnvironment: Switching to docked = %i (or waking up) ...\n", (int)m_bDocked);
 
         // restart sound engine
-#ifdef MCENGINE_FEATURE_SDL_MIXER
-
-        engine->getSound()->setMixChunkSize(m_bDocked ? horizon_snd_chunk_size_docked.getInt()
-                                                      : horizon_snd_chunk_size_undocked.getInt());
-
-#endif
         convar->getConVarByName("snd_output_device")->setValue("Default");
 
         // switch resolution

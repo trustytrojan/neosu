@@ -7,6 +7,9 @@
 
 #include "Sound.h"
 
+#include <bass.h>
+#include <bass_fx.h>
+
 #include <sstream>
 
 #include "Bancho.h"
@@ -14,21 +17,9 @@
 #include "File.h"
 #include "Osu.h"
 
-#ifdef MCENGINE_FEATURE_SOUND
-
-#include <bass.h>
-#include <bass_fx.h>
-
 #ifdef MCENGINE_FEATURE_BASS_WASAPI
 
 #include <bassmix.h>
-
-#endif
-
-#elif defined(MCENGINE_FEATURE_SDL) && defined(MCENGINE_FEATURE_SDL_MIXER)
-
-#include "SDL.h"
-#include "SDL_mixer_ext.h"
 
 #endif
 
@@ -83,8 +74,6 @@ Sound::Sound(std::string filepath, bool stream, bool threeD, bool loop, bool pre
 void Sound::init() {
     if(m_sFilePath.length() < 2 || !m_bAsyncReady) return;
 
-#ifdef MCENGINE_FEATURE_SOUND
-
     // HACKHACK: re-set some values to their defaults (only necessary because of the existence of rebuild())
     m_fActualSpeedForDisabledPitchCompensation = 1.0f;
 
@@ -99,12 +88,6 @@ void Sound::init() {
         debugLog(0xffdd3333, "%s", msg.toUtf8());
     } else
         m_bReady = true;
-
-#elif defined(MCENGINE_FEATURE_SDL) && defined(MCENGINE_FEATURE_SDL_MIXER)
-
-    m_bReady = m_bAsyncReady.load();
-
-#endif
 }
 
 void Sound::initAsync() {
@@ -126,8 +109,6 @@ void Sound::initAsync() {
             }
         }
     }
-
-#ifdef MCENGINE_FEATURE_SOUND
 
     // create the sound
     if(m_bStream) {
@@ -173,96 +154,61 @@ void Sound::initAsync() {
     }
 
     m_bAsyncReady = true;
-
-#elif defined(MCENGINE_FEATURE_SDL) && defined(MCENGINE_FEATURE_SDL_MIXER)
-
-    if(m_bStream)
-        m_mixChunkOrMixMusic = Mix_LoadMUS(m_sFilePath.c_str());
-    else
-        m_mixChunkOrMixMusic = Mix_LoadWAV(m_sFilePath.c_str());
-
-    if(m_mixChunkOrMixMusic == NULL)
-        printf(m_bStream ? "Sound Error: Mix_LoadMUS() error %s on file %s\n"
-                         : "Sound Error: Mix_LoadWAV() error %s on file %s\n",
-               SDL_GetError(), m_sFilePath.c_str());
-
-    m_bAsyncReady = (m_mixChunkOrMixMusic != NULL);
-
-#endif
 }
 
 Sound::SOUNDHANDLE Sound::getHandle() {
-#ifdef MCENGINE_FEATURE_SOUND
-
     // if the file is streamed from the disk, directly return HSTREAM
-    // if not, create a channel of the stream if there is none, else return the previously created channel IFF this
-    // sound is not overlayable (because being overlayable implies multiple channels playing at once)
-
-    if(m_bStream)
+    if(m_bStream) {
         return m_HSTREAM;
-    else {
-#ifdef MCENGINE_FEATURE_BASS_WASAPI
+    }
 
-        // HACKHACK: wasapi stream objects can't be reused
-        if(m_HCHANNEL == 0 || m_bIsOverlayable) {
-            for(size_t i = 0; i < m_danglingWasapiStreams.size(); i++) {
-                if(BASS_ChannelIsActive(m_danglingWasapiStreams[i]) != BASS_ACTIVE_PLAYING) {
-                    BASS_StreamFree(m_danglingWasapiStreams[i]);
-
-                    m_danglingWasapiStreams.erase(m_danglingWasapiStreams.begin() + i);
-                    i--;
-                }
-            }
-
-            m_HCHANNEL = BASS_StreamCreateFile(
-                TRUE, m_wasapiSampleBuffer, 0, m_iWasapiSampleBufferSize,
-                BASS_SAMPLE_FLOAT | BASS_STREAM_DECODE | BASS_UNICODE | (m_bIsLooped ? BASS_SAMPLE_LOOP : 0));
-
-            if(m_HCHANNEL == 0)
-                debugLog("BASS_StreamCreateFile() error %i\n", BASS_ErrorGetCode());
-            else {
-                BASS_ChannelSetAttribute(m_HCHANNEL, BASS_ATTRIB_VOL, m_fVolume);
-
-                m_danglingWasapiStreams.push_back(m_HCHANNEL);
+    // WASAPI stream objects can't be reused, so we always recreate a new one
+    // TODO @kiwec: handle non-overlayable sounds on WASAPI
+    if(engine->getSound()->isWASAPI()) {
+        for(size_t i = 0; i < m_danglingWasapiStreams.size(); i++) {
+            if(BASS_ChannelIsActive(m_danglingWasapiStreams[i]) != BASS_ACTIVE_PLAYING) {
+                BASS_StreamFree(m_danglingWasapiStreams[i]);
+                m_danglingWasapiStreams.erase(m_danglingWasapiStreams.begin() + i);
+                i--;
             }
         }
 
-        return m_HCHANNEL;
-
-#endif
-
-        if(m_HCHANNEL != 0 && !m_bIsOverlayable) return m_HCHANNEL;
-
-        m_HCHANNEL = BASS_SampleGetChannel(m_HSTREAMBACKUP, FALSE);
-        m_HCHANNELBACKUP = m_HCHANNEL;
+        m_HCHANNEL = BASS_StreamCreateFile(
+            true, m_wasapiSampleBuffer, 0, m_iWasapiSampleBufferSize,
+            BASS_SAMPLE_FLOAT | BASS_STREAM_DECODE | BASS_UNICODE | (m_bIsLooped ? BASS_SAMPLE_LOOP : 0));
 
         if(m_HCHANNEL == 0) {
-            debugLog(0xffdd3333, "Couldn't BASS_SampleGetChannel \"%s\", stream = %d, errorcode = %d\n",
-                     m_sFilePath.c_str(), (int)m_bStream, BASS_ErrorGetCode());
+            debugLog("BASS_StreamCreateFile() error %i\n", BASS_ErrorGetCode());
         } else {
             BASS_ChannelSetAttribute(m_HCHANNEL, BASS_ATTRIB_VOL, m_fVolume);
+            m_danglingWasapiStreams.push_back(m_HCHANNEL);
         }
 
         return m_HCHANNEL;
     }
 
-#elif defined(MCENGINE_FEATURE_SDL) && defined(MCENGINE_FEATURE_SDL_MIXER)
+    // if not, create a channel of the stream if there is none, else return the previously created channel IFF this
+    // sound is not overlayable (because being overlayable implies multiple channels playing at once)
+
+    if(m_HCHANNEL != 0 && !m_bIsOverlayable) return m_HCHANNEL;
+
+    m_HCHANNEL = BASS_SampleGetChannel(m_HSTREAMBACKUP, FALSE);
+    m_HCHANNELBACKUP = m_HCHANNEL;
+
+    if(m_HCHANNEL == 0) {
+        debugLog(0xffdd3333, "Couldn't BASS_SampleGetChannel \"%s\", stream = %d, errorcode = %d\n",
+                 m_sFilePath.c_str(), (int)m_bStream, BASS_ErrorGetCode());
+    } else {
+        BASS_ChannelSetAttribute(m_HCHANNEL, BASS_ATTRIB_VOL, m_fVolume);
+    }
 
     return m_HCHANNEL;
-
-#else
-
-    return 0;
-
-#endif
 }
 
 void Sound::destroy() {
     if(!m_bReady) return;
 
     m_bReady = false;
-
-#ifdef MCENGINE_FEATURE_SOUND
 
     if(m_bStream) {
 #ifdef MCENGINE_FEATURE_BASS_WASAPI
@@ -295,25 +241,12 @@ void Sound::destroy() {
     m_HSTREAM = 0;
     m_HSTREAMBACKUP = 0;
     m_HCHANNEL = 0;
-
-#elif defined(MCENGINE_FEATURE_SDL) && defined(MCENGINE_FEATURE_SDL_MIXER)
-
-    if(m_bStream)
-        Mix_FreeMusic((Mix_Music*)m_mixChunkOrMixMusic);
-    else
-        Mix_FreeChunk((Mix_Chunk*)m_mixChunkOrMixMusic);
-
-    m_mixChunkOrMixMusic = NULL;
-
-#endif
 }
 
 void Sound::setPosition(double percent) {
     if(!m_bReady) return;
 
     percent = clamp<double>(percent, 0.0, 1.0);
-
-#ifdef MCENGINE_FEATURE_SOUND
 
     const SOUNDHANDLE handle = (m_HCHANNELBACKUP != 0 ? m_HCHANNELBACKUP : getHandle());
 
@@ -331,46 +264,10 @@ void Sound::setPosition(double percent) {
     if(!res && debug_snd.getBool())
         debugLog("Sound::setPosition( %f ) BASS_ChannelSetPosition() error %i on file %s\n", percent,
                  BASS_ErrorGetCode(), m_sFilePath.c_str());
-
-#elif defined(MCENGINE_FEATURE_SDL) && defined(MCENGINE_FEATURE_SDL_MIXER) && defined(SDL_MIXER_X)
-
-    if(m_bStream) {
-        const double length = Mix_GetMusicTotalTime((Mix_Music*)m_mixChunkOrMixMusic);
-        if(length > 0.0) {
-            Mix_RewindMusic();
-
-            const double targetPositionS = length * percent;
-            Mix_SetMusicPosition(targetPositionS);
-
-            // NOTE: Mix_SetMusicPosition()/scrubbing is inaccurate depending on the underlying decoders, approach in 1
-            // second increments
-            const double targetPositionMS = targetPositionS * 1000.0;
-            double positionMS = targetPositionMS;
-            double actualPositionMS = getPositionMS();
-            double deltaMS = actualPositionMS - targetPositionMS;
-            int loopCounter = 0;
-            while(std::abs(deltaMS) > 1.1 * 1000.0) {
-                positionMS -= sign<double>(deltaMS) * 1000.0;
-
-                Mix_SetMusicPosition(positionMS / 1000.0);
-
-                actualPositionMS = getPositionMS();
-                deltaMS = actualPositionMS - targetPositionMS;
-
-                loopCounter++;
-                if(loopCounter > 10000) break;
-            }
-        } else if(percent == 0.0)
-            Mix_RewindMusic();
-    }
-
-#endif
 }
 
 void Sound::setPositionMS(unsigned long ms, bool internal) {
     if(!m_bReady || ms > getLengthMS()) return;
-
-#ifdef MCENGINE_FEATURE_SOUND
 
     const SOUNDHANDLE handle = getHandle();
 
@@ -386,34 +283,6 @@ void Sound::setPositionMS(unsigned long ms, bool internal) {
     if(!res && !internal && debug_snd.getBool())
         debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms, BASS_ErrorGetCode(),
                  m_sFilePath.c_str());
-
-#elif defined(MCENGINE_FEATURE_SDL) && defined(MCENGINE_FEATURE_SDL_MIXER)
-
-    if(m_bStream) {
-        Mix_RewindMusic();
-        Mix_SetMusicPosition((double)ms / 1000.0);
-
-        // NOTE: Mix_SetMusicPosition()/scrubbing is inaccurate depending on the underlying decoders, approach in 1
-        // second increments
-        const double targetPositionMS = (double)ms;
-        double positionMS = targetPositionMS;
-        double actualPositionMS = getPositionMS();
-        double deltaMS = actualPositionMS - targetPositionMS;
-        int loopCounter = 0;
-        while(std::abs(deltaMS) > 1.1 * 1000.0) {
-            positionMS -= sign<double>(deltaMS) * 1000.0;
-
-            Mix_SetMusicPosition(positionMS / 1000.0);
-
-            actualPositionMS = getPositionMS();
-            deltaMS = actualPositionMS - targetPositionMS;
-
-            loopCounter++;
-            if(loopCounter > 10000) break;
-        }
-    }
-
-#endif
 }
 
 void Sound::setVolume(float volume) {
@@ -421,23 +290,10 @@ void Sound::setVolume(float volume) {
 
     m_fVolume = clamp<float>(volume, 0.0f, 1.0f);
 
-#ifdef MCENGINE_FEATURE_SOUND
-
     if(!m_bIsOverlayable) {
         const SOUNDHANDLE handle = getHandle();
-
         BASS_ChannelSetAttribute(handle, BASS_ATTRIB_VOL, m_fVolume);
     }
-
-#elif defined(MCENGINE_FEATURE_SDL) && defined(MCENGINE_FEATURE_SDL_MIXER)
-
-    if(m_bStream) {
-        engine->getSound()->setVolumeMixMusic(m_fVolume);
-        Mix_VolumeMusic((int)(m_fVolume * engine->getSound()->getVolume() * MIX_MAX_VOLUME));
-    } else
-        Mix_VolumeChunk((Mix_Chunk*)m_mixChunkOrMixMusic, (int)(m_fVolume * MIX_MAX_VOLUME));
-
-#endif
 }
 
 void Sound::setSpeed(float speed) {
@@ -485,22 +341,8 @@ void Sound::setPan(float pan) {
 
     pan = clamp<float>(pan, -1.0f, 1.0f);
 
-#ifdef MCENGINE_FEATURE_SOUND
-
     const SOUNDHANDLE handle = getHandle();
-
     BASS_ChannelSetAttribute(handle, BASS_ATTRIB_PAN, pan);
-
-#elif defined(MCENGINE_FEATURE_SDL) && defined(MCENGINE_FEATURE_SDL_MIXER)
-
-    if(!m_bStream) {
-        const float rangeHalfLimit = 96.0f;  // NOTE: trying to match BASS behavior
-        const int left =
-            (int)lerp<float>(rangeHalfLimit / 2.0f, 254.0f - rangeHalfLimit / 2.0f, 1.0f - ((pan + 1.0f) / 2.0f));
-        Mix_SetPanning(getHandle(), left, 254 - left);
-    }
-
-#endif
 }
 
 void Sound::setLoop(bool loop) {
@@ -515,8 +357,6 @@ void Sound::setLoop(bool loop) {
 float Sound::getPosition() {
     if(!m_bReady) return 0.0f;
 
-#ifdef MCENGINE_FEATURE_SOUND
-
     const SOUNDHANDLE handle = (m_HCHANNELBACKUP != 0 ? m_HCHANNELBACKUP : getHandle());
 
     const QWORD lengthBytes = BASS_ChannelGetLength(handle, BASS_POS_BYTE);
@@ -525,30 +365,10 @@ float Sound::getPosition() {
     const float position = (float)((double)(positionBytes) / (double)(lengthBytes));
 
     return position;
-
-#elif defined(MCENGINE_FEATURE_SDL) && defined(MCENGINE_FEATURE_SDL_MIXER) && defined(SDL_MIXER_X)
-
-    if(m_bStream) {
-        const double length = Mix_GetMusicTotalTime((Mix_Music*)m_mixChunkOrMixMusic);
-        if(length > 0.0) {
-            const double position = Mix_GetMusicPosition((Mix_Music*)m_mixChunkOrMixMusic);
-            if(position > -0.0) return (float)(position / length);
-        }
-    }
-
-    return 0.0f;
-
-#else
-
-    return 0.0f;
-
-#endif
 }
 
 unsigned long Sound::getPositionMS() {
     if(!m_bReady) return 0;
-
-#ifdef MCENGINE_FEATURE_SOUND
 
     const SOUNDHANDLE handle = getHandle();
 
@@ -575,27 +395,10 @@ unsigned long Sound::getPositionMS() {
     }
 
     return positionMS;
-
-#elif defined(MCENGINE_FEATURE_SDL) && defined(MCENGINE_FEATURE_SDL_MIXER) && defined(SDL_MIXER_X)
-
-    if(m_bStream) {
-        const double position = Mix_GetMusicPosition((Mix_Music*)m_mixChunkOrMixMusic);
-        if(position > -0.0) return (unsigned long)(position * 1000.0);
-    }
-
-    return 0;
-
-#else
-
-    return 0;
-
-#endif
 }
 
 unsigned long Sound::getLengthMS() {
     if(!m_bReady) return 0;
-
-#ifdef MCENGINE_FEATURE_SOUND
 
     const SOUNDHANDLE handle = getHandle();
 
@@ -605,21 +408,6 @@ unsigned long Sound::getLengthMS() {
     const double lengthInMilliSeconds = lengthInSeconds * 1000.0;
 
     return static_cast<unsigned long>(lengthInMilliSeconds);
-
-#elif defined(MCENGINE_FEATURE_SDL) && defined(MCENGINE_FEATURE_SDL_MIXER) && defined(SDL_MIXER_X)
-
-    if(m_bStream) {
-        const double length = Mix_GetMusicTotalTime((Mix_Music*)m_mixChunkOrMixMusic);
-        if(length > -0.0) return (unsigned long)(length * 1000.0);
-    }
-
-    return 0;
-
-#else
-
-    return 0;
-
-#endif
 }
 
 float Sound::getSpeed() {
@@ -659,8 +447,6 @@ float Sound::getFrequency() {
 bool Sound::isPlaying() {
     if(!m_bReady) return false;
 
-#ifdef MCENGINE_FEATURE_SOUND
-
     const SOUNDHANDLE handle = getHandle();
 
 #ifdef MCENGINE_FEATURE_BASS_WASAPI
@@ -673,29 +459,14 @@ bool Sound::isPlaying() {
     return BASS_ChannelIsActive(handle) == BASS_ACTIVE_PLAYING;
 
 #endif
-
-#elif defined(MCENGINE_FEATURE_SDL) && defined(MCENGINE_FEATURE_SDL_MIXER)
-
-    return (m_bStream ? Mix_PlayingMusic() && !Mix_PausedMusic() : Mix_Playing(m_HCHANNEL) && !Mix_Paused(m_HCHANNEL));
-
-#endif
 }
 
 bool Sound::isFinished() {
     if(!m_bReady) return false;
 
-#ifdef MCENGINE_FEATURE_SOUND
-
     const SOUNDHANDLE handle = getHandle();
 
     return BASS_ChannelIsActive(handle) == BASS_ACTIVE_STOPPED;
-
-#elif defined(MCENGINE_FEATURE_SDL) && defined(MCENGINE_FEATURE_SDL_MIXER)
-
-    return (m_bStream ? !Mix_PlayingMusic() && !Mix_PausedMusic()
-                      : !Mix_Playing(m_HCHANNEL) && !Mix_Paused(m_HCHANNEL));
-
-#endif
 }
 
 void Sound::rebuild(std::string newFilePath) {

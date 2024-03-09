@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cwctype>
 #include <string>
+#include <vector>
 
 class UString;
 

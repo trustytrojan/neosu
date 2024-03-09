@@ -71,12 +71,6 @@ int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
 
 #endif
 
-#ifdef MCENGINE_FEATURE_SDL_MIXER
-
-    flags |= SDL_INIT_AUDIO;
-
-#endif
-
     // initialize sdl
     if(SDL_Init(flags) < 0) {
         fprintf(stderr, "Couldn't SDL_Init(): %s\n", SDL_GetError());

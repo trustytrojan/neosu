@@ -51,7 +51,6 @@ ConVar osu_draw_beatmap_background_image("osu_draw_beatmap_background_image", tr
 ConVar osu_vr_draw_desktop_playfield("osu_vr_draw_desktop_playfield", true, FCVAR_NONE);
 
 ConVar osu_universal_offset("osu_universal_offset", 0.0f, FCVAR_NONE);
-ConVar osu_universal_offset_hardcoded("osu_universal_offset_hardcoded", 0.0f, FCVAR_NONE);
 ConVar osu_universal_offset_hardcoded_fallback_dsound("osu_universal_offset_hardcoded_fallback_dsound", -15.0f,
                                                       FCVAR_NONE);
 ConVar osu_old_beatmap_offset(
@@ -189,8 +188,6 @@ ConVar osu_play_hitsound_on_click_while_playing("osu_play_hitsound_on_click_whil
 
 ConVar osu_debug_draw_timingpoints("osu_debug_draw_timingpoints", false, FCVAR_CHEAT);
 
-ConVar *OsuBeatmap::m_win_snd_fallback_dsound_ref = NULL;
-
 ConVar *OsuBeatmap::m_osu_pvs = &osu_pvs;
 ConVar *OsuBeatmap::m_osu_draw_hitobjects_ref = &osu_draw_hitobjects;
 ConVar *OsuBeatmap::m_osu_vr_draw_desktop_playfield_ref = &osu_vr_draw_desktop_playfield;
@@ -211,9 +208,6 @@ ConVar *OsuBeatmap::m_fposu_draw_scorebarbg_on_top_ref = NULL;
 
 OsuBeatmap::OsuBeatmap(Osu *osu) {
     // convar refs
-    if(m_win_snd_fallback_dsound_ref == NULL)
-        m_win_snd_fallback_dsound_ref = convar->getConVarByName("win_snd_fallback_dsound");
-
     if(m_osu_draw_hud_ref == NULL) m_osu_draw_hud_ref = convar->getConVarByName("osu_draw_hud");
     if(m_osu_draw_scorebarbg_ref == NULL) m_osu_draw_scorebarbg_ref = convar->getConVarByName("osu_draw_scorebarbg");
     if(m_osu_hud_scorebar_hide_during_breaks_ref == NULL)
@@ -448,6 +442,8 @@ void OsuBeatmap::drawBackground(Graphics *g) {
 void OsuBeatmap::update() {
     if(!canUpdate()) return;
 
+    long osu_universal_offset_hardcoded = convar->getConVarByName("osu_universal_offset_hardcoded")->getInt();
+
     if(m_bContinueScheduled) {
         bool isEarlyNoteContinue =
             (!m_bIsPaused && m_bIsWaiting);  // if we paused while m_bIsWaiting (green progressbar), then we have to let
@@ -540,13 +536,10 @@ void OsuBeatmap::update() {
         }
 
         // ugh. force update all hitobjects while waiting (necessary because of pvs optimization)
-        long curPos =
-            m_iCurMusicPos + (long)(osu_universal_offset.getFloat() * m_osu->getSpeedMultiplier()) +
-            (long)osu_universal_offset_hardcoded.getInt() +
-            (m_win_snd_fallback_dsound_ref->getBool() ? (long)osu_universal_offset_hardcoded_fallback_dsound.getInt()
-                                                      : 0) -
-            m_selectedDifficulty2->getLocalOffset() - m_selectedDifficulty2->getOnlineOffset() -
-            (m_selectedDifficulty2->getVersion() < 5 ? osu_old_beatmap_offset.getInt() : 0);
+        long curPos = m_iCurMusicPos + (long)(osu_universal_offset.getFloat() * m_osu->getSpeedMultiplier()) +
+                      osu_universal_offset_hardcoded - m_selectedDifficulty2->getLocalOffset() -
+                      m_selectedDifficulty2->getOnlineOffset() -
+                      (m_selectedDifficulty2->getVersion() < 5 ? osu_old_beatmap_offset.getInt() : 0);
         if(curPos > -1)  // otherwise auto would already click elements that start at exactly 0 (while the map has not
                          // even started)
             curPos = -1;
@@ -614,12 +607,10 @@ void OsuBeatmap::update() {
     }
 
     // update timing (points)
-    m_iCurMusicPosWithOffsets =
-        m_iCurMusicPos + (long)(osu_universal_offset.getFloat() * m_osu->getSpeedMultiplier()) +
-        (long)osu_universal_offset_hardcoded.getInt() +
-        (m_win_snd_fallback_dsound_ref->getBool() ? (long)osu_universal_offset_hardcoded_fallback_dsound.getInt() : 0) -
-        m_selectedDifficulty2->getLocalOffset() - m_selectedDifficulty2->getOnlineOffset() -
-        (m_selectedDifficulty2->getVersion() < 5 ? osu_old_beatmap_offset.getInt() : 0);
+    m_iCurMusicPosWithOffsets = m_iCurMusicPos + (long)(osu_universal_offset.getFloat() * m_osu->getSpeedMultiplier()) +
+                                osu_universal_offset_hardcoded - m_selectedDifficulty2->getLocalOffset() -
+                                m_selectedDifficulty2->getOnlineOffset() -
+                                (m_selectedDifficulty2->getVersion() < 5 ? osu_old_beatmap_offset.getInt() : 0);
     updateTimingPoints(m_iCurMusicPosWithOffsets);
 
     // for performance reasons, a lot of operations are crammed into 1 loop over all hitobjects:
@@ -2273,15 +2264,7 @@ unsigned long OsuBeatmap::getMusicPositionMSInterpolated() {
     if(!osu_interpolate_music_pos.getBool() || (m_bFailed && m_osu->isInVRMode()) || isLoading())
         return m_music->getPositionMS();
     else {
-#ifdef MCENGINE_FEATURE_SDL_MIXER
-
-        const double interpolationMultiplier = 2.0;
-
-#else
-
         const double interpolationMultiplier = 1.0;
-
-#endif
 
         // TODO: fix snapping at beginning for maps with instant start
 

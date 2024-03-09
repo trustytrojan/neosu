@@ -36,6 +36,7 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu) {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
+    latest.changes.push_back("- Added proper support for WASAPI output");
     latest.changes.push_back("- Fixed nightcore/daycore sounding like shit");
     latest.changes.push_back("- Fixed speed modifications not getting applied to song previews when switching songs");
     latest.changes.push_back("- Disabled ability to fail when using Relax while online");

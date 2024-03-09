@@ -207,8 +207,6 @@ class OsuBeatmap {
     inline float getBreakBackgroundFadeAnim() const { return m_fBreakBackgroundFade; }
 
    protected:
-    static ConVar *m_win_snd_fallback_dsound_ref;
-
     static ConVar *m_osu_pvs;
     static ConVar *m_osu_draw_hitobjects_ref;
     static ConVar *m_osu_vr_draw_desktop_playfield_ref;

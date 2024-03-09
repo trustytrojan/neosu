@@ -446,7 +446,6 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
     m_osu_skin_ref = convar->getConVarByName("osu_skin");
     m_osu_skin_random_ref = convar->getConVarByName("osu_skin_random");
     m_osu_ui_scale_ref = convar->getConVarByName("osu_ui_scale");
-    m_win_snd_fallback_dsound_ref = convar->getConVarByName("win_snd_fallback_dsound");
     m_win_snd_wasapi_buffer_size_ref = convar->getConVarByName("win_snd_wasapi_buffer_size", false);
     m_win_snd_wasapi_period_size_ref = convar->getConVarByName("win_snd_wasapi_period_size", false);
     m_osu_notelock_type_ref = convar->getConVarByName("osu_notelock_type");
@@ -828,72 +827,57 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
     CBaseUIElement *sectionAudio = addSection("Audio");
 
     addSubSection("Devices");
-    if(env->getOS() != Environment::OS::OS_HORIZON) {
+    if(env->getOS() == Environment::OS::OS_HORIZON) {
+        addButton("Restart SoundEngine (fix crackling)")
+            ->setClickCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onOutputDeviceRestart));
+    } else {
         OPTIONS_ELEMENT outputDeviceSelect = addButton("Select Output Device", "Default", true);
         ((CBaseUIButton *)outputDeviceSelect.elements[0])
             ->setClickCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onOutputDeviceSelect));
         outputDeviceSelect.resetButton->setClickCallback(
             fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onOutputDeviceResetClicked));
 
-        if(env->getOS() == Environment::OS::OS_WINDOWS) {
-#ifndef MCENGINE_FEATURE_BASS_WASAPI
-
-            CBaseUICheckbox *audioCompatibilityModeCheckbox =
-                addCheckbox("Audio compatibility mode (!)",
-                            "Use legacy audio engine (higher latency but more compatible)\nWARNING: May cause hitsound "
-                            "delays and stuttering!",
-                            m_win_snd_fallback_dsound_ref);
-            audioCompatibilityModeCheckbox->setChangeCallback(
-                fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onAudioCompatibilityModeChange));
-
-            // HACKHACK: force manual change if user has enabled it (don't use convar callback)
-            if(m_win_snd_fallback_dsound_ref->getBool()) onAudioCompatibilityModeChange(audioCompatibilityModeCheckbox);
-
-#endif
-        }
-
         m_outputDeviceResetButton = outputDeviceSelect.resetButton;
         m_outputDeviceSelectButton = outputDeviceSelect.elements[0];
         m_outputDeviceLabel = (CBaseUILabel *)outputDeviceSelect.elements[1];
-    } else
-        addButton("Restart SoundEngine (fix crackling)")
-            ->setClickCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onOutputDeviceRestart));
 
-#ifdef MCENGINE_FEATURE_BASS_WASAPI
-
-    addSubSection("WASAPI");
-    m_wasapiBufferSizeSlider = addSlider(
-        "Buffer Size:", 0.000f, 0.050f,
-        convar->getConVarByName("win_snd_wasapi_buffer_size"));  // NOTE: allow 0 for shared mode windows 10 + period
-    m_wasapiBufferSizeSlider->setChangeCallback(
-        fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onWASAPIBufferChange));
-    m_wasapiBufferSizeSlider->setKeyDelta(0.001f);
-    m_wasapiBufferSizeSlider->setAnimated(false);
-    addLabel("Windows 7: Start at 11 ms,")->setTextColor(0xff666666);
-    addLabel("Windows 10: Start at 1 ms,")->setTextColor(0xff666666);
-    addLabel("and if crackling: increment until fixed.")->setTextColor(0xff666666);
-    addLabel("(lower is better, non-wasapi has ~40 ms minimum)")->setTextColor(0xff666666);
-    addCheckbox(
-        "Exclusive Mode",
-        "Dramatically reduces audio latency, leave this enabled.\nExclusive Mode = No other application can use audio.",
-        convar->getConVarByName("win_snd_wasapi_exclusive"));
-    // addLabel("(On Windows 10 non-exclusive mode, try buffer = 0)")->setTextColor(0xff666666);
-    // addLabel("(then, try getting the smallest possible period)")->setTextColor(0xff666666);
-    addLabel("");
-    addLabel("");
-    addLabel("WARNING: Only if you know what you are doing")->setTextColor(0xffff0000);
-    m_wasapiPeriodSizeSlider =
-        addSlider("Period Size:", 0.0f, 0.050f, convar->getConVarByName("win_snd_wasapi_period_size"));
-    m_wasapiPeriodSizeSlider->setChangeCallback(
-        fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onWASAPIPeriodChange));
-    m_wasapiPeriodSizeSlider->setKeyDelta(0.001f);
-    m_wasapiPeriodSizeSlider->setAnimated(false);
-    OsuUIButton *restartSoundEngine = addButton("Restart SoundEngine");
-    restartSoundEngine->setClickCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onOutputDeviceRestart));
-    restartSoundEngine->setColor(0xff00566b);
-    addLabel("");
-
-#endif
+        // Dirty...
+        auto wasapi_idx = m_elements.size();
+        {
+            addSubSection("WASAPI");
+            m_wasapiBufferSizeSlider =
+                addSlider("Buffer Size:", 0.000f, 0.050f, convar->getConVarByName("win_snd_wasapi_buffer_size"));
+            m_wasapiBufferSizeSlider->setChangeCallback(
+                fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onWASAPIBufferChange));
+            m_wasapiBufferSizeSlider->setKeyDelta(0.001f);
+            m_wasapiBufferSizeSlider->setAnimated(false);
+            addLabel("Windows 7: Start at 11 ms,")->setTextColor(0xff666666);
+            addLabel("Windows 10: Start at 1 ms,")->setTextColor(0xff666666);
+            addLabel("and if crackling: increment until fixed.")->setTextColor(0xff666666);
+            addLabel("(lower is better, non-wasapi has ~40 ms minimum)")->setTextColor(0xff666666);
+            addCheckbox("Exclusive Mode",
+                        "Dramatically reduces latency, but prevents other applications from capturing/playing audio.",
+                        convar->getConVarByName("win_snd_wasapi_exclusive"));
+            addLabel("");
+            addLabel("");
+            addLabel("WARNING: Only if you know what you are doing")->setTextColor(0xffff0000);
+            m_wasapiPeriodSizeSlider =
+                addSlider("Period Size:", 0.0f, 0.050f, convar->getConVarByName("win_snd_wasapi_period_size"));
+            m_wasapiPeriodSizeSlider->setChangeCallback(
+                fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onWASAPIPeriodChange));
+            m_wasapiPeriodSizeSlider->setKeyDelta(0.001f);
+            m_wasapiPeriodSizeSlider->setAnimated(false);
+            OsuUIButton *restartSoundEngine = addButton("Restart SoundEngine");
+            restartSoundEngine->setClickCallback(
+                fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onOutputDeviceRestart));
+            restartSoundEngine->setColor(0xff00566b);
+            addLabel("");
+        }
+        auto wasapi_end_idx = m_elements.size();
+        for(auto i = wasapi_idx; i < wasapi_end_idx; i++) {
+            m_elements[i].wasapi_only = true;
+        }
+    }
 
     addSubSection("Volume");
     CBaseUISlider *masterVolumeSlider =
@@ -2043,6 +2027,8 @@ void OsuOptionsMenu::updateLayout() {
     bool subSectionTitleMatch = false;
     const std::string search = m_sSearchString.length() > 0 ? m_sSearchString.toUtf8() : "";
     for(int i = 0; i < m_elements.size(); i++) {
+        if(m_elements[i].wasapi_only && !engine->getSound()->isWASAPI()) continue;
+
         // searching logic happens here:
         // section
         //     content
@@ -2730,29 +2716,10 @@ void OsuOptionsMenu::onOutputDeviceResetClicked() {
 
 void OsuOptionsMenu::onOutputDeviceResetUpdate() {
     if(m_outputDeviceResetButton != NULL)
-        m_outputDeviceResetButton->setEnabled(engine->getSound()->getOutputDevices().size() > 0 &&
-                                              engine->getSound()->getOutputDevice() !=
-                                                  engine->getSound()->getOutputDevices()[0]);
+        m_outputDeviceResetButton->setEnabled(engine->getSound()->getOutputDevices().size() > 0);
 }
 
-void OsuOptionsMenu::onOutputDeviceRestart() {
-#ifdef MCENGINE_FEATURE_BASS_WASAPI
-
-    engine->getSound()->setOutputDeviceForce(engine->getSound()->getOutputDevice());
-
-#else
-
-    engine->getSound()->setOutputDevice("Default");  // NOTE: only relevant for horizon builds atm
-
-#endif
-}
-
-void OsuOptionsMenu::onAudioCompatibilityModeChange(CBaseUICheckbox *checkbox) {
-    onCheckboxChange(checkbox);
-    engine->getSound()->setOutputDeviceForce(engine->getSound()->getOutputDevice());
-    checkbox->setChecked(m_win_snd_fallback_dsound_ref->getBool(), false);
-    m_osu->getSkin()->reloadSounds();
-}
+void OsuOptionsMenu::onOutputDeviceRestart() { engine->getSound()->restart(); }
 
 void OsuOptionsMenu::onLogInClicked() {
     if(logInButton->is_loading) return;

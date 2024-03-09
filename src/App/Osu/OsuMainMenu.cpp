@@ -190,7 +190,6 @@ ConVar osu_main_menu_banner_ifupdatedfromoldversion_le3303_text(
 ConVar *OsuMainMenu::m_osu_universal_offset_ref = NULL;
 ConVar *OsuMainMenu::m_osu_universal_offset_hardcoded_ref = NULL;
 ConVar *OsuMainMenu::m_osu_old_beatmap_offset_ref = NULL;
-ConVar *OsuMainMenu::m_win_snd_fallback_dsound_ref = NULL;
 ConVar *OsuMainMenu::m_osu_universal_offset_hardcoded_fallback_dsound_ref = NULL;
 ConVar *OsuMainMenu::m_osu_slider_border_feather_ref = NULL;
 ConVar *OsuMainMenu::m_osu_mod_random_ref = NULL;
@@ -206,8 +205,6 @@ OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu) {
         m_osu_universal_offset_hardcoded_ref = convar->getConVarByName("osu_universal_offset_hardcoded");
     if(m_osu_old_beatmap_offset_ref == NULL)
         m_osu_old_beatmap_offset_ref = convar->getConVarByName("osu_old_beatmap_offset");
-    if(m_win_snd_fallback_dsound_ref == NULL)
-        m_win_snd_fallback_dsound_ref = convar->getConVarByName("win_snd_fallback_dsound");
     if(m_osu_universal_offset_hardcoded_fallback_dsound_ref == NULL)
         m_osu_universal_offset_hardcoded_fallback_dsound_ref =
             convar->getConVarByName("osu_universal_offset_hardcoded_fallback_dsound");
@@ -449,10 +446,7 @@ void OsuMainMenu::draw(Graphics *g) {
 
         const long curMusicPos = (long)m_osu->getSelectedBeatmap()->getMusic()->getPositionMS() +
                                  (long)(m_osu_universal_offset_ref->getFloat() * m_osu->getSpeedMultiplier()) +
-                                 (long)m_osu_universal_offset_hardcoded_ref->getInt() +
-                                 (m_win_snd_fallback_dsound_ref->getBool()
-                                      ? (long)m_osu_universal_offset_hardcoded_fallback_dsound_ref->getInt()
-                                      : 0) -
+                                 (long)m_osu_universal_offset_hardcoded_ref->getInt() -
                                  m_osu->getSelectedBeatmap()->getSelectedDifficulty2()->getLocalOffset() -
                                  m_osu->getSelectedBeatmap()->getSelectedDifficulty2()->getOnlineOffset() -
                                  (m_osu->getSelectedBeatmap()->getSelectedDifficulty2()->getVersion() < 5
