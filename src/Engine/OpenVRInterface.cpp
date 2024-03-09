@@ -11,6 +11,7 @@
 #include "Camera.h"
 #include "ConVar.h"
 #include "Console.h"
+#include "ConsoleBox.h"
 #include "DirectX11Interface.h"
 #include "Engine.h"
 #include "Environment.h"

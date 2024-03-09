@@ -16,6 +16,7 @@
 #error OpenGL support is currently required for SDL
 #endif
 
+#include "ConsoleBox.h"
 #include "ConVar.h"
 #include "Engine.h"
 #include "HorizonSDLEnvironment.h"

@@ -17,6 +17,7 @@
 #include "CWindowManager.h"
 #include "ConVar.h"
 #include "Console.h"
+#include "ConsoleBox.h"
 #include "Engine.h"
 #include "Environment.h"
 #include "Keyboard.h"
@@ -222,6 +223,7 @@ Osu::Osu(int instanceID) {
     env->setWindowTitle("McOsu");
     env->setCursorVisible(false);
 
+    engine->getConsoleBox()->setRequireShiftToActivate(true);
     if(m_iInstanceID < 2) engine->getMouse()->addListener(this);
 
     convar->getConVarByName("vsync")->setValue(0.0f);

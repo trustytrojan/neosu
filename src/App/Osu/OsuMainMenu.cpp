@@ -169,7 +169,7 @@ void OsuMainMenuPauseButton::draw(Graphics *g) {
 
 ConVar osu_toggle_preview_music("osu_toggle_preview_music");
 
-ConVar osu_draw_menu_background("osu_draw_menu_background", true, FCVAR_NONE);
+ConVar osu_draw_menu_background("osu_draw_menu_background", false, FCVAR_NONE);
 ConVar osu_main_menu_startup_anim_duration("osu_main_menu_startup_anim_duration", 0.25f, FCVAR_NONE);
 ConVar osu_main_menu_use_slider_text("osu_main_menu_use_slider_text", true, FCVAR_NONE);
 ConVar osu_main_menu_slider_text_alpha("osu_main_menu_slider_text_alpha", 1.0f, FCVAR_NONE);

@@ -29,6 +29,7 @@ class DiscordInterface;
 
 class CBaseUIContainer;
 class VisualProfiler;
+class ConsoleBox;
 class Console;
 
 class Engine {
@@ -131,6 +132,7 @@ class Engine {
 
     // debugging/console
     void setConsole(Console *console) { m_console = console; }
+	 inline ConsoleBox *getConsoleBox() const { return m_consoleBox; }
     inline Console *getConsole() const { return m_console; }
     inline CBaseUIContainer *getGUI() const { return m_guiContainer; }
 
@@ -177,6 +179,7 @@ class Engine {
     // engine gui, mostly for debugging
     CBaseUIContainer *m_guiContainer;
     VisualProfiler *m_visualProfiler;
+    static ConsoleBox *m_consoleBox;
     static Console *m_console;
 
     // custom
