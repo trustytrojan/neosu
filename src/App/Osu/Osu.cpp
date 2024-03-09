@@ -16,7 +16,6 @@
 #include "Environment.h"
 #include "Keyboard.h"
 #include "Mouse.h"
-#include "ConsoleBox.h"
 #include "ResourceManager.h"
 #include "AnimationHandler.h"
 #include "SoundEngine.h"
@@ -219,7 +218,6 @@ Osu::Osu(int instanceID)
 	env->setWindowTitle("McOsu");
 	env->setCursorVisible(false);
 
-	engine->getConsoleBox()->setRequireShiftToActivate(true);
 	if (m_iInstanceID < 2)
 		engine->getMouse()->addListener(this);
 

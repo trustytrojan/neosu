@@ -35,7 +35,6 @@
 #include "CBaseUIContainer.h"
 
 #include "Console.h"
-#include "ConsoleBox.h"
 #include "VisualProfiler.h"
 
 
@@ -111,7 +110,6 @@ Engine *engine = NULL;
 Environment *env = NULL;
 
 Console *Engine::m_console = NULL;
-ConsoleBox *Engine::m_consoleBox = NULL;
 
 Engine::Engine(Environment *environment, const char *args)
 {
@@ -211,7 +209,6 @@ Engine::~Engine()
 	debugLog("Engine: Freeing engine GUI...\n");
 	{
 		m_console = NULL;
-		m_consoleBox = NULL;
 	}
 	SAFE_DELETE(m_guiContainer);
 
@@ -305,10 +302,8 @@ void Engine::loadApp()
 
 		// create engine gui
 		m_guiContainer = new CBaseUIContainer(0, 0, engine->getScreenWidth(), engine->getScreenHeight(), "");
-		m_consoleBox = new ConsoleBox();
 		m_visualProfiler = new VisualProfiler();
 		m_guiContainer->addBaseUIElement(m_visualProfiler);
-		m_guiContainer->addBaseUIElement(m_consoleBox);
 
 		// (engine gui comes first)
 		m_keyboard->addListener(m_guiContainer, true);
@@ -566,8 +561,6 @@ void Engine::onResolutionChange(Vector2 newResolution)
 
 	if (m_guiContainer != NULL)
 		m_guiContainer->setSize(newResolution.x, newResolution.y);
-	if (m_consoleBox != NULL)
-		m_consoleBox->onResolutionChange(newResolution);
 
 	// update everything
 	m_vScreenSize = newResolution;
@@ -842,8 +835,6 @@ void Engine::debugLog(const char *fmt, va_list args)
 		delete[] buffer;
 
 		// WARNING: these calls here are not threadsafe by default
-		if (m_consoleBox != NULL)
-			m_consoleBox->log(actualBuffer);
 		if (m_console != NULL)
 			m_console->log(actualBuffer);
 	}
@@ -875,8 +866,6 @@ void Engine::debugLog(Color color, const char *fmt, va_list args)
 		delete[] buffer;
 
 		// WARNING: these calls here are not threadsafe by default
-		if (m_consoleBox != NULL)
-			m_consoleBox->log(actualBuffer, color);
 		if (m_console != NULL)
 			m_console->log(actualBuffer, color);
 	}

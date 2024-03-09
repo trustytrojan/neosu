@@ -23,7 +23,6 @@
 #include "Timer.h"
 #include "Mouse.h"
 #include "ConVar.h"
-#include "ConsoleBox.h"
 
 #include "SDLEnvironment.h"
 #include "HorizonSDLEnvironment.h"
@@ -414,12 +413,6 @@ int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment)
 					if (e.jbutton.button == 0) // KEY_A
 					{
 						g_engine->onMouseLeftChange(true);
-
-						if (engine->getConsoleBox()->isActive())
-						{
-							g_engine->onKeyboardKeyDown(SDL_SCANCODE_RETURN);
-							g_engine->onKeyboardKeyUp(SDL_SCANCODE_RETURN);
-						}
 					}
 					else if ((env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 10 : e.jbutton.button == 7) || e.jbutton.button == 1) // KEY_PLUS/KEY_START || KEY_B
 						g_engine->onKeyboardKeyDown(SDL_SCANCODE_ESCAPE);

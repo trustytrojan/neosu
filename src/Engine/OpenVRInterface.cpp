@@ -22,7 +22,6 @@
 #include "VertexArrayObject.h"
 
 #include "CBaseUIContainer.h"
-#include "ConsoleBox.h"
 
 #include "OpenGLRenderTarget.h"
 #include "DirectX11Interface.h"
