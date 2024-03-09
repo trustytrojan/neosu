@@ -370,7 +370,7 @@ void Engine::onUpdate() {
         loadApp();
     }
 
-    if(m_bBlackout || (m_bIsMinimized && !(m_networkHandler->isClient() || m_networkHandler->isServer()))) return;
+    if(m_bBlackout) return;
 
     // update time
     {
@@ -425,12 +425,6 @@ void Engine::onUpdate() {
                 Console::processCommand(Console::g_commandQueue[i]);
             }
             Console::g_commandQueue = std::vector<UString>();  // reset
-        }
-
-        // update networking
-        {
-            VPROF_BUDGET("NetworkHandler::update", VPROF_BUDGETGROUP_UPDATE);
-            m_networkHandler->update();
         }
     }
 

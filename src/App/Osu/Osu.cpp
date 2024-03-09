@@ -224,7 +224,6 @@ Osu::Osu(int instanceID) {
 
     if(m_iInstanceID < 2) engine->getMouse()->addListener(this);
 
-    convar->getConVarByName("console_overlay")->setValue(0.0f);
     convar->getConVarByName("vsync")->setValue(0.0f);
     convar->getConVarByName("fps_max")->setValue(420.0f);
     convar->getConVarByName("fps_max")->setDefaultFloat(420.0f);

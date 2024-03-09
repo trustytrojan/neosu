@@ -10,12 +10,6 @@
 #include "ConVar.h"
 #include "Engine.h"
 
-#ifdef _WIN32
-
-#include "WinFile.h"
-
-#endif
-
 ConVar debug_file("debug_file", false, FCVAR_NONE);
 ConVar file_size_max("file_size_max", 1024, FCVAR_NONE,
                      "maximum filesize sanity limit in MB, all files bigger than this are not allowed to load");
@@ -24,17 +18,7 @@ ConVar *File::debug = &debug_file;
 ConVar *File::size_max = &file_size_max;
 
 File::File(std::string filePath, TYPE type) {
-    m_file = NULL;
-
-#ifdef _WIN32
-
-    m_file = new WinFile(filePath, type);
-
-#else
-
     m_file = new StdFile(filePath, type);
-
-#endif
 }
 
 File::~File() { SAFE_DELETE(m_file); }

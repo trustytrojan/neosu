@@ -63,7 +63,7 @@ ConVar win_snd_wasapi_exclusive("win_snd_wasapi_exclusive", false, FCVAR_NONE,
 
 ConVar osu_universal_offset_hardcoded("osu_universal_offset_hardcoded", 0.0f, FCVAR_NONE);
 
-DWORD OutputWasapiProc(void *buffer, DWORD length, void *user) {
+DWORD CALLBACK OutputWasapiProc(void *buffer, DWORD length, void *user) {
     if(g_wasapiOutputMixer != 0) {
         const int c = BASS_ChannelGetData(g_wasapiOutputMixer, buffer, length);
 
@@ -182,7 +182,7 @@ void SoundEngine::updateOutputDevices(bool printInfo) {
         }
 
         soundDevice.driver = OutputDriver::BASS;
-        if(env->getOS() == Environment::OS::OS_WINDOWS) {
+        if(env->getOS() == Environment::OS::OS_WINDOWS && soundDevice.name != UString("No sound")) {
             soundDevice.name.append(" [DirectSound]");
         }
 
@@ -192,7 +192,7 @@ void SoundEngine::updateOutputDevices(bool printInfo) {
                  (int)isDefault);
     }
 
-#ifdef MCENGINE_FEATURE_BASS_WASAPI
+#ifdef _WIN32
     BASS_WASAPI_DEVICEINFO wasapiDeviceInfo;
     for(int d = 0; (BASS_WASAPI_GetDeviceInfo(d, &wasapiDeviceInfo) == true); d++) {
         const bool isEnabled = (wasapiDeviceInfo.flags & BASS_DEVICE_ENABLED);
@@ -243,7 +243,7 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
         BASS_Free();
     } else if(m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
         BASS_Free();
-#ifdef MCENGINE_FEATURE_BASS_WASAPI
+#ifdef _WIN32
         BASS_WASAPI_Free();
 #endif
     }
@@ -281,7 +281,7 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
 
     // init
     const int freq = snd_freq.getInt();
-    void *hwnd = NULL;
+    HWND hwnd = NULL;
 
 #ifdef _WIN32
     const WinEnvironment *winEnv = dynamic_cast<WinEnvironment *>(env);
@@ -294,7 +294,7 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
         return false;
     }
 
-#ifdef MCENGINE_FEATURE_BASS_WASAPI
+#ifdef _WIN32
     if(device.driver == OutputDriver::BASS_WASAPI) {
         const float bufferSize = std::round(win_snd_wasapi_buffer_size.getFloat() * 1000.0f) / 1000.0f;    // in seconds
         const float updatePeriod = std::round(win_snd_wasapi_period_size.getFloat() * 1000.0f) / 1000.0f;  // in seconds
@@ -365,7 +365,7 @@ SoundEngine::~SoundEngine() {
     if(m_currentOutputDevice.driver == OutputDriver::BASS) {
         BASS_Free();
     } else if(m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
-#ifdef MCENGINE_FEATURE_BASS_WASAPI
+#ifdef _WIN32
         BASS_WASAPI_Free();
 #endif
         BASS_Free();
@@ -391,7 +391,7 @@ bool SoundEngine::play(Sound *snd, float pan, float pitch) {
 
     // HACKHACK: force add to output mixer
     if(isWASAPI() && handle != 0) {
-#ifdef MCENGINE_FEATURE_BASS_WASAPI
+#ifdef _WIN32
         if(BASS_Mixer_ChannelGetMixer(handle) == 0) {
             if(!BASS_Mixer_StreamAddChannel(
                    g_wasapiOutputMixer, handle,
@@ -456,7 +456,7 @@ bool SoundEngine::play3d(Sound *snd, Vector3 pos) {
 void SoundEngine::pause(Sound *snd) {
     if(!m_bReady || snd == NULL || !snd->isReady()) return;
 
-#ifdef MCENGINE_FEATURE_BASS_WASAPI
+#ifdef _WIN32
 
     Sound::SOUNDHANDLE handle = snd->getHandle();
 
@@ -488,7 +488,7 @@ void SoundEngine::stop(Sound *snd) {
     Sound::SOUNDHANDLE handle = snd->getHandle();
 
     if(m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
-#ifdef MCENGINE_FEATURE_BASS_WASAPI
+#ifdef _WIN32
         if(BASS_Mixer_ChannelGetMixer(handle) != 0) {
             BASS_Mixer_ChannelRemove(handle);
         }
@@ -536,7 +536,7 @@ void SoundEngine::setVolume(float volume) {
     BASS_SetConfig(BASS_CONFIG_GVOL_STREAM, (DWORD)(m_fVolume * 10000));
     BASS_SetConfig(BASS_CONFIG_GVOL_MUSIC, (DWORD)(m_fVolume * 10000));
 
-#ifdef MCENGINE_FEATURE_BASS_WASAPI
+#ifdef _WIN32
     if(m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
         BASS_WASAPI_SetVolume(BASS_WASAPI_CURVE_WINDOWS | BASS_WASAPI_VOL_SESSION, m_fVolume);
     }

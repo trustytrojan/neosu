@@ -51,20 +51,6 @@
 #define MCENGINE_FEATURE_NETWORKING
 
 /*
- * BASS sound
- */
-#ifndef MCENGINE_FEATURE_SOUND
-#define MCENGINE_FEATURE_SOUND
-#endif
-
-/*
- * BASS WASAPI sound (Windows only)
- */
-#ifdef _WIN32
-// #define MCENGINE_FEATURE_BASS_WASAPI
-#endif
-
-/*
  * OpenCL
  */
 // #define MCENGINE_FEATURE_OPENCL

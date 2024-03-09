@@ -84,7 +84,7 @@ class Sound : public Resource {
     float m_fActualSpeedForDisabledPitchCompensation;
 
     // bass wasapi
-    char *m_wasapiSampleBuffer;
+    uint8_t *m_wasapiSampleBuffer;
     unsigned long long m_iWasapiSampleBufferSize;
     std::vector<SOUNDHANDLE> m_danglingWasapiStreams;
 

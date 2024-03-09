@@ -9,6 +9,7 @@
 
 #include <bass.h>
 #include <bass_fx.h>
+#include <bassmix.h>
 
 #include <sstream>
 
@@ -16,12 +17,6 @@
 #include "ConVar.h"
 #include "File.h"
 #include "Osu.h"
-
-#ifdef MCENGINE_FEATURE_BASS_WASAPI
-
-#include <bassmix.h>
-
-#endif
 
 #include "ConVar.h"
 #include "Engine.h"
@@ -63,12 +58,7 @@ Sound::Sound(std::string filepath, bool stream, bool threeD, bool loop, bool pre
 
     m_wasapiSampleBuffer = NULL;
     m_iWasapiSampleBufferSize = 0;
-
-#ifdef MCENGINE_FEATURE_BASS_WASAPI
-
     m_danglingWasapiStreams.reserve(32);
-
-#endif
 }
 
 void Sound::init() {
@@ -112,13 +102,8 @@ void Sound::initAsync() {
 
     // create the sound
     if(m_bStream) {
-        DWORD extraStreamCreateFileFlags = 0;
-        DWORD extraFXTempoCreateFlags = 0;
-
-#ifdef MCENGINE_FEATURE_BASS_WASAPI
-        extraStreamCreateFileFlags |= BASS_SAMPLE_FLOAT;
-        extraFXTempoCreateFlags |= BASS_STREAM_DECODE;
-#endif
+        DWORD extraStreamCreateFileFlags = BASS_SAMPLE_FLOAT;
+        DWORD extraFXTempoCreateFlags = BASS_STREAM_DECODE;
 
         m_HSTREAM = BASS_StreamCreateFile(
             FALSE, m_sFilePath.c_str(), 0, 0,
@@ -132,7 +117,7 @@ void Sound::initAsync() {
         m_HCHANNELBACKUP = m_HSTREAM;
     } else  // not a stream
     {
-#ifdef MCENGINE_FEATURE_BASS_WASAPI
+#ifdef _WIN32
         File file(m_sFilePath);
         if(file.canRead()) {
             m_iWasapiSampleBufferSize = file.getFileSize();
@@ -162,17 +147,17 @@ Sound::SOUNDHANDLE Sound::getHandle() {
         return m_HSTREAM;
     }
 
+    for(size_t i = 0; i < m_danglingWasapiStreams.size(); i++) {
+        if(BASS_ChannelIsActive(m_danglingWasapiStreams[i]) != BASS_ACTIVE_PLAYING) {
+            BASS_StreamFree(m_danglingWasapiStreams[i]);
+            m_danglingWasapiStreams.erase(m_danglingWasapiStreams.begin() + i);
+            i--;
+        }
+    }
+
     // WASAPI stream objects can't be reused, so we always recreate a new one
     // TODO @kiwec: handle non-overlayable sounds on WASAPI
     if(engine->getSound()->isWASAPI()) {
-        for(size_t i = 0; i < m_danglingWasapiStreams.size(); i++) {
-            if(BASS_ChannelIsActive(m_danglingWasapiStreams[i]) != BASS_ACTIVE_PLAYING) {
-                BASS_StreamFree(m_danglingWasapiStreams[i]);
-                m_danglingWasapiStreams.erase(m_danglingWasapiStreams.begin() + i);
-                i--;
-            }
-        }
-
         m_HCHANNEL = BASS_StreamCreateFile(
             true, m_wasapiSampleBuffer, 0, m_iWasapiSampleBufferSize,
             BASS_SAMPLE_FLOAT | BASS_STREAM_DECODE | BASS_UNICODE | (m_bIsLooped ? BASS_SAMPLE_LOOP : 0));
@@ -186,9 +171,6 @@ Sound::SOUNDHANDLE Sound::getHandle() {
 
         return m_HCHANNEL;
     }
-
-    // if not, create a channel of the stream if there is none, else return the previously created channel IFF this
-    // sound is not overlayable (because being overlayable implies multiple channels playing at once)
 
     if(m_HCHANNEL != 0 && !m_bIsOverlayable) return m_HCHANNEL;
 
@@ -211,10 +193,8 @@ void Sound::destroy() {
     m_bReady = false;
 
     if(m_bStream) {
-#ifdef MCENGINE_FEATURE_BASS_WASAPI
-
+#ifdef _WIN32
         BASS_Mixer_ChannelRemove(m_HSTREAM);
-
 #endif
 
         BASS_StreamFree(m_HSTREAM);  // fx (but with BASS_FX_FREESOURCE)
@@ -222,8 +202,7 @@ void Sound::destroy() {
         if(m_HCHANNEL) BASS_ChannelStop(m_HCHANNEL);
         if(m_HSTREAMBACKUP) BASS_SampleFree(m_HSTREAMBACKUP);
 
-#ifdef MCENGINE_FEATURE_BASS_WASAPI
-
+#ifdef _WIN32
         // NOTE: must guarantee that all channels are stopped before memory is deleted!
         for(const SOUNDHANDLE danglingWasapiStream : m_danglingWasapiStreams) {
             BASS_StreamFree(danglingWasapiStream);
@@ -234,7 +213,6 @@ void Sound::destroy() {
             delete[] m_wasapiSampleBuffer;
             m_wasapiSampleBuffer = NULL;
         }
-
 #endif
     }
 
@@ -449,11 +427,9 @@ bool Sound::isPlaying() {
 
     const SOUNDHANDLE handle = getHandle();
 
-#ifdef MCENGINE_FEATURE_BASS_WASAPI
-
+#ifdef _WIN32
     return BASS_ChannelIsActive(handle) == BASS_ACTIVE_PLAYING &&
            ((!m_bStream && m_bIsOverlayable) || BASS_Mixer_ChannelGetMixer(handle) != 0);
-
 #else
 
     return BASS_ChannelIsActive(handle) == BASS_ACTIVE_PLAYING;

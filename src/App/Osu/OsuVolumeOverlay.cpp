@@ -267,19 +267,25 @@ bool OsuVolumeOverlay::canChangeVolume() {
 }
 
 void OsuVolumeOverlay::gainFocus() {
-#ifndef MCENGINE_FEATURE_BASS_WASAPI  // NOTE: wasapi exclusive mode controls the system volume, so don't bother
+    if(engine->getSound()->isWASAPI() && convar->getConVarByName("win_snd_wasapi_exclusive")->getBool()) {
+        // NOTE: wasapi exclusive mode controls the system volume, so don't bother
+        return;
+    }
+
     m_fVolumeInactiveToActiveAnim = 0.0f;
     anim->moveLinear(&m_fVolumeInactiveToActiveAnim, 1.0f, 0.3f, 0.1f, true);
-#endif
 }
 
 void OsuVolumeOverlay::loseFocus() {
-#ifndef MCENGINE_FEATURE_BASS_WASAPI  // NOTE: wasapi exclusive mode controls the system volume, so don't bother
+    if(engine->getSound()->isWASAPI() && convar->getConVarByName("win_snd_wasapi_exclusive")->getBool()) {
+        // NOTE: wasapi exclusive mode controls the system volume, so don't bother
+        return;
+    }
+
     m_bVolumeInactiveToActiveScheduled = true;
     anim->deleteExistingAnimation(&m_fVolumeInactiveToActiveAnim);
     m_fVolumeInactiveToActiveAnim = 0.0f;
     engine->getSound()->setVolume(osu_volume_master_inactive->getFloat() * osu_volume_master->getFloat());
-#endif
 }
 
 void OsuVolumeOverlay::onVolumeChange(int multiplier) {
