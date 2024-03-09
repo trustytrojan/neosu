@@ -6,23 +6,22 @@
 
 #include <lzma.h>
 
-#include "base64.h"
 #include "Bancho.h"
 #include "BanchoAes.h"
 #include "BanchoNetworking.h"
 #include "BanchoSubmitter.h"
 #include "Engine.h"
 #include "OsuDatabaseBeatmap.h"
-
+#include "base64.h"
 
 void submit_score(OsuDatabase::Score score) {
     debugLog("Submitting score...\n");
-    const char* GRADES[] = {"XH", "SH", "X", "S", "A", "B", "C", "D", "F", "N"};
+    const char *GRADES[] = {"XH", "SH", "X", "S", "A", "B", "C", "D", "F", "N"};
 
     uint8_t *compressed_data = NULL;
 
     char score_time[80];
-    struct tm *timeinfo = localtime((const time_t*)&score.unixTimestamp);
+    struct tm *timeinfo = localtime((const time_t *)&score.unixTimestamp);
     strftime(score_time, sizeof(score_time), "%y%m%d%H%M%S", timeinfo);
 
     uint8_t iv[32];
@@ -70,7 +69,7 @@ void submit_score(OsuDatabase::Score score) {
         curl_mime_data(part, score_time.toUtf8(), score_time.lengthUtf8());
     }
     {
-        UString visual_settings_b64 = "0"; // TODO @kiwec: not used by bancho.py
+        UString visual_settings_b64 = "0";  // TODO @kiwec: not used by bancho.py
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "fs");
         curl_mime_data(part, visual_settings_b64.toUtf8(), visual_settings_b64.lengthUtf8());
@@ -98,7 +97,7 @@ void submit_score(OsuDatabase::Score score) {
         curl_mime_data(part, osu_version.toUtf8(), osu_version.lengthUtf8());
     }
     {
-        const char *iv_b64 = (const char*)base64_encode(iv, sizeof(iv), NULL);
+        const char *iv_b64 = (const char *)base64_encode(iv, sizeof(iv), NULL);
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "iv");
         curl_mime_data(part, iv_b64, CURL_ZERO_TERMINATED);
@@ -106,8 +105,10 @@ void submit_score(OsuDatabase::Score score) {
     }
     {
         size_t s_client_hashes_encrypted = 0;
-        uint8_t *client_hashes_encrypted = encrypt(iv, (uint8_t*)bancho.client_hashes.toUtf8(), bancho.client_hashes.lengthUtf8(), &s_client_hashes_encrypted);
-        const char *client_hashes_b64 = (const char*)base64_encode(client_hashes_encrypted, s_client_hashes_encrypted, NULL);
+        uint8_t *client_hashes_encrypted = encrypt(iv, (uint8_t *)bancho.client_hashes.toUtf8(),
+                                                   bancho.client_hashes.lengthUtf8(), &s_client_hashes_encrypted);
+        const char *client_hashes_b64 =
+            (const char *)base64_encode(client_hashes_encrypted, s_client_hashes_encrypted, NULL);
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "s");
         curl_mime_data(part, client_hashes_b64, CURL_ZERO_TERMINATED);
@@ -123,12 +124,13 @@ void submit_score(OsuDatabase::Score score) {
             idiot_check.append(UString::format("smustard%d%d", score.numKatus, score.numMisses));
             idiot_check.append(UString::format("uu%s", score.diff2->getMD5Hash().toUtf8()));
             idiot_check.append(UString::format("%d%s", score.comboMax, score.perfect ? "True" : "False"));
-            idiot_check.append(UString::format("%s%d%s", bancho.username.toUtf8(), score.score, GRADES[(int)score.grade]));
+            idiot_check.append(
+                UString::format("%s%d%s", bancho.username.toUtf8(), score.score, GRADES[(int)score.grade]));
             idiot_check.append(UString::format("%dQ%s", score.modsLegacy, score.passed ? "True" : "False"));
             idiot_check.append(UString::format("0%d%s", OSU_VERSION_DATEONLY, score_time));
             idiot_check.append(bancho.client_hashes);
 
-            auto idiot_hash = md5((uint8_t*)idiot_check.toUtf8(), idiot_check.lengthUtf8());
+            auto idiot_hash = md5((uint8_t *)idiot_check.toUtf8(), idiot_check.lengthUtf8());
             score_data.append(":");
             score_data.append(idiot_hash.hash);
         }
@@ -144,13 +146,14 @@ void submit_score(OsuDatabase::Score score) {
         score_data.append(UString::format(":%s", GRADES[(int)score.grade]));
         score_data.append(UString::format(":%d", score.modsLegacy));
         score_data.append(UString::format(":%s", score.passed ? "True" : "False"));
-        score_data.append(":0"); // gamemode, always std
+        score_data.append(":0");  // gamemode, always std
         score_data.append(UString::format(":%s", score_time));
-        score_data.append(":mcosu"); // anticheat flags
+        score_data.append(":mcosu");  // anticheat flags
 
         size_t s_score_data_encrypted = 0;
-        uint8_t *score_data_encrypted = encrypt(iv, (uint8_t*)score_data.toUtf8(), score_data.lengthUtf8(), &s_score_data_encrypted);
-        const char *score_data_b64 = (const char*)base64_encode(score_data_encrypted, s_score_data_encrypted, NULL);
+        uint8_t *score_data_encrypted =
+            encrypt(iv, (uint8_t *)score_data.toUtf8(), score_data.lengthUtf8(), &s_score_data_encrypted);
+        const char *score_data_b64 = (const char *)base64_encode(score_data_encrypted, s_score_data_encrypted, NULL);
 
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "score");
@@ -161,7 +164,7 @@ void submit_score(OsuDatabase::Score score) {
         score.replay_data.append("-12345|0|0|0,");
 
         size_t s_compressed_data = score.replay_data.lengthUtf8();
-        compressed_data = (uint8_t*)malloc(s_compressed_data);
+        compressed_data = (uint8_t *)malloc(s_compressed_data);
         lzma_stream stream = LZMA_STREAM_INIT;
         lzma_options_lzma options = {0};
         lzma_lzma_preset(&options, LZMA_PRESET_DEFAULT);
@@ -172,14 +175,14 @@ void submit_score(OsuDatabase::Score score) {
         }
 
         stream.avail_in = score.replay_data.lengthUtf8();
-        stream.next_in = (const uint8_t*)score.replay_data.toUtf8();
+        stream.next_in = (const uint8_t *)score.replay_data.toUtf8();
         stream.avail_out = s_compressed_data;
         stream.next_out = compressed_data;
         do {
             ret = lzma_code(&stream, LZMA_FINISH);
             if(ret == LZMA_OK) {
                 s_compressed_data *= 2;
-                compressed_data = (uint8_t*)realloc(compressed_data, s_compressed_data);
+                compressed_data = (uint8_t *)realloc(compressed_data, s_compressed_data);
                 stream.avail_out = s_compressed_data - stream.total_out;
                 stream.next_out = compressed_data + stream.total_out;
             } else if(ret != LZMA_STREAM_END) {
@@ -201,7 +204,7 @@ void submit_score(OsuDatabase::Score score) {
         part = curl_mime_addpart(request.mime);
         curl_mime_filename(part, "mcosu-replay.osr");
         curl_mime_name(part, "score");
-        curl_mime_data(part, (const char*)compressed_data, s_compressed_data);
+        curl_mime_data(part, (const char *)compressed_data, s_compressed_data);
         free(compressed_data);
 
         debugLog("Replay size: %d bytes (%d compressed)\n", score.replay_data.lengthUtf8(), s_compressed_data);

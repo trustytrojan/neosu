@@ -12,22 +12,22 @@
 #ifndef WINCONTEXTMENU_H
 #define WINCONTEXTMENU_H
 
-#include "ContextMenu.h"
 #include <Windows.h>
 
-class WinContextMenu : public ContextMenu
-{
-public:
-	WinContextMenu();
-	virtual ~WinContextMenu();
+#include "ContextMenu.h"
 
-	void begin();
-	void addItem(UString text, int returnValue);
-	void addSeparator();
-	int end();
+class WinContextMenu : public ContextMenu {
+   public:
+    WinContextMenu();
+    virtual ~WinContextMenu();
 
-private:
-	HMENU m_menu;
+    void begin();
+    void addItem(UString text, int returnValue);
+    void addSeparator();
+    int end();
+
+   private:
+    HMENU m_menu;
 };
 
 #endif

@@ -10,19 +10,18 @@
 
 #include "OsuScreenBackable.h"
 
-class OsuEditor : public OsuScreenBackable
-{
-public:
-	OsuEditor(Osu *osu);
-	virtual ~OsuEditor();
+class OsuEditor : public OsuScreenBackable {
+   public:
+    OsuEditor(Osu *osu);
+    virtual ~OsuEditor();
 
-	virtual void draw(Graphics *g);
-	virtual void mouse_update(bool *propagate_clicks);
+    virtual void draw(Graphics *g);
+    virtual void mouse_update(bool *propagate_clicks);
 
-	virtual void onResolutionChange(Vector2 newResolution);
+    virtual void onResolutionChange(Vector2 newResolution);
 
-private:
-	virtual void onBack();
+   private:
+    virtual void onBack();
 };
 
 #endif

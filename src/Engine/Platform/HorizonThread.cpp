@@ -11,26 +11,24 @@
 
 #include "Engine.h"
 
-HorizonThread::HorizonThread(McThread::START_ROUTINE start_routine, void *arg) : BaseThread()
-{
-	Result rc = threadCreate((Thread*)&m_thread, (ThreadFunc)start_routine, arg, NULL, 0x1000000, 0x2B, 2);
+HorizonThread::HorizonThread(McThread::START_ROUTINE start_routine, void *arg) : BaseThread() {
+    Result rc = threadCreate((Thread *)&m_thread, (ThreadFunc)start_routine, arg, NULL, 0x1000000, 0x2B, 2);
 
-	m_bReady = !R_FAILED(rc);
+    m_bReady = !R_FAILED(rc);
 
-	if (!m_bReady)
-		debugLog("HorizonThread Error: threadCreate() returned %i!\n", (int)rc);
-	else
-		threadStart((Thread*)&m_thread);
+    if(!m_bReady)
+        debugLog("HorizonThread Error: threadCreate() returned %i!\n", (int)rc);
+    else
+        threadStart((Thread *)&m_thread);
 }
 
-HorizonThread::~HorizonThread()
-{
-	if (!m_bReady) return;
+HorizonThread::~HorizonThread() {
+    if(!m_bReady) return;
 
-	m_bReady = false;
+    m_bReady = false;
 
-	threadWaitForExit((Thread*)&m_thread);
-	threadClose((Thread*)&m_thread);
+    threadWaitForExit((Thread *)&m_thread);
+    threadClose((Thread *)&m_thread);
 }
 
 #endif

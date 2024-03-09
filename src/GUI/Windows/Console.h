@@ -16,32 +16,31 @@ class CBaseUILabel;
 class CBaseUITextField;
 class McFont;
 
-class Console : public CBaseUIWindow
-{
-public:
-	static void processCommand(UString command);
-	static void execConfigFile(std::string filename);
+class Console : public CBaseUIWindow {
+   public:
+    static void processCommand(UString command);
+    static void execConfigFile(std::string filename);
 
-public:
-	Console();
-	virtual ~Console();
+   public:
+    Console();
+    virtual ~Console();
 
-	virtual void mouse_update(bool *propagate_clicks);
+    virtual void mouse_update(bool *propagate_clicks);
 
-	void log(UString text, Color textColor = 0xffffffff);
-	void clear();
+    void log(UString text, Color textColor = 0xffffffff);
+    void clear();
 
-	// events
-	void onResized();
+    // events
+    void onResized();
 
-	static std::vector<UString> g_commandQueue;
+    static std::vector<UString> g_commandQueue;
 
-private:
-	CBaseUITextField *m_newLog;
-	CBaseUIScrollView *m_log;
-	CBaseUITextbox *m_textbox;
+   private:
+    CBaseUITextField *m_newLog;
+    CBaseUIScrollView *m_log;
+    CBaseUITextbox *m_textbox;
 
-	McFont *m_logFont;
+    McFont *m_logFont;
 };
 
 #endif

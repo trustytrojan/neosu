@@ -12,18 +12,18 @@
 
 class Osu;
 
-class OsuUIUserStatsScreenLabel : public CBaseUILabel
-{
-public:
-	OsuUIUserStatsScreenLabel(Osu *osu, float xPos=0, float yPos=0, float xSize=0, float ySize=0, UString name="", UString text="");
+class OsuUIUserStatsScreenLabel : public CBaseUILabel {
+   public:
+    OsuUIUserStatsScreenLabel(Osu *osu, float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0,
+                              UString name = "", UString text = "");
 
-	virtual void mouse_update(bool *propagate_clicks);
+    virtual void mouse_update(bool *propagate_clicks);
 
-	void setTooltipText(UString text) {m_tooltipTextLines = text.split("\n");}
+    void setTooltipText(UString text) { m_tooltipTextLines = text.split("\n"); }
 
-private:
-	Osu *m_osu;
-	std::vector<UString> m_tooltipTextLines;
+   private:
+    Osu *m_osu;
+    std::vector<UString> m_tooltipTextLines;
 };
 
 #endif

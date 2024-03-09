@@ -10,18 +10,18 @@
 
 #include "ContextMenu.h"
 
-class NullContextMenu : public ContextMenu
-{
-public:
-	NullContextMenu() {;}
-	virtual ~NullContextMenu() {;}
+class NullContextMenu : public ContextMenu {
+   public:
+    NullContextMenu() { ; }
+    virtual ~NullContextMenu() { ; }
 
-	void begin() {;}
-	void addItem(UString text, int returnValue) {
-		(void)text; (void)returnValue;
-	}
-	void addSeparator() {;}
-	int end() {return -1;}
+    void begin() { ; }
+    void addItem(UString text, int returnValue) {
+        (void)text;
+        (void)returnValue;
+    }
+    void addSeparator() { ; }
+    int end() { return -1; }
 };
 
 #endif

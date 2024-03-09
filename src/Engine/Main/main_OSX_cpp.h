@@ -12,92 +12,90 @@
 
 class Timer;
 
-class MacOSWrapper
-{
-public:
-	struct VECTOR2
-	{
-		float x;
-		float y;
-	};
+class MacOSWrapper {
+   public:
+    struct VECTOR2 {
+        float x;
+        float y;
+    };
 
-	// reverse callbacks (c++ -> objective-c)
+    // reverse callbacks (c++ -> objective-c)
 
-	// native
-	static void microSleep(int microSeconds);
+    // native
+    static void microSleep(int microSeconds);
 
-	// Environment
-	static const char *getUsername();
-	static void openURLInDefaultBrowser(const char *url);
+    // Environment
+    static const char *getUsername();
+    static void openURLInDefaultBrowser(const char *url);
 
-	// clipboard
-	static const char *getClipboardText();
-	static void setClipboardText(const char *text);
+    // clipboard
+    static const char *getClipboardText();
+    static void setClipboardText(const char *text);
 
-	// dialogs & message boxes
-	static void showMessageInfo(const char *title, const char *message);
-	static void showMessageWarning(const char *title, const char *message);
-	static void showMessageError(const char *title, const char *message);
-	static void showMessageErrorFatal(const char *title, const char *message);
+    // dialogs & message boxes
+    static void showMessageInfo(const char *title, const char *message);
+    static void showMessageWarning(const char *title, const char *message);
+    static void showMessageError(const char *title, const char *message);
+    static void showMessageErrorFatal(const char *title, const char *message);
 
-	// window
-	static void center();
-	static void focus();
-	static void minimize();
-	static void maximize();
-	static void enableFullscreen();
-	static void disableFullscreen();
-	static void setWindowTitle(const char *title);
-	static void setWindowPos(int x, int y);
-	static void setWindowSize(int width, int height);
-	static void setWindowResizable(bool resizable);
-	static VECTOR2 getWindowPos();
-	static VECTOR2 getWindowSize();
-	static int getMonitor();
-	static VECTOR2 getNativeScreenSize();
+    // window
+    static void center();
+    static void focus();
+    static void minimize();
+    static void maximize();
+    static void enableFullscreen();
+    static void disableFullscreen();
+    static void setWindowTitle(const char *title);
+    static void setWindowPos(int x, int y);
+    static void setWindowSize(int width, int height);
+    static void setWindowResizable(bool resizable);
+    static VECTOR2 getWindowPos();
+    static VECTOR2 getWindowSize();
+    static int getMonitor();
+    static VECTOR2 getNativeScreenSize();
 
-	// mouse
-	static VECTOR2 getMousePos();
-	static void setCursor(int cursor);
-	static void setCursorVisible(bool visible);
-	static void setMousePos(int x, int y);
-	static void setCursorClip(bool clip);
+    // mouse
+    static VECTOR2 getMousePos();
+    static void setCursor(int cursor);
+    static void setCursorVisible(bool visible);
+    static void setMousePos(int x, int y);
+    static void setCursorClip(bool clip);
 
-	// Graphics
-	static void endScene();
-	static void setVSync(bool vsync);
+    // Graphics
+    static void endScene();
+    static void setVSync(bool vsync);
 
-public:
-	MacOSWrapper();
-	~MacOSWrapper();
+   public:
+    MacOSWrapper();
+    ~MacOSWrapper();
 
-	// native callbacks (objective-c -> c++)
+    // native callbacks (objective-c -> c++)
 
-	void loadApp();
-	void main_objc_before_winproc();
-	void main_objc_after_winproc();
+    void loadApp();
+    void main_objc_before_winproc();
+    void main_objc_after_winproc();
 
-	void onFocusGained();
-	void onFocusLost();
+    void onFocusGained();
+    void onFocusLost();
 
-	void onMouseRawMove(int xDelta, int yDelta);
-	void onMouseWheelVertical(int delta);
-	void onMouseWheelHorizontal(int delta);
-	void onMouseLeftChange(bool mouseLeftDown);
-	void onMouseMiddleChange(bool mouseMiddleDown);
-	void onMouseRightChange(bool mouseRightDown);
+    void onMouseRawMove(int xDelta, int yDelta);
+    void onMouseWheelVertical(int delta);
+    void onMouseWheelHorizontal(int delta);
+    void onMouseLeftChange(bool mouseLeftDown);
+    void onMouseMiddleChange(bool mouseMiddleDown);
+    void onMouseRightChange(bool mouseRightDown);
 
-	void onKeyboardKeyDown(unsigned long keyCode);
-	void onKeyboardKeyUp(unsigned long keyCode);
-	void onKeyboardChar(unsigned long charCode);
+    void onKeyboardKeyDown(unsigned long keyCode);
+    void onKeyboardKeyUp(unsigned long keyCode);
+    void onKeyboardChar(unsigned long charCode);
 
-	void requestResolutionChange(float newWidth, float newHeight);
+    void requestResolutionChange(float newWidth, float newHeight);
 
-private:
-	Timer *m_frameTimer;
-	Timer *m_deltaTimer;
+   private:
+    Timer *m_frameTimer;
+    Timer *m_deltaTimer;
 
-	float m_fPrevTime;
+    float m_fPrevTime;
 };
 
 #endif

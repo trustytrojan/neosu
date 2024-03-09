@@ -10,22 +10,21 @@
 #ifndef HORIZONTHREAD_H
 #define HORIZONTHREAD_H
 
-#include "Thread.h"
-
 #include <switch.h>
 
-class HorizonThread : public BaseThread
-{
-public:
-	HorizonThread(McThread::START_ROUTINE start_routine, void *arg);
-	virtual ~HorizonThread();
+#include "Thread.h"
 
-	bool isReady() {return m_bReady;}
+class HorizonThread : public BaseThread {
+   public:
+    HorizonThread(McThread::START_ROUTINE start_routine, void *arg);
+    virtual ~HorizonThread();
 
-private:
-	bool m_bReady;
+    bool isReady() { return m_bReady; }
 
-	Thread m_thread;
+   private:
+    bool m_bReady;
+
+    Thread m_thread;
 };
 
 #endif

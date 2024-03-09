@@ -16,38 +16,37 @@
 
 class MacOSEnvironment;
 
-class MacOSSDLEnvironment : public SDLEnvironment
-{
-public:
-	MacOSSDLEnvironment();
-	virtual ~MacOSSDLEnvironment();
+class MacOSSDLEnvironment : public SDLEnvironment {
+   public:
+    MacOSSDLEnvironment();
+    virtual ~MacOSSDLEnvironment();
 
-	// system
-	OS getOS();
-	void sleep(unsigned int us);
-	void openURLInDefaultBrowser(UString url);
+    // system
+    OS getOS();
+    void sleep(unsigned int us);
+    void openURLInDefaultBrowser(UString url);
 
-	// user
-	UString getUsername();
-	std::string getUserDataPath();
+    // user
+    UString getUsername();
+    std::string getUserDataPath();
 
-	// file IO
-	bool directoryExists(std::string directoryName);
-	bool createDirectory(std::string directoryName);
-	std::vector<UString> getFilesInFolder(UString folder);
-	std::vector<UString> getFoldersInFolder(UString folder);
-	std::vector<UString> getLogicalDrives();
-	std::string getFolderFromFilePath(std::string filepath);
+    // file IO
+    bool directoryExists(std::string directoryName);
+    bool createDirectory(std::string directoryName);
+    std::vector<UString> getFilesInFolder(UString folder);
+    std::vector<UString> getFoldersInFolder(UString folder);
+    std::vector<UString> getLogicalDrives();
+    std::string getFolderFromFilePath(std::string filepath);
 
-	// dialogs & message boxes
-	UString openFileWindow(const char *filetypefilters, UString title, UString initialpath);
-	UString openFolderWindow(UString title, UString initialpath);
+    // dialogs & message boxes
+    UString openFileWindow(const char *filetypefilters, UString title, UString initialpath);
+    UString openFolderWindow(UString title, UString initialpath);
 
-	// window
-	int getDPI();
+    // window
+    int getDPI();
 
-private:
-	MacOSEnvironment *m_environment;
+   private:
+    MacOSEnvironment *m_environment;
 };
 
 #endif

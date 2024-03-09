@@ -1,6 +1,7 @@
 #pragma once
 #include <unistd.h>
 
+#include "BanchoProtocol.h"
 #include "CBaseUIScrollView.h"
 #include "OsuScreen.h"
 
@@ -13,12 +14,9 @@ class OsuUIButton;
 class OsuUICheckbox;
 class OsuUIContextMenu;
 
-
 class OsuUIModList : public CBaseUIContainer {
-public:
-    OsuUIModList(uint32_t *flags) : CBaseUIContainer(0, 0, 0, 0, "mod_list") {
-        m_flags = flags;
-    }
+   public:
+    OsuUIModList(uint32_t *flags) : CBaseUIContainer(0, 0, 0, 0, "mod_list") { m_flags = flags; }
 
     uint32_t *m_flags;
 
@@ -27,7 +25,7 @@ public:
 };
 
 class OsuRoom : public OsuScreen {
-public:
+   public:
     OsuRoom(Osu *osu);
 
     virtual void draw(Graphics *g) override;
@@ -36,7 +34,7 @@ public:
     virtual void onKeyUp(KeyboardEvent &e) override;
     virtual void onChar(KeyboardEvent &e) override;
     virtual void onResolutionChange(Vector2 newResolution) override;
-    virtual CBaseUIContainer* setVisible(bool visible) override; // does nothing
+    virtual CBaseUIContainer *setVisible(bool visible) override;  // does nothing
 
     void updateLayout(Vector2 newResolution);
     void updateSettingsLayout(Vector2 newResolution);
@@ -47,7 +45,7 @@ public:
     void on_room_joined(Room room);
     void on_room_updated(Room room);
     void on_match_started(Room room);
-    void on_match_score_updated(Packet* packet);
+    void on_match_score_updated(Packet *packet);
     void on_all_players_loaded();
     void on_player_failed(int32_t slot_id);
     void on_match_finished();
@@ -94,7 +92,7 @@ public:
     OsuUIContextMenu *m_contextMenu = nullptr;
 
     OsuMainMenuPauseButton *m_pauseButton = nullptr;
-    McFont* font = nullptr;
-    McFont* lfont = nullptr;
+    McFont *font = nullptr;
+    McFont *lfont = nullptr;
     time_t last_packet_tms = {0};
 };

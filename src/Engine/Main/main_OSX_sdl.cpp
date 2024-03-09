@@ -16,10 +16,7 @@
 
 extern int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment);
 
-int main(int argc, char* argv[])
-{
-	mainSDL(argc, argv, new MacOSSDLEnvironment());
-}
+int main(int argc, char *argv[]) { mainSDL(argc, argv, new MacOSSDLEnvironment()); }
 
 #endif
 

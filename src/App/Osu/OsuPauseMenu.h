@@ -15,53 +15,52 @@ class OsuSongBrowser;
 class CBaseUIContainer;
 class OsuUIPauseMenuButton;
 
-class OsuPauseMenu : public OsuScreen
-{
-public:
-	OsuPauseMenu(Osu *osu);
+class OsuPauseMenu : public OsuScreen {
+   public:
+    OsuPauseMenu(Osu *osu);
 
-	virtual void draw(Graphics *g);
-	virtual void mouse_update(bool *propagate_clicks);
+    virtual void draw(Graphics *g);
+    virtual void mouse_update(bool *propagate_clicks);
 
-	virtual void onKeyDown(KeyboardEvent &e);
-	virtual void onKeyUp(KeyboardEvent &e);
-	virtual void onChar(KeyboardEvent &e);
+    virtual void onKeyDown(KeyboardEvent &e);
+    virtual void onKeyUp(KeyboardEvent &e);
+    virtual void onChar(KeyboardEvent &e);
 
-	virtual void onResolutionChange(Vector2 newResolution);
+    virtual void onResolutionChange(Vector2 newResolution);
 
-	virtual CBaseUIContainer* setVisible(bool visible);
+    virtual CBaseUIContainer *setVisible(bool visible);
 
-	void setContinueEnabled(bool continueEnabled);
+    void setContinueEnabled(bool continueEnabled);
 
-private:
-	void updateLayout();
+   private:
+    void updateLayout();
 
-	void onContinueClicked();
-	void onRetryClicked();
-	void onBackClicked();
+    void onContinueClicked();
+    void onRetryClicked();
+    void onBackClicked();
 
-	void onSelectionChange();
+    void onSelectionChange();
 
-	void scheduleVisibilityChange(bool visible);
+    void scheduleVisibilityChange(bool visible);
 
-	OsuUIPauseMenuButton *addButton(std::function<Image*()> getImageFunc);
+    OsuUIPauseMenuButton *addButton(std::function<Image *()> getImageFunc);
 
-	bool m_bScheduledVisibilityChange;
-	bool m_bScheduledVisibility;
+    bool m_bScheduledVisibilityChange;
+    bool m_bScheduledVisibility;
 
-	std::vector<OsuUIPauseMenuButton*> m_buttons;
-	OsuUIPauseMenuButton *m_selectedButton;
-	float m_fWarningArrowsAnimStartTime;
-	float m_fWarningArrowsAnimAlpha;
-	float m_fWarningArrowsAnimX;
-	float m_fWarningArrowsAnimY;
-	bool m_bInitialWarningArrowFlyIn;
+    std::vector<OsuUIPauseMenuButton *> m_buttons;
+    OsuUIPauseMenuButton *m_selectedButton;
+    float m_fWarningArrowsAnimStartTime;
+    float m_fWarningArrowsAnimAlpha;
+    float m_fWarningArrowsAnimX;
+    float m_fWarningArrowsAnimY;
+    bool m_bInitialWarningArrowFlyIn;
 
-	bool m_bContinueEnabled;
-	bool m_bClick1Down;
-	bool m_bClick2Down;
+    bool m_bContinueEnabled;
+    bool m_bClick1Down;
+    bool m_bClick2Down;
 
-	float m_fDimAnim;
+    float m_fDimAnim;
 };
 
 #endif

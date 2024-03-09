@@ -12,22 +12,21 @@
 
 class Osu;
 
-class OsuUICheckbox : public CBaseUICheckbox
-{
-public:
-	OsuUICheckbox(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name, UString text);
+class OsuUICheckbox : public CBaseUICheckbox {
+   public:
+    OsuUICheckbox(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name, UString text);
 
-	virtual void mouse_update(bool *propagate_clicks);
+    virtual void mouse_update(bool *propagate_clicks);
 
-	void setTooltipText(UString text);
+    void setTooltipText(UString text);
 
-private:
-	virtual void onFocusStolen();
+   private:
+    virtual void onFocusStolen();
 
-	Osu *m_osu;
-	std::vector<UString> m_tooltipTextLines;
+    Osu *m_osu;
+    std::vector<UString> m_tooltipTextLines;
 
-	bool m_bFocusStolenDelay;
+    bool m_bFocusStolenDelay;
 };
 
 #endif

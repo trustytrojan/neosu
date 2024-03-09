@@ -12,40 +12,42 @@
 
 class ConVar;
 
-class OsuUISongBrowserSongDifficultyButton : public OsuUISongBrowserSongButton
-{
-public:
-	OsuUISongBrowserSongDifficultyButton(Osu *osu, OsuSongBrowser2 *songBrowser, CBaseUIScrollView *view, OsuUIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize, UString name, OsuDatabaseBeatmap *diff2, OsuUISongBrowserSongButton *parentSongButton);
-	virtual ~OsuUISongBrowserSongDifficultyButton();
+class OsuUISongBrowserSongDifficultyButton : public OsuUISongBrowserSongButton {
+   public:
+    OsuUISongBrowserSongDifficultyButton(Osu *osu, OsuSongBrowser2 *songBrowser, CBaseUIScrollView *view,
+                                         OsuUIContextMenu *contextMenu, float xPos, float yPos, float xSize,
+                                         float ySize, UString name, OsuDatabaseBeatmap *diff2,
+                                         OsuUISongBrowserSongButton *parentSongButton);
+    virtual ~OsuUISongBrowserSongDifficultyButton();
 
-	virtual void draw(Graphics *g);
-	virtual void mouse_update(bool *propagate_clicks);
+    virtual void draw(Graphics *g);
+    virtual void mouse_update(bool *propagate_clicks);
 
-	virtual void updateGrade();
+    virtual void updateGrade();
 
-	virtual Color getInactiveBackgroundColor() const;
+    virtual Color getInactiveBackgroundColor() const;
 
-	inline OsuUISongBrowserSongButton *getParentSongButton() const {return m_parentSongButton;}
+    inline OsuUISongBrowserSongButton *getParentSongButton() const { return m_parentSongButton; }
 
-	bool isIndependentDiffButton() const;
+    bool isIndependentDiffButton() const;
 
-private:
-	static ConVar *m_osu_scores_enabled;
-	static ConVar *m_osu_songbrowser_dynamic_star_recalc_ref;
+   private:
+    static ConVar *m_osu_scores_enabled;
+    static ConVar *m_osu_songbrowser_dynamic_star_recalc_ref;
 
-	virtual void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected);
+    virtual void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected);
 
-	UString buildDiffString() {return m_sDiff;}
+    UString buildDiffString() { return m_sDiff; }
 
-	UString m_sDiff;
+    UString m_sDiff;
 
-	float m_fDiffScale;
-	float m_fOffsetPercentAnim;
+    float m_fDiffScale;
+    float m_fOffsetPercentAnim;
 
-	OsuUISongBrowserSongButton *m_parentSongButton;
+    OsuUISongBrowserSongButton *m_parentSongButton;
 
-	bool m_bUpdateGradeScheduled;
-	bool m_bPrevOffsetPercentSelectionState;
+    bool m_bUpdateGradeScheduled;
+    bool m_bPrevOffsetPercentSelectionState;
 };
 
 #endif

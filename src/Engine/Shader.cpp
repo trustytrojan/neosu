@@ -6,6 +6,7 @@
 //===============================================================================//
 
 #include "Shader.h"
+
 #include "ConVar.h"
 
 ConVar _debug_shaders("debug_shaders", false, FCVAR_NONE);

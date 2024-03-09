@@ -15,40 +15,38 @@ class Image;
 class OsuDatabaseBeatmap;
 class OsuDatabaseBeatmapBackgroundImagePathLoader;
 
-class OsuBackgroundImageHandler
-{
-public:
-	OsuBackgroundImageHandler();
-	~OsuBackgroundImageHandler();
+class OsuBackgroundImageHandler {
+   public:
+    OsuBackgroundImageHandler();
+    ~OsuBackgroundImageHandler();
 
-	void update(bool allowEviction);
+    void update(bool allowEviction);
 
-	void scheduleFreezeCache() {m_bFrozen = true;}
+    void scheduleFreezeCache() { m_bFrozen = true; }
 
-	Image *getLoadBackgroundImage(const OsuDatabaseBeatmap *beatmap);
+    Image *getLoadBackgroundImage(const OsuDatabaseBeatmap *beatmap);
 
-private:
-	struct ENTRY
-	{
-		bool isLoadScheduled;
-		bool wasUsedLastFrame;
-		float loadingTime;
-		float evictionTime;
-		unsigned long evictionTimeFrameCount;
+   private:
+    struct ENTRY {
+        bool isLoadScheduled;
+        bool wasUsedLastFrame;
+        float loadingTime;
+        float evictionTime;
+        unsigned long evictionTimeFrameCount;
 
-		std::string osuFilePath;
-		std::string folder;
-		std::string backgroundImageFileName;
+        std::string osuFilePath;
+        std::string folder;
+        std::string backgroundImageFileName;
 
-		OsuDatabaseBeatmapBackgroundImagePathLoader *backgroundImagePathLoader;
-		Image *image;
-	};
+        OsuDatabaseBeatmapBackgroundImagePathLoader *backgroundImagePathLoader;
+        Image *image;
+    };
 
-	void handleLoadPathForEntry(ENTRY &entry);
-	void handleLoadImageForEntry(ENTRY &entry);
+    void handleLoadPathForEntry(ENTRY &entry);
+    void handleLoadImageForEntry(ENTRY &entry);
 
-	std::vector<ENTRY> m_cache;
-	bool m_bFrozen;
+    std::vector<ENTRY> m_cache;
+    bool m_bFrozen;
 };
 
 #endif

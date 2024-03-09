@@ -7,42 +7,35 @@
 
 #include "SWRenderTarget.h"
 
-SWRenderTarget::SWRenderTarget(int x, int y, int width, int height, Graphics::MULTISAMPLE_TYPE multiSampleType) : RenderTarget(x, y, width, height, multiSampleType)
-{
-	// TODO:
+SWRenderTarget::SWRenderTarget(int x, int y, int width, int height, Graphics::MULTISAMPLE_TYPE multiSampleType)
+    : RenderTarget(x, y, width, height, multiSampleType) {
+    // TODO:
 }
 
-void SWRenderTarget::init()
-{
-	// TODO:
+void SWRenderTarget::init() {
+    // TODO:
 }
 
-void SWRenderTarget::initAsync()
-{
-	// TODO:
+void SWRenderTarget::initAsync() {
+    // TODO:
 }
 
-void SWRenderTarget::destroy()
-{
-	// TODO:
+void SWRenderTarget::destroy() {
+    // TODO:
 }
 
-void SWRenderTarget::enable()
-{
-	// TODO:
+void SWRenderTarget::enable() {
+    // TODO:
 }
 
-void SWRenderTarget::disable()
-{
-	// TODO:
+void SWRenderTarget::disable() {
+    // TODO:
 }
 
-void SWRenderTarget::bind(unsigned int textureUnit)
-{
-	// TODO:
+void SWRenderTarget::bind(unsigned int textureUnit) {
+    // TODO:
 }
 
-void SWRenderTarget::unbind()
-{
-	// TODO:
+void SWRenderTarget::unbind() {
+    // TODO:
 }

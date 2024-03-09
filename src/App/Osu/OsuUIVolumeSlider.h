@@ -14,41 +14,35 @@ class Osu;
 
 class McFont;
 
-class OsuUIVolumeSlider : public CBaseUISlider
-{
-public:
-	enum class TYPE
-	{
-		MASTER,
-		MUSIC,
-		EFFECTS
-	};
+class OsuUIVolumeSlider : public CBaseUISlider {
+   public:
+    enum class TYPE { MASTER, MUSIC, EFFECTS };
 
-public:
-	OsuUIVolumeSlider(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name);
+   public:
+    OsuUIVolumeSlider(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name);
 
-	void setType(TYPE type) {m_type = type;}
-	void setSelected(bool selected);
+    void setType(TYPE type) { m_type = type; }
+    void setSelected(bool selected);
 
-	bool checkWentMouseInside();
+    bool checkWentMouseInside();
 
-	float getMinimumExtraTextWidth();
+    float getMinimumExtraTextWidth();
 
-	inline bool isSelected() const {return m_bSelected;}
+    inline bool isSelected() const { return m_bSelected; }
 
-private:
-	virtual void drawBlock(Graphics *g);
+   private:
+    virtual void drawBlock(Graphics *g);
 
-	virtual void onMouseInside();
+    virtual void onMouseInside();
 
-	Osu *m_osu;
-	TYPE m_type;
-	bool m_bSelected;
+    Osu *m_osu;
+    TYPE m_type;
+    bool m_bSelected;
 
-	bool m_bWentMouseInside;
-	float m_fSelectionAnim;
+    bool m_bWentMouseInside;
+    float m_fSelectionAnim;
 
-	McFont *m_font;
+    McFont *m_font;
 };
 
 #endif

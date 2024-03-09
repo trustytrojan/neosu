@@ -10,34 +10,34 @@
 
 #include "OsuVRUIButton.h"
 
-class OsuVRUIImageCheckbox : public OsuVRUIButton
-{
-public:
-	OsuVRUIImageCheckbox(OsuVR *vr, float x, float y, float width, float height, std::string imageResourceNameChecked, std::string imageResourceNameUnchecked);
+class OsuVRUIImageCheckbox : public OsuVRUIButton {
+   public:
+    OsuVRUIImageCheckbox(OsuVR *vr, float x, float y, float width, float height, std::string imageResourceNameChecked,
+                         std::string imageResourceNameUnchecked);
 
-	virtual void drawVR(Graphics *g, Matrix4 &mvp);
-	virtual void update(Vector2 cursorPos);
+    virtual void drawVR(Graphics *g, Matrix4 &mvp);
+    virtual void update(Vector2 cursorPos);
 
-	void setChecked(bool checked) {m_bChecked = checked;}
+    void setChecked(bool checked) { m_bChecked = checked; }
 
-	inline bool isChecked() const {return m_bChecked;}
+    inline bool isChecked() const { return m_bChecked; }
 
-private:
-	virtual void onClicked();
+   private:
+    virtual void onClicked();
 
-	virtual void onCursorInside();
-	virtual void onCursorOutside();
+    virtual void onCursorInside();
+    virtual void onCursorOutside();
 
-	void updateImageResource();
+    void updateImageResource();
 
-	bool m_bChecked;
+    bool m_bChecked;
 
-	std::string m_sImageResourceNameChecked;
-	std::string m_sImageResourceNameUnchecked;
-	Image *m_imageChecked;
-	Image *m_imageUnchecked;
+    std::string m_sImageResourceNameChecked;
+    std::string m_sImageResourceNameUnchecked;
+    Image *m_imageChecked;
+    Image *m_imageUnchecked;
 
-	float m_fAnimation;
+    float m_fAnimation;
 };
 
 #endif

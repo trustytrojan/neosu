@@ -10,26 +10,25 @@
 
 #include "OsuVRUIElement.h"
 
-class OsuVRUISlider : public OsuVRUIElement
-{
-public:
-	OsuVRUISlider(OsuVR *vr, float x, float y, float width, float height);
+class OsuVRUISlider : public OsuVRUIElement {
+   public:
+    OsuVRUISlider(OsuVR *vr, float x, float y, float width, float height);
 
-	virtual void drawVR(Graphics *g, Matrix4 &mvp);
-	virtual void update(Vector2 cursorPos);
+    virtual void drawVR(Graphics *g, Matrix4 &mvp);
+    virtual void update(Vector2 cursorPos);
 
-	typedef fastdelegate::FastDelegate1<OsuVRUISlider*> SliderChangeCallback;
-	void setChangeCallback(SliderChangeCallback changeCallback) {m_sliderChangeCallback = changeCallback;}
+    typedef fastdelegate::FastDelegate1<OsuVRUISlider *> SliderChangeCallback;
+    void setChangeCallback(SliderChangeCallback changeCallback) { m_sliderChangeCallback = changeCallback; }
 
-	void setValue(float value, bool ignoreCallback = false);
+    void setValue(float value, bool ignoreCallback = false);
 
-	inline float getFloat() {return m_fCurValue;}
+    inline float getFloat() { return m_fCurValue; }
 
-private:
-	SliderChangeCallback m_sliderChangeCallback;
+   private:
+    SliderChangeCallback m_sliderChangeCallback;
 
-	float m_fMinValue, m_fMaxValue, m_fCurValue, m_fCurPercent;
-	bool m_bClickCheck;
+    float m_fMinValue, m_fMaxValue, m_fCurValue, m_fCurPercent;
+    bool m_bClickCheck;
 };
 
 #endif

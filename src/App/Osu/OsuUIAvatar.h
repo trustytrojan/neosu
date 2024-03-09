@@ -1,9 +1,10 @@
 #pragma once
 #include <pthread.h>
+
 #include "CBaseUIButton.h"
 
 class OsuUIAvatar : public CBaseUIButton {
-public:
+   public:
     OsuUIAvatar(uint32_t player_id, float xPos, float yPos, float xSize, float ySize);
 
     virtual void draw(Graphics *g);
@@ -20,4 +21,4 @@ public:
 // Accessed from BanchoNetworking
 extern int avatar_downloading_thread_id;
 extern pthread_mutex_t avatars_mtx;
-void* avatar_downloading_thread(void *arg);
+void *avatar_downloading_thread(void *arg);

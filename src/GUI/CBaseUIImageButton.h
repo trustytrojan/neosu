@@ -10,34 +10,47 @@
 
 #include "CBaseUIButton.h"
 
-class CBaseUIImageButton : public CBaseUIButton
-{
-public:
-	CBaseUIImageButton(std::string imageResourceName="", float xPos=0, float yPos=0, float xSize=0, float ySize=0, UString name="");
-	virtual ~CBaseUIImageButton() {;}
+class CBaseUIImageButton : public CBaseUIButton {
+   public:
+    CBaseUIImageButton(std::string imageResourceName = "", float xPos = 0, float yPos = 0, float xSize = 0,
+                       float ySize = 0, UString name = "");
+    virtual ~CBaseUIImageButton() { ; }
 
-	ELEMENT_BODY(CBaseUIImageButton)
+    ELEMENT_BODY(CBaseUIImageButton)
 
-	virtual void draw(Graphics *g);
+    virtual void draw(Graphics *g);
 
-	virtual void onResized();
+    virtual void onResized();
 
-	CBaseUIImageButton *setImageResourceName(std::string imageResourceName);
-	CBaseUIImageButton *setRotationDeg(float deg) {m_fRot = deg; return this;}
-	CBaseUIImageButton *setScale(float xScale, float yScale) {m_vScale.x = xScale; m_vScale.y = yScale; return this;}
-	CBaseUIImageButton *setScaleToFit(bool scaleToFit) {m_bScaleToFit = scaleToFit; return this;}
-	CBaseUIImageButton *setKeepAspectRatio(bool keepAspectRatio) {m_bKeepAspectRatio = keepAspectRatio; return this;}
+    CBaseUIImageButton *setImageResourceName(std::string imageResourceName);
+    CBaseUIImageButton *setRotationDeg(float deg) {
+        m_fRot = deg;
+        return this;
+    }
+    CBaseUIImageButton *setScale(float xScale, float yScale) {
+        m_vScale.x = xScale;
+        m_vScale.y = yScale;
+        return this;
+    }
+    CBaseUIImageButton *setScaleToFit(bool scaleToFit) {
+        m_bScaleToFit = scaleToFit;
+        return this;
+    }
+    CBaseUIImageButton *setKeepAspectRatio(bool keepAspectRatio) {
+        m_bKeepAspectRatio = keepAspectRatio;
+        return this;
+    }
 
-	inline std::string getImageResourceName() const {return m_sImageResourceName;}
-	inline Vector2 getScale() const {return m_vScale;}
+    inline std::string getImageResourceName() const { return m_sImageResourceName; }
+    inline Vector2 getScale() const { return m_vScale; }
 
-protected:
-	std::string m_sImageResourceName;
+   protected:
+    std::string m_sImageResourceName;
 
-	float m_fRot;
-	Vector2 m_vScale;
-	bool m_bScaleToFit;
-	bool m_bKeepAspectRatio;
+    float m_fRot;
+    Vector2 m_vScale;
+    bool m_bScaleToFit;
+    bool m_bKeepAspectRatio;
 };
 
 #endif

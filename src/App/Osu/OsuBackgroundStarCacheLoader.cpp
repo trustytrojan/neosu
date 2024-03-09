@@ -11,77 +11,72 @@
 #include "OsuDatabaseBeatmap.h"
 #include "OsuDifficultyCalculator.h"
 
-OsuBackgroundStarCacheLoader::OsuBackgroundStarCacheLoader(OsuBeatmap *beatmap) : Resource()
-{
-	m_beatmap = beatmap;
+OsuBackgroundStarCacheLoader::OsuBackgroundStarCacheLoader(OsuBeatmap *beatmap) : Resource() {
+    m_beatmap = beatmap;
 
-	m_bDead = true; // NOTE: start dead! need to revive() before use
-	m_iProgress = 0;
+    m_bDead = true;  // NOTE: start dead! need to revive() before use
+    m_iProgress = 0;
 }
 
-void OsuBackgroundStarCacheLoader::init()
-{
-	m_bReady = true;
-}
+void OsuBackgroundStarCacheLoader::init() { m_bReady = true; }
 
-void OsuBackgroundStarCacheLoader::initAsync()
-{
-	if (m_bDead.load())
-	{
-		m_bAsyncReady = true;
-		return;
-	}
+void OsuBackgroundStarCacheLoader::initAsync() {
+    if(m_bDead.load()) {
+        m_bAsyncReady = true;
+        return;
+    }
 
-	// recalculate star cache
-	OsuDatabaseBeatmap *diff2 = m_beatmap->getSelectedDifficulty2();
-	if (diff2 != NULL)
-	{
-		// precalculate cut star values for live pp
+    // recalculate star cache
+    OsuDatabaseBeatmap *diff2 = m_beatmap->getSelectedDifficulty2();
+    if(diff2 != NULL) {
+        // precalculate cut star values for live pp
 
-		// reset
-		m_beatmap->m_aimStarsForNumHitObjects.clear();
-		m_beatmap->m_aimSliderFactorForNumHitObjects.clear();
-		m_beatmap->m_speedStarsForNumHitObjects.clear();
-		m_beatmap->m_speedNotesForNumHitObjects.clear();
+        // reset
+        m_beatmap->m_aimStarsForNumHitObjects.clear();
+        m_beatmap->m_aimSliderFactorForNumHitObjects.clear();
+        m_beatmap->m_speedStarsForNumHitObjects.clear();
+        m_beatmap->m_speedNotesForNumHitObjects.clear();
 
-		const std::string &osuFilePath = diff2->getFilePath();
-		const Osu::GAMEMODE gameMode = m_beatmap->getOsu()->getGamemode();
-		const float AR = m_beatmap->getAR();
-		const float CS = m_beatmap->getCS();
-		const float OD = m_beatmap->getOD();
-		const float speedMultiplier = m_beatmap->getOsu()->getSpeedMultiplier(); // NOTE: not beatmap->getSpeedMultiplier()!
-		const bool relax = m_beatmap->getOsu()->getModRelax();
-		const bool touchDevice = m_beatmap->getOsu()->getModTD();
+        const std::string &osuFilePath = diff2->getFilePath();
+        const Osu::GAMEMODE gameMode = m_beatmap->getOsu()->getGamemode();
+        const float AR = m_beatmap->getAR();
+        const float CS = m_beatmap->getCS();
+        const float OD = m_beatmap->getOD();
+        const float speedMultiplier =
+            m_beatmap->getOsu()->getSpeedMultiplier();  // NOTE: not beatmap->getSpeedMultiplier()!
+        const bool relax = m_beatmap->getOsu()->getModRelax();
+        const bool touchDevice = m_beatmap->getOsu()->getModTD();
 
-		OsuDatabaseBeatmap::LOAD_DIFFOBJ_RESULT diffres = OsuDatabaseBeatmap::loadDifficultyHitObjects(osuFilePath, gameMode, AR, CS, speedMultiplier, false, m_bDead);
+        OsuDatabaseBeatmap::LOAD_DIFFOBJ_RESULT diffres = OsuDatabaseBeatmap::loadDifficultyHitObjects(
+            osuFilePath, gameMode, AR, CS, speedMultiplier, false, m_bDead);
 
-		for (size_t i=0; i<diffres.diffobjects.size(); i++)
-		{
-			double aimStars = 0.0;
-			double aimSliderFactor = 0.0;
-			double speedStars = 0.0;
-			double speedNotes = 0.0;
+        for(size_t i = 0; i < diffres.diffobjects.size(); i++) {
+            double aimStars = 0.0;
+            double aimSliderFactor = 0.0;
+            double speedStars = 0.0;
+            double speedNotes = 0.0;
 
-			OsuDifficultyCalculator::calculateStarDiffForHitObjects(diffres.diffobjects, CS, OD, speedMultiplier, relax, touchDevice, &aimStars, &aimSliderFactor, &speedStars, &speedNotes, i, NULL, NULL, m_bDead);
+            OsuDifficultyCalculator::calculateStarDiffForHitObjects(diffres.diffobjects, CS, OD, speedMultiplier, relax,
+                                                                    touchDevice, &aimStars, &aimSliderFactor,
+                                                                    &speedStars, &speedNotes, i, NULL, NULL, m_bDead);
 
-			m_beatmap->m_aimStarsForNumHitObjects.push_back(aimStars);
-			m_beatmap->m_aimSliderFactorForNumHitObjects.push_back(aimSliderFactor);
-			m_beatmap->m_speedStarsForNumHitObjects.push_back(speedStars);
-			m_beatmap->m_speedNotesForNumHitObjects.push_back(speedNotes);
+            m_beatmap->m_aimStarsForNumHitObjects.push_back(aimStars);
+            m_beatmap->m_aimSliderFactorForNumHitObjects.push_back(aimSliderFactor);
+            m_beatmap->m_speedStarsForNumHitObjects.push_back(speedStars);
+            m_beatmap->m_speedNotesForNumHitObjects.push_back(speedNotes);
 
-			m_iProgress = i;
+            m_iProgress = i;
 
-			if (m_bDead.load())
-			{
-				m_beatmap->m_aimStarsForNumHitObjects.clear();
-				m_beatmap->m_aimSliderFactorForNumHitObjects.clear();
-				m_beatmap->m_speedStarsForNumHitObjects.clear();
-				m_beatmap->m_speedNotesForNumHitObjects.clear();
+            if(m_bDead.load()) {
+                m_beatmap->m_aimStarsForNumHitObjects.clear();
+                m_beatmap->m_aimSliderFactorForNumHitObjects.clear();
+                m_beatmap->m_speedStarsForNumHitObjects.clear();
+                m_beatmap->m_speedNotesForNumHitObjects.clear();
 
-				break;
-			}
-		}
-	}
+                break;
+            }
+        }
+    }
 
-	m_bAsyncReady = true;
+    m_bAsyncReady = true;
 }

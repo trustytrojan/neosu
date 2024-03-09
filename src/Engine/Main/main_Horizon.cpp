@@ -9,86 +9,81 @@
 
 #ifdef __SWITCH__
 
-//#define MCENGINE_HORIZON_NXLINK
+// #define MCENGINE_HORIZON_NXLINK
 
 #ifndef MCENGINE_FEATURE_SDL
 #error SDL2 is currently required for switch builds
 #endif
 
-#include "HorizonSDLEnvironment.h"
-#include "ConVar.h"
-
 #include <switch.h>
+#include <unistd.h>  // for close()
 
-#include <unistd.h> // for close()
+#include "ConVar.h"
+#include "HorizonSDLEnvironment.h"
 
 static int s_nxlinkSock = -1;
 
-static void initNxLink()
-{
-    if (R_FAILED(socketInitializeDefault())) return;
+static void initNxLink() {
+    if(R_FAILED(socketInitializeDefault())) return;
 
     s_nxlinkSock = nxlinkStdio();
 
-    if (s_nxlinkSock >= 0)
+    if(s_nxlinkSock >= 0)
         printf("printf output now goes to nxlink server");
     else
         socketExit();
 }
 
-static void deinitNxLink()
-{
-    if (s_nxlinkSock >= 0)
-    {
+static void deinitNxLink() {
+    if(s_nxlinkSock >= 0) {
         close(s_nxlinkSock);
         socketExit();
         s_nxlinkSock = -1;
     }
 }
 
-extern "C" void userAppInit()
-{
+extern "C" void userAppInit() {
 #ifdef MCENGINE_HORIZON_NXLINK
 
-	initNxLink();
+    initNxLink();
 
 #endif
 }
 
-extern "C" void userAppExit()
-{
+extern "C" void userAppExit() {
 #ifdef MCENGINE_HORIZON_NXLINK
 
-	deinitNxLink();
+    deinitNxLink();
 
 #endif
 }
 
 extern int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment);
 
-int main(int argc, char* argv[])
-{
-	int ret = 0;
+int main(int argc, char *argv[]) {
+    int ret = 0;
 
-	// TODO: user selection applet popup, somehow
-	/*
-	u128 userID;
-	accountGetPreselectedUser(&userID);
-	*/
+    // TODO: user selection applet popup, somehow
+    /*
+    u128 userID;
+    accountGetPreselectedUser(&userID);
+    */
 
-	romfsInit();
-	{
-		appletSetScreenShotPermission(AppletScreenShotPermission_Enable);
-		appletSetFocusHandlingMode(AppletFocusHandlingMode_SuspendHomeSleepNotify); // TODO: seems broken? no notification is received when going to sleep
+    romfsInit();
+    {
+        appletSetScreenShotPermission(AppletScreenShotPermission_Enable);
+        appletSetFocusHandlingMode(
+            AppletFocusHandlingMode_SuspendHomeSleepNotify);  // TODO: seems broken? no notification is received when
+                                                              // going to sleep
 
-		// NOTE: yuzu emulator timing bug workaround (armGetSystemTick() is way too fast), uncomment for testing
-		//convar->getConVarByName("host_timescale")->setValue(0.018f);
+        // NOTE: yuzu emulator timing bug workaround (armGetSystemTick() is way too fast), uncomment for testing
+        // convar->getConVarByName("host_timescale")->setValue(0.018f);
 
-		ret = mainSDL(argc, argv, new HorizonSDLEnvironment());
-	}
-	romfsExit();
+        ret = mainSDL(argc, argv, new HorizonSDLEnvironment());
+    }
+    romfsExit();
 
-	return ret;
+    return ret;
 }
 
 #endif

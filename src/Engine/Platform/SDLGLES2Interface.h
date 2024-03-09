@@ -14,20 +14,19 @@
 
 #include "SDL.h"
 
-class SDLGLES2Interface : public OpenGLES2Interface
-{
-public:
-	SDLGLES2Interface(SDL_Window *window);
-	virtual ~SDLGLES2Interface();
+class SDLGLES2Interface : public OpenGLES2Interface {
+   public:
+    SDLGLES2Interface(SDL_Window *window);
+    virtual ~SDLGLES2Interface();
 
-	// scene
-	virtual void endScene();
+    // scene
+    virtual void endScene();
 
-	// device settings
-	virtual void setVSync(bool vsync);
+    // device settings
+    virtual void setVSync(bool vsync);
 
-private:
-	SDL_Window *m_window;
+   private:
+    SDL_Window *m_window;
 };
 
 #endif

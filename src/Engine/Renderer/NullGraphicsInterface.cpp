@@ -6,44 +6,41 @@
 //===============================================================================//
 
 #include "NullGraphicsInterface.h"
-#include "Engine.h"
-#include "VertexArrayObject.h"
 
+#include "Engine.h"
 #include "NullImage.h"
 #include "NullRenderTarget.h"
 #include "NullShader.h"
+#include "VertexArrayObject.h"
 
-Image *NullGraphicsInterface::createImage(std::string filePath, bool mipmapped, bool keepInSystemMemory)
-{
-	return new NullImage(filePath, mipmapped, keepInSystemMemory);
+Image *NullGraphicsInterface::createImage(std::string filePath, bool mipmapped, bool keepInSystemMemory) {
+    return new NullImage(filePath, mipmapped, keepInSystemMemory);
 }
 
-Image *NullGraphicsInterface::createImage(int width, int height, bool mipmapped, bool keepInSystemMemory)
-{
-	return new NullImage(width, height, mipmapped, keepInSystemMemory);
+Image *NullGraphicsInterface::createImage(int width, int height, bool mipmapped, bool keepInSystemMemory) {
+    return new NullImage(width, height, mipmapped, keepInSystemMemory);
 }
 
-RenderTarget *NullGraphicsInterface::createRenderTarget(int x, int y, int width, int height, Graphics::MULTISAMPLE_TYPE multiSampleType)
-{
-	return new NullRenderTarget(x, y, width, height, multiSampleType);
+RenderTarget *NullGraphicsInterface::createRenderTarget(int x, int y, int width, int height,
+                                                        Graphics::MULTISAMPLE_TYPE multiSampleType) {
+    return new NullRenderTarget(x, y, width, height, multiSampleType);
 }
 
-Shader *NullGraphicsInterface::createShaderFromFile(std::string vertexShaderFilePath, std::string fragmentShaderFilePath)
-{
-	return new NullShader(vertexShaderFilePath, fragmentShaderFilePath, false);
+Shader *NullGraphicsInterface::createShaderFromFile(std::string vertexShaderFilePath,
+                                                    std::string fragmentShaderFilePath) {
+    return new NullShader(vertexShaderFilePath, fragmentShaderFilePath, false);
 }
 
-Shader *NullGraphicsInterface::createShaderFromSource(std::string vertexShader, std::string fragmentShader)
-{
-	return new NullShader(vertexShader, fragmentShader, true);
+Shader *NullGraphicsInterface::createShaderFromSource(std::string vertexShader, std::string fragmentShader) {
+    return new NullShader(vertexShader, fragmentShader, true);
 }
 
-VertexArrayObject *NullGraphicsInterface::createVertexArrayObject(Graphics::PRIMITIVE primitive, Graphics::USAGE_TYPE usage, bool keepInSystemMemory)
-{
-	return new VertexArrayObject(primitive, usage, keepInSystemMemory);
+VertexArrayObject *NullGraphicsInterface::createVertexArrayObject(Graphics::PRIMITIVE primitive,
+                                                                  Graphics::USAGE_TYPE usage, bool keepInSystemMemory) {
+    return new VertexArrayObject(primitive, usage, keepInSystemMemory);
 }
 
-void NullGraphicsInterface::drawString(McFont *font, UString text) {;}
-UString NullGraphicsInterface::getVendor() {return "<NULL>";}
-UString NullGraphicsInterface::getModel() {return "<NULL>";}
-UString NullGraphicsInterface::getVersion() {return "<NULL>";}
+void NullGraphicsInterface::drawString(McFont *font, UString text) { ; }
+UString NullGraphicsInterface::getVendor() { return "<NULL>"; }
+UString NullGraphicsInterface::getModel() { return "<NULL>"; }
+UString NullGraphicsInterface::getVersion() { return "<NULL>"; }

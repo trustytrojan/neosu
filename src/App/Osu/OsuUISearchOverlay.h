@@ -12,34 +12,36 @@
 
 class Osu;
 
-class OsuUISearchOverlay : public CBaseUIElement
-{
-public:
-	OsuUISearchOverlay(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name);
+class OsuUISearchOverlay : public CBaseUIElement {
+   public:
+    OsuUISearchOverlay(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name);
 
-	virtual void draw(Graphics *g);
+    virtual void draw(Graphics *g);
 
-	void setDrawNumResults(bool drawNumResults) {m_bDrawNumResults = drawNumResults;}
-	void setOffsetRight(int offsetRight) {m_iOffsetRight = offsetRight;}
+    void setDrawNumResults(bool drawNumResults) { m_bDrawNumResults = drawNumResults; }
+    void setOffsetRight(int offsetRight) { m_iOffsetRight = offsetRight; }
 
-	void setSearchString(UString searchString, UString hardcodedSearchString = "") {m_sSearchString = searchString; m_sHardcodedSearchString = hardcodedSearchString;}
-	void setNumFoundResults(int numFoundResults) {m_iNumFoundResults = numFoundResults;}
+    void setSearchString(UString searchString, UString hardcodedSearchString = "") {
+        m_sSearchString = searchString;
+        m_sHardcodedSearchString = hardcodedSearchString;
+    }
+    void setNumFoundResults(int numFoundResults) { m_iNumFoundResults = numFoundResults; }
 
-	void setSearching(bool searching) {m_bSearching = searching;}
+    void setSearching(bool searching) { m_bSearching = searching; }
 
-private:
-	Osu *m_osu;
+   private:
+    Osu *m_osu;
 
-	McFont *m_font;
+    McFont *m_font;
 
-	int m_iOffsetRight;
-	bool m_bDrawNumResults;
+    int m_iOffsetRight;
+    bool m_bDrawNumResults;
 
-	UString m_sSearchString;
-	UString m_sHardcodedSearchString;
-	int m_iNumFoundResults;
+    UString m_sSearchString;
+    UString m_sHardcodedSearchString;
+    int m_iNumFoundResults;
 
-	bool m_bSearching;
+    bool m_bSearching;
 };
 
 #endif

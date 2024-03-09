@@ -8,6 +8,6 @@
 #ifndef GAMEPADEVENT_H
 #define GAMEPADEVENT_H
 
-typedef unsigned short	GAMEPADBUTTON;
+typedef unsigned short GAMEPADBUTTON;
 
 #endif

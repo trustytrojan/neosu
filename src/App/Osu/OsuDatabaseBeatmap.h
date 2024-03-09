@@ -8,10 +8,9 @@
 #ifndef OSUDATABASEBEATMAP_H
 #define OSUDATABASEBEATMAP_H
 
-#include "Resource.h"
-
 #include "Osu.h"
 #include "OsuDifficultyCalculator.h"
+#include "Resource.h"
 
 class Osu;
 class OsuBeatmap;
@@ -27,459 +26,422 @@ class OsuBackgroundImageHandler;
 // 3) allow async calculations/loaders to work on the contained data (e.g. background image loader)
 // 4) be a container for difficulties (all top level OsuDatabaseBeatmap objects are containers)
 
-class OsuDatabaseBeatmap
-{
-public:
-	// raw structs
+class OsuDatabaseBeatmap {
+   public:
+    // raw structs
 
-	struct TIMINGPOINT
-	{
-		long offset;
+    struct TIMINGPOINT {
+        long offset;
 
-		float msPerBeat;
+        float msPerBeat;
 
-		int sampleType;
-		int sampleSet;
-		int volume;
+        int sampleType;
+        int sampleSet;
+        int volume;
 
-		bool timingChange;
-		bool kiai;
+        bool timingChange;
+        bool kiai;
 
-		unsigned long long sortHack;
-	};
+        unsigned long long sortHack;
+    };
 
-	struct BREAK
-	{
-		int startTime;
-		int endTime;
-	};
+    struct BREAK {
+        int startTime;
+        int endTime;
+    };
 
-	// custom structs
+    // custom structs
 
-	struct LOAD_DIFFOBJ_RESULT
-	{
-		int errorCode;
+    struct LOAD_DIFFOBJ_RESULT {
+        int errorCode;
 
-		std::vector<OsuDifficultyHitObject> diffobjects;
+        std::vector<OsuDifficultyHitObject> diffobjects;
 
-		int maxPossibleCombo;
+        int maxPossibleCombo;
 
-		LOAD_DIFFOBJ_RESULT()
-		{
-			errorCode = 0;
+        LOAD_DIFFOBJ_RESULT() {
+            errorCode = 0;
 
-			maxPossibleCombo = 0;
-		}
-	};
+            maxPossibleCombo = 0;
+        }
+    };
 
-	struct LOAD_GAMEPLAY_RESULT
-	{
-		int errorCode;
+    struct LOAD_GAMEPLAY_RESULT {
+        int errorCode;
 
-		std::vector<OsuHitObject*> hitobjects;
-		std::vector<BREAK> breaks;
-		std::vector<Color> combocolors;
+        std::vector<OsuHitObject *> hitobjects;
+        std::vector<BREAK> breaks;
+        std::vector<Color> combocolors;
 
-		int randomSeed;
+        int randomSeed;
 
-		LOAD_GAMEPLAY_RESULT()
-		{
-			errorCode = 0;
+        LOAD_GAMEPLAY_RESULT() {
+            errorCode = 0;
 
-			randomSeed = 0;
-		}
-	};
+            randomSeed = 0;
+        }
+    };
 
-	struct TIMING_INFO
-	{
-		long offset;
+    struct TIMING_INFO {
+        long offset;
 
-		float beatLengthBase;
-		float beatLength;
+        float beatLengthBase;
+        float beatLength;
 
-		float volume;
-		int sampleType;
-		int sampleSet;
+        float volume;
+        int sampleType;
+        int sampleSet;
 
-		bool isNaN;
-	};
+        bool isNaN;
+    };
 
-	OsuDatabaseBeatmap(Osu *osu, std::string filePath, std::string folder, bool filePathIsInMemoryBeatmap = false);
-	OsuDatabaseBeatmap(Osu *osu, std::vector<OsuDatabaseBeatmap*> &difficulties);
-	~OsuDatabaseBeatmap();
+    OsuDatabaseBeatmap(Osu *osu, std::string filePath, std::string folder, bool filePathIsInMemoryBeatmap = false);
+    OsuDatabaseBeatmap(Osu *osu, std::vector<OsuDatabaseBeatmap *> &difficulties);
+    ~OsuDatabaseBeatmap();
 
+    static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string &osuFilePath, Osu::GAMEMODE gameMode,
+                                                        float AR, float CS, float speedMultiplier,
+                                                        bool calculateStarsInaccurately = false);
+    static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string &osuFilePath, Osu::GAMEMODE gameMode,
+                                                        float AR, float CS, float speedMultiplier,
+                                                        bool calculateStarsInaccurately, const std::atomic<bool> &dead);
+    static bool loadMetadata(OsuDatabaseBeatmap *databaseBeatmap);
+    static LOAD_GAMEPLAY_RESULT loadGameplay(OsuDatabaseBeatmap *databaseBeatmap, OsuBeatmap *beatmap);
 
+    void setDifficulties(std::vector<OsuDatabaseBeatmap *> &difficulties);
 
-	static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string &osuFilePath, Osu::GAMEMODE gameMode, float AR, float CS, float speedMultiplier, bool calculateStarsInaccurately = false);
-	static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string &osuFilePath, Osu::GAMEMODE gameMode, float AR, float CS, float speedMultiplier, bool calculateStarsInaccurately, const std::atomic<bool> &dead);
-	static bool loadMetadata(OsuDatabaseBeatmap *databaseBeatmap);
-	static LOAD_GAMEPLAY_RESULT loadGameplay(OsuDatabaseBeatmap *databaseBeatmap, OsuBeatmap *beatmap);
+    void setLengthMS(unsigned long lengthMS) { m_iLengthMS = lengthMS; }
 
+    void setStarsNoMod(float starsNoMod) { m_fStarsNomod = starsNoMod; }
 
+    void setNumObjects(int numObjects) { m_iNumObjects = numObjects; }
+    void setNumCircles(int numCircles) { m_iNumCircles = numCircles; }
+    void setNumSliders(int numSliders) { m_iNumSliders = numSliders; }
+    void setNumSpinners(int numSpinners) { m_iNumSpinners = numSpinners; }
 
-	void setDifficulties(std::vector<OsuDatabaseBeatmap*> &difficulties);
+    void setLocalOffset(long localOffset) { m_iLocalOffset = localOffset; }
 
-	void setLengthMS(unsigned long lengthMS) {m_iLengthMS = lengthMS;}
+    void updateSetHeuristics();
 
-	void setStarsNoMod(float starsNoMod) {m_fStarsNomod = starsNoMod;}
+    inline Osu *getOsu() const { return m_osu; }
 
-	void setNumObjects(int numObjects) {m_iNumObjects = numObjects;}
-	void setNumCircles(int numCircles) {m_iNumCircles = numCircles;}
-	void setNumSliders(int numSliders) {m_iNumSliders = numSliders;}
-	void setNumSpinners(int numSpinners) {m_iNumSpinners = numSpinners;}
+    inline std::string getFolder() const { return m_sFolder; }
+    inline std::string getFilePath() const { return m_sFilePath; }
 
-	void setLocalOffset(long localOffset) {m_iLocalOffset = localOffset;}
+    inline unsigned long long getSortHack() const { return m_iSortHack; }
 
+    inline const std::vector<OsuDatabaseBeatmap *> &getDifficulties() const { return m_difficulties; }
 
+    inline const MD5Hash &getMD5Hash() const { return m_sMD5Hash; }
 
-	void updateSetHeuristics();
+    TIMING_INFO getTimingInfoForTime(unsigned long positionMS);
+    static TIMING_INFO getTimingInfoForTimeAndTimingPoints(unsigned long positionMS,
+                                                           std::vector<TIMINGPOINT> &timingpoints);
 
+    // raw metadata
 
+    inline int getVersion() const { return m_iVersion; }
+    inline int getGameMode() const { return m_iGameMode; }
+    inline int getID() const { return m_iID; }
+    inline int getSetID() const { return m_iSetID; }
 
-	inline Osu *getOsu() const {return m_osu;}
+    inline const UString &getTitle() const { return m_sTitle; }
+    inline const UString &getArtist() const { return m_sArtist; }
+    inline const UString &getCreator() const { return m_sCreator; }
+    inline const UString &getDifficultyName() const { return m_sDifficultyName; }
+    inline const std::string &getSource() const { return m_sSource; }
+    inline const std::string &getTags() const { return m_sTags; }
+    inline const std::string &getBackgroundImageFileName() const { return m_sBackgroundImageFileName; }
+    inline const std::string &getAudioFileName() const { return m_sAudioFileName; }
 
-	inline std::string getFolder() const {return m_sFolder;}
-	inline std::string getFilePath() const {return m_sFilePath;}
+    inline unsigned long getLengthMS() const { return m_iLengthMS; }
+    inline int getPreviewTime() const { return m_iPreviewTime; }
 
-	inline unsigned long long getSortHack() const {return m_iSortHack;}
+    inline float getAR() const { return m_fAR; }
+    inline float getCS() const { return m_fCS; }
+    inline float getHP() const { return m_fHP; }
+    inline float getOD() const { return m_fOD; }
 
-	inline const std::vector<OsuDatabaseBeatmap*> &getDifficulties() const {return m_difficulties;}
+    inline float getStackLeniency() const { return m_fStackLeniency; }
+    inline float getSliderTickRate() const { return m_fSliderTickRate; }
+    inline float getSliderMultiplier() const { return m_fSliderMultiplier; }
 
-	inline const MD5Hash &getMD5Hash() const {return m_sMD5Hash;}
+    inline const std::vector<TIMINGPOINT> &getTimingpoints() const { return m_timingpoints; }
 
-	TIMING_INFO getTimingInfoForTime(unsigned long positionMS);
-	static TIMING_INFO getTimingInfoForTimeAndTimingPoints(unsigned long positionMS, std::vector<TIMINGPOINT> &timingpoints);
+    // redundant data
 
-	// raw metadata
+    inline const std::string &getFullSoundFilePath() const { return m_sFullSoundFilePath; }
+    inline const std::string &getFullBackgroundImageFilePath() const { return m_sFullBackgroundImageFilePath; }
 
-	inline int getVersion() const {return m_iVersion;}
-	inline int getGameMode() const {return m_iGameMode;}
-	inline int getID() const {return m_iID;}
-	inline int getSetID() const {return m_iSetID;}
+    // precomputed data
 
-	inline const UString &getTitle() const {return m_sTitle;}
-	inline const UString &getArtist() const {return m_sArtist;}
-	inline const UString &getCreator() const {return m_sCreator;}
-	inline const UString &getDifficultyName() const {return m_sDifficultyName;}
-	inline const std::string &getSource() const {return m_sSource;}
-	inline const std::string &getTags() const {return m_sTags;}
-	inline const std::string &getBackgroundImageFileName() const {return m_sBackgroundImageFileName;}
-	inline const std::string &getAudioFileName() const {return m_sAudioFileName;}
+    inline float getStarsNomod() const { return m_fStarsNomod; }
 
-	inline unsigned long getLengthMS() const {return m_iLengthMS;}
-	inline int getPreviewTime() const {return m_iPreviewTime;}
+    inline int getMinBPM() const { return m_iMinBPM; }
+    inline int getMaxBPM() const { return m_iMaxBPM; }
+    inline int getMostCommonBPM() const { return m_iMostCommonBPM; }
 
-	inline float getAR() const {return m_fAR;}
-	inline float getCS() const {return m_fCS;}
-	inline float getHP() const {return m_fHP;}
-	inline float getOD() const {return m_fOD;}
+    inline int getNumObjects() const { return m_iNumObjects; }
+    inline int getNumCircles() const { return m_iNumCircles; }
+    inline int getNumSliders() const { return m_iNumSliders; }
+    inline int getNumSpinners() const { return m_iNumSpinners; }
 
-	inline float getStackLeniency() const {return m_fStackLeniency;}
-	inline float getSliderTickRate() const {return m_fSliderTickRate;}
-	inline float getSliderMultiplier() const {return m_fSliderMultiplier;}
+    // custom data
 
-	inline const std::vector<TIMINGPOINT> &getTimingpoints() const {return m_timingpoints;}
+    inline long long getLastModificationTime() const { return m_iLastModificationTime; }
 
+    inline long getLocalOffset() const { return m_iLocalOffset; }
+    inline long getOnlineOffset() const { return m_iOnlineOffset; }
 
+   private:
+    // raw metadata
 
-	// redundant data
+    int m_iVersion;   // e.g. "osu file format v12" -> 12
+    int m_iGameMode;  // 0 = osu!standard, 1 = Taiko, 2 = Catch the Beat, 3 = osu!mania
+    long m_iID;       // online ID, if uploaded
+    int m_iSetID;     // online set ID, if uploaded
 
-	inline const std::string &getFullSoundFilePath() const {return m_sFullSoundFilePath;}
-	inline const std::string &getFullBackgroundImageFilePath() const {return m_sFullBackgroundImageFilePath;}
+    UString m_sTitle;
+    UString m_sArtist;
+    UString m_sCreator;
+    UString m_sDifficultyName;  // difficulty name ("Version")
+    std::string m_sSource;      // only used by search
+    std::string m_sTags;        // only used by search
+    std::string m_sBackgroundImageFileName;
+    std::string m_sAudioFileName;
 
+    unsigned long m_iLengthMS;
+    int m_iPreviewTime;
 
+    float m_fAR;
+    float m_fCS;
+    float m_fHP;
+    float m_fOD;
 
-	// precomputed data
+    float m_fStackLeniency;
+    float m_fSliderTickRate;
+    float m_fSliderMultiplier;
 
-	inline float getStarsNomod() const {return m_fStarsNomod;}
+    std::vector<TIMINGPOINT> m_timingpoints;  // necessary for main menu anim
 
-	inline int getMinBPM() const {return m_iMinBPM;}
-	inline int getMaxBPM() const {return m_iMaxBPM;}
-	inline int getMostCommonBPM() const {return m_iMostCommonBPM;}
+    // redundant data (technically contained in metadata, but precomputed anyway)
 
-	inline int getNumObjects() const {return m_iNumObjects;}
-	inline int getNumCircles() const {return m_iNumCircles;}
-	inline int getNumSliders() const {return m_iNumSliders;}
-	inline int getNumSpinners() const {return m_iNumSpinners;}
+    std::string m_sFullSoundFilePath;
+    std::string m_sFullBackgroundImageFilePath;
 
+    // precomputed data (can-run-without-but-nice-to-have data)
 
+    float m_fStarsNomod;
 
-	// custom data
+    int m_iMinBPM;
+    int m_iMaxBPM;
+    int m_iMostCommonBPM;
 
-	inline long long getLastModificationTime() const {return m_iLastModificationTime;}
+    int m_iNumObjects;
+    int m_iNumCircles;
+    int m_iNumSliders;
+    int m_iNumSpinners;
 
-	inline long getLocalOffset() const {return m_iLocalOffset;}
-	inline long getOnlineOffset() const {return m_iOnlineOffset;}
+    // custom data (not necessary, not part of the beatmap file, and not precomputed)
 
+    long long m_iLastModificationTime;  // only used for sorting
 
+    long m_iLocalOffset;
+    long m_iOnlineOffset;
 
-private:
-	// raw metadata
+    // primitive objects
 
-	int m_iVersion; // e.g. "osu file format v12" -> 12
-	int m_iGameMode;// 0 = osu!standard, 1 = Taiko, 2 = Catch the Beat, 3 = osu!mania
-	long m_iID;		// online ID, if uploaded
-	int m_iSetID;	// online set ID, if uploaded
+    struct HITCIRCLE {
+        int x, y;
+        unsigned long time;
+        int sampleType;
+        int number;
+        int colorCounter;
+        int colorOffset;
+        bool clicked;
+        long maniaEndTime;
+    };
 
-	UString m_sTitle;
-	UString m_sArtist;
-	UString m_sCreator;
-	UString m_sDifficultyName;	// difficulty name ("Version")
-	std::string m_sSource;			// only used by search
-	std::string m_sTags;			// only used by search
-	std::string m_sBackgroundImageFileName;
-	std::string m_sAudioFileName;
+    struct SLIDER {
+        int x, y;
+        char type;
+        int repeat;
+        float pixelLength;
+        long time;
+        int sampleType;
+        int number;
+        int colorCounter;
+        int colorOffset;
+        std::vector<Vector2> points;
+        std::vector<int> hitSounds;
 
-	unsigned long m_iLengthMS;
-	int m_iPreviewTime;
+        float sliderTime;
+        float sliderTimeWithoutRepeats;
+        std::vector<float> ticks;
 
-	float m_fAR;
-	float m_fCS;
-	float m_fHP;
-	float m_fOD;
+        std::vector<OsuDifficultyHitObject::SLIDER_SCORING_TIME> scoringTimesForStarCalc;
+    };
 
-	float m_fStackLeniency;
-	float m_fSliderTickRate;
-	float m_fSliderMultiplier;
+    struct SPINNER {
+        int x, y;
+        unsigned long time;
+        int sampleType;
+        unsigned long endTime;
+    };
 
-	std::vector<TIMINGPOINT> m_timingpoints; // necessary for main menu anim
+    struct PRIMITIVE_CONTAINER {
+        int errorCode;
 
+        std::vector<HITCIRCLE> hitcircles;
+        std::vector<SLIDER> sliders;
+        std::vector<SPINNER> spinners;
+        std::vector<BREAK> breaks;
 
+        std::vector<TIMINGPOINT> timingpoints;
+        std::vector<Color> combocolors;
 
-	// redundant data (technically contained in metadata, but precomputed anyway)
+        float stackLeniency;
 
-	std::string m_sFullSoundFilePath;
-	std::string m_sFullBackgroundImageFilePath;
+        float sliderMultiplier;
+        float sliderTickRate;
 
+        int version;
+    };
 
+    struct CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT {
+        int errorCode;
+    };
 
-	// precomputed data (can-run-without-but-nice-to-have data)
+    // class internal data (custom)
 
-	float m_fStarsNomod;
+    friend class OsuDatabase;
+    friend class OsuBackgroundImageHandler;
+    friend class OsuDatabaseBeatmapStarCalculator;
 
-	int m_iMinBPM;
-	int m_iMaxBPM;
-	int m_iMostCommonBPM;
+    static unsigned long long sortHackCounter;
 
-	int m_iNumObjects;
-	int m_iNumCircles;
-	int m_iNumSliders;
-	int m_iNumSpinners;
+    static ConVar *m_osu_slider_curve_max_length_ref;
+    static ConVar *m_osu_stars_xexxar_angles_sliders_ref;
+    static ConVar *m_osu_stars_stacking_ref;
+    static ConVar *m_osu_debug_pp_ref;
+    static ConVar *m_osu_slider_end_inside_check_offset_ref;
 
+    static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string &osuFilePath, Osu::GAMEMODE gameMode,
+                                                    bool filePathIsInMemoryBeatmap = false);
+    static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string &osuFilePath, Osu::GAMEMODE gameMode,
+                                                    bool filePathIsInMemoryBeatmap, const std::atomic<bool> &dead);
+    static CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT calculateSliderTimesClicksTicks(
+        int beatmapVersion, std::vector<SLIDER> &sliders, std::vector<TIMINGPOINT> &timingpoints,
+        float sliderMultiplier, float sliderTickRate);
+    static CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT calculateSliderTimesClicksTicks(
+        int beatmapVersion, std::vector<SLIDER> &sliders, std::vector<TIMINGPOINT> &timingpoints,
+        float sliderMultiplier, float sliderTickRate, const std::atomic<bool> &dead);
 
+    Osu *m_osu;
 
-	// custom data (not necessary, not part of the beatmap file, and not precomputed)
+    std::string m_sFolder;    // path to folder containing .osu file (e.g. "/path/to/beatmapfolder/")
+    std::string m_sFilePath;  // path to .osu file (e.g. "/path/to/beatmapfolder/beatmap.osu")
+    bool m_bFilePathIsInMemoryBeatmap;
 
-	long long m_iLastModificationTime; // only used for sorting
+    unsigned long long m_iSortHack;
 
-	long m_iLocalOffset;
-	long m_iOnlineOffset;
+    std::vector<OsuDatabaseBeatmap *> m_difficulties;
 
-	// primitive objects
+    MD5Hash m_sMD5Hash;
 
-	struct HITCIRCLE
-	{
-		int x,y;
-		unsigned long time;
-		int sampleType;
-		int number;
-		int colorCounter;
-		int colorOffset;
-		bool clicked;
-		long maniaEndTime;
-	};
+    // helper functions
 
-	struct SLIDER
-	{
-		int x,y;
-		char type;
-		int repeat;
-		float pixelLength;
-		long time;
-		int sampleType;
-		int number;
-		int colorCounter;
-		int colorOffset;
-		std::vector<Vector2> points;
-		std::vector<int> hitSounds;
+    struct TimingPointSortComparator {
+        bool operator()(OsuDatabaseBeatmap::TIMINGPOINT const &a, OsuDatabaseBeatmap::TIMINGPOINT const &b) const {
+            // first condition: offset
+            // second condition: if offset is the same, non-inherited timingpoints go before inherited timingpoints
 
-		float sliderTime;
-		float sliderTimeWithoutRepeats;
-		std::vector<float> ticks;
-
-		std::vector<OsuDifficultyHitObject::SLIDER_SCORING_TIME> scoringTimesForStarCalc;
-	};
-
-	struct SPINNER
-	{
-		int x,y;
-		unsigned long time;
-		int sampleType;
-		unsigned long endTime;
-	};
-
-	struct PRIMITIVE_CONTAINER
-	{
-		int errorCode;
-
-		std::vector<HITCIRCLE> hitcircles;
-		std::vector<SLIDER> sliders;
-		std::vector<SPINNER> spinners;
-		std::vector<BREAK> breaks;
-
-		std::vector<TIMINGPOINT> timingpoints;
-		std::vector<Color> combocolors;
-
-		float stackLeniency;
-
-		float sliderMultiplier;
-		float sliderTickRate;
-
-		int version;
-	};
-
-	struct CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT
-	{
-		int errorCode;
-	};
-
-	// class internal data (custom)
-
-	friend class OsuDatabase;
-	friend class OsuBackgroundImageHandler;
-	friend class OsuDatabaseBeatmapStarCalculator;
-
-	static unsigned long long sortHackCounter;
-
-	static ConVar *m_osu_slider_curve_max_length_ref;
-	static ConVar *m_osu_stars_xexxar_angles_sliders_ref;
-	static ConVar *m_osu_stars_stacking_ref;
-	static ConVar *m_osu_debug_pp_ref;
-	static ConVar *m_osu_slider_end_inside_check_offset_ref;
-
-
-
-	static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string &osuFilePath, Osu::GAMEMODE gameMode, bool filePathIsInMemoryBeatmap = false);
-	static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string &osuFilePath, Osu::GAMEMODE gameMode, bool filePathIsInMemoryBeatmap, const std::atomic<bool> &dead);
-	static CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT calculateSliderTimesClicksTicks(int beatmapVersion, std::vector<SLIDER> &sliders, std::vector<TIMINGPOINT> &timingpoints, float sliderMultiplier, float sliderTickRate);
-	static CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT calculateSliderTimesClicksTicks(int beatmapVersion, std::vector<SLIDER> &sliders, std::vector<TIMINGPOINT> &timingpoints, float sliderMultiplier, float sliderTickRate, const std::atomic<bool> &dead);
-
-
-
-	Osu *m_osu;
-
-	std::string m_sFolder;		// path to folder containing .osu file (e.g. "/path/to/beatmapfolder/")
-	std::string m_sFilePath;	// path to .osu file (e.g. "/path/to/beatmapfolder/beatmap.osu")
-	bool m_bFilePathIsInMemoryBeatmap;
-
-	unsigned long long m_iSortHack;
-
-	std::vector<OsuDatabaseBeatmap*> m_difficulties;
-
-	MD5Hash m_sMD5Hash;
-
-
-
-	// helper functions
-
-	struct TimingPointSortComparator
-	{
-	    bool operator() (OsuDatabaseBeatmap::TIMINGPOINT const &a, OsuDatabaseBeatmap::TIMINGPOINT const &b) const
-	    {
-	    	// first condition: offset
-	    	// second condition: if offset is the same, non-inherited timingpoints go before inherited timingpoints
-
-	    	// strict weak ordering!
-	    	if (a.offset == b.offset && ((a.msPerBeat >= 0 && b.msPerBeat < 0) == (b.msPerBeat >= 0 && a.msPerBeat < 0)))
-	    		return a.sortHack < b.sortHack;
-	    	else
-	    		return (a.offset < b.offset) || (a.offset == b.offset && a.msPerBeat >= 0 && b.msPerBeat < 0);
-	    }
-	};
+            // strict weak ordering!
+            if(a.offset == b.offset && ((a.msPerBeat >= 0 && b.msPerBeat < 0) == (b.msPerBeat >= 0 && a.msPerBeat < 0)))
+                return a.sortHack < b.sortHack;
+            else
+                return (a.offset < b.offset) || (a.offset == b.offset && a.msPerBeat >= 0 && b.msPerBeat < 0);
+        }
+    };
 };
 
+class OsuDatabaseBeatmapBackgroundImagePathLoader : public Resource {
+   public:
+    OsuDatabaseBeatmapBackgroundImagePathLoader(const std::string &filePath);
 
+    inline const std::string &getLoadedBackgroundImageFileName() const { return m_sLoadedBackgroundImageFileName; }
 
-class OsuDatabaseBeatmapBackgroundImagePathLoader : public Resource
-{
-public:
-	OsuDatabaseBeatmapBackgroundImagePathLoader(const std::string &filePath);
+   private:
+    virtual void init();
+    virtual void initAsync();
+    virtual void destroy() { ; }
 
-	inline const std::string &getLoadedBackgroundImageFileName() const {return m_sLoadedBackgroundImageFileName;}
-
-private:
-	virtual void init();
-	virtual void initAsync();
-	virtual void destroy() {;}
-
-	std::string m_sFilePath;
-	std::string m_sLoadedBackgroundImageFileName;
+    std::string m_sFilePath;
+    std::string m_sLoadedBackgroundImageFileName;
 };
 
+class OsuDatabaseBeatmapStarCalculator : public Resource {
+   public:
+    OsuDatabaseBeatmapStarCalculator();
 
+    bool isDead() const { return m_bDead.load(); }
+    void kill() { m_bDead = true; }
+    void revive() { m_bDead = false; }
 
-class OsuDatabaseBeatmapStarCalculator : public Resource
-{
-public:
-	OsuDatabaseBeatmapStarCalculator();
+    void setBeatmapDifficulty(OsuDatabaseBeatmap *diff2, float AR, float CS, float OD, float speedMultiplier,
+                              bool relax, bool touchDevice);
 
-	bool isDead() const {return m_bDead.load();}
-	void kill() {m_bDead = true;}
-	void revive() {m_bDead = false;}
+    inline OsuDatabaseBeatmap *getBeatmapDifficulty() const { return m_diff2; }
 
-	void setBeatmapDifficulty(OsuDatabaseBeatmap *diff2, float AR, float CS, float OD, float speedMultiplier, bool relax, bool touchDevice);
+    inline double getTotalStars() const { return m_totalStars.load(); }
+    inline double getAimStars() const { return m_aimStars.load(); }
+    inline double getSpeedStars() const { return m_speedStars.load(); }
+    inline double getPPv2() const { return m_pp.load(); }  // NOTE: pp with currently active mods (runtime mods)
 
-	inline OsuDatabaseBeatmap *getBeatmapDifficulty() const {return m_diff2;}
+    inline long getLengthMS() const { return m_iLengthMS.load(); }
 
-	inline double getTotalStars() const {return m_totalStars.load();}
-	inline double getAimStars() const {return m_aimStars.load();}
-	inline double getSpeedStars() const {return m_speedStars.load();}
-	inline double getPPv2() const {return m_pp.load();} // NOTE: pp with currently active mods (runtime mods)
+    inline const std::vector<double> &getAimStrains() const { return m_aimStrains; }
+    inline const std::vector<double> &getSpeedStrains() const { return m_speedStrains; }
 
-	inline long getLengthMS() const {return m_iLengthMS.load();}
+    inline int getNumObjects() const { return m_iNumObjects.load(); }
+    inline int getNumCircles() const { return m_iNumCircles.load(); }
+    inline int getNumSpinners() const { return m_iNumSpinners.load(); }
 
-	inline const std::vector<double> &getAimStrains() const {return m_aimStrains;}
-	inline const std::vector<double> &getSpeedStrains() const {return m_speedStrains;}
+   private:
+    virtual void init();
+    virtual void initAsync();
+    virtual void destroy() { ; }
 
-	inline int getNumObjects() const {return m_iNumObjects.load();}
-	inline int getNumCircles() const {return m_iNumCircles.load();}
-	inline int getNumSpinners() const {return m_iNumSpinners.load();}
+    std::atomic<bool> m_bDead;
 
-private:
-	virtual void init();
-	virtual void initAsync();
-	virtual void destroy() {;}
+    OsuDatabaseBeatmap *m_diff2;
 
-	std::atomic<bool> m_bDead;
+    float m_fAR;
+    float m_fCS;
+    float m_fOD;
+    float m_fSpeedMultiplier;
+    bool m_bRelax;
+    bool m_bTouchDevice;
 
-	OsuDatabaseBeatmap *m_diff2;
+    std::atomic<double> m_totalStars;
+    std::atomic<double> m_aimStars;
+    std::atomic<double> m_aimSliderFactor;
+    std::atomic<double> m_speedStars;
+    std::atomic<double> m_speedNotes;
+    std::atomic<double> m_pp;
 
-	float m_fAR;
-	float m_fCS;
-	float m_fOD;
-	float m_fSpeedMultiplier;
-	bool m_bRelax;
-	bool m_bTouchDevice;
+    std::atomic<long> m_iLengthMS;
 
-	std::atomic<double> m_totalStars;
-	std::atomic<double> m_aimStars;
-	std::atomic<double> m_aimSliderFactor;
-	std::atomic<double> m_speedStars;
-	std::atomic<double> m_speedNotes;
-	std::atomic<double> m_pp;
+    std::vector<double> m_aimStrains;
+    std::vector<double> m_speedStrains;
 
-	std::atomic<long> m_iLengthMS;
-
-	std::vector<double> m_aimStrains;
-	std::vector<double> m_speedStrains;
-
-	// custom
-	int m_iErrorCode;
-	std::atomic<int> m_iNumObjects;
-	std::atomic<int> m_iNumCircles;
-	std::atomic<int> m_iNumSliders;
-	std::atomic<int> m_iNumSpinners;
-	int m_iMaxPossibleCombo;
+    // custom
+    int m_iErrorCode;
+    std::atomic<int> m_iNumObjects;
+    std::atomic<int> m_iNumCircles;
+    std::atomic<int> m_iNumSliders;
+    std::atomic<int> m_iNumSpinners;
+    int m_iMaxPossibleCombo;
 };
 
 #endif

@@ -11,13 +11,6 @@
 
 ContextMenu *cmenu = NULL;
 
-ContextMenu::ContextMenu()
-{
-	cmenu = this;
-}
+ContextMenu::ContextMenu() { cmenu = this; }
 
-ContextMenu::~ContextMenu()
-{
-	cmenu = NULL;
-}
-
+ContextMenu::~ContextMenu() { cmenu = NULL; }

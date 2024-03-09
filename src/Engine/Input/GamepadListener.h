@@ -10,16 +10,15 @@
 
 #include "GamepadEvent.h"
 
-class GamepadListener
-{
-public:
-	virtual ~GamepadListener() {;}
+class GamepadListener {
+   public:
+    virtual ~GamepadListener() { ; }
 
-	virtual void onButtonDown(GAMEPADBUTTON b) = 0;
-	virtual void onButtonUp(GAMEPADBUTTON b) = 0;
+    virtual void onButtonDown(GAMEPADBUTTON b) = 0;
+    virtual void onButtonUp(GAMEPADBUTTON b) = 0;
 
-	virtual void onConnected() = 0;
-	virtual void onDisconnected() = 0;
+    virtual void onConnected() = 0;
+    virtual void onDisconnected() = 0;
 };
 
 #endif

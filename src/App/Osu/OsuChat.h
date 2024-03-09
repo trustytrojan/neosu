@@ -4,12 +4,10 @@
 #include "CBaseUITextbox.h"
 #include "OsuScreen.h"
 
-
 class CBaseUIButton;
 class McFont;
 class OsuChat;
 class OsuUIButton;
-
 
 struct ChatMessage {
     time_t tms;
@@ -19,11 +17,11 @@ struct ChatMessage {
 };
 
 struct OsuChatChannel {
-    OsuChatChannel(OsuChat* chat, UString name_arg);
+    OsuChatChannel(OsuChat *chat, UString name_arg);
     ~OsuChatChannel();
 
-    OsuChat* m_chat;
-    CBaseUIScrollView* ui;
+    OsuChat *m_chat;
+    CBaseUIScrollView *ui;
     OsuUIButton *btn;
     UString name;
     std::vector<ChatMessage> messages;
@@ -32,11 +30,11 @@ struct OsuChatChannel {
 
     void add_message(ChatMessage msg);
     void updateLayout(Vector2 pos, Vector2 size);
-    void onChannelButtonClick(CBaseUIButton* btn);
+    void onChannelButtonClick(CBaseUIButton *btn);
 };
 
 class OsuChat : public OsuScreen {
-public:
+   public:
     OsuChat(Osu *osu);
 
     virtual void draw(Graphics *g);
@@ -46,8 +44,8 @@ public:
     virtual void onChar(KeyboardEvent &e);
     virtual void onResolutionChange(Vector2 newResolution);
 
-    void mark_as_read(OsuChatChannel* chan);
-    void switchToChannel(OsuChatChannel* chan);
+    void mark_as_read(OsuChatChannel *chan);
+    void switchToChannel(OsuChatChannel *chan);
     void addChannel(UString channel_name, bool switch_to = false);
     void addMessage(UString channel_name, ChatMessage msg);
     void removeChannel(UString channel_name);
@@ -58,7 +56,7 @@ public:
     void leave(UString channel_name);
     void onDisconnect();
 
-    virtual CBaseUIContainer* setVisible(bool visible);
+    virtual CBaseUIContainer *setVisible(bool visible);
     bool isVisibilityForced();
     void updateVisibility();
     bool isMouseInChat();
@@ -66,12 +64,12 @@ public:
     void askWhatChannelToJoin(CBaseUIButton *btn);
     OsuUIButton *join_channel_btn;
 
-    OsuChatChannel* m_selected_channel = nullptr;
-    std::vector<OsuChatChannel*> m_channels;
+    OsuChatChannel *m_selected_channel = nullptr;
+    std::vector<OsuChatChannel *> m_channels;
     CBaseUIContainer *m_button_container;
     CBaseUITextbox *m_input_box;
 
-    McFont* font;
+    McFont *font;
     float m_fAnimation = 0.f;
     bool user_wants_chat = false;
     bool visibility_was_forced = false;

@@ -8,7 +8,7 @@ class Osu;
 class OsuUIButton;
 
 class OsuPromptScreen : public OsuScreen {
-public:
+   public:
     OsuPromptScreen(Osu *osu);
     virtual void onResolutionChange(Vector2 newResolution);
 
@@ -21,7 +21,7 @@ public:
     typedef fastdelegate::FastDelegate1<UString> PromptResponseCallback;
     void prompt(UString msg, PromptResponseCallback callback);
 
-private:
+   private:
     void on_ok();
     void on_cancel();
 

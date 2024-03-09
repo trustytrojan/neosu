@@ -1,24 +1,24 @@
+#include "OsuLobby.h"
+
 #include "Bancho.h"
 #include "BanchoNetworking.h"
 #include "BanchoUsers.h"
-#include "Osu.h"
-#include "OsuChat.h"
-#include "OsuLobby.h"
-#include "OsuMainMenu.h"
-#include "OsuNotificationOverlay.h"
-#include "OsuPromptScreen.h"
-#include "OsuRichPresence.h"
-#include "OsuUIButton.h"
-
 #include "CBaseUIButton.h"
 #include "CBaseUIContainer.h"
 #include "CBaseUILabel.h"
 #include "Engine.h"
 #include "Keyboard.h"
+#include "Osu.h"
+#include "OsuChat.h"
+#include "OsuMainMenu.h"
+#include "OsuNotificationOverlay.h"
+#include "OsuPromptScreen.h"
+#include "OsuRichPresence.h"
+#include "OsuUIButton.h"
 #include "ResourceManager.h"
 
-
-RoomUIElement::RoomUIElement(OsuLobby* multi, Room* room, float x, float y, float width, float height) : CBaseUIScrollView(x, y, width, height, "") {
+RoomUIElement::RoomUIElement(OsuLobby* multi, Room* room, float x, float y, float width, float height)
+    : CBaseUIScrollView(x, y, width, height, "") {
     // NOTE: We can't store the room pointer, since it might expire later
     m_multi = multi;
     room_id = room->id;
@@ -44,7 +44,7 @@ RoomUIElement::RoomUIElement(OsuLobby* multi, Room* room, float x, float y, floa
     join_btn = new OsuUIButton(multi->m_osu, 10, 65, 120, 30, "", "Join room");
     join_btn->setUseDefaultSkin();
     join_btn->setColor(0xff00ff00);
-    join_btn->setClickCallback( fastdelegate::MakeDelegate(this, &RoomUIElement::onRoomJoinButtonClick) );
+    join_btn->setClickCallback(fastdelegate::MakeDelegate(this, &RoomUIElement::onRoomJoinButtonClick));
     getContainer()->addBaseUIElement(join_btn);
 
     if(room->has_password) {
@@ -58,13 +58,14 @@ RoomUIElement::RoomUIElement(OsuLobby* multi, Room* room, float x, float y, floa
 void RoomUIElement::onRoomJoinButtonClick(CBaseUIButton* btn) {
     if(has_password) {
         m_multi->room_to_join = room_id;
-        m_multi->m_osu->m_prompt->prompt("Room password:", fastdelegate::MakeDelegate(m_multi, &OsuLobby::on_room_join_with_password));
+        m_multi->m_osu->m_prompt->prompt("Room password:",
+                                         fastdelegate::MakeDelegate(m_multi, &OsuLobby::on_room_join_with_password));
     } else {
         m_multi->joinRoom(room_id, "");
     }
 }
 
-OsuLobby::OsuLobby(Osu *osu) : OsuScreen(osu) {
+OsuLobby::OsuLobby(Osu* osu) : OsuScreen(osu) {
     font = engine->getResourceManager()->getFont("FONT_DEFAULT");
 
     auto heading = new CBaseUILabel(50, 30, 300, 40, "", "Multiplayer rooms");
@@ -77,7 +78,7 @@ OsuLobby::OsuLobby(Osu *osu) : OsuScreen(osu) {
     m_create_room_btn = new OsuUIButton(osu, 0, 0, 200, 50, "", "Create new room");
     m_create_room_btn->setUseDefaultSkin();
     m_create_room_btn->setColor(0xff00ff00);
-    m_create_room_btn->setClickCallback( fastdelegate::MakeDelegate(this, &OsuLobby::on_create_room_clicked) );
+    m_create_room_btn->setClickCallback(fastdelegate::MakeDelegate(this, &OsuLobby::on_create_room_clicked));
     addBaseUIElement(m_create_room_btn);
 
     m_list = new CBaseUIScrollView(0, 0, 0, 0, "");
@@ -90,7 +91,7 @@ OsuLobby::OsuLobby(Osu *osu) : OsuScreen(osu) {
     updateLayout(m_osu->getScreenSize());
 }
 
-void OsuLobby::onKeyDown(KeyboardEvent &key) {
+void OsuLobby::onKeyDown(KeyboardEvent& key) {
     if(!m_bVisible) return;
 
     if(key.getKeyCode() == KEY_ESCAPE) {
@@ -103,21 +104,19 @@ void OsuLobby::onKeyDown(KeyboardEvent &key) {
     // XXX: search bar
 }
 
-void OsuLobby::onKeyUp(KeyboardEvent &key) {
+void OsuLobby::onKeyUp(KeyboardEvent& key) {
     if(!m_bVisible) return;
 
     // XXX: search bar
 }
 
-void OsuLobby::onChar(KeyboardEvent &key) {
+void OsuLobby::onChar(KeyboardEvent& key) {
     if(!m_bVisible) return;
 
     // XXX: search bar
 }
 
-void OsuLobby::onResolutionChange(Vector2 newResolution) {
-    updateLayout(newResolution);
-}
+void OsuLobby::onResolutionChange(Vector2 newResolution) { updateLayout(newResolution); }
 
 CBaseUIContainer* OsuLobby::setVisible(bool visible) {
     if(visible == m_bVisible) return this;
@@ -170,20 +169,16 @@ void OsuLobby::updateLayout(Vector2 newResolution) {
         auto noRoomsOpenElement = new CBaseUILabel(0, 0, 0, 0, "", "There are no matches available.");
         noRoomsOpenElement->setTextJustification(CBaseUILabel::TEXT_JUSTIFICATION::TEXT_JUSTIFICATION_CENTERED);
         noRoomsOpenElement->setSizeToContent(20, 20);
-        noRoomsOpenElement->setPos(
-            m_list->getSize().x / 2 - noRoomsOpenElement->getSize().x / 2,
-            m_list->getSize().y / 2 - noRoomsOpenElement->getSize().y / 2
-        );
+        noRoomsOpenElement->setPos(m_list->getSize().x / 2 - noRoomsOpenElement->getSize().x / 2,
+                                   m_list->getSize().y / 2 - noRoomsOpenElement->getSize().y / 2);
         m_list->getContainer()->addBaseUIElement(noRoomsOpenElement);
     }
 
     float heading_ratio = 70 / newResolution.y;
     float chat_ratio = 0.3;
     float free_ratio = 1.f - (heading_ratio + chat_ratio);
-    m_create_room_btn->setPos(
-        round(newResolution.x * 0.3) - m_create_room_btn->getSize().x / 2,
-        70 + round(newResolution.y * free_ratio / 2) - m_create_room_btn->getSize().y / 2
-    );
+    m_create_room_btn->setPos(round(newResolution.x * 0.3) - m_create_room_btn->getSize().x / 2,
+                              70 + round(newResolution.y * free_ratio / 2) - m_create_room_btn->getSize().y / 2);
 
     float y = 10;
     const float room_height = 105;
@@ -208,7 +203,7 @@ void OsuLobby::joinRoom(uint32_t id, UString password) {
     write_string(&packet, password.toUtf8());
     send_packet(packet);
 
-    for(CBaseUIElement *elm : m_list->getContainer()->getElements()) {
+    for(CBaseUIElement* elm : m_list->getContainer()->getElements()) {
         auto room = (RoomUIElement*)elm;
         if(room->room_id != id) continue;
         room->join_btn->is_loading = true;
@@ -236,12 +231,12 @@ void OsuLobby::updateRoom(Room room) {
 
 void OsuLobby::removeRoom(uint32_t room_id) {
     for(auto room : rooms) {
-      if(room->id == room_id) {
-        auto it = std::find(rooms.begin(), rooms.end(), room);
-        rooms.erase(it);
-        delete room;
-        break;
-      }
+        if(room->id == room_id) {
+            auto it = std::find(rooms.begin(), rooms.end(), room);
+            rooms.erase(it);
+            delete room;
+            break;
+        }
     }
 
     updateLayout(getSize());
@@ -249,12 +244,12 @@ void OsuLobby::removeRoom(uint32_t room_id) {
 
 void OsuLobby::on_create_room_clicked() {
     bancho.room = Room();
-    bancho.room.name = "New room"; // XXX: doesn't work
+    bancho.room.name = "New room";  // XXX: doesn't work
     bancho.room.host_id = bancho.user_id;
     for(int i = 0; i < 16; i++) {
-        bancho.room.slots[i].status = 1; // open slot
+        bancho.room.slots[i].status = 1;  // open slot
     }
-    bancho.room.slots[0].status = 4; // not ready
+    bancho.room.slots[0].status = 4;  // not ready
     bancho.room.slots[0].player_id = bancho.user_id;
 
     Packet packet = {0};
@@ -265,9 +260,7 @@ void OsuLobby::on_create_room_clicked() {
     m_osu->getNotificationOverlay()->addNotification("Creating room...");
 }
 
-void OsuLobby::on_room_join_with_password(UString password) {
-    joinRoom(room_to_join, password);
-}
+void OsuLobby::on_room_join_with_password(UString password) { joinRoom(room_to_join, password); }
 
 void OsuLobby::on_room_join_failed() {
     // Updating layout will reset is_loading to false

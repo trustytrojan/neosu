@@ -8,51 +8,50 @@
 #ifndef CWINDOWMANAGER_H
 #define CWINDOWMANAGER_H
 
-#include "cbase.h"
 #include "KeyboardListener.h"
+#include "cbase.h"
 
 class CBaseUIWindow;
 
-class CWindowManager : public KeyboardListener
-{
-public:
-	CWindowManager();
-	~CWindowManager();
+class CWindowManager : public KeyboardListener {
+   public:
+    CWindowManager();
+    ~CWindowManager();
 
-	void draw(Graphics *g);
-	virtual void mouse_update(bool *propagate_clicks);
+    void draw(Graphics *g);
+    virtual void mouse_update(bool *propagate_clicks);
 
-	void onKeyDown(KeyboardEvent &e);
-	void onKeyUp(KeyboardEvent &e);
-	void onChar(KeyboardEvent &e);
+    void onKeyDown(KeyboardEvent &e);
+    void onKeyUp(KeyboardEvent &e);
+    void onChar(KeyboardEvent &e);
 
-	void onResolutionChange(Vector2 newResolution);
+    void onResolutionChange(Vector2 newResolution);
 
-	void openAll();
-	void closeAll();
+    void openAll();
+    void closeAll();
 
-	void addWindow(CBaseUIWindow *window);
+    void addWindow(CBaseUIWindow *window);
 
-	void setVisible(bool visible) {m_bVisible = visible;}
-	void setEnabled(bool enabled);
-	void setFocus(CBaseUIWindow *window);
+    void setVisible(bool visible) { m_bVisible = visible; }
+    void setEnabled(bool enabled);
+    void setFocus(CBaseUIWindow *window);
 
-	bool isMouseInside();
-	bool isVisible();
-	bool isActive();
+    bool isMouseInside();
+    bool isVisible();
+    bool isActive();
 
-	std::vector<CBaseUIWindow*> *getAllWindowsPointer() {return &m_windows;}
+    std::vector<CBaseUIWindow *> *getAllWindowsPointer() { return &m_windows; }
 
-private:
-	int getTopMouseWindowIndex();
+   private:
+    int getTopMouseWindowIndex();
 
-	bool m_bVisible;
-	bool m_bEnabled;
+    bool m_bVisible;
+    bool m_bEnabled;
 
-	int m_iLastEnabledWindow;
-	int m_iCurrentEnabledWindow;
+    int m_iLastEnabledWindow;
+    int m_iCurrentEnabledWindow;
 
-	std::vector<CBaseUIWindow*> m_windows;
+    std::vector<CBaseUIWindow *> m_windows;
 };
 
 #endif

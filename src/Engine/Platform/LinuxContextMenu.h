@@ -14,18 +14,17 @@
 
 #include "ContextMenu.h"
 
-class LinuxContextMenu : public ContextMenu
-{
-public:
-	LinuxContextMenu();
-	virtual ~LinuxContextMenu();
+class LinuxContextMenu : public ContextMenu {
+   public:
+    LinuxContextMenu();
+    virtual ~LinuxContextMenu();
 
-	void begin() {;}
-	void addItem(UString text, int returnValue) {;}
-	void addSeparator() {;}
-	int end() {return -1;}
+    void begin() { ; }
+    void addItem(UString text, int returnValue) { ; }
+    void addSeparator() { ; }
+    int end() { return -1; }
 
-private:
+   private:
 };
 
 #endif

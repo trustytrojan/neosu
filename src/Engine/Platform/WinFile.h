@@ -10,51 +10,50 @@
 #ifndef WINFILE_H
 #define WINFILE_H
 
-#include "File.h"
-
 #include <Windows.h>
 
-class WinFile : public BaseFile
-{
-public:
-	WinFile(std::string filePath, File::TYPE type);
-	virtual ~WinFile();
+#include "File.h"
 
-	bool canRead() const;
-	bool canWrite() const;
+class WinFile : public BaseFile {
+   public:
+    WinFile(std::string filePath, File::TYPE type);
+    virtual ~WinFile();
 
-	void write(const char *buffer, size_t size);
+    bool canRead() const;
+    bool canWrite() const;
 
-	UString readLine();
-	const char *readFile();
+    void write(const char *buffer, size_t size);
 
-	size_t getFileSize() const;
+    UString readLine();
+    const char *readFile();
 
-private:
-	static const DWORD bufferSize = 4096;
+    size_t getFileSize() const;
 
-	bool checkReadForLineBuffer();
-	bool checkReadForFullBuffer();
+   private:
+    static const DWORD bufferSize = 4096;
 
-	std::string m_sFilePath;
+    bool checkReadForLineBuffer();
+    bool checkReadForFullBuffer();
 
-	bool m_bReady;
-	bool m_bCanRead;
-	bool m_bCanWrite;
-	bool m_bEOF;
+    std::string m_sFilePath;
 
-	HANDLE m_handle;
-	size_t m_iFileSize;
+    bool m_bReady;
+    bool m_bCanRead;
+    bool m_bCanWrite;
+    bool m_bEOF;
 
-	// line reader
-	char *m_buffer;
-	DWORD m_iRead;
-	bool m_bNeedsRead;
-	DWORD m_iLineIndex;
+    HANDLE m_handle;
+    size_t m_iFileSize;
 
-	// full reader
-	char *m_fullBuffer;
-	DWORD m_iLineBufferReadIndexOffset;
+    // line reader
+    char *m_buffer;
+    DWORD m_iRead;
+    bool m_bNeedsRead;
+    DWORD m_iLineIndex;
+
+    // full reader
+    char *m_fullBuffer;
+    DWORD m_iLineBufferReadIndexOffset;
 };
 
 #endif

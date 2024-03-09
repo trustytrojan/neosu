@@ -10,25 +10,25 @@
 #ifndef WINSWGRAPHICSINTERFACE_H
 #define WINSWGRAPHICSINTERFACE_H
 
-#include "SWGraphicsInterface.h"
 #include <Windows.h>
 
-class WinSWGraphicsInterface : public SWGraphicsInterface
-{
-public:
-	WinSWGraphicsInterface(HWND hwnd);
-	virtual ~WinSWGraphicsInterface();
+#include "SWGraphicsInterface.h"
 
-	// scene
-	void endScene();
+class WinSWGraphicsInterface : public SWGraphicsInterface {
+   public:
+    WinSWGraphicsInterface(HWND hwnd);
+    virtual ~WinSWGraphicsInterface();
 
-	// device settings
-	void setVSync(bool vsync);
+    // scene
+    void endScene();
 
-private:
-	// device context
-	HWND m_hwnd;
-	HDC m_hdc;
+    // device settings
+    void setVSync(bool vsync);
+
+   private:
+    // device context
+    HWND m_hwnd;
+    HDC m_hdc;
 };
 
 #endif

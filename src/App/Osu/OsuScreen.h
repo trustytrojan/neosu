@@ -8,26 +8,23 @@
 #ifndef OSUSCREEN_H
 #define OSUSCREEN_H
 
-#include "cbase.h"
 #include "CBaseUIContainer.h"
+#include "cbase.h"
 
 class Osu;
 class KeyboardEvent;
 
-class OsuScreen : public CBaseUIContainer
-{
-public:
-	OsuScreen(Osu *osu) {
-		m_osu = osu;
-		m_bVisible = false;
-	}
-	virtual ~OsuScreen() {;}
+class OsuScreen : public CBaseUIContainer {
+   public:
+    OsuScreen(Osu *osu) {
+        m_osu = osu;
+        m_bVisible = false;
+    }
+    virtual ~OsuScreen() { ; }
 
-	virtual void onResolutionChange(Vector2 newResolution) {
-		(void)newResolution;
-	}
+    virtual void onResolutionChange(Vector2 newResolution) { (void)newResolution; }
 
-	Osu *m_osu;
+    Osu *m_osu;
 };
 
 #endif

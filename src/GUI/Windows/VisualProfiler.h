@@ -17,106 +17,103 @@ class ProfilerProfile;
 class McFont;
 class VertexArrayObject;
 
-class VisualProfiler : public CBaseUIElement
-{
-public:
-	VisualProfiler();
-	virtual ~VisualProfiler();
+class VisualProfiler : public CBaseUIElement {
+   public:
+    VisualProfiler();
+    virtual ~VisualProfiler();
 
-	virtual void draw(Graphics *g);
-	virtual void mouse_update(bool *propagate_clicks);
+    virtual void draw(Graphics *g);
+    virtual void mouse_update(bool *propagate_clicks);
 
-	void incrementInfoBladeDisplayMode();
-	void decrementInfoBladeDisplayMode();
+    void incrementInfoBladeDisplayMode();
+    void decrementInfoBladeDisplayMode();
 
-	void addInfoBladeAppTextLine(const UString &text);
+    void addInfoBladeAppTextLine(const UString &text);
 
-	void setProfile(ProfilerProfile *profile);
-	void setRequiresAltShiftKeysToFreeze(bool requiresAltShiftKeysToFreeze) {m_bRequiresAltShiftKeysToFreeze = requiresAltShiftKeysToFreeze;}
+    void setProfile(ProfilerProfile *profile);
+    void setRequiresAltShiftKeysToFreeze(bool requiresAltShiftKeysToFreeze) {
+        m_bRequiresAltShiftKeysToFreeze = requiresAltShiftKeysToFreeze;
+    }
 
-	virtual bool isEnabled();
+    virtual bool isEnabled();
 
-private:
-	enum INFO_BLADE_DISPLAY_MODE
-	{
-		INFO_BLADE_DISPLAY_MODE_DEFAULT = 0,
+   private:
+    enum INFO_BLADE_DISPLAY_MODE {
+        INFO_BLADE_DISPLAY_MODE_DEFAULT = 0,
 
-		INFO_BLADE_DISPLAY_MODE_GPU_INFO = 1,
-		INFO_BLADE_DISPLAY_MODE_ENGINE_INFO = 2,
-		INFO_BLADE_DISPLAY_MODE_APP_INFO = 3,
+        INFO_BLADE_DISPLAY_MODE_GPU_INFO = 1,
+        INFO_BLADE_DISPLAY_MODE_ENGINE_INFO = 2,
+        INFO_BLADE_DISPLAY_MODE_APP_INFO = 3,
 
-		INFO_BLADE_DISPLAY_MODE_COUNT = 4
-	};
+        INFO_BLADE_DISPLAY_MODE_COUNT = 4
+    };
 
-	struct TEXT_LINE
-	{
-		UString text;
-		int width;
-	};
+    struct TEXT_LINE {
+        UString text;
+        int width;
+    };
 
-private:
-	struct NODE
-	{
-		const ProfilerNode *node;
-		int depth;
-	};
+   private:
+    struct NODE {
+        const ProfilerNode *node;
+        int depth;
+    };
 
-	struct SPIKE
-	{
-		NODE node;
-		double timeLastFrame;
-		uint32_t id;
-	};
+    struct SPIKE {
+        NODE node;
+        double timeLastFrame;
+        uint32_t id;
+    };
 
-	struct GROUP
-	{
-		const char *name;
-		int id;
-		Color color;
-	};
+    struct GROUP {
+        const char *name;
+        int id;
+        Color color;
+    };
 
-private:
-	static ConVar *m_vprof_ref;
+   private:
+    static ConVar *m_vprof_ref;
 
-	static void collectProfilerNodesRecursive(const ProfilerNode *node, int depth, std::vector<NODE> &nodes, SPIKE &spike);
-	static void collectProfilerNodesSpikeRecursive(const ProfilerNode *node, int depth, std::vector<SPIKE> &spikeNodes);
+    static void collectProfilerNodesRecursive(const ProfilerNode *node, int depth, std::vector<NODE> &nodes,
+                                              SPIKE &spike);
+    static void collectProfilerNodesSpikeRecursive(const ProfilerNode *node, int depth, std::vector<SPIKE> &spikeNodes);
 
-	static int getGraphWidth();
-	static int getGraphHeight();
+    static int getGraphWidth();
+    static int getGraphHeight();
 
-	static void addTextLine(const UString &text, McFont *font, std::vector<TEXT_LINE> &textLines);
+    static void addTextLine(const UString &text, McFont *font, std::vector<TEXT_LINE> &textLines);
 
-	static void drawStringWithShadow(Graphics *g, McFont *font, const UString &string, Color color);
+    static void drawStringWithShadow(Graphics *g, McFont *font, const UString &string, Color color);
 
-	int m_iPrevVaoWidth;
-	int m_iPrevVaoHeight;
-	int m_iPrevVaoGroups;
-	float m_fPrevVaoMaxRange;
-	float m_fPrevVaoAlpha;
+    int m_iPrevVaoWidth;
+    int m_iPrevVaoHeight;
+    int m_iPrevVaoGroups;
+    float m_fPrevVaoMaxRange;
+    float m_fPrevVaoAlpha;
 
-	int m_iCurLinePos;
+    int m_iCurLinePos;
 
-	int m_iDrawGroupID;
-	int m_iDrawSwapBuffersGroupID;
+    int m_iDrawGroupID;
+    int m_iDrawSwapBuffersGroupID;
 
-	ProfilerProfile *m_profile;
-	std::vector<GROUP> m_groups;
-	std::vector<NODE> m_nodes;
-	std::vector<SPIKE> m_spikes;
+    ProfilerProfile *m_profile;
+    std::vector<GROUP> m_groups;
+    std::vector<NODE> m_nodes;
+    std::vector<SPIKE> m_spikes;
 
-	SPIKE m_spike;
-	std::vector<SPIKE> m_spikeNodes;
-	uint32_t m_spikeIDCounter;
+    SPIKE m_spike;
+    std::vector<SPIKE> m_spikeNodes;
+    uint32_t m_spikeIDCounter;
 
-	McFont *m_font;
-	McFont *m_fontConsole;
-	VertexArrayObject *m_lineVao;
+    McFont *m_font;
+    McFont *m_fontConsole;
+    VertexArrayObject *m_lineVao;
 
-	bool m_bScheduledForceRebuildLineVao;
-	bool m_bRequiresAltShiftKeysToFreeze;
+    bool m_bScheduledForceRebuildLineVao;
+    bool m_bRequiresAltShiftKeysToFreeze;
 
-	std::vector<TEXT_LINE> m_textLines;
-	std::vector<UString> m_appTextLines;
+    std::vector<TEXT_LINE> m_textLines;
+    std::vector<UString> m_appTextLines;
 };
 
 extern VisualProfiler *vprof;

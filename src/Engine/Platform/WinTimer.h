@@ -12,34 +12,34 @@
 
 #include "Timer.h"
 
-//#define WIN32_LEAN_AND_MEAN
-//#define NOCRYPT
-#include "BaseTsd.h"
+// #define WIN32_LEAN_AND_MEAN
+// #define NOCRYPT
 #include <Windows.h>
 
-class WinTimer : public BaseTimer
-{
-public:
-	WinTimer();
-	virtual ~WinTimer() {;}
+#include "BaseTsd.h"
 
-	virtual void start() override;
-	virtual void update() override;
+class WinTimer : public BaseTimer {
+   public:
+    WinTimer();
+    virtual ~WinTimer() { ; }
 
-	virtual inline double getDelta() const override {return m_delta;}
-	virtual inline double getElapsedTime() const override {return m_elapsedTime;}
-	virtual inline uint64_t getElapsedTimeMS() const override {return m_elapsedTimeMS;}
+    virtual void start() override;
+    virtual void update() override;
 
-private:
-	double m_secondsPerTick;
-	LONGLONG m_ticksPerSecond;
+    virtual inline double getDelta() const override { return m_delta; }
+    virtual inline double getElapsedTime() const override { return m_elapsedTime; }
+    virtual inline uint64_t getElapsedTimeMS() const override { return m_elapsedTimeMS; }
 
-	LARGE_INTEGER m_currentTime;
-	LARGE_INTEGER m_startTime;
+   private:
+    double m_secondsPerTick;
+    LONGLONG m_ticksPerSecond;
 
-	double m_delta;
-	double m_elapsedTime;
-	uint64_t m_elapsedTimeMS;
+    LARGE_INTEGER m_currentTime;
+    LARGE_INTEGER m_startTime;
+
+    double m_delta;
+    double m_elapsedTime;
+    uint64_t m_elapsedTimeMS;
 };
 
 #endif

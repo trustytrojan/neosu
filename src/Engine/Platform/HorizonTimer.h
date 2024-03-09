@@ -12,20 +12,19 @@
 
 #include "Timer.h"
 
-class HorizonTimer : public BaseTimer
-{
-public:
-	HorizonTimer();
-	virtual ~HorizonTimer() {;}
+class HorizonTimer : public BaseTimer {
+   public:
+    HorizonTimer();
+    virtual ~HorizonTimer() { ; }
 
-	virtual void start() override;
-	virtual void update() override;
+    virtual void start() override;
+    virtual void update() override;
 
-	virtual inline double getDelta() const override {return m_delta;}
-	virtual inline double getElapsedTime() const override {return m_elapsedTime;}
-	virtual inline uint64_t getElapsedTimeMS() const override {return m_elapsedTimeMS;}
+    virtual inline double getDelta() const override { return m_delta; }
+    virtual inline double getElapsedTime() const override { return m_elapsedTime; }
+    virtual inline uint64_t getElapsedTimeMS() const override { return m_elapsedTimeMS; }
 
-private:
+   private:
     uint64_t m_startTime;
     uint64_t m_currentTime;
 

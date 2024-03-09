@@ -13,173 +13,135 @@
 
 #include <dirent.h>
 #include <libgen.h>
+#include <pwd.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <pwd.h>
 
-LinuxSDLEnvironment::LinuxSDLEnvironment() : SDLEnvironment(NULL)
-{
+LinuxSDLEnvironment::LinuxSDLEnvironment() : SDLEnvironment(NULL) {}
 
+Environment::OS LinuxSDLEnvironment::getOS() { return Environment::OS::OS_LINUX; }
+
+void LinuxSDLEnvironment::sleep(unsigned int us) { usleep(us); }
+
+void LinuxSDLEnvironment::openURLInDefaultBrowser(UString url) {
+    if(fork() == 0) exit(execl("/usr/bin/xdg-open", "xdg-open", url.toUtf8(), (char *)0));
 }
 
-Environment::OS LinuxSDLEnvironment::getOS()
-{
-	return Environment::OS::OS_LINUX;
+UString LinuxSDLEnvironment::getUsername() {
+    passwd *pwd = getpwuid(getuid());
+    if(pwd != NULL && pwd->pw_name != NULL)
+        return UString(pwd->pw_name);
+    else
+        return UString("");
 }
 
-void LinuxSDLEnvironment::sleep(unsigned int us)
-{
-	usleep(us);
+UString LinuxSDLEnvironment::getUserDataPath() {
+    passwd *pwd = getpwuid(getuid());
+    if(pwd != NULL && pwd->pw_dir != NULL)
+        return UString(pwd->pw_dir);
+    else
+        return UString("");
 }
 
-void LinuxSDLEnvironment::openURLInDefaultBrowser(UString url)
-{
-	if (fork() == 0)
-		exit(execl("/usr/bin/xdg-open", "xdg-open", url.toUtf8(), (char*)0));
+bool LinuxSDLEnvironment::directoryExists(std::string directoryName) {
+    DIR *dir = opendir(directoryName.c_str());
+    if(dir) {
+        closedir(dir);
+        return true;
+    } else if(ENOENT == errno)  // not a directory
+    {
+    } else  // something else broke
+    {
+    }
+    return false;
 }
 
-UString LinuxSDLEnvironment::getUsername()
-{
-	passwd *pwd = getpwuid(getuid());
-	if (pwd != NULL && pwd->pw_name != NULL)
-		return UString(pwd->pw_name);
-	else
-		return UString("");
+bool LinuxSDLEnvironment::createDirectory(std::string directoryName) {
+    return mkdir(directoryName.c_str(), DEFFILEMODE) != -1;
 }
 
-UString LinuxSDLEnvironment::getUserDataPath()
-{
-	passwd *pwd = getpwuid(getuid());
-	if (pwd != NULL && pwd->pw_dir != NULL)
-		return UString(pwd->pw_dir);
-	else
-		return UString("");
+std::vector<UString> LinuxSDLEnvironment::getFilesInFolder(UString folder) {
+    std::vector<UString> files;
+
+    struct dirent **namelist;
+    int n = scandir(folder.toUtf8(), &namelist, getFilesInFolderFilter, alphasort);
+    if(n < 0) {
+        /// debugLog("LinuxEnvironment::getFilesInFolder() error, scandir() returned %i!\n", n);
+        return files;
+    }
+
+    while(n--) {
+        const char *name = namelist[n]->d_name;
+        UString uName = UString(name);
+        UString fullName = folder;
+        fullName.append(uName);
+        free(namelist[n]);
+
+        struct stat stDirInfo;
+        int lstatret = lstat(fullName.toUtf8(), &stDirInfo);
+        if(lstatret < 0) {
+            // perror (name);
+            // debugLog("LinuxEnvironment::getFilesInFolder() error, lstat() returned %i!\n", lstatret);
+            continue;
+        }
+
+        if(!S_ISDIR(stDirInfo.st_mode)) files.push_back(uName);
+    }
+    free(namelist);
+
+    return files;
 }
 
-bool LinuxSDLEnvironment::directoryExists(std::string directoryName)
-{
-	DIR *dir = opendir(directoryName.c_str());
-	if (dir)
-	{
-		closedir(dir);
-		return true;
-	}
-	else if (ENOENT == errno) // not a directory
-	{
-	}
-	else // something else broke
-	{
-	}
-	return false;
+std::vector<UString> LinuxSDLEnvironment::getFoldersInFolder(UString folder) {
+    std::vector<UString> folders;
+
+    struct dirent **namelist;
+    int n = scandir(folder.toUtf8(), &namelist, getFoldersInFolderFilter, alphasort);
+    if(n < 0) {
+        /// debugLog("LinuxEnvironment::getFilesInFolder() error, scandir() returned %i!\n", n);
+        return folders;
+    }
+
+    while(n--) {
+        const char *name = namelist[n]->d_name;
+        UString uName = UString(name);
+        UString fullName = folder;
+        fullName.append(uName);
+        free(namelist[n]);
+
+        struct stat stDirInfo;
+        int lstatret = lstat(fullName.toUtf8(), &stDirInfo);
+        if(lstatret < 0) {
+            /// perror (name);
+            /// debugLog("LinuxEnvironment::getFilesInFolder() error, lstat() returned %i!\n", lstatret);
+            continue;
+        }
+
+        if(S_ISDIR(stDirInfo.st_mode)) folders.push_back(uName);
+    }
+    free(namelist);
+
+    return folders;
 }
 
-bool LinuxSDLEnvironment::createDirectory(std::string directoryName)
-{
-	return mkdir(directoryName.c_str(), DEFFILEMODE) != -1;
+std::vector<UString> LinuxSDLEnvironment::getLogicalDrives() {
+    std::vector<UString> drives;
+    drives.push_back(UString("/"));
+    return drives;
 }
 
-std::vector<UString> LinuxSDLEnvironment::getFilesInFolder(UString folder)
-{
-	std::vector<UString> files;
-
-	struct dirent **namelist;
-	int n = scandir(folder.toUtf8(), &namelist, getFilesInFolderFilter, alphasort);
-	if (n < 0)
-	{
-		///debugLog("LinuxEnvironment::getFilesInFolder() error, scandir() returned %i!\n", n);
-		return files;
-	}
-
-	while (n--)
-	{
-		const char *name = namelist[n]->d_name;
-		UString uName = UString(name);
-		UString fullName = folder;
-		fullName.append(uName);
-		free(namelist[n]);
-
-		struct stat stDirInfo;
-		int lstatret = lstat(fullName.toUtf8(), &stDirInfo);
-		if (lstatret < 0)
-		{
-			//perror (name);
-			//debugLog("LinuxEnvironment::getFilesInFolder() error, lstat() returned %i!\n", lstatret);
-			continue;
-		}
-
-		if (!S_ISDIR(stDirInfo.st_mode))
-			files.push_back(uName);
-	}
-	free(namelist);
-
-	return files;
+UString LinuxSDLEnvironment::getFolderFromFilePath(std::string filepath) {
+    if(directoryExists(filepath))  // indirect check if this is already a valid directory (and not a file)
+        return filepath;
+    else
+        return UString(dirname((char *)filepath.c_str()));
 }
-
-std::vector<UString> LinuxSDLEnvironment::getFoldersInFolder(UString folder)
-{
-	std::vector<UString> folders;
-
-	struct dirent **namelist;
-	int n = scandir(folder.toUtf8(), &namelist, getFoldersInFolderFilter, alphasort);
-	if (n < 0)
-	{
-		///debugLog("LinuxEnvironment::getFilesInFolder() error, scandir() returned %i!\n", n);
-		return folders;
-	}
-
-	while (n--)
-	{
-		const char *name = namelist[n]->d_name;
-		UString uName = UString(name);
-		UString fullName = folder;
-		fullName.append(uName);
-		free(namelist[n]);
-
-		struct stat stDirInfo;
-		int lstatret = lstat(fullName.toUtf8(), &stDirInfo);
-		if (lstatret < 0)
-		{
-			///perror (name);
-			///debugLog("LinuxEnvironment::getFilesInFolder() error, lstat() returned %i!\n", lstatret);
-			continue;
-		}
-
-		if (S_ISDIR(stDirInfo.st_mode))
-			folders.push_back(uName);
-	}
-	free(namelist);
-
-	return folders;
-}
-
-std::vector<UString> LinuxSDLEnvironment::getLogicalDrives()
-{
-	std::vector<UString> drives;
-	drives.push_back(UString("/"));
-	return drives;
-}
-
-UString LinuxSDLEnvironment::getFolderFromFilePath(std::string filepath)
-{
-	if (directoryExists(filepath)) // indirect check if this is already a valid directory (and not a file)
-		return filepath;
-	else
-		return UString(dirname((char*)filepath.c_str()));
-}
-
-
 
 // helper functions
 
-int LinuxSDLEnvironment::getFilesInFolderFilter(const struct dirent *entry)
-{
-	return 1;
-}
+int LinuxSDLEnvironment::getFilesInFolderFilter(const struct dirent *entry) { return 1; }
 
-int LinuxSDLEnvironment::getFoldersInFolderFilter(const struct dirent *entry)
-{
-	return 1;
-}
+int LinuxSDLEnvironment::getFoldersInFolderFilter(const struct dirent *entry) { return 1; }
 
 #endif
 

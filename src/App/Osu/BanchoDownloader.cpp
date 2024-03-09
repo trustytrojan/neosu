@@ -1,16 +1,15 @@
 #include "BanchoDownloader.h"
 
-#include <sstream>
 #include <curl/curl.h>
 #include <pthread.h>
-#include "miniz.h"
+
+#include <sstream>
 
 #include "Bancho.h"
-#include "BanchoProtocol.h"
 #include "BanchoNetworking.h"
-
+#include "BanchoProtocol.h"
 #include "Engine.h"
-
+#include "miniz.h"
 
 struct DownloadThread {
     uint32_t id = 0;
@@ -22,8 +21,8 @@ struct DownloadThread {
 pthread_mutex_t downloading_mapsets_mutex = PTHREAD_MUTEX_INITIALIZER;
 std::vector<DownloadThread*> downloading_mapsets;
 
-
-void update_download_progress(void *clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow) {
+void update_download_progress(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal,
+                              curl_off_t ulnow) {
     (void)ultotal;
     (void)ulnow;
 
@@ -42,7 +41,7 @@ void* run_mapset_download_thread(void* arg) {
     downloading_mapsets.push_back(dt);
     pthread_mutex_unlock(&downloading_mapsets_mutex);
 
-    CURL *curl = curl_easy_init();
+    CURL* curl = curl_easy_init();
     if(!curl) {
         debugLog("Failed to initialize cURL\n");
         pthread_mutex_lock(&downloading_mapsets_mutex);
@@ -54,12 +53,8 @@ void* run_mapset_download_thread(void* arg) {
 
     const int NB_MIRRORS = 6;
     const char* mirrors[NB_MIRRORS] = {
-        "https://api.osu.direct/d/%d",
-        "https://chimu.moe/d/%d",
-        "https://api.nerinyan.moe/d/%d",
-        "https://catboy.best/s/%d",
-        "https://osu.gatari.pw/d/%d",
-        "https://osu.sayobot.cn/osu.php?s=%d",
+        "https://api.osu.direct/d/%d", "https://chimu.moe/d/%d",     "https://api.nerinyan.moe/d/%d",
+        "https://catboy.best/s/%d",    "https://osu.gatari.pw/d/%d", "https://osu.sayobot.cn/osu.php?s=%d",
     };
 
     Packet response = {0};
@@ -79,7 +74,7 @@ void* run_mapset_download_thread(void* arg) {
         curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
         curl_easy_setopt(curl, CURLOPT_USERAGENT, bancho.user_agent.toUtf8());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&response);
         curl_easy_setopt(curl, CURLOPT_XFERINFODATA, dt);
         curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, update_download_progress);
         curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
@@ -94,12 +89,12 @@ void* run_mapset_download_thread(void* arg) {
         }
 
         debugLog("Extracting beatmapset %d (%d bytes)\n", dt->id, response.size);
-        if (!mz_zip_reader_init_mem(&zip, response.memory, response.size, 0)) {
+        if(!mz_zip_reader_init_mem(&zip, response.memory, response.size, 0)) {
             debugLog("Failed to open .osz file\n");
             goto reset;
         }
         num_files = mz_zip_reader_get_num_files(&zip);
-        if (num_files <= 0) {
+        if(num_files <= 0) {
             debugLog(".osz file is empty!\n");
             goto reset;
         }
@@ -200,13 +195,12 @@ BeatmapDownloadStatus download_mapset(uint32_t set_id) {
 
     // Start download
     auto dt = new DownloadThread();
-    dt->id = set_id,
-    dt->progress = 0.f;
+    dt->id = set_id, dt->progress = 0.f;
     dt->status = DOWNLOADING;
     dt->thread = {0};
     pthread_mutex_lock(&downloading_mapsets_mutex);
     int ret = pthread_create(&dt->thread, NULL, run_mapset_download_thread, dt);
-    if (ret) {
+    if(ret) {
         pthread_mutex_unlock(&downloading_mapsets_mutex);
         debugLog("Failed to start download thread: pthread_create() returned %i\n", ret);
         delete dt;

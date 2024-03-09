@@ -7,401 +7,363 @@
 
 #include "Font.h"
 
+#include <ft2build.h>
+
+#include "ConVar.h"
+#include "Engine.h"
 #include "ResourceManager.h"
 #include "VertexArrayObject.h"
-#include "Engine.h"
-#include "ConVar.h"
-
-#include <ft2build.h>
 #ifdef MCENGINE_USE_SYSTEM_FREETYPE
 #include <freetype/freetype.h>
-#include <freetype/ftglyph.h>
 #include <freetype/ftbitmap.h>
+#include <freetype/ftglyph.h>
 #include <freetype/ftoutln.h>
 #include <freetype/fttrigon.h>
 #else
 #include <freetype.h>
-#include <ftglyph.h>
 #include <ftbitmap.h>
+#include <ftglyph.h>
 #include <ftoutln.h>
 #include <fttrigon.h>
 #endif
 
-ConVar r_drawstring_max_string_length("r_drawstring_max_string_length", 65536, FCVAR_CHEAT, "maximum number of characters per call, sanity/memory buffer limit");
+ConVar r_drawstring_max_string_length("r_drawstring_max_string_length", 65536, FCVAR_CHEAT,
+                                      "maximum number of characters per call, sanity/memory buffer limit");
 ConVar r_debug_drawstring_unbind("r_debug_drawstring_unbind", false, FCVAR_NONE);
 
-static void renderFTGlyphToTextureAtlas(FT_Library library, FT_Face face, wchar_t ch, TextureAtlas *textureAtlas, bool antialiasing, std::unordered_map<wchar_t, McFont::GLYPH_METRICS> *glyphMetrics);
+static void renderFTGlyphToTextureAtlas(FT_Library library, FT_Face face, wchar_t ch, TextureAtlas *textureAtlas,
+                                        bool antialiasing,
+                                        std::unordered_map<wchar_t, McFont::GLYPH_METRICS> *glyphMetrics);
 static unsigned char *unpackMonoBitmap(FT_Bitmap bitmap);
 
 const wchar_t McFont::UNKNOWN_CHAR;
 
-McFont::McFont(std::string filepath, int fontSize, bool antialiasing, int fontDPI) : Resource(filepath)
-{
-	// the default set of wchar_t glyphs (ASCII table of non-whitespace glyphs, including cyrillics)
-	std::vector<wchar_t> characters;
-	for (int i=32; i<255; i++)
-	{
-		characters.push_back((wchar_t)i);
-	}
+McFont::McFont(std::string filepath, int fontSize, bool antialiasing, int fontDPI) : Resource(filepath) {
+    // the default set of wchar_t glyphs (ASCII table of non-whitespace glyphs, including cyrillics)
+    std::vector<wchar_t> characters;
+    for(int i = 32; i < 255; i++) {
+        characters.push_back((wchar_t)i);
+    }
 
-	constructor(characters, fontSize, antialiasing, fontDPI);
+    constructor(characters, fontSize, antialiasing, fontDPI);
 }
 
-McFont::McFont(std::string filepath, std::vector<wchar_t> characters, int fontSize, bool antialiasing, int fontDPI) : Resource(filepath)
-{
-	constructor(characters, fontSize, antialiasing, fontDPI);
+McFont::McFont(std::string filepath, std::vector<wchar_t> characters, int fontSize, bool antialiasing, int fontDPI)
+    : Resource(filepath) {
+    constructor(characters, fontSize, antialiasing, fontDPI);
 }
 
-void McFont::constructor(std::vector<wchar_t> characters, int fontSize, bool antialiasing, int fontDPI)
-{
-	for (size_t i=0; i<characters.size(); i++)
-	{
-		addGlyph(characters[i]);
-	}
+void McFont::constructor(std::vector<wchar_t> characters, int fontSize, bool antialiasing, int fontDPI) {
+    for(size_t i = 0; i < characters.size(); i++) {
+        addGlyph(characters[i]);
+    }
 
-	m_iFontSize = fontSize;
-	m_bAntialiasing = antialiasing;
-	m_iFontDPI = fontDPI;
+    m_iFontSize = fontSize;
+    m_bAntialiasing = antialiasing;
+    m_iFontDPI = fontDPI;
 
-	m_textureAtlas = NULL;
+    m_textureAtlas = NULL;
 
-	m_fHeight = 1.0f;
+    m_fHeight = 1.0f;
 
-	m_errorGlyph.character = '?';
-	m_errorGlyph.advance_x = 10;
-	m_errorGlyph.sizePixelsX = 1;
-	m_errorGlyph.sizePixelsY = 1;
-	m_errorGlyph.uvPixelsX = 0;
-	m_errorGlyph.uvPixelsY = 0;
-	m_errorGlyph.top = 10;
-	m_errorGlyph.width = 10;
+    m_errorGlyph.character = '?';
+    m_errorGlyph.advance_x = 10;
+    m_errorGlyph.sizePixelsX = 1;
+    m_errorGlyph.sizePixelsY = 1;
+    m_errorGlyph.uvPixelsX = 0;
+    m_errorGlyph.uvPixelsY = 0;
+    m_errorGlyph.top = 10;
+    m_errorGlyph.width = 10;
 }
 
-void McFont::init()
-{
-	debugLog("Resource Manager: Loading %s\n", m_sFilePath.c_str());
+void McFont::init() {
+    debugLog("Resource Manager: Loading %s\n", m_sFilePath.c_str());
 
-	// init freetype
-	FT_Library library;
-	if (FT_Init_FreeType(&library))
-	{
-		engine->showMessageError("Font Error", "FT_Init_FreeType() failed!");
-		return;
-	}
+    // init freetype
+    FT_Library library;
+    if(FT_Init_FreeType(&library)) {
+        engine->showMessageError("Font Error", "FT_Init_FreeType() failed!");
+        return;
+    }
 
-	// load font file
-	FT_Face face;
-	if (FT_New_Face(library, m_sFilePath.c_str(), 0, &face))
-	{
-		engine->showMessageError("Font Error", "Couldn't load font file!\nFT_New_Face() failed.");
-		FT_Done_FreeType(library);
-		return;
-	}
+    // load font file
+    FT_Face face;
+    if(FT_New_Face(library, m_sFilePath.c_str(), 0, &face)) {
+        engine->showMessageError("Font Error", "Couldn't load font file!\nFT_New_Face() failed.");
+        FT_Done_FreeType(library);
+        return;
+    }
 
-	if (FT_Select_Charmap(face, ft_encoding_unicode))
-	{
-		engine->showMessageError("Font Error", "FT_Select_Charmap() failed!");
-		return;
-	}
+    if(FT_Select_Charmap(face, ft_encoding_unicode)) {
+        engine->showMessageError("Font Error", "FT_Select_Charmap() failed!");
+        return;
+    }
 
-	// set font height
-	// "The character width and heights are specified in 1/64th of points"
-	FT_Set_Char_Size(face, m_iFontSize*64, m_iFontSize*64, m_iFontDPI, m_iFontDPI);
+    // set font height
+    // "The character width and heights are specified in 1/64th of points"
+    FT_Set_Char_Size(face, m_iFontSize * 64, m_iFontSize * 64, m_iFontDPI, m_iFontDPI);
 
-	// create texture atlas
-	const int atlasSize = (m_iFontDPI > 96 ? (m_iFontDPI > 2*96 ? 2048 : 1024) : 512); // HACKHACK: hardcoded max atlas size, and heuristic
-	engine->getResourceManager()->requestNextLoadUnmanaged();
-	m_textureAtlas = engine->getResourceManager()->createTextureAtlas(atlasSize, atlasSize);
+    // create texture atlas
+    const int atlasSize = (m_iFontDPI > 96 ? (m_iFontDPI > 2 * 96 ? 2048 : 1024)
+                                           : 512);  // HACKHACK: hardcoded max atlas size, and heuristic
+    engine->getResourceManager()->requestNextLoadUnmanaged();
+    m_textureAtlas = engine->getResourceManager()->createTextureAtlas(atlasSize, atlasSize);
 
-	// now render all glyphs into the atlas
-	for (size_t i=0; i<m_vGlyphs.size(); i++)
-	{
-		renderFTGlyphToTextureAtlas(library, face, m_vGlyphs[i], m_textureAtlas, m_bAntialiasing, &m_vGlyphMetrics);
-	}
+    // now render all glyphs into the atlas
+    for(size_t i = 0; i < m_vGlyphs.size(); i++) {
+        renderFTGlyphToTextureAtlas(library, face, m_vGlyphs[i], m_textureAtlas, m_bAntialiasing, &m_vGlyphMetrics);
+    }
 
-	// shutdown freetype
-	FT_Done_Face(face);
-	FT_Done_FreeType(library);
+    // shutdown freetype
+    FT_Done_Face(face);
+    FT_Done_FreeType(library);
 
-	// build atlas texture
-	engine->getResourceManager()->loadResource(m_textureAtlas);
+    // build atlas texture
+    engine->getResourceManager()->loadResource(m_textureAtlas);
 
-	if (m_bAntialiasing)
-		m_textureAtlas->getAtlasImage()->setFilterMode(Graphics::FILTER_MODE::FILTER_MODE_LINEAR);
-	else
-		m_textureAtlas->getAtlasImage()->setFilterMode(Graphics::FILTER_MODE::FILTER_MODE_NONE);
+    if(m_bAntialiasing)
+        m_textureAtlas->getAtlasImage()->setFilterMode(Graphics::FILTER_MODE::FILTER_MODE_LINEAR);
+    else
+        m_textureAtlas->getAtlasImage()->setFilterMode(Graphics::FILTER_MODE::FILTER_MODE_NONE);
 
-	// precalculate average/max ASCII glyph height
-	m_fHeight = 0.0f;
-	for (int i=0; i<128; i++)
-	{
-		const int curHeight = getGlyphMetrics((wchar_t)i).top;
-		if (curHeight > m_fHeight)
-			m_fHeight = curHeight;
-	}
+    // precalculate average/max ASCII glyph height
+    m_fHeight = 0.0f;
+    for(int i = 0; i < 128; i++) {
+        const int curHeight = getGlyphMetrics((wchar_t)i).top;
+        if(curHeight > m_fHeight) m_fHeight = curHeight;
+    }
 
-	m_bReady = true;
+    m_bReady = true;
 }
 
-void McFont::initAsync()
-{
-	// (nothing)
+void McFont::initAsync() {
+    // (nothing)
 
-	m_bAsyncReady = true;
+    m_bAsyncReady = true;
 }
 
-void McFont::destroy()
-{
-	SAFE_DELETE(m_textureAtlas);
+void McFont::destroy() {
+    SAFE_DELETE(m_textureAtlas);
 
-	m_vGlyphMetrics = std::unordered_map<wchar_t, GLYPH_METRICS>();
-	m_fHeight = 1.0f;
+    m_vGlyphMetrics = std::unordered_map<wchar_t, GLYPH_METRICS>();
+    m_fHeight = 1.0f;
 }
 
-bool McFont::addGlyph(wchar_t ch)
-{
-	if (m_vGlyphExistence.find(ch) != m_vGlyphExistence.end()) return false;
-	if (ch < 32) return false;
+bool McFont::addGlyph(wchar_t ch) {
+    if(m_vGlyphExistence.find(ch) != m_vGlyphExistence.end()) return false;
+    if(ch < 32) return false;
 
-	m_vGlyphs.push_back(ch);
-	m_vGlyphExistence[ch] = true;
+    m_vGlyphs.push_back(ch);
+    m_vGlyphExistence[ch] = true;
 
-	return true;
+    return true;
 }
 
-void McFont::drawString(Graphics *g, UString text)
-{
-	if (!m_bReady) return;
+void McFont::drawString(Graphics *g, UString text) {
+    if(!m_bReady) return;
 
-	const int maxNumGlyphs = r_drawstring_max_string_length.getInt();
+    const int maxNumGlyphs = r_drawstring_max_string_length.getInt();
 
-	// texture atlas rendering
-	m_textureAtlas->getAtlasImage()->bind();
-	{
-		float advanceX = 0.0f;
-		static VertexArrayObject vao(Graphics::PRIMITIVE::PRIMITIVE_QUADS); // keep memory, avoid reallocations
-		vao.empty();
+    // texture atlas rendering
+    m_textureAtlas->getAtlasImage()->bind();
+    {
+        float advanceX = 0.0f;
+        static VertexArrayObject vao(Graphics::PRIMITIVE::PRIMITIVE_QUADS);  // keep memory, avoid reallocations
+        vao.empty();
 
-		for (int i=0; i<text.length() && i<maxNumGlyphs; i++)
-		{
-			addAtlasGlyphToVao(g, text[i], advanceX, &vao);
-		}
+        for(int i = 0; i < text.length() && i < maxNumGlyphs; i++) {
+            addAtlasGlyphToVao(g, text[i], advanceX, &vao);
+        }
 
-		g->drawVAO(&vao);
-	}
-	if (r_debug_drawstring_unbind.getBool())
-		m_textureAtlas->getAtlasImage()->unbind();
+        g->drawVAO(&vao);
+    }
+    if(r_debug_drawstring_unbind.getBool()) m_textureAtlas->getAtlasImage()->unbind();
 }
 
-void McFont::addAtlasGlyphToVao(Graphics *g, wchar_t ch, float &advanceX, VertexArrayObject *vao)
-{
-	const GLYPH_METRICS &gm = getGlyphMetrics(ch);
+void McFont::addAtlasGlyphToVao(Graphics *g, wchar_t ch, float &advanceX, VertexArrayObject *vao) {
+    const GLYPH_METRICS &gm = getGlyphMetrics(ch);
 
-	// apply glyph offsets and flip horizontally
-	const float x = gm.left + advanceX;
-	const float y = -(gm.top - gm.rows);
+    // apply glyph offsets and flip horizontally
+    const float x = gm.left + advanceX;
+    const float y = -(gm.top - gm.rows);
 
-	const float sx = gm.width;
-	const float sy = -gm.rows;
+    const float sx = gm.width;
+    const float sy = -gm.rows;
 
-	const float texX = ((float)gm.uvPixelsX / (float)m_textureAtlas->getAtlasImage()->getWidth());
-	const float texY = ((float)gm.uvPixelsY / (float)m_textureAtlas->getAtlasImage()->getHeight());
+    const float texX = ((float)gm.uvPixelsX / (float)m_textureAtlas->getAtlasImage()->getWidth());
+    const float texY = ((float)gm.uvPixelsY / (float)m_textureAtlas->getAtlasImage()->getHeight());
 
-	const float texSizeX = (float)gm.sizePixelsX / (float)m_textureAtlas->getAtlasImage()->getWidth();
-	const float texSizeY = (float)gm.sizePixelsY / (float)m_textureAtlas->getAtlasImage()->getHeight();
+    const float texSizeX = (float)gm.sizePixelsX / (float)m_textureAtlas->getAtlasImage()->getWidth();
+    const float texSizeY = (float)gm.sizePixelsY / (float)m_textureAtlas->getAtlasImage()->getHeight();
 
-	// add it
-	vao->addVertex(x, y + sy);
-	vao->addTexcoord(texX, texY);
+    // add it
+    vao->addVertex(x, y + sy);
+    vao->addTexcoord(texX, texY);
 
-	vao->addVertex(x, y);
-	vao->addTexcoord(texX, texY + texSizeY);
+    vao->addVertex(x, y);
+    vao->addTexcoord(texX, texY + texSizeY);
 
-	vao->addVertex(x + sx, y);
-	vao->addTexcoord(texX + texSizeX, texY + texSizeY);
+    vao->addVertex(x + sx, y);
+    vao->addTexcoord(texX + texSizeX, texY + texSizeY);
 
-	vao->addVertex(x + sx, y + sy);
-	vao->addTexcoord(texX + texSizeX, texY);
+    vao->addVertex(x + sx, y + sy);
+    vao->addTexcoord(texX + texSizeX, texY);
 
-	// move to next glyph
-	advanceX += gm.advance_x;
+    // move to next glyph
+    advanceX += gm.advance_x;
 }
 
-void McFont::drawTextureAtlas(Graphics *g)
-{
-	// debug
-	g->pushTransform();
-	{
-		g->translate(m_textureAtlas->getWidth()/2 + 50, m_textureAtlas->getHeight()/2 + 50);
-		g->drawImage(m_textureAtlas->getAtlasImage());
-	}
-	g->popTransform();
+void McFont::drawTextureAtlas(Graphics *g) {
+    // debug
+    g->pushTransform();
+    {
+        g->translate(m_textureAtlas->getWidth() / 2 + 50, m_textureAtlas->getHeight() / 2 + 50);
+        g->drawImage(m_textureAtlas->getAtlasImage());
+    }
+    g->popTransform();
 }
 
-float McFont::getStringWidth(UString text) const
-{
-	if (!m_bReady) return 1.0f;
+float McFont::getStringWidth(UString text) const {
+    if(!m_bReady) return 1.0f;
 
-	float width = 0;
-	for (int i=0; i<text.length(); i++)
-	{
-		width += getGlyphMetrics(text[i]).advance_x;
-	}
+    float width = 0;
+    for(int i = 0; i < text.length(); i++) {
+        width += getGlyphMetrics(text[i]).advance_x;
+    }
 
-	return width;
+    return width;
 }
 
-float McFont::getStringHeight(UString text) const
-{
-	if (!m_bReady) return 1.0f;
+float McFont::getStringHeight(UString text) const {
+    if(!m_bReady) return 1.0f;
 
-	float height = 0;
-	for (int i=0; i<text.length(); i++)
-	{
-		height += getGlyphMetrics(text[i]).top;
-	}
+    float height = 0;
+    for(int i = 0; i < text.length(); i++) {
+        height += getGlyphMetrics(text[i]).top;
+    }
 
-	return height;
+    return height;
 }
 
-const McFont::GLYPH_METRICS &McFont::getGlyphMetrics(wchar_t ch) const
-{
-	if (m_vGlyphMetrics.find(ch) != m_vGlyphMetrics.end())
-		return m_vGlyphMetrics.at(ch);
-	else if (m_vGlyphMetrics.find(UNKNOWN_CHAR) != m_vGlyphMetrics.end())
-		return m_vGlyphMetrics.at(UNKNOWN_CHAR);
-	else
-	{
-		debugLog("Font Error: Missing default backup glyph (UNKNOWN_CHAR)!\n");
-		return m_errorGlyph;
-	}
+const McFont::GLYPH_METRICS &McFont::getGlyphMetrics(wchar_t ch) const {
+    if(m_vGlyphMetrics.find(ch) != m_vGlyphMetrics.end())
+        return m_vGlyphMetrics.at(ch);
+    else if(m_vGlyphMetrics.find(UNKNOWN_CHAR) != m_vGlyphMetrics.end())
+        return m_vGlyphMetrics.at(UNKNOWN_CHAR);
+    else {
+        debugLog("Font Error: Missing default backup glyph (UNKNOWN_CHAR)!\n");
+        return m_errorGlyph;
+    }
 }
 
-bool McFont::hasGlyph(wchar_t ch) const
-{
-	return (m_vGlyphMetrics.find(ch) != m_vGlyphMetrics.end());
-}
-
-
+bool McFont::hasGlyph(wchar_t ch) const { return (m_vGlyphMetrics.find(ch) != m_vGlyphMetrics.end()); }
 
 // helper functions
 
-static void renderFTGlyphToTextureAtlas(FT_Library library, FT_Face face, wchar_t ch, TextureAtlas *textureAtlas, bool antialiasing, std::unordered_map<wchar_t, McFont::GLYPH_METRICS> *glyphMetrics)
-{
-	// load current glyph
-	if (FT_Load_Glyph(face, FT_Get_Char_Index(face, ch), antialiasing ? FT_LOAD_TARGET_NORMAL : FT_LOAD_TARGET_MONO))
-	{
-		//engine->showMessageError("Font Error", "FT_Load_Glyph() failed!");
-		debugLog("Font Error: FT_Load_Glyph() failed!\n");
-		return;
-	}
-
-	// create glyph object from face glyph
-    FT_Glyph glyph;
-    if (FT_Get_Glyph(face->glyph, &glyph))
-    {
-    	//engine->showMessageError("Font Error", "FT_Get_Glyph() failed!");
-    	debugLog("Font Error: FT_Get_Glyph() failed!\n");
-    	return;
+static void renderFTGlyphToTextureAtlas(FT_Library library, FT_Face face, wchar_t ch, TextureAtlas *textureAtlas,
+                                        bool antialiasing,
+                                        std::unordered_map<wchar_t, McFont::GLYPH_METRICS> *glyphMetrics) {
+    // load current glyph
+    if(FT_Load_Glyph(face, FT_Get_Char_Index(face, ch), antialiasing ? FT_LOAD_TARGET_NORMAL : FT_LOAD_TARGET_MONO)) {
+        // engine->showMessageError("Font Error", "FT_Load_Glyph() failed!");
+        debugLog("Font Error: FT_Load_Glyph() failed!\n");
+        return;
     }
 
-	// convert glyph to bitmap
-	FT_Glyph_To_Bitmap(&glyph, antialiasing ? FT_RENDER_MODE_NORMAL : FT_RENDER_MODE_MONO, 0, 1);
+    // create glyph object from face glyph
+    FT_Glyph glyph;
+    if(FT_Get_Glyph(face->glyph, &glyph)) {
+        // engine->showMessageError("Font Error", "FT_Get_Glyph() failed!");
+        debugLog("Font Error: FT_Get_Glyph() failed!\n");
+        return;
+    }
+
+    // convert glyph to bitmap
+    FT_Glyph_To_Bitmap(&glyph, antialiasing ? FT_RENDER_MODE_NORMAL : FT_RENDER_MODE_MONO, 0, 1);
     FT_BitmapGlyph bitmapGlyph = (FT_BitmapGlyph)glyph;
 
     // get width & height of the glyph bitmap
     FT_Bitmap &bitmap = bitmapGlyph->bitmap;
-	const int width = bitmap.width;
-	const int height = bitmap.rows;
+    const int width = bitmap.width;
+    const int height = bitmap.rows;
 
-	// build texture
-	Vector2 atlasPos;
-	if (width > 0 && height > 0)
-	{
-		// temp texture data memory
-		unsigned char *expandedData = new unsigned char[4 * width * height];
-		unsigned char *monoBitmapUnpacked = NULL;
+    // build texture
+    Vector2 atlasPos;
+    if(width > 0 && height > 0) {
+        // temp texture data memory
+        unsigned char *expandedData = new unsigned char[4 * width * height];
+        unsigned char *monoBitmapUnpacked = NULL;
 
-		if (!antialiasing)
-			monoBitmapUnpacked = unpackMonoBitmap(bitmap);
+        if(!antialiasing) monoBitmapUnpacked = unpackMonoBitmap(bitmap);
 
-		// expand bitmap
-		for (int j=0; j<height; j++)
-		{
-			for (int i=0; i<width; i++)
-			{
-				unsigned char alpha = 0;
+        // expand bitmap
+        for(int j = 0; j < height; j++) {
+            for(int i = 0; i < width; i++) {
+                unsigned char alpha = 0;
 
-				if (i < bitmap.width && j < bitmap.rows)
-				{
-					if (antialiasing)
-						alpha = bitmap.buffer[i + bitmap.width*j];
-					else
-						alpha = monoBitmapUnpacked[i + bitmap.width*j] > 0 ? 255 : 0;
-				}
+                if(i < bitmap.width && j < bitmap.rows) {
+                    if(antialiasing)
+                        alpha = bitmap.buffer[i + bitmap.width * j];
+                    else
+                        alpha = monoBitmapUnpacked[i + bitmap.width * j] > 0 ? 255 : 0;
+                }
 
-				expandedData[(4*i + (height - j - 1) * width * 4)    ] = 0xff;	// R
-				expandedData[(4*i + (height - j - 1) * width * 4) + 1] = 0xff;	// G
-				expandedData[(4*i + (height - j - 1) * width * 4) + 2] = 0xff;	// B
-				expandedData[(4*i + (height - j - 1) * width * 4) + 3] = alpha;	// A
-			}
-		}
+                expandedData[(4 * i + (height - j - 1) * width * 4)] = 0xff;       // R
+                expandedData[(4 * i + (height - j - 1) * width * 4) + 1] = 0xff;   // G
+                expandedData[(4 * i + (height - j - 1) * width * 4) + 2] = 0xff;   // B
+                expandedData[(4 * i + (height - j - 1) * width * 4) + 3] = alpha;  // A
+            }
+        }
 
-		// add glyph to atlas
-		atlasPos = textureAtlas->put(width, height, false, true, (Color*)expandedData);
+        // add glyph to atlas
+        atlasPos = textureAtlas->put(width, height, false, true, (Color *)expandedData);
 
-		// free temp expanded textures
-		delete[] expandedData;
-		if (!antialiasing)
-			delete[] monoBitmapUnpacked;
-	}
+        // free temp expanded textures
+        delete[] expandedData;
+        if(!antialiasing) delete[] monoBitmapUnpacked;
+    }
 
-	// save glyph metrics
-	(*glyphMetrics)[ch].character = ch;
+    // save glyph metrics
+    (*glyphMetrics)[ch].character = ch;
 
-	(*glyphMetrics)[ch].uvPixelsX = (unsigned int)atlasPos.x;
-	(*glyphMetrics)[ch].uvPixelsY = (unsigned int)atlasPos.y;
-	(*glyphMetrics)[ch].sizePixelsX = (unsigned int)width;
-	(*glyphMetrics)[ch].sizePixelsY = (unsigned int)height;
+    (*glyphMetrics)[ch].uvPixelsX = (unsigned int)atlasPos.x;
+    (*glyphMetrics)[ch].uvPixelsY = (unsigned int)atlasPos.y;
+    (*glyphMetrics)[ch].sizePixelsX = (unsigned int)width;
+    (*glyphMetrics)[ch].sizePixelsY = (unsigned int)height;
 
-	(*glyphMetrics)[ch].left = bitmapGlyph->left;
-	(*glyphMetrics)[ch].top = bitmapGlyph->top;
-	(*glyphMetrics)[ch].width = bitmap.width;
-	(*glyphMetrics)[ch].rows = bitmap.rows;
+    (*glyphMetrics)[ch].left = bitmapGlyph->left;
+    (*glyphMetrics)[ch].top = bitmapGlyph->top;
+    (*glyphMetrics)[ch].width = bitmap.width;
+    (*glyphMetrics)[ch].rows = bitmap.rows;
 
-	(*glyphMetrics)[ch].advance_x = (float)(face->glyph->advance.x >> 6);
+    (*glyphMetrics)[ch].advance_x = (float)(face->glyph->advance.x >> 6);
 
-	// release
-	FT_Done_Glyph(glyph);
+    // release
+    FT_Done_Glyph(glyph);
 }
 
-static unsigned char *unpackMonoBitmap(FT_Bitmap bitmap)
-{
-	unsigned char *result;
-	int y, byte_index, num_bits_done, rowstart, bits, bit_index;
-	unsigned char byte_value;
+static unsigned char *unpackMonoBitmap(FT_Bitmap bitmap) {
+    unsigned char *result;
+    int y, byte_index, num_bits_done, rowstart, bits, bit_index;
+    unsigned char byte_value;
 
-	result = new unsigned char[bitmap.rows * bitmap.width];
+    result = new unsigned char[bitmap.rows * bitmap.width];
 
-	for (y=0; y<bitmap.rows; y++)
-	{
-		for (byte_index=0; byte_index<bitmap.pitch; byte_index++)
-		{
-			byte_value = bitmap.buffer[y * bitmap.pitch + byte_index];
-			num_bits_done = byte_index * 8;
-			rowstart = y * bitmap.width + byte_index * 8;
-			bits = 8;
+    for(y = 0; y < bitmap.rows; y++) {
+        for(byte_index = 0; byte_index < bitmap.pitch; byte_index++) {
+            byte_value = bitmap.buffer[y * bitmap.pitch + byte_index];
+            num_bits_done = byte_index * 8;
+            rowstart = y * bitmap.width + byte_index * 8;
+            bits = 8;
 
-			if ((bitmap.width - num_bits_done) < 8)
-				bits = bitmap.width - num_bits_done;
+            if((bitmap.width - num_bits_done) < 8) bits = bitmap.width - num_bits_done;
 
-			for (bit_index=0; bit_index<bits; bit_index++)
-			{
-				const int bit = byte_value & (1 << (7 - bit_index));
-				result[rowstart + bit_index] = bit;
-			}
-		}
-	}
+            for(bit_index = 0; bit_index < bits; bit_index++) {
+                const int bit = byte_value & (1 << (7 - bit_index));
+                result[rowstart + bit_index] = bit;
+            }
+        }
+    }
 
-	return result;
+    return result;
 }

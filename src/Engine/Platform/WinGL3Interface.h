@@ -16,31 +16,30 @@
 
 #include <Windows.h>
 
-class WinGL3Interface : public OpenGL3Interface
-{
-public:
-	static PIXELFORMATDESCRIPTOR getPixelFormatDescriptor();
+class WinGL3Interface : public OpenGL3Interface {
+   public:
+    static PIXELFORMATDESCRIPTOR getPixelFormatDescriptor();
 
-public:
-	WinGL3Interface(HWND hwnd);
-	virtual ~WinGL3Interface();
+   public:
+    WinGL3Interface(HWND hwnd);
+    virtual ~WinGL3Interface();
 
-	// scene
-	void endScene();
+    // scene
+    void endScene();
 
-	// device settings
-	void setVSync(bool vsync);
+    // device settings
+    void setVSync(bool vsync);
 
-	// ILLEGAL:
-	bool checkGLHardwareAcceleration();
-	inline HGLRC getGLContext() const {return m_hglrc;}
-	inline HDC getHDC() const {return m_hdc;}
+    // ILLEGAL:
+    bool checkGLHardwareAcceleration();
+    inline HGLRC getGLContext() const { return m_hglrc; }
+    inline HDC getHDC() const { return m_hdc; }
 
-private:
-	// device context
-	HWND m_hwnd;
-	HGLRC m_hglrc;
-	HDC m_hdc;
+   private:
+    // device context
+    HWND m_hwnd;
+    HGLRC m_hglrc;
+    HDC m_hdc;
 };
 
 #endif

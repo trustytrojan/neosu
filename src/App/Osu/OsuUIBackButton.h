@@ -12,24 +12,23 @@
 
 class Osu;
 
-class OsuUIBackButton : public CBaseUIButton
-{
-public:
-	OsuUIBackButton(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name);
+class OsuUIBackButton : public CBaseUIButton {
+   public:
+    OsuUIBackButton(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name);
 
-	virtual void draw(Graphics *g);
-	virtual void mouse_update(bool *propagate_clicks);
+    virtual void draw(Graphics *g);
+    virtual void mouse_update(bool *propagate_clicks);
 
-	virtual void onMouseInside();
-	virtual void onMouseOutside();
+    virtual void onMouseInside();
+    virtual void onMouseOutside();
 
-	virtual void updateLayout();
+    virtual void updateLayout();
 
-	void resetAnimation();
+    void resetAnimation();
 
-private:
-	Osu *m_osu;
-	float m_fAnimation;
-	float m_fImageScale;
+   private:
+    Osu *m_osu;
+    float m_fAnimation;
+    float m_fImageScale;
 };
 #endif

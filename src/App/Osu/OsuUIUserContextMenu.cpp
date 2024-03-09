@@ -3,14 +3,12 @@
 #include "Bancho.h"
 #include "BanchoNetworking.h"
 #include "BanchoUsers.h"
+#include "Engine.h"
+#include "Mouse.h"
 #include "Osu.h"
 #include "OsuChat.h"
 #include "OsuNotificationOverlay.h"
 #include "OsuUIContextMenu.h"
-
-#include "Engine.h"
-#include "Mouse.h"
-
 
 OsuUIUserContextMenuScreen::OsuUIUserContextMenuScreen(Osu *osu) : OsuScreen(osu) {
     m_bVisible = true;
@@ -81,9 +79,7 @@ void OsuUIUserContextMenuScreen::open(uint32_t user_id) {
     menu->setVisible(true);
 }
 
-void OsuUIUserContextMenuScreen::close() {
-    menu->setVisible(false);
-}
+void OsuUIUserContextMenuScreen::close() { menu->setVisible(false); }
 
 void OsuUIUserContextMenuScreen::on_action(UString text, int user_action) {
     auto user_info = get_user_info(m_user_id);
@@ -106,16 +102,17 @@ void OsuUIUserContextMenuScreen::on_action(UString text, int user_action) {
         Packet packet = {0};
         packet.id = MATCH_LOCK;
         write_int32(&packet, slot_number);
-        send_packet(packet); // kick by locking the slot
-        send_packet(packet); // unlock the slot
+        send_packet(packet);  // kick by locking the slot
+        send_packet(packet);  // unlock the slot
     } else if(user_action == START_CHAT) {
         m_osu->m_chat->addChannel(user_info->name, true);
     } else if(user_action == VIEW_PROFILE) {
         auto url = UString::format("https://%s/u/%d", bancho.endpoint.toUtf8(), m_user_id);
-        if (env->getOS() == Environment::OS::OS_HORIZON) {
+        if(env->getOS() == Environment::OS::OS_HORIZON) {
             m_osu->getNotificationOverlay()->addNotification(url, 0xffffffff, false, 0.75f);
         } else {
-            m_osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
+            m_osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false,
+                                                             0.75f);
             env->openURLInDefaultBrowser(url.toUtf8());
         }
     } else if(user_action == UA_ADD_FRIEND) {
@@ -137,7 +134,6 @@ void OsuUIUserContextMenuScreen::on_action(UString text, int user_action) {
     menu->setVisible(false);
 }
 
-
 OsuUIUserLabel::OsuUIUserLabel(Osu *osu, uint32_t user_id, UString username) : CBaseUILabel() {
     m_user_id = user_id;
     setText(username);
@@ -145,6 +141,4 @@ OsuUIUserLabel::OsuUIUserLabel(Osu *osu, uint32_t user_id, UString username) : C
     setDrawBackground(false);
 }
 
-void OsuUIUserLabel::onMouseUpInside() {
-    bancho.osu->m_user_actions->open(m_user_id);
-}
+void OsuUIUserLabel::onMouseUpInside() { bancho.osu->m_user_actions->open(m_user_id); }

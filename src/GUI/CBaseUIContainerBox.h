@@ -10,19 +10,16 @@
 
 #include "CBaseUIContainerBase.h"
 
-class CBaseUIContainerBox : public CBaseUIContainerBase
-{
-public:
-	CBaseUIContainerBox(float xPos=0, float yPos=0, UString name="");
-	virtual ~CBaseUIContainerBox();
+class CBaseUIContainerBox : public CBaseUIContainerBase {
+   public:
+    CBaseUIContainerBox(float xPos = 0, float yPos = 0, UString name = "");
+    virtual ~CBaseUIContainerBox();
 
-	CONTAINER_BODY(CBaseUIContainerBox)
+    CONTAINER_BODY(CBaseUIContainerBox)
 
-protected:
-	virtual void updateLayout();
-	virtual void updateElement(CBaseUIElement *element);
-
-
+   protected:
+    virtual void updateLayout();
+    virtual void updateElement(CBaseUIElement *element);
 };
 
 #endif /* GUI_CBASEUICONTAINERBOX_H_ */

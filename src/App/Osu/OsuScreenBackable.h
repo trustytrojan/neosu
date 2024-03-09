@@ -13,23 +13,22 @@
 
 class Osu;
 
-class OsuScreenBackable : public OsuScreen
-{
-public:
-	OsuScreenBackable(Osu *osu);
-	virtual ~OsuScreenBackable();
+class OsuScreenBackable : public OsuScreen {
+   public:
+    OsuScreenBackable(Osu *osu);
+    virtual ~OsuScreenBackable();
 
-	virtual void draw(Graphics *g);
-	virtual void mouse_update(bool *propagate_clicks);
-	virtual void onKeyDown(KeyboardEvent &e);
-	virtual void onResolutionChange(Vector2 newResolution);
+    virtual void draw(Graphics *g);
+    virtual void mouse_update(bool *propagate_clicks);
+    virtual void onKeyDown(KeyboardEvent &e);
+    virtual void onResolutionChange(Vector2 newResolution);
 
-protected:
-	virtual void onBack() = 0;
+   protected:
+    virtual void onBack() = 0;
 
-	virtual void updateLayout();
+    virtual void updateLayout();
 
-	OsuUIBackButton *m_backButton;
+    OsuUIBackButton *m_backButton;
 };
 
 #endif

@@ -14,24 +14,23 @@ class CBaseUIContainer;
 class CBaseUIScrollView;
 class CBaseUIImage;
 
-class OsuVRTutorial : public OsuScreenBackable
-{
-public:
-	OsuVRTutorial(Osu *osu);
+class OsuVRTutorial : public OsuScreenBackable {
+   public:
+    OsuVRTutorial(Osu *osu);
 
-	virtual void mouse_update(bool *propagate_clicks);
+    virtual void mouse_update(bool *propagate_clicks);
 
-	virtual void onKeyDown(KeyboardEvent &e);
+    virtual void onKeyDown(KeyboardEvent &e);
 
-	virtual CBaseUIContainer* setVisible(bool visible);
+    virtual CBaseUIContainer *setVisible(bool visible);
 
-private:
-	virtual void updateLayout();
-	virtual void onBack();
+   private:
+    virtual void updateLayout();
+    virtual void onBack();
 
-	CBaseUIScrollView *m_scrollView;
-	CBaseUIImage *m_tutorialImage1;
-	CBaseUIImage *m_tutorialImage2;
+    CBaseUIScrollView *m_scrollView;
+    CBaseUIImage *m_tutorialImage1;
+    CBaseUIImage *m_tutorialImage2;
 };
 
 #endif

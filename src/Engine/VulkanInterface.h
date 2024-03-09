@@ -32,40 +32,38 @@
 
 class ConVar;
 
-class VulkanInterface
-{
-public:
-	static ConVar *debug_vulkan;
+class VulkanInterface {
+   public:
+    static ConVar *debug_vulkan;
 
-public:
-	VulkanInterface();
-	~VulkanInterface();
+   public:
+    VulkanInterface();
+    ~VulkanInterface();
 
-	void finish();
+    void finish();
 
-	inline uint32_t getQueueFamilyIndex() const {return m_iQueueFamilyIndex;}
-	inline bool isReady() const {return m_bReady;}
+    inline uint32_t getQueueFamilyIndex() const { return m_iQueueFamilyIndex; }
+    inline bool isReady() const { return m_bReady; }
 
 #ifdef MCENGINE_FEATURE_VULKAN
 
-	// ILLEGAL:
-	inline VkInstance getInstance() const {return m_instance;}
-	inline VkPhysicalDevice getPhysicalDevice() const {return m_physicalDevice;}
-	inline VkDevice getDevice() const {return m_device;}
+    // ILLEGAL:
+    inline VkInstance getInstance() const { return m_instance; }
+    inline VkPhysicalDevice getPhysicalDevice() const { return m_physicalDevice; }
+    inline VkDevice getDevice() const { return m_device; }
 
 #endif
 
-private:
-
-	bool m_bReady;
-	uint32_t m_iQueueFamilyIndex;
+   private:
+    bool m_bReady;
+    uint32_t m_iQueueFamilyIndex;
 
 #ifdef MCENGINE_FEATURE_VULKAN
 
-	VkInstance m_instance;
-	VkPhysicalDevice m_physicalDevice;
-	VkDevice m_device;
-	VkCommandPool m_commandPool;
+    VkInstance m_instance;
+    VkPhysicalDevice m_physicalDevice;
+    VkDevice m_device;
+    VkCommandPool m_commandPool;
 
 #endif
 };

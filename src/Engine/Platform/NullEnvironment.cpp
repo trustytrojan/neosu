@@ -6,33 +6,19 @@
 //===============================================================================//
 
 #include "NullEnvironment.h"
-#include "Engine.h"
 
-#include "NullGraphicsInterface.h"
+#include "Engine.h"
 #include "NullContextMenu.h"
+#include "NullGraphicsInterface.h"
 
 extern bool g_bRunning;
 
-NullEnvironment::NullEnvironment()
-{
-}
+NullEnvironment::NullEnvironment() {}
 
-Graphics *NullEnvironment::createRenderer()
-{
-	return new NullGraphicsInterface();
-}
+Graphics *NullEnvironment::createRenderer() { return new NullGraphicsInterface(); }
 
-ContextMenu *NullEnvironment::createContextMenu()
-{
-	return new NullContextMenu();
-}
+ContextMenu *NullEnvironment::createContextMenu() { return new NullContextMenu(); }
 
-void NullEnvironment::shutdown()
-{
-	g_bRunning = false;
-}
+void NullEnvironment::shutdown() { g_bRunning = false; }
 
-void NullEnvironment::restart()
-{
-	shutdown();
-}
+void NullEnvironment::restart() { shutdown(); }

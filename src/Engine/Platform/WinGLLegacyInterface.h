@@ -21,37 +21,35 @@ class ConVar;
 PIXELFORMATDESCRIPTOR getPixelFormatDescriptor();
 bool initWinGLMultisample(HDC hDC, HINSTANCE hInstance, HWND hWnd, int factor);
 
-struct FAKE_CONTEXT
-{
-	HGLRC hglrc;
-	HDC hdc;
+struct FAKE_CONTEXT {
+    HGLRC hglrc;
+    HDC hdc;
 };
 
-class WinGLLegacyInterface : public OpenGLLegacyInterface
-{
-public:
-	static FAKE_CONTEXT createAndMakeCurrentWGLContext(HWND hwnd, PIXELFORMATDESCRIPTOR pfdIn);
+class WinGLLegacyInterface : public OpenGLLegacyInterface {
+   public:
+    static FAKE_CONTEXT createAndMakeCurrentWGLContext(HWND hwnd, PIXELFORMATDESCRIPTOR pfdIn);
 
-public:
-	WinGLLegacyInterface(HWND hwnd);
-	virtual ~WinGLLegacyInterface();
+   public:
+    WinGLLegacyInterface(HWND hwnd);
+    virtual ~WinGLLegacyInterface();
 
-	// scene
-	void endScene();
+    // scene
+    void endScene();
 
-	// device settings
-	void setVSync(bool vsync);
+    // device settings
+    void setVSync(bool vsync);
 
-	// ILLEGAL:
-	bool checkGLHardwareAcceleration();
-	inline HGLRC getGLContext() const {return m_hglrc;}
-	inline HDC getGLHDC() const {return m_hdc;}
+    // ILLEGAL:
+    bool checkGLHardwareAcceleration();
+    inline HGLRC getGLContext() const { return m_hglrc; }
+    inline HDC getGLHDC() const { return m_hdc; }
 
-private:
-	// device context
-	HWND m_hwnd;
-	HGLRC m_hglrc;
-	HDC m_hdc;
+   private:
+    // device context
+    HWND m_hwnd;
+    HGLRC m_hglrc;
+    HDC m_hdc;
 };
 
 #endif

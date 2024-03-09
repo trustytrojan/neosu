@@ -8,45 +8,34 @@
 #ifndef APP_H
 #define APP_H
 
-#include "cbase.h"
 #include "KeyboardListener.h"
+#include "cbase.h"
 
 class Engine;
 
-class App : public KeyboardListener
-{
-public:
-	App() {;}
-	virtual ~App() {;}
+class App : public KeyboardListener {
+   public:
+    App() { ; }
+    virtual ~App() { ; }
 
-	virtual void draw(Graphics *g) {
-		(void)g;
-	}
-	virtual void update() {;}
+    virtual void draw(Graphics *g) { (void)g; }
+    virtual void update() { ; }
 
-	virtual void onKeyDown(KeyboardEvent &e) {
-		(void)e;
-	}
-	virtual void onKeyUp(KeyboardEvent &e) {
-		(void)e;
-	}
-	virtual void onChar(KeyboardEvent &e) {
-		(void)e;
-	}
-	virtual void stealFocus() {;}
+    virtual void onKeyDown(KeyboardEvent &e) { (void)e; }
+    virtual void onKeyUp(KeyboardEvent &e) { (void)e; }
+    virtual void onChar(KeyboardEvent &e) { (void)e; }
+    virtual void stealFocus() { ; }
 
-	virtual void onResolutionChanged(Vector2 newResolution) {
-		(void)newResolution;
-	}
-	virtual void onDPIChanged() {;}
+    virtual void onResolutionChanged(Vector2 newResolution) { (void)newResolution; }
+    virtual void onDPIChanged() { ; }
 
-	virtual void onFocusGained() {;}
-	virtual void onFocusLost() {;}
+    virtual void onFocusGained() { ; }
+    virtual void onFocusLost() { ; }
 
-	virtual void onMinimized() {;}
-	virtual void onRestored() {;}
+    virtual void onMinimized() { ; }
+    virtual void onRestored() { ; }
 
-	virtual bool onShutdown() {return true;}
+    virtual bool onShutdown() { return true; }
 };
 
 #endif

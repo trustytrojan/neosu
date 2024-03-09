@@ -16,11 +16,10 @@
 
 #include "SDLGLES2Interface.h"
 
-class WinSDLGLES2Interface : public SDLGLES2Interface
-{
-public:
-	WinSDLGLES2Interface(SDL_Window *window);
-	virtual ~WinSDLGLES2Interface();
+class WinSDLGLES2Interface : public SDLGLES2Interface {
+   public:
+    WinSDLGLES2Interface(SDL_Window *window);
+    virtual ~WinSDLGLES2Interface();
 };
 
 #endif

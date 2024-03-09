@@ -10,25 +10,24 @@
 
 #include "Image.h"
 
-class SWImage : public Image
-{
-public:
-	SWImage(std::string filepath, bool mipmapped = false, bool keepInSystemMemory = false);
-	SWImage(int width, int height, bool mipmapped = false, bool keepInSystemMemory = false);
-	virtual ~SWImage() {destroy();}
+class SWImage : public Image {
+   public:
+    SWImage(std::string filepath, bool mipmapped = false, bool keepInSystemMemory = false);
+    SWImage(int width, int height, bool mipmapped = false, bool keepInSystemMemory = false);
+    virtual ~SWImage() { destroy(); }
 
-	virtual void bind(unsigned int textureUnit = 0);
-	virtual void unbind();
+    virtual void bind(unsigned int textureUnit = 0);
+    virtual void unbind();
 
-	virtual void setFilterMode(Graphics::FILTER_MODE filterMode);
-	virtual void setWrapMode(Graphics::WRAP_MODE wrapMode);
+    virtual void setFilterMode(Graphics::FILTER_MODE filterMode);
+    virtual void setWrapMode(Graphics::WRAP_MODE wrapMode);
 
-private:
-	virtual void init();
-	virtual void initAsync();
-	virtual void destroy();
+   private:
+    virtual void init();
+    virtual void initAsync();
+    virtual void destroy();
 
-	unsigned int m_iTextureUnitBackup;
+    unsigned int m_iTextureUnitBackup;
 };
 
 #endif

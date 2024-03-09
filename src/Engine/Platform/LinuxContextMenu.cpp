@@ -11,14 +11,8 @@
 
 #include "LinuxContextMenu.h"
 
-LinuxContextMenu::LinuxContextMenu()
-{
+LinuxContextMenu::LinuxContextMenu() {}
 
-}
-
-LinuxContextMenu::~LinuxContextMenu()
-{
-
-}
+LinuxContextMenu::~LinuxContextMenu() {}
 
 #endif

@@ -14,19 +14,18 @@
 
 #ifdef MCENGINE_FEATURE_OPENGL
 
-class MacOSGLLegacyInterface : public OpenGLLegacyInterface
-{
-public:
-	MacOSGLLegacyInterface();
-	virtual ~MacOSGLLegacyInterface();
+class MacOSGLLegacyInterface : public OpenGLLegacyInterface {
+   public:
+    MacOSGLLegacyInterface();
+    virtual ~MacOSGLLegacyInterface();
 
-	// scene
-	void endScene();
+    // scene
+    void endScene();
 
-	// device settings
-	void setVSync(bool vsync);
+    // device settings
+    void setVSync(bool vsync);
 
-private:
+   private:
 };
 
 #endif

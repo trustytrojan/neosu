@@ -10,24 +10,23 @@
 
 #include "OsuVRUIButton.h"
 
-class OsuVRUIImageButton : public OsuVRUIButton
-{
-public:
-	OsuVRUIImageButton(OsuVR *vr, float x, float y, float width, float height, std::string imageResourceName);
+class OsuVRUIImageButton : public OsuVRUIButton {
+   public:
+    OsuVRUIImageButton(OsuVR *vr, float x, float y, float width, float height, std::string imageResourceName);
 
-	virtual void drawVR(Graphics *g, Matrix4 &mvp);
-	virtual void update(Vector2 cursorPos);
+    virtual void drawVR(Graphics *g, Matrix4 &mvp);
+    virtual void update(Vector2 cursorPos);
 
-private:
-	virtual void onCursorInside();
-	virtual void onCursorOutside();
+   private:
+    virtual void onCursorInside();
+    virtual void onCursorOutside();
 
-	void updateImageResource();
+    void updateImageResource();
 
-	std::string m_sImageResourceName;
-	Image *m_image;
+    std::string m_sImageResourceName;
+    Image *m_image;
 
-	float m_fAnimation;
+    float m_fAnimation;
 };
 
 #endif

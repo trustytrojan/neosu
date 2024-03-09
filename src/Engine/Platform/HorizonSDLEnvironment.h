@@ -18,55 +18,54 @@
 
 class ConVar;
 
-class HorizonSDLEnvironment : public SDLEnvironment
-{
-public:
-	HorizonSDLEnvironment();
-	virtual ~HorizonSDLEnvironment();
+class HorizonSDLEnvironment : public SDLEnvironment {
+   public:
+    HorizonSDLEnvironment();
+    virtual ~HorizonSDLEnvironment();
 
-	virtual void update();
-	void update_before_winproc(); // HACKHACK: mouse/keyboard
+    virtual void update();
+    void update_before_winproc();  // HACKHACK: mouse/keyboard
 
-	// system
-	virtual OS getOS();
-	virtual void sleep(unsigned int us);
+    // system
+    virtual OS getOS();
+    virtual void sleep(unsigned int us);
 
-	// user
-	virtual UString getUsername();
+    // user
+    virtual UString getUsername();
 
-	// file IO
-	virtual std::vector<UString> getFilesInFolder(UString folder);
-	virtual std::vector<UString> getFoldersInFolder(UString folder);
-	virtual std::vector<UString> getLogicalDrives();
-	virtual std::string getFolderFromFilePath(std::string filepath);
+    // file IO
+    virtual std::vector<UString> getFilesInFolder(UString folder);
+    virtual std::vector<UString> getFoldersInFolder(UString folder);
+    virtual std::vector<UString> getLogicalDrives();
+    virtual std::string getFolderFromFilePath(std::string filepath);
 
-	// window
-	int getDPI() {return 96;}
+    // window
+    int getDPI() { return 96; }
 
-	// mouse
-	Vector2 getMousePos();
-	void setMousePos(int x, int y);
+    // mouse
+    Vector2 getMousePos();
+    void setMousePos(int x, int y);
 
-	// ILLEGAL:
-	void showKeyboard();
-	bool isDocked();
-	int getMemAvailableMB();
-	int getMemUsedMB();
+    // ILLEGAL:
+    void showKeyboard();
+    bool isDocked();
+    int getMemAvailableMB();
+    int getMemUsedMB();
 
-private:
-	static ConVar *m_mouse_sensitivity_ref;
+   private:
+    static ConVar *m_mouse_sensitivity_ref;
 
-	bool m_bDocked;
+    bool m_bDocked;
 
-	Vector2 m_vMousePos;
+    Vector2 m_vMousePos;
 
-	uint32_t m_sensorHandles[4];
+    uint32_t m_sensorHandles[4];
 
-	// HACKHACK: manual keyboard/mouse handling
-	static uint8_t locks;
-	static bool keystate[MCENGINE_HORIZON_SDL_NUM_SCANCODES_SWITCH];
-	static uint64_t prev_buttons;
-	float m_fLastMouseDeltaTime;
+    // HACKHACK: manual keyboard/mouse handling
+    static uint8_t locks;
+    static bool keystate[MCENGINE_HORIZON_SDL_NUM_SCANCODES_SWITCH];
+    static uint64_t prev_buttons;
+    float m_fLastMouseDeltaTime;
 };
 
 #endif

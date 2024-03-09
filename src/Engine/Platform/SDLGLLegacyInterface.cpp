@@ -11,24 +11,15 @@
 
 #include "Engine.h"
 
-SDLGLLegacyInterface::SDLGLLegacyInterface(SDL_Window *window) : OpenGLLegacyInterface()
-{
-	m_window = window;
+SDLGLLegacyInterface::SDLGLLegacyInterface(SDL_Window *window) : OpenGLLegacyInterface() { m_window = window; }
+
+SDLGLLegacyInterface::~SDLGLLegacyInterface() {}
+
+void SDLGLLegacyInterface::endScene() {
+    OpenGLLegacyInterface::endScene();
+    SDL_GL_SwapWindow(m_window);
 }
 
-SDLGLLegacyInterface::~SDLGLLegacyInterface()
-{
-}
-
-void SDLGLLegacyInterface::endScene()
-{
-	OpenGLLegacyInterface::endScene();
-	SDL_GL_SwapWindow(m_window);
-}
-
-void SDLGLLegacyInterface::setVSync(bool vsync)
-{
-	SDL_GL_SetSwapInterval(vsync ? 1 : 0);
-}
+void SDLGLLegacyInterface::setVSync(bool vsync) { SDL_GL_SetSwapInterval(vsync ? 1 : 0); }
 
 #endif

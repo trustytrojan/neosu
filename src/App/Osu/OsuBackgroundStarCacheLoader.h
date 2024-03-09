@@ -12,27 +12,32 @@
 
 class OsuBeatmap;
 
-class OsuBackgroundStarCacheLoader : public Resource
-{
-public:
-	OsuBackgroundStarCacheLoader(OsuBeatmap *beatmap);
+class OsuBackgroundStarCacheLoader : public Resource {
+   public:
+    OsuBackgroundStarCacheLoader(OsuBeatmap *beatmap);
 
-	bool isDead() {return m_bDead.load();}
-	void kill() {m_bDead = true; m_iProgress = 0;}
-	void revive() {m_bDead = false; m_iProgress = 0;}
+    bool isDead() { return m_bDead.load(); }
+    void kill() {
+        m_bDead = true;
+        m_iProgress = 0;
+    }
+    void revive() {
+        m_bDead = false;
+        m_iProgress = 0;
+    }
 
-	inline int getProgress() const {return m_iProgress.load();}
+    inline int getProgress() const { return m_iProgress.load(); }
 
-protected:
-	virtual void init();
-	virtual void initAsync();
-	virtual void destroy() {;}
+   protected:
+    virtual void init();
+    virtual void initAsync();
+    virtual void destroy() { ; }
 
-private:
-	OsuBeatmap *m_beatmap;
+   private:
+    OsuBeatmap *m_beatmap;
 
-	std::atomic<bool> m_bDead;
-	std::atomic<int> m_iProgress;
+    std::atomic<bool> m_bDead;
+    std::atomic<int> m_iProgress;
 };
 
 #endif

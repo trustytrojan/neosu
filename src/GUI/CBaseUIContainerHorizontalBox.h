@@ -18,35 +18,56 @@
  * No per-element scaling options yet.
  */
 
-class CBaseUIContainerHorizontalBox : public CBaseUIContainerBase
-{
-public:
-	CBaseUIContainerHorizontalBox(float posX=0, float posY=0, float sizeX=0, float sizeY=0, UString name="");
-	virtual ~CBaseUIContainerHorizontalBox();
+class CBaseUIContainerHorizontalBox : public CBaseUIContainerBase {
+   public:
+    CBaseUIContainerHorizontalBox(float posX = 0, float posY = 0, float sizeX = 0, float sizeY = 0, UString name = "");
+    virtual ~CBaseUIContainerHorizontalBox();
 
-	CONTAINER_BODY(CBaseUIContainerHorizontalBox)
+    CONTAINER_BODY(CBaseUIContainerHorizontalBox)
 
-	virtual void drawDebug(Graphics *g, Color color=COLOR(255,255,0,0));
+    virtual void drawDebug(Graphics *g, Color color = COLOR(255, 255, 0, 0));
 
-	CBaseUIContainerHorizontalBox *setPadding(float padding) {m_padding = padding; return this;}
-	CBaseUIContainerHorizontalBox *setMargin(float marginX, float marginY) {m_vMargin.x = marginX; m_vMargin.y = marginY; return this;}
-	CBaseUIContainerHorizontalBox *setMarginX(float marginX) {m_vMargin.x = marginX; return this;}
-	CBaseUIContainerHorizontalBox *setMarginY(float marginY) {m_vMargin.y = marginY; return this;}
-	CBaseUIContainerHorizontalBox *setMargin(Vector2 margin) {m_vMargin = margin; return this;}
-	CBaseUIContainerHorizontalBox *setMargin(float margin) {m_vMargin.x = m_vMargin.y = margin; return this;}
-	CBaseUIContainerHorizontalBox *setWidthOverride(bool widthOverride) {m_bWidthOverride = widthOverride; return this;}
+    CBaseUIContainerHorizontalBox *setPadding(float padding) {
+        m_padding = padding;
+        return this;
+    }
+    CBaseUIContainerHorizontalBox *setMargin(float marginX, float marginY) {
+        m_vMargin.x = marginX;
+        m_vMargin.y = marginY;
+        return this;
+    }
+    CBaseUIContainerHorizontalBox *setMarginX(float marginX) {
+        m_vMargin.x = marginX;
+        return this;
+    }
+    CBaseUIContainerHorizontalBox *setMarginY(float marginY) {
+        m_vMargin.y = marginY;
+        return this;
+    }
+    CBaseUIContainerHorizontalBox *setMargin(Vector2 margin) {
+        m_vMargin = margin;
+        return this;
+    }
+    CBaseUIContainerHorizontalBox *setMargin(float margin) {
+        m_vMargin.x = m_vMargin.y = margin;
+        return this;
+    }
+    CBaseUIContainerHorizontalBox *setWidthOverride(bool widthOverride) {
+        m_bWidthOverride = widthOverride;
+        return this;
+    }
 
-protected:
-	// events
-	virtual void updateLayout();
-	virtual void updateElement(CBaseUIElement *element);
-	virtual void onMoved();
-	virtual void onResized();
+   protected:
+    // events
+    virtual void updateLayout();
+    virtual void updateElement(CBaseUIElement *element);
+    virtual void onMoved();
+    virtual void onResized();
 
-	// container options
-	bool m_bWidthOverride;
-	float m_padding;
-	Vector2 m_vMargin;
+    // container options
+    bool m_bWidthOverride;
+    float m_padding;
+    Vector2 m_vMargin;
 };
 
 #endif /* GUI_CBASEUICONTAINERHORIZONTALBOX_H_ */

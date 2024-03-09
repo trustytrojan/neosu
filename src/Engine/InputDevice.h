@@ -10,16 +10,13 @@
 
 #include "cbase.h"
 
-class InputDevice
-{
-public:
-	InputDevice() {;}
-	virtual ~InputDevice() {;}
+class InputDevice {
+   public:
+    InputDevice() { ; }
+    virtual ~InputDevice() { ; }
 
-	virtual void update() {;}
-	virtual void draw(Graphics *g) {
-		(void)g;
-	}
+    virtual void update() { ; }
+    virtual void draw(Graphics *g) { (void)g; }
 };
 
 #endif

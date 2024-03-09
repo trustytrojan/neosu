@@ -12,25 +12,25 @@
 
 class OsuSkinImage;
 
-class OsuUISelectionButton : public CBaseUIButton
-{
-public:
-	OsuUISelectionButton(std::function<OsuSkinImage*()> getImageFunc, std::function<OsuSkinImage*()> getImageOverFunc, float xPos, float yPos, float xSize, float ySize, UString name);
+class OsuUISelectionButton : public CBaseUIButton {
+   public:
+    OsuUISelectionButton(std::function<OsuSkinImage *()> getImageFunc, std::function<OsuSkinImage *()> getImageOverFunc,
+                         float xPos, float yPos, float xSize, float ySize, UString name);
 
-	void draw(Graphics *g);
+    void draw(Graphics *g);
 
-	virtual void onMouseInside();
-	virtual void onMouseOutside();
+    virtual void onMouseInside();
+    virtual void onMouseOutside();
 
-	virtual void onResized();
+    virtual void onResized();
 
-	void keyboardPulse();
+    void keyboardPulse();
 
-private:
-	float m_fAnimation;
+   private:
+    float m_fAnimation;
 
-	std::function<OsuSkinImage*()> getImageFunc;
-	std::function<OsuSkinImage*()> getImageOverFunc;
+    std::function<OsuSkinImage *()> getImageFunc;
+    std::function<OsuSkinImage *()> getImageOverFunc;
 };
 
 #endif

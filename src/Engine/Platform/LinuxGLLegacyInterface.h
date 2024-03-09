@@ -24,25 +24,24 @@ typedef unsigned char BYTE;
 
 XVisualInfo *getVisualInfo(Display *display);
 
-class LinuxGLLegacyInterface : public OpenGLLegacyInterface
-{
-public:
-	LinuxGLLegacyInterface(Display *display, Window window);
-	virtual ~LinuxGLLegacyInterface();
+class LinuxGLLegacyInterface : public OpenGLLegacyInterface {
+   public:
+    LinuxGLLegacyInterface(Display *display, Window window);
+    virtual ~LinuxGLLegacyInterface();
 
-	// scene
-	void endScene();
+    // scene
+    void endScene();
 
-	// device settings
-	void setVSync(bool vsync);
+    // device settings
+    void setVSync(bool vsync);
 
-	// ILLEGAL:
-	inline GLXContext getGLXContext() const {return m_glc;}
+    // ILLEGAL:
+    inline GLXContext getGLXContext() const { return m_glc; }
 
-private:
-	Display *m_display;
-	Window m_window;
-	GLXContext m_glc;
+   private:
+    Display *m_display;
+    Window m_window;
+    GLXContext m_glc;
 };
 
 #endif

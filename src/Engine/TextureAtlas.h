@@ -12,36 +12,35 @@
 
 class Image;
 
-class TextureAtlas : public Resource
-{
-public:
-	TextureAtlas(int width = 512, int height = 512);
-	virtual ~TextureAtlas() {destroy();}
+class TextureAtlas : public Resource {
+   public:
+    TextureAtlas(int width = 512, int height = 512);
+    virtual ~TextureAtlas() { destroy(); }
 
-	Vector2 put(int width, int height, Color *pixels) {return put(width, height, false, false, pixels);}
-	Vector2 put(int width, int height, bool flipHorizontal, bool flipVertical, Color *pixels);
+    Vector2 put(int width, int height, Color *pixels) { return put(width, height, false, false, pixels); }
+    Vector2 put(int width, int height, bool flipHorizontal, bool flipVertical, Color *pixels);
 
-	void setPadding(int padding) {m_iPadding = padding;}
+    void setPadding(int padding) { m_iPadding = padding; }
 
-	inline int getWidth() const {return m_iWidth;}
-	inline int getHeight() const {return m_iHeight;}
-	inline Image *getAtlasImage() const {return m_atlasImage;}
+    inline int getWidth() const { return m_iWidth; }
+    inline int getHeight() const { return m_iHeight; }
+    inline Image *getAtlasImage() const { return m_atlasImage; }
 
-private:
-	virtual void init();
-	virtual void initAsync();
-	virtual void destroy();
+   private:
+    virtual void init();
+    virtual void initAsync();
+    virtual void destroy();
 
-	int m_iPadding;
+    int m_iPadding;
 
-	int m_iWidth;
-	int m_iHeight;
+    int m_iWidth;
+    int m_iHeight;
 
-	Image *m_atlasImage;
+    Image *m_atlasImage;
 
-	int m_iCurX;
-	int m_iCurY;
-	int m_iMaxHeight;
+    int m_iCurX;
+    int m_iCurY;
+    int m_iMaxHeight;
 };
 
 #endif

@@ -10,22 +10,22 @@
 
 #include "RenderTarget.h"
 
-class SWRenderTarget : public RenderTarget
-{
-public:
-	SWRenderTarget(int x, int y, int width, int height, Graphics::MULTISAMPLE_TYPE multiSampleType = Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X);
-	virtual ~SWRenderTarget() {destroy();}
+class SWRenderTarget : public RenderTarget {
+   public:
+    SWRenderTarget(int x, int y, int width, int height,
+                   Graphics::MULTISAMPLE_TYPE multiSampleType = Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X);
+    virtual ~SWRenderTarget() { destroy(); }
 
-	virtual void enable();
-	virtual void disable();
+    virtual void enable();
+    virtual void disable();
 
-	virtual void bind(unsigned int textureUnit = 0);
-	virtual void unbind();
+    virtual void bind(unsigned int textureUnit = 0);
+    virtual void unbind();
 
-private:
-	virtual void init();
-	virtual void initAsync();
-	virtual void destroy();
+   private:
+    virtual void init();
+    virtual void initAsync();
+    virtual void destroy();
 };
 
 #endif

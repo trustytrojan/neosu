@@ -12,41 +12,43 @@
 
 class Osu;
 
-class OsuUIButton : public CBaseUIButton
-{
-public:
-	OsuUIButton(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name, UString text);
+class OsuUIButton : public CBaseUIButton {
+   public:
+    OsuUIButton(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name, UString text);
 
-	virtual void draw(Graphics *g);
-	virtual void mouse_update(bool *propagate_clicks);
+    virtual void draw(Graphics *g);
+    virtual void mouse_update(bool *propagate_clicks);
 
-	void setColor(Color color) {m_color = color; m_backupColor = color;}
-	void setUseDefaultSkin() {m_bDefaultSkin = true;}
-	void setAlphaAddOnHover(float alphaAddOnHover) {m_fAlphaAddOnHover = alphaAddOnHover;}
+    void setColor(Color color) {
+        m_color = color;
+        m_backupColor = color;
+    }
+    void setUseDefaultSkin() { m_bDefaultSkin = true; }
+    void setAlphaAddOnHover(float alphaAddOnHover) { m_fAlphaAddOnHover = alphaAddOnHover; }
 
-	void setTooltipText(UString text);
+    void setTooltipText(UString text);
 
-	virtual void onMouseInside();
-	virtual void onMouseOutside();
+    virtual void onMouseInside();
+    virtual void onMouseOutside();
 
-	void animateClickColor();
-	bool is_loading = false;
+    void animateClickColor();
+    bool is_loading = false;
 
-private:
-	virtual void onClicked();
-	virtual void onFocusStolen();
+   private:
+    virtual void onClicked();
+    virtual void onFocusStolen();
 
-	Osu *m_osu;
+    Osu *m_osu;
 
-	bool m_bDefaultSkin;
-	Color m_color;
-	Color m_backupColor;
-	float m_fBrightness;
-	float m_fAnim;
-	float m_fAlphaAddOnHover;
+    bool m_bDefaultSkin;
+    Color m_color;
+    Color m_backupColor;
+    float m_fBrightness;
+    float m_fAnim;
+    float m_fAlphaAddOnHover;
 
-	std::vector<UString> m_tooltipTextLines;
-	bool m_bFocusStolenDelay;
+    std::vector<UString> m_tooltipTextLines;
+    bool m_bFocusStolenDelay;
 };
 
 #endif

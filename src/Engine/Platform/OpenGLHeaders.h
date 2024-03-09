@@ -5,6 +5,7 @@
 // $NoKeywords: $glh
 //===============================================================================//
 
+// clang-format off
 #ifndef OPENGLHEADERS_H
 #define OPENGLHEADERS_H
 
@@ -60,3 +61,4 @@
 #endif
 
 #endif
+// clang-format on

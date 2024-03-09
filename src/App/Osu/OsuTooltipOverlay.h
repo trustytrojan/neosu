@@ -12,24 +12,23 @@
 
 class Osu;
 
-class OsuTooltipOverlay : public OsuScreen
-{
-public:
-	OsuTooltipOverlay(Osu *osu);
-	virtual ~OsuTooltipOverlay();
+class OsuTooltipOverlay : public OsuScreen {
+   public:
+    OsuTooltipOverlay(Osu *osu);
+    virtual ~OsuTooltipOverlay();
 
-	virtual void draw(Graphics *g);
-	virtual void mouse_update(bool *propagate_clicks);
+    virtual void draw(Graphics *g);
+    virtual void mouse_update(bool *propagate_clicks);
 
-	void begin();
-	void addLine(UString text);
-	void end();
+    void begin();
+    void addLine(UString text);
+    void end();
 
-private:
-	float m_fAnim;
-	std::vector<UString> m_lines;
+   private:
+    float m_fAnim;
+    std::vector<UString> m_lines;
 
-	bool m_bDelayFadeout;
+    bool m_bDelayFadeout;
 };
 
 #endif

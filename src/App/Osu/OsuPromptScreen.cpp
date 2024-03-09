@@ -6,7 +6,6 @@
 #include "Osu.h"
 #include "OsuUIButton.h"
 
-
 OsuPromptScreen::OsuPromptScreen(Osu *osu) : OsuScreen(osu) {
     m_prompt_label = new CBaseUILabel(0, 0, 0, 0, "", "");
     m_prompt_label->setDrawFrame(false);
@@ -106,6 +105,4 @@ void OsuPromptScreen::on_ok() {
     m_callback(m_prompt_input->getText());
 }
 
-void OsuPromptScreen::on_cancel() {
-    m_bVisible = false;
-}
+void OsuPromptScreen::on_cancel() { m_bVisible = false; }

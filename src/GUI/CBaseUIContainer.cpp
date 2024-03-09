@@ -6,285 +6,220 @@
 //===============================================================================//
 
 #include "CBaseUIContainer.h"
+
 #include "Engine.h"
 
-CBaseUIContainer::CBaseUIContainer(float Xpos, float Ypos, float Xsize, float Ysize, UString name) : CBaseUIElement(Xpos, Ypos, Xsize, Ysize, name)
-{
+CBaseUIContainer::CBaseUIContainer(float Xpos, float Ypos, float Xsize, float Ysize, UString name)
+    : CBaseUIElement(Xpos, Ypos, Xsize, Ysize, name) {}
+
+CBaseUIContainer::~CBaseUIContainer() { clear(); }
+
+void CBaseUIContainer::clear() {
+    for(size_t i = 0; i < m_vElements.size(); i++) {
+        delete m_vElements[i];
+    }
+    m_vElements = std::vector<CBaseUIElement *>();
 }
 
-CBaseUIContainer::~CBaseUIContainer()
-{
-	clear();
+void CBaseUIContainer::empty() { m_vElements = std::vector<CBaseUIElement *>(); }
+
+CBaseUIContainer *CBaseUIContainer::addBaseUIElement(CBaseUIElement *element, float xPos, float yPos) {
+    if(element == NULL) return this;
+
+    element->setRelPos(xPos, yPos);
+    element->setPos(m_vPos + element->getRelPos());
+    m_vElements.push_back(element);
+
+    return this;
 }
 
-void CBaseUIContainer::clear()
-{
-	for (size_t i=0; i<m_vElements.size(); i++)
-	{
-		delete m_vElements[i];
-	}
-	m_vElements = std::vector<CBaseUIElement*>();
+CBaseUIContainer *CBaseUIContainer::addBaseUIElement(CBaseUIElement *element) {
+    if(element == NULL) return this;
+
+    element->setRelPos(element->getPos().x, element->getPos().y);
+    element->setPos(m_vPos + element->getRelPos());
+    m_vElements.push_back(element);
+
+    return this;
 }
 
-void CBaseUIContainer::empty()
-{
-	m_vElements = std::vector<CBaseUIElement*>();
+CBaseUIContainer *CBaseUIContainer::addBaseUIElementBack(CBaseUIElement *element, float xPos, float yPos) {
+    if(element == NULL) return this;
+
+    element->setRelPos(xPos, yPos);
+    element->setPos(m_vPos + element->getRelPos());
+    m_vElements.insert(m_vElements.begin(), element);
+
+    return this;
 }
 
-CBaseUIContainer *CBaseUIContainer::addBaseUIElement(CBaseUIElement *element, float xPos, float yPos)
-{
-	if (element == NULL) return this;
+CBaseUIContainer *CBaseUIContainer::addBaseUIElementBack(CBaseUIElement *element) {
+    if(element == NULL) return this;
 
-	element->setRelPos(xPos, yPos);
-	element->setPos(m_vPos + element->getRelPos());
-	m_vElements.push_back(element);
+    element->setRelPos(element->getPos().x, element->getPos().y);
+    element->setPos(m_vPos + element->getRelPos());
+    m_vElements.insert(m_vElements.begin(), element);
 
-	return this;
+    return this;
 }
 
-CBaseUIContainer *CBaseUIContainer::addBaseUIElement(CBaseUIElement *element)
-{
-	if (element == NULL) return this;
+CBaseUIContainer *CBaseUIContainer::insertBaseUIElement(CBaseUIElement *element, CBaseUIElement *index) {
+    if(element == NULL || index == NULL) return this;
 
-	element->setRelPos(element->getPos().x, element->getPos().y);
-	element->setPos(m_vPos + element->getRelPos());
-	m_vElements.push_back(element);
+    element->setRelPos(element->getPos().x, element->getPos().y);
+    element->setPos(m_vPos + element->getRelPos());
+    for(size_t i = 0; i < m_vElements.size(); i++) {
+        if(m_vElements[i] == index) {
+            m_vElements.insert(m_vElements.begin() + clamp<int>(i, 0, m_vElements.size()), element);
+            return this;
+        }
+    }
 
-	return this;
+    debugLog("Warning: CBaseUIContainer::insertBaseUIElement() couldn't find index\n");
+
+    return this;
 }
 
-CBaseUIContainer *CBaseUIContainer::addBaseUIElementBack(CBaseUIElement *element, float xPos, float yPos)
-{
-	if (element == NULL) return this;
+CBaseUIContainer *CBaseUIContainer::insertBaseUIElementBack(CBaseUIElement *element, CBaseUIElement *index) {
+    if(element == NULL || index == NULL) return this;
 
-	element->setRelPos(xPos, yPos);
-	element->setPos(m_vPos + element->getRelPos());
-	m_vElements.insert(m_vElements.begin(), element);
+    element->setRelPos(element->getPos().x, element->getPos().y);
+    element->setPos(m_vPos + element->getRelPos());
+    for(size_t i = 0; i < m_vElements.size(); i++) {
+        if(m_vElements[i] == index) {
+            m_vElements.insert(m_vElements.begin() + clamp<int>(i + 1, 0, m_vElements.size()), element);
+            return this;
+        }
+    }
 
-	return this;
+    debugLog("Warning: CBaseUIContainer::insertBaseUIElementBack() couldn't find index\n");
+
+    return this;
 }
 
+CBaseUIContainer *CBaseUIContainer::removeBaseUIElement(CBaseUIElement *element) {
+    for(size_t i = 0; i < m_vElements.size(); i++) {
+        if(m_vElements[i] == element) {
+            m_vElements.erase(m_vElements.begin() + i);
+            return this;
+        }
+    }
 
-CBaseUIContainer *CBaseUIContainer::addBaseUIElementBack(CBaseUIElement *element)
-{
-	if (element == NULL) return this;
+    debugLog("Warning: CBaseUIContainer::removeBaseUIElement() couldn't find element\n");
 
-	element->setRelPos(element->getPos().x, element->getPos().y);
-	element->setPos(m_vPos + element->getRelPos());
-	m_vElements.insert(m_vElements.begin(), element);
-
-	return this;
+    return this;
 }
 
-CBaseUIContainer *CBaseUIContainer::insertBaseUIElement(CBaseUIElement *element, CBaseUIElement *index)
-{
-	if (element == NULL || index == NULL) return this;
+CBaseUIContainer *CBaseUIContainer::deleteBaseUIElement(CBaseUIElement *element) {
+    for(size_t i = 0; i < m_vElements.size(); i++) {
+        if(m_vElements[i] == element) {
+            delete element;
+            m_vElements.erase(m_vElements.begin() + i);
+            return this;
+        }
+    }
 
-	element->setRelPos(element->getPos().x, element->getPos().y);
-	element->setPos(m_vPos + element->getRelPos());
-	for (size_t i=0; i<m_vElements.size(); i++)
-	{
-		if (m_vElements[i] == index)
-		{
-			m_vElements.insert(m_vElements.begin() + clamp<int>(i, 0, m_vElements.size()), element);
-			return this;
-		}
-	}
+    debugLog("Warning: CBaseUIContainer::deleteBaseUIElement() couldn't find element\n");
 
-	debugLog("Warning: CBaseUIContainer::insertBaseUIElement() couldn't find index\n");
-
-	return this;
+    return this;
 }
 
-CBaseUIContainer *CBaseUIContainer::insertBaseUIElementBack(CBaseUIElement *element, CBaseUIElement *index)
-{
-	if (element == NULL || index == NULL) return this;
-
-	element->setRelPos(element->getPos().x, element->getPos().y);
-	element->setPos(m_vPos + element->getRelPos());
-	for (size_t i=0; i<m_vElements.size(); i++)
-	{
-		if (m_vElements[i] == index)
-		{
-			m_vElements.insert(m_vElements.begin() + clamp<int>(i+1, 0, m_vElements.size()), element);
-			return this;
-		}
-	}
-
-	debugLog("Warning: CBaseUIContainer::insertBaseUIElementBack() couldn't find index\n");
-
-	return this;
+CBaseUIElement *CBaseUIContainer::getBaseUIElement(UString name) {
+    for(size_t i = 0; i < m_vElements.size(); i++) {
+        if(m_vElements[i]->getName() == name) return m_vElements[i];
+    }
+    debugLog("CBaseUIContainer ERROR: GetBaseUIElement() \"%s\" does not exist!!!\n", name.toUtf8());
+    return NULL;
 }
 
-CBaseUIContainer *CBaseUIContainer::removeBaseUIElement(CBaseUIElement *element)
-{
-	for (size_t i=0; i<m_vElements.size(); i++)
-	{
-		if (m_vElements[i] == element)
-		{
-			m_vElements.erase(m_vElements.begin()+i);
-			return this;
-		}
-	}
+void CBaseUIContainer::draw(Graphics *g) {
+    if(!m_bVisible) return;
 
-	debugLog("Warning: CBaseUIContainer::removeBaseUIElement() couldn't find element\n");
-
-	return this;
+    for(size_t i = 0; i < m_vElements.size(); i++) {
+        if(!m_vElements[i]->isDrawnManually()) m_vElements[i]->draw(g);
+    }
 }
 
-CBaseUIContainer *CBaseUIContainer::deleteBaseUIElement(CBaseUIElement *element)
-{
-	for (size_t i=0; i<m_vElements.size(); i++)
-	{
-		if (m_vElements[i] == element)
-		{
-			delete element;
-			m_vElements.erase(m_vElements.begin()+i);
-			return this;
-		}
-	}
-
-	debugLog("Warning: CBaseUIContainer::deleteBaseUIElement() couldn't find element\n");
-
-	return this;
+void CBaseUIContainer::draw_debug(Graphics *g) {
+    g->setColor(0xffffffff);
+    g->drawLine(m_vPos.x, m_vPos.y, m_vPos.x + m_vSize.x, m_vPos.y);
+    g->drawLine(m_vPos.x, m_vPos.y, m_vPos.x, m_vPos.y + m_vSize.y);
+    g->drawLine(m_vPos.x, m_vPos.y + m_vSize.y, m_vPos.x + m_vSize.x, m_vPos.y + m_vSize.y);
+    g->drawLine(m_vPos.x + m_vSize.x, m_vPos.y, m_vPos.x + m_vSize.x, m_vPos.y + m_vSize.y);
 }
 
-CBaseUIElement *CBaseUIContainer::getBaseUIElement(UString name)
-{
-	for (size_t i=0; i<m_vElements.size(); i++)
-	{
-		if (m_vElements[i]->getName() == name)
-			return m_vElements[i];
-	}
-	debugLog("CBaseUIContainer ERROR: GetBaseUIElement() \"%s\" does not exist!!!\n",name.toUtf8());
-	return NULL;
+void CBaseUIContainer::mouse_update(bool *propagate_clicks) {
+    if(!m_bVisible) return;
+    CBaseUIElement::mouse_update(propagate_clicks);
+
+    for(size_t i = 0; i < m_vElements.size(); i++) {
+        m_vElements[i]->mouse_update(propagate_clicks);
+    }
 }
 
-void CBaseUIContainer::draw(Graphics *g)
-{
-	if (!m_bVisible) return;
-
-	for (size_t i=0; i<m_vElements.size(); i++)
-	{
-		if (!m_vElements[i]->isDrawnManually())
-			m_vElements[i]->draw(g);
-	}
+void CBaseUIContainer::update_pos() {
+    for(size_t i = 0; i < m_vElements.size(); i++) {
+        if(!m_vElements[i]->isPositionedManually()) m_vElements[i]->setPos(m_vPos + m_vElements[i]->getRelPos());
+    }
 }
 
-void CBaseUIContainer::draw_debug(Graphics *g)
-{
-	g->setColor(0xffffffff);
-	g->drawLine(m_vPos.x, m_vPos.y, m_vPos.x+m_vSize.x, m_vPos.y);
-	g->drawLine(m_vPos.x, m_vPos.y, m_vPos.x, m_vPos.y+m_vSize.y);
-	g->drawLine(m_vPos.x, m_vPos.y+m_vSize.y, m_vPos.x+m_vSize.x, m_vPos.y+m_vSize.y);
-	g->drawLine(m_vPos.x+m_vSize.x, m_vPos.y, m_vPos.x+m_vSize.x, m_vPos.y+m_vSize.y);
+void CBaseUIContainer::update_pos(CBaseUIElement *element) {
+    if(element != NULL) element->setPos(m_vPos + element->getRelPos());
 }
 
-void CBaseUIContainer::mouse_update(bool *propagate_clicks)
-{
-	if (!m_bVisible) return;
-	CBaseUIElement::mouse_update(propagate_clicks);
-
-	for (size_t i=0; i<m_vElements.size(); i++)
-	{
-		m_vElements[i]->mouse_update(propagate_clicks);
-	}
+void CBaseUIContainer::onKeyUp(KeyboardEvent &e) {
+    for(size_t i = 0; i < m_vElements.size(); i++) {
+        if(m_vElements[i]->isVisible()) m_vElements[i]->onKeyUp(e);
+    }
+}
+void CBaseUIContainer::onKeyDown(KeyboardEvent &e) {
+    for(size_t i = 0; i < m_vElements.size(); i++) {
+        if(m_vElements[i]->isVisible()) m_vElements[i]->onKeyDown(e);
+    }
 }
 
-void CBaseUIContainer::update_pos()
-{
-	for (size_t i=0; i<m_vElements.size(); i++)
-	{
-		if (!m_vElements[i]->isPositionedManually())
-			m_vElements[i]->setPos(m_vPos + m_vElements[i]->getRelPos());
-	}
+void CBaseUIContainer::onChar(KeyboardEvent &e) {
+    for(size_t i = 0; i < m_vElements.size(); i++) {
+        if(m_vElements[i]->isVisible()) m_vElements[i]->onChar(e);
+    }
 }
 
-void CBaseUIContainer::update_pos(CBaseUIElement *element)
-{
-	if (element != NULL)
-		element->setPos(m_vPos + element->getRelPos());
+void CBaseUIContainer::onFocusStolen() {
+    for(size_t i = 0; i < m_vElements.size(); i++) {
+        m_vElements[i]->stealFocus();
+    }
 }
 
-void CBaseUIContainer::onKeyUp(KeyboardEvent &e)
-{
-	for (size_t i=0; i<m_vElements.size(); i++)
-	{
-		if (m_vElements[i]->isVisible())
-			m_vElements[i]->onKeyUp(e);
-	}
-}
-void CBaseUIContainer::onKeyDown(KeyboardEvent &e)
-{
-	for (size_t i=0; i<m_vElements.size(); i++)
-	{
-		if (m_vElements[i]->isVisible())
-			m_vElements[i]->onKeyDown(e);
-	}
+void CBaseUIContainer::onEnabled() {
+    for(size_t i = 0; i < m_vElements.size(); i++) {
+        m_vElements[i]->setEnabled(true);
+    }
 }
 
-void CBaseUIContainer::onChar(KeyboardEvent &e)
-{
-	for (size_t i=0; i<m_vElements.size(); i++)
-	{
-		if (m_vElements[i]->isVisible())
-			m_vElements[i]->onChar(e);
-	}
+void CBaseUIContainer::onDisabled() {
+    for(size_t i = 0; i < m_vElements.size(); i++) {
+        m_vElements[i]->setEnabled(false);
+    }
 }
 
-void CBaseUIContainer::onFocusStolen()
-{
-	for (size_t i=0; i<m_vElements.size(); i++)
-	{
-		m_vElements[i]->stealFocus();
-	}
+void CBaseUIContainer::onMouseDownOutside() { onFocusStolen(); }
+
+bool CBaseUIContainer::isBusy() {
+    if(!m_bVisible) return false;
+
+    for(size_t i = 0; i < m_vElements.size(); i++) {
+        if(m_vElements[i]->isBusy()) return true;
+    }
+
+    return false;
 }
 
-void CBaseUIContainer::onEnabled()
-{
-	for (size_t i=0; i<m_vElements.size(); i++)
-	{
-		m_vElements[i]->setEnabled(true);
-	}
-}
+bool CBaseUIContainer::isActive() {
+    if(!m_bVisible) return false;
 
-void CBaseUIContainer::onDisabled()
-{
-	for (size_t i=0; i<m_vElements.size(); i++)
-	{
-		m_vElements[i]->setEnabled(false);
-	}
-}
+    for(size_t i = 0; i < m_vElements.size(); i++) {
+        if(m_vElements[i]->isActive()) return true;
+    }
 
-void CBaseUIContainer::onMouseDownOutside()
-{
-	onFocusStolen();
-}
-
-bool CBaseUIContainer::isBusy()
-{
-	if (!m_bVisible)
-		return false;
-
-	for (size_t i=0; i<m_vElements.size(); i++)
-	{
-		if (m_vElements[i]->isBusy())
-			return true;
-	}
-
-	return false;
-}
-
-bool CBaseUIContainer::isActive()
-{
-	if (!m_bVisible)
-		return false;
-
-	for (size_t i=0; i<m_vElements.size(); i++)
-	{
-		if (m_vElements[i]->isActive())
-			return true;
-	}
-
-	return false;
+    return false;
 }

@@ -1,18 +1,14 @@
 #include "OsuChat.h"
 
 #include "AnimationHandler.h"
+#include "Bancho.h"
+#include "BanchoNetworking.h"
 #include "CBaseUIButton.h"
 #include "CBaseUIContainer.h"
 #include "CBaseUILabel.h"
 #include "Engine.h"
 #include "Font.h"
 #include "Keyboard.h"
-#include "RenderTarget.h"
-#include "ResourceManager.h"
-#include "SoundEngine.h"
-
-#include "Bancho.h"
-#include "BanchoNetworking.h"
 #include "Osu.h"
 #include "OsuBeatmap.h"
 #include "OsuLobby.h"
@@ -25,9 +21,11 @@
 #include "OsuSongBrowser2.h"
 #include "OsuUIButton.h"
 #include "OsuUIUserContextMenu.h"
+#include "RenderTarget.h"
+#include "ResourceManager.h"
+#include "SoundEngine.h"
 
-
-OsuChatChannel::OsuChatChannel(OsuChat* chat, UString name_arg) {
+OsuChatChannel::OsuChatChannel(OsuChat *chat, UString name_arg) {
     m_chat = chat;
     name = name_arg;
 
@@ -42,7 +40,7 @@ OsuChatChannel::OsuChatChannel(OsuChat* chat, UString name_arg) {
     btn = new OsuUIButton(bancho.osu, 0, 0, 0, 0, "button", name);
     btn->grabs_clicks = true;
     btn->setUseDefaultSkin();
-    btn->setClickCallback( fastdelegate::MakeDelegate(this, &OsuChatChannel::onChannelButtonClick) );
+    btn->setClickCallback(fastdelegate::MakeDelegate(this, &OsuChatChannel::onChannelButtonClick));
     m_chat->m_button_container->addBaseUIElement(btn);
 }
 
@@ -51,9 +49,7 @@ OsuChatChannel::~OsuChatChannel() {
     m_chat->m_button_container->deleteBaseUIElement(btn);
 }
 
-void OsuChatChannel::onChannelButtonClick(CBaseUIButton* btn) {
-    m_chat->switchToChannel(this);
-}
+void OsuChatChannel::onChannelButtonClick(CBaseUIButton *btn) { m_chat->switchToChannel(this); }
 
 void OsuChatChannel::add_message(ChatMessage msg) {
     const float line_height = 20;
@@ -144,7 +140,7 @@ OsuChat::OsuChat(Osu *osu) : OsuScreen(osu) {
     join_channel_btn->setUseDefaultSkin();
     join_channel_btn->setColor(0xffffff55);
     join_channel_btn->setSize(button_height + 2, button_height + 2);
-    join_channel_btn->setClickCallback( fastdelegate::MakeDelegate(this, &OsuChat::askWhatChannelToJoin) );
+    join_channel_btn->setClickCallback(fastdelegate::MakeDelegate(this, &OsuChat::askWhatChannelToJoin));
     m_button_container->addBaseUIElement(join_channel_btn);
 
     m_input_box = new CBaseUITextbox(0, 0, 0, 0, "");
@@ -158,9 +154,9 @@ OsuChat::OsuChat(Osu *osu) : OsuScreen(osu) {
 
 void OsuChat::draw(Graphics *g) {
     const bool isAnimating = anim->isAnimating(&m_fAnimation);
-    if (!m_bVisible && !isAnimating) return;
+    if(!m_bVisible && !isAnimating) return;
 
-    if (isAnimating) {
+    if(isAnimating) {
         // XXX: Setting BLEND_MODE_PREMUL_ALPHA is not enough, transparency is still incorrect
         m_osu->getSliderFrameBuffer()->enable();
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_PREMUL_ALPHA);
@@ -182,10 +178,8 @@ void OsuChat::draw(Graphics *g) {
         g->fillRect(0, chat_y, chat_w, chat_h);
     } else {
         g->setColor(COLOR(100, 0, 10, 50));
-        g->fillRect(
-            m_button_container->getPos().x, m_button_container->getPos().y,
-            m_button_container->getSize().x, m_button_container->getSize().y
-        );
+        g->fillRect(m_button_container->getPos().x, m_button_container->getPos().y, m_button_container->getSize().x,
+                    m_button_container->getSize().y);
         m_button_container->draw(g);
 
         OsuScreen::draw(g);
@@ -194,14 +188,14 @@ void OsuChat::draw(Graphics *g) {
         }
     }
 
-    if (isAnimating) {
+    if(isAnimating) {
         m_osu->getSliderFrameBuffer()->disable();
 
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
         g->push3DScene(McRect(0, 0, getSize().x, getSize().y));
         {
-            g->rotate3DScene(-(1.0f - m_fAnimation)*90, 0, 0);
-            g->translate3DScene(0, -(1.0f - m_fAnimation)*getSize().y*1.25f, -(1.0f - m_fAnimation)*700);
+            g->rotate3DScene(-(1.0f - m_fAnimation) * 90, 0, 0);
+            g->translate3DScene(0, -(1.0f - m_fAnimation) * getSize().y * 1.25f, -(1.0f - m_fAnimation) * 700);
 
             m_osu->getSliderFrameBuffer()->setColor(COLORf(m_fAnimation, 1.0f, 1.0f, 1.0f));
             m_osu->getSliderFrameBuffer()->draw(g, 0, 0);
@@ -211,7 +205,7 @@ void OsuChat::draw(Graphics *g) {
 }
 
 void OsuChat::mouse_update(bool *propagate_clicks) {
-    if (!m_bVisible) return;
+    if(!m_bVisible) return;
     OsuScreen::mouse_update(propagate_clicks);
     m_button_container->mouse_update(propagate_clicks);
     if(m_selected_channel) {
@@ -246,19 +240,19 @@ void OsuChat::onKeyDown(KeyboardEvent &key) {
 
             Packet packet = {0};
             packet.id = m_selected_channel->name[0] == '#' ? SEND_PUBLIC_MESSAGE : SEND_PRIVATE_MESSAGE;
-            write_string(&packet, (char*)bancho.username.toUtf8());
-            write_string(&packet, (char*)m_input_box->getText().toUtf8());
-            write_string(&packet, (char*)m_selected_channel->name.toUtf8());
+            write_string(&packet, (char *)bancho.username.toUtf8());
+            write_string(&packet, (char *)m_input_box->getText().toUtf8());
+            write_string(&packet, (char *)m_selected_channel->name.toUtf8());
             write_int32(&packet, bancho.user_id);
             send_packet(packet);
 
             // Server doesn't echo the message back
             addMessage(m_selected_channel->name, ChatMessage{
-                .tms = time(NULL),
-                .author_id = bancho.user_id,
-                .author_name = bancho.username,
-                .text = m_input_box->getText(),
-            });
+                                                     .tms = time(NULL),
+                                                     .author_id = bancho.user_id,
+                                                     .author_name = bancho.username,
+                                                     .text = m_input_box->getText(),
+                                                 });
 
             m_input_box->clear();
         }
@@ -321,19 +315,19 @@ void OsuChat::onChar(KeyboardEvent &key) {
     key.consume();
 }
 
-void OsuChat::mark_as_read(OsuChatChannel* chan) {
+void OsuChat::mark_as_read(OsuChatChannel *chan) {
     if(!m_bVisible) return;
 
     // XXX: Only mark as read after 500ms
     chan->read = true;
 
     CURL *curl = curl_easy_init();
-    if (!curl) {
+    if(!curl) {
         debugLog("Failed to initialize cURL in OsuChat::mark_as_read()!\n");
         return;
     }
     char *channel_urlencoded = curl_easy_escape(curl, chan->name.toUtf8(), 0);
-        if (!channel_urlencoded) {
+    if(!channel_urlencoded) {
         debugLog("Failed to encode channel name!\n");
         curl_easy_cleanup(curl);
         return;
@@ -341,7 +335,8 @@ void OsuChat::mark_as_read(OsuChatChannel* chan) {
 
     APIRequest request = {
         .type = MARK_AS_READ,
-        .path = UString::format("/web/osu-markasread.php?u=%s&h=%s&channel=%s", bancho.username.toUtf8(), bancho.pw_md5.toUtf8(), channel_urlencoded),
+        .path = UString::format("/web/osu-markasread.php?u=%s&h=%s&channel=%s", bancho.username.toUtf8(),
+                                bancho.pw_md5.toUtf8(), channel_urlencoded),
         .mime = NULL,
     };
     send_api_request(request);
@@ -350,7 +345,7 @@ void OsuChat::mark_as_read(OsuChatChannel* chan) {
     curl_easy_cleanup(curl);
 }
 
-void OsuChat::switchToChannel(OsuChatChannel* chan) {
+void OsuChat::switchToChannel(OsuChatChannel *chan) {
     m_selected_channel = chan;
     if(!chan->read) {
         mark_as_read(m_selected_channel);
@@ -370,7 +365,7 @@ void OsuChat::addChannel(UString channel_name, bool switch_to) {
         }
     }
 
-    OsuChatChannel* chan = new OsuChatChannel(this, channel_name);
+    OsuChatChannel *chan = new OsuChatChannel(this, channel_name);
     m_channels.push_back(chan);
 
     if(m_selected_channel == nullptr && m_channels.size() == 1) {
@@ -409,7 +404,7 @@ void OsuChat::addMessage(UString channel_name, ChatMessage msg) {
 }
 
 void OsuChat::removeChannel(UString channel_name) {
-    OsuChatChannel* chan = nullptr;
+    OsuChatChannel *chan = nullptr;
     for(auto c : m_channels) {
         if(c->name == channel_name) {
             chan = c;
@@ -445,10 +440,7 @@ void OsuChat::updateLayout(Vector2 newResolution) {
     const float chat_h = round(newResolution.y * 0.3f) - input_box_height;
     const float chat_y = newResolution.y - (chat_h + input_box_height);
     for(auto chan : m_channels) {
-        chan->updateLayout(
-            Vector2{0.f, chat_y},
-            Vector2{chat_w, chat_h}
-        );
+        chan->updateLayout(Vector2{0.f, chat_y}, Vector2{chat_w, chat_h});
     }
 
     m_input_box->setPos(Vector2{0.f, chat_y + chat_h});
@@ -460,22 +452,21 @@ void OsuChat::updateLayout(Vector2 newResolution) {
     }
 
     updateButtonLayout(newResolution);
-    updateButtonLayout(newResolution); // idk
+    updateButtonLayout(newResolution);  // idk
 }
 
 void OsuChat::updateButtonLayout(Vector2 screen) {
     const float initial_x = 2;
     float total_x = initial_x;
 
-    std::sort(m_channels.begin(), m_channels.end(), [](OsuChatChannel* a, OsuChatChannel* b) {
-        return a->name < b->name;
-    });
+    std::sort(m_channels.begin(), m_channels.end(),
+              [](OsuChatChannel *a, OsuChatChannel *b) { return a->name < b->name; });
 
     // Look, I really tried. But for some reason setRelPos() doesn't work until we change
     // the screen resolution once. So I'll just compute absolute position manually.
     float button_container_height = button_height + 2;
     for(auto chan : m_channels) {
-        OsuUIButton* btn = chan->btn;
+        OsuUIButton *btn = chan->btn;
         float button_width = font->getStringWidth(btn->getText()) + 20;
 
         // Wrap channel buttons
@@ -491,7 +482,7 @@ void OsuChat::updateButtonLayout(Vector2 screen) {
     float total_y = 0.f;
     total_x = initial_x;
     for(auto chan : m_channels) {
-        OsuUIButton* btn = chan->btn;
+        OsuUIButton *btn = chan->btn;
         float button_width = font->getStringWidth(btn->getText()) + 20;
 
         // Wrap channel buttons
@@ -564,13 +555,12 @@ void OsuChat::onDisconnect() {
     updateVisibility();
 }
 
-void OsuChat::onResolutionChange(Vector2 newResolution) {
-    updateLayout(newResolution);
-}
+void OsuChat::onResolutionChange(Vector2 newResolution) { updateLayout(newResolution); }
 
 bool OsuChat::isVisibilityForced() {
     if(m_osu->m_room == nullptr || m_osu->m_lobby == nullptr || m_osu->m_songBrowser2 == nullptr) return false;
-    bool sitting_in_room = m_osu->m_room->isVisible() && !m_osu->m_songBrowser2->isVisible() && !bancho.is_playing_a_multi_map();
+    bool sitting_in_room =
+        m_osu->m_room->isVisible() && !m_osu->m_songBrowser2->isVisible() && !bancho.is_playing_a_multi_map();
     bool sitting_in_lobby = m_osu->m_lobby->isVisible();
     bool is_forced = (sitting_in_room || sitting_in_lobby);
 
@@ -585,7 +575,8 @@ bool OsuChat::isVisibilityForced() {
 void OsuChat::updateVisibility() {
     auto selected_beatmap = m_osu->getSelectedBeatmap();
     bool can_skip = (selected_beatmap != nullptr) && (selected_beatmap->isInSkippableSection());
-    bool is_clicking_circles = m_osu->isInPlayMode() && !can_skip && !m_osu->m_bModAuto && !m_osu->m_pauseMenu->isVisible();
+    bool is_clicking_circles =
+        m_osu->isInPlayMode() && !can_skip && !m_osu->m_bModAuto && !m_osu->m_pauseMenu->isVisible();
     if(bancho.is_playing_a_multi_map() && !bancho.room.all_players_loaded) {
         is_clicking_circles = false;
     }
@@ -601,7 +592,7 @@ void OsuChat::updateVisibility() {
     }
 }
 
-CBaseUIContainer* OsuChat::setVisible(bool visible) {
+CBaseUIContainer *OsuChat::setVisible(bool visible) {
     if(visible == m_bVisible) return this;
 
     if(visible && bancho.user_id <= 0) {
@@ -612,9 +603,9 @@ CBaseUIContainer* OsuChat::setVisible(bool visible) {
     m_bVisible = visible;
     if(visible) {
         m_osu->m_optionsMenu->setVisible(false);
-        anim->moveQuartOut(&m_fAnimation, 1.0f, 0.25f*(1.0f - m_fAnimation), true);
+        anim->moveQuartOut(&m_fAnimation, 1.0f, 0.25f * (1.0f - m_fAnimation), true);
     } else {
-        anim->moveQuadOut(&m_fAnimation, 0.0f, 0.25f*m_fAnimation, true);
+        anim->moveQuadOut(&m_fAnimation, 0.0f, 0.25f * m_fAnimation, true);
     }
 
     return this;
@@ -628,5 +619,6 @@ bool OsuChat::isMouseInChat() {
 
 void OsuChat::askWhatChannelToJoin(CBaseUIButton *btn) {
     // XXX: Could display nicer UI with full channel list (chat_channels in Bancho.cpp)
-    m_osu->m_prompt->prompt("Type in the channel you want to join (e.g. '#osu'):", fastdelegate::MakeDelegate(this, &OsuChat::join));
+    m_osu->m_prompt->prompt("Type in the channel you want to join (e.g. '#osu'):",
+                            fastdelegate::MakeDelegate(this, &OsuChat::join));
 }

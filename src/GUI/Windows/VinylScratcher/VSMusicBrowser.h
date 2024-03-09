@@ -17,64 +17,59 @@ class CBaseUIButton;
 
 class VSMusicBrowserButton;
 
-class VSMusicBrowser : public CBaseUIElement
-{
-public:
-	typedef fastdelegate::FastDelegate2<std::string, bool> FileClickedCallback;
+class VSMusicBrowser : public CBaseUIElement {
+   public:
+    typedef fastdelegate::FastDelegate2<std::string, bool> FileClickedCallback;
 
-public:
-	VSMusicBrowser(int x, int y, int xSize, int ySize, McFont *font);
-	virtual ~VSMusicBrowser();
+   public:
+    VSMusicBrowser(int x, int y, int xSize, int ySize, McFont *font);
+    virtual ~VSMusicBrowser();
 
-	virtual void draw(Graphics *g);
-	virtual void mouse_update(bool *propagate_clicks);
+    virtual void draw(Graphics *g);
+    virtual void mouse_update(bool *propagate_clicks);
 
-	void fireNextSong(bool previous);
+    void fireNextSong(bool previous);
 
-	void onInvalidFile();
+    void onInvalidFile();
 
-	void setFileClickedCallback(FileClickedCallback callback) {m_fileClickedCallback = callback;}
+    void setFileClickedCallback(FileClickedCallback callback) { m_fileClickedCallback = callback; }
 
-protected:
-	virtual void onMoved();
-	virtual void onResized();
-	virtual void onDisabled();
-	virtual void onEnabled();
-	virtual void onFocusStolen();
+   protected:
+    virtual void onMoved();
+    virtual void onResized();
+    virtual void onDisabled();
+    virtual void onEnabled();
+    virtual void onFocusStolen();
 
-private:
-	struct COLUMN
-	{
-		CBaseUIScrollView *view;
-		std::vector<VSMusicBrowserButton*> buttons;
+   private:
+    struct COLUMN {
+        CBaseUIScrollView *view;
+        std::vector<VSMusicBrowserButton *> buttons;
 
-		COLUMN()
-		{
-			view = NULL;
-		}
-	};
+        COLUMN() { view = NULL; }
+    };
 
-private:
-	void updateFolder(std::string baseFolder, size_t fromDepth);
-	void updateDrives();
-	void updatePlayingSelection(bool fromInvalidSelection = false);
+   private:
+    void updateFolder(std::string baseFolder, size_t fromDepth);
+    void updateDrives();
+    void updatePlayingSelection(bool fromInvalidSelection = false);
 
-	void onButtonClicked(CBaseUIButton *button);
+    void onButtonClicked(CBaseUIButton *button);
 
-	FileClickedCallback m_fileClickedCallback;
+    FileClickedCallback m_fileClickedCallback;
 
-	McFont *m_font;
+    McFont *m_font;
 
-	Color m_defaultTextColor;
-	Color m_playingTextBrightColor;
-	Color m_playingTextDarkColor;
+    Color m_defaultTextColor;
+    Color m_playingTextBrightColor;
+    Color m_playingTextDarkColor;
 
-	CBaseUIScrollView *m_mainContainer;
-	std::vector<COLUMN> m_columns;
+    CBaseUIScrollView *m_mainContainer;
+    std::vector<COLUMN> m_columns;
 
-	std::string m_activeSong;
-	std::string m_previousActiveSong;
-	std::vector<std::string> m_playlist;
+    std::string m_activeSong;
+    std::string m_previousActiveSong;
+    std::vector<std::string> m_playlist;
 };
 
 #endif

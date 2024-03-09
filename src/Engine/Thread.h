@@ -10,29 +10,27 @@
 
 class ConVar;
 
-class BaseThread
-{
-public:
-	virtual ~BaseThread() {;}
+class BaseThread {
+   public:
+    virtual ~BaseThread() { ; }
 
-	virtual bool isReady() = 0;
+    virtual bool isReady() = 0;
 };
 
-class McThread
-{
-public:
-	static ConVar *debug;
+class McThread {
+   public:
+    static ConVar *debug;
 
-	typedef void *(*START_ROUTINE)(void*);
+    typedef void *(*START_ROUTINE)(void *);
 
-public:
-	McThread(START_ROUTINE start_routine, void *arg);
-	~McThread();
+   public:
+    McThread(START_ROUTINE start_routine, void *arg);
+    ~McThread();
 
-	bool isReady();
+    bool isReady();
 
-private:
-	BaseThread *m_baseThread;
+   private:
+    BaseThread *m_baseThread;
 };
 
 #endif

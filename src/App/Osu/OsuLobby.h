@@ -30,12 +30,12 @@ struct RoomUIElement : CBaseUIScrollView {
 };
 
 class OsuLobby : public OsuScreen {
-public:
-    OsuLobby(Osu *osu);
+   public:
+    OsuLobby(Osu* osu);
 
-    virtual void onKeyDown(KeyboardEvent &e);
-    virtual void onKeyUp(KeyboardEvent &e);
-    virtual void onChar(KeyboardEvent &e);
+    virtual void onKeyDown(KeyboardEvent& e);
+    virtual void onKeyUp(KeyboardEvent& e);
+    virtual void onChar(KeyboardEvent& e);
     virtual void onResolutionChange(Vector2 newResolution);
 
     // /!\ Side-effect: sends bancho packets when changing state
@@ -53,8 +53,8 @@ public:
     void on_room_join_failed();
 
     std::vector<Room*> rooms;
-    OsuUIButton *m_create_room_btn;
-    CBaseUIScrollView *m_list;
+    OsuUIButton* m_create_room_btn;
+    CBaseUIScrollView* m_list;
     int32_t room_to_join;
     McFont* font;
 };

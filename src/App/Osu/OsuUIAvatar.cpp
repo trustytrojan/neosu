@@ -1,26 +1,25 @@
-#include <sstream>
+#include "OsuUIAvatar.h"
+
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <sstream>
+
 #include "Bancho.h"
 #include "BanchoNetworking.h"
+#include "Engine.h"
 #include "Osu.h"
 #include "OsuSkin.h"
-#include "OsuUIAvatar.h"
 #include "OsuUIUserContextMenu.h"
-
-#include "Engine.h"
 #include "ResourceManager.h"
-
 
 int avatar_downloading_thread_id = 0;
 pthread_mutex_t avatars_mtx = PTHREAD_MUTEX_INITIALIZER;
 std::vector<uint32_t> avatars_to_load;
 std::vector<uint32_t> avatars_loaded;
 
-
-void* avatar_downloading_thread(void *arg) {
+void *avatar_downloading_thread(void *arg) {
     (void)arg;
 
     pthread_mutex_lock(&avatars_mtx);
@@ -41,20 +40,20 @@ void* avatar_downloading_thread(void *arg) {
     }
 
     CURL *curl = curl_easy_init();
-    if (!curl) {
+    if(!curl) {
         debugLog("Failed to initialize cURL, avatar downloading disabled.\n");
         return NULL;
     }
 
     std::vector<uint32_t> blacklist;
-    blacklist.push_back(0); // make sure we don't try to load user id 0
+    blacklist.push_back(0);  // make sure we don't try to load user id 0
 
     while(thread_id == avatar_downloading_thread_id) {
-loop:
-        env->sleep(100000); // wait 100ms between every download
+    loop:
+        env->sleep(100000);  // wait 100ms between every download
 
         pthread_mutex_lock(&avatars_mtx);
-        if (avatars_to_load.empty()) {
+        if(avatars_to_load.empty()) {
             pthread_mutex_unlock(&avatars_mtx);
             continue;
         }
@@ -131,12 +130,12 @@ loop:
     return NULL;
 }
 
-
-OsuUIAvatar::OsuUIAvatar(uint32_t player_id, float xPos, float yPos, float xSize, float ySize) : CBaseUIButton(xPos, yPos, xSize, ySize, "avatar", "") {
+OsuUIAvatar::OsuUIAvatar(uint32_t player_id, float xPos, float yPos, float xSize, float ySize)
+    : CBaseUIButton(xPos, yPos, xSize, ySize, "avatar", "") {
     m_player_id = player_id;
 
     avatar_path = UString::format(MCENGINE_DATA_DIR "avatars/%s/%d", bancho.endpoint.toUtf8(), player_id);
-    setClickCallback( fastdelegate::MakeDelegate(this, &OsuUIAvatar::onAvatarClicked) );
+    setClickCallback(fastdelegate::MakeDelegate(this, &OsuUIAvatar::onAvatarClicked));
 
     struct stat attr;
     bool exists = (stat(avatar_path.c_str(), &attr) == 0);
@@ -156,13 +155,13 @@ OsuUIAvatar::OsuUIAvatar(uint32_t player_id, float xPos, float yPos, float xSize
 }
 
 void OsuUIAvatar::draw(Graphics *g) {
-    if(!on_screen) return; // Comment when you need to debug on_screen logic
+    if(!on_screen) return;  // Comment when you need to debug on_screen logic
 
     if(avatar != nullptr) {
         g->pushTransform();
         g->setColor(0xffffffff);
         g->scale(m_vSize.x / avatar->getWidth(), m_vSize.y / avatar->getHeight());
-        g->translate(m_vPos.x + m_vSize.x/2.0f, m_vPos.y + m_vSize.y/2.0f);
+        g->translate(m_vPos.x + m_vSize.x / 2.0f, m_vPos.y + m_vSize.y / 2.0f);
         g->drawImage(avatar);
         g->popTransform();
     }

@@ -25,35 +25,30 @@
 
 #endif
 
-Timer::Timer()
-{
-	m_timer = NULL;
+Timer::Timer() {
+    m_timer = NULL;
 
 #ifdef _WIN32
 
-	m_timer = new WinTimer();
+    m_timer = new WinTimer();
 
 #elif defined __linux__
 
-	m_timer = new LinuxTimer();
+    m_timer = new LinuxTimer();
 
 #elif defined __APPLE__
 
-	m_timer = new MacOSTimer();
+    m_timer = new MacOSTimer();
 
 #elif defined __SWITCH__
 
-	m_timer = new HorizonTimer();
+    m_timer = new HorizonTimer();
 
 #else
 
 #error Missing Timer implementation for OS!
 
 #endif
-
 }
 
-Timer::~Timer()
-{
-	SAFE_DELETE(m_timer);
-}
+Timer::~Timer() { SAFE_DELETE(m_timer); }

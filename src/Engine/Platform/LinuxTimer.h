@@ -10,30 +10,29 @@
 #ifndef LINUXTIMER_H
 #define LINUXTIMER_H
 
-#include "Timer.h"
-
 #include <time.h>
 
-class LinuxTimer : public BaseTimer
-{
-public:
-	LinuxTimer();
-	virtual ~LinuxTimer() {;}
+#include "Timer.h"
 
-	virtual void start() override;
-	virtual void update() override;
+class LinuxTimer : public BaseTimer {
+   public:
+    LinuxTimer();
+    virtual ~LinuxTimer() { ; }
 
-	virtual inline double getDelta() const override {return m_delta;}
-	virtual inline double getElapsedTime() const override {return m_elapsedTime;}
-	virtual inline uint64_t getElapsedTimeMS() const override {return m_elapsedTimeMS;}
+    virtual void start() override;
+    virtual void update() override;
 
-private:
-	timespec m_startTime;
-	timespec m_currentTime;
+    virtual inline double getDelta() const override { return m_delta; }
+    virtual inline double getElapsedTime() const override { return m_elapsedTime; }
+    virtual inline uint64_t getElapsedTimeMS() const override { return m_elapsedTimeMS; }
 
-	double m_delta;
-	double m_elapsedTime;
-	uint64_t m_elapsedTimeMS;
+   private:
+    timespec m_startTime;
+    timespec m_currentTime;
+
+    double m_delta;
+    double m_elapsedTime;
+    uint64_t m_elapsedTimeMS;
 };
 
 #endif

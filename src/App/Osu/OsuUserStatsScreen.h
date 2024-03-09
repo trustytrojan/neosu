@@ -22,57 +22,56 @@ class OsuUIUserStatsScreenLabel;
 
 class OsuUserStatsScreenBackgroundPPRecalculator;
 
-class OsuUserStatsScreen : public OsuScreenBackable
-{
-public:
-	OsuUserStatsScreen(Osu *osu);
-	virtual ~OsuUserStatsScreen();
+class OsuUserStatsScreen : public OsuScreenBackable {
+   public:
+    OsuUserStatsScreen(Osu *osu);
+    virtual ~OsuUserStatsScreen();
 
-	virtual void draw(Graphics *g);
-	virtual void mouse_update(bool *propagate_clicks);
+    virtual void draw(Graphics *g);
+    virtual void mouse_update(bool *propagate_clicks);
 
-	virtual CBaseUIContainer* setVisible(bool visible);
+    virtual CBaseUIContainer *setVisible(bool visible);
 
-	void onScoreContextMenu(OsuUISongBrowserScoreButton *scoreButton, int id);
+    void onScoreContextMenu(OsuUISongBrowserScoreButton *scoreButton, int id);
 
-private:
-	virtual void updateLayout();
+   private:
+    virtual void updateLayout();
 
-	virtual void onBack();
+    virtual void onBack();
 
-	void rebuildScoreButtons(UString playerName);
+    void rebuildScoreButtons(UString playerName);
 
-	void onUserClicked(CBaseUIButton *button);
-	void onUserButtonChange(UString text, int id);
-	void onScoreClicked(CBaseUIButton *button);
-	void onMenuClicked(CBaseUIButton *button);
-	void onMenuSelected(UString text, int id);
-	void onRecalculatePPImportLegacyScoresClicked();
-	void onRecalculatePPImportLegacyScoresConfirmed(UString text, int id);
-	void onRecalculatePP(bool importLegacyScores);
-	void onCopyAllScoresClicked();
-	void onCopyAllScoresUserSelected(UString text, int id);
-	void onCopyAllScoresConfirmed(UString text, int id);
-	void onDeleteAllScoresClicked();
-	void onDeleteAllScoresConfirmed(UString text, int id);
+    void onUserClicked(CBaseUIButton *button);
+    void onUserButtonChange(UString text, int id);
+    void onScoreClicked(CBaseUIButton *button);
+    void onMenuClicked(CBaseUIButton *button);
+    void onMenuSelected(UString text, int id);
+    void onRecalculatePPImportLegacyScoresClicked();
+    void onRecalculatePPImportLegacyScoresConfirmed(UString text, int id);
+    void onRecalculatePP(bool importLegacyScores);
+    void onCopyAllScoresClicked();
+    void onCopyAllScoresUserSelected(UString text, int id);
+    void onCopyAllScoresConfirmed(UString text, int id);
+    void onDeleteAllScoresClicked();
+    void onDeleteAllScoresConfirmed(UString text, int id);
 
-	ConVar *m_name_ref;
+    ConVar *m_name_ref;
 
-	OsuUIContextMenu *m_contextMenu;
+    OsuUIContextMenu *m_contextMenu;
 
-	OsuUIUserStatsScreenLabel *m_ppVersionInfoLabel;
+    OsuUIUserStatsScreenLabel *m_ppVersionInfoLabel;
 
-	OsuUISongBrowserUserButton *m_userButton;
+    OsuUISongBrowserUserButton *m_userButton;
 
-	CBaseUIScrollView *m_scores;
-	std::vector<OsuUISongBrowserScoreButton*> m_scoreButtons;
+    CBaseUIScrollView *m_scores;
+    std::vector<OsuUISongBrowserScoreButton *> m_scoreButtons;
 
-	CBaseUIButton *m_menuButton;
+    CBaseUIButton *m_menuButton;
 
-	UString m_sCopyAllScoresFromUser;
+    UString m_sCopyAllScoresFromUser;
 
-	bool m_bRecalculatingPP;
-	OsuUserStatsScreenBackgroundPPRecalculator *m_backgroundPPRecalculator;
+    bool m_bRecalculatingPP;
+    OsuUserStatsScreenBackgroundPPRecalculator *m_backgroundPPRecalculator;
 };
 
 #endif

@@ -6,7 +6,7 @@ class Osu;
 class OsuUIVolumeSlider;
 
 class OsuVolumeOverlay : public OsuScreen {
-public:
+   public:
     OsuVolumeOverlay(Osu *osu);
 
     void animate();
@@ -21,8 +21,8 @@ public:
     void gainFocus();
     void loseFocus();
 
-    void volumeUp(int multiplier = 1) {onVolumeChange(multiplier);}
-    void volumeDown(int multiplier = 1) {onVolumeChange(-multiplier);}
+    void volumeUp(int multiplier = 1) { onVolumeChange(multiplier); }
+    void volumeDown(int multiplier = 1) { onVolumeChange(-multiplier); }
     void onVolumeChange(int multiplier);
     void onMasterVolumeChange(UString oldValue, UString newValue);
     void onEffectVolumeChange();

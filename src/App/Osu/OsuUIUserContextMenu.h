@@ -17,7 +17,7 @@ enum UserActions {
 };
 
 class OsuUIUserContextMenuScreen : public OsuScreen {
-public:
+   public:
     OsuUIUserContextMenuScreen(Osu *osu);
 
     virtual void onResolutionChange(Vector2 newResolution);
@@ -32,7 +32,7 @@ public:
 };
 
 class OsuUIUserLabel : public CBaseUILabel {
-public:
+   public:
     OsuUIUserLabel(Osu *osu, uint32_t user_id, UString username);
 
     virtual void onMouseUpInside();

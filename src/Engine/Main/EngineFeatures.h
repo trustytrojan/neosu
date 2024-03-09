@@ -38,12 +38,12 @@
 /*
  * OpenGL graphics (Mobile, ES/EGL)
  */
-//#define MCENGINE_FEATURE_OPENGLES
+// #define MCENGINE_FEATURE_OPENGLES
 
 /*
  * DirectX 11 graphics
  */
-//#define MCENGINE_FEATURE_DIRECTX11
+// #define MCENGINE_FEATURE_DIRECTX11
 
 /*
  * ENet & CURL networking
@@ -61,37 +61,37 @@
  * BASS WASAPI sound (Windows only)
  */
 #ifdef _WIN32
-//#define MCENGINE_FEATURE_BASS_WASAPI
+// #define MCENGINE_FEATURE_BASS_WASAPI
 #endif
 
 /*
  * OpenCL
  */
-//#define MCENGINE_FEATURE_OPENCL
+// #define MCENGINE_FEATURE_OPENCL
 
 /*
  * Vulkan
  */
-//#define MCENGINE_FEATURE_VULKAN
+// #define MCENGINE_FEATURE_VULKAN
 
 /*
  * OpenVR
  */
-//#define MCENGINE_FEATURE_OPENVR
+// #define MCENGINE_FEATURE_OPENVR
 
 /*
  * SDL2 main + Environment
  */
-//#define MCENGINE_FEATURE_SDL
+// #define MCENGINE_FEATURE_SDL
 
 /*
  * SDL2 mixer (audio)
  */
-//#define MCENGINE_FEATURE_SDL_MIXER
+// #define MCENGINE_FEATURE_SDL_MIXER
 
 /*
  * Discord RPC (rich presence)
  */
-//#define MCENGINE_FEATURE_DISCORD
+// #define MCENGINE_FEATURE_DISCORD
 
 #endif

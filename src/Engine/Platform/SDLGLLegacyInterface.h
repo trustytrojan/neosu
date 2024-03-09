@@ -14,20 +14,19 @@
 
 #include "SDL.h"
 
-class SDLGLLegacyInterface : public OpenGLLegacyInterface
-{
-public:
-	SDLGLLegacyInterface(SDL_Window *window);
-	virtual ~SDLGLLegacyInterface();
+class SDLGLLegacyInterface : public OpenGLLegacyInterface {
+   public:
+    SDLGLLegacyInterface(SDL_Window *window);
+    virtual ~SDLGLLegacyInterface();
 
-	// scene
-	void endScene();
+    // scene
+    void endScene();
 
-	// device settings
-	void setVSync(bool vsync);
+    // device settings
+    void setVSync(bool vsync);
 
-private:
-	SDL_Window *m_window;
+   private:
+    SDL_Window *m_window;
 };
 
 #endif

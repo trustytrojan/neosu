@@ -12,18 +12,17 @@
 
 #include "cbase.h"
 
-class ContextMenu
-{
-public:
-	ContextMenu();
-	virtual ~ContextMenu();
+class ContextMenu {
+   public:
+    ContextMenu();
+    virtual ~ContextMenu();
 
-	static ContextMenu *get();
+    static ContextMenu *get();
 
-	virtual void begin() = 0;
-	virtual void addItem(UString text, int returnValue) = 0;
-	virtual void addSeparator() = 0;
-	virtual int end() = 0;
+    virtual void begin() = 0;
+    virtual void addItem(UString text, int returnValue) = 0;
+    virtual void addSeparator() = 0;
+    virtual int end() = 0;
 };
 
 extern ContextMenu *cmenu;
