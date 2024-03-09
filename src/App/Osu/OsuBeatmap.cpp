@@ -519,6 +519,7 @@ void OsuBeatmap::update() {
                     engine->getSound()->play(m_music);
                     m_music->setPosition(0.0);
                     m_music->setVolume(m_osu_volume_music_ref->getFloat());
+                    m_music->setSpeed(m_osu->getSpeedMultiplier());
 
                     // if we are quick restarting, jump just before the first hitobject (even if there is a long waiting
                     // period at the beginning with nothing etc.)
@@ -1681,6 +1682,7 @@ void OsuBeatmap::seekPercent(double percent) {
 
     m_music->setPosition(percent);
     m_music->setVolume(m_osu_volume_music_ref->getFloat());
+    m_music->setSpeed(m_osu->getSpeedMultiplier());
 
     resetHitObjects(m_music->getPositionMS());
     resetScoreInt();
@@ -2197,6 +2199,7 @@ void OsuBeatmap::loadMusic(bool stream, bool prescan) {
                 prescan);  // m_bForceStreamPlayback = prescan necessary! otherwise big mp3s will go out of sync
         m_music->setVolume(m_osu_volume_music_ref->getFloat());
         m_fMusicFrequencyBackup = m_music->getFrequency();
+        m_music->setSpeed(m_osu->getSpeedMultiplier());
     }
 }
 
