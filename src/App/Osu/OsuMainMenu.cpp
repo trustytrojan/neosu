@@ -307,16 +307,6 @@ OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu) {
     m_updateAvailableButton->setColor(0x2200ff00);
     m_updateAvailableButton->setTextColor(0x22ffffff);
 
-    m_githubButton = new OsuUIButton(m_osu, 0, 0, 0, 0, "", "Github");
-    m_githubButton->setUseDefaultSkin();
-    m_githubButton->setClickCallback(fastdelegate::MakeDelegate(this, &OsuMainMenu::onGithubPressed));
-    m_githubButton->setColor(0x2923b9ff);
-    m_githubButton->setTextBrightColor(0x55172e62);
-    m_githubButton->setTextDarkColor(0x11ffffff);
-    m_githubButton->setAlphaAddOnHover(0.5f);
-    m_githubButton->setVisible(false);
-    addBaseUIElement(m_githubButton);
-
     m_versionButton = new CBaseUIButton(0, 0, 0, 0, "", "");
     UString versionString = MCOSU_VERSION_TEXT;
     versionString.append(" ");
@@ -668,13 +658,6 @@ void OsuMainMenu::draw(Graphics *g) {
         g->translate3DScene(friendTranslationX, friendTranslationY, 0);
         g->rotate3DScene(m_fMainMenuAnim1 * 360.0f, m_fMainMenuAnim2 * 360.0f,
                          m_fMainMenuAnim3 * 360.0f + friendRotation);
-
-        // g->rotate3DScene(engine->getMouse()->getPos().y, engine->getMouse()->getPos().x, 0);
-
-        /*
-        g->offset3DScene(0, 0, 300.0f);
-        g->rotate3DScene(0, m_fCenterOffsetAnim*0.13f, 0);
-        */
     }
 
     const Color cubeColor = COLORf(1.0f, lerp<float>(0.0f, 0.5f, m_fMainMenuAnimFriendPercent),
@@ -697,20 +680,6 @@ void OsuMainMenu::draw(Graphics *g) {
     g->setColor(cubeBorderColor);
     g->setAlpha(osu_main_menu_alpha.getFloat());
     g->drawRect(mainButtonRect.getX(), mainButtonRect.getY(), mainButtonRect.getWidth(), mainButtonRect.getHeight());
-    {
-        // front side pulse border
-        /*
-        if (haveTimingpoints && !anim->isAnimating(&m_fMainMenuAnim))
-        {
-                const int pulseSizeMax = mainButtonRect.getWidth()*0.25f;
-                const int pulseOffset = (1.0f - (1.0f - pulse)*(1.0f - pulse))*pulseSizeMax;
-                g->setColor(0xffffffff);
-                g->setAlpha((1.0f - pulse)*0.4f*m_fMainMenuAnimFriendPercent);
-                g->drawRect(mainButtonRect.getX() - pulseOffset/2, mainButtonRect.getY() - pulseOffset/2,
-        mainButtonRect.getWidth() + pulseOffset, mainButtonRect.getHeight() + pulseOffset);
-        }
-        */
-    }
 
     // friend
     if(m_fMainMenuAnimFriendPercent > 0.0f) {
@@ -1171,15 +1140,6 @@ void OsuMainMenu::draw(Graphics *g) {
 
         g->setDepthBuffer(false);
     }
-
-    /*
-    if (m_fShutdownScheduledTime != 0.0f)
-    {
-            g->setColor(0xff000000);
-            g->setAlpha(1.0f - clamp<float>((m_fShutdownScheduledTime - engine->getTime()) / 0.3f, 0.0f, 1.0f));
-            g->fillRect(0, 0, m_osu->getScreenWidth(), m_osu->getScreenHeight());
-    }
-    */
 }
 
 void OsuMainMenu::mouse_update(bool *propagate_clicks) {
@@ -1408,9 +1368,6 @@ void OsuMainMenu::updateLayout() {
     m_updateAvailableButton->setSize(375 * dpiScale, 50 * dpiScale);
     m_updateAvailableButton->setPos(m_osu->getScreenWidth() / 2 - m_updateAvailableButton->getSize().x / 2,
                                     m_osu->getScreenHeight() - m_updateAvailableButton->getSize().y - 10 * dpiScale);
-
-    m_githubButton->setSize(100 * dpiScale, 50 * dpiScale);
-    m_githubButton->setRelPos(5 * dpiScale, m_osu->getScreenHeight() / 2.0f - m_githubButton->getSize().y / 2.0f);
 
     m_versionButton->onResized();  // HACKHACK: framework, setSizeToContent() does not update string metrics
     m_versionButton->setSizeToContent(8 * dpiScale, 8 * dpiScale);
@@ -1648,19 +1605,6 @@ void OsuMainMenu::onUpdatePressed() {
         engine->restart();
     else if(m_osu->getUpdateHandler()->getStatus() == OsuUpdateHandler::STATUS::STATUS_ERROR)
         m_osu->getUpdateHandler()->checkForUpdates();
-}
-
-void OsuMainMenu::onGithubPressed() {
-    if(m_osu->getInstanceID() > 1) return;
-
-    if(env->getOS() == Environment::OS::OS_HORIZON) {
-        m_osu->getNotificationOverlay()->addNotification("Go to https://github.com/McKay42/McOsu/", 0xffffffff, false,
-                                                         0.75f);
-        return;
-    }
-
-    m_osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
-    env->openURLInDefaultBrowser("https://github.com/McKay42/McOsu/");
 }
 
 void OsuMainMenu::onVersionPressed() {

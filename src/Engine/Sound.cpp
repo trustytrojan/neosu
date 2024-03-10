@@ -24,8 +24,6 @@
 #include "ResourceManager.h"
 #include "SoundEngine.h"
 
-ConVar debug_snd("debug_snd", false, FCVAR_NONE);
-
 ConVar snd_play_interp_duration(
     "snd_play_interp_duration", 0.75f, FCVAR_NONE,
     "smooth over freshly started channel position jitter with engine time over this duration in seconds");
@@ -37,39 +35,80 @@ ConVar snd_wav_file_min_size("snd_wav_file_min_size", 51, FCVAR_NONE,
                              "minimum file size in bytes for WAV files to be considered valid (everything below will "
                              "fail to load), this is a workaround for BASS crashes");
 
-Sound::Sound(std::string filepath, bool stream, bool threeD, bool loop, bool prescan) : Resource(filepath) {
-    m_HSTREAM = 0;
-    m_HSTREAMBACKUP = 0;
-    m_HCHANNEL = 0;
-    m_HCHANNELBACKUP = 0;
-
+Sound::Sound(std::string filepath, bool stream, bool overlayable, bool threeD, bool loop, bool prescan) : Resource(filepath) {
+    m_sample = 0;
+    m_stream = 0;
     m_bStream = stream;
     m_bIs3d = threeD;
     m_bIsLooped = loop;
     m_bPrescan = prescan;
-    m_bIsOverlayable = false;
-
+    m_bIsOverlayable = overlayable;
+    m_fSpeed = 1.0f;
     m_fVolume = 1.0f;
     m_fLastPlayTime = -1.0f;
+}
 
-    m_fActualSpeedForDisabledPitchCompensation = 1.0f;
+std::vector<HCHANNEL> Sound::getActiveChannels() {
+    std::vector<HCHANNEL> channels;
 
-    m_iPrevPosition = 0;
-    m_mixChunkOrMixMusic = NULL;
+    if(engine->getSound()->isWASAPI()) {
+        if(m_bStream) {
+            if(BASS_Mixer_ChannelGetMixer(m_stream) != 0) {
+                channels.push_back(m_stream);
+            }
+        } else {
+            for(auto chan : wasapi_channels) {
+                if(BASS_Mixer_ChannelGetMixer(chan) != 0) {
+                    channels.push_back(chan);
+                }
+            }
 
-    m_wasapiSampleBuffer = NULL;
-    m_iWasapiSampleBufferSize = 0;
-    m_danglingWasapiStreams.reserve(32);
+            // Only keep channels that are still playing
+            wasapi_channels = channels;
+        }
+    } else {
+        if(m_bStream) {
+            if(BASS_ChannelIsActive(m_stream) == BASS_ACTIVE_PLAYING) {
+                channels.push_back(m_stream);
+            }
+        } else {
+            HCHANNEL chans[MAX_OVERLAPPING_SAMPLES] = {0};
+            int nb = BASS_SampleGetChannels(m_sample, chans);
+            for(int i = 0; i < nb; i++) {
+                if(BASS_ChannelIsActive(chans[i]) == BASS_ACTIVE_PLAYING) {
+                    channels.push_back(chans[i]);
+                }
+            }
+        }
+    }
+
+    return channels;
+}
+
+HCHANNEL Sound::getChannel() {
+    if(m_bStream) {
+        return m_stream;
+    } else {
+        if(engine->getSound()->isWASAPI()) {
+            // If we want to be able to control samples after playing them, we
+            // have to store them here, since WASAPI only accepts DECODE streams.
+            auto chan = BASS_SampleGetChannel(m_sample, BASS_SAMCHAN_STREAM | BASS_STREAM_DECODE);
+            wasapi_channels.push_back(chan);
+            return chan;
+        } else {
+            return BASS_SampleGetChannel(m_sample, 0);
+        }
+    }
 }
 
 void Sound::init() {
     if(m_sFilePath.length() < 2 || !m_bAsyncReady) return;
 
     // HACKHACK: re-set some values to their defaults (only necessary because of the existence of rebuild())
-    m_fActualSpeedForDisabledPitchCompensation = 1.0f;
+    m_fSpeed = 1.0f;
 
     // error checking
-    if(m_HSTREAM == 0 && m_iWasapiSampleBufferSize < 1) {
+    if(m_sample == 0 && m_stream == 0) {
         UString msg = "Couldn't load sound \"";
         msg.append(m_sFilePath.c_str());
         msg.append(UString::format("\", stream = %i, errorcode = %i", (int)m_bStream, BASS_ErrorGetCode()));
@@ -102,148 +141,93 @@ void Sound::initAsync() {
         }
     }
 
-    // create the sound
     if(m_bStream) {
-        m_HSTREAM = BASS_StreamCreateFile(
-            false, m_sFilePath.c_str(), 0, 0,
-            (m_bPrescan ? BASS_STREAM_PRESCAN : 0) | BASS_STREAM_DECODE | BASS_SAMPLE_FLOAT);
-        m_HSTREAM = BASS_FX_TempoCreate(m_HSTREAM, BASS_FX_FREESOURCE | (engine->getSound()->isWASAPI() ? BASS_STREAM_DECODE : 0));
-        m_HCHANNELBACKUP = m_HSTREAM;
-    } else {
-        File file(m_sFilePath);
-        if(file.canRead()) {
-            m_iWasapiSampleBufferSize = file.getFileSize();
-            if(m_iWasapiSampleBufferSize > 0) {
-                m_wasapiSampleBuffer = new uint8_t[file.getFileSize()];
-                memcpy(m_wasapiSampleBuffer, file.readFile(), file.getFileSize());
-            }
-        } else {
-            printf("Sound Error: Couldn't file.canRead() on file %s\n", m_sFilePath.c_str());
+        auto flags = BASS_STREAM_DECODE | BASS_SAMPLE_FLOAT;
+        if(m_bPrescan) flags |= BASS_STREAM_PRESCAN;
+
+        m_stream = BASS_StreamCreateFile(false, m_sFilePath.c_str(), 0, 0, flags);
+        if(!m_stream) {
+            debugLog("BASS_StreamCreateFile() returned error %d on file %s\n", BASS_ErrorGetCode(), m_sFilePath.c_str());
+            return;
         }
 
-        m_HSTREAM = BASS_SampleLoad(
-            true, m_wasapiSampleBuffer, 0, m_iWasapiSampleBufferSize, 5,
-            BASS_SAMPLE_FLOAT | (m_bIsLooped ? BASS_SAMPLE_LOOP : 0) |
-            (m_bIs3d ? BASS_SAMPLE_3D | BASS_SAMPLE_MONO : 0) | BASS_SAMPLE_OVER_POS
-        );
-        m_HSTREAMBACKUP = m_HSTREAM;  // needed for proper cleanup for FX HSAMPLES
+        auto fx_flags = BASS_FX_FREESOURCE;
+        if(engine->getSound()->isWASAPI()) fx_flags |= BASS_STREAM_DECODE;
+        m_stream = BASS_FX_TempoCreate(m_stream, fx_flags);
+        if(!m_stream) {
+            debugLog("BASS_FX_TempoCreate() returned error %d on file %s\n", BASS_ErrorGetCode(), m_sFilePath.c_str());
+            return;
+        }
+    } else {
+        auto flags = BASS_SAMPLE_FLOAT | BASS_SAMPLE_OVER_POS;
+        if(m_bIs3d) flags |= BASS_SAMPLE_3D | BASS_SAMPLE_MONO;
 
-        if(m_HSTREAM == 0) {
-            printf("Sound Error: BASS_SampleLoad() error %i on file %s\n", BASS_ErrorGetCode(), m_sFilePath.c_str());
+        m_sample = BASS_SampleLoad(false, m_sFilePath.c_str(), 0, 0, m_bIsOverlayable ? MAX_OVERLAPPING_SAMPLES : 1, flags);
+        if(!m_sample) {
+            debugLog("BASS_SampleLoad() returned error %d on file %s\n", BASS_ErrorGetCode(), m_sFilePath.c_str());
+            return;
         }
     }
 
     m_bAsyncReady = true;
 }
 
-Sound::SOUNDHANDLE Sound::getHandle() {
-    // if the file is streamed from the disk, directly return HSTREAM
-    if(m_bStream) {
-        return m_HSTREAM;
-    }
-
-    for(size_t i = 0; i < m_danglingWasapiStreams.size(); i++) {
-        if(BASS_ChannelIsActive(m_danglingWasapiStreams[i]) != BASS_ACTIVE_PLAYING) {
-            BASS_StreamFree(m_danglingWasapiStreams[i]);
-            m_danglingWasapiStreams.erase(m_danglingWasapiStreams.begin() + i);
-            i--;
-        }
-    }
-
-    // WASAPI stream objects can't be reused, so we always recreate a new one
-    // TODO @kiwec: handle non-overlayable sounds on WASAPI
-    if(engine->getSound()->isWASAPI()) {
-        m_HCHANNEL = BASS_StreamCreateFile(
-            true, m_wasapiSampleBuffer, 0, m_iWasapiSampleBufferSize,
-            BASS_SAMPLE_FLOAT | BASS_STREAM_DECODE | (m_bIsLooped ? BASS_SAMPLE_LOOP : 0));
-        if(m_HCHANNEL == 0) {
-            debugLog("BASS_StreamCreateFile() error %i\n", BASS_ErrorGetCode());
-            return 0;
-        }
-
-        BASS_ChannelSetAttribute(m_HCHANNEL, BASS_ATTRIB_VOL, m_fVolume);
-        m_danglingWasapiStreams.push_back(m_HCHANNEL);
-        return m_HCHANNEL;
-    }
-
-    if(m_HCHANNEL != 0 && !m_bIsOverlayable) return m_HCHANNEL;
-
-    m_HCHANNEL = BASS_SampleGetChannel(m_HSTREAMBACKUP, 0);
-    m_HCHANNELBACKUP = m_HCHANNEL;
-
-    if(m_HCHANNEL == 0) {
-        debugLog(0xffdd3333, "Couldn't BASS_SampleGetChannel \"%s\", stream = %d, errorcode = %d\n",
-                 m_sFilePath.c_str(), (int)m_bStream, BASS_ErrorGetCode());
-    } else {
-        BASS_ChannelSetAttribute(m_HCHANNEL, BASS_ATTRIB_VOL, m_fVolume);
-    }
-
-    return m_HCHANNEL;
-}
-
 void Sound::destroy() {
     if(!m_bReady) return;
 
     m_bReady = false;
+    m_fLastPlayTime = 0.0;
 
     if(m_bStream) {
-#ifdef _WIN32
-        BASS_Mixer_ChannelRemove(m_HSTREAM);
-#endif
+        if(engine->getSound()->isWASAPI()) {
+            BASS_Mixer_ChannelRemove(m_stream);
+        }
 
-        BASS_StreamFree(m_HSTREAM);  // fx (but with BASS_FX_FREESOURCE)
+        BASS_ChannelStop(m_stream);
+        BASS_StreamFree(m_stream);
+        m_stream = 0;
     } else {
-        if(m_HCHANNEL) BASS_ChannelStop(m_HCHANNEL);
-        if(m_HSTREAMBACKUP) BASS_SampleFree(m_HSTREAMBACKUP);
-
-#ifdef _WIN32
-        // NOTE: must guarantee that all channels are stopped before memory is deleted!
-        for(const SOUNDHANDLE danglingWasapiStream : m_danglingWasapiStreams) {
-            BASS_StreamFree(danglingWasapiStream);
-        }
-        m_danglingWasapiStreams.clear();
-
-        if(m_wasapiSampleBuffer != NULL) {
-            delete[] m_wasapiSampleBuffer;
-            m_wasapiSampleBuffer = NULL;
-        }
-#endif
+        BASS_SampleStop(m_sample);
+        BASS_SampleFree(m_sample);
+        m_sample = 0;
     }
-
-    m_HSTREAM = 0;
-    m_HSTREAMBACKUP = 0;
-    m_HCHANNEL = 0;
 }
 
 void Sound::setPosition(double percent) {
     if(!m_bReady) return;
+    if(!m_bStream) {
+        engine->showMessageError("Programmer Error", "Called setPosition on a sample!");
+        return;
+    }
 
     percent = clamp<double>(percent, 0.0, 1.0);
 
-    const SOUNDHANDLE handle = (m_HCHANNELBACKUP != 0 ? m_HCHANNELBACKUP : getHandle());
-
-    const QWORD length = BASS_ChannelGetLength(handle, BASS_POS_BYTE);
-
-    const double lengthInSeconds = BASS_ChannelBytes2Seconds(handle, length);
+    const double length = BASS_ChannelGetLength(m_stream, BASS_POS_BYTE);
+    const double lengthInSeconds = BASS_ChannelBytes2Seconds(m_stream, length);
 
     // NOTE: abused for play interp
-    if(lengthInSeconds * percent < snd_play_interp_duration.getFloat())
+    if(lengthInSeconds * percent < snd_play_interp_duration.getFloat()) {
         m_fLastPlayTime = engine->getTime() - lengthInSeconds * percent;
-    else
+    } else {
         m_fLastPlayTime = 0.0;
+    }
 
-    const BOOL res = BASS_ChannelSetPosition(handle, (QWORD)((double)(length)*percent), BASS_POS_BYTE);
-    if(!res && debug_snd.getBool())
-        debugLog("Sound::setPosition( %f ) BASS_ChannelSetPosition() error %i on file %s\n", percent,
-                 BASS_ErrorGetCode(), m_sFilePath.c_str());
+    if(!BASS_ChannelSetPosition(m_stream, (QWORD)(length*percent), BASS_POS_BYTE)) {
+        if(Osu::debug->getBool()) {
+            debugLog("Sound::setPosition( %f ) BASS_ChannelSetPosition() error %i on file %s\n", percent,
+                     BASS_ErrorGetCode(), m_sFilePath.c_str());
+        }
+    }
 }
 
-void Sound::setPositionMS(unsigned long ms, bool internal) {
+void Sound::setPositionMS(unsigned long ms) {
     if(!m_bReady || ms > getLengthMS()) return;
+    if(!m_bStream) {
+        engine->showMessageError("Programmer Error", "Called setPositionMS on a sample!");
+        return;
+    }
 
-    const SOUNDHANDLE handle = getHandle();
-
-    const QWORD position = BASS_ChannelSeconds2Bytes(handle, ms / 1000.0);
+    const QWORD position = BASS_ChannelSeconds2Bytes(m_stream, ms / 1000.0);
 
     // NOTE: abused for play interp
     if((double)ms / 1000.0 < snd_play_interp_duration.getFloat())
@@ -251,10 +235,12 @@ void Sound::setPositionMS(unsigned long ms, bool internal) {
     else
         m_fLastPlayTime = 0.0;
 
-    const BOOL res = BASS_ChannelSetPosition(handle, position, BASS_POS_BYTE);
-    if(!res && !internal && debug_snd.getBool())
-        debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms, BASS_ErrorGetCode(),
-                 m_sFilePath.c_str());
+    if(!BASS_ChannelSetPosition(m_stream, position, BASS_POS_BYTE)) {
+        if(Osu::debug->getBool()) {
+            debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms, BASS_ErrorGetCode(),
+                     m_sFilePath.c_str());
+        }
+    }
 }
 
 void Sound::setVolume(float volume) {
@@ -262,41 +248,34 @@ void Sound::setVolume(float volume) {
 
     m_fVolume = clamp<float>(volume, 0.0f, 1.0f);
 
-    if(!m_bIsOverlayable) {
-        const SOUNDHANDLE handle = getHandle();
-        BASS_ChannelSetAttribute(handle, BASS_ATTRIB_VOL, m_fVolume);
+    for(auto channel : getActiveChannels()) {
+        BASS_ChannelSetAttribute(channel, BASS_ATTRIB_VOL, m_fVolume);
     }
 }
 
 void Sound::setSpeed(float speed) {
     if(!m_bReady) return;
+    if(!m_bStream) {
+        engine->showMessageError("Programmer Error", "Called setSpeed on a sample!");
+        return;
+    }
 
     speed = clamp<float>(speed, 0.05f, 50.0f);
 
-    float originalFreq = 44100.0f;
-    const SOUNDHANDLE handle = getHandle();
-    BASS_ChannelGetAttribute(handle, BASS_ATTRIB_FREQ, &originalFreq);
+    float freq = convar->getConVarByName("snd_freq")->getFloat();
+    BASS_ChannelGetAttribute(m_stream, BASS_ATTRIB_FREQ, &freq);
 
-    BASS_ChannelSetAttribute(handle, BASS_ATTRIB_TEMPO, 1.0f);
-    BASS_ChannelSetAttribute(handle, BASS_ATTRIB_TEMPO_FREQ, originalFreq);
+    BASS_ChannelSetAttribute(m_stream, BASS_ATTRIB_TEMPO, 1.0f);
+    BASS_ChannelSetAttribute(m_stream, BASS_ATTRIB_TEMPO_FREQ, freq);
 
     bool nightcoring = bancho.osu->getModNC() || bancho.osu->getModDC();
     if(nightcoring) {
-        BASS_ChannelSetAttribute(handle, BASS_ATTRIB_TEMPO_FREQ, speed * originalFreq);
+        BASS_ChannelSetAttribute(m_stream, BASS_ATTRIB_TEMPO_FREQ, speed * freq);
     } else {
-        BASS_ChannelSetAttribute(handle, BASS_ATTRIB_TEMPO, (speed - 1.0f) * 100.0f);
+        BASS_ChannelSetAttribute(m_stream, BASS_ATTRIB_TEMPO, (speed - 1.0f) * 100.0f);
     }
 
-    m_fActualSpeedForDisabledPitchCompensation = speed;
-}
-
-void Sound::setPitch(float pitch) {
-    if(!m_bReady) return;
-
-    pitch = clamp<float>(pitch, 0.0f, 2.0f);
-
-    const SOUNDHANDLE handle = getHandle();
-    BASS_ChannelSetAttribute(handle, BASS_ATTRIB_TEMPO_PITCH, (pitch - 1.0f) * 60.0f);
+    m_fSpeed = speed;
 }
 
 void Sound::setFrequency(float frequency) {
@@ -304,8 +283,9 @@ void Sound::setFrequency(float frequency) {
 
     frequency = (frequency > 99.0f ? clamp<float>(frequency, 100.0f, 100000.0f) : 0.0f);
 
-    const SOUNDHANDLE handle = getHandle();
-    BASS_ChannelSetAttribute(handle, BASS_ATTRIB_FREQ, frequency);
+    for(auto channel : getActiveChannels()) {
+        BASS_ChannelSetAttribute(channel, BASS_ATTRIB_FREQ, frequency);
+    }
 }
 
 void Sound::setPan(float pan) {
@@ -313,42 +293,45 @@ void Sound::setPan(float pan) {
 
     pan = clamp<float>(pan, -1.0f, 1.0f);
 
-    const SOUNDHANDLE handle = getHandle();
-    BASS_ChannelSetAttribute(handle, BASS_ATTRIB_PAN, pan);
+    for(auto channel : getActiveChannels()) {
+        BASS_ChannelSetAttribute(channel, BASS_ATTRIB_PAN, pan);
+    }
 }
 
 void Sound::setLoop(bool loop) {
     if(!m_bReady) return;
+    if(!m_bStream) {
+        engine->showMessageError("Programmer Error", "Called setLoop on a sample!");
+        return;
+    }
 
     m_bIsLooped = loop;
-
-    const SOUNDHANDLE handle = getHandle();
-    BASS_ChannelFlags(handle, m_bIsLooped ? BASS_SAMPLE_LOOP : 0, BASS_SAMPLE_LOOP);
+    BASS_ChannelFlags(m_stream, m_bIsLooped ? BASS_SAMPLE_LOOP : 0, BASS_SAMPLE_LOOP);
 }
 
 float Sound::getPosition() {
     if(!m_bReady) return 0.0f;
+    if(!m_bStream) {
+        engine->showMessageError("Programmer Error", "Called getPosition on a sample!");
+        return 0.0f;
+    }
 
-    const SOUNDHANDLE handle = (m_HCHANNELBACKUP != 0 ? m_HCHANNELBACKUP : getHandle());
-
-    const QWORD lengthBytes = BASS_ChannelGetLength(handle, BASS_POS_BYTE);
-    const QWORD positionBytes = BASS_ChannelGetPosition(handle, BASS_POS_BYTE);
-
+    const QWORD lengthBytes = BASS_ChannelGetLength(m_stream, BASS_POS_BYTE);
+    const QWORD positionBytes = BASS_ChannelGetPosition(m_stream, BASS_POS_BYTE);
     const float position = (float)((double)(positionBytes) / (double)(lengthBytes));
-
     return position;
 }
 
 unsigned long Sound::getPositionMS() {
     if(!m_bReady) return 0;
+    if(!m_bStream) {
+        engine->showMessageError("Programmer Error", "Called getPositionMS on a sample!");
+        return 0;
+    }
 
-    const SOUNDHANDLE handle = getHandle();
-
-    const QWORD position = BASS_ChannelGetPosition(handle, BASS_POS_BYTE);
-
-    const double positionInSeconds = BASS_ChannelBytes2Seconds(handle, position);
+    const QWORD position = BASS_ChannelGetPosition(m_stream, BASS_POS_BYTE);
+    const double positionInSeconds = BASS_ChannelBytes2Seconds(m_stream, position);
     const double positionInMilliSeconds = positionInSeconds * 1000.0;
-
     const unsigned long positionMS = static_cast<unsigned long>(positionInMilliSeconds);
 
     // special case: a freshly started channel position jitters, lerp with engine time over a set duration to smooth
@@ -371,72 +354,49 @@ unsigned long Sound::getPositionMS() {
 
 unsigned long Sound::getLengthMS() {
     if(!m_bReady) return 0;
+    if(!m_bStream) {
+        engine->showMessageError("Programmer Error", "Called getLengthMS on a sample!");
+        return 0;
+    }
 
-    const SOUNDHANDLE handle = getHandle();
-
-    const QWORD length = BASS_ChannelGetLength(handle, BASS_POS_BYTE);
-
-    const double lengthInSeconds = BASS_ChannelBytes2Seconds(handle, length);
+    const QWORD length = BASS_ChannelGetLength(m_stream, BASS_POS_BYTE);
+    const double lengthInSeconds = BASS_ChannelBytes2Seconds(m_stream, length);
     const double lengthInMilliSeconds = lengthInSeconds * 1000.0;
-
     return static_cast<unsigned long>(lengthInMilliSeconds);
 }
 
 float Sound::getSpeed() {
-    if(!m_bReady) return 1.0f;
-
-    // BASS will always return 1.0x speed when not compensating pitch, since
-    // we're only changing playback frequency in that case.
-    bool nightcoring = bancho.osu->getModNC() || bancho.osu->getModDC();
-    if(nightcoring) {
-        return m_fActualSpeedForDisabledPitchCompensation;
-    }
-
-    float speed = 0.0f;
-    const SOUNDHANDLE handle = getHandle();
-    BASS_ChannelGetAttribute(handle, BASS_ATTRIB_TEMPO, &speed);
-    return ((speed / 100.0f) + 1.0f);
-}
-
-float Sound::getPitch() {
-    if(!m_bReady) return 1.0f;
-
-    float pitch = 0.0f;
-    const SOUNDHANDLE handle = getHandle();
-    BASS_ChannelGetAttribute(handle, BASS_ATTRIB_TEMPO_PITCH, &pitch);
-    return ((pitch / 60.0f) + 1.0f);
+    return m_fSpeed;
 }
 
 float Sound::getFrequency() {
-    if(!m_bReady) return 44100.0f;
+    auto default_freq = convar->getConVarByName("snd_freq")->getFloat();
+    if(!m_bReady) return default_freq;
+    if(!m_bStream) {
+        engine->showMessageError("Programmer Error", "Called getFrequency on a sample!");
+        return default_freq;
+    }
 
-    float frequency = 44100.0f;
-    const SOUNDHANDLE handle = getHandle();
-    BASS_ChannelGetAttribute(handle, BASS_ATTRIB_FREQ, &frequency);
+    float frequency = default_freq;
+    BASS_ChannelGetAttribute(m_stream, BASS_ATTRIB_FREQ, &frequency);
     return frequency;
 }
 
 bool Sound::isPlaying() {
     if(!m_bReady) return false;
 
-    const SOUNDHANDLE handle = getHandle();
-
-#ifdef _WIN32
-    return BASS_ChannelIsActive(handle) == BASS_ACTIVE_PLAYING &&
-           ((!m_bStream && m_bIsOverlayable) || BASS_Mixer_ChannelGetMixer(handle) != 0);
-#else
-
-    return BASS_ChannelIsActive(handle) == BASS_ACTIVE_PLAYING;
-
-#endif
+    auto channels = getActiveChannels();
+    return !channels.empty();
 }
 
 bool Sound::isFinished() {
     if(!m_bReady) return false;
 
-    const SOUNDHANDLE handle = getHandle();
-
-    return BASS_ChannelIsActive(handle) == BASS_ACTIVE_STOPPED;
+    if(m_bStream) {
+        return BASS_ChannelIsActive(m_stream) == BASS_ACTIVE_STOPPED;
+    } else {
+        return getActiveChannels().empty();
+    }
 }
 
 void Sound::rebuild(std::string newFilePath) {

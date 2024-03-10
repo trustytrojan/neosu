@@ -104,7 +104,6 @@ class OsuMainMenu : public OsuScreen, public MouseListener {
     void onExitButtonPressed();
 
     void onUpdatePressed();
-    void onGithubPressed();
     void onVersionPressed();
 
     float m_fUpdateStatusTime;
@@ -127,7 +126,6 @@ class OsuMainMenu : public OsuScreen, public MouseListener {
 
     OsuMainMenuPauseButton *m_pauseButton;
     OsuUIButton *m_updateAvailableButton;
-    OsuUIButton *m_githubButton;
     CBaseUIButton *m_versionButton;
 
     bool m_bDrawVersionNotificationArrow;

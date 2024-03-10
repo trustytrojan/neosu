@@ -355,6 +355,7 @@ class OsuSkin {
     void checkLoadImage(Image **addressOfPointer, std::string skinElementName, std::string resourceName,
                         bool ignoreDefaultSkin = false, std::string fileExtension = "png",
                         bool forceLoadMipmaps = false);
+
     void checkLoadSound(Sound **addressOfPointer, std::string skinElementName, std::string resourceName,
                         bool isOverlayable = false, bool isSample = false, bool loop = false,
                         float hardcodedVolumeMultiplier = -1.0f);

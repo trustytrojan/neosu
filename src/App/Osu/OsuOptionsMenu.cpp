@@ -643,10 +643,9 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
         addSubSection("Layout");
         OPTIONS_ELEMENT resolutionSelect =
             addButton("Select Resolution", UString::format("%ix%i", m_osu->getScreenWidth(), m_osu->getScreenHeight()));
-        ((CBaseUIButton *)resolutionSelect.elements[0])
-            ->setClickCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onResolutionSelect));
+        m_resolutionSelectButton = (CBaseUIButton *)resolutionSelect.elements[0];
+        m_resolutionSelectButton->setClickCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onResolutionSelect));
         m_resolutionLabel = (CBaseUILabel *)resolutionSelect.elements[1];
-        m_resolutionSelectButton = resolutionSelect.elements[0];
         m_fullscreenCheckbox = addCheckbox("Fullscreen");
         m_fullscreenCheckbox->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onFullscreenChange));
         addCheckbox("Borderless",
@@ -834,7 +833,7 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
         OPTIONS_ELEMENT outputDeviceSelect = addButton("Select Output Device", "Default", true);
         m_outputDeviceResetButton = outputDeviceSelect.resetButton;
         m_outputDeviceResetButton->setClickCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onOutputDeviceResetClicked));
-        m_outputDeviceSelectButton = (OsuUIButton *)outputDeviceSelect.elements[0];
+        m_outputDeviceSelectButton = (CBaseUIButton *)outputDeviceSelect.elements[0];
         m_outputDeviceSelectButton->setClickCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onOutputDeviceSelect));
 
         m_outputDeviceLabel = (CBaseUILabel *)outputDeviceSelect.elements[1];
@@ -2672,6 +2671,7 @@ void OsuOptionsMenu::onResolutionSelect2(UString resolution, int id) {
 }
 
 void OsuOptionsMenu::onOutputDeviceSelect() {
+    // XXX: WHY IS THIS THE ONLY CONTEXT MENU BUTTON THAT NEEDS TO BE CLICKED TWICE? HELP
     std::vector<UString> outputDevices = engine->getSound()->getOutputDevices();
 
     // build context menu
@@ -2682,7 +2682,7 @@ void OsuOptionsMenu::onOutputDeviceSelect() {
         CBaseUIButton *button = m_contextMenu->addButton(outputDevices[i]);
         if(outputDevices[i] == engine->getSound()->getOutputDevice()) button->setTextBrightColor(0xff00ff00);
     }
-    m_contextMenu->end(false, false);
+    m_contextMenu->end(false, true);
     m_contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onOutputDeviceSelect2));
 }
 

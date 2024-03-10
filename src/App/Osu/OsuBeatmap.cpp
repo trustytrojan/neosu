@@ -241,7 +241,7 @@ OsuBeatmap::OsuBeatmap(Osu *osu) {
 
     m_music = NULL;
 
-    m_fMusicFrequencyBackup = 44100.0f;
+    m_fMusicFrequencyBackup = 0.f;
     m_iCurMusicPos = 0;
     m_iCurMusicPosWithOffsets = 0;
     m_bWasSeekFrame = false;
@@ -517,7 +517,7 @@ void OsuBeatmap::update() {
                     m_bIsPlaying = true;
 
                     engine->getSound()->play(m_music);
-                    m_music->setPosition(0.0);
+                    m_music->setPositionMS(0);
                     m_music->setVolume(m_osu_volume_music_ref->getFloat());
                     m_music->setSpeed(m_osu->getSpeedMultiplier());
 
@@ -1436,7 +1436,7 @@ bool OsuBeatmap::play() {
     m_fShouldFlashSectionPass = 0.0f;
     m_fShouldFlashSectionFail = 0.0f;
 
-    m_music->setPosition(0.0);
+    m_music->setPositionMS(0);
     m_iCurMusicPos = 0;
 
     // we are waiting for an asynchronous start of the beatmap in the next update()
@@ -1499,7 +1499,7 @@ void OsuBeatmap::actualRestart() {
     onModUpdate();  // sanity
 
     // reset position
-    m_music->setPosition(0.0);
+    m_music->setPositionMS(0);
     m_iCurMusicPos = 0;
 
     m_bIsPlaying = true;
@@ -2194,7 +2194,7 @@ void OsuBeatmap::loadMusic(bool stream, bool prescan) {
         if(!stream) engine->getResourceManager()->requestNextLoadAsync();
 
         m_music = engine->getResourceManager()->loadSoundAbs(
-            m_selectedDifficulty2->getFullSoundFilePath(), "OSU_BEATMAP_MUSIC", stream, false, false,
+            m_selectedDifficulty2->getFullSoundFilePath(), "OSU_BEATMAP_MUSIC", stream, false, false, false,
             m_bForceStreamPlayback &&
                 prescan);  // m_bForceStreamPlayback = prescan necessary! otherwise big mp3s will go out of sync
         m_music->setVolume(m_osu_volume_music_ref->getFloat());

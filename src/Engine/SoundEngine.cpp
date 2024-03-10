@@ -63,15 +63,9 @@ ConVar win_snd_wasapi_exclusive("win_snd_wasapi_exclusive", false, FCVAR_NONE,
 ConVar osu_universal_offset_hardcoded("osu_universal_offset_hardcoded", 0.0f, FCVAR_NONE);
 
 DWORD CALLBACK OutputWasapiProc(void *buffer, DWORD length, void *user) {
-    if(engine->getSound()->g_wasapiOutputMixer != 0) {
-        const int c = BASS_ChannelGetData(engine->getSound()->g_wasapiOutputMixer, buffer, length);
-
-        if(c < 0) return 0;
-
-        return c;
-    }
-
-    return 0;
+    if(engine->getSound()->g_wasapiOutputMixer == 0) return 0;
+    const int c = BASS_ChannelGetData(engine->getSound()->g_wasapiOutputMixer, buffer, length);
+    return c < 0 ? 0 : c;
 }
 
 void _WIN_SND_WASAPI_BUFFER_SIZE_CHANGE(UString oldValue, UString newValue) {
@@ -181,7 +175,9 @@ void SoundEngine::updateOutputDevices(bool printInfo) {
         }
 
         soundDevice.driver = OutputDriver::BASS;
-        if(env->getOS() == Environment::OS::OS_WINDOWS && soundDevice.name != UString("No sound")) {
+        if(env->getOS() == Environment::OS::OS_WINDOWS
+            && soundDevice.name != UString("No sound")
+            && soundDevice.name != UString("Default")) {
             soundDevice.name.append(" [DirectSound]");
         }
 
@@ -243,6 +239,8 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
     } else if(m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
         BASS_Free();
 #ifdef _WIN32
+        g_wasapiOutputMixer = 0;
+        BASS_WASAPI_Stop(true);
         BASS_WASAPI_Free();
 #endif
     }
@@ -293,26 +291,44 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
         return false;
     }
 
-#ifdef _WIN32
     if(device.driver == OutputDriver::BASS_WASAPI) {
+#ifdef _WIN32
         const float bufferSize = std::round(win_snd_wasapi_buffer_size.getFloat() * 1000.0f) / 1000.0f;    // in seconds
         const float updatePeriod = std::round(win_snd_wasapi_period_size.getFloat() * 1000.0f) / 1000.0f;  // in seconds
 
+        // BASS_WASAPI_RAW ignores sound "enhancements" that some sound cards offer (adds latency)
+        // BASS_MIXER_NONSTOP prevents some sound cards from going to sleep when there is no output
+        auto flags = BASS_WASAPI_RAW | BASS_MIXER_NONSTOP;
+        if(win_snd_wasapi_exclusive.getBool()) flags |= BASS_WASAPI_EXCLUSIVE;
+
         debugLog("WASAPI Exclusive Mode = %i, bufferSize = %f, updatePeriod = %f\n",
                  (int)win_snd_wasapi_exclusive.getBool(), bufferSize, updatePeriod);
-        if(!BASS_WASAPI_Init(device.id, 0, 0, (win_snd_wasapi_exclusive.getBool() ? BASS_WASAPI_EXCLUSIVE : 0),
-                             bufferSize, updatePeriod, OutputWasapiProc, NULL)) {
-            m_bReady = false;
-
+        if(!BASS_WASAPI_Init(device.id, 0, 0, flags, bufferSize, updatePeriod, OutputWasapiProc, NULL)) {
             const int errorCode = BASS_ErrorGetCode();
-
-            if(errorCode == BASS_ERROR_WASAPI_BUFFER)
+            if(errorCode == BASS_ERROR_WASAPI_BUFFER) {
                 debugLog("Sound Error: BASS_WASAPI_Init() failed with BASS_ERROR_WASAPI_BUFFER!");
-            else
+            } else {
                 engine->showMessageError("Sound Error", UString::format("BASS_WASAPI_Init() failed (%i)!", errorCode));
+            }
 
+            m_bReady = false;
             return false;
         }
+
+        BASS_WASAPI_INFO wasapiInfo;
+        BASS_WASAPI_GetInfo(&wasapiInfo);
+        auto mixer_flags = BASS_SAMPLE_FLOAT | BASS_STREAM_DECODE | BASS_MIXER_NONSTOP;
+        g_wasapiOutputMixer = BASS_Mixer_StreamCreate(wasapiInfo.freq, wasapiInfo.chans, mixer_flags);
+        if(g_wasapiOutputMixer == 0) {
+            m_bReady = false;
+            engine->showMessageError("Sound Error",
+                                     UString::format("BASS_Mixer_StreamCreate() failed (%i)!", BASS_ErrorGetCode()));
+            return false;
+        }
+
+        // SYSTEM_INFO sysinfo;
+        // GetSystemInfo(&sysinfo);
+        // BASS_ChannelSetAttribute(g_wasapiOutputMixer, BASS_ATTRIB_MIXER_THREADS, sysinfo.dwNumberOfProcessors);
 
         if(!BASS_WASAPI_Start()) {
             m_bReady = false;
@@ -320,21 +336,8 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
                                      UString::format("BASS_WASAPI_Start() failed (%i)!", BASS_ErrorGetCode()));
             return false;
         }
-
-        BASS_WASAPI_INFO wasapiInfo;
-        BASS_WASAPI_GetInfo(&wasapiInfo);
-
-        g_wasapiOutputMixer = BASS_Mixer_StreamCreate(wasapiInfo.freq, wasapiInfo.chans,
-                                                      BASS_SAMPLE_FLOAT | BASS_STREAM_DECODE | BASS_MIXER_NONSTOP);
-
-        if(g_wasapiOutputMixer == 0) {
-            m_bReady = false;
-            engine->showMessageError("Sound Error",
-                                     UString::format("BASS_Mixer_StreamCreate() failed (%i)!", BASS_ErrorGetCode()));
-            return false;
-        }
-    }
 #endif
+    }
 
     if(device.driver == OutputDriver::BASS) {
         // starting with bass 2020 2.4.15.2 which has all offset problems fixed, this is the non-dsound backend
@@ -378,129 +381,124 @@ void SoundEngine::update() {}
 bool SoundEngine::play(Sound *snd, float pan, float pitch) {
     if(!m_bReady || snd == NULL || !snd->isReady()) return false;
 
-    pan = clamp<float>(pan, -1.0f, 1.0f);
-    pitch = clamp<float>(pitch, 0.0f, 2.0f);
-
-    const bool allowPlayFrame =
-        !snd->isOverlayable() || !snd_restrict_play_frame.getBool() || engine->getTime() > snd->getLastPlayTime();
-
-    if(!allowPlayFrame) return false;
-
-    Sound::SOUNDHANDLE handle = snd->getHandle();
-    if(handle != 0) {
-        BASS_ChannelSetAttribute(handle, BASS_ATTRIB_PAN, pan);
-        BASS_ChannelSetAttribute(handle, BASS_ATTRIB_NORAMP, snd->isStream() ? 0 : 1);
-        BASS_ChannelFlags(handle, (snd->isStream() && snd->isLooped()) ? BASS_SAMPLE_LOOP : 0, BASS_SAMPLE_LOOP);
-
-        if(pitch != 1.0f) {
-            float freq = snd_freq.getFloat();
-            BASS_ChannelGetAttribute(handle, BASS_ATTRIB_FREQ, &freq);
-
-            const float semitonesShift = lerp<float>(-60.0f, 60.0f, pitch / 2.0f);
-            BASS_ChannelSetAttribute(handle, BASS_ATTRIB_FREQ, std::pow(2.0f, (semitonesShift / 12.0f)) * freq);
-        }
-
-        if(isWASAPI()) {
-            if(!BASS_Mixer_StreamAddChannel(
-                   g_wasapiOutputMixer, handle,
-                   (snd->isStream() ? 0 : BASS_STREAM_AUTOFREE) | BASS_MIXER_DOWNMIX | BASS_MIXER_NORAMPIN)) {
-                debugLog("BASS_Mixer_StreamAddChannel() failed (%i)!", BASS_ErrorGetCode());
-                return false;
-            }
-        }
-
-        if(BASS_ChannelIsActive(handle) != BASS_ACTIVE_PLAYING) {
-            if(!BASS_ChannelPlay(handle, true)) {
-                debugLog("SoundEngine::play() couldn't BASS_ChannelPlay(), errorcode %i\n", BASS_ErrorGetCode());
-                return false;
-            }
-
-            snd->setLastPlayTime(engine->getTime());
-        }
-
-        return true;
+    if(!snd->isOverlayable() && snd->isPlaying()) {
+        return false;
     }
 
-    return false;
+    if(snd->isOverlayable() && snd_restrict_play_frame.getBool()) {
+        if(engine->getTime() <= snd->getLastPlayTime()) {
+            return false;
+        }
+    }
+
+    HCHANNEL channel = snd->getChannel();
+    if(channel == 0) {
+        debugLog("SoundEngine::play() failed to get channel, errorcode %i\n", BASS_ErrorGetCode());
+        return false;
+    }
+
+    pan = clamp<float>(pan, -1.0f, 1.0f);
+    pitch = clamp<float>(pitch, 0.0f, 2.0f);
+    BASS_ChannelSetAttribute(channel, BASS_ATTRIB_VOL, snd->m_fVolume);
+    BASS_ChannelSetAttribute(channel, BASS_ATTRIB_PAN, pan);
+    BASS_ChannelSetAttribute(channel, BASS_ATTRIB_NORAMP, snd->isStream() ? 0 : 1);
+    if(pitch != 1.0f) {
+        const float semitonesShift = lerp<float>(-60.0f, 60.0f, pitch / 2.0f);
+        float freq = snd_freq.getFloat();
+        BASS_ChannelGetAttribute(channel, BASS_ATTRIB_FREQ, &freq);
+        BASS_ChannelSetAttribute(channel, BASS_ATTRIB_FREQ, std::pow(2.0f, (semitonesShift / 12.0f)) * freq);
+    }
+
+    BASS_ChannelFlags(channel, snd->isLooped() ? BASS_SAMPLE_LOOP : 0, BASS_SAMPLE_LOOP);
+
+    if(isWASAPI()) {
+        if(BASS_Mixer_ChannelGetMixer(channel) != 0) return false;
+
+        auto flags = BASS_MIXER_DOWNMIX | BASS_MIXER_NORAMPIN;
+        if(snd->isStream()) {
+            flags |= BASS_STREAM_AUTOFREE;
+        }
+
+        if(!BASS_Mixer_StreamAddChannel(g_wasapiOutputMixer, channel, flags)) {
+            debugLog("BASS_Mixer_StreamAddChannel() failed (%i)!\n", BASS_ErrorGetCode());
+            return false;
+        }
+    } else {
+        if(BASS_ChannelIsActive(channel) == BASS_ACTIVE_PLAYING) return false;
+
+        if(!BASS_ChannelPlay(channel, false)) {
+            debugLog("SoundEngine::play() couldn't BASS_ChannelPlay(), errorcode %i\n", BASS_ErrorGetCode());
+            return false;
+        }
+    }
+
+    snd->setLastPlayTime(engine->getTime());
+    debugLog("TODO @kiwec: playing %s\n", snd->m_sFilePath.c_str());
+    return true;
 }
 
 bool SoundEngine::play3d(Sound *snd, Vector3 pos) {
     if(!m_bReady || snd == NULL || !snd->isReady() || !snd->is3d()) return false;
+    if(snd_restrict_play_frame.getBool() && engine->getTime() <= snd->getLastPlayTime()) return false;
 
-    if(!snd_restrict_play_frame.getBool() || engine->getTime() > snd->getLastPlayTime()) {
-        Sound::SOUNDHANDLE handle = snd->getHandle();
-        if(BASS_ChannelIsActive(handle) != BASS_ACTIVE_PLAYING) {
-            BASS_3DVECTOR bassPos = BASS_3DVECTOR(pos.x, pos.y, pos.z);
-            if(!BASS_ChannelSet3DPosition(handle, &bassPos, NULL, NULL)) {
-                debugLog("SoundEngine::play3d() couldn't BASS_ChannelSet3DPosition(), errorcode %i\n",
-                         BASS_ErrorGetCode());
-                return false;
-            }
-
-            BASS_Apply3D();
-            if(!BASS_ChannelPlay(handle, true)) {
-                debugLog("SoundEngine::play3d() couldn't BASS_ChannelPlay(), errorcode %i\n", BASS_ErrorGetCode());
-                return false;
-            }
-
-            snd->setLastPlayTime(engine->getTime());
-            return true;
-        }
+    HCHANNEL channel = snd->getChannel();
+    if(channel == 0) {
+        debugLog("SoundEngine::play3d() failed to get channel, errorcode %i\n", BASS_ErrorGetCode());
+        return false;
     }
 
-    return false;
+    BASS_3DVECTOR bassPos = BASS_3DVECTOR(pos.x, pos.y, pos.z);
+    if(!BASS_ChannelSet3DPosition(channel, &bassPos, NULL, NULL)) {
+        debugLog("SoundEngine::play3d() couldn't BASS_ChannelSet3DPosition(), errorcode %i\n",
+                 BASS_ErrorGetCode());
+        return false;
+    }
+
+    BASS_Apply3D();
+    if(BASS_ChannelPlay(channel, false)) {
+        snd->setLastPlayTime(engine->getTime());
+        return true;
+    } else {
+        debugLog("SoundEngine::play3d() couldn't BASS_ChannelPlay(), errorcode %i\n", BASS_ErrorGetCode());
+        return false;
+    }
 }
 
 void SoundEngine::pause(Sound *snd) {
     if(!m_bReady || snd == NULL || !snd->isReady()) return;
+    if(!snd->isStream()) {
+        engine->showMessageError("Programmer Error", "Called pause on a sample!");
+        return;
+    }
+    if(!snd->isPlaying()) return;
 
-#ifdef _WIN32
+    if(isWASAPI()) {
+        auto pos = snd->getPositionMS();
 
-    Sound::SOUNDHANDLE handle = snd->getHandle();
-
-    if(snd->isStream()) {
-        if(snd->isPlaying()) {
-            snd->setPrevPosition(snd->getPrevPosition());
-            BASS_Mixer_ChannelRemove(handle);
-        } else {
-            play(snd);
-            snd->setPositionMS(snd->getPrevPosition());
-        }
+        // Calling BASS_Mixer_ChannelRemove automatically frees the stream due
+        // to BASS_STREAM_AUTOFREE. We need to reinitialize it.
+        snd->reload();
+        snd->setPositionMS(pos);
     } else {
-        if(!BASS_ChannelPause(handle)) {
+        HSTREAM stream = snd->getChannel();
+        if(!BASS_ChannelPause(stream)) {
             debugLog("SoundEngine::pause() couldn't BASS_ChannelPause(), errorcode %i\n", BASS_ErrorGetCode());
+            return;
         }
     }
 
-#else
-
-    BASS_ChannelPause(snd->getHandle());
-    { snd->setLastPlayTime(0.0); }
-
-#endif
+    snd->setLastPlayTime(0.0);
 }
 
 void SoundEngine::stop(Sound *snd) {
     if(!m_bReady || snd == NULL || !snd->isReady()) return;
 
-    Sound::SOUNDHANDLE handle = snd->getHandle();
-
-    if(m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
-#ifdef _WIN32
-        if(BASS_Mixer_ChannelGetMixer(handle) != 0) {
-            BASS_Mixer_ChannelRemove(handle);
-        }
-#endif
-    }
-
-    BASS_ChannelStop(handle);
-    {
-        snd->setPosition(0.0);
-        snd->setLastPlayTime(0.0);
-
-        // allow next play()/getHandle() to reallocate (because BASS_ChannelStop() will free the channel)
-        snd->m_HCHANNEL = 0;
-        snd->m_HCHANNELBACKUP = 0;
+    if(snd->isStream()) {
+        pause(snd);
+        snd->setPositionMS(0);
+    } else {
+        // This will stop all samples, then re-init to be ready for a play()
+        snd->reload();
     }
 }
 
@@ -529,16 +527,16 @@ void SoundEngine::setVolume(float volume) {
 
     m_fVolume = clamp<float>(volume, 0.0f, 1.0f);
 
-    // 0 (silent) - 10000 (full).
-    BASS_SetConfig(BASS_CONFIG_GVOL_SAMPLE, (DWORD)(m_fVolume * 10000));
-    BASS_SetConfig(BASS_CONFIG_GVOL_STREAM, (DWORD)(m_fVolume * 10000));
-    BASS_SetConfig(BASS_CONFIG_GVOL_MUSIC, (DWORD)(m_fVolume * 10000));
-
-#ifdef _WIN32
     if(m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
+#ifdef _WIN32
         BASS_WASAPI_SetVolume(BASS_WASAPI_CURVE_WINDOWS | BASS_WASAPI_VOL_SESSION, m_fVolume);
-    }
 #endif
+    } else {
+        // 0 (silent) - 10000 (full).
+        BASS_SetConfig(BASS_CONFIG_GVOL_SAMPLE, (DWORD)(m_fVolume * 10000));
+        BASS_SetConfig(BASS_CONFIG_GVOL_STREAM, (DWORD)(m_fVolume * 10000));
+        BASS_SetConfig(BASS_CONFIG_GVOL_MUSIC, (DWORD)(m_fVolume * 10000));
+    }
 }
 
 void SoundEngine::set3dPosition(Vector3 headPos, Vector3 viewDir, Vector3 viewUp) {
@@ -564,7 +562,9 @@ std::vector<UString> SoundEngine::getOutputDevices() {
     std::vector<UString> outputDevices;
 
     for(size_t i = 0; i < m_outputDevices.size(); i++) {
-        if(m_outputDevices[i].enabled) outputDevices.push_back(m_outputDevices[i].name);
+        if(m_outputDevices[i].enabled) {
+            outputDevices.push_back(m_outputDevices[i].name);
+        }
     }
 
     return outputDevices;

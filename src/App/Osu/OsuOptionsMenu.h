@@ -233,10 +233,10 @@ class OsuOptionsMenu : public OsuScreenBackable, public OsuNotificationOverlayKe
     CBaseUISlider *m_cursorSizeSlider;
     CBaseUILabel *m_skinLabel;
     CBaseUIElement *m_skinSelectLocalButton;
-    CBaseUIElement *m_resolutionSelectButton;
+    CBaseUIButton *m_resolutionSelectButton;
     CBaseUILabel *m_resolutionLabel;
     CBaseUITextbox *m_osuFolderTextbox;
-    OsuUIButton *m_outputDeviceSelectButton;
+    CBaseUIButton *m_outputDeviceSelectButton;
     CBaseUILabel *m_outputDeviceLabel;
     OsuOptionsMenuResetButton *m_outputDeviceResetButton;
     CBaseUISlider *m_wasapiBufferSizeSlider;

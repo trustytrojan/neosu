@@ -8,7 +8,12 @@
 #ifndef SOUND_H
 #define SOUND_H
 
+#define NOBASSOVERLOADS
+#include <bass.h>
+
 #include "Resource.h"
+
+#define MAX_OVERLAPPING_SAMPLES 5
 
 class SoundEngine;
 
@@ -19,26 +24,26 @@ class Sound : public Resource {
     typedef unsigned long SOUNDHANDLE;
 
    public:
-    Sound(std::string filepath, bool stream, bool threeD, bool loop, bool prescan);
+    Sound(std::string filepath, bool stream, bool overlayable, bool threeD, bool loop, bool prescan);
     virtual ~Sound() { destroy(); }
 
+    std::vector<HCHANNEL> wasapi_channels;
+    std::vector<HCHANNEL> getActiveChannels();
+    HCHANNEL getChannel();
+
     void setPosition(double percent);
-    void setPositionMS(unsigned long ms) { setPositionMS(ms, false); }
+    void setPositionMS(unsigned long ms);
     void setVolume(float volume);
     void setSpeed(float speed);
-    void setPitch(float pitch);
     void setFrequency(float frequency);
     void setPan(float pan);
     void setLoop(bool loop);
-    void setOverlayable(bool overlayable) { m_bIsOverlayable = overlayable; }
     void setLastPlayTime(double lastPlayTime) { m_fLastPlayTime = lastPlayTime; }
 
-    SOUNDHANDLE getHandle();
     float getPosition();
     unsigned long getPositionMS();
     unsigned long getLengthMS();
     float getSpeed();
-    float getPitch();
     float getFrequency();
 
     inline double getLastPlayTime() const { return m_fLastPlayTime; }
@@ -53,23 +58,14 @@ class Sound : public Resource {
 
     void rebuild(std::string newFilePath);
 
-    // ILLEGAL:
-    void setHandle(SOUNDHANDLE handle) { m_HCHANNEL = handle; }
-    void setPrevPosition(unsigned long prevPosition) { m_iPrevPosition = prevPosition; }
-    inline void *getMixChunkOrMixMusic() const { return m_mixChunkOrMixMusic; }
-    inline unsigned long getPrevPosition() const { return m_iPrevPosition; }
-
    private:
     virtual void init();
     virtual void initAsync();
     virtual void destroy();
 
-    void setPositionMS(unsigned long ms, bool internal);
 
-    SOUNDHANDLE m_HSTREAM;
-    SOUNDHANDLE m_HSTREAMBACKUP;
-    SOUNDHANDLE m_HCHANNEL;
-    SOUNDHANDLE m_HCHANNELBACKUP;
+    SOUNDHANDLE m_stream = 0;
+    SOUNDHANDLE m_sample = 0;
 
     bool m_bStream;
     bool m_bIs3d;
@@ -77,20 +73,9 @@ class Sound : public Resource {
     bool m_bPrescan;
     bool m_bIsOverlayable;
 
+    float m_fSpeed;
     float m_fVolume;
     double m_fLastPlayTime;
-
-    // bass custom
-    float m_fActualSpeedForDisabledPitchCompensation;
-
-    // bass wasapi
-    uint8_t *m_wasapiSampleBuffer;
-    unsigned long long m_iWasapiSampleBufferSize;
-    std::vector<SOUNDHANDLE> m_danglingWasapiStreams;
-
-    // sdl mixer
-    void *m_mixChunkOrMixMusic;
-    unsigned long m_iPrevPosition;
 };
 
 #endif

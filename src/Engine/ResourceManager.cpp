@@ -392,25 +392,7 @@ McFont *ResourceManager::loadFont(std::string filepath, std::string resourceName
     return fnt;
 }
 
-Sound *ResourceManager::loadSound(std::string filepath, std::string resourceName, bool stream, bool threeD, bool loop,
-                                  bool prescan) {
-    // check if it already exists
-    if(resourceName.length() > 0) {
-        Resource *temp = checkIfExistsAndHandle(resourceName);
-        if(temp != NULL) return dynamic_cast<Sound *>(temp);
-    }
-
-    // create instance and load it
-    filepath.insert(0, PATH_DEFAULT_SOUNDS);
-    Sound *snd = new Sound(filepath, stream, threeD, loop, prescan);
-    snd->setName(resourceName);
-
-    loadResource(snd, true);
-
-    return snd;
-}
-
-Sound *ResourceManager::loadSoundAbs(std::string filepath, std::string resourceName, bool stream, bool threeD,
+Sound *ResourceManager::loadSoundAbs(std::string filepath, std::string resourceName, bool stream, bool overlayable, bool threeD,
                                      bool loop, bool prescan) {
     // check if it already exists
     if(resourceName.length() > 0) {
@@ -419,7 +401,7 @@ Sound *ResourceManager::loadSoundAbs(std::string filepath, std::string resourceN
     }
 
     // create instance and load it
-    Sound *snd = new Sound(filepath, stream, threeD, loop, prescan);
+    Sound *snd = new Sound(filepath, stream, overlayable, threeD, loop, prescan);
     snd->setName(resourceName);
 
     loadResource(snd, true);

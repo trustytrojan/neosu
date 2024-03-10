@@ -94,9 +94,7 @@ class ResourceManager {
                      bool antialiasing = true, int fontDPI = 96);
 
     // sounds
-    Sound *loadSound(std::string filepath, std::string resourceName, bool stream = false, bool threeD = false,
-                     bool loop = false, bool prescan = false);
-    Sound *loadSoundAbs(std::string filepath, std::string resourceName, bool stream = false, bool threeD = false,
+    Sound *loadSoundAbs(std::string filepath, std::string resourceName, bool stream = false, bool overlayable = false, bool threeD = false,
                         bool loop = false, bool prescan = false);
 
     // shaders
