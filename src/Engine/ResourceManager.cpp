@@ -13,10 +13,7 @@
 #include "Thread.h"
 #include "Timer.h"
 
-#ifdef MCENGINE_FEATURE_MULTITHREADING
-
 #include <mutex>
-
 #include "WinMinGW.Mutex.h"
 
 static std::mutex g_resourceManagerMutex;             // internal lock for nested async loads
@@ -24,12 +21,8 @@ static std::mutex g_resourceManagerLoadingWorkMutex;  // work vector lock across
 
 static void *_resourceLoaderThread(void *data);
 
-#endif
-
 class ResourceManagerLoaderThread {
    public:
-#ifdef MCENGINE_FEATURE_MULTITHREADING
-
     // self
     McThread *thread;
 
@@ -40,8 +33,6 @@ class ResourceManagerLoaderThread {
     std::atomic<size_t> threadIndex;
     std::atomic<bool> running;
     std::vector<ResourceManager::LOADING_WORK> *loadingWork;
-
-#endif
 };
 
 ConVar rm_numthreads(
@@ -84,8 +75,6 @@ ResourceManager::ResourceManager() {
     }
 
     // create loader threads
-#ifdef MCENGINE_FEATURE_MULTITHREADING
-
     for(int i = 0; i < rm_numthreads.getInt(); i++) {
         ResourceManagerLoaderThread *loaderThread = new ResourceManagerLoaderThread();
 
@@ -102,8 +91,6 @@ ResourceManager::ResourceManager() {
         } else
             m_threads.push_back(loaderThread);
     }
-
-#endif
 }
 
 ResourceManager::~ResourceManager() {
@@ -111,8 +98,6 @@ ResourceManager::~ResourceManager() {
     destroyResources();
 
     // let all loader threads exit
-#ifdef MCENGINE_FEATURE_MULTITHREADING
-
     for(size_t i = 0; i < m_threads.size(); i++) {
         m_threads[i]->running = false;
     }
@@ -138,8 +123,6 @@ ResourceManager::~ResourceManager() {
 
     m_threads.clear();
 
-#endif
-
     // cleanup leftovers (can only do that after loader threads have exited) (2)
     for(size_t i = 0; i < m_loadingWorkAsyncDestroy.size(); i++) {
         delete m_loadingWorkAsyncDestroy[i];
@@ -149,12 +132,7 @@ ResourceManager::~ResourceManager() {
 
 void ResourceManager::update() {
     bool reLock = false;
-
-#ifdef MCENGINE_FEATURE_MULTITHREADING
-
     g_resourceManagerMutex.lock();
-
-#endif
     {
         // handle load finish (and synchronous init())
         size_t numResourceInitCounter = 0;
@@ -166,23 +144,11 @@ void ResourceManager::update() {
                 Resource *rs = m_loadingWork[i].resource.atomic.load();
                 const size_t threadIndex = m_loadingWork[i].threadIndex.atomic.load();
 
-#ifdef MCENGINE_FEATURE_MULTITHREADING
-
                 g_resourceManagerLoadingWorkMutex.lock();
-
-#endif
-
                 { m_loadingWork.erase(m_loadingWork.begin() + i); }
-
-#ifdef MCENGINE_FEATURE_MULTITHREADING
-
                 g_resourceManagerLoadingWorkMutex.unlock();
 
-#endif
-
                 i--;
-
-#ifdef MCENGINE_FEATURE_MULTITHREADING
 
                 // stop this worker thread if everything has been loaded
                 int numLoadingWorkForThreadIndex = 0;
@@ -196,9 +162,6 @@ void ResourceManager::update() {
 
                 // unlock. this allows resources to trigger "recursive" loads within init()
                 g_resourceManagerMutex.unlock();
-
-#endif
-
                 reLock = true;
 
                 // check if this was an async destroy, can skip load() if that is the case
@@ -236,13 +199,9 @@ void ResourceManager::update() {
             }
         }
 
-#ifdef MCENGINE_FEATURE_MULTITHREADING
-
         if(reLock) {
             g_resourceManagerMutex.lock();
         }
-
-#endif
 
         // handle async destroy
         for(size_t i = 0; i < m_loadingWorkAsyncDestroy.size(); i++) {
@@ -265,11 +224,7 @@ void ResourceManager::update() {
             }
         }
     }
-#ifdef MCENGINE_FEATURE_MULTITHREADING
-
     g_resourceManagerMutex.unlock();
-
-#endif
 }
 
 void ResourceManager::destroyResources() {
@@ -287,11 +242,7 @@ void ResourceManager::destroyResource(Resource *rs) {
 
     if(debug_rm->getBool()) debugLog("ResourceManager: Destroying %s\n", rs->getName().c_str());
 
-#ifdef MCENGINE_FEATURE_MULTITHREADING
-
     g_resourceManagerMutex.lock();
-
-#endif
     {
         bool isManagedResource = false;
         int managedResourceIndex = -1;
@@ -314,12 +265,8 @@ void ResourceManager::destroyResource(Resource *rs) {
                 m_loadingWorkAsyncDestroy.push_back(rs);
                 if(isManagedResource) m_vResources.erase(m_vResources.begin() + managedResourceIndex);
 
-                    // NOTE: ugly
-#ifdef MCENGINE_FEATURE_MULTITHREADING
-
+                // NOTE: ugly
                 g_resourceManagerMutex.unlock();
-
-#endif
                 return;  // we're done here
             }
         }
@@ -329,11 +276,7 @@ void ResourceManager::destroyResource(Resource *rs) {
 
         if(isManagedResource) m_vResources.erase(m_vResources.begin() + managedResourceIndex);
     }
-#ifdef MCENGINE_FEATURE_MULTITHREADING
-
     g_resourceManagerMutex.unlock();
-
-#endif
 }
 
 void ResourceManager::reloadResources() {
@@ -634,8 +577,6 @@ void ResourceManager::loadResource(Resource *res, bool load) {
         res->loadAsync();
         res->load();
     } else {
-#if defined(MCENGINE_FEATURE_MULTITHREADING)
-
         if(rm_numthreads.getInt() > 0) {
             g_resourceManagerMutex.lock();
             {
@@ -680,14 +621,6 @@ void ResourceManager::loadResource(Resource *res, bool load) {
             res->loadAsync();
             res->load();
         }
-
-#else
-
-        // load normally (on platforms which don't support multithreading)
-        res->loadAsync();
-        res->load();
-
-#endif
     }
 }
 
@@ -721,8 +654,6 @@ void ResourceManager::resetFlags() {
 
     m_bNextLoadAsync = false;
 }
-
-#ifdef MCENGINE_FEATURE_MULTITHREADING
 
 static void *_resourceLoaderThread(void *data) {
     ResourceManagerLoaderThread *self = (ResourceManagerLoaderThread *)data;
@@ -776,5 +707,3 @@ static void *_resourceLoaderThread(void *data) {
 
     return NULL;
 }
-
-#endif

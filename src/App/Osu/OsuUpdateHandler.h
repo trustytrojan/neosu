@@ -9,12 +9,7 @@
 #define OSUUPDATECHECKER_H
 
 #include "cbase.h"
-
-#ifdef MCENGINE_FEATURE_PTHREADS
-
 #include <pthread.h>
-
-#endif
 
 class OsuUpdateHandler {
    public:
@@ -49,12 +44,7 @@ class OsuUpdateHandler {
     bool _downloadUpdate();
     void _installUpdate(std::string zipFilePath);
 
-#ifdef MCENGINE_FEATURE_PTHREADS
-
     pthread_t m_updateThread;
-
-#endif
-
     bool _m_bKYS;
 
     // releases

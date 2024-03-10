@@ -17,13 +17,8 @@
 #include "Engine.h"
 #include "ResourceManager.h"
 
-#ifdef MCENGINE_FEATURE_MULTITHREADING
-
 #include <mutex>
-
 #include "WinMinGW.Mutex.h"
-
-#endif
 
 #define CFG_FOLDER MCENGINE_DATA_DIR "cfg/"
 
@@ -33,12 +28,7 @@ ConVar _console_logging("console_logging", true, FCVAR_NONE);
 ConVar _clear("clear");
 
 std::vector<UString> Console::g_commandQueue;
-
-#ifdef MCENGINE_FEATURE_MULTITHREADING
-
 std::mutex g_consoleLogMutex;
-
-#endif
 
 Console::Console() : CBaseUIWindow(350, 100, 620, 550, "Console") {
     // convar bindings
@@ -238,11 +228,7 @@ void Console::mouse_update(bool *propagate_clicks) {
 }
 
 void Console::log(UString text, Color textColor) {
-#ifdef MCENGINE_FEATURE_MULTITHREADING
-
     std::lock_guard<std::mutex> lk(g_consoleLogMutex);
-
-#endif
 
     if(text.length() < 1) return;
 

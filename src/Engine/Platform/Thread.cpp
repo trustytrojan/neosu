@@ -11,10 +11,6 @@
 #include "Engine.h"
 #include "HorizonThread.h"
 
-#ifdef MCENGINE_FEATURE_MULTITHREADING
-
-#ifdef MCENGINE_FEATURE_PTHREADS
-
 #include <pthread.h>
 
 // pthread implementation of Thread
@@ -47,10 +43,6 @@ class PosixThread : public BaseThread {
     bool m_bReady;
 };
 
-#endif
-
-#endif
-
 ConVar debug_thread("debug_thread", false, FCVAR_NONE);
 
 ConVar *McThread::debug = &debug_thread;
@@ -58,20 +50,10 @@ ConVar *McThread::debug = &debug_thread;
 McThread::McThread(START_ROUTINE start_routine, void *arg) {
     m_baseThread = NULL;
 
-#ifdef MCENGINE_FEATURE_MULTITHREADING
-
-#ifdef MCENGINE_FEATURE_PTHREADS
-
-    m_baseThread = new PosixThread(start_routine, arg);
-
-#elif defined(__SWITCH__)
-
+#if defined(__SWITCH__)
     m_baseThread = new HorizonThread(start_routine, arg);
-
 #else
-#error Missing Thread implementation for OS!
-#endif
-
+    m_baseThread = new PosixThread(start_routine, arg);
 #endif
 }
 

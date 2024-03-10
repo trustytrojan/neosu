@@ -8,14 +8,8 @@
 #include "Engine.h"
 
 #include <stdio.h>
-
-#ifdef MCENGINE_FEATURE_MULTITHREADING
-
 #include <mutex>
-
 #include "WinMinGW.Mutex.h"
-
-#endif
 
 #include "AnimationHandler.h"
 #include "CBaseUIContainer.h"
@@ -304,18 +298,7 @@ void Engine::loadApp() {
         //*****************//
         //	Load App here  //
         //*****************//
-
-#ifdef MCENGINE_APP
-        m_app = new MCENGINE_APP();
-#else
-        // m_app = new Osu();
-
-        // m_app = new GUICoherenceMode();
-
-        // m_app = new Asteroids();
-
-        m_app = new FrameworkTest();
-#endif
+        m_app = new Osu();
 
         // start listening to the default keyboard input
         if(m_app != NULL) m_keyboard->addListener(m_app);
@@ -542,19 +525,11 @@ void Engine::onMouseWheelVertical(int delta) { m_mouse->onWheelVertical(delta); 
 
 void Engine::onMouseWheelHorizontal(int delta) { m_mouse->onWheelHorizontal(delta); }
 
-#ifdef MCENGINE_FEATURE_MULTITHREADING
-
 std::mutex g_engineMouseLeftClickMutex;
 
-#endif
-
 void Engine::onMouseLeftChange(bool mouseLeftDown) {
-#ifdef MCENGINE_FEATURE_MULTITHREADING
-
-    std::lock_guard<std::mutex> lk(
-        g_engineMouseLeftClickMutex);  // async calls from WinRealTimeStylus must be protected
-
-#endif
+    // async calls from WinRealTimeStylus must be protected
+    std::lock_guard<std::mutex> lk(g_engineMouseLeftClickMutex);
 
     if(m_mouse->isLeftDown() !=
        mouseLeftDown)  // necessary due to WinRealTimeStylus and Touch, would cause double clicks otherwise

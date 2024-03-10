@@ -1796,7 +1796,9 @@ void OsuDatabase::loadScores() {
                     const int numScores = read_int32(&db);
 
                     if(hash_str.size() < 32) {
-                        debugLog("WARNING: Invalid score with md5hash.length() = %i!\n", hash_str.size());
+                        if(Osu::debug->getBool()) {
+                            debugLog("WARNING: Invalid score with md5hash.length() = %i!\n", hash_str.size());
+                        }
                         continue;
                     } else if(hash_str.size() > 32) {
                         debugLog("ERROR: Corrupt score database/entry detected, stopping.\n");

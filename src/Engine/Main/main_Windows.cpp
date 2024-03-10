@@ -16,13 +16,12 @@
 
 #include "cbase.h"
 
-// because "Please include winsock2.h before windows.h"
-#ifdef MCENGINE_FEATURE_NETWORKING
-#include <winsock2.h>
-#endif
-
+// winsock2.h must be included before windows.h
+// clang-format off
 #include <dwmapi.h>
+#include <winsock2.h>
 #include <windows.h>
+// clang-format on
 
 #ifdef MCENGINE_FEATURE_SDL
 
