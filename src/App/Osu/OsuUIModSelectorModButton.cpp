@@ -102,8 +102,9 @@ void OsuUIModSelectorModButton::onClicked() {
             setOn(false);
         else
             setOn(true);
-    } else
+    } else {
         setOn(true);
+    }
 
     // set new state
     setState(m_iState);
@@ -173,6 +174,17 @@ void OsuUIModSelectorModButton::setOn(bool on, bool silent) {
         animationDuration = 0.f;
     }
 
+    // Prevent DT and HT from being selected at the same time
+    if(on && !silent && !m_states.empty()) {
+        if(m_states[0].modName == UString("dt")) {
+            m_osu->m_modSelector->m_modButtonHalftime->setOn(false, true);
+            convar->getConVarByName("osu_speed_override")->setValue(-1.0f);
+        } else if(m_states[0].modName == UString("ht")) {
+            m_osu->m_modSelector->m_modButtonDoubletime->setOn(false, true);
+            convar->getConVarByName("osu_speed_override")->setValue(-1.0f);
+        }
+    }
+
     if(m_bOn) {
         if(prevState) {
             // swap effect
@@ -218,7 +230,18 @@ void OsuUIModSelectorModButton::setState(int state, bool updateModConVar) {
         getActiveImageFunc = m_states[m_iState].getImageFunc;
 
     // update mods
-    if(updateModConVar) m_osuModSelector->updateModConVar();
+    if(updateModConVar) {
+        // We want to sync "nightcore" status between both buttons
+        if(!m_states.empty()) {
+            if(m_states[0].modName == UString("dt")) {
+                m_osu->m_modSelector->m_modButtonHalftime->setState(m_iState, false);
+            } else if(m_states[0].modName == UString("ht")) {
+                m_osu->m_modSelector->m_modButtonDoubletime->setState(m_iState, false);
+            }
+        }
+
+        m_osuModSelector->updateModConVar();
+    }
 }
 
 void OsuUIModSelectorModButton::setState(unsigned int state, bool initialState, UString modName, UString tooltipText,

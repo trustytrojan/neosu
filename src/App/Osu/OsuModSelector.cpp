@@ -214,6 +214,7 @@ OsuModSelector::OsuModSelector(Osu *osu) : OsuScreen(osu) {
             fastdelegate::MakeDelegate(this, &OsuModSelector::onOverrideSliderChange));
         // overrideSpeed.slider->setValue(-1.0f, false);
         overrideSpeed.slider->setAnimated(false);  // same quick fix as above
+        overrideSpeed.slider->setLiveUpdate(false);
 
         m_speedSlider = overrideSpeed.slider;
     }
@@ -1164,9 +1165,9 @@ OsuUICheckbox *OsuModSelector::addExperimentalCheckbox(UString text, UString too
 }
 
 void OsuModSelector::resetModsUserInitiated() {
+    bancho.prefer_daycore = false;
     resetMods();
 
-    bancho.prefer_daycore = false;
     engine->getSound()->play(m_osu->getSkin()->getCheckOff());
     m_resetModsButton->animateClickColor();
 
@@ -1202,16 +1203,16 @@ void OsuModSelector::resetMods() {
         if(m_overrideSliders[i].lock != NULL) m_overrideSliders[i].lock->setChecked(false);
     }
 
-    for(int i = 0; i < m_modButtons.size(); i++) {
-        m_modButtons[i]->resetState();
-    }
-
     for(int i = 0; i < m_overrideSliders.size(); i++) {
         // HACKHACK: force small delta to force an update (otherwise values could get stuck, e.g. for "Use Mods" context
         // menu) HACKHACK: only animate while visible to workaround "Use mods" bug (if custom speed multiplier already
         // set and then "Use mods" with different custom speed multiplier would reset to 1.0x because of anim)
         m_overrideSliders[i].slider->setValue(m_overrideSliders[i].slider->getMin() + 0.0001f, m_bVisible);
         m_overrideSliders[i].slider->setValue(m_overrideSliders[i].slider->getMin(), m_bVisible);
+    }
+
+    for(int i = 0; i < m_modButtons.size(); i++) {
+        m_modButtons[i]->resetState();
     }
 
     for(int i = 0; i < m_experimentalMods.size(); i++) {

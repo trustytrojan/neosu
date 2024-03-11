@@ -62,6 +62,8 @@ class OsuModSelector : public OsuScreen {
     void updateModConVar();
 
     CBaseUILabel *m_nonVanillaWarning;
+    OsuUIModSelectorModButton *m_modButtonHalftime;
+    OsuUIModSelectorModButton *m_modButtonDoubletime;
 
    private:
     struct OVERRIDE_SLIDER {
@@ -143,10 +145,8 @@ class OsuModSelector : public OsuScreen {
     std::vector<OsuUIModSelectorModButton *> m_modButtons;
     OsuUIModSelectorModButton *m_modButtonEasy;
     OsuUIModSelectorModButton *m_modButtonNofail;
-    OsuUIModSelectorModButton *m_modButtonHalftime;
     OsuUIModSelectorModButton *m_modButtonHardrock;
     OsuUIModSelectorModButton *m_modButtonSuddendeath;
-    OsuUIModSelectorModButton *m_modButtonDoubletime;
     OsuUIModSelectorModButton *m_modButtonHidden;
     OsuUIModSelectorModButton *m_modButtonFlashlight;
     OsuUIModSelectorModButton *m_modButtonRelax;

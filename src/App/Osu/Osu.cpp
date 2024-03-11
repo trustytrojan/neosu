@@ -59,6 +59,7 @@
 #include "OsuSongBrowser2.h"
 #include "OsuTooltipOverlay.h"
 #include "OsuUIUserContextMenu.h"
+#include "OsuUIModSelectorModButton.h"
 #include "OsuUpdateHandler.h"
 #include "OsuUserStatsScreen.h"
 #include "OsuVR.h"
@@ -2154,9 +2155,42 @@ void Osu::onSkinChange(UString oldValue, UString newValue) {
 }
 
 void Osu::onSpeedChange(UString oldValue, UString newValue) {
+    float speed = newValue.toFloat();
     if(getSelectedBeatmap() != NULL) {
-        float speed = newValue.toFloat();
         getSelectedBeatmap()->setSpeed(speed >= 0.0f ? speed : getSpeedMultiplier());
+    }
+
+    if(m_modSelector != nullptr) {
+        bool nightcoring = getModNC() || getModDC() || bancho.prefer_daycore;
+
+        // Why 0.0001f you ask? See OsuModSelector::resetMods()
+        if(speed > 0.0001f && speed < 1.0) {
+            debugLog("Osu::onSpeedChange(%f)\n", speed);
+            m_modSelector->m_modButtonDoubletime->setOn(false, true);
+            m_modSelector->m_modButtonHalftime->setOn(true, true);
+            m_bModDT = false;
+            m_bModHT = true;
+            if(nightcoring) {
+                m_modSelector->m_modButtonDoubletime->setState(1, false);
+                m_modSelector->m_modButtonHalftime->setState(1, false);
+                m_bModNC = false;
+                m_bModDC = true;
+                bancho.prefer_daycore = true;
+            }
+        } else if(speed > 1.0) {
+            debugLog("Osu::onSpeedChange(%f)\n", speed);
+            m_modSelector->m_modButtonDoubletime->setOn(true, true);
+            m_modSelector->m_modButtonHalftime->setOn(false, true);
+            m_bModDT = true;
+            m_bModHT = false;
+            if(nightcoring) {
+                m_modSelector->m_modButtonDoubletime->setState(1, false);
+                m_modSelector->m_modButtonHalftime->setState(1, false);
+                m_bModNC = true;
+                m_bModDC = false;
+                bancho.prefer_daycore = true;
+            }
+        }
     }
 }
 

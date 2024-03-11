@@ -79,32 +79,6 @@ void CBaseUISlider::drawBlock(Graphics *g) {
 
     g->drawQuad(halfLeft, halfRight, bottomRight, bottomLeft, COLOR(255, 225, 225, 225), COLOR(255, 225, 225, 225),
                 COLOR(255, 255, 255, 255), COLOR(255, 255, 255, 255));
-
-    /*
-    g->drawQuad(Vector2(m_vPos.x+std::round(m_vBlockPos.x)+1, m_vPos.y+std::round(m_vBlockPos.y)+1),
-                            Vector2(m_vPos.x+std::round(m_vBlockPos.x)+1 + m_vBlockSize.x-1,
-    m_vPos.y+std::round(m_vBlockPos.y)+1), Vector2(m_vPos.x+std::round(m_vBlockPos.x)+1 + m_vBlockSize.x-1,
-    m_vPos.y+std::round(m_vBlockPos.y)+1 + m_vBlockSize.y/2), Vector2(m_vPos.x+std::round(m_vBlockPos.x)+1,
-    m_vPos.y+std::round(m_vBlockPos.y)+1 + m_vBlockSize.y/2), COLOR(255,255,255,255), COLOR(255,255,255,255),
-                            COLOR(255,241,241,241),
-                            COLOR(255,241,241,241));
-
-    g->drawQuad(Vector2(m_vPos.x+std::round(m_vBlockPos.x)+1,
-    m_vPos.y+std::round(m_vBlockPos.y)+1+std::round(m_vBlockSize.y/2.0f)), Vector2(m_vPos.x+std::round(m_vBlockPos.x)+1
-    + m_vBlockSize.x-1, m_vPos.y+std::round(m_vBlockPos.y)+1+std::round(m_vBlockSize.y/2.0f)),
-                            Vector2(m_vPos.x+std::round(m_vBlockPos.x)+1 + m_vBlockSize.x-1,
-    m_vPos.y+std::round(m_vBlockPos.y)+1+std::round(m_vBlockSize.y/2.0f) +
-    m_vBlockSize.y-(std::round(m_vBlockSize.y/2.0f))), Vector2(m_vPos.x+std::round(m_vBlockPos.x)+1,
-    m_vPos.y+std::round(m_vBlockPos.y)+1+std::round(m_vBlockSize.y/2.0f)  +
-    m_vBlockSize.y-(std::round(m_vBlockSize.y/2.0f))), COLOR(255,225,225,225), COLOR(255,225,225,225),
-                            COLOR(255,255,255,255),
-                            COLOR(255,255,255,255));
-    */
-
-    /*
-    g->setColor(0xff00ff00);
-    g->fillRect(m_vPos.x+m_vBlockPos.x+1, m_vPos.y+m_vBlockPos.y+1, m_vBlockSize.x-1, m_vBlockSize.y);
-    */
 }
 
 void CBaseUISlider::mouse_update(bool *propagate_clicks) {

@@ -41,6 +41,7 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu) {
     latest.changes.push_back("- Enabled non-vanilla mods (disables score submission)");
     latest.changes.push_back("- Fixed speed modifications not getting applied to song previews when switching songs");
     latest.changes.push_back("- Improved Nightcore/Daycore audio quality");
+    latest.changes.push_back("- Improved behavior of speed modifier mod selection");
     changelogs.push_back(latest);
 
     CHANGELOG v34_04;
