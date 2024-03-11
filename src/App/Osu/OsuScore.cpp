@@ -581,7 +581,7 @@ int OsuScore::getModsLegacy() {
     modsLegacy |= (m_osu->getModEZ() ? OsuReplay::Mods::Easy : 0);
     modsLegacy |= (m_osu->getModSD() ? OsuReplay::Mods::SuddenDeath : 0);
     modsLegacy |= (m_osu->getModSS() ? OsuReplay::Mods::Perfect : 0);
-    modsLegacy |= (m_osu->getModNM() ? OsuReplay::Mods::Nightmare : 0);
+    modsLegacy |= (m_osu->getModNightmare() ? OsuReplay::Mods::Nightmare : 0);
     modsLegacy |= (m_osu->getModTD() ? OsuReplay::Mods::TouchDevice : 0);
 
     return modsLegacy;
@@ -605,7 +605,7 @@ UString OsuScore::getModsStringForRichPresence() {
     if(m_osu->getModSS()) modsString.append("PF");
     if(m_osu->getModScorev2()) modsString.append("v2");
     if(m_osu->getModTarget()) modsString.append("TP");
-    if(m_osu->getModNM()) modsString.append("NM");
+    if(m_osu->getModNightmare()) modsString.append("NM");
     if(m_osu->getModTD()) modsString.append("TD");
 
     return modsString;

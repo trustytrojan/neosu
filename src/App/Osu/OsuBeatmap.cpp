@@ -72,22 +72,22 @@ ConVar osu_beatmap_preview_mods_live(
     "whether to immediately apply all currently selected mods while browsing beatmaps (e.g. speed/pitch)");
 ConVar osu_beatmap_preview_music_loop("osu_beatmap_preview_music_loop", true, FCVAR_NONE);
 
-ConVar osu_ar_override("osu_ar_override", -1.0f, FCVAR_CHEAT,
+ConVar osu_ar_override("osu_ar_override", -1.0f, FCVAR_NONVANILLA,
                        "use this to override between AR 0 and AR 12.5+. active if value is more than or equal to 0.");
-ConVar osu_ar_overridenegative("osu_ar_overridenegative", 0.0f, FCVAR_CHEAT,
+ConVar osu_ar_overridenegative("osu_ar_overridenegative", 0.0f, FCVAR_NONVANILLA,
                                "use this to override below AR 0. active if value is less than 0, disabled otherwise. "
                                "this override always overrides the other override.");
-ConVar osu_cs_override("osu_cs_override", -1.0f, FCVAR_CHEAT,
+ConVar osu_cs_override("osu_cs_override", -1.0f, FCVAR_NONVANILLA,
                        "use this to override between CS 0 and CS 12.1429. active if value is more than or equal to 0.");
-ConVar osu_cs_overridenegative("osu_cs_overridenegative", 0.0f, FCVAR_CHEAT,
+ConVar osu_cs_overridenegative("osu_cs_overridenegative", 0.0f, FCVAR_NONVANILLA,
                                "use this to override below CS 0. active if value is less than 0, disabled otherwise. "
                                "this override always overrides the other override.");
 ConVar osu_cs_cap_sanity("osu_cs_cap_sanity", true, FCVAR_CHEAT);
-ConVar osu_hp_override("osu_hp_override", -1.0f, FCVAR_CHEAT);
-ConVar osu_od_override("osu_od_override", -1.0f, FCVAR_CHEAT);
-ConVar osu_ar_override_lock("osu_ar_override_lock", false, FCVAR_CHEAT,
+ConVar osu_hp_override("osu_hp_override", -1.0f, FCVAR_NONVANILLA);
+ConVar osu_od_override("osu_od_override", -1.0f, FCVAR_NONVANILLA);
+ConVar osu_ar_override_lock("osu_ar_override_lock", false, FCVAR_NONVANILLA,
                             "always force constant AR even through speed changes");
-ConVar osu_od_override_lock("osu_od_override_lock", false, FCVAR_CHEAT,
+ConVar osu_od_override_lock("osu_od_override_lock", false, FCVAR_NONVANILLA,
                             "always force constant OD even through speed changes");
 
 ConVar osu_background_dim("osu_background_dim", 0.9f, FCVAR_NONE);
@@ -113,14 +113,14 @@ ConVar osu_followpoints_prevfadetime("osu_followpoints_prevfadetime", 400.0f,
 
 ConVar osu_auto_and_relax_block_user_input("osu_auto_and_relax_block_user_input", true, FCVAR_NONE);
 
-ConVar osu_mod_timewarp("osu_mod_timewarp", false, FCVAR_NONE);
+ConVar osu_mod_timewarp("osu_mod_timewarp", false, FCVAR_NONVANILLA);
 ConVar osu_mod_timewarp_multiplier("osu_mod_timewarp_multiplier", 1.5f, FCVAR_NONE);
-ConVar osu_mod_minimize("osu_mod_minimize", false, FCVAR_CHEAT);
+ConVar osu_mod_minimize("osu_mod_minimize", false, FCVAR_NONVANILLA);
 ConVar osu_mod_minimize_multiplier("osu_mod_minimize_multiplier", 0.5f, FCVAR_CHEAT);
-ConVar osu_mod_jigsaw1("osu_mod_jigsaw1", false, FCVAR_NONE);
-ConVar osu_mod_artimewarp("osu_mod_artimewarp", false, FCVAR_CHEAT);
+ConVar osu_mod_jigsaw1("osu_mod_jigsaw1", false, FCVAR_NONVANILLA);
+ConVar osu_mod_artimewarp("osu_mod_artimewarp", false, FCVAR_NONVANILLA);
 ConVar osu_mod_artimewarp_multiplier("osu_mod_artimewarp_multiplier", 0.5f, FCVAR_NONE);
-ConVar osu_mod_arwobble("osu_mod_arwobble", false, FCVAR_CHEAT);
+ConVar osu_mod_arwobble("osu_mod_arwobble", false, FCVAR_NONVANILLA);
 ConVar osu_mod_arwobble_strength("osu_mod_arwobble_strength", 1.0f, FCVAR_CHEAT);
 ConVar osu_mod_arwobble_interval("osu_mod_arwobble_interval", 7.0f, FCVAR_CHEAT);
 ConVar osu_mod_fullalternate("osu_mod_fullalternate", false, FCVAR_NONE);
@@ -938,7 +938,7 @@ void OsuBeatmap::update() {
             if(osu_play_hitsound_on_click_while_playing.getBool()) m_osu->getSkin()->playHitCircleSound(0);
 
             // nightmare mod: extra clicks = sliderbreak
-            if((m_osu->getModNM() || osu_mod_jigsaw1.getBool()) && !m_bIsInSkippableSection && !m_bInBreak &&
+            if((m_osu->getModNightmare() || osu_mod_jigsaw1.getBool()) && !m_bIsInSkippableSection && !m_bInBreak &&
                m_iCurrentHitObjectIndex > 0) {
                 addSliderBreak();
                 addHitResult(NULL, OsuScore::HIT::HIT_MISS_SLIDERBREAK, 0, false, true, true, true, true,
@@ -1340,7 +1340,7 @@ bool OsuBeatmap::play() {
     // reset everything, including deleting any previously loaded hitobjects from another diff which we might just have
     // played
     unloadObjects();
-    resetScoreInt();
+    resetScore();
 
     onBeforeLoad();
 
@@ -1464,7 +1464,7 @@ void OsuBeatmap::restart(bool quick) {
 
 void OsuBeatmap::actualRestart() {
     // reset everything
-    resetScoreInt();
+    resetScore();
     resetHitObjects(-1000);
 
     // we are waiting for an asynchronous start of the beatmap in the next update()
@@ -1685,7 +1685,7 @@ void OsuBeatmap::seekPercent(double percent) {
     m_music->setSpeed(m_osu->getSpeedMultiplier());
 
     resetHitObjects(m_music->getPositionMS());
-    resetScoreInt();
+    resetScore();
 
     m_iPreviousSectionPassFailTime = -1;
 
@@ -2235,7 +2235,9 @@ void OsuBeatmap::resetHitObjects(long curPos) {
     m_osu->getHUD()->resetHitErrorBar();
 }
 
-void OsuBeatmap::resetScoreInt() {
+void OsuBeatmap::resetScore() {
+    vanilla = convar->isVanilla();
+
     replay_data = "0|256|-500|0,-1|256|-500|0,";
     last_event_time = engine->getTimeReal();
     last_event_ms = 0;

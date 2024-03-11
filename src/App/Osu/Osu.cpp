@@ -94,7 +94,7 @@ ConVar osu_volume_change_interval("osu_volume_change_interval", 0.05f, FCVAR_NON
 ConVar osu_hud_volume_duration("osu_hud_volume_duration", 1.0f, FCVAR_NONE);
 ConVar osu_hud_volume_size_multiplier("osu_hud_volume_size_multiplier", 1.5f, FCVAR_NONE);
 
-ConVar osu_speed_override("osu_speed_override", -1.0f, FCVAR_CHEAT);
+ConVar osu_speed_override("osu_speed_override", -1.0f, FCVAR_NONVANILLA);
 
 ConVar osu_pause_on_focus_loss("osu_pause_on_focus_loss", true, FCVAR_NONE);
 ConVar osu_quick_retry_delay("osu_quick_retry_delay", 0.27f, FCVAR_NONE);
@@ -107,7 +107,7 @@ ConVar osu_seek_delta("osu_seek_delta", 5, FCVAR_NONE, "how many seconds to skip
 
 ConVar osu_mods("osu_mods", "", FCVAR_NONE);
 ConVar osu_mod_touchdevice("osu_mod_touchdevice", false, FCVAR_NONE, "used for force applying touch pp nerf always");
-ConVar osu_mod_fadingcursor("osu_mod_fadingcursor", false, FCVAR_NONE);
+ConVar osu_mod_fadingcursor("osu_mod_fadingcursor", false, FCVAR_NONVANILLA);
 ConVar osu_mod_fadingcursor_combo("osu_mod_fadingcursor_combo", 50.0f, FCVAR_NONE);
 ConVar osu_mod_endless("osu_mod_endless", false, FCVAR_CHEAT);
 
@@ -358,7 +358,7 @@ Osu::Osu(int instanceID) {
     m_bModEZ = false;
     m_bModSD = false;
     m_bModSS = false;
-    m_bModNM = false;
+    m_bModNightmare = false;
     m_bModTD = false;
 
     m_bShouldCursorBeVisible = false;
@@ -1183,7 +1183,7 @@ void Osu::updateMods() {
         m_bModSS = bancho.room.mods & (1 << 14);
         m_bModTarget = bancho.room.mods & (1 << 23);
         m_bModScorev2 = bancho.room.win_condition == SCOREV2;
-        m_bModNM = false;  // that's nightmare mod not nomod!
+        m_bModNightmare = false;
 
         if(bancho.room.freemods) {
             for(int i = 0; i < 16; i++) {
@@ -1220,7 +1220,7 @@ void Osu::updateMods() {
         m_bModEZ = osu_mods.getString().find("ez") != -1;
         m_bModSD = osu_mods.getString().find("sd") != -1;
         m_bModSS = osu_mods.getString().find("ss") != -1;
-        m_bModNM = osu_mods.getString().find("nm") != -1;
+        m_bModNightmare = osu_mods.getString().find("nightmare") != -1;
         m_bModTD = osu_mods.getString().find("nerftd") != -1;
     }
 

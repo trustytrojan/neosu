@@ -231,7 +231,7 @@ OsuRankingScreen::OsuRankingScreen(Osu *osu) : OsuScreenBackable(osu) {
     m_bModHR = false;
     m_bModNC = false;
     m_bModDT = false;
-    m_bModNM = false;
+    m_bModNightmare = false;
     m_bModScorev2 = false;
     m_bModTarget = false;
     m_bModSpunout = false;
@@ -272,7 +272,7 @@ void OsuRankingScreen::draw(Graphics *g) {
         drawModImage(g, m_osu->getSkin()->getSelectionModNightCore(), modPos, modPosMax);
     else if(m_bModDT)
         drawModImage(g, m_osu->getSkin()->getSelectionModDoubleTime(), modPos, modPosMax);
-    if(m_bModNM) drawModImage(g, m_osu->getSkin()->getSelectionModNightmare(), modPos, modPosMax);
+    if(m_bModNightmare) drawModImage(g, m_osu->getSkin()->getSelectionModNightmare(), modPos, modPosMax);
     if(m_bModScorev2) drawModImage(g, m_osu->getSkin()->getSelectionModScorev2(), modPos, modPosMax);
     if(m_bModTarget) drawModImage(g, m_osu->getSkin()->getSelectionModTarget(), modPos, modPosMax);
     if(m_bModSpunout) drawModImage(g, m_osu->getSkin()->getSelectionModSpunOut(), modPos, modPosMax);
@@ -477,7 +477,7 @@ void OsuRankingScreen::setScore(OsuScore *score) {
     m_bModHR = m_osu->getModHR();
     m_bModNC = m_osu->getModNC();
     m_bModDT = m_osu->getModDT();
-    m_bModNM = m_osu->getModNM();
+    m_bModNightmare = m_osu->getModNightmare();
     m_bModScorev2 = m_osu->getModScorev2();
     m_bModTarget = m_osu->getModTarget();
     m_bModSpunout = m_osu->getModSpunout();
@@ -547,7 +547,7 @@ void OsuRankingScreen::setScore(OsuDatabase::Score score, UString dateTime) {
     m_bModHR = score.modsLegacy & OsuReplay::Mods::HardRock;
     m_bModNC = score.modsLegacy & OsuReplay::Mods::Nightcore;
     m_bModDT = score.modsLegacy & OsuReplay::Mods::DoubleTime;
-    m_bModNM = score.modsLegacy & OsuReplay::Mods::Nightmare;
+    m_bModNightmare = score.modsLegacy & OsuReplay::Mods::Nightmare;
     m_bModScorev2 = score.modsLegacy & OsuReplay::Mods::ScoreV2;
     m_bModTarget = score.modsLegacy & OsuReplay::Mods::Target;
     m_bModSpunout = score.modsLegacy & OsuReplay::Mods::SpunOut;

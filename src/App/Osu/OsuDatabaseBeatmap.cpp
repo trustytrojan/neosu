@@ -26,7 +26,7 @@
 #include "OsuSliderCurves.h"
 #include "OsuSpinner.h"
 
-ConVar osu_mod_random("osu_mod_random", false, FCVAR_CHEAT);
+ConVar osu_mod_random("osu_mod_random", false, FCVAR_NONVANILLA);
 ConVar osu_mod_random_seed(
     "osu_mod_random_seed", 0, FCVAR_NONE,
     "0 = random seed every reload, any other value will force that value to be used as the seed");
@@ -42,8 +42,8 @@ ConVar osu_mod_random_spinner_offset_x_percent("osu_mod_random_spinner_offset_x_
                                                "how much the randomness affects things");
 ConVar osu_mod_random_spinner_offset_y_percent("osu_mod_random_spinner_offset_y_percent", 1.0f, FCVAR_NONE,
                                                "how much the randomness affects things");
-ConVar osu_mod_reverse_sliders("osu_mod_reverse_sliders", false, FCVAR_CHEAT);
-ConVar osu_mod_strict_tracking("osu_mod_strict_tracking", false, FCVAR_CHEAT);
+ConVar osu_mod_reverse_sliders("osu_mod_reverse_sliders", false, FCVAR_NONVANILLA);
+ConVar osu_mod_strict_tracking("osu_mod_strict_tracking", false, FCVAR_NONVANILLA);
 ConVar osu_mod_strict_tracking_remove_slider_ticks("osu_mod_strict_tracking_remove_slider_ticks", false, FCVAR_CHEAT,
                                                    "whether the strict tracking mod should remove slider ticks or not, "
                                                    "this changed after its initial implementation in lazer");

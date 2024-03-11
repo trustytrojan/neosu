@@ -75,8 +75,10 @@ ConVar osu_followpoints_separation_multiplier("osu_followpoints_separation_multi
 
 ConVar osu_number_scale_multiplier("osu_number_scale_multiplier", 1.0f, FCVAR_NONE);
 
-ConVar osu_playfield_mirror_horizontal("osu_playfield_mirror_horizontal", false, FCVAR_NONE);
-ConVar osu_playfield_mirror_vertical("osu_playfield_mirror_vertical", false, FCVAR_NONE);
+// XXX: Turn these back to FCVAR_NONE, we just need to adjust the cursor in the replay
+ConVar osu_playfield_mirror_horizontal("osu_playfield_mirror_horizontal", false, FCVAR_NONVANILLA);
+ConVar osu_playfield_mirror_vertical("osu_playfield_mirror_vertical", false, FCVAR_NONVANILLA);
+
 ConVar osu_playfield_rotation("osu_playfield_rotation", 0.0f, FCVAR_NONE,
                               "rotates the entire playfield by this many degrees");
 ConVar osu_playfield_stretch_x("osu_playfield_stretch_x", 0.0f, FCVAR_NONE,
@@ -93,14 +95,14 @@ ConVar osu_drain_lazer_health_min("osu_drain_lazer_health_min", 0.95f, FCVAR_NON
 ConVar osu_drain_lazer_health_mid("osu_drain_lazer_health_mid", 0.70f, FCVAR_NONE);
 ConVar osu_drain_lazer_health_max("osu_drain_lazer_health_max", 0.30f, FCVAR_NONE);
 
-ConVar osu_mod_wobble("osu_mod_wobble", false, FCVAR_NONE);
-ConVar osu_mod_wobble2("osu_mod_wobble2", false, FCVAR_NONE);
+ConVar osu_mod_wobble("osu_mod_wobble", false, FCVAR_NONVANILLA);
+ConVar osu_mod_wobble2("osu_mod_wobble2", false, FCVAR_NONVANILLA);
 ConVar osu_mod_wobble_strength("osu_mod_wobble_strength", 25.0f, FCVAR_NONE);
 ConVar osu_mod_wobble_frequency("osu_mod_wobble_frequency", 1.0f, FCVAR_NONE);
 ConVar osu_mod_wobble_rotation_speed("osu_mod_wobble_rotation_speed", 1.0f, FCVAR_NONE);
-ConVar osu_mod_jigsaw2("osu_mod_jigsaw2", false, FCVAR_NONE);
+ConVar osu_mod_jigsaw2("osu_mod_jigsaw2", false, FCVAR_NONVANILLA);
 ConVar osu_mod_jigsaw_followcircle_radius_factor("osu_mod_jigsaw_followcircle_radius_factor", 0.0f, FCVAR_NONE);
-ConVar osu_mod_shirone("osu_mod_shirone", false, FCVAR_NONE);
+ConVar osu_mod_shirone("osu_mod_shirone", false, FCVAR_NONVANILLA);
 ConVar osu_mod_shirone_combo("osu_mod_shirone_combo", 20.0f, FCVAR_NONE);
 ConVar osu_mod_mafham_render_chunksize("osu_mod_mafham_render_chunksize", 15, FCVAR_NONE,
                                        "render this many hitobjects per frame chunk into the scene buffer (spreads "
@@ -1732,7 +1734,7 @@ void OsuBeatmapStandard::onBeforeStop(bool quit) {
     int scoreIndex = -1;
 
     if(!isCheated) {
-        if(bancho.submit_scores && !isZero) {
+        if(bancho.submit_scores && !isZero && vanilla) {
             score.replay_data = replay_data;
             submit_score(score);
         }
@@ -1980,7 +1982,7 @@ void OsuBeatmapStandard::updateHitobjectMetrics() {
 
     const float followcircle_size_multiplier = OsuGameRules::osu_slider_followcircle_size_multiplier.getFloat();
     const float sliderFollowCircleDiameterMultiplier =
-        (m_osu->getModNM() || osu_mod_jigsaw2.getBool()
+        (m_osu->getModNightmare() || osu_mod_jigsaw2.getBool()
              ? (1.0f * (1.0f - osu_mod_jigsaw_followcircle_radius_factor.getFloat()) +
                 osu_mod_jigsaw_followcircle_radius_factor.getFloat() * followcircle_size_multiplier)
              : followcircle_size_multiplier);

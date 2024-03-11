@@ -80,7 +80,7 @@ ConVar osu_mod_mafham_ignore_hittable_dim("osu_mod_mafham_ignore_hittable_dim", 
                                           "having hittable dim enabled makes it possible to \"read\" the beatmap by "
                                           "looking at the un-dim animations (thus making it a lot easier)");
 
-ConVar osu_mod_approach_different("osu_mod_approach_different", false, FCVAR_NONE,
+ConVar osu_mod_approach_different("osu_mod_approach_different", false, FCVAR_NONVANILLA,
                                   "replicates osu!lazer's \"Approach Different\" mod");
 ConVar osu_mod_approach_different_initial_size(
     "osu_mod_approach_different_initial_size", 4.0f, FCVAR_NONE,

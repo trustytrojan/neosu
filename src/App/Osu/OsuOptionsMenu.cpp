@@ -1365,16 +1365,6 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
                      : "The real 3D FPS mod.\nPlay from a first person shooter perspective in a 3D environment.\nThis "
                        "is only intended for mouse!"),
                 convar->getConVarByName("osu_mod_fposu"));
-    addCheckbox(
-        "[Beta] 4D Mode",
-        (env->getOS() == Environment::OS::OS_WINDOWS ? "Actual 3D circles instead of \"just\" a flat playfield in "
-                                                       "3D.\nNOTE: Not compatible with \"Tablet/Absolute Mode\"."
-                                                     : "Actual 3D circles instead of \"just\" a flat playfield in 3D."),
-        convar->getConVarByName("fposu_3d"));
-    addCheckbox(
-        "[Beta] 4D Mode - Spheres",
-        "Combocolored lit 3D spheres instead of flat 3D circles.\nOnly relevant if \"[Beta] 4D Mode\" is enabled.",
-        convar->getConVarByName("fposu_3d_spheres"));
     addLabel("");
     addLabel("NOTE: Use CTRL + O during gameplay to get here!")->setTextColor(0xff555555);
     addLabel("");

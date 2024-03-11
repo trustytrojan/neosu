@@ -278,6 +278,16 @@ OsuModSelector::OsuModSelector(Osu *osu) : OsuScreen(osu) {
     addExperimentalCheckbox("Flip Left/Right", "Playfield is flipped left/right (mirrored at vertical axis).",
                             convar->getConVarByName("osu_playfield_mirror_vertical"));
 
+    m_nonVanillaWarning = new CBaseUILabel();
+    m_nonVanillaWarning->setDrawFrame(false);
+    m_nonVanillaWarning->setDrawBackground(false);
+    m_nonVanillaWarning->setText("WARNING: Score submission will be disabled due to non-vanilla mod selection.");
+    m_nonVanillaWarning->setTextColor(0xffff0000);
+    m_nonVanillaWarning->setCenterText(true);
+    m_nonVanillaWarning->setVisible(false);
+    addBaseUIElement(m_nonVanillaWarning);
+
+
     // build score multiplier label
     m_scoreMultiplierLabel = new CBaseUILabel();
     m_scoreMultiplierLabel->setDrawFrame(false);
@@ -313,7 +323,7 @@ void OsuModSelector::updateButtons(bool initial) {
                            [this]() -> OsuSkinImage * { return m_osu->getSkin()->getSelectionModHalfTime(); });
     setModButtonOnGrid(2, 0, 1, initial && m_osu->getModDC(), "dc", "A E S T H E T I C",
                        [this]() -> OsuSkinImage * { return m_osu->getSkin()->getSelectionModDayCore(); });
-    setModButtonOnGrid(4, 0, 0, initial && m_osu->getModNM(), "nm",
+    setModButtonOnGrid(4, 0, 0, initial && m_osu->getModNightmare(), "nightmare",
                        "Unnecessary clicks count as misses.\nMassively reduced slider follow circle radius.",
                        [this]() -> OsuSkinImage * { return m_osu->getSkin()->getSelectionModNightmare(); });
 
@@ -888,11 +898,18 @@ void OsuModSelector::updateLayout() {
         // score multiplier info label
         const float modGridMaxY =
             start.y + size.y * m_iGridHeight + offset.y * (m_iGridHeight - 1);  // exact bottom of the mod buttons
+
+        m_nonVanillaWarning->setVisible(!convar->isVanilla() && bancho.submit_scores);
+        m_nonVanillaWarning->setSizeToContent();
+        m_nonVanillaWarning->setSize(Vector2(m_osu->getScreenWidth(), 20 * uiScale));
+        m_nonVanillaWarning->setPos(
+            0, modGridMaxY + std::abs(actionStart.y - modGridMaxY) / 2 - m_nonVanillaWarning->getSize().y);
+
         m_scoreMultiplierLabel->setVisible(true);
         m_scoreMultiplierLabel->setSizeToContent();
-        m_scoreMultiplierLabel->setSize(Vector2(m_osu->getScreenWidth(), 20 * uiScale));
+        m_scoreMultiplierLabel->setSize(Vector2(m_osu->getScreenWidth(), 30 * uiScale));
         m_scoreMultiplierLabel->setPos(
-            0, modGridMaxY + std::abs(actionStart.y - modGridMaxY) / 2 - m_scoreMultiplierLabel->getSize().y / 2);
+            0, m_nonVanillaWarning->getPos().y + 20 * uiScale);
     } else  // compact in-beatmap mode
     {
         // mod grid buttons
@@ -1031,6 +1048,7 @@ void OsuModSelector::updateModConVar() {
 
     updateScoreMultiplierLabelText();
     updateOverrideSliderLabels();
+    m_osu->updateMods();
 }
 
 OsuUIModSelectorModButton *OsuModSelector::setModButtonOnGrid(int x, int y, int state, bool initialState,

@@ -48,20 +48,20 @@ ConVar OsuGameRules::osu_spinner_fade_out_time_multiplier("osu_spinner_fade_out_
 ConVar OsuGameRules::osu_slider_followcircle_size_multiplier("osu_slider_followcircle_size_multiplier", 2.4f,
                                                              FCVAR_CHEAT);
 
-ConVar OsuGameRules::osu_mod_fps("osu_mod_fps", false, FCVAR_NONE);
-ConVar OsuGameRules::osu_mod_no50s("osu_mod_no50s", false, FCVAR_NONE);
-ConVar OsuGameRules::osu_mod_no100s("osu_mod_no100s", false, FCVAR_NONE);
-ConVar OsuGameRules::osu_mod_ming3012("osu_mod_ming3012", false, FCVAR_NONE);
-ConVar OsuGameRules::osu_mod_millhioref("osu_mod_millhioref", false, FCVAR_CHEAT);
+ConVar OsuGameRules::osu_mod_fps("osu_mod_fps", false, FCVAR_NONVANILLA);
+ConVar OsuGameRules::osu_mod_no50s("osu_mod_no50s", false, FCVAR_NONVANILLA);
+ConVar OsuGameRules::osu_mod_no100s("osu_mod_no100s", false, FCVAR_NONVANILLA);
+ConVar OsuGameRules::osu_mod_ming3012("osu_mod_ming3012", false, FCVAR_NONVANILLA);
+ConVar OsuGameRules::osu_mod_millhioref("osu_mod_millhioref", false, FCVAR_NONVANILLA);
 ConVar OsuGameRules::osu_mod_millhioref_multiplier("osu_mod_millhioref_multiplier", 2.0f, FCVAR_CHEAT);
-ConVar OsuGameRules::osu_mod_mafham("osu_mod_mafham", false, FCVAR_CHEAT);
+ConVar OsuGameRules::osu_mod_mafham("osu_mod_mafham", false, FCVAR_NONVANILLA);
 ConVar OsuGameRules::osu_mod_mafham_render_livesize(
     "osu_mod_mafham_render_livesize", 25, FCVAR_NONE,
     "render this many hitobjects without any scene buffering, higher = more lag but more up-to-date scene");
 ConVar OsuGameRules::osu_stacking_ar_override("osu_stacking_ar_override", -1, FCVAR_CHEAT,
                                               "allows overriding the approach time used for the stacking calculations. "
                                               "behaves as if disabled if the value is less than 0.");
-ConVar OsuGameRules::osu_mod_halfwindow("osu_mod_halfwindow", false, FCVAR_NONE);
+ConVar OsuGameRules::osu_mod_halfwindow("osu_mod_halfwindow", false, FCVAR_NONVANILLA);
 ConVar OsuGameRules::osu_mod_halfwindow_allow_300s("osu_mod_halfwindow_allow_300s", true, FCVAR_NONE,
                                                    "should positive hit deltas be allowed within 300 range");
 

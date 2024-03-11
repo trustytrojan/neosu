@@ -78,7 +78,7 @@ class OsuBeatmap {
     void stop(bool quit = true);
     void fail();
     void cancelFailing();
-    void resetScore() { resetScoreInt(); }
+    void resetScore();
 
     // loader
     void setMaxPossibleCombo(int maxPossibleCombo) { m_iMaxPossibleCombo = maxPossibleCombo; }
@@ -138,6 +138,9 @@ class OsuBeatmap {
     }
     inline const std::vector<double> &getAimStrains() const { return m_aimStrains; }
     inline const std::vector<double> &getSpeedStrains() const { return m_speedStrains; }
+
+    // set to false when using non-vanilla mods (disables score submission)
+    bool vanilla = true;
 
     // replay recording (see OsuBeatmapStandard)
     UString replay_data;
@@ -253,7 +256,6 @@ class OsuBeatmap {
     void unloadObjects();
 
     void resetHitObjects(long curPos = 0);
-    void resetScoreInt();
 
     void playMissSound();
 

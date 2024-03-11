@@ -5,25 +5,37 @@
 // $NoKeywords: $convar
 //===============================================================================//
 
+#include "Bancho.h"
+#include "CBaseUILabel.h"
 #include "ConVar.h"
-
 #include "Engine.h"
+#include "Osu.h"
+#include "OsuBeatmap.h"
+#include "OsuModSelector.h"
 
 // #define ALLOW_DEVELOPMENT_CONVARS // NOTE: comment this out on release
 
 ConVar ConVars::sv_cheats("sv_cheats", true, FCVAR_NONE);
 
 bool ConVar::getBool() const {
-    return ((isFlagSet(FCVAR_CHEAT) && !ConVars::sv_cheats.getBool() ? m_fDefaultValue.load() : m_fValue.load()) > 0);
+    if(isFlagSet(FCVAR_CHEAT) && !ConVars::sv_cheats.getBool()) return m_fDefaultValue.load() > 0;
+    if(isFlagSet(FCVAR_NONVANILLA) && bancho.is_in_a_multi_room()) return m_fDefaultValue.load() > 0;
+    return m_fValue.load() > 0;
 }
 float ConVar::getFloat() const {
-    return (isFlagSet(FCVAR_CHEAT) && !ConVars::sv_cheats.getBool() ? m_fDefaultValue.load() : m_fValue.load());
+    if(isFlagSet(FCVAR_CHEAT) && !ConVars::sv_cheats.getBool()) return m_fDefaultValue.load();
+    if(isFlagSet(FCVAR_NONVANILLA) && bancho.is_in_a_multi_room()) return m_fDefaultValue.load();
+    return m_fValue.load();
 }
 int ConVar::getInt() {
-    return (int)(isFlagSet(FCVAR_CHEAT) && !ConVars::sv_cheats.getBool() ? m_fDefaultValue.load() : m_fValue.load());
+    if(isFlagSet(FCVAR_CHEAT) && !ConVars::sv_cheats.getBool()) return m_fDefaultValue.load();
+    if(isFlagSet(FCVAR_NONVANILLA) && bancho.is_in_a_multi_room()) return m_fDefaultValue.load();
+    return m_fValue.load();
 }
 const UString &ConVar::getString() {
-    return (isFlagSet(FCVAR_CHEAT) && !ConVars::sv_cheats.getBool() ? m_sDefaultValue : m_sValue);
+    if(isFlagSet(FCVAR_CHEAT) && !ConVars::sv_cheats.getBool()) return m_sDefaultValue;
+    if(isFlagSet(FCVAR_NONVANILLA) && bancho.is_in_a_multi_room()) return m_sDefaultValue;
+    return m_sValue;
 }
 
 static std::vector<ConVar *> &_getGlobalConVarArray() {
@@ -273,6 +285,20 @@ ConVar::ConVar(UString name, const char *sDefaultValue, int flags, const char *h
 void ConVar::exec() {
     if(isFlagSet(FCVAR_CHEAT) && !ConVars::sv_cheats.getBool()) return;
 
+    if(bancho.osu != nullptr) {
+        auto is_vanilla = convar->isVanilla();
+
+        auto beatmap = bancho.osu->getSelectedBeatmap();
+        if(beatmap != nullptr) {
+            beatmap->vanilla &= is_vanilla;
+        }
+
+        auto mod_selector = bancho.osu->m_modSelector;
+        if(mod_selector && mod_selector->m_nonVanillaWarning) {
+            mod_selector->m_nonVanillaWarning->setVisible(!is_vanilla);
+        }
+    }
+
     if(m_callbackfunc != NULL) m_callbackfunc();
 }
 
@@ -460,9 +486,29 @@ UString ConVarHandler::flagsToString(int flags) {
             if(flags & FCVAR_HARDCODED) string.append(string.length() > 0 ? " hardcoded" : "hardcoded");
             if(flags & FCVAR_HIDDEN) string.append(string.length() > 0 ? " hidden" : "hidden");
             if(flags & FCVAR_CHEAT) string.append(string.length() > 0 ? " cheat" : "cheat");
+            if(flags & FCVAR_NONVANILLA) string.append(string.length() > 0 ? " nonvanilla" : "nonvanilla");
         }
     }
     return string;
+}
+
+bool ConVarHandler::isVanilla() {
+    for(auto cv : _getGlobalConVarArray()) {
+        if(!cv->isFlagSet(FCVAR_NONVANILLA)) continue;
+        if(cv->getString() != cv->getDefaultString()) {
+            return false;
+        }
+    }
+
+    // Also check for non-vanilla mod combinations here while we're at it
+    if(bancho.osu != nullptr) {
+        if(bancho.osu->getModTarget()) return false;
+        if(bancho.osu->getModNightmare()) return false;
+        if(bancho.osu->getModEZ() && bancho.osu->getModHR()) return false;
+        if((bancho.osu->getModDT() || bancho.osu->getModNC()) && (bancho.osu->getModHT() || bancho.osu->getModDC())) return false;
+    }
+
+    return true;
 }
 
 //*****************************//

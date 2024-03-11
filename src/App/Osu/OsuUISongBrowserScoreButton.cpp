@@ -918,7 +918,7 @@ UString OsuUISongBrowserScoreButton::getModsStringForConVar(int mods) {
     if(mods & OsuReplay::Mods::SpunOut) modsString.append("spunout");
     if(mods & OsuReplay::Mods::Hidden) modsString.append("hd");
     if(mods & OsuReplay::Mods::Autoplay) modsString.append("auto");
-    if(mods & OsuReplay::Mods::Nightmare) modsString.append("nm");
+    if(mods & OsuReplay::Mods::Nightmare) modsString.append("nightmare");
     if(mods & OsuReplay::Mods::Target) modsString.append("practicetarget");
     if(mods & OsuReplay::Mods::TouchDevice) modsString.append("nerftd");
     if(mods & OsuReplay::Mods::ScoreV2) modsString.append("v2");

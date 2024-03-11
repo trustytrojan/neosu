@@ -25,6 +25,9 @@
 // changeable via setDefault*())
 #define FCVAR_CHEAT (1 << 4)
 
+// disables score submission on servers that don't support weird mods
+#define FCVAR_NONVANILLA (1 << 5)
+
 class ConVar {
    public:
     enum class CONVAR_TYPE { CONVAR_TYPE_BOOL, CONVAR_TYPE_INT, CONVAR_TYPE_FLOAT, CONVAR_TYPE_STRING };
@@ -165,6 +168,8 @@ class ConVarHandler {
 
     ConVar *getConVarByName(UString name, bool warnIfNotFound = true) const;
     std::vector<ConVar *> getConVarByLetter(UString letters) const;
+
+    bool isVanilla();
 };
 
 extern ConVarHandler *convar;

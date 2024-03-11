@@ -97,7 +97,7 @@ ConVar fposu_draw_scorebarbg_on_top("fposu_draw_scorebarbg_on_top", false, FCVAR
 ConVar fposu_transparent_playfield("fposu_transparent_playfield", false, FCVAR_NONE,
                                    "only works if background dim is 100% and background brightness is 0%");
 
-ConVar fposu_mod_strafing("fposu_mod_strafing", false, FCVAR_NONE);
+ConVar fposu_mod_strafing("fposu_mod_strafing", false, FCVAR_NONVANILLA);
 ConVar fposu_mod_strafing_strength_x("fposu_mod_strafing_strength_x", 0.3f, FCVAR_NONE);
 ConVar fposu_mod_strafing_frequency_x("fposu_mod_strafing_frequency_x", 0.1f, FCVAR_NONE);
 ConVar fposu_mod_strafing_strength_y("fposu_mod_strafing_strength_y", 0.1f, FCVAR_NONE);
@@ -105,7 +105,7 @@ ConVar fposu_mod_strafing_frequency_y("fposu_mod_strafing_frequency_y", 0.2f, FC
 ConVar fposu_mod_strafing_strength_z("fposu_mod_strafing_strength_z", 0.15f, FCVAR_NONE);
 ConVar fposu_mod_strafing_frequency_z("fposu_mod_strafing_frequency_z", 0.15f, FCVAR_NONE);
 
-ConVar fposu_mod_3d_depthwobble("fposu_mod_3d_depthwobble", false, FCVAR_NONE);
+ConVar fposu_mod_3d_depthwobble("fposu_mod_3d_depthwobble", false, FCVAR_NONVANILLA);
 
 constexpr const float OsuModFPoSu::SIZEDIV3D;
 constexpr const int OsuModFPoSu::SUBDIVISIONS;

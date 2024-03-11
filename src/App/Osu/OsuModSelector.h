@@ -61,6 +61,8 @@ class OsuModSelector : public OsuScreen {
     void updateButtons(bool initial = false);
     void updateModConVar();
 
+    CBaseUILabel *m_nonVanillaWarning;
+
    private:
     struct OVERRIDE_SLIDER {
         OVERRIDE_SLIDER() {
