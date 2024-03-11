@@ -191,7 +191,7 @@ CBaseUISlider *CBaseUISlider::setBounds(float minValue, float maxValue) {
     return this;
 }
 
-CBaseUISlider *CBaseUISlider::setValue(float value, bool animate) {
+CBaseUISlider *CBaseUISlider::setValue(float value, bool animate, bool call_callback) {
     bool changeCallbackCheck = false;
     if(value != m_fCurValue) {
         changeCallbackCheck = true;
@@ -213,7 +213,9 @@ CBaseUISlider *CBaseUISlider::setValue(float value, bool animate) {
             m_vBlockPos.x = (m_vSize.x - m_vBlockSize.x) * percent;
     }
 
-    if(changeCallbackCheck && m_sliderChangeCallback != NULL) m_sliderChangeCallback(this);
+    if(call_callback && changeCallbackCheck && m_sliderChangeCallback != NULL) {
+        m_sliderChangeCallback(this);
+    }
 
     updateBlockPos();
 

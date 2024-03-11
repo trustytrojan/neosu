@@ -67,6 +67,12 @@ class OsuOptionsMenu : public OsuScreenBackable, public OsuNotificationOverlayKe
    public:
     static const char *OSU_CONFIG_FILE_NAME;
 
+    enum class RenderCondition {
+        NONE,
+        ASIO_ENABLED,
+        WASAPI_ENABLED,
+    };
+
     struct OPTIONS_ELEMENT {
         OPTIONS_ELEMENT() {
             resetButton = NULL;
@@ -78,7 +84,7 @@ class OsuOptionsMenu : public OsuScreenBackable, public OsuNotificationOverlayKe
 
             allowOverscale = false;
             allowUnderscale = false;
-            wasapi_only = false;
+            render_condition = RenderCondition::NONE;
         }
 
         OsuOptionsMenuResetButton *resetButton;
@@ -89,7 +95,7 @@ class OsuOptionsMenu : public OsuScreenBackable, public OsuNotificationOverlayKe
         float label1Width;
         float relSizeDPI;
 
-        bool wasapi_only;
+        RenderCondition render_condition;
 
         bool allowOverscale;
         bool allowUnderscale;
@@ -160,6 +166,8 @@ class OsuOptionsMenu : public OsuScreenBackable, public OsuNotificationOverlayKe
     void onSliderChangeLetterboxingOffset(CBaseUISlider *slider);
     void onSliderChangeUIScale(CBaseUISlider *slider);
 
+    void OpenASIOSettings();
+    void onASIOBufferChange(CBaseUISlider *slider);
     void onWASAPIBufferChange(CBaseUISlider *slider);
     void onWASAPIPeriodChange(CBaseUISlider *slider);
 
@@ -241,8 +249,10 @@ class OsuOptionsMenu : public OsuScreenBackable, public OsuNotificationOverlayKe
     OsuOptionsMenuResetButton *m_outputDeviceResetButton;
     CBaseUISlider *m_wasapiBufferSizeSlider;
     CBaseUISlider *m_wasapiPeriodSizeSlider;
+    OsuOptionsMenuResetButton *m_asioBufferSizeResetButton;
     OsuOptionsMenuResetButton *m_wasapiBufferSizeResetButton;
     OsuOptionsMenuResetButton *m_wasapiPeriodSizeResetButton;
+    CBaseUISlider *m_asioBufferSizeSlider = nullptr;
     CBaseUILabel *m_vrRenderTargetResolutionLabel;
     CBaseUISlider *m_vrApproachDistanceSlider;
     CBaseUISlider *m_vrVibrationStrengthSlider;
@@ -294,6 +304,7 @@ class OsuOptionsMenu : public OsuScreenBackable, public OsuNotificationOverlayKe
     bool m_bUIScaleChangeScheduled;
     bool m_bUIScaleScrollToSliderScheduled;
     bool m_bDPIScalingScrollToSliderScheduled;
+    bool m_bASIOBufferChangeScheduled;
     bool m_bWASAPIBufferChangeScheduled;
     bool m_bWASAPIPeriodChangeScheduled;
 

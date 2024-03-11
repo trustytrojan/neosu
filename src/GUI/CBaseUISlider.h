@@ -64,7 +64,7 @@ class CBaseUISlider : public CBaseUIElement {
         m_fKeyDelta = keyDelta;
         return this;
     }
-    CBaseUISlider *setValue(float value, bool animate = true);
+    CBaseUISlider *setValue(float value, bool animate = true, bool call_callback = true);
     CBaseUISlider *setInitialValue(float value);
 
     inline float getFloat() { return m_fCurValue; }

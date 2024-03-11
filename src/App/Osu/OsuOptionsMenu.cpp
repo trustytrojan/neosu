@@ -481,6 +481,7 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
     m_outputDeviceResetButton = NULL;
     m_wasapiBufferSizeSlider = NULL;
     m_wasapiPeriodSizeSlider = NULL;
+    m_asioBufferSizeResetButton = NULL;
     m_wasapiBufferSizeResetButton = NULL;
     m_wasapiPeriodSizeResetButton = NULL;
     m_dpiTextbox = NULL;
@@ -501,6 +502,7 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
     m_bUIScaleChangeScheduled = false;
     m_bUIScaleScrollToSliderScheduled = false;
     m_bDPIScalingScrollToSliderScheduled = false;
+    m_bASIOBufferChangeScheduled = false;
     m_bWASAPIBufferChangeScheduled = false;
     m_bWASAPIPeriodChangeScheduled = false;
 
@@ -872,7 +874,31 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
         }
         auto wasapi_end_idx = m_elements.size();
         for(auto i = wasapi_idx; i < wasapi_end_idx; i++) {
-            m_elements[i].wasapi_only = true;
+            m_elements[i].render_condition = RenderCondition::WASAPI_ENABLED;
+        }
+
+        // Dirty...
+        auto asio_idx = m_elements.size();
+        {
+            addSubSection("ASIO");
+            m_asioBufferSizeSlider = addSlider("Buffer Size:", 0, 44100, convar->getConVarByName("asio_buffer_size"));
+            m_asioBufferSizeSlider->setKeyDelta(512);
+            m_asioBufferSizeSlider->setAnimated(false);
+            m_asioBufferSizeSlider->setLiveUpdate(false);
+            m_asioBufferSizeSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onASIOBufferChange));
+            addLabel("Buffer size is in samples, not milliseconds.")->setTextColor(0xff666666);
+            addLabel("");
+            OsuUIButton *asio_settings_btn = addButton("Open ASIO settings");
+            asio_settings_btn->setClickCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::OpenASIOSettings));
+            asio_settings_btn->setColor(0xff00566b);
+            OsuUIButton *restartSoundEngine = addButton("Restart SoundEngine");
+            restartSoundEngine->setClickCallback(
+                fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onOutputDeviceRestart));
+            restartSoundEngine->setColor(0xff00566b);
+        }
+        auto asio_end_idx = m_elements.size();
+        for(auto i = asio_idx; i < asio_end_idx; i++) {
+            m_elements[i].render_condition = RenderCondition::ASIO_ENABLED;
         }
     }
 
@@ -1677,6 +1703,16 @@ void OsuOptionsMenu::mouse_update(bool *propagate_clicks) {
     }
 
     // delayed WASAPI buffer/period change
+    if(m_bASIOBufferChangeScheduled) {
+        if(!m_asioBufferSizeSlider->isActive()) {
+            m_bASIOBufferChangeScheduled = false;
+
+            convar->getConVarByName("asio_buffer_size")->setValue(m_asioBufferSizeSlider->getFloat());
+
+            // and update reset buttons as usual
+            onResetUpdate(m_asioBufferSizeResetButton);
+        }
+    }
     if(m_bWASAPIBufferChangeScheduled) {
         if(!m_wasapiBufferSizeSlider->isActive()) {
             m_bWASAPIBufferChangeScheduled = false;
@@ -2014,7 +2050,8 @@ void OsuOptionsMenu::updateLayout() {
     bool subSectionTitleMatch = false;
     const std::string search = m_sSearchString.length() > 0 ? m_sSearchString.toUtf8() : "";
     for(int i = 0; i < m_elements.size(); i++) {
-        if(m_elements[i].wasapi_only && !engine->getSound()->isWASAPI()) continue;
+        if(m_elements[i].render_condition == RenderCondition::ASIO_ENABLED && !engine->getSound()->isASIO()) continue;
+        if(m_elements[i].render_condition == RenderCondition::WASAPI_ENABLED && !engine->getSound()->isWASAPI()) continue;
 
         // searching logic happens here:
         // section
@@ -3222,6 +3259,46 @@ void OsuOptionsMenu::onSliderChangeUIScale(CBaseUISlider *slider) {
             }
         }
     }
+}
+
+void OsuOptionsMenu::OpenASIOSettings() {
+#ifdef _WIN32
+    BASS_ASIO_ControlPanel();
+#endif
+}
+
+void OsuOptionsMenu::onASIOBufferChange(CBaseUISlider *slider) {
+#ifdef _WIN32
+    m_bASIOBufferChangeScheduled = true;
+
+    auto asio_buffer_size = convar->getConVarByName("asio_buffer_size");
+
+    BASS_ASIO_INFO info = {0};
+    BASS_ASIO_GetInfo(&info);
+    asio_buffer_size->setDefaultFloat(info.bufpref);
+
+    auto bufsize = asio_buffer_size->getInt();
+    bufsize = ASIO_clamp(info, bufsize);
+
+    slider->setBounds(info.bufmin, info.bufmax);
+    slider->setKeyDelta(info.bufgran == -1 ? info.bufmin : info.bufgran);
+
+    for(int i = 0; i < m_elements.size(); i++) {
+        for(int e = 0; e < m_elements[i].elements.size(); e++) {
+            if(m_elements[i].elements[e] == slider) {
+                if(m_elements[i].elements.size() == 3) {
+                    CBaseUILabel *labelPointer = dynamic_cast<CBaseUILabel *>(m_elements[i].elements[2]);
+                    UString text = UString::format("%i", bufsize);
+                    labelPointer->setText(text);
+                }
+
+                m_asioBufferSizeResetButton = m_elements[i].resetButton;  // HACKHACK: disgusting
+
+                break;
+            }
+        }
+    }
+#endif
 }
 
 void OsuOptionsMenu::onWASAPIBufferChange(CBaseUISlider *slider) {

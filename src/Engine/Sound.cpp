@@ -51,20 +51,20 @@ Sound::Sound(std::string filepath, bool stream, bool overlayable, bool threeD, b
 std::vector<HCHANNEL> Sound::getActiveChannels() {
     std::vector<HCHANNEL> channels;
 
-    if(engine->getSound()->isWASAPI()) {
+    if(engine->getSound()->isMixing()) {
         if(m_bStream) {
             if(BASS_Mixer_ChannelGetMixer(m_stream) != 0) {
                 channels.push_back(m_stream);
             }
         } else {
-            for(auto chan : wasapi_channels) {
+            for(auto chan : mixer_channels) {
                 if(BASS_Mixer_ChannelGetMixer(chan) != 0) {
                     channels.push_back(chan);
                 }
             }
 
             // Only keep channels that are still playing
-            wasapi_channels = channels;
+            mixer_channels = channels;
         }
     } else {
         if(m_bStream) {
@@ -89,11 +89,11 @@ HCHANNEL Sound::getChannel() {
     if(m_bStream) {
         return m_stream;
     } else {
-        if(engine->getSound()->isWASAPI()) {
+        if(engine->getSound()->isMixing()) {
             // If we want to be able to control samples after playing them, we
-            // have to store them here, since WASAPI only accepts DECODE streams.
+            // have to store them here, since bassmix only accepts DECODE streams.
             auto chan = BASS_SampleGetChannel(m_sample, BASS_SAMCHAN_STREAM | BASS_STREAM_DECODE);
-            wasapi_channels.push_back(chan);
+            mixer_channels.push_back(chan);
             return chan;
         } else {
             return BASS_SampleGetChannel(m_sample, 0);
@@ -152,7 +152,7 @@ void Sound::initAsync() {
         }
 
         auto fx_flags = BASS_FX_FREESOURCE;
-        if(engine->getSound()->isWASAPI()) fx_flags |= BASS_STREAM_DECODE;
+        if(engine->getSound()->isMixing()) fx_flags |= BASS_STREAM_DECODE;
         m_stream = BASS_FX_TempoCreate(m_stream, fx_flags);
         if(!m_stream) {
             debugLog("BASS_FX_TempoCreate() returned error %d on file %s\n", BASS_ErrorGetCode(), m_sFilePath.c_str());
@@ -179,7 +179,7 @@ void Sound::destroy() {
     m_fLastPlayTime = 0.0;
 
     if(m_bStream) {
-        if(engine->getSound()->isWASAPI()) {
+        if(engine->getSound()->isMixing()) {
             BASS_Mixer_ChannelRemove(m_stream);
         }
 
@@ -291,10 +291,10 @@ void Sound::setFrequency(float frequency) {
 void Sound::setPan(float pan) {
     if(!m_bReady) return;
 
-    pan = clamp<float>(pan, -1.0f, 1.0f);
+    m_fPan = clamp<float>(pan, -1.0f, 1.0f);
 
     for(auto channel : getActiveChannels()) {
-        BASS_ChannelSetAttribute(channel, BASS_ATTRIB_PAN, pan);
+        BASS_ChannelSetAttribute(channel, BASS_ATTRIB_PAN, m_fPan);
     }
 }
 

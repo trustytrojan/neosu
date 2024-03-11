@@ -27,7 +27,7 @@ class Sound : public Resource {
     Sound(std::string filepath, bool stream, bool overlayable, bool threeD, bool loop, bool prescan);
     virtual ~Sound() { destroy(); }
 
-    std::vector<HCHANNEL> wasapi_channels;
+    std::vector<HCHANNEL> mixer_channels;
     std::vector<HCHANNEL> getActiveChannels();
     HCHANNEL getChannel();
 
@@ -43,6 +43,7 @@ class Sound : public Resource {
     float getPosition();
     unsigned long getPositionMS();
     unsigned long getLengthMS();
+    float getPan() { return m_fPan; }
     float getSpeed();
     float getFrequency();
 
@@ -73,6 +74,7 @@ class Sound : public Resource {
     bool m_bPrescan;
     bool m_bIsOverlayable;
 
+    float m_fPan;
     float m_fSpeed;
     float m_fVolume;
     double m_fLastPlayTime;

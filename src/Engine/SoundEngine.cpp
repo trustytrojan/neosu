@@ -13,16 +13,21 @@
 
 #define NOBASSOVERLOADS
 #include <bass.h>
+#include <bassasio.h>
 #include <bassmix.h>
 #include <basswasapi.h>
 
 #include "Bancho.h"
+#include "CBaseUILabel.h"
+#include "CBaseUISlider.h"
 #include "ConVar.h"
 #include "Engine.h"
 #include "Environment.h"
 #include "HorizonSDLEnvironment.h"
 #include "Osu.h"
+#include "OsuBeatmap.h"
 #include "OsuOptionsMenu.h"
+#include "OsuSkin.h"
 #include "Sound.h"
 #include "Thread.h"
 #include "WinEnvironment.h"
@@ -51,42 +56,59 @@ ConVar snd_change_check_interval("snd_change_check_interval", 0.0f, FCVAR_NONE,
 ConVar win_snd_wasapi_buffer_size(
     "win_snd_wasapi_buffer_size", 0.011f, FCVAR_NONE,
     "buffer size/length in seconds (e.g. 0.011 = 11 ms), directly responsible for audio delay and crackling",
-    _WIN_SND_WASAPI_BUFFER_SIZE_CHANGE);
+    _RESTART_SOUND_ENGINE_ON_CHANGE);
 ConVar win_snd_wasapi_period_size(
     "win_snd_wasapi_period_size", 0.0f, FCVAR_NONE,
     "interval between OutputWasapiProc calls in seconds (e.g. 0.016 = 16 ms) (0 = use default)",
-    _WIN_SND_WASAPI_PERIOD_SIZE_CHANGE);
+    _RESTART_SOUND_ENGINE_ON_CHANGE);
 ConVar win_snd_wasapi_exclusive("win_snd_wasapi_exclusive", false, FCVAR_NONE,
                                 "whether to use exclusive device mode to further reduce latency",
-                                _WIN_SND_WASAPI_EXCLUSIVE_CHANGE);
+                                _RESTART_SOUND_ENGINE_ON_CHANGE);
+
+ConVar asio_buffer_size("asio_buffer_size", -1, FCVAR_NONE,
+                        "buffer size in samples (usually 44100 samples per second)", _RESTART_SOUND_ENGINE_ON_CHANGE);
 
 ConVar osu_universal_offset_hardcoded("osu_universal_offset_hardcoded", 0.0f, FCVAR_NONE);
 
 DWORD CALLBACK OutputWasapiProc(void *buffer, DWORD length, void *user) {
-    if(engine->getSound()->g_wasapiOutputMixer == 0) return 0;
-    const int c = BASS_ChannelGetData(engine->getSound()->g_wasapiOutputMixer, buffer, length);
+    if(engine->getSound()->g_bassOutputMixer == 0) return 0;
+    const int c = BASS_ChannelGetData(engine->getSound()->g_bassOutputMixer, buffer, length);
     return c < 0 ? 0 : c;
 }
 
-void _WIN_SND_WASAPI_BUFFER_SIZE_CHANGE(UString oldValue, UString newValue) {
+void _RESTART_SOUND_ENGINE_ON_CHANGE(UString oldValue, UString newValue) {
     const int oldValueMS = std::round(oldValue.toFloat() * 1000.0f);
     const int newValueMS = std::round(newValue.toFloat() * 1000.0f);
 
     if(oldValueMS != newValueMS) engine->getSound()->restart();
 }
 
-void _WIN_SND_WASAPI_PERIOD_SIZE_CHANGE(UString oldValue, UString newValue) {
-    const int oldValueMS = std::round(oldValue.toFloat() * 1000.0f);
-    const int newValueMS = std::round(newValue.toFloat() * 1000.0f);
+DWORD ASIO_clamp(BASS_ASIO_INFO info, DWORD buflen) {
+    if(buflen == -1) return info.bufpref;
+    if(buflen < info.bufmin) return info.bufmin;
+    if(buflen > info.bufmax) return info.bufmax;
+    if(info.bufgran == 0) return buflen;
 
-    if(oldValueMS != newValueMS) engine->getSound()->restart();
-}
+    if(info.bufgran == -1) {
+        // Buffer lengths are only allowed in powers of 2
+        for(int oksize = info.bufmin; oksize <= info.bufmax; oksize *= 2) {
+            if(oksize == buflen) {
+                return buflen;
+            } else if(oksize > buflen) {
+                oksize /= 2;
+                return oksize;
+            }
+        }
 
-void _WIN_SND_WASAPI_EXCLUSIVE_CHANGE(UString oldValue, UString newValue) {
-    const bool oldValueBool = oldValue.toInt();
-    const bool newValueBool = newValue.toInt();
-
-    if(oldValueBool != newValueBool) engine->getSound()->restart();
+        // Unreachable
+        return info.bufpref;
+    } else {
+        // Buffer lengths are only allowed in multiples of info.bufgran
+        buflen -= info.bufmin;
+        buflen = (buflen / info.bufgran) * info.bufgran;
+        buflen += info.bufmin;
+        return buflen;
+    }
 }
 
 SoundEngine::SoundEngine() {
@@ -183,11 +205,46 @@ void SoundEngine::updateOutputDevices(bool printInfo) {
 
         m_outputDevices.push_back(soundDevice);
 
-        debugLog("SoundEngine: Device %i = \"%s\", enabled = %i, default = %i\n", d, deviceInfo.name, (int)isEnabled,
+        debugLog("DSOUND: Device %i = \"%s\", enabled = %i, default = %i\n", d, deviceInfo.name, (int)isEnabled,
                  (int)isDefault);
     }
 
 #ifdef _WIN32
+    BASS_ASIO_DEVICEINFO asioDeviceInfo;
+    for(int d = 0; (BASS_ASIO_GetDeviceInfo(d, &asioDeviceInfo) == true); d++) {
+        OUTPUT_DEVICE soundDevice;
+        soundDevice.id = d;
+        soundDevice.name = asioDeviceInfo.name;
+        soundDevice.enabled = true;
+        soundDevice.isDefault = false;
+
+        // avoid duplicate names
+        int duplicateNameCounter = 2;
+        while(true) {
+            bool foundDuplicateName = false;
+            for(size_t i = 0; i < m_outputDevices.size(); i++) {
+                if(m_outputDevices[i].name == soundDevice.name) {
+                    foundDuplicateName = true;
+
+                    soundDevice.name = deviceInfo.name;
+                    soundDevice.name.append(UString::format(" (%i)", duplicateNameCounter));
+
+                    duplicateNameCounter++;
+
+                    break;
+                }
+            }
+
+            if(!foundDuplicateName) break;
+        }
+
+        soundDevice.driver = OutputDriver::BASS_ASIO;
+        soundDevice.name.append(" [ASIO]");
+        m_outputDevices.push_back(soundDevice);
+
+        debugLog("ASIO: Device %i = \"%s\"\n", d, asioDeviceInfo.name);
+    }
+
     BASS_WASAPI_DEVICEINFO wasapiDeviceInfo;
     for(int d = 0; (BASS_WASAPI_GetDeviceInfo(d, &wasapiDeviceInfo) == true); d++) {
         const bool isEnabled = (wasapiDeviceInfo.flags & BASS_DEVICE_ENABLED);
@@ -225,7 +282,7 @@ void SoundEngine::updateOutputDevices(bool printInfo) {
         soundDevice.name.append(" [WASAPI]");
         m_outputDevices.push_back(soundDevice);
 
-        debugLog("SoundEngine: Device %i = \"%s\", enabled = %i, default = %i\n", d, wasapiDeviceInfo.name,
+        debugLog("WASAPI: Device %i = \"%s\", enabled = %i, default = %i\n", d, wasapiDeviceInfo.name,
                  (int)isEnabled, (int)isDefault);
     }
 #endif
@@ -236,20 +293,25 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
 
     if(m_currentOutputDevice.driver == OutputDriver::BASS) {
         BASS_Free();
-    } else if(m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
-        BASS_Free();
+    } else if(m_currentOutputDevice.driver == OutputDriver::BASS_ASIO) {
 #ifdef _WIN32
-        g_wasapiOutputMixer = 0;
-        BASS_WASAPI_Stop(true);
+        g_bassOutputMixer = 0;
+        BASS_ASIO_Free();
+#endif
+        BASS_Free();
+    } else if(m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
+#ifdef _WIN32
+        g_bassOutputMixer = 0;
         BASS_WASAPI_Free();
 #endif
+        BASS_Free();
     }
 
     if(device.driver == OutputDriver::BASS) {
         // NOTE: only used by osu atm (new osu uses 5 instead of 10, but not tested enough for offset problems)
         BASS_SetConfig(BASS_CONFIG_UPDATEPERIOD, 10);
         BASS_SetConfig(BASS_CONFIG_UPDATETHREADS, 1);
-    } else if(device.driver == OutputDriver::BASS_WASAPI) {
+    } else if(device.driver == OutputDriver::BASS_ASIO || device.driver == OutputDriver::BASS_WASAPI) {
         BASS_SetConfig(BASS_CONFIG_UPDATEPERIOD, 0);
         BASS_SetConfig(BASS_CONFIG_UPDATETHREADS, 0);
     }
@@ -272,23 +334,83 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
     unsigned int runtimeFlags = BASS_DEVICE_STEREO | BASS_DEVICE_FREQ;
     if(device.driver == OutputDriver::BASS) {
         runtimeFlags |= BASS_DEVICE_DSOUND;
-    } else if(device.driver == OutputDriver::BASS_WASAPI) {
+    } else if(device.driver == OutputDriver::BASS_ASIO || device.driver == OutputDriver::BASS_WASAPI) {
         runtimeFlags |= BASS_DEVICE_NOSPEAKER;
     }
 
-    // init
+    // ASIO and WASAPI: Initialize BASS on "No sound" device
+    int bass_device_id = device.id;
+    if(device.driver == OutputDriver::BASS_ASIO || device.driver == OutputDriver::BASS_WASAPI) bass_device_id = 0;
+
     const int freq = snd_freq.getInt();
     HWND hwnd = NULL;
-
 #ifdef _WIN32
     const WinEnvironment *winEnv = dynamic_cast<WinEnvironment *>(env);
     hwnd = winEnv->getHwnd();
 #endif
 
-    if(!BASS_Init(device.driver == OutputDriver::BASS_WASAPI ? 0 : device.id, freq, runtimeFlags, hwnd, NULL)) {
+    if(!BASS_Init(bass_device_id, freq, runtimeFlags, hwnd, NULL)) {
         m_bReady = false;
         engine->showMessageError("Sound Error", UString::format("BASS_Init() failed (%i)!", BASS_ErrorGetCode()));
         return false;
+    }
+
+    // Starting with bass 2020 2.4.15.2 which has all offset problems
+    // fixed, this is the non-dsound backend compensation.
+    // Gets overwritten later if ASIO or WASAPI driver is used.
+    // Depends on BASS_CONFIG_UPDATEPERIOD/BASS_CONFIG_DEV_BUFFER.
+    osu_universal_offset_hardcoded.setValue(15.0f);
+
+    if(device.driver == OutputDriver::BASS_ASIO) {
+#ifdef _WIN32
+        if(!BASS_ASIO_Init(device.id, 0)) {
+            m_bReady = false;
+            engine->showMessageError("Sound Error", UString::format("BASS_ASIO_Init() failed (%i)!", BASS_ASIO_ErrorGetCode()));
+            return false;
+        }
+
+        double sample_rate = BASS_ASIO_GetRate();
+        if(sample_rate == 0.0) {
+            sample_rate = snd_freq.getFloat();
+            debugLog("ASIO: BASS_ASIO_GetRate() returned 0, using %f instead!\n", sample_rate);
+        }
+
+        BASS_ASIO_INFO info = {0};
+        BASS_ASIO_GetInfo(&info);
+        auto bufsize = asio_buffer_size.getInt();
+        bufsize = ASIO_clamp(info, bufsize);
+
+        if(bancho.osu && bancho.osu->m_optionsMenu) {
+            auto slider = bancho.osu->m_optionsMenu->m_asioBufferSizeSlider;
+            slider->setBounds(info.bufmin, info.bufmax);
+            slider->setKeyDelta(info.bufgran == -1 ? info.bufmin : info.bufgran);
+        }
+
+        auto mixer_flags = BASS_SAMPLE_FLOAT | BASS_STREAM_DECODE | BASS_MIXER_NONSTOP;
+        g_bassOutputMixer = BASS_Mixer_StreamCreate(sample_rate, 2, mixer_flags);
+        if(g_bassOutputMixer == 0) {
+            m_bReady = false;
+            engine->showMessageError("Sound Error",
+                                     UString::format("BASS_Mixer_StreamCreate() failed (%i)!", BASS_ErrorGetCode()));
+            return false;
+        }
+
+        if(!BASS_ASIO_ChannelEnableBASS(false, 0, g_bassOutputMixer, true)) {
+            m_bReady = false;
+            engine->showMessageError("Sound Error", UString::format("BASS_ASIO_ChannelEnableBASS() failed (code %i)!", BASS_ASIO_ErrorGetCode()));
+            return false;
+        }
+
+        if(!BASS_ASIO_Start(bufsize, 0)) {
+            m_bReady = false;
+            engine->showMessageError("Sound Error", UString::format("BASS_ASIO_Start() failed (code %i)!", BASS_ASIO_ErrorGetCode()));
+            return false;
+        }
+
+        double latency = 1000.0 * (double)BASS_ASIO_GetLatency(false) / sample_rate;
+        osu_universal_offset_hardcoded.setValue(-(latency + 25.0f));
+        debugLog("ASIO: wanted %f, got %d (min %d, max %d) -> %f ms latency\n", asio_buffer_size.getFloat(), bufsize, info.bufmin, info.bufmax, latency);
+#endif
     }
 
     if(device.driver == OutputDriver::BASS_WASAPI) {
@@ -318,17 +440,13 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
         BASS_WASAPI_INFO wasapiInfo;
         BASS_WASAPI_GetInfo(&wasapiInfo);
         auto mixer_flags = BASS_SAMPLE_FLOAT | BASS_STREAM_DECODE | BASS_MIXER_NONSTOP;
-        g_wasapiOutputMixer = BASS_Mixer_StreamCreate(wasapiInfo.freq, wasapiInfo.chans, mixer_flags);
-        if(g_wasapiOutputMixer == 0) {
+        g_bassOutputMixer = BASS_Mixer_StreamCreate(wasapiInfo.freq, wasapiInfo.chans, mixer_flags);
+        if(g_bassOutputMixer == 0) {
             m_bReady = false;
             engine->showMessageError("Sound Error",
                                      UString::format("BASS_Mixer_StreamCreate() failed (%i)!", BASS_ErrorGetCode()));
             return false;
         }
-
-        // SYSTEM_INFO sysinfo;
-        // GetSystemInfo(&sysinfo);
-        // BASS_ChannelSetAttribute(g_wasapiOutputMixer, BASS_ATTRIB_MIXER_THREADS, sysinfo.dwNumberOfProcessors);
 
         if(!BASS_WASAPI_Start()) {
             m_bReady = false;
@@ -336,16 +454,10 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
                                      UString::format("BASS_WASAPI_Start() failed (%i)!", BASS_ErrorGetCode()));
             return false;
         }
-#endif
-    }
 
-    if(device.driver == OutputDriver::BASS) {
-        // starting with bass 2020 2.4.15.2 which has all offset problems fixed, this is the non-dsound backend
-        // compensation NOTE: this depends on BASS_CONFIG_UPDATEPERIOD/BASS_CONFIG_DEV_BUFFER
-        osu_universal_offset_hardcoded.setValue(15.0f);
-    } else if(device.driver == OutputDriver::BASS_WASAPI) {
         // since we use the newer bass/fx dlls for wasapi builds anyway (which have different time handling)
         osu_universal_offset_hardcoded.setValue(-25.0f);
+#endif
     }
 
     if(env->getOS() == Environment::OS::OS_HORIZON) {
@@ -366,6 +478,11 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
 SoundEngine::~SoundEngine() {
     if(m_currentOutputDevice.driver == OutputDriver::BASS) {
         BASS_Free();
+    } else if(m_currentOutputDevice.driver == OutputDriver::BASS_ASIO) {
+#ifdef _WIN32
+        BASS_ASIO_Free();
+#endif
+        BASS_Free();
     } else if(m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
 #ifdef _WIN32
         BASS_WASAPI_Free();
@@ -374,7 +491,29 @@ SoundEngine::~SoundEngine() {
     }
 }
 
-void SoundEngine::restart() { initializeOutputDevice(m_currentOutputDevice); }
+void SoundEngine::restart() {
+    unsigned long prevMusicPositionMS = 0;
+    if(bancho.osu != nullptr) {
+        if(!bancho.osu->isInPlayMode() && bancho.osu->getSelectedBeatmap() != NULL && bancho.osu->getSelectedBeatmap()->getMusic() != NULL)
+            prevMusicPositionMS = bancho.osu->getSelectedBeatmap()->getMusic()->getPositionMS();
+    }
+
+    initializeOutputDevice(m_currentOutputDevice);
+
+    if(bancho.osu != nullptr) {
+        bancho.osu->m_optionsMenu->m_outputDeviceLabel->setText(getOutputDevice());
+        bancho.osu->getSkin()->reloadSounds();
+        bancho.osu->m_optionsMenu->onOutputDeviceResetUpdate();
+
+        // start playing music again after audio device changed
+        if(!bancho.osu->isInPlayMode() && bancho.osu->getSelectedBeatmap() != NULL &&
+           bancho.osu->getSelectedBeatmap()->getMusic() != NULL) {
+            bancho.osu->getSelectedBeatmap()->unloadMusic();
+            bancho.osu->getSelectedBeatmap()->select();  // (triggers preview music play)
+            bancho.osu->getSelectedBeatmap()->getMusic()->setPositionMS(prevMusicPositionMS);
+        }
+    }
+}
 
 void SoundEngine::update() {}
 
@@ -411,7 +550,7 @@ bool SoundEngine::play(Sound *snd, float pan, float pitch) {
 
     BASS_ChannelFlags(channel, snd->isLooped() ? BASS_SAMPLE_LOOP : 0, BASS_SAMPLE_LOOP);
 
-    if(isWASAPI()) {
+    if(isMixing()) {
         if(BASS_Mixer_ChannelGetMixer(channel) != 0) return false;
 
         auto flags = BASS_MIXER_DOWNMIX | BASS_MIXER_NORAMPIN;
@@ -419,7 +558,7 @@ bool SoundEngine::play(Sound *snd, float pan, float pitch) {
             flags |= BASS_STREAM_AUTOFREE;
         }
 
-        if(!BASS_Mixer_StreamAddChannel(g_wasapiOutputMixer, channel, flags)) {
+        if(!BASS_Mixer_StreamAddChannel(g_bassOutputMixer, channel, flags)) {
             debugLog("BASS_Mixer_StreamAddChannel() failed (%i)!\n", BASS_ErrorGetCode());
             return false;
         }
@@ -471,13 +610,19 @@ void SoundEngine::pause(Sound *snd) {
     }
     if(!snd->isPlaying()) return;
 
-    if(isWASAPI()) {
+    if(isMixing()) {
+        auto pan = snd->getPan();
         auto pos = snd->getPositionMS();
+        auto loop = snd->isLooped();
+        auto speed = snd->getSpeed();
 
         // Calling BASS_Mixer_ChannelRemove automatically frees the stream due
         // to BASS_STREAM_AUTOFREE. We need to reinitialize it.
         snd->reload();
         snd->setPositionMS(pos);
+        snd->setSpeed(speed);
+        snd->setPan(pan);
+        snd->setLoop(loop);
     } else {
         HSTREAM stream = snd->getChannel();
         if(!BASS_ChannelPause(stream)) {
@@ -525,8 +670,12 @@ void SoundEngine::setVolume(float volume) {
     if(!m_bReady) return;
 
     m_fVolume = clamp<float>(volume, 0.0f, 1.0f);
-
-    if(m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
+    if(m_currentOutputDevice.driver == OutputDriver::BASS_ASIO) {
+#ifdef _WIN32
+        BASS_ASIO_ChannelSetVolume(false, 0, m_fVolume);
+        BASS_ASIO_ChannelSetVolume(false, 1, m_fVolume);
+#endif
+    } else if(m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
 #ifdef _WIN32
         BASS_WASAPI_SetVolume(BASS_WASAPI_CURVE_WINDOWS | BASS_WASAPI_VOL_SESSION, m_fVolume);
 #endif

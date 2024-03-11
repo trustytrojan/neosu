@@ -2165,7 +2165,6 @@ void Osu::onSpeedChange(UString oldValue, UString newValue) {
 
         // Why 0.0001f you ask? See OsuModSelector::resetMods()
         if(speed > 0.0001f && speed < 1.0) {
-            debugLog("Osu::onSpeedChange(%f)\n", speed);
             m_modSelector->m_modButtonDoubletime->setOn(false, true);
             m_modSelector->m_modButtonHalftime->setOn(true, true);
             m_bModDT = false;
@@ -2178,7 +2177,6 @@ void Osu::onSpeedChange(UString oldValue, UString newValue) {
                 bancho.prefer_daycore = true;
             }
         } else if(speed > 1.0) {
-            debugLog("Osu::onSpeedChange(%f)\n", speed);
             m_modSelector->m_modButtonDoubletime->setOn(true, true);
             m_modSelector->m_modButtonHalftime->setOn(false, true);
             m_bModDT = true;

@@ -11,6 +11,9 @@
 #include "cbase.h"
 #include "Sound.h"
 
+#define NOBASSOVERLOADS
+#include <bassasio.h>
+
 enum class OutputDriver {
     NONE,
     BASS,
@@ -39,7 +42,10 @@ class SoundEngine {
     bool play3d(Sound *snd, Vector3 pos);
     void pause(Sound *snd);
     void stop(Sound *snd);
+
+    bool isASIO() { return m_currentOutputDevice.driver == OutputDriver::BASS_ASIO; }
     bool isWASAPI() { return m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI; }
+    bool isMixing() { return m_currentOutputDevice.driver == OutputDriver::BASS_ASIO || m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI; }
 
     void setOnOutputDeviceChange(std::function<void()> callback);
 
@@ -55,7 +61,7 @@ class SoundEngine {
     void updateOutputDevices(bool printInfo);
     bool initializeOutputDevice(OUTPUT_DEVICE device);
 
-    Sound::SOUNDHANDLE g_wasapiOutputMixer = 0;
+    Sound::SOUNDHANDLE g_bassOutputMixer = 0;
 
    private:
     void onFreqChanged(UString oldValue, UString newValue);
@@ -69,8 +75,8 @@ class SoundEngine {
     float m_fVolume = 1.0f;
 };
 
-void _WIN_SND_WASAPI_BUFFER_SIZE_CHANGE(UString oldValue, UString newValue);
-void _WIN_SND_WASAPI_PERIOD_SIZE_CHANGE(UString oldValue, UString newValue);
-void _WIN_SND_WASAPI_EXCLUSIVE_CHANGE(UString oldValue, UString newValue);
+DWORD ASIO_clamp(BASS_ASIO_INFO info, DWORD buflen);
+
+void _RESTART_SOUND_ENGINE_ON_CHANGE(UString oldValue, UString newValue);
 
 #endif
