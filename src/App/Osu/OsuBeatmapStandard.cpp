@@ -939,7 +939,8 @@ void OsuBeatmapStandard::update() {
 
 void OsuBeatmapStandard::write_frame() {
     long delta = m_iCurMusicPosWithOffsets - last_event_ms;
-    if(delta <= 0) return;
+    if(delta < 0) return;
+    if(delta == 0 && last_keys == current_keys) return;
 
     Vector2 pos = pixels2OsuCoords(getCursorPos());
     auto frame = UString::format("%ld|%.4f|%.4f|%hhu,", delta, pos.x, pos.y, current_keys);
