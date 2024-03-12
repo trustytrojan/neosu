@@ -879,21 +879,13 @@ void OsuSlider::draw3D(Graphics *g) {
         float sliderSnake = osu_snaking_sliders.getBool() ? m_fSliderSnakePercent : 1.0f;
 
         // shrinking sliders
-        float sliderSnakeStart = 0.0f;
         if(osu_slider_shrink.getBool() && m_iReverseArrowPos == 0) {
-            sliderSnakeStart = (m_bInReverse ? 0.0f : m_fSlidePercent);
             if(m_bInReverse) sliderSnake = m_fSlidePercent;
         }
 
         Matrix4 baseScale;
         baseScale.scale(m_beatmap->getRawHitcircleDiameter() * OsuModFPoSu::SIZEDIV3D);
         baseScale.scale(m_beatmap->getOsu()->getFPoSu()->get3DPlayfieldScale());
-
-        // TODO: draw slider body
-        /*
-        if (alpha > 0.0f && osu_slider_draw_body.getBool())
-                drawBody(g, alpha, sliderSnakeStart, sliderSnake);
-        */
 
         // draw slider ticks
         Color tickColor = 0xffffffff;
@@ -1191,15 +1183,6 @@ void OsuSlider::draw3D2(Graphics *g) {
 
             // HACKHACK: very dirty code
             bool sliderRepeatStartCircleFinished = m_iRepeat < 2;
-            bool sliderRepeatEndCircleFinished = false;
-            for(int i = 0; i < m_clicks.size(); i++) {
-                if(m_clicks[i].type == 0) {
-                    if(m_clicks[i].sliderend)
-                        sliderRepeatEndCircleFinished = m_clicks[i].finished;
-                    else
-                        sliderRepeatStartCircleFinished = m_clicks[i].finished;
-                }
-            }
 
             // start circle
             if(!m_bStartFinished || !sliderRepeatStartCircleFinished || (!m_bEndFinished && m_iRepeat % 2 == 0)) {

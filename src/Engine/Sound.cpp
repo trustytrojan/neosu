@@ -1,27 +1,13 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		sound wrapper, either streamed or preloaded
-//
-// $NoKeywords: $snd $os
-//===============================================================================//
-
-#include "Sound.h"
-
-#define NOBASSOVERLOADS
-#include <bass.h>
-#include <bass_fx.h>
-#include <bassmix.h>
-
 #include <sstream>
 
 #include "Bancho.h"
 #include "ConVar.h"
 #include "File.h"
 #include "Osu.h"
-
 #include "ConVar.h"
 #include "Engine.h"
 #include "ResourceManager.h"
+#include "Sound.h"
 #include "SoundEngine.h"
 
 ConVar snd_play_interp_duration(

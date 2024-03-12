@@ -886,7 +886,6 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
             m_asioBufferSizeSlider->setAnimated(false);
             m_asioBufferSizeSlider->setLiveUpdate(false);
             m_asioBufferSizeSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onASIOBufferChange));
-            addLabel("Buffer size is in samples, not milliseconds.")->setTextColor(0xff666666);
             addLabel("");
             OsuUIButton *asio_settings_btn = addButton("Open ASIO settings");
             asio_settings_btn->setClickCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::OpenASIOSettings));
@@ -1994,7 +1993,7 @@ void OsuOptionsMenu::updateLayout() {
     updateNotelockSelectLabel();
     updateHPDrainSelectLabel();
 
-    if(m_outputDeviceLabel != NULL) m_outputDeviceLabel->setText(engine->getSound()->getOutputDevice());
+    if(m_outputDeviceLabel != NULL) m_outputDeviceLabel->setText(engine->getSound()->getOutputDeviceName());
 
     onOutputDeviceResetUpdate();
     onNotelockSelectResetUpdate();
@@ -2699,39 +2698,34 @@ void OsuOptionsMenu::onResolutionSelect2(UString resolution, int id) {
 
 void OsuOptionsMenu::onOutputDeviceSelect() {
     // XXX: WHY IS THIS THE ONLY CONTEXT MENU BUTTON THAT NEEDS TO BE CLICKED TWICE? HELP
-    std::vector<UString> outputDevices = engine->getSound()->getOutputDevices();
+    std::vector<OUTPUT_DEVICE> outputDevices = engine->getSound()->getOutputDevices();
 
     // build context menu
     m_contextMenu->setPos(m_outputDeviceSelectButton->getPos());
     m_contextMenu->setRelPos(m_outputDeviceSelectButton->getRelPos());
     m_contextMenu->begin();
-    for(int i = 0; i < outputDevices.size(); i++) {
-        CBaseUIButton *button = m_contextMenu->addButton(outputDevices[i]);
-        if(outputDevices[i] == engine->getSound()->getOutputDevice()) button->setTextBrightColor(0xff00ff00);
+    for(auto device : outputDevices) {
+        CBaseUIButton *button = m_contextMenu->addButton(device.name);
+        if(device.name == engine->getSound()->getOutputDeviceName()) button->setTextBrightColor(0xff00ff00);
     }
     m_contextMenu->end(false, true);
     m_contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onOutputDeviceSelect2));
 }
 
 void OsuOptionsMenu::onOutputDeviceSelect2(UString outputDeviceName, int id) {
-    unsigned long prevMusicPositionMS = 0;
-    if(!m_osu->isInPlayMode() && m_osu->getSelectedBeatmap() != NULL && m_osu->getSelectedBeatmap()->getMusic() != NULL)
-        prevMusicPositionMS = m_osu->getSelectedBeatmap()->getMusic()->getPositionMS();
-
-    engine->getSound()->setOutputDevice(outputDeviceName);
-    m_outputDeviceLabel->setText(engine->getSound()->getOutputDevice());
-    m_osu->getSkin()->reloadSounds();
-
-    // and update reset button as usual
-    onOutputDeviceResetUpdate();
-
-    // start playing music again after audio device changed
-    if(!m_osu->isInPlayMode() && m_osu->getSelectedBeatmap() != NULL &&
-       m_osu->getSelectedBeatmap()->getMusic() != NULL) {
-        m_osu->getSelectedBeatmap()->unloadMusic();
-        m_osu->getSelectedBeatmap()->select();  // (triggers preview music play)
-        m_osu->getSelectedBeatmap()->getMusic()->setPositionMS(prevMusicPositionMS);
+    if(outputDeviceName == engine->getSound()->getOutputDeviceName()) {
+        debugLog("SoundEngine::setOutputDevice() \"%s\" already is the current device.\n", outputDeviceName.toUtf8());
+        return;
     }
+
+    for(auto device : engine->getSound()->getOutputDevices()) {
+        if(device.name != outputDeviceName) continue;
+
+        engine->getSound()->setOutputDevice(device);
+        return;
+    }
+
+    debugLog("SoundEngine::setOutputDevice() couldn't find output device \"%s\"!\n", outputDeviceName.toUtf8());
 }
 
 void OsuOptionsMenu::onOutputDeviceResetClicked() {
@@ -2739,15 +2733,8 @@ void OsuOptionsMenu::onOutputDeviceResetClicked() {
     if(!m_osu->isInPlayMode() && m_osu->getSelectedBeatmap() != NULL && m_osu->getSelectedBeatmap()->getMusic() != NULL)
         prevMusicPositionMS = m_osu->getSelectedBeatmap()->getMusic()->getPositionMS();
 
-    OUTPUT_DEVICE defaultOutputDevice;
-    defaultOutputDevice.id = -1;
-    defaultOutputDevice.name = "Default";
-    defaultOutputDevice.enabled = true;
-    defaultOutputDevice.isDefault = false;  // custom -1 can never have default
-    defaultOutputDevice.driver = OutputDriver::BASS;
-
-    engine->getSound()->initializeOutputDevice(defaultOutputDevice);
-    m_outputDeviceLabel->setText(engine->getSound()->getOutputDevice());
+    engine->getSound()->initializeOutputDevice(engine->getSound()->getDefaultDevice());
+    m_outputDeviceLabel->setText(engine->getSound()->getOutputDeviceName());
     m_osu->getSkin()->reloadSounds();
 
     // and update reset button as usual
@@ -2764,7 +2751,7 @@ void OsuOptionsMenu::onOutputDeviceResetClicked() {
 
 void OsuOptionsMenu::onOutputDeviceResetUpdate() {
     if(m_outputDeviceResetButton != NULL) {
-        m_outputDeviceResetButton->setEnabled(engine->getSound()->getOutputDevice() != UString("Default"));
+        m_outputDeviceResetButton->setEnabled(engine->getSound()->getOutputDeviceName() != UString("Default"));
     }
 }
 
@@ -3279,6 +3266,7 @@ void OsuOptionsMenu::onASIOBufferChange(CBaseUISlider *slider) {
 
     auto bufsize = asio_buffer_size->getInt();
     bufsize = ASIO_clamp(info, bufsize);
+    double latency = 1000.0 * (double)bufsize / std::max(BASS_ASIO_GetRate(), 44100.0);
 
     slider->setBounds(info.bufmin, info.bufmax);
     slider->setKeyDelta(info.bufgran == -1 ? info.bufmin : info.bufgran);
@@ -3288,7 +3276,7 @@ void OsuOptionsMenu::onASIOBufferChange(CBaseUISlider *slider) {
             if(m_elements[i].elements[e] == slider) {
                 if(m_elements[i].elements.size() == 3) {
                     CBaseUILabel *labelPointer = dynamic_cast<CBaseUILabel *>(m_elements[i].elements[2]);
-                    UString text = UString::format("%i", bufsize);
+                    UString text = UString::format("%.1f ms", latency);
                     labelPointer->setText(text);
                 }
 
@@ -3848,7 +3836,6 @@ void OsuOptionsMenu::save() {
     removeConCommands.push_back(convar->getConVarByName("monitor"));
     removeConCommands.push_back(convar->getConVarByName("windowed"));
     removeConCommands.push_back(m_osu_skin_ref);
-    removeConCommands.push_back(convar->getConVarByName("snd_output_device"));
 
     if(m_fullscreenCheckbox != NULL) {
         if(m_fullscreenCheckbox->isChecked()) {
@@ -3947,8 +3934,8 @@ void OsuOptionsMenu::save() {
 
     // hardcoded (!)
     out << "monitor " << env->getMonitor() << "\n";
-    if(engine->getSound()->getOutputDevice() != UString("Default"))
-        out << "snd_output_device " << engine->getSound()->getOutputDevice().toUtf8() << "\n";
+    if(engine->getSound()->getOutputDeviceName() != UString("Default"))
+        out << "snd_output_device " << engine->getSound()->getOutputDeviceName().toUtf8() << "\n";
     if(m_fullscreenCheckbox != NULL && !m_fullscreenCheckbox->isChecked())
         out << "windowed " << engine->getScreenWidth() << "x" << engine->getScreenHeight() << "\n";
 

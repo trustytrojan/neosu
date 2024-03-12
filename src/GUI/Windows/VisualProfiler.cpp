@@ -134,7 +134,7 @@ void VisualProfiler::draw(Graphics *g) {
                                 textFont, m_textLines);
                     addTextLine(UString::format("Env Mouse Pos: %i x %i", (int)envMousePos.x, (int)envMousePos.y),
                                 textFont, m_textLines);
-                    addTextLine(UString::format("Sound Device: %s", engine->getSound()->getOutputDevice().toUtf8()),
+                    addTextLine(UString::format("Sound Device: %s", engine->getSound()->getOutputDeviceName().toUtf8()),
                                 textFont, m_textLines);
                     addTextLine(UString::format("Sound Volume: %f", engine->getSound()->getVolume()), textFont,
                                 m_textLines);

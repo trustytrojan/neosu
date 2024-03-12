@@ -11,9 +11,6 @@
 #include "cbase.h"
 #include "Sound.h"
 
-#define NOBASSOVERLOADS
-#include <bassasio.h>
-
 enum class OutputDriver {
     NONE,
     BASS,
@@ -49,13 +46,15 @@ class SoundEngine {
 
     void setOnOutputDeviceChange(std::function<void()> callback);
 
-    void setOutputDevice(UString outputDeviceName);
+    bool setOutputDevice(OUTPUT_DEVICE device);
     void setVolume(float volume);
     void set3dPosition(Vector3 headPos, Vector3 viewDir, Vector3 viewUp);
 
-    std::vector<UString> getOutputDevices();
+    OUTPUT_DEVICE getDefaultDevice();
+    OUTPUT_DEVICE getWantedDevice();
+    std::vector<OUTPUT_DEVICE> getOutputDevices();
 
-    inline const UString &getOutputDevice() const { return m_currentOutputDevice.name; }
+    inline const UString &getOutputDeviceName() const { return m_currentOutputDevice.name; }
     inline float getVolume() const { return m_fVolume; }
 
     void updateOutputDevices(bool printInfo);

@@ -1,15 +1,11 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		sound wrapper, either streamed or preloaded
-//
-// $NoKeywords: $snd
-//===============================================================================//
-
-#ifndef SOUND_H
-#define SOUND_H
+#pragma once
 
 #define NOBASSOVERLOADS
 #include <bass.h>
+#include <bass_fx.h>
+#include <bassasio.h>
+#include <bassmix.h>
+#include <basswasapi.h>
 
 #include "Resource.h"
 
@@ -79,5 +75,3 @@ class Sound : public Resource {
     float m_fVolume;
     double m_fLastPlayTime;
 };
-
-#endif

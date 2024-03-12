@@ -11,12 +11,6 @@
 
 #include "SoundEngine.h"
 
-#define NOBASSOVERLOADS
-#include <bass.h>
-#include <bassasio.h>
-#include <bassmix.h>
-#include <basswasapi.h>
-
 #include "Bancho.h"
 #include "CBaseUILabel.h"
 #include "CBaseUISlider.h"
@@ -36,6 +30,13 @@
 #ifndef BASS_CONFIG_MP3_OLDGAPS
 #define BASS_CONFIG_MP3_OLDGAPS 68
 #endif
+
+void _volume(UString oldValue, UString newValue) {
+    (void)oldValue;
+    engine->getSound()->setVolume(newValue.toFloat());
+}
+
+ConVar _volume_("volume", 1.0f, FCVAR_NONE, _volume);
 
 ConVar snd_output_device("snd_output_device", "Default", FCVAR_NONE);
 ConVar snd_restart("snd_restart");
@@ -120,6 +121,32 @@ SoundEngine::SoundEngine() {
         return;
     }
 
+    auto mixer_version = BASS_Mixer_GetVersion();
+    debugLog("SoundEngine: BASSMIX version = 0x%08x\n", mixer_version);
+    if(HIWORD(mixer_version) != BASSVERSION) {
+        engine->showMessageErrorFatal("Fatal Sound Error", "An incorrect version of the BASSMIX library file was loaded!");
+        engine->shutdown();
+        return;
+    }
+
+#ifdef _WIN32
+    auto asio_version = BASS_ASIO_GetVersion();
+    debugLog("SoundEngine: BASSASIO version = 0x%08x\n", asio_version);
+    if(HIWORD(asio_version) != BASSASIOVERSION) {
+        engine->showMessageErrorFatal("Fatal Sound Error", "An incorrect version of the BASSASIO library file was loaded!");
+        engine->shutdown();
+        return;
+    }
+
+    auto wasapi_version = BASS_WASAPI_GetVersion();
+    debugLog("SoundEngine: BASSWASAPI version = 0x%08x\n", wasapi_version);
+    if(HIWORD(wasapi_version) != BASSVERSION) {
+        engine->showMessageErrorFatal("Fatal Sound Error", "An incorrect version of the BASSWASAPI library file was loaded!");
+        engine->shutdown();
+        return;
+    }
+#endif
+
     BASS_SetConfig(BASS_CONFIG_BUFFER, 100);
     BASS_SetConfig(BASS_CONFIG_NET_BUFFER, 500);
 
@@ -132,34 +159,52 @@ SoundEngine::SoundEngine() {
     // if set to 1, increases sample playback latency by 10 ms
     BASS_SetConfig(BASS_CONFIG_VISTA_TRUEPOS, 0);
 
-    // add default output device
-    OUTPUT_DEVICE defaultOutputDevice;
-    defaultOutputDevice.id = -1;
-    defaultOutputDevice.name = "Default";
-    defaultOutputDevice.enabled = true;
-    defaultOutputDevice.isDefault = false;  // custom -1 can never have default
-    defaultOutputDevice.driver = OutputDriver::BASS;
-
-    snd_output_device.setValue(defaultOutputDevice.name);
-    m_outputDevices.push_back(defaultOutputDevice);
-
-    // add all other output devices
+    // Populate devices list
     updateOutputDevices(true);
 
-    if(!initializeOutputDevice(defaultOutputDevice)) {
-        m_currentOutputDevice = {
-            .id = 0,
-            .enabled = false,
-            .isDefault = false,
-            .name = "No sound",
-            .driver = OutputDriver::NONE,
-        };
-    }
+    // Initialize device
+    m_currentOutputDevice = {
+        .id = 0,
+        .enabled = true,
+        .isDefault = true,
+        .name = "No sound",
+        .driver = OutputDriver::NONE,
+    };
+    initializeOutputDevice(getWantedDevice());
+    snd_output_device.setValue(m_currentOutputDevice.name);
 
     // convar callbacks
     snd_freq.setCallback(fastdelegate::MakeDelegate(this, &SoundEngine::onFreqChanged));
     snd_restart.setCallback(fastdelegate::MakeDelegate(this, &SoundEngine::restart));
-    snd_output_device.setCallback(fastdelegate::MakeDelegate(this, &SoundEngine::setOutputDevice));
+}
+
+OUTPUT_DEVICE SoundEngine::getWantedDevice() {
+    auto wanted_name = snd_output_device.getString();
+    for(auto device : m_outputDevices) {
+        if(device.enabled && device.name == wanted_name) {
+            return device;
+        }
+    }
+
+    debugLog("Could not find sound device '%s', initializing default one instead.\n", wanted_name.toUtf8());
+    return getDefaultDevice();
+}
+
+OUTPUT_DEVICE SoundEngine::getDefaultDevice() {
+    for(auto device : m_outputDevices) {
+        if(device.enabled && device.isDefault) {
+            return device;
+        }
+    }
+
+    debugLog("Could not find a working sound device!\n");
+    return {
+        .id = 0,
+        .enabled = true,
+        .isDefault = true,
+        .name = "No sound",
+        .driver = OutputDriver::NONE,
+    };
 }
 
 void SoundEngine::updateOutputDevices(bool printInfo) {
@@ -197,9 +242,7 @@ void SoundEngine::updateOutputDevices(bool printInfo) {
         }
 
         soundDevice.driver = OutputDriver::BASS;
-        if(env->getOS() == Environment::OS::OS_WINDOWS
-            && soundDevice.name != UString("No sound")
-            && soundDevice.name != UString("Default")) {
+        if(env->getOS() == Environment::OS::OS_WINDOWS && soundDevice.name != UString("No sound")) {
             soundDevice.name.append(" [DirectSound]");
         }
 
@@ -307,6 +350,19 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
         BASS_Free();
     }
 
+    if(device.driver == OutputDriver::NONE) {
+        m_bReady = true;
+        m_currentOutputDevice = device;
+        snd_output_device.setValue(m_currentOutputDevice.name);
+        debugLog("SoundEngine: Output Device = \"%s\"\n", m_currentOutputDevice.name.toUtf8());
+
+        if(bancho.osu && bancho.osu->m_optionsMenu) {
+            bancho.osu->m_optionsMenu->updateLayout();
+        }
+
+        return true;
+    }
+
     if(device.driver == OutputDriver::BASS) {
         // NOTE: only used by osu atm (new osu uses 5 instead of 10, but not tested enough for offset problems)
         BASS_SetConfig(BASS_CONFIG_UPDATEPERIOD, 10);
@@ -330,17 +386,15 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
             BASS_SetConfig(BASS_CONFIG_DEV_PERIOD, snd_dev_period.getInt());
     }
 
-    // dynamic runtime flags
+    // ASIO and WASAPI: Initialize BASS on "No sound" device
+    int bass_device_id = device.id;
     unsigned int runtimeFlags = BASS_DEVICE_STEREO | BASS_DEVICE_FREQ;
     if(device.driver == OutputDriver::BASS) {
         runtimeFlags |= BASS_DEVICE_DSOUND;
     } else if(device.driver == OutputDriver::BASS_ASIO || device.driver == OutputDriver::BASS_WASAPI) {
         runtimeFlags |= BASS_DEVICE_NOSPEAKER;
+        bass_device_id = 0;
     }
-
-    // ASIO and WASAPI: Initialize BASS on "No sound" device
-    int bass_device_id = device.id;
-    if(device.driver == OutputDriver::BASS_ASIO || device.driver == OutputDriver::BASS_WASAPI) bass_device_id = 0;
 
     const int freq = snd_freq.getInt();
     HWND hwnd = NULL;
@@ -409,7 +463,7 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
 
         double latency = 1000.0 * (double)BASS_ASIO_GetLatency(false) / sample_rate;
         osu_universal_offset_hardcoded.setValue(-(latency + 25.0f));
-        debugLog("ASIO: wanted %f, got %d (min %d, max %d) -> %f ms latency\n", asio_buffer_size.getFloat(), bufsize, info.bufmin, info.bufmax, latency);
+        debugLog("ASIO: wanted %f ms, got %f ms latency\n", asio_buffer_size.getFloat() / sample_rate, latency);
 #endif
     }
 
@@ -466,6 +520,7 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
 
     m_bReady = true;
     m_currentOutputDevice = device;
+    snd_output_device.setValue(m_currentOutputDevice.name);
     debugLog("SoundEngine: Output Device = \"%s\"\n", m_currentOutputDevice.name.toUtf8());
 
     if(bancho.osu && bancho.osu->m_optionsMenu) {
@@ -492,27 +547,7 @@ SoundEngine::~SoundEngine() {
 }
 
 void SoundEngine::restart() {
-    unsigned long prevMusicPositionMS = 0;
-    if(bancho.osu != nullptr) {
-        if(!bancho.osu->isInPlayMode() && bancho.osu->getSelectedBeatmap() != NULL && bancho.osu->getSelectedBeatmap()->getMusic() != NULL)
-            prevMusicPositionMS = bancho.osu->getSelectedBeatmap()->getMusic()->getPositionMS();
-    }
-
-    initializeOutputDevice(m_currentOutputDevice);
-
-    if(bancho.osu != nullptr) {
-        bancho.osu->m_optionsMenu->m_outputDeviceLabel->setText(getOutputDevice());
-        bancho.osu->getSkin()->reloadSounds();
-        bancho.osu->m_optionsMenu->onOutputDeviceResetUpdate();
-
-        // start playing music again after audio device changed
-        if(!bancho.osu->isInPlayMode() && bancho.osu->getSelectedBeatmap() != NULL &&
-           bancho.osu->getSelectedBeatmap()->getMusic() != NULL) {
-            bancho.osu->getSelectedBeatmap()->unloadMusic();
-            bancho.osu->getSelectedBeatmap()->select();  // (triggers preview music play)
-            bancho.osu->getSelectedBeatmap()->getMusic()->setPositionMS(prevMusicPositionMS);
-        }
-    }
+    setOutputDevice(m_currentOutputDevice);
 }
 
 void SoundEngine::update() {}
@@ -648,22 +683,36 @@ void SoundEngine::stop(Sound *snd) {
 
 void SoundEngine::setOnOutputDeviceChange(std::function<void()> callback) { m_outputDeviceChangeCallback = callback; }
 
-void SoundEngine::setOutputDevice(UString outputDeviceName) {
-    for(auto device : m_outputDevices) {
-        if(device.name != outputDeviceName) continue;
-        if(device.name == m_currentOutputDevice.name) {
-            debugLog("SoundEngine::setOutputDevice() \"%s\" already is the current device.\n",
-                     outputDeviceName.toUtf8());
-            return;
-        }
+bool SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
+    bool success = true;
 
-        if(!initializeOutputDevice(device)) {
-            restart();
-        }
-        return;
+    unsigned long prevMusicPositionMS = 0;
+    if(bancho.osu != nullptr) {
+        if(!bancho.osu->isInPlayMode() && bancho.osu->getSelectedBeatmap() != NULL && bancho.osu->getSelectedBeatmap()->getMusic() != NULL)
+            prevMusicPositionMS = bancho.osu->getSelectedBeatmap()->getMusic()->getPositionMS();
     }
 
-    debugLog("SoundEngine::setOutputDevice() couldn't find output device \"%s\"!\n", outputDeviceName.toUtf8());
+    auto previous = m_currentOutputDevice;
+    if(!initializeOutputDevice(device)) {
+        success = false;
+        initializeOutputDevice(previous);
+    }
+
+    if(bancho.osu != nullptr) {
+        bancho.osu->m_optionsMenu->m_outputDeviceLabel->setText(getOutputDeviceName());
+        bancho.osu->getSkin()->reloadSounds();
+        bancho.osu->m_optionsMenu->onOutputDeviceResetUpdate();
+
+        // start playing music again after audio device changed
+        if(!bancho.osu->isInPlayMode() && bancho.osu->getSelectedBeatmap() != NULL &&
+           bancho.osu->getSelectedBeatmap()->getMusic() != NULL) {
+            bancho.osu->getSelectedBeatmap()->unloadMusic();
+            bancho.osu->getSelectedBeatmap()->select();  // (triggers preview music play)
+            bancho.osu->getSelectedBeatmap()->getMusic()->setPositionMS(prevMusicPositionMS);
+        }
+    }
+
+    return success;
 }
 
 void SoundEngine::setVolume(float volume) {
@@ -706,25 +755,14 @@ void SoundEngine::onFreqChanged(UString oldValue, UString newValue) {
     restart();
 }
 
-std::vector<UString> SoundEngine::getOutputDevices() {
-    std::vector<UString> outputDevices;
+std::vector<OUTPUT_DEVICE> SoundEngine::getOutputDevices() {
+    std::vector<OUTPUT_DEVICE> outputDevices;
 
     for(size_t i = 0; i < m_outputDevices.size(); i++) {
         if(m_outputDevices[i].enabled) {
-            outputDevices.push_back(m_outputDevices[i].name);
+            outputDevices.push_back(m_outputDevices[i]);
         }
     }
 
     return outputDevices;
 }
-
-//*********************//
-//	Sound ConCommands  //
-//*********************//
-
-void _volume(UString oldValue, UString newValue) {
-    (void)oldValue;
-    engine->getSound()->setVolume(newValue.toFloat());
-}
-
-ConVar _volume_("volume", 1.0f, FCVAR_NONE, _volume);
