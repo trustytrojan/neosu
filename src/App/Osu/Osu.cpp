@@ -216,7 +216,6 @@ Osu::Osu(int instanceID) {
     m_experimentalMods.push_back(convar->getConVarByName("osu_mod_approach_different"));
 
     // engine settings/overrides
-    engine->getSound()->setOnOutputDeviceChange([this] { onAudioOutputDeviceChange(); });
     openvr->setDrawCallback(fastdelegate::MakeDelegate(this, &Osu::drawVR));
     if(openvr->isReady())  // automatically enable VR mode if it was compiled with OpenVR support and is available
         osu_vr.setValue(1.0f);
@@ -277,9 +276,6 @@ Osu::Osu(int instanceID) {
 
     // convar callbacks
     ConVars::sv_cheats.setCallback(fastdelegate::MakeDelegate(this, &Osu::onCheatsChange));
-
-    osu_skin.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSkinChange));
-    osu_skin_reload.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSkinReload));
 
     osu_speed_override.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSpeedChange));
 
@@ -378,11 +374,6 @@ Osu::Osu(int instanceID) {
 
     // debug
     m_windowManager = new CWindowManager();
-    /*
-    DebugMonitor *dm = new DebugMonitor();
-    m_windowManager->addWindow(dm);
-    dm->open();
-    */
 
     // renderer
     g_vInternalResolution = engine->getScreenSize();
@@ -404,6 +395,24 @@ Osu::Osu(int instanceID) {
         Console::execConfigFile(isInVRMode() ? "osuvr" : "osu");
         Console::execConfigFile("override");  // used for quickfixing live builds without redeploying/recompiling
     }
+
+    // Initialize sound here so we can load the preferred device from config
+    // Avoids initializing the sound device twice, which can take a while depending on the driver
+    auto sound_engine = engine->getSound();
+    sound_engine->updateOutputDevices(true);
+    sound_engine->initializeOutputDevice(sound_engine->getWantedDevice());
+    convar->getConVarByName("snd_output_device")->setValue(sound_engine->getOutputDeviceName());
+    convar->getConVarByName("snd_freq")->setCallback(fastdelegate::MakeDelegate(sound_engine, &SoundEngine::onFreqChanged));
+    convar->getConVarByName("snd_restart")->setCallback(fastdelegate::MakeDelegate(sound_engine, &SoundEngine::restart));
+    convar->getConVarByName("win_snd_wasapi_buffer_size")->setCallback(_RESTART_SOUND_ENGINE_ON_CHANGE);
+    convar->getConVarByName("win_snd_wasapi_period_size")->setCallback(_RESTART_SOUND_ENGINE_ON_CHANGE);
+    convar->getConVarByName("win_snd_wasapi_exclusive")->setCallback(_RESTART_SOUND_ENGINE_ON_CHANGE);
+    convar->getConVarByName("asio_buffer_size")->setCallback(_RESTART_SOUND_ENGINE_ON_CHANGE);
+
+    // Initialize skin after sound engine has started, or else sounds won't load properly
+    osu_skin.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSkinChange));
+    osu_skin_reload.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSkinReload));
+    onSkinChange("", osu_skin.getString());
 
     // update mod settings
     updateMods();
@@ -1648,15 +1657,6 @@ void Osu::toggleVRTutorial() { m_bToggleVRTutorialScheduled = true; }
 void Osu::toggleChangelog() { m_bToggleChangelogScheduled = true; }
 
 void Osu::toggleEditor() { m_bToggleEditorScheduled = true; }
-
-void Osu::onAudioOutputDeviceChange() {
-    if(getSelectedBeatmap() != NULL && getSelectedBeatmap()->getMusic() != NULL) {
-        getSelectedBeatmap()->getMusic()->reload();
-        getSelectedBeatmap()->select();
-    }
-
-    reloadSkin();
-}
 
 void Osu::saveScreenshot() {
     engine->getSound()->play(m_skin->getShutter());

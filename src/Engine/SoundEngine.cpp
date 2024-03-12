@@ -56,18 +56,14 @@ ConVar snd_change_check_interval("snd_change_check_interval", 0.0f, FCVAR_NONE,
 
 ConVar win_snd_wasapi_buffer_size(
     "win_snd_wasapi_buffer_size", 0.011f, FCVAR_NONE,
-    "buffer size/length in seconds (e.g. 0.011 = 11 ms), directly responsible for audio delay and crackling",
-    _RESTART_SOUND_ENGINE_ON_CHANGE);
+    "buffer size/length in seconds (e.g. 0.011 = 11 ms), directly responsible for audio delay and crackling");
 ConVar win_snd_wasapi_period_size(
     "win_snd_wasapi_period_size", 0.0f, FCVAR_NONE,
-    "interval between OutputWasapiProc calls in seconds (e.g. 0.016 = 16 ms) (0 = use default)",
-    _RESTART_SOUND_ENGINE_ON_CHANGE);
+    "interval between OutputWasapiProc calls in seconds (e.g. 0.016 = 16 ms) (0 = use default)");
 ConVar win_snd_wasapi_exclusive("win_snd_wasapi_exclusive", false, FCVAR_NONE,
-                                "whether to use exclusive device mode to further reduce latency",
-                                _RESTART_SOUND_ENGINE_ON_CHANGE);
+                                "whether to use exclusive device mode to further reduce latency");
 
-ConVar asio_buffer_size("asio_buffer_size", -1, FCVAR_NONE,
-                        "buffer size in samples (usually 44100 samples per second)", _RESTART_SOUND_ENGINE_ON_CHANGE);
+ConVar asio_buffer_size("asio_buffer_size", -1, FCVAR_NONE, "buffer size in samples (usually 44100 samples per second)");
 
 ConVar osu_universal_offset_hardcoded("osu_universal_offset_hardcoded", 0.0f, FCVAR_NONE);
 
@@ -159,10 +155,6 @@ SoundEngine::SoundEngine() {
     // if set to 1, increases sample playback latency by 10 ms
     BASS_SetConfig(BASS_CONFIG_VISTA_TRUEPOS, 0);
 
-    // Populate devices list
-    updateOutputDevices(true);
-
-    // Initialize device
     m_currentOutputDevice = {
         .id = 0,
         .enabled = true,
@@ -170,12 +162,6 @@ SoundEngine::SoundEngine() {
         .name = "No sound",
         .driver = OutputDriver::NONE,
     };
-    initializeOutputDevice(getWantedDevice());
-    snd_output_device.setValue(m_currentOutputDevice.name);
-
-    // convar callbacks
-    snd_freq.setCallback(fastdelegate::MakeDelegate(this, &SoundEngine::onFreqChanged));
-    snd_restart.setCallback(fastdelegate::MakeDelegate(this, &SoundEngine::restart));
 }
 
 OUTPUT_DEVICE SoundEngine::getWantedDevice() {
@@ -461,9 +447,10 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
             return false;
         }
 
-        double latency = 1000.0 * (double)BASS_ASIO_GetLatency(false) / sample_rate;
-        osu_universal_offset_hardcoded.setValue(-(latency + 25.0f));
-        debugLog("ASIO: wanted %f ms, got %f ms latency\n", asio_buffer_size.getFloat() / sample_rate, latency);
+        double wanted_latency = 1000.0 * asio_buffer_size.getFloat() / sample_rate;
+        double actual_latency = 1000.0 * (double)BASS_ASIO_GetLatency(false) / sample_rate;
+        osu_universal_offset_hardcoded.setValue(-(actual_latency + 25.0f));
+        debugLog("ASIO: wanted %f ms, got %f ms latency. Sample rate: %f Hz\n", wanted_latency, actual_latency, sample_rate);
 #endif
     }
 
@@ -680,8 +667,6 @@ void SoundEngine::stop(Sound *snd) {
         snd->reload();
     }
 }
-
-void SoundEngine::setOnOutputDeviceChange(std::function<void()> callback) { m_outputDeviceChangeCallback = callback; }
 
 bool SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
     bool success = true;

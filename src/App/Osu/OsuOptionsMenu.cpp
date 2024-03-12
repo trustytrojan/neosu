@@ -1939,6 +1939,8 @@ bool OsuOptionsMenu::shouldDrawVRDummyHUD() {
 }
 
 void OsuOptionsMenu::updateLayout() {
+    m_updating_layout = true;
+
     // set all elements to the current convar values, and update the reset button states
     for(int i = 0; i < m_elements.size(); i++) {
         switch(m_elements[i].type) {
@@ -2366,6 +2368,8 @@ void OsuOptionsMenu::updateLayout() {
     m_categories->setScrollSizeToContent();
 
     update_pos();
+
+    m_updating_layout = false;
 }
 
 void OsuOptionsMenu::onBack() {
@@ -2729,29 +2733,12 @@ void OsuOptionsMenu::onOutputDeviceSelect2(UString outputDeviceName, int id) {
 }
 
 void OsuOptionsMenu::onOutputDeviceResetClicked() {
-    unsigned long prevMusicPositionMS = 0;
-    if(!m_osu->isInPlayMode() && m_osu->getSelectedBeatmap() != NULL && m_osu->getSelectedBeatmap()->getMusic() != NULL)
-        prevMusicPositionMS = m_osu->getSelectedBeatmap()->getMusic()->getPositionMS();
-
-    engine->getSound()->initializeOutputDevice(engine->getSound()->getDefaultDevice());
-    m_outputDeviceLabel->setText(engine->getSound()->getOutputDeviceName());
-    m_osu->getSkin()->reloadSounds();
-
-    // and update reset button as usual
-    onOutputDeviceResetUpdate();
-
-    // start playing music again after audio device changed
-    if(!m_osu->isInPlayMode() && m_osu->getSelectedBeatmap() != NULL &&
-       m_osu->getSelectedBeatmap()->getMusic() != NULL) {
-        m_osu->getSelectedBeatmap()->unloadMusic();
-        m_osu->getSelectedBeatmap()->select();  // (triggers preview music play)
-        m_osu->getSelectedBeatmap()->getMusic()->setPositionMS(prevMusicPositionMS);
-    }
+    engine->getSound()->setOutputDevice(engine->getSound()->getDefaultDevice());
 }
 
 void OsuOptionsMenu::onOutputDeviceResetUpdate() {
     if(m_outputDeviceResetButton != NULL) {
-        m_outputDeviceResetButton->setEnabled(engine->getSound()->getOutputDeviceName() != UString("Default"));
+        m_outputDeviceResetButton->setEnabled(engine->getSound()->getOutputDeviceName() != engine->getSound()->getDefaultDevice().name);
     }
 }
 
@@ -3255,6 +3242,8 @@ void OsuOptionsMenu::OpenASIOSettings() {
 }
 
 void OsuOptionsMenu::onASIOBufferChange(CBaseUISlider *slider) {
+    if(m_updating_layout) return;
+
 #ifdef _WIN32
     m_bASIOBufferChangeScheduled = true;
 
@@ -3290,6 +3279,8 @@ void OsuOptionsMenu::onASIOBufferChange(CBaseUISlider *slider) {
 }
 
 void OsuOptionsMenu::onWASAPIBufferChange(CBaseUISlider *slider) {
+    if(m_updating_layout) return;
+
     m_bWASAPIBufferChangeScheduled = true;
 
     for(int i = 0; i < m_elements.size(); i++) {
@@ -3311,6 +3302,8 @@ void OsuOptionsMenu::onWASAPIBufferChange(CBaseUISlider *slider) {
 }
 
 void OsuOptionsMenu::onWASAPIPeriodChange(CBaseUISlider *slider) {
+    if(m_updating_layout) return;
+
     m_bWASAPIPeriodChangeScheduled = true;
 
     for(int i = 0; i < m_elements.size(); i++) {

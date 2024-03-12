@@ -203,7 +203,6 @@ class Osu : public App, public MouseListener {
         (void)newValue;
         updateMods();
     }
-    void onAudioOutputDeviceChange();
 
     void rebuildRenderTargets();
     void reloadFonts();

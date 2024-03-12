@@ -320,6 +320,8 @@ class OsuOptionsMenu : public OsuScreenBackable, public OsuNotificationOverlayKe
 
     // drain
     std::vector<UString> m_drainTypes;
+
+    bool m_updating_layout = false;
 };
 
 #endif

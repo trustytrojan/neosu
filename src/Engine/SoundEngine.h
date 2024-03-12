@@ -44,8 +44,6 @@ class SoundEngine {
     bool isWASAPI() { return m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI; }
     bool isMixing() { return m_currentOutputDevice.driver == OutputDriver::BASS_ASIO || m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI; }
 
-    void setOnOutputDeviceChange(std::function<void()> callback);
-
     bool setOutputDevice(OUTPUT_DEVICE device);
     void setVolume(float volume);
     void set3dPosition(Vector3 headPos, Vector3 viewDir, Vector3 viewUp);
@@ -61,11 +59,10 @@ class SoundEngine {
     bool initializeOutputDevice(OUTPUT_DEVICE device);
 
     Sound::SOUNDHANDLE g_bassOutputMixer = 0;
-
-   private:
     void onFreqChanged(UString oldValue, UString newValue);
 
-    std::function<void()> m_outputDeviceChangeCallback = nullptr;
+   private:
+
     std::vector<OUTPUT_DEVICE> m_outputDevices;
 
     OUTPUT_DEVICE m_currentOutputDevice;
