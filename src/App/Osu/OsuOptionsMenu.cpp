@@ -3248,17 +3248,15 @@ void OsuOptionsMenu::onASIOBufferChange(CBaseUISlider *slider) {
     m_bASIOBufferChangeScheduled = true;
 
     auto asio_buffer_size = convar->getConVarByName("asio_buffer_size");
-
     BASS_ASIO_INFO info = {0};
     BASS_ASIO_GetInfo(&info);
     asio_buffer_size->setDefaultFloat(info.bufpref);
-
-    auto bufsize = asio_buffer_size->getInt();
-    bufsize = ASIO_clamp(info, bufsize);
-    double latency = 1000.0 * (double)bufsize / std::max(BASS_ASIO_GetRate(), 44100.0);
-
     slider->setBounds(info.bufmin, info.bufmax);
     slider->setKeyDelta(info.bufgran == -1 ? info.bufmin : info.bufgran);
+
+    auto bufsize = slider->getInt();
+    bufsize = ASIO_clamp(info, bufsize);
+    double latency = 1000.0 * (double)bufsize / std::max(BASS_ASIO_GetRate(), 44100.0);
 
     for(int i = 0; i < m_elements.size(); i++) {
         for(int e = 0; e < m_elements[i].elements.size(); e++) {
