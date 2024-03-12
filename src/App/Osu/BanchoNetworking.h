@@ -5,9 +5,12 @@
 
 #include "BanchoProtocol.h"
 
-#ifndef MCOSU_STREAM
+#ifdef _DEBUG
 #define MCOSU_STREAM "dev"
+#else
+#define MCOSU_STREAM "release"
 #endif
+
 #define MCOSU_UPDATE_URL "https://mcosu.kiwec.net"
 
 // NOTE: Full version can be something like "b20200201.2cuttingedge"

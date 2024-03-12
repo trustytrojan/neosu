@@ -16,7 +16,7 @@ set CXXFLAGS=%CXXFLAGS% -Isrc/App -Isrc/App/Osu -Isrc/Engine -Isrc/GUI -Isrc/GUI
 set LDFLAGS=-logg -lADLMIDI -lmad -lmodplug -lsmpeg -lgme -lvorbis -lopus -lvorbisfile -ldiscord-rpc -lSDL2_mixer_ext.dll -lSDL2 -ld3dcompiler_47 -ld3d11 -ldxgi -lopenvr_api -lcurl -llibxinput9_1_0 -lfreetype -lopengl32 -lOpenCL -lvulkan-1 -lglew32 -lglu32 -lgdi32 -lbass -lbassasio -lbass_fx -lbassmix -lbasswasapi -lcomctl32 -lDwmapi -lComdlg32 -lpsapi -lws2_32 -lwinmm -lpthread -llibjpeg -lwbemuuid -lole32 -loleaut32 -llzma
 
 set CXXFLAGS=%CXXFLAGS% -g3
-rem set CXXFLAGS=%CXXFLAGS% -O3 -DMCOSU_STREAM=\"release\"
+rem set CXXFLAGS=%CXXFLAGS% -O3
 rem set LDFLAGS=%LDFLAGS% -mwindows -s
 
 rem PREPARE BUILD DIR

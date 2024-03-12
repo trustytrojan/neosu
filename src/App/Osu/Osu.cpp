@@ -74,7 +74,12 @@ ConVar osu_release_stream("osu_release_stream", "vr", FCVAR_NONE);
 #else
 ConVar osu_release_stream("osu_release_stream", "desktop", FCVAR_NONE);
 #endif
+
+#ifdef _DEBUG
+ConVar osu_debug("osu_debug", true, FCVAR_NONE);
+#else
 ConVar osu_debug("osu_debug", false, FCVAR_NONE);
+#endif
 
 ConVar osu_vr("osu_vr", false, FCVAR_NONE);
 ConVar osu_vr_tutorial("osu_vr_tutorial", true, FCVAR_NONE);
