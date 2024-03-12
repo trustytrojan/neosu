@@ -111,8 +111,6 @@ void OpenGLImage::init() {
     if(GLerror != 0) {
         m_GLTexture = 0;
         debugLog("OpenGL Image Error: %i on file %s!\n", GLerror, m_sFilePath.c_str());
-        engine->showMessageError("Image Error",
-                                 UString::format("OpenGL Image error %i on file %s", GLerror, m_sFilePath.c_str()));
         return;
     }
 
