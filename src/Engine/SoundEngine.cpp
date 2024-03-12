@@ -593,6 +593,7 @@ bool SoundEngine::play(Sound *snd, float pan, float pitch) {
         }
     }
 
+    snd->m_bPaused = false;
     snd->setLastPlayTime(engine->getTime());
     return true;
 }
@@ -632,40 +633,27 @@ void SoundEngine::pause(Sound *snd) {
     }
     if(!snd->isPlaying()) return;
 
-    if(isMixing()) {
-        auto pan = snd->getPan();
-        auto pos = snd->getPositionMS();
-        auto loop = snd->isLooped();
-        auto speed = snd->getSpeed();
+    auto pan = snd->getPan();
+    auto pos = snd->getPositionMS();
+    auto loop = snd->isLooped();
+    auto speed = snd->getSpeed();
 
-        // Calling BASS_Mixer_ChannelRemove automatically frees the stream due
-        // to BASS_STREAM_AUTOFREE. We need to reinitialize it.
-        snd->reload();
-        snd->setPositionMS(pos);
-        snd->setSpeed(speed);
-        snd->setPan(pan);
-        snd->setLoop(loop);
-    } else {
-        HSTREAM stream = snd->getChannel();
-        if(!BASS_ChannelPause(stream)) {
-            debugLog("SoundEngine::pause() couldn't BASS_ChannelPause(), errorcode %i\n", BASS_ErrorGetCode());
-            return;
-        }
-    }
+    // Calling BASS_Mixer_ChannelRemove automatically frees the stream due
+    // to BASS_STREAM_AUTOFREE. We need to reinitialize it.
+    snd->reload();
 
-    snd->setLastPlayTime(0.0);
+    snd->setPositionMS(pos);
+    snd->setSpeed(speed);
+    snd->setPan(pan);
+    snd->setLoop(loop);
+    snd->m_bPaused = true;
 }
 
 void SoundEngine::stop(Sound *snd) {
     if(!m_bReady || snd == NULL || !snd->isReady()) return;
 
-    if(snd->isStream()) {
-        pause(snd);
-        snd->setPositionMS(0);
-    } else {
-        // This will stop all samples, then re-init to be ready for a play()
-        snd->reload();
-    }
+    // This will stop all samples, then re-init to be ready for a play()
+    snd->reload();
 }
 
 bool SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {

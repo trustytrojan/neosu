@@ -36,14 +36,19 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu) {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
-    latest.changes.push_back("- Added support for ASIO output");
-    latest.changes.push_back("- Disabled ability to fail when using Relax (online)");
-    latest.changes.push_back("- Enabled non-vanilla mods (disables score submission)");
-    latest.changes.push_back("- Fixed speed modifications not getting applied to song previews when switching songs");
-    latest.changes.push_back("- Improved Nightcore/Daycore audio quality");
-    latest.changes.push_back("- Improved behavior of speed modifier mod selection");
-    latest.changes.push_back("- Improved WASAPI output latency");
+    latest.changes.push_back("- Fixed pausing not working correctly");
     changelogs.push_back(latest);
+
+    CHANGELOG v34_05;
+    v34_05.title = "34.05 (2024-03-12)";
+    v34_05.changes.push_back("- Added support for ASIO output");
+    v34_05.changes.push_back("- Disabled ability to fail when using Relax (online)");
+    v34_05.changes.push_back("- Enabled non-vanilla mods (disables score submission)");
+    v34_05.changes.push_back("- Fixed speed modifications not getting applied to song previews when switching songs");
+    v34_05.changes.push_back("- Improved Nightcore/Daycore audio quality");
+    v34_05.changes.push_back("- Improved behavior of speed modifier mod selection");
+    v34_05.changes.push_back("- Improved WASAPI output latency");
+    changelogs.push_back(v34_05);
 
     CHANGELOG v34_04;
     v34_04.title = "34.04 (2024-03-03)";

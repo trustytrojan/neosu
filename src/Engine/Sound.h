@@ -60,10 +60,10 @@ class Sound : public Resource {
     virtual void initAsync();
     virtual void destroy();
 
-
     SOUNDHANDLE m_stream = 0;
     SOUNDHANDLE m_sample = 0;
 
+    bool m_bPaused = false;
     bool m_bStream;
     bool m_bIs3d;
     bool m_bIsLooped;

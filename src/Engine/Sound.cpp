@@ -378,7 +378,7 @@ bool Sound::isPlaying() {
 bool Sound::isFinished() {
     if(!m_bReady) return false;
 
-    return getActiveChannels().empty();
+    return getActiveChannels().empty() && !m_bPaused;
 }
 
 void Sound::rebuild(std::string newFilePath) {
