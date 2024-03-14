@@ -58,8 +58,8 @@
 #include "OsuSkin.h"
 #include "OsuSongBrowser2.h"
 #include "OsuTooltipOverlay.h"
-#include "OsuUIUserContextMenu.h"
 #include "OsuUIModSelectorModButton.h"
+#include "OsuUIUserContextMenu.h"
 #include "OsuUpdateHandler.h"
 #include "OsuUserStatsScreen.h"
 #include "OsuVR.h"
@@ -407,8 +407,10 @@ Osu::Osu(int instanceID) {
     sound_engine->updateOutputDevices(true);
     sound_engine->initializeOutputDevice(sound_engine->getWantedDevice());
     convar->getConVarByName("snd_output_device")->setValue(sound_engine->getOutputDeviceName());
-    convar->getConVarByName("snd_freq")->setCallback(fastdelegate::MakeDelegate(sound_engine, &SoundEngine::onFreqChanged));
-    convar->getConVarByName("snd_restart")->setCallback(fastdelegate::MakeDelegate(sound_engine, &SoundEngine::restart));
+    convar->getConVarByName("snd_freq")
+        ->setCallback(fastdelegate::MakeDelegate(sound_engine, &SoundEngine::onFreqChanged));
+    convar->getConVarByName("snd_restart")
+        ->setCallback(fastdelegate::MakeDelegate(sound_engine, &SoundEngine::restart));
     convar->getConVarByName("win_snd_wasapi_buffer_size")->setCallback(_RESTART_SOUND_ENGINE_ON_CHANGE);
     convar->getConVarByName("win_snd_wasapi_period_size")->setCallback(_RESTART_SOUND_ENGINE_ON_CHANGE);
     convar->getConVarByName("win_snd_wasapi_exclusive")->setCallback(_RESTART_SOUND_ENGINE_ON_CHANGE);
@@ -962,7 +964,7 @@ void Osu::update() {
                             m_bSkipScheduled = true;
 
                             if(bancho.is_playing_a_multi_map()) {
-                                Packet packet = {0};
+                                Packet packet;
                                 packet.id = MATCH_SKIP_REQUEST;
                                 send_packet(packet);
                             }
@@ -1043,7 +1045,7 @@ void Osu::update() {
                 bancho.room.map_md5 = diff2->getMD5Hash();
                 bancho.room.map_id = diff2->getID();
 
-                Packet packet = {0};
+                Packet packet;
                 packet.id = MATCH_CHANGE_SETTINGS;
                 bancho.room.pack(&packet);
                 send_packet(packet);

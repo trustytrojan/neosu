@@ -82,7 +82,7 @@ TIMINGPOINT read_timing_point(Packet *packet) {
 }
 
 Packet load_db(std::string path) {
-    Packet db = {0};
+    Packet db;
 
     FILE *dbfile = fopen(path.c_str(), "rb");
     if(dbfile == NULL) {
@@ -1746,7 +1746,7 @@ void OsuDatabase::saveStars() {
     }
 
     // write
-    Packet cache = {0};
+    Packet cache;
     write_int32(&cache, starsCacheVersion);
     write_string(&cache, "00000000000000000000000000000000");
     write_int64(&cache, numStarsCacheEntries);
@@ -2089,7 +2089,7 @@ void OsuDatabase::saveScores() {
     if(m_scores.size() > 0) {
         debugLog("Osu: Saving scores ...\n");
 
-        Packet db = {0};
+        Packet db;
 
         const double startTime = engine->getTimeReal();
 
@@ -2450,7 +2450,7 @@ void OsuDatabase::saveCollections() {
     if(m_collections.size() > 0) {
         debugLog("Osu: Saving collections ...\n");
 
-        Packet db = {0};
+        Packet db;
         const double startTime = engine->getTimeReal();
 
         // check how much we actually have to save

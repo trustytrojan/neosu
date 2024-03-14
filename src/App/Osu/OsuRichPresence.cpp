@@ -59,7 +59,7 @@ void OsuRichPresence::setBanchoStatus(Osu *osu, const char *info_text, Action ac
     last_status = fancy_text;
     last_action = action;
 
-    Packet packet = {0};
+    Packet packet;
     packet.id = CHANGE_ACTION;
     write_byte(&packet, action);
     write_string(&packet, fancy_text);
@@ -83,7 +83,7 @@ void OsuRichPresence::updateBanchoMods() {
         }
     }
 
-    Packet packet = {0};
+    Packet packet;
     packet.id = CHANGE_ACTION;
     write_byte(&packet, last_action);
     write_string(&packet, last_status.toUtf8());

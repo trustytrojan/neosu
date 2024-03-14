@@ -261,7 +261,7 @@ void OsuRoom::mouse_update(bool *propagate_clicks) {
         // XXX: should only update 500ms after last input
         bancho.room.name = m_room_name_ipt->getText();
 
-        Packet packet = {0};
+        Packet packet;
         packet.id = MATCH_CHANGE_SETTINGS;
         bancho.room.pack(&packet);
         send_packet(packet);
@@ -482,7 +482,7 @@ void OsuRoom::ragequit() {
     m_bVisible = false;
     bancho.match_started = false;
 
-    Packet packet = {0};
+    Packet packet;
     packet.id = EXIT_ROOM;
     send_packet(packet);
 
@@ -578,26 +578,26 @@ void OsuRoom::on_map_change(bool download) {
             m_map_stars->setSizeToContent(0, 0);
             m_ready_btn->is_loading = false;
 
-            Packet packet = {0};
+            Packet packet;
             packet.id = MATCH_HAS_BEATMAP;
             send_packet(packet);
         } else if(download) {
             // Request beatmap info - automatically starts download
             auto path = UString::format("/web/osu-search-set.php?b=%d&u=%s&h=%s", bancho.room.map_id,
                                         bancho.username.toUtf8(), bancho.pw_md5.toUtf8());
-            APIRequest request = {
-                .type = GET_BEATMAPSET_INFO,
-                .path = path,
-                .mime = NULL,
-                .extra_int = (uint32_t)bancho.room.map_id,
-            };
+            APIRequest request;
+            request.type = GET_BEATMAPSET_INFO;
+            request.path = path;
+            request.mime = NULL;
+            request.extra_int = (uint32_t)bancho.room.map_id;
+
             send_api_request(request);
 
             m_map_title->setText("Loading...");
             m_map_title->setSizeToContent(0, 0);
             m_ready_btn->is_loading = true;
 
-            Packet packet = {0};
+            Packet packet;
             packet.id = MATCH_NO_BEATMAP;
             send_packet(packet);
         } else {
@@ -606,7 +606,7 @@ void OsuRoom::on_map_change(bool download) {
             m_ready_btn->is_loading = true;
             bancho.room.map_id = 0;  // prevents trying to load it again
 
-            Packet packet = {0};
+            Packet packet;
             packet.id = MATCH_NO_BEATMAP;
             send_packet(packet);
         }
@@ -770,7 +770,7 @@ void OsuRoom::onClientScoreChange(bool force) {
     bool should_update = difftime(time(NULL), last_packet_tms) > 0.25;
     if(!should_update && !force) return;
 
-    Packet packet = {0};
+    Packet packet;
     packet.id = UPDATE_MATCH_SCORE;
 
     write_int32(&packet, (int32_t)m_osu->getSelectedBeatmap()->getTime());
@@ -818,11 +818,11 @@ void OsuRoom::onReadyButtonClick() {
         }
     }
     if(bancho.room.is_host() && is_ready && nb_ready > 1) {
-        Packet packet = {0};
+        Packet packet;
         packet.id = START_MATCH;
         send_packet(packet);
     } else {
-        Packet packet = {0};
+        Packet packet;
         packet.id = is_ready ? MATCH_NOT_READY : MATCH_READY;
         send_packet(packet);
     }
@@ -839,7 +839,7 @@ void OsuRoom::onSelectMapClicked() {
 
     engine->getSound()->play(m_osu->getSkin()->getMenuHit());
 
-    Packet packet = {0};
+    Packet packet;
     packet.id = MATCH_CHANGE_SETTINGS;
     bancho.room.map_id = -1;
     bancho.room.map_name = "";
@@ -870,7 +870,7 @@ void OsuRoom::onChangeWinConditionClicked() {
 void OsuRoom::onWinConditionSelected(UString win_condition_str, int win_condition) {
     bancho.room.win_condition = win_condition;
 
-    Packet packet = {0};
+    Packet packet;
     packet.id = MATCH_CHANGE_SETTINGS;
     bancho.room.pack(&packet);
     send_packet(packet);
@@ -882,7 +882,7 @@ void OsuRoom::set_new_password(UString new_password) {
     bancho.room.has_password = new_password.length() > 0;
     bancho.room.password = new_password;
 
-    Packet packet = {0};
+    Packet packet;
     packet.id = CHANGE_ROOM_PASSWORD;
     bancho.room.pack(&packet);
     send_packet(packet);
@@ -893,7 +893,7 @@ void OsuRoom::onFreemodCheckboxChanged(CBaseUICheckbox *checkbox) {
 
     bancho.room.freemods = checkbox->isChecked();
 
-    Packet packet = {0};
+    Packet packet;
     packet.id = MATCH_CHANGE_SETTINGS;
     bancho.room.pack(&packet);
     send_packet(packet);

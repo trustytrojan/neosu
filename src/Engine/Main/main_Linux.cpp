@@ -43,7 +43,6 @@ LinuxEnvironment *g_environment = NULL;
 bool g_bRunning = true;
 bool g_bUpdate = true;
 bool g_bDraw = true;
-bool g_bDrawing = false;
 
 bool g_bHasFocus = false;  // for fps_max_background
 
@@ -371,9 +370,7 @@ int main(int argc, char *argv[]) {
 
         // draw
         if(g_bDraw) {
-            g_bDrawing = true;
-            { g_engine->onPaint(); }
-            g_bDrawing = false;
+            g_engine->onPaint();
         }
 
         // delay the next frame

@@ -57,7 +57,7 @@ void* run_mapset_download_thread(void* arg) {
         "https://catboy.best/s/%d",    "https://osu.gatari.pw/d/%d", "https://osu.sayobot.cn/osu.php?s=%d",
     };
 
-    Packet response = {0};
+    Packet response;
     response.memory = new uint8_t[2048];
     bool download_success = false;
     for(int i = 0; i < 5; i++) {
@@ -138,7 +138,7 @@ void* run_mapset_download_thread(void* arg) {
 
     reset:
         delete response.memory;
-        response = {0};
+        response = Packet();
         response.memory = new uint8_t[2048];
         curl_easy_reset(curl);
         pthread_mutex_lock(&downloading_mapsets_mutex);

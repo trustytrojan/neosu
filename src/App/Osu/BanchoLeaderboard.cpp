@@ -124,12 +124,11 @@ void fetch_online_scores(OsuDatabaseBeatmap *beatmap) {
                                 bancho.pw_md5.toUtf8())
                     .toUtf8());
 
-    APIRequest request = {
-        .type = GET_MAP_LEADERBOARD,
-        .path = path,
-        .mime = NULL,
-        .extra = (uint8_t *)strdup(beatmap->getMD5Hash().hash),
-    };
+    APIRequest request;
+    request.type = GET_MAP_LEADERBOARD;
+    request.path = path;
+    request.mime = NULL;
+    request.extra = (uint8_t *)strdup(beatmap->getMD5Hash().hash);
 
     send_api_request(request);
 }

@@ -23,7 +23,6 @@ bool g_bRunning = true;
 
 bool g_bUpdate = true;
 bool g_bDraw = true;
-bool g_bDrawing = false;
 
 bool g_bMinimized = false;  // for fps_max_background
 bool g_bHasFocus = true;    // for fps_max_background // TODO: focus handling!
@@ -81,9 +80,7 @@ void MacOSWrapper::main_objc_after_winproc() {
 
     // draw
     if(g_bDraw) {
-        g_bDrawing = true;
-        { g_engine->onPaint(); }
-        g_bDrawing = false;
+        g_engine->onPaint();
     }
 
     // delay the next frame

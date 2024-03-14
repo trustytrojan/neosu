@@ -69,7 +69,7 @@ void *avatar_downloading_thread(void *arg) {
 
         auto img_url = UString::format("https://a.%s/%d", endpoint.toUtf8(), avatar_id);
         debugLog("Downloading %s\n", img_url.toUtf8());
-        Packet response = {0};
+        Packet response;
         response.memory = new uint8_t[2048];
         curl_easy_setopt(curl, CURLOPT_URL, img_url.toUtf8());
         curl_easy_setopt(curl, CURLOPT_USERAGENT, bancho.user_agent.toUtf8());

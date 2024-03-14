@@ -131,7 +131,6 @@ Engine *g_engine = NULL;
 bool g_bRunning = true;
 bool g_bUpdate = true;
 bool g_bDraw = true;
-bool g_bDrawing = false;
 
 bool g_bMinimized = false;                       // for fps_max_background
 bool g_bHasFocus = false;                        // for fps_max_background
@@ -632,7 +631,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         case WM_SYSCOMMAND:
             switch(wParam) {
                 case SC_MINIMIZE:
-                    g_bDrawing = false;
                     g_bDraw = false;
                     /// g_bUpdate = false;
                     g_bMinimized = true;
@@ -1370,9 +1368,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         {
             const unsigned long interleaved = fps_max_background_interleaved.getInt();
             if(g_bDraw && (!inBackground || interleaved < 2 || tickCounter % interleaved == 0)) {
-                g_bDrawing = true;
-                { g_engine->onPaint(); }
-                g_bDrawing = false;
+                g_engine->onPaint();
             }
         }
 

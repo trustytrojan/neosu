@@ -1772,7 +1772,7 @@ void OsuSongBrowser2::onDifficultySelected(OsuDatabaseBeatmap *diff2, bool play)
             bancho.room.map_md5 = diff2->getMD5Hash();
             bancho.room.map_id = diff2->getID();
 
-            Packet packet = {0};
+            Packet packet;
             packet.id = MATCH_CHANGE_SETTINGS;
             bancho.room.pack(&packet);
             send_packet(packet);

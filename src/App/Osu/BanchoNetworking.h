@@ -26,10 +26,10 @@ enum APIRequestType {
 
 struct APIRequest {
     APIRequestType type;
-    UString path;
-    curl_mime *mime;
-    uint8_t *extra;
-    uint32_t extra_int;  // lazy
+    UString path = "";
+    curl_mime *mime = NULL;
+    uint8_t *extra = nullptr;
+    uint32_t extra_int = 0;  // lazy
 };
 
 void disconnect();

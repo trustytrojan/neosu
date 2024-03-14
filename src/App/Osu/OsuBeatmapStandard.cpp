@@ -887,7 +887,7 @@ void OsuBeatmapStandard::update() {
             if(!bancho.room.player_loaded) {
                 bancho.room.player_loaded = true;
 
-                Packet packet = {0};
+                Packet packet;
                 packet.id = MATCH_LOAD_COMPLETE;
                 send_packet(packet);
             }

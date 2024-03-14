@@ -123,11 +123,11 @@ CBaseUIContainer* OsuLobby::setVisible(bool visible) {
     m_bVisible = visible;
 
     if(visible) {
-        Packet packet = {0};
+        Packet packet;
         packet.id = JOIN_ROOM_LIST;
         send_packet(packet);
 
-        packet = {0};
+        packet;
         packet.id = CHANNEL_JOIN;
         write_string(&packet, "#lobby");
         send_packet(packet);
@@ -139,11 +139,11 @@ CBaseUIContainer* OsuLobby::setVisible(bool visible) {
         //      Would need to edit it a bit to work outside of songBrowser2, + display loading progress.
         //      Ideally, you'd do this in the background and still be able to browse rooms.
     } else {
-        Packet packet = {0};
+        Packet packet;
         packet.id = EXIT_ROOM_LIST;
         send_packet(packet);
 
-        packet = {0};
+        packet;
         packet.id = CHANNEL_PART;
         write_string(&packet, "#lobby");
         send_packet(packet);
@@ -197,7 +197,7 @@ void OsuLobby::addRoom(Room* room) {
 }
 
 void OsuLobby::joinRoom(uint32_t id, UString password) {
-    Packet packet = {0};
+    Packet packet;
     packet.id = JOIN_ROOM;
     write_int32(&packet, id);
     write_string(&packet, password.toUtf8());

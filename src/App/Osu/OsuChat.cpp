@@ -238,7 +238,7 @@ void OsuChat::onKeyDown(KeyboardEvent &key) {
                 return;
             }
 
-            Packet packet = {0};
+            Packet packet;
             packet.id = m_selected_channel->name[0] == '#' ? SEND_PUBLIC_MESSAGE : SEND_PRIVATE_MESSAGE;
             write_string(&packet, (char *)bancho.username.toUtf8());
             write_string(&packet, (char *)m_input_box->getText().toUtf8());
@@ -333,12 +333,12 @@ void OsuChat::mark_as_read(OsuChatChannel *chan) {
         return;
     }
 
-    APIRequest request = {
-        .type = MARK_AS_READ,
-        .path = UString::format("/web/osu-markasread.php?u=%s&h=%s&channel=%s", bancho.username.toUtf8(),
-                                bancho.pw_md5.toUtf8(), channel_urlencoded),
-        .mime = NULL,
-    };
+    APIRequest request;
+    request.type = MARK_AS_READ;
+    request.path = UString::format("/web/osu-markasread.php?u=%s&h=%s&channel=%s", bancho.username.toUtf8(),
+                                   bancho.pw_md5.toUtf8(), channel_urlencoded);
+    request.mime = NULL;
+
     send_api_request(request);
 
     curl_free(channel_urlencoded);
@@ -517,7 +517,7 @@ void OsuChat::join(UString channel_name) {
     // XXX: Open the channel immediately, without letting the user send messages in it.
     //      Would require a way to signal if a channel is joined or not.
     //      Would allow to keep open the tabs of the channels we got kicked out of.
-    Packet packet = {0};
+    Packet packet;
     packet.id = CHANNEL_JOIN;
     write_string(&packet, channel_name.toUtf8());
     send_packet(packet);
@@ -529,7 +529,7 @@ void OsuChat::leave(UString channel_name) {
     if(channel_name == UString("#multiplayer")) send_leave_packet = false;
 
     if(send_leave_packet) {
-        Packet packet = {0};
+        Packet packet;
         packet.id = CHANNEL_PART;
         write_string(&packet, channel_name.toUtf8());
         send_packet(packet);

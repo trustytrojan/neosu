@@ -16,8 +16,8 @@
 #error OpenGL support is currently required for SDL
 #endif
 
-#include "ConsoleBox.h"
 #include "ConVar.h"
+#include "ConsoleBox.h"
 #include "Engine.h"
 #include "HorizonSDLEnvironment.h"
 #include "Mouse.h"
@@ -40,7 +40,6 @@ Engine *g_engine = NULL;
 bool g_bRunning = true;
 bool g_bUpdate = true;
 bool g_bDraw = true;
-bool g_bDrawing = false;
 
 bool g_bMinimized = false;  // for fps_max_background
 bool g_bHasFocus = true;    // for fps_max_background
@@ -654,9 +653,7 @@ int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
 
         // draw
         if(g_bDraw) {
-            g_bDrawing = true;
-            { g_engine->onPaint(); }
-            g_bDrawing = false;
+            g_engine->onPaint();
         }
 
         // delay the next frame

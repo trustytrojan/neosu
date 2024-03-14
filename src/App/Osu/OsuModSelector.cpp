@@ -288,7 +288,6 @@ OsuModSelector::OsuModSelector(Osu *osu) : OsuScreen(osu) {
     m_nonVanillaWarning->setVisible(false);
     addBaseUIElement(m_nonVanillaWarning);
 
-
     // build score multiplier label
     m_scoreMultiplierLabel = new CBaseUILabel();
     m_scoreMultiplierLabel->setDrawFrame(false);
@@ -909,8 +908,7 @@ void OsuModSelector::updateLayout() {
         m_scoreMultiplierLabel->setVisible(true);
         m_scoreMultiplierLabel->setSizeToContent();
         m_scoreMultiplierLabel->setSize(Vector2(m_osu->getScreenWidth(), 30 * uiScale));
-        m_scoreMultiplierLabel->setPos(
-            0, m_nonVanillaWarning->getPos().y + 20 * uiScale);
+        m_scoreMultiplierLabel->setPos(0, m_nonVanillaWarning->getPos().y + 20 * uiScale);
     } else  // compact in-beatmap mode
     {
         // mod grid buttons
@@ -1187,7 +1185,7 @@ void OsuModSelector::resetModsUserInitiated() {
 
             bancho.room.slots[i].mods = bancho.room.mods;
 
-            Packet packet = {0};
+            Packet packet;
             packet.id = MATCH_CHANGE_MODS;
             write_int32(&packet, bancho.room.slots[i].mods);
             send_packet(packet);

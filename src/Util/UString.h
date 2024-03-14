@@ -15,7 +15,6 @@ struct MD5Hash {
     MD5Hash() { hash[0] = 0; }
 
     inline const char *toUtf8() const { return hash; }
-    MD5Hash &operator=(const MD5Hash &other);
     bool operator==(const MD5Hash &other) const;
     bool operator==(const UString &other) const;
 };

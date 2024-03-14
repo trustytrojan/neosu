@@ -17,7 +17,7 @@ UserInfo* get_user_info(uint32_t user_id, bool fetch) {
         // NOTE: This isn't implemented, since the server already sends presence
         //       data when we need it.
 
-        // Packet packet = {0};
+        // Packet packet;
         // packet.id = USER_PRESENCE_REQUEST;
         // ...
     }

@@ -23,8 +23,8 @@
 // Bancho protocol
 pthread_mutex_t outgoing_mutex = PTHREAD_MUTEX_INITIALIZER;
 bool try_logging_in = false;
-Packet login_packet = {0};
-Packet outgoing = {0};
+Packet login_packet;
+Packet outgoing;
 pthread_mutex_t incoming_mutex = PTHREAD_MUTEX_INITIALIZER;
 std::vector<Packet> incoming_queue;
 time_t last_packet_tms = {0};
@@ -45,7 +45,7 @@ void disconnect() {
     // Logout
     // This is a blocking call, but we *do* want this to block when quitting the game.
     if(bancho.is_online()) {
-        Packet packet = {0};
+        Packet packet;
         write_short(&packet, LOGOUT);
         write_byte(&packet, 0);
         write_int32(&packet, 0);
@@ -75,7 +75,7 @@ void disconnect() {
     try_logging_in = false;
     auth_header = "";
     delete[] outgoing.memory;
-    outgoing = {0};
+    outgoing = Packet();
     bancho.user_id = 0;
     bancho.submit_scores = false;
     bancho.osu->m_optionsMenu->logInButton->setText("Log in");
@@ -162,7 +162,7 @@ size_t curl_write(void *contents, size_t size, size_t nmemb, void *userp) {
 }
 
 static void send_api_request(CURL *curl, APIRequest api_out) {
-    Packet response = {0};
+    Packet response;
     response.id = api_out.type;
     response.extra = api_out.extra;
     response.extra_int = api_out.extra_int;
@@ -201,7 +201,7 @@ static void send_api_request(CURL *curl, APIRequest api_out) {
 }
 
 static void send_bancho_packet(CURL *curl, Packet outgoing) {
-    Packet response = {0};
+    Packet response;
     response.memory = (uint8_t *)malloc(2048);
 
     struct curl_slist *chunk = NULL;
@@ -316,7 +316,7 @@ static void *do_networking(void *data) {
         pthread_mutex_lock(&outgoing_mutex);
         if(try_logging_in) {
             Packet login = login_packet;
-            login_packet = {0};
+            login_packet;
             try_logging_in = false;
             pthread_mutex_unlock(&outgoing_mutex);
             send_bancho_packet(curl, login);
@@ -335,7 +335,7 @@ static void *do_networking(void *data) {
 
         if(outgoing.pos > 0) {
             Packet out = outgoing;
-            outgoing = {0};
+            outgoing = Packet();
             pthread_mutex_unlock(&outgoing_mutex);
 
             // DEBUG: If we're not sending the right amount of bytes, bancho.py just

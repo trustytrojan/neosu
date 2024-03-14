@@ -474,7 +474,7 @@ void handle_packet(Packet *packet) {
 Packet build_login_packet() {
     // Request format:
     // username\npasswd_md5\nosu_version|utc_offset|display_city|client_hashes|pm_private\n
-    Packet packet = {0};
+    Packet packet;
 
     write_bytes(&packet, (uint8_t *)bancho.username.toUtf8(), bancho.username.lengthUtf8());
     write_byte(&packet, '\n');

@@ -34,10 +34,9 @@ void submit_score(OsuDatabase::Score score) {
     getrandom(iv, sizeof(iv), 0);
 #endif
 
-    APIRequest request = {
-        .type = SUBMIT_SCORE,
-        .path = "/web/osu-submit-modular-selector.php",
-    };
+    APIRequest request;
+    request.type = SUBMIT_SCORE;
+    request.path = "/web/osu-submit-modular-selector.php";
 
     CURL *curl = curl_easy_init();
     if(!curl) {
@@ -166,7 +165,7 @@ void submit_score(OsuDatabase::Score score) {
         size_t s_compressed_data = score.replay_data.lengthUtf8();
         compressed_data = (uint8_t *)malloc(s_compressed_data);
         lzma_stream stream = LZMA_STREAM_INIT;
-        lzma_options_lzma options = {0};
+        lzma_options_lzma options;
         lzma_lzma_preset(&options, LZMA_PRESET_DEFAULT);
         lzma_ret ret = lzma_alone_encoder(&stream, &options);
         if(ret != LZMA_OK) {
