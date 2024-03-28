@@ -693,8 +693,8 @@ void OsuUISongBrowserScoreButton::setScore(const OsuDatabase::Score &score, cons
 
     const float accuracy =
         OsuScore::calculateAccuracy(score.num300s, score.num100s, score.num50s, score.numMisses) * 100.0f;
-    const bool modHidden = score.modsLegacy & OsuReplay::Mods::Hidden;
-    const bool modFlashlight = score.modsLegacy & OsuReplay::Mods::Flashlight;
+    const bool modHidden = score.modsLegacy & ModFlags::Hidden;
+    const bool modFlashlight = score.modsLegacy & ModFlags::Flashlight;
 
     const bool fullCombo = (!score.isImportedLegacyScore && !score.isLegacyScore && score.maxPossibleCombo > 0 &&
                             score.numMisses == 0 && score.numSliderBreaks == 0);  // NOTE: allows dropped sliderends
@@ -874,26 +874,26 @@ OsuSkinImage *OsuUISongBrowserScoreButton::getGradeImage(Osu *osu, OsuScore::GRA
 UString OsuUISongBrowserScoreButton::getModsStringForDisplay(int mods) {
     UString modsString;
 
-    if(mods & OsuReplay::Mods::NoFail) modsString.append("NF,");
-    if(mods & OsuReplay::Mods::Easy) modsString.append("EZ,");
-    if(mods & OsuReplay::Mods::TouchDevice) modsString.append("TD,");
-    if(mods & OsuReplay::Mods::Hidden) modsString.append("HD,");
-    if(mods & OsuReplay::Mods::HardRock) modsString.append("HR,");
-    if(mods & OsuReplay::Mods::SuddenDeath) modsString.append("SD,");
-    if(mods & OsuReplay::Mods::Nightcore)
+    if(mods & ModFlags::NoFail) modsString.append("NF,");
+    if(mods & ModFlags::Easy) modsString.append("EZ,");
+    if(mods & ModFlags::TouchDevice) modsString.append("TD,");
+    if(mods & ModFlags::Hidden) modsString.append("HD,");
+    if(mods & ModFlags::HardRock) modsString.append("HR,");
+    if(mods & ModFlags::SuddenDeath) modsString.append("SD,");
+    if(mods & ModFlags::Nightcore)
         modsString.append("NC,");
-    else if(mods & OsuReplay::Mods::DoubleTime)
+    else if(mods & ModFlags::DoubleTime)
         modsString.append("DT,");
-    if(mods & OsuReplay::Mods::Relax) modsString.append("Relax,");
-    if(mods & OsuReplay::Mods::HalfTime) modsString.append("HT,");
-    if(mods & OsuReplay::Mods::Flashlight) modsString.append("FL,");
-    if(mods & OsuReplay::Mods::Autoplay) modsString.append("AT,");
-    if(mods & OsuReplay::Mods::SpunOut) modsString.append("SO,");
-    if(mods & OsuReplay::Mods::Relax2) modsString.append("AP,");
-    if(mods & OsuReplay::Mods::Perfect) modsString.append("PF,");
-    if(mods & OsuReplay::Mods::ScoreV2) modsString.append("v2,");
-    if(mods & OsuReplay::Mods::Target) modsString.append("Target,");
-    if(mods & OsuReplay::Mods::Nightmare) modsString.append("NM,");
+    if(mods & ModFlags::Relax) modsString.append("Relax,");
+    if(mods & ModFlags::HalfTime) modsString.append("HT,");
+    if(mods & ModFlags::Flashlight) modsString.append("FL,");
+    if(mods & ModFlags::Autoplay) modsString.append("AT,");
+    if(mods & ModFlags::SpunOut) modsString.append("SO,");
+    if(mods & ModFlags::Autopilot) modsString.append("AP,");
+    if(mods & ModFlags::Perfect) modsString.append("PF,");
+    if(mods & ModFlags::ScoreV2) modsString.append("v2,");
+    if(mods & ModFlags::Target) modsString.append("Target,");
+    if(mods & ModFlags::Nightmare) modsString.append("NM,");
 
     if(modsString.length() > 0) modsString = modsString.substr(0, modsString.length() - 1);
 
@@ -905,23 +905,23 @@ UString OsuUISongBrowserScoreButton::getModsStringForConVar(int mods) {
 
     // NOTE: the order here is different on purpose, to avoid name collisions during parsing (see Osu::updateMods())
     // order is the same as in OsuModSelector::updateModConVar()
-    if(mods & OsuReplay::Mods::Easy) modsString.append("ez");
-    if(mods & OsuReplay::Mods::HardRock) modsString.append("hr");
-    if(mods & OsuReplay::Mods::Relax) modsString.append("relax");
-    if(mods & OsuReplay::Mods::NoFail) modsString.append("nf");
-    if(mods & OsuReplay::Mods::SuddenDeath) modsString.append("sd");
-    if(mods & OsuReplay::Mods::Perfect) modsString.append("ss,");
-    if(mods & OsuReplay::Mods::Relax2) modsString.append("autopilot");
-    if(mods & OsuReplay::Mods::HalfTime) modsString.append("ht");
-    if(mods & OsuReplay::Mods::DoubleTime) modsString.append("dt");
-    if(mods & OsuReplay::Mods::Nightcore) modsString.append("nc");
-    if(mods & OsuReplay::Mods::SpunOut) modsString.append("spunout");
-    if(mods & OsuReplay::Mods::Hidden) modsString.append("hd");
-    if(mods & OsuReplay::Mods::Autoplay) modsString.append("auto");
-    if(mods & OsuReplay::Mods::Nightmare) modsString.append("nightmare");
-    if(mods & OsuReplay::Mods::Target) modsString.append("practicetarget");
-    if(mods & OsuReplay::Mods::TouchDevice) modsString.append("nerftd");
-    if(mods & OsuReplay::Mods::ScoreV2) modsString.append("v2");
+    if(mods & ModFlags::Easy) modsString.append("ez");
+    if(mods & ModFlags::HardRock) modsString.append("hr");
+    if(mods & ModFlags::Relax) modsString.append("relax");
+    if(mods & ModFlags::NoFail) modsString.append("nf");
+    if(mods & ModFlags::SuddenDeath) modsString.append("sd");
+    if(mods & ModFlags::Perfect) modsString.append("ss,");
+    if(mods & ModFlags::Autopilot) modsString.append("autopilot");
+    if(mods & ModFlags::HalfTime) modsString.append("ht");
+    if(mods & ModFlags::DoubleTime) modsString.append("dt");
+    if(mods & ModFlags::Nightcore) modsString.append("nc");
+    if(mods & ModFlags::SpunOut) modsString.append("spunout");
+    if(mods & ModFlags::Hidden) modsString.append("hd");
+    if(mods & ModFlags::Autoplay) modsString.append("auto");
+    if(mods & ModFlags::Nightmare) modsString.append("nightmare");
+    if(mods & ModFlags::Target) modsString.append("practicetarget");
+    if(mods & ModFlags::TouchDevice) modsString.append("nerftd");
+    if(mods & ModFlags::ScoreV2) modsString.append("v2");
 
     return modsString;
 }

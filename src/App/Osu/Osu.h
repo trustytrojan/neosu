@@ -163,6 +163,7 @@ class Osu : public App, public MouseListener {
     inline bool getModSpunout() const { return m_bModSpunout; }
     inline bool getModTarget() const { return m_bModTarget; }
     inline bool getModScorev2() const { return m_bModScorev2; }
+    inline bool getModFlashlight() const { return m_bModFlashlight; }
     inline bool getModDT() const { return m_bModDT; }
     inline bool getModNC() const { return m_bModNC; }
     inline bool getModNF() const { return m_bModNF; }
@@ -293,11 +294,14 @@ class Osu : public App, public MouseListener {
 
     // rendering
     RenderTarget *m_backBuffer;
+    RenderTarget *m_flashlightBuffer;
     RenderTarget *m_playfieldBuffer;
     RenderTarget *m_sliderFrameBuffer;
     RenderTarget *m_frameBuffer;
     RenderTarget *m_frameBuffer2;
     Vector2 m_vInternalResolution;
+    Vector2 flashlight_position;
+    bool holding_slider = false;
 
     // mods
     bool m_bModAuto;
@@ -306,6 +310,7 @@ class Osu : public App, public MouseListener {
     bool m_bModSpunout;
     bool m_bModTarget;
     bool m_bModScorev2;
+    bool m_bModFlashlight = false;
     bool m_bModDT;
     bool m_bModNC;
     bool m_bModNF;

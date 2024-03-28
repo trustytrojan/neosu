@@ -8,6 +8,7 @@
 #include "OsuSlider.h"
 
 #include "AnimationHandler.h"
+#include "Bancho.h"
 #include "Camera.h"
 #include "ConVar.h"
 #include "Engine.h"
@@ -293,22 +294,6 @@ void OsuSlider::draw(Graphics *g) {
                (!m_bEndFinished && m_iRepeat % 2 == 0 && ifStrictTrackingModShouldDrawEndCircle))
                 drawStartCircle(g, alpha);
 
-            // debug
-            /*
-            Vector2 debugPos = m_beatmap->osuCoords2Pixels(m_curve->pointAt(0));
-            g->pushTransform();
-            {
-                    g->translate(debugPos.x, debugPos.y);
-                    g->setColor(0xffff0000);
-                    //g->drawString(engine->getResourceManager()->getFont("FONT_DEFAULT"), UString::format("%i, %i",
-            m_cType, m_points.size()));
-                    //g->drawString(engine->getResourceManager()->getFont("FONT_DEFAULT"), UString::format("%i",
-            (int)sliderRepeatStartCircleFinished)); g->drawString(engine->getResourceManager()->getFont("FONT_DEFAULT"),
-            UString::format("%li", m_iTime));
-            }
-            g->popTransform();
-            */
-
             // reverse arrows
             if(m_fReverseArrowAlpha > 0.0f) {
                 // if the combo color is nearly white, blacken the reverse arrow
@@ -467,31 +452,6 @@ void OsuSlider::draw(Graphics *g) {
     }
 
     OsuHitObject::draw(g);
-
-    // debug
-    /*
-    if (m_bVisible)
-    {
-            Vector2 screenPos = m_beatmap->osuCoords2Pixels(getRawPosAt(0));
-
-            g->setColor(0xffffffff);
-            g->pushTransform();
-            g->translate(screenPos.x, screenPos.y + 50);
-            g->drawString(engine->getResourceManager()->getFont("FONT_DEFAULT"), UString::format("%f",
-    m_fSliderSnakePercent)); g->popTransform();
-    }
-    */
-
-    // debug
-    /*
-    if (m_bBlocked)
-    {
-            const Vector2 pos = m_beatmap->osuCoords2Pixels(getRawPosAt(0));
-
-            g->setColor(0xbbff0000);
-            g->fillRect(pos.x - 20, pos.y - 20, 40, 40);
-    }
-    */
 }
 
 void OsuSlider::draw2(Graphics *g) { draw2(g, true, false); }
@@ -1134,7 +1094,10 @@ void OsuSlider::update(long curPos) {
     // handle slider start
     if(!m_bStartFinished) {
         if(m_beatmap->getOsu()->getModAuto()) {
-            if(curPos >= m_iTime) onHit(OsuScore::HIT::HIT_300, 0, false);
+            if(curPos >= m_iTime) {
+                onHit(OsuScore::HIT::HIT_300, 0, false);
+                bancho.osu->holding_slider = true;
+            }
         } else {
             long delta = curPos - m_iTime;
 
@@ -1193,6 +1156,7 @@ void OsuSlider::update(long curPos) {
 
                             m_startResult = result;
                             onHit(m_startResult, delta, false, targetDelta, targetAngle);
+                            bancho.osu->holding_slider = true;
                         }
                     }
                 }
@@ -1204,6 +1168,7 @@ void OsuSlider::update(long curPos) {
                 if(delta > (long)OsuGameRules::getHitWindow50(m_beatmap)) {
                     m_startResult = OsuScore::HIT::HIT_MISS;
                     onHit(m_startResult, delta, false);
+                    bancho.osu->holding_slider = false;
                 }
             }
         }
@@ -1302,6 +1267,7 @@ void OsuSlider::update(long curPos) {
             if(curPos >= m_iTime + m_iObjectDuration) {
                 m_bHeldTillEnd = true;
                 onHit(OsuScore::HIT::HIT_300, 0, true);
+                bancho.osu->holding_slider = false;
             }
         } else {
             if(curPos >= m_iTime + m_iObjectDuration) {
@@ -1368,6 +1334,7 @@ void OsuSlider::update(long curPos) {
                     isEndResultComingFromStrictTrackingMod = true;
 
                 onHit(m_endResult, 0, true, 0.0f, 0.0f, isEndResultComingFromStrictTrackingMod);
+                bancho.osu->holding_slider = false;
             }
         }
 
@@ -1453,6 +1420,7 @@ void OsuSlider::miss(long curPos) {
     if(!m_bStartFinished) {
         m_startResult = OsuScore::HIT::HIT_MISS;
         onHit(m_startResult, delta, false);
+        bancho.osu->holding_slider = false;
     }
 
     // endcircle, repeats, ticks
@@ -1480,6 +1448,7 @@ void OsuSlider::miss(long curPos) {
 
             m_endResult = OsuScore::HIT::HIT_MISS;
             onHit(m_endResult, 0, true);
+            bancho.osu->holding_slider = false;
         }
     }
 }
@@ -1544,6 +1513,7 @@ void OsuSlider::onClickEvent(std::vector<OsuBeatmap::CLICK> &clicks) {
                 clicks.erase(clicks.begin());
                 m_startResult = result;
                 onHit(m_startResult, delta, false, targetDelta, targetAngle);
+                bancho.osu->holding_slider = true;
             }
         }
     }

@@ -316,7 +316,7 @@ static void *do_networking(void *data) {
         pthread_mutex_lock(&outgoing_mutex);
         if(try_logging_in) {
             Packet login = login_packet;
-            login_packet;
+            login_packet = Packet();
             try_logging_in = false;
             pthread_mutex_unlock(&outgoing_mutex);
             send_bancho_packet(curl, login);

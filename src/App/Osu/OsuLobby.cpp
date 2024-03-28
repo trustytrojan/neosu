@@ -127,7 +127,7 @@ CBaseUIContainer* OsuLobby::setVisible(bool visible) {
         packet.id = JOIN_ROOM_LIST;
         send_packet(packet);
 
-        packet;
+        packet = Packet();
         packet.id = CHANNEL_JOIN;
         write_string(&packet, "#lobby");
         send_packet(packet);
@@ -143,7 +143,7 @@ CBaseUIContainer* OsuLobby::setVisible(bool visible) {
         packet.id = EXIT_ROOM_LIST;
         send_packet(packet);
 
-        packet;
+        packet = Packet();
         packet.id = CHANNEL_PART;
         write_string(&packet, "#lobby");
         send_packet(packet);

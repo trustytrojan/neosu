@@ -29,6 +29,7 @@
 #include "OsuIcons.h"
 #include "OsuKeyBindings.h"
 #include "OsuOptionsMenu.h"
+#include "OsuReplay.h"
 #include "OsuRichPresence.h"
 #include "OsuRoom.h"
 #include "OsuSkin.h"
@@ -347,7 +348,6 @@ void OsuModSelector::updateButtons(bool initial) {
     m_modButtonFlashlight =
         setModButtonOnGrid(4, 1, 0, false, "fl", "Restricted view area.",
                            [this]() -> OsuSkinImage * { return m_osu->getSkin()->getSelectionModFlashlight(); });
-    getModButtonOnGrid(4, 1)->setAvailable(false);
     m_modButtonTD = setModButtonOnGrid(5, 1, 0, initial && (m_osu->getModTD() || m_osu_mod_touchdevice_ref->getBool()),
                                        "nerftd", "Simulate pp nerf for touch devices.\nOnly affects pp calculation.",
                                        [this]() -> OsuSkinImage * { return m_osu->getSkin()->getSelectionModTD(); });
@@ -1228,59 +1228,56 @@ void OsuModSelector::resetMods() {
 uint32_t OsuModSelector::getModFlags() {
     uint32_t flags = 0;
 
-    if(m_modButtonDoubletime->isOn()) flags |= (1 << 6);           // DT
-    if(m_modButtonDoubletime->getState() == 1) flags |= (1 << 9);  // NC
+    if(m_modButtonDoubletime->isOn()) flags |= ModFlags::DoubleTime;
+    if(m_modButtonDoubletime->getState() == 1) flags |= ModFlags::Nightcore;
 
-    if(m_modButtonSuddendeath->isOn() && m_modButtonSuddendeath->getState() == 0) flags |= (1 << 5);   // SD
-    if(m_modButtonSuddendeath->isOn() && m_modButtonSuddendeath->getState() == 1) flags |= (1 << 14);  // PF
+    if(m_modButtonSuddendeath->isOn() && m_modButtonSuddendeath->getState() == 0) flags |= ModFlags::SuddenDeath;
+    if(m_modButtonSuddendeath->isOn() && m_modButtonSuddendeath->getState() == 1) flags |= ModFlags::Perfect;
 
-    if(m_modButtonNofail->isOn()) flags |= (1 << 0);
-    if(m_modButtonEasy->isOn()) flags |= (1 << 1);
-    if(m_modButtonTD->isOn()) flags |= (1 << 2);
-    if(m_modButtonHidden->isOn()) flags |= (1 << 3);
-    if(m_modButtonHardrock->isOn()) flags |= (1 << 4);
-    if(m_modButtonRelax->isOn()) flags |= (1 << 7);
-    if(m_modButtonHalftime->isOn()) flags |= (1 << 8);
-    if(m_modButtonSpunout->isOn()) flags |= (1 << 12);
-    if(m_modButtonAutopilot->isOn()) flags |= (1 << 13);
-    if(getModButtonOnGrid(4, 2)->isOn()) flags |= (1 << 23);  // Target
+    if(m_modButtonNofail->isOn()) flags |= ModFlags::NoFail;
+    if(m_modButtonEasy->isOn()) flags |= ModFlags::Easy;
+    if(m_modButtonTD->isOn()) flags |= ModFlags::TouchDevice;
+    if(m_modButtonHidden->isOn()) flags |= ModFlags::Hidden;
+    if(m_modButtonHardrock->isOn()) flags |= ModFlags::HardRock;
+    if(m_modButtonRelax->isOn()) flags |= ModFlags::Relax;
+    if(m_modButtonHalftime->isOn()) flags |= ModFlags::HalfTime;
+    if(m_modButtonSpunout->isOn()) flags |= ModFlags::SpunOut;
+    if(m_modButtonAutopilot->isOn()) flags |= ModFlags::Autopilot;
+    if(getModButtonOnGrid(4, 2)->isOn()) flags |= ModFlags::Target;
 
     return flags;
 }
 
 void OsuModSelector::enableModsFromFlags(uint32_t flags) {
-    bool dt_enabled = flags & (1 << 6);
-    bool nc_enabled = flags & (1 << 9);
-    if(dt_enabled || nc_enabled) {
+    if(flags & ModFlags::DoubleTime) {
         m_modButtonDoubletime->setOn(true, true);
-        if(nc_enabled) {
+        if(flags & ModFlags::Nightcore) {
             m_modButtonDoubletime->setState(1, true);
         }
     }
 
-    if(flags & (1 << 14)) {  // PF
+    if(flags & ModFlags::Perfect) {
         m_modButtonSuddendeath->setOn(true, true);
         m_modButtonSuddendeath->setState(1, true);
-    } else if(flags & (1 << 5)) {  // SD
+    } else if(flags & ModFlags::SuddenDeath) {
         m_modButtonSuddendeath->setOn(true, true);
         m_modButtonSuddendeath->setState(0, true);
     }
 
-    bool ht_enabled = flags & (1 << 8);
-    if(ht_enabled) {
+    if(flags & ModFlags::HalfTime) {
         m_modButtonHalftime->setOn(true, true);
         m_modButtonHalftime->setState(bancho.prefer_daycore ? 1 : 0, true);
     }
 
-    m_modButtonNofail->setOn(flags & (1 << 0), true);
-    m_modButtonEasy->setOn(flags & (1 << 1), true);
-    m_modButtonTD->setOn(flags & (1 << 2), true);
-    m_modButtonHidden->setOn(flags & (1 << 3), true);
-    m_modButtonHardrock->setOn(flags & (1 << 4), true);
-    m_modButtonRelax->setOn(flags & (1 << 7), true);
-    m_modButtonSpunout->setOn(flags & (1 << 12), true);
-    m_modButtonAutopilot->setOn(flags & (1 << 13), true);
-    getModButtonOnGrid(4, 2)->setOn(flags & (1 << 23), true);  // Target
+    m_modButtonNofail->setOn(flags & ModFlags::NoFail, true);
+    m_modButtonEasy->setOn(flags & ModFlags::Easy, true);
+    m_modButtonTD->setOn(flags & ModFlags::TouchDevice, true);
+    m_modButtonHidden->setOn(flags & ModFlags::Hidden, true);
+    m_modButtonHardrock->setOn(flags & ModFlags::HardRock, true);
+    m_modButtonRelax->setOn(flags & ModFlags::Relax, true);
+    m_modButtonSpunout->setOn(flags & ModFlags::SpunOut, true);
+    m_modButtonAutopilot->setOn(flags & ModFlags::Autopilot, true);
+    getModButtonOnGrid(4, 2)->setOn(flags & ModFlags::Target, true);
 }
 
 void OsuModSelector::close() {

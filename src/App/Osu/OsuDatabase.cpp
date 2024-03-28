@@ -844,8 +844,7 @@ OsuDatabase::PlayerPPScores OsuDatabase::getPlayerPPScores(UString playerName) {
                 if(!score.isLegacyScore &&
                    (osu_user_include_relax_and_autopilot_for_stats.getBool()
                         ? true
-                        : !((score.modsLegacy & OsuReplay::Mods::Relax) ||
-                            (score.modsLegacy & OsuReplay::Mods::Relax2))) &&
+                        : !((score.modsLegacy & ModFlags::Relax) || (score.modsLegacy & ModFlags::Autopilot))) &&
                    score.playerName == playerName) {
                     foundValidScore = true;
 
@@ -1994,7 +1993,7 @@ void OsuDatabase::loadScores() {
                         else if(scoreVersion >= 20121008)
                             /*onlineScoreID = */ read_int32(&db);
 
-                        if(mods & OsuReplay::Mods::Target) /*double totalAccuracy = */
+                        if(mods & ModFlags::Target) /*double totalAccuracy = */
                             read_float64(&db);
 
                         if(gamemode == 0x0)  // gamemode filter (osu!standard)
@@ -2030,11 +2029,9 @@ void OsuDatabase::loadScores() {
                             sc.starsTomAim = 0.0f;
                             sc.starsTomSpeed = 0.0f;
                             sc.speedMultiplier =
-                                (mods & OsuReplay::Mods::HalfTime
+                                (mods & ModFlags::HalfTime
                                      ? 0.75f
-                                     : (((mods & OsuReplay::Mods::DoubleTime) || (mods & OsuReplay::Mods::Nightcore))
-                                            ? 1.5f
-                                            : 1.0f));
+                                     : (((mods & ModFlags::DoubleTime) || (mods & ModFlags::Nightcore)) ? 1.5f : 1.0f));
                             sc.CS = 0.0f;
                             sc.AR = 0.0f;
                             sc.OD = 0.0f;

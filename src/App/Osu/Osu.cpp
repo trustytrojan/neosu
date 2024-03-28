@@ -52,6 +52,7 @@
 #include "OsuPauseMenu.h"
 #include "OsuPromptScreen.h"
 #include "OsuRankingScreen.h"
+#include "OsuReplay.h"
 #include "OsuRichPresence.h"
 #include "OsuRoom.h"
 #include "OsuScore.h"
@@ -146,6 +147,10 @@ ConVar osu_hide_cursor_during_gameplay("osu_hide_cursor_during_gameplay", false,
 ConVar osu_alt_f4_quits_even_while_playing("osu_alt_f4_quits_even_while_playing", true, FCVAR_NONE);
 ConVar osu_win_disable_windows_key_while_playing("osu_win_disable_windows_key_while_playing", true, FCVAR_NONE);
 
+ConVar avoid_flashes("avoid_flashes", false, FCVAR_NONE, "disable flashing elements (like FL dimming on sliders)");
+ConVar flashlight_radius("flashlight_radius", 100.f, FCVAR_CHEAT);
+ConVar flashlight_follow_delay("flashlight_follow_delay", 0.120f, FCVAR_CHEAT);
+
 ConVar mp_server("mp_server", "ez-pp.farm", FCVAR_NONE);
 ConVar mp_password("mp_password", "", FCVAR_NONE);
 ConVar mp_autologin("mp_autologin", false, FCVAR_NONE);
@@ -155,6 +160,8 @@ ConVar *Osu::debug = &osu_debug;
 ConVar *Osu::ui_scale = &osu_ui_scale;
 Vector2 Osu::g_vInternalResolution;
 Vector2 Osu::osuBaseResolution = Vector2(640.0f, 480.0f);
+
+Shader *flashlight_shader = nullptr;
 
 Osu::Osu(int instanceID) {
     srand(time(NULL));
@@ -347,6 +354,7 @@ Osu::Osu(int instanceID) {
     m_bModSpunout = false;
     m_bModTarget = false;
     m_bModScorev2 = false;
+    m_bModFlashlight = false;
     m_bModDT = false;
     m_bModNC = false;
     m_bModNF = false;
@@ -381,6 +389,7 @@ Osu::Osu(int instanceID) {
     g_vInternalResolution = engine->getScreenSize();
 
     m_backBuffer = engine->getResourceManager()->createRenderTarget(0, 0, getScreenWidth(), getScreenHeight());
+    m_flashlightBuffer = engine->getResourceManager()->createRenderTarget(0, 0, getScreenWidth(), getScreenHeight());
     m_playfieldBuffer = engine->getResourceManager()->createRenderTarget(0, 0, 64, 64);
     m_sliderFrameBuffer = engine->getResourceManager()->createRenderTarget(0, 0, getScreenWidth(), getScreenHeight());
     m_frameBuffer = engine->getResourceManager()->createRenderTarget(0, 0, 64, 64);
@@ -568,6 +577,8 @@ Osu::Osu(int instanceID) {
     // memory/performance optimization; if osu_mod_mafham is not enabled, reduce the two rendertarget sizes to 64x64,
     m_osu_mod_mafham_ref->setCallback(fastdelegate::MakeDelegate(this, &Osu::onModMafhamChange));
     m_osu_mod_fposu_ref->setCallback(fastdelegate::MakeDelegate(this, &Osu::onModFPoSuChange));
+
+    flashlight_shader = engine->getResourceManager()->loadShader("flashlight.vsh", "flashlight.fsh", "flashlight");
 }
 
 Osu::~Osu() {
@@ -613,21 +624,30 @@ void Osu::draw(Graphics *g) {
     // draw everything in the correct order
     if(isInPlayMode())  // if we are playing a beatmap
     {
+        OsuBeatmapStandard *beatmapStd = dynamic_cast<OsuBeatmapStandard *>(getSelectedBeatmap());
+        const bool isAuto = (m_bModAuto || m_bModAutopilot);
         const bool isFPoSu = (m_osu_mod_fposu_ref->getBool());
 
         if(isFPoSu) m_playfieldBuffer->enable();
 
+        // NOTE: I don't think drawing to a buffer is needed... but I don't
+        //       know shit about OpenGL shaders so this is easier.
+        if(m_bModFlashlight && beatmapStd != NULL) {
+            m_flashlightBuffer->enable();
+        }
+
         getSelectedBeatmap()->draw(g);
 
         if(m_bModFlashlight && beatmapStd != NULL) {
-            // Dim screen when holding sliders
+            m_flashlightBuffer->disable();
+
+            // Dim screen when holding a slider
+            float max_opacity = 1.f;
             if(holding_slider && !avoid_flashes.getBool()) {
-                g->setColor(COLOR(204, 0, 0, 0));  // 80% dimmed
-                g->fillRect(0, 0, getScreenWidth(), getScreenHeight());
+                max_opacity = 0.2f;
             }
 
             // Convert screen mouse -> osu mouse pos
-            // TODO @kiwec: test with autoplay mod
             Vector2 cursorPos = isAuto ? beatmapStd->getCursorPos() : engine->getMouse()->getPos();
             Vector2 mouse_position = cursorPos - OsuGameRules::getPlayfieldOffset(this);
             mouse_position /= OsuGameRules::getPlayfieldScaleFactor(this);
@@ -638,14 +658,22 @@ void Osu::draw(Graphics *g) {
             double t = frame_time / follow_delay;
             t = t * (2.f - t);
             flashlight_position += t * (mouse_position - flashlight_position);
-
-            // Draw flashlight
-            float flSize = flashlight_size.getFloat();
             Vector2 flashlightPos = flashlight_position * OsuGameRules::getPlayfieldScaleFactor(this) +
                                     OsuGameRules::getPlayfieldOffset(this);
-            g->setColor(COLOR(50, 255, 0, 0));
-            g->fillRect(flashlightPos.x - flSize / 2, flashlightPos.y - flSize / 2, flSize, flSize);
-            // TODO @kiwec: draw proper flashlight
+
+            float fl_radius = flashlight_radius.getFloat() * OsuGameRules::getPlayfieldScaleFactor(this);
+            if(getScore()->getCombo() >= 200) {
+                fl_radius *= 0.625f;
+            } else if(getScore()->getCombo() >= 100) {
+                fl_radius *= 0.8125f;
+            }
+
+            flashlight_shader->enable();
+            flashlight_shader->setUniform1f("max_opacity", max_opacity);
+            flashlight_shader->setUniform1f("flashlight_radius", fl_radius);
+            flashlight_shader->setUniform2f("flashlight_center", flashlightPos.x, getScreenSize().y - flashlightPos.y);
+            m_flashlightBuffer->draw(g, 0, 0);
+            flashlight_shader->disable();
         }
 
         if(!isFPoSu) m_hud->draw(g);
@@ -660,14 +688,11 @@ void Osu::draw(Graphics *g) {
         }
 
         // special cursor handling (fading cursor + invisible cursor mods + draw order etc.)
-        const bool isAuto = (m_bModAuto || m_bModAutopilot);
         const bool allowDoubleCursor = (env->getOS() == Environment::OS::OS_HORIZON || isFPoSu);
         const bool allowDrawCursor = (!osu_hide_cursor_during_gameplay.getBool() || getSelectedBeatmap()->isPaused());
         float fadingCursorAlpha =
             1.0f - clamp<float>((float)m_score->getCombo() / osu_mod_fadingcursor_combo.getFloat(), 0.0f, 1.0f);
         if(m_pauseMenu->isVisible() || getSelectedBeatmap()->isContinueScheduled()) fadingCursorAlpha = 1.0f;
-
-        OsuBeatmapStandard *beatmapStd = dynamic_cast<OsuBeatmapStandard *>(getSelectedBeatmap());
 
         // draw auto cursor
         if(isAuto && allowDrawCursor && !isFPoSu && beatmapStd != NULL && !beatmapStd->isLoading())
@@ -1182,51 +1207,52 @@ void Osu::update() {
 
 void Osu::updateMods() {
     if(bancho.is_in_a_multi_room()) {
-        m_bModNC = bancho.room.mods & (1 << 9);
+        m_bModNC = bancho.room.mods & ModFlags::Nightcore;
         if(m_bModNC) {
             m_bModDT = false;
-        } else if(bancho.room.mods & (1 << 6)) {
+        } else if(bancho.room.mods & ModFlags::DoubleTime) {
             m_bModDT = true;
         }
 
-        m_bModHT = bancho.room.mods & (1 << 8);
+        m_bModHT = (bancho.room.mods & ModFlags::HalfTime);
         m_bModDC = false;
         if(m_bModHT && bancho.prefer_daycore) {
             m_bModHT = false;
             m_bModDC = true;
         }
 
-        m_bModNF = bancho.room.mods & (1 << 0);
-        m_bModEZ = bancho.room.mods & (1 << 1);
-        m_bModTD = bancho.room.mods & (1 << 2);
-        m_bModHD = bancho.room.mods & (1 << 3);
-        m_bModHR = bancho.room.mods & (1 << 4);
-        m_bModSD = bancho.room.mods & (1 << 5);
-        m_bModRelax = bancho.room.mods & (1 << 7);
-        m_bModAuto = bancho.room.mods & (1 << 11);
-        m_bModSpunout = bancho.room.mods & (1 << 12);
-        m_bModAutopilot = bancho.room.mods & (1 << 13);
-        m_bModSS = bancho.room.mods & (1 << 14);
-        m_bModTarget = bancho.room.mods & (1 << 23);
+        m_bModNF = bancho.room.mods & ModFlags::NoFail;
+        m_bModEZ = bancho.room.mods & ModFlags::Easy;
+        m_bModTD = bancho.room.mods & ModFlags::TouchDevice;
+        m_bModHD = bancho.room.mods & ModFlags::Hidden;
+        m_bModHR = bancho.room.mods & ModFlags::HardRock;
+        m_bModSD = bancho.room.mods & ModFlags::SuddenDeath;
+        m_bModRelax = bancho.room.mods & ModFlags::Relax;
+        m_bModAuto = bancho.room.mods & ModFlags::Autoplay;
+        m_bModSpunout = bancho.room.mods & ModFlags::SpunOut;
+        m_bModAutopilot = bancho.room.mods & ModFlags::Autopilot;
+        m_bModSS = bancho.room.mods & ModFlags::Perfect;
+        m_bModTarget = bancho.room.mods & ModFlags::Target;
         m_bModScorev2 = bancho.room.win_condition == SCOREV2;
+        m_bModFlashlight = bancho.room.mods & ModFlags::Flashlight;
         m_bModNightmare = false;
 
         if(bancho.room.freemods) {
             for(int i = 0; i < 16; i++) {
                 if(bancho.room.slots[i].player_id != bancho.user_id) continue;
 
-                m_bModNF = bancho.room.slots[i].mods & (1 << 0);
-                m_bModEZ = bancho.room.slots[i].mods & (1 << 1);
-                m_bModTD = bancho.room.slots[i].mods & (1 << 2);
-                m_bModHD = bancho.room.slots[i].mods & (1 << 3);
-                m_bModHR = bancho.room.slots[i].mods & (1 << 4);
-                m_bModSD = bancho.room.slots[i].mods & (1 << 5);
-                m_bModRelax = bancho.room.slots[i].mods & (1 << 7);
-                m_bModAuto = bancho.room.slots[i].mods & (1 << 11);
-                m_bModSpunout = bancho.room.slots[i].mods & (1 << 12);
-                m_bModAutopilot = bancho.room.slots[i].mods & (1 << 13);
-                m_bModSS = bancho.room.slots[i].mods & (1 << 14);
-                m_bModTarget = bancho.room.slots[i].mods & (1 << 23);
+                m_bModNF = bancho.room.slots[i].mods & ModFlags::NoFail;
+                m_bModEZ = bancho.room.slots[i].mods & ModFlags::Easy;
+                m_bModTD = bancho.room.slots[i].mods & ModFlags::TouchDevice;
+                m_bModHD = bancho.room.slots[i].mods & ModFlags::Hidden;
+                m_bModHR = bancho.room.slots[i].mods & ModFlags::HardRock;
+                m_bModSD = bancho.room.slots[i].mods & ModFlags::SuddenDeath;
+                m_bModRelax = bancho.room.slots[i].mods & ModFlags::Relax;
+                m_bModAuto = bancho.room.slots[i].mods & ModFlags::Autoplay;
+                m_bModSpunout = bancho.room.slots[i].mods & ModFlags::SpunOut;
+                m_bModAutopilot = bancho.room.slots[i].mods & ModFlags::Autopilot;
+                m_bModSS = bancho.room.slots[i].mods & ModFlags::Perfect;
+                m_bModTarget = bancho.room.slots[i].mods & ModFlags::Target;
             }
         }
     } else {
@@ -1236,6 +1262,7 @@ void Osu::updateMods() {
         m_bModSpunout = osu_mods.getString().find("spunout") != -1;
         m_bModTarget = osu_mods.getString().find("practicetarget") != -1;
         m_bModScorev2 = osu_mods.getString().find("v2") != -1;
+        m_bModFlashlight = osu_mods.getString().find("fl") != -1;
         m_bModDT = osu_mods.getString().find("dt") != -1;
         m_bModNC = osu_mods.getString().find("nc") != -1;
         m_bModNF = osu_mods.getString().find("nf") != -1;
@@ -1836,6 +1863,7 @@ float Osu::getScoreMultiplier() {
         else
             multiplier *= 1.12f;
     }
+    if(m_bModFlashlight) multiplier *= 1.12f;
     if(m_bModHD) multiplier *= 1.06f;
     if(m_bModSpunout) multiplier *= 0.90f;
 
@@ -1956,6 +1984,7 @@ void Osu::rebuildRenderTargets() {
     debugLog("Osu(%i)::rebuildRenderTargets: %fx%f\n", m_iInstanceID, g_vInternalResolution.x, g_vInternalResolution.y);
 
     m_backBuffer->rebuild(0, 0, g_vInternalResolution.x, g_vInternalResolution.y);
+    m_flashlightBuffer->rebuild(0, 0, g_vInternalResolution.x, g_vInternalResolution.y);
 
     if(m_osu_mod_fposu_ref->getBool())
         m_playfieldBuffer->rebuild(0, 0, g_vInternalResolution.x, g_vInternalResolution.y);

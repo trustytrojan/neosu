@@ -509,8 +509,7 @@ void OsuRankingScreen::setScore(OsuDatabase::Score score, UString dateTime) {
 
     m_rankingPanel->setScore(score);
     setGrade(OsuScore::calculateGrade(score.num300s, score.num100s, score.num50s, score.numMisses,
-                                      score.modsLegacy & OsuReplay::Mods::Hidden,
-                                      score.modsLegacy & OsuReplay::Mods::Flashlight));
+                                      score.modsLegacy & ModFlags::Hidden, score.modsLegacy & ModFlags::Flashlight));
     setIndex(-1);
 
     m_fUnstableRate = score.unstableRate;
@@ -540,23 +539,23 @@ void OsuRankingScreen::setScore(OsuDatabase::Score score, UString dateTime) {
     } else
         m_sMods = "";
 
-    m_bModSS = score.modsLegacy & OsuReplay::Mods::Perfect;
-    m_bModSD = score.modsLegacy & OsuReplay::Mods::SuddenDeath;
-    m_bModEZ = score.modsLegacy & OsuReplay::Mods::Easy;
-    m_bModHD = score.modsLegacy & OsuReplay::Mods::Hidden;
-    m_bModHR = score.modsLegacy & OsuReplay::Mods::HardRock;
-    m_bModNC = score.modsLegacy & OsuReplay::Mods::Nightcore;
-    m_bModDT = score.modsLegacy & OsuReplay::Mods::DoubleTime;
-    m_bModNightmare = score.modsLegacy & OsuReplay::Mods::Nightmare;
-    m_bModScorev2 = score.modsLegacy & OsuReplay::Mods::ScoreV2;
-    m_bModTarget = score.modsLegacy & OsuReplay::Mods::Target;
-    m_bModSpunout = score.modsLegacy & OsuReplay::Mods::SpunOut;
-    m_bModRelax = score.modsLegacy & OsuReplay::Mods::Relax;
-    m_bModNF = score.modsLegacy & OsuReplay::Mods::NoFail;
-    m_bModHT = score.modsLegacy & OsuReplay::Mods::HalfTime;
-    m_bModAutopilot = score.modsLegacy & OsuReplay::Mods::Relax2;
-    m_bModAuto = score.modsLegacy & OsuReplay::Mods::Autoplay;
-    m_bModTD = score.modsLegacy & OsuReplay::Mods::TouchDevice;
+    m_bModSS = score.modsLegacy & ModFlags::Perfect;
+    m_bModSD = score.modsLegacy & ModFlags::SuddenDeath;
+    m_bModEZ = score.modsLegacy & ModFlags::Easy;
+    m_bModHD = score.modsLegacy & ModFlags::Hidden;
+    m_bModHR = score.modsLegacy & ModFlags::HardRock;
+    m_bModNC = score.modsLegacy & ModFlags::Nightcore;
+    m_bModDT = score.modsLegacy & ModFlags::DoubleTime;
+    m_bModNightmare = score.modsLegacy & ModFlags::Nightmare;
+    m_bModScorev2 = score.modsLegacy & ModFlags::ScoreV2;
+    m_bModTarget = score.modsLegacy & ModFlags::Target;
+    m_bModSpunout = score.modsLegacy & ModFlags::SpunOut;
+    m_bModRelax = score.modsLegacy & ModFlags::Relax;
+    m_bModNF = score.modsLegacy & ModFlags::NoFail;
+    m_bModHT = score.modsLegacy & ModFlags::HalfTime;
+    m_bModAutopilot = score.modsLegacy & ModFlags::Autopilot;
+    m_bModAuto = score.modsLegacy & ModFlags::Autoplay;
+    m_bModTD = score.modsLegacy & ModFlags::TouchDevice;
 
     m_enabledExperimentalMods.clear();
     if(score.experimentalModsConVars.length() > 0) {

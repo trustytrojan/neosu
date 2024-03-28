@@ -22,6 +22,7 @@
 #include "OsuModSelector.h"
 #include "OsuPromptScreen.h"
 #include "OsuRankingScreen.h"
+#include "OsuReplay.h"
 #include "OsuRichPresence.h"
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
@@ -38,33 +39,33 @@
 void OsuUIModList::draw(Graphics *g) {
     std::vector<OsuSkinImage *> mods;
 
-    if(*m_flags & (1 << 9))
+    if(*m_flags & ModFlags::Nightcore)
         mods.push_back(bancho.osu->getSkin()->getSelectionModNightCore());
-    else if(*m_flags & (1 << 6))
+    else if(*m_flags & ModFlags::DoubleTime)
         mods.push_back(bancho.osu->getSkin()->getSelectionModDoubleTime());
 
-    bool ht_enabled = *m_flags & (1 << 8);
+    bool ht_enabled = *m_flags & ModFlags::HalfTime;
     if(ht_enabled && bancho.prefer_daycore)
         mods.push_back(bancho.osu->getSkin()->getSelectionModDayCore());
     else if(ht_enabled)
         mods.push_back(bancho.osu->getSkin()->getSelectionModHalfTime());
 
-    if(*m_flags & (1 << 14))
+    if(*m_flags & ModFlags::Perfect)
         mods.push_back(bancho.osu->getSkin()->getSelectionModPerfect());
-    else if(*m_flags & (1 << 5))
+    else if(*m_flags & ModFlags::SuddenDeath)
         mods.push_back(bancho.osu->getSkin()->getSelectionModSuddenDeath());
 
-    if(*m_flags & (1 << 0)) mods.push_back(bancho.osu->getSkin()->getSelectionModNoFail());
-    if(*m_flags & (1 << 1)) mods.push_back(bancho.osu->getSkin()->getSelectionModEasy());
-    if(*m_flags & (1 << 2)) mods.push_back(bancho.osu->getSkin()->getSelectionModTD());
-    if(*m_flags & (1 << 3)) mods.push_back(bancho.osu->getSkin()->getSelectionModHidden());
-    if(*m_flags & (1 << 4)) mods.push_back(bancho.osu->getSkin()->getSelectionModHardRock());
-    if(*m_flags & (1 << 7)) mods.push_back(bancho.osu->getSkin()->getSelectionModRelax());
-    if(*m_flags & (1 << 11)) mods.push_back(bancho.osu->getSkin()->getSelectionModAutoplay());
-    if(*m_flags & (1 << 12)) mods.push_back(bancho.osu->getSkin()->getSelectionModSpunOut());
-    if(*m_flags & (1 << 13)) mods.push_back(bancho.osu->getSkin()->getSelectionModAutopilot());
-    if(*m_flags & (1 << 23)) mods.push_back(bancho.osu->getSkin()->getSelectionModTarget());
-    if(*m_flags & (1 << 29)) mods.push_back(bancho.osu->getSkin()->getSelectionModScorev2());
+    if(*m_flags & ModFlags::NoFail) mods.push_back(bancho.osu->getSkin()->getSelectionModNoFail());
+    if(*m_flags & ModFlags::Easy) mods.push_back(bancho.osu->getSkin()->getSelectionModEasy());
+    if(*m_flags & ModFlags::TouchDevice) mods.push_back(bancho.osu->getSkin()->getSelectionModTD());
+    if(*m_flags & ModFlags::Hidden) mods.push_back(bancho.osu->getSkin()->getSelectionModHidden());
+    if(*m_flags & ModFlags::HardRock) mods.push_back(bancho.osu->getSkin()->getSelectionModHardRock());
+    if(*m_flags & ModFlags::Relax) mods.push_back(bancho.osu->getSkin()->getSelectionModRelax());
+    if(*m_flags & ModFlags::Autoplay) mods.push_back(bancho.osu->getSkin()->getSelectionModAutoplay());
+    if(*m_flags & ModFlags::SpunOut) mods.push_back(bancho.osu->getSkin()->getSelectionModSpunOut());
+    if(*m_flags & ModFlags::Autopilot) mods.push_back(bancho.osu->getSkin()->getSelectionModAutopilot());
+    if(*m_flags & ModFlags::Target) mods.push_back(bancho.osu->getSkin()->getSelectionModTarget());
+    if(*m_flags & ModFlags::ScoreV2) mods.push_back(bancho.osu->getSkin()->getSelectionModScorev2());
 
     g->setColor(0xffffffff);
     Vector2 modPos = m_vPos;

@@ -143,8 +143,8 @@ class OsuUserStatsScreenBackgroundPPRecalculator : public Resource {
                     const float HP = (score.isLegacyScore ? legacyValues.HP : score.HP);
                     const float speedMultiplier =
                         (score.isLegacyScore ? legacyValues.speedMultiplier : score.speedMultiplier);
-                    const float relax = score.modsLegacy & OsuReplay::Mods::Relax;
-                    const float touchDevice = score.modsLegacy & OsuReplay::Mods::TouchDevice;
+                    const float relax = score.modsLegacy & ModFlags::Relax;
+                    const float touchDevice = score.modsLegacy & ModFlags::TouchDevice;
 
                     // 2) load hitobjects for diffcalc
                     OsuDatabaseBeatmap::LOAD_DIFFOBJ_RESULT diffres =

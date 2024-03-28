@@ -1322,6 +1322,11 @@ void OsuBeatmap::deselect() {
 bool OsuBeatmap::play() {
     if(m_selectedDifficulty2 == NULL) return false;
 
+    static const int OSU_COORD_WIDTH = 512;
+    static const int OSU_COORD_HEIGHT = 384;
+    m_osu->flashlight_position = Vector2{OSU_COORD_WIDTH / 2, OSU_COORD_HEIGHT / 2};
+    m_osu->holding_slider = false;
+
     // reset everything, including deleting any previously loaded hitobjects from another diff which we might just have
     // played
     unloadObjects();

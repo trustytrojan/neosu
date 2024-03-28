@@ -646,7 +646,8 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
         OPTIONS_ELEMENT resolutionSelect =
             addButton("Select Resolution", UString::format("%ix%i", m_osu->getScreenWidth(), m_osu->getScreenHeight()));
         m_resolutionSelectButton = (CBaseUIButton *)resolutionSelect.elements[0];
-        m_resolutionSelectButton->setClickCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onResolutionSelect));
+        m_resolutionSelectButton->setClickCallback(
+            fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onResolutionSelect));
         m_resolutionLabel = (CBaseUILabel *)resolutionSelect.elements[1];
         m_fullscreenCheckbox = addCheckbox("Fullscreen");
         m_fullscreenCheckbox->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onFullscreenChange));
@@ -689,6 +690,9 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
     }
 
     addSubSection("Detail Settings");
+    addCheckbox("Avoid flashing elements",
+                "Disables cosmetic flash effects\nDisables dimming when holding silders with Flashlight mod enabled",
+                convar->getConVarByName("avoid_flashes"));
     addCheckbox("Mipmaps",
                 "Reload your skin to apply! (CTRL + ALT + S)\nGenerate mipmaps for each skin element, at the cost of "
                 "VRAM.\nProvides smoother visuals on lower resolutions for @2x-only skins.",
@@ -834,9 +838,11 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
     } else {
         OPTIONS_ELEMENT outputDeviceSelect = addButton("Select Output Device", "Default", true);
         m_outputDeviceResetButton = outputDeviceSelect.resetButton;
-        m_outputDeviceResetButton->setClickCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onOutputDeviceResetClicked));
+        m_outputDeviceResetButton->setClickCallback(
+            fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onOutputDeviceResetClicked));
         m_outputDeviceSelectButton = (CBaseUIButton *)outputDeviceSelect.elements[0];
-        m_outputDeviceSelectButton->setClickCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onOutputDeviceSelect));
+        m_outputDeviceSelectButton->setClickCallback(
+            fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onOutputDeviceSelect));
 
         m_outputDeviceLabel = (CBaseUILabel *)outputDeviceSelect.elements[1];
 
@@ -885,7 +891,8 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
             m_asioBufferSizeSlider->setKeyDelta(512);
             m_asioBufferSizeSlider->setAnimated(false);
             m_asioBufferSizeSlider->setLiveUpdate(false);
-            m_asioBufferSizeSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onASIOBufferChange));
+            m_asioBufferSizeSlider->setChangeCallback(
+                fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onASIOBufferChange));
             addLabel("");
             OsuUIButton *asio_settings_btn = addButton("Open ASIO settings");
             asio_settings_btn->setClickCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::OpenASIOSettings));
@@ -2043,7 +2050,8 @@ void OsuOptionsMenu::updateLayout() {
     const std::string search = m_sSearchString.length() > 0 ? m_sSearchString.toUtf8() : "";
     for(int i = 0; i < m_elements.size(); i++) {
         if(m_elements[i].render_condition == RenderCondition::ASIO_ENABLED && !engine->getSound()->isASIO()) continue;
-        if(m_elements[i].render_condition == RenderCondition::WASAPI_ENABLED && !engine->getSound()->isWASAPI()) continue;
+        if(m_elements[i].render_condition == RenderCondition::WASAPI_ENABLED && !engine->getSound()->isWASAPI())
+            continue;
 
         // searching logic happens here:
         // section
@@ -2729,7 +2737,8 @@ void OsuOptionsMenu::onOutputDeviceResetClicked() {
 
 void OsuOptionsMenu::onOutputDeviceResetUpdate() {
     if(m_outputDeviceResetButton != NULL) {
-        m_outputDeviceResetButton->setEnabled(engine->getSound()->getOutputDeviceName() != engine->getSound()->getDefaultDevice().name);
+        m_outputDeviceResetButton->setEnabled(engine->getSound()->getOutputDeviceName() !=
+                                              engine->getSound()->getDefaultDevice().name);
     }
 }
 

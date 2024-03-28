@@ -13,6 +13,7 @@
 #include "Engine.h"
 #include "Osu.h"
 #include "OsuModSelector.h"
+#include "OsuReplay.h"
 #include "OsuRichPresence.h"
 #include "OsuRoom.h"
 #include "OsuSkin.h"
@@ -130,7 +131,7 @@ void OsuUIModSelectorModButton::onClicked() {
                 bancho.room.mods = m_osuModSelector->getModFlags();
                 if(bancho.room.freemods) {
                     // When freemod is enabled, we only want to force DT, HT, or Target.
-                    bancho.room.mods &= (1 << 6) | (1 << 8) | (1 << 23);
+                    bancho.room.mods &= ModFlags::DoubleTime | ModFlags::HalfTime | ModFlags::Target;
                 }
             }
 

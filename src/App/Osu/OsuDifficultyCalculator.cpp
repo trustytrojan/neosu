@@ -1097,7 +1097,7 @@ double OsuDifficultyCalculator::calculatePPv2(Osu *osu, OsuBeatmap *beatmap, dou
     int modsLegacy = osu->getScore()->getModsLegacy();
     {
         // special case: manual slider accuracy has been enabled (affects pp but not score)
-        modsLegacy |= (m_osu_slider_scorev2_ref->getBool() ? OsuReplay::Mods::ScoreV2 : 0);
+        modsLegacy |= (m_osu_slider_scorev2_ref->getBool() ? ModFlags::ScoreV2 : 0);
     }
 
     return calculatePPv2(modsLegacy, osu->getSpeedMultiplier(), beatmap->getAR(), beatmap->getOD(), aim,
@@ -1143,7 +1143,7 @@ double OsuDifficultyCalculator::calculatePPv2(int modsLegacy, double timescale, 
             score.accuracy =
                 (score.totalHits > 0 ? (double)(c300 * 300 + c100 * 100 + c50 * 50) / (double)(score.totalHits * 300)
                                      : 0.0);
-            score.amountHitObjectsWithAccuracy = (modsLegacy & OsuReplay::Mods::ScoreV2 ? score.totalHits : numCircles);
+            score.amountHitObjectsWithAccuracy = (modsLegacy & ModFlags::ScoreV2 ? score.totalHits : numCircles);
         }
     }
 
@@ -1172,15 +1172,15 @@ double OsuDifficultyCalculator::calculatePPv2(int modsLegacy, double timescale, 
     // custom multipliers for nofail and spunout
     double multiplier = 1.14;  // keep final pp normalized across changes
     {
-        if(modsLegacy & OsuReplay::Mods::NoFail)
+        if(modsLegacy & ModFlags::NoFail)
             multiplier *= std::max(
                 0.9, 1.0 - 0.02 * effectiveMissCount);  // see https://github.com/ppy/osu-performance/pull/127/files
 
-        if((modsLegacy & OsuReplay::Mods::SpunOut) && score.totalHits > 0)
+        if((modsLegacy & ModFlags::SpunOut) && score.totalHits > 0)
             multiplier *= 1.0 - std::pow((double)numSpinners / (double)score.totalHits,
                                          0.85);  // see https://github.com/ppy/osu-performance/pull/110/
 
-        if((modsLegacy & OsuReplay::Mods::Relax) && !osu_stars_and_pp_lazer_relax_autopilot_nerf_disabled.getBool()) {
+        if((modsLegacy & ModFlags::Relax) && !osu_stars_and_pp_lazer_relax_autopilot_nerf_disabled.getBool()) {
             double okMultiplier = std::max(0.0, od > 0.0 ? 1.0 - std::pow(od / 13.33, 1.8) : 1.0);   // 100
             double mehMultiplier = std::max(0.0, od > 0.0 ? 1.0 - std::pow(od / 13.33, 5.0) : 1.0);  // 50
             effectiveMissCount =
@@ -1239,8 +1239,7 @@ double OsuDifficultyCalculator::computeAimValue(const ScoreData &score,
 
     // ar bonus
     double approachRateFactor = 0.0;  // see https://github.com/ppy/osu-performance/pull/125/
-    if((score.modsLegacy & OsuReplay::Mods::Relax) == 0 ||
-       osu_stars_and_pp_lazer_relax_autopilot_nerf_disabled.getBool()) {
+    if((score.modsLegacy & ModFlags::Relax) == 0 || osu_stars_and_pp_lazer_relax_autopilot_nerf_disabled.getBool()) {
         if(attributes.ApproachRate > 10.33)
             approachRateFactor =
                 0.3 * (attributes.ApproachRate -
@@ -1259,7 +1258,7 @@ double OsuDifficultyCalculator::computeAimValue(const ScoreData &score,
     aimValue *= 1.0 + approachRateFactor * lengthBonus;
 
     // hidden
-    if(score.modsLegacy & OsuReplay::Mods::Hidden)
+    if(score.modsLegacy & ModFlags::Hidden)
         aimValue *= 1.0 + 0.04 * (std::max(12.0 - attributes.ApproachRate,
                                            0.0));  // NOTE: clamped to 0 because McOsu allows AR > 12
 
@@ -1286,7 +1285,7 @@ double OsuDifficultyCalculator::computeAimValue(const ScoreData &score,
 
 double OsuDifficultyCalculator::computeSpeedValue(const ScoreData &score, const Attributes &attributes,
                                                   double effectiveMissCount) {
-    if((score.modsLegacy & OsuReplay::Mods::Relax) && !osu_stars_and_pp_lazer_relax_autopilot_nerf_disabled.getBool())
+    if((score.modsLegacy & ModFlags::Relax) && !osu_stars_and_pp_lazer_relax_autopilot_nerf_disabled.getBool())
         return 0.0;
 
     double speedValue = std::pow(5.0 * std::max(1.0, attributes.SpeedStrain / 0.0675) - 4.0, 3.0) / 100000.0;
@@ -1319,7 +1318,7 @@ double OsuDifficultyCalculator::computeSpeedValue(const ScoreData &score, const 
     speedValue *= 1.0 + approachRateFactor * lengthBonus;
 
     // hidden
-    if(score.modsLegacy & OsuReplay::Mods::Hidden)
+    if(score.modsLegacy & ModFlags::Hidden)
         speedValue *= 1.0 + 0.04 * (std::max(12.0 - attributes.ApproachRate,
                                              0.0));  // NOTE: clamped to 0 because McOsu allows AR > 12
 
@@ -1367,9 +1366,9 @@ double OsuDifficultyCalculator::computeAccuracyValue(const ScoreData &score, con
     accuracyValue *= std::min(1.15, std::pow(score.amountHitObjectsWithAccuracy / 1000.0, 0.3));
 
     // hidden bonus
-    if(score.modsLegacy & OsuReplay::Mods::Hidden) accuracyValue *= 1.08;
+    if(score.modsLegacy & ModFlags::Hidden) accuracyValue *= 1.08;
     // flashlight bonus
-    if(score.modsLegacy & OsuReplay::Mods::Flashlight) accuracyValue *= 1.02;
+    if(score.modsLegacy & ModFlags::Flashlight) accuracyValue *= 1.02;
 
     return accuracyValue;
 }

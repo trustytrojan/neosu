@@ -1425,7 +1425,7 @@ void OsuBeatmapStandard::onBeforeStop(bool quit) {
         // special case: manual slider accuracy has been enabled (affects pp but not score), so force scorev2 for
         // potential future score recalculations NOTE: I forgot to add this before 20210103, so all old scores which
         // were played without scorev2 but with osu_slider_scorev2 will get downgraded slighly :(
-        score.modsLegacy |= (m_osu_slider_scorev2_ref->getBool() ? OsuReplay::Mods::ScoreV2 : 0);
+        score.modsLegacy |= (m_osu_slider_scorev2_ref->getBool() ? ModFlags::ScoreV2 : 0);
     }
 
     std::vector<ConVar *> allExperimentalMods = m_osu->getExperimentalMods();

@@ -220,8 +220,7 @@ void OsuUISongBrowserSongDifficultyButton::updateGrade() {
             (*m_osu->getSongBrowser()->getDatabase()->getScores())[m_databaseBeatmap->getMD5Hash()][0];
         hasGrade = true;
         grade = OsuScore::calculateGrade(score.num300s, score.num100s, score.num50s, score.numMisses,
-                                         score.modsLegacy & OsuReplay::Mods::Hidden,
-                                         score.modsLegacy & OsuReplay::Mods::Flashlight);
+                                         score.modsLegacy & ModFlags::Hidden, score.modsLegacy & ModFlags::Flashlight);
     }
 
     m_bHasGrade = hasGrade;
