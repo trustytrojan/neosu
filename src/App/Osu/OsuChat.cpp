@@ -604,6 +604,10 @@ CBaseUIContainer *OsuChat::setVisible(bool visible) {
     if(visible) {
         m_osu->m_optionsMenu->setVisible(false);
         anim->moveQuartOut(&m_fAnimation, 1.0f, 0.25f * (1.0f - m_fAnimation), true);
+
+        if(m_selected_channel != nullptr && !m_selected_channel->read) {
+            mark_as_read(m_selected_channel);
+        }
     } else {
         anim->moveQuadOut(&m_fAnimation, 0.0f, 0.25f * m_fAnimation, true);
     }
