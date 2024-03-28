@@ -37,6 +37,7 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu) {
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
     latest.changes.push_back("- Added Flashlight mod");
+    latest.changes.push_back("- Fixed a few bugs");
     changelogs.push_back(latest);
 
     CHANGELOG v34_06;

@@ -3242,10 +3242,8 @@ void OsuOptionsMenu::OpenASIOSettings() {
 }
 
 void OsuOptionsMenu::onASIOBufferChange(CBaseUISlider *slider) {
-    if(m_updating_layout) return;
-
 #ifdef _WIN32
-    m_bASIOBufferChangeScheduled = true;
+    if(!m_updating_layout) m_bASIOBufferChangeScheduled = true;
 
     auto asio_buffer_size = convar->getConVarByName("asio_buffer_size");
     BASS_ASIO_INFO info = {0};
@@ -3277,9 +3275,7 @@ void OsuOptionsMenu::onASIOBufferChange(CBaseUISlider *slider) {
 }
 
 void OsuOptionsMenu::onWASAPIBufferChange(CBaseUISlider *slider) {
-    if(m_updating_layout) return;
-
-    m_bWASAPIBufferChangeScheduled = true;
+    if(!m_updating_layout) m_bWASAPIBufferChangeScheduled = true;
 
     for(int i = 0; i < m_elements.size(); i++) {
         for(int e = 0; e < m_elements[i].elements.size(); e++) {
@@ -3300,9 +3296,7 @@ void OsuOptionsMenu::onWASAPIBufferChange(CBaseUISlider *slider) {
 }
 
 void OsuOptionsMenu::onWASAPIPeriodChange(CBaseUISlider *slider) {
-    if(m_updating_layout) return;
-
-    m_bWASAPIPeriodChangeScheduled = true;
+    if(!m_updating_layout) m_bWASAPIPeriodChangeScheduled = true;
 
     for(int i = 0; i < m_elements.size(); i++) {
         for(int e = 0; e < m_elements[i].elements.size(); e++) {
