@@ -20,8 +20,6 @@ class OsuBeatmapStandard : public OsuBeatmap {
     virtual void draw(Graphics *g);
     virtual void drawInt(Graphics *g);
     virtual void drawVR(Graphics *g, Matrix4 &mvp, OsuVR *vr);
-    virtual void draw3D(Graphics *g);
-    virtual void draw3D2(Graphics *g);
     virtual void update();
 
     virtual void onModUpdate() { onModUpdate(true, true); }
@@ -83,7 +81,6 @@ class OsuBeatmapStandard : public OsuBeatmap {
     static ConVar *m_osu_mod_fullalternate_ref;
     static ConVar *m_fposu_distance_ref;
     static ConVar *m_fposu_curved_ref;
-    static ConVar *m_fposu_3d_curve_multiplier_ref;
     static ConVar *m_fposu_mod_strafing_ref;
     static ConVar *m_fposu_mod_strafing_frequency_x_ref;
     static ConVar *m_fposu_mod_strafing_frequency_y_ref;

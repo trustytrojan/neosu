@@ -256,9 +256,6 @@ class Osu : public App, public MouseListener {
     ConVar *m_fposu_draw_cursor_trail_ref;
     ConVar *m_osu_mod_mafham_ref;
     ConVar *m_osu_mod_fposu_ref;
-    ConVar *m_fposu_3d_ref;
-    ConVar *m_fposu_3d_spheres_ref;
-    ConVar *m_fposu_3d_spheres_aa_ref;
     ConVar *m_snd_change_check_interval_ref;
     ConVar *m_ui_scrollview_scrollbarwidth_ref;
     ConVar *m_mouse_raw_input_absolute_to_window_ref;

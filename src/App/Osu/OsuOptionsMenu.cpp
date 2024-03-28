@@ -1416,15 +1416,6 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
     addCheckbox("Background cube", convar->getConVarByName("fposu_cube"));
     addCheckbox("Skybox", "NOTE: Overrides \"Background cube\".\nSee skybox_example.png for cubemap layout.",
                 convar->getConVarByName("fposu_skybox"));
-    CBaseUISlider *playfieldScaleSlider = addSlider("[Beta] 4D Mode - Scale", 0.1f, 10.0f,
-                                                    convar->getConVarByName("fposu_3d_playfield_scale"), 0.0f, true);
-    playfieldScaleSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onSliderChangePercent));
-    playfieldScaleSlider->setKeyDelta(0.01f);
-    CBaseUISlider *spheresAASlider =
-        addSlider("[Beta] 4D Mode - Spheres - MSAA", 0.0f, 16.0f, convar->getConVarByName("fposu_3d_spheres_aa"));
-    spheresAASlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onSliderChangeVRAntiAliasing));
-    spheresAASlider->setKeyDelta(2.0f);
-    spheresAASlider->setAnimated(false);
     if(env->getOS() == Environment::OS::OS_WINDOWS) {
         addSubSection("FPoSu - Mouse");
         OsuUIButton *cm360CalculatorLinkButton = addButton("https://www.mouse-sensitivity.com/");

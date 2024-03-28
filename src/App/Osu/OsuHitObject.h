@@ -19,13 +19,8 @@ class OsuHitObject {
    public:
     static void drawHitResult(Graphics *g, OsuBeatmapStandard *beatmap, Vector2 rawPos, OsuScore::HIT result,
                               float animPercentInv, float hitDeltaRangePercent);
-    static void draw3DHitResult(Graphics *g, OsuBeatmapStandard *beatmap, Vector2 rawPos, OsuScore::HIT result,
-                                float animPercentInv, float hitDeltaRangePercent);
     static void drawHitResult(Graphics *g, OsuSkin *skin, float hitcircleDiameter, float rawHitcircleDiameter,
                               Vector2 rawPos, OsuScore::HIT result, float animPercentInv, float hitDeltaRangePercent);
-    static void draw3DHitResult(Graphics *g, OsuModFPoSu *fposu, OsuSkin *skin, float hitcircleDiameter,
-                                float rawHitcircleDiameter, Vector2 rawPos, OsuScore::HIT result, float animPercentInv,
-                                float hitDeltaRangePercent);
 
     static ConVar *m_osu_approach_scale_multiplier_ref;
     static ConVar *m_osu_timingpoints_force;
@@ -39,10 +34,6 @@ class OsuHitObject {
 
     static ConVar *m_osu_mod_mafham_ref;
 
-    static ConVar *m_fposu_3d_spheres_ref;
-    static ConVar *m_fposu_3d_hitobjects_look_at_player_ref;
-    static ConVar *m_fposu_3d_approachcircles_look_at_player_ref;
-
    public:
     OsuHitObject(long time, int sampleType, int comboNumber, bool isEndOfCombo, int colorCounter, int colorOffset,
                  OsuBeatmap *beatmap);
@@ -52,8 +43,6 @@ class OsuHitObject {
     virtual void draw2(Graphics *g);
     virtual void drawVR(Graphics *g, Matrix4 &mvp, OsuVR *vr) { ; }
     virtual void drawVR2(Graphics *g, Matrix4 &mvp, OsuVR *vr) { ; }
-    virtual void draw3D(Graphics *g) { ; }
-    virtual void draw3D2(Graphics *g);
     virtual void update(long curPos);
 
     virtual void updateStackPosition(float stackOffset) = 0;
@@ -150,7 +139,6 @@ class OsuHitObject {
     };
 
     void drawHitResultAnim(Graphics *g, const HITRESULTANIM &hitresultanim);
-    void draw3DHitResultAnim(Graphics *g, const HITRESULTANIM &hitresultanim);
 
     HITRESULTANIM m_hitresultanim1;
     HITRESULTANIM m_hitresultanim2;

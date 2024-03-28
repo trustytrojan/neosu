@@ -182,9 +182,6 @@ Osu::Osu(int instanceID) {
     m_fposu_draw_cursor_trail_ref = convar->getConVarByName("fposu_draw_cursor_trail");
     m_osu_mod_mafham_ref = convar->getConVarByName("osu_mod_mafham");
     m_osu_mod_fposu_ref = convar->getConVarByName("osu_mod_fposu");
-    m_fposu_3d_ref = convar->getConVarByName("fposu_3d");
-    m_fposu_3d_spheres_ref = convar->getConVarByName("fposu_3d_spheres");
-    m_fposu_3d_spheres_aa_ref = convar->getConVarByName("fposu_3d_spheres_aa");
     m_snd_change_check_interval_ref = convar->getConVarByName("snd_change_check_interval");
     m_ui_scrollview_scrollbarwidth_ref = convar->getConVarByName("ui_scrollview_scrollbarwidth");
     m_mouse_raw_input_absolute_to_window_ref = convar->getConVarByName("mouse_raw_input_absolute_to_window");
@@ -569,12 +566,8 @@ Osu::Osu(int instanceID) {
     */
 
     // memory/performance optimization; if osu_mod_mafham is not enabled, reduce the two rendertarget sizes to 64x64,
-    // same for fposu (and fposu_3d, and fposu_3d_spheres, and fposu_3d_spheres_aa)
     m_osu_mod_mafham_ref->setCallback(fastdelegate::MakeDelegate(this, &Osu::onModMafhamChange));
     m_osu_mod_fposu_ref->setCallback(fastdelegate::MakeDelegate(this, &Osu::onModFPoSuChange));
-    m_fposu_3d_ref->setCallback(fastdelegate::MakeDelegate(this, &Osu::onModFPoSu3DChange));
-    m_fposu_3d_spheres_ref->setCallback(fastdelegate::MakeDelegate(this, &Osu::onModFPoSu3DSpheresChange));
-    m_fposu_3d_spheres_aa_ref->setCallback(fastdelegate::MakeDelegate(this, &Osu::onModFPoSu3DSpheresAAChange));
 }
 
 Osu::~Osu() {
@@ -621,23 +614,41 @@ void Osu::draw(Graphics *g) {
     if(isInPlayMode())  // if we are playing a beatmap
     {
         const bool isFPoSu = (m_osu_mod_fposu_ref->getBool());
-        const bool isFPoSu3d = (isFPoSu && m_fposu_3d_ref->getBool());
 
-        const bool isBufferedPlayfieldDraw = (isFPoSu && !isFPoSu3d);
+        if(isFPoSu) m_playfieldBuffer->enable();
 
-        if(isBufferedPlayfieldDraw) m_playfieldBuffer->enable();
+        getSelectedBeatmap()->draw(g);
 
-        if(!isFPoSu3d)
-            getSelectedBeatmap()->draw(g);
-        else {
-            m_playfieldBuffer->enable();
-            { getSelectedBeatmap()->drawInt(g); }
-            m_playfieldBuffer->disable();
+        if(m_bModFlashlight && beatmapStd != NULL) {
+            // Dim screen when holding sliders
+            if(holding_slider && !avoid_flashes.getBool()) {
+                g->setColor(COLOR(204, 0, 0, 0));  // 80% dimmed
+                g->fillRect(0, 0, getScreenWidth(), getScreenHeight());
+            }
 
-            m_fposu->draw(g);
+            // Convert screen mouse -> osu mouse pos
+            // TODO @kiwec: test with autoplay mod
+            Vector2 cursorPos = isAuto ? beatmapStd->getCursorPos() : engine->getMouse()->getPos();
+            Vector2 mouse_position = cursorPos - OsuGameRules::getPlayfieldOffset(this);
+            mouse_position /= OsuGameRules::getPlayfieldScaleFactor(this);
+
+            // Update flashlight position
+            double follow_delay = flashlight_follow_delay.getFloat();
+            double frame_time = std::min(engine->getFrameTime(), follow_delay);
+            double t = frame_time / follow_delay;
+            t = t * (2.f - t);
+            flashlight_position += t * (mouse_position - flashlight_position);
+
+            // Draw flashlight
+            float flSize = flashlight_size.getFloat();
+            Vector2 flashlightPos = flashlight_position * OsuGameRules::getPlayfieldScaleFactor(this) +
+                                    OsuGameRules::getPlayfieldOffset(this);
+            g->setColor(COLOR(50, 255, 0, 0));
+            g->fillRect(flashlightPos.x - flSize / 2, flashlightPos.y - flSize / 2, flSize, flSize);
+            // TODO @kiwec: draw proper flashlight
         }
 
-        if(!isFPoSu || isFPoSu3d) m_hud->draw(g);
+        if(!isFPoSu) m_hud->draw(g);
 
         // quick retry fadeout overlay
         if(m_fQuickRetryTime != 0.0f && m_bQuickRetryDown) {
@@ -669,20 +680,19 @@ void Osu::draw(Graphics *g) {
         m_chat->draw(g);
         m_optionsMenu->draw(g);
 
-        if(osu_draw_fps.getBool() && (!isFPoSu || isFPoSu3d)) m_hud->drawFps(g);
+        if(osu_draw_fps.getBool() && (!isFPoSu)) m_hud->drawFps(g);
 
         m_windowManager->draw(g);
 
-        if(isFPoSu && !isFPoSu3d && m_osu_draw_cursor_ripples_ref->getBool()) m_hud->drawCursorRipples(g);
+        if(isFPoSu && m_osu_draw_cursor_ripples_ref->getBool()) m_hud->drawCursorRipples(g);
 
         // draw FPoSu cursor trail
-        if(isFPoSu && !isFPoSu3d && m_fposu_draw_cursor_trail_ref->getBool())
+        if(isFPoSu && m_fposu_draw_cursor_trail_ref->getBool())
             m_hud->drawCursorTrail(g, beatmapStd->getCursorPos(),
                                    osu_mod_fadingcursor.getBool() ? fadingCursorAlpha : 1.0f);
 
-        if(isBufferedPlayfieldDraw) m_playfieldBuffer->disable();
-
-        if(isFPoSu && !isFPoSu3d) {
+        if(isFPoSu) {
+            m_playfieldBuffer->disable();
             m_fposu->draw(g);
             m_hud->draw(g);
 
@@ -696,10 +706,9 @@ void Osu::draw(Graphics *g) {
             Vector2 cursorPos =
                 (beatmapStd != NULL && !isAuto) ? beatmapStd->getCursorPos() : engine->getMouse()->getPos();
 
-            if(isFPoSu && (!isFPoSu3d || ((isAuto && !getSelectedBeatmap()->isPaused()) ||
-                                          (!getSelectedBeatmap()->isPaused() && !m_optionsMenu->isVisible() &&
-                                           !m_modSelector->isVisible()))))
+            if(isFPoSu) {
                 cursorPos = getScreenSize() / 2.0f;
+            }
 
             const bool updateAndDrawTrail = !isFPoSu;
 
@@ -1953,22 +1962,8 @@ void Osu::rebuildRenderTargets() {
     else
         m_playfieldBuffer->rebuild(0, 0, 64, 64);
 
-    if(m_osu_mod_fposu_ref->getBool() && m_fposu_3d_ref->getBool() && m_fposu_3d_spheres_ref->getBool()) {
-        Graphics::MULTISAMPLE_TYPE multisampleType = Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X;
-        {
-            if(m_fposu_3d_spheres_aa_ref->getInt() > 8)
-                multisampleType = Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_16X;
-            else if(m_fposu_3d_spheres_aa_ref->getInt() > 4)
-                multisampleType = Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_8X;
-            else if(m_fposu_3d_spheres_aa_ref->getInt() > 2)
-                multisampleType = Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_4X;
-            else if(m_fposu_3d_spheres_aa_ref->getInt() > 0)
-                multisampleType = Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_2X;
-        }
-        m_sliderFrameBuffer->rebuild(0, 0, g_vInternalResolution.x, g_vInternalResolution.y, multisampleType);
-    } else
-        m_sliderFrameBuffer->rebuild(0, 0, g_vInternalResolution.x, g_vInternalResolution.y,
-                                     Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X);
+    m_sliderFrameBuffer->rebuild(0, 0, g_vInternalResolution.x, g_vInternalResolution.y,
+                                 Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X);
 
     if(m_osu_mod_mafham_ref->getBool()) {
         m_frameBuffer->rebuild(0, 0, g_vInternalResolution.x, g_vInternalResolution.y);
