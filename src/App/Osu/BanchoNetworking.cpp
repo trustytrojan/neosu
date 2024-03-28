@@ -303,9 +303,6 @@ static void *do_networking(void *data) {
             pthread_mutex_unlock(&api_requests_mutex);
 
             send_api_request(curl, api_out);
-            if(api_out.mime != nullptr) {
-                curl_mime_free(api_out.mime);
-            }
         }
 
         if(bancho.osu && bancho.osu->m_lobby->isVisible()) seconds_between_pings = 1;
