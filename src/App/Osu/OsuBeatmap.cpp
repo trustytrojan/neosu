@@ -1688,6 +1688,9 @@ void OsuBeatmap::seekPercent(double percent) {
 
         onPlayStart();
     }
+
+    debugLog("Disabling score submission due to seeking\n");
+    vanilla = false;
 }
 
 void OsuBeatmap::seekPercentPlayable(double percent) {
