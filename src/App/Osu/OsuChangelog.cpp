@@ -42,6 +42,7 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu) {
 
     CHANGELOG v34_06;
     v34_06.title = "34.06 (2024-03-12)";
+    v34_06.changes.push_back("- Fixed pausing not working correctly");
     changelogs.push_back(v34_06);
 
     CHANGELOG v34_05;
