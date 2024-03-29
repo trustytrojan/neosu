@@ -217,6 +217,9 @@ class OsuDatabase {
     inline unsigned long long getAndIncrementScoreSortHackCounter() { return m_iSortHackCounter++; }
 
     std::unordered_map<MD5Hash, std::vector<Score>> m_online_scores;
+    std::string getOsuSongsFolder();
+
+    OsuDatabaseBeatmap *loadRawBeatmap(std::string beatmapPath);  // only used for raw loading without db
 
    private:
     friend class OsuDatabaseLoader;
@@ -240,8 +243,6 @@ class OsuDatabase {
                          const std::unordered_map<MD5Hash, OsuDatabaseBeatmap *> &hashToDiff2,
                          const std::unordered_map<MD5Hash, OsuDatabaseBeatmap *> &hashToBeatmap);
     void saveCollections();
-
-    OsuDatabaseBeatmap *loadRawBeatmap(std::string beatmapPath);  // only used for raw loading without db
 
     void onScoresRename(UString args);
     void onScoresExport();

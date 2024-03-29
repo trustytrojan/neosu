@@ -409,7 +409,7 @@ void OsuDatabase::update() {
                 m_rawBeatmapFolders.push_back(
                     curBeatmap);  // for future incremental loads, so that we know what's been loaded already
 
-                std::string fullBeatmapPath = m_sRawBeatmapLoadOsuSongFolder;
+                std::string fullBeatmapPath = getOsuSongsFolder();
                 fullBeatmapPath.append(curBeatmap);
                 fullBeatmapPath.append("/");
 
@@ -1052,19 +1052,25 @@ std::string OsuDatabase::parseLegacyCfgBeatmapDirectoryParameter() {
     return "";
 }
 
-void OsuDatabase::scheduleLoadRaw() {
-    m_sRawBeatmapLoadOsuSongFolder = osu_folder.getString();
+std::string OsuDatabase::getOsuSongsFolder() {
+    auto song_folder = osu_folder.getString();
     {
         const std::string customBeatmapDirectory = parseLegacyCfgBeatmapDirectoryParameter();
         if(customBeatmapDirectory.length() < 1)
-            m_sRawBeatmapLoadOsuSongFolder.append(osu_folder_sub_songs.getString());
+            song_folder.append(osu_folder_sub_songs.getString());
         else
-            m_sRawBeatmapLoadOsuSongFolder = customBeatmapDirectory;
+            song_folder = customBeatmapDirectory.c_str();
     }
 
-    debugLog("Database: m_sRawBeatmapLoadOsuSongFolder = %s\n", m_sRawBeatmapLoadOsuSongFolder.c_str());
+    std::string out(song_folder.toUtf8());
+    return out;
+}
 
-    m_rawLoadBeatmapFolders = env->getFoldersInFolder(m_sRawBeatmapLoadOsuSongFolder);
+void OsuDatabase::scheduleLoadRaw() {
+    auto song_folder = getOsuSongsFolder();
+    debugLog("Database: song_folder = %s\n", song_folder.c_str());
+
+    m_rawLoadBeatmapFolders = env->getFoldersInFolder(song_folder);
     m_iNumBeatmapsToLoad = m_rawLoadBeatmapFolders.size();
 
     // if this isn't the first load, only load the differences

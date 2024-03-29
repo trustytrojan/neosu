@@ -9,8 +9,8 @@
 class Osu;
 
 enum class ServerPolicy {
-    FALSE,
-    TRUE,
+    NO,
+    YES,
     NO_PREFERENCE,
 };
 

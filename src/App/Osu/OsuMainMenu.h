@@ -57,6 +57,9 @@ class OsuMainMenu : public OsuScreen, public MouseListener {
     virtual void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);
 
+    OsuDatabaseBeatmap *preloaded_beatmap = nullptr;
+    void selectRandomBeatmap();
+
     virtual void onKeyDown(KeyboardEvent &e);
 
     virtual void onLeftChange(bool down) { (void)down; }

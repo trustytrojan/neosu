@@ -20,6 +20,7 @@
 #include "Osu.h"
 #include "OsuBackgroundImageHandler.h"
 #include "OsuBeatmapStandard.h"
+#include "OsuDatabase.h"
 #include "OsuDatabaseBeatmap.h"
 #include "OsuGameRules.h"
 #include "OsuHUD.h"
@@ -1274,10 +1275,51 @@ void OsuMainMenu::mouse_update(bool *propagate_clicks) {
         m_pauseButton->setPaused(false);
     } else {
         if(shuffling) {
-            m_osu->getSongBrowser()->selectRandomBeatmap(false);
+            selectRandomBeatmap();
         } else {
             m_pauseButton->setPaused(true);
         }
+    }
+}
+
+void OsuMainMenu::selectRandomBeatmap() {
+    if(m_osu->getSongBrowser()->getDatabase()->isFinished()) {
+        m_osu->getSongBrowser()->selectRandomBeatmap(false);
+    } else {
+        // Database is not loaded yet, load a random map and select it
+        // XXX: Also pick from McOsu maps/ directory
+        auto songs_folder = m_osu->getSongBrowser()->getDatabase()->getOsuSongsFolder();
+        auto mapset_folders = env->getFoldersInFolder(songs_folder);
+        auto nb_mapsets = mapset_folders.size();
+        if(nb_mapsets == 0) return;
+
+        auto cur_beatmap = m_osu->getSongBrowser()->getSelectedBeatmap();
+        if(cur_beatmap) cur_beatmap->deselect();
+        SAFE_DELETE(preloaded_beatmap);
+
+        for(int i = 0; i < 10; i++) {
+            auto mapset_folder = songs_folder;
+            mapset_folder.append(mapset_folders[rand() % nb_mapsets]);
+            mapset_folder.append("/");
+
+            auto beatmap = m_osu->getSongBrowser()->getDatabase()->loadRawBeatmap(mapset_folder);
+            if(beatmap == nullptr) {
+                debugLog("Failed to load beatmap set '%s'\n", mapset_folder.c_str());
+                continue;
+            }
+
+            auto beatmap_diffs = beatmap->getDifficulties();
+            if(beatmap_diffs.size() == 0) {
+                debugLog("Beatmap '%s' has no difficulties!\n", mapset_folder.c_str());
+                continue;
+            }
+
+            preloaded_beatmap = beatmap_diffs[rand() % beatmap_diffs.size()];
+            m_osu->getSongBrowser()->onDifficultySelected(preloaded_beatmap, false);
+            return;
+        }
+
+        debugLog("Failed to pick random beatmap...\n");
     }
 }
 
@@ -1286,7 +1328,7 @@ void OsuMainMenu::onKeyDown(KeyboardEvent &e) {
     if(!m_bVisible || e.isConsumed()) return;
 
     if(!m_osu->getOptionsMenu()->isMouseInside()) {
-        if(e == KEY_RIGHT || e == KEY_F2) m_osu->getSongBrowser()->selectRandomBeatmap(false);
+        if(e == KEY_RIGHT || e == KEY_F2) selectRandomBeatmap();
     }
 
     if(e == KEY_C || e == KEY_F4) onPausePressed();

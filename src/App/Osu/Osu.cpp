@@ -538,14 +538,6 @@ Osu::Osu(int instanceID) {
     // m_editor->setVisible(true);
     // m_userStatsScreen->setVisible(true);
 
-    if(isInVRMode() && osu_vr_tutorial.getBool()) {
-        m_mainMenu->setStartupAnim(false);
-        m_vrTutorial->setVisible(true);
-    } else
-        m_mainMenu->setVisible(true);
-
-    m_updateHandler->checkForUpdates();
-
     if(!env->directoryExists(MCENGINE_DATA_DIR "avatars")) {
         env->createDirectory(MCENGINE_DATA_DIR "avatars");
     }
@@ -559,6 +551,16 @@ Osu::Osu(int instanceID) {
     if(mp_autologin.getBool()) {
         reconnect();
     }
+
+    if(isInVRMode() && osu_vr_tutorial.getBool()) {
+        m_mainMenu->setStartupAnim(false);
+        m_vrTutorial->setVisible(true);
+    } else {
+        m_mainMenu->setVisible(true);
+        m_mainMenu->selectRandomBeatmap();
+    }
+
+    m_updateHandler->checkForUpdates();
 
     /*
     // DEBUG: immediately start diff of a beatmap

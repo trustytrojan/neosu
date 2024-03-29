@@ -28,6 +28,7 @@
 #include "OsuHUD.h"
 #include "OsuIcons.h"
 #include "OsuKeyBindings.h"
+#include "OsuMainMenu.h"
 #include "OsuModSelector.h"
 #include "OsuNotificationOverlay.h"
 #include "OsuOptionsMenu.h"
@@ -566,18 +567,6 @@ OsuSongBrowser2::OsuSongBrowser2(Osu *osu) : OsuScreenBackable(osu) {
 
     // looks like shit there, don't like it
     m_ppVersionInfoLabel = NULL;
-    /*
-    m_ppVersionInfoLabel = new OsuUIUserStatsScreenLabel(m_osu);
-    m_ppVersionInfoLabel->setText(UString::format("pp Version: %i", OsuDifficultyCalculator::PP_ALGORITHM_VERSION));
-    m_ppVersionInfoLabel->setTooltipText("WARNING: McOsu's star/pp algorithm is currently lagging behind the
-    \"official\" version.\n \nReason being that keeping up-to-date requires a LOT of changes now.\nThe next goal is
-    rewriting the algorithm architecture to be more similar to osu!lazer,\nas that will make porting star/pp changes
-    infinitely easier for the foreseeable future.\n \nNo promises as to when all of that will be finished.");
-    m_ppVersionInfoLabel->setTextColor(0xbbbb0000);
-    m_ppVersionInfoLabel->setDrawBackground(false);
-    m_ppVersionInfoLabel->setDrawFrame(false);
-    m_bottombar->addBaseUIElement(m_ppVersionInfoLabel);
-    */
 
     // build scorebrowser
     m_scoreBrowser = new CBaseUIScrollView(0, 0, 0, 0, "");
@@ -707,14 +696,8 @@ void OsuSongBrowser2::draw(Graphics *g) {
     if(!m_bVisible) return;
 
     // draw background
-    // g->setColor(0xffffffff);
     g->setColor(0xff000000);
     g->fillRect(0, 0, m_osu->getScreenWidth(), m_osu->getScreenHeight());
-    /*
-    g->setColor(0xffffffff);
-    g->setAlpha(clamp<float>(engine->getMouse()->getPos().x / 400.0f, 0.0f, 1.0f));
-    g->fillRect(0, 0, m_osu->getScreenWidth(), m_osu->getScreenHeight());
-    */
 
     // refreshing (blocks every other call in draw() below it!)
     if(m_bBeatmapRefreshScheduled) {
@@ -906,23 +889,6 @@ void OsuSongBrowser2::draw(Graphics *g) {
                                 strainWidth * 2 * margin + 8,
                                 aimStrainHeight + speedStrainHeight + 2 * margin * strainWidth + 8);
                 }
-
-                // DEBUG:
-                /*
-                g->pushTransform();
-                {
-                        g->translate(10, m_bottombar->getPos().y - 200);
-                        g->setColor(0xffffffff);
-                        g->drawString(m_osu->getSubTitleFont(), UString::format("avg strain = %i%% (%f)",
-                (int)((averageStrain / highestStrain) * 100.0f), averageStrain)); g->translate(0,
-                m_osu->getSubTitleFont()->getHeight()); g->drawString(m_osu->getSubTitleFont(), UString::format("top
-                strain = %i%% (%f)", (int)((highestStrain / highestStrain) * 100.0f), highestStrain)); g->translate(0,
-                m_osu->getSubTitleFont()->getHeight()); g->drawString(m_osu->getSubTitleFont(), UString::format("delta =
-                %i%% (%f)", (int)(((highestStrain - averageStrain) / highestStrain) * 100.0f), (highestStrain -
-                averageStrain)));
-                }
-                g->popTransform();
-                */
             }
         }
     }
@@ -995,23 +961,6 @@ void OsuSongBrowser2::draw(Graphics *g) {
         g->popTransform();
     }
 
-    // top ranks available info
-    /*
-    if (true)
-    {
-            UString topRanksInfoMessage = "<<< Top Ranks";
-            McFont *font = engine->getResourceManager()->getFont("FONT_DEFAULT");
-            g->setColor(0xff444444);
-            g->pushTransform();
-            {
-                    g->translate((int)(m_userButton->getPos().x + m_userButton->getSize().x + 10),
-    (int)(m_userButton->getPos().y + m_userButton->getSize().y/2 + font->getHeight()/2)); g->drawString(font,
-    topRanksInfoMessage);
-            }
-            g->popTransform();
-    }
-    */
-
     // no beatmaps found (osu folder is probably invalid)
     if(m_beatmaps.size() == 0 && !m_bBeatmapRefreshScheduled) {
         UString errorMessage1 = "Invalid osu! folder (or no beatmaps found): ";
@@ -1050,39 +999,6 @@ void OsuSongBrowser2::draw(Graphics *g) {
         g->fillGradient(0, 0, m_osu->getScreenWidth(), m_osu->getScreenHeight(), topColor, topColor, bottomColor,
                         bottomColor);
     }
-
-    // debug previous random beatmap
-    /*
-    g->setColor(0xffffffff);
-    g->pushTransform();
-    g->translate(m_osu->getScreenWidth()/5, m_osu->getScreenHeight()/3);
-    for (int i=0; i<m_previousRandomBeatmaps.size(); i++)
-    {
-            UString message = UString::format("#%i = ", i);
-            message.append(m_previousRandomBeatmaps[i]->getTitle());
-
-            g->drawString(m_osu->getSongBrowserFont(), message);
-            g->translate(0, m_osu->getSongBrowserFont()->getHeight()+10);
-    }
-    g->popTransform();
-    */
-
-    // debug thumbnail resource loading
-    /*
-    g->setColor(0xffffffff);
-    g->pushTransform();
-            g->translate(m_osu->getScreenWidth()/6, m_osu->getScreenHeight()/3);
-            g->drawString(m_osu->getSongBrowserFont(), UString::format("res %i",
-    engine->getResourceManager()->getNumResources())); g->translate(0, m_osu->getSongBrowserFont()->getHeight()*2); int
-    numVisibleSongButtons = 0; std::vector<CBaseUIElement*> *elements =
-    m_songBrowser->getContainer()->getAllBaseUIElementsPointer(); for (int i=0; i<elements->size(); i++)
-            {
-                    if ((*elements)[i]->isVisible())
-                            numVisibleSongButtons++;
-            }
-            g->drawString(m_osu->getSongBrowserFont(), UString::format("vis %i", numVisibleSongButtons));
-    g->popTransform();
-    */
 }
 
 void OsuSongBrowser2::drawSelectedBeatmapBackgroundImage(Graphics *g, Osu *osu, float alpha) {
@@ -1621,7 +1537,9 @@ CBaseUIContainer *OsuSongBrowser2::setVisible(bool visible) {
         m_bHasSelectedAndIsPlaying = false;  // sanity
 
         // try another refresh, maybe the osu!folder has changed
-        if(m_beatmaps.size() == 0) refreshBeatmaps();
+        if(m_beatmaps.size() == 0) {
+            refreshBeatmaps();
+        }
 
         // update user name/stats
         onUserButtonChange(m_name_ref->getString(), -1);
@@ -3257,6 +3175,17 @@ void OsuSongBrowser2::onDatabaseLoadingFinished() {
     onUserButtonChange(m_name_ref->getString(), -1);
 
     if(osu_songbrowser_search_hardcoded_filter.getString().length() > 0) onSearchUpdate();
+
+    // main menu starts playing a song before the database is loaded,
+    // re-select it after the database has been loaded
+    if(m_osu->m_mainMenu->preloaded_beatmap != nullptr) {
+        auto matching_beatmap = getDatabase()->getBeatmapDifficulty(m_osu->m_mainMenu->preloaded_beatmap->getMD5Hash());
+        if(matching_beatmap) {
+            onDifficultySelected(matching_beatmap, false);
+        }
+
+        SAFE_DELETE(m_osu->m_mainMenu->preloaded_beatmap);
+    }
 }
 
 void OsuSongBrowser2::onSearchUpdate() {
@@ -3658,30 +3587,6 @@ void OsuSongBrowser2::onSortChangeInt(UString text, bool autoScroll) {
     // we only need to update the visible buttons array if we are in No Grouping (because Collections always get sorted
     // by the collection name on the first level)
     if(m_group == GROUP::GROUP_NO_GROUPING) {
-        // HACKHACK: TODO: this needs to happen to support correct sorting, but using this requires proper regrouping
-        // logic (with memory allocations every time)
-        /*
-        std::vector<OsuUISongBrowserSongButton*> allDiffButtons;
-        for (size_t i=0; i<m_songButtons.size(); i++)
-        {
-                OsuUISongBrowserSongButton *button = m_songButtons[i];
-                const std::vector<OsuUISongBrowserButton*> &children = button->getChildren();
-                if (children.size() < 1)
-                        allDiffButtons.push_back(button);
-                else
-                {
-                        for (size_t c=0; c<children.size(); c++)
-                        {
-                                allDiffButtons.push_back((OsuUISongBrowserSongButton*)children[c]);
-                        }
-                }
-        }
-        std::sort(allDiffButtons.begin(), allDiffButtons.end(), comparatorWrapper);
-
-        m_visibleSongButtons.clear();
-        m_visibleSongButtons.insert(m_visibleSongButtons.end(), allDiffButtons.begin(), allDiffButtons.end());
-        */
-
         m_visibleSongButtons.clear();
         m_visibleSongButtons.insert(m_visibleSongButtons.end(), m_songButtons.begin(), m_songButtons.end());
     }

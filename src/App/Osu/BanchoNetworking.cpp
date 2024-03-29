@@ -251,11 +251,11 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
     hres = curl_easy_header(curl, "x-mcosu-features", 0, CURLH_HEADER, -1, &header);
     if(hres == CURLHE_OK) {
         if(strstr(header->value, "submit=0") != NULL) {
-            bancho.score_submission_policy = ServerPolicy::FALSE;
+            bancho.score_submission_policy = ServerPolicy::NO;
             bancho.osu->m_optionsMenu->updateLayout();
             debugLog("Server doesn't want score submission. :(\n");
         } else if(strstr(header->value, "submit=1") != NULL) {
-            bancho.score_submission_policy = ServerPolicy::TRUE;
+            bancho.score_submission_policy = ServerPolicy::YES;
             bancho.osu->m_optionsMenu->updateLayout();
             debugLog("Server wants score submission! :D\n");
         }

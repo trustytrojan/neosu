@@ -39,7 +39,7 @@ bool print_new_channels = true;
 bool Bancho::submit_scores() {
     if(score_submission_policy == ServerPolicy::NO_PREFERENCE) {
         return convar->getConVarByName("submit_scores")->getBool();
-    } else if(score_submission_policy == ServerPolicy::TRUE) {
+    } else if(score_submission_policy == ServerPolicy::YES) {
         return true;
     } else {
         return false;
