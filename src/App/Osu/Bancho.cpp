@@ -36,6 +36,16 @@ Bancho bancho;
 std::unordered_map<std::string, Channel *> chat_channels;
 bool print_new_channels = true;
 
+bool Bancho::submit_scores() {
+    if(score_submission_policy == ServerPolicy::NO_PREFERENCE) {
+        return convar->getConVarByName("submit_scores")->getBool();
+    } else if(score_submission_policy == ServerPolicy::TRUE) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 void update_channel(UString name, UString topic, int32_t nb_members) {
     Channel *chan;
     auto name_str = std::string(name.toUtf8());

@@ -8,6 +8,12 @@
 
 class Osu;
 
+enum class ServerPolicy {
+    FALSE,
+    TRUE,
+    NO_PREFERENCE,
+};
+
 struct Bancho {
     UString mcosu_version;
 
@@ -20,7 +26,9 @@ struct Bancho {
 
     bool prefer_daycore = false;
 
-    bool submit_scores = false;
+    ServerPolicy score_submission_policy = ServerPolicy::NO_PREFERENCE;
+    bool submit_scores();
+
     UString user_agent;
     UString client_hashes;
     UString disk_uuid;

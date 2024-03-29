@@ -71,6 +71,7 @@ class OsuOptionsMenu : public OsuScreenBackable, public OsuNotificationOverlayKe
         NONE,
         ASIO_ENABLED,
         WASAPI_ENABLED,
+        SCORE_SUBMISSION_POLICY,
     };
 
     struct OPTIONS_ELEMENT {
@@ -279,6 +280,7 @@ class OsuOptionsMenu : public OsuScreenBackable, public OsuNotificationOverlayKe
 
     CBaseUIElement *sectionOnline;
     CBaseUITextbox *m_serverTextbox;
+    CBaseUICheckbox *m_submitScoresCheckbox;
     CBaseUITextbox *m_nameTextbox;
     CBaseUITextbox *m_passwordTextbox;
     OsuUIButton *logInButton;

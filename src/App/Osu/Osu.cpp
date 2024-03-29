@@ -154,6 +154,7 @@ ConVar flashlight_follow_delay("flashlight_follow_delay", 0.120f, FCVAR_CHEAT);
 ConVar mp_server("mp_server", "ez-pp.farm", FCVAR_NONE);
 ConVar mp_password("mp_password", "", FCVAR_NONE);
 ConVar mp_autologin("mp_autologin", false, FCVAR_NONE);
+ConVar submit_scores("submit_scores", false, FCVAR_NONE);
 
 ConVar *Osu::version = &osu_version;
 ConVar *Osu::debug = &osu_debug;

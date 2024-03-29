@@ -1461,6 +1461,8 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
     addLabel("");
     m_serverTextbox =
         addTextbox(convar->getConVarByName("mp_server")->getString(), convar->getConVarByName("mp_server"));
+    m_submitScoresCheckbox = addCheckbox("Submit scores", convar->getConVarByName("submit_scores"));
+    m_elements.back().render_condition = RenderCondition::SCORE_SUBMISSION_POLICY;
 
     addSubSection("Login details (username/password)");
     m_nameTextbox = addTextbox(convar->getConVarByName("name")->getString(), convar->getConVarByName("name"));
@@ -2054,6 +2056,9 @@ void OsuOptionsMenu::updateLayout() {
     for(int i = 0; i < m_elements.size(); i++) {
         if(m_elements[i].render_condition == RenderCondition::ASIO_ENABLED && !engine->getSound()->isASIO()) continue;
         if(m_elements[i].render_condition == RenderCondition::WASAPI_ENABLED && !engine->getSound()->isWASAPI())
+            continue;
+        if(m_elements[i].render_condition == RenderCondition::SCORE_SUBMISSION_POLICY &&
+           bancho.score_submission_policy != ServerPolicy::NO_PREFERENCE)
             continue;
 
         // searching logic happens here:

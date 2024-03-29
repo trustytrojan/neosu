@@ -7,6 +7,7 @@
 #include "Bancho.h"
 #include "BanchoLeaderboard.h"
 #include "BanchoProtocol.h"
+#include "CBaseUICheckbox.h"
 #include "ConVar.h"
 #include "Engine.h"
 #include "File.h"
@@ -77,7 +78,10 @@ void disconnect() {
     delete[] outgoing.memory;
     outgoing = Packet();
     bancho.user_id = 0;
-    bancho.submit_scores = false;
+
+    bancho.score_submission_policy = ServerPolicy::NO_PREFERENCE;
+    bancho.osu->m_optionsMenu->updateLayout();
+
     bancho.osu->m_optionsMenu->logInButton->setText("Log in");
     bancho.osu->m_optionsMenu->logInButton->setColor(0xff00ff00);
     bancho.osu->m_optionsMenu->logInButton->is_loading = false;
@@ -246,8 +250,15 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
     }
     hres = curl_easy_header(curl, "x-mcosu-features", 0, CURLH_HEADER, -1, &header);
     if(hres == CURLHE_OK) {
-        bancho.submit_scores = strstr(header->value, "submit=1") != NULL;
-        debugLog("Score submission: %d\n", bancho.submit_scores);
+        if(strstr(header->value, "submit=0") != NULL) {
+            bancho.score_submission_policy = ServerPolicy::FALSE;
+            bancho.osu->m_optionsMenu->updateLayout();
+            debugLog("Server doesn't want score submission. :(\n");
+        } else if(strstr(header->value, "submit=1") != NULL) {
+            bancho.score_submission_policy = ServerPolicy::TRUE;
+            bancho.osu->m_optionsMenu->updateLayout();
+            debugLog("Server wants score submission! :D\n");
+        }
     }
 
     while(response.pos < response.size) {

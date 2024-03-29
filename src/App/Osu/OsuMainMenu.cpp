@@ -983,7 +983,7 @@ void OsuMainMenu::draw(Graphics *g) {
 
         if(bancho.is_online()) {
             UString score_submission("Scores: ");
-            UString submission_status(bancho.submit_scores ? "ENABLED" : "DISABLED");
+            UString submission_status(bancho.submit_scores() ? "ENABLED" : "DISABLED");
 
             auto full_text = score_submission;
             full_text.append(submission_status);
@@ -1009,11 +1009,11 @@ void OsuMainMenu::draw(Graphics *g) {
             g->pushTransform();
             {
                 if(haveTimingpoints)
-                    g->setColor(COLORf(1.0f, (bancho.submit_scores ? 0.1 : 0.3) + 0.15f * invertedPulse,
-                                       (bancho.submit_scores ? 0.3 : 0.1) + 0.15f * invertedPulse,
+                    g->setColor(COLORf(1.0f, (bancho.submit_scores() ? 0.1 : 0.3) + 0.15f * invertedPulse,
+                                       (bancho.submit_scores() ? 0.3 : 0.1) + 0.15f * invertedPulse,
                                        0.10f + 0.15f * invertedPulse));
                 else
-                    g->setColor(bancho.submit_scores ? 0xff44bb44 : 0xffbb4444);
+                    g->setColor(bancho.submit_scores() ? 0xff44bb44 : 0xffbb4444);
 
                 g->scale(fontScale, fontScale);
                 g->translate(

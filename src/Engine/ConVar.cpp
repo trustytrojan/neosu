@@ -5,9 +5,10 @@
 // $NoKeywords: $convar
 //===============================================================================//
 
+#include "ConVar.h"
+
 #include "Bancho.h"
 #include "CBaseUILabel.h"
-#include "ConVar.h"
 #include "Engine.h"
 #include "Osu.h"
 #include "OsuBeatmap.h"
@@ -295,7 +296,7 @@ void ConVar::exec() {
 
         auto mod_selector = bancho.osu->m_modSelector;
         if(mod_selector && mod_selector->m_nonVanillaWarning) {
-            mod_selector->m_nonVanillaWarning->setVisible(!is_vanilla && bancho.submit_scores);
+            mod_selector->m_nonVanillaWarning->setVisible(!is_vanilla && bancho.submit_scores());
         }
     }
 
@@ -505,7 +506,8 @@ bool ConVarHandler::isVanilla() {
         if(bancho.osu->getModTarget()) return false;
         if(bancho.osu->getModNightmare()) return false;
         if(bancho.osu->getModEZ() && bancho.osu->getModHR()) return false;
-        if((bancho.osu->getModDT() || bancho.osu->getModNC()) && (bancho.osu->getModHT() || bancho.osu->getModDC())) return false;
+        if((bancho.osu->getModDT() || bancho.osu->getModNC()) && (bancho.osu->getModHT() || bancho.osu->getModDC()))
+            return false;
     }
 
     return true;

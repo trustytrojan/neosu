@@ -1441,7 +1441,7 @@ void OsuBeatmapStandard::onBeforeStop(bool quit) {
     int scoreIndex = -1;
 
     if(!isCheated) {
-        if(bancho.submit_scores && !isZero && vanilla) {
+        if(bancho.submit_scores() && !isZero && vanilla) {
             score.replay_data = replay_data;
             submit_score(score);
         }

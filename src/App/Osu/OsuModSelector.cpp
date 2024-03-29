@@ -899,7 +899,7 @@ void OsuModSelector::updateLayout() {
         const float modGridMaxY =
             start.y + size.y * m_iGridHeight + offset.y * (m_iGridHeight - 1);  // exact bottom of the mod buttons
 
-        m_nonVanillaWarning->setVisible(!convar->isVanilla() && bancho.submit_scores);
+        m_nonVanillaWarning->setVisible(!convar->isVanilla() && bancho.submit_scores());
         m_nonVanillaWarning->setSizeToContent();
         m_nonVanillaWarning->setSize(Vector2(m_osu->getScreenWidth(), 20 * uiScale));
         m_nonVanillaWarning->setPos(
