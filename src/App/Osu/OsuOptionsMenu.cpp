@@ -34,6 +34,7 @@
 #include "OsuIcons.h"
 #include "OsuKeyBindings.h"
 #include "OsuMainMenu.h"
+#include "OsuModSelector.h"
 #include "OsuNotificationOverlay.h"
 #include "OsuSkin.h"
 #include "OsuSliderRenderer.h"
@@ -42,6 +43,7 @@
 #include "OsuUIButton.h"
 #include "OsuUICheckbox.h"
 #include "OsuUIContextMenu.h"
+#include "OsuUIModSelectorModButton.h"
 #include "OsuUISearchOverlay.h"
 #include "OsuUISlider.h"
 #include "OsuVR.h"
@@ -938,6 +940,12 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
                     "Whether to always apply all mods, or keep the preview music normal.",
                     convar->getConVarByName("osu_beatmap_preview_mods_live"));
     }
+
+    addSubSection("Gameplay");
+    addCheckbox("Prefer Nightcore over Double Time",
+                "Automatically selects Nightcore or Daycore when using speed modification mods.",
+                convar->getConVarByName("nightcore_enjoyer"))
+        ->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onNightcorePreferenceChange));
 
     //**************************************************************************************************************************//
 
@@ -3959,4 +3967,17 @@ void OsuOptionsMenu::openAndScrollToSkinSection() {
 
     if(!m_skinSelectLocalButton->isVisible() || !wasVisible)
         m_options->scrollToElement(m_skinSection, 0, 100 * Osu::getUIScale(m_osu));
+}
+
+void OsuOptionsMenu::onNightcorePreferenceChange(CBaseUICheckbox *checkbox) {
+    onCheckboxChange(checkbox);
+
+    int prev_state = m_osu->m_modSelector->m_modButtonHalftime->getState();
+
+    m_osu->m_modSelector->updateButtons();
+
+    if(m_osu->m_modSelector->m_modButtonHalftime->isOn() || m_osu->m_modSelector->m_modButtonDoubletime->isOn()) {
+        m_osu->m_modSelector->m_modButtonHalftime->setState(prev_state ? 0 : 1);
+        m_osu->m_modSelector->m_modButtonDoubletime->setState(prev_state ? 0 : 1);
+    }
 }

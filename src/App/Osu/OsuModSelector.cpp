@@ -319,11 +319,6 @@ void OsuModSelector::updateButtons(bool initial) {
                            "Mechanics > \"Select HP Drain\" > \"None\".",
                            [this]() -> OsuSkinImage * { return m_osu->getSkin()->getSelectionModNoFail(); });
     m_modButtonNofail->setAvailable(m_osu_drain_type_ref->getInt() > 0);
-    m_modButtonHalftime =
-        setModButtonOnGrid(2, 0, 0, initial && m_osu->getModHT(), "ht", "Less zoom.",
-                           [this]() -> OsuSkinImage * { return m_osu->getSkin()->getSelectionModHalfTime(); });
-    setModButtonOnGrid(2, 0, 1, initial && m_osu->getModDC(), "dc", "A E S T H E T I C",
-                       [this]() -> OsuSkinImage * { return m_osu->getSkin()->getSelectionModDayCore(); });
     setModButtonOnGrid(4, 0, 0, initial && m_osu->getModNightmare(), "nightmare",
                        "Unnecessary clicks count as misses.\nMassively reduced slider follow circle radius.",
                        [this]() -> OsuSkinImage * { return m_osu->getSkin()->getSelectionModNightmare(); });
@@ -336,11 +331,33 @@ void OsuModSelector::updateButtons(bool initial) {
                            [this]() -> OsuSkinImage * { return m_osu->getSkin()->getSelectionModSuddenDeath(); });
     setModButtonOnGrid(1, 1, 1, initial && m_osu->getModSS(), "ss", "SS or quit.",
                        [this]() -> OsuSkinImage * { return m_osu->getSkin()->getSelectionModPerfect(); });
-    m_modButtonDoubletime =
-        setModButtonOnGrid(2, 1, 0, initial && m_osu->getModDT(), "dt", "Zoooooooooom.",
+
+    if(convar->getConVarByName("nightcore_enjoyer")->getBool()) {
+        m_modButtonHalftime =
+            setModButtonOnGrid(2, 0, 0, initial && m_osu->getModDC(), "dc", "A E S T H E T I C",
+                               [this]() -> OsuSkinImage * { return m_osu->getSkin()->getSelectionModDayCore(); });
+        setModButtonOnGrid(2, 0, 1, initial && m_osu->getModHT(), "ht", "Less zoom.",
+                           [this]() -> OsuSkinImage * { return m_osu->getSkin()->getSelectionModHalfTime(); });
+
+        m_modButtonDoubletime =
+            setModButtonOnGrid(2, 1, 0, initial && m_osu->getModNC(), "nc", "uguuuuuuuu",
+                               [this]() -> OsuSkinImage * { return m_osu->getSkin()->getSelectionModNightCore(); });
+        setModButtonOnGrid(2, 1, 1, initial && m_osu->getModDT(), "dt", "Zoooooooooom.",
                            [this]() -> OsuSkinImage * { return m_osu->getSkin()->getSelectionModDoubleTime(); });
-    setModButtonOnGrid(2, 1, 1, initial && m_osu->getModNC(), "nc", "uguuuuuuuu",
-                       [this]() -> OsuSkinImage * { return m_osu->getSkin()->getSelectionModNightCore(); });
+    } else {
+        m_modButtonHalftime =
+            setModButtonOnGrid(2, 0, 0, initial && m_osu->getModHT(), "ht", "Less zoom.",
+                               [this]() -> OsuSkinImage * { return m_osu->getSkin()->getSelectionModHalfTime(); });
+        setModButtonOnGrid(2, 0, 1, initial && m_osu->getModDC(), "dc", "A E S T H E T I C",
+                           [this]() -> OsuSkinImage * { return m_osu->getSkin()->getSelectionModDayCore(); });
+
+        m_modButtonDoubletime =
+            setModButtonOnGrid(2, 1, 0, initial && m_osu->getModDT(), "dt", "Zoooooooooom.",
+                               [this]() -> OsuSkinImage * { return m_osu->getSkin()->getSelectionModDoubleTime(); });
+        setModButtonOnGrid(2, 1, 1, initial && m_osu->getModNC(), "nc", "uguuuuuuuu",
+                           [this]() -> OsuSkinImage * { return m_osu->getSkin()->getSelectionModNightCore(); });
+    }
+
     m_modButtonHidden =
         setModButtonOnGrid(3, 1, 0, initial && m_osu->getModHD(), "hd",
                            "Play with no approach circles and fading notes for a slight score advantage.",

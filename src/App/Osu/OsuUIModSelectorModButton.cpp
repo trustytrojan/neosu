@@ -177,10 +177,10 @@ void OsuUIModSelectorModButton::setOn(bool on, bool silent) {
 
     // Prevent DT and HT from being selected at the same time
     if(on && !silent && !m_states.empty()) {
-        if(m_states[0].modName == UString("dt")) {
+        if(m_states[0].modName == UString("dt") || m_states[0].modName == UString("nc")) {
             m_osu->m_modSelector->m_modButtonHalftime->setOn(false, true);
             convar->getConVarByName("osu_speed_override")->setValue(-1.0f);
-        } else if(m_states[0].modName == UString("ht")) {
+        } else if(m_states[0].modName == UString("ht") || m_states[0].modName == UString("dc")) {
             m_osu->m_modSelector->m_modButtonDoubletime->setOn(false, true);
             convar->getConVarByName("osu_speed_override")->setValue(-1.0f);
         }
@@ -234,9 +234,9 @@ void OsuUIModSelectorModButton::setState(int state, bool updateModConVar) {
     if(updateModConVar) {
         // We want to sync "nightcore" status between both buttons
         if(!m_states.empty()) {
-            if(m_states[0].modName == UString("dt")) {
+            if(m_states[0].modName == UString("dt") || m_states[0].modName == UString("nc")) {
                 m_osu->m_modSelector->m_modButtonHalftime->setState(m_iState, false);
-            } else if(m_states[0].modName == UString("ht")) {
+            } else if(m_states[0].modName == UString("ht") || m_states[0].modName == UString("dc")) {
                 m_osu->m_modSelector->m_modButtonDoubletime->setState(m_iState, false);
             }
         }

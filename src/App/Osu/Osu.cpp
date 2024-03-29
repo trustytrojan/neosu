@@ -151,6 +151,8 @@ ConVar avoid_flashes("avoid_flashes", false, FCVAR_NONE, "disable flashing eleme
 ConVar flashlight_radius("flashlight_radius", 100.f, FCVAR_CHEAT);
 ConVar flashlight_follow_delay("flashlight_follow_delay", 0.120f, FCVAR_CHEAT);
 
+ConVar nightcore_enjoyer("nightcore_enjoyer", false, FCVAR_NONE, "automatically select nightcore when speed modifying");
+
 ConVar mp_server("mp_server", "ez-pp.farm", FCVAR_NONE);
 ConVar mp_password("mp_password", "", FCVAR_NONE);
 ConVar mp_autologin("mp_autologin", false, FCVAR_NONE);
@@ -2193,33 +2195,34 @@ void Osu::onSpeedChange(UString oldValue, UString newValue) {
     }
 
     if(m_modSelector != nullptr) {
-        bool nightcoring = getModNC() || getModDC() || bancho.prefer_daycore;
+        int btn_state = (getModNC() || getModDC() || bancho.prefer_daycore) ? 1 : 0;
+
+        // nightcore_enjoyer reverses button order so NC appears first
+        if(convar->getConVarByName("nightcore_enjoyer")->getBool()) {
+            btn_state = (getModDT() || getModHT()) ? 1 : 0;
+        }
 
         // Why 0.0001f you ask? See OsuModSelector::resetMods()
         if(speed > 0.0001f && speed < 1.0) {
             m_modSelector->m_modButtonDoubletime->setOn(false, true);
+            m_modSelector->m_modButtonDoubletime->setState(btn_state, false);
             m_modSelector->m_modButtonHalftime->setOn(true, true);
+            m_modSelector->m_modButtonHalftime->setState(btn_state, false);
             m_bModDT = false;
-            m_bModHT = true;
-            if(nightcoring) {
-                m_modSelector->m_modButtonDoubletime->setState(1, false);
-                m_modSelector->m_modButtonHalftime->setState(1, false);
-                m_bModNC = false;
-                m_bModDC = true;
-                bancho.prefer_daycore = true;
-            }
+            m_bModNC = false;
+            m_bModHT = m_modSelector->m_modButtonHalftime->getActiveModName() == UString("ht");
+            m_bModDC = m_modSelector->m_modButtonHalftime->getActiveModName() == UString("dc");
+            bancho.prefer_daycore = m_modSelector->m_modButtonHalftime->getActiveModName() == UString("dc");
         } else if(speed > 1.0) {
             m_modSelector->m_modButtonDoubletime->setOn(true, true);
+            m_modSelector->m_modButtonDoubletime->setState(btn_state, false);
             m_modSelector->m_modButtonHalftime->setOn(false, true);
-            m_bModDT = true;
+            m_modSelector->m_modButtonHalftime->setState(btn_state, false);
             m_bModHT = false;
-            if(nightcoring) {
-                m_modSelector->m_modButtonDoubletime->setState(1, false);
-                m_modSelector->m_modButtonHalftime->setState(1, false);
-                m_bModNC = true;
-                m_bModDC = false;
-                bancho.prefer_daycore = true;
-            }
+            m_bModDC = false;
+            m_bModDT = m_modSelector->m_modButtonDoubletime->getActiveModName() == UString("dt");
+            m_bModNC = m_modSelector->m_modButtonDoubletime->getActiveModName() == UString("nc");
+            bancho.prefer_daycore = m_modSelector->m_modButtonDoubletime->getActiveModName() == UString("nc");
         }
     }
 }
