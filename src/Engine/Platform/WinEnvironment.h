@@ -38,6 +38,7 @@ class WinEnvironment : public Environment {
     void sleep(unsigned int us);
     std::string getExecutablePath();
     void openURLInDefaultBrowser(UString url);
+    void openDirectory(std::string path);
 
     // user
     UString getUsername();

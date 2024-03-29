@@ -38,6 +38,7 @@ class Environment {
     virtual void sleep(unsigned int us) = 0;
     virtual std::string getExecutablePath() = 0;
     virtual void openURLInDefaultBrowser(UString url) = 0;
+    virtual void openDirectory(std::string path) = 0;
 
     // user
     virtual UString getUsername() = 0;

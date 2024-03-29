@@ -147,6 +147,13 @@ void LinuxEnvironment::openURLInDefaultBrowser(UString url) {
     if(fork() == 0) exit(execl("/usr/bin/xdg-open", "xdg-open", url.toUtf8(), (char *)0));
 }
 
+void LinuxEnvironment::openDirectory(std::string path) {
+    std::string cmd("xdg-open ");
+    cmd.append(path);
+
+    system(cmd.c_str());
+}
+
 UString LinuxEnvironment::getUsername() {
     passwd *pwd = getpwuid(getuid());
     if(pwd != NULL && pwd->pw_name != NULL)

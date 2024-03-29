@@ -193,6 +193,11 @@ void WinEnvironment::openURLInDefaultBrowser(UString url) {
     ShellExecuteW(m_hwnd, L"open", url.wc_str(), NULL, NULL, SW_SHOW);
 }
 
+void WinEnvironment::openDirectory(std::string path) {
+    UString wpath(path.c_str());
+    ShellExecute(m_hwnd, L"open", wpath.wc_str(), NULL, NULL, SW_SHOW);
+}
+
 UString WinEnvironment::openFileWindow(const char *filetypefilters, UString title, UString initialpath) {
     disableFullscreen();
 

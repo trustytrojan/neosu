@@ -946,6 +946,9 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
     addSubSection("Skin");
     addSkinPreview();
     {
+        addButton("Open Skin folder")
+            ->setClickCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::openSkinsFolder));
+
         OPTIONS_ELEMENT skinSelect;
         {
             skinSelect = addButton("Select Skin", "default");
@@ -2544,6 +2547,14 @@ void OsuOptionsMenu::onRawInputToAbsoluteWindowChange(CBaseUICheckbox *checkbox)
             }
         }
     }
+}
+
+void OsuOptionsMenu::openSkinsFolder() {
+    UString skinFolder = convar->getConVarByName("osu_folder")->getString();
+    skinFolder.append(convar->getConVarByName("osu_folder_sub_skins")->getString());
+
+    std::string skin_folder_str(skinFolder.toUtf8());
+    env->openDirectory(skin_folder_str);
 }
 
 void OsuOptionsMenu::onSkinSelect() {
