@@ -7,12 +7,12 @@
 
 #include "Font.h"
 
-#include <ft2build.h>
 #include <freetype/freetype.h>
 #include <freetype/ftbitmap.h>
 #include <freetype/ftglyph.h>
 #include <freetype/ftoutln.h>
 #include <freetype/fttrigon.h>
+#include <ft2build.h>
 
 #include "ConVar.h"
 #include "Engine.h"
@@ -271,10 +271,14 @@ static void renderFTGlyphToTextureAtlas(FT_Library library, FT_Face face, wchar_
     }
 
     // convert glyph to bitmap
-    FT_Glyph_To_Bitmap(&glyph, antialiasing ? FT_RENDER_MODE_NORMAL : FT_RENDER_MODE_MONO, 0, 1);
-    FT_BitmapGlyph bitmapGlyph = (FT_BitmapGlyph)glyph;
+    if(FT_Glyph_To_Bitmap(&glyph, antialiasing ? FT_RENDER_MODE_NORMAL : FT_RENDER_MODE_MONO, 0, 1)) {
+        debugLog("Font error: FT_Glyph_To_Bitmap() failed!\n");
+        FT_Done_Glyph(glyph);
+        return;
+    }
 
     // get width & height of the glyph bitmap
+    FT_BitmapGlyph bitmapGlyph = (FT_BitmapGlyph)glyph;
     FT_Bitmap &bitmap = bitmapGlyph->bitmap;
     const int width = bitmap.width;
     const int height = bitmap.rows;
@@ -335,24 +339,22 @@ static void renderFTGlyphToTextureAtlas(FT_Library library, FT_Face face, wchar_
 }
 
 static unsigned char *unpackMonoBitmap(FT_Bitmap bitmap) {
-    unsigned char *result;
-    int y, byte_index, num_bits_done, rowstart, bits, bit_index;
-    unsigned char byte_value;
+    auto result = new unsigned char[bitmap.rows * bitmap.width];
 
-    result = new unsigned char[bitmap.rows * bitmap.width];
+    int pitch = bitmap.pitch;
+    if(pitch < 0) pitch = -bitmap.pitch;
 
-    for(y = 0; y < bitmap.rows; y++) {
-        for(byte_index = 0; byte_index < bitmap.pitch; byte_index++) {
-            byte_value = bitmap.buffer[y * bitmap.pitch + byte_index];
-            num_bits_done = byte_index * 8;
-            rowstart = y * bitmap.width + byte_index * 8;
-            bits = 8;
+    for(int row = 0; row < bitmap.rows; row++) {
+        for(int byte_idx = 0; byte_idx < bitmap.pitch; byte_idx++) {
+            unsigned char byte_value = bitmap.buffer[row * pitch + byte_idx];
 
-            if((bitmap.width - num_bits_done) < 8) bits = bitmap.width - num_bits_done;
+            int num_bits_done = byte_idx * 8;
+            int bits = bitmap.width - num_bits_done;
+            if(bits > 8) bits = 8;
 
-            for(bit_index = 0; bit_index < bits; bit_index++) {
-                const int bit = byte_value & (1 << (7 - bit_index));
-                result[rowstart + bit_index] = bit;
+            for(int bit_idx = 0; bit_idx < bits; bit_idx++) {
+                const int bit = byte_value & (1 << (7 - bit_idx));
+                result[row * bitmap.width + byte_idx * 8 + bit_idx] = bit;
             }
         }
     }

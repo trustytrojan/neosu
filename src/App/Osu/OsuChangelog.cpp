@@ -37,7 +37,7 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu) {
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
     latest.changes.push_back("- Added option to always pick Nightcore mod first");
-    latest.changes.push_back("- Play a random song preview on game launch");
+    latest.changes.push_back("- Now playing a random song on game launch");
     latest.changes.push_back("- Small UI improvements");
     changelogs.push_back(latest);
 

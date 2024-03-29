@@ -136,14 +136,14 @@ enum OutgoingPackets {
     TOURNAMENT_EXIT_MATCH_CHANNEL = 109,
 };
 
-typedef struct {
+struct Packet {
     uint16_t id = 0;
     uint8_t *memory = nullptr;
     size_t size = 0;
     size_t pos = 0;
     uint8_t *extra = nullptr;
     uint32_t extra_int = 0;  // lazy
-} Packet;
+};
 
 struct Slot {
     // From ROOM_CREATED, ROOM_UPDATED

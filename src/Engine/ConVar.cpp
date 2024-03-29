@@ -54,10 +54,12 @@ static void _addConVar(ConVar *c) {
 
     if(_getGlobalConVarArray().size() < 1) _getGlobalConVarArray().reserve(1024);
 
-    if(_getGlobalConVarMap().find(std::string(c->getName().toUtf8(), c->getName().lengthUtf8())) ==
-       _getGlobalConVarMap().end()) {
+    auto cname = c->getName();
+    std::string cname_str(cname.toUtf8(), cname.lengthUtf8());
+
+    if(_getGlobalConVarMap().find(cname_str) == _getGlobalConVarMap().end()) {
         _getGlobalConVarArray().push_back(c);
-        _getGlobalConVarMap()[std::string(c->getName().toUtf8(), c->getName().lengthUtf8())] = c;
+        _getGlobalConVarMap()[cname_str] = c;
     } else {
         printf("FATAL: Duplicate ConVar name (\"%s\")\n", c->getName().toUtf8());
         std::exit(100);
