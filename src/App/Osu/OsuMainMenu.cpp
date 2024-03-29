@@ -1270,19 +1270,23 @@ void OsuMainMenu::mouse_update(bool *propagate_clicks) {
     }
 
     // handle pause button pause detection
-    if(m_osu->getSelectedBeatmap() != NULL && m_osu->getSelectedBeatmap()->isPreviewMusicPlaying()) {
-        m_osu->getSelectedBeatmap()->getMusic()->setLoop(false);
-        m_pauseButton->setPaused(false);
-    } else {
-        if(shuffling) {
-            selectRandomBeatmap();
+    if(m_osu->getSelectedBeatmap() != NULL) {
+        if(m_osu->getSelectedBeatmap()->isPreviewMusicPlaying()) {
+            m_osu->getSelectedBeatmap()->getMusic()->setLoop(false);
+            m_pauseButton->setPaused(false);
         } else {
-            m_pauseButton->setPaused(true);
+            if(shuffling) {
+                selectRandomBeatmap();
+            } else {
+                m_pauseButton->setPaused(true);
+            }
         }
     }
 }
 
 void OsuMainMenu::selectRandomBeatmap() {
+    shuffling = true;
+
     if(m_osu->getSongBrowser()->getDatabase()->isFinished()) {
         m_osu->getSongBrowser()->selectRandomBeatmap(false);
     } else {
@@ -1368,8 +1372,6 @@ void OsuMainMenu::onResolutionChange(Vector2 newResolution) {
 
 CBaseUIContainer *OsuMainMenu::setVisible(bool visible) {
     m_bVisible = visible;
-
-    shuffling = m_osu->getSelectedBeatmap() != NULL && m_osu->getSelectedBeatmap()->isPreviewMusicPlaying();
 
     if(!m_bVisible) {
         setMenuElementsVisible(false, false);
