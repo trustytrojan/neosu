@@ -195,7 +195,7 @@ void WinEnvironment::openURLInDefaultBrowser(UString url) {
 
 void WinEnvironment::openDirectory(std::string path) {
     UString wpath(path.c_str());
-    ShellExecute(m_hwnd, L"open", wpath.wc_str(), NULL, NULL, SW_SHOW);
+    ShellExecuteW(m_hwnd, L"open", wpath.wc_str(), NULL, NULL, SW_SHOW);
 }
 
 UString WinEnvironment::openFileWindow(const char *filetypefilters, UString title, UString initialpath) {
