@@ -42,6 +42,7 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu) {
     latest.changes.push_back("- Allowed scores to submit when using mirror mods");
     latest.changes.push_back("- Now playing a random song on game launch");
     latest.changes.push_back("- Small UI improvements");
+    latest.changes.push_back("- Updated protocol and database version to b20240330.2");
     changelogs.push_back(latest);
 
     CHANGELOG v34_07;
