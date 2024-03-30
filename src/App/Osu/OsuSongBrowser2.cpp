@@ -1553,27 +1553,44 @@ CBaseUIContainer *OsuSongBrowser2::setVisible(bool visible) {
         engine->getMouse()->onLeftChange(false);
         engine->getMouse()->onRightChange(false);
 
-        // Select button matching current song preview
         if(m_selectedBeatmap != nullptr) {
+            // For multiplayer: if the host exits song selection without selecting a song, we want to be able to revert
+            // to that previous song.
             m_lastSelectedBeatmap = m_selectedBeatmap->getSelectedDifficulty2();
 
-            const std::vector<CBaseUIElement *> &elements = m_songBrowser->getContainer()->getElements();
-            for(size_t i = 0; i < elements.size(); i++) {
-                OsuUISongBrowserSongButton *btn = dynamic_cast<OsuUISongBrowserSongButton *>(elements[i]);
-                if(btn == nullptr) continue;
-                if(btn->getDatabaseBeatmap() == nullptr) continue;
-                if(btn->getDatabaseBeatmap() != m_selectedBeatmap->getSelectedDifficulty2()) continue;
-
-                btn->deselect();  // if we select() it when already selected, it would start playing!
-                btn->select();
-                break;
-            }
+            // Select button matching current song preview
+            selectSelectedBeatmapSongButton();
         }
-    } else
+    } else {
         m_contextMenu->setVisible2(false);
+    }
 
     m_osu->m_chat->updateVisibility();
     return this;
+}
+
+void OsuSongBrowser2::selectSelectedBeatmapSongButton() {
+    if(m_selectedBeatmap == nullptr) return;
+
+    const std::vector<CBaseUIElement *> &elements = m_songBrowser->getContainer()->getElements();
+    for(auto elm : elements) {
+        OsuUISongBrowserSongButton *btn = dynamic_cast<OsuUISongBrowserSongButton *>(elm);
+        if(btn == nullptr) continue;
+        if(btn->getDatabaseBeatmap() == nullptr) continue;
+
+        std::vector<OsuDatabaseBeatmap *> diffs = btn->getDatabaseBeatmap()->getDifficulties();
+        diffs.push_back(btn->getDatabaseBeatmap());
+
+        for(auto diff : diffs) {
+            if(m_selectedBeatmap->getSelectedDifficulty2() == diff) {
+                btn->deselect();  // if we select() it when already selected, it would start playing!
+                btn->select();
+                return;
+            }
+        }
+    }
+
+    debugLog("No song button found for currently selected beatmap...\n");
 }
 
 void OsuSongBrowser2::onPlayEnd(bool quit) {
@@ -3185,6 +3202,7 @@ void OsuSongBrowser2::onDatabaseLoadingFinished() {
         auto matching_beatmap = getDatabase()->getBeatmapDifficulty(m_osu->m_mainMenu->preloaded_beatmap->getMD5Hash());
         if(matching_beatmap) {
             onDifficultySelected(matching_beatmap, false);
+            selectSelectedBeatmapSongButton();
         }
 
         SAFE_DELETE(m_osu->m_mainMenu->preloaded_beatmap);

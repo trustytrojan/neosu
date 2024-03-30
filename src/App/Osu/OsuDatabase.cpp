@@ -2414,8 +2414,9 @@ void OsuDatabase::loadCollections(std::string collectionFilePath, bool isLegacy,
                          m_collections[i].beatmaps.size());
             }
         }
-    } else
-        debugLog("OsuBeatmapDatabase::loadDB() : Couldn't load %s", collectionFilePath.c_str());
+    } else {
+        debugLog("OsuBeatmapDatabase::loadDB() : Couldn't load %s\n", collectionFilePath.c_str());
+    }
 
     // backup
     if(!isLegacy) {

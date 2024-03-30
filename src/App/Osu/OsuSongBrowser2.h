@@ -113,6 +113,7 @@ class OsuSongBrowser2 : public OsuScreenBackable {
 
     virtual CBaseUIContainer *setVisible(bool visible);
 
+    void selectSelectedBeatmapSongButton();
     void onPlayEnd(bool quit = true);  // called when a beatmap is finished playing (or the player quit)
 
     void onSelectionChange(OsuUISongBrowserButton *button, bool rebuild);
