@@ -582,6 +582,12 @@ int OsuScore::getModsLegacy() {
     modsLegacy |= (m_osu->getModNightmare() ? ModFlags::Nightmare : 0);
     modsLegacy |= (m_osu->getModTD() ? ModFlags::TouchDevice : 0);
 
+    // Set some unused (in osu!std) mod flags for non-vanilla mods
+    // (these flags don't seem to cause issues on osu!stable or bancho.py)
+    if(convar->getConVarByName("osu_playfield_mirror_horizontal")->getBool()) modsLegacy |= ModFlags::Mirror;
+    if(convar->getConVarByName("osu_playfield_mirror_vertical")->getBool()) modsLegacy |= ModFlags::Mirror;
+    if(convar->getConVarByName("osu_mod_fposu")->getBool()) modsLegacy |= ModFlags::FPoSu;
+
     return modsLegacy;
 }
 

@@ -894,6 +894,8 @@ UString OsuUISongBrowserScoreButton::getModsStringForDisplay(int mods) {
     if(mods & ModFlags::ScoreV2) modsString.append("v2,");
     if(mods & ModFlags::Target) modsString.append("Target,");
     if(mods & ModFlags::Nightmare) modsString.append("NM,");
+    if(mods & ModFlags::Mirror) modsString.append("Mirror,");
+    if(mods & ModFlags::FPoSu) modsString.append("FPoSu,");
 
     if(modsString.length() > 0) modsString = modsString.substr(0, modsString.length() - 1);
 

@@ -42,7 +42,7 @@ ConVar osu_slider_end_inside_check_offset("osu_slider_end_inside_check_offset", 
 ConVar osu_slider_end_miss_breaks_combo("osu_slider_end_miss_breaks_combo", false, FCVAR_NONE,
                                         "should a missed sliderend break combo (aka cause a regular sliderbreak)");
 ConVar osu_slider_break_epilepsy("osu_slider_break_epilepsy", false, FCVAR_NONE);
-ConVar osu_slider_scorev2("osu_slider_scorev2", false, FCVAR_NONE);
+ConVar osu_slider_scorev2("osu_slider_scorev2", false, FCVAR_CHEAT);
 
 ConVar osu_slider_draw_body("osu_slider_draw_body", true, FCVAR_NONE);
 ConVar osu_slider_shrink("osu_slider_shrink", false, FCVAR_NONE);
