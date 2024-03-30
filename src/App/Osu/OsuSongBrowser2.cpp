@@ -923,6 +923,9 @@ void OsuSongBrowser2::draw(Graphics *g) {
     float songSelectBottomScale = m_bottombar->getSize().y / m_osu->getSkin()->getSongSelectBottom()->getHeight();
     songSelectBottomScale *= 0.8f;
 
+    g->setColor(0xff000000);
+    g->fillRect(0, m_bottombar->getPos().y + 10, m_osu->getScreenWidth(), m_bottombar->getSize().y);
+
     g->setColor(0xffffffff);
     g->pushTransform();
     {
