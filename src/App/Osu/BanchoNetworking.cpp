@@ -69,13 +69,12 @@ void disconnect() {
         curl_easy_perform(curl);
         curl_slist_free_all(chunk);
         curl_easy_cleanup(curl);
-
-        delete[] packet.memory;
+        free(packet.memory);
     }
 
     try_logging_in = false;
     auth_header = "";
-    delete[] outgoing.memory;
+    free(outgoing.memory);
     outgoing = Packet();
     bancho.user_id = 0;
 
@@ -133,7 +132,7 @@ void reconnect() {
     Packet new_login_packet = build_login_packet();
 
     pthread_mutex_lock(&outgoing_mutex);
-    delete login_packet.memory;
+    free(login_packet.memory);
     login_packet = new_login_packet;
     try_logging_in = true;
     pthread_mutex_unlock(&outgoing_mutex);
@@ -172,7 +171,7 @@ static void send_api_request(CURL *curl, APIRequest api_out) {
     response.id = api_out.type;
     response.extra = api_out.extra;
     response.extra_int = api_out.extra_int;
-    response.memory = new uint8_t[2048];
+    response.memory = (uint8_t *)malloc(2048);
 
     struct curl_slist *chunk = NULL;
     auto query_url = UString::format("https://osu.%s%s", bancho.endpoint.toUtf8(), api_out.path.toUtf8());
@@ -281,7 +280,7 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
 
         Packet incoming = {
             .id = packet_id,
-            .memory = new uint8_t[packet_len],
+            .memory = (uint8_t *)malloc(packet_len),
             .size = packet_len,
             .pos = 0,
         };
@@ -297,7 +296,7 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
 
 end:
     curl_easy_reset(curl);
-    delete response.memory;
+    free(response.memory);
     curl_slist_free_all(chunk);
 }
 
@@ -337,7 +336,7 @@ static void *do_networking(void *data) {
             try_logging_in = false;
             pthread_mutex_unlock(&outgoing_mutex);
             send_bancho_packet(curl, login);
-            delete login.memory;
+            free(login.memory);
             pthread_mutex_lock(&outgoing_mutex);
         } else if(should_ping && outgoing.pos == 0) {
             write_short(&outgoing, PING);
@@ -362,7 +361,7 @@ static void *do_networking(void *data) {
             write_int32(&out, 0);
 
             send_bancho_packet(curl, out);
-            delete out.memory;
+            free(out.memory);
         } else {
             pthread_mutex_unlock(&outgoing_mutex);
         }
@@ -401,8 +400,8 @@ void receive_api_responses() {
         Packet incoming = api_response_queue.front();
         api_response_queue.erase(api_response_queue.begin());
         handle_api_response(incoming);
-        delete incoming.memory;
-        delete incoming.extra;
+        free(incoming.memory);
+        free(incoming.extra);
     }
     pthread_mutex_unlock(&api_responses_mutex);
 }
@@ -413,7 +412,7 @@ void receive_bancho_packets() {
         Packet incoming = incoming_queue.front();
         incoming_queue.erase(incoming_queue.begin());
         handle_packet(&incoming);
-        delete incoming.memory;
+        free(incoming.memory);
     }
     pthread_mutex_unlock(&incoming_mutex);
 }

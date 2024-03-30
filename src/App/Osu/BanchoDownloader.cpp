@@ -58,7 +58,7 @@ void* run_mapset_download_thread(void* arg) {
     };
 
     Packet response;
-    response.memory = new uint8_t[2048];
+    response.memory = (uint8_t*)malloc(2048);
     bool download_success = false;
     for(int i = 0; i < 5; i++) {
         mz_zip_archive zip = {0};
@@ -137,9 +137,9 @@ void* run_mapset_download_thread(void* arg) {
         break;
 
     reset:
-        delete response.memory;
+        free(response.memory);
         response = Packet();
-        response.memory = new uint8_t[2048];
+        response.memory = (uint8_t*)malloc(2048);
         curl_easy_reset(curl);
         pthread_mutex_lock(&downloading_mapsets_mutex);
         dt->progress = 0.f;
@@ -148,7 +148,7 @@ void* run_mapset_download_thread(void* arg) {
     }
 
     // We're finally done downloading & extracting
-    delete response.memory;
+    free(response.memory);
     curl_easy_cleanup(curl);
 
     pthread_mutex_lock(&downloading_mapsets_mutex);

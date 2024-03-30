@@ -70,7 +70,7 @@ void *avatar_downloading_thread(void *arg) {
         auto img_url = UString::format("https://a.%s/%d", endpoint.toUtf8(), avatar_id);
         debugLog("Downloading %s\n", img_url.toUtf8());
         Packet response;
-        response.memory = new uint8_t[2048];
+        response.memory = (uint8_t *)malloc(2048);
         curl_easy_setopt(curl, CURLOPT_URL, img_url.toUtf8());
         curl_easy_setopt(curl, CURLOPT_USERAGENT, bancho.user_agent.toUtf8());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
@@ -95,7 +95,7 @@ void *avatar_downloading_thread(void *arg) {
 
             // We still save the avatar if it 404s, since the server will return the default avatar
             if(response_code != 404) {
-                delete response.memory;
+                free(response.memory);
                 curl_easy_reset(curl);
                 continue;
             }
@@ -110,7 +110,7 @@ void *avatar_downloading_thread(void *arg) {
             fflush(file);
             fclose(file);
         }
-        delete response.memory;
+        free(response.memory);
         curl_easy_reset(curl);
 
         pthread_mutex_lock(&avatars_mtx);
