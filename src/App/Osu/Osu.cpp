@@ -151,6 +151,7 @@ ConVar osu_win_disable_windows_key_while_playing("osu_win_disable_windows_key_wh
 ConVar avoid_flashes("avoid_flashes", false, FCVAR_NONE, "disable flashing elements (like FL dimming on sliders)");
 ConVar flashlight_radius("flashlight_radius", 100.f, FCVAR_CHEAT);
 ConVar flashlight_follow_delay("flashlight_follow_delay", 0.120f, FCVAR_CHEAT);
+ConVar flashlight_always_hard("flashlight_always_hard", false, FCVAR_NONE, "always use 200+ combo flashlight radius");
 
 ConVar nightcore_enjoyer("nightcore_enjoyer", false, FCVAR_NONE, "automatically select nightcore when speed modifying");
 
@@ -669,7 +670,7 @@ void Osu::draw(Graphics *g) {
                                     OsuGameRules::getPlayfieldOffset(this);
 
             float fl_radius = flashlight_radius.getFloat() * OsuGameRules::getPlayfieldScaleFactor(this);
-            if(getScore()->getCombo() >= 200) {
+            if(getScore()->getCombo() >= 200 || convar->getConVarByName("flashlight_always_hard")->getBool()) {
                 fl_radius *= 0.625f;
             } else if(getScore()->getCombo() >= 100) {
                 fl_radius *= 0.8125f;

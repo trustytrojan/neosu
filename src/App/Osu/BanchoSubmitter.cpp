@@ -201,7 +201,7 @@ void submit_score(OsuDatabase::Score score) {
         }
 
         part = curl_mime_addpart(request.mime);
-        curl_mime_filename(part, "mcosu-replay.osr");
+        curl_mime_filename(part, "replay");
         curl_mime_name(part, "score");
         curl_mime_data(part, (const char *)compressed_data, s_compressed_data);
         free(compressed_data);
