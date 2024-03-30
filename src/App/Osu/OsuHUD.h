@@ -14,6 +14,7 @@ class Osu;
 class OsuUIAvatar;
 class OsuVR;
 class OsuScore;
+class OsuScoreboardSlot;
 class OsuBeatmapStandard;
 
 class McFont;
@@ -23,6 +24,18 @@ class Shader;
 class VertexArrayObject;
 
 class CBaseUIContainer;
+
+struct SCORE_ENTRY {
+    UString name;
+    int32_t entry_id = 0;
+    uint32_t player_id = 0;
+
+    int combo;
+    unsigned long long score;
+    float accuracy;
+    bool dead;
+    bool highlight;
+};
 
 class OsuHUD : public OsuScreen {
    public:
@@ -58,9 +71,12 @@ class OsuHUD : public OsuScreen {
     void drawComboSimple(Graphics *g, int combo, float scale = 1.0f);          // used by OsuRankingScreen
     void drawAccuracySimple(Graphics *g, float accuracy, float scale = 1.0f);  // used by OsuRankingScreen
     void drawWarningArrow(Graphics *g, Vector2 pos, bool flipVertically, bool originLeft = true);
-    void updateScoreBoardAvatars();
-    void drawScoreBoard(Graphics *g, const MD5Hash &beatmapMD5Hash, OsuScore *currentScore);
-    void drawScoreBoardMP(Graphics *g);
+
+    std::vector<SCORE_ENTRY> getCurrentScores();
+    void resetScoreboard();
+    void updateScoreboard();
+    void drawFancyScoreboard(Graphics *g);
+
     void drawScorebarBg(Graphics *g, float alpha, float breakAnim);
     void drawSectionPass(Graphics *g, float alpha);
     void drawSectionFail(Graphics *g, float alpha);
@@ -84,6 +100,10 @@ class OsuHUD : public OsuScreen {
 
     // ILLEGAL:
     inline float getScoreBarBreakAnim() const { return m_fScoreBarBreakAnim; }
+
+    OsuScoreboardSlot *player_slot = nullptr;
+    std::vector<OsuScoreboardSlot *> slots;
+    MD5Hash beatmap_md5;
 
    private:
     struct CURSORTRAIL {
@@ -111,18 +131,6 @@ class OsuHUD : public OsuScreen {
         float angle;
     };
 
-    struct SCORE_ENTRY {
-        UString name;
-        uint32_t player_id = 0;
-
-        int index;
-        int combo;
-        unsigned long long score;
-        float accuracy;
-        bool dead;
-        bool highlight;
-    };
-
     struct BREAK {
         float startPercent;
         float endPercent;
@@ -141,7 +149,6 @@ class OsuHUD : public OsuScreen {
     void drawCombo(Graphics *g, int combo);
     void drawScore(Graphics *g, unsigned long long score);
     void drawHPBar(Graphics *g, double health, float alpha, float breakAnim);
-    void drawScoreBoardInt(Graphics *g, const std::vector<SCORE_ENTRY> &scoreEntries);
 
     void drawWarningArrows(Graphics *g, float hitcircleDiameter = 0.0f);
     void drawContinue(Graphics *g, Vector2 cursor, float hitcircleDiameter = 0.0f);

@@ -36,6 +36,7 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu) {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
+    latest.changes.push_back("- Added animations for the in-game scoreboard");
     latest.changes.push_back("- Added option to always pick Nightcore mod first");
     latest.changes.push_back("- Added osu_animation_speed_override cheat convar (code by Givikap120)");
     latest.changes.push_back("- Added flashlight_always_hard convar to lock flashlight radius to the 200+ combo size");

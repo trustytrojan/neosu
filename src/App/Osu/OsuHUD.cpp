@@ -29,6 +29,7 @@
 #include "OsuRankingScreen.h"
 #include "OsuRoom.h"
 #include "OsuScore.h"
+#include "OsuScoreboardSlot.h"
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
 #include "OsuSongBrowser2.h"
@@ -327,15 +328,7 @@ void OsuHUD::draw(Graphics *g) {
                                  m_osu->getScore()->getKeyCount(3), m_osu->getScore()->getKeyCount(4));
         }
 
-        if(osu_draw_scoreboard.getBool() && !bancho.is_playing_a_multi_map() &&
-           beatmap->getSelectedDifficulty2() != NULL) {
-            drawScoreBoard(g, beatmap->getSelectedDifficulty2()->getMD5Hash(), m_osu->getScore());
-        }
-
-        bool playing_mp = osu_draw_scoreboard_mp.getBool() && bancho.is_playing_a_multi_map();
-        if(playing_mp) {
-            drawScoreBoardMP(g);
-        }
+        drawFancyScoreboard(g);
 
         if(!m_osu->isSkipScheduled() && beatmap->isInSkippableSection() &&
            ((m_osu_skip_intro_enabled_ref->getBool() && beatmap->getHitObjectIndexForCurrentTime() < 1) ||
@@ -537,7 +530,6 @@ void OsuHUD::drawDummy(Graphics *g) {
 
     SCORE_ENTRY scoreEntry;
     scoreEntry.name = m_name_ref->getString();
-    scoreEntry.index = 0;
     scoreEntry.combo = 420;
     scoreEntry.score = 12345678;
     scoreEntry.accuracy = 1.0f;
@@ -548,7 +540,6 @@ void OsuHUD::drawDummy(Graphics *g) {
         static std::vector<SCORE_ENTRY> scoreEntries;
         scoreEntries.clear();
         { scoreEntries.push_back(scoreEntry); }
-        drawScoreBoardInt(g, scoreEntries);
     }
 
     drawSkip(g);
@@ -588,13 +579,6 @@ void OsuHUD::drawVR(Graphics *g, Matrix4 &mvp, OsuVR *vr) {
                           osu_hud_scorebar_hide_during_breaks.getBool() ? (1.0f - beatmap->getBreakBackgroundFadeAnim())
                                                                         : 1.0f,
                           m_fScoreBarBreakAnim);
-
-            if(osu_draw_scoreboard.getBool() && !bancho.is_playing_a_multi_map()) {
-                drawScoreBoard(g, beatmap->getSelectedDifficulty2()->getMD5Hash(), m_osu->getScore());
-            }
-            if(osu_draw_scoreboard_mp.getBool() && bancho.is_playing_a_multi_map()) {
-                drawScoreBoardMP(g);
-            }
 
             if(!m_osu->isSkipScheduled() && beatmap->isInSkippableSection() &&
                ((m_osu_skip_intro_enabled_ref->getBool() && beatmap->getHitObjectIndexForCurrentTime() < 1) ||
@@ -660,7 +644,6 @@ void OsuHUD::drawVRDummy(Graphics *g, Matrix4 &mvp, OsuVR *vr) {
             static std::vector<SCORE_ENTRY> scoreEntries;
             scoreEntries.clear();
             { scoreEntries.push_back(scoreEntry); }
-            drawScoreBoardInt(g, scoreEntries);
         }
 
         drawSkip(g);
@@ -1674,195 +1657,107 @@ void OsuHUD::drawWarningArrows(Graphics *g, float hitcircleDiameter) {
                      true);
 }
 
-void OsuHUD::updateScoreBoardAvatars() {
-    std::vector<uint32_t> player_ids;
-    m_avatars.clear();
+std::vector<SCORE_ENTRY> OsuHUD::getCurrentScores() {
+    static std::vector<SCORE_ENTRY> scores;
+    scores.clear();
 
-    if(bancho.is_online()) {
-        player_ids.push_back(bancho.user_id);
-    }
+    auto beatmap = m_osu->getSelectedBeatmap();
+    if(!beatmap) return scores;
 
     if(bancho.is_in_a_multi_room()) {
         for(int i = 0; i < 16; i++) {
-            if(bancho.room.slots[i].has_player()) {
-                player_ids.push_back(bancho.room.slots[i].player_id);
+            auto slot = &bancho.room.slots[i];
+            if(!slot->is_player_playing() && !slot->has_finished_playing()) continue;
+
+            if(slot->player_id == bancho.user_id) {
+                // Update local player slot instantly
+                // (not including fields that won't be used for the HUD)
+                slot->num300 = (uint16_t)m_osu->getScore()->getNum300s();
+                slot->num100 = (uint16_t)m_osu->getScore()->getNum100s();
+                slot->num50 = (uint16_t)m_osu->getScore()->getNum50s();
+                slot->num_miss = (uint16_t)m_osu->getScore()->getNumMisses();
+                slot->current_combo = (uint16_t)m_osu->getScore()->getCombo();
+                slot->total_score = (int32_t)m_osu->getScore()->getScore();
+                slot->current_hp = beatmap->getHealth() * 200;
             }
-        }
-    } else {
-        auto beatmap = m_osu->getSelectedBeatmap();
-        if(!beatmap) return;
 
-        auto md5 = beatmap->getSelectedDifficulty2()->getMD5Hash();
-        auto db = m_osu->getSongBrowser()->getDatabase();
-        auto search = db->m_online_scores.find(md5);
-        if(search != db->m_online_scores.end()) {
-            for(auto score : search->second) {
-                player_ids.push_back(score.player_id);
-            }
-        }
-    }
+            auto user_info = get_user_info(slot->player_id, false);
 
-    for(auto id : player_ids) {
-        m_avatars.push_back(new OsuUIAvatar(id, 0, 0, 0, 0));
-    }
-}
+            SCORE_ENTRY scoreEntry;
+            scoreEntry.entry_id = slot->player_id;
+            scoreEntry.player_id = slot->player_id;
+            scoreEntry.name = user_info->name;
+            scoreEntry.combo = slot->current_combo;
+            scoreEntry.score = slot->total_score;
+            scoreEntry.dead = (slot->current_hp == 0);
+            scoreEntry.highlight = (slot->player_id == bancho.user_id);
 
-void OsuHUD::drawScoreBoard(Graphics *g, const MD5Hash &beatmapMD5Hash, OsuScore *currentScore) {
-    const int maxVisibleDatabaseScores = m_osu->isInVRDraw() ? 3 : 4;
-    auto m_db = m_osu->getSongBrowser()->getDatabase();
-    const std::vector<OsuDatabase::Score> *scores = &((*m_db->getScores())[beatmapMD5Hash]);
-
-    auto cv_sortingtype = convar->getConVarByName("osu_songbrowser_scores_sortingtype");
-    bool is_online = cv_sortingtype->getString() == UString("Online Leaderboard");
-    if(is_online) {
-        // XXX: shouldn't be called every frame... but mcosu also does it ¯\_(ツ)_/¯
-        auto search = m_db->m_online_scores.find(beatmapMD5Hash);
-        if(search != m_db->m_online_scores.end()) {
-            scores = &search->second;
-        }
-    }
-
-    const int numScores = scores->size();
-    if(numScores < 1) return;
-
-    static std::vector<SCORE_ENTRY> scoreEntries;
-    scoreEntries.clear();
-    scoreEntries.reserve(numScores);
-
-    const bool isUnranked = (m_osu->getModAuto() || (m_osu->getModAutopilot() && m_osu->getModRelax()));
-
-    for(auto avatar : m_avatars) {
-        avatar->on_screen = false;
-        avatar->setVisible(false);
-    }
-
-    bool injectCurrentScore = true;
-    for(int i = 0; i < numScores && i < maxVisibleDatabaseScores; i++) {
-        SCORE_ENTRY scoreEntry;
-
-        scoreEntry.player_id = (*scores)[i].player_id;
-        scoreEntry.name = (*scores)[i].playerName;
-
-        scoreEntry.index = -1;
-        scoreEntry.combo = (*scores)[i].comboMax;
-        scoreEntry.score = (*scores)[i].score;
-        scoreEntry.accuracy = OsuScore::calculateAccuracy((*scores)[i].num300s, (*scores)[i].num100s,
-                                                          (*scores)[i].num50s, (*scores)[i].numMisses);
-        scoreEntry.dead = false;
-        scoreEntry.highlight = false;
-
-        const bool isLastScore = (i == numScores - 1) || (i == maxVisibleDatabaseScores - 1);
-        const bool isCurrentScoreMore = (currentScore->getScore() > scoreEntry.score);
-        bool scoreAlreadyAdded = false;
-        if(injectCurrentScore && (isCurrentScoreMore || isLastScore)) {
-            injectCurrentScore = false;
-
-            SCORE_ENTRY currentScoreEntry;
-
-            currentScoreEntry.name = (isUnranked ? "McOsu" : m_name_ref->getString());
-            currentScoreEntry.player_id = bancho.user_id;
-            currentScoreEntry.combo = currentScore->getComboMax();
-            currentScoreEntry.score = currentScore->getScore();
-            currentScoreEntry.accuracy = currentScore->getAccuracy();
-
-            currentScoreEntry.index = i;
-            if(!isCurrentScoreMore) {
-                for(int j = i; j < numScores; j++) {
-                    if(currentScoreEntry.score > (*scores)[j].score)
-                        break;
-                    else
-                        currentScoreEntry.index = j + 1;
+            if(slot->has_quit()) {
+                slot->current_hp = 0;
+                scoreEntry.name = UString::format("%s [quit]", user_info->name.toUtf8());
+            } else if(beatmap != nullptr && beatmap->isInSkippableSection() &&
+                      beatmap->getHitObjectIndexForCurrentTime() < 1) {
+                if(slot->skipped) {
+                    // XXX: Draw pretty "Skip" image instead
+                    scoreEntry.name = UString::format("%s [skip]", user_info->name.toUtf8());
                 }
             }
 
-            currentScoreEntry.dead = currentScore->isDead();
-            currentScoreEntry.highlight = true;
+            // hit_score != total_score: total_score also accounts for spinner bonus & mods
+            uint64_t hit_score = 300 * slot->num300 + 100 * slot->num100 + 50 * slot->num50;
+            uint64_t max_score = 300 * (slot->num300 + slot->num100 + slot->num50 + slot->num_miss);
+            scoreEntry.accuracy = max_score > 0 ? hit_score / max_score : 0.f;
 
-            if(isLastScore) {
-                if(isCurrentScoreMore) scoreEntries.push_back(std::move(currentScoreEntry));
-
-                scoreEntries.push_back(std::move(scoreEntry));
-                scoreAlreadyAdded = true;
-
-                if(!isCurrentScoreMore) scoreEntries.push_back(std::move(currentScoreEntry));
-            } else
-                scoreEntries.push_back(std::move(currentScoreEntry));
+            scores.push_back(std::move(scoreEntry));
         }
-
-        if(!scoreAlreadyAdded) scoreEntries.push_back(std::move(scoreEntry));
-    }
-
-    drawScoreBoardInt(g, scoreEntries);
-}
-
-void OsuHUD::drawScoreBoardMP(Graphics *g) {
-    if(!bancho.is_in_a_multi_room()) return;
-
-    auto slots = bancho.room.slots;
-    if(!bancho.is_playing_a_multi_map()) {
-        slots = bancho.last_scores;
-    }
-
-    for(auto avatar : m_avatars) {
-        avatar->on_screen = false;
-        avatar->setVisible(false);
-    }
-
-    static std::vector<SCORE_ENTRY> scoreEntries;
-    scoreEntries.clear();
-    for(int i = 0; i < 16; i++) {
-        auto slot = &slots[i];
-        if(!slot->is_player_playing() && !slot->has_finished_playing()) continue;
-
-        auto beatmap = m_osu->getSelectedBeatmap();
-        if(slot->player_id == bancho.user_id && beatmap != nullptr) {
-            // Update local player slot instantly
-            // (not including fields that won't be used for the HUD)
-            slot->num300 = (uint16_t)m_osu->getScore()->getNum300s();
-            slot->num100 = (uint16_t)m_osu->getScore()->getNum100s();
-            slot->num50 = (uint16_t)m_osu->getScore()->getNum50s();
-            slot->num_miss = (uint16_t)m_osu->getScore()->getNumMisses();
-            slot->current_combo = (uint16_t)m_osu->getScore()->getCombo();
-            slot->total_score = (int32_t)m_osu->getScore()->getScore();
-            slot->current_hp = beatmap->getHealth() * 200;
-        }
-
-        SCORE_ENTRY scoreEntry;
-        scoreEntry.player_id = slot->player_id;
-
-        auto user_info = get_user_info(slot->player_id, false);
-        scoreEntry.name = user_info->name;
-
-        if(slot->has_quit()) {
-            slot->current_hp = 0;
-            scoreEntry.name = UString::format("%s [quit]", user_info->name.toUtf8());
-        } else if(beatmap != nullptr && beatmap->isInSkippableSection() &&
-                  beatmap->getHitObjectIndexForCurrentTime() < 1) {
-            if(slot->skipped) {
-                // XXX: Draw pretty "Skip" image instead
-                scoreEntry.name = UString::format("%s [skip]", user_info->name.toUtf8());
+    } else {
+        auto m_db = m_osu->getSongBrowser()->getDatabase();
+        std::vector<OsuDatabase::Score> *singleplayer_scores = &((*m_db->getScores())[beatmap_md5]);
+        auto cv_sortingtype = convar->getConVarByName("osu_songbrowser_scores_sortingtype");
+        bool is_online = cv_sortingtype->getString() == UString("Online Leaderboard");
+        if(is_online) {
+            auto search = m_db->m_online_scores.find(beatmap_md5);
+            if(search != m_db->m_online_scores.end()) {
+                singleplayer_scores = &search->second;
             }
         }
 
-        scoreEntry.index = -1;
-        scoreEntry.combo = slot->current_combo;
-        scoreEntry.score = slot->total_score;
+        int nb_slots = 0;
+        const auto &scores_ref = *singleplayer_scores;
+        for(auto score : scores_ref) {
+            SCORE_ENTRY scoreEntry;
+            scoreEntry.entry_id = -(nb_slots + 1);
+            scoreEntry.player_id = score.player_id;
+            scoreEntry.name = score.playerName;
+            scoreEntry.combo = score.comboMax;
+            scoreEntry.score = score.score;
+            scoreEntry.accuracy =
+                OsuScore::calculateAccuracy(score.num300s, score.num100s, score.num50s, score.numMisses);
+            scoreEntry.dead = false;
+            scoreEntry.highlight = false;
+            scores.push_back(std::move(scoreEntry));
+            nb_slots++;
+        }
 
-        // hit_score != total_score: total_score also accounts for spinner bonus & mods
-        uint64_t hit_score = 300 * slot->num300 + 100 * slot->num100 + 50 * slot->num50;
-        uint64_t max_score = 300 * (slot->num300 + slot->num100 + slot->num50 + slot->num_miss);
-        scoreEntry.accuracy = max_score > 0 ? hit_score / max_score : 0.f;
-
-        scoreEntry.dead = (slot->current_hp == 0);
-        scoreEntry.highlight = (slot->player_id == bancho.user_id);
-        scoreEntries.push_back(std::move(scoreEntry));
+        const bool isUnranked = (m_osu->getModAuto() || (m_osu->getModAutopilot() && m_osu->getModRelax()));
+        SCORE_ENTRY playerScoreEntry;
+        playerScoreEntry.name = (isUnranked ? "McOsu" : m_name_ref->getString());
+        playerScoreEntry.entry_id = 0;
+        playerScoreEntry.player_id = bancho.user_id;
+        playerScoreEntry.combo = m_osu->getScore()->getComboMax();
+        playerScoreEntry.score = m_osu->getScore()->getScore();
+        playerScoreEntry.accuracy = m_osu->getScore()->getAccuracy();
+        playerScoreEntry.dead = m_osu->getScore()->isDead();
+        playerScoreEntry.highlight = true;
+        scores.push_back(std::move(playerScoreEntry));
+        nb_slots++;
     }
 
-    // Sort scores
-    std::sort(scoreEntries.begin(), scoreEntries.end(), [](SCORE_ENTRY a, SCORE_ENTRY b) {
-        if(bancho.room.win_condition == ACCURACY) {
+    auto sorting_type = bancho.is_in_a_multi_room() ? bancho.room.win_condition : SCOREV1;
+    std::sort(scores.begin(), scores.end(), [sorting_type](SCORE_ENTRY a, SCORE_ENTRY b) {
+        if(sorting_type == ACCURACY) {
             return a.accuracy > b.accuracy;
-        } else if(bancho.room.win_condition == COMBO) {
+        } else if(sorting_type == COMBO) {
             // NOTE: I'm aware that 'combo' in SCORE_ENTRY represents the current combo.
             //       That's how the win condition actually works, though. lol
             return a.combo > b.combo;
@@ -1871,236 +1766,70 @@ void OsuHUD::drawScoreBoardMP(Graphics *g) {
         }
     });
 
-    // Update indices
-    int i = 0;
-    for(auto &entry : scoreEntries) {
-        entry.index = i++;
-    }
-
-    drawScoreBoardInt(g, scoreEntries);
+    return scores;
 }
 
-void OsuHUD::drawScoreBoardInt(Graphics *g, const std::vector<OsuHUD::SCORE_ENTRY> &scoreEntries) {
-    if(scoreEntries.size() < 1) return;
+void OsuHUD::resetScoreboard() {
+    OsuBeatmap *beatmap = m_osu->getSelectedBeatmap();
+    if(beatmap == nullptr) return;
+    OsuDatabaseBeatmap *diff2 = beatmap->getSelectedDifficulty2();
+    if(diff2 == nullptr) return;
 
-    const bool useMenuButtonBackground = osu_hud_scoreboard_use_menubuttonbackground.getBool();
-    OsuSkinImage *backgroundImage = m_osu->getSkin()->getMenuButtonBackground2();
-    const float oScale =
-        backgroundImage->getResolutionScale() * 0.99f;  // for converting harcoded osu offset pixels to screen pixels
+    beatmap_md5 = diff2->getMD5Hash();
+    player_slot = nullptr;
+    for(auto slot : slots) {
+        delete slot;
+    }
+    slots.clear();
 
-    McFont *indexFont = m_osu->getSongBrowserFontBold();
-    McFont *nameFont = m_osu->getSongBrowserFont();
-    McFont *scoreFont = m_osu->getSongBrowserFont();
-    McFont *comboFont = scoreFont;
-    McFont *accFont = comboFont;
-
-    const Color backgroundColor = 0x55114459;
-    const Color backgroundColorHighlight = 0x55777777;
-    const Color backgroundColorTop = 0x551b6a8c;
-    const Color backgroundColorDead = 0x55660000;
-
-    const Color indexColor = 0x11ffffff;
-    const Color indexColorHighlight = 0x22ffffff;
-
-    const Color nameScoreColor = 0xffaaaaaa;
-    const Color nameScoreColorHighlight = 0xffffffff;
-    const Color nameScoreColorTop = 0xffeeeeee;
-    const Color nameScoreColorDead = 0xffee0000;
-
-    const Color comboAccuracyColor = 0xff5d9ca1;
-    const Color comboAccuracyColorHighlight = 0xff99fafe;
-    const Color comboAccuracyColorTop = 0xff84dbe0;
-
-    const Color textShadowColor = 0x66000000;
-
-    const bool drawTextShadow = (m_osu_background_dim_ref->getFloat() < 0.7f);
-
-    const float scale = osu_hud_scoreboard_scale.getFloat() * osu_hud_scale.getFloat();
-    const float height = m_osu->getScreenHeight() * 0.07f * scale;
-    const float width = height * 2.6f;  // was 2.75f ; does not include avatar_width
-    const float margin = height * 0.1f;
-    const float padding = height * 0.05f;
-
-    const float minStartPosY =
-        m_osu->getScreenHeight() - (scoreEntries.size() * height + (scoreEntries.size() - 1) * margin);
-
-    const float startPosX = 0;
-    const float startPosY = clamp<float>(m_osu->getScreenHeight() / 2 -
-                                             (scoreEntries.size() * height + (scoreEntries.size() - 1) * margin) / 2 +
-                                             osu_hud_scoreboard_offset_y_percent.getFloat() * m_osu->getScreenHeight(),
-                                         0.0f, minStartPosY);
-    for(int i = 0; i < scoreEntries.size(); i++) {
-        float x = startPosX;
-        const float y = startPosY + i * (height + margin);
-
-        float avatar_height = height;
-        float avatar_width = avatar_height;
-        if(scoreEntries[i].player_id == 0) {
-            avatar_height = 0.f;
-            avatar_width = 0.f;
+    int player_entry_id = bancho.is_in_a_multi_room() ? bancho.user_id : 0;
+    auto scores = getCurrentScores();
+    int i = 0;
+    for(auto score : scores) {
+        auto slot = new OsuScoreboardSlot(score, i);
+        if(score.entry_id == player_entry_id) {
+            player_slot = slot;
         }
+        slots.push_back(slot);
+        i++;
+    }
 
-        if(m_osu->isInVRDraw()) {
-            g->setBlending(false);
+    updateScoreboard();
+}
+
+void OsuHUD::updateScoreboard() {
+    OsuBeatmap *beatmap = m_osu->getSelectedBeatmap();
+    if(beatmap == nullptr) return;
+    OsuDatabaseBeatmap *diff2 = beatmap->getSelectedDifficulty2();
+    if(diff2 == nullptr) return;
+
+    // Update player slot first
+    auto new_scores = getCurrentScores();
+    for(int i = 0; i < new_scores.size(); i++) {
+        if(new_scores[i].entry_id != player_slot->m_score.entry_id) continue;
+
+        player_slot->updateIndex(i);
+        player_slot->m_score = new_scores[i];
+        break;
+    }
+
+    // Update other slots
+    for(int i = 0; i < new_scores.size(); i++) {
+        if(new_scores[i].entry_id == player_slot->m_score.entry_id) continue;
+
+        for(auto slot : slots) {
+            if(slot->m_score.entry_id != new_scores[i].entry_id) continue;
+
+            slot->updateIndex(i);
+            slot->m_score = new_scores[i];
+            break;
         }
+    }
+}
 
-        // draw background
-        g->setColor(scoreEntries[i].dead
-                        ? backgroundColorDead
-                        : (scoreEntries[i].highlight ? backgroundColorHighlight
-                                                     : (i == 0 ? backgroundColorTop : backgroundColor)));
-        if(useMenuButtonBackground &&
-           !m_osu->isInVRDraw())  // NOTE: in vr you would see the other 3/4ths of menu-button-background sticking out
-                                  // left, just fallback to fillRect for now
-        {
-            const float backgroundScale = 0.62f + 0.005f;
-            backgroundImage->draw(
-                g,
-                Vector2(x + avatar_width + (backgroundImage->getSizeBase().x / 2) * backgroundScale * scale -
-                            (470 * oScale) * backgroundScale * scale,
-                        y + height / 2),
-                backgroundScale * scale);
-        } else
-            g->fillRect(x, y, width + avatar_width, height);
-
-        if(m_osu->isInVRDraw()) {
-            g->setBlending(true);
-
-            g->pushTransform();
-            g->translate(0, 0, 0.1f);
-        }
-
-        // draw avatar
-        if(avatar_width > 0) {
-            for(auto avatar : m_avatars) {
-                if(avatar->m_player_id == scoreEntries[i].player_id) {
-                    avatar->on_screen = true;
-                    avatar->setPos(x, y);
-                    avatar->setSize(avatar_width, avatar_height);
-                    avatar->setVisible(true);
-                    avatar->draw(g);  // XXX: Doesn't download but will still show as loading if not downloaded
-                    break;
-                }
-            }
-
-            x += avatar_width;
-        }
-
-        // draw index
-        const float indexScale = 0.5f;
-        g->pushTransform();
-        {
-            const float scale = (height / indexFont->getHeight()) * indexScale;
-
-            UString indexString = UString::format("%i", (scoreEntries[i].index > -1 ? scoreEntries[i].index : i) + 1);
-            const float stringWidth = indexFont->getStringWidth(indexString);
-
-            g->scale(scale, scale);
-            g->translate(x + width - stringWidth * scale - 2 * padding, y + indexFont->getHeight() * scale);
-            g->setColor((scoreEntries[i].highlight ? indexColorHighlight : indexColor));
-            g->drawString(indexFont, indexString);
-        }
-        g->popTransform();
-
-        // draw name
-        const float nameScale = 0.315f;
-        g->pushTransform();
-        {
-            const bool isInPlayModeAndAlsoNotInVR = m_osu->isInPlayMode() && !m_osu->isInVRMode();
-
-            if(isInPlayModeAndAlsoNotInVR) g->pushClipRect(McRect(x, y, width - 2 * padding, height));
-
-            const float scale = (height / nameFont->getHeight()) * nameScale;
-            g->scale(scale, scale);
-            g->translate(x + padding, y + padding + nameFont->getHeight() * scale);
-            if(drawTextShadow) {
-                g->translate(1, 1);
-                g->setColor(textShadowColor);
-                g->drawString(nameFont, scoreEntries[i].name);
-                g->translate(-1, -1);
-            }
-            g->setColor(scoreEntries[i].dead
-                            ? nameScoreColorDead
-                            : (scoreEntries[i].highlight ? nameScoreColorHighlight
-                                                         : (i == 0 ? nameScoreColorTop : nameScoreColor)));
-            g->drawString(nameFont, scoreEntries[i].name);
-
-            if(isInPlayModeAndAlsoNotInVR) g->popClipRect();
-        }
-        g->popTransform();
-
-        // draw combo
-        const float comboScale = 0.26f;
-        g->pushTransform();
-        {
-            const float scale = (height / comboFont->getHeight()) * comboScale;
-
-            UString comboString = UString::format("%ix", scoreEntries[i].combo);
-            const float stringWidth = comboFont->getStringWidth(comboString);
-
-            g->scale(scale, scale);
-            g->translate(x + width - stringWidth * scale - padding * 1.35f, y + height - 2 * padding);
-            if(drawTextShadow) {
-                g->translate(1, 1);
-                g->setColor(textShadowColor);
-                g->drawString(comboFont, comboString);
-                g->translate(-1, -1);
-            }
-            g->setColor((scoreEntries[i].highlight ? comboAccuracyColorHighlight
-                                                   : (i == 0 ? comboAccuracyColorTop : comboAccuracyColor)));
-            g->drawString(scoreFont, comboString);
-        }
-        g->popTransform();
-
-        // draw accuracy
-        if(bancho.is_playing_a_multi_map() && bancho.room.win_condition == ACCURACY) {
-            const float accScale = comboScale;
-            g->pushTransform();
-            {
-                const float scale = (height / accFont->getHeight()) * accScale;
-                UString accString = UString::format("%.2f%%", scoreEntries[i].accuracy * 100.0f);
-                g->scale(scale, scale);
-                g->translate(x + padding * 1.35f, y + height - 2 * padding);
-                {
-                    g->translate(1, 1);
-                    g->setColor(textShadowColor);
-                    g->drawString(accFont, accString);
-                    g->translate(-1, -1);
-                }
-                g->setColor((scoreEntries[i].highlight ? comboAccuracyColorHighlight
-                                                       : (i == 0 ? comboAccuracyColorTop : comboAccuracyColor)));
-                g->drawString(accFont, accString);
-            }
-            g->popTransform();
-        } else {
-            // draw score
-            const float scoreScale = comboScale;
-            g->pushTransform();
-            {
-                const float scale = (height / scoreFont->getHeight()) * scoreScale;
-
-                UString scoreString = UString::format("%llu", scoreEntries[i].score);
-
-                g->scale(scale, scale);
-                g->translate(x + padding * 1.35f, y + height - 2 * padding);
-                if(drawTextShadow) {
-                    g->translate(1, 1);
-                    g->setColor(textShadowColor);
-                    g->drawString(scoreFont, scoreString);
-                    g->translate(-1, -1);
-                }
-                g->setColor((scoreEntries[i].dead
-                                 ? nameScoreColorDead
-                                 : (scoreEntries[i].highlight ? nameScoreColorHighlight
-                                                              : (i == 0 ? nameScoreColorTop : nameScoreColor))));
-                g->drawString(scoreFont, scoreString);
-            }
-            g->popTransform();
-        }
-
-        if(m_osu->isInVRDraw()) {
-            g->popTransform();
-        }
+void OsuHUD::drawFancyScoreboard(Graphics *g) {
+    for(auto slot : slots) {
+        slot->draw(g);
     }
 }
 

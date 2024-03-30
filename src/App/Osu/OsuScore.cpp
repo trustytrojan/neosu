@@ -623,6 +623,10 @@ void OsuScore::onScoreChange() {
     // only used to block local scores for people who think they are very clever by quickly disabling auto just before
     // the end of a beatmap
     m_bIsUnranked |= (m_osu->getModAuto() || (m_osu->getModAutopilot() && m_osu->getModRelax()));
+
+    if(m_osu->isInPlayMode()) {
+        m_osu->m_hud->updateScoreboard();
+    }
 }
 
 float OsuScore::calculateAccuracy(int num300s, int num100s, int num50s, int numMisses) {

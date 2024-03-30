@@ -1331,6 +1331,7 @@ bool OsuBeatmap::play() {
     // played
     unloadObjects();
     resetScore();
+    m_osu->m_hud->resetScoreboard();
 
     onBeforeLoad();
 
@@ -1432,8 +1433,6 @@ bool OsuBeatmap::play() {
     // we are waiting for an asynchronous start of the beatmap in the next update()
     m_bIsWaiting = true;
     m_fWaitTime = engine->getTimeReal();
-
-    m_osu->m_hud->updateScoreBoardAvatars();
 
     // NOTE: loading failures are handled dynamically in update(), so temporarily assume everything has worked in here
     m_bIsPlaying = true;

@@ -7,7 +7,7 @@ class OsuUIAvatar : public CBaseUIButton {
    public:
     OsuUIAvatar(uint32_t player_id, float xPos, float yPos, float xSize, float ySize);
 
-    virtual void draw(Graphics *g);
+    virtual void draw(Graphics *g, float alpha = 1.f);
     virtual void mouse_update(bool *propagate_clicks);
 
     void onAvatarClicked(CBaseUIButton *btn);

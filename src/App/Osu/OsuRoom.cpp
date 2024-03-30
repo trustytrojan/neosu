@@ -17,6 +17,7 @@
 #include "OsuBackgroundImageHandler.h"
 #include "OsuChat.h"
 #include "OsuDatabase.h"
+#include "OsuHUD.h"
 #include "OsuLobby.h"
 #include "OsuMainMenu.h"
 #include "OsuModSelector.h"
@@ -724,6 +725,8 @@ void OsuRoom::on_match_score_updated(Packet *packet) {
         slot->sv2_combo = read_float64(packet);
         slot->sv2_bonus = read_float64(packet);
     }
+
+    bancho.osu->m_hud->updateScoreboard();
 }
 
 void OsuRoom::on_all_players_loaded() {

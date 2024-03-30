@@ -768,12 +768,6 @@ void Osu::draw(Graphics *g) {
         m_editor->draw(g);
         m_userStatsScreen->draw(g);
         m_rankingScreen->draw(g);
-
-        bool seeing_mp_results = bancho.is_in_a_multi_room() && m_rankingScreen->isVisible();
-        if(seeing_mp_results) {
-            m_hud->drawScoreBoardMP(g);
-        }
-
         m_chat->draw(g);
         m_user_actions->draw(g);
         m_optionsMenu->draw(g);

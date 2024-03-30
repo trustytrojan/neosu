@@ -154,12 +154,13 @@ OsuUIAvatar::OsuUIAvatar(uint32_t player_id, float xPos, float yPos, float xSize
     }
 }
 
-void OsuUIAvatar::draw(Graphics *g) {
+void OsuUIAvatar::draw(Graphics *g, float alpha) {
     if(!on_screen) return;  // Comment when you need to debug on_screen logic
 
     if(avatar != nullptr) {
         g->pushTransform();
         g->setColor(0xffffffff);
+        g->setAlpha(alpha);
         g->scale(m_vSize.x / avatar->getWidth(), m_vSize.y / avatar->getHeight());
         g->translate(m_vPos.x + m_vSize.x / 2.0f, m_vPos.y + m_vSize.y / 2.0f);
         g->drawImage(avatar);
