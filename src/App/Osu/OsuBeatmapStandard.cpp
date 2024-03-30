@@ -75,20 +75,19 @@ ConVar osu_followpoints_separation_multiplier("osu_followpoints_separation_multi
 
 ConVar osu_number_scale_multiplier("osu_number_scale_multiplier", 1.0f, FCVAR_NONE);
 
-// XXX: Turn these back to FCVAR_NONE, we just need to adjust the cursor in the replay
-ConVar osu_playfield_mirror_horizontal("osu_playfield_mirror_horizontal", false, FCVAR_NONVANILLA);
-ConVar osu_playfield_mirror_vertical("osu_playfield_mirror_vertical", false, FCVAR_NONVANILLA);
+ConVar osu_playfield_mirror_horizontal("osu_playfield_mirror_horizontal", false, FCVAR_NONE);
+ConVar osu_playfield_mirror_vertical("osu_playfield_mirror_vertical", false, FCVAR_NONE);
 
-ConVar osu_playfield_rotation("osu_playfield_rotation", 0.0f, FCVAR_NONE,
+ConVar osu_playfield_rotation("osu_playfield_rotation", 0.0f, FCVAR_CHEAT,
                               "rotates the entire playfield by this many degrees");
-ConVar osu_playfield_stretch_x("osu_playfield_stretch_x", 0.0f, FCVAR_NONE,
+ConVar osu_playfield_stretch_x("osu_playfield_stretch_x", 0.0f, FCVAR_CHEAT,
                                "offsets/multiplies all hitobject coordinates by it (0 = default 1x playfield size, -1 "
                                "= on a line, -0.5 = 0.5x playfield size, 0.5 = 1.5x playfield size)");
-ConVar osu_playfield_stretch_y("osu_playfield_stretch_y", 0.0f, FCVAR_NONE,
+ConVar osu_playfield_stretch_y("osu_playfield_stretch_y", 0.0f, FCVAR_CHEAT,
                                "offsets/multiplies all hitobject coordinates by it (0 = default 1x playfield size, -1 "
                                "= on a line, -0.5 = 0.5x playfield size, 0.5 = 1.5x playfield size)");
 ConVar osu_playfield_circular(
-    "osu_playfield_circular", false, FCVAR_NONE,
+    "osu_playfield_circular", false, FCVAR_CHEAT,
     "whether the playfield area should be transformed from a rectangle into a circle/disc/oval");
 
 ConVar osu_drain_lazer_health_min("osu_drain_lazer_health_min", 0.95f, FCVAR_NONE);
@@ -861,6 +860,9 @@ void OsuBeatmapStandard::write_frame() {
     if(delta == 0 && last_keys == current_keys) return;
 
     Vector2 pos = pixels2OsuCoords(getCursorPos());
+    if(osu_playfield_mirror_horizontal.getBool()) pos.y = OsuGameRules::OSU_COORD_HEIGHT - pos.y;
+    if(osu_playfield_mirror_vertical.getBool()) pos.x = OsuGameRules::OSU_COORD_WIDTH - pos.x;
+
     auto frame = UString::format("%ld|%.4f|%.4f|%hhu,", delta, pos.x, pos.y, current_keys);
     replay_data.append(frame);
     last_event_time = m_fLastRealTimeForInterpolationDelta;
