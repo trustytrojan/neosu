@@ -297,7 +297,6 @@ class Osu : public App, public MouseListener {
 
     // rendering
     RenderTarget *m_backBuffer;
-    RenderTarget *m_flashlightBuffer;
     RenderTarget *m_playfieldBuffer;
     RenderTarget *m_sliderFrameBuffer;
     RenderTarget *m_frameBuffer;

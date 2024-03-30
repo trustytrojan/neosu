@@ -395,7 +395,6 @@ Osu::Osu(int instanceID) {
     g_vInternalResolution = engine->getScreenSize();
 
     m_backBuffer = engine->getResourceManager()->createRenderTarget(0, 0, getScreenWidth(), getScreenHeight());
-    m_flashlightBuffer = engine->getResourceManager()->createRenderTarget(0, 0, getScreenWidth(), getScreenHeight());
     m_playfieldBuffer = engine->getResourceManager()->createRenderTarget(0, 0, 64, 64);
     m_sliderFrameBuffer = engine->getResourceManager()->createRenderTarget(0, 0, getScreenWidth(), getScreenHeight());
     m_frameBuffer = engine->getResourceManager()->createRenderTarget(0, 0, 64, 64);
@@ -638,17 +637,9 @@ void Osu::draw(Graphics *g) {
 
         if(isFPoSu) m_playfieldBuffer->enable();
 
-        // NOTE: I don't think drawing to a buffer is needed... but I don't
-        //       know shit about OpenGL shaders so this is easier.
-        if(m_bModFlashlight && beatmapStd != NULL) {
-            m_flashlightBuffer->enable();
-        }
-
         getSelectedBeatmap()->draw(g);
 
         if(m_bModFlashlight && beatmapStd != NULL) {
-            m_flashlightBuffer->disable();
-
             // Dim screen when holding a slider
             float max_opacity = 1.f;
             if(holding_slider && !avoid_flashes.getBool()) {
@@ -680,7 +671,8 @@ void Osu::draw(Graphics *g) {
             flashlight_shader->setUniform1f("max_opacity", max_opacity);
             flashlight_shader->setUniform1f("flashlight_radius", fl_radius);
             flashlight_shader->setUniform2f("flashlight_center", flashlightPos.x, getScreenSize().y - flashlightPos.y);
-            m_flashlightBuffer->draw(g, 0, 0);
+            g->setColor(COLOR(255, 0, 0, 0));
+            g->fillRect(0, 0, getScreenWidth(), getScreenHeight());
             flashlight_shader->disable();
         }
 
@@ -2000,7 +1992,6 @@ void Osu::rebuildRenderTargets() {
     debugLog("Osu(%i)::rebuildRenderTargets: %fx%f\n", m_iInstanceID, g_vInternalResolution.x, g_vInternalResolution.y);
 
     m_backBuffer->rebuild(0, 0, g_vInternalResolution.x, g_vInternalResolution.y);
-    m_flashlightBuffer->rebuild(0, 0, g_vInternalResolution.x, g_vInternalResolution.y);
 
     if(m_osu_mod_fposu_ref->getBool())
         m_playfieldBuffer->rebuild(0, 0, g_vInternalResolution.x, g_vInternalResolution.y);
