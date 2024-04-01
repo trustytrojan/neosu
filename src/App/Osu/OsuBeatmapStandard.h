@@ -108,10 +108,7 @@ class OsuBeatmapStandard : public OsuBeatmap {
     virtual void onLoad();
     virtual void onPlayStart();
     virtual void onBeforeStop(bool quit);
-    virtual void onStop(bool quit);
     virtual void onPaused(bool first);
-    virtual void onUnpaused();
-    virtual void onRestart(bool quick);
 
     void drawFollowPoints(Graphics *g);
     void drawHitObjects(Graphics *g);

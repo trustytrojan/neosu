@@ -1247,8 +1247,6 @@ void OsuBeatmapStandard::onBeforeStop(bool quit) {
     debugLog("OsuBeatmapStandard::onBeforeStop() done.\n");
 }
 
-void OsuBeatmapStandard::onStop(bool quit) { debugLog("OsuBeatmapStandard::onStop()\n"); }
-
 void OsuBeatmapStandard::onPaused(bool first) {
     debugLog("OsuBeatmapStandard::onPaused()\n");
 
@@ -1258,10 +1256,6 @@ void OsuBeatmapStandard::onPaused(bool first) {
         if(OsuGameRules::osu_mod_fps.getBool()) m_vContinueCursorPoint = OsuGameRules::getPlayfieldCenter(m_osu);
     }
 }
-
-void OsuBeatmapStandard::onUnpaused() { debugLog("OsuBeatmapStandard::onUnpaused()\n"); }
-
-void OsuBeatmapStandard::onRestart(bool quick) { debugLog("OsuBeatmapStandard::onRestart()\n"); }
 
 void OsuBeatmapStandard::updateAutoCursorPos() {
     m_vAutoCursorPos = m_vPlayfieldCenter;

@@ -231,12 +231,7 @@ class OsuBeatmap {
     virtual void onBeforeStop(bool quit) {
         ;
     }  // called before hitobjects are unloaded (quit = don't display ranking screen)
-    virtual void onStop(bool quit) {
-        ;
-    }  // called after hitobjects have been unloaded, but before Osu::onPlayEnd() (quit = don't display ranking screen)
     virtual void onPaused(bool first) { ; }
-    virtual void onUnpaused() { ; }
-    virtual void onRestart(bool quick) { ; }
 
     // internal
     bool canDraw();

@@ -1417,8 +1417,6 @@ void OsuBeatmap::restart(bool quick) {
         m_bIsRestartScheduledQuick = quick;
     } else if(m_bIsPaused)
         pause(false);
-
-    onRestart(quick);
 }
 
 void OsuBeatmap::actualRestart() {
@@ -1518,10 +1516,7 @@ void OsuBeatmap::pause(bool quitIfWaiting) {
             // pause menu is handled in the Osu class, a bit shit)
         m_bIsPaused = !m_bIsPaused;
 
-    if(m_bIsPaused)
-        onPaused(isFirstPause);
-    else
-        onUnpaused();
+    if(m_bIsPaused) onPaused(isFirstPause);
 
     // if we have failed, and the user early exits to the pause menu, stop the failing animation
     if(m_bFailed) anim->deleteExistingAnimation(&m_fFailAnim);
@@ -1556,8 +1551,6 @@ void OsuBeatmap::stop(bool quit) {
     onBeforeStop(quit);
 
     unloadObjects();
-
-    onStop(quit);
 
     if(bancho.is_playing_a_multi_map()) {
         if(quit) {
