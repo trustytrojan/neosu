@@ -1468,7 +1468,6 @@ void OsuBeatmap::pause(bool quitIfWaiting) {
     if(m_selectedDifficulty2 == NULL) return;
 
     const bool isFirstPause = !m_bContinueScheduled;
-    const bool forceContinueWithoutSchedule = bancho.is_playing_a_multi_map();
 
     // NOTE: this assumes that no beatmap ever goes far beyond the end of the music
     // NOTE: if pure virtual audio time is ever supported (playing without SoundEngine) then this needs to be adapted
@@ -1502,20 +1501,15 @@ void OsuBeatmap::pause(bool quitIfWaiting) {
                 m_bIsPaused = true;
             }
         }
-    } else if(m_bIsPaused && !m_bContinueScheduled)  // if this is the first time unpausing
-    {
-        if(m_osu->getModAuto() || m_osu->getModAutopilot() || m_bIsInSkippableSection ||
-           forceContinueWithoutSchedule)  // under certain conditions, immediately continue the beatmap without waiting
-                                          // for the user to click
-        {
+    } else if(m_bIsPaused && !m_bContinueScheduled) {  // if this is the first time unpausing
+        if(m_osu->getModAuto() || m_osu->getModAutopilot() || m_bIsInSkippableSection || m_bIsWatchingReplay) {
             if(!m_bIsWaiting) {  // only force play() if we were not early waiting
                 engine->getSound()->play(m_music);
             }
 
             m_bIsPlaying = true;
             m_bIsPaused = false;
-        } else  // otherwise, schedule a continue (wait for user to click, handled in update())
-        {
+        } else {  // otherwise, schedule a continue (wait for user to click, handled in update())
             // first time unpause schedules a continue
             m_bIsPaused = false;
             m_bContinueScheduled = true;
@@ -1832,7 +1826,37 @@ float OsuBeatmap::getOD() const {
     return OD;
 }
 
-bool OsuBeatmap::isClickHeld() const { return m_bClick1Held || m_bClick2Held; }
+bool OsuBeatmap::isKey1Down() {
+    if(m_bIsWatchingReplay) {
+        return current_keys & (OsuReplay::M1 | OsuReplay::K1);
+    } else {
+        return m_bClick1Held;
+    }
+}
+
+bool OsuBeatmap::isKey2Down() {
+    if(m_bIsWatchingReplay) {
+        return current_keys & (OsuReplay::M2 | OsuReplay::K2);
+    } else {
+        return m_bClick2Held;
+    }
+}
+
+bool OsuBeatmap::isClickHeld() {
+    if(m_bIsWatchingReplay) {
+        return current_keys & (OsuReplay::M1 | OsuReplay::K1 | OsuReplay::M2 | OsuReplay::K2);
+    } else {
+        return m_bClick1Held || m_bClick2Held;
+    }
+}
+
+bool OsuBeatmap::isLastKeyDownKey1() {
+    if(m_bIsWatchingReplay) {
+        return last_keys & (OsuReplay::M1 | OsuReplay::K1);
+    } else {
+        return m_bPrevKeyWasKey1;
+    }
+}
 
 UString OsuBeatmap::getTitle() const {
     if(m_selectedDifficulty2 != NULL)

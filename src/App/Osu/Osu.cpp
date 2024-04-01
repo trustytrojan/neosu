@@ -1659,8 +1659,6 @@ void Osu::onPlayStart() {
 void Osu::onPlayEnd(bool quit, bool aborted) {
     debugLog("Osu::onPlayEnd()\n");
 
-    OsuRichPresence::onPlayEnd(this, quit);
-
     m_snd_change_check_interval_ref->setValue(m_snd_change_check_interval_ref->getDefaultFloat());
 
     if(!quit) {

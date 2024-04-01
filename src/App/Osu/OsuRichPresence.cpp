@@ -139,33 +139,29 @@ void OsuRichPresence::onPlayStart(Osu *osu) {
 
 void OsuRichPresence::onPlayEnd(Osu *osu, bool quit) {
     if(!quit && osu_rich_presence_show_recentplaystats.getBool()) {
-        const bool isUnranked = (osu->getModAuto() || (osu->getModAutopilot() && osu->getModRelax()));
+        // e.g.: 230pp 900x 95.50% HDHRDT 6*
 
-        if(!isUnranked) {
-            // e.g.: 230pp 900x 95.50% HDHRDT 6*
+        // pp
+        UString scoreInfo = UString::format("%ipp", (int)(std::round(osu->getScore()->getPPv2())));
 
-            // pp
-            UString scoreInfo = UString::format("%ipp", (int)(std::round(osu->getScore()->getPPv2())));
+        // max combo
+        scoreInfo.append(UString::format(" %ix", osu->getScore()->getComboMax()));
 
-            // max combo
-            scoreInfo.append(UString::format(" %ix", osu->getScore()->getComboMax()));
+        // accuracy
+        scoreInfo.append(UString::format(" %.2f%%", osu->getScore()->getAccuracy() * 100.0f));
 
-            // accuracy
-            scoreInfo.append(UString::format(" %.2f%%", osu->getScore()->getAccuracy() * 100.0f));
-
-            // mods
-            UString mods = osu->getScore()->getModsStringForRichPresence();
-            if(mods.length() > 0) {
-                scoreInfo.append(" ");
-                scoreInfo.append(mods);
-            }
-
-            // stars
-            scoreInfo.append(UString::format(" %.2f*", osu->getScore()->getStarsTomTotal()));
-
-            setStatus(osu, scoreInfo);
-            setBanchoStatus(osu, scoreInfo.toUtf8(), SUBMITTING);
+        // mods
+        UString mods = osu->getScore()->getModsStringForRichPresence();
+        if(mods.length() > 0) {
+            scoreInfo.append(" ");
+            scoreInfo.append(mods);
         }
+
+        // stars
+        scoreInfo.append(UString::format(" %.2f*", osu->getScore()->getStarsTomTotal()));
+
+        setStatus(osu, scoreInfo);
+        setBanchoStatus(osu, scoreInfo.toUtf8(), SUBMITTING);
     }
 }
 

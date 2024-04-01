@@ -179,10 +179,10 @@ class OsuBeatmap {
     inline bool shouldFlashWarningArrows() const { return m_bShouldFlashWarningArrows; }
     inline float shouldFlashSectionPass() const { return m_fShouldFlashSectionPass; }
     inline float shouldFlashSectionFail() const { return m_fShouldFlashSectionFail; }
-    bool isClickHeld() const;  // is any key currently being held down
-    inline bool isKey1Down() const { return m_bClick1Held; }
-    inline bool isKey2Down() const { return m_bClick2Held; }
-    inline bool isLastKeyDownKey1() const { return m_bPrevKeyWasKey1; }
+    bool isKey1Down();
+    bool isKey2Down();
+    bool isClickHeld();
+    bool isLastKeyDownKey1();
 
     UString getTitle() const;
     UString getArtist() const;
@@ -257,6 +257,7 @@ class OsuBeatmap {
     Osu *m_osu;
 
     // beatmap state
+    bool m_bIsWatchingReplay = false;  // TODO @kiwec: set this somewhere
     bool m_bIsPlaying;
     bool m_bIsPaused;
     bool m_bIsWaiting;

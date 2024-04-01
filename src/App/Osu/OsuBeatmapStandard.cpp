@@ -35,6 +35,7 @@
 #include "OsuModFPoSu.h"
 #include "OsuNotificationOverlay.h"
 #include "OsuReplay.h"
+#include "OsuRichPresence.h"
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
 #include "OsuSlider.h"
@@ -720,17 +721,16 @@ void OsuBeatmapStandard::update() {
             m_iAllowAnyNextKeyForFullAlternateUntilHitObjectIndex = m_iCurrentHitObjectIndex + 1;
     }
 
-    bool is_recording = m_bIsPlaying && !m_bFailed;
-    if(is_recording) {
-        if(last_keys != current_keys) {
-            write_frame();
-        } else if(last_event_time + 0.01666666666 <= engine->getTimeReal()) {
-            write_frame();
-        }
+    if(last_keys != current_keys) {
+        write_frame();
+    } else if(last_event_time + 0.01666666666 <= engine->getTimeReal()) {
+        write_frame();
     }
 }
 
 void OsuBeatmapStandard::write_frame() {
+    if(!m_bIsPlaying || m_bFailed || m_bIsWatchingReplay) return;
+
     long delta = m_iCurMusicPosWithOffsets - last_event_ms;
     if(delta < 0) return;
     if(delta == 0 && last_keys == current_keys) return;
@@ -1216,6 +1216,8 @@ void OsuBeatmapStandard::onBeforeStop(bool quit) {
     int scoreIndex = -1;
 
     if(!isCheated) {
+        OsuRichPresence::onPlayEnd(m_osu, quit);
+
         if(bancho.submit_scores() && !isZero && vanilla) {
             score.replay_data = replay_data;
             submit_score(score);
