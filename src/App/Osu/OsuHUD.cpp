@@ -567,16 +567,6 @@ void OsuHUD::drawCursorTrail(Graphics *g, Vector2 pos, float alphaMultiplier, bo
                        fposuTrailJumpFix);
 }
 
-void OsuHUD::drawCursorSpectator1(Graphics *g, Vector2 pos, float alphaMultiplier) {
-    Matrix4 mvp;
-    drawCursorInt(g, m_cursorTrailShader, m_cursorTrailSpectator1, mvp, pos, alphaMultiplier);
-}
-
-void OsuHUD::drawCursorSpectator2(Graphics *g, Vector2 pos, float alphaMultiplier) {
-    Matrix4 mvp;
-    drawCursorInt(g, m_cursorTrailShader, m_cursorTrailSpectator2, mvp, pos, alphaMultiplier);
-}
-
 void OsuHUD::drawCursorInt(Graphics *g, Shader *trailShader, std::vector<CURSORTRAIL> &trail, Matrix4 &mvp, Vector2 pos,
                            float alphaMultiplier, bool emptyTrailFrame, bool updateAndDrawTrail) {
     if(updateAndDrawTrail) drawCursorTrailInt(g, trailShader, trail, mvp, pos, alphaMultiplier, emptyTrailFrame);

@@ -30,7 +30,6 @@ class OsuBeatmap {
    public:
     struct CLICK {
         long musicPos;
-        int maniaColumn;
     };
 
     OsuBeatmap(Osu *osu);

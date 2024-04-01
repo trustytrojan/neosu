@@ -421,12 +421,10 @@ void OsuBeatmap::update() {
     long osu_universal_offset_hardcoded = convar->getConVarByName("osu_universal_offset_hardcoded")->getInt();
 
     if(m_bContinueScheduled) {
-        bool isEarlyNoteContinue =
-            (!m_bIsPaused && m_bIsWaiting);  // if we paused while m_bIsWaiting (green progressbar), then we have to let
-                                             // the 'if (m_bIsWaiting)' block handle the sound play() call
-        if(m_bClickedContinue || isEarlyNoteContinue)  // originally was (m_bClick1Held || m_bClick2Held ||
-                                                       // isEarlyNoteContinue), replaced first two m_bClickedContinue
-        {
+        // If we paused while m_bIsWaiting (green progressbar), then we have to let the 'if (m_bIsWaiting)' block handle
+        // the sound play() call
+        bool isEarlyNoteContinue = (!m_bIsPaused && m_bIsWaiting);
+        if(m_bClickedContinue || isEarlyNoteContinue) {
             m_bClickedContinue = false;
             m_bContinueScheduled = false;
             m_bIsPaused = false;
@@ -1200,7 +1198,6 @@ void OsuBeatmap::keyPressed1(bool mouse) {
 
     CLICK click;
     click.musicPos = m_iCurMusicPosWithOffsets;
-    click.maniaColumn = -1;
 
     if((!m_osu->getModAuto() && !m_osu->getModRelax()) || !osu_auto_and_relax_block_user_input.getBool())
         m_clicks.push_back(click);
@@ -1234,7 +1231,6 @@ void OsuBeatmap::keyPressed2(bool mouse) {
 
     CLICK click;
     click.musicPos = m_iCurMusicPosWithOffsets;
-    click.maniaColumn = -1;
 
     if((!m_osu->getModAuto() && !m_osu->getModRelax()) || !osu_auto_and_relax_block_user_input.getBool())
         m_clicks.push_back(click);

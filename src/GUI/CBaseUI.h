@@ -10,11 +10,7 @@
 
 #include "CBaseUIBoxShadow.h"
 #include "CBaseUIButton.h"
-#include "CBaseUICanvas.h"
 #include "CBaseUICheckbox.h"
-#include "CBaseUIContainerBox.h"
-#include "CBaseUIContainerHorizontalBox.h"
-#include "CBaseUIContainerVerticalBox.h"
 #include "CBaseUIImage.h"
 #include "CBaseUIImageButton.h"
 #include "CBaseUILabel.h"
@@ -27,10 +23,6 @@
 namespace UI {
 typedef CBaseUIBoxShadow BoxShadow;
 typedef CBaseUIButton Button;
-typedef CBaseUICanvas Canvas;
-typedef CBaseUIContainerBox Box;
-typedef CBaseUIContainerHorizontalBox HorizontalBox;
-typedef CBaseUIContainerVerticalBox VerticalBox;
 typedef CBaseUIImage Image;
 typedef CBaseUIImageButton ImageButton;
 typedef CBaseUILabel Label;

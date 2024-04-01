@@ -51,8 +51,6 @@ class OsuHUD : public OsuScreen {
     void drawCursorTrail(
         Graphics *g, Vector2 pos, float alphaMultiplier = 1.0f,
         bool secondTrail = false);  // NOTE: only use if drawCursor() with updateAndDrawTrail = false (FPoSu)
-    void drawCursorSpectator1(Graphics *g, Vector2 pos, float alphaMultiplier = 1.0f);
-    void drawCursorSpectator2(Graphics *g, Vector2 pos, float alphaMultiplier = 1.0f);
     void drawCursorRipples(Graphics *g);
     void drawFps(Graphics *g) { drawFps(g, m_tempFont, m_fCurFps); }
     void drawHitErrorBar(Graphics *g, OsuBeatmapStandard *beatmapStd);
