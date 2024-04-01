@@ -22,10 +22,6 @@ struct OsuBeatmap {
     friend class OsuBackgroundStarCacheLoader;
     friend class OsuBackgroundStarCalcHandler;
 
-    struct CLICK {
-        long musicPos;
-    };
-
     OsuBeatmap(Osu *osu);
     ~OsuBeatmap();
 
@@ -63,6 +59,7 @@ struct OsuBeatmap {
                                 // the static slider mesh) centered at (0, 0, 0)
 
     // cursor
+    Vector2 getMousePos() const;
     Vector2 getCursorPos() const;
     Vector2 getFirstPersonCursorDelta() const;
     inline Vector2 getContinueCursorPoint() const { return m_vContinueCursorPoint; }
@@ -106,6 +103,7 @@ struct OsuBeatmap {
                     // clicking on a beatmap)
     void selectDifficulty2(OsuDatabaseBeatmap *difficulty2);
     void deselect();  // stops + unloads the currently loaded music and deletes all hitobjects
+    bool watch(std::vector<OsuReplay::Frame> replay);
     bool play();
     void restart(bool quick = false);
     void pause(bool quitIfWaiting = true);
@@ -179,13 +177,19 @@ struct OsuBeatmap {
     // set to false when using non-vanilla mods (disables score submission)
     bool vanilla = true;
 
-    // replay recording (see OsuBeatmap)
+    // replay recording
     void write_frame();
-    std::vector<OsuReplay::Frame> replay;
+    std::vector<OsuReplay::Frame> live_replay;
     double last_event_time = 0.0;
     long last_event_ms = 0;
     uint8_t current_keys = 0;
     uint8_t last_keys = 0;
+
+    // replay replaying
+    // last_event_ms, current_keys, last_keys also reused
+    std::vector<OsuReplay::Frame> spectated_replay;
+    Vector2 m_interpolatedMousePos;
+    bool m_bIsWatchingReplay = false;
 
     // used by OsuHitObject children and OsuModSelector
     inline Osu *getOsu() const { return m_osu; }
@@ -266,7 +270,6 @@ struct OsuBeatmap {
     Osu *m_osu;
 
     // beatmap state
-    bool m_bIsWatchingReplay = false;  // TODO @kiwec: set this somewhere
     bool m_bIsPlaying;
     bool m_bIsPaused;
     bool m_bIsWaiting;
@@ -324,8 +327,7 @@ struct OsuBeatmap {
     bool m_bClickedContinue;
     bool m_bPrevKeyWasKey1;
     int m_iAllowAnyNextKeyForFullAlternateUntilHitObjectIndex;
-    std::vector<CLICK> m_clicks;
-    std::vector<CLICK> m_keyUps;
+    std::vector<long> m_clicks;
 
     // hitobjects
     std::vector<OsuHitObject *> m_hitobjects;

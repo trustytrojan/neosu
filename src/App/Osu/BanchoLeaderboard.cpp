@@ -24,7 +24,7 @@ OsuDatabase::Score parse_score(char *score_line) {
     char *saveptr = NULL;
     char *str = strtok_r(score_line, "|", &saveptr);
     if(!str) return score;
-    // Do nothing with score ID
+    score.online_score_id = strtoul(str, NULL, 10);
 
     str = strtok_r(NULL, "|", &saveptr);
     if(!str) return score;
@@ -76,7 +76,7 @@ OsuDatabase::Score parse_score(char *score_line) {
 
     str = strtok_r(NULL, "|", &saveptr);
     if(!str) return score;
-    // Do nothing with rank
+    score.has_replay = strtoul(str, NULL, 10);
 
     str = strtok_r(NULL, "|", &saveptr);
     if(!str) return score;
@@ -198,6 +198,6 @@ void process_leaderboard_response(Packet response) {
     // XXX: We should also separately display either the "personal best" the server sent us,
     //      or the local best, depending on which score is better.
     debugLog("Received online leaderbord for Beatmap ID %d\n", info.beatmap_id);
-    bancho.osu->getSongBrowser()->getDatabase()->m_online_scores[beatmap_hash] = scores;
+    bancho.osu->getSongBrowser()->getDatabase()->m_online_scores[beatmap_hash] = std::move(scores);
     bancho.osu->getSongBrowser()->rebuildScoreButtons();
 }

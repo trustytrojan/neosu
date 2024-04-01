@@ -563,7 +563,7 @@ void OsuCircle::miss(long curPos) {
     onHit(OsuScore::HIT::HIT_MISS, delta);
 }
 
-void OsuCircle::onClickEvent(std::vector<OsuBeatmap::CLICK> &clicks) {
+void OsuCircle::onClickEvent(std::vector<long> &clicks) {
     if(m_bFinished) return;
 
     const Vector2 cursorPos = m_beatmap->getCursorPos();
@@ -578,7 +578,7 @@ void OsuCircle::onClickEvent(std::vector<OsuBeatmap::CLICK> &clicks) {
             return;  // ignore click event completely
         }
 
-        const long delta = (long)clicks[0].musicPos - (long)m_iTime;
+        const long delta = clicks[0] - (long)m_iTime;
 
         OsuScore::HIT result = OsuGameRules::getHitResult(delta, m_beatmap);
         if(result != OsuScore::HIT::HIT_NULL) {

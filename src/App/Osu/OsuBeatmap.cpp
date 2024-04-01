@@ -439,7 +439,7 @@ void OsuBeatmap::drawDebug(Graphics *g) {
         McFont *debugFont = engine->getResourceManager()->getFont("FONT_DEFAULT");
         g->setColor(0xffffffff);
         g->pushTransform();
-        g->translate(5, debugFont->getHeight() + 5 - engine->getMouse()->getPos().y);
+        g->translate(5, debugFont->getHeight() + 5 - getMousePos().y);
         {
             for(const OsuDatabaseBeatmap::TIMINGPOINT &t : m_selectedDifficulty2->getTimingpoints()) {
                 g->drawString(debugFont, UString::format("%li,%f,%i,%i,%i", t.offset, t.msPerBeat, t.sampleType,
@@ -581,6 +581,8 @@ void OsuBeatmap::skipEmptySection() {
 }
 
 void OsuBeatmap::keyPressed1(bool mouse) {
+    if(m_bIsWatchingReplay) return;
+
     if(m_bContinueScheduled) m_bClickedContinue = !m_osu->getModSelector()->isMouseInside();
 
     if(osu_mod_fullalternate.getBool() && m_bPrevKeyWasKey1) {
@@ -600,11 +602,8 @@ void OsuBeatmap::keyPressed1(bool mouse) {
     m_bPrevKeyWasKey1 = true;
     m_bClick1Held = true;
 
-    CLICK click;
-    click.musicPos = m_iCurMusicPosWithOffsets;
-
     if((!m_osu->getModAuto() && !m_osu->getModRelax()) || !osu_auto_and_relax_block_user_input.getBool())
-        m_clicks.push_back(click);
+        m_clicks.push_back(m_iCurMusicPosWithOffsets);
 
     if(mouse) {
         current_keys = current_keys | OsuReplay::M1;
@@ -614,6 +613,8 @@ void OsuBeatmap::keyPressed1(bool mouse) {
 }
 
 void OsuBeatmap::keyPressed2(bool mouse) {
+    if(m_bIsWatchingReplay) return;
+
     if(m_bContinueScheduled) m_bClickedContinue = !m_osu->getModSelector()->isMouseInside();
 
     if(osu_mod_fullalternate.getBool() && !m_bPrevKeyWasKey1) {
@@ -633,11 +634,8 @@ void OsuBeatmap::keyPressed2(bool mouse) {
     m_bPrevKeyWasKey1 = false;
     m_bClick2Held = true;
 
-    CLICK click;
-    click.musicPos = m_iCurMusicPosWithOffsets;
-
     if((!m_osu->getModAuto() && !m_osu->getModRelax()) || !osu_auto_and_relax_block_user_input.getBool())
-        m_clicks.push_back(click);
+        m_clicks.push_back(m_iCurMusicPosWithOffsets);
 
     if(mouse) {
         current_keys = current_keys | OsuReplay::M2;
@@ -647,6 +645,8 @@ void OsuBeatmap::keyPressed2(bool mouse) {
 }
 
 void OsuBeatmap::keyReleased1(bool mouse) {
+    if(m_bIsWatchingReplay) return;
+
     // key overlay
     m_osu->getHUD()->animateInputoverlay(1, false);
     m_osu->getHUD()->animateInputoverlay(3, false);
@@ -657,6 +657,8 @@ void OsuBeatmap::keyReleased1(bool mouse) {
 }
 
 void OsuBeatmap::keyReleased2(bool mouse) {
+    if(m_bIsWatchingReplay) return;
+
     // key overlay
     m_osu->getHUD()->animateInputoverlay(2, false);
     m_osu->getHUD()->animateInputoverlay(4, false);
@@ -692,6 +694,26 @@ void OsuBeatmap::deselect() {
     m_iContinueMusicPos = 0;
 
     unloadObjects();
+}
+
+bool OsuBeatmap::watch(std::vector<OsuReplay::Frame> replay) {
+    // Replay is invalid
+    if(replay.size() < 3) {
+        return false;
+    }
+
+    // Map failed to load
+    if(!play()) {
+        return false;
+    }
+
+    spectated_replay = std::move(replay);
+    m_bIsWatchingReplay = true;
+    last_event_ms = -1;
+    last_keys = 0;
+    current_keys = 0;
+
+    return true;
 }
 
 bool OsuBeatmap::play() {
@@ -823,9 +845,11 @@ bool OsuBeatmap::play() {
     m_bIsWaiting = true;
     m_fWaitTime = engine->getTimeReal();
 
-    // NOTE: loading failures are handled dynamically in update(), so temporarily assume everything has worked in here
     m_bIsPlaying = true;
-    return m_bIsPlaying;
+    m_bIsWatchingReplay = false;
+
+    // NOTE: loading failures are handled dynamically in update(), so temporarily assume everything has worked in here
+    return true;
 }
 
 void OsuBeatmap::restart(bool quick) {
@@ -1597,11 +1621,8 @@ void OsuBeatmap::unloadObjects() {
     m_hitobjects = std::vector<OsuHitObject *>();
     m_hitobjectsSortedByEndTime = std::vector<OsuHitObject *>();
     m_misaimObjects = std::vector<OsuHitObject *>();
-
     m_breaks = std::vector<OsuDatabaseBeatmap::BREAK>();
-
-    m_clicks = std::vector<CLICK>();
-    m_keyUps = std::vector<CLICK>();
+    m_clicks = std::vector<long>();
 }
 
 void OsuBeatmap::resetHitObjects(long curPos) {
@@ -1616,15 +1637,15 @@ void OsuBeatmap::resetHitObjects(long curPos) {
 void OsuBeatmap::resetScore() {
     vanilla = convar->isVanilla();
 
-    replay.clear();
-    replay.push_back(OsuReplay::Frame{
+    live_replay.clear();
+    live_replay.push_back(OsuReplay::Frame{
         .cur_music_pos = -1,
         .milliseconds_since_last_frame = 0,
         .x = 256,
         .y = -500,
         .key_flags = 0,
     });
-    replay.push_back(OsuReplay::Frame{
+    live_replay.push_back(OsuReplay::Frame{
         .cur_music_pos = -1,
         .milliseconds_since_last_frame = -1,
         .x = 256,
@@ -2259,10 +2280,7 @@ void OsuBeatmap::update2() {
                                   // we are continuing we can assume that everything works
 
             // for nightmare mod, to avoid a miss because of the continue click
-            {
-                m_clicks.clear();
-                m_keyUps.clear();
-            }
+            m_clicks.clear();
         }
     }
 
@@ -2409,6 +2427,74 @@ void OsuBeatmap::update2() {
                                 m_selectedDifficulty2->getOnlineOffset() -
                                 (m_selectedDifficulty2->getVersion() < 5 ? osu_old_beatmap_offset.getInt() : 0);
     updateTimingPoints(m_iCurMusicPosWithOffsets);
+
+    if(m_bIsWatchingReplay) {
+        OsuReplay::Frame current_frame = spectated_replay[0];
+        OsuReplay::Frame next_frame = spectated_replay[0];
+
+        for(auto frame : spectated_replay) {
+            next_frame = frame;
+
+            // XXX: The way this is done, inputs will be skipped if the user is lagging
+            if(next_frame.cur_music_pos > m_iCurMusicPosWithOffsets) {
+                if(current_frame.cur_music_pos > last_event_ms) {
+                    last_event_ms = current_frame.cur_music_pos;
+                    last_keys = current_keys;
+                    current_keys = current_frame.key_flags;
+
+                    // Released key 1
+                    if(last_keys & (OsuReplay::K1) && current_keys & ~(OsuReplay::K1)) {
+                        m_osu->getHUD()->animateInputoverlay(1, false);
+                    } else if(last_keys & (OsuReplay::M1) && current_keys & ~(OsuReplay::M1)) {
+                        m_osu->getHUD()->animateInputoverlay(3, false);
+                    }
+
+                    // Released key 2
+                    if(last_keys & (OsuReplay::K2) && current_keys & ~(OsuReplay::K2)) {
+                        m_osu->getHUD()->animateInputoverlay(2, false);
+                    } else if(last_keys & (OsuReplay::M2) && current_keys & ~(OsuReplay::M2)) {
+                        m_osu->getHUD()->animateInputoverlay(4, false);
+                    }
+
+                    // Pressed key 1
+                    if(last_keys & (OsuReplay::K1) && current_keys & ~(OsuReplay::K1)) {
+                        m_osu->getHUD()->animateInputoverlay(1, true);
+                        m_clicks.push_back(last_event_ms);
+                        if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(1);
+                    } else if(last_keys & (OsuReplay::M1) && current_keys & ~(OsuReplay::M1)) {
+                        m_osu->getHUD()->animateInputoverlay(3, true);
+                        m_clicks.push_back(last_event_ms);
+                        if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(3);
+                    }
+
+                    // Pressed key 2
+                    if(last_keys & ~(OsuReplay::K2) && current_keys & (OsuReplay::K2)) {
+                        m_osu->getHUD()->animateInputoverlay(2, true);
+                        m_clicks.push_back(last_event_ms);
+                        if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(2);
+                    } else if(last_keys & ~(OsuReplay::M2) && current_keys & (OsuReplay::M2)) {
+                        m_osu->getHUD()->animateInputoverlay(4, true);
+                        m_clicks.push_back(last_event_ms);
+                        if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(4);
+                    }
+                }
+
+                break;
+            }
+
+            current_frame = frame;
+        }
+
+        float percent = 0.f;
+        if(next_frame.milliseconds_since_last_frame > 0) {
+            long ms_since_last_frame = m_iCurMusicPosWithOffsets - current_frame.cur_music_pos;
+            percent = (float)ms_since_last_frame / (float)next_frame.milliseconds_since_last_frame;
+        }
+        m_interpolatedMousePos = Vector2{
+            .x = lerp(current_frame.x, next_frame.x, percent),
+            .y = lerp(current_frame.y, next_frame.y, percent),
+        };
+    }
 
     // for performance reasons, a lot of operations are crammed into 1 loop over all hitobjects:
     // update all hitobjects,
@@ -2567,8 +2653,6 @@ void OsuBeatmap::update2() {
             const bool isCurrentHitObjectFinishedBeforeClickEvents = m_hitobjects[i]->isFinished();
             {
                 if(m_clicks.size() > 0) m_hitobjects[i]->onClickEvent(m_clicks);
-
-                if(m_keyUps.size() > 0) m_hitobjects[i]->onKeyUpEvent(m_keyUps);
             }
             const bool isCurrentHitObjectFinishedAfterClickEvents = m_hitobjects[i]->isFinished();
             const bool isCurrentHitObjectASliderAndHasItsStartCircleFinishedAfterClickEvents =
@@ -2707,7 +2791,7 @@ void OsuBeatmap::update2() {
                         continue;
 
                     m_misaimObjects[i]->misAimed();
-                    const long delta = (long)m_clicks[c].musicPos - (long)m_misaimObjects[i]->getTime();
+                    const long delta = m_clicks[c] - (long)m_misaimObjects[i]->getTime();
                     m_osu->getHUD()->addHitError(delta, false, true);
 
                     break;  // the current click has been dealt with (and the hitobject has been misaimed)
@@ -2729,7 +2813,6 @@ void OsuBeatmap::update2() {
 
             m_clicks.clear();
         }
-        m_keyUps.clear();
     }
 
     // empty section detection & skipping
@@ -2953,7 +3036,7 @@ void OsuBeatmap::write_frame() {
     if(osu_playfield_mirror_horizontal.getBool()) pos.y = OsuGameRules::OSU_COORD_HEIGHT - pos.y;
     if(osu_playfield_mirror_vertical.getBool()) pos.x = OsuGameRules::OSU_COORD_WIDTH - pos.x;
 
-    replay.push_back(OsuReplay::Frame{
+    live_replay.push_back(OsuReplay::Frame{
         .cur_music_pos = m_iCurMusicPosWithOffsets,
         .milliseconds_since_last_frame = delta,
         .x = pos.x,
@@ -3257,6 +3340,14 @@ Vector2 OsuBeatmap::osuCoords2LegacyPixels(Vector2 coords) const {
     return coords;
 }
 
+Vector2 OsuBeatmap::getMousePos() const {
+    if(m_bIsWatchingReplay) {
+        return m_interpolatedMousePos;
+    } else {
+        return engine->getMouse()->getPos();
+    }
+}
+
 Vector2 OsuBeatmap::getCursorPos() const {
     if(OsuGameRules::osu_mod_fps.getBool() && !m_bIsPaused) {
         if(m_osu->getModAuto() || m_osu->getModAutopilot())
@@ -3266,7 +3357,7 @@ Vector2 OsuBeatmap::getCursorPos() const {
     } else if(m_osu->getModAuto() || m_osu->getModAutopilot())
         return m_vAutoCursorPos;
     else {
-        Vector2 pos = engine->getMouse()->getPos();
+        Vector2 pos = getMousePos();
         if(osu_mod_shirone.getBool() && m_osu->getScore()->getCombo() > 0)  // <3
             return pos + Vector2(std::sin((m_iCurMusicPos / 20.0f) * 1.15f) *
                                      ((float)m_osu->getScore()->getCombo() / osu_mod_shirone_combo.getFloat()),
@@ -3278,8 +3369,7 @@ Vector2 OsuBeatmap::getCursorPos() const {
 }
 
 Vector2 OsuBeatmap::getFirstPersonCursorDelta() const {
-    return m_vPlayfieldCenter -
-           (m_osu->getModAuto() || m_osu->getModAutopilot() ? m_vAutoCursorPos : engine->getMouse()->getPos());
+    return m_vPlayfieldCenter - (m_osu->getModAuto() || m_osu->getModAutopilot() ? m_vAutoCursorPos : getMousePos());
 }
 
 float OsuBeatmap::getHitcircleDiameter() const { return m_fHitcircleDiameter; }
@@ -3340,8 +3430,8 @@ void OsuBeatmap::onBeforeStop(bool quit) {
     // save local score, but only under certain conditions
     const bool isComplete = (num300s + num100s + num50s + numMisses >= numHitObjects);
     const bool isZero = (m_osu->getScore()->getScore() < 1);
-    const bool isCheated =
-        (m_osu->getModAuto() || (m_osu->getModAutopilot() && m_osu->getModRelax())) || m_osu->getScore()->isUnranked();
+    const bool isCheated = (m_osu->getModAuto() || (m_osu->getModAutopilot() && m_osu->getModRelax())) ||
+                           m_osu->getScore()->isUnranked() || m_bIsWatchingReplay;
 
     OsuDatabase::Score score;
     score.isLegacyScore = false;
@@ -3409,7 +3499,7 @@ void OsuBeatmap::onBeforeStop(bool quit) {
         OsuRichPresence::onPlayEnd(m_osu, quit);
 
         if(bancho.submit_scores() && !isZero && vanilla) {
-            score.replay = replay;
+            score.replay = live_replay;
             submit_score(score);
         }
 
@@ -3436,7 +3526,7 @@ void OsuBeatmap::onPaused(bool first) {
     debugLog("OsuBeatmap::onPaused()\n");
 
     if(first) {
-        m_vContinueCursorPoint = engine->getMouse()->getPos();
+        m_vContinueCursorPoint = getMousePos();
 
         if(OsuGameRules::osu_mod_fps.getBool()) m_vContinueCursorPoint = OsuGameRules::getPlayfieldCenter(m_osu);
     }

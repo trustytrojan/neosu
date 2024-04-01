@@ -1098,7 +1098,7 @@ float OsuSlider::getT(long pos, bool raw) {
     }
 }
 
-void OsuSlider::onClickEvent(std::vector<OsuBeatmap::CLICK> &clicks) {
+void OsuSlider::onClickEvent(std::vector<long> &clicks) {
     if(m_points.size() == 0 || m_bBlocked)
         return;  // also handle note blocking here (doesn't need fancy shake logic, since sliders don't shake in
                  // osu!stable)
@@ -1110,7 +1110,7 @@ void OsuSlider::onClickEvent(std::vector<OsuBeatmap::CLICK> &clicks) {
         const float cursorDelta = (cursorPos - pos).length();
 
         if(cursorDelta < m_beatmap->getHitcircleDiameter() / 2.0f) {
-            const long delta = (long)clicks[0].musicPos - (long)m_iTime;
+            const long delta = clicks[0] - (long)m_iTime;
 
             OsuScore::HIT result = OsuGameRules::getHitResult(delta, m_beatmap);
             if(result != OsuScore::HIT::HIT_NULL) {

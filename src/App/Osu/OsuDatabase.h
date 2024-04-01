@@ -63,6 +63,9 @@ class OsuDatabase {
         uint64_t play_time_ms = 0;
         std::vector<OsuReplay::Frame> replay;
 
+        bool has_replay = false;
+        uint64_t online_score_id = 0;
+
         int num300s;
         int num100s;
         int num50s;

@@ -374,7 +374,7 @@ void OsuSpinner::update(long curPos) {
     }
 }
 
-void OsuSpinner::onClickEvent(std::vector<OsuBeatmap::CLICK> &clicks) {
+void OsuSpinner::onClickEvent(std::vector<long> &clicks) {
     if(m_bFinished) return;
 
     // needed for nightmare mod

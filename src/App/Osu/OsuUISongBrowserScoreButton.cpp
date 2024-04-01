@@ -532,11 +532,16 @@ void OsuUISongBrowserScoreButton::onRightMouseUpInside() {
         m_contextMenu->begin(0, true);
         {
             m_contextMenu->addButton("Use Mods", 1);  // for scores without mods this will just nomod
+
+            if(m_score.has_replay) {
+                m_contextMenu->addButton("View replay", 2);
+            }
+
             CBaseUIButton *spacer = m_contextMenu->addButton("---");
             spacer->setEnabled(false);
             spacer->setTextColor(0xff888888);
             spacer->setTextDarkColor(0xff000000);
-            CBaseUIButton *deleteButton = m_contextMenu->addButton("Delete Score", 2);
+            CBaseUIButton *deleteButton = m_contextMenu->addButton("Delete Score", 3);
             if(m_score.isLegacyScore) {
                 deleteButton->setEnabled(false);
                 deleteButton->setTextColor(0xff888888);
@@ -551,12 +556,23 @@ void OsuUISongBrowserScoreButton::onRightMouseUpInside() {
 }
 
 void OsuUISongBrowserScoreButton::onContextMenu(UString text, int id) {
-    if(id == 1) onUseModsClicked();
+    if(id == 1) {
+        onUseModsClicked();
+        return;
+    }
+
     if(id == 2) {
+        // TODO @kiwec: view replay
+        return;
+    }
+
+    if(id == 3) {
         if(engine->getKeyboard()->isShiftDown())
             onDeleteScoreConfirmed(text, 1);
         else
             onDeleteScoreClicked();
+
+        return;
     }
 }
 
