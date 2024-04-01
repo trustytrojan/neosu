@@ -1604,21 +1604,25 @@ void OsuHUD::resetScoreboard() {
         i++;
     }
 
-    updateScoreboard();
+    updateScoreboard(false);
 }
 
-void OsuHUD::updateScoreboard() {
+void OsuHUD::updateScoreboard(bool animate) {
     OsuBeatmap *beatmap = m_osu->getSelectedBeatmap();
     if(beatmap == nullptr) return;
     OsuDatabaseBeatmap *diff2 = beatmap->getSelectedDifficulty2();
     if(diff2 == nullptr) return;
+
+    if(!convar->getConVarByName("scoreboard_animations")->getBool()) {
+        animate = false;
+    }
 
     // Update player slot first
     auto new_scores = getCurrentScores();
     for(int i = 0; i < new_scores.size(); i++) {
         if(new_scores[i].entry_id != player_slot->m_score.entry_id) continue;
 
-        player_slot->updateIndex(i);
+        player_slot->updateIndex(i, animate);
         player_slot->m_score = new_scores[i];
         break;
     }
@@ -1630,7 +1634,7 @@ void OsuHUD::updateScoreboard() {
         for(auto slot : slots) {
             if(slot->m_score.entry_id != new_scores[i].entry_id) continue;
 
-            slot->updateIndex(i);
+            slot->updateIndex(i, animate);
             slot->m_score = new_scores[i];
             break;
         }

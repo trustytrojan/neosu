@@ -142,6 +142,7 @@ ConVar flashlight_follow_delay("flashlight_follow_delay", 0.120f, FCVAR_CHEAT);
 ConVar flashlight_always_hard("flashlight_always_hard", false, FCVAR_NONE, "always use 200+ combo flashlight radius");
 
 ConVar nightcore_enjoyer("nightcore_enjoyer", false, FCVAR_NONE, "automatically select nightcore when speed modifying");
+ConVar scoreboard_animations("scoreboard_animations", true, FCVAR_NONE, "animate in-game scoreboard");
 
 ConVar mp_server("mp_server", "ez-pp.farm", FCVAR_NONE);
 ConVar mp_password("mp_password", "", FCVAR_NONE);

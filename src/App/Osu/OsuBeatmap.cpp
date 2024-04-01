@@ -1310,7 +1310,6 @@ bool OsuBeatmap::play() {
     // played
     unloadObjects();
     resetScore();
-    m_osu->m_hud->resetScoreboard();
 
     onBeforeLoad();
 
@@ -2206,6 +2205,7 @@ void OsuBeatmap::resetScore() {
     anim->deleteExistingAnimation(&m_fFailAnim);
 
     m_osu->getScore()->reset();
+    m_osu->m_hud->resetScoreboard();
 
     m_bIsFirstMissSound = true;
 }

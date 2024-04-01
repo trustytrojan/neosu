@@ -242,11 +242,11 @@ void OsuScoreboardSlot::draw(Graphics *g) {
     g->popTransform();
 }
 
-void OsuScoreboardSlot::updateIndex(int new_index) {
+void OsuScoreboardSlot::updateIndex(int new_index, bool animate) {
     bool is_player = bancho.osu->m_hud->player_slot == this;
     int player_idx = bancho.osu->m_hud->player_slot->m_index;
     if(is_player) {
-        if(new_index < m_index) {
+        if(animate && new_index < m_index) {
             m_fFlash = 1.f;
             anim->moveQuartOut(&m_fFlash, 0.0f, 0.5f, 0.0f, true);
         }
@@ -271,17 +271,30 @@ void OsuScoreboardSlot::updateIndex(int new_index) {
     }
 
     if(was_visible && !is_visible) {
-        anim->moveQuartOut(&m_y, scoreboard_y, 0.5f, 0.0f, true);
-        anim->moveQuartOut(&m_fAlpha, 0.0f, 0.5f, 0.0f, true);
+        if(animate) {
+            anim->moveQuartOut(&m_y, scoreboard_y, 0.5f, 0.0f, true);
+            anim->moveQuartOut(&m_fAlpha, 0.0f, 0.5f, 0.0f, true);
+        } else {
+            m_y = scoreboard_y;
+            m_fAlpha = 0.0f;
+        }
         was_visible = false;
     } else if(!was_visible && is_visible) {
         anim->deleteExistingAnimation(&m_y);
         m_y = scoreboard_y;
-        m_fAlpha = 0.f;
-        anim->moveQuartOut(&m_fAlpha, 1.0f, 0.5f, 0.0f, true);
+        if(animate) {
+            m_fAlpha = 0.f;
+            anim->moveQuartOut(&m_fAlpha, 1.0f, 0.5f, 0.0f, true);
+        } else {
+            m_fAlpha = 1.0f;
+        }
         was_visible = true;
     } else if(was_visible || is_visible) {
-        anim->moveQuartOut(&m_y, scoreboard_y, 0.5f, 0.0f, true);
+        if(animate) {
+            anim->moveQuartOut(&m_y, scoreboard_y, 0.5f, 0.0f, true);
+        } else {
+            m_y = scoreboard_y;
+        }
     }
 
     m_index = new_index;

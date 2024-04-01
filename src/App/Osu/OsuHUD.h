@@ -69,7 +69,7 @@ class OsuHUD : public OsuScreen {
 
     std::vector<SCORE_ENTRY> getCurrentScores();
     void resetScoreboard();
-    void updateScoreboard();
+    void updateScoreboard(bool animate);
     void drawFancyScoreboard(Graphics *g);
 
     void drawScorebarBg(Graphics *g, float alpha, float breakAnim);

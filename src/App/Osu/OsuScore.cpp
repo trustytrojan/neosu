@@ -611,7 +611,7 @@ void OsuScore::onScoreChange() {
     m_bIsUnranked |= (m_osu->getModAuto() || (m_osu->getModAutopilot() && m_osu->getModRelax()));
 
     if(m_osu->isInPlayMode()) {
-        m_osu->m_hud->updateScoreboard();
+        m_osu->m_hud->updateScoreboard(true);
     }
 }
 

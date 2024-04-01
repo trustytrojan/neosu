@@ -8,7 +8,7 @@ struct OsuScoreboardSlot {
     ~OsuScoreboardSlot();
 
     void draw(Graphics *g);
-    void updateIndex(int new_index);
+    void updateIndex(int new_index, bool animate);
 
     OsuUIAvatar *m_avatar = nullptr;
     SCORE_ENTRY m_score;

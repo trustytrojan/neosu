@@ -678,6 +678,8 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
     m_uiScaleSlider->setAnimated(false);
 
     addSubSection("Detail Settings");
+    addCheckbox("Animate scoreboard", "Use fancy animations for the in-game scoreboard",
+                convar->getConVarByName("scoreboard_animations"));
     addCheckbox("Avoid flashing elements",
                 "Disables cosmetic flash effects\nDisables dimming when holding silders with Flashlight mod enabled",
                 convar->getConVarByName("avoid_flashes"));

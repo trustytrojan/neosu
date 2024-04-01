@@ -726,7 +726,7 @@ void OsuRoom::on_match_score_updated(Packet *packet) {
         slot->sv2_bonus = read_float64(packet);
     }
 
-    bancho.osu->m_hud->updateScoreboard();
+    bancho.osu->m_hud->updateScoreboard(true);
 }
 
 void OsuRoom::on_all_players_loaded() {
