@@ -1190,15 +1190,13 @@ void OsuBeatmap::keyPressed1(bool mouse) {
 
     // key overlay & counter
     m_osu->getHUD()->animateInputoverlay(mouse ? 3 : 1, true);
-    if(!m_bInBreak && !m_bIsInSkippableSection && m_bIsPlaying && !m_bFailed)
-        m_osu->getScore()->addKeyCount(mouse ? 3 : 1);
+
+    if(m_bFailed) return;
+
+    if(!m_bInBreak && !m_bIsInSkippableSection && m_bIsPlaying) m_osu->getScore()->addKeyCount(mouse ? 3 : 1);
 
     m_bPrevKeyWasKey1 = true;
     m_bClick1Held = true;
-
-    // debugLog("async music pos = %lu, curMusicPos = %lu, curMusicPosWithOffsets = %lu\n", m_music->getPositionMS(),
-    // m_iCurMusicPos, m_iCurMusicPosWithOffsets); long curMusicPos = getMusicPositionMSInterpolated(); // this would
-    // only be useful if we also played hitsounds async! combined with checking which musicPos is bigger
 
     CLICK click;
     click.musicPos = m_iCurMusicPosWithOffsets;
@@ -1226,15 +1224,13 @@ void OsuBeatmap::keyPressed2(bool mouse) {
 
     // key overlay & counter
     m_osu->getHUD()->animateInputoverlay(mouse ? 4 : 2, true);
-    if(!m_bInBreak && !m_bIsInSkippableSection && m_bIsPlaying && !m_bFailed)
-        m_osu->getScore()->addKeyCount(mouse ? 4 : 2);
+
+    if(m_bFailed) return;
+
+    if(!m_bInBreak && !m_bIsInSkippableSection && m_bIsPlaying) m_osu->getScore()->addKeyCount(mouse ? 4 : 2);
 
     m_bPrevKeyWasKey1 = false;
     m_bClick2Held = true;
-
-    // debugLog("async music pos = %lu, curMusicPos = %lu, curMusicPosWithOffsets = %lu\n", m_music->getPositionMS(),
-    // m_iCurMusicPos, m_iCurMusicPosWithOffsets); long curMusicPos = getMusicPositionMSInterpolated(); // this would
-    // only be useful if we also played hitsounds async! combined with checking which musicPos is bigger
 
     CLICK click;
     click.musicPos = m_iCurMusicPosWithOffsets;
