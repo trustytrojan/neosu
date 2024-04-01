@@ -21,7 +21,7 @@
 #include "Mouse.h"
 #include "Osu.h"
 #include "OsuBackgroundImageHandler.h"
-#include "OsuBeatmapStandard.h"
+#include "OsuBeatmap.h"
 #include "OsuChat.h"
 #include "OsuDatabase.h"
 #include "OsuDatabaseBeatmap.h"
@@ -1682,10 +1682,9 @@ void OsuSongBrowser2::onDifficultySelected(OsuDatabaseBeatmap *diff2, bool play)
     const bool wasSelectedBeatmapNULL = (m_selectedBeatmap == NULL);
     if(m_selectedBeatmap != NULL) m_selectedBeatmap->deselect();
 
-    // create/recreate/cache runtime beatmap object depending on gamemode
-    if(m_osu->getGamemode() == Osu::GAMEMODE::STD && dynamic_cast<OsuBeatmapStandard *>(m_selectedBeatmap) == NULL) {
-        SAFE_DELETE(m_selectedBeatmap);
-        m_selectedBeatmap = new OsuBeatmapStandard(m_osu);
+    // create/recreate/cache runtime beatmap object
+    if(m_selectedBeatmap == NULL) {
+        m_selectedBeatmap = new OsuBeatmap(m_osu);
     }
 
     // remember it
@@ -3766,7 +3765,7 @@ void OsuSongBrowser2::onSelectionMode() {
         {
             if(m_osu_mod_fposu_ref->getBool())
                 activeButton = fposuButton;
-            else if(m_osu->getGamemode() == Osu::GAMEMODE::STD)
+            else
                 activeButton = standardButton;
         }
         if(activeButton != NULL) activeButton->setTextBrightColor(0xff00ff00);
@@ -3818,21 +3817,7 @@ void OsuSongBrowser2::onSelectionOptions() {
 void OsuSongBrowser2::onModeChange(UString text) { onModeChange2(text); }
 
 void OsuSongBrowser2::onModeChange2(UString text, int id) {
-    if(id != 2 && text != UString("fposu")) m_osu_mod_fposu_ref->setValue(0.0f);
-
-    if(id == 0 || text == UString("std")) {
-        if(m_osu->getGamemode() != Osu::GAMEMODE::STD) {
-            m_osu->setGamemode(Osu::GAMEMODE::STD);
-            refreshBeatmaps();
-        }
-    } else if(id == 2 || text == UString("fposu")) {
-        m_osu_mod_fposu_ref->setValue(1.0f);
-
-        if(m_osu->getGamemode() != Osu::GAMEMODE::STD) {
-            m_osu->setGamemode(Osu::GAMEMODE::STD);
-            refreshBeatmaps();
-        }
-    }
+    m_osu_mod_fposu_ref->setValue(id == 2 || text == UString("fposu"));
 }
 
 void OsuSongBrowser2::onUserButtonClicked() {

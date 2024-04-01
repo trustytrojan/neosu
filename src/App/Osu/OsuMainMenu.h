@@ -14,7 +14,7 @@
 
 class Osu;
 
-class OsuBeatmapStandard;
+class OsuBeatmap;
 class OsuDatabaseBeatmap;
 
 class OsuHitObject;
@@ -165,7 +165,7 @@ class OsuMainMenu : public OsuScreen, public MouseListener {
     float m_fStartupAnim2;
 
     OsuDatabaseBeatmap *m_mainMenuSliderTextDatabaseBeatmap;
-    OsuBeatmapStandard *m_mainMenuSliderTextBeatmapStandard;
+    OsuBeatmap *m_mainMenuSliderTextBeatmapStandard;
     std::vector<OsuHitObject *> m_mainMenuSliderTextBeatmapHitObjects;
     float m_fMainMenuSliderTextRawHitCircleDiameter;
 

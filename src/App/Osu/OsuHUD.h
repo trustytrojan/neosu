@@ -14,7 +14,7 @@ class Osu;
 class OsuUIAvatar;
 class OsuScore;
 class OsuScoreboardSlot;
-class OsuBeatmapStandard;
+class OsuBeatmap;
 
 class McFont;
 class ConVar;
@@ -53,7 +53,7 @@ class OsuHUD : public OsuScreen {
         bool secondTrail = false);  // NOTE: only use if drawCursor() with updateAndDrawTrail = false (FPoSu)
     void drawCursorRipples(Graphics *g);
     void drawFps(Graphics *g) { drawFps(g, m_tempFont, m_fCurFps); }
-    void drawHitErrorBar(Graphics *g, OsuBeatmapStandard *beatmapStd);
+    void drawHitErrorBar(Graphics *g, OsuBeatmap *beatmap);
     void drawPlayfieldBorder(Graphics *g, Vector2 playfieldCenter, Vector2 playfieldSize, float hitcircleDiameter);
     void drawPlayfieldBorder(Graphics *g, Vector2 playfieldCenter, Vector2 playfieldSize, float hitcircleDiameter,
                              float borderSize);

@@ -13,7 +13,6 @@
 #include "Engine.h"
 #include "Osu.h"
 #include "OsuBeatmap.h"
-#include "OsuBeatmapStandard.h"
 #include "OsuDatabaseBeatmap.h"
 #include "OsuDifficultyCalculator.h"
 #include "OsuGameRules.h"
@@ -300,14 +299,13 @@ void OsuScore::addHitResult(OsuBeatmap *beatmap, OsuHitObject *hitObject, HIT hi
     // recalculate pp
     if(m_osu_draw_statistics_pp_ref->getBool())  // sanity + performance
     {
-        OsuBeatmapStandard *standardPointer = dynamic_cast<OsuBeatmapStandard *>(beatmap);
-        if(standardPointer != NULL && beatmap->getSelectedDifficulty2() != NULL) {
-            double aimStars = standardPointer->getAimStars();
-            double aimSliderFactor = standardPointer->getAimSliderFactor();
-            double speedStars = standardPointer->getSpeedStars();
-            double speedNotes = standardPointer->getSpeedNotes();
+        if(beatmap != NULL && beatmap->getSelectedDifficulty2() != NULL) {
+            double aimStars = beatmap->getAimStars();
+            double aimSliderFactor = beatmap->getAimSliderFactor();
+            double speedStars = beatmap->getSpeedStars();
+            double speedNotes = beatmap->getSpeedNotes();
 
-            // int numHitObjects = standardPointer->getNumHitObjects();
+            // int numHitObjects = beatmap->getNumHitObjects();
             int maxPossibleCombo = beatmap->getMaxPossibleCombo();
             int numCircles = beatmap->getSelectedDifficulty2()->getNumCircles();
             int numSliders = beatmap->getSelectedDifficulty2()->getNumSliders();

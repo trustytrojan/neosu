@@ -13,7 +13,7 @@
 #include "ConVar.h"
 #include "Engine.h"
 #include "Osu.h"
-#include "OsuBeatmapStandard.h"
+#include "OsuBeatmap.h"
 #include "OsuCircle.h"
 #include "OsuGameRules.h"
 #include "OsuModFPoSu.h"
@@ -76,7 +76,7 @@ ConVar *OsuSlider::m_osu_drain_type_ref = NULL;
 OsuSlider::OsuSlider(char type, int repeat, float pixelLength, std::vector<Vector2> points, std::vector<int> hitSounds,
                      std::vector<float> ticks, float sliderTime, float sliderTimeWithoutRepeats, long time,
                      int sampleType, int comboNumber, bool isEndOfCombo, int colorCounter, int colorOffset,
-                     OsuBeatmapStandard *beatmap)
+                     OsuBeatmap *beatmap)
     : OsuHitObject(time, sampleType, comboNumber, isEndOfCombo, colorCounter, colorOffset, beatmap) {
     if(m_osu_playfield_mirror_horizontal_ref == NULL)
         m_osu_playfield_mirror_horizontal_ref = convar->getConVarByName("osu_playfield_mirror_horizontal");

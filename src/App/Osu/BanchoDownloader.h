@@ -1,5 +1,5 @@
 #pragma once
-#include "OsuBeatmapStandard.h"
+#include "OsuBeatmap.h"
 #include "OsuDatabaseBeatmap.h"
 
 enum DownloadStatus {

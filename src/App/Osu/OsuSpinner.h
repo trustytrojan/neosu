@@ -12,7 +12,7 @@
 
 class OsuSpinner : public OsuHitObject {
    public:
-    OsuSpinner(int x, int y, long time, int sampleType, bool isEndOfCombo, long endTime, OsuBeatmapStandard *beatmap);
+    OsuSpinner(int x, int y, long time, int sampleType, bool isEndOfCombo, long endTime, OsuBeatmap *beatmap);
     virtual ~OsuSpinner();
 
     virtual void draw(Graphics *g);
@@ -34,7 +34,7 @@ class OsuSpinner : public OsuHitObject {
     void onHit();
     void rotate(float rad);
 
-    OsuBeatmapStandard *m_beatmap;
+    OsuBeatmap *m_beatmap;
 
     Vector2 m_vRawPos;
     Vector2 m_vOriginalRawPos;

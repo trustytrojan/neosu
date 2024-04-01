@@ -64,8 +64,6 @@ class Osu : public App, public MouseListener {
 
     static bool findIgnoreCase(const std::string &haystack, const std::string &needle);
 
-    enum class GAMEMODE { STD, MANIA };
-
     Osu(int instanceID = 0);
     virtual ~Osu();
 
@@ -109,10 +107,7 @@ class Osu : public App, public MouseListener {
     void setSkin(UString skin) { onSkinChange("", skin); }
     void reloadSkin() { onSkinReload(); }
 
-    void setGamemode(GAMEMODE gamemode) { m_gamemode = gamemode; }
-
     inline int getInstanceID() const { return m_iInstanceID; }
-    inline GAMEMODE getGamemode() const { return m_gamemode; }
 
     inline Vector2 getScreenSize() const { return g_vInternalResolution; }
     inline int getScreenWidth() const { return (int)g_vInternalResolution.x; }
@@ -363,7 +358,6 @@ class Osu : public App, public MouseListener {
     CWindowManager *m_windowManager;
 
     // custom
-    GAMEMODE m_gamemode;
     bool m_bScheduleEndlessModNextBeatmap;
     int m_iMultiplayerClientNumEscPresses;
     int m_iInstanceID;

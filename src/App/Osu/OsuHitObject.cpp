@@ -11,7 +11,7 @@
 #include "ConVar.h"
 #include "Engine.h"
 #include "Osu.h"
-#include "OsuBeatmapStandard.h"
+#include "OsuBeatmap.h"
 #include "OsuGameRules.h"
 #include "OsuHUD.h"
 #include "OsuSkin.h"
@@ -98,7 +98,7 @@ ConVar *OsuHitObject::m_osu_mod_mafham_ref = NULL;
 
 unsigned long long OsuHitObject::sortHackCounter = 0;
 
-void OsuHitObject::drawHitResult(Graphics *g, OsuBeatmapStandard *beatmap, Vector2 rawPos, OsuScore::HIT result,
+void OsuHitObject::drawHitResult(Graphics *g, OsuBeatmap *beatmap, Vector2 rawPos, OsuScore::HIT result,
                                  float animPercentInv, float hitDeltaRangePercent) {
     drawHitResult(g, beatmap->getSkin(), beatmap->getHitcircleDiameter(), beatmap->getRawHitcircleDiameter(), rawPos,
                   result, animPercentInv, hitDeltaRangePercent);
@@ -352,8 +352,6 @@ void OsuHitObject::drawHitResultAnim(Graphics *g, const HITRESULTANIM &hitresult
                               // scheduled with it, e.g. for slider end)
        && (hitresultanim.time + osu_hitresult_duration_max.getFloat() *
                                     (1.0f / m_beatmap->getOsu()->getAnimationSpeedMultiplier())) > engine->getTime()) {
-        OsuBeatmapStandard *beatmapStd = dynamic_cast<OsuBeatmapStandard *>(m_beatmap);
-
         OsuSkin *skin = m_beatmap->getSkin();
         {
             const long skinAnimationTimeStartOffset =
@@ -380,11 +378,9 @@ void OsuHitObject::drawHitResultAnim(Graphics *g, const HITRESULTANIM &hitresult
                 (((engine->getTime() - hitresultanim.time) * m_beatmap->getOsu()->getAnimationSpeedMultiplier()) /
                  osu_hitresult_duration.getFloat());
 
-            if(beatmapStd != NULL)
-                drawHitResult(
-                    g, beatmapStd, beatmapStd->osuCoords2Pixels(hitresultanim.rawPos), hitresultanim.result,
-                    animPercentInv,
-                    clamp<float>((float)hitresultanim.delta / OsuGameRules::getHitWindow50(beatmapStd), -1.0f, 1.0f));
+            drawHitResult(
+                g, m_beatmap, m_beatmap->osuCoords2Pixels(hitresultanim.rawPos), hitresultanim.result, animPercentInv,
+                clamp<float>((float)hitresultanim.delta / OsuGameRules::getHitWindow50(m_beatmap), -1.0f, 1.0f));
         }
     }
 }

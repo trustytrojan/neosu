@@ -1375,9 +1375,7 @@ void OsuDatabase::loadDB(Packet *db, bool &fallbackToRawLoad) {
             continue;
 
         // fill diff with data
-        if((mode == 0 && m_osu->getGamemode() == Osu::GAMEMODE::STD) ||
-           (mode == 0x03 && m_osu->getGamemode() == Osu::GAMEMODE::MANIA))  // gamemode filter
-        {
+        if(mode == 0) {
             OsuDatabaseBeatmap *diff2 = new OsuDatabaseBeatmap(m_osu, fullFilePath, beatmapPath);
             {
                 diff2->m_sTitle = songTitle;

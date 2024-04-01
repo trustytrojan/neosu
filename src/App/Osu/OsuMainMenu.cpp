@@ -19,7 +19,7 @@
 #include "Mouse.h"
 #include "Osu.h"
 #include "OsuBackgroundImageHandler.h"
-#include "OsuBeatmapStandard.h"
+#include "OsuBeatmap.h"
 #include "OsuDatabase.h"
 #include "OsuDatabaseBeatmap.h"
 #include "OsuGameRules.h"
@@ -321,7 +321,7 @@ OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu) {
     m_fMainMenuSliderTextRawHitCircleDiameter = 1.0f;
     if(osu_main_menu_use_slider_text.getBool()) {
         m_mainMenuSliderTextDatabaseBeatmap = new OsuDatabaseBeatmap(m_osu, s_sliderTextBeatmap, "", true);
-        m_mainMenuSliderTextBeatmapStandard = new OsuBeatmapStandard(m_osu);
+        m_mainMenuSliderTextBeatmapStandard = new OsuBeatmap(m_osu);
 
         // HACKHACK: temporary workaround to avoid this breaking the main menu logo text sliders (1/2)
         const bool wasModRandomEnabled = m_osu_mod_random_ref->getBool();

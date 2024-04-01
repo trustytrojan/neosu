@@ -13,11 +13,11 @@
 class ConVar;
 
 class OsuModFPoSu;
-class OsuBeatmapStandard;
+class OsuBeatmap;
 
 class OsuHitObject {
    public:
-    static void drawHitResult(Graphics *g, OsuBeatmapStandard *beatmap, Vector2 rawPos, OsuScore::HIT result,
+    static void drawHitResult(Graphics *g, OsuBeatmap *beatmap, Vector2 rawPos, OsuScore::HIT result,
                               float animPercentInv, float hitDeltaRangePercent);
     static void drawHitResult(Graphics *g, OsuSkin *skin, float hitcircleDiameter, float rawHitcircleDiameter,
                               Vector2 rawPos, OsuScore::HIT result, float animPercentInv, float hitDeltaRangePercent);

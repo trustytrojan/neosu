@@ -1,6 +1,6 @@
 //================ Copyright (c) 2020, PG, All rights reserved. =================//
 //
-// Purpose:		used by OsuBeatmapStandard for populating the live pp star cache
+// Purpose:		used by OsuBeatmap for populating the live pp star cache
 //
 // $NoKeywords: $osubgscache
 //===============================================================================//

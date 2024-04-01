@@ -1,13 +1,4 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		beatmap loader
-//
-// $NoKeywords: $osubm
-//===============================================================================//
-
-#ifndef OSUBEATMAP_H
-#define OSUBEATMAP_H
-
+#pragma once
 #include "OsuDatabaseBeatmap.h"
 #include "OsuReplay.h"
 #include "OsuScore.h"
@@ -27,32 +18,81 @@ class OsuDatabaseBeatmap;
 class OsuBackgroundStarCacheLoader;
 class OsuBackgroundStarCalcHandler;
 
-class OsuBeatmap {
-   public:
+struct OsuBeatmap {
+    friend class OsuBackgroundStarCacheLoader;
+    friend class OsuBackgroundStarCalcHandler;
+
     struct CLICK {
         long musicPos;
     };
 
     OsuBeatmap(Osu *osu);
-    virtual ~OsuBeatmap();
+    ~OsuBeatmap();
 
-    virtual void draw(Graphics *g);
-    virtual void drawInt(Graphics *g);
+    void draw(Graphics *g);
     void drawDebug(Graphics *g);
     void drawBackground(Graphics *g);
-    virtual void update();
 
-    virtual void onKeyDown(KeyboardEvent &e);
-    virtual void onKeyUp(KeyboardEvent &e);
+    void update();
+    void update2();  // Used to be OsuBeatmap::update()
 
-    virtual void onModUpdate() {
-        ;
-    }  // this should make all the necessary internal updates to hitobjects when legacy osu mods or static mods change
-       // live (but also on start)
-    virtual bool isLoading();  // allows subclasses to delay the playing start, e.g. to load something
+    void onKeyDown(KeyboardEvent &e);
 
-    virtual long getPVS();  // Potentially Visible Set gate time size, for optimizing draw() and update() when iterating
-                            // over all hitobjects
+    // Potentially Visible Set gate time size, for optimizing draw() and update() when iterating over all hitobjects
+    long getPVS();
+
+    // this should make all the necessary internal updates to hitobjects when legacy osu mods or static mods change
+    // live (but also on start)
+    void onModUpdate(bool rebuildSliderVertexBuffers = true, bool recomputeDrainRate = true);
+
+    // Returns true if we're loading or waiting on other players
+    bool isLoading();
+
+    // Returns true if the local player is loading
+    bool isActuallyLoading();
+
+    Vector2 pixels2OsuCoords(Vector2 pixelCoords) const;  // only used for positional audio atm
+    Vector2 osuCoords2Pixels(
+        Vector2 coords) const;  // hitobjects should use this one (includes lots of special behaviour)
+    Vector2 osuCoords2RawPixels(
+        Vector2 coords) const;  // raw transform from osu!pixels to absolute screen pixels (without any mods whatsoever)
+    Vector3 osuCoordsTo3D(Vector2 coords, const OsuHitObject *hitObject) const;
+    Vector3 osuCoordsToRaw3D(Vector2 coords) const;  // (without any mods whatsoever)
+    Vector2 osuCoords2LegacyPixels(
+        Vector2 coords) const;  // only applies vanilla osu mods and static mods to the coordinates (used for generating
+                                // the static slider mesh) centered at (0, 0, 0)
+
+    // cursor
+    Vector2 getCursorPos() const;
+    Vector2 getFirstPersonCursorDelta() const;
+    inline Vector2 getContinueCursorPoint() const { return m_vContinueCursorPoint; }
+
+    // playfield
+    inline Vector2 getPlayfieldSize() const { return m_vPlayfieldSize; }
+    inline Vector2 getPlayfieldCenter() const { return m_vPlayfieldCenter; }
+    inline float getPlayfieldRotation() const { return m_fPlayfieldRotation; }
+
+    // hitobjects
+    float getHitcircleDiameter() const;  // in actual scaled pixels to the current resolution
+    inline float getRawHitcircleDiameter() const { return m_fRawHitcircleDiameter; }  // in osu!pixels
+    inline float getHitcircleXMultiplier() const {
+        return m_fXMultiplier;
+    }  // multiply osu!pixels with this to get screen pixels
+    inline float getNumberScale() const { return m_fNumberScale; }
+    inline float getHitcircleOverlapScale() const { return m_fHitcircleOverlapScale; }
+    inline float getSliderFollowCircleDiameter() const { return m_fSliderFollowCircleDiameter; }
+    inline float getRawSliderFollowCircleDiameter() const { return m_fRawSliderFollowCircleDiameter; }
+    inline bool isInMafhamRenderChunk() const { return m_bInMafhamRenderChunk; }
+
+    // score
+    inline int getNumHitObjects() const { return m_hitobjects.size(); }
+    inline float getAimStars() const { return m_fAimStars; }
+    inline float getAimSliderFactor() const { return m_fAimSliderFactor; }
+    inline float getSpeedStars() const { return m_fSpeedStars; }
+    inline float getSpeedNotes() const { return m_fSpeedNotes; }
+
+    // hud
+    inline bool isSpinnerActive() const { return m_bIsSpinnerActive; }
 
     // callbacks called by the Osu class (osu!standard)
     void skipEmptySection();
@@ -83,7 +123,8 @@ class OsuBeatmap {
     }
 
     // music/sound
-    void unloadMusic() { unloadMusicInt(); }
+    void loadMusic(bool stream = true, bool prescan = false);
+    void unloadMusic();
     void setVolume(float volume);
     void setSpeed(float speed);
     void seekPercent(double percent);
@@ -138,7 +179,8 @@ class OsuBeatmap {
     // set to false when using non-vanilla mods (disables score submission)
     bool vanilla = true;
 
-    // replay recording (see OsuBeatmapStandard)
+    // replay recording (see OsuBeatmap)
+    void write_frame();
     std::vector<OsuReplay::Frame> replay;
     double last_event_time = 0.0;
     long last_event_ms = 0;
@@ -206,33 +248,6 @@ class OsuBeatmap {
     inline float getBreakBackgroundFadeAnim() const { return m_fBreakBackgroundFade; }
 
    protected:
-    static ConVar *m_osu_pvs;
-    static ConVar *m_osu_draw_hitobjects_ref;
-    static ConVar *m_osu_followpoints_prevfadetime_ref;
-    static ConVar *m_osu_universal_offset_ref;
-    static ConVar *m_osu_early_note_time_ref;
-    static ConVar *m_osu_fail_time_ref;
-    static ConVar *m_osu_drain_type_ref;
-
-    static ConVar *m_osu_draw_hud_ref;
-    static ConVar *m_osu_draw_scorebarbg_ref;
-    static ConVar *m_osu_hud_scorebar_hide_during_breaks_ref;
-    static ConVar *m_osu_drain_stable_hpbar_maximum_ref;
-    static ConVar *m_osu_volume_music_ref;
-    static ConVar *m_osu_mod_fposu_ref;
-    static ConVar *m_fposu_draw_scorebarbg_on_top_ref;
-
-    // overridable child events
-    virtual void onBeforeLoad() { ; }  // called before hitobjects are loaded
-    virtual void onLoad() { ; }        // called after hitobjects have been loaded
-    virtual void onPlayStart() {
-        ;
-    }  // called when the player starts playing (everything has been loaded, including the music)
-    virtual void onBeforeStop(bool quit) {
-        ;
-    }  // called before hitobjects are unloaded (quit = don't display ranking screen)
-    virtual void onPaused(bool first) { ; }
-
     // internal
     bool canDraw();
     bool canUpdate();
@@ -240,8 +255,6 @@ class OsuBeatmap {
     void actualRestart();
 
     void handlePreviewPlay();
-    void loadMusic(bool stream = true, bool prescan = false);
-    void unloadMusicInt();
     void unloadObjects();
 
     void resetHitObjects(long curPos = 0);
@@ -340,8 +353,129 @@ class OsuBeatmap {
     int m_iPreviousFollowPointObjectIndex;  // TODO: this shouldn't be in this class
 
    private:
-    friend class OsuBackgroundStarCacheLoader;
-    friend class OsuBackgroundStarCalcHandler;
-};
+    ConVar *m_osu_pvs = nullptr;
+    ConVar *m_osu_draw_hitobjects_ref = nullptr;
+    ConVar *m_osu_followpoints_prevfadetime_ref = nullptr;
+    ConVar *m_osu_universal_offset_ref = nullptr;
+    ConVar *m_osu_early_note_time_ref = nullptr;
+    ConVar *m_osu_fail_time_ref = nullptr;
+    ConVar *m_osu_drain_type_ref = nullptr;
+    ConVar *m_osu_draw_hud_ref = nullptr;
+    ConVar *m_osu_draw_scorebarbg_ref = nullptr;
+    ConVar *m_osu_hud_scorebar_hide_during_breaks_ref = nullptr;
+    ConVar *m_osu_drain_stable_hpbar_maximum_ref = nullptr;
+    ConVar *m_osu_volume_music_ref = nullptr;
+    ConVar *m_osu_mod_fposu_ref = nullptr;
+    ConVar *m_fposu_draw_scorebarbg_on_top_ref = nullptr;
+    ConVar *m_osu_draw_statistics_pp_ref = nullptr;
+    ConVar *m_osu_draw_statistics_livestars_ref = nullptr;
+    ConVar *m_osu_mod_fullalternate_ref = nullptr;
+    ConVar *m_fposu_distance_ref = nullptr;
+    ConVar *m_fposu_curved_ref = nullptr;
+    ConVar *m_fposu_mod_strafing_ref = nullptr;
+    ConVar *m_fposu_mod_strafing_frequency_x_ref = nullptr;
+    ConVar *m_fposu_mod_strafing_frequency_y_ref = nullptr;
+    ConVar *m_fposu_mod_strafing_frequency_z_ref = nullptr;
+    ConVar *m_fposu_mod_strafing_strength_x_ref = nullptr;
+    ConVar *m_fposu_mod_strafing_strength_y_ref = nullptr;
+    ConVar *m_fposu_mod_strafing_strength_z_ref = nullptr;
+    ConVar *m_fposu_mod_3d_depthwobble_ref = nullptr;
+    ConVar *m_osu_slider_scorev2_ref = nullptr;
 
-#endif
+    static inline Vector2 mapNormalizedCoordsOntoUnitCircle(const Vector2 &in) {
+        return Vector2(in.x * std::sqrt(1.0f - in.y * in.y / 2.0f), in.y * std::sqrt(1.0f - in.x * in.x / 2.0f));
+    }
+
+    static float quadLerp3f(float left, float center, float right, float percent) {
+        if(percent >= 0.5f) {
+            percent = (percent - 0.5f) / 0.5f;
+            percent *= percent;
+            return lerp<float>(center, right, percent);
+        } else {
+            percent = percent / 0.5f;
+            percent = 1.0f - (1.0f - percent) * (1.0f - percent);
+            return lerp<float>(left, center, percent);
+        }
+    }
+
+    void onPlayStart();
+    void onBeforeStop(bool quit);
+    void onPaused(bool first);
+
+    void drawFollowPoints(Graphics *g);
+    void drawHitObjects(Graphics *g);
+
+    void updateAutoCursorPos();
+    void updatePlayfieldMetrics();
+    void updateHitobjectMetrics();
+    void updateSliderVertexBuffers();
+
+    void calculateStacks();
+    void computeDrainRate();
+
+    void updateStarCache();
+    void stopStarCacheLoader();
+    bool isLoadingStarCache();
+
+    // beatmap
+    bool m_bIsSpinnerActive;
+    Vector2 m_vContinueCursorPoint;
+
+    // playfield
+    float m_fPlayfieldRotation;
+    float m_fScaleFactor;
+    Vector2 m_vPlayfieldCenter;
+    Vector2 m_vPlayfieldOffset;
+    Vector2 m_vPlayfieldSize;
+
+    // hitobject scaling
+    float m_fXMultiplier;
+    float m_fRawHitcircleDiameter;
+    float m_fHitcircleDiameter;
+    float m_fNumberScale;
+    float m_fHitcircleOverlapScale;
+    float m_fSliderFollowCircleDiameter;
+    float m_fRawSliderFollowCircleDiameter;
+
+    // auto
+    Vector2 m_vAutoCursorPos;
+    int m_iAutoCursorDanceIndex;
+
+    // pp calculation buffer (only needs to be recalculated in onModUpdate(), instead of on every hit)
+    float m_fAimStars;
+    float m_fAimSliderFactor;
+    float m_fSpeedStars;
+    float m_fSpeedNotes;
+    OsuBackgroundStarCacheLoader *m_starCacheLoader;
+    float m_fStarCacheTime;
+
+    // dynamic slider vertex buffer and other recalculation checks (for live mod switching)
+    float m_fPrevHitCircleDiameter;
+    bool m_bWasHorizontalMirrorEnabled;
+    bool m_bWasVerticalMirrorEnabled;
+    bool m_bWasEZEnabled;
+    bool m_bWasMafhamEnabled;
+    float m_fPrevPlayfieldRotationFromConVar;
+    float m_fPrevPlayfieldStretchX;
+    float m_fPrevPlayfieldStretchY;
+    float m_fPrevHitCircleDiameterForStarCache;
+    float m_fPrevSpeedForStarCache;
+
+    // custom
+    bool m_bIsPreLoading;
+    int m_iPreLoadingIndex;
+    bool m_bWasHREnabled;  // dynamic stack recalculation
+
+    RenderTarget *m_mafhamActiveRenderTarget;
+    RenderTarget *m_mafhamFinishedRenderTarget;
+    bool m_bMafhamRenderScheduled;
+    int m_iMafhamHitObjectRenderIndex;  // scene buffering for rendering entire beatmaps at once with an acceptable
+                                        // framerate
+    int m_iMafhamPrevHitObjectIndex;
+    int m_iMafhamActiveRenderHitObjectIndex;
+    int m_iMafhamFinishedRenderHitObjectIndex;
+    bool m_bInMafhamRenderChunk;  // used by OsuSlider to not animate the reverse arrow, and by OsuCircle to not animate
+                                  // note blocking shaking, while being rendered into the scene buffer
+
+    int m_iMandalaIndex;
+};

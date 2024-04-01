@@ -136,7 +136,6 @@ class OsuUserStatsScreenBackgroundPPRecalculator : public Resource {
                     const OsuReplay::BEATMAP_VALUES legacyValues = OsuReplay::getBeatmapValuesForModsLegacy(
                         score.modsLegacy, diff2->getAR(), diff2->getCS(), diff2->getOD(), diff2->getHP());
                     const std::string &osuFilePath = diff2->getFilePath();
-                    const Osu::GAMEMODE gameMode = Osu::GAMEMODE::STD;
                     const float AR = (score.isLegacyScore ? legacyValues.AR : score.AR);
                     const float CS = (score.isLegacyScore ? legacyValues.CS : score.CS);
                     const float OD = (score.isLegacyScore ? legacyValues.OD : score.OD);
@@ -148,7 +147,7 @@ class OsuUserStatsScreenBackgroundPPRecalculator : public Resource {
 
                     // 2) load hitobjects for diffcalc
                     OsuDatabaseBeatmap::LOAD_DIFFOBJ_RESULT diffres =
-                        OsuDatabaseBeatmap::loadDifficultyHitObjects(osuFilePath, gameMode, AR, CS, speedMultiplier);
+                        OsuDatabaseBeatmap::loadDifficultyHitObjects(osuFilePath, AR, CS, speedMultiplier);
                     if(diffres.diffobjects.size() < 1) {
                         if(Osu::debug->getBool()) debugLog("PPRecalc couldn't load %s\n", osuFilePath.c_str());
 

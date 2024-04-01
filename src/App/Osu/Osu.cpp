@@ -31,7 +31,6 @@
 
 #include "OsuBackgroundImageHandler.h"
 #include "OsuBeatmap.h"
-#include "OsuBeatmapStandard.h"
 #include "OsuChangelog.h"
 #include "OsuChat.h"
 #include "OsuDatabaseBeatmap.h"
@@ -348,7 +347,6 @@ Osu::Osu(int instanceID) {
 
     m_bShouldCursorBeVisible = false;
 
-    m_gamemode = GAMEMODE::STD;
     m_bScheduleEndlessModNextBeatmap = false;
     m_iMultiplayerClientNumEscPresses = 0;
     m_bWasBossKeyPaused = false;
@@ -592,7 +590,7 @@ void Osu::draw(Graphics *g) {
     // draw everything in the correct order
     if(isInPlayMode())  // if we are playing a beatmap
     {
-        OsuBeatmapStandard *beatmapStd = dynamic_cast<OsuBeatmapStandard *>(getSelectedBeatmap());
+        OsuBeatmap *beatmap = getSelectedBeatmap();
         const bool isAuto = (m_bModAuto || m_bModAutopilot);
         const bool isFPoSu = (m_osu_mod_fposu_ref->getBool());
 
@@ -600,7 +598,7 @@ void Osu::draw(Graphics *g) {
 
         getSelectedBeatmap()->draw(g);
 
-        if(m_bModFlashlight && beatmapStd != NULL) {
+        if(m_bModFlashlight && beatmap != NULL) {
             // Dim screen when holding a slider
             float max_opacity = 1.f;
             if(holding_slider && !avoid_flashes.getBool()) {
@@ -608,7 +606,7 @@ void Osu::draw(Graphics *g) {
             }
 
             // Convert screen mouse -> osu mouse pos
-            Vector2 cursorPos = isAuto ? beatmapStd->getCursorPos() : engine->getMouse()->getPos();
+            Vector2 cursorPos = isAuto ? beatmap->getCursorPos() : engine->getMouse()->getPos();
             Vector2 mouse_position = cursorPos - OsuGameRules::getPlayfieldOffset(this);
             mouse_position /= OsuGameRules::getPlayfieldScaleFactor(this);
 
@@ -656,9 +654,9 @@ void Osu::draw(Graphics *g) {
         if(m_pauseMenu->isVisible() || getSelectedBeatmap()->isContinueScheduled()) fadingCursorAlpha = 1.0f;
 
         // draw auto cursor
-        if(isAuto && allowDrawCursor && !isFPoSu && beatmapStd != NULL && !beatmapStd->isLoading())
+        if(isAuto && allowDrawCursor && !isFPoSu && beatmap != NULL && !beatmap->isLoading())
             m_hud->drawCursor(
-                g, m_osu_mod_fps_ref->getBool() ? OsuGameRules::getPlayfieldCenter(this) : beatmapStd->getCursorPos(),
+                g, m_osu_mod_fps_ref->getBool() ? OsuGameRules::getPlayfieldCenter(this) : beatmap->getCursorPos(),
                 osu_mod_fadingcursor.getBool() ? fadingCursorAlpha : 1.0f);
 
         m_pauseMenu->draw(g);
@@ -674,7 +672,7 @@ void Osu::draw(Graphics *g) {
 
         // draw FPoSu cursor trail
         if(isFPoSu && m_fposu_draw_cursor_trail_ref->getBool())
-            m_hud->drawCursorTrail(g, beatmapStd->getCursorPos(),
+            m_hud->drawCursorTrail(g, beatmap->getCursorPos(),
                                    osu_mod_fadingcursor.getBool() ? fadingCursorAlpha : 1.0f);
 
         if(isFPoSu) {
@@ -687,8 +685,7 @@ void Osu::draw(Graphics *g) {
 
         // draw player cursor
         if((!isAuto || allowDoubleCursor) && allowDrawCursor) {
-            Vector2 cursorPos =
-                (beatmapStd != NULL && !isAuto) ? beatmapStd->getCursorPos() : engine->getMouse()->getPos();
+            Vector2 cursorPos = (beatmap != NULL && !isAuto) ? beatmap->getCursorPos() : engine->getMouse()->getPos();
 
             if(isFPoSu) {
                 cursorPos = getScreenSize() / 2.0f;
@@ -1469,10 +1466,6 @@ void Osu::onKeyDown(KeyboardEvent &key) {
 }
 
 void Osu::onKeyUp(KeyboardEvent &key) {
-    if(isInPlayMode()) {
-        if(!getSelectedBeatmap()->isPaused()) getSelectedBeatmap()->onKeyUp(key);  // only used for mania atm
-    }
-
     // clicks
     {
         // K1

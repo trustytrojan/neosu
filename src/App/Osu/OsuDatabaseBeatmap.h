@@ -99,12 +99,11 @@ class OsuDatabaseBeatmap {
     OsuDatabaseBeatmap(Osu *osu, std::vector<OsuDatabaseBeatmap *> &difficulties);
     ~OsuDatabaseBeatmap();
 
-    static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string &osuFilePath, Osu::GAMEMODE gameMode,
-                                                        float AR, float CS, float speedMultiplier,
-                                                        bool calculateStarsInaccurately = false);
-    static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string &osuFilePath, Osu::GAMEMODE gameMode,
-                                                        float AR, float CS, float speedMultiplier,
-                                                        bool calculateStarsInaccurately, const std::atomic<bool> &dead);
+    static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string &osuFilePath, float AR, float CS,
+                                                        float speedMultiplier, bool calculateStarsInaccurately = false);
+    static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string &osuFilePath, float AR, float CS,
+                                                        float speedMultiplier, bool calculateStarsInaccurately,
+                                                        const std::atomic<bool> &dead);
     static bool loadMetadata(OsuDatabaseBeatmap *databaseBeatmap);
     static LOAD_GAMEPLAY_RESULT loadGameplay(OsuDatabaseBeatmap *databaseBeatmap, OsuBeatmap *beatmap);
 
@@ -259,7 +258,6 @@ class OsuDatabaseBeatmap {
         int colorCounter;
         int colorOffset;
         bool clicked;
-        long maniaEndTime;
     };
 
     struct SLIDER {
@@ -326,10 +324,10 @@ class OsuDatabaseBeatmap {
     static ConVar *m_osu_debug_pp_ref;
     static ConVar *m_osu_slider_end_inside_check_offset_ref;
 
-    static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string &osuFilePath, Osu::GAMEMODE gameMode,
+    static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string &osuFilePath,
                                                     bool filePathIsInMemoryBeatmap = false);
-    static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string &osuFilePath, Osu::GAMEMODE gameMode,
-                                                    bool filePathIsInMemoryBeatmap, const std::atomic<bool> &dead);
+    static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string &osuFilePath, bool filePathIsInMemoryBeatmap,
+                                                    const std::atomic<bool> &dead);
     static CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT calculateSliderTimesClicksTicks(
         int beatmapVersion, std::vector<SLIDER> &sliders, std::vector<TIMINGPOINT> &timingpoints,
         float sliderMultiplier, float sliderTickRate);

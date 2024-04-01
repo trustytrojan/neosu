@@ -23,7 +23,7 @@
 #include "OpenGLLegacyInterface.h"
 #include "Osu.h"
 #include "OsuBackgroundImageHandler.h"
-#include "OsuBeatmapStandard.h"
+#include "OsuBeatmap.h"
 #include "OsuKeyBindings.h"
 #include "OsuModSelector.h"
 #include "OsuOptionsMenu.h"
@@ -346,8 +346,8 @@ void OsuModFPoSu::update() {
         // auto support, because it looks pretty cool
         Vector2 mousePos = engine->getMouse()->getPos();
         if(isAutoCursor && m_osu->isInPlayMode() && m_osu->getSelectedBeatmap() != NULL) {
-            OsuBeatmapStandard *beatmapStd = dynamic_cast<OsuBeatmapStandard *>(m_osu->getSelectedBeatmap());
-            if(beatmapStd != NULL && !beatmapStd->isPaused()) mousePos = beatmapStd->getCursorPos();
+            OsuBeatmap *beatmap = m_osu->getSelectedBeatmap();
+            if(beatmap != NULL && !beatmap->isPaused()) mousePos = beatmap->getCursorPos();
         }
 
         m_camera->lookAt(calculateUnProjectedVector(mousePos));

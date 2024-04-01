@@ -18,7 +18,6 @@
 #include "OpenGLES2Interface.h"
 #include "Osu.h"
 #include "OsuBeatmap.h"
-#include "OsuBeatmapStandard.h"
 #include "OsuCircle.h"
 #include "OsuDatabase.h"
 #include "OsuDatabaseBeatmap.h"
@@ -308,10 +307,8 @@ void OsuHUD::draw(Graphics *g) {
     OsuBeatmap *beatmap = m_osu->getSelectedBeatmap();
     if(beatmap == NULL) return;  // sanity check
 
-    OsuBeatmapStandard *beatmapStd = dynamic_cast<OsuBeatmapStandard *>(beatmap);
-
     if(osu_draw_hud.getBool()) {
-        if(osu_draw_inputoverlay.getBool() && beatmapStd != NULL) {
+        if(osu_draw_inputoverlay.getBool()) {
             const bool isAutoClicking = (m_osu->getModAuto() || m_osu->getModRelax());
             if(!isAutoClicking)
                 drawInputOverlay(g, m_osu->getScore()->getKeyCount(1), m_osu->getScore()->getKeyCount(2),
@@ -327,8 +324,8 @@ void OsuHUD::draw(Graphics *g) {
 
         g->pushTransform();
         {
-            if(m_osu->getModTarget() && osu_draw_target_heatmap.getBool() && beatmapStd != NULL)
-                g->translate(0, beatmapStd->getHitcircleDiameter() *
+            if(m_osu->getModTarget() && osu_draw_target_heatmap.getBool())
+                g->translate(0, beatmap->getHitcircleDiameter() *
                                     (1.0f / (osu_hud_scale.getFloat() * osu_hud_statistics_scale.getFloat())));
 
             const int hitObjectIndexForCurrentTime =
@@ -366,16 +363,15 @@ void OsuHUD::draw(Graphics *g) {
                 osu_hud_scorebar_hide_during_breaks.getBool() ? (1.0f - beatmap->getBreakBackgroundFadeAnim()) : 1.0f,
                 m_fScoreBarBreakAnim);
 
-        // NOTE: moved to draw behind hitobjects in OsuBeatmapStandard::draw()
+        // NOTE: moved to draw behind hitobjects in OsuBeatmap::draw()
         if(m_osu_mod_fposu_ref->getBool()) {
             if(osu_draw_hiterrorbar.getBool() &&
-               (beatmapStd == NULL ||
-                (!beatmapStd->isSpinnerActive() || !osu_hud_hiterrorbar_hide_during_spinner.getBool())) &&
+               (beatmap == NULL ||
+                (!beatmap->isSpinnerActive() || !osu_hud_hiterrorbar_hide_during_spinner.getBool())) &&
                !beatmap->isLoading()) {
-                if(beatmapStd != NULL)
-                    drawHitErrorBar(g, OsuGameRules::getHitWindow300(beatmap), OsuGameRules::getHitWindow100(beatmap),
-                                    OsuGameRules::getHitWindow50(beatmap), OsuGameRules::getHitWindowMiss(beatmap),
-                                    m_osu->getScore()->getUnstableRate());
+                drawHitErrorBar(g, OsuGameRules::getHitWindow300(beatmap), OsuGameRules::getHitWindow100(beatmap),
+                                OsuGameRules::getHitWindow50(beatmap), OsuGameRules::getHitWindowMiss(beatmap),
+                                m_osu->getScore()->getUnstableRate());
             }
         }
 
@@ -388,26 +384,25 @@ void OsuHUD::draw(Graphics *g) {
 
         if(osu_draw_accuracy.getBool()) drawAccuracy(g, m_osu->getScore()->getAccuracy() * 100.0f);
 
-        if(m_osu->getModTarget() && osu_draw_target_heatmap.getBool() && beatmapStd != NULL)
-            drawTargetHeatmap(g, beatmapStd->getHitcircleDiameter());
+        if(m_osu->getModTarget() && osu_draw_target_heatmap.getBool())
+            drawTargetHeatmap(g, beatmap->getHitcircleDiameter());
     } else if(!osu_hud_shift_tab_toggles_everything.getBool()) {
-        if(osu_draw_inputoverlay.getBool() && beatmapStd != NULL) {
+        if(osu_draw_inputoverlay.getBool()) {
             const bool isAutoClicking = (m_osu->getModAuto() || m_osu->getModRelax());
             if(!isAutoClicking)
                 drawInputOverlay(g, m_osu->getScore()->getKeyCount(1), m_osu->getScore()->getKeyCount(2),
                                  m_osu->getScore()->getKeyCount(3), m_osu->getScore()->getKeyCount(4));
         }
 
-        // NOTE: moved to draw behind hitobjects in OsuBeatmapStandard::draw()
+        // NOTE: moved to draw behind hitobjects in OsuBeatmap::draw()
         if(m_osu_mod_fposu_ref->getBool()) {
             if(osu_draw_hiterrorbar.getBool() &&
-               (beatmapStd == NULL ||
-                (!beatmapStd->isSpinnerActive() || !osu_hud_hiterrorbar_hide_during_spinner.getBool())) &&
+               (beatmap == NULL ||
+                (!beatmap->isSpinnerActive() || !osu_hud_hiterrorbar_hide_during_spinner.getBool())) &&
                !beatmap->isLoading()) {
-                if(beatmapStd != NULL)
-                    drawHitErrorBar(g, OsuGameRules::getHitWindow300(beatmap), OsuGameRules::getHitWindow100(beatmap),
-                                    OsuGameRules::getHitWindow50(beatmap), OsuGameRules::getHitWindowMiss(beatmap),
-                                    m_osu->getScore()->getUnstableRate());
+                drawHitErrorBar(g, OsuGameRules::getHitWindow300(beatmap), OsuGameRules::getHitWindow100(beatmap),
+                                OsuGameRules::getHitWindow50(beatmap), OsuGameRules::getHitWindowMiss(beatmap),
+                                m_osu->getScore()->getUnstableRate());
             }
         }
     }
@@ -415,11 +410,10 @@ void OsuHUD::draw(Graphics *g) {
     if(beatmap->shouldFlashSectionPass()) drawSectionPass(g, beatmap->shouldFlashSectionPass());
     if(beatmap->shouldFlashSectionFail()) drawSectionFail(g, beatmap->shouldFlashSectionFail());
 
-    if(beatmap->shouldFlashWarningArrows())
-        drawWarningArrows(g, beatmapStd != NULL ? beatmapStd->getHitcircleDiameter() : 0);
+    if(beatmap->shouldFlashWarningArrows()) drawWarningArrows(g, beatmap->getHitcircleDiameter());
 
-    if(beatmap->isContinueScheduled() && beatmapStd != NULL && osu_draw_continue.getBool())
-        drawContinue(g, beatmapStd->getContinueCursorPoint(), beatmapStd->getHitcircleDiameter());
+    if(beatmap->isContinueScheduled() && osu_draw_continue.getBool())
+        drawContinue(g, beatmap->getContinueCursorPoint(), beatmap->getHitcircleDiameter());
 
     if(osu_draw_scrubbing_timeline.getBool() && m_osu->isSeeking()) {
         static std::vector<BREAK> breaks;
@@ -1684,13 +1678,12 @@ void OsuHUD::drawContinue(Graphics *g, Vector2 cursor, float hitcircleDiameter) 
     g->popTransform();
 }
 
-void OsuHUD::drawHitErrorBar(Graphics *g, OsuBeatmapStandard *beatmapStd) {
+void OsuHUD::drawHitErrorBar(Graphics *g, OsuBeatmap *beatmap) {
     if(osu_draw_hud.getBool() || !osu_hud_shift_tab_toggles_everything.getBool()) {
         if(osu_draw_hiterrorbar.getBool() &&
-           (!beatmapStd->isSpinnerActive() || !osu_hud_hiterrorbar_hide_during_spinner.getBool()) &&
-           !beatmapStd->isLoading())
-            drawHitErrorBar(g, OsuGameRules::getHitWindow300(beatmapStd), OsuGameRules::getHitWindow100(beatmapStd),
-                            OsuGameRules::getHitWindow50(beatmapStd), OsuGameRules::getHitWindowMiss(beatmapStd),
+           (!beatmap->isSpinnerActive() || !osu_hud_hiterrorbar_hide_during_spinner.getBool()) && !beatmap->isLoading())
+            drawHitErrorBar(g, OsuGameRules::getHitWindow300(beatmap), OsuGameRules::getHitWindow100(beatmap),
+                            OsuGameRules::getHitWindow50(beatmap), OsuGameRules::getHitWindowMiss(beatmap),
                             m_osu->getScore()->getUnstableRate());
     }
 }

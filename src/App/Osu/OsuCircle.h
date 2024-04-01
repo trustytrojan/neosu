@@ -16,10 +16,10 @@ class OsuSkinImage;
 class OsuCircle : public OsuHitObject {
    public:
     // main
-    static void drawApproachCircle(Graphics *g, OsuBeatmapStandard *beatmap, Vector2 rawPos, int number,
-                                   int colorCounter, int colorOffset, float colorRGBMultiplier, float approachScale,
-                                   float alpha, bool overrideHDApproachCircle = false);
-    static void drawCircle(Graphics *g, OsuBeatmapStandard *beatmap, Vector2 rawPos, int number, int colorCounter,
+    static void drawApproachCircle(Graphics *g, OsuBeatmap *beatmap, Vector2 rawPos, int number, int colorCounter,
+                                   int colorOffset, float colorRGBMultiplier, float approachScale, float alpha,
+                                   bool overrideHDApproachCircle = false);
+    static void drawCircle(Graphics *g, OsuBeatmap *beatmap, Vector2 rawPos, int number, int colorCounter,
                            int colorOffset, float colorRGBMultiplier, float approachScale, float alpha,
                            float numberAlpha, bool drawNumber = true, bool overrideHDApproachCircle = false);
     static void drawCircle(Graphics *g, OsuSkin *skin, Vector2 pos, float hitcircleDiameter, float numberScale,
@@ -28,19 +28,17 @@ class OsuCircle : public OsuHitObject {
                            bool overrideHDApproachCircle = false);
     static void drawCircle(Graphics *g, OsuSkin *skin, Vector2 pos, float hitcircleDiameter, Color color,
                            float alpha = 1.0f);
-    static void drawSliderStartCircle(Graphics *g, OsuBeatmapStandard *beatmap, Vector2 rawPos, int number,
-                                      int colorCounter, int colorOffset, float colorRGBMultiplier, float approachScale,
-                                      float alpha, float numberAlpha, bool drawNumber = true,
-                                      bool overrideHDApproachCircle = false);
+    static void drawSliderStartCircle(Graphics *g, OsuBeatmap *beatmap, Vector2 rawPos, int number, int colorCounter,
+                                      int colorOffset, float colorRGBMultiplier, float approachScale, float alpha,
+                                      float numberAlpha, bool drawNumber = true, bool overrideHDApproachCircle = false);
     static void drawSliderStartCircle(Graphics *g, OsuSkin *skin, Vector2 pos, float hitcircleDiameter,
                                       float numberScale, float hitcircleOverlapScale, int number, int colorCounter = 0,
                                       int colorOffset = 0, float colorRGBMultiplier = 1.0f, float approachScale = 1.0f,
                                       float alpha = 1.0f, float numberAlpha = 1.0f, bool drawNumber = true,
                                       bool overrideHDApproachCircle = false);
-    static void drawSliderEndCircle(Graphics *g, OsuBeatmapStandard *beatmap, Vector2 rawPos, int number,
-                                    int colorCounter, int colorOffset, float colorRGBMultiplier, float approachScale,
-                                    float alpha, float numberAlpha, bool drawNumber = true,
-                                    bool overrideHDApproachCircle = false);
+    static void drawSliderEndCircle(Graphics *g, OsuBeatmap *beatmap, Vector2 rawPos, int number, int colorCounter,
+                                    int colorOffset, float colorRGBMultiplier, float approachScale, float alpha,
+                                    float numberAlpha, bool drawNumber = true, bool overrideHDApproachCircle = false);
     static void drawSliderEndCircle(Graphics *g, OsuSkin *skin, Vector2 pos, float hitcircleDiameter, float numberScale,
                                     float overlapScale, int number = 0, int colorCounter = 0, int colorOffset = 0,
                                     float colorRGBMultiplier = 1.0f, float approachScale = 1.0f, float alpha = 1.0f,
@@ -59,7 +57,7 @@ class OsuCircle : public OsuHitObject {
 
    public:
     OsuCircle(int x, int y, long time, int sampleType, int comboNumber, bool isEndOfCombo, int colorCounter,
-              int colorOffset, OsuBeatmapStandard *beatmap);
+              int colorOffset, OsuBeatmap *beatmap);
     virtual ~OsuCircle();
 
     virtual void draw(Graphics *g);
@@ -85,7 +83,7 @@ class OsuCircle : public OsuHitObject {
 
     void onHit(OsuScore::HIT result, long delta, float targetDelta = 0.0f, float targetAngle = 0.0f);
 
-    OsuBeatmapStandard *m_beatmap;
+    OsuBeatmap *m_beatmap;
 
     Vector2 m_vRawPos;
     Vector2 m_vOriginalRawPos;  // for live mod changing

@@ -1,6 +1,6 @@
 //================ Copyright (c) 2020, PG, All rights reserved. =================//
 //
-// Purpose:		used by OsuBeatmapStandard for populating the live pp star cache
+// Purpose:		used by OsuBeatmap for populating the live pp star cache
 //
 // $NoKeywords: $osubgscache
 //===============================================================================//
@@ -38,7 +38,6 @@ void OsuBackgroundStarCacheLoader::initAsync() {
         m_beatmap->m_speedNotesForNumHitObjects.clear();
 
         const std::string &osuFilePath = diff2->getFilePath();
-        const Osu::GAMEMODE gameMode = m_beatmap->getOsu()->getGamemode();
         const float AR = m_beatmap->getAR();
         const float CS = m_beatmap->getCS();
         const float OD = m_beatmap->getOD();
@@ -47,8 +46,8 @@ void OsuBackgroundStarCacheLoader::initAsync() {
         const bool relax = m_beatmap->getOsu()->getModRelax();
         const bool touchDevice = m_beatmap->getOsu()->getModTD();
 
-        OsuDatabaseBeatmap::LOAD_DIFFOBJ_RESULT diffres = OsuDatabaseBeatmap::loadDifficultyHitObjects(
-            osuFilePath, gameMode, AR, CS, speedMultiplier, false, m_bDead);
+        OsuDatabaseBeatmap::LOAD_DIFFOBJ_RESULT diffres =
+            OsuDatabaseBeatmap::loadDifficultyHitObjects(osuFilePath, AR, CS, speedMultiplier, false, m_bDead);
 
         for(size_t i = 0; i < diffres.diffobjects.size(); i++) {
             double aimStars = 0.0;

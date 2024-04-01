@@ -28,7 +28,7 @@ class OsuSlider : public OsuHitObject {
    public:
     OsuSlider(char type, int repeat, float pixelLength, std::vector<Vector2> points, std::vector<int> hitSounds,
               std::vector<float> ticks, float sliderTime, float sliderTimeWithoutRepeats, long time, int sampleType,
-              int comboNumber, bool isEndOfCombo, int colorCounter, int colorOffset, OsuBeatmapStandard *beatmap);
+              int comboNumber, bool isEndOfCombo, int colorCounter, int colorOffset, OsuBeatmap *beatmap);
     virtual ~OsuSlider();
 
     virtual void draw(Graphics *g);
@@ -90,7 +90,7 @@ class OsuSlider : public OsuHitObject {
 
     bool isClickHeldSlider();  // special logic to disallow hold tapping
 
-    OsuBeatmapStandard *m_beatmap;
+    OsuBeatmap *m_beatmap;
 
     OsuSliderCurve *m_curve;
 
