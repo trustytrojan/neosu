@@ -739,8 +739,13 @@ void OsuBeatmapStandard::write_frame() {
     if(osu_playfield_mirror_horizontal.getBool()) pos.y = OsuGameRules::OSU_COORD_HEIGHT - pos.y;
     if(osu_playfield_mirror_vertical.getBool()) pos.x = OsuGameRules::OSU_COORD_WIDTH - pos.x;
 
-    auto frame = UString::format("%ld|%.4f|%.4f|%hhu,", delta, pos.x, pos.y, current_keys);
-    replay_data.append(frame);
+    replay.push_back(OsuReplay::Frame{
+        .cur_music_pos = m_iCurMusicPosWithOffsets,
+        .milliseconds_since_last_frame = delta,
+        .x = pos.x,
+        .y = pos.y,
+        .key_flags = current_keys,
+    });
     last_event_time = m_fLastRealTimeForInterpolationDelta;
     last_event_ms = m_iCurMusicPosWithOffsets;
     last_keys = current_keys;
@@ -1219,7 +1224,7 @@ void OsuBeatmapStandard::onBeforeStop(bool quit) {
         OsuRichPresence::onPlayEnd(m_osu, quit);
 
         if(bancho.submit_scores() && !isZero && vanilla) {
-            score.replay_data = replay_data;
+            score.replay = replay;
             submit_score(score);
         }
 

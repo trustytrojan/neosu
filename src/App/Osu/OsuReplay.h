@@ -4,6 +4,7 @@
 
 namespace OsuReplay {
 struct Frame {
+    int64_t cur_music_pos;
     int64_t milliseconds_since_last_frame;
 
     float x;  // 0 - 512

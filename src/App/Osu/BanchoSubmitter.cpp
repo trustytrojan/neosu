@@ -160,9 +160,23 @@ void submit_score(OsuDatabase::Score score) {
         delete score_data_b64;
     }
     {
-        score.replay_data.append("-12345|0|0|0,");
+        // osu!stable doesn't consider a replay valid unless it ends with this
+        score.replay.push_back(OsuReplay::Frame{
+            .cur_music_pos = -1,
+            .milliseconds_since_last_frame = -12345,
+            .x = 0,
+            .y = 0,
+            .key_flags = 0,
+        });
 
-        size_t s_compressed_data = score.replay_data.lengthUtf8();
+        std::string replay_string;
+        for(auto frame : score.replay) {
+            auto frame_str = UString::format("%ld|%.4f|%.4f|%hhu,", frame.milliseconds_since_last_frame, frame.x,
+                                             frame.y, frame.key_flags);
+            replay_string.append(frame_str.toUtf8(), frame_str.lengthUtf8());
+        }
+
+        size_t s_compressed_data = replay_string.length();
         compressed_data = (uint8_t *)malloc(s_compressed_data);
         lzma_stream stream = LZMA_STREAM_INIT;
         lzma_options_lzma options;
@@ -173,8 +187,8 @@ void submit_score(OsuDatabase::Score score) {
             goto err;
         }
 
-        stream.avail_in = score.replay_data.lengthUtf8();
-        stream.next_in = (const uint8_t *)score.replay_data.toUtf8();
+        stream.avail_in = replay_string.length();
+        stream.next_in = (const uint8_t *)replay_string.c_str();
         stream.avail_out = s_compressed_data;
         stream.next_out = compressed_data;
         do {
@@ -196,7 +210,7 @@ void submit_score(OsuDatabase::Score score) {
 
         if(s_compressed_data <= 24) {
             debugLog("Replay too small to submit! Compressed size: %d bytes\n", s_compressed_data);
-            debugLog("Replay frames: %s\n", score.replay_data.toUtf8());
+            debugLog("Replay frames: %s\n", replay_string.c_str());
             goto err;
         }
 
@@ -206,7 +220,7 @@ void submit_score(OsuDatabase::Score score) {
         curl_mime_data(part, (const char *)compressed_data, s_compressed_data);
         free(compressed_data);
 
-        debugLog("Replay size: %d bytes (%d compressed)\n", score.replay_data.lengthUtf8(), s_compressed_data);
+        debugLog("Replay size: %d bytes (%d compressed)\n", replay_string.length(), s_compressed_data);
     }
 
     send_api_request(request);

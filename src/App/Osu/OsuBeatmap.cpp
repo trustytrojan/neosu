@@ -2206,7 +2206,22 @@ void OsuBeatmap::resetHitObjects(long curPos) {
 void OsuBeatmap::resetScore() {
     vanilla = convar->isVanilla();
 
-    replay_data = "0|256|-500|0,-1|256|-500|0,";
+    replay.clear();
+    replay.push_back(OsuReplay::Frame{
+        .cur_music_pos = -1,
+        .milliseconds_since_last_frame = 0,
+        .x = 256,
+        .y = -500,
+        .key_flags = 0,
+    });
+    replay.push_back(OsuReplay::Frame{
+        .cur_music_pos = -1,
+        .milliseconds_since_last_frame = -1,
+        .x = 256,
+        .y = -500,
+        .key_flags = 0,
+    });
+
     last_event_time = engine->getTimeReal();
     last_event_ms = 0;
     current_keys = 0;

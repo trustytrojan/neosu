@@ -9,6 +9,7 @@
 #define OSUBEATMAP_H
 
 #include "OsuDatabaseBeatmap.h"
+#include "OsuReplay.h"
 #include "OsuScore.h"
 #include "Timer.h"
 #include "UString.h"
@@ -138,7 +139,7 @@ class OsuBeatmap {
     bool vanilla = true;
 
     // replay recording (see OsuBeatmapStandard)
-    UString replay_data;
+    std::vector<OsuReplay::Frame> replay;
     double last_event_time = 0.0;
     long last_event_ms = 0;
     uint8_t current_keys = 0;

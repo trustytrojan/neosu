@@ -9,6 +9,7 @@
 #define OSUDATABASE_H
 
 #include "BanchoProtocol.h"  // Packet
+#include "OsuReplay.h"
 #include "OsuScore.h"
 #include "UString.h"
 #include "cbase.h"
@@ -60,7 +61,7 @@ class OsuDatabase {
         OsuScore::GRADE grade = OsuScore::GRADE::GRADE_N;
         OsuDatabaseBeatmap *diff2;
         uint64_t play_time_ms = 0;
-        UString replay_data = "";  // TODO @kiwec: use Packet
+        std::vector<OsuReplay::Frame> replay;
 
         int num300s;
         int num100s;
