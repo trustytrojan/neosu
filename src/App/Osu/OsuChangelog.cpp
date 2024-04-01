@@ -36,17 +36,22 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu) {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
-    latest.changes.push_back("- Added animations for the in-game scoreboard");
-    latest.changes.push_back("- Added option to always pick Nightcore mod first");
-    latest.changes.push_back("- Added osu_animation_speed_override cheat convar (code by Givikap120)");
-    latest.changes.push_back("- Added flashlight_always_hard convar to lock flashlight radius to the 200+ combo size");
-    latest.changes.push_back("- Allowed scores to submit when using mirror mods");
-    latest.changes.push_back("- Now playing a random song on game launch");
-    latest.changes.push_back("- Small UI improvements");
-    latest.changes.push_back("- Updated protocol and database version to b20240330.2");
     changelogs.push_back(latest);
 
+    CHANGELOG v34_08;
+    v34_08.title = "34.08 (2024-03-30)";
+    v34_08.changes.push_back("- Added animations for the in-game scoreboard");
+    v34_08.changes.push_back("- Added option to always pick Nightcore mod first");
+    v34_08.changes.push_back("- Added osu_animation_speed_override cheat convar (code by Givikap120)");
+    v34_08.changes.push_back("- Added flashlight_always_hard convar to lock flashlight radius to the 200+ combo size");
+    v34_08.changes.push_back("- Allowed scores to submit when using mirror mods");
+    v34_08.changes.push_back("- Now playing a random song on game launch");
+    v34_08.changes.push_back("- Small UI improvements");
+    v34_08.changes.push_back("- Updated protocol and database version to b20240330.2");
+    changelogs.push_back(v34_08);
+
     CHANGELOG v34_07;
+    v34_07.title = "34.07 (2024-03-28)";
     v34_07.changes.push_back("- Added Flashlight mod");
     v34_07.changes.push_back("- Fixed a few bugs");
     changelogs.push_back(v34_07);
