@@ -14,7 +14,6 @@
 #include "ConVar.h"
 #include "Engine.h"
 #include "OpenGLHeaders.h"
-#include "OpenVRInterface.h"
 #include "WinEnvironment.h"
 
 bool g_bARBMultisampleSupported = false;

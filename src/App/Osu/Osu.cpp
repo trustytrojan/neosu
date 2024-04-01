@@ -22,8 +22,6 @@
 #include "Environment.h"
 #include "Keyboard.h"
 #include "Mouse.h"
-#include "OpenVRController.h"
-#include "OpenVRInterface.h"
 #include "OsuDatabase.h"
 #include "RenderTarget.h"
 #include "ResourceManager.h"
@@ -63,18 +61,11 @@
 #include "OsuUIUserContextMenu.h"
 #include "OsuUpdateHandler.h"
 #include "OsuUserStatsScreen.h"
-#include "OsuVR.h"
-#include "OsuVRTutorial.h"
 #include "OsuVolumeOverlay.h"
 
 // release configuration
 ConVar auto_update("auto_update", true, FCVAR_NONE);
 ConVar osu_version("osu_version", 34.09f, FCVAR_NONE);
-#ifdef MCENGINE_FEATURE_OPENVR
-ConVar osu_release_stream("osu_release_stream", "vr", FCVAR_NONE);
-#else
-ConVar osu_release_stream("osu_release_stream", "desktop", FCVAR_NONE);
-#endif
 
 #ifdef _DEBUG
 ConVar osu_debug("osu_debug", true, FCVAR_NONE);
@@ -82,15 +73,12 @@ ConVar osu_debug("osu_debug", true, FCVAR_NONE);
 ConVar osu_debug("osu_debug", false, FCVAR_NONE);
 #endif
 
-ConVar osu_vr("osu_vr", false, FCVAR_NONE);
-ConVar osu_vr_tutorial("osu_vr_tutorial", true, FCVAR_NONE);
-
 ConVar osu_disable_mousebuttons("osu_disable_mousebuttons", false, FCVAR_NONE);
 ConVar osu_disable_mousewheel("osu_disable_mousewheel", false, FCVAR_NONE);
 ConVar osu_confine_cursor_windowed("osu_confine_cursor_windowed", false, FCVAR_NONE);
 ConVar osu_confine_cursor_fullscreen("osu_confine_cursor_fullscreen", true, FCVAR_NONE);
 
-ConVar osu_skin("osu_skin", "", FCVAR_NONE);  // set dynamically below in the constructor
+ConVar osu_skin("osu_skin", "default", FCVAR_NONE);
 ConVar osu_skin_reload("osu_skin_reload");
 
 ConVar osu_volume_master("osu_volume_master", 1.0f, FCVAR_NONE);
@@ -198,7 +186,6 @@ Osu::Osu(int instanceID) {
     m_ui_scrollview_scrollbarwidth_ref = convar->getConVarByName("ui_scrollview_scrollbarwidth");
     m_mouse_raw_input_absolute_to_window_ref = convar->getConVarByName("mouse_raw_input_absolute_to_window");
     m_win_disable_windows_key_ref = convar->getConVarByName("win_disable_windows_key");
-    m_osu_vr_draw_desktop_playfield_ref = convar->getConVarByName("osu_vr_draw_desktop_playfield");
 
     // experimental mods list
     m_experimentalMods.push_back(convar->getConVarByName("fposu_mod_strafing"));
@@ -228,11 +215,6 @@ Osu::Osu(int instanceID) {
     m_experimentalMods.push_back(convar->getConVarByName("osu_mod_wobble2"));
     m_experimentalMods.push_back(convar->getConVarByName("osu_mod_shirone"));
     m_experimentalMods.push_back(convar->getConVarByName("osu_mod_approach_different"));
-
-    // engine settings/overrides
-    openvr->setDrawCallback(fastdelegate::MakeDelegate(this, &Osu::drawVR));
-    if(openvr->isReady())  // automatically enable VR mode if it was compiled with OpenVR support and is available
-        osu_vr.setValue(1.0f);
 
     env->setWindowTitle("McOsu");
     env->setCursorVisible(false);
@@ -268,17 +250,7 @@ Osu::Osu(int instanceID) {
         convar->getConVarByName("name")->setValue(env->getUsername());
     }
 
-    // VR specific settings
-    if(isInVRMode()) {
-        osu_skin.setValue("defaultvr");
-        ConVar *osu_drain_type_ref = convar->getConVarByName("osu_drain_type");
-        osu_drain_type_ref->setDefaultFloat(1.0f);
-        osu_drain_type_ref->setValue(1.0f);
-        env->setWindowResizable(true);
-    } else {
-        osu_skin.setValue("default");
-        env->setWindowResizable(false);
-    }
+    env->setWindowResizable(false);
 
     // generate default osu! appdata user path
     std::string userDataPath = env->getUserDataPath();
@@ -350,7 +322,6 @@ Osu::Osu(int instanceID) {
     m_bToggleOptionsMenuScheduled = false;
     m_bOptionsMenuFullscreen = true;
     m_bToggleUserStatsScreenScheduled = false;
-    m_bToggleVRTutorialScheduled = false;
     m_bToggleChangelogScheduled = false;
     m_bToggleEditorScheduled = false;
 
@@ -379,7 +350,6 @@ Osu::Osu(int instanceID) {
     m_gamemode = GAMEMODE::STD;
     m_bScheduleEndlessModNextBeatmap = false;
     m_iMultiplayerClientNumEscPresses = 0;
-    m_bIsInVRDraw = false;
     m_bWasBossKeyPaused = false;
     m_bSkinLoadScheduled = false;
     m_bSkinLoadWasReload = false;
@@ -408,7 +378,7 @@ Osu::Osu(int instanceID) {
     // exec the main config file (this must be right here!)
     if(m_iInstanceID < 2) {
         Console::execConfigFile("underride");  // same as override, but for defaults
-        Console::execConfigFile(isInVRMode() ? "osuvr" : "osu");
+        Console::execConfigFile("osu");
         Console::execConfigFile("override");  // used for quickfixing live builds without redeploying/recompiling
     }
 
@@ -489,7 +459,6 @@ Osu::Osu(int instanceID) {
     // load subsystems, add them to the screens array
     m_volumeOverlay = new OsuVolumeOverlay(this);
     m_tooltipOverlay = new OsuTooltipOverlay(this);
-    m_vr = new OsuVR(this);
     m_mainMenu = new OsuMainMenu(this);
     m_optionsMenu = new OsuOptionsMenu(this);
     m_songBrowser2 = new OsuSongBrowser2(this);
@@ -499,7 +468,6 @@ Osu::Osu(int instanceID) {
     m_userStatsScreen = new OsuUserStatsScreen(this);
     m_pauseMenu = new OsuPauseMenu(this);
     m_hud = new OsuHUD(this);
-    m_vrTutorial = new OsuVRTutorial(this);
     m_changelog = new OsuChangelog(this);
     m_editor = new OsuEditor(this);
     m_fposu = new OsuModFPoSu(this);
@@ -524,7 +492,6 @@ Osu::Osu(int instanceID) {
     m_screens.push_back(m_hud);
     m_screens.push_back(m_songBrowser2);
     m_screens.push_back(m_lobby);
-    m_screens.push_back(m_vrTutorial);
     m_screens.push_back(m_changelog);
     m_screens.push_back(m_editor);
     m_screens.push_back(m_mainMenu);
@@ -554,13 +521,8 @@ Osu::Osu(int instanceID) {
         reconnect();
     }
 
-    if(isInVRMode() && osu_vr_tutorial.getBool()) {
-        m_mainMenu->setStartupAnim(false);
-        m_vrTutorial->setVisible(true);
-    } else {
-        m_mainMenu->setVisible(true);
-        m_mainMenu->selectRandomBeatmap();
-    }
+    m_mainMenu->setVisible(true);
+    m_mainMenu->selectRandomBeatmap();
 
     m_updateHandler->checkForUpdates();
 
@@ -606,9 +568,7 @@ Osu::~Osu() {
     }
 
     SAFE_DELETE(m_fposu);
-
     SAFE_DELETE(m_score);
-    SAFE_DELETE(m_vr);
     SAFE_DELETE(m_skin);
     SAFE_DELETE(m_backgroundImageHandler);
 }
@@ -623,8 +583,8 @@ void Osu::draw(Graphics *g) {
 
     // if we are not using the native window resolution, or in vr mode, or playing on a nintendo switch, or multiple
     // instances are active, draw into the buffer
-    const bool isBufferedDraw = osu_resolution_enabled.getBool() || isInVRMode() ||
-                                env->getOS() == Environment::OS::OS_HORIZON || m_iInstanceID > 0;
+    const bool isBufferedDraw =
+        osu_resolution_enabled.getBool() || env->getOS() == Environment::OS::OS_HORIZON || m_iInstanceID > 0;
 
     if(isBufferedDraw) m_backBuffer->enable();
 
@@ -725,9 +685,7 @@ void Osu::draw(Graphics *g) {
         }
 
         // draw player cursor
-        if((!isAuto || allowDoubleCursor) && allowDrawCursor &&
-           (!isInVRMode() || (m_osu_vr_draw_desktop_playfield_ref->getBool() &&
-                              (m_vr->isVirtualCursorOnScreen() || engine->hasFocus())))) {
+        if((!isAuto || allowDoubleCursor) && allowDrawCursor) {
             Vector2 cursorPos =
                 (beatmapStd != NULL && !isAuto) ? beatmapStd->getCursorPos() : engine->getMouse()->getPos();
 
@@ -740,21 +698,6 @@ void Osu::draw(Graphics *g) {
             m_hud->drawCursor(g, cursorPos, (osu_mod_fadingcursor.getBool() && !isAuto) ? fadingCursorAlpha : 1.0f,
                               isAuto, updateAndDrawTrail);
         }
-
-        // draw projected VR cursors for spectators
-        if(isInVRMode() && isInPlayMode() && !getSelectedBeatmap()->isPaused() &&
-           m_osu_vr_draw_desktop_playfield_ref->getBool() && beatmapStd != NULL) {
-            m_hud->drawCursorSpectator1(
-                g,
-                beatmapStd->osuCoords2RawPixels(m_vr->getCursorPos1() + Vector2(OsuGameRules::OSU_COORD_WIDTH / 2,
-                                                                                OsuGameRules::OSU_COORD_HEIGHT / 2)),
-                1.0f);
-            m_hud->drawCursorSpectator2(
-                g,
-                beatmapStd->osuCoords2RawPixels(m_vr->getCursorPos2() + Vector2(OsuGameRules::OSU_COORD_WIDTH / 2,
-                                                                                OsuGameRules::OSU_COORD_HEIGHT / 2)),
-                1.0f);
-        }
     } else  // if we are not playing
     {
         m_lobby->draw(g);
@@ -763,7 +706,6 @@ void Osu::draw(Graphics *g) {
         if(m_songBrowser2 != NULL) m_songBrowser2->draw(g);
 
         m_mainMenu->draw(g);
-        m_vrTutorial->draw(g);
         m_changelog->draw(g);
         m_editor->draw(g);
         m_userStatsScreen->draw(g);
@@ -777,9 +719,7 @@ void Osu::draw(Graphics *g) {
         if(osu_draw_fps.getBool()) m_hud->drawFps(g);
 
         m_windowManager->draw(g);
-
-        if(!isInVRMode() || (m_vr->isVirtualCursorOnScreen() || engine->hasFocus()))
-            m_hud->drawCursor(g, engine->getMouse()->getPos());
+        m_hud->drawCursor(g, engine->getMouse()->getPos());
     }
 
     m_tooltipOverlay->draw(g);
@@ -791,9 +731,7 @@ void Osu::draw(Graphics *g) {
         m_hud->drawLoadingSmall(g);
     }
 
-    // if we are not using the native window resolution;
-    // we must also do this if we are in VR mode, since we only draw once and the buffer is used to draw the virtual
-    // screen later. otherwise we wouldn't see anything on the desktop window
+    // if we are not using the native window resolution
     if(isBufferedDraw) {
         // draw a scaled version from the buffer to the screen
         m_backBuffer->disable();
@@ -883,42 +821,10 @@ void Osu::draw(Graphics *g) {
         }
         g->setBlending(true);
     }
-
-    // now, let OpenVR draw (this internally then calls the registered callback, meaning drawVR() here)
-    if(isInVRMode()) openvr->draw(g);
-}
-
-void Osu::drawVR(Graphics *g) {
-    m_bIsInVRDraw = true;
-
-    Matrix4 mvp = openvr->getCurrentModelViewProjectionMatrix();
-
-    // draw virtual screen + environment
-    m_vr->drawVR(g, mvp, m_backBuffer);
-
-    // draw everything in the correct order
-    if(isInPlayMode())  // if we are playing a beatmap
-    {
-        m_vr->drawVRHUD(g, mvp, m_hud);
-
-        // all beatmap elements are more important than anything else, so reset depth buffer to always draw on top
-        g->clearDepthBuffer();
-
-        m_vr->drawVRBeatmap(g, mvp, getSelectedBeatmap());
-    } else  // not playing
-    {
-        if(m_optionsMenu->shouldDrawVRDummyHUD()) m_vr->drawVRHUDDummy(g, mvp, m_hud);
-
-        m_vr->drawVRPlayfieldDummy(g, mvp);
-    }
-
-    m_bIsInVRDraw = false;
 }
 
 void Osu::update() {
     if(m_skin != NULL) m_skin->update();
-
-    if(isInVRMode()) m_vr->update();
 
     if(isInPlayMode() && m_osu_mod_fposu_ref->getBool()) m_fposu->update();
 
@@ -971,14 +877,7 @@ void Osu::update() {
            !m_volumeOverlay->isBusy()) {
             const bool isAnyOsuKeyDown = (m_bKeyboardKey1Down || m_bKeyboardKey12Down || m_bKeyboardKey2Down ||
                                           m_bKeyboardKey22Down || m_bMouseKey1Down || m_bMouseKey2Down);
-            const bool isAnyVRKeyDown =
-                isInVRMode() && !m_vr->isUIActive() &&
-                (openvr->getLeftController()->isButtonPressed(OpenVRController::BUTTON::BUTTON_STEAMVR_TOUCHPAD) ||
-                 openvr->getRightController()->isButtonPressed(OpenVRController::BUTTON::BUTTON_STEAMVR_TOUCHPAD) ||
-                 openvr->getLeftController()->getTrigger() > 0.95f ||
-                 openvr->getRightController()->getTrigger() > 0.95f);
-
-            const bool isAnyKeyDown = (isAnyOsuKeyDown || isAnyVRKeyDown || engine->getMouse()->isLeftDown());
+            const bool isAnyKeyDown = (isAnyOsuKeyDown || engine->getMouse()->isLeftDown());
 
             if(isAnyKeyDown) {
                 if(!m_bSkipDownCheck) {
@@ -987,7 +886,7 @@ void Osu::update() {
                     const bool isCursorInsideSkipButton =
                         m_hud->getSkipClickRect().contains(engine->getMouse()->getPos());
 
-                    if(isCursorInsideSkipButton || isAnyVRKeyDown) {
+                    if(isCursorInsideSkipButton) {
                         if(!m_bSkipScheduled) {
                             m_bSkipScheduled = true;
 
@@ -1089,12 +988,10 @@ void Osu::update() {
     if(m_bToggleOptionsMenuScheduled) {
         m_bToggleOptionsMenuScheduled = false;
 
-        const bool fullscreen = (isInVRMode() ? m_bOptionsMenuFullscreen : false);
         const bool wasFullscreen = m_optionsMenu->isFullscreen();
-
-        m_optionsMenu->setFullscreen(fullscreen);
+        m_optionsMenu->setFullscreen(false);
         m_optionsMenu->setVisible(!m_optionsMenu->isVisible());
-        if(fullscreen || wasFullscreen) m_mainMenu->setVisible(!m_optionsMenu->isVisible());
+        if(wasFullscreen) m_mainMenu->setVisible(!m_optionsMenu->isVisible());
     }
     if(m_bToggleUserStatsScreenScheduled) {
         m_bToggleUserStatsScreenScheduled = false;
@@ -1104,12 +1001,6 @@ void Osu::update() {
 
             if(m_songBrowser2 != NULL && m_songBrowser2->isVisible()) m_songBrowser2->setVisible(false);
         }
-    }
-    if(m_bToggleVRTutorialScheduled) {
-        m_bToggleVRTutorialScheduled = false;
-
-        m_mainMenu->setVisible(!m_mainMenu->isVisible());
-        m_vrTutorial->setVisible(!m_mainMenu->isVisible());
     }
     if(m_bToggleChangelogScheduled) {
         m_bToggleChangelogScheduled = false;
@@ -1137,10 +1028,9 @@ void Osu::update() {
         }
     }
 
-    // TODO: shitty override, but it works well enough for now => see OsuVR.cpp
     // it's a bit of a hack, because using cursor visibility to work around SetCursorPos() affecting the windows cursor
     // in the Mouse class
-    if(isInVRMode() && !env->isCursorVisible()) env->setCursorVisible(true);
+    if(!env->isCursorVisible()) env->setCursorVisible(true);
 
     // endless mod
     if(m_bScheduleEndlessModNextBeatmap) {
@@ -1311,12 +1201,10 @@ void Osu::onKeyDown(KeyboardEvent &key) {
     // reload & recompile shaders
     if(engine->getKeyboard()->isAltDown() && engine->getKeyboard()->isControlDown() && key == KEY_R) {
         Shader *sliderShader = engine->getResourceManager()->getShader("slider");
-        Shader *sliderShaderVR = engine->getResourceManager()->getShader("sliderVR");
         Shader *cursorTrailShader = engine->getResourceManager()->getShader("cursortrail");
         Shader *hitcircle3DShader = engine->getResourceManager()->getShader("hitcircle3D");
 
         if(sliderShader != NULL) sliderShader->reload();
-        if(sliderShaderVR != NULL) sliderShaderVR->reload();
         if(cursorTrailShader != NULL) cursorTrailShader->reload();
         if(hitcircle3DShader != NULL) hitcircle3DShader->reload();
 
@@ -1689,8 +1577,6 @@ void Osu::toggleOptionsMenu() {
 
 void Osu::toggleUserStatsScreen() { m_bToggleUserStatsScreenScheduled = true; }
 
-void Osu::toggleVRTutorial() { m_bToggleVRTutorialScheduled = true; }
-
 void Osu::toggleChangelog() { m_bToggleChangelogScheduled = true; }
 
 void Osu::toggleEditor() { m_bToggleEditorScheduled = true; }
@@ -1901,8 +1787,6 @@ bool Osu::isNotInPlayModeOrPaused() {
     return !isInPlayMode() || (getSelectedBeatmap() != NULL && getSelectedBeatmap()->isPaused());
 }
 
-bool Osu::isInVRMode() { return (osu_vr.getBool() && openvr->isReady()); }
-
 bool Osu::shouldFallBackToLegacySliderRenderer() {
     return osu_force_legacy_slider_renderer.getBool() || m_osu_mod_wobble_ref->getBool() ||
            m_osu_mod_wobble2_ref->getBool() || m_osu_mod_minimize_ref->getBool() ||
@@ -2045,8 +1929,6 @@ void Osu::updateMouseSettings() {
 void Osu::updateWindowsKeyDisable() {
     if(debug->getBool()) debugLog("Osu::updateWindowsKeyDisable()\n");
 
-    if(isInVRMode()) return;
-
     if(osu_win_disable_windows_key_while_playing.getBool()) {
         const bool isPlayerPlaying =
             engine->hasFocus() && isInPlayMode() && getSelectedBeatmap() != NULL &&
@@ -2177,8 +2059,7 @@ void Osu::onSkinChange(UString oldValue, UString newValue) {
     skinFolder.append("/");
     std::string sf = skinFolder.toUtf8();
 
-    m_skinScheduledToLoad =
-        new OsuSkin(this, newValue, sf, (newValue == UString("default") || newValue == UString("defaultvr")));
+    m_skinScheduledToLoad = new OsuSkin(this, newValue, sf, (newValue == UString("default")));
 
     // initial load
     if(m_skin == NULL) m_skin = m_skinScheduledToLoad;
@@ -2273,7 +2154,7 @@ void Osu::onLetterboxingChange(UString oldValue, UString newValue) {
 void Osu::updateConfineCursor() {
     if(debug->getBool()) debugLog("Osu::updateConfineCursor()\n");
 
-    if(isInVRMode() || m_iInstanceID > 0) return;
+    if(m_iInstanceID > 0) return;
 
     if((osu_confine_cursor_fullscreen.getBool() && env->isFullscreen()) ||
        (osu_confine_cursor_windowed.getBool() && !env->isFullscreen()) ||
@@ -2440,8 +2321,6 @@ float Osu::getUIScale(Osu *osu, float osuResolutionRatio) {
 }
 
 float Osu::getUIScale(Osu *osu) {
-    if(isInVRMode()) return 1.0f;
-
     if(osu != NULL) {
         if(osu->getScreenWidth() < osu_ui_scale_to_dpi_minimum_width.getInt() ||
            osu->getScreenHeight() < osu_ui_scale_to_dpi_minimum_height.getInt())

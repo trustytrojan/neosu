@@ -34,8 +34,6 @@ class OsuSlider : public OsuHitObject {
     virtual void draw(Graphics *g);
     virtual void draw2(Graphics *g);
     void draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCircle);
-    virtual void drawVR(Graphics *g, Matrix4 &mvp, OsuVR *vr);
-    virtual void drawVR2(Graphics *g, Matrix4 &mvp, OsuVR *vr);
     virtual void update(long curPos);
 
     virtual bool isSlider() { return true; }
@@ -79,7 +77,6 @@ class OsuSlider : public OsuHitObject {
     void drawStartCircle(Graphics *g, float alpha);
     void drawEndCircle(Graphics *g, float alpha, float sliderSnake = 1.0f);
     void drawBody(Graphics *g, float alpha, float from, float to);
-    void drawBodyVR(Graphics *g, OsuVR *vr, Matrix4 &mvp, float alpha, float from, float to);
 
     void updateAnimations(long curPos);
 
@@ -150,10 +147,7 @@ class OsuSlider : public OsuHitObject {
 
     float m_fSliderBreakRapeTime;
 
-    bool m_bOnHitVRLeftControllerHapticFeedback;
-
     VertexArrayObject *m_vao;
-    VertexArrayObject *m_vaoVR2;
 };
 
 #endif

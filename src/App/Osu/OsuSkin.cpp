@@ -79,10 +79,7 @@ OsuSkin::OsuSkin(Osu *osu, UString name, std::string filepath, bool isDefaultSki
 
     if(m_missingTexture == NULL) m_missingTexture = engine->getResourceManager()->getImage("MISSING_TEXTURE");
 
-    if(m_osu->isInVRMode())
-        OSUSKIN_DEFAULT_SKIN_PATH = "defaultvr/";
-    else
-        OSUSKIN_DEFAULT_SKIN_PATH = "default/";
+    OSUSKIN_DEFAULT_SKIN_PATH = "default/";
 
     // vars
     m_hitCircle = m_missingTexture;
@@ -963,8 +960,7 @@ void OsuSkin::load() {
     debugLog("OsuSkin: HitCircleOverlap = %i\n", m_iHitCircleOverlap);
 
     // delayed error notifications due to resource loading potentially blocking engine time
-    if(!parseSkinIni1Status && parseSkinIni2Status && m_osu_skin_ref->getString() != UString("default") &&
-       m_osu_skin_ref->getString() != UString("defaultvr"))
+    if(!parseSkinIni1Status && parseSkinIni2Status && m_osu_skin_ref->getString() != UString("default"))
         m_osu->getNotificationOverlay()->addNotification("Error: Couldn't load skin.ini!", 0xffff0000);
     else if(!parseSkinIni2Status)
         m_osu->getNotificationOverlay()->addNotification("Error: Couldn't load DEFAULT skin.ini!!!", 0xffff0000);

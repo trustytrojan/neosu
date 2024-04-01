@@ -441,26 +441,7 @@ double OsuScore::getHealthIncrease(OsuBeatmap *beatmap, HIT hit) {
 double OsuScore::getHealthIncrease(OsuScore::HIT hit, double HP, double hpMultiplierNormal, double hpMultiplierComboEnd,
                                    double hpBarMaximumForNormalization) {
     const int drainType = m_osu_drain_type_ref->getInt();
-    if(drainType == 1)  // VR
-    {
-        switch(hit) {
-            case OsuScore::HIT::HIT_MISS:
-                return osu_drain_vr_miss.getFloat() * osu_drain_vr_multiplier.getFloat();
-
-            case OsuScore::HIT::HIT_50:
-                return osu_drain_vr_50.getFloat() * osu_drain_vr_multiplier.getFloat();
-
-            case OsuScore::HIT::HIT_100:
-                return osu_drain_vr_100.getFloat() * osu_drain_vr_multiplier.getFloat();
-
-            case OsuScore::HIT::HIT_300:
-            case OsuScore::HIT::HIT_SLIDER30:
-                return osu_drain_vr_300.getFloat() * osu_drain_vr_multiplier.getFloat();
-
-            case OsuScore::HIT::HIT_MISS_SLIDERBREAK:
-                return osu_drain_vr_sliderbreak.getFloat() * osu_drain_vr_multiplier.getFloat();
-        }
-    } else if(drainType == 2)  // osu!stable
+    if(drainType == 2)  // osu!stable
     {
         switch(hit) {
             case OsuScore::HIT::HIT_MISS:

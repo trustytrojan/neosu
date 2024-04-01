@@ -12,7 +12,6 @@
 
 class Osu;
 class OsuUIAvatar;
-class OsuVR;
 class OsuScore;
 class OsuScoreboardSlot;
 class OsuBeatmapStandard;
@@ -46,8 +45,6 @@ class OsuHUD : public OsuScreen {
     virtual void mouse_update(bool *propagate_clicks);
 
     void drawDummy(Graphics *g);
-    void drawVR(Graphics *g, Matrix4 &mvp, OsuVR *vr);
-    void drawVRDummy(Graphics *g, Matrix4 &mvp, OsuVR *vr);
 
     void drawCursor(Graphics *g, Vector2 pos, float alphaMultiplier = 1.0f, bool secondTrail = false,
                     bool updateAndDrawTrail = true);
@@ -56,8 +53,6 @@ class OsuHUD : public OsuScreen {
         bool secondTrail = false);  // NOTE: only use if drawCursor() with updateAndDrawTrail = false (FPoSu)
     void drawCursorSpectator1(Graphics *g, Vector2 pos, float alphaMultiplier = 1.0f);
     void drawCursorSpectator2(Graphics *g, Vector2 pos, float alphaMultiplier = 1.0f);
-    void drawCursorVR1(Graphics *g, Matrix4 &mvp, Vector2 pos, float alphaMultiplier = 1.0f);
-    void drawCursorVR2(Graphics *g, Matrix4 &mvp, Vector2 pos, float alphaMultiplier = 1.0f);
     void drawCursorRipples(Graphics *g);
     void drawFps(Graphics *g) { drawFps(g, m_tempFont, m_fCurFps); }
     void drawHitErrorBar(Graphics *g, OsuBeatmapStandard *beatmapStd);
@@ -158,7 +153,6 @@ class OsuHUD : public OsuScreen {
                             float hitWindowMiss);
     void drawHitErrorBarInt2(Graphics *g, Vector2 center, int ur);
     void drawProgressBar(Graphics *g, float percent, bool waiting);
-    void drawProgressBarVR(Graphics *g, Matrix4 &mvp, OsuVR *vr, float percent, bool waiting);
     void drawStatistics(Graphics *g, int misses, int sliderbreaks, int maxPossibleCombo, float liveStars,
                         float totalStars, int bpm, float ar, float cs, float od, float hp, int nps, int nd, int ur,
                         float pp, float ppfc, float hitWindow300, int hitdeltaMin, int hitdeltaMax);
@@ -223,10 +217,7 @@ class OsuHUD : public OsuScreen {
     std::vector<CURSORTRAIL> m_cursorTrail2;
     std::vector<CURSORTRAIL> m_cursorTrailSpectator1;
     std::vector<CURSORTRAIL> m_cursorTrailSpectator2;
-    std::vector<CURSORTRAIL> m_cursorTrailVR1;
-    std::vector<CURSORTRAIL> m_cursorTrailVR2;
     Shader *m_cursorTrailShader;
-    Shader *m_cursorTrailShaderVR;
     VertexArrayObject *m_cursorTrailVAO;
     std::vector<CURSORRIPPLE> m_cursorRipples;
 

@@ -21,7 +21,6 @@ class SoundEngine;
 class ContextMenu;
 class NetworkHandler;
 class OpenCLInterface;
-class OpenVRInterface;
 class VulkanInterface;
 class ResourceManager;
 class AnimationHandler;
@@ -142,7 +141,6 @@ class Engine {
     Graphics *m_graphics;
     SoundEngine *m_sound;
     OpenCLInterface *m_openCL;
-    OpenVRInterface *m_openVR;
     VulkanInterface *m_vulkan;
     ContextMenu *m_contextMenu;
     Environment *m_environment;

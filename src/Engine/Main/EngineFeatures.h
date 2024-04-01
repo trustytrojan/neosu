@@ -32,11 +32,6 @@
 // #define MCENGINE_FEATURE_VULKAN
 
 /*
- * OpenVR
- */
-// #define MCENGINE_FEATURE_OPENVR
-
-/*
  * Discord RPC (rich presence)
  */
 // #define MCENGINE_FEATURE_DISCORD

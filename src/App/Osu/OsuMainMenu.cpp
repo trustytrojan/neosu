@@ -198,8 +198,6 @@ ConVar *OsuMainMenu::m_osu_songbrowser_background_fade_in_duration_ref = NULL;
 
 OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu) {
     if(env->getOS() == Environment::OS::OS_HORIZON) MCOSU_MAIN_BUTTON_TEXT.append(" NX");
-    if(m_osu->isInVRMode()) MCOSU_MAIN_BUTTON_TEXT.append(" VR");
-    if(m_osu->isInVRMode()) MCOSU_MAIN_BUTTON_SUBTEXT.clear();
 
     if(m_osu_universal_offset_ref == NULL) m_osu_universal_offset_ref = convar->getConVarByName("osu_universal_offset");
     if(m_osu_universal_offset_hardcoded_ref == NULL)
@@ -292,7 +290,7 @@ OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu) {
         ->setClickCallback(fastdelegate::MakeDelegate(this, &OsuMainMenu::onPlayButtonPressed));
     addMainMenuButton("Multiplayer")
         ->setClickCallback(fastdelegate::MakeDelegate(this, &OsuMainMenu::onMultiplayerButtonPressed));
-    addMainMenuButton((m_osu->isInVRMode() ? "Options" : "Options (CTRL + O)"))
+    addMainMenuButton("Options (CTRL + O)")
         ->setClickCallback(fastdelegate::MakeDelegate(this, &OsuMainMenu::onOptionsButtonPressed));
     addMainMenuButton("Exit")->setClickCallback(fastdelegate::MakeDelegate(this, &OsuMainMenu::onExitButtonPressed));
 

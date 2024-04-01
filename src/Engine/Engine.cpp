@@ -22,7 +22,6 @@
 #include "Mouse.h"
 #include "NetworkHandler.h"
 #include "OpenCLInterface.h"
-#include "OpenVRInterface.h"
 #include "Profiler.h"
 #include "ResourceManager.h"
 #include "SoundEngine.h"
@@ -176,7 +175,6 @@ Engine::Engine(Environment *environment, const char *args) {
         m_sound = new SoundEngine();
         m_animationHandler = new AnimationHandler();
         m_openCL = new OpenCLInterface();
-        m_openVR = new OpenVRInterface();
         m_networkHandler = new NetworkHandler();
         m_discord = new DiscordInterface();
 
@@ -209,9 +207,6 @@ Engine::~Engine() {
 
     debugLog("Engine: Freeing OpenCL...\n");
     SAFE_DELETE(m_openCL);
-
-    debugLog("Engine: Freeing OpenVR...\n");
-    SAFE_DELETE(m_openVR);
 
     debugLog("Engine: Freeing Sound...\n");
     SAFE_DELETE(m_sound);
@@ -388,8 +383,6 @@ void Engine::onUpdate() {
             m_inputDevices[i]->update();
         }
 
-        m_openVR->update();  // (this also handles its input devices)
-
         {
             VPROF_BUDGET("AnimationHandler::update", VPROF_BUDGETGROUP_UPDATE);
             m_animationHandler->update();
@@ -504,7 +497,6 @@ void Engine::onResolutionChange(Vector2 newResolution) {
     // update everything
     m_vScreenSize = newResolution;
     if(m_graphics != NULL) m_graphics->onResolutionChange(newResolution);
-    if(m_openVR != NULL) m_openVR->onResolutionChange(newResolution);
     if(m_app != NULL) m_app->onResolutionChanged(newResolution);
 }
 

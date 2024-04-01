@@ -22,8 +22,6 @@
 
 const char *OsuUpdateHandler::TEMP_UPDATE_DOWNLOAD_FILEPATH = "update.zip";
 
-ConVar *OsuUpdateHandler::m_osu_release_stream_ref = NULL;
-
 void *OsuUpdateHandler::run(void *data) {
     // not using semaphores/mutexes here because it's not critical
 
@@ -70,9 +68,6 @@ OsuUpdateHandler::OsuUpdateHandler() {
                                                                  : STATUS::STATUS_UP_TO_DATE;
     m_iNumRetries = 0;
     _m_bKYS = false;
-
-    // convar refs
-    if(m_osu_release_stream_ref == NULL) m_osu_release_stream_ref = convar->getConVarByName("osu_release_stream");
 }
 
 OsuUpdateHandler::~OsuUpdateHandler() {
@@ -293,16 +288,6 @@ void OsuUpdateHandler::_installUpdate(std::string zipFilePath) {
     m_status = STATUS::STATUS_SUCCESS_INSTALLATION;
 }
 
-OsuUpdateHandler::STREAM OsuUpdateHandler::stringToStream(UString streamString) {
-    STREAM stream = STREAM::STREAM_NULL;
-    if(streamString.find("desktop") != -1)
-        stream = STREAM::STREAM_DESKTOP;
-    else if(streamString.find("vr") != -1)
-        stream = STREAM::STREAM_VR;
-
-    return stream;
-}
-
 Environment::OS OsuUpdateHandler::stringToOS(UString osString) {
     Environment::OS os = Environment::OS::OS_NULL;
     if(osString.find("windows") != -1)
@@ -313,8 +298,4 @@ Environment::OS OsuUpdateHandler::stringToOS(UString osString) {
         os = Environment::OS::OS_MACOS;
 
     return os;
-}
-
-OsuUpdateHandler::STREAM OsuUpdateHandler::getReleaseStream() {
-    return stringToStream(m_osu_release_stream_ref->getString());
 }

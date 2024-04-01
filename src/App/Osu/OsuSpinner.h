@@ -16,7 +16,6 @@ class OsuSpinner : public OsuHitObject {
     virtual ~OsuSpinner();
 
     virtual void draw(Graphics *g);
-    virtual void drawVR(Graphics *g, Matrix4 &mvp, OsuVR *vr);
     virtual void update(long curPos);
 
     virtual bool isSpinner() { return true; }
@@ -57,8 +56,6 @@ class OsuSpinner : public OsuHitObject {
     float m_fRPM;
 
     float m_fLastMouseAngle;
-    float m_fLastVRCursorAngle1;
-    float m_fLastVRCursorAngle2;
     float m_fRatio;
 };
 

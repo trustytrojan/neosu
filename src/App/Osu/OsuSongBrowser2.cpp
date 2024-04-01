@@ -574,7 +574,7 @@ OsuSongBrowser2::OsuSongBrowser2(Osu *osu) : OsuScreenBackable(osu) {
     m_scoreBrowser->setDrawFrame(false);
     m_scoreBrowser->setHorizontalScrolling(false);
     m_scoreBrowser->setScrollbarSizeMultiplier(0.25f);
-    m_scoreBrowser->setScrollResistance((m_osu->isInVRMode() || env->getOS() == Environment::OS::OS_HORIZON)
+    m_scoreBrowser->setScrollResistance((env->getOS() == Environment::OS::OS_HORIZON)
                                             ? convar->getConVarByName("ui_scrollview_resistance")->getInt()
                                             : 15);  // a bit shitty this check + convar, but works well enough
     m_scoreBrowserScoresStillLoadingElement = new OsuUISongBrowserScoresStillLoadingElement(m_osu, "Loading...");
@@ -595,7 +595,7 @@ OsuSongBrowser2::OsuSongBrowser2(Osu *osu) : OsuScreenBackable(osu) {
     m_songBrowser->setDrawBackground(false);
     m_songBrowser->setDrawFrame(false);
     m_songBrowser->setHorizontalScrolling(false);
-    m_songBrowser->setScrollResistance((m_osu->isInVRMode() || env->getOS() == Environment::OS::OS_HORIZON)
+    m_songBrowser->setScrollResistance((env->getOS() == Environment::OS::OS_HORIZON)
                                            ? convar->getConVarByName("ui_scrollview_resistance")->getInt()
                                            : 15);  // a bit shitty this check + convar, but works well enough
 

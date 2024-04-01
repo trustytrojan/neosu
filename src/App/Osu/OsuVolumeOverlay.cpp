@@ -19,7 +19,6 @@
 #include "OsuSongBrowser2.h"
 #include "OsuUIVolumeSlider.h"
 #include "OsuUserStatsScreen.h"
-#include "OsuVRTutorial.h"
 #include "Sound.h"
 #include "SoundEngine.h"
 
@@ -250,7 +249,6 @@ bool OsuVolumeOverlay::canChangeVolume() {
     bool can_scroll = true;
     if(m_osu->m_songBrowser2->isVisible()) can_scroll = false;
     if(m_osu->m_optionsMenu->isVisible()) can_scroll = false;
-    if(m_osu->m_vrTutorial->isVisible()) can_scroll = false;
     if(m_osu->m_userStatsScreen->isVisible()) can_scroll = false;
     if(m_osu->m_changelog->isVisible()) can_scroll = false;
     if(m_osu->m_rankingScreen->isVisible()) can_scroll = false;

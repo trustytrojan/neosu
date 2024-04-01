@@ -19,7 +19,6 @@ class OsuBeatmapStandard : public OsuBeatmap {
 
     virtual void draw(Graphics *g);
     virtual void drawInt(Graphics *g);
-    virtual void drawVR(Graphics *g, Matrix4 &mvp, OsuVR *vr);
     virtual void update();
 
     virtual void onModUpdate() { onModUpdate(true, true); }
@@ -32,8 +31,6 @@ class OsuBeatmapStandard : public OsuBeatmap {
         Vector2 coords) const;  // hitobjects should use this one (includes lots of special behaviour)
     Vector2 osuCoords2RawPixels(
         Vector2 coords) const;  // raw transform from osu!pixels to absolute screen pixels (without any mods whatsoever)
-    Vector2 osuCoords2VRPixels(Vector2 coords)
-        const;  // this gets called by osuCoords2Pixels() during a VR draw(), for easier backwards compatibility
     Vector3 osuCoordsTo3D(Vector2 coords, const OsuHitObject *hitObject) const;
     Vector3 osuCoordsToRaw3D(Vector2 coords) const;  // (without any mods whatsoever)
     Vector2 osuCoords2LegacyPixels(
@@ -179,7 +176,6 @@ class OsuBeatmapStandard : public OsuBeatmap {
     // custom
     bool m_bIsPreLoading;
     int m_iPreLoadingIndex;
-    bool m_bIsVRDraw;      // for switching legacy drawing to osuCoords2Pixels/osuCoords2VRPixels
     bool m_bWasHREnabled;  // dynamic stack recalculation
 
     RenderTarget *m_mafhamActiveRenderTarget;

@@ -62,8 +62,6 @@ class OsuOptionsMenu : public OsuScreenBackable, public OsuNotificationOverlayKe
     bool isMouseInside();
     bool isBusy();
 
-    bool shouldDrawVRDummyHUD();
-
    public:
     static const char *OSU_CONFIG_FILE_NAME;
 
@@ -114,7 +112,6 @@ class OsuOptionsMenu : public OsuScreenBackable, public OsuNotificationOverlayKe
     void updateOsuFolder();
     void updateFposuDPI();
     void updateFposuCMper360();
-    void updateVRRenderTargetResolutionLabel();
     void updateSkinNameLabel();
     void updateNotelockSelectLabel();
     void updateHPDrainSelectLabel();
@@ -162,8 +159,6 @@ class OsuOptionsMenu : public OsuScreenBackable, public OsuNotificationOverlayKe
     void onKeyBindingButtonPressed(CBaseUIButton *button);
     void onKeyUnbindButtonPressed(CBaseUIButton *button);
     void onKeyBindingsResetAllPressed(CBaseUIButton *button);
-    void onSliderChangeVRSuperSampling(CBaseUISlider *slider);
-    void onSliderChangeVRAntiAliasing(CBaseUISlider *slider);
     void onSliderChangeSliderQuality(CBaseUISlider *slider);
     void onSliderChangeLetterboxingOffset(CBaseUISlider *slider);
     void onSliderChangeUIScale(CBaseUISlider *slider);
@@ -256,12 +251,6 @@ class OsuOptionsMenu : public OsuScreenBackable, public OsuNotificationOverlayKe
     OsuOptionsMenuResetButton *m_wasapiBufferSizeResetButton;
     OsuOptionsMenuResetButton *m_wasapiPeriodSizeResetButton;
     CBaseUISlider *m_asioBufferSizeSlider = nullptr;
-    CBaseUILabel *m_vrRenderTargetResolutionLabel;
-    CBaseUISlider *m_vrApproachDistanceSlider;
-    CBaseUISlider *m_vrVibrationStrengthSlider;
-    CBaseUISlider *m_vrSliderVibrationStrengthSlider;
-    CBaseUISlider *m_vrHudDistanceSlider;
-    CBaseUISlider *m_vrHudScaleSlider;
     CBaseUISlider *m_sliderQualitySlider;
     CBaseUISlider *m_letterboxingOffsetXSlider;
     CBaseUISlider *m_letterboxingOffsetYSlider;

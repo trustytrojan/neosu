@@ -318,7 +318,7 @@ void OsuModSelector::updateButtons(bool initial) {
                            "You can't fail. No matter what.\nNOTE: To disable drain completely:\nOptions > Gameplay > "
                            "Mechanics > \"Select HP Drain\" > \"None\".",
                            [this]() -> OsuSkinImage * { return m_osu->getSkin()->getSelectionModNoFail(); });
-    m_modButtonNofail->setAvailable(m_osu_drain_type_ref->getInt() > 0);
+    m_modButtonNofail->setAvailable(m_osu_drain_type_ref->getInt() > 1);
     setModButtonOnGrid(4, 0, 0, initial && m_osu->getModNightmare(), "nightmare",
                        "Unnecessary clicks count as misses.\nMassively reduced slider follow circle radius.",
                        [this]() -> OsuSkinImage * { return m_osu->getSkin()->getSelectionModNightmare(); });

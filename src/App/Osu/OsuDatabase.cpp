@@ -1786,7 +1786,7 @@ void OsuDatabase::loadScores() {
         const unsigned char hackIsImportedLegacyScoreFlag =
             0xA9;  // TODO: remove this once all builds on steam (even previous-version) have loading version cap logic
 
-        Packet db = load_db(m_osu->isInVRMode() ? "scoresvr.db" : "scores.db");
+        Packet db = load_db("scores.db");
         if(db.size > 0) {
             customScoresFileSize = db.size;
 
@@ -2182,7 +2182,7 @@ void OsuDatabase::saveScores() {
             }
         }
 
-        if(!save_db(&db, (m_osu->isInVRMode() ? "scoresvr.db" : "scores.db"))) {
+        if(!save_db(&db, ("scores.db"))) {
             debugLog("Couldn't write scores.db!\n");
         }
 

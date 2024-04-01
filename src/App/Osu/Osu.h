@@ -19,7 +19,6 @@ class OsuLobby;
 class OsuRoom;
 class OsuPromptScreen;
 class OsuUIUserContextMenuScreen;
-class OsuVR;
 class OsuMainMenu;
 class OsuPauseMenu;
 class OsuOptionsMenu;
@@ -36,7 +35,6 @@ class OsuScreen;
 class OsuScore;
 class OsuSkin;
 class OsuHUD;
-class OsuVRTutorial;
 class OsuChangelog;
 class OsuEditor;
 class OsuModFPoSu;
@@ -72,7 +70,6 @@ class Osu : public App, public MouseListener {
     virtual ~Osu();
 
     virtual void draw(Graphics *g);
-    void drawVR(Graphics *g);
     virtual void update();
 
     virtual void onKeyDown(KeyboardEvent &e);
@@ -104,7 +101,6 @@ class Osu : public App, public MouseListener {
     void toggleSongBrowser();
     void toggleOptionsMenu();
     void toggleUserStatsScreen();
-    void toggleVRTutorial();
     void toggleChangelog();
     void toggleEditor();
 
@@ -124,7 +120,6 @@ class Osu : public App, public MouseListener {
 
     OsuBeatmap *getSelectedBeatmap();
 
-    inline OsuVR *getVR() const { return m_vr; }
     inline OsuOptionsMenu *getOptionsMenu() const { return m_optionsMenu; }
     inline OsuSongBrowser2 *getSongBrowser() const { return m_songBrowser2; }
     inline OsuBackgroundImageHandler *getBackgroundImageHandler() const { return m_backgroundImageHandler; }
@@ -182,8 +177,6 @@ class Osu : public App, public MouseListener {
 
     bool isInPlayMode();
     bool isNotInPlayModeOrPaused();
-    static bool isInVRMode();
-    inline bool isInVRDraw() const { return m_bIsInVRDraw; }
     inline bool isSkinLoading() const { return m_bSkinLoadScheduled; }
 
     inline bool isSkipScheduled() const { return m_bSkipScheduled; }
@@ -264,11 +257,9 @@ class Osu : public App, public MouseListener {
     ConVar *m_ui_scrollview_scrollbarwidth_ref;
     ConVar *m_mouse_raw_input_absolute_to_window_ref;
     ConVar *m_win_disable_windows_key_ref;
-    ConVar *m_osu_vr_draw_desktop_playfield_ref;
 
     // interfaces
     OsuVolumeOverlay *m_volumeOverlay;
-    OsuVR *m_vr;
     OsuMainMenu *m_mainMenu;
     OsuOptionsMenu *m_optionsMenu;
     OsuChat *m_chat = nullptr;
@@ -287,7 +278,6 @@ class Osu : public App, public MouseListener {
     OsuTooltipOverlay *m_tooltipOverlay;
     OsuNotificationOverlay *m_notificationOverlay;
     OsuScore *m_score;
-    OsuVRTutorial *m_vrTutorial;
     OsuChangelog *m_changelog;
     OsuEditor *m_editor;
     OsuUpdateHandler *m_updateHandler;
@@ -355,7 +345,6 @@ class Osu : public App, public MouseListener {
     bool m_bToggleOptionsMenuScheduled;
     bool m_bOptionsMenuFullscreen;
     bool m_bToggleUserStatsScreenScheduled;
-    bool m_bToggleVRTutorialScheduled;
     bool m_bToggleChangelogScheduled;
     bool m_bToggleEditorScheduled;
 
@@ -377,7 +366,6 @@ class Osu : public App, public MouseListener {
     GAMEMODE m_gamemode;
     bool m_bScheduleEndlessModNextBeatmap;
     int m_iMultiplayerClientNumEscPresses;
-    bool m_bIsInVRDraw;
     int m_iInstanceID;
     bool m_bWasBossKeyPaused;
     bool m_bSkinLoadScheduled;

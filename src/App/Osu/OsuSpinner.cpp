@@ -11,13 +11,10 @@
 #include "ConVar.h"
 #include "Engine.h"
 #include "Mouse.h"
-#include "OpenVRController.h"
-#include "OpenVRInterface.h"
 #include "Osu.h"
 #include "OsuBeatmapStandard.h"
 #include "OsuGameRules.h"
 #include "OsuSkin.h"
-#include "OsuVR.h"
 #include "ResourceManager.h"
 #include "SoundEngine.h"
 
@@ -58,8 +55,6 @@ OsuSpinner::OsuSpinner(int x, int y, long time, int sampleType, bool isEndOfComb
     m_fDeltaAngleOverflow = 0.0f;
     m_fRPM = 0.0f;
     m_fLastMouseAngle = 0.0f;
-    m_fLastVRCursorAngle1 = 0.0f;
-    m_fLastVRCursorAngle2 = 0.0f;
     m_fRatio = 0.0f;
 
     // spinners don't need misaims
@@ -275,24 +270,6 @@ void OsuSpinner::draw(Graphics *g) {
     }
 }
 
-void OsuSpinner::drawVR(Graphics *g, Matrix4 &mvp, OsuVR *vr) {
-    /// if (m_bVisible)
-    {
-        float clampedApproachScalePercent =
-            m_fApproachScale - 1.0f;  // goes from <m_osu_approach_scale_multiplier_ref> to 0
-        clampedApproachScalePercent =
-            clamp<float>(clampedApproachScalePercent / m_osu_approach_scale_multiplier_ref->getFloat(), 0.0f,
-                         1.0f);  // goes from 1 to 0
-
-        Matrix4 translation;
-        translation.translate(0, 0, -clampedApproachScalePercent * vr->getApproachDistance());
-        Matrix4 finalMVP = mvp * translation;
-
-        vr->getShaderTexturedLegacyGeneric()->setUniformMatrix4fv("matrix", finalMVP);
-        draw(g);
-    }
-}
-
 void OsuSpinner::update(long curPos) {
     OsuHitObject::update(curPos);
 
@@ -333,24 +310,6 @@ void OsuSpinner::update(long curPos) {
             Vector2 mouseDelta = engine->getMouse()->getPos() - m_beatmap->osuCoords2Pixels(m_vRawPos);
             const float currentMouseAngle = (float)std::atan2(mouseDelta.y, mouseDelta.x);
             angleDiff = (currentMouseAngle - m_fLastMouseAngle);
-
-            if(m_beatmap->getOsu()->isInVRMode()) {
-                Vector2 vrCursorDelta1 =
-                    m_beatmap->getOsu()->getVR()->getCursorPos1() - m_beatmap->osuCoords2VRPixels(m_vRawPos);
-                Vector2 vrCursorDelta2 =
-                    m_beatmap->getOsu()->getVR()->getCursorPos2() - m_beatmap->osuCoords2VRPixels(m_vRawPos);
-
-                const float currentVRCursorAngle1 = (float)std::atan2(vrCursorDelta1.x, vrCursorDelta1.y);
-                const float currentVRCursorAngle2 = (float)std::atan2(vrCursorDelta2.x, vrCursorDelta2.y);
-
-                angleDiff -= (currentVRCursorAngle1 - m_fLastVRCursorAngle1);
-                angleDiff -= (currentVRCursorAngle2 - m_fLastVRCursorAngle2);
-
-                if(std::abs(angleDiff) > 0.001f) {
-                    m_fLastVRCursorAngle1 = currentVRCursorAngle1;
-                    m_fLastVRCursorAngle2 = currentVRCursorAngle2;
-                }
-            }
 
             if(std::abs(angleDiff) > 0.001f)
                 m_fLastMouseAngle = currentMouseAngle;

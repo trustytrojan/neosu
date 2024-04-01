@@ -69,7 +69,6 @@ class Graphics {
 
    public:
     friend class Engine;
-    friend class OpenVRInterface;
 
     Graphics();
     virtual ~Graphics() {}

@@ -40,7 +40,6 @@
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
 #include "OsuSlider.h"
-#include "OsuVR.h"
 #include "ResourceManager.h"
 #include "SoundEngine.h"
 
@@ -48,7 +47,6 @@ ConVar osu_pvs("osu_pvs", true, FCVAR_NONE,
                "optimizes all loops over all hitobjects by clamping the range to the Potentially Visible Set");
 ConVar osu_draw_hitobjects("osu_draw_hitobjects", true, FCVAR_NONE);
 ConVar osu_draw_beatmap_background_image("osu_draw_beatmap_background_image", true, FCVAR_NONE);
-ConVar osu_vr_draw_desktop_playfield("osu_vr_draw_desktop_playfield", true, FCVAR_NONE);
 
 ConVar osu_universal_offset("osu_universal_offset", 0.0f, FCVAR_NONE);
 ConVar osu_universal_offset_hardcoded_fallback_dsound("osu_universal_offset_hardcoded_fallback_dsound", -15.0f,
@@ -155,7 +153,7 @@ ConVar osu_mod_suddendeath_restart("osu_mod_suddendeath_restart", false, FCVAR_N
 
 ConVar osu_drain_type(
     "osu_drain_type", 2, FCVAR_CHEAT,
-    "which hp drain algorithm to use (0 = None, 1 = VR, 2 = osu!stable, 3 = osu!lazer 2020, 4 = osu!lazer 2018)");
+    "which hp drain algorithm to use (1 = None, 2 = osu!stable, 3 = osu!lazer 2020, 4 = osu!lazer 2018)");
 ConVar osu_drain_kill("osu_drain_kill", true, FCVAR_CHEAT, "whether to kill the player upon failing");
 ConVar osu_drain_kill_notification_duration(
     "osu_drain_kill_notification_duration", 1.0f, FCVAR_NONE,
@@ -190,7 +188,6 @@ ConVar osu_debug_draw_timingpoints("osu_debug_draw_timingpoints", false, FCVAR_C
 
 ConVar *OsuBeatmap::m_osu_pvs = &osu_pvs;
 ConVar *OsuBeatmap::m_osu_draw_hitobjects_ref = &osu_draw_hitobjects;
-ConVar *OsuBeatmap::m_osu_vr_draw_desktop_playfield_ref = &osu_vr_draw_desktop_playfield;
 ConVar *OsuBeatmap::m_osu_followpoints_prevfadetime_ref = &osu_followpoints_prevfadetime;
 ConVar *OsuBeatmap::m_osu_universal_offset_ref = &osu_universal_offset;
 ConVar *OsuBeatmap::m_osu_early_note_time_ref = &osu_early_note_time;
@@ -306,12 +303,6 @@ void OsuBeatmap::drawInt(Graphics *g) {
 
     // draw loading circle
     if(isLoading()) m_osu->getHUD()->drawLoadingSmall(g);
-}
-
-void OsuBeatmap::drawVR(Graphics *g, Matrix4 &mvp, OsuVR *vr) {
-    if(!canDraw()) return;
-
-    // empty atm
 }
 
 void OsuBeatmap::drawDebug(Graphics *g) {
@@ -1050,7 +1041,7 @@ void OsuBeatmap::update() {
     }
 
     // hp drain & failing
-    if(osu_drain_type.getInt() > 0) {
+    if(osu_drain_type.getInt() > 1) {
         const int drainType = osu_drain_type.getInt();
 
         // handle constant drain
@@ -1111,10 +1102,6 @@ void OsuBeatmap::update() {
             bool hasFailed = false;
 
             switch(drainType) {
-                case 1:  // VR
-                    hasFailed = m_fHealth2 < 0.001f;
-                    break;
-
                 case 2:  // osu!stable
                     hasFailed = (m_fHealth < 0.001) && osu_drain_stable_passive_fail.getBool();
                     break;
@@ -1194,8 +1181,6 @@ void OsuBeatmap::skipEmptySection() {
 void OsuBeatmap::keyPressed1(bool mouse) {
     if(m_bContinueScheduled) m_bClickedContinue = !m_osu->getModSelector()->isMouseInside();
 
-    if(m_osu->isInVRMode() && !m_osu_vr_draw_desktop_playfield_ref->getBool()) return;
-
     if(osu_mod_fullalternate.getBool() && m_bPrevKeyWasKey1) {
         if(m_iCurrentHitObjectIndex > m_iAllowAnyNextKeyForFullAlternateUntilHitObjectIndex) {
             engine->getSound()->play(getSkin()->getCombobreak());
@@ -1232,8 +1217,6 @@ void OsuBeatmap::keyPressed1(bool mouse) {
 void OsuBeatmap::keyPressed2(bool mouse) {
     if(m_bContinueScheduled) m_bClickedContinue = !m_osu->getModSelector()->isMouseInside();
 
-    if(m_osu->isInVRMode() && !m_osu_vr_draw_desktop_playfield_ref->getBool()) return;
-
     if(osu_mod_fullalternate.getBool() && !m_bPrevKeyWasKey1) {
         if(m_iCurrentHitObjectIndex > m_iAllowAnyNextKeyForFullAlternateUntilHitObjectIndex) {
             engine->getSound()->play(getSkin()->getCombobreak());
@@ -1268,8 +1251,6 @@ void OsuBeatmap::keyPressed2(bool mouse) {
 }
 
 void OsuBeatmap::keyReleased1(bool mouse) {
-    if(m_osu->isInVRMode() && !m_osu_vr_draw_desktop_playfield_ref->getBool()) return;
-
     // key overlay
     m_osu->getHUD()->animateInputoverlay(1, false);
     m_osu->getHUD()->animateInputoverlay(3, false);
@@ -1280,8 +1261,6 @@ void OsuBeatmap::keyReleased1(bool mouse) {
 }
 
 void OsuBeatmap::keyReleased2(bool mouse) {
-    if(m_osu->isInVRMode() && !m_osu_vr_draw_desktop_playfield_ref->getBool()) return;
-
     // key overlay
     m_osu->getHUD()->animateInputoverlay(2, false);
     m_osu->getHUD()->animateInputoverlay(4, false);
@@ -1558,9 +1537,6 @@ void OsuBeatmap::pause(bool quitIfWaiting) {
         onPaused(isFirstPause);
     else
         onUnpaused();
-
-    // don't kill VR players while paused
-    if(m_osu_drain_type_ref->getInt() == 1) anim->deleteExistingAnimation(&m_fHealth2);
 
     // if we have failed, and the user early exits to the pause menu, stop the failing animation
     if(m_bFailed) anim->deleteExistingAnimation(&m_fFailAnim);
@@ -1865,11 +1841,7 @@ float OsuBeatmap::getOD() const {
     return OD;
 }
 
-bool OsuBeatmap::isClickHeld() const {
-    return m_bClick1Held || m_bClick2Held ||
-           (m_osu->isInVRMode() && (!m_osu->getVR()->isVirtualCursorOnScreen() ||
-                                    !m_osu_vr_draw_desktop_playfield_ref->getBool()));  // a bit shit, but whatever
-}
+bool OsuBeatmap::isClickHeld() const { return m_bClick1Held || m_bClick2Held; }
 
 UString OsuBeatmap::getTitle() const {
     if(m_selectedDifficulty2 != NULL)
@@ -2025,7 +1997,7 @@ void OsuBeatmap::addScorePoints(int points, bool isSpinner) { m_osu->getScore()-
 
 void OsuBeatmap::addHealth(double percent, bool isFromHitResult) {
     const int drainType = osu_drain_type.getInt();
-    if(drainType < 1) return;
+    if(drainType < 2) return;
 
     // never drain before first hitobject
     if(m_hitobjects.size() > 0 && m_iCurMusicPosWithOffsets < m_hitobjects[0]->getTime()) return;
@@ -2051,18 +2023,7 @@ void OsuBeatmap::addHealth(double percent, bool isFromHitResult) {
         if(m_fHealth > 0.9) m_osu->getHUD()->animateKiExplode();
     }
 
-    switch(drainType) {
-        case 1:  // VR
-        {
-            const float targetHealth = clamp<float>(m_fHealth2 + percent, -0.1f, 1.0f);
-            m_fHealth = targetHealth;
-            anim->moveQuadOut(&m_fHealth2, targetHealth, osu_drain_vr_duration.getFloat(), true);
-        } break;
-
-        default:
-            m_fHealth = clamp<double>(m_fHealth + percent, 0.0, 1.0);
-            break;
-    }
+    m_fHealth = clamp<double>(m_fHealth + percent, 0.0, 1.0);
 
     // handle generic fail state (2)
     const bool isDead = m_fHealth < 0.001;
@@ -2258,7 +2219,7 @@ void OsuBeatmap::playMissSound() {
 }
 
 unsigned long OsuBeatmap::getMusicPositionMSInterpolated() {
-    if(!osu_interpolate_music_pos.getBool() || (m_bFailed && m_osu->isInVRMode()) || isLoading())
+    if(!osu_interpolate_music_pos.getBool() || isLoading())
         return m_music->getPositionMS();
     else {
         const double interpolationMultiplier = 1.0;

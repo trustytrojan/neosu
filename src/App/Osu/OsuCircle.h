@@ -64,8 +64,6 @@ class OsuCircle : public OsuHitObject {
 
     virtual void draw(Graphics *g);
     virtual void draw2(Graphics *g);
-    virtual void drawVR(Graphics *g, Matrix4 &mvp, OsuVR *vr);
-    virtual void drawVR2(Graphics *g, Matrix4 &mvp, OsuVR *vr);
     virtual void update(long curPos);
 
     virtual bool isCircle() { return true; }
@@ -95,8 +93,6 @@ class OsuCircle : public OsuHitObject {
     bool m_bWaiting;
     float m_fHitAnimation;
     float m_fShakeAnimation;
-
-    bool m_bOnHitVRLeftControllerHapticFeedback;
 };
 
 #endif

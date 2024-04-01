@@ -38,7 +38,6 @@ class OsuUpdateHandler {
 
    private:
     static const char *TEMP_UPDATE_DOWNLOAD_FILEPATH;
-    static ConVar *m_osu_release_stream_ref;
 
     // async
     void _requestUpdate();
@@ -49,11 +48,7 @@ class OsuUpdateHandler {
     bool _m_bKYS;
 
     // releases
-    enum class STREAM { STREAM_NULL, STREAM_DESKTOP, STREAM_VR };
-
-    STREAM stringToStream(UString streamString);
     Environment::OS stringToOS(UString osString);
-    STREAM getReleaseStream();
 
     // status
     STATUS m_status;
