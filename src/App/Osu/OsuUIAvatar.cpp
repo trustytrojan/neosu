@@ -40,7 +40,8 @@ bool download_avatar(uint32_t user_id) {
     float progress = -1.f;
     std::vector<uint8_t> data;
     auto img_url = UString::format("https://a.%s/%d", bancho.endpoint.toUtf8(), user_id);
-    download(img_url.toUtf8(), &progress, data);
+    int response_code;
+    download(img_url.toUtf8(), &progress, data, &response_code);
     if(progress == -1.f) blacklist.push_back(user_id);
     if(data.empty()) return false;
 

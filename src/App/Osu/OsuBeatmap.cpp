@@ -702,16 +702,25 @@ bool OsuBeatmap::watch(std::vector<OsuReplay::Frame> replay) {
         return false;
     }
 
+    m_bIsWatchingReplay = true;
+    m_osu->onBeforePlayStart();
+
     // Map failed to load
     if(!play()) {
         return false;
     }
 
+    m_bIsWatchingReplay = true;  // play() resets this to false
     spectated_replay = std::move(replay);
-    m_bIsWatchingReplay = true;
     last_event_ms = -1;
     last_keys = 0;
     current_keys = 0;
+
+    env->setCursorVisible(true);
+
+    m_osu->m_songBrowser2->m_bHasSelectedAndIsPlaying = true;
+    m_osu->m_songBrowser2->setVisible(false);
+    m_osu->onPlayStart();
 
     return true;
 }

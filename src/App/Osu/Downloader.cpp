@@ -17,6 +17,7 @@ struct DownloadResult {
     std::string url;
     std::vector<uint8_t> data;
     float progress = 0.f;
+    int response_code = 0;
 };
 
 struct DownloadThread {
@@ -96,18 +97,19 @@ void* do_downloads(void* arg) {
         curl_easy_setopt(curl, CURLOPT_CAINFO, "curl-ca-bundle.crt");
 #endif
         CURLcode res = curl_easy_perform(curl);
+        int response_code;
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
         if(res == CURLE_OK) {
             threads_mtx.lock();
             result->progress = 1.f;
+            result->response_code = response_code;
             result->data = std::vector<uint8_t>(response.memory, response.memory + response.size);
             threads_mtx.unlock();
         } else {
             debugLog("Failed to download %s: %s\n", url.c_str(), curl_easy_strerror(res));
 
-            int response_code;
-            curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
-
             threads_mtx.lock();
+            result->response_code = response_code;
             if(response_code == 429) {
                 result->progress = 0.f;
             } else {
@@ -144,7 +146,7 @@ end_thread:
     return NULL;
 }
 
-void download(const char* url, float* progress, std::vector<uint8_t>& out) {
+void download(const char* url, float* progress, std::vector<uint8_t>& out, int* response_code) {
     char* hostname = NULL;
     bool download_found = false;
     DownloadThread* matching_thread = nullptr;
@@ -192,6 +194,7 @@ void download(const char* url, float* progress, std::vector<uint8_t>& out) {
 
         if(result->url == url) {
             *progress = result->progress;
+            *response_code = result->response_code;
             if(result->progress == -1.f || result->progress == 1.f) {
                 out = result->data;
                 delete matching_thread->downloads[i];
@@ -228,8 +231,9 @@ void download_beatmapset(uint32_t set_id, float* progress) {
     std::vector<uint8_t> data;
     auto mirror = convar->getConVarByName("beatmap_mirror")->getString();
     auto url = UString::format(mirror.toUtf8(), set_id);
-    download(url.toUtf8(), progress, data);
-    if(*progress != 1.f) return;
+    int response_code = 0;
+    download(url.toUtf8(), progress, data, &response_code);
+    if(response_code != 200) return;
 
     // Download succeeded: save map to disk
     mz_zip_archive zip = {0};

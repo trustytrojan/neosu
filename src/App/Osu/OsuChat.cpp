@@ -575,8 +575,9 @@ bool OsuChat::isVisibilityForced() {
 void OsuChat::updateVisibility() {
     auto selected_beatmap = m_osu->getSelectedBeatmap();
     bool can_skip = (selected_beatmap != nullptr) && (selected_beatmap->isInSkippableSection());
-    bool is_clicking_circles =
-        m_osu->isInPlayMode() && !can_skip && !m_osu->m_bModAuto && !m_osu->m_pauseMenu->isVisible();
+    bool is_spectating = m_osu->m_bModAuto || (m_osu->m_bModAutopilot && m_osu->m_bModRelax) ||
+                         (selected_beatmap != nullptr && selected_beatmap->m_bIsWatchingReplay);
+    bool is_clicking_circles = m_osu->isInPlayMode() && !can_skip && !is_spectating && !m_osu->m_pauseMenu->isVisible();
     if(bancho.is_playing_a_multi_map() && !bancho.room.all_players_loaded) {
         is_clicking_circles = false;
     }

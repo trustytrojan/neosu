@@ -18,6 +18,7 @@
 #include "ConVar.h"
 #include "Console.h"
 #include "ConsoleBox.h"
+#include "Downloader.h"
 #include "Engine.h"
 #include "Environment.h"
 #include "Keyboard.h"
@@ -1049,6 +1050,46 @@ void Osu::update() {
     receive_api_responses();
     receive_bancho_packets();
 
+    // replay downloading
+    if(bancho.downloading_replay_id > 0) {
+        float progress = -1.f;
+        std::vector<uint8_t> replay_data;
+
+        // NOTE: Assuming the server doesn't require authentication :Clueless:
+        auto url =
+            UString::format("https://api.%s/get_replay?id=%d", bancho.endpoint.toUtf8(), bancho.downloading_replay_id);
+
+        int response_code = 0;
+        download(url.toUtf8(), &progress, replay_data, &response_code);
+
+        if(progress == -1.f || (progress == 1.f && response_code != 200)) {
+            bancho.downloading_replay_id = 0;
+            m_notificationOverlay->addNotification("Failed to download replay");
+            debugLog("Replay download: HTTP error %d\n", response_code);
+        } else if(progress < 1.f) {
+            auto progress_str = UString::format("Downloading replay... (%.1f%%)", progress * 100.f);
+            m_notificationOverlay->addNotification(progress_str);
+        } else {
+            // XXX: Undefined behavior if the user did random stuff before we start the replay
+            bancho.downloading_replay_id = 0;
+
+            replay = OsuReplay::from_bytes(replay_data.data(), replay_data.size());
+            if(replay.frames.empty()) {
+                m_notificationOverlay->addNotification("Replay file is corrupt or unavailable");
+            } else {
+                MD5Hash diff2_md5(replay.diff2_md5.toUtf8());
+                auto beatmap = getSongBrowser()->getDatabase()->getBeatmapDifficulty(diff2_md5);
+                if(beatmap == nullptr) {
+                    // XXX: Auto-download beatmap
+                    m_notificationOverlay->addNotification("Missing beatmap for this replay");
+                } else {
+                    m_songBrowser2->onDifficultySelected(beatmap, false);
+                    getSelectedBeatmap()->watch(replay.frames);
+                }
+            }
+        }
+    }
+
     // skin async loading
     if(m_bSkinLoadScheduled) {
         if(m_skinScheduledToLoad != NULL && m_skinScheduledToLoad->isReady()) {
@@ -1097,7 +1138,34 @@ void Osu::update() {
 }
 
 void Osu::updateMods() {
-    if(bancho.is_in_a_multi_room()) {
+    if(getSelectedBeatmap() != nullptr && getSelectedBeatmap()->m_bIsWatchingReplay) {
+        m_bModNC = replay.mod_flags & ModFlags::Nightcore;
+        m_bModDT = replay.mod_flags & ModFlags::DoubleTime && !m_bModNC;
+        m_bModHT = replay.mod_flags & ModFlags::HalfTime;
+        m_bModDC = false;
+        if(m_bModHT && bancho.prefer_daycore) {
+            m_bModHT = false;
+            m_bModDC = true;
+        }
+
+        m_bModNF = replay.mod_flags & ModFlags::NoFail;
+        m_bModEZ = replay.mod_flags & ModFlags::Easy;
+        m_bModTD = replay.mod_flags & ModFlags::TouchDevice;
+        m_bModHD = replay.mod_flags & ModFlags::Hidden;
+        m_bModHR = replay.mod_flags & ModFlags::HardRock;
+        m_bModSD = replay.mod_flags & ModFlags::SuddenDeath;
+        m_bModRelax = replay.mod_flags & ModFlags::Relax;
+        m_bModAutopilot = replay.mod_flags & ModFlags::Autopilot;
+        m_bModAuto = replay.mod_flags & ModFlags::Autoplay && !m_bModAutopilot;
+        m_bModSpunout = replay.mod_flags & ModFlags::SpunOut;
+        m_bModSS = replay.mod_flags & ModFlags::Perfect;
+        m_bModTarget = replay.mod_flags & ModFlags::Target;
+        m_bModScorev2 = replay.mod_flags & ModFlags::ScoreV2;
+        m_bModFlashlight = replay.mod_flags & ModFlags::Flashlight;
+        m_bModNightmare = false;
+
+        osu_speed_override.setValue("0");
+    } else if(bancho.is_in_a_multi_room()) {
         m_bModNC = bancho.room.mods & ModFlags::Nightcore;
         if(m_bModNC) {
             m_bModDT = false;

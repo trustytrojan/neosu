@@ -10,6 +10,7 @@
 
 #include "App.h"
 #include "MouseListener.h"
+#include "OsuReplay.h"
 
 class CWindowManager;
 
@@ -356,6 +357,9 @@ class Osu : public App, public MouseListener {
 
     // debugging
     CWindowManager *m_windowManager;
+
+    // replay
+    OsuReplay::Info replay;
 
     // custom
     bool m_bScheduleEndlessModNextBeatmap;

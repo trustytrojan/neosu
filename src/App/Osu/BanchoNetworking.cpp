@@ -9,6 +9,7 @@
 #include "BanchoProtocol.h"
 #include "CBaseUICheckbox.h"
 #include "ConVar.h"
+#include "Downloader.h"
 #include "Engine.h"
 #include "File.h"
 #include "OsuChat.h"
@@ -95,6 +96,7 @@ void disconnect() {
     //      While offline ones would be "By score", "By pp", etc
     bancho.osu->m_songBrowser2->onSortScoresChange(UString("Sort By Score"), 0);
 
+    bancho.downloading_replay_id = 0;
     abort_downloads();
 
     pthread_mutex_unlock(&outgoing_mutex);

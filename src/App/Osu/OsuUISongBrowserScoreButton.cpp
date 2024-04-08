@@ -10,6 +10,7 @@
 #include <chrono>
 
 #include "AnimationHandler.h"
+#include "Bancho.h"
 #include "ConVar.h"
 #include "Console.h"
 #include "Engine.h"
@@ -562,7 +563,7 @@ void OsuUISongBrowserScoreButton::onContextMenu(UString text, int id) {
     }
 
     if(id == 2) {
-        // TODO @kiwec: view replay
+        bancho.downloading_replay_id = m_score.online_score_id;
         return;
     }
 

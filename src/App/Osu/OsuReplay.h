@@ -33,7 +33,30 @@ struct BEATMAP_VALUES {
     float csDifficultyMultiplier;
 };
 
+struct Info {
+    uint8_t gamemode;
+    uint32_t osu_version;
+    UString diff2_md5;
+    UString username;
+    UString replay_md5;
+    int num300s;
+    int num100s;
+    int num50s;
+    int numGekis;
+    int numKatus;
+    int numMisses;
+    int32_t score;
+    int comboMax;
+    bool perfect;
+    int32_t mod_flags;
+    UString life_bar_graph;
+    int64_t timestamp;
+    std::vector<Frame> frames;
+};
+
 BEATMAP_VALUES getBeatmapValuesForModsLegacy(int modsLegacy, float legacyAR, float legacyCS, float legacyOD,
                                              float legacyHP);
+
+Info from_bytes(uint8_t* data, int s_data);
 
 }  // namespace OsuReplay
