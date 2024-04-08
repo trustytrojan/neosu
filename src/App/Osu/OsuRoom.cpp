@@ -3,18 +3,19 @@
 #include <sstream>
 
 #include "Bancho.h"
-#include "BanchoDownloader.h"
 #include "BanchoNetworking.h"
 #include "BanchoUsers.h"
 #include "CBaseUIButton.h"
 #include "CBaseUIContainer.h"
 #include "CBaseUILabel.h"
 #include "CBaseUITextbox.h"
+#include "Downloader.h"
 #include "Engine.h"
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "Osu.h"
 #include "OsuBackgroundImageHandler.h"
+#include "OsuBeatmap.h"
 #include "OsuChat.h"
 #include "OsuDatabase.h"
 #include "OsuHUD.h"
@@ -231,19 +232,21 @@ void OsuRoom::draw(Graphics *g) {
         return;
     }
 
-    auto status = download_mapset(set_id);
-    if(status.status == FAILURE) {
+    // Download mapset
+    float progress = -1.f;
+    download_beatmapset(set_id, &progress);
+    if(progress == -1.f) {
         auto error_str = UString::format("Failed to download beatmapset %d :(", set_id);
         m_map_title->setText(error_str);
         m_map_title->setSizeToContent(0, 0);
         m_ready_btn->is_loading = true;
         bancho.room.map_id = 0;  // don't try downloading it again
-    } else if(status.status == DOWNLOADING) {
-        auto text = UString::format("Downloading... %.2f%%", status.progress * 100.f);
+    } else if(progress < 1.f) {
+        auto text = UString::format("Downloading... %.2f%%", progress * 100.f);
         m_map_title->setText(text.toUtf8());
         m_map_title->setSizeToContent(0, 0);
         m_ready_btn->is_loading = true;
-    } else if(status.status == SUCCESS) {
+    } else {
         std::stringstream ss;
         ss << MCENGINE_DATA_DIR "maps/" << std::to_string(set_id) << "/";
         auto mapset_path = ss.str();

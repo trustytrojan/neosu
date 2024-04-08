@@ -95,11 +95,9 @@ void disconnect() {
     //      While offline ones would be "By score", "By pp", etc
     bancho.osu->m_songBrowser2->onSortScoresChange(UString("Sort By Score"), 0);
 
-    pthread_mutex_unlock(&outgoing_mutex);
+    abort_downloads();
 
-    pthread_mutex_lock(&avatars_mtx);
-    avatar_downloading_thread_id++;
-    pthread_mutex_unlock(&avatars_mtx);
+    pthread_mutex_unlock(&outgoing_mutex);
 }
 
 void reconnect() {
@@ -136,15 +134,6 @@ void reconnect() {
     login_packet = new_login_packet;
     try_logging_in = true;
     pthread_mutex_unlock(&outgoing_mutex);
-
-    pthread_mutex_lock(&avatars_mtx);
-    avatar_downloading_thread_id++;
-    pthread_t dummy = 0;
-    int ret = pthread_create(&dummy, NULL, avatar_downloading_thread, NULL);
-    if(ret) {
-        debugLog("Failed to start avatar downloading thread: pthread_create() returned %i\n", ret);
-    }
-    pthread_mutex_unlock(&avatars_mtx);
 }
 
 size_t curl_write(void *contents, size_t size, size_t nmemb, void *userp) {

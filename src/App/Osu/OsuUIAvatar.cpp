@@ -8,29 +8,27 @@
 
 #include "Bancho.h"
 #include "BanchoNetworking.h"
+#include "Downloader.h"
 #include "Engine.h"
 #include "Osu.h"
 #include "OsuSkin.h"
 #include "OsuUIUserContextMenu.h"
 #include "ResourceManager.h"
 
-int avatar_downloading_thread_id = 0;
-pthread_mutex_t avatars_mtx = PTHREAD_MUTEX_INITIALIZER;
-std::vector<uint32_t> avatars_to_load;
-std::vector<uint32_t> avatars_loaded;
+// Returns true when avatar is fully downloaded
+bool download_avatar(uint32_t user_id) {
+    if(user_id == 0) return false;
 
-void *avatar_downloading_thread(void *arg) {
-    (void)arg;
-
-    pthread_mutex_lock(&avatars_mtx);
-    avatar_downloading_thread_id++;
-    int thread_id = avatar_downloading_thread_id;
-    pthread_mutex_unlock(&avatars_mtx);
-
-    UString endpoint = bancho.endpoint;
+    // XXX: clear blacklist when changing endpoint
+    static std::vector<uint32_t> blacklist;
+    for(auto bl : blacklist) {
+        if(user_id == bl) {
+            return false;
+        }
+    }
 
     std::stringstream ss;
-    ss << MCENGINE_DATA_DIR "avatars/" << endpoint.toUtf8();
+    ss << MCENGINE_DATA_DIR "avatars/" << bancho.endpoint.toUtf8();
     auto server_dir = ss.str();
     if(!env->directoryExists(server_dir)) {
         if(!env->directoryExists(MCENGINE_DATA_DIR "avatars")) {
@@ -39,95 +37,25 @@ void *avatar_downloading_thread(void *arg) {
         env->createDirectory(server_dir);
     }
 
-    CURL *curl = curl_easy_init();
-    if(!curl) {
-        debugLog("Failed to initialize cURL, avatar downloading disabled.\n");
-        return NULL;
+    float progress = -1.f;
+    std::vector<uint8_t> data;
+    auto img_url = UString::format("https://a.%s/%d", bancho.endpoint.toUtf8(), user_id);
+    download(img_url.toUtf8(), &progress, data);
+    if(progress == -1.f) blacklist.push_back(user_id);
+    if(data.empty()) return false;
+
+    std::stringstream ss2;
+    ss2 << server_dir << "/" << std::to_string(user_id);
+    auto img_path = ss2.str();
+    FILE *file = fopen(img_path.c_str(), "wb");
+    if(file != NULL) {
+        fwrite(data.data(), data.size(), 1, file);
+        fflush(file);
+        fclose(file);
     }
 
-    std::vector<uint32_t> blacklist;
-    blacklist.push_back(0);  // make sure we don't try to load user id 0
-
-    while(thread_id == avatar_downloading_thread_id) {
-    loop:
-        env->sleep(100000);  // wait 100ms between every download
-
-        pthread_mutex_lock(&avatars_mtx);
-        if(avatars_to_load.empty()) {
-            pthread_mutex_unlock(&avatars_mtx);
-            continue;
-        }
-        uint32_t avatar_id = avatars_to_load.front();
-        for(auto bl : blacklist) {
-            if(avatar_id == bl) {
-                avatars_to_load.erase(avatars_to_load.begin());
-                pthread_mutex_unlock(&avatars_mtx);
-                goto loop;
-            }
-        }
-        pthread_mutex_unlock(&avatars_mtx);
-
-        auto img_url = UString::format("https://a.%s/%d", endpoint.toUtf8(), avatar_id);
-        debugLog("Downloading %s\n", img_url.toUtf8());
-        Packet response;
-        response.memory = (uint8_t *)malloc(2048);
-        curl_easy_setopt(curl, CURLOPT_URL, img_url.toUtf8());
-        curl_easy_setopt(curl, CURLOPT_USERAGENT, bancho.user_agent.toUtf8());
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
-#ifdef _WIN32
-        // ABSOLUTELY RETARDED, FUCK WINDOWS
-        curl_easy_setopt(curl, CURLOPT_CAINFO, "curl-ca-bundle.crt");
-#endif
-        CURLcode res = curl_easy_perform(curl);
-        if(res != CURLE_OK) {
-            debugLog("Failed to download %s: %s\n", img_url.toUtf8(), curl_easy_strerror(res));
-
-            int response_code;
-            curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
-            if(response_code == 429) {
-                // Fetching avatars too quickly, try again 5s later
-                env->sleep(5000000);
-            } else {
-                // Failed to load avatar, don't try to fetch it again
-                blacklist.push_back(avatar_id);
-            }
-
-            // We still save the avatar if it 404s, since the server will return the default avatar
-            if(response_code != 404) {
-                free(response.memory);
-                curl_easy_reset(curl);
-                continue;
-            }
-        }
-
-        std::stringstream ss2;
-        ss2 << server_dir << "/" << std::to_string(avatar_id);
-        auto img_path = ss2.str();
-        FILE *file = fopen(img_path.c_str(), "wb");
-        if(file != NULL) {
-            fwrite(response.memory, response.size, 1, file);
-            fflush(file);
-            fclose(file);
-        }
-        free(response.memory);
-        curl_easy_reset(curl);
-
-        pthread_mutex_lock(&avatars_mtx);
-        if(thread_id == avatar_downloading_thread_id) {
-            avatars_to_load.erase(avatars_to_load.begin());
-            avatars_loaded.push_back(avatar_id);
-        }
-        pthread_mutex_unlock(&avatars_mtx);
-    }
-
-    pthread_mutex_lock(&avatars_mtx);
-    avatars_to_load.clear();
-    avatars_loaded.clear();
-    pthread_mutex_unlock(&avatars_mtx);
-
-    curl_easy_cleanup(curl);
-    return NULL;
+    // NOTE: We return true even if progress is -1. Because we still get avatars from a 404!
+    return true;
 }
 
 OsuUIAvatar::OsuUIAvatar(uint32_t player_id, float xPos, float yPos, float xSize, float ySize)
@@ -157,7 +85,14 @@ OsuUIAvatar::OsuUIAvatar(uint32_t player_id, float xPos, float yPos, float xSize
 void OsuUIAvatar::draw(Graphics *g, float alpha) {
     if(!on_screen) return;  // Comment when you need to debug on_screen logic
 
-    if(avatar != nullptr) {
+    if(avatar == nullptr) {
+        // Don't download during gameplay to avoid lagspikes
+        if(!bancho.osu->isInPlayMode()) {
+            if(download_avatar(m_player_id)) {
+                avatar = engine->getResourceManager()->loadImageAbs(avatar_path, avatar_path);
+            }
+        }
+    } else {
         g->pushTransform();
         g->setColor(0xffffffff);
         g->setAlpha(alpha);
@@ -179,32 +114,6 @@ void OsuUIAvatar::draw(Graphics *g, float alpha) {
     //     g->drawQuad((int)m_vPos.x, (int)m_vPos.y, (int)m_vSize.x, (int)m_vSize.y);
     //     g->popTransform();
     // }
-}
-
-void OsuUIAvatar::mouse_update(bool *propagate_clicks) {
-    CBaseUIButton::mouse_update(propagate_clicks);
-
-    if(avatar == nullptr && m_player_id != 0) {
-        pthread_mutex_lock(&avatars_mtx);
-
-        // Check if it has finished downloading
-        auto it = std::find(avatars_loaded.begin(), avatars_loaded.end(), m_player_id);
-        if(it != avatars_loaded.end()) {
-            avatars_loaded.erase(it);
-            avatar = engine->getResourceManager()->loadImageAbs(avatar_path, avatar_path);
-        }
-
-        // Check if avatar is on screen and *still* not downloaded yet
-        if(avatar == nullptr && on_screen) {
-            // Request download if not done so already
-            auto it = std::find(avatars_to_load.begin(), avatars_to_load.end(), m_player_id);
-            if(it == avatars_to_load.end()) {
-                debugLog("Adding avatar %d to download queue\n", m_player_id);
-                avatars_to_load.push_back(m_player_id);
-            }
-        }
-        pthread_mutex_unlock(&avatars_mtx);
-    }
 }
 
 void OsuUIAvatar::onAvatarClicked(CBaseUIButton *btn) {

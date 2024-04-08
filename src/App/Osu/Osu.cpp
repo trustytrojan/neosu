@@ -148,6 +148,15 @@ ConVar mp_password("mp_password", "", FCVAR_NONE);
 ConVar mp_autologin("mp_autologin", false, FCVAR_NONE);
 ConVar submit_scores("submit_scores", false, FCVAR_NONE);
 
+// Some alternative mirrors:
+// - https://api.osu.direct/d/%d
+// - https://chimu.moe/d/%d
+// - https://api.nerinyan.moe/d/%d
+// - https://osu.gatari.pw/d/%d
+// - https://osu.sayobot.cn/osu.php?s=%d
+ConVar beatmap_mirror("beatmap_mirror", "https://catboy.best/s/%d", FCVAR_NONE,
+                      "mirror from which beatmapsets will be downloaded");
+
 ConVar *Osu::version = &osu_version;
 ConVar *Osu::debug = &osu_debug;
 ConVar *Osu::ui_scale = &osu_ui_scale;
