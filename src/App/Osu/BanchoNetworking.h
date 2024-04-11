@@ -14,8 +14,8 @@
 #define MCOSU_UPDATE_URL "https://mcosu.kiwec.net"
 
 // NOTE: Full version can be something like "b20200201.2cuttingedge"
-#define OSU_VERSION "b20240330.2"
-#define OSU_VERSION_DATEONLY 20240330
+#define OSU_VERSION "b20240411.1"
+#define OSU_VERSION_DATEONLY 20240411
 
 enum APIRequestType {
     GET_MAP_LEADERBOARD,

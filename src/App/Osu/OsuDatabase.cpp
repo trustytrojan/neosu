@@ -12,6 +12,7 @@
 #include <fstream>
 
 #include "Bancho.h"  // md5
+#include "BanchoNetworking.h"
 #include "ConVar.h"
 #include "Engine.h"
 #include "File.h"
@@ -45,7 +46,7 @@ ConVar osu_folder_sub_songs("osu_folder_sub_songs", "Songs/", FCVAR_NONE);
 ConVar osu_folder_sub_skins("osu_folder_sub_skins", "Skins/", FCVAR_NONE);
 
 ConVar osu_database_enabled("osu_database_enabled", true, FCVAR_NONE);
-ConVar osu_database_version("osu_database_version", 20240330, FCVAR_NONE,
+ConVar osu_database_version("osu_database_version", OSU_VERSION_DATEONLY, FCVAR_NONE,
                             "maximum supported osu!.db version, above this will use fallback loader");
 ConVar osu_database_ignore_version_warnings("osu_database_ignore_version_warnings", false, FCVAR_NONE);
 ConVar osu_database_ignore_version("osu_database_ignore_version", false, FCVAR_NONE,

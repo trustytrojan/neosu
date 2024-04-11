@@ -39,6 +39,7 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu) {
     latest.changes.push_back("- Added option to disable in-game scoreboard animations");
     latest.changes.push_back("- Fixed hitobjects being hittable after failing");
     latest.changes.push_back("- Removed VR support");
+    latest.changes.push_back("- Updated protocol and database version to b20240411.1");
     changelogs.push_back(latest);
 
     CHANGELOG v34_08;
