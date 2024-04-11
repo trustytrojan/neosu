@@ -18,7 +18,8 @@ class OsuDatabaseBeatmap;
 class OsuBackgroundStarCacheLoader;
 class OsuBackgroundStarCalcHandler;
 
-struct OsuBeatmap {
+class OsuBeatmap {
+   public:
     friend class OsuBackgroundStarCacheLoader;
     friend class OsuBackgroundStarCalcHandler;
 
@@ -186,10 +187,11 @@ struct OsuBeatmap {
     uint8_t last_keys = 0;
 
     // replay replaying
-    // last_event_ms, current_keys, last_keys also reused
+    // current_keys, last_keys also reused
     std::vector<OsuReplay::Frame> spectated_replay;
     Vector2 m_interpolatedMousePos;
     bool m_bIsWatchingReplay = false;
+    long current_frame_idx = 0;
 
     // used by OsuHitObject children and OsuModSelector
     inline Osu *getOsu() const { return m_osu; }

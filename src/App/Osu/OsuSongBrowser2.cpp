@@ -2770,6 +2770,8 @@ void OsuSongBrowser2::updateScoreBrowserLayout() {
 }
 
 void OsuSongBrowser2::rebuildScoreButtons() {
+    if(!isVisible()) return;
+
     // XXX: When online, it would be nice to scroll to the current user's highscore
 
     // reset

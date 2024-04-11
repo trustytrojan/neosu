@@ -131,7 +131,6 @@ ConVar osu_force_legacy_slider_renderer("osu_force_legacy_slider_renderer", fals
                                         "on some older machines, this may be faster than vertexbuffers");
 
 ConVar osu_draw_fps("osu_draw_fps", true, FCVAR_NONE);
-ConVar osu_hide_cursor_during_gameplay("osu_hide_cursor_during_gameplay", false, FCVAR_NONE);
 
 ConVar osu_alt_f4_quits_even_while_playing("osu_alt_f4_quits_even_while_playing", true, FCVAR_NONE);
 ConVar osu_win_disable_windows_key_while_playing("osu_win_disable_windows_key_while_playing", true, FCVAR_NONE);
@@ -149,13 +148,13 @@ ConVar mp_password("mp_password", "", FCVAR_NONE);
 ConVar mp_autologin("mp_autologin", false, FCVAR_NONE);
 ConVar submit_scores("submit_scores", false, FCVAR_NONE);
 
-// Some alternative mirrors:
-// - https://api.osu.direct/d/%d
-// - https://chimu.moe/d/%d
-// - https://api.nerinyan.moe/d/%d
-// - https://osu.gatari.pw/d/%d
-// - https://osu.sayobot.cn/osu.php?s=%d
-ConVar beatmap_mirror("beatmap_mirror", "https://catboy.best/s/%d", FCVAR_NONE,
+// If catboy.best doesn't work for you, here are some alternatives:
+// - https://api.osu.direct/d/
+// - https://chimu.moe/d/
+// - https://api.nerinyan.moe/d/
+// - https://osu.gatari.pw/d/
+// - https://osu.sayobot.cn/osu.php?s=
+ConVar beatmap_mirror("beatmap_mirror", "https://catboy.best/s/", FCVAR_NONE,
                       "mirror from which beatmapsets will be downloaded");
 
 ConVar *Osu::version = &osu_version;
@@ -598,17 +597,15 @@ void Osu::draw(Graphics *g) {
     if(isBufferedDraw) m_backBuffer->enable();
 
     // draw everything in the correct order
-    if(isInPlayMode())  // if we are playing a beatmap
-    {
+    if(isInPlayMode()) {  // if we are playing a beatmap
         OsuBeatmap *beatmap = getSelectedBeatmap();
-        const bool isAuto = (m_bModAuto || m_bModAutopilot);
         const bool isFPoSu = (m_osu_mod_fposu_ref->getBool());
 
         if(isFPoSu) m_playfieldBuffer->enable();
 
         getSelectedBeatmap()->draw(g);
 
-        if(m_bModFlashlight && beatmap != NULL) {
+        if(m_bModFlashlight) {
             // Dim screen when holding a slider
             float max_opacity = 1.f;
             if(holding_slider && !avoid_flashes.getBool()) {
@@ -616,7 +613,7 @@ void Osu::draw(Graphics *g) {
             }
 
             // Convert screen mouse -> osu mouse pos
-            Vector2 cursorPos = isAuto ? beatmap->getCursorPos() : engine->getMouse()->getPos();
+            Vector2 cursorPos = beatmap->getCursorPos();
             Vector2 mouse_position = cursorPos - OsuGameRules::getPlayfieldOffset(this);
             mouse_position /= OsuGameRules::getPlayfieldScaleFactor(this);
 
@@ -656,19 +653,6 @@ void Osu::draw(Graphics *g) {
             g->fillRect(0, 0, getScreenWidth(), getScreenHeight());
         }
 
-        // special cursor handling (fading cursor + invisible cursor mods + draw order etc.)
-        const bool allowDoubleCursor = (env->getOS() == Environment::OS::OS_HORIZON || isFPoSu);
-        const bool allowDrawCursor = (!osu_hide_cursor_during_gameplay.getBool() || getSelectedBeatmap()->isPaused());
-        float fadingCursorAlpha =
-            1.0f - clamp<float>((float)m_score->getCombo() / osu_mod_fadingcursor_combo.getFloat(), 0.0f, 1.0f);
-        if(m_pauseMenu->isVisible() || getSelectedBeatmap()->isContinueScheduled()) fadingCursorAlpha = 1.0f;
-
-        // draw auto cursor
-        if(isAuto && allowDrawCursor && !isFPoSu && beatmap != NULL && !beatmap->isLoading())
-            m_hud->drawCursor(
-                g, m_osu_mod_fps_ref->getBool() ? OsuGameRules::getPlayfieldCenter(this) : beatmap->getCursorPos(),
-                osu_mod_fadingcursor.getBool() ? fadingCursorAlpha : 1.0f);
-
         m_pauseMenu->draw(g);
         m_modSelector->draw(g);
         m_chat->draw(g);
@@ -681,9 +665,12 @@ void Osu::draw(Graphics *g) {
         if(isFPoSu && m_osu_draw_cursor_ripples_ref->getBool()) m_hud->drawCursorRipples(g);
 
         // draw FPoSu cursor trail
+        float fadingCursorAlpha =
+            1.0f - clamp<float>((float)m_score->getCombo() / osu_mod_fadingcursor_combo.getFloat(), 0.0f, 1.0f);
+        if(m_pauseMenu->isVisible() || getSelectedBeatmap()->isContinueScheduled() || !osu_mod_fadingcursor.getBool())
+            fadingCursorAlpha = 1.0f;
         if(isFPoSu && m_fposu_draw_cursor_trail_ref->getBool())
-            m_hud->drawCursorTrail(g, beatmap->getCursorPos(),
-                                   osu_mod_fadingcursor.getBool() ? fadingCursorAlpha : 1.0f);
+            m_hud->drawCursorTrail(g, beatmap->getCursorPos(), fadingCursorAlpha);
 
         if(isFPoSu) {
             m_playfieldBuffer->disable();
@@ -694,20 +681,15 @@ void Osu::draw(Graphics *g) {
         }
 
         // draw player cursor
-        if((!isAuto || allowDoubleCursor) && allowDrawCursor) {
-            Vector2 cursorPos = (beatmap != NULL && !isAuto) ? beatmap->getCursorPos() : engine->getMouse()->getPos();
-
-            if(isFPoSu) {
-                cursorPos = getScreenSize() / 2.0f;
-            }
-
-            const bool updateAndDrawTrail = !isFPoSu;
-
-            m_hud->drawCursor(g, cursorPos, (osu_mod_fadingcursor.getBool() && !isAuto) ? fadingCursorAlpha : 1.0f,
-                              isAuto, updateAndDrawTrail);
+        Vector2 cursorPos = beatmap->getCursorPos();
+        bool drawSecondTrail = (m_bModAuto || m_bModAutopilot || beatmap->m_bIsWatchingReplay);
+        bool updateAndDrawTrail = true;
+        if(isFPoSu) {
+            cursorPos = getScreenSize() / 2.0f;
+            updateAndDrawTrail = false;
         }
-    } else  // if we are not playing
-    {
+        m_hud->drawCursor(g, cursorPos, fadingCursorAlpha, drawSecondTrail, updateAndDrawTrail);
+    } else {  // if we are not playing
         m_lobby->draw(g);
         m_room->draw(g);
 
@@ -1050,46 +1032,6 @@ void Osu::update() {
     receive_api_responses();
     receive_bancho_packets();
 
-    // replay downloading
-    if(bancho.downloading_replay_id > 0) {
-        float progress = -1.f;
-        std::vector<uint8_t> replay_data;
-
-        // NOTE: Assuming the server doesn't require authentication :Clueless:
-        auto url =
-            UString::format("https://api.%s/get_replay?id=%d", bancho.endpoint.toUtf8(), bancho.downloading_replay_id);
-
-        int response_code = 0;
-        download(url.toUtf8(), &progress, replay_data, &response_code);
-
-        if(progress == -1.f || (progress == 1.f && response_code != 200)) {
-            bancho.downloading_replay_id = 0;
-            m_notificationOverlay->addNotification("Failed to download replay");
-            debugLog("Replay download: HTTP error %d\n", response_code);
-        } else if(progress < 1.f) {
-            auto progress_str = UString::format("Downloading replay... (%.1f%%)", progress * 100.f);
-            m_notificationOverlay->addNotification(progress_str);
-        } else {
-            // XXX: Undefined behavior if the user did random stuff before we start the replay
-            bancho.downloading_replay_id = 0;
-
-            replay = OsuReplay::from_bytes(replay_data.data(), replay_data.size());
-            if(replay.frames.empty()) {
-                m_notificationOverlay->addNotification("Replay file is corrupt or unavailable");
-            } else {
-                MD5Hash diff2_md5(replay.diff2_md5.toUtf8());
-                auto beatmap = getSongBrowser()->getDatabase()->getBeatmapDifficulty(diff2_md5);
-                if(beatmap == nullptr) {
-                    // XXX: Auto-download beatmap
-                    m_notificationOverlay->addNotification("Missing beatmap for this replay");
-                } else {
-                    m_songBrowser2->onDifficultySelected(beatmap, false);
-                    getSelectedBeatmap()->watch(replay.frames);
-                }
-            }
-        }
-    }
-
     // skin async loading
     if(m_bSkinLoadScheduled) {
         if(m_skinScheduledToLoad != NULL && m_skinScheduledToLoad->isReady()) {
@@ -1139,32 +1081,33 @@ void Osu::update() {
 
 void Osu::updateMods() {
     if(getSelectedBeatmap() != nullptr && getSelectedBeatmap()->m_bIsWatchingReplay) {
-        m_bModNC = replay.mod_flags & ModFlags::Nightcore;
-        m_bModDT = replay.mod_flags & ModFlags::DoubleTime && !m_bModNC;
-        m_bModHT = replay.mod_flags & ModFlags::HalfTime;
+        // XXX: clear experimental mods
+        m_bModNC = replay_info.mod_flags & ModFlags::Nightcore;
+        m_bModDT = replay_info.mod_flags & ModFlags::DoubleTime && !m_bModNC;
+        m_bModHT = replay_info.mod_flags & ModFlags::HalfTime;
         m_bModDC = false;
         if(m_bModHT && bancho.prefer_daycore) {
             m_bModHT = false;
             m_bModDC = true;
         }
 
-        m_bModNF = replay.mod_flags & ModFlags::NoFail;
-        m_bModEZ = replay.mod_flags & ModFlags::Easy;
-        m_bModTD = replay.mod_flags & ModFlags::TouchDevice;
-        m_bModHD = replay.mod_flags & ModFlags::Hidden;
-        m_bModHR = replay.mod_flags & ModFlags::HardRock;
-        m_bModSD = replay.mod_flags & ModFlags::SuddenDeath;
-        m_bModRelax = replay.mod_flags & ModFlags::Relax;
-        m_bModAutopilot = replay.mod_flags & ModFlags::Autopilot;
-        m_bModAuto = replay.mod_flags & ModFlags::Autoplay && !m_bModAutopilot;
-        m_bModSpunout = replay.mod_flags & ModFlags::SpunOut;
-        m_bModSS = replay.mod_flags & ModFlags::Perfect;
-        m_bModTarget = replay.mod_flags & ModFlags::Target;
-        m_bModScorev2 = replay.mod_flags & ModFlags::ScoreV2;
-        m_bModFlashlight = replay.mod_flags & ModFlags::Flashlight;
+        m_bModNF = replay_info.mod_flags & ModFlags::NoFail;
+        m_bModEZ = replay_info.mod_flags & ModFlags::Easy;
+        m_bModTD = replay_info.mod_flags & ModFlags::TouchDevice;
+        m_bModHD = replay_info.mod_flags & ModFlags::Hidden;
+        m_bModHR = replay_info.mod_flags & ModFlags::HardRock;
+        m_bModSD = replay_info.mod_flags & ModFlags::SuddenDeath;
+        m_bModRelax = replay_info.mod_flags & ModFlags::Relax;
+        m_bModAutopilot = replay_info.mod_flags & ModFlags::Autopilot;
+        m_bModAuto = replay_info.mod_flags & ModFlags::Autoplay && !m_bModAutopilot;
+        m_bModSpunout = replay_info.mod_flags & ModFlags::SpunOut;
+        m_bModSS = replay_info.mod_flags & ModFlags::Perfect;
+        m_bModTarget = replay_info.mod_flags & ModFlags::Target;
+        m_bModScorev2 = replay_info.mod_flags & ModFlags::ScoreV2;
+        m_bModFlashlight = replay_info.mod_flags & ModFlags::Flashlight;
         m_bModNightmare = false;
 
-        osu_speed_override.setValue("0");
+        osu_speed_override.setValue("-1");
     } else if(bancho.is_in_a_multi_room()) {
         m_bModNC = bancho.room.mods & ModFlags::Nightcore;
         if(m_bModNC) {

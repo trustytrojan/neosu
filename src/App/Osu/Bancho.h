@@ -24,8 +24,6 @@ struct Bancho {
     MD5Hash pw_md5;
     Room room;
 
-    uint64_t downloading_replay_id = 0;
-
     bool prefer_daycore = false;
 
     ServerPolicy score_submission_policy = ServerPolicy::NO_PREFERENCE;

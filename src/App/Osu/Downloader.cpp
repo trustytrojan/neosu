@@ -230,9 +230,9 @@ void download_beatmapset(uint32_t set_id, float* progress) {
 
     std::vector<uint8_t> data;
     auto mirror = convar->getConVarByName("beatmap_mirror")->getString();
-    auto url = UString::format(mirror.toUtf8(), set_id);
+    mirror.append(UString::format("%d", set_id));
     int response_code = 0;
-    download(url.toUtf8(), progress, data, &response_code);
+    download(mirror.toUtf8(), progress, data, &response_code);
     if(response_code != 200) return;
 
     // Download succeeded: save map to disk

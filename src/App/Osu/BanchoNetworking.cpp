@@ -12,6 +12,7 @@
 #include "Downloader.h"
 #include "Engine.h"
 #include "File.h"
+#include "OsuBeatmap.h"
 #include "OsuChat.h"
 #include "OsuDatabase.h"
 #include "OsuLobby.h"
@@ -96,7 +97,6 @@ void disconnect() {
     //      While offline ones would be "By score", "By pp", etc
     bancho.osu->m_songBrowser2->onSortScoresChange(UString("Sort By Score"), 0);
 
-    bancho.downloading_replay_id = 0;
     abort_downloads();
 
     pthread_mutex_unlock(&outgoing_mutex);
@@ -158,6 +158,8 @@ size_t curl_write(void *contents, size_t size, size_t nmemb, void *userp) {
 }
 
 static void send_api_request(CURL *curl, APIRequest api_out) {
+    // XXX: Use download()
+
     Packet response;
     response.id = api_out.type;
     response.extra = api_out.extra;
@@ -366,22 +368,57 @@ static void *do_networking(void *data) {
 }
 
 static void handle_api_response(Packet packet) {
-    if(packet.id == GET_MAP_LEADERBOARD) {
-        process_leaderboard_response(packet);
-    } else if(packet.id == GET_BEATMAPSET_INFO) {
-        OsuRoom::process_beatmapset_info_response(packet);
-    } else if(packet.id == MARK_AS_READ) {
-        // (nothing to do)
-    } else if(packet.id == SUBMIT_SCORE) {
-        // TODO @kiwec: handle response
-        debugLog("Score submit result: %s\n", packet.memory);
+    switch(packet.id) {
+        case GET_BEATMAPSET_INFO: {
+            OsuRoom::process_beatmapset_info_response(packet);
+            break;
+        }
 
-        // Reset leaderboards so new score will appear
-        bancho.osu->m_songBrowser2->m_db->m_online_scores.clear();
-        bancho.osu->m_songBrowser2->rebuildScoreButtons();
-    } else {
-        // NOTE: API Response type is same as API Request type
-        debugLog("No handler for API response type %d!\n", packet.id);
+        case GET_MAP_LEADERBOARD: {
+            process_leaderboard_response(packet);
+            break;
+        }
+
+        case GET_REPLAY: {
+            auto replay_frames = OsuReplay::get_frames(packet.memory, packet.size);
+            if(replay_frames.empty()) {
+                // Most likely, 404
+                bancho.osu->m_notificationOverlay->addNotification("Failed to download replay");
+                break;
+            }
+
+            bancho.osu->replay_info = *((ReplayExtraInfo *)packet.extra);
+            auto diff2_md5 = bancho.osu->replay_info.diff2_md5;
+            auto beatmap = bancho.osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(diff2_md5);
+            if(beatmap == nullptr) {
+                // XXX: Auto-download beatmap
+                bancho.osu->m_notificationOverlay->addNotification("Missing beatmap for this replay");
+            } else {
+                bancho.osu->getSongBrowser()->onDifficultySelected(beatmap, false);
+                bancho.osu->getSelectedBeatmap()->watch(replay_frames);
+            }
+            break;
+        }
+
+        case MARK_AS_READ: {
+            // (nothing to do)
+            break;
+        }
+
+        case SUBMIT_SCORE: {
+            // TODO @kiwec: handle response
+            debugLog("Score submit result: %s\n", packet.memory);
+
+            // Reset leaderboards so new score will appear
+            bancho.osu->getSongBrowser()->m_db->m_online_scores.clear();
+            bancho.osu->getSongBrowser()->rebuildScoreButtons();
+            break;
+        }
+
+        default: {
+            // NOTE: API Response type is same as API Request type
+            debugLog("No handler for API response type %d!\n", packet.id);
+        }
     }
 }
 

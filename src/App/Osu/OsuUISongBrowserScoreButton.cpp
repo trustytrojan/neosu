@@ -11,6 +11,7 @@
 
 #include "AnimationHandler.h"
 #include "Bancho.h"
+#include "BanchoNetworking.h"
 #include "ConVar.h"
 #include "Console.h"
 #include "Engine.h"
@@ -563,7 +564,21 @@ void OsuUISongBrowserScoreButton::onContextMenu(UString text, int id) {
     }
 
     if(id == 2) {
-        bancho.downloading_replay_id = m_score.online_score_id;
+        ReplayExtraInfo *info = (ReplayExtraInfo *)calloc(1, sizeof(ReplayExtraInfo));
+        info->diff2_md5 = m_score.md5hash.hash;
+        info->mod_flags = m_score.modsLegacy;
+        info->username = m_score.playerName;
+        info->player_id = m_score.player_id;
+
+        APIRequest request;
+        request.type = GET_REPLAY;
+        request.path = UString::format("/web/osu-getreplay.php?u=%s&h=%s&m=0&c=%d", bancho.username.toUtf8(),
+                                       bancho.pw_md5.toUtf8(), m_score.online_score_id);
+        request.mime = NULL;
+        request.extra = (uint8_t *)info;
+        send_api_request(request);
+
+        m_osu->m_notificationOverlay->addNotification("Downloading replay...");
         return;
     }
 

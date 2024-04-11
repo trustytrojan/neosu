@@ -18,8 +18,9 @@
 #define OSU_VERSION_DATEONLY 20240411
 
 enum APIRequestType {
-    GET_MAP_LEADERBOARD,
     GET_BEATMAPSET_INFO,
+    GET_MAP_LEADERBOARD,
+    GET_REPLAY,
     MARK_AS_READ,
     SUBMIT_SCORE,
 };
@@ -30,6 +31,13 @@ struct APIRequest {
     curl_mime *mime = NULL;
     uint8_t *extra = nullptr;
     uint32_t extra_int = 0;  // lazy
+};
+
+struct ReplayExtraInfo {
+    MD5Hash diff2_md5;
+    int32_t mod_flags;
+    UString username;
+    int32_t player_id;
 };
 
 void disconnect();

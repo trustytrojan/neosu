@@ -46,6 +46,53 @@ OsuReplay::BEATMAP_VALUES OsuReplay::getBeatmapValuesForModsLegacy(int modsLegac
     return v;
 }
 
+std::vector<OsuReplay::Frame> OsuReplay::get_frames(uint8_t* replay_data, int32_t replay_size) {
+    std::vector<OsuReplay::Frame> replay_frames;
+    if(replay_size <= 0) return replay_frames;
+
+    lzma_stream strm = LZMA_STREAM_INIT;
+    lzma_ret ret = lzma_alone_decoder(&strm, UINT64_MAX);
+    if(ret != LZMA_OK) {
+        debugLog("Failed to init lzma library (%d).\n", ret);
+        return replay_frames;
+    }
+
+    long cur_music_pos = 0;
+    std::stringstream ss;
+    std::string frame_str;
+    uint8_t outbuf[BUFSIZ];
+    strm.next_in = replay_data;
+    strm.avail_in = replay_size;
+    do {
+        strm.next_out = outbuf;
+        strm.avail_out = sizeof(outbuf);
+
+        ret = lzma_code(&strm, LZMA_FINISH);
+        if(ret != LZMA_OK && ret != LZMA_STREAM_END) {
+            debugLog("Decompression error (%d).\n", ret);
+            goto end;
+        }
+
+        ss.write((const char*)outbuf, sizeof(outbuf) - strm.avail_out);
+    } while(strm.avail_out == 0);
+
+    while(std::getline(ss, frame_str, ',')) {
+        OsuReplay::Frame frame;
+        sscanf(frame_str.c_str(), "%ld|%f|%f|%hhu", &frame.milliseconds_since_last_frame, &frame.x, &frame.y,
+               &frame.key_flags);
+
+        if(frame.milliseconds_since_last_frame != -12345) {
+            cur_music_pos += frame.milliseconds_since_last_frame;
+            frame.cur_music_pos = cur_music_pos;
+            replay_frames.push_back(frame);
+        }
+    }
+
+end:
+    lzma_end(&strm);
+    return replay_frames;
+}
+
 OsuReplay::Info OsuReplay::from_bytes(uint8_t* data, int s_data) {
     OsuReplay::Info info;
 
@@ -77,45 +124,11 @@ OsuReplay::Info OsuReplay::from_bytes(uint8_t* data, int s_data) {
     info.timestamp = read_int64(&replay) / 10;
 
     int32_t replay_size = read_int32(&replay);
+    if(replay_size <= 0) return info;
     auto replay_data = new uint8_t[replay_size];
     read_bytes(&replay, replay_data, replay_size);
-
-    lzma_stream strm = LZMA_STREAM_INIT;
-    lzma_ret ret = lzma_alone_decoder(&strm, UINT64_MAX);
-    if(ret != LZMA_OK) {
-        debugLog("Failed to init lzma library (%d).\n", ret);
-        delete[] replay_data;
-        return info;
-    }
-
-    std::stringstream ss;
-    std::string frame_str;
-    uint8_t outbuf[BUFSIZ];
-    strm.next_in = replay_data;
-    strm.avail_in = replay_size;
-    do {
-        strm.next_out = outbuf;
-        strm.avail_out = sizeof(outbuf);
-
-        ret = lzma_code(&strm, LZMA_FINISH);
-        if(ret != LZMA_OK && ret != LZMA_STREAM_END) {
-            debugLog("Decompression error (%d).\n", ret);
-            goto end;
-        }
-
-        ss.write((const char*)outbuf, sizeof(outbuf) - strm.avail_out);
-    } while(strm.avail_out == 0);
-
-    while(std::getline(ss, frame_str, ',')) {
-        OsuReplay::Frame frame;
-        sscanf(frame_str.c_str(), "%ld|%f|%f|%hhu", &frame.milliseconds_since_last_frame, &frame.x, &frame.y,
-               &frame.key_flags);
-        info.frames.push_back(frame);
-    }
-
-end:
+    info.frames = OsuReplay::get_frames(replay_data, replay_size);
     delete[] replay_data;
-    lzma_end(&strm);
 
     return info;
 }

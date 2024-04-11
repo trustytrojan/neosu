@@ -14,7 +14,13 @@ OsuScoreboardSlot::OsuScoreboardSlot(SCORE_ENTRY score, int index) {
     m_index = index;
 }
 
-OsuScoreboardSlot::~OsuScoreboardSlot() { delete m_avatar; }
+OsuScoreboardSlot::~OsuScoreboardSlot() {
+    anim->deleteExistingAnimation(&m_fAlpha);
+    anim->deleteExistingAnimation(&m_fFlash);
+    anim->deleteExistingAnimation(&m_y);
+
+    delete m_avatar;
+}
 
 void OsuScoreboardSlot::draw(Graphics *g) {
     if(m_fAlpha == 0.f) return;

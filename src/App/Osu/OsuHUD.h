@@ -13,8 +13,8 @@
 class Osu;
 class OsuUIAvatar;
 class OsuScore;
-class OsuScoreboardSlot;
 class OsuBeatmap;
+struct OsuScoreboardSlot;
 
 class McFont;
 class ConVar;

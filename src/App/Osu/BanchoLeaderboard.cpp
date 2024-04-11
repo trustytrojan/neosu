@@ -148,6 +148,9 @@ char *strtok_x(char d, char **str) {
 }
 
 void process_leaderboard_response(Packet response) {
+    // Don't update the leaderboard while playing, that's weird
+    if(bancho.osu->isInPlayMode()) return;
+
     // NOTE: We're not doing anything with the "info" struct.
     //       Server can return partial responses in some cases, so make sure
     //       you actually received the data if you plan on using it.
@@ -192,7 +195,9 @@ void process_leaderboard_response(Packet response) {
 
     char *score_line = NULL;
     while((score_line = strtok_x('\n', &body))[0] != '\0') {
-        scores.push_back(parse_score(score_line));
+        OsuDatabase::Score score = parse_score(score_line);
+        score.md5hash = beatmap_hash;
+        scores.push_back(score);
     }
 
     // XXX: We should also separately display either the "personal best" the server sent us,

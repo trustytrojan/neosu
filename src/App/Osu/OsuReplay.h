@@ -58,5 +58,6 @@ BEATMAP_VALUES getBeatmapValuesForModsLegacy(int modsLegacy, float legacyAR, flo
                                              float legacyHP);
 
 Info from_bytes(uint8_t* data, int s_data);
+std::vector<Frame> get_frames(uint8_t* replay_data, int32_t replay_size);
 
 }  // namespace OsuReplay

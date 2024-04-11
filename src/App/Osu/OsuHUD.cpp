@@ -1533,11 +1533,17 @@ std::vector<SCORE_ENTRY> OsuHUD::getCurrentScores() {
             nb_slots++;
         }
 
-        const bool isUnranked = (m_osu->getModAuto() || (m_osu->getModAutopilot() && m_osu->getModRelax()));
         SCORE_ENTRY playerScoreEntry;
-        playerScoreEntry.name = (isUnranked ? "McOsu" : m_name_ref->getString());
+        if(m_osu->getModAuto() || (m_osu->getModAutopilot() && m_osu->getModRelax())) {
+            playerScoreEntry.name = "McOsu";
+        } else if(beatmap->m_bIsWatchingReplay) {
+            playerScoreEntry.name = m_osu->replay_info.username;
+            playerScoreEntry.player_id = m_osu->replay_info.player_id;
+        } else {
+            playerScoreEntry.name = m_name_ref->getString();
+            playerScoreEntry.player_id = bancho.user_id;
+        }
         playerScoreEntry.entry_id = 0;
-        playerScoreEntry.player_id = bancho.user_id;
         playerScoreEntry.combo = m_osu->getScore()->getComboMax();
         playerScoreEntry.score = m_osu->getScore()->getScore();
         playerScoreEntry.accuracy = m_osu->getScore()->getAccuracy();

@@ -9,8 +9,8 @@
 #define OSU_H
 
 #include "App.h"
+#include "BanchoNetworking.h"
 #include "MouseListener.h"
-#include "OsuReplay.h"
 
 class CWindowManager;
 
@@ -359,7 +359,7 @@ class Osu : public App, public MouseListener {
     CWindowManager *m_windowManager;
 
     // replay
-    OsuReplay::Info replay;
+    ReplayExtraInfo replay_info;
 
     // custom
     bool m_bScheduleEndlessModNextBeatmap;

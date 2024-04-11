@@ -1380,7 +1380,6 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
     addCheckbox("Rainbow Sliders", convar->getConVarByName("osu_slider_rainbow"));
     addCheckbox("Rainbow Numbers", convar->getConVarByName("osu_circle_number_rainbow"));
     addCheckbox("SliderBreak Epilepsy", convar->getConVarByName("osu_slider_break_epilepsy"));
-    addCheckbox("Invisible Cursor", convar->getConVarByName("osu_hide_cursor_during_gameplay"));
     addCheckbox("Draw 300s", convar->getConVarByName("osu_hitresult_draw_300s"));
 
     addSection("Maintenance");

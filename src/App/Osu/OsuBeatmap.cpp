@@ -712,9 +712,6 @@ bool OsuBeatmap::watch(std::vector<OsuReplay::Frame> replay) {
 
     m_bIsWatchingReplay = true;  // play() resets this to false
     spectated_replay = std::move(replay);
-    last_event_ms = -1;
-    last_keys = 0;
-    current_keys = 0;
 
     env->setCursorVisible(true);
 
@@ -1021,6 +1018,7 @@ void OsuBeatmap::stop(bool quit) {
 
 void OsuBeatmap::fail() {
     if(m_bFailed) return;
+    if(m_bIsWatchingReplay) return;
 
     // Change behavior of relax mod when online
     if(bancho.is_online() && m_osu->getModRelax()) return;
@@ -1094,8 +1092,10 @@ void OsuBeatmap::seekPercent(double percent) {
         onPlayStart();
     }
 
-    debugLog("Disabling score submission due to seeking\n");
-    vanilla = false;
+    if(!m_bIsWatchingReplay) {  // score submission already disabled when watching replay
+        debugLog("Disabling score submission due to seeking\n");
+        vanilla = false;
+    }
 }
 
 void OsuBeatmap::seekPercentPlayable(double percent) {
@@ -1663,9 +1663,10 @@ void OsuBeatmap::resetScore() {
     });
 
     last_event_time = engine->getTimeReal();
-    last_event_ms = 0;
+    last_event_ms = -1;
     current_keys = 0;
     last_keys = 0;
+    current_frame_idx = 0;
     m_iCurMusicPos = 0;
     m_iCurMusicPosWithOffsets = 0;
 
@@ -2438,60 +2439,62 @@ void OsuBeatmap::update2() {
     updateTimingPoints(m_iCurMusicPosWithOffsets);
 
     if(m_bIsWatchingReplay) {
-        OsuReplay::Frame current_frame = spectated_replay[0];
-        OsuReplay::Frame next_frame = spectated_replay[0];
+        OsuReplay::Frame current_frame = spectated_replay[current_frame_idx];
+        OsuReplay::Frame next_frame = spectated_replay[current_frame_idx + 1];
 
-        for(auto frame : spectated_replay) {
-            next_frame = frame;
+        while(next_frame.cur_music_pos <= m_iCurMusicPosWithOffsets) {
+            if(current_frame_idx + 2 >= spectated_replay.size()) break;
 
-            // XXX: The way this is done, inputs will be skipped if the user is lagging
-            if(next_frame.cur_music_pos > m_iCurMusicPosWithOffsets) {
-                if(current_frame.cur_music_pos > last_event_ms) {
-                    last_event_ms = current_frame.cur_music_pos;
-                    last_keys = current_keys;
-                    current_keys = current_frame.key_flags;
+            last_keys = current_keys;
 
-                    // Released key 1
-                    if(last_keys & (OsuReplay::K1) && current_keys & ~(OsuReplay::K1)) {
-                        m_osu->getHUD()->animateInputoverlay(1, false);
-                    } else if(last_keys & (OsuReplay::M1) && current_keys & ~(OsuReplay::M1)) {
-                        m_osu->getHUD()->animateInputoverlay(3, false);
-                    }
+            current_frame_idx++;
+            current_frame = spectated_replay[current_frame_idx];
+            next_frame = spectated_replay[current_frame_idx + 1];
+            current_keys = current_frame.key_flags;
 
-                    // Released key 2
-                    if(last_keys & (OsuReplay::K2) && current_keys & ~(OsuReplay::K2)) {
-                        m_osu->getHUD()->animateInputoverlay(2, false);
-                    } else if(last_keys & (OsuReplay::M2) && current_keys & ~(OsuReplay::M2)) {
-                        m_osu->getHUD()->animateInputoverlay(4, false);
-                    }
+            // Flag fix to simplify logic (stable sets both K1 and M1 when K1 is pressed)
+            if(current_keys & OsuReplay::K1) current_keys &= ~OsuReplay::M1;
+            if(current_keys & OsuReplay::K2) current_keys &= ~OsuReplay::M2;
 
-                    // Pressed key 1
-                    if(last_keys & (OsuReplay::K1) && current_keys & ~(OsuReplay::K1)) {
-                        m_osu->getHUD()->animateInputoverlay(1, true);
-                        m_clicks.push_back(last_event_ms);
-                        if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(1);
-                    } else if(last_keys & (OsuReplay::M1) && current_keys & ~(OsuReplay::M1)) {
-                        m_osu->getHUD()->animateInputoverlay(3, true);
-                        m_clicks.push_back(last_event_ms);
-                        if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(3);
-                    }
-
-                    // Pressed key 2
-                    if(last_keys & ~(OsuReplay::K2) && current_keys & (OsuReplay::K2)) {
-                        m_osu->getHUD()->animateInputoverlay(2, true);
-                        m_clicks.push_back(last_event_ms);
-                        if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(2);
-                    } else if(last_keys & ~(OsuReplay::M2) && current_keys & (OsuReplay::M2)) {
-                        m_osu->getHUD()->animateInputoverlay(4, true);
-                        m_clicks.push_back(last_event_ms);
-                        if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(4);
-                    }
-                }
-
-                break;
+            // Released key 1
+            if(last_keys & OsuReplay::K1 && !(current_keys & OsuReplay::K1)) {
+                m_osu->getHUD()->animateInputoverlay(1, false);
+            }
+            if(last_keys & OsuReplay::M1 && !(current_keys & OsuReplay::M1)) {
+                m_osu->getHUD()->animateInputoverlay(3, false);
             }
 
-            current_frame = frame;
+            // Released key 2
+            if(last_keys & OsuReplay::K2 && !(current_keys & OsuReplay::K2)) {
+                m_osu->getHUD()->animateInputoverlay(2, false);
+            }
+            if(last_keys & OsuReplay::M2 && !(current_keys & OsuReplay::M2)) {
+                m_osu->getHUD()->animateInputoverlay(4, false);
+            }
+
+            // Pressed key 1
+            if(!(last_keys & OsuReplay::K1) && current_keys & OsuReplay::K1) {
+                m_osu->getHUD()->animateInputoverlay(1, true);
+                m_clicks.push_back(current_frame.cur_music_pos);
+                if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(1);
+            }
+            if(!(last_keys & OsuReplay::M1) && current_keys & OsuReplay::M1) {
+                m_osu->getHUD()->animateInputoverlay(3, true);
+                m_clicks.push_back(current_frame.cur_music_pos);
+                if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(3);
+            }
+
+            // Pressed key 2
+            if(!(last_keys & OsuReplay::K2) && current_keys & OsuReplay::K2) {
+                m_osu->getHUD()->animateInputoverlay(2, true);
+                m_clicks.push_back(current_frame.cur_music_pos);
+                if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(2);
+            }
+            if(!(last_keys & OsuReplay::M2) && current_keys & OsuReplay::M2) {
+                m_osu->getHUD()->animateInputoverlay(4, true);
+                m_clicks.push_back(current_frame.cur_music_pos);
+                if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(4);
+            }
         }
 
         float percent = 0.f;
@@ -2499,10 +2502,10 @@ void OsuBeatmap::update2() {
             long ms_since_last_frame = m_iCurMusicPosWithOffsets - current_frame.cur_music_pos;
             percent = (float)ms_since_last_frame / (float)next_frame.milliseconds_since_last_frame;
         }
-        m_interpolatedMousePos = Vector2{
-            .x = lerp(current_frame.x, next_frame.x, percent),
-            .y = lerp(current_frame.y, next_frame.y, percent),
-        };
+        m_interpolatedMousePos =
+            Vector2{lerp(current_frame.x, next_frame.x, percent), lerp(current_frame.y, next_frame.y, percent)};
+        m_interpolatedMousePos *= OsuGameRules::getPlayfieldScaleFactor(m_osu);
+        m_interpolatedMousePos += OsuGameRules::getPlayfieldOffset(m_osu);
     }
 
     // for performance reasons, a lot of operations are crammed into 1 loop over all hitobjects:
@@ -3350,7 +3353,7 @@ Vector2 OsuBeatmap::osuCoords2LegacyPixels(Vector2 coords) const {
 }
 
 Vector2 OsuBeatmap::getMousePos() const {
-    if(m_bIsWatchingReplay) {
+    if(m_bIsWatchingReplay && !m_bIsPaused) {
         return m_interpolatedMousePos;
     } else {
         return engine->getMouse()->getPos();
@@ -3527,6 +3530,9 @@ void OsuBeatmap::onBeforeStop(bool quit) {
     if(!isComplete) {
         m_osu->getScore()->setPPv2(0.0f);
     }
+
+    m_bIsWatchingReplay = false;
+    spectated_replay.clear();
 
     debugLog("OsuBeatmap::onBeforeStop() done.\n");
 }
