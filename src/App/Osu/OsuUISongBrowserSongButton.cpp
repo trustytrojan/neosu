@@ -16,7 +16,7 @@
 #include "OsuNotificationOverlay.h"
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
-#include "OsuSongBrowser2.h"
+#include "OsuSongBrowser.h"
 #include "OsuUIContextMenu.h"
 #include "OsuUISongBrowserCollectionButton.h"
 #include "OsuUISongBrowserScoreButton.h"
@@ -29,7 +29,7 @@ ConVar osu_songbrowser_thumbnail_fade_in_duration("osu_songbrowser_thumbnail_fad
 
 float OsuUISongBrowserSongButton::thumbnailYRatio = 1.333333f;
 
-OsuUISongBrowserSongButton::OsuUISongBrowserSongButton(Osu *osu, OsuSongBrowser2 *songBrowser, CBaseUIScrollView *view,
+OsuUISongBrowserSongButton::OsuUISongBrowserSongButton(Osu *osu, OsuSongBrowser *songBrowser, CBaseUIScrollView *view,
                                                        OsuUIContextMenu *contextMenu, float xPos, float yPos,
                                                        float xSize, float ySize, UString name,
                                                        OsuDatabaseBeatmap *databaseBeatmap)
@@ -37,7 +37,7 @@ OsuUISongBrowserSongButton::OsuUISongBrowserSongButton(Osu *osu, OsuSongBrowser2
     m_databaseBeatmap = databaseBeatmap;
     m_representativeDatabaseBeatmap = NULL;
 
-    m_grade = OsuScore::GRADE::GRADE_D;
+    m_grade = Score::Grade::D;
     m_bHasGrade = false;
 
     // settings
@@ -227,7 +227,7 @@ void OsuUISongBrowserSongButton::drawSubTitle(Graphics *g, float deselectedAlpha
 }
 
 void OsuUISongBrowserSongButton::sortChildren() {
-    std::sort(m_children.begin(), m_children.end(), OsuSongBrowser2::SortByDifficulty());
+    std::sort(m_children.begin(), m_children.end(), OsuSongBrowser::SortByDifficulty());
 }
 
 void OsuUISongBrowserSongButton::updateLayoutEx() {
@@ -291,7 +291,7 @@ void OsuUISongBrowserSongButton::triggerContextMenu(Vector2 pos) {
 
             m_contextMenu->addButton("[+Set]   Add to Collection", 2);
 
-            if(m_osu->getSongBrowser()->getGroupingMode() == OsuSongBrowser2::GROUP::GROUP_COLLECTIONS) {
+            if(m_osu->getSongBrowser()->getGroupingMode() == OsuSongBrowser::GROUP::GROUP_COLLECTIONS) {
                 // get the collection name for this diff/set
                 UString collectionName;
                 {

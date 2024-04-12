@@ -65,7 +65,7 @@ void OsuScore::reset() {
     m_hitresults = std::vector<HIT>();
     m_hitdeltas = std::vector<int>();
 
-    m_grade = OsuScore::GRADE::GRADE_N;
+    m_grade = Score::Grade::N;
 
     m_fStarsTomTotal = 0.0f;
     m_fStarsTomAim = 0.0f;
@@ -217,14 +217,14 @@ void OsuScore::addHitResult(OsuBeatmap *beatmap, OsuHitObject *hitObject, HIT hi
     }
 
     // recalculate grade
-    m_grade = OsuScore::GRADE::GRADE_D;
-    if(percent300s > 0.6f) m_grade = OsuScore::GRADE::GRADE_C;
-    if((percent300s > 0.7f && m_iNumMisses == 0) || (percent300s > 0.8f)) m_grade = OsuScore::GRADE::GRADE_B;
-    if((percent300s > 0.8f && m_iNumMisses == 0) || (percent300s > 0.9f)) m_grade = OsuScore::GRADE::GRADE_A;
+    m_grade = Score::Grade::D;
+    if(percent300s > 0.6f) m_grade = Score::Grade::C;
+    if((percent300s > 0.7f && m_iNumMisses == 0) || (percent300s > 0.8f)) m_grade = Score::Grade::B;
+    if((percent300s > 0.8f && m_iNumMisses == 0) || (percent300s > 0.9f)) m_grade = Score::Grade::A;
     if(percent300s > 0.9f && percent50s <= 0.01f && m_iNumMisses == 0)
-        m_grade = m_osu->getModHD() || m_osu->getModFlashlight() ? OsuScore::GRADE::GRADE_SH : OsuScore::GRADE::GRADE_S;
+        m_grade = m_osu->getModHD() || m_osu->getModFlashlight() ? Score::Grade::SH : Score::Grade::S;
     if(m_iNumMisses == 0 && m_iNum50s == 0 && m_iNum100s == 0)
-        m_grade = m_osu->getModHD() || m_osu->getModFlashlight() ? OsuScore::GRADE::GRADE_XH : OsuScore::GRADE::GRADE_X;
+        m_grade = m_osu->getModHD() || m_osu->getModFlashlight() ? Score::Grade::XH : Score::Grade::X;
 
     // recalculate unstable rate
     float averageDelta = 0.0f;
@@ -622,8 +622,8 @@ float OsuScore::calculateAccuracy(int num300s, int num100s, int num50s, int numM
     return 0.0f;
 }
 
-OsuScore::GRADE OsuScore::calculateGrade(int num300s, int num100s, int num50s, int numMisses, bool modHidden,
-                                         bool modFlashlight) {
+Score::Grade OsuScore::calculateGrade(int num300s, int num100s, int num50s, int numMisses, bool modHidden,
+                                      bool modFlashlight) {
     const float totalNumHits = numMisses + num50s + num100s + num300s;
 
     float percent300s = 0.0f;
@@ -633,14 +633,14 @@ OsuScore::GRADE OsuScore::calculateGrade(int num300s, int num100s, int num50s, i
         percent50s = num50s / totalNumHits;
     }
 
-    GRADE grade = OsuScore::GRADE::GRADE_D;
-    if(percent300s > 0.6f) grade = OsuScore::GRADE::GRADE_C;
-    if((percent300s > 0.7f && numMisses == 0) || (percent300s > 0.8f)) grade = OsuScore::GRADE::GRADE_B;
-    if((percent300s > 0.8f && numMisses == 0) || (percent300s > 0.9f)) grade = OsuScore::GRADE::GRADE_A;
+    Score::Grade grade = Score::Grade::D;
+    if(percent300s > 0.6f) grade = Score::Grade::C;
+    if((percent300s > 0.7f && numMisses == 0) || (percent300s > 0.8f)) grade = Score::Grade::B;
+    if((percent300s > 0.8f && numMisses == 0) || (percent300s > 0.9f)) grade = Score::Grade::A;
     if(percent300s > 0.9f && percent50s <= 0.01f && numMisses == 0)
-        grade = ((modHidden || modFlashlight) ? OsuScore::GRADE::GRADE_SH : OsuScore::GRADE::GRADE_S);
+        grade = ((modHidden || modFlashlight) ? Score::Grade::SH : Score::Grade::S);
     if(numMisses == 0 && num50s == 0 && num100s == 0)
-        grade = ((modHidden || modFlashlight) ? OsuScore::GRADE::GRADE_XH : OsuScore::GRADE::GRADE_X);
+        grade = ((modHidden || modFlashlight) ? Score::Grade::XH : Score::Grade::X);
 
     return grade;
 }

@@ -27,7 +27,7 @@
 #include "OsuNotificationOverlay.h"
 #include "OsuOptionsMenu.h"
 #include "OsuRoom.h"
-#include "OsuSongBrowser2.h"
+#include "OsuSongBrowser.h"
 #include "OsuUIAvatar.h"
 #include "OsuUIButton.h"
 #include "OsuUISongBrowserUserButton.h"
@@ -203,6 +203,14 @@ void handle_packet(Packet *packet) {
             auto avatar_dir = ss.str();
             if(!env->directoryExists(avatar_dir)) {
                 env->createDirectory(avatar_dir);
+            }
+
+            std::stringstream ss2;
+            ss2 << MCENGINE_DATA_DIR "replays/";
+            ss2 << bancho.endpoint.toUtf8();
+            auto replays_dir = ss2.str();
+            if(!env->directoryExists(replays_dir)) {
+                env->createDirectory(replays_dir);
             }
 
             // close your eyes

@@ -15,7 +15,7 @@
 #include "OsuDatabase.h"
 #include "OsuNotificationOverlay.h"
 #include "OsuSkin.h"
-#include "OsuSongBrowser2.h"
+#include "OsuSongBrowser.h"
 #include "OsuUIContextMenu.h"
 #include "ResourceManager.h"
 
@@ -37,7 +37,7 @@ ConVar osu_songbrowser_button_collection_inactive_color_g("osu_songbrowser_butto
 ConVar osu_songbrowser_button_collection_inactive_color_b("osu_songbrowser_button_collection_inactive_color_b", 143,
                                                           FCVAR_NONE);
 
-OsuUISongBrowserCollectionButton::OsuUISongBrowserCollectionButton(Osu *osu, OsuSongBrowser2 *songBrowser,
+OsuUISongBrowserCollectionButton::OsuUISongBrowserCollectionButton(Osu *osu, OsuSongBrowser *songBrowser,
                                                                    CBaseUIScrollView *view,
                                                                    OsuUIContextMenu *contextMenu, float xPos,
                                                                    float yPos, float xSize, float ySize, UString name,
@@ -88,7 +88,7 @@ void OsuUISongBrowserCollectionButton::onSelected(bool wasSelected, bool autoSel
 void OsuUISongBrowserCollectionButton::onRightMouseUpInside() { triggerContextMenu(engine->getMouse()->getPos()); }
 
 void OsuUISongBrowserCollectionButton::triggerContextMenu(Vector2 pos) {
-    if(m_osu->getSongBrowser()->getGroupingMode() != OsuSongBrowser2::GROUP::GROUP_COLLECTIONS) return;
+    if(m_osu->getSongBrowser()->getGroupingMode() != OsuSongBrowser::GROUP::GROUP_COLLECTIONS) return;
 
     bool isLegacyCollection = false;
     {

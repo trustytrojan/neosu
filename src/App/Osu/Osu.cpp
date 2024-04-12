@@ -55,7 +55,7 @@
 #include "OsuRoom.h"
 #include "OsuScore.h"
 #include "OsuSkin.h"
-#include "OsuSongBrowser2.h"
+#include "OsuSongBrowser.h"
 #include "OsuTooltipOverlay.h"
 #include "OsuUIModSelectorModButton.h"
 #include "OsuUIUserContextMenu.h"
@@ -469,7 +469,7 @@ Osu::Osu(int instanceID) {
     m_tooltipOverlay = new OsuTooltipOverlay(this);
     m_mainMenu = new OsuMainMenu(this);
     m_optionsMenu = new OsuOptionsMenu(this);
-    m_songBrowser2 = new OsuSongBrowser2(this);
+    m_songBrowser2 = new OsuSongBrowser(this);
     m_backgroundImageHandler = new OsuBackgroundImageHandler();
     m_modSelector = new OsuModSelector(this);
     m_rankingScreen = new OsuRankingScreen(this);

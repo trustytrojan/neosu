@@ -17,7 +17,7 @@
 #include "OsuDatabase.h"
 #include "OsuIcons.h"
 #include "OsuSkin.h"
-#include "OsuSongBrowser2.h"
+#include "OsuSongBrowser.h"
 #include "OsuTooltipOverlay.h"
 #include "OsuUIAvatar.h"
 #include "ResourceManager.h"

@@ -28,7 +28,7 @@
 #include "OsuRichPresence.h"
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
-#include "OsuSongBrowser2.h"
+#include "OsuSongBrowser.h"
 #include "OsuUIAvatar.h"
 #include "OsuUIButton.h"
 #include "OsuUICheckbox.h"
@@ -197,7 +197,7 @@ void OsuRoom::draw(Graphics *g) {
     if(!m_bVisible) return;
 
     // XXX: Add convar for toggling room backgrounds
-    OsuSongBrowser2::drawSelectedBeatmapBackgroundImage(g, m_osu, 1.0);
+    OsuSongBrowser::drawSelectedBeatmapBackgroundImage(g, m_osu, 1.0);
     OsuScreen::draw(g);
 
     // Update avatar visibility status

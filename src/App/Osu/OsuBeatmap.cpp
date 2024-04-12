@@ -48,7 +48,7 @@
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
 #include "OsuSlider.h"
-#include "OsuSongBrowser2.h"
+#include "OsuSongBrowser.h"
 #include "OsuSpinner.h"
 #include "ResourceManager.h"
 #include "SoundEngine.h"
@@ -696,9 +696,9 @@ void OsuBeatmap::deselect() {
     unloadObjects();
 }
 
-bool OsuBeatmap::watch(std::vector<OsuReplay::Frame> replay) {
+bool OsuBeatmap::watch(Score score) {
     // Replay is invalid
-    if(replay.size() < 3) {
+    if(score.replay.size() < 3) {
         return false;
     }
 
@@ -711,7 +711,7 @@ bool OsuBeatmap::watch(std::vector<OsuReplay::Frame> replay) {
     }
 
     m_bIsWatchingReplay = true;  // play() resets this to false
-    spectated_replay = std::move(replay);
+    spectated_replay = score.replay;
 
     env->setCursorVisible(true);
 
@@ -3445,7 +3445,7 @@ void OsuBeatmap::onBeforeStop(bool quit) {
     const bool isCheated = (m_osu->getModAuto() || (m_osu->getModAutopilot() && m_osu->getModRelax())) ||
                            m_osu->getScore()->isUnranked() || m_bIsWatchingReplay;
 
-    OsuDatabase::Score score;
+    Score score;
     score.isLegacyScore = false;
     score.isImportedLegacyScore = false;
     score.version = OsuScore::VERSION;
@@ -3459,7 +3459,7 @@ void OsuBeatmap::onBeforeStop(bool quit) {
         score.playerName = convar->getConVarByName("name")->getString();
     }
     score.passed = isComplete && !isZero && !m_osu->getScore()->hasDied();
-    score.grade = score.passed ? m_osu->getScore()->getGrade() : OsuScore::GRADE::GRADE_F;
+    score.grade = score.passed ? m_osu->getScore()->getGrade() : Score::Grade::F;
     score.diff2 = m_selectedDifficulty2;
     score.ragequit = quit;
     score.play_time_ms = m_iCurMusicPos / m_osu->getSpeedMultiplier();
@@ -3504,6 +3504,8 @@ void OsuBeatmap::onBeforeStop(bool quit) {
     }
 
     score.md5hash = m_selectedDifficulty2->getMD5Hash();  // NOTE: necessary for "Use Mods"
+    score.has_replay = true;
+    score.replay = live_replay;
 
     int scoreIndex = -1;
 
@@ -3511,8 +3513,9 @@ void OsuBeatmap::onBeforeStop(bool quit) {
         OsuRichPresence::onPlayEnd(m_osu, quit);
 
         if(bancho.submit_scores() && !isZero && vanilla) {
-            score.replay = live_replay;
+            score.server = bancho.endpoint.toUtf8();
             submit_score(score);
+            // XXX: Save online_score_id after getting submission result
         }
 
         if(score.passed) {

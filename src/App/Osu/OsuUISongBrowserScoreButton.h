@@ -20,7 +20,7 @@ class OsuUIContextMenu;
 
 class OsuUISongBrowserScoreButton : public CBaseUIButton {
    public:
-    static OsuSkinImage *getGradeImage(Osu *osu, OsuScore::GRADE grade);
+    static OsuSkinImage *getGradeImage(Osu *osu, Score::Grade grade);
     static UString getModsStringForDisplay(int mods);
     static UString getModsStringForConVar(int mods);
 
@@ -36,11 +36,11 @@ class OsuUISongBrowserScoreButton : public CBaseUIButton {
     void highlight();
     void resetHighlight();
 
-    void setScore(const OsuDatabase::Score &score, const OsuDatabaseBeatmap *diff2 = NULL, int index = 1,
-                  UString titleString = "", float weight = 1.0f);
+    void setScore(const Score &score, const OsuDatabaseBeatmap *diff2 = NULL, int index = 1, UString titleString = "",
+                  float weight = 1.0f);
     void setIndex(int index) { m_iScoreIndexNumber = index; }
 
-    inline OsuDatabase::Score getScore() const { return m_score; }
+    inline Score getScore() const { return m_score; }
     inline uint64_t getScoreUnixTimestamp() const { return m_score.unixTimestamp; }
     inline unsigned long long getScoreScore() const { return m_score.score; }
     inline float getScorePP() const { return m_score.pp; }
@@ -88,12 +88,12 @@ class OsuUISongBrowserScoreButton : public CBaseUIButton {
     bool m_bRightClickCheck;
 
     // score data
-    OsuDatabase::Score m_score;
+    Score m_score;
 
     int m_iScoreIndexNumber;
     uint64_t m_iScoreUnixTimestamp;
 
-    OsuScore::GRADE m_scoreGrade;
+    Score::Grade m_scoreGrade;
 
     // STYLE::SCORE_BROWSER
     UString m_sScoreTime;

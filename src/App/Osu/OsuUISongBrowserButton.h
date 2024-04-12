@@ -12,14 +12,14 @@
 
 class Osu;
 class OsuDatabaseBeatmap;
-class OsuSongBrowser2;
+class OsuSongBrowser;
 class OsuUIContextMenu;
 
 class CBaseUIScrollView;
 
 class OsuUISongBrowserButton : public CBaseUIButton {
    public:
-    OsuUISongBrowserButton(Osu *osu, OsuSongBrowser2 *songBrowser, CBaseUIScrollView *view,
+    OsuUISongBrowserButton(Osu *osu, OsuSongBrowser *songBrowser, CBaseUIScrollView *view,
                            OsuUIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,
                            UString name);
     virtual ~OsuUISongBrowserButton();
@@ -65,7 +65,7 @@ class OsuUISongBrowserButton : public CBaseUIButton {
 
     Osu *m_osu;
     CBaseUIScrollView *m_view;
-    OsuSongBrowser2 *m_songBrowser;
+    OsuSongBrowser *m_songBrowser;
     OsuUIContextMenu *m_contextMenu;
 
     McFont *m_font;

@@ -34,7 +34,7 @@
 #include "OsuRoom.h"
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
-#include "OsuSongBrowser2.h"
+#include "OsuSongBrowser.h"
 #include "OsuTooltipOverlay.h"
 #include "OsuUIButton.h"
 #include "OsuUICheckbox.h"

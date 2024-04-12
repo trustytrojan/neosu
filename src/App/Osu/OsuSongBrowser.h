@@ -41,7 +41,7 @@ class ConVar;
 
 class OsuSongBrowserBackgroundSearchMatcher;
 
-class OsuSongBrowser2 : public OsuScreenBackable {
+class OsuSongBrowser : public OsuScreenBackable {
    public:
     static void drawSelectedBeatmapBackgroundImage(Graphics *g, Osu *osu, float alpha = 1.0f);
 
@@ -99,8 +99,8 @@ class OsuSongBrowser2 : public OsuScreenBackable {
 
     friend class OsuSongBrowserBackgroundSearchMatcher;
 
-    OsuSongBrowser2(Osu *osu);
-    virtual ~OsuSongBrowser2();
+    OsuSongBrowser(Osu *osu);
+    virtual ~OsuSongBrowser();
 
     virtual void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);

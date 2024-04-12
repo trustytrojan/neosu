@@ -56,7 +56,7 @@ ConVar osu_scores_enabled("osu_scores_enabled", true, FCVAR_NONE);
 ConVar osu_scores_legacy_enabled("osu_scores_legacy_enabled", true, FCVAR_NONE, "load osu!'s scores.db");
 ConVar osu_scores_custom_enabled("osu_scores_custom_enabled", true, FCVAR_NONE, "load custom scores.db");
 ConVar osu_scores_custom_version("osu_scores_custom_version", 20210110, FCVAR_NONE,
-                                 "maximum supported custom scores.db/scoresvr.db version");
+                                 "maximum supported custom scores.db version");
 ConVar osu_scores_save_immediately("osu_scores_save_immediately", true, FCVAR_NONE,
                                    "write scores.db as soon as a new score is added");
 ConVar osu_scores_sort_by_pp("osu_scores_sort_by_pp", true, FCVAR_NONE, "display pp in score browser instead of score");
@@ -115,7 +115,7 @@ bool save_db(Packet *db, std::string path) {
 
 struct SortScoreByScore : public OsuDatabase::SCORE_SORTING_COMPARATOR {
     virtual ~SortScoreByScore() { ; }
-    bool operator()(OsuDatabase::Score const &a, OsuDatabase::Score const &b) const {
+    bool operator()(Score const &a, Score const &b) const {
         // first: score
         unsigned long long score1 = a.score;
         unsigned long long score2 = b.score;
@@ -135,7 +135,7 @@ struct SortScoreByScore : public OsuDatabase::SCORE_SORTING_COMPARATOR {
 
 struct SortScoreByCombo : public OsuDatabase::SCORE_SORTING_COMPARATOR {
     virtual ~SortScoreByCombo() { ; }
-    bool operator()(OsuDatabase::Score const &a, OsuDatabase::Score const &b) const {
+    bool operator()(Score const &a, Score const &b) const {
         // first: combo
         unsigned long long score1 = a.comboMax;
         unsigned long long score2 = b.comboMax;
@@ -161,7 +161,7 @@ struct SortScoreByCombo : public OsuDatabase::SCORE_SORTING_COMPARATOR {
 
 struct SortScoreByDate : public OsuDatabase::SCORE_SORTING_COMPARATOR {
     virtual ~SortScoreByDate() { ; }
-    bool operator()(OsuDatabase::Score const &a, OsuDatabase::Score const &b) const {
+    bool operator()(Score const &a, Score const &b) const {
         // first: time
         unsigned long long score1 = a.unixTimestamp;
         unsigned long long score2 = b.unixTimestamp;
@@ -175,7 +175,7 @@ struct SortScoreByDate : public OsuDatabase::SCORE_SORTING_COMPARATOR {
 
 struct SortScoreByMisses : public OsuDatabase::SCORE_SORTING_COMPARATOR {
     virtual ~SortScoreByMisses() { ; }
-    bool operator()(OsuDatabase::Score const &a, OsuDatabase::Score const &b) const {
+    bool operator()(Score const &a, Score const &b) const {
         // first: misses
         unsigned long long score1 = b.numMisses;  // swapped (lower numMisses is better)
         unsigned long long score2 = a.numMisses;
@@ -201,7 +201,7 @@ struct SortScoreByMisses : public OsuDatabase::SCORE_SORTING_COMPARATOR {
 
 struct SortScoreByAccuracy : public OsuDatabase::SCORE_SORTING_COMPARATOR {
     virtual ~SortScoreByAccuracy() { ; }
-    bool operator()(OsuDatabase::Score const &a, OsuDatabase::Score const &b) const {
+    bool operator()(Score const &a, Score const &b) const {
         // first: accuracy
         unsigned long long score1 =
             (unsigned long long)(OsuScore::calculateAccuracy(a.num300s, a.num100s, a.num50s, a.numMisses) * 10000.0f);
@@ -229,7 +229,7 @@ struct SortScoreByAccuracy : public OsuDatabase::SCORE_SORTING_COMPARATOR {
 
 struct SortScoreByPP : public OsuDatabase::SCORE_SORTING_COMPARATOR {
     virtual ~SortScoreByPP() { ; }
-    bool operator()(OsuDatabase::Score const &a, OsuDatabase::Score const &b) const {
+    bool operator()(Score const &a, Score const &b) const {
         // first: pp
         unsigned long long score1 = (unsigned long long)std::max(a.pp * 100.0f, 0.0f);
         unsigned long long score2 = (unsigned long long)std::max(b.pp * 100.0f, 0.0f);
@@ -482,7 +482,7 @@ OsuDatabaseBeatmap *OsuDatabase::addBeatmap(std::string beatmapFolderPath) {
     return beatmap;
 }
 
-int OsuDatabase::addScore(MD5Hash beatmapMD5Hash, OsuDatabase::Score score) {
+int OsuDatabase::addScore(MD5Hash beatmapMD5Hash, Score score) {
     addScoreRaw(beatmapMD5Hash, score);
     sortScores(beatmapMD5Hash);
 
@@ -490,6 +490,23 @@ int OsuDatabase::addScore(MD5Hash beatmapMD5Hash, OsuDatabase::Score score) {
     m_bDidScoresChangeForStats = true;
 
     if(osu_scores_save_immediately.getBool()) saveScores();
+
+    // XXX: this is blocking main thread
+    uint8_t *compressed_replay = NULL;
+    size_t s_compressed_replay = 0;
+    OsuReplay::compress_frames(score.replay, &compressed_replay, &s_compressed_replay);
+    if(s_compressed_replay > 0) {
+        std::string replay_path;
+        std::stringstream ss;
+        ss << MCENGINE_DATA_DIR "replays/" << score.unixTimestamp << ".replay.lzma";
+        replay_path = ss.str();
+
+        FILE *replay_file = fopen(replay_path.c_str(), "wb");
+        if(replay_file != NULL) {
+            fwrite(compressed_replay, s_compressed_replay, 1, replay_file);
+            fclose(replay_file);
+        }
+    }
 
     // return sorted index
     for(int i = 0; i < m_scores[beatmapMD5Hash].size(); i++) {
@@ -499,7 +516,7 @@ int OsuDatabase::addScore(MD5Hash beatmapMD5Hash, OsuDatabase::Score score) {
     return -1;
 }
 
-void OsuDatabase::addScoreRaw(const MD5Hash &beatmapMD5Hash, const OsuDatabase::Score &score) {
+void OsuDatabase::addScoreRaw(const MD5Hash &beatmapMD5Hash, const Score &score) {
     m_scores[beatmapMD5Hash].push_back(score);
 
     // cheap dynamic recalculations for mcosu scores
@@ -510,7 +527,7 @@ void OsuDatabase::addScoreRaw(const MD5Hash &beatmapMD5Hash, const OsuDatabase::
         {
             // find score with maxPossibleCombo info
             int maxPossibleCombo = -1;
-            for(const OsuDatabase::Score &s : m_scores[beatmapMD5Hash]) {
+            for(const Score &s : m_scores[beatmapMD5Hash]) {
                 if(s.version > 20180722) {
                     if(s.maxPossibleCombo > 0) {
                         maxPossibleCombo = s.maxPossibleCombo;
@@ -521,7 +538,7 @@ void OsuDatabase::addScoreRaw(const MD5Hash &beatmapMD5Hash, const OsuDatabase::
 
             // set 'perfect' flag on all relevant old scores of that same beatmap
             if(maxPossibleCombo > 0) {
-                for(OsuDatabase::Score &s : m_scores[beatmapMD5Hash]) {
+                for(Score &s : m_scores[beatmapMD5Hash]) {
                     if(s.version <= 20180722 ||
                        s.maxPossibleCombo <
                            1)  // also set on scores which have broken maxPossibleCombo values for whatever reason
@@ -559,9 +576,7 @@ void OsuDatabase::sortScores(MD5Hash beatmapMD5Hash) {
         if(m_osu_songbrowser_scores_sortingtype_ref->getString() == m_scoreSortingMethods[i].name) {
             struct COMPARATOR_WRAPPER {
                 SCORE_SORTING_COMPARATOR *comp;
-                bool operator()(OsuDatabase::Score const &a, OsuDatabase::Score const &b) const {
-                    return comp->operator()(a, b);
-                }
+                bool operator()(Score const &a, Score const &b) const { return comp->operator()(a, b); }
             };
             COMPARATOR_WRAPPER comparatorWrapper;
             comparatorWrapper.comp = m_scoreSortingMethods[i].comparator;
@@ -1779,6 +1794,7 @@ void OsuDatabase::loadScores() {
     // load custom scores
     // NOTE: custom scores are loaded before legacy scores (because we want to be able to skip loading legacy scores
     // which were already previously imported at some point)
+    int nb_mcosu_scores = 0;
     size_t customScoresFileSize = 0;
     if(osu_scores_custom_enabled.getBool()) {
         const int maxSupportedCustomDbVersion = osu_scores_custom_version.getInt();
@@ -1794,7 +1810,6 @@ void OsuDatabase::loadScores() {
             debugLog("Custom scores: version = %i, numBeatmaps = %i\n", dbVersion, numBeatmaps);
 
             if(dbVersion <= maxSupportedCustomDbVersion) {
-                int scoreCounter = 0;
                 for(int b = 0; b < numBeatmaps; b++) {
                     auto hash_str = read_stdstring(&db);
                     const int numScores = read_int32(&db);
@@ -1815,267 +1830,226 @@ void OsuDatabase::loadScores() {
 
                     const MD5Hash md5hash = hash_str.c_str();
                     for(int s = 0; s < numScores; s++) {
-                        const unsigned char gamemode =
-                            read_byte(&db);  // NOTE: abused as isImportedLegacyScore flag (because I forgot to add a
-                                             // version cap to old builds)
-                        const int scoreVersion = read_int32(&db);
-                        bool isImportedLegacyScore = false;
-                        if(dbVersion == 20210103 && scoreVersion > 20190103) {
-                            isImportedLegacyScore = read_byte(&db);
-                        } else if(dbVersion > 20210103 && scoreVersion > 20190103) {
+                        Score sc;
+                        sc.isLegacyScore = false;
+                        sc.isImportedLegacyScore = false;
+                        sc.maxPossibleCombo = -1;
+                        sc.numHitObjects = -1;
+                        sc.numCircles = -1;
+                        sc.perfect = false;
+
+                        const unsigned char gamemode = read_byte(&db);  // NOTE: abused as isImportedLegacyScore flag
+                        sc.version = read_int32(&db);
+
+                        if(dbVersion == 20210103 && sc.version > 20190103) {
+                            sc.isImportedLegacyScore = read_byte(&db);
+                        } else if(dbVersion > 20210103 && sc.version > 20190103) {
                             // HACKHACK: for explanation see hackIsImportedLegacyScoreFlag
-                            isImportedLegacyScore = (gamemode & hackIsImportedLegacyScoreFlag);
+                            sc.isImportedLegacyScore = (gamemode & hackIsImportedLegacyScoreFlag);
                         }
-                        const uint64_t unixTimestamp = read_int64(&db);
+
+                        sc.unixTimestamp = read_int64(&db);
 
                         // default
-                        const UString playerName = read_string(&db);
+                        sc.playerName = read_string(&db);
 
-                        const short num300s = read_short(&db);
-                        const short num100s = read_short(&db);
-                        const short num50s = read_short(&db);
-                        const short numGekis = read_short(&db);
-                        const short numKatus = read_short(&db);
-                        const short numMisses = read_short(&db);
+                        sc.num300s = read_short(&db);
+                        sc.num100s = read_short(&db);
+                        sc.num50s = read_short(&db);
+                        sc.numGekis = read_short(&db);
+                        sc.numKatus = read_short(&db);
+                        sc.numMisses = read_short(&db);
 
-                        const unsigned long long score = read_int64(&db);
-                        const short maxCombo = read_short(&db);
-                        const int modsLegacy = read_int32(&db);
+                        sc.score = read_int64(&db);
+                        sc.comboMax = read_short(&db);
+                        sc.modsLegacy = read_int32(&db);
 
                         // custom
-                        const short numSliderBreaks = read_short(&db);
-                        const float pp = read_float32(&db);
-                        const float unstableRate = read_float32(&db);
-                        const float hitErrorAvgMin = read_float32(&db);
-                        const float hitErrorAvgMax = read_float32(&db);
-                        const float starsTomTotal = read_float32(&db);
-                        const float starsTomAim = read_float32(&db);
-                        const float starsTomSpeed = read_float32(&db);
-                        const float speedMultiplier = read_float32(&db);
-                        const float CS = read_float32(&db);
-                        const float AR = read_float32(&db);
-                        const float OD = read_float32(&db);
-                        const float HP = read_float32(&db);
+                        sc.numSliderBreaks = read_short(&db);
+                        sc.pp = read_float32(&db);
+                        sc.unstableRate = read_float32(&db);
+                        sc.hitErrorAvgMin = read_float32(&db);
+                        sc.hitErrorAvgMax = read_float32(&db);
+                        sc.starsTomTotal = read_float32(&db);
+                        sc.starsTomAim = read_float32(&db);
+                        sc.starsTomSpeed = read_float32(&db);
+                        sc.speedMultiplier = read_float32(&db);
+                        sc.CS = read_float32(&db);
+                        sc.AR = read_float32(&db);
+                        sc.OD = read_float32(&db);
+                        sc.HP = read_float32(&db);
 
-                        int maxPossibleCombo = -1;
-                        int numHitObjects = -1;
-                        int numCircles = -1;
-                        if(scoreVersion > 20180722) {
-                            maxPossibleCombo = read_int32(&db);
-                            numHitObjects = read_int32(&db);
-                            numCircles = read_int32(&db);
+                        if(sc.version > 20180722) {
+                            sc.maxPossibleCombo = read_int32(&db);
+                            sc.numHitObjects = read_int32(&db);
+                            sc.numCircles = read_int32(&db);
+                            sc.perfect = sc.comboMax >= sc.maxPossibleCombo;
                         }
 
-                        const auto experimentalMods = read_stdstring(&db);
+                        if(sc.version >= 20240412) {
+                            sc.has_replay = true;
+                            sc.online_score_id = read_int32(&db);
+                            sc.server = read_stdstring(&db);
+                        }
 
-                        if(gamemode == 0x0 ||
-                           (dbVersion > 20210103 &&
-                            scoreVersion > 20190103))  // gamemode filter (osu!standard) // HACKHACK: for explanation
-                                                       // see hackIsImportedLegacyScoreFlag
-                        {
-                            Score sc;
+                        sc.experimentalModsConVars = read_stdstring(&db);
 
-                            sc.isLegacyScore = false;
-                            sc.isImportedLegacyScore = isImportedLegacyScore;
-                            sc.version = scoreVersion;
-                            sc.unixTimestamp = unixTimestamp;
-
-                            // default
-                            sc.playerName = playerName;
-
-                            sc.num300s = num300s;
-                            sc.num100s = num100s;
-                            sc.num50s = num50s;
-                            sc.numGekis = numGekis;
-                            sc.numKatus = numKatus;
-                            sc.numMisses = numMisses;
-                            sc.score = score;
-                            sc.comboMax = maxCombo;
-                            sc.perfect = (maxPossibleCombo > 0 && sc.comboMax > 0 && sc.comboMax >= maxPossibleCombo);
-                            sc.modsLegacy = modsLegacy;
-
-                            // custom
-                            sc.numSliderBreaks = numSliderBreaks;
-                            sc.pp = pp;
-                            sc.unstableRate = unstableRate;
-                            sc.hitErrorAvgMin = hitErrorAvgMin;
-                            sc.hitErrorAvgMax = hitErrorAvgMax;
-                            sc.starsTomTotal = starsTomTotal;
-                            sc.starsTomAim = starsTomAim;
-                            sc.starsTomSpeed = starsTomSpeed;
-                            sc.speedMultiplier = speedMultiplier;
-                            sc.CS = CS;
-                            sc.AR = AR;
-                            sc.OD = OD;
-                            sc.HP = HP;
-                            sc.maxPossibleCombo = maxPossibleCombo;
-                            sc.numHitObjects = numHitObjects;
-                            sc.numCircles = numCircles;
-                            sc.experimentalModsConVars = experimentalMods;
-
+                        if(gamemode == 0x0 || (dbVersion > 20210103 && sc.version > 20190103)) {
                             // runtime
                             sc.sortHack = m_iSortHackCounter++;
                             sc.md5hash = md5hash;
 
                             addScoreRaw(md5hash, sc);
-                            scoreCounter++;
+                            nb_mcosu_scores++;
                         }
                     }
                 }
-                debugLog("Loaded %i individual scores.\n", scoreCounter);
             } else {
                 debugLog("Newer scores.db version is not backwards compatible with old clients.\n");
             }
-        } else {
-            debugLog("No custom scores found.\n");
         }
+
+        free(db.memory);
     }
 
     // load legacy osu scores
+    int nb_peppy_scores = 0;
     if(osu_scores_legacy_enabled.getBool()) {
         std::string scoresPath = osu_folder.getString().toUtf8();
         scoresPath.append("scores.db");
 
         Packet db = load_db(scoresPath);
-        if(db.size > 0) {
-            // HACKHACK: heuristic sanity check (some people have their
-            // osu!folder point directly to McOsu, which would break legacy
-            // score db loading here since there is no magic number)
-            if(db.size != customScoresFileSize) {
-                const int dbVersion = read_int32(&db);
-                const int numBeatmaps = read_int32(&db);
+        // HACKHACK: heuristic sanity check (some people have their osu!folder
+        // point directly to McOsu, which would break legacy score db loading
+        // here since there is no magic number)
+        if(db.size > 0 && db.size != customScoresFileSize) {
+            const int dbVersion = read_int32(&db);
+            const int numBeatmaps = read_int32(&db);
 
-                debugLog("Legacy scores: version = %i, numBeatmaps = %i\n", dbVersion, numBeatmaps);
+            debugLog("Legacy scores: version = %i, numBeatmaps = %i\n", dbVersion, numBeatmaps);
 
-                int scoreCounter = 0;
-                for(int b = 0; b < numBeatmaps; b++) {
-                    auto hash_str = read_stdstring(&db);
+            for(int b = 0; b < numBeatmaps; b++) {
+                auto hash_str = read_stdstring(&db);
 
-                    if(hash_str.size() < 32) {
-                        if(Osu::debug->getBool()) {
-                            debugLog("WARNING: Invalid score with md5hash.length() = %i!\n", hash_str.size());
-                        }
-                        continue;
-                    } else if(hash_str.size() > 32) {
-                        debugLog("ERROR: Corrupt score database/entry detected, stopping.\n");
-                        break;
+                if(hash_str.size() < 32) {
+                    if(Osu::debug->getBool()) {
+                        debugLog("WARNING: Invalid score with md5hash.length() = %i!\n", hash_str.size());
+                    }
+                    continue;
+                } else if(hash_str.size() > 32) {
+                    debugLog("ERROR: Corrupt score database/entry detected, stopping.\n");
+                    break;
+                }
+
+                const MD5Hash md5hash = hash_str.c_str();
+                const int numScores = read_int32(&db);
+
+                if(Osu::debug->getBool())
+                    debugLog("Beatmap[%i]: md5hash = %s, numScores = %i\n", b, md5hash.toUtf8(), numScores);
+
+                for(int s = 0; s < numScores; s++) {
+                    Score sc;
+                    sc.server = "ppy.sh";
+                    sc.online_score_id = 0;
+                    sc.isLegacyScore = true;
+                    sc.isImportedLegacyScore = false;
+                    sc.numSliderBreaks = 0;
+                    sc.pp = 0.0f;
+                    sc.unstableRate = 0.0f;
+                    sc.hitErrorAvgMin = 0.0f;
+                    sc.hitErrorAvgMax = 0.0f;
+                    sc.starsTomTotal = 0.0f;
+                    sc.starsTomAim = 0.0f;
+                    sc.starsTomSpeed = 0.0f;
+                    sc.CS = 0.0f;
+                    sc.AR = 0.0f;
+                    sc.OD = 0.0f;
+                    sc.HP = 0.0f;
+                    sc.maxPossibleCombo = -1;
+                    sc.numHitObjects = -1;
+                    sc.numCircles = -1;
+
+                    const unsigned char gamemode = read_byte(&db);
+                    sc.version = read_int32(&db);
+                    skip_string(&db);  // beatmap hash (already have it)
+
+                    sc.playerName = read_string(&db);
+                    skip_string(&db);  // replay hash (don't use it)
+
+                    sc.num300s = read_short(&db);
+                    sc.num100s = read_short(&db);
+                    sc.num50s = read_short(&db);
+                    sc.numGekis = read_short(&db);
+                    sc.numKatus = read_short(&db);
+                    sc.numMisses = read_short(&db);
+
+                    int32_t score = read_int32(&db);
+                    sc.score = (score < 0 ? 0 : score);
+
+                    sc.comboMax = read_short(&db);
+                    sc.perfect = read_byte(&db);
+
+                    sc.modsLegacy = read_int32(&db);
+                    sc.speedMultiplier = 1.0f;
+                    if(sc.modsLegacy & ModFlags::HalfTime)
+                        sc.speedMultiplier = 0.75f;
+                    else if((sc.modsLegacy & ModFlags::DoubleTime) || (sc.modsLegacy & ModFlags::Nightcore))
+                        sc.speedMultiplier = 1.5f;
+
+                    skip_string(&db);  // hp graph
+
+                    uint64_t full_tms = read_int64(&db);
+                    sc.unixTimestamp = (full_tms - 621355968000000000) / 10000000;
+                    sc.legacyReplayTimestamp = full_tms - 504911232000000000;
+
+                    // Always -1, but let's skip it properly just in case
+                    int32_t old_replay_size = read_int32(&db);
+                    if(old_replay_size > 0) {
+                        db.pos += old_replay_size;
                     }
 
-                    const MD5Hash md5hash = hash_str.c_str();
-                    const int numScores = read_int32(&db);
+                    // Just assume we have the replay ¯\_(ツ)_/¯
+                    sc.has_replay = true;
 
-                    if(Osu::debug->getBool())
-                        debugLog("Beatmap[%i]: md5hash = %s, numScores = %i\n", b, md5hash.toUtf8(), numScores);
+                    if(sc.version >= 20140721)
+                        sc.online_score_id = read_int64(&db);
+                    else if(sc.version >= 20121008)
+                        sc.online_score_id = read_int32(&db);
 
-                    for(int s = 0; s < numScores; s++) {
-                        const unsigned char gamemode = read_byte(&db);
-                        const int scoreVersion = read_int32(&db);
-                        skip_string(&db);  // beatmap hash
-                        const UString playerName = read_string(&db);
-                        skip_string(&db);  // replay hash
+                    if(sc.modsLegacy & ModFlags::Target) /*double totalAccuracy = */
+                        read_float64(&db);
 
-                        const short num300s = read_short(&db);
-                        const short num100s = read_short(&db);
-                        const short num50s = read_short(&db);
-                        const short numGekis = read_short(&db);
-                        const short numKatus = read_short(&db);
-                        const short numMisses = read_short(&db);
+                    if(gamemode == 0) {  // gamemode filter (osu!standard)
+                        // runtime
+                        sc.sortHack = m_iSortHackCounter++;
+                        sc.md5hash = md5hash;
 
-                        const int score = read_int32(&db);
-                        const short maxCombo = read_short(&db);
-                        const bool perfect = read_byte(&db);
+                        nb_peppy_scores++;
 
-                        const int mods = read_int32(&db);
-                        skip_string(&db);  // hp graph
-                        const long long ticksWindows = read_int64(&db);
-
-                        uint32_t replay_len = read_int32(&db);
-                        db.pos += replay_len;  // replayCompressed
-
-                        /*long long onlineScoreID = 0;*/
-                        if(scoreVersion >= 20140721)
-                            /*onlineScoreID = */ read_int64(&db);
-                        else if(scoreVersion >= 20121008)
-                            /*onlineScoreID = */ read_int32(&db);
-
-                        if(mods & ModFlags::Target) /*double totalAccuracy = */
-                            read_float64(&db);
-
-                        if(gamemode == 0x0)  // gamemode filter (osu!standard)
+                        // NOTE: avoid adding an already imported legacy score (since that just spams the
+                        // scorebrowser with useless information)
+                        bool isScoreAlreadyImported = false;
                         {
-                            Score sc;
+                            const std::vector<Score> &otherScores = m_scores[sc.md5hash];
 
-                            sc.isLegacyScore = true;
-                            sc.isImportedLegacyScore = false;
-                            sc.version = scoreVersion;
-                            sc.unixTimestamp = (ticksWindows - 621355968000000000) / 10000000;
-
-                            // default
-                            sc.playerName = playerName;
-
-                            sc.num300s = num300s;
-                            sc.num100s = num100s;
-                            sc.num50s = num50s;
-                            sc.numGekis = numGekis;
-                            sc.numKatus = numKatus;
-                            sc.numMisses = numMisses;
-                            sc.score = (score < 0 ? 0 : score);
-                            sc.comboMax = maxCombo;
-                            sc.perfect = perfect;
-                            sc.modsLegacy = mods;
-
-                            // custom
-                            sc.numSliderBreaks = 0;
-                            sc.pp = 0.0f;
-                            sc.unstableRate = 0.0f;
-                            sc.hitErrorAvgMin = 0.0f;
-                            sc.hitErrorAvgMax = 0.0f;
-                            sc.starsTomTotal = 0.0f;
-                            sc.starsTomAim = 0.0f;
-                            sc.starsTomSpeed = 0.0f;
-                            sc.speedMultiplier =
-                                (mods & ModFlags::HalfTime
-                                     ? 0.75f
-                                     : (((mods & ModFlags::DoubleTime) || (mods & ModFlags::Nightcore)) ? 1.5f : 1.0f));
-                            sc.CS = 0.0f;
-                            sc.AR = 0.0f;
-                            sc.OD = 0.0f;
-                            sc.HP = 0.0f;
-                            sc.maxPossibleCombo = -1;
-                            sc.numHitObjects = -1;
-                            sc.numCircles = -1;
-                            // sc.experimentalModsConVars = "";
-
-                            // runtime
-                            sc.sortHack = m_iSortHackCounter++;
-                            sc.md5hash = md5hash;
-
-                            scoreCounter++;
-
-                            // NOTE: avoid adding an already imported legacy score (since that just spams the
-                            // scorebrowser with useless information)
-                            bool isScoreAlreadyImported = false;
-                            {
-                                const std::vector<OsuDatabase::Score> &otherScores = m_scores[sc.md5hash];
-
-                                for(size_t s = 0; s < otherScores.size(); s++) {
-                                    if(sc.isLegacyScoreEqualToImportedLegacyScore(otherScores[s])) {
-                                        isScoreAlreadyImported = true;
-                                        break;
-                                    }
+                            for(size_t s = 0; s < otherScores.size(); s++) {
+                                if(sc.isLegacyScoreEqualToImportedLegacyScore(otherScores[s])) {
+                                    isScoreAlreadyImported = true;
+                                    break;
                                 }
                             }
-
-                            if(!isScoreAlreadyImported) addScoreRaw(md5hash, sc);
                         }
+
+                        if(!isScoreAlreadyImported) addScoreRaw(md5hash, sc);
                     }
                 }
-                debugLog("Loaded %i individual scores.\n", scoreCounter);
-            } else
-                debugLog("Not loading legacy scores because filesize matches custom scores.\n");
-        } else
-            debugLog("No legacy scores found.\n");
+            }
+        }
+
+        free(db.memory);
     }
+
+    debugLog("Loaded %i scores from McOsu and %i scores from osu!stable.\n", nb_mcosu_scores, nb_peppy_scores);
 
     if(m_scores.size() > 0) m_bScoresLoaded = true;
 }
@@ -2084,109 +2058,103 @@ void OsuDatabase::saveScores() {
     if(!m_bDidScoresChangeForSave) return;
     m_bDidScoresChangeForSave = false;
 
+    if(m_scores.empty()) return;
     const int dbVersion = osu_scores_custom_version.getInt();
     const unsigned char hackIsImportedLegacyScoreFlag =
         0xA9;  // TODO: remove this once all builds on steam (even previous-version) have loading version cap logic
 
-    if(m_scores.size() > 0) {
-        debugLog("Osu: Saving scores ...\n");
+    debugLog("Osu: Saving scores ...\n");
 
-        Packet db;
+    Packet db;
 
-        const double startTime = engine->getTimeReal();
+    const double startTime = engine->getTimeReal();
 
-        // count number of beatmaps with valid scores
-        int numBeatmaps = 0;
-        for(std::unordered_map<MD5Hash, std::vector<Score>>::iterator it = m_scores.begin(); it != m_scores.end();
-            ++it) {
-            for(int i = 0; i < it->second.size(); i++) {
-                if(!it->second[i].isLegacyScore) {
-                    numBeatmaps++;
-                    break;
-                }
+    // count number of beatmaps with valid scores
+    int numBeatmaps = 0;
+    for(std::unordered_map<MD5Hash, std::vector<Score>>::iterator it = m_scores.begin(); it != m_scores.end(); ++it) {
+        for(int i = 0; i < it->second.size(); i++) {
+            if(!it->second[i].isLegacyScore) {
+                numBeatmaps++;
+                break;
             }
         }
-
-        // write header
-        write_int32(&db, dbVersion);
-        write_int32(&db, numBeatmaps);
-
-        // write scores for each beatmap
-        for(std::unordered_map<MD5Hash, std::vector<Score>>::iterator it = m_scores.begin(); it != m_scores.end();
-            ++it) {
-            int numNonLegacyScores = 0;
-            for(int i = 0; i < it->second.size(); i++) {
-                if(!it->second[i].isLegacyScore) numNonLegacyScores++;
-            }
-
-            if(numNonLegacyScores > 0) {
-                write_string(&db, it->first.hash);     // md5hash
-                write_int32(&db, numNonLegacyScores);  // numScores
-
-                for(int i = 0; i < it->second.size(); i++) {
-                    if(!it->second[i].isLegacyScore) {
-                        write_byte(&db,
-                                   (it->second[i].version > 20190103
-                                        ? (it->second[i].isImportedLegacyScore ? hackIsImportedLegacyScoreFlag : 0)
-                                        : 0));  // gamemode (hardcoded atm) // NOTE: abused as isImportedLegacyScore
-                                                // flag (because I forgot to add a version cap to old builds)
-                        write_int32(&db, it->second[i].version);
-                        // HACKHACK: for explanation see hackIsImportedLegacyScoreFlag
-                        /*
-                        if (it->second[i].version > 20190103)
-                        {
-                                db.writeBool(it->second[i].isImportedLegacyScore);
-                        }
-                        */
-                        write_int64(&db, it->second[i].unixTimestamp);
-
-                        // default
-                        write_string(&db, it->second[i].playerName);
-
-                        write_short(&db, it->second[i].num300s);
-                        write_short(&db, it->second[i].num100s);
-                        write_short(&db, it->second[i].num50s);
-                        write_short(&db, it->second[i].numGekis);
-                        write_short(&db, it->second[i].numKatus);
-                        write_short(&db, it->second[i].numMisses);
-
-                        write_int64(&db, it->second[i].score);
-                        write_short(&db, it->second[i].comboMax);
-                        write_int32(&db, it->second[i].modsLegacy);
-
-                        // custom
-                        write_short(&db, it->second[i].numSliderBreaks);
-                        write_float32(&db, it->second[i].pp);
-                        write_float32(&db, it->second[i].unstableRate);
-                        write_float32(&db, it->second[i].hitErrorAvgMin);
-                        write_float32(&db, it->second[i].hitErrorAvgMax);
-                        write_float32(&db, it->second[i].starsTomTotal);
-                        write_float32(&db, it->second[i].starsTomAim);
-                        write_float32(&db, it->second[i].starsTomSpeed);
-                        write_float32(&db, it->second[i].speedMultiplier);
-                        write_float32(&db, it->second[i].CS);
-                        write_float32(&db, it->second[i].AR);
-                        write_float32(&db, it->second[i].OD);
-                        write_float32(&db, it->second[i].HP);
-
-                        if(it->second[i].version > 20180722) {
-                            write_int32(&db, it->second[i].maxPossibleCombo);
-                            write_int32(&db, it->second[i].numHitObjects);
-                            write_int32(&db, it->second[i].numCircles);
-                        }
-
-                        write_string(&db, it->second[i].experimentalModsConVars.c_str());
-                    }
-                }
-            }
-        }
-
-        if(!save_db(&db, ("scores.db"))) {
-            debugLog("Couldn't write scores.db!\n");
-        }
-
-        debugLog("Took %f seconds.\n", (engine->getTimeReal() - startTime));
     }
+
+    // write header
+    write_int32(&db, dbVersion);
+    write_int32(&db, numBeatmaps);
+
+    // write scores for each beatmap
+    for(auto &beatmap : m_scores) {
+        int numNonLegacyScores = 0;
+        for(int i = 0; i < beatmap.second.size(); i++) {
+            if(!beatmap.second[i].isLegacyScore) numNonLegacyScores++;
+        }
+
+        if(numNonLegacyScores == 0) continue;
+
+        write_string(&db, beatmap.first.hash);  // beatmap md5 hash
+        write_int32(&db, numNonLegacyScores);   // numScores
+
+        for(auto &score : beatmap.second) {
+            if(score.isLegacyScore) continue;
+
+            uint8_t gamemode = 0;
+            if(score.version > 20190103 && score.isImportedLegacyScore) gamemode = hackIsImportedLegacyScoreFlag;
+            write_byte(&db, gamemode);
+
+            write_int32(&db, score.version);
+            write_int64(&db, score.unixTimestamp);
+
+            // default
+            write_string(&db, score.playerName);
+
+            write_short(&db, score.num300s);
+            write_short(&db, score.num100s);
+            write_short(&db, score.num50s);
+            write_short(&db, score.numGekis);
+            write_short(&db, score.numKatus);
+            write_short(&db, score.numMisses);
+
+            write_int64(&db, score.score);
+            write_short(&db, score.comboMax);
+            write_int32(&db, score.modsLegacy);
+
+            // custom
+            write_short(&db, score.numSliderBreaks);
+            write_float32(&db, score.pp);
+            write_float32(&db, score.unstableRate);
+            write_float32(&db, score.hitErrorAvgMin);
+            write_float32(&db, score.hitErrorAvgMax);
+            write_float32(&db, score.starsTomTotal);
+            write_float32(&db, score.starsTomAim);
+            write_float32(&db, score.starsTomSpeed);
+            write_float32(&db, score.speedMultiplier);
+            write_float32(&db, score.CS);
+            write_float32(&db, score.AR);
+            write_float32(&db, score.OD);
+            write_float32(&db, score.HP);
+
+            if(score.version > 20180722) {
+                write_int32(&db, score.maxPossibleCombo);
+                write_int32(&db, score.numHitObjects);
+                write_int32(&db, score.numCircles);
+            }
+
+            if(score.version >= 20240412) {
+                write_int32(&db, score.online_score_id);
+                write_string(&db, score.server.c_str());
+            }
+
+            write_string(&db, score.experimentalModsConVars.c_str());
+        }
+    }
+
+    if(!save_db(&db, ("scores.db"))) {
+        debugLog("Couldn't write scores.db!\n");
+    }
+
+    debugLog("Took %f seconds.\n", (engine->getTimeReal() - startTime));
 }
 
 void OsuDatabase::loadCollections(std::string collectionFilePath, bool isLegacy,

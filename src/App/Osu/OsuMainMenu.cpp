@@ -32,7 +32,7 @@
 #include "OsuSlider.h"
 #include "OsuSliderCurves.h"
 #include "OsuSliderRenderer.h"
-#include "OsuSongBrowser2.h"
+#include "OsuSongBrowser.h"
 #include "OsuUIButton.h"
 #include "OsuUpdateHandler.h"
 #include "ResourceManager.h"
@@ -422,7 +422,7 @@ void OsuMainMenu::draw(Graphics *g) {
                 alpha = 1.0f - (1.0f - alpha) * (1.0f - alpha);
             }
         }
-        OsuSongBrowser2::drawSelectedBeatmapBackgroundImage(g, m_osu, alpha);
+        OsuSongBrowser::drawSelectedBeatmapBackgroundImage(g, m_osu, alpha);
     }
 
     // main button stuff

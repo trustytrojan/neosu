@@ -31,7 +31,7 @@
 #include "OsuScoreboardSlot.h"
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
-#include "OsuSongBrowser2.h"
+#include "OsuSongBrowser.h"
 #include "OsuUIAvatar.h"
 #include "ResourceManager.h"
 #include "Shader.h"
@@ -1506,7 +1506,7 @@ std::vector<SCORE_ENTRY> OsuHUD::getCurrentScores() {
         }
     } else {
         auto m_db = m_osu->getSongBrowser()->getDatabase();
-        std::vector<OsuDatabase::Score> *singleplayer_scores = &((*m_db->getScores())[beatmap_md5]);
+        std::vector<Score> *singleplayer_scores = &((*m_db->getScores())[beatmap_md5]);
         auto cv_sortingtype = convar->getConVarByName("osu_songbrowser_scores_sortingtype");
         bool is_online = cv_sortingtype->getString() == UString("Online Leaderboard");
         if(is_online) {

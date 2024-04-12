@@ -16,7 +16,7 @@
 #include "OsuDatabaseBeatmap.h"
 #include "OsuReplay.h"
 #include "OsuSkin.h"
-#include "OsuSongBrowser2.h"
+#include "OsuSongBrowser.h"
 #include "OsuUISongBrowserScoreButton.h"
 #include "ResourceManager.h"
 
@@ -32,7 +32,7 @@ ConVar osu_songbrowser_button_difficulty_inactive_color_b("osu_songbrowser_butto
 ConVar *OsuUISongBrowserSongDifficultyButton::m_osu_scores_enabled = NULL;
 ConVar *OsuUISongBrowserSongDifficultyButton::m_osu_songbrowser_dynamic_star_recalc_ref = NULL;
 
-OsuUISongBrowserSongDifficultyButton::OsuUISongBrowserSongDifficultyButton(Osu *osu, OsuSongBrowser2 *songBrowser,
+OsuUISongBrowserSongDifficultyButton::OsuUISongBrowserSongDifficultyButton(Osu *osu, OsuSongBrowser *songBrowser,
                                                                            CBaseUIScrollView *view,
                                                                            OsuUIContextMenu *contextMenu, float xPos,
                                                                            float yPos, float xSize, float ySize,
@@ -212,12 +212,11 @@ void OsuUISongBrowserSongDifficultyButton::updateGrade() {
     }
 
     bool hasGrade = false;
-    OsuScore::GRADE grade;
+    Score::Grade grade;
 
     m_osu->getSongBrowser()->getDatabase()->sortScores(m_databaseBeatmap->getMD5Hash());
     if((*m_osu->getSongBrowser()->getDatabase()->getScores())[m_databaseBeatmap->getMD5Hash()].size() > 0) {
-        const OsuDatabase::Score &score =
-            (*m_osu->getSongBrowser()->getDatabase()->getScores())[m_databaseBeatmap->getMD5Hash()][0];
+        const Score &score = (*m_osu->getSongBrowser()->getDatabase()->getScores())[m_databaseBeatmap->getMD5Hash()][0];
         hasGrade = true;
         grade = OsuScore::calculateGrade(score.num300s, score.num100s, score.num50s, score.numMisses,
                                          score.modsLegacy & ModFlags::Hidden, score.modsLegacy & ModFlags::Flashlight);

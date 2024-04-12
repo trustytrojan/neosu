@@ -20,7 +20,7 @@
 #include "OsuModSelector.h"
 #include "OsuRoom.h"
 #include "OsuScore.h"
-#include "OsuSongBrowser2.h"
+#include "OsuSongBrowser.h"
 
 ConVar osu_rich_presence("osu_rich_presence", true, FCVAR_NONE, OsuRichPresence::onRichPresenceChange);
 ConVar osu_rich_presence_dynamic_windowtitle(

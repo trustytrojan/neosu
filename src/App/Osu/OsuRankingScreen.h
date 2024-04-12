@@ -40,7 +40,7 @@ class OsuRankingScreen : public OsuScreenBackable {
     virtual CBaseUIContainer *setVisible(bool visible);
 
     void setScore(OsuScore *score);
-    void setScore(OsuDatabase::Score score, UString dateTime);
+    void setScore(Score score, UString dateTime);
     void setBeatmapInfo(OsuBeatmap *beatmap, OsuDatabaseBeatmap *diff2);
 
    private:
@@ -51,7 +51,7 @@ class OsuRankingScreen : public OsuScreenBackable {
 
     void onScrollDownClicked();
 
-    void setGrade(OsuScore::GRADE grade);
+    void setGrade(Score::Grade grade);
     void setIndex(int index);
 
     UString getPPString();
@@ -72,7 +72,7 @@ class OsuRankingScreen : public OsuScreenBackable {
     OsuRankingScreenScrollDownInfoButton *m_rankingScrollDownInfoButton;
     float m_fRankingScrollDownInfoButtonAlphaAnim;
 
-    OsuScore::GRADE m_grade;
+    Score::Grade m_grade;
     float m_fUnstableRate;
     float m_fHitErrorAvgMin;
     float m_fHitErrorAvgMax;

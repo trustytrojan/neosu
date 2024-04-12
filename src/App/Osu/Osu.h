@@ -24,7 +24,7 @@ class OsuMainMenu;
 class OsuPauseMenu;
 class OsuOptionsMenu;
 class OsuModSelector;
-class OsuSongBrowser2;
+class OsuSongBrowser;
 class OsuBackgroundImageHandler;
 class OsuRankingScreen;
 class OsuUserStatsScreen;
@@ -117,7 +117,7 @@ class Osu : public App, public MouseListener {
     OsuBeatmap *getSelectedBeatmap();
 
     inline OsuOptionsMenu *getOptionsMenu() const { return m_optionsMenu; }
-    inline OsuSongBrowser2 *getSongBrowser() const { return m_songBrowser2; }
+    inline OsuSongBrowser *getSongBrowser() const { return m_songBrowser2; }
     inline OsuBackgroundImageHandler *getBackgroundImageHandler() const { return m_backgroundImageHandler; }
     inline OsuSkin *getSkin() const { return m_skin; }
     inline OsuHUD *getHUD() const { return m_hud; }
@@ -263,7 +263,7 @@ class Osu : public App, public MouseListener {
     OsuRoom *m_room = nullptr;
     OsuPromptScreen *m_prompt = nullptr;
     OsuUIUserContextMenuScreen *m_user_actions = nullptr;
-    OsuSongBrowser2 *m_songBrowser2 = nullptr;
+    OsuSongBrowser *m_songBrowser2 = nullptr;
     OsuBackgroundImageHandler *m_backgroundImageHandler;
     OsuModSelector *m_modSelector;
     OsuRankingScreen *m_rankingScreen;

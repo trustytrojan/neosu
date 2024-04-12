@@ -17,7 +17,7 @@
 #include "OsuGameRules.h"
 #include "OsuNotificationOverlay.h"
 #include "OsuOptionsMenu.h"
-#include "OsuSongBrowser2.h"
+#include "OsuSongBrowser.h"
 #include "OsuTooltipOverlay.h"
 #include "ResourceManager.h"
 

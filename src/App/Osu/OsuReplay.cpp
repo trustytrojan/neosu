@@ -1,16 +1,16 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		replay handler & parser
-//
-// $NoKeywords: $osr
-//===============================================================================//
-
 #include "OsuReplay.h"
 
 #include <lzma.h>
 
+#include "Bancho.h"
 #include "BanchoProtocol.h"
 #include "Engine.h"
+#include "Osu.h"
+#include "OsuBeatmap.h"
+#include "OsuDatabase.h"
+#include "OsuNotificationOverlay.h"
+#include "OsuSongBrowser.h"
+#include "Score.h"
 
 OsuReplay::BEATMAP_VALUES OsuReplay::getBeatmapValuesForModsLegacy(int modsLegacy, float legacyAR, float legacyCS,
                                                                    float legacyOD, float legacyHP) {
@@ -93,6 +93,56 @@ end:
     return replay_frames;
 }
 
+void OsuReplay::compress_frames(const std::vector<OsuReplay::Frame>& frames, uint8_t** compressed,
+                                size_t* s_compressed) {
+    lzma_stream stream = LZMA_STREAM_INIT;
+    lzma_options_lzma options;
+    lzma_lzma_preset(&options, LZMA_PRESET_DEFAULT);
+    lzma_ret ret = lzma_alone_encoder(&stream, &options);
+    if(ret != LZMA_OK) {
+        debugLog("Failed to initialize lzma encoder: error %d\n", ret);
+        *compressed = NULL;
+        *s_compressed = 0;
+        return;
+    }
+
+    std::string replay_string;
+    for(auto frame : frames) {
+        auto frame_str = UString::format("%ld|%.4f|%.4f|%hhu,", frame.milliseconds_since_last_frame, frame.x, frame.y,
+                                         frame.key_flags);
+        replay_string.append(frame_str.toUtf8(), frame_str.lengthUtf8());
+    }
+
+    // osu!stable doesn't consider a replay valid unless it ends with this
+    replay_string.append("-12345|0.0000|0.0000|0,");
+
+    *s_compressed = replay_string.length();
+    *compressed = (uint8_t*)malloc(*s_compressed);
+
+    stream.avail_in = replay_string.length();
+    stream.next_in = (const uint8_t*)replay_string.c_str();
+    stream.avail_out = *s_compressed;
+    stream.next_out = *compressed;
+    do {
+        ret = lzma_code(&stream, LZMA_FINISH);
+        if(ret == LZMA_OK) {
+            *s_compressed *= 2;
+            *compressed = (uint8_t*)realloc(*compressed, *s_compressed);
+            stream.avail_out = *s_compressed - stream.total_out;
+            stream.next_out = *compressed + stream.total_out;
+        } else if(ret != LZMA_STREAM_END) {
+            debugLog("Error while compressing replay: error %d\n", ret);
+            *compressed = NULL;
+            *s_compressed = 0;
+            lzma_end(&stream);
+            return;
+        }
+    } while(ret != LZMA_STREAM_END);
+
+    *s_compressed = stream.total_out;
+    lzma_end(&stream);
+}
+
 OsuReplay::Info OsuReplay::from_bytes(uint8_t* data, int s_data) {
     OsuReplay::Info info;
 
@@ -131,4 +181,100 @@ OsuReplay::Info OsuReplay::from_bytes(uint8_t* data, int s_data) {
     delete[] replay_data;
 
     return info;
+}
+
+bool OsuReplay::load_from_disk(Score* score) {
+    if(score->legacyReplayTimestamp > 0) {
+        auto osu_folder = convar->getConVarByName("osu_folder")->getString();
+        auto path = UString::format("%s/Data/r/%s-%llu.osr", osu_folder.toUtf8(), score->md5hash.hash,
+                                    score->legacyReplayTimestamp);
+
+        FILE* replay_file = fopen(path.toUtf8(), "rb");
+        if(replay_file == NULL) return false;
+
+        fseek(replay_file, 0, SEEK_END);
+        size_t s_full_replay = ftell(replay_file);
+        rewind(replay_file);
+
+        uint8_t* full_replay = new uint8_t[s_full_replay];
+        fread(full_replay, s_full_replay, 1, replay_file);
+        fclose(replay_file);
+        auto info = OsuReplay::from_bytes(full_replay, s_full_replay);
+        score->replay = info.frames;
+        delete[] full_replay;
+    } else {
+        auto path = UString::format(MCENGINE_DATA_DIR "replays/%s/%llu.replay.lzma", score->server.c_str(),
+                                    score->unixTimestamp);
+
+        FILE* replay_file = fopen(path.toUtf8(), "rb");
+        if(replay_file == NULL) return false;
+
+        fseek(replay_file, 0, SEEK_END);
+        size_t s_compressed_replay = ftell(replay_file);
+        rewind(replay_file);
+
+        uint8_t* compressed_replay = new uint8_t[s_compressed_replay];
+        fread(compressed_replay, s_compressed_replay, 1, replay_file);
+        fclose(replay_file);
+        score->replay = OsuReplay::get_frames(compressed_replay, s_compressed_replay);
+        delete[] compressed_replay;
+    }
+
+    auto& map_scores = (*(bancho.osu->getSongBrowser()->getDatabase()->getScores()))[score->md5hash];
+    for(auto& db_score : map_scores) {
+        if(db_score.unixTimestamp != score->unixTimestamp) continue;
+        if(&db_score != score) {
+            db_score.replay = score->replay;
+        }
+
+        break;
+    }
+
+    return true;
+}
+
+void OsuReplay::load_and_watch(Score score) {
+    // Check if replay is loaded
+    if(score.replay.empty()) {
+        if(!load_from_disk(&score)) {
+            if(strcmp(score.server.c_str(), bancho.endpoint.toUtf8()) != 0) {
+                auto msg = UString::format("Please connect to %s to view this replay!", score.server.c_str());
+                bancho.osu->m_notificationOverlay->addNotification(msg);
+            }
+
+            Score* score_cpy = (Score*)malloc(sizeof(Score));
+            *score_cpy = score;
+
+            APIRequest request;
+            request.type = GET_REPLAY;
+            request.path = UString::format("/web/osu-getreplay.php?u=%s&h=%s&m=0&c=%d", bancho.username.toUtf8(),
+                                           bancho.pw_md5.toUtf8(), score.online_score_id);
+            request.mime = NULL;
+            request.extra = (uint8_t*)score_cpy;
+            send_api_request(request);
+
+            bancho.osu->m_notificationOverlay->addNotification("Downloading replay...");
+            return;
+        }
+    }
+
+    // We tried loading from memory, we tried loading from file, we tried loading from server... RIP
+    if(score.replay.empty()) {
+        bancho.osu->m_notificationOverlay->addNotification("Failed to load replay");
+        return;
+    }
+
+    bancho.osu->replay_info.diff2_md5 = score.md5hash.hash;
+    bancho.osu->replay_info.mod_flags = score.modsLegacy;
+    bancho.osu->replay_info.username = score.playerName;
+    bancho.osu->replay_info.player_id = score.player_id;
+
+    auto beatmap = bancho.osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(score.md5hash.hash);
+    if(beatmap == nullptr) {
+        // XXX: Auto-download beatmap
+        bancho.osu->m_notificationOverlay->addNotification("Missing beatmap for this replay");
+    } else {
+        bancho.osu->getSongBrowser()->onDifficultySelected(beatmap, false);
+        bancho.osu->getSelectedBeatmap()->watch(score);
+    }
 }

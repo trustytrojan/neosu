@@ -23,7 +23,7 @@
 #include "OsuOptionsMenu.h"
 #include "OsuReplay.h"
 #include "OsuSkin.h"
-#include "OsuSongBrowser2.h"
+#include "OsuSongBrowser.h"
 #include "OsuTooltipOverlay.h"
 #include "OsuUIContextMenu.h"
 #include "OsuUISongBrowserScoreButton.h"
@@ -80,14 +80,13 @@ class OsuUserStatsScreenBackgroundPPRecalculator : public Resource {
     virtual void init() { m_bReady = true; }
 
     virtual void initAsync() {
-        std::unordered_map<MD5Hash, std::vector<OsuDatabase::Score>> *scores =
-            m_osu->getSongBrowser()->getDatabase()->getScores();
+        std::unordered_map<MD5Hash, std::vector<Score>> *scores = m_osu->getSongBrowser()->getDatabase()->getScores();
 
         // count number of scores to recalculate for UI
         size_t numScoresToRecalculate = 0;
         for(const auto &kv : *scores) {
             for(size_t i = 0; i < kv.second.size(); i++) {
-                const OsuDatabase::Score &score = kv.second[i];
+                const Score &score = kv.second[i];
 
                 if((!score.isLegacyScore || m_bImportLegacyScores) && score.playerName == m_sUserName)
                     numScoresToRecalculate++;
@@ -100,7 +99,7 @@ class OsuUserStatsScreenBackgroundPPRecalculator : public Resource {
         // actually recalculate them
         for(auto &kv : *scores) {
             for(size_t i = 0; i < kv.second.size(); i++) {
-                OsuDatabase::Score &score = kv.second[i];
+                Score &score = kv.second[i];
 
                 if((!score.isLegacyScore || m_bImportLegacyScores) && score.playerName == m_sUserName) {
                     if(m_bInterrupted.load()) break;
@@ -108,7 +107,7 @@ class OsuUserStatsScreenBackgroundPPRecalculator : public Resource {
 
                     // NOTE: avoid importing the same score twice
                     if(m_bImportLegacyScores && score.isLegacyScore) {
-                        const std::vector<OsuDatabase::Score> &otherScores = (*scores)[score.md5hash];
+                        const std::vector<Score> &otherScores = (*scores)[score.md5hash];
 
                         bool isScoreAlreadyImported = false;
                         for(size_t s = 0; s < otherScores.size(); s++) {
@@ -392,7 +391,7 @@ void OsuUserStatsScreen::rebuildScoreButtons(UString playerName) {
     m_scoreButtons.clear();
 
     OsuDatabase *db = m_osu->getSongBrowser()->getDatabase();
-    std::vector<OsuDatabase::Score *> scores = db->getPlayerPPScores(playerName).ppScores;
+    std::vector<Score *> scores = db->getPlayerPPScores(playerName).ppScores;
     for(int i = scores.size() - 1; i >= std::max(0, (int)scores.size() - osu_ui_top_ranks_max.getInt()); i--) {
         const float weight = OsuDatabase::getWeightForIndex(scores.size() - 1 - i);
 
@@ -661,16 +660,15 @@ void OsuUserStatsScreen::onCopyAllScoresConfirmed(UString text, int id) {
     debugLog("Copying all scores from \"%s\" into \"%s\"\n", m_sCopyAllScoresFromUser.toUtf8(),
              playerNameToCopyInto.toUtf8());
 
-    std::unordered_map<MD5Hash, std::vector<OsuDatabase::Score>> *scores =
-        m_osu->getSongBrowser()->getDatabase()->getScores();
+    std::unordered_map<MD5Hash, std::vector<Score>> *scores = m_osu->getSongBrowser()->getDatabase()->getScores();
 
-    std::vector<OsuDatabase::Score> tempScoresToCopy;
+    std::vector<Score> tempScoresToCopy;
     for(auto &kv : *scores) {
         tempScoresToCopy.clear();
 
         // collect all to-be-copied scores for this beatmap into tempScoresToCopy
         for(size_t i = 0; i < kv.second.size(); i++) {
-            const OsuDatabase::Score &existingScore = kv.second[i];
+            const Score &existingScore = kv.second[i];
 
             // NOTE: only ever copy McOsu scores
             if(!existingScore.isLegacyScore) {
@@ -679,7 +677,7 @@ void OsuUserStatsScreen::onCopyAllScoresConfirmed(UString text, int id) {
                     // is the case
                     bool alreadyCopied = false;
                     for(size_t j = 0; j < kv.second.size(); j++) {
-                        const OsuDatabase::Score &alreadyCopiedScore = kv.second[j];
+                        const Score &alreadyCopiedScore = kv.second[j];
 
                         if(j == i) continue;
 
@@ -750,13 +748,12 @@ void OsuUserStatsScreen::onDeleteAllScoresConfirmed(UString text, int id) {
 
     debugLog("Deleting all scores for \"%s\"\n", playerName.toUtf8());
 
-    std::unordered_map<MD5Hash, std::vector<OsuDatabase::Score>> *scores =
-        m_osu->getSongBrowser()->getDatabase()->getScores();
+    std::unordered_map<MD5Hash, std::vector<Score>> *scores = m_osu->getSongBrowser()->getDatabase()->getScores();
 
     // delete every score matching the current playerName
     for(auto &kv : *scores) {
         for(size_t i = 0; i < kv.second.size(); i++) {
-            const OsuDatabase::Score &score = kv.second[i];
+            const Score &score = kv.second[i];
 
             // NOTE: only ever delete McOsu scores
             if(!score.isLegacyScore) {

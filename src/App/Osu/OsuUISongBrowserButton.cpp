@@ -15,7 +15,7 @@
 #include "Mouse.h"
 #include "Osu.h"
 #include "OsuSkin.h"
-#include "OsuSongBrowser2.h"
+#include "OsuSongBrowser.h"
 #include "ResourceManager.h"
 #include "SoundEngine.h"
 
@@ -36,7 +36,7 @@ int OsuUISongBrowserButton::sortHackCounter = 0;
 
 // Color OsuUISongBrowserButton::inactiveDifficultyBackgroundColor = COLOR(255, 0, 150, 236); // blue
 
-OsuUISongBrowserButton::OsuUISongBrowserButton(Osu *osu, OsuSongBrowser2 *songBrowser, CBaseUIScrollView *view,
+OsuUISongBrowserButton::OsuUISongBrowserButton(Osu *osu, OsuSongBrowser *songBrowser, CBaseUIScrollView *view,
                                                OsuUIContextMenu *contextMenu, float xPos, float yPos, float xSize,
                                                float ySize, UString name)
     : CBaseUIButton(xPos, yPos, xSize, ySize, name, "") {

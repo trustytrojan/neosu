@@ -12,7 +12,7 @@
 
 class OsuUISongBrowserCollectionButton : public OsuUISongBrowserButton {
    public:
-    OsuUISongBrowserCollectionButton(Osu *osu, OsuSongBrowser2 *songBrowser, CBaseUIScrollView *view,
+    OsuUISongBrowserCollectionButton(Osu *osu, OsuSongBrowser *songBrowser, CBaseUIScrollView *view,
                                      OsuUIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,
                                      UString name, UString collectionName,
                                      std::vector<OsuUISongBrowserButton *> children);

@@ -27,7 +27,7 @@
 #include "OsuReplay.h"
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
-#include "OsuSongBrowser2.h"
+#include "OsuSongBrowser.h"
 #include "OsuTooltipOverlay.h"
 #include "OsuUIAvatar.h"
 #include "OsuUIContextMenu.h"
@@ -71,7 +71,7 @@ OsuUISongBrowserScoreButton::OsuUISongBrowserScoreButton(Osu *osu, OsuUIContextM
     m_iScoreIndexNumber = 1;
     m_iScoreUnixTimestamp = 0;
 
-    m_scoreGrade = OsuScore::GRADE::GRADE_D;
+    m_scoreGrade = Score::Grade::D;
 }
 
 OsuUISongBrowserScoreButton::~OsuUISongBrowserScoreButton() { anim->deleteExistingAnimation(&m_fIndexNumberAnim); }
@@ -564,21 +564,7 @@ void OsuUISongBrowserScoreButton::onContextMenu(UString text, int id) {
     }
 
     if(id == 2) {
-        ReplayExtraInfo *info = (ReplayExtraInfo *)calloc(1, sizeof(ReplayExtraInfo));
-        info->diff2_md5 = m_score.md5hash.hash;
-        info->mod_flags = m_score.modsLegacy;
-        info->username = m_score.playerName;
-        info->player_id = m_score.player_id;
-
-        APIRequest request;
-        request.type = GET_REPLAY;
-        request.path = UString::format("/web/osu-getreplay.php?u=%s&h=%s&m=0&c=%d", bancho.username.toUtf8(),
-                                       bancho.pw_md5.toUtf8(), m_score.online_score_id);
-        request.mime = NULL;
-        request.extra = (uint8_t *)info;
-        send_api_request(request);
-
-        m_osu->m_notificationOverlay->addNotification("Downloading replay...");
+        OsuReplay::load_and_watch(m_score);
         return;
     }
 
@@ -710,7 +696,7 @@ void OsuUISongBrowserScoreButton::onDeleteScoreConfirmed(UString text, int id) {
     if(m_style == STYLE::SCORE_BROWSER)
         m_osu->getSongBrowser()->onScoreContextMenu(this, 2);
     else if(m_style == STYLE::TOP_RANKS) {
-        // in this case, deletion of the actual scores is handled in OsuSongBrowser2::onScoreContextMenu()
+        // in this case, deletion of the actual scores is handled in OsuSongBrowser::onScoreContextMenu()
         // this is nice because it updates the songbrowser scorebrowser too (so if the user closes the top ranks screen
         // everything is in sync, even for the currently selected beatmap)
         m_osu->getSongBrowser()->onScoreContextMenu(this, 2);
@@ -718,7 +704,7 @@ void OsuUISongBrowserScoreButton::onDeleteScoreConfirmed(UString text, int id) {
     }
 }
 
-void OsuUISongBrowserScoreButton::setScore(const OsuDatabase::Score &score, const OsuDatabaseBeatmap *diff2, int index,
+void OsuUISongBrowserScoreButton::setScore(const Score &score, const OsuDatabaseBeatmap *diff2, int index,
                                            UString titleString, float weight) {
     m_score = score;
     m_iScoreIndexNumber = index;
@@ -882,21 +868,21 @@ bool OsuUISongBrowserScoreButton::isContextMenuVisible() {
     return (m_contextMenu != NULL && m_contextMenu->isVisible());
 }
 
-OsuSkinImage *OsuUISongBrowserScoreButton::getGradeImage(Osu *osu, OsuScore::GRADE grade) {
+OsuSkinImage *OsuUISongBrowserScoreButton::getGradeImage(Osu *osu, Score::Grade grade) {
     switch(grade) {
-        case OsuScore::GRADE::GRADE_XH:
+        case Score::Grade::XH:
             return osu->getSkin()->getRankingXHsmall();
-        case OsuScore::GRADE::GRADE_SH:
+        case Score::Grade::SH:
             return osu->getSkin()->getRankingSHsmall();
-        case OsuScore::GRADE::GRADE_X:
+        case Score::Grade::X:
             return osu->getSkin()->getRankingXsmall();
-        case OsuScore::GRADE::GRADE_S:
+        case Score::Grade::S:
             return osu->getSkin()->getRankingSsmall();
-        case OsuScore::GRADE::GRADE_A:
+        case Score::Grade::A:
             return osu->getSkin()->getRankingAsmall();
-        case OsuScore::GRADE::GRADE_B:
+        case Score::Grade::B:
             return osu->getSkin()->getRankingBsmall();
-        case OsuScore::GRADE::GRADE_C:
+        case Score::Grade::C:
             return osu->getSkin()->getRankingCsmall();
         default:
             return osu->getSkin()->getRankingDsmall();

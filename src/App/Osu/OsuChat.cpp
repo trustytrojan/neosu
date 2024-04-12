@@ -18,7 +18,7 @@
 #include "OsuPromptScreen.h"
 #include "OsuRoom.h"
 #include "OsuSkin.h"
-#include "OsuSongBrowser2.h"
+#include "OsuSongBrowser.h"
 #include "OsuUIButton.h"
 #include "OsuUIUserContextMenu.h"
 #include "RenderTarget.h"

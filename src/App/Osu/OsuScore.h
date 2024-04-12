@@ -8,7 +8,7 @@
 #ifndef OSUSCORE_H
 #define OSUSCORE_H
 
-#include "cbase.h"
+#include "Score.h"
 
 class ConVar;
 
@@ -18,7 +18,7 @@ class OsuHitObject;
 
 class OsuScore {
    public:
-    static constexpr const int VERSION = 20220902;
+    static constexpr const int VERSION = 20240412;
 
     enum class HIT {
         // score
@@ -40,22 +40,9 @@ class OsuScore {
         HIT_SPINNERBONUS
     };
 
-    enum class GRADE {
-        GRADE_XH,
-        GRADE_SH,
-        GRADE_X,
-        GRADE_S,
-        GRADE_A,
-        GRADE_B,
-        GRADE_C,
-        GRADE_D,
-        GRADE_F,
-        GRADE_N  // means "no grade"
-    };
-
     static float calculateAccuracy(int num300s, int num100s, int num50s, int numMisses);
-    static GRADE calculateGrade(int num300s, int num100s, int num50s, int numMisses, bool modHidden,
-                                bool modFlashlight);
+    static Score::Grade calculateGrade(int num300s, int num100s, int num50s, int numMisses, bool modHidden,
+                                       bool modFlashlight);
 
    public:
     OsuScore(Osu *osu);
@@ -89,7 +76,7 @@ class OsuScore {
     inline int getIndex() const { return m_iIndex; }
 
     unsigned long long getScore();
-    inline GRADE getGrade() const { return m_grade; }
+    inline Score::Grade getGrade() const { return m_grade; }
     inline int getCombo() const { return m_iCombo; }
     inline int getComboMax() const { return m_iComboMax; }
     inline int getComboFull() const { return m_iComboFull; }
@@ -134,7 +121,7 @@ class OsuScore {
     std::vector<HIT> m_hitresults;
     std::vector<int> m_hitdeltas;
 
-    GRADE m_grade;
+    Score::Grade m_grade;
 
     float m_fStarsTomTotal;
     float m_fStarsTomAim;

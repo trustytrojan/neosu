@@ -104,7 +104,7 @@ class OsuBeatmap {
                     // clicking on a beatmap)
     void selectDifficulty2(OsuDatabaseBeatmap *difficulty2);
     void deselect();  // stops + unloads the currently loaded music and deletes all hitobjects
-    bool watch(std::vector<OsuReplay::Frame> replay);
+    bool watch(Score score);
     bool play();
     void restart(bool quick = false);
     void pause(bool quitIfWaiting = true);

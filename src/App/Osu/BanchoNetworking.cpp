@@ -18,7 +18,7 @@
 #include "OsuLobby.h"
 #include "OsuOptionsMenu.h"
 #include "OsuRoom.h"
-#include "OsuSongBrowser2.h"
+#include "OsuSongBrowser.h"
 #include "OsuUIAvatar.h"
 #include "OsuUIButton.h"
 #include "miniz.h"
@@ -380,23 +380,28 @@ static void handle_api_response(Packet packet) {
         }
 
         case GET_REPLAY: {
-            auto replay_frames = OsuReplay::get_frames(packet.memory, packet.size);
-            if(replay_frames.empty()) {
+            if(packet.size == 0) {
                 // Most likely, 404
                 bancho.osu->m_notificationOverlay->addNotification("Failed to download replay");
                 break;
             }
 
-            bancho.osu->replay_info = *((ReplayExtraInfo *)packet.extra);
-            auto diff2_md5 = bancho.osu->replay_info.diff2_md5;
-            auto beatmap = bancho.osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(diff2_md5);
-            if(beatmap == nullptr) {
-                // XXX: Auto-download beatmap
-                bancho.osu->m_notificationOverlay->addNotification("Missing beatmap for this replay");
-            } else {
-                bancho.osu->getSongBrowser()->onDifficultySelected(beatmap, false);
-                bancho.osu->getSelectedBeatmap()->watch(replay_frames);
+            Score *score = (Score *)packet.extra;
+            std::stringstream replay_path;
+            replay_path << MCENGINE_DATA_DIR "replays/" << score->server << "/" << score->unixTimestamp
+                        << ".replay.lzma";
+
+            // XXX: this is blocking main thread
+            auto replay_path_str = replay_path.str();
+            FILE *replay_file = fopen(replay_path_str.c_str(), "wb");
+            if(replay_file == NULL) {
+                bancho.osu->m_notificationOverlay->addNotification("Failed to save replay");
+                break;
             }
+
+            fwrite(packet.memory, packet.size, 1, replay_file);
+            fclose(replay_file);
+            OsuReplay::load_and_watch(*score);
             break;
         }
 

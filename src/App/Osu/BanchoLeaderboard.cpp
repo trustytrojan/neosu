@@ -13,10 +13,11 @@
 #include "Engine.h"
 #include "OsuDatabase.h"
 #include "OsuModSelector.h"
-#include "OsuSongBrowser2.h"
+#include "OsuSongBrowser.h"
 
-OsuDatabase::Score parse_score(char *score_line) {
-    OsuDatabase::Score score;
+Score parse_score(char *score_line) {
+    Score score;
+    score.server = bancho.endpoint.toUtf8();
     score.isLegacyScore = true;
     score.isImportedLegacyScore = true;
     score.speedMultiplier = 1.0;
@@ -81,8 +82,6 @@ OsuDatabase::Score parse_score(char *score_line) {
     str = strtok_r(NULL, "|", &saveptr);
     if(!str) return score;
     score.unixTimestamp = strtoul(str, NULL, 10);
-
-    // And we do nothing with has_replay
 
     // Set username for given user id, since we now know both
     auto user = get_user_info(score.player_id);
@@ -156,7 +155,7 @@ void process_leaderboard_response(Packet response) {
     //       you actually received the data if you plan on using it.
     OnlineMapInfo info = {0};
     MD5Hash beatmap_hash = (char *)response.extra;
-    std::vector<OsuDatabase::Score> scores;
+    std::vector<Score> scores;
     char *body = (char *)response.memory;
 
     char *ranked_status = strtok_x('|', &body);
@@ -195,7 +194,7 @@ void process_leaderboard_response(Packet response) {
 
     char *score_line = NULL;
     while((score_line = strtok_x('\n', &body))[0] != '\0') {
-        OsuDatabase::Score score = parse_score(score_line);
+        Score score = parse_score(score_line);
         score.md5hash = beatmap_hash;
         scores.push_back(score);
     }

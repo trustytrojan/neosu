@@ -11,12 +11,12 @@
 #include "OsuScore.h"
 #include "OsuUISongBrowserButton.h"
 
-class OsuSongBrowser2;
+class OsuSongBrowser;
 class OsuDatabaseBeatmap;
 
 class OsuUISongBrowserSongButton : public OsuUISongBrowserButton {
    public:
-    OsuUISongBrowserSongButton(Osu *osu, OsuSongBrowser2 *songBrowser, CBaseUIScrollView *view,
+    OsuUISongBrowserSongButton(Osu *osu, OsuSongBrowser *songBrowser, CBaseUIScrollView *view,
                                OsuUIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,
                                UString name, OsuDatabaseBeatmap *databaseBeatmap);
     virtual ~OsuUISongBrowserSongButton();
@@ -64,7 +64,7 @@ class OsuUISongBrowserSongButton : public OsuUISongBrowserButton {
     UString m_sTitle;
     UString m_sArtist;
     UString m_sMapper;
-    OsuScore::GRADE m_grade;
+    Score::Grade m_grade;
     bool m_bHasGrade;
 
     float m_fTextOffset;

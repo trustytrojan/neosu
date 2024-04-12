@@ -257,6 +257,9 @@ void Engine::loadApp() {
     if(!env->directoryExists(MCENGINE_DATA_DIR "maps")) {
         env->createDirectory(MCENGINE_DATA_DIR "maps");
     }
+    if(!env->directoryExists(MCENGINE_DATA_DIR "replays")) {
+        env->createDirectory(MCENGINE_DATA_DIR "replays");
+    }
     if(!env->directoryExists(MCENGINE_DATA_DIR "screenshots")) {
         env->createDirectory(MCENGINE_DATA_DIR "screenshots");
     }

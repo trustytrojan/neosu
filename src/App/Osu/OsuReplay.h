@@ -2,6 +2,8 @@
 #include "ModFlags.h"
 #include "cbase.h"
 
+struct Score;
+
 namespace OsuReplay {
 struct Frame {
     int64_t cur_music_pos;
@@ -59,5 +61,8 @@ BEATMAP_VALUES getBeatmapValuesForModsLegacy(int modsLegacy, float legacyAR, flo
 
 Info from_bytes(uint8_t* data, int s_data);
 std::vector<Frame> get_frames(uint8_t* replay_data, int32_t replay_size);
+void compress_frames(const std::vector<Frame>& frames, uint8_t** compressed, size_t* s_compressed);
+bool load_from_disk(Score* score);
+void load_and_watch(Score score);
 
 }  // namespace OsuReplay

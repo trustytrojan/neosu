@@ -22,7 +22,7 @@ class OsuUIRankingScreenRankingPanel : public CBaseUIImage {
     virtual void draw(Graphics *g);
 
     void setScore(OsuScore *score);
-    void setScore(OsuDatabase::Score score);
+    void setScore(Score score);
 
    private:
     void drawHitImage(Graphics *g, OsuSkinImage *img, float scale, Vector2 pos);

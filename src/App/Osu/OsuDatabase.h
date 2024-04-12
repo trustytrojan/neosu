@@ -11,6 +11,7 @@
 #include "BanchoProtocol.h"  // Packet
 #include "OsuReplay.h"
 #include "OsuScore.h"
+#include "Score.h"
 #include "UString.h"
 #include "cbase.h"
 
@@ -46,105 +47,6 @@ class OsuDatabase {
         std::vector<std::pair<OsuDatabaseBeatmap *, std::vector<OsuDatabaseBeatmap *>>> beatmaps;
     };
 
-    struct Score {
-        bool isLegacyScore;  // used for identifying loaded osu! scores (which don't have any custom data available)
-        bool isImportedLegacyScore;  // used for identifying imported osu! scores (which were previously legacy scores,
-                                     // so they don't have any
-                                     // numSliderBreaks/unstableRate/hitErrorAvgMin/hitErrorAvgMax)
-        int version;
-        uint64_t unixTimestamp;
-
-        uint32_t player_id = 0;
-        UString playerName;
-        bool passed = false;
-        bool ragequit = false;
-        OsuScore::GRADE grade = OsuScore::GRADE::GRADE_N;
-        OsuDatabaseBeatmap *diff2;
-        uint64_t play_time_ms = 0;
-        std::vector<OsuReplay::Frame> replay;
-
-        bool has_replay = false;
-        uint64_t online_score_id = 0;
-
-        int num300s;
-        int num100s;
-        int num50s;
-        int numGekis;
-        int numKatus;
-        int numMisses;
-
-        unsigned long long score;
-        int comboMax;
-        bool perfect;
-        int modsLegacy;
-
-        // custom
-        int numSliderBreaks;
-        float pp;
-        float unstableRate;
-        float hitErrorAvgMin;
-        float hitErrorAvgMax;
-        float starsTomTotal;
-        float starsTomAim;
-        float starsTomSpeed;
-        float speedMultiplier;
-        float CS, AR, OD, HP;
-        int maxPossibleCombo;
-        int numHitObjects;
-        int numCircles;
-        std::string experimentalModsConVars;
-
-        // runtime
-        unsigned long long sortHack;
-        MD5Hash md5hash;
-
-        bool isLegacyScoreEqualToImportedLegacyScore(const OsuDatabase::Score &importedLegacyScore) const {
-            if(!isLegacyScore) return false;
-            if(!importedLegacyScore.isImportedLegacyScore) return false;
-
-            const bool isScoreValueEqual = (score == importedLegacyScore.score);
-            const bool isTimestampEqual = (unixTimestamp == importedLegacyScore.unixTimestamp);
-            const bool isComboMaxEqual = (comboMax == importedLegacyScore.comboMax);
-            const bool isModsLegacyEqual = (modsLegacy == importedLegacyScore.modsLegacy);
-            const bool isNum300sEqual = (num300s == importedLegacyScore.num300s);
-            const bool isNum100sEqual = (num100s == importedLegacyScore.num100s);
-            const bool isNum50sEqual = (num50s == importedLegacyScore.num50s);
-            const bool isNumGekisEqual = (numGekis == importedLegacyScore.numGekis);
-            const bool isNumKatusEqual = (numKatus == importedLegacyScore.numKatus);
-            const bool isNumMissesEqual = (numMisses == importedLegacyScore.numMisses);
-
-            return (isScoreValueEqual && isTimestampEqual && isComboMaxEqual && isModsLegacyEqual && isNum300sEqual &&
-                    isNum100sEqual && isNum50sEqual && isNumGekisEqual && isNumKatusEqual && isNumMissesEqual);
-        }
-
-        bool isScoreEqualToCopiedScoreIgnoringPlayerName(const OsuDatabase::Score &copiedScore) const {
-            const bool isScoreValueEqual = (score == copiedScore.score);
-            const bool isTimestampEqual = (unixTimestamp == copiedScore.unixTimestamp);
-            const bool isComboMaxEqual = (comboMax == copiedScore.comboMax);
-            const bool isModsLegacyEqual = (modsLegacy == copiedScore.modsLegacy);
-            const bool isNum300sEqual = (num300s == copiedScore.num300s);
-            const bool isNum100sEqual = (num100s == copiedScore.num100s);
-            const bool isNum50sEqual = (num50s == copiedScore.num50s);
-            const bool isNumGekisEqual = (numGekis == copiedScore.numGekis);
-            const bool isNumKatusEqual = (numKatus == copiedScore.numKatus);
-            const bool isNumMissesEqual = (numMisses == copiedScore.numMisses);
-
-            const bool isSpeedMultiplierEqual = (speedMultiplier == copiedScore.speedMultiplier);
-            const bool isCSEqual = (CS == copiedScore.CS);
-            const bool isAREqual = (AR == copiedScore.AR);
-            const bool isODEqual = (OD == copiedScore.OD);
-            const bool isHPEqual = (HP == copiedScore.HP);
-            const bool areExperimentalModsConVarsEqual =
-                (experimentalModsConVars == copiedScore.experimentalModsConVars);
-
-            return (isScoreValueEqual && isTimestampEqual && isComboMaxEqual && isModsLegacyEqual && isNum300sEqual &&
-                    isNum100sEqual && isNum50sEqual && isNumGekisEqual && isNumKatusEqual && isNumMissesEqual
-
-                    && isSpeedMultiplierEqual && isCSEqual && isAREqual && isODEqual && isHPEqual &&
-                    areExperimentalModsConVarsEqual);
-        }
-    };
-
     struct PlayerStats {
         UString name;
         float pp;
@@ -162,7 +64,7 @@ class OsuDatabase {
 
     struct SCORE_SORTING_COMPARATOR {
         virtual ~SCORE_SORTING_COMPARATOR() { ; }
-        virtual bool operator()(OsuDatabase::Score const &a, OsuDatabase::Score const &b) const = 0;
+        virtual bool operator()(Score const &a, Score const &b) const = 0;
     };
 
     struct SCORE_SORTING_METHOD {
@@ -182,7 +84,7 @@ class OsuDatabase {
 
     OsuDatabaseBeatmap *addBeatmap(std::string beatmapFolderPath);
 
-    int addScore(MD5Hash beatmapMD5Hash, OsuDatabase::Score score);
+    int addScore(MD5Hash beatmapMD5Hash, Score score);
     void deleteScore(MD5Hash beatmapMD5Hash, uint64_t scoreUnixTimestamp);
     void sortScores(MD5Hash beatmapMD5Hash);
     void forceScoreUpdateOnNextCalculatePlayerStats() { m_bDidScoresChangeForStats = true; }
@@ -231,7 +133,7 @@ class OsuDatabase {
     static ConVar *m_name_ref;
     static ConVar *m_osu_songbrowser_scores_sortingtype_ref;
 
-    void addScoreRaw(const MD5Hash &beatmapMD5Hash, const OsuDatabase::Score &score);
+    void addScoreRaw(const MD5Hash &beatmapMD5Hash, const Score &score);
 
     std::string parseLegacyCfgBeatmapDirectoryParameter();
     void scheduleLoadRaw();

@@ -16,7 +16,7 @@
 #include "OsuPauseMenu.h"
 #include "OsuRankingScreen.h"
 #include "OsuSkin.h"
-#include "OsuSongBrowser2.h"
+#include "OsuSongBrowser.h"
 #include "OsuUIVolumeSlider.h"
 #include "OsuUserStatsScreen.h"
 #include "Sound.h"

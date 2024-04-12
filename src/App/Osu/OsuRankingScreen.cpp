@@ -29,7 +29,7 @@
 #include "OsuScore.h"
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
-#include "OsuSongBrowser2.h"
+#include "OsuSongBrowser.h"
 #include "OsuTooltipOverlay.h"
 #include "OsuUIRankingScreenInfoLabel.h"
 #include "OsuUIRankingScreenRankingPanel.h"
@@ -207,7 +207,7 @@ OsuRankingScreen::OsuRankingScreen(Osu *osu) : OsuScreenBackable(osu) {
     addBaseUIElement(m_rankingScrollDownInfoButton);
     m_fRankingScrollDownInfoButtonAlphaAnim = 1.0f;
 
-    setGrade(OsuScore::GRADE::GRADE_D);
+    setGrade(Score::Grade::D);
     setIndex(0);  // TEMP
 
     m_fUnstableRate = 0.0f;
@@ -251,7 +251,7 @@ void OsuRankingScreen::draw(Graphics *g) {
     if(!m_bVisible) return;
 
     // draw background image
-    if(osu_draw_rankingscreen_background_image.getBool()) OsuSongBrowser2::drawSelectedBeatmapBackgroundImage(g, m_osu);
+    if(osu_draw_rankingscreen_background_image.getBool()) OsuSongBrowser::drawSelectedBeatmapBackgroundImage(g, m_osu);
 
     m_rankings->draw(g);
 
@@ -499,7 +499,7 @@ void OsuRankingScreen::setScore(OsuScore *score) {
     m_bIsUnranked = score->isUnranked();
 }
 
-void OsuRankingScreen::setScore(OsuDatabase::Score score, UString dateTime) {
+void OsuRankingScreen::setScore(Score score, UString dateTime) {
     m_bIsLegacyScore = score.isLegacyScore;
     m_bIsImportedLegacyScore = score.isImportedLegacyScore;
     m_bIsUnranked = false;
@@ -649,36 +649,36 @@ void OsuRankingScreen::onBack() {
 
 void OsuRankingScreen::onScrollDownClicked() { m_rankings->scrollToBottom(); }
 
-void OsuRankingScreen::setGrade(OsuScore::GRADE grade) {
+void OsuRankingScreen::setGrade(Score::Grade grade) {
     m_grade = grade;
 
     Vector2 hardcodedOsuRankingGradeImageSize = Vector2(369, 422);
     switch(grade) {
-        case OsuScore::GRADE::GRADE_XH:
+        case Score::Grade::XH:
             hardcodedOsuRankingGradeImageSize *= (m_osu->getSkin()->isRankingXH2x() ? 2.0f : 1.0f);
             m_rankingGrade->setImage(m_osu->getSkin()->getRankingXH());
             break;
-        case OsuScore::GRADE::GRADE_SH:
+        case Score::Grade::SH:
             hardcodedOsuRankingGradeImageSize *= (m_osu->getSkin()->isRankingSH2x() ? 2.0f : 1.0f);
             m_rankingGrade->setImage(m_osu->getSkin()->getRankingSH());
             break;
-        case OsuScore::GRADE::GRADE_X:
+        case Score::Grade::X:
             hardcodedOsuRankingGradeImageSize *= (m_osu->getSkin()->isRankingX2x() ? 2.0f : 1.0f);
             m_rankingGrade->setImage(m_osu->getSkin()->getRankingX());
             break;
-        case OsuScore::GRADE::GRADE_S:
+        case Score::Grade::S:
             hardcodedOsuRankingGradeImageSize *= (m_osu->getSkin()->isRankingS2x() ? 2.0f : 1.0f);
             m_rankingGrade->setImage(m_osu->getSkin()->getRankingS());
             break;
-        case OsuScore::GRADE::GRADE_A:
+        case Score::Grade::A:
             hardcodedOsuRankingGradeImageSize *= (m_osu->getSkin()->isRankingA2x() ? 2.0f : 1.0f);
             m_rankingGrade->setImage(m_osu->getSkin()->getRankingA());
             break;
-        case OsuScore::GRADE::GRADE_B:
+        case Score::Grade::B:
             hardcodedOsuRankingGradeImageSize *= (m_osu->getSkin()->isRankingB2x() ? 2.0f : 1.0f);
             m_rankingGrade->setImage(m_osu->getSkin()->getRankingB());
             break;
-        case OsuScore::GRADE::GRADE_C:
+        case Score::Grade::C:
             hardcodedOsuRankingGradeImageSize *= (m_osu->getSkin()->isRankingC2x() ? 2.0f : 1.0f);
             m_rankingGrade->setImage(m_osu->getSkin()->getRankingC());
             break;
