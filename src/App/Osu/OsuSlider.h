@@ -48,7 +48,7 @@ class OsuSlider : public OsuHitObject {
     Vector2 getOriginalRawPosAt(long pos);
     inline Vector2 getAutoCursorPos(long curPos) { return m_vCurPoint; }
 
-    virtual void onClickEvent(std::vector<long> &clicks);
+    virtual void onClickEvent(std::vector<Click> &clicks);
     virtual void onReset(long curPos);
 
     void rebuildVertexBuffer(bool useRawCoords = false);

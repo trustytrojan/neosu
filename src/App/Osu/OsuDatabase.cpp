@@ -780,22 +780,21 @@ std::vector<UString> OsuDatabase::getPlayerNamesWithPPScores() {
         keys.push_back(kv.first);
     }
 
-    // bit of a useless double string conversion going on here, but whatever
-
-    std::unordered_set<UString> tempNames;
+    std::unordered_set<std::string> tempNames;
     for(auto &key : keys) {
         for(Score &score : m_scores[key]) {
-            if(!score.isLegacyScore) tempNames.insert(UString(score.playerName.toUtf8()));
+            if(!score.isLegacyScore) tempNames.insert(score.playerName);
         }
     }
 
     // always add local user, even if there were no scores
-    tempNames.insert(UString(m_name_ref->getString().toUtf8()));
+    auto local_name = m_name_ref->getString();
+    tempNames.insert(std::string(local_name.toUtf8()));
 
     std::vector<UString> names;
     names.reserve(tempNames.size());
     for(auto k : tempNames) {
-        if(k.length() > 0) names.push_back(k);
+        if(k.length() > 0) names.push_back(UString(k.c_str()));
     }
 
     return names;
@@ -804,23 +803,22 @@ std::vector<UString> OsuDatabase::getPlayerNamesWithPPScores() {
 std::vector<UString> OsuDatabase::getPlayerNamesWithScoresForUserSwitcher() {
     const bool includeLegacyNames = osu_user_switcher_include_legacy_scores_for_names.getBool();
 
-    // bit of a useless double string conversion going on here, but whatever
-
-    std::unordered_set<UString> tempNames;
+    std::unordered_set<std::string> tempNames;
     for(auto kv : m_scores) {
         const MD5Hash &key = kv.first;
         for(Score &score : m_scores[key]) {
-            if(!score.isLegacyScore || includeLegacyNames) tempNames.insert(UString(score.playerName.toUtf8()));
+            if(!score.isLegacyScore || includeLegacyNames) tempNames.insert(score.playerName);
         }
     }
 
     // always add local user, even if there were no scores
-    tempNames.insert(UString(m_name_ref->getString().toUtf8()));
+    auto local_name = m_name_ref->getString();
+    tempNames.insert(std::string(local_name.toUtf8()));
 
     std::vector<UString> names;
     names.reserve(tempNames.size());
     for(auto k : tempNames) {
-        if(k.length() > 0) names.push_back(k);
+        if(k.length() > 0) names.push_back(UString(k.c_str()));
     }
 
     return names;
@@ -857,11 +855,13 @@ OsuDatabase::PlayerPPScores OsuDatabase::getPlayerPPScores(UString playerName) {
             bool foundValidScore = false;
             float prevPP = -1.0f;
             for(Score &score : m_scores[key]) {
+                UString uName = UString(score.playerName.c_str());
+
                 if(!score.isLegacyScore &&
                    (osu_user_include_relax_and_autopilot_for_stats.getBool()
                         ? true
                         : !((score.modsLegacy & ModFlags::Relax) || (score.modsLegacy & ModFlags::Autopilot))) &&
-                   score.playerName == playerName) {
+                   uName == playerName) {
                     foundValidScore = true;
 
                     totalScore += score.score;
@@ -1851,7 +1851,7 @@ void OsuDatabase::loadScores() {
                         sc.unixTimestamp = read_int64(&db);
 
                         // default
-                        sc.playerName = read_string(&db);
+                        sc.playerName = read_stdstring(&db);
 
                         sc.num300s = read_short(&db);
                         sc.num100s = read_short(&db);
@@ -1973,7 +1973,7 @@ void OsuDatabase::loadScores() {
                     sc.version = read_int32(&db);
                     skip_string(&db);  // beatmap hash (already have it)
 
-                    sc.playerName = read_string(&db);
+                    sc.playerName = read_stdstring(&db);
                     skip_string(&db);  // replay hash (don't use it)
 
                     sc.num300s = read_short(&db);
@@ -2107,7 +2107,7 @@ void OsuDatabase::saveScores() {
             write_int64(&db, score.unixTimestamp);
 
             // default
-            write_string(&db, score.playerName);
+            write_string(&db, score.playerName.c_str());
 
             write_short(&db, score.num300s);
             write_short(&db, score.num100s);
@@ -2561,9 +2561,9 @@ void OsuDatabase::onScoresRename(UString args) {
         for(size_t i = 0; i < kv.second.size(); i++) {
             Score &score = kv.second[i];
 
-            if(!score.isLegacyScore && score.playerName == playerName) {
+            if(!score.isLegacyScore && UString(score.playerName.c_str()) == playerName) {
                 numRenamedScores++;
-                score.playerName = args;
+                score.playerName = args.toUtf8();
             }
         }
     }
@@ -2628,7 +2628,7 @@ void OsuDatabase::onScoresExport() {
                 out << score.unixTimestamp;
                 out << ",";
 
-                out << score.playerName.toUtf8();
+                out << score.playerName;
                 out << ",";
 
                 out << score.num300s;

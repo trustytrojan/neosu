@@ -80,7 +80,7 @@ class OsuHitObject {
     inline bool isBlocked() const { return m_bBlocked; }
     inline bool hasMisAimed() const { return m_bMisAim; }
 
-    virtual void onClickEvent(std::vector<long> &clicks) { ; }
+    virtual void onClickEvent(std::vector<Click> &clicks) { ; }
     virtual void onReset(long curPos);
 
    protected:

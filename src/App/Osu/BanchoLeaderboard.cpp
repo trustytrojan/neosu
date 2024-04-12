@@ -29,7 +29,7 @@ Score parse_score(char *score_line) {
 
     str = strtok_r(NULL, "|", &saveptr);
     if(!str) return score;
-    score.playerName = UString(str);
+    score.playerName = str;
 
     str = strtok_r(NULL, "|", &saveptr);
     if(!str) return score;
@@ -85,7 +85,7 @@ Score parse_score(char *score_line) {
 
     // Set username for given user id, since we now know both
     auto user = get_user_info(score.player_id);
-    user->name = score.playerName;
+    user->name = UString(score.playerName.c_str());
 
     // Mark as a player. Setting this also makes the has_user_info check pass,
     // which unlocks context menu actions such as sending private messages.

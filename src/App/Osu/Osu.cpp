@@ -825,7 +825,7 @@ void Osu::update() {
         m_backgroundImageHandler->scheduleFreezeCache();
 
         // scrubbing/seeking
-        if(m_bSeekKey) {
+        if(m_bSeekKey || getSelectedBeatmap()->m_bIsWatchingReplay) {
             if(!bancho.is_playing_a_multi_map()) {
                 m_bSeeking = true;
                 const float mousePosX = (int)engine->getMouse()->getPos().x;
@@ -843,15 +843,17 @@ void Osu::update() {
                         // special case: keep player invulnerable even if scrubbing position does not change
                         getSelectedBeatmap()->resetScore();
                     }
-                } else
+                } else {
                     m_fPrevSeekMousePosX = -1.0f;
+                }
 
-                if(engine->getMouse()->isRightDown())
+                if(engine->getMouse()->isRightDown()) {
                     m_fQuickSaveTime = clamp<float>((float)((getSelectedBeatmap()->getStartTimePlayable() +
                                                              getSelectedBeatmap()->getLengthPlayable()) *
                                                             percent) /
                                                         (float)getSelectedBeatmap()->getLength(),
                                                     0.0f, 1.0f);
+                }
             }
         }
 
@@ -2011,7 +2013,7 @@ void Osu::onFocusGained() {
 
 void Osu::onFocusLost() {
     if(isInPlayMode() && !getSelectedBeatmap()->isPaused() && osu_pause_on_focus_loss.getBool()) {
-        if(!bancho.is_playing_a_multi_map()) {
+        if(!bancho.is_playing_a_multi_map() && !getSelectedBeatmap()->m_bIsWatchingReplay) {
             getSelectedBeatmap()->pause(false);
             m_pauseMenu->setVisible(true);
             m_modSelector->setVisible(false);
@@ -2163,7 +2165,8 @@ void Osu::updateConfineCursor() {
 
     if((osu_confine_cursor_fullscreen.getBool() && env->isFullscreen()) ||
        (osu_confine_cursor_windowed.getBool() && !env->isFullscreen()) ||
-       (isInPlayMode() && !m_pauseMenu->isVisible() && !getModAuto() && !getModAutopilot()))
+       (isInPlayMode() && !m_pauseMenu->isVisible() && !getModAuto() && !getModAutopilot() &&
+        !getSelectedBeatmap()->m_bIsWatchingReplay))
         env->setCursorClip(true, McRect());
     else
         env->setCursorClip(false, McRect());

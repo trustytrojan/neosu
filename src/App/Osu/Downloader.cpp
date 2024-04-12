@@ -195,7 +195,7 @@ void download(const char* url, float* progress, std::vector<uint8_t>& out, int* 
         if(result->url == url) {
             *progress = result->progress;
             *response_code = result->response_code;
-            if(result->progress == -1.f || result->progress == 1.f) {
+            if(*response_code != 0) {
                 out = result->data;
                 delete matching_thread->downloads[i];
                 matching_thread->downloads.erase(matching_thread->downloads.begin() + i);

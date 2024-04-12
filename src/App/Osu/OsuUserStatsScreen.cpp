@@ -83,12 +83,13 @@ class OsuUserStatsScreenBackgroundPPRecalculator : public Resource {
         std::unordered_map<MD5Hash, std::vector<Score>> *scores = m_osu->getSongBrowser()->getDatabase()->getScores();
 
         // count number of scores to recalculate for UI
+        std::string sUsername(m_sUserName.toUtf8());
         size_t numScoresToRecalculate = 0;
         for(const auto &kv : *scores) {
             for(size_t i = 0; i < kv.second.size(); i++) {
                 const Score &score = kv.second[i];
 
-                if((!score.isLegacyScore || m_bImportLegacyScores) && score.playerName == m_sUserName)
+                if((!score.isLegacyScore || m_bImportLegacyScores) && score.playerName == sUsername)
                     numScoresToRecalculate++;
             }
         }
@@ -101,7 +102,7 @@ class OsuUserStatsScreenBackgroundPPRecalculator : public Resource {
             for(size_t i = 0; i < kv.second.size(); i++) {
                 Score &score = kv.second[i];
 
-                if((!score.isLegacyScore || m_bImportLegacyScores) && score.playerName == m_sUserName) {
+                if((!score.isLegacyScore || m_bImportLegacyScores) && score.playerName == sUsername) {
                     if(m_bInterrupted.load()) break;
                     if(score.md5hash.hash[0] == 0) continue;
 
@@ -654,8 +655,10 @@ void OsuUserStatsScreen::onCopyAllScoresConfirmed(UString text, int id) {
     if(m_sCopyAllScoresFromUser.length() < 1) return;
 
     const UString &playerNameToCopyInto = m_name_ref->getString();
+    std::string splayerNameToCopyInto(playerNameToCopyInto.toUtf8());
 
     if(playerNameToCopyInto.length() < 1 || m_sCopyAllScoresFromUser == playerNameToCopyInto) return;
+    std::string sCopyAllScoresFromUser(m_sCopyAllScoresFromUser.toUtf8());
 
     debugLog("Copying all scores from \"%s\" into \"%s\"\n", m_sCopyAllScoresFromUser.toUtf8(),
              playerNameToCopyInto.toUtf8());
@@ -672,7 +675,7 @@ void OsuUserStatsScreen::onCopyAllScoresConfirmed(UString text, int id) {
 
             // NOTE: only ever copy McOsu scores
             if(!existingScore.isLegacyScore) {
-                if(existingScore.playerName == m_sCopyAllScoresFromUser) {
+                if(existingScore.playerName == sCopyAllScoresFromUser) {
                     // check if this user already has this exact same score (copied previously) and don't copy if that
                     // is the case
                     bool alreadyCopied = false;
@@ -682,7 +685,7 @@ void OsuUserStatsScreen::onCopyAllScoresConfirmed(UString text, int id) {
                         if(j == i) continue;
 
                         if(!alreadyCopiedScore.isLegacyScore) {
-                            if(alreadyCopiedScore.playerName == playerNameToCopyInto) {
+                            if(alreadyCopiedScore.playerName == splayerNameToCopyInto) {
                                 if(existingScore.isScoreEqualToCopiedScoreIgnoringPlayerName(alreadyCopiedScore)) {
                                     alreadyCopied = true;
                                     break;
@@ -701,7 +704,7 @@ void OsuUserStatsScreen::onCopyAllScoresConfirmed(UString text, int id) {
             if(Osu::debug->getBool()) debugLog("Copying %i for %s\n", (int)tempScoresToCopy.size(), kv.first.toUtf8());
 
             for(size_t i = 0; i < tempScoresToCopy.size(); i++) {
-                tempScoresToCopy[i].playerName = playerNameToCopyInto;  // take ownership of this copied score
+                tempScoresToCopy[i].playerName = splayerNameToCopyInto;  // take ownership of this copied score
                 tempScoresToCopy[i].sortHack =
                     m_osu->getSongBrowser()->getDatabase()->getAndIncrementScoreSortHackCounter();
 
@@ -745,6 +748,7 @@ void OsuUserStatsScreen::onDeleteAllScoresConfirmed(UString text, int id) {
     if(id != 1) return;
 
     const UString &playerName = m_name_ref->getString();
+    std::string splayerName(playerName.toUtf8());
 
     debugLog("Deleting all scores for \"%s\"\n", playerName.toUtf8());
 
@@ -757,7 +761,7 @@ void OsuUserStatsScreen::onDeleteAllScoresConfirmed(UString text, int id) {
 
             // NOTE: only ever delete McOsu scores
             if(!score.isLegacyScore) {
-                if(score.playerName == playerName) {
+                if(score.playerName == splayerName) {
                     kv.second.erase(kv.second.begin() + i);
                     i--;
                 }

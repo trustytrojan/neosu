@@ -505,7 +505,7 @@ void OsuRankingScreen::setScore(Score score, UString dateTime) {
     m_bIsUnranked = false;
 
     m_songInfo->setDate(dateTime);
-    m_songInfo->setPlayer(score.playerName);
+    m_songInfo->setPlayer(UString(score.playerName.c_str()));
 
     m_rankingPanel->setScore(score);
     setGrade(OsuScore::calculateGrade(score.num300s, score.num100s, score.num50s, score.numMisses,

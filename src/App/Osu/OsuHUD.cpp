@@ -1522,7 +1522,7 @@ std::vector<SCORE_ENTRY> OsuHUD::getCurrentScores() {
             SCORE_ENTRY scoreEntry;
             scoreEntry.entry_id = -(nb_slots + 1);
             scoreEntry.player_id = score.player_id;
-            scoreEntry.name = score.playerName;
+            scoreEntry.name = score.playerName.c_str();
             scoreEntry.combo = score.comboMax;
             scoreEntry.score = score.score;
             scoreEntry.accuracy =
@@ -2236,9 +2236,26 @@ void OsuHUD::drawTargetHeatmap(Graphics *g, float hitcircleDiameter) {
 void OsuHUD::drawScrubbingTimeline(Graphics *g, unsigned long beatmapTime, unsigned long beatmapLength,
                                    unsigned long beatmapLengthPlayable, unsigned long beatmapStartTimePlayable,
                                    float beatmapPercentFinishedPlayable, const std::vector<BREAK> &breaks) {
+    static Vector2 last_cursor_pos = engine->getMouse()->getPos();
+    static double last_cursor_movement = engine->getTime();
+    Vector2 new_cursor_pos = engine->getMouse()->getPos();
+    double new_cursor_movement = engine->getTime();
+    if(last_cursor_pos.x != new_cursor_pos.x || last_cursor_pos.y != new_cursor_pos.y) {
+        last_cursor_pos = new_cursor_pos;
+        last_cursor_movement = new_cursor_movement;
+    }
+
+    // Auto-hide scrubbing timeline when watching a replay
+    double galpha = 1.0f;
+    if(m_osu->getSelectedBeatmap()->m_bIsWatchingReplay) {
+        double time_since_last_move = new_cursor_movement - (last_cursor_movement + 1.0f);
+        galpha = fmax(0.f, fmin(1.0f - time_since_last_move, 1.0f));
+    }
+
     const float dpiScale = Osu::getUIScale(m_osu);
 
-    const Vector2 cursorPos = engine->getMouse()->getPos();
+    Vector2 cursorPos = engine->getMouse()->getPos();
+    cursorPos.y = m_osu->getScreenHeight() * 0.8;
 
     const Color grey = 0xffbbbbbb;
     const Color greyTransparent = 0xbbbbbbbb;
@@ -2303,8 +2320,7 @@ void OsuHUD::drawScrubbingTimeline(Graphics *g, unsigned long beatmapTime, unsig
                 const float offsetX =
                     ((float)startTimeMS / (float)strainStepMS) * strainWidth;  // compensate for startTimeMS
 
-                const float alpha = osu_hud_scrubbing_timeline_strains_alpha.getFloat();
-
+                const float alpha = osu_hud_scrubbing_timeline_strains_alpha.getFloat() * galpha;
                 const Color aimStrainColor =
                     COLORf(alpha, osu_hud_scrubbing_timeline_strains_aim_color_r.getInt() / 255.0f,
                            osu_hud_scrubbing_timeline_strains_aim_color_g.getInt() / 255.0f,
@@ -2361,6 +2377,7 @@ void OsuHUD::drawScrubbingTimeline(Graphics *g, unsigned long beatmapTime, unsig
 
     // breaks
     g->setColor(greyTransparent);
+    g->setAlpha(galpha);
     for(int i = 0; i < breaks.size(); i++) {
         const int width = std::max(
             (int)(m_osu->getScreenWidth() * clamp<float>(breaks[i].endPercent - breaks[i].startPercent, 0.0f, 1.0f)),
@@ -2370,8 +2387,10 @@ void OsuHUD::drawScrubbingTimeline(Graphics *g, unsigned long beatmapTime, unsig
 
     // line
     g->setColor(0xff000000);
+    g->setAlpha(galpha);
     g->drawLine(0, cursorPos.y + 1, m_osu->getScreenWidth(), cursorPos.y + 1);
     g->setColor(grey);
+    g->setAlpha(galpha);
     g->drawLine(0, cursorPos.y, m_osu->getScreenWidth(), cursorPos.y);
 
     // current time triangle
@@ -2380,9 +2399,11 @@ void OsuHUD::drawScrubbingTimeline(Graphics *g, unsigned long beatmapTime, unsig
     {
         g->translate(triangleTip.x + 1, triangleTip.y - m_osu->getSkin()->getSeekTriangle()->getHeight() / 2.0f + 1);
         g->setColor(0xff000000);
+        g->setAlpha(galpha);
         g->drawImage(m_osu->getSkin()->getSeekTriangle());
         g->translate(-1, -1);
         g->setColor(green);
+        g->setAlpha(galpha);
         g->drawImage(m_osu->getSkin()->getSeekTriangle());
     }
     g->popTransform();
@@ -2398,9 +2419,11 @@ void OsuHUD::drawScrubbingTimeline(Graphics *g, unsigned long beatmapTime, unsig
                 1,
             triangleTip.y - m_osu->getSkin()->getSeekTriangle()->getHeight() - currentTimeTopTextOffset + 1);
         g->setColor(0xff000000);
+        g->setAlpha(galpha);
         g->drawString(timeFont, currentTimeText);
         g->translate(-1, -1);
         g->setColor(green);
+        g->setAlpha(galpha);
         g->drawString(timeFont, currentTimeText);
     }
     g->popTransform();
@@ -2412,9 +2435,11 @@ void OsuHUD::drawScrubbingTimeline(Graphics *g, unsigned long beatmapTime, unsig
         g->translate((int)(startAndEndTimeTextOffset + 1),
                      (int)(triangleTip.y + startAndEndTimeTextOffset + timeFont->getHeight() + 1));
         g->setColor(0xff000000);
+        g->setAlpha(galpha);
         g->drawString(timeFont, startTimeText);
         g->translate(-1, -1);
         g->setColor(greyDark);
+        g->setAlpha(galpha);
         g->drawString(timeFont, startTimeText);
     }
     g->popTransform();
@@ -2427,9 +2452,11 @@ void OsuHUD::drawScrubbingTimeline(Graphics *g, unsigned long beatmapTime, unsig
             (int)(m_osu->getScreenWidth() - timeFont->getStringWidth(endTimeText) - startAndEndTimeTextOffset + 1),
             (int)(triangleTip.y + startAndEndTimeTextOffset + timeFont->getHeight() + 1));
         g->setColor(0xff000000);
+        g->setAlpha(galpha);
         g->drawString(timeFont, endTimeText);
         g->translate(-1, -1);
         g->setColor(greyDark);
+        g->setAlpha(galpha);
         g->drawString(timeFont, endTimeText);
     }
     g->popTransform();
@@ -2445,9 +2472,11 @@ void OsuHUD::drawScrubbingTimeline(Graphics *g, unsigned long beatmapTime, unsig
             g->translate(triangleTip.x + 1,
                          triangleTip.y + m_osu->getSkin()->getSeekTriangle()->getHeight() / 2.0f + 1);
             g->setColor(0xff000000);
+            g->setAlpha(galpha);
             g->drawImage(m_osu->getSkin()->getSeekTriangle());
             g->translate(-1, -1);
             g->setColor(grey);
+            g->setAlpha(galpha);
             g->drawImage(m_osu->getSkin()->getSeekTriangle());
         }
         g->popTransform();
@@ -2467,9 +2496,11 @@ void OsuHUD::drawScrubbingTimeline(Graphics *g, unsigned long beatmapTime, unsig
                       currentTimeTopTextOffset * std::max(1.0f, getCursorScaleFactor() * osu_cursor_scale.getFloat()) *
                           osu_hud_scrubbing_timeline_hover_tooltip_offset_multiplier.getFloat()));
             g->setColor(0xff000000);
+            g->setAlpha(galpha);
             g->drawString(timeFont, endTimeText);
             g->translate(-1, -1);
             g->setColor(grey);
+            g->setAlpha(galpha);
             g->drawString(timeFont, endTimeText);
         }
         g->popTransform();
@@ -2492,9 +2523,11 @@ void OsuHUD::drawScrubbingTimeline(Graphics *g, unsigned long beatmapTime, unsig
                       osu_hud_scrubbing_timeline_hover_tooltip_offset_multiplier.getFloat() * 2.0f -
                   1));
         g->setColor(0xff000000);
+        g->setAlpha(galpha);
         g->drawString(timeFont, hoverTimeText);
         g->translate(-1, -1);
         g->setColor(0xff666666);
+        g->setAlpha(galpha);
         g->drawString(timeFont, hoverTimeText);
     }
     g->popTransform();

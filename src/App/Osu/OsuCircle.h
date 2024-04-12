@@ -73,7 +73,7 @@ class OsuCircle : public OsuHitObject {
     Vector2 getOriginalRawPosAt(long pos) { return m_vOriginalRawPos; }
     Vector2 getAutoCursorPos(long curPos);
 
-    virtual void onClickEvent(std::vector<long> &clicks);
+    virtual void onClickEvent(std::vector<Click> &clicks);
     virtual void onReset(long curPos);
 
    private:

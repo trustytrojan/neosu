@@ -603,7 +603,10 @@ void OsuBeatmap::keyPressed1(bool mouse) {
     m_bClick1Held = true;
 
     if((!m_osu->getModAuto() && !m_osu->getModRelax()) || !osu_auto_and_relax_block_user_input.getBool())
-        m_clicks.push_back(m_iCurMusicPosWithOffsets);
+        m_clicks.push_back(Click{
+            .tms = m_iCurMusicPosWithOffsets,
+            .pos = getCursorPos(),
+        });
 
     if(mouse) {
         current_keys = current_keys | OsuReplay::M1;
@@ -635,7 +638,10 @@ void OsuBeatmap::keyPressed2(bool mouse) {
     m_bClick2Held = true;
 
     if((!m_osu->getModAuto() && !m_osu->getModRelax()) || !osu_auto_and_relax_block_user_input.getBool())
-        m_clicks.push_back(m_iCurMusicPosWithOffsets);
+        m_clicks.push_back(Click{
+            .tms = m_iCurMusicPosWithOffsets,
+            .pos = getCursorPos(),
+        });
 
     if(mouse) {
         current_keys = current_keys | OsuReplay::M2;
@@ -1631,7 +1637,7 @@ void OsuBeatmap::unloadObjects() {
     m_hitobjectsSortedByEndTime = std::vector<OsuHitObject *>();
     m_misaimObjects = std::vector<OsuHitObject *>();
     m_breaks = std::vector<OsuDatabaseBeatmap::BREAK>();
-    m_clicks = std::vector<long>();
+    m_clicks = std::vector<Click>();
 }
 
 void OsuBeatmap::resetHitObjects(long curPos) {
@@ -2452,6 +2458,13 @@ void OsuBeatmap::update2() {
             next_frame = spectated_replay[current_frame_idx + 1];
             current_keys = current_frame.key_flags;
 
+            Click click;
+            click.tms = current_frame.cur_music_pos;
+            click.pos.x = current_frame.x;
+            click.pos.y = current_frame.y;
+            click.pos *= OsuGameRules::getPlayfieldScaleFactor(m_osu);
+            click.pos += OsuGameRules::getPlayfieldOffset(m_osu);
+
             // Flag fix to simplify logic (stable sets both K1 and M1 when K1 is pressed)
             if(current_keys & OsuReplay::K1) current_keys &= ~OsuReplay::M1;
             if(current_keys & OsuReplay::K2) current_keys &= ~OsuReplay::M2;
@@ -2475,24 +2488,24 @@ void OsuBeatmap::update2() {
             // Pressed key 1
             if(!(last_keys & OsuReplay::K1) && current_keys & OsuReplay::K1) {
                 m_osu->getHUD()->animateInputoverlay(1, true);
-                m_clicks.push_back(current_frame.cur_music_pos);
+                m_clicks.push_back(click);
                 if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(1);
             }
             if(!(last_keys & OsuReplay::M1) && current_keys & OsuReplay::M1) {
                 m_osu->getHUD()->animateInputoverlay(3, true);
-                m_clicks.push_back(current_frame.cur_music_pos);
+                m_clicks.push_back(click);
                 if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(3);
             }
 
             // Pressed key 2
             if(!(last_keys & OsuReplay::K2) && current_keys & OsuReplay::K2) {
                 m_osu->getHUD()->animateInputoverlay(2, true);
-                m_clicks.push_back(current_frame.cur_music_pos);
+                m_clicks.push_back(click);
                 if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(2);
             }
             if(!(last_keys & OsuReplay::M2) && current_keys & OsuReplay::M2) {
                 m_osu->getHUD()->animateInputoverlay(4, true);
-                m_clicks.push_back(current_frame.cur_music_pos);
+                m_clicks.push_back(click);
                 if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(4);
             }
         }
@@ -2803,7 +2816,7 @@ void OsuBeatmap::update2() {
                         continue;
 
                     m_misaimObjects[i]->misAimed();
-                    const long delta = m_clicks[c] - (long)m_misaimObjects[i]->getTime();
+                    const long delta = m_clicks[c].tms - (long)m_misaimObjects[i]->getTime();
                     m_osu->getHUD()->addHitError(delta, false, true);
 
                     break;  // the current click has been dealt with (and the hitobject has been misaimed)
@@ -3454,9 +3467,10 @@ void OsuBeatmap::onBeforeStop(bool quit) {
 
     if(bancho.is_online()) {
         score.player_id = bancho.user_id;
-        score.playerName = bancho.username;
+        score.playerName = bancho.username.toUtf8();
     } else {
-        score.playerName = convar->getConVarByName("name")->getString();
+        auto local_name = convar->getConVarByName("name")->getString();
+        score.playerName = local_name.toUtf8();
     }
     score.passed = isComplete && !isZero && !m_osu->getScore()->hasDied();
     score.grade = score.passed ? m_osu->getScore()->getGrade() : Score::Grade::F;

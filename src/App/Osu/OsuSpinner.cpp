@@ -306,7 +306,7 @@ void OsuSpinner::update(long curPos) {
             angleDiff = engine->getFrameTime() * 1000.0f * AUTO_MULTIPLIER * m_beatmap->getOsu()->getSpeedMultiplier();
         else  // user spin
         {
-            Vector2 mouseDelta = engine->getMouse()->getPos() - m_beatmap->osuCoords2Pixels(m_vRawPos);
+            Vector2 mouseDelta = m_beatmap->getCursorPos() - m_beatmap->osuCoords2Pixels(m_vRawPos);
             const float currentMouseAngle = (float)std::atan2(mouseDelta.y, mouseDelta.x);
             angleDiff = (currentMouseAngle - m_fLastMouseAngle);
 
@@ -374,7 +374,7 @@ void OsuSpinner::update(long curPos) {
     }
 }
 
-void OsuSpinner::onClickEvent(std::vector<long> &clicks) {
+void OsuSpinner::onClickEvent(std::vector<Click> &clicks) {
     if(m_bFinished) return;
 
     // needed for nightmare mod

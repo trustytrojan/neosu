@@ -242,7 +242,9 @@ void OsuReplay::load_and_watch(Score score) {
                 bancho.osu->m_notificationOverlay->addNotification(msg);
             }
 
-            Score* score_cpy = (Score*)malloc(sizeof(Score));
+            // Need to allocate with calloc since APIRequests free() the .extra
+            void* mem = calloc(1, sizeof(Score));
+            Score* score_cpy = new(mem) Score;
             *score_cpy = score;
 
             APIRequest request;
@@ -266,7 +268,7 @@ void OsuReplay::load_and_watch(Score score) {
 
     bancho.osu->replay_info.diff2_md5 = score.md5hash.hash;
     bancho.osu->replay_info.mod_flags = score.modsLegacy;
-    bancho.osu->replay_info.username = score.playerName;
+    bancho.osu->replay_info.username = UString(score.playerName.c_str());
     bancho.osu->replay_info.player_id = score.player_id;
 
     auto beatmap = bancho.osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(score.md5hash.hash);

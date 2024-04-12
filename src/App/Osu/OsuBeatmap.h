@@ -18,6 +18,11 @@ class OsuDatabaseBeatmap;
 class OsuBackgroundStarCacheLoader;
 class OsuBackgroundStarCalcHandler;
 
+struct Click {
+    long tms;
+    Vector2 pos;
+};
+
 class OsuBeatmap {
    public:
     friend class OsuBackgroundStarCacheLoader;
@@ -329,7 +334,7 @@ class OsuBeatmap {
     bool m_bClickedContinue;
     bool m_bPrevKeyWasKey1;
     int m_iAllowAnyNextKeyForFullAlternateUntilHitObjectIndex;
-    std::vector<long> m_clicks;
+    std::vector<Click> m_clicks;
 
     // hitobjects
     std::vector<OsuHitObject *> m_hitobjects;

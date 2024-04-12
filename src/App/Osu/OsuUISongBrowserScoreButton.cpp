@@ -728,7 +728,7 @@ void OsuUISongBrowserScoreButton::setScore(const Score &score, const OsuDatabase
     // display
     m_scoreGrade =
         OsuScore::calculateGrade(score.num300s, score.num100s, score.num50s, score.numMisses, modHidden, modFlashlight);
-    m_sScoreUsername = score.playerName;
+    m_sScoreUsername = UString(score.playerName.c_str());
     m_sScoreScore = UString::format(
         (score.perfect ? "Score: %llu (%ix PFC)" : (fullCombo ? "Score: %llu (%ix FC)" : "Score: %llu (%ix)")),
         score.score, score.comboMax);

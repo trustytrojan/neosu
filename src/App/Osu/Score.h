@@ -26,7 +26,7 @@ struct Score {
     uint64_t unixTimestamp;
 
     uint32_t player_id = 0;
-    UString playerName;
+    std::string playerName;
     bool passed = false;
     bool ragequit = false;
     Grade grade = Grade::N;
