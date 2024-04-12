@@ -515,13 +515,6 @@ Osu::Osu(int instanceID) {
     // m_editor->setVisible(true);
     // m_userStatsScreen->setVisible(true);
 
-    if(!env->directoryExists(MCENGINE_DATA_DIR "avatars")) {
-        env->createDirectory(MCENGINE_DATA_DIR "avatars");
-    }
-    if(!env->directoryExists(MCENGINE_DATA_DIR "maps")) {
-        env->createDirectory(MCENGINE_DATA_DIR "maps");
-    }
-
     // Init online functionality (multiplayer/leaderboards/etc)
     bancho.osu = this;
     init_networking_thread();

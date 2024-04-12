@@ -26,7 +26,6 @@ class ResourceManager {
 
     static const char *PATH_DEFAULT_IMAGES;
     static const char *PATH_DEFAULT_FONTS;
-    static const char *PATH_DEFAULT_SOUNDS;
     static const char *PATH_DEFAULT_SHADERS;
 
    public:

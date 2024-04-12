@@ -247,6 +247,20 @@ Engine::~Engine() {
 }
 
 void Engine::loadApp() {
+    // create directories we will assume already exist later on
+    if(!env->directoryExists(MCENGINE_DATA_DIR "avatars")) {
+        env->createDirectory(MCENGINE_DATA_DIR "avatars");
+    }
+    if(!env->directoryExists(MCENGINE_DATA_DIR "cfg")) {
+        env->createDirectory(MCENGINE_DATA_DIR "cfg");
+    }
+    if(!env->directoryExists(MCENGINE_DATA_DIR "maps")) {
+        env->createDirectory(MCENGINE_DATA_DIR "maps");
+    }
+    if(!env->directoryExists(MCENGINE_DATA_DIR "screenshots")) {
+        env->createDirectory(MCENGINE_DATA_DIR "screenshots");
+    }
+
     // load core default resources (these are required to be able to draw the loading screen)
     if(m_iLoadingScreenDelay == 0 || m_iLoadingScreenDelay == -2) {
         debugLog("Engine: Loading default resources ...\n");

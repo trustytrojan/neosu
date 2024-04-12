@@ -50,14 +50,12 @@ ConVar *ResourceManager::debug_rm = &debug_rm_;
 
 const char *ResourceManager::PATH_DEFAULT_IMAGES = "romfs:/materials/";
 const char *ResourceManager::PATH_DEFAULT_FONTS = "romfs:/fonts/";
-const char *ResourceManager::PATH_DEFAULT_SOUNDS = "romfs:/sounds/";
 const char *ResourceManager::PATH_DEFAULT_SHADERS = "romfs:/shaders/";
 
 #else
 
 const char *ResourceManager::PATH_DEFAULT_IMAGES = MCENGINE_DATA_DIR "materials/";
 const char *ResourceManager::PATH_DEFAULT_FONTS = MCENGINE_DATA_DIR "fonts/";
-const char *ResourceManager::PATH_DEFAULT_SOUNDS = MCENGINE_DATA_DIR "sounds/";
 const char *ResourceManager::PATH_DEFAULT_SHADERS = MCENGINE_DATA_DIR "shaders/";
 
 #endif
