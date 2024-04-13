@@ -636,54 +636,7 @@ OsuSongBrowser::~OsuSongBrowser() {
     engine->getResourceManager()->destroyResource(m_dynamicStarCalculator);
     engine->getResourceManager()->destroyResource(m_backgroundSearchMatcher);
 
-    m_songBrowser->getContainer()->empty();
-
-    for(size_t i = 0; i < m_songButtons.size(); i++) {
-        delete m_songButtons[i];
-    }
-    for(size_t i = 0; i < m_collectionButtons.size(); i++) {
-        delete m_collectionButtons[i];
-    }
-    for(size_t i = 0; i < m_artistCollectionButtons.size(); i++) {
-        delete m_artistCollectionButtons[i];
-    }
-    for(size_t i = 0; i < m_difficultyCollectionButtons.size(); i++) {
-        delete m_difficultyCollectionButtons[i];
-    }
-    for(size_t i = 0; i < m_bpmCollectionButtons.size(); i++) {
-        delete m_bpmCollectionButtons[i];
-    }
-    for(size_t i = 0; i < m_creatorCollectionButtons.size(); i++) {
-        delete m_creatorCollectionButtons[i];
-    }
-    for(size_t i = 0; i < m_dateaddedCollectionButtons.size(); i++) {
-        delete m_dateaddedCollectionButtons[i];
-    }
-    for(size_t i = 0; i < m_lengthCollectionButtons.size(); i++) {
-        delete m_lengthCollectionButtons[i];
-    }
-    for(size_t i = 0; i < m_titleCollectionButtons.size(); i++) {
-        delete m_titleCollectionButtons[i];
-    }
-
-    m_scoreBrowser->getContainer()->empty();
-    for(size_t i = 0; i < m_scoreButtonCache.size(); i++) {
-        delete m_scoreButtonCache[i];
-    }
-    SAFE_DELETE(m_scoreBrowserScoresStillLoadingElement);
-    SAFE_DELETE(m_scoreBrowserNoRecordsYetElement);
-
-    for(size_t i = 0; i < m_sortingMethods.size(); i++) {
-        delete m_sortingMethods[i].comparator;
-    }
-
-    SAFE_DELETE(m_search);
-    SAFE_DELETE(m_topbarLeft);
-    SAFE_DELETE(m_topbarRight);
-    SAFE_DELETE(m_bottombar);
-    SAFE_DELETE(m_scoreBrowser);
-    SAFE_DELETE(m_songBrowser);
-    SAFE_DELETE(m_db);
+    // leak memory, who cares we're closing mcosu anyway
 }
 
 void OsuSongBrowser::draw(Graphics *g) {
