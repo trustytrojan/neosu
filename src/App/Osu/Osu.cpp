@@ -987,10 +987,6 @@ void Osu::update() {
         }
     }
 
-    // it's a bit of a hack, because using cursor visibility to work around SetCursorPos() affecting the windows cursor
-    // in the Mouse class
-    if(!env->isCursorVisible()) env->setCursorVisible(true);
-
     // endless mod
     if(m_bScheduleEndlessModNextBeatmap) {
         m_bScheduleEndlessModNextBeatmap = false;
@@ -1155,11 +1151,8 @@ void Osu::updateMods() {
     if(m_bModAutopilot) m_bModAuto = false;
 
     // handle auto/pilot cursor visibility
-    if(!m_bModAuto && !m_bModAutopilot) {
-        m_bShouldCursorBeVisible = false;
-        env->setCursorVisible(m_bShouldCursorBeVisible);
-    } else if(isInPlayMode()) {
-        m_bShouldCursorBeVisible = true;
+    if(isInPlayMode()) {
+        m_bShouldCursorBeVisible = m_bModAuto || m_bModAutopilot || getSelectedBeatmap()->m_bIsWatchingReplay;
         env->setCursorVisible(m_bShouldCursorBeVisible);
     }
 
@@ -1650,7 +1643,7 @@ void Osu::onPlayStart() {
 
     m_snd_change_check_interval_ref->setValue(0.0f);
 
-    if(m_bModAuto || m_bModAutopilot) {
+    if(m_bModAuto || m_bModAutopilot || getSelectedBeatmap()->m_bIsWatchingReplay) {
         m_bShouldCursorBeVisible = true;
         env->setCursorVisible(m_bShouldCursorBeVisible);
     }

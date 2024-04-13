@@ -730,13 +730,11 @@ bool OsuBeatmap::watch(Score score, double start_percent) {
     m_bIsWatchingReplay = true;  // play() resets this to false
     spectated_replay = score.replay;
 
-    env->setCursorVisible(true);
-
     m_osu->m_songBrowser2->m_bHasSelectedAndIsPlaying = true;
     m_osu->m_songBrowser2->setVisible(false);
 
-    m_bIsWaiting = true;  // ensure onPlayStart() will be called by seekPercent()
     seekPercent(start_percent);
+    m_osu->onPlayStart();
 
     return true;
 }
@@ -1112,7 +1110,8 @@ void OsuBeatmap::seekPercent(double percent) {
 
         engine->getSound()->play(m_music);
 
-        onPlayStart();
+        // if there are calculations in there that need the hitobjects to be loaded, also applies speed/pitch
+        onModUpdate(false, false);
     }
 
     if(!m_bIsWatchingReplay) {  // score submission already disabled when watching replay
@@ -2376,7 +2375,8 @@ void OsuBeatmap::update2() {
 
                     m_bIsRestartScheduledQuick = false;
 
-                    onPlayStart();
+                    // if there are calculations in there that need the hitobjects to be loaded, also applies speed/pitch
+                    onModUpdate(false, false);
                 }
             } else
                 m_iCurMusicPos = (engine->getTimeReal() - m_fWaitTime) * 1000.0f * m_osu->getSpeedMultiplier();
@@ -3418,13 +3418,6 @@ Vector2 OsuBeatmap::getFirstPersonCursorDelta() const {
 }
 
 float OsuBeatmap::getHitcircleDiameter() const { return m_fHitcircleDiameter; }
-
-void OsuBeatmap::onPlayStart() {
-    debugLog("OsuBeatmap::onPlayStart()\n");
-
-    // if there are calculations in there that need the hitobjects to be loaded, also applies speed/pitch
-    onModUpdate(false, false);
-}
 
 void OsuBeatmap::saveAndSubmitScore(bool quit) {
     // calculate stars

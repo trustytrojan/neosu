@@ -407,7 +407,6 @@ class OsuBeatmap {
         }
     }
 
-    void onPlayStart();
     void saveAndSubmitScore(bool quit);
     void onPaused(bool first);
 
