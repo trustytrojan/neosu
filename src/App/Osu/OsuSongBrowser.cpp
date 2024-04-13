@@ -1,4 +1,8 @@
-#include "OsuSongBrowser.h"
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <sys/random.h>
+#endif
 
 #include "AnimationHandler.h"
 #include "Bancho.h"
@@ -30,6 +34,7 @@
 #include "OsuRoom.h"
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
+#include "OsuSongBrowser.h"
 #include "OsuUIBackButton.h"
 #include "OsuUIContextMenu.h"
 #include "OsuUISearchOverlay.h"
@@ -387,9 +392,6 @@ bool OsuSongBrowser::SortByTitle::operator()(OsuUISongBrowserButton const *a, Os
 
 OsuSongBrowser::OsuSongBrowser(Osu *osu) : OsuScreenBackable(osu) {
     m_osu = osu;
-
-    // random selection algorithm init
-    m_rngalg = std::mt19937(time(0));
 
     // sorting/grouping + methods
     m_group = GROUP::GROUP_NO_GROUPING;
@@ -4132,9 +4134,18 @@ void OsuSongBrowser::selectRandomBeatmap() {
        m_selectedBeatmap->getSelectedDifficulty2() != NULL)
         m_previousRandomBeatmaps.push_back(m_selectedBeatmap->getSelectedDifficulty2());
 
-    std::uniform_int_distribution<size_t> rng(0, songButtons.size() - 1);
-    size_t randomIndex = rng(m_rngalg);
-    OsuUISongBrowserSongButton *songButton = dynamic_cast<OsuUISongBrowserSongButton *>(songButtons[randomIndex]);
+    size_t rng;
+#ifdef _WIN32
+    HCRYPTPROV hCryptProv;
+    CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
+    CryptGenRandom(hCryptProv, sizeof(rng), &rng);
+    CryptReleaseContext(hCryptProv, 0);
+#else
+    getrandom(&rng, sizeof(rng), 0);
+#endif
+    size_t randomindex = rng % songButtons.size();
+
+    OsuUISongBrowserSongButton *songButton = dynamic_cast<OsuUISongBrowserSongButton *>(songButtons[randomindex]);
     selectSongButton(songButton);
 }
 

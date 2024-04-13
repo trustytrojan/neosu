@@ -266,7 +266,6 @@ class OsuSongBrowser : public OsuScreenBackable {
     ConVar *m_osu_mod_fposu_ref;
 
     Osu *m_osu;
-    std::mt19937 m_rngalg;
     GROUP m_group;
     std::vector<GROUPING> m_groupings;
     SORT m_sortingMethod;
