@@ -542,7 +542,7 @@ Packet build_login_packet() {
     MD5Hash install_md5 = md5((uint8_t *)bancho.install_id.toUtf8(), bancho.install_id.lengthUtf8());
     ;
 
-    bancho.client_hashes = UString::format("%s:%s.:%s:%s:%s:", osu_path_md5.hash, adapters, adapters_md5.hash,
+    bancho.client_hashes = UString::format("%s:%s:%s:%s:%s:", osu_path_md5.hash, adapters, adapters_md5.hash,
                                            install_md5.hash, disk_md5.hash);
     write_bytes(&packet, (uint8_t *)bancho.client_hashes.toUtf8(), bancho.client_hashes.lengthUtf8());
 
