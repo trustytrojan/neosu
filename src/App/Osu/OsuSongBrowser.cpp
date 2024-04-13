@@ -1,9 +1,4 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		beatmap browser and selector
-//
-// $NoKeywords: $osusb
-//===============================================================================//
+#include "OsuSongBrowser.h"
 
 #include "AnimationHandler.h"
 #include "Bancho.h"
@@ -35,7 +30,6 @@
 #include "OsuRoom.h"
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
-#include "OsuSongBrowser.h"
 #include "OsuUIBackButton.h"
 #include "OsuUIContextMenu.h"
 #include "OsuUISearchOverlay.h"
@@ -4116,7 +4110,7 @@ void OsuSongBrowser::selectSongButton(OsuUISongBrowserButton *songButton) {
     }
 }
 
-void OsuSongBrowser::selectRandomBeatmap(bool playMusicFromPreviewPoint) {
+void OsuSongBrowser::selectRandomBeatmap() {
     // filter songbuttons or independent diffs
     const std::vector<CBaseUIElement *> &elements = m_songBrowser->getContainer()->getElements();
     std::vector<OsuUISongBrowserSongButton *> songButtons;

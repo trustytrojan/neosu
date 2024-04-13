@@ -1,13 +1,4 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		beatmap browser and selector
-//
-// $NoKeywords: $osusb
-//===============================================================================//
-
-#ifndef OSUSONGBROWSER2_H
-#define OSUSONGBROWSER2_H
-
+#pragma once
 #include "MouseListener.h"
 #include "OsuScreenBackable.h"
 
@@ -124,7 +115,7 @@ class OsuSongBrowser : public OsuScreenBackable {
     void onCollectionButtonContextMenu(OsuUISongBrowserCollectionButton *collectionButton, UString text, int id);
 
     void highlightScore(uint64_t unixTimestamp);
-    void selectRandomBeatmap(bool playMusicFromPreviewPoint = true);
+    void selectRandomBeatmap();
     void playNextRandomBeatmap() {
         selectRandomBeatmap();
         playSelectedDifficulty();
@@ -393,5 +384,3 @@ class OsuSongBrowser : public OsuScreenBackable {
     bool m_bBackgroundStarCalcScheduledForce;
     OsuDatabaseBeatmapStarCalculator *m_dynamicStarCalculator;
 };
-
-#endif

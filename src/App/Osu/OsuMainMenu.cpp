@@ -1267,7 +1267,7 @@ void OsuMainMenu::mouse_update(bool *propagate_clicks) {
         anim->moveQuadInOut(&m_fUpdateButtonAnim, 1.0f, 0.5f, true);
     }
 
-    // handle pause button pause detection
+    // Update pause button and shuffle songs
     if(m_osu->getSelectedBeatmap() != NULL) {
         if(m_osu->getSelectedBeatmap()->isPreviewMusicPlaying()) {
             m_osu->getSelectedBeatmap()->getMusic()->setLoop(false);
@@ -1286,7 +1286,7 @@ void OsuMainMenu::selectRandomBeatmap() {
     shuffling = true;
 
     if(m_osu->getSongBrowser()->getDatabase()->isFinished()) {
-        m_osu->getSongBrowser()->selectRandomBeatmap(false);
+        m_osu->getSongBrowser()->selectRandomBeatmap();
     } else {
         // Database is not loaded yet, load a random map and select it
         // XXX: Also pick from McOsu maps/ directory

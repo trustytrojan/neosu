@@ -1562,7 +1562,9 @@ bool OsuBeatmap::canUpdate() {
 }
 
 void OsuBeatmap::handlePreviewPlay() {
-    if(m_music != NULL && (!m_music->isPlaying() || m_music->getPosition() > 0.95f) && m_selectedDifficulty2 != NULL) {
+    if(m_music == nullptr) return;
+
+    if((!m_music->isPlaying() || m_music->getPosition() > 0.95f) && m_selectedDifficulty2 != NULL) {
         // this is an assumption, but should be good enough for most songs
         // reset playback position when the song has nearly reached the end (when the user switches back to the results
         // screen or the songbrowser after playing)
@@ -1574,14 +1576,23 @@ void OsuBeatmap::handlePreviewPlay() {
             if(m_music->getFrequency() < m_fMusicFrequencyBackup)  // player has died, reset frequency
                 m_music->setFrequency(m_fMusicFrequencyBackup);
 
-            if(m_osu->getMainMenu()->isVisible())
+            // When McOsu is initialized, it starts playing a random song in the main menu.
+            // Users can set a convar to make it start at its preview point instead.
+            // The next songs will start at the beginning regardless.
+            static bool should_start_song_at_preview_point =
+                convar->getConVarByName("start_first_main_menu_song_at_preview_point")->getBool();
+            bool start_at_song_beginning = m_osu->getMainMenu()->isVisible() && !should_start_song_at_preview_point;
+            should_start_song_at_preview_point = false;
+
+            if(start_at_song_beginning) {
                 m_music->setPositionMS(0);
-            else if(m_iContinueMusicPos != 0)
+            } else if(m_iContinueMusicPos != 0) {
                 m_music->setPositionMS(m_iContinueMusicPos);
-            else
+            } else {
                 m_music->setPositionMS(m_selectedDifficulty2->getPreviewTime() < 0
                                            ? (unsigned long)(m_music->getLengthMS() * 0.40f)
                                            : m_selectedDifficulty2->getPreviewTime());
+            }
 
             m_music->setVolume(m_osu_volume_music_ref->getFloat());
             m_music->setSpeed(m_osu->getSpeedMultiplier());
@@ -1589,7 +1600,7 @@ void OsuBeatmap::handlePreviewPlay() {
     }
 
     // always loop during preview
-    if(m_music != NULL) m_music->setLoop(osu_beatmap_preview_music_loop.getBool());
+    m_music->setLoop(osu_beatmap_preview_music_loop.getBool());
 }
 
 void OsuBeatmap::loadMusic(bool stream, bool prescan) {

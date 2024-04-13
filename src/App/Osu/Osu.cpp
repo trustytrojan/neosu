@@ -140,6 +140,7 @@ ConVar flashlight_radius("flashlight_radius", 100.f, FCVAR_CHEAT);
 ConVar flashlight_follow_delay("flashlight_follow_delay", 0.120f, FCVAR_CHEAT);
 ConVar flashlight_always_hard("flashlight_always_hard", false, FCVAR_NONE, "always use 200+ combo flashlight radius");
 
+ConVar start_first_main_menu_song_at_preview_point("start_first_main_menu_song_at_preview_point", false, FCVAR_NONE);
 ConVar nightcore_enjoyer("nightcore_enjoyer", false, FCVAR_NONE, "automatically select nightcore when speed modifying");
 ConVar scoreboard_animations("scoreboard_animations", true, FCVAR_NONE, "animate in-game scoreboard");
 
@@ -505,16 +506,6 @@ Osu::Osu(int instanceID) {
     m_screens.push_back(m_mainMenu);
     m_screens.push_back(m_tooltipOverlay);
 
-    // make primary screen visible
-    // m_optionsMenu->setVisible(true);
-    // m_modSelector->setVisible(true);
-    // m_songBrowser2->setVisible(true);
-    // m_pauseMenu->setVisible(true);
-    // m_rankingScreen->setVisible(true);
-    // m_changelog->setVisible(true);
-    // m_editor->setVisible(true);
-    // m_userStatsScreen->setVisible(true);
-
     // Init online functionality (multiplayer/leaderboards/etc)
     bancho.osu = this;
     init_networking_thread();
@@ -526,23 +517,6 @@ Osu::Osu(int instanceID) {
     m_mainMenu->selectRandomBeatmap();
 
     m_updateHandler->checkForUpdates();
-
-    /*
-    // DEBUG: immediately start diff of a beatmap
-    {
-            UString debugFolder = "S:/GAMES/osu!/Songs/41823 The Quick Brown Fox - The Big Black/";
-            UString debugDiffFileName = "The Quick Brown Fox - The Big Black (Blue Dragon) [WHO'S AFRAID OF THE BIG
-    BLACK].osu";
-
-            UString beatmapPath = debugFolder;
-            beatmapPath.append(debugDiffFileName);
-
-            OsuDatabaseBeatmap *debugDiff = new OsuDatabaseBeatmap(this, beatmapPath, debugFolder);
-
-            m_songBrowser2->onDifficultySelected(debugDiff, true);
-            // WARNING: this will leak memory (one OsuDatabaseBeatmap object), but who cares (since debug only)
-    }
-    */
 
     // memory/performance optimization; if osu_mod_mafham is not enabled, reduce the two rendertarget sizes to 64x64,
     m_osu_mod_mafham_ref->setCallback(fastdelegate::MakeDelegate(this, &Osu::onModMafhamChange));
