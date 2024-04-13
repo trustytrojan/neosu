@@ -261,11 +261,11 @@ void OsuScoreboardSlot::updateIndex(int new_index, bool animate) {
         player_idx = new_index;
     }
 
-    int min_visible_idx = player_idx - 3;
+    int min_visible_idx = player_idx - 4;
     if(min_visible_idx < 0) min_visible_idx = 0;
 
     int max_visible_idx = player_idx;
-    if(max_visible_idx < 4) max_visible_idx = 4;
+    if(max_visible_idx < 5) max_visible_idx = 5;
 
     bool is_visible = new_index == 0 || (new_index >= min_visible_idx && new_index <= max_visible_idx);
 
