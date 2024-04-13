@@ -174,7 +174,7 @@ OsuSlider::OsuSlider(char type, int repeat, float pixelLength, std::vector<Vecto
     m_fEndHitAnimation = 0.0f;
     m_fEndSliderBodyFadeAnimation = 0.0f;
     m_iStrictTrackingModLastClickHeldTime = 0;
-    m_iDownKey = 0;
+    m_iFatFingerKey = 0;
     m_iPrevSliderSlideSoundSampleSet = -1;
     m_bCursorLeft = true;
     m_bCursorInside = false;
@@ -735,12 +735,9 @@ void OsuSlider::update(long curPos) {
         m_vCurPoint = m_beatmap->osuCoords2Pixels(m_vCurPointRaw);
     }
 
-    // reset sliding key (opposite), see isClickHeldSlider()
-    if(m_iDownKey > 0) {
-        if((m_iDownKey == 2 && !m_beatmap->isKey1Down()) ||
-           (m_iDownKey == 1 && !m_beatmap->isKey2Down()))  // opposite key!
-            m_iDownKey = 0;
-    }
+    // When fat finger key is released, remove isClickHeldSlider() restrictions
+    if(m_iFatFingerKey == 1 && !m_beatmap->isKey1Down()) m_iFatFingerKey = 0;
+    if(m_iFatFingerKey == 2 && !m_beatmap->isKey2Down()) m_iFatFingerKey = 0;
 
     // handle dynamic followradius
     float followRadius =
@@ -1179,11 +1176,16 @@ void OsuSlider::onHit(OsuScore::HIT result, long delta, bool startOrEnd, float t
 
         m_bStartFinished = true;
 
-        // remember which key this slider was started with
-        if(m_beatmap->isKey2Down() && !m_beatmap->isLastKeyDownKey1())
-            m_iDownKey = 2;
-        else if(m_beatmap->isKey1Down() && m_beatmap->isLastKeyDownKey1())
-            m_iDownKey = 1;
+        // The player entered the slider by fat fingering, so...
+        if(m_beatmap->isKey1Down() && m_beatmap->isKey2Down()) {
+            if(m_beatmap->isLastKeyDownKey1()) {
+                // Player pressed K1 last: "fat finger" key is K2
+                m_iFatFingerKey = 2;
+            } else {
+                // Player pressed K2 last: "fat finger" key is K1
+                m_iFatFingerKey = 1;
+            }
+        }
 
         if(!m_beatmap->getOsu()->getModTarget())
             m_beatmap->addHitResult(
@@ -1358,7 +1360,7 @@ void OsuSlider::onReset(long curPos) {
     m_beatmap->getSkin()->stopSliderSlideSound();
 
     m_iStrictTrackingModLastClickHeldTime = 0;
-    m_iDownKey = 0;
+    m_iFatFingerKey = 0;
     m_iPrevSliderSlideSoundSampleSet = -1;
     m_bCursorLeft = true;
     m_bHeldTillEnd = false;
@@ -1434,11 +1436,16 @@ void OsuSlider::rebuildVertexBuffer(bool useRawCoords) {
 }
 
 bool OsuSlider::isClickHeldSlider() {
-    // m_iDownKey contains the key the sliderstartcircle was clicked with (if it was clicked at all, if not then it is
-    // 0) it is reset back to 0 automatically in update() once the opposite key has been released at least once if
-    // m_iDownKey is less than 1, then any key being held is enough to slide (either the startcircle was missed, or the
-    // opposite key it was clicked with has been released at least once already) otherwise, that specific key is the
-    // only one which counts for sliding
-    const bool mouseDownAcceptable = (m_iDownKey == 1 ? m_beatmap->isKey1Down() : m_beatmap->isKey2Down());
-    return (m_iDownKey < 1 ? m_beatmap->isClickHeld() : mouseDownAcceptable);
+    // osu! has a weird slider quirk, that I'll explain in detail here.
+    // When holding K1 before the slider, tapping K2 on slider head, and releasing K2 later,
+    // the slider is no longer considered being "held" until K2 is pressed again, or K1 is released and pressed again.
+
+    // The reason this exists is to prevent people from holding K1 the whole map and tapping with K2.
+    // Holding is part of the rhythm flow, and this is a rhythm game right?
+
+    if(m_iFatFingerKey == 0) return m_beatmap->isClickHeld();
+    if(m_iFatFingerKey == 1) return m_beatmap->isKey2Down();
+    if(m_iFatFingerKey == 2) return m_beatmap->isKey1Down();
+
+    return false;  // unreachable
 }

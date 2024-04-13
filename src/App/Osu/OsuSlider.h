@@ -128,7 +128,7 @@ class OsuSlider : public OsuHitObject {
     float m_fEndHitAnimation;
     float m_fEndSliderBodyFadeAnimation;
     long m_iStrictTrackingModLastClickHeldTime;
-    int m_iDownKey;
+    int m_iFatFingerKey;
     int m_iPrevSliderSlideSoundSampleSet;
     bool m_bCursorLeft;
     bool m_bCursorInside;

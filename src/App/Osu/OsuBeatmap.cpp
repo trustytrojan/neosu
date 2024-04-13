@@ -1293,21 +1293,8 @@ bool OsuBeatmap::isKey2Down() {
     }
 }
 
-bool OsuBeatmap::isClickHeld() {
-    if(m_bIsWatchingReplay) {
-        return current_keys & (OsuReplay::M1 | OsuReplay::K1 | OsuReplay::M2 | OsuReplay::K2);
-    } else {
-        return m_bClick1Held || m_bClick2Held;
-    }
-}
-
-bool OsuBeatmap::isLastKeyDownKey1() {
-    if(m_bIsWatchingReplay) {
-        return last_keys & (OsuReplay::M1 | OsuReplay::K1);
-    } else {
-        return m_bPrevKeyWasKey1;
-    }
-}
+bool OsuBeatmap::isClickHeld() { return isKey1Down() || isKey2Down(); }
+bool OsuBeatmap::isLastKeyDownKey1() { return m_bPrevKeyWasKey1; }
 
 UString OsuBeatmap::getTitle() const {
     if(m_selectedDifficulty2 != NULL)
@@ -2498,11 +2485,13 @@ void OsuBeatmap::update2() {
 
             // Pressed key 1
             if(!(last_keys & OsuReplay::K1) && current_keys & OsuReplay::K1) {
+                m_bPrevKeyWasKey1 = true;
                 m_osu->getHUD()->animateInputoverlay(1, true);
                 m_clicks.push_back(click);
                 if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(1);
             }
             if(!(last_keys & OsuReplay::M1) && current_keys & OsuReplay::M1) {
+                m_bPrevKeyWasKey1 = true;
                 m_osu->getHUD()->animateInputoverlay(3, true);
                 m_clicks.push_back(click);
                 if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(3);
@@ -2510,11 +2499,13 @@ void OsuBeatmap::update2() {
 
             // Pressed key 2
             if(!(last_keys & OsuReplay::K2) && current_keys & OsuReplay::K2) {
+                m_bPrevKeyWasKey1 = false;
                 m_osu->getHUD()->animateInputoverlay(2, true);
                 m_clicks.push_back(click);
                 if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(2);
             }
             if(!(last_keys & OsuReplay::M2) && current_keys & OsuReplay::M2) {
+                m_bPrevKeyWasKey1 = false;
                 m_osu->getHUD()->animateInputoverlay(4, true);
                 m_clicks.push_back(click);
                 if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(4);
