@@ -36,8 +36,13 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu) {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
+    latest.changes.push_back("- Added replay viewer");
+    latest.changes.push_back("- Added instant replay (press F1 while paused or after failing)");
     latest.changes.push_back("- Added option to disable in-game scoreboard animations");
+    latest.changes.push_back("- Added start_first_main_menu_song_at_preview_point convar (it does what it says)");
+    latest.changes.push_back("- Added extra slot to in-game scoreboard");
     latest.changes.push_back("- Fixed hitobjects being hittable after failing");
+    latest.changes.push_back("- Fixed login packet sending incorrect adapters list");
     latest.changes.push_back("- Removed VR support");
     latest.changes.push_back("- Updated protocol and database version to b20240411.1");
     changelogs.push_back(latest);
