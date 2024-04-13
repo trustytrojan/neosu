@@ -21,7 +21,6 @@ rem set LDFLAGS=%LDFLAGS% -mwindows -s
 
 rem PREPARE BUILD DIR
 xcopy resources build /E /I /Y > nul
-if not exist build\cfg mkdir build\cfg
 
 for /d %%i in (libraries\*) do (
 	copy %%i\bin\* build\ > nul

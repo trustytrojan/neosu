@@ -3,7 +3,6 @@
 #include <curl/curl.h>
 #include <pthread.h>
 
-#include <mutex>
 #include <sstream>
 
 #include "Bancho.h"
@@ -27,15 +26,15 @@ struct DownloadThread {
     std::vector<DownloadResult*> downloads;
 };
 
-std::mutex threads_mtx;
+pthread_mutex_t threads_mtx = PTHREAD_MUTEX_INITIALIZER;
 std::vector<DownloadThread*> threads;
 
 void abort_downloads() {
-    threads_mtx.lock();
+    pthread_mutex_lock(&threads_mtx);
     for(auto thread : threads) {
         thread->running = false;
     }
-    threads_mtx.unlock();
+    pthread_mutex_unlock(&threads_mtx);
 }
 
 void update_download_progress(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal,
@@ -43,14 +42,14 @@ void update_download_progress(void* clientp, curl_off_t dltotal, curl_off_t dlno
     (void)ultotal;
     (void)ulnow;
 
-    threads_mtx.lock();
+    pthread_mutex_lock(&threads_mtx);
     auto result = (DownloadResult*)clientp;
     if(dltotal == 0) {
         result->progress = 0.f;
     } else if(dlnow > 0) {
         result->progress = (float)dlnow / (float)dltotal;
     }
-    threads_mtx.unlock();
+    pthread_mutex_unlock(&threads_mtx);
 }
 
 void* do_downloads(void* arg) {
@@ -69,7 +68,7 @@ void* do_downloads(void* arg) {
         DownloadResult* result = nullptr;
         std::string url;
 
-        threads_mtx.lock();
+        pthread_mutex_lock(&threads_mtx);
         for(auto download : thread->downloads) {
             if(download->progress == 0.f) {
                 result = download;
@@ -77,7 +76,7 @@ void* do_downloads(void* arg) {
                 break;
             }
         }
-        threads_mtx.unlock();
+        pthread_mutex_unlock(&threads_mtx);
         if(!result) continue;
 
         free(response.memory);
@@ -100,15 +99,15 @@ void* do_downloads(void* arg) {
         int response_code;
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
         if(res == CURLE_OK) {
-            threads_mtx.lock();
+            pthread_mutex_lock(&threads_mtx);
             result->progress = 1.f;
             result->response_code = response_code;
             result->data = std::vector<uint8_t>(response.memory, response.memory + response.size);
-            threads_mtx.unlock();
+            pthread_mutex_unlock(&threads_mtx);
         } else {
             debugLog("Failed to download %s: %s\n", url.c_str(), curl_easy_strerror(res));
 
-            threads_mtx.lock();
+            pthread_mutex_lock(&threads_mtx);
             result->response_code = response_code;
             if(response_code == 429) {
                 result->progress = 0.f;
@@ -116,7 +115,7 @@ void* do_downloads(void* arg) {
                 result->data = std::vector<uint8_t>(response.memory, response.memory + response.size);
                 result->progress = -1.f;
             }
-            threads_mtx.unlock();
+            pthread_mutex_unlock(&threads_mtx);
 
             if(response_code == 429) {
                 // Try again 5s later
@@ -128,7 +127,7 @@ void* do_downloads(void* arg) {
 end_thread:
     curl_easy_cleanup(curl);
 
-    threads_mtx.lock();
+    pthread_mutex_lock(&threads_mtx);
     std::vector<DownloadThread*> new_threads;
     for(auto dt : threads) {
         if(thread != dt) {
@@ -136,7 +135,7 @@ end_thread:
         }
     }
     threads = std::move(new_threads);
-    threads_mtx.unlock();
+    pthread_mutex_unlock(&threads_mtx);
 
     free(response.memory);
     for(auto result : thread->downloads) {
@@ -167,7 +166,7 @@ void download(const char* url, float* progress, std::vector<uint8_t>& out, int* 
         goto end;
     }
 
-    threads_mtx.lock();
+    pthread_mutex_lock(&threads_mtx);
     for(auto thread : threads) {
         if(thread->running && !strcmp(thread->endpoint.c_str(), hostname)) {
             matching_thread = thread;
@@ -211,7 +210,7 @@ void download(const char* url, float* progress, std::vector<uint8_t>& out, int* 
         matching_thread->downloads.push_back(newdl);
         *progress = 0.f;
     }
-    threads_mtx.unlock();
+    pthread_mutex_unlock(&threads_mtx);
 
 end:
     curl_url_cleanup(urlu);

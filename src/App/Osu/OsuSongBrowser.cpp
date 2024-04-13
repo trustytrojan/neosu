@@ -4138,7 +4138,7 @@ void OsuSongBrowser::selectRandomBeatmap() {
 #ifdef _WIN32
     HCRYPTPROV hCryptProv;
     CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
-    CryptGenRandom(hCryptProv, sizeof(rng), &rng);
+    CryptGenRandom(hCryptProv, sizeof(rng), (BYTE*)&rng);
     CryptReleaseContext(hCryptProv, 0);
 #else
     getrandom(&rng, sizeof(rng), 0);

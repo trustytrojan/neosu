@@ -78,7 +78,7 @@ std::vector<OsuReplay::Frame> OsuReplay::get_frames(uint8_t* replay_data, int32_
 
     while(std::getline(ss, frame_str, ',')) {
         OsuReplay::Frame frame;
-        sscanf(frame_str.c_str(), "%ld|%f|%f|%hhu", &frame.milliseconds_since_last_frame, &frame.x, &frame.y,
+        sscanf(frame_str.c_str(), "%lld|%f|%f|%hhu", &frame.milliseconds_since_last_frame, &frame.x, &frame.y,
                &frame.key_flags);
 
         if(frame.milliseconds_since_last_frame != -12345) {
