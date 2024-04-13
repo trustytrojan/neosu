@@ -325,12 +325,12 @@ class Osu : public App, public MouseListener {
     bool m_bKeyboardKey22Down;
     bool m_bMouseKey1Down;
     bool m_bMouseKey2Down;
-    bool m_bSkipDownCheck;
     bool m_bSkipScheduled;
     bool m_bQuickRetryDown;
     float m_fQuickRetryTime;
     bool m_bSeekKey;
     bool m_bSeeking;
+    bool m_bClickedSkipButton = false;
     float m_fPrevSeekMousePosX;
     float m_fQuickSaveTime;
 

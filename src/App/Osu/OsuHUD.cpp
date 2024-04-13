@@ -317,11 +317,6 @@ void OsuHUD::draw(Graphics *g) {
 
         drawFancyScoreboard(g);
 
-        if(!m_osu->isSkipScheduled() && beatmap->isInSkippableSection() &&
-           ((m_osu_skip_intro_enabled_ref->getBool() && beatmap->getHitObjectIndexForCurrentTime() < 1) ||
-            (m_osu_skip_breaks_enabled_ref->getBool() && beatmap->getHitObjectIndexForCurrentTime() > 0)))
-            drawSkip(g);
-
         g->pushTransform();
         {
             if(m_osu->getModTarget() && osu_draw_target_heatmap.getBool())
@@ -450,6 +445,11 @@ void OsuHUD::draw(Graphics *g) {
         drawScrubbingTimeline(g, beatmap->getTime(), beatmap->getLength(), beatmap->getLengthPlayable(),
                               beatmap->getStartTimePlayable(), beatmap->getPercentFinishedPlayable(), breaks);
     }
+
+    if(!m_osu->isSkipScheduled() && beatmap->isInSkippableSection() &&
+       ((m_osu_skip_intro_enabled_ref->getBool() && beatmap->getHitObjectIndexForCurrentTime() < 1) ||
+        (m_osu_skip_breaks_enabled_ref->getBool() && beatmap->getHitObjectIndexForCurrentTime() > 0)))
+        drawSkip(g);
 }
 
 void OsuHUD::mouse_update(bool *propagate_clicks) {

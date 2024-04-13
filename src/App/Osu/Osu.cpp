@@ -318,7 +318,6 @@ Osu::Osu(int instanceID) {
     m_bKeyboardKey22Down = false;
     m_bMouseKey1Down = false;
     m_bMouseKey2Down = false;
-    m_bSkipDownCheck = false;
     m_bSkipScheduled = false;
     m_bQuickRetryDown = false;
     m_fQuickRetryTime = 0.0f;
@@ -798,69 +797,29 @@ void Osu::update() {
         // NOTE: force keep loaded background images while playing
         m_backgroundImageHandler->scheduleFreezeCache();
 
-        // scrubbing/seeking
-        if(m_bSeekKey || getSelectedBeatmap()->m_bIsWatchingReplay) {
-            if(!bancho.is_playing_a_multi_map()) {
-                m_bSeeking = true;
-                const float mousePosX = (int)engine->getMouse()->getPos().x;
-                const float percent = clamp<float>(mousePosX / (float)getScreenWidth(), 0.0f, 1.0f);
-
-                if(engine->getMouse()->isLeftDown()) {
-                    if(mousePosX != m_fPrevSeekMousePosX || !osu_scrubbing_smooth.getBool()) {
-                        m_fPrevSeekMousePosX = mousePosX;
-
-                        // special case: allow cancelling the failing animation here
-                        if(getSelectedBeatmap()->hasFailed()) getSelectedBeatmap()->cancelFailing();
-
-                        getSelectedBeatmap()->seekPercentPlayable(percent);
-                    } else {
-                        // special case: keep player invulnerable even if scrubbing position does not change
-                        getSelectedBeatmap()->resetScore();
-                    }
-                } else {
-                    m_fPrevSeekMousePosX = -1.0f;
-                }
-
-                if(engine->getMouse()->isRightDown()) {
-                    m_fQuickSaveTime = clamp<float>((float)((getSelectedBeatmap()->getStartTimePlayable() +
-                                                             getSelectedBeatmap()->getLengthPlayable()) *
-                                                            percent) /
-                                                        (float)getSelectedBeatmap()->getLength(),
-                                                    0.0f, 1.0f);
-                }
-            }
-        }
-
         // skip button clicking
-        if(getSelectedBeatmap()->isInSkippableSection() && !getSelectedBeatmap()->isPaused() && !m_bSeeking &&
-           !m_volumeOverlay->isBusy()) {
+        bool can_skip = getSelectedBeatmap()->isInSkippableSection() && !m_bClickedSkipButton;
+        can_skip &= !getSelectedBeatmap()->isPaused() && !m_volumeOverlay->isBusy();
+        if(can_skip) {
             const bool isAnyOsuKeyDown = (m_bKeyboardKey1Down || m_bKeyboardKey12Down || m_bKeyboardKey2Down ||
                                           m_bKeyboardKey22Down || m_bMouseKey1Down || m_bMouseKey2Down);
             const bool isAnyKeyDown = (isAnyOsuKeyDown || engine->getMouse()->isLeftDown());
 
             if(isAnyKeyDown) {
-                if(!m_bSkipDownCheck) {
-                    m_bSkipDownCheck = true;
+                if(m_hud->getSkipClickRect().contains(engine->getMouse()->getPos())) {
+                    if(!m_bSkipScheduled) {
+                        m_bSkipScheduled = true;
+                        m_bClickedSkipButton = true;
 
-                    const bool isCursorInsideSkipButton =
-                        m_hud->getSkipClickRect().contains(engine->getMouse()->getPos());
-
-                    if(isCursorInsideSkipButton) {
-                        if(!m_bSkipScheduled) {
-                            m_bSkipScheduled = true;
-
-                            if(bancho.is_playing_a_multi_map()) {
-                                Packet packet;
-                                packet.id = MATCH_SKIP_REQUEST;
-                                send_packet(packet);
-                            }
+                        if(bancho.is_playing_a_multi_map()) {
+                            Packet packet;
+                            packet.id = MATCH_SKIP_REQUEST;
+                            send_packet(packet);
                         }
                     }
                 }
-            } else
-                m_bSkipDownCheck = false;
-        } else
-            m_bSkipDownCheck = false;
+            }
+        }
 
         // skipping
         if(m_bSkipScheduled) {
@@ -882,6 +841,47 @@ void Osu::update() {
             }
 
             if(!isLoading) m_bSkipScheduled = false;
+        }
+
+        // Reset m_bClickedSkipButton on mouse up
+        // We only use m_bClickedSkipButton to prevent seeking when clicking the skip button
+        if(m_bClickedSkipButton && !getSelectedBeatmap()->isInSkippableSection()) {
+            if(!engine->getMouse()->isLeftDown()) {
+                m_bClickedSkipButton = false;
+            }
+        }
+
+        // scrubbing/seeking
+        m_bSeeking = (m_bSeekKey || getSelectedBeatmap()->m_bIsWatchingReplay);
+        m_bSeeking &= !getSelectedBeatmap()->isPaused() && !m_volumeOverlay->isBusy();
+        m_bSeeking &= !bancho.is_playing_a_multi_map() && !m_bClickedSkipButton;
+        if(m_bSeeking) {
+            const float mousePosX = (int)engine->getMouse()->getPos().x;
+            const float percent = clamp<float>(mousePosX / (float)getScreenWidth(), 0.0f, 1.0f);
+
+            if(engine->getMouse()->isLeftDown()) {
+                if(mousePosX != m_fPrevSeekMousePosX || !osu_scrubbing_smooth.getBool()) {
+                    m_fPrevSeekMousePosX = mousePosX;
+
+                    // special case: allow cancelling the failing animation here
+                    if(getSelectedBeatmap()->hasFailed()) getSelectedBeatmap()->cancelFailing();
+
+                    getSelectedBeatmap()->seekPercentPlayable(percent);
+                } else {
+                    // special case: keep player invulnerable even if scrubbing position does not change
+                    getSelectedBeatmap()->resetScore();
+                }
+            } else {
+                m_fPrevSeekMousePosX = -1.0f;
+            }
+
+            if(engine->getMouse()->isRightDown()) {
+                m_fQuickSaveTime = clamp<float>(
+                    (float)((getSelectedBeatmap()->getStartTimePlayable() + getSelectedBeatmap()->getLengthPlayable()) *
+                            percent) /
+                        (float)getSelectedBeatmap()->getLength(),
+                    0.0f, 1.0f);
+            }
         }
 
         // quick retry timer
