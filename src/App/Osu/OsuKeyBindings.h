@@ -37,6 +37,7 @@ class OsuKeyBindings {
     static ConVar QUICK_RETRY;
     static ConVar QUICK_SAVE;
     static ConVar QUICK_LOAD;
+    static ConVar INSTANT_REPLAY;
     static ConVar TOGGLE_CHAT;
     static ConVar SAVE_SCREENSHOT;
     static ConVar DISABLE_MOUSE_BUTTONS;

@@ -109,7 +109,7 @@ class OsuBeatmap {
                     // clicking on a beatmap)
     void selectDifficulty2(OsuDatabaseBeatmap *difficulty2);
     void deselect();  // stops + unloads the currently loaded music and deletes all hitobjects
-    bool watch(Score score);
+    bool watch(Score score, double start_percent);
     bool play();
     void restart(bool quick = false);
     void pause(bool quitIfWaiting = true);
@@ -408,7 +408,7 @@ class OsuBeatmap {
     }
 
     void onPlayStart();
-    void onBeforeStop(bool quit);
+    void saveAndSubmitScore(bool quit);
     void onPaused(bool first);
 
     void drawFollowPoints(Graphics *g);

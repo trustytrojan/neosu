@@ -702,11 +702,22 @@ void OsuBeatmap::deselect() {
     unloadObjects();
 }
 
-bool OsuBeatmap::watch(Score score) {
+bool OsuBeatmap::watch(Score score, double start_percent) {
     // Replay is invalid
     if(score.replay.size() < 3) {
         return false;
     }
+
+    bancho.osu->replay_info.diff2_md5 = score.md5hash.hash;
+    bancho.osu->replay_info.mod_flags = score.modsLegacy;
+    bancho.osu->replay_info.username = UString(score.playerName.c_str());
+    bancho.osu->replay_info.player_id = score.player_id;
+
+    m_bIsPlaying = false;
+    m_bIsPaused = false;
+    m_bContinueScheduled = false;
+    stopStarCacheLoader();
+    unloadObjects();
 
     m_bIsWatchingReplay = true;
     m_osu->onBeforePlayStart();
@@ -723,7 +734,9 @@ bool OsuBeatmap::watch(Score score) {
 
     m_osu->m_songBrowser2->m_bHasSelectedAndIsPlaying = true;
     m_osu->m_songBrowser2->setVisible(false);
-    m_osu->onPlayStart();
+
+    m_bIsWaiting = true;  // ensure onPlayStart() will be called by seekPercent()
+    seekPercent(start_percent);
 
     return true;
 }
@@ -997,13 +1010,17 @@ void OsuBeatmap::stop(bool quit) {
 
     if(getSkin()->getFailsound()->isPlaying()) engine->getSound()->stop(getSkin()->getFailsound());
 
-    m_currentHitObject = NULL;
-
     m_bIsPlaying = false;
     m_bIsPaused = false;
     m_bContinueScheduled = false;
 
-    onBeforeStop(quit);
+    // kill any running star cache loader
+    stopStarCacheLoader();
+
+    saveAndSubmitScore(quit);
+
+    m_bIsWatchingReplay = false;
+    spectated_replay.clear();
 
     unloadObjects();
 
@@ -1628,6 +1645,7 @@ void OsuBeatmap::unloadMusic() {
 }
 
 void OsuBeatmap::unloadObjects() {
+    m_currentHitObject = nullptr;
     for(int i = 0; i < m_hitobjects.size(); i++) {
         delete m_hitobjects[i];
     }
@@ -3408,12 +3426,7 @@ void OsuBeatmap::onPlayStart() {
     onModUpdate(false, false);
 }
 
-void OsuBeatmap::onBeforeStop(bool quit) {
-    debugLog("OsuBeatmap::onBeforeStop()\n");
-
-    // kill any running star cache loader
-    stopStarCacheLoader();
-
+void OsuBeatmap::saveAndSubmitScore(bool quit) {
     // calculate stars
     double aim = 0.0;
     double aimSliderFactor = 0.0;
@@ -3549,11 +3562,6 @@ void OsuBeatmap::onBeforeStop(bool quit) {
     if(!isComplete) {
         m_osu->getScore()->setPPv2(0.0f);
     }
-
-    m_bIsWatchingReplay = false;
-    spectated_replay.clear();
-
-    debugLog("OsuBeatmap::onBeforeStop() done.\n");
 }
 
 void OsuBeatmap::onPaused(bool first) {

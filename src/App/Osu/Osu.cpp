@@ -1244,6 +1244,37 @@ void Osu::onKeyDown(KeyboardEvent &key) {
 
     // while playing (and not in options)
     if(isInPlayMode() && !m_optionsMenu->isVisible() && !m_chat->isVisible()) {
+        auto beatmap = getSelectedBeatmap();
+
+        // instant replay
+        if((beatmap->isPaused() || beatmap->hasFailed())) {
+            if(!key.isConsumed() && key == (KEYCODE)OsuKeyBindings::INSTANT_REPLAY.getInt()) {
+                if(!beatmap->m_bIsWatchingReplay) {
+                    Score score;
+                    score.replay = beatmap->live_replay;
+                    score.md5hash = beatmap->getSelectedDifficulty2()->getMD5Hash();
+                    score.modsLegacy = getScore()->getModsLegacy();
+
+                    // XXX: code reuse from saveAndSubmitScore, also incorrect when using Auto
+                    if(bancho.is_online()) {
+                        score.player_id = bancho.user_id;
+                        score.playerName = bancho.username.toUtf8();
+                    } else {
+                        auto local_name = convar->getConVarByName("name")->getString();
+                        score.player_id = 0;
+                        score.playerName = local_name.toUtf8();
+                    }
+
+                    double percentFinished = beatmap->getPercentFinished();
+                    double offsetPercent = 10000.f / beatmap->getLength();
+                    double seekPoint = fmax(0.f, percentFinished - offsetPercent);
+                    beatmap->cancelFailing();
+                    beatmap->watch(score, seekPoint);
+                    return;
+                }
+            }
+        }
+
         // while playing and not paused
         if(!getSelectedBeatmap()->isPaused()) {
             getSelectedBeatmap()->onKeyDown(key);

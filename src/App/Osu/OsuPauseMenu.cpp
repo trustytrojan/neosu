@@ -358,7 +358,7 @@ void OsuPauseMenu::onResolutionChange(Vector2 newResolution) {
 CBaseUIContainer *OsuPauseMenu::setVisible(bool visible) {
     m_bVisible = visible;
 
-    if(m_osu->isInPlayMode() && m_osu->getSelectedBeatmap() != NULL)
+    if(m_osu->isInPlayMode())
         setContinueEnabled(!m_osu->getSelectedBeatmap()->hasFailed());
     else
         setContinueEnabled(true);

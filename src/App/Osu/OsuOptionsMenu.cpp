@@ -1025,6 +1025,7 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
     addKeyBindButton("Quick Retry (hold briefly)", &OsuKeyBindings::QUICK_RETRY);
     addKeyBindButton("Quick Save", &OsuKeyBindings::QUICK_SAVE);
     addKeyBindButton("Quick Load", &OsuKeyBindings::QUICK_LOAD);
+    addKeyBindButton("Instant Replay", &OsuKeyBindings::INSTANT_REPLAY);
     addSubSection("Keys - Universal", keyboardSectionTags);
     addKeyBindButton("Toggle chat", &OsuKeyBindings::TOGGLE_CHAT);
     addKeyBindButton("Save Screenshot", &OsuKeyBindings::SAVE_SCREENSHOT);

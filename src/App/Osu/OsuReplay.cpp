@@ -266,17 +266,12 @@ void OsuReplay::load_and_watch(Score score) {
         return;
     }
 
-    bancho.osu->replay_info.diff2_md5 = score.md5hash.hash;
-    bancho.osu->replay_info.mod_flags = score.modsLegacy;
-    bancho.osu->replay_info.username = UString(score.playerName.c_str());
-    bancho.osu->replay_info.player_id = score.player_id;
-
     auto beatmap = bancho.osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(score.md5hash.hash);
     if(beatmap == nullptr) {
         // XXX: Auto-download beatmap
         bancho.osu->m_notificationOverlay->addNotification("Missing beatmap for this replay");
     } else {
         bancho.osu->getSongBrowser()->onDifficultySelected(beatmap, false);
-        bancho.osu->getSelectedBeatmap()->watch(score);
+        bancho.osu->getSelectedBeatmap()->watch(score, 0.f);
     }
 }
