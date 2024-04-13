@@ -213,8 +213,8 @@ void download(const char* url, float* progress, std::vector<uint8_t>& out, int* 
     pthread_mutex_unlock(&threads_mtx);
 
 end:
+    curl_free(hostname);
     curl_url_cleanup(urlu);
-    free(hostname);
 }
 
 void download_beatmapset(uint32_t set_id, float* progress) {
