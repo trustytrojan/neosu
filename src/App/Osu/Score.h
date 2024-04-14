@@ -22,7 +22,7 @@ struct Score {
     bool isImportedLegacyScore;  // used for identifying imported osu! scores (which were previously legacy scores,
                                  // so they don't have any
                                  // numSliderBreaks/unstableRate/hitErrorAvgMin/hitErrorAvgMax)
-    int version;
+    uint32_t version;
     uint64_t unixTimestamp;
 
     uint32_t player_id = 0;

@@ -65,7 +65,7 @@
 
 // release configuration
 ConVar auto_update("auto_update", true, FCVAR_NONE);
-ConVar osu_version("osu_version", 34.09f, FCVAR_NONE);
+ConVar osu_version("osu_version", 34.10f, FCVAR_NONE);
 
 #ifdef _DEBUG
 ConVar osu_debug("osu_debug", true, FCVAR_NONE);

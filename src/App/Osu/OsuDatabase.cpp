@@ -55,8 +55,6 @@ ConVar osu_database_stars_cache_enabled("osu_database_stars_cache_enabled", fals
 ConVar osu_scores_enabled("osu_scores_enabled", true, FCVAR_NONE);
 ConVar osu_scores_legacy_enabled("osu_scores_legacy_enabled", true, FCVAR_NONE, "load osu!'s scores.db");
 ConVar osu_scores_custom_enabled("osu_scores_custom_enabled", true, FCVAR_NONE, "load custom scores.db");
-ConVar osu_scores_custom_version("osu_scores_custom_version", 20210110, FCVAR_NONE,
-                                 "maximum supported custom scores.db version");
 ConVar osu_scores_save_immediately("osu_scores_save_immediately", true, FCVAR_NONE,
                                    "write scores.db as soon as a new score is added");
 ConVar osu_scores_sort_by_pp("osu_scores_sort_by_pp", true, FCVAR_NONE, "display pp in score browser instead of score");
@@ -108,7 +106,7 @@ bool save_db(Packet *db, std::string path) {
         return false;
     }
 
-    fwrite(&db->memory, db->pos, 1, dbfile);
+    fwrite(db->memory, db->pos, 1, dbfile);
     fclose(dbfile);
     return true;
 }
@@ -1792,12 +1790,11 @@ void OsuDatabase::loadScores() {
     m_scores.clear();
 
     // load custom scores
-    // NOTE: custom scores are loaded before legacy scores (because we want to be able to skip loading legacy scores
-    // which were already previously imported at some point)
+    // NOTE: custom scores are loaded before legacy scores because we want to be able to skip loading legacy scores
+    // which were already previously imported at some point
     int nb_mcosu_scores = 0;
     size_t customScoresFileSize = 0;
     if(osu_scores_custom_enabled.getBool()) {
-        const int maxSupportedCustomDbVersion = osu_scores_custom_version.getInt();
         const unsigned char hackIsImportedLegacyScoreFlag =
             0xA9;  // TODO: remove this once all builds on steam (even previous-version) have loading version cap logic
 
@@ -1805,11 +1802,11 @@ void OsuDatabase::loadScores() {
         if(db.size > 0) {
             customScoresFileSize = db.size;
 
-            const int dbVersion = read_int32(&db);
-            const int numBeatmaps = read_int32(&db);
-            debugLog("Custom scores: version = %i, numBeatmaps = %i\n", dbVersion, numBeatmaps);
+            const uint32_t dbVersion = read_int32(&db);
+            const uint32_t numBeatmaps = read_int32(&db);
+            debugLog("Custom scores: version = %u, numBeatmaps = %u\n", dbVersion, numBeatmaps);
 
-            if(dbVersion <= maxSupportedCustomDbVersion) {
+            if(dbVersion <= OsuScore::VERSION) {
                 for(int b = 0; b < numBeatmaps; b++) {
                     auto hash_str = read_stdstring(&db);
                     const int numScores = read_int32(&db);
@@ -2059,14 +2056,10 @@ void OsuDatabase::saveScores() {
     m_bDidScoresChangeForSave = false;
 
     if(m_scores.empty()) return;
-    const int dbVersion = osu_scores_custom_version.getInt();
     const unsigned char hackIsImportedLegacyScoreFlag =
         0xA9;  // TODO: remove this once all builds on steam (even previous-version) have loading version cap logic
 
     debugLog("Osu: Saving scores ...\n");
-
-    Packet db;
-
     const double startTime = engine->getTimeReal();
 
     // count number of beatmaps with valid scores
@@ -2081,7 +2074,8 @@ void OsuDatabase::saveScores() {
     }
 
     // write header
-    write_int32(&db, dbVersion);
+    Packet db;
+    write_int32(&db, OsuScore::VERSION);
     write_int32(&db, numBeatmaps);
 
     // write scores for each beatmap

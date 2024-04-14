@@ -108,7 +108,7 @@ void OsuReplay::compress_frames(const std::vector<OsuReplay::Frame>& frames, uin
 
     std::string replay_string;
     for(auto frame : frames) {
-        auto frame_str = UString::format("%ld|%.4f|%.4f|%hhu,", frame.milliseconds_since_last_frame, frame.x, frame.y,
+        auto frame_str = UString::format("%lld|%.4f|%.4f|%hhu,", frame.milliseconds_since_last_frame, frame.x, frame.y,
                                          frame.key_flags);
         replay_string.append(frame_str.toUtf8(), frame_str.lengthUtf8());
     }

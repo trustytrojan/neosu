@@ -18,7 +18,7 @@ class OsuHitObject;
 
 class OsuScore {
    public:
-    static constexpr const int VERSION = 20240412;
+    static const uint32_t VERSION = 20240412;
 
     enum class HIT {
         // score
