@@ -239,8 +239,8 @@ void OsuUISongBrowserUserButton::updateUserStats() {
         uint32_t score_for_current_level = OsuDatabase::getRequiredScoreForLevel(level);
         uint32_t score_for_next_level = OsuDatabase::getRequiredScoreForLevel(level + 1);
         if(score_for_next_level > score_for_current_level) {
-            percentToNextLevel =
-                (my->total_score - score_for_current_level) / (score_for_next_level - score_for_current_level);
+            percentToNextLevel = (float)(my->total_score - score_for_current_level) /
+                                 (float)(score_for_next_level - score_for_current_level);
         }
 
         stats = OsuDatabase::PlayerStats{
