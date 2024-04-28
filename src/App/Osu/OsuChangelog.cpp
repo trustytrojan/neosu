@@ -39,6 +39,7 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu) {
     latest.changes.push_back("- Renamed 'McOsu Multiplayer' to 'neosu'");
     latest.changes.push_back("- Added server logo to main menu button");
     latest.changes.push_back("- Added instant_replay_duration convar");
+    latest.changes.push_back("- Allowed singleplayer cheats when the server doesn't accept score submissions");
     latest.changes.push_back("- Changed default instant replay key to F2 to avoid conflicts with mod selector");
     latest.changes.push_back("- Fixed chat layout updating while chat was hidden");
     latest.changes.push_back("- Fixed pause button not working after cancelling database load");

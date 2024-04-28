@@ -194,7 +194,7 @@ void handle_packet(Packet *packet) {
             bancho.osu->m_optionsMenu->logInButton->setColor(0xffff0000);
             bancho.osu->m_optionsMenu->logInButton->is_loading = false;
             convar->getConVarByName("mp_autologin")->setValue(true);
-            ConVars::sv_cheats.setValue(false);
+            ConVars::sv_cheats.setValue(!bancho.submit_scores());
             print_new_channels = true;
 
             std::stringstream ss;

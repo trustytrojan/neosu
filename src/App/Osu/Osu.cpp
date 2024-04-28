@@ -2013,7 +2013,7 @@ void Osu::fireResolutionChanged() { onResolutionChanged(g_vInternalResolution); 
 void Osu::onCheatsChange(UString oldValue, UString newValue) {
     (void)oldValue;
     (void)newValue;
-    if(bancho.is_online() && ConVars::sv_cheats.getBool()) {
+    if(bancho.is_online() && (bancho.submit_scores() || bancho.is_in_a_multi_room()) && ConVars::sv_cheats.getBool()) {
         ConVars::sv_cheats.setValue(false);
     }
 }
