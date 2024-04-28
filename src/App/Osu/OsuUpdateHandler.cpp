@@ -107,7 +107,7 @@ void OsuUpdateHandler::_requestUpdate() {
     debugLog("OsuUpdateHandler::requestUpdate()\n");
     m_status = STATUS::STATUS_CHECKING_FOR_UPDATE;
 
-    UString latestVersion = engine->getNetworkHandler()->httpGet(MCOSU_UPDATE_URL "/latest-version.txt");
+    UString latestVersion = engine->getNetworkHandler()->httpGet(NEOSU_UPDATE_URL "/latest-version.txt");
     float fLatestVersion = strtof(latestVersion.toUtf8(), NULL);
     if(fLatestVersion == 0.f) {
         m_status = STATUS::STATUS_UP_TO_DATE;
@@ -128,8 +128,10 @@ void OsuUpdateHandler::_requestUpdate() {
 #else
     const char *os = "linux";
 #endif
+
+    // XXX: Change update URL to /update/ or something
     debugLog("Downloading latest update... (current v%.2f, latest v%.2f)\n", current_version, fLatestVersion);
-    update_url = UString::format(MCOSU_UPDATE_URL "/mcosu-multiplayer-%s-v%.2f.zip", os, fLatestVersion);
+    update_url = UString::format(NEOSU_UPDATE_URL "/neosu-multiplayer-%s-v%.2f.zip", os, fLatestVersion);
 }
 
 bool OsuUpdateHandler::_downloadUpdate() {

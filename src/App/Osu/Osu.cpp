@@ -65,7 +65,7 @@
 
 // release configuration
 ConVar auto_update("auto_update", true, FCVAR_NONE);
-ConVar osu_version("osu_version", 34.10f, FCVAR_NONE);
+ConVar osu_version("osu_version", 35.00f, FCVAR_NONE);
 
 #ifdef _DEBUG
 ConVar osu_debug("osu_debug", true, FCVAR_NONE);
@@ -169,9 +169,9 @@ Shader *flashlight_shader = nullptr;
 Osu::Osu(int instanceID) {
     srand(time(NULL));
 
-    bancho.mcosu_version = UString::format("%.2f-" MCOSU_STREAM, osu_version.getFloat());
+    bancho.neosu_version = UString::format("%.2f-" NEOSU_STREAM, osu_version.getFloat());
     bancho.user_agent =
-        UString::format("Mozilla/5.0 (compatible; McOsu/%s; +" MCOSU_UPDATE_URL "/)", bancho.mcosu_version.toUtf8());
+        UString::format("Mozilla/5.0 (compatible; neosu/%s; +" NEOSU_UPDATE_URL "/)", bancho.neosu_version.toUtf8());
 
     m_iInstanceID = instanceID;
 
@@ -226,7 +226,7 @@ Osu::Osu(int instanceID) {
     m_experimentalMods.push_back(convar->getConVarByName("osu_mod_shirone"));
     m_experimentalMods.push_back(convar->getConVarByName("osu_mod_approach_different"));
 
-    env->setWindowTitle("McOsu");
+    env->setWindowTitle("neosu");
     env->setCursorVisible(false);
 
     engine->getConsoleBox()->setRequireShiftToActivate(true);

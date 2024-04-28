@@ -35,7 +35,7 @@ const UString OsuRichPresence::KEY_STEAM_STATUS = "status";
 const UString OsuRichPresence::KEY_DISCORD_STATUS = "state";
 const UString OsuRichPresence::KEY_DISCORD_DETAILS = "details";
 
-UString last_status = "[McOsu]\nWaking up";
+UString last_status = "[neosu]\nWaking up";
 Action last_action = IDLE;
 
 void OsuRichPresence::setBanchoStatus(Osu *osu, const char *info_text, Action action) {
@@ -54,7 +54,7 @@ void OsuRichPresence::setBanchoStatus(Osu *osu, const char *info_text, Action ac
     }
 
     char fancy_text[1024] = {0};
-    snprintf(fancy_text, 1023, "[McOsu]\n%s", info_text);
+    snprintf(fancy_text, 1023, "[neosu]\n%s", info_text);
 
     last_status = fancy_text;
     last_action = action;
@@ -114,7 +114,7 @@ void OsuRichPresence::onSongBrowser(Osu *osu) {
     }
 
     // also update window title
-    if(osu_rich_presence_dynamic_windowtitle.getBool()) env->setWindowTitle("McOsu");
+    if(osu_rich_presence_dynamic_windowtitle.getBool()) env->setWindowTitle("neosu");
 }
 
 void OsuRichPresence::onPlayStart(Osu *osu) {
@@ -132,7 +132,7 @@ void OsuRichPresence::onPlayStart(Osu *osu) {
     // also update window title
     if(osu_rich_presence_dynamic_windowtitle.getBool()) {
         UString windowTitle = UString(playingInfo);
-        windowTitle.insert(0, "McOsu - ");
+        windowTitle.insert(0, "neosu - ");
         env->setWindowTitle(windowTitle);
     }
 }
@@ -173,7 +173,7 @@ void OsuRichPresence::setStatus(Osu *osu, UString status, bool force) {
     discord->setRichPresence("smallImageKey", "logo_discord_512_blackfill", true);
     discord->setRichPresence("largeImageText",
                              osu_rich_presence_discord_show_totalpp.getBool()
-                                 ? "Top = Status / Recent Play; Bottom = Total weighted pp (McOsu scores only!)"
+                                 ? "Top = Status / Recent Play; Bottom = Total weighted pp (neosu scores only!)"
                                  : "",
                              true);
     discord->setRichPresence("smallImageText",

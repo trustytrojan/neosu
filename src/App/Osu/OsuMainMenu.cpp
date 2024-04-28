@@ -29,9 +29,6 @@
 #include "OsuRichPresence.h"
 #include "OsuSkin.h"
 #include "OsuSkinImage.h"
-#include "OsuSlider.h"
-#include "OsuSliderCurves.h"
-#include "OsuSliderRenderer.h"
 #include "OsuSongBrowser.h"
 #include "OsuUIButton.h"
 #include "OsuUpdateHandler.h"
@@ -39,44 +36,12 @@
 #include "SoundEngine.h"
 #include "VertexArrayObject.h"
 
-#define MCOSU_VERSION_TEXT "Version"
-#define MCOSU_BANNER_TEXT ""
-UString OsuMainMenu::MCOSU_MAIN_BUTTON_TEXT = UString("McOsu");
-UString OsuMainMenu::MCOSU_MAIN_BUTTON_SUBTEXT = UString("Multiplayer Client");
+#define NEOSU_VERSION_TEXT "Version"
+#define NEOSU_BANNER_TEXT ""
+UString OsuMainMenu::NEOSU_MAIN_BUTTON_TEXT = UString("neosu");
+UString OsuMainMenu::NEOSU_MAIN_BUTTON_SUBTEXT = UString("Multiplayer Client");
 
-#define MCOSU_NEWVERSION_NOTIFICATION_TRIGGER_FILE "version.txt"
-
-static const char *s_sliderTextBeatmap =
-    "osu file format v14\r\n"
-    "\r\n"
-    "[General]\r\n"
-    "AudioFilename: nothing.mp3\r\n"
-    "\r\n"
-    "[Metadata]\r\n"
-    "Title:McOsu Slider Text\r\n"
-    "TitleUnicode:McOsu Slider Text\r\n"
-    "Artist:McKay\r\n"
-    "ArtistUnicode:McKay\r\n"
-    "Creator:McKay\r\n"
-    "Version:McOsu\r\n"
-    "\r\n"
-    "[Difficulty]\r\n"
-    "HPDrainRate:6\r\n"
-    "CircleSize:6\r\n"
-    "OverallDifficulty:5\r\n"
-    "ApproachRate:0\r\n"
-    "SliderMultiplier:10\r\n"
-    "SliderTickRate:1\r\n"
-    "\r\n"
-    "[TimingPoints]\r\n"
-    "1717.04358603418,1200,4,1,0,27,1,0\r\n"
-    "\r\n"
-    "[HitObjects]\r\n"
-    "-143,275,0,6,0,B|-143:115|-143:115|-79:179|-79:179|-20:115|-20:115|-20:275,1,498.750001415609\r\n"
-    "112,197,0,2,0,P|45:236|115:262,1,183.75000052154\r\n"
-    "263,111,0,2,0,P|282:272|251:111,1,520\r\n"
-    "480,179,0,2,0,B|288:179|480:243|544:275|384:275,1,262.500000745058\r\n"
-    "543,182,0,2,0,B|511:309|671:309|616:165,1,236.250000670552";
+#define NEOSU_NEWVERSION_NOTIFICATION_TRIGGER_FILE "version.txt"
 
 class OsuMainMenuCubeButton : public CBaseUIButton {
    public:
@@ -172,11 +137,6 @@ ConVar osu_toggle_preview_music("osu_toggle_preview_music");
 
 ConVar osu_draw_menu_background("osu_draw_menu_background", false, FCVAR_NONE);
 ConVar osu_main_menu_startup_anim_duration("osu_main_menu_startup_anim_duration", 0.25f, FCVAR_NONE);
-ConVar osu_main_menu_use_slider_text("osu_main_menu_use_slider_text", true, FCVAR_NONE);
-ConVar osu_main_menu_slider_text_alpha("osu_main_menu_slider_text_alpha", 1.0f, FCVAR_NONE);
-ConVar osu_main_menu_slider_text_scale("osu_main_menu_slider_text_scale", 1.0f, FCVAR_NONE);
-ConVar osu_main_menu_slider_text_offset_x("osu_main_menu_slider_text_offset_x", 15.0f, FCVAR_NONE);
-ConVar osu_main_menu_slider_text_offset_y("osu_main_menu_slider_text_offset_y", 0.0f, FCVAR_NONE);
 ConVar osu_main_menu_alpha("osu_main_menu_alpha", 1.0f, FCVAR_NONE);
 ConVar osu_main_menu_friend("osu_main_menu_friend", true, FCVAR_NONE);
 
@@ -192,12 +152,11 @@ ConVar *OsuMainMenu::m_osu_universal_offset_ref = NULL;
 ConVar *OsuMainMenu::m_osu_universal_offset_hardcoded_ref = NULL;
 ConVar *OsuMainMenu::m_osu_old_beatmap_offset_ref = NULL;
 ConVar *OsuMainMenu::m_osu_universal_offset_hardcoded_fallback_dsound_ref = NULL;
-ConVar *OsuMainMenu::m_osu_slider_border_feather_ref = NULL;
 ConVar *OsuMainMenu::m_osu_mod_random_ref = NULL;
 ConVar *OsuMainMenu::m_osu_songbrowser_background_fade_in_duration_ref = NULL;
 
 OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu) {
-    if(env->getOS() == Environment::OS::OS_HORIZON) MCOSU_MAIN_BUTTON_TEXT.append(" NX");
+    if(env->getOS() == Environment::OS::OS_HORIZON) NEOSU_MAIN_BUTTON_TEXT.append(" NX");
 
     if(m_osu_universal_offset_ref == NULL) m_osu_universal_offset_ref = convar->getConVarByName("osu_universal_offset");
     if(m_osu_universal_offset_hardcoded_ref == NULL)
@@ -207,8 +166,6 @@ OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu) {
     if(m_osu_universal_offset_hardcoded_fallback_dsound_ref == NULL)
         m_osu_universal_offset_hardcoded_fallback_dsound_ref =
             convar->getConVarByName("osu_universal_offset_hardcoded_fallback_dsound");
-    if(m_osu_slider_border_feather_ref == NULL)
-        m_osu_slider_border_feather_ref = convar->getConVarByName("osu_slider_border_feather");
     if(m_osu_mod_random_ref == NULL) m_osu_mod_random_ref = convar->getConVarByName("osu_mod_random");
     if(m_osu_songbrowser_background_fade_in_duration_ref == NULL)
         m_osu_songbrowser_background_fade_in_duration_ref =
@@ -264,8 +221,8 @@ OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu) {
     m_bDidUserUpdateFromOlderVersionLe3303 = false;
     {
         m_bDrawVersionNotificationArrow = false;
-        if(env->fileExists(MCOSU_NEWVERSION_NOTIFICATION_TRIGGER_FILE)) {
-            File versionFile(MCOSU_NEWVERSION_NOTIFICATION_TRIGGER_FILE);
+        if(env->fileExists(NEOSU_NEWVERSION_NOTIFICATION_TRIGGER_FILE)) {
+            File versionFile(NEOSU_NEWVERSION_NOTIFICATION_TRIGGER_FILE);
             if(versionFile.canRead()) {
                 float version = std::stof(versionFile.readLine());
                 if(version < Osu::version->getFloat() - 0.0001f) m_bDrawVersionNotificationArrow = true;
@@ -307,7 +264,7 @@ OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu) {
     m_updateAvailableButton->setTextColor(0x22ffffff);
 
     m_versionButton = new CBaseUIButton(0, 0, 0, 0, "", "");
-    UString versionString = MCOSU_VERSION_TEXT;
+    UString versionString = NEOSU_VERSION_TEXT;
     versionString.append(" ");
     versionString.append(UString::format("%.2f", Osu::version->getFloat()));
     m_versionButton->setText(versionString);
@@ -315,43 +272,9 @@ OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu) {
     m_versionButton->setDrawFrame(false);
     m_versionButton->setClickCallback(fastdelegate::MakeDelegate(this, &OsuMainMenu::onVersionPressed));
     addBaseUIElement(m_versionButton);
-
-    m_mainMenuSliderTextDatabaseBeatmap = NULL;
-    m_mainMenuSliderTextBeatmapStandard = NULL;
-    m_fMainMenuSliderTextRawHitCircleDiameter = 1.0f;
-    if(osu_main_menu_use_slider_text.getBool()) {
-        m_mainMenuSliderTextDatabaseBeatmap = new OsuDatabaseBeatmap(m_osu, s_sliderTextBeatmap, "", true);
-        m_mainMenuSliderTextBeatmapStandard = new OsuBeatmap(m_osu);
-
-        // HACKHACK: temporary workaround to avoid this breaking the main menu logo text sliders (1/2)
-        const bool wasModRandomEnabled = m_osu_mod_random_ref->getBool();
-        if(wasModRandomEnabled) m_osu_mod_random_ref->setValue(0.0f);
-
-        OsuDatabaseBeatmap::LOAD_GAMEPLAY_RESULT result =
-            OsuDatabaseBeatmap::loadGameplay(m_mainMenuSliderTextDatabaseBeatmap, m_mainMenuSliderTextBeatmapStandard);
-        if(result.errorCode == 0) {
-            m_fMainMenuSliderTextRawHitCircleDiameter = m_mainMenuSliderTextBeatmapStandard->getRawHitcircleDiameter();
-            m_mainMenuSliderTextBeatmapHitObjects = result.hitobjects;
-            for(size_t i = 0; i < m_mainMenuSliderTextBeatmapHitObjects.size(); i++) {
-                OsuHitObject *hitObject = m_mainMenuSliderTextBeatmapHitObjects[i];
-                OsuSlider *sliderPointer = dynamic_cast<OsuSlider *>(hitObject);
-                if(sliderPointer != NULL)
-                    sliderPointer->rebuildVertexBuffer(
-                        true);  // we are working in osu coordinate space for this (no mods, just raw curve coords)
-            }
-        }
-
-        // HACKHACK: temporary workaround to avoid this breaking the main menu logo text sliders (2/2)
-        if(wasModRandomEnabled) m_osu_mod_random_ref->setValue(1.0f);
-    }
 }
 
 OsuMainMenu::~OsuMainMenu() {
-    for(auto slider : m_mainMenuSliderTextBeatmapHitObjects) {
-        delete slider;
-    }
-    m_mainMenuSliderTextBeatmapHitObjects.clear();
-
     anim->deleteExistingAnimation(&m_fUpdateButtonAnim);
 
     anim->deleteExistingAnimation(&m_fMainMenuAnimFriendEyeFollowX);
@@ -370,9 +293,6 @@ OsuMainMenu::~OsuMainMenu() {
 
     // if the user didn't click on the update notification during this session, quietly remove it so it's not annoying
     if(m_bWasCleanShutdown) writeVersionFile();
-
-    SAFE_DELETE(m_mainMenuSliderTextBeatmapStandard);
-    SAFE_DELETE(m_mainMenuSliderTextDatabaseBeatmap);
 }
 
 void OsuMainMenu::draw(Graphics *g) {
@@ -476,7 +396,7 @@ void OsuMainMenu::draw(Graphics *g) {
 #endif
 
     if(drawBanner) {
-        UString bannerText = MCOSU_BANNER_TEXT;
+        UString bannerText = NEOSU_BANNER_TEXT;
 
         if(osu_main_menu_banner_always_text.getString().length() > 0)
             bannerText = osu_main_menu_banner_always_text.getString();
@@ -569,52 +489,6 @@ void OsuMainMenu::draw(Graphics *g) {
         m_updateAvailableButton->draw(g);
         if(m_osu->getUpdateHandler()->getStatus() == OsuUpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION)
             g->pop3DScene();
-    }
-
-    // pre-render all slider text into the one single sliderFrameBuffer (up here before any of the 3dscene stuff)
-    if(osu_main_menu_use_slider_text.getBool() && m_mainMenuSliderTextBeatmapHitObjects.size() > 0) {
-        static std::vector<Vector2> alwaysPoints;
-        const float scale =
-            (mainButtonRect.getWidth() / 1100.0f) * osu_main_menu_slider_text_scale.getFloat() * m_fStartupAnim;
-        const Vector2 osuCoordsToCenteredAtOrigin =
-            Vector2(-OsuGameRules::OSU_COORD_WIDTH / 2 + osu_main_menu_slider_text_offset_x.getFloat(),
-                    -OsuGameRules::OSU_COORD_HEIGHT / 2 + osu_main_menu_slider_text_offset_y.getFloat()) *
-            scale;
-        const Vector2 screenCenterOffset =
-            Vector2(m_osu->getScreenWidth() / 2 - m_fCenterOffsetAnim, m_osu->getScreenHeight() / 2);
-        const Vector2 translation = osuCoordsToCenteredAtOrigin + screenCenterOffset;
-        const float from = 0.0f;
-        const float to = m_fStartupAnim2;
-
-        const float prevSliderBorderFeatherBackup = m_osu_slider_border_feather_ref->getFloat();
-        m_osu_slider_border_feather_ref->setValue(0.04f);  // heuristic to avoid aliasing
-        {
-            const size_t numHitObjects = m_mainMenuSliderTextBeatmapHitObjects.size();
-            for(size_t i = 0; i < numHitObjects; i++) {
-                OsuSlider *sliderPointer = dynamic_cast<OsuSlider *>(m_mainMenuSliderTextBeatmapHitObjects[i]);
-                if(sliderPointer != NULL) {
-                    alwaysPoints.clear();
-                    if(to < 1.0f)
-                        alwaysPoints.push_back((sliderPointer->getCurve()->pointAt(to)) * scale +
-                                               translation);  // alwaysPoints are always drawn in engine coords, so
-                                                              // compensate by applying scale and translation manually
-
-                    const bool doEnableRenderTarget = (i == 0);
-                    const bool doDisableRenderTarget = (i + 1 >= numHitObjects);
-                    const bool doDrawSliderFrameBufferToScreen = false;
-
-                    OsuSliderRenderer::draw(g, m_osu, sliderPointer->getVAO(), alwaysPoints, translation, scale,
-                                            (to < 1.0f ? m_fMainMenuSliderTextRawHitCircleDiameter * scale
-                                                       : OsuSliderRenderer::UNIT_CIRCLE_VAO_DIAMETER),
-                                            from, to,
-                                            m_osu->getSkin()->getComboColorForCounter(sliderPointer->getColorCounter(),
-                                                                                      sliderPointer->getColorOffset()),
-                                            1.0f, 1.0f, 0, doEnableRenderTarget, doDisableRenderTarget,
-                                            doDrawSliderFrameBufferToScreen);
-                }
-            }
-        }
-        m_osu_slider_border_feather_ref->setValue(prevSliderBorderFeatherBackup);
     }
 
     // draw main button
@@ -922,36 +796,29 @@ void OsuMainMenu::draw(Graphics *g) {
     }
 
     // main text
-    const float fontScale = (1.0f - pulseSub + m_fSizeAddAnim) * m_fStartupAnim;
+    // XXX: this is blurry, looks like shit
+    const float title_width = titleFont->getStringWidth(NEOSU_MAIN_BUTTON_TEXT);
+    const float title_scale = mainButtonRect.getWidth() / title_width * 0.6f;
+    const float fontScale = title_scale * (1.0f - pulseSub + m_fSizeAddAnim) * m_fStartupAnim;
     {
         float alpha = (1.0f - m_fMainMenuAnimFriendPercent) * (1.0f - m_fMainMenuAnimFriendPercent) *
                       (1.0f - m_fMainMenuAnimFriendPercent);
 
-        if(!osu_main_menu_use_slider_text.getBool() || m_mainMenuSliderTextBeatmapHitObjects.size() < 1) {
-            g->setColor(0xffffffff);
-            g->setAlpha(alpha);
-            g->pushTransform();
-            {
-                g->scale(fontScale, fontScale);
-                g->translate(m_vCenter.x - m_fCenterOffsetAnim -
-                                 (titleFont->getStringWidth(MCOSU_MAIN_BUTTON_TEXT) / 2.0f) * fontScale,
-                             m_vCenter.y + (titleFont->getHeight() * fontScale) / 2.25f, -1.0f);
-                g->drawString(titleFont, MCOSU_MAIN_BUTTON_TEXT);
-            }
-            g->popTransform();
-        } else {
-            alpha *= m_fStartupAnim * m_fStartupAnim * m_fStartupAnim * m_fStartupAnim;
-
-            m_osu->getSliderFrameBuffer()->setColor(
-                COLORf(alpha * osu_main_menu_slider_text_alpha.getFloat(), 1.0f, 1.0f, 1.0f));
-            m_osu->getSliderFrameBuffer()->drawRect(g, mainButtonRect.getX() + inset, mainButtonRect.getY() + inset,
-                                                    mainButtonRect.getWidth() - 2 * inset,
-                                                    mainButtonRect.getHeight() - 2 * inset);
+        g->setColor(0xffffffff);
+        g->setAlpha(alpha);
+        g->pushTransform();
+        {
+            g->scale(fontScale, fontScale);
+            g->translate(m_vCenter.x - m_fCenterOffsetAnim -
+                             (titleFont->getStringWidth(NEOSU_MAIN_BUTTON_TEXT) / 2.0f) * fontScale,
+                         m_vCenter.y + (titleFont->getHeight() * fontScale) / 2.25f, -1.0f);
+            g->drawString(titleFont, NEOSU_MAIN_BUTTON_TEXT);
         }
+        g->popTransform();
     }
 
     // subtitle
-    UString subtext = MCOSU_MAIN_BUTTON_SUBTEXT;
+    UString subtext = NEOSU_MAIN_BUTTON_SUBTEXT;
     if(bancho.is_online()) {
         subtext = bancho.endpoint;
     }
@@ -1252,7 +1119,7 @@ void OsuMainMenu::mouse_update(bool *propagate_clicks) {
                 if(m_updateAvailableButton->getText().find("ready") != -1)
                     m_updateAvailableButton->setText("Click here to restart now!");
                 else
-                    m_updateAvailableButton->setText("A new version of McOsu is ready!");
+                    m_updateAvailableButton->setText("A new version of neosu is ready!");
             }
             break;
         case OsuUpdateHandler::STATUS::STATUS_ERROR:
@@ -1289,7 +1156,7 @@ void OsuMainMenu::selectRandomBeatmap() {
         m_osu->getSongBrowser()->selectRandomBeatmap();
     } else {
         // Database is not loaded yet, load a random map and select it
-        // XXX: Also pick from McOsu maps/ directory
+        // XXX: Also pick from neosu maps/ directory
         auto songs_folder = m_osu->getSongBrowser()->getDatabase()->getOsuSongsFolder();
         auto mapset_folders = env->getFoldersInFolder(songs_folder);
         auto nb_mapsets = mapset_folders.size();
@@ -1541,7 +1408,7 @@ void OsuMainMenu::setMenuElementsVisible(bool visible, bool animate) {
 
 void OsuMainMenu::writeVersionFile() {
     // remember, don't show the notification arrow until the version changes again
-    std::ofstream versionFile(MCOSU_NEWVERSION_NOTIFICATION_TRIGGER_FILE, std::ios::out | std::ios::trunc);
+    std::ofstream versionFile(NEOSU_NEWVERSION_NOTIFICATION_TRIGGER_FILE, std::ios::out | std::ios::trunc);
     if(versionFile.good()) versionFile << Osu::version->getFloat();
 }
 

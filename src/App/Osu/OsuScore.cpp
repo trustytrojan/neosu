@@ -323,7 +323,7 @@ void OsuScore::addHitResult(OsuBeatmap *beatmap, OsuHitObject *hitObject, HIT hi
                 // NOTE: all pre-lazer-20220902 star/pp algorithm versions only ever considered everything a circle
                 // (except for spinners ofc), which is why simply "cheating" and adding a hardcoded +1 to the
                 // beatmap->getNumCirclesForCurrentTime() worked for live pp NOTE: the reason for the +1 is that in the
-                // mcosu update loop, when we get called where we are inside addHitResult(), the beatmap hitobject
+                // neosu update loop, when we get called where we are inside addHitResult(), the beatmap hitobject
                 // counters have not yet been updated. NOTE: we can not early update the counters since we don't yet
                 // know whether the hitobject will actually be "finished" in that part of the update loop. NOTE: now,
                 // since the algorithms do require each individual hitobject type counts (and not JUST the "circle"

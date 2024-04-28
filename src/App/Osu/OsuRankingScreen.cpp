@@ -572,7 +572,7 @@ void OsuRankingScreen::setScore(Score score, UString dateTime) {
 
 void OsuRankingScreen::setBeatmapInfo(OsuBeatmap *beatmap, OsuDatabaseBeatmap *diff2) {
     m_songInfo->setFromBeatmap(beatmap, diff2);
-    m_songInfo->setPlayer(m_bIsUnranked ? "McOsu" : convar->getConVarByName("name")->getString());
+    m_songInfo->setPlayer(m_bIsUnranked ? "neosu" : convar->getConVarByName("name")->getString());
 
     // round all here to 2 decimal places
     m_fSpeedMultiplier = std::round(m_osu->getSpeedMultiplier() * 100.0f) / 100.0f;

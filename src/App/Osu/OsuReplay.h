@@ -6,8 +6,8 @@ struct Score;
 
 namespace OsuReplay {
 struct Frame {
-    int64_t cur_music_pos;
-    int64_t milliseconds_since_last_frame;
+    long long int cur_music_pos;
+    long long int milliseconds_since_last_frame;
 
     float x;  // 0 - 512
     float y;  // 0 - 384

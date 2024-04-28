@@ -15,7 +15,7 @@ enum class ServerPolicy {
 };
 
 struct Bancho {
-    UString mcosu_version;
+    UString neosu_version;
 
     Osu *osu = nullptr;
     UString endpoint;

@@ -36,9 +36,14 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu) {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
-    latest.changes.push_back("- Fixed replays not saving/submitting correctly");
-    latest.changes.push_back("- Fixed scores, collections and stars/pp cache not saving correctly");
+    latest.changes.push_back("- Renamed 'McOsu Multiplayer' to 'neosu'");
     changelogs.push_back(latest);
+
+    CHANGELOG v34_10;
+    v34_10.title = "34.10 (2024-04-14)";
+    v34_10.changes.push_back("- Fixed replays not saving/submitting correctly");
+    v34_10.changes.push_back("- Fixed scores, collections and stars/pp cache not saving correctly");
+    changelogs.push_back(v34_10);
 
     CHANGELOG v34_09;
     v34_09.title = "34.09 (2024-04-13)";

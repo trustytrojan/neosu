@@ -48,7 +48,7 @@ set CXXFLAGS=%CXXFLAGS% %LIBPATHS%
 
 rem BUILD OBJECTS
 if exist "build_flags.txt" del /q "build_flags.txt"
-<nul set /p "=-o build/McOsu.exe " >> build_flags.txt
+<nul set /p "=-o build/neosu.exe " >> build_flags.txt
 <nul set /p "=!CXXFLAGS! " >> build_flags.txt
 set OBJECTS=
 for /r "src" %%i in (*.cpp) do (
@@ -79,7 +79,7 @@ if !ERRORLEVEL! neq 0 (
 ) else (
 	del /q "build_flags.txt"
 	cd build
-	McOsu.exe
+	neosu.exe
 )
 
 :END

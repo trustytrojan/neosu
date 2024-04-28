@@ -54,7 +54,7 @@ void disconnect() {
         write_int32(&packet, 0);
 
         CURL *curl = curl_easy_init();
-        auto version_header = UString::format("x-mcosu-ver: %s", bancho.mcosu_version.toUtf8());
+        auto version_header = UString::format("x-mcosu-ver: %s", bancho.neosu_version.toUtf8());
         struct curl_slist *chunk = NULL;
         chunk = curl_slist_append(chunk, auth_header.c_str());
         chunk = curl_slist_append(chunk, version_header.toUtf8());
@@ -105,7 +105,7 @@ void disconnect() {
 void reconnect() {
     if(bancho.osu->m_iInstanceID > 0) {
         // XXX: To handle multiple instances you would have to do some complex IPC
-        //      Would be great to be able to use McOsu as tournament spectator client...
+        //      Would be great to be able to use neosu as tournament spectator client...
         //      But that's not in scope right now.
         return;
     }
@@ -203,7 +203,7 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
     response.memory = (uint8_t *)malloc(2048);
 
     struct curl_slist *chunk = NULL;
-    auto version_header = UString::format("x-mcosu-ver: %s", bancho.mcosu_version.toUtf8());
+    auto version_header = UString::format("x-mcosu-ver: %s", bancho.neosu_version.toUtf8());
     chunk = curl_slist_append(chunk, version_header.toUtf8());
     if(!auth_header.empty()) {
         chunk = curl_slist_append(chunk, auth_header.c_str());

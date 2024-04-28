@@ -636,7 +636,7 @@ OsuSongBrowser::~OsuSongBrowser() {
     engine->getResourceManager()->destroyResource(m_dynamicStarCalculator);
     engine->getResourceManager()->destroyResource(m_backgroundSearchMatcher);
 
-    // leak memory, who cares we're closing mcosu anyway
+    // leak memory, who cares we're closing neosu anyway
 }
 
 void OsuSongBrowser::draw(Graphics *g) {
@@ -4091,7 +4091,7 @@ void OsuSongBrowser::selectRandomBeatmap() {
 #ifdef _WIN32
     HCRYPTPROV hCryptProv;
     CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
-    CryptGenRandom(hCryptProv, sizeof(rng), (BYTE*)&rng);
+    CryptGenRandom(hCryptProv, sizeof(rng), (BYTE *)&rng);
     CryptReleaseContext(hCryptProv, 0);
 #else
     getrandom(&rng, sizeof(rng), 0);

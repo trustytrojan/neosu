@@ -593,7 +593,7 @@ void OsuUISongBrowserScoreButton::onUseModsClicked() {
 
         // (nothing to do here, everything is already handled above in the "legacy mods" block)
     } else {
-        // mcosu score, custom values for everything possible, have to calculate and check whether to apply any
+        // neosu score, custom values for everything possible, have to calculate and check whether to apply any
         // overrides (or leave default) reason being that just because the speedMultiplier stored in the score = 1.5x
         // doesn't mean that we should move the override slider to 1.5x especially for CS/AR/OD/HP, because those get
         // stored in the score as directly coming from OsuBeatmap::getAR() (so with pre-applied difficultyMultiplier

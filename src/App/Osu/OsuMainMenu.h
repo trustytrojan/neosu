@@ -43,8 +43,8 @@ class OsuMainMenuPauseButton : public CBaseUIButton {
 
 class OsuMainMenu : public OsuScreen, public MouseListener {
    public:
-    static UString MCOSU_MAIN_BUTTON_TEXT;
-    static UString MCOSU_MAIN_BUTTON_SUBTEXT;
+    static UString NEOSU_MAIN_BUTTON_TEXT;
+    static UString NEOSU_MAIN_BUTTON_SUBTEXT;
 
     friend class OsuMainMenuCubeButton;
     friend class OsuMainMenuButton;
@@ -85,7 +85,6 @@ class OsuMainMenu : public OsuScreen, public MouseListener {
     static ConVar *m_osu_universal_offset_hardcoded_ref;
     static ConVar *m_osu_old_beatmap_offset_ref;
     static ConVar *m_osu_universal_offset_hardcoded_fallback_dsound_ref;
-    static ConVar *m_osu_slider_border_feather_ref;
     static ConVar *m_osu_mod_random_ref;
     static ConVar *m_osu_songbrowser_background_fade_in_duration_ref;
 
@@ -163,12 +162,6 @@ class OsuMainMenu : public OsuScreen, public MouseListener {
     bool m_bStartupAnim;
     float m_fStartupAnim;
     float m_fStartupAnim2;
-
-    OsuDatabaseBeatmap *m_mainMenuSliderTextDatabaseBeatmap;
-    OsuBeatmap *m_mainMenuSliderTextBeatmapStandard;
-    std::vector<OsuHitObject *> m_mainMenuSliderTextBeatmapHitObjects;
-    float m_fMainMenuSliderTextRawHitCircleDiameter;
-
     float m_fPrevShuffleTime;
     float m_fBackgroundFadeInTime;
 };

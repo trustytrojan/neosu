@@ -22,7 +22,7 @@ ConVar osu_stars_slider_curve_points_separation(
     "massively reduce curve accuracy for star calculations to save memory/performance");
 ConVar osu_stars_and_pp_lazer_relax_autopilot_nerf_disabled(
     "osu_stars_and_pp_lazer_relax_autopilot_nerf_disabled", true, FCVAR_NONE,
-    "generally disables all nerfs for relax/autopilot in both star/pp algorithms. since mcosu has always allowed "
+    "generally disables all nerfs for relax/autopilot in both star/pp algorithms. since neosu has always allowed "
     "these, the default is to not nerf them.");
 
 unsigned long long OsuDifficultyHitObject::sortHackCounter = 0;
@@ -254,7 +254,7 @@ double OsuDifficultyCalculator::calculateStarDiffForHitObjects(
                 // online ranking pp/stars now)
     float circleRadiusInOsuPixels =
         OsuGameRules::getRawHitCircleDiameter(clamp<float>(CS, 0.0f, 12.142f), applyBrokenGamefieldRoundingAllowance) /
-        2.0f;  // NOTE: clamped CS because McOsu allows CS > ~12.1429 (at which point the diameter becomes negative)
+        2.0f;  // NOTE: clamped CS because neosu allows CS > ~12.1429 (at which point the diameter becomes negative)
     const float hitWindow300 = 2.0f * OsuGameRules::getRawHitWindow300(OD) / speedMultiplier;
 
     // ******************************************************************************************************************************************
@@ -341,7 +341,7 @@ double OsuDifficultyCalculator::calculateStarDiffForHitObjects(
         double travelTime;      // precalc temp
 
         const std::vector<DiffObject>
-            &objects;  // NOTE: McOsu stores the first object in this array while lazer doesn't. newer lazer algorithms
+            &objects;  // NOTE: neosu stores the first object in this array while lazer doesn't. newer lazer algorithms
                        // require referencing objects "randomly", so we just keep the entire vector around.
         int prevObjectIndex;  // WARNING: this will be -1 for the first object (as the name implies), see note above
 
@@ -1260,7 +1260,7 @@ double OsuDifficultyCalculator::computeAimValue(const ScoreData &score,
     // hidden
     if(score.modsLegacy & ModFlags::Hidden)
         aimValue *= 1.0 + 0.04 * (std::max(12.0 - attributes.ApproachRate,
-                                           0.0));  // NOTE: clamped to 0 because McOsu allows AR > 12
+                                           0.0));  // NOTE: clamped to 0 because neosu allows AR > 12
 
     // "We assume 15% of sliders in a map are difficult since there's no way to tell from the performance calculator."
     double estimateDifficultSliders = attributes.SliderCount * 0.15;
@@ -1320,7 +1320,7 @@ double OsuDifficultyCalculator::computeSpeedValue(const ScoreData &score, const 
     // hidden
     if(score.modsLegacy & ModFlags::Hidden)
         speedValue *= 1.0 + 0.04 * (std::max(12.0 - attributes.ApproachRate,
-                                             0.0));  // NOTE: clamped to 0 because McOsu allows AR > 12
+                                             0.0));  // NOTE: clamped to 0 because neosu allows AR > 12
 
     // "Calculate accuracy assuming the worst case scenario"
     double relevantTotalDiff = score.totalHits - attributes.SpeedNoteCount;

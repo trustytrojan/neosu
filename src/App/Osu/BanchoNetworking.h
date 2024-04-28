@@ -6,12 +6,12 @@
 #include "BanchoProtocol.h"
 
 #ifdef _DEBUG
-#define MCOSU_STREAM "dev"
+#define NEOSU_STREAM "dev"
 #else
-#define MCOSU_STREAM "release"
+#define NEOSU_STREAM "release"
 #endif
 
-#define MCOSU_UPDATE_URL "https://mcosu.kiwec.net"
+#define NEOSU_UPDATE_URL "https://neosu.kiwec.net"
 
 // NOTE: Full version can be something like "b20200201.2cuttingedge"
 #define OSU_VERSION "b20240411.1"
@@ -53,7 +53,7 @@ void send_packet(Packet &packet);
 void receive_api_responses();
 void receive_bancho_packets();
 
-// Initialize networking thread. Should be called once when starting McOsu.
+// Initialize networking thread. Should be called once when starting neosu.
 void init_networking_thread();
 
 size_t curl_write(void *contents, size_t size, size_t nmemb, void *userp);

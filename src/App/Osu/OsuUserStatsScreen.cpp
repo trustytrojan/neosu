@@ -195,7 +195,7 @@ class OsuUserStatsScreenBackgroundPPRecalculator : public Resource {
                         score.version = OsuScore::VERSION;
 
                         if(m_bImportLegacyScores && score.isLegacyScore) {
-                            score.isLegacyScore = false;  // convert to McOsu (pp) score
+                            score.isLegacyScore = false;  // convert to neosu (pp) score
                             score.isImportedLegacyScore =
                                 true;  // but remember that this score does not have all play data
                             {
@@ -246,15 +246,11 @@ OsuUserStatsScreen::OsuUserStatsScreen(Osu *osu) : OsuScreenBackable(osu) {
 
     m_ppVersionInfoLabel = new OsuUIUserStatsScreenLabel(m_osu);
     m_ppVersionInfoLabel->setText(UString::format("pp Version: %i", OsuDifficultyCalculator::PP_ALGORITHM_VERSION));
-    // m_ppVersionInfoLabel->setTooltipText("WARNING: McOsu's star/pp algorithm is currently lagging behind the
-    // \"official\" version.\n \nReason being that keeping up-to-date requires a LOT of changes now.\nThe next goal is
-    // rewriting the algorithm architecture to be more similar to osu!lazer,\nas that will make porting star/pp changes
-    // infinitely easier for the foreseeable future.\n \nNo promises as to when all of that will be finished.");
     m_ppVersionInfoLabel->setTooltipText(
         "NOTE: This version number does NOT mean your scores have already been recalculated!\nNOTE: Click the gear "
         "button on the right and \"Recalculate pp\".\n \nThis version number reads as the year YYYY and then month MM "
         "and then day DD.\nThat date specifies when the last pp/star algorithm changes were done/released by "
-        "peppy.\nMcOsu always uses the in-use-for-public-global-online-rankings algorithms if possible.");
+        "peppy.\nneosu always uses the in-use-for-public-global-online-rankings algorithms if possible.");
     m_ppVersionInfoLabel->setTextColor(0x77888888 /*0xbbbb0000*/);
     m_ppVersionInfoLabel->setDrawBackground(false);
     m_ppVersionInfoLabel->setDrawFrame(false);
@@ -673,7 +669,7 @@ void OsuUserStatsScreen::onCopyAllScoresConfirmed(UString text, int id) {
         for(size_t i = 0; i < kv.second.size(); i++) {
             const Score &existingScore = kv.second[i];
 
-            // NOTE: only ever copy McOsu scores
+            // NOTE: only ever copy neosu scores
             if(!existingScore.isLegacyScore) {
                 if(existingScore.playerName == sCopyAllScoresFromUser) {
                     // check if this user already has this exact same score (copied previously) and don't copy if that
@@ -759,7 +755,7 @@ void OsuUserStatsScreen::onDeleteAllScoresConfirmed(UString text, int id) {
         for(size_t i = 0; i < kv.second.size(); i++) {
             const Score &score = kv.second[i];
 
-            // NOTE: only ever delete McOsu scores
+            // NOTE: only ever delete neosu scores
             if(!score.isLegacyScore) {
                 if(score.playerName == splayerName) {
                     kv.second.erase(kv.second.begin() + i);

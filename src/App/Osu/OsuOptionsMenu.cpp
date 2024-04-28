@@ -502,7 +502,7 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
     m_fSearchOnCharKeybindHackTime = 0.0f;
 
     m_notelockTypes.push_back("None");
-    m_notelockTypes.push_back("McOsu");
+    m_notelockTypes.push_back("neosu");
     m_notelockTypes.push_back("osu!stable (default)");
     m_notelockTypes.push_back("osu!lazer 2020");
 
@@ -584,10 +584,10 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
                 "included in the weighted pp/acc calculation?",
                 convar->getConVarByName("osu_user_include_relax_and_autopilot_for_stats"));
     addCheckbox("Disable osu!lazer star/pp Relax/Autopilot nerfs",
-                "Disabled: osu!lazer algorithm default. Relax/Autopilot scores are nerfed.\nEnabled: McOsu default. "
+                "Disabled: osu!lazer algorithm default. Relax/Autopilot scores are nerfed.\nEnabled: neosu default. "
                 "All Relax/Autopilot nerfs are disabled.",
                 convar->getConVarByName("osu_stars_and_pp_lazer_relax_autopilot_nerf_disabled"));
-    addCheckbox("Show pp instead of score in scorebrowser", "Only McOsu scores will show pp.",
+    addCheckbox("Show pp instead of score in scorebrowser", "Only neosu scores will show pp.",
                 convar->getConVarByName("osu_scores_sort_by_pp"));
     addCheckbox("Always enable touch device pp nerf mod",
                 "Keep touch device pp nerf mod active even when resetting all mods.",
@@ -1116,7 +1116,7 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
     addLabel("");
     addLabel("Info about different notelock algorithms:")->setTextColor(0xff666666);
     addLabel("");
-    addLabel("- McOsu: Auto miss previous circle, always.")->setTextColor(0xff666666);
+    addLabel("- neosu: Auto miss previous circle, always.")->setTextColor(0xff666666);
     addLabel("- osu!stable: Locked until previous circle is miss.")->setTextColor(0xff666666);
     addLabel("- osu!lazer 2020: Auto miss previous circle if > time.")->setTextColor(0xff666666);
     addLabel("");
@@ -1143,7 +1143,7 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
                 convar->getConVarByName("osu_draw_hud"));
     addCheckbox(
         "SHIFT + TAB toggles everything",
-        "Enabled: McOsu default (toggle \"Draw HUD\")\nDisabled: osu! default (always show hiterrorbar + key overlay)",
+        "Enabled: neosu default (toggle \"Draw HUD\")\nDisabled: osu! default (always show hiterrorbar + key overlay)",
         convar->getConVarByName("osu_hud_shift_tab_toggles_everything"));
     addSpacer();
     addCheckbox("Draw Score", convar->getConVarByName("osu_draw_score"));
@@ -1346,7 +1346,7 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
     sectionOnline = addSection("Online");
 
     addSubSection("Online server");
-    addLabel("If the server admins don't explicitly allow McOsu,")->setTextColor(0xff666666);
+    addLabel("If the server admins don't explicitly allow neosu,")->setTextColor(0xff666666);
     addLabel("you might get banned!")->setTextColor(0xff666666);
     addLabel("");
     m_serverTextbox =

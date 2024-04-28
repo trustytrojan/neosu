@@ -1218,7 +1218,7 @@ void OsuSlider::onHit(OsuScore::HIT result, long delta, bool startOrEnd, float t
 
         if(!isEndResultFromStrictTrackingMod) {
             // special case: osu!lazer 2020 only returns 1 judgement for the whole slider, but via the startcircle. i.e.
-            // we are not allowed to drain again here in mcosu logic (because startcircle judgement is handled at the
+            // we are not allowed to drain again here in neosu logic (because startcircle judgement is handled at the
             // end here)
             const bool isLazer2020Drain = (m_osu_drain_type_ref->getInt() == 3);  // osu!lazer 2020
 

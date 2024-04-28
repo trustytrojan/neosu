@@ -153,7 +153,7 @@ ConVar osu_skip_time("osu_skip_time", 5000.0f, FCVAR_CHEAT,
 ConVar osu_fail_time("osu_fail_time", 2.25f, FCVAR_NONE,
                      "Timeframe in s for the slowdown effect after failing, before the pause menu is shown");
 ConVar osu_notelock_type("osu_notelock_type", 2, FCVAR_CHEAT,
-                         "which notelock algorithm to use (0 = None, 1 = McOsu, 2 = osu!stable, 3 = osu!lazer 2020)");
+                         "which notelock algorithm to use (0 = None, 1 = neosu, 2 = osu!stable, 3 = osu!lazer 2020)");
 ConVar osu_notelock_stable_tolerance2b("osu_notelock_stable_tolerance2b", 3, FCVAR_CHEAT,
                                        "time tolerance in milliseconds to allow hitting simultaneous objects close "
                                        "together (e.g. circle at end of slider)");
@@ -1579,7 +1579,7 @@ void OsuBeatmap::handlePreviewPlay() {
             if(m_music->getFrequency() < m_fMusicFrequencyBackup)  // player has died, reset frequency
                 m_music->setFrequency(m_fMusicFrequencyBackup);
 
-            // When McOsu is initialized, it starts playing a random song in the main menu.
+            // When neosu is initialized, it starts playing a random song in the main menu.
             // Users can set a convar to make it start at its preview point instead.
             // The next songs will start at the beginning regardless.
             static bool should_start_song_at_preview_point =
@@ -2375,7 +2375,8 @@ void OsuBeatmap::update2() {
 
                     m_bIsRestartScheduledQuick = false;
 
-                    // if there are calculations in there that need the hitobjects to be loaded, also applies speed/pitch
+                    // if there are calculations in there that need the hitobjects to be loaded, also applies
+                    // speed/pitch
                     onModUpdate(false, false);
                 }
             } else
@@ -2644,7 +2645,7 @@ void OsuBeatmap::update2() {
             if(notelockType > 0) {
                 m_hitobjects[i]->setBlocked(blockNextNotes);
 
-                if(notelockType == 1)  // McOsu
+                if(notelockType == 1)  // neosu
                 {
                     // (nothing, handled in (2) block)
                 } else if(notelockType == 2)  // osu!stable
@@ -2731,7 +2732,7 @@ void OsuBeatmap::update2() {
 
                 blockNextNotes = false;
 
-                if(notelockType == 1)  // McOsu
+                if(notelockType == 1)  // neosu
                 {
                     // auto miss all previous unfinished hitobjects, always
                     // (can stop reverse iteration once we get to the first finished hitobject)

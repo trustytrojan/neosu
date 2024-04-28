@@ -517,7 +517,7 @@ int OsuDatabase::addScore(MD5Hash beatmapMD5Hash, Score score) {
 void OsuDatabase::addScoreRaw(const MD5Hash &beatmapMD5Hash, const Score &score) {
     m_scores[beatmapMD5Hash].push_back(score);
 
-    // cheap dynamic recalculations for mcosu scores
+    // cheap dynamic recalculations for neosu scores
     if(!score.isLegacyScore) {
         // as soon as we have >= 1 score with maxPossibleCombo info, all scores of that beatmap (even older ones without
         // the info) can get the 'perfect' flag set all scores >= 20180722 already have this populated during load, so
@@ -1792,7 +1792,7 @@ void OsuDatabase::loadScores() {
     // load custom scores
     // NOTE: custom scores are loaded before legacy scores because we want to be able to skip loading legacy scores
     // which were already previously imported at some point
-    int nb_mcosu_scores = 0;
+    int nb_neosu_scores = 0;
     size_t customScoresFileSize = 0;
     if(osu_scores_custom_enabled.getBool()) {
         const unsigned char hackIsImportedLegacyScoreFlag =
@@ -1897,7 +1897,7 @@ void OsuDatabase::loadScores() {
                             sc.md5hash = md5hash;
 
                             addScoreRaw(md5hash, sc);
-                            nb_mcosu_scores++;
+                            nb_neosu_scores++;
                         }
                     }
                 }
@@ -1913,11 +1913,13 @@ void OsuDatabase::loadScores() {
     int nb_peppy_scores = 0;
     if(osu_scores_legacy_enabled.getBool()) {
         std::string scoresPath = osu_folder.getString().toUtf8();
+        // XXX: name it something else than "scores.db" to prevent conflict with osu!stable/steam mcosu
         scoresPath.append("scores.db");
 
         Packet db = load_db(scoresPath);
+
         // HACKHACK: heuristic sanity check (some people have their osu!folder
-        // point directly to McOsu, which would break legacy score db loading
+        // point directly to neosu, which would break legacy score db loading
         // here since there is no magic number)
         if(db.size > 0 && db.size != customScoresFileSize) {
             const int dbVersion = read_int32(&db);
@@ -2046,7 +2048,8 @@ void OsuDatabase::loadScores() {
         free(db.memory);
     }
 
-    debugLog("Loaded %i scores from McOsu and %i scores from osu!stable.\n", nb_mcosu_scores, nb_peppy_scores);
+    // XXX: Also load steam mcosu scores?
+    debugLog("Loaded %i scores from neosu and %i scores from osu!stable.\n", nb_neosu_scores, nb_peppy_scores);
 
     if(m_scores.size() > 0) m_bScoresLoaded = true;
 }
@@ -2420,9 +2423,9 @@ void OsuDatabase::saveCollections() {
 
         // check how much we actually have to save
         // note that we are only saving non-legacy collections and entries (i.e. things which were added/deleted inside
-        // mcosu) reason being that it is more annoying to have osu!-side collections modifications be completely
+        // neosu) reason being that it is more annoying to have osu!-side collections modifications be completely
         // ignored (because we would make a full copy initially) if a collection or entry is deleted in osu!, then you
-        // would expect it to also be deleted here but, if a collection or entry is added in mcosu, then deleting the
+        // would expect it to also be deleted here but, if a collection or entry is added in neosu, then deleting the
         // collection in osu! should only delete all osu!-side entries
         int32_t numNonLegacyCollectionsOrCollectionsWithNonLegacyEntries = 0;
         for(size_t c = 0; c < m_collections.size(); c++) {

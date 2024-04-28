@@ -1,4 +1,4 @@
-TARGET = build/McOsu
+TARGET = build/neosu
 SOURCES = $(shell find src -type f -name '*.cpp')
 OBJECTS = $(patsubst src/%.cpp, obj/%.o, $(SOURCES))
 HEADERS = $(shell find src -type f -name '*.h')
