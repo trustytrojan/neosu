@@ -42,6 +42,7 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu) {
     latest.changes.push_back("- Fixed chat layout updating while chat was hidden");
     latest.changes.push_back("- Fixed pause button not working after cancelling database load");
     latest.changes.push_back("- Fixed level bar always being at 0%");
+    latest.changes.push_back("- Fixed FPoSu camera not following cursor while watching replays");
     latest.changes.push_back("- Disabled score submission when mods are toggled mid-game");
     changelogs.push_back(latest);
 

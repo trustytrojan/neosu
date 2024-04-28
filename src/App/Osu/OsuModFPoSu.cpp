@@ -293,7 +293,8 @@ void OsuModFPoSu::update() {
         }
     }
 
-    const bool isAutoCursor = (m_osu->getModAuto() || m_osu->getModAutopilot());
+    const bool isAutoCursor =
+        (m_osu->getModAuto() || m_osu->getModAutopilot() || m_osu->getSelectedBeatmap()->m_bIsWatchingReplay);
 
     m_bCrosshairIntersectsScreen = true;
     if(!fposu_absolute_mode.getBool() && !isAutoCursor &&
@@ -340,16 +341,13 @@ void OsuModFPoSu::update() {
         }
     } else {
         // absolute mouse position mode (or auto)
-
-        m_bCrosshairIntersectsScreen = true;
-
-        // auto support, because it looks pretty cool
         Vector2 mousePos = engine->getMouse()->getPos();
-        if(isAutoCursor && m_osu->isInPlayMode()) {
-            OsuBeatmap *beatmap = m_osu->getSelectedBeatmap();
-            if(beatmap != NULL && !beatmap->isPaused()) mousePos = beatmap->getCursorPos();
+        auto beatmap = m_osu->getSelectedBeatmap();
+        if(isAutoCursor && !beatmap->isPaused()) {
+            mousePos = beatmap->getCursorPos();
         }
 
+        m_bCrosshairIntersectsScreen = true;
         m_camera->lookAt(calculateUnProjectedVector(mousePos));
     }
 }
