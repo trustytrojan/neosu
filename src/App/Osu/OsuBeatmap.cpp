@@ -733,7 +733,11 @@ bool OsuBeatmap::watch(Score score, double start_percent) {
     m_osu->m_songBrowser2->m_bHasSelectedAndIsPlaying = true;
     m_osu->m_songBrowser2->setVisible(false);
 
-    seekPercent(start_percent);
+    // Don't seek to 0%, since it feels really bad to start immediately
+    if(start_percent > 0.f) {
+        seekPercent(start_percent);
+    }
+
     m_osu->onPlayStart();
 
     return true;
