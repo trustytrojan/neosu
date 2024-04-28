@@ -666,8 +666,14 @@ bool SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
 
     unsigned long prevMusicPositionMS = 0;
     if(bancho.osu != nullptr) {
-        if(!bancho.osu->isInPlayMode() && bancho.osu->getSelectedBeatmap()->getMusic() != NULL)
+        if(bancho.osu->isInPlayMode()) {
+            // Kick the player out of play mode, since restarting SoundEngine during gameplay is not supported.
+            // XXX: Make OsuBeatmap work without a running SoundEngine
+            bancho.osu->getSelectedBeatmap()->fail();
+            bancho.osu->getSelectedBeatmap()->stop(true);
+        } else if(bancho.osu->getSelectedBeatmap()->getMusic() != NULL) {
             prevMusicPositionMS = bancho.osu->getSelectedBeatmap()->getMusic()->getPositionMS();
+        }
     }
 
     auto previous = m_currentOutputDevice;

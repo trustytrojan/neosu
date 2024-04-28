@@ -47,6 +47,7 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu) {
     latest.changes.push_back("- Fixed FPoSu camera not following cursor while watching replays");
     latest.changes.push_back("- Fixed FPoSu mod not being included in score data");
     latest.changes.push_back("- Fixed replay playback starting too fast");
+    latest.changes.push_back("- Fixed restarting SoundEngine not kicking the player out of play mode");
     latest.changes.push_back("- Disabled score submission when mods are toggled mid-game");
     changelogs.push_back(latest);
 
