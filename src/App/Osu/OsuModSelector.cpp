@@ -1210,6 +1210,8 @@ void OsuModSelector::resetModsUserInitiated() {
 }
 
 void OsuModSelector::resetMods() {
+    convar->getConVarByName("osu_mod_fposu")->setValue(false);
+
     for(int i = 0; i < m_overrideSliders.size(); i++) {
         if(m_overrideSliders[i].lock != NULL) m_overrideSliders[i].lock->setChecked(false);
     }

@@ -1537,8 +1537,8 @@ std::vector<SCORE_ENTRY> OsuHUD::getCurrentScores() {
         if(m_osu->getModAuto() || (m_osu->getModAutopilot() && m_osu->getModRelax())) {
             playerScoreEntry.name = "neosu";
         } else if(beatmap->m_bIsWatchingReplay) {
-            playerScoreEntry.name = m_osu->replay_info.username;
-            playerScoreEntry.player_id = m_osu->replay_info.player_id;
+            playerScoreEntry.name = m_osu->replay_score.playerName.c_str();
+            playerScoreEntry.player_id = m_osu->replay_score.player_id;
         } else {
             playerScoreEntry.name = m_name_ref->getString();
             playerScoreEntry.player_id = bancho.user_id;

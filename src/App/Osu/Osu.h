@@ -11,6 +11,7 @@
 #include "App.h"
 #include "BanchoNetworking.h"
 #include "MouseListener.h"
+#include "Score.h"
 
 class CWindowManager;
 
@@ -181,6 +182,7 @@ class Osu : public App, public MouseListener {
     bool shouldFallBackToLegacySliderRenderer();  // certain mods or actions require OsuSliders to render dynamically
                                                   // (e.g. wobble or the CS override slider)
 
+    bool useMods(Score *score);
     void updateMods();
     void updateConfineCursor();
     void updateMouseSettings();
@@ -358,7 +360,7 @@ class Osu : public App, public MouseListener {
     CWindowManager *m_windowManager;
 
     // replay
-    ReplayExtraInfo replay_info;
+    Score replay_score;
 
     // custom
     bool m_bScheduleEndlessModNextBeatmap;

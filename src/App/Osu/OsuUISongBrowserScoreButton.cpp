@@ -36,12 +36,6 @@
 #include "SoundEngine.h"
 
 ConVar *OsuUISongBrowserScoreButton::m_osu_scores_sort_by_pp_ref = NULL;
-ConVar *OsuUISongBrowserScoreButton::m_osu_mods_ref = NULL;
-ConVar *OsuUISongBrowserScoreButton::m_osu_speed_override_ref = NULL;
-ConVar *OsuUISongBrowserScoreButton::m_osu_ar_override_ref = NULL;
-ConVar *OsuUISongBrowserScoreButton::m_osu_cs_override_ref = NULL;
-ConVar *OsuUISongBrowserScoreButton::m_osu_od_override_ref = NULL;
-ConVar *OsuUISongBrowserScoreButton::m_osu_hp_override_ref = NULL;
 UString OsuUISongBrowserScoreButton::recentScoreIconString;
 
 OsuUISongBrowserScoreButton::OsuUISongBrowserScoreButton(Osu *osu, OsuUIContextMenu *contextMenu, float xPos,
@@ -53,12 +47,6 @@ OsuUISongBrowserScoreButton::OsuUISongBrowserScoreButton(Osu *osu, OsuUIContextM
 
     if(m_osu_scores_sort_by_pp_ref == NULL)
         m_osu_scores_sort_by_pp_ref = convar->getConVarByName("osu_scores_sort_by_pp");
-    if(m_osu_mods_ref == NULL) m_osu_mods_ref = convar->getConVarByName("osu_mods");
-    if(m_osu_speed_override_ref == NULL) m_osu_speed_override_ref = convar->getConVarByName("osu_speed_override");
-    if(m_osu_ar_override_ref == NULL) m_osu_ar_override_ref = convar->getConVarByName("osu_ar_override");
-    if(m_osu_cs_override_ref == NULL) m_osu_cs_override_ref = convar->getConVarByName("osu_cs_override");
-    if(m_osu_od_override_ref == NULL) m_osu_od_override_ref = convar->getConVarByName("osu_od_override");
-    if(m_osu_hp_override_ref == NULL) m_osu_hp_override_ref = convar->getConVarByName("osu_hp_override");
 
     if(recentScoreIconString.length() < 1) recentScoreIconString.insert(0, OsuIcons::ARROW_CIRCLE_UP);
 
@@ -579,90 +567,7 @@ void OsuUISongBrowserScoreButton::onContextMenu(UString text, int id) {
 }
 
 void OsuUISongBrowserScoreButton::onUseModsClicked() {
-    bool nomod = (m_score.modsLegacy == 0);
-
-    // legacy mods (common to all scores)
-    {
-        m_osu->getModSelector()->resetMods();
-        m_osu_mods_ref->setValue(getModsStringForConVar(m_score.modsLegacy));
-    }
-
-    if(m_score.isLegacyScore || m_score.isImportedLegacyScore) {
-        // legacy score (or imported legacy score), no custom beatmap values necessary, can get everything directly from
-        // modsLegacy
-
-        // (nothing to do here, everything is already handled above in the "legacy mods" block)
-    } else {
-        // neosu score, custom values for everything possible, have to calculate and check whether to apply any
-        // overrides (or leave default) reason being that just because the speedMultiplier stored in the score = 1.5x
-        // doesn't mean that we should move the override slider to 1.5x especially for CS/AR/OD/HP, because those get
-        // stored in the score as directly coming from OsuBeatmap::getAR() (so with pre-applied difficultyMultiplier
-        // etc.)
-
-        // overrides
-
-        // NOTE: if the beatmap is loaded (in db), then use the raw base values from there, otherwise trust potentially
-        // incorrect stored values from score (see explanation above)
-        float tempAR = m_score.AR;
-        float tempCS = m_score.CS;
-        float tempOD = m_score.OD;
-        float tempHP = m_score.HP;
-        const OsuDatabaseBeatmap *diff2 = m_osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(m_score.md5hash);
-        if(diff2 != NULL) {
-            tempAR = diff2->getAR();
-            tempCS = diff2->getCS();
-            tempOD = diff2->getOD();
-            tempHP = diff2->getHP();
-        }
-
-        const OsuReplay::BEATMAP_VALUES legacyValues =
-            OsuReplay::getBeatmapValuesForModsLegacy(m_score.modsLegacy, tempAR, tempCS, tempOD, tempHP);
-
-        // beatmap values
-        {
-            const float beatmapValueComparisonEpsilon = 0.0001f;
-            if(std::abs(legacyValues.AR - m_score.AR) >= beatmapValueComparisonEpsilon) {
-                m_osu_ar_override_ref->setValue(m_score.AR);
-                nomod = false;
-            }
-            if(std::abs(legacyValues.CS - m_score.CS) >= beatmapValueComparisonEpsilon) {
-                m_osu_cs_override_ref->setValue(m_score.CS);
-                nomod = false;
-            }
-            if(std::abs(legacyValues.OD - m_score.OD) >= beatmapValueComparisonEpsilon) {
-                m_osu_od_override_ref->setValue(m_score.OD);
-                nomod = false;
-            }
-            if(std::abs(legacyValues.HP - m_score.HP) >= beatmapValueComparisonEpsilon) {
-                m_osu_hp_override_ref->setValue(m_score.HP);
-                nomod = false;
-            }
-        }
-
-        // speed multiplier
-        {
-            const float speedMultiplierComparisonEpsilon = 0.0001f;
-            if(std::abs(legacyValues.speedMultiplier - m_score.speedMultiplier) >= speedMultiplierComparisonEpsilon) {
-                m_osu_speed_override_ref->setValue(m_score.speedMultiplier);
-                nomod = false;
-            }
-        }
-
-        // experimental mods
-        {
-            auto cv = UString(m_score.experimentalModsConVars.c_str());
-            const std::vector<UString> experimentalMods = cv.split(";");
-            for(size_t i = 0; i < experimentalMods.size(); i++) {
-                ConVar *cvar = convar->getConVarByName(experimentalMods[i], false);
-                if(cvar != NULL) {
-                    cvar->setValue(1.0f);  // enable experimental mod (true, 1.0f)
-                    nomod = false;
-                } else
-                    debugLog("couldn't find \"%s\"\n", experimentalMods[i].toUtf8());
-            }
-        }
-    }
-
+    bool nomod = m_osu->useMods(&m_score);
     engine->getSound()->play(nomod ? m_osu->getSkin()->getCheckOff() : m_osu->getSkin()->getCheckOn());
 }
 
@@ -916,32 +821,6 @@ UString OsuUISongBrowserScoreButton::getModsStringForDisplay(int mods) {
     if(mods & ModFlags::FPoSu) modsString.append("FPoSu,");
 
     if(modsString.length() > 0) modsString = modsString.substr(0, modsString.length() - 1);
-
-    return modsString;
-}
-
-UString OsuUISongBrowserScoreButton::getModsStringForConVar(int mods) {
-    UString modsString = "  ";  // double space to reset if emtpy
-
-    // NOTE: the order here is different on purpose, to avoid name collisions during parsing (see Osu::updateMods())
-    // order is the same as in OsuModSelector::updateModConVar()
-    if(mods & ModFlags::Easy) modsString.append("ez");
-    if(mods & ModFlags::HardRock) modsString.append("hr");
-    if(mods & ModFlags::Relax) modsString.append("relax");
-    if(mods & ModFlags::NoFail) modsString.append("nf");
-    if(mods & ModFlags::SuddenDeath) modsString.append("sd");
-    if(mods & ModFlags::Perfect) modsString.append("ss,");
-    if(mods & ModFlags::Autopilot) modsString.append("autopilot");
-    if(mods & ModFlags::HalfTime) modsString.append("ht");
-    if(mods & ModFlags::DoubleTime) modsString.append("dt");
-    if(mods & ModFlags::Nightcore) modsString.append("nc");
-    if(mods & ModFlags::SpunOut) modsString.append("spunout");
-    if(mods & ModFlags::Hidden) modsString.append("hd");
-    if(mods & ModFlags::Autoplay) modsString.append("auto");
-    if(mods & ModFlags::Nightmare) modsString.append("nightmare");
-    if(mods & ModFlags::Target) modsString.append("practicetarget");
-    if(mods & ModFlags::TouchDevice) modsString.append("nerftd");
-    if(mods & ModFlags::ScoreV2) modsString.append("v2");
 
     return modsString;
 }

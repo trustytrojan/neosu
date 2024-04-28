@@ -709,10 +709,7 @@ bool OsuBeatmap::watch(Score score, double start_percent) {
         return false;
     }
 
-    bancho.osu->replay_info.diff2_md5 = score.md5hash.hash;
-    bancho.osu->replay_info.mod_flags = score.modsLegacy;
-    bancho.osu->replay_info.username = UString(score.playerName.c_str());
-    bancho.osu->replay_info.player_id = score.player_id;
+    bancho.osu->replay_score = score;
 
     m_bIsPlaying = false;
     m_bIsPaused = false;
@@ -721,6 +718,9 @@ bool OsuBeatmap::watch(Score score, double start_percent) {
     unloadObjects();
 
     m_bIsWatchingReplay = true;
+
+    bancho.osu->getModSelector()->resetMods();
+    bancho.osu->useMods(&score);
 
     // Map failed to load
     if(!play()) {
@@ -2563,8 +2563,15 @@ void OsuBeatmap::update2() {
             long ms_since_last_frame = m_iCurMusicPosWithOffsets - current_frame.cur_music_pos;
             percent = (float)ms_since_last_frame / (float)next_frame.milliseconds_since_last_frame;
         }
+
         m_interpolatedMousePos =
             Vector2{lerp(current_frame.x, next_frame.x, percent), lerp(current_frame.y, next_frame.y, percent)};
+
+        if(osu_playfield_mirror_horizontal.getBool())
+            m_interpolatedMousePos.y = OsuGameRules::OSU_COORD_HEIGHT - m_interpolatedMousePos.y;
+        if(osu_playfield_mirror_vertical.getBool())
+            m_interpolatedMousePos.x = OsuGameRules::OSU_COORD_WIDTH - m_interpolatedMousePos.x;
+
         m_interpolatedMousePos *= OsuGameRules::getPlayfieldScaleFactor(m_osu);
         m_interpolatedMousePos += OsuGameRules::getPlayfieldOffset(m_osu);
     }

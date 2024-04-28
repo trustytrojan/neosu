@@ -18,6 +18,10 @@ void submit_score(Score score) {
     debugLog("Submitting score...\n");
     const char *GRADES[] = {"XH", "SH", "X", "S", "A", "B", "C", "D", "F", "N"};
 
+    // We set custom mod flags, but not every server supports them.
+    if(!bancho.set_fposu_flag) score.modsLegacy &= ~ModFlags::FPoSu;
+    if(!bancho.set_mirror_flag) score.modsLegacy &= ~ModFlags::Mirror;
+
     uint8_t *compressed_data = NULL;
 
     char score_time[80];

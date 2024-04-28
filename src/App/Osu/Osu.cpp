@@ -1042,36 +1042,128 @@ void Osu::update() {
     }
 }
 
-void Osu::updateMods() {
-    if(getSelectedBeatmap()->m_bIsWatchingReplay) {
-        // XXX: clear experimental mods
-        m_bModNC = replay_info.mod_flags & ModFlags::Nightcore;
-        m_bModDT = replay_info.mod_flags & ModFlags::DoubleTime && !m_bModNC;
-        m_bModHT = replay_info.mod_flags & ModFlags::HalfTime;
-        m_bModDC = false;
-        if(m_bModHT && bancho.prefer_daycore) {
-            m_bModHT = false;
-            m_bModDC = true;
+UString getModsStringForConVar(int mods) {
+    UString modsString = "  ";  // double space to reset if emtpy
+
+    // NOTE: the order here is different on purpose, to avoid name collisions during parsing (see Osu::updateMods())
+    // order is the same as in OsuModSelector::updateModConVar()
+    if(mods & ModFlags::Easy) modsString.append("ez");
+    if(mods & ModFlags::HardRock) modsString.append("hr");
+    if(mods & ModFlags::Relax) modsString.append("relax");
+    if(mods & ModFlags::NoFail) modsString.append("nf");
+    if(mods & ModFlags::SuddenDeath) modsString.append("sd");
+    if(mods & ModFlags::Perfect) modsString.append("ss,");
+    if(mods & ModFlags::Autopilot) modsString.append("autopilot");
+    if(mods & ModFlags::HalfTime) modsString.append("ht");
+    if(mods & ModFlags::DoubleTime) modsString.append("dt");
+    if(mods & ModFlags::Nightcore) modsString.append("nc");
+    if(mods & ModFlags::SpunOut) modsString.append("spunout");
+    if(mods & ModFlags::Hidden) modsString.append("hd");
+    if(mods & ModFlags::Autoplay) modsString.append("auto");
+    if(mods & ModFlags::Nightmare) modsString.append("nightmare");
+    if(mods & ModFlags::Target) modsString.append("practicetarget");
+    if(mods & ModFlags::TouchDevice) modsString.append("nerftd");
+    if(mods & ModFlags::ScoreV2) modsString.append("v2");
+
+    return modsString;
+}
+
+bool Osu::useMods(Score *score) {
+    bool nomod = (score->modsLegacy == 0);
+
+    // legacy mods (common to all scores)
+    getModSelector()->resetMods();
+    osu_mods.setValue(getModsStringForConVar(score->modsLegacy));
+
+    if(score->modsLegacy & ModFlags::FPoSu) {
+        convar->getConVarByName("osu_mod_fposu")->setValue(true);
+    }
+
+    // NOTE: We don't know whether the original score was only horizontal, only vertical, or both
+    if(score->isLegacyScore && score->modsLegacy & ModFlags::Mirror) {
+        convar->getConVarByName("osu_playfield_mirror_horizontal")->setValue(true);
+        convar->getConVarByName("osu_playfield_mirror_vertical")->setValue(true);
+    }
+
+    if(!score->isLegacyScore && !score->isImportedLegacyScore) {
+        // neosu score, custom values for everything possible, have to calculate and check whether to apply any
+        // overrides (or leave default)
+        // reason being that just because the speedMultiplier stored in the score = 1.5x doesn't mean that we should
+        // move the override slider to 1.5x especially for CS/AR/OD/HP, because those get stored in the score as
+        // directly coming from OsuBeatmap::getAR() (so with pre-applied difficultyMultiplier etc.)
+
+        // overrides
+
+        // NOTE: if the beatmap is loaded (in db), then use the raw base values from there, otherwise trust potentially
+        // incorrect stored values from score (see explanation above)
+        float tempAR = score->AR;
+        float tempCS = score->CS;
+        float tempOD = score->OD;
+        float tempHP = score->HP;
+        const OsuDatabaseBeatmap *diff2 = getSongBrowser()->getDatabase()->getBeatmapDifficulty(score->md5hash);
+        if(diff2 != NULL) {
+            tempAR = diff2->getAR();
+            tempCS = diff2->getCS();
+            tempOD = diff2->getOD();
+            tempHP = diff2->getHP();
         }
 
-        m_bModNF = replay_info.mod_flags & ModFlags::NoFail;
-        m_bModEZ = replay_info.mod_flags & ModFlags::Easy;
-        m_bModTD = replay_info.mod_flags & ModFlags::TouchDevice;
-        m_bModHD = replay_info.mod_flags & ModFlags::Hidden;
-        m_bModHR = replay_info.mod_flags & ModFlags::HardRock;
-        m_bModSD = replay_info.mod_flags & ModFlags::SuddenDeath;
-        m_bModRelax = replay_info.mod_flags & ModFlags::Relax;
-        m_bModAutopilot = replay_info.mod_flags & ModFlags::Autopilot;
-        m_bModAuto = replay_info.mod_flags & ModFlags::Autoplay && !m_bModAutopilot;
-        m_bModSpunout = replay_info.mod_flags & ModFlags::SpunOut;
-        m_bModSS = replay_info.mod_flags & ModFlags::Perfect;
-        m_bModTarget = replay_info.mod_flags & ModFlags::Target;
-        m_bModScorev2 = replay_info.mod_flags & ModFlags::ScoreV2;
-        m_bModFlashlight = replay_info.mod_flags & ModFlags::Flashlight;
-        m_bModNightmare = false;
+        const OsuReplay::BEATMAP_VALUES legacyValues =
+            OsuReplay::getBeatmapValuesForModsLegacy(score->modsLegacy, tempAR, tempCS, tempOD, tempHP);
 
-        osu_speed_override.setValue("-1");
-    } else if(bancho.is_in_a_multi_room()) {
+        // beatmap values
+        {
+            const float beatmapValueComparisonEpsilon = 0.0001f;
+            if(std::abs(legacyValues.AR - score->AR) >= beatmapValueComparisonEpsilon) {
+                convar->getConVarByName("osu_ar_override")->setValue(score->AR);
+                nomod = false;
+            }
+            if(std::abs(legacyValues.CS - score->CS) >= beatmapValueComparisonEpsilon) {
+                convar->getConVarByName("osu_cs_override")->setValue(score->CS);
+                nomod = false;
+            }
+            if(std::abs(legacyValues.OD - score->OD) >= beatmapValueComparisonEpsilon) {
+                convar->getConVarByName("osu_od_override")->setValue(score->OD);
+                nomod = false;
+            }
+            if(std::abs(legacyValues.HP - score->HP) >= beatmapValueComparisonEpsilon) {
+                convar->getConVarByName("osu_hp_override")->setValue(score->HP);
+                nomod = false;
+            }
+        }
+
+        // speed multiplier
+        {
+            const float speedMultiplierComparisonEpsilon = 0.0001f;
+            if(std::abs(legacyValues.speedMultiplier - score->speedMultiplier) >= speedMultiplierComparisonEpsilon) {
+                osu_speed_override.setValue(score->speedMultiplier);
+                nomod = false;
+            }
+        }
+
+        // experimental mods
+        {
+            auto cv = UString(score->experimentalModsConVars.c_str());
+            const std::vector<UString> experimentalMods = cv.split(";");
+            for(size_t i = 0; i < experimentalMods.size(); i++) {
+                if(experimentalMods[i] == UString("")) continue;
+
+                ConVar *cvar = convar->getConVarByName(experimentalMods[i], false);
+                if(cvar != NULL) {
+                    cvar->setValue(1.0f);  // enable experimental mod (true, 1.0f)
+                    nomod = false;
+                } else {
+                    debugLog("couldn't find \"%s\"\n", experimentalMods[i].toUtf8());
+                }
+            }
+        }
+    }
+
+    return nomod;
+}
+
+void Osu::updateMods() {
+    if(bancho.is_in_a_multi_room()) {
         m_bModNC = bancho.room.mods & ModFlags::Nightcore;
         if(m_bModNC) {
             m_bModDT = false;
@@ -1241,11 +1333,25 @@ void Osu::onKeyDown(KeyboardEvent &key) {
             if(!key.isConsumed() && key == (KEYCODE)OsuKeyBindings::INSTANT_REPLAY.getInt()) {
                 if(!beatmap->m_bIsWatchingReplay) {
                     Score score;
+                    score.isLegacyScore = false;
+                    score.isImportedLegacyScore = false;
                     score.replay = beatmap->live_replay;
                     score.md5hash = beatmap->getSelectedDifficulty2()->getMD5Hash();
                     score.modsLegacy = getScore()->getModsLegacy();
+                    score.speedMultiplier = getSpeedMultiplier();
+                    score.CS = beatmap->getCS();
+                    score.AR = beatmap->getAR();
+                    score.OD = beatmap->getOD();
+                    score.HP = beatmap->getHP();
 
-                    // XXX: code reuse from saveAndSubmitScore, also incorrect when using Auto
+                    std::vector<ConVar *> allExperimentalMods = getExperimentalMods();
+                    for(int i = 0; i < allExperimentalMods.size(); i++) {
+                        if(allExperimentalMods[i]->getBool()) {
+                            score.experimentalModsConVars.append(allExperimentalMods[i]->getName());
+                            score.experimentalModsConVars.append(";");
+                        }
+                    }
+
                     if(bancho.is_online()) {
                         score.player_id = bancho.user_id;
                         score.playerName = bancho.username.toUtf8();

@@ -22,7 +22,6 @@ class OsuUISongBrowserScoreButton : public CBaseUIButton {
    public:
     static OsuSkinImage *getGradeImage(Osu *osu, Score::Grade grade);
     static UString getModsStringForDisplay(int mods);
-    static UString getModsStringForConVar(int mods);
 
     enum class STYLE { SCORE_BROWSER, TOP_RANKS };
 
