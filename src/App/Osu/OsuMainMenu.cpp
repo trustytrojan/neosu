@@ -12,6 +12,7 @@
 #include "CBaseUIButton.h"
 #include "CBaseUIContainer.h"
 #include "ConVar.h"
+#include "Downloader.h"
 #include "Engine.h"
 #include "File.h"
 #include "HorizonSDLEnvironment.h"
@@ -36,8 +37,6 @@
 #include "SoundEngine.h"
 #include "VertexArrayObject.h"
 
-#define NEOSU_VERSION_TEXT "Version"
-#define NEOSU_BANNER_TEXT ""
 UString OsuMainMenu::NEOSU_MAIN_BUTTON_TEXT = UString("neosu");
 UString OsuMainMenu::NEOSU_MAIN_BUTTON_SUBTEXT = UString("Multiplayer Client");
 
@@ -215,6 +214,11 @@ OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu) {
 
     m_fBackgroundFadeInTime = 0.0f;
 
+    const int baseDPI = 96;
+    const int newDPI = Osu::getUIScale(osu) * baseDPI;
+    m_titleFont =
+        engine->getResourceManager()->loadFont("SourceSansPro-Semibold.otf", "FONT_OSU_MAINMENU", 150, true, newDPI);
+
     // check if the user has never clicked the changelog for this update
     m_bDidUserUpdateFromOlderVersion = false;
     m_bDidUserUpdateFromOlderVersionLe3300 = false;
@@ -264,9 +268,7 @@ OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu) {
     m_updateAvailableButton->setTextColor(0x22ffffff);
 
     m_versionButton = new CBaseUIButton(0, 0, 0, 0, "", "");
-    UString versionString = NEOSU_VERSION_TEXT;
-    versionString.append(" ");
-    versionString.append(UString::format("%.2f", Osu::version->getFloat()));
+    UString versionString = UString::format("Version %.2f", Osu::version->getFloat());
     m_versionButton->setText(versionString);
     m_versionButton->setDrawBackground(false);
     m_versionButton->setDrawFrame(false);
@@ -298,8 +300,33 @@ OsuMainMenu::~OsuMainMenu() {
 void OsuMainMenu::draw(Graphics *g) {
     if(!m_bVisible) return;
 
-    McFont *smallFont = m_osu->getSubTitleFont();
-    McFont *titleFont = m_osu->getTitleFont();
+    // load server icon
+    if(bancho.is_online() && bancho.server_icon_url.length() > 0 && bancho.server_icon == nullptr) {
+        std::stringstream ss;
+        ss << MCENGINE_DATA_DIR "avatars/" << bancho.endpoint.toUtf8();
+        auto icon_path = ss.str();
+        if(!env->directoryExists(icon_path)) {
+            env->createDirectory(icon_path);
+        }
+        icon_path.append("/server_icon");
+
+        float progress = -1.f;
+        std::vector<uint8_t> data;
+        int response_code;
+        download(bancho.server_icon_url.toUtf8(), &progress, data, &response_code);
+        if(progress == -1.f) bancho.server_icon_url = "";
+        if(!data.empty()) {
+            FILE *file = fopen(icon_path.c_str(), "wb");
+            if(file != NULL) {
+                fwrite(data.data(), data.size(), 1, file);
+                fflush(file);
+                fclose(file);
+            }
+
+            bancho.server_icon = engine->getResourceManager()->loadImageAbs(icon_path, icon_path);
+            bancho.server_icon_url = "";
+        }
+    }
 
     // menu-background
     if(osu_draw_menu_background.getBool()) {
@@ -378,7 +405,6 @@ void OsuMainMenu::draw(Graphics *g) {
     } else
         pulse = (div - fmod(engine->getTime(), div)) / div;
 
-    // pulse *= pulse; // quadratic
     Vector2 size = m_vSize;
     const float pulseSub = 0.05f * pulse;
     size -= size * pulseSub;
@@ -386,60 +412,6 @@ void OsuMainMenu::draw(Graphics *g) {
     size *= m_fStartupAnim;
     McRect mainButtonRect =
         McRect(m_vCenter.x - size.x / 2.0f - m_fCenterOffsetAnim, m_vCenter.y - size.y / 2.0f, size.x, size.y);
-
-    bool drawBanner = true;
-
-#ifdef __SWITCH__
-
-    drawBanner = ((HorizonSDLEnvironment *)env)->getMemAvailableMB() < 1024;
-
-#endif
-
-    if(drawBanner) {
-        UString bannerText = NEOSU_BANNER_TEXT;
-
-        if(osu_main_menu_banner_always_text.getString().length() > 0)
-            bannerText = osu_main_menu_banner_always_text.getString();
-        else if(m_bDidUserUpdateFromOlderVersion &&
-                osu_main_menu_banner_ifupdatedfromoldversion_text.getString().length() > 0)
-            bannerText = osu_main_menu_banner_ifupdatedfromoldversion_text.getString();
-        else if(m_bDidUserUpdateFromOlderVersionLe3300 &&
-                osu_main_menu_banner_ifupdatedfromoldversion_le3300_text.getString().length() > 0)
-            bannerText = osu_main_menu_banner_ifupdatedfromoldversion_le3300_text.getString();
-        else if(m_bDidUserUpdateFromOlderVersionLe3303 &&
-                osu_main_menu_banner_ifupdatedfromoldversion_le3303_text.getString().length() > 0)
-            bannerText = osu_main_menu_banner_ifupdatedfromoldversion_le3303_text.getString();
-
-        if(bannerText.length() > 0) {
-            McFont *bannerFont = m_osu->getSubTitleFont();
-            float bannerStringWidth = bannerFont->getStringWidth(bannerText);
-            int bannerDiff = 20;
-            int bannerMargin = 5;
-            int numBanners = (int)std::round(m_osu->getScreenWidth() / (bannerStringWidth + bannerDiff)) + 2;
-
-            g->setColor(0xffee7777);
-            g->pushTransform();
-            g->translate(1, 1);
-            for(int i = -1; i < numBanners; i++) {
-                g->pushTransform();
-                g->translate(i * bannerStringWidth + i * bannerDiff +
-                                 fmod(engine->getTime() * 30, bannerStringWidth + bannerDiff),
-                             bannerFont->getHeight() + bannerMargin);
-                g->drawString(bannerFont, bannerText);
-                g->popTransform();
-            }
-            g->popTransform();
-            g->setColor(0xff555555);
-            for(int i = -1; i < numBanners; i++) {
-                g->pushTransform();
-                g->translate(i * bannerStringWidth + i * bannerDiff +
-                                 fmod(engine->getTime() * 30, bannerStringWidth + bannerDiff),
-                             bannerFont->getHeight() + bannerMargin);
-                g->drawString(bannerFont, bannerText);
-                g->popTransform();
-            }
-        }
-    }
 
     // draw notification arrow for changelog (version button)
     if(m_bDrawVersionNotificationArrow) {
@@ -458,6 +430,7 @@ void OsuMainMenu::draw(Graphics *g) {
         g->setColor(0xffffffff);
         g->pushTransform();
         {
+            McFont *smallFont = m_osu->getSubTitleFont();
             g->translate(arrowPos.x - smallFont->getStringWidth(notificationText) / 2.0f,
                          (-offset * 2) * scale + arrowPos.y -
                              (m_osu->getSkin()->getPlayWarningArrow2()->getSizeBaseRaw().y * scale) / 1.5f,
@@ -796,11 +769,11 @@ void OsuMainMenu::draw(Graphics *g) {
     }
 
     // main text
-    // XXX: this is blurry, looks like shit
-    const float title_width = titleFont->getStringWidth(NEOSU_MAIN_BUTTON_TEXT);
-    const float title_scale = mainButtonRect.getWidth() / title_width * 0.6f;
-    const float fontScale = title_scale * (1.0f - pulseSub + m_fSizeAddAnim) * m_fStartupAnim;
-    {
+    if(bancho.server_icon == nullptr || !bancho.server_icon->isReady()) {
+        const float title_width = m_titleFont->getStringWidth(NEOSU_MAIN_BUTTON_TEXT);
+        const float title_scale = mainButtonRect.getWidth() / title_width * 0.6f;
+        const float font_scale = title_scale * (1.0f - pulseSub + m_fSizeAddAnim) * m_fStartupAnim;
+
         float alpha = (1.0f - m_fMainMenuAnimFriendPercent) * (1.0f - m_fMainMenuAnimFriendPercent) *
                       (1.0f - m_fMainMenuAnimFriendPercent);
 
@@ -808,88 +781,28 @@ void OsuMainMenu::draw(Graphics *g) {
         g->setAlpha(alpha);
         g->pushTransform();
         {
-            g->scale(fontScale, fontScale);
+            g->scale(font_scale, font_scale);
             g->translate(m_vCenter.x - m_fCenterOffsetAnim -
-                             (titleFont->getStringWidth(NEOSU_MAIN_BUTTON_TEXT) / 2.0f) * fontScale,
-                         m_vCenter.y + (titleFont->getHeight() * fontScale) / 2.25f, -1.0f);
-            g->drawString(titleFont, NEOSU_MAIN_BUTTON_TEXT);
+                             (m_titleFont->getStringWidth(NEOSU_MAIN_BUTTON_TEXT) / 2.0f) * font_scale,
+                         m_vCenter.y + (m_titleFont->getHeight() * font_scale) / 2.25f, -1.0f);
+            g->drawString(m_titleFont, NEOSU_MAIN_BUTTON_TEXT);
         }
         g->popTransform();
-    }
+    } else {
+        float alpha = (1.0f - m_fMainMenuAnimFriendPercent) * (1.0f - m_fMainMenuAnimFriendPercent) *
+                      (1.0f - m_fMainMenuAnimFriendPercent);
 
-    // subtitle
-    UString subtext = NEOSU_MAIN_BUTTON_SUBTEXT;
-    if(bancho.is_online()) {
-        subtext = bancho.endpoint;
-    }
-
-    if(subtext.length() > 0) {
-        float invertedPulse = 1.0f - pulse;
-
-        if(haveTimingpoints)
-            g->setColor(COLORf(1.0f, 0.10f + 0.15f * invertedPulse, 0.10f + 0.15f * invertedPulse,
-                               0.10f + 0.15f * invertedPulse));
-        else
-            g->setColor(0xff444444);
-
-        g->setAlpha((1.0f - m_fMainMenuAnimFriendPercent) * (1.0f - m_fMainMenuAnimFriendPercent) *
-                    (1.0f - m_fMainMenuAnimFriendPercent) *
-                    (1.0f - (1.0f - m_fStartupAnim2) * (1.0f - m_fStartupAnim2)) * osu_main_menu_alpha.getFloat());
+        float xscale = mainButtonRect.getWidth() / bancho.server_icon->getWidth();
+        float yscale = mainButtonRect.getHeight() / bancho.server_icon->getHeight();
+        float scale = std::min(xscale, yscale) * 0.8f;
 
         g->pushTransform();
-        {
-            g->scale(fontScale, fontScale);
-            g->translate(
-                m_vCenter.x - m_fCenterOffsetAnim - (smallFont->getStringWidth(subtext) / 2.0f) * fontScale,
-                m_vCenter.y + (mainButtonRect.getHeight() / 2.0f) / 2.0f + (smallFont->getHeight() * fontScale) / 2.0f,
-                -1.0f);
-            g->drawString(smallFont, subtext);
-        }
+        g->setColor(0xffffffff);
+        g->setAlpha(alpha);
+        g->scale(scale, scale);
+        g->translate(m_vCenter.x - m_fCenterOffsetAnim, m_vCenter.y);
+        g->drawImage(bancho.server_icon);
         g->popTransform();
-
-        if(bancho.is_online()) {
-            UString score_submission("Scores: ");
-            UString submission_status(bancho.submit_scores() ? "ENABLED" : "DISABLED");
-
-            auto full_text = score_submission;
-            full_text.append(submission_status);
-            float x_start = m_vCenter.x - m_fCenterOffsetAnim - smallFont->getStringWidth(full_text) / 2.f * fontScale;
-
-            g->pushTransform();
-            {
-                if(haveTimingpoints)
-                    g->setColor(COLORf(1.0f, 0.10f + 0.15f * invertedPulse, 0.10f + 0.15f * invertedPulse,
-                                       0.10f + 0.15f * invertedPulse));
-                else
-                    g->setColor(0xff444444);
-
-                g->scale(fontScale, fontScale);
-                g->translate(
-                    x_start,
-                    m_vCenter.y + (mainButtonRect.getHeight() / 2.0f) / 2.0f + 2 * (smallFont->getHeight() * fontScale),
-                    -1.0f);
-                g->drawString(smallFont, score_submission);
-            }
-            g->popTransform();
-
-            g->pushTransform();
-            {
-                if(haveTimingpoints)
-                    g->setColor(COLORf(1.0f, (bancho.submit_scores() ? 0.1 : 0.3) + 0.15f * invertedPulse,
-                                       (bancho.submit_scores() ? 0.3 : 0.1) + 0.15f * invertedPulse,
-                                       0.10f + 0.15f * invertedPulse));
-                else
-                    g->setColor(bancho.submit_scores() ? 0xff44bb44 : 0xffbb4444);
-
-                g->scale(fontScale, fontScale);
-                g->translate(
-                    x_start + smallFont->getStringWidth(score_submission) * fontScale,
-                    m_vCenter.y + (mainButtonRect.getHeight() / 2.0f) / 2.0f + 2 * (smallFont->getHeight() * fontScale),
-                    -1.0f);
-                g->drawString(smallFont, submission_status);
-            }
-            g->popTransform();
-        }
     }
 
     if((m_fMainMenuAnim > 0.0f && m_fMainMenuAnim != 1.0f) ||

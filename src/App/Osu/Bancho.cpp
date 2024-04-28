@@ -398,7 +398,10 @@ void handle_packet(Packet *packet) {
         }
     } else if(packet->id == MAIN_MENU_ICON) {
         UString icon = read_string(packet);
-        debugLog("Main menu icon: %s\n", icon.toUtf8());
+        auto urls = icon.split("|");
+        if(urls.size() == 2 && urls[0].find("https://") == 0) {
+            bancho.server_icon_url = urls[0];
+        }
     } else if(packet->id == MATCH_PLAYER_SKIPPED) {
         int32_t user_id = read_int32(packet);
         bancho.osu->m_room->on_player_skip(user_id);

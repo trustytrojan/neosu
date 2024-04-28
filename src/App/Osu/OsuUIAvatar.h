@@ -6,6 +6,7 @@
 class OsuUIAvatar : public CBaseUIButton {
    public:
     OsuUIAvatar(uint32_t player_id, float xPos, float yPos, float xSize, float ySize);
+    ~OsuUIAvatar();
 
     virtual void draw(Graphics *g, float alpha = 1.f);
 

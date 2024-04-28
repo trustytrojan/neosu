@@ -96,8 +96,7 @@ void McFont::init() {
     FT_Set_Char_Size(face, m_iFontSize * 64, m_iFontSize * 64, m_iFontDPI, m_iFontDPI);
 
     // create texture atlas
-    const int atlasSize = (m_iFontDPI > 96 ? (m_iFontDPI > 2 * 96 ? 2048 : 1024)
-                                           : 512);  // HACKHACK: hardcoded max atlas size, and heuristic
+    const int atlasSize = m_iFontSize * m_iFontDPI / 10;  // XXX: incorrect calculation
     engine->getResourceManager()->requestNextLoadUnmanaged();
     m_textureAtlas = engine->getResourceManager()->createTextureAtlas(atlasSize, atlasSize);
 

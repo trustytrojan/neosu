@@ -21,6 +21,7 @@
 #include "OsuSongBrowser.h"
 #include "OsuUIAvatar.h"
 #include "OsuUIButton.h"
+#include "ResourceManager.h"
 #include "miniz.h"
 
 // Bancho protocol
@@ -79,6 +80,11 @@ void disconnect() {
     free(outgoing.memory);
     outgoing = Packet();
     bancho.user_id = 0;
+    bancho.server_icon_url = "";
+    if(bancho.server_icon != nullptr) {
+        engine->getResourceManager()->destroyResource(bancho.server_icon);
+        bancho.server_icon = nullptr;
+    }
 
     bancho.score_submission_policy = ServerPolicy::NO_PREFERENCE;
     bancho.set_fposu_flag = false;

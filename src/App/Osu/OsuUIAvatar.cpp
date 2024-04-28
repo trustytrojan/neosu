@@ -31,9 +31,6 @@ bool download_avatar(uint32_t user_id) {
     ss << MCENGINE_DATA_DIR "avatars/" << bancho.endpoint.toUtf8();
     auto server_dir = ss.str();
     if(!env->directoryExists(server_dir)) {
-        if(!env->directoryExists(MCENGINE_DATA_DIR "avatars")) {
-            env->createDirectory(MCENGINE_DATA_DIR "avatars");
-        }
         env->createDirectory(server_dir);
     }
 
@@ -80,6 +77,12 @@ OsuUIAvatar::OsuUIAvatar(uint32_t player_id, float xPos, float yPos, float xSize
 
     if(exists) {
         avatar = engine->getResourceManager()->loadImageAbs(avatar_path, avatar_path);
+    }
+}
+
+OsuUIAvatar::~OsuUIAvatar() {
+    if(avatar != nullptr) {
+        engine->getResourceManager()->destroyResource(avatar);
     }
 }
 

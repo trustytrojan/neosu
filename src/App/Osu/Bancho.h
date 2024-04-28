@@ -7,6 +7,7 @@
 #include "UString.h"
 
 class Osu;
+class Image;
 
 enum class ServerPolicy {
     NO,
@@ -23,6 +24,9 @@ struct Bancho {
     UString username;
     MD5Hash pw_md5;
     Room room;
+
+    UString server_icon_url;
+    Image *server_icon = nullptr;
 
     bool prefer_daycore = false;
 
