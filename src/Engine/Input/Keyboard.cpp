@@ -49,6 +49,7 @@ void Keyboard::onKeyDown(KEYCODE keyCode) {
         case KEY_CONTROL:
             m_bControlDown = true;
             break;
+        case 65511:  // linux
         case KEY_ALT:
             m_bAltDown = true;
             break;
@@ -73,6 +74,7 @@ void Keyboard::onKeyUp(KEYCODE keyCode) {
         case KEY_CONTROL:
             m_bControlDown = false;
             break;
+        case 65511:  // linux
         case KEY_ALT:
             m_bAltDown = false;
             break;
