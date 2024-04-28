@@ -32,10 +32,6 @@ ConVar osu_folder("osu_folder", "C:/Program Files (x86)/osu!/", FCVAR_NONE);
 
 ConVar osu_folder("osu_folder", "/osu!/", FCVAR_NONE);
 
-#elif defined __SWITCH__
-
-ConVar osu_folder("osu_folder", "sdmc:/switch/McOsu/", FCVAR_NONE);
-
 #else
 
 ConVar osu_folder("osu_folder", "", FCVAR_NONE);

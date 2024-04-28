@@ -108,13 +108,8 @@ void OsuUIUserContextMenuScreen::on_action(UString text, int user_action) {
         m_osu->m_chat->addChannel(user_info->name, true);
     } else if(user_action == VIEW_PROFILE) {
         auto url = UString::format("https://%s/u/%d", bancho.endpoint.toUtf8(), m_user_id);
-        if(env->getOS() == Environment::OS::OS_HORIZON) {
-            m_osu->getNotificationOverlay()->addNotification(url, 0xffffffff, false, 0.75f);
-        } else {
-            m_osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false,
-                                                             0.75f);
-            env->openURLInDefaultBrowser(url.toUtf8());
-        }
+        m_osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
+        env->openURLInDefaultBrowser(url.toUtf8());
     } else if(user_action == UA_ADD_FRIEND) {
         Packet packet;
         packet.id = FRIEND_ADD;

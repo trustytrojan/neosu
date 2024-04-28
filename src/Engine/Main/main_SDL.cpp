@@ -19,7 +19,6 @@
 #include "ConVar.h"
 #include "ConsoleBox.h"
 #include "Engine.h"
-#include "HorizonSDLEnvironment.h"
 #include "Mouse.h"
 #include "Profiler.h"
 #include "SDL.h"
@@ -190,14 +189,6 @@ int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
     SDL_Event e;
     while(g_bRunning) {
         VPROF_MAIN();
-
-        // HACKHACK: switch hack (usb mouse/keyboard support)
-#ifdef __SWITCH__
-
-        HorizonSDLEnvironment *horizonSDLenv = dynamic_cast<HorizonSDLEnvironment *>(environment);
-        if(horizonSDLenv != NULL) horizonSDLenv->update_before_winproc();
-
-#endif
 
         // handle window message queue
         {
@@ -384,9 +375,7 @@ int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
                         if(e.jbutton.button == 0)  // KEY_A
                         {
                             g_engine->onMouseLeftChange(true);
-                        } else if((env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 10
-                                                                               : e.jbutton.button == 7) ||
-                                  e.jbutton.button == 1)  // KEY_PLUS/KEY_START || KEY_B
+                        } else if(e.jbutton.button == 7 || e.jbutton.button == 1)  // KEY_PLUS/KEY_START || KEY_B
                             g_engine->onKeyboardKeyDown(SDL_SCANCODE_ESCAPE);
                         else if(e.jbutton.button == 2)  // KEY_X
                         {
@@ -394,53 +383,20 @@ int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
                             xDown = true;
                         } else if(e.jbutton.button == 3)  // KEY_Y
                             g_engine->onKeyboardKeyDown(SDL_SCANCODE_Y);
-                        else if((env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 21 : false) ||
-                                (env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 13
-                                                                             : false))  // right stick up || dpad up
-                            g_engine->onKeyboardKeyDown(SDL_SCANCODE_UP);
-                        else if((env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 23 : false) ||
-                                (env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 15
-                                                                             : false))  // right stick down || dpad down
-                            g_engine->onKeyboardKeyDown(SDL_SCANCODE_DOWN);
-                        else if((env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 20 : false) ||
-                                (env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 12
-                                                                             : false))  // right stick left || dpad left
-                            g_engine->onKeyboardKeyDown(SDL_SCANCODE_LEFT);
-                        else if((env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 22 : false) ||
-                                (env->getOS() == Environment::OS::OS_HORIZON
-                                     ? e.jbutton.button == 14
-                                     : false))  // right stick right || dpad right
-                            g_engine->onKeyboardKeyDown(SDL_SCANCODE_RIGHT);
-                        else if((env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 6
-                                                                             : e.jbutton.button == 4))  // KEY_L
-                            g_engine->onKeyboardKeyDown((
-                                env->getOS() == Environment::OS::OS_HORIZON ? SDL_SCANCODE_L : SDL_SCANCODE_BACKSPACE));
-                        else if((env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 7
-                                                                             : e.jbutton.button == 5))  // KEY_R
-                            g_engine->onKeyboardKeyDown(
-                                (env->getOS() == Environment::OS::OS_HORIZON ? SDL_SCANCODE_R : SDL_SCANCODE_LSHIFT));
-                        else if((env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 8
-                                                                             : false))  // KEY_ZL
-                            g_engine->onKeyboardKeyDown(SDL_SCANCODE_Z);
-                        else if((env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 9
-                                                                             : false))  // KEY_ZR
-                            g_engine->onKeyboardKeyDown(SDL_SCANCODE_V);
-                        else if((env->getOS() == Environment::OS::OS_HORIZON
-                                     ? e.jbutton.button == 11
-                                     : e.jbutton.button == 6))  // KEY_MINUS/KEY_SELECT
+                        else if(e.jbutton.button == 4)  // KEY_L
+                            g_engine->onKeyboardKeyDown(SDL_SCANCODE_BACKSPACE);
+                        else if(e.jbutton.button == 5)  // KEY_R
+                            g_engine->onKeyboardKeyDown(SDL_SCANCODE_LSHIFT);
+                        else if(e.jbutton.button == 6)  // KEY_MINUS/KEY_SELECT
                             g_engine->onKeyboardKeyDown(SDL_SCANCODE_F1);
-                        else if((env->getOS() == Environment::OS::OS_HORIZON
-                                     ? e.jbutton.button == 4
-                                     : e.jbutton.button == 8))  // left stick press
+                        else if(e.jbutton.button == 8)  // left stick press
                         {
                             // toggle options (CTRL + O)
                             g_engine->onKeyboardKeyDown(SDL_SCANCODE_LCTRL);
                             g_engine->onKeyboardKeyDown(SDL_SCANCODE_O);
                             g_engine->onKeyboardKeyUp(SDL_SCANCODE_LCTRL);
                             g_engine->onKeyboardKeyUp(SDL_SCANCODE_O);
-                        } else if((env->getOS() == Environment::OS::OS_HORIZON
-                                       ? e.jbutton.button == 5
-                                       : e.jbutton.button == 9))  // right stick press
+                        } else if(e.jbutton.button == 9)  // right stick press
                         {
                             if(xDown) {
                                 // toggle console
@@ -448,12 +404,6 @@ int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
                                 g_engine->onKeyboardKeyDown(SDL_SCANCODE_F1);
                                 g_engine->onKeyboardKeyUp(SDL_SCANCODE_LSHIFT);
                                 g_engine->onKeyboardKeyUp(SDL_SCANCODE_F1);
-                            } else {
-#ifdef __SWITCH__
-
-                                ((HorizonSDLEnvironment *)environment)->showKeyboard();
-
-#endif
                             }
                         }
                         break;
@@ -461,9 +411,7 @@ int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
                     case SDL_JOYBUTTONUP:
                         if(e.jbutton.button == 0)  // KEY_A
                             g_engine->onMouseLeftChange(false);
-                        else if((env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 10
-                                                                             : e.jbutton.button == 7) ||
-                                e.jbutton.button == 1)  // KEY_PLUS/KEY_START || KEY_B
+                        else if(e.jbutton.button == 7 || e.jbutton.button == 1)  // KEY_PLUS/KEY_START || KEY_B
                             g_engine->onKeyboardKeyUp(SDL_SCANCODE_ESCAPE);
                         else if(e.jbutton.button == 2)  // KEY_X
                         {
@@ -471,40 +419,11 @@ int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
                             xDown = false;
                         } else if(e.jbutton.button == 3)  // KEY_Y
                             g_engine->onKeyboardKeyUp(SDL_SCANCODE_Y);
-                        else if((env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 21 : false) ||
-                                (env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 13
-                                                                             : false))  // right stick up || dpad up
-                            g_engine->onKeyboardKeyUp(SDL_SCANCODE_UP);
-                        else if((env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 23 : false) ||
-                                (env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 15
-                                                                             : false))  // right stick down || dpad down
-                            g_engine->onKeyboardKeyUp(SDL_SCANCODE_DOWN);
-                        else if((env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 20 : false) ||
-                                (env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 12
-                                                                             : false))  // right stick left || dpad left
-                            g_engine->onKeyboardKeyUp(SDL_SCANCODE_LEFT);
-                        else if((env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 22 : false) ||
-                                (env->getOS() == Environment::OS::OS_HORIZON
-                                     ? e.jbutton.button == 14
-                                     : false))  // right stick right || dpad right
-                            g_engine->onKeyboardKeyUp(SDL_SCANCODE_RIGHT);
-                        else if((env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 6
-                                                                             : e.jbutton.button == 4))  // KEY_L
-                            g_engine->onKeyboardKeyUp((
-                                env->getOS() == Environment::OS::OS_HORIZON ? SDL_SCANCODE_L : SDL_SCANCODE_BACKSPACE));
-                        else if((env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 7
-                                                                             : e.jbutton.button == 5))  // KEY_R
-                            g_engine->onKeyboardKeyUp(
-                                (env->getOS() == Environment::OS::OS_HORIZON ? SDL_SCANCODE_R : SDL_SCANCODE_LSHIFT));
-                        else if((env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 8
-                                                                             : false))  // KEY_ZL
-                            g_engine->onKeyboardKeyUp(SDL_SCANCODE_Z);
-                        else if((env->getOS() == Environment::OS::OS_HORIZON ? e.jbutton.button == 9
-                                                                             : false))  // KEY_ZR
-                            g_engine->onKeyboardKeyUp(SDL_SCANCODE_V);
-                        else if((env->getOS() == Environment::OS::OS_HORIZON
-                                     ? e.jbutton.button == 11
-                                     : e.jbutton.button == 6))  // KEY_MINUS/KEY_SELECT
+                        else if(e.jbutton.button == 4)  // KEY_L
+                            g_engine->onKeyboardKeyUp(SDL_SCANCODE_BACKSPACE);
+                        else if(e.jbutton.button == 5)  // KEY_R
+                            g_engine->onKeyboardKeyUp(SDL_SCANCODE_LSHIFT);
+                        else if(e.jbutton.button == 6)  // KEY_MINUS/KEY_SELECT
                             g_engine->onKeyboardKeyUp(SDL_SCANCODE_F1);
                         break;
 
@@ -518,7 +437,7 @@ int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
                             else
                                 m_fJoystick0YPercent = clamp<float>((float)e.jaxis.value / 32767.0f, -1.0f, 1.0f);
                         }
-                        if(env->getOS() != Environment::OS::OS_HORIZON) {
+                        {
                             // ZL/ZR
                             if(e.jaxis.axis == 2 || e.jaxis.axis == 5) {
                                 if(e.jaxis.axis == 2) {
@@ -550,7 +469,7 @@ int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
 
                     case SDL_JOYHATMOTION:
                         // debugLog("joyhatmotion: hat %i : value = %i\n", (int)e.jhat.hat, (int)e.jhat.value);
-                        if(env->getOS() != Environment::OS::OS_HORIZON) {
+                        {
                             const bool wasHatUpDown = hatUpDown;
                             const bool wasHatDownDown = hatDownDown;
                             const bool wasHatLeftDown = hatLeftDown;

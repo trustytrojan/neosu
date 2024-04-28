@@ -45,32 +45,15 @@ ConVar debug_rm_("debug_rm", false, FCVAR_NONE);
 
 ConVar *ResourceManager::debug_rm = &debug_rm_;
 
-// HACKHACK: do this with env->getOS() or something
-#ifdef __SWITCH__
-
-const char *ResourceManager::PATH_DEFAULT_IMAGES = "romfs:/materials/";
-const char *ResourceManager::PATH_DEFAULT_FONTS = "romfs:/fonts/";
-const char *ResourceManager::PATH_DEFAULT_SHADERS = "romfs:/shaders/";
-
-#else
-
 const char *ResourceManager::PATH_DEFAULT_IMAGES = MCENGINE_DATA_DIR "materials/";
 const char *ResourceManager::PATH_DEFAULT_FONTS = MCENGINE_DATA_DIR "fonts/";
 const char *ResourceManager::PATH_DEFAULT_SHADERS = MCENGINE_DATA_DIR "shaders/";
-
-#endif
 
 ResourceManager::ResourceManager() {
     m_bNextLoadAsync = false;
     m_iNumResourceInitPerFrameLimit = 1;
 
     m_loadingWork.reserve(32);
-
-    // OS specific engine settings/overrides
-    if(env->getOS() == Environment::OS::OS_HORIZON) {
-        rm_numthreads.setValue(1.0f);
-        rm_numthreads.setDefaultFloat(1.0f);
-    }
 
     // create loader threads
     for(int i = 0; i < rm_numthreads.getInt(); i++) {

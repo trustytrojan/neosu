@@ -268,8 +268,6 @@ OsuHUD::OsuHUD(Osu *osu) : OsuScreen(osu) {
     m_tempFont = engine->getResourceManager()->getFont("FONT_DEFAULT");
     m_cursorTrailShader = engine->getResourceManager()->loadShader("cursortrail.vsh", "cursortrail.fsh", "cursortrail");
     m_cursorTrail.reserve(osu_cursor_trail_max_size.getInt() * 2);
-    if(env->getOS() == Environment::OS::OS_HORIZON) m_cursorTrail2.reserve(osu_cursor_trail_max_size.getInt() * 2);
-
     m_cursorTrailVAO = engine->getResourceManager()->createVertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_QUADS,
                                                                              Graphics::USAGE_TYPE::USAGE_DYNAMIC);
 
@@ -798,9 +796,9 @@ void OsuHUD::drawFps(Graphics *g, McFont *font, float fps) {
     g->popTransform();
 
     // top
-    if(fps >= 200 || (env->getOS() == Environment::OS::OS_HORIZON && fps >= 50))
+    if(fps >= 200)
         g->setColor(0xffffffff);
-    else if(fps >= 120 || (env->getOS() == Environment::OS::OS_HORIZON && fps >= 40))
+    else if(fps >= 120)
         g->setColor(0xffdddd00);
     else {
         const float pulse = std::abs(std::sin(engine->getTime() * 4));

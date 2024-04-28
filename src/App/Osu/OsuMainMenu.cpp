@@ -15,7 +15,6 @@
 #include "Downloader.h"
 #include "Engine.h"
 #include "File.h"
-#include "HorizonSDLEnvironment.h"
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "Osu.h"
@@ -155,8 +154,6 @@ ConVar *OsuMainMenu::m_osu_mod_random_ref = NULL;
 ConVar *OsuMainMenu::m_osu_songbrowser_background_fade_in_duration_ref = NULL;
 
 OsuMainMenu::OsuMainMenu(Osu *osu) : OsuScreen(osu) {
-    if(env->getOS() == Environment::OS::OS_HORIZON) NEOSU_MAIN_BUTTON_TEXT.append(" NX");
-
     if(m_osu_universal_offset_ref == NULL) m_osu_universal_offset_ref = convar->getConVarByName("osu_universal_offset");
     if(m_osu_universal_offset_hardcoded_ref == NULL)
         m_osu_universal_offset_hardcoded_ref = convar->getConVarByName("osu_universal_offset_hardcoded");

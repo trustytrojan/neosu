@@ -19,7 +19,7 @@ class ContextMenu;
 
 class Environment {
    public:
-    enum class OS { OS_NULL, OS_WINDOWS, OS_LINUX, OS_MACOS, OS_HORIZON };
+    enum class OS { OS_NULL, OS_WINDOWS, OS_LINUX, OS_MACOS };
 
    public:
     Environment();

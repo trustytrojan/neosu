@@ -11,7 +11,6 @@
 
 #include "ConVar.h"
 #include "Engine.h"
-#include "HorizonThread.h"
 
 // pthread implementation of Thread
 class PosixThread : public BaseThread {
@@ -49,12 +48,7 @@ ConVar *McThread::debug = &debug_thread;
 
 McThread::McThread(START_ROUTINE start_routine, void *arg) {
     m_baseThread = NULL;
-
-#if defined(__SWITCH__)
-    m_baseThread = new HorizonThread(start_routine, arg);
-#else
     m_baseThread = new PosixThread(start_routine, arg);
-#endif
 }
 
 McThread::~McThread() { SAFE_DELETE(m_baseThread); }

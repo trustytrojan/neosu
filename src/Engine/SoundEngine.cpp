@@ -17,7 +17,6 @@
 #include "ConVar.h"
 #include "Engine.h"
 #include "Environment.h"
-#include "HorizonSDLEnvironment.h"
 #include "Osu.h"
 #include "OsuBeatmap.h"
 #include "OsuOptionsMenu.h"
@@ -525,10 +524,6 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
         // since we use the newer bass/fx dlls for wasapi builds anyway (which have different time handling)
         osu_universal_offset_hardcoded.setValue(-25.0f);
 #endif
-    }
-
-    if(env->getOS() == Environment::OS::OS_HORIZON) {
-        osu_universal_offset_hardcoded.setValue(-45.0f);
     }
 
     m_bReady = true;

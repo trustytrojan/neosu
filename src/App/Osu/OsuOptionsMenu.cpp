@@ -567,16 +567,13 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
     addCheckbox("Use osu!.db database (read-only)",
                 "If you have an existing osu! installation,\nthen this will speed up the initial loading process.",
                 convar->getConVarByName("osu_database_enabled"));
-    if(env->getOS() != Environment::OS::OS_HORIZON)
-        addCheckbox(
-            "Load osu! collection.db (read-only)",
-            "If you have an existing osu! installation,\nalso load and display your created collections from there.",
-            convar->getConVarByName("osu_collections_legacy_enabled"));
-    if(env->getOS() != Environment::OS::OS_HORIZON)
-        addCheckbox(
-            "Load osu! scores.db (read-only)",
-            "If you have an existing osu! installation,\nalso load and display your achieved scores from there.",
-            convar->getConVarByName("osu_scores_legacy_enabled"));
+    addCheckbox(
+        "Load osu! collection.db (read-only)",
+        "If you have an existing osu! installation,\nalso load and display your created collections from there.",
+        convar->getConVarByName("osu_collections_legacy_enabled"));
+    addCheckbox("Load osu! scores.db (read-only)",
+                "If you have an existing osu! installation,\nalso load and display your achieved scores from there.",
+                convar->getConVarByName("osu_scores_legacy_enabled"));
 
     addSpacer();
     addCheckbox("Include Relax/Autopilot for total weighted pp/acc",
@@ -622,48 +619,45 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
                     convar->getConVarByName("win_processpriority"));
 
     addCheckbox("Show FPS Counter", convar->getConVarByName("osu_draw_fps"));
-    if(env->getOS() != Environment::OS::OS_HORIZON) {
-        addSpacer();
+    addSpacer();
 
-        addCheckbox("Unlimited FPS", convar->getConVarByName("fps_unlimited"));
+    addCheckbox("Unlimited FPS", convar->getConVarByName("fps_unlimited"));
 
-        CBaseUISlider *fpsSlider =
-            addSlider("FPS Limiter:", 60.0f, 1000.0f, convar->getConVarByName("fps_max"), -1.0f, true);
-        fpsSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onSliderChangeInt));
-        fpsSlider->setKeyDelta(1);
+    CBaseUISlider *fpsSlider =
+        addSlider("FPS Limiter:", 60.0f, 1000.0f, convar->getConVarByName("fps_max"), -1.0f, true);
+    fpsSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onSliderChangeInt));
+    fpsSlider->setKeyDelta(1);
 
-        addSubSection("Layout");
-        OPTIONS_ELEMENT resolutionSelect =
-            addButton("Select Resolution", UString::format("%ix%i", m_osu->getScreenWidth(), m_osu->getScreenHeight()));
-        m_resolutionSelectButton = (CBaseUIButton *)resolutionSelect.elements[0];
-        m_resolutionSelectButton->setClickCallback(
-            fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onResolutionSelect));
-        m_resolutionLabel = (CBaseUILabel *)resolutionSelect.elements[1];
-        m_fullscreenCheckbox = addCheckbox("Fullscreen");
-        m_fullscreenCheckbox->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onFullscreenChange));
-        addCheckbox("Borderless",
-                    "May cause extra input lag if enabled.\nDepends on your operating system version/updates.",
-                    convar->getConVarByName("fullscreen_windowed_borderless"))
-            ->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onBorderlessWindowedChange));
-        addCheckbox("Keep Aspect Ratio",
-                    "Black borders instead of a stretched image.\nOnly relevant if fullscreen is enabled, and "
-                    "letterboxing is disabled.\nUse the two position sliders below to move the viewport around.",
-                    convar->getConVarByName("osu_resolution_keep_aspect_ratio"));
-        addCheckbox("Letterboxing",
-                    "Useful to get the low latency of fullscreen with a smaller game resolution.\nUse the two position "
-                    "sliders below to move the viewport around.",
-                    convar->getConVarByName("osu_letterboxing"));
-        m_letterboxingOffsetXSlider =
-            addSlider("Horizontal position", -1.0f, 1.0f, convar->getConVarByName("osu_letterboxing_offset_x"), 170)
-                ->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onSliderChangeLetterboxingOffset))
-                ->setKeyDelta(0.01f)
-                ->setAnimated(false);
-        m_letterboxingOffsetYSlider =
-            addSlider("Vertical position", -1.0f, 1.0f, convar->getConVarByName("osu_letterboxing_offset_y"), 170)
-                ->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onSliderChangeLetterboxingOffset))
-                ->setKeyDelta(0.01f)
-                ->setAnimated(false);
-    }
+    addSubSection("Layout");
+    OPTIONS_ELEMENT resolutionSelect =
+        addButton("Select Resolution", UString::format("%ix%i", m_osu->getScreenWidth(), m_osu->getScreenHeight()));
+    m_resolutionSelectButton = (CBaseUIButton *)resolutionSelect.elements[0];
+    m_resolutionSelectButton->setClickCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onResolutionSelect));
+    m_resolutionLabel = (CBaseUILabel *)resolutionSelect.elements[1];
+    m_fullscreenCheckbox = addCheckbox("Fullscreen");
+    m_fullscreenCheckbox->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onFullscreenChange));
+    addCheckbox("Borderless",
+                "May cause extra input lag if enabled.\nDepends on your operating system version/updates.",
+                convar->getConVarByName("fullscreen_windowed_borderless"))
+        ->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onBorderlessWindowedChange));
+    addCheckbox("Keep Aspect Ratio",
+                "Black borders instead of a stretched image.\nOnly relevant if fullscreen is enabled, and "
+                "letterboxing is disabled.\nUse the two position sliders below to move the viewport around.",
+                convar->getConVarByName("osu_resolution_keep_aspect_ratio"));
+    addCheckbox("Letterboxing",
+                "Useful to get the low latency of fullscreen with a smaller game resolution.\nUse the two position "
+                "sliders below to move the viewport around.",
+                convar->getConVarByName("osu_letterboxing"));
+    m_letterboxingOffsetXSlider =
+        addSlider("Horizontal position", -1.0f, 1.0f, convar->getConVarByName("osu_letterboxing_offset_x"), 170)
+            ->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onSliderChangeLetterboxingOffset))
+            ->setKeyDelta(0.01f)
+            ->setAnimated(false);
+    m_letterboxingOffsetYSlider =
+        addSlider("Vertical position", -1.0f, 1.0f, convar->getConVarByName("osu_letterboxing_offset_y"), 170)
+            ->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onSliderChangeLetterboxingOffset))
+            ->setKeyDelta(0.01f)
+            ->setAnimated(false);
 
     addSubSection("UI Scaling");
     addCheckbox(
@@ -697,29 +691,24 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
                 "performance a tiny bit, since there will be less to draw overall.",
                 convar->getConVarByName("osu_slider_shrink"));
     addSpacer();
-    if(env->getOS() != Environment::OS::OS_HORIZON) {
-        addCheckbox("Legacy Slider Renderer (!)",
-                    "WARNING: Only try enabling this on shitty old computers!\nMay or may not improve fps while few "
-                    "sliders are visible.\nGuaranteed lower fps while many sliders are visible!",
-                    convar->getConVarByName("osu_force_legacy_slider_renderer"));
-        addCheckbox("Higher Quality Sliders (!)", "Disable this if your fps drop too low while sliders are visible.",
-                    convar->getConVarByName("osu_options_high_quality_sliders"))
-            ->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onHighQualitySlidersCheckboxChange));
-        m_sliderQualitySlider =
-            addSlider("Slider Quality", 0.0f, 1.0f, convar->getConVarByName("osu_options_slider_quality"));
-        m_sliderQualitySlider->setChangeCallback(
-            fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onSliderChangeSliderQuality));
-    }
+    addCheckbox("Legacy Slider Renderer (!)",
+                "WARNING: Only try enabling this on shitty old computers!\nMay or may not improve fps while few "
+                "sliders are visible.\nGuaranteed lower fps while many sliders are visible!",
+                convar->getConVarByName("osu_force_legacy_slider_renderer"));
+    addCheckbox("Higher Quality Sliders (!)", "Disable this if your fps drop too low while sliders are visible.",
+                convar->getConVarByName("osu_options_high_quality_sliders"))
+        ->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onHighQualitySlidersCheckboxChange));
+    m_sliderQualitySlider =
+        addSlider("Slider Quality", 0.0f, 1.0f, convar->getConVarByName("osu_options_slider_quality"));
+    m_sliderQualitySlider->setChangeCallback(
+        fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onSliderChangeSliderQuality));
 
     //**************************************************************************************************************************//
 
     CBaseUIElement *sectionAudio = addSection("Audio");
 
     addSubSection("Devices");
-    if(env->getOS() == Environment::OS::OS_HORIZON) {
-        addButton("Restart SoundEngine (fix crackling)")
-            ->setClickCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onOutputDeviceRestart));
-    } else {
+    {
         OPTIONS_ELEMENT outputDeviceSelect = addButton("Select Output Device", "Default", true);
         m_outputDeviceResetButton = outputDeviceSelect.resetButton;
         m_outputDeviceResetButton->setClickCallback(
@@ -820,12 +809,10 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
     offsetSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onSliderChangeIntMS));
     offsetSlider->setKeyDelta(1);
 
-    if(env->getOS() != Environment::OS::OS_HORIZON) {
-        addSubSection("Songbrowser");
-        addCheckbox("Apply speed/pitch mods while browsing",
-                    "Whether to always apply all mods, or keep the preview music normal.",
-                    convar->getConVarByName("osu_beatmap_preview_mods_live"));
-    }
+    addSubSection("Songbrowser");
+    addCheckbox("Apply speed/pitch mods while browsing",
+                "Whether to always apply all mods, or keep the preview music normal.",
+                convar->getConVarByName("osu_beatmap_preview_mods_live"));
 
     addSubSection("Gameplay");
     addCheckbox("Prefer Nightcore over Double Time",
@@ -924,15 +911,8 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
     CBaseUIElement *sectionInput = addSection("Input");
 
     addSubSection("Mouse", "scroll");
-    if(env->getOS() == Environment::OS::OS_WINDOWS || env->getOS() == Environment::OS::OS_MACOS ||
-       env->getOS() == Environment::OS::OS_HORIZON) {
-        addSlider("Sensitivity:", (env->getOS() == Environment::OS::OS_HORIZON ? 1.0f : 0.1f), 6.0f,
-                  convar->getConVarByName("mouse_sensitivity"))
-            ->setKeyDelta(0.01f);
-
-        if(env->getOS() == Environment::OS::OS_HORIZON)
-            addSlider("Joystick S.:", 0.1f, 6.0f, convar->getConVarByName("sdl_joystick_mouse_sensitivity"))
-                ->setKeyDelta(0.01f);
+    if(env->getOS() == Environment::OS::OS_WINDOWS || env->getOS() == Environment::OS::OS_MACOS) {
+        addSlider("Sensitivity:", 0.1f, 6.0f, convar->getConVarByName("mouse_sensitivity"))->setKeyDelta(0.01f);
 
         if(env->getOS() == Environment::OS::OS_MACOS) {
             addLabel("");
@@ -960,11 +940,9 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
         addLabel("Use xinput or xsetwacom to change the tablet area.")->setTextColor(0xff555555);
         addLabel("");
     }
-    if(env->getOS() != Environment::OS::OS_HORIZON) {
-        addCheckbox("Confine Cursor (Windowed)", convar->getConVarByName("osu_confine_cursor_windowed"));
-        addCheckbox("Confine Cursor (Fullscreen)", convar->getConVarByName("osu_confine_cursor_fullscreen"));
-        addCheckbox("Disable Mouse Wheel in Play Mode", convar->getConVarByName("osu_disable_mousewheel"));
-    }
+    addCheckbox("Confine Cursor (Windowed)", convar->getConVarByName("osu_confine_cursor_windowed"));
+    addCheckbox("Confine Cursor (Fullscreen)", convar->getConVarByName("osu_confine_cursor_fullscreen"));
+    addCheckbox("Disable Mouse Wheel in Play Mode", convar->getConVarByName("osu_disable_mousewheel"));
     addCheckbox("Disable Mouse Buttons in Play Mode", convar->getConVarByName("osu_disable_mousebuttons"));
     addCheckbox("Cursor ripples", "The cursor will ripple outwards on clicking.",
                 convar->getConVarByName("osu_draw_cursor_ripples"));
@@ -1338,11 +1316,6 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
                     "WARNING: Do NOT enable this if you are using a mouse!\nIf this is enabled, then DPI and cm per "
                     "360 will be ignored!",
                     convar->getConVarByName("fposu_absolute_mode"));
-    } else if(env->getOS() == Environment::OS::OS_LINUX) {
-        addSubSection("[Beta] FPoSu 4D Mode - Mouse");
-        addSlider("Sensitivity:", (env->getOS() == Environment::OS::OS_HORIZON ? 1.0f : 0.1f), 6.0f,
-                  convar->getConVarByName("mouse_sensitivity"))
-            ->setKeyDelta(0.01f);
     }
 
     //**************************************************************************************************************************//
@@ -1368,13 +1341,11 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
     logInButton->setColor(0xff00ff00);
     logInButton->setTextColor(0xffffffff);
 
-    if(env->getOS() != Environment::OS::OS_HORIZON) {
-        addSubSection("Integration");
-        addCheckbox("Rich Presence (Discord + Steam)",
-                    "Shows your current game state in your friends' friendslists.\ne.g.: Playing Gavin G - Reach Out "
-                    "[Cherry Blossom's Insane]",
-                    convar->getConVarByName("osu_rich_presence"));
-    }
+    addSubSection("Integration");
+    addCheckbox("Rich Presence (Discord + Steam)",
+                "Shows your current game state in your friends' friendslists.\ne.g.: Playing Gavin G - Reach Out "
+                "[Cherry Blossom's Insane]",
+                convar->getConVarByName("osu_rich_presence"));
 
     //**************************************************************************************************************************//
 
@@ -2631,33 +2602,16 @@ void OsuOptionsMenu::onLogInClicked() {
 }
 
 void OsuOptionsMenu::onDownloadOsuClicked() {
-    if(env->getOS() == Environment::OS::OS_HORIZON) {
-        m_osu->getNotificationOverlay()->addNotification("Go to https://osu.ppy.sh/", 0xffffffff, false, 0.75f);
-        return;
-    }
-
     m_osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
     env->openURLInDefaultBrowser("https://osu.ppy.sh/");
 }
 
 void OsuOptionsMenu::onManuallyManageBeatmapsClicked() {
-    if(env->getOS() == Environment::OS::OS_HORIZON) {
-        m_osu->getNotificationOverlay()->addNotification("Google \"How to use McOsu without osu!\"", 0xffffffff, false,
-                                                         0.75f);
-        return;
-    }
-
     m_osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
     env->openURLInDefaultBrowser("https://steamcommunity.com/sharedfiles/filedetails/?id=880768265");
 }
 
 void OsuOptionsMenu::onCM360CalculatorLinkClicked() {
-    if(env->getOS() == Environment::OS::OS_HORIZON) {
-        m_osu->getNotificationOverlay()->addNotification("Go to https://www.mouse-sensitivity.com/", 0xffffffff, false,
-                                                         0.75f);
-        return;
-    }
-
     m_osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
     env->openURLInDefaultBrowser("https://www.mouse-sensitivity.com/");
 }

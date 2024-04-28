@@ -105,12 +105,12 @@ bool OsuSkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin
     filepath2.append(skinElementName);
     filepath2.append(".png");
 
-    std::string defaultFilePath1 = env->getOS() == Environment::OS::OS_HORIZON ? "romfs:/materials/" : "./materials/";
+    std::string defaultFilePath1 = "./materials/";
     defaultFilePath1.append(OsuSkin::OSUSKIN_DEFAULT_SKIN_PATH);
     defaultFilePath1.append(skinElementName);
     defaultFilePath1.append("@2x.png");
 
-    std::string defaultFilePath2 = env->getOS() == Environment::OS::OS_HORIZON ? "romfs:/materials/" : "./materials/";
+    std::string defaultFilePath2 = "./materials/";
     defaultFilePath2.append(OsuSkin::OSUSKIN_DEFAULT_SKIN_PATH);
     defaultFilePath2.append(skinElementName);
     defaultFilePath2.append(".png");

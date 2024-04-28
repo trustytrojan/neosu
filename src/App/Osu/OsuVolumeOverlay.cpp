@@ -34,10 +34,6 @@ OsuVolumeOverlay::OsuVolumeOverlay(Osu *osu) : OsuScreen(osu) {
     osu_volume_master_inactive = convar->getConVarByName("osu_volume_master_inactive");
     osu_volume_change_interval = convar->getConVarByName("osu_volume_change_interval");
 
-    if(env->getOS() == Environment::OS::OS_HORIZON) {
-        osu_volume_music->setValue(0.3f);
-    }
-
     m_fVolumeChangeTime = 0.0f;
     m_fVolumeChangeFade = 1.0f;
     m_fLastVolume = osu_volume_master->getFloat();

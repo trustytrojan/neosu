@@ -429,8 +429,7 @@ void OsuSkin::load() {
     // skin ini
     randomizeFilePath();
     m_sSkinIniFilePath = m_sFilePath;
-    UString defaultSkinIniFilePath =
-        UString(env->getOS() == Environment::OS::OS_HORIZON ? "romfs:/materials/" : MCENGINE_DATA_DIR "/materials/");
+    UString defaultSkinIniFilePath = MCENGINE_DATA_DIR "/materials/";
     defaultSkinIniFilePath.append(OSUSKIN_DEFAULT_SKIN_PATH);
     defaultSkinIniFilePath.append("skin.ini");
     m_sSkinIniFilePath.append("skin.ini");
@@ -1304,15 +1303,13 @@ void OsuSkin::checkLoadImage(Image **addressOfPointer, std::string skinElementNa
     // NOTE: only the default skin is loaded with a resource name (it must never be unloaded by other instances), and it
     // is NOT added to the resources vector
 
-    std::string defaultFilePath1 =
-        env->getOS() == Environment::OS::OS_HORIZON ? "romfs:/materials/" : MCENGINE_DATA_DIR "/materials/";
+    std::string defaultFilePath1 = MCENGINE_DATA_DIR "/materials/";
     defaultFilePath1.append(OSUSKIN_DEFAULT_SKIN_PATH);
     defaultFilePath1.append(skinElementName);
     defaultFilePath1.append("@2x.");
     defaultFilePath1.append(fileExtension);
 
-    std::string defaultFilePath2 =
-        env->getOS() == Environment::OS::OS_HORIZON ? "romfs:/materials/" : MCENGINE_DATA_DIR "/materials/";
+    std::string defaultFilePath2 = MCENGINE_DATA_DIR "/materials/";
     defaultFilePath2.append(OSUSKIN_DEFAULT_SKIN_PATH);
     defaultFilePath2.append(skinElementName);
     defaultFilePath2.append(".");
@@ -1458,8 +1455,7 @@ void OsuSkin::checkLoadSound(Sound **addressOfPointer, std::string skinElementNa
     };
 
     // load default skin
-    std::string defaultpath =
-        env->getOS() == Environment::OS::OS_HORIZON ? "romfs:/materials/" : MCENGINE_DATA_DIR "./materials/";
+    std::string defaultpath = MCENGINE_DATA_DIR "./materials/";
     defaultpath.append(OSUSKIN_DEFAULT_SKIN_PATH);
     defaultpath.append(skinElementName);
     std::string defaultResourceName = resourceName;

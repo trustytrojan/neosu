@@ -207,18 +207,15 @@ OsuModSelector::OsuModSelector(Osu *osu) : OsuScreen(osu) {
     m_ARLock = overrideAR.lock;
     m_ODLock = overrideOD.lock;
 
-    if(env->getOS() != Environment::OS::OS_HORIZON) {
-        OVERRIDE_SLIDER overrideSpeed =
-            addOverrideSlider("Speed/BPM Multiplier", "x", convar->getConVarByName("osu_speed_override"), 0.0f, 2.5f);
+    OVERRIDE_SLIDER overrideSpeed =
+        addOverrideSlider("Speed/BPM Multiplier", "x", convar->getConVarByName("osu_speed_override"), 0.0f, 2.5f);
 
-        overrideSpeed.slider->setChangeCallback(
-            fastdelegate::MakeDelegate(this, &OsuModSelector::onOverrideSliderChange));
-        // overrideSpeed.slider->setValue(-1.0f, false);
-        overrideSpeed.slider->setAnimated(false);  // same quick fix as above
-        overrideSpeed.slider->setLiveUpdate(false);
+    overrideSpeed.slider->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuModSelector::onOverrideSliderChange));
+    // overrideSpeed.slider->setValue(-1.0f, false);
+    overrideSpeed.slider->setAnimated(false);  // same quick fix as above
+    overrideSpeed.slider->setLiveUpdate(false);
 
-        m_speedSlider = overrideSpeed.slider;
-    }
+    m_speedSlider = overrideSpeed.slider;
 
     // build experimental buttons
     addExperimentalLabel(" Experimental Mods (!)");
@@ -236,11 +233,8 @@ OsuModSelector::OsuModSelector(Osu *osu) : OsuScreen(osu) {
                             "Customize the approach circle animation.\nSee osu_mod_approach_different_style.\nSee "
                             "osu_mod_approach_different_initial_size.",
                             convar->getConVarByName("osu_mod_approach_different"));
-
-    if(env->getOS() != Environment::OS::OS_HORIZON)
-        addExperimentalCheckbox("Timewarp", "Speed increases from 100% to 150% over the course of the beatmap.",
-                                convar->getConVarByName("osu_mod_timewarp"));
-
+    addExperimentalCheckbox("Timewarp", "Speed increases from 100% to 150% over the course of the beatmap.",
+                            convar->getConVarByName("osu_mod_timewarp"));
     addExperimentalCheckbox("AR Timewarp", "Approach rate decreases from 100% to 50% over the course of the beatmap.",
                             convar->getConVarByName("osu_mod_artimewarp"));
     addExperimentalCheckbox("Minimize", "Circle size decreases from 100% to 50% over the course of the beatmap.",
@@ -399,11 +393,6 @@ void OsuModSelector::updateButtons(bool initial) {
     getModButtonOnGrid(4, 2)->setAvailable(true);
     getModButtonOnGrid(4, 0)->setAvailable(true);
     getModButtonOnGrid(5, 2)->setAvailable(true);
-
-    if(env->getOS() == Environment::OS::OS_HORIZON) {
-        getModButtonOnGrid(2, 1)->setAvailable(false);
-        getModButtonOnGrid(2, 0)->setAvailable(false);
-    }
 
     if(bancho.is_in_a_multi_room()) {
         if(bancho.room.freemods && !bancho.room.is_host()) {
