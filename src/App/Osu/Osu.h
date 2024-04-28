@@ -91,8 +91,7 @@ class Osu : public App, public MouseListener {
     virtual void onMinimized();
     virtual bool onShutdown();
 
-    void onBeforePlayStart();  // called just before OsuBeatmap->play()
-    void onPlayStart();        // called when a beatmap has successfully started playing
+    void onPlayStart();  // called when a beatmap has successfully started playing
     void onPlayEnd(bool quit = true,
                    bool aborted = false);  // called when a beatmap is finished playing (or the player quit)
 

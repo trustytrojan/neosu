@@ -344,13 +344,11 @@ void OsuSkin::update() {
     }
 
     // shitty check to not animate while paused with hitobjects in background
-    if(m_osu->isInPlayMode() && m_osu->getSelectedBeatmap() != NULL && !m_osu->getSelectedBeatmap()->isPlaying() &&
-       !osu_skin_animation_force.getBool())
+    if(m_osu->isInPlayMode() && !m_osu->getSelectedBeatmap()->isPlaying() && !osu_skin_animation_force.getBool())
         return;
 
     const bool useEngineTimeForAnimations = !m_osu->isInPlayMode();
-    const long curMusicPos =
-        m_osu->getSelectedBeatmap() != NULL ? m_osu->getSelectedBeatmap()->getCurMusicPosWithOffsets() : 0;
+    const long curMusicPos = m_osu->getSelectedBeatmap()->getCurMusicPosWithOffsets();
     for(int i = 0; i < m_images.size(); i++) {
         m_images[i]->update(m_animationSpeedMultiplier, useEngineTimeForAnimations, curMusicPos);
     }

@@ -151,8 +151,7 @@ void OsuPauseMenu::onContinueClicked() {
     if(anim->isAnimating(&m_fDimAnim)) return;
 
     engine->getSound()->play(m_osu->getSkin()->getMenuHit());
-
-    if(m_osu->getSelectedBeatmap() != NULL) m_osu->getSelectedBeatmap()->pause();
+    m_osu->getSelectedBeatmap()->pause();
 
     scheduleVisibilityChange(false);
 }
@@ -161,8 +160,7 @@ void OsuPauseMenu::onRetryClicked() {
     if(anim->isAnimating(&m_fDimAnim)) return;
 
     engine->getSound()->play(m_osu->getSkin()->getMenuHit());
-
-    if(m_osu->getSelectedBeatmap() != NULL) m_osu->getSelectedBeatmap()->restart();
+    m_osu->getSelectedBeatmap()->restart();
 
     scheduleVisibilityChange(false);
 }
@@ -171,8 +169,7 @@ void OsuPauseMenu::onBackClicked() {
     if(anim->isAnimating(&m_fDimAnim)) return;
 
     engine->getSound()->play(m_osu->getSkin()->getMenuHit());
-
-    if(m_osu->getSelectedBeatmap() != NULL) m_osu->getSelectedBeatmap()->stop();
+    m_osu->getSelectedBeatmap()->stop();
 
     scheduleVisibilityChange(false);
 }

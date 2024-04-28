@@ -212,7 +212,6 @@ void OsuRoom::draw(Graphics *g) {
     }
 
     // Not technically drawing below this line, just checking for map download progress
-    if(m_osu->getSelectedBeatmap() != NULL) return;
     if(bancho.room.map_id == 0) return;
     if(bancho.room.map_id == -1) {
         m_map_title->setText("Host is selecting a map...");
@@ -272,10 +271,7 @@ void OsuRoom::mouse_update(bool *propagate_clicks) {
         send_packet(packet);
     }
 
-    if(m_osu->getSelectedBeatmap() != NULL)
-        m_pauseButton->setPaused(!m_osu->getSelectedBeatmap()->isPreviewMusicPlaying());
-    else
-        m_pauseButton->setPaused(true);
+    m_pauseButton->setPaused(!m_osu->getSelectedBeatmap()->isPreviewMusicPlaying());
 
     m_contextMenu->mouse_update(propagate_clicks);
     if(!*propagate_clicks) return;
@@ -553,11 +549,8 @@ void OsuRoom::on_map_change(bool download) {
     m_ready_btn->is_loading = true;
 
     // Deselect current map
-    if(m_osu->getSelectedBeatmap() != nullptr) {
-        m_pauseButton->setPaused(true);
-        m_osu->m_songBrowser2->m_selectedBeatmap->deselect();
-        m_osu->m_songBrowser2->m_selectedBeatmap = nullptr;
-    }
+    m_pauseButton->setPaused(true);
+    m_osu->m_songBrowser2->m_selectedBeatmap->deselect();
 
     if(bancho.room.map_id == 0) {
         m_map_title->setText("(no map selected)");
@@ -691,7 +684,6 @@ void OsuRoom::on_match_started(Room room) {
 
     last_packet_tms = time(NULL);
 
-    m_osu->onBeforePlayStart();
     if(m_osu->getSelectedBeatmap()->play()) {
         m_bVisible = false;
         bancho.match_started = true;

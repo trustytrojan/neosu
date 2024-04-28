@@ -41,6 +41,7 @@
 #include "OsuModFPoSu.h"
 #include "OsuModSelector.h"
 #include "OsuNotificationOverlay.h"
+#include "OsuOptionsMenu.h"
 #include "OsuPauseMenu.h"
 #include "OsuReplay.h"
 #include "OsuRichPresence.h"
@@ -698,7 +699,7 @@ void OsuBeatmap::selectDifficulty2(OsuDatabaseBeatmap *difficulty2) {
 
 void OsuBeatmap::deselect() {
     m_iContinueMusicPos = 0;
-
+    m_selectedDifficulty2 = NULL;
     unloadObjects();
 }
 
@@ -720,7 +721,6 @@ bool OsuBeatmap::watch(Score score, double start_percent) {
     unloadObjects();
 
     m_bIsWatchingReplay = true;
-    m_osu->onBeforePlayStart();
 
     // Map failed to load
     if(!play()) {
@@ -741,6 +741,33 @@ bool OsuBeatmap::watch(Score score, double start_percent) {
 
 bool OsuBeatmap::play() {
     if(m_selectedDifficulty2 == NULL) return false;
+
+    engine->getSound()->play(m_osu->m_skin->getMenuHit());
+
+    m_osu->updateMods();
+
+    // mp hack
+    {
+        m_osu->m_mainMenu->setVisible(false);
+        m_osu->m_modSelector->setVisible(false);
+        m_osu->m_optionsMenu->setVisible(false);
+        m_osu->m_pauseMenu->setVisible(false);
+    }
+
+    // HACKHACK: stuck key quickfix
+    {
+        m_osu->m_bKeyboardKey1Down = false;
+        m_osu->m_bKeyboardKey12Down = false;
+        m_osu->m_bKeyboardKey2Down = false;
+        m_osu->m_bKeyboardKey22Down = false;
+        m_osu->m_bMouseKey1Down = false;
+        m_osu->m_bMouseKey2Down = false;
+
+        keyReleased1(false);
+        keyReleased1(true);
+        keyReleased2(false);
+        keyReleased2(true);
+    }
 
     static const int OSU_COORD_WIDTH = 512;
     static const int OSU_COORD_HEIGHT = 384;

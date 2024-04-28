@@ -273,7 +273,7 @@ void OsuModFPoSu::update() {
                            .getFloat());  // NOTE: slightly move back by default to avoid aliasing with background cube
 
         if(fposu_mod_strafing.getBool()) {
-            if(m_osu->isInPlayMode() && m_osu->getSelectedBeatmap() != NULL) {
+            if(m_osu->isInPlayMode()) {
                 const long curMusicPos = m_osu->getSelectedBeatmap()->getCurMusicPos();
 
                 const float speedMultiplierCompensation = 1.0f / m_osu->getSelectedBeatmap()->getSpeedMultiplier();
@@ -345,7 +345,7 @@ void OsuModFPoSu::update() {
 
         // auto support, because it looks pretty cool
         Vector2 mousePos = engine->getMouse()->getPos();
-        if(isAutoCursor && m_osu->isInPlayMode() && m_osu->getSelectedBeatmap() != NULL) {
+        if(isAutoCursor && m_osu->isInPlayMode()) {
             OsuBeatmap *beatmap = m_osu->getSelectedBeatmap();
             if(beatmap != NULL && !beatmap->isPaused()) mousePos = beatmap->getCursorPos();
         }

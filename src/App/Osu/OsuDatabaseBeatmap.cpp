@@ -1813,7 +1813,7 @@ void OsuDatabaseBeatmapStarCalculator::init() {
     // NOTE: this accesses runtime mods, so must be run sync (not async)
     // technically the getSelectedBeatmap() call here is a bit unsafe, since the beatmap could have changed already
     // between async and sync, but in that case we recalculate immediately after anyways
-    if(!m_bDead.load() && m_iErrorCode == 0 && m_diff2->m_osu->getSelectedBeatmap() != NULL)
+    if(!m_bDead.load() && m_iErrorCode == 0)
         m_pp = OsuDifficultyCalculator::calculatePPv2(m_diff2->m_osu, m_diff2->m_osu->getSelectedBeatmap(),
                                                       m_aimStars.load(), m_aimSliderFactor.load(), m_speedStars.load(),
                                                       m_speedNotes.load(), m_iNumObjects.load(), m_iNumCircles.load(),

@@ -642,7 +642,7 @@ void OsuModSelector::mouse_update(bool *propagate_clicks) {
         }
 
         // some experimental mod tooltip overrides
-        if(m_experimentalModRandomCheckbox->isChecked() && m_osu->getSelectedBeatmap() != NULL)
+        if(m_experimentalModRandomCheckbox->isChecked())
             m_experimentalModRandomCheckbox->setTooltipText(
                 UString::format("Seed = %i", m_osu->getSelectedBeatmap()->getRandomSeed()));
 
@@ -683,9 +683,7 @@ void OsuModSelector::mouse_update(bool *propagate_clicks) {
             m_bWaitForHPChangeFinished = false;
 
             {
-                if(m_osu->isInPlayMode() && m_osu->getSelectedBeatmap() != NULL)
-                    m_osu->getSelectedBeatmap()->onModUpdate();
-
+                if(m_osu->isInPlayMode()) m_osu->getSelectedBeatmap()->onModUpdate();
                 m_osu->getSongBrowser()->recalculateStarsForSelectedBeatmap(true);
             }
         }
@@ -699,9 +697,7 @@ void OsuModSelector::mouse_update(bool *propagate_clicks) {
             m_bWaitForHPChangeFinished = false;
 
             {
-                if(m_osu->isInPlayMode() && m_osu->getSelectedBeatmap() != NULL)
-                    m_osu->getSelectedBeatmap()->onModUpdate();
-
+                if(m_osu->isInPlayMode()) m_osu->getSelectedBeatmap()->onModUpdate();
                 m_osu->getSongBrowser()->recalculateStarsForSelectedBeatmap(true);
             }
         }
@@ -713,7 +709,7 @@ void OsuModSelector::mouse_update(bool *propagate_clicks) {
             m_bWaitForCSChangeFinished = false;
             m_bWaitForSpeedChangeFinished = false;
             m_bWaitForHPChangeFinished = false;
-            if(m_osu->isInPlayMode() && m_osu->getSelectedBeatmap() != NULL) m_osu->getSelectedBeatmap()->onModUpdate();
+            if(m_osu->isInPlayMode()) m_osu->getSelectedBeatmap()->onModUpdate();
         }
     }
 }
@@ -1319,8 +1315,7 @@ void OsuModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
                 m_overrideSliders[i].label->setWidthToContent(0);
 
                 // HACKHACK: dirty
-                if(m_osu->getSelectedBeatmap() != NULL &&
-                   m_osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL) {
+                if(m_osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL) {
                     if(m_overrideSliders[i].label->getName().find("BPM") != -1) {
                         // reset AR and OD override sliders if the bpm slider was reset
                         if(!m_ARLock->isChecked()) m_ARSlider->setValue(0.0f, false);
@@ -1341,8 +1336,7 @@ void OsuModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
                 }
 
                 // HACKHACK: dirty
-                if(m_osu->getSelectedBeatmap() != NULL &&
-                   m_osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL) {
+                if(m_osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL) {
                     if(m_overrideSliders[i].label->getName().find("BPM") != -1) {
                         // HACKHACK: force BPM slider to have a min value of 0.05 instead of 0 (because that's the
                         // minimum for BASS) note that the BPM slider is just a 'fake' slider, it directly controls the
@@ -1394,18 +1388,14 @@ void OsuModSelector::onOverrideSliderLockChange(CBaseUICheckbox *checkbox) {
             // usability: if we just got locked, and the override slider value is < 0.0f (disabled), then set override
             // to current value
             if(locked && !wasLocked) {
-                if(m_osu->getSelectedBeatmap() != NULL) {
-                    if(checkbox == m_ARLock) {
-                        if(m_ARSlider->getFloat() < 1.0f)
-                            m_ARSlider->setValue(
-                                m_osu->getSelectedBeatmap()->getRawAR() + 1.0f,
-                                false);  // '+1' to compensate for turn-off area of the override sliders
-                    } else if(checkbox == m_ODLock) {
-                        if(m_ODSlider->getFloat() < 1.0f)
-                            m_ODSlider->setValue(
-                                m_osu->getSelectedBeatmap()->getRawOD() + 1.0f,
-                                false);  // '+1' to compensate for turn-off area of the override sliders
-                    }
+                if(checkbox == m_ARLock) {
+                    if(m_ARSlider->getFloat() < 1.0f)
+                        m_ARSlider->setValue(m_osu->getSelectedBeatmap()->getRawAR() + 1.0f,
+                                             false);  // '+1' to compensate for turn-off area of the override sliders
+                } else if(checkbox == m_ODLock) {
+                    if(m_ODSlider->getFloat() < 1.0f)
+                        m_ODSlider->setValue(m_osu->getSelectedBeatmap()->getRawOD() + 1.0f,
+                                             false);  // '+1' to compensate for turn-off area of the override sliders
                 }
             }
 
@@ -1457,7 +1447,7 @@ UString OsuModSelector::getOverrideSliderLabelText(OsuModSelector::OVERRIDE_SLID
     float convarValue = s.cvar->getFloat();
 
     UString newLabelText = s.label->getName();
-    if(m_osu->getSelectedBeatmap() != NULL && m_osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL) {
+    if(m_osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL) {
         // used for compensating speed changing experimental mods (which cause m_osu->getSpeedMultiplier() !=
         // beatmap->getSpeedMultiplier()) to keep the AR/OD display correct
         const float speedMultiplierLive =
@@ -1575,9 +1565,7 @@ void OsuModSelector::onCheckboxChange(CBaseUICheckbox *checkbox) {
 
             // force mod update
             {
-                if(m_osu->isInPlayMode() && m_osu->getSelectedBeatmap() != NULL)
-                    m_osu->getSelectedBeatmap()->onModUpdate();
-
+                if(m_osu->isInPlayMode()) m_osu->getSelectedBeatmap()->onModUpdate();
                 m_osu->getSongBrowser()->recalculateStarsForSelectedBeatmap(true);
             }
 

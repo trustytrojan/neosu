@@ -666,8 +666,7 @@ bool SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
 
     unsigned long prevMusicPositionMS = 0;
     if(bancho.osu != nullptr) {
-        if(!bancho.osu->isInPlayMode() && bancho.osu->getSelectedBeatmap() != NULL &&
-           bancho.osu->getSelectedBeatmap()->getMusic() != NULL)
+        if(!bancho.osu->isInPlayMode() && bancho.osu->getSelectedBeatmap()->getMusic() != NULL)
             prevMusicPositionMS = bancho.osu->getSelectedBeatmap()->getMusic()->getPositionMS();
     }
 
@@ -683,8 +682,7 @@ bool SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
         bancho.osu->m_optionsMenu->onOutputDeviceResetUpdate();
 
         // start playing music again after audio device changed
-        if(!bancho.osu->isInPlayMode() && bancho.osu->getSelectedBeatmap() != NULL &&
-           bancho.osu->getSelectedBeatmap()->getMusic() != NULL) {
+        if(!bancho.osu->isInPlayMode() && bancho.osu->getSelectedBeatmap()->getMusic() != NULL) {
             bancho.osu->getSelectedBeatmap()->unloadMusic();
             bancho.osu->getSelectedBeatmap()->select();  // (triggers preview music play)
             bancho.osu->getSelectedBeatmap()->getMusic()->setPositionMS(prevMusicPositionMS);

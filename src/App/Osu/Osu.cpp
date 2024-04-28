@@ -303,7 +303,6 @@ Osu::Osu(int instanceID) {
 
     // vars
     m_skin = NULL;
-    m_songBrowser2 = NULL;
     m_backgroundImageHandler = NULL;
     m_modSelector = NULL;
     m_updateHandler = NULL;
@@ -410,9 +409,6 @@ Osu::Osu(int instanceID) {
     osu_skin_reload.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSkinReload));
     onSkinChange("", osu_skin.getString());
 
-    // update mod settings
-    updateMods();
-
     // load global resources
     const int baseDPI = 96;
     const int newDPI = Osu::getUIScale(this) * baseDPI;
@@ -429,7 +425,6 @@ Osu::Osu(int instanceID) {
         engine->getResourceManager()->loadFont("SourceSansPro-Bold.otf", "FONT_OSU_SONGBROWSER_BOLD", 30, true, newDPI);
     m_fontIcons = engine->getResourceManager()->loadFont("fontawesome-webfont.ttf", "FONT_OSU_ICONS", OsuIcons::icons,
                                                          26, true, newDPI);
-
     m_fonts.push_back(defaultFont);
     m_fonts.push_back(m_titleFont);
     m_fonts.push_back(m_subTitleFont);
@@ -465,11 +460,11 @@ Osu::Osu(int instanceID) {
     }
 
     // load subsystems, add them to the screens array
+    m_songBrowser2 = new OsuSongBrowser(this);
     m_volumeOverlay = new OsuVolumeOverlay(this);
     m_tooltipOverlay = new OsuTooltipOverlay(this);
     m_mainMenu = new OsuMainMenu(this);
     m_optionsMenu = new OsuOptionsMenu(this);
-    m_songBrowser2 = new OsuSongBrowser(this);
     m_backgroundImageHandler = new OsuBackgroundImageHandler();
     m_modSelector = new OsuModSelector(this);
     m_rankingScreen = new OsuRankingScreen(this);
@@ -504,6 +499,9 @@ Osu::Osu(int instanceID) {
     m_screens.push_back(m_editor);
     m_screens.push_back(m_mainMenu);
     m_screens.push_back(m_tooltipOverlay);
+
+    // update mod settings
+    updateMods();
 
     // Init online functionality (multiplayer/leaderboards/etc)
     bancho.osu = this;
@@ -1045,7 +1043,7 @@ void Osu::update() {
 }
 
 void Osu::updateMods() {
-    if(getSelectedBeatmap() != nullptr && getSelectedBeatmap()->m_bIsWatchingReplay) {
+    if(getSelectedBeatmap()->m_bIsWatchingReplay) {
         // XXX: clear experimental mods
         m_bModNC = replay_info.mod_flags & ModFlags::Nightcore;
         m_bModDT = replay_info.mod_flags & ModFlags::DoubleTime && !m_bModNC;
@@ -1161,10 +1159,8 @@ void Osu::updateMods() {
 
     // notify the possibly running beatmap of mod changes, for e.g. recalculating stacks dynamically if HR is toggled
     {
-        if(getSelectedBeatmap() != NULL) {
-            getSelectedBeatmap()->onModUpdate();
-            getSelectedBeatmap()->vanilla = false;  // user just cheated, prevent score submission
-        }
+        getSelectedBeatmap()->onModUpdate();
+        getSelectedBeatmap()->vanilla = false;  // user just cheated, prevent score submission
 
         if(m_songBrowser2 != NULL) m_songBrowser2->recalculateStarsForSelectedBeatmap(true);
     }
@@ -1230,10 +1226,8 @@ void Osu::onKeyDown(KeyboardEvent &key) {
     // boss key (minimize + mute)
     if(key == (KEYCODE)OsuKeyBindings::BOSS_KEY.getInt()) {
         engine->getEnvironment()->minimize();
-        if(getSelectedBeatmap() != NULL) {
-            m_bWasBossKeyPaused = getSelectedBeatmap()->isPreviewMusicPlaying();
-            getSelectedBeatmap()->pausePreviewMusic(false);
-        }
+        m_bWasBossKeyPaused = getSelectedBeatmap()->isPreviewMusicPlaying();
+        getSelectedBeatmap()->pausePreviewMusic(false);
     }
 
     // local hotkeys (and gameplay keys)
@@ -1608,42 +1602,7 @@ void Osu::saveScreenshot() {
                        screenshot_path);
 }
 
-void Osu::onBeforePlayStart() {
-    debugLog("Osu::onBeforePlayStart()\n");
-
-    engine->getSound()->play(m_skin->getMenuHit());
-
-    updateMods();
-
-    // mp hack
-    {
-        m_mainMenu->setVisible(false);
-        m_modSelector->setVisible(false);
-        m_optionsMenu->setVisible(false);
-        m_pauseMenu->setVisible(false);
-    }
-
-    // HACKHACK: stuck key quickfix
-    {
-        m_bKeyboardKey1Down = false;
-        m_bKeyboardKey12Down = false;
-        m_bKeyboardKey2Down = false;
-        m_bKeyboardKey22Down = false;
-        m_bMouseKey1Down = false;
-        m_bMouseKey2Down = false;
-
-        if(getSelectedBeatmap() != NULL) {
-            getSelectedBeatmap()->keyReleased1(false);
-            getSelectedBeatmap()->keyReleased1(true);
-            getSelectedBeatmap()->keyReleased2(false);
-            getSelectedBeatmap()->keyReleased2(true);
-        }
-    }
-}
-
 void Osu::onPlayStart() {
-    debugLog("Osu::onPlayStart()\n");
-
     m_snd_change_check_interval_ref->setValue(0.0f);
 
     if(m_bModAuto || m_bModAutopilot || getSelectedBeatmap()->m_bIsWatchingReplay) {
@@ -1666,8 +1625,6 @@ void Osu::onPlayStart() {
 }
 
 void Osu::onPlayEnd(bool quit, bool aborted) {
-    debugLog("Osu::onPlayEnd()\n");
-
     m_snd_change_check_interval_ref->setValue(m_snd_change_check_interval_ref->getDefaultFloat());
 
     if(!quit) {
@@ -1791,9 +1748,7 @@ float Osu::getAnimationSpeedMultiplier() {
 
 bool Osu::isInPlayMode() { return (m_songBrowser2 != NULL && m_songBrowser2->hasSelectedAndIsPlaying()); }
 
-bool Osu::isNotInPlayModeOrPaused() {
-    return !isInPlayMode() || (getSelectedBeatmap() != NULL && getSelectedBeatmap()->isPaused());
-}
+bool Osu::isNotInPlayModeOrPaused() { return !isInPlayMode() || getSelectedBeatmap()->isPaused(); }
 
 bool Osu::shouldFallBackToLegacySliderRenderer() {
     return osu_force_legacy_slider_renderer.getBool() || m_osu_mod_wobble_ref->getBool() ||
@@ -1939,7 +1894,7 @@ void Osu::updateWindowsKeyDisable() {
 
     if(osu_win_disable_windows_key_while_playing.getBool()) {
         const bool isPlayerPlaying =
-            engine->hasFocus() && isInPlayMode() && getSelectedBeatmap() != NULL &&
+            engine->hasFocus() && isInPlayMode() &&
             (!getSelectedBeatmap()->isPaused() || getSelectedBeatmap()->isRestartScheduled()) && !m_bModAuto;
         m_win_disable_windows_key_ref->setValue(isPlayerPlaying ? 1.0f : 0.0f);
     }
@@ -2005,7 +1960,7 @@ void Osu::onFocusGained() {
 
     if(m_bWasBossKeyPaused) {
         m_bWasBossKeyPaused = false;
-        if(getSelectedBeatmap() != NULL) getSelectedBeatmap()->pausePreviewMusic();
+        getSelectedBeatmap()->pausePreviewMusic();
     }
 
     updateWindowsKeyDisable();
@@ -2034,8 +1989,7 @@ bool Osu::onShutdown() {
     debugLog("Osu::onShutdown()\n");
 
     if(!osu_alt_f4_quits_even_while_playing.getBool() && isInPlayMode()) {
-        if(getSelectedBeatmap() != NULL) getSelectedBeatmap()->stop();
-
+        getSelectedBeatmap()->stop();
         return false;
     }
 
@@ -2076,7 +2030,7 @@ void Osu::onSkinChange(UString oldValue, UString newValue) {
 }
 
 void Osu::updateAnimationSpeed() {
-    if(getSkin() != NULL && getSelectedBeatmap() != NULL) {
+    if(getSkin() != NULL) {
         float speed = getAnimationSpeedMultiplier() / getSpeedMultiplier();
         getSkin()->setAnimationSpeed(speed >= 0.0f ? speed : 0.0f);
     }
@@ -2086,10 +2040,8 @@ void Osu::onAnimationSpeedChange(UString oldValue, UString newValue) { updateAni
 
 void Osu::onSpeedChange(UString oldValue, UString newValue) {
     float speed = newValue.toFloat();
-    if(getSelectedBeatmap() != NULL) {
-        getSelectedBeatmap()->setSpeed(speed >= 0.0f ? speed : getSpeedMultiplier());
-        updateAnimationSpeed();
-    }
+    getSelectedBeatmap()->setSpeed(speed >= 0.0f ? speed : getSpeedMultiplier());
+    updateAnimationSpeed();
 
     if(m_modSelector != nullptr) {
         int btn_state = (getModNC() || getModDC() || bancho.prefer_daycore) ? 1 : 0;
@@ -2124,9 +2076,7 @@ void Osu::onSpeedChange(UString oldValue, UString newValue) {
     }
 }
 
-void Osu::onPlayfieldChange(UString oldValue, UString newValue) {
-    if(getSelectedBeatmap() != NULL) getSelectedBeatmap()->onModUpdate();
-}
+void Osu::onPlayfieldChange(UString oldValue, UString newValue) { getSelectedBeatmap()->onModUpdate(); }
 
 void Osu::onUIScaleChange(UString oldValue, UString newValue) {
     const float oldVal = oldValue.toFloat();

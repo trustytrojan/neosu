@@ -599,7 +599,7 @@ OsuSongBrowser::OsuSongBrowser(Osu *osu) : OsuScreenBackable(osu) {
 
     // behaviour
     m_bHasSelectedAndIsPlaying = false;
-    m_selectedBeatmap = NULL;
+    m_selectedBeatmap = new OsuBeatmap(m_osu);
     m_fPulseAnimation = 0.0f;
     m_fBackgroundFadeInTime = 0.0f;
 
@@ -669,8 +669,7 @@ void OsuSongBrowser::draw(Graphics *g) {
         float alpha = 1.0f;
         if(osu_songbrowser_background_fade_in_duration.getFloat() > 0.0f) {
             // handle fadein trigger after handler is finished loading
-            const bool ready = m_osu->getSelectedBeatmap() != NULL &&
-                               m_osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL &&
+            const bool ready = m_osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL &&
                                m_osu->getBackgroundImageHandler()->getLoadBackgroundImage(
                                    m_osu->getSelectedBeatmap()->getSelectedDifficulty2()) != NULL &&
                                m_osu->getBackgroundImageHandler()
@@ -710,8 +709,8 @@ void OsuSongBrowser::draw(Graphics *g) {
     m_scoreBrowser->draw(g);
 
     // draw strain graph of currently selected beatmap
-    if(osu_draw_songbrowser_strain_graph.getBool() && getSelectedBeatmap() != NULL &&
-       getSelectedBeatmap()->getSelectedDifficulty2() != NULL && m_dynamicStarCalculator->isAsyncReady()) {
+    if(osu_draw_songbrowser_strain_graph.getBool() && getSelectedBeatmap()->getSelectedDifficulty2() != NULL &&
+       m_dynamicStarCalculator->isAsyncReady()) {
         // this is still WIP
 
         /// const std::vector<double> &aimStrains = getSelectedBeatmap()->getAimStrains();
@@ -952,7 +951,7 @@ void OsuSongBrowser::draw(Graphics *g) {
 }
 
 void OsuSongBrowser::drawSelectedBeatmapBackgroundImage(Graphics *g, Osu *osu, float alpha) {
-    if(osu->getSelectedBeatmap() != NULL && osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL) {
+    if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL) {
         Image *backgroundImage = osu->getBackgroundImageHandler()->getLoadBackgroundImage(
             osu->getSelectedBeatmap()->getSelectedDifficulty2());
         if(backgroundImage != NULL && backgroundImage->isReady()) {
@@ -1623,25 +1622,15 @@ void OsuSongBrowser::onSelectionChange(OsuUISongBrowserButton *button, bool rebu
 }
 
 void OsuSongBrowser::onDifficultySelected(OsuDatabaseBeatmap *diff2, bool play) {
-    // legacy logic (deselect = unload)
-    const bool wasSelectedBeatmapNULL = (m_selectedBeatmap == NULL);
-    if(m_selectedBeatmap != NULL) m_selectedBeatmap->deselect();
-
-    // create/recreate/cache runtime beatmap object
-    if(m_selectedBeatmap == NULL) {
-        m_selectedBeatmap = new OsuBeatmap(m_osu);
+    // deselect = unload
+    auto prev_diff2 = m_selectedBeatmap->getSelectedDifficulty2();
+    m_selectedBeatmap->deselect();
+    if(diff2 != prev_diff2 && !diff2->do_not_store) {
+        m_previousRandomBeatmaps.push_back(diff2);
     }
 
-    // remember it
-    if(diff2 != m_selectedBeatmap->getSelectedDifficulty2()) m_previousRandomBeatmaps.push_back(diff2);
-
-    // select diff on runtime beatmap object
+    // select = play preview music
     m_selectedBeatmap->selectDifficulty2(diff2);
-    if(wasSelectedBeatmapNULL) {
-        // force update music through songbrowser refreshes (db reloads)
-        m_selectedBeatmap->deselect();
-        m_selectedBeatmap->select();
-    }
 
     // update song info
     m_songInfo->setFromBeatmap(m_selectedBeatmap, diff2);
@@ -1666,7 +1655,6 @@ void OsuSongBrowser::onDifficultySelected(OsuDatabaseBeatmap *diff2, bool play) 
             // CTRL + click = auto
             if(engine->getKeyboard()->isControlDown()) m_osu->getModSelector()->enableAuto();
 
-            m_osu->onBeforePlayStart();
             if(m_selectedBeatmap->play()) {
                 m_bHasSelectedAndIsPlaying = true;
                 setVisible(false);
@@ -1698,7 +1686,9 @@ void OsuSongBrowser::refreshBeatmaps() {
     checkHandleKillDynamicStarCalculator(false);
     checkHandleKillBackgroundSearchMatcher();
 
-    m_selectedBeatmap = NULL;
+    m_selectedBeatmap->pausePreviewMusic();
+    m_selectedBeatmap->deselect();
+    m_selectedBeatmap = new OsuBeatmap(m_osu);
 
     m_selectionPreviousSongButton = NULL;
     m_selectionPreviousSongDiffButton = NULL;
@@ -4017,7 +4007,7 @@ void OsuSongBrowser::highlightScore(uint64_t unixTimestamp) {
 
 void OsuSongBrowser::recalculateStarsForSelectedBeatmap(bool force) {
     if(!osu_songbrowser_dynamic_star_recalc.getBool()) return;
-    if(m_selectedBeatmap == NULL || m_selectedBeatmap->getSelectedDifficulty2() == NULL) return;
+    if(m_selectedBeatmap->getSelectedDifficulty2() == NULL) return;
 
     // HACKHACK: temporarily deactivated, see OsuSongBrowser::update(), but only if drawing scrubbing timeline strain
     // graph is enabled (or "Draw Stats: Stars* (Total)", or "Draw Stats: pp (SS)")

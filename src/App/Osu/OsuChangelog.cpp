@@ -37,10 +37,12 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu) {
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
     latest.changes.push_back("- Renamed 'McOsu Multiplayer' to 'neosu'");
+    latest.changes.push_back("- Added server logo to main menu button");
     latest.changes.push_back("- Changed default instant replay key to F2 to avoid conflicts with mod selector");
+    latest.changes.push_back("- Fixed chat layout updating while chat was hidden");
+    latest.changes.push_back("- Fixed pause button not working after cancelling database load");
     latest.changes.push_back("- Fixed level bar always being at 0%");
     latest.changes.push_back("- Disabled score submission when mods are toggled mid-game");
-    latest.changes.push_back("- Misc UI improvements");
     changelogs.push_back(latest);
 
     CHANGELOG v34_10;

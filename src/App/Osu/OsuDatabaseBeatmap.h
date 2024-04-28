@@ -192,6 +192,8 @@ class OsuDatabaseBeatmap {
     inline long getLocalOffset() const { return m_iLocalOffset; }
     inline long getOnlineOffset() const { return m_iOnlineOffset; }
 
+    bool do_not_store = false;
+
    private:
     // raw metadata
 
