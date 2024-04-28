@@ -49,7 +49,7 @@ ConVar osu_database_enabled("osu_database_enabled", true, FCVAR_NONE);
 ConVar osu_database_version("osu_database_version", OSU_VERSION_DATEONLY, FCVAR_NONE,
                             "maximum supported osu!.db version, above this will use fallback loader");
 ConVar osu_database_ignore_version_warnings("osu_database_ignore_version_warnings", false, FCVAR_NONE);
-ConVar osu_database_ignore_version("osu_database_ignore_version", false, FCVAR_NONE,
+ConVar osu_database_ignore_version("osu_database_ignore_version", true, FCVAR_NONE,
                                    "ignore upper version limit and force load the db file (may crash)");
 ConVar osu_database_stars_cache_enabled("osu_database_stars_cache_enabled", false, FCVAR_NONE);
 ConVar osu_scores_enabled("osu_scores_enabled", true, FCVAR_NONE);

@@ -14,8 +14,8 @@
 #define NEOSU_UPDATE_URL "https://neosu.kiwec.net"
 
 // NOTE: Full version can be something like "b20200201.2cuttingedge"
-#define OSU_VERSION "b20240411.1"
-#define OSU_VERSION_DATEONLY 20240411
+#define OSU_VERSION "b20240425.2"
+#define OSU_VERSION_DATEONLY 20240425
 
 enum APIRequestType {
     GET_BEATMAPSET_INFO,

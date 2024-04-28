@@ -52,6 +52,7 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu) {
     latest.changes.push_back("- Fixed restarting SoundEngine not kicking the player out of play mode");
     latest.changes.push_back("- Fixed ALT key not working on linux");
     latest.changes.push_back("- Disabled score submission when mods are toggled mid-game");
+    latest.changes.push_back("- Updated protocol version");
     changelogs.push_back(latest);
 
     CHANGELOG v34_10;
