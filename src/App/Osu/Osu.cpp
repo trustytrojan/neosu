@@ -144,6 +144,7 @@ ConVar start_first_main_menu_song_at_preview_point("start_first_main_menu_song_a
 ConVar nightcore_enjoyer("nightcore_enjoyer", false, FCVAR_NONE, "automatically select nightcore when speed modifying");
 ConVar scoreboard_animations("scoreboard_animations", true, FCVAR_NONE, "animate in-game scoreboard");
 ConVar instant_replay_duration("instant_replay_duration", 15.f, FCVAR_NONE, "instant replay (F2) duration, in seconds");
+ConVar normalize_loudness("normalize_loudness", false, FCVAR_NONE, "normalize loudness across songs");
 
 ConVar mp_server("mp_server", "ez-pp.farm", FCVAR_NONE);
 ConVar mp_password("mp_password", "", FCVAR_NONE);

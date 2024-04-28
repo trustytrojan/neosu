@@ -129,7 +129,7 @@ class OsuBeatmap {
     // music/sound
     void loadMusic(bool stream = true, bool prescan = false);
     void unloadMusic();
-    void setVolume(float volume);
+    float getIdealVolume();
     void setSpeed(float speed);
     void seekPercent(double percent);
     void seekPercentPlayable(double percent);

@@ -167,9 +167,9 @@ class OsuDatabaseBeatmap {
 
     inline const std::vector<TIMINGPOINT> &getTimingpoints() const { return m_timingpoints; }
 
-    // redundant data
+    std::string getFullSoundFilePath();
 
-    inline const std::string &getFullSoundFilePath() const { return m_sFullSoundFilePath; }
+    // redundant data
     inline const std::string &getFullBackgroundImageFilePath() const { return m_sFullBackgroundImageFilePath; }
 
     // precomputed data

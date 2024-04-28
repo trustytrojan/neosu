@@ -167,6 +167,7 @@ class OsuOptionsMenu : public OsuScreenBackable, public OsuNotificationOverlayKe
     void onASIOBufferChange(CBaseUISlider *slider);
     void onWASAPIBufferChange(CBaseUISlider *slider);
     void onWASAPIPeriodChange(CBaseUISlider *slider);
+    void onLoudnessNormalizationToggle(CBaseUICheckbox *checkbox);
 
     void onUseSkinsSoundSamplesChange(UString oldValue, UString newValue);
     void onHighQualitySlidersCheckboxChange(CBaseUICheckbox *checkbox);

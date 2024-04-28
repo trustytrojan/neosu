@@ -793,6 +793,10 @@ OsuOptionsMenu::OsuOptionsMenu(Osu *osu) : OsuScreenBackable(osu) {
     }
 
     addSubSection("Volume");
+
+    addCheckbox("Normalize loudness across songs", convar->getConVarByName("normalize_loudness"))
+        ->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onLoudnessNormalizationToggle));
+
     CBaseUISlider *masterVolumeSlider =
         addSlider("Master:", 0.0f, 1.0f, convar->getConVarByName("osu_volume_master"), 70.0f);
     masterVolumeSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OsuOptionsMenu::onSliderChangePercent));
@@ -3125,6 +3129,15 @@ void OsuOptionsMenu::onWASAPIPeriodChange(CBaseUISlider *slider) {
                 break;
             }
         }
+    }
+}
+
+void OsuOptionsMenu::onLoudnessNormalizationToggle(CBaseUICheckbox *checkbox) {
+    onCheckboxChange(checkbox);
+
+    auto music = m_osu->getSelectedBeatmap()->getMusic();
+    if(music != nullptr) {
+        music->setVolume(m_osu->getSelectedBeatmap()->getIdealVolume());
     }
 }
 

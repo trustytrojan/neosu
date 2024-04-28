@@ -37,6 +37,7 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu) {
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
     latest.changes.push_back("- Renamed 'McOsu Multiplayer' to 'neosu'");
+    latest.changes.push_back("- Added option to normalize loudness across songs");
     latest.changes.push_back("- Added server logo to main menu button");
     latest.changes.push_back("- Added instant_replay_duration convar");
     latest.changes.push_back("- Allowed singleplayer cheats when the server doesn't accept score submissions");

@@ -127,6 +127,15 @@ SoundEngine::SoundEngine() {
         return;
     }
 
+    auto loud_version = BASS_Loudness_GetVersion();
+    debugLog("SoundEngine: BASSloud version = 0x%08x\n", loud_version);
+    if(HIWORD(loud_version) != BASSVERSION) {
+        engine->showMessageErrorFatal("Fatal Sound Error",
+                                      "An incorrect version of the BASSloud library file was loaded!");
+        engine->shutdown();
+        return;
+    }
+
 #ifdef _WIN32
     auto asio_version = BASS_ASIO_GetVersion();
     debugLog("SoundEngine: BASSASIO version = 0x%08x\n", asio_version);
@@ -148,7 +157,6 @@ SoundEngine::SoundEngine() {
 #endif
 
     BASS_SetConfig(BASS_CONFIG_BUFFER, 100);
-    BASS_SetConfig(BASS_CONFIG_NET_BUFFER, 500);
 
     // all beatmaps timed to non-iTunesSMPB + 529 sample deletion offsets on old dlls pre 2015
     BASS_SetConfig(BASS_CONFIG_MP3_OLDGAPS, 1);
@@ -325,6 +333,10 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
     debugLog("SoundEngine: initializeOutputDevice( %s ) ...\n", device.name.toUtf8());
 
     if(m_currentOutputDevice.driver == OutputDriver::BASS) {
+        BASS_SetDevice(0);
+        BASS_Free();
+        BASS_SetDevice(m_currentOutputDevice.id);
+
         BASS_Free();
     } else if(m_currentOutputDevice.driver == OutputDriver::BASS_ASIO) {
 #ifdef _WIN32
@@ -376,16 +388,6 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
             BASS_SetConfig(BASS_CONFIG_DEV_PERIOD, snd_dev_period.getInt());
     }
 
-    // ASIO and WASAPI: Initialize BASS on "No sound" device
-    int bass_device_id = device.id;
-    unsigned int runtimeFlags = BASS_DEVICE_STEREO | BASS_DEVICE_FREQ;
-    if(device.driver == OutputDriver::BASS) {
-        runtimeFlags |= BASS_DEVICE_DSOUND;
-    } else if(device.driver == OutputDriver::BASS_ASIO || device.driver == OutputDriver::BASS_WASAPI) {
-        runtimeFlags |= BASS_DEVICE_NOSPEAKER;
-        bass_device_id = 0;
-    }
-
     const int freq = snd_freq.getInt();
     HWND hwnd = NULL;
 #ifdef _WIN32
@@ -393,9 +395,25 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
     hwnd = winEnv->getHwnd();
 #endif
 
+    int bass_device_id = device.id;
+    unsigned int runtimeFlags = BASS_DEVICE_STEREO | BASS_DEVICE_FREQ;
+    if(device.driver == OutputDriver::BASS) {
+        // Regular BASS: we still want a "No sound" device to check for loudness
+        if(!BASS_Init(0, freq, runtimeFlags | BASS_DEVICE_NOSPEAKER, hwnd, NULL)) {
+            m_bReady = false;
+            engine->showMessageError("Sound Error", UString::format("BASS_Init(0) failed (%i)!", BASS_ErrorGetCode()));
+            return false;
+        }
+    } else if(device.driver == OutputDriver::BASS_ASIO || device.driver == OutputDriver::BASS_WASAPI) {
+        // ASIO and WASAPI: Initialize BASS on "No sound" device
+        runtimeFlags |= BASS_DEVICE_NOSPEAKER;
+        bass_device_id = 0;
+    }
+
     if(!BASS_Init(bass_device_id, freq, runtimeFlags, hwnd, NULL)) {
         m_bReady = false;
-        engine->showMessageError("Sound Error", UString::format("BASS_Init() failed (%i)!", BASS_ErrorGetCode()));
+        engine->showMessageError("Sound Error",
+                                 UString::format("BASS_Init(%d) failed (%i)!", bass_device_id, BASS_ErrorGetCode()));
         return false;
     }
 

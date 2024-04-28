@@ -1888,3 +1888,52 @@ void OsuDatabaseBeatmapStarCalculator::setBeatmapDifficulty(OsuDatabaseBeatmap *
     m_bRelax = relax;
     m_bTouchDevice = touchDevice;
 }
+
+std::string OsuDatabaseBeatmap::getFullSoundFilePath() {
+    // On linux, paths are case sensitive, so we retry different variations
+    if(env->getOS() != Environment::OS::OS_LINUX || env->fileExists(m_sFullSoundFilePath)) {
+        return m_sFullSoundFilePath;
+    }
+
+    // try uppercasing file extension
+    for(int s = m_sFullSoundFilePath.size(); s >= 0; s--) {
+        if(m_sFullSoundFilePath[s] == '.') {
+            for(int i = s + 1; i < m_sFullSoundFilePath.size(); i++) {
+                m_sFullSoundFilePath[i] = std::toupper(m_sFullSoundFilePath[i]);
+            }
+            break;
+        }
+    }
+    if(env->fileExists(m_sFullSoundFilePath)) {
+        return m_sFullSoundFilePath;
+    }
+
+    // try lowercasing filename, uppercasing file extension
+    bool foundFilenameStart = false;
+    for(int s = m_sFullSoundFilePath.size(); s >= 0; s--) {
+        if(foundFilenameStart) {
+            if(m_sFullSoundFilePath[s] == '/') break;
+            m_sFullSoundFilePath[s] = std::tolower(m_sFullSoundFilePath[s]);
+        }
+        if(m_sFullSoundFilePath[s] == '.') {
+            foundFilenameStart = true;
+        }
+    }
+    if(env->fileExists(m_sFullSoundFilePath)) {
+        return m_sFullSoundFilePath;
+    }
+
+    // try lowercasing everything
+    for(int s = m_sFullSoundFilePath.size(); s >= 0; s--) {
+        if(m_sFullSoundFilePath[s] == '/') {
+            break;
+        }
+        m_sFullSoundFilePath[s] = std::tolower(m_sFullSoundFilePath[s]);
+    }
+    if(env->fileExists(m_sFullSoundFilePath)) {
+        return m_sFullSoundFilePath;
+    }
+
+    // give up
+    return m_sFullSoundFilePath;
+}

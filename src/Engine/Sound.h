@@ -4,6 +4,7 @@
 #include <bass.h>
 #include <bass_fx.h>
 #include <bassasio.h>
+#include <bassloud.h>
 #include <bassmix.h>
 #include <basswasapi.h>
 

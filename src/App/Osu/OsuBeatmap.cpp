@@ -1111,8 +1111,74 @@ void OsuBeatmap::cancelFailing() {
     if(getSkin()->getFailsound()->isPlaying()) engine->getSound()->stop(getSkin()->getFailsound());
 }
 
-void OsuBeatmap::setVolume(float volume) {
-    if(m_music != NULL) m_music->setVolume(volume);
+float OsuBeatmap::getIdealVolume() {
+    if(m_music == nullptr) return 1.f;
+
+    float volume = m_osu_volume_music_ref->getFloat();
+    if(!convar->getConVarByName("normalize_loudness")->getBool()) {
+        return volume;
+    }
+
+    static std::string last_song = "";
+    static float modifier = 1.f;
+
+    if(m_selectedDifficulty2->getFullSoundFilePath() == last_song) {
+        // We already did the calculation
+        return volume * modifier;
+    }
+
+    auto device_id = BASS_GetDevice();
+    BASS_SetDevice(0);
+
+    auto decoder = BASS_StreamCreateFile(false, m_selectedDifficulty2->getFullSoundFilePath().c_str(), 0, 0,
+                                         BASS_STREAM_DECODE | BASS_SAMPLE_FLOAT);
+    if(!decoder) {
+        debugLog("BASS_StreamCreateFile() returned error %d on file %s\n", BASS_ErrorGetCode(),
+                 m_selectedDifficulty2->getFullSoundFilePath().c_str());
+        BASS_SetDevice(device_id);
+        return volume;
+    }
+
+    float preview_point = m_selectedDifficulty2->getPreviewTime();
+    if(preview_point < 0) preview_point = 0;
+    const QWORD position = BASS_ChannelSeconds2Bytes(decoder, preview_point / 1000.0);
+    if(!BASS_ChannelSetPosition(decoder, position, BASS_POS_BYTE)) {
+        debugLog("BASS_ChannelSetPosition() returned error %d\n", BASS_ErrorGetCode());
+        BASS_ChannelFree(decoder);
+        BASS_SetDevice(device_id);
+        return volume;
+    }
+
+    auto loudness = BASS_Loudness_Start(decoder, MAKELONG(BASS_LOUDNESS_INTEGRATED, 3000), 0);
+    if(!loudness) {
+        debugLog("BASS_Loudness_Start() returned error %d\n", BASS_ErrorGetCode());
+        BASS_ChannelFree(decoder);
+        BASS_SetDevice(device_id);
+        return volume;
+    }
+
+    // Process 4 seconds of audio, should be enough for the loudness measurement
+    float buf[44100 * 4];
+    BASS_ChannelGetData(decoder, buf, sizeof(buf));
+
+    float level = -13.f;
+    BASS_Loudness_GetLevel(loudness, BASS_LOUDNESS_INTEGRATED, &level);
+    if(level == -HUGE_VAL) {
+        debugLog("No loudness information available (silent song?)\n");
+    }
+
+    BASS_Loudness_Stop(loudness);
+    BASS_ChannelFree(decoder);
+    BASS_SetDevice(device_id);
+
+    last_song = m_selectedDifficulty2->getFullSoundFilePath();
+    modifier = (level / -16.f);
+
+    if(Osu::debug->getBool()) {
+        debugLog("Volume set to %.2fx for this song\n", modifier);
+    }
+
+    return volume * modifier;
 }
 
 void OsuBeatmap::setSpeed(float speed) {
@@ -1126,7 +1192,7 @@ void OsuBeatmap::seekPercent(double percent) {
     m_fWaitTime = 0.0f;
 
     m_music->setPosition(percent);
-    m_music->setVolume(m_osu_volume_music_ref->getFloat());
+    m_music->setVolume(getIdealVolume());
     m_music->setSpeed(m_osu->getSpeedMultiplier());
 
     resetHitObjects(m_music->getPositionMS());
@@ -1628,7 +1694,7 @@ void OsuBeatmap::handlePreviewPlay() {
                                            : m_selectedDifficulty2->getPreviewTime());
             }
 
-            m_music->setVolume(m_osu_volume_music_ref->getFloat());
+            m_music->setVolume(getIdealVolume());
             m_music->setSpeed(m_osu->getSpeedMultiplier());
         }
     }
@@ -1659,7 +1725,7 @@ void OsuBeatmap::loadMusic(bool stream, bool prescan) {
             m_selectedDifficulty2->getFullSoundFilePath(), "OSU_BEATMAP_MUSIC", stream, false, false, false,
             m_bForceStreamPlayback &&
                 prescan);  // m_bForceStreamPlayback = prescan necessary! otherwise big mp3s will go out of sync
-        m_music->setVolume(m_osu_volume_music_ref->getFloat());
+        m_music->setVolume(getIdealVolume());
         m_fMusicFrequencyBackup = m_music->getFrequency();
         m_music->setSpeed(m_osu->getSpeedMultiplier());
     }
@@ -2394,7 +2460,7 @@ void OsuBeatmap::update2() {
 
                     engine->getSound()->play(m_music);
                     m_music->setPositionMS(0);
-                    m_music->setVolume(m_osu_volume_music_ref->getFloat());
+                    m_music->setVolume(getIdealVolume());
                     m_music->setSpeed(m_osu->getSpeedMultiplier());
 
                     // if we are quick restarting, jump just before the first hitobject (even if there is a long waiting

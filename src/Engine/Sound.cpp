@@ -235,7 +235,7 @@ void Sound::setPositionMS(unsigned long ms) {
 void Sound::setVolume(float volume) {
     if(!m_bReady) return;
 
-    m_fVolume = clamp<float>(volume, 0.0f, 1.0f);
+    m_fVolume = clamp<float>(volume, 0.0f, 2.0f);
 
     for(auto channel : getActiveChannels()) {
         BASS_ChannelSetAttribute(channel, BASS_ATTRIB_VOL, m_fVolume);
