@@ -1161,7 +1161,10 @@ void Osu::updateMods() {
 
     // notify the possibly running beatmap of mod changes, for e.g. recalculating stacks dynamically if HR is toggled
     {
-        if(getSelectedBeatmap() != NULL) getSelectedBeatmap()->onModUpdate();
+        if(getSelectedBeatmap() != NULL) {
+            getSelectedBeatmap()->onModUpdate();
+            getSelectedBeatmap()->vanilla = false;  // user just cheated, prevent score submission
+        }
 
         if(m_songBrowser2 != NULL) m_songBrowser2->recalculateStarsForSelectedBeatmap(true);
     }
