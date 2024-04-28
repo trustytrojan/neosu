@@ -37,6 +37,7 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu) {
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
     latest.changes.push_back("- Renamed 'McOsu Multiplayer' to 'neosu'");
+    latest.changes.push_back("- Changed default instant replay key to F2 to avoid conflicts with mod selector");
     latest.changes.push_back("- Disabled score submission when mods are toggled mid-game");
     changelogs.push_back(latest);
 

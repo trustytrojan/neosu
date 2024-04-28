@@ -31,7 +31,7 @@ ConVar OsuKeyBindings::SEEK_TIME_FORWARD("osu_key_seek_time_forward", (int)KEY_R
 ConVar OsuKeyBindings::QUICK_RETRY("osu_key_quick_retry", (int)KEY_BACKSPACE, FCVAR_NONE);
 ConVar OsuKeyBindings::QUICK_SAVE("osu_key_quick_save", (int)KEY_F6, FCVAR_NONE);
 ConVar OsuKeyBindings::QUICK_LOAD("osu_key_quick_load", (int)KEY_F7, FCVAR_NONE);
-ConVar OsuKeyBindings::INSTANT_REPLAY("osu_key_instant_replay", (int)KEY_F1, FCVAR_NONE);
+ConVar OsuKeyBindings::INSTANT_REPLAY("osu_key_instant_replay", (int)KEY_F2, FCVAR_NONE);
 ConVar OsuKeyBindings::TOGGLE_CHAT("osu_key_toggle_chat", (int)KEY_F8, FCVAR_NONE);
 ConVar OsuKeyBindings::SAVE_SCREENSHOT("osu_key_save_screenshot", (int)KEY_F12, FCVAR_NONE);
 ConVar OsuKeyBindings::DISABLE_MOUSE_BUTTONS("osu_key_disable_mouse_buttons", (int)KEY_F10, FCVAR_NONE);
