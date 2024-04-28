@@ -73,6 +73,7 @@ class OsuChat : public OsuScreen {
     float m_fAnimation = 0.f;
     bool user_wants_chat = false;
     bool visibility_was_forced = false;
+    bool layout_update_scheduled = false;
 
     const float input_box_height = 30.f;
     const float button_height = 26.f;

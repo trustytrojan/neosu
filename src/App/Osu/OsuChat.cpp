@@ -428,6 +428,12 @@ void OsuChat::removeChannel(UString channel_name) {
 }
 
 void OsuChat::updateLayout(Vector2 newResolution) {
+    // We don't want to update while the chat is hidden, to avoid lagspikes during gameplay
+    if(!m_bVisible) {
+        layout_update_scheduled = true;
+        return;
+    }
+
     // In the lobby and in multi rooms (e.g. when visibility is forced), don't
     // take the full horizontal width to allow for cleaner UI designs.
     if(isVisibilityForced()) {
@@ -453,6 +459,7 @@ void OsuChat::updateLayout(Vector2 newResolution) {
 
     updateButtonLayout(newResolution);
     updateButtonLayout(newResolution);  // idk
+    layout_update_scheduled = false;
 }
 
 void OsuChat::updateButtonLayout(Vector2 screen) {
@@ -608,6 +615,10 @@ CBaseUIContainer *OsuChat::setVisible(bool visible) {
 
         if(m_selected_channel != nullptr && !m_selected_channel->read) {
             mark_as_read(m_selected_channel);
+        }
+
+        if(layout_update_scheduled) {
+            updateLayout(m_osu->getScreenSize());
         }
     } else {
         anim->moveQuadOut(&m_fAnimation, 0.0f, 0.25f * m_fAnimation, true);
