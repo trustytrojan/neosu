@@ -143,6 +143,7 @@ ConVar flashlight_always_hard("flashlight_always_hard", false, FCVAR_NONE, "alwa
 ConVar start_first_main_menu_song_at_preview_point("start_first_main_menu_song_at_preview_point", false, FCVAR_NONE);
 ConVar nightcore_enjoyer("nightcore_enjoyer", false, FCVAR_NONE, "automatically select nightcore when speed modifying");
 ConVar scoreboard_animations("scoreboard_animations", true, FCVAR_NONE, "animate in-game scoreboard");
+ConVar instant_replay_duration("instant_replay_duration", 15.f, FCVAR_NONE, "instant replay (F2) duration, in seconds");
 
 ConVar mp_server("mp_server", "ez-pp.farm", FCVAR_NONE);
 ConVar mp_password("mp_password", "", FCVAR_NONE);
@@ -1362,7 +1363,8 @@ void Osu::onKeyDown(KeyboardEvent &key) {
                     }
 
                     double percentFinished = beatmap->getPercentFinished();
-                    double offsetPercent = 10000.f / beatmap->getLength();
+                    double duration = convar->getConVarByName("instant_replay_duration")->getFloat() * 1000.f;
+                    double offsetPercent = duration / beatmap->getLength();
                     double seekPoint = fmax(0.f, percentFinished - offsetPercent);
                     beatmap->cancelFailing();
                     beatmap->watch(score, seekPoint);
