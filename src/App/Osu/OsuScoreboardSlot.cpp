@@ -2,6 +2,7 @@
 
 #include "AnimationHandler.h"
 #include "Bancho.h"
+#include "BanchoUsers.h"
 #include "Engine.h"
 #include "Font.h"
 #include "Osu.h"
@@ -12,6 +13,9 @@ OsuScoreboardSlot::OsuScoreboardSlot(SCORE_ENTRY score, int index) {
     m_avatar = new OsuUIAvatar(score.player_id, 0, 0, 0, 0);
     m_score = score;
     m_index = index;
+
+    auto user = get_user_info(score.player_id);
+    is_friend = user->is_friend();
 }
 
 OsuScoreboardSlot::~OsuScoreboardSlot() {
@@ -55,7 +59,7 @@ void OsuScoreboardSlot::draw(Graphics *g) {
     } else if(m_index == 0) {
         g->setColor(0xff1b6a8c);
     } else {
-        g->setColor(0xff114459);
+        g->setColor(is_friend ? 0xff9C205C : 0xff114459);
     }
     g->setAlpha(0.3f * m_fAlpha);
 

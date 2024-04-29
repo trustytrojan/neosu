@@ -16,5 +16,6 @@ struct OsuScoreboardSlot {
     float m_y = 0.f;
     float m_fAlpha = 0.f;
     float m_fFlash = 0.f;
+    bool is_friend = false;
     bool was_visible = false;
 };

@@ -385,10 +385,12 @@ void handle_packet(Packet *packet) {
         read_int32(packet);
         // (nothing to do)
     } else if(packet->id == FRIENDS_LIST) {
+        friends.clear();
+
         uint16_t nb_friends = read_short(packet);
         for(int i = 0; i < nb_friends; i++) {
-            auto user = get_user_info(read_int32(packet));
-            user->is_friend = true;
+            uint32_t friend_id = read_int32(packet);
+            friends.push_back(friend_id);
         }
     } else if(packet->id == PROTOCOL_VERSION) {
         int protocol_version = read_int32(packet);

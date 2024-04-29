@@ -7,6 +7,7 @@
 #include "Bancho.h"
 #include "BanchoLeaderboard.h"
 #include "BanchoProtocol.h"
+#include "BanchoUsers.h"
 #include "CBaseUICheckbox.h"
 #include "ConVar.h"
 #include "Downloader.h"
@@ -95,6 +96,12 @@ void disconnect() {
     bancho.osu->m_optionsMenu->logInButton->setColor(0xff00ff00);
     bancho.osu->m_optionsMenu->logInButton->is_loading = false;
     ConVars::sv_cheats.setValue(true);
+
+    for(auto pair : online_users) {
+        delete pair.second;
+    }
+    online_users.clear();
+    friends.clear();
 
     bancho.osu->m_chat->onDisconnect();
 

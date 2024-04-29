@@ -41,7 +41,12 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu) {
     latest.changes.push_back("- Added server logo to main menu button");
     latest.changes.push_back("- Added instant_replay_duration convar");
     latest.changes.push_back("- Allowed singleplayer cheats when the server doesn't accept score submissions");
+    latest.changes.push_back("- Changed scoreboard name color to red for friends");
     latest.changes.push_back("- Changed default instant replay key to F2 to avoid conflicts with mod selector");
+    latest.changes.push_back("- Forced exclusive mode when using WASAPI output");
+    latest.changes.push_back("- Disabled score submission when mods are toggled mid-game");
+    latest.changes.push_back("- Removed support for the Nintendo Switch");
+    latest.changes.push_back("- Updated protocol version");
     latest.changes.push_back("- Fixed chat layout updating while chat was hidden");
     latest.changes.push_back("- Fixed pause button not working after cancelling database load");
     latest.changes.push_back("- Fixed level bar always being at 0%");
@@ -51,10 +56,6 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu) {
     latest.changes.push_back("- Fixed replay playback starting too fast");
     latest.changes.push_back("- Fixed restarting SoundEngine not kicking the player out of play mode");
     latest.changes.push_back("- Fixed ALT key not working on linux");
-    latest.changes.push_back("- Forced exclusive mode when using WASAPI output");
-    latest.changes.push_back("- Disabled score submission when mods are toggled mid-game");
-    latest.changes.push_back("- Removed support for the Nintendo Switch");
-    latest.changes.push_back("- Updated protocol version");
     changelogs.push_back(latest);
 
     CHANGELOG v34_10;

@@ -47,6 +47,7 @@ class OsuUISongBrowserScoreButton : public CBaseUIButton {
     inline UString getDateTime() const { return m_sScoreDateTime; }
     inline int getIndex() const { return m_iScoreIndexNumber; }
 
+    bool is_friend = false;
     OsuUIAvatar *m_avatar = nullptr;
     MD5Hash map_hash;
 

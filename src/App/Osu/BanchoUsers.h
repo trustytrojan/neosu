@@ -6,7 +6,6 @@
 
 struct UserInfo {
     uint32_t user_id = 0;
-    bool is_friend = false;
 
     // Presence (via USER_PRESENCE_REQUEST or USER_PRESENCE_REQUEST_ALL)
     UString name;
@@ -29,7 +28,11 @@ struct UserInfo {
     int32_t plays = 0;
     uint16_t pp = 0.f;
     float accuracy = 0.f;
+
+    bool is_friend();
 };
 
 extern std::unordered_map<uint32_t, UserInfo*> online_users;
+extern std::vector<uint32_t> friends;
+
 UserInfo* get_user_info(uint32_t user_id, bool fetch = false);

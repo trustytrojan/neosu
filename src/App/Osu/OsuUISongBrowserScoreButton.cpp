@@ -12,6 +12,7 @@
 #include "AnimationHandler.h"
 #include "Bancho.h"
 #include "BanchoNetworking.h"
+#include "BanchoUsers.h"
 #include "ConVar.h"
 #include "Console.h"
 #include "Engine.h"
@@ -172,7 +173,7 @@ void OsuUISongBrowserScoreButton::draw(Graphics *g) {
         g->setAlpha(0.75f);
         g->drawString(usernameFont, string);
         g->translate(-0.75f, -0.75f);
-        g->setColor(0xffffffff);
+        g->setColor(is_friend ? 0xffD424B0 : 0xffffffff);
         g->drawString(usernameFont, string);
     }
     g->popTransform();
@@ -628,6 +629,9 @@ void OsuUISongBrowserScoreButton::setScore(const Score &score, const OsuDatabase
     }
     if(score.player_id != 0) {
         m_avatar = new OsuUIAvatar(score.player_id, m_vPos.x, m_vPos.y, m_vSize.y, m_vSize.y);
+
+        auto user = get_user_info(score.player_id);
+        is_friend = user->is_friend();
     }
 
     // display

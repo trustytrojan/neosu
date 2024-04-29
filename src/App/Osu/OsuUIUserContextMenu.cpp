@@ -63,7 +63,7 @@ void OsuUIUserContextMenuScreen::open(uint32_t user_id) {
             // menu->addButton("Invite to game", INVITE_TO_GAME);
         }
 
-        if(user_info->is_friend) {
+        if(user_info->is_friend()) {
             menu->addButton("Revoke friendship", UA_REMOVE_FRIEND);
         } else {
             menu->addButton("Add as friend", UA_ADD_FRIEND);
@@ -115,15 +115,17 @@ void OsuUIUserContextMenuScreen::on_action(UString text, int user_action) {
         packet.id = FRIEND_ADD;
         write_int32(&packet, m_user_id);
         send_packet(packet);
-
-        user_info->is_friend = true;
+        friends.push_back(m_user_id);
     } else if(user_action == UA_REMOVE_FRIEND) {
         Packet packet;
         packet.id = FRIEND_REMOVE;
         write_int32(&packet, m_user_id);
         send_packet(packet);
 
-        user_info->is_friend = false;
+        auto it = std::find(friends.begin(), friends.end(), m_user_id);
+        if(it != friends.end()) {
+            friends.erase(it);
+        }
     }
 
     menu->setVisible(false);
