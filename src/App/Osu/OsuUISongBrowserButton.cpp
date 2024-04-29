@@ -316,8 +316,6 @@ void OsuUISongBrowserButton::setTargetRelPosY(float targetRelPosY) {
 
 Vector2 OsuUISongBrowserButton::getActualOffset() const {
     const float hd2xMultiplier = m_osu->getSkin()->isMenuButtonBackground2x() ? 2.0f : 1.0f;
-    // const float correctedMarginPixelsX = (2*marginPixelsX +
-    // m_beatmap->getOsu()->getSkin()->getMenuButtonBackground()->getWidth()/hd2xMultiplier - 699)/2.0f;
     const float correctedMarginPixelsY =
         (2 * marginPixelsY + m_osu->getSkin()->getMenuButtonBackground()->getHeight() / hd2xMultiplier - 103.0f) / 2.0f;
     return Vector2((int)(marginPixelsX * m_fScale * hd2xMultiplier),

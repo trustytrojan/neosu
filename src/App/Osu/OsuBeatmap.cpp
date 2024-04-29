@@ -1409,14 +1409,14 @@ bool OsuBeatmap::isKey2Down() {
 bool OsuBeatmap::isClickHeld() { return isKey1Down() || isKey2Down(); }
 bool OsuBeatmap::isLastKeyDownKey1() { return m_bPrevKeyWasKey1; }
 
-UString OsuBeatmap::getTitle() const {
+std::string OsuBeatmap::getTitle() const {
     if(m_selectedDifficulty2 != NULL)
         return m_selectedDifficulty2->getTitle();
     else
         return "NULL";
 }
 
-UString OsuBeatmap::getArtist() const {
+std::string OsuBeatmap::getArtist() const {
     if(m_selectedDifficulty2 != NULL)
         return m_selectedDifficulty2->getArtist();
     else

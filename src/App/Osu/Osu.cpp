@@ -889,8 +889,8 @@ void Osu::update() {
             // We didn't select a map; revert to previously selected one
             auto diff2 = m_songBrowser2->m_lastSelectedBeatmap;
             if(diff2 != nullptr) {
-                bancho.room.map_name = UString::format("%s - %s [%s]", diff2->getArtist().toUtf8(),
-                                                       diff2->getTitle().toUtf8(), diff2->getDifficultyName().toUtf8());
+                bancho.room.map_name = UString::format("%s - %s [%s]", diff2->getArtist().c_str(),
+                                                       diff2->getTitle().c_str(), diff2->getDifficultyName().c_str());
                 bancho.room.map_md5 = diff2->getMD5Hash();
                 bancho.room.map_id = diff2->getID();
 

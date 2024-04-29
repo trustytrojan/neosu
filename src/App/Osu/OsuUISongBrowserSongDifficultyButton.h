@@ -37,9 +37,7 @@ class OsuUISongBrowserSongDifficultyButton : public OsuUISongBrowserSongButton {
 
     virtual void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected);
 
-    UString buildDiffString() { return m_sDiff; }
-
-    UString m_sDiff;
+    std::string m_sDiff;
 
     float m_fDiffScale;
     float m_fOffsetPercentAnim;

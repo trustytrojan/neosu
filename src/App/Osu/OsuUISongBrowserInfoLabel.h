@@ -26,10 +26,10 @@ class OsuUISongBrowserInfoLabel : public CBaseUIButton {
     void setFromBeatmap(OsuBeatmap *beatmap, OsuDatabaseBeatmap *diff2);
     void setFromMissingBeatmap(long beatmapId);
 
-    void setArtist(UString artist) { m_sArtist = artist; }
-    void setTitle(UString title) { m_sTitle = title; }
-    void setDiff(UString diff) { m_sDiff = diff; }
-    void setMapper(UString mapper) { m_sMapper = mapper; }
+    void setArtist(std::string artist) { m_sArtist = artist; }
+    void setTitle(std::string title) { m_sTitle = title; }
+    void setDiff(std::string diff) { m_sDiff = diff; }
+    void setMapper(std::string mapper) { m_sMapper = mapper; }
 
     void setLengthMS(unsigned long lengthMS) { m_iLengthMS = lengthMS; }
     void setBPM(int minBPM, int maxBPM, int mostCommonBPM) {
@@ -54,8 +54,6 @@ class OsuUISongBrowserInfoLabel : public CBaseUIButton {
     long getBeatmapID() const { return m_iBeatmapId; }
 
    private:
-    UString buildTitleString();
-    UString buildSubTitleString();
     UString buildSongInfoString();
     UString buildDiffInfoString();
     UString buildOffsetInfoString();
@@ -73,10 +71,10 @@ class OsuUISongBrowserInfoLabel : public CBaseUIButton {
     float m_fDiffInfoScale;
     float m_fOffsetInfoScale;
 
-    UString m_sArtist;
-    UString m_sTitle;
-    UString m_sDiff;
-    UString m_sMapper;
+    std::string m_sArtist;
+    std::string m_sTitle;
+    std::string m_sDiff;
+    std::string m_sMapper;
 
     unsigned long m_iLengthMS;
     int m_iMinBPM;

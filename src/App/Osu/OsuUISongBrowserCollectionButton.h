@@ -24,7 +24,7 @@ class OsuUISongBrowserCollectionButton : public OsuUISongBrowserButton {
     virtual Color getActiveBackgroundColor() const;
     virtual Color getInactiveBackgroundColor() const;
 
-    const UString &getCollectionName() const { return m_sCollectionName; }
+    const std::string &getCollectionName() const { return m_sCollectionName; }
 
    private:
     virtual void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected);
@@ -34,9 +34,7 @@ class OsuUISongBrowserCollectionButton : public OsuUISongBrowserButton {
     void onRenameCollectionConfirmed(UString text, int id = -1);
     void onDeleteCollectionConfirmed(UString text, int id = -1);
 
-    UString buildTitleString();
-
-    UString m_sCollectionName;
+    std::string m_sCollectionName;
 
     float m_fTitleScale;
 };

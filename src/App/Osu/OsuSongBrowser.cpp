@@ -4,6 +4,8 @@
 #include <sys/random.h>
 #endif
 
+#include <string.h>
+
 #include "AnimationHandler.h"
 #include "Bancho.h"
 #include "BanchoLeaderboard.h"
@@ -255,11 +257,9 @@ class OsuUISongBrowserNoRecordsSetElement : public CBaseUILabel {
 bool OsuSongBrowser::SortByArtist::operator()(OsuUISongBrowserButton const *a, OsuUISongBrowserButton const *b) const {
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
 
-    // strict weak ordering!
-    if(a->getDatabaseBeatmap()->getArtist().equalsIgnoreCase(b->getDatabaseBeatmap()->getArtist()))
-        return a->getSortHack() < b->getSortHack();
-
-    return a->getDatabaseBeatmap()->getArtist().lessThanIgnoreCase(b->getDatabaseBeatmap()->getArtist());
+    int res = strcasecmp(a->getDatabaseBeatmap()->getArtist().c_str(), b->getDatabaseBeatmap()->getArtist().c_str());
+    if(res == 0) return a->getSortHack() < b->getSortHack();
+    return res > 0;
 }
 
 bool OsuSongBrowser::SortByBPM::operator()(OsuUISongBrowserButton const *a, OsuUISongBrowserButton const *b) const {
@@ -277,41 +277,25 @@ bool OsuSongBrowser::SortByBPM::operator()(OsuUISongBrowserButton const *a, OsuU
         if(bDiffs[i]->getMostCommonBPM() > bpm2) bpm2 = bDiffs[i]->getMostCommonBPM();
     }
 
-    // strict weak ordering!
     if(bpm1 == bpm2) return a->getSortHack() < b->getSortHack();
-
     return bpm1 < bpm2;
 }
 
 bool OsuSongBrowser::SortByCreator::operator()(OsuUISongBrowserButton const *a, OsuUISongBrowserButton const *b) const {
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
 
-    // strict weak ordering!
-    if(a->getDatabaseBeatmap()->getCreator().equalsIgnoreCase(b->getDatabaseBeatmap()->getCreator()))
-        return a->getSortHack() < b->getSortHack();
-
-    return a->getDatabaseBeatmap()->getCreator().lessThanIgnoreCase(b->getDatabaseBeatmap()->getCreator());
+    int res = strcasecmp(a->getDatabaseBeatmap()->getCreator().c_str(), b->getDatabaseBeatmap()->getCreator().c_str());
+    if(res == 0) return a->getSortHack() < b->getSortHack();
+    return res > 0;
 }
 
 bool OsuSongBrowser::SortByDateAdded::operator()(OsuUISongBrowserButton const *a,
                                                  OsuUISongBrowserButton const *b) const {
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
 
-    long long time1 = a->getDatabaseBeatmap()->getLastModificationTime();
-    const std::vector<OsuDatabaseBeatmap *> &aDiffs = a->getDatabaseBeatmap()->getDifficulties();
-    for(size_t i = 0; i < aDiffs.size(); i++) {
-        if(aDiffs[i]->getLastModificationTime() > time1) time1 = aDiffs[i]->getLastModificationTime();
-    }
-
-    long long time2 = b->getDatabaseBeatmap()->getLastModificationTime();
-    const std::vector<OsuDatabaseBeatmap *> &bDiffs = b->getDatabaseBeatmap()->getDifficulties();
-    for(size_t i = 0; i < bDiffs.size(); i++) {
-        if(bDiffs[i]->getLastModificationTime() > time2) time2 = bDiffs[i]->getLastModificationTime();
-    }
-
-    // strict weak ordering!
+    long long time1 = a->getDatabaseBeatmap()->last_modification_time;
+    long long time2 = b->getDatabaseBeatmap()->last_modification_time;
     if(time1 == time2) return a->getSortHack() > b->getSortHack();
-
     return time1 > time2;
 }
 
@@ -384,11 +368,9 @@ bool OsuSongBrowser::SortByLength::operator()(OsuUISongBrowserButton const *a, O
 bool OsuSongBrowser::SortByTitle::operator()(OsuUISongBrowserButton const *a, OsuUISongBrowserButton const *b) const {
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
 
-    // strict weak ordering!
-    if(a->getDatabaseBeatmap()->getTitle().equalsIgnoreCase(b->getDatabaseBeatmap()->getTitle()))
-        return a->getSortHack() < b->getSortHack();
-
-    return a->getDatabaseBeatmap()->getTitle().lessThanIgnoreCase(b->getDatabaseBeatmap()->getTitle());
+    int res = strcasecmp(a->getDatabaseBeatmap()->getTitle().c_str(), b->getDatabaseBeatmap()->getTitle().c_str());
+    if(res == 0) return a->getSortHack() < b->getSortHack();
+    return res > 0;
 }
 
 OsuSongBrowser::OsuSongBrowser(Osu *osu) : OsuScreenBackable(osu) {
@@ -1635,8 +1617,8 @@ void OsuSongBrowser::onDifficultySelected(OsuDatabaseBeatmap *diff2, bool play) 
     // start playing
     if(play) {
         if(bancho.is_in_a_multi_room()) {
-            bancho.room.map_name = UString::format("%s - %s [%s]", diff2->getArtist().toUtf8(),
-                                                   diff2->getTitle().toUtf8(), diff2->getDifficultyName().toUtf8());
+            bancho.room.map_name = UString::format("%s - %s [%s]", diff2->getArtist().c_str(),
+                                                   diff2->getTitle().c_str(), diff2->getDifficultyName().c_str());
             bancho.room.map_md5 = diff2->getMD5Hash();
             bancho.room.map_id = diff2->getID();
 
@@ -1786,9 +1768,9 @@ void OsuSongBrowser::addBeatmap(OsuDatabaseBeatmap *beatmap) {
     {
         // artist
         if(m_artistCollectionButtons.size() == 28) {
-            const UString &artist = beatmap->getArtist();
+            const std::string &artist = beatmap->getArtist();
             if(artist.length() > 0) {
-                const char firstChar = artist.toUtf8()[0];
+                const char firstChar = artist[0];
 
                 const bool isNumber = (firstChar >= '0' && firstChar <= '9');
                 const bool isLowerCase = (firstChar >= 'a' && firstChar <= 'z');
@@ -1821,9 +1803,9 @@ void OsuSongBrowser::addBeatmap(OsuDatabaseBeatmap *beatmap) {
 
         // creator
         if(m_creatorCollectionButtons.size() == 28) {
-            const UString &creator = beatmap->getCreator();
+            const std::string &creator = beatmap->getCreator();
             if(creator.length() > 0) {
-                const char firstChar = creator.toUtf8()[0];
+                const char firstChar = creator[0];
 
                 const bool isNumber = (firstChar >= '0' && firstChar <= '9');
                 const bool isLowerCase = (firstChar >= 'a' && firstChar <= 'z');
@@ -1867,9 +1849,9 @@ void OsuSongBrowser::addBeatmap(OsuDatabaseBeatmap *beatmap) {
 
         // title
         if(m_titleCollectionButtons.size() == 28) {
-            const UString &creator = beatmap->getTitle();
+            const std::string &creator = beatmap->getTitle();
             if(creator.length() > 0) {
-                const char firstChar = creator.toUtf8()[0];
+                const char firstChar = creator[0];
 
                 const bool isNumber = (firstChar >= '0' && firstChar <= '9');
                 const bool isLowerCase = (firstChar >= 'a' && firstChar <= 'z');
@@ -2404,37 +2386,37 @@ bool OsuSongBrowser::searchMatcher(const OsuDatabaseBeatmap *databaseBeatmap,
 
 bool OsuSongBrowser::findSubstringInDifficulty(const OsuDatabaseBeatmap *diff, const UString &searchString) {
     if(diff->getTitle().length() > 0) {
-        if(diff->getTitle().findIgnoreCase(searchString) != -1) return true;
+        if(strcasestr(diff->getTitle().c_str(), searchString.toUtf8()) != NULL) return true;
     }
 
     if(diff->getArtist().length() > 0) {
-        if(diff->getArtist().findIgnoreCase(searchString) != -1) return true;
+        if(strcasestr(diff->getArtist().c_str(), searchString.toUtf8()) != NULL) return true;
     }
 
     if(diff->getCreator().length() > 0) {
-        if(diff->getCreator().findIgnoreCase(searchString) != -1) return true;
+        if(strcasestr(diff->getCreator().c_str(), searchString.toUtf8()) != NULL) return true;
     }
 
     if(diff->getDifficultyName().length() > 0) {
-        if(diff->getDifficultyName().findIgnoreCase(searchString) != -1) return true;
+        if(strcasestr(diff->getDifficultyName().c_str(), searchString.toUtf8()) != NULL) return true;
     }
 
     if(diff->getSource().length() > 0) {
-        auto source = UString(diff->getSource().c_str());
-        if(source.findIgnoreCase(searchString) != -1) return true;
+        if(strcasestr(diff->getSource().c_str(), searchString.toUtf8()) != NULL) return true;
     }
 
     if(diff->getTags().length() > 0) {
-        auto tags = UString(diff->getTags().c_str());
-        if(tags.findIgnoreCase(searchString) != -1) return true;
+        if(strcasestr(diff->getTags().c_str(), searchString.toUtf8()) != NULL) return true;
     }
 
     if(diff->getID() > 0) {
-        if(UString::format("%i", diff->getID()).findIgnoreCase(searchString) != -1) return true;
+        auto id = std::to_string(diff->getID());
+        if(strcasestr(id.c_str(), searchString.toUtf8()) != NULL) return true;
     }
 
     if(diff->getSetID() > 0) {
-        if(UString::format("%i", diff->getSetID()).findIgnoreCase(searchString) != -1) return true;
+        auto set_id = std::to_string(diff->getSetID());
+        if(strcasestr(set_id.c_str(), searchString.toUtf8()) != NULL) return true;
     }
 
     return false;
@@ -3485,18 +3467,12 @@ void OsuSongBrowser::onSortChangeInt(UString text, bool autoScroll) {
 
     // resort Collection buttons (one button for each collection)
     // these are always sorted alphabetically by name
-    {
-        struct COLLECTION_NAME_SORTING_COMPARATOR {
-            bool operator()(OsuUISongBrowserCollectionButton const *a, OsuUISongBrowserCollectionButton const *b) {
-                // strict weak ordering!
-                if(a->getCollectionName() == b->getCollectionName()) return a->getSortHack() < b->getSortHack();
-
-                return a->getCollectionName().lessThanIgnoreCase(b->getCollectionName());
-            }
-        };
-
-        std::sort(m_collectionButtons.begin(), m_collectionButtons.end(), COLLECTION_NAME_SORTING_COMPARATOR());
-    }
+    std::sort(m_collectionButtons.begin(), m_collectionButtons.end(),
+              [](OsuUISongBrowserCollectionButton *a, OsuUISongBrowserCollectionButton *b) {
+                  int res = strcasecmp(a->getCollectionName().c_str(), b->getCollectionName().c_str());
+                  if(res == 0) return a->getSortHack() < b->getSortHack();
+                  return res < 0;
+              });
 
     // resort Collection button array (each group of songbuttons inside each Collection)
     for(size_t i = 0; i < m_collectionButtons.size(); i++) {
@@ -3879,7 +3855,7 @@ void OsuSongBrowser::onSongButtonContextMenu(OsuUISongBrowserSongButton *songBut
             // remove diff from collection
 
             // get collection name by selection
-            UString collectionName;
+            std::string collectionName;
             {
                 for(size_t i = 0; i < m_collectionButtons.size(); i++) {
                     if(m_collectionButtons[i]->isSelected()) {
@@ -3889,8 +3865,7 @@ void OsuSongBrowser::onSongButtonContextMenu(OsuUISongBrowserSongButton *songBut
                 }
             }
 
-            std::string name = collectionName.toUtf8();
-            auto collection = get_or_create_collection(name);
+            auto collection = get_or_create_collection(collectionName);
             collection->remove_map(songButton->getDatabaseBeatmap()->getMD5Hash());
             save_collections();
             updateUIScheduled = true;
@@ -3898,7 +3873,7 @@ void OsuSongBrowser::onSongButtonContextMenu(OsuUISongBrowserSongButton *songBut
             // remove entire set from collection
 
             // get collection name by selection
-            UString collectionName;
+            std::string collectionName;
             {
                 for(size_t i = 0; i < m_collectionButtons.size(); i++) {
                     if(m_collectionButtons[i]->isSelected()) {
@@ -3908,8 +3883,7 @@ void OsuSongBrowser::onSongButtonContextMenu(OsuUISongBrowserSongButton *songBut
                 }
             }
 
-            std::string name = collectionName.toUtf8();
-            auto collection = get_or_create_collection(name);
+            auto collection = get_or_create_collection(collectionName);
             const std::vector<MD5Hash> beatmapSetHashes =
                 CollectionManagementHelper::getBeatmapSetHashesForSongButton(songButton, m_db);
             for(auto hash : beatmapSetHashes) {
@@ -3942,7 +3916,7 @@ void OsuSongBrowser::onSongButtonContextMenu(OsuUISongBrowserSongButton *songBut
 
     if(updateUIScheduled) {
         const float prevScrollPosY = m_songBrowser->getScrollPosY();  // usability
-        const UString previouslySelectedCollectionName =
+        const auto previouslySelectedCollectionName =
             (m_selectionPreviousCollectionButton != NULL ? m_selectionPreviousCollectionButton->getCollectionName()
                                                          : "");  // usability
         {
@@ -3966,10 +3940,11 @@ void OsuSongBrowser::onSongButtonContextMenu(OsuUISongBrowserSongButton *songBut
 
 void OsuSongBrowser::onCollectionButtonContextMenu(OsuUISongBrowserCollectionButton *collectionButton, UString text,
                                                    int id) {
-    if(id == 2)  // delete collection
-    {
+    std::string collection_name = text.toUtf8();
+
+    if(id == 2) {  // delete collection
         for(size_t i = 0; i < m_collectionButtons.size(); i++) {
-            if(m_collectionButtons[i]->getCollectionName() == text) {
+            if(m_collectionButtons[i]->getCollectionName() == collection_name) {
                 // delete UI
                 delete m_collectionButtons[i];
                 m_collectionButtons.erase(m_collectionButtons.begin() + i);
@@ -3977,21 +3952,19 @@ void OsuSongBrowser::onCollectionButtonContextMenu(OsuUISongBrowserCollectionBut
                 // reset UI state
                 m_selectionPreviousCollectionButton = NULL;
 
-                std::string name = text.toUtf8();
-                auto collection = get_or_create_collection(name);
+                auto collection = get_or_create_collection(collection_name);
                 collection->delete_collection();
                 save_collections();
 
                 // update UI
-                { onGroupCollections(false); }
+                onGroupCollections(false);
 
                 break;
             }
         }
-    } else if(id == 3)  // collection has been renamed
-    {
+    } else if(id == 3) {  // collection has been renamed
         // update UI
-        { onSortChangeInt(osu_songbrowser_sortingtype.getString(), false); }
+        onSortChangeInt(osu_songbrowser_sortingtype.getString(), false);
     }
 }
 

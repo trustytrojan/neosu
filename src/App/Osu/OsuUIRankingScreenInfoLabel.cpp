@@ -35,18 +35,15 @@ OsuUIRankingScreenInfoLabel::OsuUIRankingScreenInfoLabel(Osu *osu, float xPos, f
 }
 
 void OsuUIRankingScreenInfoLabel::draw(Graphics *g) {
-    // debug bounding box
-    /*
-    g->setColor(0xffffffff);
-    g->drawLine(m_vPos.x, m_vPos.y, m_vPos.x+m_vSize.x, m_vPos.y);
-    g->drawLine(m_vPos.x, m_vPos.y, m_vPos.x, m_vPos.y+m_vSize.y);
-    g->drawLine(m_vPos.x, m_vPos.y+m_vSize.y, m_vPos.x+m_vSize.x, m_vPos.y+m_vSize.y);
-    g->drawLine(m_vPos.x+m_vSize.x, m_vPos.y, m_vPos.x+m_vSize.x, m_vPos.y+m_vSize.y);
-    */
-
     // build strings
-    const UString titleText = buildTitleString();
-    const UString subTitleText = buildSubTitleString();
+    UString titleText = m_sArtist.c_str();
+    titleText.append(" - ");
+    titleText.append(m_sTitle.c_str());
+    titleText.append(" [");
+    titleText.append(m_sDiff.c_str());
+    titleText.append("]");
+    UString subTitleText = "Beatmap by ";
+    subTitleText.append(m_sMapper.c_str());
     const UString playerText = buildPlayerString();
 
     const float globalScale = std::max((m_vSize.y / getMinimumHeight()) * 0.741f, 1.0f);
@@ -106,41 +103,19 @@ void OsuUIRankingScreenInfoLabel::setFromBeatmap(OsuBeatmap *beatmap, OsuDatabas
 
     std::time_t now_c = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     m_sDate = std::ctime(&now_c);
-    m_sDate = m_sDate.trim();
-}
-
-UString OsuUIRankingScreenInfoLabel::buildTitleString() {
-    UString titleString = m_sArtist;
-    titleString.append(" - ");
-    titleString.append(m_sTitle);
-    titleString.append(" [");
-    titleString.append(m_sDiff);
-    titleString.append("]");
-
-    return titleString;
-}
-
-UString OsuUIRankingScreenInfoLabel::buildSubTitleString() {
-    UString subTitleString = "Beatmap by ";
-    subTitleString.append(m_sMapper);
-
-    return subTitleString;
+    trim(&m_sDate);
 }
 
 UString OsuUIRankingScreenInfoLabel::buildPlayerString() {
     UString playerString = "Played by ";
-    playerString.append(m_sPlayer);
+    playerString.append(m_sPlayer.c_str());
     playerString.append(" on ");
-    playerString.append(m_sDate);
+    playerString.append(m_sDate.c_str());
 
     return playerString;
 }
 
 float OsuUIRankingScreenInfoLabel::getMinimumWidth() {
-    /*
-    float titleWidth = m_font->getStringWidth(buildTitleString());
-    float subTitleWidth = m_font->getStringWidth(buildSubTitleString()) * m_fSubTitleScale;
-    */
     float titleWidth = 0;
     float subTitleWidth = 0;
     float playerWidth = m_font->getStringWidth(buildPlayerString()) * m_fSubTitleScale;

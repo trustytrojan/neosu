@@ -85,8 +85,6 @@ Collection* get_or_create_collection(std::string name) {
     collection->name = name;
     collections.push_back(collection);
 
-    std::sort(collections.begin(), collections.end(), [](Collection* a, Collection* b) { return a->name < b->name; });
-
     return collection;
 }
 
@@ -176,8 +174,6 @@ bool load_collections() {
         }
     }
     free(neosu_collections.memory);
-
-    std::sort(collections.begin(), collections.end(), [](Collection* a, Collection* b) { return a->name < b->name; });
 
     debugLog("collections.db: loading took %f seconds\n", (engine->getTimeReal() - startTime));
     collections_loaded = true;

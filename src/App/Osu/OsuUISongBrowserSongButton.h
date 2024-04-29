@@ -22,7 +22,6 @@ class OsuUISongBrowserSongButton : public OsuUISongBrowserButton {
     virtual ~OsuUISongBrowserSongButton();
 
     virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
 
     void triggerContextMenu(Vector2 pos);
 
@@ -49,21 +48,11 @@ class OsuUISongBrowserSongButton : public OsuUISongBrowserButton {
     float calculateGradeScale();
     float calculateGradeWidth();
 
-    UString buildTitleString() { return m_sTitle; }
-
-    UString buildSubTitleString() {
-        UString subTitleString = m_sArtist;
-        subTitleString.append(" // ");
-        subTitleString.append(m_sMapper);
-
-        return subTitleString;
-    }
-
     OsuDatabaseBeatmap *m_databaseBeatmap;
 
-    UString m_sTitle;
-    UString m_sArtist;
-    UString m_sMapper;
+    std::string m_sTitle;
+    std::string m_sArtist;
+    std::string m_sMapper;
     Score::Grade m_grade;
     bool m_bHasGrade;
 
@@ -79,10 +68,6 @@ class OsuUISongBrowserSongButton : public OsuUISongBrowserButton {
     static float thumbnailYRatio;
 
     float m_fThumbnailFadeInTime;
-
-    void updateRepresentativeDatabaseBeatmap();
-
-    OsuDatabaseBeatmap *m_representativeDatabaseBeatmap;
 };
 
 #endif

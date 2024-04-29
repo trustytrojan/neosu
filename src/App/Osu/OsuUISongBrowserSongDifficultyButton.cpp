@@ -107,7 +107,7 @@ void OsuUISongBrowserSongDifficultyButton::draw(Graphics *g) {
                      pos.y + size.y * m_fTextMarginScale + m_font->getHeight() * titleScale +
                          size.y * m_fTextSpacingScale + m_font->getHeight() * subTitleScale * 0.85f +
                          size.y * m_fTextSpacingScale + m_fontBold->getHeight() * diffScale * 0.8f);
-        g->drawString(m_fontBold, buildDiffString());
+        g->drawString(m_fontBold, m_sDiff.c_str());
     }
     g->popTransform();
 

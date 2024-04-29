@@ -74,8 +74,14 @@ void OsuUISongBrowserInfoLabel::draw(Graphics *g) {
     }
 
     // build strings
-    const UString titleText = buildTitleString();
-    const UString subTitleText = buildSubTitleString();
+    UString titleText = m_sArtist.c_str();
+    titleText.append(" - ");
+    titleText.append(m_sTitle.c_str());
+    titleText.append(" [");
+    titleText.append(m_sDiff.c_str());
+    titleText.append("]");
+    UString subTitleText = "Mapped by ";
+    subTitleText.append(m_sMapper.c_str());
     const UString songInfoText = buildSongInfoString();
     const UString diffInfoText = buildDiffInfoString();
     const UString offsetInfoText = buildOffsetInfoString();
@@ -311,24 +317,6 @@ void OsuUISongBrowserInfoLabel::setFromMissingBeatmap(long beatmapId) {
     setOnlineOffset(0);
 }
 
-UString OsuUISongBrowserInfoLabel::buildTitleString() {
-    UString titleString = m_sArtist;
-    titleString.append(" - ");
-    titleString.append(m_sTitle);
-    titleString.append(" [");
-    titleString.append(m_sDiff);
-    titleString.append("]");
-
-    return titleString;
-}
-
-UString OsuUISongBrowserInfoLabel::buildSubTitleString() {
-    UString subTitleString = "Mapped by ";
-    subTitleString.append(m_sMapper);
-
-    return subTitleString;
-}
-
 UString OsuUISongBrowserInfoLabel::buildSongInfoString() {
     unsigned long lengthMS = m_iLengthMS;
 
@@ -401,10 +389,6 @@ UString OsuUISongBrowserInfoLabel::buildOffsetInfoString() {
 }
 
 float OsuUISongBrowserInfoLabel::getMinimumWidth() {
-    /*
-    float titleWidth = m_font->getStringWidth(buildTitleString());
-    float subTitleWidth = m_font->getStringWidth(buildSubTitleString()) * m_fSubTitleScale;
-    */
     float titleWidth = 0;
     float subTitleWidth = 0;
     float songInfoWidth = m_font->getStringWidth(buildSongInfoString()) * m_fSongInfoScale;

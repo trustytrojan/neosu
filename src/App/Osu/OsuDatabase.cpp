@@ -301,8 +301,6 @@ class OsuDatabaseLoader : public Resource {
             m_bNeedCleanup = true;
             m_toCleanup.swap(m_db->m_databaseBeatmaps);
             m_db->m_databaseBeatmaps.clear();
-
-            m_db->m_fLoadingProgress = 0.25f;
             m_db->loadDB(&db, m_bNeedRawLoad);
         } else
             m_bNeedRawLoad = true;
@@ -1011,7 +1009,7 @@ void OsuDatabase::loadDB(Packet *db, bool &fallbackToRawLoad) {
 
         if(Osu::debug->getBool()) debugLog("Database: Reading beatmap %i/%i ...\n", (i + 1), m_iNumBeatmapsToLoad);
 
-        m_fLoadingProgress = 0.24f + 0.5f * ((float)(i + 1) / (float)m_iNumBeatmapsToLoad);
+        m_fLoadingProgress = ((float)(i + 1) / (float)m_iNumBeatmapsToLoad);
 
         if(m_iVersion < 20191107)  // see https://osu.ppy.sh/home/changelog/stable40/20191107.2
         {
@@ -1022,12 +1020,16 @@ void OsuDatabase::loadDB(Packet *db, bool &fallbackToRawLoad) {
             /*unsigned int size = */ read_int32(db);  // size in bytes of the beatmap entry
         }
 
-        UString artistName = read_string(db).trim();
-        UString artistNameUnicode = read_string(db);
-        UString songTitle = read_string(db).trim();
-        UString songTitleUnicode = read_string(db);
-        UString creatorName = read_string(db).trim();
-        UString difficultyName = read_string(db).trim();
+        std::string artistName = read_stdstring(db);
+        trim(&artistName);
+        std::string artistNameUnicode = read_stdstring(db);
+        std::string songTitle = read_stdstring(db);
+        trim(&songTitle);
+        std::string songTitleUnicode = read_stdstring(db);
+        std::string creatorName = read_stdstring(db);
+        trim(&creatorName);
+        std::string difficultyName = read_stdstring(db);
+        trim(&difficultyName);
         std::string audioFileName = read_stdstring(db);
         auto hash_str = read_stdstring(db);
         MD5Hash md5hash = hash_str.c_str();
@@ -1209,7 +1211,7 @@ void OsuDatabase::loadDB(Packet *db, bool &fallbackToRawLoad) {
                 // diff2->m_sBackgroundImageFileName = "";
 
                 diff2->m_iPreviewTime = previewTime;
-                diff2->m_iLastModificationTime = lastModificationTime;
+                diff2->last_modification_time = lastModificationTime;
 
                 diff2->m_sFullSoundFilePath = beatmapPath;
                 diff2->m_sFullSoundFilePath.append(diff2->m_sAudioFileName);
@@ -1396,7 +1398,7 @@ void OsuDatabase::loadDB(Packet *db, bool &fallbackToRawLoad) {
     // we now have a collection of BeatmapSets (where one set is equal to one beatmap and all of its diffs), build the
     // actual OsuBeatmap objects first, build all beatmaps which have a valid setID (trusting the values from the osu
     // database)
-    std::unordered_map<UString, OsuDatabaseBeatmap *> titleArtistToBeatmap;
+    std::unordered_map<std::string, OsuDatabaseBeatmap *> titleArtistToBeatmap;
     for(int i = 0; i < beatmapSets.size(); i++) {
         if(m_bInterruptLoad.load()) break;  // cancellation point
 
@@ -1414,9 +1416,9 @@ void OsuDatabase::loadDB(Packet *db, bool &fallbackToRawLoad) {
                 }
 
                 // and in the other hashmap
-                UString titleArtist = bm->getTitle();
+                std::string titleArtist = bm->getTitle();
                 titleArtist.append(bm->getArtist());
-                if(titleArtist.length() > 0) titleArtistToBeatmap[UString(titleArtist.toUtf8())] = bm;
+                if(titleArtist.length() > 0) titleArtistToBeatmap[titleArtist] = bm;
             }
         }
     }
@@ -1441,11 +1443,11 @@ void OsuDatabase::loadDB(Packet *db, bool &fallbackToRawLoad) {
                     bool existsAlready = false;
 
                     // new: use hashmap
-                    UString titleArtistCreator = diff2->getTitle();
+                    std::string titleArtistCreator = diff2->getTitle();
                     titleArtistCreator.append(diff2->getArtist());
                     titleArtistCreator.append(diff2->getCreator());
                     if(titleArtistCreator.length() > 0) {
-                        const auto result = titleArtistToBeatmap.find(UString(titleArtistCreator.toUtf8()));
+                        const auto result = titleArtistToBeatmap.find(titleArtistCreator);
                         if(result != titleArtistToBeatmap.end()) {
                             existsAlready = true;
 
@@ -1481,9 +1483,6 @@ void OsuDatabase::loadDB(Packet *db, bool &fallbackToRawLoad) {
     m_importTimer->update();
     debugLog("Refresh finished, added %i beatmaps in %f seconds.\n", m_databaseBeatmaps.size(),
              m_importTimer->getElapsedTime());
-
-    // signal that we are almost done
-    m_fLoadingProgress = 0.75f;
 
     load_collections();
 

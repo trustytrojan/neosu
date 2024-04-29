@@ -136,7 +136,7 @@ OsuDatabaseBeatmap::OsuDatabaseBeatmap(Osu *osu, std::string filePath, std::stri
 
     // custom data
 
-    m_iLastModificationTime = (std::numeric_limits<long long>::max() / 2) + m_iSortHack;
+    last_modification_time = (std::numeric_limits<long long>::max() / 2) + m_iSortHack;
 
     m_iLocalOffset = 0;
     m_iOnlineOffset = 0;
@@ -1045,25 +1045,25 @@ bool OsuDatabaseBeatmap::loadMetadata(OsuDatabaseBeatmap *databaseBeatmap) {
                         memset(stringBuffer, '\0', 1024);
                         if(sscanf(curLineChar, " Title :%1023[^\n]", stringBuffer) == 1) {
                             databaseBeatmap->m_sTitle = UString(stringBuffer);
-                            databaseBeatmap->m_sTitle = databaseBeatmap->m_sTitle.trim();
+                            trim(&databaseBeatmap->m_sTitle);
                         }
 
                         memset(stringBuffer, '\0', 1024);
                         if(sscanf(curLineChar, " Artist :%1023[^\n]", stringBuffer) == 1) {
                             databaseBeatmap->m_sArtist = UString(stringBuffer);
-                            databaseBeatmap->m_sArtist = databaseBeatmap->m_sArtist.trim();
+                            trim(&databaseBeatmap->m_sArtist);
                         }
 
                         memset(stringBuffer, '\0', 1024);
                         if(sscanf(curLineChar, " Creator :%1023[^\n]", stringBuffer) == 1) {
                             databaseBeatmap->m_sCreator = UString(stringBuffer);
-                            databaseBeatmap->m_sCreator = databaseBeatmap->m_sCreator.trim();
+                            trim(&databaseBeatmap->m_sCreator);
                         }
 
                         memset(stringBuffer, '\0', 1024);
                         if(sscanf(curLineChar, " Version :%1023[^\n]", stringBuffer) == 1) {
                             databaseBeatmap->m_sDifficultyName = UString(stringBuffer);
-                            databaseBeatmap->m_sDifficultyName = databaseBeatmap->m_sDifficultyName.trim();
+                            trim(&databaseBeatmap->m_sDifficultyName);
                         }
 
                         memset(stringBuffer, '\0', 1024);
@@ -1600,7 +1600,7 @@ void OsuDatabaseBeatmap::setDifficulties(std::vector<OsuDatabaseBeatmap *> &diff
         m_iMinBPM = std::numeric_limits<int>::max();
         m_iMaxBPM = 0;
         m_iMostCommonBPM = 0;
-        m_iLastModificationTime = 0;
+        last_modification_time = 0;
         for(size_t i = 0; i < m_difficulties.size(); i++) {
             if(m_difficulties[i]->getLengthMS() > m_iLengthMS) m_iLengthMS = m_difficulties[i]->getLengthMS();
             if(m_difficulties[i]->getCS() > m_fCS) m_fCS = m_difficulties[i]->getCS();
@@ -1612,8 +1612,8 @@ void OsuDatabaseBeatmap::setDifficulties(std::vector<OsuDatabaseBeatmap *> &diff
             if(m_difficulties[i]->getMaxBPM() > m_iMaxBPM) m_iMaxBPM = m_difficulties[i]->getMaxBPM();
             if(m_difficulties[i]->getMostCommonBPM() > m_iMostCommonBPM)
                 m_iMostCommonBPM = m_difficulties[i]->getMostCommonBPM();
-            if(m_difficulties[i]->getLastModificationTime() > m_iLastModificationTime)
-                m_iLastModificationTime = m_difficulties[i]->getLastModificationTime();
+            if(m_difficulties[i]->last_modification_time > last_modification_time)
+                last_modification_time = m_difficulties[i]->last_modification_time;
         }
     }
 }

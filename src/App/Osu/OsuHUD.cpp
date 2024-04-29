@@ -919,40 +919,9 @@ void OsuHUD::drawPlayfieldBorder(Graphics *g, Vector2 playfieldCenter, Vector2 p
         }
     }
     g->popTransform();
-
-    /*
-    //g->setColor(0x44ffffff);
-    // top
-    g->fillRect(playfieldBorderTopLeft.x, playfieldBorderTopLeft.y, playfieldBorderSize.x + borderSize*2, borderSize);
-
-    // left
-    g->fillRect(playfieldBorderTopLeft.x, playfieldBorderTopLeft.y + borderSize, borderSize, playfieldBorderSize.y);
-
-    // right
-    g->fillRect(playfieldBorderTopLeft.x + playfieldBorderSize.x + borderSize, playfieldBorderTopLeft.y + borderSize,
-    borderSize, playfieldBorderSize.y);
-
-    // bottom
-    g->fillRect(playfieldBorderTopLeft.x, playfieldBorderTopLeft.y+playfieldBorderSize.y + borderSize,
-    playfieldBorderSize.x + borderSize*2, borderSize);
-    */
 }
 
 void OsuHUD::drawLoadingSmall(Graphics *g) {
-    /*
-    McFont *font = engine->getResourceManager()->getFont("FONT_DEFAULT");
-    UString loadingText = "Loading ...";
-    float stringWidth = font->getStringWidth(loadingText);
-
-    g->setColor(0xffffffff);
-    g->pushTransform();
-    g->translate(-stringWidth/2, font->getHeight()/2);
-    g->rotate(engine->getTime()*180, 0, 0, 1);
-    g->translate(0, 0);
-    g->translate(m_osu->getScreenWidth()/2, m_osu->getScreenHeight()/2);
-    g->drawString(font, loadingText);
-    g->popTransform();
-    */
     const float scale = Osu::getImageScale(m_osu, m_osu->getSkin()->getLoadingSpinner(), 29);
 
     g->setColor(0xffffffff);

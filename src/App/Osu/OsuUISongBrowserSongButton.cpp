@@ -36,7 +36,6 @@ OsuUISongBrowserSongButton::OsuUISongBrowserSongButton(Osu *osu, OsuSongBrowser 
                                                        OsuDatabaseBeatmap *databaseBeatmap)
     : OsuUISongBrowserButton(osu, songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, name) {
     m_databaseBeatmap = databaseBeatmap;
-    m_representativeDatabaseBeatmap = NULL;
 
     m_grade = Score::Grade::D;
     m_bHasGrade = false;
@@ -67,7 +66,6 @@ OsuUISongBrowserSongButton::OsuUISongBrowserSongButton(Osu *osu, OsuSongBrowser 
         }
     }
 
-    updateRepresentativeDatabaseBeatmap();
     updateLayoutEx();
 }
 
@@ -81,23 +79,33 @@ void OsuUISongBrowserSongButton::draw(Graphics *g) {
     OsuUISongBrowserButton::draw(g);
     if(!m_bVisible) return;
 
+    if(m_vPos.y + m_vSize.y < 0) return;
+    if(m_vPos.y > engine->getScreenHeight()) return;
+
     // draw background image
-    if(m_representativeDatabaseBeatmap != NULL)
-        drawBeatmapBackgroundThumbnail(
-            g, m_osu->getBackgroundImageHandler()->getLoadBackgroundImage(m_representativeDatabaseBeatmap));
+    sortChildren();
+    if(m_databaseBeatmap != NULL && m_children.size() > 0) {
+        // use the bottom child (hardest diff, assuming default sorting, and respecting the current search matches)
+        for(int i = m_children.size() - 1; i >= 0; i--) {
+            // NOTE: if no search is active, then all search matches return true by default
+            if(m_children[i]->isSearchMatch()) {
+                auto representative_beatmap =
+                    dynamic_cast<OsuUISongBrowserSongButton *>(m_children[i])->getDatabaseBeatmap();
+
+                m_sTitle = representative_beatmap->getTitle();
+                m_sArtist = representative_beatmap->getArtist();
+                m_sMapper = representative_beatmap->getCreator();
+
+                drawBeatmapBackgroundThumbnail(
+                    g, m_osu->getBackgroundImageHandler()->getLoadBackgroundImage(representative_beatmap));
+
+                break;
+            }
+        }
+    }
 
     drawTitle(g);
     drawSubTitle(g);
-}
-
-void OsuUISongBrowserSongButton::mouse_update(bool *propagate_clicks) {
-    if(!m_bVisible) return;
-    OsuUISongBrowserButton::mouse_update(propagate_clicks);
-
-    // HACKHACK: calling these two every frame is a bit insane, but too lazy to write delta detection logic atm. (UI
-    // desync is not a problem since parent buttons are invisible while selected, so no resorting happens in that state)
-    sortChildren();
-    updateRepresentativeDatabaseBeatmap();
 }
 
 void OsuUISongBrowserSongButton::drawBeatmapBackgroundThumbnail(Graphics *g, Image *image) {
@@ -183,12 +191,10 @@ void OsuUISongBrowserSongButton::drawTitle(Graphics *g, float deselectedAlpha, b
 
     g->pushTransform();
     {
+        UString title = m_sTitle.c_str();
         g->scale(titleScale, titleScale);
         g->translate(pos.x + m_fTextOffset, pos.y + size.y * m_fTextMarginScale + m_font->getHeight() * titleScale);
-        g->drawString(m_font, buildTitleString());
-
-        // debugging
-        // g->drawString(m_font, UString::format("%i, %i", m_diff->setID, m_diff->ID));
+        g->drawString(m_font, title);
     }
     g->popTransform();
 }
@@ -206,23 +212,15 @@ void OsuUISongBrowserSongButton::drawSubTitle(Graphics *g, float deselectedAlpha
 
     g->pushTransform();
     {
+        UString subTitleString = m_sArtist.c_str();
+        subTitleString.append(" // ");
+        subTitleString.append(m_sMapper.c_str());
+
         g->scale(subTitleScale, subTitleScale);
         g->translate(pos.x + m_fTextOffset, pos.y + size.y * m_fTextMarginScale + m_font->getHeight() * titleScale +
                                                 size.y * m_fTextSpacingScale +
                                                 m_font->getHeight() * subTitleScale * 0.85f);
-        g->drawString(m_font, buildSubTitleString());
-
-        // debug stuff
-        /*
-        g->translate(-300, 0);
-        long long oldestTime = std::numeric_limits<long long>::min();
-        for (int i=0; i<m_beatmap->getNumDifficulties(); i++)
-        {
-                if ((*m_beatmap->getDifficultiesPointer())[i]->lastModificationTime > oldestTime)
-                        oldestTime = (*m_beatmap->getDifficultiesPointer())[i]->lastModificationTime;
-        }
-        g->drawString(m_font, UString::format("t = %I64d", oldestTime));
-        */
+        g->drawString(m_font, subTitleString);
     }
     g->popTransform();
 }
@@ -293,19 +291,6 @@ void OsuUISongBrowserSongButton::triggerContextMenu(Vector2 pos) {
             m_contextMenu->addButton("[+Set]   Add to Collection", 2);
 
             if(m_osu->getSongBrowser()->getGroupingMode() == OsuSongBrowser::GROUP::GROUP_COLLECTIONS) {
-                // get the collection name for this diff/set
-                UString collectionName;
-                {
-                    const std::vector<OsuUISongBrowserCollectionButton *> &collectionButtons =
-                        m_osu->getSongBrowser()->getCollectionButtons();
-                    for(size_t i = 0; i < collectionButtons.size(); i++) {
-                        if(collectionButtons[i]->isSelected()) {
-                            collectionName = collectionButtons[i]->getCollectionName();
-                            break;
-                        }
-                    }
-                }
-
                 CBaseUIButton *spacer = m_contextMenu->addButton("---");
                 spacer->setTextLeft(false);
                 spacer->setEnabled(false);
@@ -440,28 +425,4 @@ float OsuUISongBrowserSongButton::calculateGradeWidth() {
     OsuSkinImage *grade = OsuUISongBrowserScoreButton::getGradeImage(m_osu, m_grade);
 
     return grade->getSizeBaseRaw().x * calculateGradeScale();
-}
-
-void OsuUISongBrowserSongButton::updateRepresentativeDatabaseBeatmap() {
-    if(m_databaseBeatmap != NULL && m_children.size() > 0) {
-        const OsuDatabaseBeatmap *previousRepresentativeDatabaseBeatmap = m_representativeDatabaseBeatmap;
-
-        // use the bottom child (hardest diff, assuming default sorting, and respecting the current search matches)
-        for(int i = m_children.size() - 1; i >= 0; i--) {
-            if(m_children[i]
-                   ->isSearchMatch())  // NOTE: if no search is active, then all search matches return true by default
-            {
-                m_representativeDatabaseBeatmap =
-                    dynamic_cast<OsuUISongBrowserSongButton *>(m_children[i])->getDatabaseBeatmap();
-                break;
-            }
-        }
-
-        if(m_representativeDatabaseBeatmap != NULL &&
-           m_representativeDatabaseBeatmap != previousRepresentativeDatabaseBeatmap) {
-            m_sTitle = m_representativeDatabaseBeatmap->getTitle();
-            m_sArtist = m_representativeDatabaseBeatmap->getArtist();
-            m_sMapper = m_representativeDatabaseBeatmap->getCreator();
-        }
-    }
 }

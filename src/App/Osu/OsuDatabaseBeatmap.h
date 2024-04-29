@@ -144,10 +144,10 @@ class OsuDatabaseBeatmap {
     inline int getID() const { return m_iID; }
     inline int getSetID() const { return m_iSetID; }
 
-    inline const UString &getTitle() const { return m_sTitle; }
-    inline const UString &getArtist() const { return m_sArtist; }
-    inline const UString &getCreator() const { return m_sCreator; }
-    inline const UString &getDifficultyName() const { return m_sDifficultyName; }
+    inline const std::string &getTitle() const { return m_sTitle; }
+    inline const std::string &getArtist() const { return m_sArtist; }
+    inline const std::string &getCreator() const { return m_sCreator; }
+    inline const std::string &getDifficultyName() const { return m_sDifficultyName; }
     inline const std::string &getSource() const { return m_sSource; }
     inline const std::string &getTags() const { return m_sTags; }
     inline const std::string &getBackgroundImageFileName() const { return m_sBackgroundImageFileName; }
@@ -187,7 +187,7 @@ class OsuDatabaseBeatmap {
 
     // custom data
 
-    inline long long getLastModificationTime() const { return m_iLastModificationTime; }
+    long long last_modification_time;
 
     inline long getLocalOffset() const { return m_iLocalOffset; }
     inline long getOnlineOffset() const { return m_iOnlineOffset; }
@@ -202,12 +202,12 @@ class OsuDatabaseBeatmap {
     long m_iID;       // online ID, if uploaded
     int m_iSetID;     // online set ID, if uploaded
 
-    UString m_sTitle;
-    UString m_sArtist;
-    UString m_sCreator;
-    UString m_sDifficultyName;  // difficulty name ("Version")
-    std::string m_sSource;      // only used by search
-    std::string m_sTags;        // only used by search
+    std::string m_sTitle;
+    std::string m_sArtist;
+    std::string m_sCreator;
+    std::string m_sDifficultyName;  // difficulty name ("Version")
+    std::string m_sSource;          // only used by search
+    std::string m_sTags;            // only used by search
     std::string m_sBackgroundImageFileName;
     std::string m_sAudioFileName;
 
@@ -244,8 +244,6 @@ class OsuDatabaseBeatmap {
     int m_iNumSpinners;
 
     // custom data (not necessary, not part of the beatmap file, and not precomputed)
-
-    long long m_iLastModificationTime;  // only used for sorting
 
     long m_iLocalOffset;
     long m_iOnlineOffset;

@@ -238,8 +238,8 @@ class OsuBeatmap {
     bool isClickHeld();
     bool isLastKeyDownKey1();
 
-    UString getTitle() const;
-    UString getArtist() const;
+    std::string getTitle() const;
+    std::string getArtist() const;
 
     inline const std::vector<OsuDatabaseBeatmap::BREAK> &getBreaks() const { return m_breaks; }
     unsigned long getBreakDurationTotal() const;

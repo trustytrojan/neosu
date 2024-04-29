@@ -396,11 +396,11 @@ void OsuUserStatsScreen::rebuildScoreButtons(UString playerName) {
 
         UString title = "...";
         if(diff != NULL) {
-            title = diff->getArtist();
+            title = diff->getArtist().c_str();
             title.append(" - ");
-            title.append(diff->getTitle());
+            title.append(diff->getTitle().c_str());
             title.append(" [");
-            title.append(diff->getDifficultyName());
+            title.append(diff->getDifficultyName().c_str());
             title.append("]");
         }
 

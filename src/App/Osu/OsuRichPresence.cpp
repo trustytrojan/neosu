@@ -119,11 +119,11 @@ void OsuRichPresence::onSongBrowser(Osu *osu) {
 
 void OsuRichPresence::onPlayStart(Osu *osu) {
     UString playingInfo /*= "Playing "*/;
-    playingInfo.append(osu->getSelectedBeatmap()->getSelectedDifficulty2()->getArtist());
+    playingInfo.append(osu->getSelectedBeatmap()->getSelectedDifficulty2()->getArtist().c_str());
     playingInfo.append(" - ");
-    playingInfo.append(osu->getSelectedBeatmap()->getSelectedDifficulty2()->getTitle());
+    playingInfo.append(osu->getSelectedBeatmap()->getSelectedDifficulty2()->getTitle().c_str());
     playingInfo.append(" [");
-    playingInfo.append(osu->getSelectedBeatmap()->getSelectedDifficulty2()->getDifficultyName());
+    playingInfo.append(osu->getSelectedBeatmap()->getSelectedDifficulty2()->getDifficultyName().c_str());
     playingInfo.append("]");
 
     setStatus(osu, playingInfo);

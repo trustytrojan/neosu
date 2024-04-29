@@ -24,19 +24,17 @@ class OsuUIRankingScreenInfoLabel : public CBaseUIElement {
 
     void setFromBeatmap(OsuBeatmap *beatmap, OsuDatabaseBeatmap *diff2);
 
-    void setArtist(UString artist) { m_sArtist = artist; }
-    void setTitle(UString title) { m_sTitle = title; }
-    void setDiff(UString diff) { m_sDiff = diff; }
-    void setMapper(UString mapper) { m_sMapper = mapper; }
-    void setPlayer(UString player) { m_sPlayer = player; }
-    void setDate(UString date) { m_sDate = date; }
+    void setArtist(std::string artist) { m_sArtist = artist; }
+    void setTitle(std::string title) { m_sTitle = title; }
+    void setDiff(std::string diff) { m_sDiff = diff; }
+    void setMapper(std::string mapper) { m_sMapper = mapper; }
+    void setPlayer(std::string player) { m_sPlayer = player; }
+    void setDate(std::string date) { m_sDate = date; }
 
     float getMinimumWidth();
     float getMinimumHeight();
 
    private:
-    UString buildTitleString();
-    UString buildSubTitleString();
     UString buildPlayerString();
 
     Osu *m_osu;
@@ -45,12 +43,12 @@ class OsuUIRankingScreenInfoLabel : public CBaseUIElement {
     int m_iMargin;
     float m_fSubTitleScale;
 
-    UString m_sArtist;
-    UString m_sTitle;
-    UString m_sDiff;
-    UString m_sMapper;
-    UString m_sPlayer;
-    UString m_sDate;
+    std::string m_sArtist;
+    std::string m_sTitle;
+    std::string m_sDiff;
+    std::string m_sMapper;
+    std::string m_sPlayer;
+    std::string m_sDate;
 };
 
 #endif

@@ -504,8 +504,8 @@ void OsuRankingScreen::setScore(Score score, UString dateTime) {
     m_bIsImportedLegacyScore = score.isImportedLegacyScore;
     m_bIsUnranked = false;
 
-    m_songInfo->setDate(dateTime);
-    m_songInfo->setPlayer(UString(score.playerName.c_str()));
+    m_songInfo->setDate(dateTime.toUtf8());
+    m_songInfo->setPlayer(score.playerName);
 
     m_rankingPanel->setScore(score);
     setGrade(OsuScore::calculateGrade(score.num300s, score.num100s, score.num50s, score.numMisses,
@@ -572,7 +572,9 @@ void OsuRankingScreen::setScore(Score score, UString dateTime) {
 
 void OsuRankingScreen::setBeatmapInfo(OsuBeatmap *beatmap, OsuDatabaseBeatmap *diff2) {
     m_songInfo->setFromBeatmap(beatmap, diff2);
-    m_songInfo->setPlayer(m_bIsUnranked ? "neosu" : convar->getConVarByName("name")->getString());
+
+    UString local_name = convar->getConVarByName("name")->getString();
+    m_songInfo->setPlayer(m_bIsUnranked ? "neosu" : local_name.toUtf8());
 
     // round all here to 2 decimal places
     m_fSpeedMultiplier = std::round(m_osu->getSpeedMultiplier() * 100.0f) / 100.0f;

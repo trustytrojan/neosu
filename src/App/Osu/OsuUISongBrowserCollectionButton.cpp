@@ -65,7 +65,21 @@ void OsuUISongBrowserCollectionButton::draw(Graphics *g) {
     const Vector2 size = getActualSize();
 
     // draw title
-    UString titleString = buildTitleString();
+    UString titleString = m_sCollectionName.c_str();
+    int numChildren = 0;
+    {
+        for(size_t c = 0; c < m_children.size(); c++) {
+            const std::vector<OsuUISongBrowserButton *> &childrenChildren = m_children[c]->getChildren();
+            if(childrenChildren.size() > 0) {
+                for(size_t cc = 0; cc < childrenChildren.size(); cc++) {
+                    if(childrenChildren[cc]->isSearchMatch()) numChildren++;
+                }
+            } else if(m_children[c]->isSearchMatch())
+                numChildren++;
+        }
+    }
+    titleString.append(UString::format((numChildren == 1 ? " (%i map)" : " (%i maps)"), numChildren));
+
     int textXOffset = size.x * 0.02f;
     float titleScale = (size.y * m_fTitleScale) / m_font->getHeight();
     g->setColor(m_bSelected ? skin->getSongSelectActiveText() : skin->getSongSelectInactiveText());
@@ -128,7 +142,7 @@ void OsuUISongBrowserCollectionButton::onContextMenu(UString text, int id) {
             spacer->setTextColor(0xff888888);
             spacer->setTextDarkColor(0xff000000);
 
-            m_contextMenu->addTextbox(m_sCollectionName, id)->setCursorPosRight();
+            m_contextMenu->addTextbox(m_sCollectionName.c_str(), id)->setCursorPosRight();
 
             spacer = m_contextMenu->addButton("---");
             spacer->setTextLeft(false);
@@ -172,14 +186,13 @@ void OsuUISongBrowserCollectionButton::onContextMenu(UString text, int id) {
 
 void OsuUISongBrowserCollectionButton::onRenameCollectionConfirmed(UString text, int id) {
     if(text.length() > 0) {
-        std::string old_name = m_sCollectionName.toUtf8();
         std::string new_name = text.toUtf8();
-        auto collection = get_or_create_collection(old_name);
+        auto collection = get_or_create_collection(m_sCollectionName);
         collection->rename_to(new_name);
         save_collections();
 
         // (trigger re-sorting of collection buttons)
-        m_osu->getSongBrowser()->onCollectionButtonContextMenu(this, m_sCollectionName, 3);
+        m_osu->getSongBrowser()->onCollectionButtonContextMenu(this, m_sCollectionName.c_str(), 3);
     }
 }
 
@@ -187,29 +200,7 @@ void OsuUISongBrowserCollectionButton::onDeleteCollectionConfirmed(UString text,
     if(id != 2) return;
 
     // just forward it
-    m_osu->getSongBrowser()->onCollectionButtonContextMenu(this, m_sCollectionName, id);
-}
-
-UString OsuUISongBrowserCollectionButton::buildTitleString() {
-    UString titleString = m_sCollectionName;
-
-    // count children (also with support for search results in collections)
-    int numChildren = 0;
-    {
-        for(size_t c = 0; c < m_children.size(); c++) {
-            const std::vector<OsuUISongBrowserButton *> &childrenChildren = m_children[c]->getChildren();
-            if(childrenChildren.size() > 0) {
-                for(size_t cc = 0; cc < childrenChildren.size(); cc++) {
-                    if(childrenChildren[cc]->isSearchMatch()) numChildren++;
-                }
-            } else if(m_children[c]->isSearchMatch())
-                numChildren++;
-        }
-    }
-
-    titleString.append(UString::format((numChildren == 1 ? " (%i map)" : " (%i maps)"), numChildren));
-
-    return titleString;
+    m_osu->getSongBrowser()->onCollectionButtonContextMenu(this, m_sCollectionName.c_str(), id);
 }
 
 Color OsuUISongBrowserCollectionButton::getActiveBackgroundColor() const {
