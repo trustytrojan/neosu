@@ -12,6 +12,7 @@
 #include "CBaseUIImageButton.h"
 #include "CBaseUILabel.h"
 #include "CBaseUIScrollView.h"
+#include "Collections.h"
 #include "ConVar.h"
 #include "Engine.h"
 #include "Keyboard.h"
@@ -1697,6 +1698,7 @@ void OsuSongBrowser::refreshBeatmaps() {
         delete m_songButtons[i];
     }
     m_songButtons.clear();
+    hashToSongButton.clear();
     for(size_t i = 0; i < m_collectionButtons.size(); i++) {
         delete m_collectionButtons[i];
     }
@@ -1755,15 +1757,19 @@ void OsuSongBrowser::addBeatmap(OsuDatabaseBeatmap *beatmap) {
     if(beatmap->getDifficulties().size() < 1) return;
 
     OsuUISongBrowserSongButton *songButton;
-    if(beatmap->getDifficulties().size() > 1)
+    if(beatmap->getDifficulties().size() > 1) {
         songButton = new OsuUISongBrowserSongButton(m_osu, this, m_songBrowser, m_contextMenu, 250,
                                                     250 + m_beatmaps.size() * 50, 200, 50, "", beatmap);
-    else
+    } else {
         songButton = new OsuUISongBrowserSongDifficultyButton(m_osu, this, m_songBrowser, m_contextMenu, 250,
                                                               250 + m_beatmaps.size() * 50, 200, 50, "",
                                                               beatmap->getDifficulties()[0], NULL);
+    }
 
     m_songButtons.push_back(songButton);
+    for(auto diff : beatmap->getDifficulties()) {
+        hashToSongButton[diff->getMD5Hash()] = songButton;
+    }
 
     // prebuild temporary list of all relevant buttons, used by some groups
     std::vector<OsuUISongBrowserButton *> tempChildrenForGroups;
@@ -3853,22 +3859,21 @@ void OsuSongBrowser::onSongButtonContextMenu(OsuUISongBrowserSongButton *songBut
     {
         if(id == 1) {
             // add diff to collection
-
-            m_db->addBeatmapToCollection(text, songButton->getDatabaseBeatmap()->getMD5Hash());
-
+            std::string name = text.toUtf8();
+            auto collection = get_or_create_collection(name);
+            collection->add_map(songButton->getDatabaseBeatmap()->getMD5Hash());
+            save_collections();
             updateUIScheduled = true;
         } else if(id == 2) {
             // add set to collection
-
+            std::string name = text.toUtf8();
+            auto collection = get_or_create_collection(name);
             const std::vector<MD5Hash> beatmapSetHashes =
                 CollectionManagementHelper::getBeatmapSetHashesForSongButton(songButton, m_db);
-            for(size_t i = 0; i < beatmapSetHashes.size(); i++) {
-                m_db->addBeatmapToCollection(text, beatmapSetHashes[i],
-                                             false);  // (don't save here every time) (this will ignore already added
-                                                      // parts of the set, so nothing to worry about)
+            for(auto hash : beatmapSetHashes) {
+                collection->add_map(hash);
             }
-            m_db->triggerSaveCollections();  // (but do save here once at the end)
-
+            save_collections();
             updateUIScheduled = true;
         } else if(id == 3) {
             // remove diff from collection
@@ -3884,8 +3889,10 @@ void OsuSongBrowser::onSongButtonContextMenu(OsuUISongBrowserSongButton *songBut
                 }
             }
 
-            m_db->removeBeatmapFromCollection(collectionName, songButton->getDatabaseBeatmap()->getMD5Hash());
-
+            std::string name = collectionName.toUtf8();
+            auto collection = get_or_create_collection(name);
+            collection->remove_map(songButton->getDatabaseBeatmap()->getMD5Hash());
+            save_collections();
             updateUIScheduled = true;
         } else if(id == 4) {
             // remove entire set from collection
@@ -3901,41 +3908,35 @@ void OsuSongBrowser::onSongButtonContextMenu(OsuUISongBrowserSongButton *songBut
                 }
             }
 
+            std::string name = collectionName.toUtf8();
+            auto collection = get_or_create_collection(name);
             const std::vector<MD5Hash> beatmapSetHashes =
                 CollectionManagementHelper::getBeatmapSetHashesForSongButton(songButton, m_db);
-            for(size_t i = 0; i < beatmapSetHashes.size(); i++) {
-                m_db->removeBeatmapFromCollection(collectionName, beatmapSetHashes[i],
-                                                  false);  // (don't save here every time)
+            for(auto hash : beatmapSetHashes) {
+                collection->remove_map(hash);
             }
-            m_db->triggerSaveCollections();  // (but do save here once at the end)
-
+            save_collections();
             updateUIScheduled = true;
         } else if(id == -2 || id == -4) {
-            // add new collection with name text
+            // add beatmap(set) to new collection
+            std::string name = text.toUtf8();
+            auto collection = get_or_create_collection(name);
 
-            if(!m_db->addCollection(text))
-                m_osu->getNotificationOverlay()->addNotification("Error: Collection name already exists or is invalid.",
-                                                                 0xffffff00);
-            else {
-                if(id == -2) {
-                    // id == -2 means add diff to the just-created new collection
-
-                    m_db->addBeatmapToCollection(text, songButton->getDatabaseBeatmap()->getMD5Hash());
-
-                    updateUIScheduled = true;
-                } else if(id == -4) {
-                    // id == -4 means add set to the just-created new collection
-
-                    const std::vector<MD5Hash> beatmapSetHashes =
-                        CollectionManagementHelper::getBeatmapSetHashesForSongButton(songButton, m_db);
-                    for(size_t i = 0; i < beatmapSetHashes.size(); i++) {
-                        m_db->addBeatmapToCollection(text, beatmapSetHashes[i], false);  // (don't save here every time)
-                    }
-                    m_db->triggerSaveCollections();  // (but do save here once at the end)
-
-                    updateUIScheduled = true;
+            if(id == -2) {
+                // id == -2 means beatmap
+                collection->add_map(songButton->getDatabaseBeatmap()->getMD5Hash());
+                updateUIScheduled = true;
+            } else if(id == -4) {
+                // id == -4 means beatmapset
+                const std::vector<MD5Hash> beatmapSetHashes =
+                    CollectionManagementHelper::getBeatmapSetHashesForSongButton(songButton, m_db);
+                for(size_t i = 0; i < beatmapSetHashes.size(); i++) {
+                    collection->add_map(beatmapSetHashes[i]);
                 }
+                updateUIScheduled = true;
             }
+
+            save_collections();
         }
     }
 
@@ -3976,7 +3977,10 @@ void OsuSongBrowser::onCollectionButtonContextMenu(OsuUISongBrowserCollectionBut
                 // reset UI state
                 m_selectionPreviousCollectionButton = NULL;
 
-                m_db->deleteCollection(text);
+                std::string name = text.toUtf8();
+                auto collection = get_or_create_collection(name);
+                collection->delete_collection();
+                save_collections();
 
                 // update UI
                 { onGroupCollections(false); }
@@ -4167,77 +4171,52 @@ void OsuSongBrowser::recreateCollectionsButtons() {
     Timer t;
     t.start();
 
-    const std::vector<OsuDatabase::Collection> &collections = m_db->getCollections();
+    for(auto collection : collections) {
+        if(collection->maps.empty()) continue;
 
-    std::vector<std::vector<OsuUISongBrowserButton *>> collection_button_children;
-    for(int i = 0; i < collections.size(); i++) {
-        collection_button_children.push_back(std::vector<OsuUISongBrowserButton *>());
-    }
+        std::vector<OsuUISongBrowserButton *> folder;
+        std::vector<uint32_t> matched_sets;
 
-    for(auto &song_button : m_songButtons) {
-        for(int i = 0; i < collections.size(); i++) {
-            for(auto &pair : collections[i].beatmaps) {
-                const OsuDatabaseBeatmap *collectionBeatmap = pair.first;
-                const std::vector<OsuDatabaseBeatmap *> &colDiffs = pair.second;
+        for(auto &map : collection->maps) {
+            auto it = hashToSongButton.find(map);
+            if(it == hashToSongButton.end()) continue;
 
-                // first: search direct buttons on collection beatmap
-                auto song_beatmap = song_button->getDatabaseBeatmap();
-                bool isMatchingSongButton = (song_beatmap == collectionBeatmap);
-
-                // second: search direct buttons on collection diffs (e.g. standalone diffs which still have a wrapper
-                // beatmap)
-                if(!isMatchingSongButton) {
-                    for(auto &diff : colDiffs) {
-                        if(song_beatmap == diff) {
-                            isMatchingSongButton = true;
-                            break;
-                        }
+            uint32_t set_id = 0;
+            auto song_button = it->second;
+            const std::vector<OsuUISongBrowserButton *> &songButtonChildren = song_button->getChildren();
+            std::vector<OsuUISongBrowserButton *> matching_diffs;
+            for(OsuUISongBrowserButton *sbc : songButtonChildren) {
+                for(auto &map2 : collection->maps) {
+                    if(sbc->getDatabaseBeatmap()->getMD5Hash() == map2) {
+                        matching_diffs.push_back(sbc);
+                        set_id = sbc->getDatabaseBeatmap()->getSetID();
                     }
-                }
-
-                // third: search child buttons
-                if(!isMatchingSongButton) {
-                    const std::vector<OsuUISongBrowserButton *> &songButtonChildren = song_button->getChildren();
-                    for(OsuUISongBrowserButton *sbc : songButtonChildren) {
-                        // check set match
-                        if(sbc->getDatabaseBeatmap() == collectionBeatmap) {
-                            isMatchingSongButton = true;
-                            break;
-                        }
-                    }
-                }
-
-                if(isMatchingSongButton) {
-                    const std::vector<OsuUISongBrowserButton *> &songButtonChildren = song_button->getChildren();
-                    std::vector<OsuUISongBrowserButton *> matchingDiffs;
-
-                    for(OsuUISongBrowserButton *sbc : songButtonChildren) {
-                        for(auto &diff : colDiffs) {
-                            if(sbc->getDatabaseBeatmap() == diff) matchingDiffs.push_back(sbc);
-                        }
-                    }
-
-                    // new: only add matched diff buttons, instead of the set button
-                    // however, if all diffs match, then add the set button instead (user added all diffs of beatmap
-                    // into collection)
-                    if(songButtonChildren.size() == matchingDiffs.size())
-                        collection_button_children[i].push_back(
-                            song_button);  // TODO: this is more of a convenience workaround until dynamic regrouping is
-                                           // implemented
-                    else
-                        collection_button_children[i].insert(collection_button_children[i].end(), matchingDiffs.begin(),
-                                                             matchingDiffs.end());
                 }
             }
-        }
-    }
 
-    for(int i = 0; i < collections.size(); i++) {
-        if(!collection_button_children[i].empty()) {
-            OsuUISongBrowserCollectionButton *collectionButton = new OsuUISongBrowserCollectionButton(
-                m_osu, this, m_songBrowser, m_contextMenu, 250, 250 + m_beatmaps.size() * 50, 200, 50, "",
-                collections[i].name, collection_button_children[i]);
-            m_collectionButtons.push_back(collectionButton);
+            auto set = std::find(matched_sets.begin(), matched_sets.end(), set_id);
+            if(set == matched_sets.end()) {
+                // Mark set as processed so we don't add the diffs from the same set twice
+                matched_sets.push_back(set_id);
+            } else {
+                // We already added the maps from this set to the collection!
+                continue;
+            }
+
+            if(songButtonChildren.size() == matching_diffs.size()) {
+                // all diffs match: add the set button (user added all diffs of beatmap into collection)
+                folder.push_back(song_button);
+            } else {
+                // only add matched diff buttons
+                folder.insert(folder.end(), matching_diffs.begin(), matching_diffs.end());
+            }
+        }
+
+        if(!folder.empty()) {
+            UString uname = collection->name.c_str();
+            m_collectionButtons.push_back(
+                new OsuUISongBrowserCollectionButton(m_osu, this, m_songBrowser, m_contextMenu, 250,
+                                                     250 + m_beatmaps.size() * 50, 200, 50, "", uname, folder));
         }
     }
 

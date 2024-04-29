@@ -254,6 +254,7 @@ double read_float64(Packet *packet);
 UString read_string(Packet *packet);
 std::string read_stdstring(Packet *packet);
 void skip_string(Packet *packet);
+MD5Hash read_hash(Packet *packet);
 
 void write_bytes(Packet *packet, uint8_t *bytes, size_t n);
 void write_byte(Packet *packet, uint8_t b);

@@ -40,11 +40,13 @@ OsuChangelog::OsuChangelog(Osu *osu) : OsuScreenBackable(osu) {
     latest.changes.push_back("- Added option to normalize loudness across songs");
     latest.changes.push_back("- Added server logo to main menu button");
     latest.changes.push_back("- Added instant_replay_duration convar");
+    latest.changes.push_back("- Added ability to remove beatmaps from osu!stable collections (only affects neosu)");
     latest.changes.push_back("- Allowed singleplayer cheats when the server doesn't accept score submissions");
     latest.changes.push_back("- Changed scoreboard name color to red for friends");
     latest.changes.push_back("- Changed default instant replay key to F2 to avoid conflicts with mod selector");
-    latest.changes.push_back("- Forced exclusive mode when using WASAPI output");
     latest.changes.push_back("- Disabled score submission when mods are toggled mid-game");
+    latest.changes.push_back("- Forced exclusive mode when using WASAPI output");
+    latest.changes.push_back("- Optimized collection processing");
     latest.changes.push_back("- Removed support for the Nintendo Switch");
     latest.changes.push_back("- Updated protocol version");
     latest.changes.push_back("- Fixed chat layout updating while chat was hidden");

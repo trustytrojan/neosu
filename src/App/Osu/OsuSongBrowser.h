@@ -339,6 +339,7 @@ class OsuSongBrowser : public OsuScreenBackable {
     std::vector<OsuUISongBrowserCollectionButton *> m_dateaddedCollectionButtons;
     std::vector<OsuUISongBrowserCollectionButton *> m_lengthCollectionButtons;
     std::vector<OsuUISongBrowserCollectionButton *> m_titleCollectionButtons;
+    std::unordered_map<MD5Hash, OsuUISongBrowserSongButton *> hashToSongButton;
     bool m_bBeatmapRefreshScheduled;
     UString m_sLastOsuFolder;
 

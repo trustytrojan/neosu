@@ -1,13 +1,4 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		osu!.db + collection.db + raw loader + scores etc.
-//
-// $NoKeywords: $osubdb
-//===============================================================================//
-
-#ifndef OSUDATABASE_H
-#define OSUDATABASE_H
-
+#pragma once
 #include "BanchoProtocol.h"  // Packet
 #include "OsuReplay.h"
 #include "OsuScore.h"
@@ -35,18 +26,6 @@ bool save_db(Packet *db, std::string path);
 
 class OsuDatabase {
    public:
-    struct CollectionEntry {
-        bool isLegacyEntry;  // used for identifying loaded osu! collection entries
-        MD5Hash hash;
-    };
-
-    struct Collection {
-        bool isLegacyCollection;  // used for identifying loaded osu! collections
-        UString name;
-        std::vector<CollectionEntry> hashes;
-        std::vector<std::pair<OsuDatabaseBeatmap *, std::vector<OsuDatabaseBeatmap *>>> beatmaps;
-    };
-
     struct PlayerStats {
         UString name;
         float pp;
@@ -90,14 +69,6 @@ class OsuDatabase {
     void forceScoreUpdateOnNextCalculatePlayerStats() { m_bDidScoresChangeForStats = true; }
     void forceScoresSaveOnNextShutdown() { m_bDidScoresChangeForSave = true; }
 
-    bool addCollection(UString collectionName);
-    bool renameCollection(UString oldCollectionName, UString newCollectionName);
-    void deleteCollection(UString collectionName);
-    void addBeatmapToCollection(UString collectionName, MD5Hash beatmapMD5Hash, bool doSaveImmediatelyIfEnabled = true);
-    void removeBeatmapFromCollection(UString collectionName, MD5Hash beatmapMD5Hash,
-                                     bool doSaveImmediatelyIfEnabled = true);
-    void triggerSaveCollections() { saveCollections(); }
-
     std::vector<UString> getPlayerNamesWithPPScores();
     std::vector<UString> getPlayerNamesWithScoresForUserSwitcher();
     PlayerPPScores getPlayerPPScores(UString playerName);
@@ -114,8 +85,6 @@ class OsuDatabase {
     inline const std::vector<OsuDatabaseBeatmap *> getDatabaseBeatmaps() const { return m_databaseBeatmaps; }
     OsuDatabaseBeatmap *getBeatmap(const MD5Hash &md5hash);
     OsuDatabaseBeatmap *getBeatmapDifficulty(const MD5Hash &md5hash);
-
-    inline const std::vector<Collection> &getCollections() const { return m_collections; }
 
     inline std::unordered_map<MD5Hash, std::vector<Score>> *getScores() { return &m_scores; }
     inline const std::vector<SCORE_SORTING_METHOD> &getScoreSortingMethods() const { return m_scoreSortingMethods; }
@@ -145,11 +114,6 @@ class OsuDatabase {
     void loadScores();
     void saveScores();
 
-    void loadCollections(std::string collectionFilePath, bool isLegacy,
-                         const std::unordered_map<MD5Hash, OsuDatabaseBeatmap *> &hashToDiff2,
-                         const std::unordered_map<MD5Hash, OsuDatabaseBeatmap *> &hashToBeatmap);
-    void saveCollections();
-
     void onScoresRename(UString args);
     void onScoresExport();
 
@@ -167,10 +131,6 @@ class OsuDatabase {
     // osu!.db
     int m_iVersion;
     int m_iFolderCount;
-
-    // collection.db (legacy and custom)
-    std::vector<Collection> m_collections;
-    bool m_bDidCollectionsChangeForSave;
 
     // scores.db (legacy and custom)
     bool m_bScoresLoaded;
@@ -196,5 +156,3 @@ class OsuDatabase {
     };
     std::unordered_map<MD5Hash, STARS_CACHE_ENTRY> m_starsCache;
 };
-
-#endif

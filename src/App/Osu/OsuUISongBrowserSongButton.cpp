@@ -7,6 +7,7 @@
 
 #include "OsuUISongBrowserSongButton.h"
 
+#include "Collections.h"
 #include "ConVar.h"
 #include "Engine.h"
 #include "Mouse.h"
@@ -305,69 +306,17 @@ void OsuUISongBrowserSongButton::triggerContextMenu(Vector2 pos) {
                     }
                 }
 
-                // check if this entry in the collection is coming from osu! or not
-                // the entry could be either a set button, or an independent diff button
-                bool isLegacyEntry = false;
-                {
-                    const std::vector<OsuDatabase::Collection> &collections =
-                        m_osu->getSongBrowser()->getDatabase()->getCollections();
-                    for(size_t i = 0; i < collections.size(); i++) {
-                        if(collections[i].name == collectionName) {
-                            for(size_t e = 0; e < collections[i].hashes.size(); e++) {
-                                if(m_databaseBeatmap->getDifficulties().size() < 1) {
-                                    // independent diff
-
-                                    if(collections[i].hashes[e].hash == m_databaseBeatmap->getMD5Hash()) {
-                                        isLegacyEntry = collections[i].hashes[e].isLegacyEntry;
-                                        break;
-                                    }
-                                } else {
-                                    // set
-
-                                    const std::vector<OsuDatabaseBeatmap *> &diffs =
-                                        m_databaseBeatmap->getDifficulties();
-
-                                    for(size_t d = 0; d < diffs.size(); d++) {
-                                        if(collections[i].hashes[e].hash == diffs[d]->getMD5Hash()) {
-                                            // one single entry of the set coming from osu! is enough to deny removing
-                                            // the set (as a whole)
-                                            if(collections[i].hashes[e].isLegacyEntry) {
-                                                isLegacyEntry = true;
-                                                break;
-                                            }
-                                        }
-                                    }
-
-                                    if(isLegacyEntry) break;
-                                }
-                            }
-
-                            break;
-                        }
-                    }
-                }
-
                 CBaseUIButton *spacer = m_contextMenu->addButton("---");
                 spacer->setTextLeft(false);
                 spacer->setEnabled(false);
                 spacer->setTextColor(0xff888888);
                 spacer->setTextDarkColor(0xff000000);
 
-                CBaseUIButton *removeDiffButton = NULL;
-                if(m_databaseBeatmap == NULL || m_databaseBeatmap->getDifficulties().size() < 1)
-                    removeDiffButton = m_contextMenu->addButton("[-]          Remove from Collection", 3);
-
-                CBaseUIButton *removeSetButton = m_contextMenu->addButton("[-Set]    Remove from Collection", 4);
-
-                if(isLegacyEntry) {
-                    if(removeDiffButton != NULL) {
-                        removeDiffButton->setTextColor(0xff888888);
-                        removeDiffButton->setTextDarkColor(0xff000000);
-                    }
-
-                    removeSetButton->setTextColor(0xff888888);
-                    removeSetButton->setTextDarkColor(0xff000000);
+                if(m_databaseBeatmap == NULL || m_databaseBeatmap->getDifficulties().size() < 1) {
+                    m_contextMenu->addButton("[-]          Remove from Collection", 3);
                 }
+
+                m_contextMenu->addButton("[-Set]    Remove from Collection", 4);
             }
         }
         m_contextMenu->end(false, false);
@@ -379,98 +328,46 @@ void OsuUISongBrowserSongButton::triggerContextMenu(Vector2 pos) {
 
 void OsuUISongBrowserSongButton::onContextMenu(UString text, int id) {
     if(id == 1 || id == 2) {
+        // 1 = add map to collection
+        // 2 = add set to collection
         m_contextMenu->begin(0, true);
         {
-            const std::vector<OsuDatabase::Collection> &collections =
-                m_osu->getSongBrowser()->getDatabase()->getCollections();
-
             m_contextMenu->addButton("[+]   Create new Collection?", -id * 2);
 
-            if(collections.size() > 0) {
-                CBaseUIButton *spacer = m_contextMenu->addButton("---");
-                spacer->setTextLeft(false);
-                spacer->setEnabled(false);
-                spacer->setTextColor(0xff888888);
-                spacer->setTextDarkColor(0xff000000);
+            for(auto collection : collections) {
+                if(!collection->maps.empty()) {
+                    CBaseUIButton *spacer = m_contextMenu->addButton("---");
+                    spacer->setTextLeft(false);
+                    spacer->setEnabled(false);
+                    spacer->setTextColor(0xff888888);
+                    spacer->setTextDarkColor(0xff000000);
+                    break;
+                }
+            }
 
-                for(size_t i = 0; i < collections.size(); i++) {
-                    bool isDiffAndAlreadyContained = false;
-                    if(m_databaseBeatmap != NULL && m_databaseBeatmap->getDifficulties().size() < 1) {
-                        for(size_t h = 0; h < collections[i].hashes.size(); h++) {
-                            if(collections[i].hashes[h].hash == m_databaseBeatmap->getMD5Hash()) {
-                                isDiffAndAlreadyContained = true;
+            auto map_hash = m_databaseBeatmap->getMD5Hash();
+            for(auto collection : collections) {
+                if(collection->maps.empty()) continue;
 
-                                // edge case: allow adding the set of this diff if it does not represent the entire set
-                                // (and the set is not yet added completely)
-                                if(id == 2) {
-                                    const OsuUISongBrowserSongDifficultyButton *diffButtonPointer =
-                                        dynamic_cast<OsuUISongBrowserSongDifficultyButton *>(this);
-                                    if(diffButtonPointer != NULL && diffButtonPointer->getParentSongButton() != NULL &&
-                                       diffButtonPointer->getParentSongButton()->getDatabaseBeatmap() != NULL) {
-                                        const OsuDatabaseBeatmap *setContainer =
-                                            diffButtonPointer->getParentSongButton()->getDatabaseBeatmap();
+                bool can_add_to_collection = true;
 
-                                        if(setContainer->getDifficulties().size() > 1) {
-                                            const std::vector<OsuDatabaseBeatmap *> &diffs =
-                                                setContainer->getDifficulties();
-
-                                            bool isSetAlreadyContained = true;
-                                            for(size_t s = 0; s < diffs.size(); s++) {
-                                                bool isDiffAlreadyContained = false;
-                                                for(size_t h2 = 0; h2 < collections[i].hashes.size(); h2++) {
-                                                    if(diffs[s]->getMD5Hash() == collections[i].hashes[h2].hash) {
-                                                        isDiffAlreadyContained = true;
-                                                        break;
-                                                    }
-                                                }
-
-                                                if(!isDiffAlreadyContained) {
-                                                    isSetAlreadyContained = false;
-                                                    break;
-                                                }
-                                            }
-
-                                            if(!isSetAlreadyContained) isDiffAndAlreadyContained = false;
-                                        }
-                                    }
-                                }
-
-                                break;
-                            }
-                        }
+                if(id == 1) {
+                    auto it = std::find(collection->maps.begin(), collection->maps.end(), map_hash);
+                    if(it != collection->maps.end()) {
+                        // Map already is present in the collection
+                        can_add_to_collection = false;
                     }
+                }
 
-                    bool isContainerAndSetAlreadyContained = false;
-                    if(m_databaseBeatmap != NULL && m_databaseBeatmap->getDifficulties().size() > 0) {
-                        const std::vector<OsuDatabaseBeatmap *> &diffs = m_databaseBeatmap->getDifficulties();
+                if(id == 2) {
+                    // XXX: Don't mark as valid if the set is fully present in the collection
+                }
 
-                        bool foundAllDiffs = true;
-                        for(size_t d = 0; d < diffs.size(); d++) {
-                            const std::vector<OsuDatabaseBeatmap *> &diffs = m_databaseBeatmap->getDifficulties();
-
-                            bool foundDiff = false;
-                            for(size_t h = 0; h < collections[i].hashes.size(); h++) {
-                                if(collections[i].hashes[h].hash == diffs[d]->getMD5Hash()) {
-                                    foundDiff = true;
-
-                                    break;
-                                }
-                            }
-
-                            foundAllDiffs = foundDiff;
-                            if(!foundAllDiffs) break;
-                        }
-
-                        isContainerAndSetAlreadyContained = foundAllDiffs;
-                    }
-
-                    CBaseUIButton *collectionButton = m_contextMenu->addButton(collections[i].name, id);
-
-                    if(isDiffAndAlreadyContained || isContainerAndSetAlreadyContained) {
-                        collectionButton->setEnabled(false);
-                        collectionButton->setTextColor(0xff555555);
-                        collectionButton->setTextDarkColor(0xff000000);
-                    }
+                auto collectionButton = m_contextMenu->addButton(UString(collection->name.c_str()), id);
+                if(!can_add_to_collection) {
+                    collectionButton->setEnabled(false);
+                    collectionButton->setTextColor(0xff555555);
+                    collectionButton->setTextDarkColor(0xff000000);
                 }
             }
         }
@@ -480,69 +377,9 @@ void OsuUISongBrowserSongButton::onContextMenu(UString text, int id) {
         OsuUIContextMenu::clampToRightScreenEdge(m_contextMenu);
         OsuUIContextMenu::clampToBottomScreenEdge(m_contextMenu);
     } else if(id == 3 || id == 4) {
-        // get the collection name for this diff/set
-        UString collectionName;
-        {
-            const std::vector<OsuUISongBrowserCollectionButton *> &collectionButtons =
-                m_osu->getSongBrowser()->getCollectionButtons();
-            for(size_t i = 0; i < collectionButtons.size(); i++) {
-                if(collectionButtons[i]->isSelected()) {
-                    collectionName = collectionButtons[i]->getCollectionName();
-                    break;
-                }
-            }
-        }
-
-        // check if this entry in the collection is coming from osu! or not
-        // the entry could be either a set button, or an independent diff button
-        bool isLegacyEntry = false;
-        {
-            const std::vector<OsuDatabase::Collection> &collections =
-                m_osu->getSongBrowser()->getDatabase()->getCollections();
-            for(size_t i = 0; i < collections.size(); i++) {
-                if(collections[i].name == collectionName) {
-                    for(size_t e = 0; e < collections[i].hashes.size(); e++) {
-                        if(m_databaseBeatmap->getDifficulties().size() < 1) {
-                            // independent diff
-
-                            if(collections[i].hashes[e].hash == m_databaseBeatmap->getMD5Hash()) {
-                                isLegacyEntry = collections[i].hashes[e].isLegacyEntry;
-                                break;
-                            }
-                        } else {
-                            // set
-
-                            const std::vector<OsuDatabaseBeatmap *> &diffs = m_databaseBeatmap->getDifficulties();
-
-                            for(size_t d = 0; d < diffs.size(); d++) {
-                                if(collections[i].hashes[e].hash == diffs[d]->getMD5Hash()) {
-                                    // one single entry of the set coming from osu! is enough to deny removing the set
-                                    // (as a whole)
-                                    if(collections[i].hashes[e].isLegacyEntry) {
-                                        isLegacyEntry = true;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if(isLegacyEntry) break;
-                        }
-                    }
-
-                    break;
-                }
-            }
-        }
-
-        if(isLegacyEntry) {
-            if(id == 3)
-                m_osu->getNotificationOverlay()->addNotification("Can't remove collection entry loaded from osu!",
-                                                                 0xffffff00);
-            else if(id == 4)
-                m_osu->getNotificationOverlay()->addNotification("Can't remove collection set loaded from osu!",
-                                                                 0xffffff00);
-        } else
-            m_osu->getSongBrowser()->onSongButtonContextMenu(this, text, id);
+        // 3 = remove map from collection
+        // 4 = remove set from collection
+        m_osu->getSongBrowser()->onSongButtonContextMenu(this, text, id);
     }
 }
 

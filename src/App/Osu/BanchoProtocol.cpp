@@ -187,6 +187,22 @@ std::string read_stdstring(Packet *packet) {
     return str_out;
 }
 
+MD5Hash read_hash(Packet *packet) {
+    MD5Hash hash;
+
+    uint8_t empty_check = read_byte(packet);
+    if(empty_check == 0) return hash;
+
+    uint32_t len = read_uleb128(packet);
+    if(len > 32) {
+        len = 32;
+    }
+
+    read_bytes(packet, (uint8_t *)hash.hash, len);
+    hash.hash[len] = '\0';
+    return hash;
+}
+
 void skip_string(Packet *packet) {
     uint8_t empty_check = read_byte(packet);
     if(empty_check == 0) {
