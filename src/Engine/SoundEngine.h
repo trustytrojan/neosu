@@ -13,9 +13,9 @@
 
 enum class OutputDriver {
     NONE,
-    BASS,
-    BASS_WASAPI,
-    BASS_ASIO,
+    BASS,         // directsound/wasapi non-exclusive mode/alsa
+    BASS_WASAPI,  // exclusive mode
+    BASS_ASIO,    // exclusive move
 };
 
 struct OUTPUT_DEVICE {

@@ -261,7 +261,7 @@ bool OsuVolumeOverlay::canChangeVolume() {
 }
 
 void OsuVolumeOverlay::gainFocus() {
-    if(engine->getSound()->isWASAPI() && convar->getConVarByName("win_snd_wasapi_exclusive")->getBool()) {
+    if(engine->getSound()->isWASAPI()) {
         // NOTE: wasapi exclusive mode controls the system volume, so don't bother
         return;
     }
@@ -271,7 +271,7 @@ void OsuVolumeOverlay::gainFocus() {
 }
 
 void OsuVolumeOverlay::loseFocus() {
-    if(engine->getSound()->isWASAPI() && convar->getConVarByName("win_snd_wasapi_exclusive")->getBool()) {
+    if(engine->getSound()->isWASAPI()) {
         // NOTE: wasapi exclusive mode controls the system volume, so don't bother
         return;
     }

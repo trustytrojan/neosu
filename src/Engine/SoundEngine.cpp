@@ -59,8 +59,6 @@ ConVar win_snd_wasapi_buffer_size(
 ConVar win_snd_wasapi_period_size(
     "win_snd_wasapi_period_size", 0.0f, FCVAR_NONE,
     "interval between OutputWasapiProc calls in seconds (e.g. 0.016 = 16 ms) (0 = use default)");
-ConVar win_snd_wasapi_exclusive("win_snd_wasapi_exclusive", false, FCVAR_NONE,
-                                "whether to use exclusive device mode to further reduce latency");
 
 ConVar asio_buffer_size("asio_buffer_size", -1, FCVAR_NONE,
                         "buffer size in samples (usually 44100 samples per second)");
@@ -239,10 +237,6 @@ void SoundEngine::updateOutputDevices(bool printInfo) {
         }
 
         soundDevice.driver = OutputDriver::BASS;
-        if(env->getOS() == Environment::OS::OS_WINDOWS && soundDevice.name != UString("No sound")) {
-            soundDevice.name.append(" [DirectSound]");
-        }
-
         m_outputDevices.push_back(soundDevice);
 
         debugLog("DSOUND: Device %i = \"%s\", enabled = %i, default = %i\n", d, deviceInfo.name, (int)isEnabled,
@@ -486,11 +480,9 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
 
         // BASS_WASAPI_RAW ignores sound "enhancements" that some sound cards offer (adds latency)
         // BASS_MIXER_NONSTOP prevents some sound cards from going to sleep when there is no output
-        auto flags = BASS_WASAPI_RAW | BASS_MIXER_NONSTOP;
-        if(win_snd_wasapi_exclusive.getBool()) flags |= BASS_WASAPI_EXCLUSIVE;
+        auto flags = BASS_WASAPI_RAW | BASS_MIXER_NONSTOP | BASS_WASAPI_EXCLUSIVE;
 
-        debugLog("WASAPI Exclusive Mode = %i, bufferSize = %f, updatePeriod = %f\n",
-                 (int)win_snd_wasapi_exclusive.getBool(), bufferSize, updatePeriod);
+        debugLog("WASAPI bufferSize = %f, updatePeriod = %f\n", bufferSize, updatePeriod);
         if(!BASS_WASAPI_Init(device.id, 0, 0, flags, bufferSize, updatePeriod, OutputWasapiProc, NULL)) {
             const int errorCode = BASS_ErrorGetCode();
             if(errorCode == BASS_ERROR_WASAPI_BUFFER) {

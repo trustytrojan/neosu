@@ -384,7 +384,6 @@ Osu::Osu(int instanceID) {
         ->setCallback(fastdelegate::MakeDelegate(sound_engine, &SoundEngine::restart));
     convar->getConVarByName("win_snd_wasapi_buffer_size")->setCallback(_RESTART_SOUND_ENGINE_ON_CHANGE);
     convar->getConVarByName("win_snd_wasapi_period_size")->setCallback(_RESTART_SOUND_ENGINE_ON_CHANGE);
-    convar->getConVarByName("win_snd_wasapi_exclusive")->setCallback(_RESTART_SOUND_ENGINE_ON_CHANGE);
     convar->getConVarByName("asio_buffer_size")->setCallback(_RESTART_SOUND_ENGINE_ON_CHANGE);
 
     // Initialize skin after sound engine has started, or else sounds won't load properly
