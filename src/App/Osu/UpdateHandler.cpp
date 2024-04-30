@@ -92,6 +92,7 @@ void UpdateHandler::wait() {
 
 void UpdateHandler::checkForUpdates() {
     if(!convar->getConVarByName("auto_update")->getBool() || Osu::debug->getBool() || m_updateThread != 0) return;
+    if(env->getOS() != Environment::OS::OS_WINDOWS) return;  // only windows gets releases right now
 
     int ret = pthread_create(&m_updateThread, NULL, UpdateHandler::run, (void *)this);
     if(ret) {
