@@ -223,6 +223,9 @@ void handle_packet(Packet *packet) {
             //      Online ones would be "Local scores", "Global", "Country", "Selected mods" etc
             //      While offline ones would be "By score", "By pp", etc
             bancho.osu->m_songBrowser2->onSortScoresChange(UString("Online Leaderboard"), 0);
+
+            // If server sent a score submission policy, update options menu to hide the checkbox
+            bancho.osu->m_optionsMenu->updateLayout();
         } else {
             convar->getConVarByName("mp_autologin")->setValue(false);
             bancho.osu->m_optionsMenu->logInButton->setText("Log in");

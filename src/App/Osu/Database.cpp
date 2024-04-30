@@ -391,8 +391,10 @@ void Database::update() {
                 addBeatmap(fullBeatmapPath);
             }
 
-            // update progress
-            m_fLoadingProgress = (float)m_iCurRawBeatmapLoadIndex / (float)m_iNumBeatmapsToLoad;
+            // update progress (another thread checks if progress >= 1.f to know when we're done)
+            float progress = (float)m_iCurRawBeatmapLoadIndex / (float)m_iNumBeatmapsToLoad;
+            if(progress >= 1.0f) progress = 0.99f;
+            m_fLoadingProgress = progress;
 
             // check if we are finished
             if(m_iCurRawBeatmapLoadIndex >= m_iNumBeatmapsToLoad ||
@@ -609,6 +611,10 @@ std::vector<UString> Database::getPlayerNamesWithScoresForUserSwitcher() {
 }
 
 Database::PlayerPPScores Database::getPlayerPPScores(UString playerName) {
+    PlayerPPScores ppScores;
+    ppScores.totalScore = 0;
+    if(getProgress() < 1.0f) return ppScores;
+
     std::vector<FinishedScore *> scores;
 
     // collect all scores with pp data
@@ -666,7 +672,6 @@ Database::PlayerPPScores Database::getPlayerPPScores(UString playerName) {
     // sort by pp
     std::sort(scores.begin(), scores.end(), ScoreSortComparator());
 
-    PlayerPPScores ppScores;
     ppScores.ppScores = std::move(scores);
     ppScores.totalScore = totalScore;
 
@@ -993,7 +998,10 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
 
         if(Osu::debug->getBool()) debugLog("Database: Reading beatmap %i/%i ...\n", (i + 1), m_iNumBeatmapsToLoad);
 
-        m_fLoadingProgress = ((float)(i + 1) / (float)m_iNumBeatmapsToLoad);
+        // update progress (another thread checks if progress >= 1.f to know when we're done)
+        float progress = (float)i / (float)m_iNumBeatmapsToLoad;
+        if(progress >= 1.f) progress = 0.99f;
+        m_fLoadingProgress = progress;
 
         if(m_iVersion < 20191107)  // see https://osu.ppy.sh/home/changelog/stable40/20191107.2
         {

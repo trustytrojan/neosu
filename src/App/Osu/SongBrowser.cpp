@@ -709,7 +709,6 @@ void SongBrowser::draw(Graphics *g) {
             double highestSpeedStrain = 0.0;
             double highestStrain = 0.0;
             int highestStrainIndex = -1;
-            double averageStrain = 0.0;
             for(int i = 0; i < aimStrains.size(); i++) {
                 const double aimStrain = aimStrains[i];
                 const double speedStrain = speedStrains[i];
@@ -721,10 +720,7 @@ void SongBrowser::draw(Graphics *g) {
                 }
                 if(aimStrain > highestAimStrain) highestAimStrain = aimStrain;
                 if(speedStrain > highestSpeedStrain) highestSpeedStrain = speedStrain;
-
-                averageStrain += strain;
             }
-            averageStrain /= (double)aimStrains.size();
 
             // draw strain bar graph
             if(highestAimStrain > 0.0 && highestSpeedStrain > 0.0 && highestStrain > 0.0) {
@@ -2935,8 +2931,8 @@ CBaseUIButton *SongBrowser::addTopBarLeftButton(UString text) {
 }
 
 void SongBrowser::onDatabaseLoadingFinished() {
-    m_beatmaps = std::vector<DatabaseBeatmap *>(
-        m_db->getDatabaseBeatmaps());  // having a copy of the vector in here is actually completely unnecessary
+    // having a copy of the vector in here is actually completely unnecessary
+    m_beatmaps = std::vector<DatabaseBeatmap *>(m_db->getDatabaseBeatmaps());
 
     debugLog("SongBrowser::onDatabaseLoadingFinished() : %i beatmaps.\n", m_beatmaps.size());
 
