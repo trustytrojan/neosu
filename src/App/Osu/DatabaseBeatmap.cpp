@@ -14,6 +14,7 @@
 #include "Beatmap.h"
 #include "Circle.h"
 #include "ConVar.h"
+#include "Database.h"
 #include "Engine.h"
 #include "File.h"
 #include "GameRules.h"
@@ -23,6 +24,7 @@
 #include "Skin.h"
 #include "Slider.h"
 #include "SliderCurves.h"
+#include "SongBrowser.h"
 #include "Spinner.h"
 
 ConVar osu_mod_random("osu_mod_random", false, FCVAR_NONVANILLA);
@@ -82,6 +84,7 @@ ConVar *DatabaseBeatmap::m_osu_debug_pp_ref = NULL;
 ConVar *DatabaseBeatmap::m_osu_slider_end_inside_check_offset_ref = NULL;
 
 DatabaseBeatmap::DatabaseBeatmap(Osu *osu, std::string filePath, std::string folder, bool filePathIsInMemoryBeatmap) {
+    m_difficulties = new std::vector<DatabaseBeatmap *>();
     m_osu = osu;
 
     m_sFilePath = filePath;
@@ -141,15 +144,16 @@ DatabaseBeatmap::DatabaseBeatmap(Osu *osu, std::string filePath, std::string fol
     m_iOnlineOffset = 0;
 }
 
-DatabaseBeatmap::DatabaseBeatmap(Osu *osu, std::vector<DatabaseBeatmap *> &&difficulties)
+DatabaseBeatmap::DatabaseBeatmap(Osu *osu, std::vector<DatabaseBeatmap *> *difficulties)
     : DatabaseBeatmap(osu, "", "") {
-    setDifficulties(std::move(difficulties));
+    setDifficulties(difficulties);
 }
 
 DatabaseBeatmap::~DatabaseBeatmap() {
-    for(size_t i = 0; i < m_difficulties.size(); i++) {
-        delete m_difficulties[i];
+    for(size_t i = 0; i < m_difficulties->size(); i++) {
+        delete(*m_difficulties)[i];
     }
+    SAFE_DELETE(m_difficulties);
 }
 
 DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const std::string &osuFilePath,
@@ -939,7 +943,7 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(c
 
 bool DatabaseBeatmap::loadMetadata(DatabaseBeatmap *databaseBeatmap) {
     if(databaseBeatmap == NULL) return false;
-    if(databaseBeatmap->m_difficulties.size() > 0) return false;  // we are just a container
+    if(!databaseBeatmap->m_difficulties->empty()) return false;  // we are just a container
 
     // reset
     databaseBeatmap->m_timingpoints.clear();
@@ -1181,12 +1185,28 @@ bool DatabaseBeatmap::loadMetadata(DatabaseBeatmap *databaseBeatmap) {
         std::sort(databaseBeatmap->m_timingpoints.begin(), databaseBeatmap->m_timingpoints.end(),
                   TimingPointSortComparator());
 
-        // calculate bpm range
-        auto bpm = getBPM(databaseBeatmap->m_timingpoints,
-                          databaseBeatmap->m_timingpoints[databaseBeatmap->m_timingpoints.size() - 1].offset);
-        databaseBeatmap->m_iMinBPM = bpm.min;
-        databaseBeatmap->m_iMaxBPM = bpm.max;
-        databaseBeatmap->m_iMostCommonBPM = bpm.most_common;
+        // NOTE: if we have our own stars/bpm cached then use that
+        bool bpm_was_cached = false;
+        auto db = bancho.osu->getSongBrowser()->getDatabase();
+        const auto result = db->m_starsCache.find(databaseBeatmap->getMD5Hash());
+        if(result != db->m_starsCache.end()) {
+            if(result->second.starsNomod >= 0.f) {
+                databaseBeatmap->m_fStarsNomod = result->second.starsNomod;
+            }
+            if(result->second.min_bpm >= 0) {
+                databaseBeatmap->m_iMinBPM = result->second.min_bpm;
+                databaseBeatmap->m_iMaxBPM = result->second.max_bpm;
+                databaseBeatmap->m_iMostCommonBPM = result->second.common_bpm;
+                bpm_was_cached = true;
+            }
+        }
+
+        if(!bpm_was_cached) {
+            auto bpm = getBPM(databaseBeatmap->m_timingpoints);
+            databaseBeatmap->m_iMinBPM = bpm.min;
+            databaseBeatmap->m_iMaxBPM = bpm.max;
+            databaseBeatmap->m_iMostCommonBPM = bpm.most_common;
+        }
     }
 
     // special case: old beatmaps have AR = OD, there is no ApproachRate stored
@@ -1466,15 +1486,19 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
     return result;
 }
 
-void DatabaseBeatmap::setDifficulties(std::vector<DatabaseBeatmap *> &&difficulties) {
-    m_difficulties = std::move(difficulties);
-    if(m_difficulties.empty()) return;
+void DatabaseBeatmap::setDifficulties(std::vector<DatabaseBeatmap *> *difficulties) {
+    if(m_difficulties != difficulties) {
+        delete m_difficulties;
+        m_difficulties = difficulties;
+    }
+
+    if(m_difficulties->empty()) return;
 
     // set representative values for this container (i.e. use values from first difficulty)
-    m_sTitle = m_difficulties[0]->m_sTitle;
-    m_sArtist = m_difficulties[0]->m_sArtist;
-    m_sCreator = m_difficulties[0]->m_sCreator;
-    m_sBackgroundImageFileName = m_difficulties[0]->m_sBackgroundImageFileName;
+    m_sTitle = (*m_difficulties)[0]->m_sTitle;
+    m_sArtist = (*m_difficulties)[0]->m_sArtist;
+    m_sCreator = (*m_difficulties)[0]->m_sCreator;
+    m_sBackgroundImageFileName = (*m_difficulties)[0]->m_sBackgroundImageFileName;
 
     // also precalculate some largest representative values
     m_iLengthMS = 0;
@@ -1487,7 +1511,7 @@ void DatabaseBeatmap::setDifficulties(std::vector<DatabaseBeatmap *> &&difficult
     m_iMaxBPM = 0;
     m_iMostCommonBPM = 0;
     last_modification_time = 0;
-    for(auto diff : m_difficulties) {
+    for(auto diff : (*m_difficulties)) {
         if(diff->getLengthMS() > m_iLengthMS) m_iLengthMS = diff->getLengthMS();
         if(diff->getCS() > m_fCS) m_fCS = diff->getCS();
         if(diff->getAR() > m_fAR) m_fAR = diff->getAR();

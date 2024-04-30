@@ -183,6 +183,7 @@ struct zarray {
     void clear() { nb = 0; }
     T *begin() const { return memory; }
     T *data() { return memory; }
+    bool empty() const { return nb == 0; }
     T *end() const { return &memory[nb]; }
     size_t size() const { return nb; }
 

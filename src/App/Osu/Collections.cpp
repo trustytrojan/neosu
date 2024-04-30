@@ -175,7 +175,17 @@ bool load_collections() {
     }
     free(neosu_collections.memory);
 
-    debugLog("collections.db: loading took %f seconds\n", (engine->getTimeReal() - startTime));
+    u32 nb_peppy = 0;
+    u32 nb_neosu = 0;
+    u32 nb_total = 0;
+    for(auto collection : collections) {
+        nb_peppy += collection->peppy_maps.size();
+        nb_neosu += collection->neosu_maps.size();
+        nb_total += collection->maps.size();
+    }
+
+    debugLog("peppy+neosu collections: loading took %f seconds (%d peppy, %d neosu, %d maps total)\n",
+             (engine->getTimeReal() - startTime), nb_peppy, nb_neosu, nb_total);
     collections_loaded = true;
     return true;
 }

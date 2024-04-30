@@ -87,7 +87,7 @@ class DatabaseBeatmap {
     };
 
     DatabaseBeatmap(Osu *osu, std::string filePath, std::string folder, bool filePathIsInMemoryBeatmap = false);
-    DatabaseBeatmap(Osu *osu, std::vector<DatabaseBeatmap *> &&difficulties);
+    DatabaseBeatmap(Osu *osu, std::vector<DatabaseBeatmap *> *difficulties);
     ~DatabaseBeatmap();
 
     static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string &osuFilePath, float AR, float CS,
@@ -98,7 +98,7 @@ class DatabaseBeatmap {
     static bool loadMetadata(DatabaseBeatmap *databaseBeatmap);
     static LOAD_GAMEPLAY_RESULT loadGameplay(DatabaseBeatmap *databaseBeatmap, Beatmap *beatmap);
 
-    void setDifficulties(std::vector<DatabaseBeatmap *> &&difficulties);
+    void setDifficulties(std::vector<DatabaseBeatmap *> *difficulties);
 
     void setLengthMS(unsigned long lengthMS) { m_iLengthMS = lengthMS; }
 
@@ -118,7 +118,7 @@ class DatabaseBeatmap {
 
     inline unsigned long long getSortHack() const { return m_iSortHack; }
 
-    inline const std::vector<DatabaseBeatmap *> &getDifficulties() const { return m_difficulties; }
+    inline const std::vector<DatabaseBeatmap *> &getDifficulties() const { return *m_difficulties; }
 
     inline const MD5Hash &getMD5Hash() const { return m_sMD5Hash; }
 
@@ -223,9 +223,9 @@ class DatabaseBeatmap {
 
     float m_fStarsNomod;
 
-    int m_iMinBPM;
-    int m_iMaxBPM;
-    int m_iMostCommonBPM;
+    int m_iMinBPM = 0;
+    int m_iMaxBPM = 0;
+    int m_iMostCommonBPM = 0;
 
     int m_iNumObjects;
     int m_iNumCircles;
@@ -334,7 +334,7 @@ class DatabaseBeatmap {
 
     unsigned long long m_iSortHack;
 
-    std::vector<DatabaseBeatmap *> m_difficulties;
+    std::vector<DatabaseBeatmap *> *m_difficulties = nullptr;
 
     MD5Hash m_sMD5Hash;
 
@@ -434,14 +434,14 @@ class DatabaseBeatmapStarCalculator : public Resource {
 };
 
 struct BPMInfo {
-    u32 min;
-    u32 max;
-    u32 most_common;
+    i32 min;
+    i32 max;
+    i32 most_common;
 };
 
 template <typename T>
-struct BPMInfo getBPM(const zarray<T> &timing_points, long lastTime) {
-    if(timing_points.size() < 1) {
+struct BPMInfo getBPM(const zarray<T> &timing_points) {
+    if(timing_points.empty()) {
         return BPMInfo{
             .min = 0,
             .max = 0,
@@ -450,26 +450,27 @@ struct BPMInfo getBPM(const zarray<T> &timing_points, long lastTime) {
     }
 
     struct Tuple {
-        u32 bpm;
-        u32 duration;
+        i32 bpm;
+        i32 duration;
     };
 
     zarray<Tuple> bpms;
     bpms.reserve(timing_points.size());
 
+    long lastTime = timing_points[timing_points.size() - 1].offset;
     for(size_t i = 0; i < timing_points.size(); i++) {
         const T &t = timing_points[i];
-        if(t.offset > lastTime) break;
+        if(t.offset > lastTime) continue;
         if(t.msPerBeat < 0) continue;
 
         // "osu-stable forced the first control point to start at 0."
         // "This is reproduced here to maintain compatibility around osu!mania scroll speed and song
         // select display."
         const long currentTime = (i == 0 ? 0 : t.offset);
-        const long nextTime = (i >= timing_points.size() - 1 ? lastTime : timing_points[i + 1].offset);
+        const long nextTime = (i == timing_points.size() - 1 ? lastTime : timing_points[i + 1].offset);
 
-        u32 bpm = t.msPerBeat / 60000;
-        u32 duration = std::max(nextTime - currentTime, (long)0);
+        i32 bpm = t.msPerBeat / 60000;
+        i32 duration = std::max(nextTime - currentTime, (long)0);
 
         bool found = false;
         for(auto tuple : bpms) {
@@ -488,10 +489,10 @@ struct BPMInfo getBPM(const zarray<T> &timing_points, long lastTime) {
         }
     }
 
-    u32 min = 9001;
-    u32 max = 0;
-    u32 mostCommonBPM = 0;
-    u32 longestDuration = 0;
+    i32 min = 9001;
+    i32 max = 0;
+    i32 mostCommonBPM = 0;
+    i32 longestDuration = 0;
     for(auto tuple : bpms) {
         if(tuple.bpm > max) max = tuple.bpm;
         if(tuple.bpm < min) min = tuple.bpm;

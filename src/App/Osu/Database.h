@@ -13,6 +13,8 @@ class OsuFile;
 class DatabaseBeatmap;
 class DatabaseLoader;
 
+#define STARS_CACHE_VERSION 20240430
+
 // Field ordering matters here
 #pragma pack(push, 1)
 struct TIMINGPOINT {
@@ -99,6 +101,15 @@ class Database {
 
     void loadDB(Packet *db, bool &fallbackToRawLoad);
 
+    // stars.cache
+    struct STARS_CACHE_ENTRY {
+        float starsNomod = -1;
+        i32 min_bpm = -1;
+        i32 max_bpm = -1;
+        i32 common_bpm = -1;
+    };
+    std::unordered_map<MD5Hash, STARS_CACHE_ENTRY> m_starsCache;
+
    private:
     friend class DatabaseLoader;
 
@@ -149,10 +160,4 @@ class Database {
     std::string m_sRawBeatmapLoadOsuSongFolder;
     std::vector<std::string> m_rawBeatmapFolders;
     std::vector<std::string> m_rawLoadBeatmapFolders;
-
-    // stars.cache
-    struct STARS_CACHE_ENTRY {
-        float starsNomod;
-    };
-    std::unordered_map<MD5Hash, STARS_CACHE_ENTRY> m_starsCache;
 };

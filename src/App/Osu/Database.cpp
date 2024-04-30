@@ -48,7 +48,6 @@ ConVar osu_database_version("osu_database_version", OSU_VERSION_DATEONLY, FCVAR_
 ConVar osu_database_ignore_version_warnings("osu_database_ignore_version_warnings", false, FCVAR_NONE);
 ConVar osu_database_ignore_version("osu_database_ignore_version", true, FCVAR_NONE,
                                    "ignore upper version limit and force load the db file (may crash)");
-ConVar osu_database_stars_cache_enabled("osu_database_stars_cache_enabled", false, FCVAR_NONE);
 ConVar osu_scores_enabled("osu_scores_enabled", true, FCVAR_NONE);
 ConVar osu_scores_legacy_enabled("osu_scores_legacy_enabled", true, FCVAR_NONE, "load osu!'s scores.db");
 ConVar osu_scores_custom_enabled("osu_scores_custom_enabled", true, FCVAR_NONE, "load custom scores.db");
@@ -985,7 +984,7 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
     struct BeatmapSet {
         int setID;
         std::string path;
-        std::vector<DatabaseBeatmap *> diffs2;
+        std::vector<DatabaseBeatmap *> *diffs2 = nullptr;
     };
     std::vector<BeatmapSet> beatmapSets;
     std::unordered_map<int, size_t> setIDToIndex;
@@ -1016,8 +1015,7 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
         std::string difficultyName = read_stdstring(db);
         trim(&difficultyName);
         std::string audioFileName = read_stdstring(db);
-        auto hash_str = read_stdstring(db);
-        MD5Hash md5hash = hash_str.c_str();
+        auto md5hash = read_hash(db);
         std::string osuFileName = read_stdstring(db);
         /*unsigned char rankedStatus = */ read<u8>(db);
         unsigned short numCircles = read<u16>(db);
@@ -1041,14 +1039,6 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
             // debugLog("%f stars for %u\n", starRating, mods);
 
             if(mods == 0) numOsuStandardStars = starRating;
-        }
-        // NOTE: if we have our own stars cached then prefer that
-        {
-            if(osu_database_stars_cache_enabled.getBool())
-                numOsuStandardStars = 0.0f;  // NOTE: force don't use stable stars
-
-            const auto result = m_starsCache.find(md5hash);
-            if(result != m_starsCache.end()) numOsuStandardStars = result->second.starsNomod;
         }
 
         unsigned int numTaikoStarRatings = read<u32>(db);
@@ -1166,98 +1156,114 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
             continue;
 
         // fill diff with data
-        if(mode == 0) {
-            DatabaseBeatmap *diff2 = new DatabaseBeatmap(m_osu, fullFilePath, beatmapPath);
-            {
-                diff2->m_sTitle = songTitle;
-                diff2->m_sAudioFileName = audioFileName;
-                diff2->m_iLengthMS = duration;
+        if(mode != 0) continue;
 
-                diff2->m_fStackLeniency = stackLeniency;
+        DatabaseBeatmap *diff2 = new DatabaseBeatmap(m_osu, fullFilePath, beatmapPath);
+        {
+            diff2->m_sTitle = songTitle;
+            diff2->m_sAudioFileName = audioFileName;
+            diff2->m_iLengthMS = duration;
 
-                diff2->m_sArtist = artistName;
-                diff2->m_sCreator = creatorName;
-                diff2->m_sDifficultyName = difficultyName;
-                diff2->m_sSource = songSource;
-                diff2->m_sTags = songTags;
-                diff2->m_sMD5Hash = md5hash;
-                diff2->m_iID = beatmapID;
-                diff2->m_iSetID = beatmapSetID;
+            diff2->m_fStackLeniency = stackLeniency;
 
-                diff2->m_fAR = AR;
-                diff2->m_fCS = CS;
-                diff2->m_fHP = HP;
-                diff2->m_fOD = OD;
-                diff2->m_fSliderMultiplier = sliderMultiplier;
+            diff2->m_sArtist = artistName;
+            diff2->m_sCreator = creatorName;
+            diff2->m_sDifficultyName = difficultyName;
+            diff2->m_sSource = songSource;
+            diff2->m_sTags = songTags;
+            diff2->m_sMD5Hash = md5hash;
+            diff2->m_iID = beatmapID;
+            diff2->m_iSetID = beatmapSetID;
 
-                // diff2->m_sBackgroundImageFileName = "";
+            diff2->m_fAR = AR;
+            diff2->m_fCS = CS;
+            diff2->m_fHP = HP;
+            diff2->m_fOD = OD;
+            diff2->m_fSliderMultiplier = sliderMultiplier;
 
-                diff2->m_iPreviewTime = previewTime;
-                diff2->last_modification_time = lastModificationTime;
+            // diff2->m_sBackgroundImageFileName = "";
 
-                diff2->m_sFullSoundFilePath = beatmapPath;
-                diff2->m_sFullSoundFilePath.append(diff2->m_sAudioFileName);
-                diff2->m_iLocalOffset = localOffset;
-                diff2->m_iOnlineOffset = (long)onlineOffset;
-                diff2->m_iNumObjects = numCircles + numSliders + numSpinners;
-                diff2->m_iNumCircles = numCircles;
-                diff2->m_iNumSliders = numSliders;
-                diff2->m_iNumSpinners = numSpinners;
-                diff2->m_fStarsNomod = numOsuStandardStars;
+            diff2->m_iPreviewTime = previewTime;
+            diff2->last_modification_time = lastModificationTime;
 
-                // calculate bpm range
-                auto bpm = getBPM(timingPoints, (numTimingPoints > 0 ? timingPoints[numTimingPoints - 1].offset : 0));
+            diff2->m_sFullSoundFilePath = beatmapPath;
+            diff2->m_sFullSoundFilePath.append(diff2->m_sAudioFileName);
+            diff2->m_iLocalOffset = localOffset;
+            diff2->m_iOnlineOffset = (long)onlineOffset;
+            diff2->m_iNumObjects = numCircles + numSliders + numSpinners;
+            diff2->m_iNumCircles = numCircles;
+            diff2->m_iNumSliders = numSliders;
+            diff2->m_iNumSpinners = numSpinners;
+
+            // NOTE: if we have our own stars/bpm cached then use that
+            bool bpm_was_cached = false;
+            diff2->m_fStarsNomod = numOsuStandardStars;
+
+            const auto result = m_starsCache.find(md5hash);
+            if(result != m_starsCache.end()) {
+                if(result->second.starsNomod >= 0.f) {
+                    diff2->m_fStarsNomod = result->second.starsNomod;
+                }
+                if(result->second.min_bpm >= 0) {
+                    diff2->m_iMinBPM = result->second.min_bpm;
+                    diff2->m_iMaxBPM = result->second.max_bpm;
+                    diff2->m_iMostCommonBPM = result->second.common_bpm;
+                    bpm_was_cached = true;
+                }
+            }
+
+            if(!bpm_was_cached) {
+                auto bpm = getBPM(timingPoints);
                 diff2->m_iMinBPM = bpm.min;
                 diff2->m_iMaxBPM = bpm.max;
                 diff2->m_iMostCommonBPM = bpm.most_common;
-
-                // build temp partial timingpoints, only used for menu animations
-                // a bit hacky to avoid slow ass allocations
-                diff2->m_timingpoints.resize(numTimingPoints);
-                memset(diff2->m_timingpoints.data(), 0, numTimingPoints * sizeof(DatabaseBeatmap::TIMINGPOINT));
-                for(int t = 0; t < numTimingPoints; t++) {
-                    diff2->m_timingpoints[t].offset = (long)timingPoints[t].offset;
-                    diff2->m_timingpoints[t].msPerBeat = (float)timingPoints[t].msPerBeat;
-                    diff2->m_timingpoints[t].timingChange = timingPoints[t].timingChange;
-                }
             }
 
-            // special case: legacy fallback behavior for invalid beatmapSetID, try to parse the ID from the path
-            if(beatmapSetID < 1 && path.length() > 0) {
-                auto upath = UString(path.c_str());
-                const std::vector<UString> pathTokens =
-                    upath.split("\\");  // NOTE: this is hardcoded to backslash since osu is windows only
-                if(pathTokens.size() > 0 && pathTokens[0].length() > 0) {
-                    const std::vector<UString> spaceTokens = pathTokens[0].split(" ");
-                    if(spaceTokens.size() > 0 && spaceTokens[0].length() > 0) {
-                        try {
-                            beatmapSetID = spaceTokens[0].toInt();
-                        } catch(...) {
-                            beatmapSetID = -1;
-                        }
+            // build temp partial timingpoints, only used for menu animations
+            // a bit hacky to avoid slow ass allocations
+            diff2->m_timingpoints.resize(numTimingPoints);
+            memset(diff2->m_timingpoints.data(), 0, numTimingPoints * sizeof(DatabaseBeatmap::TIMINGPOINT));
+            for(int t = 0; t < numTimingPoints; t++) {
+                diff2->m_timingpoints[t].offset = (long)timingPoints[t].offset;
+                diff2->m_timingpoints[t].msPerBeat = (float)timingPoints[t].msPerBeat;
+                diff2->m_timingpoints[t].timingChange = timingPoints[t].timingChange;
+            }
+        }
+
+        // special case: legacy fallback behavior for invalid beatmapSetID, try to parse the ID from the path
+        if(beatmapSetID < 1 && path.length() > 0) {
+            auto upath = UString(path.c_str());
+            const std::vector<UString> pathTokens =
+                upath.split("\\");  // NOTE: this is hardcoded to backslash since osu is windows only
+            if(pathTokens.size() > 0 && pathTokens[0].length() > 0) {
+                const std::vector<UString> spaceTokens = pathTokens[0].split(" ");
+                if(spaceTokens.size() > 0 && spaceTokens[0].length() > 0) {
+                    try {
+                        beatmapSetID = spaceTokens[0].toInt();
+                    } catch(...) {
+                        beatmapSetID = -1;
                     }
                 }
             }
+        }
 
-            // (the diff is now fully built)
+        // (the diff is now fully built)
 
-            // now, search if the current set (to which this diff would belong) already exists and add it there, or if
-            // it doesn't exist then create the set
-            const auto result = setIDToIndex.find(beatmapSetID);
-            const bool beatmapSetExists = (result != setIDToIndex.end());
-            if(beatmapSetExists)
-                beatmapSets[result->second].diffs2.push_back(diff2);
-            else {
-                setIDToIndex[beatmapSetID] = beatmapSets.size();
+        // now, search if the current set (to which this diff would belong) already exists and add it there, or if
+        // it doesn't exist then create the set
+        const auto result = setIDToIndex.find(beatmapSetID);
+        const bool beatmapSetExists = (result != setIDToIndex.end());
+        if(beatmapSetExists) {
+            beatmapSets[result->second].diffs2->push_back(diff2);
+        } else {
+            setIDToIndex[beatmapSetID] = beatmapSets.size();
 
-                BeatmapSet s;
-
-                s.setID = beatmapSetID;
-                s.path = beatmapPath;
-                s.diffs2.push_back(diff2);
-
-                beatmapSets.push_back(s);
-            }
+            BeatmapSet s;
+            s.setID = beatmapSetID;
+            s.path = beatmapPath;
+            s.diffs2 = new std::vector<DatabaseBeatmap *>();
+            s.diffs2->push_back(diff2);
+            beatmapSets.push_back(s);
         }
     }
 
@@ -1268,10 +1274,10 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
     for(int i = 0; i < beatmapSets.size(); i++) {
         if(m_bInterruptLoad.load()) break;  // cancellation point
 
-        if(beatmapSets[i].diffs2.size() > 0)  // sanity check
+        if(!beatmapSets[i].diffs2->empty())  // sanity check
         {
             if(beatmapSets[i].setID > 0) {
-                DatabaseBeatmap *bm = new DatabaseBeatmap(m_osu, std::move(beatmapSets[i].diffs2));
+                DatabaseBeatmap *bm = new DatabaseBeatmap(m_osu, beatmapSets[i].diffs2);
 
                 m_databaseBeatmaps.push_back(bm);
 
@@ -1290,13 +1296,13 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
     for(int i = 0; i < beatmapSets.size(); i++) {
         if(m_bInterruptLoad.load()) break;  // cancellation point
 
-        if(beatmapSets[i].diffs2.size() > 0)  // sanity check
+        if(!beatmapSets[i].diffs2->empty())  // sanity check
         {
             if(beatmapSets[i].setID < 1) {
-                for(int b = 0; b < beatmapSets[i].diffs2.size(); b++) {
+                for(int b = 0; b < beatmapSets[i].diffs2->size(); b++) {
                     if(m_bInterruptLoad.load()) break;  // cancellation point
 
-                    DatabaseBeatmap *diff2 = beatmapSets[i].diffs2[b];
+                    DatabaseBeatmap *diff2 = (*beatmapSets[i].diffs2)[b];
 
                     // try finding an already existing beatmap with matching artist and title and creator (into which we
                     // could inject this lone diff)
@@ -1319,10 +1325,10 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
 
                     // if we couldn't find any beatmap with our title and artist, create a new one
                     if(!existsAlready) {
-                        std::vector<DatabaseBeatmap *> diffs2;
-                        diffs2.push_back(beatmapSets[i].diffs2[b]);
+                        auto diffs2 = new std::vector<DatabaseBeatmap *>();
+                        diffs2->push_back((*beatmapSets[i].diffs2)[b]);
 
-                        DatabaseBeatmap *bm = new DatabaseBeatmap(m_osu, std::move(diffs2));
+                        DatabaseBeatmap *bm = new DatabaseBeatmap(m_osu, diffs2);
 
                         m_databaseBeatmaps.push_back(bm);
                     }
@@ -1331,87 +1337,88 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
         }
     }
 
+    load_collections();
+
     m_importTimer->update();
     debugLog("Refresh finished, added %i beatmaps in %f seconds.\n", m_databaseBeatmaps.size(),
              m_importTimer->getElapsedTime());
-
-    load_collections();
 
     // signal that we are done
     m_fLoadingProgress = 1.0f;
 }
 
 void Database::loadStars() {
-    if(!osu_database_stars_cache_enabled.getBool()) return;
-
-    debugLog("Database::loadStars()\n");
-
-    const int starsCacheVersion = 20221108;
-
     Packet cache = load_db("stars.cache");
-    if(cache.size > 0) {
-        m_starsCache.clear();
+    if(cache.size <= 0) return;
 
-        const int cacheVersion = read<u32>(&cache);
+    m_starsCache.clear();
 
-        if(cacheVersion <= starsCacheVersion) {
-            skip_string(&cache);  // ignore md5
-            const i64 numStarsCacheEntries = read<u64>(&cache);
+    const int cacheVersion = read<u32>(&cache);
+    if(cacheVersion > STARS_CACHE_VERSION) {
+        debugLog("Invalid stars cache version, ignoring.\n");
+        free(cache.memory);
+        return;
+    }
 
-            debugLog("Stars cache: version = %i, numStarsCacheEntries = %i\n", cacheVersion, numStarsCacheEntries);
+    skip_string(&cache);  // ignore md5
+    const i64 numStarsCacheEntries = read<u64>(&cache);
 
-            for(i64 i = 0; i < numStarsCacheEntries; i++) {
-                auto hash_str = read_stdstring(&cache);
-                const MD5Hash beatmapMD5Hash = hash_str.c_str();
-                const float starsNomod = read<f32>(&cache);
+    debugLog("Stars cache: version = %i, numStarsCacheEntries = %i\n", cacheVersion, numStarsCacheEntries);
 
-                STARS_CACHE_ENTRY entry;
-                { entry.starsNomod = starsNomod; }
-                m_starsCache[beatmapMD5Hash] = entry;
-            }
-        } else
-            debugLog("Invalid stars cache version, ignoring.\n");
-    } else
-        debugLog("No stars cache found.\n");
+    for(i64 i = 0; i < numStarsCacheEntries; i++) {
+        auto beatmapMD5Hash = read_hash(&cache);
+
+        STARS_CACHE_ENTRY entry;
+        entry.starsNomod = read<f32>(&cache);
+
+        if(cacheVersion >= 20240430) {
+            entry.min_bpm = read<i32>(&cache);
+            entry.max_bpm = read<i32>(&cache);
+            entry.common_bpm = read<i32>(&cache);
+        }
+
+        m_starsCache[beatmapMD5Hash] = entry;
+    }
+
+    free(cache.memory);
 }
 
 void Database::saveStars() {
-    if(!osu_database_stars_cache_enabled.getBool()) return;
-
     debugLog("Osu: Saving stars ...\n");
 
-    const int starsCacheVersion = 20221108;
-
-    // count
     i64 numStarsCacheEntries = 0;
     for(DatabaseBeatmap *beatmap : m_databaseBeatmaps) {
-        for(DatabaseBeatmap *diff2 : beatmap->getDifficulties()) {
-            if(diff2->getStarsNomod() > 0.0f && diff2->getStarsNomod() != 0.0001f) numStarsCacheEntries++;
-        }
+        numStarsCacheEntries += beatmap->getDifficulties().size();
     }
 
-    if(numStarsCacheEntries < 1) {
-        debugLog("No stars cached, nothing to write.\n");
+    // 100 instead of 1 because player can idle in main menu while shuffling without loading database
+    // If the player *did* load the database and actually has less than 100 beatmaps, then it doesn't matter
+    // since getting the stars/bpm/etc would be fast enough anyway.
+    if(numStarsCacheEntries < 100) {
+        debugLog("No beatmaps loaded, nothing to write.\n");
         return;
     }
 
     // write
     Packet cache;
-    write_u32(&cache, starsCacheVersion);
+    write_u32(&cache, STARS_CACHE_VERSION);
     write_string(&cache, "00000000000000000000000000000000");
     write_u64(&cache, numStarsCacheEntries);
     for(DatabaseBeatmap *beatmap : m_databaseBeatmaps) {
         for(DatabaseBeatmap *diff2 : beatmap->getDifficulties()) {
-            if(diff2->getStarsNomod() > 0.0f && diff2->getStarsNomod() != 0.0001f) {
-                write_string(&cache, diff2->getMD5Hash().hash);
-                write_f32(&cache, diff2->getStarsNomod());
-            }
+            write_string(&cache, diff2->getMD5Hash().hash);
+            write_f32(&cache, diff2->getStarsNomod());
+            write<i32>(&cache, diff2->getMinBPM());
+            write<i32>(&cache, diff2->getMaxBPM());
+            write<i32>(&cache, diff2->getMostCommonBPM());
         }
     }
 
     if(!save_db(&cache, "stars.cache")) {
         debugLog("Couldn't write stars.cache!\n");
     }
+
+    free(cache.memory);
 }
 
 void Database::loadScores() {
@@ -1441,24 +1448,13 @@ void Database::loadScores() {
 
             if(dbVersion <= LiveScore::VERSION) {
                 for(int b = 0; b < numBeatmaps; b++) {
-                    auto hash_str = read_stdstring(&db);
+                    auto md5hash = read_hash(&db);
                     const int numScores = read<u32>(&db);
 
-                    if(hash_str.size() < 32) {
-                        if(Osu::debug->getBool()) {
-                            debugLog("WARNING: Invalid score with md5hash.length() = %i!\n", hash_str.size());
-                        }
-                        continue;
-                    } else if(hash_str.size() > 32) {
-                        debugLog("ERROR: Corrupt score database/entry detected, stopping.\n");
-                        break;
-                    }
-
                     if(Osu::debug->getBool()) {
-                        debugLog("Beatmap[%i]: md5hash = %s, numScores = %i\n", b, hash_str.c_str(), numScores);
+                        debugLog("Beatmap[%i]: md5hash = %s, numScores = %i\n", b, md5hash.hash, numScores);
                     }
 
-                    const MD5Hash md5hash = hash_str.c_str();
                     for(int s = 0; s < numScores; s++) {
                         FinishedScore sc;
                         sc.isLegacyScore = false;
@@ -1561,19 +1557,7 @@ void Database::loadScores() {
             debugLog("Legacy scores: version = %i, numBeatmaps = %i\n", dbVersion, numBeatmaps);
 
             for(int b = 0; b < numBeatmaps; b++) {
-                auto hash_str = read_stdstring(&db);
-
-                if(hash_str.size() < 32) {
-                    if(Osu::debug->getBool()) {
-                        debugLog("WARNING: Invalid score with md5hash.length() = %i!\n", hash_str.size());
-                    }
-                    continue;
-                } else if(hash_str.size() > 32) {
-                    debugLog("ERROR: Corrupt score database/entry detected, stopping.\n");
-                    break;
-                }
-
-                const MD5Hash md5hash = hash_str.c_str();
+                auto md5hash = read_hash(&db);
                 const int numScores = read<u32>(&db);
 
                 if(Osu::debug->getBool())
@@ -1792,7 +1776,7 @@ DatabaseBeatmap *Database::loadRawBeatmap(std::string beatmapPath) {
     if(Osu::debug->getBool()) debugLog("BeatmapDatabase::loadRawBeatmap() : %s\n", beatmapPath.c_str());
 
     // try loading all diffs
-    std::vector<DatabaseBeatmap *> diffs2;
+    std::vector<DatabaseBeatmap *> *diffs2 = new std::vector<DatabaseBeatmap *>();
     {
         std::vector<std::string> beatmapFiles = env->getFilesInFolder(beatmapPath);
         for(int i = 0; i < beatmapFiles.size(); i++) {
@@ -1806,7 +1790,10 @@ DatabaseBeatmap *Database::loadRawBeatmap(std::string beatmapPath) {
                 DatabaseBeatmap *diff2 = new DatabaseBeatmap(m_osu, fullFilePath, beatmapPath);
 
                 // try to load it. if successful save it, else cleanup and continue to the next osu file
-                if(!DatabaseBeatmap::loadMetadata(diff2)) {
+                if(DatabaseBeatmap::loadMetadata(diff2)) {
+                    // (metadata loaded successfully)
+                    diffs2->push_back(diff2);
+                } else {
                     if(Osu::debug->getBool()) {
                         debugLog("BeatmapDatabase::loadRawBeatmap() : Couldn't loadMetadata(), deleting object.\n");
                         if(diff2->getGameMode() == 0)
@@ -1814,26 +1801,17 @@ DatabaseBeatmap *Database::loadRawBeatmap(std::string beatmapPath) {
                                                        "Couldn't loadMetadata()\n");
                     }
                     SAFE_DELETE(diff2);
-                    continue;
                 }
-
-                // (metadata loaded successfully)
-
-                // NOTE: if we have our own stars cached then use that
-                {
-                    const auto result = m_starsCache.find(diff2->getMD5Hash());
-                    if(result != m_starsCache.end()) diff2->m_fStarsNomod = result->second.starsNomod;
-                }
-
-                diffs2.push_back(diff2);
             }
         }
     }
 
     // build beatmap from diffs
     DatabaseBeatmap *beatmap = NULL;
-    if(diffs2.size() > 0) {
-        beatmap = new DatabaseBeatmap(m_osu, std::move(diffs2));
+    if(diffs2->empty()) {
+        delete diffs2;
+    } else {
+        beatmap = new DatabaseBeatmap(m_osu, diffs2);
     }
 
     return beatmap;
