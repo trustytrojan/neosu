@@ -10,11 +10,11 @@
 #include "BanchoAes.h"
 #include "BanchoNetworking.h"
 #include "BanchoSubmitter.h"
+#include "DatabaseBeatmap.h"
 #include "Engine.h"
-#include "OsuDatabaseBeatmap.h"
 #include "base64.h"
 
-void submit_score(Score score) {
+void submit_score(FinishedScore score) {
     debugLog("Submitting score...\n");
     const char *GRADES[] = {"XH", "SH", "X", "S", "A", "B", "C", "D", "F", "N"};
 
@@ -165,7 +165,7 @@ void submit_score(Score score) {
     }
     {
         size_t s_compressed_data = 0;
-        OsuReplay::compress_frames(score.replay, &compressed_data, &s_compressed_data);
+        Replay::compress_frames(score.replay, &compressed_data, &s_compressed_data);
         if(s_compressed_data <= 24) {
             debugLog("Replay too small to submit! Compressed size: %d bytes\n", s_compressed_data);
             goto err;

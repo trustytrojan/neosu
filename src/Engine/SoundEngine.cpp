@@ -12,15 +12,15 @@
 #include "SoundEngine.h"
 
 #include "Bancho.h"
+#include "Beatmap.h"
 #include "CBaseUILabel.h"
 #include "CBaseUISlider.h"
 #include "ConVar.h"
 #include "Engine.h"
 #include "Environment.h"
+#include "OptionsMenu.h"
 #include "Osu.h"
-#include "OsuBeatmap.h"
-#include "OsuOptionsMenu.h"
-#include "OsuSkin.h"
+#include "Skin.h"
 #include "Sound.h"
 #include "Thread.h"
 #include "WinEnvironment.h"
@@ -673,7 +673,7 @@ bool SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
     if(bancho.osu != nullptr) {
         if(bancho.osu->isInPlayMode()) {
             // Kick the player out of play mode, since restarting SoundEngine during gameplay is not supported.
-            // XXX: Make OsuBeatmap work without a running SoundEngine
+            // XXX: Make Beatmap work without a running SoundEngine
             bancho.osu->getSelectedBeatmap()->fail();
             bancho.osu->getSelectedBeatmap()->stop(true);
         } else if(bancho.osu->getSelectedBeatmap()->getMusic() != NULL) {

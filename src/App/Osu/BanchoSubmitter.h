@@ -1,4 +1,4 @@
 #pragma once
-#include "OsuDatabase.h"
+#include "Database.h"
 
-void submit_score(Score score);
+void submit_score(FinishedScore score);

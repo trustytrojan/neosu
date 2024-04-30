@@ -8,11 +8,11 @@
 #include "ConVar.h"
 
 #include "Bancho.h"
+#include "Beatmap.h"
 #include "CBaseUILabel.h"
 #include "Engine.h"
+#include "ModSelector.h"
 #include "Osu.h"
-#include "OsuBeatmap.h"
-#include "OsuModSelector.h"
 
 // #define ALLOW_DEVELOPMENT_CONVARS // NOTE: comment this out on release
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "BanchoProtocol.h"
-#include "OsuDatabaseBeatmap.h"
+#include "DatabaseBeatmap.h"
 
 struct OnlineMapInfo {
     long ranked_status;
@@ -12,4 +12,4 @@ struct OnlineMapInfo {
 
 void process_leaderboard_response(Packet response);
 
-void fetch_online_scores(OsuDatabaseBeatmap *beatmap);
+void fetch_online_scores(DatabaseBeatmap *beatmap);

@@ -11,35 +11,33 @@
 #include "App.h"
 #include "BanchoNetworking.h"
 #include "MouseListener.h"
-#include "Score.h"
+#include "score.h"
 
 class CWindowManager;
 
-class OsuVolumeOverlay;
-class OsuChat;
-class OsuLobby;
-class OsuRoom;
-class OsuPromptScreen;
-class OsuUIUserContextMenuScreen;
-class OsuMainMenu;
-class OsuPauseMenu;
-class OsuOptionsMenu;
-class OsuModSelector;
-class OsuSongBrowser;
-class OsuBackgroundImageHandler;
-class OsuRankingScreen;
-class OsuUserStatsScreen;
-class OsuUpdateHandler;
-class OsuNotificationOverlay;
-class OsuTooltipOverlay;
-class OsuBeatmap;
+class VolumeOverlay;
+class Chat;
+class Lobby;
+class RoomScreen;
+class PromptScreen;
+class UIUserContextMenuScreen;
+class MainMenu;
+class PauseMenu;
+class OptionsMenu;
+class ModSelector;
+class SongBrowser;
+class BackgroundImageHandler;
+class RankingScreen;
+class UserStatsScreen;
+class UpdateHandler;
+class NotificationOverlay;
+class TooltipOverlay;
+class Beatmap;
 class OsuScreen;
-class OsuScore;
-class OsuSkin;
-class OsuHUD;
-class OsuChangelog;
-class OsuEditor;
-class OsuModFPoSu;
+class Skin;
+class HUD;
+class Changelog;
+class ModFPoSu;
 
 class ConVar;
 class Image;
@@ -114,23 +112,23 @@ class Osu : public App, public MouseListener {
     inline int getScreenWidth() const { return (int)g_vInternalResolution.x; }
     inline int getScreenHeight() const { return (int)g_vInternalResolution.y; }
 
-    OsuBeatmap *getSelectedBeatmap();
+    Beatmap *getSelectedBeatmap();
 
-    inline OsuOptionsMenu *getOptionsMenu() const { return m_optionsMenu; }
-    inline OsuSongBrowser *getSongBrowser() const { return m_songBrowser2; }
-    inline OsuBackgroundImageHandler *getBackgroundImageHandler() const { return m_backgroundImageHandler; }
-    inline OsuSkin *getSkin() const { return m_skin; }
-    inline OsuHUD *getHUD() const { return m_hud; }
-    inline OsuNotificationOverlay *getNotificationOverlay() const { return m_notificationOverlay; }
-    inline OsuTooltipOverlay *getTooltipOverlay() const { return m_tooltipOverlay; }
-    inline OsuModSelector *getModSelector() const { return m_modSelector; }
-    inline OsuModFPoSu *getFPoSu() const { return m_fposu; }
-    inline OsuPauseMenu *getPauseMenu() const { return m_pauseMenu; }
-    inline OsuMainMenu *getMainMenu() const { return m_mainMenu; }
-    inline OsuRankingScreen *getRankingScreen() const { return m_rankingScreen; }
-    inline OsuScore *getScore() const { return m_score; }
-    inline OsuUpdateHandler *getUpdateHandler() const { return m_updateHandler; }
-    inline OsuUserStatsScreen *getUserStatsScreen() const { return m_userStatsScreen; }
+    inline OptionsMenu *getOptionsMenu() const { return m_optionsMenu; }
+    inline SongBrowser *getSongBrowser() const { return m_songBrowser2; }
+    inline BackgroundImageHandler *getBackgroundImageHandler() const { return m_backgroundImageHandler; }
+    inline Skin *getSkin() const { return m_skin; }
+    inline HUD *getHUD() const { return m_hud; }
+    inline NotificationOverlay *getNotificationOverlay() const { return m_notificationOverlay; }
+    inline TooltipOverlay *getTooltipOverlay() const { return m_tooltipOverlay; }
+    inline ModSelector *getModSelector() const { return m_modSelector; }
+    inline ModFPoSu *getFPoSu() const { return m_fposu; }
+    inline PauseMenu *getPauseMenu() const { return m_pauseMenu; }
+    inline MainMenu *getMainMenu() const { return m_mainMenu; }
+    inline RankingScreen *getRankingScreen() const { return m_rankingScreen; }
+    inline LiveScore *getScore() const { return m_score; }
+    inline UpdateHandler *getUpdateHandler() const { return m_updateHandler; }
+    inline UserStatsScreen *getUserStatsScreen() const { return m_userStatsScreen; }
 
     inline RenderTarget *getPlayfieldBuffer() const { return m_playfieldBuffer; }
     inline RenderTarget *getSliderFrameBuffer() const { return m_sliderFrameBuffer; }
@@ -179,10 +177,10 @@ class Osu : public App, public MouseListener {
     inline bool isSeeking() const { return m_bSeeking; }
     inline float getQuickSaveTime() const { return m_fQuickSaveTime; }
 
-    bool shouldFallBackToLegacySliderRenderer();  // certain mods or actions require OsuSliders to render dynamically
+    bool shouldFallBackToLegacySliderRenderer();  // certain mods or actions require Sliders to render dynamically
                                                   // (e.g. wobble or the CS override slider)
 
-    bool useMods(Score *score);
+    bool useMods(FinishedScore *score);
     void updateMods();
     void updateConfineCursor();
     void updateMouseSettings();
@@ -256,29 +254,28 @@ class Osu : public App, public MouseListener {
     ConVar *m_win_disable_windows_key_ref;
 
     // interfaces
-    OsuVolumeOverlay *m_volumeOverlay;
-    OsuMainMenu *m_mainMenu;
-    OsuOptionsMenu *m_optionsMenu;
-    OsuChat *m_chat = nullptr;
-    OsuLobby *m_lobby = nullptr;
-    OsuRoom *m_room = nullptr;
-    OsuPromptScreen *m_prompt = nullptr;
-    OsuUIUserContextMenuScreen *m_user_actions = nullptr;
-    OsuSongBrowser *m_songBrowser2 = nullptr;
-    OsuBackgroundImageHandler *m_backgroundImageHandler;
-    OsuModSelector *m_modSelector;
-    OsuRankingScreen *m_rankingScreen;
-    OsuUserStatsScreen *m_userStatsScreen;
-    OsuPauseMenu *m_pauseMenu;
-    OsuSkin *m_skin;
-    OsuHUD *m_hud;
-    OsuTooltipOverlay *m_tooltipOverlay;
-    OsuNotificationOverlay *m_notificationOverlay;
-    OsuScore *m_score;
-    OsuChangelog *m_changelog;
-    OsuEditor *m_editor;
-    OsuUpdateHandler *m_updateHandler;
-    OsuModFPoSu *m_fposu;
+    VolumeOverlay *m_volumeOverlay;
+    MainMenu *m_mainMenu;
+    OptionsMenu *m_optionsMenu;
+    Chat *m_chat = nullptr;
+    Lobby *m_lobby = nullptr;
+    RoomScreen *m_room = nullptr;
+    PromptScreen *m_prompt = nullptr;
+    UIUserContextMenuScreen *m_user_actions = nullptr;
+    SongBrowser *m_songBrowser2 = nullptr;
+    BackgroundImageHandler *m_backgroundImageHandler;
+    ModSelector *m_modSelector;
+    RankingScreen *m_rankingScreen;
+    UserStatsScreen *m_userStatsScreen;
+    PauseMenu *m_pauseMenu;
+    Skin *m_skin;
+    HUD *m_hud;
+    TooltipOverlay *m_tooltipOverlay;
+    NotificationOverlay *m_notificationOverlay;
+    LiveScore *m_score;
+    Changelog *m_changelog;
+    UpdateHandler *m_updateHandler;
+    ModFPoSu *m_fposu;
 
     std::vector<OsuScreen *> m_screens;
 
@@ -360,7 +357,7 @@ class Osu : public App, public MouseListener {
     CWindowManager *m_windowManager;
 
     // replay
-    Score replay_score;
+    FinishedScore replay_score;
 
     // custom
     bool m_bScheduleEndlessModNextBeatmap;
@@ -369,7 +366,7 @@ class Osu : public App, public MouseListener {
     bool m_bWasBossKeyPaused;
     bool m_bSkinLoadScheduled;
     bool m_bSkinLoadWasReload;
-    OsuSkin *m_skinScheduledToLoad;
+    Skin *m_skinScheduledToLoad;
     bool m_bFontReloadScheduled;
     bool m_bFireResolutionChangedScheduled;
     bool m_bFireDelayedFontReloadAndResolutionChangeToFixDesyncedUIScaleScheduled;

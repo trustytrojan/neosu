@@ -1,0 +1,34 @@
+//================ Copyright (c) 2016, PG, All rights reserved. =================//
+//
+// Purpose:		tooltips
+//
+// $NoKeywords: $osutt
+//===============================================================================//
+
+#ifndef OSUTOOLTIPOVERLAY_H
+#define OSUTOOLTIPOVERLAY_H
+
+#include "OsuScreen.h"
+
+class Osu;
+
+class TooltipOverlay : public OsuScreen {
+   public:
+    TooltipOverlay(Osu *osu);
+    virtual ~TooltipOverlay();
+
+    virtual void draw(Graphics *g);
+    virtual void mouse_update(bool *propagate_clicks);
+
+    void begin();
+    void addLine(UString text);
+    void end();
+
+   private:
+    float m_fAnim;
+    std::vector<UString> m_lines;
+
+    bool m_bDelayFadeout;
+};
+
+#endif

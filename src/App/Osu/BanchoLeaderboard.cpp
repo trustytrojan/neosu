@@ -10,13 +10,13 @@
 #include "BanchoNetworking.h"
 #include "BanchoUsers.h"
 #include "ConVar.h"
+#include "Database.h"
 #include "Engine.h"
-#include "OsuDatabase.h"
-#include "OsuModSelector.h"
-#include "OsuSongBrowser.h"
+#include "ModSelector.h"
+#include "SongBrowser.h"
 
-Score parse_score(char *score_line) {
-    Score score;
+FinishedScore parse_score(char *score_line) {
+    FinishedScore score;
     score.server = bancho.endpoint.toUtf8();
     score.isLegacyScore = true;
     score.isImportedLegacyScore = true;
@@ -94,7 +94,7 @@ Score parse_score(char *score_line) {
     return score;
 }
 
-void fetch_online_scores(OsuDatabaseBeatmap *beatmap) {
+void fetch_online_scores(DatabaseBeatmap *beatmap) {
     UString path = "/web/osu-osz2-getscores.php?s=0&vv=4&v=1";
     path.append(UString::format("&c=%s", beatmap->getMD5Hash().hash));
 
@@ -155,7 +155,7 @@ void process_leaderboard_response(Packet response) {
     //       you actually received the data if you plan on using it.
     OnlineMapInfo info = {0};
     MD5Hash beatmap_hash = (char *)response.extra;
-    std::vector<Score> scores;
+    std::vector<FinishedScore> scores;
     char *body = (char *)response.memory;
 
     char *ranked_status = strtok_x('|', &body);
@@ -194,7 +194,7 @@ void process_leaderboard_response(Packet response) {
 
     char *score_line = NULL;
     while((score_line = strtok_x('\n', &body))[0] != '\0') {
-        Score score = parse_score(score_line);
+        FinishedScore score = parse_score(score_line);
         score.md5hash = beatmap_hash;
         scores.push_back(score);
     }

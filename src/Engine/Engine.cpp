@@ -140,7 +140,7 @@ Engine::Engine(Environment *environment, const char *args) {
     m_vScreenSize = m_environment->getWindowSize();
     m_vNewScreenSize = m_vScreenSize;
 
-    debugLog("Engine: ScreenSize = (%ix%i)\n", (int)m_vScreenSize.x, (int)m_vScreenSize.y);
+    debugLog("Engine: OsuScreenSize = (%ix%i)\n", (int)m_vScreenSize.x, (int)m_vScreenSize.y);
 
     // custom
     m_bDrawing = false;

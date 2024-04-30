@@ -8,21 +8,21 @@
 #include "BanchoLeaderboard.h"
 #include "BanchoProtocol.h"
 #include "BanchoUsers.h"
+#include "Beatmap.h"
 #include "CBaseUICheckbox.h"
+#include "Chat.h"
 #include "ConVar.h"
+#include "Database.h"
 #include "Downloader.h"
 #include "Engine.h"
 #include "File.h"
-#include "OsuBeatmap.h"
-#include "OsuChat.h"
-#include "OsuDatabase.h"
-#include "OsuLobby.h"
-#include "OsuOptionsMenu.h"
-#include "OsuRoom.h"
-#include "OsuSongBrowser.h"
-#include "OsuUIAvatar.h"
-#include "OsuUIButton.h"
+#include "Lobby.h"
+#include "OptionsMenu.h"
 #include "ResourceManager.h"
+#include "RoomScreen.h"
+#include "SongBrowser.h"
+#include "UIAvatar.h"
+#include "UIButton.h"
 #include "miniz.h"
 
 // Bancho protocol
@@ -383,7 +383,7 @@ static void *do_networking(void *data) {
 static void handle_api_response(Packet packet) {
     switch(packet.id) {
         case GET_BEATMAPSET_INFO: {
-            OsuRoom::process_beatmapset_info_response(packet);
+            RoomScreen::process_beatmapset_info_response(packet);
             break;
         }
 
@@ -399,7 +399,7 @@ static void handle_api_response(Packet packet) {
                 break;
             }
 
-            Score *score = (Score *)packet.extra;
+            FinishedScore *score = (FinishedScore *)packet.extra;
             std::stringstream replay_path;
             replay_path << MCENGINE_DATA_DIR "replays/" << score->server << "/" << score->unixTimestamp
                         << ".replay.lzma";
@@ -414,7 +414,7 @@ static void handle_api_response(Packet packet) {
 
             fwrite(packet.memory, packet.size, 1, replay_file);
             fclose(replay_file);
-            OsuReplay::load_and_watch(*score);
+            Replay::load_and_watch(*score);
             break;
         }
 

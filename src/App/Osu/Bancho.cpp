@@ -18,19 +18,19 @@
 #include "BanchoNetworking.h"
 #include "BanchoProtocol.h"
 #include "BanchoUsers.h"
+#include "Chat.h"
 #include "ConVar.h"
 #include "Engine.h"
+#include "Lobby.h"
 #include "MD5.h"
+#include "NotificationOverlay.h"
+#include "OptionsMenu.h"
 #include "Osu.h"
-#include "OsuChat.h"
-#include "OsuLobby.h"
-#include "OsuNotificationOverlay.h"
-#include "OsuOptionsMenu.h"
-#include "OsuRoom.h"
-#include "OsuSongBrowser.h"
-#include "OsuUIAvatar.h"
-#include "OsuUIButton.h"
-#include "OsuUISongBrowserUserButton.h"
+#include "RoomScreen.h"
+#include "SongBrowser.h"
+#include "UIAvatar.h"
+#include "UIButton.h"
+#include "UISongBrowserUserButton.h"
 
 Bancho bancho;
 std::unordered_map<std::string, Channel *> chat_channels;
@@ -215,7 +215,7 @@ void handle_packet(Packet *packet) {
 
             // close your eyes
             SAFE_DELETE(bancho.osu->m_songBrowser2->m_userButton->m_avatar);
-            bancho.osu->m_songBrowser2->m_userButton->m_avatar = new OsuUIAvatar(bancho.user_id, 0.f, 0.f, 0.f, 0.f);
+            bancho.osu->m_songBrowser2->m_userButton->m_avatar = new UIAvatar(bancho.user_id, 0.f, 0.f, 0.f, 0.f);
             bancho.osu->m_songBrowser2->m_userButton->m_avatar->on_screen = true;
 
             // XXX: We should toggle between "offline" sorting options and "online" ones

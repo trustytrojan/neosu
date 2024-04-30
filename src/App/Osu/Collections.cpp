@@ -2,8 +2,8 @@
 
 #include "BanchoProtocol.h"
 #include "ConVar.h"
+#include "Database.h"
 #include "Engine.h"
-#include "OsuDatabase.h"
 
 bool collections_loaded = false;
 std::vector<Collection*> collections;
