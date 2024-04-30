@@ -5,34 +5,34 @@
 #include "UString.h"
 
 struct UserInfo {
-    uint32_t user_id = 0;
+    u32 user_id = 0;
 
     // Presence (via USER_PRESENCE_REQUEST or USER_PRESENCE_REQUEST_ALL)
     UString name;
-    uint8_t utc_offset = 0;
-    uint8_t country = 0;
-    uint8_t privileges = 0;
+    u8 utc_offset = 0;
+    u8 country = 0;
+    u8 privileges = 0;
     float longitude = 0.f;
     float latitude = 0.f;
-    int32_t global_rank = 0;
+    i32 global_rank = 0;
 
     // Stats (via USER_STATS_REQUEST)
     Action action = UNKNOWN;
     GameMode mode = STANDARD;
     UString info_text = UString("Loading...");
     UString map_md5;
-    int32_t map_id = 0;
-    uint32_t mods = 0;
-    int64_t total_score = 0;
-    int64_t ranked_score = 0;
-    int32_t plays = 0;
-    uint16_t pp = 0.f;
+    i32 map_id = 0;
+    u32 mods = 0;
+    i64 total_score = 0;
+    i64 ranked_score = 0;
+    i32 plays = 0;
+    u16 pp = 0.f;
     float accuracy = 0.f;
 
     bool is_friend();
 };
 
-extern std::unordered_map<uint32_t, UserInfo*> online_users;
-extern std::vector<uint32_t> friends;
+extern std::unordered_map<u32, UserInfo*> online_users;
+extern std::vector<u32> friends;
 
-UserInfo* get_user_info(uint32_t user_id, bool fetch = false);
+UserInfo* get_user_info(u32 user_id, bool fetch = false);

@@ -1,9 +1,9 @@
 #include "BanchoUsers.h"
 
-std::unordered_map<uint32_t, UserInfo*> online_users;
-std::vector<uint32_t> friends;
+std::unordered_map<u32, UserInfo*> online_users;
+std::vector<u32> friends;
 
-UserInfo* get_user_info(uint32_t user_id, bool fetch) {
+UserInfo* get_user_info(u32 user_id, bool fetch) {
     auto it = online_users.find(user_id);
     if(it != online_users.end()) {
         return it->second;

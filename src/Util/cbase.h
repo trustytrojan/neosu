@@ -1,12 +1,4 @@
-//================ Copyright (c) 2012, PG, All rights reserved. =================//
-//
-// Purpose:		CBASE - all global stuff goes in here
-//
-// $NoKeywords: $base
-//===============================================================================//
-
-#ifndef CBASE_H
-#define CBASE_H
+#pragma once
 
 // STD INCLUDES
 
@@ -27,6 +19,8 @@
 #include <unordered_set>
 #include <vector>
 
+#include "types.h"
+
 // ENGINE INCLUDES
 
 #include "EngineFeatures.h"
@@ -46,21 +40,6 @@
 #endif
 
 typedef unsigned char COLORPART;
-
-/*
-#ifndef DWORD
-typedef unsigned long 	DWORD;
-#endif
-#ifndef WORD
-typedef unsigned short	WORD;
-#endif
-#ifndef BYTE
-typedef unsigned char	BYTE;
-#endif
-#ifndef UINT8
-typedef unsigned char 	UINT8;
-#endif
-*/
 
 #define SAFE_DELETE(p)  \
     {                   \
@@ -143,5 +122,3 @@ inline bool isInt(float f) { return (f == static_cast<float>(static_cast<int>(f)
 inline unsigned long &floatBits(float &f) { return *reinterpret_cast<unsigned long *>(&f); }
 
 inline bool isFinite(float f) { return ((floatBits(f) & 0x7F800000) != 0x7F800000); }
-
-#endif

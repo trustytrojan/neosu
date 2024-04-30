@@ -11,7 +11,7 @@ class UIButton;
 
 struct ChatMessage {
     time_t tms;
-    int32_t author_id;
+    i32 author_id;
     UString author_name;
     UString text;
 };

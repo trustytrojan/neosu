@@ -39,7 +39,7 @@ void WinTimer::update() {
 
     m_delta = (double)(nowTime.QuadPart - m_currentTime.QuadPart) * m_secondsPerTick;
     m_elapsedTime = (double)(nowTime.QuadPart - m_startTime.QuadPart) * m_secondsPerTick;
-    m_elapsedTimeMS = (uint64_t)(((nowTime.QuadPart - m_startTime.QuadPart) * 1000) / m_ticksPerSecond);
+    m_elapsedTimeMS = (u64)(((nowTime.QuadPart - m_startTime.QuadPart) * 1000) / m_ticksPerSecond);
     m_currentTime = nowTime;
 }
 

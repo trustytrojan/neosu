@@ -455,16 +455,16 @@ void UISongBrowserScoreButton::resetHighlight() {
 
 void UISongBrowserScoreButton::updateElapsedTimeString() {
     if(m_iScoreUnixTimestamp > 0) {
-        const uint64_t curUnixTime =
+        const u64 curUnixTime =
             std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch())
                 .count();
-        const uint64_t delta = curUnixTime - m_iScoreUnixTimestamp;
+        const u64 delta = curUnixTime - m_iScoreUnixTimestamp;
 
-        const uint64_t deltaInSeconds = delta;
-        const uint64_t deltaInMinutes = delta / 60;
-        const uint64_t deltaInHours = deltaInMinutes / 60;
-        const uint64_t deltaInDays = deltaInHours / 24;
-        const uint64_t deltaInYears = deltaInDays / 365;
+        const u64 deltaInSeconds = delta;
+        const u64 deltaInMinutes = delta / 60;
+        const u64 deltaInHours = deltaInMinutes / 60;
+        const u64 deltaInDays = deltaInHours / 24;
+        const u64 deltaInYears = deltaInDays / 365;
 
         if(deltaInHours < 96 || m_style == STYLE::TOP_RANKS) {
             if(deltaInDays > 364)

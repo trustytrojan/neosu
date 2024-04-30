@@ -40,7 +40,7 @@ class UISongBrowserScoreButton : public CBaseUIButton {
     void setIndex(int index) { m_iScoreIndexNumber = index; }
 
     inline FinishedScore getScore() const { return m_score; }
-    inline uint64_t getScoreUnixTimestamp() const { return m_score.unixTimestamp; }
+    inline u64 getScoreUnixTimestamp() const { return m_score.unixTimestamp; }
     inline unsigned long long getScoreScore() const { return m_score.score; }
     inline float getScorePP() const { return m_score.pp; }
 
@@ -91,7 +91,7 @@ class UISongBrowserScoreButton : public CBaseUIButton {
     FinishedScore m_score;
 
     int m_iScoreIndexNumber;
-    uint64_t m_iScoreUnixTimestamp;
+    u64 m_iScoreUnixTimestamp;
 
     FinishedScore::Grade m_scoreGrade;
 

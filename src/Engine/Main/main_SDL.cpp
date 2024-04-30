@@ -62,7 +62,7 @@ ConVar sdl_joystick_zr_threshold("sdl_joystick_zr_threshold", -0.5f, FCVAR_NONE)
 int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
     SDLEnvironment *environment = customSDLEnvironment;
 
-    uint32_t flags = SDL_INIT_VIDEO;
+    u32 flags = SDL_INIT_VIDEO;
 
 #ifdef MCENGINE_SDL_JOYSTICK
 
@@ -93,7 +93,7 @@ int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
 
 #endif
 
-    uint32_t windowFlags =
+    u32 windowFlags =
         SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS | SDL_WINDOW_FOREIGN;
 
 #if defined(MCENGINE_FEATURE_OPENGL) || defined(MCENGINE_FEATURE_OPENGLES)

@@ -27,12 +27,11 @@ class File {
     bool canRead() const;
     bool canWrite() const;
 
-    void write(const uint8_t *buffer, size_t size);
+    void write(const u8 *buffer, size_t size);
 
     std::string readLine();
     std::string readString();
-    const uint8_t *
-    readFile();  // WARNING: this is NOT a null-terminated string! DO NOT USE THIS with UString/std::string!
+    const u8 *readFile();  // WARNING: this is NOT a null-terminated string! DO NOT USE THIS with UString/std::string!
     size_t getFileSize() const;
 
    private:
@@ -46,10 +45,10 @@ class BaseFile {
     virtual bool canRead() const = 0;
     virtual bool canWrite() const = 0;
 
-    virtual void write(const uint8_t *buffer, size_t size) = 0;
+    virtual void write(const u8 *buffer, size_t size) = 0;
 
     virtual std::string readLine() = 0;
-    virtual const uint8_t *readFile() = 0;
+    virtual const u8 *readFile() = 0;
     virtual size_t getFileSize() const = 0;
 };
 
@@ -62,10 +61,10 @@ class StdFile : public BaseFile {
     bool canRead() const;
     bool canWrite() const;
 
-    void write(const uint8_t *buffer, size_t size);
+    void write(const u8 *buffer, size_t size);
 
     std::string readLine();
-    const uint8_t *readFile();
+    const u8 *readFile();
     size_t getFileSize() const;
 
    private:
@@ -79,7 +78,7 @@ class StdFile : public BaseFile {
     size_t m_iFileSize;
 
     // full reader
-    std::vector<uint8_t> m_fullBuffer;
+    std::vector<u8> m_fullBuffer;
 };
 
 #endif

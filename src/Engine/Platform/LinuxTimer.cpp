@@ -50,7 +50,7 @@ void LinuxTimer::update() {
 
     const timespec elapsed = diff(m_startTime, t);
     m_elapsedTime = elapsed.tv_sec + (double)elapsed.tv_nsec / 1000000000.0;
-    m_elapsedTimeMS = ((uint64_t)elapsed.tv_sec * (uint64_t)1000) + ((uint64_t)elapsed.tv_nsec / (uint64_t)1000000);
+    m_elapsedTimeMS = ((u64)elapsed.tv_sec * (u64)1000) + ((u64)elapsed.tv_nsec / (u64)1000000);
 
     m_currentTime = t;
 }

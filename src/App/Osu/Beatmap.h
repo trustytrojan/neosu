@@ -188,8 +188,8 @@ class Beatmap {
     std::vector<Replay::Frame> live_replay;
     double last_event_time = 0.0;
     long last_event_ms = 0;
-    uint8_t current_keys = 0;
-    uint8_t last_keys = 0;
+    u8 current_keys = 0;
+    u8 last_keys = 0;
 
     // replay replaying
     // current_keys, last_keys also reused

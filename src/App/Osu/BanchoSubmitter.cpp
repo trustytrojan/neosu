@@ -22,13 +22,13 @@ void submit_score(FinishedScore score) {
     if(!bancho.set_fposu_flag) score.modsLegacy &= ~ModFlags::FPoSu;
     if(!bancho.set_mirror_flag) score.modsLegacy &= ~ModFlags::Mirror;
 
-    uint8_t *compressed_data = NULL;
+    u8 *compressed_data = NULL;
 
     char score_time[80];
     struct tm *timeinfo = localtime((const time_t *)&score.unixTimestamp);
     strftime(score_time, sizeof(score_time), "%y%m%d%H%M%S", timeinfo);
 
-    uint8_t iv[32];
+    u8 iv[32];
 #ifdef _WIN32
     HCRYPTPROV hCryptProv;
     CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
@@ -108,8 +108,8 @@ void submit_score(FinishedScore score) {
     }
     {
         size_t s_client_hashes_encrypted = 0;
-        uint8_t *client_hashes_encrypted = encrypt(iv, (uint8_t *)bancho.client_hashes.toUtf8(),
-                                                   bancho.client_hashes.lengthUtf8(), &s_client_hashes_encrypted);
+        u8 *client_hashes_encrypted = encrypt(iv, (u8 *)bancho.client_hashes.toUtf8(),
+                                              bancho.client_hashes.lengthUtf8(), &s_client_hashes_encrypted);
         const char *client_hashes_b64 =
             (const char *)base64_encode(client_hashes_encrypted, s_client_hashes_encrypted, NULL);
         part = curl_mime_addpart(request.mime);
@@ -133,7 +133,7 @@ void submit_score(FinishedScore score) {
             idiot_check.append(UString::format("0%d%s", OSU_VERSION_DATEONLY, score_time));
             idiot_check.append(bancho.client_hashes);
 
-            auto idiot_hash = md5((uint8_t *)idiot_check.toUtf8(), idiot_check.lengthUtf8());
+            auto idiot_hash = md5((u8 *)idiot_check.toUtf8(), idiot_check.lengthUtf8());
             score_data.append(":");
             score_data.append(idiot_hash.hash);
         }
@@ -154,8 +154,8 @@ void submit_score(FinishedScore score) {
         score_data.append(":mcosu");  // anticheat flags
 
         size_t s_score_data_encrypted = 0;
-        uint8_t *score_data_encrypted =
-            encrypt(iv, (uint8_t *)score_data.toUtf8(), score_data.lengthUtf8(), &s_score_data_encrypted);
+        u8 *score_data_encrypted =
+            encrypt(iv, (u8 *)score_data.toUtf8(), score_data.lengthUtf8(), &s_score_data_encrypted);
         const char *score_data_b64 = (const char *)base64_encode(score_data_encrypted, s_score_data_encrypted, NULL);
 
         part = curl_mime_addpart(request.mime);

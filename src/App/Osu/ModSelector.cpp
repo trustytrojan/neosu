@@ -1188,7 +1188,7 @@ void ModSelector::resetModsUserInitiated() {
 
             Packet packet;
             packet.id = MATCH_CHANGE_MODS;
-            write_int32(&packet, bancho.room.slots[i].mods);
+            write_u32(&packet, bancho.room.slots[i].mods);
             send_packet(packet);
 
             m_osu->m_room->updateLayout(m_osu->getScreenSize());
@@ -1228,8 +1228,8 @@ void ModSelector::resetMods() {
     }
 }
 
-uint32_t ModSelector::getModFlags() {
-    uint32_t flags = 0;
+u32 ModSelector::getModFlags() {
+    u32 flags = 0;
 
     if(m_modButtonDoubletime->isOn()) flags |= ModFlags::DoubleTime;
     if(m_modButtonDoubletime->getState() == 1) flags |= ModFlags::Nightcore;
@@ -1251,7 +1251,7 @@ uint32_t ModSelector::getModFlags() {
     return flags;
 }
 
-void ModSelector::enableModsFromFlags(uint32_t flags) {
+void ModSelector::enableModsFromFlags(u32 flags) {
     if(flags & ModFlags::DoubleTime) {
         m_modButtonDoubletime->setOn(true, true);
         if(flags & ModFlags::Nightcore) {

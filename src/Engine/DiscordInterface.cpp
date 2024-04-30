@@ -94,9 +94,9 @@ void DiscordInterface::setRichPresence(UString key, UString value, bool pool) {
         m_sPresenceDetails = value;
         m_presence.details = m_sPresenceDetails.toUtf8();
     } else if(key == "startTimestamp")
-        m_presence.startTimestamp = (int64_t)value.toLong();
+        m_presence.startTimestamp = (i64)value.toLong();
     else if(key == "endTimestamp")
-        m_presence.endTimestamp = (int64_t)value.toLong();
+        m_presence.endTimestamp = (i64)value.toLong();
     else if(key == "largeImageKey" && value.length() <= 32) {
         m_sPresenceLargeImageKey = value;
         m_presence.largeImageKey = m_sPresenceLargeImageKey.toUtf8();
@@ -126,7 +126,7 @@ void DiscordInterface::setRichPresence(UString key, UString value, bool pool) {
         m_sPresenceSpectateSecret = value;
         m_presence.spectateSecret = m_sPresenceSpectateSecret.toUtf8();
     } else if(key == "instance")
-        m_presence.instance = (int8_t)value.toInt();
+        m_presence.instance = (i8)value.toInt();
 
     if(!pool) Discord_UpdatePresence(&m_presence);
 

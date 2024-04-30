@@ -5,8 +5,8 @@
 struct OnlineMapInfo {
     long ranked_status;
     bool server_has_osz2;
-    uint32_t beatmap_id;
-    uint32_t beatmap_set_id;
+    u32 beatmap_id;
+    u32 beatmap_set_id;
     int nb_scores;
 };
 

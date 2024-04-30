@@ -114,7 +114,7 @@ class SongBrowser : public ScreenBackable {
     void onSongButtonContextMenu(UISongBrowserSongButton *songButton, UString text, int id);
     void onCollectionButtonContextMenu(UISongBrowserCollectionButton *collectionButton, UString text, int id);
 
-    void highlightScore(uint64_t unixTimestamp);
+    void highlightScore(u64 unixTimestamp);
     void selectRandomBeatmap();
     void playNextRandomBeatmap() {
         selectRandomBeatmap();

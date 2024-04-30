@@ -28,7 +28,7 @@ class WinTimer : public BaseTimer {
 
     virtual inline double getDelta() const override { return m_delta; }
     virtual inline double getElapsedTime() const override { return m_elapsedTime; }
-    virtual inline uint64_t getElapsedTimeMS() const override { return m_elapsedTimeMS; }
+    virtual inline u64 getElapsedTimeMS() const override { return m_elapsedTimeMS; }
 
    private:
     double m_secondsPerTick;
@@ -39,7 +39,7 @@ class WinTimer : public BaseTimer {
 
     double m_delta;
     double m_elapsedTime;
-    uint64_t m_elapsedTimeMS;
+    u64 m_elapsedTimeMS;
 };
 
 #endif

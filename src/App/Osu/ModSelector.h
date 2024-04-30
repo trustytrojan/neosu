@@ -48,8 +48,8 @@ class ModSelector : public OsuScreen {
     void toggleAuto();
     void resetModsUserInitiated();
     void resetMods();
-    uint32_t getModFlags();
-    void enableModsFromFlags(uint32_t flags);
+    u32 getModFlags();
+    void enableModsFromFlags(u32 flags);
 
     void setWaitForF1KeyUp(bool waitForF1KeyUp) { m_bWaitForF1KeyUp = waitForF1KeyUp; }
 

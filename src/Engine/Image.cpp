@@ -120,7 +120,7 @@ bool Image::loadRawImage() {
         if(m_bInterrupted)  // cancellation point
             return false;
 
-        const uint8_t *data = file.readFile();
+        const u8 *data = file.readFile();
         if(data == NULL) {
             printf("Image Error: Couldn't readFile() file %s\n", m_sFilePath.c_str());
             return false;

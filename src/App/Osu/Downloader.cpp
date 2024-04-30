@@ -14,7 +14,7 @@
 
 struct DownloadResult {
     std::string url;
-    std::vector<uint8_t> data;
+    std::vector<u8> data;
     float progress = 0.f;
     int response_code = 0;
 };
@@ -103,7 +103,7 @@ void* do_downloads(void* arg) {
             pthread_mutex_lock(&threads_mtx);
             result->progress = 1.f;
             result->response_code = response_code;
-            result->data = std::vector<uint8_t>(response.memory, response.memory + response.size);
+            result->data = std::vector<u8>(response.memory, response.memory + response.size);
             pthread_mutex_unlock(&threads_mtx);
         } else {
             debugLog("Failed to download %s: %s\n", url.c_str(), curl_easy_strerror(res));
@@ -113,7 +113,7 @@ void* do_downloads(void* arg) {
             if(response_code == 429) {
                 result->progress = 0.f;
             } else {
-                result->data = std::vector<uint8_t>(response.memory, response.memory + response.size);
+                result->data = std::vector<u8>(response.memory, response.memory + response.size);
                 result->progress = -1.f;
             }
             pthread_mutex_unlock(&threads_mtx);
@@ -146,7 +146,7 @@ end_thread:
     return NULL;
 }
 
-void download(const char* url, float* progress, std::vector<uint8_t>& out, int* response_code) {
+void download(const char* url, float* progress, std::vector<u8>& out, int* response_code) {
     char* hostname = NULL;
     bool download_found = false;
     DownloadThread* matching_thread = nullptr;
@@ -218,7 +218,7 @@ end:
     curl_url_cleanup(urlu);
 }
 
-void download_beatmapset(uint32_t set_id, float* progress) {
+void download_beatmapset(u32 set_id, float* progress) {
     // Check if we already have downloaded it
     std::stringstream ss;
     ss << MCENGINE_DATA_DIR "maps/" << std::to_string(set_id) << "/";
@@ -228,7 +228,7 @@ void download_beatmapset(uint32_t set_id, float* progress) {
         return;
     }
 
-    std::vector<uint8_t> data;
+    std::vector<u8> data;
     auto mirror = convar->getConVarByName("beatmap_mirror")->getString();
     mirror.append(UString::format("%d", set_id));
     int response_code = 0;

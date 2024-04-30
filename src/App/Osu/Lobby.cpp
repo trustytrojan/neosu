@@ -196,10 +196,10 @@ void Lobby::addRoom(Room* room) {
     updateLayout(getSize());
 }
 
-void Lobby::joinRoom(uint32_t id, UString password) {
+void Lobby::joinRoom(u32 id, UString password) {
     Packet packet;
     packet.id = JOIN_ROOM;
-    write_int32(&packet, id);
+    write_u32(&packet, id);
     write_string(&packet, password.toUtf8());
     send_packet(packet);
 
@@ -229,7 +229,7 @@ void Lobby::updateRoom(Room room) {
     addRoom(new_room);
 }
 
-void Lobby::removeRoom(uint32_t room_id) {
+void Lobby::removeRoom(u32 room_id) {
     for(auto room : rooms) {
         if(room->id == room_id) {
             auto it = std::find(rooms.begin(), rooms.end(), room);

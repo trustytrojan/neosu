@@ -23,19 +23,19 @@ class UIUserContextMenuScreen : public OsuScreen {
     virtual void onResolutionChange(Vector2 newResolution);
     virtual void stealFocus();
 
-    void open(uint32_t user_id);
+    void open(u32 user_id);
     void close();
     void on_action(UString text, int user_action);
 
-    uint32_t m_user_id;
+    u32 m_user_id;
     UIContextMenu *menu = nullptr;
 };
 
 class UIUserLabel : public CBaseUILabel {
    public:
-    UIUserLabel(Osu *osu, uint32_t user_id, UString username);
+    UIUserLabel(Osu *osu, u32 user_id, UString username);
 
     virtual void onMouseUpInside();
 
-    uint32_t m_user_id;
+    u32 m_user_id;
 };

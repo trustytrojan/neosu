@@ -42,7 +42,7 @@ void RichPresence::setBanchoStatus(Osu *osu, const char *info_text, Action actio
     if(osu == NULL) return;
 
     MD5Hash map_md5("");
-    uint32_t map_id = 0;
+    u32 map_id = 0;
 
     auto selected_beatmap = osu->getSelectedBeatmap();
     if(selected_beatmap != nullptr) {
@@ -61,18 +61,18 @@ void RichPresence::setBanchoStatus(Osu *osu, const char *info_text, Action actio
 
     Packet packet;
     packet.id = CHANGE_ACTION;
-    write_byte(&packet, action);
+    write_u8(&packet, action);
     write_string(&packet, fancy_text);
     write_string(&packet, map_md5.hash);
-    write_int32(&packet, osu->m_modSelector->getModFlags());
-    write_byte(&packet, 0);  // osu!std
-    write_int32(&packet, map_id);
+    write_u32(&packet, osu->m_modSelector->getModFlags());
+    write_u8(&packet, 0);  // osu!std
+    write_u32(&packet, map_id);
     send_packet(packet);
 }
 
 void RichPresence::updateBanchoMods() {
     MD5Hash map_md5("");
-    uint32_t map_id = 0;
+    u32 map_id = 0;
 
     auto selected_beatmap = bancho.osu->getSelectedBeatmap();
     if(selected_beatmap != nullptr) {
@@ -85,12 +85,12 @@ void RichPresence::updateBanchoMods() {
 
     Packet packet;
     packet.id = CHANGE_ACTION;
-    write_byte(&packet, last_action);
+    write_u8(&packet, last_action);
     write_string(&packet, last_status.toUtf8());
     write_string(&packet, map_md5.hash);
-    write_int32(&packet, bancho.osu->m_modSelector->getModFlags());
-    write_byte(&packet, 0);  // osu!std
-    write_int32(&packet, map_id);
+    write_u32(&packet, bancho.osu->m_modSelector->getModFlags());
+    write_u8(&packet, 0);  // osu!std
+    write_u32(&packet, map_id);
     send_packet(packet);
 
     // Servers like akatsuki send different leaderboards based on what mods

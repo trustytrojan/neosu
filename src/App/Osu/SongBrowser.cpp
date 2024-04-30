@@ -3956,7 +3956,7 @@ void SongBrowser::onCollectionButtonContextMenu(UISongBrowserCollectionButton *c
     }
 }
 
-void SongBrowser::highlightScore(uint64_t unixTimestamp) {
+void SongBrowser::highlightScore(u64 unixTimestamp) {
     for(size_t i = 0; i < m_scoreButtonCache.size(); i++) {
         if(m_scoreButtonCache[i]->getScore().unixTimestamp == unixTimestamp) {
             m_scoreBrowser->scrollToElement(m_scoreButtonCache[i], 0, 10);
@@ -4136,13 +4136,13 @@ void SongBrowser::recreateCollectionsButtons() {
         if(collection->maps.empty()) continue;
 
         std::vector<UISongBrowserButton *> folder;
-        std::vector<uint32_t> matched_sets;
+        std::vector<u32> matched_sets;
 
         for(auto &map : collection->maps) {
             auto it = hashToSongButton.find(map);
             if(it == hashToSongButton.end()) continue;
 
-            uint32_t set_id = 0;
+            u32 set_id = 0;
             auto song_button = it->second;
             const std::vector<UISongBrowserButton *> &songButtonChildren = song_button->getChildren();
             std::vector<UISongBrowserButton *> matching_diffs;

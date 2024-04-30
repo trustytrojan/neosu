@@ -25,8 +25,8 @@ class CBaseUIContainer;
 
 struct SCORE_ENTRY {
     UString name;
-    int32_t entry_id = 0;
-    uint32_t player_id = 0;
+    i32 entry_id = 0;
+    u32 player_id = 0;
 
     int combo;
     unsigned long long score;

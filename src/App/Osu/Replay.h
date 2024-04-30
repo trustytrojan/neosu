@@ -12,7 +12,7 @@ struct Frame {
     float x;  // 0 - 512
     float y;  // 0 - 384
 
-    uint8_t key_flags;
+    u8 key_flags;
 };
 
 enum KeyFlags {
@@ -36,8 +36,8 @@ struct BEATMAP_VALUES {
 };
 
 struct Info {
-    uint8_t gamemode;
-    uint32_t osu_version;
+    u8 gamemode;
+    u32 osu_version;
     UString diff2_md5;
     UString username;
     UString replay_md5;
@@ -47,21 +47,21 @@ struct Info {
     int numGekis;
     int numKatus;
     int numMisses;
-    int32_t score;
+    i32 score;
     int comboMax;
     bool perfect;
-    int32_t mod_flags;
+    i32 mod_flags;
     UString life_bar_graph;
-    int64_t timestamp;
+    i64 timestamp;
     std::vector<Frame> frames;
 };
 
 BEATMAP_VALUES getBeatmapValuesForModsLegacy(int modsLegacy, float legacyAR, float legacyCS, float legacyOD,
                                              float legacyHP);
 
-Info from_bytes(uint8_t* data, int s_data);
-std::vector<Frame> get_frames(uint8_t* replay_data, int32_t replay_size);
-void compress_frames(const std::vector<Frame>& frames, uint8_t** compressed, size_t* s_compressed);
+Info from_bytes(u8* data, int s_data);
+std::vector<Frame> get_frames(u8* replay_data, i32 replay_size);
+void compress_frames(const std::vector<Frame>& frames, u8** compressed, size_t* s_compressed);
 bool load_from_disk(FinishedScore* score);
 void load_and_watch(FinishedScore score);
 

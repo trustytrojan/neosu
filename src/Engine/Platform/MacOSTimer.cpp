@@ -30,12 +30,12 @@ void MacOSTimer::start() {
 }
 
 void MacOSTimer::update() {
-    const uint64_t nowTime = mach_absolute_time();
+    const u64 nowTime = mach_absolute_time();
 
     m_delta = (((nowTime - m_currentTime) * m_timebaseInfo.numer) / m_timebaseInfo.denom) / 1000000000.0;
     m_elapsedTime = (((nowTime - m_startTime) * m_timebaseInfo.numer) / m_timebaseInfo.denom) / 1000000000.0;
-    m_elapsedTimeMS = (((nowTime - m_startTime) * (uint64_t)m_timebaseInfo.numer) / (uint64_t)m_timebaseInfo.denom) /
-                      (uint64_t)1000000;
+    m_elapsedTimeMS =
+        (((nowTime - m_startTime) * (u64)m_timebaseInfo.numer) / (u64)m_timebaseInfo.denom) / (u64)1000000;
     m_currentTime = nowTime;
 }
 

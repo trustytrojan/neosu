@@ -51,9 +51,9 @@ void disconnect() {
     // This is a blocking call, but we *do* want this to block when quitting the game.
     if(bancho.is_online()) {
         Packet packet;
-        write_short(&packet, LOGOUT);
-        write_byte(&packet, 0);
-        write_int32(&packet, 0);
+        write_u16(&packet, LOGOUT);
+        write_u8(&packet, 0);
+        write_u32(&packet, 0);
 
         CURL *curl = curl_easy_init();
         auto version_header = UString::format("x-mcosu-ver: %s", bancho.neosu_version.toUtf8());
@@ -136,7 +136,7 @@ void reconnect() {
     }
 
     const char *pw = cv_password.toUtf8();  // cv_password needs to stay in scope!
-    bancho.pw_md5 = md5((uint8_t *)pw, strlen(pw));
+    bancho.pw_md5 = md5((u8 *)pw, strlen(pw));
 
     bancho.username = convar->getConVarByName("name")->getString();
     bancho.endpoint = convar->getConVarByName("mp_server")->getString();
@@ -155,7 +155,7 @@ size_t curl_write(void *contents, size_t size, size_t nmemb, void *userp) {
     size_t realsize = size * nmemb;
     Packet *mem = (Packet *)userp;
 
-    uint8_t *ptr = (uint8_t *)realloc(mem->memory, mem->size + realsize + 1);
+    u8 *ptr = (u8 *)realloc(mem->memory, mem->size + realsize + 1);
     if(!ptr) {
         /* out of memory! */
         debugLog("not enough memory (realloc returned NULL)\n");
@@ -177,7 +177,7 @@ static void send_api_request(CURL *curl, APIRequest api_out) {
     response.id = api_out.type;
     response.extra = api_out.extra;
     response.extra_int = api_out.extra_int;
-    response.memory = (uint8_t *)malloc(2048);
+    response.memory = (u8 *)malloc(2048);
 
     struct curl_slist *chunk = NULL;
     auto query_url = UString::format("https://osu.%s%s", bancho.endpoint.toUtf8(), api_out.path.toUtf8());
@@ -213,7 +213,7 @@ static void send_api_request(CURL *curl, APIRequest api_out) {
 
 static void send_bancho_packet(CURL *curl, Packet outgoing) {
     Packet response;
-    response.memory = (uint8_t *)malloc(2048);
+    response.memory = (u8 *)malloc(2048);
 
     struct curl_slist *chunk = NULL;
     auto version_header = UString::format("x-mcosu-ver: %s", bancho.neosu_version.toUtf8());
@@ -276,9 +276,9 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
     }
 
     while(response.pos < response.size) {
-        uint16_t packet_id = read_short(&response);
+        u16 packet_id = read_u16(&response);
         response.pos++;
-        uint32_t packet_len = read_int32(&response);
+        u32 packet_len = read_u32(&response);
         if(packet_len > 10485760) {
             debugLog("Received a packet over 10Mb! Dropping response.\n");
             goto end;
@@ -286,7 +286,7 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
 
         Packet incoming = {
             .id = packet_id,
-            .memory = (uint8_t *)malloc(packet_len),
+            .memory = (u8 *)malloc(packet_len),
             .size = packet_len,
             .pos = 0,
         };
@@ -345,9 +345,9 @@ static void *do_networking(void *data) {
             free(login.memory);
             pthread_mutex_lock(&outgoing_mutex);
         } else if(should_ping && outgoing.pos == 0) {
-            write_short(&outgoing, PING);
-            write_byte(&outgoing, 0);
-            write_int32(&outgoing, 0);
+            write_u16(&outgoing, PING);
+            write_u8(&outgoing, 0);
+            write_u32(&outgoing, 0);
 
             // Polling gets slower over time, but resets when we receive new data
             if(seconds_between_pings < 30.0) {
@@ -362,9 +362,9 @@ static void *do_networking(void *data) {
 
             // DEBUG: If we're not sending the right amount of bytes, bancho.py just
             // chugs along! To try to detect it faster, we'll send two packets per request.
-            write_short(&out, PING);
-            write_byte(&out, 0);
-            write_int32(&out, 0);
+            write_u16(&out, PING);
+            write_u8(&out, 0);
+            write_u32(&out, 0);
 
             send_bancho_packet(curl, out);
             free(out.memory);
@@ -497,9 +497,9 @@ void send_packet(Packet &packet) {
 
     // We're not sending it immediately, instead we just add it to the pile of
     // packets to send
-    write_short(&outgoing, packet.id);
-    write_byte(&outgoing, 0);
-    write_int32(&outgoing, packet.pos);
+    write_u16(&outgoing, packet.id);
+    write_u8(&outgoing, 0);
+    write_u32(&outgoing, packet.pos);
     write_bytes(&outgoing, packet.memory, packet.pos);
 
     pthread_mutex_unlock(&outgoing_mutex);

@@ -950,7 +950,7 @@ bool DatabaseBeatmap::loadMetadata(DatabaseBeatmap *databaseBeatmap) {
     {
         File file(!databaseBeatmap->m_bFilePathIsInMemoryBeatmap ? databaseBeatmap->m_sFilePath : "");
 
-        const uint8_t *beatmapFile = NULL;
+        const u8 *beatmapFile = NULL;
         size_t beatmapFileSize = 0;
         {
             if(!databaseBeatmap->m_bFilePathIsInMemoryBeatmap) {
@@ -959,13 +959,13 @@ bool DatabaseBeatmap::loadMetadata(DatabaseBeatmap *databaseBeatmap) {
                     beatmapFileSize = file.getFileSize();
                 }
             } else {
-                beatmapFile = (uint8_t *)databaseBeatmap->m_sFilePath.c_str();
+                beatmapFile = (u8 *)databaseBeatmap->m_sFilePath.c_str();
                 beatmapFileSize = databaseBeatmap->m_sFilePath.size();
             }
         }
 
         if(beatmapFile != NULL) {
-            auto hash = md5((uint8_t *)beatmapFile, beatmapFileSize);
+            auto hash = md5((u8 *)beatmapFile, beatmapFileSize);
             databaseBeatmap->m_sMD5Hash = MD5Hash(hash.toUtf8());
         }
     }
@@ -1364,9 +1364,9 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
     // build hitobjects from the primitive data we loaded from the osu file
     {
         struct Helper {
-            static inline uint32_t pcgHash(uint32_t input) {
-                const uint32_t state = input * 747796405u + 2891336453u;
-                const uint32_t word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
+            static inline u32 pcgHash(u32 input) {
+                const u32 state = input * 747796405u + 2891336453u;
+                const u32 word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
                 return (word >> 22u) ^ word;
             }
         };

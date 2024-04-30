@@ -852,13 +852,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     #pragma pack(1)
 
-            enum class IPC_STATE : uint8_t
+            enum class IPC_STATE : u8
             {
                     IDLE,
                     MESSAGE
             };
 
-            enum class IPC_MESSAGE_TYPE : uint8_t
+            enum class IPC_MESSAGE_TYPE : u8
             {
                     URL
             };

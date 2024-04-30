@@ -221,7 +221,7 @@ void RoomScreen::draw(Graphics *g) {
 
     auto search = mapset_by_mapid.find(bancho.room.map_id);
     if(search == mapset_by_mapid.end()) return;
-    uint32_t set_id = search->second;
+    u32 set_id = search->second;
     if(set_id == 0) {
         auto error_str = UString::format("Could not find beatmapset for map ID %d", bancho.room.map_id);
         m_map_title->setText(error_str);
@@ -402,7 +402,7 @@ void RoomScreen::updateSettingsLayout(Vector2 newResolution) {
     // Ready button
     int nb_ready = 0;
     bool is_ready = false;
-    for(uint8_t i = 0; i < 16; i++) {
+    for(u8 i = 0; i < 16; i++) {
         if(bancho.room.slots[i].has_player() && bancho.room.slots[i].is_ready()) {
             nb_ready++;
             if(bancho.room.slots[i].player_id == bancho.user_id) {
@@ -498,7 +498,7 @@ void RoomScreen::ragequit() {
 }
 
 void RoomScreen::process_beatmapset_info_response(Packet packet) {
-    uint32_t map_id = packet.extra_int;
+    u32 map_id = packet.extra_int;
     if(packet.size == 0) {
         bancho.osu->m_room->mapset_by_mapid[map_id] = 0;
         return;
@@ -588,7 +588,7 @@ void RoomScreen::on_map_change(bool download) {
             request.type = GET_BEATMAPSET_INFO;
             request.path = path;
             request.mime = NULL;
-            request.extra_int = (uint32_t)bancho.room.map_id;
+            request.extra_int = (u32)bancho.room.map_id;
 
             send_api_request(request);
 
@@ -699,29 +699,29 @@ void RoomScreen::on_match_started(Room room) {
 }
 
 void RoomScreen::on_match_score_updated(Packet *packet) {
-    int32_t update_tms = read_int32(packet);
-    uint8_t slot_id = read_byte(packet);
+    i32 update_tms = read_u32(packet);
+    u8 slot_id = read_u8(packet);
     if(slot_id > 15) return;
 
     auto slot = &bancho.room.slots[slot_id];
     slot->last_update_tms = update_tms;
-    slot->num300 = read_short(packet);
-    slot->num100 = read_short(packet);
-    slot->num50 = read_short(packet);
-    slot->num_geki = read_short(packet);
-    slot->num_katu = read_short(packet);
-    slot->num_miss = read_short(packet);
-    slot->total_score = read_int32(packet);
-    slot->max_combo = read_short(packet);
-    slot->current_combo = read_short(packet);
-    slot->is_perfect = read_byte(packet);
-    slot->current_hp = read_byte(packet);
-    slot->tag = read_byte(packet);
+    slot->num300 = read_u16(packet);
+    slot->num100 = read_u16(packet);
+    slot->num50 = read_u16(packet);
+    slot->num_geki = read_u16(packet);
+    slot->num_katu = read_u16(packet);
+    slot->num_miss = read_u16(packet);
+    slot->total_score = read_u32(packet);
+    slot->max_combo = read_u16(packet);
+    slot->current_combo = read_u16(packet);
+    slot->is_perfect = read_u8(packet);
+    slot->current_hp = read_u8(packet);
+    slot->tag = read_u8(packet);
 
-    bool is_scorev2 = read_byte(packet);
+    bool is_scorev2 = read_u8(packet);
     if(is_scorev2) {
-        slot->sv2_combo = read_float64(packet);
-        slot->sv2_bonus = read_float64(packet);
+        slot->sv2_combo = read_f64(packet);
+        slot->sv2_bonus = read_f64(packet);
     }
 
     bancho.osu->m_hud->updateScoreboard(true);
@@ -732,7 +732,7 @@ void RoomScreen::on_all_players_loaded() {
     m_osu->m_chat->updateVisibility();
 }
 
-void RoomScreen::on_player_failed(int32_t slot_id) {
+void RoomScreen::on_player_failed(i32 slot_id) {
     if(slot_id < 0 || slot_id > 15) return;
     bancho.room.slots[slot_id].died = true;
 }
@@ -749,7 +749,7 @@ void RoomScreen::on_match_finished() {
 
 void RoomScreen::on_all_players_skipped() { bancho.room.all_players_skipped = true; }
 
-void RoomScreen::on_player_skip(int32_t user_id) {
+void RoomScreen::on_player_skip(i32 user_id) {
     for(int i = 0; i < 16; i++) {
         if(bancho.room.slots[i].player_id == user_id) {
             bancho.room.slots[i].skipped = true;
@@ -775,31 +775,31 @@ void RoomScreen::onClientScoreChange(bool force) {
     Packet packet;
     packet.id = UPDATE_MATCH_SCORE;
 
-    write_int32(&packet, (int32_t)m_osu->getSelectedBeatmap()->getTime());
+    write_u32(&packet, (i32)m_osu->getSelectedBeatmap()->getTime());
 
-    uint8_t slot_id = 0;
-    for(uint8_t i = 0; i < 16; i++) {
+    u8 slot_id = 0;
+    for(u8 i = 0; i < 16; i++) {
         if(bancho.room.slots[i].player_id == bancho.user_id) {
             slot_id = i;
             break;
         }
     }
-    write_byte(&packet, slot_id);
+    write_u8(&packet, slot_id);
 
-    write_short(&packet, (uint16_t)m_osu->getScore()->getNum300s());
-    write_short(&packet, (uint16_t)m_osu->getScore()->getNum100s());
-    write_short(&packet, (uint16_t)m_osu->getScore()->getNum50s());
-    write_short(&packet, (uint16_t)m_osu->getScore()->getNum300gs());
-    write_short(&packet, (uint16_t)m_osu->getScore()->getNum100ks());
-    write_short(&packet, (uint16_t)m_osu->getScore()->getNumMisses());
-    write_int32(&packet, (int32_t)m_osu->getScore()->getScore());
-    write_short(&packet, (uint16_t)m_osu->getScore()->getCombo());
-    write_short(&packet, (uint16_t)m_osu->getScore()->getComboMax());
-    write_byte(&packet, m_osu->getScore()->getNumSliderBreaks() == 0 && m_osu->getScore()->getNumMisses() == 0 &&
-                            m_osu->getScore()->getNum50s() == 0 && m_osu->getScore()->getNum100s() == 0);
-    write_byte(&packet, m_osu->getSelectedBeatmap()->getHealth() * 200);
-    write_byte(&packet, 0);  // 4P, not supported
-    write_byte(&packet, m_osu->getModScorev2());
+    write_u16(&packet, (u16)m_osu->getScore()->getNum300s());
+    write_u16(&packet, (u16)m_osu->getScore()->getNum100s());
+    write_u16(&packet, (u16)m_osu->getScore()->getNum50s());
+    write_u16(&packet, (u16)m_osu->getScore()->getNum300gs());
+    write_u16(&packet, (u16)m_osu->getScore()->getNum100ks());
+    write_u16(&packet, (u16)m_osu->getScore()->getNumMisses());
+    write_u32(&packet, (i32)m_osu->getScore()->getScore());
+    write_u16(&packet, (u16)m_osu->getScore()->getCombo());
+    write_u16(&packet, (u16)m_osu->getScore()->getComboMax());
+    write_u8(&packet, m_osu->getScore()->getNumSliderBreaks() == 0 && m_osu->getScore()->getNumMisses() == 0 &&
+                          m_osu->getScore()->getNum50s() == 0 && m_osu->getScore()->getNum100s() == 0);
+    write_u8(&packet, m_osu->getSelectedBeatmap()->getHealth() * 200);
+    write_u8(&packet, 0);  // 4P, not supported
+    write_u8(&packet, m_osu->getModScorev2());
     send_packet(packet);
 
     last_packet_tms = time(NULL);
@@ -811,7 +811,7 @@ void RoomScreen::onReadyButtonClick() {
 
     int nb_ready = 0;
     bool is_ready = false;
-    for(uint8_t i = 0; i < 16; i++) {
+    for(u8 i = 0; i < 16; i++) {
         if(bancho.room.slots[i].has_player() && bancho.room.slots[i].is_ready()) {
             nb_ready++;
             if(bancho.room.slots[i].player_id == bancho.user_id) {

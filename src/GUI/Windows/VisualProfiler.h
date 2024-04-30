@@ -62,7 +62,7 @@ class VisualProfiler : public CBaseUIElement {
     struct SPIKE {
         NODE node;
         double timeLastFrame;
-        uint32_t id;
+        u32 id;
     };
 
     struct GROUP {
@@ -103,7 +103,7 @@ class VisualProfiler : public CBaseUIElement {
 
     SPIKE m_spike;
     std::vector<SPIKE> m_spikeNodes;
-    uint32_t m_spikeIDCounter;
+    u32 m_spikeIDCounter;
 
     McFont *m_font;
     McFont *m_fontConsole;

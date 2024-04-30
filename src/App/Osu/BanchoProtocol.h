@@ -1,8 +1,6 @@
 #pragma once
-#include <stddef.h>
-#include <stdint.h>
-
 #include "UString.h"
+#include "types.h"
 
 enum Action {
     IDLE = 0,
@@ -137,20 +135,20 @@ enum OutgoingPackets {
 };
 
 struct Packet {
-    uint16_t id = 0;
-    uint8_t *memory = nullptr;
+    u16 id = 0;
+    u8 *memory = nullptr;
     size_t size = 0;
     size_t pos = 0;
-    uint8_t *extra = nullptr;
-    uint32_t extra_int = 0;  // lazy
+    u8 *extra = nullptr;
+    u32 extra_int = 0;  // lazy
 };
 
 struct Slot {
     // From ROOM_CREATED, ROOM_UPDATED
-    uint8_t status = 0;  // bitfield of [quit, complete, playing, no_map, ready, not_ready, locked, open]
-    uint8_t team = 0;
-    uint32_t player_id = 0;
-    uint32_t mods = 0;
+    u8 status = 0;  // bitfield of [quit, complete, playing, no_map, ready, not_ready, locked, open]
+    u8 team = 0;
+    u32 player_id = 0;
+    u32 mods = 0;
 
     // From MATCH_PLAYER_SKIPPED
     bool skipped = false;
@@ -159,19 +157,19 @@ struct Slot {
     bool died = false;
 
     // From MATCH_SCORE_UPDATED
-    int32_t last_update_tms = 0;
-    uint16_t num300 = 0;
-    uint16_t num100 = 0;
-    uint16_t num50 = 0;
-    uint16_t num_geki = 0;
-    uint16_t num_katu = 0;
-    uint16_t num_miss = 0;
-    int32_t total_score = 0;
-    uint16_t current_combo = 0;
-    uint16_t max_combo = 0;
-    uint8_t is_perfect = 0;
-    uint8_t current_hp = 0;
-    uint8_t tag = 0;
+    i32 last_update_tms = 0;
+    u16 num300 = 0;
+    u16 num100 = 0;
+    u16 num50 = 0;
+    u16 num_geki = 0;
+    u16 num_katu = 0;
+    u16 num_miss = 0;
+    i32 total_score = 0;
+    u16 current_combo = 0;
+    u16 max_combo = 0;
+    u8 is_perfect = 0;
+    u8 current_hp = 0;
+    u8 tag = 0;
     double sv2_combo = 0.0;
     double sv2_bonus = 0.0;
 
@@ -203,11 +201,11 @@ class Room {
     Room();
     Room(Packet *packet);
 
-    uint16_t id = 0;
-    uint8_t in_progress = 0;
-    uint8_t match_type = 0;
-    uint32_t mods = 0;
-    uint32_t seed = 0;
+    u16 id = 0;
+    u8 in_progress = 0;
+    u8 match_type = 0;
+    u32 mods = 0;
+    u32 seed = 0;
     bool all_players_loaded = false;
     bool all_players_skipped = false;
     bool player_loaded = false;
@@ -218,16 +216,16 @@ class Room {
 
     UString map_name = "";
     MD5Hash map_md5;
-    int32_t map_id = 0;
+    i32 map_id = 0;
 
-    uint8_t mode = 0;
-    uint8_t win_condition = 0;
-    uint8_t team_type = 0;
-    uint8_t freemods = 0;
+    u8 mode = 0;
+    u8 win_condition = 0;
+    u8 team_type = 0;
+    u8 freemods = 0;
 
-    int32_t host_id = 0;
-    uint8_t nb_players = 0;
-    uint8_t nb_open_slots = 0;
+    i32 host_id = 0;
+    u8 nb_players = 0;
+    u8 nb_open_slots = 0;
     Slot slots[16];
 
     bool all_players_ready() {
@@ -243,25 +241,25 @@ class Room {
     void pack(Packet *packet);
 };
 
-void read_bytes(Packet *packet, uint8_t *bytes, size_t n);
-uint8_t read_byte(Packet *packet);
-uint16_t read_short(Packet *packet);
-uint32_t read_int32(Packet *packet);
-uint64_t read_int64(Packet *packet);
-uint32_t read_uleb128(Packet *packet);
-float read_float32(Packet *packet);
-double read_float64(Packet *packet);
+void read_bytes(Packet *packet, u8 *bytes, size_t n);
+u8 read_u8(Packet *packet);
+u16 read_u16(Packet *packet);
+u32 read_u32(Packet *packet);
+u64 read_u64(Packet *packet);
+f32 read_f32(Packet *packet);
+f64 read_f64(Packet *packet);
+u32 read_uleb128(Packet *packet);
 UString read_string(Packet *packet);
 std::string read_stdstring(Packet *packet);
 void skip_string(Packet *packet);
 MD5Hash read_hash(Packet *packet);
 
-void write_bytes(Packet *packet, uint8_t *bytes, size_t n);
-void write_byte(Packet *packet, uint8_t b);
-void write_short(Packet *packet, uint16_t s);
-void write_int32(Packet *packet, uint32_t i);
-void write_int64(Packet *packet, uint64_t i);
-void write_uleb128(Packet *packet, uint32_t num);
-void write_float32(Packet *packet, float f);
-void write_float64(Packet *packet, double f);
+void write_bytes(Packet *packet, u8 *bytes, size_t n);
+void write_u8(Packet *packet, u8 b);
+void write_u16(Packet *packet, u16 s);
+void write_u32(Packet *packet, u32 i);
+void write_u64(Packet *packet, u64 i);
+void write_f32(Packet *packet, f32 f);
+void write_f64(Packet *packet, f64 f);
+void write_uleb128(Packet *packet, u32 num);
 void write_string(Packet *packet, const char *str);

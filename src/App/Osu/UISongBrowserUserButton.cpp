@@ -236,8 +236,8 @@ void UISongBrowserUserButton::updateUserStats() {
 
         int level = Database::getLevelForScore(my->total_score);
         float percentToNextLevel = 1.f;
-        uint32_t score_for_current_level = Database::getRequiredScoreForLevel(level);
-        uint32_t score_for_next_level = Database::getRequiredScoreForLevel(level + 1);
+        u32 score_for_current_level = Database::getRequiredScoreForLevel(level);
+        u32 score_for_next_level = Database::getRequiredScoreForLevel(level + 1);
         if(score_for_next_level > score_for_current_level) {
             percentToNextLevel = (float)(my->total_score - score_for_current_level) /
                                  (float)(score_for_next_level - score_for_current_level);
@@ -250,7 +250,7 @@ void UISongBrowserUserButton::updateUserStats() {
             .numScoresWithPP = 0,
             .level = level,
             .percentToNextLevel = percentToNextLevel,
-            .totalScore = (uint32_t)my->total_score,
+            .totalScore = (u32)my->total_score,
         };
     }
 

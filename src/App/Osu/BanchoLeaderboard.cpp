@@ -127,7 +127,7 @@ void fetch_online_scores(DatabaseBeatmap *beatmap) {
     request.type = GET_MAP_LEADERBOARD;
     request.path = path;
     request.mime = NULL;
-    request.extra = (uint8_t *)strdup(beatmap->getMD5Hash().hash);
+    request.extra = (u8 *)strdup(beatmap->getMD5Hash().hash);
 
     send_api_request(request);
 }

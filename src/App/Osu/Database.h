@@ -63,7 +63,7 @@ class Database {
     DatabaseBeatmap *addBeatmap(std::string beatmapFolderPath);
 
     int addScore(MD5Hash beatmapMD5Hash, FinishedScore score);
-    void deleteScore(MD5Hash beatmapMD5Hash, uint64_t scoreUnixTimestamp);
+    void deleteScore(MD5Hash beatmapMD5Hash, u64 scoreUnixTimestamp);
     void sortScores(MD5Hash beatmapMD5Hash);
     void forceScoreUpdateOnNextCalculatePlayerStats() { m_bDidScoresChangeForStats = true; }
     void forceScoresSaveOnNextShutdown() { m_bDidScoresChangeForSave = true; }

@@ -46,7 +46,7 @@ Replay::BEATMAP_VALUES Replay::getBeatmapValuesForModsLegacy(int modsLegacy, flo
     return v;
 }
 
-std::vector<Replay::Frame> Replay::get_frames(uint8_t* replay_data, int32_t replay_size) {
+std::vector<Replay::Frame> Replay::get_frames(u8* replay_data, i32 replay_size) {
     std::vector<Replay::Frame> replay_frames;
     if(replay_size <= 0) return replay_frames;
 
@@ -60,7 +60,7 @@ std::vector<Replay::Frame> Replay::get_frames(uint8_t* replay_data, int32_t repl
     long cur_music_pos = 0;
     std::stringstream ss;
     std::string frame_str;
-    uint8_t outbuf[BUFSIZ];
+    u8 outbuf[BUFSIZ];
     strm.next_in = replay_data;
     strm.avail_in = replay_size;
     do {
@@ -93,7 +93,7 @@ end:
     return replay_frames;
 }
 
-void Replay::compress_frames(const std::vector<Replay::Frame>& frames, uint8_t** compressed, size_t* s_compressed) {
+void Replay::compress_frames(const std::vector<Replay::Frame>& frames, u8** compressed, size_t* s_compressed) {
     lzma_stream stream = LZMA_STREAM_INIT;
     lzma_options_lzma options;
     lzma_lzma_preset(&options, LZMA_PRESET_DEFAULT);
@@ -116,17 +116,17 @@ void Replay::compress_frames(const std::vector<Replay::Frame>& frames, uint8_t**
     replay_string.append("-12345|0.0000|0.0000|0,");
 
     *s_compressed = replay_string.length();
-    *compressed = (uint8_t*)malloc(*s_compressed);
+    *compressed = (u8*)malloc(*s_compressed);
 
     stream.avail_in = replay_string.length();
-    stream.next_in = (const uint8_t*)replay_string.c_str();
+    stream.next_in = (const u8*)replay_string.c_str();
     stream.avail_out = *s_compressed;
     stream.next_out = *compressed;
     do {
         ret = lzma_code(&stream, LZMA_FINISH);
         if(ret == LZMA_OK) {
             *s_compressed *= 2;
-            *compressed = (uint8_t*)realloc(*compressed, *s_compressed);
+            *compressed = (u8*)realloc(*compressed, *s_compressed);
             stream.avail_out = *s_compressed - stream.total_out;
             stream.next_out = *compressed + stream.total_out;
         } else if(ret != LZMA_STREAM_END) {
@@ -142,39 +142,39 @@ void Replay::compress_frames(const std::vector<Replay::Frame>& frames, uint8_t**
     lzma_end(&stream);
 }
 
-Replay::Info Replay::from_bytes(uint8_t* data, int s_data) {
+Replay::Info Replay::from_bytes(u8* data, int s_data) {
     Replay::Info info;
 
     Packet replay;
     replay.memory = data;
     replay.size = s_data;
 
-    info.gamemode = read_byte(&replay);
+    info.gamemode = read_u8(&replay);
     if(info.gamemode != 0) {
         debugLog("Replay has unexpected gamemode %d!", info.gamemode);
         return info;
     }
 
-    info.osu_version = read_int32(&replay);
+    info.osu_version = read_u32(&replay);
     info.diff2_md5 = read_string(&replay);
     info.username = read_string(&replay);
     info.replay_md5 = read_string(&replay);
-    info.num300s = read_short(&replay);
-    info.num100s = read_short(&replay);
-    info.num50s = read_short(&replay);
-    info.numGekis = read_short(&replay);
-    info.numKatus = read_short(&replay);
-    info.numMisses = read_short(&replay);
-    info.score = read_int32(&replay);
-    info.comboMax = read_short(&replay);
-    info.perfect = read_byte(&replay);
-    info.mod_flags = read_int32(&replay);
+    info.num300s = read_u16(&replay);
+    info.num100s = read_u16(&replay);
+    info.num50s = read_u16(&replay);
+    info.numGekis = read_u16(&replay);
+    info.numKatus = read_u16(&replay);
+    info.numMisses = read_u16(&replay);
+    info.score = read_u32(&replay);
+    info.comboMax = read_u16(&replay);
+    info.perfect = read_u8(&replay);
+    info.mod_flags = read_u32(&replay);
     info.life_bar_graph = read_string(&replay);
-    info.timestamp = read_int64(&replay) / 10;
+    info.timestamp = read_u64(&replay) / 10;
 
-    int32_t replay_size = read_int32(&replay);
+    i32 replay_size = read_u32(&replay);
     if(replay_size <= 0) return info;
-    auto replay_data = new uint8_t[replay_size];
+    auto replay_data = new u8[replay_size];
     read_bytes(&replay, replay_data, replay_size);
     info.frames = Replay::get_frames(replay_data, replay_size);
     delete[] replay_data;
@@ -195,7 +195,7 @@ bool Replay::load_from_disk(FinishedScore* score) {
         size_t s_full_replay = ftell(replay_file);
         rewind(replay_file);
 
-        uint8_t* full_replay = new uint8_t[s_full_replay];
+        u8* full_replay = new u8[s_full_replay];
         fread(full_replay, s_full_replay, 1, replay_file);
         fclose(replay_file);
         auto info = Replay::from_bytes(full_replay, s_full_replay);
@@ -212,7 +212,7 @@ bool Replay::load_from_disk(FinishedScore* score) {
         size_t s_compressed_replay = ftell(replay_file);
         rewind(replay_file);
 
-        uint8_t* compressed_replay = new uint8_t[s_compressed_replay];
+        u8* compressed_replay = new u8[s_compressed_replay];
         fread(compressed_replay, s_compressed_replay, 1, replay_file);
         fclose(replay_file);
         score->replay = Replay::get_frames(compressed_replay, s_compressed_replay);
@@ -251,7 +251,7 @@ void Replay::load_and_watch(FinishedScore score) {
             request.path = UString::format("/web/osu-getreplay.php?u=%s&h=%s&m=0&c=%d", bancho.username.toUtf8(),
                                            bancho.pw_md5.toUtf8(), score.online_score_id);
             request.mime = NULL;
-            request.extra = (uint8_t*)score_cpy;
+            request.extra = (u8*)score_cpy;
             send_api_request(request);
 
             bancho.osu->m_notificationOverlay->addNotification("Downloading replay...");

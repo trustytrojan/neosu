@@ -1431,12 +1431,12 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
             if(slot->player_id == bancho.user_id) {
                 // Update local player slot instantly
                 // (not including fields that won't be used for the HUD)
-                slot->num300 = (uint16_t)m_osu->getScore()->getNum300s();
-                slot->num100 = (uint16_t)m_osu->getScore()->getNum100s();
-                slot->num50 = (uint16_t)m_osu->getScore()->getNum50s();
-                slot->num_miss = (uint16_t)m_osu->getScore()->getNumMisses();
-                slot->current_combo = (uint16_t)m_osu->getScore()->getCombo();
-                slot->total_score = (int32_t)m_osu->getScore()->getScore();
+                slot->num300 = (u16)m_osu->getScore()->getNum300s();
+                slot->num100 = (u16)m_osu->getScore()->getNum100s();
+                slot->num50 = (u16)m_osu->getScore()->getNum50s();
+                slot->num_miss = (u16)m_osu->getScore()->getNumMisses();
+                slot->current_combo = (u16)m_osu->getScore()->getCombo();
+                slot->total_score = (i32)m_osu->getScore()->getScore();
                 slot->current_hp = beatmap->getHealth() * 200;
             }
 
@@ -1463,8 +1463,8 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
             }
 
             // hit_score != total_score: total_score also accounts for spinner bonus & mods
-            uint64_t hit_score = 300 * slot->num300 + 100 * slot->num100 + 50 * slot->num50;
-            uint64_t max_score = 300 * (slot->num300 + slot->num100 + slot->num50 + slot->num_miss);
+            u64 hit_score = 300 * slot->num300 + 100 * slot->num100 + 50 * slot->num50;
+            u64 max_score = 300 * (slot->num300 + slot->num100 + slot->num50 + slot->num_miss);
             scoreEntry.accuracy = max_score > 0 ? hit_score / max_score : 0.f;
 
             scores.push_back(std::move(scoreEntry));

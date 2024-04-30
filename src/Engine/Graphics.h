@@ -1,14 +1,8 @@
-//================ Copyright (c) 2012, PG, All rights reserved. =================//
-//
-// Purpose:		top level graphics interface
-//
-// $NoKeywords: $graphics
-//===============================================================================//
+#pragma once
 
-#ifndef GRAPHICS_H
-#define GRAPHICS_H
+#include "types.h"
+// ^ import order matters
 
-#include <cstdint>
 #include <stack>
 #include <vector>
 
@@ -25,7 +19,7 @@ class Shader;
 class RenderTarget;
 class VertexArrayObject;
 
-typedef uint32_t Color;
+typedef u32 Color;
 
 class Graphics {
    public:
@@ -223,5 +217,3 @@ class Graphics {
     Matrix4 m_3dSceneWorldMatrix;
     Matrix4 m_3dSceneProjectionMatrix;
 };
-
-#endif

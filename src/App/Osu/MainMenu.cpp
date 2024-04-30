@@ -307,7 +307,7 @@ void MainMenu::draw(Graphics *g) {
         icon_path.append("/server_icon");
 
         float progress = -1.f;
-        std::vector<uint8_t> data;
+        std::vector<u8> data;
         int response_code;
         download(bancho.server_icon_url.toUtf8(), &progress, data, &response_code);
         if(progress == -1.f) bancho.server_icon_url = "";

@@ -25,7 +25,7 @@ bool File::canRead() const { return m_file->canRead(); }
 
 bool File::canWrite() const { return m_file->canWrite(); }
 
-void File::write(const uint8_t *buffer, size_t size) { m_file->write(buffer, size); }
+void File::write(const u8 *buffer, size_t size) { m_file->write(buffer, size); }
 
 std::string File::readLine() { return m_file->readLine(); }
 
@@ -36,7 +36,7 @@ std::string File::readString() {
     return std::string((const char *)readFile(), size);
 }
 
-const uint8_t *File::readFile() { return m_file->readFile(); }
+const u8 *File::readFile() { return m_file->readFile(); }
 
 size_t File::getFileSize() const { return m_file->getFileSize(); }
 
@@ -107,7 +107,7 @@ bool StdFile::canRead() const { return m_bReady && m_ifstream.good() && m_bRead;
 
 bool StdFile::canWrite() const { return m_bReady && m_ofstream.good() && !m_bRead; }
 
-void StdFile::write(const uint8_t *buffer, size_t size) {
+void StdFile::write(const u8 *buffer, size_t size) {
     if(!canWrite()) return;
 
     m_ofstream.write((const char *)buffer, size);
@@ -126,7 +126,7 @@ std::string StdFile::readLine() {
     return line;
 }
 
-const uint8_t *StdFile::readFile() {
+const u8 *StdFile::readFile() {
     if(File::debug->getBool()) debugLog("StdFile::readFile() on %s\n", m_sFilePath.c_str());
 
     if(m_fullBuffer.size() > 0) return &m_fullBuffer[0];

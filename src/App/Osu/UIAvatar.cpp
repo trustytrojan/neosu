@@ -16,11 +16,11 @@
 #include "UIUserContextMenu.h"
 
 // Returns true when avatar is fully downloaded
-bool download_avatar(uint32_t user_id) {
+bool download_avatar(u32 user_id) {
     if(user_id == 0) return false;
 
     // XXX: clear blacklist when changing endpoint
-    static std::vector<uint32_t> blacklist;
+    static std::vector<u32> blacklist;
     for(auto bl : blacklist) {
         if(user_id == bl) {
             return false;
@@ -35,7 +35,7 @@ bool download_avatar(uint32_t user_id) {
     }
 
     float progress = -1.f;
-    std::vector<uint8_t> data;
+    std::vector<u8> data;
     auto img_url = UString::format("https://a.%s/%d", bancho.endpoint.toUtf8(), user_id);
     int response_code;
     download(img_url.toUtf8(), &progress, data, &response_code);
@@ -56,7 +56,7 @@ bool download_avatar(uint32_t user_id) {
     return true;
 }
 
-UIAvatar::UIAvatar(uint32_t player_id, float xPos, float yPos, float xSize, float ySize)
+UIAvatar::UIAvatar(u32 player_id, float xPos, float yPos, float xSize, float ySize)
     : CBaseUIButton(xPos, yPos, xSize, ySize, "avatar", "") {
     m_player_id = player_id;
 

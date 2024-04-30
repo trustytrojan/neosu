@@ -29,15 +29,15 @@ struct APIRequest {
     APIRequestType type;
     UString path = "";
     curl_mime *mime = NULL;
-    uint8_t *extra = nullptr;
-    uint32_t extra_int = 0;  // lazy
+    u8 *extra = nullptr;
+    u32 extra_int = 0;  // lazy
 };
 
 struct ReplayExtraInfo {
     MD5Hash diff2_md5;
-    int32_t mod_flags;
+    i32 mod_flags;
     UString username;
-    int32_t player_id;
+    i32 player_id;
 };
 
 void disconnect();

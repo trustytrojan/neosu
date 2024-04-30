@@ -22,7 +22,7 @@ struct RoomUIElement : CBaseUIScrollView {
     UIButton* join_btn;
     CBaseUIScrollView* ui;
     Lobby* m_multi;
-    int32_t room_id;
+    i32 room_id;
     bool has_password;
 
     void updateLayout(Vector2 pos, Vector2 size);
@@ -42,9 +42,9 @@ class Lobby : public OsuScreen {
     virtual CBaseUIContainer* setVisible(bool visible);
 
     void addRoom(Room* room);
-    void joinRoom(uint32_t id, UString password);
+    void joinRoom(u32 id, UString password);
     void updateRoom(Room room);
-    void removeRoom(uint32_t room_id);
+    void removeRoom(u32 room_id);
     void updateLayout(Vector2 newResolution);
 
     void on_create_room_clicked();
@@ -55,6 +55,6 @@ class Lobby : public OsuScreen {
     std::vector<Room*> rooms;
     UIButton* m_create_room_btn;
     CBaseUIScrollView* m_list;
-    int32_t room_to_join;
+    i32 room_to_join;
     McFont* font;
 };

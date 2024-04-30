@@ -65,7 +65,7 @@ VulkanInterface::VulkanInterface() {
     VkPhysicalDeviceFeatures enabledDeviceFeatures = {};
 
     // list all available layers
-    uint32_t layerCount;
+    u32 layerCount;
     vkEnumerateInstanceLayerProperties(&layerCount, NULL);
     std::vector<VkLayerProperties> availableLayers(layerCount);
     vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
@@ -144,8 +144,8 @@ VulkanInterface::VulkanInterface() {
         debugLog("Vulkan Device #%i: Driver Version: %d\n", i, deviceProperties.driverVersion);
         debugLog("Vulkan Device #%i: Device Name:    %s\n", i, deviceProperties.deviceName);
         debugLog("Vulkan Device #%i: Device Type:    %d\n", i, deviceProperties.deviceType);
-        debugLog("Vulkan Device #%i: API Version:    %d.%d.%d\n", i, (uint32_t)deviceProperties.apiVersion >> 22,
-                 ((uint32_t)deviceProperties.apiVersion >> 12) & 0x3ff, (uint32_t)deviceProperties.apiVersion & 0xfff);
+        debugLog("Vulkan Device #%i: API Version:    %d.%d.%d\n", i, (u32)deviceProperties.apiVersion >> 22,
+                 ((u32)deviceProperties.apiVersion >> 12) & 0x3ff, (u32)deviceProperties.apiVersion & 0xfff);
     }
 
     // and select a device
@@ -155,7 +155,7 @@ VulkanInterface::VulkanInterface() {
 
     // get queue family properties
     std::vector<VkQueueFamilyProperties> queueFamilyProperties;
-    uint32_t queueFamilyPropertyCount = 0;
+    u32 queueFamilyPropertyCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(m_physicalDevice, &queueFamilyPropertyCount, NULL);
     if(queueFamilyPropertyCount < 1) {
         engine->showMessageError(
@@ -180,7 +180,7 @@ VulkanInterface::VulkanInterface() {
 
         // get index of first VK_QUEUE_GRAPHICS_BIT queue, default to 0 (first available queue)
         deviceQueueCreateInfo.queueFamilyIndex = 0;
-        for(uint32_t i = 0; i < queueFamilyProperties.size(); i++) {
+        for(u32 i = 0; i < queueFamilyProperties.size(); i++) {
             if(queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
                 debugLog("Vulkan: Selecting queue %i.\n", i);
                 m_iQueueFamilyIndex = i;

@@ -26,22 +26,22 @@ struct FinishedScore {
     bool isImportedLegacyScore;  // used for identifying imported osu! scores (which were previously legacy scores,
                                  // so they don't have any
                                  // numSliderBreaks/unstableRate/hitErrorAvgMin/hitErrorAvgMax)
-    uint32_t version;
-    uint64_t unixTimestamp;
+    u32 version;
+    u64 unixTimestamp;
 
-    uint32_t player_id = 0;
+    u32 player_id = 0;
     std::string playerName;
     bool passed = false;
     bool ragequit = false;
     Grade grade = Grade::N;
     DatabaseBeatmap *diff2;
-    uint64_t play_time_ms = 0;
+    u64 play_time_ms = 0;
 
     std::string server;
-    uint64_t online_score_id = 0;
+    u64 online_score_id = 0;
     bool has_replay = false;
     std::vector<Replay::Frame> replay;
-    uint64_t legacyReplayTimestamp = 0;
+    u64 legacyReplayTimestamp = 0;
 
     int num300s;
     int num100s;
@@ -123,7 +123,7 @@ struct FinishedScore {
 
 class LiveScore {
    public:
-    static const uint32_t VERSION = 20240412;
+    static const u32 VERSION = 20240412;
 
     enum class HIT {
         // score

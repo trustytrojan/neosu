@@ -1,6 +1,4 @@
 #pragma once
-#include <stdint.h>
-
 #include <unordered_map>
 
 #include "BanchoProtocol.h"
@@ -20,7 +18,7 @@ struct Bancho {
 
     Osu *osu = nullptr;
     UString endpoint;
-    int32_t user_id = 0;
+    i32 user_id = 0;
     UString username;
     MD5Hash pw_md5;
     Room room;
@@ -54,10 +52,10 @@ struct Bancho {
 struct Channel {
     UString name;
     UString topic;
-    uint32_t nb_members;
+    u32 nb_members;
 };
 
-MD5Hash md5(uint8_t *msg, size_t msg_len);
+MD5Hash md5(u8 *msg, size_t msg_len);
 
 void handle_packet(Packet *packet);
 

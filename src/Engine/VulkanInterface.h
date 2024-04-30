@@ -42,7 +42,7 @@ class VulkanInterface {
 
     void finish();
 
-    inline uint32_t getQueueFamilyIndex() const { return m_iQueueFamilyIndex; }
+    inline u32 getQueueFamilyIndex() const { return m_iQueueFamilyIndex; }
     inline bool isReady() const { return m_bReady; }
 
 #ifdef MCENGINE_FEATURE_VULKAN
@@ -56,7 +56,7 @@ class VulkanInterface {
 
    private:
     bool m_bReady;
-    uint32_t m_iQueueFamilyIndex;
+    u32 m_iQueueFamilyIndex;
 
 #ifdef MCENGINE_FEATURE_VULKAN
 

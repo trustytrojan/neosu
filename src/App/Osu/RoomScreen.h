@@ -16,9 +16,9 @@ class UIContextMenu;
 
 class UIModList : public CBaseUIContainer {
    public:
-    UIModList(uint32_t *flags) : CBaseUIContainer(0, 0, 0, 0, "mod_list") { m_flags = flags; }
+    UIModList(u32 *flags) : CBaseUIContainer(0, 0, 0, 0, "mod_list") { m_flags = flags; }
 
-    uint32_t *m_flags;
+    u32 *m_flags;
 
     virtual void draw(Graphics *g) override;
     virtual bool isVisible() override;
@@ -47,10 +47,10 @@ class RoomScreen : public OsuScreen {
     void on_match_started(Room room);
     void on_match_score_updated(Packet *packet);
     void on_all_players_loaded();
-    void on_player_failed(int32_t slot_id);
+    void on_player_failed(i32 slot_id);
     void on_match_finished();
     void on_all_players_skipped();
-    void on_player_skip(int32_t user_id);
+    void on_player_skip(i32 user_id);
     void on_match_aborted();
     void onClientScoreChange(bool force = false);
     void onReadyButtonClick();
@@ -65,7 +65,7 @@ class RoomScreen : public OsuScreen {
     void set_new_password(UString new_password);
     void onFreemodCheckboxChanged(CBaseUICheckbox *checkbox);
 
-    std::unordered_map<uint32_t, uint32_t> mapset_by_mapid;
+    std::unordered_map<u32, u32> mapset_by_mapid;
 
     CBaseUILabel *map_label = nullptr;
     CBaseUILabel *mods_label = nullptr;
