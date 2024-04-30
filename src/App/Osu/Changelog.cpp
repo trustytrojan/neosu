@@ -46,7 +46,7 @@ Changelog::Changelog(Osu *osu) : ScreenBackable(osu) {
     latest.changes.push_back("- Changed default instant replay key to F2 to avoid conflicts with mod selector");
     latest.changes.push_back("- Disabled score submission when mods are toggled mid-game");
     latest.changes.push_back("- Forced exclusive mode when using WASAPI output");
-    latest.changes.push_back("- Optimized beatmap list loading speed");
+    latest.changes.push_back("- Optimized beatmap list loading speed (a lot)");
     latest.changes.push_back("- Optimized collection processing speed");
     latest.changes.push_back("- Removed support for the Nintendo Switch");
     latest.changes.push_back("- Updated protocol version");

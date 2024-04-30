@@ -100,8 +100,8 @@ bool load_collections() {
     peppy_collections_path.append("collection.db");
     Packet peppy_collections = load_db(peppy_collections_path);
     if(peppy_collections.size > 0) {
-        u32 version = read_u32(&peppy_collections);
-        u32 nb_collections = read_u32(&peppy_collections);
+        u32 version = read<u32>(&peppy_collections);
+        u32 nb_collections = read<u32>(&peppy_collections);
 
         if(version > osu_database_version) {
             debugLog("osu!stable collection.db version more recent than neosu, loading might fail.\n");
@@ -109,7 +109,7 @@ bool load_collections() {
 
         for(int c = 0; c < nb_collections; c++) {
             auto name = read_stdstring(&peppy_collections);
-            u32 nb_maps = read_u32(&peppy_collections);
+            u32 nb_maps = read<u32>(&peppy_collections);
 
             auto collection = get_or_create_collection(name);
             collection->maps.reserve(nb_maps);
@@ -126,8 +126,8 @@ bool load_collections() {
 
     auto neosu_collections = load_db("collections.db");
     if(neosu_collections.size > 0) {
-        u32 version = read_u32(&neosu_collections);
-        u32 nb_collections = read_u32(&neosu_collections);
+        u32 version = read<u32>(&neosu_collections);
+        u32 nb_collections = read<u32>(&neosu_collections);
 
         if(version > COLLECTIONS_DB_VERSION) {
             debugLog("neosu collections.db version is too recent! Cannot load it without stuff breaking.\n");
@@ -142,7 +142,7 @@ bool load_collections() {
 
             u32 nb_deleted_maps = 0;
             if(version >= 20240429) {
-                nb_deleted_maps = read_u32(&neosu_collections);
+                nb_deleted_maps = read<u32>(&neosu_collections);
             }
 
             collection->deleted_maps.reserve(nb_deleted_maps);
@@ -157,7 +157,7 @@ bool load_collections() {
                 collection->deleted_maps.push_back(map_hash);
             }
 
-            u32 nb_maps = read_u32(&neosu_collections);
+            u32 nb_maps = read<u32>(&neosu_collections);
             collection->maps.reserve(collection->maps.size() + nb_maps);
             collection->neosu_maps.reserve(nb_maps);
 

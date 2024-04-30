@@ -1087,7 +1087,17 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
                     readdBeatmap(calculatedDiff);
 
                     // and update wrapper representative values (parent)
-                    if(m_backgroundStarCalcTempParent != NULL) m_backgroundStarCalcTempParent->updateSetHeuristics();
+                    if(m_backgroundStarCalcTempParent != NULL) {
+                        // lol @ useless getter setters
+                        m_backgroundStarCalcTempParent->setLengthMS(0);
+                        m_backgroundStarCalcTempParent->setStarsNoMod(0.0f);
+                        for(auto diff : m_backgroundStarCalcTempParent->getDifficulties()) {
+                            if(diff->getLengthMS() > m_backgroundStarCalcTempParent->getLengthMS())
+                                m_backgroundStarCalcTempParent->setLengthMS(diff->getLengthMS());
+                            if(diff->getStarsNomod() > m_backgroundStarCalcTempParent->getStarsNomod())
+                                m_backgroundStarCalcTempParent->setStarsNoMod(diff->getStarsNomod());
+                        }
+                    }
 
                     m_backgroundStarCalculator->kill();
                 }

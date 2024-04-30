@@ -149,30 +149,30 @@ Replay::Info Replay::from_bytes(u8* data, int s_data) {
     replay.memory = data;
     replay.size = s_data;
 
-    info.gamemode = read_u8(&replay);
+    info.gamemode = read<u8>(&replay);
     if(info.gamemode != 0) {
         debugLog("Replay has unexpected gamemode %d!", info.gamemode);
         return info;
     }
 
-    info.osu_version = read_u32(&replay);
+    info.osu_version = read<u32>(&replay);
     info.diff2_md5 = read_string(&replay);
     info.username = read_string(&replay);
     info.replay_md5 = read_string(&replay);
-    info.num300s = read_u16(&replay);
-    info.num100s = read_u16(&replay);
-    info.num50s = read_u16(&replay);
-    info.numGekis = read_u16(&replay);
-    info.numKatus = read_u16(&replay);
-    info.numMisses = read_u16(&replay);
-    info.score = read_u32(&replay);
-    info.comboMax = read_u16(&replay);
-    info.perfect = read_u8(&replay);
-    info.mod_flags = read_u32(&replay);
+    info.num300s = read<u16>(&replay);
+    info.num100s = read<u16>(&replay);
+    info.num50s = read<u16>(&replay);
+    info.numGekis = read<u16>(&replay);
+    info.numKatus = read<u16>(&replay);
+    info.numMisses = read<u16>(&replay);
+    info.score = read<u32>(&replay);
+    info.comboMax = read<u16>(&replay);
+    info.perfect = read<u8>(&replay);
+    info.mod_flags = read<u32>(&replay);
     info.life_bar_graph = read_string(&replay);
-    info.timestamp = read_u64(&replay) / 10;
+    info.timestamp = read<u64>(&replay) / 10;
 
-    i32 replay_size = read_u32(&replay);
+    i32 replay_size = read<u32>(&replay);
     if(replay_size <= 0) return info;
     auto replay_data = new u8[replay_size];
     read_bytes(&replay, replay_data, replay_size);

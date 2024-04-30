@@ -242,17 +242,30 @@ class Room {
 };
 
 void read_bytes(Packet *packet, u8 *bytes, size_t n);
-u8 read_u8(Packet *packet);
-u16 read_u16(Packet *packet);
-u32 read_u32(Packet *packet);
-u64 read_u64(Packet *packet);
-f32 read_f32(Packet *packet);
-f64 read_f64(Packet *packet);
 u32 read_uleb128(Packet *packet);
 UString read_string(Packet *packet);
 std::string read_stdstring(Packet *packet);
 void skip_string(Packet *packet);
 MD5Hash read_hash(Packet *packet);
+
+// Null array for returning empty structures when trying to read more data out of a Packet than expected.
+// See the read<> template below.
+#define NULL_ARRAY_SIZE 128
+extern u8 NULL_ARRAY[NULL_ARRAY_SIZE];
+
+template <typename T>
+T read(Packet *packet) {
+    static_assert(sizeof(T) <= sizeof(NULL_ARRAY), "Please make NULL_ARRAY_SIZE bigger");
+
+    if(packet->pos + sizeof(T) > packet->size) {
+        packet->pos = packet->size + 1;
+        return *(T *)NULL_ARRAY;
+    } else {
+        T out = *(T *)(packet->memory + packet->pos);
+        packet->pos += sizeof(T);
+        return out;
+    }
+}
 
 void write_bytes(Packet *packet, u8 *bytes, size_t n);
 void write_u8(Packet *packet, u8 b);
@@ -263,3 +276,15 @@ void write_f32(Packet *packet, f32 f);
 void write_f64(Packet *packet, f64 f);
 void write_uleb128(Packet *packet, u32 num);
 void write_string(Packet *packet, const char *str);
+
+template <typename T>
+void write(Packet *packet, T t) {
+    if(packet->pos + sizeof(T) > packet->size) {
+        packet->memory = (u8 *)realloc(packet->memory, packet->size + sizeof(T) + 128);
+        packet->size += sizeof(T) + 128;
+        if(!packet->memory) return;
+    }
+
+    *(packet->memory + packet->pos) = t;
+    packet->pos += sizeof(T);
+}

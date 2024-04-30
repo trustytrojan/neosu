@@ -699,29 +699,29 @@ void RoomScreen::on_match_started(Room room) {
 }
 
 void RoomScreen::on_match_score_updated(Packet *packet) {
-    i32 update_tms = read_u32(packet);
-    u8 slot_id = read_u8(packet);
+    i32 update_tms = read<u32>(packet);
+    u8 slot_id = read<u8>(packet);
     if(slot_id > 15) return;
 
     auto slot = &bancho.room.slots[slot_id];
     slot->last_update_tms = update_tms;
-    slot->num300 = read_u16(packet);
-    slot->num100 = read_u16(packet);
-    slot->num50 = read_u16(packet);
-    slot->num_geki = read_u16(packet);
-    slot->num_katu = read_u16(packet);
-    slot->num_miss = read_u16(packet);
-    slot->total_score = read_u32(packet);
-    slot->max_combo = read_u16(packet);
-    slot->current_combo = read_u16(packet);
-    slot->is_perfect = read_u8(packet);
-    slot->current_hp = read_u8(packet);
-    slot->tag = read_u8(packet);
+    slot->num300 = read<u16>(packet);
+    slot->num100 = read<u16>(packet);
+    slot->num50 = read<u16>(packet);
+    slot->num_geki = read<u16>(packet);
+    slot->num_katu = read<u16>(packet);
+    slot->num_miss = read<u16>(packet);
+    slot->total_score = read<u32>(packet);
+    slot->max_combo = read<u16>(packet);
+    slot->current_combo = read<u16>(packet);
+    slot->is_perfect = read<u8>(packet);
+    slot->current_hp = read<u8>(packet);
+    slot->tag = read<u8>(packet);
 
-    bool is_scorev2 = read_u8(packet);
+    bool is_scorev2 = read<u8>(packet);
     if(is_scorev2) {
-        slot->sv2_combo = read_f64(packet);
-        slot->sv2_bonus = read_f64(packet);
+        slot->sv2_combo = read<f64>(packet);
+        slot->sv2_bonus = read<f64>(packet);
     }
 
     bancho.osu->m_hud->updateScoreboard(true);

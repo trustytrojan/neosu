@@ -13,12 +13,14 @@ class OsuFile;
 class DatabaseBeatmap;
 class DatabaseLoader;
 
+// Field ordering matters here
+#pragma pack(push, 1)
 struct TIMINGPOINT {
     double msPerBeat;
     double offset;
     bool timingChange;
 };
-TIMINGPOINT read_timing_point(Packet *packet);
+#pragma pack(pop)
 
 Packet load_db(std::string path);
 bool save_db(Packet *db, std::string path);
@@ -95,6 +97,8 @@ class Database {
 
     DatabaseBeatmap *loadRawBeatmap(std::string beatmapPath);  // only used for raw loading without db
 
+    void loadDB(Packet *db, bool &fallbackToRawLoad);
+
    private:
     friend class DatabaseLoader;
 
@@ -105,7 +109,6 @@ class Database {
 
     std::string parseLegacyCfgBeatmapDirectoryParameter();
     void scheduleLoadRaw();
-    void loadDB(Packet *db, bool &fallbackToRawLoad);
 
     void loadStars();
     void saveStars();
@@ -146,8 +149,6 @@ class Database {
     std::string m_sRawBeatmapLoadOsuSongFolder;
     std::vector<std::string> m_rawBeatmapFolders;
     std::vector<std::string> m_rawLoadBeatmapFolders;
-    std::unordered_map<MD5Hash, DatabaseBeatmap *> m_rawHashToDiff2;
-    std::unordered_map<MD5Hash, DatabaseBeatmap *> m_rawHashToBeatmap;
 
     // stars.cache
     struct STARS_CACHE_ENTRY {

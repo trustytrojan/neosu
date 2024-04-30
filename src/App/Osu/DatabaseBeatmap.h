@@ -1,13 +1,4 @@
-//================ Copyright (c) 2020, PG, All rights reserved. =================//
-//
-// Purpose:		loader + container for raw beatmap files/data (v2 rewrite)
-//
-// $NoKeywords: $osudiff
-//===============================================================================//
-
-#ifndef OSUDATABASEBEATMAP_H
-#define OSUDATABASEBEATMAP_H
-
+#pragma once
 #include "DifficultyCalculator.h"
 #include "Osu.h"
 #include "Resource.h"
@@ -96,7 +87,7 @@ class DatabaseBeatmap {
     };
 
     DatabaseBeatmap(Osu *osu, std::string filePath, std::string folder, bool filePathIsInMemoryBeatmap = false);
-    DatabaseBeatmap(Osu *osu, std::vector<DatabaseBeatmap *> &difficulties);
+    DatabaseBeatmap(Osu *osu, std::vector<DatabaseBeatmap *> &&difficulties);
     ~DatabaseBeatmap();
 
     static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string &osuFilePath, float AR, float CS,
@@ -107,7 +98,7 @@ class DatabaseBeatmap {
     static bool loadMetadata(DatabaseBeatmap *databaseBeatmap);
     static LOAD_GAMEPLAY_RESULT loadGameplay(DatabaseBeatmap *databaseBeatmap, Beatmap *beatmap);
 
-    void setDifficulties(std::vector<DatabaseBeatmap *> &difficulties);
+    void setDifficulties(std::vector<DatabaseBeatmap *> &&difficulties);
 
     void setLengthMS(unsigned long lengthMS) { m_iLengthMS = lengthMS; }
 
@@ -119,8 +110,6 @@ class DatabaseBeatmap {
     void setNumSpinners(int numSpinners) { m_iNumSpinners = numSpinners; }
 
     void setLocalOffset(long localOffset) { m_iLocalOffset = localOffset; }
-
-    void updateSetHeuristics();
 
     inline Osu *getOsu() const { return m_osu; }
 
@@ -135,7 +124,7 @@ class DatabaseBeatmap {
 
     TIMING_INFO getTimingInfoForTime(unsigned long positionMS);
     static TIMING_INFO getTimingInfoForTimeAndTimingPoints(unsigned long positionMS,
-                                                           std::vector<TIMINGPOINT> &timingpoints);
+                                                           const zarray<TIMINGPOINT> &timingpoints);
 
     // raw metadata
 
@@ -165,7 +154,7 @@ class DatabaseBeatmap {
     inline float getSliderTickRate() const { return m_fSliderTickRate; }
     inline float getSliderMultiplier() const { return m_fSliderMultiplier; }
 
-    inline const std::vector<TIMINGPOINT> &getTimingpoints() const { return m_timingpoints; }
+    inline const zarray<TIMINGPOINT> &getTimingpoints() const { return m_timingpoints; }
 
     std::string getFullSoundFilePath();
 
@@ -223,7 +212,7 @@ class DatabaseBeatmap {
     float m_fSliderTickRate;
     float m_fSliderMultiplier;
 
-    std::vector<TIMINGPOINT> m_timingpoints;  // necessary for main menu anim
+    zarray<TIMINGPOINT> m_timingpoints;  // necessary for main menu anim
 
     // redundant data (technically contained in metadata, but precomputed anyway)
 
@@ -295,7 +284,7 @@ class DatabaseBeatmap {
         std::vector<SPINNER> spinners;
         std::vector<BREAK> breaks;
 
-        std::vector<TIMINGPOINT> timingpoints;
+        zarray<TIMINGPOINT> timingpoints;
         std::vector<Color> combocolors;
 
         float stackLeniency;
@@ -328,12 +317,14 @@ class DatabaseBeatmap {
                                                     bool filePathIsInMemoryBeatmap = false);
     static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string &osuFilePath, bool filePathIsInMemoryBeatmap,
                                                     const std::atomic<bool> &dead);
+    static CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT calculateSliderTimesClicksTicks(int beatmapVersion,
+                                                                                      std::vector<SLIDER> &sliders,
+                                                                                      zarray<TIMINGPOINT> &timingpoints,
+                                                                                      float sliderMultiplier,
+                                                                                      float sliderTickRate);
     static CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT calculateSliderTimesClicksTicks(
-        int beatmapVersion, std::vector<SLIDER> &sliders, std::vector<TIMINGPOINT> &timingpoints,
-        float sliderMultiplier, float sliderTickRate);
-    static CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT calculateSliderTimesClicksTicks(
-        int beatmapVersion, std::vector<SLIDER> &sliders, std::vector<TIMINGPOINT> &timingpoints,
-        float sliderMultiplier, float sliderTickRate, const std::atomic<bool> &dead);
+        int beatmapVersion, std::vector<SLIDER> &sliders, zarray<TIMINGPOINT> &timingpoints, float sliderMultiplier,
+        float sliderTickRate, const std::atomic<bool> &dead);
 
     Osu *m_osu;
 
@@ -442,4 +433,78 @@ class DatabaseBeatmapStarCalculator : public Resource {
     int m_iMaxPossibleCombo;
 };
 
-#endif
+struct BPMInfo {
+    u32 min;
+    u32 max;
+    u32 most_common;
+};
+
+template <typename T>
+struct BPMInfo getBPM(const zarray<T> &timing_points, long lastTime) {
+    if(timing_points.size() < 1) {
+        return BPMInfo{
+            .min = 0,
+            .max = 0,
+            .most_common = 0,
+        };
+    }
+
+    struct Tuple {
+        u32 bpm;
+        u32 duration;
+    };
+
+    zarray<Tuple> bpms;
+    bpms.reserve(timing_points.size());
+
+    for(size_t i = 0; i < timing_points.size(); i++) {
+        const T &t = timing_points[i];
+        if(t.offset > lastTime) break;
+        if(t.msPerBeat < 0) continue;
+
+        // "osu-stable forced the first control point to start at 0."
+        // "This is reproduced here to maintain compatibility around osu!mania scroll speed and song
+        // select display."
+        const long currentTime = (i == 0 ? 0 : t.offset);
+        const long nextTime = (i >= timing_points.size() - 1 ? lastTime : timing_points[i + 1].offset);
+
+        u32 bpm = t.msPerBeat / 60000;
+        u32 duration = std::max(nextTime - currentTime, (long)0);
+
+        bool found = false;
+        for(auto tuple : bpms) {
+            if(tuple.bpm == bpm) {
+                tuple.duration += duration;
+                found = true;
+                break;
+            }
+        }
+
+        if(!found) {
+            bpms.push_back(Tuple{
+                .bpm = bpm,
+                .duration = duration,
+            });
+        }
+    }
+
+    u32 min = 9001;
+    u32 max = 0;
+    u32 mostCommonBPM = 0;
+    u32 longestDuration = 0;
+    for(auto tuple : bpms) {
+        if(tuple.bpm > max) max = tuple.bpm;
+        if(tuple.bpm < min) min = tuple.bpm;
+
+        if(tuple.duration > longestDuration) {
+            longestDuration = tuple.duration;
+            mostCommonBPM = tuple.bpm;
+        }
+    }
+
+    return BPMInfo{
+        .min = min,
+        .max = max,
+        .most_common = mostCommonBPM,
+    };
+}

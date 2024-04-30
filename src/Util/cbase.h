@@ -3,11 +3,12 @@
 // STD INCLUDES
 
 #include <math.h>
+#include <stdarg.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 #include <algorithm>
 #include <atomic>
-#include <cstdarg>
-#include <cstdint>
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -122,3 +123,71 @@ inline bool isInt(float f) { return (f == static_cast<float>(static_cast<int>(f)
 inline unsigned long &floatBits(float &f) { return *reinterpret_cast<unsigned long *>(&f); }
 
 inline bool isFinite(float f) { return ((floatBits(f) & 0x7F800000) != 0x7F800000); }
+
+// zero-initialized dynamic array, similar to std::vector but way faster when you don't need constructors
+// obviously don't use it on complex types :)
+template <class T>
+struct zarray {
+    zarray(size_t nb_initial = 0) {
+        if(nb_initial > 0) {
+            reserve(nb_initial);
+            nb = nb_initial;
+        }
+    }
+
+    void push_back(T t) {
+        if(nb + 1 > max) {
+            reserve(max + max / 2 + 1);
+        }
+
+        memory[nb] = t;
+        nb++;
+    }
+
+    void reserve(size_t new_max) {
+        if(max == 0) {
+            memory = (T *)calloc(new_max, sizeof(T));
+        } else {
+            memory = (T *)reallocarray(memory, new_max, sizeof(T));
+            memset(&memory[max], 0, (new_max - max) * sizeof(T));
+        }
+
+        max = new_max;
+    }
+
+    void resize(size_t new_nb) {
+        if(new_nb < nb) {
+            memset(&memory[new_nb], 0, (nb - new_nb) * sizeof(T));
+        } else if(new_nb > max) {
+            reserve(new_nb);
+        }
+
+        nb = new_nb;
+    }
+
+    void swap(zarray<T> other) {
+        size_t omax = max;
+        size_t onb = nb;
+        T *omemory = memory;
+
+        max = other.max;
+        nb = other.nb;
+        memory = other.memory;
+
+        other.max = omax;
+        other.nb = onb;
+        other.memory = omemory;
+    }
+
+    T &operator[](size_t index) const { return memory[index]; }
+    void clear() { nb = 0; }
+    T *begin() const { return memory; }
+    T *data() { return memory; }
+    T *end() const { return &memory[nb]; }
+    size_t size() const { return nb; }
+
+   private:
+    size_t max = 0;
+    size_t nb = 0;
+    T *memory = nullptr;
+};

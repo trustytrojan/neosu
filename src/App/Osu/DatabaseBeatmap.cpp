@@ -141,9 +141,9 @@ DatabaseBeatmap::DatabaseBeatmap(Osu *osu, std::string filePath, std::string fol
     m_iOnlineOffset = 0;
 }
 
-DatabaseBeatmap::DatabaseBeatmap(Osu *osu, std::vector<DatabaseBeatmap *> &difficulties)
+DatabaseBeatmap::DatabaseBeatmap(Osu *osu, std::vector<DatabaseBeatmap *> &&difficulties)
     : DatabaseBeatmap(osu, "", "") {
-    setDifficulties(difficulties);
+    setDifficulties(std::move(difficulties));
 }
 
 DatabaseBeatmap::~DatabaseBeatmap() {
@@ -513,7 +513,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
 }
 
 DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::calculateSliderTimesClicksTicks(
-    int beatmapVersion, std::vector<SLIDER> &sliders, std::vector<TIMINGPOINT> &timingpoints, float sliderMultiplier,
+    int beatmapVersion, std::vector<SLIDER> &sliders, zarray<TIMINGPOINT> &timingpoints, float sliderMultiplier,
     float sliderTickRate) {
     std::atomic<bool> dead;
     dead = false;
@@ -522,7 +522,7 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
 }
 
 DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::calculateSliderTimesClicksTicks(
-    int beatmapVersion, std::vector<SLIDER> &sliders, std::vector<TIMINGPOINT> &timingpoints, float sliderMultiplier,
+    int beatmapVersion, std::vector<SLIDER> &sliders, zarray<TIMINGPOINT> &timingpoints, float sliderMultiplier,
     float sliderTickRate, const std::atomic<bool> &dead) {
     CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT r;
     { r.errorCode = 0; }
@@ -942,7 +942,7 @@ bool DatabaseBeatmap::loadMetadata(DatabaseBeatmap *databaseBeatmap) {
     if(databaseBeatmap->m_difficulties.size() > 0) return false;  // we are just a container
 
     // reset
-    databaseBeatmap->m_timingpoints = std::vector<TIMINGPOINT>();
+    databaseBeatmap->m_timingpoints.clear();
 
     if(Osu::debug->getBool()) debugLog("DatabaseBeatmap::loadMetadata() : %s\n", databaseBeatmap->m_sFilePath.c_str());
 
@@ -1182,121 +1182,11 @@ bool DatabaseBeatmap::loadMetadata(DatabaseBeatmap *databaseBeatmap) {
                   TimingPointSortComparator());
 
         // calculate bpm range
-        float tempMinBPM = 0.0f;
-        float tempMaxBPM = std::numeric_limits<float>::max();
-        std::vector<TIMINGPOINT> uninheritedTimingpoints;
-        for(int i = 0; i < databaseBeatmap->m_timingpoints.size(); i++) {
-            const TIMINGPOINT &t = databaseBeatmap->m_timingpoints[i];
-
-            if(t.msPerBeat >= 0.0f)  // NOT inherited
-            {
-                uninheritedTimingpoints.push_back(t);
-
-                if(t.msPerBeat > tempMinBPM) tempMinBPM = t.msPerBeat;
-                if(t.msPerBeat < tempMaxBPM) tempMaxBPM = t.msPerBeat;
-            }
-        }
-
-        // convert from msPerBeat to BPM
-        const float msPerMinute = 1.0f * 60.0f * 1000.0f;
-        if(tempMinBPM != 0.0f) tempMinBPM = msPerMinute / tempMinBPM;
-        if(tempMaxBPM != 0.0f) tempMaxBPM = msPerMinute / tempMaxBPM;
-
-        databaseBeatmap->m_iMinBPM = (int)std::round(tempMinBPM);
-        databaseBeatmap->m_iMaxBPM = (int)std::round(tempMaxBPM);
-
-        struct MostCommonBPMHelper {
-            static int calculateMostCommonBPM(const std::vector<DatabaseBeatmap::TIMINGPOINT> &uninheritedTimingpoints,
-                                              long lastTime) {
-                if(uninheritedTimingpoints.size() < 1) return 0;
-
-                struct Tuple {
-                    float beatLength;
-                    long duration;
-
-                    size_t sortHack;
-                };
-
-                // "Construct a set of (beatLength, duration) tuples for each individual timing point."
-                std::vector<Tuple> tuples;
-                tuples.reserve(uninheritedTimingpoints.size());
-                for(size_t i = 0; i < uninheritedTimingpoints.size(); i++) {
-                    const DatabaseBeatmap::TIMINGPOINT &t = uninheritedTimingpoints[i];
-
-                    Tuple tuple;
-                    {
-                        if(t.offset > lastTime) {
-                            tuple.beatLength = std::round(t.msPerBeat * 1000.0f) / 1000.0f;
-                            tuple.duration = 0;
-                        } else {
-                            // "osu-stable forced the first control point to start at 0."
-                            // "This is reproduced here to maintain compatibility around osu!mania scroll speed and song
-                            // select display."
-                            const long currentTime = (i == 0 ? 0 : t.offset);
-                            const long nextTime =
-                                (i >= uninheritedTimingpoints.size() - 1 ? lastTime
-                                                                         : uninheritedTimingpoints[i + 1].offset);
-
-                            tuple.beatLength = std::round(t.msPerBeat * 1000.0f) / 1000.0f;
-                            tuple.duration = std::max(nextTime - currentTime, (long)0);
-                        }
-
-                        tuple.sortHack = i;
-                    }
-                    tuples.push_back(tuple);
-                }
-
-                // "Aggregate durations into a set of (beatLength, duration) tuples for each beat length"
-                std::vector<Tuple> aggregations;
-                aggregations.reserve(tuples.size());
-                for(size_t i = 0; i < tuples.size(); i++) {
-                    const Tuple &t = tuples[i];
-
-                    bool foundExistingAggregation = false;
-                    size_t aggregationIndex = 0;
-                    for(size_t j = 0; j < aggregations.size(); j++) {
-                        if(aggregations[j].beatLength == t.beatLength) {
-                            foundExistingAggregation = true;
-                            aggregationIndex = j;
-                            break;
-                        }
-                    }
-
-                    if(!foundExistingAggregation)
-                        aggregations.push_back(t);
-                    else
-                        aggregations[aggregationIndex].duration += t.duration;
-                }
-
-                // "Get the most common one, or 0 as a suitable default"
-                struct SortByDuration {
-                    bool operator()(Tuple const &a, Tuple const &b) const {
-                        // first condition: duration
-                        // second condition: if duration is the same, higher BPM goes before lower BPM
-
-                        // strict weak ordering!
-                        if(a.duration == b.duration && a.beatLength == b.beatLength)
-                            return a.sortHack > b.sortHack;
-                        else if(a.duration == b.duration)
-                            return (a.beatLength < b.beatLength);
-                        else
-                            return (a.duration > b.duration);
-                    }
-                };
-                std::sort(aggregations.begin(), aggregations.end(), SortByDuration());
-
-                float mostCommonBPM = aggregations[0].beatLength;
-                {
-                    // convert from msPerBeat to BPM
-                    const float msPerMinute = 1.0f * 60.0f * 1000.0f;
-                    if(mostCommonBPM != 0.0f) mostCommonBPM = msPerMinute / mostCommonBPM;
-                }
-                return (int)std::round(mostCommonBPM);
-            }
-        };
-        databaseBeatmap->m_iMostCommonBPM = MostCommonBPMHelper::calculateMostCommonBPM(
-            uninheritedTimingpoints,
-            databaseBeatmap->m_timingpoints[databaseBeatmap->m_timingpoints.size() - 1].offset);
+        auto bpm = getBPM(databaseBeatmap->m_timingpoints,
+                          databaseBeatmap->m_timingpoints[databaseBeatmap->m_timingpoints.size() - 1].offset);
+        databaseBeatmap->m_iMinBPM = bpm.min;
+        databaseBeatmap->m_iMaxBPM = bpm.max;
+        databaseBeatmap->m_iMostCommonBPM = bpm.most_common;
     }
 
     // special case: old beatmaps have AR = OD, there is no ApproachRate stored
@@ -1576,52 +1466,47 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
     return result;
 }
 
-void DatabaseBeatmap::setDifficulties(std::vector<DatabaseBeatmap *> &difficulties) {
-    m_difficulties = difficulties;
+void DatabaseBeatmap::setDifficulties(std::vector<DatabaseBeatmap *> &&difficulties) {
+    m_difficulties = std::move(difficulties);
+    if(m_difficulties.empty()) return;
 
-    if(m_difficulties.size() > 0) {
-        // set representative values for this container (i.e. use values from first difficulty)
-        m_sTitle = m_difficulties[0]->m_sTitle;
-        m_sArtist = m_difficulties[0]->m_sArtist;
-        m_sCreator = m_difficulties[0]->m_sCreator;
-        m_sBackgroundImageFileName = m_difficulties[0]->m_sBackgroundImageFileName;
+    // set representative values for this container (i.e. use values from first difficulty)
+    m_sTitle = m_difficulties[0]->m_sTitle;
+    m_sArtist = m_difficulties[0]->m_sArtist;
+    m_sCreator = m_difficulties[0]->m_sCreator;
+    m_sBackgroundImageFileName = m_difficulties[0]->m_sBackgroundImageFileName;
 
-        // also precalculate some largest representative values
-        m_iLengthMS = 0;
-        m_fCS = 0.0f;
-        m_fAR = 0.0f;
-        m_fOD = 0.0f;
-        m_fHP = 0.0f;
-        m_fStarsNomod = 0.0f;
-        m_iMinBPM = std::numeric_limits<int>::max();
-        m_iMaxBPM = 0;
-        m_iMostCommonBPM = 0;
-        last_modification_time = 0;
-        for(size_t i = 0; i < m_difficulties.size(); i++) {
-            if(m_difficulties[i]->getLengthMS() > m_iLengthMS) m_iLengthMS = m_difficulties[i]->getLengthMS();
-            if(m_difficulties[i]->getCS() > m_fCS) m_fCS = m_difficulties[i]->getCS();
-            if(m_difficulties[i]->getAR() > m_fAR) m_fAR = m_difficulties[i]->getAR();
-            if(m_difficulties[i]->getHP() > m_fHP) m_fHP = m_difficulties[i]->getHP();
-            if(m_difficulties[i]->getOD() > m_fOD) m_fOD = m_difficulties[i]->getOD();
-            if(m_difficulties[i]->getStarsNomod() > m_fStarsNomod) m_fStarsNomod = m_difficulties[i]->getStarsNomod();
-            if(m_difficulties[i]->getMinBPM() < m_iMinBPM) m_iMinBPM = m_difficulties[i]->getMinBPM();
-            if(m_difficulties[i]->getMaxBPM() > m_iMaxBPM) m_iMaxBPM = m_difficulties[i]->getMaxBPM();
-            if(m_difficulties[i]->getMostCommonBPM() > m_iMostCommonBPM)
-                m_iMostCommonBPM = m_difficulties[i]->getMostCommonBPM();
-            if(m_difficulties[i]->last_modification_time > last_modification_time)
-                last_modification_time = m_difficulties[i]->last_modification_time;
-        }
+    // also precalculate some largest representative values
+    m_iLengthMS = 0;
+    m_fCS = 0.0f;
+    m_fAR = 0.0f;
+    m_fOD = 0.0f;
+    m_fHP = 0.0f;
+    m_fStarsNomod = 0.0f;
+    m_iMinBPM = std::numeric_limits<int>::max();
+    m_iMaxBPM = 0;
+    m_iMostCommonBPM = 0;
+    last_modification_time = 0;
+    for(auto diff : m_difficulties) {
+        if(diff->getLengthMS() > m_iLengthMS) m_iLengthMS = diff->getLengthMS();
+        if(diff->getCS() > m_fCS) m_fCS = diff->getCS();
+        if(diff->getAR() > m_fAR) m_fAR = diff->getAR();
+        if(diff->getHP() > m_fHP) m_fHP = diff->getHP();
+        if(diff->getOD() > m_fOD) m_fOD = diff->getOD();
+        if(diff->getStarsNomod() > m_fStarsNomod) m_fStarsNomod = diff->getStarsNomod();
+        if(diff->getMinBPM() < m_iMinBPM) m_iMinBPM = diff->getMinBPM();
+        if(diff->getMaxBPM() > m_iMaxBPM) m_iMaxBPM = diff->getMaxBPM();
+        if(diff->getMostCommonBPM() > m_iMostCommonBPM) m_iMostCommonBPM = diff->getMostCommonBPM();
+        if(diff->last_modification_time > last_modification_time) last_modification_time = diff->last_modification_time;
     }
 }
-
-void DatabaseBeatmap::updateSetHeuristics() { setDifficulties(m_difficulties); }
 
 DatabaseBeatmap::TIMING_INFO DatabaseBeatmap::getTimingInfoForTime(unsigned long positionMS) {
     return getTimingInfoForTimeAndTimingPoints(positionMS, m_timingpoints);
 }
 
 DatabaseBeatmap::TIMING_INFO DatabaseBeatmap::getTimingInfoForTimeAndTimingPoints(
-    unsigned long positionMS, std::vector<TIMINGPOINT> &timingpoints) {
+    unsigned long positionMS, const zarray<TIMINGPOINT> &timingpoints) {
     TIMING_INFO ti;
     ti.offset = 0;
     ti.beatLengthBase = 1;
@@ -1678,51 +1563,6 @@ DatabaseBeatmap::TIMING_INFO DatabaseBeatmap::getTimingInfoForTimeAndTimingPoint
         ti.sampleType = timingpoints[audioPoint].sampleType;
         ti.sampleSet = timingpoints[audioPoint].sampleSet;
     }
-
-    // old (McKay's algorithm)
-    // (doesn't work for all aspire maps, e.g. XNOR)
-    /*
-    // initial timing values (get first non-inherited timingpoint as base)
-    for (int i=0; i<timingpoints.size(); i++)
-    {
-            TIMINGPOINT *t = &timingpoints[i];
-            if (t->msPerBeat >= 0)
-            {
-                    ti.beatLength = t->msPerBeat;
-                    ti.beatLengthBase = ti.beatLength;
-                    ti.offset = t->offset;
-                    break;
-            }
-    }
-
-    // go through all timingpoints before positionMS
-    for (int i=0; i<timingpoints.size(); i++)
-    {
-            TIMINGPOINT *t = &timingpoints[i];
-            if (t->offset > (long)positionMS)
-                    break;
-
-            //debugLog("timingpoint %i msperbeat = %f\n", i, t->msPerBeat);
-
-            if (t->msPerBeat >= 0) // NOT inherited
-            {
-                    ti.beatLengthBase = t->msPerBeat;
-                    ti.beatLength = ti.beatLengthBase;
-                    ti.offset = t->offset;
-            }
-            else // inherited
-            {
-                    // note how msPerBeat is clamped
-                    ti.isNaN = std::isnan(t->msPerBeat);
-                    ti.beatLength = ti.beatLengthBase * (clamp<float>(!ti.isNaN ? std::abs(t->msPerBeat) : 1000, 10,
-    1000) / 100.0f); // sliderMultiplier of a timingpoint = (t->velocity / -100.0f)
-            }
-
-            ti.volume = t->volume;
-            ti.sampleType = t->sampleType;
-            ti.sampleSet = t->sampleSet;
-    }
-    */
 
     return ti;
 }

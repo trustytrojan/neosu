@@ -186,8 +186,9 @@ UString get_disk_uuid() {
 }
 
 void handle_packet(Packet *packet) {
+    // XXX: This is a bit of a mess, should at least group packets by type for readability
     if(packet->id == USER_ID) {
-        bancho.user_id = read_u32(packet);
+        bancho.user_id = read<u32>(packet);
         if(bancho.user_id > 0) {
             debugLog("Logged in as user #%d.\n", bancho.user_id);
             bancho.osu->m_optionsMenu->logInButton->setText("Disconnect");
@@ -259,7 +260,7 @@ void handle_packet(Packet *packet) {
         UString sender = read_string(packet);
         UString text = read_string(packet);
         UString recipient = read_string(packet);
-        i32 sender_id = read_u32(packet);
+        i32 sender_id = read<u32>(packet);
 
         bancho.osu->m_chat->addMessage(recipient, ChatMessage{
                                                       .tms = time(NULL),
@@ -270,44 +271,44 @@ void handle_packet(Packet *packet) {
     } else if(packet->id == PONG) {
         // (nothing to do)
     } else if(packet->id == USER_STATS) {
-        i32 stats_user_id = read_u32(packet);
-        u8 action = read_u8(packet);
+        i32 stats_user_id = read<u32>(packet);
+        u8 action = read<u8>(packet);
 
         UserInfo *user = get_user_info(stats_user_id);
         user->action = (Action)action;
         user->info_text = read_string(packet);
         user->map_md5 = read_string(packet);
-        user->mods = read_u32(packet);
-        user->mode = (GameMode)read_u8(packet);
-        user->map_id = read_u32(packet);
-        user->ranked_score = read_u64(packet);
-        user->accuracy = read_f32(packet);
-        user->plays = read_u32(packet);
-        user->total_score = read_u64(packet);
-        user->global_rank = read_u32(packet);
-        user->pp = read_u16(packet);
+        user->mods = read<u32>(packet);
+        user->mode = (GameMode)read<u8>(packet);
+        user->map_id = read<u32>(packet);
+        user->ranked_score = read<u64>(packet);
+        user->accuracy = read<f32>(packet);
+        user->plays = read<u32>(packet);
+        user->total_score = read<u64>(packet);
+        user->global_rank = read<u32>(packet);
+        user->pp = read<u16>(packet);
 
         if(stats_user_id == bancho.user_id) {
             bancho.osu->m_songBrowser2->m_userButton->updateUserStats();
         }
     } else if(packet->id == USER_LOGOUT) {
-        i32 logged_out_id = read_u32(packet);
-        read_u8(packet);
+        i32 logged_out_id = read<u32>(packet);
+        read<u8>(packet);
         if(logged_out_id == bancho.user_id) {
             debugLog("Logged out.\n");
             disconnect();
         }
     } else if(packet->id == SPECTATOR_JOINED) {
-        i32 spectator_id = read_u32(packet);
+        i32 spectator_id = read<u32>(packet);
         debugLog("Spectator joined: user id %d\n", spectator_id);
     } else if(packet->id == SPECTATOR_LEFT) {
-        i32 spectator_id = read_u32(packet);
+        i32 spectator_id = read<u32>(packet);
         debugLog("Spectator left: user id %d\n", spectator_id);
     } else if(packet->id == VERSION_UPDATE) {
         disconnect();
         bancho.osu->getNotificationOverlay()->addNotification("Server uses an unsupported protocol version.");
     } else if(packet->id == SPECTATOR_CANT_SPECTATE) {
-        i32 spectator_id = read_u32(packet);
+        i32 spectator_id = read<u32>(packet);
         debugLog("Spectator can't spectate: user id %d\n", spectator_id);
     } else if(packet->id == GET_ATTENTION) {
         // (nothing to do)
@@ -329,7 +330,7 @@ void handle_packet(Packet *packet) {
         auto room = new Room(packet);
         bancho.osu->m_lobby->addRoom(room);
     } else if(packet->id == ROOM_CLOSED) {
-        i32 room_id = read_u32(packet);
+        i32 room_id = read<u32>(packet);
         bancho.osu->m_lobby->removeRoom(room_id);
     } else if(packet->id == ROOM_JOIN_SUCCESS) {
         auto room = Room(packet);
@@ -338,10 +339,10 @@ void handle_packet(Packet *packet) {
         bancho.osu->getNotificationOverlay()->addNotification("Failed to join room.");
         bancho.osu->m_lobby->on_room_join_failed();
     } else if(packet->id == FELLOW_SPECTATOR_JOINED) {
-        u32 spectator_id = read_u32(packet);
+        u32 spectator_id = read<u32>(packet);
         (void)spectator_id;  // (spectating not implemented; nothing to do)
     } else if(packet->id == FELLOW_SPECTATOR_LEFT) {
-        u32 spectator_id = read_u32(packet);
+        u32 spectator_id = read<u32>(packet);
         (void)spectator_id;  // (spectating not implemented; nothing to do)
     } else if(packet->id == MATCH_STARTED) {
         auto room = Room(packet);
@@ -353,7 +354,7 @@ void handle_packet(Packet *packet) {
     } else if(packet->id == MATCH_ALL_PLAYERS_LOADED) {
         bancho.osu->m_room->on_all_players_loaded();
     } else if(packet->id == MATCH_PLAYER_FAILED) {
-        i32 slot_id = read_u32(packet);
+        i32 slot_id = read<u32>(packet);
         bancho.osu->m_room->on_player_failed(slot_id);
     } else if(packet->id == MATCH_FINISHED) {
         bancho.osu->m_room->on_match_finished();
@@ -371,7 +372,7 @@ void handle_packet(Packet *packet) {
     } else if(packet->id == CHANNEL_INFO) {
         UString channel_name = read_string(packet);
         UString channel_topic = read_string(packet);
-        i32 nb_members = read_u32(packet);
+        i32 nb_members = read<u32>(packet);
         update_channel(channel_name, channel_topic, nb_members);
     } else if(packet->id == LEFT_CHANNEL) {
         UString name = read_string(packet);
@@ -379,21 +380,21 @@ void handle_packet(Packet *packet) {
     } else if(packet->id == CHANNEL_AUTO_JOIN) {
         UString channel_name = read_string(packet);
         UString channel_topic = read_string(packet);
-        i32 nb_members = read_u32(packet);
+        i32 nb_members = read<u32>(packet);
         update_channel(channel_name, channel_topic, nb_members);
     } else if(packet->id == PRIVILEGES) {
-        read_u32(packet);
+        read<u32>(packet);
         // (nothing to do)
     } else if(packet->id == FRIENDS_LIST) {
         friends.clear();
 
-        u16 nb_friends = read_u16(packet);
+        u16 nb_friends = read<u16>(packet);
         for(int i = 0; i < nb_friends; i++) {
-            u32 friend_id = read_u32(packet);
+            u32 friend_id = read<u32>(packet);
             friends.push_back(friend_id);
         }
     } else if(packet->id == PROTOCOL_VERSION) {
-        int protocol_version = read_u32(packet);
+        int protocol_version = read<u32>(packet);
         if(protocol_version != 19) {
             disconnect();
             bancho.osu->getNotificationOverlay()->addNotification("Server uses an unsupported protocol version.");
@@ -405,7 +406,7 @@ void handle_packet(Packet *packet) {
             bancho.server_icon_url = urls[0];
         }
     } else if(packet->id == MATCH_PLAYER_SKIPPED) {
-        i32 user_id = read_u32(packet);
+        i32 user_id = read<u32>(packet);
         bancho.osu->m_room->on_player_skip(user_id);
 
         // I'm not sure the server ever sends MATCH_SKIP... So, double-checking here.
@@ -421,20 +422,20 @@ void handle_packet(Packet *packet) {
             bancho.osu->m_room->on_all_players_skipped();
         }
     } else if(packet->id == USER_PRESENCE) {
-        i32 presence_user_id = read_u32(packet);
+        i32 presence_user_id = read<u32>(packet);
         UString presence_username = read_string(packet);
 
         UserInfo *user = get_user_info(presence_user_id);
         user->name = presence_username;
-        user->utc_offset = read_u8(packet);
-        user->country = read_u8(packet);
-        user->privileges = read_u8(packet);
-        user->longitude = read_f32(packet);
-        user->latitude = read_f32(packet);
-        user->global_rank = read_u32(packet);
+        user->utc_offset = read<u8>(packet);
+        user->country = read<u8>(packet);
+        user->privileges = read<u8>(packet);
+        user->longitude = read<f32>(packet);
+        user->latitude = read<f32>(packet);
+        user->global_rank = read<u32>(packet);
     } else if(packet->id == RESTART) {
         // XXX: wait 'ms' milliseconds before reconnecting
-        i32 ms = read_u32(packet);
+        i32 ms = read<u32>(packet);
         (void)ms;
 
         // Some servers send "restart" packets when password is incorrect
@@ -447,7 +448,7 @@ void handle_packet(Packet *packet) {
         UString text = read_string(packet);
         UString recipient = read_string(packet);
         (void)recipient;
-        i32 sender_id = read_u32(packet);
+        i32 sender_id = read<u32>(packet);
         bancho.osu->m_chat->addMessage(recipient, ChatMessage{
                                                       .tms = time(NULL),
                                                       .author_id = sender_id,
@@ -463,23 +464,23 @@ void handle_packet(Packet *packet) {
         debugLog("Room changed password to %s\n", new_password.toUtf8());
         bancho.room.password = new_password;
     } else if(packet->id == SILENCE_END) {
-        i32 delta = read_u32(packet);
+        i32 delta = read<u32>(packet);
         debugLog("Silence ends in %d seconds.\n", delta);
         // XXX: Prevent user from sending messages while silenced
     } else if(packet->id == USER_SILENCED) {
-        i32 user_id = read_u32(packet);
+        i32 user_id = read<u32>(packet);
         debugLog("User #%d silenced.\n", user_id);
     } else if(packet->id == USER_DM_BLOCKED) {
         read_string(packet);
         read_string(packet);
         UString blocked = read_string(packet);
-        read_u32(packet);
+        read<u32>(packet);
         debugLog("Blocked %s.\n", blocked.toUtf8());
     } else if(packet->id == TARGET_IS_SILENCED) {
         read_string(packet);
         read_string(packet);
         UString blocked = read_string(packet);
-        read_u32(packet);
+        read<u32>(packet);
         debugLog("Silenced %s.\n", blocked.toUtf8());
     } else if(packet->id == VERSION_UPDATE_FORCED) {
         disconnect();

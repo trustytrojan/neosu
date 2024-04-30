@@ -70,13 +70,6 @@ ConVar osu_user_include_relax_and_autopilot_for_stats("osu_user_include_relax_an
 ConVar osu_user_switcher_include_legacy_scores_for_names("osu_user_switcher_include_legacy_scores_for_names", true,
                                                          FCVAR_NONE);
 
-TIMINGPOINT read_timing_point(Packet *packet) {
-    const double bpm = read_f64(packet);
-    const double offset = read_f64(packet);
-    const bool timingChange = (bool)read_u8(packet);
-    return (struct TIMINGPOINT){bpm, offset, timingChange};
-}
-
 Packet load_db(std::string path) {
     Packet db;
 
@@ -923,12 +916,6 @@ void Database::scheduleLoadRaw() {
 
         m_bRawBeatmapLoadScheduled = true;
         m_importTimer->start();
-
-        if(m_bIsFirstLoad) {
-            // reset
-            m_rawHashToDiff2.clear();
-            m_rawHashToBeatmap.clear();
-        }
     } else
         m_fLoadingProgress = 1.0f;
 
@@ -956,12 +943,12 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
     m_importTimer->start();
 
     // read header
-    m_iVersion = read_u32(db);
-    m_iFolderCount = read_u32(db);
-    read_u8(db);
-    read_u64(db) /* timestamp */;
+    m_iVersion = read<u32>(db);
+    m_iFolderCount = read<u32>(db);
+    read<u8>(db);
+    read<u64>(db) /* timestamp */;
     auto playerName = read_stdstring(db);
-    m_iNumBeatmapsToLoad = read_u32(db);
+    m_iNumBeatmapsToLoad = read<u32>(db);
 
     debugLog("Database: version = %i, folderCount = %i, playerName = %s, numDiffs = %i\n", m_iVersion, m_iFolderCount,
              playerName.c_str(), m_iNumBeatmapsToLoad);
@@ -1002,8 +989,6 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
     };
     std::vector<BeatmapSet> beatmapSets;
     std::unordered_map<int, size_t> setIDToIndex;
-    std::unordered_map<MD5Hash, DatabaseBeatmap *> hashToDiff2;
-    std::unordered_map<MD5Hash, DatabaseBeatmap *> hashToBeatmap;
     for(int i = 0; i < m_iNumBeatmapsToLoad; i++) {
         if(m_bInterruptLoad.load()) break;  // cancellation point
 
@@ -1017,7 +1002,7 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
             // no idea why peppy decided to change the wiki version from 20191107 to 20191106, because that's not what
             // stable is doing. the correct version is still 20191107
 
-            /*unsigned int size = */ read_u32(db);  // size in bytes of the beatmap entry
+            /*unsigned int size = */ read<u32>(db);  // size in bytes of the beatmap entry
         }
 
         std::string artistName = read_stdstring(db);
@@ -1034,25 +1019,25 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
         auto hash_str = read_stdstring(db);
         MD5Hash md5hash = hash_str.c_str();
         std::string osuFileName = read_stdstring(db);
-        /*unsigned char rankedStatus = */ read_u8(db);
-        unsigned short numCircles = read_u16(db);
-        unsigned short numSliders = read_u16(db);
-        unsigned short numSpinners = read_u16(db);
-        long long lastModificationTime = read_u64(db);
-        float AR = read_f32(db);
-        float CS = read_f32(db);
-        float HP = read_f32(db);
-        float OD = read_f32(db);
-        double sliderMultiplier = read_f64(db);
+        /*unsigned char rankedStatus = */ read<u8>(db);
+        unsigned short numCircles = read<u16>(db);
+        unsigned short numSliders = read<u16>(db);
+        unsigned short numSpinners = read<u16>(db);
+        long long lastModificationTime = read<u64>(db);
+        float AR = read<f32>(db);
+        float CS = read<f32>(db);
+        float HP = read<f32>(db);
+        float OD = read<f32>(db);
+        double sliderMultiplier = read<f64>(db);
 
-        unsigned int numOsuStandardStarRatings = read_u32(db);
+        unsigned int numOsuStandardStarRatings = read<u32>(db);
         // debugLog("%i star ratings for osu!standard\n", numOsuStandardStarRatings);
         float numOsuStandardStars = 0.0f;
         for(int s = 0; s < numOsuStandardStarRatings; s++) {
-            read_u8(db);  // ObjType
-            unsigned int mods = read_u32(db);
-            read_u8(db);  // ObjType
-            double starRating = read_f64(db);
+            read<u8>(db);  // ObjType
+            unsigned int mods = read<u32>(db);
+            read<u8>(db);  // ObjType
+            double starRating = read<f64>(db);
             // debugLog("%f stars for %u\n", starRating, mods);
 
             if(mods == 0) numOsuStandardStars = starRating;
@@ -1066,63 +1051,60 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
             if(result != m_starsCache.end()) numOsuStandardStars = result->second.starsNomod;
         }
 
-        unsigned int numTaikoStarRatings = read_u32(db);
+        unsigned int numTaikoStarRatings = read<u32>(db);
         // debugLog("%i star ratings for taiko\n", numTaikoStarRatings);
         for(int s = 0; s < numTaikoStarRatings; s++) {
-            read_u8(db);  // ObjType
-            read_u32(db);
-            read_u8(db);  // ObjType
-            read_f64(db);
+            read<u8>(db);  // ObjType
+            read<u32>(db);
+            read<u8>(db);  // ObjType
+            read<f64>(db);
         }
 
-        unsigned int numCtbStarRatings = read_u32(db);
+        unsigned int numCtbStarRatings = read<u32>(db);
         // debugLog("%i star ratings for ctb\n", numCtbStarRatings);
         for(int s = 0; s < numCtbStarRatings; s++) {
-            read_u8(db);  // ObjType
-            read_u32(db);
-            read_u8(db);  // ObjType
-            read_f64(db);
+            read<u8>(db);  // ObjType
+            read<u32>(db);
+            read<u8>(db);  // ObjType
+            read<f64>(db);
         }
 
-        unsigned int numManiaStarRatings = read_u32(db);
+        unsigned int numManiaStarRatings = read<u32>(db);
         // debugLog("%i star ratings for mania\n", numManiaStarRatings);
         for(int s = 0; s < numManiaStarRatings; s++) {
-            read_u8(db);  // ObjType
-            read_u32(db);
-            read_u8(db);  // ObjType
-            read_f64(db);
+            read<u8>(db);  // ObjType
+            read<u32>(db);
+            read<u8>(db);  // ObjType
+            read<f64>(db);
         }
 
-        /*unsigned int drainTime = */ read_u32(db);  // seconds
-        int duration = read_u32(db);                 // milliseconds
-        duration = duration >= 0 ? duration : 0;     // sanity clamp
-        int previewTime = read_u32(db);
+        /*unsigned int drainTime = */ read<u32>(db);  // seconds
+        int duration = read<u32>(db);                 // milliseconds
+        duration = duration >= 0 ? duration : 0;      // sanity clamp
+        int previewTime = read<u32>(db);
 
         // debugLog("drainTime = %i sec, duration = %i ms, previewTime = %i ms\n", drainTime, duration, previewTime);
 
-        unsigned int numTimingPoints = read_u32(db);
-        // debugLog("%i timingpoints\n", numTimingPoints);
-        std::vector<TIMINGPOINT> timingPoints;
-        for(int t = 0; t < numTimingPoints; t++) {
-            timingPoints.push_back(read_timing_point(db));
-        }
+        unsigned int numTimingPoints = read<u32>(db);
+        zarray<TIMINGPOINT> timingPoints(numTimingPoints);
+        read_bytes(db, (u8 *)timingPoints.data(), sizeof(TIMINGPOINT) * numTimingPoints);
 
-        int beatmapID = read_u32(db);     // fucking bullshit, this is NOT an unsigned integer as is described on the
-                                          // wiki, it can and is -1 sometimes
-        int beatmapSetID = read_u32(db);  // same here
-        /*unsigned int threadID = */ read_u32(db);
+        int beatmapID = read<i32>(db);     // fucking bullshit, this is NOT an unsigned integer as is described on the
+                                           // wiki, it can and is -1 sometimes
+        int beatmapSetID = read<i32>(db);  // same here
+        /*unsigned int threadID = */ read<u32>(db);
 
-        /*unsigned char osuStandardGrade = */ read_u8(db);
-        /*unsigned char taikoGrade = */ read_u8(db);
-        /*unsigned char ctbGrade = */ read_u8(db);
-        /*unsigned char maniaGrade = */ read_u8(db);
+        /*unsigned char osuStandardGrade = */ read<u8>(db);
+        /*unsigned char taikoGrade = */ read<u8>(db);
+        /*unsigned char ctbGrade = */ read<u8>(db);
+        /*unsigned char maniaGrade = */ read<u8>(db);
         // debugLog("beatmapID = %i, beatmapSetID = %i, threadID = %i, osuStandardGrade = %i, taikoGrade = %i, ctbGrade
         // = %i, maniaGrade = %i\n", beatmapID, beatmapSetID, threadID, osuStandardGrade, taikoGrade, ctbGrade,
         // maniaGrade);
 
-        short localOffset = read_u16(db);
-        float stackLeniency = read_f32(db);
-        unsigned char mode = read_u8(db);
+        short localOffset = read<u16>(db);
+        float stackLeniency = read<f32>(db);
+        unsigned char mode = read<u8>(db);
         // debugLog("localOffset = %i, stackLeniency = %f, mode = %i\n", localOffset, stackLeniency, mode);
 
         auto songSource = read_stdstring(db);
@@ -1131,29 +1113,29 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
         trim(&songTags);
         // debugLog("songSource = %s, songTags = %s\n", songSource.toUtf8(), songTags.toUtf8());
 
-        short onlineOffset = read_u16(db);
+        short onlineOffset = read<u16>(db);
         skip_string(db);  // song title font
-        /*bool unplayed = */ read_u8(db);
-        /*long long lastTimePlayed = */ read_u64(db);
-        /*bool isOsz2 = */ read_u8(db);
+        /*bool unplayed = */ read<u8>(db);
+        /*long long lastTimePlayed = */ read<u64>(db);
+        /*bool isOsz2 = */ read<u8>(db);
 
         // somehow, some beatmaps may have spaces at the start/end of their
         // path, breaking the Windows API (e.g. https://osu.ppy.sh/s/215347)
         auto path = read_stdstring(db);
         trim(&path);
 
-        /*long long lastOnlineCheck = */ read_u64(db);
+        /*long long lastOnlineCheck = */ read<u64>(db);
         // debugLog("onlineOffset = %i, songTitleFont = %s, unplayed = %i, lastTimePlayed = %lu, isOsz2 = %i, path = %s,
         // lastOnlineCheck = %lu\n", onlineOffset, songTitleFont.toUtf8(), (int)unplayed, lastTimePlayed, (int)isOsz2,
         // path.c_str(), lastOnlineCheck);
 
-        /*bool ignoreBeatmapSounds = */ read_u8(db);
-        /*bool ignoreBeatmapSkin = */ read_u8(db);
-        /*bool disableStoryboard = */ read_u8(db);
-        /*bool disableVideo = */ read_u8(db);
-        /*bool visualOverride = */ read_u8(db);
-        /*int lastEditTime = */ read_u32(db);
-        /*unsigned char maniaScrollSpeed = */ read_u8(db);
+        /*bool ignoreBeatmapSounds = */ read<u8>(db);
+        /*bool ignoreBeatmapSkin = */ read<u8>(db);
+        /*bool disableStoryboard = */ read<u8>(db);
+        /*bool disableVideo = */ read<u8>(db);
+        /*bool visualOverride = */ read<u8>(db);
+        /*int lastEditTime = */ read<u32>(db);
+        /*unsigned char maniaScrollSpeed = */ read<u8>(db);
         // debugLog("ignoreBeatmapSounds = %i, ignoreBeatmapSkin = %i, disableStoryboard = %i, disableVideo = %i,
         // visualOverride = %i, maniaScrollSpeed = %i\n", (int)ignoreBeatmapSounds, (int)ignoreBeatmapSkin,
         // (int)disableStoryboard, (int)disableVideo, (int)visualOverride, maniaScrollSpeed);
@@ -1224,132 +1206,19 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
                 diff2->m_fStarsNomod = numOsuStandardStars;
 
                 // calculate bpm range
-                float minBeatLength = 0;
-                float maxBeatLength = std::numeric_limits<float>::max();
-                std::vector<TIMINGPOINT> uninheritedTimingpoints;
-                for(int j = 0; j < timingPoints.size(); j++) {
-                    const TIMINGPOINT &t = timingPoints[j];
-
-                    if(t.msPerBeat >= 0)  // NOT inherited
-                    {
-                        uninheritedTimingpoints.push_back(t);
-
-                        if(t.msPerBeat > minBeatLength) minBeatLength = t.msPerBeat;
-                        if(t.msPerBeat < maxBeatLength) maxBeatLength = t.msPerBeat;
-                    }
-                }
-
-                // convert from msPerBeat to BPM
-                const float msPerMinute = 1 * 60 * 1000;
-                if(minBeatLength != 0) minBeatLength = msPerMinute / minBeatLength;
-                if(maxBeatLength != 0) maxBeatLength = msPerMinute / maxBeatLength;
-
-                diff2->m_iMinBPM = (int)std::round(minBeatLength);
-                diff2->m_iMaxBPM = (int)std::round(maxBeatLength);
-
-                struct MostCommonBPMHelper {
-                    static int calculateMostCommonBPM(const std::vector<TIMINGPOINT> &uninheritedTimingpoints,
-                                                      long lastTime) {
-                        if(uninheritedTimingpoints.size() < 1) return 0;
-
-                        struct Tuple {
-                            float beatLength;
-                            long duration;
-
-                            size_t sortHack;
-                        };
-
-                        // "Construct a set of (beatLength, duration) tuples for each individual timing point."
-                        std::vector<Tuple> tuples;
-                        tuples.reserve(uninheritedTimingpoints.size());
-                        for(size_t i = 0; i < uninheritedTimingpoints.size(); i++) {
-                            const TIMINGPOINT &t = uninheritedTimingpoints[i];
-
-                            Tuple tuple;
-                            {
-                                if(t.offset > lastTime) {
-                                    tuple.beatLength = std::round(t.msPerBeat * 1000.0f) / 1000.0f;
-                                    tuple.duration = 0;
-                                } else {
-                                    // "osu-stable forced the first control point to start at 0."
-                                    // "This is reproduced here to maintain compatibility around osu!mania scroll speed
-                                    // and song select display."
-                                    const long currentTime = (i == 0 ? 0 : t.offset);
-                                    const long nextTime = (i >= uninheritedTimingpoints.size() - 1
-                                                               ? lastTime
-                                                               : uninheritedTimingpoints[i + 1].offset);
-
-                                    tuple.beatLength = std::round(t.msPerBeat * 1000.0f) / 1000.0f;
-                                    tuple.duration = std::max(nextTime - currentTime, (long)0);
-                                }
-
-                                tuple.sortHack = i;
-                            }
-                            tuples.push_back(tuple);
-                        }
-
-                        // "Aggregate durations into a set of (beatLength, duration) tuples for each beat length"
-                        std::vector<Tuple> aggregations;
-                        aggregations.reserve(tuples.size());
-                        for(size_t i = 0; i < tuples.size(); i++) {
-                            const Tuple &t = tuples[i];
-
-                            bool foundExistingAggregation = false;
-                            size_t aggregationIndex = 0;
-                            for(size_t j = 0; j < aggregations.size(); j++) {
-                                if(aggregations[j].beatLength == t.beatLength) {
-                                    foundExistingAggregation = true;
-                                    aggregationIndex = j;
-                                    break;
-                                }
-                            }
-
-                            if(!foundExistingAggregation)
-                                aggregations.push_back(t);
-                            else
-                                aggregations[aggregationIndex].duration += t.duration;
-                        }
-
-                        // "Get the most common one, or 0 as a suitable default"
-                        struct SortByDuration {
-                            bool operator()(Tuple const &a, Tuple const &b) const {
-                                // first condition: duration
-                                // second condition: if duration is the same, higher BPM goes before lower BPM
-
-                                // strict weak ordering!
-                                if(a.duration == b.duration && a.beatLength == b.beatLength)
-                                    return a.sortHack > b.sortHack;
-                                else if(a.duration == b.duration)
-                                    return (a.beatLength < b.beatLength);
-                                else
-                                    return (a.duration > b.duration);
-                            }
-                        };
-                        std::sort(aggregations.begin(), aggregations.end(), SortByDuration());
-
-                        float mostCommonBPM = aggregations[0].beatLength;
-                        {
-                            // convert from msPerBeat to BPM
-                            const float msPerMinute = 1.0f * 60.0f * 1000.0f;
-                            if(mostCommonBPM != 0.0f) mostCommonBPM = msPerMinute / mostCommonBPM;
-                        }
-                        return (int)std::round(mostCommonBPM);
-                    }
-                };
-                diff2->m_iMostCommonBPM = MostCommonBPMHelper::calculateMostCommonBPM(
-                    uninheritedTimingpoints,
-                    (timingPoints.size() > 0 ? timingPoints[timingPoints.size() - 1].offset : 0));
+                auto bpm = getBPM(timingPoints, (numTimingPoints > 0 ? timingPoints[numTimingPoints - 1].offset : 0));
+                diff2->m_iMinBPM = bpm.min;
+                diff2->m_iMaxBPM = bpm.max;
+                diff2->m_iMostCommonBPM = bpm.most_common;
 
                 // build temp partial timingpoints, only used for menu animations
-                for(int t = 0; t < timingPoints.size(); t++) {
-                    DatabaseBeatmap::TIMINGPOINT tp;
-                    {
-                        tp.offset = timingPoints[t].offset;
-                        tp.msPerBeat = timingPoints[t].msPerBeat;
-                        tp.timingChange = timingPoints[t].timingChange;
-                        tp.kiai = false;
-                    }
-                    diff2->m_timingpoints.push_back(tp);
+                // a bit hacky to avoid slow ass allocations
+                diff2->m_timingpoints.resize(numTimingPoints);
+                memset(diff2->m_timingpoints.data(), 0, numTimingPoints * sizeof(DatabaseBeatmap::TIMINGPOINT));
+                for(int t = 0; t < numTimingPoints; t++) {
+                    diff2->m_timingpoints[t].offset = (long)timingPoints[t].offset;
+                    diff2->m_timingpoints[t].msPerBeat = (float)timingPoints[t].msPerBeat;
+                    diff2->m_timingpoints[t].timingChange = timingPoints[t].timingChange;
                 }
             }
 
@@ -1389,9 +1258,6 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
 
                 beatmapSets.push_back(s);
             }
-
-            // and add an entry in our hashmap
-            hashToDiff2[diff2->getMD5Hash()] = diff2;
         }
     }
 
@@ -1405,17 +1271,11 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
         if(beatmapSets[i].diffs2.size() > 0)  // sanity check
         {
             if(beatmapSets[i].setID > 0) {
-                DatabaseBeatmap *bm = new DatabaseBeatmap(m_osu, beatmapSets[i].diffs2);
+                DatabaseBeatmap *bm = new DatabaseBeatmap(m_osu, std::move(beatmapSets[i].diffs2));
 
                 m_databaseBeatmaps.push_back(bm);
 
-                // and add an entry in our hashmap
-                for(int d = 0; d < beatmapSets[i].diffs2.size(); d++) {
-                    const MD5Hash &md5hash = beatmapSets[i].diffs2[d]->getMD5Hash();
-                    hashToBeatmap[md5hash] = bm;
-                }
-
-                // and in the other hashmap
+                // and add an entry in the hashmap
                 std::string titleArtist = bm->getTitle();
                 titleArtist.append(bm->getArtist());
                 if(titleArtist.length() > 0) titleArtistToBeatmap[titleArtist] = bm;
@@ -1454,9 +1314,6 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
                             // we have found a matching beatmap, add ourself to its diffs
                             const_cast<std::vector<DatabaseBeatmap *> &>(result->second->getDifficulties())
                                 .push_back(diff2);
-
-                            // and add an entry in our hashmap
-                            hashToBeatmap[diff2->getMD5Hash()] = result->second;
                         }
                     }
 
@@ -1465,15 +1322,9 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
                         std::vector<DatabaseBeatmap *> diffs2;
                         diffs2.push_back(beatmapSets[i].diffs2[b]);
 
-                        DatabaseBeatmap *bm = new DatabaseBeatmap(m_osu, diffs2);
+                        DatabaseBeatmap *bm = new DatabaseBeatmap(m_osu, std::move(diffs2));
 
                         m_databaseBeatmaps.push_back(bm);
-
-                        // and add an entry in our hashmap
-                        for(int d = 0; d < diffs2.size(); d++) {
-                            const MD5Hash &md5hash = diffs2[d]->getMD5Hash();
-                            hashToBeatmap[md5hash] = bm;
-                        }
                     }
                 }
             }
@@ -1501,18 +1352,18 @@ void Database::loadStars() {
     if(cache.size > 0) {
         m_starsCache.clear();
 
-        const int cacheVersion = read_u32(&cache);
+        const int cacheVersion = read<u32>(&cache);
 
         if(cacheVersion <= starsCacheVersion) {
             skip_string(&cache);  // ignore md5
-            const i64 numStarsCacheEntries = read_u64(&cache);
+            const i64 numStarsCacheEntries = read<u64>(&cache);
 
             debugLog("Stars cache: version = %i, numStarsCacheEntries = %i\n", cacheVersion, numStarsCacheEntries);
 
             for(i64 i = 0; i < numStarsCacheEntries; i++) {
                 auto hash_str = read_stdstring(&cache);
                 const MD5Hash beatmapMD5Hash = hash_str.c_str();
-                const float starsNomod = read_f32(&cache);
+                const float starsNomod = read<f32>(&cache);
 
                 STARS_CACHE_ENTRY entry;
                 { entry.starsNomod = starsNomod; }
@@ -1584,14 +1435,14 @@ void Database::loadScores() {
         if(db.size > 0) {
             customScoresFileSize = db.size;
 
-            const u32 dbVersion = read_u32(&db);
-            const u32 numBeatmaps = read_u32(&db);
+            const u32 dbVersion = read<u32>(&db);
+            const u32 numBeatmaps = read<u32>(&db);
             debugLog("Custom scores: version = %u, numBeatmaps = %u\n", dbVersion, numBeatmaps);
 
             if(dbVersion <= LiveScore::VERSION) {
                 for(int b = 0; b < numBeatmaps; b++) {
                     auto hash_str = read_stdstring(&db);
-                    const int numScores = read_u32(&db);
+                    const int numScores = read<u32>(&db);
 
                     if(hash_str.size() < 32) {
                         if(Osu::debug->getBool()) {
@@ -1617,57 +1468,57 @@ void Database::loadScores() {
                         sc.numCircles = -1;
                         sc.perfect = false;
 
-                        const unsigned char gamemode = read_u8(&db);  // NOTE: abused as isImportedLegacyScore flag
-                        sc.version = read_u32(&db);
+                        const unsigned char gamemode = read<u8>(&db);  // NOTE: abused as isImportedLegacyScore flag
+                        sc.version = read<u32>(&db);
 
                         if(dbVersion == 20210103 && sc.version > 20190103) {
-                            sc.isImportedLegacyScore = read_u8(&db);
+                            sc.isImportedLegacyScore = read<u8>(&db);
                         } else if(dbVersion > 20210103 && sc.version > 20190103) {
                             // HACKHACK: for explanation see hackIsImportedLegacyScoreFlag
                             sc.isImportedLegacyScore = (gamemode & hackIsImportedLegacyScoreFlag);
                         }
 
-                        sc.unixTimestamp = read_u64(&db);
+                        sc.unixTimestamp = read<u64>(&db);
 
                         // default
                         sc.playerName = read_stdstring(&db);
 
-                        sc.num300s = read_u16(&db);
-                        sc.num100s = read_u16(&db);
-                        sc.num50s = read_u16(&db);
-                        sc.numGekis = read_u16(&db);
-                        sc.numKatus = read_u16(&db);
-                        sc.numMisses = read_u16(&db);
+                        sc.num300s = read<u16>(&db);
+                        sc.num100s = read<u16>(&db);
+                        sc.num50s = read<u16>(&db);
+                        sc.numGekis = read<u16>(&db);
+                        sc.numKatus = read<u16>(&db);
+                        sc.numMisses = read<u16>(&db);
 
-                        sc.score = read_u64(&db);
-                        sc.comboMax = read_u16(&db);
-                        sc.modsLegacy = read_u32(&db);
+                        sc.score = read<u64>(&db);
+                        sc.comboMax = read<u16>(&db);
+                        sc.modsLegacy = read<u32>(&db);
 
                         // custom
-                        sc.numSliderBreaks = read_u16(&db);
-                        sc.pp = read_f32(&db);
-                        sc.unstableRate = read_f32(&db);
-                        sc.hitErrorAvgMin = read_f32(&db);
-                        sc.hitErrorAvgMax = read_f32(&db);
-                        sc.starsTomTotal = read_f32(&db);
-                        sc.starsTomAim = read_f32(&db);
-                        sc.starsTomSpeed = read_f32(&db);
-                        sc.speedMultiplier = read_f32(&db);
-                        sc.CS = read_f32(&db);
-                        sc.AR = read_f32(&db);
-                        sc.OD = read_f32(&db);
-                        sc.HP = read_f32(&db);
+                        sc.numSliderBreaks = read<u16>(&db);
+                        sc.pp = read<f32>(&db);
+                        sc.unstableRate = read<f32>(&db);
+                        sc.hitErrorAvgMin = read<f32>(&db);
+                        sc.hitErrorAvgMax = read<f32>(&db);
+                        sc.starsTomTotal = read<f32>(&db);
+                        sc.starsTomAim = read<f32>(&db);
+                        sc.starsTomSpeed = read<f32>(&db);
+                        sc.speedMultiplier = read<f32>(&db);
+                        sc.CS = read<f32>(&db);
+                        sc.AR = read<f32>(&db);
+                        sc.OD = read<f32>(&db);
+                        sc.HP = read<f32>(&db);
 
                         if(sc.version > 20180722) {
-                            sc.maxPossibleCombo = read_u32(&db);
-                            sc.numHitObjects = read_u32(&db);
-                            sc.numCircles = read_u32(&db);
+                            sc.maxPossibleCombo = read<u32>(&db);
+                            sc.numHitObjects = read<u32>(&db);
+                            sc.numCircles = read<u32>(&db);
                             sc.perfect = sc.comboMax >= sc.maxPossibleCombo;
                         }
 
                         if(sc.version >= 20240412) {
                             sc.has_replay = true;
-                            sc.online_score_id = read_u32(&db);
+                            sc.online_score_id = read<u32>(&db);
                             sc.server = read_stdstring(&db);
                         }
 
@@ -1704,8 +1555,8 @@ void Database::loadScores() {
         // point directly to neosu, which would break legacy score db loading
         // here since there is no magic number)
         if(db.size > 0 && db.size != customScoresFileSize) {
-            const int dbVersion = read_u32(&db);
-            const int numBeatmaps = read_u32(&db);
+            const int dbVersion = read<u32>(&db);
+            const int numBeatmaps = read<u32>(&db);
 
             debugLog("Legacy scores: version = %i, numBeatmaps = %i\n", dbVersion, numBeatmaps);
 
@@ -1723,7 +1574,7 @@ void Database::loadScores() {
                 }
 
                 const MD5Hash md5hash = hash_str.c_str();
-                const int numScores = read_u32(&db);
+                const int numScores = read<u32>(&db);
 
                 if(Osu::debug->getBool())
                     debugLog("Beatmap[%i]: md5hash = %s, numScores = %i\n", b, md5hash.toUtf8(), numScores);
@@ -1750,27 +1601,27 @@ void Database::loadScores() {
                     sc.numHitObjects = -1;
                     sc.numCircles = -1;
 
-                    const unsigned char gamemode = read_u8(&db);
-                    sc.version = read_u32(&db);
+                    const unsigned char gamemode = read<u8>(&db);
+                    sc.version = read<u32>(&db);
                     skip_string(&db);  // beatmap hash (already have it)
 
                     sc.playerName = read_stdstring(&db);
                     skip_string(&db);  // replay hash (don't use it)
 
-                    sc.num300s = read_u16(&db);
-                    sc.num100s = read_u16(&db);
-                    sc.num50s = read_u16(&db);
-                    sc.numGekis = read_u16(&db);
-                    sc.numKatus = read_u16(&db);
-                    sc.numMisses = read_u16(&db);
+                    sc.num300s = read<u16>(&db);
+                    sc.num100s = read<u16>(&db);
+                    sc.num50s = read<u16>(&db);
+                    sc.numGekis = read<u16>(&db);
+                    sc.numKatus = read<u16>(&db);
+                    sc.numMisses = read<u16>(&db);
 
-                    i32 score = read_u32(&db);
+                    i32 score = read<u32>(&db);
                     sc.score = (score < 0 ? 0 : score);
 
-                    sc.comboMax = read_u16(&db);
-                    sc.perfect = read_u8(&db);
+                    sc.comboMax = read<u16>(&db);
+                    sc.perfect = read<u8>(&db);
 
-                    sc.modsLegacy = read_u32(&db);
+                    sc.modsLegacy = read<u32>(&db);
                     sc.speedMultiplier = 1.0f;
                     if(sc.modsLegacy & ModFlags::HalfTime)
                         sc.speedMultiplier = 0.75f;
@@ -1779,12 +1630,12 @@ void Database::loadScores() {
 
                     skip_string(&db);  // hp graph
 
-                    u64 full_tms = read_u64(&db);
+                    u64 full_tms = read<u64>(&db);
                     sc.unixTimestamp = (full_tms - 621355968000000000) / 10000000;
                     sc.legacyReplayTimestamp = full_tms - 504911232000000000;
 
                     // Always -1, but let's skip it properly just in case
-                    i32 old_replay_size = read_u32(&db);
+                    i32 old_replay_size = read<u32>(&db);
                     if(old_replay_size > 0) {
                         db.pos += old_replay_size;
                     }
@@ -1793,12 +1644,12 @@ void Database::loadScores() {
                     sc.has_replay = true;
 
                     if(sc.version >= 20140721)
-                        sc.online_score_id = read_u64(&db);
+                        sc.online_score_id = read<u64>(&db);
                     else if(sc.version >= 20121008)
-                        sc.online_score_id = read_u32(&db);
+                        sc.online_score_id = read<u32>(&db);
 
                     if(sc.modsLegacy & ModFlags::Target) /*double totalAccuracy = */
-                        read_f64(&db);
+                        read<f64>(&db);
 
                     if(gamemode == 0) {  // gamemode filter (osu!standard)
                         // runtime
@@ -1981,17 +1832,8 @@ DatabaseBeatmap *Database::loadRawBeatmap(std::string beatmapPath) {
 
     // build beatmap from diffs
     DatabaseBeatmap *beatmap = NULL;
-    {
-        if(diffs2.size() > 0) {
-            beatmap = new DatabaseBeatmap(m_osu, diffs2);
-
-            // and add entries in our hashmaps
-            for(size_t i = 0; i < diffs2.size(); i++) {
-                DatabaseBeatmap *diff2 = diffs2[i];
-                m_rawHashToDiff2[diff2->getMD5Hash()] = diff2;
-                m_rawHashToBeatmap[diff2->getMD5Hash()] = beatmap;
-            }
-        }
+    if(diffs2.size() > 0) {
+        beatmap = new DatabaseBeatmap(m_osu, std::move(diffs2));
     }
 
     return beatmap;
