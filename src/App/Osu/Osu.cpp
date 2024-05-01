@@ -514,7 +514,6 @@ Osu::~Osu() {
     SAFE_DELETE(m_windowManager);
 
     for(int i = 0; i < m_screens.size(); i++) {
-        debugLog("%i\n", i);
         SAFE_DELETE(m_screens[i]);
     }
 

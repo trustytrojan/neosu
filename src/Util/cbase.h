@@ -134,6 +134,7 @@ struct zarray {
             nb = nb_initial;
         }
     }
+    ~zarray() { free(memory); }
 
     void push_back(T t) {
         if(nb + 1 > max) {

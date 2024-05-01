@@ -192,6 +192,29 @@ RoomScreen::RoomScreen(Osu *osu) : OsuScreen(osu) {
     updateLayout(m_osu->getScreenSize());
 }
 
+RoomScreen::~RoomScreen() {
+    m_settings->getContainer()->empty();
+    SAFE_DELETE(m_room_name);
+    SAFE_DELETE(m_change_password_btn);
+    SAFE_DELETE(m_host);
+    SAFE_DELETE(m_room_name_iptl);
+    SAFE_DELETE(m_room_name_ipt);
+    SAFE_DELETE(m_select_map_btn);
+    SAFE_DELETE(m_select_mods_btn);
+    SAFE_DELETE(m_change_win_condition_btn);
+    SAFE_DELETE(m_win_condition);
+    SAFE_DELETE(map_label);
+    SAFE_DELETE(m_map_title);
+    SAFE_DELETE(m_map_stars);
+    SAFE_DELETE(m_map_attributes);
+    SAFE_DELETE(m_map_attributes2);
+    SAFE_DELETE(mods_label);
+    SAFE_DELETE(m_freemod);
+    SAFE_DELETE(m_no_mods_selected);
+    SAFE_DELETE(m_mods);
+    SAFE_DELETE(m_ready_btn);
+}
+
 void RoomScreen::draw(Graphics *g) {
     if(!m_bVisible) return;
 

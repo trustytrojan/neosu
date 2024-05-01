@@ -1387,6 +1387,13 @@ OptionsMenu::OptionsMenu(Osu *osu) : ScreenBackable(osu) {
         onHighQualitySlidersConVarChange("", osu_options_high_quality_sliders.getString());
 }
 
+OptionsMenu::~OptionsMenu() {
+    // TODO @kiwec: remove them from containers first
+    // SAFE_DELETE(m_asioBufferSizeSlider);
+    // SAFE_DELETE(m_wasapiBufferSizeSlider);
+    // SAFE_DELETE(m_wasapiPeriodSizeSlider);
+}
+
 void OptionsMenu::draw(Graphics *g) {
     const bool isAnimating = anim->isAnimating(&m_fAnimation);
     if(!m_bVisible && !isAnimating) return;

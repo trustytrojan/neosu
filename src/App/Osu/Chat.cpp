@@ -152,6 +152,8 @@ Chat::Chat(Osu *osu) : OsuScreen(osu) {
     updateLayout(m_osu->getScreenSize());
 }
 
+Chat::~Chat() { delete m_button_container; }
+
 void Chat::draw(Graphics *g) {
     const bool isAnimating = anim->isAnimating(&m_fAnimation);
     if(!m_bVisible && !isAnimating) return;

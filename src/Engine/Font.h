@@ -1,12 +1,10 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		freetype font wrapper
-//
-// $NoKeywords: $fnt
-//===============================================================================//
-
-#ifndef FONT_H
-#define FONT_H
+#pragma once
+#include <freetype/freetype.h>
+#include <freetype/ftbitmap.h>
+#include <freetype/ftglyph.h>
+#include <freetype/ftoutln.h>
+#include <freetype/fttrigon.h>
+#include <ft2build.h>
 
 #include "Resource.h"
 
@@ -70,6 +68,9 @@ class McFont : public Resource {
     bool addGlyph(wchar_t ch);
 
     void addAtlasGlyphToVao(Graphics *g, wchar_t ch, float &advanceX, VertexArrayObject *vao);
+    void renderFTGlyphToTextureAtlas(FT_Library library, FT_Face face, wchar_t ch, TextureAtlas *textureAtlas,
+                                     bool antialiasing,
+                                     std::unordered_map<wchar_t, McFont::GLYPH_METRICS> *glyphMetrics);
 
     int m_iFontSize;
     bool m_bAntialiasing;
@@ -86,5 +87,3 @@ class McFont : public Resource {
 
     GLYPH_METRICS m_errorGlyph;
 };
-
-#endif

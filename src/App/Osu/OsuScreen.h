@@ -20,7 +20,6 @@ class OsuScreen : public CBaseUIContainer {
         m_osu = osu;
         m_bVisible = false;
     }
-    virtual ~OsuScreen() { ; }
 
     virtual void onResolutionChange(Vector2 newResolution) { (void)newResolution; }
 

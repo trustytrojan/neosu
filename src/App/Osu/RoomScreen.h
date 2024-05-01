@@ -27,6 +27,7 @@ class UIModList : public CBaseUIContainer {
 class RoomScreen : public OsuScreen {
    public:
     RoomScreen(Osu *osu);
+    ~RoomScreen();
 
     virtual void draw(Graphics *g) override;
     virtual void mouse_update(bool *propagate_clicks) override;

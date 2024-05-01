@@ -151,7 +151,7 @@ DatabaseBeatmap::DatabaseBeatmap(Osu *osu, std::vector<DatabaseBeatmap *> *diffi
 
 DatabaseBeatmap::~DatabaseBeatmap() {
     for(size_t i = 0; i < m_difficulties->size(); i++) {
-        delete(*m_difficulties)[i];
+        delete((*m_difficulties)[i]);
     }
     SAFE_DELETE(m_difficulties);
 }

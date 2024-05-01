@@ -59,6 +59,7 @@ class MainMenu : public OsuScreen, public MouseListener {
     virtual void mouse_update(bool *propagate_clicks);
 
     DatabaseBeatmap *preloaded_beatmap = nullptr;
+    DatabaseBeatmap *preloaded_beatmapset = nullptr;
     void selectRandomBeatmap();
 
     virtual void onKeyDown(KeyboardEvent &e);
@@ -128,7 +129,7 @@ class MainMenu : public OsuScreen, public MouseListener {
     std::vector<MainMenuButton *> m_menuElements;
 
     MainMenuPauseButton *m_pauseButton;
-    UIButton *m_updateAvailableButton;
+    UIButton *m_updateAvailableButton = nullptr;
     CBaseUIButton *m_versionButton;
 
     bool m_bDrawVersionNotificationArrow;

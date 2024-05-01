@@ -255,13 +255,13 @@ MainMenu::MainMenu(Osu *osu) : OsuScreen(osu) {
     m_pauseButton->setClickCallback(fastdelegate::MakeDelegate(this, &MainMenu::onPausePressed));
     addBaseUIElement(m_pauseButton);
 
-    m_updateAvailableButton =
-        new UIButton(m_osu, 0, 0, 0, 0, "",
-                     Osu::debug->getBool() ? "Debug mode, update check disabled" : "Checking for updates ...");
-    m_updateAvailableButton->setUseDefaultSkin();
-    m_updateAvailableButton->setClickCallback(fastdelegate::MakeDelegate(this, &MainMenu::onUpdatePressed));
-    m_updateAvailableButton->setColor(0x2200ff00);
-    m_updateAvailableButton->setTextColor(0x22ffffff);
+    if(env->getOS() == Environment::OS::OS_WINDOWS) {
+        m_updateAvailableButton = new UIButton(m_osu, 0, 0, 0, 0, "", "Checking for updates ...");
+        m_updateAvailableButton->setUseDefaultSkin();
+        m_updateAvailableButton->setClickCallback(fastdelegate::MakeDelegate(this, &MainMenu::onUpdatePressed));
+        m_updateAvailableButton->setColor(0x2200ff00);
+        m_updateAvailableButton->setTextColor(0x22ffffff);
+    }
 
     m_versionButton = new CBaseUIButton(0, 0, 0, 0, "", "");
     UString versionString = UString::format("Version %.2f", Osu::version->getFloat());
@@ -273,6 +273,9 @@ MainMenu::MainMenu(Osu *osu) : OsuScreen(osu) {
 }
 
 MainMenu::~MainMenu() {
+    SAFE_DELETE(preloaded_beatmapset);
+    SAFE_DELETE(m_updateAvailableButton);
+
     anim->deleteExistingAnimation(&m_fUpdateButtonAnim);
 
     anim->deleteExistingAnimation(&m_fMainMenuAnimFriendEyeFollowX);
@@ -286,8 +289,6 @@ MainMenu::~MainMenu() {
     anim->deleteExistingAnimation(&m_fCenterOffsetAnim);
     anim->deleteExistingAnimation(&m_fStartupAnim);
     anim->deleteExistingAnimation(&m_fStartupAnim2);
-
-    SAFE_DELETE(m_updateAvailableButton);
 
     // if the user didn't click on the update notification during this session, quietly remove it so it's not annoying
     if(m_bWasCleanShutdown) writeVersionFile();
@@ -446,7 +447,7 @@ void MainMenu::draw(Graphics *g) {
     OsuScreen::draw(g);
 
     // draw update check button
-    {
+    if(m_updateAvailableButton != nullptr) {
         if(m_osu->getUpdateHandler()->getStatus() == UpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION) {
             g->push3DScene(McRect(m_updateAvailableButton->getPos().x, m_updateAvailableButton->getPos().y,
                                   m_updateAvailableButton->getSize().x, m_updateAvailableButton->getSize().y));
@@ -921,7 +922,10 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
 
     // update and focus handling
     OsuScreen::mouse_update(propagate_clicks);
-    m_updateAvailableButton->mouse_update(propagate_clicks);
+
+    if(m_updateAvailableButton != nullptr) {
+        m_updateAvailableButton->mouse_update(propagate_clicks);
+    }
 
     // handle automatic menu closing
     if(m_fMainMenuButtonCloseTime != 0.0f && engine->getTime() > m_fMainMenuButtonCloseTime) {
@@ -998,39 +1002,41 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
     }
 
     // handle update checker and status text
-    switch(m_osu->getUpdateHandler()->getStatus()) {
-        case UpdateHandler::STATUS::STATUS_UP_TO_DATE:
-            if(m_updateAvailableButton->isVisible()) {
-                m_updateAvailableButton->setText("");
-                m_updateAvailableButton->setVisible(false);
-            }
-            break;
-        case UpdateHandler::STATUS::STATUS_CHECKING_FOR_UPDATE:
-            m_updateAvailableButton->setText("Checking for updates ...");
-            break;
-        case UpdateHandler::STATUS::STATUS_DOWNLOADING_UPDATE:
-            m_updateAvailableButton->setText("Downloading ...");
-            break;
-        case UpdateHandler::STATUS::STATUS_INSTALLING_UPDATE:
-            m_updateAvailableButton->setText("Installing ...");
-            break;
-        case UpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION:
-            if(engine->getTime() > m_fUpdateButtonTextTime && anim->isAnimating(&m_fUpdateButtonAnim) &&
-               m_fUpdateButtonAnim > 0.175f) {
-                m_fUpdateButtonTextTime = m_fUpdateButtonAnimTime;
+    if(m_updateAvailableButton != nullptr) {
+        switch(m_osu->getUpdateHandler()->getStatus()) {
+            case UpdateHandler::STATUS::STATUS_UP_TO_DATE:
+                if(m_updateAvailableButton->isVisible()) {
+                    m_updateAvailableButton->setText("");
+                    m_updateAvailableButton->setVisible(false);
+                }
+                break;
+            case UpdateHandler::STATUS::STATUS_CHECKING_FOR_UPDATE:
+                m_updateAvailableButton->setText("Checking for updates ...");
+                break;
+            case UpdateHandler::STATUS::STATUS_DOWNLOADING_UPDATE:
+                m_updateAvailableButton->setText("Downloading ...");
+                break;
+            case UpdateHandler::STATUS::STATUS_INSTALLING_UPDATE:
+                m_updateAvailableButton->setText("Installing ...");
+                break;
+            case UpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION:
+                if(engine->getTime() > m_fUpdateButtonTextTime && anim->isAnimating(&m_fUpdateButtonAnim) &&
+                   m_fUpdateButtonAnim > 0.175f) {
+                    m_fUpdateButtonTextTime = m_fUpdateButtonAnimTime;
 
-                m_updateAvailableButton->setColor(0xff00ff00);
-                m_updateAvailableButton->setTextColor(0xffffffff);
+                    m_updateAvailableButton->setColor(0xff00ff00);
+                    m_updateAvailableButton->setTextColor(0xffffffff);
 
-                if(m_updateAvailableButton->getText().find("ready") != -1)
-                    m_updateAvailableButton->setText("Click here to restart now!");
-                else
-                    m_updateAvailableButton->setText("A new version of neosu is ready!");
-            }
-            break;
-        case UpdateHandler::STATUS::STATUS_ERROR:
-            m_updateAvailableButton->setText("Update Error! Click to retry ...");
-            break;
+                    if(m_updateAvailableButton->getText().find("ready") != -1)
+                        m_updateAvailableButton->setText("Click here to restart now!");
+                    else
+                        m_updateAvailableButton->setText("A new version of neosu is ready!");
+                }
+                break;
+            case UpdateHandler::STATUS::STATUS_ERROR:
+                m_updateAvailableButton->setText("Update Error! Click to retry ...");
+                break;
+        }
     }
 
     if(m_osu->getUpdateHandler()->getStatus() == UpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION &&
@@ -1072,7 +1078,7 @@ void MainMenu::selectRandomBeatmap() {
         if(nb_mapsets == 0) return;
 
         m_osu->getSongBrowser()->getSelectedBeatmap()->deselect();
-        SAFE_DELETE(preloaded_beatmap);
+        SAFE_DELETE(preloaded_beatmapset);
 
         for(int i = 0; i < 10; i++) {
             auto mapset_folder = songs_folder;
@@ -1088,12 +1094,15 @@ void MainMenu::selectRandomBeatmap() {
             auto beatmap_diffs = beatmap->getDifficulties();
             if(beatmap_diffs.size() == 0) {
                 debugLog("Beatmap '%s' has no difficulties!\n", mapset_folder.c_str());
+                delete beatmap;
                 continue;
             }
 
+            preloaded_beatmapset = beatmap;
             preloaded_beatmap = beatmap_diffs[rand() % beatmap_diffs.size()];
             preloaded_beatmap->do_not_store = true;
             m_osu->getSongBrowser()->onDifficultySelected(preloaded_beatmap, false);
+
             return;
         }
 
@@ -1183,9 +1192,12 @@ void MainMenu::updateLayout() {
     m_pauseButton->setRelPos(m_osu->getScreenWidth() - m_pauseButton->getSize().x * 2 - 10 * dpiScale,
                              m_pauseButton->getSize().y + 10 * dpiScale);
 
-    m_updateAvailableButton->setSize(375 * dpiScale, 50 * dpiScale);
-    m_updateAvailableButton->setPos(m_osu->getScreenWidth() / 2 - m_updateAvailableButton->getSize().x / 2,
-                                    m_osu->getScreenHeight() - m_updateAvailableButton->getSize().y - 10 * dpiScale);
+    if(m_updateAvailableButton != nullptr) {
+        m_updateAvailableButton->setSize(375 * dpiScale, 50 * dpiScale);
+        m_updateAvailableButton->setPos(
+            m_osu->getScreenWidth() / 2 - m_updateAvailableButton->getSize().x / 2,
+            m_osu->getScreenHeight() - m_updateAvailableButton->getSize().y - 10 * dpiScale);
+    }
 
     m_versionButton->onResized();  // HACKHACK: framework, setSizeToContent() does not update string metrics
     m_versionButton->setSizeToContent(8 * dpiScale, 8 * dpiScale);

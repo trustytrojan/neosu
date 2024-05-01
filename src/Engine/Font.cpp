@@ -7,13 +7,6 @@
 
 #include "Font.h"
 
-#include <freetype/freetype.h>
-#include <freetype/ftbitmap.h>
-#include <freetype/ftglyph.h>
-#include <freetype/ftoutln.h>
-#include <freetype/fttrigon.h>
-#include <ft2build.h>
-
 #include "ConVar.h"
 #include "Engine.h"
 #include "ResourceManager.h"
@@ -23,9 +16,6 @@ ConVar r_drawstring_max_string_length("r_drawstring_max_string_length", 65536, F
                                       "maximum number of characters per call, sanity/memory buffer limit");
 ConVar r_debug_drawstring_unbind("r_debug_drawstring_unbind", false, FCVAR_NONE);
 
-static void renderFTGlyphToTextureAtlas(FT_Library library, FT_Face face, wchar_t ch, TextureAtlas *textureAtlas,
-                                        bool antialiasing,
-                                        std::unordered_map<wchar_t, McFont::GLYPH_METRICS> *glyphMetrics);
 static unsigned char *unpackMonoBitmap(FT_Bitmap bitmap);
 
 const wchar_t McFont::UNKNOWN_CHAR;
@@ -251,9 +241,9 @@ bool McFont::hasGlyph(wchar_t ch) const { return (m_vGlyphMetrics.find(ch) != m_
 
 // helper functions
 
-static void renderFTGlyphToTextureAtlas(FT_Library library, FT_Face face, wchar_t ch, TextureAtlas *textureAtlas,
-                                        bool antialiasing,
-                                        std::unordered_map<wchar_t, McFont::GLYPH_METRICS> *glyphMetrics) {
+void McFont::renderFTGlyphToTextureAtlas(FT_Library library, FT_Face face, wchar_t ch, TextureAtlas *textureAtlas,
+                                         bool antialiasing,
+                                         std::unordered_map<wchar_t, McFont::GLYPH_METRICS> *glyphMetrics) {
     // load current glyph
     if(FT_Load_Glyph(face, FT_Get_Char_Index(face, ch), antialiasing ? FT_LOAD_TARGET_NORMAL : FT_LOAD_TARGET_MONO)) {
         // engine->showMessageError("Font Error", "FT_Load_Glyph() failed!");
@@ -281,6 +271,8 @@ static void renderFTGlyphToTextureAtlas(FT_Library library, FT_Face face, wchar_
     FT_Bitmap &bitmap = bitmapGlyph->bitmap;
     const int width = bitmap.width;
     const int height = bitmap.rows;
+
+    debugLog("Creating texture for font %s (%dpt)\n", m_sFilePath.c_str(), m_iFontSize);
 
     // build texture
     Vector2 atlasPos;

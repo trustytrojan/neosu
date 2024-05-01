@@ -36,6 +36,7 @@ struct ChatChannel {
 class Chat : public OsuScreen {
    public:
     Chat(Osu *osu);
+    ~Chat();
 
     virtual void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);

@@ -37,6 +37,7 @@ class ConVar;
 class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener {
    public:
     OptionsMenu(Osu *osu);
+    ~OptionsMenu();
 
     virtual void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);
