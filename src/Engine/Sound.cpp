@@ -21,12 +21,10 @@ ConVar snd_wav_file_min_size("snd_wav_file_min_size", 51, FCVAR_NONE,
                              "minimum file size in bytes for WAV files to be considered valid (everything below will "
                              "fail to load), this is a workaround for BASS crashes");
 
-Sound::Sound(std::string filepath, bool stream, bool overlayable, bool threeD, bool loop, bool prescan)
-    : Resource(filepath) {
+Sound::Sound(std::string filepath, bool stream, bool overlayable, bool loop, bool prescan) : Resource(filepath) {
     m_sample = 0;
     m_stream = 0;
     m_bStream = stream;
-    m_bIs3d = threeD;
     m_bIsLooped = loop;
     m_bPrescan = prescan;
     m_bIsOverlayable = overlayable;
@@ -38,35 +36,19 @@ Sound::Sound(std::string filepath, bool stream, bool overlayable, bool threeD, b
 std::vector<HCHANNEL> Sound::getActiveChannels() {
     std::vector<HCHANNEL> channels;
 
-    if(engine->getSound()->isMixing()) {
-        if(m_bStream) {
-            if(BASS_Mixer_ChannelGetMixer(m_stream) != 0) {
-                channels.push_back(m_stream);
-            }
-        } else {
-            for(auto chan : mixer_channels) {
-                if(BASS_Mixer_ChannelGetMixer(chan) != 0) {
-                    channels.push_back(chan);
-                }
-            }
-
-            // Only keep channels that are still playing
-            mixer_channels = channels;
+    if(m_bStream) {
+        if(BASS_Mixer_ChannelGetMixer(m_stream) != 0) {
+            channels.push_back(m_stream);
         }
     } else {
-        if(m_bStream) {
-            if(BASS_ChannelIsActive(m_stream) == BASS_ACTIVE_PLAYING) {
-                channels.push_back(m_stream);
-            }
-        } else {
-            HCHANNEL chans[MAX_OVERLAPPING_SAMPLES] = {0};
-            int nb = BASS_SampleGetChannels(m_sample, chans);
-            for(int i = 0; i < nb; i++) {
-                if(BASS_ChannelIsActive(chans[i]) == BASS_ACTIVE_PLAYING) {
-                    channels.push_back(chans[i]);
-                }
+        for(auto chan : mixer_channels) {
+            if(BASS_Mixer_ChannelGetMixer(chan) != 0) {
+                channels.push_back(chan);
             }
         }
+
+        // Only keep channels that are still playing
+        mixer_channels = channels;
     }
 
     return channels;
@@ -76,15 +58,11 @@ HCHANNEL Sound::getChannel() {
     if(m_bStream) {
         return m_stream;
     } else {
-        if(engine->getSound()->isMixing()) {
-            // If we want to be able to control samples after playing them, we
-            // have to store them here, since bassmix only accepts DECODE streams.
-            auto chan = BASS_SampleGetChannel(m_sample, BASS_SAMCHAN_STREAM | BASS_STREAM_DECODE);
-            mixer_channels.push_back(chan);
-            return chan;
-        } else {
-            return BASS_SampleGetChannel(m_sample, 0);
-        }
+        // If we want to be able to control samples after playing them, we
+        // have to store them here, since bassmix only accepts DECODE streams.
+        auto chan = BASS_SampleGetChannel(m_sample, BASS_SAMCHAN_STREAM | BASS_STREAM_DECODE);
+        mixer_channels.push_back(chan);
+        return chan;
     }
 }
 
@@ -139,17 +117,13 @@ void Sound::initAsync() {
             return;
         }
 
-        auto fx_flags = BASS_FX_FREESOURCE;
-        if(engine->getSound()->isMixing()) fx_flags |= BASS_STREAM_DECODE;
-        m_stream = BASS_FX_TempoCreate(m_stream, fx_flags);
+        m_stream = BASS_FX_TempoCreate(m_stream, BASS_FX_FREESOURCE | BASS_STREAM_DECODE);
         if(!m_stream) {
             debugLog("BASS_FX_TempoCreate() returned error %d on file %s\n", BASS_ErrorGetCode(), m_sFilePath.c_str());
             return;
         }
     } else {
         auto flags = BASS_SAMPLE_FLOAT | BASS_SAMPLE_OVER_POS;
-        if(m_bIs3d) flags |= BASS_SAMPLE_3D | BASS_SAMPLE_MONO;
-
         m_sample =
             BASS_SampleLoad(false, m_sFilePath.c_str(), 0, 0, m_bIsOverlayable ? MAX_OVERLAPPING_SAMPLES : 1, flags);
         if(!m_sample) {
@@ -168,14 +142,18 @@ void Sound::destroy() {
     m_fLastPlayTime = 0.0;
 
     if(m_bStream) {
-        if(engine->getSound()->isMixing()) {
-            BASS_Mixer_ChannelRemove(m_stream);
-        }
-
+        BASS_Mixer_ChannelRemove(m_stream);
         BASS_ChannelStop(m_stream);
         BASS_StreamFree(m_stream);
         m_stream = 0;
     } else {
+        for(auto chan : mixer_channels) {
+            BASS_Mixer_ChannelRemove(chan);
+            BASS_ChannelStop(chan);
+            BASS_ChannelFree(chan);
+        }
+        mixer_channels.clear();
+
         BASS_SampleStop(m_sample);
         BASS_SampleFree(m_sample);
         m_sample = 0;

@@ -65,12 +65,6 @@ ConVar asio_buffer_size("asio_buffer_size", -1, FCVAR_NONE,
 
 ConVar osu_universal_offset_hardcoded("osu_universal_offset_hardcoded", 0.0f, FCVAR_NONE);
 
-DWORD CALLBACK OutputWasapiProc(void *buffer, DWORD length, void *user) {
-    if(engine->getSound()->g_bassOutputMixer == 0) return 0;
-    const int c = BASS_ChannelGetData(engine->getSound()->g_bassOutputMixer, buffer, length);
-    return c < 0 ? 0 : c;
-}
-
 void _RESTART_SOUND_ENGINE_ON_CHANGE(UString oldValue, UString newValue) {
     const int oldValueMS = std::round(oldValue.toFloat() * 1000.0f);
     const int newValueMS = std::round(newValue.toFloat() * 1000.0f);
@@ -326,26 +320,23 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
     debugLog("SoundEngine: initializeOutputDevice( %s ) ...\n", device.name.toUtf8());
 
     if(m_currentOutputDevice.driver == OutputDriver::BASS) {
-        BASS_SetDevice(0);
-        BASS_Free();
         BASS_SetDevice(m_currentOutputDevice.id);
-
         BASS_Free();
-    } else if(m_currentOutputDevice.driver == OutputDriver::BASS_ASIO) {
-#ifdef _WIN32
-        g_bassOutputMixer = 0;
-        BASS_ASIO_Free();
-#endif
-        BASS_Free();
-    } else if(m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
-#ifdef _WIN32
-        g_bassOutputMixer = 0;
-        BASS_WASAPI_Free();
-#endif
-        BASS_Free();
+        BASS_SetDevice(0);
     }
 
-    if(device.driver == OutputDriver::NONE) {
+#ifdef _WIN32
+    if(m_currentOutputDevice.driver == OutputDriver::BASS_ASIO) {
+        BASS_ASIO_Free();
+    } else if(m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
+        BASS_WASAPI_Free();
+    }
+#endif
+
+    g_bassOutputMixer = 0;
+    BASS_Free();  // free "No sound" device
+
+    if(device.driver == OutputDriver::NONE || (device.driver == OutputDriver::BASS && device.id == 0)) {
         m_bReady = true;
         m_currentOutputDevice = device;
         snd_output_device.setValue(m_currentOutputDevice.name);
@@ -359,13 +350,17 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
     }
 
     if(device.driver == OutputDriver::BASS) {
-        // NOTE: only used by osu atm (new osu uses 5 instead of 10, but not tested enough for offset problems)
-        BASS_SetConfig(BASS_CONFIG_UPDATEPERIOD, 10);
+        // Normal output: render playback buffer every 5ms (buffer is 100ms large)
+        BASS_SetConfig(BASS_CONFIG_UPDATEPERIOD, 5);
         BASS_SetConfig(BASS_CONFIG_UPDATETHREADS, 1);
     } else if(device.driver == OutputDriver::BASS_ASIO || device.driver == OutputDriver::BASS_WASAPI) {
+        // ASIO/WASAPI: let driver decide when to render playback buffer
         BASS_SetConfig(BASS_CONFIG_UPDATEPERIOD, 0);
         BASS_SetConfig(BASS_CONFIG_UPDATETHREADS, 0);
     }
+
+    // Base offset compensation. Gets modified later when using ASIO driver.
+    osu_universal_offset_hardcoded.setValue(-25.0f);
 
     // allow users to override some defaults (but which may cause beatmap desyncs)
     // we only want to set these if their values have been explicitly modified (to avoid sideeffects in the default
@@ -388,36 +383,40 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
     hwnd = winEnv->getHwnd();
 #endif
 
-    int bass_device_id = device.id;
-    unsigned int runtimeFlags = BASS_DEVICE_STEREO | BASS_DEVICE_FREQ;
-    if(device.driver == OutputDriver::BASS) {
-        // Regular BASS: we still want a "No sound" device to check for loudness
-        if(!BASS_Init(0, freq, runtimeFlags | BASS_DEVICE_NOSPEAKER, hwnd, NULL)) {
-            m_bReady = false;
-            engine->showMessageError("Sound Error", UString::format("BASS_Init(0) failed (%i)!", BASS_ErrorGetCode()));
-            return false;
-        }
-    } else if(device.driver == OutputDriver::BASS_ASIO || device.driver == OutputDriver::BASS_WASAPI) {
-        // ASIO and WASAPI: Initialize BASS on "No sound" device
-        runtimeFlags |= BASS_DEVICE_NOSPEAKER;
-        bass_device_id = 0;
-    }
-
-    if(!BASS_Init(bass_device_id, freq, runtimeFlags, hwnd, NULL)) {
+    // We initialize a "No sound" device for measuring loudness and mixing sounds,
+    // regardless of the device we'll use for actual output.
+    unsigned int runtimeFlags = BASS_DEVICE_STEREO | BASS_DEVICE_FREQ | BASS_DEVICE_NOSPEAKER;
+    if(!BASS_Init(0, freq, runtimeFlags | BASS_DEVICE_SOFTWARE, hwnd, NULL)) {
         m_bReady = false;
-        engine->showMessageError("Sound Error",
-                                 UString::format("BASS_Init(%d) failed (%i)!", bass_device_id, BASS_ErrorGetCode()));
+        engine->showMessageError("Sound Error", UString::format("BASS_Init(0) failed (%i)!", BASS_ErrorGetCode()));
         return false;
     }
 
-    // Starting with bass 2020 2.4.15.2 which has all offset problems
-    // fixed, this is the non-dsound backend compensation.
-    // Gets overwritten later if ASIO or WASAPI driver is used.
-    // Depends on BASS_CONFIG_UPDATEPERIOD/BASS_CONFIG_DEV_BUFFER.
-    osu_universal_offset_hardcoded.setValue(15.0f);
+    if(device.driver == OutputDriver::BASS) {
+        if(!BASS_Init(device.id, freq, runtimeFlags, hwnd, NULL)) {
+            m_bReady = false;
+            engine->showMessageError("Sound Error",
+                                     UString::format("BASS_Init(%d) failed (%i)!", device.id, BASS_ErrorGetCode()));
+            return false;
+        }
+    }
 
-    if(device.driver == OutputDriver::BASS_ASIO) {
+    auto mixer_flags = BASS_SAMPLE_FLOAT | BASS_MIXER_NONSTOP | BASS_MIXER_RESUME;
+    if(device.driver != OutputDriver::BASS) mixer_flags |= BASS_STREAM_DECODE;
+    g_bassOutputMixer = BASS_Mixer_StreamCreate(freq, 2, mixer_flags);
+    if(g_bassOutputMixer == 0) {
+        m_bReady = false;
+        engine->showMessageError("Sound Error",
+                                 UString::format("BASS_Mixer_StreamCreate() failed (%i)!", BASS_ErrorGetCode()));
+        return false;
+    }
+
+    // Switch to "No sound" device for all future sound processing
+    // Only g_bassOutputMixer will be output to the actual device!
+    BASS_SetDevice(0);
+
 #ifdef _WIN32
+    if(device.driver == OutputDriver::BASS_ASIO) {
         if(!BASS_ASIO_Init(device.id, 0)) {
             m_bReady = false;
             engine->showMessageError("Sound Error",
@@ -442,15 +441,6 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
             slider->setKeyDelta(info.bufgran == -1 ? info.bufmin : info.bufgran);
         }
 
-        auto mixer_flags = BASS_SAMPLE_FLOAT | BASS_STREAM_DECODE | BASS_MIXER_NONSTOP;
-        g_bassOutputMixer = BASS_Mixer_StreamCreate(sample_rate, 2, mixer_flags);
-        if(g_bassOutputMixer == 0) {
-            m_bReady = false;
-            engine->showMessageError("Sound Error",
-                                     UString::format("BASS_Mixer_StreamCreate() failed (%i)!", BASS_ErrorGetCode()));
-            return false;
-        }
-
         if(!BASS_ASIO_ChannelEnableBASS(false, 0, g_bassOutputMixer, true)) {
             m_bReady = false;
             engine->showMessageError("Sound Error", UString::format("BASS_ASIO_ChannelEnableBASS() failed (code %i)!",
@@ -470,20 +460,18 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
         osu_universal_offset_hardcoded.setValue(-(actual_latency + 25.0f));
         debugLog("ASIO: wanted %f ms, got %f ms latency. Sample rate: %f Hz\n", wanted_latency, actual_latency,
                  sample_rate);
-#endif
     }
 
     if(device.driver == OutputDriver::BASS_WASAPI) {
-#ifdef _WIN32
         const float bufferSize = std::round(win_snd_wasapi_buffer_size.getFloat() * 1000.0f) / 1000.0f;    // in seconds
         const float updatePeriod = std::round(win_snd_wasapi_period_size.getFloat() * 1000.0f) / 1000.0f;  // in seconds
 
         // BASS_WASAPI_RAW ignores sound "enhancements" that some sound cards offer (adds latency)
         // BASS_MIXER_NONSTOP prevents some sound cards from going to sleep when there is no output
+        // BASS_WASAPI_EXCLUSIVE makes neosu have exclusive output to the sound card
         auto flags = BASS_WASAPI_RAW | BASS_MIXER_NONSTOP | BASS_WASAPI_EXCLUSIVE;
 
-        debugLog("WASAPI bufferSize = %f, updatePeriod = %f\n", bufferSize, updatePeriod);
-        if(!BASS_WASAPI_Init(device.id, 0, 0, flags, bufferSize, updatePeriod, OutputWasapiProc, NULL)) {
+        if(!BASS_WASAPI_Init(device.id, 0, 0, flags, bufferSize, updatePeriod, WASAPIPROC_BASS, g_bassOutputMixer)) {
             const int errorCode = BASS_ErrorGetCode();
             if(errorCode == BASS_ERROR_WASAPI_BUFFER) {
                 debugLog("Sound Error: BASS_WASAPI_Init() failed with BASS_ERROR_WASAPI_BUFFER!");
@@ -495,28 +483,14 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
             return false;
         }
 
-        BASS_WASAPI_INFO wasapiInfo;
-        BASS_WASAPI_GetInfo(&wasapiInfo);
-        auto mixer_flags = BASS_SAMPLE_FLOAT | BASS_STREAM_DECODE | BASS_MIXER_NONSTOP;
-        g_bassOutputMixer = BASS_Mixer_StreamCreate(wasapiInfo.freq, wasapiInfo.chans, mixer_flags);
-        if(g_bassOutputMixer == 0) {
-            m_bReady = false;
-            engine->showMessageError("Sound Error",
-                                     UString::format("BASS_Mixer_StreamCreate() failed (%i)!", BASS_ErrorGetCode()));
-            return false;
-        }
-
         if(!BASS_WASAPI_Start()) {
             m_bReady = false;
             engine->showMessageError("Sound Error",
                                      UString::format("BASS_WASAPI_Start() failed (%i)!", BASS_ErrorGetCode()));
             return false;
         }
-
-        // since we use the newer bass/fx dlls for wasapi builds anyway (which have different time handling)
-        osu_universal_offset_hardcoded.setValue(-25.0f);
-#endif
     }
+#endif
 
     m_bReady = true;
     m_currentOutputDevice = device;
@@ -583,56 +557,31 @@ bool SoundEngine::play(Sound *snd, float pan, float pitch) {
 
     BASS_ChannelFlags(channel, snd->isLooped() ? BASS_SAMPLE_LOOP : 0, BASS_SAMPLE_LOOP);
 
-    if(isMixing()) {
-        if(BASS_Mixer_ChannelGetMixer(channel) != 0) return false;
+    if(BASS_Mixer_ChannelGetMixer(channel) != 0) return false;
 
-        auto flags = BASS_MIXER_DOWNMIX | BASS_MIXER_NORAMPIN;
-        if(snd->isStream()) {
-            flags |= BASS_STREAM_AUTOFREE;
-        }
+    auto flags = BASS_MIXER_DOWNMIX | BASS_MIXER_NORAMPIN;
+    if(snd->isStream()) {
+        flags |= BASS_STREAM_AUTOFREE;
+    }
 
-        if(!BASS_Mixer_StreamAddChannel(g_bassOutputMixer, channel, flags)) {
-            debugLog("BASS_Mixer_StreamAddChannel() failed (%i)!\n", BASS_ErrorGetCode());
-            return false;
-        }
-    } else {
-        if(BASS_ChannelIsActive(channel) == BASS_ACTIVE_PLAYING) return false;
+    if(!BASS_Mixer_StreamAddChannel(g_bassOutputMixer, channel, flags)) {
+        debugLog("BASS_Mixer_StreamAddChannel() failed (%i)!\n", BASS_ErrorGetCode());
+        return false;
+    }
 
-        if(!BASS_ChannelPlay(channel, false)) {
-            debugLog("SoundEngine::play() couldn't BASS_ChannelPlay(), errorcode %i\n", BASS_ErrorGetCode());
-            return false;
+    // Make sure the mixer is playing! Duh.
+    if(m_currentOutputDevice.driver == OutputDriver::BASS) {
+        if(BASS_ChannelIsActive(g_bassOutputMixer) != BASS_ACTIVE_PLAYING) {
+            if(!BASS_ChannelPlay(g_bassOutputMixer, false)) {
+                debugLog("SoundEngine::play() couldn't BASS_ChannelPlay(), errorcode %i\n", BASS_ErrorGetCode());
+                return false;
+            }
         }
     }
 
     snd->m_bPaused = false;
     snd->setLastPlayTime(engine->getTime());
     return true;
-}
-
-bool SoundEngine::play3d(Sound *snd, Vector3 pos) {
-    if(!m_bReady || snd == NULL || !snd->isReady() || !snd->is3d()) return false;
-    if(snd_restrict_play_frame.getBool() && engine->getTime() <= snd->getLastPlayTime()) return false;
-
-    HCHANNEL channel = snd->getChannel();
-    if(channel == 0) {
-        debugLog("SoundEngine::play3d() failed to get channel, errorcode %i\n", BASS_ErrorGetCode());
-        return false;
-    }
-
-    BASS_3DVECTOR bassPos = BASS_3DVECTOR(pos.x, pos.y, pos.z);
-    if(!BASS_ChannelSet3DPosition(channel, &bassPos, NULL, NULL)) {
-        debugLog("SoundEngine::play3d() couldn't BASS_ChannelSet3DPosition(), errorcode %i\n", BASS_ErrorGetCode());
-        return false;
-    }
-
-    BASS_Apply3D();
-    if(BASS_ChannelPlay(channel, false)) {
-        snd->setLastPlayTime(engine->getTime());
-        return true;
-    } else {
-        debugLog("SoundEngine::play3d() couldn't BASS_ChannelPlay(), errorcode %i\n", BASS_ErrorGetCode());
-        return false;
-    }
 }
 
 void SoundEngine::pause(Sound *snd) {
@@ -722,19 +671,6 @@ void SoundEngine::setVolume(float volume) {
         BASS_SetConfig(BASS_CONFIG_GVOL_STREAM, (DWORD)(m_fVolume * 10000));
         BASS_SetConfig(BASS_CONFIG_GVOL_MUSIC, (DWORD)(m_fVolume * 10000));
     }
-}
-
-void SoundEngine::set3dPosition(Vector3 headPos, Vector3 viewDir, Vector3 viewUp) {
-    if(!m_bReady) return;
-
-    BASS_3DVECTOR bassHeadPos = BASS_3DVECTOR(headPos.x, headPos.y, headPos.z);
-    BASS_3DVECTOR bassViewDir = BASS_3DVECTOR(viewDir.x, viewDir.y, viewDir.z);
-    BASS_3DVECTOR bassViewUp = BASS_3DVECTOR(viewUp.x, viewUp.y, viewUp.z);
-
-    if(!BASS_Set3DPosition(&bassHeadPos, NULL, &bassViewDir, &bassViewUp))
-        debugLog("SoundEngine::set3dPosition() couldn't BASS_Set3DPosition(), errorcode %i\n", BASS_ErrorGetCode());
-    else
-        BASS_Apply3D();  // apply the changes
 }
 
 void SoundEngine::onFreqChanged(UString oldValue, UString newValue) {

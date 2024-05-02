@@ -1127,15 +1127,11 @@ float Beatmap::getIdealVolume() {
         return volume * modifier;
     }
 
-    auto device_id = BASS_GetDevice();
-    BASS_SetDevice(0);
-
     auto decoder = BASS_StreamCreateFile(false, m_selectedDifficulty2->getFullSoundFilePath().c_str(), 0, 0,
                                          BASS_STREAM_DECODE | BASS_SAMPLE_FLOAT);
     if(!decoder) {
         debugLog("BASS_StreamCreateFile() returned error %d on file %s\n", BASS_ErrorGetCode(),
                  m_selectedDifficulty2->getFullSoundFilePath().c_str());
-        BASS_SetDevice(device_id);
         return volume;
     }
 
@@ -1145,7 +1141,6 @@ float Beatmap::getIdealVolume() {
     if(!BASS_ChannelSetPosition(decoder, position, BASS_POS_BYTE)) {
         debugLog("BASS_ChannelSetPosition() returned error %d\n", BASS_ErrorGetCode());
         BASS_ChannelFree(decoder);
-        BASS_SetDevice(device_id);
         return volume;
     }
 
@@ -1153,7 +1148,6 @@ float Beatmap::getIdealVolume() {
     if(!loudness) {
         debugLog("BASS_Loudness_Start() returned error %d\n", BASS_ErrorGetCode());
         BASS_ChannelFree(decoder);
-        BASS_SetDevice(device_id);
         return volume;
     }
 
@@ -1169,7 +1163,6 @@ float Beatmap::getIdealVolume() {
 
     BASS_Loudness_Stop(loudness);
     BASS_ChannelFree(decoder);
-    BASS_SetDevice(device_id);
 
     last_song = m_selectedDifficulty2->getFullSoundFilePath();
     modifier = (level / -16.f);
@@ -1722,7 +1715,7 @@ void Beatmap::loadMusic(bool stream, bool prescan) {
         if(!stream) engine->getResourceManager()->requestNextLoadAsync();
 
         m_music = engine->getResourceManager()->loadSoundAbs(
-            m_selectedDifficulty2->getFullSoundFilePath(), "OSU_BEATMAP_MUSIC", stream, false, false, false,
+            m_selectedDifficulty2->getFullSoundFilePath(), "OSU_BEATMAP_MUSIC", stream, false, false,
             m_bForceStreamPlayback &&
                 prescan);  // m_bForceStreamPlayback = prescan necessary! otherwise big mp3s will go out of sync
         m_music->setVolume(getIdealVolume());

@@ -36,20 +36,15 @@ class SoundEngine {
     void update();
 
     bool play(Sound *snd, float pan = 0.0f, float pitch = 1.0f);
-    bool play3d(Sound *snd, Vector3 pos);
     void pause(Sound *snd);
     void stop(Sound *snd);
 
     bool isASIO() { return m_currentOutputDevice.driver == OutputDriver::BASS_ASIO; }
     bool isWASAPI() { return m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI; }
-    bool isMixing() {
-        return m_currentOutputDevice.driver == OutputDriver::BASS_ASIO ||
-               m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI;
-    }
+    bool hasExclusiveOutput() { return isASIO() || isWASAPI(); }
 
     bool setOutputDevice(OUTPUT_DEVICE device);
     void setVolume(float volume);
-    void set3dPosition(Vector3 headPos, Vector3 viewDir, Vector3 viewUp);
 
     OUTPUT_DEVICE getDefaultDevice();
     OUTPUT_DEVICE getWantedDevice();

@@ -261,20 +261,14 @@ bool VolumeOverlay::canChangeVolume() {
 }
 
 void VolumeOverlay::gainFocus() {
-    if(engine->getSound()->isWASAPI()) {
-        // NOTE: wasapi exclusive mode controls the system volume, so don't bother
-        return;
-    }
+    if(engine->getSound()->hasExclusiveOutput()) return;
 
     m_fVolumeInactiveToActiveAnim = 0.0f;
     anim->moveLinear(&m_fVolumeInactiveToActiveAnim, 1.0f, 0.3f, 0.1f, true);
 }
 
 void VolumeOverlay::loseFocus() {
-    if(engine->getSound()->isWASAPI()) {
-        // NOTE: wasapi exclusive mode controls the system volume, so don't bother
-        return;
-    }
+    if(engine->getSound()->hasExclusiveOutput()) return;
 
     m_bVolumeInactiveToActiveScheduled = true;
     anim->deleteExistingAnimation(&m_fVolumeInactiveToActiveAnim);

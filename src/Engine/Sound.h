@@ -21,7 +21,7 @@ class Sound : public Resource {
     typedef unsigned long SOUNDHANDLE;
 
    public:
-    Sound(std::string filepath, bool stream, bool overlayable, bool threeD, bool loop, bool prescan);
+    Sound(std::string filepath, bool stream, bool overlayable, bool loop, bool prescan);
     virtual ~Sound() { destroy(); }
 
     std::vector<HCHANNEL> mixer_channels;
@@ -50,7 +50,6 @@ class Sound : public Resource {
     bool isFinished();
 
     inline bool isStream() const { return m_bStream; }
-    inline bool is3d() const { return m_bIs3d; }
     inline bool isLooped() const { return m_bIsLooped; }
     inline bool isOverlayable() const { return m_bIsOverlayable; }
 
@@ -66,7 +65,6 @@ class Sound : public Resource {
 
     bool m_bPaused = false;
     bool m_bStream;
-    bool m_bIs3d;
     bool m_bIsLooped;
     bool m_bPrescan;
     bool m_bIsOverlayable;
