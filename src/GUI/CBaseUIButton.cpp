@@ -40,20 +40,6 @@ void CBaseUIButton::draw(Graphics *g) {
 
     // draw frame
     if(m_bDrawFrame) {
-        /*
-        ///const float lineThickness = std::round((float)m_font->getDPI() / 96.0f); // NOTE: abusing font dpi
-        const float lineThickness = 9.0f;
-
-        const float lineOffset = std::floor(lineThickness / 2.0f);
-
-        g->setColor(m_frameColor);
-        g->setAlpha(0.5f);
-        g->fillRect(m_vPos.x - lineOffset, m_vPos.y - lineOffset, lineThickness, m_vSize.y);
-        g->fillRect(m_vPos.x + lineThickness - lineOffset, m_vPos.y - lineOffset, m_vSize.x - lineThickness,
-        lineThickness); g->fillRect(m_vPos.x + m_vSize.x - lineOffset, m_vPos.y - lineOffset, lineThickness, m_vSize.y);
-        g->fillRect(m_vPos.x - lineOffset, m_vPos.y + m_vSize.y - lineOffset, m_vSize.x + lineThickness, lineThickness);
-        */
-
         g->setColor(m_frameColor);
         g->drawRect(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y);
     }

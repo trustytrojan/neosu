@@ -12,7 +12,7 @@
 #include "MouseListener.h"
 #include "OsuScreen.h"
 
-class McFont;
+class Image;
 class Osu;
 
 class Beatmap;
@@ -169,7 +169,7 @@ class MainMenu : public OsuScreen, public MouseListener {
     float m_fPrevShuffleTime;
     float m_fBackgroundFadeInTime;
 
-    McFont *m_titleFont;
+    Image *logo_img;
 };
 
 #endif

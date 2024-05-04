@@ -134,7 +134,7 @@ ConVar osu_toggle_preview_music("osu_toggle_preview_music");
 
 ConVar osu_draw_menu_background("osu_draw_menu_background", false, FCVAR_NONE);
 ConVar osu_main_menu_startup_anim_duration("osu_main_menu_startup_anim_duration", 0.25f, FCVAR_NONE);
-ConVar osu_main_menu_alpha("osu_main_menu_alpha", 1.0f, FCVAR_NONE);
+ConVar osu_main_menu_alpha("osu_main_menu_alpha", 0.8f, FCVAR_NONE);
 ConVar osu_main_menu_friend("osu_main_menu_friend", true, FCVAR_NONE);
 
 ConVar osu_main_menu_banner_always_text("osu_main_menu_banner_always_text", "", FCVAR_NONE);
@@ -210,10 +210,7 @@ MainMenu::MainMenu(Osu *osu) : OsuScreen(osu) {
 
     m_fBackgroundFadeInTime = 0.0f;
 
-    const int baseDPI = 96;
-    const int newDPI = Osu::getUIScale(osu) * baseDPI;
-    m_titleFont =
-        engine->getResourceManager()->loadFont("SourceSansPro-Semibold.otf", "FONT_OSU_MAINMENU", 150, true, newDPI);
+    logo_img = engine->getResourceManager()->loadImage("neosu.png", "NEOSU_LOGO");
 
     // check if the user has never clicked the changelog for this update
     m_bDidUserUpdateFromOlderVersion = false;
@@ -459,9 +456,11 @@ void MainMenu::draw(Graphics *g) {
     }
 
     // draw main button
+    bool drawing_full_cube = (m_fMainMenuAnim > 0.0f && m_fMainMenuAnim != 1.0f) ||
+                             (haveTimingpoints && m_fMainMenuAnimFriendPercent > 0.0f);
+
     float inset = 0.0f;
-    if((m_fMainMenuAnim > 0.0f && m_fMainMenuAnim != 1.0f) ||
-       (haveTimingpoints && m_fMainMenuAnimFriendPercent > 0.0f)) {
+    if(drawing_full_cube) {
         inset = 1.0f - 0.5 * m_fMainMenuAnimFriendPercent;
 
         g->setDepthBuffer(true);
@@ -508,18 +507,16 @@ void MainMenu::draw(Graphics *g) {
                                          lerp<float>(1.0f, 0.965f, m_fMainMenuAnimFriendPercent));
 
     // front side
+    g->pushTransform();
+    g->translate(0, 0, inset);
     g->setColor(cubeColor);
     g->setAlpha(osu_main_menu_alpha.getFloat());
-    g->pushTransform();
-    {
-        g->translate(0, 0, inset);
-        g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
-                    mainButtonRect.getHeight() - 2 * inset);
-    }
-    g->popTransform();
+    g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
+                mainButtonRect.getHeight() - 2 * inset);
     g->setColor(cubeBorderColor);
-    g->setAlpha(osu_main_menu_alpha.getFloat());
-    g->drawRect(mainButtonRect.getX(), mainButtonRect.getY(), mainButtonRect.getWidth(), mainButtonRect.getHeight());
+    g->drawRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
+                mainButtonRect.getHeight() - 2 * inset);
+    g->popTransform();
 
     // friend
     if(m_fMainMenuAnimFriendPercent > 0.0f) {
@@ -762,32 +759,18 @@ void MainMenu::draw(Graphics *g) {
         }
     }
 
-    // main text
-    if(bancho.server_icon == nullptr || !bancho.server_icon->isReady()) {
-        const float title_width = m_titleFont->getStringWidth(NEOSU_MAIN_BUTTON_TEXT);
-        const float title_scale = mainButtonRect.getWidth() / title_width * 0.6f;
-        const float font_scale = title_scale * (1.0f - pulseSub + m_fSizeAddAnim) * m_fStartupAnim;
-
-        float alpha = (1.0f - m_fMainMenuAnimFriendPercent) * (1.0f - m_fMainMenuAnimFriendPercent) *
-                      (1.0f - m_fMainMenuAnimFriendPercent);
-
-        g->setColor(0xffffffff);
-        g->setAlpha(alpha);
-        g->pushTransform();
-        {
-            g->scale(font_scale, font_scale);
-            g->translate(m_vCenter.x - m_fCenterOffsetAnim -
-                             (m_titleFont->getStringWidth(NEOSU_MAIN_BUTTON_TEXT) / 2.0f) * font_scale,
-                         m_vCenter.y + (m_titleFont->getHeight() * font_scale) / 2.25f, -1.0f);
-            g->drawString(m_titleFont, NEOSU_MAIN_BUTTON_TEXT);
+    // neosu/server logo
+    {
+        auto logo = logo_img;
+        if(bancho.server_icon != nullptr && bancho.server_icon->isReady()) {
+            logo = bancho.server_icon;
         }
-        g->popTransform();
-    } else {
+
         float alpha = (1.0f - m_fMainMenuAnimFriendPercent) * (1.0f - m_fMainMenuAnimFriendPercent) *
                       (1.0f - m_fMainMenuAnimFriendPercent);
 
-        float xscale = mainButtonRect.getWidth() / bancho.server_icon->getWidth();
-        float yscale = mainButtonRect.getHeight() / bancho.server_icon->getHeight();
+        float xscale = mainButtonRect.getWidth() / logo->getWidth();
+        float yscale = mainButtonRect.getHeight() / logo->getHeight();
         float scale = std::min(xscale, yscale) * 0.8f;
 
         g->pushTransform();
@@ -795,122 +778,91 @@ void MainMenu::draw(Graphics *g) {
         g->setAlpha(alpha);
         g->scale(scale, scale);
         g->translate(m_vCenter.x - m_fCenterOffsetAnim, m_vCenter.y);
-        g->drawImage(bancho.server_icon);
+        g->drawImage(logo);
         g->popTransform();
     }
 
-    if((m_fMainMenuAnim > 0.0f && m_fMainMenuAnim != 1.0f) ||
-       (haveTimingpoints && m_fMainMenuAnimFriendPercent > 0.0f)) {
+    if(drawing_full_cube) {
         // back side
         g->rotate3DScene(0, -180, 0);
+        g->pushTransform();
+        g->translate(0, 0, inset);
         g->setColor(cubeColor);
         g->setAlpha(osu_main_menu_alpha.getFloat());
-        g->pushTransform();
-        {
-            g->translate(0, 0, inset);
-            g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset,
-                        mainButtonRect.getWidth() - 2 * inset, mainButtonRect.getHeight() - 2 * inset);
-        }
-        g->popTransform();
+        g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
+                    mainButtonRect.getHeight() - 2 * inset);
         g->setColor(cubeBorderColor);
-        g->setAlpha(osu_main_menu_alpha.getFloat());
-        g->drawRect(mainButtonRect.getX(), mainButtonRect.getY(), mainButtonRect.getWidth(),
-                    mainButtonRect.getHeight());
+        g->drawRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
+                    mainButtonRect.getHeight() - 2 * inset);
+        g->popTransform();
 
         // right side
         g->offset3DScene(0, 0, mainButtonRect.getWidth() / 2);
         g->rotate3DScene(0, 90, 0);
-        {
-            // g->setColor(0xff00ff00);
-            g->setColor(cubeColor);
-            g->setAlpha(osu_main_menu_alpha.getFloat());
-            g->pushTransform();
-            {
-                g->translate(0, 0, inset);
-                g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset,
-                            mainButtonRect.getWidth() - 2 * inset, mainButtonRect.getHeight() - 2 * inset);
-            }
-            g->popTransform();
-
-            g->setColor(cubeBorderColor);
-            g->setAlpha(osu_main_menu_alpha.getFloat());
-            g->drawRect(mainButtonRect.getX(), mainButtonRect.getY(), mainButtonRect.getWidth(),
-                        mainButtonRect.getHeight());
-        }
+        g->pushTransform();
+        g->translate(0, 0, inset);
+        g->setColor(cubeColor);
+        g->setAlpha(osu_main_menu_alpha.getFloat());
+        g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
+                    mainButtonRect.getHeight() - 2 * inset);
+        g->setColor(cubeBorderColor);
+        g->drawRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
+                    mainButtonRect.getHeight() - 2 * inset);
+        g->popTransform();
         g->rotate3DScene(0, -90, 0);
         g->offset3DScene(0, 0, 0);
 
         // left side
         g->offset3DScene(0, 0, mainButtonRect.getWidth() / 2);
         g->rotate3DScene(0, -90, 0);
-        {
-            // g->setColor(0xffffff00);
-            g->setColor(cubeColor);
-            g->setAlpha(osu_main_menu_alpha.getFloat());
-            g->pushTransform();
-            {
-                g->translate(0, 0, inset);
-                g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset,
-                            mainButtonRect.getWidth() - 2 * inset, mainButtonRect.getHeight() - 2 * inset);
-            }
-            g->popTransform();
-
-            g->setColor(cubeBorderColor);
-            g->setAlpha(osu_main_menu_alpha.getFloat());
-            g->drawRect(mainButtonRect.getX(), mainButtonRect.getY(), mainButtonRect.getWidth(),
-                        mainButtonRect.getHeight());
-        }
+        g->pushTransform();
+        g->translate(0, 0, inset);
+        g->setColor(cubeColor);
+        g->setAlpha(osu_main_menu_alpha.getFloat());
+        g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
+                    mainButtonRect.getHeight() - 2 * inset);
+        g->setColor(cubeBorderColor);
+        g->drawRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
+                    mainButtonRect.getHeight() - 2 * inset);
+        g->popTransform();
         g->rotate3DScene(0, 90, 0);
         g->offset3DScene(0, 0, 0);
 
         // top side
         g->offset3DScene(0, 0, mainButtonRect.getHeight() / 2);
         g->rotate3DScene(90, 0, 0);
-        {
-            // g->setColor(0xff00ffff);
-            g->setColor(cubeColor);
-            g->setAlpha(osu_main_menu_alpha.getFloat());
-            g->pushTransform();
-            {
-                g->translate(0, 0, inset);
-                g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset,
-                            mainButtonRect.getWidth() - 2 * inset, mainButtonRect.getHeight() - 2 * inset);
-            }
-            g->popTransform();
-
-            g->setColor(cubeBorderColor);
-            g->setAlpha(osu_main_menu_alpha.getFloat());
-            g->drawRect(mainButtonRect.getX(), mainButtonRect.getY(), mainButtonRect.getWidth(),
-                        mainButtonRect.getHeight());
-        }
+        g->pushTransform();
+        g->translate(0, 0, inset);
+        g->setColor(cubeColor);
+        g->setAlpha(osu_main_menu_alpha.getFloat());
+        g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
+                    mainButtonRect.getHeight() - 2 * inset);
+        g->setColor(cubeBorderColor);
+        g->drawRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
+                    mainButtonRect.getHeight() - 2 * inset);
+        g->popTransform();
         g->rotate3DScene(-90, 0, 0);
         g->offset3DScene(0, 0, 0);
 
         // bottom side
         g->offset3DScene(0, 0, mainButtonRect.getHeight() / 2);
         g->rotate3DScene(-90, 0, 0);
-        {
-            // g->setColor(0xffff0000);
-            g->setColor(cubeColor);
-            g->setAlpha(osu_main_menu_alpha.getFloat());
-            g->pushTransform();
-            {
-                g->translate(0, 0, inset);
-                g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset,
-                            mainButtonRect.getWidth() - 2 * inset, mainButtonRect.getHeight() - 2 * inset);
-            }
-            g->popTransform();
-
-            g->setColor(cubeBorderColor);
-            g->setAlpha(osu_main_menu_alpha.getFloat());
-            g->drawRect(mainButtonRect.getX(), mainButtonRect.getY(), mainButtonRect.getWidth(),
-                        mainButtonRect.getHeight());
-        }
+        g->pushTransform();
+        g->translate(0, 0, inset);
+        g->setColor(cubeColor);
+        g->setAlpha(osu_main_menu_alpha.getFloat());
+        g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
+                    mainButtonRect.getHeight() - 2 * inset);
+        g->setColor(cubeBorderColor);
+        g->drawRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
+                    mainButtonRect.getHeight() - 2 * inset);
+        g->popTransform();
         g->rotate3DScene(90, 0, 0);
         g->offset3DScene(0, 0, 0);
 
         g->pop3DScene();
 
+        g->setCulling(true);
         g->setDepthBuffer(false);
     }
 }
@@ -1225,9 +1177,10 @@ void MainMenu::updateLayout() {
         m_menuElements[i]->setSize(m_cube->getSize().x + menuElementExtraWidth * offsetPercent -
                                        2.0f * menuElementExtraWidth * (1.0f - offsetPercent),
                                    menuElementHeight);
-        m_menuElements[i]->setTextColor(COLORf(offsetPercent, 1.0f, 1.0f, 1.0f));
+        m_menuElements[i]->setTextColor(
+            COLORf(offsetPercent * offsetPercent * offsetPercent * offsetPercent, 1.0f, 1.0f, 1.0f));
         m_menuElements[i]->setFrameColor(COLORf(offsetPercent, 1.0f, 1.0f, 1.0f));
-        m_menuElements[i]->setBackgroundColor(COLORf(offsetPercent, 0.0f, 0.0f, 0.0f));
+        m_menuElements[i]->setBackgroundColor(COLORf(offsetPercent * osu_main_menu_alpha.getFloat(), 0.0f, 0.0f, 0.0f));
     }
 
     setSize(m_osu->getScreenSize() + Vector2(1, 1));

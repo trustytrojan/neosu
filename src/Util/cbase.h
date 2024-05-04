@@ -75,7 +75,7 @@ typedef unsigned char COLORPART;
 #define COLOR_GET_Af(color) (((COLORPART)(color >> 24)) / 255.0f)
 
 #define COLOR_INVERT(color) \
-    (COLOR(255, 255 - COLOR_GET_Ri(color), 255 - COLOR_GET_Gi(color), 255 - COLOR_GET_Bi(color)))
+    (COLOR(COLOR_GET_Ai(color), 255 - COLOR_GET_Ri(color), 255 - COLOR_GET_Gi(color), 255 - COLOR_GET_Bi(color)))
 
 #define COLOR_MULTIPLY(color1, color2)                                                                      \
     (COLORf(1.0f, COLOR_GET_Rf(color1) * COLOR_GET_Rf(color2), COLOR_GET_Gf(color1) * COLOR_GET_Gf(color2), \
