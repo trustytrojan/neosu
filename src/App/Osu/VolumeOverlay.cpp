@@ -243,7 +243,9 @@ bool VolumeOverlay::isVisible() { return engine->getTime() < m_fVolumeChangeTime
 
 bool VolumeOverlay::canChangeVolume() {
     bool can_scroll = true;
-    if(m_osu->m_songBrowser2->isVisible()) can_scroll = false;
+    if(m_osu->m_songBrowser2->isVisible() && m_osu->m_songBrowser2->getDatabase()->isFinished() == 1.f) {
+        can_scroll = false;
+    }
     if(m_osu->m_optionsMenu->isVisible()) can_scroll = false;
     if(m_osu->m_userStatsScreen->isVisible()) can_scroll = false;
     if(m_osu->m_changelog->isVisible()) can_scroll = false;
