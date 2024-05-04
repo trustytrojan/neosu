@@ -798,7 +798,7 @@ void RoomScreen::onClientScoreChange(bool force) {
     Packet packet;
     packet.id = UPDATE_MATCH_SCORE;
 
-    write_u32(&packet, (i32)m_osu->getSelectedBeatmap()->getTime());
+    write<u32>(&packet, (i32)m_osu->getSelectedBeatmap()->getTime());
 
     u8 slot_id = 0;
     for(u8 i = 0; i < 16; i++) {
@@ -807,22 +807,22 @@ void RoomScreen::onClientScoreChange(bool force) {
             break;
         }
     }
-    write_u8(&packet, slot_id);
+    write<u8>(&packet, slot_id);
 
-    write_u16(&packet, (u16)m_osu->getScore()->getNum300s());
-    write_u16(&packet, (u16)m_osu->getScore()->getNum100s());
-    write_u16(&packet, (u16)m_osu->getScore()->getNum50s());
-    write_u16(&packet, (u16)m_osu->getScore()->getNum300gs());
-    write_u16(&packet, (u16)m_osu->getScore()->getNum100ks());
-    write_u16(&packet, (u16)m_osu->getScore()->getNumMisses());
-    write_u32(&packet, (i32)m_osu->getScore()->getScore());
-    write_u16(&packet, (u16)m_osu->getScore()->getCombo());
-    write_u16(&packet, (u16)m_osu->getScore()->getComboMax());
-    write_u8(&packet, m_osu->getScore()->getNumSliderBreaks() == 0 && m_osu->getScore()->getNumMisses() == 0 &&
-                          m_osu->getScore()->getNum50s() == 0 && m_osu->getScore()->getNum100s() == 0);
-    write_u8(&packet, m_osu->getSelectedBeatmap()->getHealth() * 200);
-    write_u8(&packet, 0);  // 4P, not supported
-    write_u8(&packet, m_osu->getModScorev2());
+    write<u16>(&packet, (u16)m_osu->getScore()->getNum300s());
+    write<u16>(&packet, (u16)m_osu->getScore()->getNum100s());
+    write<u16>(&packet, (u16)m_osu->getScore()->getNum50s());
+    write<u16>(&packet, (u16)m_osu->getScore()->getNum300gs());
+    write<u16>(&packet, (u16)m_osu->getScore()->getNum100ks());
+    write<u16>(&packet, (u16)m_osu->getScore()->getNumMisses());
+    write<u32>(&packet, (i32)m_osu->getScore()->getScore());
+    write<u16>(&packet, (u16)m_osu->getScore()->getCombo());
+    write<u16>(&packet, (u16)m_osu->getScore()->getComboMax());
+    write<u8>(&packet, m_osu->getScore()->getNumSliderBreaks() == 0 && m_osu->getScore()->getNumMisses() == 0 &&
+                           m_osu->getScore()->getNum50s() == 0 && m_osu->getScore()->getNum100s() == 0);
+    write<u8>(&packet, m_osu->getSelectedBeatmap()->getHealth() * 200);
+    write<u8>(&packet, 0);  // 4P, not supported
+    write<u8>(&packet, m_osu->getModScorev2());
     send_packet(packet);
 
     last_packet_tms = time(NULL);

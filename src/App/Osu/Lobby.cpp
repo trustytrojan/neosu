@@ -199,7 +199,7 @@ void Lobby::addRoom(Room* room) {
 void Lobby::joinRoom(u32 id, UString password) {
     Packet packet;
     packet.id = JOIN_ROOM;
-    write_u32(&packet, id);
+    write<u32>(&packet, id);
     write_string(&packet, password.toUtf8());
     send_packet(packet);
 

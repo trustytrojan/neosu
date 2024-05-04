@@ -273,7 +273,7 @@ MainMenu::MainMenu(Osu *osu) : OsuScreen(osu) {
 }
 
 MainMenu::~MainMenu() {
-    SAFE_DELETE(preloaded_beatmapset);
+    // SAFE_DELETE(preloaded_beatmapset); // double free??
     SAFE_DELETE(m_updateAvailableButton);
 
     anim->deleteExistingAnimation(&m_fUpdateButtonAnim);
@@ -1054,9 +1054,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
     } else {
         if(music->isFinished()) {
             selectRandomBeatmap();
-        }
-
-        if(music->isPlaying()) {
+        } else if(music->isPlaying()) {
             m_pauseButton->setPaused(false);
 
             // NOTE: We set this every frame, because music loading isn't instant

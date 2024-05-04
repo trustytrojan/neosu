@@ -1188,7 +1188,7 @@ void ModSelector::resetModsUserInitiated() {
 
             Packet packet;
             packet.id = MATCH_CHANGE_MODS;
-            write_u32(&packet, bancho.room.slots[i].mods);
+            write<u32>(&packet, bancho.room.slots[i].mods);
             send_packet(packet);
 
             m_osu->m_room->updateLayout(m_osu->getScreenSize());

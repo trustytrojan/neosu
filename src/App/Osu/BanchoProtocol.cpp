@@ -65,39 +65,39 @@ Room::Room(Packet *packet) {
 }
 
 void Room::pack(Packet *packet) {
-    write_u16(packet, id);
-    write_u8(packet, in_progress);
-    write_u8(packet, match_type);
-    write_u32(packet, mods);
+    write<u16>(packet, id);
+    write<u8>(packet, in_progress);
+    write<u8>(packet, match_type);
+    write<u32>(packet, mods);
     write_string(packet, name.toUtf8());
     write_string(packet, password.toUtf8());
     write_string(packet, map_name.toUtf8());
-    write_u32(packet, map_id);
+    write<u32>(packet, map_id);
     write_string(packet, map_md5.toUtf8());
     for(int i = 0; i < 16; i++) {
-        write_u8(packet, slots[i].status);
+        write<u8>(packet, slots[i].status);
     }
     for(int i = 0; i < 16; i++) {
-        write_u8(packet, slots[i].team);
+        write<u8>(packet, slots[i].team);
     }
     for(int s = 0; s < 16; s++) {
         if(slots[s].has_player()) {
-            write_u32(packet, slots[s].player_id);
+            write<u32>(packet, slots[s].player_id);
         }
     }
 
-    write_u32(packet, host_id);
-    write_u8(packet, mode);
-    write_u8(packet, win_condition);
-    write_u8(packet, team_type);
-    write_u8(packet, freemods);
+    write<u32>(packet, host_id);
+    write<u8>(packet, mode);
+    write<u8>(packet, win_condition);
+    write<u8>(packet, team_type);
+    write<u8>(packet, freemods);
     if(freemods) {
         for(int i = 0; i < 16; i++) {
-            write_u32(packet, slots[i].mods);
+            write<u32>(packet, slots[i].mods);
         }
     }
 
-    write_u32(packet, seed);
+    write<u32>(packet, seed);
 }
 
 bool Room::is_host() { return host_id == bancho.user_id; }
@@ -182,8 +182,8 @@ void skip_string(Packet *packet) {
 
 void write_bytes(Packet *packet, u8 *bytes, size_t n) {
     if(packet->pos + n > packet->size) {
-        packet->memory = (unsigned char *)realloc(packet->memory, packet->size + n + 128);
-        packet->size += n + 128;
+        packet->memory = (unsigned char *)realloc(packet->memory, packet->size + n + 4096);
+        packet->size += n + 4096;
         if(!packet->memory) return;
     }
 
@@ -191,18 +191,10 @@ void write_bytes(Packet *packet, u8 *bytes, size_t n) {
     packet->pos += n;
 }
 
-void write_u8(Packet *packet, u8 b) { write_bytes(packet, &b, 1); }
-
-void write_u16(Packet *packet, u16 s) { write_bytes(packet, (u8 *)&s, 2); }
-
-void write_u32(Packet *packet, u32 i) { write_bytes(packet, (u8 *)&i, 4); }
-
-void write_u64(Packet *packet, u64 i) { write_bytes(packet, (u8 *)&i, 8); }
-
 void write_uleb128(Packet *packet, u32 num) {
     if(num == 0) {
         u8 zero = 0;
-        write_u8(packet, zero);
+        write<u8>(packet, zero);
         return;
     }
 
@@ -212,25 +204,27 @@ void write_uleb128(Packet *packet, u32 num) {
         if(num != 0) {
             next |= 0x80;
         }
-        write_u8(packet, next);
+        write<u8>(packet, next);
     }
 }
-
-void write_f32(Packet *packet, float f) { write_bytes(packet, (u8 *)&f, 4); }
-
-void write_f64(Packet *packet, double f) { write_bytes(packet, (u8 *)&f, 8); }
 
 void write_string(Packet *packet, const char *str) {
     if(!str || str[0] == '\0') {
         u8 zero = 0;
-        write_u8(packet, zero);
+        write<u8>(packet, zero);
         return;
     }
 
     u8 empty_check = 11;
-    write_u8(packet, empty_check);
+    write<u8>(packet, empty_check);
 
     u32 len = strlen(str);
     write_uleb128(packet, len);
     write_bytes(packet, (u8 *)str, len);
+}
+
+void write_hash(Packet *packet, MD5Hash hash) {
+    write<u8>(packet, 0x0B);
+    write<u8>(packet, 0x20);
+    write_bytes(packet, (u8 *)hash.hash, 32);
 }

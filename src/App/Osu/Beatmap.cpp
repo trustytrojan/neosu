@@ -1726,11 +1726,10 @@ void Beatmap::loadMusic(bool stream, bool prescan) {
 
 void Beatmap::unloadMusic() {
     if(m_osu->getInstanceID() < 2) {
-        engine->getSound()->stop(m_music);
         engine->getResourceManager()->destroyResource(m_music);
     }
 
-    m_music = NULL;
+    m_music = nullptr;
 }
 
 void Beatmap::unloadObjects() {

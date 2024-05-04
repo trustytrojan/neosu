@@ -208,22 +208,22 @@ bool save_collections() {
     const double startTime = engine->getTimeReal();
 
     Packet db;
-    write_u32(&db, COLLECTIONS_DB_VERSION);
+    write<u32>(&db, COLLECTIONS_DB_VERSION);
 
     u32 nb_collections = collections.size();
-    write_u32(&db, nb_collections);
+    write<u32>(&db, nb_collections);
 
     for(auto collection : collections) {
         write_string(&db, collection->name.c_str());
 
         u32 nb_deleted = collection->deleted_maps.size();
-        write_u32(&db, nb_deleted);
+        write<u32>(&db, nb_deleted);
         for(auto map : collection->deleted_maps) {
             write_string(&db, map.hash);
         }
 
         u32 nb_neosu = collection->neosu_maps.size();
-        write_u32(&db, nb_neosu);
+        write<u32>(&db, nb_neosu);
         for(auto map : collection->neosu_maps) {
             write_string(&db, map.hash);
         }

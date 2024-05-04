@@ -504,13 +504,13 @@ Packet build_login_packet() {
     Packet packet;
 
     write_bytes(&packet, (u8 *)bancho.username.toUtf8(), bancho.username.lengthUtf8());
-    write_u8(&packet, '\n');
+    write<u8>(&packet, '\n');
 
     write_bytes(&packet, (u8 *)bancho.pw_md5.hash, 32);
-    write_u8(&packet, '\n');
+    write<u8>(&packet, '\n');
 
     write_bytes(&packet, (u8 *)OSU_VERSION, strlen(OSU_VERSION));
-    write_u8(&packet, '|');
+    write<u8>(&packet, '|');
 
     // UTC offset
     time_t now = time(NULL);
@@ -518,15 +518,15 @@ Packet build_login_packet() {
     auto local_time = localtime(&now);
     int utc_offset = difftime(mktime(local_time), mktime(gmt)) / 3600;
     if(utc_offset < 0) {
-        write_u8(&packet, '-');
+        write<u8>(&packet, '-');
         utc_offset *= -1;
     }
-    write_u8(&packet, '0' + utc_offset);
-    write_u8(&packet, '|');
+    write<u8>(&packet, '0' + utc_offset);
+    write<u8>(&packet, '|');
 
     // Don't dox the user's city
-    write_u8(&packet, '0');
-    write_u8(&packet, '|');
+    write<u8>(&packet, '0');
+    write<u8>(&packet, '|');
 
     char osu_path[PATH_MAX] = {0};
 #ifdef _WIN32
@@ -556,9 +556,9 @@ Packet build_login_packet() {
     write_bytes(&packet, (u8 *)bancho.client_hashes.toUtf8(), bancho.client_hashes.lengthUtf8());
 
     // Allow PMs from strangers
-    write_u8(&packet, '|');
-    write_u8(&packet, '0');
+    write<u8>(&packet, '|');
+    write<u8>(&packet, '0');
 
-    write_u8(&packet, '\n');
+    write<u8>(&packet, '\n');
     return packet;
 }

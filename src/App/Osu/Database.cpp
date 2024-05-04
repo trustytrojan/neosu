@@ -294,8 +294,10 @@ class DatabaseLoader : public Resource {
             m_toCleanup.swap(m_db->m_databaseBeatmaps);
             m_db->m_databaseBeatmaps.clear();
             m_db->loadDB(&db, m_bNeedRawLoad);
-        } else
+        } else {
             m_bNeedRawLoad = true;
+        }
+        free(db.memory);
 
         m_bAsyncReady = true;
     }
@@ -368,6 +370,8 @@ Database::~Database() {
     for(int i = 0; i < m_scoreSortingMethods.size(); i++) {
         delete m_scoreSortingMethods[i].comparator;
     }
+
+    unload_collections();
 }
 
 void Database::update() {
@@ -1393,6 +1397,8 @@ void Database::loadStars() {
 
 void Database::saveStars() {
     debugLog("Osu: Saving stars ...\n");
+    Timer t;
+    t.start();
 
     i64 numStarsCacheEntries = 0;
     for(DatabaseBeatmap *beatmap : m_databaseBeatmaps) {
@@ -1409,13 +1415,15 @@ void Database::saveStars() {
 
     // write
     Packet cache;
-    write_u32(&cache, STARS_CACHE_VERSION);
+    write<u32>(&cache, STARS_CACHE_VERSION);
     write_string(&cache, "00000000000000000000000000000000");
-    write_u64(&cache, numStarsCacheEntries);
+    write<u64>(&cache, numStarsCacheEntries);
+
+    cache.reserve(cache.size + (34 + 4 + 4 + 4 + 4) * numStarsCacheEntries);
     for(DatabaseBeatmap *beatmap : m_databaseBeatmaps) {
         for(DatabaseBeatmap *diff2 : beatmap->getDifficulties()) {
-            write_string(&cache, diff2->getMD5Hash().hash);
-            write_f32(&cache, diff2->getStarsNomod());
+            write_hash(&cache, diff2->getMD5Hash().hash);
+            write<f32>(&cache, diff2->getStarsNomod());
             write<i32>(&cache, diff2->getMinBPM());
             write<i32>(&cache, diff2->getMaxBPM());
             write<i32>(&cache, diff2->getMostCommonBPM());
@@ -1427,6 +1435,9 @@ void Database::saveStars() {
     }
 
     free(cache.memory);
+
+    t.update();
+    debugLog("Saving stars took %f seconds.\n", t.getElapsedTime());
 }
 
 void Database::loadScores() {
@@ -1704,8 +1715,8 @@ void Database::saveScores() {
 
     // write header
     Packet db;
-    write_u32(&db, LiveScore::VERSION);
-    write_u32(&db, numBeatmaps);
+    write<u32>(&db, LiveScore::VERSION);
+    write<u32>(&db, numBeatmaps);
 
     // write scores for each beatmap
     for(auto &beatmap : m_scores) {
@@ -1717,55 +1728,55 @@ void Database::saveScores() {
         if(numNonLegacyScores == 0) continue;
 
         write_string(&db, beatmap.first.hash);  // beatmap md5 hash
-        write_u32(&db, numNonLegacyScores);     // numScores
+        write<u32>(&db, numNonLegacyScores);    // numScores
 
         for(auto &score : beatmap.second) {
             if(score.isLegacyScore) continue;
 
             u8 gamemode = 0;
             if(score.version > 20190103 && score.isImportedLegacyScore) gamemode = hackIsImportedLegacyScoreFlag;
-            write_u8(&db, gamemode);
+            write<u8>(&db, gamemode);
 
-            write_u32(&db, score.version);
-            write_u64(&db, score.unixTimestamp);
+            write<u32>(&db, score.version);
+            write<u64>(&db, score.unixTimestamp);
 
             // default
             write_string(&db, score.playerName.c_str());
 
-            write_u16(&db, score.num300s);
-            write_u16(&db, score.num100s);
-            write_u16(&db, score.num50s);
-            write_u16(&db, score.numGekis);
-            write_u16(&db, score.numKatus);
-            write_u16(&db, score.numMisses);
+            write<u16>(&db, score.num300s);
+            write<u16>(&db, score.num100s);
+            write<u16>(&db, score.num50s);
+            write<u16>(&db, score.numGekis);
+            write<u16>(&db, score.numKatus);
+            write<u16>(&db, score.numMisses);
 
-            write_u64(&db, score.score);
-            write_u16(&db, score.comboMax);
-            write_u32(&db, score.modsLegacy);
+            write<u64>(&db, score.score);
+            write<u16>(&db, score.comboMax);
+            write<u32>(&db, score.modsLegacy);
 
             // custom
-            write_u16(&db, score.numSliderBreaks);
-            write_f32(&db, score.pp);
-            write_f32(&db, score.unstableRate);
-            write_f32(&db, score.hitErrorAvgMin);
-            write_f32(&db, score.hitErrorAvgMax);
-            write_f32(&db, score.starsTomTotal);
-            write_f32(&db, score.starsTomAim);
-            write_f32(&db, score.starsTomSpeed);
-            write_f32(&db, score.speedMultiplier);
-            write_f32(&db, score.CS);
-            write_f32(&db, score.AR);
-            write_f32(&db, score.OD);
-            write_f32(&db, score.HP);
+            write<u16>(&db, score.numSliderBreaks);
+            write<f32>(&db, score.pp);
+            write<f32>(&db, score.unstableRate);
+            write<f32>(&db, score.hitErrorAvgMin);
+            write<f32>(&db, score.hitErrorAvgMax);
+            write<f32>(&db, score.starsTomTotal);
+            write<f32>(&db, score.starsTomAim);
+            write<f32>(&db, score.starsTomSpeed);
+            write<f32>(&db, score.speedMultiplier);
+            write<f32>(&db, score.CS);
+            write<f32>(&db, score.AR);
+            write<f32>(&db, score.OD);
+            write<f32>(&db, score.HP);
 
             if(score.version > 20180722) {
-                write_u32(&db, score.maxPossibleCombo);
-                write_u32(&db, score.numHitObjects);
-                write_u32(&db, score.numCircles);
+                write<u32>(&db, score.maxPossibleCombo);
+                write<u32>(&db, score.numHitObjects);
+                write<u32>(&db, score.numCircles);
             }
 
             if(score.version >= 20240412) {
-                write_u32(&db, score.online_score_id);
+                write<u32>(&db, score.online_score_id);
                 write_string(&db, score.server.c_str());
             }
 

@@ -319,22 +319,7 @@ void SoundEngine::updateOutputDevices(bool printInfo) {
 bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
     debugLog("SoundEngine: initializeOutputDevice( %s ) ...\n", device.name.toUtf8());
 
-    if(m_currentOutputDevice.driver == OutputDriver::BASS) {
-        BASS_SetDevice(m_currentOutputDevice.id);
-        BASS_Free();
-        BASS_SetDevice(0);
-    }
-
-#ifdef _WIN32
-    if(m_currentOutputDevice.driver == OutputDriver::BASS_ASIO) {
-        BASS_ASIO_Free();
-    } else if(m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
-        BASS_WASAPI_Free();
-    }
-#endif
-
-    g_bassOutputMixer = 0;
-    BASS_Free();  // free "No sound" device
+    shutdown();
 
     if(device.driver == OutputDriver::NONE || (device.driver == OutputDriver::BASS && device.id == 0)) {
         m_bReady = true;
@@ -504,23 +489,26 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
     return true;
 }
 
-SoundEngine::~SoundEngine() {
-    if(m_currentOutputDevice.driver == OutputDriver::BASS) {
-        BASS_Free();
-    } else if(m_currentOutputDevice.driver == OutputDriver::BASS_ASIO) {
-#ifdef _WIN32
-        BASS_ASIO_Free();
-#endif
-        BASS_Free();
-    } else if(m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
-#ifdef _WIN32
-        BASS_WASAPI_Free();
-#endif
-        BASS_Free();
-    }
-}
-
 void SoundEngine::restart() { setOutputDevice(m_currentOutputDevice); }
+
+void SoundEngine::shutdown() {
+    if(m_currentOutputDevice.driver == OutputDriver::BASS) {
+        BASS_SetDevice(m_currentOutputDevice.id);
+        BASS_Free();
+        BASS_SetDevice(0);
+    }
+
+#ifdef _WIN32
+    if(m_currentOutputDevice.driver == OutputDriver::BASS_ASIO) {
+        BASS_ASIO_Free();
+    } else if(m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
+        BASS_WASAPI_Free();
+    }
+#endif
+
+    g_bassOutputMixer = 0;
+    BASS_Free();  // free "No sound" device
+}
 
 void SoundEngine::update() {}
 

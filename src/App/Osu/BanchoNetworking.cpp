@@ -51,9 +51,9 @@ void disconnect() {
     // This is a blocking call, but we *do* want this to block when quitting the game.
     if(bancho.is_online()) {
         Packet packet;
-        write_u16(&packet, LOGOUT);
-        write_u8(&packet, 0);
-        write_u32(&packet, 0);
+        write<u16>(&packet, LOGOUT);
+        write<u8>(&packet, 0);
+        write<u32>(&packet, 0);
 
         CURL *curl = curl_easy_init();
         auto version_header = UString::format("x-mcosu-ver: %s", bancho.neosu_version.toUtf8());
@@ -309,7 +309,6 @@ static void *do_networking(void *data) {
 
     last_packet_tms = time(NULL);
 
-    curl_global_init(CURL_GLOBAL_ALL);
     CURL *curl = curl_easy_init();
     if(!curl) {
         debugLog("Failed to initialize cURL, online functionality disabled.\n");
@@ -343,9 +342,9 @@ static void *do_networking(void *data) {
             free(login.memory);
             pthread_mutex_lock(&outgoing_mutex);
         } else if(should_ping && outgoing.pos == 0) {
-            write_u16(&outgoing, PING);
-            write_u8(&outgoing, 0);
-            write_u32(&outgoing, 0);
+            write<u16>(&outgoing, PING);
+            write<u8>(&outgoing, 0);
+            write<u32>(&outgoing, 0);
 
             // Polling gets slower over time, but resets when we receive new data
             if(seconds_between_pings < 30.0) {
@@ -360,9 +359,9 @@ static void *do_networking(void *data) {
 
             // DEBUG: If we're not sending the right amount of bytes, bancho.py just
             // chugs along! To try to detect it faster, we'll send two packets per request.
-            write_u16(&out, PING);
-            write_u8(&out, 0);
-            write_u32(&out, 0);
+            write<u16>(&out, PING);
+            write<u8>(&out, 0);
+            write<u32>(&out, 0);
 
             send_bancho_packet(curl, out);
             free(out.memory);
@@ -495,9 +494,9 @@ void send_packet(Packet &packet) {
 
     // We're not sending it immediately, instead we just add it to the pile of
     // packets to send
-    write_u16(&outgoing, packet.id);
-    write_u8(&outgoing, 0);
-    write_u32(&outgoing, packet.pos);
+    write<u16>(&outgoing, packet.id);
+    write<u8>(&outgoing, 0);
+    write<u32>(&outgoing, packet.pos);
     write_bytes(&outgoing, packet.memory, packet.pos);
 
     pthread_mutex_unlock(&outgoing_mutex);

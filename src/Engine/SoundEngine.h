@@ -29,9 +29,9 @@ struct OUTPUT_DEVICE {
 class SoundEngine {
    public:
     SoundEngine();
-    ~SoundEngine();
 
     void restart();
+    void shutdown();
 
     void update();
 

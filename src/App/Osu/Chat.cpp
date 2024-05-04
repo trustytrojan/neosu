@@ -245,7 +245,7 @@ void Chat::onKeyDown(KeyboardEvent &key) {
             write_string(&packet, (char *)bancho.username.toUtf8());
             write_string(&packet, (char *)m_input_box->getText().toUtf8());
             write_string(&packet, (char *)m_selected_channel->name.toUtf8());
-            write_u32(&packet, bancho.user_id);
+            write<u32>(&packet, bancho.user_id);
             send_packet(packet);
 
             // Server doesn't echo the message back

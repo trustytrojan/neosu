@@ -141,6 +141,12 @@ struct Packet {
     size_t pos = 0;
     u8 *extra = nullptr;
     u32 extra_int = 0;  // lazy
+
+    void reserve(u32 newsize) {
+        if(newsize <= size) return;
+        memory = (u8 *)realloc(memory, newsize);
+        size = newsize;
+    }
 };
 
 struct Slot {
@@ -268,20 +274,15 @@ T read(Packet *packet) {
 }
 
 void write_bytes(Packet *packet, u8 *bytes, size_t n);
-void write_u8(Packet *packet, u8 b);
-void write_u16(Packet *packet, u16 s);
-void write_u32(Packet *packet, u32 i);
-void write_u64(Packet *packet, u64 i);
-void write_f32(Packet *packet, f32 f);
-void write_f64(Packet *packet, f64 f);
 void write_uleb128(Packet *packet, u32 num);
 void write_string(Packet *packet, const char *str);
+void write_hash(Packet *packet, MD5Hash hash);
 
 template <typename T>
 void write(Packet *packet, T t) {
     if(packet->pos + sizeof(T) > packet->size) {
-        packet->memory = (u8 *)realloc(packet->memory, packet->size + sizeof(T) + 128);
-        packet->size += sizeof(T) + 128;
+        packet->memory = (u8 *)realloc(packet->memory, packet->size + sizeof(T) + 4096);
+        packet->size += sizeof(T) + 4096;
         if(!packet->memory) return;
     }
 

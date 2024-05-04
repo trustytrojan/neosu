@@ -105,6 +105,9 @@ Console *Engine::m_console = NULL;
 ConsoleBox *Engine::m_consoleBox = NULL;
 
 Engine::Engine(Environment *environment, const char *args) {
+    // XXX: run curl_global_cleanup() after waiting for network threads to terminate
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+
     engine = this;
     m_environment = environment;
     env = environment;
@@ -527,6 +530,7 @@ void Engine::onShutdown() {
     if(m_bBlackout || (m_app != NULL && !m_app->onShutdown())) return;
 
     m_bBlackout = true;
+    m_sound->shutdown();
     m_environment->shutdown();
 }
 

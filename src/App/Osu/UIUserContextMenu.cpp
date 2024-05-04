@@ -96,12 +96,12 @@ void UIUserContextMenuScreen::on_action(UString text, int user_action) {
     if(user_action == UA_TRANSFER_HOST) {
         Packet packet;
         packet.id = TRANSFER_HOST;
-        write_u32(&packet, slot_number);
+        write<u32>(&packet, slot_number);
         send_packet(packet);
     } else if(user_action == KICK) {
         Packet packet;
         packet.id = MATCH_LOCK;
-        write_u32(&packet, slot_number);
+        write<u32>(&packet, slot_number);
         send_packet(packet);  // kick by locking the slot
         send_packet(packet);  // unlock the slot
     } else if(user_action == START_CHAT) {
@@ -113,13 +113,13 @@ void UIUserContextMenuScreen::on_action(UString text, int user_action) {
     } else if(user_action == UA_ADD_FRIEND) {
         Packet packet;
         packet.id = FRIEND_ADD;
-        write_u32(&packet, m_user_id);
+        write<u32>(&packet, m_user_id);
         send_packet(packet);
         friends.push_back(m_user_id);
     } else if(user_action == UA_REMOVE_FRIEND) {
         Packet packet;
         packet.id = FRIEND_REMOVE;
-        write_u32(&packet, m_user_id);
+        write<u32>(&packet, m_user_id);
         send_packet(packet);
 
         auto it = std::find(friends.begin(), friends.end(), m_user_id);
