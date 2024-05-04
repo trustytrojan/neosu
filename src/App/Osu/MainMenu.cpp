@@ -273,7 +273,7 @@ MainMenu::MainMenu(Osu *osu) : OsuScreen(osu) {
 }
 
 MainMenu::~MainMenu() {
-    // SAFE_DELETE(preloaded_beatmapset); // double free??
+    SAFE_DELETE(preloaded_beatmapset);
     SAFE_DELETE(m_updateAvailableButton);
 
     anim->deleteExistingAnimation(&m_fUpdateButtonAnim);
@@ -1083,22 +1083,26 @@ void MainMenu::selectRandomBeatmap() {
             mapset_folder.append(mapset_folders[rand() % nb_mapsets]);
             mapset_folder.append("/");
 
-            auto beatmap = m_osu->getSongBrowser()->getDatabase()->loadRawBeatmap(mapset_folder);
-            if(beatmap == nullptr) {
+            BeatmapSet *set = m_osu->getSongBrowser()->getDatabase()->loadRawBeatmap(mapset_folder);
+            if(set == nullptr) {
                 debugLog("Failed to load beatmap set '%s'\n", mapset_folder.c_str());
                 continue;
             }
 
-            auto beatmap_diffs = beatmap->getDifficulties();
+            auto beatmap_diffs = set->getDifficulties();
             if(beatmap_diffs.size() == 0) {
                 debugLog("Beatmap '%s' has no difficulties!\n", mapset_folder.c_str());
-                delete beatmap;
+                delete set;
                 continue;
             }
 
-            preloaded_beatmapset = beatmap;
+            preloaded_beatmapset = set;
+
+            // We're picking a random diff and not the first one, because diffs of the same set
+            // can have their own separate sound file.
             preloaded_beatmap = beatmap_diffs[rand() % beatmap_diffs.size()];
             preloaded_beatmap->do_not_store = true;
+
             m_osu->getSongBrowser()->onDifficultySelected(preloaded_beatmap, false);
 
             return;

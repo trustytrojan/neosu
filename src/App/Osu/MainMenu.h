@@ -17,6 +17,8 @@ class Osu;
 
 class Beatmap;
 class DatabaseBeatmap;
+typedef DatabaseBeatmap BeatmapDifficulty;
+typedef DatabaseBeatmap BeatmapSet;
 
 class HitObject;
 
@@ -58,8 +60,8 @@ class MainMenu : public OsuScreen, public MouseListener {
     virtual void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);
 
-    DatabaseBeatmap *preloaded_beatmap = nullptr;
-    DatabaseBeatmap *preloaded_beatmapset = nullptr;
+    BeatmapDifficulty *preloaded_beatmap = nullptr;
+    BeatmapSet *preloaded_beatmapset = nullptr;
     void selectRandomBeatmap();
 
     virtual void onKeyDown(KeyboardEvent &e);

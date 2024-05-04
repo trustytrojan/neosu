@@ -8,7 +8,8 @@ class UIAvatar : public CBaseUIButton {
     UIAvatar(u32 player_id, float xPos, float yPos, float xSize, float ySize);
     ~UIAvatar();
 
-    virtual void draw(Graphics *g, float alpha = 1.f);
+    virtual void draw(Graphics *g) { draw_avatar(g, 1.f); }
+    void draw_avatar(Graphics *g, float alpha);
 
     void onAvatarClicked(CBaseUIButton *btn);
 

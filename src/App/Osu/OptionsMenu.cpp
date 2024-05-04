@@ -1388,10 +1388,17 @@ OptionsMenu::OptionsMenu(Osu *osu) : ScreenBackable(osu) {
 }
 
 OptionsMenu::~OptionsMenu() {
-    // TODO @kiwec: remove them from containers first
-    // SAFE_DELETE(m_asioBufferSizeSlider);
-    // SAFE_DELETE(m_wasapiBufferSizeSlider);
-    // SAFE_DELETE(m_wasapiPeriodSizeSlider);
+    m_options->getContainer()->empty();
+
+    SAFE_DELETE(m_spacer);
+    SAFE_DELETE(m_contextMenu);
+
+    for(auto element : m_elements) {
+        SAFE_DELETE(element.resetButton);
+        for(auto sub : element.elements) {
+            SAFE_DELETE(sub);
+        }
+    }
 }
 
 void OptionsMenu::draw(Graphics *g) {

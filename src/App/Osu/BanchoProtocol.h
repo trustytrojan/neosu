@@ -280,12 +280,5 @@ void write_hash(Packet *packet, MD5Hash hash);
 
 template <typename T>
 void write(Packet *packet, T t) {
-    if(packet->pos + sizeof(T) > packet->size) {
-        packet->memory = (u8 *)realloc(packet->memory, packet->size + sizeof(T) + 4096);
-        packet->size += sizeof(T) + 4096;
-        if(!packet->memory) return;
-    }
-
-    *(packet->memory + packet->pos) = t;
-    packet->pos += sizeof(T);
+    write_bytes(packet, (u8 *)&t, sizeof(T));
 }

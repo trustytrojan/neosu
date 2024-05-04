@@ -12,6 +12,8 @@ class Osu;
 class OsuFile;
 class DatabaseBeatmap;
 class DatabaseLoader;
+typedef DatabaseBeatmap BeatmapDifficulty;
+typedef DatabaseBeatmap BeatmapSet;
 
 #define STARS_CACHE_VERSION 20240430
 
@@ -97,7 +99,7 @@ class Database {
     std::unordered_map<MD5Hash, std::vector<FinishedScore>> m_online_scores;
     std::string getOsuSongsFolder();
 
-    DatabaseBeatmap *loadRawBeatmap(std::string beatmapPath);  // only used for raw loading without db
+    BeatmapSet *loadRawBeatmap(std::string beatmapPath);  // only used for raw loading without db
 
     void loadDB(Packet *db, bool &fallbackToRawLoad);
 

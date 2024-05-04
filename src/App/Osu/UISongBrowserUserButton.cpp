@@ -67,7 +67,7 @@ void UISongBrowserUserButton::draw(Graphics *g) {
     if(m_avatar) {
         m_avatar->setPos(m_vPos.x + iconBorder + 1, m_vPos.y + iconBorder + 1);
         m_avatar->setSize(iconWidth, iconHeight);
-        m_avatar->draw(g, 1.f);
+        m_avatar->draw_avatar(g, 1.f);
     } else {
         g->setColor(0xffffffff);
         g->pushClipRect(McRect(m_vPos.x + iconBorder + 1, m_vPos.y + iconBorder + 2, iconWidth, iconHeight));

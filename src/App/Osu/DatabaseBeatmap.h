@@ -17,14 +17,17 @@ class BackgroundImageHandler;
 // 3) allow async calculations/loaders to work on the contained data (e.g. background image loader)
 // 4) be a container for difficulties (all top level DatabaseBeatmap objects are containers)
 
+class DatabaseBeatmap;
+typedef DatabaseBeatmap BeatmapDifficulty;
+typedef DatabaseBeatmap BeatmapSet;
+
 class DatabaseBeatmap {
    public:
     // raw structs
 
     struct TIMINGPOINT {
-        long offset;
-
-        float msPerBeat;
+        double offset;
+        double msPerBeat;
 
         int sampleType;
         int sampleSet;
@@ -95,10 +98,8 @@ class DatabaseBeatmap {
     static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string &osuFilePath, float AR, float CS,
                                                         float speedMultiplier, bool calculateStarsInaccurately,
                                                         const std::atomic<bool> &dead);
-    static bool loadMetadata(DatabaseBeatmap *databaseBeatmap);
+    bool loadMetadata();
     static LOAD_GAMEPLAY_RESULT loadGameplay(DatabaseBeatmap *databaseBeatmap, Beatmap *beatmap);
-
-    void setDifficulties(std::vector<DatabaseBeatmap *> *difficulties);
 
     void setLengthMS(unsigned long lengthMS) { m_iLengthMS = lengthMS; }
 
@@ -118,7 +119,10 @@ class DatabaseBeatmap {
 
     inline unsigned long long getSortHack() const { return m_iSortHack; }
 
-    inline const std::vector<DatabaseBeatmap *> &getDifficulties() const { return *m_difficulties; }
+    inline const std::vector<DatabaseBeatmap *> &getDifficulties() const {
+        static std::vector<DatabaseBeatmap *> empty;
+        return m_difficulties == nullptr ? empty : *m_difficulties;
+    }
 
     inline const MD5Hash &getMD5Hash() const { return m_sMD5Hash; }
 
@@ -451,26 +455,26 @@ struct BPMInfo getBPM(const zarray<T> &timing_points) {
 
     struct Tuple {
         i32 bpm;
-        i32 duration;
+        double duration;
     };
 
     zarray<Tuple> bpms;
     bpms.reserve(timing_points.size());
 
-    long lastTime = timing_points[timing_points.size() - 1].offset;
+    double lastTime = timing_points[timing_points.size() - 1].offset;
     for(size_t i = 0; i < timing_points.size(); i++) {
         const T &t = timing_points[i];
         if(t.offset > lastTime) continue;
-        if(t.msPerBeat < 0) continue;
+        if(t.msPerBeat <= 0.0) continue;
 
         // "osu-stable forced the first control point to start at 0."
         // "This is reproduced here to maintain compatibility around osu!mania scroll speed and song
         // select display."
-        const long currentTime = (i == 0 ? 0 : t.offset);
-        const long nextTime = (i == timing_points.size() - 1 ? lastTime : timing_points[i + 1].offset);
+        double currentTime = (i == 0 ? 0 : t.offset);
+        double nextTime = (i == timing_points.size() - 1 ? lastTime : timing_points[i + 1].offset);
 
-        i32 bpm = t.msPerBeat / 60000;
-        i32 duration = std::max(nextTime - currentTime, (long)0);
+        i32 bpm = std::min(60000.0 / t.msPerBeat, 9001.0);
+        double duration = std::max(nextTime - currentTime, 0.0);
 
         bool found = false;
         for(auto tuple : bpms) {
@@ -492,16 +496,16 @@ struct BPMInfo getBPM(const zarray<T> &timing_points) {
     i32 min = 9001;
     i32 max = 0;
     i32 mostCommonBPM = 0;
-    i32 longestDuration = 0;
+    double longestDuration = 0;
     for(auto tuple : bpms) {
         if(tuple.bpm > max) max = tuple.bpm;
         if(tuple.bpm < min) min = tuple.bpm;
-
-        if(tuple.duration > longestDuration) {
+        if(tuple.duration > longestDuration || (tuple.duration == longestDuration && tuple.bpm > mostCommonBPM)) {
             longestDuration = tuple.duration;
             mostCommonBPM = tuple.bpm;
         }
     }
+    if(min > max) min = max;
 
     return BPMInfo{
         .min = min,

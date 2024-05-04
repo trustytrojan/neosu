@@ -81,7 +81,7 @@ void ScoreboardSlot::draw(Graphics *g) {
     m_avatar->setPos(0, start_y);
     m_avatar->setSize(avatar_width, avatar_height);
     m_avatar->setVisible(true);
-    m_avatar->draw(g, 0.8f * m_fAlpha);
+    m_avatar->draw_avatar(g, 0.8f * m_fAlpha);
 
     // Draw index
     g->pushTransform();

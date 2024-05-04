@@ -445,10 +445,8 @@ void Database::save() {
 }
 
 DatabaseBeatmap *Database::addBeatmap(std::string beatmapFolderPath) {
-    DatabaseBeatmap *beatmap = loadRawBeatmap(beatmapFolderPath);
-
-    if(beatmap != NULL) m_databaseBeatmaps.push_back(beatmap);
-
+    BeatmapSet *beatmap = loadRawBeatmap(beatmapFolderPath);
+    if(beatmap != nullptr) m_databaseBeatmaps.push_back(beatmap);
     return beatmap;
 }
 
@@ -990,12 +988,12 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
     }
 
     // read beatmapInfos, and also build two hashmaps (diff hash -> BeatmapDifficulty, diff hash -> Beatmap)
-    struct BeatmapSet {
+    struct Beatmap_Set {
         int setID;
         std::string path;
         std::vector<DatabaseBeatmap *> *diffs2 = nullptr;
     };
-    std::vector<BeatmapSet> beatmapSets;
+    std::vector<Beatmap_Set> beatmapSets;
     std::unordered_map<int, size_t> setIDToIndex;
     for(int i = 0; i < m_iNumBeatmapsToLoad; i++) {
         if(m_bInterruptLoad.load()) break;  // cancellation point
@@ -1270,7 +1268,7 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
         } else {
             setIDToIndex[beatmapSetID] = beatmapSets.size();
 
-            BeatmapSet s;
+            Beatmap_Set s;
             s.setID = beatmapSetID;
             s.path = beatmapPath;
             s.diffs2 = new std::vector<DatabaseBeatmap *>();
@@ -1279,72 +1277,33 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
         }
     }
 
-    // we now have a collection of BeatmapSets (where one set is equal to one beatmap and all of its diffs), build the
-    // actual Beatmap objects first, build all beatmaps which have a valid setID (trusting the values from the osu
-    // database)
-    std::unordered_map<std::string, DatabaseBeatmap *> titleArtistToBeatmap;
+    // build beatmap sets
     for(int i = 0; i < beatmapSets.size(); i++) {
-        if(m_bInterruptLoad.load()) break;  // cancellation point
+        if(m_bInterruptLoad.load()) break;            // cancellation point
+        if(beatmapSets[i].diffs2->empty()) continue;  // sanity check
 
-        if(!beatmapSets[i].diffs2->empty())  // sanity check
-        {
-            if(beatmapSets[i].setID > 0) {
-                DatabaseBeatmap *bm = new DatabaseBeatmap(m_osu, beatmapSets[i].diffs2);
+        if(beatmapSets[i].setID > 0) {
+            DatabaseBeatmap *bm = new DatabaseBeatmap(m_osu, beatmapSets[i].diffs2);
+            m_databaseBeatmaps.push_back(bm);
+        } else {
+            // set with invalid ID: treat all its diffs separately. we'll group the diffs by title+artist.
+            std::unordered_map<std::string, std::vector<DatabaseBeatmap *> *> titleArtistToBeatmap;
+            for(auto diff : (*beatmapSets[i].diffs2)) {
+                std::string titleArtist = diff->getTitle();
+                titleArtist.append("|");
+                titleArtist.append(diff->getArtist());
 
-                m_databaseBeatmaps.push_back(bm);
-
-                // and add an entry in the hashmap
-                std::string titleArtist = bm->getTitle();
-                titleArtist.append(bm->getArtist());
-                if(titleArtist.length() > 0) titleArtistToBeatmap[titleArtist] = bm;
-            }
-        }
-    }
-
-    // second, handle all diffs which have an invalid setID, and group them exclusively by artist and title and creator
-    // (diffs with the same artist and title and creator will end up in the same beatmap object) this goes through every
-    // individual diff in a "set" (not really a set because its ID is either 0 or -1) instead of trusting the ID values
-    // from the osu database
-    for(int i = 0; i < beatmapSets.size(); i++) {
-        if(m_bInterruptLoad.load()) break;  // cancellation point
-
-        if(!beatmapSets[i].diffs2->empty())  // sanity check
-        {
-            if(beatmapSets[i].setID < 1) {
-                for(int b = 0; b < beatmapSets[i].diffs2->size(); b++) {
-                    if(m_bInterruptLoad.load()) break;  // cancellation point
-
-                    DatabaseBeatmap *diff2 = (*beatmapSets[i].diffs2)[b];
-
-                    // try finding an already existing beatmap with matching artist and title and creator (into which we
-                    // could inject this lone diff)
-                    bool existsAlready = false;
-
-                    // new: use hashmap
-                    std::string titleArtistCreator = diff2->getTitle();
-                    titleArtistCreator.append(diff2->getArtist());
-                    titleArtistCreator.append(diff2->getCreator());
-                    if(titleArtistCreator.length() > 0) {
-                        const auto result = titleArtistToBeatmap.find(titleArtistCreator);
-                        if(result != titleArtistToBeatmap.end()) {
-                            existsAlready = true;
-
-                            // we have found a matching beatmap, add ourself to its diffs
-                            const_cast<std::vector<DatabaseBeatmap *> &>(result->second->getDifficulties())
-                                .push_back(diff2);
-                        }
-                    }
-
-                    // if we couldn't find any beatmap with our title and artist, create a new one
-                    if(!existsAlready) {
-                        auto diffs2 = new std::vector<DatabaseBeatmap *>();
-                        diffs2->push_back((*beatmapSets[i].diffs2)[b]);
-
-                        DatabaseBeatmap *bm = new DatabaseBeatmap(m_osu, diffs2);
-
-                        m_databaseBeatmaps.push_back(bm);
-                    }
+                auto it = titleArtistToBeatmap.find(titleArtist);
+                if(it == titleArtistToBeatmap.end()) {
+                    titleArtistToBeatmap[titleArtist] = new std::vector<DatabaseBeatmap *>();
                 }
+
+                titleArtistToBeatmap[titleArtist]->push_back(diff);
+            }
+
+            for(auto scuffed_set : titleArtistToBeatmap) {
+                DatabaseBeatmap *bm = new DatabaseBeatmap(m_osu, scuffed_set.second);
+                m_databaseBeatmaps.push_back(bm);
             }
         }
     }
@@ -1420,8 +1379,8 @@ void Database::saveStars() {
     write<u64>(&cache, numStarsCacheEntries);
 
     cache.reserve(cache.size + (34 + 4 + 4 + 4 + 4) * numStarsCacheEntries);
-    for(DatabaseBeatmap *beatmap : m_databaseBeatmaps) {
-        for(DatabaseBeatmap *diff2 : beatmap->getDifficulties()) {
+    for(BeatmapSet *beatmap : m_databaseBeatmaps) {
+        for(BeatmapDifficulty *diff2 : beatmap->getDifficulties()) {
             write_hash(&cache, diff2->getMD5Hash().hash);
             write<f32>(&cache, diff2->getStarsNomod());
             write<i32>(&cache, diff2->getMinBPM());
@@ -1791,49 +1750,38 @@ void Database::saveScores() {
     debugLog("Took %f seconds.\n", (engine->getTimeReal() - startTime));
 }
 
-DatabaseBeatmap *Database::loadRawBeatmap(std::string beatmapPath) {
+BeatmapSet *Database::loadRawBeatmap(std::string beatmapPath) {
     if(Osu::debug->getBool()) debugLog("BeatmapDatabase::loadRawBeatmap() : %s\n", beatmapPath.c_str());
 
     // try loading all diffs
-    std::vector<DatabaseBeatmap *> *diffs2 = new std::vector<DatabaseBeatmap *>();
-    {
-        std::vector<std::string> beatmapFiles = env->getFilesInFolder(beatmapPath);
-        for(int i = 0; i < beatmapFiles.size(); i++) {
-            std::string ext = env->getFileExtensionFromFilePath(beatmapFiles[i]);
+    std::vector<BeatmapDifficulty *> *diffs2 = new std::vector<BeatmapDifficulty *>();
+    std::vector<std::string> beatmapFiles = env->getFilesInFolder(beatmapPath);
+    for(int i = 0; i < beatmapFiles.size(); i++) {
+        std::string ext = env->getFileExtensionFromFilePath(beatmapFiles[i]);
+        if(ext.compare("osu") != 0) continue;
 
-            std::string fullFilePath = beatmapPath;
-            fullFilePath.append(beatmapFiles[i]);
+        std::string fullFilePath = beatmapPath;
+        fullFilePath.append(beatmapFiles[i]);
 
-            // load diffs
-            if(ext.compare("osu") == 0) {
-                DatabaseBeatmap *diff2 = new DatabaseBeatmap(m_osu, fullFilePath, beatmapPath);
-
-                // try to load it. if successful save it, else cleanup and continue to the next osu file
-                if(DatabaseBeatmap::loadMetadata(diff2)) {
-                    // (metadata loaded successfully)
-                    diffs2->push_back(diff2);
-                } else {
-                    if(Osu::debug->getBool()) {
-                        debugLog("BeatmapDatabase::loadRawBeatmap() : Couldn't loadMetadata(), deleting object.\n");
-                        if(diff2->getGameMode() == 0)
-                            engine->showMessageWarning("BeatmapDatabase::loadRawBeatmap()",
-                                                       "Couldn't loadMetadata()\n");
-                    }
-                    SAFE_DELETE(diff2);
-                }
+        BeatmapDifficulty *diff2 = new BeatmapDifficulty(m_osu, fullFilePath, beatmapPath);
+        if(diff2->loadMetadata()) {
+            diffs2->push_back(diff2);
+        } else {
+            if(Osu::debug->getBool()) {
+                debugLog("BeatmapDatabase::loadRawBeatmap() : Couldn't loadMetadata(), deleting object.\n");
             }
+            SAFE_DELETE(diff2);
         }
     }
 
-    // build beatmap from diffs
-    DatabaseBeatmap *beatmap = NULL;
+    BeatmapSet *set = NULL;
     if(diffs2->empty()) {
         delete diffs2;
     } else {
-        beatmap = new DatabaseBeatmap(m_osu, diffs2);
+        set = new BeatmapSet(m_osu, diffs2);
     }
 
-    return beatmap;
+    return set;
 }
 
 void Database::onScoresRename(UString args) {

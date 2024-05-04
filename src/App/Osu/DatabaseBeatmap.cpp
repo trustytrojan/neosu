@@ -7,6 +7,8 @@
 
 #include "DatabaseBeatmap.h"
 
+#include <assert.h>
+
 #include <iostream>
 #include <sstream>
 
@@ -84,7 +86,6 @@ ConVar *DatabaseBeatmap::m_osu_debug_pp_ref = NULL;
 ConVar *DatabaseBeatmap::m_osu_slider_end_inside_check_offset_ref = NULL;
 
 DatabaseBeatmap::DatabaseBeatmap(Osu *osu, std::string filePath, std::string folder, bool filePathIsInMemoryBeatmap) {
-    m_difficulties = new std::vector<DatabaseBeatmap *>();
     m_osu = osu;
 
     m_sFilePath = filePath;
@@ -146,14 +147,48 @@ DatabaseBeatmap::DatabaseBeatmap(Osu *osu, std::string filePath, std::string fol
 
 DatabaseBeatmap::DatabaseBeatmap(Osu *osu, std::vector<DatabaseBeatmap *> *difficulties)
     : DatabaseBeatmap(osu, "", "") {
-    setDifficulties(difficulties);
+    m_difficulties = difficulties;
+    if(m_difficulties->empty()) return;
+
+    // set representative values for this container (i.e. use values from first difficulty)
+    m_sTitle = (*m_difficulties)[0]->m_sTitle;
+    m_sArtist = (*m_difficulties)[0]->m_sArtist;
+    m_sCreator = (*m_difficulties)[0]->m_sCreator;
+    m_sBackgroundImageFileName = (*m_difficulties)[0]->m_sBackgroundImageFileName;
+
+    // also calculate largest representative values
+    m_iLengthMS = 0;
+    m_fCS = 99.f;
+    m_fAR = 0.0f;
+    m_fOD = 0.0f;
+    m_fHP = 0.0f;
+    m_fStarsNomod = 0.0f;
+    m_iMinBPM = 9001;
+    m_iMaxBPM = 0;
+    m_iMostCommonBPM = 0;
+    last_modification_time = 0;
+    for(auto diff : (*m_difficulties)) {
+        if(diff->getLengthMS() > m_iLengthMS) m_iLengthMS = diff->getLengthMS();
+        if(diff->getCS() < m_fCS) m_fCS = diff->getCS();
+        if(diff->getAR() > m_fAR) m_fAR = diff->getAR();
+        if(diff->getHP() > m_fHP) m_fHP = diff->getHP();
+        if(diff->getOD() > m_fOD) m_fOD = diff->getOD();
+        if(diff->getStarsNomod() > m_fStarsNomod) m_fStarsNomod = diff->getStarsNomod();
+        if(diff->getMinBPM() < m_iMinBPM) m_iMinBPM = diff->getMinBPM();
+        if(diff->getMaxBPM() > m_iMaxBPM) m_iMaxBPM = diff->getMaxBPM();
+        if(diff->getMostCommonBPM() > m_iMostCommonBPM) m_iMostCommonBPM = diff->getMostCommonBPM();
+        if(diff->last_modification_time > last_modification_time) last_modification_time = diff->last_modification_time;
+    }
 }
 
 DatabaseBeatmap::~DatabaseBeatmap() {
-    for(size_t i = 0; i < m_difficulties->size(); i++) {
-        delete((*m_difficulties)[i]);
+    if(m_difficulties != nullptr) {
+        for(auto diff : (*m_difficulties)) {
+            assert(diff->m_difficulties == nullptr);
+            delete diff;
+        }
+        delete m_difficulties;
     }
-    SAFE_DELETE(m_difficulties);
 }
 
 DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const std::string &osuFilePath,
@@ -941,276 +976,265 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(c
     return result;
 }
 
-bool DatabaseBeatmap::loadMetadata(DatabaseBeatmap *databaseBeatmap) {
-    if(databaseBeatmap == NULL) return false;
-    if(!databaseBeatmap->m_difficulties->empty()) return false;  // we are just a container
+bool DatabaseBeatmap::loadMetadata() {
+    if(m_difficulties != nullptr) return false;  // we are a beatmapset, not a difficulty
 
     // reset
-    databaseBeatmap->m_timingpoints.clear();
+    m_timingpoints.clear();
 
-    if(Osu::debug->getBool()) debugLog("DatabaseBeatmap::loadMetadata() : %s\n", databaseBeatmap->m_sFilePath.c_str());
+    if(Osu::debug->getBool()) debugLog("DatabaseBeatmap::loadMetadata() : %s\n", m_sFilePath.c_str());
 
     // generate MD5 hash (loads entire file, very slow)
     {
-        File file(!databaseBeatmap->m_bFilePathIsInMemoryBeatmap ? databaseBeatmap->m_sFilePath : "");
+        File file(!m_bFilePathIsInMemoryBeatmap ? m_sFilePath : "");
 
         const u8 *beatmapFile = NULL;
         size_t beatmapFileSize = 0;
         {
-            if(!databaseBeatmap->m_bFilePathIsInMemoryBeatmap) {
+            if(!m_bFilePathIsInMemoryBeatmap) {
                 if(file.canRead()) {
                     beatmapFile = file.readFile();
                     beatmapFileSize = file.getFileSize();
                 }
             } else {
-                beatmapFile = (u8 *)databaseBeatmap->m_sFilePath.c_str();
-                beatmapFileSize = databaseBeatmap->m_sFilePath.size();
+                beatmapFile = (u8 *)m_sFilePath.c_str();
+                beatmapFileSize = m_sFilePath.size();
             }
         }
 
         if(beatmapFile != NULL) {
             auto hash = md5((u8 *)beatmapFile, beatmapFileSize);
-            databaseBeatmap->m_sMD5Hash = MD5Hash(hash.toUtf8());
+            m_sMD5Hash = MD5Hash(hash.toUtf8());
         }
     }
 
     // open osu file again, but this time for parsing
     bool foundAR = false;
-    {
-        File file(!databaseBeatmap->m_bFilePathIsInMemoryBeatmap ? databaseBeatmap->m_sFilePath : "");
-        if(!file.canRead() && !databaseBeatmap->m_bFilePathIsInMemoryBeatmap) {
-            debugLog("Osu Error: Couldn't read file %s\n", databaseBeatmap->m_sFilePath.c_str());
-            return false;
+
+    File file(!m_bFilePathIsInMemoryBeatmap ? m_sFilePath : "");
+    if(!file.canRead() && !m_bFilePathIsInMemoryBeatmap) {
+        debugLog("Osu Error: Couldn't read file %s\n", m_sFilePath.c_str());
+        return false;
+    }
+
+    std::istringstream ss(m_bFilePathIsInMemoryBeatmap ? m_sFilePath.c_str() : "");
+
+    // load metadata only
+    int curBlock = -1;
+    unsigned long long timingPointSortHack = 0;
+    char stringBuffer[1024];
+    std::string curLine;
+    while(!m_bFilePathIsInMemoryBeatmap ? file.canRead() : static_cast<bool>(std::getline(ss, curLine))) {
+        if(!m_bFilePathIsInMemoryBeatmap) {
+            curLine = file.readLine();
         }
 
-        std::istringstream ss(databaseBeatmap->m_bFilePathIsInMemoryBeatmap ? databaseBeatmap->m_sFilePath.c_str()
-                                                                            : "");  // eh
+        // ignore comments, but only if at the beginning of
+        // a line (e.g. allow Artist:DJ'TEKINA//SOMETHING)
+        if(curLine.find("//") == 0) continue;
 
-        // load metadata only
-        int curBlock = -1;
-        unsigned long long timingPointSortHack = 0;
-        char stringBuffer[1024];
-        std::string curLine;
-        while(!databaseBeatmap->m_bFilePathIsInMemoryBeatmap ? file.canRead()
-                                                             : static_cast<bool>(std::getline(ss, curLine))) {
-            if(!databaseBeatmap->m_bFilePathIsInMemoryBeatmap) {
-                curLine = file.readLine();
-            }
+        const char *curLineChar = curLine.c_str();
+        if(curLine.find("[General]") != std::string::npos)
+            curBlock = 0;
+        else if(curLine.find("[Metadata]") != std::string::npos)
+            curBlock = 1;
+        else if(curLine.find("[Difficulty]") != std::string::npos)
+            curBlock = 2;
+        else if(curLine.find("[Events]") != std::string::npos)
+            curBlock = 3;
+        else if(curLine.find("[TimingPoints]") != std::string::npos)
+            curBlock = 4;
+        else if(curLine.find("[HitObjects]") != std::string::npos)
+            break;  // NOTE: stop early
 
-            const char *curLineChar = curLine.c_str();
-            const int commentIndex = curLine.find("//");
-            if(commentIndex == std::string::npos ||
-               commentIndex != 0)  // ignore comments, but only if at the beginning of a line (e.g. allow
-                                   // Artist:DJ'TEKINA//SOMETHING)
+        switch(curBlock) {
+            case -1:  // header (e.g. "osu file format v12")
             {
-                if(curLine.find("[General]") != std::string::npos)
-                    curBlock = 0;
-                else if(curLine.find("[Metadata]") != std::string::npos)
-                    curBlock = 1;
-                else if(curLine.find("[Difficulty]") != std::string::npos)
-                    curBlock = 2;
-                else if(curLine.find("[Events]") != std::string::npos)
-                    curBlock = 3;
-                else if(curLine.find("[TimingPoints]") != std::string::npos)
-                    curBlock = 4;
-                else if(curLine.find("[HitObjects]") != std::string::npos)
-                    break;  // NOTE: stop early
-
-                switch(curBlock) {
-                    case -1:  // header (e.g. "osu file format v12")
-                    {
-                        if(sscanf(curLineChar, " osu file format v %i \n", &databaseBeatmap->m_iVersion) == 1) {
-                            if(databaseBeatmap->m_iVersion > osu_beatmap_version.getInt()) {
-                                debugLog("Ignoring unknown/invalid beatmap version %i\n", databaseBeatmap->m_iVersion);
-                                return false;
-                            }
-                        }
-                    } break;
-
-                    case 0:  // General
-                    {
-                        memset(stringBuffer, '\0', 1024);
-                        if(sscanf(curLineChar, " AudioFilename : %1023[^\n]", stringBuffer) == 1) {
-                            databaseBeatmap->m_sAudioFileName = stringBuffer;
-                            trim(&databaseBeatmap->m_sAudioFileName);
-                        }
-
-                        sscanf(curLineChar, " StackLeniency : %f \n", &databaseBeatmap->m_fStackLeniency);
-                        sscanf(curLineChar, " PreviewTime : %i \n", &databaseBeatmap->m_iPreviewTime);
-                        sscanf(curLineChar, " Mode : %i \n", &databaseBeatmap->m_iGameMode);
-                    } break;
-
-                    case 1:  // Metadata
-                    {
-                        memset(stringBuffer, '\0', 1024);
-                        if(sscanf(curLineChar, " Title :%1023[^\n]", stringBuffer) == 1) {
-                            databaseBeatmap->m_sTitle = UString(stringBuffer);
-                            trim(&databaseBeatmap->m_sTitle);
-                        }
-
-                        memset(stringBuffer, '\0', 1024);
-                        if(sscanf(curLineChar, " Artist :%1023[^\n]", stringBuffer) == 1) {
-                            databaseBeatmap->m_sArtist = UString(stringBuffer);
-                            trim(&databaseBeatmap->m_sArtist);
-                        }
-
-                        memset(stringBuffer, '\0', 1024);
-                        if(sscanf(curLineChar, " Creator :%1023[^\n]", stringBuffer) == 1) {
-                            databaseBeatmap->m_sCreator = UString(stringBuffer);
-                            trim(&databaseBeatmap->m_sCreator);
-                        }
-
-                        memset(stringBuffer, '\0', 1024);
-                        if(sscanf(curLineChar, " Version :%1023[^\n]", stringBuffer) == 1) {
-                            databaseBeatmap->m_sDifficultyName = UString(stringBuffer);
-                            trim(&databaseBeatmap->m_sDifficultyName);
-                        }
-
-                        memset(stringBuffer, '\0', 1024);
-                        if(sscanf(curLineChar, " Source :%1023[^\n]", stringBuffer) == 1) {
-                            databaseBeatmap->m_sSource = stringBuffer;
-                            trim(&databaseBeatmap->m_sSource);
-                        }
-
-                        memset(stringBuffer, '\0', 1024);
-                        if(sscanf(curLineChar, " Tags :%1023[^\n]", stringBuffer) == 1) {
-                            databaseBeatmap->m_sTags = stringBuffer;
-                            trim(&databaseBeatmap->m_sTags);
-                        }
-
-                        sscanf(curLineChar, " BeatmapID : %ld \n", &databaseBeatmap->m_iID);
-                        sscanf(curLineChar, " BeatmapSetID : %i \n", &databaseBeatmap->m_iSetID);
-                    } break;
-
-                    case 2:  // Difficulty
-                    {
-                        sscanf(curLineChar, " CircleSize : %f \n", &databaseBeatmap->m_fCS);
-                        if(sscanf(curLineChar, " ApproachRate : %f \n", &databaseBeatmap->m_fAR) == 1) foundAR = true;
-
-                        sscanf(curLineChar, " HPDrainRate : %f \n", &databaseBeatmap->m_fHP);
-                        sscanf(curLineChar, " OverallDifficulty : %f \n", &databaseBeatmap->m_fOD);
-                        sscanf(curLineChar, " SliderMultiplier : %f \n", &databaseBeatmap->m_fSliderMultiplier);
-                        sscanf(curLineChar, " SliderTickRate : %f \n", &databaseBeatmap->m_fSliderTickRate);
-                    } break;
-
-                    case 3:  // Events
-                    {
-                        memset(stringBuffer, '\0', 1024);
-                        int type, startTime;
-                        if(sscanf(curLineChar, " %i , %i , \"%1023[^\"]\"", &type, &startTime, stringBuffer) == 3) {
-                            if(type == 0) {
-                                databaseBeatmap->m_sBackgroundImageFileName = UString(stringBuffer);
-                                databaseBeatmap->m_sFullBackgroundImageFilePath = databaseBeatmap->m_sFolder;
-                                databaseBeatmap->m_sFullBackgroundImageFilePath.append(
-                                    databaseBeatmap->m_sBackgroundImageFileName);
-                            }
-                        }
-                    } break;
-
-                    case 4:  // TimingPoints
-                    {
-                        // old beatmaps: Offset, Milliseconds per Beat
-                        // old new beatmaps: Offset, Milliseconds per Beat, Meter, Sample Type, Sample Set, Volume,
-                        // !Inherited new new beatmaps: Offset, Milliseconds per Beat, Meter, Sample Type, Sample Set,
-                        // Volume, !Inherited, Kiai Mode
-
-                        double tpOffset;
-                        float tpMSPerBeat;
-                        int tpMeter;
-                        int tpSampleType, tpSampleSet;
-                        int tpVolume;
-                        int tpTimingChange;
-                        int tpKiai = 0;  // optional
-                        if(sscanf(curLineChar, " %lf , %f , %i , %i , %i , %i , %i , %i", &tpOffset, &tpMSPerBeat,
-                                  &tpMeter, &tpSampleType, &tpSampleSet, &tpVolume, &tpTimingChange, &tpKiai) == 8 ||
-                           sscanf(curLineChar, " %lf , %f , %i , %i , %i , %i , %i", &tpOffset, &tpMSPerBeat, &tpMeter,
-                                  &tpSampleType, &tpSampleSet, &tpVolume, &tpTimingChange) == 7) {
-                            TIMINGPOINT t;
-                            {
-                                t.offset = (long)std::round(tpOffset);
-                                t.msPerBeat = tpMSPerBeat;
-
-                                t.sampleType = tpSampleType;
-                                t.sampleSet = tpSampleSet;
-                                t.volume = tpVolume;
-
-                                t.timingChange = tpTimingChange == 1;
-                                t.kiai = tpKiai > 0;
-
-                                t.sortHack = timingPointSortHack++;
-                            }
-                            databaseBeatmap->m_timingpoints.push_back(t);
-                        } else if(sscanf(curLineChar, " %lf , %f", &tpOffset, &tpMSPerBeat) == 2) {
-                            TIMINGPOINT t;
-                            {
-                                t.offset = (long)std::round(tpOffset);
-                                t.msPerBeat = tpMSPerBeat;
-
-                                t.sampleType = 0;
-                                t.sampleSet = 0;
-                                t.volume = 100;
-
-                                t.timingChange = true;
-                                t.kiai = false;
-
-                                t.sortHack = timingPointSortHack++;
-                            }
-                            databaseBeatmap->m_timingpoints.push_back(t);
-                        }
-                    } break;
+                if(sscanf(curLineChar, " osu file format v %i \n", &m_iVersion) == 1) {
+                    if(m_iVersion > osu_beatmap_version.getInt()) {
+                        debugLog("Ignoring unknown/invalid beatmap version %i\n", m_iVersion);
+                        return false;
+                    }
                 }
-            }
+            } break;
+
+            case 0:  // General
+            {
+                memset(stringBuffer, '\0', 1024);
+                if(sscanf(curLineChar, " AudioFilename : %1023[^\n]", stringBuffer) == 1) {
+                    m_sAudioFileName = stringBuffer;
+                    trim(&m_sAudioFileName);
+                }
+
+                sscanf(curLineChar, " StackLeniency : %f \n", &m_fStackLeniency);
+                sscanf(curLineChar, " PreviewTime : %i \n", &m_iPreviewTime);
+                sscanf(curLineChar, " Mode : %i \n", &m_iGameMode);
+            } break;
+
+            case 1:  // Metadata
+            {
+                memset(stringBuffer, '\0', 1024);
+                if(sscanf(curLineChar, " Title :%1023[^\n]", stringBuffer) == 1) {
+                    m_sTitle = UString(stringBuffer);
+                    trim(&m_sTitle);
+                }
+
+                memset(stringBuffer, '\0', 1024);
+                if(sscanf(curLineChar, " Artist :%1023[^\n]", stringBuffer) == 1) {
+                    m_sArtist = UString(stringBuffer);
+                    trim(&m_sArtist);
+                }
+
+                memset(stringBuffer, '\0', 1024);
+                if(sscanf(curLineChar, " Creator :%1023[^\n]", stringBuffer) == 1) {
+                    m_sCreator = UString(stringBuffer);
+                    trim(&m_sCreator);
+                }
+
+                memset(stringBuffer, '\0', 1024);
+                if(sscanf(curLineChar, " Version :%1023[^\n]", stringBuffer) == 1) {
+                    m_sDifficultyName = UString(stringBuffer);
+                    trim(&m_sDifficultyName);
+                }
+
+                memset(stringBuffer, '\0', 1024);
+                if(sscanf(curLineChar, " Source :%1023[^\n]", stringBuffer) == 1) {
+                    m_sSource = stringBuffer;
+                    trim(&m_sSource);
+                }
+
+                memset(stringBuffer, '\0', 1024);
+                if(sscanf(curLineChar, " Tags :%1023[^\n]", stringBuffer) == 1) {
+                    m_sTags = stringBuffer;
+                    trim(&m_sTags);
+                }
+
+                sscanf(curLineChar, " BeatmapID : %ld \n", &m_iID);
+                sscanf(curLineChar, " BeatmapSetID : %i \n", &m_iSetID);
+            } break;
+
+            case 2:  // Difficulty
+            {
+                sscanf(curLineChar, " CircleSize : %f \n", &m_fCS);
+                if(sscanf(curLineChar, " ApproachRate : %f \n", &m_fAR) == 1) foundAR = true;
+                sscanf(curLineChar, " HPDrainRate : %f \n", &m_fHP);
+                sscanf(curLineChar, " OverallDifficulty : %f \n", &m_fOD);
+                sscanf(curLineChar, " SliderMultiplier : %f \n", &m_fSliderMultiplier);
+                sscanf(curLineChar, " SliderTickRate : %f \n", &m_fSliderTickRate);
+            } break;
+
+            case 3:  // Events
+            {
+                memset(stringBuffer, '\0', 1024);
+                int type, startTime;
+                if(sscanf(curLineChar, " %i , %i , \"%1023[^\"]\"", &type, &startTime, stringBuffer) == 3) {
+                    if(type == 0) {
+                        m_sBackgroundImageFileName = UString(stringBuffer);
+                        m_sFullBackgroundImageFilePath = m_sFolder;
+                        m_sFullBackgroundImageFilePath.append(m_sBackgroundImageFileName);
+                    }
+                }
+            } break;
+
+            case 4:  // TimingPoints
+            {
+                // old beatmaps: Offset, Milliseconds per Beat
+                // old new beatmaps: Offset, Milliseconds per Beat, Meter, Sample Type, Sample Set, Volume,
+                // !Inherited new new beatmaps: Offset, Milliseconds per Beat, Meter, Sample Type, Sample Set,
+                // Volume, !Inherited, Kiai Mode
+
+                double tpOffset;
+                float tpMSPerBeat;
+                int tpMeter;
+                int tpSampleType, tpSampleSet;
+                int tpVolume;
+                int tpTimingChange;
+                int tpKiai = 0;  // optional
+                if(sscanf(curLineChar, " %lf , %f , %i , %i , %i , %i , %i , %i", &tpOffset, &tpMSPerBeat, &tpMeter,
+                          &tpSampleType, &tpSampleSet, &tpVolume, &tpTimingChange, &tpKiai) == 8 ||
+                   sscanf(curLineChar, " %lf , %f , %i , %i , %i , %i , %i", &tpOffset, &tpMSPerBeat, &tpMeter,
+                          &tpSampleType, &tpSampleSet, &tpVolume, &tpTimingChange) == 7) {
+                    TIMINGPOINT t;
+                    {
+                        t.offset = (long)std::round(tpOffset);
+                        t.msPerBeat = tpMSPerBeat;
+
+                        t.sampleType = tpSampleType;
+                        t.sampleSet = tpSampleSet;
+                        t.volume = tpVolume;
+
+                        t.timingChange = tpTimingChange == 1;
+                        t.kiai = tpKiai > 0;
+
+                        t.sortHack = timingPointSortHack++;
+                    }
+                    m_timingpoints.push_back(t);
+                } else if(sscanf(curLineChar, " %lf , %f", &tpOffset, &tpMSPerBeat) == 2) {
+                    TIMINGPOINT t;
+                    {
+                        t.offset = (long)std::round(tpOffset);
+                        t.msPerBeat = tpMSPerBeat;
+
+                        t.sampleType = 0;
+                        t.sampleSet = 0;
+                        t.volume = 100;
+
+                        t.timingChange = true;
+                        t.kiai = false;
+
+                        t.sortHack = timingPointSortHack++;
+                    }
+                    m_timingpoints.push_back(t);
+                }
+            } break;
         }
     }
 
     // gamemode filter
-    if(databaseBeatmap->m_iGameMode != 0) return false;  // nothing more to do here
+    if(m_iGameMode != 0) return false;  // nothing more to do here
 
     // general sanity checks
-    if((databaseBeatmap->m_timingpoints.size() < 1)) {
+    if((m_timingpoints.size() < 1)) {
         if(Osu::debug->getBool()) debugLog("DatabaseBeatmap::loadMetadata() : no timingpoints in beatmap!\n");
-
         return false;  // nothing more to do here
     }
 
     // build sound file path
-    databaseBeatmap->m_sFullSoundFilePath = databaseBeatmap->m_sFolder;
-    databaseBeatmap->m_sFullSoundFilePath.append(databaseBeatmap->m_sAudioFileName);
+    m_sFullSoundFilePath = m_sFolder;
+    m_sFullSoundFilePath.append(m_sAudioFileName);
 
     // sort timingpoints and calculate BPM range
-    if(databaseBeatmap->m_timingpoints.size() > 0) {
-        if(Osu::debug->getBool()) debugLog("DatabaseBeatmap::loadMetadata() : calculating BPM range ...\n");
-
+    if(m_timingpoints.size() > 0) {
         // sort timingpoints by time
-        std::sort(databaseBeatmap->m_timingpoints.begin(), databaseBeatmap->m_timingpoints.end(),
-                  TimingPointSortComparator());
+        std::sort(m_timingpoints.begin(), m_timingpoints.end(), TimingPointSortComparator());
 
         // NOTE: if we have our own stars/bpm cached then use that
         bool bpm_was_cached = false;
         auto db = bancho.osu->getSongBrowser()->getDatabase();
-        const auto result = db->m_starsCache.find(databaseBeatmap->getMD5Hash());
+        const auto result = db->m_starsCache.find(getMD5Hash());
         if(result != db->m_starsCache.end()) {
             if(result->second.starsNomod >= 0.f) {
-                databaseBeatmap->m_fStarsNomod = result->second.starsNomod;
+                m_fStarsNomod = result->second.starsNomod;
             }
             if(result->second.min_bpm >= 0) {
-                databaseBeatmap->m_iMinBPM = result->second.min_bpm;
-                databaseBeatmap->m_iMaxBPM = result->second.max_bpm;
-                databaseBeatmap->m_iMostCommonBPM = result->second.common_bpm;
+                m_iMinBPM = result->second.min_bpm;
+                m_iMaxBPM = result->second.max_bpm;
+                m_iMostCommonBPM = result->second.common_bpm;
                 bpm_was_cached = true;
             }
         }
 
         if(!bpm_was_cached) {
-            auto bpm = getBPM(databaseBeatmap->m_timingpoints);
-            databaseBeatmap->m_iMinBPM = bpm.min;
-            databaseBeatmap->m_iMaxBPM = bpm.max;
-            databaseBeatmap->m_iMostCommonBPM = bpm.most_common;
+            if(Osu::debug->getBool()) debugLog("DatabaseBeatmap::loadMetadata() : calculating BPM range ...\n");
+            auto bpm = getBPM(m_timingpoints);
+            m_iMinBPM = bpm.min;
+            m_iMaxBPM = bpm.max;
+            m_iMostCommonBPM = bpm.most_common;
         }
     }
 
     // special case: old beatmaps have AR = OD, there is no ApproachRate stored
-    if(!foundAR) databaseBeatmap->m_fAR = databaseBeatmap->m_fOD;
+    if(!foundAR) m_fAR = m_fOD;
 
     return true;
 }
@@ -1221,7 +1245,7 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
 
     // NOTE: reload metadata (force ensures that all necessary data is ready for creating hitobjects and playing etc.,
     // also if beatmap file is changed manually in the meantime)
-    if(!loadMetadata(databaseBeatmap)) {
+    if(!databaseBeatmap->loadMetadata()) {
         result.errorCode = 1;
         return result;
     }
@@ -1484,45 +1508,6 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
     debugLog("DatabaseBeatmap::load() loaded %i hitobjects\n", result.hitobjects.size());
 
     return result;
-}
-
-void DatabaseBeatmap::setDifficulties(std::vector<DatabaseBeatmap *> *difficulties) {
-    if(m_difficulties != difficulties) {
-        delete m_difficulties;
-        m_difficulties = difficulties;
-    }
-
-    if(m_difficulties->empty()) return;
-
-    // set representative values for this container (i.e. use values from first difficulty)
-    m_sTitle = (*m_difficulties)[0]->m_sTitle;
-    m_sArtist = (*m_difficulties)[0]->m_sArtist;
-    m_sCreator = (*m_difficulties)[0]->m_sCreator;
-    m_sBackgroundImageFileName = (*m_difficulties)[0]->m_sBackgroundImageFileName;
-
-    // also precalculate some largest representative values
-    m_iLengthMS = 0;
-    m_fCS = 0.0f;
-    m_fAR = 0.0f;
-    m_fOD = 0.0f;
-    m_fHP = 0.0f;
-    m_fStarsNomod = 0.0f;
-    m_iMinBPM = std::numeric_limits<int>::max();
-    m_iMaxBPM = 0;
-    m_iMostCommonBPM = 0;
-    last_modification_time = 0;
-    for(auto diff : (*m_difficulties)) {
-        if(diff->getLengthMS() > m_iLengthMS) m_iLengthMS = diff->getLengthMS();
-        if(diff->getCS() > m_fCS) m_fCS = diff->getCS();
-        if(diff->getAR() > m_fAR) m_fAR = diff->getAR();
-        if(diff->getHP() > m_fHP) m_fHP = diff->getHP();
-        if(diff->getOD() > m_fOD) m_fOD = diff->getOD();
-        if(diff->getStarsNomod() > m_fStarsNomod) m_fStarsNomod = diff->getStarsNomod();
-        if(diff->getMinBPM() < m_iMinBPM) m_iMinBPM = diff->getMinBPM();
-        if(diff->getMaxBPM() > m_iMaxBPM) m_iMaxBPM = diff->getMaxBPM();
-        if(diff->getMostCommonBPM() > m_iMostCommonBPM) m_iMostCommonBPM = diff->getMostCommonBPM();
-        if(diff->last_modification_time > last_modification_time) last_modification_time = diff->last_modification_time;
-    }
 }
 
 DatabaseBeatmap::TIMING_INFO DatabaseBeatmap::getTimingInfoForTime(unsigned long positionMS) {

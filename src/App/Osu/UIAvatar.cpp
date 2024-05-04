@@ -81,12 +81,10 @@ UIAvatar::UIAvatar(u32 player_id, float xPos, float yPos, float xSize, float ySi
 }
 
 UIAvatar::~UIAvatar() {
-    if(avatar != nullptr) {
-        engine->getResourceManager()->destroyResource(avatar);
-    }
+    // XXX: leaking avatar Resource here, because we don't know in how many places it will be reused
 }
 
-void UIAvatar::draw(Graphics *g, float alpha) {
+void UIAvatar::draw_avatar(Graphics *g, float alpha) {
     if(!on_screen) return;  // Comment when you need to debug on_screen logic
 
     if(avatar == nullptr) {

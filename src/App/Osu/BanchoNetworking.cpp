@@ -44,6 +44,13 @@ pthread_mutex_t api_responses_mutex = PTHREAD_MUTEX_INITIALIZER;
 std::vector<APIRequest> api_request_queue;
 std::vector<Packet> api_response_queue;
 
+// dummy method to prevent curl from printing to stdout
+size_t curldummy(void *buffer, size_t size, size_t nmemb, void *userp) {
+    (void)buffer;
+    (void)userp;
+    return size * nmemb;
+}
+
 void disconnect() {
     pthread_mutex_lock(&outgoing_mutex);
 
@@ -66,6 +73,7 @@ void disconnect() {
         curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, packet.pos);
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curldummy);
 #ifdef _WIN32
         // ABSOLUTELY RETARDED, FUCK WINDOWS
         curl_easy_setopt(curl, CURLOPT_CAINFO, "curl-ca-bundle.crt");
@@ -481,6 +489,9 @@ void send_api_request(APIRequest request) {
 void send_packet(Packet &packet) {
     if(bancho.user_id <= 0) {
         // Don't queue any packets until we're logged in
+        free(packet.memory);
+        packet.memory = nullptr;
+        packet.size = 0;
         return;
     }
 
@@ -500,6 +511,10 @@ void send_packet(Packet &packet) {
     write_bytes(&outgoing, packet.memory, packet.pos);
 
     pthread_mutex_unlock(&outgoing_mutex);
+
+    free(packet.memory);
+    packet.memory = nullptr;
+    packet.size = 0;
 }
 
 void init_networking_thread() {

@@ -3,9 +3,9 @@
 #include "Database.h"
 
 class Osu;
-class FinishedScore;
 class LiveScore;
 class SkinImage;
+struct FinishedScore;
 
 class UIRankingScreenRankingPanel : public CBaseUIImage {
    public:

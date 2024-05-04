@@ -127,12 +127,11 @@ class UserStatsScreenBackgroundPPRecalculator : public Resource {
                         m_osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(score.md5hash);
                     if(diff2 == NULL) {
                         if(Osu::debug->getBool()) debugLog("PPRecalc couldn't find %s\n", score.md5hash.toUtf8());
-
                         continue;
                     }
 
                     // 1.5) reload metadata for sanity (maybe osu!.db has outdated AR/CS/OD/HP or some other shit)
-                    if(!DatabaseBeatmap::loadMetadata(diff2)) continue;
+                    if(!diff2->loadMetadata()) continue;
 
                     const Replay::BEATMAP_VALUES legacyValues = Replay::getBeatmapValuesForModsLegacy(
                         score.modsLegacy, diff2->getAR(), diff2->getCS(), diff2->getOD(), diff2->getHP());

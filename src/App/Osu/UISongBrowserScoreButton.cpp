@@ -106,7 +106,7 @@ void UISongBrowserScoreButton::draw(Graphics *g) {
         bool is_below_top = m_avatar->getPos().y + m_avatar->getSize().y >= m_scoreBrowser->getPos().y;
         bool is_above_bottom = m_avatar->getPos().y <= m_scoreBrowser->getPos().y + m_scoreBrowser->getSize().y;
         m_avatar->on_screen = is_below_top && is_above_bottom;
-        m_avatar->draw(g, 1.f);
+        m_avatar->draw_avatar(g, 1.f);
     }
     const float indexNumberScale = 0.35f;
     const float indexNumberWidthPercent = (m_style == STYLE::TOP_RANKS ? 0.075f : 0.15f);

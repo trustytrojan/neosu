@@ -166,7 +166,7 @@ struct zarray {
         nb = new_nb;
     }
 
-    void swap(zarray<T> other) {
+    void swap(zarray<T> &other) {
         size_t omax = max;
         size_t onb = nb;
         T *omemory = memory;

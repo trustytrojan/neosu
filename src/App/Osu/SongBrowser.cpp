@@ -266,17 +266,7 @@ bool SongBrowser::SortByBPM::operator()(UISongBrowserButton const *a, UISongBrow
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
 
     int bpm1 = a->getDatabaseBeatmap()->getMostCommonBPM();
-    const std::vector<DatabaseBeatmap *> &aDiffs = a->getDatabaseBeatmap()->getDifficulties();
-    for(size_t i = 0; i < aDiffs.size(); i++) {
-        if(aDiffs[i]->getMostCommonBPM() > bpm1) bpm1 = aDiffs[i]->getMostCommonBPM();
-    }
-
     int bpm2 = b->getDatabaseBeatmap()->getMostCommonBPM();
-    const std::vector<DatabaseBeatmap *> &bDiffs = b->getDatabaseBeatmap()->getDifficulties();
-    for(size_t i = 0; i < bDiffs.size(); i++) {
-        if(bDiffs[i]->getMostCommonBPM() > bpm2) bpm2 = bDiffs[i]->getMostCommonBPM();
-    }
-
     if(bpm1 == bpm2) return a->getSortHack() < b->getSortHack();
     return bpm1 < bpm2;
 }
@@ -301,65 +291,27 @@ bool SongBrowser::SortByDateAdded::operator()(UISongBrowserButton const *a, UISo
 bool SongBrowser::SortByDifficulty::operator()(UISongBrowserButton const *a, UISongBrowserButton const *b) const {
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
 
+    float stars1 = a->getDatabaseBeatmap()->getStarsNomod();
+    float stars2 = b->getDatabaseBeatmap()->getStarsNomod();
+    if(stars1 != stars2) return stars1 < stars2;
+
     float diff1 = (a->getDatabaseBeatmap()->getAR() + 1) * (a->getDatabaseBeatmap()->getCS() + 1) *
                   (a->getDatabaseBeatmap()->getHP() + 1) * (a->getDatabaseBeatmap()->getOD() + 1) *
                   (std::max(a->getDatabaseBeatmap()->getMostCommonBPM(), 1));
-    float stars1 = a->getDatabaseBeatmap()->getStarsNomod();
-    const std::vector<DatabaseBeatmap *> &aDiffs = a->getDatabaseBeatmap()->getDifficulties();
-    for(size_t i = 0; i < aDiffs.size(); i++) {
-        const DatabaseBeatmap *d = aDiffs[i];
-        if(d->getStarsNomod() > stars1) stars1 = d->getStarsNomod();
-
-        const float tempDiff1 = (d->getAR() + 1) * (d->getCS() + 1) * (d->getHP() + 1) * (d->getOD() + 1) *
-                                (std::max(d->getMostCommonBPM(), 1));
-        if(tempDiff1 > diff1) diff1 = tempDiff1;
-    }
-
     float diff2 = (b->getDatabaseBeatmap()->getAR() + 1) * (b->getDatabaseBeatmap()->getCS() + 1) *
                   (b->getDatabaseBeatmap()->getHP() + 1) * (b->getDatabaseBeatmap()->getOD() + 1) *
                   (std::max(b->getDatabaseBeatmap()->getMostCommonBPM(), 1));
-    float stars2 = b->getDatabaseBeatmap()->getStarsNomod();
-    const std::vector<DatabaseBeatmap *> &bDiffs = b->getDatabaseBeatmap()->getDifficulties();
-    for(size_t i = 0; i < bDiffs.size(); i++) {
-        const DatabaseBeatmap *d = bDiffs[i];
-        if(d->getStarsNomod() > stars2) stars2 = d->getStarsNomod();
+    if(diff1 != diff2) return diff1 < diff2;
 
-        const float tempDiff2 = (d->getAR() + 1) * (d->getCS() + 1) * (d->getHP() + 1) * (d->getOD() + 1) *
-                                (std::max(d->getMostCommonBPM(), 1));
-        if(tempDiff2 > diff1) diff2 = tempDiff2;
-    }
-
-    if(stars1 > 0 && stars2 > 0) {
-        // strict weak ordering!
-        if(stars1 == stars2) return a->getSortHack() < b->getSortHack();
-
-        return stars1 < stars2;
-    } else {
-        // strict weak ordering!
-        if(diff1 == diff2) return a->getSortHack() < b->getSortHack();
-
-        return diff1 < diff2;
-    }
+    return a->getSortHack() < b->getSortHack();
 }
 
 bool SongBrowser::SortByLength::operator()(UISongBrowserButton const *a, UISongBrowserButton const *b) const {
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
 
     unsigned long length1 = a->getDatabaseBeatmap()->getLengthMS();
-    const std::vector<DatabaseBeatmap *> &aDiffs = a->getDatabaseBeatmap()->getDifficulties();
-    for(size_t i = 0; i < aDiffs.size(); i++) {
-        if(aDiffs[i]->getLengthMS() > length1) length1 = aDiffs[i]->getLengthMS();
-    }
-
     unsigned long length2 = b->getDatabaseBeatmap()->getLengthMS();
-    const std::vector<DatabaseBeatmap *> &bDiffs = b->getDatabaseBeatmap()->getDifficulties();
-    for(size_t i = 0; i < bDiffs.size(); i++) {
-        if(bDiffs[i]->getLengthMS() > length2) length2 = bDiffs[i]->getLengthMS();
-    }
-
-    // strict weak ordering!
     if(length1 == length2) return a->getSortHack() < b->getSortHack();
-
     return length1 < length2;
 }
 
@@ -1720,6 +1672,7 @@ void SongBrowser::refreshBeatmaps() {
 
     m_selectedBeatmap->pausePreviewMusic();
     m_selectedBeatmap->deselect();
+    SAFE_DELETE(m_selectedBeatmap);
     m_selectedBeatmap = new Beatmap(m_osu);
 
     m_selectionPreviousSongButton = NULL;
@@ -3168,14 +3121,19 @@ void SongBrowser::onDatabaseLoadingFinished() {
 
     // main menu starts playing a song before the database is loaded,
     // re-select it after the database has been loaded
-    if(m_osu->m_mainMenu->preloaded_beatmap != nullptr) {
+    if(m_osu->m_mainMenu->preloaded_beatmapset != nullptr) {
         auto matching_beatmap = getDatabase()->getBeatmapDifficulty(m_osu->m_mainMenu->preloaded_beatmap->getMD5Hash());
         if(matching_beatmap) {
             onDifficultySelected(matching_beatmap, false);
             selectSelectedBeatmapSongButton();
         }
 
-        SAFE_DELETE(m_osu->m_mainMenu->preloaded_beatmap);
+        SAFE_DELETE(m_osu->m_mainMenu->preloaded_beatmapset);
+    }
+
+    // ok, if we still haven't selected a song, do so now
+    if(m_selectedBeatmap->getSelectedDifficulty2() == nullptr) {
+        selectRandomBeatmap();
     }
 }
 
