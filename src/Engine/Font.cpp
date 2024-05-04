@@ -86,7 +86,8 @@ void McFont::init() {
     FT_Set_Char_Size(face, m_iFontSize * 64, m_iFontSize * 64, m_iFontDPI, m_iFontDPI);
 
     // create texture atlas
-    const int atlasSize = m_iFontSize * m_iFontDPI / 10;  // XXX: incorrect calculation
+    // HACKHACK: hardcoded max atlas size, and heuristic
+    const int atlasSize = (m_iFontDPI > 96 ? (m_iFontDPI > 2 * 96 ? 2048 : 1024) : 512);
     engine->getResourceManager()->requestNextLoadUnmanaged();
     m_textureAtlas = engine->getResourceManager()->createTextureAtlas(atlasSize, atlasSize);
 
@@ -271,8 +272,6 @@ void McFont::renderFTGlyphToTextureAtlas(FT_Library library, FT_Face face, wchar
     FT_Bitmap &bitmap = bitmapGlyph->bitmap;
     const int width = bitmap.width;
     const int height = bitmap.rows;
-
-    debugLog("Creating texture for font %s (%dpt)\n", m_sFilePath.c_str(), m_iFontSize);
 
     // build texture
     Vector2 atlasPos;

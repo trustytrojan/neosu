@@ -1,5 +1,12 @@
 #pragma once
 
+#ifdef _WIN32
+// #including <shlwapi.h> for strcasecmp and StrStrIA
+#include <winsock2.h>
+// winsock2.h must be included before windows.h
+#include <shlwapi.h>
+#endif
+
 // STD INCLUDES
 
 #include <math.h>
@@ -38,6 +45,11 @@
 
 #ifndef NULL
 #define NULL nullptr
+#endif
+
+#ifdef _WIN32
+#define reallocarray(ptr, a, b) realloc(ptr, a * b)
+#define strcasestr(a, b) StrStrIA(a, b)
 #endif
 
 typedef unsigned char COLORPART;

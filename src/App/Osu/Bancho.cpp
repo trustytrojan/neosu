@@ -1,4 +1,5 @@
 #ifdef _WIN32
+#include "cbase.h"
 #include <stdio.h>
 #include <wbemidl.h>
 #include <windows.h>

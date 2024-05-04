@@ -8,8 +8,9 @@
 #ifndef SOUNDENGINE_H
 #define SOUNDENGINE_H
 
-#include "Sound.h"
 #include "cbase.h"
+// ^ needs to be before Sound.h on windows
+#include "Sound.h"
 
 enum class OutputDriver {
     NONE,

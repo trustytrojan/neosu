@@ -498,7 +498,27 @@ Osu::Osu(int instanceID) {
     m_osu_mod_mafham_ref->setCallback(fastdelegate::MakeDelegate(this, &Osu::onModMafhamChange));
     m_osu_mod_fposu_ref->setCallback(fastdelegate::MakeDelegate(this, &Osu::onModFPoSuChange));
 
-    flashlight_shader = engine->getResourceManager()->loadShader("flashlight.vsh", "flashlight.fsh", "flashlight");
+    // Not the type of shader you want players to tweak or delete, so loading from string
+    flashlight_shader = engine->getGraphics()->createShaderFromSource(
+        "#version 110\n"
+        "varying vec2 tex_coord;\n"
+        "void main() {\n"
+        "    gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.x, gl_Vertex.y, 0.0, 1.0);\n"
+        "    gl_FrontColor = gl_Color;\n"
+        "    tex_coord = gl_MultiTexCoord0.xy;\n"
+        "}",
+        "#version 110\n"
+        "uniform float max_opacity;\n"
+        "uniform float flashlight_radius;\n"
+        "uniform vec2 flashlight_center;\n"
+        "void main(void) {\n"
+        "    float dist = distance(flashlight_center, gl_FragCoord.xy);\n"
+        "    float opacity = 1.0 - smoothstep(flashlight_radius, flashlight_radius * 1.4, dist);\n"
+        "    opacity = 1.0 - min(opacity, max_opacity);\n"
+        "    gl_FragColor = vec4(0.0, 0.0, 0.0, opacity);\n"
+        "}"
+    );
+
 }
 
 Osu::~Osu() {

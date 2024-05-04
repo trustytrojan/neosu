@@ -12,6 +12,7 @@
 #ifndef WINCONTEXTMENU_H
 #define WINCONTEXTMENU_H
 
+#include "cbase.h"
 #include <Windows.h>
 
 #include "ContextMenu.h"

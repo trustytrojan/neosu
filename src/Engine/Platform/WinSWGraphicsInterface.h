@@ -10,6 +10,7 @@
 #ifndef WINSWGRAPHICSINTERFACE_H
 #define WINSWGRAPHICSINTERFACE_H
 
+#include "cbase.h"
 #include <Windows.h>
 
 #include "SWGraphicsInterface.h"

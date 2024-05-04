@@ -1,4 +1,5 @@
 #ifdef _WIN32
+#include "cbase.h"
 #include <windows.h>
 #else
 #include <sys/random.h>

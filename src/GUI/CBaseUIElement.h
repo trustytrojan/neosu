@@ -1,12 +1,5 @@
-//================ Copyright (c) 2013, PG, All rights reserved. =================//
-//
-// Purpose:		the base class for all UI Elements
-//
-// $NoKeywords: $buie
-//===============================================================================//
-
-#ifndef CBASEUIELEMENT_H
-#define CBASEUIELEMENT_H
+#pragma once
+#include "cbase.h"
 
 #define ELEMENT_BODY(T)                                          \
     virtual T *setPos(float xPos, float yPos) {                  \
@@ -381,7 +374,6 @@
     }
 
 #include "KeyboardListener.h"
-#include "cbase.h"
 
 class CBaseUIElement : public KeyboardListener {
    public:
@@ -473,5 +465,3 @@ class CBaseUIElement : public KeyboardListener {
     bool m_bMouseInsideCheck;
     bool m_bMouseUpCheck;
 };
-
-#endif

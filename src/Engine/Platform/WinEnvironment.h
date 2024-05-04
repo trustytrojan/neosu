@@ -10,6 +10,7 @@
 #ifndef WINENVIRONMENT_H
 #define WINENVIRONMENT_H
 
+#include "cbase.h"
 #include <windows.h>
 
 #include "Environment.h"

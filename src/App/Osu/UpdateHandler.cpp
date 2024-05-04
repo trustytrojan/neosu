@@ -130,9 +130,8 @@ void UpdateHandler::_requestUpdate() {
     const char *os = "linux";
 #endif
 
-    // XXX: Change update URL to /update/ or something
     debugLog("Downloading latest update... (current v%.2f, latest v%.2f)\n", current_version, fLatestVersion);
-    update_url = UString::format(NEOSU_UPDATE_URL "/neosu-multiplayer-%s-v%.2f.zip", os, fLatestVersion);
+    update_url = UString::format(NEOSU_UPDATE_URL "/update/%s-v%.2f.zip", os, fLatestVersion);
 }
 
 bool UpdateHandler::_downloadUpdate() {

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "cbase.h"
+
 #define NOBASSOVERLOADS
 #include <bass.h>
 #include <bass_fx.h>

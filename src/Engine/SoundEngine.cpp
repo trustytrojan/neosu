@@ -456,7 +456,7 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
         // BASS_WASAPI_EXCLUSIVE makes neosu have exclusive output to the sound card
         auto flags = BASS_WASAPI_RAW | BASS_MIXER_NONSTOP | BASS_WASAPI_EXCLUSIVE;
 
-        if(!BASS_WASAPI_Init(device.id, 0, 0, flags, bufferSize, updatePeriod, WASAPIPROC_BASS, g_bassOutputMixer)) {
+        if(!BASS_WASAPI_Init(device.id, 0, 0, flags, bufferSize, updatePeriod, WASAPIPROC_BASS, (void*)g_bassOutputMixer)) {
             const int errorCode = BASS_ErrorGetCode();
             if(errorCode == BASS_ERROR_WASAPI_BUFFER) {
                 debugLog("Sound Error: BASS_WASAPI_Init() failed with BASS_ERROR_WASAPI_BUFFER!");
