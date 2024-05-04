@@ -258,6 +258,8 @@ class Beatmap {
     inline const std::vector<HitObject *> &getHitObjectsPointer() const { return m_hitobjects; }
     inline float getBreakBackgroundFadeAnim() const { return m_fBreakBackgroundFade; }
 
+    Sound *m_music;
+
    protected:
     // internal
     bool canDraw();
@@ -295,7 +297,6 @@ class Beatmap {
     DatabaseBeatmap *m_selectedDifficulty2;
 
     // sound
-    Sound *m_music;
     float m_fMusicFrequencyBackup;
     long m_iCurMusicPos;
     long m_iCurMusicPosWithOffsets;

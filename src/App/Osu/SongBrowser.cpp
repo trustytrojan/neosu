@@ -1711,6 +1711,13 @@ void SongBrowser::refreshBeatmaps() {
     checkHandleKillDynamicStarCalculator(false);
     checkHandleKillBackgroundSearchMatcher();
 
+    // don't pause the music the first time we load the song database
+    static bool first_refresh = true;
+    if(first_refresh) {
+        m_selectedBeatmap->m_music = nullptr;
+        first_refresh = false;
+    }
+
     m_selectedBeatmap->pausePreviewMusic();
     m_selectedBeatmap->deselect();
     m_selectedBeatmap = new Beatmap(m_osu);

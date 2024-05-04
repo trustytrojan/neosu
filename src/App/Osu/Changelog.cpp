@@ -51,6 +51,7 @@ Changelog::Changelog(Osu *osu) : ScreenBackable(osu) {
     latest.changes.push_back("- Fixed FPoSu camera not following cursor while watching replays");
     latest.changes.push_back("- Fixed FPoSu mod not being included in score data");
     latest.changes.push_back("- Fixed level bar always being at 0%");
+    latest.changes.push_back("- Fixed music pausing on first song database load");
     latest.changes.push_back("- Fixed not being able to adjust volume while song database was loading");
     latest.changes.push_back("- Fixed pause button not working after cancelling database load");
     latest.changes.push_back("- Fixed replay playback starting too fast");
