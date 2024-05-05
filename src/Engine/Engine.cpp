@@ -193,6 +193,8 @@ Engine::Engine(Environment *environment, const char *args) {
 Engine::~Engine() {
     debugLog("\n-= Engine Shutdown =-\n");
 
+    // The windows build freezes on windows when freeing these, idk why
+#ifndef _WIN32
     debugLog("Engine: Freeing app...\n");
     SAFE_DELETE(m_app);
 
@@ -243,6 +245,7 @@ Engine::~Engine() {
 
     debugLog("Engine: Freeing environment...\n");
     SAFE_DELETE(m_environment);
+#endif
 
     debugLog("Engine: Goodbye.");
 

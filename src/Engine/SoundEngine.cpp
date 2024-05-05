@@ -45,7 +45,6 @@ ConVar snd_updateperiod("snd_updateperiod", 10, FCVAR_NONE, "BASS_CONFIG_UPDATEP
 ConVar snd_dev_period("snd_dev_period", 10, FCVAR_NONE,
                       "BASS_CONFIG_DEV_PERIOD length in milliseconds, or if negative then in samples");
 ConVar snd_dev_buffer("snd_dev_buffer", 30, FCVAR_NONE, "BASS_CONFIG_DEV_BUFFER length in milliseconds");
-ConVar snd_chunk_size("snd_chunk_size", 256, FCVAR_NONE, "only used in horizon builds with sdl mixer audio");
 
 ConVar snd_restrict_play_frame(
     "snd_restrict_play_frame", true, FCVAR_NONE,
@@ -335,7 +334,7 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
     }
 
     if(device.driver == OutputDriver::BASS) {
-        // Normal output: render playback buffer every 5ms (buffer is 100ms large)
+        // Normal output: render playback buffer every 5ms (buffer is 30ms large)
         BASS_SetConfig(BASS_CONFIG_UPDATEPERIOD, 5);
         BASS_SetConfig(BASS_CONFIG_UPDATETHREADS, 1);
     } else if(device.driver == OutputDriver::BASS_ASIO || device.driver == OutputDriver::BASS_WASAPI) {
@@ -343,9 +342,6 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
         BASS_SetConfig(BASS_CONFIG_UPDATEPERIOD, 0);
         BASS_SetConfig(BASS_CONFIG_UPDATETHREADS, 0);
     }
-
-    // Base offset compensation. Gets modified later when using ASIO driver.
-    osu_universal_offset_hardcoded.setValue(-25.0f);
 
     // allow users to override some defaults (but which may cause beatmap desyncs)
     // we only want to set these if their values have been explicitly modified (to avoid sideeffects in the default
@@ -384,6 +380,8 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
                                      UString::format("BASS_Init(%d) failed (%i)!", device.id, BASS_ErrorGetCode()));
             return false;
         }
+
+        osu_universal_offset_hardcoded.setValue(-25.f);
     }
 
     auto mixer_flags = BASS_SAMPLE_FLOAT | BASS_MIXER_NONSTOP | BASS_MIXER_RESUME;
@@ -474,6 +472,8 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
                                      UString::format("BASS_WASAPI_Start() failed (%i)!", BASS_ErrorGetCode()));
             return false;
         }
+
+        osu_universal_offset_hardcoded.setValue(-(25.0f + win_snd_wasapi_buffer_size.getFloat() * 1000.0f));
     }
 #endif
 
