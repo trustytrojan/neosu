@@ -71,6 +71,10 @@ for /r "src" %%i in (*.cpp) do (
 	)
 )
 
+rem PREPARE ICON
+windres resource.rc -O coff -o obj/icon.o
+<nul set /p "=obj/icon.o " >> build_flags.txt
+
 rem BUILD EXECUTABLE
 <nul set /p "=!LDFLAGS! " >> build_flags.txt
 %LD% @build_flags.txt
