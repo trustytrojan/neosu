@@ -30,7 +30,7 @@
 #include "RichPresence.h"
 #include "Skin.h"
 #include "SkinImage.h"
-#include "SongBrowser.h"
+#include "SongBrowser/SongBrowser.h"
 #include "SoundEngine.h"
 #include "UIButton.h"
 #include "UpdateHandler.h"

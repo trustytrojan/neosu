@@ -1,11 +1,10 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		beatmap + diff button
-//
-// $NoKeywords: $osusbsb
-//===============================================================================//
+#include "SongButton.h"
 
-#include "UISongBrowserSongButton.h"
+#include "CollectionButton.h"
+#include "ScoreButton.h"
+#include "SongBrowser.h"
+#include "SongDifficultyButton.h"
+// ---
 
 #include "BackgroundImageHandler.h"
 #include "Collections.h"
@@ -18,22 +17,17 @@
 #include "ResourceManager.h"
 #include "Skin.h"
 #include "SkinImage.h"
-#include "SongBrowser.h"
 #include "UIContextMenu.h"
-#include "UISongBrowserCollectionButton.h"
-#include "UISongBrowserScoreButton.h"
-#include "UISongBrowserSongDifficultyButton.h"
 
 ConVar osu_draw_songbrowser_thumbnails("osu_draw_songbrowser_thumbnails", true, FCVAR_NONE);
 ConVar osu_songbrowser_thumbnail_delay("osu_songbrowser_thumbnail_delay", 0.1f, FCVAR_NONE);
 ConVar osu_songbrowser_thumbnail_fade_in_duration("osu_songbrowser_thumbnail_fade_in_duration", 0.1f, FCVAR_NONE);
 
-float UISongBrowserSongButton::thumbnailYRatio = 1.333333f;
+float SongButton::thumbnailYRatio = 1.333333f;
 
-UISongBrowserSongButton::UISongBrowserSongButton(Osu *osu, SongBrowser *songBrowser, CBaseUIScrollView *view,
-                                                 UIContextMenu *contextMenu, float xPos, float yPos, float xSize,
-                                                 float ySize, UString name, DatabaseBeatmap *databaseBeatmap)
-    : UISongBrowserButton(osu, songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, name) {
+SongButton::SongButton(Osu *osu, SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu,
+                       float xPos, float yPos, float xSize, float ySize, UString name, DatabaseBeatmap *databaseBeatmap)
+    : Button(osu, songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, name) {
     m_databaseBeatmap = databaseBeatmap;
 
     m_grade = FinishedScore::Grade::D;
@@ -58,8 +52,8 @@ UISongBrowserSongButton::UISongBrowserSongButton(Osu *osu, SongBrowser *songBrow
 
         // and add them
         for(int i = 0; i < difficulties.size(); i++) {
-            UISongBrowserSongButton *songButton = new UISongBrowserSongDifficultyButton(
-                m_osu, m_songBrowser, m_view, m_contextMenu, 0, 0, 0, 0, "", difficulties[i], this);
+            SongButton *songButton = new SongDifficultyButton(m_osu, m_songBrowser, m_view, m_contextMenu, 0, 0, 0, 0,
+                                                              "", difficulties[i], this);
 
             m_children.push_back(songButton);
         }
@@ -68,14 +62,14 @@ UISongBrowserSongButton::UISongBrowserSongButton(Osu *osu, SongBrowser *songBrow
     updateLayoutEx();
 }
 
-UISongBrowserSongButton::~UISongBrowserSongButton() {
+SongButton::~SongButton() {
     for(int i = 0; i < m_children.size(); i++) {
         delete m_children[i];
     }
 }
 
-void UISongBrowserSongButton::draw(Graphics *g) {
-    UISongBrowserButton::draw(g);
+void SongButton::draw(Graphics *g) {
+    Button::draw(g);
     if(!m_bVisible) return;
 
     if(m_vPos.y + m_vSize.y < 0) return;
@@ -88,8 +82,7 @@ void UISongBrowserSongButton::draw(Graphics *g) {
         for(int i = m_children.size() - 1; i >= 0; i--) {
             // NOTE: if no search is active, then all search matches return true by default
             if(m_children[i]->isSearchMatch()) {
-                auto representative_beatmap =
-                    dynamic_cast<UISongBrowserSongButton *>(m_children[i])->getDatabaseBeatmap();
+                auto representative_beatmap = dynamic_cast<SongButton *>(m_children[i])->getDatabaseBeatmap();
 
                 m_sTitle = representative_beatmap->getTitle();
                 m_sArtist = representative_beatmap->getArtist();
@@ -107,7 +100,7 @@ void UISongBrowserSongButton::draw(Graphics *g) {
     drawSubTitle(g);
 }
 
-void UISongBrowserSongButton::drawBeatmapBackgroundThumbnail(Graphics *g, Image *image) {
+void SongButton::drawBeatmapBackgroundThumbnail(Graphics *g, Image *image) {
     if(!osu_draw_songbrowser_thumbnails.getBool() || m_osu->getSkin()->getVersion() < 2.2f) return;
 
     float alpha = 1.0f;
@@ -161,12 +154,12 @@ void UISongBrowserSongButton::drawBeatmapBackgroundThumbnail(Graphics *g, Image 
     }
 }
 
-void UISongBrowserSongButton::drawGrade(Graphics *g) {
+void SongButton::drawGrade(Graphics *g) {
     // scaling
     const Vector2 pos = getActualPos();
     const Vector2 size = getActualSize();
 
-    SkinImage *grade = UISongBrowserScoreButton::getGradeImage(m_osu, m_grade);
+    SkinImage *grade = ScoreButton::getGradeImage(m_osu, m_grade);
     g->pushTransform();
     {
         const float scale = calculateGradeScale();
@@ -178,7 +171,7 @@ void UISongBrowserSongButton::drawGrade(Graphics *g) {
     g->popTransform();
 }
 
-void UISongBrowserSongButton::drawTitle(Graphics *g, float deselectedAlpha, bool forceSelectedStyle) {
+void SongButton::drawTitle(Graphics *g, float deselectedAlpha, bool forceSelectedStyle) {
     // scaling
     const Vector2 pos = getActualPos();
     const Vector2 size = getActualSize();
@@ -198,7 +191,7 @@ void UISongBrowserSongButton::drawTitle(Graphics *g, float deselectedAlpha, bool
     g->popTransform();
 }
 
-void UISongBrowserSongButton::drawSubTitle(Graphics *g, float deselectedAlpha, bool forceSelectedStyle) {
+void SongButton::drawSubTitle(Graphics *g, float deselectedAlpha, bool forceSelectedStyle) {
     // scaling
     const Vector2 pos = getActualPos();
     const Vector2 size = getActualSize();
@@ -224,12 +217,10 @@ void UISongBrowserSongButton::drawSubTitle(Graphics *g, float deselectedAlpha, b
     g->popTransform();
 }
 
-void UISongBrowserSongButton::sortChildren() {
-    std::sort(m_children.begin(), m_children.end(), SongBrowser::SortByDifficulty());
-}
+void SongButton::sortChildren() { std::sort(m_children.begin(), m_children.end(), SongBrowser::SortByDifficulty()); }
 
-void UISongBrowserSongButton::updateLayoutEx() {
-    UISongBrowserButton::updateLayoutEx();
+void SongButton::updateLayoutEx() {
+    Button::updateLayoutEx();
 
     // scaling
     const Vector2 size = getActualSize();
@@ -248,15 +239,15 @@ void UISongBrowserSongButton::updateLayoutEx() {
     }
 }
 
-void UISongBrowserSongButton::onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected) {
-    UISongBrowserButton::onSelected(wasSelected, autoSelectBottomMostChild, wasParentSelected);
+void SongButton::onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected) {
+    Button::onSelected(wasSelected, autoSelectBottomMostChild, wasParentSelected);
 
     // resort children (since they might have been updated in the meantime)
     sortChildren();
 
     // update grade on child
     for(int c = 0; c < m_children.size(); c++) {
-        UISongBrowserSongDifficultyButton *child = (UISongBrowserSongDifficultyButton *)m_children[c];
+        SongDifficultyButton *child = (SongDifficultyButton *)m_children[c];
         child->updateGrade();
     }
 
@@ -276,9 +267,9 @@ void UISongBrowserSongButton::onSelected(bool wasSelected, bool autoSelectBottom
     }
 }
 
-void UISongBrowserSongButton::onRightMouseUpInside() { triggerContextMenu(engine->getMouse()->getPos()); }
+void SongButton::onRightMouseUpInside() { triggerContextMenu(engine->getMouse()->getPos()); }
 
-void UISongBrowserSongButton::triggerContextMenu(Vector2 pos) {
+void SongButton::triggerContextMenu(Vector2 pos) {
     if(m_contextMenu != NULL) {
         m_contextMenu->setPos(pos);
         m_contextMenu->setRelPos(pos);
@@ -304,13 +295,13 @@ void UISongBrowserSongButton::triggerContextMenu(Vector2 pos) {
             }
         }
         m_contextMenu->end(false, false);
-        m_contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &UISongBrowserSongButton::onContextMenu));
+        m_contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &SongButton::onContextMenu));
         UIContextMenu::clampToRightScreenEdge(m_contextMenu);
         UIContextMenu::clampToBottomScreenEdge(m_contextMenu);
     }
 }
 
-void UISongBrowserSongButton::onContextMenu(UString text, int id) {
+void SongButton::onContextMenu(UString text, int id) {
     if(id == 1 || id == 2) {
         // 1 = add map to collection
         // 2 = add set to collection
@@ -356,8 +347,7 @@ void UISongBrowserSongButton::onContextMenu(UString text, int id) {
             }
         }
         m_contextMenu->end(false, true);
-        m_contextMenu->setClickCallback(
-            fastdelegate::MakeDelegate(this, &UISongBrowserSongButton::onAddToCollectionConfirmed));
+        m_contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &SongButton::onAddToCollectionConfirmed));
         UIContextMenu::clampToRightScreenEdge(m_contextMenu);
         UIContextMenu::clampToBottomScreenEdge(m_contextMenu);
     } else if(id == 3 || id == 4) {
@@ -367,7 +357,7 @@ void UISongBrowserSongButton::onContextMenu(UString text, int id) {
     }
 }
 
-void UISongBrowserSongButton::onAddToCollectionConfirmed(UString text, int id) {
+void SongButton::onAddToCollectionConfirmed(UString text, int id) {
     if(id == -2 || id == -4) {
         m_contextMenu->begin(0, true);
         {
@@ -395,8 +385,7 @@ void UISongBrowserSongButton::onAddToCollectionConfirmed(UString text, int id) {
             label->setTextDarkColor(0xff000000);
         }
         m_contextMenu->end(false, false);
-        m_contextMenu->setClickCallback(
-            fastdelegate::MakeDelegate(this, &UISongBrowserSongButton::onCreateNewCollectionConfirmed));
+        m_contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &SongButton::onCreateNewCollectionConfirmed));
         UIContextMenu::clampToRightScreenEdge(m_contextMenu);
         UIContextMenu::clampToBottomScreenEdge(m_contextMenu);
     } else {
@@ -405,23 +394,23 @@ void UISongBrowserSongButton::onAddToCollectionConfirmed(UString text, int id) {
     }
 }
 
-void UISongBrowserSongButton::onCreateNewCollectionConfirmed(UString text, int id) {
+void SongButton::onCreateNewCollectionConfirmed(UString text, int id) {
     if(id == -2 || id == -4) {
         // just forward it
         m_osu->getSongBrowser()->onSongButtonContextMenu(this, text, id);
     }
 }
 
-float UISongBrowserSongButton::calculateGradeScale() {
+float SongButton::calculateGradeScale() {
     const Vector2 size = getActualSize();
 
-    SkinImage *grade = UISongBrowserScoreButton::getGradeImage(m_osu, m_grade);
+    SkinImage *grade = ScoreButton::getGradeImage(m_osu, m_grade);
 
     return Osu::getImageScaleToFitResolution(grade->getSizeBaseRaw(), Vector2(size.x, size.y * m_fGradeScale));
 }
 
-float UISongBrowserSongButton::calculateGradeWidth() {
-    SkinImage *grade = UISongBrowserScoreButton::getGradeImage(m_osu, m_grade);
+float SongButton::calculateGradeWidth() {
+    SkinImage *grade = ScoreButton::getGradeImage(m_osu, m_grade);
 
     return grade->getSizeBaseRaw().x * calculateGradeScale();
 }

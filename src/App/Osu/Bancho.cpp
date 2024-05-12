@@ -1,10 +1,11 @@
 #ifdef _WIN32
-#include "cbase.h"
 #include <stdio.h>
 #include <wbemidl.h>
 #include <windows.h>
 
 #include <sstream>
+
+#include "cbase.h"
 #else
 #include <blkid/blkid.h>
 #include <linux/limits.h>
@@ -28,10 +29,10 @@
 #include "OptionsMenu.h"
 #include "Osu.h"
 #include "RoomScreen.h"
-#include "SongBrowser.h"
+#include "SongBrowser/SongBrowser.h"
+#include "SongBrowser/UserButton.h"
 #include "UIAvatar.h"
 #include "UIButton.h"
-#include "UISongBrowserUserButton.h"
 
 Bancho bancho;
 std::unordered_map<std::string, Channel *> chat_channels;

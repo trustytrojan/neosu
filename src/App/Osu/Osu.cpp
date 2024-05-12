@@ -53,7 +53,7 @@
 #include "RichPresence.h"
 #include "RoomScreen.h"
 #include "Skin.h"
-#include "SongBrowser.h"
+#include "SongBrowser/SongBrowser.h"
 #include "TooltipOverlay.h"
 #include "UIModSelectorModButton.h"
 #include "UIUserContextMenu.h"

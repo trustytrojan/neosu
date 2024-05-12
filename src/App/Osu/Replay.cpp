@@ -9,7 +9,7 @@
 #include "Engine.h"
 #include "NotificationOverlay.h"
 #include "Osu.h"
-#include "SongBrowser.h"
+#include "SongBrowser/SongBrowser.h"
 #include "score.h"
 
 Replay::BEATMAP_VALUES Replay::getBeatmapValuesForModsLegacy(int modsLegacy, float legacyAR, float legacyCS,

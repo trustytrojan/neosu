@@ -1,6 +1,6 @@
 //================ Copyright (c) 2016, PG, All rights reserved. =================//
 //
-// Purpose:		analog to UISongBrowserInfoLabel, but for the ranking screen
+// Purpose:		analog to InfoLabel, but for the ranking screen
 //
 // $NoKeywords: $osursil
 //===============================================================================//

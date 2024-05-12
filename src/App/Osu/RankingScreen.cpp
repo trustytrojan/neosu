@@ -29,12 +29,12 @@
 #include "RoomScreen.h"
 #include "Skin.h"
 #include "SkinImage.h"
-#include "SongBrowser.h"
+#include "SongBrowser/ScoreButton.h"
+#include "SongBrowser/SongBrowser.h"
 #include "SoundEngine.h"
 #include "TooltipOverlay.h"
 #include "UIRankingScreenInfoLabel.h"
 #include "UIRankingScreenRankingPanel.h"
-#include "UISongBrowserScoreButton.h"
 #include "score.h"
 
 ConVar osu_rankingscreen_topbar_height_percent("osu_rankingscreen_topbar_height_percent", 0.785f, FCVAR_NONE);
@@ -463,7 +463,7 @@ void RankingScreen::setScore(LiveScore *score) {
     m_fStarsTomSpeed = score->getStarsTomSpeed();
     m_fPPv2 = score->getPPv2();
 
-    const UString modsString = UISongBrowserScoreButton::getModsStringForDisplay(score->getModsLegacy());
+    const UString modsString = ScoreButton::getModsStringForDisplay(score->getModsLegacy());
     if(modsString.length() > 0) {
         m_sMods = "Mods: ";
         m_sMods.append(modsString);
@@ -532,7 +532,7 @@ void RankingScreen::setScore(FinishedScore score, UString dateTime) {
             100.0f;
     m_fHP = std::round(score.HP * 100.0f) / 100.0f;
 
-    const UString modsString = UISongBrowserScoreButton::getModsStringForDisplay(score.modsLegacy);
+    const UString modsString = ScoreButton::getModsStringForDisplay(score.modsLegacy);
     if(modsString.length() > 0) {
         m_sMods = "Mods: ";
         m_sMods.append(modsString);

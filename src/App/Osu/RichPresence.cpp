@@ -19,7 +19,7 @@
 #include "ModSelector.h"
 #include "Osu.h"
 #include "RoomScreen.h"
-#include "SongBrowser.h"
+#include "SongBrowser/SongBrowser.h"
 #include "score.h"
 
 ConVar osu_rich_presence("osu_rich_presence", true, FCVAR_NONE, RichPresence::onRichPresenceChange);

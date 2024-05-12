@@ -1,13 +1,4 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		song browser beatmap info (top left)
-//
-// $NoKeywords: $osusbil
-//===============================================================================//
-
-#ifndef OSUUISONGBROWSERINFOLABEL_H
-#define OSUUISONGBROWSERINFOLABEL_H
-
+#pragma once
 #include "CBaseUIButton.h"
 
 class McFont;
@@ -16,9 +7,9 @@ class Osu;
 class Beatmap;
 class DatabaseBeatmap;
 
-class UISongBrowserInfoLabel : public CBaseUIButton {
+class InfoLabel : public CBaseUIButton {
    public:
-    UISongBrowserInfoLabel(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name);
+    InfoLabel(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name);
 
     void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);
@@ -94,5 +85,3 @@ class UISongBrowserInfoLabel : public CBaseUIButton {
     // custom
     long m_iBeatmapId;
 };
-
-#endif

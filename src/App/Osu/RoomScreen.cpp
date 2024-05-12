@@ -29,13 +29,13 @@
 #include "RichPresence.h"
 #include "Skin.h"
 #include "SkinImage.h"
-#include "SongBrowser.h"
+#include "SongBrowser/SongBrowser.h"
+#include "SongBrowser/SongButton.h"
 #include "SoundEngine.h"
 #include "UIAvatar.h"
 #include "UIButton.h"
 #include "UICheckbox.h"
 #include "UIContextMenu.h"
-#include "UISongBrowserSongButton.h"
 #include "UIUserContextMenu.h"
 
 void UIModList::draw(Graphics *g) {

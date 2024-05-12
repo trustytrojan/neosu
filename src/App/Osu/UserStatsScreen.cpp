@@ -24,12 +24,12 @@
 #include "Replay.h"
 #include "ResourceManager.h"
 #include "Skin.h"
-#include "SongBrowser.h"
+#include "SongBrowser/ScoreButton.h"
+#include "SongBrowser/SongBrowser.h"
+#include "SongBrowser/UserButton.h"
 #include "SoundEngine.h"
 #include "TooltipOverlay.h"
 #include "UIContextMenu.h"
-#include "UISongBrowserScoreButton.h"
-#include "UISongBrowserUserButton.h"
 #include "UIUserStatsScreenLabel.h"
 
 ConVar osu_ui_top_ranks_max("osu_ui_top_ranks_max", 200, FCVAR_NONE,
@@ -256,7 +256,7 @@ UserStatsScreen::UserStatsScreen(Osu *osu) : ScreenBackable(osu) {
     m_ppVersionInfoLabel->setDrawFrame(false);
     addBaseUIElement(m_ppVersionInfoLabel);
 
-    m_userButton = new UISongBrowserUserButton(m_osu);
+    m_userButton = new UserButton(m_osu);
     m_userButton->addTooltipLine("Click to change [User]");
     m_userButton->setClickCallback(fastdelegate::MakeDelegate(this, &UserStatsScreen::onUserClicked));
     addBaseUIElement(m_userButton);
@@ -362,8 +362,8 @@ CBaseUIContainer *UserStatsScreen::setVisible(bool visible) {
     return this;
 }
 
-void UserStatsScreen::onScoreContextMenu(UISongBrowserScoreButton *scoreButton, int id) {
-    // NOTE: see UISongBrowserScoreButton::onContextMenu()
+void UserStatsScreen::onScoreContextMenu(ScoreButton *scoreButton, int id) {
+    // NOTE: see ScoreButton::onContextMenu()
 
     if(id == 2) rebuildScoreButtons(m_name_ref->getString());
 }
@@ -404,8 +404,7 @@ void UserStatsScreen::rebuildScoreButtons(UString playerName) {
             title.append("]");
         }
 
-        UISongBrowserScoreButton *button = new UISongBrowserScoreButton(m_osu, m_contextMenu, 0, 0, 300, 100,
-                                                                        UISongBrowserScoreButton::STYLE::TOP_RANKS);
+        ScoreButton *button = new ScoreButton(m_osu, m_contextMenu, 0, 0, 300, 100, ScoreButton::STYLE::TOP_RANKS);
         button->map_hash = scores[i]->md5hash;
         button->setScore(*scores[i], NULL, scores.size() - i, title, weight);
         button->setClickCallback(fastdelegate::MakeDelegate(this, &UserStatsScreen::onScoreClicked));
@@ -458,7 +457,7 @@ void UserStatsScreen::onUserButtonChange(UString text, int id) {
 
 void UserStatsScreen::onScoreClicked(CBaseUIButton *button) {
     m_osu->toggleSongBrowser();
-    m_osu->getSongBrowser()->highlightScore(((UISongBrowserScoreButton *)button)->getScore().unixTimestamp);
+    m_osu->getSongBrowser()->highlightScore(((ScoreButton *)button)->getScore().unixTimestamp);
 }
 
 void UserStatsScreen::onMenuClicked(CBaseUIButton *button) {

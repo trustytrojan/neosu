@@ -1,11 +1,7 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		song browser beatmap info (top left)
-//
-// $NoKeywords: $osusbil
-//===============================================================================//
+#include "InfoLabel.h"
 
-#include "UISongBrowserInfoLabel.h"
+#include "SongBrowser.h"
+// ---
 
 #include "Beatmap.h"
 #include "ConVar.h"
@@ -18,10 +14,9 @@
 #include "OptionsMenu.h"
 #include "Osu.h"
 #include "ResourceManager.h"
-#include "SongBrowser.h"
 #include "TooltipOverlay.h"
 
-UISongBrowserInfoLabel::UISongBrowserInfoLabel(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name)
+InfoLabel::InfoLabel(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name)
     : CBaseUIButton(xPos, yPos, xSize, ySize, name, "") {
     m_osu = osu;
     m_font = m_osu->getSubTitleFont();
@@ -62,7 +57,7 @@ UISongBrowserInfoLabel::UISongBrowserInfoLabel(Osu *osu, float xPos, float yPos,
     m_iBeatmapId = -1;
 }
 
-void UISongBrowserInfoLabel::draw(Graphics *g) {
+void InfoLabel::draw(Graphics *g) {
     // debug bounding box
     if(m_osu_debug_ref->getBool()) {
         g->setColor(0xffff0000);
@@ -193,7 +188,7 @@ void UISongBrowserInfoLabel::draw(Graphics *g) {
     }
 }
 
-void UISongBrowserInfoLabel::mouse_update(bool *propagate_clicks) {
+void InfoLabel::mouse_update(bool *propagate_clicks) {
     if(!m_bVisible) return;
     CBaseUIButton::mouse_update(propagate_clicks);
 
@@ -272,7 +267,7 @@ void UISongBrowserInfoLabel::mouse_update(bool *propagate_clicks) {
     }
 }
 
-void UISongBrowserInfoLabel::setFromBeatmap(Beatmap *beatmap, DatabaseBeatmap *diff2) {
+void InfoLabel::setFromBeatmap(Beatmap *beatmap, DatabaseBeatmap *diff2) {
     m_iBeatmapId = diff2->getID();
 
     setArtist(diff2->getArtist());
@@ -294,7 +289,7 @@ void UISongBrowserInfoLabel::setFromBeatmap(Beatmap *beatmap, DatabaseBeatmap *d
     setOnlineOffset(diff2->getOnlineOffset());
 }
 
-void UISongBrowserInfoLabel::setFromMissingBeatmap(long beatmapId) {
+void InfoLabel::setFromMissingBeatmap(long beatmapId) {
     m_iBeatmapId = beatmapId;
 
     setArtist(m_iBeatmapId > 0 ? "CLICK HERE TO DOWNLOAD!" : "MISSING BEATMAP!");
@@ -316,7 +311,7 @@ void UISongBrowserInfoLabel::setFromMissingBeatmap(long beatmapId) {
     setOnlineOffset(0);
 }
 
-UString UISongBrowserInfoLabel::buildSongInfoString() {
+UString InfoLabel::buildSongInfoString() {
     unsigned long lengthMS = m_iLengthMS;
 
     const bool areStarsInaccurate = (m_osu->getSongBrowser()->getDynamicStarCalculator()->isDead() ||
@@ -345,7 +340,7 @@ UString UISongBrowserInfoLabel::buildSongInfoString() {
                                mostCommonBPM, numObjects);
 }
 
-UString UISongBrowserInfoLabel::buildDiffInfoString() {
+UString InfoLabel::buildDiffInfoString() {
     float CS = m_fCS;
     float AR = m_fAR;
     float OD = m_fOD;
@@ -383,11 +378,11 @@ UString UISongBrowserInfoLabel::buildDiffInfoString() {
     return finalString;
 }
 
-UString UISongBrowserInfoLabel::buildOffsetInfoString() {
+UString InfoLabel::buildOffsetInfoString() {
     return UString::format("Your Offset: %ld ms / Online Offset: %ld ms", m_iLocalOffset, m_iOnlineOffset);
 }
 
-float UISongBrowserInfoLabel::getMinimumWidth() {
+float InfoLabel::getMinimumWidth() {
     float titleWidth = 0;
     float subTitleWidth = 0;
     float songInfoWidth = m_font->getStringWidth(buildSongInfoString()) * m_fSongInfoScale;
@@ -398,7 +393,7 @@ float UISongBrowserInfoLabel::getMinimumWidth() {
                     offsetInfoWidth);
 }
 
-float UISongBrowserInfoLabel::getMinimumHeight() {
+float InfoLabel::getMinimumHeight() {
     float titleHeight = m_font->getHeight() * m_fTitleScale;
     float subTitleHeight = m_font->getHeight() * m_fSubTitleScale;
     float songInfoHeight = m_font->getHeight() * m_fSongInfoScale;

@@ -26,7 +26,7 @@
 #include "Skin.h"
 #include "Slider.h"
 #include "SliderCurves.h"
-#include "SongBrowser.h"
+#include "SongBrowser/SongBrowser.h"
 #include "Spinner.h"
 
 ConVar osu_mod_random("osu_mod_random", false, FCVAR_NONVANILLA);

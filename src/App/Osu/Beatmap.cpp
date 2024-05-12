@@ -50,7 +50,7 @@
 #include "Skin.h"
 #include "SkinImage.h"
 #include "Slider.h"
-#include "SongBrowser.h"
+#include "SongBrowser/SongBrowser.h"
 #include "SoundEngine.h"
 #include "Spinner.h"
 

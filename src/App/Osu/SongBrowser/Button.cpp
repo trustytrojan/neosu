@@ -1,11 +1,7 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		song browser button base class
-//
-// $NoKeywords: $osusbb
-//===============================================================================//
+#include "Button.h"
 
-#include "UISongBrowserButton.h"
+#include "SongBrowser.h"
+// ---
 
 #include "AnimationHandler.h"
 #include "CBaseUIContainer.h"
@@ -16,7 +12,6 @@
 #include "Osu.h"
 #include "ResourceManager.h"
 #include "Skin.h"
-#include "SongBrowser.h"
 #include "SoundEngine.h"
 
 ConVar osu_songbrowser_button_active_color_a("osu_songbrowser_button_active_color_a", 220 + 10, FCVAR_NONE);
@@ -29,16 +24,15 @@ ConVar osu_songbrowser_button_inactive_color_r("osu_songbrowser_button_inactive_
 ConVar osu_songbrowser_button_inactive_color_g("osu_songbrowser_button_inactive_color_g", 73, FCVAR_NONE);
 ConVar osu_songbrowser_button_inactive_color_b("osu_songbrowser_button_inactive_color_b", 153, FCVAR_NONE);
 
-int UISongBrowserButton::marginPixelsX = 9;
-int UISongBrowserButton::marginPixelsY = 9;
-float UISongBrowserButton::lastHoverSoundTime = 0;
-int UISongBrowserButton::sortHackCounter = 0;
+int Button::marginPixelsX = 9;
+int Button::marginPixelsY = 9;
+float Button::lastHoverSoundTime = 0;
+int Button::sortHackCounter = 0;
 
-// Color UISongBrowserButton::inactiveDifficultyBackgroundColor = COLOR(255, 0, 150, 236); // blue
+// Color Button::inactiveDifficultyBackgroundColor = COLOR(255, 0, 150, 236); // blue
 
-UISongBrowserButton::UISongBrowserButton(Osu *osu, SongBrowser *songBrowser, CBaseUIScrollView *view,
-                                         UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,
-                                         UString name)
+Button::Button(Osu *osu, SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos,
+               float yPos, float xSize, float ySize, UString name)
     : CBaseUIButton(xPos, yPos, xSize, ySize, name, "") {
     m_osu = osu;
     m_view = view;
@@ -69,16 +63,16 @@ UISongBrowserButton::UISongBrowserButton(Osu *osu, SongBrowser *songBrowser, CBa
     m_moveAwayState = MOVE_AWAY_STATE::MOVE_CENTER;
 }
 
-UISongBrowserButton::~UISongBrowserButton() { deleteAnimations(); }
+Button::~Button() { deleteAnimations(); }
 
-void UISongBrowserButton::deleteAnimations() {
+void Button::deleteAnimations() {
     anim->deleteExistingAnimation(&m_fCenterOffsetAnimation);
     anim->deleteExistingAnimation(&m_fCenterOffsetVelocityAnimation);
     anim->deleteExistingAnimation(&m_fHoverOffsetAnimation);
     anim->deleteExistingAnimation(&m_fHoverMoveAwayAnimation);
 }
 
-void UISongBrowserButton::draw(Graphics *g) {
+void Button::draw(Graphics *g) {
     if(!m_bVisible) return;
 
     drawMenuButtonBackground(g);
@@ -106,7 +100,7 @@ void UISongBrowserButton::draw(Graphics *g) {
     }
 }
 
-void UISongBrowserButton::drawMenuButtonBackground(Graphics *g) {
+void Button::drawMenuButtonBackground(Graphics *g) {
     g->setColor(m_bSelected ? getActiveBackgroundColor() : getInactiveBackgroundColor());
     g->pushTransform();
     {
@@ -117,7 +111,7 @@ void UISongBrowserButton::drawMenuButtonBackground(Graphics *g) {
     g->popTransform();
 }
 
-void UISongBrowserButton::mouse_update(bool *propagate_clicks) {
+void Button::mouse_update(bool *propagate_clicks) {
     // HACKHACK: absolutely disgusting
     // temporarily fool CBaseUIElement with modified position and size
     {
@@ -153,7 +147,7 @@ void UISongBrowserButton::mouse_update(bool *propagate_clicks) {
     updateLayoutEx();
 }
 
-void UISongBrowserButton::updateLayoutEx() {
+void Button::updateLayoutEx() {
     const float uiScale = Osu::ui_scale->getFloat();
 
     Image *menuButtonBackground = m_osu->getSkin()->getMenuButtonBackground();
@@ -216,7 +210,7 @@ void UISongBrowserButton::updateLayoutEx() {
     setRelPosY(m_fTargetRelPosY + getSize().y * 0.125f * m_fHoverMoveAwayAnimation);
 }
 
-UISongBrowserButton *UISongBrowserButton::setVisible(bool visible) {
+Button *Button::setVisible(bool visible) {
     CBaseUIButton::setVisible(visible);
 
     deleteAnimations();
@@ -241,7 +235,7 @@ UISongBrowserButton *UISongBrowserButton::setVisible(bool visible) {
     return this;
 }
 
-void UISongBrowserButton::select(bool fireCallbacks, bool autoSelectBottomMostChild, bool wasParentSelected) {
+void Button::select(bool fireCallbacks, bool autoSelectBottomMostChild, bool wasParentSelected) {
     const bool wasSelected = m_bSelected;
     m_bSelected = true;
 
@@ -249,11 +243,11 @@ void UISongBrowserButton::select(bool fireCallbacks, bool autoSelectBottomMostCh
     if(fireCallbacks) onSelected(wasSelected, autoSelectBottomMostChild, wasParentSelected);
 }
 
-void UISongBrowserButton::deselect() { m_bSelected = false; }
+void Button::deselect() { m_bSelected = false; }
 
-void UISongBrowserButton::resetAnimations() { setMoveAwayState(MOVE_AWAY_STATE::MOVE_CENTER, false); }
+void Button::resetAnimations() { setMoveAwayState(MOVE_AWAY_STATE::MOVE_CENTER, false); }
 
-void UISongBrowserButton::onClicked() {
+void Button::onClicked() {
     engine->getSound()->play(m_osu->getSkin()->getMenuClick());
 
     CBaseUIButton::onClicked();
@@ -261,7 +255,7 @@ void UISongBrowserButton::onClicked() {
     select(true, true);
 }
 
-void UISongBrowserButton::onMouseInside() {
+void Button::onMouseInside() {
     CBaseUIButton::onMouseInside();
 
     // hover sound
@@ -279,7 +273,7 @@ void UISongBrowserButton::onMouseInside() {
     const std::vector<CBaseUIElement *> &elements = m_view->getContainer()->getElements();
     bool foundCenter = false;
     for(size_t i = 0; i < elements.size(); i++) {
-        UISongBrowserButton *b = dynamic_cast<UISongBrowserButton *>(elements[i]);
+        Button *b = dynamic_cast<Button *>(elements[i]);
         if(b != NULL)  // sanity
         {
             if(b == this) {
@@ -291,7 +285,7 @@ void UISongBrowserButton::onMouseInside() {
     }
 }
 
-void UISongBrowserButton::onMouseOutside() {
+void Button::onMouseOutside() {
     CBaseUIButton::onMouseOutside();
 
     // reverse hover anim
@@ -302,19 +296,19 @@ void UISongBrowserButton::onMouseOutside() {
     if(m_moveAwayState == MOVE_AWAY_STATE::MOVE_CENTER) {
         const std::vector<CBaseUIElement *> &elements = m_view->getContainer()->getElements();
         for(size_t i = 0; i < elements.size(); i++) {
-            UISongBrowserButton *b = dynamic_cast<UISongBrowserButton *>(elements[i]);
+            Button *b = dynamic_cast<Button *>(elements[i]);
             if(b != NULL)  // sanity check
                 b->setMoveAwayState(MOVE_AWAY_STATE::MOVE_CENTER);
         }
     }
 }
 
-void UISongBrowserButton::setTargetRelPosY(float targetRelPosY) {
+void Button::setTargetRelPosY(float targetRelPosY) {
     m_fTargetRelPosY = targetRelPosY;
     setRelPosY(m_fTargetRelPosY);
 }
 
-Vector2 UISongBrowserButton::getActualOffset() const {
+Vector2 Button::getActualOffset() const {
     const float hd2xMultiplier = m_osu->getSkin()->isMenuButtonBackground2x() ? 2.0f : 1.0f;
     const float correctedMarginPixelsY =
         (2 * marginPixelsY + m_osu->getSkin()->getMenuButtonBackground()->getHeight() / hd2xMultiplier - 103.0f) / 2.0f;
@@ -322,7 +316,7 @@ Vector2 UISongBrowserButton::getActualOffset() const {
                    (int)(correctedMarginPixelsY * m_fScale * hd2xMultiplier));
 }
 
-void UISongBrowserButton::setMoveAwayState(UISongBrowserButton::MOVE_AWAY_STATE moveAwayState, bool animate) {
+void Button::setMoveAwayState(Button::MOVE_AWAY_STATE moveAwayState, bool animate) {
     m_moveAwayState = moveAwayState;
 
     // if we are not visible, destroy possibly existing animation
@@ -356,14 +350,14 @@ void UISongBrowserButton::setMoveAwayState(UISongBrowserButton::MOVE_AWAY_STATE 
     }
 }
 
-Color UISongBrowserButton::getActiveBackgroundColor() const {
+Color Button::getActiveBackgroundColor() const {
     return COLOR(clamp<int>(osu_songbrowser_button_active_color_a.getInt(), 0, 255),
                  clamp<int>(osu_songbrowser_button_active_color_r.getInt(), 0, 255),
                  clamp<int>(osu_songbrowser_button_active_color_g.getInt(), 0, 255),
                  clamp<int>(osu_songbrowser_button_active_color_b.getInt(), 0, 255));
 }
 
-Color UISongBrowserButton::getInactiveBackgroundColor() const {
+Color Button::getInactiveBackgroundColor() const {
     return COLOR(clamp<int>(osu_songbrowser_button_inactive_color_a.getInt(), 0, 255),
                  clamp<int>(osu_songbrowser_button_inactive_color_r.getInt(), 0, 255),
                  clamp<int>(osu_songbrowser_button_inactive_color_g.getInt(), 0, 255),

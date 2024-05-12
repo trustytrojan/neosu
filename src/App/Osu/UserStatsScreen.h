@@ -16,8 +16,8 @@ class CBaseUIContainer;
 class CBaseUIScrollView;
 
 class UIContextMenu;
-class UISongBrowserUserButton;
-class UISongBrowserScoreButton;
+class UserButton;
+class ScoreButton;
 class UIUserStatsScreenLabel;
 
 class UserStatsScreenBackgroundPPRecalculator;
@@ -32,7 +32,7 @@ class UserStatsScreen : public ScreenBackable {
 
     virtual CBaseUIContainer *setVisible(bool visible);
 
-    void onScoreContextMenu(UISongBrowserScoreButton *scoreButton, int id);
+    void onScoreContextMenu(ScoreButton *scoreButton, int id);
 
    private:
     virtual void updateLayout();
@@ -61,10 +61,10 @@ class UserStatsScreen : public ScreenBackable {
 
     UIUserStatsScreenLabel *m_ppVersionInfoLabel;
 
-    UISongBrowserUserButton *m_userButton;
+    UserButton *m_userButton;
 
     CBaseUIScrollView *m_scores;
-    std::vector<UISongBrowserScoreButton *> m_scoreButtons;
+    std::vector<ScoreButton *> m_scoreButtons;
 
     CBaseUIButton *m_menuButton;
 

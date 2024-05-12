@@ -1,13 +1,4 @@
-//================ Copyright (c) 2018, PG, All rights reserved. =================//
-//
-// Purpose:		clickable button displaying score, grade, name, acc, mods, combo
-//
-// $NoKeywords: $
-//===============================================================================//
-
-#ifndef OSUUISONGBROWSERSCOREBUTTON_H
-#define OSUUISONGBROWSERSCOREBUTTON_H
-
+#pragma once
 #include "CBaseUIButton.h"
 #include "Database.h"
 #include "score.h"
@@ -18,16 +9,16 @@ class SkinImage;
 class UIAvatar;
 class UIContextMenu;
 
-class UISongBrowserScoreButton : public CBaseUIButton {
+class ScoreButton : public CBaseUIButton {
    public:
     static SkinImage *getGradeImage(Osu *osu, FinishedScore::Grade grade);
     static UString getModsStringForDisplay(int mods);
 
     enum class STYLE { SCORE_BROWSER, TOP_RANKS };
 
-    UISongBrowserScoreButton(Osu *osu, UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,
-                             STYLE style = STYLE::SCORE_BROWSER);
-    virtual ~UISongBrowserScoreButton();
+    ScoreButton(Osu *osu, UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,
+                STYLE style = STYLE::SCORE_BROWSER);
+    virtual ~ScoreButton();
 
     void draw(Graphics *g);
     void mouse_update(bool *propagate_clicks);
@@ -114,5 +105,3 @@ class UISongBrowserScoreButton : public CBaseUIButton {
     std::vector<UString> m_tooltipLines;
     UString m_sScoreDateTime;
 };
-
-#endif

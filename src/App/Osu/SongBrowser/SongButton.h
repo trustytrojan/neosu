@@ -1,25 +1,15 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		beatmap + diff button
-//
-// $NoKeywords: $osusbsb
-//===============================================================================//
-
-#ifndef OSUUISONGBROWSERSONGBUTTON_H
-#define OSUUISONGBROWSERSONGBUTTON_H
-
-#include "UISongBrowserButton.h"
+#pragma once
+#include "Button.h"
 #include "score.h"
 
 class SongBrowser;
 class DatabaseBeatmap;
 
-class UISongBrowserSongButton : public UISongBrowserButton {
+class SongButton : public Button {
    public:
-    UISongBrowserSongButton(Osu *osu, SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu,
-                            float xPos, float yPos, float xSize, float ySize, UString name,
-                            DatabaseBeatmap *databaseBeatmap);
-    virtual ~UISongBrowserSongButton();
+    SongButton(Osu *osu, SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos,
+               float yPos, float xSize, float ySize, UString name, DatabaseBeatmap *databaseBeatmap);
+    virtual ~SongButton();
 
     virtual void draw(Graphics *g);
 
@@ -69,5 +59,3 @@ class UISongBrowserSongButton : public UISongBrowserButton {
 
     float m_fThumbnailFadeInTime;
 };
-
-#endif

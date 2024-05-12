@@ -1,13 +1,4 @@
-//================ Copyright (c) 2018, PG, All rights reserved. =================//
-//
-// Purpose:		user card/button (shows total weighted pp + user switcher)
-//
-// $NoKeywords: $
-//===============================================================================//
-
-#ifndef OSUUISONGBROWSERUSERBUTTON_H
-#define OSUUISONGBROWSERUSERBUTTON_H
-
+#pragma once
 #include "CBaseUIButton.h"
 
 class ConVar;
@@ -15,9 +6,9 @@ class ConVar;
 class Osu;
 class UIAvatar;
 
-class UISongBrowserUserButton : public CBaseUIButton {
+class UserButton : public CBaseUIButton {
    public:
-    UISongBrowserUserButton(Osu *osu);
+    UserButton(Osu *osu);
 
     virtual void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);
@@ -47,5 +38,3 @@ class UISongBrowserUserButton : public CBaseUIButton {
     float m_fHoverAnim;
     std::vector<UString> m_vTooltipLines;
 };
-
-#endif

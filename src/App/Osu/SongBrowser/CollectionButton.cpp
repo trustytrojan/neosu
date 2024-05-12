@@ -1,11 +1,7 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		collection button (also used for grouping)
-//
-// $NoKeywords: $osusbcb
-//===============================================================================//
+#include "CollectionButton.h"
 
-#include "UISongBrowserCollectionButton.h"
+#include "SongBrowser.h"
+// ---
 
 #include "Collections.h"
 #include "ConVar.h"
@@ -17,7 +13,6 @@
 #include "Osu.h"
 #include "ResourceManager.h"
 #include "Skin.h"
-#include "SongBrowser.h"
 #include "UIContextMenu.h"
 
 ConVar osu_songbrowser_button_collection_active_color_a("osu_songbrowser_button_collection_active_color_a", 255,
@@ -38,12 +33,10 @@ ConVar osu_songbrowser_button_collection_inactive_color_g("osu_songbrowser_butto
 ConVar osu_songbrowser_button_collection_inactive_color_b("osu_songbrowser_button_collection_inactive_color_b", 143,
                                                           FCVAR_NONE);
 
-UISongBrowserCollectionButton::UISongBrowserCollectionButton(Osu *osu, SongBrowser *songBrowser,
-                                                             CBaseUIScrollView *view, UIContextMenu *contextMenu,
-                                                             float xPos, float yPos, float xSize, float ySize,
-                                                             UString name, UString collectionName,
-                                                             std::vector<UISongBrowserButton *> children)
-    : UISongBrowserButton(osu, songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, name) {
+CollectionButton::CollectionButton(Osu *osu, SongBrowser *songBrowser, CBaseUIScrollView *view,
+                                   UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,
+                                   UString name, UString collectionName, std::vector<Button *> children)
+    : Button(osu, songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, name) {
     m_sCollectionName = collectionName;
     m_children = children;
 
@@ -53,8 +46,8 @@ UISongBrowserCollectionButton::UISongBrowserCollectionButton(Osu *osu, SongBrows
     setOffsetPercent(0.075f * 0.5f);
 }
 
-void UISongBrowserCollectionButton::draw(Graphics *g) {
-    UISongBrowserButton::draw(g);
+void CollectionButton::draw(Graphics *g) {
+    Button::draw(g);
     if(!m_bVisible) return;
 
     Skin *skin = m_osu->getSkin();
@@ -68,7 +61,7 @@ void UISongBrowserCollectionButton::draw(Graphics *g) {
     int numChildren = 0;
     {
         for(size_t c = 0; c < m_children.size(); c++) {
-            const std::vector<UISongBrowserButton *> &childrenChildren = m_children[c]->getChildren();
+            const std::vector<Button *> &childrenChildren = m_children[c]->getChildren();
             if(childrenChildren.size() > 0) {
                 for(size_t cc = 0; cc < childrenChildren.size(); cc++) {
                     if(childrenChildren[cc]->isSearchMatch()) numChildren++;
@@ -91,17 +84,16 @@ void UISongBrowserCollectionButton::draw(Graphics *g) {
     g->popTransform();
 }
 
-void UISongBrowserCollectionButton::onSelected(bool wasSelected, bool autoSelectBottomMostChild,
-                                               bool wasParentSelected) {
-    UISongBrowserButton::onSelected(wasSelected, autoSelectBottomMostChild, wasParentSelected);
+void CollectionButton::onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected) {
+    Button::onSelected(wasSelected, autoSelectBottomMostChild, wasParentSelected);
 
     m_songBrowser->onSelectionChange(this, true);
     m_songBrowser->scrollToSongButton(this, true);
 }
 
-void UISongBrowserCollectionButton::onRightMouseUpInside() { triggerContextMenu(engine->getMouse()->getPos()); }
+void CollectionButton::onRightMouseUpInside() { triggerContextMenu(engine->getMouse()->getPos()); }
 
-void UISongBrowserCollectionButton::triggerContextMenu(Vector2 pos) {
+void CollectionButton::triggerContextMenu(Vector2 pos) {
     if(m_osu->getSongBrowser()->getGroupingMode() != SongBrowser::GROUP::GROUP_COLLECTIONS) return;
 
     if(m_contextMenu != NULL) {
@@ -120,14 +112,13 @@ void UISongBrowserCollectionButton::triggerContextMenu(Vector2 pos) {
             m_contextMenu->addButton("[-]         Delete Collection", 2);
         }
         m_contextMenu->end(false, false);
-        m_contextMenu->setClickCallback(
-            fastdelegate::MakeDelegate(this, &UISongBrowserCollectionButton::onContextMenu));
+        m_contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &CollectionButton::onContextMenu));
         UIContextMenu::clampToRightScreenEdge(m_contextMenu);
         UIContextMenu::clampToBottomScreenEdge(m_contextMenu);
     }
 }
 
-void UISongBrowserCollectionButton::onContextMenu(UString text, int id) {
+void CollectionButton::onContextMenu(UString text, int id) {
     if(id == 1) {
         m_contextMenu->begin(0, true);
         {
@@ -156,7 +147,7 @@ void UISongBrowserCollectionButton::onContextMenu(UString text, int id) {
         }
         m_contextMenu->end(false, false);
         m_contextMenu->setClickCallback(
-            fastdelegate::MakeDelegate(this, &UISongBrowserCollectionButton::onRenameCollectionConfirmed));
+            fastdelegate::MakeDelegate(this, &CollectionButton::onRenameCollectionConfirmed));
         UIContextMenu::clampToRightScreenEdge(m_contextMenu);
         UIContextMenu::clampToBottomScreenEdge(m_contextMenu);
     } else if(id == 2) {
@@ -176,14 +167,14 @@ void UISongBrowserCollectionButton::onContextMenu(UString text, int id) {
             }
             m_contextMenu->end(false, false);
             m_contextMenu->setClickCallback(
-                fastdelegate::MakeDelegate(this, &UISongBrowserCollectionButton::onDeleteCollectionConfirmed));
+                fastdelegate::MakeDelegate(this, &CollectionButton::onDeleteCollectionConfirmed));
             UIContextMenu::clampToRightScreenEdge(m_contextMenu);
             UIContextMenu::clampToBottomScreenEdge(m_contextMenu);
         }
     }
 }
 
-void UISongBrowserCollectionButton::onRenameCollectionConfirmed(UString text, int id) {
+void CollectionButton::onRenameCollectionConfirmed(UString text, int id) {
     if(text.length() > 0) {
         std::string new_name = text.toUtf8();
         auto collection = get_or_create_collection(m_sCollectionName);
@@ -195,21 +186,21 @@ void UISongBrowserCollectionButton::onRenameCollectionConfirmed(UString text, in
     }
 }
 
-void UISongBrowserCollectionButton::onDeleteCollectionConfirmed(UString text, int id) {
+void CollectionButton::onDeleteCollectionConfirmed(UString text, int id) {
     if(id != 2) return;
 
     // just forward it
     m_osu->getSongBrowser()->onCollectionButtonContextMenu(this, m_sCollectionName.c_str(), id);
 }
 
-Color UISongBrowserCollectionButton::getActiveBackgroundColor() const {
+Color CollectionButton::getActiveBackgroundColor() const {
     return COLOR(clamp<int>(osu_songbrowser_button_collection_active_color_a.getInt(), 0, 255),
                  clamp<int>(osu_songbrowser_button_collection_active_color_r.getInt(), 0, 255),
                  clamp<int>(osu_songbrowser_button_collection_active_color_g.getInt(), 0, 255),
                  clamp<int>(osu_songbrowser_button_collection_active_color_b.getInt(), 0, 255));
 }
 
-Color UISongBrowserCollectionButton::getInactiveBackgroundColor() const {
+Color CollectionButton::getInactiveBackgroundColor() const {
     return COLOR(clamp<int>(osu_songbrowser_button_collection_inactive_color_a.getInt(), 0, 255),
                  clamp<int>(osu_songbrowser_button_collection_inactive_color_r.getInt(), 0, 255),
                  clamp<int>(osu_songbrowser_button_collection_inactive_color_g.getInt(), 0, 255),

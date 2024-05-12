@@ -31,7 +31,7 @@
 #include "Shader.h"
 #include "Skin.h"
 #include "SkinImage.h"
-#include "SongBrowser.h"
+#include "SongBrowser/SongBrowser.h"
 #include "UIAvatar.h"
 #include "VertexArrayObject.h"
 #include "score.h"
@@ -335,7 +335,7 @@ void HUD::draw(Graphics *g) {
                 beatmap->getHP(), beatmap->getNPS(), beatmap->getND(), m_osu->getScore()->getUnstableRate(),
                 m_osu->getScore()->getPPv2(), m_osu->getSongBrowser()->getDynamicStarCalculator()->getPPv2(),
                 ((int)GameRules::getHitWindow300(beatmap) - 0.5f) *
-                    (1.0f / m_osu->getSpeedMultiplier()),  // see UISongBrowserInfoLabel::update()
+                    (1.0f / m_osu->getSpeedMultiplier()),  // see InfoLabel::update()
                 m_osu->getScore()->getHitErrorAvgCustomMin(), m_osu->getScore()->getHitErrorAvgCustomMax());
         }
         g->popTransform();

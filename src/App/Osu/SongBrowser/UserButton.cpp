@@ -1,11 +1,7 @@
-//================ Copyright (c) 2018, PG, All rights reserved. =================//
-//
-// Purpose:		user card/button (shows total weighted pp + user switcher)
-//
-// $NoKeywords: $
-//===============================================================================//
+#include "UserButton.h"
 
-#include "UISongBrowserUserButton.h"
+#include "SongBrowser.h"
+// ---
 
 #include "AnimationHandler.h"
 #include "Bancho.h"
@@ -18,7 +14,6 @@
 #include "Osu.h"
 #include "ResourceManager.h"
 #include "Skin.h"
-#include "SongBrowser.h"
 #include "TooltipOverlay.h"
 #include "UIAvatar.h"
 
@@ -29,7 +24,7 @@ ConVar osu_user_draw_accuracy("osu_user_draw_accuracy", true, FCVAR_NONE);
 ConVar osu_user_draw_level("osu_user_draw_level", true, FCVAR_NONE);
 ConVar osu_user_draw_level_bar("osu_user_draw_level_bar", true, FCVAR_NONE);
 
-UISongBrowserUserButton::UISongBrowserUserButton(Osu *osu) : CBaseUIButton() {
+UserButton::UserButton(Osu *osu) : CBaseUIButton() {
     m_osu = osu;
 
     m_osu_scores_enabled_ref = convar->getConVarByName("osu_scores_enabled");
@@ -45,7 +40,7 @@ UISongBrowserUserButton::UISongBrowserUserButton(Osu *osu) : CBaseUIButton() {
     m_fHoverAnim = 0.0f;
 }
 
-void UISongBrowserUserButton::draw(Graphics *g) {
+void UserButton::draw(Graphics *g) {
     if(!m_bVisible) return;
 
     int yCounter = 0;
@@ -217,7 +212,7 @@ void UISongBrowserUserButton::draw(Graphics *g) {
     }
 }
 
-void UISongBrowserUserButton::mouse_update(bool *propagate_clicks) {
+void UserButton::mouse_update(bool *propagate_clicks) {
     if(!m_bVisible) return;
 
     if(m_avatar) {
@@ -228,7 +223,7 @@ void UISongBrowserUserButton::mouse_update(bool *propagate_clicks) {
     CBaseUIButton::mouse_update(propagate_clicks);
 }
 
-void UISongBrowserUserButton::updateUserStats() {
+void UserButton::updateUserStats() {
     Database::PlayerStats stats = m_osu->getSongBrowser()->getDatabase()->calculatePlayerStats(m_sText);
 
     if(bancho.user_id > 0) {
@@ -278,12 +273,12 @@ void UISongBrowserUserButton::updateUserStats() {
     }
 }
 
-void UISongBrowserUserButton::onMouseInside() {
+void UserButton::onMouseInside() {
     CBaseUIButton::onMouseInside();
     anim->moveLinear(&m_fHoverAnim, 1.0f, 0.15f * (1.0f - m_fHoverAnim), true);
 }
 
-void UISongBrowserUserButton::onMouseOutside() {
+void UserButton::onMouseOutside() {
     CBaseUIButton::onMouseOutside();
     anim->moveLinear(&m_fHoverAnim, 0.0f, 0.15f * m_fHoverAnim, true);
 }

@@ -1,11 +1,7 @@
-//================ Copyright (c) 2018, PG, All rights reserved. =================//
-//
-// Purpose:		clickable button displaying score, grade, name, acc, mods, combo
-//
-// $NoKeywords: $
-//===============================================================================//
+#include "ScoreButton.h"
 
-#include "UISongBrowserScoreButton.h"
+#include "SongBrowser.h"
+// ---
 
 #include <chrono>
 
@@ -29,18 +25,17 @@
 #include "ResourceManager.h"
 #include "Skin.h"
 #include "SkinImage.h"
-#include "SongBrowser.h"
 #include "SoundEngine.h"
 #include "TooltipOverlay.h"
 #include "UIAvatar.h"
 #include "UIContextMenu.h"
 #include "UserStatsScreen.h"
 
-ConVar *UISongBrowserScoreButton::m_osu_scores_sort_by_pp_ref = NULL;
-UString UISongBrowserScoreButton::recentScoreIconString;
+ConVar *ScoreButton::m_osu_scores_sort_by_pp_ref = NULL;
+UString ScoreButton::recentScoreIconString;
 
-UISongBrowserScoreButton::UISongBrowserScoreButton(Osu *osu, UIContextMenu *contextMenu, float xPos, float yPos,
-                                                   float xSize, float ySize, STYLE style)
+ScoreButton::ScoreButton(Osu *osu, UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,
+                         STYLE style)
     : CBaseUIButton(xPos, yPos, xSize, ySize, "", "") {
     m_osu = osu;
     m_contextMenu = contextMenu;
@@ -63,9 +58,9 @@ UISongBrowserScoreButton::UISongBrowserScoreButton(Osu *osu, UIContextMenu *cont
     m_scoreGrade = FinishedScore::Grade::D;
 }
 
-UISongBrowserScoreButton::~UISongBrowserScoreButton() { anim->deleteExistingAnimation(&m_fIndexNumberAnim); }
+ScoreButton::~ScoreButton() { anim->deleteExistingAnimation(&m_fIndexNumberAnim); }
 
-void UISongBrowserScoreButton::draw(Graphics *g) {
+void ScoreButton::draw(Graphics *g) {
     if(!m_bVisible) return;
 
     // background
@@ -381,7 +376,7 @@ void UISongBrowserScoreButton::draw(Graphics *g) {
     }
 }
 
-void UISongBrowserScoreButton::mouse_update(bool *propagate_clicks) {
+void ScoreButton::mouse_update(bool *propagate_clicks) {
     if(!m_bVisible) return;
 
     if(m_avatar) {
@@ -432,7 +427,7 @@ void UISongBrowserScoreButton::mouse_update(bool *propagate_clicks) {
     if(!isMouseInside() && !anim->isAnimating(&m_fIndexNumberAnim)) m_fIndexNumberAnim = 0.0f;
 }
 
-void UISongBrowserScoreButton::highlight() {
+void ScoreButton::highlight() {
     m_bIsPulseAnim = true;
 
     const int numPulses = 10;
@@ -447,13 +442,13 @@ void UISongBrowserScoreButton::highlight() {
     }
 }
 
-void UISongBrowserScoreButton::resetHighlight() {
+void ScoreButton::resetHighlight() {
     m_bIsPulseAnim = false;
     anim->deleteExistingAnimation(&m_fIndexNumberAnim);
     m_fIndexNumberAnim = 0.0f;
 }
 
-void UISongBrowserScoreButton::updateElapsedTimeString() {
+void ScoreButton::updateElapsedTimeString() {
     if(m_iScoreUnixTimestamp > 0) {
         const u64 curUnixTime =
             std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch())
@@ -485,25 +480,25 @@ void UISongBrowserScoreButton::updateElapsedTimeString() {
     }
 }
 
-void UISongBrowserScoreButton::onClicked() {
+void ScoreButton::onClicked() {
     engine->getSound()->play(m_osu->getSkin()->getMenuHit());
     CBaseUIButton::onClicked();
 }
 
-void UISongBrowserScoreButton::onMouseInside() {
+void ScoreButton::onMouseInside() {
     m_bIsPulseAnim = false;
 
     if(!isContextMenuVisible())
         anim->moveQuadOut(&m_fIndexNumberAnim, 1.0f, 0.125f * (1.0f - m_fIndexNumberAnim), true);
 }
 
-void UISongBrowserScoreButton::onMouseOutside() {
+void ScoreButton::onMouseOutside() {
     m_bIsPulseAnim = false;
 
     anim->moveLinear(&m_fIndexNumberAnim, 0.0f, 0.15f * m_fIndexNumberAnim, true);
 }
 
-void UISongBrowserScoreButton::onFocusStolen() {
+void ScoreButton::onFocusStolen() {
     CBaseUIButton::onFocusStolen();
 
     m_bRightClick = false;
@@ -514,7 +509,7 @@ void UISongBrowserScoreButton::onFocusStolen() {
     }
 }
 
-void UISongBrowserScoreButton::onRightMouseUpInside() {
+void ScoreButton::onRightMouseUpInside() {
     const Vector2 pos = engine->getMouse()->getPos();
 
     if(m_contextMenu != NULL) {
@@ -540,13 +535,13 @@ void UISongBrowserScoreButton::onRightMouseUpInside() {
             }
         }
         m_contextMenu->end(false, false);
-        m_contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &UISongBrowserScoreButton::onContextMenu));
+        m_contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &ScoreButton::onContextMenu));
         UIContextMenu::clampToRightScreenEdge(m_contextMenu);
         UIContextMenu::clampToBottomScreenEdge(m_contextMenu);
     }
 }
 
-void UISongBrowserScoreButton::onContextMenu(UString text, int id) {
+void ScoreButton::onContextMenu(UString text, int id) {
     if(id == 1) {
         onUseModsClicked();
         return;
@@ -567,12 +562,12 @@ void UISongBrowserScoreButton::onContextMenu(UString text, int id) {
     }
 }
 
-void UISongBrowserScoreButton::onUseModsClicked() {
+void ScoreButton::onUseModsClicked() {
     bool nomod = m_osu->useMods(&m_score);
     engine->getSound()->play(nomod ? m_osu->getSkin()->getCheckOff() : m_osu->getSkin()->getCheckOn());
 }
 
-void UISongBrowserScoreButton::onDeleteScoreClicked() {
+void ScoreButton::onDeleteScoreClicked() {
     if(m_contextMenu != NULL) {
         m_contextMenu->begin(0, true);
         {
@@ -586,14 +581,13 @@ void UISongBrowserScoreButton::onDeleteScoreClicked() {
             m_contextMenu->addButton("No")->setTextLeft(false);
         }
         m_contextMenu->end(false, false);
-        m_contextMenu->setClickCallback(
-            fastdelegate::MakeDelegate(this, &UISongBrowserScoreButton::onDeleteScoreConfirmed));
+        m_contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &ScoreButton::onDeleteScoreConfirmed));
         UIContextMenu::clampToRightScreenEdge(m_contextMenu);
         UIContextMenu::clampToBottomScreenEdge(m_contextMenu);
     }
 }
 
-void UISongBrowserScoreButton::onDeleteScoreConfirmed(UString text, int id) {
+void ScoreButton::onDeleteScoreConfirmed(UString text, int id) {
     if(id != 1) return;
 
     debugLog("Deleting score\n");
@@ -610,8 +604,8 @@ void UISongBrowserScoreButton::onDeleteScoreConfirmed(UString text, int id) {
     }
 }
 
-void UISongBrowserScoreButton::setScore(const FinishedScore &score, const DatabaseBeatmap *diff2, int index,
-                                        UString titleString, float weight) {
+void ScoreButton::setScore(const FinishedScore &score, const DatabaseBeatmap *diff2, int index, UString titleString,
+                           float weight) {
     m_score = score;
     m_iScoreIndexNumber = index;
 
@@ -773,9 +767,9 @@ void UISongBrowserScoreButton::setScore(const FinishedScore &score, const Databa
     updateElapsedTimeString();
 }
 
-bool UISongBrowserScoreButton::isContextMenuVisible() { return (m_contextMenu != NULL && m_contextMenu->isVisible()); }
+bool ScoreButton::isContextMenuVisible() { return (m_contextMenu != NULL && m_contextMenu->isVisible()); }
 
-SkinImage *UISongBrowserScoreButton::getGradeImage(Osu *osu, FinishedScore::Grade grade) {
+SkinImage *ScoreButton::getGradeImage(Osu *osu, FinishedScore::Grade grade) {
     switch(grade) {
         case FinishedScore::Grade::XH:
             return osu->getSkin()->getRankingXHsmall();
@@ -796,7 +790,7 @@ SkinImage *UISongBrowserScoreButton::getGradeImage(Osu *osu, FinishedScore::Grad
     }
 }
 
-UString UISongBrowserScoreButton::getModsStringForDisplay(int mods) {
+UString ScoreButton::getModsStringForDisplay(int mods) {
     UString modsString;
 
     if(mods & ModFlags::NoFail) modsString.append("NF,");

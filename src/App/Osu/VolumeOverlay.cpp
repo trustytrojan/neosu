@@ -16,7 +16,7 @@
 #include "PauseMenu.h"
 #include "RankingScreen.h"
 #include "Skin.h"
-#include "SongBrowser.h"
+#include "SongBrowser/SongBrowser.h"
 #include "Sound.h"
 #include "SoundEngine.h"
 #include "UIVolumeSlider.h"

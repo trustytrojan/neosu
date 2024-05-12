@@ -12,13 +12,13 @@ class SkinImage;
 class UIContextMenu;
 class UISearchOverlay;
 class UISelectionButton;
-class UISongBrowserInfoLabel;
-class UISongBrowserUserButton;
-class UISongBrowserScoreButton;
-class UISongBrowserButton;
-class UISongBrowserSongButton;
-class UISongBrowserSongDifficultyButton;
-class UISongBrowserCollectionButton;
+class InfoLabel;
+class UserButton;
+class ScoreButton;
+class Button;
+class SongButton;
+class SongDifficultyButton;
+class CollectionButton;
 class UIUserStatsScreenLabel;
 
 class CBaseUIContainer;
@@ -38,42 +38,42 @@ class SongBrowser : public ScreenBackable {
 
     struct SORTING_COMPARATOR {
         virtual ~SORTING_COMPARATOR() { ; }
-        virtual bool operator()(UISongBrowserButton const *a, UISongBrowserButton const *b) const = 0;
+        virtual bool operator()(Button const *a, Button const *b) const = 0;
     };
 
     struct SortByArtist : public SORTING_COMPARATOR {
         virtual ~SortByArtist() { ; }
-        virtual bool operator()(UISongBrowserButton const *a, UISongBrowserButton const *b) const;
+        virtual bool operator()(Button const *a, Button const *b) const;
     };
 
     struct SortByBPM : public SORTING_COMPARATOR {
         virtual ~SortByBPM() { ; }
-        virtual bool operator()(UISongBrowserButton const *a, UISongBrowserButton const *b) const;
+        virtual bool operator()(Button const *a, Button const *b) const;
     };
 
     struct SortByCreator : public SORTING_COMPARATOR {
         virtual ~SortByCreator() { ; }
-        virtual bool operator()(UISongBrowserButton const *a, UISongBrowserButton const *b) const;
+        virtual bool operator()(Button const *a, Button const *b) const;
     };
 
     struct SortByDateAdded : public SORTING_COMPARATOR {
         virtual ~SortByDateAdded() { ; }
-        virtual bool operator()(UISongBrowserButton const *a, UISongBrowserButton const *b) const;
+        virtual bool operator()(Button const *a, Button const *b) const;
     };
 
     struct SortByDifficulty : public SORTING_COMPARATOR {
         virtual ~SortByDifficulty() { ; }
-        virtual bool operator()(UISongBrowserButton const *a, UISongBrowserButton const *b) const;
+        virtual bool operator()(Button const *a, Button const *b) const;
     };
 
     struct SortByLength : public SORTING_COMPARATOR {
         virtual ~SortByLength() { ; }
-        bool operator()(UISongBrowserButton const *a, UISongBrowserButton const *b) const;
+        bool operator()(Button const *a, Button const *b) const;
     };
 
     struct SortByTitle : public SORTING_COMPARATOR {
         virtual ~SortByTitle() { ; }
-        bool operator()(UISongBrowserButton const *a, UISongBrowserButton const *b) const;
+        bool operator()(Button const *a, Button const *b) const;
     };
 
     enum class GROUP {
@@ -107,12 +107,12 @@ class SongBrowser : public ScreenBackable {
     void selectSelectedBeatmapSongButton();
     void onPlayEnd(bool quit = true);  // called when a beatmap is finished playing (or the player quit)
 
-    void onSelectionChange(UISongBrowserButton *button, bool rebuild);
+    void onSelectionChange(Button *button, bool rebuild);
     void onDifficultySelected(DatabaseBeatmap *diff2, bool play = false);
 
-    void onScoreContextMenu(UISongBrowserScoreButton *scoreButton, int id);
-    void onSongButtonContextMenu(UISongBrowserSongButton *songButton, UString text, int id);
-    void onCollectionButtonContextMenu(UISongBrowserCollectionButton *collectionButton, UString text, int id);
+    void onScoreContextMenu(ScoreButton *scoreButton, int id);
+    void onSongButtonContextMenu(SongButton *songButton, UString text, int id);
+    void onCollectionButtonContextMenu(CollectionButton *collectionButton, UString text, int id);
 
     void highlightScore(u64 unixTimestamp);
     void selectRandomBeatmap();
@@ -126,8 +126,8 @@ class SongBrowser : public ScreenBackable {
     void addBeatmap(DatabaseBeatmap *beatmap);
     void readdBeatmap(DatabaseBeatmap *diff2);
 
-    void requestNextScrollToSongButtonJumpFix(UISongBrowserSongDifficultyButton *diffButton);
-    void scrollToSongButton(UISongBrowserButton *songButton, bool alignOnTop = false);
+    void requestNextScrollToSongButtonJumpFix(SongDifficultyButton *diffButton);
+    void scrollToSongButton(Button *songButton, bool alignOnTop = false);
     void scrollToSelectedSongButton();
     void rebuildSongButtons();
     void recreateCollectionsButtons();
@@ -135,10 +135,8 @@ class SongBrowser : public ScreenBackable {
     void updateSongButtonLayout();
     void updateSongButtonSorting();
 
-    UISongBrowserButton *findCurrentlySelectedSongButton() const;
-    inline const std::vector<UISongBrowserCollectionButton *> &getCollectionButtons() const {
-        return m_collectionButtons;
-    }
+    Button *findCurrentlySelectedSongButton() const;
+    inline const std::vector<CollectionButton *> &getCollectionButtons() const { return m_collectionButtons; }
 
     inline bool hasSelectedAndIsPlaying() const { return m_bHasSelectedAndIsPlaying; }
     inline bool isInSearch() const { return m_bInSearch; }
@@ -148,7 +146,7 @@ class SongBrowser : public ScreenBackable {
     inline Beatmap *getSelectedBeatmap() const { return m_selectedBeatmap; }
     inline const DatabaseBeatmapStarCalculator *getDynamicStarCalculator() const { return m_dynamicStarCalculator; }
 
-    inline UISongBrowserInfoLabel *getInfoLabel() { return m_songInfo; }
+    inline InfoLabel *getInfoLabel() { return m_songInfo; }
 
     inline GROUP getGroupingMode() const { return m_group; }
 
@@ -241,7 +239,7 @@ class SongBrowser : public ScreenBackable {
 
     void onScoreClicked(CBaseUIButton *button);
 
-    void selectSongButton(UISongBrowserButton *songButton);
+    void selectSongButton(Button *songButton);
     void selectPreviousRandomBeatmap();
     void playSelectedDifficulty();
 
@@ -275,7 +273,7 @@ class SongBrowser : public ScreenBackable {
 
     // top bar left
     CBaseUIContainer *m_topbarLeft;
-    UISongBrowserInfoLabel *m_songInfo;
+    InfoLabel *m_songInfo;
     std::vector<CBaseUIButton *> m_topbarLeftTabButtons;
     std::vector<CBaseUIButton *> m_topbarLeftButtons;
     CBaseUIButton *m_scoreSortButton;
@@ -299,17 +297,17 @@ class SongBrowser : public ScreenBackable {
     // bottom bar
     CBaseUIContainer *m_bottombar;
     std::vector<UISelectionButton *> m_bottombarNavButtons;
-    UISongBrowserUserButton *m_userButton;
+    UserButton *m_userButton;
     UIUserStatsScreenLabel *m_ppVersionInfoLabel;
 
     // score browser
-    std::vector<UISongBrowserScoreButton *> m_scoreButtonCache;
+    std::vector<ScoreButton *> m_scoreButtonCache;
     CBaseUIScrollView *m_scoreBrowser;
     CBaseUIElement *m_scoreBrowserScoresStillLoadingElement;
     CBaseUIElement *m_scoreBrowserNoRecordsYetElement;
     CBaseUIContainer *m_localBestContainer;
     CBaseUILabel *m_localBestLabel;
-    UISongBrowserScoreButton *m_localBestButton = nullptr;
+    ScoreButton *m_localBestButton = nullptr;
 
     // song browser
     CBaseUIScrollView *m_songBrowser;
@@ -321,24 +319,24 @@ class SongBrowser : public ScreenBackable {
     float m_fNextScrollToSongButtonJumpFixOldScrollSizeY;
 
     // song browser selection state logic
-    UISongBrowserSongButton *m_selectionPreviousSongButton;
-    UISongBrowserSongDifficultyButton *m_selectionPreviousSongDiffButton;
-    UISongBrowserCollectionButton *m_selectionPreviousCollectionButton;
+    SongButton *m_selectionPreviousSongButton;
+    SongDifficultyButton *m_selectionPreviousSongDiffButton;
+    CollectionButton *m_selectionPreviousCollectionButton;
 
     // beatmap database
     Database *m_db;
     std::vector<DatabaseBeatmap *> m_beatmaps;
-    std::vector<UISongBrowserSongButton *> m_songButtons;
-    std::vector<UISongBrowserButton *> m_visibleSongButtons;
-    std::vector<UISongBrowserCollectionButton *> m_collectionButtons;
-    std::vector<UISongBrowserCollectionButton *> m_artistCollectionButtons;
-    std::vector<UISongBrowserCollectionButton *> m_difficultyCollectionButtons;
-    std::vector<UISongBrowserCollectionButton *> m_bpmCollectionButtons;
-    std::vector<UISongBrowserCollectionButton *> m_creatorCollectionButtons;
-    std::vector<UISongBrowserCollectionButton *> m_dateaddedCollectionButtons;
-    std::vector<UISongBrowserCollectionButton *> m_lengthCollectionButtons;
-    std::vector<UISongBrowserCollectionButton *> m_titleCollectionButtons;
-    std::unordered_map<MD5Hash, UISongBrowserSongButton *> hashToSongButton;
+    std::vector<SongButton *> m_songButtons;
+    std::vector<Button *> m_visibleSongButtons;
+    std::vector<CollectionButton *> m_collectionButtons;
+    std::vector<CollectionButton *> m_artistCollectionButtons;
+    std::vector<CollectionButton *> m_difficultyCollectionButtons;
+    std::vector<CollectionButton *> m_bpmCollectionButtons;
+    std::vector<CollectionButton *> m_creatorCollectionButtons;
+    std::vector<CollectionButton *> m_dateaddedCollectionButtons;
+    std::vector<CollectionButton *> m_lengthCollectionButtons;
+    std::vector<CollectionButton *> m_titleCollectionButtons;
+    std::unordered_map<MD5Hash, SongButton *> hashToSongButton;
     bool m_bBeatmapRefreshScheduled;
     UString m_sLastOsuFolder;
 

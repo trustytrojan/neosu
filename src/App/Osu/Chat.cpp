@@ -20,7 +20,7 @@
 #include "ResourceManager.h"
 #include "RoomScreen.h"
 #include "Skin.h"
-#include "SongBrowser.h"
+#include "SongBrowser/SongBrowser.h"
 #include "SoundEngine.h"
 #include "UIButton.h"
 #include "UIUserContextMenu.h"

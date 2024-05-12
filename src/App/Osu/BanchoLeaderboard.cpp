@@ -13,7 +13,7 @@
 #include "Database.h"
 #include "Engine.h"
 #include "ModSelector.h"
-#include "SongBrowser.h"
+#include "SongBrowser/SongBrowser.h"
 
 FinishedScore parse_score(char *score_line) {
     FinishedScore score;

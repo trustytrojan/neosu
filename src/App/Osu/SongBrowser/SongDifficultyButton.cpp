@@ -1,11 +1,8 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		beatmap difficulty button (child of UISongBrowserSongButton)
-//
-// $NoKeywords: $osusbsdb
-//===============================================================================//
+#include "SongDifficultyButton.h"
 
-#include "UISongBrowserSongDifficultyButton.h"
+#include "ScoreButton.h"
+#include "SongBrowser.h"
+// ---
 
 #include "AnimationHandler.h"
 #include "BackgroundImageHandler.h"
@@ -17,8 +14,6 @@
 #include "Replay.h"
 #include "ResourceManager.h"
 #include "Skin.h"
-#include "SongBrowser.h"
-#include "UISongBrowserScoreButton.h"
 
 ConVar osu_songbrowser_button_difficulty_inactive_color_a("osu_songbrowser_button_difficulty_inactive_color_a", 255,
                                                           FCVAR_NONE);
@@ -29,13 +24,13 @@ ConVar osu_songbrowser_button_difficulty_inactive_color_g("osu_songbrowser_butto
 ConVar osu_songbrowser_button_difficulty_inactive_color_b("osu_songbrowser_button_difficulty_inactive_color_b", 236,
                                                           FCVAR_NONE);
 
-ConVar *UISongBrowserSongDifficultyButton::m_osu_scores_enabled = NULL;
-ConVar *UISongBrowserSongDifficultyButton::m_osu_songbrowser_dynamic_star_recalc_ref = NULL;
+ConVar *SongDifficultyButton::m_osu_scores_enabled = NULL;
+ConVar *SongDifficultyButton::m_osu_songbrowser_dynamic_star_recalc_ref = NULL;
 
-UISongBrowserSongDifficultyButton::UISongBrowserSongDifficultyButton(
-    Osu *osu, SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos, float yPos,
-    float xSize, float ySize, UString name, DatabaseBeatmap *diff2, UISongBrowserSongButton *parentSongButton)
-    : UISongBrowserSongButton(osu, songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, name, NULL) {
+SongDifficultyButton::SongDifficultyButton(Osu *osu, SongBrowser *songBrowser, CBaseUIScrollView *view,
+                                           UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,
+                                           UString name, DatabaseBeatmap *diff2, SongButton *parentSongButton)
+    : SongButton(osu, songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, name, NULL) {
     m_databaseBeatmap = diff2;  // NOTE: can't use parent constructor for passing this argument, as it would otherwise
                                 // try to build a full button (and not just a diff button)
     m_parentSongButton = parentSongButton;
@@ -68,12 +63,10 @@ UISongBrowserSongDifficultyButton::UISongBrowserSongDifficultyButton(
     updateLayoutEx();
 }
 
-UISongBrowserSongDifficultyButton::~UISongBrowserSongDifficultyButton() {
-    anim->deleteExistingAnimation(&m_fOffsetPercentAnim);
-}
+SongDifficultyButton::~SongDifficultyButton() { anim->deleteExistingAnimation(&m_fOffsetPercentAnim); }
 
-void UISongBrowserSongDifficultyButton::draw(Graphics *g) {
-    UISongBrowserButton::draw(g);
+void SongDifficultyButton::draw(Graphics *g) {
+    Button::draw(g);
     if(!m_bVisible) return;
 
     const bool isIndependentDiff = isIndependentDiffButton();
@@ -168,9 +161,9 @@ void UISongBrowserSongDifficultyButton::draw(Graphics *g) {
     }
 }
 
-void UISongBrowserSongDifficultyButton::mouse_update(bool *propagate_clicks) {
+void SongDifficultyButton::mouse_update(bool *propagate_clicks) {
     if(!m_bVisible) return;
-    UISongBrowserSongButton::mouse_update(propagate_clicks);
+    SongButton::mouse_update(propagate_clicks);
 
     // dynamic settings (moved from constructor to here)
     const bool newOffsetPercentSelectionState = (m_bSelected || !isIndependentDiffButton());
@@ -187,9 +180,8 @@ void UISongBrowserSongDifficultyButton::mouse_update(bool *propagate_clicks) {
     }
 }
 
-void UISongBrowserSongDifficultyButton::onSelected(bool wasSelected, bool autoSelectBottomMostChild,
-                                                   bool wasParentSelected) {
-    UISongBrowserButton::onSelected(wasSelected, autoSelectBottomMostChild, wasParentSelected);
+void SongDifficultyButton::onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected) {
+    Button::onSelected(wasSelected, autoSelectBottomMostChild, wasParentSelected);
 
     const bool wasParentActuallySelected = (m_parentSongButton != NULL && wasParentSelected);
 
@@ -202,7 +194,7 @@ void UISongBrowserSongDifficultyButton::onSelected(bool wasSelected, bool autoSe
     m_songBrowser->scrollToSongButton(this);
 }
 
-void UISongBrowserSongDifficultyButton::updateGrade() {
+void SongDifficultyButton::updateGrade() {
     if(!m_osu_scores_enabled->getBool()) {
         m_bHasGrade = false;
         return;
@@ -224,13 +216,13 @@ void UISongBrowserSongDifficultyButton::updateGrade() {
     if(m_bHasGrade) m_grade = grade;
 }
 
-bool UISongBrowserSongDifficultyButton::isIndependentDiffButton() const {
+bool SongDifficultyButton::isIndependentDiffButton() const {
     return (m_parentSongButton == NULL || !m_parentSongButton->isSelected());
 }
 
-Color UISongBrowserSongDifficultyButton::getInactiveBackgroundColor() const {
+Color SongDifficultyButton::getInactiveBackgroundColor() const {
     if(isIndependentDiffButton())
-        return UISongBrowserSongButton::getInactiveBackgroundColor();
+        return SongButton::getInactiveBackgroundColor();
     else
         return COLOR(clamp<int>(osu_songbrowser_button_difficulty_inactive_color_a.getInt(), 0, 255),
                      clamp<int>(osu_songbrowser_button_difficulty_inactive_color_r.getInt(), 0, 255),

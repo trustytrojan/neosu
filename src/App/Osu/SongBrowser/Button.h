@@ -1,13 +1,4 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		song browser button base class
-//
-// $NoKeywords: $osusbb
-//===============================================================================//
-
-#ifndef OSUUISONGBROWSERBUTTON_H
-#define OSUUISONGBROWSERBUTTON_H
-
+#pragma once
 #include "CBaseUIButton.h"
 
 class Osu;
@@ -17,11 +8,11 @@ class UIContextMenu;
 
 class CBaseUIScrollView;
 
-class UISongBrowserButton : public CBaseUIButton {
+class Button : public CBaseUIButton {
    public:
-    UISongBrowserButton(Osu *osu, SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu,
-                        float xPos, float yPos, float xSize, float ySize, UString name);
-    virtual ~UISongBrowserButton();
+    Button(Osu *osu, SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos,
+           float yPos, float xSize, float ySize, UString name);
+    virtual ~Button();
     void deleteAnimations();
 
     virtual void draw(Graphics *g);
@@ -29,7 +20,7 @@ class UISongBrowserButton : public CBaseUIButton {
 
     virtual void updateLayoutEx();
 
-    UISongBrowserButton *setVisible(bool visible);
+    Button *setVisible(bool visible);
 
     void select(bool fireCallbacks = true, bool autoSelectBottomMostChild = true, bool wasParentSelected = true);
     void deselect();
@@ -37,7 +28,7 @@ class UISongBrowserButton : public CBaseUIButton {
     void resetAnimations();
 
     void setTargetRelPosY(float targetRelPosY);
-    void setChildren(std::vector<UISongBrowserButton *> children) { m_children = children; }
+    void setChildren(std::vector<Button *> children) { m_children = children; }
     void setOffsetPercent(float offsetPercent) { m_fOffsetPercent = offsetPercent; }
     void setHideIfSelected(bool hideIfSelected) { m_bHideIfSelected = hideIfSelected; }
     void setIsSearchMatch(bool isSearchMatch) { m_bIsSearchMatch = isSearchMatch; }
@@ -45,7 +36,7 @@ class UISongBrowserButton : public CBaseUIButton {
     Vector2 getActualOffset() const;
     inline Vector2 getActualSize() const { return m_vSize - 2 * getActualOffset(); }
     inline Vector2 getActualPos() const { return m_vPos + getActualOffset(); }
-    inline std::vector<UISongBrowserButton *> &getChildren() { return m_children; }
+    inline std::vector<Button *> &getChildren() { return m_children; }
     inline int getSortHack() const { return m_iSortHack; }
 
     virtual DatabaseBeatmap *getDatabaseBeatmap() const { return NULL; }
@@ -72,7 +63,7 @@ class UISongBrowserButton : public CBaseUIButton {
 
     bool m_bSelected;
 
-    std::vector<UISongBrowserButton *> m_children;
+    std::vector<Button *> m_children;
 
    private:
     static int marginPixelsX;
@@ -106,5 +97,3 @@ class UISongBrowserButton : public CBaseUIButton {
 
     MOVE_AWAY_STATE m_moveAwayState;
 };
-
-#endif
