@@ -77,14 +77,10 @@ class ResourceManager {
     void requestNextLoadUnmanaged();
 
     // images
-    Image *loadImage(std::string filepath, std::string resourceName, bool mipmapped = false,
-                     bool keepInSystemMemory = false);
-    Image *loadImageUnnamed(std::string filepath, bool mipmapped = false, bool keepInSystemMemory = false);
-    Image *loadImageAbs(std::string absoluteFilepath, std::string resourceName, bool mipmapped = false,
-                        bool keepInSystemMemory = false);
-    Image *loadImageAbsUnnamed(std::string absoluteFilepath, bool mipmapped = false, bool keepInSystemMemory = false);
-    Image *createImage(unsigned int width, unsigned int height, bool mipmapped = false,
-                       bool keepInSystemMemory = false);
+    Image *loadImage(std::string filepath, std::string resourceName, bool mipmapped = false);
+    Image *loadImageAbs(std::string absoluteFilepath, std::string resourceName, bool mipmapped = false);
+    Image *loadImageAbsUnnamed(std::string absoluteFilepath, bool mipmapped = false);
+    Image *createImage(unsigned int width, unsigned int height, bool mipmapped = false);
 
     // fonts
     McFont *loadFont(std::string filepath, std::string resourceName, int fontSize = 16, bool antialiasing = true,

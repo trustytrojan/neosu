@@ -20,8 +20,6 @@ class InputDevice;
 class SoundEngine;
 class ContextMenu;
 class NetworkHandler;
-class OpenCLInterface;
-class VulkanInterface;
 class ResourceManager;
 class AnimationHandler;
 class DiscordInterface;
@@ -140,8 +138,6 @@ class Engine {
     App *m_app;
     Graphics *m_graphics;
     SoundEngine *m_sound;
-    OpenCLInterface *m_openCL;
-    VulkanInterface *m_vulkan;
     ContextMenu *m_contextMenu;
     Environment *m_environment;
     NetworkHandler *m_networkHandler;

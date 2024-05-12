@@ -721,12 +721,12 @@ void OpenGL3Interface::onResolutionChange(Vector2 newResolution) {
     }
 }
 
-Image *OpenGL3Interface::createImage(std::string filePath, bool mipmapped, bool keepInSystemMemory) {
-    return new OpenGLImage(filePath, mipmapped, keepInSystemMemory);
+Image *OpenGL3Interface::createImage(std::string filePath, bool mipmapped) {
+    return new OpenGLImage(filePath, mipmapped);
 }
 
-Image *OpenGL3Interface::createImage(int width, int height, bool mipmapped, bool keepInSystemMemory) {
-    return new OpenGLImage(width, height, mipmapped, keepInSystemMemory);
+Image *OpenGL3Interface::createImage(int width, int height, bool mipmapped) {
+    return new OpenGLImage(width, height, mipmapped);
 }
 
 RenderTarget *OpenGL3Interface::createRenderTarget(int x, int y, int width, int height,

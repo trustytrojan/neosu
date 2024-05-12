@@ -21,13 +21,11 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "NetworkHandler.h"
-#include "OpenCLInterface.h"
 #include "Profiler.h"
 #include "ResourceManager.h"
 #include "SoundEngine.h"
 #include "Timer.h"
 #include "VisualProfiler.h"
-#include "VulkanInterface.h"
 #include "WinMinGW.Mutex.h"
 #include "XInputGamepad.h"
 
@@ -166,7 +164,6 @@ Engine::Engine(Environment *environment, const char *args) {
         m_gamepads.push_back(m_gamepad);
 
         // init platform specific interfaces
-        m_vulkan = new VulkanInterface();  // needs to be created before Graphics
         m_graphics = m_environment->createRenderer();
         {
             m_graphics->init();  // needs init() separation due to potential engine->getGraphics() access
@@ -177,7 +174,6 @@ Engine::Engine(Environment *environment, const char *args) {
         m_resourceManager = new ResourceManager();
         m_sound = new SoundEngine();
         m_animationHandler = new AnimationHandler();
-        m_openCL = new OpenCLInterface();
         m_networkHandler = new NetworkHandler();
         m_discord = new DiscordInterface();
 
@@ -210,9 +206,6 @@ Engine::~Engine() {
     debugLog("Engine: Freeing resource manager...\n");
     SAFE_DELETE(m_resourceManager);
 
-    debugLog("Engine: Freeing OpenCL...\n");
-    SAFE_DELETE(m_openCL);
-
     debugLog("Engine: Freeing Sound...\n");
     SAFE_DELETE(m_sound);
 
@@ -239,9 +232,6 @@ Engine::~Engine() {
 
     debugLog("Engine: Freeing graphics...\n");
     SAFE_DELETE(m_graphics);
-
-    debugLog("Engine: Freeing Vulkan...\n");
-    SAFE_DELETE(m_vulkan);
 
     debugLog("Engine: Freeing environment...\n");
     SAFE_DELETE(m_environment);

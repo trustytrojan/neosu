@@ -664,12 +664,12 @@ void OpenGLLegacyInterface::onResolutionChange(Vector2 newResolution) {
     }
 }
 
-Image *OpenGLLegacyInterface::createImage(std::string filePath, bool mipmapped, bool keepInSystemMemory) {
-    return new OpenGLImage(filePath, mipmapped, keepInSystemMemory);
+Image *OpenGLLegacyInterface::createImage(std::string filePath, bool mipmapped) {
+    return new OpenGLImage(filePath, mipmapped);
 }
 
-Image *OpenGLLegacyInterface::createImage(int width, int height, bool mipmapped, bool keepInSystemMemory) {
-    return new OpenGLImage(width, height, mipmapped, keepInSystemMemory);
+Image *OpenGLLegacyInterface::createImage(int width, int height, bool mipmapped) {
+    return new OpenGLImage(width, height, mipmapped);
 }
 
 RenderTarget *OpenGLLegacyInterface::createRenderTarget(int x, int y, int width, int height,

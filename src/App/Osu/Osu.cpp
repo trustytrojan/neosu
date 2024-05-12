@@ -64,7 +64,7 @@
 
 // release configuration
 ConVar auto_update("auto_update", true, FCVAR_NONE);
-ConVar osu_version("osu_version", 35.00f, FCVAR_NONE);
+ConVar osu_version("osu_version", 35.01f, FCVAR_NONE);
 
 #ifdef _DEBUG
 ConVar osu_debug("osu_debug", true, FCVAR_NONE);
@@ -516,9 +516,7 @@ Osu::Osu(int instanceID) {
         "    float opacity = 1.0 - smoothstep(flashlight_radius, flashlight_radius * 1.4, dist);\n"
         "    opacity = 1.0 - min(opacity, max_opacity);\n"
         "    gl_FragColor = vec4(0.0, 0.0, 0.0, opacity);\n"
-        "}"
-    );
-
+        "}");
 }
 
 Osu::~Osu() {

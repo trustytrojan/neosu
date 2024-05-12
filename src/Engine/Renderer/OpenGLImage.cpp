@@ -16,21 +16,18 @@
 #include "OpenGLHeaders.h"
 #include "ResourceManager.h"
 
-OpenGLImage::OpenGLImage(std::string filepath, bool mipmapped, bool keepInSystemMemory)
-    : Image(filepath, mipmapped, keepInSystemMemory) {
+OpenGLImage::OpenGLImage(std::string filepath, bool mipmapped) : Image(filepath, mipmapped) {
     m_GLTexture = 0;
     m_iTextureUnitBackup = 0;
 }
 
-OpenGLImage::OpenGLImage(int width, int height, bool mipmapped, bool keepInSystemMemory)
-    : Image(width, height, mipmapped, keepInSystemMemory) {
+OpenGLImage::OpenGLImage(int width, int height, bool mipmapped) : Image(width, height, mipmapped) {
     m_GLTexture = 0;
     m_iTextureUnitBackup = 0;
 }
 
 void OpenGLImage::init() {
-    if((m_GLTexture != 0 && !m_bKeepInSystemMemory) || !m_bAsyncReady)
-        return;  // only load if we are not already loaded
+    if(m_GLTexture != 0 || !m_bAsyncReady) return;  // only load if we are not already loaded
 
     // create texture object
     if(m_GLTexture == 0) {
@@ -102,9 +99,6 @@ void OpenGLImage::init() {
         if(m_type == Image::TYPE::TYPE_JPG && prevUnpackAlignment != jpgUnpackAlignment)
             glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpackAlignment);
     }
-
-    // free memory
-    if(!m_bKeepInSystemMemory) m_rawImage = std::vector<unsigned char>();
 
     // check for errors
     GLerror = (GLerror == 0 ? glGetError() : GLerror);

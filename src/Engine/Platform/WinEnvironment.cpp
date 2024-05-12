@@ -16,15 +16,12 @@
 #include <string>
 
 #include "ConVar.h"
-#include "DirectX11Interface.h"
 #include "Engine.h"
 #include "Mouse.h"
 #include "NullGraphicsInterface.h"
-#include "VulkanGraphicsInterface.h"
 #include "WinContextMenu.h"
 #include "WinGL3Interface.h"
 #include "WinGLLegacyInterface.h"
-#include "WinSWGraphicsInterface.h"
 
 bool g_bCursorVisible = true;
 
@@ -75,20 +72,8 @@ void WinEnvironment::update() {
 }
 
 Graphics *WinEnvironment::createRenderer() {
-#ifdef MCENGINE_FEATURE_DIRECTX11
-
-    if(engine->getArgs().length() > 0 &&
-       (engine->getArgs().find("dx11") != -1 || engine->getArgs().find("d3d11") != -1))
-        return new DirectX11Interface(m_hwnd);
-
-#endif
-
-    // return new NullGraphicsInterface();
-    // return new VulkanGraphicsInterface();
-    // return new WinSWGraphicsInterface(m_hwnd);
     return new WinGLLegacyInterface(m_hwnd);
     // return new WinGL3Interface(m_hwnd);
-    // return new DirectX11Interface(m_hwnd);
 }
 
 ContextMenu *WinEnvironment::createContextMenu() { return new WinContextMenu(); }
@@ -429,13 +414,6 @@ void WinEnvironment::showMessageErrorFatal(UString title, UString message) {
 void WinEnvironment::focus() { SetForegroundWindow(m_hwnd); }
 
 void WinEnvironment::center() {
-#ifdef MCENGINE_FEATURE_DIRECTX11
-    {
-        DirectX11Interface *dx11 = dynamic_cast<DirectX11Interface *>(engine->getGraphics());
-        if(dx11 != NULL && m_bFullScreen) return;
-    }
-#endif
-
     RECT clientRect;
     GetClientRect(m_hwnd, &clientRect);
 
@@ -483,43 +461,16 @@ void WinEnvironment::enableFullscreen() {
     m_vLastWindowSize.x = std::abs(clientRect.right - clientRect.left);
     m_vLastWindowSize.y = std::abs(clientRect.bottom - clientRect.top);
 
-    bool isDirectX11Renderer = false;
+    // get nearest monitor, build fullscreen resolution
+    const McRect desktopRect = getDesktopRect();
+    const int width = desktopRect.getWidth();
+    const int height = desktopRect.getHeight() + (m_bFullscreenWindowedBorderless ? 1 : 0);
 
-#ifdef MCENGINE_FEATURE_DIRECTX11
-    {
-        DirectX11Interface *dx11 = dynamic_cast<DirectX11Interface *>(engine->getGraphics());
-        if(dx11 != NULL) {
-            isDirectX11Renderer = true;
+    // and apply everything (move + resize)
+    SetWindowLongPtr(m_hwnd, GWL_STYLE, getWindowStyleFullscreen());
+    MoveWindow(m_hwnd, (int)(desktopRect.getX()), (int)(desktopRect.getY()), width, height, FALSE);
 
-            m_bFullScreen = dx11->enableFullscreen(m_bFullscreenWindowedBorderless);
-
-            if(m_bFullscreenWindowedBorderless) {
-                // get nearest monitor, build fullscreen resolution
-                const McRect desktopRect = getDesktopRect();
-                const int width = desktopRect.getWidth();
-                const int height = desktopRect.getHeight();
-
-                // and apply everything (move + resize)
-                SetWindowLongPtr(m_hwnd, GWL_STYLE, getWindowStyleFullscreen());
-                dx11->resizeTarget(Vector2(desktopRect.getWidth(), desktopRect.getHeight()));
-                MoveWindow(m_hwnd, (int)(desktopRect.getX()), (int)(desktopRect.getY()), width, height, FALSE);
-            }
-        }
-    }
-#endif
-
-    if(!isDirectX11Renderer) {
-        // get nearest monitor, build fullscreen resolution
-        const McRect desktopRect = getDesktopRect();
-        const int width = desktopRect.getWidth();
-        const int height = desktopRect.getHeight() + (m_bFullscreenWindowedBorderless ? 1 : 0);
-
-        // and apply everything (move + resize)
-        SetWindowLongPtr(m_hwnd, GWL_STYLE, getWindowStyleFullscreen());
-        MoveWindow(m_hwnd, (int)(desktopRect.getX()), (int)(desktopRect.getY()), width, height, FALSE);
-
-        m_bFullScreen = true;
-    }
+    m_bFullScreen = true;
 }
 
 void WinEnvironment::disableFullscreen() {
@@ -542,19 +493,6 @@ void WinEnvironment::disableFullscreen() {
     m_vWindowSize.x = std::abs(rect.right - rect.left);
     m_vWindowSize.y = std::abs(rect.bottom - rect.top);
 
-#ifdef MCENGINE_FEATURE_DIRECTX11
-    {
-        DirectX11Interface *dx11 = dynamic_cast<DirectX11Interface *>(engine->getGraphics());
-        if(dx11 != NULL) {
-            // HACKHACK: repair broken style before disabling fullscreen so that it gives us the correct client size
-            // (Windows/DX bug)
-            SetWindowLongPtr(m_hwnd, GWL_STYLE, getWindowStyleWindowed());
-
-            dx11->disableFullscreen();
-        }
-    }
-#endif
-
     // HACKHACK: double MoveWindow is a workaround for a windows bug (otherwise overscale would get clamped to taskbar)
     SetWindowLongPtr(m_hwnd, GWL_STYLE, getWindowStyleWindowed());
     MoveWindow(m_hwnd, (int)m_vLastWindowPos.x, (int)m_vLastWindowPos.y, (int)m_vWindowSize.x, (int)m_vWindowSize.y,
@@ -568,13 +506,6 @@ void WinEnvironment::disableFullscreen() {
 void WinEnvironment::setWindowTitle(UString title) { SetWindowText(m_hwnd, title.toUtf8()); }
 
 void WinEnvironment::setWindowPos(int x, int y) {
-#ifdef MCENGINE_FEATURE_DIRECTX11
-    {
-        DirectX11Interface *dx11 = dynamic_cast<DirectX11Interface *>(engine->getGraphics());
-        if(dx11 != NULL && m_bFullScreen) return;
-    }
-#endif
-
     SetWindowPos(m_hwnd, m_hwnd, x, y, 0, 0, SWP_NOZORDER | SWP_NOSIZE | SWP_NOOWNERZORDER | SWP_NOACTIVATE);
 }
 
@@ -589,36 +520,19 @@ void WinEnvironment::setWindowSize(int width, int height) {
     m_vLastWindowSize.x = width;
     m_vLastWindowSize.y = height;
 
-    bool isDirectX11Renderer = false;
+    // request window size based on client size
+    rect.left = 0;
+    rect.top = 0;
+    rect.right = width;
+    rect.bottom = height;
+    AdjustWindowRect(&rect, getWindowStyleWindowed(), FALSE);
 
-#ifdef MCENGINE_FEATURE_DIRECTX11
-    {
-        DirectX11Interface *dx11 = dynamic_cast<DirectX11Interface *>(engine->getGraphics());
-        if(dx11 != NULL) {
-            isDirectX11Renderer = true;
+    // build new size, set it as the current size
+    m_vWindowSize.x = std::abs(rect.right - rect.left);
+    m_vWindowSize.y = std::abs(rect.bottom - rect.top);
 
-            if(m_bFullScreen) return;
-
-            dx11->resizeTarget(Vector2(width, height));
-        }
-    }
-#endif
-
-    if(!isDirectX11Renderer) {
-        // request window size based on client size
-        rect.left = 0;
-        rect.top = 0;
-        rect.right = width;
-        rect.bottom = height;
-        AdjustWindowRect(&rect, getWindowStyleWindowed(), FALSE);
-
-        // build new size, set it as the current size
-        m_vWindowSize.x = std::abs(rect.right - rect.left);
-        m_vWindowSize.y = std::abs(rect.bottom - rect.top);
-
-        MoveWindow(m_hwnd, (int)m_vLastWindowPos.x, (int)m_vLastWindowPos.y, (int)m_vWindowSize.x, (int)m_vWindowSize.y,
-                   FALSE);  // non-client width/height!
-    }
+    MoveWindow(m_hwnd, (int)m_vLastWindowPos.x, (int)m_vLastWindowPos.y, (int)m_vWindowSize.x, (int)m_vWindowSize.y,
+               FALSE);  // non-client width/height!
 }
 
 void WinEnvironment::setWindowResizable(bool resizable) {

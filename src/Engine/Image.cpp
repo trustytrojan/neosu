@@ -50,9 +50,8 @@ void Image::saveToImage(unsigned char *data, unsigned int width, unsigned int he
     }
 }
 
-Image::Image(std::string filepath, bool mipmapped, bool keepInSystemMemory) : Resource(filepath) {
+Image::Image(std::string filepath, bool mipmapped) : Resource(filepath) {
     m_bMipmapped = mipmapped;
-    m_bKeepInSystemMemory = keepInSystemMemory;
 
     m_type = Image::TYPE::TYPE_PNG;
     m_filterMode = Graphics::FILTER_MODE::FILTER_MODE_LINEAR;
@@ -65,9 +64,8 @@ Image::Image(std::string filepath, bool mipmapped, bool keepInSystemMemory) : Re
     m_bCreatedImage = false;
 }
 
-Image::Image(int width, int height, bool mipmapped, bool keepInSystemMemory) : Resource() {
+Image::Image(int width, int height, bool mipmapped) : Resource() {
     m_bMipmapped = mipmapped;
-    m_bKeepInSystemMemory = keepInSystemMemory;
 
     m_type = Image::TYPE::TYPE_RGBA;
     m_filterMode = Graphics::FILTER_MODE::FILTER_MODE_LINEAR;

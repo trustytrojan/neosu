@@ -12,14 +12,8 @@
 
 class NullImage : public Image {
    public:
-    NullImage(std::string filePath, bool mipmapped = false, bool keepInSystemMemory = false)
-        : Image(filePath, mipmapped, keepInSystemMemory) {
-        ;
-    }
-    NullImage(int width, int height, bool mipmapped = false, bool keepInSystemMemory = false)
-        : Image(width, height, mipmapped, keepInSystemMemory) {
-        ;
-    }
+    NullImage(std::string filePath, bool mipmapped = false) : Image(filePath, mipmapped) { ; }
+    NullImage(int width, int height, bool mipmapped = false) : Image(width, height, mipmapped) { ; }
     virtual ~NullImage() { destroy(); }
 
     virtual void bind(unsigned int textureUnit = 0) { ; }

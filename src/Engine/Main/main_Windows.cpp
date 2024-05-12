@@ -91,7 +91,6 @@ PGPI g_GetPointerInfo = (PGPI)GetProcAddress(GetModuleHandle(TEXT("user32.dll"))
 #include <iostream>
 
 #include "ConVar.h"
-#include "DirectX11Interface.h"
 #include "Engine.h"
 #include "Mouse.h"
 #include "Profiler.h"
@@ -691,15 +690,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
         // resize limit
         case WM_GETMINMAXINFO: {
-            // NOTE: if rendering via DirectX then don't interfere here, since it handles all window management stuff
-            // for us
-#ifdef MCENGINE_FEATURE_DIRECTX11
-
-            if(g_engine != NULL && dynamic_cast<DirectX11Interface *>(g_engine->getGraphics()) != NULL)
-                return DefWindowProcW(hwnd, msg, wParam, lParam);
-
-#endif
-
             WINDOWPLACEMENT wPos;
             { wPos.length = sizeof(WINDOWPLACEMENT); }
             GetWindowPlacement(hwnd, &wPos);

@@ -14,7 +14,6 @@
 #include "Beatmap.h"
 #include "Camera.h"
 #include "ConVar.h"
-#include "DirectX11Interface.h"
 #include "Engine.h"
 #include "Environment.h"
 #include "KeyBindings.h"
@@ -206,18 +205,6 @@ void ModFPoSu::draw(Graphics *g) {
                     if(fposu_transparent_playfield.getBool()) g->setBlending(true);
 
                     Matrix4 worldMatrix = m_modelMatrix;
-
-#ifdef MCENGINE_FEATURE_DIRECTX11
-                    {
-                        DirectX11Interface *dx11 = dynamic_cast<DirectX11Interface *>(engine->getGraphics());
-                        if(dx11 != NULL) {
-                            // NOTE: convert from OpenGL coordinate system
-                            static Matrix4 zflip = Matrix4().scale(1, 1, -1);
-                            worldMatrix = worldMatrix * zflip;
-                        }
-                    }
-#endif
-
                     g->setWorldMatrixMul(worldMatrix);
                     {
                         m_osu->getPlayfieldBuffer()->bind();
@@ -587,25 +574,8 @@ void ModFPoSu::makePlayfield() {
     m_vao->clear();
     m_meshList.clear();
 
-#ifdef MCENGINE_FEATURE_DIRECTX11
-
-    float topTC = 1.0f;
-    float bottomTC = 0.0f;
-    {
-        DirectX11Interface *dx11 = dynamic_cast<DirectX11Interface *>(engine->getGraphics());
-        if(dx11 != NULL) {
-            topTC = 0.0f;
-            bottomTC = 1.0f;
-        }
-    }
-
-#else
-
     const float topTC = 1.0f;
     const float bottomTC = 0.0f;
-
-#endif
-
     const float dist = -fposu_distance.getFloat();
 
     VertexPair vp1 = VertexPair(Vector3(-0.5, 0.5, dist), Vector3(-0.5, -0.5, dist), 0);

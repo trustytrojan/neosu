@@ -13,7 +13,7 @@ if %errorlevel% equ 0 (
 set CXXFLAGS=-std=c++17 -Wall -fmessage-length=0 -Wno-sign-compare -Wno-unused-local-typedefs -Wno-reorder -Wno-switch -IC:\mingw32\include
 set CXXFLAGS=%CXXFLAGS% -D__GXX_EXPERIMENTAL_CXX0X__
 set CXXFLAGS=%CXXFLAGS% -Isrc/App -Isrc/App/Osu -Isrc/Engine -Isrc/GUI -Isrc/GUI/Windows -Isrc/GUI/Windows/VinylScratcher -Isrc/Engine/Input -Isrc/Engine/Platform -Isrc/Engine/Main -Isrc/Engine/Renderer -Isrc/Util
-set LDFLAGS=-logg -lADLMIDI -lmad -lmodplug -lsmpeg -lgme -lvorbis -lopus -lvorbisfile -ldiscord-rpc -lSDL2_mixer_ext.dll -lSDL2 -ld3dcompiler_47 -ld3d11 -ldxgi -lcurl -llibxinput9_1_0 -lfreetype -lopengl32 -lOpenCL -lvulkan-1 -lglew32 -lglu32 -lgdi32 -lbass -lbassasio -lbass_fx -lbassmix -lbasswasapi -lbassloud -lcomctl32 -lDwmapi -lComdlg32 -lpsapi -lws2_32 -lwinmm -lpthread -llibjpeg -lwbemuuid -lole32 -loleaut32 -llzma -lShlwapi
+set LDFLAGS=-logg -lADLMIDI -lmad -lmodplug -lsmpeg -lgme -lvorbis -lopus -lvorbisfile -ldiscord-rpc -lSDL2_mixer_ext.dll -lSDL2 -ld3dcompiler_47 -ld3d11 -ldxgi -lcurl -llibxinput9_1_0 -lfreetype -lopengl32 -lglew32 -lglu32 -lgdi32 -lbass -lbassasio -lbass_fx -lbassmix -lbasswasapi -lbassloud -lcomctl32 -lDwmapi -lComdlg32 -lpsapi -lws2_32 -lwinmm -lpthread -llibjpeg -lwbemuuid -lole32 -loleaut32 -llzma -lShlwapi
 
 set CXXFLAGS=%CXXFLAGS% -g3
 rem set CXXFLAGS=%CXXFLAGS% -O3

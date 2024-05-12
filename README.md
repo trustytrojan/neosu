@@ -27,7 +27,6 @@ Required dependencies:
 - libenet
 - libjpeg
 - liblzma
-- OpenCL
 - xi
 - zlib
 

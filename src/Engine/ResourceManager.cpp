@@ -270,8 +270,7 @@ void ResourceManager::requestNextLoadAsync() { m_bNextLoadAsync = true; }
 
 void ResourceManager::requestNextLoadUnmanaged() { m_nextLoadUnmanagedStack.push(true); }
 
-Image *ResourceManager::loadImage(std::string filepath, std::string resourceName, bool mipmapped,
-                                  bool keepInSystemMemory) {
+Image *ResourceManager::loadImage(std::string filepath, std::string resourceName, bool mipmapped) {
     // check if it already exists
     if(resourceName.length() > 0) {
         Resource *temp = checkIfExistsAndHandle(resourceName);
@@ -280,7 +279,7 @@ Image *ResourceManager::loadImage(std::string filepath, std::string resourceName
 
     // create instance and load it
     filepath.insert(0, PATH_DEFAULT_IMAGES);
-    Image *img = engine->getGraphics()->createImage(filepath, mipmapped, keepInSystemMemory);
+    Image *img = engine->getGraphics()->createImage(filepath, mipmapped);
     img->setName(resourceName);
 
     loadResource(img, true);
@@ -288,17 +287,7 @@ Image *ResourceManager::loadImage(std::string filepath, std::string resourceName
     return img;
 }
 
-Image *ResourceManager::loadImageUnnamed(std::string filepath, bool mipmapped, bool keepInSystemMemory) {
-    filepath.insert(0, PATH_DEFAULT_IMAGES);
-    Image *img = engine->getGraphics()->createImage(filepath, mipmapped, keepInSystemMemory);
-
-    loadResource(img, true);
-
-    return img;
-}
-
-Image *ResourceManager::loadImageAbs(std::string absoluteFilepath, std::string resourceName, bool mipmapped,
-                                     bool keepInSystemMemory) {
+Image *ResourceManager::loadImageAbs(std::string absoluteFilepath, std::string resourceName, bool mipmapped) {
     // check if it already exists
     if(resourceName.length() > 0) {
         Resource *temp = checkIfExistsAndHandle(resourceName);
@@ -306,7 +295,7 @@ Image *ResourceManager::loadImageAbs(std::string absoluteFilepath, std::string r
     }
 
     // create instance and load it
-    Image *img = engine->getGraphics()->createImage(absoluteFilepath, mipmapped, keepInSystemMemory);
+    Image *img = engine->getGraphics()->createImage(absoluteFilepath, mipmapped);
     img->setName(resourceName);
 
     loadResource(img, true);
@@ -314,15 +303,15 @@ Image *ResourceManager::loadImageAbs(std::string absoluteFilepath, std::string r
     return img;
 }
 
-Image *ResourceManager::loadImageAbsUnnamed(std::string absoluteFilepath, bool mipmapped, bool keepInSystemMemory) {
-    Image *img = engine->getGraphics()->createImage(absoluteFilepath, mipmapped, keepInSystemMemory);
+Image *ResourceManager::loadImageAbsUnnamed(std::string absoluteFilepath, bool mipmapped) {
+    Image *img = engine->getGraphics()->createImage(absoluteFilepath, mipmapped);
 
     loadResource(img, true);
 
     return img;
 }
 
-Image *ResourceManager::createImage(unsigned int width, unsigned int height, bool mipmapped, bool keepInSystemMemory) {
+Image *ResourceManager::createImage(unsigned int width, unsigned int height, bool mipmapped) {
     if(width > 8192 || height > 8192) {
         engine->showMessageError(
             "Resource Manager Error",
@@ -330,7 +319,7 @@ Image *ResourceManager::createImage(unsigned int width, unsigned int height, boo
         return NULL;
     }
 
-    Image *img = engine->getGraphics()->createImage(width, height, mipmapped, keepInSystemMemory);
+    Image *img = engine->getGraphics()->createImage(width, height, mipmapped);
 
     loadResource(img, false);
 

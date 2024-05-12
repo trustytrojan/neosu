@@ -17,8 +17,8 @@ class Image : public Resource {
     enum class TYPE { TYPE_RGBA, TYPE_PNG, TYPE_JPG };
 
    public:
-    Image(std::string filepath, bool mipmapped = false, bool keepInSystemMemory = false);
-    Image(int width, int height, bool mipmapped = false, bool keepInSystemMemory = false);
+    Image(std::string filepath, bool mipmapped = false);
+    Image(int width, int height, bool mipmapped = false);
     virtual ~Image() { ; }
 
     virtual void bind(unsigned int textureUnit = 0) = 0;
@@ -59,7 +59,6 @@ class Image : public Resource {
     bool m_bHasAlphaChannel;
     bool m_bMipmapped;
     bool m_bCreatedImage;
-    bool m_bKeepInSystemMemory;
 
     std::vector<unsigned char> m_rawImage;
 };
