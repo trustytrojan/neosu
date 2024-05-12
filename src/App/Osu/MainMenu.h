@@ -170,6 +170,7 @@ class MainMenu : public OsuScreen, public MouseListener {
     float m_fBackgroundFadeInTime;
 
     Image *logo_img;
+    Shader *background_shader = nullptr;
 };
 
 #endif
