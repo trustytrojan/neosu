@@ -317,8 +317,7 @@ void handle_packet(Packet *packet) {
         i32 spectator_id = read<u32>(packet);
         debugLog("Spectator left: user id %d\n", spectator_id);
     } else if(packet->id == VERSION_UPDATE) {
-        disconnect();
-        bancho.osu->getNotificationOverlay()->addNotification("This server may use an unsupported protocol version.");
+        // (nothing to do)
     } else if(packet->id == SPECTATOR_CANT_SPECTATE) {
         i32 spectator_id = read<u32>(packet);
         debugLog("Spectator can't spectate: user id %d\n", spectator_id);
@@ -408,7 +407,8 @@ void handle_packet(Packet *packet) {
     } else if(packet->id == PROTOCOL_VERSION) {
         int protocol_version = read<u32>(packet);
         if(protocol_version != 19) {
-            bancho.osu->getNotificationOverlay()->addNotification("This server may use an unsupported protocol version.");
+            bancho.osu->getNotificationOverlay()->addNotification(
+                "This server may use an unsupported protocol version.");
         }
     } else if(packet->id == MAIN_MENU_ICON) {
         UString icon = read_string(packet);
@@ -495,7 +495,7 @@ void handle_packet(Packet *packet) {
         debugLog("Silenced %s.\n", blocked.toUtf8());
     } else if(packet->id == VERSION_UPDATE_FORCED) {
         disconnect();
-        bancho.osu->getNotificationOverlay()->addNotification("This server may use an unsupported protocol version.");
+        bancho.osu->getNotificationOverlay()->addNotification("This server requires a newer client version.");
     } else if(packet->id == ACCOUNT_RESTRICTED) {
         bancho.osu->getNotificationOverlay()->addNotification("Account restricted.");
         disconnect();
