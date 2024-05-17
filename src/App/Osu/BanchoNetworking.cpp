@@ -236,10 +236,6 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
     }
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
 
-    auto token_header = UString::format("osu-token: %s", cho_token.toUtf8());
-    chunk = curl_slist_append(chunk, token_header.toUtf8());
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
-
     auto query_url = UString::format("https://c.%s/", bancho.endpoint.toUtf8());
     curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, outgoing.memory);
