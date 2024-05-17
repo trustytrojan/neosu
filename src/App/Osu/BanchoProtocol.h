@@ -81,6 +81,7 @@ enum IncomingPackets {
     SWITCH_SERVER = 103,
     ACCOUNT_RESTRICTED = 104,
     MATCH_ABORT = 106,
+    OVERRIDE_NEOSU_CONVARS = 120,
 };
 
 enum OutgoingPackets {

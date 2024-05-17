@@ -25,6 +25,7 @@
 #include "Engine.h"
 #include "Lobby.h"
 #include "MD5.h"
+#include "NeosuSettings.h"
 #include "NotificationOverlay.h"
 #include "OptionsMenu.h"
 #include "Osu.h"
@@ -501,6 +502,8 @@ void handle_packet(Packet *packet) {
         disconnect();
     } else if(packet->id == MATCH_ABORT) {
         bancho.osu->m_room->on_match_aborted();
+    } else if(packet->id == OVERRIDE_NEOSU_CONVARS) {
+        process_neosu_settings(*packet);
     } else {
         debugLog("Unknown packet ID %d (%d bytes)!\n", packet->id, packet->size);
     }
