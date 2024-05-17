@@ -570,6 +570,5 @@ Packet build_login_packet() {
     write<u8>(&packet, '|');
     write<u8>(&packet, '0');
 
-    write<u8>(&packet, '\n');
     return packet;
 }
