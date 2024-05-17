@@ -268,6 +268,7 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
         auth_header = "osu-token: " + std::string(header->value);
         cho_token = UString(header->value);
     }
+
     hres = curl_easy_header(curl, "x-mcosu-features", 0, CURLH_HEADER, -1, &header);
     if(hres == CURLHE_OK) {
         if(strstr(header->value, "submit=0") != NULL) {
