@@ -205,6 +205,7 @@ static void send_api_request(CURL *curl, APIRequest api_out) {
     }
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
 #ifdef _WIN32
     // ABSOLUTELY RETARDED, FUCK WINDOWS
     curl_easy_setopt(curl, CURLOPT_CAINFO, "curl-ca-bundle.crt");
