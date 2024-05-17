@@ -408,7 +408,6 @@ void handle_packet(Packet *packet) {
     } else if(packet->id == PROTOCOL_VERSION) {
         int protocol_version = read<u32>(packet);
         if(protocol_version != 19) {
-            disconnect();
             bancho.osu->getNotificationOverlay()->addNotification("This server may use an unsupported protocol version.");
         }
     } else if(packet->id == MAIN_MENU_ICON) {
