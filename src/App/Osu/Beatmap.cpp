@@ -1076,7 +1076,7 @@ void Beatmap::fail() {
     // Change behavior of relax mod when online
     if(bancho.is_online() && m_osu->getModRelax()) return;
 
-    if(osu_drain_kill.getBool()) {
+    if(!bancho.is_playing_a_multi_map() && osu_drain_kill.getBool()) {
         engine->getSound()->play(getSkin()->getFailsound());
 
         m_bFailed = true;
