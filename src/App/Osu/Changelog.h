@@ -1,13 +1,4 @@
-//================ Copyright (c) 2017, PG, All rights reserved. =================//
-//
-// Purpose:		changelog screen
-//
-// $NoKeywords: $osulog
-//===============================================================================//
-
-#ifndef OSUCHANGELOG_H
-#define OSUCHANGELOG_H
-
+#pragma once
 #include "ScreenBackable.h"
 
 class CBaseUIContainer;
@@ -44,5 +35,3 @@ class Changelog : public ScreenBackable {
 
     std::vector<CHANGELOG_UI> m_changelogs;
 };
-
-#endif

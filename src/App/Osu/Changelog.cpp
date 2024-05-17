@@ -1,10 +1,3 @@
-//================ Copyright (c) 2017, PG, All rights reserved. =================//
-//
-// Purpose:		changelog screen
-//
-// $NoKeywords: $osulog
-//===============================================================================//
-
 #include "Changelog.h"
 
 #include "CBaseUIButton.h"
@@ -36,6 +29,7 @@ Changelog::Changelog(Osu *osu) : ScreenBackable(osu) {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
+    latest.changes.push_back("- Hid password cvar from console command list");
     latest.changes.push_back("- Removed DirectX, Software, Vulkan renderers");
     latest.changes.push_back("- Removed OpenCL support");
     changelogs.push_back(latest);
