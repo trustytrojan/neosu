@@ -16,22 +16,22 @@
 #include "UIContextMenu.h"
 
 ConVar osu_songbrowser_button_collection_active_color_a("osu_songbrowser_button_collection_active_color_a", 255,
-                                                        FCVAR_NONE);
+                                                        FCVAR_DEFAULT);
 ConVar osu_songbrowser_button_collection_active_color_r("osu_songbrowser_button_collection_active_color_r", 163,
-                                                        FCVAR_NONE);
+                                                        FCVAR_DEFAULT);
 ConVar osu_songbrowser_button_collection_active_color_g("osu_songbrowser_button_collection_active_color_g", 240,
-                                                        FCVAR_NONE);
+                                                        FCVAR_DEFAULT);
 ConVar osu_songbrowser_button_collection_active_color_b("osu_songbrowser_button_collection_active_color_b", 44,
-                                                        FCVAR_NONE);
+                                                        FCVAR_DEFAULT);
 
 ConVar osu_songbrowser_button_collection_inactive_color_a("osu_songbrowser_button_collection_inactive_color_a", 255,
-                                                          FCVAR_NONE);
+                                                          FCVAR_DEFAULT);
 ConVar osu_songbrowser_button_collection_inactive_color_r("osu_songbrowser_button_collection_inactive_color_r", 35,
-                                                          FCVAR_NONE);
+                                                          FCVAR_DEFAULT);
 ConVar osu_songbrowser_button_collection_inactive_color_g("osu_songbrowser_button_collection_inactive_color_g", 50,
-                                                          FCVAR_NONE);
+                                                          FCVAR_DEFAULT);
 ConVar osu_songbrowser_button_collection_inactive_color_b("osu_songbrowser_button_collection_inactive_color_b", 143,
-                                                          FCVAR_NONE);
+                                                          FCVAR_DEFAULT);
 
 CollectionButton::CollectionButton(Osu *osu, SongBrowser *songBrowser, CBaseUIScrollView *view,
                                    UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,

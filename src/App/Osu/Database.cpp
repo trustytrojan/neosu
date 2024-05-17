@@ -27,47 +27,50 @@
 
 #ifdef _WIN32
 
-ConVar osu_folder("osu_folder", "C:/Program Files (x86)/osu!/", FCVAR_NONE);
+ConVar osu_folder("osu_folder", "C:/Program Files (x86)/osu!/", FCVAR_DEFAULT);
 
 #elif defined __APPLE__
 
-ConVar osu_folder("osu_folder", "/osu!/", FCVAR_NONE);
+ConVar osu_folder("osu_folder", "/osu!/", FCVAR_DEFAULT);
 
 #else
 
-ConVar osu_folder("osu_folder", "", FCVAR_NONE);
+ConVar osu_folder("osu_folder", "", FCVAR_DEFAULT);
 
 #endif
 
-ConVar osu_folder_sub_songs("osu_folder_sub_songs", "Songs/", FCVAR_NONE);
-ConVar osu_folder_sub_skins("osu_folder_sub_skins", "Skins/", FCVAR_NONE);
+ConVar osu_folder_sub_songs("osu_folder_sub_songs", "Songs/", FCVAR_DEFAULT);
+ConVar osu_folder_sub_skins("osu_folder_sub_skins", "Skins/", FCVAR_DEFAULT);
 
-ConVar osu_database_enabled("osu_database_enabled", true, FCVAR_NONE);
-ConVar osu_database_version("osu_database_version", OSU_VERSION_DATEONLY, FCVAR_NONE,
+ConVar osu_database_enabled("osu_database_enabled", true, FCVAR_DEFAULT);
+ConVar osu_database_version("osu_database_version", OSU_VERSION_DATEONLY, FCVAR_DEFAULT,
                             "maximum supported osu!.db version, above this will use fallback loader");
-ConVar osu_database_ignore_version_warnings("osu_database_ignore_version_warnings", false, FCVAR_NONE);
-ConVar osu_database_ignore_version("osu_database_ignore_version", true, FCVAR_NONE,
+ConVar osu_database_ignore_version_warnings("osu_database_ignore_version_warnings", false, FCVAR_DEFAULT);
+ConVar osu_database_ignore_version("osu_database_ignore_version", true, FCVAR_DEFAULT,
                                    "ignore upper version limit and force load the db file (may crash)");
-ConVar osu_scores_enabled("osu_scores_enabled", true, FCVAR_NONE);
-ConVar osu_scores_legacy_enabled("osu_scores_legacy_enabled", true, FCVAR_NONE, "load osu!'s scores.db");
-ConVar osu_scores_custom_enabled("osu_scores_custom_enabled", true, FCVAR_NONE, "load custom scores.db");
-ConVar osu_scores_save_immediately("osu_scores_save_immediately", true, FCVAR_NONE,
+ConVar osu_scores_enabled("osu_scores_enabled", true, FCVAR_DEFAULT);
+ConVar osu_scores_legacy_enabled("osu_scores_legacy_enabled", true, FCVAR_DEFAULT, "load osu!'s scores.db");
+ConVar osu_scores_custom_enabled("osu_scores_custom_enabled", true, FCVAR_DEFAULT, "load custom scores.db");
+ConVar osu_scores_save_immediately("osu_scores_save_immediately", true, FCVAR_DEFAULT,
                                    "write scores.db as soon as a new score is added");
-ConVar osu_scores_sort_by_pp("osu_scores_sort_by_pp", true, FCVAR_NONE, "display pp in score browser instead of score");
-ConVar osu_scores_bonus_pp("osu_scores_bonus_pp", true, FCVAR_NONE,
+ConVar osu_scores_sort_by_pp("osu_scores_sort_by_pp", true, FCVAR_DEFAULT,
+                             "display pp in score browser instead of score");
+ConVar osu_scores_bonus_pp("osu_scores_bonus_pp", true, FCVAR_DEFAULT,
                            "whether to add bonus pp to total (real) pp or not");
 ConVar osu_scores_rename("osu_scores_rename");
 ConVar osu_scores_export("osu_scores_export");
-ConVar osu_collections_legacy_enabled("osu_collections_legacy_enabled", true, FCVAR_NONE, "load osu!'s collection.db");
-ConVar osu_collections_custom_enabled("osu_collections_custom_enabled", true, FCVAR_NONE, "load custom collections.db");
-ConVar osu_collections_custom_version("osu_collections_custom_version", 20220110, FCVAR_NONE,
+ConVar osu_collections_legacy_enabled("osu_collections_legacy_enabled", true, FCVAR_DEFAULT,
+                                      "load osu!'s collection.db");
+ConVar osu_collections_custom_enabled("osu_collections_custom_enabled", true, FCVAR_DEFAULT,
+                                      "load custom collections.db");
+ConVar osu_collections_custom_version("osu_collections_custom_version", 20220110, FCVAR_DEFAULT,
                                       "maximum supported custom collections.db version");
-ConVar osu_collections_save_immediately("osu_collections_save_immediately", true, FCVAR_NONE,
+ConVar osu_collections_save_immediately("osu_collections_save_immediately", true, FCVAR_DEFAULT,
                                         "write collections.db as soon as anything is changed");
 ConVar osu_user_include_relax_and_autopilot_for_stats("osu_user_include_relax_and_autopilot_for_stats", false,
-                                                      FCVAR_NONE);
+                                                      FCVAR_DEFAULT);
 ConVar osu_user_switcher_include_legacy_scores_for_names("osu_user_switcher_include_legacy_scores_for_names", true,
-                                                         FCVAR_NONE);
+                                                         FCVAR_DEFAULT);
 
 Packet load_db(std::string path) {
     Packet db;

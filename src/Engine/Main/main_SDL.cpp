@@ -45,19 +45,19 @@ bool g_bHasFocus = true;    // for fps_max_background
 
 SDL_Window *g_window = NULL;
 
-ConVar fps_max("fps_max", 60.0f, FCVAR_NONE, "framerate limiter, foreground");
-ConVar fps_max_yield("fps_max_yield", true, FCVAR_NONE,
+ConVar fps_max("fps_max", 60.0f, FCVAR_DEFAULT, "framerate limiter, foreground");
+ConVar fps_max_yield("fps_max_yield", true, FCVAR_DEFAULT,
                      "always release rest of timeslice once per frame (call scheduler via sleep(0))");
-ConVar fps_max_background("fps_max_background", 30.0f, FCVAR_NONE, "framerate limiter, background");
-ConVar fps_unlimited("fps_unlimited", false, FCVAR_NONE);
+ConVar fps_max_background("fps_max_background", 30.0f, FCVAR_DEFAULT, "framerate limiter, background");
+ConVar fps_unlimited("fps_unlimited", false, FCVAR_DEFAULT);
 ConVar fps_unlimited_yield(
-    "fps_unlimited_yield", true, FCVAR_NONE,
+    "fps_unlimited_yield", true, FCVAR_DEFAULT,
     "always release rest of timeslice once per frame (call scheduler via sleep(0)), even if unlimited fps are enabled");
 
-ConVar sdl_joystick_mouse_sensitivity("sdl_joystick_mouse_sensitivity", 1.0f, FCVAR_NONE);
-ConVar sdl_joystick0_deadzone("sdl_joystick0_deadzone", 0.3f, FCVAR_NONE);
-ConVar sdl_joystick_zl_threshold("sdl_joystick_zl_threshold", -0.5f, FCVAR_NONE);
-ConVar sdl_joystick_zr_threshold("sdl_joystick_zr_threshold", -0.5f, FCVAR_NONE);
+ConVar sdl_joystick_mouse_sensitivity("sdl_joystick_mouse_sensitivity", 1.0f, FCVAR_DEFAULT);
+ConVar sdl_joystick0_deadzone("sdl_joystick0_deadzone", 0.3f, FCVAR_DEFAULT);
+ConVar sdl_joystick_zl_threshold("sdl_joystick_zl_threshold", -0.5f, FCVAR_DEFAULT);
+ConVar sdl_joystick_zr_threshold("sdl_joystick_zr_threshold", -0.5f, FCVAR_DEFAULT);
 
 int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
     SDLEnvironment *environment = customSDLEnvironment;

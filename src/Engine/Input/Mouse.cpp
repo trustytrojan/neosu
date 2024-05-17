@@ -12,17 +12,17 @@
 #include "Environment.h"
 #include "ResourceManager.h"
 
-ConVar debug_mouse("debug_mouse", false, FCVAR_CHEAT);
+ConVar debug_mouse("debug_mouse", false, FCVAR_LOCKED);
 
-ConVar mouse_sensitivity("mouse_sensitivity", 1.0f, FCVAR_NONE);
-ConVar mouse_raw_input("mouse_raw_input", false, FCVAR_NONE);
-ConVar mouse_raw_input_absolute_to_window("mouse_raw_input_absolute_to_window", false, FCVAR_NONE);
-ConVar mouse_fakelag("mouse_fakelag", 0.000f, FCVAR_NONE,
+ConVar mouse_sensitivity("mouse_sensitivity", 1.0f, FCVAR_DEFAULT);
+ConVar mouse_raw_input("mouse_raw_input", false, FCVAR_DEFAULT);
+ConVar mouse_raw_input_absolute_to_window("mouse_raw_input_absolute_to_window", false, FCVAR_DEFAULT);
+ConVar mouse_fakelag("mouse_fakelag", 0.000f, FCVAR_DEFAULT,
                      "delay all mouse movement by this many seconds (e.g. 0.1 = 100 ms delay)");
 
-ConVar tablet_sensitivity_ignore("tablet_sensitivity_ignore", false, FCVAR_NONE);
+ConVar tablet_sensitivity_ignore("tablet_sensitivity_ignore", false, FCVAR_DEFAULT);
 
-ConVar win_ink_workaround("win_ink_workaround", false, FCVAR_NONE);
+ConVar win_ink_workaround("win_ink_workaround", false, FCVAR_DEFAULT);
 
 Mouse::Mouse() : InputDevice() {
     m_bMouseLeftDown = false;

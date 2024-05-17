@@ -42,7 +42,7 @@ class PosixThread : public BaseThread {
     bool m_bReady;
 };
 
-ConVar debug_thread("debug_thread", false, FCVAR_NONE);
+ConVar debug_thread("debug_thread", false, FCVAR_DEFAULT);
 
 ConVar *McThread::debug = &debug_thread;
 

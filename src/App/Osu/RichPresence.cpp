@@ -22,12 +22,12 @@
 #include "SongBrowser/SongBrowser.h"
 #include "score.h"
 
-ConVar osu_rich_presence("osu_rich_presence", true, FCVAR_NONE, RichPresence::onRichPresenceChange);
+ConVar osu_rich_presence("osu_rich_presence", true, FCVAR_DEFAULT, RichPresence::onRichPresenceChange);
 ConVar osu_rich_presence_dynamic_windowtitle(
-    "osu_rich_presence_dynamic_windowtitle", true, FCVAR_NONE,
+    "osu_rich_presence_dynamic_windowtitle", true, FCVAR_DEFAULT,
     "should the window title show the currently playing beatmap Artist - Title and [Difficulty] name");
-ConVar osu_rich_presence_show_recentplaystats("osu_rich_presence_show_recentplaystats", true, FCVAR_NONE);
-ConVar osu_rich_presence_discord_show_totalpp("osu_rich_presence_discord_show_totalpp", true, FCVAR_NONE);
+ConVar osu_rich_presence_show_recentplaystats("osu_rich_presence_show_recentplaystats", true, FCVAR_DEFAULT);
+ConVar osu_rich_presence_discord_show_totalpp("osu_rich_presence_discord_show_totalpp", true, FCVAR_DEFAULT);
 
 ConVar *RichPresence::m_name_ref = NULL;
 

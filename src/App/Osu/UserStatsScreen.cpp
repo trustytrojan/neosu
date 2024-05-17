@@ -32,7 +32,7 @@
 #include "UIContextMenu.h"
 #include "UIUserStatsScreenLabel.h"
 
-ConVar osu_ui_top_ranks_max("osu_ui_top_ranks_max", 200, FCVAR_NONE,
+ConVar osu_ui_top_ranks_max("osu_ui_top_ranks_max", 200, FCVAR_DEFAULT,
                             "maximum number of displayed scores, to keep the ui/scrollbar manageable");
 
 class UserStatsScreenMenuButton : public CBaseUIButton {

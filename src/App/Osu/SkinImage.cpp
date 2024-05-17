@@ -14,7 +14,7 @@
 #include "ResourceManager.h"
 #include "Skin.h"
 
-ConVar osu_skin_animation_fps_override("osu_skin_animation_fps_override", -1.0f, FCVAR_NONE);
+ConVar osu_skin_animation_fps_override("osu_skin_animation_fps_override", -1.0f, FCVAR_DEFAULT);
 
 ConVar *SkinImage::m_osu_skin_mipmaps_ref = NULL;
 

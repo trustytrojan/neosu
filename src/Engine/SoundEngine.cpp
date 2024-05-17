@@ -35,34 +35,34 @@ void _volume(UString oldValue, UString newValue) {
     engine->getSound()->setVolume(newValue.toFloat());
 }
 
-ConVar _volume_("volume", 1.0f, FCVAR_NONE, _volume);
+ConVar _volume_("volume", 1.0f, FCVAR_DEFAULT, _volume);
 
-ConVar snd_output_device("snd_output_device", "Default", FCVAR_NONE);
+ConVar snd_output_device("snd_output_device", "Default", FCVAR_DEFAULT);
 ConVar snd_restart("snd_restart");
 
-ConVar snd_freq("snd_freq", 44100, FCVAR_NONE, "output sampling rate in Hz");
-ConVar snd_updateperiod("snd_updateperiod", 10, FCVAR_NONE, "BASS_CONFIG_UPDATEPERIOD length in milliseconds");
-ConVar snd_dev_period("snd_dev_period", 10, FCVAR_NONE,
+ConVar snd_freq("snd_freq", 44100, FCVAR_DEFAULT, "output sampling rate in Hz");
+ConVar snd_updateperiod("snd_updateperiod", 10, FCVAR_DEFAULT, "BASS_CONFIG_UPDATEPERIOD length in milliseconds");
+ConVar snd_dev_period("snd_dev_period", 10, FCVAR_DEFAULT,
                       "BASS_CONFIG_DEV_PERIOD length in milliseconds, or if negative then in samples");
-ConVar snd_dev_buffer("snd_dev_buffer", 30, FCVAR_NONE, "BASS_CONFIG_DEV_BUFFER length in milliseconds");
+ConVar snd_dev_buffer("snd_dev_buffer", 30, FCVAR_DEFAULT, "BASS_CONFIG_DEV_BUFFER length in milliseconds");
 
 ConVar snd_restrict_play_frame(
-    "snd_restrict_play_frame", true, FCVAR_NONE,
+    "snd_restrict_play_frame", true, FCVAR_DEFAULT,
     "only allow one new channel per frame for overlayable sounds (prevents lag and earrape)");
-ConVar snd_change_check_interval("snd_change_check_interval", 0.0f, FCVAR_NONE,
+ConVar snd_change_check_interval("snd_change_check_interval", 0.0f, FCVAR_DEFAULT,
                                  "check for output device changes every this many seconds. 0 = disabled (default)");
 
 ConVar win_snd_wasapi_buffer_size(
-    "win_snd_wasapi_buffer_size", 0.011f, FCVAR_NONE,
+    "win_snd_wasapi_buffer_size", 0.011f, FCVAR_DEFAULT,
     "buffer size/length in seconds (e.g. 0.011 = 11 ms), directly responsible for audio delay and crackling");
 ConVar win_snd_wasapi_period_size(
-    "win_snd_wasapi_period_size", 0.0f, FCVAR_NONE,
+    "win_snd_wasapi_period_size", 0.0f, FCVAR_DEFAULT,
     "interval between OutputWasapiProc calls in seconds (e.g. 0.016 = 16 ms) (0 = use default)");
 
-ConVar asio_buffer_size("asio_buffer_size", -1, FCVAR_NONE,
+ConVar asio_buffer_size("asio_buffer_size", -1, FCVAR_DEFAULT,
                         "buffer size in samples (usually 44100 samples per second)");
 
-ConVar osu_universal_offset_hardcoded("osu_universal_offset_hardcoded", 0.0f, FCVAR_NONE);
+ConVar osu_universal_offset_hardcoded("osu_universal_offset_hardcoded", 0.0f, FCVAR_DEFAULT);
 
 void _RESTART_SOUND_ENGINE_ON_CHANGE(UString oldValue, UString newValue) {
     const int oldValueMS = std::round(oldValue.toFloat() * 1000.0f);
@@ -454,7 +454,8 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
         // BASS_WASAPI_EXCLUSIVE makes neosu have exclusive output to the sound card
         auto flags = BASS_WASAPI_RAW | BASS_MIXER_NONSTOP | BASS_WASAPI_EXCLUSIVE;
 
-        if(!BASS_WASAPI_Init(device.id, 0, 0, flags, bufferSize, updatePeriod, WASAPIPROC_BASS, (void*)g_bassOutputMixer)) {
+        if(!BASS_WASAPI_Init(device.id, 0, 0, flags, bufferSize, updatePeriod, WASAPIPROC_BASS,
+                             (void *)g_bassOutputMixer)) {
             const int errorCode = BASS_ErrorGetCode();
             if(errorCode == BASS_ERROR_WASAPI_BUFFER) {
                 debugLog("Sound Error: BASS_WASAPI_Init() failed with BASS_ERROR_WASAPI_BUFFER!");

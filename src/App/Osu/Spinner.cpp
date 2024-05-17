@@ -19,7 +19,7 @@
 #include "SoundEngine.h"
 
 ConVar osu_spinner_use_ar_fadein(
-    "osu_spinner_use_ar_fadein", false, FCVAR_NONE,
+    "osu_spinner_use_ar_fadein", false, FCVAR_DEFAULT,
     "whether spinners should fade in with AR (same as circles), or with hardcoded 400 ms fadein time (osu!default)");
 
 Spinner::Spinner(int x, int y, long time, int sampleType, bool isEndOfCombo, long endTime, Beatmap *beatmap)

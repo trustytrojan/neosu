@@ -11,13 +11,13 @@
 #include "SoundEngine.h"
 
 ConVar snd_play_interp_duration(
-    "snd_play_interp_duration", 0.75f, FCVAR_NONE,
+    "snd_play_interp_duration", 0.75f, FCVAR_DEFAULT,
     "smooth over freshly started channel position jitter with engine time over this duration in seconds");
-ConVar snd_play_interp_ratio("snd_play_interp_ratio", 0.50f, FCVAR_NONE,
+ConVar snd_play_interp_ratio("snd_play_interp_ratio", 0.50f, FCVAR_DEFAULT,
                              "percentage of snd_play_interp_duration to use 100% engine time over audio time (some "
                              "devices report 0 for very long)");
 
-ConVar snd_wav_file_min_size("snd_wav_file_min_size", 51, FCVAR_NONE,
+ConVar snd_wav_file_min_size("snd_wav_file_min_size", 51, FCVAR_DEFAULT,
                              "minimum file size in bytes for WAV files to be considered valid (everything below will "
                              "fail to load), this is a workaround for BASS crashes");
 

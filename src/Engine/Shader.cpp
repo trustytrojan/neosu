@@ -9,6 +9,6 @@
 
 #include "ConVar.h"
 
-ConVar _debug_shaders("debug_shaders", false, FCVAR_NONE);
+ConVar _debug_shaders("debug_shaders", false, FCVAR_DEFAULT);
 
 ConVar *Shader::debug_shaders = &_debug_shaders;

@@ -9,7 +9,7 @@
 
 #include "ConVar.h"
 
-ConVar _debug_env("debug_env", false, FCVAR_NONE);
+ConVar _debug_env("debug_env", false, FCVAR_DEFAULT);
 ConVar *Environment::debug_env = &_debug_env;
 
 Environment::Environment() { m_bFullscreenWindowedBorderless = false; }
@@ -33,6 +33,6 @@ void _fullscreen_windowed_borderless(UString oldValue, UString newValue) {
 
 void _monitor(UString oldValue, UString newValue) { env->setMonitor(newValue.toInt()); }
 
-ConVar _fullscreen_windowed_borderless_("fullscreen_windowed_borderless", false, FCVAR_NONE,
+ConVar _fullscreen_windowed_borderless_("fullscreen_windowed_borderless", false, FCVAR_DEFAULT,
                                         _fullscreen_windowed_borderless);
-ConVar _monitor_("monitor", 0, FCVAR_NONE, "monitor/display device to switch to, 0 = primary monitor", _monitor);
+ConVar _monitor_("monitor", 0, FCVAR_DEFAULT, "monitor/display device to switch to, 0 = primary monitor", _monitor);

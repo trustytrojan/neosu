@@ -14,30 +14,21 @@
 #include "ModSelector.h"
 #include "Osu.h"
 
-// #define ALLOW_DEVELOPMENT_CONVARS // NOTE: comment this out on release
+bool ConVar::isUnlocked() const {
+    if(isFlagSet(FCVAR_PRIVATE)) return true;
+    if(!bancho.is_online()) return true;
 
-ConVar ConVars::sv_cheats("sv_cheats", true, FCVAR_NONE);
+    if(bancho.is_in_a_multi_room()) {
+        return isFlagSet(FCVAR_UNLOCK_MULTIPLAYER);
+    } else {
+        return isFlagSet(FCVAR_UNLOCK_SINGLEPLAYER);
+    }
+}
 
-bool ConVar::getBool() const {
-    if(isFlagSet(FCVAR_CHEAT) && !ConVars::sv_cheats.getBool()) return m_fDefaultValue.load() > 0;
-    if(isFlagSet(FCVAR_NONVANILLA) && bancho.is_in_a_multi_room()) return m_fDefaultValue.load() > 0;
-    return m_fValue.load() > 0;
-}
-float ConVar::getFloat() const {
-    if(isFlagSet(FCVAR_CHEAT) && !ConVars::sv_cheats.getBool()) return m_fDefaultValue.load();
-    if(isFlagSet(FCVAR_NONVANILLA) && bancho.is_in_a_multi_room()) return m_fDefaultValue.load();
-    return m_fValue.load();
-}
-int ConVar::getInt() {
-    if(isFlagSet(FCVAR_CHEAT) && !ConVars::sv_cheats.getBool()) return m_fDefaultValue.load();
-    if(isFlagSet(FCVAR_NONVANILLA) && bancho.is_in_a_multi_room()) return m_fDefaultValue.load();
-    return m_fValue.load();
-}
-const UString &ConVar::getString() {
-    if(isFlagSet(FCVAR_CHEAT) && !ConVars::sv_cheats.getBool()) return m_sDefaultValue;
-    if(isFlagSet(FCVAR_NONVANILLA) && bancho.is_in_a_multi_room()) return m_sDefaultValue;
-    return m_sValue;
-}
+bool ConVar::getBool() const { return getFloat() > 0; }
+int ConVar::getInt() { return (int)getFloat(); }
+float ConVar::getFloat() const { return isUnlocked() ? m_fValue.load() : m_fDefaultValue.load(); }
+const UString &ConVar::getString() { return isUnlocked() ? m_sValue : m_sDefaultValue; }
 
 static std::vector<ConVar *> &_getGlobalConVarArray() {
     static std::vector<ConVar *> g_vConVars;  // (singleton)
@@ -50,8 +41,6 @@ static std::unordered_map<std::string, ConVar *> &_getGlobalConVarMap() {
 }
 
 static void _addConVar(ConVar *c) {
-    if(c->isFlagSet(FCVAR_UNREGISTERED)) return;
-
     if(_getGlobalConVarArray().size() < 1) _getGlobalConVarArray().reserve(1024);
 
     auto cname = c->getName();
@@ -72,6 +61,23 @@ static ConVar *_getConVar(const UString &name) {
         return result->second;
     else
         return NULL;
+}
+
+std::string ConVar::getFancyDefaultValue() {
+    switch(getType()) {
+        case ConVar::CONVAR_TYPE::CONVAR_TYPE_BOOL:
+            return m_fDefaultDefaultValue == 0 ? "false" : "true";
+        case ConVar::CONVAR_TYPE::CONVAR_TYPE_INT:
+            return std::to_string((int)m_fDefaultDefaultValue);
+        case ConVar::CONVAR_TYPE::CONVAR_TYPE_FLOAT:
+            return std::to_string(m_fDefaultDefaultValue);
+        case ConVar::CONVAR_TYPE::CONVAR_TYPE_STRING: {
+            std::string out = "\"";
+            out.append(m_sDefaultDefaultValue.toUtf8());
+            out.append("\"");
+            return out;
+        }
+    }
 }
 
 UString ConVar::typeToString(CONVAR_TYPE type) {
@@ -95,25 +101,21 @@ void ConVar::init(int flags) {
     m_changecallback = NULL;
 
     m_fValue = 0.0f;
+    m_fDefaultDefaultValue = 0.0f;
     m_fDefaultValue = 0.0f;
+    m_sDefaultDefaultValue = "";
+    m_sDefaultValue = "";
 
-    m_bHasValue = true;
+    m_bHasValue = false;
     m_type = CONVAR_TYPE::CONVAR_TYPE_FLOAT;
+    m_iDefaultFlags = flags;
     m_iFlags = flags;
-
-#ifdef ALLOW_DEVELOPMENT_CONVARS
-
-    m_iFlags &= ~FCVAR_DEVELOPMENTONLY;
-
-#endif
 }
 
 void ConVar::init(UString &name, int flags) {
     init(flags);
 
     m_sName = name;
-
-    m_bHasValue = false;
     m_type = CONVAR_TYPE::CONVAR_TYPE_STRING;
 }
 
@@ -122,8 +124,6 @@ void ConVar::init(UString &name, int flags, ConVarCallback callback) {
 
     m_sName = name;
     m_callbackfunc = callback;
-
-    m_bHasValue = false;
     m_type = CONVAR_TYPE::CONVAR_TYPE_STRING;
 }
 
@@ -138,8 +138,6 @@ void ConVar::init(UString &name, int flags, ConVarCallbackArgs callbackARGS) {
 
     m_sName = name;
     m_callbackfuncargs = callbackARGS;
-
-    m_bHasValue = false;
     m_type = CONVAR_TYPE::CONVAR_TYPE_STRING;
 }
 
@@ -154,8 +152,11 @@ void ConVar::init(UString &name, float defaultValue, int flags, UString helpStri
 
     m_type = CONVAR_TYPE::CONVAR_TYPE_FLOAT;
     m_sName = name;
-    setDefaultFloatInt(defaultValue);
-    { setValueInt(defaultValue); }
+    m_fDefaultValue = defaultValue;
+    m_fDefaultDefaultValue = defaultValue;
+    m_sDefaultValue = UString::format("%g", defaultValue);
+    m_sDefaultDefaultValue = m_sDefaultValue;
+    setValue(defaultValue);
     m_sHelpString = helpString;
     m_changecallback = callback;
 }
@@ -165,14 +166,15 @@ void ConVar::init(UString &name, UString defaultValue, int flags, UString helpSt
 
     m_type = CONVAR_TYPE::CONVAR_TYPE_STRING;
     m_sName = name;
-    setDefaultStringInt(defaultValue);
-    { setValueInt(defaultValue); }
+    m_sDefaultValue = defaultValue;
+    m_sDefaultDefaultValue = defaultValue;
+    setValue(defaultValue);
     m_sHelpString = helpString;
     m_changecallback = callback;
 }
 
 ConVar::ConVar(UString name) {
-    init(name, FCVAR_NONE);
+    init(name, FCVAR_DEFAULT);
     _addConVar(this);
 }
 
@@ -218,49 +220,49 @@ ConVar::ConVar(UString name, float fDefaultValue, int flags, const char *helpStr
 
 ConVar::ConVar(UString name, int iDefaultValue, int flags) {
     init(name, (float)iDefaultValue, flags, "", NULL);
-    { m_type = CONVAR_TYPE::CONVAR_TYPE_INT; }
+    m_type = CONVAR_TYPE::CONVAR_TYPE_INT;
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, int iDefaultValue, int flags, ConVarChangeCallback callback) {
     init(name, (float)iDefaultValue, flags, "", callback);
-    { m_type = CONVAR_TYPE::CONVAR_TYPE_INT; }
+    m_type = CONVAR_TYPE::CONVAR_TYPE_INT;
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, int iDefaultValue, int flags, const char *helpString) {
     init(name, (float)iDefaultValue, flags, UString(helpString), NULL);
-    { m_type = CONVAR_TYPE::CONVAR_TYPE_INT; }
+    m_type = CONVAR_TYPE::CONVAR_TYPE_INT;
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, int iDefaultValue, int flags, const char *helpString, ConVarChangeCallback callback) {
     init(name, (float)iDefaultValue, flags, UString(helpString), callback);
-    { m_type = CONVAR_TYPE::CONVAR_TYPE_INT; }
+    m_type = CONVAR_TYPE::CONVAR_TYPE_INT;
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, bool bDefaultValue, int flags) {
     init(name, bDefaultValue ? 1.0f : 0.0f, flags, "", NULL);
-    { m_type = CONVAR_TYPE::CONVAR_TYPE_BOOL; }
+    m_type = CONVAR_TYPE::CONVAR_TYPE_BOOL;
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, bool bDefaultValue, int flags, ConVarChangeCallback callback) {
     init(name, bDefaultValue ? 1.0f : 0.0f, flags, "", callback);
-    { m_type = CONVAR_TYPE::CONVAR_TYPE_BOOL; }
+    m_type = CONVAR_TYPE::CONVAR_TYPE_BOOL;
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, bool bDefaultValue, int flags, const char *helpString) {
     init(name, bDefaultValue ? 1.0f : 0.0f, flags, UString(helpString), NULL);
-    { m_type = CONVAR_TYPE::CONVAR_TYPE_BOOL; }
+    m_type = CONVAR_TYPE::CONVAR_TYPE_BOOL;
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, bool bDefaultValue, int flags, const char *helpString, ConVarChangeCallback callback) {
     init(name, bDefaultValue ? 1.0f : 0.0f, flags, UString(helpString), callback);
-    { m_type = CONVAR_TYPE::CONVAR_TYPE_BOOL; }
+    m_type = CONVAR_TYPE::CONVAR_TYPE_BOOL;
     _addConVar(this);
 }
 
@@ -286,7 +288,7 @@ ConVar::ConVar(UString name, const char *sDefaultValue, int flags, const char *h
 }
 
 void ConVar::exec() {
-    if(isFlagSet(FCVAR_CHEAT) && !ConVars::sv_cheats.getBool()) return;
+    if(!isUnlocked()) return;
 
     if(bancho.osu != nullptr) {
         auto is_vanilla = convar->isVanilla();
@@ -306,37 +308,32 @@ void ConVar::exec() {
 }
 
 void ConVar::execArgs(UString args) {
-    if(isFlagSet(FCVAR_CHEAT) && !ConVars::sv_cheats.getBool()) return;
+    if(!isUnlocked()) return;
 
     if(m_callbackfuncargs != NULL) m_callbackfuncargs(args);
 }
 
-void ConVar::setDefaultFloat(float defaultValue) {
-    if(isFlagSet(FCVAR_HARDCODED)) return;
-
-    setDefaultFloatInt(defaultValue);
+// Reset default values to the actual defaults (before neosu.json overrides)
+void ConVar::resetDefaults() {
+    m_iFlags = m_iDefaultFlags;
+    m_fDefaultValue = m_fDefaultDefaultValue;
+    m_sDefaultValue = m_sDefaultDefaultValue;
 }
 
-void ConVar::setDefaultFloatInt(float defaultValue) {
+void ConVar::setDefaultFloat(float defaultValue) {
+    if(isFlagSet(FCVAR_PRIVATE)) return;
     m_fDefaultValue = defaultValue;
     m_sDefaultValue = UString::format("%g", defaultValue);
 }
 
 void ConVar::setDefaultString(UString defaultValue) {
-    if(isFlagSet(FCVAR_HARDCODED)) return;
-
-    setDefaultStringInt(defaultValue);
+    if(isFlagSet(FCVAR_PRIVATE)) return;
+    m_sDefaultValue = defaultValue;
 }
-
-void ConVar::setDefaultStringInt(UString defaultValue) { m_sDefaultValue = defaultValue; }
 
 void ConVar::setValue(float value) {
-    if(isFlagSet(FCVAR_HARDCODED) || (isFlagSet(FCVAR_CHEAT) && !ConVars::sv_cheats.getBool())) return;
+    if(!isUnlocked()) return;
 
-    setValueInt(value);
-}
-
-void ConVar::setValueInt(float value) {
     // TODO: make this less unsafe in multithreaded environments (for float convars at least)
 
     // backup previous value
@@ -347,6 +344,7 @@ void ConVar::setValueInt(float value) {
     {
         m_fValue = value;
         m_sValue = newStringValue;
+        m_bHasValue = true;
     }
 
     // handle callbacks
@@ -363,18 +361,15 @@ void ConVar::setValueInt(float value) {
 }
 
 void ConVar::setValue(UString sValue) {
-    if(isFlagSet(FCVAR_HARDCODED) || (isFlagSet(FCVAR_CHEAT) && !ConVars::sv_cheats.getBool())) return;
+    if(!isUnlocked()) return;
 
-    setValueInt(sValue);
-}
-
-void ConVar::setValueInt(UString sValue) {
     // backup previous value
     const UString oldValue = m_sValue;
 
     // then set the new value
     {
         m_sValue = sValue;
+        m_bHasValue = true;
 
         if(sValue.length() > 0) m_fValue = sValue.toFloat();
     }
@@ -405,7 +400,7 @@ void ConVar::setHelpString(UString helpString) { m_sHelpString = helpString; }
 //********************************//
 
 ConVar _emptyDummyConVar(
-    "emptyDummyConVar", 42.0f, FCVAR_NONE,
+    "emptyDummyConVar", 42.0f, FCVAR_DEFAULT,
     "this placeholder convar is returned by convar->getConVarByName() if no matching convar is found");
 
 ConVarHandler *convar = new ConVarHandler();
@@ -446,7 +441,7 @@ std::vector<ConVar *> ConVarHandler::getConVarByLetter(UString letters) const {
 
         // first try matching exactly
         for(size_t i = 0; i < convars.size(); i++) {
-            if(convars[i]->isFlagSet(FCVAR_HIDDEN) || convars[i]->isFlagSet(FCVAR_DEVELOPMENTONLY)) continue;
+            if(convars[i]->isFlagSet(FCVAR_HIDDEN)) continue;
 
             if(convars[i]->getName().find(letters, 0, letters.length()) == 0) {
                 if(letters.length() > 1)
@@ -460,7 +455,7 @@ std::vector<ConVar *> ConVarHandler::getConVarByLetter(UString letters) const {
         // then try matching substrings
         if(letters.length() > 1) {
             for(size_t i = 0; i < convars.size(); i++) {
-                if(convars[i]->isFlagSet(FCVAR_HIDDEN) || convars[i]->isFlagSet(FCVAR_DEVELOPMENTONLY)) continue;
+                if(convars[i]->isFlagSet(FCVAR_HIDDEN)) continue;
 
                 if(convars[i]->getName().find(letters) != -1) {
                     std::string stdName(convars[i]->getName().toUtf8(), convars[i]->getName().lengthUtf8());
@@ -480,16 +475,13 @@ std::vector<ConVar *> ConVarHandler::getConVarByLetter(UString letters) const {
 UString ConVarHandler::flagsToString(int flags) {
     UString string;
     {
-        if(flags == FCVAR_NONE)
+        if(flags == 0) {
             string.append("no flags");
-        else {
-            if(flags & FCVAR_UNREGISTERED) string.append(string.length() > 0 ? " unregistered" : "unregistered");
-            if(flags & FCVAR_DEVELOPMENTONLY)
-                string.append(string.length() > 0 ? " developmentonly" : "developmentonly");
-            if(flags & FCVAR_HARDCODED) string.append(string.length() > 0 ? " hardcoded" : "hardcoded");
+        } else {
             if(flags & FCVAR_HIDDEN) string.append(string.length() > 0 ? " hidden" : "hidden");
-            if(flags & FCVAR_CHEAT) string.append(string.length() > 0 ? " cheat" : "cheat");
-            if(flags & FCVAR_NONVANILLA) string.append(string.length() > 0 ? " nonvanilla" : "nonvanilla");
+            if(flags & FCVAR_UNLOCK_SINGLEPLAYER) string.append(string.length() > 0 ? " unlock_solo" : "unlock_solo");
+            if(flags & FCVAR_UNLOCK_MULTIPLAYER) string.append(string.length() > 0 ? " unlock_multi" : "unlock_multi");
+            if(flags & FCVAR_ALWAYS_SUBMIT) string.append(string.length() > 0 ? " always_submit" : "always_submit");
         }
     }
     return string;
@@ -497,7 +489,7 @@ UString ConVarHandler::flagsToString(int flags) {
 
 bool ConVarHandler::isVanilla() {
     for(auto cv : _getGlobalConVarArray()) {
-        if(!cv->isFlagSet(FCVAR_NONVANILLA)) continue;
+        if(cv->isFlagSet(FCVAR_ALWAYS_SUBMIT)) continue;
         if(cv->getString() != cv->getDefaultString()) {
             return false;
         }
@@ -529,7 +521,7 @@ static void _find(UString args) {
 
     std::vector<ConVar *> matchingConVars;
     for(size_t i = 0; i < convars.size(); i++) {
-        if(convars[i]->isFlagSet(FCVAR_HIDDEN) || convars[i]->isFlagSet(FCVAR_DEVELOPMENTONLY)) continue;
+        if(convars[i]->isFlagSet(FCVAR_HIDDEN)) continue;
 
         const UString name = convars[i]->getName();
         if(name.find(args, 0, name.length()) != -1) matchingConVars.push_back(convars[i]);
@@ -630,7 +622,7 @@ static void _listcommands(void) {
         std::sort(convars.begin(), convars.end(), CONVAR_SORT_COMPARATOR());
 
         for(size_t i = 0; i < convars.size(); i++) {
-            if(convars[i]->isFlagSet(FCVAR_HIDDEN) || convars[i]->isFlagSet(FCVAR_DEVELOPMENTONLY)) continue;
+            if(convars[i]->isFlagSet(FCVAR_HIDDEN)) continue;
 
             ConVar *var = convars[i];
 
@@ -659,6 +651,50 @@ static void _listcommands(void) {
     debugLog("----------------------------------------------\n");
 }
 
-ConVar _find_("find", FCVAR_NONE, _find);
-ConVar _help_("help", FCVAR_NONE, _help);
-ConVar _listcommands_("listcommands", FCVAR_NONE, _listcommands);
+static void _dumpcommands(void) {
+    std::vector<ConVar *> convars = convar->getConVarArray();
+    struct CONVAR_SORT_COMPARATOR {
+        bool operator()(ConVar const *var1, ConVar const *var2) { return (var1->getName() < var2->getName()); }
+    };
+    std::sort(convars.begin(), convars.end(), CONVAR_SORT_COMPARATOR());
+
+    FILE *file = fopen("commands.htm", "w");
+    if(file == NULL) {
+        debugLog("Failed to open commands.htm for writing\n");
+        return;
+    }
+
+    for(size_t i = 0; i < convars.size(); i++) {
+        ConVar *var = convars[i];
+        if(!var->hasValue()) continue;
+        if(var->isFlagSet(FCVAR_HIDDEN)) continue;
+        if(var->isFlagSet(FCVAR_PRIVATE)) continue;
+
+        std::string cmd = "<h4>";
+        cmd.append(var->getName());
+        cmd.append("</h4>\n");
+        cmd.append(var->getHelpstring().toUtf8());
+        cmd.append("<pre>{");
+        cmd.append("\n    \"default\": ");
+        cmd.append(var->getFancyDefaultValue());
+        cmd.append("\n    \"unlock_singleplayer\": ");
+        cmd.append(var->isFlagSet(FCVAR_UNLOCK_SINGLEPLAYER) ? "true" : "false");
+        cmd.append("\n    \"unlock_multiplayer\": ");
+        cmd.append(var->isFlagSet(FCVAR_UNLOCK_MULTIPLAYER) ? "true" : "false");
+        cmd.append("\n    \"always_submit\": ");
+        cmd.append(var->isFlagSet(FCVAR_ALWAYS_SUBMIT) ? "true" : "false");
+        cmd.append("\n}</pre>\n");
+
+        fwrite(cmd.c_str(), cmd.size(), 1, file);
+    }
+
+    fflush(file);
+    fclose(file);
+
+    debugLog("Commands dumped to commands.htm\n");
+}
+
+ConVar _find_("find", FCVAR_DEFAULT, _find);
+ConVar _help_("help", FCVAR_DEFAULT, _help);
+ConVar _listcommands_("listcommands", FCVAR_DEFAULT, _listcommands);
+ConVar _dumpcommands_("dumpcommands", FCVAR_HIDDEN, _dumpcommands);

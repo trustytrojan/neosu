@@ -14,15 +14,15 @@
 #include "Skin.h"
 #include "SoundEngine.h"
 
-ConVar osu_songbrowser_button_active_color_a("osu_songbrowser_button_active_color_a", 220 + 10, FCVAR_NONE);
-ConVar osu_songbrowser_button_active_color_r("osu_songbrowser_button_active_color_r", 255, FCVAR_NONE);
-ConVar osu_songbrowser_button_active_color_g("osu_songbrowser_button_active_color_g", 255, FCVAR_NONE);
-ConVar osu_songbrowser_button_active_color_b("osu_songbrowser_button_active_color_b", 255, FCVAR_NONE);
+ConVar osu_songbrowser_button_active_color_a("osu_songbrowser_button_active_color_a", 220 + 10, FCVAR_DEFAULT);
+ConVar osu_songbrowser_button_active_color_r("osu_songbrowser_button_active_color_r", 255, FCVAR_DEFAULT);
+ConVar osu_songbrowser_button_active_color_g("osu_songbrowser_button_active_color_g", 255, FCVAR_DEFAULT);
+ConVar osu_songbrowser_button_active_color_b("osu_songbrowser_button_active_color_b", 255, FCVAR_DEFAULT);
 
-ConVar osu_songbrowser_button_inactive_color_a("osu_songbrowser_button_inactive_color_a", 240, FCVAR_NONE);
-ConVar osu_songbrowser_button_inactive_color_r("osu_songbrowser_button_inactive_color_r", 235, FCVAR_NONE);
-ConVar osu_songbrowser_button_inactive_color_g("osu_songbrowser_button_inactive_color_g", 73, FCVAR_NONE);
-ConVar osu_songbrowser_button_inactive_color_b("osu_songbrowser_button_inactive_color_b", 153, FCVAR_NONE);
+ConVar osu_songbrowser_button_inactive_color_a("osu_songbrowser_button_inactive_color_a", 240, FCVAR_DEFAULT);
+ConVar osu_songbrowser_button_inactive_color_r("osu_songbrowser_button_inactive_color_r", 235, FCVAR_DEFAULT);
+ConVar osu_songbrowser_button_inactive_color_g("osu_songbrowser_button_inactive_color_g", 73, FCVAR_DEFAULT);
+ConVar osu_songbrowser_button_inactive_color_b("osu_songbrowser_button_inactive_color_b", 153, FCVAR_DEFAULT);
 
 int Button::marginPixelsX = 9;
 int Button::marginPixelsY = 9;

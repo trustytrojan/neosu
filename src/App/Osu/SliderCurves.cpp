@@ -12,12 +12,12 @@
 #include "Engine.h"
 
 ConVar osu_slider_curve_points_separation(
-    "osu_slider_curve_points_separation", 2.5f, FCVAR_CHEAT,
+    "osu_slider_curve_points_separation", 2.5f, FCVAR_LOCKED,
     "slider body curve approximation step width in osu!pixels, don't set this lower than around 1.5");
-ConVar osu_slider_curve_max_points("osu_slider_curve_max_points", 9999.0f, FCVAR_CHEAT,
+ConVar osu_slider_curve_max_points("osu_slider_curve_max_points", 9999.0f, FCVAR_LOCKED,
                                    "maximum number of allowed interpolated curve points. quality will be forced to go "
                                    "down if a slider has more steps than this");
-ConVar osu_slider_curve_max_length("osu_slider_curve_max_length", 65536 / 2, FCVAR_CHEAT,
+ConVar osu_slider_curve_max_length("osu_slider_curve_max_length", 65536 / 2, FCVAR_LOCKED,
                                    "maximum slider length in osu!pixels (i.e. pixelLength). also used to clamp all "
                                    "(control-)point coordinates to sane values.");
 

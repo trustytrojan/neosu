@@ -63,92 +63,96 @@
 #include "score.h"
 
 // release configuration
-ConVar auto_update("auto_update", true, FCVAR_NONE);
-ConVar osu_version("osu_version", 35.01f, FCVAR_NONE);
+ConVar auto_update("auto_update", true, FCVAR_DEFAULT);
+ConVar osu_version("osu_version", 35.01f, FCVAR_DEFAULT | FCVAR_HIDDEN);
 
 #ifdef _DEBUG
-ConVar osu_debug("osu_debug", true, FCVAR_NONE);
+ConVar osu_debug("osu_debug", true, FCVAR_DEFAULT);
 #else
-ConVar osu_debug("osu_debug", false, FCVAR_NONE);
+ConVar osu_debug("osu_debug", false, FCVAR_DEFAULT);
 #endif
 
-ConVar osu_disable_mousebuttons("osu_disable_mousebuttons", false, FCVAR_NONE);
-ConVar osu_disable_mousewheel("osu_disable_mousewheel", false, FCVAR_NONE);
-ConVar osu_confine_cursor_windowed("osu_confine_cursor_windowed", false, FCVAR_NONE);
-ConVar osu_confine_cursor_fullscreen("osu_confine_cursor_fullscreen", true, FCVAR_NONE);
+ConVar osu_disable_mousebuttons("osu_disable_mousebuttons", false, FCVAR_DEFAULT);
+ConVar osu_disable_mousewheel("osu_disable_mousewheel", false, FCVAR_DEFAULT);
+ConVar osu_confine_cursor_windowed("osu_confine_cursor_windowed", false, FCVAR_DEFAULT);
+ConVar osu_confine_cursor_fullscreen("osu_confine_cursor_fullscreen", true, FCVAR_DEFAULT);
 
-ConVar osu_skin("osu_skin", "default", FCVAR_NONE);
+ConVar osu_skin("osu_skin", "default", FCVAR_DEFAULT);
 ConVar osu_skin_reload("osu_skin_reload");
 
-ConVar osu_volume_master("osu_volume_master", 1.0f, FCVAR_NONE);
-ConVar osu_volume_master_inactive("osu_volume_master_inactive", 0.25f, FCVAR_NONE);
-ConVar osu_volume_effects("osu_volume_effects", 1.0f, FCVAR_NONE);
-ConVar osu_volume_music("osu_volume_music", 0.4f, FCVAR_NONE);
-ConVar osu_volume_change_interval("osu_volume_change_interval", 0.05f, FCVAR_NONE);
-ConVar osu_hud_volume_duration("osu_hud_volume_duration", 1.0f, FCVAR_NONE);
-ConVar osu_hud_volume_size_multiplier("osu_hud_volume_size_multiplier", 1.5f, FCVAR_NONE);
+ConVar osu_volume_master("osu_volume_master", 1.0f, FCVAR_DEFAULT);
+ConVar osu_volume_master_inactive("osu_volume_master_inactive", 0.25f, FCVAR_DEFAULT);
+ConVar osu_volume_effects("osu_volume_effects", 1.0f, FCVAR_DEFAULT);
+ConVar osu_volume_music("osu_volume_music", 0.4f, FCVAR_DEFAULT);
+ConVar osu_volume_change_interval("osu_volume_change_interval", 0.05f, FCVAR_DEFAULT);
+ConVar osu_hud_volume_duration("osu_hud_volume_duration", 1.0f, FCVAR_DEFAULT);
+ConVar osu_hud_volume_size_multiplier("osu_hud_volume_size_multiplier", 1.5f, FCVAR_DEFAULT);
 
-ConVar osu_speed_override("osu_speed_override", -1.0f, FCVAR_NONVANILLA);
-ConVar osu_animation_speed_override("osu_animation_speed_override", -1.0f, FCVAR_CHEAT);
+ConVar osu_speed_override("osu_speed_override", -1.0f, FCVAR_UNLOCKED);
+ConVar osu_animation_speed_override("osu_animation_speed_override", -1.0f, FCVAR_LOCKED);
 
-ConVar osu_pause_on_focus_loss("osu_pause_on_focus_loss", true, FCVAR_NONE);
-ConVar osu_quick_retry_delay("osu_quick_retry_delay", 0.27f, FCVAR_NONE);
-ConVar osu_scrubbing_smooth("osu_scrubbing_smooth", true, FCVAR_NONE);
-ConVar osu_skip_intro_enabled("osu_skip_intro_enabled", true, FCVAR_NONE,
+ConVar osu_pause_on_focus_loss("osu_pause_on_focus_loss", true, FCVAR_DEFAULT);
+ConVar osu_quick_retry_delay("osu_quick_retry_delay", 0.27f, FCVAR_DEFAULT);
+ConVar osu_scrubbing_smooth("osu_scrubbing_smooth", true, FCVAR_DEFAULT);
+ConVar osu_skip_intro_enabled("osu_skip_intro_enabled", true, FCVAR_DEFAULT,
                               "enables/disables skip button for intro until first hitobject");
-ConVar osu_skip_breaks_enabled("osu_skip_breaks_enabled", true, FCVAR_NONE,
+ConVar osu_skip_breaks_enabled("osu_skip_breaks_enabled", true, FCVAR_DEFAULT,
                                "enables/disables skip button for breaks in the middle of beatmaps");
-ConVar osu_seek_delta("osu_seek_delta", 5, FCVAR_NONE, "how many seconds to skip backward/forward when quick seeking");
+ConVar osu_seek_delta("osu_seek_delta", 5, FCVAR_DEFAULT,
+                      "how many seconds to skip backward/forward when quick seeking");
 
-ConVar osu_mods("osu_mods", "", FCVAR_NONE);
-ConVar osu_mod_touchdevice("osu_mod_touchdevice", false, FCVAR_NONE, "used for force applying touch pp nerf always");
-ConVar osu_mod_fadingcursor("osu_mod_fadingcursor", false, FCVAR_NONVANILLA);
-ConVar osu_mod_fadingcursor_combo("osu_mod_fadingcursor_combo", 50.0f, FCVAR_NONE);
-ConVar osu_mod_endless("osu_mod_endless", false, FCVAR_CHEAT);
+ConVar osu_mods("osu_mods", "", FCVAR_DEFAULT);
+ConVar osu_mod_touchdevice("osu_mod_touchdevice", false, FCVAR_DEFAULT, "used for force applying touch pp nerf always");
+ConVar osu_mod_fadingcursor("osu_mod_fadingcursor", false, FCVAR_UNLOCKED);
+ConVar osu_mod_fadingcursor_combo("osu_mod_fadingcursor_combo", 50.0f, FCVAR_DEFAULT);
+ConVar osu_mod_endless("osu_mod_endless", false, FCVAR_LOCKED);
 
 ConVar osu_notification("osu_notification");
-ConVar osu_notification_color_r("osu_notification_color_r", 255, FCVAR_NONE);
-ConVar osu_notification_color_g("osu_notification_color_g", 255, FCVAR_NONE);
-ConVar osu_notification_color_b("osu_notification_color_b", 255, FCVAR_NONE);
+ConVar osu_notification_color_r("osu_notification_color_r", 255, FCVAR_DEFAULT);
+ConVar osu_notification_color_g("osu_notification_color_g", 255, FCVAR_DEFAULT);
+ConVar osu_notification_color_b("osu_notification_color_b", 255, FCVAR_DEFAULT);
 
-ConVar osu_ui_scale("osu_ui_scale", 1.0f, FCVAR_NONE, "multiplier");
-ConVar osu_ui_scale_to_dpi("osu_ui_scale_to_dpi", true, FCVAR_NONE,
+ConVar osu_ui_scale("osu_ui_scale", 1.0f, FCVAR_DEFAULT, "multiplier");
+ConVar osu_ui_scale_to_dpi("osu_ui_scale_to_dpi", true, FCVAR_DEFAULT,
                            "whether the game should scale its UI based on the DPI reported by your operating system");
 ConVar osu_ui_scale_to_dpi_minimum_width(
-    "osu_ui_scale_to_dpi_minimum_width", 2200, FCVAR_NONE,
+    "osu_ui_scale_to_dpi_minimum_width", 2200, FCVAR_DEFAULT,
     "any in-game resolutions below this will have osu_ui_scale_to_dpi force disabled");
 ConVar osu_ui_scale_to_dpi_minimum_height(
-    "osu_ui_scale_to_dpi_minimum_height", 1300, FCVAR_NONE,
+    "osu_ui_scale_to_dpi_minimum_height", 1300, FCVAR_DEFAULT,
     "any in-game resolutions below this will have osu_ui_scale_to_dpi force disabled");
-ConVar osu_letterboxing("osu_letterboxing", true, FCVAR_NONE);
-ConVar osu_letterboxing_offset_x("osu_letterboxing_offset_x", 0.0f, FCVAR_NONE);
-ConVar osu_letterboxing_offset_y("osu_letterboxing_offset_y", 0.0f, FCVAR_NONE);
-ConVar osu_resolution("osu_resolution", "1280x720", FCVAR_NONE);
-ConVar osu_resolution_enabled("osu_resolution_enabled", false, FCVAR_NONE);
-ConVar osu_resolution_keep_aspect_ratio("osu_resolution_keep_aspect_ratio", false, FCVAR_NONE);
-ConVar osu_force_legacy_slider_renderer("osu_force_legacy_slider_renderer", false, FCVAR_NONE,
+ConVar osu_letterboxing("osu_letterboxing", true, FCVAR_DEFAULT);
+ConVar osu_letterboxing_offset_x("osu_letterboxing_offset_x", 0.0f, FCVAR_DEFAULT);
+ConVar osu_letterboxing_offset_y("osu_letterboxing_offset_y", 0.0f, FCVAR_DEFAULT);
+ConVar osu_resolution("osu_resolution", "1280x720", FCVAR_DEFAULT);
+ConVar osu_resolution_enabled("osu_resolution_enabled", false, FCVAR_DEFAULT);
+ConVar osu_resolution_keep_aspect_ratio("osu_resolution_keep_aspect_ratio", false, FCVAR_DEFAULT);
+ConVar osu_force_legacy_slider_renderer("osu_force_legacy_slider_renderer", false, FCVAR_DEFAULT,
                                         "on some older machines, this may be faster than vertexbuffers");
 
-ConVar osu_draw_fps("osu_draw_fps", true, FCVAR_NONE);
+ConVar osu_draw_fps("osu_draw_fps", true, FCVAR_DEFAULT);
 
-ConVar osu_alt_f4_quits_even_while_playing("osu_alt_f4_quits_even_while_playing", true, FCVAR_NONE);
-ConVar osu_win_disable_windows_key_while_playing("osu_win_disable_windows_key_while_playing", true, FCVAR_NONE);
+ConVar osu_alt_f4_quits_even_while_playing("osu_alt_f4_quits_even_while_playing", true, FCVAR_DEFAULT);
+ConVar osu_win_disable_windows_key_while_playing("osu_win_disable_windows_key_while_playing", true, FCVAR_DEFAULT);
 
-ConVar avoid_flashes("avoid_flashes", false, FCVAR_NONE, "disable flashing elements (like FL dimming on sliders)");
-ConVar flashlight_radius("flashlight_radius", 100.f, FCVAR_CHEAT);
-ConVar flashlight_follow_delay("flashlight_follow_delay", 0.120f, FCVAR_CHEAT);
-ConVar flashlight_always_hard("flashlight_always_hard", false, FCVAR_NONE, "always use 200+ combo flashlight radius");
+ConVar avoid_flashes("avoid_flashes", false, FCVAR_DEFAULT, "disable flashing elements (like FL dimming on sliders)");
+ConVar flashlight_radius("flashlight_radius", 100.f, FCVAR_LOCKED);
+ConVar flashlight_follow_delay("flashlight_follow_delay", 0.120f, FCVAR_LOCKED);
+ConVar flashlight_always_hard("flashlight_always_hard", false, FCVAR_DEFAULT,
+                              "always use 200+ combo flashlight radius");
 
-ConVar start_first_main_menu_song_at_preview_point("start_first_main_menu_song_at_preview_point", false, FCVAR_NONE);
-ConVar nightcore_enjoyer("nightcore_enjoyer", false, FCVAR_NONE, "automatically select nightcore when speed modifying");
-ConVar scoreboard_animations("scoreboard_animations", true, FCVAR_NONE, "animate in-game scoreboard");
-ConVar instant_replay_duration("instant_replay_duration", 15.f, FCVAR_NONE, "instant replay (F2) duration, in seconds");
-ConVar normalize_loudness("normalize_loudness", false, FCVAR_NONE, "normalize loudness across songs");
+ConVar start_first_main_menu_song_at_preview_point("start_first_main_menu_song_at_preview_point", false, FCVAR_DEFAULT);
+ConVar nightcore_enjoyer("nightcore_enjoyer", false, FCVAR_DEFAULT,
+                         "automatically select nightcore when speed modifying");
+ConVar scoreboard_animations("scoreboard_animations", true, FCVAR_DEFAULT, "animate in-game scoreboard");
+ConVar instant_replay_duration("instant_replay_duration", 15.f, FCVAR_DEFAULT,
+                               "instant replay (F2) duration, in seconds");
+ConVar normalize_loudness("normalize_loudness", false, FCVAR_DEFAULT, "normalize loudness across songs");
 
-ConVar mp_server("mp_server", "ez-pp.farm", FCVAR_NONE);
-ConVar mp_password("mp_password", "", FCVAR_HIDDEN);
-ConVar mp_autologin("mp_autologin", false, FCVAR_NONE);
-ConVar submit_scores("submit_scores", false, FCVAR_NONE);
+ConVar mp_server("mp_server", "ez-pp.farm", FCVAR_DEFAULT);
+ConVar mp_password("mp_password", "", FCVAR_DEFAULT | FCVAR_HIDDEN);
+ConVar mp_autologin("mp_autologin", false, FCVAR_DEFAULT);
+ConVar submit_scores("submit_scores", false, FCVAR_DEFAULT);
 
 // If catboy.best doesn't work for you, here are some alternatives:
 // - https://api.osu.direct/d/
@@ -156,7 +160,7 @@ ConVar submit_scores("submit_scores", false, FCVAR_NONE);
 // - https://api.nerinyan.moe/d/
 // - https://osu.gatari.pw/d/
 // - https://osu.sayobot.cn/osu.php?s=
-ConVar beatmap_mirror("beatmap_mirror", "https://catboy.best/s/", FCVAR_NONE,
+ConVar beatmap_mirror("beatmap_mirror", "https://catboy.best/s/", FCVAR_DEFAULT,
                       "mirror from which beatmapsets will be downloaded");
 
 ConVar *Osu::version = &osu_version;
@@ -253,8 +257,6 @@ Osu::Osu(int instanceID) {
     }
 
     // convar callbacks
-    ConVars::sv_cheats.setCallback(fastdelegate::MakeDelegate(this, &Osu::onCheatsChange));
-
     osu_speed_override.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSpeedChange));
     osu_animation_speed_override.setCallback(fastdelegate::MakeDelegate(this, &Osu::onAnimationSpeedChange));
 
@@ -1985,14 +1987,6 @@ void Osu::updateWindowsKeyDisable() {
 }
 
 void Osu::fireResolutionChanged() { onResolutionChanged(g_vInternalResolution); }
-
-void Osu::onCheatsChange(UString oldValue, UString newValue) {
-    (void)oldValue;
-    (void)newValue;
-    if(bancho.is_online() && (bancho.submit_scores() || bancho.is_in_a_multi_room()) && ConVars::sv_cheats.getBool()) {
-        ConVars::sv_cheats.setValue(false);
-    }
-}
 
 void Osu::onInternalResolutionChanged(UString oldValue, UString args) {
     if(args.length() < 7) return;

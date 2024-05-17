@@ -132,18 +132,18 @@ void MainMenuPauseButton::draw(Graphics *g) {
 
 ConVar osu_toggle_preview_music("osu_toggle_preview_music");
 
-ConVar osu_draw_menu_background("osu_draw_menu_background", false, FCVAR_NONE);
-ConVar osu_main_menu_startup_anim_duration("osu_main_menu_startup_anim_duration", 0.25f, FCVAR_NONE);
-ConVar osu_main_menu_alpha("osu_main_menu_alpha", 0.8f, FCVAR_NONE);
-ConVar osu_main_menu_friend("osu_main_menu_friend", true, FCVAR_NONE);
+ConVar osu_draw_menu_background("osu_draw_menu_background", false, FCVAR_DEFAULT);
+ConVar osu_main_menu_startup_anim_duration("osu_main_menu_startup_anim_duration", 0.25f, FCVAR_DEFAULT);
+ConVar osu_main_menu_alpha("osu_main_menu_alpha", 0.8f, FCVAR_DEFAULT);
+ConVar osu_main_menu_friend("osu_main_menu_friend", true, FCVAR_DEFAULT);
 
-ConVar osu_main_menu_banner_always_text("osu_main_menu_banner_always_text", "", FCVAR_NONE);
+ConVar osu_main_menu_banner_always_text("osu_main_menu_banner_always_text", "", FCVAR_DEFAULT);
 ConVar osu_main_menu_banner_ifupdatedfromoldversion_text("osu_main_menu_banner_ifupdatedfromoldversion_text", "",
-                                                         FCVAR_NONE);
+                                                         FCVAR_DEFAULT);
 ConVar osu_main_menu_banner_ifupdatedfromoldversion_le3300_text(
-    "osu_main_menu_banner_ifupdatedfromoldversion_le3300_text", "", FCVAR_NONE);
+    "osu_main_menu_banner_ifupdatedfromoldversion_le3300_text", "", FCVAR_DEFAULT);
 ConVar osu_main_menu_banner_ifupdatedfromoldversion_le3303_text(
-    "osu_main_menu_banner_ifupdatedfromoldversion_le3303_text", "", FCVAR_NONE);
+    "osu_main_menu_banner_ifupdatedfromoldversion_le3303_text", "", FCVAR_DEFAULT);
 
 ConVar *MainMenu::m_osu_universal_offset_ref = NULL;
 ConVar *MainMenu::m_osu_universal_offset_hardcoded_ref = NULL;

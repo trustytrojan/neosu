@@ -36,12 +36,12 @@ class ResourceManagerLoaderThread {
 };
 
 ConVar rm_numthreads(
-    "rm_numthreads", 3, FCVAR_NONE,
+    "rm_numthreads", 3, FCVAR_DEFAULT,
     "how many parallel resource loader threads are spawned once on startup (!), and subsequently used during runtime");
-ConVar rm_warnings("rm_warnings", false, FCVAR_NONE);
-ConVar rm_debug_async_delay("rm_debug_async_delay", 0.0f, FCVAR_CHEAT);
-ConVar rm_interrupt_on_destroy("rm_interrupt_on_destroy", true, FCVAR_CHEAT);
-ConVar debug_rm_("debug_rm", false, FCVAR_NONE);
+ConVar rm_warnings("rm_warnings", false, FCVAR_DEFAULT);
+ConVar rm_debug_async_delay("rm_debug_async_delay", 0.0f, FCVAR_LOCKED);
+ConVar rm_interrupt_on_destroy("rm_interrupt_on_destroy", true, FCVAR_LOCKED);
+ConVar debug_rm_("debug_rm", false, FCVAR_DEFAULT);
 
 ConVar *ResourceManager::debug_rm = &debug_rm_;
 

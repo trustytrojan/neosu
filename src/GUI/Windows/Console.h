@@ -36,7 +36,6 @@ class Console : public CBaseUIWindow {
     static std::vector<UString> g_commandQueue;
 
    private:
-    CBaseUITextField *m_newLog;
     CBaseUIScrollView *m_log;
     CBaseUITextbox *m_textbox;
 

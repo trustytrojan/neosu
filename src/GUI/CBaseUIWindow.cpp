@@ -19,8 +19,8 @@
 #include "RenderTarget.h"
 #include "ResourceManager.h"
 
-ConVar ui_window_animspeed("ui_window_animspeed", 0.29f, FCVAR_NONE);
-ConVar ui_window_shadow_radius("ui_window_shadow_radius", 13.0f, FCVAR_NONE);
+ConVar ui_window_animspeed("ui_window_animspeed", 0.29f, FCVAR_DEFAULT);
+ConVar ui_window_shadow_radius("ui_window_shadow_radius", 13.0f, FCVAR_DEFAULT);
 
 CBaseUIWindow::CBaseUIWindow(float xPos, float yPos, float xSize, float ySize, UString name)
     : CBaseUIElement(xPos, yPos, xSize, ySize, name) {

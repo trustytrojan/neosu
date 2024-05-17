@@ -10,8 +10,8 @@
 #include "ConVar.h"
 #include "Engine.h"
 
-ConVar debug_file("debug_file", false, FCVAR_NONE);
-ConVar file_size_max("file_size_max", 1024, FCVAR_NONE,
+ConVar debug_file("debug_file", false, FCVAR_DEFAULT);
+ConVar file_size_max("file_size_max", 1024, FCVAR_DEFAULT,
                      "maximum filesize sanity limit in MB, all files bigger than this are not allowed to load");
 
 ConVar *File::debug = &debug_file;

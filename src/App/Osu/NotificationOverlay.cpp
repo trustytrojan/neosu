@@ -14,7 +14,7 @@
 #include "Osu.h"
 #include "ResourceManager.h"
 
-ConVar osu_notification_duration("osu_notification_duration", 1.25f, FCVAR_NONE);
+ConVar osu_notification_duration("osu_notification_duration", 1.25f, FCVAR_DEFAULT);
 
 NotificationOverlay::NotificationOverlay(Osu *osu) : OsuScreen(osu) {
     m_bWaitForKey = false;

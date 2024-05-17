@@ -29,56 +29,56 @@
 #include "ResourceManager.h"
 #include "Skin.h"
 
-ConVar osu_mod_fposu("osu_mod_fposu", false, FCVAR_NONE);
+ConVar osu_mod_fposu("osu_mod_fposu", false, FCVAR_DEFAULT);
 
-ConVar fposu_mouse_dpi("fposu_mouse_dpi", 400, FCVAR_NONE);
-ConVar fposu_mouse_cm_360("fposu_mouse_cm_360", 30.0f, FCVAR_NONE);
-ConVar fposu_absolute_mode("fposu_absolute_mode", false, FCVAR_NONE);
+ConVar fposu_mouse_dpi("fposu_mouse_dpi", 400, FCVAR_DEFAULT);
+ConVar fposu_mouse_cm_360("fposu_mouse_cm_360", 30.0f, FCVAR_DEFAULT);
+ConVar fposu_absolute_mode("fposu_absolute_mode", false, FCVAR_DEFAULT);
 
-ConVar fposu_distance("fposu_distance", 0.5f, FCVAR_NONE);
-ConVar fposu_playfield_position_x("fposu_playfield_position_x", 0.0f, FCVAR_NONE);
-ConVar fposu_playfield_position_y("fposu_playfield_position_y", 0.0f, FCVAR_NONE);
-ConVar fposu_playfield_position_z("fposu_playfield_position_z", 0.0f, FCVAR_NONE);
-ConVar fposu_playfield_rotation_x("fposu_playfield_rotation_x", 0.0f, FCVAR_NONE);
-ConVar fposu_playfield_rotation_y("fposu_playfield_rotation_y", 0.0f, FCVAR_NONE);
-ConVar fposu_playfield_rotation_z("fposu_playfield_rotation_z", 0.0f, FCVAR_NONE);
-ConVar fposu_fov("fposu_fov", 103.0f, FCVAR_NONE);
-ConVar fposu_zoom_fov("fposu_zoom_fov", 45.0f, FCVAR_NONE);
-ConVar fposu_zoom_sensitivity_ratio("fposu_zoom_sensitivity_ratio", 1.0f, FCVAR_NONE,
+ConVar fposu_distance("fposu_distance", 0.5f, FCVAR_DEFAULT);
+ConVar fposu_playfield_position_x("fposu_playfield_position_x", 0.0f, FCVAR_DEFAULT);
+ConVar fposu_playfield_position_y("fposu_playfield_position_y", 0.0f, FCVAR_DEFAULT);
+ConVar fposu_playfield_position_z("fposu_playfield_position_z", 0.0f, FCVAR_DEFAULT);
+ConVar fposu_playfield_rotation_x("fposu_playfield_rotation_x", 0.0f, FCVAR_DEFAULT);
+ConVar fposu_playfield_rotation_y("fposu_playfield_rotation_y", 0.0f, FCVAR_DEFAULT);
+ConVar fposu_playfield_rotation_z("fposu_playfield_rotation_z", 0.0f, FCVAR_DEFAULT);
+ConVar fposu_fov("fposu_fov", 103.0f, FCVAR_DEFAULT);
+ConVar fposu_zoom_fov("fposu_zoom_fov", 45.0f, FCVAR_DEFAULT);
+ConVar fposu_zoom_sensitivity_ratio("fposu_zoom_sensitivity_ratio", 1.0f, FCVAR_DEFAULT,
                                     "replicates zoom_sensitivity_ratio behavior on css/csgo/tf2/etc.");
-ConVar fposu_zoom_anim_duration("fposu_zoom_anim_duration", 0.065f, FCVAR_NONE,
+ConVar fposu_zoom_anim_duration("fposu_zoom_anim_duration", 0.065f, FCVAR_DEFAULT,
                                 "time in seconds for the zoom/unzoom animation");
-ConVar fposu_zoom_toggle("fposu_zoom_toggle", false, FCVAR_NONE, "whether the zoom key acts as a toggle");
-ConVar fposu_vertical_fov("fposu_vertical_fov", false, FCVAR_NONE);
-ConVar fposu_curved("fposu_curved", true, FCVAR_NONE);
-ConVar fposu_skybox("fposu_skybox", true, FCVAR_NONE);
-ConVar fposu_cube("fposu_cube", true, FCVAR_NONE);
-ConVar fposu_cube_size("fposu_cube_size", 500.0f, FCVAR_NONE);
-ConVar fposu_cube_tint_r("fposu_cube_tint_r", 255, FCVAR_NONE, "from 0 to 255");
-ConVar fposu_cube_tint_g("fposu_cube_tint_g", 255, FCVAR_NONE, "from 0 to 255");
-ConVar fposu_cube_tint_b("fposu_cube_tint_b", 255, FCVAR_NONE, "from 0 to 255");
-ConVar fposu_invert_vertical("fposu_invert_vertical", false, FCVAR_NONE);
-ConVar fposu_invert_horizontal("fposu_invert_horizontal", false, FCVAR_NONE);
+ConVar fposu_zoom_toggle("fposu_zoom_toggle", false, FCVAR_DEFAULT, "whether the zoom key acts as a toggle");
+ConVar fposu_vertical_fov("fposu_vertical_fov", false, FCVAR_DEFAULT);
+ConVar fposu_curved("fposu_curved", true, FCVAR_DEFAULT);
+ConVar fposu_skybox("fposu_skybox", true, FCVAR_DEFAULT);
+ConVar fposu_cube("fposu_cube", true, FCVAR_DEFAULT);
+ConVar fposu_cube_size("fposu_cube_size", 500.0f, FCVAR_DEFAULT);
+ConVar fposu_cube_tint_r("fposu_cube_tint_r", 255, FCVAR_DEFAULT, "from 0 to 255");
+ConVar fposu_cube_tint_g("fposu_cube_tint_g", 255, FCVAR_DEFAULT, "from 0 to 255");
+ConVar fposu_cube_tint_b("fposu_cube_tint_b", 255, FCVAR_DEFAULT, "from 0 to 255");
+ConVar fposu_invert_vertical("fposu_invert_vertical", false, FCVAR_DEFAULT);
+ConVar fposu_invert_horizontal("fposu_invert_horizontal", false, FCVAR_DEFAULT);
 
-ConVar fposu_noclip("fposu_noclip", true, FCVAR_NONE);
-ConVar fposu_noclipspeed("fposu_noclipspeed", 2.0f, FCVAR_NONE);
-ConVar fposu_noclipaccelerate("fposu_noclipaccelerate", 20.0f, FCVAR_NONE);
-ConVar fposu_noclipfriction("fposu_noclipfriction", 10.0f, FCVAR_NONE);
+ConVar fposu_noclip("fposu_noclip", true, FCVAR_DEFAULT);
+ConVar fposu_noclipspeed("fposu_noclipspeed", 2.0f, FCVAR_DEFAULT);
+ConVar fposu_noclipaccelerate("fposu_noclipaccelerate", 20.0f, FCVAR_DEFAULT);
+ConVar fposu_noclipfriction("fposu_noclipfriction", 10.0f, FCVAR_DEFAULT);
 
-ConVar fposu_draw_cursor_trail("fposu_draw_cursor_trail", true, FCVAR_NONE);
-ConVar fposu_draw_scorebarbg_on_top("fposu_draw_scorebarbg_on_top", false, FCVAR_NONE);
-ConVar fposu_transparent_playfield("fposu_transparent_playfield", false, FCVAR_NONE,
+ConVar fposu_draw_cursor_trail("fposu_draw_cursor_trail", true, FCVAR_DEFAULT);
+ConVar fposu_draw_scorebarbg_on_top("fposu_draw_scorebarbg_on_top", false, FCVAR_DEFAULT);
+ConVar fposu_transparent_playfield("fposu_transparent_playfield", false, FCVAR_DEFAULT,
                                    "only works if background dim is 100% and background brightness is 0%");
 
-ConVar fposu_mod_strafing("fposu_mod_strafing", false, FCVAR_NONVANILLA);
-ConVar fposu_mod_strafing_strength_x("fposu_mod_strafing_strength_x", 0.3f, FCVAR_NONE);
-ConVar fposu_mod_strafing_frequency_x("fposu_mod_strafing_frequency_x", 0.1f, FCVAR_NONE);
-ConVar fposu_mod_strafing_strength_y("fposu_mod_strafing_strength_y", 0.1f, FCVAR_NONE);
-ConVar fposu_mod_strafing_frequency_y("fposu_mod_strafing_frequency_y", 0.2f, FCVAR_NONE);
-ConVar fposu_mod_strafing_strength_z("fposu_mod_strafing_strength_z", 0.15f, FCVAR_NONE);
-ConVar fposu_mod_strafing_frequency_z("fposu_mod_strafing_frequency_z", 0.15f, FCVAR_NONE);
+ConVar fposu_mod_strafing("fposu_mod_strafing", false, FCVAR_UNLOCKED);
+ConVar fposu_mod_strafing_strength_x("fposu_mod_strafing_strength_x", 0.3f, FCVAR_DEFAULT);
+ConVar fposu_mod_strafing_frequency_x("fposu_mod_strafing_frequency_x", 0.1f, FCVAR_DEFAULT);
+ConVar fposu_mod_strafing_strength_y("fposu_mod_strafing_strength_y", 0.1f, FCVAR_DEFAULT);
+ConVar fposu_mod_strafing_frequency_y("fposu_mod_strafing_frequency_y", 0.2f, FCVAR_DEFAULT);
+ConVar fposu_mod_strafing_strength_z("fposu_mod_strafing_strength_z", 0.15f, FCVAR_DEFAULT);
+ConVar fposu_mod_strafing_frequency_z("fposu_mod_strafing_frequency_z", 0.15f, FCVAR_DEFAULT);
 
-ConVar fposu_mod_3d_depthwobble("fposu_mod_3d_depthwobble", false, FCVAR_NONVANILLA);
+ConVar fposu_mod_3d_depthwobble("fposu_mod_3d_depthwobble", false, FCVAR_UNLOCKED);
 
 constexpr const float ModFPoSu::SIZEDIV3D;
 constexpr const int ModFPoSu::SUBDIVISIONS;

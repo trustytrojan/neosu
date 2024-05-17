@@ -26,35 +26,36 @@
 #define OSU_BITMASK_HITFINISH 0x4
 #define OSU_BITMASK_HITCLAP 0x8
 
-ConVar osu2_sound_source_id("osu2_sound_source_id", 1, FCVAR_NONE,
+ConVar osu2_sound_source_id("osu2_sound_source_id", 1, FCVAR_DEFAULT,
                             "which instance/player/client should play hitsounds (e.g. master top left is always 1)");
 
-ConVar osu_skin_async("osu_skin_async", true, FCVAR_NONE, "load in background without blocking");
-ConVar osu_skin_hd("osu_skin_hd", true, FCVAR_NONE, "load and use @2x versions of skin images, if available");
+ConVar osu_skin_async("osu_skin_async", true, FCVAR_DEFAULT, "load in background without blocking");
+ConVar osu_skin_hd("osu_skin_hd", true, FCVAR_DEFAULT, "load and use @2x versions of skin images, if available");
 ConVar osu_skin_mipmaps(
-    "osu_skin_mipmaps", false, FCVAR_NONE,
+    "osu_skin_mipmaps", false, FCVAR_DEFAULT,
     "generate mipmaps for every skin image (only useful on lower game resolutions, requires more vram)");
-ConVar osu_skin_color_index_add("osu_skin_color_index_add", 0, FCVAR_NONE);
-ConVar osu_skin_animation_force("osu_skin_animation_force", false, FCVAR_NONE);
+ConVar osu_skin_color_index_add("osu_skin_color_index_add", 0, FCVAR_DEFAULT);
+ConVar osu_skin_animation_force("osu_skin_animation_force", false, FCVAR_DEFAULT);
 ConVar osu_skin_use_skin_hitsounds(
-    "osu_skin_use_skin_hitsounds", true, FCVAR_NONE,
+    "osu_skin_use_skin_hitsounds", true, FCVAR_DEFAULT,
     "If enabled: Use skin's sound samples. If disabled: Use default skin's sound samples. For hitsounds only.");
-ConVar osu_skin_force_hitsound_sample_set("osu_skin_force_hitsound_sample_set", 0, FCVAR_NONE,
+ConVar osu_skin_force_hitsound_sample_set("osu_skin_force_hitsound_sample_set", 0, FCVAR_DEFAULT,
                                           "force a specific hitsound sample set to always be used regardless of what "
                                           "the beatmap says. 0 = disabled, 1 = normal, 2 = soft, 3 = drum.");
-ConVar osu_skin_random("osu_skin_random", false, FCVAR_NONE, "select random skin from list on every skin load/reload");
-ConVar osu_skin_random_elements("osu_skin_random_elements", false, FCVAR_NONE,
+ConVar osu_skin_random("osu_skin_random", false, FCVAR_DEFAULT,
+                       "select random skin from list on every skin load/reload");
+ConVar osu_skin_random_elements("osu_skin_random_elements", false, FCVAR_DEFAULT,
                                 "sElECt RanDOM sKIn eLemENTs FRoM ranDom SkINs");
-ConVar osu_mod_fposu_sound_panning("osu_mod_fposu_sound_panning", false, FCVAR_NONE, "see osu_sound_panning");
-ConVar osu_mod_fps_sound_panning("osu_mod_fps_sound_panning", false, FCVAR_NONE, "see osu_sound_panning");
-ConVar osu_sound_panning("osu_sound_panning", true, FCVAR_NONE,
+ConVar osu_mod_fposu_sound_panning("osu_mod_fposu_sound_panning", false, FCVAR_DEFAULT, "see osu_sound_panning");
+ConVar osu_mod_fps_sound_panning("osu_mod_fps_sound_panning", false, FCVAR_DEFAULT, "see osu_sound_panning");
+ConVar osu_sound_panning("osu_sound_panning", true, FCVAR_DEFAULT,
                          "positional hitsound audio depending on the playfield position");
-ConVar osu_sound_panning_multiplier("osu_sound_panning_multiplier", 1.0f, FCVAR_NONE,
+ConVar osu_sound_panning_multiplier("osu_sound_panning_multiplier", 1.0f, FCVAR_DEFAULT,
                                     "the final panning value is multiplied with this, e.g. if you want to reduce or "
                                     "increase the effect strength by a percentage");
 
-ConVar osu_ignore_beatmap_combo_colors("osu_ignore_beatmap_combo_colors", false, FCVAR_NONE);
-ConVar osu_ignore_beatmap_sample_volume("osu_ignore_beatmap_sample_volume", false, FCVAR_NONE);
+ConVar osu_ignore_beatmap_combo_colors("osu_ignore_beatmap_combo_colors", false, FCVAR_DEFAULT);
+ConVar osu_ignore_beatmap_sample_volume("osu_ignore_beatmap_sample_volume", false, FCVAR_DEFAULT);
 
 const char *Skin::OSUSKIN_DEFAULT_SKIN_PATH = "";  // set dynamically below in the constructor
 Image *Skin::m_missingTexture = NULL;

@@ -10,7 +10,7 @@
 #include "ConVar.h"
 #include "Engine.h"
 
-ConVar debug_anim("debug_anim", false, FCVAR_NONE);
+ConVar debug_anim("debug_anim", false, FCVAR_DEFAULT);
 
 AnimationHandler *anim = NULL;
 

@@ -54,219 +54,220 @@
 #include "SoundEngine.h"
 #include "Spinner.h"
 
-ConVar osu_pvs("osu_pvs", true, FCVAR_NONE,
+ConVar osu_pvs("osu_pvs", true, FCVAR_DEFAULT,
                "optimizes all loops over all hitobjects by clamping the range to the Potentially Visible Set");
-ConVar osu_draw_hitobjects("osu_draw_hitobjects", true, FCVAR_NONE);
-ConVar osu_draw_beatmap_background_image("osu_draw_beatmap_background_image", true, FCVAR_NONE);
+ConVar osu_draw_hitobjects("osu_draw_hitobjects", true, FCVAR_DEFAULT);
+ConVar osu_draw_beatmap_background_image("osu_draw_beatmap_background_image", true, FCVAR_DEFAULT);
 
-ConVar osu_universal_offset("osu_universal_offset", 0.0f, FCVAR_NONE);
+ConVar osu_universal_offset("osu_universal_offset", 0.0f, FCVAR_DEFAULT);
 ConVar osu_universal_offset_hardcoded_fallback_dsound("osu_universal_offset_hardcoded_fallback_dsound", -15.0f,
-                                                      FCVAR_NONE);
+                                                      FCVAR_DEFAULT);
 ConVar osu_old_beatmap_offset(
-    "osu_old_beatmap_offset", 24.0f, FCVAR_NONE,
+    "osu_old_beatmap_offset", 24.0f, FCVAR_DEFAULT,
     "offset in ms which is added to beatmap versions < 5 (default value is hardcoded 24 ms in stable)");
-ConVar osu_timingpoints_offset("osu_timingpoints_offset", 5.0f, FCVAR_NONE,
+ConVar osu_timingpoints_offset("osu_timingpoints_offset", 5.0f, FCVAR_DEFAULT,
                                "Offset in ms which is added before determining the active timingpoint for the sample "
                                "type and sample volume (hitsounds) of the current frame");
 ConVar osu_interpolate_music_pos(
-    "osu_interpolate_music_pos", true, FCVAR_NONE,
+    "osu_interpolate_music_pos", true, FCVAR_DEFAULT,
     "Interpolate song position with engine time if the audio library reports the same position more than once");
 ConVar osu_compensate_music_speed(
-    "osu_compensate_music_speed", true, FCVAR_NONE,
+    "osu_compensate_music_speed", true, FCVAR_DEFAULT,
     "compensates speeds slower than 1x a little bit, by adding an offset depending on the slowness");
-ConVar osu_combobreak_sound_combo("osu_combobreak_sound_combo", 20, FCVAR_NONE,
+ConVar osu_combobreak_sound_combo("osu_combobreak_sound_combo", 20, FCVAR_DEFAULT,
                                   "Only play the combobreak sound if the combo is higher than this");
 ConVar osu_beatmap_preview_mods_live(
-    "osu_beatmap_preview_mods_live", false, FCVAR_NONE,
+    "osu_beatmap_preview_mods_live", false, FCVAR_DEFAULT,
     "whether to immediately apply all currently selected mods while browsing beatmaps (e.g. speed/pitch)");
-ConVar osu_beatmap_preview_music_loop("osu_beatmap_preview_music_loop", true, FCVAR_NONE);
+ConVar osu_beatmap_preview_music_loop("osu_beatmap_preview_music_loop", true, FCVAR_DEFAULT);
 
-ConVar osu_ar_override("osu_ar_override", -1.0f, FCVAR_NONVANILLA,
+ConVar osu_ar_override("osu_ar_override", -1.0f, FCVAR_UNLOCKED,
                        "use this to override between AR 0 and AR 12.5+. active if value is more than or equal to 0.");
-ConVar osu_ar_overridenegative("osu_ar_overridenegative", 0.0f, FCVAR_NONVANILLA,
+ConVar osu_ar_overridenegative("osu_ar_overridenegative", 0.0f, FCVAR_UNLOCKED,
                                "use this to override below AR 0. active if value is less than 0, disabled otherwise. "
                                "this override always overrides the other override.");
-ConVar osu_cs_override("osu_cs_override", -1.0f, FCVAR_NONVANILLA,
+ConVar osu_cs_override("osu_cs_override", -1.0f, FCVAR_UNLOCKED,
                        "use this to override between CS 0 and CS 12.1429. active if value is more than or equal to 0.");
-ConVar osu_cs_overridenegative("osu_cs_overridenegative", 0.0f, FCVAR_NONVANILLA,
+ConVar osu_cs_overridenegative("osu_cs_overridenegative", 0.0f, FCVAR_UNLOCKED,
                                "use this to override below CS 0. active if value is less than 0, disabled otherwise. "
                                "this override always overrides the other override.");
-ConVar osu_cs_cap_sanity("osu_cs_cap_sanity", true, FCVAR_CHEAT);
-ConVar osu_hp_override("osu_hp_override", -1.0f, FCVAR_NONVANILLA);
-ConVar osu_od_override("osu_od_override", -1.0f, FCVAR_NONVANILLA);
-ConVar osu_ar_override_lock("osu_ar_override_lock", false, FCVAR_NONVANILLA,
+ConVar osu_cs_cap_sanity("osu_cs_cap_sanity", true, FCVAR_LOCKED);
+ConVar osu_hp_override("osu_hp_override", -1.0f, FCVAR_UNLOCKED);
+ConVar osu_od_override("osu_od_override", -1.0f, FCVAR_UNLOCKED);
+ConVar osu_ar_override_lock("osu_ar_override_lock", false, FCVAR_UNLOCKED,
                             "always force constant AR even through speed changes");
-ConVar osu_od_override_lock("osu_od_override_lock", false, FCVAR_NONVANILLA,
+ConVar osu_od_override_lock("osu_od_override_lock", false, FCVAR_UNLOCKED,
                             "always force constant OD even through speed changes");
 
-ConVar osu_background_dim("osu_background_dim", 0.9f, FCVAR_NONE);
-ConVar osu_background_fade_after_load("osu_background_fade_after_load", true, FCVAR_NONE);
-ConVar osu_background_dont_fade_during_breaks("osu_background_dont_fade_during_breaks", false, FCVAR_NONE);
-ConVar osu_background_fade_min_duration("osu_background_fade_min_duration", 1.4f, FCVAR_NONE,
+ConVar osu_background_dim("osu_background_dim", 0.9f, FCVAR_DEFAULT);
+ConVar osu_background_fade_after_load("osu_background_fade_after_load", true, FCVAR_DEFAULT);
+ConVar osu_background_dont_fade_during_breaks("osu_background_dont_fade_during_breaks", false, FCVAR_DEFAULT);
+ConVar osu_background_fade_min_duration("osu_background_fade_min_duration", 1.4f, FCVAR_DEFAULT,
                                         "Only fade if the break is longer than this (in seconds)");
-ConVar osu_background_fade_in_duration("osu_background_fade_in_duration", 0.85f, FCVAR_NONE);
-ConVar osu_background_fade_out_duration("osu_background_fade_out_duration", 0.25f, FCVAR_NONE);
-ConVar osu_background_brightness("osu_background_brightness", 0.0f, FCVAR_NONE,
+ConVar osu_background_fade_in_duration("osu_background_fade_in_duration", 0.85f, FCVAR_DEFAULT);
+ConVar osu_background_fade_out_duration("osu_background_fade_out_duration", 0.25f, FCVAR_DEFAULT);
+ConVar osu_background_brightness("osu_background_brightness", 0.0f, FCVAR_DEFAULT,
                                  "0 to 1, if this is larger than 0 then it will replace the entire beatmap background "
                                  "image with a solid color (see osu_background_color_r/g/b)");
-ConVar osu_background_color_r("osu_background_color_r", 255.0f, FCVAR_NONE,
+ConVar osu_background_color_r("osu_background_color_r", 255.0f, FCVAR_DEFAULT,
                               "0 to 255, only relevant if osu_background_brightness is larger than 0");
-ConVar osu_background_color_g("osu_background_color_g", 255.0f, FCVAR_NONE,
+ConVar osu_background_color_g("osu_background_color_g", 255.0f, FCVAR_DEFAULT,
                               "0 to 255, only relevant if osu_background_brightness is larger than 0");
-ConVar osu_background_color_b("osu_background_color_b", 255.0f, FCVAR_NONE,
+ConVar osu_background_color_b("osu_background_color_b", 255.0f, FCVAR_DEFAULT,
                               "0 to 255, only relevant if osu_background_brightness is larger than 0");
-ConVar osu_hiterrorbar_misaims("osu_hiterrorbar_misaims", true, FCVAR_NONE);
+ConVar osu_hiterrorbar_misaims("osu_hiterrorbar_misaims", true, FCVAR_DEFAULT);
 
 ConVar osu_followpoints_prevfadetime("osu_followpoints_prevfadetime", 400.0f,
-                                     FCVAR_NONE);  // TODO: this shouldn't be in this class
+                                     FCVAR_DEFAULT);  // TODO: this shouldn't be in this class
 
-ConVar osu_auto_and_relax_block_user_input("osu_auto_and_relax_block_user_input", true, FCVAR_NONE);
+ConVar osu_auto_and_relax_block_user_input("osu_auto_and_relax_block_user_input", true, FCVAR_DEFAULT);
 
-ConVar osu_mod_timewarp("osu_mod_timewarp", false, FCVAR_NONVANILLA);
-ConVar osu_mod_timewarp_multiplier("osu_mod_timewarp_multiplier", 1.5f, FCVAR_NONE);
-ConVar osu_mod_minimize("osu_mod_minimize", false, FCVAR_NONVANILLA);
-ConVar osu_mod_minimize_multiplier("osu_mod_minimize_multiplier", 0.5f, FCVAR_CHEAT);
-ConVar osu_mod_jigsaw1("osu_mod_jigsaw1", false, FCVAR_NONVANILLA);
-ConVar osu_mod_artimewarp("osu_mod_artimewarp", false, FCVAR_NONVANILLA);
-ConVar osu_mod_artimewarp_multiplier("osu_mod_artimewarp_multiplier", 0.5f, FCVAR_NONE);
-ConVar osu_mod_arwobble("osu_mod_arwobble", false, FCVAR_NONVANILLA);
-ConVar osu_mod_arwobble_strength("osu_mod_arwobble_strength", 1.0f, FCVAR_CHEAT);
-ConVar osu_mod_arwobble_interval("osu_mod_arwobble_interval", 7.0f, FCVAR_CHEAT);
-ConVar osu_mod_fullalternate("osu_mod_fullalternate", false, FCVAR_NONE);
+ConVar osu_mod_timewarp("osu_mod_timewarp", false, FCVAR_UNLOCKED);
+ConVar osu_mod_timewarp_multiplier("osu_mod_timewarp_multiplier", 1.5f, FCVAR_DEFAULT);
+ConVar osu_mod_minimize("osu_mod_minimize", false, FCVAR_UNLOCKED);
+ConVar osu_mod_minimize_multiplier("osu_mod_minimize_multiplier", 0.5f, FCVAR_LOCKED);
+ConVar osu_mod_jigsaw1("osu_mod_jigsaw1", false, FCVAR_UNLOCKED);
+ConVar osu_mod_artimewarp("osu_mod_artimewarp", false, FCVAR_UNLOCKED);
+ConVar osu_mod_artimewarp_multiplier("osu_mod_artimewarp_multiplier", 0.5f, FCVAR_DEFAULT);
+ConVar osu_mod_arwobble("osu_mod_arwobble", false, FCVAR_UNLOCKED);
+ConVar osu_mod_arwobble_strength("osu_mod_arwobble_strength", 1.0f, FCVAR_LOCKED);
+ConVar osu_mod_arwobble_interval("osu_mod_arwobble_interval", 7.0f, FCVAR_LOCKED);
+ConVar osu_mod_fullalternate("osu_mod_fullalternate", false, FCVAR_DEFAULT);
 
 ConVar osu_early_note_time(
-    "osu_early_note_time", 1500.0f, FCVAR_NONE,
+    "osu_early_note_time", 1500.0f, FCVAR_DEFAULT,
     "Timeframe in ms at the beginning of a beatmap which triggers a starting delay for easier reading");
 ConVar osu_quick_retry_time(
-    "osu_quick_retry_time", 2000.0f, FCVAR_NONE,
+    "osu_quick_retry_time", 2000.0f, FCVAR_DEFAULT,
     "Timeframe in ms subtracted from the first hitobject when quick retrying (not regular retry)");
-ConVar osu_end_delay_time("osu_end_delay_time", 750.0f, FCVAR_NONE,
+ConVar osu_end_delay_time("osu_end_delay_time", 750.0f, FCVAR_DEFAULT,
                           "Duration in ms which is added at the end of a beatmap after the last hitobject is finished "
                           "but before the ranking screen is automatically shown");
 ConVar osu_end_skip(
-    "osu_end_skip", true, FCVAR_NONE,
+    "osu_end_skip", true, FCVAR_DEFAULT,
     "whether the beatmap jumps to the ranking screen as soon as the last hitobject plus lenience has passed");
-ConVar osu_end_skip_time("osu_end_skip_time", 400.0f, FCVAR_NONE,
+ConVar osu_end_skip_time("osu_end_skip_time", 400.0f, FCVAR_DEFAULT,
                          "Duration in ms which is added to the endTime of the last hitobject, after which pausing the "
                          "game will immediately jump to the ranking screen");
-ConVar osu_skip_time("osu_skip_time", 5000.0f, FCVAR_CHEAT,
+ConVar osu_skip_time("osu_skip_time", 5000.0f, FCVAR_LOCKED,
                      "Timeframe in ms within a beatmap which allows skipping if it doesn't contain any hitobjects");
-ConVar osu_fail_time("osu_fail_time", 2.25f, FCVAR_NONE,
+ConVar osu_fail_time("osu_fail_time", 2.25f, FCVAR_DEFAULT,
                      "Timeframe in s for the slowdown effect after failing, before the pause menu is shown");
-ConVar osu_notelock_type("osu_notelock_type", 2, FCVAR_CHEAT,
+ConVar osu_notelock_type("osu_notelock_type", 2, FCVAR_LOCKED,
                          "which notelock algorithm to use (0 = None, 1 = neosu, 2 = osu!stable, 3 = osu!lazer 2020)");
-ConVar osu_notelock_stable_tolerance2b("osu_notelock_stable_tolerance2b", 3, FCVAR_CHEAT,
+ConVar osu_notelock_stable_tolerance2b("osu_notelock_stable_tolerance2b", 3, FCVAR_LOCKED,
                                        "time tolerance in milliseconds to allow hitting simultaneous objects close "
                                        "together (e.g. circle at end of slider)");
-ConVar osu_mod_suddendeath_restart("osu_mod_suddendeath_restart", false, FCVAR_NONE,
+ConVar osu_mod_suddendeath_restart("osu_mod_suddendeath_restart", false,
+                                   FCVAR_UNLOCK_SINGLEPLAYER | FCVAR_ALWAYS_SUBMIT,
                                    "osu! has this set to false (i.e. you fail after missing). if set to true, then "
                                    "behave like SS/PF, instantly restarting the map");
 
 ConVar osu_drain_type(
-    "osu_drain_type", 2, FCVAR_CHEAT,
+    "osu_drain_type", 2, FCVAR_LOCKED,
     "which hp drain algorithm to use (1 = None, 2 = osu!stable, 3 = osu!lazer 2020, 4 = osu!lazer 2018)");
-ConVar osu_drain_kill("osu_drain_kill", true, FCVAR_CHEAT, "whether to kill the player upon failing");
+ConVar osu_drain_kill("osu_drain_kill", true, FCVAR_LOCKED, "whether to kill the player upon failing");
 ConVar osu_drain_kill_notification_duration(
-    "osu_drain_kill_notification_duration", 1.0f, FCVAR_NONE,
+    "osu_drain_kill_notification_duration", 1.0f, FCVAR_DEFAULT,
     "how long to display the \"You have failed, but you can keep playing!\" notification (0 = disabled)");
 
-ConVar osu_drain_vr_duration("osu_drain_vr_duration", 0.35f, FCVAR_NONE);
+ConVar osu_drain_vr_duration("osu_drain_vr_duration", 0.35f, FCVAR_DEFAULT);
 ConVar osu_drain_stable_passive_fail(
-    "osu_drain_stable_passive_fail", false, FCVAR_NONE,
+    "osu_drain_stable_passive_fail", false, FCVAR_DEFAULT,
     "whether to fail the player instantly if health = 0, or only once a negative judgement occurs");
-ConVar osu_drain_stable_break_before("osu_drain_stable_break_before", false, FCVAR_NONE,
+ConVar osu_drain_stable_break_before("osu_drain_stable_break_before", false, FCVAR_DEFAULT,
                                      "drain after last hitobject before a break actually starts");
 ConVar osu_drain_stable_break_before_old(
-    "osu_drain_stable_break_before_old", true, FCVAR_NONE,
+    "osu_drain_stable_break_before_old", true, FCVAR_DEFAULT,
     "for beatmap versions < 8, drain after last hitobject before a break actually starts");
-ConVar osu_drain_stable_break_after("osu_drain_stable_break_after", false, FCVAR_NONE,
+ConVar osu_drain_stable_break_after("osu_drain_stable_break_after", false, FCVAR_DEFAULT,
                                     "drain after a break before the next hitobject can be clicked");
 ConVar osu_drain_lazer_passive_fail(
-    "osu_drain_lazer_passive_fail", false, FCVAR_NONE,
+    "osu_drain_lazer_passive_fail", false, FCVAR_DEFAULT,
     "whether to fail the player instantly if health = 0, or only once a negative judgement occurs");
-ConVar osu_drain_lazer_break_before("osu_drain_lazer_break_before", false, FCVAR_NONE,
+ConVar osu_drain_lazer_break_before("osu_drain_lazer_break_before", false, FCVAR_DEFAULT,
                                     "drain after last hitobject before a break actually starts");
-ConVar osu_drain_lazer_break_after("osu_drain_lazer_break_after", false, FCVAR_NONE,
+ConVar osu_drain_lazer_break_after("osu_drain_lazer_break_after", false, FCVAR_DEFAULT,
                                    "drain after a break before the next hitobject can be clicked");
-ConVar osu_drain_stable_spinner_nerf("osu_drain_stable_spinner_nerf", 0.25f, FCVAR_CHEAT,
+ConVar osu_drain_stable_spinner_nerf("osu_drain_stable_spinner_nerf", 0.25f, FCVAR_LOCKED,
                                      "drain gets multiplied with this while a spinner is active");
-ConVar osu_drain_stable_hpbar_recovery("osu_drain_stable_hpbar_recovery", 160.0f, FCVAR_CHEAT,
+ConVar osu_drain_stable_hpbar_recovery("osu_drain_stable_hpbar_recovery", 160.0f, FCVAR_LOCKED,
                                        "hp gets set to this value when failing with ez and causing a recovery");
 
-ConVar osu_play_hitsound_on_click_while_playing("osu_play_hitsound_on_click_while_playing", false, FCVAR_NONE);
+ConVar osu_play_hitsound_on_click_while_playing("osu_play_hitsound_on_click_while_playing", false, FCVAR_DEFAULT);
 
-ConVar osu_debug_draw_timingpoints("osu_debug_draw_timingpoints", false, FCVAR_CHEAT);
+ConVar osu_debug_draw_timingpoints("osu_debug_draw_timingpoints", false, FCVAR_LOCKED);
 
-ConVar osu_draw_followpoints("osu_draw_followpoints", true, FCVAR_NONE);
-ConVar osu_draw_reverse_order("osu_draw_reverse_order", false, FCVAR_NONE);
-ConVar osu_draw_playfield_border("osu_draw_playfield_border", true, FCVAR_NONE);
+ConVar osu_draw_followpoints("osu_draw_followpoints", true, FCVAR_DEFAULT);
+ConVar osu_draw_reverse_order("osu_draw_reverse_order", false, FCVAR_DEFAULT);
+ConVar osu_draw_playfield_border("osu_draw_playfield_border", true, FCVAR_DEFAULT);
 
-ConVar osu_stacking("osu_stacking", true, FCVAR_NONE, "Whether to use stacking calculations or not");
-ConVar osu_stacking_leniency_override("osu_stacking_leniency_override", -1.0f, FCVAR_NONE);
+ConVar osu_stacking("osu_stacking", true, FCVAR_DEFAULT, "Whether to use stacking calculations or not");
+ConVar osu_stacking_leniency_override("osu_stacking_leniency_override", -1.0f, FCVAR_DEFAULT);
 
-ConVar osu_auto_snapping_strength("osu_auto_snapping_strength", 1.0f, FCVAR_NONE,
+ConVar osu_auto_snapping_strength("osu_auto_snapping_strength", 1.0f, FCVAR_DEFAULT,
                                   "How many iterations of quadratic interpolation to use, more = snappier, 0 = linear");
-ConVar osu_auto_cursordance("osu_auto_cursordance", false, FCVAR_NONE);
+ConVar osu_auto_cursordance("osu_auto_cursordance", false, FCVAR_DEFAULT);
 ConVar osu_autopilot_snapping_strength(
-    "osu_autopilot_snapping_strength", 2.0f, FCVAR_NONE,
+    "osu_autopilot_snapping_strength", 2.0f, FCVAR_DEFAULT,
     "How many iterations of quadratic interpolation to use, more = snappier, 0 = linear");
-ConVar osu_autopilot_lenience("osu_autopilot_lenience", 0.75f, FCVAR_NONE);
+ConVar osu_autopilot_lenience("osu_autopilot_lenience", 0.75f, FCVAR_DEFAULT);
 
-ConVar osu_followpoints_clamp("osu_followpoints_clamp", false, FCVAR_NONE,
+ConVar osu_followpoints_clamp("osu_followpoints_clamp", false, FCVAR_DEFAULT,
                               "clamp followpoint approach time to current circle approach time (instead of using the "
                               "hardcoded default 800 ms raw)");
-ConVar osu_followpoints_anim("osu_followpoints_anim", false, FCVAR_NONE,
+ConVar osu_followpoints_anim("osu_followpoints_anim", false, FCVAR_DEFAULT,
                              "scale + move animation while fading in followpoints (osu only does this when its "
                              "internal default skin is being used)");
-ConVar osu_followpoints_connect_combos("osu_followpoints_connect_combos", false, FCVAR_NONE,
+ConVar osu_followpoints_connect_combos("osu_followpoints_connect_combos", false, FCVAR_DEFAULT,
                                        "connect followpoints even if a new combo has started");
-ConVar osu_followpoints_connect_spinners("osu_followpoints_connect_spinners", false, FCVAR_NONE,
+ConVar osu_followpoints_connect_spinners("osu_followpoints_connect_spinners", false, FCVAR_DEFAULT,
                                          "connect followpoints even through spinners");
-ConVar osu_followpoints_approachtime("osu_followpoints_approachtime", 800.0f, FCVAR_NONE);
-ConVar osu_followpoints_scale_multiplier("osu_followpoints_scale_multiplier", 1.0f, FCVAR_NONE);
-ConVar osu_followpoints_separation_multiplier("osu_followpoints_separation_multiplier", 1.0f, FCVAR_NONE);
+ConVar osu_followpoints_approachtime("osu_followpoints_approachtime", 800.0f, FCVAR_DEFAULT);
+ConVar osu_followpoints_scale_multiplier("osu_followpoints_scale_multiplier", 1.0f, FCVAR_DEFAULT);
+ConVar osu_followpoints_separation_multiplier("osu_followpoints_separation_multiplier", 1.0f, FCVAR_DEFAULT);
 
-ConVar osu_number_scale_multiplier("osu_number_scale_multiplier", 1.0f, FCVAR_NONE);
+ConVar osu_number_scale_multiplier("osu_number_scale_multiplier", 1.0f, FCVAR_DEFAULT);
 
-ConVar osu_playfield_mirror_horizontal("osu_playfield_mirror_horizontal", false, FCVAR_NONE);
-ConVar osu_playfield_mirror_vertical("osu_playfield_mirror_vertical", false, FCVAR_NONE);
+ConVar osu_playfield_mirror_horizontal("osu_playfield_mirror_horizontal", false, FCVAR_DEFAULT);
+ConVar osu_playfield_mirror_vertical("osu_playfield_mirror_vertical", false, FCVAR_DEFAULT);
 
-ConVar osu_playfield_rotation("osu_playfield_rotation", 0.0f, FCVAR_CHEAT,
+ConVar osu_playfield_rotation("osu_playfield_rotation", 0.0f, FCVAR_LOCKED,
                               "rotates the entire playfield by this many degrees");
-ConVar osu_playfield_stretch_x("osu_playfield_stretch_x", 0.0f, FCVAR_CHEAT,
+ConVar osu_playfield_stretch_x("osu_playfield_stretch_x", 0.0f, FCVAR_LOCKED,
                                "offsets/multiplies all hitobject coordinates by it (0 = default 1x playfield size, -1 "
                                "= on a line, -0.5 = 0.5x playfield size, 0.5 = 1.5x playfield size)");
-ConVar osu_playfield_stretch_y("osu_playfield_stretch_y", 0.0f, FCVAR_CHEAT,
+ConVar osu_playfield_stretch_y("osu_playfield_stretch_y", 0.0f, FCVAR_LOCKED,
                                "offsets/multiplies all hitobject coordinates by it (0 = default 1x playfield size, -1 "
                                "= on a line, -0.5 = 0.5x playfield size, 0.5 = 1.5x playfield size)");
 ConVar osu_playfield_circular(
-    "osu_playfield_circular", false, FCVAR_CHEAT,
+    "osu_playfield_circular", false, FCVAR_LOCKED,
     "whether the playfield area should be transformed from a rectangle into a circle/disc/oval");
 
-ConVar osu_drain_lazer_health_min("osu_drain_lazer_health_min", 0.95f, FCVAR_NONE);
-ConVar osu_drain_lazer_health_mid("osu_drain_lazer_health_mid", 0.70f, FCVAR_NONE);
-ConVar osu_drain_lazer_health_max("osu_drain_lazer_health_max", 0.30f, FCVAR_NONE);
+ConVar osu_drain_lazer_health_min("osu_drain_lazer_health_min", 0.95f, FCVAR_DEFAULT);
+ConVar osu_drain_lazer_health_mid("osu_drain_lazer_health_mid", 0.70f, FCVAR_DEFAULT);
+ConVar osu_drain_lazer_health_max("osu_drain_lazer_health_max", 0.30f, FCVAR_DEFAULT);
 
-ConVar osu_mod_wobble("osu_mod_wobble", false, FCVAR_NONVANILLA);
-ConVar osu_mod_wobble2("osu_mod_wobble2", false, FCVAR_NONVANILLA);
-ConVar osu_mod_wobble_strength("osu_mod_wobble_strength", 25.0f, FCVAR_NONE);
-ConVar osu_mod_wobble_frequency("osu_mod_wobble_frequency", 1.0f, FCVAR_NONE);
-ConVar osu_mod_wobble_rotation_speed("osu_mod_wobble_rotation_speed", 1.0f, FCVAR_NONE);
-ConVar osu_mod_jigsaw2("osu_mod_jigsaw2", false, FCVAR_NONVANILLA);
-ConVar osu_mod_jigsaw_followcircle_radius_factor("osu_mod_jigsaw_followcircle_radius_factor", 0.0f, FCVAR_NONE);
-ConVar osu_mod_shirone("osu_mod_shirone", false, FCVAR_NONVANILLA);
-ConVar osu_mod_shirone_combo("osu_mod_shirone_combo", 20.0f, FCVAR_NONE);
-ConVar osu_mod_mafham_render_chunksize("osu_mod_mafham_render_chunksize", 15, FCVAR_NONE,
+ConVar osu_mod_wobble("osu_mod_wobble", false, FCVAR_UNLOCKED);
+ConVar osu_mod_wobble2("osu_mod_wobble2", false, FCVAR_UNLOCKED);
+ConVar osu_mod_wobble_strength("osu_mod_wobble_strength", 25.0f, FCVAR_DEFAULT);
+ConVar osu_mod_wobble_frequency("osu_mod_wobble_frequency", 1.0f, FCVAR_DEFAULT);
+ConVar osu_mod_wobble_rotation_speed("osu_mod_wobble_rotation_speed", 1.0f, FCVAR_DEFAULT);
+ConVar osu_mod_jigsaw2("osu_mod_jigsaw2", false, FCVAR_UNLOCKED);
+ConVar osu_mod_jigsaw_followcircle_radius_factor("osu_mod_jigsaw_followcircle_radius_factor", 0.0f, FCVAR_DEFAULT);
+ConVar osu_mod_shirone("osu_mod_shirone", false, FCVAR_UNLOCKED);
+ConVar osu_mod_shirone_combo("osu_mod_shirone_combo", 20.0f, FCVAR_DEFAULT);
+ConVar osu_mod_mafham_render_chunksize("osu_mod_mafham_render_chunksize", 15, FCVAR_DEFAULT,
                                        "render this many hitobjects per frame chunk into the scene buffer (spreads "
                                        "rendering across many frames to minimize lag)");
 
-ConVar osu_mandala("osu_mandala", false, FCVAR_CHEAT);
-ConVar osu_mandala_num("osu_mandala_num", 7, FCVAR_NONE);
+ConVar osu_mandala("osu_mandala", false, FCVAR_LOCKED);
+ConVar osu_mandala_num("osu_mandala_num", 7, FCVAR_DEFAULT);
 
-ConVar osu_debug_hiterrorbar_misaims("osu_debug_hiterrorbar_misaims", false, FCVAR_NONE);
+ConVar osu_debug_hiterrorbar_misaims("osu_debug_hiterrorbar_misaims", false, FCVAR_DEFAULT);
 
 ConVar osu_pp_live_timeout(
-    "osu_pp_live_timeout", 1.0f, FCVAR_NONE,
+    "osu_pp_live_timeout", 1.0f, FCVAR_DEFAULT,
     "show message that we're still calculating stars after this many seconds, on the first start of the beatmap");
 
 Beatmap::Beatmap(Osu *osu) {
@@ -1075,7 +1076,7 @@ void Beatmap::fail() {
     // Change behavior of relax mod when online
     if(bancho.is_online() && m_osu->getModRelax()) return;
 
-    if(!bancho.is_playing_a_multi_map() && osu_drain_kill.getBool()) {
+    if(osu_drain_kill.getBool()) {
         engine->getSound()->play(getSkin()->getFailsound());
 
         m_bFailed = true;
@@ -1478,7 +1479,7 @@ LiveScore::HIT Beatmap::addHitResult(HitObject *hitObject, LiveScore::HIT hit, l
         }
     } else if(m_osu->getModSD()) {
         if(hit == LiveScore::HIT::HIT_MISS) {
-            if(osu_mod_suddendeath_restart.getBool() && !bancho.is_in_a_multi_room())
+            if(osu_mod_suddendeath_restart.getBool())
                 restart();
             else
                 fail();

@@ -17,7 +17,7 @@
 #include "ResourceManager.h"
 #include "VinylScratcher.h"
 
-ConVar vs_browser_animspeed("vs_browser_animspeed", 0.15f, FCVAR_NONE);
+ConVar vs_browser_animspeed("vs_browser_animspeed", 0.15f, FCVAR_DEFAULT);
 
 struct VSMusicBrowserNaturalSortStringComparator {
     // heavily modified version of https://github.com/scopeInfinity/NaturalSort

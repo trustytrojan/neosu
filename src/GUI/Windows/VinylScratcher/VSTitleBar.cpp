@@ -15,7 +15,7 @@
 #include "Mouse.h"
 #include "ResourceManager.h"
 
-ConVar vs_percent("vs_percent", 0.0f, FCVAR_NONE);
+ConVar vs_percent("vs_percent", 0.0f, FCVAR_DEFAULT);
 
 class VSTitleBarButton : public CBaseUIButton {
    public:

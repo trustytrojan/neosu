@@ -4,29 +4,25 @@
 #include "FastDelegate.h"
 #include "UString.h"
 
-// the default, no flags at all
-#define FCVAR_NONE 0
+enum FCVAR_FLAGS {
+    // not visible in find/listcommands results etc., but is settable/gettable via console/help
+    FCVAR_HIDDEN = (1 << 0),
 
-// not added to g_vConVars list (not settable/gettable via console/help), not visible in find/listcommands
-// results etc.
-#define FCVAR_UNREGISTERED (1 << 0)
+    // if flag is not set, value will be forced to default when online
+    FCVAR_UNLOCK_SINGLEPLAYER = (1 << 1),
+    FCVAR_UNLOCK_MULTIPLAYER = (1 << 2),
+    FCVAR_UNLOCKED = (FCVAR_UNLOCK_SINGLEPLAYER | FCVAR_UNLOCK_MULTIPLAYER),
 
-// hidden in released products (like FCVAR_HIDDEN, but flag gets compiled out if ALLOW_DEVELOPMENT_CONVARS
-// is defined)
-#define FCVAR_DEVELOPMENTONLY (1 << 1)
+    // if flag is not set, score will not submit when value is not default
+    FCVAR_ALWAYS_SUBMIT = (1 << 3),
 
-// if this is set then the value can't and shouldn't ever be changed
-#define FCVAR_HARDCODED (1 << 2)
+    // don't allow server to modify this cvar
+    FCVAR_PRIVATE = (1 << 4),
 
-// not visible in find/listcommands results etc., but is settable/gettable via console/help
-#define FCVAR_HIDDEN (1 << 3)
-
-// always return default value and ignore callbacks unless sv_cheats is enabled (default value is
-// changeable via setDefault*())
-#define FCVAR_CHEAT (1 << 4)
-
-// disables score submission on servers that don't support weird mods
-#define FCVAR_NONVANILLA (1 << 5)
+    // legacy definitions
+    FCVAR_LOCKED = 0,
+    FCVAR_DEFAULT = FCVAR_UNLOCKED | FCVAR_ALWAYS_SUBMIT,
+};
 
 class ConVar {
    public:
@@ -80,6 +76,9 @@ class ConVar {
     void execArgs(UString args);
 
     // set
+    void resetDefaults();
+    void setDefaultBool(bool defaultValue) { setDefaultFloat(defaultValue ? 1.f : 0.f); }
+    void setDefaultInt(int defaultValue) { setDefaultFloat((float)defaultValue); }
     void setDefaultFloat(float defaultValue);
     void setDefaultString(UString defaultValue);
 
@@ -96,6 +95,9 @@ class ConVar {
     inline float getDefaultFloat() const { return m_fDefaultValue.load(); }
     inline const UString &getDefaultString() const { return m_sDefaultValue; }
 
+    bool isUnlocked() const;
+    std::string getFancyDefaultValue();
+
     bool getBool() const;
     float getFloat() const;
     int getInt();
@@ -105,6 +107,7 @@ class ConVar {
     inline const UString &getName() const { return m_sName; }
     inline CONVAR_TYPE getType() const { return m_type; }
     inline int getFlags() const { return m_iFlags; }
+    inline void setFlags(int new_flags) { m_iFlags = new_flags; }
 
     inline bool hasValue() const { return m_bHasValue; }
     inline bool hasCallbackArgs() const { return (m_callbackfuncargs || m_changecallback); }
@@ -120,15 +123,10 @@ class ConVar {
     void init(UString &name, float defaultValue, int flags, UString helpString, ConVarChangeCallback callback);
     void init(UString &name, UString defaultValue, int flags, UString helpString, ConVarChangeCallback callback);
 
-    void setDefaultFloatInt(float defaultValue);
-    void setDefaultStringInt(UString defaultValue);
-
-    void setValueInt(float value);
-    void setValueInt(UString sValue);
-
    private:
     bool m_bHasValue;
     CONVAR_TYPE m_type;
+    int m_iDefaultFlags;
     int m_iFlags;
 
     UString m_sName;
@@ -136,19 +134,15 @@ class ConVar {
 
     std::atomic<float> m_fValue;
     std::atomic<float> m_fDefaultValue;
+    float m_fDefaultDefaultValue;
 
     UString m_sValue;
     UString m_sDefaultValue;
+    UString m_sDefaultDefaultValue;
 
     NativeConVarCallback m_callbackfunc;
     NativeConVarCallbackArgs m_callbackfuncargs;
     NativeConVarChangeCallback m_changecallback;
-};
-
-class ConVars {
-   public:
-    // shared engine-wide cross-game convars for convenience access (for convars which don't fit anywhere else)
-    static ConVar sv_cheats;
 };
 
 //*******************//

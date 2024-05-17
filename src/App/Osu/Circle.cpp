@@ -24,20 +24,20 @@
 #include "SkinImage.h"
 #include "SoundEngine.h"
 
-ConVar osu_bug_flicker_log("osu_bug_flicker_log", false, FCVAR_NONE);
+ConVar osu_bug_flicker_log("osu_bug_flicker_log", false, FCVAR_DEFAULT);
 
-ConVar osu_circle_color_saturation("osu_circle_color_saturation", 1.0f, FCVAR_NONE);
-ConVar osu_circle_rainbow("osu_circle_rainbow", false, FCVAR_NONE);
-ConVar osu_circle_number_rainbow("osu_circle_number_rainbow", false, FCVAR_NONE);
-ConVar osu_circle_shake_duration("osu_circle_shake_duration", 0.120f, FCVAR_NONE);
-ConVar osu_circle_shake_strength("osu_circle_shake_strength", 8.0f, FCVAR_NONE);
-ConVar osu_approach_circle_alpha_multiplier("osu_approach_circle_alpha_multiplier", 0.9f, FCVAR_NONE);
+ConVar osu_circle_color_saturation("osu_circle_color_saturation", 1.0f, FCVAR_DEFAULT);
+ConVar osu_circle_rainbow("osu_circle_rainbow", false, FCVAR_DEFAULT);
+ConVar osu_circle_number_rainbow("osu_circle_number_rainbow", false, FCVAR_DEFAULT);
+ConVar osu_circle_shake_duration("osu_circle_shake_duration", 0.120f, FCVAR_DEFAULT);
+ConVar osu_circle_shake_strength("osu_circle_shake_strength", 8.0f, FCVAR_DEFAULT);
+ConVar osu_approach_circle_alpha_multiplier("osu_approach_circle_alpha_multiplier", 0.9f, FCVAR_DEFAULT);
 
-ConVar osu_draw_numbers("osu_draw_numbers", true, FCVAR_NONE);
-ConVar osu_draw_circles("osu_draw_circles", true, FCVAR_NONE);
-ConVar osu_draw_approach_circles("osu_draw_approach_circles", true, FCVAR_NONE);
+ConVar osu_draw_numbers("osu_draw_numbers", true, FCVAR_DEFAULT);
+ConVar osu_draw_circles("osu_draw_circles", true, FCVAR_DEFAULT);
+ConVar osu_draw_approach_circles("osu_draw_approach_circles", true, FCVAR_DEFAULT);
 
-ConVar osu_slider_draw_endcircle("osu_slider_draw_endcircle", true, FCVAR_NONE);
+ConVar osu_slider_draw_endcircle("osu_slider_draw_endcircle", true, FCVAR_DEFAULT);
 
 int Circle::rainbowNumber = 0;
 int Circle::rainbowColorCounter = 0;

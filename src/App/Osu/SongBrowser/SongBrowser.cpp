@@ -56,38 +56,38 @@
 #include "UserButton.h"
 #include "VertexArrayObject.h"
 
-ConVar osu_gamemode("osu_gamemode", "std", FCVAR_NONE);
+ConVar osu_gamemode("osu_gamemode", "std", FCVAR_DEFAULT);
 
-ConVar osu_songbrowser_sortingtype("osu_songbrowser_sortingtype", "By Date Added", FCVAR_NONE);
-ConVar osu_songbrowser_scores_sortingtype("osu_songbrowser_scores_sortingtype", "Sort By Score", FCVAR_NONE);
+ConVar osu_songbrowser_sortingtype("osu_songbrowser_sortingtype", "By Date Added", FCVAR_DEFAULT);
+ConVar osu_songbrowser_scores_sortingtype("osu_songbrowser_scores_sortingtype", "Sort By Score", FCVAR_DEFAULT);
 
-ConVar osu_songbrowser_topbar_left_percent("osu_songbrowser_topbar_left_percent", 0.93f, FCVAR_NONE);
-ConVar osu_songbrowser_topbar_left_width_percent("osu_songbrowser_topbar_left_width_percent", 0.265f, FCVAR_NONE);
-ConVar osu_songbrowser_topbar_middle_width_percent("osu_songbrowser_topbar_middle_width_percent", 0.15f, FCVAR_NONE);
-ConVar osu_songbrowser_topbar_right_height_percent("osu_songbrowser_topbar_right_height_percent", 0.5f, FCVAR_NONE);
-ConVar osu_songbrowser_topbar_right_percent("osu_songbrowser_topbar_right_percent", 0.378f, FCVAR_NONE);
-ConVar osu_songbrowser_bottombar_percent("osu_songbrowser_bottombar_percent", 0.116f, FCVAR_NONE);
+ConVar osu_songbrowser_topbar_left_percent("osu_songbrowser_topbar_left_percent", 0.93f, FCVAR_DEFAULT);
+ConVar osu_songbrowser_topbar_left_width_percent("osu_songbrowser_topbar_left_width_percent", 0.265f, FCVAR_DEFAULT);
+ConVar osu_songbrowser_topbar_middle_width_percent("osu_songbrowser_topbar_middle_width_percent", 0.15f, FCVAR_DEFAULT);
+ConVar osu_songbrowser_topbar_right_height_percent("osu_songbrowser_topbar_right_height_percent", 0.5f, FCVAR_DEFAULT);
+ConVar osu_songbrowser_topbar_right_percent("osu_songbrowser_topbar_right_percent", 0.378f, FCVAR_DEFAULT);
+ConVar osu_songbrowser_bottombar_percent("osu_songbrowser_bottombar_percent", 0.116f, FCVAR_DEFAULT);
 
-ConVar osu_draw_songbrowser_background_image("osu_draw_songbrowser_background_image", true, FCVAR_NONE);
-ConVar osu_draw_songbrowser_menu_background_image("osu_draw_songbrowser_menu_background_image", true, FCVAR_NONE);
-ConVar osu_draw_songbrowser_strain_graph("osu_draw_songbrowser_strain_graph", false, FCVAR_NONE);
-ConVar osu_songbrowser_scorebrowser_enabled("osu_songbrowser_scorebrowser_enabled", true, FCVAR_NONE);
-ConVar osu_songbrowser_background_fade_in_duration("osu_songbrowser_background_fade_in_duration", 0.1f, FCVAR_NONE);
+ConVar osu_draw_songbrowser_background_image("osu_draw_songbrowser_background_image", true, FCVAR_DEFAULT);
+ConVar osu_draw_songbrowser_menu_background_image("osu_draw_songbrowser_menu_background_image", true, FCVAR_DEFAULT);
+ConVar osu_draw_songbrowser_strain_graph("osu_draw_songbrowser_strain_graph", false, FCVAR_DEFAULT);
+ConVar osu_songbrowser_scorebrowser_enabled("osu_songbrowser_scorebrowser_enabled", true, FCVAR_DEFAULT);
+ConVar osu_songbrowser_background_fade_in_duration("osu_songbrowser_background_fade_in_duration", 0.1f, FCVAR_DEFAULT);
 
-ConVar osu_songbrowser_search_delay("osu_songbrowser_search_delay", 0.5f, FCVAR_NONE,
+ConVar osu_songbrowser_search_delay("osu_songbrowser_search_delay", 0.5f, FCVAR_DEFAULT,
                                     "delay until search update when entering text");
 void _osu_songbrowser_search_hardcoded_filter(UString oldValue, UString newValue);
-ConVar osu_songbrowser_search_hardcoded_filter("osu_songbrowser_search_hardcoded_filter", "", FCVAR_NONE,
+ConVar osu_songbrowser_search_hardcoded_filter("osu_songbrowser_search_hardcoded_filter", "", FCVAR_DEFAULT,
                                                "allows forcing the specified search filter to be active all the time",
                                                _osu_songbrowser_search_hardcoded_filter);
-ConVar osu_songbrowser_background_star_calculation("osu_songbrowser_background_star_calculation", true, FCVAR_NONE,
+ConVar osu_songbrowser_background_star_calculation("osu_songbrowser_background_star_calculation", true, FCVAR_DEFAULT,
                                                    "precalculate stars for all loaded beatmaps while in songbrowser");
 ConVar osu_songbrowser_dynamic_star_recalc(
-    "osu_songbrowser_dynamic_star_recalc", true, FCVAR_NONE,
+    "osu_songbrowser_dynamic_star_recalc", true, FCVAR_DEFAULT,
     "dynamically recalculate displayed star value of currently selected beatmap in songbrowser");
 
 ConVar osu_debug_background_star_calc(
-    "osu_debug_background_star_calc", false, FCVAR_NONE,
+    "osu_debug_background_star_calc", false, FCVAR_DEFAULT,
     "prints the name of the beatmap about to get its stars calculated (cmd/terminal window only, no in-game log!)");
 
 void _osu_songbrowser_search_hardcoded_filter(UString oldValue, UString newValue) {

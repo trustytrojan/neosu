@@ -21,7 +21,7 @@
 #include "OpenGLHeaders.h"
 */
 
-ConVar debug_box_shadows("debug_box_shadows", false, FCVAR_NONE);
+ConVar debug_box_shadows("debug_box_shadows", false, FCVAR_DEFAULT);
 
 CBaseUIBoxShadow::CBaseUIBoxShadow(Color color, float radius, float xPos, float yPos, float xSize, float ySize,
                                    UString name)

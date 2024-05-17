@@ -27,9 +27,9 @@ bool g_bDraw = true;
 bool g_bMinimized = false;  // for fps_max_background
 bool g_bHasFocus = true;    // for fps_max_background // TODO: focus handling!
 
-ConVar fps_max("fps_max", 60.0f, FCVAR_NONE);
-ConVar fps_max_background("fps_max_background", 30.0f, FCVAR_NONE);
-ConVar fps_unlimited("fps_unlimited", false, FCVAR_NONE);
+ConVar fps_max("fps_max", 60.0f, FCVAR_DEFAULT);
+ConVar fps_max_background("fps_max_background", 30.0f, FCVAR_DEFAULT);
+ConVar fps_unlimited("fps_unlimited", false, FCVAR_DEFAULT);
 
 MacOSWrapper::MacOSWrapper() {
     // create timers

@@ -16,13 +16,13 @@
 #include "Skin.h"
 
 ConVar osu_songbrowser_button_difficulty_inactive_color_a("osu_songbrowser_button_difficulty_inactive_color_a", 255,
-                                                          FCVAR_NONE);
+                                                          FCVAR_DEFAULT);
 ConVar osu_songbrowser_button_difficulty_inactive_color_r("osu_songbrowser_button_difficulty_inactive_color_r", 0,
-                                                          FCVAR_NONE);
+                                                          FCVAR_DEFAULT);
 ConVar osu_songbrowser_button_difficulty_inactive_color_g("osu_songbrowser_button_difficulty_inactive_color_g", 150,
-                                                          FCVAR_NONE);
+                                                          FCVAR_DEFAULT);
 ConVar osu_songbrowser_button_difficulty_inactive_color_b("osu_songbrowser_button_difficulty_inactive_color_b", 236,
-                                                          FCVAR_NONE);
+                                                          FCVAR_DEFAULT);
 
 ConVar *SongDifficultyButton::m_osu_scores_enabled = NULL;
 ConVar *SongDifficultyButton::m_osu_songbrowser_dynamic_star_recalc_ref = NULL;

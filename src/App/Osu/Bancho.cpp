@@ -197,7 +197,6 @@ void handle_packet(Packet *packet) {
             bancho.osu->m_optionsMenu->logInButton->setColor(0xffff0000);
             bancho.osu->m_optionsMenu->logInButton->is_loading = false;
             convar->getConVarByName("mp_autologin")->setValue(true);
-            ConVars::sv_cheats.setValue(!bancho.submit_scores());
             print_new_channels = true;
 
             std::stringstream ss;
@@ -228,6 +227,13 @@ void handle_packet(Packet *packet) {
 
             // If server sent a score submission policy, update options menu to hide the checkbox
             bancho.osu->m_optionsMenu->updateLayout();
+
+            APIRequest request;
+            request.type = GET_NEOSU_SETTINGS;
+            request.path = UString::format("/neosu.json?u=%s&h=%s", bancho.username.toUtf8(), bancho.pw_md5.toUtf8());
+            request.mime = NULL;
+            request.extra = NULL;
+            send_api_request(request);
         } else {
             convar->getConVarByName("mp_autologin")->setValue(false);
             bancho.osu->m_optionsMenu->logInButton->setText("Log in");

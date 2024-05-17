@@ -27,41 +27,41 @@
 #include "SoundEngine.h"
 #include "VertexArrayObject.h"
 
-ConVar osu_slider_ball_tint_combo_color("osu_slider_ball_tint_combo_color", true, FCVAR_NONE);
+ConVar osu_slider_ball_tint_combo_color("osu_slider_ball_tint_combo_color", true, FCVAR_DEFAULT);
 
-ConVar osu_snaking_sliders("osu_snaking_sliders", true, FCVAR_NONE);
-ConVar osu_mod_hd_slider_fade_percent("osu_mod_hd_slider_fade_percent", 1.0f, FCVAR_CHEAT);
-ConVar osu_mod_hd_slider_fast_fade("osu_mod_hd_slider_fast_fade", false, FCVAR_NONE);
+ConVar osu_snaking_sliders("osu_snaking_sliders", true, FCVAR_DEFAULT);
+ConVar osu_mod_hd_slider_fade_percent("osu_mod_hd_slider_fade_percent", 1.0f, FCVAR_LOCKED);
+ConVar osu_mod_hd_slider_fast_fade("osu_mod_hd_slider_fast_fade", false, FCVAR_DEFAULT);
 
-ConVar osu_slider_end_inside_check_offset("osu_slider_end_inside_check_offset", 36, FCVAR_CHEAT,
+ConVar osu_slider_end_inside_check_offset("osu_slider_end_inside_check_offset", 36, FCVAR_LOCKED,
                                           "offset in milliseconds going backwards from the end point, at which \"being "
                                           "inside the slider\" is checked. (osu bullshit behavior)");
-ConVar osu_slider_end_miss_breaks_combo("osu_slider_end_miss_breaks_combo", false, FCVAR_NONE,
+ConVar osu_slider_end_miss_breaks_combo("osu_slider_end_miss_breaks_combo", false, FCVAR_DEFAULT,
                                         "should a missed sliderend break combo (aka cause a regular sliderbreak)");
-ConVar osu_slider_break_epilepsy("osu_slider_break_epilepsy", false, FCVAR_NONE);
-ConVar osu_slider_scorev2("osu_slider_scorev2", false, FCVAR_CHEAT);
+ConVar osu_slider_break_epilepsy("osu_slider_break_epilepsy", false, FCVAR_DEFAULT);
+ConVar osu_slider_scorev2("osu_slider_scorev2", false, FCVAR_LOCKED);
 
-ConVar osu_slider_draw_body("osu_slider_draw_body", true, FCVAR_NONE);
-ConVar osu_slider_shrink("osu_slider_shrink", false, FCVAR_NONE);
-ConVar osu_slider_snake_duration_multiplier("osu_slider_snake_duration_multiplier", 1.0f, FCVAR_NONE,
+ConVar osu_slider_draw_body("osu_slider_draw_body", true, FCVAR_DEFAULT);
+ConVar osu_slider_shrink("osu_slider_shrink", false, FCVAR_DEFAULT);
+ConVar osu_slider_snake_duration_multiplier("osu_slider_snake_duration_multiplier", 1.0f, FCVAR_DEFAULT,
                                             "the default snaking duration is multiplied with this (max sensible value "
                                             "is 3, anything above that will take longer than the approachtime)");
 ConVar osu_slider_reverse_arrow_black_threshold(
-    "osu_slider_reverse_arrow_black_threshold", 1.0f, FCVAR_NONE,
+    "osu_slider_reverse_arrow_black_threshold", 1.0f, FCVAR_DEFAULT,
     "Blacken reverse arrows if the average color brightness percentage is above this value");  // looks too shitty atm
-ConVar osu_slider_reverse_arrow_fadein_duration("osu_slider_reverse_arrow_fadein_duration", 150, FCVAR_NONE,
+ConVar osu_slider_reverse_arrow_fadein_duration("osu_slider_reverse_arrow_fadein_duration", 150, FCVAR_DEFAULT,
                                                 "duration in ms of the reverse arrow fadein animation after it starts");
 ConVar osu_slider_body_smoothsnake(
-    "osu_slider_body_smoothsnake", true, FCVAR_NONE,
+    "osu_slider_body_smoothsnake", true, FCVAR_DEFAULT,
     "draw 1 extra interpolated circle mesh at the start & end of every slider for extra smooth snaking/shrinking");
-ConVar osu_slider_body_lazer_fadeout_style("osu_slider_body_lazer_fadeout_style", true, FCVAR_NONE,
+ConVar osu_slider_body_lazer_fadeout_style("osu_slider_body_lazer_fadeout_style", true, FCVAR_DEFAULT,
                                            "if snaking out sliders are enabled (aka shrinking sliders), smoothly fade "
                                            "out the last remaining part of the body (instead of vanishing instantly)");
-ConVar osu_slider_body_fade_out_time_multiplier("osu_slider_body_fade_out_time_multiplier", 1.0f, FCVAR_NONE,
+ConVar osu_slider_body_fade_out_time_multiplier("osu_slider_body_fade_out_time_multiplier", 1.0f, FCVAR_DEFAULT,
                                                 "multiplies osu_hitobject_fade_out_time");
-ConVar osu_slider_reverse_arrow_animated("osu_slider_reverse_arrow_animated", true, FCVAR_NONE,
+ConVar osu_slider_reverse_arrow_animated("osu_slider_reverse_arrow_animated", true, FCVAR_DEFAULT,
                                          "pulse animation on reverse arrows");
-ConVar osu_slider_reverse_arrow_alpha_multiplier("osu_slider_reverse_arrow_alpha_multiplier", 1.0f, FCVAR_NONE);
+ConVar osu_slider_reverse_arrow_alpha_multiplier("osu_slider_reverse_arrow_alpha_multiplier", 1.0f, FCVAR_DEFAULT);
 
 ConVar *Slider::m_osu_playfield_mirror_horizontal_ref = NULL;
 ConVar *Slider::m_osu_playfield_mirror_vertical_ref = NULL;

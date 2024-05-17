@@ -516,8 +516,6 @@ void RoomScreen::ragequit() {
     m_osu->m_mainMenu->setVisible(true);
     m_osu->m_chat->removeChannel("#multiplayer");
     m_osu->m_chat->updateVisibility();
-
-    ConVars::sv_cheats.setValue(!bancho.submit_scores());
 }
 
 void RoomScreen::process_beatmapset_info_response(Packet packet) {
@@ -638,8 +636,6 @@ void RoomScreen::on_map_change(bool download) {
 }
 
 void RoomScreen::on_room_joined(Room room) {
-    ConVars::sv_cheats.setValue(false);
-
     bancho.room = room;
     debugLog("Joined room #%d\nPlayers:\n", room.id);
     for(int i = 0; i < 16; i++) {

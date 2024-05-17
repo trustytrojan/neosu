@@ -17,6 +17,7 @@
 #include "Engine.h"
 #include "File.h"
 #include "Lobby.h"
+#include "NeosuSettings.h"
 #include "OptionsMenu.h"
 #include "ResourceManager.h"
 #include "RoomScreen.h"
@@ -95,6 +96,11 @@ void disconnect() {
         bancho.server_icon = nullptr;
     }
 
+    std::vector<ConVar *> convars = convar->getConVarArray();
+    for(auto var : convars) {
+        var->resetDefaults();
+    }
+
     bancho.score_submission_policy = ServerPolicy::NO_PREFERENCE;
     bancho.set_fposu_flag = false;
     bancho.set_mirror_flag = false;
@@ -103,7 +109,6 @@ void disconnect() {
     bancho.osu->m_optionsMenu->logInButton->setText("Log in");
     bancho.osu->m_optionsMenu->logInButton->setColor(0xff00ff00);
     bancho.osu->m_optionsMenu->logInButton->is_loading = false;
-    ConVars::sv_cheats.setValue(true);
 
     for(auto pair : online_users) {
         delete pair.second;
@@ -387,6 +392,11 @@ static void *do_networking(void *data) {
 
 static void handle_api_response(Packet packet) {
     switch(packet.id) {
+        case GET_NEOSU_SETTINGS: {
+            process_neosu_settings(packet);
+            break;
+        }
+
         case GET_BEATMAPSET_INFO: {
             RoomScreen::process_beatmapset_info_response(packet);
             break;

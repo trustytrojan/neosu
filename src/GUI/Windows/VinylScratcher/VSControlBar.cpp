@@ -16,9 +16,9 @@
 #include "Keyboard.h"
 #include "ResourceManager.h"
 
-ConVar vs_repeat("vs_repeat", false, FCVAR_NONE);
-ConVar vs_shuffle("vs_shuffle", false, FCVAR_NONE);
-ConVar vs_volume("vs_volume", 1.0f, FCVAR_NONE);
+ConVar vs_repeat("vs_repeat", false, FCVAR_DEFAULT);
+ConVar vs_shuffle("vs_shuffle", false, FCVAR_DEFAULT);
+ConVar vs_volume("vs_volume", 1.0f, FCVAR_DEFAULT);
 
 class VSControlBarButton : public CBaseUIButton {
    public:
