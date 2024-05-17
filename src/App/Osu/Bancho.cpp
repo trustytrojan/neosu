@@ -318,7 +318,7 @@ void handle_packet(Packet *packet) {
         debugLog("Spectator left: user id %d\n", spectator_id);
     } else if(packet->id == VERSION_UPDATE) {
         disconnect();
-        bancho.osu->getNotificationOverlay()->addNotification("Server uses an unsupported protocol version.");
+        bancho.osu->getNotificationOverlay()->addNotification("This server may use an unsupported protocol version.");
     } else if(packet->id == SPECTATOR_CANT_SPECTATE) {
         i32 spectator_id = read<u32>(packet);
         debugLog("Spectator can't spectate: user id %d\n", spectator_id);
