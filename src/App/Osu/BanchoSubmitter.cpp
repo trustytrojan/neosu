@@ -1,5 +1,6 @@
 #ifdef _WIN32
 #include "cbase.h"
+// ^ needs to be above <windows.h>
 #include <windows.h>
 #else
 #include <sys/random.h>
@@ -105,7 +106,7 @@ void submit_score(FinishedScore score) {
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "iv");
         curl_mime_data(part, iv_b64, CURL_ZERO_TERMINATED);
-        delete iv_b64;
+        delete[] iv_b64;
     }
     {
         size_t s_client_hashes_encrypted = 0;
@@ -116,7 +117,7 @@ void submit_score(FinishedScore score) {
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "s");
         curl_mime_data(part, client_hashes_b64, CURL_ZERO_TERMINATED);
-        delete client_hashes_b64;
+        delete[] client_hashes_b64;
     }
     {
         UString score_data;
@@ -162,7 +163,7 @@ void submit_score(FinishedScore score) {
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "score");
         curl_mime_data(part, score_data_b64, CURL_ZERO_TERMINATED);
-        delete score_data_b64;
+        delete[] score_data_b64;
     }
     {
         size_t s_compressed_data = 0;
