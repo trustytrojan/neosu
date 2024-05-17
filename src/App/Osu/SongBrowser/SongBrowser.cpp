@@ -464,17 +464,17 @@ SongBrowser::SongBrowser() : ScreenBackable() {
     // build bottombar
     m_bottombar = new CBaseUIContainer(0, 0, 0, 0, "");
 
-    addBottombarNavButton([this]() -> SkinImage * { return osu->getSkin()->getSelectionMode(); },
-                          [this]() -> SkinImage * { return osu->getSkin()->getSelectionModeOver(); })
+    addBottombarNavButton([]() -> SkinImage * { return osu->getSkin()->getSelectionMode(); },
+                          []() -> SkinImage * { return osu->getSkin()->getSelectionModeOver(); })
         ->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onSelectionMode));
-    addBottombarNavButton([this]() -> SkinImage * { return osu->getSkin()->getSelectionMods(); },
-                          [this]() -> SkinImage * { return osu->getSkin()->getSelectionModsOver(); })
+    addBottombarNavButton([]() -> SkinImage * { return osu->getSkin()->getSelectionMods(); },
+                          []() -> SkinImage * { return osu->getSkin()->getSelectionModsOver(); })
         ->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onSelectionMods));
-    addBottombarNavButton([this]() -> SkinImage * { return osu->getSkin()->getSelectionRandom(); },
-                          [this]() -> SkinImage * { return osu->getSkin()->getSelectionRandomOver(); })
+    addBottombarNavButton([]() -> SkinImage * { return osu->getSkin()->getSelectionRandom(); },
+                          []() -> SkinImage * { return osu->getSkin()->getSelectionRandomOver(); })
         ->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onSelectionRandom));
-    addBottombarNavButton([this]() -> SkinImage * { return osu->getSkin()->getSelectionOptions(); },
-                          [this]() -> SkinImage * { return osu->getSkin()->getSelectionOptionsOver(); })
+    addBottombarNavButton([]() -> SkinImage * { return osu->getSkin()->getSelectionOptions(); },
+                          []() -> SkinImage * { return osu->getSkin()->getSelectionOptionsOver(); })
         ->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onSelectionOptions));
 
     m_userButton = new UserButton();
@@ -597,6 +597,7 @@ SongBrowser::~SongBrowser() {
         delete m_sortingMethods[i].comparator;
     }
 
+    SAFE_DELETE(m_selectedBeatmap);
     SAFE_DELETE(m_search);
     SAFE_DELETE(m_topbarLeft);
     SAFE_DELETE(m_topbarRight);
@@ -1619,8 +1620,6 @@ void SongBrowser::onDifficultySelected(DatabaseBeatmap *diff2, bool play) {
             if(m_selectedBeatmap->play()) {
                 m_bHasSelectedAndIsPlaying = true;
                 setVisible(false);
-
-                osu->onPlayStart();
             }
         }
     }

@@ -4,6 +4,8 @@
 #include <string.h>
 
 #include "Bancho.h"
+#include "Beatmap.h"
+#include "Osu.h"
 
 // Null array for returning empty structures when trying to read more data out of a Packet than expected.
 u8 NULL_ARRAY[NULL_ARRAY_SIZE] = {0};
@@ -227,4 +229,36 @@ void write_hash(Packet *packet, MD5Hash hash) {
     write<u8>(packet, 0x0B);
     write<u8>(packet, 0x20);
     write_bytes(packet, (u8 *)hash.hash, 32);
+}
+
+ScoreFrame ScoreFrame::get() {
+    u8 slot_id = 0;
+    for(u8 i = 0; i < 16; i++) {
+        if(bancho.room.slots[i].player_id == bancho.user_id) {
+            slot_id = i;
+            break;
+        }
+    }
+
+    auto score = osu->getScore();
+    auto perfect = (score->getNumSliderBreaks() == 0 && score->getNumMisses() == 0 && score->getNum50s() == 0 &&
+                    score->getNum100s() == 0);
+
+    return ScoreFrame{
+        .time = (i32)osu->getSelectedBeatmap()->getCurMusicPos(),  // NOTE: might be incorrect
+        .slot_id = slot_id,
+        .num300 = (u16)score->getNum300s(),
+        .num100 = (u16)score->getNum100s(),
+        .num50 = (u16)score->getNum50s(),
+        .num_geki = (u16)score->getNum300gs(),
+        .num_katu = (u16)score->getNum100ks(),
+        .num_miss = (u16)score->getNumMisses(),
+        .total_score = (i32)score->getScore(),
+        .max_combo = (u16)score->getComboMax(),
+        .current_combo = (u16)score->getCombo(),
+        .is_perfect = perfect,
+        .current_hp = (u8)(osu->getSelectedBeatmap()->getHealth() * 200.0),
+        .tag = 0,         // tag gamemode currently not supported
+        .is_scorev2 = 0,  // scorev2 currently not supported
+    };
 }

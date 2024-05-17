@@ -710,7 +710,6 @@ void RoomScreen::on_match_started(Room room) {
         m_bVisible = false;
         bancho.match_started = true;
         osu->m_songBrowser2->m_bHasSelectedAndIsPlaying = true;
-        osu->onPlayStart();
         osu->m_chat->updateVisibility();
     } else {
         ragequit();  // map failed to load
@@ -718,24 +717,23 @@ void RoomScreen::on_match_started(Room room) {
 }
 
 void RoomScreen::on_match_score_updated(Packet *packet) {
-    i32 update_tms = read<u32>(packet);
-    u8 slot_id = read<u8>(packet);
-    if(slot_id > 15) return;
+    auto frame = read<ScoreFrame>(packet);
+    if(frame.slot_id > 15) return;
 
-    auto slot = &bancho.room.slots[slot_id];
-    slot->last_update_tms = update_tms;
-    slot->num300 = read<u16>(packet);
-    slot->num100 = read<u16>(packet);
-    slot->num50 = read<u16>(packet);
-    slot->num_geki = read<u16>(packet);
-    slot->num_katu = read<u16>(packet);
-    slot->num_miss = read<u16>(packet);
-    slot->total_score = read<u32>(packet);
-    slot->max_combo = read<u16>(packet);
-    slot->current_combo = read<u16>(packet);
-    slot->is_perfect = read<u8>(packet);
-    slot->current_hp = read<u8>(packet);
-    slot->tag = read<u8>(packet);
+    auto slot = &bancho.room.slots[frame.slot_id];
+    slot->last_update_tms = frame.time;
+    slot->num300 = frame.num300;
+    slot->num100 = frame.num100;
+    slot->num50 = frame.num50;
+    slot->num_geki = frame.num_geki;
+    slot->num_katu = frame.num_katu;
+    slot->num_miss = frame.num_miss;
+    slot->total_score = frame.total_score;
+    slot->max_combo = frame.max_combo;
+    slot->current_combo = frame.current_combo;
+    slot->is_perfect = frame.is_perfect;
+    slot->current_hp = frame.current_hp;
+    slot->tag = frame.tag;
 
     bool is_scorev2 = read<u8>(packet);
     if(is_scorev2) {

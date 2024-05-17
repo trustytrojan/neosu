@@ -1118,6 +1118,17 @@ CBaseUIContainer *MainMenu::setVisible(bool visible) {
     if(visible) {
         RichPresence::onMainMenu();
 
+        if(!bancho.spectators.empty()) {
+            Packet packet;
+            packet.id = SPECTATE_FRAMES;
+            write<i32>(&packet, 0);
+            write<u16>(&packet, 0);
+            write<u8>(&packet, LiveReplayBundle::Action::NONE);
+            write<ScoreFrame>(&packet, ScoreFrame::get());
+            write<u16>(&packet, osu->getSelectedBeatmap()->spectator_sequence++);
+            send_packet(packet);
+        }
+
         updateLayout();
 
         m_fMainMenuAnimDuration = 15.0f;

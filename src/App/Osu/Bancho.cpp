@@ -312,15 +312,29 @@ void handle_packet(Packet *packet) {
         }
     } else if(packet->id == SPECTATOR_JOINED) {
         i32 spectator_id = read<u32>(packet);
+        bancho.spectators.push_back(spectator_id);
         debugLog("Spectator joined: user id %d\n", spectator_id);
     } else if(packet->id == SPECTATOR_LEFT) {
         i32 spectator_id = read<u32>(packet);
+        auto it = std::find(bancho.spectators.begin(), bancho.spectators.end(), spectator_id);
+        if(it != bancho.spectators.end()) {
+            bancho.spectators.erase(it);
+        }
         debugLog("Spectator left: user id %d\n", spectator_id);
-    } else if(packet->id == VERSION_UPDATE) {
-        // (nothing to do)
     } else if(packet->id == SPECTATOR_CANT_SPECTATE) {
         i32 spectator_id = read<u32>(packet);
         debugLog("Spectator can't spectate: user id %d\n", spectator_id);
+    } else if(packet->id == FELLOW_SPECTATOR_JOINED) {
+        i32 spectator_id = read<u32>(packet);
+        bancho.fellow_spectators.push_back(spectator_id);
+        debugLog("Fellow spectator joined: user id %d\n", spectator_id);
+    } else if(packet->id == FELLOW_SPECTATOR_LEFT) {
+        i32 spectator_id = read<u32>(packet);
+        auto it = std::find(bancho.fellow_spectators.begin(), bancho.fellow_spectators.end(), spectator_id);
+        if(it != bancho.fellow_spectators.end()) {
+            bancho.fellow_spectators.erase(it);
+        }
+        debugLog("Fellow spectator left: user id %d\n", spectator_id);
     } else if(packet->id == GET_ATTENTION) {
         // (nothing to do)
     } else if(packet->id == NOTIFICATION) {
@@ -349,12 +363,6 @@ void handle_packet(Packet *packet) {
     } else if(packet->id == ROOM_JOIN_FAIL) {
         osu->getNotificationOverlay()->addNotification("Failed to join room.");
         osu->m_lobby->on_room_join_failed();
-    } else if(packet->id == FELLOW_SPECTATOR_JOINED) {
-        u32 spectator_id = read<u32>(packet);
-        (void)spectator_id;  // (spectating not implemented; nothing to do)
-    } else if(packet->id == FELLOW_SPECTATOR_LEFT) {
-        u32 spectator_id = read<u32>(packet);
-        (void)spectator_id;  // (spectating not implemented; nothing to do)
     } else if(packet->id == MATCH_STARTED) {
         auto room = Room(packet);
         osu->m_room->on_match_started(room);
@@ -492,6 +500,8 @@ void handle_packet(Packet *packet) {
         UString blocked = read_string(packet);
         read<u32>(packet);
         debugLog("Silenced %s.\n", blocked.toUtf8());
+    } else if(packet->id == VERSION_UPDATE) {
+        // (nothing to do)
     } else if(packet->id == VERSION_UPDATE_FORCED) {
         disconnect();
         osu->getNotificationOverlay()->addNotification("This server requires a newer client version.");

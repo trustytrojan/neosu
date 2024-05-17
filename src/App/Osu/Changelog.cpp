@@ -29,6 +29,7 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
+    latest.changes.push_back("- Added ability to get spectated");
     latest.changes.push_back("- Added option for servers to override convars using neosu.json");
     latest.changes.push_back("- Added option for servers to override convars using a custom bancho packet");
     latest.changes.push_back("- Hid password cvar from console command list");

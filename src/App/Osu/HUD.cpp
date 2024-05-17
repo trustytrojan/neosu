@@ -243,6 +243,8 @@ ConVar osu_combo_anim1_size("osu_combo_anim1_size", 0.15f, FCVAR_DEFAULT);
 ConVar osu_combo_anim2_duration("osu_combo_anim2_duration", 0.4f, FCVAR_DEFAULT);
 ConVar osu_combo_anim2_size("osu_combo_anim2_size", 0.5f, FCVAR_DEFAULT);
 
+ConVar draw_spectator_list("draw_spectator_list", true, FCVAR_DEFAULT);
+
 HUD::HUD() : OsuScreen() {
     // convar refs
     m_name_ref = convar->getConVarByName("name");
@@ -441,6 +443,30 @@ void HUD::draw(Graphics *g) {
        ((m_osu_skip_intro_enabled_ref->getBool() && beatmap->getHitObjectIndexForCurrentTime() < 1) ||
         (m_osu_skip_breaks_enabled_ref->getBool() && beatmap->getHitObjectIndexForCurrentTime() > 0)))
         drawSkip(g);
+
+    u32 nb_spectators = beatmap->is_spectating ? bancho.fellow_spectators.size() : bancho.spectators.size();
+    if(nb_spectators > 0 && draw_spectator_list.getBool()) {
+        // XXX: maybe draw player names? avatars?
+        const UString str = UString::format("%d spectators", nb_spectators);
+
+        g->pushTransform();
+        McFont *font = osu->getSongBrowserFont();
+        const float height = roundf(osu->getScreenHeight() * 0.07f);
+        const float scale = (height / font->getHeight()) * 0.315f;
+        g->scale(scale, scale);
+        g->translate(30.f * scale, osu->getScreenHeight() / 2.f - ((height * 2.5f) + font->getHeight() * scale));
+
+        if(convar->getConVarByName("osu_background_dim")->getFloat() < 0.7f) {
+            g->translate(1, 1);
+            g->setColor(0x66000000);
+            g->drawString(font, str);
+            g->translate(-1, -1);
+        }
+
+        g->setColor(0xffffffff);
+        g->drawString(font, str);
+        g->popTransform();
+    }
 }
 
 void HUD::mouse_update(bool *propagate_clicks) {
@@ -1491,8 +1517,8 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
         if(osu->getModAuto() || (osu->getModAutopilot() && osu->getModRelax())) {
             playerScoreEntry.name = "neosu";
         } else if(beatmap->m_bIsWatchingReplay) {
-            playerScoreEntry.name = osu->replay_score.playerName.c_str();
-            playerScoreEntry.player_id = osu->replay_score.player_id;
+            playerScoreEntry.name = osu->watched_user_name;
+            playerScoreEntry.player_id = osu->watched_user_id;
         } else {
             playerScoreEntry.name = m_name_ref->getString();
             playerScoreEntry.player_id = bancho.user_id;

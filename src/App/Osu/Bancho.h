@@ -20,6 +20,8 @@ struct Bancho {
     UString username;
     MD5Hash pw_md5;
     Room room;
+    std::vector<u32> spectators;
+    std::vector<u32> fellow_spectators;
 
     UString server_icon_url;
     Image *server_icon = nullptr;

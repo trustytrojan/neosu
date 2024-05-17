@@ -1,13 +1,7 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		pause menu (while playing)
-//
-// $NoKeywords: $
-//===============================================================================//
-
 #include "PauseMenu.h"
 
 #include "AnimationHandler.h"
+#include "Bancho.h"
 #include "Beatmap.h"
 #include "CBaseUIContainer.h"
 #include "Chat.h"
@@ -50,9 +44,9 @@ PauseMenu::PauseMenu() : OsuScreen() {
 
     setSize(osu->getScreenWidth(), osu->getScreenHeight());
 
-    UIPauseMenuButton *continueButton = addButton([this]() -> Image * { return osu->getSkin()->getPauseContinue(); });
-    UIPauseMenuButton *retryButton = addButton([this]() -> Image * { return osu->getSkin()->getPauseRetry(); });
-    UIPauseMenuButton *backButton = addButton([this]() -> Image * { return osu->getSkin()->getPauseBack(); });
+    UIPauseMenuButton *continueButton = addButton([]() -> Image * { return osu->getSkin()->getPauseContinue(); });
+    UIPauseMenuButton *retryButton = addButton([]() -> Image * { return osu->getSkin()->getPauseRetry(); });
+    UIPauseMenuButton *backButton = addButton([]() -> Image * { return osu->getSkin()->getPauseBack(); });
 
     continueButton->setClickCallback(fastdelegate::MakeDelegate(this, &PauseMenu::onContinueClicked));
     retryButton->setClickCallback(fastdelegate::MakeDelegate(this, &PauseMenu::onRetryClicked));
@@ -352,11 +346,33 @@ CBaseUIContainer *PauseMenu::setVisible(bool visible) {
         if(m_bContinueEnabled) {
             RichPresence::setStatus("Paused");
             RichPresence::setBanchoStatus("Taking a break", PAUSED);
+
+            if(!bancho.spectators.empty()) {
+                Packet packet;
+                packet.id = SPECTATE_FRAMES;
+                write<i32>(&packet, 0);
+                write<u16>(&packet, 0);
+                write<u8>(&packet, LiveReplayBundle::Action::PAUSE);
+                write<ScoreFrame>(&packet, ScoreFrame::get());
+                write<u16>(&packet, osu->getSelectedBeatmap()->spectator_sequence++);
+                send_packet(packet);
+            }
         } else {
             RichPresence::setBanchoStatus("Failed", SUBMITTING);
         }
     } else {
         RichPresence::onPlayStart();
+
+        if(!bancho.spectators.empty()) {
+            Packet packet;
+            packet.id = SPECTATE_FRAMES;
+            write<i32>(&packet, 0);
+            write<u16>(&packet, 0);
+            write<u8>(&packet, LiveReplayBundle::Action::UNPAUSE);
+            write<ScoreFrame>(&packet, ScoreFrame::get());
+            write<u16>(&packet, osu->getSelectedBeatmap()->spectator_sequence++);
+            send_packet(packet);
+        }
     }
 
     // HACKHACK: force disable mod selection screen in case it was open and the beatmap ended/failed

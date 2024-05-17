@@ -1634,28 +1634,6 @@ void Osu::saveScreenshot() {
                        screenshot_path);
 }
 
-void Osu::onPlayStart() {
-    m_snd_change_check_interval_ref->setValue(0.0f);
-
-    if(m_bModAuto || m_bModAutopilot || getSelectedBeatmap()->m_bIsWatchingReplay) {
-        m_bShouldCursorBeVisible = true;
-        env->setCursorVisible(m_bShouldCursorBeVisible);
-    }
-
-    if(getSelectedBeatmap()->getSelectedDifficulty2()->getLocalOffset() != 0)
-        m_notificationOverlay->addNotification(
-            UString::format("Using local beatmap offset (%ld ms)",
-                            getSelectedBeatmap()->getSelectedDifficulty2()->getLocalOffset()),
-            0xffffffff, false, 0.75f);
-
-    m_fQuickSaveTime = 0.0f;  // reset
-
-    updateConfineCursor();
-    updateWindowsKeyDisable();
-
-    RichPresence::onPlayStart();
-}
-
 void Osu::onPlayEnd(bool quit, bool aborted) {
     m_snd_change_check_interval_ref->setValue(m_snd_change_check_interval_ref->getDefaultFloat());
 

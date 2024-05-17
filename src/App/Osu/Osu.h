@@ -81,7 +81,6 @@ class Osu : public App, public MouseListener {
     virtual void onMinimized();
     virtual bool onShutdown();
 
-    void onPlayStart();  // called when a beatmap has successfully started playing
     void onPlayEnd(bool quit = true,
                    bool aborted = false);  // called when a beatmap is finished playing (or the player quit)
 
@@ -345,7 +344,8 @@ class Osu : public App, public MouseListener {
     CWindowManager *m_windowManager;
 
     // replay
-    FinishedScore replay_score;
+    UString watched_user_name;
+    u32 watched_user_id = 0;
 
     // custom
     bool m_bScheduleEndlessModNextBeatmap;

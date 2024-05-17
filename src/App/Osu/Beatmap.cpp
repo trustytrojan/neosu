@@ -571,6 +571,21 @@ void Beatmap::skipEmptySection() {
         m_music->setPositionMS(std::max(m_iNextHitObjectTime - (long)(offset * offsetMultiplier), (long)0));
 
     engine->getSound()->play(osu->getSkin()->getMenuHit());
+
+    if(!bancho.spectators.empty()) {
+        // TODO @kiwec: how does skip work? does client jump to latest time or just skip beginning?
+        //              is signaling skip even necessary?
+        broadcast_spectator_frames();
+
+        Packet packet;
+        packet.id = SPECTATE_FRAMES;
+        write<i32>(&packet, 0);
+        write<u16>(&packet, 0);
+        write<u8>(&packet, LiveReplayBundle::Action::SKIP);
+        write<ScoreFrame>(&packet, ScoreFrame::get());
+        write<u16>(&packet, spectator_sequence++);
+        send_packet(packet);
+    }
 }
 
 void Beatmap::keyPressed1(bool mouse) {
@@ -695,13 +710,35 @@ void Beatmap::deselect() {
     unloadObjects();
 }
 
-bool Beatmap::watch(FinishedScore score, double start_percent) {
-    // Replay is invalid
-    if(score.replay.size() < 3) {
-        return false;
+bool Beatmap::play() {
+    if(start()) {
+        m_bIsWatchingReplay = false;
+        m_bIsPlaying = true;
+        last_spectator_broadcast = engine->getTime();
+
+        RichPresence::onPlayStart();
+        if(!bancho.spectators.empty()) {
+            Packet packet;
+            packet.id = SPECTATE_FRAMES;
+            write<i32>(&packet, 0);
+            write<u16>(&packet, 0);  // 0 frames, we're just signaling map start
+            write<u8>(&packet, LiveReplayBundle::Action::NEW_SONG);
+            write<ScoreFrame>(&packet, ScoreFrame::get());
+            write<u16>(&packet, spectator_sequence++);
+            send_packet(packet);
+        }
+
+        return true;
     }
 
-    osu->replay_score = score;
+    return false;
+}
+
+bool Beatmap::watch(FinishedScore score, double start_percent) {
+    if(score.replay.size() < 3) {
+        // Replay is invalid
+        return false;
+    }
 
     m_bIsPlaying = false;
     m_bIsPaused = false;
@@ -709,17 +746,18 @@ bool Beatmap::watch(FinishedScore score, double start_percent) {
     stopStarCacheLoader();
     unloadObjects();
 
+    osu->watched_user_name = score.playerName.c_str();
+    osu->watched_user_id = score.player_id;
     m_bIsWatchingReplay = true;
 
     osu->getModSelector()->resetMods();
     osu->useMods(&score);
 
-    // Map failed to load
-    if(!play()) {
+    if(!start()) {
+        // Map failed to load
         return false;
     }
 
-    m_bIsWatchingReplay = true;  // play() resets this to false
     spectated_replay = score.replay;
 
     osu->m_songBrowser2->m_bHasSelectedAndIsPlaying = true;
@@ -730,12 +768,10 @@ bool Beatmap::watch(FinishedScore score, double start_percent) {
         seekPercent(start_percent);
     }
 
-    osu->onPlayStart();
-
     return true;
 }
 
-bool Beatmap::play() {
+bool Beatmap::start() {
     if(m_selectedDifficulty2 == NULL) return false;
 
     engine->getSound()->play(osu->m_skin->getMenuHit());
@@ -891,8 +927,22 @@ bool Beatmap::play() {
     m_bIsWaiting = true;
     m_fWaitTime = engine->getTimeReal();
 
-    m_bIsPlaying = true;
-    m_bIsWatchingReplay = false;
+    osu->m_snd_change_check_interval_ref->setValue(0.0f);
+
+    if(osu->m_bModAuto || osu->m_bModAutopilot || m_bIsWatchingReplay) {
+        osu->m_bShouldCursorBeVisible = true;
+        env->setCursorVisible(osu->m_bShouldCursorBeVisible);
+    }
+
+    if(getSelectedDifficulty2()->getLocalOffset() != 0)
+        osu->m_notificationOverlay->addNotification(
+            UString::format("Using local beatmap offset (%ld ms)", getSelectedDifficulty2()->getLocalOffset()),
+            0xffffffff, false, 0.75f);
+
+    osu->m_fQuickSaveTime = 0.0f;  // reset
+
+    osu->updateConfineCursor();
+    osu->updateWindowsKeyDisable();
 
     // NOTE: loading failures are handled dynamically in update(), so temporarily assume everything has worked in here
     return true;
@@ -1499,18 +1549,14 @@ LiveScore::HIT Beatmap::addHitResult(HitObject *hitObject, LiveScore::HIT hit, l
                 addHealth(osu->getScore()->getHealthIncrease(this, returnedHit), true);
                 osu->getScore()->addHitResultComboEnd(returnedHit);
             } else if((comboEndBitmask & 2) == 0) {
-                switch(hit) {
-                    case LiveScore::HIT::HIT_100:
-                        returnedHit = LiveScore::HIT::HIT_100K;
-                        addHealth(osu->getScore()->getHealthIncrease(this, returnedHit), true);
-                        osu->getScore()->addHitResultComboEnd(returnedHit);
-                        break;
-
-                    case LiveScore::HIT::HIT_300:
-                        returnedHit = LiveScore::HIT::HIT_300K;
-                        addHealth(osu->getScore()->getHealthIncrease(this, returnedHit), true);
-                        osu->getScore()->addHitResultComboEnd(returnedHit);
-                        break;
+                if(hit == LiveScore::HIT::HIT_100) {
+                    returnedHit = LiveScore::HIT::HIT_100K;
+                    addHealth(osu->getScore()->getHealthIncrease(this, returnedHit), true);
+                    osu->getScore()->addHitResultComboEnd(returnedHit);
+                } else if(hit == LiveScore::HIT::HIT_300) {
+                    returnedHit = LiveScore::HIT::HIT_300K;
+                    addHealth(osu->getScore()->getHealthIncrease(this, returnedHit), true);
+                    osu->getScore()->addHitResultComboEnd(returnedHit);
                 }
             } else if(hit != LiveScore::HIT::HIT_MISS)
                 addHealth(osu->getScore()->getHealthIncrease(this, LiveScore::HIT::HIT_MU), true);
@@ -3137,6 +3183,25 @@ void Beatmap::update2() {
     }
 }
 
+void Beatmap::broadcast_spectator_frames() {
+    if(bancho.spectators.empty()) return;
+
+    Packet packet;
+    packet.id = SPECTATE_FRAMES;
+    write<i32>(&packet, 0);
+    write<u16>(&packet, frame_batch.size());
+    for(auto batch : frame_batch) {
+        write<LiveReplayFrame>(&packet, batch);
+    }
+    write<u8>(&packet, LiveReplayBundle::Action::NONE);
+    write<ScoreFrame>(&packet, ScoreFrame::get());
+    write<u16>(&packet, spectator_sequence++);
+    send_packet(packet);
+
+    frame_batch.clear();
+    last_spectator_broadcast = engine->getTime();
+}
+
 void Beatmap::write_frame() {
     if(!m_bIsPlaying || m_bFailed || m_bIsWatchingReplay) return;
 
@@ -3155,9 +3220,22 @@ void Beatmap::write_frame() {
         .y = pos.y,
         .key_flags = current_keys,
     });
+
+    frame_batch.push_back(LiveReplayFrame{
+        .key_flags = current_keys,
+        .padding = 0,
+        .mouse_x = pos.x,
+        .mouse_y = pos.y,
+        .time = (i32)m_iCurMusicPos,  // NOTE: might be incorrect
+    });
+
     last_event_time = m_fLastRealTimeForInterpolationDelta;
     last_event_ms = m_iCurMusicPosWithOffsets;
     last_keys = current_keys;
+
+    if(!bancho.spectators.empty() && engine->getTime() > last_spectator_broadcast + 1.0) {
+        broadcast_spectator_frames();
+    }
 }
 
 void Beatmap::onModUpdate(bool rebuildSliderVertexBuffers, bool recomputeDrainRate) {
@@ -3617,6 +3695,19 @@ void Beatmap::saveAndSubmitScore(bool quit) {
 
     osu->getScore()->setIndex(scoreIndex);
     osu->getScore()->setComboFull(maxPossibleCombo);  // used in RankingScreen/UIRankingScreenRankingPanel
+
+    if(!bancho.spectators.empty()) {
+        broadcast_spectator_frames();
+
+        Packet packet;
+        packet.id = SPECTATE_FRAMES;
+        write<i32>(&packet, 0);
+        write<u16>(&packet, 0);
+        write<u8>(&packet, isComplete ? LiveReplayBundle::Action::COMPLETION : LiveReplayBundle::Action::FAIL);
+        write<ScoreFrame>(&packet, ScoreFrame::get());
+        write<u16>(&packet, spectator_sequence++);
+        send_packet(packet);
+    }
 
     // special case: incomplete scores should NEVER show pp, even if auto
     if(!isComplete) {

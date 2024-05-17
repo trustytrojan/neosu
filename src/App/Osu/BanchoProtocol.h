@@ -248,6 +248,58 @@ class Room {
     void pack(Packet *packet);
 };
 
+#pragma pack(push, 1)
+struct ScoreFrame {
+    i32 time;
+    u8 slot_id;
+    u16 num300;
+    u16 num100;
+    u16 num50;
+    u16 num_geki;
+    u16 num_katu;
+    u16 num_miss;
+    i32 total_score;
+    u16 max_combo;
+    u16 current_combo;
+    u8 is_perfect;
+    u8 current_hp;
+    u8 tag;
+    u8 is_scorev2;
+
+    static ScoreFrame get();
+};
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+struct LiveReplayFrame {
+    u8 key_flags;
+    u8 padding;  // was used in very old versions of the game
+    f32 mouse_x;
+    f32 mouse_y;
+    i32 time;
+};
+#pragma pack(pop)
+
+struct LiveReplayBundle {
+    enum Action {
+        NONE = 0,
+        NEW_SONG = 1,
+        SKIP = 2,
+        COMPLETION = 3,
+        FAIL = 4,
+        PAUSE = 5,
+        UNPAUSE = 6,
+        SONG_SELECT = 7,
+        WATCHING_OTHER = 8,
+    };
+
+    Action action;
+    u16 nb_frames;
+    LiveReplayFrame *frames;
+    ScoreFrame score;
+    u16 sequence;
+};
+
 void read_bytes(Packet *packet, u8 *bytes, size_t n);
 u32 read_uleb128(Packet *packet);
 UString read_string(Packet *packet);

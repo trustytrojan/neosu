@@ -89,7 +89,10 @@ void disconnect() {
     auth_header = "";
     free(outgoing.memory);
     outgoing = Packet();
+
     bancho.user_id = 0;
+    bancho.spectators.clear();
+    bancho.fellow_spectators.clear();
     bancho.server_icon_url = "";
     if(bancho.server_icon != nullptr) {
         engine->getResourceManager()->destroyResource(bancho.server_icon);
