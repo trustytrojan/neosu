@@ -409,7 +409,7 @@ void handle_packet(Packet *packet) {
         int protocol_version = read<u32>(packet);
         if(protocol_version != 19) {
             disconnect();
-            bancho.osu->getNotificationOverlay()->addNotification("Server uses an unsupported protocol version.");
+            bancho.osu->getNotificationOverlay()->addNotification("This server may use an unsupported protocol version.");
         }
     } else if(packet->id == MAIN_MENU_ICON) {
         UString icon = read_string(packet);
@@ -496,7 +496,7 @@ void handle_packet(Packet *packet) {
         debugLog("Silenced %s.\n", blocked.toUtf8());
     } else if(packet->id == VERSION_UPDATE_FORCED) {
         disconnect();
-        bancho.osu->getNotificationOverlay()->addNotification("Server uses an unsupported protocol version.");
+        bancho.osu->getNotificationOverlay()->addNotification("This server may use an unsupported protocol version.");
     } else if(packet->id == ACCOUNT_RESTRICTED) {
         bancho.osu->getNotificationOverlay()->addNotification("Account restricted.");
         disconnect();
