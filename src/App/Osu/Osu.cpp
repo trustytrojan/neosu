@@ -171,14 +171,12 @@ Vector2 Osu::osuBaseResolution = Vector2(640.0f, 480.0f);
 
 Shader *flashlight_shader = nullptr;
 
-Osu::Osu(int instanceID) {
+Osu::Osu() {
     srand(time(NULL));
 
     bancho.neosu_version = UString::format("%.2f-" NEOSU_STREAM, osu_version.getFloat());
     bancho.user_agent =
         UString::format("Mozilla/5.0 (compatible; neosu/%s; +" NEOSU_UPDATE_URL "/)", bancho.neosu_version.toUtf8());
-
-    m_iInstanceID = instanceID;
 
     // convar refs
     m_osu_folder_ref = convar->getConVarByName("osu_folder");
@@ -235,7 +233,7 @@ Osu::Osu(int instanceID) {
     env->setCursorVisible(false);
 
     engine->getConsoleBox()->setRequireShiftToActivate(true);
-    if(m_iInstanceID < 2) engine->getMouse()->addListener(this);
+    engine->getMouse()->addListener(this);
 
     convar->getConVarByName("vsync")->setValue(0.0f);
     convar->getConVarByName("fps_max")->setValue(420.0f);
@@ -367,11 +365,9 @@ Osu::Osu(int instanceID) {
     m_updateHandler = new UpdateHandler();
 
     // exec the main config file (this must be right here!)
-    if(m_iInstanceID < 2) {
-        Console::execConfigFile("underride");  // same as override, but for defaults
-        Console::execConfigFile("osu");
-        Console::execConfigFile("override");  // used for quickfixing live builds without redeploying/recompiling
-    }
+    Console::execConfigFile("underride");  // same as override, but for defaults
+    Console::execConfigFile("osu");
+    Console::execConfigFile("override");  // used for quickfixing live builds without redeploying/recompiling
 
     // Initialize sound here so we can load the preferred device from config
     // Avoids initializing the sound device twice, which can take a while depending on the driver
@@ -551,9 +547,8 @@ void Osu::draw(Graphics *g) {
         return;
     }
 
-    // if we are not using the native window resolution, or in vr mode, or multiple instances are active,
-    // draw into the buffer
-    const bool isBufferedDraw = osu_resolution_enabled.getBool() || m_iInstanceID > 0;
+    // if we are not using the native window resolution, draw into the buffer
+    const bool isBufferedDraw = osu_resolution_enabled.getBool();
 
     if(isBufferedDraw) m_backBuffer->enable();
 
@@ -686,50 +681,8 @@ void Osu::draw(Graphics *g) {
         // draw a scaled version from the buffer to the screen
         m_backBuffer->disable();
 
-        // TODO: move this shit to Osu2
         Vector2 offset = Vector2(engine->getGraphics()->getResolution().x / 2 - g_vInternalResolution.x / 2,
                                  engine->getGraphics()->getResolution().y / 2 - g_vInternalResolution.y / 2);
-        if(m_iInstanceID > 0) {
-            const int numHorizontalInstances = 2;
-            const int numVerticalInstances = 1;
-
-            float emptySpaceX =
-                engine->getGraphics()->getResolution().x - numHorizontalInstances * g_vInternalResolution.x;
-            float emptySpaceY =
-                engine->getGraphics()->getResolution().y - numVerticalInstances * g_vInternalResolution.y;
-
-            switch(m_iInstanceID) {
-                case 1:
-                    offset.x = emptySpaceX / 2.0f / numHorizontalInstances;
-                    offset.y = emptySpaceY / 2.0f / numVerticalInstances;
-                    break;
-                case 2:
-                    offset.x = emptySpaceX / 2.0f / numHorizontalInstances;
-                    offset.y = emptySpaceY / 2.0f / numVerticalInstances + engine->getGraphics()->getResolution().y / 2;
-                    break;
-                case 3:
-                    offset.x =
-                        emptySpaceX / 2.0f / numHorizontalInstances + engine->getGraphics()->getResolution().x / 2;
-                    offset.y = emptySpaceY / 2.0f / numVerticalInstances;
-                    break;
-                case 4:
-                    offset.x =
-                        emptySpaceX / 2.0f / numHorizontalInstances + engine->getGraphics()->getResolution().x / 2;
-                    offset.y = emptySpaceY / 2.0f / numVerticalInstances + engine->getGraphics()->getResolution().y / 2;
-                    break;
-                case 5:
-                    offset.x =
-                        emptySpaceX / 2.0f / numHorizontalInstances + engine->getGraphics()->getResolution().x / 2;
-                    offset.y = emptySpaceY / 2.0f / numVerticalInstances + engine->getGraphics()->getResolution().y / 2;
-                    break;
-                case 6:
-                    offset.x =
-                        emptySpaceX / 2.0f / numHorizontalInstances + engine->getGraphics()->getResolution().x / 2;
-                    offset.y = emptySpaceY / 2.0f / numVerticalInstances + engine->getGraphics()->getResolution().y / 2;
-                    break;
-            }
-        }
-
         g->setBlending(false);
         if(osu_letterboxing.getBool()) {
             m_backBuffer->draw(g, offset.x * (1.0f + osu_letterboxing_offset_x.getFloat()),
@@ -932,12 +885,9 @@ void Osu::update() {
     }
     if(m_bToggleUserStatsScreenScheduled) {
         m_bToggleUserStatsScreenScheduled = false;
+        m_userStatsScreen->setVisible(true);
 
-        if(m_iInstanceID < 2) {
-            m_userStatsScreen->setVisible(true);
-
-            if(m_songBrowser2 != NULL && m_songBrowser2->isVisible()) m_songBrowser2->setVisible(false);
-        }
+        if(m_songBrowser2 != NULL && m_songBrowser2->isVisible()) m_songBrowser2->setVisible(false);
     }
     if(m_bToggleChangelogScheduled) {
         m_bToggleChangelogScheduled = false;
@@ -954,7 +904,7 @@ void Osu::update() {
     // handle cursor visibility if outside of internal resolution
     // TODO: not a critical bug, but the real cursor gets visible way too early if sensitivity is > 1.0f, due to this
     // using scaled/offset getMouse()->getPos()
-    if(osu_resolution_enabled.getBool() && m_iInstanceID < 1) {
+    if(osu_resolution_enabled.getBool()) {
         McRect internalWindow = McRect(0, 0, g_vInternalResolution.x, g_vInternalResolution.y);
         bool cursorVisible = env->isCursorVisible();
         if(!internalWindow.contains(engine->getMouse()->getPos())) {
@@ -1739,11 +1689,7 @@ void Osu::onPlayEnd(bool quit, bool aborted) {
     // When playing in multiplayer, screens are toggled in Room
     if(!bancho.is_playing_a_multi_map()) {
         if(quit) {
-            if(m_iInstanceID < 2) {
-                toggleSongBrowser();
-            } else {
-                m_mainMenu->setVisible(true);
-            }
+            toggleSongBrowser();
         } else {
             m_rankingScreen->setVisible(true);
         }
@@ -1851,33 +1797,30 @@ void Osu::onResolutionChanged(Vector2 newResolution) {
 
     const float prevUIScale = getUIScale(this);
 
-    if(m_iInstanceID < 1) {
-        if(!osu_resolution_enabled.getBool())
-            g_vInternalResolution = newResolution;
-        else if(!engine->isMinimized())  // if we just got minimized, ignore the resolution change (for the internal
+    if(!osu_resolution_enabled.getBool()) {
+        g_vInternalResolution = newResolution;
+    } else if(!engine->isMinimized()) {  // if we just got minimized, ignore the resolution change (for the internal
                                          // stuff)
-        {
-            // clamp upwards to internal resolution (osu_resolution)
-            if(g_vInternalResolution.x < m_vInternalResolution.x) g_vInternalResolution.x = m_vInternalResolution.x;
-            if(g_vInternalResolution.y < m_vInternalResolution.y) g_vInternalResolution.y = m_vInternalResolution.y;
+        // clamp upwards to internal resolution (osu_resolution)
+        if(g_vInternalResolution.x < m_vInternalResolution.x) g_vInternalResolution.x = m_vInternalResolution.x;
+        if(g_vInternalResolution.y < m_vInternalResolution.y) g_vInternalResolution.y = m_vInternalResolution.y;
 
-            // clamp downwards to engine resolution
-            if(newResolution.x < g_vInternalResolution.x) g_vInternalResolution.x = newResolution.x;
-            if(newResolution.y < g_vInternalResolution.y) g_vInternalResolution.y = newResolution.y;
+        // clamp downwards to engine resolution
+        if(newResolution.x < g_vInternalResolution.x) g_vInternalResolution.x = newResolution.x;
+        if(newResolution.y < g_vInternalResolution.y) g_vInternalResolution.y = newResolution.y;
 
-            // disable internal resolution on specific conditions
-            bool windowsBorderlessHackCondition =
-                (env->getOS() == Environment::OS::OS_WINDOWS && env->isFullscreen() &&
-                 env->isFullscreenWindowedBorderless() &&
-                 (int)g_vInternalResolution.y == (int)env->getNativeScreenSize().y);  // HACKHACK
-            if(((int)g_vInternalResolution.x == engine->getScreenWidth() &&
-                (int)g_vInternalResolution.y == engine->getScreenHeight()) ||
-               !env->isFullscreen() || windowsBorderlessHackCondition) {
-                debugLog("Internal resolution == Engine resolution || !Fullscreen, disabling resampler (%i, %i)\n",
-                         (int)(g_vInternalResolution == engine->getScreenSize()), (int)(!env->isFullscreen()));
-                osu_resolution_enabled.setValue(0.0f);
-                g_vInternalResolution = engine->getScreenSize();
-            }
+        // disable internal resolution on specific conditions
+        bool windowsBorderlessHackCondition =
+            (env->getOS() == Environment::OS::OS_WINDOWS && env->isFullscreen() &&
+             env->isFullscreenWindowedBorderless() &&
+             (int)g_vInternalResolution.y == (int)env->getNativeScreenSize().y);  // HACKHACK
+        if(((int)g_vInternalResolution.x == engine->getScreenWidth() &&
+            (int)g_vInternalResolution.y == engine->getScreenHeight()) ||
+           !env->isFullscreen() || windowsBorderlessHackCondition) {
+            debugLog("Internal resolution == Engine resolution || !Fullscreen, disabling resampler (%i, %i)\n",
+                     (int)(g_vInternalResolution == engine->getScreenSize()), (int)(!env->isFullscreen()));
+            osu_resolution_enabled.setValue(0.0f);
+            g_vInternalResolution = engine->getScreenSize();
         }
     }
 
@@ -1916,7 +1859,7 @@ void Osu::onDPIChanged() {
 }
 
 void Osu::rebuildRenderTargets() {
-    debugLog("Osu(%i)::rebuildRenderTargets: %fx%f\n", m_iInstanceID, g_vInternalResolution.x, g_vInternalResolution.y);
+    debugLog("Osu::rebuildRenderTargets: %fx%f\n", g_vInternalResolution.x, g_vInternalResolution.y);
 
     m_backBuffer->rebuild(0, 0, g_vInternalResolution.x, g_vInternalResolution.y);
 
@@ -2188,8 +2131,6 @@ void Osu::onLetterboxingChange(UString oldValue, UString newValue) {
 
 void Osu::updateConfineCursor() {
     if(debug->getBool()) debugLog("Osu::updateConfineCursor()\n");
-
-    if(m_iInstanceID > 0) return;
 
     if((osu_confine_cursor_fullscreen.getBool() && env->isFullscreen()) ||
        (osu_confine_cursor_windowed.getBool() && !env->isFullscreen()) ||

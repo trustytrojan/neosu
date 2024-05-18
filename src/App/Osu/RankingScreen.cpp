@@ -644,8 +644,8 @@ void RankingScreen::onBack() {
         engine->getSound()->stop(m_osu->getSkin()->getApplause());
 
     setVisible(false);
-    if(!bancho.is_in_a_multi_room()) {
-        if(m_osu->m_songBrowser2 != NULL && m_osu->m_iInstanceID < 2) m_osu->m_songBrowser2->setVisible(true);
+    if(!bancho.is_in_a_multi_room() && m_osu->m_songBrowser2 != NULL) {
+        m_osu->m_songBrowser2->setVisible(true);
     }
 }
 

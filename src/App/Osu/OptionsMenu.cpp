@@ -2438,11 +2438,7 @@ void OptionsMenu::onSkinSelect() {
 }
 
 void OptionsMenu::onSkinSelect2(UString skinName, int id) {
-    if(m_osu->getInstanceID() < 1)
-        m_osu_skin_ref->setValue(skinName);
-    else
-        m_osu->setSkin(skinName);
-
+    m_osu_skin_ref->setValue(skinName);
     updateSkinNameLabel();
 }
 

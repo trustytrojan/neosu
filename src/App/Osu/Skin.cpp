@@ -1153,14 +1153,16 @@ Color Skin::getComboColorForCounter(int i, int offset) {
 void Skin::setBeatmapComboColors(std::vector<Color> colors) { m_beatmapComboColors = colors; }
 
 void Skin::playHitCircleSound(int sampleType, float pan) {
-    if(m_iSampleVolume <= 0 || (m_osu->getInstanceID() > 0 && m_osu->getInstanceID() != osu2_sound_source_id.getInt()))
+    if(m_iSampleVolume <= 0) {
         return;
+    }
 
     if(!osu_sound_panning.getBool() || (m_osu_mod_fposu_ref->getBool() && !osu_mod_fposu_sound_panning.getBool()) ||
-       (GameRules::osu_mod_fps.getBool() && !osu_mod_fps_sound_panning.getBool()))
+       (GameRules::osu_mod_fps.getBool() && !osu_mod_fps_sound_panning.getBool())) {
         pan = 0.0f;
-    else
+    } else {
         pan *= osu_sound_panning_multiplier.getFloat();
+    }
 
     int actualSampleSet = m_iSampleSet;
     if(osu_skin_force_hitsound_sample_set.getInt() > 0) actualSampleSet = osu_skin_force_hitsound_sample_set.getInt();
@@ -1191,14 +1193,14 @@ void Skin::playHitCircleSound(int sampleType, float pan) {
 }
 
 void Skin::playSliderTickSound(float pan) {
-    if(m_iSampleVolume <= 0 || (m_osu->getInstanceID() > 0 && m_osu->getInstanceID() != osu2_sound_source_id.getInt()))
-        return;
+    if(m_iSampleVolume <= 0) return;
 
     if(!osu_sound_panning.getBool() || (m_osu_mod_fposu_ref->getBool() && !osu_mod_fposu_sound_panning.getBool()) ||
-       (GameRules::osu_mod_fps.getBool() && !osu_mod_fps_sound_panning.getBool()))
+       (GameRules::osu_mod_fps.getBool() && !osu_mod_fps_sound_panning.getBool())) {
         pan = 0.0f;
-    else
+    } else {
         pan *= osu_sound_panning_multiplier.getFloat();
+    }
 
     switch(m_iSampleSet) {
         case 3:
@@ -1214,13 +1216,12 @@ void Skin::playSliderTickSound(float pan) {
 }
 
 void Skin::playSliderSlideSound(float pan) {
-    if((m_osu->getInstanceID() > 0 && m_osu->getInstanceID() != osu2_sound_source_id.getInt())) return;
-
     if(!osu_sound_panning.getBool() || (m_osu_mod_fposu_ref->getBool() && !osu_mod_fposu_sound_panning.getBool()) ||
-       (GameRules::osu_mod_fps.getBool() && !osu_mod_fps_sound_panning.getBool()))
+       (GameRules::osu_mod_fps.getBool() && !osu_mod_fps_sound_panning.getBool())) {
         pan = 0.0f;
-    else
+    } else {
         pan *= osu_sound_panning_multiplier.getFloat();
+    }
 
     switch(m_iSampleSet) {
         case 3:
@@ -1254,16 +1255,15 @@ void Skin::playSliderSlideSound(float pan) {
 }
 
 void Skin::playSpinnerSpinSound() {
-    if((m_osu->getInstanceID() > 0 && m_osu->getInstanceID() != osu2_sound_source_id.getInt())) return;
-
-    if(!m_spinnerSpinSound->isPlaying()) engine->getSound()->play(m_spinnerSpinSound);
+    if(!m_spinnerSpinSound->isPlaying()) {
+        engine->getSound()->play(m_spinnerSpinSound);
+    }
 }
 
 void Skin::playSpinnerBonusSound() {
-    if(m_iSampleVolume <= 0 || (m_osu->getInstanceID() > 0 && m_osu->getInstanceID() != osu2_sound_source_id.getInt()))
-        return;
-
-    engine->getSound()->play(m_spinnerBonus);
+    if(m_iSampleVolume > 0) {
+        engine->getSound()->play(m_spinnerBonus);
+    }
 }
 
 void Skin::stopSliderSlideSound(int sampleSet) {

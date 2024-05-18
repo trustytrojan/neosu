@@ -64,7 +64,7 @@ class Osu : public App, public MouseListener {
 
     static bool findIgnoreCase(const std::string &haystack, const std::string &needle);
 
-    Osu(int instanceID = 0);
+    Osu();
     virtual ~Osu();
 
     virtual void draw(Graphics *g);
@@ -105,8 +105,6 @@ class Osu : public App, public MouseListener {
 
     void setSkin(UString skin) { onSkinChange("", skin); }
     void reloadSkin() { onSkinReload(); }
-
-    inline int getInstanceID() const { return m_iInstanceID; }
 
     inline Vector2 getScreenSize() const { return g_vInternalResolution; }
     inline int getScreenWidth() const { return (int)g_vInternalResolution.x; }
@@ -361,7 +359,6 @@ class Osu : public App, public MouseListener {
     // custom
     bool m_bScheduleEndlessModNextBeatmap;
     int m_iMultiplayerClientNumEscPresses;
-    int m_iInstanceID;
     bool m_bWasBossKeyPaused;
     bool m_bSkinLoadScheduled;
     bool m_bSkinLoadWasReload;

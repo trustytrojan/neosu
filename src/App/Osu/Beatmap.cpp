@@ -1644,16 +1644,7 @@ bool Beatmap::canDraw() {
     return true;
 }
 
-bool Beatmap::canUpdate() {
-    if(!m_bIsPlaying && !m_bIsPaused && !m_bContinueScheduled) return false;
-
-    if(m_osu->getInstanceID() > 1) {
-        m_music = engine->getResourceManager()->getSound("OSU_BEATMAP_MUSIC");
-        if(m_music == NULL) return false;
-    }
-
-    return true;
-}
+bool Beatmap::canUpdate() { return m_bIsPlaying || m_bIsPaused || m_bContinueScheduled; }
 
 void Beatmap::handlePreviewPlay() {
     if(m_music == nullptr) return;
@@ -1698,11 +1689,6 @@ void Beatmap::handlePreviewPlay() {
 }
 
 void Beatmap::loadMusic(bool stream, bool prescan) {
-    if(m_osu->getInstanceID() > 1) {
-        m_music = engine->getResourceManager()->getSound("OSU_BEATMAP_MUSIC");
-        return;
-    }
-
     stream = stream || m_bForceStreamPlayback;
     m_iResourceLoadUpdateDelayHack = 0;
 
@@ -1726,10 +1712,7 @@ void Beatmap::loadMusic(bool stream, bool prescan) {
 }
 
 void Beatmap::unloadMusic() {
-    if(m_osu->getInstanceID() < 2) {
-        engine->getResourceManager()->destroyResource(m_music);
-    }
-
+    engine->getResourceManager()->destroyResource(m_music);
     m_music = nullptr;
 }
 

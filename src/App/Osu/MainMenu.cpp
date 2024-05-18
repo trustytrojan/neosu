@@ -1353,8 +1353,6 @@ void MainMenu::onPlayButtonPressed() {
     m_bMainMenuAnimFadeToFriendForNextAnim = false;
     m_bMainMenuAnimFriendScheduled = false;
 
-    if(m_osu->getInstanceID() > 1) return;
-
     m_osu->toggleSongBrowser();
 }
 
@@ -1379,8 +1377,6 @@ void MainMenu::onExitButtonPressed() {
 }
 
 void MainMenu::onPausePressed() {
-    if(m_osu->getInstanceID() > 1) return;
-
     if(m_osu->getSelectedBeatmap()->isPreviewMusicPlaying()) {
         m_osu->getSelectedBeatmap()->pausePreviewMusic();
     } else {
@@ -1392,8 +1388,6 @@ void MainMenu::onPausePressed() {
 }
 
 void MainMenu::onUpdatePressed() {
-    if(m_osu->getInstanceID() > 1) return;
-
     if(m_osu->getUpdateHandler()->getStatus() == UpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION)
         engine->restart();
     else if(m_osu->getUpdateHandler()->getStatus() == UpdateHandler::STATUS::STATUS_ERROR)
@@ -1401,8 +1395,6 @@ void MainMenu::onUpdatePressed() {
 }
 
 void MainMenu::onVersionPressed() {
-    if(m_osu->getInstanceID() > 1) return;
-
     m_bDrawVersionNotificationArrow = false;
     writeVersionFile();
     m_osu->toggleChangelog();
