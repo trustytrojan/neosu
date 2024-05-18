@@ -10,9 +10,9 @@
 #include "Osu.h"
 #include "UIContextMenu.h"
 
-UIUserContextMenuScreen::UIUserContextMenuScreen(Osu *osu) : OsuScreen(osu) {
+UIUserContextMenuScreen::UIUserContextMenuScreen() : OsuScreen() {
     m_bVisible = true;
-    menu = new UIContextMenu(osu);
+    menu = new UIContextMenu();
     addBaseUIElement(menu);
 }
 
@@ -105,10 +105,10 @@ void UIUserContextMenuScreen::on_action(UString text, int user_action) {
         send_packet(packet);  // kick by locking the slot
         send_packet(packet);  // unlock the slot
     } else if(user_action == START_CHAT) {
-        m_osu->m_chat->addChannel(user_info->name, true);
+        osu->m_chat->addChannel(user_info->name, true);
     } else if(user_action == VIEW_PROFILE) {
         auto url = UString::format("https://osu.%s/u/%d", bancho.endpoint.toUtf8(), m_user_id);
-        m_osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
+        osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
         env->openURLInDefaultBrowser(url.toUtf8());
     } else if(user_action == UA_ADD_FRIEND) {
         Packet packet;
@@ -131,11 +131,11 @@ void UIUserContextMenuScreen::on_action(UString text, int user_action) {
     menu->setVisible(false);
 }
 
-UIUserLabel::UIUserLabel(Osu *osu, u32 user_id, UString username) : CBaseUILabel() {
+UIUserLabel::UIUserLabel(u32 user_id, UString username) : CBaseUILabel() {
     m_user_id = user_id;
     setText(username);
     setDrawFrame(false);
     setDrawBackground(false);
 }
 
-void UIUserLabel::onMouseUpInside() { bancho.osu->m_user_actions->open(m_user_id); }
+void UIUserLabel::onMouseUpInside() { osu->m_user_actions->open(m_user_id); }

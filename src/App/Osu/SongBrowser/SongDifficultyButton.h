@@ -5,8 +5,8 @@ class ConVar;
 
 class SongDifficultyButton : public SongButton {
    public:
-    SongDifficultyButton(Osu *osu, SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu,
-                         float xPos, float yPos, float xSize, float ySize, UString name, DatabaseBeatmap *diff2,
+    SongDifficultyButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos,
+                         float yPos, float xSize, float ySize, UString name, DatabaseBeatmap *diff2,
                          SongButton *parentSongButton);
     virtual ~SongDifficultyButton();
 

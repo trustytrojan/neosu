@@ -1,10 +1,3 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		context menu, dropdown style
-//
-// $NoKeywords: $
-//===============================================================================//
-
 #include "UIContextMenu.h"
 
 #include "AnimationHandler.h"
@@ -17,10 +10,9 @@
 #include "Osu.h"
 #include "TooltipOverlay.h"
 
-UIContextMenuButton::UIContextMenuButton(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name,
-                                         UString text, int id)
+UIContextMenuButton::UIContextMenuButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text,
+                                         int id)
     : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {
-    m_osu = osu;
     m_iID = id;
 }
 
@@ -29,13 +21,13 @@ void UIContextMenuButton::mouse_update(bool *propagate_clicks) {
     CBaseUIButton::mouse_update(propagate_clicks);
 
     if(isMouseInside() && m_tooltipTextLines.size() > 0) {
-        m_osu->getTooltipOverlay()->begin();
+        osu->getTooltipOverlay()->begin();
         {
             for(int i = 0; i < m_tooltipTextLines.size(); i++) {
-                m_osu->getTooltipOverlay()->addLine(m_tooltipTextLines[i]);
+                osu->getTooltipOverlay()->addLine(m_tooltipTextLines[i]);
             }
         }
-        m_osu->getTooltipOverlay()->end();
+        osu->getTooltipOverlay()->end();
     }
 }
 
@@ -46,10 +38,8 @@ UIContextMenuTextbox::UIContextMenuTextbox(float xPos, float yPos, float xSize, 
     m_iID = id;
 }
 
-UIContextMenu::UIContextMenu(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name,
-                             CBaseUIScrollView *parent)
+UIContextMenu::UIContextMenu(float xPos, float yPos, float xSize, float ySize, UString name, CBaseUIScrollView *parent)
     : CBaseUIScrollView(xPos, yPos, xSize, ySize, name) {
-    m_osu = osu;
     m_parent = parent;
 
     setPos(xPos, yPos);
@@ -185,16 +175,16 @@ void UIContextMenu::begin(int minWidth, bool bigStyle) {
 }
 
 UIContextMenuButton *UIContextMenu::addButton(UString text, int id) {
-    const int buttonHeight = 30 * Osu::getUIScale(m_osu) * (m_bBigStyle ? 1.27f : 1.0f);
-    const int margin = 9 * Osu::getUIScale(m_osu);
+    const int buttonHeight = 30 * Osu::getUIScale() * (m_bBigStyle ? 1.27f : 1.0f);
+    const int margin = 9 * Osu::getUIScale();
 
     UIContextMenuButton *button =
-        new UIContextMenuButton(m_osu, margin, m_iYCounter + margin, 0, buttonHeight, text, text, id);
+        new UIContextMenuButton(margin, m_iYCounter + margin, 0, buttonHeight, text, text, id);
     {
-        if(m_bBigStyle) button->setFont(m_osu->getSubTitleFont());
+        if(m_bBigStyle) button->setFont(osu->getSubTitleFont());
 
         button->setClickCallback(fastdelegate::MakeDelegate(this, &UIContextMenu::onClick));
-        button->setWidthToContent(3 * Osu::getUIScale(m_osu));
+        button->setWidthToContent(3 * Osu::getUIScale());
         button->setTextLeft(true);
         button->setDrawFrame(false);
         button->setDrawBackground(false);
@@ -213,14 +203,14 @@ UIContextMenuButton *UIContextMenu::addButton(UString text, int id) {
 }
 
 UIContextMenuTextbox *UIContextMenu::addTextbox(UString text, int id) {
-    const int buttonHeight = 30 * Osu::getUIScale(m_osu) * (m_bBigStyle ? 1.27f : 1.0f);
-    const int margin = 9 * Osu::getUIScale(m_osu);
+    const int buttonHeight = 30 * Osu::getUIScale() * (m_bBigStyle ? 1.27f : 1.0f);
+    const int margin = 9 * Osu::getUIScale();
 
     UIContextMenuTextbox *textbox = new UIContextMenuTextbox(margin, m_iYCounter + margin, 0, buttonHeight, text, id);
     {
         textbox->setText(text);
 
-        if(m_bBigStyle) textbox->setFont(m_osu->getSubTitleFont());
+        if(m_bBigStyle) textbox->setFont(osu->getSubTitleFont());
 
         textbox->setActive(true);
     }
@@ -239,7 +229,7 @@ void UIContextMenu::end(bool invertAnimation, bool clampUnderflowAndOverflowAndE
     m_bInvertAnimation = invertAnimation;
     m_bClampUnderflowAndOverflowAndEnableScrollingIfNecessary = clampUnderflowAndOverflowAndEnableScrollingIfNecessary;
 
-    const int margin = 9 * Osu::getUIScale(m_osu);
+    const int margin = 9 * Osu::getUIScale();
 
     const std::vector<CBaseUIElement *> &elements = getContainer()->getElements();
     for(size_t i = 0; i < elements.size(); i++) {
@@ -261,8 +251,8 @@ void UIContextMenu::end(bool invertAnimation, bool clampUnderflowAndOverflowAndE
                 setVerticalScrolling(true);
             }
 
-            if(m_vPos.y + m_vSize.y > m_osu->getScreenHeight()) {
-                const float overflow = std::abs(m_vPos.y + m_vSize.y - m_osu->getScreenHeight());
+            if(m_vPos.y + m_vSize.y > osu->getScreenHeight()) {
+                const float overflow = std::abs(m_vPos.y + m_vSize.y - osu->getScreenHeight());
 
                 setSizeY(m_vSize.y - overflow - 1);
 
@@ -315,16 +305,16 @@ void UIContextMenu::onHitEnter(UIContextMenuTextbox *textbox) {
 }
 
 void UIContextMenu::clampToBottomScreenEdge(UIContextMenu *menu) {
-    if(menu->getRelPos().y + menu->getSize().y > menu->m_osu->getScreenHeight()) {
-        int newRelPosY = menu->m_osu->getScreenHeight() - menu->getSize().y - 1;
+    if(menu->getRelPos().y + menu->getSize().y > osu->getScreenHeight()) {
+        int newRelPosY = osu->getScreenHeight() - menu->getSize().y - 1;
         menu->setRelPosY(newRelPosY);
         menu->setPosY(newRelPosY);
     }
 }
 
 void UIContextMenu::clampToRightScreenEdge(UIContextMenu *menu) {
-    if(menu->getRelPos().x + menu->getSize().x > menu->m_osu->getScreenWidth()) {
-        const int newRelPosX = menu->m_osu->getScreenWidth() - menu->getSize().x - 1;
+    if(menu->getRelPos().x + menu->getSize().x > osu->getScreenWidth()) {
+        const int newRelPosX = osu->getScreenWidth() - menu->getSize().x - 1;
         menu->setRelPosX(newRelPosX);
         menu->setPosX(newRelPosX);
     }

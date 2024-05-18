@@ -31,7 +31,7 @@ struct RoomUIElement : CBaseUIScrollView {
 
 class Lobby : public OsuScreen {
    public:
-    Lobby(Osu* osu);
+    Lobby();
 
     virtual void onKeyDown(KeyboardEvent& e);
     virtual void onKeyUp(KeyboardEvent& e);

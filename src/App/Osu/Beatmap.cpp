@@ -1,10 +1,3 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		beatmap loader
-//
-// $NoKeywords: $osubm
-//===============================================================================//
-
 #include "Beatmap.h"
 
 #include <string.h>
@@ -270,7 +263,7 @@ ConVar osu_pp_live_timeout(
     "osu_pp_live_timeout", 1.0f, FCVAR_DEFAULT,
     "show message that we're still calculating stars after this many seconds, on the first start of the beatmap");
 
-Beatmap::Beatmap(Osu *osu) {
+Beatmap::Beatmap() {
     // convar refs
     m_osu_pvs = &osu_pvs;
     m_osu_draw_hitobjects_ref = &osu_draw_hitobjects;
@@ -302,8 +295,6 @@ Beatmap::Beatmap(Osu *osu) {
     m_osu_slider_scorev2_ref = convar->getConVarByName("osu_slider_scorev2");
 
     // vars
-    m_osu = osu;
-
     m_bIsPlaying = false;
     m_bIsPaused = false;
     m_bIsWaiting = false;
@@ -458,11 +449,11 @@ void Beatmap::drawBackground(Graphics *g) {
 
     // draw beatmap background image
     {
-        Image *backgroundImage = m_osu->getBackgroundImageHandler()->getLoadBackgroundImage(m_selectedDifficulty2);
+        Image *backgroundImage = osu->getBackgroundImageHandler()->getLoadBackgroundImage(m_selectedDifficulty2);
         if(osu_draw_beatmap_background_image.getBool() && backgroundImage != NULL &&
            (osu_background_dim.getFloat() < 1.0f || m_fBreakBackgroundFade > 0.0f)) {
-            const float scale = Osu::getImageScaleToFillResolution(backgroundImage, m_osu->getScreenSize());
-            const Vector2 centerTrans = (m_osu->getScreenSize() / 2);
+            const float scale = Osu::getImageScaleToFillResolution(backgroundImage, osu->getScreenSize());
+            const Vector2 centerTrans = (osu->getScreenSize() / 2);
 
             const float backgroundFadeDimMultiplier =
                 clamp<float>(1.0f - (osu_background_dim.getFloat() - 0.3f), 0.0f, 1.0f);
@@ -490,16 +481,16 @@ void Beatmap::drawBackground(Graphics *g) {
         const short blue = clamp<float>(brightness * osu_background_color_b.getFloat(), 0.0f, 255.0f);
         const short alpha = clamp<float>(1.0f - m_fBreakBackgroundFade, 0.0f, 1.0f) * 255.0f;
         g->setColor(COLOR(alpha, red, green, blue));
-        g->fillRect(0, 0, m_osu->getScreenWidth(), m_osu->getScreenHeight());
+        g->fillRect(0, 0, osu->getScreenWidth(), osu->getScreenHeight());
     }
 
     // draw scorebar-bg
     if(m_osu_draw_hud_ref->getBool() && m_osu_draw_scorebarbg_ref->getBool() &&
        (!m_osu_mod_fposu_ref->getBool() ||
         (!m_fposu_draw_scorebarbg_on_top_ref->getBool())))  // NOTE: special case for FPoSu
-        m_osu->getHUD()->drawScorebarBg(
+        osu->getHUD()->drawScorebarBg(
             g, m_osu_hud_scorebar_hide_during_breaks_ref->getBool() ? (1.0f - m_fBreakBackgroundFade) : 1.0f,
-            m_osu->getHUD()->getScoreBarBreakAnim());
+            osu->getHUD()->getScoreBarBreakAnim());
 
     if(Osu::debug->getBool()) {
         int y = 50;
@@ -548,7 +539,7 @@ void Beatmap::drawBackground(Graphics *g) {
 
 void Beatmap::onKeyDown(KeyboardEvent &e) {
     if(e == KEY_O && engine->getKeyboard()->isControlDown()) {
-        m_osu->toggleOptionsMenu();
+        osu->toggleOptionsMenu();
         e.consume();
     }
 }
@@ -556,10 +547,10 @@ void Beatmap::onKeyDown(KeyboardEvent &e) {
 void Beatmap::skipEmptySection() {
     if(!m_bIsInSkippableSection) return;
     m_bIsInSkippableSection = false;
-    m_osu->m_chat->updateVisibility();
+    osu->m_chat->updateVisibility();
 
     const float offset = 2500.0f;
-    float offsetMultiplier = m_osu->getSpeedMultiplier();
+    float offsetMultiplier = osu->getSpeedMultiplier();
     {
         // only compensate if not within "normal" osu mod range (would make the game feel too different regarding time
         // from skip until first hitobject)
@@ -579,13 +570,13 @@ void Beatmap::skipEmptySection() {
     else
         m_music->setPositionMS(std::max(m_iNextHitObjectTime - (long)(offset * offsetMultiplier), (long)0));
 
-    engine->getSound()->play(m_osu->getSkin()->getMenuHit());
+    engine->getSound()->play(osu->getSkin()->getMenuHit());
 }
 
 void Beatmap::keyPressed1(bool mouse) {
     if(m_bIsWatchingReplay) return;
 
-    if(m_bContinueScheduled) m_bClickedContinue = !m_osu->getModSelector()->isMouseInside();
+    if(m_bContinueScheduled) m_bClickedContinue = !osu->getModSelector()->isMouseInside();
 
     if(osu_mod_fullalternate.getBool() && m_bPrevKeyWasKey1) {
         if(m_iCurrentHitObjectIndex > m_iAllowAnyNextKeyForFullAlternateUntilHitObjectIndex) {
@@ -595,16 +586,16 @@ void Beatmap::keyPressed1(bool mouse) {
     }
 
     // key overlay & counter
-    m_osu->getHUD()->animateInputoverlay(mouse ? 3 : 1, true);
+    osu->getHUD()->animateInputoverlay(mouse ? 3 : 1, true);
 
     if(m_bFailed) return;
 
-    if(!m_bInBreak && !m_bIsInSkippableSection && m_bIsPlaying) m_osu->getScore()->addKeyCount(mouse ? 3 : 1);
+    if(!m_bInBreak && !m_bIsInSkippableSection && m_bIsPlaying) osu->getScore()->addKeyCount(mouse ? 3 : 1);
 
     m_bPrevKeyWasKey1 = true;
     m_bClick1Held = true;
 
-    if((!m_osu->getModAuto() && !m_osu->getModRelax()) || !osu_auto_and_relax_block_user_input.getBool())
+    if((!osu->getModAuto() && !osu->getModRelax()) || !osu_auto_and_relax_block_user_input.getBool())
         m_clicks.push_back(Click{
             .tms = m_iCurMusicPosWithOffsets,
             .pos = getCursorPos(),
@@ -620,7 +611,7 @@ void Beatmap::keyPressed1(bool mouse) {
 void Beatmap::keyPressed2(bool mouse) {
     if(m_bIsWatchingReplay) return;
 
-    if(m_bContinueScheduled) m_bClickedContinue = !m_osu->getModSelector()->isMouseInside();
+    if(m_bContinueScheduled) m_bClickedContinue = !osu->getModSelector()->isMouseInside();
 
     if(osu_mod_fullalternate.getBool() && !m_bPrevKeyWasKey1) {
         if(m_iCurrentHitObjectIndex > m_iAllowAnyNextKeyForFullAlternateUntilHitObjectIndex) {
@@ -630,16 +621,16 @@ void Beatmap::keyPressed2(bool mouse) {
     }
 
     // key overlay & counter
-    m_osu->getHUD()->animateInputoverlay(mouse ? 4 : 2, true);
+    osu->getHUD()->animateInputoverlay(mouse ? 4 : 2, true);
 
     if(m_bFailed) return;
 
-    if(!m_bInBreak && !m_bIsInSkippableSection && m_bIsPlaying) m_osu->getScore()->addKeyCount(mouse ? 4 : 2);
+    if(!m_bInBreak && !m_bIsInSkippableSection && m_bIsPlaying) osu->getScore()->addKeyCount(mouse ? 4 : 2);
 
     m_bPrevKeyWasKey1 = false;
     m_bClick2Held = true;
 
-    if((!m_osu->getModAuto() && !m_osu->getModRelax()) || !osu_auto_and_relax_block_user_input.getBool())
+    if((!osu->getModAuto() && !osu->getModRelax()) || !osu_auto_and_relax_block_user_input.getBool())
         m_clicks.push_back(Click{
             .tms = m_iCurMusicPosWithOffsets,
             .pos = getCursorPos(),
@@ -656,8 +647,8 @@ void Beatmap::keyReleased1(bool mouse) {
     if(m_bIsWatchingReplay) return;
 
     // key overlay
-    m_osu->getHUD()->animateInputoverlay(1, false);
-    m_osu->getHUD()->animateInputoverlay(3, false);
+    osu->getHUD()->animateInputoverlay(1, false);
+    osu->getHUD()->animateInputoverlay(3, false);
 
     m_bClick1Held = false;
 
@@ -668,8 +659,8 @@ void Beatmap::keyReleased2(bool mouse) {
     if(m_bIsWatchingReplay) return;
 
     // key overlay
-    m_osu->getHUD()->animateInputoverlay(2, false);
-    m_osu->getHUD()->animateInputoverlay(4, false);
+    osu->getHUD()->animateInputoverlay(2, false);
+    osu->getHUD()->animateInputoverlay(4, false);
 
     m_bClick2Held = false;
 
@@ -710,7 +701,7 @@ bool Beatmap::watch(FinishedScore score, double start_percent) {
         return false;
     }
 
-    bancho.osu->replay_score = score;
+    osu->replay_score = score;
 
     m_bIsPlaying = false;
     m_bIsPaused = false;
@@ -720,8 +711,8 @@ bool Beatmap::watch(FinishedScore score, double start_percent) {
 
     m_bIsWatchingReplay = true;
 
-    bancho.osu->getModSelector()->resetMods();
-    bancho.osu->useMods(&score);
+    osu->getModSelector()->resetMods();
+    osu->useMods(&score);
 
     // Map failed to load
     if(!play()) {
@@ -731,15 +722,15 @@ bool Beatmap::watch(FinishedScore score, double start_percent) {
     m_bIsWatchingReplay = true;  // play() resets this to false
     spectated_replay = score.replay;
 
-    m_osu->m_songBrowser2->m_bHasSelectedAndIsPlaying = true;
-    m_osu->m_songBrowser2->setVisible(false);
+    osu->m_songBrowser2->m_bHasSelectedAndIsPlaying = true;
+    osu->m_songBrowser2->setVisible(false);
 
     // Don't seek to 0%, since it feels really bad to start immediately
     if(start_percent > 0.f) {
         seekPercent(start_percent);
     }
 
-    m_osu->onPlayStart();
+    osu->onPlayStart();
 
     return true;
 }
@@ -747,26 +738,26 @@ bool Beatmap::watch(FinishedScore score, double start_percent) {
 bool Beatmap::play() {
     if(m_selectedDifficulty2 == NULL) return false;
 
-    engine->getSound()->play(m_osu->m_skin->getMenuHit());
+    engine->getSound()->play(osu->m_skin->getMenuHit());
 
-    m_osu->updateMods();
+    osu->updateMods();
 
     // mp hack
     {
-        m_osu->m_mainMenu->setVisible(false);
-        m_osu->m_modSelector->setVisible(false);
-        m_osu->m_optionsMenu->setVisible(false);
-        m_osu->m_pauseMenu->setVisible(false);
+        osu->m_mainMenu->setVisible(false);
+        osu->m_modSelector->setVisible(false);
+        osu->m_optionsMenu->setVisible(false);
+        osu->m_pauseMenu->setVisible(false);
     }
 
     // HACKHACK: stuck key quickfix
     {
-        m_osu->m_bKeyboardKey1Down = false;
-        m_osu->m_bKeyboardKey12Down = false;
-        m_osu->m_bKeyboardKey2Down = false;
-        m_osu->m_bKeyboardKey22Down = false;
-        m_osu->m_bMouseKey1Down = false;
-        m_osu->m_bMouseKey2Down = false;
+        osu->m_bKeyboardKey1Down = false;
+        osu->m_bKeyboardKey12Down = false;
+        osu->m_bKeyboardKey2Down = false;
+        osu->m_bKeyboardKey22Down = false;
+        osu->m_bMouseKey1Down = false;
+        osu->m_bMouseKey2Down = false;
 
         keyReleased1(false);
         keyReleased1(true);
@@ -776,7 +767,7 @@ bool Beatmap::play() {
 
     static const int OSU_COORD_WIDTH = 512;
     static const int OSU_COORD_HEIGHT = 384;
-    m_osu->flashlight_position = Vector2{OSU_COORD_WIDTH / 2, OSU_COORD_HEIGHT / 2};
+    osu->flashlight_position = Vector2{OSU_COORD_WIDTH / 2, OSU_COORD_HEIGHT / 2};
 
     // reset everything, including deleting any previously loaded hitobjects from another diff which we might just have
     // played
@@ -798,7 +789,7 @@ bool Beatmap::play() {
                     debugLog("Osu Error: Couldn't load beatmap metadata %s\n",
                              m_selectedDifficulty2->getFilePath().c_str());
 
-                    if(m_osu != NULL) m_osu->getNotificationOverlay()->addNotification(errorMessage, 0xffff0000);
+                    osu->getNotificationOverlay()->addNotification(errorMessage, 0xffff0000);
                 } break;
 
                 case 2: {
@@ -806,7 +797,7 @@ bool Beatmap::play() {
                     debugLog("Osu Error: Couldn't load beatmap file %s\n",
                              m_selectedDifficulty2->getFilePath().c_str());
 
-                    if(m_osu != NULL) m_osu->getNotificationOverlay()->addNotification(errorMessage, 0xffff0000);
+                    osu->getNotificationOverlay()->addNotification(errorMessage, 0xffff0000);
                 } break;
 
                 case 3: {
@@ -814,14 +805,14 @@ bool Beatmap::play() {
                     debugLog("Osu Error: No timingpoints in beatmap %s\n",
                              m_selectedDifficulty2->getFilePath().c_str());
 
-                    if(m_osu != NULL) m_osu->getNotificationOverlay()->addNotification(errorMessage, 0xffff0000);
+                    osu->getNotificationOverlay()->addNotification(errorMessage, 0xffff0000);
                 } break;
 
                 case 4: {
                     UString errorMessage = "Error: No hitobjects in beatmap :(";
                     debugLog("Osu Error: No hitobjects in beatmap %s\n", m_selectedDifficulty2->getFilePath().c_str());
 
-                    if(m_osu != NULL) m_osu->getNotificationOverlay()->addNotification(errorMessage, 0xffff0000);
+                    osu->getNotificationOverlay()->addNotification(errorMessage, 0xffff0000);
                 } break;
 
                 case 5: {
@@ -829,7 +820,7 @@ bool Beatmap::play() {
                     debugLog("Osu Error: Too many hitobjects in beatmap %s\n",
                              m_selectedDifficulty2->getFilePath().c_str());
 
-                    if(m_osu != NULL) m_osu->getNotificationOverlay()->addNotification(errorMessage, 0xffff0000);
+                    osu->getNotificationOverlay()->addNotification(errorMessage, 0xffff0000);
                 } break;
             }
 
@@ -840,10 +831,10 @@ bool Beatmap::play() {
         m_iRandomSeed = result.randomSeed;
         m_hitobjects = std::move(result.hitobjects);
         m_breaks = std::move(result.breaks);
-        m_osu->getSkin()->setBeatmapComboColors(std::move(result.combocolors));  // update combo colors in skin
+        osu->getSkin()->setBeatmapComboColors(std::move(result.combocolors));  // update combo colors in skin
 
         // load beatmap skin
-        m_osu->getSkin()->loadBeatmapOverride(m_selectedDifficulty2->getFolder());
+        osu->getSkin()->loadBeatmapOverride(m_selectedDifficulty2->getFolder());
     }
 
     // the drawing order is different from the playing/input order.
@@ -998,7 +989,7 @@ void Beatmap::pause(bool quitIfWaiting) {
             }
         }
     } else if(m_bIsPaused && !m_bContinueScheduled) {  // if this is the first time unpausing
-        if(m_osu->getModAuto() || m_osu->getModAutopilot() || m_bIsInSkippableSection || m_bIsWatchingReplay) {
+        if(osu->getModAuto() || osu->getModAutopilot() || m_bIsInSkippableSection || m_bIsWatchingReplay) {
             if(!m_bIsWaiting) {  // only force play() if we were not early waiting
                 engine->getSound()->play(m_music);
             }
@@ -1056,16 +1047,16 @@ void Beatmap::stop(bool quit) {
 
     if(bancho.is_playing_a_multi_map()) {
         if(quit) {
-            m_osu->onPlayEnd(true);
-            m_osu->m_room->ragequit();
+            osu->onPlayEnd(true);
+            osu->m_room->ragequit();
         } else {
-            m_osu->m_room->onClientScoreChange(true);
+            osu->m_room->onClientScoreChange(true);
             Packet packet;
             packet.id = FINISH_MATCH;
             send_packet(packet);
         }
     } else {
-        m_osu->onPlayEnd(quit);
+        osu->onPlayEnd(quit);
     }
 }
 
@@ -1074,7 +1065,7 @@ void Beatmap::fail() {
     if(m_bIsWatchingReplay) return;
 
     // Change behavior of relax mod when online
-    if(bancho.is_online() && m_osu->getModRelax()) return;
+    if(bancho.is_online() && osu->getModRelax()) return;
 
     if(!bancho.is_playing_a_multi_map() && osu_drain_kill.getBool()) {
         engine->getSound()->play(getSkin()->getFailsound());
@@ -1083,20 +1074,19 @@ void Beatmap::fail() {
         m_fFailAnim = 1.0f;
         anim->moveLinear(&m_fFailAnim, 0.0f, osu_fail_time.getFloat(),
                          true);  // trigger music slowdown and delayed menu, see update()
-    } else if(!m_osu->getScore()->isDead()) {
+    } else if(!osu->getScore()->isDead()) {
         anim->deleteExistingAnimation(&m_fHealth2);
         m_fHealth = 0.0;
         m_fHealth2 = 0.0f;
 
         if(osu_drain_kill_notification_duration.getFloat() > 0.0f) {
-            if(!m_osu->getScore()->hasDied())
-                m_osu->getNotificationOverlay()->addNotification("You have failed, but you can keep playing!",
-                                                                 0xffffffff, false,
-                                                                 osu_drain_kill_notification_duration.getFloat());
+            if(!osu->getScore()->hasDied())
+                osu->getNotificationOverlay()->addNotification("You have failed, but you can keep playing!", 0xffffffff,
+                                                               false, osu_drain_kill_notification_duration.getFloat());
         }
     }
 
-    if(!m_osu->getScore()->isDead()) m_osu->getScore()->setDead(true);
+    if(!osu->getScore()->isDead()) osu->getScore()->setDead(true);
 }
 
 void Beatmap::cancelFailing() {
@@ -1187,7 +1177,7 @@ void Beatmap::seekPercent(double percent) {
 
     m_music->setPosition(percent);
     m_music->setVolume(getIdealVolume());
-    m_music->setSpeed(m_osu->getSpeedMultiplier());
+    m_music->setSpeed(osu->getSpeedMultiplier());
 
     resetHitObjects(m_music->getPositionMS());
     resetScore();
@@ -1281,7 +1271,7 @@ int Beatmap::getMostCommonBPM() const {
         if(m_music != NULL)
             return (int)(m_selectedDifficulty2->getMostCommonBPM() * m_music->getSpeed());
         else
-            return (int)(m_selectedDifficulty2->getMostCommonBPM() * m_osu->getSpeedMultiplier());
+            return (int)(m_selectedDifficulty2->getMostCommonBPM() * osu->getSpeedMultiplier());
     } else
         return 0;
 }
@@ -1293,12 +1283,12 @@ float Beatmap::getSpeedMultiplier() const {
         return 1.0f;
 }
 
-Skin *Beatmap::getSkin() const { return m_osu->getSkin(); }
+Skin *Beatmap::getSkin() const { return osu->getSkin(); }
 
 float Beatmap::getRawAR() const {
     if(m_selectedDifficulty2 == NULL) return 5.0f;
 
-    return clamp<float>(m_selectedDifficulty2->getAR() * m_osu->getDifficultyMultiplier(), 0.0f, 10.0f);
+    return clamp<float>(m_selectedDifficulty2->getAR() * osu->getDifficultyMultiplier(), 0.0f, 10.0f);
 }
 
 float Beatmap::getAR() const {
@@ -1313,7 +1303,7 @@ float Beatmap::getAR() const {
     if(osu_ar_override_lock.getBool())
         AR = GameRules::getRawConstantApproachRateForSpeedMultiplier(
             GameRules::getRawApproachTime(AR),
-            (m_music != NULL && m_bIsPlaying ? getSpeedMultiplier() : m_osu->getSpeedMultiplier()));
+            (m_music != NULL && m_bIsPlaying ? getSpeedMultiplier() : osu->getSpeedMultiplier()));
 
     if(osu_mod_artimewarp.getBool() && m_hitobjects.size() > 0) {
         const float percent =
@@ -1334,7 +1324,7 @@ float Beatmap::getAR() const {
 float Beatmap::getCS() const {
     if(m_selectedDifficulty2 == NULL) return 5.0f;
 
-    float CS = clamp<float>(m_selectedDifficulty2->getCS() * m_osu->getCSDifficultyMultiplier(), 0.0f, 10.0f);
+    float CS = clamp<float>(m_selectedDifficulty2->getCS() * osu->getCSDifficultyMultiplier(), 0.0f, 10.0f);
 
     if(osu_cs_override.getFloat() >= 0.0f) CS = osu_cs_override.getFloat();
 
@@ -1359,7 +1349,7 @@ float Beatmap::getCS() const {
 float Beatmap::getHP() const {
     if(m_selectedDifficulty2 == NULL) return 5.0f;
 
-    float HP = clamp<float>(m_selectedDifficulty2->getHP() * m_osu->getDifficultyMultiplier(), 0.0f, 10.0f);
+    float HP = clamp<float>(m_selectedDifficulty2->getHP() * osu->getDifficultyMultiplier(), 0.0f, 10.0f);
     if(osu_hp_override.getFloat() >= 0.0f) HP = osu_hp_override.getFloat();
 
     return HP;
@@ -1368,7 +1358,7 @@ float Beatmap::getHP() const {
 float Beatmap::getRawOD() const {
     if(m_selectedDifficulty2 == NULL) return 5.0f;
 
-    return clamp<float>(m_selectedDifficulty2->getOD() * m_osu->getDifficultyMultiplier(), 0.0f, 10.0f);
+    return clamp<float>(m_selectedDifficulty2->getOD() * osu->getDifficultyMultiplier(), 0.0f, 10.0f);
 }
 
 float Beatmap::getOD() const {
@@ -1379,7 +1369,7 @@ float Beatmap::getOD() const {
     if(osu_od_override_lock.getBool())
         OD = GameRules::getRawConstantOverallDifficultyForSpeedMultiplier(
             GameRules::getRawHitWindow300(OD),
-            (m_music != NULL && m_bIsPlaying ? getSpeedMultiplier() : m_osu->getSpeedMultiplier()));
+            (m_music != NULL && m_bIsPlaying ? getSpeedMultiplier() : osu->getSpeedMultiplier()));
 
     return OD;
 }
@@ -1456,28 +1446,28 @@ LiveScore::HIT Beatmap::addHitResult(HitObject *hitObject, LiveScore::HIT hit, l
         should_write_frame |= (hit == LiveScore::HIT::HIT_MISS_SLIDERBREAK);
 
         // Relax: no keypresses, instead we write on every hitresult
-        if(m_osu->getModRelax()) {
+        if(osu->getModRelax()) {
             should_write_frame |= (hit == LiveScore::HIT::HIT_50);
             should_write_frame |= (hit == LiveScore::HIT::HIT_100);
             should_write_frame |= (hit == LiveScore::HIT::HIT_300);
             should_write_frame |= (hit == LiveScore::HIT::HIT_MISS);
         }
 
-        Beatmap *beatmap = (Beatmap *)m_osu->getSelectedBeatmap();
+        Beatmap *beatmap = (Beatmap *)osu->getSelectedBeatmap();
         if(should_write_frame && !hitErrorBarOnly && beatmap != nullptr) {
             beatmap->write_frame();
         }
     }
 
     // handle perfect & sudden death
-    if(m_osu->getModSS()) {
+    if(osu->getModSS()) {
         if(!hitErrorBarOnly && hit != LiveScore::HIT::HIT_300 && hit != LiveScore::HIT::HIT_300G &&
            hit != LiveScore::HIT::HIT_SLIDER10 && hit != LiveScore::HIT::HIT_SLIDER30 &&
            hit != LiveScore::HIT::HIT_SPINNERSPIN && hit != LiveScore::HIT::HIT_SPINNERBONUS) {
             restart();
             return LiveScore::HIT::HIT_MISS;
         }
-    } else if(m_osu->getModSD()) {
+    } else if(osu->getModSD()) {
         if(hit == LiveScore::HIT::HIT_MISS) {
             if(osu_mod_suddendeath_restart.getBool())
                 restart();
@@ -1492,40 +1482,40 @@ LiveScore::HIT Beatmap::addHitResult(HitObject *hitObject, LiveScore::HIT hit, l
     if(hit == LiveScore::HIT::HIT_MISS) playMissSound();
 
     // score
-    m_osu->getScore()->addHitResult(this, hitObject, hit, delta, ignoreOnHitErrorBar, hitErrorBarOnly, ignoreCombo,
-                                    ignoreScore);
+    osu->getScore()->addHitResult(this, hitObject, hit, delta, ignoreOnHitErrorBar, hitErrorBarOnly, ignoreCombo,
+                                  ignoreScore);
 
     // health
     LiveScore::HIT returnedHit = LiveScore::HIT::HIT_MISS;
     if(!ignoreHealth) {
-        addHealth(m_osu->getScore()->getHealthIncrease(this, hit), true);
+        addHealth(osu->getScore()->getHealthIncrease(this, hit), true);
 
         // geki/katu handling
         if(isEndOfCombo) {
-            const int comboEndBitmask = m_osu->getScore()->getComboEndBitmask();
+            const int comboEndBitmask = osu->getScore()->getComboEndBitmask();
 
             if(comboEndBitmask == 0) {
                 returnedHit = LiveScore::HIT::HIT_300G;
-                addHealth(m_osu->getScore()->getHealthIncrease(this, returnedHit), true);
-                m_osu->getScore()->addHitResultComboEnd(returnedHit);
+                addHealth(osu->getScore()->getHealthIncrease(this, returnedHit), true);
+                osu->getScore()->addHitResultComboEnd(returnedHit);
             } else if((comboEndBitmask & 2) == 0) {
                 switch(hit) {
                     case LiveScore::HIT::HIT_100:
                         returnedHit = LiveScore::HIT::HIT_100K;
-                        addHealth(m_osu->getScore()->getHealthIncrease(this, returnedHit), true);
-                        m_osu->getScore()->addHitResultComboEnd(returnedHit);
+                        addHealth(osu->getScore()->getHealthIncrease(this, returnedHit), true);
+                        osu->getScore()->addHitResultComboEnd(returnedHit);
                         break;
 
                     case LiveScore::HIT::HIT_300:
                         returnedHit = LiveScore::HIT::HIT_300K;
-                        addHealth(m_osu->getScore()->getHealthIncrease(this, returnedHit), true);
-                        m_osu->getScore()->addHitResultComboEnd(returnedHit);
+                        addHealth(osu->getScore()->getHealthIncrease(this, returnedHit), true);
+                        osu->getScore()->addHitResultComboEnd(returnedHit);
                         break;
                 }
             } else if(hit != LiveScore::HIT::HIT_MISS)
-                addHealth(m_osu->getScore()->getHealthIncrease(this, LiveScore::HIT::HIT_MU), true);
+                addHealth(osu->getScore()->getHealthIncrease(this, LiveScore::HIT::HIT_MU), true);
 
-            m_osu->getScore()->setComboEndBitmask(0);
+            osu->getScore()->setComboEndBitmask(0);
         }
     }
 
@@ -1534,10 +1524,10 @@ LiveScore::HIT Beatmap::addHitResult(HitObject *hitObject, LiveScore::HIT hit, l
 
 void Beatmap::addSliderBreak() {
     // handle perfect & sudden death
-    if(m_osu->getModSS()) {
+    if(osu->getModSS()) {
         restart();
         return;
-    } else if(m_osu->getModSD()) {
+    } else if(osu->getModSD()) {
         if(osu_mod_suddendeath_restart.getBool())
             restart();
         else
@@ -1550,10 +1540,10 @@ void Beatmap::addSliderBreak() {
     playMissSound();
 
     // score
-    m_osu->getScore()->addSliderBreak();
+    osu->getScore()->addSliderBreak();
 }
 
-void Beatmap::addScorePoints(int points, bool isSpinner) { m_osu->getScore()->addPoints(points, isSpinner); }
+void Beatmap::addScorePoints(int points, bool isSpinner) { osu->getScore()->addPoints(points, isSpinner); }
 
 void Beatmap::addHealth(double percent, bool isFromHitResult) {
     const int drainType = osu_drain_type.getInt();
@@ -1578,19 +1568,19 @@ void Beatmap::addHealth(double percent, bool isFromHitResult) {
     }
 
     if(isFromHitResult && percent > 0.0) {
-        m_osu->getHUD()->animateKiBulge();
+        osu->getHUD()->animateKiBulge();
 
-        if(m_fHealth > 0.9) m_osu->getHUD()->animateKiExplode();
+        if(m_fHealth > 0.9) osu->getHUD()->animateKiExplode();
     }
 
     m_fHealth = clamp<double>(m_fHealth + percent, 0.0, 1.0);
 
     // handle generic fail state (2)
     const bool isDead = m_fHealth < 0.001;
-    if(isDead && !m_osu->getModNF()) {
-        if(m_osu->getModEZ() && m_osu->getScore()->getNumEZRetries() > 0)  // retries with ez
+    if(isDead && !osu->getModNF()) {
+        if(osu->getModEZ() && osu->getScore()->getNumEZRetries() > 0)  // retries with ez
         {
-            m_osu->getScore()->setNumEZRetries(m_osu->getScore()->getNumEZRetries() - 1);
+            osu->getScore()->setNumEZRetries(osu->getScore()->getNumEZRetries() - 1);
 
             // special case: set health to 160/200 (osu!stable behavior, seems fine for all drains)
             m_fHealth = osu_drain_stable_hpbar_recovery.getFloat() / m_osu_drain_stable_hpbar_maximum_ref->getFloat();
@@ -1623,9 +1613,9 @@ void Beatmap::updateTimingPoints(long curPos) {
 
     const DatabaseBeatmap::TIMING_INFO t =
         m_selectedDifficulty2->getTimingInfoForTime(curPos + (long)osu_timingpoints_offset.getInt());
-    m_osu->getSkin()->setSampleSet(
+    osu->getSkin()->setSampleSet(
         t.sampleType);  // normal/soft/drum is stored in the sample type! the sample set number is for custom sets
-    m_osu->getSkin()->setSampleVolume(clamp<float>(t.volume / 100.0f, 0.0f, 1.0f));
+    osu->getSkin()->setSampleVolume(clamp<float>(t.volume / 100.0f, 0.0f, 1.0f));
 }
 
 long Beatmap::getPVS() {
@@ -1666,7 +1656,7 @@ void Beatmap::handlePreviewPlay() {
             // The next songs will start at the beginning regardless.
             static bool should_start_song_at_preview_point =
                 convar->getConVarByName("start_first_main_menu_song_at_preview_point")->getBool();
-            bool start_at_song_beginning = m_osu->getMainMenu()->isVisible() && !should_start_song_at_preview_point;
+            bool start_at_song_beginning = osu->getMainMenu()->isVisible() && !should_start_song_at_preview_point;
             should_start_song_at_preview_point = false;
 
             if(start_at_song_beginning) {
@@ -1680,7 +1670,7 @@ void Beatmap::handlePreviewPlay() {
             }
 
             m_music->setVolume(getIdealVolume());
-            m_music->setSpeed(m_osu->getSpeedMultiplier());
+            m_music->setSpeed(osu->getSpeedMultiplier());
         }
     }
 
@@ -1707,7 +1697,7 @@ void Beatmap::loadMusic(bool stream, bool prescan) {
                 prescan);  // m_bForceStreamPlayback = prescan necessary! otherwise big mp3s will go out of sync
         m_music->setVolume(getIdealVolume());
         m_fMusicFrequencyBackup = m_music->getFrequency();
-        m_music->setSpeed(m_osu->getSpeedMultiplier());
+        m_music->setSpeed(osu->getSpeedMultiplier());
     }
 }
 
@@ -1734,7 +1724,7 @@ void Beatmap::resetHitObjects(long curPos) {
         m_hitobjects[i]->update(curPos);  // fgt
         m_hitobjects[i]->onReset(curPos);
     }
-    m_osu->getHUD()->resetHitErrorBar();
+    osu->getHUD()->resetHitErrorBar();
 }
 
 void Beatmap::resetScore() {
@@ -1770,16 +1760,16 @@ void Beatmap::resetScore() {
     m_fFailAnim = 1.0f;
     anim->deleteExistingAnimation(&m_fFailAnim);
 
-    m_osu->getScore()->reset();
-    m_osu->holding_slider = false;
-    m_osu->m_hud->resetScoreboard();
+    osu->getScore()->reset();
+    osu->holding_slider = false;
+    osu->m_hud->resetScoreboard();
 
     m_bIsFirstMissSound = true;
 }
 
 void Beatmap::playMissSound() {
-    if((m_bIsFirstMissSound && m_osu->getScore()->getCombo() > 0) ||
-       m_osu->getScore()->getCombo() > osu_combobreak_sound_combo.getInt()) {
+    if((m_bIsFirstMissSound && osu->getScore()->getCombo() > 0) ||
+       osu->getScore()->getCombo() > osu_combobreak_sound_combo.getInt()) {
         m_bIsFirstMissSound = false;
         engine->getSound()->play(getSkin()->getCombobreak());
     }
@@ -1834,7 +1824,7 @@ unsigned long Beatmap::getMusicPositionMSInterpolated() {
             // calculate final return value
             returnPos = (unsigned long)std::round(m_fInterpolatedMusicPos);
 
-            bool nightcoring = m_osu->getModNC() || m_osu->getModDC();
+            bool nightcoring = osu->getModNC() || osu->getModDC();
             if(speed < 1.0f && osu_compensate_music_speed.getBool() && !nightcoring) {
                 returnPos += (unsigned long)(((1.0f - speed) / 0.75f) * 5);
             }
@@ -1864,7 +1854,7 @@ void Beatmap::draw(Graphics *g) {
     drawBackground(g);
 
     // draw loading circle
-    if(isLoading()) m_osu->getHUD()->drawLoadingSmall(g);
+    if(isLoading()) osu->getHUD()->drawLoadingSmall(g);
 
     if(isLoadingStarCache() && engine->getTime() > m_fStarCacheTime) {
         float progressPercent = 0.0f;
@@ -1877,18 +1867,16 @@ void Beatmap::draw(Graphics *g) {
         UString loadingMessage2 = "(To get rid of this delay, disable [Draw Statistics: pp/Stars***])";
         g->pushTransform();
         {
-            g->translate(
-                (int)(m_osu->getScreenWidth() / 2 - m_osu->getSubTitleFont()->getStringWidth(loadingMessage) / 2),
-                m_osu->getScreenHeight() - m_osu->getSubTitleFont()->getHeight() - 25);
-            g->drawString(m_osu->getSubTitleFont(), loadingMessage);
+            g->translate((int)(osu->getScreenWidth() / 2 - osu->getSubTitleFont()->getStringWidth(loadingMessage) / 2),
+                         osu->getScreenHeight() - osu->getSubTitleFont()->getHeight() - 25);
+            g->drawString(osu->getSubTitleFont(), loadingMessage);
         }
         g->popTransform();
         g->pushTransform();
         {
-            g->translate(
-                (int)(m_osu->getScreenWidth() / 2 - m_osu->getSubTitleFont()->getStringWidth(loadingMessage2) / 2),
-                m_osu->getScreenHeight() - 15);
-            g->drawString(m_osu->getSubTitleFont(), loadingMessage2);
+            g->translate((int)(osu->getScreenWidth() / 2 - osu->getSubTitleFont()->getStringWidth(loadingMessage2) / 2),
+                         osu->getScreenHeight() - 15);
+            g->drawString(osu->getSubTitleFont(), loadingMessage2);
         }
         g->popTransform();
     } else if(bancho.is_playing_a_multi_map() && !bancho.room.all_players_loaded) {
@@ -1899,9 +1887,9 @@ void Beatmap::draw(Graphics *g) {
             g->pushTransform();
             {
                 g->translate(
-                    (int)(m_osu->getScreenWidth() / 2 - m_osu->getSubTitleFont()->getStringWidth(loadingMessage) / 2),
-                    m_osu->getScreenHeight() - m_osu->getSubTitleFont()->getHeight() - 15);
-                g->drawString(m_osu->getSubTitleFont(), loadingMessage);
+                    (int)(osu->getScreenWidth() / 2 - osu->getSubTitleFont()->getStringWidth(loadingMessage) / 2),
+                    osu->getScreenHeight() - osu->getSubTitleFont()->getHeight() - 15);
+                g->drawString(osu->getSubTitleFont(), loadingMessage);
             }
             g->popTransform();
         }
@@ -1911,10 +1899,10 @@ void Beatmap::draw(Graphics *g) {
 
     // draw playfield border
     if(osu_draw_playfield_border.getBool() && !GameRules::osu_mod_fps.getBool())
-        m_osu->getHUD()->drawPlayfieldBorder(g, m_vPlayfieldCenter, m_vPlayfieldSize, m_fHitcircleDiameter);
+        osu->getHUD()->drawPlayfieldBorder(g, m_vPlayfieldCenter, m_vPlayfieldSize, m_fHitcircleDiameter);
 
     // draw hiterrorbar
-    if(!m_osu_mod_fposu_ref->getBool()) m_osu->getHUD()->drawHitErrorBar(g, this);
+    if(!m_osu_mod_fposu_ref->getBool()) osu->getHUD()->drawHitErrorBar(g, this);
 
     // draw first person crosshair
     if(GameRules::osu_mod_fps.getBool()) {
@@ -1949,7 +1937,7 @@ void Beatmap::draw(Graphics *g) {
 }
 
 void Beatmap::drawFollowPoints(Graphics *g) {
-    Skin *skin = m_osu->getSkin();
+    Skin *skin = osu->getSkin();
 
     const long curPos = m_iCurMusicPosWithOffsets;
 
@@ -1959,7 +1947,7 @@ void Beatmap::drawFollowPoints(Graphics *g) {
     // people notice a change after all this time (26.02.2020)
 
     // 0.7x means animation lasts only 0.7 of it's time
-    const double animationMutiplier = m_osu->getSpeedMultiplier() / m_osu->getAnimationSpeedMultiplier();
+    const double animationMutiplier = osu->getSpeedMultiplier() / osu->getAnimationSpeedMultiplier();
     const long followPointApproachTime =
         animationMutiplier *
         (osu_followpoints_clamp.getBool()
@@ -2019,7 +2007,7 @@ void Beatmap::drawFollowPoints(Graphics *g) {
                 std::round(diff.length() * 100.0f) / 100.0f;  // rounded to avoid flicker with playfield rotations
 
             // draw all points between the two objects
-            const int followPointSeparation = Osu::getUIScale(m_osu, 32) * followPointSeparationMultiplier;
+            const int followPointSeparation = Osu::getUIScale(32) * followPointSeparationMultiplier;
             for(int j = (int)(followPointSeparation * 1.5f); j < (dist - followPointSeparation);
                 j += followPointSeparation) {
                 const float animRatio = ((float)j / dist);
@@ -2045,8 +2033,8 @@ void Beatmap::drawFollowPoints(Graphics *g) {
 
                 // bullshit performance optimization: only draw followpoints if within screen bounds (plus a bit of a
                 // margin) there is only one beatmap where this matters currently: https://osu.ppy.sh/b/1145513
-                if(followPos.x < -m_osu->getScreenWidth() || followPos.x > m_osu->getScreenWidth() * 2 ||
-                   followPos.y < -m_osu->getScreenHeight() || followPos.y > m_osu->getScreenHeight() * 2)
+                if(followPos.x < -osu->getScreenWidth() || followPos.x > osu->getScreenWidth() * 2 ||
+                   followPos.y < -osu->getScreenHeight() || followPos.y > osu->getScreenHeight() * 2)
                     continue;
 
                 // calculate trail alpha
@@ -2144,9 +2132,9 @@ void Beatmap::drawHitObjects(Graphics *g) {
     } else {
         const int mafhamRenderLiveSize = GameRules::osu_mod_mafham_render_livesize.getInt();
 
-        if(m_mafhamActiveRenderTarget == NULL) m_mafhamActiveRenderTarget = m_osu->getFrameBuffer();
+        if(m_mafhamActiveRenderTarget == NULL) m_mafhamActiveRenderTarget = osu->getFrameBuffer();
 
-        if(m_mafhamFinishedRenderTarget == NULL) m_mafhamFinishedRenderTarget = m_osu->getFrameBuffer2();
+        if(m_mafhamFinishedRenderTarget == NULL) m_mafhamFinishedRenderTarget = osu->getFrameBuffer2();
 
         // if we have a chunk to render into the scene buffer
         const bool shouldDrawBuffer =
@@ -2325,7 +2313,7 @@ void Beatmap::update() {
     if(isLoading()) return;  // only continue if we have loaded everything
 
     // update auto (after having updated the hitobjects)
-    if(m_osu->getModAuto() || m_osu->getModAutopilot()) updateAutoCursorPos();
+    if(osu->getModAuto() || osu->getModAutopilot()) updateAutoCursorPos();
 
     // spinner detection (used by osu!stable drain, and by HUD for not drawing the hiterrorbar)
     if(m_currentHitObject != NULL) {
@@ -2408,7 +2396,7 @@ void Beatmap::update2() {
                           m_hitobjects[m_hitobjects.size() - 1]->getDuration() - m_hitobjects[0]->getTime()));
             float warp_multiplier = std::max(osu_mod_timewarp_multiplier.getFloat(), 1.f);
             const float speed =
-                m_osu->getSpeedMultiplier() + percentFinished * m_osu->getSpeedMultiplier() * (warp_multiplier - 1.0f);
+                osu->getSpeedMultiplier() + percentFinished * osu->getSpeedMultiplier() * (warp_multiplier - 1.0f);
             m_music->setSpeed(speed);
         }
     }
@@ -2435,7 +2423,7 @@ void Beatmap::update2() {
                     engine->getSound()->play(m_music);
                     m_music->setPositionMS(0);
                     m_music->setVolume(getIdealVolume());
-                    m_music->setSpeed(m_osu->getSpeedMultiplier());
+                    m_music->setSpeed(osu->getSpeedMultiplier());
 
                     // if we are quick restarting, jump just before the first hitobject (even if there is a long waiting
                     // period at the beginning with nothing etc.)
@@ -2451,11 +2439,11 @@ void Beatmap::update2() {
                     onModUpdate(false, false);
                 }
             } else
-                m_iCurMusicPos = (engine->getTimeReal() - m_fWaitTime) * 1000.0f * m_osu->getSpeedMultiplier();
+                m_iCurMusicPos = (engine->getTimeReal() - m_fWaitTime) * 1000.0f * osu->getSpeedMultiplier();
         }
 
         // ugh. force update all hitobjects while waiting (necessary because of pvs optimization)
-        long curPos = m_iCurMusicPos + (long)(osu_universal_offset.getFloat() * m_osu->getSpeedMultiplier()) +
+        long curPos = m_iCurMusicPos + (long)(osu_universal_offset.getFloat() * osu->getSpeedMultiplier()) +
                       osu_universal_offset_hardcoded - m_selectedDifficulty2->getLocalOffset() -
                       m_selectedDifficulty2->getOnlineOffset() -
                       (m_selectedDifficulty2->getVersion() < 5 ? osu_old_beatmap_offset.getInt() : 0);
@@ -2488,7 +2476,7 @@ void Beatmap::update2() {
         } else if(m_iResourceLoadUpdateDelayHack >
                   3)  // second: if that still doesn't work, stop and display an error message
         {
-            m_osu->getNotificationOverlay()->addNotification("Couldn't load music file :(", 0xffff0000);
+            osu->getNotificationOverlay()->addNotification("Couldn't load music file :(", 0xffff0000);
             stop(true);
         }
     }
@@ -2526,7 +2514,7 @@ void Beatmap::update2() {
     }
 
     // update timing (points)
-    m_iCurMusicPosWithOffsets = m_iCurMusicPos + (long)(osu_universal_offset.getFloat() * m_osu->getSpeedMultiplier()) +
+    m_iCurMusicPosWithOffsets = m_iCurMusicPos + (long)(osu_universal_offset.getFloat() * osu->getSpeedMultiplier()) +
                                 osu_universal_offset_hardcoded - m_selectedDifficulty2->getLocalOffset() -
                                 m_selectedDifficulty2->getOnlineOffset() -
                                 (m_selectedDifficulty2->getVersion() < 5 ? osu_old_beatmap_offset.getInt() : 0);
@@ -2550,8 +2538,8 @@ void Beatmap::update2() {
             click.tms = current_frame.cur_music_pos;
             click.pos.x = current_frame.x;
             click.pos.y = current_frame.y;
-            click.pos *= GameRules::getPlayfieldScaleFactor(m_osu);
-            click.pos += GameRules::getPlayfieldOffset(m_osu);
+            click.pos *= GameRules::getPlayfieldScaleFactor();
+            click.pos += GameRules::getPlayfieldOffset();
 
             // Flag fix to simplify logic (stable sets both K1 and M1 when K1 is pressed)
             if(current_keys & Replay::K1) current_keys &= ~Replay::M1;
@@ -2559,46 +2547,46 @@ void Beatmap::update2() {
 
             // Released key 1
             if(last_keys & Replay::K1 && !(current_keys & Replay::K1)) {
-                m_osu->getHUD()->animateInputoverlay(1, false);
+                osu->getHUD()->animateInputoverlay(1, false);
             }
             if(last_keys & Replay::M1 && !(current_keys & Replay::M1)) {
-                m_osu->getHUD()->animateInputoverlay(3, false);
+                osu->getHUD()->animateInputoverlay(3, false);
             }
 
             // Released key 2
             if(last_keys & Replay::K2 && !(current_keys & Replay::K2)) {
-                m_osu->getHUD()->animateInputoverlay(2, false);
+                osu->getHUD()->animateInputoverlay(2, false);
             }
             if(last_keys & Replay::M2 && !(current_keys & Replay::M2)) {
-                m_osu->getHUD()->animateInputoverlay(4, false);
+                osu->getHUD()->animateInputoverlay(4, false);
             }
 
             // Pressed key 1
             if(!(last_keys & Replay::K1) && current_keys & Replay::K1) {
                 m_bPrevKeyWasKey1 = true;
-                m_osu->getHUD()->animateInputoverlay(1, true);
+                osu->getHUD()->animateInputoverlay(1, true);
                 m_clicks.push_back(click);
-                if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(1);
+                if(!m_bInBreak && !m_bIsInSkippableSection) osu->getScore()->addKeyCount(1);
             }
             if(!(last_keys & Replay::M1) && current_keys & Replay::M1) {
                 m_bPrevKeyWasKey1 = true;
-                m_osu->getHUD()->animateInputoverlay(3, true);
+                osu->getHUD()->animateInputoverlay(3, true);
                 m_clicks.push_back(click);
-                if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(3);
+                if(!m_bInBreak && !m_bIsInSkippableSection) osu->getScore()->addKeyCount(3);
             }
 
             // Pressed key 2
             if(!(last_keys & Replay::K2) && current_keys & Replay::K2) {
                 m_bPrevKeyWasKey1 = false;
-                m_osu->getHUD()->animateInputoverlay(2, true);
+                osu->getHUD()->animateInputoverlay(2, true);
                 m_clicks.push_back(click);
-                if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(2);
+                if(!m_bInBreak && !m_bIsInSkippableSection) osu->getScore()->addKeyCount(2);
             }
             if(!(last_keys & Replay::M2) && current_keys & Replay::M2) {
                 m_bPrevKeyWasKey1 = false;
-                m_osu->getHUD()->animateInputoverlay(4, true);
+                osu->getHUD()->animateInputoverlay(4, true);
                 m_clicks.push_back(click);
-                if(!m_bInBreak && !m_bIsInSkippableSection) m_osu->getScore()->addKeyCount(4);
+                if(!m_bInBreak && !m_bIsInSkippableSection) osu->getScore()->addKeyCount(4);
             }
         }
 
@@ -2616,8 +2604,8 @@ void Beatmap::update2() {
         if(osu_playfield_mirror_vertical.getBool())
             m_interpolatedMousePos.x = GameRules::OSU_COORD_WIDTH - m_interpolatedMousePos.x;
 
-        m_interpolatedMousePos *= GameRules::getPlayfieldScaleFactor(m_osu);
-        m_interpolatedMousePos += GameRules::getPlayfieldOffset(m_osu);
+        m_interpolatedMousePos *= GameRules::getPlayfieldScaleFactor();
+        m_interpolatedMousePos += GameRules::getPlayfieldOffset();
     }
 
     // for performance reasons, a lot of operations are crammed into 1 loop over all hitobjects:
@@ -2916,7 +2904,7 @@ void Beatmap::update2() {
 
                     m_misaimObjects[i]->misAimed();
                     const long delta = m_clicks[c].tms - (long)m_misaimObjects[i]->getTime();
-                    m_osu->getHUD()->addHitError(delta, false, true);
+                    osu->getHUD()->addHitError(delta, false, true);
 
                     break;  // the current click has been dealt with (and the hitobject has been misaimed)
                 }
@@ -2925,10 +2913,10 @@ void Beatmap::update2() {
 
         // all remaining clicks which have not been consumed by any hitobjects can safely be deleted
         if(m_clicks.size() > 0) {
-            if(osu_play_hitsound_on_click_while_playing.getBool()) m_osu->getSkin()->playHitCircleSound(0);
+            if(osu_play_hitsound_on_click_while_playing.getBool()) osu->getSkin()->playHitCircleSound(0);
 
             // nightmare mod: extra clicks = sliderbreak
-            if((m_osu->getModNightmare() || osu_mod_jigsaw1.getBool()) && !m_bIsInSkippableSection && !m_bInBreak &&
+            if((osu->getModNightmare() || osu_mod_jigsaw1.getBool()) && !m_bIsInSkippableSection && !m_bInBreak &&
                m_iCurrentHitObjectIndex > 0) {
                 addSliderBreak();
                 addHitResult(NULL, LiveScore::HIT::HIT_MISS_SLIDERBREAK, 0, false, true, true, true, true,
@@ -2951,7 +2939,7 @@ void Beatmap::update2() {
         else
             m_bIsInSkippableSection = false;
 
-        m_osu->m_chat->updateVisibility();
+        osu->m_chat->updateVisibility();
 
         // While we want to allow the chat to pop up during breaks, we don't
         // want to be able to skip after the start in multiplayer rooms
@@ -3045,9 +3033,9 @@ void Beatmap::update2() {
 
                 if(!wasSeekFrame) {
                     if(passing)
-                        engine->getSound()->play(m_osu->getSkin()->getSectionPassSound());
+                        engine->getSound()->play(osu->getSkin()->getSectionPassSound());
                     else
-                        engine->getSound()->play(m_osu->getSkin()->getSectionFailSound());
+                        engine->getSound()->play(osu->getSkin()->getSectionFailSound());
                 }
             }
         }
@@ -3126,21 +3114,21 @@ void Beatmap::update2() {
                     break;
             }
 
-            if(hasFailed && !m_osu->getModNF()) fail();
+            if(hasFailed && !osu->getModNF()) fail();
         }
 
         // revive in mp
-        if(m_fHealth > 0.999 && m_osu->getScore()->isDead()) m_osu->getScore()->setDead(false);
+        if(m_fHealth > 0.999 && osu->getScore()->isDead()) osu->getScore()->setDead(false);
 
         // handle fail animation
         if(m_bFailed) {
             if(m_fFailAnim <= 0.0f) {
-                if(m_music->isPlaying() || !m_osu->getPauseMenu()->isVisible()) {
+                if(m_music->isPlaying() || !osu->getPauseMenu()->isVisible()) {
                     engine->getSound()->pause(m_music);
                     m_bIsPaused = true;
 
-                    m_osu->getPauseMenu()->setVisible(true);
-                    m_osu->updateConfineCursor();
+                    osu->getPauseMenu()->setVisible(true);
+                    osu->updateConfineCursor();
                 }
             } else
                 m_music->setFrequency(
@@ -3181,14 +3169,14 @@ void Beatmap::onModUpdate(bool rebuildSliderVertexBuffers, bool recomputeDrainRa
     if(recomputeDrainRate) computeDrainRate();
 
     if(m_music != NULL) {
-        m_music->setSpeed(m_osu->getSpeedMultiplier());
+        m_music->setSpeed(osu->getSpeedMultiplier());
     }
 
     // recalculate slider vertexbuffers
-    if(m_osu->getModHR() != m_bWasHREnabled ||
+    if(osu->getModHR() != m_bWasHREnabled ||
        osu_playfield_mirror_horizontal.getBool() != m_bWasHorizontalMirrorEnabled ||
        osu_playfield_mirror_vertical.getBool() != m_bWasVerticalMirrorEnabled) {
-        m_bWasHREnabled = m_osu->getModHR();
+        m_bWasHREnabled = osu->getModHR();
         m_bWasHorizontalMirrorEnabled = osu_playfield_mirror_horizontal.getBool();
         m_bWasVerticalMirrorEnabled = osu_playfield_mirror_vertical.getBool();
 
@@ -3196,10 +3184,10 @@ void Beatmap::onModUpdate(bool rebuildSliderVertexBuffers, bool recomputeDrainRa
 
         if(rebuildSliderVertexBuffers) updateSliderVertexBuffers();
     }
-    if(m_osu->getModEZ() != m_bWasEZEnabled) {
+    if(osu->getModEZ() != m_bWasEZEnabled) {
         calculateStacks();
 
-        m_bWasEZEnabled = m_osu->getModEZ();
+        m_bWasEZEnabled = osu->getModEZ();
         if(rebuildSliderVertexBuffers) updateSliderVertexBuffers();
     }
     if(getHitcircleDiameter() != m_fPrevHitCircleDiameter && m_hitobjects.size() > 0) {
@@ -3242,10 +3230,10 @@ void Beatmap::onModUpdate(bool rebuildSliderVertexBuffers, bool recomputeDrainRa
         }
 
         bool didSpeedChange = false;
-        if(m_osu->getSpeedMultiplier() != m_fPrevSpeedForStarCache && m_hitobjects.size() > 0) {
+        if(osu->getSpeedMultiplier() != m_fPrevSpeedForStarCache && m_hitobjects.size() > 0) {
             m_fPrevSpeedForStarCache =
-                m_osu->getSpeedMultiplier();  // this is not using the beatmap function for speed on purpose, because
-                                              // that wouldn't work while the music is still loading
+                osu->getSpeedMultiplier();  // this is not using the beatmap function for speed on purpose, because
+                                            // that wouldn't work while the music is still loading
             didSpeedChange = true;
         }
 
@@ -3266,8 +3254,8 @@ Vector2 Beatmap::pixels2OsuCoords(Vector2 pixelCoords) const {
     if(GameRules::osu_mod_fps.getBool()) {
         // HACKHACK: this is the worst hack possible (engine->isDrawing()), but it works
         // the problem is that this same function is called while draw()ing and update()ing
-        if(!((engine->isDrawing() && (m_osu->getModAuto() || m_osu->getModAutopilot())) ||
-             !(m_osu->getModAuto() || m_osu->getModAutopilot())))
+        if(!((engine->isDrawing() && (osu->getModAuto() || osu->getModAutopilot())) ||
+             !(osu->getModAuto() || osu->getModAutopilot())))
             pixelCoords += getFirstPersonCursorDelta();
     }
 
@@ -3279,7 +3267,7 @@ Vector2 Beatmap::pixels2OsuCoords(Vector2 pixelCoords) const {
 }
 
 Vector2 Beatmap::osuCoords2Pixels(Vector2 coords) const {
-    if(m_osu->getModHR()) coords.y = GameRules::OSU_COORD_HEIGHT - coords.y;
+    if(osu->getModHR()) coords.y = GameRules::OSU_COORD_HEIGHT - coords.y;
     if(osu_playfield_mirror_horizontal.getBool()) coords.y = GameRules::OSU_COORD_HEIGHT - coords.y;
     if(osu_playfield_mirror_vertical.getBool()) coords.x = GameRules::OSU_COORD_WIDTH - coords.x;
 
@@ -3400,8 +3388,8 @@ Vector2 Beatmap::osuCoords2Pixels(Vector2 coords) const {
     if(GameRules::osu_mod_fps.getBool()) {
         // this is the worst hack possible (engine->isDrawing()), but it works
         // the problem is that this same function is called while draw()ing and update()ing
-        if((engine->isDrawing() && (m_osu->getModAuto() || m_osu->getModAutopilot())) ||
-           !(m_osu->getModAuto() || m_osu->getModAutopilot()))
+        if((engine->isDrawing() && (osu->getModAuto() || osu->getModAutopilot())) ||
+           !(osu->getModAuto() || osu->getModAutopilot()))
             coords += getFirstPersonCursorDelta();
     }
 
@@ -3417,7 +3405,7 @@ Vector2 Beatmap::osuCoords2RawPixels(Vector2 coords) const {
 }
 
 Vector2 Beatmap::osuCoords2LegacyPixels(Vector2 coords) const {
-    if(m_osu->getModHR()) coords.y = GameRules::OSU_COORD_HEIGHT - coords.y;
+    if(osu->getModHR()) coords.y = GameRules::OSU_COORD_HEIGHT - coords.y;
     if(osu_playfield_mirror_horizontal.getBool()) coords.y = GameRules::OSU_COORD_HEIGHT - coords.y;
     if(osu_playfield_mirror_vertical.getBool()) coords.x = GameRules::OSU_COORD_WIDTH - coords.x;
 
@@ -3474,26 +3462,26 @@ Vector2 Beatmap::getMousePos() const {
 
 Vector2 Beatmap::getCursorPos() const {
     if(GameRules::osu_mod_fps.getBool() && !m_bIsPaused) {
-        if(m_osu->getModAuto() || m_osu->getModAutopilot())
+        if(osu->getModAuto() || osu->getModAutopilot())
             return m_vAutoCursorPos;
         else
             return m_vPlayfieldCenter;
-    } else if(m_osu->getModAuto() || m_osu->getModAutopilot())
+    } else if(osu->getModAuto() || osu->getModAutopilot())
         return m_vAutoCursorPos;
     else {
         Vector2 pos = getMousePos();
-        if(osu_mod_shirone.getBool() && m_osu->getScore()->getCombo() > 0)  // <3
+        if(osu_mod_shirone.getBool() && osu->getScore()->getCombo() > 0)  // <3
             return pos + Vector2(std::sin((m_iCurMusicPos / 20.0f) * 1.15f) *
-                                     ((float)m_osu->getScore()->getCombo() / osu_mod_shirone_combo.getFloat()),
+                                     ((float)osu->getScore()->getCombo() / osu_mod_shirone_combo.getFloat()),
                                  std::cos((m_iCurMusicPos / 20.0f) * 1.3f) *
-                                     ((float)m_osu->getScore()->getCombo() / osu_mod_shirone_combo.getFloat()));
+                                     ((float)osu->getScore()->getCombo() / osu_mod_shirone_combo.getFloat()));
         else
             return pos;
     }
 }
 
 Vector2 Beatmap::getFirstPersonCursorDelta() const {
-    return m_vPlayfieldCenter - (m_osu->getModAuto() || m_osu->getModAutopilot() ? m_vAutoCursorPos : getMousePos());
+    return m_vPlayfieldCenter - (osu->getModAuto() || osu->getModAutopilot() ? m_vAutoCursorPos : getMousePos());
 }
 
 float Beatmap::getHitcircleDiameter() const { return m_fHitcircleDiameter; }
@@ -3508,9 +3496,9 @@ void Beatmap::saveAndSubmitScore(bool quit) {
     const float AR = getAR();
     const float CS = getCS();
     const float OD = getOD();
-    const float speedMultiplier = m_osu->getSpeedMultiplier();  // NOTE: not this->getSpeedMultiplier()!
-    const bool relax = m_osu->getModRelax();
-    const bool touchDevice = m_osu->getModTD();
+    const float speedMultiplier = osu->getSpeedMultiplier();  // NOTE: not this->getSpeedMultiplier()!
+    const bool relax = osu->getModRelax();
+    const bool touchDevice = osu->getModTD();
 
     DatabaseBeatmap::LOAD_DIFFOBJ_RESULT diffres =
         DatabaseBeatmap::loadDifficultyHitObjects(osuFilePath, AR, CS, speedMultiplier);
@@ -3526,24 +3514,24 @@ void Beatmap::saveAndSubmitScore(bool quit) {
     const int numSliders = m_selectedDifficulty2->getNumSliders();
     const int numSpinners = m_selectedDifficulty2->getNumSpinners();
     const int maxPossibleCombo = m_iMaxPossibleCombo;
-    const int highestCombo = m_osu->getScore()->getComboMax();
-    const int numMisses = m_osu->getScore()->getNumMisses();
-    const int num300s = m_osu->getScore()->getNum300s();
-    const int num100s = m_osu->getScore()->getNum100s();
-    const int num50s = m_osu->getScore()->getNum50s();
-    const float pp = DifficultyCalculator::calculatePPv2(
-        m_osu, this, aim, aimSliderFactor, speed, speedNotes, numHitObjects, numCircles, numSliders, numSpinners,
-        maxPossibleCombo, highestCombo, numMisses, num300s, num100s, num50s);
-    m_osu->getScore()->setStarsTomTotal(totalStars);
-    m_osu->getScore()->setStarsTomAim(m_fAimStars);
-    m_osu->getScore()->setStarsTomSpeed(m_fSpeedStars);
-    m_osu->getScore()->setPPv2(pp);
+    const int highestCombo = osu->getScore()->getComboMax();
+    const int numMisses = osu->getScore()->getNumMisses();
+    const int num300s = osu->getScore()->getNum300s();
+    const int num100s = osu->getScore()->getNum100s();
+    const int num50s = osu->getScore()->getNum50s();
+    const float pp = DifficultyCalculator::calculatePPv2(this, aim, aimSliderFactor, speed, speedNotes, numHitObjects,
+                                                         numCircles, numSliders, numSpinners, maxPossibleCombo,
+                                                         highestCombo, numMisses, num300s, num100s, num50s);
+    osu->getScore()->setStarsTomTotal(totalStars);
+    osu->getScore()->setStarsTomAim(m_fAimStars);
+    osu->getScore()->setStarsTomSpeed(m_fSpeedStars);
+    osu->getScore()->setPPv2(pp);
 
     // save local score, but only under certain conditions
     const bool isComplete = (num300s + num100s + num50s + numMisses >= numHitObjects);
-    const bool isZero = (m_osu->getScore()->getScore() < 1);
-    const bool isCheated = (m_osu->getModAuto() || (m_osu->getModAutopilot() && m_osu->getModRelax())) ||
-                           m_osu->getScore()->isUnranked() || m_bIsWatchingReplay;
+    const bool isZero = (osu->getScore()->getScore() < 1);
+    const bool isCheated = (osu->getModAuto() || (osu->getModAutopilot() && osu->getModRelax())) ||
+                           osu->getScore()->isUnranked() || m_bIsWatchingReplay;
 
     FinishedScore score;
     score.isLegacyScore = false;
@@ -3559,30 +3547,30 @@ void Beatmap::saveAndSubmitScore(bool quit) {
         auto local_name = convar->getConVarByName("name")->getString();
         score.playerName = local_name.toUtf8();
     }
-    score.passed = isComplete && !isZero && !m_osu->getScore()->hasDied();
-    score.grade = score.passed ? m_osu->getScore()->getGrade() : FinishedScore::Grade::F;
+    score.passed = isComplete && !isZero && !osu->getScore()->hasDied();
+    score.grade = score.passed ? osu->getScore()->getGrade() : FinishedScore::Grade::F;
     score.diff2 = m_selectedDifficulty2;
     score.ragequit = quit;
-    score.play_time_ms = m_iCurMusicPos / m_osu->getSpeedMultiplier();
+    score.play_time_ms = m_iCurMusicPos / osu->getSpeedMultiplier();
 
-    score.num300s = m_osu->getScore()->getNum300s();
-    score.num100s = m_osu->getScore()->getNum100s();
-    score.num50s = m_osu->getScore()->getNum50s();
-    score.numGekis = m_osu->getScore()->getNum300gs();
-    score.numKatus = m_osu->getScore()->getNum100ks();
-    score.numMisses = m_osu->getScore()->getNumMisses();
-    score.score = m_osu->getScore()->getScore();
-    score.comboMax = m_osu->getScore()->getComboMax();
+    score.num300s = osu->getScore()->getNum300s();
+    score.num100s = osu->getScore()->getNum100s();
+    score.num50s = osu->getScore()->getNum50s();
+    score.numGekis = osu->getScore()->getNum300gs();
+    score.numKatus = osu->getScore()->getNum100ks();
+    score.numMisses = osu->getScore()->getNumMisses();
+    score.score = osu->getScore()->getScore();
+    score.comboMax = osu->getScore()->getComboMax();
     score.perfect = (maxPossibleCombo > 0 && score.comboMax > 0 && score.comboMax >= maxPossibleCombo);
-    score.numSliderBreaks = m_osu->getScore()->getNumSliderBreaks();
+    score.numSliderBreaks = osu->getScore()->getNumSliderBreaks();
     score.pp = pp;
-    score.unstableRate = m_osu->getScore()->getUnstableRate();
-    score.hitErrorAvgMin = m_osu->getScore()->getHitErrorAvgMin();
-    score.hitErrorAvgMax = m_osu->getScore()->getHitErrorAvgMax();
+    score.unstableRate = osu->getScore()->getUnstableRate();
+    score.hitErrorAvgMin = osu->getScore()->getHitErrorAvgMin();
+    score.hitErrorAvgMax = osu->getScore()->getHitErrorAvgMax();
     score.starsTomTotal = totalStars;
     score.starsTomAim = aim;
     score.starsTomSpeed = speed;
-    score.speedMultiplier = m_osu->getSpeedMultiplier();
+    score.speedMultiplier = osu->getSpeedMultiplier();
     score.CS = CS;
     score.AR = AR;
     score.OD = getOD();
@@ -3590,13 +3578,13 @@ void Beatmap::saveAndSubmitScore(bool quit) {
     score.maxPossibleCombo = maxPossibleCombo;
     score.numHitObjects = numHitObjects;
     score.numCircles = numCircles;
-    score.modsLegacy = m_osu->getScore()->getModsLegacy();
+    score.modsLegacy = osu->getScore()->getModsLegacy();
 
     // special case: manual slider accuracy has been enabled (affects pp but not score), so force scorev2 for
     // potential future score recalculations
     score.modsLegacy |= (m_osu_slider_scorev2_ref->getBool() ? ModFlags::ScoreV2 : 0);
 
-    std::vector<ConVar *> allExperimentalMods = m_osu->getExperimentalMods();
+    std::vector<ConVar *> allExperimentalMods = osu->getExperimentalMods();
     for(int i = 0; i < allExperimentalMods.size(); i++) {
         if(allExperimentalMods[i]->getBool()) {
             score.experimentalModsConVars.append(allExperimentalMods[i]->getName());
@@ -3611,7 +3599,7 @@ void Beatmap::saveAndSubmitScore(bool quit) {
     int scoreIndex = -1;
 
     if(!isCheated) {
-        RichPresence::onPlayEnd(m_osu, quit);
+        RichPresence::onPlayEnd(quit);
 
         if(bancho.submit_scores() && !isZero && vanilla) {
             score.server = bancho.endpoint.toUtf8();
@@ -3620,19 +3608,19 @@ void Beatmap::saveAndSubmitScore(bool quit) {
         }
 
         if(score.passed) {
-            scoreIndex = m_osu->getSongBrowser()->getDatabase()->addScore(m_selectedDifficulty2->getMD5Hash(), score);
+            scoreIndex = osu->getSongBrowser()->getDatabase()->addScore(m_selectedDifficulty2->getMD5Hash(), score);
             if(scoreIndex == -1) {
-                m_osu->getNotificationOverlay()->addNotification("Failed saving score!", 0xffff0000, false, 3.0f);
+                osu->getNotificationOverlay()->addNotification("Failed saving score!", 0xffff0000, false, 3.0f);
             }
         }
     }
 
-    m_osu->getScore()->setIndex(scoreIndex);
-    m_osu->getScore()->setComboFull(maxPossibleCombo);  // used in RankingScreen/UIRankingScreenRankingPanel
+    osu->getScore()->setIndex(scoreIndex);
+    osu->getScore()->setComboFull(maxPossibleCombo);  // used in RankingScreen/UIRankingScreenRankingPanel
 
     // special case: incomplete scores should NEVER show pp, even if auto
     if(!isComplete) {
-        m_osu->getScore()->setPPv2(0.0f);
+        osu->getScore()->setPPv2(0.0f);
     }
 }
 
@@ -3642,7 +3630,7 @@ void Beatmap::onPaused(bool first) {
     if(first) {
         m_vContinueCursorPoint = getMousePos();
 
-        if(GameRules::osu_mod_fps.getBool()) m_vContinueCursorPoint = GameRules::getPlayfieldCenter(m_osu);
+        if(GameRules::osu_mod_fps.getBool()) m_vContinueCursorPoint = GameRules::getPlayfieldCenter();
     }
 }
 
@@ -3675,7 +3663,7 @@ void Beatmap::updateAutoCursorPos() {
     if(m_hitobjects[0]->getTime() < (long)m_osu_early_note_time_ref->getInt())
         prevTime = -(long)m_osu_early_note_time_ref->getInt() * getSpeedMultiplier();
 
-    if(m_osu->getModAuto()) {
+    if(osu->getModAuto()) {
         bool autoDanceOverride = false;
         for(int i = 0; i < m_hitobjects.size(); i++) {
             HitObject *o = m_hitobjects[i];
@@ -3755,7 +3743,7 @@ void Beatmap::updateAutoCursorPos() {
                 break;
             }
         }
-    } else if(m_osu->getModAutopilot()) {
+    } else if(osu->getModAutopilot()) {
         for(int i = 0; i < m_hitobjects.size(); i++) {
             HitObject *o = m_hitobjects[i];
 
@@ -3806,9 +3794,9 @@ void Beatmap::updateAutoCursorPos() {
         float distance = (nextPos - prevPos).length();
         if(distance > m_fHitcircleDiameter * 1.05f)  // snap only if not in a stream (heuristic)
         {
-            int numIterations = clamp<int>(m_osu->getModAutopilot() ? osu_autopilot_snapping_strength.getInt()
-                                                                    : osu_auto_snapping_strength.getInt(),
-                                           0, 42);
+            int numIterations = clamp<int>(
+                osu->getModAutopilot() ? osu_autopilot_snapping_strength.getInt() : osu_auto_snapping_strength.getInt(),
+                0, 42);
             for(int i = 0; i < numIterations; i++) {
                 percent = (-percent) * (percent - 2.0f);
             }
@@ -3819,7 +3807,7 @@ void Beatmap::updateAutoCursorPos() {
 
         m_vAutoCursorPos = prevPos + (nextPos - prevPos) * percent;
 
-        if(osu_auto_cursordance.getBool() && !m_osu->getModAutopilot()) {
+        if(osu_auto_cursordance.getBool() && !osu->getModAutopilot()) {
             Vector3 dir = Vector3(nextPos.x, nextPos.y, 0) - Vector3(prevPos.x, prevPos.y, 0);
             Vector3 center = dir * 0.5f;
             Matrix4 worldMatrix;
@@ -3833,17 +3821,17 @@ void Beatmap::updateAutoCursorPos() {
 }
 
 void Beatmap::updatePlayfieldMetrics() {
-    m_fScaleFactor = GameRules::getPlayfieldScaleFactor(m_osu);
-    m_vPlayfieldSize = GameRules::getPlayfieldSize(m_osu);
-    m_vPlayfieldOffset = GameRules::getPlayfieldOffset(m_osu);
-    m_vPlayfieldCenter = GameRules::getPlayfieldCenter(m_osu);
+    m_fScaleFactor = GameRules::getPlayfieldScaleFactor();
+    m_vPlayfieldSize = GameRules::getPlayfieldSize();
+    m_vPlayfieldOffset = GameRules::getPlayfieldOffset();
+    m_vPlayfieldCenter = GameRules::getPlayfieldCenter();
 }
 
 void Beatmap::updateHitobjectMetrics() {
-    Skin *skin = m_osu->getSkin();
+    Skin *skin = osu->getSkin();
 
     m_fRawHitcircleDiameter = GameRules::getRawHitCircleDiameter(getCS());
-    m_fXMultiplier = GameRules::getHitCircleXMultiplier(m_osu);
+    m_fXMultiplier = GameRules::getHitCircleXMultiplier();
     m_fHitcircleDiameter = GameRules::getHitCircleDiameter(this);
 
     const float osuCoordScaleMultiplier = (getHitcircleDiameter() / m_fRawHitcircleDiameter);
@@ -3854,7 +3842,7 @@ void Beatmap::updateHitobjectMetrics() {
 
     const float followcircle_size_multiplier = GameRules::osu_slider_followcircle_size_multiplier.getFloat();
     const float sliderFollowCircleDiameterMultiplier =
-        (m_osu->getModNightmare() || osu_mod_jigsaw2.getBool()
+        (osu->getModNightmare() || osu_mod_jigsaw2.getBool()
              ? (1.0f * (1.0f - osu_mod_jigsaw_followcircle_radius_factor.getFloat()) +
                 osu_mod_jigsaw_followcircle_radius_factor.getFloat() * followcircle_size_multiplier)
              : followcircle_size_multiplier);
@@ -3866,7 +3854,7 @@ void Beatmap::updateSliderVertexBuffers() {
     updatePlayfieldMetrics();
     updateHitobjectMetrics();
 
-    m_bWasEZEnabled = m_osu->getModEZ();                // to avoid useless double updates in onModUpdate()
+    m_bWasEZEnabled = osu->getModEZ();                  // to avoid useless double updates in onModUpdate()
     m_fPrevHitCircleDiameter = getHitcircleDiameter();  // same here
     m_fPrevPlayfieldRotationFromConVar = osu_playfield_rotation.getFloat();  // same here
     m_fPrevPlayfieldStretchX = osu_playfield_stretch_x.getFloat();           // same here
@@ -4331,7 +4319,7 @@ void Beatmap::updateStarCache() {
     if(m_osu_draw_statistics_pp_ref->getBool() || m_osu_draw_statistics_livestars_ref->getBool()) {
         // so we don't get a useless double load inside onModUpdate()
         m_fPrevHitCircleDiameterForStarCache = getHitcircleDiameter();
-        m_fPrevSpeedForStarCache = m_osu->getSpeedMultiplier();
+        m_fPrevSpeedForStarCache = osu->getSpeedMultiplier();
 
         // kill any running loader, so we get to a clean state
         stopStarCacheLoader();

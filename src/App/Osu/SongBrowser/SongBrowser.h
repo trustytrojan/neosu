@@ -2,7 +2,6 @@
 #include "MouseListener.h"
 #include "ScreenBackable.h"
 
-class Osu;
 class Beatmap;
 class Database;
 class DatabaseBeatmap;
@@ -34,7 +33,7 @@ class SongBrowserBackgroundSearchMatcher;
 
 class SongBrowser : public ScreenBackable {
    public:
-    static void drawSelectedBeatmapBackgroundImage(Graphics *g, Osu *osu, float alpha = 1.0f);
+    static void drawSelectedBeatmapBackgroundImage(Graphics *g, float alpha = 1.0f);
 
     struct SORTING_COMPARATOR {
         virtual ~SORTING_COMPARATOR() { ; }
@@ -90,7 +89,7 @@ class SongBrowser : public ScreenBackable {
 
     friend class SongBrowserBackgroundSearchMatcher;
 
-    SongBrowser(Osu *osu);
+    SongBrowser();
     virtual ~SongBrowser();
 
     virtual void draw(Graphics *g);
@@ -262,7 +261,6 @@ class SongBrowser : public ScreenBackable {
 
     ConVar *m_osu_mod_fposu_ref;
 
-    Osu *m_osu;
     GROUP m_group;
     std::vector<GROUPING> m_groupings;
     SORT m_sortingMethod;

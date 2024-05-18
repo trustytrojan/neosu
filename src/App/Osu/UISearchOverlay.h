@@ -1,20 +1,9 @@
-//================ Copyright (c) 2017, PG, All rights reserved. =================//
-//
-// Purpose:		search text overlay
-//
-// $NoKeywords: $osufind
-//===============================================================================//
-
-#ifndef OSUUISEARCHOVERLAY_H
-#define OSUUISEARCHOVERLAY_H
-
+#pragma once
 #include "CBaseUIElement.h"
-
-class Osu;
 
 class UISearchOverlay : public CBaseUIElement {
    public:
-    UISearchOverlay(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name);
+    UISearchOverlay(float xPos, float yPos, float xSize, float ySize, UString name);
 
     virtual void draw(Graphics *g);
 
@@ -30,8 +19,6 @@ class UISearchOverlay : public CBaseUIElement {
     void setSearching(bool searching) { m_bSearching = searching; }
 
    private:
-    Osu *m_osu;
-
     McFont *m_font;
 
     int m_iOffsetRight;
@@ -43,5 +30,3 @@ class UISearchOverlay : public CBaseUIElement {
 
     bool m_bSearching;
 };
-
-#endif

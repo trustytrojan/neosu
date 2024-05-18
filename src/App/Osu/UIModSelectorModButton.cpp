@@ -1,10 +1,3 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		mod image buttons (EZ, HD, HR, HT, DT, etc.)
-//
-// $NoKeywords: $osumsmb
-//===============================================================================//
-
 #include "UIModSelectorModButton.h"
 
 #include "AnimationHandler.h"
@@ -22,10 +15,9 @@
 #include "SoundEngine.h"
 #include "TooltipOverlay.h"
 
-UIModSelectorModButton::UIModSelectorModButton(Osu *osu, ModSelector *osuModSelector, float xPos, float yPos,
-                                               float xSize, float ySize, UString name)
+UIModSelectorModButton::UIModSelectorModButton(ModSelector *osuModSelector, float xPos, float yPos, float xSize,
+                                               float ySize, UString name)
     : CBaseUIButton(xPos, yPos, xSize, ySize, name, "") {
-    m_osu = osu;
     m_osuModSelector = osuModSelector;
     m_iState = 0;
     m_vScale = m_vBaseScale = Vector2(1, 1);
@@ -77,11 +69,11 @@ void UIModSelectorModButton::mouse_update(bool *propagate_clicks) {
 
     // handle tooltips
     if(isMouseInside() && m_bAvailable && m_states.size() > 0 && !m_bFocusStolenDelay) {
-        m_osu->getTooltipOverlay()->begin();
+        osu->getTooltipOverlay()->begin();
         for(int i = 0; i < m_states[m_iState].tooltipTextLines.size(); i++) {
-            m_osu->getTooltipOverlay()->addLine(m_states[m_iState].tooltipTextLines[i]);
+            osu->getTooltipOverlay()->addLine(m_states[m_iState].tooltipTextLines[i]);
         }
-        m_osu->getTooltipOverlay()->end();
+        osu->getTooltipOverlay()->end();
     }
 
     m_bFocusStolenDelay = false;
@@ -141,7 +133,7 @@ void UIModSelectorModButton::onClicked() {
             write<u32>(&packet, bancho.room.slots[i].mods);
             send_packet(packet);
 
-            m_osu->m_room->on_room_updated(bancho.room);
+            osu->m_room->on_room_updated(bancho.room);
             break;
         }
     }
@@ -178,10 +170,10 @@ void UIModSelectorModButton::setOn(bool on, bool silent) {
     // Prevent DT and HT from being selected at the same time
     if(on && !silent && !m_states.empty()) {
         if(m_states[0].modName == UString("dt") || m_states[0].modName == UString("nc")) {
-            m_osu->m_modSelector->m_modButtonHalftime->setOn(false, true);
+            osu->m_modSelector->m_modButtonHalftime->setOn(false, true);
             convar->getConVarByName("osu_speed_override")->setValue(-1.0f);
         } else if(m_states[0].modName == UString("ht") || m_states[0].modName == UString("dc")) {
-            m_osu->m_modSelector->m_modButtonDoubletime->setOn(false, true);
+            osu->m_modSelector->m_modButtonDoubletime->setOn(false, true);
             convar->getConVarByName("osu_speed_override")->setValue(-1.0f);
         }
     }
@@ -209,7 +201,7 @@ void UIModSelectorModButton::setOn(bool on, bool silent) {
         }
 
         if(!silent) {
-            engine->getSound()->play(m_osu->getSkin()->getCheckOn());
+            engine->getSound()->play(osu->getSkin()->getCheckOn());
         }
     } else {
         anim->moveLinear(&m_fRot, 0.0f, animationDuration, true);
@@ -218,7 +210,7 @@ void UIModSelectorModButton::setOn(bool on, bool silent) {
 
         if(prevState && !m_bOn && !silent) {
             // only play sound on specific change
-            engine->getSound()->play(m_osu->getSkin()->getCheckOff());
+            engine->getSound()->play(osu->getSkin()->getCheckOff());
         }
     }
 }
@@ -235,9 +227,9 @@ void UIModSelectorModButton::setState(int state, bool updateModConVar) {
         // We want to sync "nightcore" status between both buttons
         if(!m_states.empty()) {
             if(m_states[0].modName == UString("dt") || m_states[0].modName == UString("nc")) {
-                m_osu->m_modSelector->m_modButtonHalftime->setState(m_iState, false);
+                osu->m_modSelector->m_modButtonHalftime->setState(m_iState, false);
             } else if(m_states[0].modName == UString("ht") || m_states[0].modName == UString("dc")) {
-                m_osu->m_modSelector->m_modButtonDoubletime->setState(m_iState, false);
+                osu->m_modSelector->m_modButtonDoubletime->setState(m_iState, false);
             }
         }
 

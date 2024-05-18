@@ -104,11 +104,11 @@ void disconnect() {
     bancho.score_submission_policy = ServerPolicy::NO_PREFERENCE;
     bancho.set_fposu_flag = false;
     bancho.set_mirror_flag = false;
-    bancho.osu->m_optionsMenu->updateLayout();
+    osu->m_optionsMenu->updateLayout();
 
-    bancho.osu->m_optionsMenu->logInButton->setText("Log in");
-    bancho.osu->m_optionsMenu->logInButton->setColor(0xff00ff00);
-    bancho.osu->m_optionsMenu->logInButton->is_loading = false;
+    osu->m_optionsMenu->logInButton->setText("Log in");
+    osu->m_optionsMenu->logInButton->setColor(0xff00ff00);
+    osu->m_optionsMenu->logInButton->is_loading = false;
 
     for(auto pair : online_users) {
         delete pair.second;
@@ -116,12 +116,12 @@ void disconnect() {
     online_users.clear();
     friends.clear();
 
-    bancho.osu->m_chat->onDisconnect();
+    osu->m_chat->onDisconnect();
 
     // XXX: We should toggle between "offline" sorting options and "online" ones
     //      Online ones would be "Local scores", "Global", "Country", "Selected mods" etc
     //      While offline ones would be "By score", "By pp", etc
-    bancho.osu->m_songBrowser2->onSortScoresChange(UString("Sort By Score"), 0);
+    osu->m_songBrowser2->onSortScoresChange(UString("Sort By Score"), 0);
 
     abort_downloads();
 
@@ -147,7 +147,7 @@ void reconnect() {
     bancho.username = convar->getConVarByName("name")->getString();
     bancho.endpoint = convar->getConVarByName("mp_server")->getString();
 
-    bancho.osu->m_optionsMenu->logInButton->is_loading = true;
+    osu->m_optionsMenu->logInButton->is_loading = true;
     Packet new_login_packet = build_login_packet();
 
     pthread_mutex_lock(&outgoing_mutex);
@@ -250,7 +250,7 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
         if(auth_header.empty()) {
             // XXX: Not thread safe, playing with fire here
             auto errmsg = UString::format("Failed to log in: %s", curl_easy_strerror(res));
-            bancho.osu->getNotificationOverlay()->addNotification(errmsg);
+            osu->getNotificationOverlay()->addNotification(errmsg);
         }
         goto end;
     }
@@ -323,7 +323,7 @@ static void *do_networking(void *data) {
         return NULL;
     }
 
-    while(bancho.osu != nullptr) {
+    while(osu != nullptr) {
         pthread_mutex_lock(&api_requests_mutex);
         if(api_request_queue.empty()) {
             pthread_mutex_unlock(&api_requests_mutex);
@@ -335,7 +335,7 @@ static void *do_networking(void *data) {
             send_api_request(curl, api_out);
         }
 
-        if(bancho.osu && bancho.osu->m_lobby->isVisible()) seconds_between_pings = 1;
+        if(osu && osu->m_lobby->isVisible()) seconds_between_pings = 1;
         if(bancho.is_in_a_multi_room() && seconds_between_pings > 3) seconds_between_pings = 3;
         bool should_ping = difftime(time(NULL), last_packet_tms) > seconds_between_pings;
         if(bancho.user_id <= 0) should_ping = false;
@@ -405,7 +405,7 @@ static void handle_api_response(Packet packet) {
         case GET_REPLAY: {
             if(packet.size == 0) {
                 // Most likely, 404
-                bancho.osu->m_notificationOverlay->addNotification("Failed to download replay");
+                osu->m_notificationOverlay->addNotification("Failed to download replay");
                 break;
             }
 
@@ -418,7 +418,7 @@ static void handle_api_response(Packet packet) {
             auto replay_path_str = replay_path.str();
             FILE *replay_file = fopen(replay_path_str.c_str(), "wb");
             if(replay_file == NULL) {
-                bancho.osu->m_notificationOverlay->addNotification("Failed to save replay");
+                osu->m_notificationOverlay->addNotification("Failed to save replay");
                 break;
             }
 
@@ -438,8 +438,8 @@ static void handle_api_response(Packet packet) {
             debugLog("Score submit result: %s\n", packet.memory);
 
             // Reset leaderboards so new score will appear
-            bancho.osu->getSongBrowser()->m_db->m_online_scores.clear();
-            bancho.osu->getSongBrowser()->rebuildScoreButtons();
+            osu->getSongBrowser()->m_db->m_online_scores.clear();
+            osu->getSongBrowser()->rebuildScoreButtons();
             break;
         }
 

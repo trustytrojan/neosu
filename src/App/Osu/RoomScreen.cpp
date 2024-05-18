@@ -42,32 +42,32 @@ void UIModList::draw(Graphics *g) {
     std::vector<SkinImage *> mods;
 
     if(*m_flags & ModFlags::Nightcore)
-        mods.push_back(bancho.osu->getSkin()->getSelectionModNightCore());
+        mods.push_back(osu->getSkin()->getSelectionModNightCore());
     else if(*m_flags & ModFlags::DoubleTime)
-        mods.push_back(bancho.osu->getSkin()->getSelectionModDoubleTime());
+        mods.push_back(osu->getSkin()->getSelectionModDoubleTime());
 
     bool ht_enabled = *m_flags & ModFlags::HalfTime;
     if(ht_enabled && bancho.prefer_daycore)
-        mods.push_back(bancho.osu->getSkin()->getSelectionModDayCore());
+        mods.push_back(osu->getSkin()->getSelectionModDayCore());
     else if(ht_enabled)
-        mods.push_back(bancho.osu->getSkin()->getSelectionModHalfTime());
+        mods.push_back(osu->getSkin()->getSelectionModHalfTime());
 
     if(*m_flags & ModFlags::Perfect)
-        mods.push_back(bancho.osu->getSkin()->getSelectionModPerfect());
+        mods.push_back(osu->getSkin()->getSelectionModPerfect());
     else if(*m_flags & ModFlags::SuddenDeath)
-        mods.push_back(bancho.osu->getSkin()->getSelectionModSuddenDeath());
+        mods.push_back(osu->getSkin()->getSelectionModSuddenDeath());
 
-    if(*m_flags & ModFlags::NoFail) mods.push_back(bancho.osu->getSkin()->getSelectionModNoFail());
-    if(*m_flags & ModFlags::Easy) mods.push_back(bancho.osu->getSkin()->getSelectionModEasy());
-    if(*m_flags & ModFlags::TouchDevice) mods.push_back(bancho.osu->getSkin()->getSelectionModTD());
-    if(*m_flags & ModFlags::Hidden) mods.push_back(bancho.osu->getSkin()->getSelectionModHidden());
-    if(*m_flags & ModFlags::HardRock) mods.push_back(bancho.osu->getSkin()->getSelectionModHardRock());
-    if(*m_flags & ModFlags::Relax) mods.push_back(bancho.osu->getSkin()->getSelectionModRelax());
-    if(*m_flags & ModFlags::Autoplay) mods.push_back(bancho.osu->getSkin()->getSelectionModAutoplay());
-    if(*m_flags & ModFlags::SpunOut) mods.push_back(bancho.osu->getSkin()->getSelectionModSpunOut());
-    if(*m_flags & ModFlags::Autopilot) mods.push_back(bancho.osu->getSkin()->getSelectionModAutopilot());
-    if(*m_flags & ModFlags::Target) mods.push_back(bancho.osu->getSkin()->getSelectionModTarget());
-    if(*m_flags & ModFlags::ScoreV2) mods.push_back(bancho.osu->getSkin()->getSelectionModScorev2());
+    if(*m_flags & ModFlags::NoFail) mods.push_back(osu->getSkin()->getSelectionModNoFail());
+    if(*m_flags & ModFlags::Easy) mods.push_back(osu->getSkin()->getSelectionModEasy());
+    if(*m_flags & ModFlags::TouchDevice) mods.push_back(osu->getSkin()->getSelectionModTD());
+    if(*m_flags & ModFlags::Hidden) mods.push_back(osu->getSkin()->getSelectionModHidden());
+    if(*m_flags & ModFlags::HardRock) mods.push_back(osu->getSkin()->getSelectionModHardRock());
+    if(*m_flags & ModFlags::Relax) mods.push_back(osu->getSkin()->getSelectionModRelax());
+    if(*m_flags & ModFlags::Autoplay) mods.push_back(osu->getSkin()->getSelectionModAutoplay());
+    if(*m_flags & ModFlags::SpunOut) mods.push_back(osu->getSkin()->getSelectionModSpunOut());
+    if(*m_flags & ModFlags::Autopilot) mods.push_back(osu->getSkin()->getSelectionModAutopilot());
+    if(*m_flags & ModFlags::Target) mods.push_back(osu->getSkin()->getSelectionModTarget());
+    if(*m_flags & ModFlags::ScoreV2) mods.push_back(osu->getSkin()->getSelectionModScorev2());
 
     g->setColor(0xffffffff);
     Vector2 modPos = m_vPos;
@@ -110,7 +110,7 @@ bool UIModList::isVisible() { return *m_flags != 0; }
         m_settings->getContainer()->addBaseUIElement(button);           \
     } while(0)
 
-RoomScreen::RoomScreen(Osu *osu) : OsuScreen(osu) {
+RoomScreen::RoomScreen() : OsuScreen() {
     font = engine->getResourceManager()->getFont("FONT_DEFAULT");
     lfont = osu->getSubTitleFont();
 
@@ -132,20 +132,20 @@ RoomScreen::RoomScreen(Osu *osu) : OsuScreen(osu) {
     m_room_name_ipt = new CBaseUITextbox(0, 0, m_settings->getSize().x, 40, "");
     m_room_name_ipt->setText("Multiplayer room");
 
-    m_change_password_btn = new UIButton(osu, 0, 0, 190, 40, "change_password_btn", "Change password");
+    m_change_password_btn = new UIButton(0, 0, 190, 40, "change_password_btn", "Change password");
     m_change_password_btn->setColor(0xff0e94b5);
     m_change_password_btn->setUseDefaultSkin();
     m_change_password_btn->setClickCallback(fastdelegate::MakeDelegate(this, &RoomScreen::onChangePasswordClicked));
 
     INIT_LABEL(m_win_condition, "Win condition: Score", false);
-    m_change_win_condition_btn = new UIButton(osu, 0, 0, 240, 40, "change_win_condition_btn", "Win condition: Score");
+    m_change_win_condition_btn = new UIButton(0, 0, 240, 40, "change_win_condition_btn", "Win condition: Score");
     m_change_win_condition_btn->setColor(0xff00ff00);
     m_change_win_condition_btn->setUseDefaultSkin();
     m_change_win_condition_btn->setClickCallback(
         fastdelegate::MakeDelegate(this, &RoomScreen::onChangeWinConditionClicked));
 
     INIT_LABEL(map_label, "Beatmap", true);
-    m_select_map_btn = new UIButton(osu, 0, 0, 130, 40, "select_map_btn", "Select map");
+    m_select_map_btn = new UIButton(0, 0, 130, 40, "select_map_btn", "Select map");
     m_select_map_btn->setColor(0xff0e94b5);
     m_select_map_btn->setUseDefaultSkin();
     m_select_map_btn->setClickCallback(fastdelegate::MakeDelegate(this, &RoomScreen::onSelectMapClicked));
@@ -156,18 +156,18 @@ RoomScreen::RoomScreen(Osu *osu) : OsuScreen(osu) {
     INIT_LABEL(m_map_attributes2, "", false);
 
     INIT_LABEL(mods_label, "Mods", true);
-    m_select_mods_btn = new UIButton(osu, 0, 0, 180, 40, "select_mods_btn", "Select mods [F1]");
+    m_select_mods_btn = new UIButton(0, 0, 180, 40, "select_mods_btn", "Select mods [F1]");
     m_select_mods_btn->setColor(0xff0e94b5);
     m_select_mods_btn->setUseDefaultSkin();
     m_select_mods_btn->setClickCallback(fastdelegate::MakeDelegate(this, &RoomScreen::onSelectModsClicked));
-    m_freemod = new UICheckbox(m_osu, 0, 0, 200, 50, "allow_freemod", "Freemod");
+    m_freemod = new UICheckbox(0, 0, 200, 50, "allow_freemod", "Freemod");
     m_freemod->setDrawFrame(false);
     m_freemod->setDrawBackground(false);
     m_freemod->setChangeCallback(fastdelegate::MakeDelegate(this, &RoomScreen::onFreemodCheckboxChanged));
     m_mods = new UIModList(&bancho.room.mods);
     INIT_LABEL(m_no_mods_selected, "No mods selected.", false);
 
-    m_ready_btn = new UIButton(osu, 0, 0, 300, 50, "start_game_btn", "Start game");
+    m_ready_btn = new UIButton(0, 0, 300, 50, "start_game_btn", "Start game");
     m_ready_btn->setColor(0xff00ff00);
     m_ready_btn->setUseDefaultSkin();
     m_ready_btn->setClickCallback(fastdelegate::MakeDelegate(this, &RoomScreen::onReadyButtonClick));
@@ -186,10 +186,10 @@ RoomScreen::RoomScreen(Osu *osu) : OsuScreen(osu) {
     m_slotlist->setHorizontalScrolling(false);
     addBaseUIElement(m_slotlist);
 
-    m_contextMenu = new UIContextMenu(m_osu, 50, 50, 150, 0, "", m_settings);
+    m_contextMenu = new UIContextMenu(50, 50, 150, 0, "", m_settings);
     addBaseUIElement(m_contextMenu);
 
-    updateLayout(m_osu->getScreenSize());
+    updateLayout(osu->getScreenSize());
 }
 
 RoomScreen::~RoomScreen() {
@@ -219,7 +219,7 @@ void RoomScreen::draw(Graphics *g) {
     if(!m_bVisible) return;
 
     // XXX: Add convar for toggling room backgrounds
-    SongBrowser::drawSelectedBeatmapBackgroundImage(g, m_osu, 1.0);
+    SongBrowser::drawSelectedBeatmapBackgroundImage(g, 1.0);
     OsuScreen::draw(g);
 
     // Update avatar visibility status
@@ -272,15 +272,15 @@ void RoomScreen::draw(Graphics *g) {
         ss << MCENGINE_DATA_DIR "maps/" << std::to_string(set_id) << "/";
         auto mapset_path = ss.str();
         // XXX: Make a permanent database for auto-downloaded songs, so we can load them like osu!.db's
-        m_osu->m_songBrowser2->getDatabase()->addBeatmap(mapset_path);
-        m_osu->m_songBrowser2->updateSongButtonSorting();
+        osu->m_songBrowser2->getDatabase()->addBeatmap(mapset_path);
+        osu->m_songBrowser2->updateSongButtonSorting();
         debugLog("Finished loading beatmapset %d.\n", set_id);
         on_map_change(false);
     }
 }
 
 void RoomScreen::mouse_update(bool *propagate_clicks) {
-    if(!m_bVisible || m_osu->m_songBrowser2->isVisible()) return;
+    if(!m_bVisible || osu->m_songBrowser2->isVisible()) return;
 
     const bool room_name_changed = m_room_name_ipt->getText() != bancho.room.name;
     if(bancho.room.is_host() && room_name_changed) {
@@ -293,7 +293,7 @@ void RoomScreen::mouse_update(bool *propagate_clicks) {
         send_packet(packet);
     }
 
-    m_pauseButton->setPaused(!m_osu->getSelectedBeatmap()->isPreviewMusicPlaying());
+    m_pauseButton->setPaused(!osu->getSelectedBeatmap()->isPreviewMusicPlaying());
 
     m_contextMenu->mouse_update(propagate_clicks);
     if(!*propagate_clicks) return;
@@ -302,7 +302,7 @@ void RoomScreen::mouse_update(bool *propagate_clicks) {
 }
 
 void RoomScreen::onKeyDown(KeyboardEvent &key) {
-    if(!m_bVisible || m_osu->m_songBrowser2->isVisible()) return;
+    if(!m_bVisible || osu->m_songBrowser2->isVisible()) return;
 
     if(key.getKeyCode() == KEY_ESCAPE) {
         key.consume();
@@ -313,8 +313,8 @@ void RoomScreen::onKeyDown(KeyboardEvent &key) {
     if(key.getKeyCode() == KEY_F1) {
         key.consume();
         if(bancho.room.freemods || bancho.room.is_host()) {
-            m_osu->m_modSelector->setVisible(!m_osu->m_modSelector->isVisible());
-            m_bVisible = !m_osu->m_modSelector->isVisible();
+            osu->m_modSelector->setVisible(!osu->m_modSelector->isVisible());
+            m_bVisible = !osu->m_modSelector->isVisible();
         }
         return;
     }
@@ -323,12 +323,12 @@ void RoomScreen::onKeyDown(KeyboardEvent &key) {
 }
 
 void RoomScreen::onKeyUp(KeyboardEvent &key) {
-    if(!m_bVisible || m_osu->m_songBrowser2->isVisible()) return;
+    if(!m_bVisible || osu->m_songBrowser2->isVisible()) return;
     OsuScreen::onKeyUp(key);
 }
 
 void RoomScreen::onChar(KeyboardEvent &key) {
-    if(!m_bVisible || m_osu->m_songBrowser2->isVisible()) return;
+    if(!m_bVisible || osu->m_songBrowser2->isVisible()) return;
     OsuScreen::onChar(key);
 }
 
@@ -453,7 +453,7 @@ void RoomScreen::updateLayout(Vector2 newResolution) {
     setSize(newResolution);
     updateSettingsLayout(newResolution);
 
-    const float dpiScale = Osu::getUIScale(m_osu);
+    const float dpiScale = Osu::getUIScale();
     m_pauseButton->setSize(30 * dpiScale, 30 * dpiScale);
     m_pauseButton->setPos(round(newResolution.x * 0.6) - m_pauseButton->getSize().x * 2 - 10 * dpiScale,
                           m_pauseButton->getSize().y + 10 * dpiScale);
@@ -474,7 +474,7 @@ void RoomScreen::updateLayout(Vector2 newResolution) {
             auto avatar = new UIAvatar(bancho.room.slots[i].player_id, 10, y_total, SLOT_HEIGHT, SLOT_HEIGHT);
             m_slotlist->getContainer()->addBaseUIElement(avatar);
 
-            auto user_box = new UIUserLabel(m_osu, bancho.room.slots[i].player_id, username);
+            auto user_box = new UIUserLabel(bancho.room.slots[i].player_id, username);
             user_box->setFont(lfont);
             user_box->setPos(avatar->getRelPos().x + avatar->getSize().x + 10, y_total);
 
@@ -509,19 +509,19 @@ void RoomScreen::ragequit() {
     packet.id = EXIT_ROOM;
     send_packet(packet);
 
-    m_osu->m_modSelector->resetMods();
-    m_osu->m_modSelector->updateButtons();
+    osu->m_modSelector->resetMods();
+    osu->m_modSelector->updateButtons();
 
     bancho.room = Room();
-    m_osu->m_mainMenu->setVisible(true);
-    m_osu->m_chat->removeChannel("#multiplayer");
-    m_osu->m_chat->updateVisibility();
+    osu->m_mainMenu->setVisible(true);
+    osu->m_chat->removeChannel("#multiplayer");
+    osu->m_chat->updateVisibility();
 }
 
 void RoomScreen::process_beatmapset_info_response(Packet packet) {
     u32 map_id = packet.extra_int;
     if(packet.size == 0) {
-        bancho.osu->m_room->mapset_by_mapid[map_id] = 0;
+        osu->m_room->mapset_by_mapid[map_id] = 0;
         return;
     }
 
@@ -557,14 +557,14 @@ void RoomScreen::process_beatmapset_info_response(Packet packet) {
 
     str = strtok_r(NULL, "|", &saveptr);
     if(!str) return;
-    bancho.osu->m_room->mapset_by_mapid[map_id] = strtoul(str, NULL, 10);
+    osu->m_room->mapset_by_mapid[map_id] = strtoul(str, NULL, 10);
 
     // Do nothing with the rest
 }
 
 void RoomScreen::on_map_change(bool download) {
     // Results screen has map background and such showing, so prevent map from changing while we're on it.
-    if(m_osu->m_rankingScreen->isVisible()) return;
+    if(osu->m_rankingScreen->isVisible()) return;
 
     debugLog("Map changed to ID %d, MD5 %s: %s\n", bancho.room.map_id, bancho.room.map_md5.hash,
              bancho.room.map_name.toUtf8());
@@ -572,16 +572,16 @@ void RoomScreen::on_map_change(bool download) {
 
     // Deselect current map
     m_pauseButton->setPaused(true);
-    m_osu->m_songBrowser2->m_selectedBeatmap->deselect();
+    osu->m_songBrowser2->m_selectedBeatmap->deselect();
 
     if(bancho.room.map_id == 0) {
         m_map_title->setText("(no map selected)");
         m_map_title->setSizeToContent(0, 0);
         m_ready_btn->is_loading = true;
     } else {
-        auto beatmap = m_osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(bancho.room.map_md5);
+        auto beatmap = osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(bancho.room.map_md5);
         if(beatmap != nullptr) {
-            m_osu->m_songBrowser2->onDifficultySelected(beatmap, false);
+            osu->m_songBrowser2->onDifficultySelected(beatmap, false);
             m_map_title->setText(bancho.room.map_name);
             m_map_title->setSizeToContent(0, 0);
             auto attributes = UString::format("AR: %.1f, CS: %.1f, HP: %.1f, OD: %.1f", beatmap->getAR(),
@@ -632,7 +632,7 @@ void RoomScreen::on_map_change(bool download) {
         }
     }
 
-    updateLayout(m_osu->getScreenSize());
+    updateLayout(osu->getScreenSize());
 }
 
 void RoomScreen::on_room_joined(Room room) {
@@ -650,16 +650,16 @@ void RoomScreen::on_room_joined(Room room) {
     // Currently we can only join rooms from the lobby.
     // If we add ability to join from links, you would need to hide all other
     // screens, kick the player out of the song they're currently playing, etc.
-    m_osu->m_lobby->setVisible(false);
-    updateLayout(m_osu->getScreenSize());
+    osu->m_lobby->setVisible(false);
+    updateLayout(osu->getScreenSize());
     m_bVisible = true;
 
-    RichPresence::setBanchoStatus(m_osu, room.name.toUtf8(), MULTIPLAYER);
-    m_osu->m_chat->addChannel("#multiplayer");
-    m_osu->m_chat->updateVisibility();
+    RichPresence::setBanchoStatus(room.name.toUtf8(), MULTIPLAYER);
+    osu->m_chat->addChannel("#multiplayer");
+    osu->m_chat->updateVisibility();
 
-    m_osu->m_modSelector->resetMods();
-    m_osu->m_modSelector->enableModsFromFlags(bancho.room.mods);
+    osu->m_modSelector->resetMods();
+    osu->m_modSelector->enableModsFromFlags(bancho.room.mods);
 }
 
 void RoomScreen::on_room_updated(Room room) {
@@ -690,28 +690,28 @@ void RoomScreen::on_room_updated(Room room) {
         m_room_name_ipt->setText(bancho.room.name);
     }
 
-    m_osu->m_modSelector->updateButtons();
-    m_osu->m_modSelector->resetMods();
-    m_osu->m_modSelector->enableModsFromFlags(bancho.room.mods | player_slot->mods);
+    osu->m_modSelector->updateButtons();
+    osu->m_modSelector->resetMods();
+    osu->m_modSelector->enableModsFromFlags(bancho.room.mods | player_slot->mods);
 
-    updateLayout(m_osu->getScreenSize());
+    updateLayout(osu->getScreenSize());
 }
 
 void RoomScreen::on_match_started(Room room) {
     bancho.room = room;
-    if(m_osu->getSelectedBeatmap() == nullptr) {
+    if(osu->getSelectedBeatmap() == nullptr) {
         debugLog("We received MATCH_STARTED without being ready, wtf!\n");
         return;
     }
 
     last_packet_tms = time(NULL);
 
-    if(m_osu->getSelectedBeatmap()->play()) {
+    if(osu->getSelectedBeatmap()->play()) {
         m_bVisible = false;
         bancho.match_started = true;
-        m_osu->m_songBrowser2->m_bHasSelectedAndIsPlaying = true;
-        m_osu->onPlayStart();
-        m_osu->m_chat->updateVisibility();
+        osu->m_songBrowser2->m_bHasSelectedAndIsPlaying = true;
+        osu->onPlayStart();
+        osu->m_chat->updateVisibility();
     } else {
         ragequit();  // map failed to load
     }
@@ -743,12 +743,12 @@ void RoomScreen::on_match_score_updated(Packet *packet) {
         slot->sv2_bonus = read<f64>(packet);
     }
 
-    bancho.osu->m_hud->updateScoreboard(true);
+    osu->m_hud->updateScoreboard(true);
 }
 
 void RoomScreen::on_all_players_loaded() {
     bancho.room.all_players_loaded = true;
-    m_osu->m_chat->updateVisibility();
+    osu->m_chat->updateVisibility();
 }
 
 void RoomScreen::on_player_failed(i32 slot_id) {
@@ -760,10 +760,10 @@ void RoomScreen::on_player_failed(i32 slot_id) {
 void RoomScreen::on_match_finished() {
     if(!bancho.is_playing_a_multi_map()) return;
     memcpy(bancho.last_scores, bancho.room.slots, sizeof(bancho.room.slots));
-    m_osu->onPlayEnd(false, false);
+    osu->onPlayEnd(false, false);
     bancho.match_started = false;
-    m_osu->m_rankingScreen->setVisible(true);
-    m_osu->m_chat->updateVisibility();
+    osu->m_rankingScreen->setVisible(true);
+    osu->m_chat->updateVisibility();
 }
 
 void RoomScreen::on_all_players_skipped() { bancho.room.all_players_skipped = true; }
@@ -779,7 +779,7 @@ void RoomScreen::on_player_skip(i32 user_id) {
 
 void RoomScreen::on_match_aborted() {
     if(!bancho.is_playing_a_multi_map()) return;
-    m_osu->onPlayEnd(false, true);
+    osu->onPlayEnd(false, true);
     m_bVisible = true;
     bancho.match_started = false;
 }
@@ -794,7 +794,7 @@ void RoomScreen::onClientScoreChange(bool force) {
     Packet packet;
     packet.id = UPDATE_MATCH_SCORE;
 
-    write<u32>(&packet, (i32)m_osu->getSelectedBeatmap()->getTime());
+    write<u32>(&packet, (i32)osu->getSelectedBeatmap()->getTime());
 
     u8 slot_id = 0;
     for(u8 i = 0; i < 16; i++) {
@@ -805,20 +805,20 @@ void RoomScreen::onClientScoreChange(bool force) {
     }
     write<u8>(&packet, slot_id);
 
-    write<u16>(&packet, (u16)m_osu->getScore()->getNum300s());
-    write<u16>(&packet, (u16)m_osu->getScore()->getNum100s());
-    write<u16>(&packet, (u16)m_osu->getScore()->getNum50s());
-    write<u16>(&packet, (u16)m_osu->getScore()->getNum300gs());
-    write<u16>(&packet, (u16)m_osu->getScore()->getNum100ks());
-    write<u16>(&packet, (u16)m_osu->getScore()->getNumMisses());
-    write<u32>(&packet, (i32)m_osu->getScore()->getScore());
-    write<u16>(&packet, (u16)m_osu->getScore()->getCombo());
-    write<u16>(&packet, (u16)m_osu->getScore()->getComboMax());
-    write<u8>(&packet, m_osu->getScore()->getNumSliderBreaks() == 0 && m_osu->getScore()->getNumMisses() == 0 &&
-                           m_osu->getScore()->getNum50s() == 0 && m_osu->getScore()->getNum100s() == 0);
-    write<u8>(&packet, m_osu->getSelectedBeatmap()->getHealth() * 200);
+    write<u16>(&packet, (u16)osu->getScore()->getNum300s());
+    write<u16>(&packet, (u16)osu->getScore()->getNum100s());
+    write<u16>(&packet, (u16)osu->getScore()->getNum50s());
+    write<u16>(&packet, (u16)osu->getScore()->getNum300gs());
+    write<u16>(&packet, (u16)osu->getScore()->getNum100ks());
+    write<u16>(&packet, (u16)osu->getScore()->getNumMisses());
+    write<u32>(&packet, (i32)osu->getScore()->getScore());
+    write<u16>(&packet, (u16)osu->getScore()->getCombo());
+    write<u16>(&packet, (u16)osu->getScore()->getComboMax());
+    write<u8>(&packet, osu->getScore()->getNumSliderBreaks() == 0 && osu->getScore()->getNumMisses() == 0 &&
+                           osu->getScore()->getNum50s() == 0 && osu->getScore()->getNum100s() == 0);
+    write<u8>(&packet, osu->getSelectedBeatmap()->getHealth() * 200);
     write<u8>(&packet, 0);  // 4P, not supported
-    write<u8>(&packet, m_osu->getModScorev2());
+    write<u8>(&packet, osu->getModScorev2());
     send_packet(packet);
 
     last_packet_tms = time(NULL);
@@ -826,7 +826,7 @@ void RoomScreen::onClientScoreChange(bool force) {
 
 void RoomScreen::onReadyButtonClick() {
     if(m_ready_btn->is_loading) return;
-    engine->getSound()->play(m_osu->getSkin()->getMenuHit());
+    engine->getSound()->play(osu->getSkin()->getMenuHit());
 
     int nb_ready = 0;
     bool is_ready = false;
@@ -850,15 +850,15 @@ void RoomScreen::onReadyButtonClick() {
 }
 
 void RoomScreen::onSelectModsClicked() {
-    engine->getSound()->play(m_osu->getSkin()->getMenuHit());
-    m_osu->m_modSelector->setVisible(true);
+    engine->getSound()->play(osu->getSkin()->getMenuHit());
+    osu->m_modSelector->setVisible(true);
     m_bVisible = false;
 }
 
 void RoomScreen::onSelectMapClicked() {
     if(!bancho.room.is_host()) return;
 
-    engine->getSound()->play(m_osu->getSkin()->getMenuHit());
+    engine->getSound()->play(osu->getSkin()->getMenuHit());
 
     Packet packet;
     packet.id = MATCH_CHANGE_SETTINGS;
@@ -868,11 +868,11 @@ void RoomScreen::onSelectMapClicked() {
     bancho.room.pack(&packet);
     send_packet(packet);
 
-    m_osu->m_songBrowser2->setVisible(true);
+    osu->m_songBrowser2->setVisible(true);
 }
 
 void RoomScreen::onChangePasswordClicked() {
-    m_osu->m_prompt->prompt("New password:", fastdelegate::MakeDelegate(this, &RoomScreen::set_new_password));
+    osu->m_prompt->prompt("New password:", fastdelegate::MakeDelegate(this, &RoomScreen::set_new_password));
 }
 
 void RoomScreen::onChangeWinConditionClicked() {
@@ -896,7 +896,7 @@ void RoomScreen::onWinConditionSelected(UString win_condition_str, int win_condi
     bancho.room.pack(&packet);
     send_packet(packet);
 
-    updateLayout(m_osu->getScreenSize());
+    updateLayout(osu->getScreenSize());
 }
 
 void RoomScreen::set_new_password(UString new_password) {

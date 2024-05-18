@@ -7,8 +7,8 @@ class DatabaseBeatmap;
 
 class SongButton : public Button {
    public:
-    SongButton(Osu *osu, SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos,
-               float yPos, float xSize, float ySize, UString name, DatabaseBeatmap *databaseBeatmap);
+    SongButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos, float yPos,
+               float xSize, float ySize, UString name, DatabaseBeatmap *databaseBeatmap);
     virtual ~SongButton();
 
     virtual void draw(Graphics *g);

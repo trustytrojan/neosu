@@ -6,7 +6,7 @@
 #include "Osu.h"
 #include "UIButton.h"
 
-PromptScreen::PromptScreen(Osu *osu) : OsuScreen(osu) {
+PromptScreen::PromptScreen() : OsuScreen() {
     m_prompt_label = new CBaseUILabel(0, 0, 0, 0, "", "");
     m_prompt_label->setDrawFrame(false);
     m_prompt_label->setDrawBackground(false);
@@ -15,13 +15,13 @@ PromptScreen::PromptScreen(Osu *osu) : OsuScreen(osu) {
     m_prompt_input = new CBaseUITextbox(0, 0, 400, 40, "");
     addBaseUIElement(m_prompt_input);
 
-    m_ok_btn = new UIButton(osu, 0, 0, 110, 35, "ok_btn", "OK");
+    m_ok_btn = new UIButton(0, 0, 110, 35, "ok_btn", "OK");
     m_ok_btn->setColor(0xff00ff00);
     m_ok_btn->setUseDefaultSkin();
     m_ok_btn->setClickCallback(fastdelegate::MakeDelegate(this, &PromptScreen::on_ok));
     addBaseUIElement(m_ok_btn);
 
-    m_cancel_btn = new UIButton(osu, 0, 0, 110, 35, "cancel_btn", "Cancel");
+    m_cancel_btn = new UIButton(0, 0, 110, 35, "cancel_btn", "Cancel");
     m_cancel_btn->setColor(0xff0e94b5);
     m_cancel_btn->setUseDefaultSkin();
     m_cancel_btn->setClickCallback(fastdelegate::MakeDelegate(this, &PromptScreen::on_cancel));
@@ -97,7 +97,7 @@ void PromptScreen::prompt(UString msg, PromptResponseCallback callback) {
     m_callback = callback;
     m_bVisible = true;
 
-    onResolutionChange(m_osu->getScreenSize());
+    onResolutionChange(osu->getScreenSize());
 }
 
 void PromptScreen::on_ok() {

@@ -64,8 +64,7 @@ class UserStatsScreenMenuButton : public CBaseUIButton {
 
 class UserStatsScreenBackgroundPPRecalculator : public Resource {
    public:
-    UserStatsScreenBackgroundPPRecalculator(Osu *osu, UString userName, bool importLegacyScores) : Resource() {
-        m_osu = osu;
+    UserStatsScreenBackgroundPPRecalculator(UString userName, bool importLegacyScores) : Resource() {
         m_sUserName = userName;
         m_bImportLegacyScores = importLegacyScores;
 
@@ -81,7 +80,7 @@ class UserStatsScreenBackgroundPPRecalculator : public Resource {
 
     virtual void initAsync() {
         std::unordered_map<MD5Hash, std::vector<FinishedScore>> *scores =
-            m_osu->getSongBrowser()->getDatabase()->getScores();
+            osu->getSongBrowser()->getDatabase()->getScores();
 
         // count number of scores to recalculate for UI
         std::string sUsername(m_sUserName.toUtf8());
@@ -123,8 +122,7 @@ class UserStatsScreenBackgroundPPRecalculator : public Resource {
                     }
 
                     // 1) get matching beatmap from db
-                    DatabaseBeatmap *diff2 =
-                        m_osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(score.md5hash);
+                    DatabaseBeatmap *diff2 = osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(score.md5hash);
                     if(diff2 == NULL) {
                         if(Osu::debug->getBool()) debugLog("PPRecalc couldn't find %s\n", score.md5hash.toUtf8());
                         continue;
@@ -230,7 +228,6 @@ class UserStatsScreenBackgroundPPRecalculator : public Resource {
 
     virtual void destroy() { ; }
 
-    Osu *m_osu;
     UString m_sUserName;
     bool m_bImportLegacyScores;
 
@@ -238,13 +235,13 @@ class UserStatsScreenBackgroundPPRecalculator : public Resource {
     std::atomic<int> m_iNumScoresRecalculated;
 };
 
-UserStatsScreen::UserStatsScreen(Osu *osu) : ScreenBackable(osu) {
+UserStatsScreen::UserStatsScreen() : ScreenBackable() {
     m_name_ref = convar->getConVarByName("name");
 
-    m_contextMenu = new UIContextMenu(m_osu);
+    m_contextMenu = new UIContextMenu();
     m_contextMenu->setVisible(true);
 
-    m_ppVersionInfoLabel = new UIUserStatsScreenLabel(m_osu);
+    m_ppVersionInfoLabel = new UIUserStatsScreenLabel();
     m_ppVersionInfoLabel->setText(UString::format("pp Version: %i", DifficultyCalculator::PP_ALGORITHM_VERSION));
     m_ppVersionInfoLabel->setTooltipText(
         "NOTE: This version number does NOT mean your scores have already been recalculated!\nNOTE: Click the gear "
@@ -256,7 +253,7 @@ UserStatsScreen::UserStatsScreen(Osu *osu) : ScreenBackable(osu) {
     m_ppVersionInfoLabel->setDrawFrame(false);
     addBaseUIElement(m_ppVersionInfoLabel);
 
-    m_userButton = new UserButton(m_osu);
+    m_userButton = new UserButton();
     m_userButton->addTooltipLine("Click to change [User]");
     m_userButton->setClickCallback(fastdelegate::MakeDelegate(this, &UserStatsScreen::onUserClicked));
     addBaseUIElement(m_userButton);
@@ -268,7 +265,7 @@ UserStatsScreen::UserStatsScreen(Osu *osu) : ScreenBackable(osu) {
     addBaseUIElement(m_scores);
 
     m_menuButton = new UserStatsScreenMenuButton();
-    m_menuButton->setFont(m_osu->getFontIcons());
+    m_menuButton->setFont(osu->getFontIcons());
     {
         UString iconString;
         iconString.insert(0, Icons::GEAR);
@@ -310,14 +307,14 @@ void UserStatsScreen::draw(Graphics *g) {
             g->pushTransform();
             {
                 g->translate(
-                    (int)(m_osu->getScreenWidth() / 2 - m_osu->getSubTitleFont()->getStringWidth(loadingMessage) / 2),
-                    m_osu->getScreenHeight() - 15);
-                g->drawString(m_osu->getSubTitleFont(), loadingMessage);
+                    (int)(osu->getScreenWidth() / 2 - osu->getSubTitleFont()->getStringWidth(loadingMessage) / 2),
+                    osu->getScreenHeight() - 15);
+                g->drawString(osu->getSubTitleFont(), loadingMessage);
             }
             g->popTransform();
         }
 
-        m_osu->getHUD()->drawBeatmapImportSpinner(g);
+        osu->getHUD()->drawBeatmapImportSpinner(g);
 
         ScreenBackable::draw(g);
         return;
@@ -335,8 +332,8 @@ void UserStatsScreen::mouse_update(bool *propagate_clicks) {
         // wait until recalc is finished
         if(m_backgroundPPRecalculator != NULL && m_backgroundPPRecalculator->isReady()) {
             // force recalc + refresh UI
-            m_osu->getSongBrowser()->getDatabase()->forceScoreUpdateOnNextCalculatePlayerStats();
-            m_osu->getSongBrowser()->getDatabase()->forceScoresSaveOnNextShutdown();
+            osu->getSongBrowser()->getDatabase()->forceScoreUpdateOnNextCalculatePlayerStats();
+            osu->getSongBrowser()->getDatabase()->forceScoresSaveOnNextShutdown();
 
             rebuildScoreButtons(m_name_ref->getString());
 
@@ -375,8 +372,8 @@ void UserStatsScreen::onBack() {
         else
             m_bRecalculatingPP = false;  // this should never happen
     } else {
-        engine->getSound()->play(m_osu->getSkin()->getMenuClick());
-        m_osu->toggleSongBrowser();
+        engine->getSound()->play(osu->getSkin()->getMenuClick());
+        osu->toggleSongBrowser();
     }
 }
 
@@ -387,7 +384,7 @@ void UserStatsScreen::rebuildScoreButtons(UString playerName) {
     m_scores->getContainer()->clear();
     m_scoreButtons.clear();
 
-    Database *db = m_osu->getSongBrowser()->getDatabase();
+    Database *db = osu->getSongBrowser()->getDatabase();
     std::vector<FinishedScore *> scores = db->getPlayerPPScores(playerName).ppScores;
     for(int i = scores.size() - 1; i >= std::max(0, (int)scores.size() - osu_ui_top_ranks_max.getInt()); i--) {
         const float weight = Database::getWeightForIndex(scores.size() - 1 - i);
@@ -404,7 +401,7 @@ void UserStatsScreen::rebuildScoreButtons(UString playerName) {
             title.append("]");
         }
 
-        ScoreButton *button = new ScoreButton(m_osu, m_contextMenu, 0, 0, 300, 100, ScoreButton::STYLE::TOP_RANKS);
+        ScoreButton *button = new ScoreButton(m_contextMenu, 0, 0, 300, 100, ScoreButton::STYLE::TOP_RANKS);
         button->map_hash = scores[i]->md5hash;
         button->setScore(*scores[i], NULL, scores.size() - i, title, weight);
         button->setClickCallback(fastdelegate::MakeDelegate(this, &UserStatsScreen::onScoreClicked));
@@ -414,7 +411,7 @@ void UserStatsScreen::rebuildScoreButtons(UString playerName) {
     }
 
     m_userButton->setText(playerName);
-    m_osu->getOptionsMenu()->setUsername(
+    osu->getOptionsMenu()->setUsername(
         playerName);  // NOTE: force update options textbox to avoid shutdown inconsistency
     m_userButton->updateUserStats();
 
@@ -422,10 +419,10 @@ void UserStatsScreen::rebuildScoreButtons(UString playerName) {
 }
 
 void UserStatsScreen::onUserClicked(CBaseUIButton *button) {
-    engine->getSound()->play(m_osu->getSkin()->getMenuClick());
+    engine->getSound()->play(osu->getSkin()->getMenuClick());
 
     // NOTE: code duplication (see OsuSongbrowser2.cpp)
-    std::vector<UString> names = m_osu->getSongBrowser()->getDatabase()->getPlayerNamesWithScoresForUserSwitcher();
+    std::vector<UString> names = osu->getSongBrowser()->getDatabase()->getPlayerNamesWithScoresForUserSwitcher();
     if(names.size() > 0) {
         m_contextMenu->setPos(m_userButton->getPos() + Vector2(0, m_userButton->getSize().y));
         m_contextMenu->setRelPos(m_userButton->getPos() + Vector2(0, m_userButton->getSize().y));
@@ -456,8 +453,8 @@ void UserStatsScreen::onUserButtonChange(UString text, int id) {
 }
 
 void UserStatsScreen::onScoreClicked(CBaseUIButton *button) {
-    m_osu->toggleSongBrowser();
-    m_osu->getSongBrowser()->highlightScore(((ScoreButton *)button)->getScore().unixTimestamp);
+    osu->toggleSongBrowser();
+    osu->getSongBrowser()->highlightScore(((ScoreButton *)button)->getScore().unixTimestamp);
 }
 
 void UserStatsScreen::onMenuClicked(CBaseUIButton *button) {
@@ -572,18 +569,18 @@ void UserStatsScreen::onRecalculatePP(bool importLegacyScores) {
     }
 
     m_backgroundPPRecalculator =
-        new UserStatsScreenBackgroundPPRecalculator(m_osu, m_name_ref->getString(), importLegacyScores);
+        new UserStatsScreenBackgroundPPRecalculator(m_name_ref->getString(), importLegacyScores);
 
     // NOTE: force disable all runtime mods (including all experimental mods!), as they directly influence global
     // GameRules which are used during pp calculation
-    m_osu->getModSelector()->resetMods();
+    osu->getModSelector()->resetMods();
 
     engine->getResourceManager()->requestNextLoadAsync();
     engine->getResourceManager()->loadResource(m_backgroundPPRecalculator);
 }
 
 void UserStatsScreen::onCopyAllScoresClicked() {
-    std::vector<UString> names = m_osu->getSongBrowser()->getDatabase()->getPlayerNamesWithPPScores();
+    std::vector<UString> names = osu->getSongBrowser()->getDatabase()->getPlayerNamesWithPPScores();
     {
         // remove ourself
         for(size_t i = 0; i < names.size(); i++) {
@@ -595,7 +592,7 @@ void UserStatsScreen::onCopyAllScoresClicked() {
     }
 
     if(names.size() < 1) {
-        m_osu->getNotificationOverlay()->addNotification("There are no valid users/scores to copy from.");
+        osu->getNotificationOverlay()->addNotification("There are no valid users/scores to copy from.");
         return;
     }
 
@@ -658,8 +655,7 @@ void UserStatsScreen::onCopyAllScoresConfirmed(UString text, int id) {
     debugLog("Copying all scores from \"%s\" into \"%s\"\n", m_sCopyAllScoresFromUser.toUtf8(),
              playerNameToCopyInto.toUtf8());
 
-    std::unordered_map<MD5Hash, std::vector<FinishedScore>> *scores =
-        m_osu->getSongBrowser()->getDatabase()->getScores();
+    std::unordered_map<MD5Hash, std::vector<FinishedScore>> *scores = osu->getSongBrowser()->getDatabase()->getScores();
 
     std::vector<FinishedScore> tempScoresToCopy;
     for(auto &kv : *scores) {
@@ -702,7 +698,7 @@ void UserStatsScreen::onCopyAllScoresConfirmed(UString text, int id) {
             for(size_t i = 0; i < tempScoresToCopy.size(); i++) {
                 tempScoresToCopy[i].playerName = splayerNameToCopyInto;  // take ownership of this copied score
                 tempScoresToCopy[i].sortHack =
-                    m_osu->getSongBrowser()->getDatabase()->getAndIncrementScoreSortHackCounter();
+                    osu->getSongBrowser()->getDatabase()->getAndIncrementScoreSortHackCounter();
 
                 kv.second.push_back(tempScoresToCopy[i]);  // copy into db
             }
@@ -710,8 +706,8 @@ void UserStatsScreen::onCopyAllScoresConfirmed(UString text, int id) {
     }
 
     // force recalc + refresh UI
-    m_osu->getSongBrowser()->getDatabase()->forceScoreUpdateOnNextCalculatePlayerStats();
-    m_osu->getSongBrowser()->getDatabase()->forceScoresSaveOnNextShutdown();
+    osu->getSongBrowser()->getDatabase()->forceScoreUpdateOnNextCalculatePlayerStats();
+    osu->getSongBrowser()->getDatabase()->forceScoresSaveOnNextShutdown();
 
     rebuildScoreButtons(playerNameToCopyInto);
 }
@@ -748,8 +744,7 @@ void UserStatsScreen::onDeleteAllScoresConfirmed(UString text, int id) {
 
     debugLog("Deleting all scores for \"%s\"\n", playerName.toUtf8());
 
-    std::unordered_map<MD5Hash, std::vector<FinishedScore>> *scores =
-        m_osu->getSongBrowser()->getDatabase()->getScores();
+    std::unordered_map<MD5Hash, std::vector<FinishedScore>> *scores = osu->getSongBrowser()->getDatabase()->getScores();
 
     // delete every score matching the current playerName
     for(auto &kv : *scores) {
@@ -767,8 +762,8 @@ void UserStatsScreen::onDeleteAllScoresConfirmed(UString text, int id) {
     }
 
     // force recalc + refresh UI
-    m_osu->getSongBrowser()->getDatabase()->forceScoreUpdateOnNextCalculatePlayerStats();
-    m_osu->getSongBrowser()->getDatabase()->forceScoresSaveOnNextShutdown();
+    osu->getSongBrowser()->getDatabase()->forceScoreUpdateOnNextCalculatePlayerStats();
+    osu->getSongBrowser()->getDatabase()->forceScoresSaveOnNextShutdown();
 
     rebuildScoreButtons(playerName);
 }
@@ -776,14 +771,13 @@ void UserStatsScreen::onDeleteAllScoresConfirmed(UString text, int id) {
 void UserStatsScreen::updateLayout() {
     ScreenBackable::updateLayout();
 
-    const float dpiScale = Osu::getUIScale(m_osu);
+    const float dpiScale = Osu::getUIScale();
 
-    setSize(m_osu->getScreenSize());
+    setSize(osu->getScreenSize());
 
-    const int scoreListHeight = m_osu->getScreenHeight() * 0.8f;
-    m_scores->setSize(m_osu->getScreenWidth() * 0.6f, scoreListHeight);
-    m_scores->setPos(m_osu->getScreenWidth() / 2 - m_scores->getSize().x / 2,
-                     m_osu->getScreenHeight() - scoreListHeight);
+    const int scoreListHeight = osu->getScreenHeight() * 0.8f;
+    m_scores->setSize(osu->getScreenWidth() * 0.6f, scoreListHeight);
+    m_scores->setPos(osu->getScreenWidth() / 2 - m_scores->getSize().x / 2, osu->getScreenHeight() - scoreListHeight);
 
     const int margin = 5 * dpiScale;
     const int padding = 5 * dpiScale;
@@ -801,7 +795,7 @@ void UserStatsScreen::updateLayout() {
 
     const int userButtonHeight = m_scores->getPos().y * 0.6f;
     m_userButton->setSize(userButtonHeight * 3.5f, userButtonHeight);
-    m_userButton->setPos(m_osu->getScreenWidth() / 2 - m_userButton->getSize().x / 2,
+    m_userButton->setPos(osu->getScreenWidth() / 2 - m_userButton->getSize().x / 2,
                          m_scores->getPos().y / 2 - m_userButton->getSize().y / 2);
 
     m_menuButton->setSize(userButtonHeight * 0.9f, userButtonHeight * 0.9f);

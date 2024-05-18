@@ -1,10 +1,3 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		settings
-//
-// $NoKeywords: $
-//===============================================================================//
-
 #include "OptionsMenu.h"
 
 #include <fstream>
@@ -64,16 +57,15 @@ const char *OptionsMenu::OSU_CONFIG_FILE_NAME = "";  // set dynamically below in
 
 class OptionsMenuSkinPreviewElement : public CBaseUIElement {
    public:
-    OptionsMenuSkinPreviewElement(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name)
+    OptionsMenuSkinPreviewElement(float xPos, float yPos, float xSize, float ySize, UString name)
         : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
-        m_osu = osu;
         m_iMode = 0;
     }
 
     virtual void draw(Graphics *g) {
         if(!m_bVisible) return;
 
-        Skin *skin = m_osu->getSkin();
+        Skin *skin = osu->getSkin();
 
         float hitcircleDiameter = m_vSize.y * 0.5f;
         float numberScale = (hitcircleDiameter / (160.0f * (skin->isDefault12x() ? 2.0f : 1.0f))) * 1 *
@@ -95,22 +87,22 @@ class OptionsMenuSkinPreviewElement : public CBaseUIElement {
             const int colorOffset = 0;
             const float colorRGBMultiplier = 1.0f;
 
-            Circle::drawCircle(g, m_osu->getSkin(),
+            Circle::drawCircle(g, osu->getSkin(),
                                m_vPos + Vector2(0, m_vSize.y / 2) + Vector2(m_vSize.x * (1.0f / 5.0f), 0.0f),
                                hitcircleDiameter, numberScale, overlapScale, number, colorCounter, colorOffset,
                                colorRGBMultiplier, approachScale, approachAlpha, approachAlpha, true, false);
-            Circle::drawHitResult(g, m_osu->getSkin(), hitcircleDiameter, hitcircleDiameter,
+            Circle::drawHitResult(g, osu->getSkin(), hitcircleDiameter, hitcircleDiameter,
                                   m_vPos + Vector2(0, m_vSize.y / 2) + Vector2(m_vSize.x * (2.0f / 5.0f), 0.0f),
                                   LiveScore::HIT::HIT_100, 0.45f, 0.33f);
-            Circle::drawHitResult(g, m_osu->getSkin(), hitcircleDiameter, hitcircleDiameter,
+            Circle::drawHitResult(g, osu->getSkin(), hitcircleDiameter, hitcircleDiameter,
                                   m_vPos + Vector2(0, m_vSize.y / 2) + Vector2(m_vSize.x * (3.0f / 5.0f), 0.0f),
                                   LiveScore::HIT::HIT_50, 0.45f, 0.66f);
-            Circle::drawHitResult(g, m_osu->getSkin(), hitcircleDiameter, hitcircleDiameter,
+            Circle::drawHitResult(g, osu->getSkin(), hitcircleDiameter, hitcircleDiameter,
                                   m_vPos + Vector2(0, m_vSize.y / 2) + Vector2(m_vSize.x * (4.0f / 5.0f), 0.0f),
                                   LiveScore::HIT::HIT_MISS, 0.45f, 1.0f);
-            Circle::drawApproachCircle(g, m_osu->getSkin(),
+            Circle::drawApproachCircle(g, osu->getSkin(),
                                        m_vPos + Vector2(0, m_vSize.y / 2) + Vector2(m_vSize.x * (1.0f / 5.0f), 0.0f),
-                                       m_osu->getSkin()->getComboColorForCounter(colorCounter, colorOffset),
+                                       osu->getSkin()->getComboColorForCounter(colorCounter, colorOffset),
                                        hitcircleDiameter, approachScale, approachCircleAlpha, false, false);
         } else if(m_iMode == 1) {
             const int numNumbers = 6;
@@ -129,7 +121,7 @@ class OptionsMenuSkinPreviewElement : public CBaseUIElement {
                 g->pushTransform();
                 g->scale(scoreScale, scoreScale);
                 g->translate(pos.x - skin->getScore0()->getWidth() * scoreScale, pos.y);
-                m_osu->getHUD()->drawScoreNumber(g, i - 1, 1.0f);
+                osu->getHUD()->drawScoreNumber(g, i - 1, 1.0f);
                 g->popTransform();
             }
         }
@@ -141,15 +133,13 @@ class OptionsMenuSkinPreviewElement : public CBaseUIElement {
     }
 
    private:
-    Osu *m_osu;
     int m_iMode;
 };
 
 class OptionsMenuSliderPreviewElement : public CBaseUIElement {
    public:
-    OptionsMenuSliderPreviewElement(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name)
+    OptionsMenuSliderPreviewElement(float xPos, float yPos, float xSize, float ySize, UString name)
         : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
-        m_osu = osu;
         m_bDrawSliderHack = true;
         m_fPrevLength = 0.0f;
         m_vao = NULL;
@@ -166,8 +156,8 @@ class OptionsMenuSliderPreviewElement : public CBaseUIElement {
         */
 
         const float hitcircleDiameter = m_vSize.y * 0.5f;
-        const float numberScale = (hitcircleDiameter / (160.0f * (m_osu->getSkin()->isDefault12x() ? 2.0f : 1.0f))) *
-                                  1 * convar->getConVarByName("osu_number_scale_multiplier")->getFloat();
+        const float numberScale = (hitcircleDiameter / (160.0f * (osu->getSkin()->isDefault12x() ? 2.0f : 1.0f))) * 1 *
+                                  convar->getConVarByName("osu_number_scale_multiplier")->getFloat();
         const float overlapScale =
             (hitcircleDiameter / (160.0f)) * 1 * convar->getConVarByName("osu_number_scale_multiplier")->getFloat();
 
@@ -212,13 +202,13 @@ class OptionsMenuSliderPreviewElement : public CBaseUIElement {
                 const int colorOffset = 0;
                 const float colorRGBMultiplier = 1.0f;
 
-                Circle::drawCircle(g, m_osu->getSkin(),
+                Circle::drawCircle(g, osu->getSkin(),
                                    points[numPoints / 2] + (!useLegacyRenderer ? m_vPos : Vector2(0, 0)),
                                    hitcircleDiameter, numberScale, overlapScale, number, colorCounter, colorOffset,
                                    colorRGBMultiplier, approachScale, approachAlpha, approachAlpha, true, false);
-                Circle::drawApproachCircle(g, m_osu->getSkin(),
+                Circle::drawApproachCircle(g, osu->getSkin(),
                                            points[numPoints / 2] + (!useLegacyRenderer ? m_vPos : Vector2(0, 0)),
-                                           m_osu->getSkin()->getComboColorForCounter(420, 0), hitcircleDiameter,
+                                           osu->getSkin()->getComboColorForCounter(420, 0), hitcircleDiameter,
                                            approachScale, approachCircleAlpha, false, false);
             }
 
@@ -228,8 +218,8 @@ class OptionsMenuSliderPreviewElement : public CBaseUIElement {
                 // the options menu is animating
                 if(m_bDrawSliderHack) {
                     if(useLegacyRenderer)
-                        SliderRenderer::draw(g, m_osu, points, emptyVector, hitcircleDiameter, 0, 1,
-                                             m_osu->getSkin()->getComboColorForCounter(420, 0));
+                        SliderRenderer::draw(g, points, emptyVector, hitcircleDiameter, 0, 1,
+                                             osu->getSkin()->getComboColorForCounter(420, 0));
                     else {
                         // (lazy generate vao)
                         if(m_vao == NULL || length != m_fPrevLength) {
@@ -243,11 +233,10 @@ class OptionsMenuSliderPreviewElement : public CBaseUIElement {
                             }
 
                             if(m_vao == NULL)
-                                m_vao = SliderRenderer::generateVAO(m_osu, points, hitcircleDiameter, Vector3(0, 0, 0),
-                                                                    false);
+                                m_vao = SliderRenderer::generateVAO(points, hitcircleDiameter, Vector3(0, 0, 0), false);
                         }
-                        SliderRenderer::draw(g, m_osu, m_vao, emptyVector, m_vPos, 1, hitcircleDiameter, 0, 1,
-                                             m_osu->getSkin()->getComboColorForCounter(420, 0));
+                        SliderRenderer::draw(g, m_vao, emptyVector, m_vPos, 1, hitcircleDiameter, 0, 1,
+                                             osu->getSkin()->getComboColorForCounter(420, 0));
                     }
                 }
             }
@@ -260,9 +249,9 @@ class OptionsMenuSliderPreviewElement : public CBaseUIElement {
                 const float colorRGBMultiplier = 1.0f;
 
                 Circle::drawSliderStartCircle(
-                    g, m_osu->getSkin(), points[0] + (!useLegacyRenderer ? m_vPos : Vector2(0, 0)), hitcircleDiameter,
+                    g, osu->getSkin(), points[0] + (!useLegacyRenderer ? m_vPos : Vector2(0, 0)), hitcircleDiameter,
                     numberScale, overlapScale, number, colorCounter, colorOffset, colorRGBMultiplier);
-                Circle::drawSliderEndCircle(g, m_osu->getSkin(),
+                Circle::drawSliderEndCircle(g, osu->getSkin(),
                                             points[points.size() - 1] + (!useLegacyRenderer ? m_vPos : Vector2(0, 0)),
                                             hitcircleDiameter, numberScale, overlapScale, number, colorCounter,
                                             colorOffset, colorRGBMultiplier, 1.0f, 1.0f, 0.0f, false, false);
@@ -273,7 +262,6 @@ class OptionsMenuSliderPreviewElement : public CBaseUIElement {
     void setDrawSliderHack(bool drawSliderHack) { m_bDrawSliderHack = drawSliderHack; }
 
    private:
-    Osu *m_osu;
     bool m_bDrawSliderHack;
     VertexArrayObject *m_vao;
     float m_fPrevLength;
@@ -331,8 +319,8 @@ class OptionsMenuKeyBindLabel : public CBaseUILabel {
 
 class OptionsMenuKeyBindButton : public UIButton {
    public:
-    OptionsMenuKeyBindButton(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name, UString text)
-        : UIButton(osu, xPos, yPos, xSize, ySize, name, text) {
+    OptionsMenuKeyBindButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
+        : UIButton(xPos, yPos, xSize, ySize, name, text) {
         m_bDisallowLeftMouseClickBinding = false;
     }
 
@@ -384,9 +372,8 @@ class OptionsMenuCategoryButton : public CBaseUIButton {
 
 class OptionsMenuResetButton : public CBaseUIButton {
    public:
-    OptionsMenuResetButton(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name, UString text)
+    OptionsMenuResetButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
         : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {
-        m_osu = osu;
         m_fAnim = 1.0f;
     }
 
@@ -395,7 +382,7 @@ class OptionsMenuResetButton : public CBaseUIButton {
     virtual void draw(Graphics *g) {
         if(!m_bVisible || m_fAnim <= 0.0f) return;
 
-        const int fullColorBlockSize = 4 * Osu::getUIScale(m_osu);
+        const int fullColorBlockSize = 4 * Osu::getUIScale();
 
         Color left = COLOR((int)(255 * m_fAnim), 255, 233, 50);
         Color middle = COLOR((int)(255 * m_fAnim), 255, 211, 50);
@@ -410,9 +397,9 @@ class OptionsMenuResetButton : public CBaseUIButton {
         CBaseUIButton::mouse_update(propagate_clicks);
 
         if(isMouseInside()) {
-            m_osu->getTooltipOverlay()->begin();
-            { m_osu->getTooltipOverlay()->addLine("Reset"); }
-            m_osu->getTooltipOverlay()->end();
+            osu->getTooltipOverlay()->begin();
+            { osu->getTooltipOverlay()->addLine("Reset"); }
+            osu->getTooltipOverlay()->end();
         }
     }
 
@@ -427,13 +414,10 @@ class OptionsMenuResetButton : public CBaseUIButton {
         anim->moveQuadOut(&m_fAnim, 0.0f, m_fAnim * 0.15f, true);
     }
 
-    Osu *m_osu;
     float m_fAnim;
 };
 
-OptionsMenu::OptionsMenu(Osu *osu) : ScreenBackable(osu) {
-    m_osu = osu;
-
+OptionsMenu::OptionsMenu() : ScreenBackable() {
     m_bFullscreen = false;
     m_fAnimation = 0.0f;
 
@@ -461,7 +445,7 @@ OptionsMenu::OptionsMenu(Osu *osu) : ScreenBackable(osu) {
 
     OSU_CONFIG_FILE_NAME = "osu";
 
-    m_osu->getNotificationOverlay()->addKeyListener(this);
+    osu->getNotificationOverlay()->addKeyListener(this);
 
     m_waitingKey = NULL;
     m_resolutionLabel = NULL;
@@ -530,9 +514,9 @@ OptionsMenu::OptionsMenu(Osu *osu) : ScreenBackable(osu) {
     m_categories->setScrollResistance(30);  // since all categories are always visible anyway
     addBaseUIElement(m_categories);
 
-    m_contextMenu = new UIContextMenu(m_osu, 50, 50, 150, 0, "", m_options);
+    m_contextMenu = new UIContextMenu(50, 50, 150, 0, "", m_options);
 
-    m_search = new UISearchOverlay(m_osu, 0, 0, 0, 0, "");
+    m_search = new UISearchOverlay(0, 0, 0, 0, "");
     m_search->setOffsetRight(20);
     addBaseUIElement(m_search);
 
@@ -630,7 +614,7 @@ OptionsMenu::OptionsMenu(Osu *osu) : ScreenBackable(osu) {
 
     addSubSection("Layout");
     OPTIONS_ELEMENT resolutionSelect =
-        addButton("Select Resolution", UString::format("%ix%i", m_osu->getScreenWidth(), m_osu->getScreenHeight()));
+        addButton("Select Resolution", UString::format("%ix%i", osu->getScreenWidth(), osu->getScreenHeight()));
     m_resolutionSelectButton = (CBaseUIButton *)resolutionSelect.elements[0];
     m_resolutionSelectButton->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onResolutionSelect));
     m_resolutionLabel = (CBaseUILabel *)resolutionSelect.elements[1];
@@ -1408,12 +1392,12 @@ void OptionsMenu::draw(Graphics *g) {
     m_sliderPreviewElement->setDrawSliderHack(!isAnimating);
 
     if(isAnimating) {
-        m_osu->getSliderFrameBuffer()->enable();
+        osu->getSliderFrameBuffer()->enable();
 
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_PREMUL_ALPHA);
     }
 
-    const bool isPlayingBeatmap = m_osu->isInPlayMode();
+    const bool isPlayingBeatmap = osu->isInPlayMode();
 
     // interactive sliders
 
@@ -1425,7 +1409,7 @@ void OptionsMenu::draw(Graphics *g) {
             const short blue = clamp<float>(brightness * m_osu_background_color_b_ref->getFloat(), 0.0f, 255.0f);
             if(brightness > 0.0f) {
                 g->setColor(COLOR(255, red, green, blue));
-                g->fillRect(0, 0, m_osu->getScreenWidth(), m_osu->getScreenHeight());
+                g->fillRect(0, 0, osu->getScreenWidth(), osu->getScreenHeight());
             }
         }
     }
@@ -1434,7 +1418,7 @@ void OptionsMenu::draw(Graphics *g) {
         if(!isPlayingBeatmap) {
             const short dim = clamp<float>(m_backgroundDimSlider->getFloat(), 0.0f, 1.0f) * 255.0f;
             g->setColor(COLOR(dim, 0, 0, 0));
-            g->fillRect(0, 0, m_osu->getScreenWidth(), m_osu->getScreenHeight());
+            g->fillRect(0, 0, osu->getScreenWidth(), osu->getScreenHeight());
         }
     }
 
@@ -1446,10 +1430,9 @@ void OptionsMenu::draw(Graphics *g) {
        m_hudScoreBarScaleSlider->isActive() || m_hudScoreBoardScaleSlider->isActive() ||
        m_hudInputoverlayScaleSlider->isActive() || m_statisticsOverlayScaleSlider->isActive() ||
        m_statisticsOverlayXOffsetSlider->isActive() || m_statisticsOverlayYOffsetSlider->isActive()) {
-        if(!isPlayingBeatmap) m_osu->getHUD()->drawDummy(g);
+        if(!isPlayingBeatmap) osu->getHUD()->drawDummy(g);
     } else if(m_playfieldBorderSizeSlider->isActive()) {
-        m_osu->getHUD()->drawPlayfieldBorder(g, GameRules::getPlayfieldCenter(m_osu),
-                                             GameRules::getPlayfieldSize(m_osu), 100);
+        osu->getHUD()->drawPlayfieldBorder(g, GameRules::getPlayfieldCenter(), GameRules::getPlayfieldSize(), 100);
     } else
         ScreenBackable::draw(g);
 
@@ -1461,7 +1444,7 @@ void OptionsMenu::draw(Graphics *g) {
 
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
 
-        m_osu->getSliderFrameBuffer()->disable();
+        osu->getSliderFrameBuffer()->disable();
 
         g->push3DScene(McRect(0, 0, m_options->getSize().x, m_options->getSize().y));
         {
@@ -1469,8 +1452,8 @@ void OptionsMenu::draw(Graphics *g) {
             g->translate3DScene(-(1.0f - m_fAnimation) * m_options->getSize().x * 1.25f, 0,
                                 -(1.0f - m_fAnimation) * 700);
 
-            m_osu->getSliderFrameBuffer()->setColor(COLORf(m_fAnimation, 1.0f, 1.0f, 1.0f));
-            m_osu->getSliderFrameBuffer()->draw(g, 0, 0);
+            osu->getSliderFrameBuffer()->setColor(COLORf(m_fAnimation, 1.0f, 1.0f, 1.0f));
+            osu->getSliderFrameBuffer()->draw(g, 0, 0);
         }
         g->pop3DScene();
     }
@@ -1488,7 +1471,7 @@ void OptionsMenu::mouse_update(bool *propagate_clicks) {
 
     if(m_bDPIScalingScrollToSliderScheduled) {
         m_bDPIScalingScrollToSliderScheduled = false;
-        m_options->scrollToElement(m_uiScaleSlider, 0, 200 * Osu::getUIScale(m_osu));
+        m_options->scrollToElement(m_uiScaleSlider, 0, 200 * Osu::getUIScale());
     }
 
     // flash osu!folder textbox red if incorrect
@@ -1499,7 +1482,7 @@ void OptionsMenu::mouse_update(bool *propagate_clicks) {
         m_osuFolderTextbox->setBackgroundColor(0xff000000);
 
     // hack to avoid entering search text while binding keys
-    if(m_osu->getNotificationOverlay()->isVisible() && m_osu->getNotificationOverlay()->isWaitingForKey())
+    if(osu->getNotificationOverlay()->isVisible() && osu->getNotificationOverlay()->isWaitingForKey())
         m_fSearchOnCharKeybindHackTime = engine->getTime() + 0.1f;
 
     // highlight active category depending on scroll position
@@ -1536,7 +1519,7 @@ void OptionsMenu::mouse_update(bool *propagate_clicks) {
 
     if(m_bUIScaleScrollToSliderScheduled) {
         m_bUIScaleScrollToSliderScheduled = false;
-        m_options->scrollToElement(m_uiScaleSlider, 0, 200 * Osu::getUIScale(m_osu));
+        m_options->scrollToElement(m_uiScaleSlider, 0, 200 * Osu::getUIScale());
     }
 
     // delayed UI scale change
@@ -1544,11 +1527,11 @@ void OptionsMenu::mouse_update(bool *propagate_clicks) {
         if(!m_uiScaleSlider->isActive()) {
             m_bUIScaleChangeScheduled = false;
 
-            const float oldUIScale = Osu::getUIScale(m_osu);
+            const float oldUIScale = Osu::getUIScale();
 
             m_osu_ui_scale_ref->setValue(m_uiScaleSlider->getFloat());
 
-            const float newUIScale = Osu::getUIScale(m_osu);
+            const float newUIScale = Osu::getUIScale();
 
             // and update reset buttons as usual
             onResetUpdate(m_uiScaleResetButton);
@@ -1750,13 +1733,13 @@ void OptionsMenu::setVisibleInt(bool visible, bool fromOnBack) {
 
         // save even if not closed via onBack(), e.g. if closed via setVisible(false) from outside
         if(!visible && !fromOnBack) {
-            m_osu->getNotificationOverlay()->stopWaitingForKey();
+            osu->getNotificationOverlay()->stopWaitingForKey();
             save();
         }
     }
 
     m_bVisible = visible;
-    m_osu->m_chat->updateVisibility();
+    osu->m_chat->updateVisibility();
 
     if(visible)
         updateLayout();
@@ -1768,7 +1751,7 @@ void OptionsMenu::setVisibleInt(bool visible, bool fromOnBack) {
     }
 
     // usability: auto scroll to fposu settings if opening options while in fposu gamemode
-    if(visible && m_osu->isInPlayMode() && m_osu_mod_fposu_ref->getBool() && !m_fposuCategoryButton->isActiveCategory())
+    if(visible && osu->isInPlayMode() && m_osu_mod_fposu_ref->getBool() && !m_fposuCategoryButton->isActiveCategory())
         onCategoryClicked(m_fposuCategoryButton);
 
     if(visible) {
@@ -1857,29 +1840,29 @@ void OptionsMenu::updateLayout() {
 
     ScreenBackable::updateLayout();
 
-    const float dpiScale = Osu::getUIScale(m_osu);
+    const float dpiScale = Osu::getUIScale();
 
-    setSize(m_osu->getScreenSize());
+    setSize(osu->getScreenSize());
 
     // options panel
     const float optionsScreenWidthPercent = 0.5f;
     const float categoriesOptionsPercent = 0.135f;
 
-    int optionsWidth = (int)(m_osu->getScreenWidth() * optionsScreenWidthPercent);
+    int optionsWidth = (int)(osu->getScreenWidth() * optionsScreenWidthPercent);
     if(!m_bFullscreen)
         optionsWidth = std::min((int)(725.0f * (1.0f - categoriesOptionsPercent)), optionsWidth) * dpiScale;
 
     const int categoriesWidth = optionsWidth * categoriesOptionsPercent;
 
-    m_options->setRelPosX((!m_bFullscreen ? -1 : m_osu->getScreenWidth() / 2 - (optionsWidth + categoriesWidth) / 2) +
+    m_options->setRelPosX((!m_bFullscreen ? -1 : osu->getScreenWidth() / 2 - (optionsWidth + categoriesWidth) / 2) +
                           categoriesWidth);
-    m_options->setSize(optionsWidth, m_osu->getScreenHeight() + 1);
+    m_options->setSize(optionsWidth, osu->getScreenHeight() + 1);
 
     m_search->setRelPos(m_options->getRelPos());
     m_search->setSize(m_options->getSize());
 
     m_categories->setRelPosX(m_options->getRelPos().x - categoriesWidth);
-    m_categories->setSize(categoriesWidth, m_osu->getScreenHeight() + 1);
+    m_categories->setSize(categoriesWidth, osu->getScreenHeight() + 1);
 
     // reset
     m_options->getContainer()->empty();
@@ -2227,13 +2210,13 @@ void OptionsMenu::updateLayout() {
 }
 
 void OptionsMenu::onBack() {
-    m_osu->getNotificationOverlay()->stopWaitingForKey();
+    osu->getNotificationOverlay()->stopWaitingForKey();
 
-    engine->getSound()->play(m_osu->getSkin()->getMenuClick());
+    engine->getSound()->play(osu->getSkin()->getMenuClick());
     save();
 
     if(m_bFullscreen)
-        m_osu->toggleOptionsMenu();
+        osu->toggleOptionsMenu();
     else
         setVisibleInt(false, true);
 }
@@ -2248,7 +2231,7 @@ void OptionsMenu::scheduleSearchUpdate() {
 
 void OptionsMenu::askForLoginDetails() {
     setVisible(true);
-    m_options->scrollToElement(sectionOnline, 0, 100 * m_osu->getUIScale(m_osu));
+    m_options->scrollToElement(sectionOnline, 0, 100 * osu->getUIScale());
     m_nameTextbox->focus();
 }
 
@@ -2360,13 +2343,13 @@ void OptionsMenu::onDPIScalingChange(CBaseUICheckbox *checkbox) {
     for(int i = 0; i < m_elements.size(); i++) {
         for(int e = 0; e < m_elements[i].elements.size(); e++) {
             if(m_elements[i].elements[e] == checkbox) {
-                const float prevUIScale = Osu::getUIScale(m_osu);
+                const float prevUIScale = Osu::getUIScale();
 
                 if(m_elements[i].cvar != NULL) m_elements[i].cvar->setValue(checkbox->isChecked());
 
                 onResetUpdate(m_elements[i].resetButton);
 
-                if(Osu::getUIScale(m_osu) != prevUIScale) m_bDPIScalingScrollToSliderScheduled = true;
+                if(Osu::getUIScale() != prevUIScale) m_bDPIScalingScrollToSliderScheduled = true;
 
                 break;
             }
@@ -2384,7 +2367,7 @@ void OptionsMenu::onRawInputToAbsoluteWindowChange(CBaseUICheckbox *checkbox) {
 
                 // special case: this requires a virtual mouse offset update, but since it is an engine convar we can't
                 // use callbacks
-                m_osu->updateMouseSettings();
+                osu->updateMouseSettings();
 
                 break;
             }
@@ -2403,7 +2386,7 @@ void OptionsMenu::openSkinsFolder() {
 void OptionsMenu::onSkinSelect() {
     updateOsuFolder();
 
-    if(m_osu->isSkinLoading()) return;
+    if(osu->isSkinLoading()) return;
 
     UString skinFolder = convar->getConVarByName("osu_folder")->getString();
     skinFolder.append(convar->getConVarByName("osu_folder_sub_skins")->getString());
@@ -2431,7 +2414,7 @@ void OptionsMenu::onSkinSelect() {
         m_contextMenu->end(false, true);
         m_contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSkinSelect2));
     } else {
-        m_osu->getNotificationOverlay()->addNotification("Error: Couldn't find any skins", 0xffff0000);
+        osu->getNotificationOverlay()->addNotification("Error: Couldn't find any skins", 0xffff0000);
         m_options->scrollToTop();
         m_fOsuFolderTextboxInvalidAnim = engine->getTime() + 3.0f;
     }
@@ -2442,14 +2425,14 @@ void OptionsMenu::onSkinSelect2(UString skinName, int id) {
     updateSkinNameLabel();
 }
 
-void OptionsMenu::onSkinReload() { m_osu->reloadSkin(); }
+void OptionsMenu::onSkinReload() { osu->reloadSkin(); }
 
 void OptionsMenu::onSkinRandom() {
     const bool isRandomSkinEnabled = m_osu_skin_random_ref->getBool();
 
     if(!isRandomSkinEnabled) m_osu_skin_random_ref->setValue(1.0f);
 
-    m_osu->reloadSkin();
+    osu->reloadSkin();
 
     if(!isRandomSkinEnabled) m_osu_skin_random_ref->setValue(0.0f);
 }
@@ -2592,7 +2575,7 @@ void OptionsMenu::onOutputDeviceRestart() { engine->getSound()->restart(); }
 
 void OptionsMenu::onLogInClicked() {
     if(logInButton->is_loading) return;
-    engine->getSound()->play(m_osu->getSkin()->getMenuHit());
+    engine->getSound()->play(osu->getSkin()->getMenuHit());
 
     if(bancho.user_id > 0) {
         disconnect();
@@ -2602,17 +2585,17 @@ void OptionsMenu::onLogInClicked() {
 }
 
 void OptionsMenu::onDownloadOsuClicked() {
-    m_osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
+    osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
     env->openURLInDefaultBrowser("https://osu.ppy.sh/");
 }
 
 void OptionsMenu::onManuallyManageBeatmapsClicked() {
-    m_osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
+    osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
     env->openURLInDefaultBrowser("https://steamcommunity.com/sharedfiles/filedetails/?id=880768265");
 }
 
 void OptionsMenu::onCM360CalculatorLinkClicked() {
-    m_osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
+    osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
     env->openURLInDefaultBrowser("https://www.mouse-sensitivity.com/");
 }
 
@@ -2881,8 +2864,8 @@ void OptionsMenu::onKeyBindingButtonPressed(CBaseUIButton *button) {
                     notificationText.append(":");
 
                     const bool waitForKey = true;
-                    m_osu->getNotificationOverlay()->addNotification(notificationText, 0xffffffff, waitForKey);
-                    m_osu->getNotificationOverlay()->setDisallowWaitForKeyLeftClick(
+                    osu->getNotificationOverlay()->addNotification(notificationText, 0xffffffff, waitForKey);
+                    osu->getNotificationOverlay()->setDisallowWaitForKeyLeftClick(
                         !(dynamic_cast<OptionsMenuKeyBindButton *>(button)->isLeftMouseClickBindingAllowed()));
                 }
                 break;
@@ -2892,7 +2875,7 @@ void OptionsMenu::onKeyBindingButtonPressed(CBaseUIButton *button) {
 }
 
 void OptionsMenu::onKeyUnbindButtonPressed(CBaseUIButton *button) {
-    engine->getSound()->play(m_osu->getSkin()->getCheckOff());
+    engine->getSound()->play(osu->getSkin()->getCheckOff());
 
     for(int i = 0; i < m_elements.size(); i++) {
         for(int e = 0; e < m_elements[i].elements.size(); e++) {
@@ -2919,13 +2902,13 @@ void OptionsMenu::onKeyBindingsResetAllPressed(CBaseUIButton *button) {
             bind->setValue(bind->getDefaultFloat());
         }
 
-        m_osu->getNotificationOverlay()->addNotification("All key bindings have been reset.", 0xff00ff00);
+        osu->getNotificationOverlay()->addNotification("All key bindings have been reset.", 0xff00ff00);
     } else {
         if(remainingUntilReset > 1)
-            m_osu->getNotificationOverlay()->addNotification(
+            osu->getNotificationOverlay()->addNotification(
                 UString::format("Press %i more times to confirm.", remainingUntilReset));
         else
-            m_osu->getNotificationOverlay()->addNotification(
+            osu->getNotificationOverlay()->addNotification(
                 UString::format("Press %i more time to confirm!", remainingUntilReset), 0xffffff00);
     }
 }
@@ -3089,13 +3072,13 @@ void OptionsMenu::onWASAPIPeriodChange(CBaseUISlider *slider) {
 void OptionsMenu::onLoudnessNormalizationToggle(CBaseUICheckbox *checkbox) {
     onCheckboxChange(checkbox);
 
-    auto music = m_osu->getSelectedBeatmap()->getMusic();
+    auto music = osu->getSelectedBeatmap()->getMusic();
     if(music != nullptr) {
-        music->setVolume(m_osu->getSelectedBeatmap()->getIdealVolume());
+        music->setVolume(osu->getSelectedBeatmap()->getIdealVolume());
     }
 }
 
-void OptionsMenu::onUseSkinsSoundSamplesChange(UString oldValue, UString newValue) { m_osu->reloadSkin(); }
+void OptionsMenu::onUseSkinsSoundSamplesChange(UString oldValue, UString newValue) { osu->reloadSkin(); }
 
 void OptionsMenu::onHighQualitySlidersCheckboxChange(CBaseUICheckbox *checkbox) {
     onCheckboxChange(checkbox);
@@ -3149,8 +3132,7 @@ void OptionsMenu::onCategoryClicked(CBaseUIButton *button) {
 
     // scroll to category
     OptionsMenuCategoryButton *categoryButton = dynamic_cast<OptionsMenuCategoryButton *>(button);
-    if(categoryButton != NULL)
-        m_options->scrollToElement(categoryButton->getSection(), 0, 100 * Osu::getUIScale(m_osu));
+    if(categoryButton != NULL) m_options->scrollToElement(categoryButton->getSection(), 0, 100 * Osu::getUIScale());
 }
 
 void OptionsMenu::onResetUpdate(CBaseUIButton *button) {
@@ -3225,13 +3207,13 @@ void OptionsMenu::onResetEverythingClicked(CBaseUIButton *button) {
             bind->setValue(bind->getDefaultFloat());
         }
 
-        m_osu->getNotificationOverlay()->addNotification("All settings have been reset.", 0xff00ff00);
+        osu->getNotificationOverlay()->addNotification("All settings have been reset.", 0xff00ff00);
     } else {
         if(remainingUntilReset > 1)
-            m_osu->getNotificationOverlay()->addNotification(
+            osu->getNotificationOverlay()->addNotification(
                 UString::format("Press %i more times to confirm.", remainingUntilReset));
         else
-            m_osu->getNotificationOverlay()->addNotification(
+            osu->getNotificationOverlay()->addNotification(
                 UString::format("Press %i more time to confirm!", remainingUntilReset), 0xffffff00);
     }
 }
@@ -3246,7 +3228,7 @@ void OptionsMenu::addSpacer() {
 CBaseUILabel *OptionsMenu::addSection(UString text) {
     CBaseUILabel *label = new CBaseUILabel(0, 0, m_options->getSize().x, 25, text, text);
     // label->setTextColor(0xff58dafe);
-    label->setFont(m_osu->getTitleFont());
+    label->setFont(osu->getTitleFont());
     label->setSizeToContent(0, 0);
     label->setTextJustification(CBaseUILabel::TEXT_JUSTIFICATION_RIGHT);
     label->setDrawFrame(false);
@@ -3264,7 +3246,7 @@ CBaseUILabel *OptionsMenu::addSection(UString text) {
 
 CBaseUILabel *OptionsMenu::addSubSection(UString text, UString searchTags) {
     CBaseUILabel *label = new CBaseUILabel(0, 0, m_options->getSize().x, 25, text, text);
-    label->setFont(m_osu->getSubTitleFont());
+    label->setFont(osu->getSubTitleFont());
     label->setSizeToContent(0, 0);
     label->setDrawFrame(false);
     label->setDrawBackground(false);
@@ -3297,7 +3279,7 @@ CBaseUILabel *OptionsMenu::addLabel(UString text) {
 }
 
 UIButton *OptionsMenu::addButton(UString text) {
-    UIButton *button = new UIButton(m_osu, 0, 0, m_options->getSize().x, 50, text, text);
+    UIButton *button = new UIButton(0, 0, m_options->getSize().x, 50, text, text);
     button->setColor(0xff0e94b5);
     button->setUseDefaultSkin();
     m_options->getContainer()->addBaseUIElement(button);
@@ -3311,7 +3293,7 @@ UIButton *OptionsMenu::addButton(UString text) {
 }
 
 OptionsMenu::OPTIONS_ELEMENT OptionsMenu::addButton(UString text, UString labelText, bool withResetButton) {
-    UIButton *button = new UIButton(m_osu, 0, 0, m_options->getSize().x, 50, text, text);
+    UIButton *button = new UIButton(0, 0, m_options->getSize().x, 50, text, text);
     button->setColor(0xff0e94b5);
     button->setUseDefaultSkin();
     m_options->getContainer()->addBaseUIElement(button);
@@ -3323,7 +3305,7 @@ OptionsMenu::OPTIONS_ELEMENT OptionsMenu::addButton(UString text, UString labelT
 
     OPTIONS_ELEMENT e;
     if(withResetButton) {
-        e.resetButton = new OptionsMenuResetButton(m_osu, 0, 0, 35, 50, "", "");
+        e.resetButton = new OptionsMenuResetButton(0, 0, 35, 50, "", "");
     }
     e.elements.push_back(button);
     e.elements.push_back(label);
@@ -3334,12 +3316,12 @@ OptionsMenu::OPTIONS_ELEMENT OptionsMenu::addButton(UString text, UString labelT
 }
 
 OptionsMenu::OPTIONS_ELEMENT OptionsMenu::addButtonButton(UString text1, UString text2) {
-    UIButton *button = new UIButton(m_osu, 0, 0, m_options->getSize().x, 50, text1, text1);
+    UIButton *button = new UIButton(0, 0, m_options->getSize().x, 50, text1, text1);
     button->setColor(0xff0e94b5);
     button->setUseDefaultSkin();
     m_options->getContainer()->addBaseUIElement(button);
 
-    UIButton *button2 = new UIButton(m_osu, 0, 0, m_options->getSize().x, 50, text2, text2);
+    UIButton *button2 = new UIButton(0, 0, m_options->getSize().x, 50, text2, text2);
     button2->setColor(0xff0e94b5);
     button2->setUseDefaultSkin();
     m_options->getContainer()->addBaseUIElement(button2);
@@ -3355,12 +3337,12 @@ OptionsMenu::OPTIONS_ELEMENT OptionsMenu::addButtonButton(UString text1, UString
 
 OptionsMenu::OPTIONS_ELEMENT OptionsMenu::addButtonButtonLabel(UString text1, UString text2, UString labelText,
                                                                bool withResetButton) {
-    UIButton *button = new UIButton(m_osu, 0, 0, m_options->getSize().x, 50, text1, text1);
+    UIButton *button = new UIButton(0, 0, m_options->getSize().x, 50, text1, text1);
     button->setColor(0xff0e94b5);
     button->setUseDefaultSkin();
     m_options->getContainer()->addBaseUIElement(button);
 
-    UIButton *button2 = new UIButton(m_osu, 0, 0, m_options->getSize().x, 50, text2, text2);
+    UIButton *button2 = new UIButton(0, 0, m_options->getSize().x, 50, text2, text2);
     button2->setColor(0xff0e94b5);
     button2->setUseDefaultSkin();
     m_options->getContainer()->addBaseUIElement(button2);
@@ -3372,7 +3354,7 @@ OptionsMenu::OPTIONS_ELEMENT OptionsMenu::addButtonButtonLabel(UString text1, US
 
     OPTIONS_ELEMENT e;
     if(withResetButton) {
-        e.resetButton = new OptionsMenuResetButton(m_osu, 0, 0, 35, 50, "", "");
+        e.resetButton = new OptionsMenuResetButton(0, 0, 35, 50, "", "");
     }
     e.elements.push_back(button);
     e.elements.push_back(button2);
@@ -3385,16 +3367,15 @@ OptionsMenu::OPTIONS_ELEMENT OptionsMenu::addButtonButtonLabel(UString text1, US
 
 OptionsMenuKeyBindButton *OptionsMenu::addKeyBindButton(UString text, ConVar *cvar) {
     /// UString unbindIconString; unbindIconString.insert(0, Icons::UNDO);
-    UIButton *unbindButton = new UIButton(m_osu, 0, 0, m_options->getSize().x, 50, text, "");
+    UIButton *unbindButton = new UIButton(0, 0, m_options->getSize().x, 50, text, "");
     unbindButton->setTooltipText("Unbind");
     unbindButton->setColor(0x77ff0000);
     unbindButton->setUseDefaultSkin();
     unbindButton->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onKeyUnbindButtonPressed));
-    /// unbindButton->setFont(m_osu->getFontIcons());
+    /// unbindButton->setFont(osu->getFontIcons());
     m_options->getContainer()->addBaseUIElement(unbindButton);
 
-    OptionsMenuKeyBindButton *bindButton =
-        new OptionsMenuKeyBindButton(m_osu, 0, 0, m_options->getSize().x, 50, text, text);
+    OptionsMenuKeyBindButton *bindButton = new OptionsMenuKeyBindButton(0, 0, m_options->getSize().x, 50, text, text);
     bindButton->setColor(0xff0e94b5);
     bindButton->setUseDefaultSkin();
     bindButton->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onKeyBindingButtonPressed));
@@ -3420,7 +3401,7 @@ OptionsMenuKeyBindButton *OptionsMenu::addKeyBindButton(UString text, ConVar *cv
 CBaseUICheckbox *OptionsMenu::addCheckbox(UString text, ConVar *cvar) { return addCheckbox(text, "", cvar); }
 
 CBaseUICheckbox *OptionsMenu::addCheckbox(UString text, UString tooltipText, ConVar *cvar) {
-    UICheckbox *checkbox = new UICheckbox(m_osu, 0, 0, m_options->getSize().x, 50, text, text);
+    UICheckbox *checkbox = new UICheckbox(0, 0, m_options->getSize().x, 50, text, text);
     checkbox->setDrawFrame(false);
     checkbox->setDrawBackground(false);
 
@@ -3435,7 +3416,7 @@ CBaseUICheckbox *OptionsMenu::addCheckbox(UString text, UString tooltipText, Con
 
     OPTIONS_ELEMENT e;
     if(cvar != NULL) {
-        e.resetButton = new OptionsMenuResetButton(m_osu, 0, 0, 35, 50, "", "");
+        e.resetButton = new OptionsMenuResetButton(0, 0, 35, 50, "", "");
         e.resetButton->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onResetClicked));
     }
     e.elements.push_back(checkbox);
@@ -3448,7 +3429,7 @@ CBaseUICheckbox *OptionsMenu::addCheckbox(UString text, UString tooltipText, Con
 
 UISlider *OptionsMenu::addSlider(UString text, float min, float max, ConVar *cvar, float label1Width,
                                  bool allowOverscale, bool allowUnderscale) {
-    UISlider *slider = new UISlider(m_osu, 0, 0, 100, 50, text);
+    UISlider *slider = new UISlider(0, 0, 100, 50, text);
     slider->setAllowMouseWheel(false);
     slider->setBounds(min, max);
     slider->setLiveUpdate(true);
@@ -3475,7 +3456,7 @@ UISlider *OptionsMenu::addSlider(UString text, float min, float max, ConVar *cva
 
     OPTIONS_ELEMENT e;
     if(cvar != NULL) {
-        e.resetButton = new OptionsMenuResetButton(m_osu, 0, 0, 35, 50, "", "");
+        e.resetButton = new OptionsMenuResetButton(0, 0, 35, 50, "", "");
         e.resetButton->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onResetClicked));
     }
     e.elements.push_back(label1);
@@ -3528,8 +3509,7 @@ CBaseUITextbox *OptionsMenu::addTextbox(UString text, UString labelText, ConVar 
 }
 
 CBaseUIElement *OptionsMenu::addSkinPreview() {
-    CBaseUIElement *skinPreview =
-        new OptionsMenuSkinPreviewElement(m_osu, 0, 0, 0, 200, "skincirclenumberhitresultpreview");
+    CBaseUIElement *skinPreview = new OptionsMenuSkinPreviewElement(0, 0, 0, 200, "skincirclenumberhitresultpreview");
     m_options->getContainer()->addBaseUIElement(skinPreview);
 
     OPTIONS_ELEMENT e;
@@ -3542,7 +3522,7 @@ CBaseUIElement *OptionsMenu::addSkinPreview() {
 }
 
 CBaseUIElement *OptionsMenu::addSliderPreview() {
-    CBaseUIElement *sliderPreview = new OptionsMenuSliderPreviewElement(m_osu, 0, 0, 0, 200, "skinsliderpreview");
+    CBaseUIElement *sliderPreview = new OptionsMenuSliderPreviewElement(0, 0, 0, 200, "skinsliderpreview");
     m_options->getContainer()->addBaseUIElement(sliderPreview);
 
     OPTIONS_ELEMENT e;
@@ -3558,7 +3538,7 @@ OptionsMenuCategoryButton *OptionsMenu::addCategory(CBaseUIElement *section, wch
     UString iconString;
     iconString.insert(0, icon);
     OptionsMenuCategoryButton *button = new OptionsMenuCategoryButton(section, 0, 0, 50, 50, "", iconString);
-    button->setFont(m_osu->getFontIcons());
+    button->setFont(osu->getFontIcons());
     button->setDrawBackground(false);
     button->setDrawFrame(false);
     button->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onCategoryClicked));
@@ -3717,21 +3697,21 @@ void OptionsMenu::save() {
 
 void OptionsMenu::openAndScrollToSkinSection() {
     const bool wasVisible = isVisible();
-    if(!wasVisible) m_osu->toggleOptionsMenu();
+    if(!wasVisible) osu->toggleOptionsMenu();
 
     if(!m_skinSelectLocalButton->isVisible() || !wasVisible)
-        m_options->scrollToElement(m_skinSection, 0, 100 * Osu::getUIScale(m_osu));
+        m_options->scrollToElement(m_skinSection, 0, 100 * Osu::getUIScale());
 }
 
 void OptionsMenu::onNightcorePreferenceChange(CBaseUICheckbox *checkbox) {
     onCheckboxChange(checkbox);
 
-    int prev_state = m_osu->m_modSelector->m_modButtonHalftime->getState();
+    int prev_state = osu->m_modSelector->m_modButtonHalftime->getState();
 
-    m_osu->m_modSelector->updateButtons();
+    osu->m_modSelector->updateButtons();
 
-    if(m_osu->m_modSelector->m_modButtonHalftime->isOn() || m_osu->m_modSelector->m_modButtonDoubletime->isOn()) {
-        m_osu->m_modSelector->m_modButtonHalftime->setState(prev_state ? 0 : 1);
-        m_osu->m_modSelector->m_modButtonDoubletime->setState(prev_state ? 0 : 1);
+    if(osu->m_modSelector->m_modButtonHalftime->isOn() || osu->m_modSelector->m_modButtonDoubletime->isOn()) {
+        osu->m_modSelector->m_modButtonHalftime->setState(prev_state ? 0 : 1);
+        osu->m_modSelector->m_modButtonDoubletime->setState(prev_state ? 0 : 1);
     }
 }

@@ -119,8 +119,7 @@ void fetch_online_scores(DatabaseBeatmap *beatmap) {
     curl_free(encoded_filename);
     curl_easy_cleanup(curl);
     path.append(UString::format("&m=0&i=%d&mods=%d&h=&a=0&us=%s&ha=%s", beatmap->getSetID(),
-                                bancho.osu->m_modSelector->getModFlags(), bancho.username.toUtf8(),
-                                bancho.pw_md5.toUtf8())
+                                osu->m_modSelector->getModFlags(), bancho.username.toUtf8(), bancho.pw_md5.toUtf8())
                     .toUtf8());
 
     APIRequest request;
@@ -148,7 +147,7 @@ char *strtok_x(char d, char **str) {
 
 void process_leaderboard_response(Packet response) {
     // Don't update the leaderboard while playing, that's weird
-    if(bancho.osu->isInPlayMode()) return;
+    if(osu->isInPlayMode()) return;
 
     // NOTE: We're not doing anything with the "info" struct.
     //       Server can return partial responses in some cases, so make sure
@@ -202,6 +201,6 @@ void process_leaderboard_response(Packet response) {
     // XXX: We should also separately display either the "personal best" the server sent us,
     //      or the local best, depending on which score is better.
     debugLog("Received online leaderbord for Beatmap ID %d\n", info.beatmap_id);
-    bancho.osu->getSongBrowser()->getDatabase()->m_online_scores[beatmap_hash] = std::move(scores);
-    bancho.osu->getSongBrowser()->rebuildScoreButtons();
+    osu->getSongBrowser()->getDatabase()->m_online_scores[beatmap_hash] = std::move(scores);
+    osu->getSongBrowser()->rebuildScoreButtons();
 }

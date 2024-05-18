@@ -31,7 +31,7 @@ ConVar osu_pause_dim_background("osu_pause_dim_background", true, FCVAR_DEFAULT)
 ConVar osu_pause_dim_alpha("osu_pause_dim_alpha", 0.58f, FCVAR_DEFAULT);
 ConVar osu_pause_anim_duration("osu_pause_anim_duration", 0.15f, FCVAR_DEFAULT);
 
-PauseMenu::PauseMenu(Osu *osu) : OsuScreen(osu) {
+PauseMenu::PauseMenu() : OsuScreen() {
     m_bScheduledVisibility = false;
     m_bScheduledVisibilityChange = false;
 
@@ -48,11 +48,11 @@ PauseMenu::PauseMenu(Osu *osu) : OsuScreen(osu) {
 
     m_fDimAnim = 0.0f;
 
-    setSize(m_osu->getScreenWidth(), m_osu->getScreenHeight());
+    setSize(osu->getScreenWidth(), osu->getScreenHeight());
 
-    UIPauseMenuButton *continueButton = addButton([this]() -> Image * { return m_osu->getSkin()->getPauseContinue(); });
-    UIPauseMenuButton *retryButton = addButton([this]() -> Image * { return m_osu->getSkin()->getPauseRetry(); });
-    UIPauseMenuButton *backButton = addButton([this]() -> Image * { return m_osu->getSkin()->getPauseBack(); });
+    UIPauseMenuButton *continueButton = addButton([this]() -> Image * { return osu->getSkin()->getPauseContinue(); });
+    UIPauseMenuButton *retryButton = addButton([this]() -> Image * { return osu->getSkin()->getPauseRetry(); });
+    UIPauseMenuButton *backButton = addButton([this]() -> Image * { return osu->getSkin()->getPauseBack(); });
 
     continueButton->setClickCallback(fastdelegate::MakeDelegate(this, &PauseMenu::onContinueClicked));
     retryButton->setClickCallback(fastdelegate::MakeDelegate(this, &PauseMenu::onRetryClicked));
@@ -68,20 +68,20 @@ void PauseMenu::draw(Graphics *g) {
     // draw dim
     if(osu_pause_dim_background.getBool()) {
         g->setColor(COLORf(m_fDimAnim * osu_pause_dim_alpha.getFloat(), 0.078f, 0.078f, 0.078f));
-        g->fillRect(0, 0, m_osu->getScreenWidth(), m_osu->getScreenHeight());
+        g->fillRect(0, 0, osu->getScreenWidth(), osu->getScreenHeight());
     }
 
     // draw background image
     if((m_bVisible || isAnimating)) {
         Image *image = NULL;
         if(m_bContinueEnabled)
-            image = m_osu->getSkin()->getPauseOverlay();
+            image = osu->getSkin()->getPauseOverlay();
         else
-            image = m_osu->getSkin()->getFailBackground();
+            image = osu->getSkin()->getFailBackground();
 
-        if(image != m_osu->getSkin()->getMissingTexture()) {
-            const float scale = Osu::getImageScaleToFillResolution(image, m_osu->getScreenSize());
-            const Vector2 centerTrans = (m_osu->getScreenSize() / 2);
+        if(image != osu->getSkin()->getMissingTexture()) {
+            const float scale = Osu::getImageScaleToFillResolution(image, osu->getScreenSize());
+            const Vector2 centerTrans = (osu->getScreenSize() / 2);
 
             g->setColor(COLORf(m_fDimAnim, 1.0f, 1.0f, 1.0f));
             g->pushTransform();
@@ -107,19 +107,18 @@ void PauseMenu::draw(Graphics *g) {
         if(animation > 1.0f) animation = 2.0f - animation;
 
         animation = -animation * (animation - 2);  // quad out
-        const float offset = m_osu->getUIScale(m_osu, 20.0f + 45.0f * animation);
+        const float offset = osu->getUIScale(20.0f + 45.0f * animation);
 
         g->setColor(arrowColor);
         g->setAlpha(m_fWarningArrowsAnimAlpha * m_fDimAnim);
-        m_osu->getHUD()->drawWarningArrow(g,
-                                          Vector2(m_fWarningArrowsAnimX, m_fWarningArrowsAnimY) +
-                                              Vector2(0, m_selectedButton->getSize().y / 2) - Vector2(offset, 0),
-                                          false, false);
-        m_osu->getHUD()->drawWarningArrow(
-            g,
-            Vector2(m_osu->getScreenWidth() - m_fWarningArrowsAnimX, m_fWarningArrowsAnimY) +
-                Vector2(0, m_selectedButton->getSize().y / 2) + Vector2(offset, 0),
-            true, false);
+        osu->getHUD()->drawWarningArrow(g,
+                                        Vector2(m_fWarningArrowsAnimX, m_fWarningArrowsAnimY) +
+                                            Vector2(0, m_selectedButton->getSize().y / 2) - Vector2(offset, 0),
+                                        false, false);
+        osu->getHUD()->drawWarningArrow(g,
+                                        Vector2(osu->getScreenWidth() - m_fWarningArrowsAnimX, m_fWarningArrowsAnimY) +
+                                            Vector2(0, m_selectedButton->getSize().y / 2) + Vector2(offset, 0),
+                                        true, false);
     }
 }
 
@@ -141,8 +140,8 @@ void PauseMenu::onContinueClicked() {
     if(!m_bContinueEnabled) return;
     if(anim->isAnimating(&m_fDimAnim)) return;
 
-    engine->getSound()->play(m_osu->getSkin()->getMenuHit());
-    m_osu->getSelectedBeatmap()->pause();
+    engine->getSound()->play(osu->getSkin()->getMenuHit());
+    osu->getSelectedBeatmap()->pause();
 
     scheduleVisibilityChange(false);
 }
@@ -150,8 +149,8 @@ void PauseMenu::onContinueClicked() {
 void PauseMenu::onRetryClicked() {
     if(anim->isAnimating(&m_fDimAnim)) return;
 
-    engine->getSound()->play(m_osu->getSkin()->getMenuHit());
-    m_osu->getSelectedBeatmap()->restart();
+    engine->getSound()->play(osu->getSkin()->getMenuHit());
+    osu->getSelectedBeatmap()->restart();
 
     scheduleVisibilityChange(false);
 }
@@ -159,8 +158,8 @@ void PauseMenu::onRetryClicked() {
 void PauseMenu::onBackClicked() {
     if(anim->isAnimating(&m_fDimAnim)) return;
 
-    engine->getSound()->play(m_osu->getSkin()->getMenuHit());
-    m_osu->getSelectedBeatmap()->stop();
+    engine->getSound()->play(osu->getSkin()->getMenuHit());
+    osu->getSelectedBeatmap()->stop();
 
     scheduleVisibilityChange(false);
 }
@@ -171,7 +170,7 @@ void PauseMenu::onSelectionChange() {
             m_bInitialWarningArrowFlyIn = false;
 
             m_fWarningArrowsAnimY = m_selectedButton->getPos().y;
-            m_fWarningArrowsAnimX = m_selectedButton->getPos().x - m_osu->getUIScale(m_osu, 170.0f);
+            m_fWarningArrowsAnimX = m_selectedButton->getPos().x - osu->getUIScale(170.0f);
 
             anim->moveLinear(&m_fWarningArrowsAnimAlpha, 1.0f, 0.3f);
             anim->moveQuadIn(&m_fWarningArrowsAnimX, m_selectedButton->getPos().x, 0.3f);
@@ -180,7 +179,7 @@ void PauseMenu::onSelectionChange() {
 
         anim->moveQuadOut(&m_fWarningArrowsAnimY, m_selectedButton->getPos().y, 0.1f);
 
-        engine->getSound()->play(m_osu->getSkin()->getMenuClick());
+        engine->getSound()->play(osu->getSkin()->getMenuClick());
     }
 }
 
@@ -301,17 +300,16 @@ void PauseMenu::scheduleVisibilityChange(bool visible) {
 }
 
 void PauseMenu::updateLayout() {
-    const float height = (m_osu->getScreenHeight() / (float)m_buttons.size());
+    const float height = (osu->getScreenHeight() / (float)m_buttons.size());
     const float half = (m_buttons.size() - 1) / 2.0f;
 
     float maxWidth = 0.0f;
     float maxHeight = 0.0f;
     for(int i = 0; i < m_buttons.size(); i++) {
         Image *img = m_buttons[i]->getImage();
-        if(img == NULL) img = m_osu->getSkin()->getMissingTexture();
+        if(img == NULL) img = osu->getSkin()->getMissingTexture();
 
-        const float scale =
-            m_osu->getUIScale(m_osu, 256) / (411.0f * (m_osu->getSkin()->isPauseContinue2x() ? 2.0f : 1.0f));
+        const float scale = osu->getUIScale(256) / (411.0f * (osu->getSkin()->isPauseContinue2x() ? 2.0f : 1.0f));
 
         m_buttons[i]->setBaseScale(scale, scale);
         m_buttons[i]->setSize(img->getWidth() * scale, img->getHeight() * scale);
@@ -322,7 +320,7 @@ void PauseMenu::updateLayout() {
 
     for(int i = 0; i < m_buttons.size(); i++) {
         Vector2 newPos =
-            Vector2(m_osu->getScreenWidth() / 2.0f - maxWidth / 2, (i + 1) * height - height / 2.0f - maxHeight / 2.0f);
+            Vector2(osu->getScreenWidth() / 2.0f - maxWidth / 2, (i + 1) * height - height / 2.0f - maxHeight / 2.0f);
 
         const float pinch = std::max(0.0f, (height / 2.0f - maxHeight / 2.0f));
         if((float)i < half)
@@ -345,24 +343,24 @@ void PauseMenu::onResolutionChange(Vector2 newResolution) {
 CBaseUIContainer *PauseMenu::setVisible(bool visible) {
     m_bVisible = visible;
 
-    if(m_osu->isInPlayMode())
-        setContinueEnabled(!m_osu->getSelectedBeatmap()->hasFailed());
+    if(osu->isInPlayMode())
+        setContinueEnabled(!osu->getSelectedBeatmap()->hasFailed());
     else
         setContinueEnabled(true);
 
     if(visible) {
         if(m_bContinueEnabled) {
-            RichPresence::setStatus(m_osu, "Paused");
-            RichPresence::setBanchoStatus(m_osu, "Taking a break", PAUSED);
+            RichPresence::setStatus("Paused");
+            RichPresence::setBanchoStatus("Taking a break", PAUSED);
         } else {
-            RichPresence::setBanchoStatus(m_osu, "Failed", SUBMITTING);
+            RichPresence::setBanchoStatus("Failed", SUBMITTING);
         }
     } else {
-        RichPresence::onPlayStart(m_osu);
+        RichPresence::onPlayStart();
     }
 
     // HACKHACK: force disable mod selection screen in case it was open and the beatmap ended/failed
-    m_osu->getModSelector()->setVisible(false);
+    osu->getModSelector()->setVisible(false);
 
     // reset
     m_selectedButton = NULL;
@@ -373,12 +371,12 @@ CBaseUIContainer *PauseMenu::setVisible(bool visible) {
 
     if(m_bVisible) updateLayout();
 
-    m_osu->updateConfineCursor();
-    m_osu->updateWindowsKeyDisable();
+    osu->updateConfineCursor();
+    osu->updateWindowsKeyDisable();
 
     anim->moveQuadOut(&m_fDimAnim, (m_bVisible ? 1.0f : 0.0f),
                       osu_pause_anim_duration.getFloat() * (m_bVisible ? 1.0f - m_fDimAnim : m_fDimAnim), true);
-    m_osu->m_chat->updateVisibility();
+    osu->m_chat->updateVisibility();
     return this;
 }
 
@@ -388,7 +386,7 @@ void PauseMenu::setContinueEnabled(bool continueEnabled) {
 }
 
 UIPauseMenuButton *PauseMenu::addButton(std::function<Image *()> getImageFunc) {
-    UIPauseMenuButton *button = new UIPauseMenuButton(m_osu, getImageFunc, 0, 0, 0, 0, "");
+    UIPauseMenuButton *button = new UIPauseMenuButton(getImageFunc, 0, 0, 0, 0, "");
     addBaseUIElement(button);
     m_buttons.push_back(button);
     return button;

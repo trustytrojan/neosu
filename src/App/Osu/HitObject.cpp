@@ -350,8 +350,8 @@ void HitObject::drawHitResultAnim(Graphics *g, const HITRESULTANIM &hitresultani
     if((hitresultanim.time - osu_hitresult_duration.getFloat()) <
            engine->getTime()  // NOTE: this is written like that on purpose, don't change it ("future" results can be
                               // scheduled with it, e.g. for slider end)
-       && (hitresultanim.time + osu_hitresult_duration_max.getFloat() *
-                                    (1.0f / m_beatmap->getOsu()->getAnimationSpeedMultiplier())) > engine->getTime()) {
+       && (hitresultanim.time + osu_hitresult_duration_max.getFloat() * (1.0f / osu->getAnimationSpeedMultiplier())) >
+              engine->getTime()) {
         Skin *skin = m_beatmap->getSkin();
         {
             const long skinAnimationTimeStartOffset =
@@ -374,9 +374,8 @@ void HitObject::drawHitResultAnim(Graphics *g, const HITRESULTANIM &hitresultani
             skin->getHit300k()->setAnimationFrameClampUp();
 
             const float animPercentInv =
-                1.0f -
-                (((engine->getTime() - hitresultanim.time) * m_beatmap->getOsu()->getAnimationSpeedMultiplier()) /
-                 osu_hitresult_duration.getFloat());
+                1.0f - (((engine->getTime() - hitresultanim.time) * osu->getAnimationSpeedMultiplier()) /
+                        osu_hitresult_duration.getFloat());
 
             drawHitResult(g, m_beatmap, m_beatmap->osuCoords2Pixels(hitresultanim.rawPos), hitresultanim.result,
                           animPercentInv,
@@ -389,8 +388,7 @@ void HitObject::update(long curPos) {
     m_fAlphaForApproachCircle = 0.0f;
     m_fHittableDimRGBColorMultiplierPercent = 1.0f;
 
-    double animationSpeedMultipler =
-        m_beatmap->getOsu()->getSpeedMultiplier() / m_beatmap->getOsu()->getAnimationSpeedMultiplier();
+    double animationSpeedMultipler = osu->getSpeedMultiplier() / osu->getAnimationSpeedMultiplier();
     m_iApproachTime = (m_bUseFadeInTimeAsApproachTime ? (GameRules::getFadeInTime() * animationSpeedMultipler)
                                                       : (long)GameRules::getApproachTime(m_beatmap));
     m_iFadeInTime = GameRules::getFadeInTime() * animationSpeedMultipler;
@@ -466,7 +464,7 @@ void HitObject::update(long curPos) {
         m_fAlpha = clamp<float>(1.0f - ((float)(fadeInEnd - curPos) / (float)(fadeInEnd - fadeInStart)), 0.0f, 1.0f);
         m_fAlphaWithoutHidden = m_fAlpha;
 
-        if(m_beatmap->getOsu()->getModHD()) {
+        if(osu->getModHD()) {
             // hidden hitobject body fadein
             const float fin_start_percent = osu_mod_hd_circle_fadein_start_percent.getFloat();
             const float fin_end_percent = osu_mod_hd_circle_fadein_end_percent.getFloat();
@@ -521,7 +519,7 @@ void HitObject::update(long curPos) {
 void HitObject::addHitResult(LiveScore::HIT result, long delta, bool isEndOfCombo, Vector2 posRaw, float targetDelta,
                              float targetAngle, bool ignoreOnHitErrorBar, bool ignoreCombo, bool ignoreHealth,
                              bool addObjectDurationToSkinAnimationTimeStartOffset) {
-    if(m_beatmap->getOsu()->getModTarget() && result != LiveScore::HIT::HIT_MISS && targetDelta >= 0.0f) {
+    if(osu->getModTarget() && result != LiveScore::HIT::HIT_MISS && targetDelta >= 0.0f) {
         const float p300 = osu_mod_target_300_percent.getFloat();
         const float p100 = osu_mod_target_100_percent.getFloat();
         const float p50 = osu_mod_target_50_percent.getFloat();
@@ -535,7 +533,7 @@ void HitObject::addHitResult(LiveScore::HIT result, long delta, bool isEndOfComb
         else
             result = LiveScore::HIT::HIT_MISS;
 
-        m_beatmap->getOsu()->getHUD()->addTarget(targetDelta, targetAngle);
+        osu->getHUD()->addTarget(targetDelta, targetAngle);
     }
 
     const LiveScore::HIT returnedHit = m_beatmap->addHitResult(this, result, delta, isEndOfCombo, ignoreOnHitErrorBar,
@@ -551,8 +549,8 @@ void HitObject::addHitResult(LiveScore::HIT result, long delta, bool isEndOfComb
     }
 
     // currently a maximum of 2 simultaneous results are supported (for drawing, per hitobject)
-    if(engine->getTime() > m_hitresultanim1.time + osu_hitresult_duration_max.getFloat() *
-                                                       (1.0f / m_beatmap->getOsu()->getAnimationSpeedMultiplier()))
+    if(engine->getTime() >
+       m_hitresultanim1.time + osu_hitresult_duration_max.getFloat() * (1.0f / osu->getAnimationSpeedMultiplier()))
         m_hitresultanim1 = hitresultanim;
     else
         m_hitresultanim2 = hitresultanim;

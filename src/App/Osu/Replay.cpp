@@ -219,7 +219,7 @@ bool Replay::load_from_disk(FinishedScore* score) {
         delete[] compressed_replay;
     }
 
-    auto& map_scores = (*(bancho.osu->getSongBrowser()->getDatabase()->getScores()))[score->md5hash];
+    auto& map_scores = (*(osu->getSongBrowser()->getDatabase()->getScores()))[score->md5hash];
     for(auto& db_score : map_scores) {
         if(db_score.unixTimestamp != score->unixTimestamp) continue;
         if(&db_score != score) {
@@ -238,7 +238,7 @@ void Replay::load_and_watch(FinishedScore score) {
         if(!load_from_disk(&score)) {
             if(strcmp(score.server.c_str(), bancho.endpoint.toUtf8()) != 0) {
                 auto msg = UString::format("Please connect to %s to view this replay!", score.server.c_str());
-                bancho.osu->m_notificationOverlay->addNotification(msg);
+                osu->m_notificationOverlay->addNotification(msg);
             }
 
             // Need to allocate with calloc since APIRequests free() the .extra
@@ -254,23 +254,23 @@ void Replay::load_and_watch(FinishedScore score) {
             request.extra = (u8*)score_cpy;
             send_api_request(request);
 
-            bancho.osu->m_notificationOverlay->addNotification("Downloading replay...");
+            osu->m_notificationOverlay->addNotification("Downloading replay...");
             return;
         }
     }
 
     // We tried loading from memory, we tried loading from file, we tried loading from server... RIP
     if(score.replay.empty()) {
-        bancho.osu->m_notificationOverlay->addNotification("Failed to load replay");
+        osu->m_notificationOverlay->addNotification("Failed to load replay");
         return;
     }
 
-    auto beatmap = bancho.osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(score.md5hash.hash);
+    auto beatmap = osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(score.md5hash.hash);
     if(beatmap == nullptr) {
         // XXX: Auto-download beatmap
-        bancho.osu->m_notificationOverlay->addNotification("Missing beatmap for this replay");
+        osu->m_notificationOverlay->addNotification("Missing beatmap for this replay");
     } else {
-        bancho.osu->getSongBrowser()->onDifficultySelected(beatmap, false);
-        bancho.osu->getSelectedBeatmap()->watch(score, 0.f);
+        osu->getSongBrowser()->onDifficultySelected(beatmap, false);
+        osu->getSelectedBeatmap()->watch(score, 0.f);
     }
 }

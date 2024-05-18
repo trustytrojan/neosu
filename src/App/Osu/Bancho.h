@@ -4,7 +4,6 @@
 #include "BanchoProtocol.h"
 #include "UString.h"
 
-class Osu;
 class Image;
 
 enum class ServerPolicy {
@@ -16,7 +15,6 @@ enum class ServerPolicy {
 struct Bancho {
     UString neosu_version;
 
-    Osu *osu = nullptr;
     UString endpoint;
     i32 user_id = 0;
     UString username;

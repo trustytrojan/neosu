@@ -1,10 +1,3 @@
-//================ Copyright (c) 2020, PG, All rights reserved. =================//
-//
-// Purpose:		loader + container for raw beatmap files/data (v2 rewrite)
-//
-// $NoKeywords: $osudiff
-//===============================================================================//
-
 #include "DatabaseBeatmap.h"
 
 #include <assert.h>
@@ -85,9 +78,7 @@ ConVar *DatabaseBeatmap::m_osu_stars_stacking_ref = NULL;
 ConVar *DatabaseBeatmap::m_osu_debug_pp_ref = NULL;
 ConVar *DatabaseBeatmap::m_osu_slider_end_inside_check_offset_ref = NULL;
 
-DatabaseBeatmap::DatabaseBeatmap(Osu *osu, std::string filePath, std::string folder, bool filePathIsInMemoryBeatmap) {
-    m_osu = osu;
-
+DatabaseBeatmap::DatabaseBeatmap(std::string filePath, std::string folder, bool filePathIsInMemoryBeatmap) {
     m_sFilePath = filePath;
     m_bFilePathIsInMemoryBeatmap = filePathIsInMemoryBeatmap;
 
@@ -145,8 +136,7 @@ DatabaseBeatmap::DatabaseBeatmap(Osu *osu, std::string filePath, std::string fol
     m_iOnlineOffset = 0;
 }
 
-DatabaseBeatmap::DatabaseBeatmap(Osu *osu, std::vector<DatabaseBeatmap *> *difficulties)
-    : DatabaseBeatmap(osu, "", "") {
+DatabaseBeatmap::DatabaseBeatmap(std::vector<DatabaseBeatmap *> *difficulties) : DatabaseBeatmap("", "") {
     m_difficulties = difficulties;
     if(m_difficulties->empty()) return;
 
@@ -1210,7 +1200,7 @@ bool DatabaseBeatmap::loadMetadata() {
 
         // NOTE: if we have our own stars/bpm cached then use that
         bool bpm_was_cached = false;
-        auto db = bancho.osu->getSongBrowser()->getDatabase();
+        auto db = osu->getSongBrowser()->getDatabase();
         const auto result = db->m_starsCache.find(getMD5Hash());
         if(result != db->m_starsCache.end()) {
             if(result->second.starsNomod >= 0.f) {
@@ -1390,10 +1380,9 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
             const float AR = beatmap->getAR();
             const float CS = beatmap->getCS();
             const float OD = beatmap->getOD();
-            const float speedMultiplier =
-                databaseBeatmap->m_osu->getSpeedMultiplier();  // NOTE: not this->getSpeedMultiplier()!
-            const bool relax = databaseBeatmap->m_osu->getModRelax();
-            const bool touchDevice = databaseBeatmap->m_osu->getModTD();
+            const float speedMultiplier = osu->getSpeedMultiplier();  // NOTE: not this->getSpeedMultiplier()!
+            const bool relax = osu->getModRelax();
+            const bool touchDevice = osu->getModTD();
 
             LOAD_DIFFOBJ_RESULT diffres =
                 DatabaseBeatmap::loadDifficultyHitObjects(osuFilePath, AR, CS, speedMultiplier);
@@ -1406,7 +1395,7 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
                 diffres.diffobjects, CS, OD, speedMultiplier, relax, touchDevice, &aim, &aimSliderFactor, &speed,
                 &speedNotes);
             double pp = DifficultyCalculator::calculatePPv2(
-                beatmap->getOsu(), beatmap, aim, aimSliderFactor, speed, speedNotes, databaseBeatmap->m_iNumObjects,
+                beatmap, aim, aimSliderFactor, speed, speedNotes, databaseBeatmap->m_iNumObjects,
                 databaseBeatmap->m_iNumCircles, databaseBeatmap->m_iNumSliders, databaseBeatmap->m_iNumSpinners,
                 maxPossibleCombo);
 
@@ -1659,10 +1648,10 @@ void DatabaseBeatmapStarCalculator::init() {
     // technically the getSelectedBeatmap() call here is a bit unsafe, since the beatmap could have changed already
     // between async and sync, but in that case we recalculate immediately after anyways
     if(!m_bDead.load() && m_iErrorCode == 0)
-        m_pp = DifficultyCalculator::calculatePPv2(m_diff2->m_osu, m_diff2->m_osu->getSelectedBeatmap(),
-                                                   m_aimStars.load(), m_aimSliderFactor.load(), m_speedStars.load(),
-                                                   m_speedNotes.load(), m_iNumObjects.load(), m_iNumCircles.load(),
-                                                   m_iNumSliders.load(), m_iNumSpinners.load(), m_iMaxPossibleCombo);
+        m_pp = DifficultyCalculator::calculatePPv2(osu->getSelectedBeatmap(), m_aimStars.load(),
+                                                   m_aimSliderFactor.load(), m_speedStars.load(), m_speedNotes.load(),
+                                                   m_iNumObjects.load(), m_iNumCircles.load(), m_iNumSliders.load(),
+                                                   m_iNumSpinners.load(), m_iMaxPossibleCombo);
 
     m_bReady = true;
 }

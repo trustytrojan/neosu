@@ -1,22 +1,11 @@
-//================ Copyright (c) 2018, PG, All rights reserved. =================//
-//
-// Purpose:		pause menu button
-//
-// $NoKeywords: $
-//===============================================================================//
-
-#ifndef OSUUIPAUSEMENUBUTTON_H
-#define OSUUIPAUSEMENUBUTTON_H
-
+#pragma once
 #include "CBaseUIButton.h"
-
-class Osu;
 
 class Image;
 
 class UIPauseMenuButton : public CBaseUIButton {
    public:
-    UIPauseMenuButton(Osu *osu, std::function<Image *()> getImageFunc, float xPos, float yPos, float xSize, float ySize,
+    UIPauseMenuButton(std::function<Image *()> getImageFunc, float xPos, float yPos, float xSize, float ySize,
                       UString name);
 
     virtual void draw(Graphics *g);
@@ -30,8 +19,6 @@ class UIPauseMenuButton : public CBaseUIButton {
     Image *getImage() { return getImageFunc != NULL ? getImageFunc() : NULL; }
 
    private:
-    Osu *m_osu;
-
     Vector2 m_vScale;
     Vector2 m_vBaseScale;
     float m_fScaleMultiplier;
@@ -40,5 +27,3 @@ class UIPauseMenuButton : public CBaseUIButton {
 
     std::function<Image *()> getImageFunc;
 };
-
-#endif

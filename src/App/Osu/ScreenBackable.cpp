@@ -14,8 +14,8 @@
 #include "Skin.h"
 #include "UIBackButton.h"
 
-ScreenBackable::ScreenBackable(Osu *osu) : OsuScreen(osu) {
-    m_backButton = new UIBackButton(m_osu, -1, 0, 0, 0, "");
+ScreenBackable::ScreenBackable() : OsuScreen() {
+    m_backButton = new UIBackButton(-1, 0, 0, 0, "");
     m_backButton->setClickCallback(fastdelegate::MakeDelegate(this, &ScreenBackable::onBack));
 
     updateLayout();
@@ -49,7 +49,7 @@ void ScreenBackable::onKeyDown(KeyboardEvent &e) {
 
 void ScreenBackable::updateLayout() {
     m_backButton->updateLayout();
-    m_backButton->setPosY(m_osu->getScreenHeight() - m_backButton->getSize().y);
+    m_backButton->setPosY(osu->getScreenHeight() - m_backButton->getSize().y);
 }
 
 void ScreenBackable::onResolutionChange(Vector2 newResolution) { updateLayout(); }

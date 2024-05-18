@@ -2,14 +2,13 @@
 #include "CBaseUIImage.h"
 #include "Database.h"
 
-class Osu;
 class LiveScore;
 class SkinImage;
 struct FinishedScore;
 
 class UIRankingScreenRankingPanel : public CBaseUIImage {
    public:
-    UIRankingScreenRankingPanel(Osu *osu);
+    UIRankingScreenRankingPanel();
 
     virtual void draw(Graphics *g);
 
@@ -19,8 +18,6 @@ class UIRankingScreenRankingPanel : public CBaseUIImage {
    private:
     void drawHitImage(Graphics *g, SkinImage *img, float scale, Vector2 pos);
     void drawNumHits(Graphics *g, int numHits, float scale, Vector2 pos);
-
-    Osu *m_osu;
 
     unsigned long long m_iScore;
     int m_iNum300s;

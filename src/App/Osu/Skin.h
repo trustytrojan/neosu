@@ -1,13 +1,4 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		skin loader and container
-//
-// $NoKeywords: $osusk
-//===============================================================================//
-
-#ifndef OSUSKIN_H
-#define OSUSKIN_H
-
+#pragma once
 #include "cbase.h"
 
 class Image;
@@ -15,7 +6,6 @@ class Sound;
 class Resource;
 class ConVar;
 
-class Osu;
 class SkinImage;
 
 class Skin {
@@ -25,7 +15,7 @@ class Skin {
     static ConVar *m_osu_skin_async;
     static ConVar *m_osu_skin_hd;
 
-    Skin(Osu *osu, UString name, std::string filepath, bool isDefaultSkin = false);
+    Skin(UString name, std::string filepath, bool isDefaultSkin = false);
     virtual ~Skin();
 
     void update();
@@ -59,7 +49,6 @@ class Skin {
     // drawable helpers
     inline std::string getName() { return m_sName; }
     inline std::string getFilePath() { return m_sFilePath; }
-    inline Osu *getOsu() { return m_osu; }
 
     // raw
     inline Image *getMissingTexture() { return m_missingTexture; }
@@ -366,7 +355,6 @@ class Skin {
     void onEffectVolumeChange(UString oldValue, UString newValue);
     void onIgnoreBeatmapSampleVolumeChange(UString oldValue, UString newValue);
 
-    Osu *m_osu;
     bool m_bReady;
     bool m_bIsDefaultSkin;
     float m_animationSpeedMultiplier;
@@ -690,5 +678,3 @@ class Skin {
 
     std::vector<std::string> m_filepathsForExport;
 };
-
-#endif

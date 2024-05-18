@@ -1,10 +1,3 @@
-//================ Copyright (c) 2018, PG, All rights reserved. =================//
-//
-// Purpose:		generalized rich presence handler
-//
-// $NoKeywords: $rpt
-//===============================================================================//
-
 #include "RichPresence.h"
 
 #include "Bancho.h"
@@ -38,7 +31,7 @@ const UString RichPresence::KEY_DISCORD_DETAILS = "details";
 UString last_status = "[neosu]\nWaking up";
 Action last_action = IDLE;
 
-void RichPresence::setBanchoStatus(Osu *osu, const char *info_text, Action action) {
+void RichPresence::setBanchoStatus(const char *info_text, Action action) {
     if(osu == NULL) return;
 
     MD5Hash map_md5("");
@@ -74,7 +67,7 @@ void RichPresence::updateBanchoMods() {
     MD5Hash map_md5("");
     u32 map_id = 0;
 
-    auto selected_beatmap = bancho.osu->getSelectedBeatmap();
+    auto selected_beatmap = osu->getSelectedBeatmap();
     if(selected_beatmap != nullptr) {
         auto diff = selected_beatmap->getSelectedDifficulty2();
         if(diff != nullptr) {
@@ -88,36 +81,36 @@ void RichPresence::updateBanchoMods() {
     write<u8>(&packet, last_action);
     write_string(&packet, last_status.toUtf8());
     write_string(&packet, map_md5.hash);
-    write<u32>(&packet, bancho.osu->m_modSelector->getModFlags());
+    write<u32>(&packet, osu->m_modSelector->getModFlags());
     write<u8>(&packet, 0);  // osu!std
     write<u32>(&packet, map_id);
     send_packet(packet);
 
     // Servers like akatsuki send different leaderboards based on what mods
     // you have selected. Reset leaderboard when switching mods.
-    bancho.osu->m_songBrowser2->m_db->m_online_scores.clear();
-    bancho.osu->m_songBrowser2->rebuildScoreButtons();
+    osu->m_songBrowser2->m_db->m_online_scores.clear();
+    osu->m_songBrowser2->rebuildScoreButtons();
 }
 
-void RichPresence::onMainMenu(Osu *osu) {
-    setStatus(osu, "Main Menu");
-    setBanchoStatus(osu, "Main Menu", AFK);
+void RichPresence::onMainMenu() {
+    setStatus("Main Menu");
+    setBanchoStatus("Main Menu", AFK);
 }
 
-void RichPresence::onSongBrowser(Osu *osu) {
-    setStatus(osu, "Song Selection");
+void RichPresence::onSongBrowser() {
+    setStatus("Song Selection");
 
     if(osu->m_room->isVisible()) {
-        setBanchoStatus(osu, "Picking a map", MULTIPLAYER);
+        setBanchoStatus("Picking a map", MULTIPLAYER);
     } else {
-        setBanchoStatus(osu, "Song selection", IDLE);
+        setBanchoStatus("Song selection", IDLE);
     }
 
     // also update window title
     if(osu_rich_presence_dynamic_windowtitle.getBool()) env->setWindowTitle("neosu");
 }
 
-void RichPresence::onPlayStart(Osu *osu) {
+void RichPresence::onPlayStart() {
     UString playingInfo /*= "Playing "*/;
     playingInfo.append(osu->getSelectedBeatmap()->getSelectedDifficulty2()->getArtist().c_str());
     playingInfo.append(" - ");
@@ -126,8 +119,8 @@ void RichPresence::onPlayStart(Osu *osu) {
     playingInfo.append(osu->getSelectedBeatmap()->getSelectedDifficulty2()->getDifficultyName().c_str());
     playingInfo.append("]");
 
-    setStatus(osu, playingInfo);
-    setBanchoStatus(osu, playingInfo.toUtf8(), bancho.is_in_a_multi_room() ? MULTIPLAYER : PLAYING);
+    setStatus(playingInfo);
+    setBanchoStatus(playingInfo.toUtf8(), bancho.is_in_a_multi_room() ? MULTIPLAYER : PLAYING);
 
     // also update window title
     if(osu_rich_presence_dynamic_windowtitle.getBool()) {
@@ -137,7 +130,7 @@ void RichPresence::onPlayStart(Osu *osu) {
     }
 }
 
-void RichPresence::onPlayEnd(Osu *osu, bool quit) {
+void RichPresence::onPlayEnd(bool quit) {
     if(!quit && osu_rich_presence_show_recentplaystats.getBool()) {
         // e.g.: 230pp 900x 95.50% HDHRDT 6*
 
@@ -160,12 +153,12 @@ void RichPresence::onPlayEnd(Osu *osu, bool quit) {
         // stars
         scoreInfo.append(UString::format(" %.2f*", osu->getScore()->getStarsTomTotal()));
 
-        setStatus(osu, scoreInfo);
-        setBanchoStatus(osu, scoreInfo.toUtf8(), SUBMITTING);
+        setStatus(scoreInfo);
+        setBanchoStatus(scoreInfo.toUtf8(), SUBMITTING);
     }
 }
 
-void RichPresence::setStatus(Osu *osu, UString status, bool force) {
+void RichPresence::setStatus(UString status, bool force) {
     if(!osu_rich_presence.getBool() && !force) return;
 
     // discord
@@ -183,7 +176,7 @@ void RichPresence::setStatus(Osu *osu, UString status, bool force) {
                              true);
     discord->setRichPresence(KEY_DISCORD_DETAILS, status);
 
-    if(osu != NULL) {
+    if(osu->getSongBrowser() != nullptr) {
         if(osu_rich_presence_discord_show_totalpp.getBool()) {
             if(m_name_ref == NULL) m_name_ref = convar->getConVarByName("name");
 
@@ -202,6 +195,6 @@ void RichPresence::onRichPresenceChange(UString oldValue, UString newValue) {
         onRichPresenceEnable();
 }
 
-void RichPresence::onRichPresenceEnable() { setStatus(NULL, "..."); }
+void RichPresence::onRichPresenceEnable() { setStatus("..."); }
 
-void RichPresence::onRichPresenceDisable() { setStatus(NULL, "", true); }
+void RichPresence::onRichPresenceDisable() { setStatus("", true); }

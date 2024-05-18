@@ -1,13 +1,4 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		difficulty & playfield behaviour
-//
-// $NoKeywords: $osugr
-//===============================================================================//
-
-#ifndef OSUGAMERULES_H
-#define OSUGAMERULES_H
-
+#pragma once
 #include "Beatmap.h"
 #include "ConVar.h"
 #include "Osu.h"
@@ -50,7 +41,7 @@ class GameRules {
     {
         const float fade_out_time = osu_hitobject_fade_out_time.getFloat();
         const float multiplier_min = osu_hitobject_fade_out_time_speed_multiplier_min.getFloat();
-        return fade_out_time * (1.0f / std::max(beatmap->getOsu()->getAnimationSpeedMultiplier(), multiplier_min));
+        return fade_out_time * (1.0f / std::max(osu->getAnimationSpeedMultiplier(), multiplier_min));
     }
 
     static inline long getFadeInTime() { return (long)osu_hitobject_fade_in_time.getInt(); }
@@ -162,18 +153,17 @@ class GameRules {
     }
     static float getApproachRateForSpeedMultiplier(Beatmap *beatmap)  // respect all mods and overrides
     {
-        return getApproachRateForSpeedMultiplier(beatmap, beatmap->getOsu()->getSpeedMultiplier());
+        return getApproachRateForSpeedMultiplier(beatmap, osu->getSpeedMultiplier());
     }
     static float getRawApproachRateForSpeedMultiplier(Beatmap *beatmap)  // ignore AR override
     {
-        return mapDifficultyRangeInv(
-            (float)getRawApproachTime(beatmap) * (1.0f / beatmap->getOsu()->getSpeedMultiplier()), getMinApproachTime(),
-            getMidApproachTime(), getMaxApproachTime());
+        return mapDifficultyRangeInv((float)getRawApproachTime(beatmap) * (1.0f / osu->getSpeedMultiplier()),
+                                     getMinApproachTime(), getMidApproachTime(), getMaxApproachTime());
     }
     static float getConstantApproachRateForSpeedMultiplier(
         Beatmap *beatmap)  // ignore AR override, keep AR consistent through speed changes
     {
-        return mapDifficultyRangeInv((float)getRawApproachTime(beatmap) * beatmap->getOsu()->getSpeedMultiplier(),
+        return mapDifficultyRangeInv((float)getRawApproachTime(beatmap) * osu->getSpeedMultiplier(),
                                      getMinApproachTime(), getMidApproachTime(), getMaxApproachTime());
     }
     static float getRawConstantApproachRateForSpeedMultiplier(
@@ -199,18 +189,17 @@ class GameRules {
     }
     static float getOverallDifficultyForSpeedMultiplier(Beatmap *beatmap)  // respect all mods and overrides
     {
-        return getOverallDifficultyForSpeedMultiplier(beatmap, beatmap->getOsu()->getSpeedMultiplier());
+        return getOverallDifficultyForSpeedMultiplier(beatmap, osu->getSpeedMultiplier());
     }
     static float getRawOverallDifficultyForSpeedMultiplier(Beatmap *beatmap)  // ignore OD override
     {
-        return mapDifficultyRangeInv(
-            (float)getRawHitWindow300(beatmap) * (1.0f / beatmap->getOsu()->getSpeedMultiplier()), getMinHitWindow300(),
-            getMidHitWindow300(), getMaxHitWindow300());
+        return mapDifficultyRangeInv((float)getRawHitWindow300(beatmap) * (1.0f / osu->getSpeedMultiplier()),
+                                     getMinHitWindow300(), getMidHitWindow300(), getMaxHitWindow300());
     }
     static float getConstantOverallDifficultyForSpeedMultiplier(
         Beatmap *beatmap)  // ignore OD override, keep OD consistent through speed changes
     {
-        return mapDifficultyRangeInv((float)getRawHitWindow300(beatmap) * beatmap->getOsu()->getSpeedMultiplier(),
+        return mapDifficultyRangeInv((float)getRawHitWindow300(beatmap) * osu->getSpeedMultiplier(),
                                      getMinHitWindow300(), getMidHitWindow300(), getMaxHitWindow300());
     }
     static float getRawConstantOverallDifficultyForSpeedMultiplier(
@@ -285,7 +274,7 @@ class GameRules {
         Beatmap *beatmap,
         long spinnerDuration)  // spinner length compensated rotations // respect all mods and overrides
     {
-        return getSpinnerRotationsForSpeedMultiplier(beatmap, spinnerDuration, beatmap->getOsu()->getSpeedMultiplier());
+        return getSpinnerRotationsForSpeedMultiplier(beatmap, spinnerDuration, osu->getSpeedMultiplier());
     }
 
     static LiveScore::HIT getHitResult(long delta, Beatmap *beatmap) {
@@ -352,12 +341,12 @@ class GameRules {
                                  : 1.0f));  // gives the circle diameter in osu!pixels, goes negative above CS 12.1429
     }
 
-    static float getHitCircleXMultiplier(Osu *osu) {
-        return getPlayfieldSize(osu).x / OSU_COORD_WIDTH;  // scales osu!pixels to the actual playfield size
+    static float getHitCircleXMultiplier() {
+        return getPlayfieldSize().x / OSU_COORD_WIDTH;  // scales osu!pixels to the actual playfield size
     }
 
     static float getHitCircleDiameter(Beatmap *beatmap) {
-        return getRawHitCircleDiameter(beatmap->getCS()) * getHitCircleXMultiplier(beatmap->getOsu());
+        return getRawHitCircleDiameter(beatmap->getCS()) * getHitCircleXMultiplier();
     }
 
     //*************//
@@ -370,7 +359,7 @@ class GameRules {
     static const int OSU_COORD_WIDTH = 512;
     static const int OSU_COORD_HEIGHT = 384;
 
-    static float getPlayfieldScaleFactor(Osu *osu) {
+    static float getPlayfieldScaleFactor() {
         const int engineScreenWidth = osu->getScreenWidth();
         const int topBorderSize = osu_playfield_border_top_percent.getFloat() * osu->getScreenHeight();
         const int bottomBorderSize = osu_playfield_border_bottom_percent.getFloat() * osu->getScreenHeight();
@@ -381,14 +370,14 @@ class GameRules {
                    : engineScreenWidth / (float)OSU_COORD_WIDTH;
     }
 
-    static Vector2 getPlayfieldSize(Osu *osu) {
-        const float scaleFactor = getPlayfieldScaleFactor(osu);
+    static Vector2 getPlayfieldSize() {
+        const float scaleFactor = getPlayfieldScaleFactor();
 
         return Vector2(OSU_COORD_WIDTH * scaleFactor, OSU_COORD_HEIGHT * scaleFactor);
     }
 
-    static Vector2 getPlayfieldOffset(Osu *osu) {
-        const Vector2 playfieldSize = getPlayfieldSize(osu);
+    static Vector2 getPlayfieldOffset() {
+        const Vector2 playfieldSize = getPlayfieldSize();
         const int bottomBorderSize = osu_playfield_border_bottom_percent.getFloat() * osu->getScreenHeight();
         int playfieldYOffset = (osu->getScreenHeight() / 2.0f - (playfieldSize.y / 2.0f)) - bottomBorderSize;
 
@@ -400,13 +389,11 @@ class GameRules {
                        (osu->getScreenHeight() - playfieldSize.y) / 2.0f + playfieldYOffset);
     }
 
-    static Vector2 getPlayfieldCenter(Osu *osu) {
-        const float scaleFactor = getPlayfieldScaleFactor(osu);
-        const Vector2 playfieldOffset = getPlayfieldOffset(osu);
+    static Vector2 getPlayfieldCenter() {
+        const float scaleFactor = getPlayfieldScaleFactor();
+        const Vector2 playfieldOffset = getPlayfieldOffset();
 
         return Vector2((OSU_COORD_WIDTH / 2) * scaleFactor + playfieldOffset.x,
                        (OSU_COORD_HEIGHT / 2) * scaleFactor + playfieldOffset.y);
     }
 };
-
-#endif

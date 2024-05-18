@@ -3,7 +3,6 @@
 #include "Database.h"
 #include "score.h"
 
-class Osu;
 class SkinImage;
 
 class UIAvatar;
@@ -11,12 +10,12 @@ class UIContextMenu;
 
 class ScoreButton : public CBaseUIButton {
    public:
-    static SkinImage *getGradeImage(Osu *osu, FinishedScore::Grade grade);
+    static SkinImage *getGradeImage(FinishedScore::Grade grade);
     static UString getModsStringForDisplay(int mods);
 
     enum class STYLE { SCORE_BROWSER, TOP_RANKS };
 
-    ScoreButton(Osu *osu, UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,
+    ScoreButton(UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,
                 STYLE style = STYLE::SCORE_BROWSER);
     virtual ~ScoreButton();
 
@@ -69,7 +68,6 @@ class ScoreButton : public CBaseUIButton {
 
     bool isContextMenuVisible();
 
-    Osu *m_osu;
     UIContextMenu *m_contextMenu;
     STYLE m_style;
     float m_fIndexNumberAnim;

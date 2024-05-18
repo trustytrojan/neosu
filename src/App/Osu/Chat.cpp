@@ -37,7 +37,7 @@ ChatChannel::ChatChannel(Chat *chat, UString name_arg) {
     ui->setDrawScrollbars(true);
     ui->sticky = true;
 
-    btn = new UIButton(bancho.osu, 0, 0, 0, 0, "button", name);
+    btn = new UIButton(0, 0, 0, 0, "button", name);
     btn->grabs_clicks = true;
     btn->setUseDefaultSkin();
     btn->setClickCallback(fastdelegate::MakeDelegate(this, &ChatChannel::onChannelButtonClick));
@@ -71,7 +71,7 @@ void ChatChannel::add_message(ChatMessage msg) {
     if(!is_system_message) {
         float name_width = m_chat->font->getStringWidth(msg.author_name);
 
-        auto user_box = new UIUserLabel(m_chat->m_osu, msg.author_id, msg.author_name);
+        auto user_box = new UIUserLabel(msg.author_id, msg.author_name);
         user_box->setTextColor(0xff2596be);
         user_box->setPos(x, y_total);
         user_box->setSize(name_width, line_height);
@@ -131,12 +131,12 @@ void ChatChannel::updateLayout(Vector2 pos, Vector2 size) {
     ui->setScrollSizeToContent();
 }
 
-Chat::Chat(Osu *osu) : OsuScreen(osu) {
+Chat::Chat() : OsuScreen() {
     font = engine->getResourceManager()->getFont("FONT_DEFAULT");
 
     m_button_container = new CBaseUIContainer(0, 0, 0, 0, "");
 
-    join_channel_btn = new UIButton(osu, 0, 0, 0, 0, "button", "+");
+    join_channel_btn = new UIButton(0, 0, 0, 0, "button", "+");
     join_channel_btn->setUseDefaultSkin();
     join_channel_btn->setColor(0xffffff55);
     join_channel_btn->setSize(button_height + 2, button_height + 2);
@@ -149,7 +149,7 @@ Chat::Chat(Osu *osu) : OsuScreen(osu) {
     m_input_box->setBackgroundColor(0xdd000000);
     addBaseUIElement(m_input_box);
 
-    updateLayout(m_osu->getScreenSize());
+    updateLayout(osu->getScreenSize());
 }
 
 Chat::~Chat() { delete m_button_container; }
@@ -160,7 +160,7 @@ void Chat::draw(Graphics *g) {
 
     if(isAnimating) {
         // XXX: Setting BLEND_MODE_PREMUL_ALPHA is not enough, transparency is still incorrect
-        m_osu->getSliderFrameBuffer()->enable();
+        osu->getSliderFrameBuffer()->enable();
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_PREMUL_ALPHA);
     }
 
@@ -191,7 +191,7 @@ void Chat::draw(Graphics *g) {
     }
 
     if(isAnimating) {
-        m_osu->getSliderFrameBuffer()->disable();
+        osu->getSliderFrameBuffer()->disable();
 
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
         g->push3DScene(McRect(0, 0, getSize().x, getSize().y));
@@ -199,8 +199,8 @@ void Chat::draw(Graphics *g) {
             g->rotate3DScene(-(1.0f - m_fAnimation) * 90, 0, 0);
             g->translate3DScene(0, -(1.0f - m_fAnimation) * getSize().y * 1.25f, -(1.0f - m_fAnimation) * 700);
 
-            m_osu->getSliderFrameBuffer()->setColor(COLORf(m_fAnimation, 1.0f, 1.0f, 1.0f));
-            m_osu->getSliderFrameBuffer()->draw(g, 0, 0);
+            osu->getSliderFrameBuffer()->setColor(COLORf(m_fAnimation, 1.0f, 1.0f, 1.0f));
+            osu->getSliderFrameBuffer()->draw(g, 0, 0);
         }
         g->pop3DScene();
     }
@@ -378,7 +378,7 @@ void Chat::addChannel(UString channel_name, bool switch_to) {
         switchToChannel(chan);
     }
 
-    updateLayout(m_osu->getScreenSize());
+    updateLayout(osu->getScreenSize());
 }
 
 void Chat::addMessage(UString channel_name, ChatMessage msg) {
@@ -558,7 +558,7 @@ void Chat::onDisconnect() {
     chat_channels.clear();
 
     m_selected_channel = nullptr;
-    updateLayout(m_osu->getScreenSize());
+    updateLayout(osu->getScreenSize());
 
     updateVisibility();
 }
@@ -566,30 +566,30 @@ void Chat::onDisconnect() {
 void Chat::onResolutionChange(Vector2 newResolution) { updateLayout(newResolution); }
 
 bool Chat::isVisibilityForced() {
-    if(m_osu->m_room == nullptr || m_osu->m_lobby == nullptr || m_osu->m_songBrowser2 == nullptr) return false;
+    if(osu->m_room == nullptr || osu->m_lobby == nullptr || osu->m_songBrowser2 == nullptr) return false;
     bool sitting_in_room =
-        m_osu->m_room->isVisible() && !m_osu->m_songBrowser2->isVisible() && !bancho.is_playing_a_multi_map();
-    bool sitting_in_lobby = m_osu->m_lobby->isVisible();
+        osu->m_room->isVisible() && !osu->m_songBrowser2->isVisible() && !bancho.is_playing_a_multi_map();
+    bool sitting_in_lobby = osu->m_lobby->isVisible();
     bool is_forced = (sitting_in_room || sitting_in_lobby);
 
     if(is_forced != visibility_was_forced) {
         // Chat width changed: update the layout now
         visibility_was_forced = is_forced;
-        updateLayout(m_osu->getScreenSize());
+        updateLayout(osu->getScreenSize());
     }
     return is_forced;
 }
 
 void Chat::updateVisibility() {
-    auto selected_beatmap = m_osu->getSelectedBeatmap();
+    auto selected_beatmap = osu->getSelectedBeatmap();
     bool can_skip = (selected_beatmap != nullptr) && (selected_beatmap->isInSkippableSection());
-    bool is_spectating = m_osu->m_bModAuto || (m_osu->m_bModAutopilot && m_osu->m_bModRelax) ||
+    bool is_spectating = osu->m_bModAuto || (osu->m_bModAutopilot && osu->m_bModRelax) ||
                          (selected_beatmap != nullptr && selected_beatmap->m_bIsWatchingReplay);
-    bool is_clicking_circles = m_osu->isInPlayMode() && !can_skip && !is_spectating && !m_osu->m_pauseMenu->isVisible();
+    bool is_clicking_circles = osu->isInPlayMode() && !can_skip && !is_spectating && !osu->m_pauseMenu->isVisible();
     if(bancho.is_playing_a_multi_map() && !bancho.room.all_players_loaded) {
         is_clicking_circles = false;
     }
-    bool force_hide = m_osu->m_optionsMenu->isVisible() || m_osu->m_modSelector->isVisible() || is_clicking_circles;
+    bool force_hide = osu->m_optionsMenu->isVisible() || osu->m_modSelector->isVisible() || is_clicking_circles;
     if(!bancho.is_online()) force_hide = true;
 
     if(force_hide) {
@@ -605,13 +605,13 @@ CBaseUIContainer *Chat::setVisible(bool visible) {
     if(visible == m_bVisible) return this;
 
     if(visible && bancho.user_id <= 0) {
-        m_osu->m_optionsMenu->askForLoginDetails();
+        osu->m_optionsMenu->askForLoginDetails();
         return this;
     }
 
     m_bVisible = visible;
     if(visible) {
-        m_osu->m_optionsMenu->setVisible(false);
+        osu->m_optionsMenu->setVisible(false);
         anim->moveQuartOut(&m_fAnimation, 1.0f, 0.25f * (1.0f - m_fAnimation), true);
 
         if(m_selected_channel != nullptr && !m_selected_channel->read) {
@@ -619,7 +619,7 @@ CBaseUIContainer *Chat::setVisible(bool visible) {
         }
 
         if(layout_update_scheduled) {
-            updateLayout(m_osu->getScreenSize());
+            updateLayout(osu->getScreenSize());
         }
     } else {
         anim->moveQuadOut(&m_fAnimation, 0.0f, 0.25f * m_fAnimation, true);
@@ -636,6 +636,6 @@ bool Chat::isMouseInChat() {
 
 void Chat::askWhatChannelToJoin(CBaseUIButton *btn) {
     // XXX: Could display nicer UI with full channel list (chat_channels in Bancho.cpp)
-    m_osu->m_prompt->prompt("Type in the channel you want to join (e.g. '#osu'):",
-                            fastdelegate::MakeDelegate(this, &Chat::join));
+    osu->m_prompt->prompt("Type in the channel you want to join (e.g. '#osu'):",
+                          fastdelegate::MakeDelegate(this, &Chat::join));
 }

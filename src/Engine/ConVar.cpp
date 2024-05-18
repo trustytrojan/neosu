@@ -1,10 +1,3 @@
-//================ Copyright (c) 2011, PG, All rights reserved. =================//
-//
-// Purpose:		console variables
-//
-// $NoKeywords: $convar
-//===============================================================================//
-
 #include "ConVar.h"
 
 #include "Bancho.h"
@@ -290,15 +283,15 @@ ConVar::ConVar(UString name, const char *sDefaultValue, int flags, const char *h
 void ConVar::exec() {
     if(!isUnlocked()) return;
 
-    if(bancho.osu != nullptr) {
+    if(osu != nullptr) {
         auto is_vanilla = convar->isVanilla();
 
-        auto beatmap = bancho.osu->getSelectedBeatmap();
+        auto beatmap = osu->getSelectedBeatmap();
         if(beatmap != nullptr) {
             beatmap->vanilla &= is_vanilla;
         }
 
-        auto mod_selector = bancho.osu->m_modSelector;
+        auto mod_selector = osu->m_modSelector;
         if(mod_selector && mod_selector->m_nonVanillaWarning) {
             mod_selector->m_nonVanillaWarning->setVisible(!is_vanilla && bancho.submit_scores());
         }
@@ -496,12 +489,11 @@ bool ConVarHandler::isVanilla() {
     }
 
     // Also check for non-vanilla mod combinations here while we're at it
-    if(bancho.osu != nullptr) {
-        if(bancho.osu->getModTarget()) return false;
-        if(bancho.osu->getModNightmare()) return false;
-        if(bancho.osu->getModEZ() && bancho.osu->getModHR()) return false;
-        if((bancho.osu->getModDT() || bancho.osu->getModNC()) && (bancho.osu->getModHT() || bancho.osu->getModDC()))
-            return false;
+    if(osu != nullptr) {
+        if(osu->getModTarget()) return false;
+        if(osu->getModNightmare()) return false;
+        if(osu->getModEZ() && osu->getModHR()) return false;
+        if((osu->getModDT() || osu->getModNC()) && (osu->getModHT() || osu->getModDC())) return false;
     }
 
     return true;

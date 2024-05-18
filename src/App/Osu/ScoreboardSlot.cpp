@@ -35,13 +35,13 @@ void ScoreboardSlot::draw(Graphics *g) {
 
     g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_PREMUL_ALPHA);
 
-    const float height = roundf(bancho.osu->getScreenHeight() * 0.07f);
+    const float height = roundf(osu->getScreenHeight() * 0.07f);
     const float width = roundf(height * 2.6f);  // does not include avatar_width
     const float avatar_height = height;
     const float avatar_width = avatar_height;
     const float padding = roundf(height * 0.05f);
 
-    float start_y = bancho.osu->getScreenHeight() / 2.0f - (height * 2.5f);
+    float start_y = osu->getScreenHeight() / 2.0f - (height * 2.5f);
     start_y += m_y * height;
     start_y = roundf(start_y);
 
@@ -65,7 +65,7 @@ void ScoreboardSlot::draw(Graphics *g) {
 
     if(convar->getConVarByName("osu_hud_scoreboard_use_menubuttonbackground")->getBool()) {
         float bg_scale = 0.625f;
-        auto bg_img = bancho.osu->getSkin()->getMenuButtonBackground2();
+        auto bg_img = osu->getSkin()->getMenuButtonBackground2();
         float oScale = bg_img->getResolutionScale() * 0.99f;
         g->fillRect(0, start_y, avatar_width, height);
         bg_img->draw(g,
@@ -86,7 +86,7 @@ void ScoreboardSlot::draw(Graphics *g) {
     // Draw index
     g->pushTransform();
     {
-        McFont *indexFont = bancho.osu->getSongBrowserFontBold();
+        McFont *indexFont = osu->getSongBrowserFontBold();
         UString indexString = UString::format("%i", m_index + 1);
         const float scale = (avatar_height / indexFont->getHeight()) * 0.5f;
 
@@ -114,7 +114,7 @@ void ScoreboardSlot::draw(Graphics *g) {
     const float nameScale = 0.315f;
     g->pushTransform();
     {
-        McFont *nameFont = bancho.osu->getSongBrowserFont();
+        McFont *nameFont = osu->getSongBrowserFont();
         g->pushClipRect(McRect(avatar_width, start_y, width, height));
 
         const float scale = (height / nameFont->getHeight()) * nameScale;
@@ -149,7 +149,7 @@ void ScoreboardSlot::draw(Graphics *g) {
     const Color comboAccuracyColorHighlight = 0xff99fafe;
     const Color comboAccuracyColorTop = 0xff84dbe0;
     const float comboScale = 0.26f;
-    McFont *scoreFont = bancho.osu->getSongBrowserFont();
+    McFont *scoreFont = osu->getSongBrowserFont();
     McFont *comboFont = scoreFont;
     McFont *accFont = comboFont;
     g->pushTransform();
@@ -253,8 +253,8 @@ void ScoreboardSlot::draw(Graphics *g) {
 }
 
 void ScoreboardSlot::updateIndex(int new_index, bool animate) {
-    bool is_player = bancho.osu->m_hud->player_slot == this;
-    int player_idx = bancho.osu->m_hud->player_slot->m_index;
+    bool is_player = osu->m_hud->player_slot == this;
+    int player_idx = osu->m_hud->player_slot->m_index;
     if(is_player) {
         if(animate && new_index < m_index) {
             m_fFlash = 1.f;

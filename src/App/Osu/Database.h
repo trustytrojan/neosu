@@ -8,7 +8,6 @@
 class Timer;
 class ConVar;
 
-class Osu;
 class OsuFile;
 class DatabaseBeatmap;
 class DatabaseLoader;
@@ -57,7 +56,7 @@ class Database {
     };
 
    public:
-    Database(Osu *osu);
+    Database();
     ~Database();
 
     void update();
@@ -132,7 +131,6 @@ class Database {
     void onScoresRename(UString args);
     void onScoresExport();
 
-    Osu *m_osu;
     Timer *m_importTimer;
     bool m_bIsFirstLoad;   // only load differences after first raw load
     bool m_bFoundChanges;  // for total refresh detection of raw loading

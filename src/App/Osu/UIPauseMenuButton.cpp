@@ -1,10 +1,3 @@
-//================ Copyright (c) 2018, PG, All rights reserved. =================//
-//
-// Purpose:		pause menu button
-//
-// $NoKeywords: $
-//===============================================================================//
-
 #include "UIPauseMenuButton.h"
 
 #include "AnimationHandler.h"
@@ -13,10 +6,9 @@
 #include "Skin.h"
 #include "SoundEngine.h"
 
-UIPauseMenuButton::UIPauseMenuButton(Osu *osu, std::function<Image *()> getImageFunc, float xPos, float yPos,
-                                     float xSize, float ySize, UString name)
+UIPauseMenuButton::UIPauseMenuButton(std::function<Image *()> getImageFunc, float xPos, float yPos, float xSize,
+                                     float ySize, UString name)
     : CBaseUIButton(xPos, yPos, xSize, ySize, name) {
-    m_osu = osu;
     this->getImageFunc = getImageFunc;
 
     m_vScale = Vector2(1, 1);
@@ -55,7 +47,7 @@ void UIPauseMenuButton::setBaseScale(float xScale, float yScale) {
 void UIPauseMenuButton::onMouseInside() {
     CBaseUIButton::onMouseInside();
 
-    if(engine->hasFocus()) engine->getSound()->play(m_osu->getSkin()->getMenuClick());
+    if(engine->hasFocus()) engine->getSound()->play(osu->getSkin()->getMenuClick());
 
     const float animationDuration = 0.09f;
     anim->moveLinear(&m_vScale.x, m_vBaseScale.x * m_fScaleMultiplier, animationDuration, true);

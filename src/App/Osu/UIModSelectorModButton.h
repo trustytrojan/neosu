@@ -1,23 +1,12 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		mod image buttons (EZ, HD, HR, HT, DT, etc.)
-//
-// $NoKeywords: $osumsmb
-//===============================================================================//
-
-#ifndef OSUUIMODSELECTORMODBUTTON_H
-#define OSUUIMODSELECTORMODBUTTON_H
-
+#pragma once
 #include "CBaseUIImageButton.h"
 
-class Osu;
 class SkinImage;
 class ModSelector;
 
 class UIModSelectorModButton : public CBaseUIButton {
    public:
-    UIModSelectorModButton(Osu *osu, ModSelector *osuModSelector, float xPos, float yPos, float xSize, float ySize,
-                           UString name);
+    UIModSelectorModButton(ModSelector *osuModSelector, float xPos, float yPos, float xSize, float ySize, UString name);
 
     virtual void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);
@@ -39,7 +28,6 @@ class UIModSelectorModButton : public CBaseUIButton {
    private:
     virtual void onFocusStolen();
 
-    Osu *m_osu;
     ModSelector *m_osuModSelector;
 
     bool m_bOn;
@@ -62,5 +50,3 @@ class UIModSelectorModButton : public CBaseUIButton {
 
     bool m_bFocusStolenDelay;
 };
-
-#endif

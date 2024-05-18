@@ -1,30 +1,19 @@
-//================ Copyright (c) 2018, PG, All rights reserved. =================//
-//
-// Purpose:		generalized rich presence handler
-//
-// $NoKeywords: $rpt
-//===============================================================================//
-
-#ifndef OSURICHPRESENCE_H
-#define OSURICHPRESENCE_H
-
+#pragma once
 #include "BanchoProtocol.h"
 #include "cbase.h"
 
 class ConVar;
 
-class Osu;
-
 class RichPresence {
    public:
-    static void onMainMenu(Osu *osu);
-    static void onSongBrowser(Osu *osu);
-    static void onPlayStart(Osu *osu);
-    static void onPlayEnd(Osu *osu, bool quit);
+    static void onMainMenu();
+    static void onSongBrowser();
+    static void onPlayStart();
+    static void onPlayEnd(bool quit);
 
     static void onRichPresenceChange(UString oldValue, UString newValue);
-    static void setStatus(Osu *osu, UString status, bool force = false);
-    static void setBanchoStatus(Osu *osu, const char *info_text, Action action);
+    static void setStatus(UString status, bool force = false);
+    static void setBanchoStatus(const char *info_text, Action action);
     static void updateBanchoMods();
 
    private:
@@ -37,5 +26,3 @@ class RichPresence {
     static void onRichPresenceEnable();
     static void onRichPresenceDisable();
 };
-
-#endif

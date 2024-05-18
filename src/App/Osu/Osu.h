@@ -1,13 +1,4 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		yet another ouendan clone, because why not
-//
-// $NoKeywords: $osu
-//===============================================================================//
-
-#ifndef OSU_H
-#define OSU_H
-
+#pragma once
 #include "App.h"
 #include "BanchoNetworking.h"
 #include "MouseListener.h"
@@ -57,10 +48,10 @@ class Osu : public App, public MouseListener {
     static float getImageScaleToFitResolution(Vector2 size, Vector2 resolution);
     static float getImageScaleToFillResolution(Vector2 size, Vector2 resolution);
     static float getImageScaleToFillResolution(Image *img, Vector2 resolution);
-    static float getImageScale(Osu *osu, Vector2 size, float osuSize);
-    static float getImageScale(Osu *osu, Image *img, float osuSize);
-    static float getUIScale(Osu *osu, float osuResolutionRatio);
-    static float getUIScale(Osu *osu);  // NOTE: includes premultiplied dpi scale!
+    static float getImageScale(Vector2 size, float osuSize);
+    static float getImageScale(Image *img, float osuSize);
+    static float getUIScale(float osuResolutionRatio);
+    static float getUIScale();  // NOTE: includes premultiplied dpi scale!
 
     static bool findIgnoreCase(const std::string &haystack, const std::string &needle);
 
@@ -251,28 +242,28 @@ class Osu : public App, public MouseListener {
     ConVar *m_win_disable_windows_key_ref;
 
     // interfaces
-    VolumeOverlay *m_volumeOverlay;
-    MainMenu *m_mainMenu;
-    OptionsMenu *m_optionsMenu;
+    VolumeOverlay *m_volumeOverlay = nullptr;
+    MainMenu *m_mainMenu = nullptr;
+    OptionsMenu *m_optionsMenu = nullptr;
     Chat *m_chat = nullptr;
     Lobby *m_lobby = nullptr;
     RoomScreen *m_room = nullptr;
     PromptScreen *m_prompt = nullptr;
     UIUserContextMenuScreen *m_user_actions = nullptr;
     SongBrowser *m_songBrowser2 = nullptr;
-    BackgroundImageHandler *m_backgroundImageHandler;
-    ModSelector *m_modSelector;
-    RankingScreen *m_rankingScreen;
-    UserStatsScreen *m_userStatsScreen;
-    PauseMenu *m_pauseMenu;
-    Skin *m_skin;
-    HUD *m_hud;
-    TooltipOverlay *m_tooltipOverlay;
-    NotificationOverlay *m_notificationOverlay;
-    LiveScore *m_score;
-    Changelog *m_changelog;
-    UpdateHandler *m_updateHandler;
-    ModFPoSu *m_fposu;
+    BackgroundImageHandler *m_backgroundImageHandler = nullptr;
+    ModSelector *m_modSelector = nullptr;
+    RankingScreen *m_rankingScreen = nullptr;
+    UserStatsScreen *m_userStatsScreen = nullptr;
+    PauseMenu *m_pauseMenu = nullptr;
+    Skin *m_skin = nullptr;
+    HUD *m_hud = nullptr;
+    TooltipOverlay *m_tooltipOverlay = nullptr;
+    NotificationOverlay *m_notificationOverlay = nullptr;
+    LiveScore *m_score = nullptr;
+    Changelog *m_changelog = nullptr;
+    UpdateHandler *m_updateHandler = nullptr;
+    ModFPoSu *m_fposu = nullptr;
 
     std::vector<OsuScreen *> m_screens;
 
@@ -287,25 +278,25 @@ class Osu : public App, public MouseListener {
     bool holding_slider = false;
 
     // mods
-    bool m_bModAuto;
-    bool m_bModAutopilot;
-    bool m_bModRelax;
-    bool m_bModSpunout;
-    bool m_bModTarget;
-    bool m_bModScorev2;
+    bool m_bModAuto = false;
+    bool m_bModAutopilot = false;
+    bool m_bModRelax = false;
+    bool m_bModSpunout = false;
+    bool m_bModTarget = false;
+    bool m_bModScorev2 = false;
     bool m_bModFlashlight = false;
-    bool m_bModDT;
-    bool m_bModNC;
-    bool m_bModNF;
-    bool m_bModHT;
-    bool m_bModDC;
-    bool m_bModHD;
-    bool m_bModHR;
-    bool m_bModEZ;
-    bool m_bModSD;
-    bool m_bModSS;
-    bool m_bModNightmare;
-    bool m_bModTD;
+    bool m_bModDT = false;
+    bool m_bModNC = false;
+    bool m_bModNF = false;
+    bool m_bModHT = false;
+    bool m_bModDC = false;
+    bool m_bModHD = false;
+    bool m_bModHR = false;
+    bool m_bModEZ = false;
+    bool m_bModSD = false;
+    bool m_bModSS = false;
+    bool m_bModNightmare = false;
+    bool m_bModTD = false;
 
     std::vector<ConVar *> m_experimentalMods;
 
@@ -368,4 +359,4 @@ class Osu : public App, public MouseListener {
     bool m_bFireDelayedFontReloadAndResolutionChangeToFixDesyncedUIScaleScheduled;
 };
 
-#endif
+extern Osu *osu;

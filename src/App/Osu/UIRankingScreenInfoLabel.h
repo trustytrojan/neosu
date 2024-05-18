@@ -1,24 +1,14 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		analog to InfoLabel, but for the ranking screen
-//
-// $NoKeywords: $osursil
-//===============================================================================//
-
-#ifndef OSUUIRANKINGSCREENINFOLABEL_H
-#define OSUUIRANKINGSCREENINFOLABEL_H
-
+#pragma once
 #include "CBaseUIElement.h"
 
 class McFont;
 
-class Osu;
 class Beatmap;
 class DatabaseBeatmap;
 
 class UIRankingScreenInfoLabel : public CBaseUIElement {
    public:
-    UIRankingScreenInfoLabel(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name);
+    UIRankingScreenInfoLabel(float xPos, float yPos, float xSize, float ySize, UString name);
 
     void draw(Graphics *g);
 
@@ -37,7 +27,6 @@ class UIRankingScreenInfoLabel : public CBaseUIElement {
    private:
     UString buildPlayerString();
 
-    Osu *m_osu;
     McFont *m_font;
 
     int m_iMargin;
@@ -50,5 +39,3 @@ class UIRankingScreenInfoLabel : public CBaseUIElement {
     std::string m_sPlayer;
     std::string m_sDate;
 };
-
-#endif

@@ -62,12 +62,12 @@ ConVar osu_slider_legacy_use_baked_vao(
     "use baked cone mesh instead of raw mesh for legacy slider renderer (disabled by default because usually slower on "
     "very old gpus even though it should not be)");
 
-VertexArrayObject *SliderRenderer::generateVAO(Osu *osu, const std::vector<Vector2> &points, float hitcircleDiameter,
+VertexArrayObject *SliderRenderer::generateVAO(const std::vector<Vector2> &points, float hitcircleDiameter,
                                                Vector3 translation, bool skipOOBPoints) {
     engine->getResourceManager()->requestNextLoadUnmanaged();
     VertexArrayObject *vao = engine->getResourceManager()->createVertexArrayObject();
 
-    checkUpdateVars(osu, hitcircleDiameter);
+    checkUpdateVars(hitcircleDiameter);
 
     const Vector3 xOffset = Vector3(hitcircleDiameter, 0, 0);
     const Vector3 yOffset = Vector3(0, hitcircleDiameter, 0);
@@ -126,12 +126,12 @@ VertexArrayObject *SliderRenderer::generateVAO(Osu *osu, const std::vector<Vecto
     return vao;
 }
 
-void SliderRenderer::draw(Graphics *g, Osu *osu, const std::vector<Vector2> &points,
-                          const std::vector<Vector2> &alwaysPoints, float hitcircleDiameter, float from, float to,
-                          Color undimmedColor, float colorRGBMultiplier, float alpha, long sliderTimeForRainbow) {
+void SliderRenderer::draw(Graphics *g, const std::vector<Vector2> &points, const std::vector<Vector2> &alwaysPoints,
+                          float hitcircleDiameter, float from, float to, Color undimmedColor, float colorRGBMultiplier,
+                          float alpha, long sliderTimeForRainbow) {
     if(osu_slider_alpha_multiplier.getFloat() <= 0.0f || alpha <= 0.0f) return;
 
-    checkUpdateVars(osu, hitcircleDiameter);
+    checkUpdateVars(hitcircleDiameter);
 
     const int drawFromIndex = clamp<int>((int)std::round(points.size() * from), 0, points.size());
     const int drawUpToIndex = clamp<int>((int)std::round(points.size() * to), 0, points.size());
@@ -246,13 +246,13 @@ void SliderRenderer::draw(Graphics *g, Osu *osu, const std::vector<Vector2> &poi
                 // draw curve mesh
                 {
                     drawFillSliderBodyPeppy(
-                        g, osu, points,
+                        g, points,
                         (osu_slider_legacy_use_baked_vao.getBool() ? UNIT_CIRCLE_VAO_BAKED : UNIT_CIRCLE_VAO),
                         hitcircleDiameter / 2.0f, drawFromIndex, drawUpToIndex, BLEND_SHADER);
 
                     if(alwaysPoints.size() > 0)
-                        drawFillSliderBodyPeppy(g, osu, alwaysPoints, UNIT_CIRCLE_VAO_BAKED, hitcircleDiameter / 2.0f,
-                                                0, alwaysPoints.size(), BLEND_SHADER);
+                        drawFillSliderBodyPeppy(g, alwaysPoints, UNIT_CIRCLE_VAO_BAKED, hitcircleDiameter / 2.0f, 0,
+                                                alwaysPoints.size(), BLEND_SHADER);
                 }
             }
 
@@ -276,7 +276,7 @@ void SliderRenderer::draw(Graphics *g, Osu *osu, const std::vector<Vector2> &poi
                                           m_fBoundingBoxMaxY - m_fBoundingBoxMinY);
 }
 
-void SliderRenderer::draw(Graphics *g, Osu *osu, VertexArrayObject *vao, const std::vector<Vector2> &alwaysPoints,
+void SliderRenderer::draw(Graphics *g, VertexArrayObject *vao, const std::vector<Vector2> &alwaysPoints,
                           Vector2 translation, float scale, float hitcircleDiameter, float from, float to,
                           Color undimmedColor, float colorRGBMultiplier, float alpha, long sliderTimeForRainbow,
                           bool doEnableRenderTarget, bool doDisableRenderTarget, bool doDrawSliderFrameBufferToScreen) {
@@ -284,7 +284,7 @@ void SliderRenderer::draw(Graphics *g, Osu *osu, VertexArrayObject *vao, const s
        (alpha <= 0.0f && doDrawSliderFrameBufferToScreen) || vao == NULL)
         return;
 
-    checkUpdateVars(osu, hitcircleDiameter);
+    checkUpdateVars(hitcircleDiameter);
 
     if(osu_slider_debug_draw_square_vao.getBool()) {
         const Color dimmedColor = COLOR(255, (int)(COLOR_GET_Ri(undimmedColor) * colorRGBMultiplier),
@@ -435,8 +435,8 @@ void SliderRenderer::draw(Graphics *g, Osu *osu, VertexArrayObject *vao, const s
                     g->popTransform();
 
                     if(alwaysPoints.size() > 0)
-                        drawFillSliderBodyPeppy(g, osu, alwaysPoints, UNIT_CIRCLE_VAO_BAKED, hitcircleDiameter / 2.0f,
-                                                0, alwaysPoints.size(), BLEND_SHADER);
+                        drawFillSliderBodyPeppy(g, alwaysPoints, UNIT_CIRCLE_VAO_BAKED, hitcircleDiameter / 2.0f, 0,
+                                                alwaysPoints.size(), BLEND_SHADER);
                 }
             }
 
@@ -454,12 +454,12 @@ void SliderRenderer::draw(Graphics *g, Osu *osu, VertexArrayObject *vao, const s
     }
 }
 
-void SliderRenderer::drawMM(Graphics *g, Osu *osu, const std::vector<Vector2> &points, float hitcircleDiameter,
-                            float from, float to, Color undimmedColor, float colorRGBMultiplier, float alpha,
+void SliderRenderer::drawMM(Graphics *g, const std::vector<Vector2> &points, float hitcircleDiameter, float from,
+                            float to, Color undimmedColor, float colorRGBMultiplier, float alpha,
                             long sliderTimeForRainbow) {
     if(osu_slider_alpha_multiplier.getFloat() <= 0.0f || alpha <= 0.0f) return;
 
-    checkUpdateVars(osu, hitcircleDiameter);
+    checkUpdateVars(hitcircleDiameter);
 
     // TODO: shit
     int numPointsTotal = points.size();
@@ -549,7 +549,7 @@ void SliderRenderer::drawMM(Graphics *g, Osu *osu, const std::vector<Vector2> &p
     osu->getSliderFrameBuffer()->draw(g, 0, 0);
 }
 
-void SliderRenderer::drawFillSliderBodyPeppy(Graphics *g, Osu *osu, const std::vector<Vector2> &points,
+void SliderRenderer::drawFillSliderBodyPeppy(Graphics *g, const std::vector<Vector2> &points,
                                              VertexArrayObject *circleMesh, float radius, int drawFromIndex,
                                              int drawUpToIndex, Shader *shader) {
     if(drawFromIndex < 0) drawFromIndex = 0;
@@ -744,7 +744,7 @@ void SliderRenderer::drawFillSliderBodyMM(Graphics *g, const std::vector<Vector2
     }
 }
 
-void SliderRenderer::checkUpdateVars(Osu *osu, float hitcircleDiameter) {
+void SliderRenderer::checkUpdateVars(float hitcircleDiameter) {
     // static globals
 
     // build shaders and circle mesh

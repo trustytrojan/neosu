@@ -1,20 +1,11 @@
-//================ Copyright (c) 2017, PG, All rights reserved. =================//
-//
-// Purpose:		search text overlay
-//
-// $NoKeywords: $osufind
-//===============================================================================//
-
 #include "UISearchOverlay.h"
 
 #include "Engine.h"
 #include "Osu.h"
 #include "ResourceManager.h"
 
-UISearchOverlay::UISearchOverlay(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name)
+UISearchOverlay::UISearchOverlay(float xPos, float yPos, float xSize, float ySize, UString name)
     : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
-    m_osu = osu;
-
     m_font = engine->getResourceManager()->getFont("FONT_DEFAULT");
 
     m_iOffsetRight = 0;
@@ -61,7 +52,7 @@ void UISearchOverlay::draw(Graphics *g) {
                                      (searchTextFont->getHeight() * searchTextScale) * 0.5f - m_iOffsetRight) +
                                (int)(searchTextFont->getStringWidth(searchText1) * searchTextScale) +
                                (int)(searchStringWidth * searchTextScale);
-        if(actualXEnd > m_osu->getScreenWidth()) textOverflowXOffset = actualXEnd - m_osu->getScreenWidth();
+        if(actualXEnd > osu->getScreenWidth()) textOverflowXOffset = actualXEnd - osu->getScreenWidth();
     }
 
     // draw background

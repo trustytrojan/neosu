@@ -1,10 +1,3 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		generic slider (mod overrides, options, etc.)
-//
-// $NoKeywords: $osusl
-//===============================================================================//
-
 #include "UISlider.h"
 
 #include "AnimationHandler.h"
@@ -12,16 +5,15 @@
 #include "ResourceManager.h"
 #include "Skin.h"
 
-UISlider::UISlider(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name)
+UISlider::UISlider(float xPos, float yPos, float xSize, float ySize, UString name)
     : CBaseUISlider(xPos, yPos, xSize, ySize, name) {
-    m_osu = osu;
     setBlockSize(20, 20);
 }
 
 void UISlider::draw(Graphics *g) {
     if(!m_bVisible) return;
 
-    Image *img = m_osu->getSkin()->getCircleEmpty();
+    Image *img = osu->getSkin()->getCircleEmpty();
     if(img == NULL) {
         CBaseUISlider::draw(g);
         return;
@@ -52,7 +44,7 @@ void UISlider::draw(Graphics *g) {
     {
         g->scale(scale.x, scale.y);
         g->translate(blockCenter.x, blockCenter.y + 1);
-        g->drawImage(m_osu->getSkin()->getCircleEmpty());
+        g->drawImage(osu->getSkin()->getCircleEmpty());
     }
     g->popTransform();
 }

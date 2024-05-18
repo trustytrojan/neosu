@@ -1,10 +1,3 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		generic button (context menu items, mod selection screen, etc.)
-//
-// $NoKeywords: $osubt
-//===============================================================================//
-
 #include "UIButton.h"
 
 #include "AnimationHandler.h"
@@ -14,10 +7,8 @@
 #include "Skin.h"
 #include "TooltipOverlay.h"
 
-UIButton::UIButton(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name, UString text)
+UIButton::UIButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
     : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {
-    m_osu = osu;
-
     m_bDefaultSkin = false;
     m_color = 0xffffffff;
     m_backupColor = m_color;
@@ -31,16 +22,14 @@ UIButton::UIButton(Osu *osu, float xPos, float yPos, float xSize, float ySize, U
 void UIButton::draw(Graphics *g) {
     if(!m_bVisible) return;
 
-    Image *buttonLeft = m_bDefaultSkin ? m_osu->getSkin()->getDefaultButtonLeft() : m_osu->getSkin()->getButtonLeft();
-    Image *buttonMiddle =
-        m_bDefaultSkin ? m_osu->getSkin()->getDefaultButtonMiddle() : m_osu->getSkin()->getButtonMiddle();
-    Image *buttonRight =
-        m_bDefaultSkin ? m_osu->getSkin()->getDefaultButtonRight() : m_osu->getSkin()->getButtonRight();
+    Image *buttonLeft = m_bDefaultSkin ? osu->getSkin()->getDefaultButtonLeft() : osu->getSkin()->getButtonLeft();
+    Image *buttonMiddle = m_bDefaultSkin ? osu->getSkin()->getDefaultButtonMiddle() : osu->getSkin()->getButtonMiddle();
+    Image *buttonRight = m_bDefaultSkin ? osu->getSkin()->getDefaultButtonRight() : osu->getSkin()->getButtonRight();
 
-    float leftScale = m_osu->getImageScaleToFitResolution(buttonLeft, m_vSize);
+    float leftScale = osu->getImageScaleToFitResolution(buttonLeft, m_vSize);
     float leftWidth = buttonLeft->getWidth() * leftScale;
 
-    float rightScale = m_osu->getImageScaleToFitResolution(buttonRight, m_vSize);
+    float rightScale = osu->getImageScaleToFitResolution(buttonRight, m_vSize);
     float rightWidth = buttonRight->getWidth() * rightScale;
 
     float middleWidth = m_vSize.x - leftWidth - rightWidth;
@@ -66,13 +55,13 @@ void UIButton::draw(Graphics *g) {
     buttonRight->unbind();
 
     if(is_loading) {
-        const float scale = (m_vSize.y * 0.8) / m_osu->getSkin()->getLoadingSpinner()->getSize().y;
+        const float scale = (m_vSize.y * 0.8) / osu->getSkin()->getLoadingSpinner()->getSize().y;
         g->setColor(0xffffffff);
         g->pushTransform();
         g->rotate(engine->getTime() * 180, 0, 0, 1);
         g->scale(scale, scale);
         g->translate(m_vPos.x + m_vSize.x / 2.0f, m_vPos.y + m_vSize.y / 2.0f);
-        g->drawImage(m_osu->getSkin()->getLoadingSpinner());
+        g->drawImage(osu->getSkin()->getLoadingSpinner());
         g->popTransform();
     } else {
         drawText(g);
@@ -84,13 +73,13 @@ void UIButton::mouse_update(bool *propagate_clicks) {
     CBaseUIButton::mouse_update(propagate_clicks);
 
     if(isMouseInside() && m_tooltipTextLines.size() > 0 && !m_bFocusStolenDelay) {
-        m_osu->getTooltipOverlay()->begin();
+        osu->getTooltipOverlay()->begin();
         {
             for(int i = 0; i < m_tooltipTextLines.size(); i++) {
-                m_osu->getTooltipOverlay()->addLine(m_tooltipTextLines[i]);
+                osu->getTooltipOverlay()->addLine(m_tooltipTextLines[i]);
             }
         }
-        m_osu->getTooltipOverlay()->end();
+        osu->getTooltipOverlay()->end();
     }
 
     m_bFocusStolenDelay = false;

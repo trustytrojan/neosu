@@ -34,10 +34,8 @@
 ConVar *ScoreButton::m_osu_scores_sort_by_pp_ref = NULL;
 UString ScoreButton::recentScoreIconString;
 
-ScoreButton::ScoreButton(Osu *osu, UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,
-                         STYLE style)
+ScoreButton::ScoreButton(UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize, STYLE style)
     : CBaseUIButton(xPos, yPos, xSize, ySize, "", "") {
-    m_osu = osu;
     m_contextMenu = contextMenu;
     m_style = style;
 
@@ -67,12 +65,12 @@ void ScoreButton::draw(Graphics *g) {
     if(m_style == STYLE::SCORE_BROWSER) {
         g->setColor(0xff000000);
         g->setAlpha(0.59f * (0.5f + 0.5f * m_fIndexNumberAnim));
-        Image *backgroundImage = m_osu->getSkin()->getMenuButtonBackground();
+        Image *backgroundImage = osu->getSkin()->getMenuButtonBackground();
         g->pushTransform();
         {
             // allow overscale
             Vector2 hardcodedImageSize =
-                Vector2(699.0f, 103.0f) * (m_osu->getSkin()->isMenuButtonBackground2x() ? 2.0f : 1.0f);
+                Vector2(699.0f, 103.0f) * (osu->getSkin()->isMenuButtonBackground2x() ? 2.0f : 1.0f);
             const float scale = Osu::getImageScaleToFillResolution(hardcodedImageSize, m_vSize);
 
             g->scale(scale, scale);
@@ -97,7 +95,7 @@ void ScoreButton::draw(Graphics *g) {
 
         // Update avatar visibility status
         // NOTE: Not checking horizontal visibility
-        auto m_scoreBrowser = m_osu->m_songBrowser2->m_scoreBrowser;
+        auto m_scoreBrowser = osu->m_songBrowser2->m_scoreBrowser;
         bool is_below_top = m_avatar->getPos().y + m_avatar->getSize().y >= m_scoreBrowser->getPos().y;
         bool is_above_bottom = m_avatar->getPos().y <= m_scoreBrowser->getPos().y + m_scoreBrowser->getSize().y;
         m_avatar->on_screen = is_below_top && is_above_bottom;
@@ -105,7 +103,7 @@ void ScoreButton::draw(Graphics *g) {
     }
     const float indexNumberScale = 0.35f;
     const float indexNumberWidthPercent = (m_style == STYLE::TOP_RANKS ? 0.075f : 0.15f);
-    McFont *indexNumberFont = m_osu->getSongBrowserFontBold();
+    McFont *indexNumberFont = osu->getSongBrowserFontBold();
     g->pushTransform();
     {
         UString indexNumberString = UString::format("%i", m_iScoreIndexNumber);
@@ -128,7 +126,7 @@ void ScoreButton::draw(Graphics *g) {
 
     // grade
     const float gradeHeightPercent = 0.7f;
-    SkinImage *grade = getGradeImage(m_osu, m_scoreGrade);
+    SkinImage *grade = getGradeImage(m_scoreGrade);
     int gradeWidth = 0;
     g->pushTransform();
     {
@@ -149,7 +147,7 @@ void ScoreButton::draw(Graphics *g) {
 
     // username | (artist + songName + diffName)
     const float usernameScale = (m_style == STYLE::TOP_RANKS ? 0.6f : 0.7f);
-    McFont *usernameFont = m_osu->getSongBrowserFont();
+    McFont *usernameFont = osu->getSongBrowserFont();
     g->pushClipRect(McRect(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y));
     g->pushTransform();
     {
@@ -220,7 +218,7 @@ void ScoreButton::draw(Graphics *g) {
 
     // mods
     const float modScale = 0.7f;
-    McFont *modFont = m_osu->getSubTitleFont();
+    McFont *modFont = osu->getSubTitleFont();
     g->pushTransform();
     {
         const float height = rightSideThirdHeight;
@@ -244,7 +242,7 @@ void ScoreButton::draw(Graphics *g) {
 
     // accuracy
     const float accScale = 0.65f;
-    McFont *accFont = m_osu->getSubTitleFont();
+    McFont *accFont = osu->getSubTitleFont();
     g->pushTransform();
     {
         const UString &scoreAccuracy = (m_style == STYLE::TOP_RANKS ? m_sScoreAccuracyFC : m_sScoreAccuracy);
@@ -271,7 +269,7 @@ void ScoreButton::draw(Graphics *g) {
     // custom info (Spd.)
     if(m_style == STYLE::SCORE_BROWSER && m_sCustom.length() > 0) {
         const float customScale = 0.50f;
-        McFont *customFont = m_osu->getSubTitleFont();
+        McFont *customFont = osu->getSubTitleFont();
         g->pushTransform();
         {
             const float height = rightSideThirdHeight;
@@ -297,7 +295,7 @@ void ScoreButton::draw(Graphics *g) {
     if(m_style == STYLE::TOP_RANKS) {
         // weighted percent
         const float weightScale = 0.65f;
-        McFont *weightFont = m_osu->getSubTitleFont();
+        McFont *weightFont = osu->getSubTitleFont();
         g->pushTransform();
         {
             const float height = rightSideThirdHeight;
@@ -323,7 +321,7 @@ void ScoreButton::draw(Graphics *g) {
     // recent icon + elapsed time since score
     const float upIconScale = 0.35f;
     const float timeElapsedScale = accScale;
-    McFont *iconFont = m_osu->getFontIcons();
+    McFont *iconFont = osu->getFontIcons();
     McFont *timeFont = accFont;
     if(m_iScoreUnixTimestamp > 0) {
         const float iconScale = (m_vSize.y / iconFont->getHeight()) * upIconScale;
@@ -406,13 +404,13 @@ void ScoreButton::mouse_update(bool *propagate_clicks) {
     if(isMouseInside()) {
         if(!isContextMenuVisible()) {
             if(m_fIndexNumberAnim > 0.0f) {
-                m_osu->getTooltipOverlay()->begin();
+                osu->getTooltipOverlay()->begin();
                 {
                     for(int i = 0; i < m_tooltipLines.size(); i++) {
-                        if(m_tooltipLines[i].length() > 0) m_osu->getTooltipOverlay()->addLine(m_tooltipLines[i]);
+                        if(m_tooltipLines[i].length() > 0) osu->getTooltipOverlay()->addLine(m_tooltipLines[i]);
                     }
                 }
-                m_osu->getTooltipOverlay()->end();
+                osu->getTooltipOverlay()->end();
             }
         } else {
             anim->deleteExistingAnimation(&m_fIndexNumberAnim);
@@ -481,7 +479,7 @@ void ScoreButton::updateElapsedTimeString() {
 }
 
 void ScoreButton::onClicked() {
-    engine->getSound()->play(m_osu->getSkin()->getMenuHit());
+    engine->getSound()->play(osu->getSkin()->getMenuHit());
     CBaseUIButton::onClicked();
 }
 
@@ -563,8 +561,8 @@ void ScoreButton::onContextMenu(UString text, int id) {
 }
 
 void ScoreButton::onUseModsClicked() {
-    bool nomod = m_osu->useMods(&m_score);
-    engine->getSound()->play(nomod ? m_osu->getSkin()->getCheckOff() : m_osu->getSkin()->getCheckOn());
+    bool nomod = osu->useMods(&m_score);
+    engine->getSound()->play(nomod ? osu->getSkin()->getCheckOff() : osu->getSkin()->getCheckOn());
 }
 
 void ScoreButton::onDeleteScoreClicked() {
@@ -594,13 +592,13 @@ void ScoreButton::onDeleteScoreConfirmed(UString text, int id) {
 
     // absolutely disgusting
     if(m_style == STYLE::SCORE_BROWSER)
-        m_osu->getSongBrowser()->onScoreContextMenu(this, 2);
+        osu->getSongBrowser()->onScoreContextMenu(this, 2);
     else if(m_style == STYLE::TOP_RANKS) {
         // in this case, deletion of the actual scores is handled in SongBrowser::onScoreContextMenu()
         // this is nice because it updates the songbrowser scorebrowser too (so if the user closes the top ranks screen
         // everything is in sync, even for the currently selected beatmap)
-        m_osu->getSongBrowser()->onScoreContextMenu(this, 2);
-        m_osu->getUserStatsScreen()->onScoreContextMenu(this, 2);
+        osu->getSongBrowser()->onScoreContextMenu(this, 2);
+        osu->getUserStatsScreen()->onScoreContextMenu(this, 2);
     }
 }
 
@@ -769,7 +767,7 @@ void ScoreButton::setScore(const FinishedScore &score, const DatabaseBeatmap *di
 
 bool ScoreButton::isContextMenuVisible() { return (m_contextMenu != NULL && m_contextMenu->isVisible()); }
 
-SkinImage *ScoreButton::getGradeImage(Osu *osu, FinishedScore::Grade grade) {
+SkinImage *ScoreButton::getGradeImage(FinishedScore::Grade grade) {
     switch(grade) {
         case FinishedScore::Grade::XH:
             return osu->getSkin()->getRankingXHsmall();

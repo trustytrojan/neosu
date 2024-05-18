@@ -1,7 +1,6 @@
 #pragma once
 #include "CBaseUIButton.h"
 
-class Osu;
 class DatabaseBeatmap;
 class SongBrowser;
 class UIContextMenu;
@@ -10,8 +9,8 @@ class CBaseUIScrollView;
 
 class Button : public CBaseUIButton {
    public:
-    Button(Osu *osu, SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos,
-           float yPos, float xSize, float ySize, UString name);
+    Button(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos, float yPos,
+           float xSize, float ySize, UString name);
     virtual ~Button();
     void deleteAnimations();
 
@@ -53,7 +52,6 @@ class Button : public CBaseUIButton {
     virtual void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected) { ; }
     virtual void onRightMouseUpInside() { ; }
 
-    Osu *m_osu;
     CBaseUIScrollView *m_view;
     SongBrowser *m_songBrowser;
     UIContextMenu *m_contextMenu;

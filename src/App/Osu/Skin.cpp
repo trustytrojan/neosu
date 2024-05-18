@@ -1,10 +1,3 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		skin loader and container
-//
-// $NoKeywords: $osusk
-//===============================================================================//
-
 #include "Skin.h"
 
 #include <string.h>
@@ -66,8 +59,7 @@ ConVar *Skin::m_osu_skin_hd = &osu_skin_hd;
 ConVar *Skin::m_osu_skin_ref = NULL;
 ConVar *Skin::m_osu_mod_fposu_ref = NULL;
 
-Skin::Skin(Osu *osu, UString name, std::string filepath, bool isDefaultSkin) {
-    m_osu = osu;
+Skin::Skin(UString name, std::string filepath, bool isDefaultSkin) {
     m_sName = name;
     m_sFilePath = filepath;
     m_bIsDefaultSkin = isDefaultSkin;
@@ -341,15 +333,14 @@ void Skin::update() {
         m_bReady = true;
 
         // force effect volume update
-        m_osu->m_volumeOverlay->onEffectVolumeChange();
+        osu->m_volumeOverlay->onEffectVolumeChange();
     }
 
     // shitty check to not animate while paused with hitobjects in background
-    if(m_osu->isInPlayMode() && !m_osu->getSelectedBeatmap()->isPlaying() && !osu_skin_animation_force.getBool())
-        return;
+    if(osu->isInPlayMode() && !osu->getSelectedBeatmap()->isPlaying() && !osu_skin_animation_force.getBool()) return;
 
-    const bool useEngineTimeForAnimations = !m_osu->isInPlayMode();
-    const long curMusicPos = m_osu->getSelectedBeatmap()->getCurMusicPosWithOffsets();
+    const bool useEngineTimeForAnimations = !osu->isInPlayMode();
+    const long curMusicPos = osu->getSelectedBeatmap()->getCurMusicPosWithOffsets();
     for(int i = 0; i < m_images.size(); i++) {
         m_images[i]->update(m_animationSpeedMultiplier, useEngineTimeForAnimations, curMusicPos);
     }
@@ -958,13 +949,13 @@ void Skin::load() {
 
     // delayed error notifications due to resource loading potentially blocking engine time
     if(!parseSkinIni1Status && parseSkinIni2Status && m_osu_skin_ref->getString() != UString("default"))
-        m_osu->getNotificationOverlay()->addNotification("Error: Couldn't load skin.ini!", 0xffff0000);
+        osu->getNotificationOverlay()->addNotification("Error: Couldn't load skin.ini!", 0xffff0000);
     else if(!parseSkinIni2Status)
-        m_osu->getNotificationOverlay()->addNotification("Error: Couldn't load DEFAULT skin.ini!!!", 0xffff0000);
+        osu->getNotificationOverlay()->addNotification("Error: Couldn't load DEFAULT skin.ini!!!", 0xffff0000);
 
     // TODO: is this crashing some users?
     // HACKHACK: speed up initial game startup time by async loading the skin (if osu_skin_async 1 in underride)
-    if(m_osu->getSkin() == NULL && osu_skin_async.getBool()) {
+    if(osu->getSkin() == NULL && osu_skin_async.getBool()) {
         while(engine->getResourceManager()->isLoading()) {
             engine->getResourceManager()->update();
             env->sleep(0);

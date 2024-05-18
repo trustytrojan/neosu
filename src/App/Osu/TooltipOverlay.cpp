@@ -16,7 +16,7 @@
 
 ConVar osu_tooltip_anim_duration("osu_tooltip_anim_duration", 0.4f, FCVAR_DEFAULT);
 
-TooltipOverlay::TooltipOverlay(Osu *osu) : OsuScreen(osu) {
+TooltipOverlay::TooltipOverlay() : OsuScreen() {
     m_fAnim = 0.0f;
     m_bDelayFadeout = false;
 }
@@ -25,7 +25,7 @@ TooltipOverlay::~TooltipOverlay() {}
 
 void TooltipOverlay::draw(Graphics *g) {
     if(m_fAnim > 0.0f) {
-        const float dpiScale = Osu::getUIScale(m_osu);
+        const float dpiScale = Osu::getUIScale();
 
         McFont *font = engine->getResourceManager()->getFont("FONT_DEFAULT");
 
@@ -44,12 +44,12 @@ void TooltipOverlay::draw(Graphics *g) {
         Vector2 cursorPos = engine->getMouse()->getPos();
 
         // clamp to right edge
-        if(cursorPos.x + width + offset.x + 2 * margin > m_osu->getScreenWidth())
-            cursorPos.x -= (cursorPos.x + width + offset.x + 2 * margin) - m_osu->getScreenWidth() + 1;
+        if(cursorPos.x + width + offset.x + 2 * margin > osu->getScreenWidth())
+            cursorPos.x -= (cursorPos.x + width + offset.x + 2 * margin) - osu->getScreenWidth() + 1;
 
         // clamp to bottom edge
-        if(cursorPos.y + height + offset.y + 2 * margin > m_osu->getScreenHeight())
-            cursorPos.y -= (cursorPos.y + height + offset.y + 2 * margin) - m_osu->getScreenHeight() + 1;
+        if(cursorPos.y + height + offset.y + 2 * margin > osu->getScreenHeight())
+            cursorPos.y -= (cursorPos.y + height + offset.y + 2 * margin) - osu->getScreenHeight() + 1;
 
         // clamp to left edge
         if(cursorPos.x < 0) cursorPos.x += std::abs(cursorPos.x);

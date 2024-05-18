@@ -3,12 +3,11 @@
 
 class ConVar;
 
-class Osu;
 class UIAvatar;
 
 class UserButton : public CBaseUIButton {
    public:
-    UserButton(Osu *osu);
+    UserButton();
 
     virtual void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);
@@ -24,8 +23,6 @@ class UserButton : public CBaseUIButton {
     virtual void onMouseOutside();
 
     ConVar *m_osu_scores_enabled_ref;
-
-    Osu *m_osu;
 
     float m_fPP;
     float m_fAcc;

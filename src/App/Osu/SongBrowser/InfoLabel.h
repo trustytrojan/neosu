@@ -3,13 +3,12 @@
 
 class McFont;
 
-class Osu;
 class Beatmap;
 class DatabaseBeatmap;
 
 class InfoLabel : public CBaseUIButton {
    public:
-    InfoLabel(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name);
+    InfoLabel(float xPos, float yPos, float xSize, float ySize, UString name);
 
     void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);
@@ -52,7 +51,6 @@ class InfoLabel : public CBaseUIButton {
     ConVar *m_osu_debug_ref;
     ConVar *m_osu_songbrowser_dynamic_star_recalc_ref;
 
-    Osu *m_osu;
     McFont *m_font;
 
     int m_iMargin;

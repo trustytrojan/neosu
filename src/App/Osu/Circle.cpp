@@ -1,10 +1,3 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		circle
-//
-// $NoKeywords: $circle
-//===============================================================================//
-
 #include "Circle.h"
 
 #include "AnimationHandler.h"
@@ -55,7 +48,7 @@ void Circle::drawApproachCircle(Graphics *g, Beatmap *beatmap, Vector2 rawPos, i
               (int)(COLOR_GET_Bi(comboColor) * colorRGBMultiplier * osu_circle_color_saturation.getFloat()));
 
     drawApproachCircle(g, beatmap->getSkin(), beatmap->osuCoords2Pixels(rawPos), comboColor,
-                       beatmap->getHitcircleDiameter(), approachScale, alpha, beatmap->getOsu()->getModHD(),
+                       beatmap->getHitcircleDiameter(), approachScale, alpha, osu->getModHD(),
                        overrideHDApproachCircle);
 }
 
@@ -150,7 +143,7 @@ void Circle::drawSliderStartCircle(Graphics *g, Skin *skin, Vector2 pos, float h
 
     // approach circle
     /// drawApproachCircle(g, skin, pos, comboColor, beatmap->getHitcircleDiameter(), approachScale, alpha,
-    /// beatmap->getOsu()->getModHD(), overrideHDApproachCircle); // they are now drawn separately in draw2()
+    /// osu->getModHD(), overrideHDApproachCircle); // they are now drawn separately in draw2()
 
     // circle
     const float circleImageScale = hitcircleDiameter / (128.0f * (skin->isSliderStartCircle2x() ? 2.0f : 1.0f));
@@ -433,10 +426,10 @@ Circle::~Circle() { onReset(0); }
 
 void Circle::draw(Graphics *g) {
     HitObject::draw(g);
-    Skin *skin = m_beatmap->getOsu()->getSkin();
+    Skin *skin = osu->getSkin();
 
     // draw hit animation
-    if(m_fHitAnimation > 0.0f && m_fHitAnimation != 1.0f && !m_beatmap->getOsu()->getModHD()) {
+    if(m_fHitAnimation > 0.0f && m_fHitAnimation != 1.0f && !osu->getModHD()) {
         float alpha = 1.0f - m_fHitAnimation;
 
         float scale = m_fHitAnimation;
@@ -464,7 +457,7 @@ void Circle::draw(Graphics *g) {
         return;
 
     // draw circle
-    const bool hd = m_beatmap->getOsu()->getModHD();
+    const bool hd = osu->getModHD();
     Vector2 shakeCorrectedPos = m_vRawPos;
     if(engine->getTime() < m_fShakeAnimation && !m_beatmap->isInMafhamRenderChunk())  // handle note blocking shaking
     {
@@ -495,7 +488,7 @@ void Circle::draw2(Graphics *g) {
                  // we still need to draw the object
 
     // draw approach circle
-    const bool hd = m_beatmap->getOsu()->getModHD();
+    const bool hd = osu->getModHD();
 
     // HACKHACK: don't fucking change this piece of code here, it fixes a heisenbug
     // (https://github.com/McKay42/McOsu/issues/165)
@@ -515,17 +508,17 @@ void Circle::update(long curPos) {
 
     // if we have not been clicked yet, check if we are in the timeframe of a miss, also handle auto and relax
     if(!m_bFinished) {
-        if(m_beatmap->getOsu()->getModAuto()) {
+        if(osu->getModAuto()) {
             if(curPos >= m_iTime) onHit(LiveScore::HIT::HIT_300, 0);
         } else {
             const long delta = curPos - m_iTime;
 
-            if(m_beatmap->getOsu()->getModRelax()) {
+            if(osu->getModRelax()) {
                 if(curPos >= m_iTime + (long)m_osu_relax_offset_ref->getInt() && !m_beatmap->isPaused() &&
                    !m_beatmap->isContinueScheduled()) {
                     const Vector2 pos = m_beatmap->osuCoords2Pixels(m_vRawPos);
                     const float cursorDelta = (m_beatmap->getCursorPos() - pos).length();
-                    if((cursorDelta < m_beatmap->getHitcircleDiameter() / 2.0f && m_beatmap->getOsu()->getModRelax())) {
+                    if((cursorDelta < m_beatmap->getHitcircleDiameter() / 2.0f && osu->getModRelax())) {
                         LiveScore::HIT result = GameRules::getHitResult(delta, m_beatmap);
 
                         if(result != LiveScore::HIT::HIT_NULL) {
@@ -551,8 +544,8 @@ void Circle::update(long curPos) {
 }
 
 void Circle::updateStackPosition(float stackOffset) {
-    m_vRawPos = m_vOriginalRawPos - Vector2(m_iStack * stackOffset,
-                                            m_iStack * stackOffset * (m_beatmap->getOsu()->getModHR() ? -1.0f : 1.0f));
+    m_vRawPos =
+        m_vOriginalRawPos - Vector2(m_iStack * stackOffset, m_iStack * stackOffset * (osu->getModHR() ? -1.0f : 1.0f));
 }
 
 void Circle::miss(long curPos) {

@@ -1,21 +1,10 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		screen + back button
-//
-// $NoKeywords: $
-//===============================================================================//
-
-#ifndef OSUSCREENBACKABLE_H
-#define OSUSCREENBACKABLE_H
-
+#pragma once
 #include "OsuScreen.h"
 #include "UIBackButton.h"
 
-class Osu;
-
 class ScreenBackable : public OsuScreen {
    public:
-    ScreenBackable(Osu *osu);
+    ScreenBackable();
     virtual ~ScreenBackable();
 
     virtual void draw(Graphics *g);
@@ -30,5 +19,3 @@ class ScreenBackable : public OsuScreen {
 
     UIBackButton *m_backButton;
 };
-
-#endif

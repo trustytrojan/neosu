@@ -27,10 +27,10 @@ ConVar osu_songbrowser_button_difficulty_inactive_color_b("osu_songbrowser_butto
 ConVar *SongDifficultyButton::m_osu_scores_enabled = NULL;
 ConVar *SongDifficultyButton::m_osu_songbrowser_dynamic_star_recalc_ref = NULL;
 
-SongDifficultyButton::SongDifficultyButton(Osu *osu, SongBrowser *songBrowser, CBaseUIScrollView *view,
+SongDifficultyButton::SongDifficultyButton(SongBrowser *songBrowser, CBaseUIScrollView *view,
                                            UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,
                                            UString name, DatabaseBeatmap *diff2, SongButton *parentSongButton)
-    : SongButton(osu, songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, name, NULL) {
+    : SongButton(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, name, NULL) {
     m_databaseBeatmap = diff2;  // NOTE: can't use parent constructor for passing this argument, as it would otherwise
                                 // try to build a full button (and not just a diff button)
     m_parentSongButton = parentSongButton;
@@ -71,14 +71,14 @@ void SongDifficultyButton::draw(Graphics *g) {
 
     const bool isIndependentDiff = isIndependentDiffButton();
 
-    Skin *skin = m_osu->getSkin();
+    Skin *skin = osu->getSkin();
 
     // scaling
     const Vector2 pos = getActualPos();
     const Vector2 size = getActualSize();
 
     // draw background image
-    drawBeatmapBackgroundThumbnail(g, m_osu->getBackgroundImageHandler()->getLoadBackgroundImage(m_databaseBeatmap));
+    drawBeatmapBackgroundThumbnail(g, osu->getBackgroundImageHandler()->getLoadBackgroundImage(m_databaseBeatmap));
 
     if(m_bHasGrade) drawGrade(g);
 
@@ -104,11 +104,11 @@ void SongDifficultyButton::draw(Graphics *g) {
     // draw stars
     const float starsNoMod =
         m_databaseBeatmap->getStarsNomod();  // NOTE: this can sometimes be infinity! (e.g. broken osu!.db database)
-    const bool areStarsInaccurate = (m_osu->getSongBrowser()->getDynamicStarCalculator()->isDead() ||
-                                     !m_osu->getSongBrowser()->getDynamicStarCalculator()->isAsyncReady());
+    const bool areStarsInaccurate = (osu->getSongBrowser()->getDynamicStarCalculator()->isDead() ||
+                                     !osu->getSongBrowser()->getDynamicStarCalculator()->isAsyncReady());
     const float stars = (areStarsInaccurate || !m_osu_songbrowser_dynamic_star_recalc_ref->getBool() || !m_bSelected
                              ? starsNoMod
-                             : m_osu->getSongBrowser()->getDynamicStarCalculator()->getTotalStars());
+                             : osu->getSongBrowser()->getDynamicStarCalculator()->getTotalStars());
     if(stars > 0) {
         const float starOffsetY = (size.y * 0.85);
         const float starWidth = (size.y * 0.2);
@@ -203,10 +203,10 @@ void SongDifficultyButton::updateGrade() {
     bool hasGrade = false;
     FinishedScore::Grade grade;
 
-    m_osu->getSongBrowser()->getDatabase()->sortScores(m_databaseBeatmap->getMD5Hash());
-    if((*m_osu->getSongBrowser()->getDatabase()->getScores())[m_databaseBeatmap->getMD5Hash()].size() > 0) {
+    osu->getSongBrowser()->getDatabase()->sortScores(m_databaseBeatmap->getMD5Hash());
+    if((*osu->getSongBrowser()->getDatabase()->getScores())[m_databaseBeatmap->getMD5Hash()].size() > 0) {
         const FinishedScore &score =
-            (*m_osu->getSongBrowser()->getDatabase()->getScores())[m_databaseBeatmap->getMD5Hash()][0];
+            (*osu->getSongBrowser()->getDatabase()->getScores())[m_databaseBeatmap->getMD5Hash()][0];
         hasGrade = true;
         grade = LiveScore::calculateGrade(score.num300s, score.num100s, score.num50s, score.numMisses,
                                           score.modsLegacy & ModFlags::Hidden, score.modsLegacy & ModFlags::Flashlight);

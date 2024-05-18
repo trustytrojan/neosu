@@ -25,9 +25,9 @@ ConVar osu_songbrowser_thumbnail_fade_in_duration("osu_songbrowser_thumbnail_fad
 
 float SongButton::thumbnailYRatio = 1.333333f;
 
-SongButton::SongButton(Osu *osu, SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu,
-                       float xPos, float yPos, float xSize, float ySize, UString name, DatabaseBeatmap *databaseBeatmap)
-    : Button(osu, songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, name) {
+SongButton::SongButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos,
+                       float yPos, float xSize, float ySize, UString name, DatabaseBeatmap *databaseBeatmap)
+    : Button(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, name) {
     m_databaseBeatmap = databaseBeatmap;
 
     m_grade = FinishedScore::Grade::D;
@@ -52,8 +52,8 @@ SongButton::SongButton(Osu *osu, SongBrowser *songBrowser, CBaseUIScrollView *vi
 
         // and add them
         for(int i = 0; i < difficulties.size(); i++) {
-            SongButton *songButton = new SongDifficultyButton(m_osu, m_songBrowser, m_view, m_contextMenu, 0, 0, 0, 0,
-                                                              "", difficulties[i], this);
+            SongButton *songButton =
+                new SongDifficultyButton(m_songBrowser, m_view, m_contextMenu, 0, 0, 0, 0, "", difficulties[i], this);
 
             m_children.push_back(songButton);
         }
@@ -89,7 +89,7 @@ void SongButton::draw(Graphics *g) {
                 m_sMapper = representative_beatmap->getCreator();
 
                 drawBeatmapBackgroundThumbnail(
-                    g, m_osu->getBackgroundImageHandler()->getLoadBackgroundImage(representative_beatmap));
+                    g, osu->getBackgroundImageHandler()->getLoadBackgroundImage(representative_beatmap));
 
                 break;
             }
@@ -101,7 +101,7 @@ void SongButton::draw(Graphics *g) {
 }
 
 void SongButton::drawBeatmapBackgroundThumbnail(Graphics *g, Image *image) {
-    if(!osu_draw_songbrowser_thumbnails.getBool() || m_osu->getSkin()->getVersion() < 2.2f) return;
+    if(!osu_draw_songbrowser_thumbnails.getBool() || osu->getSkin()->getVersion() < 2.2f) return;
 
     float alpha = 1.0f;
     if(osu_songbrowser_thumbnail_fade_in_duration.getFloat() > 0.0f) {
@@ -159,7 +159,7 @@ void SongButton::drawGrade(Graphics *g) {
     const Vector2 pos = getActualPos();
     const Vector2 size = getActualSize();
 
-    SkinImage *grade = ScoreButton::getGradeImage(m_osu, m_grade);
+    SkinImage *grade = ScoreButton::getGradeImage(m_grade);
     g->pushTransform();
     {
         const float scale = calculateGradeScale();
@@ -177,8 +177,8 @@ void SongButton::drawTitle(Graphics *g, float deselectedAlpha, bool forceSelecte
     const Vector2 size = getActualSize();
 
     const float titleScale = (size.y * m_fTitleScale) / m_font->getHeight();
-    g->setColor((m_bSelected || forceSelectedStyle) ? m_osu->getSkin()->getSongSelectActiveText()
-                                                    : m_osu->getSkin()->getSongSelectInactiveText());
+    g->setColor((m_bSelected || forceSelectedStyle) ? osu->getSkin()->getSongSelectActiveText()
+                                                    : osu->getSkin()->getSongSelectInactiveText());
     if(!(m_bSelected || forceSelectedStyle)) g->setAlpha(deselectedAlpha);
 
     g->pushTransform();
@@ -198,8 +198,8 @@ void SongButton::drawSubTitle(Graphics *g, float deselectedAlpha, bool forceSele
 
     const float titleScale = (size.y * m_fTitleScale) / m_font->getHeight();
     const float subTitleScale = (size.y * m_fSubTitleScale) / m_font->getHeight();
-    g->setColor((m_bSelected || forceSelectedStyle) ? m_osu->getSkin()->getSongSelectActiveText()
-                                                    : m_osu->getSkin()->getSongSelectInactiveText());
+    g->setColor((m_bSelected || forceSelectedStyle) ? osu->getSkin()->getSongSelectActiveText()
+                                                    : osu->getSkin()->getSongSelectInactiveText());
     if(!(m_bSelected || forceSelectedStyle)) g->setAlpha(deselectedAlpha);
 
     g->pushTransform();
@@ -230,7 +230,7 @@ void SongButton::updateLayoutEx() {
 
     if(m_bHasGrade) m_fTextOffset += calculateGradeWidth();
 
-    if(m_osu->getSkin()->getVersion() < 2.2f) {
+    if(osu->getSkin()->getVersion() < 2.2f) {
         m_fTextOffset += size.x * 0.02f * 2.0f;
         if(m_bHasGrade) m_fGradeOffset += calculateGradeWidth() / 2;
     } else {
@@ -280,7 +280,7 @@ void SongButton::triggerContextMenu(Vector2 pos) {
 
             m_contextMenu->addButton("[+Set]   Add to Collection", 2);
 
-            if(m_osu->getSongBrowser()->getGroupingMode() == SongBrowser::GROUP::GROUP_COLLECTIONS) {
+            if(osu->getSongBrowser()->getGroupingMode() == SongBrowser::GROUP::GROUP_COLLECTIONS) {
                 CBaseUIButton *spacer = m_contextMenu->addButton("---");
                 spacer->setTextLeft(false);
                 spacer->setEnabled(false);
@@ -353,7 +353,7 @@ void SongButton::onContextMenu(UString text, int id) {
     } else if(id == 3 || id == 4) {
         // 3 = remove map from collection
         // 4 = remove set from collection
-        m_osu->getSongBrowser()->onSongButtonContextMenu(this, text, id);
+        osu->getSongBrowser()->onSongButtonContextMenu(this, text, id);
     }
 }
 
@@ -390,27 +390,27 @@ void SongButton::onAddToCollectionConfirmed(UString text, int id) {
         UIContextMenu::clampToBottomScreenEdge(m_contextMenu);
     } else {
         // just forward it
-        m_osu->getSongBrowser()->onSongButtonContextMenu(this, text, id);
+        osu->getSongBrowser()->onSongButtonContextMenu(this, text, id);
     }
 }
 
 void SongButton::onCreateNewCollectionConfirmed(UString text, int id) {
     if(id == -2 || id == -4) {
         // just forward it
-        m_osu->getSongBrowser()->onSongButtonContextMenu(this, text, id);
+        osu->getSongBrowser()->onSongButtonContextMenu(this, text, id);
     }
 }
 
 float SongButton::calculateGradeScale() {
     const Vector2 size = getActualSize();
 
-    SkinImage *grade = ScoreButton::getGradeImage(m_osu, m_grade);
+    SkinImage *grade = ScoreButton::getGradeImage(m_grade);
 
     return Osu::getImageScaleToFitResolution(grade->getSizeBaseRaw(), Vector2(size.x, size.y * m_fGradeScale));
 }
 
 float SongButton::calculateGradeWidth() {
-    SkinImage *grade = ScoreButton::getGradeImage(m_osu, m_grade);
+    SkinImage *grade = ScoreButton::getGradeImage(m_grade);
 
     return grade->getSizeBaseRaw().x * calculateGradeScale();
 }

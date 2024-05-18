@@ -1,20 +1,9 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		generic button (context menu items, mod selection screen, etc.)
-//
-// $NoKeywords: $osubt
-//===============================================================================//
-
-#ifndef OSUBUTTON_H
-#define OSUBUTTON_H
-
+#pragma once
 #include "CBaseUIButton.h"
-
-class Osu;
 
 class UIButton : public CBaseUIButton {
    public:
-    UIButton(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name, UString text);
+    UIButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text);
 
     virtual void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);
@@ -38,8 +27,6 @@ class UIButton : public CBaseUIButton {
     virtual void onClicked();
     virtual void onFocusStolen();
 
-    Osu *m_osu;
-
     bool m_bDefaultSkin;
     Color m_color;
     Color m_backupColor;
@@ -50,5 +37,3 @@ class UIButton : public CBaseUIButton {
     std::vector<UString> m_tooltipTextLines;
     bool m_bFocusStolenDelay;
 };
-
-#endif

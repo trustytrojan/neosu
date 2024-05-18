@@ -9,7 +9,6 @@
 class Sound;
 class ConVar;
 
-class Osu;
 class Skin;
 class HitObject;
 
@@ -28,7 +27,7 @@ class Beatmap {
     friend class BackgroundStarCacheLoader;
     friend class BackgroundStarCalcHandler;
 
-    Beatmap(Osu *osu);
+    Beatmap();
     ~Beatmap();
 
     void draw(Graphics *g);
@@ -199,7 +198,6 @@ class Beatmap {
     long current_frame_idx = 0;
 
     // used by HitObject children and ModSelector
-    inline Osu *getOsu() const { return m_osu; }
     Skin *getSkin() const;  // maybe use this for beatmap skins, maybe
     inline int getRandomSeed() const { return m_iRandomSeed; }
 
@@ -275,8 +273,6 @@ class Beatmap {
     void playMissSound();
 
     unsigned long getMusicPositionMSInterpolated();
-
-    Osu *m_osu;
 
     // beatmap state
     bool m_bIsPlaying;

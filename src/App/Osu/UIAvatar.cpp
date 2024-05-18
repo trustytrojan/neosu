@@ -89,7 +89,7 @@ void UIAvatar::draw_avatar(Graphics *g, float alpha) {
 
     if(avatar == nullptr) {
         // Don't download during gameplay to avoid lagspikes
-        if(!bancho.osu->isInPlayMode()) {
+        if(!osu->isInPlayMode()) {
             if(download_avatar(m_player_id)) {
                 avatar = engine->getResourceManager()->loadImageAbs(avatar_path, avatar_path);
             }
@@ -119,10 +119,10 @@ void UIAvatar::draw_avatar(Graphics *g, float alpha) {
 }
 
 void UIAvatar::onAvatarClicked(CBaseUIButton *btn) {
-    if(bancho.osu->isInPlayMode()) {
+    if(osu->isInPlayMode()) {
         // Don't want context menu to pop up while playing a map
         return;
     }
 
-    bancho.osu->m_user_actions->open(m_player_id);
+    osu->m_user_actions->open(m_player_id);
 }

@@ -41,7 +41,7 @@ RoomUIElement::RoomUIElement(Lobby* multi, Room* room, float x, float y, float w
     slots_ui->setDrawBackground(false);
     getContainer()->addBaseUIElement(slots_ui);
 
-    join_btn = new UIButton(multi->m_osu, 10, 65, 120, 30, "", "Join room");
+    join_btn = new UIButton(10, 65, 120, 30, "", "Join room");
     join_btn->setUseDefaultSkin();
     join_btn->setColor(0xff00ff00);
     join_btn->setClickCallback(fastdelegate::MakeDelegate(this, &RoomUIElement::onRoomJoinButtonClick));
@@ -58,24 +58,24 @@ RoomUIElement::RoomUIElement(Lobby* multi, Room* room, float x, float y, float w
 void RoomUIElement::onRoomJoinButtonClick(CBaseUIButton* btn) {
     if(has_password) {
         m_multi->room_to_join = room_id;
-        m_multi->m_osu->m_prompt->prompt("Room password:",
-                                         fastdelegate::MakeDelegate(m_multi, &Lobby::on_room_join_with_password));
+        osu->m_prompt->prompt("Room password:",
+                              fastdelegate::MakeDelegate(m_multi, &Lobby::on_room_join_with_password));
     } else {
         m_multi->joinRoom(room_id, "");
     }
 }
 
-Lobby::Lobby(Osu* osu) : OsuScreen(osu) {
+Lobby::Lobby() : OsuScreen() {
     font = engine->getResourceManager()->getFont("FONT_DEFAULT");
 
     auto heading = new CBaseUILabel(50, 30, 300, 40, "", "Multiplayer rooms");
-    heading->setFont(m_osu->getTitleFont());
+    heading->setFont(osu->getTitleFont());
     heading->setSizeToContent(0, 0);
     heading->setDrawFrame(false);
     heading->setDrawBackground(false);
     addBaseUIElement(heading);
 
-    m_create_room_btn = new UIButton(osu, 0, 0, 200, 50, "", "Create new room");
+    m_create_room_btn = new UIButton(0, 0, 200, 50, "", "Create new room");
     m_create_room_btn->setUseDefaultSkin();
     m_create_room_btn->setColor(0xff00ff00);
     m_create_room_btn->setClickCallback(fastdelegate::MakeDelegate(this, &Lobby::on_create_room_clicked));
@@ -88,7 +88,7 @@ Lobby::Lobby(Osu* osu) : OsuScreen(osu) {
     m_list->setHorizontalScrolling(false);
     addBaseUIElement(m_list);
 
-    updateLayout(m_osu->getScreenSize());
+    updateLayout(osu->getScreenSize());
 }
 
 void Lobby::onKeyDown(KeyboardEvent& key) {
@@ -97,7 +97,7 @@ void Lobby::onKeyDown(KeyboardEvent& key) {
     if(key.getKeyCode() == KEY_ESCAPE) {
         key.consume();
         setVisible(false);
-        m_osu->m_mainMenu->setVisible(true);
+        osu->m_mainMenu->setVisible(true);
         return;
     }
 
@@ -133,7 +133,7 @@ CBaseUIContainer* Lobby::setVisible(bool visible) {
         send_packet(packet);
 
         // LOBBY presence is broken so we send MULTIPLAYER
-        RichPresence::setBanchoStatus(m_osu, "Looking to play", MULTIPLAYER);
+        RichPresence::setBanchoStatus("Looking to play", MULTIPLAYER);
 
         // XXX: Could call refreshBeatmaps() here so we load them if not already done so.
         //      Would need to edit it a bit to work outside of songBrowser2, + display loading progress.
@@ -154,7 +154,7 @@ CBaseUIContainer* Lobby::setVisible(bool visible) {
         rooms.clear();
     }
 
-    m_osu->m_chat->updateVisibility();
+    osu->m_chat->updateVisibility();
     return this;
 }
 
@@ -210,7 +210,7 @@ void Lobby::joinRoom(u32 id, UString password) {
         break;
     }
 
-    m_osu->getNotificationOverlay()->addNotification("Joining room...");
+    osu->getNotificationOverlay()->addNotification("Joining room...");
 }
 
 void Lobby::updateRoom(Room room) {
@@ -257,7 +257,7 @@ void Lobby::on_create_room_clicked() {
     bancho.room.pack(&packet);
     send_packet(packet);
 
-    m_osu->getNotificationOverlay()->addNotification("Creating room...");
+    osu->getNotificationOverlay()->addNotification("Creating room...");
 }
 
 void Lobby::on_room_join_with_password(UString password) { joinRoom(room_to_join, password); }

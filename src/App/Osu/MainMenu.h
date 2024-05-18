@@ -1,19 +1,9 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		main menu
-//
-// $NoKeywords: $osumain
-//===============================================================================//
-
-#ifndef OSUMENUMAIN_H
-#define OSUMENUMAIN_H
-
+#pragma once
 #include "CBaseUIButton.h"
 #include "MouseListener.h"
 #include "OsuScreen.h"
 
 class Image;
-class Osu;
 
 class Beatmap;
 class DatabaseBeatmap;
@@ -54,7 +44,7 @@ class MainMenu : public OsuScreen, public MouseListener {
     void onPausePressed();
     void onCubePressed();
 
-    MainMenu(Osu *osu);
+    MainMenu();
     virtual ~MainMenu();
 
     virtual void draw(Graphics *g);
@@ -81,8 +71,6 @@ class MainMenu : public OsuScreen, public MouseListener {
         m_bStartupAnim = startupAnim;
         m_fStartupAnim = m_fStartupAnim2 = (m_bStartupAnim ? 0.0f : 1.0f);
     }
-
-    inline Osu *getOsu() const { return m_osu; }
 
    private:
     static ConVar *m_osu_universal_offset_ref;
@@ -172,5 +160,3 @@ class MainMenu : public OsuScreen, public MouseListener {
     Image *logo_img;
     Shader *background_shader = nullptr;
 };
-
-#endif

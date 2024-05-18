@@ -2,7 +2,6 @@
 #include "CBaseUILabel.h"
 #include "OsuScreen.h"
 
-class Osu;
 class UIContextMenu;
 
 enum UserActions {
@@ -18,7 +17,7 @@ enum UserActions {
 
 class UIUserContextMenuScreen : public OsuScreen {
    public:
-    UIUserContextMenuScreen(Osu *osu);
+    UIUserContextMenuScreen();
 
     virtual void onResolutionChange(Vector2 newResolution);
     virtual void stealFocus();
@@ -33,7 +32,7 @@ class UIUserContextMenuScreen : public OsuScreen {
 
 class UIUserLabel : public CBaseUILabel {
    public:
-    UIUserLabel(Osu *osu, u32 user_id, UString username);
+    UIUserLabel(u32 user_id, UString username);
 
     virtual void onMouseUpInside();
 

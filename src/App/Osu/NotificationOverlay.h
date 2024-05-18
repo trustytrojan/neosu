@@ -1,17 +1,6 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		text bar overlay which can eat inputs (also used for key bindings)
-//
-// $NoKeywords: $osunot
-//===============================================================================//
-
-#ifndef OSUNOTIFICATIONOVERLAY_H
-#define OSUNOTIFICATIONOVERLAY_H
-
+#pragma once
 #include "KeyboardEvent.h"
 #include "OsuScreen.h"
-
-class Osu;
 
 class NotificationOverlayKeyListener {
    public:
@@ -21,7 +10,7 @@ class NotificationOverlayKeyListener {
 
 class NotificationOverlay : public OsuScreen {
    public:
-    NotificationOverlay(Osu *osu);
+    NotificationOverlay();
     virtual ~NotificationOverlay() { ; }
 
     virtual void draw(Graphics *g);
@@ -65,5 +54,3 @@ class NotificationOverlay : public OsuScreen {
     bool m_bConsumeNextChar;
     NotificationOverlayKeyListener *m_keyListener;
 };
-
-#endif

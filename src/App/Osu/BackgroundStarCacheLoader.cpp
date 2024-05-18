@@ -41,10 +41,9 @@ void BackgroundStarCacheLoader::initAsync() {
         const float AR = m_beatmap->getAR();
         const float CS = m_beatmap->getCS();
         const float OD = m_beatmap->getOD();
-        const float speedMultiplier =
-            m_beatmap->getOsu()->getSpeedMultiplier();  // NOTE: not beatmap->getSpeedMultiplier()!
-        const bool relax = m_beatmap->getOsu()->getModRelax();
-        const bool touchDevice = m_beatmap->getOsu()->getModTD();
+        const float speedMultiplier = osu->getSpeedMultiplier();  // NOTE: not beatmap->getSpeedMultiplier()!
+        const bool relax = osu->getModRelax();
+        const bool touchDevice = osu->getModTD();
 
         DatabaseBeatmap::LOAD_DIFFOBJ_RESULT diffres =
             DatabaseBeatmap::loadDifficultyHitObjects(osuFilePath, AR, CS, speedMultiplier, false, m_bDead);

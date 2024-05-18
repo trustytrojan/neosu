@@ -1,19 +1,8 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		static renderer class, so it can be used outside of Slider
-//
-// $NoKeywords: $sliderrender
-//===============================================================================//
-
-#ifndef OSUSLIDERRENDERER_H
-#define OSUSLIDERRENDERER_H
-
+#pragma once
 #include "cbase.h"
 
 class Shader;
 class VertexArrayObject;
-
-class Osu;
 
 class SliderRenderer {
    public:
@@ -22,30 +11,28 @@ class SliderRenderer {
     static float UNIT_CIRCLE_VAO_DIAMETER;
 
    public:
-    static VertexArrayObject *generateVAO(Osu *osu, const std::vector<Vector2> &points, float hitcircleDiameter,
+    static VertexArrayObject *generateVAO(const std::vector<Vector2> &points, float hitcircleDiameter,
                                           Vector3 translation = Vector3(0, 0, 0), bool skipOOBPoints = true);
 
-    static void draw(Graphics *g, Osu *osu, const std::vector<Vector2> &points,
-                     const std::vector<Vector2> &alwaysPoints, float hitcircleDiameter, float from = 0.0f,
-                     float to = 1.0f, Color undimmedColor = 0xffffffff, float colorRGBMultiplier = 1.0f,
-                     float alpha = 1.0f, long sliderTimeForRainbow = 0);
-    static void draw(Graphics *g, Osu *osu, VertexArrayObject *vao, const std::vector<Vector2> &alwaysPoints,
-                     Vector2 translation, float scale, float hitcircleDiameter, float from = 0.0f, float to = 1.0f,
+    static void draw(Graphics *g, const std::vector<Vector2> &points, const std::vector<Vector2> &alwaysPoints,
+                     float hitcircleDiameter, float from = 0.0f, float to = 1.0f, Color undimmedColor = 0xffffffff,
+                     float colorRGBMultiplier = 1.0f, float alpha = 1.0f, long sliderTimeForRainbow = 0);
+    static void draw(Graphics *g, VertexArrayObject *vao, const std::vector<Vector2> &alwaysPoints, Vector2 translation,
+                     float scale, float hitcircleDiameter, float from = 0.0f, float to = 1.0f,
                      Color undimmedColor = 0xffffffff, float colorRGBMultiplier = 1.0f, float alpha = 1.0f,
                      long sliderTimeForRainbow = 0, bool doEnableRenderTarget = true, bool doDisableRenderTarget = true,
                      bool doDrawSliderFrameBufferToScreen = true);
-    static void drawMM(Graphics *g, Osu *osu, const std::vector<Vector2> &points, float hitcircleDiameter,
-                       float from = 0.0f, float to = 1.0f, Color undimmedColor = 0xffffffff,
-                       float colorRGBMultiplier = 1.0f, float alpha = 1.0f, long sliderTimeForRainbow = 0);
+    static void drawMM(Graphics *g, const std::vector<Vector2> &points, float hitcircleDiameter, float from = 0.0f,
+                       float to = 1.0f, Color undimmedColor = 0xffffffff, float colorRGBMultiplier = 1.0f,
+                       float alpha = 1.0f, long sliderTimeForRainbow = 0);
 
    private:
-    static void drawFillSliderBodyPeppy(Graphics *g, Osu *osu, const std::vector<Vector2> &points,
-                                        VertexArrayObject *circleMesh, float radius, int drawFromIndex,
-                                        int drawUpToIndex, Shader *shader = NULL);
+    static void drawFillSliderBodyPeppy(Graphics *g, const std::vector<Vector2> &points, VertexArrayObject *circleMesh,
+                                        float radius, int drawFromIndex, int drawUpToIndex, Shader *shader = NULL);
     static void drawFillSliderBodyMM(Graphics *g, const std::vector<Vector2> &points, float radius, int drawFromIndex,
                                      int drawUpToIndex);
 
-    static void checkUpdateVars(Osu *osu, float hitcircleDiameter);
+    static void checkUpdateVars(float hitcircleDiameter);
 
     static void resetRenderTargetBoundingBox();
 
@@ -63,5 +50,3 @@ class SliderRenderer {
     static float m_fBoundingBoxMinY;
     static float m_fBoundingBoxMaxY;
 };
-
-#endif

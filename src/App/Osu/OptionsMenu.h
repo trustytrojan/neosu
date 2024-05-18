@@ -1,17 +1,6 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		settings
-//
-// $NoKeywords: $
-//===============================================================================//
-
-#ifndef OSUOPTIONSMENU_H
-#define OSUOPTIONSMENU_H
-
+#pragma once
 #include "NotificationOverlay.h"
 #include "ScreenBackable.h"
-
-class Osu;
 
 class UIButton;
 class UISlider;
@@ -36,7 +25,7 @@ class ConVar;
 
 class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener {
    public:
-    OptionsMenu(Osu *osu);
+    OptionsMenu();
     ~OptionsMenu();
 
     virtual void draw(Graphics *g);
@@ -206,7 +195,6 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     OptionsMenuCategoryButton *addCategory(CBaseUIElement *section, wchar_t icon);
 
     // vars
-    Osu *m_osu;
     CBaseUIScrollView *m_categories;
     CBaseUIScrollView *m_options;
     UIContextMenu *m_contextMenu;
@@ -318,5 +306,3 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
 
     bool m_updating_layout = false;
 };
-
-#endif

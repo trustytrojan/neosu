@@ -152,7 +152,7 @@ ConVar *MainMenu::m_osu_universal_offset_hardcoded_fallback_dsound_ref = NULL;
 ConVar *MainMenu::m_osu_mod_random_ref = NULL;
 ConVar *MainMenu::m_osu_songbrowser_background_fade_in_duration_ref = NULL;
 
-MainMenu::MainMenu(Osu *osu) : OsuScreen(osu) {
+MainMenu::MainMenu() : OsuScreen() {
     if(m_osu_universal_offset_ref == NULL) m_osu_universal_offset_ref = convar->getConVarByName("osu_universal_offset");
     if(m_osu_universal_offset_hardcoded_ref == NULL)
         m_osu_universal_offset_hardcoded_ref = convar->getConVarByName("osu_universal_offset_hardcoded");
@@ -235,7 +235,7 @@ MainMenu::MainMenu(Osu *osu) : OsuScreen(osu) {
     m_bDidUserUpdateFromOlderVersion = m_bDrawVersionNotificationArrow;  // (same logic atm)
 
     setPos(-1, 0);
-    setSize(m_osu->getScreenWidth(), m_osu->getScreenHeight());
+    setSize(osu->getScreenWidth(), osu->getScreenHeight());
 
     m_cube = new MainMenuCubeButton(this, 0, 0, 1, 1, "", "");
     m_cube->setClickCallback(fastdelegate::MakeDelegate(this, &MainMenu::onCubePressed));
@@ -254,7 +254,7 @@ MainMenu::MainMenu(Osu *osu) : OsuScreen(osu) {
     addBaseUIElement(m_pauseButton);
 
     if(env->getOS() == Environment::OS::OS_WINDOWS) {
-        m_updateAvailableButton = new UIButton(m_osu, 0, 0, 0, 0, "", "Checking for updates ...");
+        m_updateAvailableButton = new UIButton(0, 0, 0, 0, "", "Checking for updates ...");
         m_updateAvailableButton->setUseDefaultSkin();
         m_updateAvailableButton->setClickCallback(fastdelegate::MakeDelegate(this, &MainMenu::onUpdatePressed));
         m_updateAvailableButton->setColor(0x2200ff00);
@@ -325,17 +325,17 @@ void MainMenu::draw(Graphics *g) {
 
     // menu-background
     if(osu_draw_menu_background.getBool()) {
-        Image *backgroundImage = m_osu->getSkin()->getMenuBackground();
-        if(backgroundImage != NULL && backgroundImage != m_osu->getSkin()->getMissingTexture() &&
+        Image *backgroundImage = osu->getSkin()->getMenuBackground();
+        if(backgroundImage != NULL && backgroundImage != osu->getSkin()->getMissingTexture() &&
            backgroundImage->isReady()) {
-            const float scale = Osu::getImageScaleToFillResolution(backgroundImage, m_osu->getScreenSize());
+            const float scale = Osu::getImageScaleToFillResolution(backgroundImage, osu->getScreenSize());
 
             g->setColor(0xffffffff);
             g->setAlpha(m_fStartupAnim);
             g->pushTransform();
             {
                 g->scale(scale, scale);
-                g->translate(m_osu->getScreenWidth() / 2, m_osu->getScreenHeight() / 2);
+                g->translate(osu->getScreenWidth() / 2, osu->getScreenHeight() / 2);
                 g->drawImage(backgroundImage);
             }
             g->popTransform();
@@ -346,11 +346,11 @@ void MainMenu::draw(Graphics *g) {
     float alpha = 1.0f;
     if(m_osu_songbrowser_background_fade_in_duration_ref->getFloat() > 0.0f) {
         // handle fadein trigger after handler is finished loading
-        const bool ready = m_osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL &&
-                           m_osu->getBackgroundImageHandler()->getLoadBackgroundImage(
-                               m_osu->getSelectedBeatmap()->getSelectedDifficulty2()) != NULL &&
-                           m_osu->getBackgroundImageHandler()
-                               ->getLoadBackgroundImage(m_osu->getSelectedBeatmap()->getSelectedDifficulty2())
+        const bool ready = osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL &&
+                           osu->getBackgroundImageHandler()->getLoadBackgroundImage(
+                               osu->getSelectedBeatmap()->getSelectedDifficulty2()) != NULL &&
+                           osu->getBackgroundImageHandler()
+                               ->getLoadBackgroundImage(osu->getSelectedBeatmap()->getSelectedDifficulty2())
                                ->isReady();
 
         if(!ready)
@@ -365,29 +365,29 @@ void MainMenu::draw(Graphics *g) {
 
     background_shader->enable();
     background_shader->setUniform1f("time", engine->getTime());
-    background_shader->setUniform2f("resolution", m_osu->getScreenWidth(), m_osu->getScreenHeight());
-    SongBrowser::drawSelectedBeatmapBackgroundImage(g, m_osu, alpha);
+    background_shader->setUniform2f("resolution", osu->getScreenWidth(), osu->getScreenHeight());
+    SongBrowser::drawSelectedBeatmapBackgroundImage(g, alpha);
     background_shader->disable();
 
     // main button stuff
     bool haveTimingpoints = false;
     const float div = 1.25f;
     float pulse = 0.0f;
-    if(m_osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL &&
-       m_osu->getSelectedBeatmap()->getMusic() != NULL && m_osu->getSelectedBeatmap()->getMusic()->isPlaying()) {
+    if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL && osu->getSelectedBeatmap()->getMusic() != NULL &&
+       osu->getSelectedBeatmap()->getMusic()->isPlaying()) {
         haveTimingpoints = true;
 
-        const long curMusicPos = (long)m_osu->getSelectedBeatmap()->getMusic()->getPositionMS() +
-                                 (long)(m_osu_universal_offset_ref->getFloat() * m_osu->getSpeedMultiplier()) +
+        const long curMusicPos = (long)osu->getSelectedBeatmap()->getMusic()->getPositionMS() +
+                                 (long)(m_osu_universal_offset_ref->getFloat() * osu->getSpeedMultiplier()) +
                                  (long)m_osu_universal_offset_hardcoded_ref->getInt() -
-                                 m_osu->getSelectedBeatmap()->getSelectedDifficulty2()->getLocalOffset() -
-                                 m_osu->getSelectedBeatmap()->getSelectedDifficulty2()->getOnlineOffset() -
-                                 (m_osu->getSelectedBeatmap()->getSelectedDifficulty2()->getVersion() < 5
+                                 osu->getSelectedBeatmap()->getSelectedDifficulty2()->getLocalOffset() -
+                                 osu->getSelectedBeatmap()->getSelectedDifficulty2()->getOnlineOffset() -
+                                 (osu->getSelectedBeatmap()->getSelectedDifficulty2()->getVersion() < 5
                                       ? m_osu_old_beatmap_offset_ref->getInt()
                                       : 0);
 
         DatabaseBeatmap::TIMING_INFO t =
-            m_osu->getSelectedBeatmap()->getSelectedDifficulty2()->getTimingInfoForTime(curMusicPos);
+            osu->getSelectedBeatmap()->getSelectedDifficulty2()->getTimingInfoForTime(curMusicPos);
 
         if(t.beatLengthBase == 0.0f)  // bah
             t.beatLengthBase = 1.0f;
@@ -415,22 +415,22 @@ void MainMenu::draw(Graphics *g) {
         float animation = fmod((float)(engine->getTime()) * 3.2f, 2.0f);
         if(animation > 1.0f) animation = 2.0f - animation;
         animation = -animation * (animation - 2);  // quad out
-        float offset = m_osu->getUIScale(m_osu, 45.0f * animation);
+        float offset = osu->getUIScale(45.0f * animation);
 
-        const float scale = m_versionButton->getSize().x / m_osu->getSkin()->getPlayWarningArrow2()->getSizeBaseRaw().x;
+        const float scale = m_versionButton->getSize().x / osu->getSkin()->getPlayWarningArrow2()->getSizeBaseRaw().x;
 
         const Vector2 arrowPos =
             Vector2(m_versionButton->getSize().x / 1.75f,
-                    m_osu->getScreenHeight() - m_versionButton->getSize().y * 2 - m_versionButton->getSize().y * scale);
+                    osu->getScreenHeight() - m_versionButton->getSize().y * 2 - m_versionButton->getSize().y * scale);
 
         UString notificationText = "Changelog";
         g->setColor(0xffffffff);
         g->pushTransform();
         {
-            McFont *smallFont = m_osu->getSubTitleFont();
+            McFont *smallFont = osu->getSubTitleFont();
             g->translate(arrowPos.x - smallFont->getStringWidth(notificationText) / 2.0f,
                          (-offset * 2) * scale + arrowPos.y -
-                             (m_osu->getSkin()->getPlayWarningArrow2()->getSizeBaseRaw().y * scale) / 1.5f,
+                             (osu->getSkin()->getPlayWarningArrow2()->getSizeBaseRaw().y * scale) / 1.5f,
                          0);
             g->drawString(smallFont, notificationText);
         }
@@ -441,7 +441,7 @@ void MainMenu::draw(Graphics *g) {
         {
             g->rotate(90.0f);
             g->translate(0, -offset * 2, 0);
-            m_osu->getSkin()->getPlayWarningArrow2()->drawRaw(g, arrowPos, scale);
+            osu->getSkin()->getPlayWarningArrow2()->drawRaw(g, arrowPos, scale);
         }
         g->popTransform();
     }
@@ -451,14 +451,13 @@ void MainMenu::draw(Graphics *g) {
 
     // draw update check button
     if(m_updateAvailableButton != nullptr) {
-        if(m_osu->getUpdateHandler()->getStatus() == UpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION) {
+        if(osu->getUpdateHandler()->getStatus() == UpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION) {
             g->push3DScene(McRect(m_updateAvailableButton->getPos().x, m_updateAvailableButton->getPos().y,
                                   m_updateAvailableButton->getSize().x, m_updateAvailableButton->getSize().y));
             g->rotate3DScene(m_fUpdateButtonAnim * 360.0f, 0, 0);
         }
         m_updateAvailableButton->draw(g);
-        if(m_osu->getUpdateHandler()->getStatus() == UpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION)
-            g->pop3DScene();
+        if(osu->getUpdateHandler()->getStatus() == UpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION) g->pop3DScene();
     }
 
     // draw main button
@@ -961,7 +960,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
 
     // handle update checker and status text
     if(m_updateAvailableButton != nullptr) {
-        switch(m_osu->getUpdateHandler()->getStatus()) {
+        switch(osu->getUpdateHandler()->getStatus()) {
             case UpdateHandler::STATUS::STATUS_UP_TO_DATE:
                 if(m_updateAvailableButton->isVisible()) {
                     m_updateAvailableButton->setText("");
@@ -997,7 +996,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
         }
     }
 
-    if(m_osu->getUpdateHandler()->getStatus() == UpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION &&
+    if(osu->getUpdateHandler()->getStatus() == UpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION &&
        engine->getTime() > m_fUpdateButtonAnimTime) {
         m_fUpdateButtonAnimTime = engine->getTime() + 3.0f;
         m_fUpdateButtonAnim = 0.0f;
@@ -1006,7 +1005,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
 
     // Update pause button and shuffle songs
     m_pauseButton->setPaused(true);
-    auto music = m_osu->getSelectedBeatmap()->getMusic();
+    auto music = osu->getSelectedBeatmap()->getMusic();
     if(music == nullptr) {
         selectRandomBeatmap();
     } else {
@@ -1022,18 +1021,18 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
 }
 
 void MainMenu::selectRandomBeatmap() {
-    auto sb = m_osu->getSongBrowser();
+    auto sb = osu->getSongBrowser();
     if(sb->getDatabase()->isFinished() && !sb->m_beatmaps.empty()) {
-        m_osu->getSongBrowser()->selectRandomBeatmap();
+        osu->getSongBrowser()->selectRandomBeatmap();
     } else {
         // Database is not loaded yet, load a random map and select it
         // XXX: Also pick from neosu maps/ directory
-        auto songs_folder = m_osu->getSongBrowser()->getDatabase()->getOsuSongsFolder();
+        auto songs_folder = osu->getSongBrowser()->getDatabase()->getOsuSongsFolder();
         auto mapset_folders = env->getFoldersInFolder(songs_folder);
         auto nb_mapsets = mapset_folders.size();
         if(nb_mapsets == 0) return;
 
-        m_osu->getSongBrowser()->getSelectedBeatmap()->deselect();
+        osu->getSongBrowser()->getSelectedBeatmap()->deselect();
         SAFE_DELETE(preloaded_beatmapset);
 
         for(int i = 0; i < 10; i++) {
@@ -1041,7 +1040,7 @@ void MainMenu::selectRandomBeatmap() {
             mapset_folder.append(mapset_folders[rand() % nb_mapsets]);
             mapset_folder.append("/");
 
-            BeatmapSet *set = m_osu->getSongBrowser()->getDatabase()->loadRawBeatmap(mapset_folder);
+            BeatmapSet *set = osu->getSongBrowser()->getDatabase()->loadRawBeatmap(mapset_folder);
             if(set == nullptr) {
                 debugLog("Failed to load beatmap set '%s'\n", mapset_folder.c_str());
                 continue;
@@ -1061,7 +1060,7 @@ void MainMenu::selectRandomBeatmap() {
             preloaded_beatmap = beatmap_diffs[rand() % beatmap_diffs.size()];
             preloaded_beatmap->do_not_store = true;
 
-            m_osu->getSongBrowser()->onDifficultySelected(preloaded_beatmap, false);
+            osu->getSongBrowser()->onDifficultySelected(preloaded_beatmap, false);
 
             return;
         }
@@ -1074,7 +1073,7 @@ void MainMenu::onKeyDown(KeyboardEvent &e) {
     OsuScreen::onKeyDown(e);  // only used for options menu
     if(!m_bVisible || e.isConsumed()) return;
 
-    if(!m_osu->getOptionsMenu()->isMouseInside()) {
+    if(!osu->getOptionsMenu()->isMouseInside()) {
         if(e == KEY_RIGHT || e == KEY_F2) selectRandomBeatmap();
     }
 
@@ -1117,7 +1116,7 @@ CBaseUIContainer *MainMenu::setVisible(bool visible) {
     m_bVisible = visible;
 
     if(visible) {
-        RichPresence::onMainMenu(m_osu);
+        RichPresence::onMainMenu();
 
         updateLayout();
 
@@ -1139,29 +1138,28 @@ CBaseUIContainer *MainMenu::setVisible(bool visible) {
 }
 
 void MainMenu::updateLayout() {
-    const float dpiScale = Osu::getUIScale(m_osu);
+    const float dpiScale = Osu::getUIScale();
 
-    m_vCenter = m_osu->getScreenSize() / 2.0f;
-    const float size = Osu::getUIScale(m_osu, 324.0f);
+    m_vCenter = osu->getScreenSize() / 2.0f;
+    const float size = Osu::getUIScale(324.0f);
     m_vSize = Vector2(size, size);
 
     m_cube->setRelPos(m_vCenter - m_vSize / 2.0f - Vector2(m_fCenterOffsetAnim, 0.0f));
     m_cube->setSize(m_vSize);
 
     m_pauseButton->setSize(30 * dpiScale, 30 * dpiScale);
-    m_pauseButton->setRelPos(m_osu->getScreenWidth() - m_pauseButton->getSize().x * 2 - 10 * dpiScale,
+    m_pauseButton->setRelPos(osu->getScreenWidth() - m_pauseButton->getSize().x * 2 - 10 * dpiScale,
                              m_pauseButton->getSize().y + 10 * dpiScale);
 
     if(m_updateAvailableButton != nullptr) {
         m_updateAvailableButton->setSize(375 * dpiScale, 50 * dpiScale);
-        m_updateAvailableButton->setPos(
-            m_osu->getScreenWidth() / 2 - m_updateAvailableButton->getSize().x / 2,
-            m_osu->getScreenHeight() - m_updateAvailableButton->getSize().y - 10 * dpiScale);
+        m_updateAvailableButton->setPos(osu->getScreenWidth() / 2 - m_updateAvailableButton->getSize().x / 2,
+                                        osu->getScreenHeight() - m_updateAvailableButton->getSize().y - 10 * dpiScale);
     }
 
     m_versionButton->onResized();  // HACKHACK: framework, setSizeToContent() does not update string metrics
     m_versionButton->setSizeToContent(8 * dpiScale, 8 * dpiScale);
-    m_versionButton->setRelPos(-1, m_osu->getScreenSize().y - m_versionButton->getSize().y);
+    m_versionButton->setRelPos(-1, osu->getScreenSize().y - m_versionButton->getSize().y);
 
     int numButtons = m_menuElements.size();
     int menuElementHeight = m_vSize.y / numButtons;
@@ -1189,7 +1187,7 @@ void MainMenu::updateLayout() {
         m_menuElements[i]->setBackgroundColor(COLORf(offsetPercent * osu_main_menu_alpha.getFloat(), 0.0f, 0.0f, 0.0f));
     }
 
-    setSize(m_osu->getScreenSize() + Vector2(1, 1));
+    setSize(osu->getScreenSize() + Vector2(1, 1));
     update_pos();
 }
 
@@ -1296,7 +1294,7 @@ void MainMenu::writeVersionFile() {
 
 MainMenuButton *MainMenu::addMainMenuButton(UString text) {
     MainMenuButton *button = new MainMenuButton(this, m_vSize.x, 0, 1, 1, "", text);
-    button->setFont(m_osu->getSubTitleFont());
+    button->setFont(osu->getSubTitleFont());
     button->setVisible(false);
 
     m_menuElements.push_back(button);
@@ -1305,7 +1303,7 @@ MainMenuButton *MainMenu::addMainMenuButton(UString text) {
 }
 
 void MainMenu::onCubePressed() {
-    engine->getSound()->play(m_osu->getSkin()->getMenuHit());
+    engine->getSound()->play(osu->getSkin()->getMenuHit());
 
     anim->moveQuadInOut(&m_fSizeAddAnim, 0.0f, 0.06f, 0.0f, false);
     anim->moveQuadInOut(&m_fSizeAddAnim, 0.12f, 0.06f, 0.07f, false);
@@ -1353,21 +1351,21 @@ void MainMenu::onPlayButtonPressed() {
     m_bMainMenuAnimFadeToFriendForNextAnim = false;
     m_bMainMenuAnimFriendScheduled = false;
 
-    m_osu->toggleSongBrowser();
+    osu->toggleSongBrowser();
 }
 
 void MainMenu::onMultiplayerButtonPressed() {
     if(bancho.user_id <= 0) {
-        m_osu->m_optionsMenu->askForLoginDetails();
+        osu->m_optionsMenu->askForLoginDetails();
         return;
     }
 
     setVisible(false);
-    m_osu->m_lobby->setVisible(true);
+    osu->m_lobby->setVisible(true);
 }
 
 void MainMenu::onOptionsButtonPressed() {
-    if(!m_osu->getOptionsMenu()->isVisible()) m_osu->toggleOptionsMenu();
+    if(!osu->getOptionsMenu()->isVisible()) osu->toggleOptionsMenu();
 }
 
 void MainMenu::onExitButtonPressed() {
@@ -1377,10 +1375,10 @@ void MainMenu::onExitButtonPressed() {
 }
 
 void MainMenu::onPausePressed() {
-    if(m_osu->getSelectedBeatmap()->isPreviewMusicPlaying()) {
-        m_osu->getSelectedBeatmap()->pausePreviewMusic();
+    if(osu->getSelectedBeatmap()->isPreviewMusicPlaying()) {
+        osu->getSelectedBeatmap()->pausePreviewMusic();
     } else {
-        auto music = m_osu->getSelectedBeatmap()->getMusic();
+        auto music = osu->getSelectedBeatmap()->getMusic();
         if(music != nullptr) {
             engine->getSound()->play(music);
         }
@@ -1388,16 +1386,16 @@ void MainMenu::onPausePressed() {
 }
 
 void MainMenu::onUpdatePressed() {
-    if(m_osu->getUpdateHandler()->getStatus() == UpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION)
+    if(osu->getUpdateHandler()->getStatus() == UpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION)
         engine->restart();
-    else if(m_osu->getUpdateHandler()->getStatus() == UpdateHandler::STATUS::STATUS_ERROR)
-        m_osu->getUpdateHandler()->checkForUpdates();
+    else if(osu->getUpdateHandler()->getStatus() == UpdateHandler::STATUS::STATUS_ERROR)
+        osu->getUpdateHandler()->checkForUpdates();
 }
 
 void MainMenu::onVersionPressed() {
     m_bDrawVersionNotificationArrow = false;
     writeVersionFile();
-    m_osu->toggleChangelog();
+    osu->toggleChangelog();
 }
 
 MainMenuCubeButton::MainMenuCubeButton(MainMenu *mainMenu, float xPos, float yPos, float xSize, float ySize,
@@ -1432,6 +1430,6 @@ MainMenuButton::MainMenuButton(MainMenu *mainMenu, float xPos, float yPos, float
 void MainMenuButton::onMouseDownInside() {
     if(m_mainMenu->m_cube->isMouseInside()) return;
 
-    engine->getSound()->play(m_mainMenu->getOsu()->getSkin()->getMenuHit());
+    engine->getSound()->play(osu->getSkin()->getMenuHit());
     CBaseUIButton::onMouseDownInside();
 }

@@ -1,23 +1,13 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		pause menu (while playing)
-//
-// $NoKeywords: $
-//===============================================================================//
-
-#ifndef OSUPAUSEMENU_H
-#define OSUPAUSEMENU_H
-
+#pragma once
 #include "OsuScreen.h"
 
-class Osu;
 class SongBrowser;
 class CBaseUIContainer;
 class UIPauseMenuButton;
 
 class PauseMenu : public OsuScreen {
    public:
-    PauseMenu(Osu *osu);
+    PauseMenu();
 
     virtual void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);
@@ -62,5 +52,3 @@ class PauseMenu : public OsuScreen {
 
     float m_fDimAnim;
 };
-
-#endif

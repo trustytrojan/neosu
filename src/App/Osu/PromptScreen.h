@@ -4,12 +4,11 @@
 class CBaseUILabel;
 class CBaseUITextbox;
 class Graphics;
-class Osu;
 class UIButton;
 
 class PromptScreen : public OsuScreen {
    public:
-    PromptScreen(Osu *osu);
+    PromptScreen();
     virtual void onResolutionChange(Vector2 newResolution);
 
     virtual void draw(Graphics *g);

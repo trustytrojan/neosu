@@ -1,20 +1,9 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		context menu, dropdown style
-//
-// $NoKeywords: $
-//===============================================================================//
-
-#ifndef OSUUICONTEXTMENU_H
-#define OSUUICONTEXTMENU_H
-
+#pragma once
 #include "CBaseUIButton.h"
 #include "CBaseUIScrollView.h"
 #include "CBaseUITextbox.h"
 
 class CBaseUIContainer;
-
-class Osu;
 
 class UIContextMenuButton;
 class UIContextMenuTextbox;
@@ -25,7 +14,7 @@ class UIContextMenu : public CBaseUIScrollView {
     static void clampToRightScreenEdge(UIContextMenu *menu);
 
    public:
-    UIContextMenu(Osu *osu, float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "",
+    UIContextMenu(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "",
                   CBaseUIScrollView *parent = NULL);
 
     virtual void draw(Graphics *g);
@@ -56,8 +45,6 @@ class UIContextMenu : public CBaseUIScrollView {
     void onClick(CBaseUIButton *button);
     void onHitEnter(UIContextMenuTextbox *textbox);
 
-    Osu *m_osu;
-
     CBaseUIScrollView *m_parent;
 
     UIContextMenuTextbox *m_containedTextbox;
@@ -79,7 +66,7 @@ class UIContextMenu : public CBaseUIScrollView {
 
 class UIContextMenuButton : public CBaseUIButton {
    public:
-    UIContextMenuButton(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name, UString text, int id);
+    UIContextMenuButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text, int id);
     virtual ~UIContextMenuButton() { ; }
 
     virtual void mouse_update(bool *propagate_clicks);
@@ -89,8 +76,6 @@ class UIContextMenuButton : public CBaseUIButton {
     void setTooltipText(UString text);
 
    private:
-    Osu *m_osu;
-
     int m_iID;
 
     std::vector<UString> m_tooltipTextLines;
@@ -106,5 +91,3 @@ class UIContextMenuTextbox : public CBaseUITextbox {
    private:
     int m_iID;
 };
-
-#endif

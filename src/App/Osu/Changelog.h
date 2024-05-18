@@ -8,7 +8,7 @@ class CBaseUILabel;
 
 class Changelog : public ScreenBackable {
    public:
-    Changelog(Osu *osu);
+    Changelog();
     virtual ~Changelog();
 
     virtual void mouse_update(bool *propagate_clicks);

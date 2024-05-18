@@ -1,18 +1,7 @@
-//================ Copyright (c) 2019, Colin Brook & PG, All rights reserved. =================//
-//
-// Purpose:		real 3d first person mode for fps warmup/practice
-//
-// $NoKeywords: $fposu
-//=============================================================================================//
-
-#ifndef OSUMODFPOSU_H
-#define OSUMODFPOSU_H
-
+#pragma once
 #include <list>
 
 #include "cbase.h"
-
-class Osu;
 
 class Camera;
 class ConVar;
@@ -28,7 +17,7 @@ class ModFPoSu {
     static constexpr const int SUBDIVISIONS = 4;
 
    public:
-    ModFPoSu(Osu *osu);
+    ModFPoSu();
     ~ModFPoSu();
 
     void draw(Graphics *g);
@@ -76,8 +65,6 @@ class ModFPoSu {
     static Vector3 normalFromTriangle(Vector3 p1, Vector3 p2, Vector3 p3);
 
    private:
-    Osu *m_osu;
-
     ConVar *m_mouse_sensitivity_ref;
     ConVar *m_osu_draw_beatmap_background_image_ref;
     ConVar *m_osu_background_dim_ref;
@@ -107,5 +94,3 @@ class ModFPoSu {
 
     Shader *m_hitcircleShader;
 };
-
-#endif

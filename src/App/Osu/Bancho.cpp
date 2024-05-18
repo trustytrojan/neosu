@@ -59,7 +59,7 @@ void update_channel(UString name, UString topic, i32 nb_members) {
         chat_channels[name_str] = chan;
 
         if(print_new_channels) {
-            bancho.osu->m_chat->addMessage(
+            osu->m_chat->addMessage(
                 "#osu", ChatMessage{
                             .tms = time(NULL),
                             .author_id = 0,
@@ -194,9 +194,9 @@ void handle_packet(Packet *packet) {
         bancho.user_id = read<u32>(packet);
         if(bancho.user_id > 0) {
             debugLog("Logged in as user #%d.\n", bancho.user_id);
-            bancho.osu->m_optionsMenu->logInButton->setText("Disconnect");
-            bancho.osu->m_optionsMenu->logInButton->setColor(0xffff0000);
-            bancho.osu->m_optionsMenu->logInButton->is_loading = false;
+            osu->m_optionsMenu->logInButton->setText("Disconnect");
+            osu->m_optionsMenu->logInButton->setColor(0xffff0000);
+            osu->m_optionsMenu->logInButton->is_loading = false;
             convar->getConVarByName("mp_autologin")->setValue(true);
             print_new_channels = true;
 
@@ -217,17 +217,17 @@ void handle_packet(Packet *packet) {
             }
 
             // close your eyes
-            SAFE_DELETE(bancho.osu->m_songBrowser2->m_userButton->m_avatar);
-            bancho.osu->m_songBrowser2->m_userButton->m_avatar = new UIAvatar(bancho.user_id, 0.f, 0.f, 0.f, 0.f);
-            bancho.osu->m_songBrowser2->m_userButton->m_avatar->on_screen = true;
+            SAFE_DELETE(osu->m_songBrowser2->m_userButton->m_avatar);
+            osu->m_songBrowser2->m_userButton->m_avatar = new UIAvatar(bancho.user_id, 0.f, 0.f, 0.f, 0.f);
+            osu->m_songBrowser2->m_userButton->m_avatar->on_screen = true;
 
             // XXX: We should toggle between "offline" sorting options and "online" ones
             //      Online ones would be "Local scores", "Global", "Country", "Selected mods" etc
             //      While offline ones would be "By score", "By pp", etc
-            bancho.osu->m_songBrowser2->onSortScoresChange(UString("Online Leaderboard"), 0);
+            osu->m_songBrowser2->onSortScoresChange(UString("Online Leaderboard"), 0);
 
             // If server sent a score submission policy, update options menu to hide the checkbox
-            bancho.osu->m_optionsMenu->updateLayout();
+            osu->m_optionsMenu->updateLayout();
 
             APIRequest request;
             request.type = GET_NEOSU_SETTINGS;
@@ -237,9 +237,9 @@ void handle_packet(Packet *packet) {
             send_api_request(request);
         } else {
             convar->getConVarByName("mp_autologin")->setValue(false);
-            bancho.osu->m_optionsMenu->logInButton->setText("Log in");
-            bancho.osu->m_optionsMenu->logInButton->setColor(0xff00ff00);
-            bancho.osu->m_optionsMenu->logInButton->is_loading = false;
+            osu->m_optionsMenu->logInButton->setText("Log in");
+            osu->m_optionsMenu->logInButton->setColor(0xff00ff00);
+            osu->m_optionsMenu->logInButton->is_loading = false;
 
             debugLog("Failed to log in, server returned code %d.\n", bancho.user_id);
             UString errmsg = UString::format("Failed to log in: %s (code %d)\n", cho_token.toUtf8(), bancho.user_id);
@@ -266,7 +266,7 @@ void handle_packet(Packet *packet) {
                     errmsg = "Please contact an administrator of the server.";
                 }
             }
-            bancho.osu->getNotificationOverlay()->addNotification(errmsg);
+            osu->getNotificationOverlay()->addNotification(errmsg);
         }
     } else if(packet->id == RECV_MESSAGE) {
         UString sender = read_string(packet);
@@ -274,12 +274,12 @@ void handle_packet(Packet *packet) {
         UString recipient = read_string(packet);
         i32 sender_id = read<u32>(packet);
 
-        bancho.osu->m_chat->addMessage(recipient, ChatMessage{
-                                                      .tms = time(NULL),
-                                                      .author_id = sender_id,
-                                                      .author_name = sender,
-                                                      .text = text,
-                                                  });
+        osu->m_chat->addMessage(recipient, ChatMessage{
+                                               .tms = time(NULL),
+                                               .author_id = sender_id,
+                                               .author_name = sender,
+                                               .text = text,
+                                           });
     } else if(packet->id == PONG) {
         // (nothing to do)
     } else if(packet->id == USER_STATS) {
@@ -301,7 +301,7 @@ void handle_packet(Packet *packet) {
         user->pp = read<u16>(packet);
 
         if(stats_user_id == bancho.user_id) {
-            bancho.osu->m_songBrowser2->m_userButton->updateUserStats();
+            osu->m_songBrowser2->m_userButton->updateUserStats();
         }
     } else if(packet->id == USER_LOGOUT) {
         i32 logged_out_id = read<u32>(packet);
@@ -325,30 +325,30 @@ void handle_packet(Packet *packet) {
         // (nothing to do)
     } else if(packet->id == NOTIFICATION) {
         UString notification = read_string(packet);
-        bancho.osu->getNotificationOverlay()->addNotification(notification);
+        osu->getNotificationOverlay()->addNotification(notification);
         // XXX: don't do McOsu style notifications, since:
         // 1) they can't do multiline text
         // 2) they don't stack, if the server sends >1 you only see the latest
         // Maybe log them in the chat + display in bottom right like ppy client?
     } else if(packet->id == ROOM_UPDATED) {
         auto room = Room(packet);
-        if(bancho.osu->m_lobby->isVisible()) {
-            bancho.osu->m_lobby->updateRoom(room);
+        if(osu->m_lobby->isVisible()) {
+            osu->m_lobby->updateRoom(room);
         } else if(room.id == bancho.room.id) {
-            bancho.osu->m_room->on_room_updated(room);
+            osu->m_room->on_room_updated(room);
         }
     } else if(packet->id == ROOM_CREATED) {
         auto room = new Room(packet);
-        bancho.osu->m_lobby->addRoom(room);
+        osu->m_lobby->addRoom(room);
     } else if(packet->id == ROOM_CLOSED) {
         i32 room_id = read<u32>(packet);
-        bancho.osu->m_lobby->removeRoom(room_id);
+        osu->m_lobby->removeRoom(room_id);
     } else if(packet->id == ROOM_JOIN_SUCCESS) {
         auto room = Room(packet);
-        bancho.osu->m_room->on_room_joined(room);
+        osu->m_room->on_room_joined(room);
     } else if(packet->id == ROOM_JOIN_FAIL) {
-        bancho.osu->getNotificationOverlay()->addNotification("Failed to join room.");
-        bancho.osu->m_lobby->on_room_join_failed();
+        osu->getNotificationOverlay()->addNotification("Failed to join room.");
+        osu->m_lobby->on_room_join_failed();
     } else if(packet->id == FELLOW_SPECTATOR_JOINED) {
         u32 spectator_id = read<u32>(packet);
         (void)spectator_id;  // (spectating not implemented; nothing to do)
@@ -357,29 +357,29 @@ void handle_packet(Packet *packet) {
         (void)spectator_id;  // (spectating not implemented; nothing to do)
     } else if(packet->id == MATCH_STARTED) {
         auto room = Room(packet);
-        bancho.osu->m_room->on_match_started(room);
+        osu->m_room->on_match_started(room);
     } else if(packet->id == UPDATE_MATCH_SCORE || packet->id == MATCH_SCORE_UPDATED) {
-        bancho.osu->m_room->on_match_score_updated(packet);
+        osu->m_room->on_match_score_updated(packet);
     } else if(packet->id == HOST_CHANGED) {
         // (nothing to do)
     } else if(packet->id == MATCH_ALL_PLAYERS_LOADED) {
-        bancho.osu->m_room->on_all_players_loaded();
+        osu->m_room->on_all_players_loaded();
     } else if(packet->id == MATCH_PLAYER_FAILED) {
         i32 slot_id = read<u32>(packet);
-        bancho.osu->m_room->on_player_failed(slot_id);
+        osu->m_room->on_player_failed(slot_id);
     } else if(packet->id == MATCH_FINISHED) {
-        bancho.osu->m_room->on_match_finished();
+        osu->m_room->on_match_finished();
     } else if(packet->id == MATCH_SKIP) {
-        bancho.osu->m_room->on_all_players_skipped();
+        osu->m_room->on_all_players_skipped();
     } else if(packet->id == CHANNEL_JOIN_SUCCESS) {
         UString name = read_string(packet);
-        bancho.osu->m_chat->addChannel(name);
-        bancho.osu->m_chat->addMessage(name, ChatMessage{
-                                                 .tms = time(NULL),
-                                                 .author_id = 0,
-                                                 .author_name = UString(""),
-                                                 .text = UString("Joined channel."),
-                                             });
+        osu->m_chat->addChannel(name);
+        osu->m_chat->addMessage(name, ChatMessage{
+                                          .tms = time(NULL),
+                                          .author_id = 0,
+                                          .author_name = UString(""),
+                                          .text = UString("Joined channel."),
+                                      });
     } else if(packet->id == CHANNEL_INFO) {
         UString channel_name = read_string(packet);
         UString channel_topic = read_string(packet);
@@ -387,7 +387,7 @@ void handle_packet(Packet *packet) {
         update_channel(channel_name, channel_topic, nb_members);
     } else if(packet->id == LEFT_CHANNEL) {
         UString name = read_string(packet);
-        bancho.osu->m_chat->removeChannel(name);
+        osu->m_chat->removeChannel(name);
     } else if(packet->id == CHANNEL_AUTO_JOIN) {
         UString channel_name = read_string(packet);
         UString channel_topic = read_string(packet);
@@ -407,8 +407,7 @@ void handle_packet(Packet *packet) {
     } else if(packet->id == PROTOCOL_VERSION) {
         int protocol_version = read<u32>(packet);
         if(protocol_version != 19) {
-            bancho.osu->getNotificationOverlay()->addNotification(
-                "This server may use an unsupported protocol version.");
+            osu->getNotificationOverlay()->addNotification("This server may use an unsupported protocol version.");
         }
     } else if(packet->id == MAIN_MENU_ICON) {
         UString icon = read_string(packet);
@@ -418,7 +417,7 @@ void handle_packet(Packet *packet) {
         }
     } else if(packet->id == MATCH_PLAYER_SKIPPED) {
         i32 user_id = read<u32>(packet);
-        bancho.osu->m_room->on_player_skip(user_id);
+        osu->m_room->on_player_skip(user_id);
 
         // I'm not sure the server ever sends MATCH_SKIP... So, double-checking here.
         bool all_players_skipped = true;
@@ -430,7 +429,7 @@ void handle_packet(Packet *packet) {
             }
         }
         if(all_players_skipped) {
-            bancho.osu->m_room->on_all_players_skipped();
+            osu->m_room->on_all_players_skipped();
         }
     } else if(packet->id == USER_PRESENCE) {
         i32 presence_user_id = read<u32>(packet);
@@ -460,16 +459,16 @@ void handle_packet(Packet *packet) {
         UString recipient = read_string(packet);
         (void)recipient;
         i32 sender_id = read<u32>(packet);
-        bancho.osu->m_chat->addMessage(recipient, ChatMessage{
-                                                      .tms = time(NULL),
-                                                      .author_id = sender_id,
-                                                      .author_name = sender,
-                                                      .text = text,
-                                                  });
+        osu->m_chat->addMessage(recipient, ChatMessage{
+                                               .tms = time(NULL),
+                                               .author_id = sender_id,
+                                               .author_name = sender,
+                                               .text = text,
+                                           });
     } else if(packet->id == CHANNEL_INFO_END) {
         print_new_channels = false;
-        bancho.osu->m_chat->join("#announce");
-        bancho.osu->m_chat->join("#osu");
+        osu->m_chat->join("#announce");
+        osu->m_chat->join("#osu");
     } else if(packet->id == ROOM_PASSWORD_CHANGED) {
         UString new_password = read_string(packet);
         debugLog("Room changed password to %s\n", new_password.toUtf8());
@@ -495,12 +494,12 @@ void handle_packet(Packet *packet) {
         debugLog("Silenced %s.\n", blocked.toUtf8());
     } else if(packet->id == VERSION_UPDATE_FORCED) {
         disconnect();
-        bancho.osu->getNotificationOverlay()->addNotification("This server requires a newer client version.");
+        osu->getNotificationOverlay()->addNotification("This server requires a newer client version.");
     } else if(packet->id == ACCOUNT_RESTRICTED) {
-        bancho.osu->getNotificationOverlay()->addNotification("Account restricted.");
+        osu->getNotificationOverlay()->addNotification("Account restricted.");
         disconnect();
     } else if(packet->id == MATCH_ABORT) {
-        bancho.osu->m_room->on_match_aborted();
+        osu->m_room->on_match_aborted();
     } else if(packet->id == OVERRIDE_NEOSU_CONVARS) {
         process_neosu_settings(*packet);
     } else {

@@ -310,7 +310,8 @@ void Engine::loadApp() {
         //*****************//
         //	Load App here  //
         //*****************//
-        m_app = new Osu();
+        osu = new Osu();
+        m_app = osu;
 
         // start listening to the default keyboard input
         if(m_app != NULL) m_keyboard->addListener(m_app);

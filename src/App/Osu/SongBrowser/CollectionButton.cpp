@@ -33,10 +33,10 @@ ConVar osu_songbrowser_button_collection_inactive_color_g("osu_songbrowser_butto
 ConVar osu_songbrowser_button_collection_inactive_color_b("osu_songbrowser_button_collection_inactive_color_b", 143,
                                                           FCVAR_DEFAULT);
 
-CollectionButton::CollectionButton(Osu *osu, SongBrowser *songBrowser, CBaseUIScrollView *view,
-                                   UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,
-                                   UString name, UString collectionName, std::vector<Button *> children)
-    : Button(osu, songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, name) {
+CollectionButton::CollectionButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu,
+                                   float xPos, float yPos, float xSize, float ySize, UString name,
+                                   UString collectionName, std::vector<Button *> children)
+    : Button(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, name) {
     m_sCollectionName = collectionName;
     m_children = children;
 
@@ -50,7 +50,7 @@ void CollectionButton::draw(Graphics *g) {
     Button::draw(g);
     if(!m_bVisible) return;
 
-    Skin *skin = m_osu->getSkin();
+    Skin *skin = osu->getSkin();
 
     // scaling
     const Vector2 pos = getActualPos();
@@ -94,7 +94,7 @@ void CollectionButton::onSelected(bool wasSelected, bool autoSelectBottomMostChi
 void CollectionButton::onRightMouseUpInside() { triggerContextMenu(engine->getMouse()->getPos()); }
 
 void CollectionButton::triggerContextMenu(Vector2 pos) {
-    if(m_osu->getSongBrowser()->getGroupingMode() != SongBrowser::GROUP::GROUP_COLLECTIONS) return;
+    if(osu->getSongBrowser()->getGroupingMode() != SongBrowser::GROUP::GROUP_COLLECTIONS) return;
 
     if(m_contextMenu != NULL) {
         m_contextMenu->setPos(pos);
@@ -182,7 +182,7 @@ void CollectionButton::onRenameCollectionConfirmed(UString text, int id) {
         save_collections();
 
         // (trigger re-sorting of collection buttons)
-        m_osu->getSongBrowser()->onCollectionButtonContextMenu(this, m_sCollectionName.c_str(), 3);
+        osu->getSongBrowser()->onCollectionButtonContextMenu(this, m_sCollectionName.c_str(), 3);
     }
 }
 
@@ -190,7 +190,7 @@ void CollectionButton::onDeleteCollectionConfirmed(UString text, int id) {
     if(id != 2) return;
 
     // just forward it
-    m_osu->getSongBrowser()->onCollectionButtonContextMenu(this, m_sCollectionName.c_str(), id);
+    osu->getSongBrowser()->onCollectionButtonContextMenu(this, m_sCollectionName.c_str(), id);
 }
 
 Color CollectionButton::getActiveBackgroundColor() const {

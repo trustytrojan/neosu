@@ -1,10 +1,3 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		analog to UIRankingScreenInfoLabel, but for the ranking screen
-//
-// $NoKeywords: $osursil
-//===============================================================================//
-
 #include "UIRankingScreenInfoLabel.h"
 
 #include <chrono>
@@ -15,11 +8,9 @@
 #include "Osu.h"
 #include "ResourceManager.h"
 
-UIRankingScreenInfoLabel::UIRankingScreenInfoLabel(Osu *osu, float xPos, float yPos, float xSize, float ySize,
-                                                   UString name)
+UIRankingScreenInfoLabel::UIRankingScreenInfoLabel(float xPos, float yPos, float xSize, float ySize, UString name)
     : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
-    m_osu = osu;
-    m_font = m_osu->getSubTitleFont();
+    m_font = osu->getSubTitleFont();
 
     m_iMargin = 10;
 

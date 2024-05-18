@@ -395,9 +395,7 @@ float SkinImage::getImageScale() {
         return 1.0f;
 }
 
-float SkinImage::getResolutionScale() {
-    return Osu::getImageScale(m_skin->getOsu(), m_vBaseSizeForScaling2x, m_fOsuSize);
-}
+float SkinImage::getResolutionScale() { return Osu::getImageScale(m_vBaseSizeForScaling2x, m_fOsuSize); }
 
 bool SkinImage::isReady() {
     if(m_bReady) return true;

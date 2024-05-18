@@ -1,16 +1,6 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		difficulty modifier selection screen
-//
-// $NoKeywords: $osums
-//===============================================================================//
-
-#ifndef OSUMODSELECTOR_H
-#define OSUMODSELECTOR_H
-
+#pragma once
 #include "OsuScreen.h"
 
-class Osu;
 class SkinImage;
 class SongBrowser;
 
@@ -31,7 +21,7 @@ class ConVar;
 
 class ModSelector : public OsuScreen {
    public:
-    ModSelector(Osu *osu);
+    ModSelector();
     virtual ~ModSelector();
 
     virtual void draw(Graphics *g);
@@ -172,5 +162,3 @@ class ModSelector : public OsuScreen {
     ConVar *m_osu_drain_type_ref;
     ConVar *m_osu_mod_touchdevice_ref;
 };
-
-#endif

@@ -9,6 +9,7 @@ CXXFLAGS = -std=c++17 -fmessage-length=0 -Wno-sign-compare -Wno-unused-local-typ
 CXXFLAGS += `pkgconf --static --cflags $(LIBS)` `curl-config --cflags`
 CXXFLAGS += -Isrc/App -Isrc/App/Osu -Isrc/Engine -Isrc/GUI -Isrc/GUI/Windows -Isrc/GUI/Windows/VinylScratcher -Isrc/Engine/Input -Isrc/Engine/Platform -Isrc/Engine/Main -Isrc/Engine/Renderer -Isrc/Util
 CXXFLAGS += -Ilibraries/bass/include -Ilibraries/bassasio/include -Ilibraries/bassfx/include -Ilibraries/bassmix/include -Ilibraries/basswasapi/include -Ilibraries/bassloud/include
+CXXFLAGS += -O2
 CXXFLAGS += -g3 -fsanitize=address
 
 LDFLAGS = -ldiscord-rpc -lbass -lbassmix -lbass_fx -lbassloud -lpthread -lstdc++

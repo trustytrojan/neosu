@@ -12,10 +12,8 @@
 #include "Osu.h"
 #include "ResourceManager.h"
 
-UIVolumeSlider::UIVolumeSlider(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name)
+UIVolumeSlider::UIVolumeSlider(float xPos, float yPos, float xSize, float ySize, UString name)
     : CBaseUISlider(xPos, yPos, xSize, ySize, name) {
-    m_osu = osu;
-
     m_type = TYPE::MASTER;
     m_bSelected = false;
 

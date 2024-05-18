@@ -45,8 +45,7 @@ ConVar osu_drain_lazer_2018_miss("osu_drain_lazer_2018_miss", -0.02f, FCVAR_DEFA
 ConVar *LiveScore::m_osu_draw_statistics_pp_ref = NULL;
 ConVar *LiveScore::m_osu_drain_type_ref = NULL;
 
-LiveScore::LiveScore(Osu *osu) {
-    m_osu = osu;
+LiveScore::LiveScore() {
     reset();
 
     if(m_osu_draw_statistics_pp_ref == NULL)
@@ -112,18 +111,18 @@ void LiveScore::addHitResult(Beatmap *beatmap, HitObject *hitObject, HIT hit, lo
     if(hit != LiveScore::HIT::HIT_MISS) {
         if(!ignoreOnHitErrorBar) {
             m_hitdeltas.push_back((int)delta);
-            m_osu->getHUD()->addHitError(delta);
+            osu->getHUD()->addHitError(delta);
         }
 
         if(!ignoreCombo) {
             m_iCombo++;
-            m_osu->getHUD()->animateCombo();
+            osu->getHUD()->animateCombo();
         }
     } else  // misses
     {
         if(osu_hiterrorbar_misses.getBool() && !ignoreOnHitErrorBar &&
            delta <= (long)GameRules::getHitWindow50(beatmap))
-            m_osu->getHUD()->addHitError(delta, true);
+            osu->getHUD()->addHitError(delta, true);
 
         m_iCombo = 0;
     }
@@ -176,7 +175,7 @@ void LiveScore::addHitResult(Beatmap *beatmap, HitObject *hitObject, HIT hit, lo
     if(!ignoreScore)
         m_iScoreV1 +=
             hitValue + ((hitValue * (unsigned long long)((double)scoreComboMultiplier * (double)difficultyMultiplier *
-                                                         (double)m_osu->getScoreMultiplier())) /
+                                                         (double)osu->getScoreMultiplier())) /
                         (unsigned long long)25);
 
     const float totalHitPoints = m_iNum50s * (1.0f / 6.0f) + m_iNum100s * (2.0f / 6.0f) + m_iNum300s;
@@ -193,7 +192,7 @@ void LiveScore::addHitResult(Beatmap *beatmap, HitObject *hitObject, HIT hit, lo
 
     // recalculate score v2
     m_iScoreV2ComboPortion += (unsigned long long)((double)hitValue * (1.0 + (double)scoreComboMultiplier / 10.0));
-    if(m_osu->getModScorev2()) {
+    if(osu->getModScorev2()) {
         const int numHitObjects = beatmap->getSelectedDifficulty2()->getNumObjects();
         const double maximumAccurateHits = numHitObjects;
 
@@ -203,7 +202,7 @@ void LiveScore::addHitResult(Beatmap *beatmap, HitObject *hitObject, HIT hit, lo
                                                std::pow((double)m_fAccuracy, 10.0) *
                                                    ((double)totalNumHits / maximumAccurateHits) * 300000.0 +
                                                (double)m_iBonusPoints) *
-                                              (double)m_osu->getScoreMultiplier());
+                                              (double)osu->getScoreMultiplier());
 
         /// debugLog("%i / %i, combo = %ix\n", (int)m_iScoreV2ComboPortion,
         /// (int)beatmap->getSelectedDifficulty()->getScoreV2ComboPortionMaximum(), m_iCombo);
@@ -215,9 +214,9 @@ void LiveScore::addHitResult(Beatmap *beatmap, HitObject *hitObject, HIT hit, lo
     if((percent300s > 0.7f && m_iNumMisses == 0) || (percent300s > 0.8f)) m_grade = FinishedScore::Grade::B;
     if((percent300s > 0.8f && m_iNumMisses == 0) || (percent300s > 0.9f)) m_grade = FinishedScore::Grade::A;
     if(percent300s > 0.9f && percent50s <= 0.01f && m_iNumMisses == 0)
-        m_grade = m_osu->getModHD() || m_osu->getModFlashlight() ? FinishedScore::Grade::SH : FinishedScore::Grade::S;
+        m_grade = osu->getModHD() || osu->getModFlashlight() ? FinishedScore::Grade::SH : FinishedScore::Grade::S;
     if(m_iNumMisses == 0 && m_iNum50s == 0 && m_iNum100s == 0)
-        m_grade = m_osu->getModHD() || m_osu->getModFlashlight() ? FinishedScore::Grade::XH : FinishedScore::Grade::X;
+        m_grade = osu->getModHD() || osu->getModFlashlight() ? FinishedScore::Grade::XH : FinishedScore::Grade::X;
 
     // recalculate unstable rate
     float averageDelta = 0.0f;
@@ -352,8 +351,8 @@ void LiveScore::addHitResult(Beatmap *beatmap, HitObject *hitObject, HIT hit, lo
                 speedNotes = beatmap->getSpeedNotesForUpToHitObjectIndex(curHitobjectIndex);
 
                 m_fPPv2 = DifficultyCalculator::calculatePPv2(
-                    m_osu, beatmap, aimStars, aimSliderFactor, speedStars, speedNotes, -1, numCircles, numSliders,
-                    numSpinners, maxPossibleCombo, m_iComboMax, m_iNumMisses, m_iNum300s, m_iNum100s, m_iNum50s);
+                    beatmap, aimStars, aimSliderFactor, speedStars, speedNotes, -1, numCircles, numSliders, numSpinners,
+                    maxPossibleCombo, m_iComboMax, m_iNumMisses, m_iNum300s, m_iNum100s, m_iNum50s);
 
                 if(osu_debug_pp.getBool())
                     debugLog(
@@ -536,24 +535,24 @@ int LiveScore::getKeyCount(int key) {
 int LiveScore::getModsLegacy() {
     int modsLegacy = 0;
 
-    modsLegacy |= (m_osu->getModAuto() ? ModFlags::Autoplay : 0);
-    modsLegacy |= (m_osu->getModAutopilot() ? ModFlags::Autopilot : 0);
-    modsLegacy |= (m_osu->getModRelax() ? ModFlags::Relax : 0);
-    modsLegacy |= (m_osu->getModSpunout() ? ModFlags::SpunOut : 0);
-    modsLegacy |= (m_osu->getModTarget() ? ModFlags::Target : 0);
-    modsLegacy |= (m_osu->getModScorev2() ? ModFlags::ScoreV2 : 0);
-    modsLegacy |= (m_osu->getModDT() ? ModFlags::DoubleTime : 0);
-    modsLegacy |= (m_osu->getModNC() ? (ModFlags::DoubleTime | ModFlags::Nightcore) : 0);
-    modsLegacy |= (m_osu->getModNF() ? ModFlags::NoFail : 0);
-    modsLegacy |= (m_osu->getModHT() ? ModFlags::HalfTime : 0);
-    modsLegacy |= (m_osu->getModDC() ? ModFlags::HalfTime : 0);
-    modsLegacy |= (m_osu->getModHD() ? ModFlags::Hidden : 0);
-    modsLegacy |= (m_osu->getModHR() ? ModFlags::HardRock : 0);
-    modsLegacy |= (m_osu->getModEZ() ? ModFlags::Easy : 0);
-    modsLegacy |= (m_osu->getModSD() ? ModFlags::SuddenDeath : 0);
-    modsLegacy |= (m_osu->getModSS() ? ModFlags::Perfect : 0);
-    modsLegacy |= (m_osu->getModNightmare() ? ModFlags::Nightmare : 0);
-    modsLegacy |= (m_osu->getModTD() ? ModFlags::TouchDevice : 0);
+    modsLegacy |= (osu->getModAuto() ? ModFlags::Autoplay : 0);
+    modsLegacy |= (osu->getModAutopilot() ? ModFlags::Autopilot : 0);
+    modsLegacy |= (osu->getModRelax() ? ModFlags::Relax : 0);
+    modsLegacy |= (osu->getModSpunout() ? ModFlags::SpunOut : 0);
+    modsLegacy |= (osu->getModTarget() ? ModFlags::Target : 0);
+    modsLegacy |= (osu->getModScorev2() ? ModFlags::ScoreV2 : 0);
+    modsLegacy |= (osu->getModDT() ? ModFlags::DoubleTime : 0);
+    modsLegacy |= (osu->getModNC() ? (ModFlags::DoubleTime | ModFlags::Nightcore) : 0);
+    modsLegacy |= (osu->getModNF() ? ModFlags::NoFail : 0);
+    modsLegacy |= (osu->getModHT() ? ModFlags::HalfTime : 0);
+    modsLegacy |= (osu->getModDC() ? ModFlags::HalfTime : 0);
+    modsLegacy |= (osu->getModHD() ? ModFlags::Hidden : 0);
+    modsLegacy |= (osu->getModHR() ? ModFlags::HardRock : 0);
+    modsLegacy |= (osu->getModEZ() ? ModFlags::Easy : 0);
+    modsLegacy |= (osu->getModSD() ? ModFlags::SuddenDeath : 0);
+    modsLegacy |= (osu->getModSS() ? ModFlags::Perfect : 0);
+    modsLegacy |= (osu->getModNightmare() ? ModFlags::Nightmare : 0);
+    modsLegacy |= (osu->getModTD() ? ModFlags::TouchDevice : 0);
 
     // Set some unused (in osu!std) mod flags for non-vanilla mods
     // (these flags don't seem to cause issues on osu!stable or bancho.py)
@@ -567,38 +566,38 @@ int LiveScore::getModsLegacy() {
 UString LiveScore::getModsStringForRichPresence() {
     UString modsString;
 
-    if(m_osu->getModNF()) modsString.append("NF");
-    if(m_osu->getModEZ()) modsString.append("EZ");
-    if(m_osu->getModHD()) modsString.append("HD");
-    if(m_osu->getModHR()) modsString.append("HR");
-    if(m_osu->getModSD()) modsString.append("SD");
-    if(m_osu->getModDT()) modsString.append("DT");
-    if(m_osu->getModRelax()) modsString.append("RX");
-    if(m_osu->getModHT()) modsString.append("HT");
-    if(m_osu->getModNC()) modsString.append("NC");
-    if(m_osu->getModAuto()) modsString.append("AT");
-    if(m_osu->getModSpunout()) modsString.append("SO");
-    if(m_osu->getModAutopilot()) modsString.append("AP");
-    if(m_osu->getModSS()) modsString.append("PF");
-    if(m_osu->getModScorev2()) modsString.append("v2");
-    if(m_osu->getModTarget()) modsString.append("TP");
-    if(m_osu->getModNightmare()) modsString.append("NM");
-    if(m_osu->getModTD()) modsString.append("TD");
+    if(osu->getModNF()) modsString.append("NF");
+    if(osu->getModEZ()) modsString.append("EZ");
+    if(osu->getModHD()) modsString.append("HD");
+    if(osu->getModHR()) modsString.append("HR");
+    if(osu->getModSD()) modsString.append("SD");
+    if(osu->getModDT()) modsString.append("DT");
+    if(osu->getModRelax()) modsString.append("RX");
+    if(osu->getModHT()) modsString.append("HT");
+    if(osu->getModNC()) modsString.append("NC");
+    if(osu->getModAuto()) modsString.append("AT");
+    if(osu->getModSpunout()) modsString.append("SO");
+    if(osu->getModAutopilot()) modsString.append("AP");
+    if(osu->getModSS()) modsString.append("PF");
+    if(osu->getModScorev2()) modsString.append("v2");
+    if(osu->getModTarget()) modsString.append("TP");
+    if(osu->getModNightmare()) modsString.append("NM");
+    if(osu->getModTD()) modsString.append("TD");
 
     return modsString;
 }
 
-unsigned long long LiveScore::getScore() { return m_osu->getModScorev2() ? m_iScoreV2 : m_iScoreV1; }
+unsigned long long LiveScore::getScore() { return osu->getModScorev2() ? m_iScoreV2 : m_iScoreV1; }
 
 void LiveScore::onScoreChange() {
-    m_osu->m_room->onClientScoreChange();
+    osu->m_room->onClientScoreChange();
 
     // only used to block local scores for people who think they are very clever by quickly disabling auto just before
     // the end of a beatmap
-    m_bIsUnranked |= (m_osu->getModAuto() || (m_osu->getModAutopilot() && m_osu->getModRelax()));
+    m_bIsUnranked |= (osu->getModAuto() || (osu->getModAutopilot() && osu->getModRelax()));
 
-    if(m_osu->isInPlayMode()) {
-        m_osu->m_hud->updateScoreboard(true);
+    if(osu->isInPlayMode()) {
+        osu->m_hud->updateScoreboard(true);
     }
 }
 

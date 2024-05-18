@@ -24,9 +24,7 @@ ConVar osu_user_draw_accuracy("osu_user_draw_accuracy", true, FCVAR_DEFAULT);
 ConVar osu_user_draw_level("osu_user_draw_level", true, FCVAR_DEFAULT);
 ConVar osu_user_draw_level_bar("osu_user_draw_level_bar", true, FCVAR_DEFAULT);
 
-UserButton::UserButton(Osu *osu) : CBaseUIButton() {
-    m_osu = osu;
-
+UserButton::UserButton() : CBaseUIButton() {
     m_osu_scores_enabled_ref = convar->getConVarByName("osu_scores_enabled");
 
     m_fPP = 0.0f;
@@ -69,17 +67,17 @@ void UserButton::draw(Graphics *g) {
         g->pushTransform();
         {
             const float scale =
-                Osu::getImageScaleToFillResolution(m_osu->getSkin()->getUserIcon(), Vector2(iconWidth, iconHeight));
+                Osu::getImageScaleToFillResolution(osu->getSkin()->getUserIcon(), Vector2(iconWidth, iconHeight));
             g->scale(scale, scale);
             g->translate(m_vPos.x + iconBorder + iconWidth / 2 + 1, m_vPos.y + iconBorder + iconHeight / 2 + 1);
-            g->drawImage(m_osu->getSkin()->getUserIcon());
+            g->drawImage(osu->getSkin()->getUserIcon());
         }
         g->popTransform();
         g->popClipRect();
     }
 
     // draw username
-    McFont *usernameFont = m_osu->getSongBrowserFont();
+    McFont *usernameFont = osu->getSongBrowserFont();
     const float usernameScale = 0.5f;
     float usernamePaddingLeft = 0.0f;
     g->pushClipRect(McRect(m_vPos.x + iconBorder, m_vPos.y + iconBorder, m_vSize.x - 2 * iconBorder, iconHeight));
@@ -104,7 +102,7 @@ void UserButton::draw(Graphics *g) {
 
     if(m_osu_scores_enabled_ref->getBool()) {
         // draw performance (pp), and accuracy
-        McFont *performanceFont = m_osu->getSubTitleFont();
+        McFont *performanceFont = osu->getSubTitleFont();
         const float performanceScale = 0.3f;
         g->pushTransform();
         {
@@ -133,7 +131,7 @@ void UserButton::draw(Graphics *g) {
         g->popTransform();
 
         // draw level
-        McFont *scoreFont = m_osu->getSubTitleFont();
+        McFont *scoreFont = osu->getSubTitleFont();
         const float scoreScale = 0.3f;
         g->pushTransform();
         {
@@ -224,7 +222,7 @@ void UserButton::mouse_update(bool *propagate_clicks) {
 }
 
 void UserButton::updateUserStats() {
-    Database::PlayerStats stats = m_osu->getSongBrowser()->getDatabase()->calculatePlayerStats(m_sText);
+    Database::PlayerStats stats = osu->getSongBrowser()->getDatabase()->calculatePlayerStats(m_sText);
 
     if(bancho.user_id > 0) {
         UserInfo *my = get_user_info(bancho.user_id);

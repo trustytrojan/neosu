@@ -3,7 +3,6 @@
 #include "Osu.h"
 #include "Resource.h"
 
-class Osu;
 class Beatmap;
 class HitObject;
 
@@ -89,8 +88,8 @@ class DatabaseBeatmap {
         bool isNaN;
     };
 
-    DatabaseBeatmap(Osu *osu, std::string filePath, std::string folder, bool filePathIsInMemoryBeatmap = false);
-    DatabaseBeatmap(Osu *osu, std::vector<DatabaseBeatmap *> *difficulties);
+    DatabaseBeatmap(std::string filePath, std::string folder, bool filePathIsInMemoryBeatmap = false);
+    DatabaseBeatmap(std::vector<DatabaseBeatmap *> *difficulties);
     ~DatabaseBeatmap();
 
     static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string &osuFilePath, float AR, float CS,
@@ -111,8 +110,6 @@ class DatabaseBeatmap {
     void setNumSpinners(int numSpinners) { m_iNumSpinners = numSpinners; }
 
     void setLocalOffset(long localOffset) { m_iLocalOffset = localOffset; }
-
-    inline Osu *getOsu() const { return m_osu; }
 
     inline std::string getFolder() const { return m_sFolder; }
     inline std::string getFilePath() const { return m_sFilePath; }
@@ -329,8 +326,6 @@ class DatabaseBeatmap {
     static CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT calculateSliderTimesClicksTicks(
         int beatmapVersion, std::vector<SLIDER> &sliders, zarray<TIMINGPOINT> &timingpoints, float sliderMultiplier,
         float sliderTickRate, const std::atomic<bool> &dead);
-
-    Osu *m_osu;
 
     std::string m_sFolder;    // path to folder containing .osu file (e.g. "/path/to/beatmapfolder/")
     std::string m_sFilePath;  // path to .osu file (e.g. "/path/to/beatmapfolder/beatmap.osu")

@@ -1,14 +1,3 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		handles sounds, bass library wrapper atm
-//
-// $NoKeywords: $snd
-//===============================================================================//
-
-// TODO: async audio implementation still needs changes in Sound class playing-state handling
-// TODO: async audio thread needs proper delay timing
-// TODO: finish dynamic audio device updating, but can only do async due to potential lag, disabled by default
-
 #include "SoundEngine.h"
 
 #include "Bancho.h"
@@ -326,8 +315,8 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
         snd_output_device.setValue(m_currentOutputDevice.name);
         debugLog("SoundEngine: Output Device = \"%s\"\n", m_currentOutputDevice.name.toUtf8());
 
-        if(bancho.osu && bancho.osu->m_optionsMenu) {
-            bancho.osu->m_optionsMenu->updateLayout();
+        if(osu && osu->m_optionsMenu) {
+            osu->m_optionsMenu->updateLayout();
         }
 
         return true;
@@ -418,8 +407,8 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
         auto bufsize = asio_buffer_size.getInt();
         bufsize = ASIO_clamp(info, bufsize);
 
-        if(bancho.osu && bancho.osu->m_optionsMenu) {
-            auto slider = bancho.osu->m_optionsMenu->m_asioBufferSizeSlider;
+        if(osu && osu->m_optionsMenu) {
+            auto slider = osu->m_optionsMenu->m_asioBufferSizeSlider;
             slider->setBounds(info.bufmin, info.bufmax);
             slider->setKeyDelta(info.bufgran == -1 ? info.bufmin : info.bufgran);
         }
@@ -483,8 +472,8 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
     snd_output_device.setValue(m_currentOutputDevice.name);
     debugLog("SoundEngine: Output Device = \"%s\"\n", m_currentOutputDevice.name.toUtf8());
 
-    if(bancho.osu && bancho.osu->m_optionsMenu) {
-        bancho.osu->m_optionsMenu->updateLayout();
+    if(osu && osu->m_optionsMenu) {
+        osu->m_optionsMenu->updateLayout();
     }
 
     return true;
@@ -608,15 +597,13 @@ bool SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
     bool success = true;
 
     unsigned long prevMusicPositionMS = 0;
-    if(bancho.osu != nullptr) {
-        if(bancho.osu->isInPlayMode()) {
-            // Kick the player out of play mode, since restarting SoundEngine during gameplay is not supported.
-            // XXX: Make Beatmap work without a running SoundEngine
-            bancho.osu->getSelectedBeatmap()->fail();
-            bancho.osu->getSelectedBeatmap()->stop(true);
-        } else if(bancho.osu->getSelectedBeatmap()->getMusic() != NULL) {
-            prevMusicPositionMS = bancho.osu->getSelectedBeatmap()->getMusic()->getPositionMS();
-        }
+    if(osu->isInPlayMode()) {
+        // Kick the player out of play mode, since restarting SoundEngine during gameplay is not supported.
+        // XXX: Make Beatmap work without a running SoundEngine
+        osu->getSelectedBeatmap()->fail();
+        osu->getSelectedBeatmap()->stop(true);
+    } else if(osu->getSelectedBeatmap()->getMusic() != NULL) {
+        prevMusicPositionMS = osu->getSelectedBeatmap()->getMusic()->getPositionMS();
     }
 
     auto previous = m_currentOutputDevice;
@@ -625,17 +612,15 @@ bool SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
         initializeOutputDevice(previous);
     }
 
-    if(bancho.osu != nullptr) {
-        bancho.osu->m_optionsMenu->m_outputDeviceLabel->setText(getOutputDeviceName());
-        bancho.osu->getSkin()->reloadSounds();
-        bancho.osu->m_optionsMenu->onOutputDeviceResetUpdate();
+    osu->m_optionsMenu->m_outputDeviceLabel->setText(getOutputDeviceName());
+    osu->getSkin()->reloadSounds();
+    osu->m_optionsMenu->onOutputDeviceResetUpdate();
 
-        // start playing music again after audio device changed
-        if(!bancho.osu->isInPlayMode() && bancho.osu->getSelectedBeatmap()->getMusic() != NULL) {
-            bancho.osu->getSelectedBeatmap()->unloadMusic();
-            bancho.osu->getSelectedBeatmap()->select();  // (triggers preview music play)
-            bancho.osu->getSelectedBeatmap()->getMusic()->setPositionMS(prevMusicPositionMS);
-        }
+    // start playing music again after audio device changed
+    if(!osu->isInPlayMode() && osu->getSelectedBeatmap()->getMusic() != NULL) {
+        osu->getSelectedBeatmap()->unloadMusic();
+        osu->getSelectedBeatmap()->select();  // (triggers preview music play)
+        osu->getSelectedBeatmap()->getMusic()->setPositionMS(prevMusicPositionMS);
     }
 
     return success;

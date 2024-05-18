@@ -1,10 +1,3 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		difficulty modifier selection screen
-//
-// $NoKeywords: $osums
-//===============================================================================//
-
 #include "ModSelector.h"
 
 #include "AnimationHandler.h"
@@ -46,20 +39,17 @@
 
 class ModSelectorOverrideSliderDescButton : public CBaseUIButton {
    public:
-    ModSelectorOverrideSliderDescButton(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name,
-                                        UString text)
-        : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {
-        m_osu = osu;
-    }
+    ModSelectorOverrideSliderDescButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
+        : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {}
 
     virtual void mouse_update(bool *propagate_clicks) {
         if(!m_bVisible) return;
         CBaseUIButton::mouse_update(propagate_clicks);
 
         if(isMouseInside() && m_sTooltipText.length() > 0) {
-            m_osu->getTooltipOverlay()->begin();
-            { m_osu->getTooltipOverlay()->addLine(m_sTooltipText); }
-            m_osu->getTooltipOverlay()->end();
+            osu->getTooltipOverlay()->begin();
+            { osu->getTooltipOverlay()->addLine(m_sTooltipText); }
+            osu->getTooltipOverlay()->end();
         }
     }
 
@@ -85,16 +75,13 @@ class ModSelectorOverrideSliderDescButton : public CBaseUIButton {
         }
     }
 
-    Osu *m_osu;
     UString m_sTooltipText;
 };
 
 class ModSelectorOverrideSliderLockButton : public CBaseUICheckbox {
    public:
-    ModSelectorOverrideSliderLockButton(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name,
-                                        UString text)
+    ModSelectorOverrideSliderLockButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
         : CBaseUICheckbox(xPos, yPos, xSize, ySize, name, text) {
-        m_osu = osu;
         m_fAnim = 1.0f;
     }
 
@@ -105,7 +92,7 @@ class ModSelectorOverrideSliderLockButton : public CBaseUICheckbox {
         UString iconString;
         iconString.insert(0, icon);
 
-        McFont *iconFont = m_osu->getFontIcons();
+        McFont *iconFont = osu->getFontIcons();
         const float scale = (m_vSize.y / iconFont->getHeight()) * m_fAnim;
         g->setColor(m_bChecked ? 0xffffffff : 0xff1166ff);
 
@@ -122,7 +109,7 @@ class ModSelectorOverrideSliderLockButton : public CBaseUICheckbox {
    private:
     virtual void onPressed() {
         CBaseUICheckbox::onPressed();
-        engine->getSound()->play(isChecked() ? m_osu->getSkin()->getCheckOn() : m_osu->getSkin()->getCheckOff());
+        engine->getSound()->play(isChecked() ? osu->getSkin()->getCheckOn() : osu->getSkin()->getCheckOff());
 
         if(isChecked()) {
             // anim->moveQuadOut(&m_fAnim, 1.5f, 0.060f, true);
@@ -133,18 +120,17 @@ class ModSelectorOverrideSliderLockButton : public CBaseUICheckbox {
         }
     }
 
-    Osu *m_osu;
     float m_fAnim;
 };
 
-ModSelector::ModSelector(Osu *osu) : OsuScreen(osu) {
+ModSelector::ModSelector() : OsuScreen() {
     m_fAnimation = 0.0f;
     m_fExperimentalAnimation = 0.0f;
     m_bScheduledHide = false;
     m_bExperimentalVisible = false;
-    setSize(m_osu->getScreenWidth(), m_osu->getScreenHeight());
-    m_overrideSliderContainer = new CBaseUIContainer(0, 0, m_osu->getScreenWidth(), m_osu->getScreenHeight(), "");
-    m_experimentalContainer = new CBaseUIScrollView(-1, 0, m_osu->getScreenWidth(), m_osu->getScreenHeight(), "");
+    setSize(osu->getScreenWidth(), osu->getScreenHeight());
+    m_overrideSliderContainer = new CBaseUIContainer(0, 0, osu->getScreenWidth(), osu->getScreenHeight(), "");
+    m_experimentalContainer = new CBaseUIScrollView(-1, 0, osu->getScreenWidth(), osu->getScreenHeight(), "");
     m_experimentalContainer->setHorizontalScrolling(false);
     m_experimentalContainer->setVerticalScrolling(true);
     m_experimentalContainer->setDrawFrame(false);
@@ -169,7 +155,7 @@ ModSelector::ModSelector(Osu *osu) : OsuScreen(osu) {
 
     for(int x = 0; x < m_iGridWidth; x++) {
         for(int y = 0; y < m_iGridHeight; y++) {
-            UIModSelectorModButton *imageButton = new UIModSelectorModButton(m_osu, this, 50, 50, 100, 100, "");
+            UIModSelectorModButton *imageButton = new UIModSelectorModButton(this, 50, 50, 100, 100, "");
             imageButton->setDrawBackground(false);
             imageButton->setVisible(false);
 
@@ -304,87 +290,87 @@ ModSelector::ModSelector(Osu *osu) : OsuScreen(osu) {
 
 void ModSelector::updateButtons(bool initial) {
     m_modButtonEasy = setModButtonOnGrid(
-        0, 0, 0, initial && m_osu->getModEZ(), "ez",
+        0, 0, 0, initial && osu->getModEZ(), "ez",
         "Reduces overall difficulty - larger circles, more forgiving HP drain, less accuracy required.",
-        [this]() -> SkinImage * { return m_osu->getSkin()->getSelectionModEasy(); });
+        [this]() -> SkinImage * { return osu->getSkin()->getSelectionModEasy(); });
     m_modButtonNofail =
-        setModButtonOnGrid(1, 0, 0, initial && m_osu->getModNF(), "nf",
+        setModButtonOnGrid(1, 0, 0, initial && osu->getModNF(), "nf",
                            "You can't fail. No matter what.\nNOTE: To disable drain completely:\nOptions > Gameplay > "
                            "Mechanics > \"Select HP Drain\" > \"None\".",
-                           [this]() -> SkinImage * { return m_osu->getSkin()->getSelectionModNoFail(); });
+                           [this]() -> SkinImage * { return osu->getSkin()->getSelectionModNoFail(); });
     m_modButtonNofail->setAvailable(m_osu_drain_type_ref->getInt() > 1);
-    setModButtonOnGrid(4, 0, 0, initial && m_osu->getModNightmare(), "nightmare",
+    setModButtonOnGrid(4, 0, 0, initial && osu->getModNightmare(), "nightmare",
                        "Unnecessary clicks count as misses.\nMassively reduced slider follow circle radius.",
-                       [this]() -> SkinImage * { return m_osu->getSkin()->getSelectionModNightmare(); });
+                       [this]() -> SkinImage * { return osu->getSkin()->getSelectionModNightmare(); });
 
     m_modButtonHardrock =
-        setModButtonOnGrid(0, 1, 0, initial && m_osu->getModHR(), "hr", "Everything just got a bit harder...",
-                           [this]() -> SkinImage * { return m_osu->getSkin()->getSelectionModHardRock(); });
+        setModButtonOnGrid(0, 1, 0, initial && osu->getModHR(), "hr", "Everything just got a bit harder...",
+                           [this]() -> SkinImage * { return osu->getSkin()->getSelectionModHardRock(); });
     m_modButtonSuddendeath =
-        setModButtonOnGrid(1, 1, 0, initial && m_osu->getModSD(), "sd", "Miss a note and fail.",
-                           [this]() -> SkinImage * { return m_osu->getSkin()->getSelectionModSuddenDeath(); });
-    setModButtonOnGrid(1, 1, 1, initial && m_osu->getModSS(), "ss", "SS or quit.",
-                       [this]() -> SkinImage * { return m_osu->getSkin()->getSelectionModPerfect(); });
+        setModButtonOnGrid(1, 1, 0, initial && osu->getModSD(), "sd", "Miss a note and fail.",
+                           [this]() -> SkinImage * { return osu->getSkin()->getSelectionModSuddenDeath(); });
+    setModButtonOnGrid(1, 1, 1, initial && osu->getModSS(), "ss", "SS or quit.",
+                       [this]() -> SkinImage * { return osu->getSkin()->getSelectionModPerfect(); });
 
     if(convar->getConVarByName("nightcore_enjoyer")->getBool()) {
         m_modButtonHalftime =
-            setModButtonOnGrid(2, 0, 0, initial && m_osu->getModDC(), "dc", "A E S T H E T I C",
-                               [this]() -> SkinImage * { return m_osu->getSkin()->getSelectionModDayCore(); });
-        setModButtonOnGrid(2, 0, 1, initial && m_osu->getModHT(), "ht", "Less zoom.",
-                           [this]() -> SkinImage * { return m_osu->getSkin()->getSelectionModHalfTime(); });
+            setModButtonOnGrid(2, 0, 0, initial && osu->getModDC(), "dc", "A E S T H E T I C",
+                               [this]() -> SkinImage * { return osu->getSkin()->getSelectionModDayCore(); });
+        setModButtonOnGrid(2, 0, 1, initial && osu->getModHT(), "ht", "Less zoom.",
+                           [this]() -> SkinImage * { return osu->getSkin()->getSelectionModHalfTime(); });
 
         m_modButtonDoubletime =
-            setModButtonOnGrid(2, 1, 0, initial && m_osu->getModNC(), "nc", "uguuuuuuuu",
-                               [this]() -> SkinImage * { return m_osu->getSkin()->getSelectionModNightCore(); });
-        setModButtonOnGrid(2, 1, 1, initial && m_osu->getModDT(), "dt", "Zoooooooooom.",
-                           [this]() -> SkinImage * { return m_osu->getSkin()->getSelectionModDoubleTime(); });
+            setModButtonOnGrid(2, 1, 0, initial && osu->getModNC(), "nc", "uguuuuuuuu",
+                               [this]() -> SkinImage * { return osu->getSkin()->getSelectionModNightCore(); });
+        setModButtonOnGrid(2, 1, 1, initial && osu->getModDT(), "dt", "Zoooooooooom.",
+                           [this]() -> SkinImage * { return osu->getSkin()->getSelectionModDoubleTime(); });
     } else {
         m_modButtonHalftime =
-            setModButtonOnGrid(2, 0, 0, initial && m_osu->getModHT(), "ht", "Less zoom.",
-                               [this]() -> SkinImage * { return m_osu->getSkin()->getSelectionModHalfTime(); });
-        setModButtonOnGrid(2, 0, 1, initial && m_osu->getModDC(), "dc", "A E S T H E T I C",
-                           [this]() -> SkinImage * { return m_osu->getSkin()->getSelectionModDayCore(); });
+            setModButtonOnGrid(2, 0, 0, initial && osu->getModHT(), "ht", "Less zoom.",
+                               [this]() -> SkinImage * { return osu->getSkin()->getSelectionModHalfTime(); });
+        setModButtonOnGrid(2, 0, 1, initial && osu->getModDC(), "dc", "A E S T H E T I C",
+                           [this]() -> SkinImage * { return osu->getSkin()->getSelectionModDayCore(); });
 
         m_modButtonDoubletime =
-            setModButtonOnGrid(2, 1, 0, initial && m_osu->getModDT(), "dt", "Zoooooooooom.",
-                               [this]() -> SkinImage * { return m_osu->getSkin()->getSelectionModDoubleTime(); });
-        setModButtonOnGrid(2, 1, 1, initial && m_osu->getModNC(), "nc", "uguuuuuuuu",
-                           [this]() -> SkinImage * { return m_osu->getSkin()->getSelectionModNightCore(); });
+            setModButtonOnGrid(2, 1, 0, initial && osu->getModDT(), "dt", "Zoooooooooom.",
+                               [this]() -> SkinImage * { return osu->getSkin()->getSelectionModDoubleTime(); });
+        setModButtonOnGrid(2, 1, 1, initial && osu->getModNC(), "nc", "uguuuuuuuu",
+                           [this]() -> SkinImage * { return osu->getSkin()->getSelectionModNightCore(); });
     }
 
     m_modButtonHidden =
-        setModButtonOnGrid(3, 1, 0, initial && m_osu->getModHD(), "hd",
+        setModButtonOnGrid(3, 1, 0, initial && osu->getModHD(), "hd",
                            "Play with no approach circles and fading notes for a slight score advantage.",
-                           [this]() -> SkinImage * { return m_osu->getSkin()->getSelectionModHidden(); });
+                           [this]() -> SkinImage * { return osu->getSkin()->getSelectionModHidden(); });
     m_modButtonFlashlight = setModButtonOnGrid(4, 1, 0, false, "fl", "Restricted view area.", [this]() -> SkinImage * {
-        return m_osu->getSkin()->getSelectionModFlashlight();
+        return osu->getSkin()->getSelectionModFlashlight();
     });
-    m_modButtonTD = setModButtonOnGrid(5, 1, 0, initial && (m_osu->getModTD() || m_osu_mod_touchdevice_ref->getBool()),
+    m_modButtonTD = setModButtonOnGrid(5, 1, 0, initial && (osu->getModTD() || m_osu_mod_touchdevice_ref->getBool()),
                                        "nerftd", "Simulate pp nerf for touch devices.\nOnly affects pp calculation.",
-                                       [this]() -> SkinImage * { return m_osu->getSkin()->getSelectionModTD(); });
+                                       [this]() -> SkinImage * { return osu->getSkin()->getSelectionModTD(); });
     getModButtonOnGrid(5, 1)->setAvailable(!m_osu_mod_touchdevice_ref->getBool());
 
     m_modButtonRelax = setModButtonOnGrid(
-        0, 2, 0, initial && m_osu->getModRelax(), "relax",
+        0, 2, 0, initial && osu->getModRelax(), "relax",
         "You don't need to click.\nGive your clicking/tapping fingers a break from the heat of things.\n** UNRANKED **",
-        [this]() -> SkinImage * { return m_osu->getSkin()->getSelectionModRelax(); });
+        [this]() -> SkinImage * { return osu->getSkin()->getSelectionModRelax(); });
     m_modButtonAutopilot =
-        setModButtonOnGrid(1, 2, 0, initial && m_osu->getModAutopilot(), "autopilot",
+        setModButtonOnGrid(1, 2, 0, initial && osu->getModAutopilot(), "autopilot",
                            "Automatic cursor movement - just follow the rhythm.\n** UNRANKED **",
-                           [this]() -> SkinImage * { return m_osu->getSkin()->getSelectionModAutopilot(); });
+                           [this]() -> SkinImage * { return osu->getSkin()->getSelectionModAutopilot(); });
     m_modButtonSpunout = setModButtonOnGrid(
-        2, 2, 0, initial && m_osu->getModSpunout(), "spunout", "Spinners will be automatically completed.",
-        [this]() -> SkinImage * { return m_osu->getSkin()->getSelectionModSpunOut(); });
-    m_modButtonAuto = setModButtonOnGrid(
-        3, 2, 0, initial && m_osu->getModAuto(), "auto", "Watch a perfect automated play through the song.",
-        [this]() -> SkinImage * { return m_osu->getSkin()->getSelectionModAutoplay(); });
-    setModButtonOnGrid(4, 2, 0, initial && m_osu->getModTarget(), "practicetarget",
+        2, 2, 0, initial && osu->getModSpunout(), "spunout", "Spinners will be automatically completed.",
+        [this]() -> SkinImage * { return osu->getSkin()->getSelectionModSpunOut(); });
+    m_modButtonAuto = setModButtonOnGrid(3, 2, 0, initial && osu->getModAuto(), "auto",
+                                         "Watch a perfect automated play through the song.",
+                                         [this]() -> SkinImage * { return osu->getSkin()->getSelectionModAutoplay(); });
+    setModButtonOnGrid(4, 2, 0, initial && osu->getModTarget(), "practicetarget",
                        "Accuracy is based on the distance to the center of all hitobjects.\n300s still require at "
                        "least being in the hit window of a 100 in addition to the rule above.",
-                       [this]() -> SkinImage * { return m_osu->getSkin()->getSelectionModTarget(); });
+                       [this]() -> SkinImage * { return osu->getSkin()->getSelectionModTarget(); });
     m_modButtonScoreV2 = setModButtonOnGrid(
-        5, 2, 0, initial && m_osu->getModScorev2(), "v2", "Try the future scoring system.\n** UNRANKED **",
-        [this]() -> SkinImage * { return m_osu->getSkin()->getSelectionModScorev2(); });
+        5, 2, 0, initial && osu->getModScorev2(), "v2", "Try the future scoring system.\n** UNRANKED **",
+        [this]() -> SkinImage * { return osu->getSkin()->getSelectionModScorev2(); });
 
     // Enable all mods that we disable conditionally below
     getModButtonOnGrid(2, 0)->setAvailable(true);
@@ -408,7 +394,7 @@ void ModSelector::updateButtons(bool initial) {
 }
 
 void ModSelector::updateScoreMultiplierLabelText() {
-    const float scoreMultiplier = m_osu->getScoreMultiplier();
+    const float scoreMultiplier = osu->getScoreMultiplier();
 
     const int alpha = 200;
     if(scoreMultiplier > 1.0f)
@@ -453,8 +439,8 @@ void ModSelector::draw(Graphics *g) {
 
     if(bancho.is_in_a_multi_room()) {
         // get mod button element bounds
-        Vector2 modGridButtonsStart = Vector2(m_osu->getScreenWidth(), m_osu->getScreenHeight());
-        Vector2 modGridButtonsSize = Vector2(0, m_osu->getScreenHeight());
+        Vector2 modGridButtonsStart = Vector2(osu->getScreenWidth(), osu->getScreenHeight());
+        Vector2 modGridButtonsSize = Vector2(0, osu->getScreenHeight());
         for(int i = 0; i < m_modButtons.size(); i++) {
             CBaseUIButton *button = m_modButtons[i];
 
@@ -481,7 +467,7 @@ void ModSelector::draw(Graphics *g) {
         // if we are in compact mode, draw some backgrounds under the override sliders & mod grid buttons
 
         // get override slider element bounds
-        Vector2 overrideSlidersStart = Vector2(m_osu->getScreenWidth(), 0);
+        Vector2 overrideSlidersStart = Vector2(osu->getScreenWidth(), 0);
         Vector2 overrideSlidersSize;
         for(int i = 0; i < m_overrideSliders.size(); i++) {
             CBaseUIButton *desc = m_overrideSliders[i].desc;
@@ -497,8 +483,8 @@ void ModSelector::draw(Graphics *g) {
         overrideSlidersSize.x -= overrideSlidersStart.x;
 
         // get mod button element bounds
-        Vector2 modGridButtonsStart = Vector2(m_osu->getScreenWidth(), m_osu->getScreenHeight());
-        Vector2 modGridButtonsSize = Vector2(0, m_osu->getScreenHeight());
+        Vector2 modGridButtonsStart = Vector2(osu->getScreenWidth(), osu->getScreenHeight());
+        Vector2 modGridButtonsSize = Vector2(0, osu->getScreenHeight());
         for(int i = 0; i < m_modButtons.size(); i++) {
             CBaseUIButton *button = m_modButtons[i];
 
@@ -536,10 +522,10 @@ void ModSelector::draw(Graphics *g) {
     {
         // draw hint text on left edge of screen
         {
-            const float dpiScale = Osu::getUIScale(m_osu);
+            const float dpiScale = Osu::getUIScale();
 
             UString experimentalText = "Experimental Mods";
-            McFont *experimentalFont = m_osu->getSubTitleFont();
+            McFont *experimentalFont = osu->getSubTitleFont();
 
             const float experimentalTextWidth = experimentalFont->getStringWidth(experimentalText);
             const float experimentalTextHeight = experimentalFont->getHeight();
@@ -554,7 +540,7 @@ void ModSelector::draw(Graphics *g) {
                 g->translate(
                     (int)(experimentalTextHeight / 3.0f +
                           std::max(0.0f, experimentalModsAnimationTranslation + m_experimentalContainer->getSize().x)),
-                    (int)(m_osu->getScreenHeight() / 2 - experimentalTextWidth / 2));
+                    (int)(osu->getScreenHeight() / 2 - experimentalTextWidth / 2));
                 g->setColor(0xff777777);
                 g->setAlpha(1.0f - m_fExperimentalAnimation * m_fExperimentalAnimation);
                 g->drawString(experimentalFont, experimentalText);
@@ -566,7 +552,7 @@ void ModSelector::draw(Graphics *g) {
                 g->rotate(90);
                 g->translate((int)(rectHeight + std::max(0.0f, experimentalModsAnimationTranslation +
                                                                    m_experimentalContainer->getSize().x)),
-                             (int)(m_osu->getScreenHeight() / 2 - rectWidth / 2));
+                             (int)(osu->getScreenHeight() / 2 - rectWidth / 2));
                 g->drawRect(0, 0, rectWidth, rectHeight);
             }
             g->popTransform();
@@ -621,9 +607,9 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
         if(m_bShowOverrideSliderALTHint) {
             for(int i = 0; i < m_overrideSliders.size(); i++) {
                 if(m_overrideSliders[i].slider->isBusy()) {
-                    m_osu->getTooltipOverlay()->begin();
-                    { m_osu->getTooltipOverlay()->addLine("Hold [ALT] to slide in 0.01 increments."); }
-                    m_osu->getTooltipOverlay()->end();
+                    osu->getTooltipOverlay()->begin();
+                    { osu->getTooltipOverlay()->addLine("Hold [ALT] to slide in 0.01 increments."); }
+                    osu->getTooltipOverlay()->end();
 
                     if(engine->getKeyboard()->isAltDown()) m_bShowOverrideSliderALTHint = false;
                 }
@@ -633,7 +619,7 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
         // some experimental mod tooltip overrides
         if(m_experimentalModRandomCheckbox->isChecked())
             m_experimentalModRandomCheckbox->setTooltipText(
-                UString::format("Seed = %i", m_osu->getSelectedBeatmap()->getRandomSeed()));
+                UString::format("Seed = %i", osu->getSelectedBeatmap()->getRandomSeed()));
 
         // handle experimental mods visibility
         bool experimentalModEnabled = false;
@@ -645,9 +631,9 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
             }
         }
 
-        McRect experimentalTrigger = McRect(
-            0, 0, m_bExperimentalVisible ? m_experimentalContainer->getSize().x : m_osu->getScreenWidth() * 0.05f,
-            m_osu->getScreenHeight());
+        McRect experimentalTrigger =
+            McRect(0, 0, m_bExperimentalVisible ? m_experimentalContainer->getSize().x : osu->getScreenWidth() * 0.05f,
+                   osu->getScreenHeight());
         if(experimentalTrigger.contains(engine->getMouse()->getPos())) {
             if(!m_bExperimentalVisible) {
                 m_bExperimentalVisible = true;
@@ -672,8 +658,8 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
             m_bWaitForHPChangeFinished = false;
 
             {
-                if(m_osu->isInPlayMode()) m_osu->getSelectedBeatmap()->onModUpdate();
-                m_osu->getSongBrowser()->recalculateStarsForSelectedBeatmap(true);
+                if(osu->isInPlayMode()) osu->getSelectedBeatmap()->onModUpdate();
+                osu->getSongBrowser()->recalculateStarsForSelectedBeatmap(true);
             }
         }
 
@@ -686,8 +672,8 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
             m_bWaitForHPChangeFinished = false;
 
             {
-                if(m_osu->isInPlayMode()) m_osu->getSelectedBeatmap()->onModUpdate();
-                m_osu->getSongBrowser()->recalculateStarsForSelectedBeatmap(true);
+                if(osu->isInPlayMode()) osu->getSelectedBeatmap()->onModUpdate();
+                osu->getSongBrowser()->recalculateStarsForSelectedBeatmap(true);
             }
         }
 
@@ -698,7 +684,7 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
             m_bWaitForCSChangeFinished = false;
             m_bWaitForSpeedChangeFinished = false;
             m_bWaitForHPChangeFinished = false;
-            if(m_osu->isInPlayMode()) m_osu->getSelectedBeatmap()->onModUpdate();
+            if(osu->isInPlayMode()) osu->getSelectedBeatmap()->onModUpdate();
         }
     }
 }
@@ -787,7 +773,7 @@ CBaseUIContainer *ModSelector::setVisible(bool visible) {
     return this;
 }
 
-bool ModSelector::isInCompactMode() { return m_osu->isInPlayMode(); }
+bool ModSelector::isInCompactMode() { return osu->isInPlayMode(); }
 
 bool ModSelector::isCSOverrideSliderActive() { return m_CSSlider->isActive(); }
 
@@ -819,14 +805,14 @@ bool ModSelector::isMouseInside() {
 void ModSelector::updateLayout() {
     if(m_modButtons.size() < 1 || m_overrideSliders.size() < 1) return;
 
-    const float dpiScale = Osu::getUIScale(m_osu);
+    const float dpiScale = Osu::getUIScale();
     const float uiScale = Osu::ui_scale->getFloat();
 
     if(!isInCompactMode())  // normal layout
     {
         // mod grid buttons
-        Vector2 center = m_osu->getScreenSize() / 2.0f;
-        Vector2 size = m_osu->getSkin()->getSelectionModEasy()->getSizeBase() * uiScale;
+        Vector2 center = osu->getScreenSize() / 2.0f;
+        Vector2 size = osu->getSkin()->getSelectionModEasy()->getSizeBase() * uiScale;
         Vector2 offset = Vector2(size.x * 1.0f, size.y * 0.25f);
         Vector2 start = Vector2(center.x - (size.x * m_iGridWidth) / 2.0f - (offset.x * (m_iGridWidth - 1)) / 2.0f,
                                 center.y - (size.y * m_iGridHeight) / 2.0f - (offset.y * (m_iGridHeight - 1)) / 2.0f);
@@ -845,12 +831,12 @@ void ModSelector::updateLayout() {
 
         // override sliders (down here because they depend on the mod grid button alignment)
         const int margin = 10 * dpiScale;
-        const int overrideSliderWidth = m_osu->getUIScale(m_osu, 250.0f);
+        const int overrideSliderWidth = osu->getUIScale(250.0f);
         const int overrideSliderHeight = 25 * dpiScale;
         const int overrideSliderOffsetY =
             ((start.y - m_overrideSliders.size() * overrideSliderHeight) / (m_overrideSliders.size() - 1)) * 0.35f;
         const Vector2 overrideSliderStart =
-            Vector2(m_osu->getScreenWidth() / 2 - overrideSliderWidth / 2,
+            Vector2(osu->getScreenWidth() / 2 - overrideSliderWidth / 2,
                     start.y / 2 - (m_overrideSliders.size() * overrideSliderHeight +
                                    (m_overrideSliders.size() - 1) * overrideSliderOffsetY) /
                                       1.75f);
@@ -884,11 +870,11 @@ void ModSelector::updateLayout() {
         // action buttons
         float actionMinY =
             start.y + size.y * m_iGridHeight + offset.y * (m_iGridHeight - 1);  // exact bottom of the mod buttons
-        Vector2 actionSize = Vector2(m_osu->getUIScale(m_osu, 448.0f) * uiScale, size.y * 0.75f);
+        Vector2 actionSize = Vector2(osu->getUIScale(448.0f) * uiScale, size.y * 0.75f);
         float actionOffsetY = actionSize.y * 0.5f;
         Vector2 actionStart =
-            Vector2(m_osu->getScreenWidth() / 2.0f - actionSize.x / 2.0f,
-                    actionMinY + (m_osu->getScreenHeight() - actionMinY) / 2.0f -
+            Vector2(osu->getScreenWidth() / 2.0f - actionSize.x / 2.0f,
+                    actionMinY + (osu->getScreenHeight() - actionMinY) / 2.0f -
                         (actionSize.y * m_actionButtons.size() + actionOffsetY * (m_actionButtons.size() - 1)) / 2.0f);
         for(int i = 0; i < m_actionButtons.size(); i++) {
             m_actionButtons[i]->setVisible(true);
@@ -903,23 +889,23 @@ void ModSelector::updateLayout() {
 
         m_nonVanillaWarning->setVisible(!convar->isVanilla() && bancho.submit_scores());
         m_nonVanillaWarning->setSizeToContent();
-        m_nonVanillaWarning->setSize(Vector2(m_osu->getScreenWidth(), 20 * uiScale));
+        m_nonVanillaWarning->setSize(Vector2(osu->getScreenWidth(), 20 * uiScale));
         m_nonVanillaWarning->setPos(
             0, modGridMaxY + std::abs(actionStart.y - modGridMaxY) / 2 - m_nonVanillaWarning->getSize().y);
 
         m_scoreMultiplierLabel->setVisible(true);
         m_scoreMultiplierLabel->setSizeToContent();
-        m_scoreMultiplierLabel->setSize(Vector2(m_osu->getScreenWidth(), 30 * uiScale));
+        m_scoreMultiplierLabel->setSize(Vector2(osu->getScreenWidth(), 30 * uiScale));
         m_scoreMultiplierLabel->setPos(0, m_nonVanillaWarning->getPos().y + 20 * uiScale);
     } else  // compact in-beatmap mode
     {
         // mod grid buttons
-        Vector2 center = m_osu->getScreenSize() / 2.0f;
-        Vector2 blockSize = m_osu->getSkin()->getSelectionModEasy()->getSizeBase() * uiScale;
+        Vector2 center = osu->getScreenSize() / 2.0f;
+        Vector2 blockSize = osu->getSkin()->getSelectionModEasy()->getSizeBase() * uiScale;
         Vector2 offset = Vector2(blockSize.x * 0.15f, blockSize.y * 0.05f);
         Vector2 size = Vector2((blockSize.x * m_iGridWidth) + (offset.x * (m_iGridWidth - 1)),
                                (blockSize.y * m_iGridHeight) + (offset.y * (m_iGridHeight - 1)));
-        center.y = m_osu->getScreenHeight() - size.y / 2 - offset.y * 3.0f;
+        center.y = osu->getScreenHeight() - size.y / 2 - offset.y * 3.0f;
         Vector2 start = Vector2(center.x - size.x / 2.0f, center.y - size.y / 2.0f);
 
         for(int x = 0; x < m_iGridWidth; x++) {
@@ -936,10 +922,10 @@ void ModSelector::updateLayout() {
 
         // override sliders (down here because they depend on the mod grid button alignment)
         const int margin = 10 * dpiScale;
-        int overrideSliderWidth = m_osu->getUIScale(m_osu, 250.0f);
+        int overrideSliderWidth = osu->getUIScale(250.0f);
         int overrideSliderHeight = 25 * dpiScale;
         int overrideSliderOffsetY = 5 * dpiScale;
-        Vector2 overrideSliderStart = Vector2(m_osu->getScreenWidth() / 2 - overrideSliderWidth / 2, 5 * dpiScale);
+        Vector2 overrideSliderStart = Vector2(osu->getScreenWidth() / 2 - overrideSliderWidth / 2, 5 * dpiScale);
         for(int i = 0; i < m_overrideSliders.size(); i++) {
             m_overrideSliders[i].desc->setSizeToContent(5 * dpiScale, 0);
             m_overrideSliders[i].desc->setSizeY(overrideSliderHeight);
@@ -979,7 +965,7 @@ void ModSelector::updateLayout() {
 }
 
 void ModSelector::updateExperimentalLayout() {
-    const float dpiScale = Osu::getUIScale(m_osu);
+    const float dpiScale = Osu::getUIScale();
 
     // experimental mods
     int yCounter = 5 * dpiScale;
@@ -1013,8 +999,8 @@ void ModSelector::updateExperimentalLayout() {
     }
 
     // laziness
-    if(m_osu->getScreenHeight() > yCounter)
-        yCounter = 5 * dpiScale + m_osu->getScreenHeight() / 2.0f - yCounter / 2.0f;
+    if(osu->getScreenHeight() > yCounter)
+        yCounter = 5 * dpiScale + osu->getScreenHeight() / 2.0f - yCounter / 2.0f;
     else
         yCounter = 5 * dpiScale;
 
@@ -1049,7 +1035,7 @@ void ModSelector::updateModConVar() {
 
     updateScoreMultiplierLabelText();
     updateOverrideSliderLabels();
-    m_osu->updateMods();
+    osu->updateMods();
 }
 
 UIModSelectorModButton *ModSelector::setModButtonOnGrid(int x, int y, int state, bool initialState, UString modName,
@@ -1080,12 +1066,12 @@ ModSelector::OVERRIDE_SLIDER ModSelector::addOverrideSlider(UString text, UStrin
 
     OVERRIDE_SLIDER os;
     if(lockCvar != NULL) {
-        os.lock = new ModSelectorOverrideSliderLockButton(m_osu, 0, 0, height, height, "", "");
+        os.lock = new ModSelectorOverrideSliderLockButton(0, 0, height, height, "", "");
         os.lock->setChangeCallback(fastdelegate::MakeDelegate(this, &ModSelector::onOverrideSliderLockChange));
     }
-    os.desc = new ModSelectorOverrideSliderDescButton(m_osu, 0, 0, 100, height, "", text);
+    os.desc = new ModSelectorOverrideSliderDescButton(0, 0, 100, height, "", text);
     os.desc->setTooltipText(tooltipText);
-    os.slider = new UISlider(m_osu, 0, 0, 100, height, "");
+    os.slider = new UISlider(0, 0, 100, height, "");
     os.label = new CBaseUILabel(0, 0, 100, height, labelText, labelText);
     os.cvar = cvar;
     os.lockCvar = lockCvar;
@@ -1122,7 +1108,7 @@ ModSelector::OVERRIDE_SLIDER ModSelector::addOverrideSlider(UString text, UStrin
 }
 
 UIButton *ModSelector::addActionButton(UString text) {
-    UIButton *actionButton = new UIButton(m_osu, 50, 50, 100, 100, text, text);
+    UIButton *actionButton = new UIButton(50, 50, 100, 100, text, text);
     m_actionButtons.push_back(actionButton);
     addBaseUIElement(actionButton);
 
@@ -1131,7 +1117,7 @@ UIButton *ModSelector::addActionButton(UString text) {
 
 CBaseUILabel *ModSelector::addExperimentalLabel(UString text) {
     CBaseUILabel *label = new CBaseUILabel(0, 0, 0, 25, text, text);
-    label->setFont(m_osu->getSubTitleFont());
+    label->setFont(osu->getSubTitleFont());
     label->setWidthToContent(0);
     label->setDrawBackground(false);
     label->setDrawFrame(false);
@@ -1146,7 +1132,7 @@ CBaseUILabel *ModSelector::addExperimentalLabel(UString text) {
 }
 
 UICheckbox *ModSelector::addExperimentalCheckbox(UString text, UString tooltipText, ConVar *cvar) {
-    UICheckbox *checkbox = new UICheckbox(m_osu, 0, 0, 0, 35, text, text);
+    UICheckbox *checkbox = new UICheckbox(0, 0, 0, 35, text, text);
     checkbox->setTooltipText(tooltipText);
     checkbox->setWidthToContent(0);
     if(cvar != NULL) {
@@ -1167,7 +1153,7 @@ void ModSelector::resetModsUserInitiated() {
     bancho.prefer_daycore = false;
     resetMods();
 
-    engine->getSound()->play(m_osu->getSkin()->getCheckOff());
+    engine->getSound()->play(osu->getSkin()->getCheckOff());
     m_resetModsButton->animateClickColor();
 
     if(bancho.is_online()) {
@@ -1191,7 +1177,7 @@ void ModSelector::resetModsUserInitiated() {
             write<u32>(&packet, bancho.room.slots[i].mods);
             send_packet(packet);
 
-            m_osu->m_room->updateLayout(m_osu->getScreenSize());
+            osu->m_room->updateLayout(osu->getScreenSize());
             break;
         }
     }
@@ -1285,7 +1271,7 @@ void ModSelector::enableModsFromFlags(u32 flags) {
 
 void ModSelector::close() {
     m_closeButton->animateClickColor();
-    m_osu->toggleModSelection();
+    osu->toggleModSelection();
 }
 
 void ModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
@@ -1305,7 +1291,7 @@ void ModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
                 m_overrideSliders[i].label->setWidthToContent(0);
 
                 // HACKHACK: dirty
-                if(m_osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL) {
+                if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL) {
                     if(m_overrideSliders[i].label->getName().find("BPM") != -1) {
                         // reset AR and OD override sliders if the bpm slider was reset
                         if(!m_ARLock->isChecked()) m_ARSlider->setValue(0.0f, false);
@@ -1326,7 +1312,7 @@ void ModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
                 }
 
                 // HACKHACK: dirty
-                if(m_osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL) {
+                if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL) {
                     if(m_overrideSliders[i].label->getName().find("BPM") != -1) {
                         // HACKHACK: force BPM slider to have a min value of 0.05 instead of 0 (because that's the
                         // minimum for BASS) note that the BPM slider is just a 'fake' slider, it directly controls the
@@ -1341,9 +1327,9 @@ void ModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
 
                         // force change all other depending sliders
                         const float newAR =
-                            GameRules::getConstantApproachRateForSpeedMultiplier(m_osu->getSelectedBeatmap());
+                            GameRules::getConstantApproachRateForSpeedMultiplier(osu->getSelectedBeatmap());
                         const float newOD =
-                            GameRules::getConstantOverallDifficultyForSpeedMultiplier(m_osu->getSelectedBeatmap());
+                            GameRules::getConstantOverallDifficultyForSpeedMultiplier(osu->getSelectedBeatmap());
 
                         m_ARSlider->setValue(newAR + 1.0f,
                                              false);  // '+1' to compensate for turn-off area of the override sliders
@@ -1380,11 +1366,11 @@ void ModSelector::onOverrideSliderLockChange(CBaseUICheckbox *checkbox) {
             if(locked && !wasLocked) {
                 if(checkbox == m_ARLock) {
                     if(m_ARSlider->getFloat() < 1.0f)
-                        m_ARSlider->setValue(m_osu->getSelectedBeatmap()->getRawAR() + 1.0f,
+                        m_ARSlider->setValue(osu->getSelectedBeatmap()->getRawAR() + 1.0f,
                                              false);  // '+1' to compensate for turn-off area of the override sliders
                 } else if(checkbox == m_ODLock) {
                     if(m_ODSlider->getFloat() < 1.0f)
-                        m_ODSlider->setValue(m_osu->getSelectedBeatmap()->getRawOD() + 1.0f,
+                        m_ODSlider->setValue(osu->getSelectedBeatmap()->getRawOD() + 1.0f,
                                              false);  // '+1' to compensate for turn-off area of the override sliders
                 }
             }
@@ -1437,55 +1423,54 @@ UString ModSelector::getOverrideSliderLabelText(ModSelector::OVERRIDE_SLIDER s, 
     float convarValue = s.cvar->getFloat();
 
     UString newLabelText = s.label->getName();
-    if(m_osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL) {
-        // used for compensating speed changing experimental mods (which cause m_osu->getSpeedMultiplier() !=
+    if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL) {
+        // used for compensating speed changing experimental mods (which cause osu->getSpeedMultiplier() !=
         // beatmap->getSpeedMultiplier()) to keep the AR/OD display correct
         const float speedMultiplierLive =
-            m_osu->isInPlayMode() ? m_osu->getSelectedBeatmap()->getSpeedMultiplier() : m_osu->getSpeedMultiplier();
+            osu->isInPlayMode() ? osu->getSelectedBeatmap()->getSpeedMultiplier() : osu->getSpeedMultiplier();
 
         // for relevant values (AR/OD), any non-1.0x speed multiplier should show the fractional parts caused by such a
         // speed multiplier (same for non-1.0x difficulty multiplier)
         const bool forceDisplayTwoDecimalDigits =
-            (speedMultiplierLive != 1.0f || m_osu->getDifficultyMultiplier() != 1.0f ||
-             m_osu->getCSDifficultyMultiplier() != 1.0f);
+            (speedMultiplierLive != 1.0f || osu->getDifficultyMultiplier() != 1.0f ||
+             osu->getCSDifficultyMultiplier() != 1.0f);
 
         // HACKHACK: dirty
         bool wasSpeedSlider = false;
         float beatmapValue = 1.0f;
         if(s.label->getName().find("CS") != -1) {
             beatmapValue = clamp<float>(
-                m_osu->getSelectedBeatmap()->getSelectedDifficulty2()->getCS() * m_osu->getCSDifficultyMultiplier(),
-                0.0f, 10.0f);
-            convarValue = m_osu->getSelectedBeatmap()->getCS();
+                osu->getSelectedBeatmap()->getSelectedDifficulty2()->getCS() * osu->getCSDifficultyMultiplier(), 0.0f,
+                10.0f);
+            convarValue = osu->getSelectedBeatmap()->getCS();
         } else if(s.label->getName().find("AR") != -1) {
-            beatmapValue = active ? GameRules::getRawApproachRateForSpeedMultiplier(m_osu->getSelectedBeatmap())
-                                  : GameRules::getApproachRateForSpeedMultiplier(m_osu->getSelectedBeatmap());
+            beatmapValue = active ? GameRules::getRawApproachRateForSpeedMultiplier(osu->getSelectedBeatmap())
+                                  : GameRules::getApproachRateForSpeedMultiplier(osu->getSelectedBeatmap());
 
             // compensate and round
-            convarValue =
-                GameRules::getApproachRateForSpeedMultiplier(m_osu->getSelectedBeatmap(), speedMultiplierLive);
+            convarValue = GameRules::getApproachRateForSpeedMultiplier(osu->getSelectedBeatmap(), speedMultiplierLive);
             if(!engine->getKeyboard()->isAltDown() && !forceDisplayTwoDecimalDigits)
                 convarValue = std::round(convarValue * 10.0f) / 10.0f;
             else
                 convarValue = std::round(convarValue * 100.0f) / 100.0f;
         } else if(s.label->getName().find("OD") != -1) {
-            beatmapValue = active ? GameRules::getRawOverallDifficultyForSpeedMultiplier(m_osu->getSelectedBeatmap())
-                                  : GameRules::getOverallDifficultyForSpeedMultiplier(m_osu->getSelectedBeatmap());
+            beatmapValue = active ? GameRules::getRawOverallDifficultyForSpeedMultiplier(osu->getSelectedBeatmap())
+                                  : GameRules::getOverallDifficultyForSpeedMultiplier(osu->getSelectedBeatmap());
 
             // compensate and round
             convarValue =
-                GameRules::getOverallDifficultyForSpeedMultiplier(m_osu->getSelectedBeatmap(), speedMultiplierLive);
+                GameRules::getOverallDifficultyForSpeedMultiplier(osu->getSelectedBeatmap(), speedMultiplierLive);
             if(!engine->getKeyboard()->isAltDown() && !forceDisplayTwoDecimalDigits)
                 convarValue = std::round(convarValue * 10.0f) / 10.0f;
             else
                 convarValue = std::round(convarValue * 100.0f) / 100.0f;
         } else if(s.label->getName().find("HP") != -1) {
             beatmapValue = clamp<float>(
-                m_osu->getSelectedBeatmap()->getSelectedDifficulty2()->getHP() * m_osu->getDifficultyMultiplier(), 0.0f,
+                osu->getSelectedBeatmap()->getSelectedDifficulty2()->getHP() * osu->getDifficultyMultiplier(), 0.0f,
                 10.0f);
-            convarValue = m_osu->getSelectedBeatmap()->getHP();
+            convarValue = osu->getSelectedBeatmap()->getHP();
         } else if(s.desc->getText().find("Speed") != -1) {
-            beatmapValue = active ? m_osu->getRawSpeedMultiplier() : m_osu->getSpeedMultiplier();
+            beatmapValue = active ? osu->getRawSpeedMultiplier() : osu->getSpeedMultiplier();
 
             wasSpeedSlider = true;
             {
@@ -1498,13 +1483,13 @@ UString ModSelector::getOverrideSliderLabelText(ModSelector::OVERRIDE_SLIDER s, 
 
                 newLabelText.append("  (BPM: ");
 
-                int minBPM = m_osu->getSelectedBeatmap()->getSelectedDifficulty2()->getMinBPM();
-                int maxBPM = m_osu->getSelectedBeatmap()->getSelectedDifficulty2()->getMaxBPM();
-                int mostCommonBPM = m_osu->getSelectedBeatmap()->getSelectedDifficulty2()->getMostCommonBPM();
-                int newMinBPM = minBPM * m_osu->getSpeedMultiplier();
-                int newMaxBPM = maxBPM * m_osu->getSpeedMultiplier();
-                int newMostCommonBPM = mostCommonBPM * m_osu->getSpeedMultiplier();
-                if(!active || m_osu->getSpeedMultiplier() == 1.0f) {
+                int minBPM = osu->getSelectedBeatmap()->getSelectedDifficulty2()->getMinBPM();
+                int maxBPM = osu->getSelectedBeatmap()->getSelectedDifficulty2()->getMaxBPM();
+                int mostCommonBPM = osu->getSelectedBeatmap()->getSelectedDifficulty2()->getMostCommonBPM();
+                int newMinBPM = minBPM * osu->getSpeedMultiplier();
+                int newMaxBPM = maxBPM * osu->getSpeedMultiplier();
+                int newMostCommonBPM = mostCommonBPM * osu->getSpeedMultiplier();
+                if(!active || osu->getSpeedMultiplier() == 1.0f) {
                     if(minBPM == maxBPM)
                         newLabelText.append(UString::format("%i", newMaxBPM));
                     else
@@ -1555,8 +1540,8 @@ void ModSelector::onCheckboxChange(CBaseUICheckbox *checkbox) {
 
             // force mod update
             {
-                if(m_osu->isInPlayMode()) m_osu->getSelectedBeatmap()->onModUpdate();
-                m_osu->getSongBrowser()->recalculateStarsForSelectedBeatmap(true);
+                if(osu->isInPlayMode()) osu->getSelectedBeatmap()->onModUpdate();
+                osu->getSongBrowser()->recalculateStarsForSelectedBeatmap(true);
             }
 
             break;

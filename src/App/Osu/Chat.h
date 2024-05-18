@@ -35,7 +35,7 @@ struct ChatChannel {
 
 class Chat : public OsuScreen {
    public:
-    Chat(Osu *osu);
+    Chat();
     ~Chat();
 
     virtual void draw(Graphics *g);

@@ -117,7 +117,7 @@ void Spinner::draw(Graphics *g) {
         }
 
         // draw approach circle
-        if(!m_beatmap->getOsu()->getModHD() && m_fPercent > 0.0f) {
+        if(!osu->getModHD() && m_fPercent > 0.0f) {
             const float spinnerApproachCircleImageScale =
                 globalBaseSize / ((globalBaseSkinSize / 2) * (skin->isSpinnerApproachCircle2x() ? 2.0f : 1.0f));
 
@@ -205,7 +205,7 @@ void Spinner::draw(Graphics *g) {
         }
 
         // approach circle
-        if(!m_beatmap->getOsu()->getModHD() && m_fPercent > 0.0f) {
+        if(!osu->getModHD() && m_fPercent > 0.0f) {
             const float spinnerApproachCircleImageScale =
                 globalBaseSize / ((globalBaseSkinSize / 2) * (skin->isSpinnerApproachCircle2x() ? 2.0f : 1.0f));
 
@@ -224,7 +224,7 @@ void Spinner::draw(Graphics *g) {
 
     // "CLEAR!"
     if(m_fRatio >= 1.0f) {
-        const float spinnerClearImageScale = Osu::getImageScale(m_beatmap->getOsu(), skin->getSpinnerClear(), 80);
+        const float spinnerClearImageScale = Osu::getImageScale(skin->getSpinnerClear(), 80);
 
         g->setColor(0xffffffff);
         g->setAlpha(alphaMultiplier);
@@ -239,7 +239,7 @@ void Spinner::draw(Graphics *g) {
 
     // "SPIN!"
     if(clampedRatio < 0.03f) {
-        const float spinerSpinImageScale = Osu::getImageScale(m_beatmap->getOsu(), skin->getSpinnerSpin(), 80);
+        const float spinerSpinImageScale = Osu::getImageScale(skin->getSpinnerSpin(), 80);
 
         g->setColor(0xffffffff);
         g->setAlpha(m_fAlphaWithoutHidden * alphaMultiplier);
@@ -260,9 +260,9 @@ void Spinner::draw(Graphics *g) {
         g->setAlpha(m_fAlphaWithoutHidden * m_fAlphaWithoutHidden * m_fAlphaWithoutHidden * alphaMultiplier);
         g->pushTransform();
         {
-            g->translate((int)(m_beatmap->getOsu()->getScreenWidth() / 2 - stringWidth / 2),
-                         (int)(m_beatmap->getOsu()->getScreenHeight() - 5 +
-                               (5 + rpmFont->getHeight()) * (1.0f - m_fAlphaWithoutHidden)));
+            g->translate(
+                (int)(osu->getScreenWidth() / 2 - stringWidth / 2),
+                (int)(osu->getScreenHeight() - 5 + (5 + rpmFont->getHeight()) * (1.0f - m_fAlphaWithoutHidden)));
             g->drawString(rpmFont, UString::format("RPM: %i", (int)(m_fRPM + 0.4f)));
         }
         g->popTransform();
@@ -301,9 +301,8 @@ void Spinner::update(long curPos) {
 
         // handle auto, mouse spinning movement
         float angleDiff = 0;
-        if(m_beatmap->getOsu()->getModAuto() || m_beatmap->getOsu()->getModAutopilot() ||
-           m_beatmap->getOsu()->getModSpunout())
-            angleDiff = engine->getFrameTime() * 1000.0f * AUTO_MULTIPLIER * m_beatmap->getOsu()->getSpeedMultiplier();
+        if(osu->getModAuto() || osu->getModAutopilot() || osu->getModSpunout())
+            angleDiff = engine->getFrameTime() * 1000.0f * AUTO_MULTIPLIER * osu->getSpeedMultiplier();
         else  // user spin
         {
             Vector2 mouseDelta = m_beatmap->getCursorPos() - m_beatmap->osuCoords2Pixels(m_vRawPos);
@@ -319,8 +318,8 @@ void Spinner::update(long curPos) {
         // handle spinning
         // HACKHACK: rewrite this
         if(delta <= 0) {
-            bool isSpinning = m_beatmap->isClickHeld() || m_beatmap->getOsu()->getModAuto() ||
-                              m_beatmap->getOsu()->getModRelax() || m_beatmap->getOsu()->getModSpunout();
+            bool isSpinning =
+                m_beatmap->isClickHeld() || osu->getModAuto() || osu->getModRelax() || osu->getModSpunout();
 
             m_fDeltaOverflow += engine->getFrameTime() * 1000.0f;
 
@@ -419,7 +418,7 @@ void Spinner::onHit() {
 
     // calculate hit result
     LiveScore::HIT result = LiveScore::HIT::HIT_NULL;
-    if(m_fRatio >= 1.0f || m_beatmap->getOsu()->getModAuto())
+    if(m_fRatio >= 1.0f || osu->getModAuto())
         result = LiveScore::HIT::HIT_300;
     else if(m_fRatio >= 0.9f && !GameRules::osu_mod_ming3012.getBool() && !GameRules::osu_mod_no100s.getBool())
         result = LiveScore::HIT::HIT_100;
@@ -493,8 +492,7 @@ Vector2 Spinner::getAutoCursorPos(long curPos) {
 
     Vector2 actualPos = m_beatmap->osuCoords2Pixels(m_vRawPos);
     const float AUTO_MULTIPLIER = (1.0f / 20.0f);
-    float multiplier =
-        (m_beatmap->getOsu()->getModAuto() || m_beatmap->getOsu()->getModAutopilot()) ? AUTO_MULTIPLIER : 1.0f;
+    float multiplier = (osu->getModAuto() || osu->getModAutopilot()) ? AUTO_MULTIPLIER : 1.0f;
     float angle = (delta * multiplier) - PI / 2.0f;
     float r = m_beatmap->getPlayfieldSize().y / 10.0f;
     return Vector2((float)(actualPos.x + r * std::cos(angle)), (float)(actualPos.y + r * std::sin(angle)));

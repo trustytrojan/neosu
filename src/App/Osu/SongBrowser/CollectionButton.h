@@ -3,8 +3,8 @@
 
 class CollectionButton : public Button {
    public:
-    CollectionButton(Osu *osu, SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu,
-                     float xPos, float yPos, float xSize, float ySize, UString name, UString collectionName,
+    CollectionButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos,
+                     float yPos, float xSize, float ySize, UString name, UString collectionName,
                      std::vector<Button *> children);
 
     virtual void draw(Graphics *g);

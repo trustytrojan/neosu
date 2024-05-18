@@ -1,16 +1,5 @@
-//================ Copyright (c) 2018, PG, All rights reserved. =================//
-//
-// Purpose:		slider used for the volume overlay HUD
-//
-// $NoKeywords: $osuvolsl
-//===============================================================================//
-
-#ifndef OSUUIVOLUMESLIDER_H
-#define OSUUIVOLUMESLIDER_H
-
+#pragma once
 #include "CBaseUISlider.h"
-
-class Osu;
 
 class McFont;
 
@@ -19,7 +8,7 @@ class UIVolumeSlider : public CBaseUISlider {
     enum class TYPE { MASTER, MUSIC, EFFECTS };
 
    public:
-    UIVolumeSlider(Osu *osu, float xPos, float yPos, float xSize, float ySize, UString name);
+    UIVolumeSlider(float xPos, float yPos, float xSize, float ySize, UString name);
 
     void setType(TYPE type) { m_type = type; }
     void setSelected(bool selected);
@@ -35,7 +24,6 @@ class UIVolumeSlider : public CBaseUISlider {
 
     virtual void onMouseInside();
 
-    Osu *m_osu;
     TYPE m_type;
     bool m_bSelected;
 
@@ -44,5 +32,3 @@ class UIVolumeSlider : public CBaseUISlider {
 
     McFont *m_font;
 };
-
-#endif

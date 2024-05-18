@@ -1,10 +1,3 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		yet another ouendan clone, because why not
-//
-// $NoKeywords: $osu
-//===============================================================================//
-
 #include "Osu.h"
 
 #include <sstream>
@@ -61,6 +54,8 @@
 #include "UserStatsScreen.h"
 #include "VolumeOverlay.h"
 #include "score.h"
+
+Osu *osu = nullptr;
 
 // release configuration
 ConVar auto_update("auto_update", true, FCVAR_DEFAULT);
@@ -172,6 +167,8 @@ Vector2 Osu::osuBaseResolution = Vector2(640.0f, 480.0f);
 Shader *flashlight_shader = nullptr;
 
 Osu::Osu() {
+    osu = this;
+
     srand(time(NULL));
 
     bancho.neosu_version = UString::format("%.2f-" NEOSU_STREAM, osu_version.getFloat());
@@ -360,8 +357,8 @@ Osu::Osu() {
     m_frameBuffer2 = engine->getResourceManager()->createRenderTarget(0, 0, 64, 64);
 
     // load a few select subsystems very early
-    m_notificationOverlay = new NotificationOverlay(this);
-    m_score = new LiveScore(this);
+    m_notificationOverlay = new NotificationOverlay();
+    m_score = new LiveScore();
     m_updateHandler = new UpdateHandler();
 
     // exec the main config file (this must be right here!)
@@ -390,7 +387,7 @@ Osu::Osu() {
 
     // load global resources
     const int baseDPI = 96;
-    const int newDPI = Osu::getUIScale(this) * baseDPI;
+    const int newDPI = Osu::getUIScale() * baseDPI;
 
     McFont *defaultFont =
         engine->getResourceManager()->loadFont("weblysleekuisb.ttf", "FONT_DEFAULT", 15, true, newDPI);
@@ -439,24 +436,24 @@ Osu::Osu() {
     }
 
     // load subsystems, add them to the screens array
-    m_songBrowser2 = new SongBrowser(this);
-    m_volumeOverlay = new VolumeOverlay(this);
-    m_tooltipOverlay = new TooltipOverlay(this);
-    m_mainMenu = new MainMenu(this);
-    m_optionsMenu = new OptionsMenu(this);
+    m_songBrowser2 = new SongBrowser();
+    m_volumeOverlay = new VolumeOverlay();
+    m_tooltipOverlay = new TooltipOverlay();
+    m_mainMenu = new MainMenu();
+    m_optionsMenu = new OptionsMenu();
     m_backgroundImageHandler = new BackgroundImageHandler();
-    m_modSelector = new ModSelector(this);
-    m_rankingScreen = new RankingScreen(this);
-    m_userStatsScreen = new UserStatsScreen(this);
-    m_pauseMenu = new PauseMenu(this);
-    m_hud = new HUD(this);
-    m_changelog = new Changelog(this);
-    m_fposu = new ModFPoSu(this);
-    m_chat = new Chat(this);
-    m_lobby = new Lobby(this);
-    m_room = new RoomScreen(this);
-    m_prompt = new PromptScreen(this);
-    m_user_actions = new UIUserContextMenuScreen(this);
+    m_modSelector = new ModSelector();
+    m_rankingScreen = new RankingScreen();
+    m_userStatsScreen = new UserStatsScreen();
+    m_pauseMenu = new PauseMenu();
+    m_hud = new HUD();
+    m_changelog = new Changelog();
+    m_fposu = new ModFPoSu();
+    m_chat = new Chat();
+    m_lobby = new Lobby();
+    m_room = new RoomScreen();
+    m_prompt = new PromptScreen();
+    m_user_actions = new UIUserContextMenuScreen();
 
     // the order in this vector will define in which order events are handled/consumed
     m_screens.push_back(m_volumeOverlay);
@@ -481,7 +478,6 @@ Osu::Osu() {
     updateMods();
 
     // Init online functionality (multiplayer/leaderboards/etc)
-    bancho.osu = this;
     init_networking_thread();
     if(mp_autologin.getBool()) {
         reconnect();
@@ -518,7 +514,7 @@ Osu::Osu() {
 }
 
 Osu::~Osu() {
-    bancho.osu = nullptr;
+    osu = nullptr;
 
     // "leak" UpdateHandler object, but not relevant since shutdown:
     // this is the only way of handling instant user shutdown requests properly, there is no solution for active working
@@ -570,8 +566,8 @@ void Osu::draw(Graphics *g) {
 
             // Convert screen mouse -> osu mouse pos
             Vector2 cursorPos = beatmap->getCursorPos();
-            Vector2 mouse_position = cursorPos - GameRules::getPlayfieldOffset(this);
-            mouse_position /= GameRules::getPlayfieldScaleFactor(this);
+            Vector2 mouse_position = cursorPos - GameRules::getPlayfieldOffset();
+            mouse_position /= GameRules::getPlayfieldScaleFactor();
 
             // Update flashlight position
             double follow_delay = flashlight_follow_delay.getFloat();
@@ -580,9 +576,9 @@ void Osu::draw(Graphics *g) {
             t = t * (2.f - t);
             flashlight_position += t * (mouse_position - flashlight_position);
             Vector2 flashlightPos =
-                flashlight_position * GameRules::getPlayfieldScaleFactor(this) + GameRules::getPlayfieldOffset(this);
+                flashlight_position * GameRules::getPlayfieldScaleFactor() + GameRules::getPlayfieldOffset();
 
-            float fl_radius = flashlight_radius.getFloat() * GameRules::getPlayfieldScaleFactor(this);
+            float fl_radius = flashlight_radius.getFloat() * GameRules::getPlayfieldScaleFactor();
             if(getScore()->getCombo() >= 200 || convar->getConVarByName("flashlight_always_hard")->getBool()) {
                 fl_radius *= 0.625f;
             } else if(getScore()->getCombo() >= 100) {
@@ -1657,7 +1653,7 @@ void Osu::onPlayStart() {
     updateConfineCursor();
     updateWindowsKeyDisable();
 
-    RichPresence::onPlayStart(this);
+    RichPresence::onPlayStart();
 }
 
 void Osu::onPlayEnd(bool quit, bool aborted) {
@@ -1795,7 +1791,7 @@ void Osu::onResolutionChanged(Vector2 newResolution) {
 
     if(engine->isMinimized()) return;  // ignore if minimized
 
-    const float prevUIScale = getUIScale(this);
+    const float prevUIScale = getUIScale();
 
     if(!osu_resolution_enabled.getBool()) {
         g_vInternalResolution = newResolution;
@@ -1825,7 +1821,7 @@ void Osu::onResolutionChanged(Vector2 newResolution) {
     }
 
     // update dpi specific engine globals
-    m_ui_scrollview_scrollbarwidth_ref->setValue(15.0f * Osu::getUIScale(this));  // not happy with this as a convar
+    m_ui_scrollview_scrollbarwidth_ref->setValue(15.0f * Osu::getUIScale());  // not happy with this as a convar
 
     // interfaces
     for(int i = 0; i < m_screens.size(); i++) {
@@ -1848,7 +1844,7 @@ void Osu::onResolutionChanged(Vector2 newResolution) {
 
     // a bit hacky, but detect resolution-specific-dpi-scaling changes and force a font and layout reload after a 1
     // frame delay (1/2)
-    if(!LossyComparisonToFixExcessFPUPrecisionBugBecauseFuckYou::equalEpsilon(getUIScale(this), prevUIScale))
+    if(!LossyComparisonToFixExcessFPUPrecisionBugBecauseFuckYou::equalEpsilon(getUIScale(), prevUIScale))
         m_bFireDelayedFontReloadAndResolutionChangeToFixDesyncedUIScaleScheduled = true;
 }
 
@@ -1882,7 +1878,7 @@ void Osu::rebuildRenderTargets() {
 
 void Osu::reloadFonts() {
     const int baseDPI = 96;
-    const int newDPI = Osu::getUIScale(this) * baseDPI;
+    const int newDPI = Osu::getUIScale() * baseDPI;
 
     for(McFont *font : m_fonts) {
         if(font->getDPI() != newDPI) {
@@ -1934,7 +1930,7 @@ void Osu::fireResolutionChanged() { onResolutionChanged(g_vInternalResolution); 
 void Osu::onInternalResolutionChanged(UString oldValue, UString args) {
     if(args.length() < 7) return;
 
-    const float prevUIScale = getUIScale(this);
+    const float prevUIScale = getUIScale();
 
     std::vector<UString> resolution = args.split("x");
     if(resolution.size() != 2)
@@ -1972,7 +1968,7 @@ void Osu::onInternalResolutionChanged(UString oldValue, UString args) {
 
     // a bit hacky, but detect resolution-specific-dpi-scaling changes and force a font and layout reload after a 1
     // frame delay (2/2)
-    if(getUIScale(this) != prevUIScale) m_bFireDelayedFontReloadAndResolutionChangeToFixDesyncedUIScaleScheduled = true;
+    if(getUIScale() != prevUIScale) m_bFireDelayedFontReloadAndResolutionChangeToFixDesyncedUIScaleScheduled = true;
 }
 
 void Osu::onFocusGained() {
@@ -2041,7 +2037,7 @@ void Osu::onSkinChange(UString oldValue, UString newValue) {
     skinFolder.append("/");
     std::string sf = skinFolder.toUtf8();
 
-    m_skinScheduledToLoad = new Skin(this, newValue, sf, (newValue == UString("default")));
+    m_skinScheduledToLoad = new Skin(newValue, sf, (newValue == UString("default")));
 
     // initial load
     if(m_skin == NULL) m_skin = m_skinScheduledToLoad;
@@ -2257,7 +2253,7 @@ float Osu::getImageScaleToFillResolution(Image *img, Vector2 resolution) {
     return getImageScaleToFillResolution(Vector2(img->getWidth(), img->getHeight()), resolution);
 }
 
-float Osu::getImageScale(Osu *osu, Vector2 size, float osuSize) {
+float Osu::getImageScale(Vector2 size, float osuSize) {
     int swidth = osu->getScreenWidth();
     int sheight = osu->getScreenHeight();
 
@@ -2275,11 +2271,11 @@ float Osu::getImageScale(Osu *osu, Vector2 size, float osuSize) {
     return xDiameter / size.x > yDiameter / size.y ? xDiameter / size.x : yDiameter / size.y;
 }
 
-float Osu::getImageScale(Osu *osu, Image *img, float osuSize) {
-    return getImageScale(osu, Vector2(img->getWidth(), img->getHeight()), osuSize);
+float Osu::getImageScale(Image *img, float osuSize) {
+    return getImageScale(Vector2(img->getWidth(), img->getHeight()), osuSize);
 }
 
-float Osu::getUIScale(Osu *osu, float osuResolutionRatio) {
+float Osu::getUIScale(float osuResolutionRatio) {
     int swidth = osu->getScreenWidth();
     int sheight = osu->getScreenHeight();
 
@@ -2297,7 +2293,7 @@ float Osu::getUIScale(Osu *osu, float osuResolutionRatio) {
     return xDiameter > yDiameter ? xDiameter : yDiameter;
 }
 
-float Osu::getUIScale(Osu *osu) {
+float Osu::getUIScale() {
     if(osu != NULL) {
         if(osu->getScreenWidth() < osu_ui_scale_to_dpi_minimum_width.getInt() ||
            osu->getScreenHeight() < osu_ui_scale_to_dpi_minimum_height.getInt())

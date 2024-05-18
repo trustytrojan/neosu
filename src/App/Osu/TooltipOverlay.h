@@ -1,20 +1,9 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		tooltips
-//
-// $NoKeywords: $osutt
-//===============================================================================//
-
-#ifndef OSUTOOLTIPOVERLAY_H
-#define OSUTOOLTIPOVERLAY_H
-
+#pragma once
 #include "OsuScreen.h"
-
-class Osu;
 
 class TooltipOverlay : public OsuScreen {
    public:
-    TooltipOverlay(Osu *osu);
+    TooltipOverlay();
     virtual ~TooltipOverlay();
 
     virtual void draw(Graphics *g);
@@ -30,5 +19,3 @@ class TooltipOverlay : public OsuScreen {
 
     bool m_bDelayFadeout;
 };
-
-#endif

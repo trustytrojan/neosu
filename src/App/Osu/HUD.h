@@ -1,16 +1,6 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		hud element drawing functions (accuracy, combo, score, etc.)
-//
-// $NoKeywords: $osuhud
-//===============================================================================//
-
-#ifndef OSUHUD_H
-#define OSUHUD_H
-
+#pragma once
 #include "OsuScreen.h"
 
-class Osu;
 class UIAvatar;
 class Beatmap;
 struct ScoreboardSlot;
@@ -37,7 +27,7 @@ struct SCORE_ENTRY {
 
 class HUD : public OsuScreen {
    public:
-    HUD(Osu *osu);
+    HUD();
     virtual ~HUD();
 
     virtual void draw(Graphics *g);
@@ -228,5 +218,3 @@ class HUD : public OsuScreen {
     float m_fScoreBarBreakAnim;
     float m_fKiScaleAnim;
 };
-
-#endif

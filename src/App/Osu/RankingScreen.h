@@ -32,7 +32,7 @@ class ConVar;
 
 class RankingScreen : public ScreenBackable {
    public:
-    RankingScreen(Osu *osu);
+    RankingScreen();
 
     virtual void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);

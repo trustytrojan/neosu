@@ -14,7 +14,7 @@
 #include "Skin.h"
 #include "SoundEngine.h"
 
-Changelog::Changelog(Osu *osu) : ScreenBackable(osu) {
+Changelog::Changelog() : ScreenBackable() {
     setPos(-1, -1);
     m_scrollView = new CBaseUIScrollView(-1, -1, 0, 0, "");
     m_scrollView->setVerticalScrolling(true);
@@ -257,10 +257,10 @@ CBaseUIContainer *Changelog::setVisible(bool visible) {
 void Changelog::updateLayout() {
     ScreenBackable::updateLayout();
 
-    const float dpiScale = Osu::getUIScale(m_osu);
+    const float dpiScale = Osu::getUIScale();
 
-    setSize(m_osu->getScreenSize() + Vector2(2, 2));
-    m_scrollView->setSize(m_osu->getScreenSize() + Vector2(2, 2));
+    setSize(osu->getScreenSize() + Vector2(2, 2));
+    m_scrollView->setSize(osu->getScreenSize() + Vector2(2, 2));
 
     float yCounter = 0;
     for(const CHANGELOG_UI &changelog : m_changelogs) {
@@ -287,9 +287,9 @@ void Changelog::updateLayout() {
 }
 
 void Changelog::onBack() {
-    engine->getSound()->play(m_osu->getSkin()->getMenuClick());
+    engine->getSound()->play(osu->getSkin()->getMenuClick());
 
-    m_osu->toggleChangelog();
+    osu->toggleChangelog();
 }
 
 void Changelog::onChangeClicked(CBaseUIButton *button) {
@@ -302,7 +302,7 @@ void Changelog::onChangeClicked(CBaseUIButton *button) {
 
         debugLog("url = %s\n", url.toUtf8());
 
-        m_osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
+        osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
         env->openURLInDefaultBrowser(url);
     }
 }

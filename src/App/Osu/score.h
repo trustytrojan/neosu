@@ -4,7 +4,6 @@
 
 class ConVar;
 class DatabaseBeatmap;
-class Osu;
 class Beatmap;
 class HitObject;
 
@@ -150,7 +149,7 @@ class LiveScore {
                                                bool modFlashlight);
 
    public:
-    LiveScore(Osu *osu);
+    LiveScore();
 
     void reset();  // only Beatmap may call this function!
 
@@ -220,8 +219,6 @@ class LiveScore {
     static ConVar *m_osu_drain_type_ref;
 
     void onScoreChange();
-
-    Osu *m_osu;
 
     std::vector<HIT> m_hitresults;
     std::vector<int> m_hitdeltas;

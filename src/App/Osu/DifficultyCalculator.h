@@ -1,16 +1,6 @@
-//================ Copyright (c) 2019, PG & Francesco149, All rights reserved. =================//
-//
-// Purpose:		star rating + pp calculation, based on https://github.com/Francesco149/oppai/
-//
-// $NoKeywords: $tomstarspp
-//==============================================================================================//
-
-#ifndef OSUDIFFICULTYCALCULATOR_H
-#define OSUDIFFICULTYCALCULATOR_H
-
+#pragma once
 #include "cbase.h"
 
-class Osu;
 class Beatmap;
 
 class SliderCurve;
@@ -122,8 +112,8 @@ class DifficultyCalculator {
                                                  std::vector<double> *outSpeedStrains, const std::atomic<bool> &dead);
 
     // pp, use runtime mods (convenience)
-    static double calculatePPv2(Osu *osu, Beatmap *beatmap, double aim, double aimSliderFactor, double speed,
-                                double speedNotes, int numHitObjects, int numCircles, int numSliders, int numSpinners,
+    static double calculatePPv2(Beatmap *beatmap, double aim, double aimSliderFactor, double speed, double speedNotes,
+                                int numHitObjects, int numCircles, int numSliders, int numSpinners,
                                 int maxPossibleCombo, int combo = -1, int misses = 0, int c300 = -1, int c100 = 0,
                                 int c50 = 0);
 
@@ -167,5 +157,3 @@ class DifficultyCalculator {
     static double computeSpeedValue(const ScoreData &score, const Attributes &attributes, double effectiveMissCount);
     static double computeAccuracyValue(const ScoreData &score, const Attributes &attributes);
 };
-
-#endif

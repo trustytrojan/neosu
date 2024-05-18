@@ -2,12 +2,11 @@
 #include "OsuScreen.h"
 
 class CBaseUIContainer;
-class Osu;
 class UIVolumeSlider;
 
 class VolumeOverlay : public OsuScreen {
    public:
-    VolumeOverlay(Osu *osu);
+    VolumeOverlay();
 
     void animate();
     virtual void draw(Graphics *g);

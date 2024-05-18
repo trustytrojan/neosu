@@ -1085,7 +1085,7 @@ double DifficultyCalculator::calculateStarDiffForHitObjects(
     return calculateTotalStarsFromSkills(*aim, *speed);
 }
 
-double DifficultyCalculator::calculatePPv2(Osu *osu, Beatmap *beatmap, double aim, double aimSliderFactor, double speed,
+double DifficultyCalculator::calculatePPv2(Beatmap *beatmap, double aim, double aimSliderFactor, double speed,
                                            double speedNotes, int numHitObjects, int numCircles, int numSliders,
                                            int numSpinners, int maxPossibleCombo, int combo, int misses, int c300,
                                            int c100, int c50) {
