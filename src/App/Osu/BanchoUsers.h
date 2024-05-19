@@ -20,7 +20,7 @@ struct UserInfo {
     Action action = UNKNOWN;
     GameMode mode = STANDARD;
     UString info_text = UString("Loading...");
-    UString map_md5;
+    MD5Hash map_md5;
     i32 map_id = 0;
     u32 mods = 0;
     i64 total_score = 0;
@@ -35,4 +35,5 @@ struct UserInfo {
 extern std::unordered_map<u32, UserInfo*> online_users;
 extern std::vector<u32> friends;
 
+UserInfo* find_user(UString username);
 UserInfo* get_user_info(u32 user_id, bool fetch = false);

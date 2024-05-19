@@ -29,7 +29,6 @@
 #include "TooltipOverlay.h"
 #include "UIAvatar.h"
 #include "UIContextMenu.h"
-#include "UserStatsScreen.h"
 
 ConVar *ScoreButton::m_osu_scores_sort_by_pp_ref = NULL;
 UString ScoreButton::recentScoreIconString;
@@ -598,7 +597,6 @@ void ScoreButton::onDeleteScoreConfirmed(UString text, int id) {
         // this is nice because it updates the songbrowser scorebrowser too (so if the user closes the top ranks screen
         // everything is in sync, even for the currently selected beatmap)
         osu->getSongBrowser()->onScoreContextMenu(this, 2);
-        osu->getUserStatsScreen()->onScoreContextMenu(this, 2);
     }
 }
 

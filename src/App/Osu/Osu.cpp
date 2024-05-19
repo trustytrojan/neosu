@@ -3,55 +3,53 @@
 #include <sstream>
 
 #include "AnimationHandler.h"
+#include "BackgroundImageHandler.h"
 #include "Bancho.h"
 #include "BanchoNetworking.h"
+#include "Beatmap.h"
 #include "CBaseUIScrollView.h"
 #include "CBaseUITextbox.h"
 #include "CWindowManager.h"
+#include "Changelog.h"
+#include "Chat.h"
 #include "ConVar.h"
 #include "Console.h"
 #include "ConsoleBox.h"
 #include "Database.h"
+#include "DatabaseBeatmap.h"
 #include "Downloader.h"
 #include "Engine.h"
 #include "Environment.h"
-#include "Keyboard.h"
-#include "Mouse.h"
-#include "RenderTarget.h"
-#include "ResourceManager.h"
-#include "Shader.h"
-#include "SoundEngine.h"
-// #include "DebugMonitor.h"
-
-#include "BackgroundImageHandler.h"
-#include "Beatmap.h"
-#include "Changelog.h"
-#include "Chat.h"
-#include "DatabaseBeatmap.h"
 #include "GameRules.h"
 #include "HUD.h"
 #include "HitObject.h"
 #include "Icons.h"
 #include "KeyBindings.h"
+#include "Keyboard.h"
 #include "Lobby.h"
 #include "MainMenu.h"
 #include "ModFPoSu.h"
 #include "ModSelector.h"
+#include "Mouse.h"
 #include "NotificationOverlay.h"
 #include "OptionsMenu.h"
 #include "PauseMenu.h"
 #include "PromptScreen.h"
 #include "RankingScreen.h"
+#include "RenderTarget.h"
 #include "Replay.h"
+#include "ResourceManager.h"
 #include "RichPresence.h"
 #include "RoomScreen.h"
+#include "Shader.h"
 #include "Skin.h"
 #include "SongBrowser/SongBrowser.h"
+#include "SoundEngine.h"
+#include "SpectatorScreen.h"
 #include "TooltipOverlay.h"
 #include "UIModSelectorModButton.h"
 #include "UIUserContextMenu.h"
 #include "UpdateHandler.h"
-#include "UserStatsScreen.h"
 #include "VolumeOverlay.h"
 #include "score.h"
 
@@ -156,7 +154,7 @@ ConVar submit_scores("submit_scores", false, FCVAR_DEFAULT);
 // - https://api.nerinyan.moe/d/
 // - https://osu.gatari.pw/d/
 // - https://osu.sayobot.cn/osu.php?s=
-ConVar beatmap_mirror("beatmap_mirror", "https://catboy.best/s/", FCVAR_DEFAULT,
+ConVar beatmap_mirror("beatmap_mirror", "https://catboy.best/d/", FCVAR_DEFAULT,
                       "mirror from which beatmapsets will be downloaded");
 
 ConVar *Osu::version = &osu_version;
@@ -309,7 +307,6 @@ Osu::Osu() {
     m_bToggleSongBrowserScheduled = false;
     m_bToggleOptionsMenuScheduled = false;
     m_bOptionsMenuFullscreen = true;
-    m_bToggleUserStatsScreenScheduled = false;
     m_bToggleChangelogScheduled = false;
     m_bToggleEditorScheduled = false;
 
@@ -366,6 +363,11 @@ Osu::Osu() {
     Console::execConfigFile("underride");  // same as override, but for defaults
     Console::execConfigFile("osu");
     Console::execConfigFile("override");  // used for quickfixing live builds without redeploying/recompiling
+
+    // Old value was invalid
+    if(beatmap_mirror.getString() == UString("https://catboy.best/s/")) {
+        beatmap_mirror.setValue("https://catboy.best/d/");
+    }
 
     // Initialize sound here so we can load the preferred device from config
     // Avoids initializing the sound device twice, which can take a while depending on the driver
@@ -445,7 +447,6 @@ Osu::Osu() {
     m_backgroundImageHandler = new BackgroundImageHandler();
     m_modSelector = new ModSelector();
     m_rankingScreen = new RankingScreen();
-    m_userStatsScreen = new UserStatsScreen();
     m_pauseMenu = new PauseMenu();
     m_hud = new HUD();
     m_changelog = new Changelog();
@@ -455,6 +456,7 @@ Osu::Osu() {
     m_room = new RoomScreen();
     m_prompt = new PromptScreen();
     m_user_actions = new UIUserContextMenuScreen();
+    m_spectatorScreen = new SpectatorScreen();
 
     // the order in this vector will define in which order events are handled/consumed
     m_screens.push_back(m_volumeOverlay);
@@ -465,7 +467,6 @@ Osu::Osu() {
     m_screens.push_back(m_chat);
     m_screens.push_back(m_notificationOverlay);
     m_screens.push_back(m_optionsMenu);
-    m_screens.push_back(m_userStatsScreen);
     m_screens.push_back(m_rankingScreen);
     m_screens.push_back(m_pauseMenu);
     m_screens.push_back(m_hud);
@@ -474,6 +475,7 @@ Osu::Osu() {
     m_screens.push_back(m_changelog);
     m_screens.push_back(m_mainMenu);
     m_screens.push_back(m_tooltipOverlay);
+    m_screens.push_back(m_spectatorScreen);
 
     // update mod settings
     updateMods();
@@ -635,7 +637,8 @@ void Osu::draw(Graphics *g) {
 
         // draw player cursor
         Vector2 cursorPos = beatmap->getCursorPos();
-        bool drawSecondTrail = (m_bModAuto || m_bModAutopilot || beatmap->m_bIsWatchingReplay);
+        bool drawSecondTrail =
+            (m_bModAuto || m_bModAutopilot || beatmap->m_bIsWatchingReplay || beatmap->is_spectating);
         bool updateAndDrawTrail = true;
         if(isFPoSu) {
             cursorPos = getScreenSize() / 2.0f;
@@ -643,6 +646,8 @@ void Osu::draw(Graphics *g) {
         }
         m_hud->drawCursor(g, cursorPos, fadingCursorAlpha, drawSecondTrail, updateAndDrawTrail);
     } else {  // if we are not playing
+        m_spectatorScreen->draw(g);
+
         m_lobby->draw(g);
         m_room->draw(g);
 
@@ -650,7 +655,6 @@ void Osu::draw(Graphics *g) {
 
         m_mainMenu->draw(g);
         m_changelog->draw(g);
-        m_userStatsScreen->draw(g);
         m_rankingScreen->draw(g);
         m_chat->draw(g);
         m_user_actions->draw(g);
@@ -783,6 +787,7 @@ void Osu::update() {
         m_bSeeking = (m_bSeekKey || getSelectedBeatmap()->m_bIsWatchingReplay);
         m_bSeeking &= !getSelectedBeatmap()->isPaused() && !m_volumeOverlay->isBusy();
         m_bSeeking &= !bancho.is_playing_a_multi_map() && !m_bClickedSkipButton;
+        m_bSeeking &= !getSelectedBeatmap()->is_spectating;
         if(m_bSeeking) {
             const float mousePosX = (int)engine->getMouse()->getPos().x;
             const float percent = clamp<float>(mousePosX / (float)getScreenWidth(), 0.0f, 1.0f);
@@ -844,8 +849,6 @@ void Osu::update() {
     if(m_bToggleSongBrowserScheduled) {
         m_bToggleSongBrowserScheduled = false;
 
-        if(m_userStatsScreen->isVisible()) m_userStatsScreen->setVisible(false);
-
         if(m_mainMenu->isVisible() && m_optionsMenu->isVisible()) m_optionsMenu->setVisible(false);
 
         if(m_songBrowser2 != NULL) m_songBrowser2->setVisible(!m_songBrowser2->isVisible());
@@ -864,7 +867,7 @@ void Osu::update() {
                 bancho.room.pack(&packet);
                 send_packet(packet);
 
-                m_room->on_map_change(false);
+                m_room->on_map_change();
             }
         } else {
             m_mainMenu->setVisible(!(m_songBrowser2 != NULL && m_songBrowser2->isVisible()));
@@ -879,12 +882,6 @@ void Osu::update() {
         m_optionsMenu->setFullscreen(false);
         m_optionsMenu->setVisible(!m_optionsMenu->isVisible());
         if(wasFullscreen) m_mainMenu->setVisible(!m_optionsMenu->isVisible());
-    }
-    if(m_bToggleUserStatsScreenScheduled) {
-        m_bToggleUserStatsScreenScheduled = false;
-        m_userStatsScreen->setVisible(true);
-
-        if(m_songBrowser2 != NULL && m_songBrowser2->isVisible()) m_songBrowser2->setVisible(false);
     }
     if(m_bToggleChangelogScheduled) {
         m_bToggleChangelogScheduled = false;
@@ -1168,7 +1165,8 @@ void Osu::updateMods() {
 
     // handle auto/pilot cursor visibility
     if(isInPlayMode()) {
-        m_bShouldCursorBeVisible = m_bModAuto || m_bModAutopilot || getSelectedBeatmap()->m_bIsWatchingReplay;
+        m_bShouldCursorBeVisible = m_bModAuto || m_bModAutopilot || getSelectedBeatmap()->m_bIsWatchingReplay ||
+                                   getSelectedBeatmap()->is_spectating;
         env->setCursorVisible(m_bShouldCursorBeVisible);
     }
 
@@ -1257,7 +1255,7 @@ void Osu::onKeyDown(KeyboardEvent &key) {
         // instant replay
         if((beatmap->isPaused() || beatmap->hasFailed())) {
             if(!key.isConsumed() && key == (KEYCODE)KeyBindings::INSTANT_REPLAY.getInt()) {
-                if(!beatmap->m_bIsWatchingReplay) {
+                if(!beatmap->m_bIsWatchingReplay && !beatmap->is_spectating) {
                     FinishedScore score;
                     score.isLegacyScore = false;
                     score.isImportedLegacyScore = false;
@@ -1612,8 +1610,6 @@ void Osu::toggleOptionsMenu() {
     m_bOptionsMenuFullscreen = m_mainMenu->isVisible();
 }
 
-void Osu::toggleUserStatsScreen() { m_bToggleUserStatsScreenScheduled = true; }
-
 void Osu::toggleChangelog() { m_bToggleChangelogScheduled = true; }
 
 void Osu::toggleEditor() { m_bToggleEditorScheduled = true; }
@@ -1965,7 +1961,8 @@ void Osu::onFocusGained() {
 
 void Osu::onFocusLost() {
     if(isInPlayMode() && !getSelectedBeatmap()->isPaused() && osu_pause_on_focus_loss.getBool()) {
-        if(!bancho.is_playing_a_multi_map() && !getSelectedBeatmap()->m_bIsWatchingReplay) {
+        if(!bancho.is_playing_a_multi_map() && !getSelectedBeatmap()->m_bIsWatchingReplay &&
+           !getSelectedBeatmap()->is_spectating) {
             getSelectedBeatmap()->pause(false);
             m_pauseMenu->setVisible(true);
             m_modSelector->setVisible(false);
@@ -2110,7 +2107,7 @@ void Osu::updateConfineCursor() {
     if((osu_confine_cursor_fullscreen.getBool() && env->isFullscreen()) ||
        (osu_confine_cursor_windowed.getBool() && !env->isFullscreen()) ||
        (isInPlayMode() && !m_pauseMenu->isVisible() && !getModAuto() && !getModAutopilot() &&
-        !getSelectedBeatmap()->m_bIsWatchingReplay))
+        !getSelectedBeatmap()->m_bIsWatchingReplay && !getSelectedBeatmap()->is_spectating))
         env->setCursorClip(true, McRect());
     else
         env->setCursorClip(false, McRect());

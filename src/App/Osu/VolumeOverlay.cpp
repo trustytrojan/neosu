@@ -20,7 +20,6 @@
 #include "Sound.h"
 #include "SoundEngine.h"
 #include "UIVolumeSlider.h"
-#include "UserStatsScreen.h"
 
 VolumeOverlay::VolumeOverlay() : OsuScreen() {
     osu_volume_master = convar->getConVarByName("osu_volume_master");
@@ -245,7 +244,6 @@ bool VolumeOverlay::canChangeVolume() {
         can_scroll = false;
     }
     if(osu->m_optionsMenu->isVisible()) can_scroll = false;
-    if(osu->m_userStatsScreen->isVisible()) can_scroll = false;
     if(osu->m_changelog->isVisible()) can_scroll = false;
     if(osu->m_rankingScreen->isVisible()) can_scroll = false;
     if(osu->m_modSelector->isMouseInScrollView()) can_scroll = false;

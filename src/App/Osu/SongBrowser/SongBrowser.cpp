@@ -52,8 +52,7 @@
 #include "UIContextMenu.h"
 #include "UISearchOverlay.h"
 #include "UISelectionButton.h"
-#include "UIUserStatsScreenLabel.h"
-#include "UserButton.h"
+#include "UserCard.h"
 #include "VertexArrayObject.h"
 
 ConVar osu_gamemode("osu_gamemode", "std", FCVAR_DEFAULT);
@@ -477,14 +476,8 @@ SongBrowser::SongBrowser() : ScreenBackable() {
                           []() -> SkinImage * { return osu->getSkin()->getSelectionOptionsOver(); })
         ->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onSelectionOptions));
 
-    m_userButton = new UserButton();
-    m_userButton->addTooltipLine("Click to change [User] or view/edit [Top Ranks]");
-    m_userButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onUserButtonClicked));
-    m_userButton->setText(m_name_ref->getString());
+    m_userButton = new UserCard(bancho.user_id);
     m_bottombar->addBaseUIElement(m_userButton);
-
-    // looks like shit there, don't like it
-    m_ppVersionInfoLabel = NULL;
 
     // build scorebrowser
     m_scoreBrowser = new CBaseUIScrollView(0, 0, 0, 0, "");
@@ -1453,7 +1446,7 @@ CBaseUIContainer *SongBrowser::setVisible(bool visible) {
         }
 
         // update user name/stats
-        onUserButtonChange(m_name_ref->getString(), -1);
+        onUserCardChange(m_name_ref->getString());
 
         // HACKHACK: workaround for BaseUI framework deficiency (missing mouse events. if a mouse button is being held,
         // and then suddenly a BaseUIElement gets put under it and set visible, and then the mouse button is released,
@@ -1610,7 +1603,7 @@ void SongBrowser::onDifficultySelected(DatabaseBeatmap *diff2, bool play) {
             bancho.room.pack(&packet);
             send_packet(packet);
 
-            osu->m_room->on_map_change(false);
+            osu->m_room->on_map_change();
 
             setVisible(false);
         } else {
@@ -2570,15 +2563,6 @@ void SongBrowser::updateLayout() {
                                          m_bottombarNavButtons[m_bottombarNavButtons.size() - 1]->getSize().x + 10),
                             m_bottombar->getSize().y - m_userButton->getSize().y - 1);
 
-    if(m_ppVersionInfoLabel != NULL) {
-        m_ppVersionInfoLabel
-            ->onResized();  // HACKHACK: framework bug (should update string metrics on setSizeToContent())
-        m_ppVersionInfoLabel->setSizeToContent(1, 10);
-        m_ppVersionInfoLabel->setRelPos(m_userButton->getRelPos() +
-                                        Vector2(m_userButton->getSize().x + 20 * dpiScale,
-                                                m_userButton->getSize().y / 2 - m_ppVersionInfoLabel->getSize().y / 2));
-    }
-
     m_bottombar->update_pos();
 
     // score browser
@@ -3084,7 +3068,7 @@ void SongBrowser::onDatabaseLoadingFinished() {
     RichPresence::onSongBrowser();
 
     // update user name/stats
-    onUserButtonChange(m_name_ref->getString(), -1);
+    onUserCardChange(m_name_ref->getString());
 
     if(osu_songbrowser_search_hardcoded_filter.getString().length() > 0) onSearchUpdate();
 
@@ -3703,51 +3687,10 @@ void SongBrowser::onModeChange2(UString text, int id) {
     m_osu_mod_fposu_ref->setValue(id == 2 || text == UString("fposu"));
 }
 
-void SongBrowser::onUserButtonClicked() {
-    // Not allowed to switch user while online
-    if(bancho.user_id > 0) return;
-
-    engine->getSound()->play(osu->getSkin()->getMenuClick());
-
-    std::vector<UString> names = m_db->getPlayerNamesWithScoresForUserSwitcher();
-    if(names.size() > 0) {
-        m_contextMenu->setPos(m_userButton->getPos());
-        m_contextMenu->setRelPos(m_userButton->getPos());
-        m_contextMenu->begin(m_userButton->getSize().x);
-        m_contextMenu->addButton("Switch User:", 0)
-            ->setTextColor(0xff888888)
-            ->setTextDarkColor(0xff000000)
-            ->setTextLeft(false)
-            ->setEnabled(false);
-        // m_contextMenu->addButton("", 0)->setEnabled(false);
-        for(size_t i = 0; i < names.size(); i++) {
-            CBaseUIButton *button = m_contextMenu->addButton(names[i]);
-            if(names[i] == m_name_ref->getString()) button->setTextBrightColor(0xff00ff00);
-        }
-        m_contextMenu->addButton("", 0)->setEnabled(false);
-        m_contextMenu->addButton(">>> Top Ranks <<<", 1)->setTextLeft(false);
-        m_contextMenu->addButton("", 0)->setEnabled(false);
-        m_contextMenu->setPos(m_contextMenu->getPos() - Vector2(0, m_contextMenu->getSize().y));
-        m_contextMenu->setRelPos(m_contextMenu->getRelPos() - Vector2(0, m_contextMenu->getSize().y));
-        m_contextMenu->end(true, true);
-        m_contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onUserButtonChange));
-        UIContextMenu::clampToRightScreenEdge(m_contextMenu);
-    }
-}
-
-void SongBrowser::onUserButtonChange(UString text, int id) {
-    if(id == 0) return;
-
-    if(id == 1) {
-        osu->toggleUserStatsScreen();
-        return;
-    }
-
-    m_name_ref->setValue(text);
-    osu->getOptionsMenu()->setUsername(text);  // NOTE: force update options textbox to avoid shutdown inconsistency
-    m_userButton->setText(text);
-
-    m_userButton->updateUserStats();
+void SongBrowser::onUserCardChange(UString new_username) {
+    // NOTE: force update options textbox to avoid shutdown inconsistency
+    osu->getOptionsMenu()->setUsername(new_username);
+    m_userButton->setID(bancho.user_id);
 }
 
 void SongBrowser::onScoreClicked(CBaseUIButton *button) {

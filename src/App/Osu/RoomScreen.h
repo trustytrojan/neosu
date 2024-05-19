@@ -41,8 +41,7 @@ class RoomScreen : public OsuScreen {
     void updateSettingsLayout(Vector2 newResolution);
     void ragequit();
 
-    static void process_beatmapset_info_response(Packet packet);
-    void on_map_change(bool download = true);
+    void on_map_change();
     void on_room_joined(Room room);
     void on_room_updated(Room room);
     void on_match_started(Room room);
@@ -65,8 +64,6 @@ class RoomScreen : public OsuScreen {
     void onWinConditionSelected(UString win_condition_str, int win_condition);
     void set_new_password(UString new_password);
     void onFreemodCheckboxChanged(CBaseUICheckbox *checkbox);
-
-    std::unordered_map<u32, u32> mapset_by_mapid;
 
     CBaseUILabel *map_label = nullptr;
     CBaseUILabel *mods_label = nullptr;

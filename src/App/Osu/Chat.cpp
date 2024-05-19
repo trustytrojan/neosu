@@ -584,7 +584,8 @@ void Chat::updateVisibility() {
     auto selected_beatmap = osu->getSelectedBeatmap();
     bool can_skip = (selected_beatmap != nullptr) && (selected_beatmap->isInSkippableSection());
     bool is_spectating = osu->m_bModAuto || (osu->m_bModAutopilot && osu->m_bModRelax) ||
-                         (selected_beatmap != nullptr && selected_beatmap->m_bIsWatchingReplay);
+                         (selected_beatmap != nullptr && selected_beatmap->m_bIsWatchingReplay) ||
+                         bancho.spectated_player_id != 0;
     bool is_clicking_circles = osu->isInPlayMode() && !can_skip && !is_spectating && !osu->m_pauseMenu->isVisible();
     if(bancho.is_playing_a_multi_map() && !bancho.room.all_players_loaded) {
         is_clicking_circles = false;

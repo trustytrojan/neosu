@@ -5,22 +5,20 @@ class ConVar;
 
 class UIAvatar;
 
-class UserButton : public CBaseUIButton {
+class UserCard : public CBaseUIButton {
    public:
-    UserButton();
+    UserCard(i32 user_id);
+    ~UserCard();
 
     virtual void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);
 
     void updateUserStats();
-
-    void addTooltipLine(UString text) { m_vTooltipLines.push_back(text); }
-
-    UIAvatar *m_avatar = nullptr;
+    void setID(i32 new_id);
 
    private:
-    virtual void onMouseInside();
-    virtual void onMouseOutside();
+    UIAvatar *m_avatar = nullptr;
+    i32 m_user_id = 0;
 
     ConVar *m_osu_scores_enabled_ref;
 
@@ -31,7 +29,4 @@ class UserButton : public CBaseUIButton {
 
     float m_fPPDelta;
     float m_fPPDeltaAnim;
-
-    float m_fHoverAnim;
-    std::vector<UString> m_vTooltipLines;
 };

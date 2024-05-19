@@ -71,6 +71,8 @@ std::string ConVar::getFancyDefaultValue() {
             return out;
         }
     }
+
+    return "unreachable";
 }
 
 UString ConVar::typeToString(CONVAR_TYPE type) {

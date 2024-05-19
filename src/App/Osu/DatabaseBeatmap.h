@@ -314,9 +314,9 @@ class DatabaseBeatmap {
     static ConVar *m_osu_debug_pp_ref;
     static ConVar *m_osu_slider_end_inside_check_offset_ref;
 
-    static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string &osuFilePath,
+    static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string osuFilePath,
                                                     bool filePathIsInMemoryBeatmap = false);
-    static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string &osuFilePath, bool filePathIsInMemoryBeatmap,
+    static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string osuFilePath, bool filePathIsInMemoryBeatmap,
                                                     const std::atomic<bool> &dead);
     static CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT calculateSliderTimesClicksTicks(int beatmapVersion,
                                                                                       std::vector<SLIDER> &sliders,

@@ -92,6 +92,7 @@ void disconnect() {
     outgoing = Packet();
 
     bancho.user_id = 0;
+    bancho.spectated_player_id = 0;
     bancho.spectators.clear();
     bancho.fellow_spectators.clear();
     bancho.server_icon_url = "";
@@ -342,6 +343,7 @@ static void *do_networking(void *data) {
         }
 
         if(osu && osu->m_lobby->isVisible()) seconds_between_pings = 1;
+        if(bancho.spectated_player_id != 0) seconds_between_pings = 1;
         if(bancho.is_in_a_multi_room() && seconds_between_pings > 3) seconds_between_pings = 3;
         bool should_ping = difftime(time(NULL), last_packet_tms) > seconds_between_pings;
         if(bancho.user_id <= 0) should_ping = false;
@@ -399,7 +401,7 @@ static void handle_api_response(Packet packet) {
         }
 
         case GET_BEATMAPSET_INFO: {
-            RoomScreen::process_beatmapset_info_response(packet);
+            process_beatmapset_info_response(packet);
             break;
         }
 

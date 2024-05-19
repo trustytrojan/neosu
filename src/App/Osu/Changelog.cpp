@@ -30,12 +30,14 @@ Changelog::Changelog() : ScreenBackable() {
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
     latest.changes.push_back("- Added ability to get spectated");
+    latest.changes.push_back("- Added ability to spectate others");
     latest.changes.push_back("- Added option for servers to override convars using neosu.json");
     latest.changes.push_back("- Added option for servers to override convars using a custom bancho packet");
     latest.changes.push_back("- Added use_https convar (to support plain HTTP servers)");
     latest.changes.push_back("- Hid password cvar from console command list");
     latest.changes.push_back("- Removed DirectX, Software, Vulkan renderers");
     latest.changes.push_back("- Removed OpenCL support");
+    latest.changes.push_back("- Removed user stats screen");
     changelogs.push_back(latest);
 
     CHANGELOG v35_00;

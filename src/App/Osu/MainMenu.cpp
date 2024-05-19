@@ -1120,7 +1120,7 @@ CBaseUIContainer *MainMenu::setVisible(bool visible) {
 
         if(!bancho.spectators.empty()) {
             Packet packet;
-            packet.id = SPECTATE_FRAMES;
+            packet.id = OUT_SPECTATE_FRAMES;
             write<i32>(&packet, 0);
             write<u16>(&packet, 0);
             write<u8>(&packet, LiveReplayBundle::Action::NONE);

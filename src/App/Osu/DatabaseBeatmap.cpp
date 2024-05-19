@@ -181,14 +181,14 @@ DatabaseBeatmap::~DatabaseBeatmap() {
     }
 }
 
-DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const std::string &osuFilePath,
+DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const std::string osuFilePath,
                                                                            bool filePathIsInMemoryBeatmap) {
     std::atomic<bool> dead;
     dead = false;
     return loadPrimitiveObjects(osuFilePath, filePathIsInMemoryBeatmap, dead);
 }
 
-DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const std::string &osuFilePath,
+DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const std::string osuFilePath,
                                                                            bool filePathIsInMemoryBeatmap,
                                                                            const std::atomic<bool> &dead) {
     PRIMITIVE_CONTAINER c;

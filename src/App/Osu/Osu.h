@@ -17,9 +17,9 @@ class PauseMenu;
 class OptionsMenu;
 class ModSelector;
 class SongBrowser;
+class SpectatorScreen;
 class BackgroundImageHandler;
 class RankingScreen;
-class UserStatsScreen;
 class UpdateHandler;
 class NotificationOverlay;
 class TooltipOverlay;
@@ -87,7 +87,6 @@ class Osu : public App, public MouseListener {
     void toggleModSelection(bool waitForF1KeyUp = false);
     void toggleSongBrowser();
     void toggleOptionsMenu();
-    void toggleUserStatsScreen();
     void toggleChangelog();
     void toggleEditor();
 
@@ -116,7 +115,6 @@ class Osu : public App, public MouseListener {
     inline RankingScreen *getRankingScreen() const { return m_rankingScreen; }
     inline LiveScore *getScore() const { return m_score; }
     inline UpdateHandler *getUpdateHandler() const { return m_updateHandler; }
-    inline UserStatsScreen *getUserStatsScreen() const { return m_userStatsScreen; }
 
     inline RenderTarget *getPlayfieldBuffer() const { return m_playfieldBuffer; }
     inline RenderTarget *getSliderFrameBuffer() const { return m_sliderFrameBuffer; }
@@ -253,7 +251,6 @@ class Osu : public App, public MouseListener {
     BackgroundImageHandler *m_backgroundImageHandler = nullptr;
     ModSelector *m_modSelector = nullptr;
     RankingScreen *m_rankingScreen = nullptr;
-    UserStatsScreen *m_userStatsScreen = nullptr;
     PauseMenu *m_pauseMenu = nullptr;
     Skin *m_skin = nullptr;
     HUD *m_hud = nullptr;
@@ -263,6 +260,7 @@ class Osu : public App, public MouseListener {
     Changelog *m_changelog = nullptr;
     UpdateHandler *m_updateHandler = nullptr;
     ModFPoSu *m_fposu = nullptr;
+    SpectatorScreen *m_spectatorScreen = nullptr;
 
     std::vector<OsuScreen *> m_screens;
 
@@ -325,7 +323,6 @@ class Osu : public App, public MouseListener {
     bool m_bToggleSongBrowserScheduled;
     bool m_bToggleOptionsMenuScheduled;
     bool m_bOptionsMenuFullscreen;
-    bool m_bToggleUserStatsScreenScheduled;
     bool m_bToggleChangelogScheduled;
     bool m_bToggleEditorScheduled;
 

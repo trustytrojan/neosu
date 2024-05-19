@@ -218,6 +218,30 @@ RoomScreen::~RoomScreen() {
 void RoomScreen::draw(Graphics *g) {
     if(!m_bVisible) return;
 
+    static i32 current_map_id = -1;
+    if(bancho.room.map_id == -1 || bancho.room.map_id == 0) {
+        m_map_title->setText("Host is selecting a map...");
+        m_map_title->setSizeToContent(0, 0);
+        m_ready_btn->is_loading = true;
+    } else if(bancho.room.map_id != current_map_id) {
+        float progress = -1.f;
+        auto beatmap = download_beatmap(bancho.room.map_id, bancho.room.map_md5, &progress);
+        if(progress == -1.f) {
+            auto error_str = UString::format("Failed to download Beatmap #%d :(", bancho.room.map_id);
+            m_map_title->setText(error_str);
+            m_map_title->setSizeToContent(0, 0);
+            m_ready_btn->is_loading = true;
+        } else if(progress < 1.f) {
+            auto text = UString::format("Downloading... %.2f%%", progress * 100.f);
+            m_map_title->setText(text.toUtf8());
+            m_map_title->setSizeToContent(0, 0);
+            m_ready_btn->is_loading = true;
+        } else if(beatmap != nullptr) {
+            current_map_id = bancho.room.map_id;
+            on_map_change();
+        }
+    }
+
     // XXX: Add convar for toggling room backgrounds
     SongBrowser::drawSelectedBeatmapBackgroundImage(g, 1.0);
     OsuScreen::draw(g);
@@ -231,51 +255,6 @@ void RoomScreen::draw(Graphics *g) {
             bool is_above_bottom = avatar->getPos().y <= m_slotlist->getPos().y + m_slotlist->getSize().y;
             avatar->on_screen = is_below_top && is_above_bottom;
         }
-    }
-
-    // Not technically drawing below this line, just checking for map download progress
-    if(bancho.room.map_id == 0) return;
-    if(bancho.room.map_id == -1) {
-        m_map_title->setText("Host is selecting a map...");
-        m_map_title->setSizeToContent(0, 0);
-        m_ready_btn->is_loading = true;
-        return;
-    }
-
-    auto search = mapset_by_mapid.find(bancho.room.map_id);
-    if(search == mapset_by_mapid.end()) return;
-    u32 set_id = search->second;
-    if(set_id == 0) {
-        auto error_str = UString::format("Could not find beatmapset for map ID %d", bancho.room.map_id);
-        m_map_title->setText(error_str);
-        m_map_title->setSizeToContent(0, 0);
-        m_ready_btn->is_loading = true;
-        return;
-    }
-
-    // Download mapset
-    float progress = -1.f;
-    download_beatmapset(set_id, &progress);
-    if(progress == -1.f) {
-        auto error_str = UString::format("Failed to download beatmapset %d :(", set_id);
-        m_map_title->setText(error_str);
-        m_map_title->setSizeToContent(0, 0);
-        m_ready_btn->is_loading = true;
-        bancho.room.map_id = 0;  // don't try downloading it again
-    } else if(progress < 1.f) {
-        auto text = UString::format("Downloading... %.2f%%", progress * 100.f);
-        m_map_title->setText(text.toUtf8());
-        m_map_title->setSizeToContent(0, 0);
-        m_ready_btn->is_loading = true;
-    } else {
-        std::stringstream ss;
-        ss << MCENGINE_DATA_DIR "maps/" << std::to_string(set_id) << "/";
-        auto mapset_path = ss.str();
-        // XXX: Make a permanent database for auto-downloaded songs, so we can load them like osu!.db's
-        osu->m_songBrowser2->getDatabase()->addBeatmap(mapset_path);
-        osu->m_songBrowser2->updateSongButtonSorting();
-        debugLog("Finished loading beatmapset %d.\n", set_id);
-        on_map_change(false);
     }
 }
 
@@ -518,51 +497,7 @@ void RoomScreen::ragequit() {
     osu->m_chat->updateVisibility();
 }
 
-void RoomScreen::process_beatmapset_info_response(Packet packet) {
-    u32 map_id = packet.extra_int;
-    if(packet.size == 0) {
-        osu->m_room->mapset_by_mapid[map_id] = 0;
-        return;
-    }
-
-    // {set_id}.osz|{artist}|{title}|{creator}|{status}|10.0|{last_update}|{set_id}|0|0|0|0|0
-    char *saveptr = NULL;
-    char *str = strtok_r((char *)packet.memory, "|", &saveptr);
-    if(!str) return;
-    // Do nothing with beatmapset filename
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return;
-    // Do nothing with beatmap artist
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return;
-    // Do nothing with beatmap title
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return;
-    // Do nothing with beatmap creator
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return;
-    // Do nothing with beatmap status
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return;
-    // Do nothing with beatmap rating
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return;
-    // Do nothing with beatmap last update
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return;
-    osu->m_room->mapset_by_mapid[map_id] = strtoul(str, NULL, 10);
-
-    // Do nothing with the rest
-}
-
-void RoomScreen::on_map_change(bool download) {
+void RoomScreen::on_map_change() {
     // Results screen has map background and such showing, so prevent map from changing while we're on it.
     if(osu->m_rankingScreen->isVisible()) return;
 
@@ -601,31 +536,7 @@ void RoomScreen::on_map_change(bool download) {
             Packet packet;
             packet.id = MATCH_HAS_BEATMAP;
             send_packet(packet);
-        } else if(download) {
-            // Request beatmap info - automatically starts download
-            auto path = UString::format("/web/osu-search-set.php?b=%d&u=%s&h=%s", bancho.room.map_id,
-                                        bancho.username.toUtf8(), bancho.pw_md5.toUtf8());
-            APIRequest request;
-            request.type = GET_BEATMAPSET_INFO;
-            request.path = path;
-            request.mime = NULL;
-            request.extra_int = (u32)bancho.room.map_id;
-
-            send_api_request(request);
-
-            m_map_title->setText("Loading...");
-            m_map_title->setSizeToContent(0, 0);
-            m_ready_btn->is_loading = true;
-
-            Packet packet;
-            packet.id = MATCH_NO_BEATMAP;
-            send_packet(packet);
         } else {
-            m_map_title->setText("Failed to load map. Is it catch/taiko/mania?");
-            m_map_title->setSizeToContent(0, 0);
-            m_ready_btn->is_loading = true;
-            bancho.room.map_id = 0;  // prevents trying to load it again
-
             Packet packet;
             packet.id = MATCH_NO_BEATMAP;
             send_packet(packet);
@@ -645,7 +556,7 @@ void RoomScreen::on_room_joined(Room room) {
         }
     }
 
-    on_map_change(true);
+    on_map_change();
 
     // Currently we can only join rooms from the lobby.
     // If we add ability to join from links, you would need to hide all other
@@ -683,7 +594,7 @@ void RoomScreen::on_room_updated(Room room) {
     }
 
     if(map_changed) {
-        on_map_change(true);
+        on_map_change();
     }
 
     if(!was_host && bancho.room.is_host()) {
@@ -791,32 +702,7 @@ void RoomScreen::onClientScoreChange(bool force) {
 
     Packet packet;
     packet.id = UPDATE_MATCH_SCORE;
-
-    write<u32>(&packet, (i32)osu->getSelectedBeatmap()->getTime());
-
-    u8 slot_id = 0;
-    for(u8 i = 0; i < 16; i++) {
-        if(bancho.room.slots[i].player_id == bancho.user_id) {
-            slot_id = i;
-            break;
-        }
-    }
-    write<u8>(&packet, slot_id);
-
-    write<u16>(&packet, (u16)osu->getScore()->getNum300s());
-    write<u16>(&packet, (u16)osu->getScore()->getNum100s());
-    write<u16>(&packet, (u16)osu->getScore()->getNum50s());
-    write<u16>(&packet, (u16)osu->getScore()->getNum300gs());
-    write<u16>(&packet, (u16)osu->getScore()->getNum100ks());
-    write<u16>(&packet, (u16)osu->getScore()->getNumMisses());
-    write<u32>(&packet, (i32)osu->getScore()->getScore());
-    write<u16>(&packet, (u16)osu->getScore()->getCombo());
-    write<u16>(&packet, (u16)osu->getScore()->getComboMax());
-    write<u8>(&packet, osu->getScore()->getNumSliderBreaks() == 0 && osu->getScore()->getNumMisses() == 0 &&
-                           osu->getScore()->getNum50s() == 0 && osu->getScore()->getNum100s() == 0);
-    write<u8>(&packet, osu->getSelectedBeatmap()->getHealth() * 200);
-    write<u8>(&packet, 0);  // 4P, not supported
-    write<u8>(&packet, osu->getModScorev2());
+    write<ScoreFrame>(&packet, ScoreFrame::get());
     send_packet(packet);
 
     last_packet_tms = time(NULL);

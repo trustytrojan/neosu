@@ -31,7 +31,7 @@ struct APIRequest {
     UString path = "";
     curl_mime *mime = NULL;
     u8 *extra = nullptr;
-    u32 extra_int = 0;  // lazy
+    i32 extra_int = 0;  // lazy
 };
 
 struct ReplayExtraInfo {

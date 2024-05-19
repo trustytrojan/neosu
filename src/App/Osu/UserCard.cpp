@@ -1,7 +1,4 @@
-#include "UserButton.h"
-
-#include "SongBrowser.h"
-// ---
+#include "UserCard.h"
 
 #include "AnimationHandler.h"
 #include "Bancho.h"
@@ -14,6 +11,7 @@
 #include "Osu.h"
 #include "ResourceManager.h"
 #include "Skin.h"
+#include "SongBrowser/SongBrowser.h"
 #include "TooltipOverlay.h"
 #include "UIAvatar.h"
 
@@ -24,8 +22,10 @@ ConVar osu_user_draw_accuracy("osu_user_draw_accuracy", true, FCVAR_DEFAULT);
 ConVar osu_user_draw_level("osu_user_draw_level", true, FCVAR_DEFAULT);
 ConVar osu_user_draw_level_bar("osu_user_draw_level_bar", true, FCVAR_DEFAULT);
 
-UserButton::UserButton() : CBaseUIButton() {
+UserCard::UserCard(i32 user_id) : CBaseUIButton() {
     m_osu_scores_enabled_ref = convar->getConVarByName("osu_scores_enabled");
+
+    setID(user_id);
 
     m_fPP = 0.0f;
     m_fAcc = 0.0f;
@@ -34,18 +34,17 @@ UserButton::UserButton() : CBaseUIButton() {
 
     m_fPPDelta = 0.0f;
     m_fPPDeltaAnim = 0.0f;
-
-    m_fHoverAnim = 0.0f;
 }
 
-void UserButton::draw(Graphics *g) {
+UserCard::~UserCard() { SAFE_DELETE(m_avatar); }
+
+void UserCard::draw(Graphics *g) {
     if(!m_bVisible) return;
 
     int yCounter = 0;
 
     // draw background
-    const float backgroundBrightness = m_fHoverAnim * 0.175f;
-    g->setColor(COLORf(1.0f, backgroundBrightness, backgroundBrightness, backgroundBrightness));
+    g->setColor(COLORf(1.0f, 0.f, 0.f, 0.f));
     g->fillRect(m_vPos.x + 1, m_vPos.y + 1, m_vSize.x - 1, m_vSize.y - 1);
 
     const float iconBorder = m_vSize.y * 0.03f;
@@ -183,9 +182,7 @@ void UserButton::draw(Graphics *g) {
             const Vector2 textPos = Vector2(pos.x, pos.y + deltaFont->getHeight() * scale);
 
             // background (to ensure readability even with stupid long usernames)
-            g->setColor(COLORf(1.0f, backgroundBrightness, backgroundBrightness,
-                               backgroundBrightness));  // NOTE: this must match the general background rect color in
-                                                        // order to merge seamlessly
+            g->setColor(COLORf(1.0f, 0.f, 0.f, 0.f));
             g->setAlpha(1.0f - (1.0f - m_fPPDeltaAnim) * (1.0f - m_fPPDeltaAnim));
             g->fillRect(pos.x, pos.y, backgroundSize.x, backgroundSize.y);
 
@@ -210,8 +207,19 @@ void UserButton::draw(Graphics *g) {
     }
 }
 
-void UserButton::mouse_update(bool *propagate_clicks) {
+void UserCard::mouse_update(bool *propagate_clicks) {
     if(!m_bVisible) return;
+
+    if(m_user_id > 0) {
+        UserInfo *my = get_user_info(m_user_id);
+        m_sText = my->name;
+
+        static i64 total_score = 0;
+        if(total_score != my->total_score) {
+            total_score = my->total_score;
+            updateUserStats();
+        }
+    }
 
     if(m_avatar) {
         m_avatar->mouse_update(propagate_clicks);
@@ -221,11 +229,11 @@ void UserButton::mouse_update(bool *propagate_clicks) {
     CBaseUIButton::mouse_update(propagate_clicks);
 }
 
-void UserButton::updateUserStats() {
+void UserCard::updateUserStats() {
     Database::PlayerStats stats = osu->getSongBrowser()->getDatabase()->calculatePlayerStats(m_sText);
 
-    if(bancho.user_id > 0) {
-        UserInfo *my = get_user_info(bancho.user_id);
+    if(m_user_id > 0) {
+        UserInfo *my = get_user_info(m_user_id);
 
         int level = Database::getLevelForScore(my->total_score);
         float percentToNextLevel = 1.f;
@@ -261,9 +269,6 @@ void UserButton::updateUserStats() {
     m_fPercentToNextLevel = stats.percentToNextLevel;
 
     if(changed) {
-        anim->moveQuadOut(&m_fHoverAnim, 1.5f, 0.2f, true);
-        anim->moveLinear(&m_fHoverAnim, 0.0f, 1.5f, 0.2f);
-
         if(changedPP && !isFirstLoad && m_fPPDelta != 0.0f && m_fPP != 0.0f) {
             m_fPPDeltaAnim = 1.0f;
             anim->moveLinear(&m_fPPDeltaAnim, 0.0f, 25.0f, true);
@@ -271,12 +276,15 @@ void UserButton::updateUserStats() {
     }
 }
 
-void UserButton::onMouseInside() {
-    CBaseUIButton::onMouseInside();
-    anim->moveLinear(&m_fHoverAnim, 1.0f, 0.15f * (1.0f - m_fHoverAnim), true);
-}
+void UserCard::setID(i32 new_id) {
+    SAFE_DELETE(m_avatar);
 
-void UserButton::onMouseOutside() {
-    CBaseUIButton::onMouseOutside();
-    anim->moveLinear(&m_fHoverAnim, 0.0f, 0.15f * m_fHoverAnim, true);
+    m_user_id = new_id;
+    if(m_user_id > 0) {
+        m_avatar = new UIAvatar(m_user_id, 0.f, 0.f, 0.f, 0.f);
+        m_avatar->on_screen = true;
+        m_sText = "Mysterious user";
+    } else {
+        m_sText = convar->getConVarByName("name")->getString();
+    }
 }

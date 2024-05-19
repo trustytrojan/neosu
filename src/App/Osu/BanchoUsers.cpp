@@ -3,6 +3,16 @@
 std::unordered_map<u32, UserInfo*> online_users;
 std::vector<u32> friends;
 
+UserInfo* find_user(UString username) {
+    for(auto pair : online_users) {
+        if(pair.second->name == username) {
+            return pair.second;
+        }
+    }
+
+    return nullptr;
+}
+
 UserInfo* get_user_info(u32 user_id, bool fetch) {
     auto it = online_users.find(user_id);
     if(it != online_users.end()) {

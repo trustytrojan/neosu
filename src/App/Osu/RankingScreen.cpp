@@ -444,7 +444,7 @@ CBaseUIContainer *RankingScreen::setVisible(bool visible) {
         osu->m_chat->updateVisibility();
 
         // Since we prevented on_map_change() from running while the ranking screen was visible, run it now.
-        osu->m_room->on_map_change(true);
+        osu->m_room->on_map_change();
     }
 
     return this;

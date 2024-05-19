@@ -46,6 +46,8 @@ class Beatmap {
     // live (but also on start)
     void onModUpdate(bool rebuildSliderVertexBuffers = true, bool recomputeDrainRate = true);
 
+    bool isBuffering();
+
     // Returns true if we're loading or waiting on other players
     bool isLoading();
 
@@ -108,8 +110,11 @@ class Beatmap {
                     // clicking on a beatmap)
     void selectDifficulty2(DatabaseBeatmap *difficulty2);
     void deselect();  // stops + unloads the currently loaded music and deletes all hitobjects
+
     bool play();
     bool watch(FinishedScore score, double start_percent);
+    bool spectate();
+
     bool start();
     void restart(bool quick = false);
     void pause(bool quitIfWaiting = true);
@@ -198,12 +203,17 @@ class Beatmap {
     bool m_bIsWatchingReplay = false;
     long current_frame_idx = 0;
 
-    // spectating
+    // getting spectated
     void broadcast_spectator_frames();
     std::vector<LiveReplayFrame> frame_batch;
     double last_spectator_broadcast = 0;
     u16 spectator_sequence = 0;
+
+    // spectating
+    std::vector<ScoreFrame> score_frames;
     bool is_spectating = false;
+    bool is_buffering = false;
+    i32 last_frame_ms = 0;
 
     // used by HitObject children and ModSelector
     Skin *getSkin() const;  // maybe use this for beatmap skins, maybe

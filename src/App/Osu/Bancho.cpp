@@ -20,6 +20,7 @@
 #include "BanchoNetworking.h"
 #include "BanchoProtocol.h"
 #include "BanchoUsers.h"
+#include "Beatmap.h"
 #include "Chat.h"
 #include "ConVar.h"
 #include "Engine.h"
@@ -31,9 +32,9 @@
 #include "Osu.h"
 #include "RoomScreen.h"
 #include "SongBrowser/SongBrowser.h"
-#include "SongBrowser/UserButton.h"
 #include "UIAvatar.h"
 #include "UIButton.h"
+#include "UserCard.h"
 
 Bancho bancho;
 std::unordered_map<std::string, Channel *> chat_channels;
@@ -216,10 +217,7 @@ void handle_packet(Packet *packet) {
                 env->createDirectory(replays_dir);
             }
 
-            // close your eyes
-            SAFE_DELETE(osu->m_songBrowser2->m_userButton->m_avatar);
-            osu->m_songBrowser2->m_userButton->m_avatar = new UIAvatar(bancho.user_id, 0.f, 0.f, 0.f, 0.f);
-            osu->m_songBrowser2->m_userButton->m_avatar->on_screen = true;
+            osu->getSongBrowser()->onUserCardChange(bancho.username);
 
             // XXX: We should toggle between "offline" sorting options and "online" ones
             //      Online ones would be "Local scores", "Global", "Country", "Selected mods" etc
@@ -289,7 +287,7 @@ void handle_packet(Packet *packet) {
         UserInfo *user = get_user_info(stats_user_id);
         user->action = (Action)action;
         user->info_text = read_string(packet);
-        user->map_md5 = read_string(packet);
+        user->map_md5 = read_hash(packet);
         user->mods = read<u32>(packet);
         user->mode = (GameMode)read<u8>(packet);
         user->map_id = read<u32>(packet);
@@ -309,6 +307,41 @@ void handle_packet(Packet *packet) {
         if(logged_out_id == bancho.user_id) {
             debugLog("Logged out.\n");
             disconnect();
+        }
+    } else if(packet->id == IN_SPECTATE_FRAMES) {
+        i32 target = read<i32>(packet);
+        if(bancho.spectated_player_id != 0 && bancho.spectated_player_id == target) {
+            u16 nb_frames = read<u16>(packet);
+            for(u16 i = 0; i < nb_frames; i++) {
+                auto frame = read<LiveReplayFrame>(packet);
+                osu->getSelectedBeatmap()->spectated_replay.push_back(Replay::Frame{
+                    .cur_music_pos = frame.time,
+                    .milliseconds_since_last_frame = frame.time - osu->getSelectedBeatmap()->last_frame_ms,
+                    .x = frame.mouse_x,
+                    .y = frame.mouse_y,
+                    .key_flags = frame.key_flags,
+                });
+                osu->getSelectedBeatmap()->last_frame_ms = frame.time;
+            }
+
+            // TODO @kiwec: handle actions
+            LiveReplayBundle::Action action = (LiveReplayBundle::Action)read<u8>(packet);
+            // NONE = 0
+            // NEW_SONG = 1
+            // SKIP = 2
+            // COMPLETION = 3
+            // FAIL = 4
+            // PAUSE = 5
+            // UNPAUSE = 6
+            // SONG_SELECT = 7
+            // WATCHING_OTHER = 8
+
+            // TODO @kiwec: handle score frames
+            auto score_frame = read<ScoreFrame>(packet);
+            osu->getSelectedBeatmap()->score_frames.push_back(score_frame);
+
+            auto sequence = read<u16>(packet);
+            (void)sequence;  // don't know how to use this
         }
     } else if(packet->id == SPECTATOR_JOINED) {
         i32 spectator_id = read<u32>(packet);

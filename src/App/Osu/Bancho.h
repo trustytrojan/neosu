@@ -20,6 +20,8 @@ struct Bancho {
     UString username;
     MD5Hash pw_md5;
     Room room;
+
+    i32 spectated_player_id = 0;
     std::vector<u32> spectators;
     std::vector<u32> fellow_spectators;
 

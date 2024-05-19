@@ -8,6 +8,7 @@
 #include "Mouse.h"
 #include "NotificationOverlay.h"
 #include "Osu.h"
+#include "SpectatorScreen.h"
 #include "UIContextMenu.h"
 
 UIUserContextMenuScreen::UIUserContextMenuScreen() : OsuScreen() {
@@ -69,8 +70,11 @@ void UIUserContextMenuScreen::open(u32 user_id) {
             menu->addButton("Add as friend", UA_ADD_FRIEND);
         }
 
-        // XXX: Not implemented
-        // menu->addButton("Spectate", TOGGLE_SPECTATE);
+        if(bancho.spectated_player_id == user_id) {
+            menu->addButton("Stop spectating", TOGGLE_SPECTATE);
+        } else {
+            menu->addButton("Spectate", TOGGLE_SPECTATE);
+        }
     }
 
     menu->end(false, false);
@@ -125,6 +129,12 @@ void UIUserContextMenuScreen::on_action(UString text, int user_action) {
         auto it = std::find(friends.begin(), friends.end(), m_user_id);
         if(it != friends.end()) {
             friends.erase(it);
+        }
+    } else if(user_action == TOGGLE_SPECTATE) {
+        if(bancho.spectated_player_id == m_user_id) {
+            stop_spectating();
+        } else {
+            start_spectating(m_user_id);
         }
     }
 

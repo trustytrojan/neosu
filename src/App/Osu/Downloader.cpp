@@ -9,7 +9,10 @@
 #include "BanchoNetworking.h"
 #include "BanchoProtocol.h"
 #include "ConVar.h"
+#include "Database.h"
 #include "Engine.h"
+#include "Osu.h"
+#include "SongBrowser/SongBrowser.h"
 #include "miniz.h"
 
 struct DownloadResult {
@@ -289,4 +292,117 @@ void download_beatmapset(u32 set_id, float* progress) {
 
     // Success
     mz_zip_reader_end(&zip);
+}
+
+std::unordered_map<i32, i32> beatmap_to_beatmapset;
+DatabaseBeatmap* download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* progress) {
+    static i32 queried_map_id = 0;
+
+    auto beatmap = osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(beatmap_md5);
+    if(beatmap != nullptr) {
+        *progress = 1.f;
+        return beatmap;
+    }
+
+    // XXX: Currently, we do not try to find the difficulty from unloaded database, or from neosu downloaded maps
+    auto it = beatmap_to_beatmapset.find(beatmap_id);
+    if(it == beatmap_to_beatmapset.end()) {
+        if(queried_map_id == beatmap_id) {
+            // We already queried for the beatmapset ID, and are waiting for the response
+            *progress = 0.f;
+            return nullptr;
+        }
+
+        APIRequest request;
+        request.type = GET_BEATMAPSET_INFO;
+        request.path = UString::format("/web/osu-search-set.php?b=%d&u=%s&h=%s", beatmap_id, bancho.username.toUtf8(),
+                                       bancho.pw_md5.toUtf8());
+        request.extra_int = beatmap_id;
+        send_api_request(request);
+
+        queried_map_id = beatmap_id;
+
+        *progress = 0.f;
+        return nullptr;
+    }
+
+    i32 set_id = it->second;
+    if(set_id == 0) {
+        // Already failed to load the beatmap
+        *progress = -1.f;
+        return nullptr;
+    }
+
+    download_beatmapset(set_id, progress);
+    if(*progress == -1.f) {
+        // Download failed, don't retry
+        beatmap_to_beatmapset[beatmap_id] = 0;
+        return nullptr;
+    }
+
+    // Download not finished
+    if(*progress != 1.f) return nullptr;
+
+    std::stringstream ss;
+    ss << MCENGINE_DATA_DIR "maps/" << std::to_string(set_id) << "/";
+    auto mapset_path = ss.str();
+    // XXX: Make a permanent database for auto-downloaded songs, so we can load them like osu!.db's
+    osu->m_songBrowser2->getDatabase()->addBeatmap(mapset_path);
+    osu->m_songBrowser2->updateSongButtonSorting();
+    debugLog("Finished loading beatmapset %d.\n", set_id);
+
+    beatmap = osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(beatmap_md5);
+    if(beatmap == nullptr) {
+        beatmap_to_beatmapset[beatmap_id] = 0;
+        *progress = -1.f;
+        return nullptr;
+    }
+
+    *progress = 1.f;
+    return beatmap;
+}
+
+void process_beatmapset_info_response(Packet packet) {
+    i32 map_id = packet.extra_int;
+    if(packet.size == 0) {
+        beatmap_to_beatmapset[map_id] = 0;
+        return;
+    }
+
+    // {set_id}.osz|{artist}|{title}|{creator}|{status}|10.0|{last_update}|{set_id}|0|0|0|0|0
+    char* saveptr = NULL;
+    char* str = strtok_r((char*)packet.memory, "|", &saveptr);
+    if(!str) return;
+    // Do nothing with beatmapset filename
+
+    str = strtok_r(NULL, "|", &saveptr);
+    if(!str) return;
+    // Do nothing with beatmap artist
+
+    str = strtok_r(NULL, "|", &saveptr);
+    if(!str) return;
+    // Do nothing with beatmap title
+
+    str = strtok_r(NULL, "|", &saveptr);
+    if(!str) return;
+    // Do nothing with beatmap creator
+
+    str = strtok_r(NULL, "|", &saveptr);
+    if(!str) return;
+    // Do nothing with beatmap status
+
+    str = strtok_r(NULL, "|", &saveptr);
+    if(!str) return;
+    // Do nothing with beatmap rating
+
+    str = strtok_r(NULL, "|", &saveptr);
+    if(!str) return;
+    // Do nothing with beatmap last update
+
+    str = strtok_r(NULL, "|", &saveptr);
+    if(!str) return;
+
+    beatmap_to_beatmapset[map_id] = strtoul(str, NULL, 10);
+
+    // Do nothing with the rest
 }

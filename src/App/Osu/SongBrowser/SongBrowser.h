@@ -12,13 +12,12 @@ class UIContextMenu;
 class UISearchOverlay;
 class UISelectionButton;
 class InfoLabel;
-class UserButton;
+class UserCard;
 class ScoreButton;
 class Button;
 class SongButton;
 class SongDifficultyButton;
 class CollectionButton;
-class UIUserStatsScreenLabel;
 
 class CBaseUIContainer;
 class CBaseUIImageButton;
@@ -233,8 +232,7 @@ class SongBrowser : public ScreenBackable {
     void onModeChange(UString text);
     void onModeChange2(UString text, int id = -1);
 
-    void onUserButtonClicked();
-    void onUserButtonChange(UString text, int id);
+    void onUserCardChange(UString new_username);
 
     void onScoreClicked(CBaseUIButton *button);
 
@@ -295,8 +293,7 @@ class SongBrowser : public ScreenBackable {
     // bottom bar
     CBaseUIContainer *m_bottombar;
     std::vector<UISelectionButton *> m_bottombarNavButtons;
-    UserButton *m_userButton;
-    UIUserStatsScreenLabel *m_ppVersionInfoLabel;
+    UserCard *m_userButton = nullptr;
 
     // score browser
     std::vector<ScoreButton *> m_scoreButtonCache;

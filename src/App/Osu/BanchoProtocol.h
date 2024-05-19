@@ -41,6 +41,7 @@ enum IncomingPackets {
     USER_LOGOUT = 12,
     SPECTATOR_JOINED = 13,
     SPECTATOR_LEFT = 14,
+    IN_SPECTATE_FRAMES = 15,
     VERSION_UPDATE = 19,
     SPECTATOR_CANT_SPECTATE = 22,
     GET_ATTENTION = 23,
@@ -91,7 +92,7 @@ enum OutgoingPackets {
     PING = 4,
     START_SPECTATING = 16,
     STOP_SPECTATING = 17,
-    SPECTATE_FRAMES = 18,
+    OUT_SPECTATE_FRAMES = 18,
     ERROR_REPORT = 20,
     CANT_SPECTATE = 21,
     SEND_PRIVATE_MESSAGE = 25,
@@ -141,7 +142,7 @@ struct Packet {
     size_t size = 0;
     size_t pos = 0;
     u8 *extra = nullptr;
-    u32 extra_int = 0;  // lazy
+    i32 extra_int = 0;  // lazy
 
     void reserve(u32 newsize) {
         if(newsize <= size) return;
