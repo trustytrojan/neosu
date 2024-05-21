@@ -144,6 +144,7 @@ ConVar instant_replay_duration("instant_replay_duration", 15.f, FCVAR_DEFAULT,
                                "instant replay (F2) duration, in seconds");
 ConVar normalize_loudness("normalize_loudness", false, FCVAR_DEFAULT, "normalize loudness across songs");
 
+ConVar use_https("use_https", true, FCVAR_DEFAULT);
 ConVar mp_server("mp_server", "ez-pp.farm", FCVAR_DEFAULT);
 ConVar mp_password("mp_password", "", FCVAR_DEFAULT | FCVAR_HIDDEN);
 ConVar mp_autologin("mp_autologin", false, FCVAR_DEFAULT);

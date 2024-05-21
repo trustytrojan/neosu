@@ -420,7 +420,7 @@ void handle_packet(Packet *packet) {
     } else if(packet->id == MAIN_MENU_ICON) {
         UString icon = read_string(packet);
         auto urls = icon.split("|");
-        if(urls.size() == 2 && urls[0].find("https://") == 0) {
+        if(urls.size() == 2 && ((urls[0].find("http://") == 0) || urls[0].find("https://") == 0)) {
             bancho.server_icon_url = urls[0];
         }
     } else if(packet->id == MATCH_PLAYER_SKIPPED) {

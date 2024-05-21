@@ -36,7 +36,8 @@ bool download_avatar(u32 user_id) {
 
     float progress = -1.f;
     std::vector<u8> data;
-    auto img_url = UString::format("https://a.%s/%d", bancho.endpoint.toUtf8(), user_id);
+    auto scheme = convar->getConVarByName("use_https")->getBool() ? "https://" : "http://";
+    auto img_url = UString::format("%sa.%s/%d", scheme, bancho.endpoint.toUtf8(), user_id);
     int response_code;
     download(img_url.toUtf8(), &progress, data, &response_code);
     if(progress == -1.f) blacklist.push_back(user_id);

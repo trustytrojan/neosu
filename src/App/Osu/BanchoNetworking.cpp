@@ -68,7 +68,8 @@ void disconnect() {
         struct curl_slist *chunk = NULL;
         chunk = curl_slist_append(chunk, auth_header.c_str());
         chunk = curl_slist_append(chunk, version_header.toUtf8());
-        auto query_url = UString::format("https://c.%s/", bancho.endpoint.toUtf8());
+        auto scheme = convar->getConVarByName("use_https")->getBool() ? "https://" : "http://";
+        auto query_url = UString::format("%sc.%s/", scheme, bancho.endpoint.toUtf8());
         curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, packet.memory);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, packet.pos);
@@ -189,7 +190,8 @@ static void send_api_request(CURL *curl, APIRequest api_out) {
     response.memory = (u8 *)malloc(2048);
 
     struct curl_slist *chunk = NULL;
-    auto query_url = UString::format("https://osu.%s%s", bancho.endpoint.toUtf8(), api_out.path.toUtf8());
+    auto scheme = convar->getConVarByName("use_https")->getBool() ? "https://" : "http://";
+    auto query_url = UString::format("%sosu.%s%s", scheme, bancho.endpoint.toUtf8(), api_out.path.toUtf8());
     curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
     if(api_out.type == SUBMIT_SCORE) {
         auto token_header = UString::format("token: %s", cho_token.toUtf8());
@@ -233,7 +235,8 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
     }
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
 
-    auto query_url = UString::format("https://c.%s/", bancho.endpoint.toUtf8());
+    auto scheme = convar->getConVarByName("use_https")->getBool() ? "https://" : "http://";
+    auto query_url = UString::format("%sc.%s/", scheme, bancho.endpoint.toUtf8());
     curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, outgoing.memory);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, outgoing.pos);
