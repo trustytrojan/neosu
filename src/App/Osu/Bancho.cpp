@@ -32,6 +32,7 @@
 #include "Osu.h"
 #include "RoomScreen.h"
 #include "SongBrowser/SongBrowser.h"
+#include "SpectatorScreen.h"  // TODO @kiwec: FOR DEBUGGING
 #include "UIAvatar.h"
 #include "UIButton.h"
 #include "UserCard.h"
@@ -233,6 +234,8 @@ void handle_packet(Packet *packet) {
             request.mime = NULL;
             request.extra = NULL;
             send_api_request(request);
+
+            start_spectating(4);  // TODO @kiwec: FOR DEBUGGING
         } else {
             convar->getConVarByName("mp_autologin")->setValue(false);
             osu->m_optionsMenu->logInButton->setText("Log in");

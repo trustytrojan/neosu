@@ -1178,10 +1178,7 @@ void Osu::updateMods() {
         getSelectedBeatmap()->vanilla = false;  // user just cheated, prevent score submission
 
         if(m_songBrowser2 != NULL) {
-            // XXX: Some race condition here, jank 'fix' is to check if spectating
-            if(!getSelectedBeatmap()->is_spectating) {
-                m_songBrowser2->recalculateStarsForSelectedBeatmap(true);
-            }
+            m_songBrowser2->recalculateStarsForSelectedBeatmap(true);
         }
     }
 }

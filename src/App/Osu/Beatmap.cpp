@@ -5,11 +5,11 @@
 #include <algorithm>
 #include <cctype>
 #include <chrono>
+#include <future>
 #include <sstream>
 
 #include "AnimationHandler.h"
 #include "BackgroundImageHandler.h"
-#include "BackgroundStarCacheLoader.h"
 #include "Bancho.h"
 #include "BanchoNetworking.h"
 #include "BanchoProtocol.h"
@@ -281,8 +281,6 @@ Beatmap::Beatmap() {
     m_osu_volume_music_ref = convar->getConVarByName("osu_volume_music");
     m_osu_mod_fposu_ref = convar->getConVarByName("osu_mod_fposu");
     m_fposu_draw_scorebarbg_on_top_ref = convar->getConVarByName("fposu_draw_scorebarbg_on_top");
-    m_osu_draw_statistics_pp_ref = convar->getConVarByName("osu_draw_statistics_pp");
-    m_osu_draw_statistics_livestars_ref = convar->getConVarByName("osu_draw_statistics_livestars");
     m_osu_mod_fullalternate_ref = convar->getConVarByName("osu_mod_fullalternate");
     m_fposu_distance_ref = convar->getConVarByName("fposu_distance");
     m_fposu_curved_ref = convar->getConVarByName("fposu_curved");
@@ -382,8 +380,6 @@ Beatmap::Beatmap() {
     m_fAimSliderFactor = 0.0f;
     m_fSpeedStars = 0.0f;
     m_fSpeedNotes = 0.0f;
-    m_starCacheLoader = new BackgroundStarCacheLoader(this);
-    m_fStarCacheTime = 0.0f;
 
     m_bWasHREnabled = false;
     m_fPrevHitCircleDiameter = 0.0f;
@@ -394,8 +390,6 @@ Beatmap::Beatmap() {
     m_fPrevPlayfieldRotationFromConVar = 0.0f;
     m_fPrevPlayfieldStretchX = 0.0f;
     m_fPrevPlayfieldStretchY = 0.0f;
-    m_fPrevHitCircleDiameterForStarCache = 1.0f;
-    m_fPrevSpeedForStarCache = 1.0f;
     m_bIsPreLoading = true;
     m_iPreLoadingIndex = 0;
 
@@ -417,16 +411,6 @@ Beatmap::~Beatmap() {
     anim->deleteExistingAnimation(&m_fFailAnim);
 
     unloadObjects();
-
-    m_starCacheLoader->kill();
-
-    if(engine->getResourceManager()->isLoadingResource(m_starCacheLoader)) {
-        while(!m_starCacheLoader->isAsyncReady()) {
-            // wait
-        }
-    }
-
-    engine->getResourceManager()->destroyResource(m_starCacheLoader);
 }
 
 void Beatmap::drawDebug(Graphics *g) {
@@ -704,6 +688,13 @@ void Beatmap::selectDifficulty2(DatabaseBeatmap *difficulty2) {
     }
 
     if(osu_beatmap_preview_mods_live.getBool()) onModUpdate();
+
+    // Request full pp recomputation
+    if(!m_selectedDifficulty2->do_not_store) {
+        m_selectedDifficulty2->m_calculate_full_pp =
+            std::async(std::launch::async, calculate_full_pp, m_selectedDifficulty2->m_sFilePath.c_str(),
+                       osu->getScore()->getModsLegacy(), getAR(), getCS(), getOD(), osu->getSpeedMultiplier());
+    }
 }
 
 void Beatmap::deselect() {
@@ -744,7 +735,6 @@ bool Beatmap::watch(FinishedScore score, double start_percent) {
     m_bIsPlaying = false;
     m_bIsPaused = false;
     m_bContinueScheduled = false;
-    stopStarCacheLoader();
     unloadObjects();
 
     osu->watched_user_name = score.playerName.c_str();
@@ -775,7 +765,6 @@ bool Beatmap::spectate() {
     m_bIsPlaying = false;
     m_bIsPaused = false;
     m_bContinueScheduled = false;
-    stopStarCacheLoader();
     unloadObjects();
 
     auto user_info = get_user_info(bancho.spectated_player_id);
@@ -838,6 +827,8 @@ bool Beatmap::start() {
     // played
     unloadObjects();
     resetScore();
+    osu->getHUD()->live_pp = 0.0;
+    osu->getHUD()->live_stars = 0.0;
 
     // some hitobjects already need this information to be up-to-date before their constructor is called
     updatePlayfieldMetrics();
@@ -927,10 +918,8 @@ bool Beatmap::start() {
     m_bIsPreLoading = true;
     m_iPreLoadingIndex = 0;
 
-    // build stars
-    // first time delay only. subsequent updates should immediately show the loading spinner
-    m_fStarCacheTime = engine->getTime() + osu_pp_live_timeout.getFloat();
-    updateStarCache();
+    // live pp/stars
+    resetLiveStarsTasks();
 
     // load music
     unloadMusic();  // need to reload in case of speed/pitch changes (just to be sure)
@@ -1128,9 +1117,6 @@ void Beatmap::stop(bool quit) {
     m_bIsPaused = false;
     m_bContinueScheduled = false;
     is_spectating = false;
-
-    // kill any running star cache loader
-    stopStarCacheLoader();
 
     saveAndSubmitScore(quit);
 
@@ -1945,24 +1931,7 @@ void Beatmap::draw(Graphics *g) {
 
     // draw loading circle
     if(isLoading()) {
-        if(isLoadingStarCache() && engine->getTime() > m_fStarCacheTime) {
-            u32 progress = 0;
-            if(m_hitobjects.size() > 0) {
-                progress = m_starCacheLoader->getProgress() * 100 / m_hitobjects.size();
-            }
-
-            UString loadingMessage = UString::format("Calculating stars for realtime pp/stars (%d%%) ...", progress);
-            osu->getHUD()->drawLoadingSmall(g, loadingMessage);
-
-            g->pushTransform();
-            UString loadingMessage2 = "(To get rid of this delay, disable [Draw Statistics: pp/Stars***])";
-            g->setColor(0x44ffffff);
-            g->translate((int)(osu->getScreenWidth() / 2 - osu->getSubTitleFont()->getStringWidth(loadingMessage2) / 2),
-                         osu->getScreenHeight() - 15);
-            g->drawString(osu->getSubTitleFont(), loadingMessage2);
-            g->popTransform();
-
-        } else if(isBuffering()) {
+        if(isBuffering()) {
             float leeway = clamp<i32>(last_frame_ms - last_event_ms, 0, 2500);
             float pct = leeway / 2500.f * 100.f;
             auto loadingMessage = UString::format("Buffering ... (%.2f%%)", pct);
@@ -2388,6 +2357,44 @@ void Beatmap::update() {
                 packet.id = MATCH_LOAD_COMPLETE;
                 send_packet(packet);
             }
+        }
+    }
+
+    if(convar->getConVarByName("osu_draw_statistics_pp")->getBool() ||
+       convar->getConVarByName("osu_draw_statistics_livestars")->getBool()) {
+        if(m_gradual_pp != NULL) {
+            if(m_calculate_gradual_pp.valid()) {
+                if(m_calculate_gradual_pp.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+                    m_gradual_pp = m_calculate_gradual_pp.get();
+                    m_calculate_gradual_pp = std::future<gradual_pp *>();
+                }
+            }
+
+            if(m_gradual_pp != NULL && !m_calculate_gradual_pp.valid() &&
+               last_calculated_hitobject < m_iCurrentHitObjectIndex) {
+                auto score = osu->getScore();
+                m_calculate_gradual_pp =
+                    std::async(std::launch::async, calculate_gradual_pp, m_gradual_pp, m_iCurrentHitObjectIndex,
+                               score->getComboMax(), score->getNum300s(), score->getNum100s(), score->getNum50s(),
+                               score->getNumMisses(), &osu->getHUD()->live_stars, &osu->getHUD()->live_pp);
+            }
+        } else if(!m_init_gradual_pp.valid()) {
+            if(Osu::debug->getBool()) {
+                debugLog("m_gradual_pp is NULL, calling init_gradual_pp()\n");
+            }
+            m_init_gradual_pp =
+                std::async(std::launch::async, init_gradual_pp, m_selectedDifficulty2, osu->getScore()->getModsLegacy(),
+                           getAR(), getCS(), getOD(), osu->getSpeedMultiplier());
+        } else if(m_init_gradual_pp.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+            m_gradual_pp = m_init_gradual_pp.get();
+            m_init_gradual_pp = std::future<gradual_pp *>();
+            last_calculated_hitobject = -1;
+
+            auto score = osu->getScore();
+            m_calculate_gradual_pp =
+                std::async(std::launch::async, calculate_gradual_pp, m_gradual_pp, m_iCurrentHitObjectIndex,
+                           score->getComboMax(), score->getNum300s(), score->getNum100s(), score->getNum50s(),
+                           score->getNumMisses(), &osu->getHUD()->live_stars, &osu->getHUD()->live_pp);
         }
     }
 
@@ -3346,28 +3353,26 @@ void Beatmap::onModUpdate(bool rebuildSliderVertexBuffers, bool recomputeDrainRa
         }
     }
 
-    // recalculate star cache for live pp
-    if(m_osu_draw_statistics_pp_ref->getBool() ||
-       m_osu_draw_statistics_livestars_ref->getBool())  // sanity + performance/usability
-    {
-        bool didCSChange = false;
-        if(getHitcircleDiameter() != m_fPrevHitCircleDiameterForStarCache && m_hitobjects.size() > 0) {
-            m_fPrevHitCircleDiameterForStarCache = getHitcircleDiameter();
-            didCSChange = true;
-        }
+    resetLiveStarsTasks();
+}
 
-        bool didSpeedChange = false;
-        if(osu->getSpeedMultiplier() != m_fPrevSpeedForStarCache && m_hitobjects.size() > 0) {
-            // this is not using the beatmap function for speed on purpose, because
-            // that wouldn't work while the music is still loading
-            m_fPrevSpeedForStarCache = osu->getSpeedMultiplier();
-            didSpeedChange = true;
-        }
+void Beatmap::resetLiveStarsTasks() {
+    if(Osu::debug->getBool()) debugLog("Beatmap::resetLiveStarsTasks() called\n");
 
-        if(didCSChange || didSpeedChange) {
-            if(m_selectedDifficulty2 != NULL) updateStarCache();
-        }
+    if(m_init_gradual_pp.valid()) {
+        m_init_gradual_pp.wait();
+        m_init_gradual_pp = std::future<gradual_pp *>();
     }
+    if(m_calculate_gradual_pp.valid()) {
+        m_calculate_gradual_pp.wait();
+        m_calculate_gradual_pp = std::future<gradual_pp *>();
+    }
+
+    free_gradual_pp(m_gradual_pp);
+    m_gradual_pp = NULL;
+
+    osu->getHUD()->live_pp = 0.0;
+    osu->getHUD()->live_stars = 0.0;
 }
 
 // HACK: Updates buffering state and pauses/unpauses the music!
@@ -3399,7 +3404,7 @@ bool Beatmap::isLoading() {
             (bancho.is_playing_a_multi_map() && !bancho.room.all_players_loaded));
 }
 
-bool Beatmap::isActuallyLoading() { return (!m_music->isAsyncReady() || m_bIsPreLoading || isLoadingStarCache()); }
+bool Beatmap::isActuallyLoading() { return (!m_music->isAsyncReady() || m_bIsPreLoading); }
 
 Vector2 Beatmap::pixels2OsuCoords(Vector2 pixelCoords) const {
     // un-first-person
@@ -4468,46 +4473,4 @@ void Beatmap::computeDrainRate() {
 
         m_fDrainRate = result * 1000.0;  // from ms to seconds
     }
-}
-
-void Beatmap::updateStarCache() {
-    if(m_osu_draw_statistics_pp_ref->getBool() || m_osu_draw_statistics_livestars_ref->getBool()) {
-        // so we don't get a useless double load inside onModUpdate()
-        m_fPrevHitCircleDiameterForStarCache = getHitcircleDiameter();
-        m_fPrevSpeedForStarCache = osu->getSpeedMultiplier();
-
-        // kill any running loader, so we get to a clean state
-        stopStarCacheLoader();
-        engine->getResourceManager()->destroyResource(m_starCacheLoader);
-
-        // create new loader
-        m_starCacheLoader = new BackgroundStarCacheLoader(this);
-        m_starCacheLoader->revive();  // activate it
-        engine->getResourceManager()->requestNextLoadAsync();
-        engine->getResourceManager()->loadResource(m_starCacheLoader);
-    }
-}
-
-void Beatmap::stopStarCacheLoader() {
-    if(!m_starCacheLoader->isDead()) {
-        m_starCacheLoader->kill();
-        double startTime = engine->getTimeReal();
-        while(!m_starCacheLoader->isAsyncReady())  // stall main thread until it's killed (this should be very quick,
-                                                   // around max 1 ms, as the kill flag is checked in every iteration)
-        {
-            if(engine->getTimeReal() - startTime > 2) {
-                debugLog("WARNING: Ignoring stuck StarCacheLoader thread!\n");
-                break;
-            }
-        }
-
-        // NOTE: this only works safely because BackgroundStarCacheLoader does no work in load(), because it might
-        // still be in the ResourceManager's sync load() queue, so future loadAsync() could crash with the old pending
-        // load()
-    }
-}
-
-bool Beatmap::isLoadingStarCache() {
-    return ((m_osu_draw_statistics_pp_ref->getBool() || m_osu_draw_statistics_livestars_ref->getBool()) &&
-            !m_starCacheLoader->isReady());
 }

@@ -5,7 +5,6 @@
 class Beatmap;
 class Database;
 class DatabaseBeatmap;
-class DatabaseBeatmapStarCalculator;
 class SkinImage;
 
 class UIContextMenu;
@@ -142,7 +141,6 @@ class SongBrowser : public ScreenBackable {
 
     inline Database *getDatabase() const { return m_db; }
     inline Beatmap *getSelectedBeatmap() const { return m_selectedBeatmap; }
-    inline const DatabaseBeatmapStarCalculator *getDynamicStarCalculator() const { return m_dynamicStarCalculator; }
 
     inline InfoLabel *getInfoLabel() { return m_songInfo; }
 
@@ -181,8 +179,6 @@ class SongBrowser : public ScreenBackable {
 
     void scheduleSearchUpdate(bool immediately = false);
 
-    void checkHandleKillBackgroundStarCalculator();
-    bool checkHandleKillDynamicStarCalculator(bool timeout);
     void checkHandleKillBackgroundSearchMatcher();
 
     UISelectionButton *addBottombarNavButton(std::function<SkinImage *()> getImageFunc,
@@ -354,15 +350,4 @@ class SongBrowser : public ScreenBackable {
     SongBrowserBackgroundSearchMatcher *m_backgroundSearchMatcher;
     bool m_bOnAfterSortingOrGroupChangeUpdateScheduled;
     bool m_bOnAfterSortingOrGroupChangeUpdateScheduledAutoScroll;
-
-    // background star calculation (entire database)
-    float m_fBackgroundStarCalculationWorkNotificationTime;
-    int m_iBackgroundStarCalculationIndex;
-    DatabaseBeatmapStarCalculator *m_backgroundStarCalculator;
-    DatabaseBeatmap *m_backgroundStarCalcTempParent;
-
-    // background star calculation (currently selected beatmap)
-    bool m_bBackgroundStarCalcScheduled;
-    bool m_bBackgroundStarCalcScheduledForce;
-    DatabaseBeatmapStarCalculator *m_dynamicStarCalculator;
 };

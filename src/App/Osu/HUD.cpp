@@ -321,15 +321,12 @@ void HUD::draw(Graphics *g) {
 
             drawStatistics(
                 g, osu->getScore()->getNumMisses(), osu->getScore()->getNumSliderBreaks(),
-                beatmap->getMaxPossibleCombo(),
-                DifficultyCalculator::calculateTotalStarsFromSkills(
-                    beatmap->getAimStarsForUpToHitObjectIndex(hitObjectIndexForCurrentTime),
-                    beatmap->getSpeedStarsForUpToHitObjectIndex(hitObjectIndexForCurrentTime)),
-                osu->getSongBrowser()->getDynamicStarCalculator()->getTotalStars(), beatmap->getMostCommonBPM(),
+                beatmap->getMaxPossibleCombo(), live_stars,
+                osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.total_stars, beatmap->getMostCommonBPM(),
                 GameRules::getApproachRateForSpeedMultiplier(beatmap, beatmap->getSpeedMultiplier()), beatmap->getCS(),
                 GameRules::getOverallDifficultyForSpeedMultiplier(beatmap, beatmap->getSpeedMultiplier()),
-                beatmap->getHP(), beatmap->getNPS(), beatmap->getND(), osu->getScore()->getUnstableRate(),
-                osu->getScore()->getPPv2(), osu->getSongBrowser()->getDynamicStarCalculator()->getPPv2(),
+                beatmap->getHP(), beatmap->getNPS(), beatmap->getND(), osu->getScore()->getUnstableRate(), live_pp,
+                osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.pp,
                 ((int)GameRules::getHitWindow300(beatmap) - 0.5f) *
                     (1.0f / osu->getSpeedMultiplier()),  // see InfoLabel::update()
                 osu->getScore()->getHitErrorAvgCustomMin(), osu->getScore()->getHitErrorAvgCustomMax());

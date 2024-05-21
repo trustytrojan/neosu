@@ -1,7 +1,10 @@
 #pragma once
+#include <future>
+
 #include "DifficultyCalculator.h"
 #include "Osu.h"
 #include "Resource.h"
+#include "pp.h"
 
 class Beatmap;
 class HitObject;
@@ -88,7 +91,7 @@ class DatabaseBeatmap {
         bool isNaN;
     };
 
-    DatabaseBeatmap(std::string filePath, std::string folder, bool filePathIsInMemoryBeatmap = false);
+    DatabaseBeatmap(std::string filePath, std::string folder);
     DatabaseBeatmap(std::vector<DatabaseBeatmap *> *difficulties);
     ~DatabaseBeatmap();
 
@@ -111,6 +114,8 @@ class DatabaseBeatmap {
 
     void setLocalOffset(long localOffset) { m_iLocalOffset = localOffset; }
 
+    std::string m_sFolder;    // path to folder containing .osu file (e.g. "/path/to/beatmapfolder/")
+    std::string m_sFilePath;  // path to .osu file (e.g. "/path/to/beatmapfolder/beatmap.osu")
     inline std::string getFolder() const { return m_sFolder; }
     inline std::string getFilePath() const { return m_sFilePath; }
 
@@ -183,6 +188,10 @@ class DatabaseBeatmap {
     inline long getOnlineOffset() const { return m_iOnlineOffset; }
 
     bool do_not_store = false;
+
+    // song select mod-adjusted pp/stars
+    std::future<pp_info> m_calculate_full_pp;
+    pp_info m_pp_info;
 
    private:
     // raw metadata
@@ -304,7 +313,6 @@ class DatabaseBeatmap {
 
     friend class Database;
     friend class BackgroundImageHandler;
-    friend class DatabaseBeatmapStarCalculator;
 
     static unsigned long long sortHackCounter;
 
@@ -314,10 +322,8 @@ class DatabaseBeatmap {
     static ConVar *m_osu_debug_pp_ref;
     static ConVar *m_osu_slider_end_inside_check_offset_ref;
 
-    static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string osuFilePath,
-                                                    bool filePathIsInMemoryBeatmap = false);
-    static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string osuFilePath, bool filePathIsInMemoryBeatmap,
-                                                    const std::atomic<bool> &dead);
+    static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string osuFilePath);
+    static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string osuFilePath, const std::atomic<bool> &dead);
     static CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT calculateSliderTimesClicksTicks(int beatmapVersion,
                                                                                       std::vector<SLIDER> &sliders,
                                                                                       zarray<TIMINGPOINT> &timingpoints,
@@ -326,10 +332,6 @@ class DatabaseBeatmap {
     static CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT calculateSliderTimesClicksTicks(
         int beatmapVersion, std::vector<SLIDER> &sliders, zarray<TIMINGPOINT> &timingpoints, float sliderMultiplier,
         float sliderTickRate, const std::atomic<bool> &dead);
-
-    std::string m_sFolder;    // path to folder containing .osu file (e.g. "/path/to/beatmapfolder/")
-    std::string m_sFilePath;  // path to .osu file (e.g. "/path/to/beatmapfolder/beatmap.osu")
-    bool m_bFilePathIsInMemoryBeatmap;
 
     unsigned long long m_iSortHack;
 
@@ -366,64 +368,6 @@ class DatabaseBeatmapBackgroundImagePathLoader : public Resource {
 
     std::string m_sFilePath;
     std::string m_sLoadedBackgroundImageFileName;
-};
-
-class DatabaseBeatmapStarCalculator : public Resource {
-   public:
-    DatabaseBeatmapStarCalculator();
-
-    bool isDead() const { return m_bDead.load(); }
-    void kill() { m_bDead = true; }
-    void revive() { m_bDead = false; }
-
-    void setBeatmapDifficulty(DatabaseBeatmap *diff2, float AR, float CS, float OD, float speedMultiplier, bool relax,
-                              bool touchDevice);
-
-    inline DatabaseBeatmap *getBeatmapDifficulty() const { return m_diff2; }
-
-    inline double getTotalStars() const { return m_totalStars.load(); }
-    inline double getAimStars() const { return m_aimStars.load(); }
-    inline double getSpeedStars() const { return m_speedStars.load(); }
-    inline double getPPv2() const { return m_pp.load(); }  // NOTE: pp with currently active mods (runtime mods)
-
-    inline long getLengthMS() const { return m_iLengthMS.load(); }
-
-    inline int getNumObjects() const { return m_iNumObjects.load(); }
-    inline int getNumCircles() const { return m_iNumCircles.load(); }
-    inline int getNumSpinners() const { return m_iNumSpinners.load(); }
-
-   private:
-    virtual void init();
-    virtual void initAsync();
-    virtual void destroy() { ; }
-
-    std::atomic<bool> m_bDead;
-
-    DatabaseBeatmap *m_diff2;
-
-    float m_fAR;
-    float m_fCS;
-    float m_fOD;
-    float m_fSpeedMultiplier;
-    bool m_bRelax;
-    bool m_bTouchDevice;
-
-    std::atomic<double> m_totalStars;
-    std::atomic<double> m_aimStars;
-    std::atomic<double> m_aimSliderFactor;
-    std::atomic<double> m_speedStars;
-    std::atomic<double> m_speedNotes;
-    std::atomic<double> m_pp;
-
-    std::atomic<long> m_iLengthMS;
-
-    // custom
-    int m_iErrorCode;
-    std::atomic<int> m_iNumObjects;
-    std::atomic<int> m_iNumCircles;
-    std::atomic<int> m_iNumSliders;
-    std::atomic<int> m_iNumSpinners;
-    int m_iMaxPossibleCombo;
 };
 
 struct BPMInfo {

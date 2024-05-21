@@ -1,0 +1,11 @@
+[package]
+name = "rosu-pp-c"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+libc = "0.2.155"
+rosu-pp = "1.0.0"
+
+[lib]
+crate-type = ["staticlib"]

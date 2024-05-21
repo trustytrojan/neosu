@@ -23,7 +23,6 @@ class SongDifficultyButton : public SongButton {
 
    private:
     static ConVar *m_osu_scores_enabled;
-    static ConVar *m_osu_songbrowser_dynamic_star_recalc_ref;
 
     virtual void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected);
 

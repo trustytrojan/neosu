@@ -87,6 +87,9 @@ class HUD : public OsuScreen {
     std::vector<ScoreboardSlot *> slots;
     MD5Hash beatmap_md5;
 
+    f64 live_pp = 0.0;
+    f64 live_stars = 0.0;
+
    private:
     struct CURSORTRAIL {
         Vector2 pos;

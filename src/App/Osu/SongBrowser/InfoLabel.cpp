@@ -21,7 +21,6 @@ InfoLabel::InfoLabel(float xPos, float yPos, float xSize, float ySize, UString n
     m_font = osu->getSubTitleFont();
 
     m_osu_debug_ref = convar->getConVarByName("osu_debug");
-    m_osu_songbrowser_dynamic_star_recalc_ref = convar->getConVarByName("osu_songbrowser_dynamic_star_recalc");
 
     m_iMargin = 10;
 
@@ -225,17 +224,13 @@ void InfoLabel::mouse_update(bool *propagate_clicks) {
                     int numSliders = beatmap->getSelectedDifficulty2()->getNumSliders();
                     unsigned long lengthMS = beatmap->getSelectedDifficulty2()->getLengthMS();
 
-                    const bool areStarsInaccurate =
-                        (osu->getSongBrowser()->getDynamicStarCalculator()->isDead() ||
-                         !osu->getSongBrowser()->getDynamicStarCalculator()->isAsyncReady());
-                    if(!areStarsInaccurate) {
-                        numObjects = osu->getSongBrowser()->getDynamicStarCalculator()->getNumObjects();
-                        numCircles = osu->getSongBrowser()->getDynamicStarCalculator()->getNumCircles();
-                        numSliders =
-                            std::max(0, osu->getSongBrowser()->getDynamicStarCalculator()->getNumObjects() -
-                                            osu->getSongBrowser()->getDynamicStarCalculator()->getNumCircles() -
-                                            osu->getSongBrowser()->getDynamicStarCalculator()->getNumSpinners());
-                        lengthMS = osu->getSongBrowser()->getDynamicStarCalculator()->getLengthMS();
+                    if(osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.ok) {
+                        numObjects = osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.num_objects;
+                        numCircles = osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.num_circles;
+                        numSliders = std::max(
+                            0, numObjects -
+                                   (numCircles +
+                                    (i32)osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.num_spinners));
                     }
 
                     const float opm =
@@ -312,12 +307,6 @@ void InfoLabel::setFromMissingBeatmap(long beatmapId) {
 UString InfoLabel::buildSongInfoString() {
     unsigned long lengthMS = m_iLengthMS;
 
-    const bool areStarsInaccurate = (osu->getSongBrowser()->getDynamicStarCalculator()->isDead() ||
-                                     !osu->getSongBrowser()->getDynamicStarCalculator()->isAsyncReady());
-
-    if(!areStarsInaccurate)
-        lengthMS = std::max(lengthMS, (unsigned long)osu->getSongBrowser()->getDynamicStarCalculator()->getLengthMS());
-
     const unsigned long fullSeconds = (lengthMS * (1.0 / osu->getSpeedMultiplier())) / 1000.0;
     const int minutes = fullSeconds / 60;
     const int seconds = fullSeconds % 60;
@@ -327,14 +316,16 @@ UString InfoLabel::buildSongInfoString() {
     const int mostCommonBPM = m_iMostCommonBPM * osu->getSpeedMultiplier();
 
     int numObjects = m_iNumObjects;
+    if(osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.ok) {
+        numObjects = osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.num_objects;
+    }
 
-    if(!areStarsInaccurate) numObjects = osu->getSongBrowser()->getDynamicStarCalculator()->getNumObjects();
-
-    if(m_iMinBPM == m_iMaxBPM)
+    if(m_iMinBPM == m_iMaxBPM) {
         return UString::format("Length: %02i:%02i BPM: %i Objects: %i", minutes, seconds, maxBPM, numObjects);
-    else
+    } else {
         return UString::format("Length: %02i:%02i BPM: %i-%i (%i) Objects: %i", minutes, seconds, minBPM, maxBPM,
                                mostCommonBPM, numObjects);
+    }
 }
 
 UString InfoLabel::buildDiffInfoString() {
@@ -344,10 +335,8 @@ UString InfoLabel::buildDiffInfoString() {
     float HP = m_fHP;
     float stars = m_fStars;
 
-    const float modStars = (float)osu->getSongBrowser()->getDynamicStarCalculator()->getTotalStars();
-    const float modPp = (float)osu->getSongBrowser()->getDynamicStarCalculator()->getPPv2();
-    const bool areStarsInaccurate = (osu->getSongBrowser()->getDynamicStarCalculator()->isDead() ||
-                                     !osu->getSongBrowser()->getDynamicStarCalculator()->isAsyncReady());
+    const float modStars = osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.total_stars;
+    const float modPp = osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.pp;
 
     Beatmap *beatmap = osu->getSelectedBeatmap();
     if(beatmap != NULL) {
@@ -361,16 +350,14 @@ UString InfoLabel::buildDiffInfoString() {
     const bool starsAndModStarsAreEqual = (std::abs(stars - modStars) < starComparisonEpsilon);
 
     UString finalString;
-    if(areStarsInaccurate && m_osu_songbrowser_dynamic_star_recalc_ref->getBool())
+    if(!osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.ok)
         finalString = UString::format("CS:%.3g AR:%.3g OD:%.3g HP:%.3g Stars:%.3g *", CS, AR, OD, HP, stars);
-    else if(!starsAndModStarsAreEqual && m_osu_songbrowser_dynamic_star_recalc_ref->getBool())
+    else if(!starsAndModStarsAreEqual)
         finalString = UString::format("CS:%.3g AR:%.3g OD:%.3g HP:%.3g Stars:%.3g -> %.3g (%ipp)", CS, AR, OD, HP,
                                       stars, modStars, (int)(std::round(modPp)));
-    else if(m_osu_songbrowser_dynamic_star_recalc_ref->getBool())
+    else
         finalString = UString::format("CS:%.3g AR:%.3g OD:%.3g HP:%.3g Stars:%.3g (%ipp)", CS, AR, OD, HP, stars,
                                       (int)(std::round(modPp)));
-    else
-        finalString = UString::format("CS:%.3g AR:%.3g OD:%.3g HP:%.3g Stars:%.3g", CS, AR, OD, HP, stars);
 
     return finalString;
 }

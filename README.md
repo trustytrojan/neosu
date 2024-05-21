@@ -16,6 +16,7 @@ Once those are installed, just run `build.bat`.
 
 Required dependencies:
 
+- Rust (for building rosu-pp-c)
 - [bass](https://www.un4seen.com/download.php?bass24-linux)
 - [bassmix](https://www.un4seen.com/download.php?bassmix24-linux)
 - [bass_fx](https://www.un4seen.com/download.php?z/0/bass_fx24-linux)

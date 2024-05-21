@@ -1,21 +1,19 @@
 #pragma once
+#include <future>
+
 #include "DatabaseBeatmap.h"
 #include "Replay.h"
 #include "Timer.h"
 #include "UString.h"
 #include "cbase.h"
+#include "pp.h"
 #include "score.h"
 
 class Sound;
 class ConVar;
-
 class Skin;
 class HitObject;
-
 class DatabaseBeatmap;
-
-class BackgroundStarCacheLoader;
-class BackgroundStarCalcHandler;
 
 struct Click {
     long tms;
@@ -24,9 +22,6 @@ struct Click {
 
 class Beatmap {
    public:
-    friend class BackgroundStarCacheLoader;
-    friend class BackgroundStarCalcHandler;
-
     Beatmap();
     ~Beatmap();
 
@@ -275,6 +270,9 @@ class Beatmap {
 
     Sound *m_music;
 
+    // live pp/stars
+    i32 last_calculated_hitobject = -1;
+
    protected:
     // internal
     bool canDraw();
@@ -388,8 +386,6 @@ class Beatmap {
     ConVar *m_osu_volume_music_ref = NULL;
     ConVar *m_osu_mod_fposu_ref = NULL;
     ConVar *m_fposu_draw_scorebarbg_on_top_ref = NULL;
-    ConVar *m_osu_draw_statistics_pp_ref = NULL;
-    ConVar *m_osu_draw_statistics_livestars_ref = NULL;
     ConVar *m_osu_mod_fullalternate_ref = NULL;
     ConVar *m_fposu_distance_ref = NULL;
     ConVar *m_fposu_curved_ref = NULL;
@@ -432,10 +428,6 @@ class Beatmap {
     void calculateStacks();
     void computeDrainRate();
 
-    void updateStarCache();
-    void stopStarCacheLoader();
-    bool isLoadingStarCache();
-
     // beatmap
     bool m_bIsSpinnerActive;
     Vector2 m_vContinueCursorPoint;
@@ -460,13 +452,17 @@ class Beatmap {
     Vector2 m_vAutoCursorPos;
     int m_iAutoCursorDanceIndex;
 
+    // live pp/stars
+    void resetLiveStarsTasks();
+    std::future<gradual_pp *> m_init_gradual_pp;
+    std::future<gradual_pp *> m_calculate_gradual_pp;
+    gradual_pp *m_gradual_pp = NULL;
+
     // pp calculation buffer (only needs to be recalculated in onModUpdate(), instead of on every hit)
     float m_fAimStars;
     float m_fAimSliderFactor;
     float m_fSpeedStars;
     float m_fSpeedNotes;
-    BackgroundStarCacheLoader *m_starCacheLoader;
-    float m_fStarCacheTime;
 
     // dynamic slider vertex buffer and other recalculation checks (for live mod switching)
     float m_fPrevHitCircleDiameter;
@@ -477,8 +473,6 @@ class Beatmap {
     float m_fPrevPlayfieldRotationFromConVar;
     float m_fPrevPlayfieldStretchX;
     float m_fPrevPlayfieldStretchY;
-    float m_fPrevHitCircleDiameterForStarCache;
-    float m_fPrevSpeedForStarCache;
 
     // custom
     bool m_bIsPreLoading;

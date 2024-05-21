@@ -6,6 +6,7 @@
 
 #include "AnimationHandler.h"
 #include "BackgroundImageHandler.h"
+#include "Beatmap.h"
 #include "ConVar.h"
 #include "Database.h"
 #include "DatabaseBeatmap.h"
@@ -14,6 +15,7 @@
 #include "Replay.h"
 #include "ResourceManager.h"
 #include "Skin.h"
+#include "Timer.h"
 
 ConVar osu_songbrowser_button_difficulty_inactive_color_a("osu_songbrowser_button_difficulty_inactive_color_a", 255,
                                                           FCVAR_DEFAULT);
@@ -25,7 +27,6 @@ ConVar osu_songbrowser_button_difficulty_inactive_color_b("osu_songbrowser_butto
                                                           FCVAR_DEFAULT);
 
 ConVar *SongDifficultyButton::m_osu_scores_enabled = NULL;
-ConVar *SongDifficultyButton::m_osu_songbrowser_dynamic_star_recalc_ref = NULL;
 
 SongDifficultyButton::SongDifficultyButton(SongBrowser *songBrowser, CBaseUIScrollView *view,
                                            UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,
@@ -36,15 +37,6 @@ SongDifficultyButton::SongDifficultyButton(SongBrowser *songBrowser, CBaseUIScro
     m_parentSongButton = parentSongButton;
 
     if(m_osu_scores_enabled == NULL) m_osu_scores_enabled = convar->getConVarByName("osu_scores_enabled");
-    if(m_osu_songbrowser_dynamic_star_recalc_ref == NULL)
-        m_osu_songbrowser_dynamic_star_recalc_ref = convar->getConVarByName("osu_songbrowser_dynamic_star_recalc");
-
-    /*
-    m_sTitle = "Title";
-    m_sArtist = "Artist";
-    m_sMapper = "Mapper";
-    m_sDiff = "Difficulty";
-    */
 
     m_sTitle = m_databaseBeatmap->getTitle();
     m_sArtist = m_databaseBeatmap->getArtist();
@@ -102,13 +94,11 @@ void SongDifficultyButton::draw(Graphics *g) {
     g->popTransform();
 
     // draw stars
-    const float starsNoMod =
-        m_databaseBeatmap->getStarsNomod();  // NOTE: this can sometimes be infinity! (e.g. broken osu!.db database)
-    const bool areStarsInaccurate = (osu->getSongBrowser()->getDynamicStarCalculator()->isDead() ||
-                                     !osu->getSongBrowser()->getDynamicStarCalculator()->isAsyncReady());
-    const float stars = (areStarsInaccurate || !m_osu_songbrowser_dynamic_star_recalc_ref->getBool() || !m_bSelected
-                             ? starsNoMod
-                             : osu->getSongBrowser()->getDynamicStarCalculator()->getTotalStars());
+    // NOTE: stars can sometimes be infinity! (e.g. broken osu!.db database)
+    float stars = m_databaseBeatmap->getStarsNomod();
+    if(m_bSelected && osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.ok) {
+        stars = osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.total_stars;
+    }
     if(stars > 0) {
         const float starOffsetY = (size.y * 0.85);
         const float starWidth = (size.y * 0.2);

@@ -80,9 +80,6 @@ ConVar osu_songbrowser_search_hardcoded_filter("osu_songbrowser_search_hardcoded
                                                _osu_songbrowser_search_hardcoded_filter);
 ConVar osu_songbrowser_background_star_calculation("osu_songbrowser_background_star_calculation", true, FCVAR_DEFAULT,
                                                    "precalculate stars for all loaded beatmaps while in songbrowser");
-ConVar osu_songbrowser_dynamic_star_recalc(
-    "osu_songbrowser_dynamic_star_recalc", true, FCVAR_DEFAULT,
-    "dynamically recalculate displayed star value of currently selected beatmap in songbrowser");
 
 ConVar osu_debug_background_star_calc(
     "osu_debug_background_star_calc", false, FCVAR_DEFAULT,
@@ -506,27 +503,12 @@ SongBrowser::SongBrowser() : ScreenBackable() {
     m_bOnAfterSortingOrGroupChangeUpdateScheduled = false;
     m_bOnAfterSortingOrGroupChangeUpdateScheduledAutoScroll = false;
 
-    // background star calculation (entire database)
-    m_fBackgroundStarCalculationWorkNotificationTime = 0.0f;
-    m_iBackgroundStarCalculationIndex = 0;
-    m_backgroundStarCalculator = new DatabaseBeatmapStarCalculator();
-    m_backgroundStarCalcTempParent = NULL;
-
-    // background star calculation (currently selected beatmap)
-    m_bBackgroundStarCalcScheduled = false;
-    m_bBackgroundStarCalcScheduledForce = false;
-    m_dynamicStarCalculator = new DatabaseBeatmapStarCalculator();
-
     updateLayout();
 }
 
 SongBrowser::~SongBrowser() {
-    checkHandleKillBackgroundStarCalculator();
-    checkHandleKillDynamicStarCalculator(false);
     checkHandleKillBackgroundSearchMatcher();
 
-    engine->getResourceManager()->destroyResource(m_backgroundStarCalculator);
-    engine->getResourceManager()->destroyResource(m_dynamicStarCalculator);
     engine->getResourceManager()->destroyResource(m_backgroundSearchMatcher);
 
     m_songBrowser->getContainer()->empty();
@@ -703,21 +685,19 @@ void SongBrowser::draw(Graphics *g) {
     if(Osu::debug->getBool()) m_bottombar->draw_debug(g);
 
     // background task busy notification
-    if(m_fBackgroundStarCalculationWorkNotificationTime > engine->getTime()) {
-        UString busyMessage = "Calculating stars (";
-        busyMessage.append(UString::format("%i/%i) ...", m_iBackgroundStarCalculationIndex, m_beatmaps.size()));
-        McFont *font = engine->getResourceManager()->getFont("FONT_DEFAULT");
-
-        g->setColor(0xff333333);
-        g->pushTransform();
-        {
-            g->translate(
-                (int)(m_bottombar->getPos().x + m_bottombar->getSize().x - font->getStringWidth(busyMessage) - 20),
-                (int)(m_bottombar->getPos().y + m_bottombar->getSize().y / 2 - font->getHeight() / 2));
-            g->drawString(font, busyMessage);
-        }
-        g->popTransform();
-    }
+    // TODO @kiwec
+    // UString busyMessage = "Calculating stars (";
+    // busyMessage.append(UString::format("%i/%i) ...", m_iBackgroundStarCalculationIndex, m_beatmaps.size()));
+    // McFont *font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    // g->setColor(0xff333333);
+    // g->pushTransform();
+    // {
+    //     g->translate(
+    //         (int)(m_bottombar->getPos().x + m_bottombar->getSize().x - font->getStringWidth(busyMessage) - 20),
+    //         (int)(m_bottombar->getPos().y + m_bottombar->getSize().y / 2 - font->getHeight() / 2));
+    //     g->drawString(font, busyMessage);
+    // }
+    // g->popTransform();
 
     // no beatmaps found (osu folder is probably invalid)
     if(m_beatmaps.size() == 0 && !m_bBeatmapRefreshScheduled) {
@@ -778,19 +758,16 @@ void SongBrowser::drawSelectedBeatmapBackgroundImage(Graphics *g, float alpha) {
 }
 
 void SongBrowser::mouse_update(bool *propagate_clicks) {
-    // HACKHACK: temporarily putting this on top as to support recalc while inPlayMode() (and songbrowser is invisible)
-    // for drawing strain graph in scrubbing timeline (and total stars statistics, and max total pp statistics) handle
-    // background star calculation (1)
-    if(m_bBackgroundStarCalcScheduled) {
-        m_bBackgroundStarCalcScheduled = false;
-        const bool force = m_bBackgroundStarCalcScheduledForce;
-        m_bBackgroundStarCalcScheduledForce = false;
-
-        recalculateStarsForSelectedBeatmap(force);
-    }
-
     if(!m_bVisible) return;
     ScreenBackable::mouse_update(propagate_clicks);
+
+    auto db_diff = m_selectedBeatmap->getSelectedDifficulty2();
+    if(db_diff != NULL && db_diff->m_calculate_full_pp.valid()) {
+        if(db_diff->m_calculate_full_pp.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+            db_diff->m_pp_info = db_diff->m_calculate_full_pp.get();
+            db_diff->m_calculate_full_pp = std::future<pp_info>();
+        }
+    }
 
     // refresh logic (blocks every other call in the update() function below it!)
     if(m_bBeatmapRefreshScheduled) {
@@ -882,107 +859,6 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
             if(m_bOnAfterSortingOrGroupChangeUpdateScheduled) {
                 m_bOnAfterSortingOrGroupChangeUpdateScheduled = false;
                 onAfterSortingOrGroupChangeUpdateInt(m_bOnAfterSortingOrGroupChangeUpdateScheduledAutoScroll);
-            }
-        }
-    }
-
-    // handle background star calculation (2)
-    // this goes through all loaded beatmaps and checks if stars + length have to be calculated and set (e.g. if without
-    // osu!.db database)
-    if(m_beatmaps.size() > 0 && osu_songbrowser_background_star_calculation.getBool()) {
-        for(int s = 0; s < 1; s++)  // one beatmap per update (leave one update loop gap between beatmaps to avoid
-                                    // stalling background image loading)
-        {
-            bool canMoveToNextBeatmap = true;
-            if(m_iBackgroundStarCalculationIndex >= 0 && m_iBackgroundStarCalculationIndex < m_beatmaps.size()) {
-                DatabaseBeatmap *beatmap = m_beatmaps[m_iBackgroundStarCalculationIndex];
-                const std::vector<DatabaseBeatmap *> &diffs = beatmap->getDifficulties();
-
-                if(!m_backgroundStarCalculator->isDead() && m_backgroundStarCalculator->isAsyncReady()) {
-                    // we have a result, store it in db
-                    // this is up here to avoid one extra update loop until the next calc is triggered, but still have a
-                    // gap between consecutive beatmap objects NOTE: stars are upclamped to 0.0001f to signify that they
-                    // have been calculated once for this diff (even if something fails), we only try once
-
-                    DatabaseBeatmap *calculatedDiff = m_backgroundStarCalculator->getBeatmapDifficulty();
-                    calculatedDiff->setStarsNoMod(
-                        std::max(0.0001f, (float)m_backgroundStarCalculator->getTotalStars()));
-                    calculatedDiff->setNumObjects(m_backgroundStarCalculator->getNumObjects());
-                    calculatedDiff->setNumCircles(m_backgroundStarCalculator->getNumCircles());
-                    calculatedDiff->setNumSliders(std::max(0, m_backgroundStarCalculator->getNumObjects() -
-                                                                  m_backgroundStarCalculator->getNumCircles() -
-                                                                  m_backgroundStarCalculator->getNumSpinners()));
-                    calculatedDiff->setNumSpinners(m_backgroundStarCalculator->getNumSpinners());
-                    calculatedDiff->setLengthMS(std::max(calculatedDiff->getLengthMS(),
-                                                         (unsigned long)m_backgroundStarCalculator->getLengthMS()));
-
-                    // re-add (potentially changed stars, potentially changed length)
-                    readdBeatmap(calculatedDiff);
-
-                    // and update wrapper representative values (parent)
-                    if(m_backgroundStarCalcTempParent != NULL) {
-                        // lol @ useless getter setters
-                        m_backgroundStarCalcTempParent->setLengthMS(0);
-                        m_backgroundStarCalcTempParent->setStarsNoMod(0.0f);
-                        for(auto diff : m_backgroundStarCalcTempParent->getDifficulties()) {
-                            if(diff->getLengthMS() > m_backgroundStarCalcTempParent->getLengthMS())
-                                m_backgroundStarCalcTempParent->setLengthMS(diff->getLengthMS());
-                            if(diff->getStarsNomod() > m_backgroundStarCalcTempParent->getStarsNomod())
-                                m_backgroundStarCalcTempParent->setStarsNoMod(diff->getStarsNomod());
-                        }
-                    }
-
-                    m_backgroundStarCalculator->kill();
-                }
-
-                DatabaseBeatmap *diffToCalc = NULL;
-                if(diffs.size() > 0) {
-                    for(size_t d = 0; d < diffs.size(); d++) {
-                        if(diffs[d]->getStarsNomod() <= 0.0f) {
-                            diffToCalc = diffs[d];
-                            break;
-                        }
-                    }
-                } else if(diffToCalc->getStarsNomod() <= 0.0f)
-                    diffToCalc = beatmap;
-
-                if(diffToCalc != NULL) {
-                    // bump notification
-                    m_fBackgroundStarCalculationWorkNotificationTime = engine->getTime() + 0.1f;
-
-                    // only one diff per beatmap per update
-                    canMoveToNextBeatmap = false;
-
-                    if(m_backgroundStarCalculator->isDead()) {
-                        m_backgroundStarCalculator->revive();
-
-                        if(osu_debug_background_star_calc.getBool())
-                            debugLog("diffToCalc = %s\n", diffToCalc->getFilePath().c_str());
-
-                        // start new calc (nomod stars)
-                        {
-                            m_backgroundStarCalculator->release();
-
-                            const float AR = diffToCalc->getAR();
-                            const float CS = diffToCalc->getCS();
-                            const float OD = diffToCalc->getOD();
-                            const float speedMultiplier = 1.0f;
-                            m_backgroundStarCalculator->setBeatmapDifficulty(diffToCalc, AR, CS, OD, speedMultiplier,
-                                                                             false, false);
-                            m_backgroundStarCalcTempParent = (diffs.size() > 0 ? beatmap : NULL);
-
-                            engine->getResourceManager()->requestNextLoadAsync();
-                            engine->getResourceManager()->loadResource(m_backgroundStarCalculator);
-                        }
-                    }
-                }
-            }
-
-            if(canMoveToNextBeatmap) {
-                m_iBackgroundStarCalculationIndex++;
-                if(m_iBackgroundStarCalculationIndex >= m_beatmaps.size()) m_iBackgroundStarCalculationIndex = 0;
-
-                m_iBackgroundStarCalculationIndex = clamp<int>(m_iBackgroundStarCalculationIndex, 0, m_beatmaps.size());
             }
         }
     }
@@ -1488,8 +1364,6 @@ void SongBrowser::refreshBeatmaps() {
     if(!m_bVisible || m_bHasSelectedAndIsPlaying) return;
 
     // reset
-    checkHandleKillBackgroundStarCalculator();
-    checkHandleKillDynamicStarCalculator(false);
     checkHandleKillBackgroundSearchMatcher();
 
     // don't pause the music the first time we load the song database
@@ -2641,42 +2515,6 @@ void SongBrowser::scheduleSearchUpdate(bool immediately) {
     m_fSearchWaitTime = engine->getTime() + (immediately ? 0.0f : osu_songbrowser_search_delay.getFloat());
 }
 
-void SongBrowser::checkHandleKillBackgroundStarCalculator() {
-    if(!m_backgroundStarCalculator->isDead()) {
-        m_backgroundStarCalculator->kill();
-
-        const double startTime = engine->getTimeReal();
-        while(!m_backgroundStarCalculator->isAsyncReady()) {
-            if(engine->getTimeReal() - startTime > 2) {
-                debugLog("WARNING: Ignoring stuck BackgroundStarCalculator thread!\n");
-                break;
-            }
-        }
-    }
-}
-
-bool SongBrowser::checkHandleKillDynamicStarCalculator(bool timeout) {
-    if(!m_dynamicStarCalculator->isDead()) {
-        m_dynamicStarCalculator->kill();
-
-        if(!timeout) {
-            const double startTime = engine->getTimeReal();
-            while(!m_dynamicStarCalculator->isAsyncReady()) {
-                env->sleep(1);
-
-                if(engine->getTimeReal() - startTime > 20.0) {
-                    debugLog("WARNING: Ignoring stuck DynamicStarCalculator thread!\n");
-                    break;
-                }
-            }
-        }
-
-        return m_dynamicStarCalculator->isAsyncReady();
-    } else
-        return (!engine->getResourceManager()->isLoadingResource(m_dynamicStarCalculator) ||
-                m_dynamicStarCalculator->isAsyncReady());
-}
-
 void SongBrowser::checkHandleKillBackgroundSearchMatcher() {
     if(!m_backgroundSearchMatcher->isDead()) {
         m_backgroundSearchMatcher->kill();
@@ -3743,44 +3581,9 @@ void SongBrowser::highlightScore(u64 unixTimestamp) {
 }
 
 void SongBrowser::recalculateStarsForSelectedBeatmap(bool force) {
-    if(!osu_songbrowser_dynamic_star_recalc.getBool()) return;
     if(m_selectedBeatmap->getSelectedDifficulty2() == NULL) return;
 
-    // HACKHACK: temporarily deactivated, see SongBrowser::update(), but only if drawing scrubbing timeline strain
-    // graph is enabled (or "Draw Stats: Stars* (Total)", or "Draw Stats: pp (SS)")
-    if(!m_osu_draw_statistics_perfectpp_ref->getBool() && !m_osu_draw_statistics_totalstars_ref->getBool()) {
-        if(osu->isInPlayMode()) {
-            m_bBackgroundStarCalcScheduled = true;
-            m_bBackgroundStarCalcScheduledForce = (m_bBackgroundStarCalcScheduledForce || force);
-
-            return;
-        }
-    }
-
-    if(checkHandleKillDynamicStarCalculator(true)) {
-        // NOTE: this only works safely because DatabaseBeatmapStarCalculator does no work in load(), because it
-        // might still be in the ResourceManager's sync load() queue, so future loadAsync() could crash with the old
-        // pending load()
-
-        m_dynamicStarCalculator->release();
-        m_dynamicStarCalculator->revive();
-
-        const float AR = m_selectedBeatmap->getAR();
-        const float CS = m_selectedBeatmap->getCS();
-        const float OD = m_selectedBeatmap->getOD();
-        const float speedMultiplier = osu->getSpeedMultiplier();  // NOTE: not m_selectedBeatmap->getSpeedMultiplier()!
-        const bool relax = osu->getModRelax();
-        const bool touchdevice = osu->getModTD();
-
-        m_dynamicStarCalculator->setBeatmapDifficulty(m_selectedBeatmap->getSelectedDifficulty2(), AR, CS, OD,
-                                                      speedMultiplier, relax, touchdevice);
-
-        engine->getResourceManager()->requestNextLoadAsync();
-        engine->getResourceManager()->loadResource(m_dynamicStarCalculator);
-    } else {
-        m_bBackgroundStarCalcScheduled = true;
-        m_bBackgroundStarCalcScheduledForce = (m_bBackgroundStarCalcScheduledForce || force);
-    }
+    // TODO @kiwec
 }
 
 void SongBrowser::selectSongButton(Button *songButton) {

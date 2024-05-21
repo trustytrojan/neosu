@@ -78,9 +78,8 @@ ConVar *DatabaseBeatmap::m_osu_stars_stacking_ref = NULL;
 ConVar *DatabaseBeatmap::m_osu_debug_pp_ref = NULL;
 ConVar *DatabaseBeatmap::m_osu_slider_end_inside_check_offset_ref = NULL;
 
-DatabaseBeatmap::DatabaseBeatmap(std::string filePath, std::string folder, bool filePathIsInMemoryBeatmap) {
+DatabaseBeatmap::DatabaseBeatmap(std::string filePath, std::string folder) {
     m_sFilePath = filePath;
-    m_bFilePathIsInMemoryBeatmap = filePathIsInMemoryBeatmap;
 
     m_sFolder = folder;
 
@@ -134,6 +133,8 @@ DatabaseBeatmap::DatabaseBeatmap(std::string filePath, std::string folder, bool 
 
     m_iLocalOffset = 0;
     m_iOnlineOffset = 0;
+
+    m_pp_info.ok = false;
 }
 
 DatabaseBeatmap::DatabaseBeatmap(std::vector<DatabaseBeatmap *> *difficulties) : DatabaseBeatmap("", "") {
@@ -172,6 +173,12 @@ DatabaseBeatmap::DatabaseBeatmap(std::vector<DatabaseBeatmap *> *difficulties) :
 }
 
 DatabaseBeatmap::~DatabaseBeatmap() {
+    // Because calculate_full_pp() relies on the file path, wait for it to end before freeing self
+    if(m_calculate_full_pp.valid()) {
+        m_calculate_full_pp.wait();
+        m_calculate_full_pp = std::future<pp_info>();
+    }
+
     if(m_difficulties != NULL) {
         for(auto diff : (*m_difficulties)) {
             assert(diff->m_difficulties == NULL);
@@ -181,15 +188,13 @@ DatabaseBeatmap::~DatabaseBeatmap() {
     }
 }
 
-DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const std::string osuFilePath,
-                                                                           bool filePathIsInMemoryBeatmap) {
+DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const std::string osuFilePath) {
     std::atomic<bool> dead;
     dead = false;
-    return loadPrimitiveObjects(osuFilePath, filePathIsInMemoryBeatmap, dead);
+    return loadPrimitiveObjects(osuFilePath, dead);
 }
 
 DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const std::string osuFilePath,
-                                                                           bool filePathIsInMemoryBeatmap,
                                                                            const std::atomic<bool> &dead) {
     PRIMITIVE_CONTAINER c;
     {
@@ -211,13 +216,13 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
 
     // open osu file for parsing
     {
-        File file(!filePathIsInMemoryBeatmap ? osuFilePath : "");
-        if(!file.canRead() && !filePathIsInMemoryBeatmap) {
+        File file(osuFilePath);
+        if(!file.canRead()) {
             c.errorCode = 2;
             return c;
         }
 
-        std::istringstream ss(filePathIsInMemoryBeatmap ? osuFilePath.c_str() : "");  // eh
+        std::istringstream ss("");
 
         // load the actual beatmap
         unsigned long long timingPointSortHack = 0;
@@ -227,15 +232,13 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
         int comboNumber = 1;
         int curBlock = -1;
         std::string curLine;
-        while(!filePathIsInMemoryBeatmap ? file.canRead() : static_cast<bool>(std::getline(ss, curLine))) {
+        while(file.canRead()) {
             if(dead.load()) {
                 c.errorCode = 6;
                 return c;
             }
 
-            if(!filePathIsInMemoryBeatmap) {
-                curLine = file.readLine();
-            }
+            curLine = file.readLine();
 
             const char *curLineChar = curLine.c_str();
             const int commentIndex = curLine.find("//");
@@ -720,7 +723,7 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(c
     // type for simplicity
 
     // load primitive arrays
-    PRIMITIVE_CONTAINER c = loadPrimitiveObjects(osuFilePath, false, dead);
+    PRIMITIVE_CONTAINER c = loadPrimitiveObjects(osuFilePath, dead);
     if(c.errorCode != 0) {
         result.errorCode = c.errorCode;
         return result;
@@ -976,19 +979,14 @@ bool DatabaseBeatmap::loadMetadata() {
 
     // generate MD5 hash (loads entire file, very slow)
     {
-        File file(!m_bFilePathIsInMemoryBeatmap ? m_sFilePath : "");
+        File file(m_sFilePath);
 
         const u8 *beatmapFile = NULL;
         size_t beatmapFileSize = 0;
         {
-            if(!m_bFilePathIsInMemoryBeatmap) {
-                if(file.canRead()) {
-                    beatmapFile = file.readFile();
-                    beatmapFileSize = file.getFileSize();
-                }
-            } else {
-                beatmapFile = (u8 *)m_sFilePath.c_str();
-                beatmapFileSize = m_sFilePath.size();
+            if(file.canRead()) {
+                beatmapFile = file.readFile();
+                beatmapFileSize = file.getFileSize();
             }
         }
 
@@ -1001,23 +999,21 @@ bool DatabaseBeatmap::loadMetadata() {
     // open osu file again, but this time for parsing
     bool foundAR = false;
 
-    File file(!m_bFilePathIsInMemoryBeatmap ? m_sFilePath : "");
-    if(!file.canRead() && !m_bFilePathIsInMemoryBeatmap) {
+    File file(m_sFilePath);
+    if(!file.canRead()) {
         debugLog("Osu Error: Couldn't read file %s\n", m_sFilePath.c_str());
         return false;
     }
 
-    std::istringstream ss(m_bFilePathIsInMemoryBeatmap ? m_sFilePath.c_str() : "");
+    std::istringstream ss("");
 
     // load metadata only
     int curBlock = -1;
     unsigned long long timingPointSortHack = 0;
     char stringBuffer[1024];
     std::string curLine;
-    while(!m_bFilePathIsInMemoryBeatmap ? file.canRead() : static_cast<bool>(std::getline(ss, curLine))) {
-        if(!m_bFilePathIsInMemoryBeatmap) {
-            curLine = file.readLine();
-        }
+    while(file.canRead()) {
+        curLine = file.readLine();
 
         // ignore comments, but only if at the beginning of
         // a line (e.g. allow Artist:DJ'TEKINA//SOMETHING)
@@ -1241,8 +1237,7 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
     }
 
     // load primitives, put in temporary container
-    PRIMITIVE_CONTAINER c =
-        loadPrimitiveObjects(databaseBeatmap->m_sFilePath, databaseBeatmap->m_bFilePathIsInMemoryBeatmap);
+    PRIMITIVE_CONTAINER c = loadPrimitiveObjects(databaseBeatmap->m_sFilePath);
     if(c.errorCode != 0) {
         result.errorCode = c.errorCode;
         return result;
@@ -1612,115 +1607,6 @@ void DatabaseBeatmapBackgroundImagePathLoader::initAsync() {
 
     m_bAsyncReady = true;
     m_bReady = true;  // NOTE: on purpose. there is nothing to do in init(), so finish 1 frame early
-}
-
-DatabaseBeatmapStarCalculator::DatabaseBeatmapStarCalculator() : Resource() {
-    m_bDead = true;  // NOTE: start dead! need to revive() before use
-
-    m_diff2 = NULL;
-
-    m_fAR = 5.0f;
-    m_fCS = 5.0f;
-    m_fOD = 5.0f;
-    m_fSpeedMultiplier = 1.0f;
-    m_bRelax = false;
-    m_bTouchDevice = false;
-
-    m_totalStars = 0.0;
-    m_aimStars = 0.0;
-    m_aimSliderFactor = 0.0;
-    m_speedStars = 0.0;
-    m_speedNotes = 0.0;
-    m_pp = 0.0;
-
-    m_iLengthMS = 0;
-
-    m_iErrorCode = 0;
-    m_iNumObjects = 0;
-    m_iNumCircles = 0;
-    m_iNumSliders = 0;
-    m_iNumSpinners = 0;
-    m_iMaxPossibleCombo = 0;
-}
-
-void DatabaseBeatmapStarCalculator::init() {
-    // NOTE: this accesses runtime mods, so must be run sync (not async)
-    // technically the getSelectedBeatmap() call here is a bit unsafe, since the beatmap could have changed already
-    // between async and sync, but in that case we recalculate immediately after anyways
-    if(!m_bDead.load() && m_iErrorCode == 0)
-        m_pp = DifficultyCalculator::calculatePPv2(osu->getSelectedBeatmap(), m_aimStars.load(),
-                                                   m_aimSliderFactor.load(), m_speedStars.load(), m_speedNotes.load(),
-                                                   m_iNumObjects.load(), m_iNumCircles.load(), m_iNumSliders.load(),
-                                                   m_iNumSpinners.load(), m_iMaxPossibleCombo);
-
-    m_bReady = true;
-}
-
-void DatabaseBeatmapStarCalculator::initAsync() {
-    // sanity reset
-    m_totalStars = 0.0;
-    m_aimStars = 0.0;
-    m_aimSliderFactor = 0.0;
-    m_speedStars = 0.0;
-    m_speedNotes = 0.0;
-    m_pp = 0.0;
-
-    m_iLengthMS = 0;
-
-    DatabaseBeatmap::LOAD_DIFFOBJ_RESULT diffres =
-        DatabaseBeatmap::loadDifficultyHitObjects(m_sFilePath, m_fAR, m_fCS, m_fSpeedMultiplier, false, m_bDead);
-    m_iErrorCode = diffres.errorCode;
-
-    if(m_iErrorCode == 0) {
-        m_iNumObjects = diffres.diffobjects.size();
-        {
-            m_iNumCircles = 0;
-            m_iNumSliders = 0;
-            m_iNumSpinners = 0;
-            for(size_t i = 0; i < diffres.diffobjects.size(); i++) {
-                if(diffres.diffobjects[i].type == OsuDifficultyHitObject::TYPE::CIRCLE) m_iNumCircles++;
-                if(diffres.diffobjects[i].type == OsuDifficultyHitObject::TYPE::SLIDER) m_iNumSliders++;
-                if(diffres.diffobjects[i].type == OsuDifficultyHitObject::TYPE::SPINNER) m_iNumSpinners++;
-            }
-        }
-        m_iMaxPossibleCombo = diffres.maxPossibleCombo;
-
-        double aimStars = 0.0;
-        double aimSliderFactor = 0.0;
-        double speedStars = 0.0;
-        double speedNotes = 0.0;
-        m_totalStars = DifficultyCalculator::calculateStarDiffForHitObjects(
-            diffres.diffobjects, m_fCS, m_fOD, m_fSpeedMultiplier, m_bRelax, m_bTouchDevice, &aimStars,
-            &aimSliderFactor, &speedStars, &speedNotes, -1, m_bDead);
-        m_aimStars = aimStars;
-        m_aimSliderFactor = aimSliderFactor;
-        m_speedStars = speedStars;
-        m_speedNotes = speedNotes;
-
-        // NOTE: this matches osu, i.e. it is the time from the start of the music track until the end of the last
-        // hitobject (including all breaks and initial skippable sections!)
-        if(diffres.diffobjects.size() > 0)
-            m_iLengthMS =
-                (long)((float)std::max((diffres.diffobjects[diffres.diffobjects.size() - 1].endTime), (long)0) *
-                       m_fSpeedMultiplier);  // NOTE: reverse compensate for diffobj speed compensation in order to get
-                                             // actual length
-    }
-
-    m_bAsyncReady = true;
-}
-
-void DatabaseBeatmapStarCalculator::setBeatmapDifficulty(DatabaseBeatmap *diff2, float AR, float CS, float OD,
-                                                         float speedMultiplier, bool relax, bool touchDevice) {
-    m_diff2 = diff2;
-
-    m_sFilePath = diff2->getFilePath();
-
-    m_fAR = AR;
-    m_fCS = CS;
-    m_fOD = OD;
-    m_fSpeedMultiplier = speedMultiplier;
-    m_bRelax = relax;
-    m_bTouchDevice = touchDevice;
 }
 
 std::string DatabaseBeatmap::getFullSoundFilePath() {
