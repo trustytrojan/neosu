@@ -48,7 +48,7 @@ class Chat : public OsuScreen {
     void mark_as_read(ChatChannel *chan);
     void switchToChannel(ChatChannel *chan);
     void addChannel(UString channel_name, bool switch_to = false);
-    void addMessage(UString channel_name, ChatMessage msg);
+    void addMessage(UString channel_name, ChatMessage msg, bool mark_unread = true);
     void removeChannel(UString channel_name);
     void updateLayout(Vector2 newResolution);
     void updateButtonLayout(Vector2 screen);
@@ -58,6 +58,7 @@ class Chat : public OsuScreen {
     void onDisconnect();
 
     virtual CBaseUIContainer *setVisible(bool visible);
+    bool isSmallChat();
     bool isVisibilityForced();
     void updateVisibility();
     bool isMouseInChat();

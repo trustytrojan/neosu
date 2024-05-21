@@ -468,6 +468,7 @@ Osu::Osu() {
     m_screens.push_back(m_notificationOverlay);
     m_screens.push_back(m_optionsMenu);
     m_screens.push_back(m_rankingScreen);
+    m_screens.push_back(m_spectatorScreen);
     m_screens.push_back(m_pauseMenu);
     m_screens.push_back(m_hud);
     m_screens.push_back(m_songBrowser2);
@@ -475,7 +476,6 @@ Osu::Osu() {
     m_screens.push_back(m_changelog);
     m_screens.push_back(m_mainMenu);
     m_screens.push_back(m_tooltipOverlay);
-    m_screens.push_back(m_spectatorScreen);
 
     // update mod settings
     updateMods();
@@ -637,8 +637,7 @@ void Osu::draw(Graphics *g) {
 
         // draw player cursor
         Vector2 cursorPos = beatmap->getCursorPos();
-        bool drawSecondTrail =
-            (m_bModAuto || m_bModAutopilot || beatmap->m_bIsWatchingReplay || beatmap->is_spectating);
+        bool drawSecondTrail = (m_bModAuto || m_bModAutopilot || beatmap->is_watching || beatmap->is_spectating);
         bool updateAndDrawTrail = true;
         if(isFPoSu) {
             cursorPos = getScreenSize() / 2.0f;
@@ -674,7 +673,7 @@ void Osu::draw(Graphics *g) {
 
     // loading spinner for some async tasks
     if((m_bSkinLoadScheduled && m_skin != m_skinScheduledToLoad)) {
-        m_hud->drawLoadingSmall(g);
+        m_hud->drawLoadingSmall(g, "");
     }
 
     // if we are not using the native window resolution
@@ -784,7 +783,7 @@ void Osu::update() {
         }
 
         // scrubbing/seeking
-        m_bSeeking = (m_bSeekKey || getSelectedBeatmap()->m_bIsWatchingReplay);
+        m_bSeeking = (m_bSeekKey || getSelectedBeatmap()->is_watching);
         m_bSeeking &= !getSelectedBeatmap()->isPaused() && !m_volumeOverlay->isBusy();
         m_bSeeking &= !bancho.is_playing_a_multi_map() && !m_bClickedSkipButton;
         m_bSeeking &= !getSelectedBeatmap()->is_spectating;
@@ -1165,8 +1164,8 @@ void Osu::updateMods() {
 
     // handle auto/pilot cursor visibility
     if(isInPlayMode()) {
-        m_bShouldCursorBeVisible = m_bModAuto || m_bModAutopilot || getSelectedBeatmap()->m_bIsWatchingReplay ||
-                                   getSelectedBeatmap()->is_spectating;
+        m_bShouldCursorBeVisible =
+            m_bModAuto || m_bModAutopilot || getSelectedBeatmap()->is_watching || getSelectedBeatmap()->is_spectating;
         env->setCursorVisible(m_bShouldCursorBeVisible);
     }
 
@@ -1178,7 +1177,12 @@ void Osu::updateMods() {
         getSelectedBeatmap()->onModUpdate();
         getSelectedBeatmap()->vanilla = false;  // user just cheated, prevent score submission
 
-        if(m_songBrowser2 != NULL) m_songBrowser2->recalculateStarsForSelectedBeatmap(true);
+        if(m_songBrowser2 != NULL) {
+            // XXX: Some race condition here, jank 'fix' is to check if spectating
+            if(!getSelectedBeatmap()->is_spectating) {
+                m_songBrowser2->recalculateStarsForSelectedBeatmap(true);
+            }
+        }
     }
 }
 
@@ -1255,7 +1259,7 @@ void Osu::onKeyDown(KeyboardEvent &key) {
         // instant replay
         if((beatmap->isPaused() || beatmap->hasFailed())) {
             if(!key.isConsumed() && key == (KEYCODE)KeyBindings::INSTANT_REPLAY.getInt()) {
-                if(!beatmap->m_bIsWatchingReplay && !beatmap->is_spectating) {
+                if(!beatmap->is_watching && !beatmap->is_spectating) {
                     FinishedScore score;
                     score.isLegacyScore = false;
                     score.isImportedLegacyScore = false;
@@ -1462,12 +1466,10 @@ void Osu::onKeyDown(KeyboardEvent &key) {
                         getSelectedBeatmap()->stop(true);
                         m_room->ragequit();
                     } else {
-                        if(!getSelectedBeatmap()->hasFailed() ||
-                           !m_pauseMenu->isVisible())  // you can open the pause menu while the failing animation is
-                                                       // happening, but never close it then
-                        {
+                        // you can open the pause menu while the failing animation is
+                        // happening, but never close it then
+                        if(!getSelectedBeatmap()->hasFailed() || !m_pauseMenu->isVisible()) {
                             m_bEscape = true;
-
                             getSelectedBeatmap()->pause();
                             m_pauseMenu->setVisible(getSelectedBeatmap()->isPaused());
 
@@ -1660,7 +1662,10 @@ void Osu::onPlayEnd(bool quit, bool aborted) {
     // When playing in multiplayer, screens are toggled in Room
     if(!bancho.is_playing_a_multi_map()) {
         if(quit) {
-            toggleSongBrowser();
+            // When spectating, we don't want to enable the song browser after song ends
+            if(bancho.spectated_player_id == 0) {
+                toggleSongBrowser();
+            }
         } else {
             m_rankingScreen->setVisible(true);
         }
@@ -1961,7 +1966,7 @@ void Osu::onFocusGained() {
 
 void Osu::onFocusLost() {
     if(isInPlayMode() && !getSelectedBeatmap()->isPaused() && osu_pause_on_focus_loss.getBool()) {
-        if(!bancho.is_playing_a_multi_map() && !getSelectedBeatmap()->m_bIsWatchingReplay &&
+        if(!bancho.is_playing_a_multi_map() && !getSelectedBeatmap()->is_watching &&
            !getSelectedBeatmap()->is_spectating) {
             getSelectedBeatmap()->pause(false);
             m_pauseMenu->setVisible(true);
@@ -2107,7 +2112,7 @@ void Osu::updateConfineCursor() {
     if((osu_confine_cursor_fullscreen.getBool() && env->isFullscreen()) ||
        (osu_confine_cursor_windowed.getBool() && !env->isFullscreen()) ||
        (isInPlayMode() && !m_pauseMenu->isVisible() && !getModAuto() && !getModAutopilot() &&
-        !getSelectedBeatmap()->m_bIsWatchingReplay && !getSelectedBeatmap()->is_spectating))
+        !getSelectedBeatmap()->is_watching && !getSelectedBeatmap()->is_spectating))
         env->setCursorClip(true, McRect());
     else
         env->setCursorClip(false, McRect());

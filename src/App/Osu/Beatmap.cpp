@@ -46,6 +46,7 @@
 #include "Slider.h"
 #include "SongBrowser/SongBrowser.h"
 #include "SoundEngine.h"
+#include "SpectatorScreen.h"
 #include "Spinner.h"
 
 ConVar osu_pvs("osu_pvs", true, FCVAR_DEFAULT,
@@ -590,7 +591,7 @@ void Beatmap::skipEmptySection() {
 }
 
 void Beatmap::keyPressed1(bool mouse) {
-    if(m_bIsWatchingReplay || is_spectating) return;
+    if(is_watching || is_spectating) return;
 
     if(m_bContinueScheduled) m_bClickedContinue = !osu->getModSelector()->isMouseInside();
 
@@ -625,7 +626,7 @@ void Beatmap::keyPressed1(bool mouse) {
 }
 
 void Beatmap::keyPressed2(bool mouse) {
-    if(m_bIsWatchingReplay || is_spectating) return;
+    if(is_watching || is_spectating) return;
 
     if(m_bContinueScheduled) m_bClickedContinue = !osu->getModSelector()->isMouseInside();
 
@@ -660,7 +661,7 @@ void Beatmap::keyPressed2(bool mouse) {
 }
 
 void Beatmap::keyReleased1(bool mouse) {
-    if(m_bIsWatchingReplay || is_spectating) return;
+    if(is_watching || is_spectating) return;
 
     // key overlay
     osu->getHUD()->animateInputoverlay(1, false);
@@ -672,7 +673,7 @@ void Beatmap::keyReleased1(bool mouse) {
 }
 
 void Beatmap::keyReleased2(bool mouse) {
-    if(m_bIsWatchingReplay || is_spectating) return;
+    if(is_watching || is_spectating) return;
 
     // key overlay
     osu->getHUD()->animateInputoverlay(2, false);
@@ -712,11 +713,10 @@ void Beatmap::deselect() {
 }
 
 bool Beatmap::play() {
-    if(start()) {
-        m_bIsWatchingReplay = false;
-        m_bIsPlaying = true;
-        last_spectator_broadcast = engine->getTime();
+    is_watching = false;
 
+    if(start()) {
+        last_spectator_broadcast = engine->getTime();
         RichPresence::onPlayStart();
         if(!bancho.spectators.empty()) {
             Packet packet;
@@ -749,9 +749,8 @@ bool Beatmap::watch(FinishedScore score, double start_percent) {
 
     osu->watched_user_name = score.playerName.c_str();
     osu->watched_user_id = score.player_id;
-    m_bIsWatchingReplay = true;
+    is_watching = true;
 
-    osu->getModSelector()->resetMods();
     osu->useMods(&score);
 
     if(!start()) {
@@ -787,7 +786,6 @@ bool Beatmap::spectate() {
     FinishedScore score;
     score.isLegacyScore = true;
     score.modsLegacy = user_info->mods;
-    osu->getModSelector()->resetMods();
     osu->useMods(&score);
 
     if(!start()) {
@@ -930,10 +928,8 @@ bool Beatmap::start() {
     m_iPreLoadingIndex = 0;
 
     // build stars
-    m_fStarCacheTime =
-        engine->getTime() +
-        osu_pp_live_timeout
-            .getFloat();  // first time delay only. subsequent updates should immediately show the loading spinner
+    // first time delay only. subsequent updates should immediately show the loading spinner
+    m_fStarCacheTime = engine->getTime() + osu_pp_live_timeout.getFloat();
     updateStarCache();
 
     // load music
@@ -955,12 +951,13 @@ bool Beatmap::start() {
     m_iCurMusicPos = 0;
 
     // we are waiting for an asynchronous start of the beatmap in the next update()
+    m_bIsPlaying = true;
     m_bIsWaiting = true;
     m_fWaitTime = engine->getTimeReal();
 
     osu->m_snd_change_check_interval_ref->setValue(0.0f);
 
-    if(osu->m_bModAuto || osu->m_bModAutopilot || m_bIsWatchingReplay || is_spectating) {
+    if(osu->m_bModAuto || osu->m_bModAutopilot || is_watching || is_spectating) {
         osu->m_bShouldCursorBeVisible = true;
         env->setCursorVisible(osu->m_bShouldCursorBeVisible);
     }
@@ -1034,6 +1031,10 @@ void Beatmap::actualRestart() {
 
 void Beatmap::pause(bool quitIfWaiting) {
     if(m_selectedDifficulty2 == NULL) return;
+    if(is_spectating) {
+        stop_spectating();
+        return;
+    }
 
     const bool isFirstPause = !m_bContinueScheduled;
 
@@ -1046,48 +1047,58 @@ void Beatmap::pause(bool quitIfWaiting) {
             return;
     }
 
-    if(m_bIsPlaying)  // if we are playing, aka if this is the first time pausing
-    {
-        if(m_bIsWaiting && quitIfWaiting)  // if we are still m_bIsWaiting, pausing the game via the escape key is the
-                                           // same as stopping playing
+    if(m_bIsPlaying) {
+        if(m_bIsWaiting && quitIfWaiting) {
+            // if we are still m_bIsWaiting, pausing the game via the escape key is the
+            // same as stopping playing
             stop();
-        else {
+        } else {
             // first time pause pauses the music
             // case 1: the beatmap is already "finished", jump to the ranking screen if some small amount of time past
-            // the last objects endTime case 2: in the middle somewhere, pause as usual
+            //         the last objects endTime
+            // case 2: in the middle somewhere, pause as usual
             HitObject *lastHitObject = m_hitobjectsSortedByEndTime.size() > 0
                                            ? m_hitobjectsSortedByEndTime[m_hitobjectsSortedByEndTime.size() - 1]
                                            : NULL;
             if(lastHitObject != NULL && lastHitObject->isFinished() &&
                (m_iCurMusicPos >
                 lastHitObject->getTime() + lastHitObject->getDuration() + (long)osu_end_skip_time.getInt()) &&
-               osu_end_skip.getBool())
+               osu_end_skip.getBool()) {
                 stop(false);
-            else {
+            } else {
                 engine->getSound()->pause(m_music);
                 m_bIsPlaying = false;
                 m_bIsPaused = true;
             }
         }
-    } else if(m_bIsPaused && !m_bContinueScheduled) {  // if this is the first time unpausing
-        if(osu->getModAuto() || osu->getModAutopilot() || m_bIsInSkippableSection || m_bIsWatchingReplay ||
-           is_spectating) {
-            if(!m_bIsWaiting) {  // only force play() if we were not early waiting
+    } else if(m_bIsPaused && !m_bContinueScheduled) {
+        // if this is the first time unpausing
+        if(osu->getModAuto() || osu->getModAutopilot() || m_bIsInSkippableSection || is_watching) {
+            if(!m_bIsWaiting) {
+                // only force play() if we were not early waiting
                 engine->getSound()->play(m_music);
             }
 
             m_bIsPlaying = true;
             m_bIsPaused = false;
-        } else {  // otherwise, schedule a continue (wait for user to click, handled in update())
+        } else {
+            // otherwise, schedule a continue (wait for user to click, handled in update())
             // first time unpause schedules a continue
             m_bIsPaused = false;
             m_bContinueScheduled = true;
         }
-    } else  // if this is not the first time pausing/unpausing, then just toggle the pause state (the visibility of the
-            // pause menu is handled in the Osu class, a bit shit)
+    } else {
+        // if this is not the first time pausing/unpausing, then just toggle the pause state (the visibility of the
+        // pause menu is handled in the Osu class, a bit shit)
         m_bIsPaused = !m_bIsPaused;
+    }
 
-    if(m_bIsPaused) onPaused(isFirstPause);
+    if(m_bIsPaused && isFirstPause) {
+        m_vContinueCursorPoint = getMousePos();
+        if(GameRules::osu_mod_fps.getBool()) {
+            m_vContinueCursorPoint = GameRules::getPlayfieldCenter();
+        }
+    }
 
     // if we have failed, and the user early exits to the pause menu, stop the failing animation
     if(m_bFailed) anim->deleteExistingAnimation(&m_fFailAnim);
@@ -1123,7 +1134,7 @@ void Beatmap::stop(bool quit) {
 
     saveAndSubmitScore(quit);
 
-    m_bIsWatchingReplay = false;
+    is_watching = false;
     spectated_replay.clear();
 
     unloadObjects();
@@ -1145,7 +1156,7 @@ void Beatmap::stop(bool quit) {
 
 void Beatmap::fail() {
     if(m_bFailed) return;
-    if(m_bIsWatchingReplay) return;
+    if(is_watching) return;
 
     // Change behavior of relax mod when online
     if(bancho.is_online() && osu->getModRelax()) return;
@@ -1278,7 +1289,7 @@ void Beatmap::seekPercent(double percent) {
         onModUpdate(false, false);
     }
 
-    if(!m_bIsWatchingReplay && !is_spectating) {  // score submission already disabled when watching replay
+    if(!is_watching && !is_spectating) {  // score submission already disabled when watching replay
         debugLog("Disabling score submission due to seeking\n");
         vanilla = false;
     }
@@ -1458,7 +1469,7 @@ float Beatmap::getOD() const {
 }
 
 bool Beatmap::isKey1Down() {
-    if(m_bIsWatchingReplay || is_spectating) {
+    if(is_watching || is_spectating) {
         return current_keys & (Replay::M1 | Replay::K1);
     } else {
         return m_bClick1Held;
@@ -1466,7 +1477,7 @@ bool Beatmap::isKey1Down() {
 }
 
 bool Beatmap::isKey2Down() {
-    if(m_bIsWatchingReplay || is_spectating) {
+    if(is_watching || is_spectating) {
         return current_keys & (Replay::M2 | Replay::K2);
     } else {
         return m_bClick2Held;
@@ -1933,63 +1944,43 @@ void Beatmap::draw(Graphics *g) {
     drawBackground(g);
 
     // draw loading circle
-    if(isLoading()) osu->getHUD()->drawLoadingSmall(g);
+    if(isLoading()) {
+        if(isLoadingStarCache() && engine->getTime() > m_fStarCacheTime) {
+            u32 progress = 0;
+            if(m_hitobjects.size() > 0) {
+                progress = m_starCacheLoader->getProgress() * 100 / m_hitobjects.size();
+            }
 
-    if(isLoadingStarCache() && engine->getTime() > m_fStarCacheTime) {
-        float progressPercent = 0.0f;
-        if(m_hitobjects.size() > 0)
-            progressPercent = (float)m_starCacheLoader->getProgress() / (float)m_hitobjects.size();
+            UString loadingMessage = UString::format("Calculating stars for realtime pp/stars (%d%%) ...", progress);
+            osu->getHUD()->drawLoadingSmall(g, loadingMessage);
 
-        g->setColor(0x44ffffff);
-        UString loadingMessage =
-            UString::format("Calculating stars for realtime pp/stars (%i%%) ...", (int)(progressPercent * 100.0f));
-        UString loadingMessage2 = "(To get rid of this delay, disable [Draw Statistics: pp/Stars***])";
-        g->pushTransform();
-        {
-            g->translate((int)(osu->getScreenWidth() / 2 - osu->getSubTitleFont()->getStringWidth(loadingMessage) / 2),
-                         osu->getScreenHeight() - osu->getSubTitleFont()->getHeight() - 25);
-            g->drawString(osu->getSubTitleFont(), loadingMessage);
-        }
-        g->popTransform();
-        g->pushTransform();
-        {
+            g->pushTransform();
+            UString loadingMessage2 = "(To get rid of this delay, disable [Draw Statistics: pp/Stars***])";
+            g->setColor(0x44ffffff);
             g->translate((int)(osu->getScreenWidth() / 2 - osu->getSubTitleFont()->getStringWidth(loadingMessage2) / 2),
                          osu->getScreenHeight() - 15);
             g->drawString(osu->getSubTitleFont(), loadingMessage2);
-        }
-        g->popTransform();
-    } else if(isBuffering()) {
-        float leeway = last_frame_ms - last_event_ms;
-        g->setColor(0x44ffffff);
-        auto loadingMessage = UString::format("Buffering ... (%.2f%%)", leeway / 50.f);
-        g->pushTransform();
-        {
-            g->translate((int)(osu->getScreenWidth() / 2 - osu->getSubTitleFont()->getStringWidth(loadingMessage) / 2),
-                         osu->getScreenHeight() - osu->getSubTitleFont()->getHeight() - 15);
-            g->drawString(osu->getSubTitleFont(), loadingMessage);
-        }
-        g->popTransform();
-    } else if(bancho.is_playing_a_multi_map() && !bancho.room.all_players_loaded) {
-        if(!m_bIsPreLoading && !isLoadingStarCache())  // usability
-        {
-            g->setColor(0x44ffffff);
-            UString loadingMessage = "Waiting for players ...";
-            g->pushTransform();
-            {
-                g->translate(
-                    (int)(osu->getScreenWidth() / 2 - osu->getSubTitleFont()->getStringWidth(loadingMessage) / 2),
-                    osu->getScreenHeight() - osu->getSubTitleFont()->getHeight() - 15);
-                g->drawString(osu->getSubTitleFont(), loadingMessage);
-            }
             g->popTransform();
+
+        } else if(isBuffering()) {
+            float leeway = clamp<i32>(last_frame_ms - last_event_ms, 0, 2500);
+            float pct = leeway / 2500.f * 100.f;
+            auto loadingMessage = UString::format("Buffering ... (%.2f%%)", pct);
+            osu->getHUD()->drawLoadingSmall(g, loadingMessage);
+        } else if(bancho.is_playing_a_multi_map() && !bancho.room.all_players_loaded) {
+            osu->getHUD()->drawLoadingSmall(g, "Waiting for players ...");
+        } else {
+            osu->getHUD()->drawLoadingSmall(g, "Loading ...");
         }
+
+        // only start drawing the rest of the playfield if everything has loaded
+        return;
     }
 
-    if(isLoading()) return;  // only start drawing the rest of the playfield if everything has loaded
-
     // draw playfield border
-    if(osu_draw_playfield_border.getBool() && !GameRules::osu_mod_fps.getBool())
+    if(osu_draw_playfield_border.getBool() && !GameRules::osu_mod_fps.getBool()) {
         osu->getHUD()->drawPlayfieldBorder(g, m_vPlayfieldCenter, m_vPlayfieldSize, m_fHitcircleDiameter);
+    }
 
     // draw hiterrorbar
     if(!m_osu_mod_fposu_ref->getBool()) osu->getHUD()->drawHitErrorBar(g, this);
@@ -2400,7 +2391,10 @@ void Beatmap::update() {
         }
     }
 
-    if(isLoading()) return;  // only continue if we have loaded everything
+    if(isLoading()) {
+        // only continue if we have loaded everything
+        return;
+    }
 
     // update auto (after having updated the hitobjects)
     if(osu->getModAuto() || osu->getModAutopilot()) updateAutoCursorPos();
@@ -2610,7 +2604,18 @@ void Beatmap::update2() {
                                 (m_selectedDifficulty2->getVersion() < 5 ? osu_old_beatmap_offset.getInt() : 0);
     updateTimingPoints(m_iCurMusicPosWithOffsets);
 
-    if(m_bIsWatchingReplay || is_spectating) {
+    // Make sure we're not too far behind the liveplay
+    if(is_spectating) {
+        if(m_iCurMusicPos + 5000 < last_frame_ms) {
+            debugLog("Spectator is too far behind, seeking to catch up to player...\n");
+            i32 target = last_frame_ms - 2500;
+            float percent = (float)target / (float)getLength();
+            seekPercent(percent);
+            return;
+        }
+    }
+
+    if(is_watching || is_spectating) {
         Replay::Frame current_frame = spectated_replay[current_frame_idx];
         Replay::Frame next_frame = spectated_replay[current_frame_idx + 1];
 
@@ -3247,7 +3252,7 @@ void Beatmap::broadcast_spectator_frames() {
 }
 
 void Beatmap::write_frame() {
-    if(!m_bIsPlaying || m_bFailed || m_bIsWatchingReplay || is_spectating) return;
+    if(!m_bIsPlaying || m_bFailed || is_watching || is_spectating) return;
 
     long delta = m_iCurMusicPosWithOffsets - last_event_ms;
     if(delta < 0) return;
@@ -3353,9 +3358,9 @@ void Beatmap::onModUpdate(bool rebuildSliderVertexBuffers, bool recomputeDrainRa
 
         bool didSpeedChange = false;
         if(osu->getSpeedMultiplier() != m_fPrevSpeedForStarCache && m_hitobjects.size() > 0) {
-            m_fPrevSpeedForStarCache =
-                osu->getSpeedMultiplier();  // this is not using the beatmap function for speed on purpose, because
-                                            // that wouldn't work while the music is still loading
+            // this is not using the beatmap function for speed on purpose, because
+            // that wouldn't work while the music is still loading
+            m_fPrevSpeedForStarCache = osu->getSpeedMultiplier();
             didSpeedChange = true;
         }
 
@@ -3365,17 +3370,28 @@ void Beatmap::onModUpdate(bool rebuildSliderVertexBuffers, bool recomputeDrainRa
     }
 }
 
+// HACK: Updates buffering state and pauses/unpauses the music!
 bool Beatmap::isBuffering() {
     if(!is_spectating) return false;
 
     i32 leeway = last_frame_ms - last_event_ms;
-    if((!is_buffering && leeway < 1000) || (is_buffering && leeway < 5000)) {
-        is_buffering = true;
-        return true;
+    if(is_buffering) {
+        if(leeway >= 2500) {
+            debugLog("PAUSING: leeway: %i, last_event: %d, last_frame: %d\n", leeway, last_event_ms, last_frame_ms);
+            engine->getSound()->play(m_music);
+            m_bIsPlaying = true;
+            is_buffering = false;
+        }
+    } else {
+        if(leeway < 1000) {
+            debugLog("UNPAUSING: leeway: %i, last_event: %d, last_frame: %d\n", leeway, last_event_ms, last_frame_ms);
+            engine->getSound()->pause(m_music);
+            m_bIsPlaying = false;
+            is_buffering = true;
+        }
     }
 
-    is_buffering = false;
-    return false;
+    return is_buffering;
 }
 
 bool Beatmap::isLoading() {
@@ -3589,7 +3605,7 @@ Vector2 Beatmap::osuCoords2LegacyPixels(Vector2 coords) const {
 }
 
 Vector2 Beatmap::getMousePos() const {
-    if((m_bIsWatchingReplay || is_spectating) && !m_bIsPaused) {
+    if((is_watching || is_spectating) && !m_bIsPaused) {
         return m_interpolatedMousePos;
     } else {
         return engine->getMouse()->getPos();
@@ -3667,7 +3683,7 @@ void Beatmap::saveAndSubmitScore(bool quit) {
     const bool isComplete = (num300s + num100s + num50s + numMisses >= numHitObjects);
     const bool isZero = (osu->getScore()->getScore() < 1);
     const bool isCheated = (osu->getModAuto() || (osu->getModAutopilot() && osu->getModRelax())) ||
-                           osu->getScore()->isUnranked() || m_bIsWatchingReplay || is_spectating;
+                           osu->getScore()->isUnranked() || is_watching || is_spectating;
 
     FinishedScore score;
     score.isLegacyScore = false;
@@ -3770,16 +3786,6 @@ void Beatmap::saveAndSubmitScore(bool quit) {
     // special case: incomplete scores should NEVER show pp, even if auto
     if(!isComplete) {
         osu->getScore()->setPPv2(0.0f);
-    }
-}
-
-void Beatmap::onPaused(bool first) {
-    debugLog("Beatmap::onPaused()\n");
-
-    if(first) {
-        m_vContinueCursorPoint = getMousePos();
-
-        if(GameRules::osu_mod_fps.getBool()) m_vContinueCursorPoint = GameRules::getPlayfieldCenter();
     }
 }
 

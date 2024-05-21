@@ -1,10 +1,3 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		osu!.db + collection.db + raw loader + scores etc.
-//
-// $NoKeywords: $osubdb
-//===============================================================================//
-
 #include "Database.h"
 
 #include <string.h>
@@ -778,24 +771,9 @@ int Database::getLevelForScore(unsigned long long score, int maxLevel) {
     }
 }
 
-DatabaseBeatmap *Database::getBeatmap(const MD5Hash &md5hash) {
-    for(size_t i = 0; i < m_databaseBeatmaps.size(); i++) {
-        DatabaseBeatmap *beatmap = m_databaseBeatmaps[i];
-        const std::vector<DatabaseBeatmap *> &diffs = beatmap->getDifficulties();
-        for(size_t d = 0; d < diffs.size(); d++) {
-            const DatabaseBeatmap *diff = diffs[d];
-            if(diff->getMD5Hash() == md5hash) {
-                return beatmap;
-            }
-        }
-    }
-
-    return NULL;
-}
-
 DatabaseBeatmap *Database::getBeatmapDifficulty(const MD5Hash &md5hash) {
-    // TODO: optimize db accesses by caching a hashmap from md5hash -> Beatmap*, currently it just does a loop over
-    // all diffs of all beatmaps (for every call)
+    if(!isFinished()) return NULL;
+
     for(size_t i = 0; i < m_databaseBeatmaps.size(); i++) {
         DatabaseBeatmap *beatmap = m_databaseBeatmaps[i];
         const std::vector<DatabaseBeatmap *> &diffs = beatmap->getDifficulties();

@@ -22,6 +22,7 @@
 #include "Skin.h"
 #include "SongBrowser/SongBrowser.h"
 #include "SoundEngine.h"
+#include "SpectatorScreen.h"
 #include "UIButton.h"
 #include "UIUserContextMenu.h"
 
@@ -168,9 +169,8 @@ void Chat::draw(Graphics *g) {
         const float chat_h = round(getSize().y * 0.3f);
         const float chat_y = getSize().y - chat_h;
         float chat_w = getSize().x;
-        if(isVisibilityForced()) {
-            // In the lobby and in multi rooms (e.g. when visibility is forced), don't
-            // take the full horizontal width to allow for cleaner UI designs.
+        if(isSmallChat()) {
+            // In the lobby and in multi rooms, don't take the full horizontal width to allow for cleaner UI designs.
             chat_w = round(chat_w * 0.6);
         }
 
@@ -381,7 +381,7 @@ void Chat::addChannel(UString channel_name, bool switch_to) {
     updateLayout(osu->getScreenSize());
 }
 
-void Chat::addMessage(UString channel_name, ChatMessage msg) {
+void Chat::addMessage(UString channel_name, ChatMessage msg, bool mark_unread) {
     if(msg.author_id > 0 && channel_name[0] != '#' && msg.author_name != bancho.username) {
         // If it's a PM, the channel title should be the one who sent the message
         channel_name = msg.author_name;
@@ -392,12 +392,16 @@ void Chat::addMessage(UString channel_name, ChatMessage msg) {
         if(chan->name != channel_name) continue;
         chan->messages.push_back(msg);
         chan->add_message(msg);
-        chan->read = false;
-        if(chan == m_selected_channel) {
-            mark_as_read(chan);
-        } else {
-            updateButtonLayout(getSize());
+
+        if(mark_unread) {
+            chan->read = false;
+            if(chan == m_selected_channel) {
+                mark_as_read(chan);
+            } else {
+                updateButtonLayout(getSize());
+            }
         }
+
         if(chan->messages.size() > 100) {
             chan->messages.erase(chan->messages.begin());
         }
@@ -436,9 +440,8 @@ void Chat::updateLayout(Vector2 newResolution) {
         return;
     }
 
-    // In the lobby and in multi rooms (e.g. when visibility is forced), don't
-    // take the full horizontal width to allow for cleaner UI designs.
-    if(isVisibilityForced()) {
+    // In the lobby and in multi rooms don't take the full horizontal width to allow for cleaner UI designs.
+    if(isSmallChat()) {
         newResolution.x = round(newResolution.x * 0.6);
     }
 
@@ -565,13 +568,16 @@ void Chat::onDisconnect() {
 
 void Chat::onResolutionChange(Vector2 newResolution) { updateLayout(newResolution); }
 
-bool Chat::isVisibilityForced() {
+bool Chat::isSmallChat() {
     if(osu->m_room == nullptr || osu->m_lobby == nullptr || osu->m_songBrowser2 == nullptr) return false;
     bool sitting_in_room =
         osu->m_room->isVisible() && !osu->m_songBrowser2->isVisible() && !bancho.is_playing_a_multi_map();
     bool sitting_in_lobby = osu->m_lobby->isVisible();
-    bool is_forced = (sitting_in_room || sitting_in_lobby);
+    return sitting_in_room || sitting_in_lobby;
+}
 
+bool Chat::isVisibilityForced() {
+    bool is_forced = (isSmallChat() || osu->m_spectatorScreen->isVisible());
     if(is_forced != visibility_was_forced) {
         // Chat width changed: update the layout now
         visibility_was_forced = is_forced;
@@ -584,7 +590,7 @@ void Chat::updateVisibility() {
     auto selected_beatmap = osu->getSelectedBeatmap();
     bool can_skip = (selected_beatmap != nullptr) && (selected_beatmap->isInSkippableSection());
     bool is_spectating = osu->m_bModAuto || (osu->m_bModAutopilot && osu->m_bModRelax) ||
-                         (selected_beatmap != nullptr && selected_beatmap->m_bIsWatchingReplay) ||
+                         (selected_beatmap != nullptr && selected_beatmap->is_watching) ||
                          bancho.spectated_player_id != 0;
     bool is_clicking_circles = osu->isInPlayMode() && !can_skip && !is_spectating && !osu->m_pauseMenu->isVisible();
     if(bancho.is_playing_a_multi_map() && !bancho.room.all_players_loaded) {

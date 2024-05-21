@@ -92,9 +92,9 @@ class DatabaseBeatmap {
     DatabaseBeatmap(std::vector<DatabaseBeatmap *> *difficulties);
     ~DatabaseBeatmap();
 
-    static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string &osuFilePath, float AR, float CS,
+    static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string osuFilePath, float AR, float CS,
                                                         float speedMultiplier, bool calculateStarsInaccurately = false);
-    static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string &osuFilePath, float AR, float CS,
+    static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string osuFilePath, float AR, float CS,
                                                         float speedMultiplier, bool calculateStarsInaccurately,
                                                         const std::atomic<bool> &dead);
     bool loadMetadata();

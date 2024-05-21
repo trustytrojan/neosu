@@ -938,7 +938,7 @@ void HUD::drawPlayfieldBorder(Graphics *g, Vector2 playfieldCenter, Vector2 play
     g->popTransform();
 }
 
-void HUD::drawLoadingSmall(Graphics *g) {
+void HUD::drawLoadingSmall(Graphics *g, UString text) {
     const float scale = Osu::getImageScale(osu->getSkin()->getLoadingSpinner(), 29);
 
     g->setColor(0xffffffff);
@@ -948,6 +948,16 @@ void HUD::drawLoadingSmall(Graphics *g) {
         g->scale(scale, scale);
         g->translate(osu->getScreenWidth() / 2, osu->getScreenHeight() / 2);
         g->drawImage(osu->getSkin()->getLoadingSpinner());
+    }
+    g->popTransform();
+
+    float spinner_height = osu->getSkin()->getLoadingSpinner()->getHeight() * scale;
+    g->setColor(0x44ffffff);
+    g->pushTransform();
+    {
+        g->translate((int)(osu->getScreenWidth() / 2 - osu->getSubTitleFont()->getStringWidth(text) / 2),
+                     osu->getScreenHeight() / 2 + 2.f * spinner_height);
+        g->drawString(osu->getSubTitleFont(), text);
     }
     g->popTransform();
 }
@@ -1516,7 +1526,7 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
         SCORE_ENTRY playerScoreEntry;
         if(osu->getModAuto() || (osu->getModAutopilot() && osu->getModRelax())) {
             playerScoreEntry.name = "neosu";
-        } else if(beatmap->m_bIsWatchingReplay || beatmap->is_spectating) {
+        } else if(beatmap->is_watching || beatmap->is_spectating) {
             playerScoreEntry.name = osu->watched_user_name;
             playerScoreEntry.player_id = osu->watched_user_id;
         } else {
@@ -2225,7 +2235,7 @@ void HUD::drawScrubbingTimeline(Graphics *g, unsigned long beatmapTime, unsigned
 
     // Auto-hide scrubbing timeline when watching a replay
     double galpha = 1.0f;
-    if(osu->getSelectedBeatmap()->m_bIsWatchingReplay) {
+    if(osu->getSelectedBeatmap()->is_watching) {
         double time_since_last_move = new_cursor_movement - (last_cursor_movement + 1.0f);
         galpha = fmax(0.f, fmin(1.0f - time_since_last_move, 1.0f));
     }

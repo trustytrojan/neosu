@@ -34,6 +34,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.changes.push_back("- Added option for servers to override convars using neosu.json");
     latest.changes.push_back("- Added option for servers to override convars using a custom bancho packet");
     latest.changes.push_back("- Added use_https convar (to support plain HTTP servers)");
+    latest.changes.push_back("- Fixed chat channels being unread after joining");
     latest.changes.push_back("- Hid password cvar from console command list");
     latest.changes.push_back("- Removed DirectX, Software, Vulkan renderers");
     latest.changes.push_back("- Removed OpenCL support");

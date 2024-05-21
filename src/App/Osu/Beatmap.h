@@ -46,6 +46,7 @@ class Beatmap {
     // live (but also on start)
     void onModUpdate(bool rebuildSliderVertexBuffers = true, bool recomputeDrainRate = true);
 
+    // HACK: Updates buffering state and pauses/unpauses the music!
     bool isBuffering();
 
     // Returns true if we're loading or waiting on other players
@@ -196,20 +197,20 @@ class Beatmap {
     u8 current_keys = 0;
     u8 last_keys = 0;
 
-    // replay replaying
+    // replay replaying (prerecorded)
     // current_keys, last_keys also reused
     std::vector<Replay::Frame> spectated_replay;
     Vector2 m_interpolatedMousePos;
-    bool m_bIsWatchingReplay = false;
+    bool is_watching = false;
     long current_frame_idx = 0;
 
-    // getting spectated
+    // getting spectated (live)
     void broadcast_spectator_frames();
     std::vector<LiveReplayFrame> frame_batch;
     double last_spectator_broadcast = 0;
     u16 spectator_sequence = 0;
 
-    // spectating
+    // spectating (live)
     std::vector<ScoreFrame> score_frames;
     bool is_spectating = false;
     bool is_buffering = false;
@@ -423,7 +424,6 @@ class Beatmap {
     }
 
     void saveAndSubmitScore(bool quit);
-    void onPaused(bool first);
 
     void drawFollowPoints(Graphics *g);
     void drawHitObjects(Graphics *g);

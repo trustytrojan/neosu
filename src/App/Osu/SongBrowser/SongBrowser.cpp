@@ -3729,7 +3729,8 @@ void SongBrowser::onSongButtonContextMenu(SongButton *songButton, UString text, 
                         beatmapSetHashes.push_back(songButtonChildren[i]->getDatabaseBeatmap()->getMD5Hash());
                     }
                 } else {
-                    const DatabaseBeatmap *beatmap = db->getBeatmap(songButton->getDatabaseBeatmap()->getMD5Hash());
+                    const DatabaseBeatmap *beatmap =
+                        db->getBeatmapDifficulty(songButton->getDatabaseBeatmap()->getMD5Hash());
                     if(beatmap != NULL) {
                         const std::vector<DatabaseBeatmap *> &diffs = beatmap->getDifficulties();
                         for(size_t i = 0; i < diffs.size(); i++) {

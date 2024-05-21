@@ -60,13 +60,13 @@ void update_channel(UString name, UString topic, i32 nb_members) {
         chat_channels[name_str] = chan;
 
         if(print_new_channels) {
-            osu->m_chat->addMessage(
-                "#osu", ChatMessage{
-                            .tms = time(NULL),
-                            .author_id = 0,
-                            .author_name = UString(""),
-                            .text = UString::format("%s (%d): %s", name.toUtf8(), nb_members, topic.toUtf8()),
-                        });
+            auto msg = ChatMessage{
+                .tms = time(NULL),
+                .author_id = 0,
+                .author_name = UString(""),
+                .text = UString::format("%s (%d): %s", name.toUtf8(), nb_members, topic.toUtf8()),
+            };
+            osu->m_chat->addMessage("#osu", msg, false);
         }
     } else {
         chan = it->second;
@@ -272,12 +272,13 @@ void handle_packet(Packet *packet) {
         UString recipient = read_string(packet);
         i32 sender_id = read<u32>(packet);
 
-        osu->m_chat->addMessage(recipient, ChatMessage{
-                                               .tms = time(NULL),
-                                               .author_id = sender_id,
-                                               .author_name = sender,
-                                               .text = text,
-                                           });
+        auto msg = ChatMessage{
+            .tms = time(NULL),
+            .author_id = sender_id,
+            .author_name = sender,
+            .text = text,
+        };
+        osu->m_chat->addMessage(recipient, msg);
     } else if(packet->id == PONG) {
         // (nothing to do)
     } else if(packet->id == USER_STATS) {
@@ -309,8 +310,10 @@ void handle_packet(Packet *packet) {
             disconnect();
         }
     } else if(packet->id == IN_SPECTATE_FRAMES) {
-        i32 target = read<i32>(packet);
-        if(bancho.spectated_player_id != 0 && bancho.spectated_player_id == target) {
+        i32 extra = read<i32>(packet);
+        (void)extra;  // this is mania seed or something we can't use
+
+        if(bancho.spectated_player_id != 0) {
             u16 nb_frames = read<u16>(packet);
             for(u16 i = 0; i < nb_frames; i++) {
                 auto frame = read<LiveReplayFrame>(packet);
@@ -414,13 +417,14 @@ void handle_packet(Packet *packet) {
         osu->m_room->on_all_players_skipped();
     } else if(packet->id == CHANNEL_JOIN_SUCCESS) {
         UString name = read_string(packet);
+        auto msg = ChatMessage{
+            .tms = time(NULL),
+            .author_id = 0,
+            .author_name = UString(""),
+            .text = UString("Joined channel."),
+        };
         osu->m_chat->addChannel(name);
-        osu->m_chat->addMessage(name, ChatMessage{
-                                          .tms = time(NULL),
-                                          .author_id = 0,
-                                          .author_name = UString(""),
-                                          .text = UString("Joined channel."),
-                                      });
+        osu->m_chat->addMessage(name, msg, false);
     } else if(packet->id == CHANNEL_INFO) {
         UString channel_name = read_string(packet);
         UString channel_topic = read_string(packet);
@@ -500,12 +504,13 @@ void handle_packet(Packet *packet) {
         UString recipient = read_string(packet);
         (void)recipient;
         i32 sender_id = read<u32>(packet);
-        osu->m_chat->addMessage(recipient, ChatMessage{
-                                               .tms = time(NULL),
-                                               .author_id = sender_id,
-                                               .author_name = sender,
-                                               .text = text,
-                                           });
+        auto msg = ChatMessage{
+            .tms = time(NULL),
+            .author_id = sender_id,
+            .author_name = sender,
+            .text = text,
+        };
+        osu->m_chat->addMessage(recipient, msg);
     } else if(packet->id == CHANNEL_INFO_END) {
         print_new_channels = false;
         osu->m_chat->join("#announce");

@@ -87,7 +87,6 @@ class Database {
     inline bool foundChanges() const { return m_bFoundChanges; }
 
     inline const std::vector<DatabaseBeatmap *> getDatabaseBeatmaps() const { return m_databaseBeatmaps; }
-    DatabaseBeatmap *getBeatmap(const MD5Hash &md5hash);
     DatabaseBeatmap *getBeatmapDifficulty(const MD5Hash &md5hash);
 
     inline std::unordered_map<MD5Hash, std::vector<FinishedScore>> *getScores() { return &m_scores; }

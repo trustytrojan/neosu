@@ -270,9 +270,8 @@ void ModFPoSu::update() {
         }
     }
 
-    const bool isAutoCursor =
-        (osu->getModAuto() || osu->getModAutopilot() || osu->getSelectedBeatmap()->m_bIsWatchingReplay ||
-         osu->getSelectedBeatmap()->is_spectating);
+    const bool isAutoCursor = (osu->getModAuto() || osu->getModAutopilot() || osu->getSelectedBeatmap()->is_watching ||
+                               osu->getSelectedBeatmap()->is_spectating);
 
     m_bCrosshairIntersectsScreen = true;
     if(!fposu_absolute_mode.getBool() && !isAutoCursor &&

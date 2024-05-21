@@ -46,7 +46,7 @@ class HUD : public OsuScreen {
     void drawPlayfieldBorder(Graphics *g, Vector2 playfieldCenter, Vector2 playfieldSize, float hitcircleDiameter);
     void drawPlayfieldBorder(Graphics *g, Vector2 playfieldCenter, Vector2 playfieldSize, float hitcircleDiameter,
                              float borderSize);
-    void drawLoadingSmall(Graphics *g);
+    void drawLoadingSmall(Graphics *g, UString text);
     void drawBeatmapImportSpinner(Graphics *g);
     void drawScoreNumber(Graphics *g, unsigned long long number, float scale = 1.0f, bool drawLeadingZeroes = false);
     void drawComboNumber(Graphics *g, unsigned long long number, float scale = 1.0f, bool drawLeadingZeroes = false);

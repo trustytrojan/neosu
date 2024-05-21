@@ -701,7 +701,7 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
     return r;
 }
 
-DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(const std::string &osuFilePath, float AR,
+DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(const std::string osuFilePath, float AR,
                                                                                float CS, float speedMultiplier,
                                                                                bool calculateStarsInaccurately) {
     std::atomic<bool> dead;
@@ -709,7 +709,7 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(c
     return loadDifficultyHitObjects(osuFilePath, AR, CS, speedMultiplier, calculateStarsInaccurately, dead);
 }
 
-DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(const std::string &osuFilePath, float AR,
+DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(const std::string osuFilePath, float AR,
                                                                                float CS, float speedMultiplier,
                                                                                bool calculateStarsInaccurately,
                                                                                const std::atomic<bool> &dead) {
