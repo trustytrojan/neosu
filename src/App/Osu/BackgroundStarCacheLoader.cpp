@@ -56,7 +56,7 @@ void BackgroundStarCacheLoader::initAsync() {
 
             DifficultyCalculator::calculateStarDiffForHitObjects(diffres.diffobjects, CS, OD, speedMultiplier, relax,
                                                                  touchDevice, &aimStars, &aimSliderFactor, &speedStars,
-                                                                 &speedNotes, i, NULL, NULL, m_bDead);
+                                                                 &speedNotes, i, m_bDead);
 
             m_beatmap->m_aimStarsForNumHitObjects.push_back(aimStars);
             m_beatmap->m_aimSliderFactorForNumHitObjects.push_back(aimSliderFactor);

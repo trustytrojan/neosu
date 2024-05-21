@@ -224,20 +224,18 @@ ConVar *DifficultyCalculator::m_osu_slider_scorev2_ref = NULL;
 double DifficultyCalculator::calculateStarDiffForHitObjects(std::vector<OsuDifficultyHitObject> &sortedHitObjects,
                                                             float CS, float OD, float speedMultiplier, bool relax,
                                                             bool touchDevice, double *aim, double *aimSliderFactor,
-                                                            double *speed, double *speedNotes, int upToObjectIndex,
-                                                            std::vector<double> *outAimStrains,
-                                                            std::vector<double> *outSpeedStrains) {
+                                                            double *speed, double *speedNotes, int upToObjectIndex) {
     std::atomic<bool> dead;
     dead = false;
     return calculateStarDiffForHitObjects(sortedHitObjects, CS, OD, speedMultiplier, relax, touchDevice, aim,
-                                          aimSliderFactor, speed, speedNotes, upToObjectIndex, outAimStrains,
-                                          outSpeedStrains, dead);
+                                          aimSliderFactor, speed, speedNotes, upToObjectIndex, dead);
 }
 
-double DifficultyCalculator::calculateStarDiffForHitObjects(
-    std::vector<OsuDifficultyHitObject> &sortedHitObjects, float CS, float OD, float speedMultiplier, bool relax,
-    bool touchDevice, double *aim, double *aimSliderFactor, double *speed, double *speedNotes, int upToObjectIndex,
-    std::vector<double> *outAimStrains, std::vector<double> *outSpeedStrains, const std::atomic<bool> &dead) {
+double DifficultyCalculator::calculateStarDiffForHitObjects(std::vector<OsuDifficultyHitObject> &sortedHitObjects,
+                                                            float CS, float OD, float speedMultiplier, bool relax,
+                                                            bool touchDevice, double *aim, double *aimSliderFactor,
+                                                            double *speed, double *speedNotes, int upToObjectIndex,
+                                                            const std::atomic<bool> &dead) {
     // NOTE: depends on speed multiplier + CS + OD + relax + touchDevice
 
     // NOTE: upToObjectIndex is applied way below, during the construction of the 'dobjects'
@@ -435,7 +433,7 @@ double DifficultyCalculator::calculateStarDiffForHitObjects(
         }
 
         static double calculate_difficulty(const Skills::Skill type, const std::vector<DiffObject> &dobjects,
-                                           std::vector<double> *outStrains = NULL, double *outRelevantNotes = NULL) {
+                                           double *outRelevantNotes = NULL) {
             // (old) see https://github.com/ppy/osu/blob/master/osu.Game/Rulesets/Difficulty/Skills/Skill.cs
             // (new) see https://github.com/ppy/osu/blob/master/osu.Game/Rulesets/Difficulty/Skills/StrainSkill.cs
 
@@ -479,8 +477,6 @@ double DifficultyCalculator::calculateStarDiffForHitObjects(
 
             // the peak strain will not be saved for the last section in the above loop
             highestStrains.push_back(max_strain);
-
-            if(outStrains != NULL) (*outStrains) = highestStrains;  // save a copy
 
             // calculate relevant speed note count
             // RelevantNoteCount @
@@ -1064,8 +1060,8 @@ double DifficultyCalculator::calculateStarDiffForHitObjects(
     double aimNoSliders = osu_stars_xexxar_angles_sliders.getBool()
                               ? DiffObject::calculate_difficulty(Skills::Skill::AIM_NO_SLIDERS, diffObjects)
                               : 0.0;
-    *aim = DiffObject::calculate_difficulty(Skills::Skill::AIM_SLIDERS, diffObjects, outAimStrains);
-    *speed = DiffObject::calculate_difficulty(Skills::Skill::SPEED, diffObjects, outSpeedStrains, speedNotes);
+    *aim = DiffObject::calculate_difficulty(Skills::Skill::AIM_SLIDERS, diffObjects);
+    *speed = DiffObject::calculate_difficulty(Skills::Skill::SPEED, diffObjects, speedNotes);
 
     static const double star_scaling_factor = 0.0675;
 

@@ -1691,7 +1691,7 @@ void DatabaseBeatmapStarCalculator::initAsync() {
         double speedNotes = 0.0;
         m_totalStars = DifficultyCalculator::calculateStarDiffForHitObjects(
             diffres.diffobjects, m_fCS, m_fOD, m_fSpeedMultiplier, m_bRelax, m_bTouchDevice, &aimStars,
-            &aimSliderFactor, &speedStars, &speedNotes, -1, &m_aimStrains, &m_speedStrains, m_bDead);
+            &aimSliderFactor, &speedStars, &speedNotes, -1, m_bDead);
         m_aimStars = aimStars;
         m_aimSliderFactor = aimSliderFactor;
         m_speedStars = speedStars;

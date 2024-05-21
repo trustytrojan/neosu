@@ -183,8 +183,6 @@ class Beatmap {
                                                               m_speedNotesForNumHitObjects.size() - 1)]
                     : 0);
     }
-    inline const std::vector<double> &getAimStrains() const { return m_aimStrains; }
-    inline const std::vector<double> &getSpeedStrains() const { return m_speedStrains; }
 
     // set to false when using non-vanilla mods (disables score submission)
     bool vanilla = true;
@@ -371,8 +369,6 @@ class Beatmap {
     std::vector<double> m_aimSliderFactorForNumHitObjects;
     std::vector<double> m_speedStarsForNumHitObjects;
     std::vector<double> m_speedNotesForNumHitObjects;
-    std::vector<double> m_aimStrains;
-    std::vector<double> m_speedStrains;
 
     // custom
     int m_iPreviousFollowPointObjectIndex;  // TODO: this shouldn't be in this class

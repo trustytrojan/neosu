@@ -69,7 +69,6 @@ ConVar osu_songbrowser_bottombar_percent("osu_songbrowser_bottombar_percent", 0.
 
 ConVar osu_draw_songbrowser_background_image("osu_draw_songbrowser_background_image", true, FCVAR_DEFAULT);
 ConVar osu_draw_songbrowser_menu_background_image("osu_draw_songbrowser_menu_background_image", true, FCVAR_DEFAULT);
-ConVar osu_draw_songbrowser_strain_graph("osu_draw_songbrowser_strain_graph", false, FCVAR_DEFAULT);
 ConVar osu_songbrowser_scorebrowser_enabled("osu_songbrowser_scorebrowser_enabled", true, FCVAR_DEFAULT);
 ConVar osu_songbrowser_background_fade_in_duration("osu_songbrowser_background_fade_in_duration", 0.1f, FCVAR_DEFAULT);
 
@@ -350,25 +349,6 @@ SongBrowser::SongBrowser() : ScreenBackable() {
     m_fps_max_ref = convar->getConVarByName("fps_max");
     m_osu_scores_enabled = convar->getConVarByName("osu_scores_enabled");
     m_name_ref = convar->getConVarByName("name");
-
-    m_osu_draw_scrubbing_timeline_strain_graph_ref =
-        convar->getConVarByName("osu_draw_scrubbing_timeline_strain_graph");
-    m_osu_hud_scrubbing_timeline_strains_height_ref =
-        convar->getConVarByName("osu_hud_scrubbing_timeline_strains_height");
-    m_osu_hud_scrubbing_timeline_strains_alpha_ref =
-        convar->getConVarByName("osu_hud_scrubbing_timeline_strains_alpha");
-    m_osu_hud_scrubbing_timeline_strains_aim_color_r_ref =
-        convar->getConVarByName("osu_hud_scrubbing_timeline_strains_aim_color_r");
-    m_osu_hud_scrubbing_timeline_strains_aim_color_g_ref =
-        convar->getConVarByName("osu_hud_scrubbing_timeline_strains_aim_color_g");
-    m_osu_hud_scrubbing_timeline_strains_aim_color_b_ref =
-        convar->getConVarByName("osu_hud_scrubbing_timeline_strains_aim_color_b");
-    m_osu_hud_scrubbing_timeline_strains_speed_color_r_ref =
-        convar->getConVarByName("osu_hud_scrubbing_timeline_strains_speed_color_r");
-    m_osu_hud_scrubbing_timeline_strains_speed_color_g_ref =
-        convar->getConVarByName("osu_hud_scrubbing_timeline_strains_speed_color_g");
-    m_osu_hud_scrubbing_timeline_strains_speed_color_b_ref =
-        convar->getConVarByName("osu_hud_scrubbing_timeline_strains_speed_color_b");
 
     m_osu_draw_statistics_perfectpp_ref = convar->getConVarByName("osu_draw_statistics_perfectpp");
     m_osu_draw_statistics_totalstars_ref = convar->getConVarByName("osu_draw_statistics_totalstars");
@@ -667,133 +647,6 @@ void SongBrowser::draw(Graphics *g) {
 
     // draw score browser
     m_scoreBrowser->draw(g);
-
-    // draw strain graph of currently selected beatmap
-    if(osu_draw_songbrowser_strain_graph.getBool() && getSelectedBeatmap()->getSelectedDifficulty2() != NULL &&
-       m_dynamicStarCalculator->isAsyncReady()) {
-        // this is still WIP
-
-        /// const std::vector<double> &aimStrains = getSelectedBeatmap()->getAimStrains();
-        /// const std::vector<double> &speedStrains = getSelectedBeatmap()->getSpeedStrains();
-        const std::vector<double> &aimStrains = m_dynamicStarCalculator->getAimStrains();
-        const std::vector<double> &speedStrains = m_dynamicStarCalculator->getSpeedStrains();
-        const float speedMultiplier = osu->getSpeedMultiplier();
-
-        // const unsigned long lengthFullMS = beatmapLength;
-        // const unsigned long lengthMS = getSelectedBeatmap()->getLengthPlayable();
-        // const unsigned long startTimeMS = getSelectedBeatmap()->getStartTimePlayable();
-        // const unsigned long endTimeMS = startTimeMS + lengthMS;
-        // const unsigned long currentTimeMS = beatmapTime;
-
-        if(aimStrains.size() > 0 && aimStrains.size() == speedStrains.size()) {
-            const float strainStepMS = 400.0f * speedMultiplier;
-
-            const unsigned long lengthMS = strainStepMS * aimStrains.size();
-
-            // get highest strain values for normalization
-            double highestAimStrain = 0.0;
-            double highestSpeedStrain = 0.0;
-            double highestStrain = 0.0;
-            int highestStrainIndex = -1;
-            for(int i = 0; i < aimStrains.size(); i++) {
-                const double aimStrain = aimStrains[i];
-                const double speedStrain = speedStrains[i];
-                const double strain = aimStrain + speedStrain;
-
-                if(strain > highestStrain) {
-                    highestStrain = strain;
-                    highestStrainIndex = i;
-                }
-                if(aimStrain > highestAimStrain) highestAimStrain = aimStrain;
-                if(speedStrain > highestSpeedStrain) highestSpeedStrain = speedStrain;
-            }
-
-            // draw strain bar graph
-            if(highestAimStrain > 0.0 && highestSpeedStrain > 0.0 && highestStrain > 0.0) {
-                const float dpiScale = Osu::getUIScale();
-
-                const float graphWidth = m_scoreBrowser->getSize().x;
-
-                const float msPerPixel = (float)lengthMS / graphWidth;
-                const float strainWidth = strainStepMS / msPerPixel;
-                const float strainHeightMultiplier =
-                    m_osu_hud_scrubbing_timeline_strains_height_ref->getFloat() * dpiScale;
-
-                McRect graphRect(0, m_bottombar->getPos().y - strainHeightMultiplier, graphWidth,
-                                 strainHeightMultiplier);
-
-                const float alpha = (graphRect.contains(engine->getMouse()->getPos())
-                                         ? 1.0f
-                                         : m_osu_hud_scrubbing_timeline_strains_alpha_ref->getFloat());
-
-                const Color aimStrainColor =
-                    COLORf(alpha, m_osu_hud_scrubbing_timeline_strains_aim_color_r_ref->getInt() / 255.0f,
-                           m_osu_hud_scrubbing_timeline_strains_aim_color_g_ref->getInt() / 255.0f,
-                           m_osu_hud_scrubbing_timeline_strains_aim_color_b_ref->getInt() / 255.0f);
-                const Color speedStrainColor =
-                    COLORf(alpha, m_osu_hud_scrubbing_timeline_strains_speed_color_r_ref->getInt() / 255.0f,
-                           m_osu_hud_scrubbing_timeline_strains_speed_color_g_ref->getInt() / 255.0f,
-                           m_osu_hud_scrubbing_timeline_strains_speed_color_b_ref->getInt() / 255.0f);
-
-                g->setDepthBuffer(true);
-                for(int i = 0; i < aimStrains.size(); i++) {
-                    const double aimStrain = (aimStrains[i]) / highestStrain;
-                    const double speedStrain = (speedStrains[i]) / highestStrain;
-                    // const double strain = (aimStrains[i] + speedStrains[i]) / highestStrain;
-
-                    const double aimStrainHeight = aimStrain * strainHeightMultiplier;
-                    const double speedStrainHeight = speedStrain * strainHeightMultiplier;
-                    // const double strainHeight = strain * strainHeightMultiplier;
-
-                    if(!engine->getKeyboard()->isShiftDown()) {
-                        g->setColor(aimStrainColor);
-                        g->fillRect(i * strainWidth, m_bottombar->getPos().y - aimStrainHeight,
-                                    std::max(1.0f, std::round(strainWidth + 0.5f)), aimStrainHeight);
-                    }
-
-                    if(!engine->getKeyboard()->isControlDown()) {
-                        g->setColor(speedStrainColor);
-                        g->fillRect(i * strainWidth,
-                                    m_bottombar->getPos().y -
-                                        (engine->getKeyboard()->isShiftDown() ? 0 : aimStrainHeight) -
-                                        speedStrainHeight,
-                                    std::max(1.0f, std::round(strainWidth + 0.5f)), speedStrainHeight + 1);
-                    }
-                }
-                g->setDepthBuffer(false);
-
-                // highlight highest total strain value (+- section block)
-                if(highestStrainIndex > -1) {
-                    const double aimStrain = (aimStrains[highestStrainIndex]) / highestStrain;
-                    const double speedStrain = (speedStrains[highestStrainIndex]) / highestStrain;
-                    // const double strain = (aimStrains[i] + speedStrains[i]) / highestStrain;
-
-                    const double aimStrainHeight = aimStrain * strainHeightMultiplier;
-                    const double speedStrainHeight = speedStrain * strainHeightMultiplier;
-                    // const double strainHeight = strain * strainHeightMultiplier;
-
-                    Vector2 topLeftCenter = Vector2(highestStrainIndex * strainWidth + strainWidth / 2.0f,
-                                                    m_bottombar->getPos().y - aimStrainHeight - speedStrainHeight);
-
-                    const float margin = 5.0f * dpiScale;
-
-                    g->setColor(0xffffffff);
-                    g->setAlpha(alpha);
-                    g->drawRect(topLeftCenter.x - margin * strainWidth, topLeftCenter.y - margin * strainWidth,
-                                strainWidth * 2 * margin,
-                                aimStrainHeight + speedStrainHeight + 2 * margin * strainWidth);
-                    g->setAlpha(alpha * 0.5f);
-                    g->drawRect(topLeftCenter.x - margin * strainWidth - 2, topLeftCenter.y - margin * strainWidth - 2,
-                                strainWidth * 2 * margin + 4,
-                                aimStrainHeight + speedStrainHeight + 2 * margin * strainWidth + 4);
-                    g->setAlpha(alpha * 0.25f);
-                    g->drawRect(topLeftCenter.x - margin * strainWidth - 4, topLeftCenter.y - margin * strainWidth - 4,
-                                strainWidth * 2 * margin + 8,
-                                aimStrainHeight + speedStrainHeight + 2 * margin * strainWidth + 8);
-                }
-            }
-        }
-    }
 
     // draw song browser
     m_songBrowser->draw(g);
@@ -3895,8 +3748,7 @@ void SongBrowser::recalculateStarsForSelectedBeatmap(bool force) {
 
     // HACKHACK: temporarily deactivated, see SongBrowser::update(), but only if drawing scrubbing timeline strain
     // graph is enabled (or "Draw Stats: Stars* (Total)", or "Draw Stats: pp (SS)")
-    if(!m_osu_draw_scrubbing_timeline_strain_graph_ref->getBool() && !m_osu_draw_statistics_perfectpp_ref->getBool() &&
-       !m_osu_draw_statistics_totalstars_ref->getBool()) {
+    if(!m_osu_draw_statistics_perfectpp_ref->getBool() && !m_osu_draw_statistics_totalstars_ref->getBool()) {
         if(osu->isInPlayMode()) {
             m_bBackgroundStarCalcScheduled = true;
             m_bBackgroundStarCalcScheduledForce = (m_bBackgroundStarCalcScheduledForce || force);

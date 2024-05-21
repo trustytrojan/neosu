@@ -388,9 +388,6 @@ class DatabaseBeatmapStarCalculator : public Resource {
 
     inline long getLengthMS() const { return m_iLengthMS.load(); }
 
-    inline const std::vector<double> &getAimStrains() const { return m_aimStrains; }
-    inline const std::vector<double> &getSpeedStrains() const { return m_speedStrains; }
-
     inline int getNumObjects() const { return m_iNumObjects.load(); }
     inline int getNumCircles() const { return m_iNumCircles.load(); }
     inline int getNumSpinners() const { return m_iNumSpinners.load(); }
@@ -419,9 +416,6 @@ class DatabaseBeatmapStarCalculator : public Resource {
     std::atomic<double> m_pp;
 
     std::atomic<long> m_iLengthMS;
-
-    std::vector<double> m_aimStrains;
-    std::vector<double> m_speedStrains;
 
     // custom
     int m_iErrorCode;

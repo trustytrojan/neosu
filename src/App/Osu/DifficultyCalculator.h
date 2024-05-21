@@ -101,15 +101,12 @@ class DifficultyCalculator {
     static double calculateStarDiffForHitObjects(std::vector<OsuDifficultyHitObject> &sortedHitObjects, float CS,
                                                  float OD, float speedMultiplier, bool relax, bool touchDevice,
                                                  double *aim, double *aimSliderFactor, double *speed,
-                                                 double *speedNotes, int upToObjectIndex = -1,
-                                                 std::vector<double> *outAimStrains = NULL,
-                                                 std::vector<double> *outSpeedStrains = NULL);
+                                                 double *speedNotes, int upToObjectIndex = -1);
     static double calculateStarDiffForHitObjects(std::vector<OsuDifficultyHitObject> &sortedHitObjects, float CS,
                                                  float OD, float speedMultiplier, bool relax, bool touchDevice,
                                                  double *aim, double *aimSliderFactor, double *speed,
                                                  double *speedNotes, int upToObjectIndex,
-                                                 std::vector<double> *outAimStrains,
-                                                 std::vector<double> *outSpeedStrains, const std::atomic<bool> &dead);
+                                                 const std::atomic<bool> &dead);
 
     // pp, use runtime mods (convenience)
     static double calculatePPv2(Beatmap *beatmap, double aim, double aimSliderFactor, double speed, double speedNotes,
