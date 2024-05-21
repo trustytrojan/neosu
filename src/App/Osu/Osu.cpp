@@ -53,7 +53,7 @@
 #include "VolumeOverlay.h"
 #include "score.h"
 
-Osu *osu = nullptr;
+Osu *osu = NULL;
 
 // release configuration
 ConVar auto_update("auto_update", true, FCVAR_DEFAULT);
@@ -163,7 +163,7 @@ ConVar *Osu::ui_scale = &osu_ui_scale;
 Vector2 Osu::g_vInternalResolution;
 Vector2 Osu::osuBaseResolution = Vector2(640.0f, 480.0f);
 
-Shader *flashlight_shader = nullptr;
+Shader *flashlight_shader = NULL;
 
 Osu::Osu() {
     osu = this;
@@ -517,7 +517,7 @@ Osu::Osu() {
 }
 
 Osu::~Osu() {
-    osu = nullptr;
+    osu = NULL;
 
     // "leak" UpdateHandler object, but not relevant since shutdown:
     // this is the only way of handling instant user shutdown requests properly, there is no solution for active working
@@ -855,7 +855,7 @@ void Osu::update() {
         if(bancho.is_in_a_multi_room()) {
             // We didn't select a map; revert to previously selected one
             auto diff2 = m_songBrowser2->m_lastSelectedBeatmap;
-            if(diff2 != nullptr) {
+            if(diff2 != NULL) {
                 bancho.room.map_name = UString::format("%s - %s [%s]", diff2->getArtist().c_str(),
                                                        diff2->getTitle().c_str(), diff2->getDifficultyName().c_str());
                 bancho.room.map_md5 = diff2->getMD5Hash();
@@ -2040,7 +2040,7 @@ void Osu::onSpeedChange(UString oldValue, UString newValue) {
     getSelectedBeatmap()->setSpeed(speed >= 0.0f ? speed : getSpeedMultiplier());
     updateAnimationSpeed();
 
-    if(m_modSelector != nullptr) {
+    if(m_modSelector != NULL) {
         int btn_state = (getModNC() || getModDC() || bancho.prefer_daycore) ? 1 : 0;
 
         // nightcore_enjoyer reverses button order so NC appears first

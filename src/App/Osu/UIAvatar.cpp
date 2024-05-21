@@ -88,7 +88,7 @@ UIAvatar::~UIAvatar() {
 void UIAvatar::draw_avatar(Graphics *g, float alpha) {
     if(!on_screen) return;  // Comment when you need to debug on_screen logic
 
-    if(avatar == nullptr) {
+    if(avatar == NULL) {
         // Don't download during gameplay to avoid lagspikes
         if(!osu->isInPlayMode()) {
             if(download_avatar(m_player_id)) {

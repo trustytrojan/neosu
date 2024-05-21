@@ -1479,7 +1479,7 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
             if(slot->has_quit()) {
                 slot->current_hp = 0;
                 scoreEntry.name = UString::format("%s [quit]", user_info->name.toUtf8());
-            } else if(beatmap != nullptr && beatmap->isInSkippableSection() &&
+            } else if(beatmap != NULL && beatmap->isInSkippableSection() &&
                       beatmap->getHitObjectIndexForCurrentTime() < 1) {
                 if(slot->skipped) {
                     // XXX: Draw pretty "Skip" image instead
@@ -1561,12 +1561,12 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
 
 void HUD::resetScoreboard() {
     Beatmap *beatmap = osu->getSelectedBeatmap();
-    if(beatmap == nullptr) return;
+    if(beatmap == NULL) return;
     DatabaseBeatmap *diff2 = beatmap->getSelectedDifficulty2();
-    if(diff2 == nullptr) return;
+    if(diff2 == NULL) return;
 
     beatmap_md5 = diff2->getMD5Hash();
-    player_slot = nullptr;
+    player_slot = NULL;
     for(auto slot : slots) {
         delete slot;
     }
@@ -1589,9 +1589,9 @@ void HUD::resetScoreboard() {
 
 void HUD::updateScoreboard(bool animate) {
     Beatmap *beatmap = osu->getSelectedBeatmap();
-    if(beatmap == nullptr) return;
+    if(beatmap == NULL) return;
     DatabaseBeatmap *diff2 = beatmap->getSelectedDifficulty2();
-    if(diff2 == nullptr) return;
+    if(diff2 == NULL) return;
 
     if(!convar->getConVarByName("scoreboard_animations")->getBool()) {
         animate = false;

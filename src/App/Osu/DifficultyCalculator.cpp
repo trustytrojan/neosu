@@ -1056,7 +1056,7 @@ double DifficultyCalculator::calculateStarDiffForHitObjects(
     // calculate strains/skills
     for(size_t i = 1; i < numDiffObjects; i++)  // NOTE: start at 1
     {
-        diffObjects[i].calculate_strains(diffObjects[i - 1], (i == numDiffObjects - 1) ? nullptr : &diffObjects[i + 1],
+        diffObjects[i].calculate_strains(diffObjects[i - 1], (i == numDiffObjects - 1) ? NULL : &diffObjects[i + 1],
                                          hitWindow300);
     }
 

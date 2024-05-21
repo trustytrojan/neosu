@@ -43,12 +43,8 @@
 
 // DEFS
 
-#ifndef NULL
-#define NULL nullptr
-#endif
-
 #ifdef _WIN32
-#define reallocarray(ptr, a, b) realloc(ptr, a * b)
+#define reallocarray(ptr, a, b) realloc(ptr, a *b)
 #define strcasestr(a, b) StrStrIA(a, b)
 #endif
 
@@ -203,5 +199,5 @@ struct zarray {
    private:
     size_t max = 0;
     size_t nb = 0;
-    T *memory = nullptr;
+    T *memory = NULL;
 };

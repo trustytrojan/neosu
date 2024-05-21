@@ -264,7 +264,7 @@
             m_vPos.y -= m_vSize.y * (yAnchor - m_vAnchor.y);     \
             m_vAnchor.x = xAnchor;                               \
             m_vAnchor.y = yAnchor;                               \
-            if(m_parent != nullptr) updateLayout();              \
+            if(m_parent != NULL) updateLayout();                 \
             onMoved();                                           \
         }                                                        \
         return this;                                             \
@@ -274,7 +274,7 @@
             m_vmPos.x -= m_vmSize.x * (xAnchor - m_vAnchor.x);   \
             m_vPos.x -= m_vSize.x * (xAnchor - m_vAnchor.x);     \
             m_vAnchor.x = xAnchor;                               \
-            if(m_parent != nullptr) updateLayout();              \
+            if(m_parent != NULL) updateLayout();                 \
             onMoved();                                           \
         }                                                        \
         return this;                                             \
@@ -284,7 +284,7 @@
             m_vmPos.y -= m_vmSize.y * (yAnchor - m_vAnchor.y);   \
             m_vPos.y -= m_vSize.y * (yAnchor - m_vAnchor.y);     \
             m_vAnchor.y = yAnchor;                               \
-            if(m_parent != nullptr) updateLayout();              \
+            if(m_parent != NULL) updateLayout();                 \
             onMoved();                                           \
         }                                                        \
         return this;                                             \
@@ -294,7 +294,7 @@
             m_vmPos -= m_vmSize * (anchor - m_vAnchor);          \
             m_vPos -= m_vSize * (anchor - m_vAnchor);            \
             m_vAnchor = anchor;                                  \
-            if(m_parent != nullptr) updateLayout();              \
+            if(m_parent != NULL) updateLayout();                 \
             onMoved();                                           \
         }                                                        \
         return this;                                             \
@@ -417,7 +417,7 @@ class CBaseUIElement : public KeyboardListener {
         onFocusStolen();
     }
     void updateLayout() {
-        if(m_parent != nullptr) m_parent->updateLayout();
+        if(m_parent != NULL) m_parent->updateLayout();
     }
 
    protected:

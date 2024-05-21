@@ -30,7 +30,7 @@ struct APIRequest {
     APIRequestType type;
     UString path = "";
     curl_mime *mime = NULL;
-    u8 *extra = nullptr;
+    u8 *extra = NULL;
     i32 extra_int = 0;  // lazy
 };
 

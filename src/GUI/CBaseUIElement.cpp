@@ -23,7 +23,7 @@ CBaseUIElement::CBaseUIElement(float xPos, float yPos, float xSize, float ySize,
     m_vAnchor.x = 0;
     m_vAnchor.y = 0;
     m_sName = name;
-    m_parent = nullptr;
+    m_parent = NULL;
 
     // attributes
     m_bVisible = true;

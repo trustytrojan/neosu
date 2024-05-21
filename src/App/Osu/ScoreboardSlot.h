@@ -10,7 +10,7 @@ struct ScoreboardSlot {
     void draw(Graphics *g);
     void updateIndex(int new_index, bool animate);
 
-    UIAvatar *m_avatar = nullptr;
+    UIAvatar *m_avatar = NULL;
     SCORE_ENTRY m_score;
     int m_index;
     float m_y = 0.f;

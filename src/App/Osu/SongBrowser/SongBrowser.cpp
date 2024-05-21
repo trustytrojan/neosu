@@ -1454,7 +1454,7 @@ CBaseUIContainer *SongBrowser::setVisible(bool visible) {
         engine->getMouse()->onLeftChange(false);
         engine->getMouse()->onRightChange(false);
 
-        if(m_selectedBeatmap != nullptr) {
+        if(m_selectedBeatmap != NULL) {
             // For multiplayer: if the host exits song selection without selecting a song, we want to be able to revert
             // to that previous song.
             m_lastSelectedBeatmap = m_selectedBeatmap->getSelectedDifficulty2();
@@ -1471,13 +1471,13 @@ CBaseUIContainer *SongBrowser::setVisible(bool visible) {
 }
 
 void SongBrowser::selectSelectedBeatmapSongButton() {
-    if(m_selectedBeatmap == nullptr) return;
+    if(m_selectedBeatmap == NULL) return;
 
     const std::vector<CBaseUIElement *> &elements = m_songBrowser->getContainer()->getElements();
     for(auto elm : elements) {
         SongButton *btn = dynamic_cast<SongButton *>(elm);
-        if(btn == nullptr) continue;
-        if(btn->getDatabaseBeatmap() == nullptr) continue;
+        if(btn == NULL) continue;
+        if(btn->getDatabaseBeatmap() == NULL) continue;
 
         std::vector<DatabaseBeatmap *> diffs = btn->getDatabaseBeatmap()->getDifficulties();
         diffs.push_back(btn->getDatabaseBeatmap());
@@ -1642,7 +1642,7 @@ void SongBrowser::refreshBeatmaps() {
     // don't pause the music the first time we load the song database
     static bool first_refresh = true;
     if(first_refresh) {
-        m_selectedBeatmap->m_music = nullptr;
+        m_selectedBeatmap->m_music = NULL;
         first_refresh = false;
     }
 
@@ -3074,7 +3074,7 @@ void SongBrowser::onDatabaseLoadingFinished() {
 
     // main menu starts playing a song before the database is loaded,
     // re-select it after the database has been loaded
-    if(osu->m_mainMenu->preloaded_beatmapset != nullptr) {
+    if(osu->m_mainMenu->preloaded_beatmapset != NULL) {
         auto matching_beatmap = getDatabase()->getBeatmapDifficulty(osu->m_mainMenu->preloaded_beatmap->getMD5Hash());
         if(matching_beatmap) {
             onDifficultySelected(matching_beatmap, false);
@@ -3085,7 +3085,7 @@ void SongBrowser::onDatabaseLoadingFinished() {
     }
 
     // ok, if we still haven't selected a song, do so now
-    if(m_selectedBeatmap->getSelectedDifficulty2() == nullptr) {
+    if(m_selectedBeatmap->getSelectedDifficulty2() == NULL) {
         selectRandomBeatmap();
     }
 }

@@ -236,7 +236,7 @@ void RoomScreen::draw(Graphics *g) {
             m_map_title->setText(text.toUtf8());
             m_map_title->setSizeToContent(0, 0);
             m_ready_btn->is_loading = true;
-        } else if(beatmap != nullptr) {
+        } else if(beatmap != NULL) {
             current_map_id = bancho.room.map_id;
             on_map_change();
         }
@@ -515,7 +515,7 @@ void RoomScreen::on_map_change() {
         m_ready_btn->is_loading = true;
     } else {
         auto beatmap = osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(bancho.room.map_md5);
-        if(beatmap != nullptr) {
+        if(beatmap != NULL) {
             osu->m_songBrowser2->onDifficultySelected(beatmap, false);
             m_map_title->setText(bancho.room.map_name);
             m_map_title->setSizeToContent(0, 0);
@@ -580,14 +580,14 @@ void RoomScreen::on_room_updated(Room room) {
     bool map_changed = bancho.room.map_id != room.map_id;
     bancho.room = room;
 
-    Slot *player_slot = nullptr;
+    Slot *player_slot = NULL;
     for(int i = 0; i < 16; i++) {
         if(bancho.room.slots[i].player_id == bancho.user_id) {
             player_slot = &bancho.room.slots[i];
             break;
         }
     }
-    if(player_slot == nullptr) {
+    if(player_slot == NULL) {
         // Player got kicked
         ragequit();
         return;
@@ -610,7 +610,7 @@ void RoomScreen::on_room_updated(Room room) {
 
 void RoomScreen::on_match_started(Room room) {
     bancho.room = room;
-    if(osu->getSelectedBeatmap() == nullptr) {
+    if(osu->getSelectedBeatmap() == NULL) {
         debugLog("We received MATCH_STARTED without being ready, wtf!\n");
         return;
     }

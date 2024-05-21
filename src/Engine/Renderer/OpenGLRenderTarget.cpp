@@ -178,7 +178,7 @@ void OpenGLRenderTarget::init() {
 
             // fill texture
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, (int)m_vSize.x, (int)m_vSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                         nullptr);
+                         NULL);
 
             // set resolve texture as color attachment0 on the resolve framebuffer
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_iResolveTexture, 0);

@@ -68,7 +68,7 @@ void* do_downloads(void* arg) {
     while(thread->running) {
         env->sleep(100000);  // wait 100ms between every download
 
-        DownloadResult* result = nullptr;
+        DownloadResult* result = NULL;
         std::string url;
 
         pthread_mutex_lock(&threads_mtx);
@@ -152,7 +152,7 @@ end_thread:
 void download(const char* url, float* progress, std::vector<u8>& out, int* response_code) {
     char* hostname = NULL;
     bool download_found = false;
-    DownloadThread* matching_thread = nullptr;
+    DownloadThread* matching_thread = NULL;
 
     CURLU* urlu = curl_url();
     if(!urlu) {
@@ -177,7 +177,7 @@ void download(const char* url, float* progress, std::vector<u8>& out, int* respo
             break;
         }
     }
-    if(matching_thread == nullptr) {
+    if(matching_thread == NULL) {
         matching_thread = new DownloadThread();
         matching_thread->running = true;
         matching_thread->endpoint = std::string(hostname);
@@ -299,7 +299,7 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* pr
     static i32 queried_map_id = 0;
 
     auto beatmap = osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(beatmap_md5);
-    if(beatmap != nullptr) {
+    if(beatmap != NULL) {
         *progress = 1.f;
         return beatmap;
     }
@@ -310,7 +310,7 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* pr
         if(queried_map_id == beatmap_id) {
             // We already queried for the beatmapset ID, and are waiting for the response
             *progress = 0.f;
-            return nullptr;
+            return NULL;
         }
 
         APIRequest request;
@@ -323,25 +323,25 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* pr
         queried_map_id = beatmap_id;
 
         *progress = 0.f;
-        return nullptr;
+        return NULL;
     }
 
     i32 set_id = it->second;
     if(set_id == 0) {
         // Already failed to load the beatmap
         *progress = -1.f;
-        return nullptr;
+        return NULL;
     }
 
     download_beatmapset(set_id, progress);
     if(*progress == -1.f) {
         // Download failed, don't retry
         beatmap_to_beatmapset[beatmap_id] = 0;
-        return nullptr;
+        return NULL;
     }
 
     // Download not finished
-    if(*progress != 1.f) return nullptr;
+    if(*progress != 1.f) return NULL;
 
     std::stringstream ss;
     ss << MCENGINE_DATA_DIR "maps/" << std::to_string(set_id) << "/";
@@ -352,10 +352,10 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* pr
     debugLog("Finished loading beatmapset %d.\n", set_id);
 
     beatmap = osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(beatmap_md5);
-    if(beatmap == nullptr) {
+    if(beatmap == NULL) {
         beatmap_to_beatmapset[beatmap_id] = 0;
         *progress = -1.f;
-        return nullptr;
+        return NULL;
     }
 
     *progress = 1.f;

@@ -138,10 +138,10 @@ enum OutgoingPackets {
 
 struct Packet {
     u16 id = 0;
-    u8 *memory = nullptr;
+    u8 *memory = NULL;
     size_t size = 0;
     size_t pos = 0;
-    u8 *extra = nullptr;
+    u8 *extra = NULL;
     i32 extra_int = 0;  // lazy
 
     void reserve(u32 newsize) {

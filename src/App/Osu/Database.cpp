@@ -441,7 +441,7 @@ void Database::save() {
 
 DatabaseBeatmap *Database::addBeatmap(std::string beatmapFolderPath) {
     BeatmapSet *beatmap = loadRawBeatmap(beatmapFolderPath);
-    if(beatmap != nullptr) m_databaseBeatmaps.push_back(beatmap);
+    if(beatmap != NULL) m_databaseBeatmaps.push_back(beatmap);
     return beatmap;
 }
 
@@ -971,7 +971,7 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
     struct Beatmap_Set {
         int setID;
         std::string path;
-        std::vector<DatabaseBeatmap *> *diffs2 = nullptr;
+        std::vector<DatabaseBeatmap *> *diffs2 = NULL;
     };
     std::vector<Beatmap_Set> beatmapSets;
     std::unordered_map<int, size_t> setIDToIndex;

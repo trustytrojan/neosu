@@ -293,7 +293,7 @@ class SongBrowser : public ScreenBackable {
     // bottom bar
     CBaseUIContainer *m_bottombar;
     std::vector<UISelectionButton *> m_bottombarNavButtons;
-    UserCard *m_userButton = nullptr;
+    UserCard *m_userButton = NULL;
 
     // score browser
     std::vector<ScoreButton *> m_scoreButtonCache;
@@ -302,7 +302,7 @@ class SongBrowser : public ScreenBackable {
     CBaseUIElement *m_scoreBrowserNoRecordsYetElement;
     CBaseUIContainer *m_localBestContainer;
     CBaseUILabel *m_localBestLabel;
-    ScoreButton *m_localBestButton = nullptr;
+    ScoreButton *m_localBestButton = NULL;
 
     // song browser
     CBaseUIScrollView *m_songBrowser;
@@ -346,7 +346,7 @@ class SongBrowser : public ScreenBackable {
     bool m_bPreviousRandomBeatmapScheduled;
 
     // behaviour
-    DatabaseBeatmap *m_lastSelectedBeatmap = nullptr;
+    DatabaseBeatmap *m_lastSelectedBeatmap = NULL;
     Beatmap *m_selectedBeatmap;
     bool m_bHasSelectedAndIsPlaying;
     float m_fPulseAnimation;

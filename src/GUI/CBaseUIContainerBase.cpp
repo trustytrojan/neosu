@@ -14,7 +14,7 @@ CBaseUIContainerBase::CBaseUIContainerBase(UString name) : CBaseUIElement(0, 0, 
 CBaseUIContainerBase::~CBaseUIContainerBase() {}
 
 void CBaseUIContainerBase::empty() {
-    for(size_t i = 0; i < m_vElements.size(); i++) m_vElements[i]->setParent(nullptr);
+    for(size_t i = 0; i < m_vElements.size(); i++) m_vElements[i]->setParent(NULL);
 
     m_vElements = std::vector<std::shared_ptr<CBaseUIElement>>();
 }
@@ -35,7 +35,7 @@ CBaseUIContainerBase *CBaseUIContainerBase::addElement(CBaseUIElement *element, 
 }
 
 CBaseUIContainerBase *CBaseUIContainerBase::addElement(std::shared_ptr<CBaseUIElement> element, bool back) {
-    if(element == NULL || element.get() == nullptr) return this;
+    if(element == NULL || element.get() == NULL) return this;
 
     element->setParent(this);
 
@@ -49,7 +49,7 @@ CBaseUIContainerBase *CBaseUIContainerBase::addElement(std::shared_ptr<CBaseUIEl
 }
 
 CBaseUIContainerBase *CBaseUIContainerBase::insertElement(CBaseUIElement *element, CBaseUIElement *index, bool back) {
-    if(element == nullptr || index == nullptr) return this;
+    if(element == NULL || index == NULL) return this;
 
     for(size_t i = 0; i < m_vElements.size(); i++) {
         if(m_vElements[i].get() == index) {
@@ -73,7 +73,7 @@ CBaseUIContainerBase *CBaseUIContainerBase::insertElement(CBaseUIElement *elemen
 
 CBaseUIContainerBase *CBaseUIContainerBase::insertElement(CBaseUIElement *element,
                                                           std::shared_ptr<CBaseUIElement> index, bool back) {
-    if(element == nullptr || index == NULL || index.get() == nullptr) return this;
+    if(element == NULL || index == NULL || index.get() == NULL) return this;
 
     for(size_t i = 0; i < m_vElements.size(); i++) {
         if(m_vElements[i] == index) {
@@ -95,7 +95,7 @@ CBaseUIContainerBase *CBaseUIContainerBase::insertElement(CBaseUIElement *elemen
 
 CBaseUIContainerBase *CBaseUIContainerBase::insertElement(std::shared_ptr<CBaseUIElement> element,
                                                           CBaseUIElement *index, bool back) {
-    if(element == NULL || element.get() == nullptr || index == NULL) return this;
+    if(element == NULL || element.get() == NULL || index == NULL) return this;
 
     for(size_t i = 0; i < m_vElements.size(); i++) {
         if(m_vElements[i].get() == index) {
@@ -116,7 +116,7 @@ CBaseUIContainerBase *CBaseUIContainerBase::insertElement(std::shared_ptr<CBaseU
 
 CBaseUIContainerBase *CBaseUIContainerBase::insertElement(std::shared_ptr<CBaseUIElement> element,
                                                           std::shared_ptr<CBaseUIElement> index, bool back) {
-    if(element == NULL || index == NULL || element.get() == nullptr || index.get() == nullptr) return this;
+    if(element == NULL || index == NULL || element.get() == NULL || index.get() == NULL) return this;
 
     for(size_t i = 0; i < m_vElements.size(); i++) {
         if(m_vElements[i] == index) {
@@ -139,7 +139,7 @@ CBaseUIContainerBase *CBaseUIContainerBase::insertElement(std::shared_ptr<CBaseU
 void CBaseUIContainerBase::removeElement(CBaseUIElement *element) {
     for(size_t i = 0; i < m_vElements.size(); i++) {
         if(m_vElements[i].get() == element) {
-            m_vElements[i]->setParent(nullptr);
+            m_vElements[i]->setParent(NULL);
             m_vElements.erase(m_vElements.begin() + i);
             updateLayout();
             return;
@@ -152,7 +152,7 @@ void CBaseUIContainerBase::removeElement(CBaseUIElement *element) {
 void CBaseUIContainerBase::removeElement(std::shared_ptr<CBaseUIElement> element) {
     for(size_t i = 0; i < m_vElements.size(); i++) {
         if(m_vElements[i] == element) {
-            m_vElements[i]->setParent(nullptr);
+            m_vElements[i]->setParent(NULL);
             m_vElements.erase(m_vElements.begin() + i);
             updateLayout();
             return;
@@ -169,12 +169,12 @@ CBaseUIElement *CBaseUIContainerBase::getElementByName(UString name, bool search
 
         else if(searchNestedContainers) {
             CBaseUIContainerBase *container = dynamic_cast<CBaseUIContainerBase *>(m_vElements[i].get());
-            if(container != nullptr) return container->getElementByName(name, true);
+            if(container != NULL) return container->getElementByName(name, true);
         }
     }
 
     debugLog("Error: CBaseUIContainerBase::getSlotByElementName() \"%s\" does not exist!!!\n", name.toUtf8());
-    return nullptr;
+    return NULL;
 }
 
 std::shared_ptr<CBaseUIElement> CBaseUIContainerBase::getElementSharedByName(UString name,
@@ -185,12 +185,12 @@ std::shared_ptr<CBaseUIElement> CBaseUIContainerBase::getElementSharedByName(USt
 
         else if(searchNestedContainers) {
             CBaseUIContainerBase *container = dynamic_cast<CBaseUIContainerBase *>(m_vElements[i].get());
-            if(container != nullptr) return container->getElementSharedByName(name, true);
+            if(container != NULL) return container->getElementSharedByName(name, true);
         }
     }
 
     debugLog("Error: CBaseUIContainerBase::getSlotByElementName() \"%s\" does not exist!!!\n", name.toUtf8());
-    return nullptr;
+    return NULL;
 }
 
 void CBaseUIContainerBase::draw(Graphics *g) {

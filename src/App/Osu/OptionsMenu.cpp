@@ -3073,7 +3073,7 @@ void OptionsMenu::onLoudnessNormalizationToggle(CBaseUICheckbox *checkbox) {
     onCheckboxChange(checkbox);
 
     auto music = osu->getSelectedBeatmap()->getMusic();
-    if(music != nullptr) {
+    if(music != NULL) {
         music->setVolume(osu->getSelectedBeatmap()->getIdealVolume());
     }
 }

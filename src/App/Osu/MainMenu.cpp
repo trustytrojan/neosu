@@ -296,7 +296,7 @@ void MainMenu::draw(Graphics *g) {
     if(!m_bVisible) return;
 
     // load server icon
-    if(bancho.is_online() && bancho.server_icon_url.length() > 0 && bancho.server_icon == nullptr) {
+    if(bancho.is_online() && bancho.server_icon_url.length() > 0 && bancho.server_icon == NULL) {
         std::stringstream ss;
         ss << MCENGINE_DATA_DIR "avatars/" << bancho.endpoint.toUtf8();
         auto icon_path = ss.str();
@@ -450,7 +450,7 @@ void MainMenu::draw(Graphics *g) {
     OsuScreen::draw(g);
 
     // draw update check button
-    if(m_updateAvailableButton != nullptr) {
+    if(m_updateAvailableButton != NULL) {
         if(osu->getUpdateHandler()->getStatus() == UpdateHandler::STATUS::STATUS_SUCCESS_INSTALLATION) {
             g->push3DScene(McRect(m_updateAvailableButton->getPos().x, m_updateAvailableButton->getPos().y,
                                   m_updateAvailableButton->getSize().x, m_updateAvailableButton->getSize().y));
@@ -767,7 +767,7 @@ void MainMenu::draw(Graphics *g) {
     // neosu/server logo
     {
         auto logo = logo_img;
-        if(bancho.server_icon != nullptr && bancho.server_icon->isReady()) {
+        if(bancho.server_icon != NULL && bancho.server_icon->isReady()) {
             logo = bancho.server_icon;
         }
 
@@ -880,7 +880,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
     // update and focus handling
     OsuScreen::mouse_update(propagate_clicks);
 
-    if(m_updateAvailableButton != nullptr) {
+    if(m_updateAvailableButton != NULL) {
         m_updateAvailableButton->mouse_update(propagate_clicks);
     }
 
@@ -959,7 +959,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
     }
 
     // handle update checker and status text
-    if(m_updateAvailableButton != nullptr) {
+    if(m_updateAvailableButton != NULL) {
         switch(osu->getUpdateHandler()->getStatus()) {
             case UpdateHandler::STATUS::STATUS_UP_TO_DATE:
                 if(m_updateAvailableButton->isVisible()) {
@@ -1006,7 +1006,7 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
     // Update pause button and shuffle songs
     m_pauseButton->setPaused(true);
     auto music = osu->getSelectedBeatmap()->getMusic();
-    if(music == nullptr) {
+    if(music == NULL) {
         selectRandomBeatmap();
     } else {
         if(music->isFinished()) {
@@ -1041,7 +1041,7 @@ void MainMenu::selectRandomBeatmap() {
             mapset_folder.append("/");
 
             BeatmapSet *set = osu->getSongBrowser()->getDatabase()->loadRawBeatmap(mapset_folder);
-            if(set == nullptr) {
+            if(set == NULL) {
                 debugLog("Failed to load beatmap set '%s'\n", mapset_folder.c_str());
                 continue;
             }
@@ -1162,7 +1162,7 @@ void MainMenu::updateLayout() {
     m_pauseButton->setRelPos(osu->getScreenWidth() - m_pauseButton->getSize().x * 2 - 10 * dpiScale,
                              m_pauseButton->getSize().y + 10 * dpiScale);
 
-    if(m_updateAvailableButton != nullptr) {
+    if(m_updateAvailableButton != NULL) {
         m_updateAvailableButton->setSize(375 * dpiScale, 50 * dpiScale);
         m_updateAvailableButton->setPos(osu->getScreenWidth() / 2 - m_updateAvailableButton->getSize().x / 2,
                                         osu->getScreenHeight() - m_updateAvailableButton->getSize().y - 10 * dpiScale);
@@ -1390,7 +1390,7 @@ void MainMenu::onPausePressed() {
         osu->getSelectedBeatmap()->pausePreviewMusic();
     } else {
         auto music = osu->getSelectedBeatmap()->getMusic();
-        if(music != nullptr) {
+        if(music != NULL) {
             engine->getSound()->play(music);
         }
     }

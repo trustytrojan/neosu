@@ -240,7 +240,7 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     OptionsMenuResetButton *m_asioBufferSizeResetButton;
     OptionsMenuResetButton *m_wasapiBufferSizeResetButton;
     OptionsMenuResetButton *m_wasapiPeriodSizeResetButton;
-    CBaseUISlider *m_asioBufferSizeSlider = nullptr;
+    CBaseUISlider *m_asioBufferSizeSlider = NULL;
     CBaseUISlider *m_sliderQualitySlider;
     CBaseUISlider *m_letterboxingOffsetXSlider;
     CBaseUISlider *m_letterboxingOffsetYSlider;

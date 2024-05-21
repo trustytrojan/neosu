@@ -17,7 +17,7 @@ class UserCard : public CBaseUIButton {
     void setID(i32 new_id);
 
    private:
-    UIAvatar *m_avatar = nullptr;
+    UIAvatar *m_avatar = NULL;
     i32 m_user_id = 0;
 
     ConVar *m_osu_scores_enabled_ref;

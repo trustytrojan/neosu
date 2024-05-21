@@ -29,7 +29,7 @@ i32 current_user_id = 0;
 
 void spectate_by_username(UString username) {
     auto user = find_user(username);
-    if(user == nullptr) {
+    if(user == NULL) {
         debugLog("Couldn't find user \"%s\"!", username.toUtf8());
         return;
     }
@@ -153,7 +153,7 @@ void SpectatorScreen::draw(Graphics *g) {
         } else if(progress < 1.f) {
             auto text = UString::format("Downloading map... %.2f%%", progress * 100.f);
             m_status->setText(text);
-        } else if(beatmap != nullptr) {
+        } else if(beatmap != NULL) {
             current_map_id = user_info->map_id;
             osu->m_songBrowser2->onDifficultySelected(beatmap, false);
             osu->getSelectedBeatmap()->spectate();

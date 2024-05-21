@@ -266,7 +266,7 @@ void Replay::load_and_watch(FinishedScore score) {
     }
 
     auto beatmap = osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(score.md5hash.hash);
-    if(beatmap == nullptr) {
+    if(beatmap == NULL) {
         // XXX: Auto-download beatmap
         osu->m_notificationOverlay->addNotification("Missing beatmap for this replay");
     } else {

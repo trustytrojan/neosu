@@ -615,7 +615,7 @@ void ScoreButton::setScore(const FinishedScore &score, const DatabaseBeatmap *di
 
     if(m_avatar) {
         delete m_avatar;
-        m_avatar = nullptr;
+        m_avatar = NULL;
     }
     if(score.player_id != 0) {
         m_avatar = new UIAvatar(score.player_id, m_vPos.x, m_vPos.y, m_vSize.y, m_vSize.y);

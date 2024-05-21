@@ -118,7 +118,7 @@ class DatabaseBeatmap {
 
     inline const std::vector<DatabaseBeatmap *> &getDifficulties() const {
         static std::vector<DatabaseBeatmap *> empty;
-        return m_difficulties == nullptr ? empty : *m_difficulties;
+        return m_difficulties == NULL ? empty : *m_difficulties;
     }
 
     inline const MD5Hash &getMD5Hash() const { return m_sMD5Hash; }
@@ -333,7 +333,7 @@ class DatabaseBeatmap {
 
     unsigned long long m_iSortHack;
 
-    std::vector<DatabaseBeatmap *> *m_difficulties = nullptr;
+    std::vector<DatabaseBeatmap *> *m_difficulties = NULL;
 
     MD5Hash m_sMD5Hash;
 

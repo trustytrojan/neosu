@@ -172,9 +172,9 @@ DatabaseBeatmap::DatabaseBeatmap(std::vector<DatabaseBeatmap *> *difficulties) :
 }
 
 DatabaseBeatmap::~DatabaseBeatmap() {
-    if(m_difficulties != nullptr) {
+    if(m_difficulties != NULL) {
         for(auto diff : (*m_difficulties)) {
-            assert(diff->m_difficulties == nullptr);
+            assert(diff->m_difficulties == NULL);
             delete diff;
         }
         delete m_difficulties;
@@ -967,7 +967,7 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(c
 }
 
 bool DatabaseBeatmap::loadMetadata() {
-    if(m_difficulties != nullptr) return false;  // we are a beatmapset, not a difficulty
+    if(m_difficulties != NULL) return false;  // we are a beatmapset, not a difficulty
 
     // reset
     m_timingpoints.clear();

@@ -26,7 +26,7 @@ struct Bancho {
     std::vector<u32> fellow_spectators;
 
     UString server_icon_url;
-    Image *server_icon = nullptr;
+    Image *server_icon = NULL;
 
     bool prefer_daycore = false;
 

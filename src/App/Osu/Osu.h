@@ -239,28 +239,28 @@ class Osu : public App, public MouseListener {
     ConVar *m_win_disable_windows_key_ref;
 
     // interfaces
-    VolumeOverlay *m_volumeOverlay = nullptr;
-    MainMenu *m_mainMenu = nullptr;
-    OptionsMenu *m_optionsMenu = nullptr;
-    Chat *m_chat = nullptr;
-    Lobby *m_lobby = nullptr;
-    RoomScreen *m_room = nullptr;
-    PromptScreen *m_prompt = nullptr;
-    UIUserContextMenuScreen *m_user_actions = nullptr;
-    SongBrowser *m_songBrowser2 = nullptr;
-    BackgroundImageHandler *m_backgroundImageHandler = nullptr;
-    ModSelector *m_modSelector = nullptr;
-    RankingScreen *m_rankingScreen = nullptr;
-    PauseMenu *m_pauseMenu = nullptr;
-    Skin *m_skin = nullptr;
-    HUD *m_hud = nullptr;
-    TooltipOverlay *m_tooltipOverlay = nullptr;
-    NotificationOverlay *m_notificationOverlay = nullptr;
-    LiveScore *m_score = nullptr;
-    Changelog *m_changelog = nullptr;
-    UpdateHandler *m_updateHandler = nullptr;
-    ModFPoSu *m_fposu = nullptr;
-    SpectatorScreen *m_spectatorScreen = nullptr;
+    VolumeOverlay *m_volumeOverlay = NULL;
+    MainMenu *m_mainMenu = NULL;
+    OptionsMenu *m_optionsMenu = NULL;
+    Chat *m_chat = NULL;
+    Lobby *m_lobby = NULL;
+    RoomScreen *m_room = NULL;
+    PromptScreen *m_prompt = NULL;
+    UIUserContextMenuScreen *m_user_actions = NULL;
+    SongBrowser *m_songBrowser2 = NULL;
+    BackgroundImageHandler *m_backgroundImageHandler = NULL;
+    ModSelector *m_modSelector = NULL;
+    RankingScreen *m_rankingScreen = NULL;
+    PauseMenu *m_pauseMenu = NULL;
+    Skin *m_skin = NULL;
+    HUD *m_hud = NULL;
+    TooltipOverlay *m_tooltipOverlay = NULL;
+    NotificationOverlay *m_notificationOverlay = NULL;
+    LiveScore *m_score = NULL;
+    Changelog *m_changelog = NULL;
+    UpdateHandler *m_updateHandler = NULL;
+    ModFPoSu *m_fposu = NULL;
+    SpectatorScreen *m_spectatorScreen = NULL;
 
     std::vector<OsuScreen *> m_screens;
 

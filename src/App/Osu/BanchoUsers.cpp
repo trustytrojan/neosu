@@ -10,7 +10,7 @@ UserInfo* find_user(UString username) {
         }
     }
 
-    return nullptr;
+    return NULL;
 }
 
 UserInfo* get_user_info(u32 user_id, bool fetch) {

@@ -38,9 +38,9 @@ void RichPresence::setBanchoStatus(const char *info_text, Action action) {
     u32 map_id = 0;
 
     auto selected_beatmap = osu->getSelectedBeatmap();
-    if(selected_beatmap != nullptr) {
+    if(selected_beatmap != NULL) {
         auto diff = selected_beatmap->getSelectedDifficulty2();
-        if(diff != nullptr) {
+        if(diff != NULL) {
             map_md5 = diff->getMD5Hash();
             map_id = diff->getID();
         }
@@ -68,9 +68,9 @@ void RichPresence::updateBanchoMods() {
     u32 map_id = 0;
 
     auto selected_beatmap = osu->getSelectedBeatmap();
-    if(selected_beatmap != nullptr) {
+    if(selected_beatmap != NULL) {
         auto diff = selected_beatmap->getSelectedDifficulty2();
-        if(diff != nullptr) {
+        if(diff != NULL) {
             map_md5 = diff->getMD5Hash();
             map_id = diff->getID();
         }
@@ -176,7 +176,7 @@ void RichPresence::setStatus(UString status, bool force) {
                              true);
     discord->setRichPresence(KEY_DISCORD_DETAILS, status);
 
-    if(osu->getSongBrowser() != nullptr) {
+    if(osu->getSongBrowser() != NULL) {
         if(osu_rich_presence_discord_show_totalpp.getBool()) {
             if(m_name_ref == NULL) m_name_ref = convar->getConVarByName("name");
 

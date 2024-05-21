@@ -96,9 +96,9 @@ void disconnect() {
     bancho.spectators.clear();
     bancho.fellow_spectators.clear();
     bancho.server_icon_url = "";
-    if(bancho.server_icon != nullptr) {
+    if(bancho.server_icon != NULL) {
         engine->getResourceManager()->destroyResource(bancho.server_icon);
-        bancho.server_icon = nullptr;
+        bancho.server_icon = NULL;
     }
 
     std::vector<ConVar *> convars = convar->getConVarArray();
@@ -199,7 +199,7 @@ static void send_api_request(CURL *curl, APIRequest api_out) {
         chunk = curl_slist_append(chunk, token_header.toUtf8());
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
     }
-    if(api_out.mime != nullptr) {
+    if(api_out.mime != NULL) {
         curl_easy_setopt(curl, CURLOPT_MIMEPOST, api_out.mime);
     }
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
@@ -330,7 +330,7 @@ static void *do_networking(void *data) {
         return NULL;
     }
 
-    while(osu != nullptr) {
+    while(osu != NULL) {
         pthread_mutex_lock(&api_requests_mutex);
         if(api_request_queue.empty()) {
             pthread_mutex_unlock(&api_requests_mutex);
@@ -503,7 +503,7 @@ void send_packet(Packet &packet) {
     if(bancho.user_id <= 0) {
         // Don't queue any packets until we're logged in
         free(packet.memory);
-        packet.memory = nullptr;
+        packet.memory = NULL;
         packet.size = 0;
         return;
     }
@@ -526,7 +526,7 @@ void send_packet(Packet &packet) {
     pthread_mutex_unlock(&outgoing_mutex);
 
     free(packet.memory);
-    packet.memory = nullptr;
+    packet.memory = NULL;
     packet.size = 0;
 }
 

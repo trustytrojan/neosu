@@ -165,7 +165,7 @@ void Chat::draw(Graphics *g) {
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_PREMUL_ALPHA);
     }
 
-    if(m_selected_channel == nullptr) {
+    if(m_selected_channel == NULL) {
         const float chat_h = round(getSize().y * 0.3f);
         const float chat_y = getSize().y - chat_h;
         float chat_w = getSize().x;
@@ -185,7 +185,7 @@ void Chat::draw(Graphics *g) {
         m_button_container->draw(g);
 
         OsuScreen::draw(g);
-        if(m_selected_channel != nullptr) {
+        if(m_selected_channel != NULL) {
             m_selected_channel->ui->draw(g);
         }
     }
@@ -234,7 +234,7 @@ void Chat::onKeyDown(KeyboardEvent &key) {
     // Return: send message
     if(key.getKeyCode() == KEY_ENTER) {
         key.consume();
-        if(m_selected_channel != nullptr && m_input_box->getText().length() > 0) {
+        if(m_selected_channel != NULL && m_input_box->getText().length() > 0) {
             if(m_input_box->getText() == UString("/close")) {
                 leave(m_selected_channel->name);
                 return;
@@ -264,7 +264,7 @@ void Chat::onKeyDown(KeyboardEvent &key) {
     // Ctrl+W: Close current channel
     if(engine->getKeyboard()->isControlDown() && key.getKeyCode() == KEY_W) {
         key.consume();
-        if(m_selected_channel != nullptr) {
+        if(m_selected_channel != NULL) {
             leave(m_selected_channel->name);
         }
         return;
@@ -274,7 +274,7 @@ void Chat::onKeyDown(KeyboardEvent &key) {
     // KEY_TAB doesn't work on Linux
     if(engine->getKeyboard()->isControlDown() && (key.getKeyCode() == 65056 || key.getKeyCode() == KEY_TAB)) {
         key.consume();
-        if(m_selected_channel == nullptr) return;
+        if(m_selected_channel == NULL) return;
         int chan_index = m_channels.size();
         for(auto chan : m_channels) {
             if(chan == m_selected_channel) {
@@ -370,7 +370,7 @@ void Chat::addChannel(UString channel_name, bool switch_to) {
     ChatChannel *chan = new ChatChannel(this, channel_name);
     m_channels.push_back(chan);
 
-    if(m_selected_channel == nullptr && m_channels.size() == 1) {
+    if(m_selected_channel == NULL && m_channels.size() == 1) {
         switchToChannel(chan);
     } else if(channel_name == UString("#multiplayer") || channel_name == UString("#lobby")) {
         switchToChannel(chan);
@@ -410,7 +410,7 @@ void Chat::addMessage(UString channel_name, ChatMessage msg, bool mark_unread) {
 }
 
 void Chat::removeChannel(UString channel_name) {
-    ChatChannel *chan = nullptr;
+    ChatChannel *chan = NULL;
     for(auto c : m_channels) {
         if(c->name == channel_name) {
             chan = c;
@@ -418,12 +418,12 @@ void Chat::removeChannel(UString channel_name) {
         }
     }
 
-    if(chan == nullptr) return;
+    if(chan == NULL) return;
 
     auto it = std::find(m_channels.begin(), m_channels.end(), chan);
     m_channels.erase(it);
     if(m_selected_channel == chan) {
-        m_selected_channel = nullptr;
+        m_selected_channel = NULL;
         if(!m_channels.empty()) {
             switchToChannel(m_channels[0]);
         }
@@ -457,7 +457,7 @@ void Chat::updateLayout(Vector2 newResolution) {
     m_input_box->setPos(Vector2{0.f, chat_y + chat_h});
     m_input_box->setSize(Vector2{chat_w, input_box_height});
 
-    if(m_selected_channel == nullptr && !m_channels.empty()) {
+    if(m_selected_channel == NULL && !m_channels.empty()) {
         m_selected_channel = m_channels[0];
         m_selected_channel->read = true;
     }
@@ -560,7 +560,7 @@ void Chat::onDisconnect() {
     }
     chat_channels.clear();
 
-    m_selected_channel = nullptr;
+    m_selected_channel = NULL;
     updateLayout(osu->getScreenSize());
 
     updateVisibility();
@@ -569,7 +569,7 @@ void Chat::onDisconnect() {
 void Chat::onResolutionChange(Vector2 newResolution) { updateLayout(newResolution); }
 
 bool Chat::isSmallChat() {
-    if(osu->m_room == nullptr || osu->m_lobby == nullptr || osu->m_songBrowser2 == nullptr) return false;
+    if(osu->m_room == NULL || osu->m_lobby == NULL || osu->m_songBrowser2 == NULL) return false;
     bool sitting_in_room =
         osu->m_room->isVisible() && !osu->m_songBrowser2->isVisible() && !bancho.is_playing_a_multi_map();
     bool sitting_in_lobby = osu->m_lobby->isVisible();
@@ -588,10 +588,9 @@ bool Chat::isVisibilityForced() {
 
 void Chat::updateVisibility() {
     auto selected_beatmap = osu->getSelectedBeatmap();
-    bool can_skip = (selected_beatmap != nullptr) && (selected_beatmap->isInSkippableSection());
+    bool can_skip = (selected_beatmap != NULL) && (selected_beatmap->isInSkippableSection());
     bool is_spectating = osu->m_bModAuto || (osu->m_bModAutopilot && osu->m_bModRelax) ||
-                         (selected_beatmap != nullptr && selected_beatmap->is_watching) ||
-                         bancho.spectated_player_id != 0;
+                         (selected_beatmap != NULL && selected_beatmap->is_watching) || bancho.spectated_player_id != 0;
     bool is_clicking_circles = osu->isInPlayMode() && !can_skip && !is_spectating && !osu->m_pauseMenu->isVisible();
     if(bancho.is_playing_a_multi_map() && !bancho.room.all_players_loaded) {
         is_clicking_circles = false;
@@ -621,7 +620,7 @@ CBaseUIContainer *Chat::setVisible(bool visible) {
         osu->m_optionsMenu->setVisible(false);
         anim->moveQuartOut(&m_fAnimation, 1.0f, 0.25f * (1.0f - m_fAnimation), true);
 
-        if(m_selected_channel != nullptr && !m_selected_channel->read) {
+        if(m_selected_channel != NULL && !m_selected_channel->read) {
             mark_as_read(m_selected_channel);
         }
 
@@ -637,7 +636,7 @@ CBaseUIContainer *Chat::setVisible(bool visible) {
 
 bool Chat::isMouseInChat() {
     if(!isVisible()) return false;
-    if(m_selected_channel == nullptr) return false;
+    if(m_selected_channel == NULL) return false;
     return m_input_box->isMouseInside() || m_selected_channel->ui->isMouseInside();
 }
 

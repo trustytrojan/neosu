@@ -1197,7 +1197,7 @@ void Beatmap::cancelFailing() {
 }
 
 float Beatmap::getIdealVolume() {
-    if(m_music == nullptr) return 1.f;
+    if(m_music == NULL) return 1.f;
 
     float volume = m_osu_volume_music_ref->getFloat();
     if(!convar->getConVarByName("normalize_loudness")->getBool()) {
@@ -1548,7 +1548,7 @@ LiveScore::HIT Beatmap::addHitResult(HitObject *hitObject, LiveScore::HIT hit, l
         }
 
         Beatmap *beatmap = (Beatmap *)osu->getSelectedBeatmap();
-        if(should_write_frame && !hitErrorBarOnly && beatmap != nullptr) {
+        if(should_write_frame && !hitErrorBarOnly && beatmap != NULL) {
             beatmap->write_frame();
         }
     }
@@ -1727,7 +1727,7 @@ bool Beatmap::canDraw() {
 bool Beatmap::canUpdate() { return m_bIsPlaying || m_bIsPaused || m_bContinueScheduled; }
 
 void Beatmap::handlePreviewPlay() {
-    if(m_music == nullptr) return;
+    if(m_music == NULL) return;
 
     if((!m_music->isPlaying() || m_music->getPosition() > 0.95f) && m_selectedDifficulty2 != NULL) {
         // this is an assumption, but should be good enough for most songs
@@ -1793,11 +1793,11 @@ void Beatmap::loadMusic(bool stream, bool prescan) {
 
 void Beatmap::unloadMusic() {
     engine->getResourceManager()->destroyResource(m_music);
-    m_music = nullptr;
+    m_music = NULL;
 }
 
 void Beatmap::unloadObjects() {
-    m_currentHitObject = nullptr;
+    m_currentHitObject = NULL;
     for(int i = 0; i < m_hitobjects.size(); i++) {
         delete m_hitobjects[i];
     }

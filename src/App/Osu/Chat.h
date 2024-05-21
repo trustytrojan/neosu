@@ -66,7 +66,7 @@ class Chat : public OsuScreen {
     void askWhatChannelToJoin(CBaseUIButton *btn);
     UIButton *join_channel_btn;
 
-    ChatChannel *m_selected_channel = nullptr;
+    ChatChannel *m_selected_channel = NULL;
     std::vector<ChatChannel *> m_channels;
     CBaseUIContainer *m_button_container;
     CBaseUITextbox *m_input_box;

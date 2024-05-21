@@ -285,11 +285,11 @@ ConVar::ConVar(UString name, const char *sDefaultValue, int flags, const char *h
 void ConVar::exec() {
     if(!isUnlocked()) return;
 
-    if(osu != nullptr) {
+    if(osu != NULL) {
         auto is_vanilla = convar->isVanilla();
 
         auto beatmap = osu->getSelectedBeatmap();
-        if(beatmap != nullptr) {
+        if(beatmap != NULL) {
             beatmap->vanilla &= is_vanilla;
         }
 
@@ -491,7 +491,7 @@ bool ConVarHandler::isVanilla() {
     }
 
     // Also check for non-vanilla mod combinations here while we're at it
-    if(osu != nullptr) {
+    if(osu != NULL) {
         if(osu->getModTarget()) return false;
         if(osu->getModNightmare()) return false;
         if(osu->getModEZ() && osu->getModHR()) return false;

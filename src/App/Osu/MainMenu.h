@@ -50,8 +50,8 @@ class MainMenu : public OsuScreen, public MouseListener {
     virtual void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);
 
-    BeatmapDifficulty *preloaded_beatmap = nullptr;
-    BeatmapSet *preloaded_beatmapset = nullptr;
+    BeatmapDifficulty *preloaded_beatmap = NULL;
+    BeatmapSet *preloaded_beatmapset = NULL;
     void selectRandomBeatmap();
 
     virtual void onKeyDown(KeyboardEvent &e);
@@ -119,7 +119,7 @@ class MainMenu : public OsuScreen, public MouseListener {
     std::vector<MainMenuButton *> m_menuElements;
 
     MainMenuPauseButton *m_pauseButton;
-    UIButton *m_updateAvailableButton = nullptr;
+    UIButton *m_updateAvailableButton = NULL;
     CBaseUIButton *m_versionButton;
 
     bool m_bDrawVersionNotificationArrow;
@@ -158,5 +158,5 @@ class MainMenu : public OsuScreen, public MouseListener {
     float m_fBackgroundFadeInTime;
 
     Image *logo_img;
-    Shader *background_shader = nullptr;
+    Shader *background_shader = NULL;
 };

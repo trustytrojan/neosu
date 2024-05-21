@@ -1442,7 +1442,7 @@ void Skin::checkLoadSound(Sound **addressOfPointer, std::string skinElementName,
             }
         }
 
-        return (Sound *)nullptr;
+        return (Sound *)NULL;
     };
 
     // load default skin
@@ -1454,24 +1454,24 @@ void Skin::checkLoadSound(Sound **addressOfPointer, std::string skinElementName,
     *addressOfPointer = try_load_sound(defaultpath, defaultResourceName, loop);
 
     // load user skin
-    Sound *skin_sound = nullptr;
+    Sound *skin_sound = NULL;
     if(osu_skin_use_skin_hitsounds.getBool() || !isSample) {
         std::string filepath = m_sFilePath;
         filepath.append(skinElementName);
         skin_sound = try_load_sound(filepath, "", loop);
-        if(skin_sound != nullptr) {
+        if(skin_sound != NULL) {
             *addressOfPointer = skin_sound;
         }
     }
 
     Sound *sound = *addressOfPointer;
-    if(sound == nullptr) {
+    if(sound == NULL) {
         debugLog("Skin Warning: NULL sound %s!\n", skinElementName.c_str());
         return;
     }
 
     // force reload default skin sound anyway if the custom skin does not include it (e.g. audio device change)
-    if(skin_sound == nullptr) {
+    if(skin_sound == NULL) {
         sound->reload();
     } else {
         m_resources.push_back(sound);

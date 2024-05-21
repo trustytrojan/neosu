@@ -27,7 +27,7 @@ class UIUserContextMenuScreen : public OsuScreen {
     void on_action(UString text, int user_action);
 
     u32 m_user_id;
-    UIContextMenu *menu = nullptr;
+    UIContextMenu *menu = NULL;
 };
 
 class UIUserLabel : public CBaseUILabel {
