@@ -123,9 +123,7 @@ void Sound::initAsync() {
             return;
         }
     } else {
-        auto flags = BASS_SAMPLE_FLOAT | BASS_SAMPLE_OVER_POS;
-        m_sample =
-            BASS_SampleLoad(false, m_sFilePath.c_str(), 0, 0, m_bIsOverlayable ? MAX_OVERLAPPING_SAMPLES : 1, flags);
+        m_sample = BASS_SampleLoad(false, m_sFilePath.c_str(), 0, 0, 1, BASS_SAMPLE_FLOAT);
         if(!m_sample) {
             debugLog("BASS_SampleLoad() returned error %d on file %s\n", BASS_ErrorGetCode(), m_sFilePath.c_str());
             return;
@@ -179,7 +177,7 @@ void Sound::setPosition(double percent) {
         m_fLastPlayTime = 0.0;
     }
 
-    if(!BASS_ChannelSetPosition(m_stream, (QWORD)(length * percent), BASS_POS_BYTE)) {
+    if(!BASS_ChannelSetPosition(m_stream, (QWORD)(length * percent), BASS_POS_BYTE | BASS_POS_FLUSH)) {
         if(Osu::debug->getBool()) {
             debugLog("Sound::setPosition( %f ) BASS_ChannelSetPosition() error %i on file %s\n", percent,
                      BASS_ErrorGetCode(), m_sFilePath.c_str());
@@ -202,7 +200,7 @@ void Sound::setPositionMS(unsigned long ms) {
     else
         m_fLastPlayTime = 0.0;
 
-    if(!BASS_ChannelSetPosition(m_stream, position, BASS_POS_BYTE)) {
+    if(!BASS_ChannelSetPosition(m_stream, position, BASS_POS_BYTE | BASS_POS_FLUSH)) {
         if(Osu::debug->getBool()) {
             debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
                      BASS_ErrorGetCode(), m_sFilePath.c_str());

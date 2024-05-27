@@ -550,7 +550,7 @@ bool SoundEngine::play(Sound *snd, float pan, float pitch) {
     // Make sure the mixer is playing! Duh.
     if(m_currentOutputDevice.driver == OutputDriver::BASS) {
         if(BASS_ChannelIsActive(g_bassOutputMixer) != BASS_ACTIVE_PLAYING) {
-            if(!BASS_ChannelPlay(g_bassOutputMixer, false)) {
+            if(!BASS_ChannelPlay(g_bassOutputMixer, true)) {
                 debugLog("SoundEngine::play() couldn't BASS_ChannelPlay(), errorcode %i\n", BASS_ErrorGetCode());
                 return false;
             }

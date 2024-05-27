@@ -12,8 +12,6 @@
 
 #include "Resource.h"
 
-#define MAX_OVERLAPPING_SAMPLES 5
-
 class SoundEngine;
 
 class Sound : public Resource {
