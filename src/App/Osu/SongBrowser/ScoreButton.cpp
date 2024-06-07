@@ -647,7 +647,7 @@ void ScoreButton::setScore(const FinishedScore &score, const DatabaseBeatmap *di
             if(experimentalMods[i].length() > 0) m_sScoreMods.append("+");
         }
     }
-    m_sCustom = (score.speedMultiplier != 1.0f ? UString::format("Spd: %gx", score.speedMultiplier) : "");
+    m_sCustom = (score.speedMultiplier != 1.0f ? UString::format("Spd: %gx", score.speedMultiplier) : UString(""));
     if(diff2 != NULL && !score.isImportedLegacyScore && !score.isLegacyScore) {
         const Replay::BEATMAP_VALUES beatmapValuesForModsLegacy = Replay::getBeatmapValuesForModsLegacy(
             score.modsLegacy, diff2->getAR(), diff2->getCS(), diff2->getOD(), diff2->getHP());

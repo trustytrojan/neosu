@@ -1,6 +1,4 @@
 #ifdef _WIN32
-#include <windows.h>
-
 #include "cbase.h"
 #else
 #include <sys/random.h>
@@ -288,10 +286,10 @@ bool SongBrowser::SortByDifficulty::operator()(Button const *a, Button const *b)
 
     float diff1 = (a->getDatabaseBeatmap()->getAR() + 1) * (a->getDatabaseBeatmap()->getCS() + 1) *
                   (a->getDatabaseBeatmap()->getHP() + 1) * (a->getDatabaseBeatmap()->getOD() + 1) *
-                  (std::max(a->getDatabaseBeatmap()->getMostCommonBPM(), 1));
+                  (max(a->getDatabaseBeatmap()->getMostCommonBPM(), 1));
     float diff2 = (b->getDatabaseBeatmap()->getAR() + 1) * (b->getDatabaseBeatmap()->getCS() + 1) *
                   (b->getDatabaseBeatmap()->getHP() + 1) * (b->getDatabaseBeatmap()->getOD() + 1) *
-                  (std::max(b->getDatabaseBeatmap()->getMostCommonBPM(), 1));
+                  (max(b->getDatabaseBeatmap()->getMostCommonBPM(), 1));
     if(diff1 != diff2) return diff1 < diff2;
 
     return a->getSortHack() < b->getSortHack();
@@ -2140,25 +2138,25 @@ void SongBrowser::updateLayout() {
     // top bar
     m_fSongSelectTopScale = Osu::getImageScaleToFitResolution(osu->getSkin()->getSongSelectTop(), osu->getScreenSize());
     const float songSelectTopHeightScaled =
-        std::max(osu->getSkin()->getSongSelectTop()->getHeight() * m_fSongSelectTopScale,
+        max(osu->getSkin()->getSongSelectTop()->getHeight() * m_fSongSelectTopScale,
                  m_songInfo->getMinimumHeight() * 1.5f + margin);  // NOTE: the height is a heuristic here more or less
     m_fSongSelectTopScale =
-        std::max(m_fSongSelectTopScale, songSelectTopHeightScaled / osu->getSkin()->getSongSelectTop()->getHeight());
+        max(m_fSongSelectTopScale, songSelectTopHeightScaled / osu->getSkin()->getSongSelectTop()->getHeight());
     m_fSongSelectTopScale *=
         uiScale;  // NOTE: any user osu_ui_scale below 1.0 will break things (because songSelectTop image)
 
-    // topbar left (NOTE: the right side of the std::max() width is commented to keep the scorebrowser width consistent,
+    // topbar left (NOTE: the right side of the max() width is commented to keep the scorebrowser width consistent,
     // and because it's not really needed anyway)
-    m_topbarLeft->setSize(std::max(osu->getSkin()->getSongSelectTop()->getWidth() * m_fSongSelectTopScale *
+    m_topbarLeft->setSize(max(osu->getSkin()->getSongSelectTop()->getWidth() * m_fSongSelectTopScale *
                                            osu_songbrowser_topbar_left_width_percent.getFloat() +
                                        margin,
                                    /*m_songInfo->getMinimumWidth() + margin*/ 0.0f),
-                          std::max(osu->getSkin()->getSongSelectTop()->getHeight() * m_fSongSelectTopScale *
+                          max(osu->getSkin()->getSongSelectTop()->getHeight() * m_fSongSelectTopScale *
                                        osu_songbrowser_topbar_left_percent.getFloat(),
                                    m_songInfo->getMinimumHeight() + margin));
     m_songInfo->setRelPos(margin, margin);
     m_songInfo->setSize(m_topbarLeft->getSize().x - margin,
-                        std::max(m_topbarLeft->getSize().y * 0.75f, m_songInfo->getMinimumHeight() + margin));
+                        max(m_topbarLeft->getSize().y * 0.75f, m_songInfo->getMinimumHeight() + margin));
 
     const int topbarLeftButtonMargin = 5 * dpiScale;
     const int topbarLeftButtonHeight = 30 * dpiScale;
@@ -2262,7 +2260,7 @@ void SongBrowser::updateLayout() {
 
     // nav bar
     const bool isWidescreen =
-        ((int)(std::max(0, (int)((osu->getScreenWidth() - (osu->getScreenHeight() * 4.0f / 3.0f)) / 2.0f))) > 0);
+        ((int)(max(0, (int)((osu->getScreenWidth() - (osu->getScreenHeight() * 4.0f / 3.0f)) / 2.0f))) > 0);
     const float navBarXCounter = Osu::getUIScale((isWidescreen ? 140.0f : 120.0f));
 
     // bottombar cont
@@ -2276,7 +2274,7 @@ void SongBrowser::updateLayout() {
         // button)
         m_bottombarNavButtons[i]->setRelPosX(
             navBarXCounter + gap + (i > 0 ? Osu::getUIScale(57.6f) : 0) +
-            (i > 1 ? std::max((i - 1) * Osu::getUIScale(48.0f), m_bottombarNavButtons[i - 1]->getSize().x) : 0));
+            (i > 1 ? max((i - 1) * Osu::getUIScale(48.0f), m_bottombarNavButtons[i - 1]->getSize().x) : 0));
 
         // old, overflows with some skins (e.g. kyu)
         // m_bottombarNavButtons[i]->setRelPosX((i == 0 ? navBarXCounter : 0) + gap + (i > 0 ?
@@ -2285,7 +2283,7 @@ void SongBrowser::updateLayout() {
 
     const int userButtonHeight = m_bottombar->getSize().y * 0.9f;
     m_userButton->setSize(userButtonHeight * 3.5f, userButtonHeight);
-    m_userButton->setRelPos(std::max(m_bottombar->getSize().x / 2 - m_userButton->getSize().x / 2,
+    m_userButton->setRelPos(max(m_bottombar->getSize().x / 2 - m_userButton->getSize().x / 2,
                                      m_bottombarNavButtons[m_bottombarNavButtons.size() - 1]->getRelPos().x +
                                          m_bottombarNavButtons[m_bottombarNavButtons.size() - 1]->getSize().x + 10),
                             m_bottombar->getSize().y - m_userButton->getSize().y - 1);
@@ -2339,7 +2337,7 @@ void SongBrowser::updateScoreBrowserLayout() {
 
         float scale =
             Osu::getImageScaleToFillResolution(menuButtonBackground, Vector2(scoreButtonWidthMax, scoreHeight));
-        scoreHeight = std::max(scoreHeight, (int)(menuButtonBackground->getHeight() * scale));
+        scoreHeight = max(scoreHeight, (int)(menuButtonBackground->getHeight() * scale));
 
         // limit to scrollview width (while keeping the aspect ratio)
         const float ratio = minimumSize.x / minimumSize.y;
@@ -2404,7 +2402,7 @@ void SongBrowser::rebuildScoreButtons() {
     if(validBeatmap) {
         auto local_scores = (*m_db->getScores())[m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash()];
         auto local_best =
-            std::max_element(local_scores.begin(), local_scores.end(),
+            max_element(local_scores.begin(), local_scores.end(),
                              [](FinishedScore const &a, FinishedScore const &b) { return a.score < b.score; });
 
         if(is_online) {

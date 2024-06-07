@@ -1,7 +1,8 @@
 #include "Downloader.h"
 
 #include <curl/curl.h>
-#include <pthread.h>
+#include <mutex>
+#include <thread>
 
 #include <sstream>
 
@@ -24,20 +25,18 @@ struct DownloadResult {
 
 struct DownloadThread {
     bool running;
-    pthread_t id;
     std::string endpoint;
     std::vector<DownloadResult*> downloads;
 };
 
-pthread_mutex_t threads_mtx = PTHREAD_MUTEX_INITIALIZER;
+std::mutex threads_mtx;
 std::vector<DownloadThread*> threads;
 
 void abort_downloads() {
-    pthread_mutex_lock(&threads_mtx);
+    std::lock_guard<std::mutex> lock(threads_mtx);
     for(auto thread : threads) {
         thread->running = false;
     }
-    pthread_mutex_unlock(&threads_mtx);
 }
 
 void update_download_progress(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal,
@@ -45,14 +44,13 @@ void update_download_progress(void* clientp, curl_off_t dltotal, curl_off_t dlno
     (void)ultotal;
     (void)ulnow;
 
-    pthread_mutex_lock(&threads_mtx);
+    std::lock_guard<std::mutex> lock(threads_mtx);
     auto result = (DownloadResult*)clientp;
     if(dltotal == 0) {
         result->progress = 0.f;
     } else if(dlnow > 0) {
         result->progress = (float)dlnow / (float)dltotal;
     }
-    pthread_mutex_unlock(&threads_mtx);
 }
 
 void* do_downloads(void* arg) {
@@ -71,7 +69,7 @@ void* do_downloads(void* arg) {
         DownloadResult* result = NULL;
         std::string url;
 
-        pthread_mutex_lock(&threads_mtx);
+        threads_mtx.lock();
         for(auto download : thread->downloads) {
             if(download->progress == 0.f) {
                 result = download;
@@ -79,7 +77,7 @@ void* do_downloads(void* arg) {
                 break;
             }
         }
-        pthread_mutex_unlock(&threads_mtx);
+        threads_mtx.unlock();
         if(!result) continue;
 
         free(response.memory);
@@ -103,15 +101,15 @@ void* do_downloads(void* arg) {
         int response_code;
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
         if(res == CURLE_OK) {
-            pthread_mutex_lock(&threads_mtx);
+            threads_mtx.lock();
             result->progress = 1.f;
             result->response_code = response_code;
             result->data = std::vector<u8>(response.memory, response.memory + response.size);
-            pthread_mutex_unlock(&threads_mtx);
+            threads_mtx.unlock();
         } else {
             debugLog("Failed to download %s: %s\n", url.c_str(), curl_easy_strerror(res));
 
-            pthread_mutex_lock(&threads_mtx);
+            threads_mtx.lock();
             result->response_code = response_code;
             if(response_code == 429) {
                 result->progress = 0.f;
@@ -119,7 +117,7 @@ void* do_downloads(void* arg) {
                 result->data = std::vector<u8>(response.memory, response.memory + response.size);
                 result->progress = -1.f;
             }
-            pthread_mutex_unlock(&threads_mtx);
+            threads_mtx.unlock();
 
             if(response_code == 429) {
                 // Try again 5s later
@@ -131,7 +129,7 @@ void* do_downloads(void* arg) {
 end_thread:
     curl_easy_cleanup(curl);
 
-    pthread_mutex_lock(&threads_mtx);
+    threads_mtx.lock();
     std::vector<DownloadThread*> new_threads;
     for(auto dt : threads) {
         if(thread != dt) {
@@ -139,7 +137,7 @@ end_thread:
         }
     }
     threads = std::move(new_threads);
-    pthread_mutex_unlock(&threads_mtx);
+    threads_mtx.unlock();
 
     free(response.memory);
     for(auto result : thread->downloads) {
@@ -170,7 +168,7 @@ void download(const char* url, float* progress, std::vector<u8>& out, int* respo
         goto end;
     }
 
-    pthread_mutex_lock(&threads_mtx);
+    threads_mtx.lock();
     for(auto thread : threads) {
         if(thread->running && !strcmp(thread->endpoint.c_str(), hostname)) {
             matching_thread = thread;
@@ -181,15 +179,8 @@ void download(const char* url, float* progress, std::vector<u8>& out, int* respo
         matching_thread = new DownloadThread();
         matching_thread->running = true;
         matching_thread->endpoint = std::string(hostname);
-        int ret = pthread_create(&matching_thread->id, NULL, do_downloads, matching_thread);
-        if(ret) {
-            debugLog("Failed to start download thread: pthread_create() returned %i\n", ret);
-            *progress = -1.f;
-            delete matching_thread;
-            goto end;
-        } else {
-            threads.push_back(matching_thread);
-        }
+        std::thread(do_downloads, matching_thread);
+        threads.push_back(matching_thread);
     }
 
     for(int i = 0; i < matching_thread->downloads.size(); i++) {
@@ -214,7 +205,7 @@ void download(const char* url, float* progress, std::vector<u8>& out, int* respo
         matching_thread->downloads.push_back(newdl);
         *progress = 0.f;
     }
-    pthread_mutex_unlock(&threads_mtx);
+    threads_mtx.unlock();
 
 end:
     curl_free(hostname);
@@ -223,10 +214,8 @@ end:
 
 void download_beatmapset(u32 set_id, float* progress) {
     // Check if we already have downloaded it
-    std::stringstream ss;
-    ss << MCENGINE_DATA_DIR "maps/" << std::to_string(set_id) << "/";
-    auto map_dir = ss.str();
-    if(env->directoryExists(map_dir)) {
+    auto map_dir = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_id);
+    if(env->directoryExists(map_dir.toUtf8())) {
         *progress = 1.f;
         return;
     }
@@ -257,29 +246,26 @@ void download_beatmapset(u32 set_id, float* progress) {
         *progress = -1.f;
         return;
     }
-    if(!env->directoryExists(map_dir)) {
-        env->createDirectory(map_dir);
+    if(!env->directoryExists(map_dir.toUtf8())) {
+        env->createDirectory(map_dir.toUtf8());
     }
     for(mz_uint i = 0; i < num_files; i++) {
         if(!mz_zip_reader_file_stat(&zip, i, &file_stat)) continue;
         if(mz_zip_reader_is_file_a_directory(&zip, i)) continue;
 
-        char* saveptr = NULL;
-        char* folder = strtok_r(file_stat.m_filename, "/", &saveptr);
-        std::string file_path = map_dir;
-        while(folder != NULL) {
-            if(!strcmp(folder, "..")) {
-                // Bro...
-                goto skip_file;
+        auto folders = UString(file_stat.m_filename).split("/");
+        std::string file_path = map_dir.toUtf8();
+        for(auto folder : folders) {
+            if(!env->directoryExists(file_path)) {
+                env->createDirectory(file_path);
             }
 
-            file_path.append("/");
-            file_path.append(folder);
-            folder = strtok_r(NULL, "/", &saveptr);
-            if(folder != NULL) {
-                if(!env->directoryExists(file_path)) {
-                    env->createDirectory(file_path);
-                }
+            if(folder == UString("..")) {
+                // Bro...
+                goto skip_file;
+            } else {
+                file_path.append("/");
+                file_path.append(folder.toUtf8());
             }
         }
 
@@ -343,11 +329,9 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* pr
     // Download not finished
     if(*progress != 1.f) return NULL;
 
-    std::stringstream ss;
-    ss << MCENGINE_DATA_DIR "maps/" << std::to_string(set_id) << "/";
-    auto mapset_path = ss.str();
+    auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_id);
     // XXX: Make a permanent database for auto-downloaded songs, so we can load them like osu!.db's
-    osu->m_songBrowser2->getDatabase()->addBeatmap(mapset_path);
+    osu->m_songBrowser2->getDatabase()->addBeatmap(mapset_path.toUtf8());
     osu->m_songBrowser2->updateSongButtonSorting();
     debugLog("Finished loading beatmapset %d.\n", set_id);
 
@@ -370,39 +354,8 @@ void process_beatmapset_info_response(Packet packet) {
     }
 
     // {set_id}.osz|{artist}|{title}|{creator}|{status}|10.0|{last_update}|{set_id}|0|0|0|0|0
-    char* saveptr = NULL;
-    char* str = strtok_r((char*)packet.memory, "|", &saveptr);
-    if(!str) return;
-    // Do nothing with beatmapset filename
+    auto tokens = UString((char*)packet.memory).split("|");
+    if(tokens.size() != 13) return;
 
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return;
-    // Do nothing with beatmap artist
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return;
-    // Do nothing with beatmap title
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return;
-    // Do nothing with beatmap creator
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return;
-    // Do nothing with beatmap status
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return;
-    // Do nothing with beatmap rating
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return;
-    // Do nothing with beatmap last update
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return;
-
-    beatmap_to_beatmapset[map_id] = strtoul(str, NULL, 10);
-
-    // Do nothing with the rest
+    beatmap_to_beatmapset[map_id] = strtoul(tokens[7].toUtf8(), NULL, 10);
 }

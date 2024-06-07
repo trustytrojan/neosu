@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include <iostream>
+#include <limits>
 #include <sstream>
 
 #include "Bancho.h"  // md5
@@ -129,7 +130,7 @@ DatabaseBeatmap::DatabaseBeatmap(std::string filePath, std::string folder) {
 
     // custom data
 
-    last_modification_time = (std::numeric_limits<long long>::max() / 2) + m_iSortHack;
+    last_modification_time = ((std::numeric_limits<long long>::max)() / 2) + m_iSortHack;
 
     m_iLocalOffset = 0;
     m_iOnlineOffset = 0;
@@ -625,7 +626,7 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
             const float tickDurationPercentOfSliderLength =
                 tickPixelLength / (s.pixelLength == 0.0f ? 1.0f : s.pixelLength);
             const int max_ticks = osu_slider_max_ticks.getInt();
-            const int tickCount = std::min((int)std::ceil(s.pixelLength / tickPixelLength) - 1,
+            const int tickCount = min((int)std::ceil(s.pixelLength / tickPixelLength) - 1,
                                            max_ticks);  // NOTE: hard sanity limit number of ticks per slider
 
             if(tickCount > 0 && !timingInfo.isNaN && !std::isnan(s.pixelLength) &&
@@ -687,7 +688,7 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
 
             // 4) add slider end (potentially before last tick for bullshit sliders, but sorting takes care of that)
             // see https://github.com/ppy/osu/pull/4193#issuecomment-460127543
-            const long time = std::max(s.time + (long)s.sliderTime / 2,
+            const long time = max(s.time + (long)s.sliderTime / 2,
                                        (s.time + (long)s.sliderTime) - osuSliderEndInsideCheckOffset);
             s.scoringTimesForStarCalc.push_back(OsuDifficultyHitObject::SLIDER_SCORING_TIME{
                 .type = OsuDifficultyHitObject::SLIDER_SCORING_TIME::TYPE::END,
@@ -743,7 +744,7 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(c
         for(int i = 0; i < c.sliders.size(); i++) {
             const SLIDER &s = c.sliders[i];
 
-            const int repeats = std::max((s.repeat - 1), 0);
+            const int repeats = max((s.repeat - 1), 0);
             result.maxPossibleCombo +=
                 2 + repeats + (repeats + 1) * s.ticks.size();  // start/end + repeat arrow + ticks
         }
@@ -1343,7 +1344,7 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
                                                    s.sliderTime, s.sliderTimeWithoutRepeats, s.time, s.sampleType,
                                                    s.number, false, s.colorCounter, s.colorOffset, beatmap));
 
-            const int repeats = std::max((s.repeat - 1), 0);
+            const int repeats = max((s.repeat - 1), 0);
             maxPossibleCombo += 2 + repeats + (repeats + 1) * s.ticks.size();  // start/end + repeat arrow + ticks
         }
 
@@ -1435,14 +1436,14 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
             const Slider *sliderPointer = dynamic_cast<Slider *>(currentHitObject);
             const Spinner *spinnerPointer = dynamic_cast<Spinner *>(currentHitObject);
 
-            int scoreComboMultiplier = std::max(combo - 1, 0);
+            int scoreComboMultiplier = max(combo - 1, 0);
 
             if(circlePointer != NULL || spinnerPointer != NULL) {
                 scoreV2ComboPortionMaximum += (unsigned long long)(300.0 * (1.0 + (double)scoreComboMultiplier / 10.0));
                 combo++;
             } else if(sliderPointer != NULL) {
                 combo += 1 + sliderPointer->getClicks().size();
-                scoreComboMultiplier = std::max(combo - 1, 0);
+                scoreComboMultiplier = max(combo - 1, 0);
                 scoreV2ComboPortionMaximum += (unsigned long long)(300.0 * (1.0 + (double)scoreComboMultiplier / 10.0));
                 combo++;
             }
@@ -1611,7 +1612,7 @@ void DatabaseBeatmapBackgroundImagePathLoader::initAsync() {
 
 std::string DatabaseBeatmap::getFullSoundFilePath() {
     // On linux, paths are case sensitive, so we retry different variations
-    if(env->getOS() != Environment::OS::OS_LINUX || env->fileExists(m_sFullSoundFilePath)) {
+    if(env->getOS() != Environment::OS::LINUX || env->fileExists(m_sFullSoundFilePath)) {
         return m_sFullSoundFilePath;
     }
 

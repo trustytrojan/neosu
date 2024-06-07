@@ -17,7 +17,7 @@ MacOSSDLEnvironment::MacOSSDLEnvironment() : SDLEnvironment(NULL) { m_environmen
 
 MacOSSDLEnvironment::~MacOSSDLEnvironment() { SAFE_DELETE(m_environment); }
 
-Environment::OS MacOSSDLEnvironment::getOS() { return Environment::OS::OS_MACOS; }
+Environment::OS MacOSSDLEnvironment::getOS() { return Environment::OS::MACOS; }
 
 void MacOSSDLEnvironment::sleep(unsigned int us) { m_environment->sleep(us); }
 

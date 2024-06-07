@@ -19,7 +19,7 @@
 
 LinuxSDLEnvironment::LinuxSDLEnvironment() : SDLEnvironment(NULL) {}
 
-Environment::OS LinuxSDLEnvironment::getOS() { return Environment::OS::OS_LINUX; }
+Environment::OS LinuxSDLEnvironment::getOS() { return Environment::OS::LINUX; }
 
 void LinuxSDLEnvironment::sleep(unsigned int us) { usleep(us); }
 

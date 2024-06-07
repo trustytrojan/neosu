@@ -125,7 +125,7 @@ void CBaseUISlider::mouse_update(bool *propagate_clicks) {
         if(m_bMouseInside && m_bAllowMouseWheel) {
             int wheelDelta = engine->getMouse()->getWheelDeltaVertical();
             if(wheelDelta != 0) {
-                const int multiplier = std::max(1, std::abs(wheelDelta) / 120);
+                const int multiplier = max(1, std::abs(wheelDelta) / 120);
 
                 if(wheelDelta > 0)
                     setValue(m_fCurValue + m_fKeyDelta * multiplier, m_bAnimated);

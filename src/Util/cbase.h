@@ -1,10 +1,12 @@
 #pragma once
 
 #ifdef _WIN32
-// #including <shlwapi.h> for strcasecmp and StrStrIA
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
 #include <winsock2.h>
-// winsock2.h must be included before windows.h
-#include <shlwapi.h>
+#include <windows.h>
+#include <shlwapi.h> // for StrStrIA
+#include <wincrypt.h> // for random number generation
 #endif
 
 // STD INCLUDES
@@ -19,8 +21,8 @@
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <limits>
 #include <memory>
-#include <random>
 #include <stack>
 #include <string>
 #include <unordered_map>
@@ -46,6 +48,20 @@
 #ifdef _WIN32
 #define reallocarray(ptr, a, b) realloc(ptr, a *b)
 #define strcasestr(a, b) StrStrIA(a, b)
+#define strcasecmp(a, b) _stricmp(a, b)
+#endif
+
+#ifndef PATH_MAX
+#define PATH_MAX MAX_PATH
+#endif
+#ifndef max
+#define max(...) std::max(__VA_ARGS__)
+#endif
+#ifndef min
+#define min(...) std::min(__VA_ARGS__)
+#endif
+#ifndef pow
+#define pow(...) std::pow(__VA_ARGS__)
 #endif
 
 typedef unsigned char COLORPART;

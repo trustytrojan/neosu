@@ -104,7 +104,7 @@ void LiveScore::reset() {
 
 void LiveScore::addHitResult(Beatmap *beatmap, HitObject *hitObject, HIT hit, long delta, bool ignoreOnHitErrorBar,
                              bool hitErrorBarOnly, bool ignoreCombo, bool ignoreScore) {
-    const int scoreComboMultiplier = std::max(
+    const int scoreComboMultiplier = max(
         m_iCombo - 1, 0);  // current combo, excluding the current hitobject which caused the addHitResult() call
 
     // handle hits (and misses)
@@ -163,7 +163,7 @@ void LiveScore::addHitResult(Beatmap *beatmap, HitObject *hitObject, HIT hit, lo
     // add hitValue to score, recalculate score v1
     const unsigned long breakTimeMS = beatmap->getBreakDurationTotal();
     const unsigned long drainLength =
-        std::max(beatmap->getLengthPlayable() - std::min(breakTimeMS, beatmap->getLengthPlayable()),
+        max(beatmap->getLengthPlayable() - min(breakTimeMS, beatmap->getLengthPlayable()),
                  (unsigned long)1000) /
         1000;
     const int difficultyMultiplier = (int)std::round(
@@ -199,7 +199,7 @@ void LiveScore::addHitResult(Beatmap *beatmap, HitObject *hitObject, HIT hit, lo
         if(totalNumHits > 0)
             m_iScoreV2 = (unsigned long long)(((double)m_iScoreV2ComboPortion /
                                                    (double)beatmap->getScoreV2ComboPortionMaximum() * 700000.0 +
-                                               std::pow((double)m_fAccuracy, 10.0) *
+                                               pow((double)m_fAccuracy, 10.0) *
                                                    ((double)totalNumHits / maximumAccurateHits) * 300000.0 +
                                                (double)m_iBonusPoints) *
                                               (double)osu->getScoreMultiplier());
@@ -234,7 +234,7 @@ void LiveScore::addHitResult(Beatmap *beatmap, HitObject *hitObject, HIT hit, lo
         const int customStartIndex =
             (osu_hud_statistics_hitdelta_chunksize.getInt() < 0
                  ? 0
-                 : std::max(0, (int)m_hitdeltas.size() - osu_hud_statistics_hitdelta_chunksize.getInt())) -
+                 : max(0, (int)m_hitdeltas.size() - osu_hud_statistics_hitdelta_chunksize.getInt())) -
             1;
 
         for(int i = 0; i < m_hitdeltas.size(); i++) {
@@ -509,7 +509,7 @@ double LiveScore::getHealthIncrease(LiveScore::HIT hit, double HP, double hpMult
             case HIT::HIT_300:
             case HIT::HIT_SLIDER10:
             case HIT::HIT_SLIDER30:
-                return (10.2 - std::min(HP, 10.0)) * osu_drain_lazer_2018_300.getFloat() *
+                return (10.2 - min(HP, 10.0)) * osu_drain_lazer_2018_300.getFloat() *
                        osu_drain_lazer_2018_multiplier.getFloat();
         }
     }

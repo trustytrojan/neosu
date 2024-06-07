@@ -458,7 +458,7 @@ void HitObject::update(long curPos) {
         // hitobject body fadein
         const long fadeInStart = m_iTime - m_iApproachTime;
         const long fadeInEnd =
-            std::min(m_iTime, m_iTime - m_iApproachTime +
+            min(m_iTime, m_iTime - m_iApproachTime +
                                   m_iFadeInTime);  // min() ensures that the fade always finishes at m_iTime (even if
                                                    // the fadeintime is longer than the approachtime)
         m_fAlpha = clamp<float>(1.0f - ((float)(fadeInEnd - curPos) / (float)(fadeInEnd - fadeInStart)), 0.0f, 1.0f);
@@ -486,7 +486,7 @@ void HitObject::update(long curPos) {
         // approach circle fadein (doubled fadeintime)
         const long approachCircleFadeStart = m_iTime - m_iApproachTime;
         const long approachCircleFadeEnd =
-            std::min(m_iTime, m_iTime - m_iApproachTime +
+            min(m_iTime, m_iTime - m_iApproachTime +
                                   2 * m_iFadeInTime);  // min() ensures that the fade always finishes at m_iTime (even
                                                        // if the fadeintime is longer than the approachtime)
         m_fAlphaForApproachCircle = clamp<float>(

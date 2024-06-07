@@ -1,20 +1,22 @@
 #ifdef _WIN32
+#include "cbase.h"
+
 #include <stdio.h>
 #include <wbemidl.h>
-#include <windows.h>
 
 #include <sstream>
-
-#include "cbase.h"
 #else
 #include <blkid/blkid.h>
 #include <linux/limits.h>
 #endif
 
+#ifndef _MSC_VER
+#include <unistd.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "Bancho.h"
 #include "BanchoNetworking.h"
@@ -202,20 +204,14 @@ void handle_packet(Packet *packet) {
             convar->getConVarByName("mp_autologin")->setValue(true);
             print_new_channels = true;
 
-            std::stringstream ss;
-            ss << MCENGINE_DATA_DIR "avatars/";
-            ss << bancho.endpoint.toUtf8();
-            auto avatar_dir = ss.str();
-            if(!env->directoryExists(avatar_dir)) {
-                env->createDirectory(avatar_dir);
+            auto avatar_dir = UString::format(MCENGINE_DATA_DIR "avatars/%s", bancho.endpoint.toUtf8());
+            if(!env->directoryExists(avatar_dir.toUtf8())) {
+                env->createDirectory(avatar_dir.toUtf8());
             }
 
-            std::stringstream ss2;
-            ss2 << MCENGINE_DATA_DIR "replays/";
-            ss2 << bancho.endpoint.toUtf8();
-            auto replays_dir = ss2.str();
-            if(!env->directoryExists(replays_dir)) {
-                env->createDirectory(replays_dir);
+            auto replays_dir = UString::format(MCENGINE_DATA_DIR "replays/%s", bancho.endpoint.toUtf8());
+            if(!env->directoryExists(replays_dir.toUtf8())) {
+                env->createDirectory(replays_dir.toUtf8());
             }
 
             osu->getSongBrowser()->onUserCardChange(bancho.username);

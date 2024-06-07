@@ -1,13 +1,4 @@
-//================ Copyright (c) 2012, PG, All rights reserved. =================//
-//
-// Purpose:		rect
-//
-// $NoKeywords: $rect
-//===============================================================================//
-
-#ifndef RECT_H
-#define RECT_H
-
+#pragma once
 #include "Vectors.h"
 
 class McRect {
@@ -48,5 +39,3 @@ class McRect {
     float m_fMaxX;
     float m_fMaxY;
 };
-
-#endif

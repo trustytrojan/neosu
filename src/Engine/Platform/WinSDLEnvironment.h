@@ -1,19 +1,11 @@
-//================ Copyright (c) 2019, PG, All rights reserved. =================//
-//
-// Purpose:		windows sdl environment
-//
-// $NoKeywords: $sdlwinenv
-//===============================================================================//
-
+#pragma once
 #ifdef _WIN32
-
-#ifndef WINSDLENVIRONMENT_H
-#define WINSDLENVIRONMENT_H
 
 #include "SDLEnvironment.h"
 
 #ifdef MCENGINE_FEATURE_SDL
 
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 class WinSDLEnvironment : public SDLEnvironment {
@@ -46,8 +38,6 @@ class WinSDLEnvironment : public SDLEnvironment {
    private:
     void path_strip_filename(TCHAR *Path);
 };
-
-#endif
 
 #endif
 

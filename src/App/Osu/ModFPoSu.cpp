@@ -275,7 +275,7 @@ void ModFPoSu::update() {
 
     m_bCrosshairIntersectsScreen = true;
     if(!fposu_absolute_mode.getBool() && !isAutoCursor &&
-       env->getOS() == Environment::OS::OS_WINDOWS)  // HACKHACK: windows only for now (raw input support)
+       env->getOS() == Environment::OS::WINDOWS)  // HACKHACK: windows only for now (raw input support)
     {
         // regular mouse position mode
 
@@ -498,7 +498,7 @@ Vector2 ModFPoSu::intersectRayMesh(Vector3 pos, Vector3 dir) {
                         const float x = u / (rightLength * rightLength);
                         const float y = v / (downLength * downLength);
                         const float distancePerFace =
-                            (float)osu->getScreenWidth() / std::pow(2.0f, (float)SUBDIVISIONS);
+                            (float)osu->getScreenWidth() / pow(2.0f, (float)SUBDIVISIONS);
                         const float distanceInFace = distancePerFace * x;
 
                         const Vector2 newMousePos =

@@ -35,9 +35,9 @@ void UIButton::draw(Graphics *g) {
     float middleWidth = m_vSize.x - leftWidth - rightWidth;
 
     auto color = is_loading ? 0xff333333 : m_color;
-    char red = std::max((unsigned int)(COLOR_GET_Ri(color) * m_fBrightness), (unsigned int)(m_fAnim * 255.0f));
-    char green = std::max((unsigned int)(COLOR_GET_Gi(color) * m_fBrightness), (unsigned int)(m_fAnim * 255.0f));
-    char blue = std::max((unsigned int)(COLOR_GET_Bi(color) * m_fBrightness), (unsigned int)(m_fAnim * 255.0f));
+    char red = max((unsigned int)(COLOR_GET_Ri(color) * m_fBrightness), (unsigned int)(m_fAnim * 255.0f));
+    char green = max((unsigned int)(COLOR_GET_Gi(color) * m_fBrightness), (unsigned int)(m_fAnim * 255.0f));
+    char blue = max((unsigned int)(COLOR_GET_Bi(color) * m_fBrightness), (unsigned int)(m_fAnim * 255.0f));
     g->setColor(
         COLOR(clamp<int>(COLOR_GET_Ai(color) + (isMouseInside() ? (int)(m_fAlphaAddOnHover * 255.0f) : 0), 0, 255), red,
               green, blue));

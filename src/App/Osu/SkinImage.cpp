@@ -350,7 +350,7 @@ void SkinImage::update(float speedMultiplier, bool useEngineTimeForAnimations, l
         // the beatmap (m_iBeatmapTimeAnimationStartOffset), and we need the beatmap time (curMusicPos) as a relative
         // base m_iBeatmapAnimationTimeStartOffset must be set by all hitobjects live while drawing (e.g. to their
         // m_iTime-m_iObjectTime), since we don't have any animation state saved in the hitobjects!
-        m_iFrameCounter = std::max(
+        m_iFrameCounter = max(
             (int)((curMusicPos - m_iBeatmapAnimationTimeStartOffset) / (long)(frameDurationInSeconds * 1000.0f)),
             0);  // freeze animation on frame 0 on negative offsets
         m_iFrameCounterUnclamped = m_iFrameCounter;

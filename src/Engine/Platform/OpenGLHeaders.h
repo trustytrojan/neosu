@@ -1,17 +1,7 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		a collection of all necessary OpenGL header files
-//
-// $NoKeywords: $glh
-//===============================================================================//
-
-// clang-format off
-#ifndef OPENGLHEADERS_H
-#define OPENGLHEADERS_H
-
-// required on windows due to missing APIENTRY typedefs
+#pragma once
 #ifdef _WIN32
 
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 #define GLEW_STATIC
@@ -22,9 +12,6 @@
 
 #include <gl/glu.h>
 #include <gl/gl.h>
-
-#include <gl/wglext.h>
-#include <gl/glext.h>
 
 #endif
 
@@ -52,6 +39,3 @@
 #include <GLUT/glut.h>
 
 #endif
-
-#endif
-// clang-format on

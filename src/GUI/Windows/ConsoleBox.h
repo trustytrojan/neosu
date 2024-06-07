@@ -1,17 +1,7 @@
-//================ Copyright (c) 2011, PG, All rights reserved. =================//
-//
-// Purpose:		textbox + scrollview command suggestion list
-//
-// $NoKeywords: $
-//===============================================================================//
-
-#ifndef CONSOLEBOX_H
-#define CONSOLEBOX_H
-
+#pragma once
 #include <mutex>
 
 #include "CBaseUIElement.h"
-#include "WinMinGW.Mutex.h"
 
 class CBaseUITextbox;
 class CBaseUIButton;
@@ -97,5 +87,3 @@ class ConsoleBox : public CBaseUIElement {
 
     std::mutex m_logMutex;
 };
-
-#endif

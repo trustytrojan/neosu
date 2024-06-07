@@ -1,10 +1,3 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		console window, also handles ConVar parsing
-//
-// $NoKeywords: $con
-//===============================================================================//
-
 #include "Console.h"
 
 #include <mutex>
@@ -18,7 +11,6 @@
 #include "ConVar.h"
 #include "Engine.h"
 #include "ResourceManager.h"
-#include "WinMinGW.Mutex.h"
 
 #define CFG_FOLDER MCENGINE_DATA_DIR "cfg/"
 

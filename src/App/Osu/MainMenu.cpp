@@ -253,7 +253,7 @@ MainMenu::MainMenu() : OsuScreen() {
     m_pauseButton->setClickCallback(fastdelegate::MakeDelegate(this, &MainMenu::onPausePressed));
     addBaseUIElement(m_pauseButton);
 
-    if(env->getOS() == Environment::OS::OS_WINDOWS) {
+    if(env->getOS() == Environment::OS::WINDOWS) {
         m_updateAvailableButton = new UIButton(0, 0, 0, 0, "", "Checking for updates ...");
         m_updateAvailableButton->setUseDefaultSkin();
         m_updateAvailableButton->setClickCallback(fastdelegate::MakeDelegate(this, &MainMenu::onUpdatePressed));
@@ -297,11 +297,9 @@ void MainMenu::draw(Graphics *g) {
 
     // load server icon
     if(bancho.is_online() && bancho.server_icon_url.length() > 0 && bancho.server_icon == NULL) {
-        std::stringstream ss;
-        ss << MCENGINE_DATA_DIR "avatars/" << bancho.endpoint.toUtf8();
-        auto icon_path = ss.str();
-        if(!env->directoryExists(icon_path)) {
-            env->createDirectory(icon_path);
+        auto icon_path = UString::format(MCENGINE_DATA_DIR "avatars/%s", bancho.endpoint.toUtf8());
+        if(!env->directoryExists(icon_path.toUtf8())) {
+            env->createDirectory(icon_path.toUtf8());
         }
         icon_path.append("/server_icon");
 
@@ -311,14 +309,14 @@ void MainMenu::draw(Graphics *g) {
         download(bancho.server_icon_url.toUtf8(), &progress, data, &response_code);
         if(progress == -1.f) bancho.server_icon_url = "";
         if(!data.empty()) {
-            FILE *file = fopen(icon_path.c_str(), "wb");
+            FILE *file = fopen(icon_path.toUtf8(), "wb");
             if(file != NULL) {
                 fwrite(data.data(), data.size(), 1, file);
                 fflush(file);
                 fclose(file);
             }
 
-            bancho.server_icon = engine->getResourceManager()->loadImageAbs(icon_path, icon_path);
+            bancho.server_icon = engine->getResourceManager()->loadImageAbs(icon_path.toUtf8(), icon_path.toUtf8());
             bancho.server_icon_url = "";
         }
     }
@@ -393,9 +391,9 @@ void MainMenu::draw(Graphics *g) {
             t.beatLengthBase = 1.0f;
 
         m_iMainMenuAnimBeatCounter =
-            (curMusicPos - t.offset - (long)(std::max((long)t.beatLengthBase, (long)1) * 0.5f)) /
-            std::max((long)t.beatLengthBase, (long)1);
-        pulse = (float)((curMusicPos - t.offset) % std::max((long)t.beatLengthBase, (long)1)) /
+            (curMusicPos - t.offset - (long)(max((long)t.beatLengthBase, (long)1) * 0.5f)) /
+            max((long)t.beatLengthBase, (long)1);
+        pulse = (float)((curMusicPos - t.offset) % max((long)t.beatLengthBase, (long)1)) /
                 t.beatLengthBase;  // modulo must be >= 1
         pulse = clamp<float>(pulse, -1.0f, 1.0f);
         if(pulse < 0.0f) pulse = 1.0f - std::abs(pulse);
@@ -776,7 +774,7 @@ void MainMenu::draw(Graphics *g) {
 
         float xscale = mainButtonRect.getWidth() / logo->getWidth();
         float yscale = mainButtonRect.getHeight() / logo->getHeight();
-        float scale = std::min(xscale, yscale) * 0.8f;
+        float scale = min(xscale, yscale) * 0.8f;
 
         g->pushTransform();
         g->setColor(0xffffffff);
@@ -1207,7 +1205,7 @@ void MainMenu::animMainButton() {
 
     m_iMainMenuRandomAnimType = (rand() % 4) == 1 ? 1 : 0;
     if(!m_bMainMenuAnimFadeToFriendForNextAnim && osu_main_menu_friend.getBool() &&
-       env->getOS() == Environment::OS::OS_WINDOWS)  // NOTE: z buffer bullshit on other platforms >:(
+       env->getOS() == Environment::OS::WINDOWS)  // NOTE: z buffer bullshit on other platforms >:(
         m_bMainMenuAnimFadeToFriendForNextAnim = (rand() % 24) == 1;
 
     m_fMainMenuAnim = 0.0f;
@@ -1226,7 +1224,7 @@ void MainMenu::animMainButton() {
         const float randomDuration3 = (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * 3.5f;
 
         anim->moveQuadOut(&m_fMainMenuAnim, 1.0f,
-                          1.5f + std::max(randomDuration1, std::max(randomDuration2, randomDuration3)));
+                          1.5f + max(randomDuration1, max(randomDuration2, randomDuration3)));
         anim->moveQuadOut(&m_fMainMenuAnim1, m_fMainMenuAnim1Target, 1.5f + randomDuration1);
         anim->moveQuadOut(&m_fMainMenuAnim2, m_fMainMenuAnim2Target, 1.5f + randomDuration2);
         anim->moveQuadOut(&m_fMainMenuAnim3, m_fMainMenuAnim3Target, 1.5f + randomDuration3);

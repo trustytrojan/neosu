@@ -2,7 +2,10 @@
 
 #include <stdlib.h>
 #include <sys/stat.h>
+
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 #include <sstream>
 
@@ -27,11 +30,9 @@ bool download_avatar(u32 user_id) {
         }
     }
 
-    std::stringstream ss;
-    ss << MCENGINE_DATA_DIR "avatars/" << bancho.endpoint.toUtf8();
-    auto server_dir = ss.str();
-    if(!env->directoryExists(server_dir)) {
-        env->createDirectory(server_dir);
+    auto server_dir = UString::format(MCENGINE_DATA_DIR "avatars/%s", bancho.endpoint.toUtf8());
+    if(!env->directoryExists(server_dir.toUtf8())) {
+        env->createDirectory(server_dir.toUtf8());
     }
 
     float progress = -1.f;
@@ -43,10 +44,8 @@ bool download_avatar(u32 user_id) {
     if(progress == -1.f) blacklist.push_back(user_id);
     if(data.empty()) return false;
 
-    std::stringstream ss2;
-    ss2 << server_dir << "/" << std::to_string(user_id);
-    auto img_path = ss2.str();
-    FILE *file = fopen(img_path.c_str(), "wb");
+    auto img_path = UString::format("%s/%d", server_dir.toUtf8(), user_id);
+    FILE *file = fopen(img_path.toUtf8(), "wb");
     if(file != NULL) {
         fwrite(data.data(), data.size(), 1, file);
         fflush(file);

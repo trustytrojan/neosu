@@ -56,7 +56,7 @@ void AnimationHandler::update() {
         // modify percentage
         switch(animation.m_animType) {
             case ANIMATION_TYPE::MOVE_SMOOTH_END:
-                percent = clamp<float>(1.0f - std::pow(1.0f - percent, animation.m_fFactor), 0.0f, 1.0f);
+                percent = clamp<float>(1.0f - pow(1.0f - percent, animation.m_fFactor), 0.0f, 1.0f);
                 if((int)(percent * (animation.m_fTarget - animation.m_fStartValue) + animation.m_fStartValue) ==
                    (int)animation.m_fTarget)
                     percent = 1.0f;
@@ -177,7 +177,7 @@ void AnimationHandler::deleteExistingAnimation(float *base) {
 float AnimationHandler::getRemainingDuration(float *base) const {
     for(size_t i = 0; i < m_vAnimations.size(); i++) {
         if(m_vAnimations[i].m_fBase == base)
-            return std::max(0.0f,
+            return max(0.0f,
                             (m_vAnimations[i].m_fStartTime + m_vAnimations[i].m_fDuration) - (float)engine->getTime());
     }
 

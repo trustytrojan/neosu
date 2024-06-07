@@ -25,7 +25,7 @@
 
 WinSDLEnvironment::WinSDLEnvironment() : SDLEnvironment(NULL) {}
 
-Environment::OS WinSDLEnvironment::getOS() { return Environment::OS::OS_WINDOWS; }
+Environment::OS WinSDLEnvironment::getOS() { return Environment::OS::WINDOWS; }
 
 void WinSDLEnvironment::sleep(unsigned int us) { Sleep(us / 1000); }
 

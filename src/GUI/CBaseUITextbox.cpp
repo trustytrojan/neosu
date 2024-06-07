@@ -385,7 +385,7 @@ void CBaseUITextbox::onKeyDown(KeyboardEvent &e) {
 
         case KEY_LEFT: {
             const bool hadSelectedText = hasSelectedText();
-            const int prevSelectPos = std::min(m_iSelectStart, m_iSelectEnd);
+            const int prevSelectPos = min(m_iSelectStart, m_iSelectEnd);
 
             deselectText();
 
@@ -401,7 +401,7 @@ void CBaseUITextbox::onKeyDown(KeyboardEvent &e) {
 
         case KEY_RIGHT: {
             const bool hadSelectedText = hasSelectedText();
-            const int prevSelectPos = std::max(m_iSelectStart, m_iSelectEnd);
+            const int prevSelectPos = max(m_iSelectStart, m_iSelectEnd);
 
             deselectText();
 

@@ -1,13 +1,4 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		top level interface for native OS calls
-//
-// $NoKeywords: $env
-//===============================================================================//
-
-#ifndef ENVIRONMENT_H
-#define ENVIRONMENT_H
-
+#pragma once
 #include "ConVar.h"
 #include "Cursors.h"
 #include "Graphics.h"
@@ -19,7 +10,7 @@ class ContextMenu;
 
 class Environment {
    public:
-    enum class OS { OS_NULL, OS_WINDOWS, OS_LINUX, OS_MACOS };
+    enum class OS { NONE, WINDOWS, LINUX, MACOS };
 
    public:
     Environment();
@@ -123,5 +114,3 @@ class Environment {
 };
 
 extern Environment *env;
-
-#endif

@@ -652,7 +652,7 @@ void Slider::update(long curPos) {
     m_fActualSlidePercent = m_fSlidePercent;
 
     const float sliderSnakeDuration = (1.0f / 3.0f) * m_iApproachTime * osu_slider_snake_duration_multiplier.getFloat();
-    m_fSliderSnakePercent = std::min(1.0f, (curPos - (m_iTime - m_iApproachTime)) / (sliderSnakeDuration));
+    m_fSliderSnakePercent = min(1.0f, (curPos - (m_iTime - m_iApproachTime)) / (sliderSnakeDuration));
 
     const long reverseArrowFadeInStart =
         m_iTime - (osu_snaking_sliders.getBool() ? (m_iApproachTime - sliderSnakeDuration) : m_iApproachTime);
@@ -669,7 +669,7 @@ void Slider::update(long curPos) {
 
         // fade out over the duration of the slider, starting exactly when the default fadein finishes
         const long hiddenSliderBodyFadeOutStart =
-            std::min(m_iTime, m_iTime - m_iApproachTime +
+            min(m_iTime, m_iTime - m_iApproachTime +
                                   m_iFadeInTime);  // min() ensures that the fade always starts at m_iTime (even if the
                                                    // fadeintime is longer than the approachtime)
         const float fade_percent = osu_mod_hd_slider_fade_percent.getFloat();
@@ -790,7 +790,7 @@ void Slider::update(long curPos) {
         // because fuck you
         const long offset = (long)osu_slider_end_inside_check_offset.getInt();
         const long lenienceHackEndTime =
-            std::max(m_iTime + m_iObjectDuration / 2, (m_iTime + m_iObjectDuration) - offset);
+            max(m_iTime + m_iObjectDuration / 2, (m_iTime + m_iObjectDuration) - offset);
         const bool isTrackingCorrectly = (isClickHeldSlider() || osu->getModRelax()) && m_bCursorInside;
         if(isTrackingCorrectly) {
             if(isTrackingStrictTrackingMod) {

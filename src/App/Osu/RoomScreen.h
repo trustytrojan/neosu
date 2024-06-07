@@ -1,5 +1,7 @@
 #pragma once
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 #include "BanchoProtocol.h"
 #include "CBaseUIScrollView.h"

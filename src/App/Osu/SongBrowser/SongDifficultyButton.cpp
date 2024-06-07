@@ -104,14 +104,14 @@ void SongDifficultyButton::draw(Graphics *g) {
         const float starWidth = (size.y * 0.2);
         const float starScale = starWidth / skin->getStar()->getHeight();
         const int numFullStars = clamp<int>((int)stars, 0, 25);
-        const float partialStarScale = std::max(0.5f, clamp<float>(stars - numFullStars, 0.0f, 1.0f));  // at least 0.5x
+        const float partialStarScale = max(0.5f, clamp<float>(stars - numFullStars, 0.0f, 1.0f));  // at least 0.5x
 
         g->setColor(m_bSelected ? skin->getSongSelectActiveText() : skin->getSongSelectInactiveText());
 
         // full stars
         for(int i = 0; i < numFullStars; i++) {
             const float scale =
-                std::min(starScale * 1.175f, starScale + i * 0.015f);  // more stars = getting bigger, up to a limit
+                min(starScale * 1.175f, starScale + i * 0.015f);  // more stars = getting bigger, up to a limit
 
             g->pushTransform();
             {

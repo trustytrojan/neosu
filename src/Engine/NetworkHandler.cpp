@@ -1,10 +1,3 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		handles network connections, multiplayer, chat etc.
-//
-// $NoKeywords: $nw
-//===============================================================================//
-
 #include "NetworkHandler.h"
 
 #include <curl/curl.h>

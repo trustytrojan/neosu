@@ -20,7 +20,7 @@ class NullEnvironment : public Environment {
     ContextMenu *createContextMenu();
 
     // system
-    OS getOS() { return Environment::OS::OS_NULL; }
+    OS getOS() { return Environment::OS::NONE; }
     void shutdown();
     void restart();
     void sleep(unsigned int us) { (void)us; }

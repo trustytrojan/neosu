@@ -1,10 +1,3 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		main entry point
-//
-// $NoKeywords: $main
-//===============================================================================//
-
 #ifdef _WIN32
 
 // #define MCENGINE_WINDOWS_REALTIMESTYLUS_SUPPORT
@@ -16,12 +9,10 @@
 
 #include "cbase.h"
 
-// winsock2.h must be included before windows.h
-// clang-format off
-#include <winsock2.h>
 #include <dwmapi.h>
-#include <windows.h>
-// clang-format on
+
+// NEXTRAWINPUTBLOCK macro requires this
+typedef uint64_t QWORD;
 
 #ifdef MCENGINE_FEATURE_SDL
 
@@ -179,7 +170,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
         case WM_NCCREATE:
             if(g_bSupportsPerMonitorDpiAwareness) {
-                typedef WINBOOL(WINAPI * EPNCDS)(HWND);
+                typedef BOOL(WINAPI * EPNCDS)(HWND);
                 EPNCDS g_EnableNonClientDpiScaling =
                     (EPNCDS)GetProcAddress(GetModuleHandle(TEXT("user32.dll")), "EnableNonClientDpiScaling");
                 if(g_EnableNonClientDpiScaling != NULL) g_EnableNonClientDpiScaling(hwnd);
@@ -891,7 +882,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
                                             {
                                                     if (((IPCState*)ipcSharedMemory)->state == IPC_STATE::IDLE)
                                                     {
-                                                            const size_t bytesToCopy = std::min(strlen(lpCmdLine),
+                                                            const size_t bytesToCopy = min(strlen(lpCmdLine),
     sharedMemorySize - sizeof(IPCState) - 2) + 1;
 
                                                             //printf("Copying %u bytes\n", bytesToCopy);
@@ -1014,9 +1005,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             // Windows Vista+
             // system-wide dpi scaling
             {
-                typedef WINBOOL(WINAPI * PSPDA)(void);
-                PSPDA g_SetProcessDPIAware =
-                    (PSPDA)GetProcAddress(GetModuleHandle(TEXT("user32.dll")), "SetProcessDPIAware");
+                auto g_SetProcessDPIAware = GetProcAddress(GetModuleHandle(TEXT("user32.dll")), "SetProcessDPIAware");
                 if(g_SetProcessDPIAware != NULL) g_SetProcessDPIAware();
             }
         }
@@ -1329,7 +1318,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
                                 {
                                 case IPC_MESSAGE_TYPE::URL:
                                         char *content = (((char*)ipcSharedMemory) + sizeof(IPCState));
-                                        const size_t length = std::min(strlen(content), sharedMemorySize -
+                                        const size_t length = min(strlen(content), sharedMemorySize -
            sizeof(IPCState) - 2); const UString ustring = UString(content, length);
 
                                         g_engine->debugLog("IPC: Received URL %s\n", ustring.toUtf8());

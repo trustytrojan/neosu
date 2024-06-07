@@ -1,11 +1,10 @@
 #ifdef _WIN32
 #include "cbase.h"
-// ^ needs to be above <windows.h>
-#include <windows.h>
 #else
 #include <sys/random.h>
 #endif
 
+#define LZMA_API_STATIC
 #include <lzma.h>
 
 #include "Bancho.h"

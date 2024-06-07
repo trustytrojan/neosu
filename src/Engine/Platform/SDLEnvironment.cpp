@@ -68,7 +68,7 @@ Graphics *SDLEnvironment::createRenderer() {
 
 ContextMenu *SDLEnvironment::createContextMenu() { return new NullContextMenu(); }
 
-Environment::OS SDLEnvironment::getOS() { return Environment::OS::OS_NULL; }
+Environment::OS SDLEnvironment::getOS() { return Environment::OS::NONE; }
 
 void SDLEnvironment::shutdown() {
     SDL_Event event;

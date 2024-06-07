@@ -1,20 +1,12 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		resource manager
-//
-// $NoKeywords: $rm
-//===============================================================================//
-
 #include "ResourceManager.h"
 
 #include <mutex>
+#include <thread>
 
 #include "ConVar.h"
 #include "Engine.h"
 #include "Environment.h"
-#include "Thread.h"
 #include "Timer.h"
-#include "WinMinGW.Mutex.h"
 
 static std::mutex g_resourceManagerMutex;             // internal lock for nested async loads
 static std::mutex g_resourceManagerLoadingWorkMutex;  // work vector lock across all threads
@@ -24,7 +16,7 @@ static void *_resourceLoaderThread(void *data);
 class ResourceManagerLoaderThread {
    public:
     // self
-    McThread *thread;
+    std::thread thread;
 
     // wait lock
     std::mutex loadingMutex;
@@ -64,13 +56,8 @@ ResourceManager::ResourceManager() {
         loaderThread->running = true;
         loaderThread->loadingWork = &m_loadingWork;
 
-        loaderThread->thread = new McThread(_resourceLoaderThread, (void *)loaderThread);
-        if(!loaderThread->thread->isReady()) {
-            engine->showMessageError("ResourceManager Error", "Couldn't create thread!");
-            SAFE_DELETE(loaderThread->thread);
-            SAFE_DELETE(loaderThread);
-        } else
-            m_threads.push_back(loaderThread);
+        loaderThread->thread = std::thread(_resourceLoaderThread, (void *)loaderThread);
+        m_threads.push_back(loaderThread);
     }
 }
 
@@ -99,7 +86,7 @@ ResourceManager::~ResourceManager() {
 
     // wait for threads to stop
     for(size_t i = 0; i < m_threads.size(); i++) {
-        delete m_threads[i]->thread;
+        m_threads[i]->thread.join();
     }
 
     m_threads.clear();
@@ -547,7 +534,7 @@ void ResourceManager::loadResource(Resource *res, bool load) {
                 work.done = MobileAtomicBool(false);
 
                 threadIndexCounter = (threadIndexCounter + 1) %
-                                     (std::min(m_threads.size(), (size_t)std::max(rm_numthreads.getInt(), 1)));
+                                     (min(m_threads.size(), (size_t)max(rm_numthreads.getInt(), 1)));
 
                 g_resourceManagerLoadingWorkMutex.lock();
                 {

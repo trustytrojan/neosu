@@ -45,7 +45,7 @@ void *UpdateHandler::run(void *data) {
             handler->_installUpdate(TEMP_UPDATE_DOWNLOAD_FILEPATH);
         }
 
-        handler->m_updateThread = 0;  // reset
+        handler->m_updateThread = NULL;  // reset
 
         if(handler->_m_bKYS) return NULL;  // cancellation point
 
@@ -54,14 +54,14 @@ void *UpdateHandler::run(void *data) {
             handler->m_iNumRetries++;
             if(handler->m_iNumRetries < 4) handler->checkForUpdates();
         }
-    } else
-        handler->m_updateThread = 0;  // reset
+    } else {
+        handler->m_updateThread = NULL;  // reset
+    }
 
     return NULL;
 }
 
 UpdateHandler::UpdateHandler() {
-    m_updateThread = 0;
     update_url = "";
 
     m_status = convar->getConVarByName("auto_update")->getBool() ? STATUS::STATUS_CHECKING_FOR_UPDATE
@@ -70,36 +70,24 @@ UpdateHandler::UpdateHandler() {
     _m_bKYS = false;
 }
 
-UpdateHandler::~UpdateHandler() {
-    if(m_updateThread != 0)
-        engine->showMessageErrorFatal("Fatal Error",
-                                      "UpdateHandler was destroyed while the update thread is still running!!!");
-}
+UpdateHandler::~UpdateHandler() {}
 
 void UpdateHandler::stop() {
-    if(m_updateThread != 0) {
-        _m_bKYS = true;
-        m_updateThread = 0;
-    }
+    _m_bKYS = true;
+    m_updateThread = NULL;
 }
 
 void UpdateHandler::wait() {
-    if(m_updateThread != 0) {
-        pthread_join(m_updateThread, NULL);
-        m_updateThread = 0;
+    if(m_updateThread != NULL) {
+        m_updateThread->join();
     }
 }
 
 void UpdateHandler::checkForUpdates() {
-    if(!convar->getConVarByName("auto_update")->getBool() || Osu::debug->getBool() || m_updateThread != 0) return;
-    if(env->getOS() != Environment::OS::OS_WINDOWS) return;  // only windows gets releases right now
+    if(!convar->getConVarByName("auto_update")->getBool() || Osu::debug->getBool() || (m_updateThread != NULL && m_updateThread->joinable())) return;
+    if(env->getOS() != Environment::OS::WINDOWS) return;  // only windows gets releases right now
 
-    int ret = pthread_create(&m_updateThread, NULL, UpdateHandler::run, (void *)this);
-    if(ret) {
-        m_updateThread = 0;
-        debugLog("UpdateHandler: Error, pthread_create() returned %i!\n", ret);
-        return;
-    }
+    m_updateThread = new std::thread(UpdateHandler::run, (void *)this);
 
     if(m_iNumRetries > 0) debugLog("UpdateHandler::checkForUpdates() retry %i ...\n", m_iNumRetries);
 }
@@ -290,13 +278,13 @@ void UpdateHandler::_installUpdate(std::string zipFilePath) {
 }
 
 Environment::OS UpdateHandler::stringToOS(UString osString) {
-    Environment::OS os = Environment::OS::OS_NULL;
+    Environment::OS os = Environment::OS::NONE;
     if(osString.find("windows") != -1)
-        os = Environment::OS::OS_WINDOWS;
+        os = Environment::OS::WINDOWS;
     else if(osString.find("linux") != -1)
-        os = Environment::OS::OS_LINUX;
+        os = Environment::OS::LINUX;
     else if(osString.find("macos") != -1)
-        os = Environment::OS::OS_MACOS;
+        os = Environment::OS::MACOS;
 
     return os;
 }

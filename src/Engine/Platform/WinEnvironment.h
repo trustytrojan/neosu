@@ -1,17 +1,8 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		windows
-//
-// $NoKeywords: $winenv
-//===============================================================================//
+#pragma once
 
 #ifdef _WIN32
 
-#ifndef WINENVIRONMENT_H
-#define WINENVIRONMENT_H
-
 #include "cbase.h"
-#include <windows.h>
 
 #include "Environment.h"
 
@@ -157,7 +148,5 @@ class WinEnvironment : public Environment {
     static int m_iNumCoresForProcessAffinity;
     static HHOOK g_hKeyboardHook;
 };
-
-#endif
 
 #endif

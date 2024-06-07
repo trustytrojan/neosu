@@ -1,11 +1,6 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		static renderer class, so it can be used outside of Slider
-//
-// $NoKeywords: $sliderrender
-//===============================================================================//
-
 #include "SliderRenderer.h"
+
+#include <limits>
 
 #include "ConVar.h"
 #include "Engine.h"
@@ -33,9 +28,9 @@ VertexArrayObject *SliderRenderer::UNIT_CIRCLE_VAO_BAKED = NULL;
 VertexArrayObject *SliderRenderer::UNIT_CIRCLE_VAO_TRIANGLES = NULL;
 float SliderRenderer::UNIT_CIRCLE_VAO_DIAMETER = 0.0f;
 
-float SliderRenderer::m_fBoundingBoxMinX = std::numeric_limits<float>::max();
+float SliderRenderer::m_fBoundingBoxMinX = (std::numeric_limits<float>::max)();
 float SliderRenderer::m_fBoundingBoxMaxX = 0.0f;
-float SliderRenderer::m_fBoundingBoxMinY = std::numeric_limits<float>::max();
+float SliderRenderer::m_fBoundingBoxMinY = (std::numeric_limits<float>::max)();
 float SliderRenderer::m_fBoundingBoxMaxY = 0.0f;
 
 ConVar osu_slider_debug_draw("osu_slider_debug_draw", false, FCVAR_DEFAULT,
@@ -309,49 +304,6 @@ void SliderRenderer::draw(Graphics *g, VertexArrayObject *vao, const std::vector
 
         return;  // nothing more to draw here
     }
-
-    // NOTE: this would add support for aspire slider distortions, but calculating the bounding box live is a waste of
-    // performance, not worth it
-    /*
-    {
-            m_fBoundingBoxMinX = std::numeric_limits<float>::max();
-            m_fBoundingBoxMaxX = std::numeric_limits<float>::min();
-            m_fBoundingBoxMinY = std::numeric_limits<float>::max();
-            m_fBoundingBoxMaxY = std::numeric_limits<float>::min();
-
-            // NOTE: to get the animated effect, would have to use from -> to (not implemented atm)
-            for (int i=0; i<points.size(); i++)
-            {
-                    const float &x = points[i].x;
-                    const float &y = points[i].y;
-                    const float radius = hitcircleDiameter/2.0f;
-
-                    if (x-radius < m_fBoundingBoxMinX)
-                            m_fBoundingBoxMinX = x-radius;
-                    if (x+radius > m_fBoundingBoxMaxX)
-                            m_fBoundingBoxMaxX = x+radius;
-                    if (y-radius < m_fBoundingBoxMinY)
-                            m_fBoundingBoxMinY = y-radius;
-                    if (y+radius > m_fBoundingBoxMaxY)
-                            m_fBoundingBoxMaxY = y+radius;
-            }
-
-            const Vector4 tLS = (g->getProjectionMatrix() * Vector4(m_fBoundingBoxMinX, m_fBoundingBoxMinY, 0, 0) +
-    Vector4(1, 1, 0, 0)) * 0.5f; const Vector4 bRS = (g->getProjectionMatrix() * Vector4(m_fBoundingBoxMaxX,
-    m_fBoundingBoxMaxY, 0, 0) + Vector4(1, 1, 0, 0)) * 0.5f;
-
-            float scaleToApplyAfterTranslationX = 1.0f;
-            float scaleToApplyAfterTranslationY = 1.0f;
-
-            const float sclX = (32768.0f / (float)osu->getScreenWidth());
-            const float sclY = (32768.0f / (float)osu->getScreenHeight());
-
-            if (-tLS.x + bRS.x > sclX)
-                    scaleToApplyAfterTranslationX = sclX / (-tLS.x + bRS.x);
-            if (-tLS.y + bRS.y > sclY)
-                    scaleToApplyAfterTranslationY = sclY / (-tLS.y + bRS.y);
-    }
-    */
 
     // draw entire slider into framebuffer
     g->setDepthBuffer(true);
@@ -641,7 +593,7 @@ void SliderRenderer::drawFillSliderBodyMM(Graphics *g, const std::vector<Vector2
                     vao.addTexcoord(0, 0);
                     vao.addVertex(current.x, current.y);
 
-                    const float angularOffset = std::min(p * step, thetaDiff);
+                    const float angularOffset = min(p * step, thetaDiff);
                     current = origin + pointOnCircle(theta + dir * angularOffset) * radius;
 
                     // second outer point
@@ -855,8 +807,8 @@ void SliderRenderer::checkUpdateVars(float hitcircleDiameter) {
 }
 
 void SliderRenderer::resetRenderTargetBoundingBox() {
-    SliderRenderer::m_fBoundingBoxMinX = std::numeric_limits<float>::max();
+    SliderRenderer::m_fBoundingBoxMinX = (std::numeric_limits<float>::max)();
     SliderRenderer::m_fBoundingBoxMaxX = 0.0f;
-    SliderRenderer::m_fBoundingBoxMinY = std::numeric_limits<float>::max();
+    SliderRenderer::m_fBoundingBoxMinY = (std::numeric_limits<float>::max)();
     SliderRenderer::m_fBoundingBoxMaxY = 0.0f;
 }

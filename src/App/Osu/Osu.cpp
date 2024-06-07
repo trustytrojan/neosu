@@ -246,7 +246,7 @@ Osu::Osu() {
     std::string userDataPath = env->getUserDataPath();
     if(userDataPath.length() > 1) {
         std::string defaultOsuFolder = userDataPath;
-        defaultOsuFolder.append(env->getOS() == Environment::OS::OS_WINDOWS ? "\\osu!\\" : "/osu!/");
+        defaultOsuFolder.append(env->getOS() == Environment::OS::WINDOWS ? "\\osu!\\" : "/osu!/");
         m_osu_folder_ref->setValue(defaultOsuFolder.c_str());
     }
 
@@ -574,7 +574,7 @@ void Osu::draw(Graphics *g) {
 
             // Update flashlight position
             double follow_delay = flashlight_follow_delay.getFloat();
-            double frame_time = std::min(engine->getFrameTime(), follow_delay);
+            double frame_time = min(engine->getFrameTime(), follow_delay);
             double t = frame_time / follow_delay;
             t = t * (2.f - t);
             flashlight_position += t * (mouse_position - flashlight_position);
@@ -696,9 +696,9 @@ void Osu::draw(Graphics *g) {
                 const float scaledHeight = m_backBuffer->getHeight() * scale;
                 m_backBuffer->draw(
                     g,
-                    std::max(0.0f, engine->getGraphics()->getResolution().x / 2.0f - scaledWidth / 2.0f) *
+                    max(0.0f, engine->getGraphics()->getResolution().x / 2.0f - scaledWidth / 2.0f) *
                         (1.0f + osu_letterboxing_offset_x.getFloat()),
-                    std::max(0.0f, engine->getGraphics()->getResolution().y / 2.0f - scaledHeight / 2.0f) *
+                    max(0.0f, engine->getGraphics()->getResolution().y / 2.0f - scaledHeight / 2.0f) *
                         (1.0f + osu_letterboxing_offset_y.getFloat()),
                     scaledWidth, scaledHeight);
             } else {
@@ -937,7 +937,7 @@ void Osu::update() {
 
                 m_notificationOverlay->addNotification(
                     m_skin->getName().length() > 0 ? UString::format("Skin reloaded! (%s)", m_skin->getName().c_str())
-                                                   : "Skin reloaded!",
+                                                   : UString("Skin reloaded!"),
                     0xffffffff, false, 0.75f);
             }
         }
@@ -1616,18 +1616,15 @@ void Osu::toggleEditor() { m_bToggleEditorScheduled = true; }
 void Osu::saveScreenshot() {
     engine->getSound()->play(m_skin->getShutter());
     int screenshotNumber = 0;
-    std::string screenshot_path;
+    UString screenshot_path;
     do {
-        std::stringstream ss;
-        ss << "screenshots/screenshot" << screenshotNumber << ".png";
-        screenshot_path = ss.str();
-
+        screenshot_path = UString("screenshots/screenshot%d.png", screenshotNumber);
         screenshotNumber++;
-    } while(env->fileExists(screenshot_path));
+    } while(env->fileExists(screenshot_path.toUtf8()));
 
     std::vector<unsigned char> pixels = engine->getGraphics()->getScreenshot();
     Image::saveToImage(&pixels[0], engine->getGraphics()->getResolution().x, engine->getGraphics()->getResolution().y,
-                       screenshot_path);
+                       screenshot_path.toUtf8());
 }
 
 void Osu::onPlayEnd(bool quit, bool aborted) {
@@ -1738,7 +1735,7 @@ float Osu::getRawSpeedMultiplier() {
 float Osu::getSpeedMultiplier() {
     float speedMultiplier = getRawSpeedMultiplier();
 
-    if(osu_speed_override.getFloat() >= 0.0f) return std::max(osu_speed_override.getFloat(), 0.05f);
+    if(osu_speed_override.getFloat() >= 0.0f) return max(osu_speed_override.getFloat(), 0.05f);
 
     return speedMultiplier;
 }
@@ -1746,7 +1743,7 @@ float Osu::getSpeedMultiplier() {
 float Osu::getAnimationSpeedMultiplier() {
     float animationSpeedMultiplier = getSpeedMultiplier();
 
-    if(osu_animation_speed_override.getFloat() >= 0.0f) return std::max(osu_animation_speed_override.getFloat(), 0.05f);
+    if(osu_animation_speed_override.getFloat() >= 0.0f) return max(osu_animation_speed_override.getFloat(), 0.05f);
 
     return animationSpeedMultiplier;
 }
@@ -1784,7 +1781,7 @@ void Osu::onResolutionChanged(Vector2 newResolution) {
 
         // disable internal resolution on specific conditions
         bool windowsBorderlessHackCondition =
-            (env->getOS() == Environment::OS::OS_WINDOWS && env->isFullscreen() &&
+            (env->getOS() == Environment::OS::WINDOWS && env->isFullscreen() &&
              env->isFullscreenWindowedBorderless() &&
              (int)g_vInternalResolution.y == (int)env->getNativeScreenSize().y);  // HACKHACK
         if(((int)g_vInternalResolution.x == engine->getScreenWidth() &&

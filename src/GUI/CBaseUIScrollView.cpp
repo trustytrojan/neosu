@@ -523,7 +523,7 @@ void CBaseUIScrollView::updateScrollbars() {
 
         const float verticalHeightPercent = (m_vSize.y - (verticalBlockWidth * 2)) / m_vScrollSize.y;
         const float verticalBlockHeight =
-            clamp<float>(std::max(verticalHeightPercent * m_vSize.y, verticalBlockWidth) * overscroll,
+            clamp<float>(max(verticalHeightPercent * m_vSize.y, verticalBlockWidth) * overscroll,
                          verticalBlockWidth, m_vSize.y);
 
         m_verticalScrollbar =
@@ -540,7 +540,7 @@ void CBaseUIScrollView::updateScrollbars() {
             1.0f);
         const float horizontalBlockWidth = ui_scrollview_scrollbarwidth.getInt();
         const float horizontalHeightPercent = (m_vSize.x - (horizontalBlockWidth * 2)) / m_vScrollSize.x;
-        const float horizontalBlockHeight = std::max(horizontalHeightPercent * m_vSize.x, horizontalBlockWidth);
+        const float horizontalBlockHeight = max(horizontalHeightPercent * m_vSize.x, horizontalBlockWidth);
 
         m_horizontalScrollbar =
             McRect(m_vPos.x + (horizontalPercent * (m_vSize.x - (horizontalBlockWidth * 2) - horizontalBlockHeight) +
@@ -582,7 +582,7 @@ CBaseUIScrollView *CBaseUIScrollView::setScrollSizeToContent(int border) {
         // Scroll to bottom without animation
         // XXX: Correct way to do this would be to keep the animation, but then you have to correct
         //      the existing scrolling animation, AND the possible scroll bounce animation.
-        auto target = std::max(oldScrollPos.y, m_vScrollSize.y);
+        auto target = max(oldScrollPos.y, m_vScrollSize.y);
         scrollToY(-target, false);
     }
 

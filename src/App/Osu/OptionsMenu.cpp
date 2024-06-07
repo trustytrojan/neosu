@@ -589,7 +589,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     addSubSection("Renderer");
     addCheckbox("VSync", "If enabled: plz enjoy input lag.", convar->getConVarByName("vsync"));
 
-    if(env->getOS() == Environment::OS::OS_WINDOWS)
+    if(env->getOS() == Environment::OS::WINDOWS)
         addCheckbox("High Priority", "Sets the game process priority to high",
                     convar->getConVarByName("win_processpriority"));
 
@@ -881,16 +881,16 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     CBaseUIElement *sectionInput = addSection("Input");
 
     addSubSection("Mouse", "scroll");
-    if(env->getOS() == Environment::OS::OS_WINDOWS || env->getOS() == Environment::OS::OS_MACOS) {
+    if(env->getOS() == Environment::OS::WINDOWS || env->getOS() == Environment::OS::MACOS) {
         addSlider("Sensitivity:", 0.1f, 6.0f, convar->getConVarByName("mouse_sensitivity"))->setKeyDelta(0.01f);
 
-        if(env->getOS() == Environment::OS::OS_MACOS) {
+        if(env->getOS() == Environment::OS::MACOS) {
             addLabel("");
             addLabel("WARNING: Set Sensitivity to 1 for tablets!")->setTextColor(0xffff0000);
             addLabel("");
         }
     }
-    if(env->getOS() == Environment::OS::OS_WINDOWS) {
+    if(env->getOS() == Environment::OS::WINDOWS) {
         addCheckbox("Raw Input", convar->getConVarByName("mouse_raw_input"));
         {
             ConVar *win_mouse_raw_input_buffer_ref = convar->getConVarByName("win_mouse_raw_input_buffer", false);
@@ -904,7 +904,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
         addCheckbox("Map Absolute Raw Input to Window", convar->getConVarByName("mouse_raw_input_absolute_to_window"))
             ->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onRawInputToAbsoluteWindowChange));
     }
-    if(env->getOS() == Environment::OS::OS_LINUX) {
+    if(env->getOS() == Environment::OS::LINUX) {
         addLabel("Use system settings to change the mouse sensitivity.")->setTextColor(0xff555555);
         addLabel("");
         addLabel("Use xinput or xsetwacom to change the tablet area.")->setTextColor(0xff555555);
@@ -917,7 +917,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     addCheckbox("Cursor ripples", "The cursor will ripple outwards on clicking.",
                 convar->getConVarByName("osu_draw_cursor_ripples"));
 
-    if(env->getOS() == Environment::OS::OS_WINDOWS) {
+    if(env->getOS() == Environment::OS::WINDOWS) {
 #ifndef MCENGINE_FEATURE_SDL
 
         addSubSection("Tablet");
@@ -1233,7 +1233,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
 
     addSubSection("FPoSu - General");
     addCheckbox("FPoSu",
-                (env->getOS() == Environment::OS::OS_WINDOWS
+                (env->getOS() == Environment::OS::WINDOWS
                      ? "The real 3D FPS mod.\nPlay from a first person shooter perspective in a 3D environment.\nThis "
                        "is only intended for mouse! (Enable \"Tablet/Absolute Mode\" for tablets.)"
                      : "The real 3D FPS mod.\nPlay from a first person shooter perspective in a 3D environment.\nThis "
@@ -1264,7 +1264,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     addCheckbox("Background cube", convar->getConVarByName("fposu_cube"));
     addCheckbox("Skybox", "NOTE: Overrides \"Background cube\".\nSee skybox_example.png for cubemap layout.",
                 convar->getConVarByName("fposu_skybox"));
-    if(env->getOS() == Environment::OS::OS_WINDOWS) {
+    if(env->getOS() == Environment::OS::WINDOWS) {
         addSubSection("FPoSu - Mouse");
         UIButton *cm360CalculatorLinkButton = addButton("https://www.mouse-sensitivity.com/");
         cm360CalculatorLinkButton->setClickCallback(
@@ -1691,7 +1691,7 @@ void OptionsMenu::onResolutionChange(Vector2 newResolution) {
     ScreenBackable::onResolutionChange(newResolution);
 
     // HACKHACK: magic
-    if((env->getOS() == Environment::OS::OS_WINDOWS && env->isFullscreen() && env->isFullscreenWindowedBorderless() &&
+    if((env->getOS() == Environment::OS::WINDOWS && env->isFullscreen() && env->isFullscreenWindowedBorderless() &&
         (int)newResolution.y == (int)env->getNativeScreenSize().y + 1))
         newResolution.y--;
 
@@ -1841,7 +1841,7 @@ void OptionsMenu::updateLayout() {
 
     int optionsWidth = (int)(osu->getScreenWidth() * optionsScreenWidthPercent);
     if(!m_bFullscreen)
-        optionsWidth = std::min((int)(725.0f * (1.0f - categoriesOptionsPercent)), optionsWidth) * dpiScale;
+        optionsWidth = min((int)(725.0f * (1.0f - categoriesOptionsPercent)), optionsWidth) * dpiScale;
 
     const int categoriesWidth = optionsWidth * categoriesOptionsPercent;
 
@@ -2998,7 +2998,7 @@ void OptionsMenu::onASIOBufferChange(CBaseUISlider *slider) {
 
     auto bufsize = slider->getInt();
     bufsize = ASIO_clamp(info, bufsize);
-    double latency = 1000.0 * (double)bufsize / std::max(BASS_ASIO_GetRate(), 44100.0);
+    double latency = 1000.0 * (double)bufsize / max(BASS_ASIO_GetRate(), 44100.0);
 
     for(int i = 0; i < m_elements.size(); i++) {
         for(int e = 0; e < m_elements[i].elements.size(); e++) {

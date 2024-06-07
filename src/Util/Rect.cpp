@@ -1,11 +1,6 @@
-//================ Copyright (c) 2012, PG, All rights reserved. =================//
-//
-// Purpose:		rect
-//
-// $NoKeywords: $rect
-//===============================================================================//
-
 #include "Rect.h"
+
+#include "cbase.h"
 
 McRect::McRect(float x, float y, float width, float height, bool isCentered) { set(x, y, width, height, isCentered); }
 
@@ -28,10 +23,10 @@ void McRect::set(float x, float y, float width, float height, bool isCentered) {
 McRect McRect::intersect(const McRect &rect) const {
     McRect intersection;
 
-    intersection.m_fMinX = std::max(m_fMinX, rect.m_fMinX);
-    intersection.m_fMinY = std::max(m_fMinY, rect.m_fMinY);
-    intersection.m_fMaxX = std::min(m_fMaxX, rect.m_fMaxX);
-    intersection.m_fMaxY = std::min(m_fMaxY, rect.m_fMaxY);
+    intersection.m_fMinX = max(m_fMinX, rect.m_fMinX);
+    intersection.m_fMinY = max(m_fMinY, rect.m_fMinY);
+    intersection.m_fMaxX = min(m_fMaxX, rect.m_fMaxX);
+    intersection.m_fMaxY = min(m_fMaxY, rect.m_fMaxY);
 
     // if the rects don't intersect
     if(intersection.m_fMinX > intersection.m_fMaxX || intersection.m_fMinY > intersection.m_fMaxY) {
@@ -48,19 +43,19 @@ McRect McRect::intersect(const McRect &rect) const {
 McRect McRect::Union(const McRect &rect) const {
     McRect Union;
 
-    Union.m_fMinX = std::min(m_fMinX, rect.m_fMinX);
-    Union.m_fMinY = std::min(m_fMinY, rect.m_fMinY);
-    Union.m_fMaxX = std::max(m_fMaxX, rect.m_fMaxX);
-    Union.m_fMaxY = std::max(m_fMaxY, rect.m_fMaxY);
+    Union.m_fMinX = min(m_fMinX, rect.m_fMinX);
+    Union.m_fMinY = min(m_fMinY, rect.m_fMinY);
+    Union.m_fMaxX = max(m_fMaxX, rect.m_fMaxX);
+    Union.m_fMaxY = max(m_fMaxY, rect.m_fMaxY);
 
     return Union;
 }
 
 bool McRect::intersects(const McRect &rect) const {
-    const float minx = std::max(m_fMinX, rect.m_fMinX);
-    const float miny = std::max(m_fMinY, rect.m_fMinY);
-    const float maxx = std::min(m_fMaxX, rect.m_fMaxX);
-    const float maxy = std::min(m_fMaxY, rect.m_fMaxY);
+    const float minx = max(m_fMinX, rect.m_fMinX);
+    const float miny = max(m_fMinY, rect.m_fMinY);
+    const float maxx = min(m_fMaxX, rect.m_fMaxX);
+    const float maxy = min(m_fMaxY, rect.m_fMaxY);
 
     return (minx < maxx && miny < maxy);
 }

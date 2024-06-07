@@ -393,7 +393,7 @@ void Skin::load() {
             }
 
             if(m_bIsRandom && filepathsForRandomSkin.size() > 0) {
-                const int randomIndex = std::rand() % std::min(filepathsForRandomSkin.size(), skinNames.size());
+                const int randomIndex = std::rand() % min(filepathsForRandomSkin.size(), skinNames.size());
 
                 m_sName = skinNames[randomIndex];
                 m_sFilePath = filepathsForRandomSkin[randomIndex];
@@ -1131,7 +1131,7 @@ void Skin::setSampleVolume(float volume, bool force) {
 
 Color Skin::getComboColorForCounter(int i, int offset) {
     i += osu_skin_color_index_add.getInt();
-    i = std::max(i, 0);
+    i = max(i, 0);
 
     if(m_beatmapComboColors.size() > 0 && !osu_ignore_beatmap_combo_colors.getBool())
         return m_beatmapComboColors[(i + offset) % m_beatmapComboColors.size()];

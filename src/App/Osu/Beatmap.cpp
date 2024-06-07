@@ -6,6 +6,7 @@
 #include <cctype>
 #include <chrono>
 #include <future>
+#include <limits>
 #include <sstream>
 
 #include "AnimationHandler.h"
@@ -552,9 +553,9 @@ void Beatmap::skipEmptySection() {
     const long nextHitObjectDelta = m_iNextHitObjectTime - (long)m_iCurMusicPosWithOffsets;
 
     if(!osu_end_skip.getBool() && nextHitObjectDelta < 0)
-        m_music->setPositionMS(std::max(m_music->getLengthMS(), (unsigned long)1) - 1);
+        m_music->setPositionMS(max(m_music->getLengthMS(), (unsigned long)1) - 1);
     else
-        m_music->setPositionMS(std::max(m_iNextHitObjectTime - (long)(offset * offsetMultiplier), (long)0));
+        m_music->setPositionMS(max(m_iNextHitObjectTime - (long)(offset * offsetMultiplier), (long)0));
 
     engine->getSound()->play(osu->getSkin()->getMenuHit());
 
@@ -1358,7 +1359,7 @@ int Beatmap::getMostCommonBPM() const {
 
 float Beatmap::getSpeedMultiplier() const {
     if(m_music != NULL)
-        return std::max(m_music->getSpeed(), 0.05f);
+        return max(m_music->getSpeed(), 0.05f);
     else
         return 1.0f;
 }
@@ -1421,7 +1422,7 @@ float Beatmap::getCS() const {
         }
     }
 
-    if(osu_cs_cap_sanity.getBool()) CS = std::min(CS, 12.1429f);
+    if(osu_cs_cap_sanity.getBool()) CS = min(CS, 12.1429f);
 
     return CS;
 }
@@ -2001,11 +2002,11 @@ void Beatmap::drawFollowPoints(Graphics *g) {
     const long followPointApproachTime =
         animationMutiplier *
         (osu_followpoints_clamp.getBool()
-             ? std::min((long)GameRules::getApproachTime(this), (long)osu_followpoints_approachtime.getFloat())
+             ? min((long)GameRules::getApproachTime(this), (long)osu_followpoints_approachtime.getFloat())
              : (long)osu_followpoints_approachtime.getFloat());
     const bool followPointsConnectCombos = osu_followpoints_connect_combos.getBool();
     const bool followPointsConnectSpinners = osu_followpoints_connect_spinners.getBool();
-    const float followPointSeparationMultiplier = std::max(osu_followpoints_separation_multiplier.getFloat(), 0.1f);
+    const float followPointSeparationMultiplier = max(osu_followpoints_separation_multiplier.getFloat(), 0.1f);
     const float followPointPrevFadeTime = animationMutiplier * m_osu_followpoints_prevfadetime_ref->getFloat();
     const float followPointScaleMultiplier = osu_followpoints_scale_multiplier.getFloat();
 
@@ -2485,7 +2486,7 @@ void Beatmap::update2() {
                 ((double)(m_iCurMusicPos - m_hitobjects[0]->getTime()) /
                  (double)(m_hitobjects[m_hitobjects.size() - 1]->getTime() +
                           m_hitobjects[m_hitobjects.size() - 1]->getDuration() - m_hitobjects[0]->getTime()));
-            float warp_multiplier = std::max(osu_mod_timewarp_multiplier.getFloat(), 1.f);
+            float warp_multiplier = max(osu_mod_timewarp_multiplier.getFloat(), 1.f);
             const float speed =
                 osu->getSpeedMultiplier() + percentFinished * osu->getSpeedMultiplier() * (warp_multiplier - 1.0f);
             m_music->setSpeed(speed);
@@ -2521,7 +2522,7 @@ void Beatmap::update2() {
                     if(m_bIsRestartScheduledQuick && m_hitobjects.size() > 0 &&
                        m_hitobjects[0]->getTime() > (long)osu_quick_retry_time.getInt())
                         m_music->setPositionMS(
-                            std::max((long)0, m_hitobjects[0]->getTime() - (long)osu_quick_retry_time.getInt()));
+                            max((long)0, m_hitobjects[0]->getTime() - (long)osu_quick_retry_time.getInt()));
 
                     m_bIsRestartScheduledQuick = false;
 
@@ -3843,7 +3844,7 @@ void Beatmap::updateAutoCursorPos() {
                             prevPos = osuCoords2Pixels(o->getRawPosAt(prevTime));
 
                             long biggestPrevious = 0;
-                            long smallestNext = std::numeric_limits<long>::max();
+                            long smallestNext = (std::numeric_limits<long>::max)();
                             bool allFinished = true;
                             long endTime = 0;
 
@@ -4289,7 +4290,7 @@ void Beatmap::computeDrainRate() {
 
                 if(testPlayer.health > lowestHpEver) {
                     const double longObjectDrop = testDrop * (double)h->getDuration();
-                    const double maxLongObjectDrop = std::max(0.0, longObjectDrop - testPlayer.health);
+                    const double maxLongObjectDrop = max(0.0, longObjectDrop - testPlayer.health);
 
                     testPlayer.decreaseHealth(longObjectDrop);
 
@@ -4450,13 +4451,13 @@ void Beatmap::computeDrainRate() {
                         currentBreak++;
                     }
 
-                    if(currentBreak >= 0) lastTime = std::max(lastTime, (double)m_breaks[currentBreak].endTime);
+                    if(currentBreak >= 0) lastTime = max(lastTime, (double)m_breaks[currentBreak].endTime);
                 }
 
                 // Apply health adjustments
                 currentHealth -= (healthIncreases[i].first - lastTime) * result;
-                lowestHealth = std::min(lowestHealth, currentHealth);
-                currentHealth = std::min(1.0, currentHealth + healthIncreases[i].second);
+                lowestHealth = min(lowestHealth, currentHealth);
+                currentHealth = min(1.0, currentHealth + healthIncreases[i].second);
 
                 // Common scenario for when the drain rate is definitely too harsh
                 if(lowestHealth < 0) break;

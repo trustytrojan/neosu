@@ -1,10 +1,3 @@
-//================ Copyright (c) 2012, PG, All rights reserved. =================//
-//
-// Purpose:		core
-//
-// $NoKeywords: $engine
-//===============================================================================//
-
 #include "Engine.h"
 
 #include <stdio.h>
@@ -26,7 +19,6 @@
 #include "SoundEngine.h"
 #include "Timer.h"
 #include "VisualProfiler.h"
-#include "WinMinGW.Mutex.h"
 #include "XInputGamepad.h"
 
 //********************//

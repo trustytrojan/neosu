@@ -37,7 +37,7 @@ void UIRankingScreenInfoLabel::draw(Graphics *g) {
     subTitleText.append(m_sMapper.c_str());
     const UString playerText = buildPlayerString();
 
-    const float globalScale = std::max((m_vSize.y / getMinimumHeight()) * 0.741f, 1.0f);
+    const float globalScale = max((m_vSize.y / getMinimumHeight()) * 0.741f, 1.0f);
 
     // draw title
     g->setColor(0xffffffff);
@@ -111,7 +111,7 @@ float UIRankingScreenInfoLabel::getMinimumWidth() {
     float subTitleWidth = 0;
     float playerWidth = m_font->getStringWidth(buildPlayerString()) * m_fSubTitleScale;
 
-    return std::max(std::max(titleWidth, subTitleWidth), playerWidth);
+    return max(max(titleWidth, subTitleWidth), playerWidth);
 }
 
 float UIRankingScreenInfoLabel::getMinimumHeight() {

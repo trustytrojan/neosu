@@ -214,8 +214,8 @@ struct SortScoreByPP : public Database::SCORE_SORTING_COMPARATOR {
     virtual ~SortScoreByPP() { ; }
     bool operator()(FinishedScore const &a, FinishedScore const &b) const {
         // first: pp
-        unsigned long long score1 = (unsigned long long)std::max(a.pp * 100.0f, 0.0f);
-        unsigned long long score2 = (unsigned long long)std::max(b.pp * 100.0f, 0.0f);
+        unsigned long long score1 = (unsigned long long)max(a.pp * 100.0f, 0.0f);
+        unsigned long long score2 = (unsigned long long)max(b.pp * 100.0f, 0.0f);
 
         // second: score
         if(score1 == score2) {
@@ -459,12 +459,8 @@ int Database::addScore(MD5Hash beatmapMD5Hash, FinishedScore score) {
     size_t s_compressed_replay = 0;
     Replay::compress_frames(score.replay, &compressed_replay, &s_compressed_replay);
     if(s_compressed_replay > 0) {
-        std::string replay_path;
-        std::stringstream ss;
-        ss << MCENGINE_DATA_DIR "replays/" << score.unixTimestamp << ".replay.lzma";
-        replay_path = ss.str();
-
-        FILE *replay_file = fopen(replay_path.c_str(), "wb");
+        auto replay_path = UString::format(MCENGINE_DATA_DIR "replays/%d.replay.lzma", score.unixTimestamp);
+        FILE *replay_file = fopen(replay_path.toUtf8(), "wb");
         if(replay_file != NULL) {
             fwrite(compressed_replay, s_compressed_replay, 1, replay_file);
             fclose(replay_file);
@@ -729,7 +725,7 @@ Database::PlayerStats Database::calculatePlayerStats(UString playerName) {
     return m_prevPlayerStats;
 }
 
-float Database::getWeightForIndex(int i) { return std::pow(0.95, (double)i); }
+float Database::getWeightForIndex(int i) { return pow(0.95, (double)i); }
 
 float Database::getBonusPPForNumScores(int numScores) {
     // TODO: rework to take size_t numScores instead of useless early int conversion
@@ -738,18 +734,18 @@ float Database::getBonusPPForNumScores(int numScores) {
     // https://github.com/ppy/osu-queue-score-statistics/blob/185ad3c00423f6209bcfd8f7177fbe915179055a/osu.Server.Queues.ScoreStatisticsProcessor/Processors/UserTotalPerformanceProcessor.cs#L72
 
     // old
-    return (416.6667 * (1.0 - std::pow(0.9994, (double)numScores)));
+    return (416.6667 * (1.0 - pow(0.9994, (double)numScores)));
 
     // new
-    // return ((417.0 - 1.0 / 3.0) * (1.0 - std::pow(0.995, (double)std::min(1000, numScores))));
+    // return ((417.0 - 1.0 / 3.0) * (1.0 - pow(0.995, (double)min(1000, numScores))));
 }
 
 unsigned long long Database::getRequiredScoreForLevel(int level) {
     // https://zxq.co/ripple/ocl/src/branch/master/level.go
     if(level <= 100) {
         if(level > 1)
-            return (u64)std::floor(5000 / 3 * (4 * std::pow(level, 3) - 3 * std::pow(level, 2) - level) +
-                                   std::floor(1.25 * std::pow(1.8, (double)(level - 60))));
+            return (u64)std::floor(5000 / 3 * (4 * pow(level, 3) - 3 * pow(level, 2) - level) +
+                                   std::floor(1.25 * pow(1.8, (double)(level - 60))));
 
         return 1;
     }
@@ -1122,7 +1118,7 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
 
         // HACKHACK: workaround for linux and macos: it can happen that nested beatmaps are stored in the database, and
         // that osu! stores that filepath with a backslash (because windows)
-        if(env->getOS() == Environment::OS::OS_LINUX || env->getOS() == Environment::OS::OS_MACOS) {
+        if(env->getOS() == Environment::OS::LINUX || env->getOS() == Environment::OS::MACOS) {
             for(int c = 0; c < path.length(); c++) {
                 if(path[c] == '\\') {
                     path[c] = '/';

@@ -190,7 +190,7 @@ void Button::updateLayoutEx() {
         // visible even if all animations are fully active the 0.85f here heuristically pushes the buttons a bit further
         // to the right than would be necessary, to make animations work better on lower resolutions (would otherwise
         // hit the left edge too early)
-        const float buttonWidthCompensation = std::max(m_view->getSize().x - getActualSize().x * 0.85f, 0.0f);
+        const float buttonWidthCompensation = max(m_view->getSize().x - getActualSize().x * 0.85f, 0.0f);
         minOffset += buttonWidthCompensation;
     }
 

@@ -1,8 +1,12 @@
 #include "BanchoNetworking.h"
 
-#include <pthread.h>
+#include <mutex>
+#include <thread>
 #include <time.h>
+
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 #include "Bancho.h"
 #include "BanchoLeaderboard.h"
@@ -27,11 +31,11 @@
 #include "miniz.h"
 
 // Bancho protocol
-pthread_mutex_t outgoing_mutex = PTHREAD_MUTEX_INITIALIZER;
+std::mutex outgoing_mutex;
 bool try_logging_in = false;
 Packet login_packet;
 Packet outgoing;
-pthread_mutex_t incoming_mutex = PTHREAD_MUTEX_INITIALIZER;
+std::mutex incoming_mutex;
 std::vector<Packet> incoming_queue;
 time_t last_packet_tms = {0};
 double seconds_between_pings = 1.0;
@@ -40,8 +44,8 @@ std::string auth_header = "";
 UString cho_token = "";
 
 // osu! private API
-pthread_mutex_t api_requests_mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t api_responses_mutex = PTHREAD_MUTEX_INITIALIZER;
+std::mutex api_requests_mutex;
+std::mutex api_responses_mutex;
 std::vector<APIRequest> api_request_queue;
 std::vector<Packet> api_response_queue;
 
@@ -53,7 +57,7 @@ size_t curldummy(void *buffer, size_t size, size_t nmemb, void *userp) {
 }
 
 void disconnect() {
-    pthread_mutex_lock(&outgoing_mutex);
+    std::lock_guard<std::mutex> lock(outgoing_mutex);
 
     // Logout
     // This is a blocking call, but we *do* want this to block when quitting the game.
@@ -129,8 +133,6 @@ void disconnect() {
     osu->m_songBrowser2->onSortScoresChange(UString("Sort By Score"), 0);
 
     abort_downloads();
-
-    pthread_mutex_unlock(&outgoing_mutex);
 }
 
 void reconnect() {
@@ -155,11 +157,11 @@ void reconnect() {
     osu->m_optionsMenu->logInButton->is_loading = true;
     Packet new_login_packet = build_login_packet();
 
-    pthread_mutex_lock(&outgoing_mutex);
+    outgoing_mutex.lock();
     free(login_packet.memory);
     login_packet = new_login_packet;
     try_logging_in = true;
-    pthread_mutex_unlock(&outgoing_mutex);
+    outgoing_mutex.unlock();
 }
 
 size_t curl_write(void *contents, size_t size, size_t nmemb, void *userp) {
@@ -212,9 +214,9 @@ static void send_api_request(CURL *curl, APIRequest api_out) {
 
     CURLcode res = curl_easy_perform(curl);
     if(res == CURLE_OK) {
-        pthread_mutex_lock(&api_responses_mutex);
+        api_responses_mutex.lock();
         api_response_queue.push_back(response);
-        pthread_mutex_unlock(&api_responses_mutex);
+        api_responses_mutex.unlock();
     }
 
     if(api_out.mime) {
@@ -305,9 +307,9 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
         };
         memcpy(incoming.memory, response.memory + response.pos, packet_len);
 
-        pthread_mutex_lock(&incoming_mutex);
+        incoming_mutex.lock();
         incoming_queue.push_back(incoming);
-        pthread_mutex_unlock(&incoming_mutex);
+        incoming_mutex.unlock();
 
         seconds_between_pings = 1.0;
         response.pos += packet_len;
@@ -331,13 +333,13 @@ static void *do_networking(void *data) {
     }
 
     while(osu != NULL) {
-        pthread_mutex_lock(&api_requests_mutex);
+        api_requests_mutex.lock();
         if(api_request_queue.empty()) {
-            pthread_mutex_unlock(&api_requests_mutex);
+            api_requests_mutex.unlock();
         } else {
             APIRequest api_out = api_request_queue.front();
             api_request_queue.erase(api_request_queue.begin());
-            pthread_mutex_unlock(&api_requests_mutex);
+            api_requests_mutex.unlock();
 
             send_api_request(curl, api_out);
         }
@@ -348,15 +350,15 @@ static void *do_networking(void *data) {
         bool should_ping = difftime(time(NULL), last_packet_tms) > seconds_between_pings;
         if(bancho.user_id <= 0) should_ping = false;
 
-        pthread_mutex_lock(&outgoing_mutex);
+        outgoing_mutex.lock();
         if(try_logging_in) {
             Packet login = login_packet;
             login_packet = Packet();
             try_logging_in = false;
-            pthread_mutex_unlock(&outgoing_mutex);
+            outgoing_mutex.unlock();
             send_bancho_packet(curl, login);
             free(login.memory);
-            pthread_mutex_lock(&outgoing_mutex);
+            outgoing_mutex.lock();
         } else if(should_ping && outgoing.pos == 0) {
             write<u16>(&outgoing, PING);
             write<u8>(&outgoing, 0);
@@ -371,7 +373,7 @@ static void *do_networking(void *data) {
         if(outgoing.pos > 0) {
             Packet out = outgoing;
             outgoing = Packet();
-            pthread_mutex_unlock(&outgoing_mutex);
+            outgoing_mutex.unlock();
 
             // DEBUG: If we're not sending the right amount of bytes, bancho.py just
             // chugs along! To try to detect it faster, we'll send two packets per request.
@@ -382,7 +384,7 @@ static void *do_networking(void *data) {
             send_bancho_packet(curl, out);
             free(out.memory);
         } else {
-            pthread_mutex_unlock(&outgoing_mutex);
+            outgoing_mutex.unlock();
         }
 
         env->sleep(1000);  // wait 1ms
@@ -418,13 +420,10 @@ static void handle_api_response(Packet packet) {
             }
 
             FinishedScore *score = (FinishedScore *)packet.extra;
-            std::stringstream replay_path;
-            replay_path << MCENGINE_DATA_DIR "replays/" << score->server << "/" << score->unixTimestamp
-                        << ".replay.lzma";
+            auto replay_path = UString::format(MCENGINE_DATA_DIR "replays/%s/%d.replay.lzma", score->server.c_str(), score->unixTimestamp);
 
             // XXX: this is blocking main thread
-            auto replay_path_str = replay_path.str();
-            FILE *replay_file = fopen(replay_path_str.c_str(), "wb");
+            FILE *replay_file = fopen(replay_path.toUtf8(), "wb");
             if(replay_file == NULL) {
                 osu->m_notificationOverlay->addNotification("Failed to save replay");
                 break;
@@ -459,7 +458,7 @@ static void handle_api_response(Packet packet) {
 }
 
 void receive_api_responses() {
-    pthread_mutex_lock(&api_responses_mutex);
+    std::lock_guard<std::mutex> lock(api_responses_mutex);
     while(!api_response_queue.empty()) {
         Packet incoming = api_response_queue.front();
         api_response_queue.erase(api_response_queue.begin());
@@ -467,18 +466,16 @@ void receive_api_responses() {
         free(incoming.memory);
         free(incoming.extra);
     }
-    pthread_mutex_unlock(&api_responses_mutex);
 }
 
 void receive_bancho_packets() {
-    pthread_mutex_lock(&incoming_mutex);
+    std::lock_guard<std::mutex> lock(incoming_mutex);
     while(!incoming_queue.empty()) {
         Packet incoming = incoming_queue.front();
         incoming_queue.erase(incoming_queue.begin());
         handle_packet(&incoming);
         free(incoming.memory);
     }
-    pthread_mutex_unlock(&incoming_mutex);
 }
 
 void send_api_request(APIRequest request) {
@@ -487,7 +484,7 @@ void send_api_request(APIRequest request) {
         return;
     }
 
-    pthread_mutex_lock(&api_requests_mutex);
+    std::lock_guard<std::mutex> lock(api_requests_mutex);
 
     // Jank way to do things... remove outdated requests now
     api_request_queue.erase(std::remove_if(api_request_queue.begin(), api_request_queue.end(),
@@ -495,8 +492,6 @@ void send_api_request(APIRequest request) {
                             api_request_queue.end());
 
     api_request_queue.push_back(request);
-
-    pthread_mutex_unlock(&api_requests_mutex);
 }
 
 void send_packet(Packet &packet) {
@@ -514,7 +509,7 @@ void send_packet(Packet &packet) {
     // }
     // debugLog("\n");
 
-    pthread_mutex_lock(&outgoing_mutex);
+    outgoing_mutex.lock();
 
     // We're not sending it immediately, instead we just add it to the pile of
     // packets to send
@@ -523,7 +518,7 @@ void send_packet(Packet &packet) {
     write<u32>(&outgoing, packet.pos);
     write_bytes(&outgoing, packet.memory, packet.pos);
 
-    pthread_mutex_unlock(&outgoing_mutex);
+    outgoing_mutex.unlock();
 
     free(packet.memory);
     packet.memory = NULL;
@@ -531,12 +526,5 @@ void send_packet(Packet &packet) {
 }
 
 void init_networking_thread() {
-    pthread_t dummy = 0;
-    int ret = pthread_create(&dummy, NULL, do_networking, NULL);
-    if(ret) {
-        debugLog(
-            "Failed to start networking thread: pthread_create() returned "
-            "code %i\n",
-            ret);
-    }
+    std::thread(do_networking);
 }

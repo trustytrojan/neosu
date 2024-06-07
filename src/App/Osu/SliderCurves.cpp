@@ -180,7 +180,7 @@ SliderCurveEqualDistanceMulti::SliderCurveEqualDistanceMulti(std::vector<Vector2
                                                              float curvePointsSeparation)
     : SliderCurve(controlPoints, pixelLength) {
     const int max_points = osu_slider_curve_max_points.getInt();
-    m_iNCurve = std::min((int)(m_fPixelLength / clamp<float>(curvePointsSeparation, 1.0f, 100.0f)), max_points);
+    m_iNCurve = min((int)(m_fPixelLength / clamp<float>(curvePointsSeparation, 1.0f, 100.0f)), max_points);
 }
 
 void SliderCurveEqualDistanceMulti::init(const std::vector<SliderCurveType *> &curvesList) {
@@ -581,7 +581,7 @@ SliderCurveCircumscribedCircle::SliderCurveCircumscribedCircle(std::vector<Vecto
 
     // calculate points
     const float max_points = osu_slider_curve_max_points.getInt();
-    const float steps = std::min(m_fPixelLength / (clamp<float>(curvePointsSeparation, 1.0f, 100.0f)), max_points);
+    const float steps = min(m_fPixelLength / (clamp<float>(curvePointsSeparation, 1.0f, 100.0f)), max_points);
     const int intSteps = (int)std::round(steps) + 2;  // must guarantee an int range of 0 to steps!
     for(int i = 0; i < intSteps; i++) {
         float t = clamp<float>((float)i / steps, 0.0f, 1.0f);
@@ -699,7 +699,7 @@ bool SliderBezierApproximator::isFlatEnough(const std::vector<Vector2> &controlP
     if(controlPoints.size() < 1) return true;
 
     for(int i = 1; i < (int)(controlPoints.size() - 1); i++) {
-        if(std::pow((double)(controlPoints[i - 1] - 2 * controlPoints[i] + controlPoints[i + 1]).length(), 2.0) >
+        if(pow((double)(controlPoints[i - 1] - 2 * controlPoints[i] + controlPoints[i + 1]).length(), 2.0) >
            TOLERANCE_SQ * 4)
             return false;
     }

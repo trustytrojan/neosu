@@ -11,7 +11,6 @@
 #include "Osu.h"
 #include "Skin.h"
 #include "Sound.h"
-#include "Thread.h"
 #include "WinEnvironment.h"
 
 // removed from latest headers. not sure if it's handled at all
@@ -530,7 +529,7 @@ bool SoundEngine::play(Sound *snd, float pan, float pitch) {
         const float semitonesShift = lerp<float>(-60.0f, 60.0f, pitch / 2.0f);
         float freq = snd_freq.getFloat();
         BASS_ChannelGetAttribute(channel, BASS_ATTRIB_FREQ, &freq);
-        BASS_ChannelSetAttribute(channel, BASS_ATTRIB_FREQ, std::pow(2.0f, (semitonesShift / 12.0f)) * freq);
+        BASS_ChannelSetAttribute(channel, BASS_ATTRIB_FREQ, pow(2.0f, (semitonesShift / 12.0f)) * freq);
     }
 
     BASS_ChannelFlags(channel, snd->isLooped() ? BASS_SAMPLE_LOOP : 0, BASS_SAMPLE_LOOP);

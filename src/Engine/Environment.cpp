@@ -1,10 +1,3 @@
-//================ Copyright (c) 2017, PG, All rights reserved. =================//
-//
-// Purpose:		top level interface for native OS calls
-//
-// $NoKeywords: $env
-//===============================================================================//
-
 #include "Environment.h"
 
 #include "ConVar.h"

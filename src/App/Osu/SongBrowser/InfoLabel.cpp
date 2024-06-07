@@ -78,7 +78,7 @@ void InfoLabel::draw(Graphics *g) {
     const UString diffInfoText = buildDiffInfoString();
     const UString offsetInfoText = buildOffsetInfoString();
 
-    const float globalScale = std::max((m_vSize.y / getMinimumHeight()) * 0.91f, 1.0f);
+    const float globalScale = max((m_vSize.y / getMinimumHeight()) * 0.91f, 1.0f);
 
     const int shadowOffset = std::round(1.0f * ((float)m_font->getDPI() / 96.0f));  // NOTE: abusing font dpi
 
@@ -227,7 +227,7 @@ void InfoLabel::mouse_update(bool *propagate_clicks) {
                     if(osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.ok) {
                         numObjects = osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.num_objects;
                         numCircles = osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.num_circles;
-                        numSliders = std::max(
+                        numSliders = max(
                             0, numObjects -
                                    (numCircles +
                                     (i32)osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.num_spinners));
@@ -245,7 +245,7 @@ void InfoLabel::mouse_update(bool *propagate_clicks) {
 
                     osu->getTooltipOverlay()->addLine(
                         UString::format("Circles: %i, Sliders: %i, Spinners: %i", numCircles, numSliders,
-                                        std::max(0, numObjects - numCircles - numSliders)));
+                                        max(0, numObjects - numCircles - numSliders)));
                     osu->getTooltipOverlay()->addLine(
                         UString::format("OPM: %i, CPM: %i, SPM: %i", (int)opm, (int)cpm, (int)spm));
                     osu->getTooltipOverlay()->addLine(UString::format("ID: %i, SetID: %i",
@@ -373,7 +373,7 @@ float InfoLabel::getMinimumWidth() {
     float diffInfoWidth = m_font->getStringWidth(buildDiffInfoString()) * m_fDiffInfoScale;
     float offsetInfoWidth = m_font->getStringWidth(buildOffsetInfoString()) * m_fOffsetInfoScale;
 
-    return std::max(std::max(std::max(std::max(titleWidth, subTitleWidth), songInfoWidth), diffInfoWidth),
+    return max(max(max(max(titleWidth, subTitleWidth), songInfoWidth), diffInfoWidth),
                     offsetInfoWidth);
 }
 

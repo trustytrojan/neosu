@@ -352,14 +352,14 @@ void Spinner::update(long curPos) {
 
                 /// m_fRPM = std::abs(rotationPerSec*60.0f);
 
-                const float decay = std::pow(0.01f, (float)engine->getFrameTime());
+                const float decay = pow(0.01f, (float)engine->getFrameTime());
                 m_fRPM = m_fRPM * decay + (1.0 - decay) * std::abs(rotationPerSec) * 60;
-                m_fRPM = std::min(m_fRPM, 477.0f);
+                m_fRPM = min(m_fRPM, 477.0f);
 
                 /*
                 m_fRPM += std::abs(rotationPerSec*60.0f);
                 m_fRPM /= 2.0;
-                m_fRPM = std::min(m_fRPM, 477.0f);
+                m_fRPM = min(m_fRPM, 477.0f);
                 */
 
                 if(std::abs(rotationAngle) > 0.0001f) rotate(rotationAngle);

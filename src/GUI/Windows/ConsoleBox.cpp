@@ -80,13 +80,13 @@ class ConsoleBoxSuggestionButton : public CBaseUIButton {
                 const UString helpTextSeparator = "-";
                 const int helpTextOffset = std::round(2.0f * m_font->getStringWidth(helpTextSeparator) *
                                                       ((float)m_font->getDPI() / 96.0f));  // NOTE: abusing font dpi
-                const int helpTextSeparatorStringWidth = std::max(1, (int)m_font->getStringWidth(helpTextSeparator));
-                const int helpTextStringWidth = std::max(1, (int)m_font->getStringWidth(m_sHelpText));
+                const int helpTextSeparatorStringWidth = max(1, (int)m_font->getStringWidth(helpTextSeparator));
+                const int helpTextStringWidth = max(1, (int)m_font->getStringWidth(m_sHelpText));
 
                 g->pushTransform();
                 {
-                    const float scale = std::min(
-                        1.0f, (std::max(1.0f, m_consoleBox->getTextbox()->getSize().x - m_fStringWidth -
+                    const float scale = min(
+                        1.0f, (max(1.0f, m_consoleBox->getTextbox()->getSize().x - m_fStringWidth -
                                                   helpTextOffset * 1.5f - helpTextSeparatorStringWidth * 1.5f)) /
                                   (float)helpTextStringWidth);
 
@@ -645,5 +645,5 @@ void ConsoleBox::log(UString text, Color textColor) {
 float ConsoleBox::getAnimTargetY() { return 32.0f * getDPIScale(); }
 
 float ConsoleBox::getDPIScale() {
-    return ((float)std::max(env->getDPI(), m_textbox->getFont()->getDPI()) / 96.0f);  // NOTE: abusing font dpi
+    return ((float)max(env->getDPI(), m_textbox->getFont()->getDPI()) / 96.0f);  // NOTE: abusing font dpi
 }

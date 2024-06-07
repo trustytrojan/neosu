@@ -20,7 +20,7 @@ Resource::Resource(std::string filepath) {
         /// engine->showMessageError("Resource Error", errorMessage);
 
         // HACKHACK: workaround retry different case variations due to linux fs case sensitivity
-        if(env->getOS() == Environment::OS::OS_LINUX) {
+        if(env->getOS() == Environment::OS::LINUX) {
             // NOTE: this assumes that filepaths in code are always fully lowercase
             // better than not doing/trying anything though
 

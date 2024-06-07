@@ -74,7 +74,7 @@ Graphics *MacOSEnvironment::createRenderer() { return new MacOSGLLegacyInterface
 
 ContextMenu *MacOSEnvironment::createContextMenu() { return new NullContextMenu(); }
 
-Environment::OS MacOSEnvironment::getOS() { return Environment::OS::OS_MACOS; }
+Environment::OS MacOSEnvironment::getOS() { return Environment::OS::MACOS; }
 
 void MacOSEnvironment::shutdown() { g_bRunning = false; }
 

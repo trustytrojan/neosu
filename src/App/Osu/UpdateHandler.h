@@ -1,14 +1,6 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		checks if an update is available from github
-//
-// $NoKeywords: $osuupdchk
-//===============================================================================//
+#pragma once
 
-#ifndef OSUUPDATECHECKER_H
-#define OSUUPDATECHECKER_H
-
-#include <pthread.h>
+#include <thread>
 
 #include "cbase.h"
 
@@ -44,7 +36,7 @@ class UpdateHandler {
     bool _downloadUpdate();
     void _installUpdate(std::string zipFilePath);
 
-    pthread_t m_updateThread;
+    std::thread* m_updateThread = NULL;
     bool _m_bKYS;
 
     // releases
@@ -54,5 +46,3 @@ class UpdateHandler {
     STATUS m_status;
     int m_iNumRetries;
 };
-
-#endif

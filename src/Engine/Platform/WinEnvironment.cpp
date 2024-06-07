@@ -1,17 +1,14 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		windows
-//
-// $NoKeywords: $winenv
-//===============================================================================//
-
 #ifdef _WIN32
+
+#include "cbase.h"
 
 #include "WinEnvironment.h"
 
 #include <Lmcons.h>
 #include <Shlobj.h>
 #include <tchar.h>
+#include <Commdlg.h>
+#include <shellapi.h>
 
 #include <string>
 
@@ -78,7 +75,7 @@ Graphics *WinEnvironment::createRenderer() {
 
 ContextMenu *WinEnvironment::createContextMenu() { return new WinContextMenu(); }
 
-Environment::OS WinEnvironment::getOS() { return Environment::OS::OS_WINDOWS; }
+Environment::OS WinEnvironment::getOS() { return Environment::OS::WINDOWS; }
 
 void WinEnvironment::shutdown() { SendMessage(m_hwnd, WM_CLOSE, 0, 0); }
 
@@ -90,8 +87,9 @@ void WinEnvironment::restart() {
 void WinEnvironment::sleep(unsigned int us) { Sleep(us / 1000); }
 
 UString WinEnvironment::getUsername() {
-    DWORD username_len = UNLEN + 1;
-    wchar_t username[username_len];
+    const DWORD idiot_msvc_len = UNLEN + 1;
+    DWORD username_len = idiot_msvc_len;
+    wchar_t username[idiot_msvc_len];
 
     if(GetUserNameW(username, &username_len)) return UString(username);
 
@@ -478,8 +476,8 @@ void WinEnvironment::disableFullscreen() {
 
     // clamp prev window client size to monitor
     const McRect desktopRect = getDesktopRect();
-    m_vLastWindowSize.x = std::min(m_vLastWindowSize.x, desktopRect.getWidth());
-    m_vLastWindowSize.y = std::min(m_vLastWindowSize.y, desktopRect.getHeight());
+    m_vLastWindowSize.x = min(m_vLastWindowSize.x, desktopRect.getWidth());
+    m_vLastWindowSize.y = min(m_vLastWindowSize.y, desktopRect.getHeight());
 
     // request window size based on prev client size
     RECT rect;
@@ -564,8 +562,8 @@ void WinEnvironment::setMonitor(int monitor) {
     GetWindowRect(m_hwnd, &windowRect);
     const Vector2 windowSize = Vector2(std::abs((int)(windowRect.right - windowRect.left)),
                                        std::abs((int)(windowRect.bottom - windowRect.top)));
-    const int width = std::min((int)windowSize.x, (int)desktopRect.getWidth());
-    const int height = std::min((int)windowSize.y, (int)desktopRect.getHeight());
+    const int width = min((int)windowSize.x, (int)desktopRect.getWidth());
+    const int height = min((int)windowSize.y, (int)desktopRect.getHeight());
 
     // move and resize, force center
     MoveWindow(m_hwnd, desktopRect.getX(), desktopRect.getY(), width, height, FALSE);  // non-client width/height!

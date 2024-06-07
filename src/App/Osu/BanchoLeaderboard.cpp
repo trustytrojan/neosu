@@ -22,66 +22,24 @@ FinishedScore parse_score(char *score_line) {
     score.isImportedLegacyScore = true;
     score.speedMultiplier = 1.0;
 
-    char *saveptr = NULL;
-    char *str = strtok_r(score_line, "|", &saveptr);
-    if(!str) return score;
-    score.online_score_id = strtoul(str, NULL, 10);
+    auto tokens = UString(score_line).split("|");
+    if(tokens.size() != 15) return score;
 
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return score;
-    score.playerName = str;
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return score;
-    score.score = strtoul(str, NULL, 10);
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return score;
-    score.comboMax = strtoul(str, NULL, 10);
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return score;
-    score.num50s = strtoul(str, NULL, 10);
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return score;
-    score.num100s = strtoul(str, NULL, 10);
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return score;
-    score.num300s = strtoul(str, NULL, 10);
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return score;
-    score.numMisses = strtoul(str, NULL, 10);
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return score;
-    score.numKatus = strtoul(str, NULL, 10);
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return score;
-    score.numGekis = strtoul(str, NULL, 10);
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return score;
-    score.perfect = strtoul(str, NULL, 10) == 1;
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return score;
-    score.modsLegacy = strtoul(str, NULL, 10);
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return score;
-    score.player_id = strtoul(str, NULL, 10);
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return score;
-    score.has_replay = strtoul(str, NULL, 10);
-
-    str = strtok_r(NULL, "|", &saveptr);
-    if(!str) return score;
-    score.unixTimestamp = strtoul(str, NULL, 10);
+    score.online_score_id = strtoul(tokens[0].toUtf8(), NULL, 10);
+    score.playerName = tokens[1].toUtf8();
+    score.score = strtoul(tokens[2].toUtf8(), NULL, 10);
+    score.comboMax = strtoul(tokens[3].toUtf8(), NULL, 10);
+    score.num50s = strtoul(tokens[4].toUtf8(), NULL, 10);
+    score.num100s = strtoul(tokens[5].toUtf8(), NULL, 10);
+    score.num300s = strtoul(tokens[6].toUtf8(), NULL, 10);
+    score.numMisses = strtoul(tokens[7].toUtf8(), NULL, 10);
+    score.numKatus = strtoul(tokens[8].toUtf8(), NULL, 10);
+    score.numGekis = strtoul(tokens[9].toUtf8(), NULL, 10);
+    score.perfect = strtoul(tokens[10].toUtf8(), NULL, 10) == 1;
+    score.modsLegacy = strtoul(tokens[11].toUtf8(), NULL, 10);
+    score.player_id = strtoul(tokens[12].toUtf8(), NULL, 10);
+    score.has_replay = strtoul(tokens[13].toUtf8(), NULL, 10);
+    score.unixTimestamp = strtoul(tokens[14].toUtf8(), NULL, 10);
 
     // Set username for given user id, since we now know both
     auto user = get_user_info(score.player_id);

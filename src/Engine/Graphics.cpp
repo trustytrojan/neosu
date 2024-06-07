@@ -134,7 +134,7 @@ void Graphics::push3DScene(McRect region) {
     // calculate height to fit viewport angle
     float angle = (180.0f - m_fFov) / 2.0f;
     float b = (engine->getScreenHeight() / std::sin(deg2rad(m_fFov))) * std::sin(deg2rad(angle));
-    float hc = std::sqrt(std::pow(b, 2.0f) - std::pow((engine->getScreenHeight() / 2.0f), 2.0f));
+    float hc = std::sqrt(pow(b, 2.0f) - pow((engine->getScreenHeight() / 2.0f), 2.0f));
 
     // set projection matrix
     Matrix4 trans2 = Matrix4().translate(-1 + (region.getWidth()) / (float)engine->getScreenWidth() +

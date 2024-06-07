@@ -11,7 +11,7 @@ CXXFLAGS += -Isrc/App -Isrc/App/Osu -Isrc/Engine -Isrc/GUI -Isrc/GUI/Windows -Is
 CXXFLAGS += -Ilibraries/bass/include -Ilibraries/bassasio/include -Ilibraries/bassfx/include -Ilibraries/bassmix/include -Ilibraries/basswasapi/include -Ilibraries/bassloud/include
 CXXFLAGS += -g3 -fsanitize=address
 
-LDFLAGS = -ldiscord-rpc -lbass -lbassmix -lbass_fx -lbassloud -lpthread -lstdc++
+LDFLAGS = -ldiscord-rpc -lbass -lbassmix -lbass_fx -lbassloud -lstdc++
 LDFLAGS += `pkgconf --static --libs $(LIBS)` `curl-config --static-libs --libs`
 LDFLAGS += -Lrosu-pp-c/target/release -lrosu_pp_c
 

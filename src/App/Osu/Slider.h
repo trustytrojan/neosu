@@ -41,7 +41,7 @@ class Slider : public HitObject {
     virtual void updateStackPosition(float stackOffset);
     virtual void miss(long curPos);
     virtual int getCombo() {
-        return 2 + std::max((m_iRepeat - 1), 0) + (std::max((m_iRepeat - 1), 0) + 1) * m_ticks.size();
+        return 2 + max((m_iRepeat - 1), 0) + (max((m_iRepeat - 1), 0) + 1) * m_ticks.size();
     }
 
     Vector2 getRawPosAt(long pos);

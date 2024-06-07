@@ -1,12 +1,4 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		vk defs
-//
-// $NoKeywords: $vk $os
-//===============================================================================//
-
-#ifndef KEYBOARDKEYS_H
-#define KEYBOARDKEYS_H
+#pragma once
 
 #if defined(MCENGINE_FEATURE_SDL)
 
@@ -111,6 +103,7 @@
 
 #elif defined(_WIN32)
 
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 // ASCII letters
@@ -417,8 +410,6 @@
 #define KEY_SUPER kVK_Command
 #define KEY_PAGEUP kVK_PageUp
 #define KEY_PAGEDOWN kVK_PageDown
-
-#endif
 
 #endif
 

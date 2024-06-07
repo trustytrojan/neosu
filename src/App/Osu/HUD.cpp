@@ -475,9 +475,9 @@ void HUD::mouse_update(bool *propagate_clicks) {
         const double frameAimTime = 1000.0 / 60.0;
         const double frameRatio = elapsedMS / frameAimTime;
         if(m_fHealth < currentHealth)
-            m_fHealth = std::min(1.0, m_fHealth + std::abs(currentHealth - m_fHealth) / 4.0 * frameRatio);
+            m_fHealth = min(1.0, m_fHealth + std::abs(currentHealth - m_fHealth) / 4.0 * frameRatio);
         else if(m_fHealth > currentHealth)
-            m_fHealth = std::max(0.0, m_fHealth - std::abs(m_fHealth - currentHealth) / 6.0 * frameRatio);
+            m_fHealth = max(0.0, m_fHealth - std::abs(m_fHealth - currentHealth) / 6.0 * frameRatio);
 
         if(osu_hud_scorebar_hide_during_breaks.getBool()) {
             if(!anim->isAnimating(&m_fScoreBarBreakAnim) && !beatmap->isWaiting()) {
@@ -495,7 +495,7 @@ void HUD::mouse_update(bool *propagate_clicks) {
 
     // fps string update
     if(osu_hud_fps_smoothing.getBool()) {
-        const float smooth = std::pow(0.05, engine->getFrameTime());
+        const float smooth = pow(0.05, engine->getFrameTime());
         m_fCurFpsSmooth = smooth * m_fCurFpsSmooth + (1.0f - smooth) * (1.0f / engine->getFrameTime());
         if(engine->getTime() > m_fFpsUpdate || std::abs(m_fCurFpsSmooth - m_fCurFps) > 2.0f) {
             m_fFpsUpdate = engine->getTime() + 0.25f;
@@ -750,8 +750,8 @@ void HUD::drawCursorRipples(Graphics *g) {
     const float normalizedWidth = osu->getSkin()->getCursorRipple()->getWidth() * normalized2xScale * imageScale;
     const float normalizedHeight = osu->getSkin()->getCursorRipple()->getHeight() * normalized2xScale * imageScale;
 
-    const float duration = std::max(osu_cursor_ripple_duration.getFloat(), 0.0001f);
-    const float fadeDuration = std::max(
+    const float duration = max(osu_cursor_ripple_duration.getFloat(), 0.0001f);
+    const float fadeDuration = max(
         osu_cursor_ripple_duration.getFloat() - osu_cursor_ripple_anim_start_fadeout_delay.getFloat(), 0.0001f);
 
     if(osu_cursor_ripple_additive.getBool()) g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ADDITIVE);
@@ -1255,11 +1255,11 @@ void HUD::drawHPBar(Graphics *g, double health, float alpha, float breakAnim) {
     // lerp color depending on health
     if(useNewDefault) {
         if(health < 0.2) {
-            const float factor = std::max(0.0, (0.2 - health) / 0.2);
+            const float factor = max(0.0, (0.2 - health) / 0.2);
             const float value = lerp<float>(0.0f, 1.0f, factor);
             g->setColor(COLORf(1.0f, value, 0.0f, 0.0f));
         } else if(health < 0.5) {
-            const float factor = std::max(0.0, (0.5 - health) / 0.5);
+            const float factor = max(0.0, (0.5 - health) / 0.5);
             const float value = lerp<float>(1.0f, 0.0f, factor);
             g->setColor(COLORf(1.0f, value, value, value));
         } else
@@ -2264,7 +2264,7 @@ void HUD::drawScrubbingTimeline(Graphics *g, unsigned long beatmapTime, unsigned
     g->setColor(greyTransparent);
     g->setAlpha(galpha);
     for(int i = 0; i < breaks.size(); i++) {
-        const int width = std::max(
+        const int width = max(
             (int)(osu->getScreenWidth() * clamp<float>(breaks[i].endPercent - breaks[i].startPercent, 0.0f, 1.0f)), 2);
         g->fillRect(osu->getScreenWidth() * breaks[i].startPercent, cursorPos.y + 1, width, breakHeight);
     }
@@ -2376,7 +2376,7 @@ void HUD::drawScrubbingTimeline(Graphics *g, unsigned long beatmapTime, unsigned
                                        currentTimeLeftRightTextOffset) +
                       1),
                 (int)(triangleTip.y + startAndEndTimeTextOffset + timeFont->getHeight() * 2.2f + 1 +
-                      currentTimeTopTextOffset * std::max(1.0f, getCursorScaleFactor() * osu_cursor_scale.getFloat()) *
+                      currentTimeTopTextOffset * max(1.0f, getCursorScaleFactor() * osu_cursor_scale.getFloat()) *
                           osu_hud_scrubbing_timeline_hover_tooltip_offset_multiplier.getFloat()));
             g->setColor(0xff000000);
             g->setAlpha(galpha);
@@ -2402,7 +2402,7 @@ void HUD::drawScrubbingTimeline(Graphics *g, unsigned long beatmapTime, unsigned
                 osu->getScreenWidth() - timeFont->getStringWidth(currentTimeText) - currentTimeLeftRightTextOffset) +
                 1,
             (int)(triangleTip.y - osu->getSkin()->getSeekTriangle()->getHeight() - timeFont->getHeight() * 1.2f -
-                  currentTimeTopTextOffset * std::max(1.0f, getCursorScaleFactor() * osu_cursor_scale.getFloat()) *
+                  currentTimeTopTextOffset * max(1.0f, getCursorScaleFactor() * osu_cursor_scale.getFloat()) *
                       osu_hud_scrubbing_timeline_hover_tooltip_offset_multiplier.getFloat() * 2.0f -
                   1));
         g->setColor(0xff000000);
@@ -2628,7 +2628,7 @@ void HUD::animateInputoverlay(int key, bool down) {
         const float remainingDuration = anim->getRemainingDuration(animScale);
         anim->moveQuadOut(animScale, 1.0f,
                           osu_hud_inputoverlay_anim_scale_duration.getFloat() -
-                              std::min(remainingDuration * 1.4f, osu_hud_inputoverlay_anim_scale_duration.getFloat()),
+                              min(remainingDuration * 1.4f, osu_hud_inputoverlay_anim_scale_duration.getFloat()),
                           remainingDuration);
 
         // color

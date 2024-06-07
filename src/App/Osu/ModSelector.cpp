@@ -539,7 +539,7 @@ void ModSelector::draw(Graphics *g) {
                 g->rotate(90);
                 g->translate(
                     (int)(experimentalTextHeight / 3.0f +
-                          std::max(0.0f, experimentalModsAnimationTranslation + m_experimentalContainer->getSize().x)),
+                          max(0.0f, experimentalModsAnimationTranslation + m_experimentalContainer->getSize().x)),
                     (int)(osu->getScreenHeight() / 2 - experimentalTextWidth / 2));
                 g->setColor(0xff777777);
                 g->setAlpha(1.0f - m_fExperimentalAnimation * m_fExperimentalAnimation);
@@ -550,7 +550,7 @@ void ModSelector::draw(Graphics *g) {
             g->pushTransform();
             {
                 g->rotate(90);
-                g->translate((int)(rectHeight + std::max(0.0f, experimentalModsAnimationTranslation +
+                g->translate((int)(rectHeight + max(0.0f, experimentalModsAnimationTranslation +
                                                                    m_experimentalContainer->getSize().x)),
                              (int)(osu->getScreenHeight() / 2 - rectWidth / 2));
                 g->drawRect(0, 0, rectWidth, rectHeight);
@@ -1319,7 +1319,7 @@ void ModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
                         // HACKHACK: force BPM slider to have a min value of 0.05 instead of 0 (because that's the
                         // minimum for BASS) note that the BPM slider is just a 'fake' slider, it directly controls the
                         // speed slider to do its thing (thus it needs the same limits)
-                        sliderValue = std::max(sliderValue, 0.05f);
+                        sliderValue = max(sliderValue, 0.05f);
 
                         // speed slider may not be used in conjunction
                         m_speedSlider->setValue(0.0f, false);
@@ -1341,7 +1341,7 @@ void ModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
 
                 // HACKHACK: force speed slider to have a min value of 0.05 instead of 0 (because that's the minimum for
                 // BASS)
-                if(m_overrideSliders[i].desc->getText().find("Speed") != -1) sliderValue = std::max(sliderValue, 0.05f);
+                if(m_overrideSliders[i].desc->getText().find("Speed") != -1) sliderValue = max(sliderValue, 0.05f);
             }
 
             // update convar with final value (e.g. osu_ar_override, osu_speed_override, etc.)

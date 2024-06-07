@@ -316,7 +316,7 @@ void PauseMenu::updateLayout() {
         Vector2 newPos =
             Vector2(osu->getScreenWidth() / 2.0f - maxWidth / 2, (i + 1) * height - height / 2.0f - maxHeight / 2.0f);
 
-        const float pinch = std::max(0.0f, (height / 2.0f - maxHeight / 2.0f));
+        const float pinch = max(0.0f, (height / 2.0f - maxHeight / 2.0f));
         if((float)i < half)
             newPos.y += pinch;
         else if((float)i > half)
