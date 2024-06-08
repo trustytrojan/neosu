@@ -515,6 +515,7 @@ Osu::Osu() {
         "    opacity = 1.0 - min(opacity, max_opacity);\n"
         "    gl_FragColor = vec4(0.0, 0.0, 0.0, opacity);\n"
         "}");
+    engine->getResourceManager()->loadResource(flashlight_shader);
 }
 
 Osu::~Osu() {

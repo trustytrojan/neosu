@@ -33,6 +33,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.changes.push_back("- Added use_https convar (to support plain HTTP servers)");
     latest.changes.push_back("- Added restart_sound_engine_before_playing convar (\"fixes\" sound engine lagging after a while)");
     latest.changes.push_back("- Fixed chat channels being unread after joining");
+    latest.changes.push_back("- Fixed flashlight mod");
     latest.changes.push_back("- Fixed FPoSu mode");
     latest.changes.push_back("- Fixed playfield borders not being visible");
     latest.changes.push_back("- Fixed sound engine not being restartable during gameplay or while paused");
