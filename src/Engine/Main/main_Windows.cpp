@@ -811,11 +811,15 @@ HWND createWinWindow(HINSTANCE hInstance) {
     // create the window
     hwnd = CreateWindowExW(exStyle, WINDOW_TITLE, WINDOW_TITLE, style, xPos, yPos, width, height, NULL, NULL, hInstance,
                            NULL);
-
     if(hwnd == NULL) {
         MessageBox(NULL, "Couldn't CreateWindowEx()!", "Fatal Error", MB_ICONEXCLAMATION | MB_OK);
         return NULL;
     }
+
+    // NOTE: Hardcoded "1" from resource.rc
+    HICON hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(1));
+    SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+    SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
 
     return hwnd;
 }
