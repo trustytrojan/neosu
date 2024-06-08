@@ -825,137 +825,18 @@ HWND createWinWindow(HINSTANCE hInstance) {
 //********************//
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-    // NOTE: add -mwindows to linker options to disable console window if compiling with Eclipse
-
-    // IPC URL protocol handler (1)
-    /*
-            const size_t sharedMemorySize = sizeof(char) * 4096;
-
-    #pragma pack(1)
-
-            enum class IPC_STATE : u8
-            {
-                    IDLE,
-                    MESSAGE
-            };
-
-            enum class IPC_MESSAGE_TYPE : u8
-            {
-                    URL
-            };
-
-            struct IPCState
-            {
-                    IPC_STATE state;
-                    IPC_MESSAGE_TYPE type;
-            };
-
-    #pragma pack()
-
-            HANDLE ipcMappedFile = NULL;
-            LPVOID ipcSharedMemory = NULL;
-            {
-                    const char *sharedMemoryName = "Local\\McEngine";
-
-                    // check for other running instance
-                    ipcMappedFile = OpenFileMapping(FILE_MAP_READ | FILE_MAP_WRITE, FALSE, sharedMemoryName);
-
-                    // if we are the first instance
-                    bool slave = true;
-                    if (ipcMappedFile == NULL)
-                    {
-                            slave = false;
-                            ipcMappedFile = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0,
-    sharedMemorySize, sharedMemoryName);
-                    }
-
-                    if (ipcMappedFile != NULL)
-                    {
-                            ipcSharedMemory = MapViewOfFile(ipcMappedFile, FILE_MAP_READ | FILE_MAP_WRITE, 0, 0,
-    sharedMemorySize);
-
-                            if (ipcSharedMemory != NULL)
-                            {
-                                    if (slave)
-                                    {
-                                            if (strncmp(lpCmdLine, "mcengine://", 11) == 0)
-                                            {
-                                                    if (((IPCState*)ipcSharedMemory)->state == IPC_STATE::IDLE)
-                                                    {
-                                                            const size_t bytesToCopy = min(strlen(lpCmdLine),
-    sharedMemorySize - sizeof(IPCState) - 2) + 1;
-
-                                                            //printf("Copying %u bytes\n", bytesToCopy);
-
-                                                            CopyMemory(((char*)ipcSharedMemory) + sizeof(IPCState),
-    lpCmdLine, bytesToCopy);
-
-                                                            IPCState ipcState;
-
-                                                            ipcState.state = IPC_STATE::MESSAGE;
-                                                            ipcState.type = IPC_MESSAGE_TYPE::URL;
-
-                                                            CopyMemory(ipcSharedMemory, &ipcState, sizeof(IPCState));
-                                                    }
-
-                                                    UnmapViewOfFile(ipcSharedMemory);
-                                                    CloseHandle(ipcMappedFile);
-
-                                                    return 0; // we are done here, shutdown slave
-                                            }
-                                    }
-                                    else
-                                    {
-                                            IPCState ipcState;
-
-                                            ipcState.state = IPC_STATE::IDLE;
-
-                                            CopyMemory(ipcSharedMemory, &ipcState, sizeof(IPCState));
-                                    }
-                            }
-                            else
-                                    printf("IPC ERROR: Couldn't MapViewOfFile()!\n");
-                    }
-                    else
-                            printf("IPC ERROR: Couldn't OpenFileMapping() or CreateFileMapping()!\n");
-            }
-    */
-
-    /*
-            // TEMP: register URL protocol handler in registry
-            // TODO: this needs admin elevation, otherwise just silently fails, very annoying for usability
-            {
-                    wchar_t fullPathToExe[MAX_PATH];
-                    GetModuleFileNameW(NULL, fullPathToExe, MAX_PATH);
-
-                    UString fullPathString = UString(fullPathToExe);
-
-                    UString defaultIconString = UString(fullPathString.wc_str()); // copy
-                    defaultIconString.insert(0, L'"');
-                    defaultIconString.append("\",1");
-
-                    UString shellOpenCommandString = UString(fullPathString.wc_str()); // copy
-                    shellOpenCommandString.insert(0, L'"');
-                    shellOpenCommandString.append("\" \"%1\"");
-
-                    HKEY hkey;
-                    if (RegCreateKeyW(HKEY_CLASSES_ROOT, L"mcengine", &hkey) == ERROR_SUCCESS)
-                    {
-                            RegSetValueW(hkey, NULL, REG_SZ, L"mcengine url handler", 0);
-                            RegSetValueExW(hkey, L"URL Protocol", 0, REG_SZ, NULL, 0);
-
-                            HKEY defaultIcon;
-                            RegCreateKeyW(hkey, L"DefaultIcon", &defaultIcon);
-                            RegSetValueW(defaultIcon, NULL, REG_SZ, defaultIconString.wc_str(), 0);
-
-                            HKEY command;
-                            RegCreateKeyW(hkey, L"shell\\open\\command", &command);
-                            RegSetValueW(command, NULL, REG_SZ, shellOpenCommandString.wc_str(), 0);
-                    }
-                    else
-                            printf("REG ERROR: Couldn't RegCreateKeyW()!\n");
-            }
-    */
+#ifdef _MSC_VER
+    // When building with MSVC, vprintf() is not returning the correct value unless we have a console allocated.
+    FILE* dummy;
+#ifdef _DEBUG
+    AllocConsole();
+    freopen_s(&dummy, "CONOUT$", "w", stdout);
+    freopen_s(&dummy, "CONOUT$", "w", stderr);
+#else
+    freopen_s(&dummy, "NUL", "w", stdout);
+    freopen_s(&dummy, "NUL", "w", stderr);
+#endif
+#endif
 
     // disable IME text input
     if(strstr(lpCmdLine, "-noime") != NULL) {
