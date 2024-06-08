@@ -70,11 +70,12 @@ void UIUserContextMenuScreen::open(u32 user_id) {
             menu->addButton("Add as friend", UA_ADD_FRIEND);
         }
 
-        if(bancho.spectated_player_id == user_id) {
-            menu->addButton("Stop spectating", TOGGLE_SPECTATE);
-        } else {
-            menu->addButton("Spectate", TOGGLE_SPECTATE);
-        }
+        // TODO: Disabled for now, since it's not finished
+        // if(bancho.spectated_player_id == user_id) {
+        //     menu->addButton("Stop spectating", TOGGLE_SPECTATE);
+        // } else {
+        //     menu->addButton("Spectate", TOGGLE_SPECTATE);
+        // }
     }
 
     menu->end(false, false);

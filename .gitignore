@@ -1,5 +1,7 @@
 .vs/
+*.sln
 *.vcxproj.filters
+*.vcxproj.user
 
 build/
 obj/

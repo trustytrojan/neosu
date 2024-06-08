@@ -224,12 +224,13 @@ void handle_packet(Packet *packet) {
             // If server sent a score submission policy, update options menu to hide the checkbox
             osu->m_optionsMenu->updateLayout();
 
-            APIRequest request;
-            request.type = GET_NEOSU_SETTINGS;
-            request.path = UString::format("/neosu.json?u=%s&h=%s", bancho.username.toUtf8(), bancho.pw_md5.toUtf8());
-            request.mime = NULL;
-            request.extra = NULL;
-            send_api_request(request);
+            // TODO: Disabled for now since the API is not finished
+            // APIRequest request;
+            // request.type = GET_NEOSU_SETTINGS;
+            // request.path = UString::format("/neosu.json?u=%s&h=%s", bancho.username.toUtf8(), bancho.pw_md5.toUtf8());
+            // request.mime = NULL;
+            // request.extra = NULL;
+            // send_api_request(request);
 
             start_spectating(4);  // TODO @kiwec: FOR DEBUGGING
         } else {
@@ -548,7 +549,8 @@ void handle_packet(Packet *packet) {
     } else if(packet->id == MATCH_ABORT) {
         osu->m_room->on_match_aborted();
     } else if(packet->id == OVERRIDE_NEOSU_CONVARS) {
-        process_neosu_settings(*packet);
+        // TODO: Disabled for now as the API is not finished
+        // process_neosu_settings(*packet);
     } else {
         debugLog("Unknown packet ID %d (%d bytes)!\n", packet->id, packet->size);
     }

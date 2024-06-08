@@ -211,7 +211,7 @@ MainMenu::MainMenu() : OsuScreen() {
     m_fBackgroundFadeInTime = 0.0f;
 
     logo_img = engine->getResourceManager()->loadImage("neosu.png", "NEOSU_LOGO");
-    background_shader = engine->getResourceManager()->loadShader("main_menu_bg.vsh", "main_menu_bg.fsh");
+    // background_shader = engine->getResourceManager()->loadShader("main_menu_bg.vsh", "main_menu_bg.fsh");
 
     // check if the user has never clicked the changelog for this update
     m_bDidUserUpdateFromOlderVersion = false;
@@ -361,11 +361,11 @@ void MainMenu::draw(Graphics *g) {
         }
     }
 
-    background_shader->enable();
-    background_shader->setUniform1f("time", engine->getTime());
-    background_shader->setUniform2f("resolution", osu->getScreenWidth(), osu->getScreenHeight());
+    // background_shader->enable();
+    // background_shader->setUniform1f("time", engine->getTime());
+    // background_shader->setUniform2f("resolution", osu->getScreenWidth(), osu->getScreenHeight());
     SongBrowser::drawSelectedBeatmapBackgroundImage(g, alpha);
-    background_shader->disable();
+    // background_shader->disable();
 
     // main button stuff
     bool haveTimingpoints = false;
