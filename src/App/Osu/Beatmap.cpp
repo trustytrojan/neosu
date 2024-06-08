@@ -972,8 +972,9 @@ void Beatmap::restart(bool quick) {
     if(!m_bIsWaiting) {
         m_bIsRestartScheduled = true;
         m_bIsRestartScheduledQuick = quick;
-    } else if(m_bIsPaused)
+    } else if(m_bIsPaused) {
         pause(false);
+    }
 }
 
 void Beatmap::actualRestart() {
@@ -3405,7 +3406,7 @@ bool Beatmap::isLoading() {
             (bancho.is_playing_a_multi_map() && !bancho.room.all_players_loaded));
 }
 
-bool Beatmap::isActuallyLoading() { return (!m_music->isAsyncReady() || m_bIsPreLoading); }
+bool Beatmap::isActuallyLoading() { return (!engine->getSound()->isReady() || !m_music->isAsyncReady() || m_bIsPreLoading); }
 
 Vector2 Beatmap::pixels2OsuCoords(Vector2 pixelCoords) const {
     // un-first-person

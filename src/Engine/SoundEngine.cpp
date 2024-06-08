@@ -595,16 +595,14 @@ void SoundEngine::stop(Sound *snd) {
 bool SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
     bool success = true;
 
+    bool was_playing = false;
     unsigned long prevMusicPositionMS = 0;
-    if(osu->isInPlayMode()) {
-        // Kick the player out of play mode, since restarting SoundEngine during gameplay is not supported.
-        // XXX: Make Beatmap work without a running SoundEngine
-        osu->getSelectedBeatmap()->fail();
-        osu->getSelectedBeatmap()->stop(true);
-    } else if(osu->getSelectedBeatmap()->getMusic() != NULL) {
+    if(osu->getSelectedBeatmap()->getMusic() != NULL) {
+        was_playing = osu->getSelectedBeatmap()->getMusic()->isPlaying();
         prevMusicPositionMS = osu->getSelectedBeatmap()->getMusic()->getPositionMS();
     }
 
+    // TODO: This is blocking main thread, can freeze for a long time on some sound cards
     auto previous = m_currentOutputDevice;
     if(!initializeOutputDevice(device)) {
         success = false;
@@ -616,10 +614,19 @@ bool SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
     osu->m_optionsMenu->onOutputDeviceResetUpdate();
 
     // start playing music again after audio device changed
-    if(!osu->isInPlayMode() && osu->getSelectedBeatmap()->getMusic() != NULL) {
-        osu->getSelectedBeatmap()->unloadMusic();
-        osu->getSelectedBeatmap()->select();  // (triggers preview music play)
-        osu->getSelectedBeatmap()->getMusic()->setPositionMS(prevMusicPositionMS);
+    if(osu->getSelectedBeatmap()->getMusic() != NULL) {
+        if(osu->isInPlayMode()) {
+            osu->getSelectedBeatmap()->unloadMusic();
+            osu->getSelectedBeatmap()->loadMusic(false, osu->getSelectedBeatmap()->m_bForceStreamPlayback);
+            if(was_playing) {
+                play(osu->getSelectedBeatmap()->getMusic());
+            }
+            osu->getSelectedBeatmap()->getMusic()->setPositionMS(prevMusicPositionMS);
+        } else {
+            osu->getSelectedBeatmap()->unloadMusic();
+            osu->getSelectedBeatmap()->select();  // (triggers preview music play)
+            osu->getSelectedBeatmap()->getMusic()->setPositionMS(prevMusicPositionMS);
+        }
     }
 
     return success;

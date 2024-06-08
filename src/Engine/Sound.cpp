@@ -137,6 +137,7 @@ void Sound::destroy() {
     if(!m_bReady) return;
 
     m_bReady = false;
+    m_bAsyncReady = false;
     m_fLastPlayTime = 0.0;
 
     if(m_bStream) {
@@ -354,6 +355,9 @@ bool Sound::isPlaying() {
 
 bool Sound::isFinished() {
     if(!m_bReady) return false;
+
+    // The sound has never been started!
+    if(m_fLastPlayTime <= 0.0) return false;
 
     return getActiveChannels().empty() && !m_bPaused;
 }

@@ -269,6 +269,7 @@ class Beatmap {
     inline float getBreakBackgroundFadeAnim() const { return m_fBreakBackgroundFade; }
 
     Sound *m_music;
+    bool m_bForceStreamPlayback;
 
     // live pp/stars
     i32 last_calculated_hitobject = -1;
@@ -316,7 +317,6 @@ class Beatmap {
     double m_fLastAudioTimeAccurateSet;
     double m_fLastRealTimeForInterpolationDelta;
     int m_iResourceLoadUpdateDelayHack;
-    bool m_bForceStreamPlayback;
     float m_fAfterMusicIsFinishedVirtualAudioTimeStart;
     bool m_bIsFirstMissSound;
 

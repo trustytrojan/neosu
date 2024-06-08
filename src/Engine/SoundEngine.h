@@ -40,6 +40,7 @@ class SoundEngine {
     void pause(Sound *snd);
     void stop(Sound *snd);
 
+    bool isReady() { return m_bReady; }
     bool isASIO() { return m_currentOutputDevice.driver == OutputDriver::BASS_ASIO; }
     bool isWASAPI() { return m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI; }
     bool hasExclusiveOutput() { return isASIO() || isWASAPI(); }
