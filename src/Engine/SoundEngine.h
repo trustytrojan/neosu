@@ -43,9 +43,9 @@ class SoundEngine {
     bool isReady() { return m_bReady; }
     bool isASIO() { return m_currentOutputDevice.driver == OutputDriver::BASS_ASIO; }
     bool isWASAPI() { return m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI; }
-    bool hasExclusiveOutput() { return isASIO() || isWASAPI(); }
+    bool hasExclusiveOutput();
 
-    bool setOutputDevice(OUTPUT_DEVICE device);
+    void setOutputDevice(OUTPUT_DEVICE device);
     void setVolume(float volume);
 
     OUTPUT_DEVICE getDefaultDevice();
@@ -57,6 +57,7 @@ class SoundEngine {
 
     void updateOutputDevices(bool printInfo);
     bool initializeOutputDevice(OUTPUT_DEVICE device);
+    bool init_bass_mixer(OUTPUT_DEVICE device);
 
     Sound::SOUNDHANDLE g_bassOutputMixer = 0;
     void onFreqChanged(UString oldValue, UString newValue);

@@ -23,34 +23,35 @@ void _volume(UString oldValue, UString newValue) {
     engine->getSound()->setVolume(newValue.toFloat());
 }
 
-ConVar _volume_("volume", 1.0f, FCVAR_DEFAULT, _volume);
+ConVar _volume_("volume", 1.0f, FCVAR_DEFAULT | FCVAR_PRIVATE, _volume);
 
-ConVar snd_output_device("snd_output_device", "Default", FCVAR_DEFAULT);
+ConVar snd_output_device("snd_output_device", "Default", FCVAR_DEFAULT | FCVAR_PRIVATE);
 ConVar snd_restart("snd_restart");
 
-ConVar snd_freq("snd_freq", 44100, FCVAR_DEFAULT, "output sampling rate in Hz");
-ConVar snd_updateperiod("snd_updateperiod", 10, FCVAR_DEFAULT, "BASS_CONFIG_UPDATEPERIOD length in milliseconds");
-ConVar snd_dev_period("snd_dev_period", 10, FCVAR_DEFAULT,
+ConVar snd_freq("snd_freq", 44100, FCVAR_DEFAULT | FCVAR_PRIVATE, "output sampling rate in Hz");
+ConVar snd_updateperiod("snd_updateperiod", 10, FCVAR_DEFAULT | FCVAR_PRIVATE, "BASS_CONFIG_UPDATEPERIOD length in milliseconds");
+ConVar snd_dev_period("snd_dev_period", 10, FCVAR_DEFAULT | FCVAR_PRIVATE,
                       "BASS_CONFIG_DEV_PERIOD length in milliseconds, or if negative then in samples");
-ConVar snd_dev_buffer("snd_dev_buffer", 30, FCVAR_DEFAULT, "BASS_CONFIG_DEV_BUFFER length in milliseconds");
+ConVar snd_dev_buffer("snd_dev_buffer", 30, FCVAR_DEFAULT | FCVAR_PRIVATE, "BASS_CONFIG_DEV_BUFFER length in milliseconds");
 
 ConVar snd_restrict_play_frame(
-    "snd_restrict_play_frame", true, FCVAR_DEFAULT,
+    "snd_restrict_play_frame", true, FCVAR_DEFAULT | FCVAR_PRIVATE,
     "only allow one new channel per frame for overlayable sounds (prevents lag and earrape)");
-ConVar snd_change_check_interval("snd_change_check_interval", 0.0f, FCVAR_DEFAULT,
+ConVar snd_change_check_interval("snd_change_check_interval", 0.0f, FCVAR_DEFAULT | FCVAR_PRIVATE,
                                  "check for output device changes every this many seconds. 0 = disabled (default)");
 
+ConVar win_snd_wasapi_exclusive("win_snd_wasapi_exclusive", true, FCVAR_DEFAULT | FCVAR_PRIVATE);
 ConVar win_snd_wasapi_buffer_size(
-    "win_snd_wasapi_buffer_size", 0.011f, FCVAR_DEFAULT,
+    "win_snd_wasapi_buffer_size", 0.011f, FCVAR_DEFAULT | FCVAR_PRIVATE,
     "buffer size/length in seconds (e.g. 0.011 = 11 ms), directly responsible for audio delay and crackling");
 ConVar win_snd_wasapi_period_size(
-    "win_snd_wasapi_period_size", 0.0f, FCVAR_DEFAULT,
+    "win_snd_wasapi_period_size", 0.0f, FCVAR_DEFAULT | FCVAR_PRIVATE,
     "interval between OutputWasapiProc calls in seconds (e.g. 0.016 = 16 ms) (0 = use default)");
 
-ConVar asio_buffer_size("asio_buffer_size", -1, FCVAR_DEFAULT,
+ConVar asio_buffer_size("asio_buffer_size", -1, FCVAR_DEFAULT | FCVAR_PRIVATE,
                         "buffer size in samples (usually 44100 samples per second)");
 
-ConVar osu_universal_offset_hardcoded("osu_universal_offset_hardcoded", 0.0f, FCVAR_DEFAULT);
+ConVar osu_universal_offset_hardcoded("osu_universal_offset_hardcoded", 0.0f, FCVAR_DEFAULT | FCVAR_PRIVATE);
 
 void _RESTART_SOUND_ENGINE_ON_CHANGE(UString oldValue, UString newValue) {
     const int oldValueMS = std::round(oldValue.toFloat() * 1000.0f);
@@ -303,6 +304,195 @@ void SoundEngine::updateOutputDevices(bool printInfo) {
 #endif
 }
 
+void display_bass_error() {
+    auto code = BASS_ErrorGetCode();
+    switch(code) {
+    case BASS_OK:
+        break;
+    case BASS_ERROR_MEM:
+        osu->getNotificationOverlay()->addNotification("BASS error: Memory error");
+        break;
+    case BASS_ERROR_FILEOPEN:
+        osu->getNotificationOverlay()->addNotification("BASS error: Can't open the file");
+        break;
+    case BASS_ERROR_DRIVER:
+        osu->getNotificationOverlay()->addNotification("BASS error: Can't find an available driver");
+        break;
+    case BASS_ERROR_BUFLOST:
+        osu->getNotificationOverlay()->addNotification("BASS error: The sample buffer was lost");
+        break;
+    case BASS_ERROR_HANDLE:
+        osu->getNotificationOverlay()->addNotification("BASS error: Invalid handle");
+        break;
+    case BASS_ERROR_FORMAT:
+        osu->getNotificationOverlay()->addNotification("BASS error: Unsupported sample format");
+        break;
+    case BASS_ERROR_POSITION:
+        osu->getNotificationOverlay()->addNotification("BASS error: Invalid position");
+        break;
+    case BASS_ERROR_INIT:
+        osu->getNotificationOverlay()->addNotification("BASS error: BASS_Init has not been successfully called");
+        break;
+    case BASS_ERROR_START:
+        osu->getNotificationOverlay()->addNotification("BASS error: BASS_Start has not been successfully called");
+        break;
+    case BASS_ERROR_SSL:
+        osu->getNotificationOverlay()->addNotification("BASS error: SSL/HTTPS support isn't available");
+        break;
+    case BASS_ERROR_REINIT:
+        osu->getNotificationOverlay()->addNotification("BASS error: Device needs to be reinitialized");
+        break;
+    case BASS_ERROR_ALREADY:
+        osu->getNotificationOverlay()->addNotification("BASS error: Already initialized");
+        break;
+    case BASS_ERROR_NOTAUDIO:
+        osu->getNotificationOverlay()->addNotification("BASS error: File does not contain audio");
+        break;
+    case BASS_ERROR_NOCHAN:
+        osu->getNotificationOverlay()->addNotification("BASS error: Can't get a free channel");
+        break;
+    case BASS_ERROR_ILLTYPE:
+        osu->getNotificationOverlay()->addNotification("BASS error: An illegal type was specified");
+        break;
+    case BASS_ERROR_ILLPARAM:
+        osu->getNotificationOverlay()->addNotification("BASS error: An illegal parameter was specified");
+        break;
+    case BASS_ERROR_NO3D:
+        osu->getNotificationOverlay()->addNotification("BASS error: No 3D support");
+        break;
+    case BASS_ERROR_NOEAX:
+        osu->getNotificationOverlay()->addNotification("BASS error: No EAX support");
+        break;
+    case BASS_ERROR_DEVICE:
+        osu->getNotificationOverlay()->addNotification("BASS error: Illegal device number");
+        break;
+    case BASS_ERROR_NOPLAY:
+        osu->getNotificationOverlay()->addNotification("BASS error: Not playing");
+        break;
+    case BASS_ERROR_FREQ:
+        osu->getNotificationOverlay()->addNotification("BASS error: Illegal sample rate");
+        break;
+    case BASS_ERROR_NOTFILE:
+        osu->getNotificationOverlay()->addNotification("BASS error: The stream is not a file stream");
+        break;
+    case BASS_ERROR_NOHW:
+        osu->getNotificationOverlay()->addNotification("BASS error: No hardware voices available");
+        break;
+    case BASS_ERROR_EMPTY:
+        osu->getNotificationOverlay()->addNotification("BASS error: The file has no sample data");
+        break;
+    case BASS_ERROR_NONET:
+        osu->getNotificationOverlay()->addNotification("BASS error: No internet connection could be opened");
+        break;
+    case BASS_ERROR_CREATE:
+        osu->getNotificationOverlay()->addNotification("BASS error: Couldn't create the file");
+        break;
+    case BASS_ERROR_NOFX:
+        osu->getNotificationOverlay()->addNotification("BASS error: Effects are not available");
+        break;
+    case BASS_ERROR_NOTAVAIL:
+        osu->getNotificationOverlay()->addNotification("BASS error: Requested data/action is not available");
+        break;
+    case BASS_ERROR_DECODE:
+        osu->getNotificationOverlay()->addNotification("BASS error: The channel is/isn't a decoding channel");
+        break;
+    case BASS_ERROR_DX:
+        osu->getNotificationOverlay()->addNotification("BASS error: A sufficient DirectX version is not installed");
+        break;
+    case BASS_ERROR_TIMEOUT:
+        osu->getNotificationOverlay()->addNotification("BASS error: Connection timeout");
+        break;
+    case BASS_ERROR_FILEFORM:
+        osu->getNotificationOverlay()->addNotification("BASS error: Unsupported file format");
+        break;
+    case BASS_ERROR_SPEAKER:
+        osu->getNotificationOverlay()->addNotification("BASS error: Unavailable speaker");
+        break;
+    case BASS_ERROR_VERSION:
+        osu->getNotificationOverlay()->addNotification("BASS error: Invalid BASS version");
+        break;
+    case BASS_ERROR_CODEC:
+        osu->getNotificationOverlay()->addNotification("BASS error: Codec is not available/supported");
+        break;
+    case BASS_ERROR_ENDED:
+        osu->getNotificationOverlay()->addNotification("BASS error: The channel/file has ended");
+        break;
+    case BASS_ERROR_BUSY:
+        osu->getNotificationOverlay()->addNotification("BASS error: The device is busy");
+        break;
+    case BASS_ERROR_UNSTREAMABLE:
+        osu->getNotificationOverlay()->addNotification("BASS error: Unstreamable file");
+        break;
+    case BASS_ERROR_PROTOCOL:
+        osu->getNotificationOverlay()->addNotification("BASS error: Unsupported protocol");
+        break;
+    case BASS_ERROR_DENIED:
+        osu->getNotificationOverlay()->addNotification("BASS error: Access Denied");
+        break;
+    case BASS_ERROR_WASAPI:
+        osu->getNotificationOverlay()->addNotification("WASAPI error: No WASAPI");
+        break;
+    case BASS_ERROR_WASAPI_BUFFER:
+        osu->getNotificationOverlay()->addNotification("WASAPI error: Invalid buffer size");
+        break;
+    case BASS_ERROR_WASAPI_CATEGORY:
+        osu->getNotificationOverlay()->addNotification("WASAPI error: Can't set category");
+        break;
+    case BASS_ERROR_WASAPI_DENIED:
+        osu->getNotificationOverlay()->addNotification("WASAPI error: Access denied");
+        break;
+    case BASS_ERROR_UNKNOWN:  // fallthrough
+    default:
+        osu->getNotificationOverlay()->addNotification("Unknown BASS error (%i)!", code);
+        break;
+    }
+}
+
+// The BASS mixer is used for every sound driver, but it's useful to be able to
+// initialize it later on some drivers where we know the best available frequency.
+bool SoundEngine::init_bass_mixer(OUTPUT_DEVICE device) {
+    auto bass_flags = BASS_DEVICE_STEREO | BASS_DEVICE_FREQ | BASS_DEVICE_NOSPEAKER;
+    auto freq = snd_freq.getInt();
+
+    // We initialize a "No sound" device for measuring loudness and mixing sounds,
+    // regardless of the device we'll use for actual output.
+    if(!BASS_Init(0, freq, bass_flags | BASS_DEVICE_SOFTWARE, NULL, NULL)) {
+        auto code = BASS_ErrorGetCode();
+        if(code != BASS_ERROR_ALREADY) {
+            m_bReady = false;
+            debugLog("BASS_Init(0) failed.\n");
+            display_bass_error();
+            return false;
+        }
+    }
+
+    if(device.driver == OutputDriver::BASS) {
+        if(!BASS_Init(device.id, freq, bass_flags, NULL, NULL)) {
+            m_bReady = false;
+            debugLog("BASS_Init(%d) errored out.\n", device.id);
+            display_bass_error();
+            return false;
+        }
+
+        osu_universal_offset_hardcoded.setValue(-25.f);
+    }
+
+    auto mixer_flags = BASS_SAMPLE_FLOAT | BASS_MIXER_NONSTOP | BASS_MIXER_RESUME;
+    if(device.driver != OutputDriver::BASS) mixer_flags |= BASS_STREAM_DECODE;
+    g_bassOutputMixer = BASS_Mixer_StreamCreate(freq, 2, mixer_flags);
+    if(g_bassOutputMixer == 0) {
+        m_bReady = false;
+        debugLog("BASS_Mixer_StreamCreate() failed.\n");
+        display_bass_error();
+        return false;
+    }
+
+    // Switch to "No sound" device for all future sound processing
+    // Only g_bassOutputMixer will be output to the actual device!
+    BASS_SetDevice(0);
+    return true;
+}
+
 bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
     debugLog("SoundEngine: initializeOutputDevice( %s ) ...\n", device.name.toUtf8());
 
@@ -345,53 +535,20 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
             BASS_SetConfig(BASS_CONFIG_DEV_PERIOD, snd_dev_period.getInt());
     }
 
-    const int freq = snd_freq.getInt();
-    HWND hwnd = NULL;
-#ifdef _WIN32
-    const WinEnvironment *winEnv = dynamic_cast<WinEnvironment *>(env);
-    hwnd = winEnv->getHwnd();
-#endif
-
-    // We initialize a "No sound" device for measuring loudness and mixing sounds,
-    // regardless of the device we'll use for actual output.
-    unsigned int runtimeFlags = BASS_DEVICE_STEREO | BASS_DEVICE_FREQ | BASS_DEVICE_NOSPEAKER;
-    if(!BASS_Init(0, freq, runtimeFlags | BASS_DEVICE_SOFTWARE, hwnd, NULL)) {
-        m_bReady = false;
-        engine->showMessageError("Sound Error", UString::format("BASS_Init(0) failed (%i)!", BASS_ErrorGetCode()));
-        return false;
-    }
-
+    // When the driver is BASS, we can init the mixer immediately
+    // On other drivers, we'd rather get the sound card's frequency first
     if(device.driver == OutputDriver::BASS) {
-        if(!BASS_Init(device.id, freq, runtimeFlags, hwnd, NULL)) {
-            m_bReady = false;
-            engine->showMessageError("Sound Error",
-                                     UString::format("BASS_Init(%d) failed (%i)!", device.id, BASS_ErrorGetCode()));
+        if(!init_bass_mixer(device)) {
             return false;
         }
-
-        osu_universal_offset_hardcoded.setValue(-25.f);
     }
-
-    auto mixer_flags = BASS_SAMPLE_FLOAT | BASS_MIXER_NONSTOP | BASS_MIXER_RESUME;
-    if(device.driver != OutputDriver::BASS) mixer_flags |= BASS_STREAM_DECODE;
-    g_bassOutputMixer = BASS_Mixer_StreamCreate(freq, 2, mixer_flags);
-    if(g_bassOutputMixer == 0) {
-        m_bReady = false;
-        engine->showMessageError("Sound Error",
-                                 UString::format("BASS_Mixer_StreamCreate() failed (%i)!", BASS_ErrorGetCode()));
-        return false;
-    }
-
-    // Switch to "No sound" device for all future sound processing
-    // Only g_bassOutputMixer will be output to the actual device!
-    BASS_SetDevice(0);
 
 #ifdef _WIN32
     if(device.driver == OutputDriver::BASS_ASIO) {
         if(!BASS_ASIO_Init(device.id, 0)) {
             m_bReady = false;
-            engine->showMessageError("Sound Error",
-                                     UString::format("BASS_ASIO_Init() failed (%i)!", BASS_ASIO_ErrorGetCode()));
+            debugLog("BASS_ASIO_Init() failed.\n");
+            display_bass_error();
             return false;
         }
 
@@ -399,6 +556,11 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
         if(sample_rate == 0.0) {
             sample_rate = snd_freq.getFloat();
             debugLog("ASIO: BASS_ASIO_GetRate() returned 0, using %f instead!\n", sample_rate);
+        } else {
+            snd_freq.setValue(sample_rate);
+        }
+        if(!init_bass_mixer(device)) {
+            return false;
         }
 
         BASS_ASIO_INFO info = {0};
@@ -414,15 +576,15 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
 
         if(!BASS_ASIO_ChannelEnableBASS(false, 0, g_bassOutputMixer, true)) {
             m_bReady = false;
-            engine->showMessageError("Sound Error", UString::format("BASS_ASIO_ChannelEnableBASS() failed (code %i)!",
-                                                                    BASS_ASIO_ErrorGetCode()));
+            debugLog("BASS_ASIO_ChannelEnableBASS() failed.\n");
+            display_bass_error();
             return false;
         }
 
         if(!BASS_ASIO_Start(bufsize, 0)) {
             m_bReady = false;
-            engine->showMessageError("Sound Error",
-                                     UString::format("BASS_ASIO_Start() failed (code %i)!", BASS_ASIO_ErrorGetCode()));
+            debugLog("BASS_ASIO_Start() failed.\n");
+            display_bass_error();
             return false;
         }
 
@@ -437,28 +599,38 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
         const float bufferSize = std::round(win_snd_wasapi_buffer_size.getFloat() * 1000.0f) / 1000.0f;    // in seconds
         const float updatePeriod = std::round(win_snd_wasapi_period_size.getFloat() * 1000.0f) / 1000.0f;  // in seconds
 
+        BASS_WASAPI_DEVICEINFO info;
+        if(!BASS_WASAPI_GetDeviceInfo(device.id, &info)) {
+            debugLog("WASAPI: Failed to get device info\n");
+            return false;
+        }
+        snd_freq.setValue(info.mixfreq);
+        if(!init_bass_mixer(device)) {
+            return false;
+        }
+
         // BASS_WASAPI_RAW ignores sound "enhancements" that some sound cards offer (adds latency)
         // BASS_MIXER_NONSTOP prevents some sound cards from going to sleep when there is no output
-        // BASS_WASAPI_EXCLUSIVE makes neosu have exclusive output to the sound card
-        auto flags = BASS_WASAPI_RAW | BASS_MIXER_NONSTOP | BASS_WASAPI_EXCLUSIVE;
+        // BASS_WASAPI_RAW bypasses windows "sound enhancements"
+        auto flags = BASS_WASAPI_RAW | BASS_MIXER_NONSTOP | BASS_WASAPI_RAW;
+        if(convar->getConVarByName("wasapi_exclusive_mode")->getBool()) {
+            // BASS_WASAPI_EXCLUSIVE makes neosu have exclusive output to the sound card
+            // BASS_WASAPI_AUTOFORMAT chooses the best matching sample format, BASSWASAPI doesn't resample in exclusive mode
+            flags |= BASS_WASAPI_EXCLUSIVE | BASS_WASAPI_AUTOFORMAT;
+        }
 
-        if(!BASS_WASAPI_Init(device.id, 0, 0, flags, bufferSize, updatePeriod, WASAPIPROC_BASS,
-                             (void *)g_bassOutputMixer)) {
+        if(!BASS_WASAPI_Init(device.id, 0, 0, flags, bufferSize, updatePeriod, WASAPIPROC_BASS, (void *)g_bassOutputMixer)) {
             const int errorCode = BASS_ErrorGetCode();
-            if(errorCode == BASS_ERROR_WASAPI_BUFFER) {
-                debugLog("Sound Error: BASS_WASAPI_Init() failed with BASS_ERROR_WASAPI_BUFFER!");
-            } else {
-                engine->showMessageError("Sound Error", UString::format("BASS_WASAPI_Init() failed (%i)!", errorCode));
-            }
-
             m_bReady = false;
+            debugLog("BASS_WASAPI_Init() failed.\n");
+            display_bass_error();
             return false;
         }
 
         if(!BASS_WASAPI_Start()) {
             m_bReady = false;
-            engine->showMessageError("Sound Error",
-                                     UString::format("BASS_WASAPI_Start() failed (%i)!", BASS_ErrorGetCode()));
+            debugLog("BASS_WASAPI_Start() failed.\n");
+            display_bass_error();
             return false;
         }
 
@@ -495,6 +667,7 @@ void SoundEngine::shutdown() {
     }
 #endif
 
+    m_bReady = false;
     g_bassOutputMixer = 0;
     BASS_Free();  // free "No sound" device
 }
@@ -592,9 +765,11 @@ void SoundEngine::stop(Sound *snd) {
     snd->reload();
 }
 
-bool SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
-    bool success = true;
+bool SoundEngine::hasExclusiveOutput() {
+    return isASIO() || (isWASAPI() && convar->getConVarByName("win_snd_wasapi_exclusive")->getBool());
+}
 
+void SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
     bool was_playing = false;
     unsigned long prevMusicPositionMS = 0;
     if(osu->getSelectedBeatmap()->getMusic() != NULL) {
@@ -605,8 +780,18 @@ bool SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
     // TODO: This is blocking main thread, can freeze for a long time on some sound cards
     auto previous = m_currentOutputDevice;
     if(!initializeOutputDevice(device)) {
-        success = false;
-        initializeOutputDevice(previous);
+        if(device.id == previous.id && device.driver == previous.driver) {
+            // We failed to reinitialize the device, don't start an infinite loop, just give up
+            m_currentOutputDevice = {
+                .id = 0,
+                .enabled = true,
+                .isDefault = true,
+                .name = "No sound",
+                .driver = OutputDriver::NONE,
+            };
+        } else {
+            initializeOutputDevice(previous);
+        }
     }
 
     osu->m_optionsMenu->m_outputDeviceLabel->setText(getOutputDeviceName());
@@ -628,8 +813,6 @@ bool SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
             osu->getSelectedBeatmap()->getMusic()->setPositionMS(prevMusicPositionMS);
         }
     }
-
-    return success;
 }
 
 void SoundEngine::setVolume(float volume) {
@@ -656,6 +839,7 @@ void SoundEngine::setVolume(float volume) {
 void SoundEngine::onFreqChanged(UString oldValue, UString newValue) {
     (void)oldValue;
     (void)newValue;
+    if(!m_bReady) return;
     restart();
 }
 

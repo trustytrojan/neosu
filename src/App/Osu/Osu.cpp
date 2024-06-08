@@ -57,7 +57,7 @@ Osu *osu = NULL;
 
 // release configuration
 ConVar auto_update("auto_update", true, FCVAR_DEFAULT);
-ConVar osu_version("osu_version", 35.02f, FCVAR_DEFAULT | FCVAR_HIDDEN);
+ConVar osu_version("osu_version", 35.03f, FCVAR_DEFAULT | FCVAR_HIDDEN);
 
 #ifdef _DEBUG
 ConVar osu_debug("osu_debug", true, FCVAR_DEFAULT);
@@ -380,6 +380,7 @@ Osu::Osu() {
         ->setCallback(fastdelegate::MakeDelegate(sound_engine, &SoundEngine::onFreqChanged));
     convar->getConVarByName("snd_restart")
         ->setCallback(fastdelegate::MakeDelegate(sound_engine, &SoundEngine::restart));
+    convar->getConVarByName("win_snd_wasapi_exclusive")->setCallback(_RESTART_SOUND_ENGINE_ON_CHANGE);
     convar->getConVarByName("win_snd_wasapi_buffer_size")->setCallback(_RESTART_SOUND_ENGINE_ON_CHANGE);
     convar->getConVarByName("win_snd_wasapi_period_size")->setCallback(_RESTART_SOUND_ENGINE_ON_CHANGE);
     convar->getConVarByName("asio_buffer_size")->setCallback(_RESTART_SOUND_ENGINE_ON_CHANGE);

@@ -29,8 +29,14 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
-    latest.changes.push_back("- Fixed online leaderboards displaying incorrect values");
+    latest.changes.push_back("- Re-added win_snd_wasapi_exclusive convar");
+    latest.changes.push_back("- Improved sound engine reliability");
     changelogs.push_back(latest);
+
+    CHANGELOG v35_02;
+    v35_02.title = "35.02 (2024-06-08)";
+    v35_02.changes.push_back("- Fixed online leaderboards displaying incorrect values");
+    changelogs.push_back(v35_02);
 
     CHANGELOG v35_01;
     v35_01.title = "35.01 (2024-06-08)";

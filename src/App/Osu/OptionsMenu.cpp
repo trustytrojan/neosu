@@ -708,6 +708,9 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
             addLabel("Windows 10: Start at 1 ms,")->setTextColor(0xff666666);
             addLabel("and if crackling: increment until fixed.")->setTextColor(0xff666666);
             addLabel("(lower is better, non-wasapi has ~40 ms minimum)")->setTextColor(0xff666666);
+            addCheckbox("Exclusive Mode",
+                        "Dramatically reduces latency, but prevents other applications from capturing/playing audio.",
+                        convar->getConVarByName("win_snd_wasapi_exclusive"));
             addLabel("");
             addLabel("");
             addLabel("WARNING: Only if you know what you are doing")->setTextColor(0xffff0000);
