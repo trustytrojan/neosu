@@ -57,6 +57,7 @@ ResourceManager::ResourceManager() {
         loaderThread->loadingWork = &m_loadingWork;
 
         loaderThread->thread = std::thread(_resourceLoaderThread, (void *)loaderThread);
+        loaderThread->thread.detach();
         m_threads.push_back(loaderThread);
     }
 }

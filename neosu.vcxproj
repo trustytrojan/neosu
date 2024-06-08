@@ -109,7 +109,8 @@ copy $(SolutionDir)libraries\bassasio\$(Platform)\bassasio.dll $(SolutionDir)bui
 copy $(SolutionDir)libraries\bassloud\$(Platform)\bassloud.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
 copy $(SolutionDir)libraries\bassmix\$(Platform)\bassmix.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
 copy $(SolutionDir)libraries\basswasapi\$(Platform)\basswasapi.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
-copy $(SolutionDir)libraries\libcurl\$(Platform)\*.dll $(SolutionDir)build\$(Platform)\$(Configuration)\</Command>
+copy $(SolutionDir)libraries\libcurl\$(Platform)\*.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
+copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Platform)\$(Configuration)\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -137,7 +138,8 @@ copy $(SolutionDir)libraries\bassasio\$(Platform)\bassasio.dll $(SolutionDir)bui
 copy $(SolutionDir)libraries\bassloud\$(Platform)\bassloud.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
 copy $(SolutionDir)libraries\bassmix\$(Platform)\bassmix.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
 copy $(SolutionDir)libraries\basswasapi\$(Platform)\basswasapi.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
-copy $(SolutionDir)libraries\libcurl\$(Platform)\*.dll $(SolutionDir)build\$(Platform)\$(Configuration)\</Command>
+copy $(SolutionDir)libraries\libcurl\$(Platform)\*.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
+copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Platform)\$(Configuration)\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -167,7 +169,8 @@ copy $(SolutionDir)libraries\bassasio\$(Platform)\bassasio.dll $(SolutionDir)bui
 copy $(SolutionDir)libraries\bassloud\$(Platform)\bassloud.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
 copy $(SolutionDir)libraries\bassmix\$(Platform)\bassmix.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
 copy $(SolutionDir)libraries\basswasapi\$(Platform)\basswasapi.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
-copy $(SolutionDir)libraries\libcurl\$(Platform)\*.dll $(SolutionDir)build\$(Platform)\$(Configuration)\</Command>
+copy $(SolutionDir)libraries\libcurl\$(Platform)\*.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
+copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Platform)\$(Configuration)\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -196,7 +199,8 @@ copy $(SolutionDir)libraries\bassasio\$(Platform)\bassasio.dll $(SolutionDir)bui
 copy $(SolutionDir)libraries\bassloud\$(Platform)\bassloud.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
 copy $(SolutionDir)libraries\bassmix\$(Platform)\bassmix.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
 copy $(SolutionDir)libraries\basswasapi\$(Platform)\basswasapi.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
-copy $(SolutionDir)libraries\libcurl\$(Platform)\*.dll $(SolutionDir)build\$(Platform)\$(Configuration)\</Command>
+copy $(SolutionDir)libraries\libcurl\$(Platform)\*.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
+copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Platform)\$(Configuration)\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

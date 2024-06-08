@@ -344,9 +344,7 @@ end:
     curl_slist_free_all(chunk);
 }
 
-static void *do_networking(void *data) {
-    (void)data;
-
+static void *do_networking() {
     last_packet_tms = time(NULL);
 
     CURL *curl = curl_easy_init();
@@ -549,5 +547,6 @@ void send_packet(Packet &packet) {
 }
 
 void init_networking_thread() {
-    std::thread(do_networking);
+    auto net_thread = std::thread(do_networking);
+    net_thread.detach();
 }

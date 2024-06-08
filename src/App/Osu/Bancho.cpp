@@ -232,7 +232,7 @@ void handle_packet(Packet *packet) {
             // request.extra = NULL;
             // send_api_request(request);
 
-            start_spectating(4);  // TODO @kiwec: FOR DEBUGGING
+            // start_spectating(4);  // TODO @kiwec: FOR DEBUGGING
         } else {
             convar->getConVarByName("mp_autologin")->setValue(false);
             osu->m_optionsMenu->logInButton->setText("Log in");

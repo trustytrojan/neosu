@@ -88,6 +88,7 @@ void UpdateHandler::checkForUpdates() {
     if(env->getOS() != Environment::OS::WINDOWS) return;  // only windows gets releases right now
 
     m_updateThread = new std::thread(UpdateHandler::run, (void *)this);
+    m_updateThread->detach();
 
     if(m_iNumRetries > 0) debugLog("UpdateHandler::checkForUpdates() retry %i ...\n", m_iNumRetries);
 }

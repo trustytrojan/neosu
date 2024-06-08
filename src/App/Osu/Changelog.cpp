@@ -39,7 +39,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.changes.push_back("- Fixed sound engine not being restartable during gameplay or while paused");
     latest.changes.push_back("- Fixed missing window icon");
     latest.changes.push_back("- Hid password cvar from console command list");
-    latest.changes.push_back("- Now making 64-bit builds with MSVC");
+    latest.changes.push_back("- Now making 64-bit MSVC builds");
     latest.changes.push_back("- Now using rosu-pp for some pp calculations");
     latest.changes.push_back("- Removed DirectX, Software, Vulkan renderers");
     latest.changes.push_back("- Removed OpenCL support");

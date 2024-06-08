@@ -179,7 +179,8 @@ void download(const char* url, float* progress, std::vector<u8>& out, int* respo
         matching_thread = new DownloadThread();
         matching_thread->running = true;
         matching_thread->endpoint = std::string(hostname);
-        std::thread(do_downloads, matching_thread);
+        auto dl_thread = std::thread(do_downloads, matching_thread);
+        dl_thread.detach();
         threads.push_back(matching_thread);
     }
 
