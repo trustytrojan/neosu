@@ -23,7 +23,7 @@ FinishedScore parse_score(char *score_line) {
     score.speedMultiplier = 1.0;
 
     auto tokens = UString(score_line).split("|");
-    if(tokens.size() != 15) return score;
+    if(tokens.size() < 15) return score;
 
     score.online_score_id = strtoul(tokens[0].toUtf8(), NULL, 10);
     score.playerName = tokens[1].toUtf8();

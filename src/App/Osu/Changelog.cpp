@@ -29,24 +29,30 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
-    latest.changes.push_back("- Added ability to get spectated");
-    latest.changes.push_back("- Added use_https convar (to support plain HTTP servers)");
-    latest.changes.push_back("- Added restart_sound_engine_before_playing convar (\"fixes\" sound engine lagging after a while)");
-    latest.changes.push_back("- Fixed chat channels being unread after joining");
-    latest.changes.push_back("- Fixed flashlight mod");
-    latest.changes.push_back("- Fixed FPoSu mode");
-    latest.changes.push_back("- Fixed playfield borders not being visible");
-    latest.changes.push_back("- Fixed sound engine not being restartable during gameplay or while paused");
-    latest.changes.push_back("- Fixed missing window icon");
-    latest.changes.push_back("- Hid password cvar from console command list");
-    latest.changes.push_back("- Now making 64-bit MSVC builds");
-    latest.changes.push_back("- Now using rosu-pp for some pp calculations");
-    latest.changes.push_back("- Removed DirectX, Software, Vulkan renderers");
-    latest.changes.push_back("- Removed OpenCL support");
-    latest.changes.push_back("- Removed user stats screen");
+    latest.changes.push_back("- Fixed online leaderboards displaying incorrect values");
     changelogs.push_back(latest);
 
+    CHANGELOG v35_01;
+    v35_01.title = "35.01 (2024-06-08)";
+    v35_01.changes.push_back("- Added ability to get spectated");
+    v35_01.changes.push_back("- Added use_https convar (to support plain HTTP servers)");
+    v35_01.changes.push_back("- Added restart_sound_engine_before_playing convar (\"fixes\" sound engine lagging after a while)");
+    v35_01.changes.push_back("- Fixed chat channels being unread after joining");
+    v35_01.changes.push_back("- Fixed flashlight mod");
+    v35_01.changes.push_back("- Fixed FPoSu mode");
+    v35_01.changes.push_back("- Fixed playfield borders not being visible");
+    v35_01.changes.push_back("- Fixed sound engine not being restartable during gameplay or while paused");
+    v35_01.changes.push_back("- Fixed missing window icon");
+    v35_01.changes.push_back("- Hid password cvar from console command list");
+    v35_01.changes.push_back("- Now making 64-bit MSVC builds");
+    v35_01.changes.push_back("- Now using rosu-pp for some pp calculations");
+    v35_01.changes.push_back("- Removed DirectX, Software, Vulkan renderers");
+    v35_01.changes.push_back("- Removed OpenCL support");
+    v35_01.changes.push_back("- Removed user stats screen");
+    changelogs.push_back(v35_01);
+
     CHANGELOG v35_00;
+    v35_00.title = "35.00 (2024-05-05)";
     v35_00.changes.push_back("- Renamed 'McOsu Multiplayer' to 'neosu'");
     v35_00.changes.push_back("- Added option to normalize loudness across songs");
     v35_00.changes.push_back("- Added server logo to main menu button");

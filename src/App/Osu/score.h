@@ -26,7 +26,7 @@ struct FinishedScore {
                                  // so they don't have any
                                  // numSliderBreaks/unstableRate/hitErrorAvgMin/hitErrorAvgMax)
     u32 version;
-    u64 unixTimestamp;
+    u64 unixTimestamp = 0;
 
     u32 player_id = 0;
     std::string playerName;
@@ -42,17 +42,17 @@ struct FinishedScore {
     std::vector<Replay::Frame> replay;
     u64 legacyReplayTimestamp = 0;
 
-    int num300s;
-    int num100s;
-    int num50s;
-    int numGekis;
-    int numKatus;
-    int numMisses;
+    int num300s = 0;
+    int num100s = 0;
+    int num50s = 0;
+    int numGekis = 0;
+    int numKatus = 0;
+    int numMisses = 0;
 
-    unsigned long long score;
-    int comboMax;
-    bool perfect;
-    int modsLegacy;
+    unsigned long long score = 0;
+    int comboMax = 0;
+    bool perfect = false;
+    int modsLegacy = 0;
 
     // custom
     int numSliderBreaks;

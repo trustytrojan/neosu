@@ -356,7 +356,7 @@ void process_beatmapset_info_response(Packet packet) {
 
     // {set_id}.osz|{artist}|{title}|{creator}|{status}|10.0|{last_update}|{set_id}|0|0|0|0|0
     auto tokens = UString((char*)packet.memory).split("|");
-    if(tokens.size() != 13) return;
+    if(tokens.size() < 13) return;
 
     beatmap_to_beatmapset[map_id] = strtoul(tokens[7].toUtf8(), NULL, 10);
 }
