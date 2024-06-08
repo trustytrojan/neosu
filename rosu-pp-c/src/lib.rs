@@ -6,6 +6,7 @@ use libc;
 use rosu_pp;
 
 #[repr(C)]
+#[derive(Default)]
 pub struct pp_info {
     pub total_stars: f64,
     pub aim_stars: f64,
@@ -24,37 +25,19 @@ pub extern "C" fn calculate_full_pp(path: *const libc::c_char, mod_flags: u32, a
     let path = Path::new(c_path.to_str().unwrap());
     let map = match rosu_pp::Beatmap::from_path(path) {
         Ok(val) => val,
-        Err(_) => return pp_info {
-            total_stars: 0.0,
-            aim_stars: 0.0,
-            speed_stars: 0.0,
-            pp: 0.0,
-            num_objects: 0,
-            num_circles: 0,
-            num_spinners: 0,
-            ok: false,
-        }
+        Err(_) => return pp_info::default()
     };
 
     let osu_map = match rosu_pp::osu::OsuBeatmap::try_from_owned(map) {
         Ok(val) => val,
-        Err(_) => return pp_info {
-            total_stars: 0.0,
-            aim_stars: 0.0,
-            speed_stars: 0.0,
-            pp: 0.0,
-            num_objects: 0,
-            num_circles: 0,
-            num_spinners: 0,
-            ok: false,
-        }
+        Err(_) => return pp_info::default()
     };
 
     let diff_attrs = rosu_pp::Difficulty::new()
         .mods(mod_flags)
-        .ar(ar, true)
-        .cs(cs, true)
-        .od(od, true)
+        .ar(ar, false)
+        .cs(cs, false)
+        .od(od, false)
         .clock_rate(speed_multiplier)
         .with_mode()
         .calculate(&osu_map);
@@ -71,6 +54,11 @@ pub extern "C" fn calculate_full_pp(path: *const libc::c_char, mod_flags: u32, a
     };
 
     result.pp = rosu_pp::Performance::new(diff_attrs)
+        .mods(mod_flags)
+        .ar(ar, false)
+        .cs(cs, false)
+        .od(od, false)
+        .clock_rate(speed_multiplier)
         .calculate()
         .pp();
 
@@ -106,9 +94,9 @@ pub extern "C" fn load_map(path: *const libc::c_char, mod_flags: u32, ar: f32, c
 
     let gradual = rosu_pp::Difficulty::new()
         .mods(mod_flags)
-        .ar(ar, true)
-        .cs(cs, true)
-        .od(od, true)
+        .ar(ar, false)
+        .cs(cs, false)
+        .od(od, false)
         .clock_rate(speed_multiplier)
         .with_mode()
         .gradual_performance(&osu_map);
