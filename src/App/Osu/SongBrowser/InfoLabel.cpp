@@ -316,9 +316,10 @@ UString InfoLabel::buildSongInfoString() {
     const int mostCommonBPM = m_iMostCommonBPM * osu->getSpeedMultiplier();
 
     int numObjects = m_iNumObjects;
-    if(osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.ok) {
-        numObjects = osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.num_objects;
-    }
+    auto diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();
+    if(diff2 && diff2->m_pp_info.ok) {
+        numObjects = diff2->m_pp_info.num_objects;
+	}
 
     if(m_iMinBPM == m_iMaxBPM) {
         return UString::format("Length: %02i:%02i BPM: %i Objects: %i", minutes, seconds, maxBPM, numObjects);
@@ -334,9 +335,14 @@ UString InfoLabel::buildDiffInfoString() {
     float OD = m_fOD;
     float HP = m_fHP;
     float stars = m_fStars;
+    float modStars = 0.f;
+    float modPp = 0.f;
 
-    const float modStars = osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.total_stars;
-    const float modPp = osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.pp;
+	auto diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();
+    if(diff2) {
+        modStars = diff2->m_pp_info.total_stars;
+        modPp = diff2->m_pp_info.pp;
+	}
 
     Beatmap *beatmap = osu->getSelectedBeatmap();
     if(beatmap != NULL) {
@@ -350,7 +356,7 @@ UString InfoLabel::buildDiffInfoString() {
     const bool starsAndModStarsAreEqual = (std::abs(stars - modStars) < starComparisonEpsilon);
 
     UString finalString;
-    if(!osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.ok)
+    if(!diff2 || !diff2->m_pp_info.ok)
         finalString = UString::format("CS:%.3g AR:%.3g OD:%.3g HP:%.3g Stars:%.3g *", CS, AR, OD, HP, stars);
     else if(!starsAndModStarsAreEqual)
         finalString = UString::format("CS:%.3g AR:%.3g OD:%.3g HP:%.3g Stars:%.3g -> %.3g (%ipp)", CS, AR, OD, HP,

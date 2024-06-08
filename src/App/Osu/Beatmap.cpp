@@ -691,7 +691,7 @@ void Beatmap::selectDifficulty2(DatabaseBeatmap *difficulty2) {
     if(osu_beatmap_preview_mods_live.getBool()) onModUpdate();
 
     // Request full pp recomputation
-    if(!m_selectedDifficulty2->do_not_store) {
+    if(m_selectedDifficulty2 && !m_selectedDifficulty2->do_not_store) {
         m_selectedDifficulty2->m_calculate_full_pp =
             std::async(std::launch::async, calculate_full_pp, m_selectedDifficulty2->m_sFilePath.c_str(),
                        osu->getScore()->getModsLegacy(), getAR(), getCS(), getOD(), osu->getSpeedMultiplier());

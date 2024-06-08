@@ -142,17 +142,40 @@ void reconnect() {
     // Will be reenabled after the login succeeds
     convar->getConVarByName("mp_autologin")->setValue(false);
 
+    bancho.username = convar->getConVarByName("name")->getString();
+    bancho.endpoint = convar->getConVarByName("mp_server")->getString();
+
+    // Admins told me they don't want any clients to connect
+    const char* server_blacklist[] = {
+        "ppy.sh",  // haven't asked, but the answer is obvious
+        "gatari.pw",
+    };
+    for(const char* endpoint : server_blacklist) {
+        if(!strcmp(endpoint, bancho.endpoint.toUtf8())) {
+            osu->m_notificationOverlay->addNotification("This server does not allow neosu clients.");
+            return;
+        }
+    }
+
     UString cv_password = convar->getConVarByName("mp_password")->getString();
     if(cv_password.length() == 0) {
         // No password: don't try to log in
         return;
     }
-
     const char *pw = cv_password.toUtf8();  // cv_password needs to stay in scope!
     bancho.pw_md5 = md5((u8 *)pw, strlen(pw));
 
-    bancho.username = convar->getConVarByName("name")->getString();
-    bancho.endpoint = convar->getConVarByName("mp_server")->getString();
+    // Admins told me they don't want score submission enabled
+    const char* submit_blacklist[] = {
+        "akatsuki.gg",
+        "ripple.moe",
+    };
+    for(const char* endpoint : submit_blacklist) {
+        if(!strcmp(endpoint, bancho.endpoint.toUtf8())) {
+            bancho.score_submission_policy = ServerPolicy::NO;
+            break;
+        }
+    }
 
     osu->m_optionsMenu->logInButton->is_loading = true;
     Packet new_login_packet = build_login_packet();
