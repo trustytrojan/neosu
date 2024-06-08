@@ -923,8 +923,16 @@ bool Beatmap::start() {
     resetLiveStarsTasks();
 
     // load music
-    unloadMusic();  // need to reload in case of speed/pitch changes (just to be sure)
-    loadMusic(false, m_bForceStreamPlayback);
+    if(convar->getConVarByName("restart_sound_engine_before_playing")->getBool()) {
+        // HACKHACK: Reload sound engine before starting the song, as it starts lagging after a while
+        //           (i haven't figured out the root cause yet)
+        engine->getSound()->restart();
+
+        // Restarting sound engine already reloads the music
+    } else {
+        unloadMusic();  // need to reload in case of speed/pitch changes (just to be sure)
+        loadMusic(false, m_bForceStreamPlayback);
+    }
 
     m_music->setLoop(false);
     m_bIsPaused = false;

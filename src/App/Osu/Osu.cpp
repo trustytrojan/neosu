@@ -141,6 +141,7 @@ ConVar scoreboard_animations("scoreboard_animations", true, FCVAR_DEFAULT, "anim
 ConVar instant_replay_duration("instant_replay_duration", 15.f, FCVAR_DEFAULT,
                                "instant replay (F2) duration, in seconds");
 ConVar normalize_loudness("normalize_loudness", false, FCVAR_DEFAULT, "normalize loudness across songs");
+ConVar restart_sound_engine_before_playing("restart_sound_engine_before_playing", false, FCVAR_DEFAULT, "jank fix for users who experience sound issues after playing for a while");
 
 ConVar use_https("use_https", true, FCVAR_DEFAULT);
 ConVar mp_server("mp_server", "ez-pp.farm", FCVAR_DEFAULT);
