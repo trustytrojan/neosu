@@ -238,17 +238,6 @@ void UpdateHandler::_installUpdate(std::string zipFilePath) {
         }
     }
 
-    // on windows it's impossible to overwrite a running executable, but we can simply rename/move it
-    // this is not necessary on other operating systems, but it doesn't break anything so
-    std::string executablePath = env->getExecutablePath();
-    if(executablePath.length() > 0) {
-        std::string oldExecutablePath = executablePath;
-        oldExecutablePath.append(".old");
-        env->deleteFile(oldExecutablePath);  // must delete potentially existing file from previous update, otherwise
-                                             // renaming will not work
-        env->renameFile(executablePath, oldExecutablePath);
-    }
-
     // extract and overwrite almost everything
     for(int i = 0; i < files.size(); i++) {
         // ignore cfg directory (don't want to overwrite user settings), except if it doesn't exist
@@ -258,15 +247,26 @@ void UpdateHandler::_installUpdate(std::string zipFilePath) {
         }
 
         int mainDirectoryOffset = files[i].find(mainDirectory);
-
         if(mainDirectoryOffset == 0 && files[i].length() - mainDirectoryOffset > 0 &&
-           mainDirectoryOffset + mainDirectory.length() < files[i].length()) {
+                mainDirectoryOffset + mainDirectory.length() < files[i].length()) {
             std::string outFilePath = files[i].substr(mainDirectoryOffset + mainDirectory.length());
+
+            // .exe and .dll can't be directly overwritten on windows
+            if(outFilePath.length() > 4) {
+                if(!strcmp(outFilePath.c_str() + outFilePath.length() - 4, ".exe") || !strcmp(outFilePath.c_str() + outFilePath.length() - 4, ".dll")) {
+                    std::string old_path = outFilePath;
+                    old_path.append(".old");
+                    env->deleteFile(old_path);
+                    env->renameFile(outFilePath, old_path);
+                }
+            }
+
             debugLog("UpdateHandler: Writing %s\n", outFilePath.c_str());
             mz_zip_reader_extract_file_to_file(&zip_archive, files[i].c_str(), outFilePath.c_str(), 0);
-        } else if(mainDirectoryOffset != 0)
+        } else if(mainDirectoryOffset != 0) {
             debugLog("UpdateHandler::installUpdate() warning, ignoring file \"%s\" because it's not in the main dir!\n",
                      files[i].c_str());
+        }
     }
 
     mz_zip_reader_end(&zip_archive);
@@ -276,6 +276,7 @@ void UpdateHandler::_installUpdate(std::string zipFilePath) {
 #endif
 
     m_status = STATUS::STATUS_SUCCESS_INSTALLATION;
+    env->deleteFile(zipFilePath);
 }
 
 Environment::OS UpdateHandler::stringToOS(UString osString) {
