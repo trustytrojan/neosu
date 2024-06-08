@@ -468,6 +468,7 @@ void MainMenu::draw(Graphics *g) {
 
         g->setDepthBuffer(true);
         g->clearDepthBuffer();
+        g->setCulling(true);
 
         g->push3DScene(mainButtonRect);
         g->offset3DScene(0, 0, mainButtonRect.getWidth() / 2);
@@ -865,7 +866,7 @@ void MainMenu::draw(Graphics *g) {
 
         g->pop3DScene();
 
-        g->setCulling(true);
+        g->setCulling(false);
         g->setDepthBuffer(false);
     }
 }
