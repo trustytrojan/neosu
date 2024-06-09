@@ -738,6 +738,8 @@ bool Beatmap::watch(FinishedScore score, double start_percent) {
     m_bContinueScheduled = false;
     unloadObjects();
 
+    osu->previous_mod_flags = osu->getScore()->getModsLegacy();
+
     osu->watched_user_name = score.playerName.c_str();
     osu->watched_user_id = score.player_id;
     is_watching = true;
@@ -772,6 +774,8 @@ bool Beatmap::spectate() {
     osu->watched_user_id = bancho.spectated_player_id;
     osu->watched_user_name = user_info->name;
     is_spectating = true;
+
+    osu->previous_mod_flags = osu->getScore()->getModsLegacy();
 
     FinishedScore score;
     score.isLegacyScore = true;
@@ -1128,10 +1132,15 @@ void Beatmap::stop(bool quit) {
     m_bIsPlaying = false;
     m_bIsPaused = false;
     m_bContinueScheduled = false;
-    is_spectating = false;
 
     saveAndSubmitScore(quit);
 
+    if(is_watching || is_spectating) {
+        osu->m_modSelector->resetMods();
+        osu->m_modSelector->enableModsFromFlags(osu->previous_mod_flags);
+    }
+
+    is_spectating = false;
     is_watching = false;
     spectated_replay.clear();
 

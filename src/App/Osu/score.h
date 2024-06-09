@@ -211,7 +211,7 @@ class LiveScore {
                                     double hpMultiplierComboEnd = 1.0f, double hpBarMaximumForNormalization = 200.0f);
 
     int getKeyCount(int key);
-    int getModsLegacy();
+    u32 getModsLegacy();
     UString getModsStringForRichPresence();
 
    private:

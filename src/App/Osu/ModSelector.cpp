@@ -1215,28 +1215,7 @@ void ModSelector::resetMods() {
 }
 
 u32 ModSelector::getModFlags() {
-    u32 flags = 0;
-
-    if(m_modButtonDoubletime->isOn()) flags |= ModFlags::DoubleTime;
-    if(m_modButtonDoubletime->getState() == 1) flags |= ModFlags::Nightcore;
-
-    if(m_modButtonSuddendeath->isOn() && m_modButtonSuddendeath->getState() == 0) flags |= ModFlags::SuddenDeath;
-    if(m_modButtonSuddendeath->isOn() && m_modButtonSuddendeath->getState() == 1) flags |= ModFlags::Perfect;
-
-    if(m_modButtonNofail->isOn()) flags |= ModFlags::NoFail;
-    if(m_modButtonEasy->isOn()) flags |= ModFlags::Easy;
-    if(m_modButtonTD->isOn()) flags |= ModFlags::TouchDevice;
-    if(m_modButtonHidden->isOn()) flags |= ModFlags::Hidden;
-    if(m_modButtonHardrock->isOn()) flags |= ModFlags::HardRock;
-    if(m_modButtonRelax->isOn()) flags |= ModFlags::Relax;
-    if(m_modButtonHalftime->isOn()) flags |= ModFlags::HalfTime;
-    if(m_modButtonSpunout->isOn()) flags |= ModFlags::SpunOut;
-    if(m_modButtonAutopilot->isOn()) flags |= ModFlags::Autopilot;
-    if(getModButtonOnGrid(4, 2)->isOn()) flags |= ModFlags::Target;
-    if(m_modButtonAuto->isOn()) flags |= ModFlags::Autoplay;
-    if(m_modButtonFlashlight) flags |= ModFlags::Flashlight;
-
-    return flags;
+    return osu->getScore()->getModsLegacy();
 }
 
 void ModSelector::enableModsFromFlags(u32 flags) {
@@ -1269,6 +1248,8 @@ void ModSelector::enableModsFromFlags(u32 flags) {
     m_modButtonSpunout->setOn(flags & ModFlags::SpunOut, true);
     m_modButtonAutopilot->setOn(flags & ModFlags::Autopilot, true);
     getModButtonOnGrid(4, 2)->setOn(flags & ModFlags::Target, true);
+    m_modButtonFlashlight->setOn(flags & ModFlags::Flashlight, true);
+    m_modButtonScoreV2->setOn(flags & ModFlags::ScoreV2, true);
 }
 
 void ModSelector::close() {

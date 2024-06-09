@@ -33,6 +33,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.changes.push_back("- Fixed restarting map while watching a replay");
     latest.changes.push_back("- Improved sound engine reliability");
     latest.changes.push_back("- Re-added win_snd_wasapi_exclusive convar");
+    latest.changes.push_back("- User mods will no longer change when watching a replay or joining a multiplayer room");
     changelogs.push_back(latest);
 
     CHANGELOG v35_02;

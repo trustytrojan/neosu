@@ -613,7 +613,7 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
         // BASS_MIXER_NONSTOP prevents some sound cards from going to sleep when there is no output
         // BASS_WASAPI_RAW bypasses windows "sound enhancements"
         auto flags = BASS_WASAPI_RAW | BASS_MIXER_NONSTOP | BASS_WASAPI_RAW;
-        if(convar->getConVarByName("wasapi_exclusive_mode")->getBool()) {
+        if(convar->getConVarByName("win_snd_wasapi_exclusive")->getBool()) {
             // BASS_WASAPI_EXCLUSIVE makes neosu have exclusive output to the sound card
             // BASS_WASAPI_AUTOFORMAT chooses the best matching sample format, BASSWASAPI doesn't resample in exclusive mode
             flags |= BASS_WASAPI_EXCLUSIVE | BASS_WASAPI_AUTOFORMAT;

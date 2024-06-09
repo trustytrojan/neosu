@@ -532,7 +532,7 @@ int LiveScore::getKeyCount(int key) {
     return 0;
 }
 
-int LiveScore::getModsLegacy() {
+u32 LiveScore::getModsLegacy() {
     int modsLegacy = 0;
 
     modsLegacy |= (osu->getModAuto() ? ModFlags::Autoplay : 0);
@@ -553,6 +553,7 @@ int LiveScore::getModsLegacy() {
     modsLegacy |= (osu->getModSS() ? ModFlags::Perfect : 0);
     modsLegacy |= (osu->getModNightmare() ? ModFlags::Nightmare : 0);
     modsLegacy |= (osu->getModTD() ? ModFlags::TouchDevice : 0);
+    modsLegacy |= (osu->getModFlashlight() ? ModFlags::Flashlight : 0);
 
     // Set some unused (in osu!std) mod flags for non-vanilla mods
     // (these flags don't seem to cause issues on osu!stable or bancho.py)

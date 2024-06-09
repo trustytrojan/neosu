@@ -495,6 +495,9 @@ void RoomScreen::ragequit() {
     osu->m_mainMenu->setVisible(true);
     osu->m_chat->removeChannel("#multiplayer");
     osu->m_chat->updateVisibility();
+
+    osu->m_modSelector->resetMods();
+    osu->m_modSelector->enableModsFromFlags(osu->previous_mod_flags);
 }
 
 void RoomScreen::on_map_change() {
@@ -568,6 +571,8 @@ void RoomScreen::on_room_joined(Room room) {
     RichPresence::setBanchoStatus(room.name.toUtf8(), MULTIPLAYER);
     osu->m_chat->addChannel("#multiplayer");
     osu->m_chat->updateVisibility();
+
+    osu->previous_mod_flags = osu->getScore()->getModsLegacy();
 
     osu->m_modSelector->resetMods();
     osu->m_modSelector->enableModsFromFlags(bancho.room.mods);
