@@ -1,15 +1,4 @@
-//================ Copyright (c) 2013, PG, All rights reserved. =================//
-//
-// Purpose:		smooth kinetic scrolling container
-//
-// $NoKeywords: $
-//===============================================================================//
-
-// TODO: refactor the spaghetti parts, this can be done way more elegantly
-
-#ifndef CBASEUISCROLLVIEW_H
-#define CBASEUISCROLLVIEW_H
-
+#pragma once
 #include "CBaseUIElement.h"
 
 class CBaseUIContainer;
@@ -53,10 +42,6 @@ class CBaseUIScrollView : public CBaseUIElement {
     }
     CBaseUIScrollView *setDrawScrollbars(bool drawScrollbars) {
         m_bDrawScrollbars = drawScrollbars;
-        return this;
-    }
-    CBaseUIScrollView *setClipping(bool clipping) {
-        m_bClipping = clipping;
         return this;
     }
 
@@ -133,6 +118,9 @@ class CBaseUIScrollView : public CBaseUIElement {
     // Useful in places where you're waiting on new content, like chat logs.
     bool sticky = false;
 
+    bool m_bHorizontalClipping = true;
+    bool m_bVerticalClipping = true;
+
    protected:
     virtual void onMoved();
 
@@ -150,7 +138,6 @@ class CBaseUIScrollView : public CBaseUIElement {
     bool m_bDrawFrame;
     bool m_bDrawBackground;
     bool m_bDrawScrollbars;
-    bool m_bClipping;
 
     Color m_backgroundColor;
     Color m_frameColor;
@@ -188,5 +175,3 @@ class CBaseUIScrollView : public CBaseUIElement {
     bool m_bScrollResistanceCheck;
     int m_iScrollResistance;
 };
-
-#endif

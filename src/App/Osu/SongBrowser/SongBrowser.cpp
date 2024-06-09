@@ -461,6 +461,7 @@ SongBrowser::SongBrowser() : ScreenBackable() {
     m_scoreBrowser->setHorizontalScrolling(false);
     m_scoreBrowser->setScrollbarSizeMultiplier(0.25f);
     m_scoreBrowser->setScrollResistance(15);
+    m_scoreBrowser->m_bHorizontalClipping = false;
     m_scoreBrowserScoresStillLoadingElement = new ScoresStillLoadingElement("Loading...");
     m_scoreBrowserNoRecordsYetElement = new NoRecordsSetElement("No records set!");
     m_scoreBrowser->getContainer()->addBaseUIElement(m_scoreBrowserNoRecordsYetElement);

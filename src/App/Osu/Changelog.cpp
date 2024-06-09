@@ -32,6 +32,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.changes.push_back("- Disabled FPoSu noclip by default");
     latest.changes.push_back("- Fixed auto mod staying on after Ctrl+clicking a map");
     latest.changes.push_back("- Fixed downloads sometimes failing on Windows");
+    latest.changes.push_back("- Fixed recent score times not being visible in leaderboards");
     latest.changes.push_back("- Fixed restarting map while watching a replay");
     latest.changes.push_back("- Improved sound engine reliability");
     latest.changes.push_back("- Re-added win_snd_wasapi_exclusive convar");

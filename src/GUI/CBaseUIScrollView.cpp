@@ -34,7 +34,6 @@ CBaseUIScrollView::CBaseUIScrollView(float xPos, float yPos, float xSize, float 
     m_bDrawFrame = true;
     m_bDrawBackground = true;
     m_bDrawScrollbars = true;
-    m_bClipping = true;
 
     m_backgroundColor = 0xff000000;
     m_frameColor = 0xffffffff;
@@ -110,8 +109,14 @@ void CBaseUIScrollView::draw(Graphics *g) {
     }
 
     // draw elements & scrollbars
-    if(m_bClipping) {
-        g->pushClipRect(McRect(m_vPos.x + 1, m_vPos.y + 2, m_vSize.x - 1, m_vSize.y - 1));
+    if(m_bHorizontalClipping || m_bVerticalClipping) {
+        auto clip_rect = McRect(
+            m_bHorizontalClipping ? m_vPos.x + 1 : 0,
+            m_bVerticalClipping ? m_vPos.y + 2 : 0,
+            m_bHorizontalClipping ? m_vSize.x - 1 : engine->getScreenWidth(),
+            m_bVerticalClipping ? m_vSize.y - 1 : engine->getScreenHeight()
+        );
+        g->pushClipRect(clip_rect);
     }
     {
         m_container->draw(g);
@@ -147,7 +152,7 @@ void CBaseUIScrollView::draw(Graphics *g) {
             }
         }
     }
-    if(m_bClipping) {
+    if(m_bHorizontalClipping || m_bVerticalClipping) {
         g->popClipRect();
     }
 }
