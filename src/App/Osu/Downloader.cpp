@@ -39,7 +39,7 @@ void abort_downloads() {
     }
 }
 
-void update_download_progress(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal,
+int update_download_progress(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal,
                               curl_off_t ulnow) {
     (void)ultotal;
     (void)ulnow;
@@ -51,6 +51,8 @@ void update_download_progress(void* clientp, curl_off_t dltotal, curl_off_t dlno
     } else if(dlnow > 0) {
         result->progress = (float)dlnow / (float)dltotal;
     }
+
+    return CURL_PROGRESSFUNC_CONTINUE;
 }
 
 void* do_downloads(void* arg) {
