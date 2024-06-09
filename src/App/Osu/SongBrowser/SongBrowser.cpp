@@ -1335,7 +1335,10 @@ void SongBrowser::onDifficultySelected(DatabaseBeatmap *diff2, bool play) {
             setVisible(false);
         } else {
             // CTRL + click = auto
-            if(engine->getKeyboard()->isControlDown()) osu->getModSelector()->enableAuto();
+            if(engine->getKeyboard()->isControlDown()) {
+                osu->m_bModAutoTemp = true;
+                osu->getModSelector()->enableAuto();
+            }
 
             if(m_selectedBeatmap->play()) {
                 m_bHasSelectedAndIsPlaying = true;

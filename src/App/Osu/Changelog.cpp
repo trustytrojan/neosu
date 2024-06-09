@@ -30,6 +30,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
     latest.changes.push_back("- Disabled FPoSu noclip by default");
+    latest.changes.push_back("- Fixed auto mod staying on after Ctrl+clicking a map");
     latest.changes.push_back("- Fixed restarting map while watching a replay");
     latest.changes.push_back("- Improved sound engine reliability");
     latest.changes.push_back("- Re-added win_snd_wasapi_exclusive convar");

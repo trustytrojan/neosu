@@ -54,6 +54,7 @@ class ModSelector : public OsuScreen {
     CBaseUILabel *m_nonVanillaWarning;
     UIModSelectorModButton *m_modButtonHalftime;
     UIModSelectorModButton *m_modButtonDoubletime;
+    UIModSelectorModButton *m_modButtonAuto;
 
    private:
     struct OVERRIDE_SLIDER {
@@ -142,7 +143,6 @@ class ModSelector : public OsuScreen {
     UIModSelectorModButton *m_modButtonRelax;
     UIModSelectorModButton *m_modButtonAutopilot;
     UIModSelectorModButton *m_modButtonSpunout;
-    UIModSelectorModButton *m_modButtonAuto;
     UIModSelectorModButton *m_modButtonScoreV2;
     UIModSelectorModButton *m_modButtonTD;
 

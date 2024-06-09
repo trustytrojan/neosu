@@ -49,6 +49,7 @@
 #include "SoundEngine.h"
 #include "SpectatorScreen.h"
 #include "Spinner.h"
+#include "UIModSelectorModButton.h"
 
 ConVar osu_pvs("osu_pvs", true, FCVAR_DEFAULT,
                "optimizes all loops over all hitobjects by clamping the range to the Potentially Visible Set");
@@ -1134,6 +1135,14 @@ void Beatmap::stop(bool quit) {
     m_bContinueScheduled = false;
 
     saveAndSubmitScore(quit);
+
+    // Auto mod was "temporary" since it was set from Ctrl+Clicking a map, not from the mod selector
+    if(osu->m_bModAutoTemp) {
+        if(osu->m_modSelector->m_modButtonAuto->isOn()) {
+            osu->m_modSelector->m_modButtonAuto->click();
+        }
+        osu->m_bModAutoTemp = false;
+    }
 
     if(is_watching || is_spectating) {
         osu->m_modSelector->resetMods();
