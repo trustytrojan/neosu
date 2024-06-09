@@ -1026,6 +1026,8 @@ void Beatmap::actualRestart() {
     m_iCurMusicPos = 0;
 
     m_bIsPlaying = true;
+    is_spectating = false;
+    is_watching = false;
 }
 
 void Beatmap::pause(bool quitIfWaiting) {
