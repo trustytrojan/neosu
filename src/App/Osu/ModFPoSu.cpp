@@ -53,7 +53,7 @@ ConVar fposu_cube_tint_b("fposu_cube_tint_b", 255, FCVAR_DEFAULT, "from 0 to 255
 ConVar fposu_invert_vertical("fposu_invert_vertical", false, FCVAR_DEFAULT);
 ConVar fposu_invert_horizontal("fposu_invert_horizontal", false, FCVAR_DEFAULT);
 
-ConVar fposu_noclip("fposu_noclip", true, FCVAR_DEFAULT);
+ConVar fposu_noclip("fposu_noclip", false, FCVAR_DEFAULT);
 ConVar fposu_noclipspeed("fposu_noclipspeed", 2.0f, FCVAR_DEFAULT);
 ConVar fposu_noclipaccelerate("fposu_noclipaccelerate", 20.0f, FCVAR_DEFAULT);
 ConVar fposu_noclipfriction("fposu_noclipfriction", 10.0f, FCVAR_DEFAULT);
