@@ -3716,9 +3716,9 @@ void Beatmap::saveAndSubmitScore(bool quit) {
     osu->getScore()->setPPv2(pp);
 
     // save local score, but only under certain conditions
-    const bool isComplete = (num300s + num100s + num50s + numMisses >= numHitObjects);
-    const bool isZero = (osu->getScore()->getScore() < 1);
-    const bool isCheated = (osu->getModAuto() || (osu->getModAutopilot() && osu->getModRelax())) ||
+    bool isComplete = (num300s + num100s + num50s + numMisses >= numHitObjects);
+    bool isZero = (osu->getScore()->getScore() < 1);
+    bool isCheated = (osu->getModAuto() || (osu->getModAutopilot() && osu->getModRelax())) ||
                            osu->getScore()->isUnranked() || is_watching || is_spectating;
 
     FinishedScore score;
@@ -3740,6 +3740,9 @@ void Beatmap::saveAndSubmitScore(bool quit) {
     score.diff2 = m_selectedDifficulty2;
     score.ragequit = quit;
     score.play_time_ms = m_iCurMusicPos / osu->getSpeedMultiplier();
+
+    // osu!stable doesn't submit scores of less than 7 seconds
+    isZero |= (score.play_time_ms < 7000);
 
     score.num300s = osu->getScore()->getNum300s();
     score.num100s = osu->getScore()->getNum100s();
