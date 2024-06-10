@@ -1,7 +1,13 @@
 #pragma once
 
 #ifndef MCENGINE_DATA_DIR
+
+#ifdef _WIN32
+#define MCENGINE_DATA_DIR ".\\"
+#else
 #define MCENGINE_DATA_DIR "./"
+#endif
+
 #endif
 
 /*

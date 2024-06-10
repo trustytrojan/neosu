@@ -807,18 +807,17 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     addSubSection("Skin");
     addSkinPreview();
     {
-        addButton("Open Skin folder")
-            ->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::openSkinsFolder));
-
         OPTIONS_ELEMENT skinSelect;
         {
             skinSelect = addButton("Select Skin", "default");
             m_skinSelectLocalButton = skinSelect.elements[0];
             m_skinLabel = (CBaseUILabel *)skinSelect.elements[1];
         }
-
         ((CBaseUIButton *)m_skinSelectLocalButton)
             ->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSkinSelect));
+
+        addButton("Open current Skin folder")
+            ->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::openCurrentSkinFolder));
 
         OPTIONS_ELEMENT skinReload = addButtonButton("Reload Skin", "Random Skin");
         ((UIButton *)skinReload.elements[0])
@@ -2376,12 +2375,22 @@ void OptionsMenu::onRawInputToAbsoluteWindowChange(CBaseUICheckbox *checkbox) {
     }
 }
 
-void OptionsMenu::openSkinsFolder() {
-    UString skinFolder = convar->getConVarByName("osu_folder")->getString();
-    skinFolder.append(convar->getConVarByName("osu_folder_sub_skins")->getString());
-
-    std::string skin_folder_str(skinFolder.toUtf8());
-    env->openDirectory(skin_folder_str);
+void OptionsMenu::openCurrentSkinFolder() {
+    auto current_skin = convar->getConVarByName("osu_skin")->getString();
+    if(current_skin == UString("default")) {
+#ifdef _WIN32
+        // ................yeah
+        env->openDirectory(MCENGINE_DATA_DIR "materials\\default");
+#else
+        env->openDirectory(MCENGINE_DATA_DIR "materials/default");
+#endif
+    } else {
+        UString skinFolder = convar->getConVarByName("osu_folder")->getString();
+        skinFolder.append(convar->getConVarByName("osu_folder_sub_skins")->getString());
+        skinFolder.append(current_skin);
+        std::string skin_folder_str(skinFolder.toUtf8());
+        env->openDirectory(skinFolder.toUtf8());
+    }
 }
 
 void OptionsMenu::onSkinSelect() {

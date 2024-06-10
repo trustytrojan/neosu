@@ -29,6 +29,7 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
+    latest.changes.push_back("- Changed \"Open Skins folder\" button to open the currently selected skin's folder");
     latest.changes.push_back("- Fixed sliderslide and spinnerspin sounds not looping");
     latest.changes.push_back("- Improved sound engine reliability");
     latest.changes.push_back("- Removed sliderhead fadeout animation (set osu_slider_sliderhead_fadeout to 1 for old behavior)");

@@ -111,7 +111,7 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     void onBorderlessWindowedChange(CBaseUICheckbox *checkbox);
     void onDPIScalingChange(CBaseUICheckbox *checkbox);
     void onRawInputToAbsoluteWindowChange(CBaseUICheckbox *checkbox);
-    void openSkinsFolder();
+    void openCurrentSkinFolder();
     void onSkinSelect();
     void onSkinSelect2(UString skinName, int id = -1);
     void onSkinReload();
