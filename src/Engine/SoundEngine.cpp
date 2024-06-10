@@ -9,6 +9,7 @@
 #include "Environment.h"
 #include "OptionsMenu.h"
 #include "Osu.h"
+#include "PauseMenu.h"
 #include "Skin.h"
 #include "Sound.h"
 #include "WinEnvironment.h"
@@ -781,6 +782,11 @@ void SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
     if(osu->getSelectedBeatmap()->getMusic() != NULL) {
         was_playing = osu->getSelectedBeatmap()->getMusic()->isPlaying();
         prevMusicPositionMS = osu->getSelectedBeatmap()->getMusic()->getPositionMS();
+
+        if(osu->isInPlayMode() && was_playing) {
+            osu->getSelectedBeatmap()->pause(false);
+            osu->m_pauseMenu->setVisible(osu->getSelectedBeatmap()->isPaused());
+        }
     }
 
     // TODO: This is blocking main thread, can freeze for a long time on some sound cards
