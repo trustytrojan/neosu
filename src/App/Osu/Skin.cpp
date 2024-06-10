@@ -1437,8 +1437,8 @@ void Skin::checkLoadSound(Sound **addressOfPointer, std::string skinElementName,
                 if(osu_skin_async.getBool()) {
                     engine->getResourceManager()->requestNextLoadAsync();
                 }
-                return engine->getResourceManager()->loadSoundAbs(path, resource_name, !isSample, isOverlayable, false,
-                                                                  loop);
+                return engine->getResourceManager()->loadSoundAbs(path, resource_name, !isSample, isOverlayable, loop,
+                                                                  false);
             }
         }
 

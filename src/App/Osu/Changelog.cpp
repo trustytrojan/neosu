@@ -29,6 +29,7 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
+    latest.changes.push_back("- Fixed sliderslide and spinnerspin sounds not looping");
     latest.changes.push_back("- Improved sound engine reliability");
     changelogs.push_back(latest);
 
