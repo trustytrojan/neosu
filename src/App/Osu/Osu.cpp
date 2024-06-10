@@ -1619,7 +1619,7 @@ void Osu::saveScreenshot() {
     int screenshotNumber = 0;
     UString screenshot_path;
     do {
-        screenshot_path = UString("screenshots/screenshot%d.png", screenshotNumber);
+        screenshot_path = UString::format("screenshots/screenshot%d.png", screenshotNumber);
         screenshotNumber++;
     } while(env->fileExists(screenshot_path.toUtf8()));
 
