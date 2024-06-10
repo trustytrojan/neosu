@@ -29,16 +29,21 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
-    latest.changes.push_back("- Added SoundEngine auto-restart settings");
-    latest.changes.push_back("- Disabled FPoSu noclip by default");
-    latest.changes.push_back("- Fixed auto mod staying on after Ctrl+clicking a map");
-    latest.changes.push_back("- Fixed downloads sometimes failing on Windows");
-    latest.changes.push_back("- Fixed recent score times not being visible in leaderboards");
-    latest.changes.push_back("- Fixed restarting map while watching a replay");
     latest.changes.push_back("- Improved sound engine reliability");
-    latest.changes.push_back("- Re-added win_snd_wasapi_exclusive convar");
-    latest.changes.push_back("- User mods will no longer change when watching a replay or joining a multiplayer room");
     changelogs.push_back(latest);
+
+    CHANGELOG v35_03;
+    v35_03.title = "35.03 (2024-06-10)";
+    v35_03.changes.push_back("- Added SoundEngine auto-restart settings");
+    v35_03.changes.push_back("- Disabled FPoSu noclip by default");
+    v35_03.changes.push_back("- Fixed auto mod staying on after Ctrl+clicking a map");
+    v35_03.changes.push_back("- Fixed downloads sometimes failing on Windows");
+    v35_03.changes.push_back("- Fixed recent score times not being visible in leaderboards");
+    v35_03.changes.push_back("- Fixed restarting map while watching a replay");
+    v35_03.changes.push_back("- Improved sound engine reliability");
+    v35_03.changes.push_back("- Re-added win_snd_wasapi_exclusive convar");
+    v35_03.changes.push_back("- User mods will no longer change when watching a replay or joining a multiplayer room");
+    changelogs.push_back(v35_03);
 
     CHANGELOG v35_02;
     v35_02.title = "35.02 (2024-06-08)";

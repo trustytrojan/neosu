@@ -57,7 +57,7 @@ Osu *osu = NULL;
 
 // release configuration
 ConVar auto_update("auto_update", true, FCVAR_DEFAULT);
-ConVar osu_version("osu_version", 35.03f, FCVAR_DEFAULT | FCVAR_HIDDEN);
+ConVar osu_version("osu_version", 35.04f, FCVAR_DEFAULT | FCVAR_HIDDEN);
 
 #ifdef _DEBUG
 ConVar osu_debug("osu_debug", true, FCVAR_DEFAULT);

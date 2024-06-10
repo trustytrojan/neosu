@@ -30,7 +30,6 @@ Sound::Sound(std::string filepath, bool stream, bool overlayable, bool loop, boo
     m_bIsOverlayable = overlayable;
     m_fSpeed = 1.0f;
     m_fVolume = 1.0f;
-    m_fLastPlayTime = -1.0f;
 }
 
 std::vector<HCHANNEL> Sound::getActiveChannels() {
@@ -122,12 +121,24 @@ void Sound::initAsync() {
             debugLog("BASS_FX_TempoCreate() returned error %d on file %s\n", BASS_ErrorGetCode(), m_sFilePath.c_str());
             return;
         }
+
+        // Only compute the length once
+        i64 length = BASS_ChannelGetLength(m_stream, BASS_POS_BYTE);
+        f64 lengthInSeconds = BASS_ChannelBytes2Seconds(m_stream, length);
+        f64 lengthInMilliSeconds = lengthInSeconds * 1000.0;
+        m_length = (u32)lengthInMilliSeconds;
     } else {
         m_sample = BASS_SampleLoad(false, m_sFilePath.c_str(), 0, 0, 1, BASS_SAMPLE_FLOAT);
         if(!m_sample) {
             debugLog("BASS_SampleLoad() returned error %d on file %s\n", BASS_ErrorGetCode(), m_sFilePath.c_str());
             return;
         }
+
+        // Only compute the length once
+        i64 length = BASS_ChannelGetLength(m_sample, BASS_POS_BYTE);
+        f64 lengthInSeconds = BASS_ChannelBytes2Seconds(m_sample, length);
+        f64 lengthInMilliSeconds = lengthInSeconds * 1000.0;
+        m_length = (u32)lengthInMilliSeconds;
     }
 
     m_bAsyncReady = true;
@@ -136,9 +147,11 @@ void Sound::initAsync() {
 void Sound::destroy() {
     if(!m_bReady) return;
 
+    m_bStarted = false;
     m_bReady = false;
     m_bAsyncReady = false;
     m_fLastPlayTime = 0.0;
+    m_bPaused = false;
 
     if(m_bStream) {
         BASS_Mixer_ChannelRemove(m_stream);
@@ -166,23 +179,24 @@ void Sound::setPosition(double percent) {
         return;
     }
 
-    percent = clamp<double>(percent, 0.0, 1.0);
+    percent = clamp<f64>(percent, 0.0, 1.0);
 
-    const double length = BASS_ChannelGetLength(m_stream, BASS_POS_BYTE);
-    const double lengthInSeconds = BASS_ChannelBytes2Seconds(m_stream, length);
-
-    // NOTE: abused for play interp
-    if(lengthInSeconds * percent < snd_play_interp_duration.getFloat()) {
-        m_fLastPlayTime = engine->getTime() - lengthInSeconds * percent;
-    } else {
-        m_fLastPlayTime = 0.0;
+    f64 length = BASS_ChannelGetLength(m_stream, BASS_POS_BYTE);
+    if(length < 0) {
+        debugLog("Could not set stream position: error %d\n", BASS_ErrorGetCode());
+        return;
     }
 
-    if(!BASS_ChannelSetPosition(m_stream, (QWORD)(length * percent), BASS_POS_BYTE | BASS_POS_FLUSH)) {
+    f64 lengthInSeconds = BASS_ChannelBytes2Seconds(m_stream, length);
+    if(!BASS_ChannelSetPosition(m_stream, (i64)(length * percent), BASS_POS_BYTE | BASS_POS_FLUSH)) {
         if(Osu::debug->getBool()) {
             debugLog("Sound::setPosition( %f ) BASS_ChannelSetPosition() error %i on file %s\n", percent,
                      BASS_ErrorGetCode(), m_sFilePath.c_str());
         }
+    }
+
+    if(m_bStarted) {
+        m_fLastPlayTime = engine->getTime() - (lengthInSeconds * percent);
     }
 }
 
@@ -193,19 +207,21 @@ void Sound::setPositionMS(unsigned long ms) {
         return;
     }
 
-    const QWORD position = BASS_ChannelSeconds2Bytes(m_stream, ms / 1000.0);
-
-    // NOTE: abused for play interp
-    if((double)ms / 1000.0 < snd_play_interp_duration.getFloat())
-        m_fLastPlayTime = engine->getTime() - ((double)ms / 1000.0);
-    else
-        m_fLastPlayTime = 0.0;
+    i64 position = BASS_ChannelSeconds2Bytes(m_stream, ms / 1000.0);
+    if(position < 0) {
+        debugLog("Could not set stream position: error %d\n", BASS_ErrorGetCode());
+        return;
+    }
 
     if(!BASS_ChannelSetPosition(m_stream, position, BASS_POS_BYTE | BASS_POS_FLUSH)) {
         if(Osu::debug->getBool()) {
             debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
                      BASS_ErrorGetCode(), m_sFilePath.c_str());
         }
+    }
+
+    if(m_bStarted) {
+        m_fLastPlayTime = engine->getTime() - ((f64)ms / 1000.0);
     }
 }
 
@@ -276,59 +292,63 @@ void Sound::setLoop(bool loop) {
 }
 
 float Sound::getPosition() {
-    if(!m_bReady) return 0.0f;
+    if(!m_bReady) return 0.f;
     if(!m_bStream) {
         engine->showMessageError("Programmer Error", "Called getPosition on a sample!");
-        return 0.0f;
+        return 0.f;
     }
 
-    const QWORD lengthBytes = BASS_ChannelGetLength(m_stream, BASS_POS_BYTE);
-    const QWORD positionBytes = BASS_ChannelGetPosition(m_stream, BASS_POS_BYTE);
+    i64 lengthBytes = BASS_ChannelGetLength(m_stream, BASS_POS_BYTE);
+    if(lengthBytes < 0) {
+        // The stream ended and got freed by BASS_STREAM_AUTOFREE -> invalid handle!
+        return 1.f;
+    }
+
+    i64 positionBytes = BASS_ChannelGetPosition(m_stream, BASS_POS_BYTE);
     const float position = (float)((double)(positionBytes) / (double)(lengthBytes));
     return position;
 }
 
-unsigned long Sound::getPositionMS() {
+u32 Sound::getPositionMS() {
     if(!m_bReady) return 0;
     if(!m_bStream) {
         engine->showMessageError("Programmer Error", "Called getPositionMS on a sample!");
         return 0;
     }
 
-    const QWORD position = BASS_ChannelGetPosition(m_stream, BASS_POS_BYTE);
-    const double positionInSeconds = BASS_ChannelBytes2Seconds(m_stream, position);
-    const double positionInMilliSeconds = positionInSeconds * 1000.0;
-    const unsigned long positionMS = static_cast<unsigned long>(positionInMilliSeconds);
+    i64 position = BASS_ChannelGetPosition(m_stream, BASS_POS_BYTE);
+    if(position < 0) {
+        // The stream ended and got freed by BASS_STREAM_AUTOFREE -> invalid handle!
+        return m_length;
+    }
+
+    f64 positionInSeconds = BASS_ChannelBytes2Seconds(m_stream, position);
+    f64 positionInMilliSeconds = positionInSeconds * 1000.0;
+    u32 positionMS = (u32)positionInMilliSeconds;
+    if(!isPlaying()) {
+        return positionMS;
+    }
 
     // special case: a freshly started channel position jitters, lerp with engine time over a set duration to smooth
     // things over
-    const double interpDuration = snd_play_interp_duration.getFloat();
-    const unsigned long interpDurationMS = interpDuration * 1000;
-    if(interpDuration > 0.0 && positionMS < interpDurationMS) {
-        const float speedMultiplier = getSpeed();
-        const double delta = (engine->getTime() - m_fLastPlayTime) * speedMultiplier;
-        if(m_fLastPlayTime > 0.0 && delta < interpDuration && isPlaying()) {
-            const double lerpPercent = clamp<double>(((delta / interpDuration) - snd_play_interp_ratio.getFloat()) /
-                                                         (1.0 - snd_play_interp_ratio.getFloat()),
-                                                     0.0, 1.0);
-            return static_cast<unsigned long>(lerp<double>(delta * 1000.0, (double)positionMS, lerpPercent));
-        }
+    f64 interpDuration = snd_play_interp_duration.getFloat();
+    u32 interpDurationMS = interpDuration * 1000;
+    if(interpDuration <= 0.0 || positionMS >= interpDurationMS) return positionMS;
+
+    f64 speedMultiplier = getSpeed();
+    f64 delta = (engine->getTime() - m_fLastPlayTime) * speedMultiplier;
+    f64 interp_ratio = snd_play_interp_ratio.getFloat();
+    if(delta < interpDuration) {
+        f64 lerpPercent = clamp<f64>(((delta / interpDuration) - interp_ratio) / (1.0 - interp_ratio), 0.0, 1.0);
+        positionMS = (u32)lerp<f64>(delta * 1000.0, (f64)positionMS, lerpPercent);
     }
 
     return positionMS;
 }
 
-unsigned long Sound::getLengthMS() {
+u32 Sound::getLengthMS() {
     if(!m_bReady) return 0;
-    if(!m_bStream) {
-        engine->showMessageError("Programmer Error", "Called getLengthMS on a sample!");
-        return 0;
-    }
-
-    const QWORD length = BASS_ChannelGetLength(m_stream, BASS_POS_BYTE);
-    const double lengthInSeconds = BASS_ChannelBytes2Seconds(m_stream, length);
-    const double lengthInMilliSeconds = lengthInSeconds * 1000.0;
-    return static_cast<unsigned long>(lengthInMilliSeconds);
+    return m_length;
 }
 
 float Sound::getSpeed() { return m_fSpeed; }
@@ -347,23 +367,14 @@ float Sound::getFrequency() {
 }
 
 bool Sound::isPlaying() {
-    if(!m_bReady) return false;
-
-    auto channels = getActiveChannels();
-    return !channels.empty();
+    return m_bReady && m_bStarted && !m_bPaused && !getActiveChannels().empty();
 }
 
 bool Sound::isFinished() {
-    if(!m_bReady) return false;
-
-    // The sound has never been started!
-    if(m_fLastPlayTime <= 0.0) return false;
-
-    return getActiveChannels().empty() && !m_bPaused;
+    return m_bReady && m_bStarted && !isPlaying();
 }
 
 void Sound::rebuild(std::string newFilePath) {
     m_sFilePath = newFilePath;
-
     reload();
 }

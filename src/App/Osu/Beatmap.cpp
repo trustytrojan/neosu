@@ -554,7 +554,7 @@ void Beatmap::skipEmptySection() {
     const long nextHitObjectDelta = m_iNextHitObjectTime - (long)m_iCurMusicPosWithOffsets;
 
     if(!osu_end_skip.getBool() && nextHitObjectDelta < 0)
-        m_music->setPositionMS(max(m_music->getLengthMS(), (unsigned long)1) - 1);
+        m_music->setPositionMS(max(m_music->getLengthMS(), (u32)1) - 1);
     else
         m_music->setPositionMS(max(m_iNextHitObjectTime - (long)(offset * offsetMultiplier), (long)0));
 
@@ -2542,6 +2542,7 @@ void Beatmap::update2() {
                     m_bIsPlaying = true;
 
                     engine->getSound()->play(m_music);
+                    m_music->setLoop(false);
                     m_music->setPositionMS(0);
                     m_music->setVolume(getIdealVolume());
                     m_music->setSpeed(osu->getSpeedMultiplier());
