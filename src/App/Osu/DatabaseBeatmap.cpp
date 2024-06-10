@@ -178,6 +178,7 @@ DatabaseBeatmap::~DatabaseBeatmap() {
     if(m_calculate_full_pp.valid()) {
         m_calculate_full_pp.wait();
         m_calculate_full_pp = std::future<pp_info>();
+        // TODO @kiwec: free pp_info
     }
 
     if(m_difficulties != NULL) {

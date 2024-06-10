@@ -578,6 +578,15 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
                 "from ALL scores?\n(Even from ones you got in your database because you watched a replay?)",
                 convar->getConVarByName("osu_user_switcher_include_legacy_scores_for_names"));
 
+    addSubSection("Songbrowser");
+    addCheckbox("Draw Strain Graph in Songbrowser",
+                "Hold either SHIFT/CTRL to show only speed/aim strains.\nSpeed strain is red, aim strain is "
+                "green.\n(See osu_hud_scrubbing_timeline_strains_*)",
+                convar->getConVarByName("osu_draw_songbrowser_strain_graph"));
+    addCheckbox("Draw Strain Graph in Scrubbing Timeline",
+                "Speed strain is red, aim strain is green.\n(See osu_hud_scrubbing_timeline_strains_*)",
+                convar->getConVarByName("osu_draw_scrubbing_timeline_strain_graph"));
+
     addSubSection("Window");
     addCheckbox("Pause on Focus Loss", "Should the game pause when you switch to another application?",
                 convar->getConVarByName("osu_pause_on_focus_loss"));

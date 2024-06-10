@@ -681,6 +681,8 @@ void Beatmap::select() {
 }
 
 void Beatmap::selectDifficulty2(DatabaseBeatmap *difficulty2) {
+    auto previous_diff = m_selectedDifficulty2;
+
     if(difficulty2 != NULL) {
         m_selectedDifficulty2 = difficulty2;
 
@@ -691,12 +693,21 @@ void Beatmap::selectDifficulty2(DatabaseBeatmap *difficulty2) {
 
     if(osu_beatmap_preview_mods_live.getBool()) onModUpdate();
 
-    // Request full pp recomputation
-    if(m_selectedDifficulty2 && !m_selectedDifficulty2->do_not_store) {
-        m_selectedDifficulty2->m_calculate_full_pp =
-            std::async(std::launch::async, calculate_full_pp, m_selectedDifficulty2->m_sFilePath.c_str(),
-                       osu->getScore()->getModsLegacy(), getAR(), getCS(), getOD(), osu->getSpeedMultiplier());
+    if(previous_diff != difficulty2) {
+        // TODO @kiwec: commented out because this still gets triggered when
+        //              starting a map, thus erasing strains from schrubbing timeline
+        // m_aimStrains.clear();
+        // m_speedStrains.clear();
+
+        // Request full pp recomputation
+        if(m_selectedDifficulty2 && !m_selectedDifficulty2->do_not_store) {
+            // TODO @kiwec: free pp_info of previous m_calculate_full_pp, if applicable
+            m_selectedDifficulty2->m_calculate_full_pp =
+                std::async(std::launch::async, calculate_full_pp, m_selectedDifficulty2->m_sFilePath.c_str(),
+                           osu->getScore()->getModsLegacy(), getAR(), getCS(), getOD(), osu->getSpeedMultiplier());
+        }
     }
+
 }
 
 void Beatmap::deselect() {

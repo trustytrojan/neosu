@@ -178,6 +178,9 @@ class Beatmap {
                                                               m_speedNotesForNumHitObjects.size() - 1)]
                     : 0);
     }
+    
+    std::vector<double> m_aimStrains;
+    std::vector<double> m_speedStrains;
 
     // set to false when using non-vanilla mods (disables score submission)
     bool vanilla = true;

@@ -6,16 +6,64 @@ use libc;
 use rosu_pp;
 
 #[repr(C)]
-#[derive(Default)]
 pub struct pp_info {
     pub total_stars: f64,
     pub aim_stars: f64,
     pub speed_stars: f64,
+
     pub pp: f64,
+
     pub num_objects: u32,
     pub num_circles: u32,
     pub num_spinners: u32,
+
+    pub aim_strains: *mut f64,
+    pub aim_strains_len: usize,
+    pub aim_strains_capacity: usize,
+    pub speed_strains: *mut f64,
+    pub speed_strains_len: usize,
+    pub speed_strains_capacity: usize,
+
     pub ok: bool,
+}
+
+impl Default for pp_info {
+    fn default() -> Self {
+        pp_info {
+            total_stars: 0.0,
+            aim_stars: 0.0,
+            speed_stars: 0.0,
+
+            pp: 0.0,
+
+            num_objects: 0,
+            num_circles: 0,
+            num_spinners: 0,
+
+            aim_strains: std::ptr::null_mut(),
+            aim_strains_len: 0,
+            aim_strains_capacity: 0,
+            speed_strains: std::ptr::null_mut(),
+            speed_strains_len: 0,
+            speed_strains_capacity: 0,
+
+            ok: false,
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn free_pp_info(info: pp_info) {
+    if !info.aim_strains.is_null() {
+        unsafe {
+            Vec::from_raw_parts(info.aim_strains, info.aim_strains_len, info.aim_strains_capacity);
+        }
+    }
+    if !info.speed_strains.is_null() {
+        unsafe {
+            Vec::from_raw_parts(info.speed_strains, info.speed_strains_len, info.speed_strains_capacity);
+        }
+    }
 }
 
 #[no_mangle]
@@ -33,23 +81,36 @@ pub extern "C" fn calculate_full_pp(path: *const libc::c_char, mod_flags: u32, a
         Err(_) => return pp_info::default()
     };
 
-    let diff_attrs = rosu_pp::Difficulty::new()
+    let diff = rosu_pp::Difficulty::new()
         .mods(mod_flags)
         .ar(ar, false)
         .cs(cs, false)
         .od(od, false)
-        .clock_rate(speed_multiplier)
-        .with_mode()
-        .calculate(&osu_map);
+        .clock_rate(speed_multiplier);
+
+    let diff_attrs = diff.with_mode().calculate(&osu_map);
+    let diff_strains = diff.with_mode().strains(&osu_map);
+    let mut aim_strains = std::mem::ManuallyDrop::new(diff_strains.aim);
+    let mut speed_strains = std::mem::ManuallyDrop::new(diff_strains.speed);
 
     let mut result = pp_info {
         total_stars: diff_attrs.stars,
         aim_stars: diff_attrs.aim,
         speed_stars: diff_attrs.speed,
+
         pp: 0.0,
+
         num_objects: diff_attrs.n_circles + diff_attrs.n_sliders + diff_attrs.n_spinners,
         num_circles: diff_attrs.n_circles,
         num_spinners: diff_attrs.n_spinners,
+
+        aim_strains: aim_strains.as_mut_ptr(),
+        aim_strains_len: aim_strains.len(),
+        aim_strains_capacity: aim_strains.capacity(),
+        speed_strains: speed_strains.as_mut_ptr(),
+        speed_strains_len: speed_strains.len(),
+        speed_strains_capacity: speed_strains.capacity(),
+
         ok: true,
     };
 

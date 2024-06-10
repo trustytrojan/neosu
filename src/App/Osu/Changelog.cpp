@@ -32,6 +32,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.changes.push_back("- Changed \"Open Skins folder\" button to open the currently selected skin's folder");
     latest.changes.push_back("- Fixed sliderslide and spinnerspin sounds not looping");
     latest.changes.push_back("- Improved sound engine reliability");
+    latest.changes.push_back("- Re-added strain graphs");
     latest.changes.push_back("- Removed sliderhead fadeout animation (set osu_slider_sliderhead_fadeout to 1 for old behavior)");
     changelogs.push_back(latest);
 
