@@ -56,6 +56,9 @@ ConVar osu_slider_reverse_arrow_animated("osu_slider_reverse_arrow_animated", tr
                                          "pulse animation on reverse arrows");
 ConVar osu_slider_reverse_arrow_alpha_multiplier("osu_slider_reverse_arrow_alpha_multiplier", 1.0f, FCVAR_DEFAULT);
 
+// osu!stable doesn't display a fadeout animation for sliderheads
+ConVar osu_slider_sliderhead_fadeout("osu_slider_sliderhead_fadeout", false, FCVAR_DEFAULT);
+
 ConVar *Slider::m_osu_playfield_mirror_horizontal_ref = NULL;
 ConVar *Slider::m_osu_playfield_mirror_vertical_ref = NULL;
 ConVar *Slider::m_osu_playfield_rotation_ref = NULL;
@@ -376,7 +379,7 @@ void Slider::draw(Graphics *g) {
                                  1.0f - m_fEndSliderBodyFadeAnimation, getTime());
     }
 
-    if(m_fStartHitAnimation > 0.0f && m_fStartHitAnimation != 1.0f && !osu->getModHD()) {
+    if(osu_slider_sliderhead_fadeout.getBool() && m_fStartHitAnimation > 0.0f && m_fStartHitAnimation != 1.0f && !osu->getModHD()) {
         float alpha = 1.0f - m_fStartHitAnimation;
 
         float scale = m_fStartHitAnimation;
