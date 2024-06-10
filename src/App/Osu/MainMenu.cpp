@@ -1,10 +1,3 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		main menu
-//
-// $NoKeywords: $osumain
-//===============================================================================//
-
 #include "MainMenu.h"
 
 #include "AnimationHandler.h"
@@ -130,8 +123,6 @@ void MainMenuPauseButton::draw(Graphics *g) {
     if(m_bActive && m_bEnabled) drawHoverRect(g, 6);
 }
 
-ConVar osu_toggle_preview_music("osu_toggle_preview_music");
-
 ConVar osu_draw_menu_background("osu_draw_menu_background", false, FCVAR_DEFAULT);
 ConVar osu_main_menu_startup_anim_duration("osu_main_menu_startup_anim_duration", 0.25f, FCVAR_DEFAULT);
 ConVar osu_main_menu_alpha("osu_main_menu_alpha", 0.8f, FCVAR_DEFAULT);
@@ -165,8 +156,6 @@ MainMenu::MainMenu() : OsuScreen() {
     if(m_osu_songbrowser_background_fade_in_duration_ref == NULL)
         m_osu_songbrowser_background_fade_in_duration_ref =
             convar->getConVarByName("osu_songbrowser_background_fade_in_duration");
-
-    osu_toggle_preview_music.setCallback(fastdelegate::MakeDelegate(this, &MainMenu::onPausePressed));
 
     // engine settings
     engine->getMouse()->addListener(this);
@@ -1004,17 +993,20 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
 
     // Update pause button and shuffle songs
     m_pauseButton->setPaused(true);
-    auto music = osu->getSelectedBeatmap()->getMusic();
-    if(music == NULL) {
-        selectRandomBeatmap();
-    } else {
-        if(music->isFinished()) {
-            selectRandomBeatmap();
-        } else if(music->isPlaying()) {
-            m_pauseButton->setPaused(false);
 
-            // NOTE: We set this every frame, because music loading isn't instant
-            music->setLoop(false);
+    if(engine->getSound()->isReady()) {
+        auto music = osu->getSelectedBeatmap()->getMusic();
+        if(music == NULL) {
+            selectRandomBeatmap();
+        } else {
+            if(music->isFinished()) {
+                selectRandomBeatmap();
+            } else if(music->isPlaying()) {
+                m_pauseButton->setPaused(false);
+
+                // NOTE: We set this every frame, because music loading isn't instant
+                music->setLoop(false);
+            }
         }
     }
 }

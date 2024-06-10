@@ -489,8 +489,6 @@ Osu::Osu() {
     }
 
     m_mainMenu->setVisible(true);
-    m_mainMenu->selectRandomBeatmap();
-
     m_updateHandler->checkForUpdates();
 
     // memory/performance optimization; if osu_mod_mafham is not enabled, reduce the two rendertarget sizes to 64x64,

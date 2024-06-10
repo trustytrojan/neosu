@@ -25,6 +25,7 @@ void _volume(UString oldValue, UString newValue) {
 
 ConVar _volume_("volume", 1.0f, FCVAR_DEFAULT | FCVAR_PRIVATE, _volume);
 
+ConVar snd_ready_delay("snd_ready_delay", 0.0f, FCVAR_DEFAULT | FCVAR_PRIVATE, "after a sound engine restart, wait this many seconds before marking it as ready");
 ConVar snd_output_device("snd_output_device", "Default", FCVAR_DEFAULT | FCVAR_PRIVATE);
 ConVar snd_restart("snd_restart");
 
@@ -459,7 +460,7 @@ bool SoundEngine::init_bass_mixer(OUTPUT_DEVICE device) {
     if(!BASS_Init(0, freq, bass_flags | BASS_DEVICE_SOFTWARE, NULL, NULL)) {
         auto code = BASS_ErrorGetCode();
         if(code != BASS_ERROR_ALREADY) {
-            m_bReady = false;
+            ready_since = -1.0;
             debugLog("BASS_Init(0) failed.\n");
             display_bass_error();
             return false;
@@ -468,7 +469,7 @@ bool SoundEngine::init_bass_mixer(OUTPUT_DEVICE device) {
 
     if(device.driver == OutputDriver::BASS) {
         if(!BASS_Init(device.id, freq, bass_flags, NULL, NULL)) {
-            m_bReady = false;
+            ready_since = -1.0;
             debugLog("BASS_Init(%d) errored out.\n", device.id);
             display_bass_error();
             return false;
@@ -481,7 +482,7 @@ bool SoundEngine::init_bass_mixer(OUTPUT_DEVICE device) {
     if(device.driver != OutputDriver::BASS) mixer_flags |= BASS_STREAM_DECODE;
     g_bassOutputMixer = BASS_Mixer_StreamCreate(freq, 2, mixer_flags);
     if(g_bassOutputMixer == 0) {
-        m_bReady = false;
+        ready_since = -1.0;
         debugLog("BASS_Mixer_StreamCreate() failed.\n");
         display_bass_error();
         return false;
@@ -499,7 +500,7 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
     shutdown();
 
     if(device.driver == OutputDriver::NONE || (device.driver == OutputDriver::BASS && device.id == 0)) {
-        m_bReady = true;
+        ready_since = -1.0;
         m_currentOutputDevice = device;
         snd_output_device.setValue(m_currentOutputDevice.name);
         debugLog("SoundEngine: Output Device = \"%s\"\n", m_currentOutputDevice.name.toUtf8());
@@ -546,7 +547,7 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
 #ifdef _WIN32
     if(device.driver == OutputDriver::BASS_ASIO) {
         if(!BASS_ASIO_Init(device.id, 0)) {
-            m_bReady = false;
+            ready_since = -1.0;
             debugLog("BASS_ASIO_Init() failed.\n");
             display_bass_error();
             return false;
@@ -575,14 +576,14 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
         }
 
         if(!BASS_ASIO_ChannelEnableBASS(false, 0, g_bassOutputMixer, true)) {
-            m_bReady = false;
+            ready_since = -1.0;
             debugLog("BASS_ASIO_ChannelEnableBASS() failed.\n");
             display_bass_error();
             return false;
         }
 
         if(!BASS_ASIO_Start(bufsize, 0)) {
-            m_bReady = false;
+            ready_since = -1.0;
             debugLog("BASS_ASIO_Start() failed.\n");
             display_bass_error();
             return false;
@@ -621,14 +622,14 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
 
         if(!BASS_WASAPI_Init(device.id, 0, 0, flags, bufferSize, updatePeriod, WASAPIPROC_BASS, (void *)g_bassOutputMixer)) {
             const int errorCode = BASS_ErrorGetCode();
-            m_bReady = false;
+            ready_since = -1.0;
             debugLog("BASS_WASAPI_Init() failed.\n");
             display_bass_error();
             return false;
         }
 
         if(!BASS_WASAPI_Start()) {
-            m_bReady = false;
+            ready_since = -1.0;
             debugLog("BASS_WASAPI_Start() failed.\n");
             display_bass_error();
             return false;
@@ -638,7 +639,7 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
     }
 #endif
 
-    m_bReady = true;
+    ready_since = engine->getTime();
     m_currentOutputDevice = device;
     snd_output_device.setValue(m_currentOutputDevice.name);
     debugLog("SoundEngine: Output Device = \"%s\"\n", m_currentOutputDevice.name.toUtf8());
@@ -667,7 +668,7 @@ void SoundEngine::shutdown() {
     }
 #endif
 
-    m_bReady = false;
+    ready_since = -1.0;
     g_bassOutputMixer = 0;
     BASS_Free();  // free "No sound" device
 }
@@ -675,7 +676,7 @@ void SoundEngine::shutdown() {
 void SoundEngine::update() {}
 
 bool SoundEngine::play(Sound *snd, float pan, float pitch) {
-    if(!m_bReady || snd == NULL || !snd->isReady()) return false;
+    if(!isReady() || snd == NULL || !snd->isReady()) return false;
 
     if(!snd->isOverlayable() && snd->isPlaying()) {
         return false;
@@ -735,7 +736,7 @@ bool SoundEngine::play(Sound *snd, float pan, float pitch) {
 }
 
 void SoundEngine::pause(Sound *snd) {
-    if(!m_bReady || snd == NULL || !snd->isReady()) return;
+    if(!isReady() || snd == NULL || !snd->isReady()) return;
     if(!snd->isStream()) {
         engine->showMessageError("Programmer Error", "Called pause on a sample!");
         return;
@@ -759,10 +760,15 @@ void SoundEngine::pause(Sound *snd) {
 }
 
 void SoundEngine::stop(Sound *snd) {
-    if(!m_bReady || snd == NULL || !snd->isReady()) return;
+    if(!isReady() || snd == NULL || !snd->isReady()) return;
 
     // This will stop all samples, then re-init to be ready for a play()
     snd->reload();
+}
+
+bool SoundEngine::isReady() {
+    if(ready_since == -1.0) return false;
+    return ready_since + (double)convar->getConVarByName("snd_ready_delay")->getFloat() < engine->getTime();
 }
 
 bool SoundEngine::hasExclusiveOutput() {
@@ -780,7 +786,7 @@ void SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
     // TODO: This is blocking main thread, can freeze for a long time on some sound cards
     auto previous = m_currentOutputDevice;
     if(!initializeOutputDevice(device)) {
-        if(device.id == previous.id && device.driver == previous.driver) {
+        if((device.id == previous.id && device.driver == previous.driver) || !initializeOutputDevice(previous)) {
             // We failed to reinitialize the device, don't start an infinite loop, just give up
             m_currentOutputDevice = {
                 .id = 0,
@@ -789,8 +795,6 @@ void SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
                 .name = "No sound",
                 .driver = OutputDriver::NONE,
             };
-        } else {
-            initializeOutputDevice(previous);
         }
     }
 
@@ -816,7 +820,7 @@ void SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
 }
 
 void SoundEngine::setVolume(float volume) {
-    if(!m_bReady) return;
+    if(!isReady()) return;
 
     m_fVolume = clamp<float>(volume, 0.0f, 1.0f);
     if(m_currentOutputDevice.driver == OutputDriver::BASS_ASIO) {
@@ -839,7 +843,7 @@ void SoundEngine::setVolume(float volume) {
 void SoundEngine::onFreqChanged(UString oldValue, UString newValue) {
     (void)oldValue;
     (void)newValue;
-    if(!m_bReady) return;
+    if(!isReady()) return;
     restart();
 }
 

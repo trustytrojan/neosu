@@ -29,6 +29,7 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
+    latest.changes.push_back("- Added SoundEngine auto-restart settings");
     latest.changes.push_back("- Disabled FPoSu noclip by default");
     latest.changes.push_back("- Fixed auto mod staying on after Ctrl+clicking a map");
     latest.changes.push_back("- Fixed downloads sometimes failing on Windows");

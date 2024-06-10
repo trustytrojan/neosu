@@ -1,12 +1,4 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		handles sounds, bass library wrapper atm
-//
-// $NoKeywords: $snd
-//===============================================================================//
-
-#ifndef SOUNDENGINE_H
-#define SOUNDENGINE_H
+#pragma once
 
 #include "cbase.h"
 // ^ needs to be before Sound.h on windows
@@ -40,7 +32,7 @@ class SoundEngine {
     void pause(Sound *snd);
     void stop(Sound *snd);
 
-    bool isReady() { return m_bReady; }
+    bool isReady();
     bool isASIO() { return m_currentOutputDevice.driver == OutputDriver::BASS_ASIO; }
     bool isWASAPI() { return m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI; }
     bool hasExclusiveOutput();
@@ -67,12 +59,10 @@ class SoundEngine {
 
     OUTPUT_DEVICE m_currentOutputDevice;
 
-    bool m_bReady = false;
+    double ready_since = -1.0;
     float m_fVolume = 1.0f;
 };
 
 DWORD ASIO_clamp(BASS_ASIO_INFO info, DWORD buflen);
 
 void _RESTART_SOUND_ENGINE_ON_CHANGE(UString oldValue, UString newValue);
-
-#endif
