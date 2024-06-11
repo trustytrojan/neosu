@@ -347,6 +347,7 @@ class Osu : public App, public MouseListener {
     u32 watched_user_id = 0;
 
     // custom
+    bool music_unpause_scheduled = false;
     bool m_bScheduleEndlessModNextBeatmap;
     int m_iMultiplayerClientNumEscPresses;
     bool m_bWasBossKeyPaused;

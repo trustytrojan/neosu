@@ -784,11 +784,6 @@ void SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
     if(osu->getSelectedBeatmap()->getMusic() != NULL) {
         was_playing = osu->getSelectedBeatmap()->getMusic()->isPlaying();
         prevMusicPositionMS = osu->getSelectedBeatmap()->getMusic()->getPositionMS();
-
-        if(osu->isInPlayMode() && was_playing) {
-            osu->getSelectedBeatmap()->pause(false);
-            osu->m_pauseMenu->setVisible(osu->getSelectedBeatmap()->isPaused());
-        }
     }
 
     // TODO: This is blocking main thread, can freeze for a long time on some sound cards
@@ -816,15 +811,16 @@ void SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
             osu->getSelectedBeatmap()->unloadMusic();
             osu->getSelectedBeatmap()->loadMusic(false, osu->getSelectedBeatmap()->m_bForceStreamPlayback);
             osu->getSelectedBeatmap()->getMusic()->setLoop(false);
-            if(was_playing) {
-                play(osu->getSelectedBeatmap()->getMusic());
-            }
             osu->getSelectedBeatmap()->getMusic()->setPositionMS(prevMusicPositionMS);
         } else {
             osu->getSelectedBeatmap()->unloadMusic();
-            osu->getSelectedBeatmap()->select();  // (triggers preview music play)
+            osu->getSelectedBeatmap()->select();
             osu->getSelectedBeatmap()->getMusic()->setPositionMS(prevMusicPositionMS);
         }
+    }
+
+    if(was_playing) {
+        osu->music_unpause_scheduled = true;
     }
 }
 

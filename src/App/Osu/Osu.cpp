@@ -721,6 +721,13 @@ void Osu::update() {
         m_screens[i]->mouse_update(&propagate_clicks);
     }
 
+    if(music_unpause_scheduled && engine->getSound()->isReady()) {
+        if(getSelectedBeatmap()->getMusic() != NULL) {
+            engine->getSound()->play(getSelectedBeatmap()->getMusic());
+        }
+        music_unpause_scheduled = false;
+    }
+
     // main beatmap update
     m_bSeeking = false;
     if(isInPlayMode()) {
