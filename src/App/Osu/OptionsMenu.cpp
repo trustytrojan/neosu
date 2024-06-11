@@ -2421,12 +2421,9 @@ void OptionsMenu::onSkinSelect() {
         if(defaultText == m_osu_skin_ref->getString()) buttonDefault->setTextBrightColor(0xff00ff00);
 
         for(int i = 0; i < skinFolders.size(); i++) {
-            if(skinFolders[i].compare(".") == 0 ||
-               skinFolders[i].compare("..") == 0)  // is this universal in every file system? too lazy to check. should
-                                                   // probably fix this in the engine and not here
-                continue;
+            if(skinFolders[i].compare(".") == 0 || skinFolders[i].compare("..") == 0) continue;
 
-            CBaseUIButton *button = m_contextMenu->addButton(UString(skinFolders[i].c_str()));
+            CBaseUIButton *button = m_contextMenu->addButton(skinFolders[i].c_str());
             auto osu_skin = m_osu_skin_ref->getString();
             if(skinFolders[i].compare(osu_skin.toUtf8()) == 0) button->setTextBrightColor(0xff00ff00);
         }

@@ -10,6 +10,7 @@
 #include <Commdlg.h>
 #include <shellapi.h>
 
+#include <filesystem>
 #include <string>
 
 #include "ConVar.h"
@@ -116,7 +117,7 @@ bool WinEnvironment::fileExists(std::string filename) {
     WIN32_FIND_DATA FindFileData;
     HANDLE handle = FindFirstFile(filename.c_str(), &FindFileData);
     if(handle == INVALID_HANDLE_VALUE)
-        return std::ifstream(filename.c_str()).good();
+        return std::ifstream(std::filesystem::u8path(filename.c_str())).good();
     else {
         FindClose(handle);
         return true;
@@ -246,33 +247,41 @@ UString WinEnvironment::openFolderWindow(UString title, UString initialpath) {
 }
 
 std::vector<std::string> WinEnvironment::getFilesInFolder(std::string folder) {
+    // Since we want to avoid wide strings in the codebase as much as possible,
+    // we convert wide paths to UTF-8 (as they fucking should be).
+    // We can't just use FindFirstFileA, because then any path with unicode
+    // characters will fail to open!
+    // Keep in mind that windows can't handle the way too modern 1993 UTF-8, so
+    // you have to use std::filesystem::u8path() or convert it back to a wstring
+    // before using the windows API.
+
     folder.append("*.*");
-    WIN32_FIND_DATA data;
-    std::string buffer;
+    WIN32_FIND_DATAW data;
+    std::wstring buffer;
     std::vector<std::string> files;
 
-    HANDLE handle = FindFirstFile(folder.c_str(), &data);
+    int size = MultiByteToWideChar(CP_UTF8, 0, folder.c_str(), folder.length(), NULL, 0);
+    std::wstring wfile(size, 0);
+    MultiByteToWideChar(CP_UTF8, 0, folder.c_str(), folder.length(), (LPWSTR)wfile.c_str(), wfile.length());
+
+    HANDLE handle = FindFirstFileW(wfile.c_str(), &data);
 
     while(true) {
-        std::string filename(data.cFileName);
+        std::wstring filename(data.cFileName);
+        if(filename == buffer) break;
 
-        if(filename != buffer) {
-            buffer = filename;
+        buffer = filename;
 
-            if(filename.length() > 0) {
-                if((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0)  // directory
-                {
-                    /// if (filename.length() > 0)
-                    ///	folders.push_back(filename.c_str());
-                } else  // file
-                {
-                    if(filename.length() > 0) files.push_back(filename.c_str());
-                }
+        if(filename.length() > 0) {
+            if((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
+                int size = WideCharToMultiByte(CP_UTF8, 0, filename.c_str(), filename.length(), NULL, 0, NULL, NULL);
+                std::string utf8filename(size, 0);
+                WideCharToMultiByte(CP_UTF8, 0, filename.c_str(), size, (LPSTR)utf8filename.c_str(), size, NULL, NULL);
+                files.push_back(utf8filename);
             }
+        }
 
-            FindNextFile(handle, &data);
-        } else
-            break;
+        FindNextFileW(handle, &data);
     }
 
     FindClose(handle);
@@ -280,33 +289,41 @@ std::vector<std::string> WinEnvironment::getFilesInFolder(std::string folder) {
 }
 
 std::vector<std::string> WinEnvironment::getFoldersInFolder(std::string folder) {
+    // Since we want to avoid wide strings in the codebase as much as possible,
+    // we convert wide paths to UTF-8 (as they fucking should be).
+    // We can't just use FindFirstFileA, because then any path with unicode
+    // characters will fail to open!
+    // Keep in mind that windows can't handle the way too modern 1993 UTF-8, so
+    // you have to use std::filesystem::u8path() or convert it back to a wstring
+    // before using the windows API.
+
     folder.append("*.*");
-    WIN32_FIND_DATA data;
-    std::string buffer;
+    WIN32_FIND_DATAW data;
+    std::wstring buffer;
     std::vector<std::string> folders;
 
-    HANDLE handle = FindFirstFile(folder.c_str(), &data);
+	int size = MultiByteToWideChar(CP_UTF8, 0, folder.c_str(), folder.length(), NULL, 0);
+    std::wstring wfolder(size, 0);
+    MultiByteToWideChar(CP_UTF8, 0, folder.c_str(), folder.length(), (LPWSTR)wfolder.c_str(), wfolder.length());
+
+    HANDLE handle = FindFirstFileW(wfolder.c_str(), &data);
 
     while(true) {
-        std::string filename(data.cFileName);
+        std::wstring filename(data.cFileName);
+        if(filename == buffer) break;
 
-        if(filename != buffer) {
-            buffer = filename;
+        buffer = filename;
 
-            if(filename.length() > 0) {
-                if((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0)  // directory
-                {
-                    if(filename.length() > 0) folders.push_back(filename.c_str());
-                } else  // file
-                {
-                    /// if (filename.length() > 0)
-                    ///	files.push_back(filename.c_str());
-                }
+        if(filename.length() > 0) {
+            if((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) {
+                int size = WideCharToMultiByte(CP_UTF8, 0, filename.c_str(), filename.length(), NULL, 0, NULL, NULL);
+                std::string utf8filename(size, 0);
+                WideCharToMultiByte(CP_UTF8, 0, filename.c_str(), size, (LPSTR)utf8filename.c_str(), size, NULL, NULL);
+                folders.push_back(utf8filename);
             }
+        }
 
-            FindNextFile(handle, &data);
-        } else
-            break;
+        FindNextFileW(handle, &data);
     }
 
     FindClose(handle);

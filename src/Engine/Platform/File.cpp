@@ -1,9 +1,4 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		file wrapper, for cross-platform unicode path support
-//
-// $NoKeywords: $file
-//===============================================================================//
+#include <filesystem>
 
 #include "File.h"
 
@@ -49,7 +44,7 @@ StdFile::StdFile(std::string filePath, File::TYPE type) {
     m_iFileSize = 0;
 
     if(m_bRead) {
-        m_ifstream.open(filePath.c_str(), std::ios::in | std::ios::binary);
+        m_ifstream.open(std::filesystem::u8path(filePath.c_str()), std::ios::in | std::ios::binary);
 
         // check if we could open it at all
         if(!m_ifstream.good()) {
@@ -82,9 +77,8 @@ StdFile::StdFile(std::string filePath, File::TYPE type) {
         }
         m_ifstream.clear();  // clear potential error state due to the check above
         m_ifstream.seekg(0, std::ios::beg);
-    } else  // WRITE
-    {
-        m_ofstream.open(filePath.c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
+    } else {  // WRITE
+        m_ofstream.open(std::filesystem::u8path(filePath.c_str()), std::ios::out | std::ios::trunc | std::ios::binary);
 
         // check if we could open it at all
         if(!m_ofstream.good()) {

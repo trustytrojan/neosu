@@ -105,11 +105,21 @@ void Sound::initAsync() {
         }
     }
 
+#ifdef _WIN32
+    // On Windows, we need to convert the UTF-8 path to UTF-16, or paths with unicode characters will fail to open
+    int size = MultiByteToWideChar(CP_UTF8, 0, m_sFilePath.c_str(), m_sFilePath.length(), NULL, 0);
+    std::wstring file_path(size, 0);
+    MultiByteToWideChar(CP_UTF8, 0, m_sFilePath.c_str(), m_sFilePath.length(), (LPWSTR)file_path.c_str(), file_path.length());
+#else
+    std::string file_path = m_sFilePath;
+#endif
+
     if(m_bStream) {
         auto flags = BASS_STREAM_DECODE | BASS_SAMPLE_FLOAT;
         if(m_bPrescan) flags |= BASS_STREAM_PRESCAN;
+        if(env->getOS() == Environment::OS::WINDOWS) flags |= BASS_UNICODE;
 
-        m_stream = BASS_StreamCreateFile(false, m_sFilePath.c_str(), 0, 0, flags);
+        m_stream = BASS_StreamCreateFile(false, file_path.c_str(), 0, 0, flags);
         if(!m_stream) {
             debugLog("BASS_StreamCreateFile() returned error %d on file %s\n", BASS_ErrorGetCode(),
                      m_sFilePath.c_str());
@@ -128,7 +138,10 @@ void Sound::initAsync() {
         f64 lengthInMilliSeconds = lengthInSeconds * 1000.0;
         m_length = (u32)lengthInMilliSeconds;
     } else {
-        m_sample = BASS_SampleLoad(false, m_sFilePath.c_str(), 0, 0, 1, BASS_SAMPLE_FLOAT);
+        auto flags = BASS_SAMPLE_FLOAT;
+        if(env->getOS() == Environment::OS::WINDOWS) flags |= BASS_UNICODE;
+
+        m_sample = BASS_SampleLoad(false, file_path.c_str(), 0, 0, 1, flags);
         if(!m_sample) {
             debugLog("BASS_SampleLoad() returned error %d on file %s\n", BASS_ErrorGetCode(), m_sFilePath.c_str());
             return;
