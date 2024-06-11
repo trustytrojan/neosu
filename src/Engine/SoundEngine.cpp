@@ -839,7 +839,12 @@ void SoundEngine::setVolume(float volume) {
 #endif
     } else if(m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
 #ifdef _WIN32
-        BASS_WASAPI_SetVolume(BASS_WASAPI_CURVE_WINDOWS | BASS_WASAPI_VOL_SESSION, m_fVolume);
+        if(hasExclusiveOutput()) {
+            // Device volume doesn't seem to work, so we'll use DSP instead
+            BASS_ChannelSetAttribute(g_bassOutputMixer, BASS_ATTRIB_VOLDSP, m_fVolume);
+        } else {
+            BASS_WASAPI_SetVolume(BASS_WASAPI_CURVE_WINDOWS | BASS_WASAPI_VOL_SESSION, m_fVolume);
+        }
 #endif
     } else {
         // 0 (silent) - 10000 (full).

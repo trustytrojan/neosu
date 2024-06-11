@@ -30,6 +30,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
     latest.changes.push_back("- Changed \"Open Skins folder\" button to open the currently selected skin's folder");
+    latest.changes.push_back("- Fixed master volume control not working on exclusive WASAPI");
     latest.changes.push_back("- Fixed screenshots failing to save");
     latest.changes.push_back("- Fixed skins with non-ANSI folder names failing to open on Windows");
     latest.changes.push_back("- Fixed sliderslide and spinnerspin sounds not looping");
