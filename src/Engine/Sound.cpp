@@ -144,8 +144,14 @@ void Sound::initAsync() {
 
         m_sample = BASS_SampleLoad(false, file_path.c_str(), 0, 0, 1, flags);
         if(!m_sample) {
-            debugLog("BASS_SampleLoad() returned error %d on file %s\n", BASS_ErrorGetCode(), m_sFilePath.c_str());
-            return;
+            auto code = BASS_ErrorGetCode();
+            if(code == BASS_ERROR_EMPTY) {
+                debugLog("Sound: Ignoring empty file %s\n", m_sFilePath.c_str());
+                return;
+            } else {
+                debugLog("BASS_SampleLoad() returned error %d on file %s\n", code, m_sFilePath.c_str());
+                return;
+            }
         }
 
         // Only compute the length once
