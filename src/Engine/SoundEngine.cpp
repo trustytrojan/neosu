@@ -35,6 +35,7 @@ ConVar snd_updateperiod("snd_updateperiod", 10, FCVAR_DEFAULT | FCVAR_PRIVATE, "
 ConVar snd_dev_period("snd_dev_period", 10, FCVAR_DEFAULT | FCVAR_PRIVATE,
                       "BASS_CONFIG_DEV_PERIOD length in milliseconds, or if negative then in samples");
 ConVar snd_dev_buffer("snd_dev_buffer", 30, FCVAR_DEFAULT | FCVAR_PRIVATE, "BASS_CONFIG_DEV_BUFFER length in milliseconds");
+ConVar snd_async_buffer("snd_async_buffer", 65536, FCVAR_DEFAULT | FCVAR_PRIVATE, "BASS_CONFIG_ASYNCFILE_BUFFER length in bytes. Set to 0 to disable.");
 
 ConVar snd_restrict_play_frame(
     "snd_restrict_play_frame", true, FCVAR_DEFAULT | FCVAR_PRIVATE,

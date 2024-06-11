@@ -117,6 +117,7 @@ void Sound::initAsync() {
     if(m_bStream) {
         auto flags = BASS_STREAM_DECODE | BASS_SAMPLE_FLOAT;
         if(m_bPrescan) flags |= BASS_STREAM_PRESCAN;
+        if(convar->getConVarByName("snd_async_buffer")->getInt() > 0) flags |= BASS_ASYNCFILE;
         if(env->getOS() == Environment::OS::WINDOWS) flags |= BASS_UNICODE;
 
         m_stream = BASS_StreamCreateFile(false, file_path.c_str(), 0, 0, flags);
