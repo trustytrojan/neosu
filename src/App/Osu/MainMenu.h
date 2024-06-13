@@ -76,7 +76,6 @@ class MainMenu : public OsuScreen, public MouseListener {
     static ConVar *m_osu_universal_offset_ref;
     static ConVar *m_osu_universal_offset_hardcoded_ref;
     static ConVar *m_osu_old_beatmap_offset_ref;
-    static ConVar *m_osu_universal_offset_hardcoded_fallback_dsound_ref;
     static ConVar *m_osu_mod_random_ref;
     static ConVar *m_osu_songbrowser_background_fade_in_duration_ref;
 

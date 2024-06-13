@@ -143,7 +143,7 @@ SoundEngine::SoundEngine() {
     // all beatmaps timed to non-iTunesSMPB + 529 sample deletion offsets on old dlls pre 2015
     BASS_SetConfig(BASS_CONFIG_MP3_OLDGAPS, 1);
 
-    // avoids lag/jitter in BASS_ChannelGetPosition() shortly after a BASS_ChannelPlay() after loading/silence
+    // avoids lag/jitter in BASS_Mixer_ChannelGetPosition() shortly after a BASS_ChannelPlay() after loading/silence
     BASS_SetConfig(BASS_CONFIG_DEV_NONSTOP, 1);
 
     // if set to 1, increases sample playback latency by 10 ms
@@ -470,18 +470,16 @@ bool SoundEngine::init_bass_mixer(OUTPUT_DEVICE device) {
     }
 
     if(device.driver == OutputDriver::BASS) {
-        if(!BASS_Init(device.id, freq, bass_flags, NULL, NULL)) {
+        if(!BASS_Init(device.id, freq, bass_flags | BASS_DEVICE_SOFTWARE, NULL, NULL)) {
             ready_since = -1.0;
             debugLog("BASS_Init(%d) errored out.\n", device.id);
             display_bass_error();
             return false;
         }
-
-        osu_universal_offset_hardcoded.setValue(-25.f);
     }
 
     auto mixer_flags = BASS_SAMPLE_FLOAT | BASS_MIXER_NONSTOP | BASS_MIXER_RESUME;
-    if(device.driver != OutputDriver::BASS) mixer_flags |= BASS_STREAM_DECODE;
+    if(device.driver != OutputDriver::BASS) mixer_flags |= BASS_STREAM_DECODE | BASS_MIXER_POSEX;
     g_bassOutputMixer = BASS_Mixer_StreamCreate(freq, 2, mixer_flags);
     if(g_bassOutputMixer == 0) {
         ready_since = -1.0;
@@ -500,6 +498,9 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
     debugLog("SoundEngine: initializeOutputDevice( %s ) ...\n", device.name.toUtf8());
 
     shutdown();
+
+    // We compensate for latency via BASS_ATTRIB_MIXER_LATENCY
+    osu_universal_offset_hardcoded.setValue(0.f);
 
     if(device.driver == OutputDriver::NONE || (device.driver == OutputDriver::BASS && device.id == 0)) {
         ready_since = -1.0;
@@ -593,7 +594,7 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
 
         double wanted_latency = 1000.0 * asio_buffer_size.getFloat() / sample_rate;
         double actual_latency = 1000.0 * (double)BASS_ASIO_GetLatency(false) / sample_rate;
-        osu_universal_offset_hardcoded.setValue(-(actual_latency + 25.0f));
+        BASS_ChannelSetAttribute(g_bassOutputMixer, BASS_ATTRIB_MIXER_LATENCY, actual_latency / 1000.0);
         debugLog("ASIO: wanted %f ms, got %f ms latency. Sample rate: %f Hz\n", wanted_latency, actual_latency,
                  sample_rate);
     }
@@ -637,7 +638,7 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
             return false;
         }
 
-        osu_universal_offset_hardcoded.setValue(-(25.0f + win_snd_wasapi_buffer_size.getFloat() * 1000.0f));
+        BASS_ChannelSetAttribute(g_bassOutputMixer, BASS_ATTRIB_MIXER_LATENCY, win_snd_wasapi_buffer_size.getFloat());
     }
 #endif
 

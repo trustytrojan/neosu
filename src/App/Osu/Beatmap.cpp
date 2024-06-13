@@ -57,8 +57,6 @@ ConVar osu_draw_hitobjects("osu_draw_hitobjects", true, FCVAR_DEFAULT);
 ConVar osu_draw_beatmap_background_image("osu_draw_beatmap_background_image", true, FCVAR_DEFAULT);
 
 ConVar osu_universal_offset("osu_universal_offset", 0.0f, FCVAR_DEFAULT);
-ConVar osu_universal_offset_hardcoded_fallback_dsound("osu_universal_offset_hardcoded_fallback_dsound", -15.0f,
-                                                      FCVAR_DEFAULT);
 ConVar osu_old_beatmap_offset(
     "osu_old_beatmap_offset", 24.0f, FCVAR_DEFAULT,
     "offset in ms which is added to beatmap versions < 5 (default value is hardcoded 24 ms in stable)");
@@ -1900,9 +1898,9 @@ void Beatmap::playMissSound() {
 }
 
 unsigned long Beatmap::getMusicPositionMSInterpolated() {
-    if(!osu_interpolate_music_pos.getBool() || isLoading())
+    if(!osu_interpolate_music_pos.getBool() || isLoading()) {
         return m_music->getPositionMS();
-    else {
+    } else {
         const double interpolationMultiplier = 1.0;
 
         // TODO: fix snapping at beginning for maps with instant start

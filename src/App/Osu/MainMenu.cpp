@@ -139,7 +139,6 @@ ConVar osu_main_menu_banner_ifupdatedfromoldversion_le3303_text(
 ConVar *MainMenu::m_osu_universal_offset_ref = NULL;
 ConVar *MainMenu::m_osu_universal_offset_hardcoded_ref = NULL;
 ConVar *MainMenu::m_osu_old_beatmap_offset_ref = NULL;
-ConVar *MainMenu::m_osu_universal_offset_hardcoded_fallback_dsound_ref = NULL;
 ConVar *MainMenu::m_osu_mod_random_ref = NULL;
 ConVar *MainMenu::m_osu_songbrowser_background_fade_in_duration_ref = NULL;
 
@@ -149,9 +148,6 @@ MainMenu::MainMenu() : OsuScreen() {
         m_osu_universal_offset_hardcoded_ref = convar->getConVarByName("osu_universal_offset_hardcoded");
     if(m_osu_old_beatmap_offset_ref == NULL)
         m_osu_old_beatmap_offset_ref = convar->getConVarByName("osu_old_beatmap_offset");
-    if(m_osu_universal_offset_hardcoded_fallback_dsound_ref == NULL)
-        m_osu_universal_offset_hardcoded_fallback_dsound_ref =
-            convar->getConVarByName("osu_universal_offset_hardcoded_fallback_dsound");
     if(m_osu_mod_random_ref == NULL) m_osu_mod_random_ref = convar->getConVarByName("osu_mod_random");
     if(m_osu_songbrowser_background_fade_in_duration_ref == NULL)
         m_osu_songbrowser_background_fade_in_duration_ref =

@@ -209,16 +209,22 @@ void Sound::setPosition(double percent) {
         return;
     }
 
-    f64 lengthInSeconds = BASS_ChannelBytes2Seconds(m_stream, length);
-    if(!BASS_ChannelSetPosition(m_stream, (i64)(length * percent), BASS_POS_BYTE | BASS_POS_FLUSH)) {
-        if(Osu::debug->getBool()) {
-            debugLog("Sound::setPosition( %f ) BASS_ChannelSetPosition() error %i on file %s\n", percent,
-                     BASS_ErrorGetCode(), m_sFilePath.c_str());
+    if(isPlaying()) {
+        if(!BASS_Mixer_ChannelSetPosition(m_stream, (i64)(length * percent), BASS_POS_BYTE)) {
+            if(Osu::debug->getBool()) {
+                debugLog("Sound::setPosition( %f ) BASS_ChannelSetPosition() error %i on file %s\n", percent,
+                         BASS_ErrorGetCode(), m_sFilePath.c_str());
+            }
         }
-    }
 
-    if(m_bStarted) {
-        m_fLastPlayTime = m_fChannelCreationTime - (lengthInSeconds * percent);
+        m_fLastPlayTime = m_fChannelCreationTime - ((f64)m_length * percent / 1000.0);
+    } else {
+        if(!BASS_ChannelSetPosition(m_stream, (i64)(length * percent), BASS_POS_BYTE | BASS_POS_FLUSH)) {
+            if(Osu::debug->getBool()) {
+                debugLog("Sound::setPosition( %f ) BASS_ChannelSetPosition() error %i on file %s\n", percent,
+                         BASS_ErrorGetCode(), m_sFilePath.c_str());
+            }
+        }
     }
 }
 
@@ -235,15 +241,22 @@ void Sound::setPositionMS(unsigned long ms) {
         return;
     }
 
-    if(!BASS_ChannelSetPosition(m_stream, position, BASS_POS_BYTE | BASS_POS_FLUSH)) {
-        if(Osu::debug->getBool()) {
-            debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
-                     BASS_ErrorGetCode(), m_sFilePath.c_str());
+    if(isPlaying()) {
+        if(!BASS_Mixer_ChannelSetPosition(m_stream, position, BASS_POS_BYTE)) {
+            if(Osu::debug->getBool()) {
+                debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
+                         BASS_ErrorGetCode(), m_sFilePath.c_str());
+            }
         }
-    }
 
-    if(m_bStarted) {
         m_fLastPlayTime = m_fChannelCreationTime - ((f64)ms / 1000.0);
+    } else {
+        if(!BASS_ChannelSetPosition(m_stream, position, BASS_POS_BYTE | BASS_POS_FLUSH)) {
+            if(Osu::debug->getBool()) {
+                debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
+                         BASS_ErrorGetCode(), m_sFilePath.c_str());
+            }
+        }
     }
 }
 
@@ -329,7 +342,13 @@ float Sound::getPosition() {
         return 1.f;
     }
 
-    i64 positionBytes = BASS_ChannelGetPosition(m_stream, BASS_POS_BYTE);
+    i64 positionBytes = 0;
+    if(isPlaying()) {
+        positionBytes = BASS_Mixer_ChannelGetPosition(m_stream, BASS_POS_BYTE);
+    } else {
+        positionBytes = BASS_ChannelGetPosition(m_stream, BASS_POS_BYTE);
+    }
+
     const float position = (float)((double)(positionBytes) / (double)(lengthBytes));
     return position;
 }
@@ -344,13 +363,18 @@ u32 Sound::getPositionMS() {
         return m_paused_position_ms;
     }
 
-    i64 position = BASS_ChannelGetPosition(m_stream, BASS_POS_BYTE);
-    if(position < 0) {
+    i64 positionBytes = 0;
+    if(isPlaying()) {
+        positionBytes = BASS_Mixer_ChannelGetPosition(m_stream, BASS_POS_BYTE);
+    } else {
+        positionBytes = BASS_ChannelGetPosition(m_stream, BASS_POS_BYTE);
+    }
+    if(positionBytes < 0) {
         // The stream ended and got freed by BASS_STREAM_AUTOFREE -> invalid handle!
         return m_length;
     }
 
-    f64 positionInSeconds = BASS_ChannelBytes2Seconds(m_stream, position);
+    f64 positionInSeconds = BASS_ChannelBytes2Seconds(m_stream, positionBytes);
     f64 positionInMilliSeconds = positionInSeconds * 1000.0;
     u32 positionMS = (u32)positionInMilliSeconds;
     if(!isPlaying()) {
