@@ -685,7 +685,7 @@ bool SoundEngine::play(Sound *snd, float pan, float pitch) {
     }
 
     if(snd->isOverlayable() && snd_restrict_play_frame.getBool()) {
-        if(engine->getTime() <= snd->getLastPlayTime()) {
+        if(engine->getTime() <= snd->m_fLastPlayTime) {
             return false;
         }
     }
@@ -729,8 +729,14 @@ bool SoundEngine::play(Sound *snd, float pan, float pitch) {
     }
 
     snd->m_bStarted = true;
-    snd->m_bPaused = false;
-    snd->setLastPlayTime(engine->getTime());
+    snd->m_fChannelCreationTime = engine->getTime();
+    if(snd->m_bPaused) {
+        snd->m_bPaused = false;
+        snd->m_fLastPlayTime = snd->m_fChannelCreationTime - (((f64)snd->m_paused_position_ms) / 1000.0);
+    } else {
+        snd->m_fLastPlayTime = snd->m_fChannelCreationTime;
+    }
+
     return true;
 }
 
@@ -756,6 +762,7 @@ void SoundEngine::pause(Sound *snd) {
     snd->setPan(pan);
     snd->setLoop(loop);
     snd->m_bPaused = true;
+    snd->m_paused_position_ms = pos;
 }
 
 void SoundEngine::stop(Sound *snd) {

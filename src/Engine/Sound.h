@@ -35,7 +35,6 @@ class Sound : public Resource {
     void setFrequency(float frequency);
     void setPan(float pan);
     void setLoop(bool loop);
-    void setLastPlayTime(double lastPlayTime) { m_fLastPlayTime = lastPlayTime; }
 
     float getPosition();
     u32 getPositionMS();
@@ -43,8 +42,6 @@ class Sound : public Resource {
     float getPan() { return m_fPan; }
     float getSpeed();
     float getFrequency();
-
-    inline double getLastPlayTime() const { return m_fLastPlayTime; }
 
     bool isPlaying();
     bool isFinished();
@@ -74,5 +71,7 @@ class Sound : public Resource {
     float m_fSpeed;
     float m_fVolume;
     f64 m_fLastPlayTime = 0.0;
+    f64 m_fChannelCreationTime = 0.0;
+    u32 m_paused_position_ms = 0;
     u32 m_length = 0;
 };

@@ -553,10 +553,13 @@ void Beatmap::skipEmptySection() {
 
     const long nextHitObjectDelta = m_iNextHitObjectTime - (long)m_iCurMusicPosWithOffsets;
 
-    if(!osu_end_skip.getBool() && nextHitObjectDelta < 0)
+    if(!osu_end_skip.getBool() && nextHitObjectDelta < 0) {
         m_music->setPositionMS(max(m_music->getLengthMS(), (u32)1) - 1);
-    else
+        m_bWasSeekFrame = true;
+    } else {
         m_music->setPositionMS(max(m_iNextHitObjectTime - (long)(offset * offsetMultiplier), (long)0));
+        m_bWasSeekFrame = true;
+    }
 
     engine->getSound()->play(osu->getSkin()->getMenuHit());
 
@@ -1039,6 +1042,7 @@ void Beatmap::actualRestart() {
 
     // reset position
     m_music->setPositionMS(0);
+    m_bWasSeekFrame = true;
     m_iCurMusicPos = 0;
 
     m_bIsPlaying = true;
@@ -1778,12 +1782,15 @@ void Beatmap::handlePreviewPlay() {
 
             if(start_at_song_beginning) {
                 m_music->setPositionMS(0);
+                m_bWasSeekFrame = true;
             } else if(m_iContinueMusicPos != 0) {
                 m_music->setPositionMS(m_iContinueMusicPos);
+                m_bWasSeekFrame = true;
             } else {
                 m_music->setPositionMS(m_selectedDifficulty2->getPreviewTime() < 0
                                            ? (unsigned long)(m_music->getLengthMS() * 0.40f)
                                            : m_selectedDifficulty2->getPreviewTime());
+                m_bWasSeekFrame = true;
             }
 
             m_music->setVolume(getIdealVolume());
@@ -2555,6 +2562,7 @@ void Beatmap::update2() {
                     engine->getSound()->play(m_music);
                     m_music->setLoop(false);
                     m_music->setPositionMS(0);
+                    m_bWasSeekFrame = true;
                     m_music->setVolume(getIdealVolume());
                     m_music->setSpeed(osu->getSpeedMultiplier());
 
@@ -2564,6 +2572,7 @@ void Beatmap::update2() {
                        m_hitobjects[0]->getTime() > (long)osu_quick_retry_time.getInt())
                         m_music->setPositionMS(
                             max((long)0, m_hitobjects[0]->getTime() - (long)osu_quick_retry_time.getInt()));
+                        m_bWasSeekFrame = true;
 
                     m_bIsRestartScheduledQuick = false;
 

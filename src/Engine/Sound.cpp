@@ -171,7 +171,9 @@ void Sound::destroy() {
     m_bReady = false;
     m_bAsyncReady = false;
     m_fLastPlayTime = 0.0;
+    m_fChannelCreationTime = 0.0;
     m_bPaused = false;
+    m_paused_position_ms = 0;
 
     if(m_bStream) {
         BASS_Mixer_ChannelRemove(m_stream);
@@ -216,7 +218,7 @@ void Sound::setPosition(double percent) {
     }
 
     if(m_bStarted) {
-        m_fLastPlayTime = engine->getTime() - (lengthInSeconds * percent);
+        m_fLastPlayTime = m_fChannelCreationTime - (lengthInSeconds * percent);
     }
 }
 
@@ -241,7 +243,7 @@ void Sound::setPositionMS(unsigned long ms) {
     }
 
     if(m_bStarted) {
-        m_fLastPlayTime = engine->getTime() - ((f64)ms / 1000.0);
+        m_fLastPlayTime = m_fChannelCreationTime - ((f64)ms / 1000.0);
     }
 }
 
@@ -317,6 +319,9 @@ float Sound::getPosition() {
         engine->showMessageError("Programmer Error", "Called getPosition on a sample!");
         return 0.f;
     }
+    if(m_bPaused) {
+        return (f64)m_paused_position_ms / (f64)m_length;
+    }
 
     i64 lengthBytes = BASS_ChannelGetLength(m_stream, BASS_POS_BYTE);
     if(lengthBytes < 0) {
@@ -335,6 +340,9 @@ u32 Sound::getPositionMS() {
         engine->showMessageError("Programmer Error", "Called getPositionMS on a sample!");
         return 0;
     }
+    if(m_bPaused) {
+        return m_paused_position_ms;
+    }
 
     i64 position = BASS_ChannelGetPosition(m_stream, BASS_POS_BYTE);
     if(position < 0) {
@@ -352,15 +360,22 @@ u32 Sound::getPositionMS() {
     // special case: a freshly started channel position jitters, lerp with engine time over a set duration to smooth
     // things over
     f64 interpDuration = snd_play_interp_duration.getFloat();
-    u32 interpDurationMS = interpDuration * 1000;
-    if(interpDuration <= 0.0 || positionMS >= interpDurationMS) return positionMS;
+    if(interpDuration <= 0.0) return positionMS;
+
+    f64 channel_age = engine->getTime() - m_fChannelCreationTime;
+    if(channel_age >= interpDuration) return positionMS;
 
     f64 speedMultiplier = getSpeed();
-    f64 delta = (engine->getTime() - m_fLastPlayTime) * speedMultiplier;
+    f64 delta = channel_age * speedMultiplier;
     f64 interp_ratio = snd_play_interp_ratio.getFloat();
     if(delta < interpDuration) {
+        auto pre_interp_pos = positionMS;
+        delta = (engine->getTime() - m_fLastPlayTime) * speedMultiplier;
         f64 lerpPercent = clamp<f64>(((delta / interpDuration) - interp_ratio) / (1.0 - interp_ratio), 0.0, 1.0);
         positionMS = (u32)lerp<f64>(delta * 1000.0, (f64)positionMS, lerpPercent);
+        if(pre_interp_pos != positionMS) {
+            debugLog("Interpolating music position! %d ms -> %d ms\n", pre_interp_pos, positionMS);
+        }
     }
 
     return positionMS;
