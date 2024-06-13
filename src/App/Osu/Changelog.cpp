@@ -29,15 +29,21 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
-    latest.changes.push_back("- Changed \"Open Skins folder\" button to open the currently selected skin's folder");
-    latest.changes.push_back("- Fixed master volume control not working on exclusive WASAPI");
-    latest.changes.push_back("- Fixed screenshots failing to save");
-    latest.changes.push_back("- Fixed skins with non-ANSI folder names failing to open on Windows");
-    latest.changes.push_back("- Fixed sliderslide and spinnerspin sounds not looping");
     latest.changes.push_back("- Improved sound engine reliability");
-    latest.changes.push_back("- Re-added strain graphs");
-    latest.changes.push_back("- Removed sliderhead fadeout animation (set osu_slider_sliderhead_fadeout to 1 for old behavior)");
+    latest.changes.push_back("- Removed herobrine");
     changelogs.push_back(latest);
+
+    CHANGELOG v35_04;
+    v35_04.title = "35.04 (2024-06-11)";
+    v35_04.changes.push_back("- Changed \"Open Skins folder\" button to open the currently selected skin's folder");
+    v35_04.changes.push_back("- Fixed master volume control not working on exclusive WASAPI");
+    v35_04.changes.push_back("- Fixed screenshots failing to save");
+    v35_04.changes.push_back("- Fixed skins with non-ANSI folder names failing to open on Windows");
+    v35_04.changes.push_back("- Fixed sliderslide and spinnerspin sounds not looping");
+    v35_04.changes.push_back("- Improved sound engine reliability");
+    v35_04.changes.push_back("- Re-added strain graphs");
+    v35_04.changes.push_back("- Removed sliderhead fadeout animation (set osu_slider_sliderhead_fadeout to 1 for old behavior)");
+    changelogs.push_back(v35_04);
 
     CHANGELOG v35_03;
     v35_03.title = "35.03 (2024-06-10)";

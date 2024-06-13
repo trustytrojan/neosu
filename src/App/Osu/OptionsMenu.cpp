@@ -761,13 +761,6 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
         for(auto i = asio_idx; i < asio_end_idx; i++) {
             m_elements[i].render_condition = RenderCondition::ASIO_ENABLED;
         }
-
-        // Jank
-        addCheckbox("Restart SoundEngine before every song",
-            "Useful if music or sounds start lagging/glitching after a while.\n"
-            "You probably also want to set a start delay, to make sure SoundEngine had time to reinitialize fully.",
-            convar->getConVarByName("restart_sound_engine_before_playing"));
-        addSlider("Song start delay:", 0.0f, 5.0f, convar->getConVarByName("snd_ready_delay"))->setKeyDelta(0.5f);
     }
 
     addSubSection("Volume");

@@ -204,22 +204,23 @@ MainMenu::MainMenu() : OsuScreen() {
 
     // check if the user has never clicked the changelog for this update
     m_bDidUserUpdateFromOlderVersion = false;
-    m_bDidUserUpdateFromOlderVersionLe3300 = false;
-    m_bDidUserUpdateFromOlderVersionLe3303 = false;
+    m_bDrawVersionNotificationArrow = false;
     {
-        m_bDrawVersionNotificationArrow = false;
         if(env->fileExists(NEOSU_NEWVERSION_NOTIFICATION_TRIGGER_FILE)) {
             File versionFile(NEOSU_NEWVERSION_NOTIFICATION_TRIGGER_FILE);
             if(versionFile.canRead()) {
                 float version = std::stof(versionFile.readLine());
                 if(version < Osu::version->getFloat() - 0.0001f) m_bDrawVersionNotificationArrow = true;
-
-                if(version < 33.01f - 0.0001f) m_bDidUserUpdateFromOlderVersionLe3300 = true;
-                if(version < 33.04f - 0.0001f) m_bDidUserUpdateFromOlderVersionLe3303 = true;
-            } else
+                if(version < 34.05) {
+                    // SoundEngine choking issues have been fixed, option has been removed from settings menu
+                    // We leave the cvar available as it could still be useful for some players
+                    convar->getConVarByName("restart_sound_engine_before_playing")->setValue(false);
+                    osu->getOptionsMenu()->save();
+                }
+            } else {
                 m_bDrawVersionNotificationArrow = true;
-        } else
-            m_bDrawVersionNotificationArrow = false;
+            }
+        }
     }
     m_bDidUserUpdateFromOlderVersion = m_bDrawVersionNotificationArrow;  // (same logic atm)
 

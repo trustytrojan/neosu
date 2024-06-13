@@ -712,11 +712,7 @@ bool SoundEngine::play(Sound *snd, float pan, float pitch) {
 
     if(BASS_Mixer_ChannelGetMixer(channel) != 0) return false;
 
-    auto flags = BASS_MIXER_DOWNMIX | BASS_MIXER_NORAMPIN;
-    if(snd->isStream()) {
-        flags |= BASS_STREAM_AUTOFREE;
-    }
-
+    auto flags = BASS_MIXER_DOWNMIX | BASS_MIXER_NORAMPIN | BASS_STREAM_AUTOFREE;
     if(!BASS_Mixer_StreamAddChannel(g_bassOutputMixer, channel, flags)) {
         debugLog("BASS_Mixer_StreamAddChannel() failed (%i)!\n", BASS_ErrorGetCode());
         return false;
