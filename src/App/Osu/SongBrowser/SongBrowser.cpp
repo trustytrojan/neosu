@@ -249,7 +249,7 @@ bool SongBrowser::SortByArtist::operator()(Button const *a, Button const *b) con
 
     int res = strcasecmp(a->getDatabaseBeatmap()->getArtist().c_str(), b->getDatabaseBeatmap()->getArtist().c_str());
     if(res == 0) return a->getSortHack() < b->getSortHack();
-    return res > 0;
+    return res < 0;
 }
 
 bool SongBrowser::SortByBPM::operator()(Button const *a, Button const *b) const {
@@ -266,7 +266,7 @@ bool SongBrowser::SortByCreator::operator()(Button const *a, Button const *b) co
 
     int res = strcasecmp(a->getDatabaseBeatmap()->getCreator().c_str(), b->getDatabaseBeatmap()->getCreator().c_str());
     if(res == 0) return a->getSortHack() < b->getSortHack();
-    return res > 0;
+    return res < 0;
 }
 
 bool SongBrowser::SortByDateAdded::operator()(Button const *a, Button const *b) const {
@@ -310,7 +310,7 @@ bool SongBrowser::SortByTitle::operator()(Button const *a, Button const *b) cons
 
     int res = strcasecmp(a->getDatabaseBeatmap()->getTitle().c_str(), b->getDatabaseBeatmap()->getTitle().c_str());
     if(res == 0) return a->getSortHack() < b->getSortHack();
-    return res > 0;
+    return res < 0;
 }
 
 SongBrowser::SongBrowser() : ScreenBackable() {
