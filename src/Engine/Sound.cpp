@@ -21,12 +21,11 @@ ConVar snd_wav_file_min_size("snd_wav_file_min_size", 51, FCVAR_DEFAULT,
                              "minimum file size in bytes for WAV files to be considered valid (everything below will "
                              "fail to load), this is a workaround for BASS crashes");
 
-Sound::Sound(std::string filepath, bool stream, bool overlayable, bool loop, bool prescan) : Resource(filepath) {
+Sound::Sound(std::string filepath, bool stream, bool overlayable, bool loop) : Resource(filepath) {
     m_sample = 0;
     m_stream = 0;
     m_bStream = stream;
     m_bIsLooped = loop;
-    m_bPrescan = prescan;
     m_bIsOverlayable = overlayable;
     m_fSpeed = 1.0f;
     m_fVolume = 1.0f;
@@ -115,8 +114,7 @@ void Sound::initAsync() {
 #endif
 
     if(m_bStream) {
-        auto flags = BASS_STREAM_DECODE | BASS_SAMPLE_FLOAT;
-        if(m_bPrescan) flags |= BASS_STREAM_PRESCAN;
+        auto flags = BASS_STREAM_DECODE | BASS_SAMPLE_FLOAT | BASS_STREAM_PRESCAN;
         if(convar->getConVarByName("snd_async_buffer")->getInt() > 0) flags |= BASS_ASYNCFILE;
         if(env->getOS() == Environment::OS::WINDOWS) flags |= BASS_UNICODE;
 
@@ -195,37 +193,7 @@ void Sound::destroy() {
 }
 
 void Sound::setPosition(double percent) {
-    if(!m_bReady) return;
-    if(!m_bStream) {
-        engine->showMessageError("Programmer Error", "Called setPosition on a sample!");
-        return;
-    }
-
-    percent = clamp<f64>(percent, 0.0, 1.0);
-
-    f64 length = BASS_ChannelGetLength(m_stream, BASS_POS_BYTE);
-    if(length < 0) {
-        debugLog("Could not set stream position: error %d\n", BASS_ErrorGetCode());
-        return;
-    }
-
-    if(isPlaying()) {
-        if(!BASS_Mixer_ChannelSetPosition(m_stream, (i64)(length * percent), BASS_POS_BYTE)) {
-            if(Osu::debug->getBool()) {
-                debugLog("Sound::setPosition( %f ) BASS_ChannelSetPosition() error %i on file %s\n", percent,
-                         BASS_ErrorGetCode(), m_sFilePath.c_str());
-            }
-        }
-
-        m_fLastPlayTime = m_fChannelCreationTime - ((f64)m_length * percent / 1000.0);
-    } else {
-        if(!BASS_ChannelSetPosition(m_stream, (i64)(length * percent), BASS_POS_BYTE | BASS_POS_FLUSH)) {
-            if(Osu::debug->getBool()) {
-                debugLog("Sound::setPosition( %f ) BASS_ChannelSetPosition() error %i on file %s\n", percent,
-                         BASS_ErrorGetCode(), m_sFilePath.c_str());
-            }
-        }
-    }
+    return setPositionMS(clamp<f64>(percent, 0.0, 1.0) * m_length);
 }
 
 void Sound::setPositionMS(unsigned long ms) {
@@ -235,27 +203,65 @@ void Sound::setPositionMS(unsigned long ms) {
         return;
     }
 
-    i64 position = BASS_ChannelSeconds2Bytes(m_stream, ms / 1000.0);
-    if(position < 0) {
-        debugLog("Could not set stream position: error %d\n", BASS_ErrorGetCode());
+    i64 target_pos = BASS_ChannelSeconds2Bytes(m_stream, ms / 1000.0);
+    if(target_pos < 0) {
+        debugLog("setPositionMS: error %d while calling BASS_ChannelSeconds2Bytes\n", BASS_ErrorGetCode());
         return;
     }
 
-    if(isPlaying()) {
-        if(!BASS_Mixer_ChannelSetPosition(m_stream, position, BASS_POS_BYTE)) {
+    // Naively setting position breaks with the current BASS version (& addons).
+    //
+    // BASS_STREAM_PRESCAN no longer seems to work, so our only recourse is to use the BASS_POS_DECODETO
+    // flag which renders the whole audio stream up until the requested seek point.
+    //
+    // The downside of BASS_POS_DECODETO is that it can only seek forward... furthermore, we can't
+    // just seek to 0 before seeking forward again, since BASS_Mixer_ChannelGetPosition breaks
+    // in that case. So, our only recourse is to just reload the whole fucking stream just for seeking.
+
+    bool was_playing = isPlaying();
+    auto pos = getPositionMS();
+    if(pos <= ms) {
+        // Lucky path, we can just seek forward and be done
+        if(isPlaying()) {
+            if(!BASS_Mixer_ChannelSetPosition(m_stream, target_pos, BASS_POS_BYTE | BASS_POS_DECODETO | BASS_POS_MIXER_RESET)) {
+                if(Osu::debug->getBool()) {
+                    debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
+                             BASS_ErrorGetCode(), m_sFilePath.c_str());
+                }
+            }
+
+            m_fLastPlayTime = m_fChannelCreationTime - ((f64)ms / 1000.0);
+        } else {
+            if(!BASS_ChannelSetPosition(m_stream, target_pos, BASS_POS_BYTE | BASS_POS_DECODETO | BASS_POS_FLUSH)) {
+                if(Osu::debug->getBool()) {
+                    debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
+                             BASS_ErrorGetCode(), m_sFilePath.c_str());
+                }
+            }
+        }
+    } else {
+        // Unlucky path, we have to reload the stream
+        auto pan = getPan();
+        auto loop = isLooped();
+        auto speed = getSpeed();
+
+        reload();
+
+        setSpeed(speed);
+        setPan(pan);
+        setLoop(loop);
+        m_bPaused = true;
+        m_paused_position_ms = ms;
+
+        if(!BASS_ChannelSetPosition(m_stream, target_pos, BASS_POS_BYTE | BASS_POS_DECODETO | BASS_POS_FLUSH)) {
             if(Osu::debug->getBool()) {
                 debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
                          BASS_ErrorGetCode(), m_sFilePath.c_str());
             }
         }
 
-        m_fLastPlayTime = m_fChannelCreationTime - ((f64)ms / 1000.0);
-    } else {
-        if(!BASS_ChannelSetPosition(m_stream, position, BASS_POS_BYTE | BASS_POS_FLUSH)) {
-            if(Osu::debug->getBool()) {
-                debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
-                         BASS_ErrorGetCode(), m_sFilePath.c_str());
-            }
+        if(was_playing) {
+            osu->music_unpause_scheduled = true;
         }
     }
 }

@@ -813,7 +813,7 @@ void SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
     if(osu->getSelectedBeatmap()->getMusic() != NULL) {
         if(osu->isInPlayMode()) {
             osu->getSelectedBeatmap()->unloadMusic();
-            osu->getSelectedBeatmap()->loadMusic(false, osu->getSelectedBeatmap()->m_bForceStreamPlayback);
+            osu->getSelectedBeatmap()->loadMusic(false);
             osu->getSelectedBeatmap()->getMusic()->setLoop(false);
             osu->getSelectedBeatmap()->getMusic()->setPositionMS(prevMusicPositionMS);
         } else {

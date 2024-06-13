@@ -350,8 +350,7 @@ McFont *ResourceManager::loadFont(std::string filepath, std::string resourceName
     return fnt;
 }
 
-Sound *ResourceManager::loadSoundAbs(std::string filepath, std::string resourceName, bool stream, bool overlayable,
-                                     bool loop, bool prescan) {
+Sound *ResourceManager::loadSoundAbs(std::string filepath, std::string resourceName, bool stream, bool overlayable, bool loop) {
     // check if it already exists
     if(resourceName.length() > 0) {
         Resource *temp = checkIfExistsAndHandle(resourceName);
@@ -359,7 +358,7 @@ Sound *ResourceManager::loadSoundAbs(std::string filepath, std::string resourceN
     }
 
     // create instance and load it
-    Sound *snd = new Sound(filepath, stream, overlayable, loop, prescan);
+    Sound *snd = new Sound(filepath, stream, overlayable, loop);
     snd->setName(resourceName);
 
     loadResource(snd, true);

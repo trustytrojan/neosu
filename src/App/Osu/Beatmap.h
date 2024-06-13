@@ -128,7 +128,7 @@ class Beatmap {
     }
 
     // music/sound
-    void loadMusic(bool stream = true, bool prescan = false);
+    void loadMusic(bool stream = true);
     void unloadMusic();
     float getIdealVolume();
     void setSpeed(float speed);

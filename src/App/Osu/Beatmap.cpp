@@ -948,7 +948,7 @@ bool Beatmap::start() {
         // Restarting sound engine already reloads the music
     } else {
         unloadMusic();  // need to reload in case of speed/pitch changes (just to be sure)
-        loadMusic(false, m_bForceStreamPlayback);
+        loadMusic(false);
     }
 
     m_music->setLoop(false);
@@ -1800,7 +1800,7 @@ void Beatmap::handlePreviewPlay() {
     m_music->setLoop(osu_beatmap_preview_music_loop.getBool());
 }
 
-void Beatmap::loadMusic(bool stream, bool prescan) {
+void Beatmap::loadMusic(bool stream) {
     stream = stream || m_bForceStreamPlayback;
     m_iResourceLoadUpdateDelayHack = 0;
 
@@ -1814,9 +1814,7 @@ void Beatmap::loadMusic(bool stream, bool prescan) {
         if(!stream) engine->getResourceManager()->requestNextLoadAsync();
 
         m_music = engine->getResourceManager()->loadSoundAbs(
-            m_selectedDifficulty2->getFullSoundFilePath(), "OSU_BEATMAP_MUSIC", stream, false, false,
-            m_bForceStreamPlayback &&
-                prescan);  // m_bForceStreamPlayback = prescan necessary! otherwise big mp3s will go out of sync
+            m_selectedDifficulty2->getFullSoundFilePath(), "OSU_BEATMAP_MUSIC", stream, false, false);
         m_music->setVolume(getIdealVolume());
         m_fMusicFrequencyBackup = m_music->getFrequency();
         m_music->setSpeed(osu->getSpeedMultiplier());
@@ -2608,7 +2606,7 @@ void Beatmap::update2() {
         {
             m_bForceStreamPlayback = true;
             unloadMusic();
-            loadMusic(true, m_bForceStreamPlayback);
+            loadMusic(true);
 
             // we are waiting for an asynchronous start of the beatmap in the next update()
             m_bIsWaiting = true;
