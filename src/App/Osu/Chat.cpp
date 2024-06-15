@@ -67,7 +67,6 @@ void ChatChannel::add_message(ChatMessage msg) {
         if(msg.text.endsWith("\001")) {
             msg.text.erase(msg.text.length() - 1, 1);
         }
-        msg.text.append("*");
     }
 
     struct tm *tm = localtime(&msg.tms);
@@ -124,8 +123,13 @@ void ChatChannel::add_message(ChatMessage msg) {
         text_idx = url_start + url_length;
         search_start = msg_text.cbegin() + text_idx;
     }
+    if(is_action) {
+        // Only appending now to prevent this character from being included in a link
+        msg.text.append(L"*");
+        msg_text.append(L"*");
+    }
     if(search_start != msg_text.cend()) {
-        auto text = msg.text.substr(search_start - msg_text.cbegin());
+        auto text = msg.text.substr(text_idx);
         text_fragments.push_back(new CBaseUILabel(0, 0, 0, 0, "", text));
     }
 
@@ -141,7 +145,6 @@ void ChatChannel::add_message(ChatMessage msg) {
             if(line_width + char_width + 20 >= m_chat->getSize().x) {
                 ChatLink *link_fragment = dynamic_cast<ChatLink *>(fragment);
                 if(link_fragment == NULL) {
-                    debugLog("New text fragment: %s\n", text_str.toUtf8());
                     CBaseUILabel *text = new CBaseUILabel(x, y_total, line_width, line_height, "", text_str);
                     text->setDrawFrame(false);
                     text->setDrawBackground(false);
@@ -150,7 +153,6 @@ void ChatChannel::add_message(ChatMessage msg) {
                     }
                     ui->getContainer()->addBaseUIElement(text);
                 } else {
-                    debugLog("New link fragment: %s\n", text_str.toUtf8());
                     ChatLink *link = new ChatLink(x, y_total, line_width, line_height, fragment->getName(), text_str);
                     ui->getContainer()->addBaseUIElement(link);
                 }
@@ -167,7 +169,6 @@ void ChatChannel::add_message(ChatMessage msg) {
 
         ChatLink *link_fragment = dynamic_cast<ChatLink *>(fragment);
         if(link_fragment == NULL) {
-            debugLog("New text fragment: %s\n", text_str.toUtf8());
             CBaseUILabel *text = new CBaseUILabel(x, y_total, line_width, line_height, "", text_str);
             text->setDrawFrame(false);
             text->setDrawBackground(false);
@@ -176,7 +177,6 @@ void ChatChannel::add_message(ChatMessage msg) {
             }
             ui->getContainer()->addBaseUIElement(text);
         } else {
-            debugLog("New link fragment: %s\n", text_str.toUtf8());
             ChatLink *link = new ChatLink(x, y_total, line_width, line_height, fragment->getName(), text_str);
             ui->getContainer()->addBaseUIElement(link);
         }
@@ -307,6 +307,13 @@ void Chat::onKeyDown(KeyboardEvent &key) {
             if(m_input_box->getText() == UString("/close")) {
                 leave(m_selected_channel->name);
                 return;
+            }
+
+            if(m_input_box->getText().startsWith("/me ")) {
+                auto new_text = m_input_box->getText().substr(3);
+                new_text.insert(0, "\001ACTION");
+                new_text.append("\001");
+                m_input_box->setText(new_text);
             }
 
             Packet packet;
