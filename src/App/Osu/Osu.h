@@ -275,7 +275,7 @@ class Osu : public App, public MouseListener {
     bool holding_slider = false;
 
     // mods
-    u32 previous_mod_flags = 0;  // mod flags before spectating/multiplaying/etc
+    u32 previous_mod_flags = 0;   // mod flags before spectating/multiplaying/etc
     bool m_bModAutoTemp = false;  // when ctrl+clicking a map, the auto mod should disable itself after the map finishes
     bool m_bModAuto = false;
     bool m_bModAutopilot = false;

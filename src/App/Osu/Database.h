@@ -88,6 +88,7 @@ class Database {
 
     inline const std::vector<DatabaseBeatmap *> getDatabaseBeatmaps() const { return m_databaseBeatmaps; }
     DatabaseBeatmap *getBeatmapDifficulty(const MD5Hash &md5hash);
+    DatabaseBeatmap *getBeatmapDifficulty(i32 map_id);
 
     inline std::unordered_map<MD5Hash, std::vector<FinishedScore>> *getScores() { return &m_scores; }
     inline const std::vector<SCORE_SORTING_METHOD> &getScoreSortingMethods() const { return m_scoreSortingMethods; }

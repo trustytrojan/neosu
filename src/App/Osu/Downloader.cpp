@@ -1,10 +1,10 @@
 #include "Downloader.h"
 
 #include <curl/curl.h>
-#include <mutex>
-#include <thread>
 
+#include <mutex>
 #include <sstream>
+#include <thread>
 
 #include "Bancho.h"
 #include "BanchoNetworking.h"
@@ -40,7 +40,7 @@ void abort_downloads() {
 }
 
 int update_download_progress(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal,
-                              curl_off_t ulnow) {
+                             curl_off_t ulnow) {
     (void)ultotal;
     (void)ulnow;
 
@@ -52,7 +52,7 @@ int update_download_progress(void* clientp, curl_off_t dltotal, curl_off_t dlnow
         result->progress = (float)dlnow / (float)dltotal;
     }
 
-    return CURL_PROGRESSFUNC_CONTINUE;
+    return 0;
 }
 
 void* do_downloads(void* arg) {
@@ -339,6 +339,78 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* pr
     debugLog("Finished loading beatmapset %d.\n", set_id);
 
     beatmap = osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(beatmap_md5);
+    if(beatmap == NULL) {
+        beatmap_to_beatmapset[beatmap_id] = 0;
+        *progress = -1.f;
+        return NULL;
+    }
+
+    *progress = 1.f;
+    return beatmap;
+}
+
+DatabaseBeatmap* download_beatmap(i32 beatmap_id, i32 beatmapset_id, float* progress) {
+    static i32 queried_map_id = 0;
+
+    auto beatmap = osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(beatmap_id);
+    if(beatmap != NULL) {
+        *progress = 1.f;
+        return beatmap;
+    }
+
+    // XXX: Currently, we do not try to find the difficulty from unloaded database, or from neosu downloaded maps
+    auto it = beatmap_to_beatmapset.find(beatmap_id);
+    if(it == beatmap_to_beatmapset.end()) {
+        if(queried_map_id == beatmap_id) {
+            // We already queried for the beatmapset ID, and are waiting for the response
+            *progress = 0.f;
+            return NULL;
+        }
+
+        // We already have the set ID, skip the API request
+        if(beatmapset_id != 0) {
+            beatmap_to_beatmapset[beatmap_id] = beatmapset_id;
+            *progress = 0.f;
+            return NULL;
+        }
+
+        APIRequest request;
+        request.type = GET_BEATMAPSET_INFO;
+        request.path = UString::format("/web/osu-search-set.php?b=%d&u=%s&h=%s", beatmap_id, bancho.username.toUtf8(),
+                                       bancho.pw_md5.toUtf8());
+        request.extra_int = beatmap_id;
+        send_api_request(request);
+
+        queried_map_id = beatmap_id;
+
+        *progress = 0.f;
+        return NULL;
+    }
+
+    i32 set_id = it->second;
+    if(set_id == 0) {
+        // Already failed to load the beatmap
+        *progress = -1.f;
+        return NULL;
+    }
+
+    download_beatmapset(set_id, progress);
+    if(*progress == -1.f) {
+        // Download failed, don't retry
+        beatmap_to_beatmapset[beatmap_id] = 0;
+        return NULL;
+    }
+
+    // Download not finished
+    if(*progress != 1.f) return NULL;
+
+    auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_id);
+    // XXX: Make a permanent database for auto-downloaded songs, so we can load them like osu!.db's
+    osu->m_songBrowser2->getDatabase()->addBeatmap(mapset_path.toUtf8());
+    osu->m_songBrowser2->updateSongButtonSorting();
+    debugLog("Finished loading beatmapset %d.\n", set_id);
+
+    beatmap = osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(beatmap_id);
     if(beatmap == NULL) {
         beatmap_to_beatmapset[beatmap_id] = 0;
         *progress = -1.f;

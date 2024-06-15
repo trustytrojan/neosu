@@ -349,6 +349,10 @@ class SongBrowser : public ScreenBackable {
     float m_fBackgroundFadeInTime;
     std::vector<DatabaseBeatmap *> m_previousRandomBeatmaps;
 
+    // map auto-download
+    i32 map_autodl = 0;
+    i32 set_autodl = 0;
+
     // search
     UISearchOverlay *m_search;
     UString m_sSearchString;

@@ -31,6 +31,7 @@ Changelog::Changelog() : ScreenBackable() {
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
     latest.changes.push_back("- Chat: added support for /me command");
     latest.changes.push_back("- Chat: added support for links");
+    latest.changes.push_back("- Chat: added support for map links (auto-downloads)");
     changelogs.push_back(latest);
 
     CHANGELOG v35_05;

@@ -22,6 +22,7 @@
 #include "ConVar.h"
 #include "Database.h"
 #include "DatabaseBeatmap.h"
+#include "Downloader.h"
 #include "Engine.h"
 #include "HUD.h"
 #include "Icons.h"
@@ -903,13 +904,10 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
             db_diff->m_calculate_full_pp = std::future<pp_info>();
 
             m_selectedBeatmap->m_aimStrains = std::vector<f64>(
-                db_diff->m_pp_info.aim_strains,
-                &db_diff->m_pp_info.aim_strains[db_diff->m_pp_info.aim_strains_len]
-            );
-            m_selectedBeatmap->m_speedStrains = std::vector<f64>(
-                db_diff->m_pp_info.speed_strains,
-                &db_diff->m_pp_info.speed_strains[db_diff->m_pp_info.speed_strains_len]
-            );
+                db_diff->m_pp_info.aim_strains, &db_diff->m_pp_info.aim_strains[db_diff->m_pp_info.aim_strains_len]);
+            m_selectedBeatmap->m_speedStrains =
+                std::vector<f64>(db_diff->m_pp_info.speed_strains,
+                                 &db_diff->m_pp_info.speed_strains[db_diff->m_pp_info.speed_strains_len]);
 
             // Free the strains, which we already copied into vectors
             free_pp_info(db_diff->m_pp_info);
@@ -926,6 +924,26 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
             onDatabaseLoadingFinished();
         }
         return;
+    }
+
+    // auto-download
+    if(map_autodl) {
+        float progress = -1.f;
+        auto beatmap = download_beatmap(map_autodl, set_autodl, &progress);
+        if(progress == -1.f) {
+            auto error_str = UString::format("Failed to download Beatmap #%d :(", map_autodl);
+            osu->getNotificationOverlay()->addNotification(error_str);
+            map_autodl = 0;
+            set_autodl = 0;
+        } else if(progress < 1.f) {
+            // TODO @kiwec: this notification format is jank & laggy
+            auto text = UString::format("Downloading... %.2f%%", progress * 100.f);
+            osu->getNotificationOverlay()->addNotification(text);
+        } else if(beatmap != NULL) {
+            osu->m_songBrowser2->onDifficultySelected(beatmap, false);
+            map_autodl = 0;
+            set_autodl = 0;
+        }
     }
 
     // update and focus handling
@@ -2291,7 +2309,7 @@ void SongBrowser::updateLayout() {
     m_fSongSelectTopScale = Osu::getImageScaleToFitResolution(osu->getSkin()->getSongSelectTop(), osu->getScreenSize());
     const float songSelectTopHeightScaled =
         max(osu->getSkin()->getSongSelectTop()->getHeight() * m_fSongSelectTopScale,
-                 m_songInfo->getMinimumHeight() * 1.5f + margin);  // NOTE: the height is a heuristic here more or less
+            m_songInfo->getMinimumHeight() * 1.5f + margin);  // NOTE: the height is a heuristic here more or less
     m_fSongSelectTopScale =
         max(m_fSongSelectTopScale, songSelectTopHeightScaled / osu->getSkin()->getSongSelectTop()->getHeight());
     m_fSongSelectTopScale *=
@@ -2300,12 +2318,12 @@ void SongBrowser::updateLayout() {
     // topbar left (NOTE: the right side of the max() width is commented to keep the scorebrowser width consistent,
     // and because it's not really needed anyway)
     m_topbarLeft->setSize(max(osu->getSkin()->getSongSelectTop()->getWidth() * m_fSongSelectTopScale *
-                                           osu_songbrowser_topbar_left_width_percent.getFloat() +
-                                       margin,
-                                   /*m_songInfo->getMinimumWidth() + margin*/ 0.0f),
+                                      osu_songbrowser_topbar_left_width_percent.getFloat() +
+                                  margin,
+                              /*m_songInfo->getMinimumWidth() + margin*/ 0.0f),
                           max(osu->getSkin()->getSongSelectTop()->getHeight() * m_fSongSelectTopScale *
-                                       osu_songbrowser_topbar_left_percent.getFloat(),
-                                   m_songInfo->getMinimumHeight() + margin));
+                                  osu_songbrowser_topbar_left_percent.getFloat(),
+                              m_songInfo->getMinimumHeight() + margin));
     m_songInfo->setRelPos(margin, margin);
     m_songInfo->setSize(m_topbarLeft->getSize().x - margin,
                         max(m_topbarLeft->getSize().y * 0.75f, m_songInfo->getMinimumHeight() + margin));
@@ -2436,8 +2454,8 @@ void SongBrowser::updateLayout() {
     const int userButtonHeight = m_bottombar->getSize().y * 0.9f;
     m_userButton->setSize(userButtonHeight * 3.5f, userButtonHeight);
     m_userButton->setRelPos(max(m_bottombar->getSize().x / 2 - m_userButton->getSize().x / 2,
-                                     m_bottombarNavButtons[m_bottombarNavButtons.size() - 1]->getRelPos().x +
-                                         m_bottombarNavButtons[m_bottombarNavButtons.size() - 1]->getSize().x + 10),
+                                m_bottombarNavButtons[m_bottombarNavButtons.size() - 1]->getRelPos().x +
+                                    m_bottombarNavButtons[m_bottombarNavButtons.size() - 1]->getSize().x + 10),
                             m_bottombar->getSize().y - m_userButton->getSize().y - 1);
 
     m_bottombar->update_pos();
@@ -2553,9 +2571,8 @@ void SongBrowser::rebuildScoreButtons() {
     std::vector<FinishedScore> scores;
     if(validBeatmap) {
         auto local_scores = (*m_db->getScores())[m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash()];
-        auto local_best =
-            max_element(local_scores.begin(), local_scores.end(),
-                             [](FinishedScore const &a, FinishedScore const &b) { return a.score < b.score; });
+        auto local_best = max_element(local_scores.begin(), local_scores.end(),
+                                      [](FinishedScore const &a, FinishedScore const &b) { return a.score < b.score; });
 
         if(is_online) {
             auto search = m_db->m_online_scores.find(m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash());

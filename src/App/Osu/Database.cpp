@@ -784,6 +784,23 @@ DatabaseBeatmap *Database::getBeatmapDifficulty(const MD5Hash &md5hash) {
     return NULL;
 }
 
+DatabaseBeatmap *Database::getBeatmapDifficulty(i32 map_id) {
+    if(!isFinished()) return NULL;
+
+    for(size_t i = 0; i < m_databaseBeatmaps.size(); i++) {
+        DatabaseBeatmap *beatmap = m_databaseBeatmaps[i];
+        const std::vector<DatabaseBeatmap *> &diffs = beatmap->getDifficulties();
+        for(size_t d = 0; d < diffs.size(); d++) {
+            DatabaseBeatmap *diff = diffs[d];
+            if(diff->getID() == map_id) {
+                return diff;
+            }
+        }
+    }
+
+    return NULL;
+}
+
 std::string Database::parseLegacyCfgBeatmapDirectoryParameter() {
     // get BeatmapDirectory parameter from osu!.<OS_USERNAME>.cfg
     debugLog("Database::parseLegacyCfgBeatmapDirectoryParameter() : username = %s\n", env->getUsername().toUtf8());
