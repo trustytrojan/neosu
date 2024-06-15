@@ -133,19 +133,22 @@ void ChatChannel::add_message(ChatMessage msg) {
         text_fragments.push_back(new CBaseUILabel(0, 0, 0, 0, "", text));
     }
 
+    // We're offsetting the first fragment to account for the username + timestamp
+    // Since first fragment will always be text, we don't care about the size being wrong
+    float line_width = x;
+
     // We got a bunch of text fragments, now position them, and if we start a new line,
     // possibly divide them into more text fragments.
     for(auto fragment : text_fragments) {
         UString text_str("");
         auto fragment_text = fragment->getText();
-        float line_width = 0;
 
         for(int i = 0; i < fragment_text.length(); i++) {
             float char_width = m_chat->font->getGlyphMetrics(fragment_text[i]).advance_x;
             if(line_width + char_width + 20 >= m_chat->getSize().x) {
                 ChatLink *link_fragment = dynamic_cast<ChatLink *>(fragment);
                 if(link_fragment == NULL) {
-                    CBaseUILabel *text = new CBaseUILabel(x, y_total, line_width, line_height, "", text_str);
+                    CBaseUILabel *text = new CBaseUILabel(x, y_total, line_width - x, line_height, "", text_str);
                     text->setDrawFrame(false);
                     text->setDrawBackground(false);
                     if(is_system_message) {
@@ -153,7 +156,8 @@ void ChatChannel::add_message(ChatMessage msg) {
                     }
                     ui->getContainer()->addBaseUIElement(text);
                 } else {
-                    ChatLink *link = new ChatLink(x, y_total, line_width, line_height, fragment->getName(), text_str);
+                    ChatLink *link =
+                        new ChatLink(x, y_total, line_width - x, line_height, fragment->getName(), text_str);
                     ui->getContainer()->addBaseUIElement(link);
                 }
 
@@ -161,15 +165,15 @@ void ChatChannel::add_message(ChatMessage msg) {
                 y_total += line_height;
                 line_width = x;
                 text_str = "";
-            } else {
-                text_str.append(fragment_text[i]);
-                line_width += char_width;
             }
+
+            text_str.append(fragment_text[i]);
+            line_width += char_width;
         }
 
         ChatLink *link_fragment = dynamic_cast<ChatLink *>(fragment);
         if(link_fragment == NULL) {
-            CBaseUILabel *text = new CBaseUILabel(x, y_total, line_width, line_height, "", text_str);
+            CBaseUILabel *text = new CBaseUILabel(x, y_total, line_width - x, line_height, "", text_str);
             text->setDrawFrame(false);
             text->setDrawBackground(false);
             if(is_system_message) {
@@ -177,11 +181,11 @@ void ChatChannel::add_message(ChatMessage msg) {
             }
             ui->getContainer()->addBaseUIElement(text);
         } else {
-            ChatLink *link = new ChatLink(x, y_total, line_width, line_height, fragment->getName(), text_str);
+            ChatLink *link = new ChatLink(x, y_total, line_width - x, line_height, fragment->getName(), text_str);
             ui->getContainer()->addBaseUIElement(link);
         }
 
-        x += line_width;
+        x = line_width;
     }
 
     y_total += line_height;
