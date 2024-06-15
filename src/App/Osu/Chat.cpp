@@ -94,33 +94,67 @@ void ChatChannel::add_message(ChatMessage msg) {
         }
     }
 
+    // regex101 format: (\[\[(.+?)\]\])|(\[(https?:\/\/\S+) (.+?)\])|(https?:\/\/\S+)
+    // example: link1 https://example.com link2 [https://regex101.com label] link3 [[FAQ]]
+    //
     // Sadly, perl-style (?|(a)|(b)) capture groups are not supported in C++.
-    // So instead of having a nice regex that handles all cases, we have four capture groups:
-    // - The first one captures the whole [url label] group (if there's a label)
-    // - The second one captures the URL (if there's a label)
-    // - The third one captures the label (if there's a label)
-    // - The fourth one captures the URL (if there's no label)
-    std::wregex url_regex(L"(\\[(https?://\\S+) (.+)\\])|(https?://\\S+)");
+    // So instead of having a nice regex that handles all cases, we have 6 capture groups.
+    //
+    // Group 1) [[FAQ]]
+    // Group 2) FAQ
+    // Group 3) [https://regex101.com label]
+    // Group 4) https://regex101.com
+    // Group 5) label
+    // Group 6) https://example.com
+    //
+    // Groups 1, 2 only exist for wiki links
+    // Groups 3, 4, 5 only exist for labeled links
+    // Group 6 only exists for raw links
+    std::wregex url_regex(L"(\\[\\[(.+?)\\]\\])|(\\[(https?://\\S+) (.+?)\\])|(https?://\\S+)");
+
     std::wstring msg_text = msg.text.wc_str();
     std::wsmatch match;
     std::vector<CBaseUILabel *> text_fragments;
     std::wstring::const_iterator search_start = msg_text.cbegin();
     int text_idx = 0;
     while(std::regex_search(search_start, msg_text.cend(), match, url_regex)) {
+        int match_pos;
+        int match_len;
+        UString link_url;
+        UString link_label;
+        if(match[6].matched) {
+            // Raw link
+            match_pos = match.position(6);
+            match_len = match.length(6);
+            link_url = match.str(6).c_str();
+            link_label = match.str(6).c_str();
+        } else if(match[3].matched) {
+            // Labeled link
+            match_pos = match.position(3);
+            match_len = match.length(3);
+            link_url = match.str(4).c_str();
+            link_label = match.str(5).c_str();
+        } else {
+            // Wiki link
+            match_pos = match.position(1);
+            match_len = match.length(1);
+            link_url = "https://osu.ppy.sh/wiki/";
+            link_url.append(match.str(2).c_str());
+            link_label = "wiki:";
+            link_label.append(match.str(2).c_str());
+        }
+
         int search_idx = search_start - msg_text.cbegin();
-        auto url_start = search_idx + match.position(match[4].matched ? 4 : 1);
-        auto url_length = match.length(match[4].matched ? 4 : 1);
+        auto url_start = search_idx + match_pos;
         auto preceding_text = msg.text.substr(text_idx, url_start - text_idx);
         if(preceding_text.length() > 0) {
             text_fragments.push_back(new CBaseUILabel(0, 0, 0, 0, "", preceding_text));
         }
 
-        UString link_url = match.str(match[4].matched ? 4 : 2).c_str();
-        UString link_label = match.str(match[4].matched ? 4 : 3).c_str();
         auto link = new ChatLink(0, 0, 0, 0, link_url, link_label);
         text_fragments.push_back(link);
 
-        text_idx = url_start + url_length;
+        text_idx = url_start + match_len;
         search_start = msg_text.cbegin() + text_idx;
     }
     if(is_action) {
