@@ -1,5 +1,7 @@
 #include "Chat.h"
 
+#include <regex>
+
 #include "AnimationHandler.h"
 #include "Bancho.h"
 #include "BanchoNetworking.h"
@@ -7,6 +9,7 @@
 #include "CBaseUIButton.h"
 #include "CBaseUIContainer.h"
 #include "CBaseUILabel.h"
+#include "ChatLink.h"
 #include "Engine.h"
 #include "Font.h"
 #include "Keyboard.h"
@@ -56,7 +59,6 @@ void ChatChannel::add_message(ChatMessage msg) {
     const float line_height = 20;
     const Color system_color = 0xffffff00;
 
-    UString text_str = "";
     float x = 10;
 
     bool is_action = msg.text.startsWith("\001ACTION");
@@ -89,17 +91,83 @@ void ChatChannel::add_message(ChatMessage msg) {
         x += name_width;
 
         if(!is_action) {
-            text_str.append(": ");
+            msg.text.insert(0, ": ");
         }
     }
 
-    // XXX: Handle links, open them in the browser on click
-    // XXX: Handle map links, on click auto-download, add to song browser and select
-    // XXX: Handle lobby invite links, on click join the lobby (even if passworded)
-    float line_width = x;
-    for(int i = 0; i < msg.text.length(); i++) {
-        float char_width = m_chat->font->getGlyphMetrics(msg.text[i]).advance_x;
-        if(line_width + char_width + 20 >= m_chat->getSize().x) {
+    // Sadly, perl-style (?|(a)|(b)) capture groups are not supported in C++.
+    // So instead of having a nice regex that handles all cases, we have four capture groups:
+    // - The first one captures the whole [url label] group (if there's a label)
+    // - The second one captures the URL (if there's a label)
+    // - The third one captures the label (if there's a label)
+    // - The fourth one captures the URL (if there's no label)
+    std::wregex url_regex(L"(\\[(https?://\\S+) (.+)\\])|(https?://\\S+)");
+    std::wstring msg_text = msg.text.wc_str();
+    std::wsmatch match;
+    std::vector<CBaseUILabel *> text_fragments;
+    std::wstring::const_iterator search_start = msg_text.cbegin();
+    int text_idx = 0;
+    while(std::regex_search(search_start, msg_text.cend(), match, url_regex)) {
+        int search_idx = search_start - msg_text.cbegin();
+        auto url_start = search_idx + match.position(match[4].matched ? 4 : 1);
+        auto url_length = match.length(match[4].matched ? 4 : 1);
+        auto preceding_text = msg.text.substr(text_idx, url_start - text_idx);
+        if(preceding_text.length() > 0) {
+            text_fragments.push_back(new CBaseUILabel(0, 0, 0, 0, "", preceding_text));
+        }
+
+        UString link_url = match.str(match[4].matched ? 4 : 2).c_str();
+        UString link_label = match.str(match[4].matched ? 4 : 3).c_str();
+        auto link = new ChatLink(0, 0, 0, 0, link_url, link_label);
+        text_fragments.push_back(link);
+
+        text_idx = url_start + url_length;
+        search_start = msg_text.cbegin() + text_idx;
+    }
+    if(search_start != msg_text.cend()) {
+        auto text = msg.text.substr(search_start - msg_text.cbegin());
+        text_fragments.push_back(new CBaseUILabel(0, 0, 0, 0, "", text));
+    }
+
+    // We got a bunch of text fragments, now position them, and if we start a new line,
+    // possibly divide them into more text fragments.
+    for(auto fragment : text_fragments) {
+        UString text_str("");
+        auto fragment_text = fragment->getText();
+        float line_width = 0;
+
+        for(int i = 0; i < fragment_text.length(); i++) {
+            float char_width = m_chat->font->getGlyphMetrics(fragment_text[i]).advance_x;
+            if(line_width + char_width + 20 >= m_chat->getSize().x) {
+                ChatLink *link_fragment = dynamic_cast<ChatLink *>(fragment);
+                if(link_fragment == NULL) {
+                    debugLog("New text fragment: %s\n", text_str.toUtf8());
+                    CBaseUILabel *text = new CBaseUILabel(x, y_total, line_width, line_height, "", text_str);
+                    text->setDrawFrame(false);
+                    text->setDrawBackground(false);
+                    if(is_system_message) {
+                        text->setTextColor(system_color);
+                    }
+                    ui->getContainer()->addBaseUIElement(text);
+                } else {
+                    debugLog("New link fragment: %s\n", text_str.toUtf8());
+                    ChatLink *link = new ChatLink(x, y_total, line_width, line_height, fragment->getName(), text_str);
+                    ui->getContainer()->addBaseUIElement(link);
+                }
+
+                x = 10;
+                y_total += line_height;
+                line_width = x;
+                text_str = "";
+            } else {
+                text_str.append(fragment_text[i]);
+                line_width += char_width;
+            }
+        }
+
+        ChatLink *link_fragment = dynamic_cast<ChatLink *>(fragment);
+        if(link_fragment == NULL) {
+            debugLog("New text fragment: %s\n", text_str.toUtf8());
             CBaseUILabel *text = new CBaseUILabel(x, y_total, line_width, line_height, "", text_str);
             text->setDrawFrame(false);
             text->setDrawBackground(false);
@@ -107,24 +175,14 @@ void ChatChannel::add_message(ChatMessage msg) {
                 text->setTextColor(system_color);
             }
             ui->getContainer()->addBaseUIElement(text);
-            x = 10;
-            y_total += line_height;
-            line_width = x;
-            text_str = "";
         } else {
-            text_str.append(msg.text[i]);
-            line_width += char_width;
+            debugLog("New link fragment: %s\n", text_str.toUtf8());
+            ChatLink *link = new ChatLink(x, y_total, line_width, line_height, fragment->getName(), text_str);
+            ui->getContainer()->addBaseUIElement(link);
         }
-    }
 
-    CBaseUILabel *text = new CBaseUILabel(x, y_total, line_width, line_height, "", text_str);
-    text->setDrawFrame(false);
-    text->setDrawBackground(false);
-    if(is_system_message) {
-        text->setTextColor(system_color);
+        x += line_width;
     }
-    ui->getContainer()->addBaseUIElement(text);
-    x += line_width;
 
     y_total += line_height;
     ui->setScrollSizeToContent();

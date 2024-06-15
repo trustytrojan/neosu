@@ -29,7 +29,8 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
-    latest.changes.push_back("- Chat: fixed /me and #announce message formatting");
+    latest.changes.push_back("- Chat: added support for \"action\" text (eg. /me)");
+    latest.changes.push_back("- Chat: added support for links");
     changelogs.push_back(latest);
 
     CHANGELOG v35_05;

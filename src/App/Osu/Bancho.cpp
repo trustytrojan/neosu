@@ -1,10 +1,12 @@
 #ifdef _WIN32
+// clang-format off
 #include "cbase.h"
 
 #include <stdio.h>
 #include <wbemidl.h>
 
 #include <sstream>
+// clang-format on
 #else
 #include <blkid/blkid.h>
 #include <linux/limits.h>
@@ -67,7 +69,7 @@ void update_channel(UString name, UString topic, i32 nb_members) {
                 .tms = time(NULL),
                 .author_id = 0,
                 .author_name = UString(""),
-                .text = UString::format("%s (%d): %s", name.toUtf8(), nb_members, topic.toUtf8()),
+                .text = UString::format("%s: %s", name.toUtf8(), topic.toUtf8()),
             };
             osu->m_chat->addMessage("#osu", msg, false);
         }
@@ -225,6 +227,7 @@ void handle_packet(Packet *packet) {
             osu->m_optionsMenu->updateLayout();
 
             // TODO: Disabled for now since the API is not finished
+            // clang-format off
             // APIRequest request;
             // request.type = GET_NEOSU_SETTINGS;
             // request.path = UString::format("/neosu.json?u=%s&h=%s", bancho.username.toUtf8(), bancho.pw_md5.toUtf8());
@@ -233,6 +236,7 @@ void handle_packet(Packet *packet) {
             // send_api_request(request);
 
             // start_spectating(4);  // TODO @kiwec: FOR DEBUGGING
+            // clang-format on
         } else {
             convar->getConVarByName("mp_autologin")->setValue(false);
             osu->m_optionsMenu->logInButton->setText("Log in");
