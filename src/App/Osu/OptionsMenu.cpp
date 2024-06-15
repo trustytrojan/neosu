@@ -40,6 +40,8 @@
 #include "UISearchOverlay.h"
 #include "UISlider.h"
 
+using namespace std;
+
 ConVar osu_options_save_on_back("osu_options_save_on_back", true, FCVAR_DEFAULT);
 ConVar osu_options_high_quality_sliders("osu_options_high_quality_sliders", false, FCVAR_DEFAULT);
 ConVar osu_options_slider_preview_use_legacy_renderer(
@@ -1851,8 +1853,7 @@ void OptionsMenu::updateLayout() {
     const float categoriesOptionsPercent = 0.135f;
 
     int optionsWidth = (int)(osu->getScreenWidth() * optionsScreenWidthPercent);
-    if(!m_bFullscreen)
-        optionsWidth = min((int)(725.0f * (1.0f - categoriesOptionsPercent)), optionsWidth) * dpiScale;
+    if(!m_bFullscreen) optionsWidth = min((int)(725.0f * (1.0f - categoriesOptionsPercent)), optionsWidth) * dpiScale;
 
     const int categoriesWidth = optionsWidth * categoriesOptionsPercent;
 

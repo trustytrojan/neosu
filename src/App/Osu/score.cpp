@@ -14,6 +14,8 @@
 #include "Replay.h"
 #include "RoomScreen.h"
 
+using namespace std;
+
 ConVar osu_hiterrorbar_misses("osu_hiterrorbar_misses", true, FCVAR_DEFAULT);
 ConVar osu_debug_pp("osu_debug_pp", false, FCVAR_DEFAULT);
 
@@ -104,8 +106,8 @@ void LiveScore::reset() {
 
 void LiveScore::addHitResult(Beatmap *beatmap, HitObject *hitObject, HIT hit, long delta, bool ignoreOnHitErrorBar,
                              bool hitErrorBarOnly, bool ignoreCombo, bool ignoreScore) {
-    const int scoreComboMultiplier = max(
-        m_iCombo - 1, 0);  // current combo, excluding the current hitobject which caused the addHitResult() call
+    const int scoreComboMultiplier =
+        max(m_iCombo - 1, 0);  // current combo, excluding the current hitobject which caused the addHitResult() call
 
     // handle hits (and misses)
     if(hit != LiveScore::HIT::HIT_MISS) {
@@ -163,9 +165,7 @@ void LiveScore::addHitResult(Beatmap *beatmap, HitObject *hitObject, HIT hit, lo
     // add hitValue to score, recalculate score v1
     const unsigned long breakTimeMS = beatmap->getBreakDurationTotal();
     const unsigned long drainLength =
-        max(beatmap->getLengthPlayable() - min(breakTimeMS, beatmap->getLengthPlayable()),
-                 (unsigned long)1000) /
-        1000;
+        max(beatmap->getLengthPlayable() - min(breakTimeMS, beatmap->getLengthPlayable()), (unsigned long)1000) / 1000;
     const int difficultyMultiplier = (int)std::round(
         (beatmap->getSelectedDifficulty2()->getCS() + beatmap->getSelectedDifficulty2()->getHP() +
          beatmap->getSelectedDifficulty2()->getOD() +

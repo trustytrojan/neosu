@@ -15,6 +15,8 @@
 #include "Skin.h"
 #include "UIContextMenu.h"
 
+using namespace std;
+
 ConVar osu_songbrowser_button_collection_active_color_a("osu_songbrowser_button_collection_active_color_a", 255,
                                                         FCVAR_DEFAULT);
 ConVar osu_songbrowser_button_collection_active_color_r("osu_songbrowser_button_collection_active_color_r", 163,

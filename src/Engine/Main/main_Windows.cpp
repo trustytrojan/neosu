@@ -7,9 +7,9 @@
 #define WINVER 0x0A00  // Windows 10, to enable the ifdefs in winuser.h for touch
 #endif
 
-#include "cbase.h"
-
 #include <dwmapi.h>
+
+#include "cbase.h"
 
 // NEXTRAWINPUTBLOCK macro requires this
 typedef uint64_t QWORD;
@@ -831,7 +831,7 @@ HWND createWinWindow(HINSTANCE hInstance) {
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 #ifdef _MSC_VER
     // When building with MSVC, vprintf() is not returning the correct value unless we have a console allocated.
-    FILE* dummy;
+    FILE *dummy;
 #ifdef _DEBUG
     AllocConsole();
     freopen_s(&dummy, "CONOUT$", "w", stdout);
@@ -1192,31 +1192,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
                 }
             }
         }
-
-        // IPC (2)
-        /*
-                        if (ipcSharedMemory != NULL && ((IPCState*)ipcSharedMemory)->state == IPC_STATE::MESSAGE)
-                        {
-                                g_engine->debugLog("IPC: Received message @ %f\n", g_engine->getTime());
-
-                                switch (((IPCState*)ipcSharedMemory)->type)
-                                {
-                                case IPC_MESSAGE_TYPE::URL:
-                                        char *content = (((char*)ipcSharedMemory) + sizeof(IPCState));
-                                        const size_t length = min(strlen(content), sharedMemorySize -
-           sizeof(IPCState) - 2); const UString ustring = UString(content, length);
-
-                                        g_engine->debugLog("IPC: Received URL %s\n", ustring.toUtf8());
-
-                                        if (ustring.find("mcengine://") == 0)
-                                                Console::processCommand(ustring.substr(11));
-
-                                        break;
-                                }
-
-                                ((IPCState*)ipcSharedMemory)->state = IPC_STATE::IDLE;
-                        }
-        */
 
         // update
         {

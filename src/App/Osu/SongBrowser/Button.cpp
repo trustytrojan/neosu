@@ -14,6 +14,8 @@
 #include "Skin.h"
 #include "SoundEngine.h"
 
+using namespace std;
+
 ConVar osu_songbrowser_button_active_color_a("osu_songbrowser_button_active_color_a", 220 + 10, FCVAR_DEFAULT);
 ConVar osu_songbrowser_button_active_color_r("osu_songbrowser_button_active_color_r", 255, FCVAR_DEFAULT);
 ConVar osu_songbrowser_button_active_color_g("osu_songbrowser_button_active_color_g", 255, FCVAR_DEFAULT);

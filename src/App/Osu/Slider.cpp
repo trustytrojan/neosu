@@ -20,6 +20,8 @@
 #include "SoundEngine.h"
 #include "VertexArrayObject.h"
 
+using namespace std;
+
 ConVar osu_slider_ball_tint_combo_color("osu_slider_ball_tint_combo_color", true, FCVAR_DEFAULT);
 
 ConVar osu_snaking_sliders("osu_snaking_sliders", true, FCVAR_DEFAULT);
@@ -379,7 +381,8 @@ void Slider::draw(Graphics *g) {
                                  1.0f - m_fEndSliderBodyFadeAnimation, getTime());
     }
 
-    if(osu_slider_sliderhead_fadeout.getBool() && m_fStartHitAnimation > 0.0f && m_fStartHitAnimation != 1.0f && !osu->getModHD()) {
+    if(osu_slider_sliderhead_fadeout.getBool() && m_fStartHitAnimation > 0.0f && m_fStartHitAnimation != 1.0f &&
+       !osu->getModHD()) {
         float alpha = 1.0f - m_fStartHitAnimation;
 
         float scale = m_fStartHitAnimation;
@@ -672,9 +675,9 @@ void Slider::update(long curPos) {
 
         // fade out over the duration of the slider, starting exactly when the default fadein finishes
         const long hiddenSliderBodyFadeOutStart =
-            min(m_iTime, m_iTime - m_iApproachTime +
-                                  m_iFadeInTime);  // min() ensures that the fade always starts at m_iTime (even if the
-                                                   // fadeintime is longer than the approachtime)
+            min(m_iTime,
+                m_iTime - m_iApproachTime + m_iFadeInTime);  // min() ensures that the fade always starts at m_iTime
+                                                             // (even if the fadeintime is longer than the approachtime)
         const float fade_percent = osu_mod_hd_slider_fade_percent.getFloat();
         const long hiddenSliderBodyFadeOutEnd = m_iTime + (long)(fade_percent * m_fSliderTime);
         if(curPos >= hiddenSliderBodyFadeOutStart) {
@@ -792,8 +795,7 @@ void Slider::update(long curPos) {
         // (for the end of the slider) is NOT checked at the exact end of the slider, but somewhere random before,
         // because fuck you
         const long offset = (long)osu_slider_end_inside_check_offset.getInt();
-        const long lenienceHackEndTime =
-            max(m_iTime + m_iObjectDuration / 2, (m_iTime + m_iObjectDuration) - offset);
+        const long lenienceHackEndTime = max(m_iTime + m_iObjectDuration / 2, (m_iTime + m_iObjectDuration) - offset);
         const bool isTrackingCorrectly = (isClickHeldSlider() || osu->getModRelax()) && m_bCursorInside;
         if(isTrackingCorrectly) {
             if(isTrackingStrictTrackingMod) {

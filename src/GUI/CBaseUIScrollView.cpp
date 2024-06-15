@@ -1,10 +1,3 @@
-//================ Copyright (c) 2013, PG, All rights reserved. =================//
-//
-// Purpose:		smooth kinetic scrolling container
-//
-// $NoKeywords: $
-//===============================================================================//
-
 // TODO: refactor the spaghetti parts, this can be done way more elegantly
 
 #include "CBaseUIScrollView.h"
@@ -16,6 +9,8 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "ResourceManager.h"
+
+using namespace std;
 
 ConVar ui_scrollview_resistance("ui_scrollview_resistance", 5.0f, FCVAR_DEFAULT,
                                 "how many pixels you have to pull before you start scrolling");
@@ -110,12 +105,9 @@ void CBaseUIScrollView::draw(Graphics *g) {
 
     // draw elements & scrollbars
     if(m_bHorizontalClipping || m_bVerticalClipping) {
-        auto clip_rect = McRect(
-            m_bHorizontalClipping ? m_vPos.x + 1 : 0,
-            m_bVerticalClipping ? m_vPos.y + 2 : 0,
-            m_bHorizontalClipping ? m_vSize.x - 1 : engine->getScreenWidth(),
-            m_bVerticalClipping ? m_vSize.y - 1 : engine->getScreenHeight()
-        );
+        auto clip_rect = McRect(m_bHorizontalClipping ? m_vPos.x + 1 : 0, m_bVerticalClipping ? m_vPos.y + 2 : 0,
+                                m_bHorizontalClipping ? m_vSize.x - 1 : engine->getScreenWidth(),
+                                m_bVerticalClipping ? m_vSize.y - 1 : engine->getScreenHeight());
         g->pushClipRect(clip_rect);
     }
     {
@@ -527,9 +519,8 @@ void CBaseUIScrollView::updateScrollbars() {
         const float verticalPercent = clamp<float>(rawVerticalPercent, 0.0f, 1.0f);
 
         const float verticalHeightPercent = (m_vSize.y - (verticalBlockWidth * 2)) / m_vScrollSize.y;
-        const float verticalBlockHeight =
-            clamp<float>(max(verticalHeightPercent * m_vSize.y, verticalBlockWidth) * overscroll,
-                         verticalBlockWidth, m_vSize.y);
+        const float verticalBlockHeight = clamp<float>(
+            max(verticalHeightPercent * m_vSize.y, verticalBlockWidth) * overscroll, verticalBlockWidth, m_vSize.y);
 
         m_verticalScrollbar =
             McRect(m_vPos.x + m_vSize.x - (verticalBlockWidth * m_fScrollbarSizeMultiplier),

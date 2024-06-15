@@ -15,6 +15,8 @@
 #include "TooltipOverlay.h"
 #include "UIAvatar.h"
 
+using namespace std;
+
 // NOTE: selected username is stored in m_sText
 
 ConVar osu_user_draw_pp("osu_user_draw_pp", true, FCVAR_DEFAULT);

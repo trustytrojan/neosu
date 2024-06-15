@@ -1,13 +1,4 @@
-//================ Copyright (c) 2017, PG, All rights reserved. =================//
-//
-// Purpose:		skin images/drawables
-//
-// $NoKeywords: $osuskimg
-//===============================================================================//
-
-#ifndef OSUSKINIMAGE_H
-#define OSUSKINIMAGE_H
-
+#pragma once
 #include "cbase.h"
 
 class Skin;
@@ -33,7 +24,7 @@ class SkinImage {
                                         // depending on the diameter defined by the CS)
     virtual void update(float speedMultiplier, bool useEngineTimeForAnimations = true, long curMusicPos = 0);
 
-    void setAnimationFramerate(float fps) { m_fFrameDuration = 1.0f / clamp<float>(fps, 1.0f, 9999.0f); }
+    void setAnimationFramerate(float fps) { m_fFrameDuration = 1.0f / std::clamp<float>(fps, 1.0f, 9999.0f); }
     void setAnimationTimeOffset(float speedMultiplier,
                                 long offset);  // set this every frame (before drawing) to a fixed point in time
                                                // relative to curMusicPos where we become visible
@@ -100,5 +91,3 @@ class SkinImage {
     float m_fDrawClipWidthPercent;
     std::vector<std::string> m_filepathsForExport;
 };
-
-#endif

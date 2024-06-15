@@ -1,10 +1,3 @@
-//================ Copyright (c) 2017, PG, All rights reserved. =================//
-//
-// Purpose:		OpenGL baking support for vao
-//
-// $NoKeywords: $glvao
-//===============================================================================//
-
 #include "OpenGL3VertexArrayObject.h"
 
 #ifdef MCENGINE_FEATURE_OPENGL
@@ -12,6 +5,8 @@
 #include "Engine.h"
 #include "OpenGL3Interface.h"
 #include "OpenGLHeaders.h"
+
+using namespace std;
 
 OpenGL3VertexArrayObject::OpenGL3VertexArrayObject(Graphics::PRIMITIVE primitive, Graphics::USAGE_TYPE usage,
                                                    bool keepInSystemMemory)

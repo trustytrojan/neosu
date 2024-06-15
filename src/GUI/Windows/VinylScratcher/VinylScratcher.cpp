@@ -1,10 +1,3 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		a music player with style
-//
-// $NoKeywords: $vs
-//===============================================================================//
-
 #include "VinylScratcher.h"
 
 #include "AnimationHandler.h"
@@ -19,6 +12,8 @@
 #include "VSControlBar.h"
 #include "VSMusicBrowser.h"
 #include "VSTitleBar.h"
+
+using namespace std;
 
 Sound *VinylScratcher::m_stream2 = NULL;
 

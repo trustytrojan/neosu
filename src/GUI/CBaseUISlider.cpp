@@ -1,16 +1,11 @@
-//================ Copyright (c) 2012, PG, All rights reserved. =================//
-//
-// Purpose:		a simple slider
-//
-// $NoKeywords: $
-//===============================================================================//
-
 #include "CBaseUISlider.h"
 
 #include "AnimationHandler.h"
 #include "Engine.h"
 #include "Keyboard.h"
 #include "Mouse.h"
+
+using namespace std;
 
 CBaseUISlider::CBaseUISlider(float xPos, float yPos, float xSize, float ySize, UString name)
     : CBaseUIElement(xPos, yPos, xSize, ySize, name) {

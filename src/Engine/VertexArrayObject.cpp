@@ -1,13 +1,8 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		modern opengl style mesh wrapper (vertices, texcoords, etc.)
-//
-// $NoKeywords: $vao
-//===============================================================================//
-
 #include "VertexArrayObject.h"
 
 #include "Engine.h"
+
+using namespace std;
 
 VertexArrayObject::VertexArrayObject(Graphics::PRIMITIVE primitive, Graphics::USAGE_TYPE usage, bool keepInSystemMemory)
     : Resource() {

@@ -6,6 +6,8 @@
 #include "Resource.h"
 #include "pp.h"
 
+using namespace std;
+
 class Beatmap;
 class HitObject;
 

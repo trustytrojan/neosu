@@ -335,10 +335,10 @@ class GameRules {
 
     static float getRawHitCircleDiameter(float CS, bool applyBrokenGamefieldRoundingAllowance = true) {
         return max(0.0f,
-                        ((1.0f - 0.7f * (CS - 5.0f) / 5.0f) / 2.0f) * 128.0f *
-                            (applyBrokenGamefieldRoundingAllowance
-                                 ? broken_gamefield_rounding_allowance
-                                 : 1.0f));  // gives the circle diameter in osu!pixels, goes negative above CS 12.1429
+                   ((1.0f - 0.7f * (CS - 5.0f) / 5.0f) / 2.0f) * 128.0f *
+                       (applyBrokenGamefieldRoundingAllowance
+                            ? broken_gamefield_rounding_allowance
+                            : 1.0f));  // gives the circle diameter in osu!pixels, goes negative above CS 12.1429
     }
 
     static float getHitCircleXMultiplier() {
@@ -356,8 +356,8 @@ class GameRules {
     static ConVar osu_playfield_border_top_percent;
     static ConVar osu_playfield_border_bottom_percent;
 
-    static const int OSU_COORD_WIDTH = 512;
-    static const int OSU_COORD_HEIGHT = 384;
+    static const int OSU_COORD_WIDTH;
+    static const int OSU_COORD_HEIGHT;
 
     static float getPlayfieldScaleFactor() {
         const int engineScreenWidth = osu->getScreenWidth();

@@ -14,6 +14,7 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "NetworkHandler.h"
+#include "Osu.h"
 #include "Profiler.h"
 #include "ResourceManager.h"
 #include "SoundEngine.h"
@@ -21,14 +22,7 @@
 #include "VisualProfiler.h"
 #include "XInputGamepad.h"
 
-//********************//
-//	Include App here  //
-//********************//
-
-#include "Osu.h"
-// #include "GUICoherenceMode.h"
-// #include "Asteroids.h"
-// #include "FrameworkTest.h"
+using namespace std;
 
 class EngineLoadingScreenApp : public App {
    public:

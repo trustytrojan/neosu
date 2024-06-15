@@ -1,10 +1,3 @@
-//================ Copyright (c) 2020, PG, All rights reserved. =================//
-//
-// Purpose:		vprof gui overlay
-//
-// $NoKeywords: $vprof
-//===============================================================================//
-
 #include "VisualProfiler.h"
 
 #include <string.h>
@@ -18,6 +11,8 @@
 #include "Profiler.h"
 #include "ResourceManager.h"
 #include "SoundEngine.h"
+
+using namespace std;
 
 ConVar vprof_graph("vprof_graph", true, FCVAR_DEFAULT, "whether to draw the graph when the overlay is enabled");
 ConVar vprof_graph_height("vprof_graph_height", 250.0f, FCVAR_DEFAULT);

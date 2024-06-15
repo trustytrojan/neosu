@@ -7,6 +7,8 @@
 #include "Skin.h"
 #include "TooltipOverlay.h"
 
+using namespace std;
+
 UIButton::UIButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
     : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {
     m_bDefaultSkin = false;

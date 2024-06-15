@@ -1,10 +1,3 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		linux
-//
-// $NoKeywords: $linuxenv
-//===============================================================================//
-
 #ifdef __linux__
 
 #include "LinuxEnvironment.h"
@@ -25,6 +18,8 @@
 #include "Engine.h"
 #include "LinuxContextMenu.h"
 #include "LinuxGLLegacyInterface.h"
+
+using namespace std;
 
 typedef struct {
     unsigned long flags;

@@ -1,10 +1,3 @@
-//================ Copyright (c) 2017, PG, All rights reserved. =================//
-//
-// Purpose:		OpenGL baking support for vao
-//
-// $NoKeywords: $glvao
-//===============================================================================//
-
 #include "OpenGLVertexArrayObject.h"
 
 #ifdef MCENGINE_FEATURE_OPENGL
@@ -12,6 +5,8 @@
 #include "ConVar.h"
 #include "Engine.h"
 #include "OpenGLHeaders.h"
+
+using namespace std;
 
 ConVar r_opengl_legacy_vao_use_vertex_array(
     "r_opengl_legacy_vao_use_vertex_array", false, FCVAR_LOCKED,

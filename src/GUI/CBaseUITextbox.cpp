@@ -1,10 +1,3 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		a not so simple textbox, revision 4
-//
-// $NoKeywords: $
-//===============================================================================//
-
 // TODO: support SHIFT + LEFT/RIGHT selection adjustments
 // TODO: support CTRL + LEFT/RIGHT word caret jumping (to next space)
 // TODO: support both SHIFT + CTRL + LEFT/RIGHT selection word jumping
@@ -20,6 +13,8 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "ResourceManager.h"
+
+using namespace std;
 
 ConVar ui_textbox_caret_blink_time("ui_textbox_caret_blink_time", 0.5f, FCVAR_DEFAULT);
 ConVar ui_textbox_text_offset_x("ui_textbox_text_offset_x", 3, FCVAR_DEFAULT);

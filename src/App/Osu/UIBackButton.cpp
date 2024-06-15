@@ -7,6 +7,8 @@
 #include "Skin.h"
 #include "SkinImage.h"
 
+using namespace std;
+
 UIBackButton::UIBackButton(float xPos, float yPos, float xSize, float ySize, UString name)
     : CBaseUIButton(xPos, yPos, xSize, ySize, name, "") {
     m_fAnimation = 0.0f;

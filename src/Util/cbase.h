@@ -1,12 +1,14 @@
 #pragma once
 
 #ifdef _WIN32
+// clang-format off
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <winsock2.h>
 #include <windows.h>
 #include <shlwapi.h> // for StrStrIA
 #include <wincrypt.h> // for random number generation
+// clang-format on
 #endif
 
 // STD INCLUDES
@@ -53,15 +55,6 @@
 
 #ifndef PATH_MAX
 #define PATH_MAX MAX_PATH
-#endif
-#ifndef max
-#define max(...) std::max(__VA_ARGS__)
-#endif
-#ifndef min
-#define min(...) std::min(__VA_ARGS__)
-#endif
-#ifndef pow
-#define pow(...) std::pow(__VA_ARGS__)
 #endif
 
 typedef unsigned char COLORPART;
@@ -120,11 +113,6 @@ typedef unsigned char COLORPART;
 #define PIOVER180 0.01745329251994329576923690768489
 
 // UTIL
-
-template <class T>
-inline T clamp(T x, T a, T b) {
-    return x < a ? a : (x > b ? b : x);
-}
 
 template <class T>
 inline T lerp(T x1, T x2, T percent) {

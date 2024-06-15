@@ -1,10 +1,3 @@
-//================ Copyright (c) 2015, PG & Jeffrey Han (opsu!), All rights reserved. =================//
-//
-// Purpose:		spinner. spin logic has been taken from opsu!, I didn't have time to rewrite it yet
-//
-// $NoKeywords: $spin
-//=====================================================================================================//
-
 #include "Spinner.h"
 
 #include "AnimationHandler.h"
@@ -17,6 +10,8 @@
 #include "ResourceManager.h"
 #include "Skin.h"
 #include "SoundEngine.h"
+
+using namespace std;
 
 ConVar osu_spinner_use_ar_fadein(
     "osu_spinner_use_ar_fadein", false, FCVAR_DEFAULT,

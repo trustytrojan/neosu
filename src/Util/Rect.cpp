@@ -2,6 +2,8 @@
 
 #include "cbase.h"
 
+using namespace std;
+
 McRect::McRect(float x, float y, float width, float height, bool isCentered) { set(x, y, width, height, isCentered); }
 
 McRect::McRect(Vector2 pos, Vector2 size, bool isCentered) { set(pos.x, pos.y, size.x, size.y, isCentered); }

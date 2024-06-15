@@ -17,6 +17,8 @@
 #include "Skin.h"
 #include "VertexArrayObject.h"
 
+using namespace std;
+
 Shader *SliderRenderer::BLEND_SHADER = NULL;
 
 float SliderRenderer::MESH_CENTER_HEIGHT =

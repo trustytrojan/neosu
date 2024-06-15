@@ -29,6 +29,8 @@
 #include "VertexArrayObject.h"
 #include "score.h"
 
+using namespace std;
+
 ConVar osu_automatic_cursor_size("osu_automatic_cursor_size", false, FCVAR_DEFAULT);
 
 ConVar osu_cursor_alpha("osu_cursor_alpha", 1.0f, FCVAR_DEFAULT);
@@ -752,8 +754,8 @@ void HUD::drawCursorRipples(Graphics *g) {
     const float normalizedHeight = osu->getSkin()->getCursorRipple()->getHeight() * normalized2xScale * imageScale;
 
     const float duration = max(osu_cursor_ripple_duration.getFloat(), 0.0001f);
-    const float fadeDuration = max(
-        osu_cursor_ripple_duration.getFloat() - osu_cursor_ripple_anim_start_fadeout_delay.getFloat(), 0.0001f);
+    const float fadeDuration =
+        max(osu_cursor_ripple_duration.getFloat() - osu_cursor_ripple_anim_start_fadeout_delay.getFloat(), 0.0001f);
 
     if(osu_cursor_ripple_additive.getBool()) g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ADDITIVE);
 

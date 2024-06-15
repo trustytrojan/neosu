@@ -1,15 +1,9 @@
-//================ Copyright (c) 2015, PG & Jeffrey Han (opsu!), All rights reserved. =================//
-//
-// Purpose:		curve classes have been taken from opsu!, albeit heavily modified.
-//				contains all classes and functions for calculating slider curves
-//
-// $NoKeywords: $slidercurves
-//=====================================================================================================//
-
 #include "SliderCurves.h"
 
 #include "ConVar.h"
 #include "Engine.h"
+
+using namespace std;
 
 ConVar osu_slider_curve_points_separation(
     "osu_slider_curve_points_separation", 2.5f, FCVAR_LOCKED,

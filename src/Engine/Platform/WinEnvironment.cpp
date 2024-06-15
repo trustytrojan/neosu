@@ -1,14 +1,12 @@
 #ifdef _WIN32
 
-#include "cbase.h"
-
 #include "WinEnvironment.h"
 
+#include <Commdlg.h>
 #include <Lmcons.h>
 #include <Shlobj.h>
-#include <tchar.h>
-#include <Commdlg.h>
 #include <shellapi.h>
+#include <tchar.h>
 
 #include <filesystem>
 #include <string>
@@ -20,6 +18,9 @@
 #include "WinContextMenu.h"
 #include "WinGL3Interface.h"
 #include "WinGLLegacyInterface.h"
+#include "cbase.h"
+
+using namespace std;
 
 bool g_bCursorVisible = true;
 
@@ -302,7 +303,7 @@ std::vector<std::string> WinEnvironment::getFoldersInFolder(std::string folder) 
     std::wstring buffer;
     std::vector<std::string> folders;
 
-	int size = MultiByteToWideChar(CP_UTF8, 0, folder.c_str(), folder.length(), NULL, 0);
+    int size = MultiByteToWideChar(CP_UTF8, 0, folder.c_str(), folder.length(), NULL, 0);
     std::wstring wfolder(size, 0);
     MultiByteToWideChar(CP_UTF8, 0, folder.c_str(), folder.length(), (LPWSTR)wfolder.c_str(), wfolder.length());
 

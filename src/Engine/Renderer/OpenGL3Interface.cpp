@@ -1,10 +1,3 @@
-//================ Copyright (c) 2017, PG, All rights reserved. =================//
-//
-// Purpose:		raw opengl 3.x graphics interface
-//
-// $NoKeywords: $gl3i
-//===============================================================================//
-
 #include "OpenGL3Interface.h"
 
 #ifdef MCENGINE_FEATURE_OPENGL
@@ -18,6 +11,8 @@
 #include "OpenGLImage.h"
 #include "OpenGLRenderTarget.h"
 #include "OpenGLShader.h"
+
+using namespace std;
 
 OpenGL3Interface::OpenGL3Interface() : Graphics() {
     // renderer

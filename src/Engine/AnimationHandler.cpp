@@ -1,14 +1,9 @@
-//================ Copyright (c) 2012, PG, All rights reserved. =================//
-//
-// Purpose:		global fps independent animations
-//
-// $NoKeywords: $anim
-//===============================================================================//
-
 #include "AnimationHandler.h"
 
 #include "ConVar.h"
 #include "Engine.h"
+
+using namespace std;
 
 ConVar debug_anim("debug_anim", false, FCVAR_DEFAULT);
 
@@ -177,8 +172,7 @@ void AnimationHandler::deleteExistingAnimation(float *base) {
 float AnimationHandler::getRemainingDuration(float *base) const {
     for(size_t i = 0; i < m_vAnimations.size(); i++) {
         if(m_vAnimations[i].m_fBase == base)
-            return max(0.0f,
-                            (m_vAnimations[i].m_fStartTime + m_vAnimations[i].m_fDuration) - (float)engine->getTime());
+            return max(0.0f, (m_vAnimations[i].m_fStartTime + m_vAnimations[i].m_fDuration) - (float)engine->getTime());
     }
 
     return 0.0f;

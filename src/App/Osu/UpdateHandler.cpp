@@ -84,7 +84,9 @@ void UpdateHandler::wait() {
 }
 
 void UpdateHandler::checkForUpdates() {
-    if(!convar->getConVarByName("auto_update")->getBool() || Osu::debug->getBool() || (m_updateThread != NULL && m_updateThread->joinable())) return;
+    if(!convar->getConVarByName("auto_update")->getBool() || Osu::debug->getBool() ||
+       (m_updateThread != NULL && m_updateThread->joinable()))
+        return;
     if(env->getOS() != Environment::OS::WINDOWS) return;  // only windows gets releases right now
 
     m_updateThread = new std::thread(UpdateHandler::run, (void *)this);
@@ -248,12 +250,13 @@ void UpdateHandler::_installUpdate(std::string zipFilePath) {
 
         int mainDirectoryOffset = files[i].find(mainDirectory);
         if(mainDirectoryOffset == 0 && files[i].length() - mainDirectoryOffset > 0 &&
-                mainDirectoryOffset + mainDirectory.length() < files[i].length()) {
+           mainDirectoryOffset + mainDirectory.length() < files[i].length()) {
             std::string outFilePath = files[i].substr(mainDirectoryOffset + mainDirectory.length());
 
             // .exe and .dll can't be directly overwritten on windows
             if(outFilePath.length() > 4) {
-                if(!strcmp(outFilePath.c_str() + outFilePath.length() - 4, ".exe") || !strcmp(outFilePath.c_str() + outFilePath.length() - 4, ".dll")) {
+                if(!strcmp(outFilePath.c_str() + outFilePath.length() - 4, ".exe") ||
+                   !strcmp(outFilePath.c_str() + outFilePath.length() - 4, ".dll")) {
                     std::string old_path = outFilePath;
                     old_path.append(".old");
                     env->deleteFile(old_path);
@@ -270,10 +273,6 @@ void UpdateHandler::_installUpdate(std::string zipFilePath) {
     }
 
     mz_zip_reader_end(&zip_archive);
-
-#ifndef _WIN32
-    chmod(executablePath.c_str(), S_IRWXU);
-#endif
 
     m_status = STATUS::STATUS_SUCCESS_INSTALLATION;
     env->deleteFile(zipFilePath);

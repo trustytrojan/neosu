@@ -10,6 +10,8 @@
 #include "ResourceManager.h"
 #include "SoundEngine.h"
 
+using namespace std;
+
 ConVar snd_play_interp_duration(
     "snd_play_interp_duration", 0.75f, FCVAR_DEFAULT,
     "smooth over freshly started channel position jitter with engine time over this duration in seconds");
@@ -108,7 +110,8 @@ void Sound::initAsync() {
     // On Windows, we need to convert the UTF-8 path to UTF-16, or paths with unicode characters will fail to open
     int size = MultiByteToWideChar(CP_UTF8, 0, m_sFilePath.c_str(), m_sFilePath.length(), NULL, 0);
     std::wstring file_path(size, 0);
-    MultiByteToWideChar(CP_UTF8, 0, m_sFilePath.c_str(), m_sFilePath.length(), (LPWSTR)file_path.c_str(), file_path.length());
+    MultiByteToWideChar(CP_UTF8, 0, m_sFilePath.c_str(), m_sFilePath.length(), (LPWSTR)file_path.c_str(),
+                        file_path.length());
 #else
     std::string file_path = m_sFilePath;
 #endif
@@ -192,9 +195,7 @@ void Sound::destroy() {
     }
 }
 
-void Sound::setPosition(double percent) {
-    return setPositionMS(clamp<f64>(percent, 0.0, 1.0) * m_length);
-}
+void Sound::setPosition(double percent) { return setPositionMS(clamp<f64>(percent, 0.0, 1.0) * m_length); }
 
 void Sound::setPositionMS(unsigned long ms) {
     if(!m_bReady || ms > getLengthMS()) return;
@@ -223,7 +224,8 @@ void Sound::setPositionMS(unsigned long ms) {
     if(pos <= ms) {
         // Lucky path, we can just seek forward and be done
         if(isPlaying()) {
-            if(!BASS_Mixer_ChannelSetPosition(m_stream, target_pos, BASS_POS_BYTE | BASS_POS_DECODETO | BASS_POS_MIXER_RESET)) {
+            if(!BASS_Mixer_ChannelSetPosition(m_stream, target_pos,
+                                              BASS_POS_BYTE | BASS_POS_DECODETO | BASS_POS_MIXER_RESET)) {
                 if(Osu::debug->getBool()) {
                     debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
                              BASS_ErrorGetCode(), m_sFilePath.c_str());
@@ -431,13 +433,9 @@ float Sound::getFrequency() {
     return frequency;
 }
 
-bool Sound::isPlaying() {
-    return m_bReady && m_bStarted && !m_bPaused && !getActiveChannels().empty();
-}
+bool Sound::isPlaying() { return m_bReady && m_bStarted && !m_bPaused && !getActiveChannels().empty(); }
 
-bool Sound::isFinished() {
-    return m_bReady && m_bStarted && !isPlaying();
-}
+bool Sound::isFinished() { return m_bReady && m_bStarted && !isPlaying(); }
 
 void Sound::rebuild(std::string newFilePath) {
     m_sFilePath = newFilePath;

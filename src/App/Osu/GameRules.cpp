@@ -1,11 +1,7 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		difficulty & playfield behaviour
-//
-// $NoKeywords: $osugr
-//===============================================================================//
-
 #include "GameRules.h"
+
+const int GameRules::OSU_COORD_WIDTH = 512;
+const int GameRules::OSU_COORD_HEIGHT = 384;
 
 ConVar GameRules::osu_playfield_border_top_percent("osu_playfield_border_top_percent", 0.117f, FCVAR_DEFAULT);
 ConVar GameRules::osu_playfield_border_bottom_percent("osu_playfield_border_bottom_percent", 0.0834f, FCVAR_DEFAULT);

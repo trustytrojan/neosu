@@ -1,14 +1,9 @@
-//================ Copyright (c) 2017, PG, All rights reserved. =================//
-//
-// Purpose:		container for dynamically merging multiple images into one
-//
-// $NoKeywords: $imgtxat
-//===============================================================================//
-
 #include "TextureAtlas.h"
 
 #include "Engine.h"
 #include "ResourceManager.h"
+
+using namespace std;
 
 TextureAtlas::TextureAtlas(int width, int height) : Resource() {
     m_iWidth = width;

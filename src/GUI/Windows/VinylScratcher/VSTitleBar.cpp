@@ -1,10 +1,3 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		3D flip bar used for music scrolling/searching/play history
-//
-// $NoKeywords: $
-//===============================================================================//
-
 #include "VSTitleBar.h"
 
 #include "AnimationHandler.h"
@@ -14,6 +7,8 @@
 #include "Engine.h"
 #include "Mouse.h"
 #include "ResourceManager.h"
+
+using namespace std;
 
 ConVar vs_percent("vs_percent", 0.0f, FCVAR_DEFAULT);
 

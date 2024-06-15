@@ -1,13 +1,8 @@
-//================ Copyright (c) 2011, PG, All rights reserved. =================//
-//
-// Purpose:		a container for UI elements
-//
-// $NoKeywords: $
-//===============================================================================//
-
 #include "CBaseUIContainer.h"
 
 #include "Engine.h"
+
+using namespace std;
 
 CBaseUIContainer::CBaseUIContainer(float Xpos, float Ypos, float Xsize, float Ysize, UString name)
     : CBaseUIElement(Xpos, Ypos, Xsize, Ysize, name) {}

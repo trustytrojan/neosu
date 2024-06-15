@@ -8,6 +8,8 @@
 #include "Environment.h"
 #include "Timer.h"
 
+using namespace std;
+
 static std::mutex g_resourceManagerMutex;             // internal lock for nested async loads
 static std::mutex g_resourceManagerLoadingWorkMutex;  // work vector lock across all threads
 
@@ -350,7 +352,8 @@ McFont *ResourceManager::loadFont(std::string filepath, std::string resourceName
     return fnt;
 }
 
-Sound *ResourceManager::loadSoundAbs(std::string filepath, std::string resourceName, bool stream, bool overlayable, bool loop) {
+Sound *ResourceManager::loadSoundAbs(std::string filepath, std::string resourceName, bool stream, bool overlayable,
+                                     bool loop) {
     // check if it already exists
     if(resourceName.length() > 0) {
         Resource *temp = checkIfExistsAndHandle(resourceName);
@@ -533,8 +536,8 @@ void ResourceManager::loadResource(Resource *res, bool load) {
                 work.threadIndex = MobileAtomicSizeT(threadIndex);
                 work.done = MobileAtomicBool(false);
 
-                threadIndexCounter = (threadIndexCounter + 1) %
-                                     (min(m_threads.size(), (size_t)max(rm_numthreads.getInt(), 1)));
+                threadIndexCounter =
+                    (threadIndexCounter + 1) % (min(m_threads.size(), (size_t)max(rm_numthreads.getInt(), 1)));
 
                 g_resourceManagerLoadingWorkMutex.lock();
                 {

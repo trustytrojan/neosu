@@ -1,10 +1,3 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		base class for all gameplay objects
-//
-// $NoKeywords: $hitobj
-//===============================================================================//
-
 #include "HitObject.h"
 
 #include "AnimationHandler.h"
@@ -17,6 +10,8 @@
 #include "ResourceManager.h"
 #include "Skin.h"
 #include "SkinImage.h"
+
+using namespace std;
 
 ConVar osu_hitresult_draw_300s("osu_hitresult_draw_300s", false, FCVAR_DEFAULT);
 
@@ -458,9 +453,9 @@ void HitObject::update(long curPos) {
         // hitobject body fadein
         const long fadeInStart = m_iTime - m_iApproachTime;
         const long fadeInEnd =
-            min(m_iTime, m_iTime - m_iApproachTime +
-                                  m_iFadeInTime);  // min() ensures that the fade always finishes at m_iTime (even if
-                                                   // the fadeintime is longer than the approachtime)
+            min(m_iTime,
+                m_iTime - m_iApproachTime + m_iFadeInTime);  // min() ensures that the fade always finishes at m_iTime
+                                                             // (even if the fadeintime is longer than the approachtime)
         m_fAlpha = clamp<float>(1.0f - ((float)(fadeInEnd - curPos) / (float)(fadeInEnd - fadeInStart)), 0.0f, 1.0f);
         m_fAlphaWithoutHidden = m_fAlpha;
 
@@ -487,8 +482,8 @@ void HitObject::update(long curPos) {
         const long approachCircleFadeStart = m_iTime - m_iApproachTime;
         const long approachCircleFadeEnd =
             min(m_iTime, m_iTime - m_iApproachTime +
-                                  2 * m_iFadeInTime);  // min() ensures that the fade always finishes at m_iTime (even
-                                                       // if the fadeintime is longer than the approachtime)
+                             2 * m_iFadeInTime);  // min() ensures that the fade always finishes at m_iTime (even
+                                                  // if the fadeintime is longer than the approachtime)
         m_fAlphaForApproachCircle = clamp<float>(
             1.0f - ((float)(approachCircleFadeEnd - curPos) / (float)(approachCircleFadeEnd - approachCircleFadeStart)),
             0.0f, 1.0f);

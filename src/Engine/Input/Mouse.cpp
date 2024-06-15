@@ -1,16 +1,11 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		mouse wrapper
-//
-// $NoKeywords: $mouse
-//===============================================================================//
-
 #include "Mouse.h"
 
 #include "ConVar.h"
 #include "Engine.h"
 #include "Environment.h"
 #include "ResourceManager.h"
+
+using namespace std;
 
 ConVar debug_mouse("debug_mouse", false, FCVAR_LOCKED);
 
@@ -239,8 +234,7 @@ void Mouse::update() {
     // first person games which call engine->getMouse()->setPos() every frame to manually re-center the cursor NEVER
     // need env->setPos() absolute input NEVER needs env->setPos() also update prevOsMousePos
     if(windowRect.contains(osMousePos) && (sensitivityAdjustmentNeeded || mouse_raw_input.getBool()) &&
-       !m_bSetPosWasCalledLastFrame && !m_bAbsolute &&
-       env->getOS() != Environment::OS::LINUX)  // HACKHACK: linux hack
+       !m_bSetPosWasCalledLastFrame && !m_bAbsolute && env->getOS() != Environment::OS::LINUX)  // HACKHACK: linux hack
     {
         const Vector2 newOsMousePos = m_vPosWithoutOffset;
 

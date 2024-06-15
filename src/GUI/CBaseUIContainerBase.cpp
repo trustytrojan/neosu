@@ -1,13 +1,8 @@
-/*
- * CBaseUIContainerBase.cpp
- *
- *  Created on: May 31, 2017
- *      Author: Psy
- */
-
 #include "CBaseUIContainerBase.h"
 
 #include "Engine.h"
+
+using namespace std;
 
 CBaseUIContainerBase::CBaseUIContainerBase(UString name) : CBaseUIElement(0, 0, 0, 0, name) { m_bClipping = false; }
 

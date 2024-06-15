@@ -17,6 +17,8 @@
 #include "Skin.h"
 #include "Timer.h"
 
+using namespace std;
+
 ConVar osu_songbrowser_button_difficulty_inactive_color_a("osu_songbrowser_button_difficulty_inactive_color_a", 255,
                                                           FCVAR_DEFAULT);
 ConVar osu_songbrowser_button_difficulty_inactive_color_r("osu_songbrowser_button_difficulty_inactive_color_r", 0,

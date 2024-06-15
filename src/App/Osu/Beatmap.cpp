@@ -51,6 +51,8 @@
 #include "Spinner.h"
 #include "UIModSelectorModButton.h"
 
+using namespace std;
+
 ConVar osu_pvs("osu_pvs", true, FCVAR_DEFAULT,
                "optimizes all loops over all hitobjects by clamping the range to the Potentially Visible Set");
 ConVar osu_draw_hitobjects("osu_draw_hitobjects", true, FCVAR_DEFAULT);
@@ -708,7 +710,6 @@ void Beatmap::selectDifficulty2(DatabaseBeatmap *difficulty2) {
                            osu->getScore()->getModsLegacy(), getAR(), getCS(), getOD(), osu->getSpeedMultiplier());
         }
     }
-
 }
 
 void Beatmap::deselect() {
@@ -1813,8 +1814,8 @@ void Beatmap::loadMusic(bool stream) {
         // if it's not a stream then we are loading the entire song into memory for playing
         if(!stream) engine->getResourceManager()->requestNextLoadAsync();
 
-        m_music = engine->getResourceManager()->loadSoundAbs(
-            m_selectedDifficulty2->getFullSoundFilePath(), "OSU_BEATMAP_MUSIC", stream, false, false);
+        m_music = engine->getResourceManager()->loadSoundAbs(m_selectedDifficulty2->getFullSoundFilePath(),
+                                                             "OSU_BEATMAP_MUSIC", stream, false, false);
         m_music->setVolume(getIdealVolume());
         m_fMusicFrequencyBackup = m_music->getFrequency();
         m_music->setSpeed(osu->getSpeedMultiplier());
@@ -2043,10 +2044,9 @@ void Beatmap::drawFollowPoints(Graphics *g) {
     // 0.7x means animation lasts only 0.7 of it's time
     const double animationMutiplier = osu->getSpeedMultiplier() / osu->getAnimationSpeedMultiplier();
     const long followPointApproachTime =
-        animationMutiplier *
-        (osu_followpoints_clamp.getBool()
-             ? min((long)GameRules::getApproachTime(this), (long)osu_followpoints_approachtime.getFloat())
-             : (long)osu_followpoints_approachtime.getFloat());
+        animationMutiplier * (osu_followpoints_clamp.getBool() ? min((long)GameRules::getApproachTime(this),
+                                                                     (long)osu_followpoints_approachtime.getFloat())
+                                                               : (long)osu_followpoints_approachtime.getFloat());
     const bool followPointsConnectCombos = osu_followpoints_connect_combos.getBool();
     const bool followPointsConnectSpinners = osu_followpoints_connect_spinners.getBool();
     const float followPointSeparationMultiplier = max(osu_followpoints_separation_multiplier.getFloat(), 0.1f);
@@ -2568,7 +2568,7 @@ void Beatmap::update2() {
                        m_hitobjects[0]->getTime() > (long)osu_quick_retry_time.getInt())
                         m_music->setPositionMS(
                             max((long)0, m_hitobjects[0]->getTime() - (long)osu_quick_retry_time.getInt()));
-                        m_bWasSeekFrame = true;
+                    m_bWasSeekFrame = true;
 
                     m_bIsRestartScheduledQuick = false;
 
@@ -3451,7 +3451,9 @@ bool Beatmap::isLoading() {
             (bancho.is_playing_a_multi_map() && !bancho.room.all_players_loaded));
 }
 
-bool Beatmap::isActuallyLoading() { return (!engine->getSound()->isReady() || !m_music->isAsyncReady() || m_bIsPreLoading); }
+bool Beatmap::isActuallyLoading() {
+    return (!engine->getSound()->isReady() || !m_music->isAsyncReady() || m_bIsPreLoading);
+}
 
 Vector2 Beatmap::pixels2OsuCoords(Vector2 pixelCoords) const {
     // un-first-person
@@ -3735,7 +3737,7 @@ void Beatmap::saveAndSubmitScore(bool quit) {
     bool isComplete = (num300s + num100s + num50s + numMisses >= numHitObjects);
     bool isZero = (osu->getScore()->getScore() < 1);
     bool isCheated = (osu->getModAuto() || (osu->getModAutopilot() && osu->getModRelax())) ||
-                           osu->getScore()->isUnranked() || is_watching || is_spectating;
+                     osu->getScore()->isUnranked() || is_watching || is_spectating;
 
     FinishedScore score;
     score.isLegacyScore = false;

@@ -53,6 +53,8 @@
 #include "VolumeOverlay.h"
 #include "score.h"
 
+using namespace std;
+
 Osu *osu = NULL;
 
 // release configuration
@@ -141,7 +143,8 @@ ConVar scoreboard_animations("scoreboard_animations", true, FCVAR_DEFAULT, "anim
 ConVar instant_replay_duration("instant_replay_duration", 15.f, FCVAR_DEFAULT,
                                "instant replay (F2) duration, in seconds");
 ConVar normalize_loudness("normalize_loudness", false, FCVAR_DEFAULT, "normalize loudness across songs");
-ConVar restart_sound_engine_before_playing("restart_sound_engine_before_playing", false, FCVAR_DEFAULT, "jank fix for users who experience sound issues after playing for a while");
+ConVar restart_sound_engine_before_playing("restart_sound_engine_before_playing", false, FCVAR_DEFAULT,
+                                           "jank fix for users who experience sound issues after playing for a while");
 
 ConVar use_https("use_https", true, FCVAR_DEFAULT);
 ConVar mp_server("mp_server", "ez-pp.farm", FCVAR_DEFAULT);
@@ -695,13 +698,12 @@ void Osu::draw(Graphics *g) {
                     getImageScaleToFitResolution(m_backBuffer->getSize(), engine->getGraphics()->getResolution());
                 const float scaledWidth = m_backBuffer->getWidth() * scale;
                 const float scaledHeight = m_backBuffer->getHeight() * scale;
-                m_backBuffer->draw(
-                    g,
-                    max(0.0f, engine->getGraphics()->getResolution().x / 2.0f - scaledWidth / 2.0f) *
-                        (1.0f + osu_letterboxing_offset_x.getFloat()),
-                    max(0.0f, engine->getGraphics()->getResolution().y / 2.0f - scaledHeight / 2.0f) *
-                        (1.0f + osu_letterboxing_offset_y.getFloat()),
-                    scaledWidth, scaledHeight);
+                m_backBuffer->draw(g,
+                                   max(0.0f, engine->getGraphics()->getResolution().x / 2.0f - scaledWidth / 2.0f) *
+                                       (1.0f + osu_letterboxing_offset_x.getFloat()),
+                                   max(0.0f, engine->getGraphics()->getResolution().y / 2.0f - scaledHeight / 2.0f) *
+                                       (1.0f + osu_letterboxing_offset_y.getFloat()),
+                                   scaledWidth, scaledHeight);
             } else {
                 m_backBuffer->draw(g, 0, 0, engine->getGraphics()->getResolution().x,
                                    engine->getGraphics()->getResolution().y);
@@ -1789,8 +1791,7 @@ void Osu::onResolutionChanged(Vector2 newResolution) {
 
         // disable internal resolution on specific conditions
         bool windowsBorderlessHackCondition =
-            (env->getOS() == Environment::OS::WINDOWS && env->isFullscreen() &&
-             env->isFullscreenWindowedBorderless() &&
+            (env->getOS() == Environment::OS::WINDOWS && env->isFullscreen() && env->isFullscreenWindowedBorderless() &&
              (int)g_vInternalResolution.y == (int)env->getNativeScreenSize().y);  // HACKHACK
         if(((int)g_vInternalResolution.x == engine->getScreenWidth() &&
             (int)g_vInternalResolution.y == engine->getScreenHeight()) ||

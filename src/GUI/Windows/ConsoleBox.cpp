@@ -1,10 +1,3 @@
-//================ Copyright (c) 2011, PG, All rights reserved. =================//
-//
-// Purpose:		textbox + scrollview command suggestion list
-//
-// $NoKeywords: $
-//===============================================================================//
-
 #include "ConsoleBox.h"
 
 #include "AnimationHandler.h"
@@ -20,6 +13,8 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "ResourceManager.h"
+
+using namespace std;
 
 ConVar showconsolebox("showconsolebox");
 
@@ -85,10 +80,10 @@ class ConsoleBoxSuggestionButton : public CBaseUIButton {
 
                 g->pushTransform();
                 {
-                    const float scale = min(
-                        1.0f, (max(1.0f, m_consoleBox->getTextbox()->getSize().x - m_fStringWidth -
-                                                  helpTextOffset * 1.5f - helpTextSeparatorStringWidth * 1.5f)) /
-                                  (float)helpTextStringWidth);
+                    const float scale =
+                        min(1.0f, (max(1.0f, m_consoleBox->getTextbox()->getSize().x - m_fStringWidth -
+                                                 helpTextOffset * 1.5f - helpTextSeparatorStringWidth * 1.5f)) /
+                                      (float)helpTextStringWidth);
 
                     g->scale(scale, scale);
                     g->translate((int)(m_vPos.x + m_fStringWidth + helpTextOffset * scale / 2 +

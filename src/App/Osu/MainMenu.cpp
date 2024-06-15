@@ -29,6 +29,8 @@
 #include "UpdateHandler.h"
 #include "VertexArrayObject.h"
 
+using namespace std;
+
 UString MainMenu::NEOSU_MAIN_BUTTON_TEXT = UString("neosu");
 UString MainMenu::NEOSU_MAIN_BUTTON_SUBTEXT = UString("Multiplayer Client");
 
@@ -376,9 +378,8 @@ void MainMenu::draw(Graphics *g) {
         if(t.beatLengthBase == 0.0f)  // bah
             t.beatLengthBase = 1.0f;
 
-        m_iMainMenuAnimBeatCounter =
-            (curMusicPos - t.offset - (long)(max((long)t.beatLengthBase, (long)1) * 0.5f)) /
-            max((long)t.beatLengthBase, (long)1);
+        m_iMainMenuAnimBeatCounter = (curMusicPos - t.offset - (long)(max((long)t.beatLengthBase, (long)1) * 0.5f)) /
+                                     max((long)t.beatLengthBase, (long)1);
         pulse = (float)((curMusicPos - t.offset) % max((long)t.beatLengthBase, (long)1)) /
                 t.beatLengthBase;  // modulo must be >= 1
         pulse = clamp<float>(pulse, -1.0f, 1.0f);
@@ -1213,8 +1214,7 @@ void MainMenu::animMainButton() {
         const float randomDuration2 = (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * 3.5f;
         const float randomDuration3 = (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * 3.5f;
 
-        anim->moveQuadOut(&m_fMainMenuAnim, 1.0f,
-                          1.5f + max(randomDuration1, max(randomDuration2, randomDuration3)));
+        anim->moveQuadOut(&m_fMainMenuAnim, 1.0f, 1.5f + max(randomDuration1, max(randomDuration2, randomDuration3)));
         anim->moveQuadOut(&m_fMainMenuAnim1, m_fMainMenuAnim1Target, 1.5f + randomDuration1);
         anim->moveQuadOut(&m_fMainMenuAnim2, m_fMainMenuAnim2Target, 1.5f + randomDuration2);
         anim->moveQuadOut(&m_fMainMenuAnim3, m_fMainMenuAnim3Target, 1.5f + randomDuration3);

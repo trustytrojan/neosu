@@ -1,10 +1,3 @@
-//================ Copyright (c) 2019, PG & Francesco149, All rights reserved. =================//
-//
-// Purpose:		star rating + pp calculation, based on https://github.com/Francesco149/oppai/
-//
-// $NoKeywords: $tomstarspp
-//==============================================================================================//
-
 #include "DifficultyCalculator.h"
 
 #include "Beatmap.h"
@@ -14,6 +7,8 @@
 #include "Osu.h"
 #include "Replay.h"
 #include "SliderCurves.h"
+
+using namespace std;
 
 ConVar osu_stars_xexxar_angles_sliders("osu_stars_xexxar_angles_sliders", true, FCVAR_DEFAULT,
                                        "completely enables/disables the new star/pp calc algorithm");
@@ -646,12 +641,10 @@ double DifficultyCalculator::calculateStarDiffForHitObjects(std::vector<OsuDiffi
 
                     double speed_bonus = 1.0;
                     if(strain_time < min_speed_bonus)
-                        speed_bonus =
-                            1.0 + 0.75 * pow((min_speed_bonus - strain_time) / speed_balancing_factor, 2.0);
+                        speed_bonus = 1.0 + 0.75 * pow((min_speed_bonus - strain_time) / speed_balancing_factor, 2.0);
 
-                    raw_speed_strain =
-                        (speed_bonus + speed_bonus * pow(distance / single_spacing_threshold, 3.5)) *
-                        doubletapness / strain_time;
+                    raw_speed_strain = (speed_bonus + speed_bonus * pow(distance / single_spacing_threshold, 3.5)) *
+                                       doubletapness / strain_time;
 
                     // https://github.com/ppy/osu/blob/master/osu.Game.Rulesets.Osu/Difficulty/Evaluators/RhythmEvaluator.cs
                     int previousIslandSize = 0;
@@ -682,19 +675,18 @@ double DifficultyCalculator::calculateStarDiffForHitObjects(std::vector<OsuDiffi
 
                         currHistoricalDecay =
                             min((double)(historicalNoteCount - i) / historicalNoteCount,
-                                     currHistoricalDecay);  // either we're limited by time or limited by object count.
+                                currHistoricalDecay);  // either we're limited by time or limited by object count.
 
                         double currDelta = currObj->strain_time;
                         double prevDelta = prevObj->strain_time;
                         double lastDelta = lastObj->strain_time;
                         double currRatio =
-                            1.0 + 6.0 * min(0.5, pow(std::sin(PI / (min(prevDelta, currDelta) /
-                                                                              max(prevDelta, currDelta))),
-                                                               2.0));  // fancy function to calculate rhythmbonuses.
+                            1.0 +
+                            6.0 * min(0.5, pow(std::sin(PI / (min(prevDelta, currDelta) / max(prevDelta, currDelta))),
+                                               2.0));  // fancy function to calculate rhythmbonuses.
 
-                        double windowPenalty =
-                            min(1.0, max(0.0, std::abs(prevDelta - currDelta) - hitWindow300 * 0.3) /
-                                              (hitWindow300 * 0.3));
+                        double windowPenalty = min(
+                            1.0, max(0.0, std::abs(prevDelta - currDelta) - hitWindow300 * 0.3) / (hitWindow300 * 0.3));
 
                         windowPenalty = min(1.0, windowPenalty);
 
@@ -769,9 +761,7 @@ double DifficultyCalculator::calculateStarDiffForHitObjects(std::vector<OsuDiffi
                         return 0.0;
 
                     auto calcWideAngleBonus = [](double angle) {
-                        return pow(
-                            std::sin(3.0 / 4.0 * (min(5.0 / 6.0 * PI, max(PI / 6.0, angle)) - PI / 6.0)),
-                            2.0);
+                        return pow(std::sin(3.0 / 4.0 * (min(5.0 / 6.0 * PI, max(PI / 6.0, angle)) - PI / 6.0)), 2.0);
                     };
                     auto calcAcuteAngleBonus = [=](double angle) { return 1.0 - calcWideAngleBonus(angle); };
 
@@ -809,15 +799,13 @@ double DifficultyCalculator::calculateStarDiffForHitObjects(std::vector<OsuDiffi
                                        min(angleBonus, 125.0 / strain_time) *
                                        pow(std::sin(PI / 2.0 * min(1.0, (100.0 - strain_time) / 25.0)), 2.0) *
                                        pow(std::sin(PI / 2.0 * (clamp<double>(jumpDistance, 50.0, 100.0) - 50.0) /
-                                                         50.0),
-                                                2.0));
+                                                    50.0),
+                                           2.0));
 
                             wideAngleBonus *=
-                                angleBonus *
-                                (1.0 - min(wideAngleBonus, pow(calcWideAngleBonus(prev.angle), 3.0)));
-                            acuteAngleBonus *=
-                                0.5 + 0.5 * (1.0 - min(acuteAngleBonus,
-                                                            pow(calcAcuteAngleBonus(prevPrev->angle), 3.0)));
+                                angleBonus * (1.0 - min(wideAngleBonus, pow(calcWideAngleBonus(prev.angle), 3.0)));
+                            acuteAngleBonus *= 0.5 + 0.5 * (1.0 - min(acuteAngleBonus,
+                                                                      pow(calcAcuteAngleBonus(prevPrev->angle), 3.0)));
                         }
                     }
 
@@ -826,22 +814,21 @@ double DifficultyCalculator::calculateStarDiffForHitObjects(std::vector<OsuDiffi
                         currVelocity = (jumpDistance + prev.travelDistance) / strain_time;
 
                         double distRatio = pow(std::sin(PI / 2.0 * std::abs(prevVelocity - currVelocity) /
-                                                             max(prevVelocity, currVelocity)),
-                                                    2.0);
-                        double overlapVelocityBuff = min(125.0 / min(strain_time, prev.strain_time),
-                                                              std::abs(prevVelocity - currVelocity));
+                                                        max(prevVelocity, currVelocity)),
+                                               2.0);
+                        double overlapVelocityBuff =
+                            min(125.0 / min(strain_time, prev.strain_time), std::abs(prevVelocity - currVelocity));
                         velocityChangeBonus =
                             overlapVelocityBuff * distRatio *
-                            pow(min(strain_time, prev.strain_time) / max(strain_time, prev.strain_time),
-                                     2.0);
+                            pow(min(strain_time, prev.strain_time) / max(strain_time, prev.strain_time), 2.0);
                     }
 
                     if(prev.ho->type == OsuDifficultyHitObject::TYPE::SLIDER)
                         sliderBonus = prev.travelDistance / prev.travelTime;
 
-                    aimStrain += max(
-                        acuteAngleBonus * acute_angle_multiplier,
-                        wideAngleBonus * wide_angle_multiplier + velocityChangeBonus * velocity_change_multiplier);
+                    aimStrain +=
+                        max(acuteAngleBonus * acute_angle_multiplier,
+                            wideAngleBonus * wide_angle_multiplier + velocityChangeBonus * velocity_change_multiplier);
                     if(withSliders) aimStrain += sliderBonus * slider_multiplier;
 
                     return aimStrain;
@@ -1012,9 +999,9 @@ double DifficultyCalculator::calculateStarDiffForHitObjects(std::vector<OsuDiffi
                         (prev1.ho->curve ? prev1.ho->curve->pointAt(prev1.ho->repeats % 2 ? 1.0 : 0.0) : prev1.ho->pos)
                             .distance(cur.ho->pos) *
                         radius_scaling_factor;
-                    cur.minJumpDistance = max(
-                        0.0f, min((float)cur.minJumpDistance - (maximum_slider_radius - assumed_slider_radius),
-                                       tail_jump_dist - maximum_slider_radius));
+                    cur.minJumpDistance =
+                        max(0.0f, min((float)cur.minJumpDistance - (maximum_slider_radius - assumed_slider_radius),
+                                      tail_jump_dist - maximum_slider_radius));
                 }
 
                 // calculate angles
@@ -1168,12 +1155,12 @@ double DifficultyCalculator::calculatePPv2(int modsLegacy, double timescale, dou
     double multiplier = 1.14;  // keep final pp normalized across changes
     {
         if(modsLegacy & ModFlags::NoFail)
-            multiplier *= max(
-                0.9, 1.0 - 0.02 * effectiveMissCount);  // see https://github.com/ppy/osu-performance/pull/127/files
+            multiplier *=
+                max(0.9, 1.0 - 0.02 * effectiveMissCount);  // see https://github.com/ppy/osu-performance/pull/127/files
 
         if((modsLegacy & ModFlags::SpunOut) && score.totalHits > 0)
             multiplier *= 1.0 - pow((double)numSpinners / (double)score.totalHits,
-                                         0.85);  // see https://github.com/ppy/osu-performance/pull/110/
+                                    0.85);  // see https://github.com/ppy/osu-performance/pull/110/
 
         if((modsLegacy & ModFlags::Relax) && !osu_stars_and_pp_lazer_relax_autopilot_nerf_disabled.getBool()) {
             double okMultiplier = max(0.0, od > 0.0 ? 1.0 - pow(od / 13.33, 1.8) : 1.0);   // 100
@@ -1188,8 +1175,7 @@ double DifficultyCalculator::calculatePPv2(int modsLegacy, double timescale, dou
     const double accuracyValue = computeAccuracyValue(score, attributes);
 
     const double totalValue =
-        pow(pow(aimValue, 1.1) + pow(speedValue, 1.1) + pow(accuracyValue, 1.1), 1.0 / 1.1) *
-        multiplier;
+        pow(pow(aimValue, 1.1) + pow(speedValue, 1.1) + pow(accuracyValue, 1.1), 1.0 / 1.1) * multiplier;
 
     return totalValue;
 }
@@ -1197,8 +1183,7 @@ double DifficultyCalculator::calculatePPv2(int modsLegacy, double timescale, dou
 double DifficultyCalculator::calculateTotalStarsFromSkills(double aim, double speed) {
     double baseAimPerformance = pow(5.0 * max(1.0, aim / 0.0675) - 4.0, 3.0) / 100000.0;
     double baseSpeedPerformance = pow(5.0 * max(1.0, speed / 0.0675) - 4.0, 3.0) / 100000.0;
-    double basePerformance =
-        pow(pow(baseAimPerformance, 1.1) + pow(baseSpeedPerformance, 1.1), 1.0 / 1.1);
+    double basePerformance = pow(pow(baseAimPerformance, 1.1) + pow(baseSpeedPerformance, 1.1), 1.0 / 1.1);
     return basePerformance > 0.00001
                ? 1.04464392682 /* Math.Cbrt(OsuPerformanceCalculator.PERFORMANCE_BASE_MULTIPLIER) */ * 0.027 *
                      (std::cbrt(100000.0 / pow(2.0, 1 / 1.1) * basePerformance) + 4.0)
@@ -1223,13 +1208,11 @@ double DifficultyCalculator::computeAimValue(const ScoreData &score, const Diffi
     // Penalize misses by assessing # of misses relative to the total # of objects. Default a 3% reduction for any # of
     // misses.
     if(effectiveMissCount > 0 && score.totalHits > 0)
-        aimValue *=
-            0.97 * pow(1.0 - pow(effectiveMissCount / (double)score.totalHits, 0.775), effectiveMissCount);
+        aimValue *= 0.97 * pow(1.0 - pow(effectiveMissCount / (double)score.totalHits, 0.775), effectiveMissCount);
 
     // combo scaling
     if(score.beatmapMaxCombo > 0)
-        aimValue *=
-            min(pow((double)score.scoreMaxCombo, 0.8) / pow((double)score.beatmapMaxCombo, 0.8), 1.0);
+        aimValue *= min(pow((double)score.scoreMaxCombo, 0.8) / pow((double)score.beatmapMaxCombo, 0.8), 1.0);
 
     // ar bonus
     double approachRateFactor = 0.0;  // see https://github.com/ppy/osu-performance/pull/125/
@@ -1254,18 +1237,17 @@ double DifficultyCalculator::computeAimValue(const ScoreData &score, const Diffi
     // hidden
     if(score.modsLegacy & ModFlags::Hidden)
         aimValue *= 1.0 + 0.04 * (max(12.0 - attributes.ApproachRate,
-                                           0.0));  // NOTE: clamped to 0 because neosu allows AR > 12
+                                      0.0));  // NOTE: clamped to 0 because neosu allows AR > 12
 
     // "We assume 15% of sliders in a map are difficult since there's no way to tell from the performance calculator."
     double estimateDifficultSliders = attributes.SliderCount * 0.15;
     if(attributes.SliderCount > 0) {
-        double estimateSliderEndsDropped =
-            clamp<double>((double)min(score.countGood + score.countMeh + score.countMiss,
-                                           score.beatmapMaxCombo - score.scoreMaxCombo),
-                          0.0, estimateDifficultSliders);
-        double sliderNerfFactor = (1.0 - attributes.SliderFactor) *
-                                      pow(1.0 - estimateSliderEndsDropped / estimateDifficultSliders, 3.0) +
-                                  attributes.SliderFactor;
+        double estimateSliderEndsDropped = clamp<double>((double)min(score.countGood + score.countMeh + score.countMiss,
+                                                                     score.beatmapMaxCombo - score.scoreMaxCombo),
+                                                         0.0, estimateDifficultSliders);
+        double sliderNerfFactor =
+            (1.0 - attributes.SliderFactor) * pow(1.0 - estimateSliderEndsDropped / estimateDifficultSliders, 3.0) +
+            attributes.SliderFactor;
         aimValue *= sliderNerfFactor;
     }
 
@@ -1293,13 +1275,12 @@ double DifficultyCalculator::computeSpeedValue(const ScoreData &score, const Att
     // Penalize misses by assessing # of misses relative to the total # of objects. Default a 3% reduction for any # of
     // misses.
     if(effectiveMissCount > 0 && score.totalHits > 0)
-        speedValue *= 0.97 * pow(1.0 - pow(effectiveMissCount / (double)score.totalHits, 0.775),
-                                      pow(effectiveMissCount, 0.875));
+        speedValue *=
+            0.97 * pow(1.0 - pow(effectiveMissCount / (double)score.totalHits, 0.775), pow(effectiveMissCount, 0.875));
 
     // combo scaling
     if(score.beatmapMaxCombo > 0)
-        speedValue *=
-            min(pow((double)score.scoreMaxCombo, 0.8) / pow((double)score.beatmapMaxCombo, 0.8), 1.0);
+        speedValue *= min(pow((double)score.scoreMaxCombo, 0.8) / pow((double)score.beatmapMaxCombo, 0.8), 1.0);
 
     // ar bonus
     double approachRateFactor = 0.0;  // see https://github.com/ppy/osu-performance/pull/125/
@@ -1314,7 +1295,7 @@ double DifficultyCalculator::computeSpeedValue(const ScoreData &score, const Att
     // hidden
     if(score.modsLegacy & ModFlags::Hidden)
         speedValue *= 1.0 + 0.04 * (max(12.0 - attributes.ApproachRate,
-                                             0.0));  // NOTE: clamped to 0 because neosu allows AR > 12
+                                        0.0));  // NOTE: clamped to 0 because neosu allows AR > 12
 
     // "Calculate accuracy assuming the worst case scenario"
     double relevantTotalDiff = score.totalHits - attributes.SpeedNoteCount;
@@ -1329,9 +1310,8 @@ double DifficultyCalculator::computeSpeedValue(const ScoreData &score, const Att
 
     // see https://github.com/ppy/osu-performance/pull/128/
     // Scale the speed value with accuracy and OD
-    speedValue *=
-        (0.95 + pow(attributes.OverallDifficulty, 2.0) / 750.0) *
-        pow((score.accuracy + relevantAccuracy) / 2.0, (14.5 - max(attributes.OverallDifficulty, 8.0)) / 2.0);
+    speedValue *= (0.95 + pow(attributes.OverallDifficulty, 2.0) / 750.0) *
+                  pow((score.accuracy + relevantAccuracy) / 2.0, (14.5 - max(attributes.OverallDifficulty, 8.0)) / 2.0);
     // Scale the speed value with # of 50s to punish doubletapping.
     speedValue *=
         pow(0.99, score.countMeh < (score.totalHits / 500.0) ? 0.0 : score.countMeh - (score.totalHits / 500.0));
@@ -1353,8 +1333,7 @@ double DifficultyCalculator::computeAccuracyValue(const ScoreData &score, const 
     if(betterAccuracyPercentage < 0.0) betterAccuracyPercentage = 0.0;
 
     // arbitrary values tom crafted out of trial and error
-    double accuracyValue =
-        pow(1.52163, attributes.OverallDifficulty) * pow(betterAccuracyPercentage, 24.0) * 2.83;
+    double accuracyValue = pow(1.52163, attributes.OverallDifficulty) * pow(betterAccuracyPercentage, 24.0) * 2.83;
 
     // length bonus
     accuracyValue *= min(1.15, pow(score.amountHitObjectsWithAccuracy / 1000.0, 0.3));

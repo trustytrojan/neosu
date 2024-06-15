@@ -1,10 +1,3 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		base class for windows
-//
-// $NoKeywords: $
-//===============================================================================//
-
 #include "CBaseUIWindow.h"
 
 #include "AnimationHandler.h"
@@ -18,6 +11,8 @@
 #include "Mouse.h"
 #include "RenderTarget.h"
 #include "ResourceManager.h"
+
+using namespace std;
 
 ConVar ui_window_animspeed("ui_window_animspeed", 0.29f, FCVAR_DEFAULT);
 ConVar ui_window_shadow_radius("ui_window_shadow_radius", 13.0f, FCVAR_DEFAULT);

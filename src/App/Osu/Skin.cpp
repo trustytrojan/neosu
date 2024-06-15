@@ -15,6 +15,8 @@
 #include "SoundEngine.h"
 #include "VolumeOverlay.h"
 
+using namespace std;
+
 #define OSU_BITMASK_HITWHISTLE 0x2
 #define OSU_BITMASK_HITFINISH 0x4
 #define OSU_BITMASK_HITCLAP 0x8
