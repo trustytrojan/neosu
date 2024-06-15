@@ -59,8 +59,18 @@ void ChatChannel::add_message(ChatMessage msg) {
     UString text_str = "";
     float x = 10;
 
+    bool is_action = msg.text.startsWith("\001ACTION");
+    if(is_action) {
+        msg.text.erase(0, 7);
+        if(msg.text.endsWith("\001")) {
+            msg.text.erase(msg.text.length() - 1, 1);
+        }
+        msg.text.append("*");
+    }
+
     struct tm *tm = localtime(&msg.tms);
     auto timestamp_str = UString::format("%02d:%02d ", tm->tm_hour, tm->tm_min);
+    if(is_action) timestamp_str.append("*");
     float time_width = m_chat->font->getStringWidth(timestamp_str);
     CBaseUILabel *timestamp = new CBaseUILabel(x, y_total, time_width, line_height, "", timestamp_str);
     timestamp->setDrawFrame(false);
@@ -71,7 +81,6 @@ void ChatChannel::add_message(ChatMessage msg) {
     bool is_system_message = msg.author_name.length() == 0;
     if(!is_system_message) {
         float name_width = m_chat->font->getStringWidth(msg.author_name);
-
         auto user_box = new UIUserLabel(msg.author_id, msg.author_name);
         user_box->setTextColor(0xff2596be);
         user_box->setPos(x, y_total);
@@ -79,7 +88,9 @@ void ChatChannel::add_message(ChatMessage msg) {
         ui->getContainer()->addBaseUIElement(user_box);
         x += name_width;
 
-        text_str.append(": ");
+        if(!is_action) {
+            text_str.append(": ");
+        }
     }
 
     // XXX: Handle links, open them in the browser on click

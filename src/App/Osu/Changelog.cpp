@@ -29,10 +29,15 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
-    latest.changes.push_back("- Fixed Artist/Creator/Title sorting to be in A-Z order");
-    latest.changes.push_back("- Improved sound engine reliability");
-    latest.changes.push_back("- Removed herobrine");
+    latest.changes.push_back("- Chat: fixed /me and #announce message formatting");
     changelogs.push_back(latest);
+
+    CHANGELOG v35_05;
+    v35_05.title = "35.05 (2024-06-13)";
+    v35_05.changes.push_back("- Fixed Artist/Creator/Title sorting to be in A-Z order");
+    v35_05.changes.push_back("- Improved sound engine reliability");
+    v35_05.changes.push_back("- Removed herobrine");
+    changelogs.push_back(v35_05);
 
     CHANGELOG v35_04;
     v35_04.title = "35.04 (2024-06-11)";
@@ -43,7 +48,8 @@ Changelog::Changelog() : ScreenBackable() {
     v35_04.changes.push_back("- Fixed sliderslide and spinnerspin sounds not looping");
     v35_04.changes.push_back("- Improved sound engine reliability");
     v35_04.changes.push_back("- Re-added strain graphs");
-    v35_04.changes.push_back("- Removed sliderhead fadeout animation (set osu_slider_sliderhead_fadeout to 1 for old behavior)");
+    v35_04.changes.push_back(
+        "- Removed sliderhead fadeout animation (set osu_slider_sliderhead_fadeout to 1 for old behavior)");
     changelogs.push_back(v35_04);
 
     CHANGELOG v35_03;
@@ -68,7 +74,8 @@ Changelog::Changelog() : ScreenBackable() {
     v35_01.title = "35.01 (2024-06-08)";
     v35_01.changes.push_back("- Added ability to get spectated");
     v35_01.changes.push_back("- Added use_https convar (to support plain HTTP servers)");
-    v35_01.changes.push_back("- Added restart_sound_engine_before_playing convar (\"fixes\" sound engine lagging after a while)");
+    v35_01.changes.push_back(
+        "- Added restart_sound_engine_before_playing convar (\"fixes\" sound engine lagging after a while)");
     v35_01.changes.push_back("- Fixed chat channels being unread after joining");
     v35_01.changes.push_back("- Fixed flashlight mod");
     v35_01.changes.push_back("- Fixed FPoSu mode");

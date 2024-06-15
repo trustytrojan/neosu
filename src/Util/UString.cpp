@@ -154,10 +154,9 @@ UString UString::format(const char *utf8format, ...) {
         // https://github.com/McKay42/McEngine/commit/f5461d835a6ffb24fb26f0f36505e83e65e4bb2e
         // MSVC's standard library is horribly broken and switched the meaning of %s and %S for wide char functions
         // TODO: this doesn't handle patterns like "%%s"
-        while (true) {
+        while(true) {
             int pos = formatted.find("%s");
-            if (pos == -1)
-                break;
+            if(pos == -1) break;
 
             formatted.mUnicode[pos + 1] = L'S';
         }
@@ -651,6 +650,22 @@ bool UString::operator<(const UString &ustr) const {
     if(mLength == ustr.mLength) return false;
 
     return mLength < ustr.mLength;
+}
+
+bool UString::startsWith(const UString &ustr) const {
+    if(mLength < ustr.mLength) return false;
+    for(int i = 0; i < ustr.mLength; i++) {
+        if(mUnicode[i] != ustr.mUnicode[i]) return false;
+    }
+    return true;
+}
+
+bool UString::endsWith(const UString &ustr) const {
+    if(mLength < ustr.mLength) return false;
+    for(int i = 0; i < ustr.mLength; i++) {
+        if(mUnicode[mLength - ustr.mLength + i] != ustr.mUnicode[i]) return false;
+    }
+    return true;
 }
 
 bool UString::equalsIgnoreCase(const UString &ustr) const {
