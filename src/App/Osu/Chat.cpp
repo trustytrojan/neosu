@@ -94,23 +94,25 @@ void ChatChannel::add_message(ChatMessage msg) {
         }
     }
 
-    // regex101 format: (\[\[(.+?)\]\])|(\[(https?:\/\/\S+) (.+?)\])|(https?:\/\/\S+)
-    // example: link1 https://example.com link2 [https://regex101.com label] link3 [[FAQ]]
-    //
-    // Sadly, perl-style (?|(a)|(b)) capture groups are not supported in C++.
-    // So instead of having a nice regex that handles all cases, we have 6 capture groups.
+    // regex101 format: (\[\[(.+?)\]\])|(\[((\S+):\/\/\S+) (.+?)\])|(https?:\/\/\S+)
+    // This matches:
+    // - Raw URLs      https://example.com
+    // - Labeled URLs  [https://regex101.com useful website]
+    // - Lobby invites [osump://0/ join my lobby plz]
+    // - Wiki links    [[Chat Console]]
     //
     // Group 1) [[FAQ]]
     // Group 2) FAQ
     // Group 3) [https://regex101.com label]
     // Group 4) https://regex101.com
-    // Group 5) label
-    // Group 6) https://example.com
+    // Group 5) https
+    // Group 6) label
+    // Group 7) https://example.com
     //
     // Groups 1, 2 only exist for wiki links
-    // Groups 3, 4, 5 only exist for labeled links
-    // Group 6 only exists for raw links
-    std::wregex url_regex(L"(\\[\\[(.+?)\\]\\])|(\\[(https?://\\S+) (.+?)\\])|(https?://\\S+)");
+    // Groups 3, 4, 5, 6 only exist for labeled links
+    // Group 7 only exists for raw links
+    std::wregex url_regex(L"(\\[\\[(.+?)\\]\\])|(\\[((\\S+)://\\S+) (.+?)\\])|(https?://\\S+)");
 
     std::wstring msg_text = msg.text.wc_str();
     std::wsmatch match;
@@ -122,18 +124,28 @@ void ChatChannel::add_message(ChatMessage msg) {
         int match_len;
         UString link_url;
         UString link_label;
-        if(match[6].matched) {
+        if(match[7].matched) {
             // Raw link
-            match_pos = match.position(6);
-            match_len = match.length(6);
-            link_url = match.str(6).c_str();
-            link_label = match.str(6).c_str();
+            match_pos = match.position(7);
+            match_len = match.length(7);
+            link_url = match.str(7).c_str();
+            link_label = match.str(7).c_str();
         } else if(match[3].matched) {
             // Labeled link
             match_pos = match.position(3);
             match_len = match.length(3);
             link_url = match.str(4).c_str();
-            link_label = match.str(5).c_str();
+            link_label = match.str(6).c_str();
+
+            // Normalize invite links to osump://
+            UString link_protocol = match.str(5).c_str();
+            if(link_protocol == UString("osu")) {
+                // osu:// -> osump://
+                link_url.insert(2, "mp");
+            } else if(link_protocol == UString("http://osump")) {
+                // http://osump:// -> osump://
+                link_url.erase(0, 7);
+            }
         } else {
             // Wiki link
             match_pos = match.position(1);

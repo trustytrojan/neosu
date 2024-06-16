@@ -11,6 +11,7 @@
 #include "CBaseUIContainer.h"
 #include "CBaseUILabel.h"
 #include "CBaseUITextbox.h"
+#include "Changelog.h"
 #include "Chat.h"
 #include "Database.h"
 #include "Downloader.h"
@@ -32,6 +33,7 @@
 #include "SongBrowser/SongBrowser.h"
 #include "SongBrowser/SongButton.h"
 #include "SoundEngine.h"
+#include "SpectatorScreen.h"
 #include "UIAvatar.h"
 #include "UIButton.h"
 #include "UICheckbox.h"
@@ -561,10 +563,17 @@ void RoomScreen::on_room_joined(Room room) {
 
     on_map_change();
 
-    // Currently we can only join rooms from the lobby.
-    // If we add ability to join from links, you would need to hide all other
-    // screens, kick the player out of the song they're currently playing, etc.
+    // Close all screens and stop any activity the player is in
+    stop_spectating();
+    if(osu->getSelectedBeatmap()->isPlaying()) {
+        osu->getSelectedBeatmap()->stop(true);
+    }
+    osu->m_rankingScreen->setVisible(false);
+    osu->m_songBrowser2->setVisible(false);
+    osu->m_changelog->setVisible(false);
+    osu->m_mainMenu->setVisible(false);
     osu->m_lobby->setVisible(false);
+
     updateLayout(osu->getScreenSize());
     m_bVisible = true;
 

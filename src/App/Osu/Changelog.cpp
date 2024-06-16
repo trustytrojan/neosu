@@ -32,6 +32,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.changes.push_back("- Chat: added support for /me command");
     latest.changes.push_back("- Chat: added support for links");
     latest.changes.push_back("- Chat: added support for map links (auto-downloads)");
+    latest.changes.push_back("- Chat: added support for multiplayer invite links");
     changelogs.push_back(latest);
 
     CHANGELOG v35_05;

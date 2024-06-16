@@ -4,8 +4,11 @@
 #include <regex>
 
 #include "Bancho.h"
+#include "Lobby.h"
 #include "MainMenu.h"
+#include "NotificationOverlay.h"
 #include "Osu.h"
+#include "RoomScreen.h"
 #include "SongBrowser/SongBrowser.h"
 #include "TooltipOverlay.h"
 
@@ -32,7 +35,23 @@ void ChatLink::mouse_update(bool *propagate_clicks) {
 }
 
 void ChatLink::onMouseUpInside() {
-    // TODO: Handle lobby invite links, on click join the lobby (even if passworded)
+    if(m_link.startsWith("osump://")) {
+        if(osu->m_room->isVisible()) {
+            osu->getNotificationOverlay()->addNotification("You are already in a multiplayer room.");
+            return;
+        }
+
+        // If the password has a space in it, parsing will break, but there's no way around it...
+        // osu!stable also considers anything after a space to be part of the lobby title :(
+        std::regex password_regex("osump://(\\d+)/(\\S*)");
+        std::string invite_str = m_link.toUtf8();
+        std::smatch match;
+        std::regex_search(invite_str, match, password_regex);
+        u32 invite_id = strtoul(match.str(1).c_str(), NULL, 10);
+        UString password = match.str(2).c_str();
+        osu->m_lobby->joinRoom(invite_id, password);
+        return;
+    }
 
     // This lazy escaping is only good for endpoint URLs, not anything more serious
     UString escaped_endpoint;

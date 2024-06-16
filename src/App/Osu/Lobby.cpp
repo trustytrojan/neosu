@@ -204,12 +204,14 @@ void Lobby::joinRoom(u32 id, UString password) {
     send_packet(packet);
 
     for(CBaseUIElement* elm : m_list->getContainer()->getElements()) {
-        auto room = (RoomUIElement*)elm;
+        RoomUIElement* room = dynamic_cast<RoomUIElement*>(elm);
+        if(room == NULL) continue;
         if(room->room_id != id) continue;
         room->join_btn->is_loading = true;
         break;
     }
 
+    debugLog("Joining room #%d with password '%s'\n", id, password.toUtf8());
     osu->getNotificationOverlay()->addNotification("Joining room...");
 }
 
