@@ -36,6 +36,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.changes.push_back("- Chat: added support for multiplayer invite links");
     latest.changes.push_back("- FPS counter will now display worst frametime instead of current frametime");
     latest.changes.push_back("- Improved song browser performance");
+    latest.changes.push_back("- Skins are now sorted alphabetically, ignoring meme characters");
     changelogs.push_back(latest);
 
     CHANGELOG v35_05;
