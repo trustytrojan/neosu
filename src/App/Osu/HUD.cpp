@@ -319,9 +319,6 @@ void HUD::draw(Graphics *g) {
                 g->translate(0, beatmap->getHitcircleDiameter() *
                                     (1.0f / (osu_hud_scale.getFloat() * osu_hud_statistics_scale.getFloat())));
 
-            const int hitObjectIndexForCurrentTime =
-                (beatmap->getHitObjectIndexForCurrentTime() < 1 ? -1 : beatmap->getHitObjectIndexForCurrentTime());
-
             drawStatistics(
                 g, osu->getScore()->getNumMisses(), osu->getScore()->getNumSliderBreaks(),
                 beatmap->getMaxPossibleCombo(), live_stars,
@@ -504,8 +501,9 @@ void HUD::mouse_update(bool *propagate_clicks) {
             m_fFpsUpdate = engine->getTime() + 0.25f;
             m_fCurFps = m_fCurFpsSmooth;
         }
-    } else
+    } else {
         m_fCurFps = (1.0f / engine->getFrameTime());
+    }
 
     // target heatmap cleanup
     if(osu->getModTarget()) {
@@ -786,9 +784,20 @@ void HUD::drawCursorRipples(Graphics *g) {
 }
 
 void HUD::drawFps(Graphics *g, McFont *font, float fps) {
+    static double old_worst_frametime = 0.0;
+    static double new_worst_frametime = 0.0;
+    static double current_second = 0.0;
+    if(current_second + 1.0 > engine->getTime()) {
+        new_worst_frametime = max(new_worst_frametime, engine->getFrameTime());
+    } else {
+        old_worst_frametime = new_worst_frametime;
+        new_worst_frametime = 0.f;
+        current_second = engine->getTime();
+    }
+
     fps = std::round(fps);
     const UString fpsString = UString::format("%i fps", (int)(fps));
-    const UString msString = UString::format("%.1f ms", (1.0f / fps) * 1000.0f);
+    const UString msString = UString::format("%.1f ms", old_worst_frametime * 1000.0f);
 
     const float dpiScale = Osu::getUIScale();
 
@@ -813,17 +822,18 @@ void HUD::drawFps(Graphics *g, McFont *font, float fps) {
     g->popTransform();
 
     // top
-    if(fps >= 200)
-        g->setColor(0xffffffff);
-    else if(fps >= 120)
-        g->setColor(0xffdddd00);
-    else {
-        const float pulse = std::abs(std::sin(engine->getTime() * 4));
-        g->setColor(COLORf(1.0f, 1.0f, 0.26f * pulse, 0.26f * pulse));
-    }
 
     g->pushTransform();
     {
+        if(fps >= 200)
+            g->setColor(0xffffffff);
+        else if(fps >= 120)
+            g->setColor(0xffdddd00);
+        else {
+            const float pulse = std::abs(std::sin(engine->getTime() * 4));
+            g->setColor(COLORf(1.0f, 1.0f, 0.26f * pulse, 0.26f * pulse));
+        }
+
         g->translate(osu->getScreenWidth() - font->getStringWidth(fpsString) - margin,
                      osu->getScreenHeight() - margin - font->getHeight() - margin);
         g->drawString(font, fpsString);
@@ -831,6 +841,15 @@ void HUD::drawFps(Graphics *g, McFont *font, float fps) {
     g->popTransform();
     g->pushTransform();
     {
+        if(old_worst_frametime <= 0.005) {
+            g->setColor(0xffffffff);
+        } else if(old_worst_frametime <= 0.008) {
+            g->setColor(0xffdddd00);
+        } else {
+            const float pulse = std::abs(std::sin(engine->getTime() * 4));
+            g->setColor(COLORf(1.0f, 1.0f, 0.26f * pulse, 0.26f * pulse));
+        }
+
         g->translate(osu->getScreenWidth() - font->getStringWidth(msString) - margin, osu->getScreenHeight() - margin);
         g->drawString(font, msString);
     }
