@@ -32,6 +32,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.changes.push_back("- Added cursor trail customization settings");
     latest.changes.push_back("- Added instafade checkbox");
     latest.changes.push_back("- Added more UI sounds");
+    latest.changes.push_back("- Added submit_after_pause convar");
     latest.changes.push_back("- Chat: added support for /me command");
     latest.changes.push_back("- Chat: added support for links");
     latest.changes.push_back("- Chat: added support for map links (auto-downloads)");

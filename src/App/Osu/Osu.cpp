@@ -152,6 +152,7 @@ ConVar mp_server("mp_server", "ez-pp.farm", FCVAR_DEFAULT);
 ConVar mp_password("mp_password", "", FCVAR_DEFAULT | FCVAR_HIDDEN);
 ConVar mp_autologin("mp_autologin", false, FCVAR_DEFAULT);
 ConVar submit_scores("submit_scores", false, FCVAR_DEFAULT);
+ConVar submit_after_pause("submit_after_pause", true, FCVAR_DEFAULT);
 
 // If catboy.best doesn't work for you, here are some alternatives:
 // - https://api.osu.direct/d/

@@ -1116,6 +1116,11 @@ void Beatmap::pause(bool quitIfWaiting) {
     }
 
     if(m_bIsPaused && isFirstPause) {
+        if(!convar->getConVarByName("submit_after_pause")->getBool()) {
+            debugLog("Disabling score submission due to pausing\n");
+            vanilla = false;
+        }
+
         m_vContinueCursorPoint = getMousePos();
         if(GameRules::osu_mod_fps.getBool()) {
             m_vContinueCursorPoint = GameRules::getPlayfieldCenter();
