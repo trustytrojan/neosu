@@ -863,6 +863,11 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
                 "Usually, the presence of the cursormiddle.png skin image enables smooth cursortrails.\nThis option "
                 "allows you to force enable smooth cursortrails for all skins.",
                 convar->getConVarByName("osu_cursor_trail_smooth_force"));
+    addCheckbox("Always draw Cursor Trail", "Draw the cursor trail even when the cursor isn't moving",
+                convar->getConVarByName("always_render_cursor_trail"));
+    addSlider("Cursor trail spacing:", 0.f, 30.f, convar->getConVarByName("cursor_trail_spacing"), -1.f, true)
+        ->setAnimated(false)
+        ->setKeyDelta(0.01f);
     m_cursorSizeSlider =
         addSlider("Cursor Size:", 0.01f, 5.0f, convar->getConVarByName("osu_cursor_scale"), -1.0f, true);
     m_cursorSizeSlider->setAnimated(false);

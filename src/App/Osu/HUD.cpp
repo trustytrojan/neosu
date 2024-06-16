@@ -40,9 +40,9 @@ ConVar osu_cursor_expand_duration("osu_cursor_expand_duration", 0.1f, FCVAR_DEFA
 ConVar osu_cursor_trail_scale("osu_cursor_trail_scale", 1.0f, FCVAR_DEFAULT);
 ConVar osu_cursor_trail_length("osu_cursor_trail_length", 0.17f, FCVAR_DEFAULT,
                                "how long unsmooth cursortrails should be, in seconds");
-ConVar osu_cursor_trail_spacing(
-    "osu_cursor_trail_spacing", 0.015f, FCVAR_DEFAULT,
-    "how big the gap between consecutive unsmooth cursortrail images should be, in seconds");
+ConVar cursor_trail_spacing(
+    "cursor_trail_spacing", 15.f, FCVAR_DEFAULT,
+    "how big the gap between consecutive unsmooth cursortrail images should be, in milliseconds");
 ConVar osu_cursor_trail_alpha("osu_cursor_trail_alpha", 1.0f, FCVAR_DEFAULT);
 ConVar osu_cursor_trail_smooth_force("osu_cursor_trail_smooth_force", false, FCVAR_DEFAULT);
 ConVar osu_cursor_trail_smooth_length("osu_cursor_trail_smooth_length", 0.5f, FCVAR_DEFAULT,
@@ -55,6 +55,8 @@ ConVar osu_cursor_trail_max_size("osu_cursor_trail_max_size", 2048, FCVAR_DEFAUL
 ConVar osu_cursor_trail_expand(
     "osu_cursor_trail_expand", true, FCVAR_DEFAULT,
     "if \"CursorExpand: 1\" in your skin.ini, whether the trail should then also expand or not");
+ConVar always_render_cursor_trail("always_render_cursor_trail", true, FCVAR_DEFAULT,
+                                  "always render the cursor trail, even when not moving the cursor");
 ConVar osu_cursor_ripple_duration("osu_cursor_ripple_duration", 0.7f, FCVAR_DEFAULT,
                                   "time in seconds each cursor ripple is visible");
 ConVar osu_cursor_ripple_alpha("osu_cursor_ripple_alpha", 1.0f, FCVAR_DEFAULT);
@@ -2830,18 +2832,21 @@ void HUD::addCursorTrailPosition(std::vector<CURSORTRAIL> &trail, Vector2 pos, b
                     trail.push_back(mid);
                 }
             }
-        } else
+        } else {
             trail.push_back(ct);
+        }
     } else if((trail.size() > 0 && engine->getTime() > trail[trail.size() - 1].time -
                                                            osu_cursor_trail_length.getFloat() +
-                                                           osu_cursor_trail_spacing.getFloat()) ||
+                                                           cursor_trail_spacing.getFloat() / 1000.f) ||
               trail.size() == 0) {
-        if(trail.size() > 0 && trail[trail.size() - 1].pos == pos) {
+        if(trail.size() > 0 && trail[trail.size() - 1].pos == pos &&
+           !convar->getConVarByName("always_render_cursor_trail")->getBool()) {
             trail[trail.size() - 1].time = ct.time;
             trail[trail.size() - 1].alpha = 1.0f;
             trail[trail.size() - 1].scale = ct.scale;
-        } else
+        } else {
             trail.push_back(ct);
+        }
     }
 
     // early cleanup
