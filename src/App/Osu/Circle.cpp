@@ -429,7 +429,8 @@ void Circle::draw(Graphics *g) {
     Skin *skin = osu->getSkin();
 
     // draw hit animation
-    if(m_fHitAnimation > 0.0f && m_fHitAnimation != 1.0f && !osu->getModHD()) {
+    bool is_instafade = convar->getConVarByName("instafade")->getBool();
+    if(!is_instafade && m_fHitAnimation > 0.0f && m_fHitAnimation != 1.0f && !osu->getModHD()) {
         float alpha = 1.0f - m_fHitAnimation;
 
         float scale = m_fHitAnimation;

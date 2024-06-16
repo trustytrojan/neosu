@@ -847,6 +847,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     hitResultScaleSlider->setKeyDelta(0.01f);
     addCheckbox("Draw Numbers", convar->getConVarByName("osu_draw_numbers"));
     addCheckbox("Draw Approach Circles", convar->getConVarByName("osu_draw_approach_circles"));
+    addCheckbox("Instafade", convar->getConVarByName("instafade"));
     addSpacer();
     addCheckbox("Ignore Beatmap Sample Volume",
                 "Ignore beatmap timingpoint effect volumes.\nQuiet hitsounds can destroy accuracy and concentration, "
