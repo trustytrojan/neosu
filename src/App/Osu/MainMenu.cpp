@@ -29,6 +29,8 @@
 #include "UpdateHandler.h"
 #include "VertexArrayObject.h"
 
+static float button_sound_cooldown = 0.f;
+
 using namespace std;
 
 UString MainMenu::NEOSU_MAIN_BUTTON_TEXT = UString("neosu");
@@ -1423,7 +1425,10 @@ void MainMenuCubeButton::onMouseInside() {
 
     CBaseUIButton::onMouseInside();
 
-    engine->getSound()->play(osu->getSkin()->m_hoverMainMenuCube);
+    if(button_sound_cooldown + 0.05f < engine->getTime()) {
+        engine->getSound()->play(osu->getSkin()->m_hoverMainMenuCube);
+        button_sound_cooldown = engine->getTime();
+    }
 }
 
 void MainMenuCubeButton::onMouseOutside() {
@@ -1447,13 +1452,17 @@ void MainMenuButton::onMouseInside() {
     if(m_mainMenu->m_cube->isMouseInside()) return;
     CBaseUIButton::onMouseInside();
 
-    if(getName() == UString("Singleplayer")) {
-        engine->getSound()->play(osu->getSkin()->m_hoverSingleplayer);
-    } else if(getName() == UString("Multiplayer")) {
-        engine->getSound()->play(osu->getSkin()->m_hoverMultiplayer);
-    } else if(getName() == UString("Options")) {
-        engine->getSound()->play(osu->getSkin()->m_hoverOptions);
-    } else if(getName() == UString("Exit")) {
-        engine->getSound()->play(osu->getSkin()->m_hoverExit);
+    if(button_sound_cooldown + 0.05f < engine->getTime()) {
+        if(getText() == UString("Singleplayer")) {
+            engine->getSound()->play(osu->getSkin()->m_hoverSingleplayer);
+        } else if(getText() == UString("Multiplayer")) {
+            engine->getSound()->play(osu->getSkin()->m_hoverMultiplayer);
+        } else if(getText() == UString("Options (CTRL + O)")) {
+            engine->getSound()->play(osu->getSkin()->m_hoverOptions);
+        } else if(getText() == UString("Exit")) {
+            engine->getSound()->play(osu->getSkin()->m_hoverExit);
+        }
+
+        button_sound_cooldown = engine->getTime();
     }
 }

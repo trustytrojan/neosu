@@ -2215,7 +2215,7 @@ void OptionsMenu::updateLayout() {
 void OptionsMenu::onBack() {
     osu->getNotificationOverlay()->stopWaitingForKey();
 
-    engine->getSound()->play(osu->getSkin()->getMenuClick());
+    engine->getSound()->play(osu->getSkin()->m_menuBack);
     save();
 
     if(m_bFullscreen)

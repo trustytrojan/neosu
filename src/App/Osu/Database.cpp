@@ -1241,11 +1241,8 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
             if(pathTokens.size() > 0 && pathTokens[0].length() > 0) {
                 const std::vector<UString> spaceTokens = pathTokens[0].split(" ");
                 if(spaceTokens.size() > 0 && spaceTokens[0].length() > 0) {
-                    try {
-                        beatmapSetID = spaceTokens[0].toInt();
-                    } catch(...) {
-                        beatmapSetID = -1;
-                    }
+                    beatmapSetID = spaceTokens[0].toInt();
+                    if(beatmapSetID == 0) beatmapSetID = -1;
                 }
             }
         }

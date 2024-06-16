@@ -1,14 +1,6 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		linux
-//
-// $NoKeywords: $linuxenv
-//===============================================================================//
+#pragma once
 
 #ifdef __linux__
-
-#ifndef LINUXENVIRONMENT_H
-#define LINUXENVIRONMENT_H
 
 #include <X11/X.h>
 #include <X11/Xlib.h>
@@ -167,4 +159,4 @@ class LinuxEnvironment : public Environment {
 
 #endif
 
-#endif
+std::string fix_filename_casing(std::string directory, std::string filename);

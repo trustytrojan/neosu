@@ -249,7 +249,7 @@ void Button::deselect() { m_bSelected = false; }
 void Button::resetAnimations() { setMoveAwayState(MOVE_AWAY_STATE::MOVE_CENTER, false); }
 
 void Button::onClicked() {
-    engine->getSound()->play(osu->getSkin()->getMenuClick());
+    engine->getSound()->play(osu->getSkin()->m_selectDifficulty);
 
     CBaseUIButton::onClicked();
 
@@ -262,7 +262,7 @@ void Button::onMouseInside() {
     // hover sound
     if(engine->getTime() > lastHoverSoundTime + 0.05f)  // to avoid earraep
     {
-        if(engine->hasFocus()) engine->getSound()->play(osu->getSkin()->getMenuClick());
+        if(engine->hasFocus()) engine->getSound()->play(osu->getSkin()->getMenuHover());
 
         lastHoverSoundTime = engine->getTime();
     }

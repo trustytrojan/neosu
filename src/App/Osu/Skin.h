@@ -243,7 +243,7 @@ class Skin {
     inline Sound *getFailsound() { return m_failsound; }
     inline Sound *getApplause() { return m_applause; }
     inline Sound *getMenuHit() { return m_menuHit; }
-    inline Sound *getMenuClick() { return m_menuClick; }
+    inline Sound *getMenuHover() { return m_menuHover; }
     inline Sound *getCheckOn() { return m_checkOn; }
     inline Sound *getCheckOff() { return m_checkOff; }
     inline Sound *getShutter() { return m_shutter; }
@@ -350,7 +350,7 @@ class Skin {
 
     void checkLoadSound(Sound **addressOfPointer, std::string skinElementName, std::string resourceName,
                         bool isOverlayable = false, bool isSample = false, bool loop = false,
-                        float hardcodedVolumeMultiplier = -1.0f);
+                        bool fallback_to_default = true, float hardcodedVolumeMultiplier = -1.0f);
 
     void onEffectVolumeChange(UString oldValue, UString newValue);
     void onIgnoreBeatmapSampleVolumeChange(UString oldValue, UString newValue);
@@ -624,6 +624,8 @@ class Skin {
     Sound *m_hoverExit = NULL;
 
     // Pause menu sounds
+    Sound *m_pauseLoop = NULL;
+    Sound *m_pauseHover = NULL;
     Sound *m_clickPauseBack = NULL;
     Sound *m_hoverPauseBack = NULL;
     Sound *m_clickPauseContinue = NULL;
@@ -656,7 +658,7 @@ class Skin {
     Sound *m_failsound;
     Sound *m_applause;
     Sound *m_menuHit;
-    Sound *m_menuClick;
+    Sound *m_menuHover;
     Sound *m_checkOn;
     Sound *m_checkOff;
     Sound *m_shutter;

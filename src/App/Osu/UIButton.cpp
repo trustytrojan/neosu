@@ -10,6 +10,8 @@
 
 using namespace std;
 
+static float button_sound_cooldown = 0.f;
+
 UIButton::UIButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
     : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {
     m_bDefaultSkin = false;
@@ -91,7 +93,10 @@ void UIButton::mouse_update(bool *propagate_clicks) {
 void UIButton::onMouseInside() {
     m_fBrightness = 1.0f;
 
-    engine->getSound()->play(osu->getSkin()->m_hoverButton);
+    if(button_sound_cooldown + 0.05f < engine->getTime()) {
+        engine->getSound()->play(osu->getSkin()->m_hoverButton);
+        button_sound_cooldown = engine->getTime();
+    }
 }
 
 void UIButton::onMouseOutside() { m_fBrightness = 0.85f; }

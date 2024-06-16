@@ -638,7 +638,7 @@ void RankingScreen::updateLayout() {
 }
 
 void RankingScreen::onBack() {
-    engine->getSound()->play(osu->getSkin()->getMenuClick());
+    engine->getSound()->play(osu->getSkin()->m_menuBack);
 
     // stop applause sound
     if(osu->getSkin()->getApplause() != NULL && osu->getSkin()->getApplause()->isPlaying())

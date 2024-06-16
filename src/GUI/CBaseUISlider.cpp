@@ -221,7 +221,7 @@ CBaseUISlider *CBaseUISlider::setValue(float value, bool animate, bool call_call
 
         if(m_bHasChanged) {
             if(m_fLastSoundPlayTime + 0.05f < engine->getTime()) {
-                engine->getSound()->play(osu->getSkin()->m_sliderbar);
+                engine->getSound()->play(osu->getSkin()->m_sliderbar, 0.f, 1.f + 0.05f * percent);
                 m_fLastSoundPlayTime = engine->getTime();
             }
         }

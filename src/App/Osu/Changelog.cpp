@@ -346,7 +346,7 @@ void Changelog::updateLayout() {
 }
 
 void Changelog::onBack() {
-    engine->getSound()->play(osu->getSkin()->getMenuClick());
+    engine->getSound()->play(osu->getSkin()->m_menuBack);
 
     osu->toggleChangelog();
 }

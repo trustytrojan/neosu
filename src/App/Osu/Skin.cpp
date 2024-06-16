@@ -8,6 +8,7 @@
 #include "Environment.h"
 #include "File.h"
 #include "GameRules.h"
+#include "LinuxEnvironment.h"
 #include "NotificationOverlay.h"
 #include "Osu.h"
 #include "ResourceManager.h"
@@ -225,7 +226,7 @@ Skin::Skin(UString name, std::string filepath, bool isDefaultSkin) {
     m_failsound = NULL;
     m_applause = NULL;
     m_menuHit = NULL;
-    m_menuClick = NULL;
+    m_menuHover = NULL;
     m_checkOn = NULL;
     m_checkOff = NULL;
     m_shutter = NULL;
@@ -829,28 +830,30 @@ void Skin::load() {
     // sounds
 
     // samples
-    checkLoadSound(&m_normalHitNormal, "normal-hitnormal", "OSU_SKIN_NORMALHITNORMAL_SND", true, true, false, 0.8f);
-    checkLoadSound(&m_normalHitWhistle, "normal-hitwhistle", "OSU_SKIN_NORMALHITWHISTLE_SND", true, true, false, 0.85f);
+    checkLoadSound(&m_normalHitNormal, "normal-hitnormal", "OSU_SKIN_NORMALHITNORMAL_SND", true, true, false, true,
+                   0.8f);
+    checkLoadSound(&m_normalHitWhistle, "normal-hitwhistle", "OSU_SKIN_NORMALHITWHISTLE_SND", true, true, false, true,
+                   0.85f);
     checkLoadSound(&m_normalHitFinish, "normal-hitfinish", "OSU_SKIN_NORMALHITFINISH_SND", true, true);
-    checkLoadSound(&m_normalHitClap, "normal-hitclap", "OSU_SKIN_NORMALHITCLAP_SND", true, true, false, 0.85f);
+    checkLoadSound(&m_normalHitClap, "normal-hitclap", "OSU_SKIN_NORMALHITCLAP_SND", true, true, false, true, 0.85f);
 
     checkLoadSound(&m_normalSliderTick, "normal-slidertick", "OSU_SKIN_NORMALSLIDERTICK_SND", true, true);
     checkLoadSound(&m_normalSliderSlide, "normal-sliderslide", "OSU_SKIN_NORMALSLIDERSLIDE_SND", false, true, true);
     checkLoadSound(&m_normalSliderWhistle, "normal-sliderwhistle", "OSU_SKIN_NORMALSLIDERWHISTLE_SND", true, true);
 
-    checkLoadSound(&m_softHitNormal, "soft-hitnormal", "OSU_SKIN_SOFTHITNORMAL_SND", true, true, false, 0.8f);
-    checkLoadSound(&m_softHitWhistle, "soft-hitwhistle", "OSU_SKIN_SOFTHITWHISTLE_SND", true, true, false, 0.85f);
+    checkLoadSound(&m_softHitNormal, "soft-hitnormal", "OSU_SKIN_SOFTHITNORMAL_SND", true, true, false, true, 0.8f);
+    checkLoadSound(&m_softHitWhistle, "soft-hitwhistle", "OSU_SKIN_SOFTHITWHISTLE_SND", true, true, false, true, 0.85f);
     checkLoadSound(&m_softHitFinish, "soft-hitfinish", "OSU_SKIN_SOFTHITFINISH_SND", true, true);
-    checkLoadSound(&m_softHitClap, "soft-hitclap", "OSU_SKIN_SOFTHITCLAP_SND", true, true, false, 0.85f);
+    checkLoadSound(&m_softHitClap, "soft-hitclap", "OSU_SKIN_SOFTHITCLAP_SND", true, true, false, true, 0.85f);
 
     checkLoadSound(&m_softSliderTick, "soft-slidertick", "OSU_SKIN_SOFTSLIDERTICK_SND", true, true);
     checkLoadSound(&m_softSliderSlide, "soft-sliderslide", "OSU_SKIN_SOFTSLIDERSLIDE_SND", false, true, true);
     checkLoadSound(&m_softSliderWhistle, "soft-sliderwhistle", "OSU_SKIN_SOFTSLIDERWHISTLE_SND", true, true);
 
-    checkLoadSound(&m_drumHitNormal, "drum-hitnormal", "OSU_SKIN_DRUMHITNORMAL_SND", true, true, false, 0.8f);
-    checkLoadSound(&m_drumHitWhistle, "drum-hitwhistle", "OSU_SKIN_DRUMHITWHISTLE_SND", true, true, false, 0.85f);
+    checkLoadSound(&m_drumHitNormal, "drum-hitnormal", "OSU_SKIN_DRUMHITNORMAL_SND", true, true, false, true, 0.8f);
+    checkLoadSound(&m_drumHitWhistle, "drum-hitwhistle", "OSU_SKIN_DRUMHITWHISTLE_SND", true, true, false, true, 0.85f);
     checkLoadSound(&m_drumHitFinish, "drum-hitfinish", "OSU_SKIN_DRUMHITFINISH_SND", true, true);
-    checkLoadSound(&m_drumHitClap, "drum-hitclap", "OSU_SKIN_DRUMHITCLAP_SND", true, true, false, 0.85f);
+    checkLoadSound(&m_drumHitClap, "drum-hitclap", "OSU_SKIN_DRUMHITCLAP_SND", true, true, false, true, 0.85f);
 
     checkLoadSound(&m_drumSliderTick, "drum-slidertick", "OSU_SKIN_DRUMSLIDERTICK_SND", true, true);
     checkLoadSound(&m_drumSliderSlide, "drum-sliderslide", "OSU_SKIN_DRUMSLIDERSLIDE_SND", false, true, true);
@@ -859,38 +862,46 @@ void Skin::load() {
     checkLoadSound(&m_spinnerBonus, "spinnerbonus", "OSU_SKIN_SPINNERBONUS_SND", true, true);
     checkLoadSound(&m_spinnerSpinSound, "spinnerspin", "OSU_SKIN_SPINNERSPIN_SND", false, true, true);
 
+    // others
+    checkLoadSound(&m_combobreak, "combobreak", "OSU_SKIN_COMBOBREAK_SND", true, true);
+    checkLoadSound(&m_failsound, "failsound", "OSU_SKIN_FAILSOUND_SND");
+    checkLoadSound(&m_applause, "applause", "OSU_SKIN_APPLAUSE_SND");
+    checkLoadSound(&m_menuHit, "menuhit", "OSU_SKIN_MENUHIT_SND", true, true);
+    checkLoadSound(&m_menuHover, "menuclick", "OSU_SKIN_MENUCLICK_SND", true, true);
+    checkLoadSound(&m_checkOn, "check-on", "OSU_SKIN_CHECKON_SND", true, true);
+    checkLoadSound(&m_checkOff, "check-off", "OSU_SKIN_CHECKOFF_SND", true, true);
+    checkLoadSound(&m_shutter, "shutter", "OSU_SKIN_SHUTTER_SND", true, true);
+    checkLoadSound(&m_sectionPassSound, "sectionpass", "OSU_SKIN_SECTIONPASS_SND");
+    checkLoadSound(&m_sectionFailSound, "sectionfail", "OSU_SKIN_SECTIONFAIL_SND");
+
     // UI feedback
     checkLoadSound(&m_messageSent, "key-confirm", "OSU_SKIN_MESSAGE_SENT_SND", true, true, false);
     checkLoadSound(&m_deletingText, "key-delete", "OSU_SKIN_DELETING_TEXT_SND", true, true, false);
     checkLoadSound(&m_movingTextCursor, "key-movement", "OSU_MOVING_TEXT_CURSOR_SND", true, true, false);
     checkLoadSound(&m_typing1, "key-press-1", "OSU_TYPING_1_SND", true, true, false);
-    checkLoadSound(&m_typing2, "key-press-2", "OSU_TYPING_2_SND", true, true, false);
-    checkLoadSound(&m_typing3, "key-press-3", "OSU_TYPING_3_SND", true, true, false);
-    checkLoadSound(&m_typing4, "key-press-4", "OSU_TYPING_4_SND", true, true, false);
-    checkLoadSound(&m_backButtonClick, "back-button-click", "OSU_BACK_BUTTON_CLICK_SND", true, true, false);
-    checkLoadSound(&m_backButtonHover, "back-button-hover", "OSU_BACK_BUTTON_HOVER_SND", true, true, false);
-    checkLoadSound(&m_menuBack, "menuback", "OSU_MENU_BACK_SND", true, true, false);
-    checkLoadSound(&m_closeChatTab, "click-close", "OSU_CLOSE_CHAT_TAB_SND", true, true, false);
-    checkLoadSound(&m_hoverButton, "click-short", "OSU_HOVER_BUTTON_SND", true, true, false);
-    checkLoadSound(&m_clickButton, "click-short-confirm", "OSU_CLICK_BUTTON_SND", true, true, false);
-    checkLoadSound(&m_clickMainMenuCube, "menu-play-click", "OSU_CLICK_MAIN_MENU_CUBE_SND", true, true, false);
-    checkLoadSound(&m_hoverMainMenuCube, "menu-play-hover", "OSU_HOVER_MAIN_MENU_CUBE_SND", true, true, false);
-    checkLoadSound(&m_clickSingleplayer, "menu-freeplay-click", "OSU_CLICK_SINGLEPLAYER_SND", true, true, false);
-    checkLoadSound(&m_hoverSingleplayer, "menu-freeplay-hover", "OSU_HOVER_SINGLEPLAYER_SND", true, true, false);
-    checkLoadSound(&m_clickMultiplayer, "menu-multiplayer-click", "OSU_CLICK_MULTIPLAYER_SND", true, true, false);
-    checkLoadSound(&m_hoverMultiplayer, "menu-multiplayer-hover", "OSU_HOVER_MULTIPLAYER_SND", true, true, false);
-    checkLoadSound(&m_clickOptions, "menu-options-click", "OSU_CLICK_OPTIONS_SND", true, true, false);
-    checkLoadSound(&m_hoverOptions, "menu-options-hover", "OSU_HOVER_OPTIONS_SND", true, true, false);
-    checkLoadSound(&m_clickExit, "menu-exit-click", "OSU_CLICK_EXIT_SND", true, true, false);
-    checkLoadSound(&m_hoverExit, "menu-exit-hover", "OSU_HOVER_EXIT_SND", true, true, false);
-    checkLoadSound(&m_clickPauseBack, "pause-back-click", "OSU_CLICK_QUIT_SONG_SND", true, true, false);
-    checkLoadSound(&m_hoverPauseBack, "pause-back-hover", "OSU_HOVER_QUIT_SONG_SND", true, true, false);
-    checkLoadSound(&m_clickPauseContinue, "pause-continue-click", "OSU_CLICK_RESUME_SONG_SND", true, true, false);
-    checkLoadSound(&m_hoverPauseContinue, "pause-continue-hover", "OSU_HOVER_RESUME_SONG_SND", true, true, false);
-    checkLoadSound(&m_clickPauseRetry, "pause-retry-click", "OSU_CLICK_RETRY_SONG_SND", true, true, false);
-    checkLoadSound(&m_hoverPauseRetry, "pause-retry-hover", "OSU_HOVER_RETRY_SONG_SND", true, true, false);
+    checkLoadSound(&m_typing2, "key-press-2", "OSU_TYPING_2_SND", true, true, false, false);
+    checkLoadSound(&m_typing3, "key-press-3", "OSU_TYPING_3_SND", true, true, false, false);
+    checkLoadSound(&m_typing4, "key-press-4", "OSU_TYPING_4_SND", true, true, false, false);
+    checkLoadSound(&m_menuBack, "menuback", "OSU_MENU_BACK_SND", true, true, false, false);
+    checkLoadSound(&m_closeChatTab, "click-close", "OSU_CLOSE_CHAT_TAB_SND", true, true, false, false);
+    checkLoadSound(&m_clickButton, "click-short-confirm", "OSU_CLICK_BUTTON_SND", true, true, false, false);
+    checkLoadSound(&m_hoverButton, "click-short", "OSU_HOVER_BUTTON_SND", true, true, false, false);
+    checkLoadSound(&m_backButtonClick, "back-button-click", "OSU_BACK_BUTTON_CLICK_SND", true, true, false, false);
+    checkLoadSound(&m_backButtonHover, "back-button-hover", "OSU_BACK_BUTTON_HOVER_SND", true, true, false, false);
+    checkLoadSound(&m_clickMainMenuCube, "menu-play-click", "OSU_CLICK_MAIN_MENU_CUBE_SND", true, true, false, false);
+    checkLoadSound(&m_hoverMainMenuCube, "menu-play-hover", "OSU_HOVER_MAIN_MENU_CUBE_SND", true, true, false, false);
+    checkLoadSound(&m_clickSingleplayer, "menu-freeplay-click", "OSU_CLICK_SINGLEPLAYER_SND", true, true, false, false);
+    checkLoadSound(&m_hoverSingleplayer, "menu-freeplay-hover", "OSU_HOVER_SINGLEPLAYER_SND", true, true, false, false);
+    checkLoadSound(&m_clickMultiplayer, "menu-multiplayer-click", "OSU_CLICK_MULTIPLAYER_SND", true, true, false,
+                   false);
+    checkLoadSound(&m_hoverMultiplayer, "menu-multiplayer-hover", "OSU_HOVER_MULTIPLAYER_SND", true, true, false,
+                   false);
+    checkLoadSound(&m_clickOptions, "menu-options-click", "OSU_CLICK_OPTIONS_SND", true, true, false, false);
+    checkLoadSound(&m_hoverOptions, "menu-options-hover", "OSU_HOVER_OPTIONS_SND", true, true, false, false);
+    checkLoadSound(&m_clickExit, "menu-exit-click", "OSU_CLICK_EXIT_SND", true, true, false, false);
+    checkLoadSound(&m_hoverExit, "menu-exit-hover", "OSU_HOVER_EXIT_SND", true, true, false, false);
     checkLoadSound(&m_expand, "select-expand", "OSU_EXPAND_SND", true, true, false);
-    checkLoadSound(&m_selectDifficulty, "select-difficulty", "OSU_SELECT_DIFFICULTY_SND", true, true, false);
+    checkLoadSound(&m_selectDifficulty, "select-difficulty", "OSU_SELECT_DIFFICULTY_SND", true, true, false, false);
     checkLoadSound(&m_sliderbar, "sliderbar", "OSU_DRAG_SLIDER_SND", true, true, false);
     checkLoadSound(&m_matchConfirm, "match-confirm", "OSU_ALL_PLAYERS_READY_SND", true, true, false);
     checkLoadSound(&m_roomJoined, "match-join", "OSU_ROOM_JOINED_SND", true, true, false);
@@ -899,17 +910,44 @@ void Skin::load() {
     checkLoadSound(&m_roomReady, "match-ready", "OSU_ROOM_READY_SND", true, true, false);
     checkLoadSound(&m_matchStart, "match-start", "OSU_MATCH_START_SND", true, true, false);
 
-    // others
-    checkLoadSound(&m_combobreak, "combobreak", "OSU_SKIN_COMBOBREAK_SND", true, true);
-    checkLoadSound(&m_failsound, "failsound", "OSU_SKIN_FAILSOUND_SND");
-    checkLoadSound(&m_applause, "applause", "OSU_SKIN_APPLAUSE_SND");
-    checkLoadSound(&m_menuHit, "menuhit", "OSU_SKIN_MENUHIT_SND", true, true);
-    checkLoadSound(&m_menuClick, "menuclick", "OSU_SKIN_MENUCLICK_SND", true, true);
-    checkLoadSound(&m_checkOn, "check-on", "OSU_SKIN_CHECKON_SND", true, true);
-    checkLoadSound(&m_checkOff, "check-off", "OSU_SKIN_CHECKOFF_SND", true, true);
-    checkLoadSound(&m_shutter, "shutter", "OSU_SKIN_SHUTTER_SND", true, true);
-    checkLoadSound(&m_sectionPassSound, "sectionpass", "OSU_SKIN_SECTIONPASS_SND");
-    checkLoadSound(&m_sectionFailSound, "sectionfail", "OSU_SKIN_SECTIONFAIL_SND");
+    checkLoadSound(&m_pauseLoop, "pause-loop", "OSU_PAUSE_LOOP_SND", false, false, true, true);
+    checkLoadSound(&m_pauseHover, "pause-hover", "OSU_PAUSE_HOVER_SND", true, true, false, false);
+    checkLoadSound(&m_clickPauseBack, "pause-back-click", "OSU_CLICK_QUIT_SONG_SND", true, true, false, false);
+    checkLoadSound(&m_hoverPauseBack, "pause-back-hover", "OSU_HOVER_QUIT_SONG_SND", true, true, false, false);
+    checkLoadSound(&m_clickPauseContinue, "pause-continue-click", "OSU_CLICK_RESUME_SONG_SND", true, true, false,
+                   false);
+    checkLoadSound(&m_hoverPauseContinue, "pause-continue-hover", "OSU_HOVER_RESUME_SONG_SND", true, true, false,
+                   false);
+    checkLoadSound(&m_clickPauseRetry, "pause-retry-click", "OSU_CLICK_RETRY_SONG_SND", true, true, false, false);
+    checkLoadSound(&m_hoverPauseRetry, "pause-retry-hover", "OSU_HOVER_RETRY_SONG_SND", true, true, false, false);
+
+    if(m_clickButton == NULL) m_clickButton = m_menuHit;
+    if(m_hoverButton == NULL) m_hoverButton = m_menuHover;
+    if(m_pauseHover == NULL) m_pauseHover = m_hoverButton;
+    if(m_selectDifficulty == NULL) m_selectDifficulty = m_clickButton;
+    if(m_typing2 == NULL) m_typing2 = m_typing1;
+    if(m_typing3 == NULL) m_typing3 = m_typing2;
+    if(m_typing4 == NULL) m_typing4 = m_typing3;
+    if(m_backButtonClick == NULL) m_backButtonClick = m_clickButton;
+    if(m_backButtonHover == NULL) m_backButtonHover = m_hoverButton;
+    if(m_menuBack == NULL) m_menuBack = m_clickButton;
+    if(m_closeChatTab == NULL) m_closeChatTab = m_clickButton;
+    if(m_clickMainMenuCube == NULL) m_clickMainMenuCube = m_clickButton;
+    if(m_hoverMainMenuCube == NULL) m_hoverMainMenuCube = m_menuHover;
+    if(m_clickSingleplayer == NULL) m_clickSingleplayer = m_clickButton;
+    if(m_hoverSingleplayer == NULL) m_hoverSingleplayer = m_menuHover;
+    if(m_clickMultiplayer == NULL) m_clickMultiplayer = m_clickButton;
+    if(m_hoverMultiplayer == NULL) m_hoverMultiplayer = m_menuHover;
+    if(m_clickOptions == NULL) m_clickOptions = m_clickButton;
+    if(m_hoverOptions == NULL) m_hoverOptions = m_menuHover;
+    if(m_clickExit == NULL) m_clickExit = m_clickButton;
+    if(m_hoverExit == NULL) m_hoverExit = m_menuHover;
+    if(m_clickPauseBack == NULL) m_clickPauseBack = m_clickButton;
+    if(m_hoverPauseBack == NULL) m_hoverPauseBack = m_pauseHover;
+    if(m_clickPauseContinue == NULL) m_clickPauseContinue = m_clickButton;
+    if(m_hoverPauseContinue == NULL) m_hoverPauseContinue = m_pauseHover;
+    if(m_clickPauseRetry == NULL) m_clickPauseRetry = m_clickButton;
+    if(m_hoverPauseRetry == NULL) m_hoverPauseRetry = m_pauseHover;
 
     // scaling
     // HACKHACK: this is pure cancer
@@ -1460,7 +1498,8 @@ void Skin::checkLoadImage(Image **addressOfPointer, std::string skinElementName,
 }
 
 void Skin::checkLoadSound(Sound **addressOfPointer, std::string skinElementName, std::string resourceName,
-                          bool isOverlayable, bool isSample, bool loop, float hardcodedVolumeMultiplier) {
+                          bool isOverlayable, bool isSample, bool loop, bool fallback_to_default,
+                          float hardcodedVolumeMultiplier) {
     if(*addressOfPointer != NULL) return;  // we are already loaded
 
     // NOTE: only the default skin is loaded with a resource name (it must never be unloaded by other instances), and it
@@ -1469,11 +1508,15 @@ void Skin::checkLoadSound(Sound **addressOfPointer, std::string skinElementName,
     // random skin support
     randomizeFilePath();
 
-    auto try_load_sound = [=](std::string base_path, std::string resource_name, bool loop) {
+    auto try_load_sound = [=](std::string base_path, std::string filename, std::string resource_name, bool loop) {
         const char *extensions[] = {".wav", ".mp3", ".ogg"};
         for(int i = 0; i < 3; i++) {
+            std::string fn = filename;
+            fn.append(extensions[i]);
+            fn = fix_filename_casing(base_path, fn);
+
             std::string path = base_path;
-            path.append(extensions[i]);
+            path.append(fn);
 
             if(env->fileExists(path)) {
                 if(osu_skin_async.getBool()) {
@@ -1487,19 +1530,18 @@ void Skin::checkLoadSound(Sound **addressOfPointer, std::string skinElementName,
     };
 
     // load default skin
-    std::string defaultpath = MCENGINE_DATA_DIR "./materials/";
-    defaultpath.append(OSUSKIN_DEFAULT_SKIN_PATH);
-    defaultpath.append(skinElementName);
-    std::string defaultResourceName = resourceName;
-    defaultResourceName.append("_DEFAULT");
-    *addressOfPointer = try_load_sound(defaultpath, defaultResourceName, loop);
+    if(fallback_to_default) {
+        std::string defaultpath = MCENGINE_DATA_DIR "./materials/";
+        defaultpath.append(OSUSKIN_DEFAULT_SKIN_PATH);
+        std::string defaultResourceName = resourceName;
+        defaultResourceName.append("_DEFAULT");
+        *addressOfPointer = try_load_sound(defaultpath, skinElementName, defaultResourceName, loop);
+    }
 
     // load user skin
     Sound *skin_sound = NULL;
     if(osu_skin_use_skin_hitsounds.getBool() || !isSample) {
-        std::string filepath = m_sFilePath;
-        filepath.append(skinElementName);
-        skin_sound = try_load_sound(filepath, "", loop);
+        skin_sound = try_load_sound(m_sFilePath, skinElementName, "", loop);
         if(skin_sound != NULL) {
             *addressOfPointer = skin_sound;
         }

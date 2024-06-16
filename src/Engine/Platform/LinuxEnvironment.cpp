@@ -875,3 +875,21 @@ UString LinuxEnvironment::getClipboardTextInt() {
 }
 
 #endif
+
+#include <filesystem>
+
+std::string fix_filename_casing(std::string directory, std::string filename) {
+#ifdef _WIN32
+    return filename;
+#else
+    if(!std::filesystem::exists(directory) || !std::filesystem::is_directory(directory)) return filename;
+
+    std::filesystem::path dir = directory;
+    for(auto &entry : std::filesystem::directory_iterator(dir)) {
+        if(entry.is_regular_file() && !strcasecmp(entry.path().filename().string().c_str(), filename.c_str())) {
+            return entry.path().filename().string();
+        }
+    }
+    return filename;
+#endif
+}

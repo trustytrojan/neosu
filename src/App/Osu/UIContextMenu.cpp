@@ -12,6 +12,8 @@
 #include "SoundEngine.h"
 #include "TooltipOverlay.h"
 
+static float button_sound_cooldown = 0.f;
+
 UIContextMenuButton::UIContextMenuButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text,
                                          int id)
     : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {
@@ -33,7 +35,12 @@ void UIContextMenuButton::mouse_update(bool *propagate_clicks) {
     }
 }
 
-void UIContextMenuButton::onMouseInside() { engine->getSound()->play(osu->getSkin()->m_hoverButton); }
+void UIContextMenuButton::onMouseInside() {
+    if(button_sound_cooldown + 0.05f < engine->getTime()) {
+        engine->getSound()->play(osu->getSkin()->m_hoverButton);
+        button_sound_cooldown = engine->getTime();
+    }
+}
 
 void UIContextMenuButton::onMouseDownInside() { engine->getSound()->play(osu->getSkin()->m_clickButton); }
 

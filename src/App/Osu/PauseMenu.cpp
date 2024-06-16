@@ -173,8 +173,6 @@ void PauseMenu::onSelectionChange() {
             m_fWarningArrowsAnimX = m_selectedButton->getPos().x;
 
         anim->moveQuadOut(&m_fWarningArrowsAnimY, m_selectedButton->getPos().y, 0.1f);
-
-        engine->getSound()->play(osu->getSkin()->getMenuClick());
     }
 }
 
@@ -338,12 +336,15 @@ void PauseMenu::onResolutionChange(Vector2 newResolution) {
 CBaseUIContainer *PauseMenu::setVisible(bool visible) {
     m_bVisible = visible;
 
-    if(osu->isInPlayMode())
+    if(osu->isInPlayMode()) {
         setContinueEnabled(!osu->getSelectedBeatmap()->hasFailed());
-    else
+    } else {
         setContinueEnabled(true);
+    }
 
     if(visible) {
+        engine->getSound()->play(osu->getSkin()->m_pauseLoop);
+
         if(m_bContinueEnabled) {
             RichPresence::setStatus("Paused");
             RichPresence::setBanchoStatus("Taking a break", PAUSED);
@@ -362,6 +363,8 @@ CBaseUIContainer *PauseMenu::setVisible(bool visible) {
             RichPresence::setBanchoStatus("Failed", SUBMITTING);
         }
     } else {
+        engine->getSound()->stop(osu->getSkin()->m_pauseLoop);
+
         RichPresence::onPlayStart();
 
         if(!bancho.spectators.empty()) {

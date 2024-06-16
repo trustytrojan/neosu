@@ -5,7 +5,7 @@ HEADERS = $(shell find src -type f -name '*.h')
 
 LIBS = blkid freetype2 glew libenet libjpeg liblzma xi zlib
 
-CXXFLAGS = -std=c++17 -fmessage-length=0 -Wno-sign-compare -Wno-unused-local-typedefs -Wno-reorder -Wno-switch -Wall
+CXXFLAGS = -std=c++17 -fmessage-length=0 -fno-exceptions -Wno-sign-compare -Wno-unused-local-typedefs -Wno-reorder -Wno-switch -Wall
 CXXFLAGS += `pkgconf --static --cflags $(LIBS)` `curl-config --cflags`
 CXXFLAGS += -Isrc/App -Isrc/App/Osu -Isrc/Engine -Isrc/GUI -Isrc/GUI/Windows -Isrc/GUI/Windows/VinylScratcher -Isrc/Engine/Input -Isrc/Engine/Platform -Isrc/Engine/Main -Isrc/Engine/Renderer -Isrc/Util
 CXXFLAGS += -Ilibraries/bass/include -Ilibraries/bassasio/include -Ilibraries/bassfx/include -Ilibraries/bassmix/include -Ilibraries/basswasapi/include -Ilibraries/bassloud/include

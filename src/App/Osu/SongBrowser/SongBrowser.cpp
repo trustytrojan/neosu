@@ -2482,7 +2482,7 @@ void SongBrowser::updateLayout() {
 }
 
 void SongBrowser::onBack() {
-    engine->getSound()->play(osu->getSkin()->getMenuClick());
+    engine->getSound()->play(osu->getSkin()->m_menuBack);
     osu->toggleSongBrowser();
 }
 
@@ -3481,8 +3481,6 @@ void SongBrowser::onAfterSortingOrGroupChangeUpdateInt(bool autoScroll) {
 }
 
 void SongBrowser::onSelectionMode() {
-    engine->getSound()->play(osu->getSkin()->getMenuClick());
-
     m_contextMenu->setPos(m_bottombarNavButtons[0]->getPos());
     m_contextMenu->setRelPos(m_bottombarNavButtons[0]->getRelPos());
     m_contextMenu->begin(0, true);
@@ -3516,12 +3514,12 @@ void SongBrowser::onSelectionMode() {
 }
 
 void SongBrowser::onSelectionMods() {
-    engine->getSound()->play(osu->getSkin()->getMenuClick());
+    engine->getSound()->play(osu->getSkin()->m_expand);
     osu->toggleModSelection(m_bF1Pressed);
 }
 
 void SongBrowser::onSelectionRandom() {
-    engine->getSound()->play(osu->getSkin()->getMenuClick());
+    engine->getSound()->play(osu->getSkin()->m_clickButton);
     if(m_bShiftPressed)
         m_bPreviousRandomBeatmapScheduled = true;
     else
@@ -3529,7 +3527,7 @@ void SongBrowser::onSelectionRandom() {
 }
 
 void SongBrowser::onSelectionOptions() {
-    engine->getSound()->play(osu->getSkin()->getMenuClick());
+    engine->getSound()->play(osu->getSkin()->m_clickButton);
 
     Button *currentlySelectedSongButton = findCurrentlySelectedSongButton();
     if(currentlySelectedSongButton != NULL) {
