@@ -69,11 +69,11 @@ SongButton::~SongButton() {
 }
 
 void SongButton::draw(Graphics *g) {
-    Button::draw(g);
     if(!m_bVisible) return;
-
     if(m_vPos.y + m_vSize.y < 0) return;
     if(m_vPos.y > engine->getScreenHeight()) return;
+
+    Button::draw(g);
 
     // draw background image
     sortChildren();

@@ -113,6 +113,10 @@ void Button::drawMenuButtonBackground(Graphics *g) {
 }
 
 void Button::mouse_update(bool *propagate_clicks) {
+    // Not correct, but clears most of the lag
+    if(m_vPos.y + m_vSize.y < 0) return;
+    if(m_vPos.y > engine->getScreenHeight()) return;
+
     // HACKHACK: absolutely disgusting
     // temporarily fool CBaseUIElement with modified position and size
     {
