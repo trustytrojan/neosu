@@ -41,7 +41,7 @@ class RoomScreen : public OsuScreen {
 
     void updateLayout(Vector2 newResolution);
     void updateSettingsLayout(Vector2 newResolution);
-    void ragequit();
+    void ragequit(bool play_sound = true);
 
     void on_map_change();
     void on_room_joined(Room room);

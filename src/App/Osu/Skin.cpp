@@ -758,7 +758,7 @@ void Skin::load() {
     checkLoadImage(&m_buttonMiddle, "button-middle", "OSU_SKIN_BUTTON_MIDDLE");
     checkLoadImage(&m_buttonRight, "button-right", "OSU_SKIN_BUTTON_RIGHT");
     randomizeFilePath();
-    m_menuBack = createSkinImage("menu-back", Vector2(225, 87), 54);
+    m_menuBackImg = createSkinImage("menu-back", Vector2(225, 87), 54);
     randomizeFilePath();
     m_selectionMode = createSkinImage("selection-mode", Vector2(90, 90),
                                       38);  // NOTE: should actually be Vector2(88, 90), but slightly overscale to
@@ -858,6 +858,46 @@ void Skin::load() {
 
     checkLoadSound(&m_spinnerBonus, "spinnerbonus", "OSU_SKIN_SPINNERBONUS_SND", true, true);
     checkLoadSound(&m_spinnerSpinSound, "spinnerspin", "OSU_SKIN_SPINNERSPIN_SND", false, true, true);
+
+    // UI feedback
+    checkLoadSound(&m_messageSent, "key-confirm", "OSU_SKIN_MESSAGE_SENT_SND", true, true, false);
+    checkLoadSound(&m_deletingText, "key-delete", "OSU_SKIN_DELETING_TEXT_SND", true, true, false);
+    checkLoadSound(&m_movingTextCursor, "key-movement", "OSU_MOVING_TEXT_CURSOR_SND", true, true, false);
+    checkLoadSound(&m_typing1, "key-press-1", "OSU_TYPING_1_SND", true, true, false);
+    checkLoadSound(&m_typing2, "key-press-2", "OSU_TYPING_2_SND", true, true, false);
+    checkLoadSound(&m_typing3, "key-press-3", "OSU_TYPING_3_SND", true, true, false);
+    checkLoadSound(&m_typing4, "key-press-4", "OSU_TYPING_4_SND", true, true, false);
+    checkLoadSound(&m_backButtonClick, "back-button-click", "OSU_BACK_BUTTON_CLICK_SND", true, true, false);
+    checkLoadSound(&m_backButtonHover, "back-button-hover", "OSU_BACK_BUTTON_HOVER_SND", true, true, false);
+    checkLoadSound(&m_menuBack, "menuback", "OSU_MENU_BACK_SND", true, true, false);
+    checkLoadSound(&m_closeChatTab, "click-close", "OSU_CLOSE_CHAT_TAB_SND", true, true, false);
+    checkLoadSound(&m_hoverButton, "click-short", "OSU_HOVER_BUTTON_SND", true, true, false);
+    checkLoadSound(&m_clickButton, "click-short-confirm", "OSU_CLICK_BUTTON_SND", true, true, false);
+    checkLoadSound(&m_clickMainMenuCube, "menu-play-click", "OSU_CLICK_MAIN_MENU_CUBE_SND", true, true, false);
+    checkLoadSound(&m_hoverMainMenuCube, "menu-play-hover", "OSU_HOVER_MAIN_MENU_CUBE_SND", true, true, false);
+    checkLoadSound(&m_clickSingleplayer, "menu-freeplay-click", "OSU_CLICK_SINGLEPLAYER_SND", true, true, false);
+    checkLoadSound(&m_hoverSingleplayer, "menu-freeplay-hover", "OSU_HOVER_SINGLEPLAYER_SND", true, true, false);
+    checkLoadSound(&m_clickMultiplayer, "menu-multiplayer-click", "OSU_CLICK_MULTIPLAYER_SND", true, true, false);
+    checkLoadSound(&m_hoverMultiplayer, "menu-multiplayer-hover", "OSU_HOVER_MULTIPLAYER_SND", true, true, false);
+    checkLoadSound(&m_clickOptions, "menu-options-click", "OSU_CLICK_OPTIONS_SND", true, true, false);
+    checkLoadSound(&m_hoverOptions, "menu-options-hover", "OSU_HOVER_OPTIONS_SND", true, true, false);
+    checkLoadSound(&m_clickExit, "menu-exit-click", "OSU_CLICK_EXIT_SND", true, true, false);
+    checkLoadSound(&m_hoverExit, "menu-exit-hover", "OSU_HOVER_EXIT_SND", true, true, false);
+    checkLoadSound(&m_clickPauseBack, "pause-back-click", "OSU_CLICK_QUIT_SONG_SND", true, true, false);
+    checkLoadSound(&m_hoverPauseBack, "pause-back-hover", "OSU_HOVER_QUIT_SONG_SND", true, true, false);
+    checkLoadSound(&m_clickPauseContinue, "pause-continue-click", "OSU_CLICK_RESUME_SONG_SND", true, true, false);
+    checkLoadSound(&m_hoverPauseContinue, "pause-continue-hover", "OSU_HOVER_RESUME_SONG_SND", true, true, false);
+    checkLoadSound(&m_clickPauseRetry, "pause-retry-click", "OSU_CLICK_RETRY_SONG_SND", true, true, false);
+    checkLoadSound(&m_hoverPauseRetry, "pause-retry-hover", "OSU_HOVER_RETRY_SONG_SND", true, true, false);
+    checkLoadSound(&m_expand, "select-expand", "OSU_EXPAND_SND", true, true, false);
+    checkLoadSound(&m_selectDifficulty, "select-difficulty", "OSU_SELECT_DIFFICULTY_SND", true, true, false);
+    checkLoadSound(&m_sliderbar, "sliderbar", "OSU_DRAG_SLIDER_SND", true, true, false);
+    checkLoadSound(&m_matchConfirm, "match-confirm", "OSU_ALL_PLAYERS_READY_SND", true, true, false);
+    checkLoadSound(&m_roomJoined, "match-join", "OSU_ROOM_JOINED_SND", true, true, false);
+    checkLoadSound(&m_roomQuit, "match-leave", "OSU_ROOM_QUIT_SND", true, true, false);
+    checkLoadSound(&m_roomNotReady, "match-notready", "OSU_ROOM_NOT_READY_SND", true, true, false);
+    checkLoadSound(&m_roomReady, "match-ready", "OSU_ROOM_READY_SND", true, true, false);
+    checkLoadSound(&m_matchStart, "match-start", "OSU_MATCH_START_SND", true, true, false);
 
     // others
     checkLoadSound(&m_combobreak, "combobreak", "OSU_SKIN_COMBOBREAK_SND", true, true);

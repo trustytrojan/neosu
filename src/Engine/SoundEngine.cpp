@@ -26,16 +26,20 @@ void _volume(UString oldValue, UString newValue) {
 
 ConVar _volume_("volume", 1.0f, FCVAR_DEFAULT | FCVAR_PRIVATE, _volume);
 
-ConVar snd_ready_delay("snd_ready_delay", 0.0f, FCVAR_DEFAULT | FCVAR_PRIVATE, "after a sound engine restart, wait this many seconds before marking it as ready");
+ConVar snd_ready_delay("snd_ready_delay", 0.0f, FCVAR_DEFAULT | FCVAR_PRIVATE,
+                       "after a sound engine restart, wait this many seconds before marking it as ready");
 ConVar snd_output_device("snd_output_device", "Default", FCVAR_DEFAULT | FCVAR_PRIVATE);
 ConVar snd_restart("snd_restart");
 
 ConVar snd_freq("snd_freq", 44100, FCVAR_DEFAULT | FCVAR_PRIVATE, "output sampling rate in Hz");
-ConVar snd_updateperiod("snd_updateperiod", 10, FCVAR_DEFAULT | FCVAR_PRIVATE, "BASS_CONFIG_UPDATEPERIOD length in milliseconds");
+ConVar snd_updateperiod("snd_updateperiod", 10, FCVAR_DEFAULT | FCVAR_PRIVATE,
+                        "BASS_CONFIG_UPDATEPERIOD length in milliseconds");
 ConVar snd_dev_period("snd_dev_period", 10, FCVAR_DEFAULT | FCVAR_PRIVATE,
                       "BASS_CONFIG_DEV_PERIOD length in milliseconds, or if negative then in samples");
-ConVar snd_dev_buffer("snd_dev_buffer", 30, FCVAR_DEFAULT | FCVAR_PRIVATE, "BASS_CONFIG_DEV_BUFFER length in milliseconds");
-ConVar snd_async_buffer("snd_async_buffer", 65536, FCVAR_DEFAULT | FCVAR_PRIVATE, "BASS_CONFIG_ASYNCFILE_BUFFER length in bytes. Set to 0 to disable.");
+ConVar snd_dev_buffer("snd_dev_buffer", 30, FCVAR_DEFAULT | FCVAR_PRIVATE,
+                      "BASS_CONFIG_DEV_BUFFER length in milliseconds");
+ConVar snd_async_buffer("snd_async_buffer", 65536, FCVAR_DEFAULT | FCVAR_PRIVATE,
+                        "BASS_CONFIG_ASYNCFILE_BUFFER length in bytes. Set to 0 to disable.");
 
 ConVar snd_restrict_play_frame(
     "snd_restrict_play_frame", true, FCVAR_DEFAULT | FCVAR_PRIVATE,
@@ -310,144 +314,144 @@ void SoundEngine::updateOutputDevices(bool printInfo) {
 void display_bass_error() {
     auto code = BASS_ErrorGetCode();
     switch(code) {
-    case BASS_OK:
-        break;
-    case BASS_ERROR_MEM:
-        osu->getNotificationOverlay()->addNotification("BASS error: Memory error");
-        break;
-    case BASS_ERROR_FILEOPEN:
-        osu->getNotificationOverlay()->addNotification("BASS error: Can't open the file");
-        break;
-    case BASS_ERROR_DRIVER:
-        osu->getNotificationOverlay()->addNotification("BASS error: Can't find an available driver");
-        break;
-    case BASS_ERROR_BUFLOST:
-        osu->getNotificationOverlay()->addNotification("BASS error: The sample buffer was lost");
-        break;
-    case BASS_ERROR_HANDLE:
-        osu->getNotificationOverlay()->addNotification("BASS error: Invalid handle");
-        break;
-    case BASS_ERROR_FORMAT:
-        osu->getNotificationOverlay()->addNotification("BASS error: Unsupported sample format");
-        break;
-    case BASS_ERROR_POSITION:
-        osu->getNotificationOverlay()->addNotification("BASS error: Invalid position");
-        break;
-    case BASS_ERROR_INIT:
-        osu->getNotificationOverlay()->addNotification("BASS error: BASS_Init has not been successfully called");
-        break;
-    case BASS_ERROR_START:
-        osu->getNotificationOverlay()->addNotification("BASS error: BASS_Start has not been successfully called");
-        break;
-    case BASS_ERROR_SSL:
-        osu->getNotificationOverlay()->addNotification("BASS error: SSL/HTTPS support isn't available");
-        break;
-    case BASS_ERROR_REINIT:
-        osu->getNotificationOverlay()->addNotification("BASS error: Device needs to be reinitialized");
-        break;
-    case BASS_ERROR_ALREADY:
-        osu->getNotificationOverlay()->addNotification("BASS error: Already initialized");
-        break;
-    case BASS_ERROR_NOTAUDIO:
-        osu->getNotificationOverlay()->addNotification("BASS error: File does not contain audio");
-        break;
-    case BASS_ERROR_NOCHAN:
-        osu->getNotificationOverlay()->addNotification("BASS error: Can't get a free channel");
-        break;
-    case BASS_ERROR_ILLTYPE:
-        osu->getNotificationOverlay()->addNotification("BASS error: An illegal type was specified");
-        break;
-    case BASS_ERROR_ILLPARAM:
-        osu->getNotificationOverlay()->addNotification("BASS error: An illegal parameter was specified");
-        break;
-    case BASS_ERROR_NO3D:
-        osu->getNotificationOverlay()->addNotification("BASS error: No 3D support");
-        break;
-    case BASS_ERROR_NOEAX:
-        osu->getNotificationOverlay()->addNotification("BASS error: No EAX support");
-        break;
-    case BASS_ERROR_DEVICE:
-        osu->getNotificationOverlay()->addNotification("BASS error: Illegal device number");
-        break;
-    case BASS_ERROR_NOPLAY:
-        osu->getNotificationOverlay()->addNotification("BASS error: Not playing");
-        break;
-    case BASS_ERROR_FREQ:
-        osu->getNotificationOverlay()->addNotification("BASS error: Illegal sample rate");
-        break;
-    case BASS_ERROR_NOTFILE:
-        osu->getNotificationOverlay()->addNotification("BASS error: The stream is not a file stream");
-        break;
-    case BASS_ERROR_NOHW:
-        osu->getNotificationOverlay()->addNotification("BASS error: No hardware voices available");
-        break;
-    case BASS_ERROR_EMPTY:
-        osu->getNotificationOverlay()->addNotification("BASS error: The file has no sample data");
-        break;
-    case BASS_ERROR_NONET:
-        osu->getNotificationOverlay()->addNotification("BASS error: No internet connection could be opened");
-        break;
-    case BASS_ERROR_CREATE:
-        osu->getNotificationOverlay()->addNotification("BASS error: Couldn't create the file");
-        break;
-    case BASS_ERROR_NOFX:
-        osu->getNotificationOverlay()->addNotification("BASS error: Effects are not available");
-        break;
-    case BASS_ERROR_NOTAVAIL:
-        osu->getNotificationOverlay()->addNotification("BASS error: Requested data/action is not available");
-        break;
-    case BASS_ERROR_DECODE:
-        osu->getNotificationOverlay()->addNotification("BASS error: The channel is/isn't a decoding channel");
-        break;
-    case BASS_ERROR_DX:
-        osu->getNotificationOverlay()->addNotification("BASS error: A sufficient DirectX version is not installed");
-        break;
-    case BASS_ERROR_TIMEOUT:
-        osu->getNotificationOverlay()->addNotification("BASS error: Connection timeout");
-        break;
-    case BASS_ERROR_FILEFORM:
-        osu->getNotificationOverlay()->addNotification("BASS error: Unsupported file format");
-        break;
-    case BASS_ERROR_SPEAKER:
-        osu->getNotificationOverlay()->addNotification("BASS error: Unavailable speaker");
-        break;
-    case BASS_ERROR_VERSION:
-        osu->getNotificationOverlay()->addNotification("BASS error: Invalid BASS version");
-        break;
-    case BASS_ERROR_CODEC:
-        osu->getNotificationOverlay()->addNotification("BASS error: Codec is not available/supported");
-        break;
-    case BASS_ERROR_ENDED:
-        osu->getNotificationOverlay()->addNotification("BASS error: The channel/file has ended");
-        break;
-    case BASS_ERROR_BUSY:
-        osu->getNotificationOverlay()->addNotification("BASS error: The device is busy");
-        break;
-    case BASS_ERROR_UNSTREAMABLE:
-        osu->getNotificationOverlay()->addNotification("BASS error: Unstreamable file");
-        break;
-    case BASS_ERROR_PROTOCOL:
-        osu->getNotificationOverlay()->addNotification("BASS error: Unsupported protocol");
-        break;
-    case BASS_ERROR_DENIED:
-        osu->getNotificationOverlay()->addNotification("BASS error: Access Denied");
-        break;
-    case BASS_ERROR_WASAPI:
-        osu->getNotificationOverlay()->addNotification("WASAPI error: No WASAPI");
-        break;
-    case BASS_ERROR_WASAPI_BUFFER:
-        osu->getNotificationOverlay()->addNotification("WASAPI error: Invalid buffer size");
-        break;
-    case BASS_ERROR_WASAPI_CATEGORY:
-        osu->getNotificationOverlay()->addNotification("WASAPI error: Can't set category");
-        break;
-    case BASS_ERROR_WASAPI_DENIED:
-        osu->getNotificationOverlay()->addNotification("WASAPI error: Access denied");
-        break;
-    case BASS_ERROR_UNKNOWN:  // fallthrough
-    default:
-        osu->getNotificationOverlay()->addNotification("Unknown BASS error (%i)!", code);
-        break;
+        case BASS_OK:
+            break;
+        case BASS_ERROR_MEM:
+            osu->getNotificationOverlay()->addNotification("BASS error: Memory error");
+            break;
+        case BASS_ERROR_FILEOPEN:
+            osu->getNotificationOverlay()->addNotification("BASS error: Can't open the file");
+            break;
+        case BASS_ERROR_DRIVER:
+            osu->getNotificationOverlay()->addNotification("BASS error: Can't find an available driver");
+            break;
+        case BASS_ERROR_BUFLOST:
+            osu->getNotificationOverlay()->addNotification("BASS error: The sample buffer was lost");
+            break;
+        case BASS_ERROR_HANDLE:
+            osu->getNotificationOverlay()->addNotification("BASS error: Invalid handle");
+            break;
+        case BASS_ERROR_FORMAT:
+            osu->getNotificationOverlay()->addNotification("BASS error: Unsupported sample format");
+            break;
+        case BASS_ERROR_POSITION:
+            osu->getNotificationOverlay()->addNotification("BASS error: Invalid position");
+            break;
+        case BASS_ERROR_INIT:
+            osu->getNotificationOverlay()->addNotification("BASS error: BASS_Init has not been successfully called");
+            break;
+        case BASS_ERROR_START:
+            osu->getNotificationOverlay()->addNotification("BASS error: BASS_Start has not been successfully called");
+            break;
+        case BASS_ERROR_SSL:
+            osu->getNotificationOverlay()->addNotification("BASS error: SSL/HTTPS support isn't available");
+            break;
+        case BASS_ERROR_REINIT:
+            osu->getNotificationOverlay()->addNotification("BASS error: Device needs to be reinitialized");
+            break;
+        case BASS_ERROR_ALREADY:
+            osu->getNotificationOverlay()->addNotification("BASS error: Already initialized");
+            break;
+        case BASS_ERROR_NOTAUDIO:
+            osu->getNotificationOverlay()->addNotification("BASS error: File does not contain audio");
+            break;
+        case BASS_ERROR_NOCHAN:
+            osu->getNotificationOverlay()->addNotification("BASS error: Can't get a free channel");
+            break;
+        case BASS_ERROR_ILLTYPE:
+            osu->getNotificationOverlay()->addNotification("BASS error: An illegal type was specified");
+            break;
+        case BASS_ERROR_ILLPARAM:
+            osu->getNotificationOverlay()->addNotification("BASS error: An illegal parameter was specified");
+            break;
+        case BASS_ERROR_NO3D:
+            osu->getNotificationOverlay()->addNotification("BASS error: No 3D support");
+            break;
+        case BASS_ERROR_NOEAX:
+            osu->getNotificationOverlay()->addNotification("BASS error: No EAX support");
+            break;
+        case BASS_ERROR_DEVICE:
+            osu->getNotificationOverlay()->addNotification("BASS error: Illegal device number");
+            break;
+        case BASS_ERROR_NOPLAY:
+            osu->getNotificationOverlay()->addNotification("BASS error: Not playing");
+            break;
+        case BASS_ERROR_FREQ:
+            osu->getNotificationOverlay()->addNotification("BASS error: Illegal sample rate");
+            break;
+        case BASS_ERROR_NOTFILE:
+            osu->getNotificationOverlay()->addNotification("BASS error: The stream is not a file stream");
+            break;
+        case BASS_ERROR_NOHW:
+            osu->getNotificationOverlay()->addNotification("BASS error: No hardware voices available");
+            break;
+        case BASS_ERROR_EMPTY:
+            osu->getNotificationOverlay()->addNotification("BASS error: The file has no sample data");
+            break;
+        case BASS_ERROR_NONET:
+            osu->getNotificationOverlay()->addNotification("BASS error: No internet connection could be opened");
+            break;
+        case BASS_ERROR_CREATE:
+            osu->getNotificationOverlay()->addNotification("BASS error: Couldn't create the file");
+            break;
+        case BASS_ERROR_NOFX:
+            osu->getNotificationOverlay()->addNotification("BASS error: Effects are not available");
+            break;
+        case BASS_ERROR_NOTAVAIL:
+            osu->getNotificationOverlay()->addNotification("BASS error: Requested data/action is not available");
+            break;
+        case BASS_ERROR_DECODE:
+            osu->getNotificationOverlay()->addNotification("BASS error: The channel is/isn't a decoding channel");
+            break;
+        case BASS_ERROR_DX:
+            osu->getNotificationOverlay()->addNotification("BASS error: A sufficient DirectX version is not installed");
+            break;
+        case BASS_ERROR_TIMEOUT:
+            osu->getNotificationOverlay()->addNotification("BASS error: Connection timeout");
+            break;
+        case BASS_ERROR_FILEFORM:
+            osu->getNotificationOverlay()->addNotification("BASS error: Unsupported file format");
+            break;
+        case BASS_ERROR_SPEAKER:
+            osu->getNotificationOverlay()->addNotification("BASS error: Unavailable speaker");
+            break;
+        case BASS_ERROR_VERSION:
+            osu->getNotificationOverlay()->addNotification("BASS error: Invalid BASS version");
+            break;
+        case BASS_ERROR_CODEC:
+            osu->getNotificationOverlay()->addNotification("BASS error: Codec is not available/supported");
+            break;
+        case BASS_ERROR_ENDED:
+            osu->getNotificationOverlay()->addNotification("BASS error: The channel/file has ended");
+            break;
+        case BASS_ERROR_BUSY:
+            osu->getNotificationOverlay()->addNotification("BASS error: The device is busy");
+            break;
+        case BASS_ERROR_UNSTREAMABLE:
+            osu->getNotificationOverlay()->addNotification("BASS error: Unstreamable file");
+            break;
+        case BASS_ERROR_PROTOCOL:
+            osu->getNotificationOverlay()->addNotification("BASS error: Unsupported protocol");
+            break;
+        case BASS_ERROR_DENIED:
+            osu->getNotificationOverlay()->addNotification("BASS error: Access Denied");
+            break;
+        case BASS_ERROR_WASAPI:
+            osu->getNotificationOverlay()->addNotification("WASAPI error: No WASAPI");
+            break;
+        case BASS_ERROR_WASAPI_BUFFER:
+            osu->getNotificationOverlay()->addNotification("WASAPI error: Invalid buffer size");
+            break;
+        case BASS_ERROR_WASAPI_CATEGORY:
+            osu->getNotificationOverlay()->addNotification("WASAPI error: Can't set category");
+            break;
+        case BASS_ERROR_WASAPI_DENIED:
+            osu->getNotificationOverlay()->addNotification("WASAPI error: Access denied");
+            break;
+        case BASS_ERROR_UNKNOWN:  // fallthrough
+        default:
+            osu->getNotificationOverlay()->addNotification("Unknown BASS error (%i)!", code);
+            break;
     }
 }
 
@@ -619,11 +623,13 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
         auto flags = BASS_WASAPI_RAW | BASS_MIXER_NONSTOP | BASS_WASAPI_RAW;
         if(convar->getConVarByName("win_snd_wasapi_exclusive")->getBool()) {
             // BASS_WASAPI_EXCLUSIVE makes neosu have exclusive output to the sound card
-            // BASS_WASAPI_AUTOFORMAT chooses the best matching sample format, BASSWASAPI doesn't resample in exclusive mode
+            // BASS_WASAPI_AUTOFORMAT chooses the best matching sample format, BASSWASAPI doesn't resample in exclusive
+            // mode
             flags |= BASS_WASAPI_EXCLUSIVE | BASS_WASAPI_AUTOFORMAT;
         }
 
-        if(!BASS_WASAPI_Init(device.id, 0, 0, flags, bufferSize, updatePeriod, WASAPIPROC_BASS, (void *)g_bassOutputMixer)) {
+        if(!BASS_WASAPI_Init(device.id, 0, 0, flags, bufferSize, updatePeriod, WASAPIPROC_BASS,
+                             (void *)g_bassOutputMixer)) {
             const int errorCode = BASS_ErrorGetCode();
             ready_since = -1.0;
             debugLog("BASS_WASAPI_Init() failed.\n");
@@ -736,6 +742,10 @@ bool SoundEngine::play(Sound *snd, float pan, float pitch) {
         snd->m_fLastPlayTime = snd->m_fChannelCreationTime - (((f64)snd->m_paused_position_ms) / 1000.0);
     } else {
         snd->m_fLastPlayTime = snd->m_fChannelCreationTime;
+    }
+
+    if(Osu::debug->getBool()) {
+        debugLog("Playing %s\n", snd->getFilePath().c_str());
     }
 
     return true;

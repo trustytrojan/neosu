@@ -442,6 +442,7 @@ CBaseUIContainer *RankingScreen::setVisible(bool visible) {
         // We backed out of the ranking screen, display the room again
         osu->m_room->setVisible(true);
         osu->m_chat->updateVisibility();
+        engine->getSound()->play(osu->getSkin()->m_menuBack);
 
         // Since we prevented on_map_change() from running while the ranking screen was visible, run it now.
         osu->m_room->on_map_change();
@@ -600,7 +601,7 @@ void RankingScreen::updateLayout() {
 
     m_songInfo->setSize(osu->getScreenWidth(),
                         max(m_songInfo->getMinimumHeight(),
-                                 m_rankingTitle->getSize().y * osu_rankingscreen_topbar_height_percent.getFloat()));
+                            m_rankingTitle->getSize().y * osu_rankingscreen_topbar_height_percent.getFloat()));
 
     m_rankings->setSize(osu->getScreenSize().x + 2, osu->getScreenSize().y - m_songInfo->getSize().y + 3);
     m_rankings->setRelPosY(m_songInfo->getSize().y - 1);
@@ -613,9 +614,9 @@ void RankingScreen::updateLayout() {
     m_rankingPanel->setScale(Osu::getImageScale(hardcodedOsuRankingPanelImageSize, 317.0f),
                              Osu::getImageScale(hardcodedOsuRankingPanelImageSize, 317.0f));
     m_rankingPanel->setSize(max(hardcodedOsuRankingPanelImageSize.x * m_rankingPanel->getScale().x,
-                                     m_rankingPanel->getImage()->getWidth() * m_rankingPanel->getScale().x),
+                                m_rankingPanel->getImage()->getWidth() * m_rankingPanel->getScale().x),
                             max(hardcodedOsuRankingPanelImageSize.y * m_rankingPanel->getScale().y,
-                                     m_rankingPanel->getImage()->getHeight() * m_rankingPanel->getScale().y));
+                                m_rankingPanel->getImage()->getHeight() * m_rankingPanel->getScale().y));
 
     m_rankingIndex->setSize(m_rankings->getSize().x + 2, osu->getScreenHeight() * 0.07f * uiScale);
     m_rankingIndex->setBackgroundColor(0xff745e13);

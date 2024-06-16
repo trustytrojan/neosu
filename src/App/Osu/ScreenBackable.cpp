@@ -1,10 +1,3 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		screen + back button
-//
-// $NoKeywords: $
-//===============================================================================//
-
 #include "ScreenBackable.h"
 
 #include "KeyBindings.h"

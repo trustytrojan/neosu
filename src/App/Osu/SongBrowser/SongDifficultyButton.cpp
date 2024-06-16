@@ -15,6 +15,7 @@
 #include "Replay.h"
 #include "ResourceManager.h"
 #include "Skin.h"
+#include "SoundEngine.h"
 #include "Timer.h"
 
 using namespace std;
@@ -170,6 +171,15 @@ void SongDifficultyButton::mouse_update(bool *propagate_clicks) {
         m_bUpdateGradeScheduled = false;
         updateGrade();
     }
+}
+
+void SongDifficultyButton::onClicked() {
+    engine->getSound()->play(osu->getSkin()->m_selectDifficulty);
+
+    // NOTE: Intentionally not calling Button::onClicked(), since that one plays another sound
+    CBaseUIButton::onClicked();
+
+    select(true, true);
 }
 
 void SongDifficultyButton::onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected) {

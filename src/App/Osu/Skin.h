@@ -188,7 +188,7 @@ class Skin {
     inline Image *getDefaultButtonLeft() { return m_defaultButtonLeft; }
     inline Image *getDefaultButtonMiddle() { return m_defaultButtonMiddle; }
     inline Image *getDefaultButtonRight() { return m_defaultButtonRight; }
-    inline SkinImage *getMenuBack2() { return m_menuBack; }
+    inline SkinImage *getMenuBack2() { return m_menuBackImg; }
     inline SkinImage *getSelectionMode() { return m_selectionMode; }
     inline SkinImage *getSelectionModeOver() { return m_selectionModeOver; }
     inline SkinImage *getSelectionMods() { return m_selectionMods; }
@@ -504,7 +504,7 @@ class Skin {
     Image *m_defaultButtonLeft;
     Image *m_defaultButtonMiddle;
     Image *m_defaultButtonRight;
-    SkinImage *m_menuBack;
+    SkinImage *m_menuBackImg;
     SkinImage *m_selectionMode;
     SkinImage *m_selectionModeOver;
     SkinImage *m_selectionMods;
@@ -582,6 +582,75 @@ class Skin {
 
     Sound *m_spinnerBonus;
     Sound *m_spinnerSpinSound;
+
+    // Plays when sending a message in chat
+    Sound *m_messageSent = NULL;
+
+    // Plays when deleting text in a message in chat
+    Sound *m_deletingText = NULL;
+
+    // Plays when changing the text cursor position
+    Sound *m_movingTextCursor = NULL;
+
+    // Plays when pressing a key for chat, search, edit, etc
+    Sound *m_typing1 = NULL;
+    Sound *m_typing2 = NULL;
+    Sound *m_typing3 = NULL;
+    Sound *m_typing4 = NULL;
+
+    // Plays when returning to the previous screen
+    Sound *m_menuBack = NULL;
+
+    // Plays when closing a chat tab
+    Sound *m_closeChatTab = NULL;
+
+    // Plays when hovering above all selectable boxes except beatmaps or main screen buttons
+    Sound *m_hoverButton = NULL;
+
+    // Plays when clicking to confirm a button or dropdown option, opening or
+    // closing chat, switching between chat tabs, or switching groups
+    Sound *m_clickButton = NULL;
+
+    // Main menu sounds
+    Sound *m_clickMainMenuCube = NULL;
+    Sound *m_hoverMainMenuCube = NULL;
+    Sound *m_clickSingleplayer = NULL;
+    Sound *m_hoverSingleplayer = NULL;
+    Sound *m_clickMultiplayer = NULL;
+    Sound *m_hoverMultiplayer = NULL;
+    Sound *m_clickOptions = NULL;
+    Sound *m_hoverOptions = NULL;
+    Sound *m_clickExit = NULL;
+    Sound *m_hoverExit = NULL;
+
+    // Pause menu sounds
+    Sound *m_clickPauseBack = NULL;
+    Sound *m_hoverPauseBack = NULL;
+    Sound *m_clickPauseContinue = NULL;
+    Sound *m_hoverPauseContinue = NULL;
+    Sound *m_clickPauseRetry = NULL;
+    Sound *m_hoverPauseRetry = NULL;
+
+    // Back button sounds
+    Sound *m_backButtonClick = NULL;
+    Sound *m_backButtonHover = NULL;
+
+    // Plays when switching into song selection, selecting a beatmap, opening dropdown boxes, opening chat tabs
+    Sound *m_expand = NULL;
+
+    // Plays when selecting a difficulty of a beatmap
+    Sound *m_selectDifficulty = NULL;
+
+    // Plays when changing the options via a slider
+    Sound *m_sliderbar = NULL;
+
+    // Multiplayer sounds
+    Sound *m_matchConfirm = NULL;  // all players are ready
+    Sound *m_roomJoined = NULL;    // a player joined
+    Sound *m_roomQuit = NULL;      // a player left
+    Sound *m_roomNotReady = NULL;  // a player is no longer ready
+    Sound *m_roomReady = NULL;     // a player is now ready
+    Sound *m_matchStart = NULL;    // match started
 
     Sound *m_combobreak;
     Sound *m_failsound;

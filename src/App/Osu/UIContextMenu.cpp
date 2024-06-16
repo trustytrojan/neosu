@@ -8,6 +8,8 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "Osu.h"
+#include "Skin.h"
+#include "SoundEngine.h"
 #include "TooltipOverlay.h"
 
 UIContextMenuButton::UIContextMenuButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text,
@@ -30,6 +32,10 @@ void UIContextMenuButton::mouse_update(bool *propagate_clicks) {
         osu->getTooltipOverlay()->end();
     }
 }
+
+void UIContextMenuButton::onMouseInside() { engine->getSound()->play(osu->getSkin()->m_hoverButton); }
+
+void UIContextMenuButton::onMouseDownInside() { engine->getSound()->play(osu->getSkin()->m_clickButton); }
 
 void UIContextMenuButton::setTooltipText(UString text) { m_tooltipTextLines = text.split("\n"); }
 
@@ -267,6 +273,8 @@ void UIContextMenu::end(bool invertAnimation, bool clampUnderflowAndOverflowAndE
 
     m_fAnimation = 0.001f;
     anim->moveQuartOut(&m_fAnimation, 1.0f, 0.15f, true);
+
+    engine->getSound()->play(osu->getSkin()->m_expand);
 }
 
 void UIContextMenu::setVisible2(bool visible2) {

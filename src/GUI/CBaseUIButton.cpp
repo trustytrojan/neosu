@@ -1,10 +1,3 @@
-//================ Copyright (c) 2013, PG, All rights reserved. =================//
-//
-// Purpose:		a simple button
-//
-// $NoKeywords: $button
-//===============================================================================//
-
 #include "CBaseUIButton.h"
 
 #include "Engine.h"

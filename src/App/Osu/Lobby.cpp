@@ -15,6 +15,8 @@
 #include "PromptScreen.h"
 #include "ResourceManager.h"
 #include "RichPresence.h"
+#include "Skin.h"
+#include "SoundEngine.h"
 #include "UIButton.h"
 
 RoomUIElement::RoomUIElement(Lobby* multi, Room* room, float x, float y, float width, float height)
@@ -98,6 +100,7 @@ void Lobby::onKeyDown(KeyboardEvent& key) {
         key.consume();
         setVisible(false);
         osu->m_mainMenu->setVisible(true);
+        engine->getSound()->play(osu->getSkin()->m_menuBack);
         return;
     }
 

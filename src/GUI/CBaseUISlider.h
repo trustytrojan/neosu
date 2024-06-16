@@ -1,15 +1,7 @@
-//================ Copyright (c) 2012, PG, All rights reserved. =================//
-//
-// Purpose:		a simple slider
-//
-// $NoKeywords: $
-//===============================================================================//
+#pragma once
 
 // TODO: fix vertical sliders
 // TODO: this entire class is a mess
-
-#ifndef CBASEUISLIDER_H
-#define CBASEUISLIDER_H
 
 #include "CBaseUIElement.h"
 
@@ -103,8 +95,7 @@ class CBaseUISlider : public CBaseUIElement {
     float m_fPrevValue;
 
     float m_fKeyDelta;
+    float m_fLastSoundPlayTime = 0.f;
 
     SliderChangeCallback m_sliderChangeCallback;
 };
-
-#endif

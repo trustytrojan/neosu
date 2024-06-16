@@ -1,13 +1,4 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		a not so simple textbox, revision 4
-//
-// $NoKeywords: $
-//===============================================================================//
-
-#ifndef CBASEUITEXTBOX_H
-#define CBASEUITEXTBOX_H
-
+#pragma once
 #include "CBaseUIElement.h"
 
 class McFont;
@@ -148,5 +139,3 @@ class CBaseUITextbox : public CBaseUIElement {
     int m_iSelectEnd;
     int m_iSelectX;
 };
-
-#endif

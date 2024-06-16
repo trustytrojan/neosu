@@ -12,6 +12,7 @@ class SongDifficultyButton : public SongButton {
 
     virtual void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);
+    virtual void onClicked();
 
     virtual void updateGrade();
 

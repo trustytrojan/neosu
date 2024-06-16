@@ -236,6 +236,16 @@ class Room {
     u8 nb_open_slots = 0;
     Slot slots[16];
 
+    bool nb_ready() {
+        u8 nb = 0;
+        for(int i = 0; i < 16; i++) {
+            if(slots[i].has_player() && slots[i].is_ready()) {
+                nb++;
+            }
+        }
+        return nb;
+    }
+
     bool all_players_ready() {
         for(int i = 0; i < 16; i++) {
             if(slots[i].has_player() && !slots[i].is_ready()) {

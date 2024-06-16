@@ -316,8 +316,15 @@ void RoomScreen::onChar(KeyboardEvent &key) {
 void RoomScreen::onResolutionChange(Vector2 newResolution) { updateLayout(newResolution); }
 
 CBaseUIContainer *RoomScreen::setVisible(bool visible) {
+    if(m_bVisible == visible) return this;
+
     // NOTE: Calling setVisible(false) does not quit the room! Call ragequit() instead.
     m_bVisible = visible;
+
+    if(visible) {
+        engine->getSound()->play(osu->getSkin()->m_menuBack);
+    }
+
     return this;
 }
 
@@ -482,7 +489,7 @@ void RoomScreen::updateLayout(Vector2 newResolution) {
 }
 
 // Exit to main menu
-void RoomScreen::ragequit() {
+void RoomScreen::ragequit(bool play_sound) {
     m_bVisible = false;
     bancho.match_started = false;
 
@@ -500,6 +507,10 @@ void RoomScreen::ragequit() {
 
     osu->m_modSelector->resetMods();
     osu->m_modSelector->enableModsFromFlags(osu->previous_mod_flags);
+
+    if(play_sound) {
+        engine->getSound()->play(osu->getSkin()->m_menuBack);
+    }
 }
 
 void RoomScreen::on_map_change() {
@@ -590,6 +601,20 @@ void RoomScreen::on_room_joined(Room room) {
 void RoomScreen::on_room_updated(Room room) {
     if(bancho.is_playing_a_multi_map() || !bancho.is_in_a_multi_room()) return;
 
+    if(bancho.room.nb_players < room.nb_players) {
+        engine->getSound()->play(osu->getSkin()->m_roomJoined);
+    } else if(bancho.room.nb_players > room.nb_players) {
+        engine->getSound()->play(osu->getSkin()->m_roomQuit);
+    }
+    if(bancho.room.nb_ready() < room.nb_ready()) {
+        engine->getSound()->play(osu->getSkin()->m_roomReady);
+    } else if(bancho.room.nb_ready() > room.nb_ready()) {
+        engine->getSound()->play(osu->getSkin()->m_roomNotReady);
+    }
+    if(!bancho.room.all_players_ready() && room.all_players_ready()) {
+        engine->getSound()->play(osu->getSkin()->m_matchConfirm);
+    }
+
     bool was_host = bancho.room.is_host();
     bool map_changed = bancho.room.map_id != room.map_id;
     bancho.room = room;
@@ -636,6 +661,8 @@ void RoomScreen::on_match_started(Room room) {
         bancho.match_started = true;
         osu->m_songBrowser2->m_bHasSelectedAndIsPlaying = true;
         osu->m_chat->updateVisibility();
+
+        engine->getSound()->play(osu->getSkin()->m_matchStart);
     } else {
         ragequit();  // map failed to load
     }

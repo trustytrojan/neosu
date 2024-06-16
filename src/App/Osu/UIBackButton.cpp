@@ -6,6 +6,7 @@
 #include "Osu.h"
 #include "Skin.h"
 #include "SkinImage.h"
+#include "SoundEngine.h"
 
 using namespace std;
 
@@ -53,10 +54,17 @@ void UIBackButton::mouse_update(bool *propagate_clicks) {
     CBaseUIButton::mouse_update(propagate_clicks);
 }
 
+void UIBackButton::onMouseDownInside() {
+    CBaseUIButton::onMouseDownInside();
+
+    engine->getSound()->play(osu->getSkin()->m_backButtonClick);
+}
+
 void UIBackButton::onMouseInside() {
     CBaseUIButton::onMouseInside();
 
     anim->moveQuadOut(&m_fAnimation, 1.0f, 0.1f, 0.0f, true);
+    engine->getSound()->play(osu->getSkin()->m_backButtonHover);
 }
 
 void UIBackButton::onMouseOutside() {

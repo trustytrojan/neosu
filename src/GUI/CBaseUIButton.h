@@ -1,13 +1,4 @@
-//================ Copyright (c) 2013, PG, All rights reserved. =================//
-//
-// Purpose:		a simple button
-//
-// $NoKeywords: $button
-//===============================================================================//
-
-#ifndef CBASEUIBUTTON_H
-#define CBASEUIBUTTON_H
-
+#pragma once
 #include "CBaseUIElement.h"
 
 class McFont;
@@ -133,5 +124,3 @@ class CBaseUIButton : public CBaseUIElement {
     ButtonClickVoidCallback m_clickVoidCallback;
     ButtonClickCallback m_clickCallback;
 };
-
-#endif

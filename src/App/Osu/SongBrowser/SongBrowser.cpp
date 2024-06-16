@@ -426,6 +426,8 @@ SongBrowser::SongBrowser() : ScreenBackable() {
     m_groupButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onGroupClicked));
 
     {
+        // TODO: Add hover sounds
+
         // "hardcoded" grouping tabs
         m_collectionsButton = addTopBarRightTabButton("Collections");
         m_collectionsButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onGroupTabButtonClicked));
@@ -1321,10 +1323,13 @@ void SongBrowser::onChar(KeyboardEvent &e) {
 void SongBrowser::onResolutionChange(Vector2 newResolution) { ScreenBackable::onResolutionChange(newResolution); }
 
 CBaseUIContainer *SongBrowser::setVisible(bool visible) {
+    if(visible == m_bVisible) return this;
+
     m_bVisible = visible;
     m_bShiftPressed = false;  // seems to get stuck sometimes otherwise
 
     if(m_bVisible) {
+        engine->getSound()->play(osu->getSkin()->m_expand);
         RichPresence::onSongBrowser();
 
         updateLayout();
@@ -3344,7 +3349,10 @@ void SongBrowser::onSortChangeInt(UString text, bool autoScroll) {
     onAfterSortingOrGroupChange(autoScroll);
 }
 
-void SongBrowser::onGroupTabButtonClicked(CBaseUIButton *groupTabButton) { onGroupChange(groupTabButton->getText()); }
+void SongBrowser::onGroupTabButtonClicked(CBaseUIButton *groupTabButton) {
+    onGroupChange(groupTabButton->getText());
+    engine->getSound()->play(osu->getSkin()->m_clickButton);
+}
 
 void SongBrowser::onGroupNoGrouping() {
     m_group = GROUP::GROUP_NO_GROUPING;
@@ -3561,6 +3569,8 @@ void SongBrowser::onScoreClicked(CBaseUIButton *button) {
 
     osu->getSongBrowser()->setVisible(false);
     osu->getRankingScreen()->setVisible(true);
+
+    engine->getSound()->play(osu->getSkin()->m_menuHit);
 }
 
 void SongBrowser::onScoreContextMenu(ScoreButton *scoreButton, int id) {

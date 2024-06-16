@@ -20,7 +20,9 @@
 #include "PromptScreen.h"
 #include "ResourceManager.h"
 #include "RoomScreen.h"
+#include "Skin.h"
 #include "SongBrowser/SongBrowser.h"
+#include "SoundEngine.h"
 #include "UIButton.h"
 #include "UserCard.h"
 
@@ -70,9 +72,10 @@ void start_spectating(i32 user_id) {
     osu->m_lobby->setVisible(false);
     osu->m_changelog->setVisible(false);
     osu->m_mainMenu->setVisible(false);
-    if(osu->m_room->isVisible()) osu->m_room->ragequit();
+    if(osu->m_room->isVisible()) osu->m_room->ragequit(false);
 
     osu->m_spectatorScreen->setVisible(true);
+    engine->getSound()->play(osu->getSkin()->m_menuHit);
 }
 
 void stop_spectating() {
@@ -95,6 +98,7 @@ void stop_spectating() {
 
     osu->m_spectatorScreen->setVisible(false);
     osu->m_mainMenu->setVisible(true);
+    engine->getSound()->play(osu->getSkin()->m_menuBack);
 }
 
 SpectatorScreen::SpectatorScreen() {

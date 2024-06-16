@@ -33,7 +33,7 @@ class PauseMenu : public OsuScreen {
 
     void scheduleVisibilityChange(bool visible);
 
-    UIPauseMenuButton *addButton(std::function<Image *()> getImageFunc);
+    UIPauseMenuButton *addButton(std::function<Image *()> getImageFunc, UString name);
 
     bool m_bScheduledVisibilityChange;
     bool m_bScheduledVisibility;

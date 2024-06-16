@@ -5,6 +5,7 @@
 #include "Osu.h"
 #include "ResourceManager.h"
 #include "Skin.h"
+#include "SoundEngine.h"
 #include "TooltipOverlay.h"
 
 using namespace std;
@@ -87,7 +88,11 @@ void UIButton::mouse_update(bool *propagate_clicks) {
     m_bFocusStolenDelay = false;
 }
 
-void UIButton::onMouseInside() { m_fBrightness = 1.0f; }
+void UIButton::onMouseInside() {
+    m_fBrightness = 1.0f;
+
+    engine->getSound()->play(osu->getSkin()->m_hoverButton);
+}
 
 void UIButton::onMouseOutside() { m_fBrightness = 0.85f; }
 
@@ -97,6 +102,8 @@ void UIButton::onClicked() {
     CBaseUIButton::onClicked();
 
     animateClickColor();
+
+    engine->getSound()->play(osu->getSkin()->m_clickButton);
 }
 
 void UIButton::onFocusStolen() {

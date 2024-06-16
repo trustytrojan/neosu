@@ -53,7 +53,10 @@ ChatChannel::~ChatChannel() {
     m_chat->m_button_container->deleteBaseUIElement(btn);
 }
 
-void ChatChannel::onChannelButtonClick(CBaseUIButton *btn) { m_chat->switchToChannel(this); }
+void ChatChannel::onChannelButtonClick(CBaseUIButton *btn) {
+    engine->getSound()->play(osu->getSkin()->m_clickButton);
+    m_chat->switchToChannel(this);
+}
 
 void ChatChannel::add_message(ChatMessage msg) {
     const float line_height = 20;
@@ -382,6 +385,8 @@ void Chat::onKeyDown(KeyboardEvent &key) {
                                                      .text = m_input_box->getText(),
                                                  });
 
+            engine->getSound()->play(osu->getSkin()->m_messageSent);
+
             m_input_box->clear();
         }
         return;
@@ -418,6 +423,9 @@ void Chat::onKeyDown(KeyboardEvent &key) {
             auto new_chan = m_channels[(chan_index + 1) % m_channels.size()];
             switchToChannel(new_chan);
         }
+
+        engine->getSound()->play(osu->getSkin()->m_clickButton);
+
         return;
     }
 
@@ -505,6 +513,10 @@ void Chat::addChannel(UString channel_name, bool switch_to) {
     }
 
     updateLayout(osu->getScreenSize());
+
+    if(isVisible()) {
+        engine->getSound()->play(osu->getSkin()->m_expand);
+    }
 }
 
 void Chat::addMessage(UString channel_name, ChatMessage msg, bool mark_unread) {
@@ -673,6 +685,8 @@ void Chat::leave(UString channel_name) {
     }
 
     removeChannel(channel_name);
+
+    engine->getSound()->play(osu->getSkin()->m_closeChatTab);
 }
 
 void Chat::onDisconnect() {
@@ -735,6 +749,8 @@ void Chat::updateVisibility() {
 
 CBaseUIContainer *Chat::setVisible(bool visible) {
     if(visible == m_bVisible) return this;
+
+    engine->getSound()->play(osu->getSkin()->m_clickButton);
 
     if(visible && bancho.user_id <= 0) {
         osu->m_optionsMenu->askForLoginDetails();

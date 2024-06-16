@@ -54,6 +54,14 @@ void UIPauseMenuButton::onMouseInside() {
     const float animationDuration = 0.09f;
     anim->moveLinear(&m_vScale.x, m_vBaseScale.x * m_fScaleMultiplier, animationDuration, true);
     anim->moveLinear(&m_vScale.y, m_vBaseScale.y * m_fScaleMultiplier, animationDuration, true);
+
+    if(getName() == UString("Resume")) {
+        engine->getSound()->play(osu->getSkin()->m_hoverPauseContinue);
+    } else if(getName() == UString("Retry")) {
+        engine->getSound()->play(osu->getSkin()->m_hoverPauseRetry);
+    } else if(getName() == UString("Quit")) {
+        engine->getSound()->play(osu->getSkin()->m_hoverPauseBack);
+    }
 }
 
 void UIPauseMenuButton::onMouseOutside() {

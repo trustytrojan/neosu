@@ -8,6 +8,7 @@ class UIBackButton : public CBaseUIButton {
     virtual void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);
 
+    virtual void onMouseDownInside();
     virtual void onMouseInside();
     virtual void onMouseOutside();
 

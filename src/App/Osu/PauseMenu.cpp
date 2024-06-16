@@ -44,9 +44,10 @@ PauseMenu::PauseMenu() : OsuScreen() {
 
     setSize(osu->getScreenWidth(), osu->getScreenHeight());
 
-    UIPauseMenuButton *continueButton = addButton([]() -> Image * { return osu->getSkin()->getPauseContinue(); });
-    UIPauseMenuButton *retryButton = addButton([]() -> Image * { return osu->getSkin()->getPauseRetry(); });
-    UIPauseMenuButton *backButton = addButton([]() -> Image * { return osu->getSkin()->getPauseBack(); });
+    UIPauseMenuButton *continueButton =
+        addButton([]() -> Image * { return osu->getSkin()->getPauseContinue(); }, "Resume");
+    UIPauseMenuButton *retryButton = addButton([]() -> Image * { return osu->getSkin()->getPauseRetry(); }, "Retry");
+    UIPauseMenuButton *backButton = addButton([]() -> Image * { return osu->getSkin()->getPauseBack(); }, "Quit");
 
     continueButton->setClickCallback(fastdelegate::MakeDelegate(this, &PauseMenu::onContinueClicked));
     retryButton->setClickCallback(fastdelegate::MakeDelegate(this, &PauseMenu::onRetryClicked));
@@ -134,7 +135,7 @@ void PauseMenu::onContinueClicked() {
     if(!m_bContinueEnabled) return;
     if(anim->isAnimating(&m_fDimAnim)) return;
 
-    engine->getSound()->play(osu->getSkin()->getMenuHit());
+    engine->getSound()->play(osu->getSkin()->m_clickPauseContinue);
     osu->getSelectedBeatmap()->pause();
 
     scheduleVisibilityChange(false);
@@ -143,7 +144,7 @@ void PauseMenu::onContinueClicked() {
 void PauseMenu::onRetryClicked() {
     if(anim->isAnimating(&m_fDimAnim)) return;
 
-    engine->getSound()->play(osu->getSkin()->getMenuHit());
+    engine->getSound()->play(osu->getSkin()->m_clickPauseRetry);
     osu->getSelectedBeatmap()->restart();
 
     scheduleVisibilityChange(false);
@@ -152,7 +153,7 @@ void PauseMenu::onRetryClicked() {
 void PauseMenu::onBackClicked() {
     if(anim->isAnimating(&m_fDimAnim)) return;
 
-    engine->getSound()->play(osu->getSkin()->getMenuHit());
+    engine->getSound()->play(osu->getSkin()->m_clickPauseBack);
     osu->getSelectedBeatmap()->stop();
 
     scheduleVisibilityChange(false);
@@ -401,8 +402,8 @@ void PauseMenu::setContinueEnabled(bool continueEnabled) {
     if(m_buttons.size() > 0) m_buttons[0]->setVisible(m_bContinueEnabled);
 }
 
-UIPauseMenuButton *PauseMenu::addButton(std::function<Image *()> getImageFunc) {
-    UIPauseMenuButton *button = new UIPauseMenuButton(getImageFunc, 0, 0, 0, 0, "");
+UIPauseMenuButton *PauseMenu::addButton(std::function<Image *()> getImageFunc, UString btn_name) {
+    UIPauseMenuButton *button = new UIPauseMenuButton(getImageFunc, 0, 0, 0, 0, btn_name);
     addBaseUIElement(button);
     m_buttons.push_back(button);
     return button;

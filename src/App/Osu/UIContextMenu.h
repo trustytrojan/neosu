@@ -71,6 +71,9 @@ class UIContextMenuButton : public CBaseUIButton {
 
     virtual void mouse_update(bool *propagate_clicks);
 
+    virtual void onMouseInside();
+    virtual void onMouseDownInside();
+
     inline int getID() const { return m_iID; }
 
     void setTooltipText(UString text);

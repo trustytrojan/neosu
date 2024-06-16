@@ -29,6 +29,7 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
+    latest.changes.push_back("- Added missing UI sounds");
     latest.changes.push_back("- Chat: added support for /me command");
     latest.changes.push_back("- Chat: added support for links");
     latest.changes.push_back("- Chat: added support for map links (auto-downloads)");

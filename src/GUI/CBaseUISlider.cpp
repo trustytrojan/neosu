@@ -4,6 +4,9 @@
 #include "Engine.h"
 #include "Keyboard.h"
 #include "Mouse.h"
+#include "Osu.h"
+#include "Skin.h"
+#include "SoundEngine.h"
 
 using namespace std;
 
@@ -86,33 +89,37 @@ void CBaseUISlider::mouse_update(bool *propagate_clicks) {
     if(m_bActive) {
         // calculate new values
         if(!m_bHorizontal) {
-            if(m_bAnimated)
+            if(m_bAnimated) {
                 anim->moveQuadOut(&m_vBlockPos.y,
                                   clamp<float>(mousepos.y - m_vGrabBackup.y, 0.0f, m_vSize.y - m_vBlockSize.y), 0.10f,
                                   0, true);
-            else
+            } else {
                 m_vBlockPos.y = clamp<float>(mousepos.y - m_vGrabBackup.y, 0.0f, m_vSize.y - m_vBlockSize.y);
+            }
 
             m_fCurPercent = clamp<float>(1.0f - (std::round(m_vBlockPos.y) / (m_vSize.y - m_vBlockSize.y)), 0.0f, 1.0f);
         } else {
-            if(m_bAnimated)
+            if(m_bAnimated) {
                 anim->moveQuadOut(&m_vBlockPos.x,
                                   clamp<float>(mousepos.x - m_vGrabBackup.x, 0.0f, m_vSize.x - m_vBlockSize.x), 0.10f,
                                   0, true);
-            else
+            } else {
                 m_vBlockPos.x = clamp<float>(mousepos.x - m_vGrabBackup.x, 0.0f, m_vSize.x - m_vBlockSize.x);
+            }
 
             m_fCurPercent = clamp<float>(std::round(m_vBlockPos.x) / (m_vSize.x - m_vBlockSize.x), 0.0f, 1.0f);
         }
 
         // set new value
         if(m_bAnimated) {
-            if(m_bLiveUpdate)
+            if(m_bLiveUpdate) {
                 setValue(lerp<float>(m_fMinValue, m_fMaxValue, m_fCurPercent), false);
-            else
+            } else {
                 m_fCurValue = lerp<float>(m_fMinValue, m_fMaxValue, m_fCurPercent);
-        } else
+            }
+        } else {
             setValue(lerp<float>(m_fMinValue, m_fMaxValue, m_fCurPercent), false);
+        }
 
         m_bHasChanged = true;
     } else {
@@ -122,10 +129,11 @@ void CBaseUISlider::mouse_update(bool *propagate_clicks) {
             if(wheelDelta != 0) {
                 const int multiplier = max(1, std::abs(wheelDelta) / 120);
 
-                if(wheelDelta > 0)
+                if(wheelDelta > 0) {
                     setValue(m_fCurValue + m_fKeyDelta * multiplier, m_bAnimated);
-                else
+                } else {
                     setValue(m_fCurValue - m_fKeyDelta * multiplier, m_bAnimated);
+                }
             }
         }
     }
@@ -210,6 +218,13 @@ CBaseUISlider *CBaseUISlider::setValue(float value, bool animate, bool call_call
 
     if(call_callback && changeCallbackCheck && m_sliderChangeCallback != NULL) {
         m_sliderChangeCallback(this);
+
+        if(m_bHasChanged) {
+            if(m_fLastSoundPlayTime + 0.05f < engine->getTime()) {
+                engine->getSound()->play(osu->getSkin()->m_sliderbar);
+                m_fLastSoundPlayTime = engine->getTime();
+            }
+        }
     }
 
     updateBlockPos();

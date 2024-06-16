@@ -54,6 +54,7 @@ class MainMenuButton : public CBaseUIButton {
     MainMenuButton(MainMenu *mainMenu, float xPos, float yPos, float xSize, float ySize, UString name, UString text);
 
     void onMouseDownInside();
+    void onMouseInside();
 
    private:
     MainMenu *m_mainMenu;
@@ -1302,7 +1303,7 @@ MainMenuButton *MainMenu::addMainMenuButton(UString text) {
 }
 
 void MainMenu::onCubePressed() {
-    engine->getSound()->play(osu->getSkin()->getMenuHit());
+    engine->getSound()->play(osu->getSkin()->m_clickMainMenuCube);
 
     anim->moveQuadInOut(&m_fSizeAddAnim, 0.0f, 0.06f, 0.0f, false);
     anim->moveQuadInOut(&m_fSizeAddAnim, 0.12f, 0.06f, 0.07f, false);
@@ -1351,6 +1352,9 @@ void MainMenu::onPlayButtonPressed() {
     m_bMainMenuAnimFriendScheduled = false;
 
     osu->toggleSongBrowser();
+
+    engine->getSound()->play(osu->getSkin()->m_menuHit);
+    engine->getSound()->play(osu->getSkin()->m_clickSingleplayer);
 }
 
 void MainMenu::onMultiplayerButtonPressed() {
@@ -1361,16 +1365,23 @@ void MainMenu::onMultiplayerButtonPressed() {
 
     setVisible(false);
     osu->m_lobby->setVisible(true);
+
+    engine->getSound()->play(osu->getSkin()->m_menuHit);
+    engine->getSound()->play(osu->getSkin()->m_clickMultiplayer);
 }
 
 void MainMenu::onOptionsButtonPressed() {
     if(!osu->getOptionsMenu()->isVisible()) osu->toggleOptionsMenu();
+
+    engine->getSound()->play(osu->getSkin()->m_clickOptions);
 }
 
 void MainMenu::onExitButtonPressed() {
     m_fShutdownScheduledTime = engine->getTime() + 0.3f;
     m_bWasCleanShutdown = true;
     setMenuElementsVisible(false);
+
+    engine->getSound()->play(osu->getSkin()->m_clickExit);
 }
 
 void MainMenu::onPausePressed() {
@@ -1405,13 +1416,14 @@ MainMenuCubeButton::MainMenuCubeButton(MainMenu *mainMenu, float xPos, float yPo
 
 void MainMenuCubeButton::draw(Graphics *g) {
     // draw nothing
-    /// CBaseUIButton::draw(g);
 }
 
 void MainMenuCubeButton::onMouseInside() {
     anim->moveQuadInOut(&m_mainMenu->m_fSizeAddAnim, 0.12f, 0.15f, 0.0f, true);
 
     CBaseUIButton::onMouseInside();
+
+    engine->getSound()->play(osu->getSkin()->m_hoverMainMenuCube);
 }
 
 void MainMenuCubeButton::onMouseOutside() {
@@ -1428,7 +1440,20 @@ MainMenuButton::MainMenuButton(MainMenu *mainMenu, float xPos, float yPos, float
 
 void MainMenuButton::onMouseDownInside() {
     if(m_mainMenu->m_cube->isMouseInside()) return;
-
-    engine->getSound()->play(osu->getSkin()->getMenuHit());
     CBaseUIButton::onMouseDownInside();
+}
+
+void MainMenuButton::onMouseInside() {
+    if(m_mainMenu->m_cube->isMouseInside()) return;
+    CBaseUIButton::onMouseInside();
+
+    if(getName() == UString("Singleplayer")) {
+        engine->getSound()->play(osu->getSkin()->m_hoverSingleplayer);
+    } else if(getName() == UString("Multiplayer")) {
+        engine->getSound()->play(osu->getSkin()->m_hoverMultiplayer);
+    } else if(getName() == UString("Options")) {
+        engine->getSound()->play(osu->getSkin()->m_hoverOptions);
+    } else if(getName() == UString("Exit")) {
+        engine->getSound()->play(osu->getSkin()->m_hoverExit);
+    }
 }
