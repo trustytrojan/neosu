@@ -40,6 +40,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.changes.push_back("- FPS counter will now display worst frametime instead of current frametime");
     latest.changes.push_back("- Improved song browser performance");
     latest.changes.push_back("- Skins are now sorted alphabetically, ignoring meme characters");
+    latest.changes.push_back("- Unlocked osu_drain_kill convar");
     changelogs.push_back(latest);
 
     CHANGELOG v35_05;

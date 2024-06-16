@@ -163,7 +163,7 @@ ConVar osu_mod_suddendeath_restart("osu_mod_suddendeath_restart", false,
 ConVar osu_drain_type(
     "osu_drain_type", 2, FCVAR_LOCKED,
     "which hp drain algorithm to use (1 = None, 2 = osu!stable, 3 = osu!lazer 2020, 4 = osu!lazer 2018)");
-ConVar osu_drain_kill("osu_drain_kill", true, FCVAR_LOCKED, "whether to kill the player upon failing");
+ConVar osu_drain_kill("osu_drain_kill", true, FCVAR_DEFAULT, "whether to kill the player upon failing");
 ConVar osu_drain_kill_notification_duration(
     "osu_drain_kill_notification_duration", 1.0f, FCVAR_DEFAULT,
     "how long to display the \"You have failed, but you can keep playing!\" notification (0 = disabled)");
@@ -1206,6 +1206,9 @@ void Beatmap::fail() {
         anim->moveLinear(&m_fFailAnim, 0.0f, osu_fail_time.getFloat(),
                          true);  // trigger music slowdown and delayed menu, see update()
     } else if(!osu->getScore()->isDead()) {
+        debugLog("Disabling score submission due to death\n");
+        vanilla = false;
+
         anim->deleteExistingAnimation(&m_fHealth2);
         m_fHealth = 0.0;
         m_fHealth2 = 0.0f;
