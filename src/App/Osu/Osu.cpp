@@ -449,8 +449,8 @@ Osu::Osu() {
     m_songBrowser2 = new SongBrowser();
     m_volumeOverlay = new VolumeOverlay();
     m_tooltipOverlay = new TooltipOverlay();
-    m_mainMenu = new MainMenu();
     m_optionsMenu = new OptionsMenu();
+    m_mainMenu = new MainMenu();  // has to be after options menu
     m_backgroundImageHandler = new BackgroundImageHandler();
     m_modSelector = new ModSelector();
     m_rankingScreen = new RankingScreen();

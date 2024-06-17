@@ -1,6 +1,27 @@
 #pragma once
 
 #ifdef _WIN32
+// Windows build
+#ifdef _WIN64
+#define OS_NAME "win64"
+#define WINVER 0x0A00  // Windows 10, to enable the ifdefs in winuser.h for touch
+#define MCENGINE_WINDOWS_REALTIMESTYLUS_SUPPORT
+#define MCENGINE_WINDOWS_TOUCH_SUPPORT
+#else
+#define OS_NAME "win32"
+#endif
+// End of Windows build
+#else
+// Linux build
+#ifdef __x86_64
+#define OS_NAME "linux-x64"
+#else
+#define OS_NAME "linux-i686"
+#endif
+// End of Linux build
+#endif
+
+#ifdef _WIN32
 // clang-format off
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
@@ -46,24 +67,6 @@
 #include "Vectors.h"
 
 // DEFS
-
-#ifdef _WIN32
-
-#ifdef _WIN64
-#define OS_NAME "win64"
-#else
-#define OS_NAME "win32"
-#endif
-
-#else
-
-#ifdef __x86_64
-#define OS_NAME "linux-x64"
-#else
-#define OS_NAME "linux-i686"
-#endif
-
-#endif
 
 #ifdef _WIN32
 #define reallocarray(ptr, a, b) realloc(ptr, a *b)

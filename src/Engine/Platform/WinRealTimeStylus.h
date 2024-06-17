@@ -1,7 +1,5 @@
+#pragma once
 #ifdef _WIN32
-
-#ifndef WINREALTIMESTYLUS_H
-#define WINREALTIMESTYLUS_H
 
 #ifdef MCENGINE_WINDOWS_REALTIMESTYLUS_SUPPORT
 
@@ -11,19 +9,12 @@
 extern Engine* g_engine;
 extern ConVar* win_realtimestylus;
 
-// this is really hacky, I copied and merged some header files from the Microsoft SDK into MinGW to make it work
-// MinGW is missing some definitions inside tpcshrd.h, you can get them from the Microsoft SDK includes
-// you MUST link to Ole32.lib and Uuid.lib (which is not in the default project configuration!)
-
 // most of this code was taken 1:1 from the windows sdk samples
 // the only interesting/useful functions here are StylusDown and StylusUp
 
 #include <rtscom.h>  // RTS interface and GUID declarations
 
 #include <rtscom_i.c>  // RTS GUID definitions
-
-// yay for missing uuid declarations, had to add this one manually
-__CRT_UUID_DECL(IRealTimeStylus, 0xA8BB5D22, 0x3144, 0x4a7b, 0x93, 0xCD, 0xF3, 0x4A, 0x16, 0xBE, 0x51, 0x3A);
 
 static IRealTimeStylus* g_pRealTimeStylus = NULL;         // RTS object
 static IStylusSyncPlugin* g_pSyncEventHandlerRTS = NULL;  // EventHandler object
@@ -383,8 +374,6 @@ BOOL InitRealTimeStylus(HINSTANCE hInstance, HWND hWnd)  // extern
 
     return TRUE;
 }
-
-#endif
 
 #endif
 

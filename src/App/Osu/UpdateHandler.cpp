@@ -109,7 +109,7 @@ void UpdateHandler::_requestUpdate() {
     }
 
     debugLog("Downloading latest update... (current v%.2f, latest v%.2f)\n", current_version, fLatestVersion);
-    update_url = UString::format(NEOSU_URL "/update/" OS_NAME "/v%.2f.zip", os, fLatestVersion);
+    update_url = UString::format(NEOSU_URL "/update/" OS_NAME "/v%.2f.zip", fLatestVersion);
 }
 
 bool UpdateHandler::_downloadUpdate() {

@@ -91,8 +91,8 @@ void XInputGamepad::setVibration(float leftMotorSpeedPercent, float rightMotorSp
         XINPUT_VIBRATION vibration;
         memset(&vibration, 0, sizeof(XINPUT_VIBRATION));
         {
-            vibration.wLeftMotorSpeed = (WORD)(65535.0f * clamp<float>(leftMotorSpeedPercent, 0.0f, 1.0f));
-            vibration.wRightMotorSpeed = (WORD)(65535.0f * clamp<float>(rightMotorSpeedPercent, 0.0f, 1.0f));
+            vibration.wLeftMotorSpeed = (WORD)(65535.0f * std::clamp<float>(leftMotorSpeedPercent, 0.0f, 1.0f));
+            vibration.wRightMotorSpeed = (WORD)(65535.0f * std::clamp<float>(rightMotorSpeedPercent, 0.0f, 1.0f));
         }
         XInputSetState(m_iPort, &vibration);
     }

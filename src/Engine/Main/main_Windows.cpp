@@ -1,15 +1,10 @@
 #ifdef _WIN32
 
-// #define MCENGINE_WINDOWS_REALTIMESTYLUS_SUPPORT
-// #define MCENGINE_WINDOWS_TOUCH_SUPPORT
-
-#ifdef MCENGINE_WINDOWS_TOUCH_SUPPORT
-#define WINVER 0x0A00  // Windows 10, to enable the ifdefs in winuser.h for touch
-#endif
-
-#include <dwmapi.h>
-
+// clang-format off
+// Include order matters
 #include "cbase.h"
+#include <dwmapi.h>
+// clang-format on
 
 // NEXTRAWINPUTBLOCK macro requires this
 typedef uint64_t QWORD;
@@ -60,7 +55,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 #ifdef MCENGINE_WINDOWS_TOUCH_SUPPORT
 #include <winuser.h>
-typedef WINBOOL(WINAPI *PGPI)(UINT32 pointerId, POINTER_INFO *pointerInfo);
+typedef BOOL(WINAPI * PGPI)(UINT32 pointerId, POINTER_INFO *pointerInfo);
 PGPI g_GetPointerInfo = (PGPI)GetProcAddress(GetModuleHandle(TEXT("user32.dll")), "GetPointerInfo");
 #ifndef TWF_WANTPALM
 #define TWF_WANTPALM 0x00000002
@@ -1133,7 +1128,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
                     // rate will produce ~0.12 MB per second)
                     const UINT numAlignmentBytes = 8;
                     const UINT rawInputBufferNumBytes =
-                        clamp<UINT>(minRawInputBufferNumBytes * numAlignmentBytes * 1024, 1, 1024 * 1024);
+                        std::clamp<UINT>(minRawInputBufferNumBytes * numAlignmentBytes * 1024, 1, 1024 * 1024);
                     if(currentRawInputBuffer == NULL || currentRawInputBufferNumBytes < rawInputBufferNumBytes) {
                         currentRawInputBufferNumBytes = rawInputBufferNumBytes;
                         {

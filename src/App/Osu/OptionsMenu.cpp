@@ -2427,6 +2427,9 @@ void OptionsMenu::onSkinSelect() {
             char la = tolower(a[i]);
             char lb = tolower(b[j]);
             if(la != lb) return la < lb;
+
+            i++;
+            j++;
         }
 
         return false;
