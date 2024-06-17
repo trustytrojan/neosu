@@ -148,7 +148,7 @@ ConVar restart_sound_engine_before_playing("restart_sound_engine_before_playing"
 ConVar instafade("instafade", false, FCVAR_DEFAULT, "don't draw hitcircle fadeout animations");
 
 ConVar use_https("use_https", true, FCVAR_DEFAULT);
-ConVar mp_server("mp_server", "ez-pp.farm", FCVAR_DEFAULT);
+ConVar mp_server("mp_server", "akatsuki.gg", FCVAR_DEFAULT);
 ConVar mp_password("mp_password", "", FCVAR_DEFAULT | FCVAR_HIDDEN);
 ConVar mp_autologin("mp_autologin", false, FCVAR_DEFAULT);
 ConVar submit_scores("submit_scores", false, FCVAR_DEFAULT);
@@ -178,7 +178,7 @@ Osu::Osu() {
 
     bancho.neosu_version = UString::format("%.2f-" NEOSU_STREAM, osu_version.getFloat());
     bancho.user_agent =
-        UString::format("Mozilla/5.0 (compatible; neosu/%s; +" NEOSU_UPDATE_URL "/)", bancho.neosu_version.toUtf8());
+        UString::format("Mozilla/5.0 (compatible; neosu/%s; +" NEOSU_URL "/)", bancho.neosu_version.toUtf8());
 
     // convar refs
     m_osu_folder_ref = convar->getConVarByName("osu_folder");

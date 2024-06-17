@@ -72,7 +72,7 @@ ConVar osu_draw_songbrowser_strain_graph("osu_draw_songbrowser_strain_graph", fa
 ConVar osu_songbrowser_scorebrowser_enabled("osu_songbrowser_scorebrowser_enabled", true, FCVAR_DEFAULT);
 ConVar osu_songbrowser_background_fade_in_duration("osu_songbrowser_background_fade_in_duration", 0.1f, FCVAR_DEFAULT);
 
-ConVar osu_songbrowser_search_delay("osu_songbrowser_search_delay", 0.5f, FCVAR_DEFAULT,
+ConVar osu_songbrowser_search_delay("osu_songbrowser_search_delay", 0.2f, FCVAR_DEFAULT,
                                     "delay until search update when entering text");
 void _osu_songbrowser_search_hardcoded_filter(UString oldValue, UString newValue);
 ConVar osu_songbrowser_search_hardcoded_filter("osu_songbrowser_search_hardcoded_filter", "", FCVAR_DEFAULT,

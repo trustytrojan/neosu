@@ -3607,9 +3607,12 @@ void OptionsMenu::save() {
     std::vector<ConVar *> manualConVars;
     std::vector<ConVar *> removeConCommands;
 
+    manualConVars.push_back(convar->getConVarByName("osu_relax_offset"));
     manualConVars.push_back(convar->getConVarByName("osu_songbrowser_sortingtype"));
     manualConVars.push_back(convar->getConVarByName("osu_songbrowser_scores_sortingtype"));
+    manualConVars.push_back(convar->getConVarByName("osu_songbrowser_search_delay"));
     manualConVars.push_back(convar->getConVarByName("mp_autologin"));
+    manualConVars.push_back(convar->getConVarByName("restart_sound_engine_before_playing"));
     manualConVars.push_back(m_osu_notelock_type_ref);
     manualConVars.push_back(m_osu_drain_type_ref);
 

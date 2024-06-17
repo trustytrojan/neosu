@@ -83,7 +83,7 @@ ConVar osu_mod_approach_different_style(
     "Decelerate1, 8 = Decelerate2, 9 = Decelerate3");
 
 ConVar osu_relax_offset(
-    "osu_relax_offset", 0, FCVAR_DEFAULT,
+    "osu_relax_offset", -12, FCVAR_DEFAULT,
     "osu!relax always hits -12 ms too early, so set this to -12 (note the negative) if you want it to be the same");
 
 ConVar *HitObject::m_osu_approach_scale_multiplier_ref = &osu_approach_scale_multiplier;

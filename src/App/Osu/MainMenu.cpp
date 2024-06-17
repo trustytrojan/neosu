@@ -212,10 +212,23 @@ MainMenu::MainMenu() : OsuScreen() {
             if(versionFile.canRead()) {
                 float version = std::stof(versionFile.readLine());
                 if(version < Osu::version->getFloat() - 0.0001f) m_bDrawVersionNotificationArrow = true;
-                if(version < 34.05) {
+                if(version < 35.06) {
                     // SoundEngine choking issues have been fixed, option has been removed from settings menu
                     // We leave the cvar available as it could still be useful for some players
                     convar->getConVarByName("restart_sound_engine_before_playing")->setValue(false);
+
+                    // 0.5 is shit default value
+                    auto search_delay = convar->getConVarByName("osu_songbrowser_search_delay");
+                    if(search_delay->getFloat() == 0.5f) {
+                        search_delay->setValue(0.2f);
+                    }
+
+                    // Match osu!stable value
+                    auto relax_offset = convar->getConVarByName("osu_relax_offset");
+                    if(relax_offset->getFloat() == 0.f) {
+                        relax_offset->setValue(-12.f);
+                    }
+
                     osu->getOptionsMenu()->save();
                 }
             } else {
