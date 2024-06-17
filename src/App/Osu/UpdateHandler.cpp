@@ -1,10 +1,3 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		checks if an update is available from github
-//
-// $NoKeywords: $osuupdchk
-//===============================================================================//
-
 #ifndef _WIN32
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -99,7 +92,7 @@ void UpdateHandler::_requestUpdate() {
     debugLog("UpdateHandler::requestUpdate()\n");
     m_status = STATUS::STATUS_CHECKING_FOR_UPDATE;
 
-    UString latestVersion = engine->getNetworkHandler()->httpGet(NEOSU_UPDATE_URL "/latest-version.txt");
+    UString latestVersion = engine->getNetworkHandler()->httpGet(NEOSU_URL "/update/" OS_NAME "/latest-version.txt");
     float fLatestVersion = strtof(latestVersion.toUtf8(), NULL);
     if(fLatestVersion == 0.f) {
         m_status = STATUS::STATUS_UP_TO_DATE;
@@ -115,14 +108,8 @@ void UpdateHandler::_requestUpdate() {
         return;
     }
 
-#ifdef _WIN32
-    const char *os = "windows";
-#else
-    const char *os = "linux";
-#endif
-
     debugLog("Downloading latest update... (current v%.2f, latest v%.2f)\n", current_version, fLatestVersion);
-    update_url = UString::format(NEOSU_UPDATE_URL "/update/%s-v%.2f.zip", os, fLatestVersion);
+    update_url = UString::format(NEOSU_URL "/update/" OS_NAME "/v%.2f.zip", os, fLatestVersion);
 }
 
 bool UpdateHandler::_downloadUpdate() {
@@ -276,16 +263,4 @@ void UpdateHandler::_installUpdate(std::string zipFilePath) {
 
     m_status = STATUS::STATUS_SUCCESS_INSTALLATION;
     env->deleteFile(zipFilePath);
-}
-
-Environment::OS UpdateHandler::stringToOS(UString osString) {
-    Environment::OS os = Environment::OS::NONE;
-    if(osString.find("windows") != -1)
-        os = Environment::OS::WINDOWS;
-    else if(osString.find("linux") != -1)
-        os = Environment::OS::LINUX;
-    else if(osString.find("macos") != -1)
-        os = Environment::OS::MACOS;
-
-    return os;
 }

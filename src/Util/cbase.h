@@ -48,6 +48,24 @@
 // DEFS
 
 #ifdef _WIN32
+
+#ifdef _WIN64
+#define OS_NAME "win64"
+#else
+#define OS_NAME "win32"
+#endif
+
+#else
+
+#ifdef __x86_64
+#define OS_NAME "linux-x64"
+#else
+#define OS_NAME "linux-i686"
+#endif
+
+#endif
+
+#ifdef _WIN32
 #define reallocarray(ptr, a, b) realloc(ptr, a *b)
 #define strcasestr(a, b) StrStrIA(a, b)
 #define strcasecmp(a, b) _stricmp(a, b)

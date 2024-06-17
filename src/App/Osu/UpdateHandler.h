@@ -39,9 +39,6 @@ class UpdateHandler {
     std::thread* m_updateThread = NULL;
     bool _m_bKYS;
 
-    // releases
-    Environment::OS stringToOS(UString osString);
-
     // status
     STATUS m_status;
     int m_iNumRetries;

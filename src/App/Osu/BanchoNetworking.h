@@ -11,7 +11,7 @@
 #define NEOSU_STREAM "release"
 #endif
 
-#define NEOSU_UPDATE_URL "https://neosu.net"
+#define NEOSU_URL "https://neosu.net"
 
 // NOTE: Full version can be something like "b20200201.2cuttingedge"
 #define OSU_VERSION "b20240425.2"
