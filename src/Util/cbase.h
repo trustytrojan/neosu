@@ -135,6 +135,12 @@ typedef unsigned char COLORPART;
 
 // UTIL
 
+// "bad" because a can be lower than b
+template <class T>
+inline T bad_clamp(T x, T a, T b) {
+    return x < a ? a : (x > b ? b : x);
+}
+
 template <class T>
 inline T lerp(T x1, T x2, T percent) {
     return x1 * (1 - percent) + x2 * percent;

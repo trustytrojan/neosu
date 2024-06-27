@@ -519,7 +519,7 @@ void CBaseUIScrollView::updateScrollbars() {
         const float verticalPercent = clamp<float>(rawVerticalPercent, 0.0f, 1.0f);
 
         const float verticalHeightPercent = (m_vSize.y - (verticalBlockWidth * 2)) / m_vScrollSize.y;
-        const float verticalBlockHeight = clamp<float>(
+        const float verticalBlockHeight = bad_clamp<float>(
             max(verticalHeightPercent * m_vSize.y, verticalBlockWidth) * overscroll, verticalBlockWidth, m_vSize.y);
 
         m_verticalScrollbar =
