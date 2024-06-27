@@ -492,6 +492,10 @@ bool SoundEngine::init_bass_mixer(OUTPUT_DEVICE device) {
         return false;
     }
 
+    // Disable buffering to lower latency on regular BASS output
+    // This has no effect on ASIO/WASAPI since for those the mixer is a decode stream
+    BASS_ChannelSetAttribute(g_bassOutputMixer, BASS_ATTRIB_BUFFER, 0.f);
+
     // Switch to "No sound" device for all future sound processing
     // Only g_bassOutputMixer will be output to the actual device!
     BASS_SetDevice(0);
