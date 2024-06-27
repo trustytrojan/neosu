@@ -11,6 +11,7 @@
 #include "RoomScreen.h"
 #include "SongBrowser/SongBrowser.h"
 #include "TooltipOverlay.h"
+#include "UIUserContextMenu.h"
 
 ChatLink::ChatLink(float xPos, float yPos, float xSize, float ySize, UString link, UString label)
     : CBaseUILabel(xPos, yPos, xSize, ySize, link, label) {
@@ -34,24 +35,22 @@ void ChatLink::mouse_update(bool *propagate_clicks) {
     }
 }
 
-void ChatLink::onMouseUpInside() {
-    if(m_link.startsWith("osump://")) {
-        if(osu->m_room->isVisible()) {
-            osu->getNotificationOverlay()->addNotification("You are already in a multiplayer room.");
-            return;
-        }
-
-        // If the password has a space in it, parsing will break, but there's no way around it...
-        // osu!stable also considers anything after a space to be part of the lobby title :(
-        std::regex password_regex("osump://(\\d+)/(\\S*)");
-        std::string invite_str = m_link.toUtf8();
-        std::smatch match;
-        std::regex_search(invite_str, match, password_regex);
-        u32 invite_id = strtoul(match.str(1).c_str(), NULL, 10);
-        UString password = match.str(2).c_str();
-        osu->m_lobby->joinRoom(invite_id, password);
-        return;
+void ChatLink::open_beatmap_link(i32 map_id, i32 set_id) {
+    if(osu->getSongBrowser()->isVisible()) {
+        osu->getSongBrowser()->map_autodl = map_id;
+        osu->getSongBrowser()->set_autodl = set_id;
+    } else if(osu->getMainMenu()->isVisible()) {
+        osu->toggleSongBrowser();
+        osu->getSongBrowser()->map_autodl = map_id;
+        osu->getSongBrowser()->set_autodl = set_id;
+    } else {
+        env->openURLInDefaultBrowser(m_link);
     }
+}
+
+void ChatLink::onMouseUpInside() {
+    std::string link_str = m_link.toUtf8();
+    std::smatch match;
 
     // This lazy escaping is only good for endpoint URLs, not anything more serious
     UString escaped_endpoint;
@@ -63,33 +62,57 @@ void ChatLink::onMouseUpInside() {
         }
     }
 
-    // https:\/\/(akatsuki.gg|osu.ppy.sh)\/b(eatmapsets\/\d+#(osu)?)?\/(\d+)
-    UString map_pattern = "https://(osu\\.";
+    // Detect multiplayer invite links
+    if(m_link.startsWith("osump://")) {
+        if(osu->m_room->isVisible()) {
+            osu->getNotificationOverlay()->addNotification("You are already in a multiplayer room.");
+            return;
+        }
+
+        // If the password has a space in it, parsing will break, but there's no way around it...
+        // osu!stable also considers anything after a space to be part of the lobby title :(
+        std::regex_search(link_str, match, std::regex("osump://(\\d+)/(\\S*)"));
+        u32 invite_id = strtoul(match.str(1).c_str(), NULL, 10);
+        UString password = match.str(2).c_str();
+        osu->m_lobby->joinRoom(invite_id, password);
+        return;
+    }
+
+    // Detect user links
+    // https:\/\/(osu\.)?akatsuki\.gg\/u(sers)?\/(\d+)
+    UString user_pattern = "https://(osu\\.)?";
+    user_pattern.append(escaped_endpoint);
+    user_pattern.append("/u(sers)?/(\\d+)");
+    if(std::regex_search(link_str, match, std::regex(user_pattern.toUtf8()))) {
+        i32 user_id = std::stoi(match.str(3));
+        osu->m_user_actions->open(user_id);
+        return;
+    }
+
+    // Detect beatmap links
+    // https:\/\/((osu\.)?akatsuki\.gg|osu\.ppy\.sh)\/b(eatmaps)?\/(\d+)
+    UString map_pattern = "https://((osu\\.)?";
     map_pattern.append(escaped_endpoint);
-    map_pattern.append("|osu.ppy.sh)/b(eatmapsets/(\\d+)#(osu)?)?/(\\d+)");
-    std::wregex map_regex(map_pattern.wc_str());
+    map_pattern.append("|osu\\.ppy\\.sh)/b(eatmaps)?/(\\d+)");
+    if(std::regex_search(link_str, match, std::regex(map_pattern.toUtf8()))) {
+        i32 map_id = std::stoi(match.str(4));
+        open_beatmap_link(map_id, 0);
+        return;
+    }
 
-    std::wstring link_str = m_link.wc_str();
-    std::wsmatch match;
-    if(std::regex_search(link_str, match, map_regex)) {
-        i32 map_id = std::stoi(std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(match.str(5)));
-        i32 set_id = 0;
-        if(match[3].matched) {
-            // Set ID doesn't match if the URL only contains the map ID
-            set_id = std::stoi(std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(match.str(3)));
+    // Detect beatmapset links
+    // https:\/\/((osu\.)?akatsuki\.gg|osu\.ppy\.sh)\/beatmapsets\/(\d+)(#osu\/(\d+))?
+    UString set_pattern = "https://((osu\\.)?";
+    set_pattern.append(escaped_endpoint);
+    set_pattern.append("|osu\\.ppy\\.sh)/beatmapsets/(\\d+)(#osu/(\\d+))?");
+    if(std::regex_search(link_str, match, std::regex(set_pattern.toUtf8()))) {
+        i32 set_id = std::stoi(match.str(3));
+        i32 map_id = 0;
+        if(match[5].matched) {
+            map_id = std::stoi(match.str(5));
         }
 
-        if(osu->getSongBrowser()->isVisible()) {
-            osu->getSongBrowser()->map_autodl = map_id;
-            osu->getSongBrowser()->set_autodl = set_id;
-        } else if(osu->getMainMenu()->isVisible()) {
-            osu->toggleSongBrowser();
-            osu->getSongBrowser()->map_autodl = map_id;
-            osu->getSongBrowser()->set_autodl = set_id;
-        } else {
-            env->openURLInDefaultBrowser(m_link);
-        }
-
+        open_beatmap_link(map_id, set_id);
         return;
     }
 

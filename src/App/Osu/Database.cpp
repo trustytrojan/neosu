@@ -801,6 +801,19 @@ DatabaseBeatmap *Database::getBeatmapDifficulty(i32 map_id) {
     return NULL;
 }
 
+DatabaseBeatmap *Database::getBeatmapSet(i32 set_id) {
+    if(!isFinished()) return NULL;
+
+    for(size_t i = 0; i < m_databaseBeatmaps.size(); i++) {
+        DatabaseBeatmap *beatmap = m_databaseBeatmaps[i];
+        if(beatmap->getSetID() == set_id) {
+            return beatmap;
+        }
+    }
+
+    return NULL;
+}
+
 std::string Database::parseLegacyCfgBeatmapDirectoryParameter() {
     // get BeatmapDirectory parameter from osu!.<OS_USERNAME>.cfg
     debugLog("Database::parseLegacyCfgBeatmapDirectoryParameter() : username = %s\n", env->getUsername().toUtf8());

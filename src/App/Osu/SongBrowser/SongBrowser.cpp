@@ -946,6 +946,52 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
             map_autodl = 0;
             set_autodl = 0;
         }
+    } else if(set_autodl) {
+        auto beatmapset = getDatabase()->getBeatmapSet(set_autodl);
+        if(beatmapset == NULL) {
+            float progress = -1.f;
+            download_beatmapset(set_autodl, &progress);
+            if(progress == -1.f) {
+                auto error_str = UString::format("Failed to download Beatmapset #%d :(", set_autodl);
+                osu->getNotificationOverlay()->addNotification(error_str);
+                map_autodl = 0;
+                set_autodl = 0;
+            } else if(progress < 1.f) {
+                // TODO @kiwec: this notification format is jank & laggy
+                auto text = UString::format("Downloading... %.2f%%", progress * 100.f);
+                osu->getNotificationOverlay()->addNotification(text);
+            } else {
+                // Pasted from Downloader::download_beatmap
+                auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_autodl);
+                // XXX: Make a permanent database for auto-downloaded songs, so we can load them like osu!.db's
+                osu->m_songBrowser2->getDatabase()->addBeatmap(mapset_path.toUtf8());
+                osu->m_songBrowser2->updateSongButtonSorting();
+                debugLog("Finished loading beatmapset %d.\n", set_autodl);
+
+                beatmapset = getDatabase()->getBeatmapSet(set_autodl);
+            }
+        }
+
+        if(beatmapset != NULL) {
+            // Just picking the hardest diff for now
+            DatabaseBeatmap *best_diff = NULL;
+            const std::vector<DatabaseBeatmap *> &diffs = beatmapset->getDifficulties();
+            for(size_t d = 0; d < diffs.size(); d++) {
+                DatabaseBeatmap *diff = diffs[d];
+                if(!best_diff || diff->getStarsNomod() > best_diff->getStarsNomod()) {
+                    best_diff = diff;
+                }
+            }
+
+            if(best_diff == NULL) {
+                osu->getNotificationOverlay()->addNotification("Beatmapset has no difficulties :/");
+            } else {
+                osu->m_songBrowser2->onDifficultySelected(best_diff, false);
+            }
+
+            map_autodl = 0;
+            set_autodl = 0;
+        }
     }
 
     // update and focus handling
