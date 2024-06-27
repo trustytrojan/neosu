@@ -32,6 +32,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.changes.push_back("- Added setting to prevent servers from replacing the main menu logo");
     latest.changes.push_back("- Chat: added support for user links");
     latest.changes.push_back("- Chat: improved map link support");
+    latest.changes.push_back("- Fixed freeze when switching between songs in song browser");
     latest.changes.push_back("- Lowered audio latency for default (not ASIO/WASAPI) output");
     changelogs.push_back(latest);
 

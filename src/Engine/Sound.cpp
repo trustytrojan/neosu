@@ -198,6 +198,7 @@ void Sound::destroy() {
 void Sound::setPosition(double percent) { return setPositionMS(clamp<f64>(percent, 0.0, 1.0) * m_length); }
 
 void Sound::setPositionMS(unsigned long ms) {
+    if(ms == 0) return setPositionMS_fast(ms);
     if(!m_bReady || ms > getLengthMS()) return;
     if(!m_bStream) {
         engine->showMessageError("Programmer Error", "Called setPositionMS on a sample!");
@@ -264,6 +265,39 @@ void Sound::setPositionMS(unsigned long ms) {
 
         if(was_playing) {
             osu->music_unpause_scheduled = true;
+        }
+    }
+}
+
+// Inaccurate but fast seeking, to use at song select
+void Sound::setPositionMS_fast(u32 ms) {
+    if(!m_bReady || ms > getLengthMS()) return;
+    if(!m_bStream) {
+        engine->showMessageError("Programmer Error", "Called setPositionMS_fast on a sample!");
+        return;
+    }
+
+    i64 target_pos = BASS_ChannelSeconds2Bytes(m_stream, ms / 1000.0);
+    if(target_pos < 0) {
+        debugLog("setPositionMS_fast: error %d while calling BASS_ChannelSeconds2Bytes\n", BASS_ErrorGetCode());
+        return;
+    }
+
+    if(isPlaying()) {
+        if(!BASS_Mixer_ChannelSetPosition(m_stream, target_pos, BASS_POS_BYTE | BASS_POS_MIXER_RESET)) {
+            if(Osu::debug->getBool()) {
+                debugLog("Sound::setPositionMS_fast( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
+                         BASS_ErrorGetCode(), m_sFilePath.c_str());
+            }
+        }
+
+        m_fLastPlayTime = m_fChannelCreationTime - ((f64)ms / 1000.0);
+    } else {
+        if(!BASS_ChannelSetPosition(m_stream, target_pos, BASS_POS_BYTE | BASS_POS_FLUSH)) {
+            if(Osu::debug->getBool()) {
+                debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
+                         BASS_ErrorGetCode(), m_sFilePath.c_str());
+            }
         }
     }
 }

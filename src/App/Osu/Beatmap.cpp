@@ -1790,13 +1790,13 @@ void Beatmap::handlePreviewPlay() {
             should_start_song_at_preview_point = false;
 
             if(start_at_song_beginning) {
-                m_music->setPositionMS(0);
+                m_music->setPositionMS_fast(0);
                 m_bWasSeekFrame = true;
             } else if(m_iContinueMusicPos != 0) {
-                m_music->setPositionMS(m_iContinueMusicPos);
+                m_music->setPositionMS_fast(m_iContinueMusicPos);
                 m_bWasSeekFrame = true;
             } else {
-                m_music->setPositionMS(m_selectedDifficulty2->getPreviewTime() < 0
+                m_music->setPositionMS_fast(m_selectedDifficulty2->getPreviewTime() < 0
                                            ? (unsigned long)(m_music->getLengthMS() * 0.40f)
                                            : m_selectedDifficulty2->getPreviewTime());
                 m_bWasSeekFrame = true;

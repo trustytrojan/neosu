@@ -30,6 +30,8 @@ class Sound : public Resource {
 
     void setPosition(double percent);
     void setPositionMS(unsigned long ms);
+    void setPositionMS_fast(u32 ms);
+
     void setVolume(float volume);
     void setSpeed(float speed);
     void setFrequency(float frequency);
