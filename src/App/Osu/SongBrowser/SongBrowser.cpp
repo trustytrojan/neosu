@@ -943,6 +943,7 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
             osu->getNotificationOverlay()->addNotification(text);
         } else if(beatmap != NULL) {
             osu->m_songBrowser2->onDifficultySelected(beatmap, false);
+            osu->m_songBrowser2->selectSelectedBeatmapSongButton();
             map_autodl = 0;
             set_autodl = 0;
         }
@@ -987,6 +988,7 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
                 osu->getNotificationOverlay()->addNotification("Beatmapset has no difficulties :/");
             } else {
                 osu->m_songBrowser2->onDifficultySelected(best_diff, false);
+                osu->m_songBrowser2->selectSelectedBeatmapSongButton();
             }
 
             map_autodl = 0;
