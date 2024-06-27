@@ -147,6 +147,7 @@ ConVar normalize_loudness("normalize_loudness", false, FCVAR_DEFAULT, "normalize
 ConVar restart_sound_engine_before_playing("restart_sound_engine_before_playing", false, FCVAR_DEFAULT,
                                            "jank fix for users who experience sound issues after playing for a while");
 ConVar instafade("instafade", false, FCVAR_DEFAULT, "don't draw hitcircle fadeout animations");
+ConVar sort_skins_by_name("sort_skins_by_name", true, FCVAR_DEFAULT, "set to false to use old behavior");
 
 ConVar use_https("use_https", true, FCVAR_DEFAULT);
 ConVar mp_server("mp_server", "akatsuki.gg", FCVAR_DEFAULT);

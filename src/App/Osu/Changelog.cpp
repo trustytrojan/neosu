@@ -29,6 +29,7 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
+    latest.changes.push_back("- Added sort_skins_by_name convar");
     latest.changes.push_back("- Added setting to prevent servers from replacing the main menu logo");
     latest.changes.push_back("- Chat: added missing chat commands");
     latest.changes.push_back("- Chat: added missing keyboard shortcuts");

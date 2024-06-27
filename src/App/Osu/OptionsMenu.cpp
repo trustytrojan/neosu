@@ -2414,29 +2414,31 @@ void OptionsMenu::onSkinSelect() {
     skinFolder.append(convar->getConVarByName("osu_folder_sub_skins")->getString());
     std::vector<std::string> skinFolders = env->getFoldersInFolder(skinFolder.toUtf8());
 
-    // Sort skins only by alphanum characters, ignore the others
-    std::sort(skinFolders.begin(), skinFolders.end(), [](std::string a, std::string b) {
-        int i = 0;
-        int j = 0;
-        while(i < a.length() && j < b.length()) {
-            if(!isalnum(a[i])) {
+    if(convar->getConVarByName("sort_skins_by_name")->getBool()) {
+        // Sort skins only by alphanum characters, ignore the others
+        std::sort(skinFolders.begin(), skinFolders.end(), [](std::string a, std::string b) {
+            int i = 0;
+            int j = 0;
+            while(i < a.length() && j < b.length()) {
+                if(!isalnum(a[i])) {
+                    i++;
+                    continue;
+                }
+                if(!isalnum(b[j])) {
+                    j++;
+                    continue;
+                }
+                char la = tolower(a[i]);
+                char lb = tolower(b[j]);
+                if(la != lb) return la < lb;
+
                 i++;
-                continue;
-            }
-            if(!isalnum(b[j])) {
                 j++;
-                continue;
             }
-            char la = tolower(a[i]);
-            char lb = tolower(b[j]);
-            if(la != lb) return la < lb;
 
-            i++;
-            j++;
-        }
-
-        return false;
-    });
+            return false;
+        });
+    }
 
     if(skinFolders.size() > 0) {
         m_contextMenu->setPos(m_skinSelectLocalButton->getPos());
