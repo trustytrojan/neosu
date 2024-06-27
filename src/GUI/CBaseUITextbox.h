@@ -82,6 +82,11 @@ class CBaseUITextbox : public CBaseUIElement {
 
     bool is_password = false;
 
+    UString m_sText;
+    int m_iCaretPosition;
+    void tickCaret();
+    void updateTextPos();
+
    protected:
     virtual void drawText(Graphics *g);
 
@@ -92,18 +97,14 @@ class CBaseUITextbox : public CBaseUIElement {
     virtual void onMouseUpOutside();
     virtual void onResized();
 
-    void tickCaret();
     void handleCaretKeyboardMove();
     void handleCaretKeyboardDelete();
     void updateCaretX();
 
     void handleDeleteSelectedText();
     void insertTextFromClipboard();
-    void updateTextPos();
     void deselectText();
     UString getSelectedText();
-
-    UString m_sText;
 
     McFont *m_font;
 
@@ -124,7 +125,6 @@ class CBaseUITextbox : public CBaseUIElement {
     int m_iTextAddX;
     int m_iTextAddY;
     float m_fTextScrollAddX;
-    int m_iCaretPosition;
     int m_iCaretX;
     int m_iCaretWidth;
     int m_iTextJustification;

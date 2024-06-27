@@ -13,6 +13,29 @@ UserInfo* find_user(UString username) {
     return NULL;
 }
 
+UserInfo* find_user_starting_with(UString prefix, UString last_match) {
+    bool matched = last_match.length() == 0;
+    for(auto pair : online_users) {
+        auto user = pair.second;
+        if(!matched) {
+            if(user->name == last_match) {
+                matched = true;
+            }
+            continue;
+        }
+
+        if(user->name.startsWithIgnoreCase(prefix)) {
+            return user;
+        }
+    }
+
+    if(last_match.length() == 0) {
+        return NULL;
+    } else {
+        return find_user_starting_with(prefix, "");
+    }
+}
+
 UserInfo* get_user_info(u32 user_id, bool fetch) {
     auto it = online_users.find(user_id);
     if(it != online_users.end()) {

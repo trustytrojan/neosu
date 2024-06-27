@@ -668,6 +668,14 @@ bool UString::endsWith(const UString &ustr) const {
     return true;
 }
 
+bool UString::startsWithIgnoreCase(const UString &ustr) const {
+    if(mLength < ustr.mLength) return false;
+    for(int i = 0; i < ustr.mLength; i++) {
+        if(std::towlower(mUnicode[i]) != std::towlower(ustr.mUnicode[i])) return false;
+    }
+    return true;
+}
+
 bool UString::equalsIgnoreCase(const UString &ustr) const {
     if(mLength != ustr.mLength) return false;
 

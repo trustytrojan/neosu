@@ -36,4 +36,5 @@ extern std::unordered_map<u32, UserInfo*> online_users;
 extern std::vector<u32> friends;
 
 UserInfo* find_user(UString username);
+UserInfo* find_user_starting_with(UString prefix, UString last_match);
 UserInfo* get_user_info(u32 user_id, bool fetch = false);

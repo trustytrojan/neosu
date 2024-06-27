@@ -49,12 +49,15 @@ class Chat : public OsuScreen {
     void switchToChannel(ChatChannel *chan);
     void addChannel(UString channel_name, bool switch_to = false);
     void addMessage(UString channel_name, ChatMessage msg, bool mark_unread = true);
+    void addSystemMessage(UString msg);
     void removeChannel(UString channel_name);
     void updateLayout(Vector2 newResolution);
     void updateButtonLayout(Vector2 screen);
 
     void join(UString channel_name);
     void leave(UString channel_name);
+    void handle_command(UString msg);
+    void send_message(UString msg);
     void onDisconnect();
 
     virtual CBaseUIContainer *setVisible(bool visible);
@@ -79,4 +82,8 @@ class Chat : public OsuScreen {
 
     const float input_box_height = 30.f;
     const float button_height = 26.f;
+
+    UString away_msg;
+    UString tab_completion_prefix;
+    UString tab_completion_match;
 };

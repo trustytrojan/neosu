@@ -5,10 +5,12 @@
 #include "AnimationHandler.h"
 #include "Bancho.h"
 #include "BanchoNetworking.h"
+#include "BanchoUsers.h"
 #include "Beatmap.h"
 #include "CBaseUIButton.h"
 #include "CBaseUIContainer.h"
 #include "CBaseUILabel.h"
+#include "CBaseUITextbox.h"
 #include "ChatLink.h"
 #include "Engine.h"
 #include "Font.h"
@@ -23,6 +25,7 @@
 #include "ResourceManager.h"
 #include "RoomScreen.h"
 #include "Skin.h"
+#include "SongBrowser/ScoreButton.h"
 #include "SongBrowser/SongBrowser.h"
 #include "SoundEngine.h"
 #include "SpectatorScreen.h"
@@ -340,8 +343,214 @@ void Chat::mouse_update(bool *propagate_clicks) {
     m_input_box->focus(false);
 }
 
+void Chat::handle_command(UString msg) {
+    if(msg == UString("/clear")) {
+        m_selected_channel->messages.clear();
+        updateLayout(osu->getScreenSize());
+        return;
+    }
+
+    if(msg == UString("/close") || msg == UString("/p") || msg == UString("/part")) {
+        leave(m_selected_channel->name);
+        return;
+    }
+
+    if(msg == UString("/help") || msg == UString("/keys")) {
+        env->openURLInDefaultBrowser("https://osu.ppy.sh/wiki/en/Client/Interface/Chat_console");
+        return;
+    }
+
+    if(msg == UString("/np")) {
+        auto diff = osu->getSelectedBeatmap()->getSelectedDifficulty2();
+        if(diff == NULL) {
+            addSystemMessage("You are not listening to anything.");
+            return;
+        }
+
+        UString song_name = UString::format("%s - %s [%s]", diff->getArtist().c_str(), diff->getTitle().c_str(), diff->getDifficultyName().c_str());
+        UString song_link = UString::format("[https://osu.%s/beatmaps/%d %s]", bancho.endpoint.toUtf8(), diff->getID(), song_name.toUtf8());
+
+        UString np_msg;
+        if(osu->isInPlayMode()) {
+            np_msg = UString::format("\001ACTION is playing %s", song_link.toUtf8());
+
+            auto mod_string = ScoreButton::getModsStringForDisplay(osu->getScore()->getModsLegacy());
+            if(mod_string.length() > 0) {
+                np_msg.append("(+");
+                np_msg.append(mod_string);
+                np_msg.append(")");
+            }
+
+            np_msg.append("\001");
+        } else {
+            np_msg = UString::format("\001ACTION is listening to %s\001", song_link.toUtf8());
+        }
+
+        send_message(np_msg);
+        return;
+    }
+
+    if(msg.startsWith("/addfriend ")) {
+        auto friend_name = msg.substr(11);
+        auto user = find_user(friend_name);
+        if(!user) {
+            addSystemMessage(UString::format("User '%s' not found. Are they online?", friend_name.toUtf8()));
+            return;
+        }
+
+        if(user->is_friend()) {
+            addSystemMessage(UString::format("You are already friends with %s!", friend_name.toUtf8()));
+        } else {
+            Packet packet;
+            packet.id = FRIEND_ADD;
+            write<u32>(&packet, user->user_id);
+            send_packet(packet);
+
+            friends.push_back(user->user_id);
+
+            addSystemMessage(UString::format("You are now friends with %s.", friend_name.toUtf8()));
+        }
+
+        return;
+    }
+
+    if(msg.startsWith("/bb ")) {
+        addChannel("BanchoBot", true);
+        send_message(msg.substr(4));
+        return;
+    }
+
+    if(msg == UString("/away")) {
+        away_msg = "";
+        addSystemMessage("Away message removed.");
+        return;
+    }
+    if(msg.startsWith("/away ")) {
+        away_msg = msg.substr(6);
+        addSystemMessage(UString::format("Away message set to '%s'.", away_msg.toUtf8()));
+        return;
+    }
+
+    if(msg.startsWith("/delfriend ")) {
+        auto friend_name = msg.substr(11);
+        auto user = find_user(friend_name);
+        if(!user) {
+            addSystemMessage(UString::format("User '%s' not found. Are they online?", friend_name.toUtf8()));
+            return;
+        }
+
+        if(user->is_friend()) {
+            Packet packet;
+            packet.id = FRIEND_REMOVE;
+            write<u32>(&packet, user->user_id);
+            send_packet(packet);
+
+            auto it = std::find(friends.begin(), friends.end(), user->user_id);
+            if(it != friends.end()) {
+                friends.erase(it);
+            }
+
+            addSystemMessage(UString::format("You are no longer friends with %s.", friend_name.toUtf8()));
+        } else {
+            addSystemMessage(UString::format("You aren't friends with %s!", friend_name.toUtf8()));
+        }
+
+        return;
+    }
+
+    if(msg.startsWith("/me ")) {
+        auto new_text = msg.substr(3);
+        new_text.insert(0, "\001ACTION");
+        new_text.append("\001");
+        send_message(new_text);
+        return;
+    }
+
+    if(msg.startsWith("/chat ") || msg.startsWith("/msg ") || msg.startsWith("/query ")) {
+        auto username = msg.substr(msg.find(L" "));
+        addChannel(username, true);
+        return;
+    }
+
+    if(msg.startsWith("/invite ")) {
+        if(!bancho.is_in_a_multi_room()) {
+            addSystemMessage("You are not in a multiplayer room!");
+            return;
+        }
+
+        auto username = msg.substr(8);
+        auto invite_msg = UString::format("\001ACTION has invited you to join [osump://%d/%s %s]\001", bancho.room.id, bancho.room.password.toUtf8(), bancho.room.name.toUtf8());
+
+        Packet packet;
+        packet.id = SEND_PRIVATE_MESSAGE;
+        write_string(&packet, (char *)bancho.username.toUtf8());
+        write_string(&packet, (char *)invite_msg.toUtf8());
+        write_string(&packet, (char *)username.toUtf8());
+        write<u32>(&packet, bancho.user_id);
+        send_packet(packet);
+
+        addSystemMessage(UString::format("%s has been invited to the game.", username.toUtf8()));
+        return;
+    }
+
+    if(msg.startsWith("/j ") || msg.startsWith("/join ")) {
+        auto channel = msg.substr(msg.find(L" "));
+        join(channel);
+        return;
+    }
+
+    if(msg.startsWith("/p ") || msg.startsWith("/part ")) {
+        auto channel = msg.substr(msg.find(L" "));
+        leave(channel);
+        return;
+    }
+
+    addSystemMessage("This command is not supported.");
+}
+
 void Chat::onKeyDown(KeyboardEvent &key) {
     if(!m_bVisible) return;
+
+    if(engine->getKeyboard()->isAltDown()) {
+        i32 tab_select = -1;
+        if(key.getKeyCode() == KEY_1) tab_select = 0;
+        if(key.getKeyCode() == KEY_2) tab_select = 1;
+        if(key.getKeyCode() == KEY_3) tab_select = 2;
+        if(key.getKeyCode() == KEY_4) tab_select = 3;
+        if(key.getKeyCode() == KEY_5) tab_select = 4;
+        if(key.getKeyCode() == KEY_6) tab_select = 5;
+        if(key.getKeyCode() == KEY_7) tab_select = 6;
+        if(key.getKeyCode() == KEY_8) tab_select = 7;
+        if(key.getKeyCode() == KEY_9) tab_select = 8;
+        if(key.getKeyCode() == KEY_0) tab_select = 9;
+
+        if(tab_select != -1) {
+            if(tab_select >= m_channels.size()) {
+                key.consume();
+                return;
+            }
+
+            key.consume();
+            switchToChannel(m_channels[tab_select]);
+            return;
+        }
+    }
+
+    if(key.getKeyCode() == KEY_PAGEUP) {
+        if(m_selected_channel != NULL) {
+            key.consume();
+            m_selected_channel->ui->scrollY(getSize().y - input_box_height);
+            return;
+        }
+    }
+
+    if(key.getKeyCode() == KEY_PAGEDOWN) {
+        if(m_selected_channel != NULL) {
+            key.consume();
+            m_selected_channel->ui->scrollY(-(getSize().y - input_box_height));
+            return;
+        }
+    }
 
     // Escape: close chat
     if(key.getKeyCode() == KEY_ESCAPE) {
@@ -357,38 +566,17 @@ void Chat::onKeyDown(KeyboardEvent &key) {
     if(key.getKeyCode() == KEY_ENTER) {
         key.consume();
         if(m_selected_channel != NULL && m_input_box->getText().length() > 0) {
-            if(m_input_box->getText() == UString("/close")) {
-                leave(m_selected_channel->name);
-                return;
+            if(m_input_box->getText()[0] == L'/') {
+                handle_command(m_input_box->getText());
+            } else {
+                send_message(m_input_box->getText());
             }
-
-            if(m_input_box->getText().startsWith("/me ")) {
-                auto new_text = m_input_box->getText().substr(3);
-                new_text.insert(0, "\001ACTION");
-                new_text.append("\001");
-                m_input_box->setText(new_text);
-            }
-
-            Packet packet;
-            packet.id = m_selected_channel->name[0] == '#' ? SEND_PUBLIC_MESSAGE : SEND_PRIVATE_MESSAGE;
-            write_string(&packet, (char *)bancho.username.toUtf8());
-            write_string(&packet, (char *)m_input_box->getText().toUtf8());
-            write_string(&packet, (char *)m_selected_channel->name.toUtf8());
-            write<u32>(&packet, bancho.user_id);
-            send_packet(packet);
-
-            // Server doesn't echo the message back
-            addMessage(m_selected_channel->name, ChatMessage{
-                                                     .tms = time(NULL),
-                                                     .author_id = bancho.user_id,
-                                                     .author_name = bancho.username,
-                                                     .text = m_input_box->getText(),
-                                                 });
 
             engine->getSound()->play(osu->getSkin()->m_messageSent);
-
             m_input_box->clear();
         }
+        tab_completion_prefix = "";
+        tab_completion_match = "";
         return;
     }
 
@@ -429,8 +617,48 @@ void Chat::onKeyDown(KeyboardEvent &key) {
         return;
     }
 
+    // TAB: Complete nickname
+    // KEY_TAB doesn't work on Linux
+    if(key.getKeyCode() == 65056 || key.getKeyCode() == KEY_TAB) {
+        key.consume();
+
+        auto text = m_input_box->getText();
+        i32 username_start_idx = text.findLast(" ", 0, m_input_box->m_iCaretPosition) + 1;
+        i32 username_end_idx = m_input_box->m_iCaretPosition;
+        i32 username_len = username_end_idx - username_start_idx;
+
+        if(tab_completion_prefix.length() == 0) {
+            tab_completion_prefix = text.substr(username_start_idx, username_len);
+        } else {
+            username_start_idx = m_input_box->m_iCaretPosition - tab_completion_match.length();
+            username_len = username_end_idx - username_start_idx;
+        }
+
+        auto user = find_user_starting_with(tab_completion_prefix, tab_completion_match);
+        if(user) {
+            tab_completion_match = user->name;
+
+            // Remove current username, add new username
+            m_input_box->m_sText.erase(m_input_box->m_iCaretPosition - username_len, username_len);
+            m_input_box->m_iCaretPosition -= username_len;
+            m_input_box->m_sText.insert(m_input_box->m_iCaretPosition, tab_completion_match);
+            m_input_box->m_iCaretPosition += tab_completion_match.length();
+            m_input_box->setText(m_input_box->m_sText);
+            m_input_box->updateTextPos();
+            m_input_box->tickCaret();
+
+            Sound *sounds[] = {osu->getSkin()->m_typing1, osu->getSkin()->m_typing2, osu->getSkin()->m_typing3,
+                               osu->getSkin()->m_typing4};
+            engine->getSound()->play(sounds[rand() % 4]);
+        }
+
+        return;
+    }
+
     // Typing in chat: capture keypresses
     if(!engine->getKeyboard()->isAltDown()) {
+        tab_completion_prefix = "";
+        tab_completion_match = "";
         m_input_box->onKeyDown(key);
         key.consume();
         return;
@@ -520,7 +748,8 @@ void Chat::addChannel(UString channel_name, bool switch_to) {
 }
 
 void Chat::addMessage(UString channel_name, ChatMessage msg, bool mark_unread) {
-    if(msg.author_id > 0 && channel_name[0] != '#' && msg.author_name != bancho.username) {
+    bool is_pm = msg.author_id > 0 && channel_name[0] != '#' && msg.author_name != bancho.username;
+    if(is_pm) {
         // If it's a PM, the channel title should be the one who sent the message
         channel_name = msg.author_name;
     }
@@ -543,8 +772,36 @@ void Chat::addMessage(UString channel_name, ChatMessage msg, bool mark_unread) {
         if(chan->messages.size() > 100) {
             chan->messages.erase(chan->messages.begin());
         }
-        return;
+
+        break;
     }
+
+    if(is_pm && away_msg.length() > 0) {
+        Packet packet;
+        packet.id = SEND_PRIVATE_MESSAGE;
+        write_string(&packet, (char *)bancho.username.toUtf8());
+        write_string(&packet, (char *)away_msg.toUtf8());
+        write_string(&packet, (char *)msg.author_name.toUtf8());
+        write<u32>(&packet, bancho.user_id);
+        send_packet(packet);
+
+        // Server doesn't echo the message back
+        addMessage(channel_name, ChatMessage{
+                                     .tms = time(NULL),
+                                     .author_id = bancho.user_id,
+                                     .author_name = bancho.username,
+                                     .text = away_msg,
+                                 });
+    }
+}
+
+void Chat::addSystemMessage(UString msg) {
+    addMessage(m_selected_channel->name, ChatMessage{
+                                             .tms = time(NULL),
+                                             .author_id = 0,
+                                             .author_name = "",
+                                             .text = msg,
+                                         });
 }
 
 void Chat::removeChannel(UString channel_name) {
@@ -687,6 +944,24 @@ void Chat::leave(UString channel_name) {
     removeChannel(channel_name);
 
     engine->getSound()->play(osu->getSkin()->m_closeChatTab);
+}
+
+void Chat::send_message(UString msg) {
+    Packet packet;
+    packet.id = m_selected_channel->name[0] == '#' ? SEND_PUBLIC_MESSAGE : SEND_PRIVATE_MESSAGE;
+    write_string(&packet, (char *)bancho.username.toUtf8());
+    write_string(&packet, (char *)msg.toUtf8());
+    write_string(&packet, (char *)m_selected_channel->name.toUtf8());
+    write<u32>(&packet, bancho.user_id);
+    send_packet(packet);
+
+    // Server doesn't echo the message back
+    addMessage(m_selected_channel->name, ChatMessage{
+                                             .tms = time(NULL),
+                                             .author_id = bancho.user_id,
+                                             .author_name = bancho.username,
+                                             .text = msg,
+                                         });
 }
 
 void Chat::onDisconnect() {

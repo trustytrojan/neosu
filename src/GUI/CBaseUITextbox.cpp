@@ -268,51 +268,6 @@ void CBaseUITextbox::mouse_update(bool *propagate_clicks) {
     // handle context menu
     if(!mright && m_bContextMouse && isMouseInside()) {
         m_bContextMouse = false;
-        /*
-        engine->getMouse()->setCursorType(CURSORTYPE::CURSOR_NORMAL);
-        cmenu->begin();
-        {
-                cmenu->addItem("Clear", 5);
-                cmenu->addSeparator();
-                cmenu->addItem("Paste", 4);
-
-                if (hasSelectedText())
-                {
-                        cmenu->addItem("Copy", 3);
-                        cmenu->addItem("Cut", 2);
-                        cmenu->addSeparator();
-                        cmenu->addItem("Delete", 1);
-                }
-        }
-        const int item = cmenu->end();
-
-        switch (item)
-        {
-        case 5: // clear
-                clear();
-                break;
-
-        case 4: // paste
-                handleDeleteSelectedText();
-                insertTextFromClipboard();
-                break;
-
-        case 3: // copy
-                //envDebugLog("selected copy text: %s\n",getSelectedText().toUtf8());
-                env->setClipBoardText(getSelectedText());
-                break;
-
-        case 2: // cut
-                env->setClipBoardText(getSelectedText());
-                handleDeleteSelectedText();
-                //envDebugLog("selected cut text: %s\n",getSelectedText().toUtf8());
-                break;
-
-        case 1: // delete
-                handleDeleteSelectedText();
-                break;
-        }
-        */
     }
 }
 
@@ -658,9 +613,7 @@ void CBaseUITextbox::updateTextPos() {
     if(m_iTextJustification == 0) {
         if((m_iTextAddX + m_fTextScrollAddX) > ui_textbox_text_offset_x.getInt()) {
             if(hasSelectedText() && m_iCaretPosition == 0) {
-                // TODO: animations? don't like it as it is
                 m_fTextScrollAddX = ui_textbox_text_offset_x.getInt() - m_iTextAddX;
-                /// animation->moveSmoothEnd(&m_fTextScrollAddX, ui_textbox_text_offset_x.getInt() - m_iTextAddX, 1);
             } else
                 m_fTextScrollAddX = ui_textbox_text_offset_x.getInt() - m_iTextAddX;
         }

@@ -90,6 +90,7 @@ class UString {
     bool operator<(const UString &ustr) const;
 
     bool startsWith(const UString &ustr) const;
+    bool startsWithIgnoreCase(const UString &ustr) const;
     bool endsWith(const UString &ustr) const;
     bool equalsIgnoreCase(const UString &ustr) const;
     bool lessThanIgnoreCase(const UString &ustr) const;
