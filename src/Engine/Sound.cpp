@@ -198,7 +198,6 @@ void Sound::destroy() {
 void Sound::setPosition(double percent) { return setPositionMS(clamp<f64>(percent, 0.0, 1.0) * m_length); }
 
 void Sound::setPositionMS(unsigned long ms) {
-    if(ms == 0) return setPositionMS_fast(ms);
     if(!m_bReady || ms > getLengthMS()) return;
     if(!m_bStream) {
         engine->showMessageError("Programmer Error", "Called setPositionMS on a sample!");

@@ -29,15 +29,20 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
-    latest.changes.push_back("- Added sort_skins_by_name convar");
-    latest.changes.push_back("- Added setting to prevent servers from replacing the main menu logo");
-    latest.changes.push_back("- Chat: added missing chat commands");
-    latest.changes.push_back("- Chat: added missing keyboard shortcuts");
-    latest.changes.push_back("- Chat: added support for user links");
-    latest.changes.push_back("- Chat: improved map link support");
-    latest.changes.push_back("- Fixed freeze when switching between songs in song browser");
-    latest.changes.push_back("- Lowered audio latency for default (not ASIO/WASAPI) output");
+    latest.changes.push_back("- Fixed songs failing to restart");
     changelogs.push_back(latest);
+
+    CHANGELOG v35_07;
+    v35_07.title = "35.07 (2024-06-27)";
+    v35_07.changes.push_back("- Added sort_skins_by_name convar");
+    v35_07.changes.push_back("- Added setting to prevent servers from replacing the main menu logo");
+    v35_07.changes.push_back("- Chat: added missing chat commands");
+    v35_07.changes.push_back("- Chat: added missing keyboard shortcuts");
+    v35_07.changes.push_back("- Chat: added support for user links");
+    v35_07.changes.push_back("- Chat: improved map link support");
+    v35_07.changes.push_back("- Fixed freeze when switching between songs in song browser");
+    v35_07.changes.push_back("- Lowered audio latency for default (not ASIO/WASAPI) output");
+    changelogs.push_back(v35_07);
 
     CHANGELOG v35_06;
     v35_06.title = "35.06 (2024-06-17)";
