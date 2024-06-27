@@ -59,7 +59,7 @@ Osu *osu = NULL;
 
 // release configuration
 ConVar auto_update("auto_update", true, FCVAR_DEFAULT);
-ConVar osu_version("osu_version", 35.06f, FCVAR_DEFAULT | FCVAR_HIDDEN);
+ConVar osu_version("osu_version", 35.07f, FCVAR_DEFAULT | FCVAR_HIDDEN);
 
 #ifdef _DEBUG
 ConVar osu_debug("osu_debug", true, FCVAR_DEFAULT);
@@ -136,6 +136,7 @@ ConVar flashlight_follow_delay("flashlight_follow_delay", 0.120f, FCVAR_LOCKED);
 ConVar flashlight_always_hard("flashlight_always_hard", false, FCVAR_DEFAULT,
                               "always use 200+ combo flashlight radius");
 
+ConVar main_menu_use_server_logo("main_menu_use_server_logo", true, FCVAR_DEFAULT);
 ConVar start_first_main_menu_song_at_preview_point("start_first_main_menu_song_at_preview_point", false, FCVAR_DEFAULT);
 ConVar nightcore_enjoyer("nightcore_enjoyer", false, FCVAR_DEFAULT,
                          "automatically select nightcore when speed modifying");

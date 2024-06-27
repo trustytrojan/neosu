@@ -1326,6 +1326,9 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     logInButton->setColor(0xff00ff00);
     logInButton->setTextColor(0xffffffff);
 
+    addSubSection("Detail settings");
+    addCheckbox("Replace main menu logo with server logo", convar->getConVarByName("main_menu_use_server_logo"));
+
     addSubSection("Integration");
     addCheckbox("Rich Presence (Discord + Steam)",
                 "Shows your current game state in your friends' friendslists.\ne.g.: Playing Gavin G - Reach Out "

@@ -29,19 +29,24 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
-    latest.changes.push_back("- Added cursor trail customization settings");
-    latest.changes.push_back("- Added instafade checkbox");
-    latest.changes.push_back("- Added more UI sounds");
-    latest.changes.push_back("- Added submit_after_pause convar");
-    latest.changes.push_back("- Chat: added support for /me command");
-    latest.changes.push_back("- Chat: added support for links");
-    latest.changes.push_back("- Chat: added support for map links (auto-downloads)");
-    latest.changes.push_back("- Chat: added support for multiplayer invite links");
-    latest.changes.push_back("- FPS counter will now display worst frametime instead of current frametime");
-    latest.changes.push_back("- Improved song browser performance");
-    latest.changes.push_back("- Skins are now sorted alphabetically, ignoring meme characters");
-    latest.changes.push_back("- Unlocked osu_drain_kill convar");
+    latest.changes.push_back("- Added setting to prevent servers from replacing the main menu logo");
     changelogs.push_back(latest);
+
+    CHANGELOG v35_06;
+    v35_06.title = "35.06 (2024-06-17)";
+    v35_06.changes.push_back("- Added cursor trail customization settings");
+    v35_06.changes.push_back("- Added instafade checkbox");
+    v35_06.changes.push_back("- Added more UI sounds");
+    v35_06.changes.push_back("- Added submit_after_pause convar");
+    v35_06.changes.push_back("- Chat: added support for /me command");
+    v35_06.changes.push_back("- Chat: added support for links");
+    v35_06.changes.push_back("- Chat: added support for map links (auto-downloads)");
+    v35_06.changes.push_back("- Chat: added support for multiplayer invite links");
+    v35_06.changes.push_back("- FPS counter will now display worst frametime instead of current frametime");
+    v35_06.changes.push_back("- Improved song browser performance");
+    v35_06.changes.push_back("- Skins are now sorted alphabetically, ignoring meme characters");
+    v35_06.changes.push_back("- Unlocked osu_drain_kill convar");
+    changelogs.push_back(v35_06);
 
     CHANGELOG v35_05;
     v35_05.title = "35.05 (2024-06-13)";

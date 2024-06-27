@@ -769,7 +769,7 @@ void MainMenu::draw(Graphics *g) {
     // neosu/server logo
     {
         auto logo = logo_img;
-        if(bancho.server_icon != NULL && bancho.server_icon->isReady()) {
+        if(bancho.server_icon != NULL && bancho.server_icon->isReady() && convar->getConVarByName("main_menu_use_server_logo")->getBool()) {
             logo = bancho.server_icon;
         }
 
