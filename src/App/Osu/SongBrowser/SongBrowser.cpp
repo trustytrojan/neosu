@@ -900,7 +900,6 @@ bool SongBrowser::selectBeatmapset(i32 set_id) {
     if(beatmapset == NULL) {
         // Pasted from Downloader::download_beatmap
         auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_id);
-        // XXX: Make a permanent database for auto-downloaded songs, so we can load them like osu!.db's
         osu->m_songBrowser2->getDatabase()->addBeatmap(mapset_path.toUtf8());
         osu->m_songBrowser2->updateSongButtonSorting();
         debugLog("Finished loading beatmapset %d.\n", set_id);
@@ -1811,85 +1810,6 @@ void SongBrowser::addBeatmap(DatabaseBeatmap *beatmap) {
                     if(index > 0 && index < 27) m_titleCollectionButtons[index]->getChildren().push_back(songButton);
                 } else
                     m_titleCollectionButtons[27]->getChildren().push_back(songButton);
-            }
-        }
-    }
-}
-
-void SongBrowser::readdBeatmap(DatabaseBeatmap *diff2) {
-    // this function readds updated diffs to the correct groups
-    // i.e. when stars and length are calculated in background
-
-    // NOTE: the difficulty and length groups only contain diffs (and no parent wrapper objects), makes searching for
-    // the button way easier
-
-    // difficulty group
-    {
-        // remove from difficulty group
-        Button *difficultyGroupButton = NULL;
-        for(size_t i = 0; i < m_difficultyCollectionButtons.size(); i++) {
-            CollectionButton *groupButton = m_difficultyCollectionButtons[i];
-            std::vector<Button *> &children = groupButton->getChildren();
-            for(size_t c = 0; c < children.size(); c++) {
-                if(children[c]->getDatabaseBeatmap() == diff2) {
-                    difficultyGroupButton = children[c];
-
-                    // remove
-                    children.erase(children.begin() + c);
-
-                    break;
-                }
-            }
-        }
-
-        // add to new difficulty group
-        if(difficultyGroupButton != NULL) {
-            // HACKHACK: partial code duplication, see addBeatmap()
-            if(m_difficultyCollectionButtons.size() == 12) {
-                const int index = clamp<int>((int)diff2->getStarsNomod(), 0, 11);
-                m_difficultyCollectionButtons[index]->getChildren().push_back(difficultyGroupButton);
-            }
-        }
-    }
-
-    // length group
-    {
-        // remove from length group
-        Button *lengthGroupButton = NULL;
-        for(size_t i = 0; i < m_lengthCollectionButtons.size(); i++) {
-            CollectionButton *groupButton = m_lengthCollectionButtons[i];
-            std::vector<Button *> &children = groupButton->getChildren();
-            for(size_t c = 0; c < children.size(); c++) {
-                if(children[c]->getDatabaseBeatmap() == diff2) {
-                    lengthGroupButton = children[c];
-
-                    // remove
-                    children.erase(children.begin() + c);
-
-                    break;
-                }
-            }
-        }
-
-        // add to new length group
-        if(lengthGroupButton != NULL) {
-            // HACKHACK: partial code duplication, see addBeatmap()
-            if(m_lengthCollectionButtons.size() == 7) {
-                const unsigned long lengthMS = diff2->getLengthMS();
-                if(lengthMS <= 1000 * 60)
-                    m_lengthCollectionButtons[0]->getChildren().push_back(lengthGroupButton);
-                else if(lengthMS <= 1000 * 60 * 2)
-                    m_lengthCollectionButtons[1]->getChildren().push_back(lengthGroupButton);
-                else if(lengthMS <= 1000 * 60 * 3)
-                    m_lengthCollectionButtons[2]->getChildren().push_back(lengthGroupButton);
-                else if(lengthMS <= 1000 * 60 * 4)
-                    m_lengthCollectionButtons[3]->getChildren().push_back(lengthGroupButton);
-                else if(lengthMS <= 1000 * 60 * 5)
-                    m_lengthCollectionButtons[4]->getChildren().push_back(lengthGroupButton);
-                else if(lengthMS <= 1000 * 60 * 10)
-                    m_lengthCollectionButtons[5]->getChildren().push_back(lengthGroupButton);
-                else
-                    m_lengthCollectionButtons[6]->getChildren().push_back(lengthGroupButton);
             }
         }
     }

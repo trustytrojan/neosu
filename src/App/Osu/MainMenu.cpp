@@ -1031,18 +1031,23 @@ void MainMenu::selectRandomBeatmap() {
         osu->getSongBrowser()->selectRandomBeatmap();
     } else {
         // Database is not loaded yet, load a random map and select it
-        // XXX: Also pick from neosu maps/ directory
         auto songs_folder = osu->getSongBrowser()->getDatabase()->getOsuSongsFolder();
         auto mapset_folders = env->getFoldersInFolder(songs_folder);
+        auto mapset_folders2 = env->getFoldersInFolder(MCENGINE_DATA_DIR "maps/");
         auto nb_mapsets = mapset_folders.size();
-        if(nb_mapsets == 0) return;
+        auto nb_mapsets2 = mapset_folders2.size();
+        if(nb_mapsets + nb_mapsets2 == 0) return;
 
         osu->getSongBrowser()->getSelectedBeatmap()->deselect();
         SAFE_DELETE(preloaded_beatmapset);
 
         for(int i = 0; i < 10; i++) {
-            auto mapset_folder = songs_folder;
-            mapset_folder.append(mapset_folders[rand() % nb_mapsets]);
+            u32 lucky_number = rand() % (nb_mapsets + nb_mapsets2);
+            bool is_neosu_set = lucky_number > nb_mapsets;
+            if(is_neosu_set) lucky_number -= nb_mapsets;
+
+            auto mapset_folder = is_neosu_set ? MCENGINE_DATA_DIR "maps/" : songs_folder;
+            mapset_folder.append((is_neosu_set ? mapset_folders2 : mapset_folders)[lucky_number]);
             mapset_folder.append("/");
 
             BeatmapSet *set = osu->getSongBrowser()->getDatabase()->loadRawBeatmap(mapset_folder);

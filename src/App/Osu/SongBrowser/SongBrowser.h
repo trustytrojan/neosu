@@ -122,7 +122,6 @@ class SongBrowser : public ScreenBackable {
 
     void refreshBeatmaps();
     void addBeatmap(DatabaseBeatmap *beatmap);
-    void readdBeatmap(DatabaseBeatmap *diff2);
 
     void requestNextScrollToSongButtonJumpFix(SongDifficultyButton *diffButton);
     void scrollToSongButton(Button *songButton, bool alignOnTop = false);

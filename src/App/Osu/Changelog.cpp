@@ -29,8 +29,9 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
-    latest.changes.push_back("- Added ability to drag-and-drop .osk and .osz files onto neosu");
-    latest.changes.push_back("- Added local skin folder");
+    latest.changes.push_back("- Added ability to import .osk and .osz files (drop them onto the neosu window)");
+    latest.changes.push_back("- Added persistent map database (downloaded or imported maps stay after restarting the game)");
+    latest.changes.push_back("- Added skin folder");
     latest.changes.push_back("- Fixed songs failing to restart");
     changelogs.push_back(latest);
 

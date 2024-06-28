@@ -196,6 +196,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 if(!extension.compare("osz")) {
                     File osz(utf8filepath);
                     i32 set_id = extract_beatmapset_id(osz.readFile(), osz.getFileSize());
+                    if(set_id < 0) {
+                        // special case: legacy fallback behavior for invalid beatmapSetID, try to parse the ID from the path
+                        auto mapset_name = UString(env->getFileNameFromFilePath(utf8filepath).c_str());
+                        const std::vector<UString> tokens = mapset_name.split(" ");
+                        for(auto token : tokens) {
+                            i32 id = token.toInt();
+                            if(id > 0) set_id = id;
+                        }
+                    }
                     if(set_id == -1) {
                         osu->getNotificationOverlay()->addNotification("Beatmapset doesn't have a valid ID.");
                         continue;

@@ -403,7 +403,6 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* pr
     if(*progress != 1.f) return NULL;
 
     auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_id);
-    // XXX: Make a permanent database for auto-downloaded songs, so we can load them like osu!.db's
     osu->m_songBrowser2->getDatabase()->addBeatmap(mapset_path.toUtf8());
     osu->m_songBrowser2->updateSongButtonSorting();
     debugLog("Finished loading beatmapset %d.\n", set_id);
@@ -475,7 +474,6 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, i32 beatmapset_id, float* prog
     if(*progress != 1.f) return NULL;
 
     auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_id);
-    // XXX: Make a permanent database for auto-downloaded songs, so we can load them like osu!.db's
     osu->m_songBrowser2->getDatabase()->addBeatmap(mapset_path.toUtf8());
     osu->m_songBrowser2->updateSongButtonSorting();
     debugLog("Finished loading beatmapset %d.\n", set_id);

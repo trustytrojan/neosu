@@ -15,6 +15,7 @@ typedef DatabaseBeatmap BeatmapDifficulty;
 typedef DatabaseBeatmap BeatmapSet;
 
 #define STARS_CACHE_VERSION 20240430
+#define NEOSU_MAPS_DB_VERSION 20240628
 
 // Field ordering matters here
 #pragma pack(push, 1)
@@ -90,7 +91,7 @@ class Database {
     inline bool isFinished() const { return (getProgress() >= 1.0f); }
     inline bool foundChanges() const { return m_bFoundChanges; }
 
-    inline const std::vector<DatabaseBeatmap *> getDatabaseBeatmaps() const { return m_databaseBeatmaps; }
+    inline const std::vector<DatabaseBeatmap *> getDatabaseBeatmaps() const { return m_beatmapsets; }
     DatabaseBeatmap *getBeatmapDifficulty(const MD5Hash &md5hash);
     DatabaseBeatmap *getBeatmapDifficulty(i32 map_id);
     DatabaseBeatmap *getBeatmapSet(i32 set_id);
@@ -105,7 +106,7 @@ class Database {
 
     BeatmapSet *loadRawBeatmap(std::string beatmapPath);  // only used for raw loading without db
 
-    void loadDB(Packet *db, bool &fallbackToRawLoad);
+    void loadDB(Packet *db);
 
     // stars.cache
     struct STARS_CACHE_ENTRY {
@@ -125,7 +126,8 @@ class Database {
     void addScoreRaw(const MD5Hash &beatmapMD5Hash, const FinishedScore &score);
 
     std::string parseLegacyCfgBeatmapDirectoryParameter();
-    void scheduleLoadRaw();
+
+    void saveMaps();
 
     void loadStars();
     void saveStars();
@@ -144,7 +146,9 @@ class Database {
     int m_iNumBeatmapsToLoad;
     std::atomic<float> m_fLoadingProgress;
     std::atomic<bool> m_bInterruptLoad;
-    std::vector<DatabaseBeatmap *> m_databaseBeatmaps;
+    std::vector<BeatmapSet *> m_beatmapsets;
+    std::vector<BeatmapSet *> m_neosu_sets;
+    bool m_neosu_maps_loaded = false;
 
     // osu!.db
     int m_iVersion;
@@ -158,11 +162,4 @@ class Database {
     unsigned long long m_iSortHackCounter;
     PlayerStats m_prevPlayerStats;
     std::vector<SCORE_SORTING_METHOD> m_scoreSortingMethods;
-
-    // raw load
-    bool m_bRawBeatmapLoadScheduled;
-    int m_iCurRawBeatmapLoadIndex;
-    std::string m_sRawBeatmapLoadOsuSongFolder;
-    std::vector<std::string> m_rawBeatmapFolders;
-    std::vector<std::string> m_rawLoadBeatmapFolders;
 };

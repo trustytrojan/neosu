@@ -242,8 +242,6 @@ class DatabaseLoader : public Resource {
    public:
     DatabaseLoader(Database *db) : Resource() {
         m_db = db;
-        m_bNeedRawLoad = false;
-        m_bNeedCleanup = false;
 
         m_bAsyncReady = false;
         m_bReady = false;
@@ -251,20 +249,6 @@ class DatabaseLoader : public Resource {
 
    protected:
     virtual void init() {
-        // legacy loading, if db is not found or by convar
-        if(m_bNeedRawLoad)
-            m_db->scheduleLoadRaw();
-        else {
-            // delete all previously loaded beatmaps here
-            if(m_bNeedCleanup) {
-                m_bNeedCleanup = false;
-                for(int i = 0; i < m_toCleanup.size(); i++) {
-                    delete m_toCleanup[i];
-                }
-                m_toCleanup.clear();
-            }
-        }
-
         m_bReady = true;
 
         delete this;  // commit sudoku
@@ -279,20 +263,12 @@ class DatabaseLoader : public Resource {
         // load stars.cache
         m_db->loadStars();
 
-        // check if osu database exists, load file completely
+        // load database
+        m_db->m_beatmapsets.clear(); // TODO @kiwec: this just leaks memory?
         std::string osuDbFilePath = osu_folder.getString().toUtf8();
         osuDbFilePath.append("osu!.db");
-
-        // load database
         Packet db = load_db(osuDbFilePath);
-        if(db.size > 0 && osu_database_enabled.getBool()) {
-            m_bNeedCleanup = true;
-            m_toCleanup.swap(m_db->m_databaseBeatmaps);
-            m_db->m_databaseBeatmaps.clear();
-            m_db->loadDB(&db, m_bNeedRawLoad);
-        } else {
-            m_bNeedRawLoad = true;
-        }
+        m_db->loadDB(&db);
         free(db.memory);
 
         m_bAsyncReady = true;
@@ -302,10 +278,6 @@ class DatabaseLoader : public Resource {
 
    private:
     Database *m_db;
-    bool m_bNeedRawLoad;
-
-    bool m_bNeedCleanup;
-    std::vector<DatabaseBeatmap *> m_toCleanup;
 };
 
 ConVar *Database::m_name_ref = NULL;
@@ -337,9 +309,6 @@ Database::Database() {
     m_bDidScoresChangeForStats = true;
     m_iSortHackCounter = 0;
 
-    m_iCurRawBeatmapLoadIndex = 0;
-    m_bRawBeatmapLoadScheduled = false;
-
     m_prevPlayerStats.pp = 0.0f;
     m_prevPlayerStats.accuracy = 0.0f;
     m_prevPlayerStats.numScoresWithPP = 0;
@@ -358,8 +327,8 @@ Database::Database() {
 Database::~Database() {
     SAFE_DELETE(m_importTimer);
 
-    for(int i = 0; i < m_databaseBeatmaps.size(); i++) {
-        delete m_databaseBeatmaps[i];
+    for(int i = 0; i < m_beatmapsets.size(); i++) {
+        delete m_beatmapsets[i];
     }
 
     for(int i = 0; i < m_scoreSortingMethods.size(); i++) {
@@ -369,54 +338,7 @@ Database::~Database() {
     unload_collections();
 }
 
-void Database::update() {
-    // loadRaw() logic
-    if(m_bRawBeatmapLoadScheduled) {
-        Timer t;
-        t.start();
-
-        while(t.getElapsedTime() < 0.033f) {
-            if(m_bInterruptLoad.load()) break;  // cancellation point
-
-            if(m_rawLoadBeatmapFolders.size() > 0 && m_iCurRawBeatmapLoadIndex < m_rawLoadBeatmapFolders.size()) {
-                std::string curBeatmap = m_rawLoadBeatmapFolders[m_iCurRawBeatmapLoadIndex++];
-                m_rawBeatmapFolders.push_back(
-                    curBeatmap);  // for future incremental loads, so that we know what's been loaded already
-
-                std::string fullBeatmapPath = getOsuSongsFolder();
-                fullBeatmapPath.append(curBeatmap);
-                fullBeatmapPath.append("/");
-
-                addBeatmap(fullBeatmapPath);
-            }
-
-            // update progress (another thread checks if progress >= 1.f to know when we're done)
-            float progress = (float)m_iCurRawBeatmapLoadIndex / (float)m_iNumBeatmapsToLoad;
-            if(progress == 0.f) progress = 0.01f;
-            if(progress >= 1.f) progress = 0.99f;
-            m_fLoadingProgress = progress;
-
-            // check if we are finished
-            if(m_iCurRawBeatmapLoadIndex >= m_iNumBeatmapsToLoad ||
-               m_iCurRawBeatmapLoadIndex > (int)(m_rawLoadBeatmapFolders.size() - 1)) {
-                m_rawLoadBeatmapFolders.clear();
-                m_bRawBeatmapLoadScheduled = false;
-                m_importTimer->update();
-
-                debugLog("Refresh finished, added %i beatmaps in %f seconds.\n", m_databaseBeatmaps.size(),
-                         m_importTimer->getElapsedTime());
-
-                load_collections();
-
-                m_fLoadingProgress = 1.0f;
-
-                break;
-            }
-
-            t.update();
-        }
-    }
-}
+void Database::update() {}
 
 void Database::load() {
     m_bInterruptLoad = false;
@@ -430,19 +352,22 @@ void Database::load() {
 
 void Database::cancel() {
     m_bInterruptLoad = true;
-    m_bRawBeatmapLoadScheduled = false;
     m_fLoadingProgress = 1.0f;  // force finished
     m_bFoundChanges = true;
 }
 
 void Database::save() {
+    saveMaps();
     saveScores();
     saveStars();
 }
 
 DatabaseBeatmap *Database::addBeatmap(std::string beatmapFolderPath) {
     BeatmapSet *beatmap = loadRawBeatmap(beatmapFolderPath);
-    if(beatmap != NULL) m_databaseBeatmaps.push_back(beatmap);
+    if(beatmap != NULL) {
+        m_beatmapsets.push_back(beatmap);
+        m_neosu_sets.push_back(beatmap);
+    }
     return beatmap;
 }
 
@@ -771,8 +696,8 @@ int Database::getLevelForScore(unsigned long long score, int maxLevel) {
 DatabaseBeatmap *Database::getBeatmapDifficulty(const MD5Hash &md5hash) {
     if(isLoading()) return NULL;
 
-    for(size_t i = 0; i < m_databaseBeatmaps.size(); i++) {
-        DatabaseBeatmap *beatmap = m_databaseBeatmaps[i];
+    for(size_t i = 0; i < m_beatmapsets.size(); i++) {
+        DatabaseBeatmap *beatmap = m_beatmapsets[i];
         const std::vector<DatabaseBeatmap *> &diffs = beatmap->getDifficulties();
         for(size_t d = 0; d < diffs.size(); d++) {
             DatabaseBeatmap *diff = diffs[d];
@@ -788,8 +713,8 @@ DatabaseBeatmap *Database::getBeatmapDifficulty(const MD5Hash &md5hash) {
 DatabaseBeatmap *Database::getBeatmapDifficulty(i32 map_id) {
     if(isLoading()) return NULL;
 
-    for(size_t i = 0; i < m_databaseBeatmaps.size(); i++) {
-        DatabaseBeatmap *beatmap = m_databaseBeatmaps[i];
+    for(size_t i = 0; i < m_beatmapsets.size(); i++) {
+        DatabaseBeatmap *beatmap = m_beatmapsets[i];
         const std::vector<DatabaseBeatmap *> &diffs = beatmap->getDifficulties();
         for(size_t d = 0; d < diffs.size(); d++) {
             DatabaseBeatmap *diff = diffs[d];
@@ -805,8 +730,8 @@ DatabaseBeatmap *Database::getBeatmapDifficulty(i32 map_id) {
 DatabaseBeatmap *Database::getBeatmapSet(i32 set_id) {
     if(isLoading()) return NULL;
 
-    for(size_t i = 0; i < m_databaseBeatmaps.size(); i++) {
-        DatabaseBeatmap *beatmap = m_databaseBeatmaps[i];
+    for(size_t i = 0; i < m_beatmapsets.size(); i++) {
+        DatabaseBeatmap *beatmap = m_beatmapsets[i];
         if(beatmap->getSetID() == set_id) {
             return beatmap;
         }
@@ -880,65 +805,9 @@ std::string Database::getOsuSongsFolder() {
     return out;
 }
 
-void Database::scheduleLoadRaw() {
-    auto song_folder = getOsuSongsFolder();
-    debugLog("Database: song_folder = %s\n", song_folder.c_str());
-
-    m_rawLoadBeatmapFolders = env->getFoldersInFolder(song_folder);
-    m_iNumBeatmapsToLoad = m_rawLoadBeatmapFolders.size();
-
-    // if this isn't the first load, only load the differences
-    if(!m_bIsFirstLoad) {
-        std::vector<std::string> toLoad;
-        for(int i = 0; i < m_iNumBeatmapsToLoad; i++) {
-            bool alreadyLoaded = false;
-            for(int j = 0; j < m_rawBeatmapFolders.size(); j++) {
-                if(m_rawLoadBeatmapFolders[i] == m_rawBeatmapFolders[j]) {
-                    alreadyLoaded = true;
-                    break;
-                }
-            }
-
-            if(!alreadyLoaded) toLoad.push_back(m_rawLoadBeatmapFolders[i]);
-        }
-
-        // only load differences
-        m_rawLoadBeatmapFolders = toLoad;
-        m_iNumBeatmapsToLoad = m_rawLoadBeatmapFolders.size();
-
-        debugLog("Database: Found %i new/changed beatmaps.\n", m_iNumBeatmapsToLoad);
-
-        m_bFoundChanges = m_iNumBeatmapsToLoad > 0;
-        if(m_bFoundChanges)
-            osu->getNotificationOverlay()->addNotification(
-                UString::format(m_iNumBeatmapsToLoad == 1 ? "Adding %i new beatmap." : "Adding %i new beatmaps.",
-                                m_iNumBeatmapsToLoad),
-                0xff00ff00);
-        else
-            osu->getNotificationOverlay()->addNotification(
-                UString::format("No new beatmaps detected.", m_iNumBeatmapsToLoad), 0xff00ff00);
-    }
-
-    debugLog("Database: Building beatmap database ...\n");
-    debugLog("Database: Found %i folders to load.\n", m_rawLoadBeatmapFolders.size());
-
-    // only start loading if we have something to load
-    if(m_rawLoadBeatmapFolders.size() > 0) {
-        m_fLoadingProgress = 0.0f;
-        m_iCurRawBeatmapLoadIndex = 0;
-
-        m_bRawBeatmapLoadScheduled = true;
-        m_importTimer->start();
-    } else
-        m_fLoadingProgress = 1.0f;
-
-    m_bIsFirstLoad = false;
-}
-
-void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
-    if(m_databaseBeatmaps.size() > 0) debugLog("WARNING: Database::loadDB() called without cleared m_beatmaps!!!\n");
-
-    m_databaseBeatmaps.clear();
+void Database::loadDB(Packet *db) {
+    auto neosu_maps = load_db("neosu_maps.db");
+    u32 db_size_sum = neosu_maps.size + db->size;
 
     // get BeatmapDirectory parameter from osu!.<OS_USERNAME>.cfg
     // fallback to /Songs/ if it doesn't exist
@@ -955,368 +824,449 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
 
     m_importTimer->start();
 
-    // read header
-    m_iVersion = read<u32>(db);
-    m_iFolderCount = read<u32>(db);
-    read<u8>(db);
-    read<u64>(db) /* timestamp */;
-    auto playerName = read_stdstring(db);
-    m_iNumBeatmapsToLoad = read<u32>(db);
+    bool should_read_peppy_database = db->size > 0;
+    if(should_read_peppy_database) {
+        // read header
+        m_iVersion = read<u32>(db);
+        m_iFolderCount = read<u32>(db);
+        read<u8>(db);
+        read<u64>(db) /* timestamp */;
+        auto playerName = read_stdstring(db);
+        m_iNumBeatmapsToLoad = read<u32>(db);
 
-    debugLog("Database: version = %i, folderCount = %i, playerName = %s, numDiffs = %i\n", m_iVersion, m_iFolderCount,
-             playerName.c_str(), m_iNumBeatmapsToLoad);
+        debugLog("Database: version = %i, folderCount = %i, playerName = %s, numDiffs = %i\n", m_iVersion, m_iFolderCount,
+                 playerName.c_str(), m_iNumBeatmapsToLoad);
 
-    if(m_iVersion < 20170222) {
-        debugLog("Database: Version is quite old, below 20170222 ...\n");
-        osu->getNotificationOverlay()->addNotification("osu!.db version too old, update osu! and try again!",
-                                                       0xffff0000);
-        m_fLoadingProgress = 1.0f;
-        return;
-    }
-
-    if(!osu_database_ignore_version_warnings.getBool()) {
-        if(m_iVersion < 20190207)  // xexxar angles star recalc
-        {
-            osu->getNotificationOverlay()->addNotification("osu!.db version is old,  let osu! update when convenient.",
-                                                           0xffffff00, false, 3.0f);
-        }
-    }
-
-    // hard cap upper db version
-    if(m_iVersion > osu_database_version.getInt() && !osu_database_ignore_version.getBool()) {
-        osu->getNotificationOverlay()->addNotification(
-            UString::format("osu!.db version unknown (%i),  using fallback loader.", m_iVersion), 0xffffff00, false,
-            5.0f);
-
-        fallbackToRawLoad = true;
-        m_fLoadingProgress = 0.0f;
-
-        return;
-    }
-
-    // read beatmapInfos, and also build two hashmaps (diff hash -> BeatmapDifficulty, diff hash -> Beatmap)
-    struct Beatmap_Set {
-        int setID;
-        std::string path;
-        std::vector<DatabaseBeatmap *> *diffs2 = NULL;
-    };
-    std::vector<Beatmap_Set> beatmapSets;
-    std::unordered_map<int, size_t> setIDToIndex;
-    for(int i = 0; i < m_iNumBeatmapsToLoad; i++) {
-        if(m_bInterruptLoad.load()) break;  // cancellation point
-
-        if(Osu::debug->getBool()) debugLog("Database: Reading beatmap %i/%i ...\n", (i + 1), m_iNumBeatmapsToLoad);
-
-        // update progress (another thread checks if progress >= 1.f to know when we're done)
-        float progress = (float)i / (float)m_iNumBeatmapsToLoad;
-        if(progress == 0.f) progress = 0.01f;
-        if(progress >= 1.f) progress = 0.99f;
-        m_fLoadingProgress = progress;
-
-        if(m_iVersion < 20191107)  // see https://osu.ppy.sh/home/changelog/stable40/20191107.2
-        {
-            // also see https://github.com/ppy/osu-wiki/commit/b90f312e06b4f86e509b397565f1fe014bb15943
-            // no idea why peppy decided to change the wiki version from 20191107 to 20191106, because that's not what
-            // stable is doing. the correct version is still 20191107
-
-            /*unsigned int size = */ read<u32>(db);  // size in bytes of the beatmap entry
-        }
-
-        std::string artistName = read_stdstring(db);
-        trim(&artistName);
-        std::string artistNameUnicode = read_stdstring(db);
-        std::string songTitle = read_stdstring(db);
-        trim(&songTitle);
-        std::string songTitleUnicode = read_stdstring(db);
-        std::string creatorName = read_stdstring(db);
-        trim(&creatorName);
-        std::string difficultyName = read_stdstring(db);
-        trim(&difficultyName);
-        std::string audioFileName = read_stdstring(db);
-        auto md5hash = read_hash(db);
-        std::string osuFileName = read_stdstring(db);
-        /*unsigned char rankedStatus = */ read<u8>(db);
-        unsigned short numCircles = read<u16>(db);
-        unsigned short numSliders = read<u16>(db);
-        unsigned short numSpinners = read<u16>(db);
-        long long lastModificationTime = read<u64>(db);
-        float AR = read<f32>(db);
-        float CS = read<f32>(db);
-        float HP = read<f32>(db);
-        float OD = read<f32>(db);
-        double sliderMultiplier = read<f64>(db);
-
-        unsigned int numOsuStandardStarRatings = read<u32>(db);
-        // debugLog("%i star ratings for osu!standard\n", numOsuStandardStarRatings);
-        float numOsuStandardStars = 0.0f;
-        for(int s = 0; s < numOsuStandardStarRatings; s++) {
-            read<u8>(db);  // ObjType
-            unsigned int mods = read<u32>(db);
-            read<u8>(db);  // ObjType
-            double starRating = read<f64>(db);
-            // debugLog("%f stars for %u\n", starRating, mods);
-
-            if(mods == 0) numOsuStandardStars = starRating;
-        }
-
-        unsigned int numTaikoStarRatings = read<u32>(db);
-        // debugLog("%i star ratings for taiko\n", numTaikoStarRatings);
-        for(int s = 0; s < numTaikoStarRatings; s++) {
-            read<u8>(db);  // ObjType
-            read<u32>(db);
-            read<u8>(db);  // ObjType
-            read<f64>(db);
-        }
-
-        unsigned int numCtbStarRatings = read<u32>(db);
-        // debugLog("%i star ratings for ctb\n", numCtbStarRatings);
-        for(int s = 0; s < numCtbStarRatings; s++) {
-            read<u8>(db);  // ObjType
-            read<u32>(db);
-            read<u8>(db);  // ObjType
-            read<f64>(db);
-        }
-
-        unsigned int numManiaStarRatings = read<u32>(db);
-        // debugLog("%i star ratings for mania\n", numManiaStarRatings);
-        for(int s = 0; s < numManiaStarRatings; s++) {
-            read<u8>(db);  // ObjType
-            read<u32>(db);
-            read<u8>(db);  // ObjType
-            read<f64>(db);
-        }
-
-        /*unsigned int drainTime = */ read<u32>(db);  // seconds
-        int duration = read<u32>(db);                 // milliseconds
-        duration = duration >= 0 ? duration : 0;      // sanity clamp
-        int previewTime = read<u32>(db);
-
-        // debugLog("drainTime = %i sec, duration = %i ms, previewTime = %i ms\n", drainTime, duration, previewTime);
-
-        unsigned int numTimingPoints = read<u32>(db);
-        zarray<TIMINGPOINT> timingPoints(numTimingPoints);
-        read_bytes(db, (u8 *)timingPoints.data(), sizeof(TIMINGPOINT) * numTimingPoints);
-
-        int beatmapID = read<i32>(db);     // fucking bullshit, this is NOT an unsigned integer as is described on the
-                                           // wiki, it can and is -1 sometimes
-        int beatmapSetID = read<i32>(db);  // same here
-        /*unsigned int threadID = */ read<u32>(db);
-
-        /*unsigned char osuStandardGrade = */ read<u8>(db);
-        /*unsigned char taikoGrade = */ read<u8>(db);
-        /*unsigned char ctbGrade = */ read<u8>(db);
-        /*unsigned char maniaGrade = */ read<u8>(db);
-        // debugLog("beatmapID = %i, beatmapSetID = %i, threadID = %i, osuStandardGrade = %i, taikoGrade = %i, ctbGrade
-        // = %i, maniaGrade = %i\n", beatmapID, beatmapSetID, threadID, osuStandardGrade, taikoGrade, ctbGrade,
-        // maniaGrade);
-
-        short localOffset = read<u16>(db);
-        float stackLeniency = read<f32>(db);
-        unsigned char mode = read<u8>(db);
-        // debugLog("localOffset = %i, stackLeniency = %f, mode = %i\n", localOffset, stackLeniency, mode);
-
-        auto songSource = read_stdstring(db);
-        auto songTags = read_stdstring(db);
-        trim(&songSource);
-        trim(&songTags);
-        // debugLog("songSource = %s, songTags = %s\n", songSource.toUtf8(), songTags.toUtf8());
-
-        short onlineOffset = read<u16>(db);
-        skip_string(db);  // song title font
-        /*bool unplayed = */ read<u8>(db);
-        /*long long lastTimePlayed = */ read<u64>(db);
-        /*bool isOsz2 = */ read<u8>(db);
-
-        // somehow, some beatmaps may have spaces at the start/end of their
-        // path, breaking the Windows API (e.g. https://osu.ppy.sh/s/215347)
-        auto path = read_stdstring(db);
-        trim(&path);
-
-        /*long long lastOnlineCheck = */ read<u64>(db);
-        // debugLog("onlineOffset = %i, songTitleFont = %s, unplayed = %i, lastTimePlayed = %lu, isOsz2 = %i, path = %s,
-        // lastOnlineCheck = %lu\n", onlineOffset, songTitleFont.toUtf8(), (int)unplayed, lastTimePlayed, (int)isOsz2,
-        // path.c_str(), lastOnlineCheck);
-
-        /*bool ignoreBeatmapSounds = */ read<u8>(db);
-        /*bool ignoreBeatmapSkin = */ read<u8>(db);
-        /*bool disableStoryboard = */ read<u8>(db);
-        /*bool disableVideo = */ read<u8>(db);
-        /*bool visualOverride = */ read<u8>(db);
-        /*int lastEditTime = */ read<u32>(db);
-        /*unsigned char maniaScrollSpeed = */ read<u8>(db);
-        // debugLog("ignoreBeatmapSounds = %i, ignoreBeatmapSkin = %i, disableStoryboard = %i, disableVideo = %i,
-        // visualOverride = %i, maniaScrollSpeed = %i\n", (int)ignoreBeatmapSounds, (int)ignoreBeatmapSkin,
-        // (int)disableStoryboard, (int)disableVideo, (int)visualOverride, maniaScrollSpeed);
-
-        // HACKHACK: workaround for linux and macos: it can happen that nested beatmaps are stored in the database, and
-        // that osu! stores that filepath with a backslash (because windows)
-        if(env->getOS() == Environment::OS::LINUX || env->getOS() == Environment::OS::MACOS) {
-            for(int c = 0; c < path.length(); c++) {
-                if(path[c] == '\\') {
-                    path[c] = '/';
-                }
+        if(m_iVersion < 20170222) {
+            debugLog("Database: Version is quite old, below 20170222 ...\n");
+            osu->getNotificationOverlay()->addNotification("osu!.db version too old, update osu! and try again!", 0xffff0000);
+            should_read_peppy_database = false;
+        } else if(!osu_database_ignore_version_warnings.getBool()) {
+            if(m_iVersion < 20190207) {  // xexxar angles star recalc
+                osu->getNotificationOverlay()->addNotification("osu!.db version is old, let osu! update when convenient.",
+                                                               0xffffff00, false, 3.0f);
             }
         }
 
-        // build beatmap & diffs from all the data
-        std::string beatmapPath = songFolder;
-        beatmapPath.append(path.c_str());
-        beatmapPath.append("/");
-        std::string fullFilePath = beatmapPath;
-        fullFilePath.append(osuFileName);
-
-        // skip invalid/corrupt entries
-        // the good way would be to check if the .osu file actually exists on disk, but that is slow af, ain't nobody
-        // got time for that so, since I've seen some concrete examples of what happens in such cases, we just exclude
-        // those
-        if(artistName.length() < 1 && songTitle.length() < 1 && creatorName.length() < 1 &&
-           difficultyName.length() < 1 && md5hash.hash[0] == 0)
-            continue;
-
-        // fill diff with data
-        if(mode != 0) continue;
-
-        DatabaseBeatmap *diff2 = new DatabaseBeatmap(fullFilePath, beatmapPath);
-        {
-            diff2->m_sTitle = songTitle;
-            diff2->m_sAudioFileName = audioFileName;
-            diff2->m_iLengthMS = duration;
-
-            diff2->m_fStackLeniency = stackLeniency;
-
-            diff2->m_sArtist = artistName;
-            diff2->m_sCreator = creatorName;
-            diff2->m_sDifficultyName = difficultyName;
-            diff2->m_sSource = songSource;
-            diff2->m_sTags = songTags;
-            diff2->m_sMD5Hash = md5hash;
-            diff2->m_iID = beatmapID;
-            diff2->m_iSetID = beatmapSetID;
-
-            diff2->m_fAR = AR;
-            diff2->m_fCS = CS;
-            diff2->m_fHP = HP;
-            diff2->m_fOD = OD;
-            diff2->m_fSliderMultiplier = sliderMultiplier;
-
-            // diff2->m_sBackgroundImageFileName = "";
-
-            diff2->m_iPreviewTime = previewTime;
-            diff2->last_modification_time = lastModificationTime;
-
-            diff2->m_sFullSoundFilePath = beatmapPath;
-            diff2->m_sFullSoundFilePath.append(diff2->m_sAudioFileName);
-            diff2->m_iLocalOffset = localOffset;
-            diff2->m_iOnlineOffset = (long)onlineOffset;
-            diff2->m_iNumObjects = numCircles + numSliders + numSpinners;
-            diff2->m_iNumCircles = numCircles;
-            diff2->m_iNumSliders = numSliders;
-            diff2->m_iNumSpinners = numSpinners;
-
-            // NOTE: if we have our own stars/bpm cached then use that
-            bool bpm_was_cached = false;
-            diff2->m_fStarsNomod = numOsuStandardStars;
-
-            const auto result = m_starsCache.find(md5hash);
-            if(result != m_starsCache.end()) {
-                if(result->second.starsNomod >= 0.f) {
-                    diff2->m_fStarsNomod = result->second.starsNomod;
-                }
-                if(result->second.min_bpm >= 0) {
-                    diff2->m_iMinBPM = result->second.min_bpm;
-                    diff2->m_iMaxBPM = result->second.max_bpm;
-                    diff2->m_iMostCommonBPM = result->second.common_bpm;
-                    bpm_was_cached = true;
-                }
-            }
-
-            if(!bpm_was_cached) {
-                auto bpm = getBPM(timingPoints);
-                diff2->m_iMinBPM = bpm.min;
-                diff2->m_iMaxBPM = bpm.max;
-                diff2->m_iMostCommonBPM = bpm.most_common;
-            }
-
-            // build temp partial timingpoints, only used for menu animations
-            // a bit hacky to avoid slow ass allocations
-            diff2->m_timingpoints.resize(numTimingPoints);
-            memset(diff2->m_timingpoints.data(), 0, numTimingPoints * sizeof(DatabaseBeatmap::TIMINGPOINT));
-            for(int t = 0; t < numTimingPoints; t++) {
-                diff2->m_timingpoints[t].offset = (long)timingPoints[t].offset;
-                diff2->m_timingpoints[t].msPerBeat = (float)timingPoints[t].msPerBeat;
-                diff2->m_timingpoints[t].timingChange = timingPoints[t].timingChange;
-            }
-        }
-
-        // special case: legacy fallback behavior for invalid beatmapSetID, try to parse the ID from the path
-        if(beatmapSetID < 1 && path.length() > 0) {
-            auto upath = UString(path.c_str());
-            const std::vector<UString> pathTokens =
-                upath.split("\\");  // NOTE: this is hardcoded to backslash since osu is windows only
-            if(pathTokens.size() > 0 && pathTokens[0].length() > 0) {
-                const std::vector<UString> spaceTokens = pathTokens[0].split(" ");
-                if(spaceTokens.size() > 0 && spaceTokens[0].length() > 0) {
-                    beatmapSetID = spaceTokens[0].toInt();
-                    if(beatmapSetID == 0) beatmapSetID = -1;
-                }
-            }
-        }
-
-        // (the diff is now fully built)
-
-        // now, search if the current set (to which this diff would belong) already exists and add it there, or if
-        // it doesn't exist then create the set
-        const auto result = setIDToIndex.find(beatmapSetID);
-        const bool beatmapSetExists = (result != setIDToIndex.end());
-        if(beatmapSetExists) {
-            beatmapSets[result->second].diffs2->push_back(diff2);
-        } else {
-            setIDToIndex[beatmapSetID] = beatmapSets.size();
-
-            Beatmap_Set s;
-            s.setID = beatmapSetID;
-            s.path = beatmapPath;
-            s.diffs2 = new std::vector<DatabaseBeatmap *>();
-            s.diffs2->push_back(diff2);
-            beatmapSets.push_back(s);
+        // hard cap upper db version
+        if(m_iVersion > osu_database_version.getInt() && !osu_database_ignore_version.getBool()) {
+            osu->getNotificationOverlay()->addNotification(
+                UString::format("osu!.db version unknown (%i), osu!stable maps will not get loaded.", m_iVersion), 0xffffff00, false,
+                5.0f);
+            should_read_peppy_database = false;
         }
     }
 
-    // build beatmap sets
-    for(int i = 0; i < beatmapSets.size(); i++) {
-        if(m_bInterruptLoad.load()) break;            // cancellation point
-        if(beatmapSets[i].diffs2->empty()) continue;  // sanity check
+    if(should_read_peppy_database) {
+        // read beatmapInfos, and also build two hashmaps (diff hash -> BeatmapDifficulty, diff hash -> Beatmap)
+        struct Beatmap_Set {
+            int setID;
+            std::string path;
+            std::vector<DatabaseBeatmap *> *diffs2 = NULL;
+        };
+        std::vector<Beatmap_Set> beatmapSets;
+        std::unordered_map<int, size_t> setIDToIndex;
+        for(int i = 0; i < m_iNumBeatmapsToLoad; i++) {
+            if(m_bInterruptLoad.load()) break;  // cancellation point
 
-        if(beatmapSets[i].setID > 0) {
-            DatabaseBeatmap *bm = new DatabaseBeatmap(beatmapSets[i].diffs2);
-            m_databaseBeatmaps.push_back(bm);
-        } else {
-            // set with invalid ID: treat all its diffs separately. we'll group the diffs by title+artist.
-            std::unordered_map<std::string, std::vector<DatabaseBeatmap *> *> titleArtistToBeatmap;
-            for(auto diff : (*beatmapSets[i].diffs2)) {
-                std::string titleArtist = diff->getTitle();
-                titleArtist.append("|");
-                titleArtist.append(diff->getArtist());
+            if(Osu::debug->getBool()) debugLog("Database: Reading beatmap %i/%i ...\n", (i + 1), m_iNumBeatmapsToLoad);
 
-                auto it = titleArtistToBeatmap.find(titleArtist);
-                if(it == titleArtistToBeatmap.end()) {
-                    titleArtistToBeatmap[titleArtist] = new std::vector<DatabaseBeatmap *>();
+            // update progress (another thread checks if progress >= 1.f to know when we're done)
+            u32 db_pos_sum = db->pos + neosu_maps.pos;
+            float progress = (float)db_pos_sum / (float)db_size_sum;
+            if(progress == 0.f) progress = 0.01f;
+            if(progress >= 1.f) progress = 0.99f;
+            m_fLoadingProgress = progress;
+
+            if(m_iVersion < 20191107)  // see https://osu.ppy.sh/home/changelog/stable40/20191107.2
+            {
+                // also see https://github.com/ppy/osu-wiki/commit/b90f312e06b4f86e509b397565f1fe014bb15943
+                // no idea why peppy decided to change the wiki version from 20191107 to 20191106, because that's not what
+                // stable is doing. the correct version is still 20191107
+
+                /*unsigned int size = */ read<u32>(db);  // size in bytes of the beatmap entry
+            }
+
+            std::string artistName = read_stdstring(db);
+            trim(&artistName);
+            std::string artistNameUnicode = read_stdstring(db);
+            std::string songTitle = read_stdstring(db);
+            trim(&songTitle);
+            std::string songTitleUnicode = read_stdstring(db);
+            std::string creatorName = read_stdstring(db);
+            trim(&creatorName);
+            std::string difficultyName = read_stdstring(db);
+            trim(&difficultyName);
+            std::string audioFileName = read_stdstring(db);
+            auto md5hash = read_hash(db);
+            std::string osuFileName = read_stdstring(db);
+            /*unsigned char rankedStatus = */ read<u8>(db);
+            unsigned short numCircles = read<u16>(db);
+            unsigned short numSliders = read<u16>(db);
+            unsigned short numSpinners = read<u16>(db);
+            long long lastModificationTime = read<u64>(db);
+            float AR = read<f32>(db);
+            float CS = read<f32>(db);
+            float HP = read<f32>(db);
+            float OD = read<f32>(db);
+            double sliderMultiplier = read<f64>(db);
+
+            unsigned int numOsuStandardStarRatings = read<u32>(db);
+            // debugLog("%i star ratings for osu!standard\n", numOsuStandardStarRatings);
+            float numOsuStandardStars = 0.0f;
+            for(int s = 0; s < numOsuStandardStarRatings; s++) {
+                read<u8>(db);  // ObjType
+                unsigned int mods = read<u32>(db);
+                read<u8>(db);  // ObjType
+                double starRating = read<f64>(db);
+                // debugLog("%f stars for %u\n", starRating, mods);
+
+                if(mods == 0) numOsuStandardStars = starRating;
+            }
+
+            unsigned int numTaikoStarRatings = read<u32>(db);
+            // debugLog("%i star ratings for taiko\n", numTaikoStarRatings);
+            for(int s = 0; s < numTaikoStarRatings; s++) {
+                read<u8>(db);  // ObjType
+                read<u32>(db);
+                read<u8>(db);  // ObjType
+                read<f64>(db);
+            }
+
+            unsigned int numCtbStarRatings = read<u32>(db);
+            // debugLog("%i star ratings for ctb\n", numCtbStarRatings);
+            for(int s = 0; s < numCtbStarRatings; s++) {
+                read<u8>(db);  // ObjType
+                read<u32>(db);
+                read<u8>(db);  // ObjType
+                read<f64>(db);
+            }
+
+            unsigned int numManiaStarRatings = read<u32>(db);
+            // debugLog("%i star ratings for mania\n", numManiaStarRatings);
+            for(int s = 0; s < numManiaStarRatings; s++) {
+                read<u8>(db);  // ObjType
+                read<u32>(db);
+                read<u8>(db);  // ObjType
+                read<f64>(db);
+            }
+
+            /*unsigned int drainTime = */ read<u32>(db);  // seconds
+            int duration = read<u32>(db);                 // milliseconds
+            duration = duration >= 0 ? duration : 0;      // sanity clamp
+            int previewTime = read<u32>(db);
+
+            // debugLog("drainTime = %i sec, duration = %i ms, previewTime = %i ms\n", drainTime, duration, previewTime);
+
+            unsigned int numTimingPoints = read<u32>(db);
+            zarray<TIMINGPOINT> timingPoints(numTimingPoints);
+            read_bytes(db, (u8 *)timingPoints.data(), sizeof(TIMINGPOINT) * numTimingPoints);
+
+            int beatmapID = read<i32>(db);     // fucking bullshit, this is NOT an unsigned integer as is described on the
+                                               // wiki, it can and is -1 sometimes
+            int beatmapSetID = read<i32>(db);  // same here
+            /*unsigned int threadID = */ read<u32>(db);
+
+            /*unsigned char osuStandardGrade = */ read<u8>(db);
+            /*unsigned char taikoGrade = */ read<u8>(db);
+            /*unsigned char ctbGrade = */ read<u8>(db);
+            /*unsigned char maniaGrade = */ read<u8>(db);
+            // debugLog("beatmapID = %i, beatmapSetID = %i, threadID = %i, osuStandardGrade = %i, taikoGrade = %i, ctbGrade
+            // = %i, maniaGrade = %i\n", beatmapID, beatmapSetID, threadID, osuStandardGrade, taikoGrade, ctbGrade,
+            // maniaGrade);
+
+            short localOffset = read<u16>(db);
+            float stackLeniency = read<f32>(db);
+            unsigned char mode = read<u8>(db);
+            // debugLog("localOffset = %i, stackLeniency = %f, mode = %i\n", localOffset, stackLeniency, mode);
+
+            auto songSource = read_stdstring(db);
+            auto songTags = read_stdstring(db);
+            trim(&songSource);
+            trim(&songTags);
+            // debugLog("songSource = %s, songTags = %s\n", songSource.toUtf8(), songTags.toUtf8());
+
+            short onlineOffset = read<u16>(db);
+            skip_string(db);  // song title font
+            /*bool unplayed = */ read<u8>(db);
+            /*long long lastTimePlayed = */ read<u64>(db);
+            /*bool isOsz2 = */ read<u8>(db);
+
+            // somehow, some beatmaps may have spaces at the start/end of their
+            // path, breaking the Windows API (e.g. https://osu.ppy.sh/s/215347)
+            auto path = read_stdstring(db);
+            trim(&path);
+
+            /*long long lastOnlineCheck = */ read<u64>(db);
+            // debugLog("onlineOffset = %i, songTitleFont = %s, unplayed = %i, lastTimePlayed = %lu, isOsz2 = %i, path = %s,
+            // lastOnlineCheck = %lu\n", onlineOffset, songTitleFont.toUtf8(), (int)unplayed, lastTimePlayed, (int)isOsz2,
+            // path.c_str(), lastOnlineCheck);
+
+            /*bool ignoreBeatmapSounds = */ read<u8>(db);
+            /*bool ignoreBeatmapSkin = */ read<u8>(db);
+            /*bool disableStoryboard = */ read<u8>(db);
+            /*bool disableVideo = */ read<u8>(db);
+            /*bool visualOverride = */ read<u8>(db);
+            /*int lastEditTime = */ read<u32>(db);
+            /*unsigned char maniaScrollSpeed = */ read<u8>(db);
+            // debugLog("ignoreBeatmapSounds = %i, ignoreBeatmapSkin = %i, disableStoryboard = %i, disableVideo = %i,
+            // visualOverride = %i, maniaScrollSpeed = %i\n", (int)ignoreBeatmapSounds, (int)ignoreBeatmapSkin,
+            // (int)disableStoryboard, (int)disableVideo, (int)visualOverride, maniaScrollSpeed);
+
+            // HACKHACK: workaround for linux and macos: it can happen that nested beatmaps are stored in the database, and
+            // that osu! stores that filepath with a backslash (because windows)
+            if(env->getOS() == Environment::OS::LINUX || env->getOS() == Environment::OS::MACOS) {
+                for(int c = 0; c < path.length(); c++) {
+                    if(path[c] == '\\') {
+                        path[c] = '/';
+                    }
+                }
+            }
+
+            // build beatmap & diffs from all the data
+            std::string beatmapPath = songFolder;
+            beatmapPath.append(path.c_str());
+            beatmapPath.append("/");
+            std::string fullFilePath = beatmapPath;
+            fullFilePath.append(osuFileName);
+
+            // skip invalid/corrupt entries
+            // the good way would be to check if the .osu file actually exists on disk, but that is slow af, ain't nobody
+            // got time for that so, since I've seen some concrete examples of what happens in such cases, we just exclude
+            // those
+            if(artistName.length() < 1 && songTitle.length() < 1 && creatorName.length() < 1 &&
+               difficultyName.length() < 1 && md5hash.hash[0] == 0)
+                continue;
+
+            // fill diff with data
+            if(mode != 0) continue;
+
+            DatabaseBeatmap *diff2 = new DatabaseBeatmap(fullFilePath, beatmapPath);
+            {
+                diff2->m_sTitle = songTitle;
+                diff2->m_sAudioFileName = audioFileName;
+                diff2->m_iLengthMS = duration;
+
+                diff2->m_fStackLeniency = stackLeniency;
+
+                diff2->m_sArtist = artistName;
+                diff2->m_sCreator = creatorName;
+                diff2->m_sDifficultyName = difficultyName;
+                diff2->m_sSource = songSource;
+                diff2->m_sTags = songTags;
+                diff2->m_sMD5Hash = md5hash;
+                diff2->m_iID = beatmapID;
+                diff2->m_iSetID = beatmapSetID;
+
+                diff2->m_fAR = AR;
+                diff2->m_fCS = CS;
+                diff2->m_fHP = HP;
+                diff2->m_fOD = OD;
+                diff2->m_fSliderMultiplier = sliderMultiplier;
+
+                // diff2->m_sBackgroundImageFileName = "";
+
+                diff2->m_iPreviewTime = previewTime;
+                diff2->last_modification_time = lastModificationTime;
+
+                diff2->m_sFullSoundFilePath = beatmapPath;
+                diff2->m_sFullSoundFilePath.append(diff2->m_sAudioFileName);
+                diff2->m_iLocalOffset = localOffset;
+                diff2->m_iOnlineOffset = (long)onlineOffset;
+                diff2->m_iNumObjects = numCircles + numSliders + numSpinners;
+                diff2->m_iNumCircles = numCircles;
+                diff2->m_iNumSliders = numSliders;
+                diff2->m_iNumSpinners = numSpinners;
+
+                // NOTE: if we have our own stars/bpm cached then use that
+                bool bpm_was_cached = false;
+                diff2->m_fStarsNomod = numOsuStandardStars;
+
+                const auto result = m_starsCache.find(md5hash);
+                if(result != m_starsCache.end()) {
+                    if(result->second.starsNomod >= 0.f) {
+                        diff2->m_fStarsNomod = result->second.starsNomod;
+                    }
+                    if(result->second.min_bpm >= 0) {
+                        diff2->m_iMinBPM = result->second.min_bpm;
+                        diff2->m_iMaxBPM = result->second.max_bpm;
+                        diff2->m_iMostCommonBPM = result->second.common_bpm;
+                        bpm_was_cached = true;
+                    }
                 }
 
-                titleArtistToBeatmap[titleArtist]->push_back(diff);
+                if(!bpm_was_cached) {
+                    auto bpm = getBPM(timingPoints);
+                    diff2->m_iMinBPM = bpm.min;
+                    diff2->m_iMaxBPM = bpm.max;
+                    diff2->m_iMostCommonBPM = bpm.most_common;
+                }
+
+                // build temp partial timingpoints, only used for menu animations
+                // a bit hacky to avoid slow ass allocations
+                diff2->m_timingpoints.resize(numTimingPoints);
+                memset(diff2->m_timingpoints.data(), 0, numTimingPoints * sizeof(DatabaseBeatmap::TIMINGPOINT));
+                for(int t = 0; t < numTimingPoints; t++) {
+                    diff2->m_timingpoints[t].offset = (long)timingPoints[t].offset;
+                    diff2->m_timingpoints[t].msPerBeat = (float)timingPoints[t].msPerBeat;
+                    diff2->m_timingpoints[t].timingChange = timingPoints[t].timingChange;
+                }
             }
 
-            for(auto scuffed_set : titleArtistToBeatmap) {
-                DatabaseBeatmap *bm = new DatabaseBeatmap(scuffed_set.second);
-                m_databaseBeatmaps.push_back(bm);
+            // special case: legacy fallback behavior for invalid beatmapSetID, try to parse the ID from the path
+            if(beatmapSetID < 1 && path.length() > 0) {
+                auto upath = UString(path.c_str());
+                const std::vector<UString> pathTokens =
+                    upath.split("\\");  // NOTE: this is hardcoded to backslash since osu is windows only
+                if(pathTokens.size() > 0 && pathTokens[0].length() > 0) {
+                    const std::vector<UString> spaceTokens = pathTokens[0].split(" ");
+                    if(spaceTokens.size() > 0 && spaceTokens[0].length() > 0) {
+                        beatmapSetID = spaceTokens[0].toInt();
+                        if(beatmapSetID == 0) beatmapSetID = -1;
+                    }
+                }
+            }
+
+            // (the diff is now fully built)
+
+            // now, search if the current set (to which this diff would belong) already exists and add it there, or if
+            // it doesn't exist then create the set
+            const auto result = setIDToIndex.find(beatmapSetID);
+            const bool beatmapSetExists = (result != setIDToIndex.end());
+            if(beatmapSetExists) {
+                beatmapSets[result->second].diffs2->push_back(diff2);
+            } else {
+                setIDToIndex[beatmapSetID] = beatmapSets.size();
+
+                Beatmap_Set s;
+                s.setID = beatmapSetID;
+                s.path = beatmapPath;
+                s.diffs2 = new std::vector<DatabaseBeatmap *>();
+                s.diffs2->push_back(diff2);
+                beatmapSets.push_back(s);
             }
         }
+
+        // build beatmap sets
+        for(int i = 0; i < beatmapSets.size(); i++) {
+            if(m_bInterruptLoad.load()) break;            // cancellation point
+            if(beatmapSets[i].diffs2->empty()) continue;  // sanity check
+
+            if(beatmapSets[i].setID > 0) {
+                BeatmapSet *set = new BeatmapSet(beatmapSets[i].diffs2);
+                m_beatmapsets.push_back(set);
+            } else {
+                // set with invalid ID: treat all its diffs separately. we'll group the diffs by title+artist.
+                std::unordered_map<std::string, std::vector<DatabaseBeatmap *> *> titleArtistToBeatmap;
+                for(auto diff : (*beatmapSets[i].diffs2)) {
+                    std::string titleArtist = diff->getTitle();
+                    titleArtist.append("|");
+                    titleArtist.append(diff->getArtist());
+
+                    auto it = titleArtistToBeatmap.find(titleArtist);
+                    if(it == titleArtistToBeatmap.end()) {
+                        titleArtistToBeatmap[titleArtist] = new std::vector<DatabaseBeatmap *>();
+                    }
+
+                    titleArtistToBeatmap[titleArtist]->push_back(diff);
+                }
+
+                for(auto scuffed_set : titleArtistToBeatmap) {
+                    BeatmapSet *set = new BeatmapSet(scuffed_set.second);
+                    m_beatmapsets.push_back(set);
+                }
+            }
+        }
+    }
+
+    // Load neosu map database
+    // We don't want to reload it, ever. Would cause too much jank.
+    static bool first_load = true;
+    if(first_load && neosu_maps.size > 0) {
+        first_load = false;
+
+        u32 version = read<u32>(&neosu_maps);
+        u32 nb_sets = read<u32>(&neosu_maps);
+
+        for(u32 i = 0; i < nb_sets; i++) {
+            u32 db_pos_sum = db->pos + neosu_maps.pos;
+            float progress = (float)db_pos_sum / (float)db_size_sum;
+            if(progress == 0.f) progress = 0.01f;
+            if(progress >= 1.f) progress = 0.99f;
+            m_fLoadingProgress = progress;
+
+            i32 set_id = read<i32>(&neosu_maps);
+            u16 nb_diffs = read<u16>(&neosu_maps);
+
+            std::string mapset_path = MCENGINE_DATA_DIR "maps/";
+            mapset_path.append(std::to_string(set_id));
+            mapset_path.append("/");
+
+            std::vector<BeatmapDifficulty*> *diffs = new std::vector<DatabaseBeatmap*>();
+            for(u16 j = 0; j < nb_diffs; j++) {
+                std::string osu_filename = read_stdstring(&neosu_maps);
+
+                std::string map_path = mapset_path;
+                map_path.append(osu_filename);
+
+                auto diff = new BeatmapDifficulty(map_path, mapset_path);
+                diff->m_iID = read<i32>(&neosu_maps);
+                diff->m_iSetID = set_id;
+                diff->m_sTitle = read_stdstring(&neosu_maps);
+                diff->m_sAudioFileName = read_stdstring(&neosu_maps);
+                diff->m_sFullSoundFilePath = mapset_path;
+                diff->m_sFullSoundFilePath.append(diff->m_sAudioFileName);
+                diff->m_iLengthMS = read<i32>(&neosu_maps);
+                diff->m_fStackLeniency = read<f32>(&neosu_maps);
+                diff->m_sArtist = read_stdstring(&neosu_maps);
+                diff->m_sCreator = read_stdstring(&neosu_maps);
+                diff->m_sDifficultyName = read_stdstring(&neosu_maps);
+                diff->m_sSource = read_stdstring(&neosu_maps);
+                diff->m_sTags = read_stdstring(&neosu_maps);
+                diff->m_sMD5Hash = read_hash(&neosu_maps);
+                diff->m_fAR = read<f32>(&neosu_maps);
+                diff->m_fCS = read<f32>(&neosu_maps);
+                diff->m_fHP = read<f32>(&neosu_maps);
+                diff->m_fOD = read<f32>(&neosu_maps);
+                diff->m_fSliderMultiplier = read<f64>(&neosu_maps);
+                diff->m_iPreviewTime = read<u32>(&neosu_maps);
+                diff->last_modification_time = read<u64>(&neosu_maps);
+                diff->m_iLocalOffset = read<i16>(&neosu_maps);
+                diff->m_iOnlineOffset = read<i16>(&neosu_maps);
+                diff->m_iNumCircles = read<u16>(&neosu_maps);
+                diff->m_iNumSliders = read<u16>(&neosu_maps);
+                diff->m_iNumSpinners = read<u16>(&neosu_maps);
+                diff->m_iNumObjects = diff->m_iNumCircles + diff->m_iNumSliders + diff->m_iNumSpinners;
+                diff->m_fStarsNomod = read<f64>(&neosu_maps);
+                diff->m_iMinBPM = read<i32>(&neosu_maps);
+                diff->m_iMaxBPM = read<i32>(&neosu_maps);
+                diff->m_iMostCommonBPM = read<i32>(&neosu_maps);
+
+                // build temp partial timingpoints, only used for menu animations
+                // a bit hacky to avoid slow ass allocations
+                u32 numTimingPoints = read<u32>(&neosu_maps);
+                diff->m_timingpoints.resize(numTimingPoints);
+                read_bytes(&neosu_maps, (u8 *)diff->m_timingpoints.data(), sizeof(TIMINGPOINT) * numTimingPoints);
+
+                diffs->push_back(diff);
+            }
+
+            if(diffs->empty()) {
+                delete diffs;
+            } else {
+                auto set = new BeatmapSet(diffs);
+                m_beatmapsets.push_back(set);
+                m_neosu_sets.push_back(set);
+            }
+        }
+
+        m_neosu_maps_loaded = true;
     }
 
     load_collections();
 
     m_importTimer->update();
-    debugLog("Refresh finished, added %i beatmaps in %f seconds.\n", m_databaseBeatmaps.size(),
+    debugLog("Refresh finished, added %i beatmaps in %f seconds.\n", m_beatmapsets.size(),
              m_importTimer->getElapsedTime());
 
     // signal that we are done
@@ -1365,7 +1315,7 @@ void Database::saveStars() {
     t.start();
 
     i64 numStarsCacheEntries = 0;
-    for(DatabaseBeatmap *beatmap : m_databaseBeatmaps) {
+    for(DatabaseBeatmap *beatmap : m_beatmapsets) {
         numStarsCacheEntries += beatmap->getDifficulties().size();
     }
 
@@ -1384,7 +1334,7 @@ void Database::saveStars() {
     write<u64>(&cache, numStarsCacheEntries);
 
     cache.reserve(cache.size + (34 + 4 + 4 + 4 + 4) * numStarsCacheEntries);
-    for(BeatmapSet *beatmap : m_databaseBeatmaps) {
+    for(BeatmapSet *beatmap : m_beatmapsets) {
         for(BeatmapDifficulty *diff2 : beatmap->getDifficulties()) {
             write_hash(&cache, diff2->getMD5Hash().hash);
             write<f32>(&cache, diff2->getStarsNomod());
@@ -1402,6 +1352,66 @@ void Database::saveStars() {
 
     t.update();
     debugLog("Saving stars took %f seconds.\n", t.getElapsedTime());
+}
+
+void Database::saveMaps() {
+    if(!m_neosu_maps_loaded) return;
+
+    debugLog("Osu: Saving maps ...\n");
+    Timer t;
+    t.start();
+
+    // write
+    Packet maps;
+    write<u32>(&maps, NEOSU_MAPS_DB_VERSION);
+    write<u32>(&maps, m_neosu_sets.size());
+    for(BeatmapSet *beatmap : m_neosu_sets) {
+        write<i32>(&maps, beatmap->getSetID());
+        write<u16>(&maps, beatmap->getDifficulties().size());
+
+        for(BeatmapDifficulty *diff : beatmap->getDifficulties()) {
+            write_string(&maps, env->getFileNameFromFilePath(diff->m_sFilePath).c_str());
+            write<i32>(&maps, diff->m_iID);
+            write_string(&maps, diff->m_sTitle.c_str());
+            write_string(&maps, diff->m_sAudioFileName.c_str());
+            write<i32>(&maps, diff->m_iLengthMS);
+            write<f32>(&maps, diff->m_fStackLeniency);
+            write_string(&maps, diff->m_sArtist.c_str());
+            write_string(&maps, diff->m_sCreator.c_str());
+            write_string(&maps, diff->m_sDifficultyName.c_str());
+            write_string(&maps, diff->m_sSource.c_str());
+            write_string(&maps, diff->m_sTags.c_str());
+            write_hash(&maps, diff->m_sMD5Hash);
+            write<f32>(&maps, diff->m_fAR);
+            write<f32>(&maps, diff->m_fCS);
+            write<f32>(&maps, diff->m_fHP);
+            write<f32>(&maps, diff->m_fOD);
+            write<f64>(&maps, diff->m_fSliderMultiplier);
+            write<u32>(&maps, diff->m_iPreviewTime);
+            write<u64>(&maps, diff->last_modification_time);
+            write<i16>(&maps, diff->m_iLocalOffset);
+            write<i16>(&maps, diff->m_iOnlineOffset);
+            write<u16>(&maps, diff->m_iNumCircles);
+            write<u16>(&maps, diff->m_iNumSliders);
+            write<u16>(&maps, diff->m_iNumSpinners);
+            write<f64>(&maps, diff->m_fStarsNomod);
+            write<i32>(&maps, diff->m_iMinBPM);
+            write<i32>(&maps, diff->m_iMaxBPM);
+            write<i32>(&maps, diff->m_iMostCommonBPM);
+
+            u32 numTimingPoints = diff->m_timingpoints.size();
+            write<u32>(&maps, numTimingPoints);
+            write_bytes(&maps, (u8 *)diff->m_timingpoints.data(), sizeof(TIMINGPOINT) * numTimingPoints);
+        }
+    }
+
+    if(!save_db(&maps, "neosu_maps.db")) {
+        debugLog("Couldn't write neosu_maps.db!\n");
+    }
+    free(maps.memory);
+
+    t.update();
+    debugLog("Saving maps took %f seconds.\n", t.getElapsedTime());
 }
 
 void Database::loadScores() {
