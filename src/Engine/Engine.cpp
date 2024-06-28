@@ -245,6 +245,9 @@ void Engine::loadApp() {
     if(!env->directoryExists(MCENGINE_DATA_DIR "screenshots")) {
         env->createDirectory(MCENGINE_DATA_DIR "screenshots");
     }
+    if(!env->directoryExists(MCENGINE_DATA_DIR "skins")) {
+        env->createDirectory(MCENGINE_DATA_DIR "skins");
+    }
 
     // load core default resources (these are required to be able to draw the loading screen)
     if(m_iLoadingScreenDelay == 0 || m_iLoadingScreenDelay == -2) {

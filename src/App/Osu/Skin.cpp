@@ -2,6 +2,8 @@
 
 #include <string.h>
 
+#include "miniz.h"
+
 #include "Beatmap.h"
 #include "ConVar.h"
 #include "Engine.h"
@@ -61,6 +63,67 @@ ConVar *Skin::m_osu_skin_hd = &osu_skin_hd;
 
 ConVar *Skin::m_osu_skin_ref = NULL;
 ConVar *Skin::m_osu_mod_fposu_ref = NULL;
+
+void Skin::unpack(const char* filepath) {
+    auto skin_name = env->getFileNameFromFilePath(filepath);
+    debugLog("Extracting %s...\n", skin_name.c_str());
+    skin_name.erase(skin_name.size() - 4); // remove .osk extension
+
+    auto skin_root = std::string(MCENGINE_DATA_DIR "skins/");
+    skin_root.append(skin_name);
+    skin_root.append("/");
+
+    File file(filepath);
+
+    mz_zip_archive zip = {0};
+    mz_zip_archive_file_stat file_stat;
+    mz_uint num_files = 0;
+
+    if(!mz_zip_reader_init_mem(&zip, file.readFile(), file.getFileSize(), 0)) {
+        debugLog("Failed to open .osk file\n");
+        return;
+    }
+
+    num_files = mz_zip_reader_get_num_files(&zip);
+    if(num_files <= 0) {
+        debugLog(".osk file is empty!\n");
+        mz_zip_reader_end(&zip);
+        return;
+    }
+
+    if(!env->directoryExists(skin_root)) {
+        env->createDirectory(skin_root);
+    }
+
+    for(mz_uint i = 0; i < num_files; i++) {
+        if(!mz_zip_reader_file_stat(&zip, i, &file_stat)) continue;
+        if(mz_zip_reader_is_file_a_directory(&zip, i)) continue;
+
+        auto folders = UString(file_stat.m_filename).split("/");
+        std::string file_path = skin_root;
+        for(auto folder : folders) {
+            if(!env->directoryExists(file_path)) {
+                env->createDirectory(file_path);
+            }
+
+            if(folder == UString("..")) {
+                // Bro...
+                goto skip_file;
+            } else {
+                file_path.append("/");
+                file_path.append(folder.toUtf8());
+            }
+        }
+
+        mz_zip_reader_extract_to_file(&zip, i, file_path.c_str(), 0);
+
+    skip_file:;
+        // When a file can't be extracted we just ignore it (as long as the archive is valid).
+    }
+
+    // Success
+    mz_zip_reader_end(&zip);
+}
 
 Skin::Skin(UString name, std::string filepath, bool isDefaultSkin) {
     m_sName = name;

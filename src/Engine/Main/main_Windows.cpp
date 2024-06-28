@@ -4,7 +4,12 @@
 // Include order matters
 #include "cbase.h"
 #include <dwmapi.h>
+#include <shellapi.h>
 // clang-format on
+
+#include "OptionsMenu.h"
+#include "Osu.h"
+#include "Skin.h"
 
 // NEXTRAWINPUTBLOCK macro requires this
 typedef uint64_t QWORD;
@@ -154,15 +159,6 @@ extern ConVar *win_realtimestylus;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch(msg) {
-#ifdef WINDOW_GHOST
-
-        // window click-through
-        // case WM_NCHITTEST:
-        //	return HTNOWHERE;
-        //	break;
-
-#endif
-
         case WM_NCCREATE:
             if(g_bSupportsPerMonitorDpiAwareness) {
                 typedef BOOL(WINAPI * EPNCDS)(HWND);
@@ -172,45 +168,51 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             }
             return DefWindowProcW(hwnd, msg, wParam, lParam);
 
-#if defined(WINDOW_FRAMELESS) && !defined(WINDOW_GHOST)
+        case WM_DROPFILES: {
+            HDROP hDrop = (HDROP)wParam;
+            UINT fileCount = DragQueryFileW(hDrop, 0xFFFFFFFF, NULL, 0);
 
-            // ignore
-            /*
-            case WM_ERASEBKGND:
-                    return 1;
-            */
+            std::string first_skin;
 
-            // window border paint
-            /*
-            case WM_NCPAINT:
-                    {
-                            // draw beautifully blurred windows 7 background + shadows
-                            return DefWindowProcW(hwnd, msg, wParam, lParam);
+            for (UINT i = 0; i < fileCount; i++) {
+                UINT pathLength = DragQueryFileW(hDrop, i, NULL, 0);
+                wchar_t *filePath = new wchar_t[pathLength + 1];
+                DragQueryFileW(hDrop, i, filePath, pathLength + 1);
 
-                            // draw white rectangle over everything except the shadows
-                            //HDC hdc;
-                            //hdc = GetDCEx(hwnd, (HRGN)wParam, DCX_WINDOW|DCX_INTERSECTRGN);
-                            //PAINTSTRUCT ps;
-                            //hdc = BeginPaint(hwnd, &ps);
-                            //RECT wr;
-                            //GetClientRect(hwnd, &wr);
-                            //HBRUSH br;
-                            //br = GetSysColorBrush(COLOR_WINDOW);
-                            //FillRect(hdc, &wr, br);
-                            //ReleaseDC(hwnd, hdc);
+                // Convert filepath to UTF-8
+                int size = WideCharToMultiByte(CP_UTF8, 0, filePath, pathLength, NULL, 0, NULL, NULL);
+                std::string utf8filepath(size, 0);
+                WideCharToMultiByte(CP_UTF8, 0, filePath, size, (LPSTR)utf8filepath.c_str(), size, NULL, NULL);
+				delete[] filePath;
+
+                if(utf8filepath.length() < 4) continue;
+                auto extension = env->getFileExtensionFromFilePath(utf8filepath);
+                if(!extension.compare("osk") || !extension.compare("zip")) {
+                    Skin::unpack(utf8filepath.c_str());
+                    if(first_skin.length() == 0) {
+                        first_skin = utf8filepath;
                     }
-                    /// return 0;
-            */
+                }
+            }
 
+            DragFinish(hDrop);
+
+            if(first_skin.length() > 0) {
+                auto folder_name = env->getFileNameFromFilePath(first_skin);
+                folder_name.erase(folder_name.size() - 4); // remove .osk extension
+
+                convar->getConVarByName("osu_skin")->setValue(env->getFileNameFromFilePath(folder_name).c_str());
+                osu->m_optionsMenu->updateSkinNameLabel();
+            }
+
+            return 0;
+        }
+
+
+#if defined(WINDOW_FRAMELESS) && !defined(WINDOW_GHOST)
         case WM_NCCALCSIZE: {
             if(wParam == TRUE) {
                 LPNCCALCSIZE_PARAMS pncc = (LPNCCALCSIZE_PARAMS)lParam;
-
-                // debugLog("new rectang: top = %i, right = %i, bottom = %i, left = %i\n", pncc->rgrc[0].top,
-                // pncc->rgrc[0].right, pncc->rgrc[0].bottom, pncc->rgrc[0].left); debugLog("old rectang: top = %i,
-                // right = %i, bottom = %i, left = %i\n", pncc->rgrc[1].top, pncc->rgrc[1].right, pncc->rgrc[1].bottom,
-                // pncc->rgrc[1].left); debugLog("client rect: top = %i, right = %i, bottom = %i, left = %i\n",
-                // pncc->rgrc[2].top, pncc->rgrc[2].right, pncc->rgrc[2].bottom, pncc->rgrc[2].left);
 
                 if(IsZoomed(hwnd)) {
                     // HACKHACK: use center instead of MonitorFromWindow() in order to workaround windows display
@@ -226,26 +228,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                     info.cbSize = sizeof(MONITORINFO);
                     GetMonitorInfo(monitor, &info);
 
-                    // McRect mr(info.rcMonitor.left, info.rcMonitor.top, std::abs(info.rcMonitor.left -
-                    // info.rcMonitor.right), std::abs(info.rcMonitor.top - info.rcMonitor.bottom)); printf("monitor.x =
-                    // %i, y = %i, width = %i, height = %i\n", (int)mr.getX(), (int)mr.getY(), (int)mr.getWidth(),
-                    // (int)mr.getHeight());
-
-                    // old (broken for multi-monitor setups)
-                    // pncc->rgrc[0].right += pncc->rgrc[0].left;
-                    // pncc->rgrc[0].bottom += pncc->rgrc[0].top;
-                    // pncc->rgrc[0].top = 0;
-                    // pncc->rgrc[0].left = 0;
-
-                    // new (still feels incorrect and fragile, but works for what I've tested it on)
                     pncc->rgrc[0].right += pncc->rgrc[0].left - info.rcMonitor.left;
                     pncc->rgrc[0].bottom += pncc->rgrc[0].top - info.rcMonitor.top;
                     pncc->rgrc[0].top = info.rcMonitor.top;
                     pncc->rgrc[0].left = info.rcMonitor.left;
                 }
-
-                // printf("after:  right = %i, bottom = %i, top = %i, left = %i\n", (int)pncc->rgrc[0].right,
-                // (int)pncc->rgrc[0].bottom, (int)pncc->rgrc[0].top, (int)pncc->rgrc[0].left);
             }
         }
             // "When wParam is TRUE, simply returning 0 without processing the NCCALCSIZE_PARAMS rectangles will cause
@@ -310,34 +297,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
         // paint nothing on repaint
         case WM_PAINT: {
-            // variant 1 (apparently not the correct way of doing this?):
-            /*
-            ValidateRect(hwnd, NULL);
-            */
-
-            // variant 2 (seems to be what DefWindowProc is doing):
             PAINTSTRUCT ps;
             BeginPaint(hwnd, &ps);
             EndPaint(hwnd, &ps);
-
-            // debug:
-            /*
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hwnd, &ps);
-
-            RECT wr;
-            GetClientRect(hwnd, &wr);
-            HBRUSH br;
-            br = (HBRUSH)GetStockObject(BLACK_BRUSH);
-            FillRect(hdc, &wr, br);
-
-            ///br = (HBRUSH)GetStockObject(GRAY_BRUSH);
-            ///wr.right = 100;
-            ///wr.bottom = 100;
-            ///FillRect(hdc, &wr, br);
-
-            EndPaint(hwnd,&ps);
-            */
         }
             return 0;
 
@@ -1103,6 +1065,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     bool wasLaunchedInBackgroundAndWaitingForFocus = !g_bHasFocus;  // HACKHACK: workaround (2), see above
 
     if(g_bHasFocus) g_engine->onFocusGained();
+
+    DragAcceptFiles(hwnd, TRUE);
 
     frameTimer->update();
     deltaTimer->update();

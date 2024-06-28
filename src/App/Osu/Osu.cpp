@@ -59,7 +59,7 @@ Osu *osu = NULL;
 
 // release configuration
 ConVar auto_update("auto_update", true, FCVAR_DEFAULT);
-ConVar osu_version("osu_version", 35.07f, FCVAR_DEFAULT | FCVAR_HIDDEN);
+ConVar osu_version("osu_version", 35.08f, FCVAR_DEFAULT | FCVAR_HIDDEN);
 
 #ifdef _DEBUG
 ConVar osu_debug("osu_debug", true, FCVAR_DEFAULT);
@@ -2019,13 +2019,19 @@ void Osu::onSkinChange(UString oldValue, UString newValue) {
         if(newValue.length() < 1) return;
     }
 
-    UString skinFolder = m_osu_folder_ref->getString();
-    skinFolder.append(m_osu_folder_sub_skins_ref->getString());
-    skinFolder.append(newValue);
-    skinFolder.append("/");
-    std::string sf = skinFolder.toUtf8();
-
-    m_skinScheduledToLoad = new Skin(newValue, sf, (newValue == UString("default")));
+    std::string neosuSkinFolder = MCENGINE_DATA_DIR "skins/";
+    neosuSkinFolder.append(newValue.toUtf8());
+    neosuSkinFolder.append("/");
+    if(env->directoryExists(neosuSkinFolder)) {
+        m_skinScheduledToLoad = new Skin(newValue, neosuSkinFolder, (newValue == UString("default")));
+    } else {
+        UString ppySkinFolder = m_osu_folder_ref->getString();
+        ppySkinFolder.append(m_osu_folder_sub_skins_ref->getString());
+        ppySkinFolder.append(newValue);
+        ppySkinFolder.append("/");
+        std::string sf = ppySkinFolder.toUtf8();
+        m_skinScheduledToLoad = new Skin(newValue, sf, (newValue == UString("default")));
+    }
 
     // initial load
     if(m_skin == NULL) m_skin = m_skinScheduledToLoad;

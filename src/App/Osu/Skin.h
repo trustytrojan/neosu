@@ -11,6 +11,7 @@ class SkinImage;
 class Skin {
    public:
     static const char *OSUSKIN_DEFAULT_SKIN_PATH;
+    static void unpack(const char* filepath);
 
     static ConVar *m_osu_skin_async;
     static ConVar *m_osu_skin_hd;

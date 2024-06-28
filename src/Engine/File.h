@@ -1,13 +1,4 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		file wrapper, for cross-platform unicode path support
-//
-// $NoKeywords: $file $os
-//===============================================================================//
-
-#ifndef FILE_H
-#define FILE_H
-
+#pragma once
 #include "cbase.h"
 
 class BaseFile;
@@ -80,5 +71,3 @@ class StdFile : public BaseFile {
     // full reader
     std::vector<u8> m_fullBuffer;
 };
-
-#endif

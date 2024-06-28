@@ -378,13 +378,15 @@ std::string WinEnvironment::getFileExtensionFromFilePath(std::string filepath, b
 }
 
 std::string WinEnvironment::getFileNameFromFilePath(std::string filePath) {
-    // TODO: use PathStripPath
     if(filePath.length() < 1) return filePath;
 
     const size_t lastSlashIndex = filePath.find_last_of('/');
-    if(lastSlashIndex != std::string::npos) return filePath.substr(lastSlashIndex + 1);
+    const size_t lastBackSlashIndex = filePath.find_last_of('\\');
+    size_t idx = 0;
+    if(lastSlashIndex != std::string::npos) idx = lastSlashIndex + 1;
+    if(lastBackSlashIndex != std::string::npos) idx = max(idx, lastBackSlashIndex + 1);
 
-    return filePath;
+    return filePath.substr(idx);
 }
 
 void WinEnvironment::showMessageInfo(UString title, UString message) {

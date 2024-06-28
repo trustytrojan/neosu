@@ -2397,11 +2397,16 @@ void OptionsMenu::openCurrentSkinFolder() {
         env->openDirectory(MCENGINE_DATA_DIR "materials/default");
 #endif
     } else {
-        UString skinFolder = convar->getConVarByName("osu_folder")->getString();
-        skinFolder.append(convar->getConVarByName("osu_folder_sub_skins")->getString());
-        skinFolder.append(current_skin);
-        std::string skin_folder_str(skinFolder.toUtf8());
-        env->openDirectory(skinFolder.toUtf8());
+        std::string neosuSkinFolder = MCENGINE_DATA_DIR "skins/";
+        neosuSkinFolder.append(current_skin.toUtf8());
+        if(env->directoryExists(neosuSkinFolder)) {
+            env->openDirectory(neosuSkinFolder);
+        } else {
+            UString skinFolder = convar->getConVarByName("osu_folder")->getString();
+            skinFolder.append(convar->getConVarByName("osu_folder_sub_skins")->getString());
+            skinFolder.append(current_skin);
+            env->openDirectory(skinFolder.toUtf8());
+        }
     }
 }
 
@@ -2412,7 +2417,14 @@ void OptionsMenu::onSkinSelect() {
 
     UString skinFolder = convar->getConVarByName("osu_folder")->getString();
     skinFolder.append(convar->getConVarByName("osu_folder_sub_skins")->getString());
-    std::vector<std::string> skinFolders = env->getFoldersInFolder(skinFolder.toUtf8());
+
+    std::vector<std::string> skinFolders;
+    for(auto skin : env->getFoldersInFolder(MCENGINE_DATA_DIR "skins/")) {
+        skinFolders.push_back(skin);
+    }
+    for(auto skin : env->getFoldersInFolder(skinFolder.toUtf8())) {
+        skinFolders.push_back(skin);
+    }
 
     if(convar->getConVarByName("sort_skins_by_name")->getBool()) {
         // Sort skins only by alphanum characters, ignore the others

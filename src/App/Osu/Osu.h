@@ -92,7 +92,6 @@ class Osu : public App, public MouseListener {
 
     void saveScreenshot();
 
-    void setSkin(UString skin) { onSkinChange("", skin); }
     void reloadSkin() { onSkinReload(); }
 
     inline Vector2 getScreenSize() const { return g_vInternalResolution; }
