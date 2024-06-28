@@ -101,6 +101,7 @@ class SongBrowser : public ScreenBackable {
 
     virtual CBaseUIContainer *setVisible(bool visible);
 
+    bool selectBeatmapset(i32 set_id);
     void selectSelectedBeatmapSongButton();
     void onPlayEnd(bool quit = true);  // called when a beatmap is finished playing (or the player quit)
 
@@ -330,6 +331,7 @@ class SongBrowser : public ScreenBackable {
     std::unordered_map<MD5Hash, SongButton *> hashToSongButton;
     bool m_bBeatmapRefreshScheduled;
     UString m_sLastOsuFolder;
+    MD5Hash beatmap_to_reselect_after_db_load;
 
     // keys
     bool m_bF1Pressed;

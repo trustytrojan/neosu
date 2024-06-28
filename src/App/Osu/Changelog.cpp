@@ -29,13 +29,13 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
+    latest.changes.push_back("- Added ability to drag-and-drop .osk and .osz files onto neosu");
+    latest.changes.push_back("- Added local skin folder");
     latest.changes.push_back("- Fixed songs failing to restart");
     changelogs.push_back(latest);
 
     CHANGELOG v35_07;
     v35_07.title = "35.07 (2024-06-27)";
-    v35_07.changes.push_back("- Added ability to drag-and-drop skins onto neosu");
-    v35_07.changes.push_back("- Added local skin folder");
     v35_07.changes.push_back("- Added sort_skins_by_name convar");
     v35_07.changes.push_back("- Added setting to prevent servers from replacing the main menu logo");
     v35_07.changes.push_back("- Chat: added missing chat commands");

@@ -147,6 +147,7 @@ DatabaseBeatmap::DatabaseBeatmap(std::vector<DatabaseBeatmap *> *difficulties) :
     m_sArtist = (*m_difficulties)[0]->m_sArtist;
     m_sCreator = (*m_difficulties)[0]->m_sCreator;
     m_sBackgroundImageFileName = (*m_difficulties)[0]->m_sBackgroundImageFileName;
+    m_iSetID = (*m_difficulties)[0]->m_iSetID;
 
     // also calculate largest representative values
     m_iLengthMS = 0;

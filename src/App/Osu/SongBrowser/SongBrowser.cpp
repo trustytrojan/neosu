@@ -895,6 +895,43 @@ void SongBrowser::drawSelectedBeatmapBackgroundImage(Graphics *g, float alpha) {
     }
 }
 
+bool SongBrowser::selectBeatmapset(i32 set_id) {
+    auto beatmapset = getDatabase()->getBeatmapSet(set_id);
+    if(beatmapset == NULL) {
+        // Pasted from Downloader::download_beatmap
+        auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_id);
+        // XXX: Make a permanent database for auto-downloaded songs, so we can load them like osu!.db's
+        osu->m_songBrowser2->getDatabase()->addBeatmap(mapset_path.toUtf8());
+        osu->m_songBrowser2->updateSongButtonSorting();
+        debugLog("Finished loading beatmapset %d.\n", set_id);
+
+        beatmapset = getDatabase()->getBeatmapSet(set_autodl);
+    }
+
+    if(beatmapset == NULL) {
+        return false;
+    }
+
+    // Just picking the hardest diff for now
+    DatabaseBeatmap *best_diff = NULL;
+    const std::vector<DatabaseBeatmap *> &diffs = beatmapset->getDifficulties();
+    for(size_t d = 0; d < diffs.size(); d++) {
+        DatabaseBeatmap *diff = diffs[d];
+        if(!best_diff || diff->getStarsNomod() > best_diff->getStarsNomod()) {
+            best_diff = diff;
+        }
+    }
+
+    if(best_diff == NULL) {
+        osu->getNotificationOverlay()->addNotification("Beatmapset has no difficulties :/");
+        return false;
+    } else {
+        osu->m_songBrowser2->onDifficultySelected(best_diff, false);
+        osu->m_songBrowser2->selectSelectedBeatmapSongButton();
+        return true;
+    }
+}
+
 void SongBrowser::mouse_update(bool *propagate_clicks) {
     if(!m_bVisible) return;
     ScreenBackable::mouse_update(propagate_clicks);
@@ -948,8 +985,10 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
             set_autodl = 0;
         }
     } else if(set_autodl) {
-        auto beatmapset = getDatabase()->getBeatmapSet(set_autodl);
-        if(beatmapset == NULL) {
+        if(selectBeatmapset(set_autodl)) {
+            map_autodl = 0;
+            set_autodl = 0;
+        } else {
             float progress = -1.f;
             download_beatmapset(set_autodl, &progress);
             if(progress == -1.f) {
@@ -962,37 +1001,11 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
                 auto text = UString::format("Downloading... %.2f%%", progress * 100.f);
                 osu->getNotificationOverlay()->addNotification(text);
             } else {
-                // Pasted from Downloader::download_beatmap
-                auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_autodl);
-                // XXX: Make a permanent database for auto-downloaded songs, so we can load them like osu!.db's
-                osu->m_songBrowser2->getDatabase()->addBeatmap(mapset_path.toUtf8());
-                osu->m_songBrowser2->updateSongButtonSorting();
-                debugLog("Finished loading beatmapset %d.\n", set_autodl);
+                selectBeatmapset(set_autodl);
 
-                beatmapset = getDatabase()->getBeatmapSet(set_autodl);
+                map_autodl = 0;
+                set_autodl = 0;
             }
-        }
-
-        if(beatmapset != NULL) {
-            // Just picking the hardest diff for now
-            DatabaseBeatmap *best_diff = NULL;
-            const std::vector<DatabaseBeatmap *> &diffs = beatmapset->getDifficulties();
-            for(size_t d = 0; d < diffs.size(); d++) {
-                DatabaseBeatmap *diff = diffs[d];
-                if(!best_diff || diff->getStarsNomod() > best_diff->getStarsNomod()) {
-                    best_diff = diff;
-                }
-            }
-
-            if(best_diff == NULL) {
-                osu->getNotificationOverlay()->addNotification("Beatmapset has no difficulties :/");
-            } else {
-                osu->m_songBrowser2->onDifficultySelected(best_diff, false);
-                osu->m_songBrowser2->selectSelectedBeatmapSongButton();
-            }
-
-            map_autodl = 0;
-            set_autodl = 0;
         }
     }
 
@@ -1592,6 +1605,11 @@ void SongBrowser::refreshBeatmaps() {
     if(first_refresh) {
         m_selectedBeatmap->m_music = NULL;
         first_refresh = false;
+    }
+
+    auto diff2 = m_selectedBeatmap->getSelectedDifficulty2();
+    if(diff2) {
+        beatmap_to_reselect_after_db_load = diff2->getMD5Hash();
     }
 
     m_selectedBeatmap->pausePreviewMusic();
@@ -2983,12 +3001,10 @@ void SongBrowser::onDatabaseLoadingFinished() {
 
     if(osu_songbrowser_search_hardcoded_filter.getString().length() > 0) onSearchUpdate();
 
-    // main menu starts playing a song before the database is loaded,
-    // re-select it after the database has been loaded
-    if(osu->m_mainMenu->preloaded_beatmapset != NULL) {
-        auto matching_beatmap = getDatabase()->getBeatmapDifficulty(osu->m_mainMenu->preloaded_beatmap->getMD5Hash());
-        if(matching_beatmap) {
-            onDifficultySelected(matching_beatmap, false);
+    if(beatmap_to_reselect_after_db_load.hash[0] != 0) {
+        auto beatmap = getDatabase()->getBeatmapDifficulty(beatmap_to_reselect_after_db_load);
+        if(beatmap) {
+            onDifficultySelected(beatmap, false);
             selectSelectedBeatmapSongButton();
         }
 

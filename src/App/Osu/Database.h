@@ -83,6 +83,10 @@ class Database {
     static int getLevelForScore(unsigned long long score, int maxLevel = 120);
 
     inline float getProgress() const { return m_fLoadingProgress.load(); }
+    inline bool isLoading() const {
+        float progress = getProgress();
+        return progress > 0.f && progress < 1.f;
+    }
     inline bool isFinished() const { return (getProgress() >= 1.0f); }
     inline bool foundChanges() const { return m_bFoundChanges; }
 

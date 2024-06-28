@@ -215,49 +215,96 @@ end:
     curl_url_cleanup(urlu);
 }
 
-void download_beatmapset(u32 set_id, float* progress) {
-    // Check if we already have downloaded it
-    auto map_dir = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_id);
-    if(env->directoryExists(map_dir.toUtf8())) {
-        *progress = 1.f;
-        return;
+i32 get_beatmapset_id_from_osu_file(const u8* osu_data, size_t s_osu_data) {
+    i32 set_id = -1;
+    std::string line;
+    for(size_t i = 0; i < s_osu_data; i++) {
+        if(osu_data[i] == '\n') {
+            if(line.find("//") != 0) {
+                debugLog("%s\n", line.c_str());
+                sscanf(line.c_str(), " BeatmapSetID : %i \n", &set_id);
+                if(set_id != -1) return set_id;
+            }
+
+            line = "";
+        } else {
+            line.push_back(osu_data[i]);
+        }
     }
 
-    std::vector<u8> data;
-    auto mirror = convar->getConVarByName("beatmap_mirror")->getString();
-    mirror.append(UString::format("%d", set_id));
-    int response_code = 0;
-    download(mirror.toUtf8(), progress, data, &response_code);
-    if(response_code != 200) return;
+    if(line.find("//") != 0) {
+        debugLog("%s\n", line.c_str());
+        sscanf(line.c_str(), " BeatmapSetID : %i \n", &set_id);
+    }
 
-    // Download succeeded: save map to disk
+    return -1;
+}
+
+i32 extract_beatmapset_id(const u8* data, size_t data_s) {
+    i32 set_id = -1;
+
     mz_zip_archive zip = {0};
     mz_zip_archive_file_stat file_stat;
     mz_uint num_files = 0;
 
-    debugLog("Extracting beatmapset %d (%d bytes)\n", set_id, data.size());
-    if(!mz_zip_reader_init_mem(&zip, data.data(), data.size(), 0)) {
+    debugLog("Reading beatmapset (%d bytes)\n", data_s);
+    if(!mz_zip_reader_init_mem(&zip, data, data_s, 0)) {
         debugLog("Failed to open .osz file\n");
-        *progress = -1.f;
-        return;
+        return -1;
     }
 
     num_files = mz_zip_reader_get_num_files(&zip);
     if(num_files <= 0) {
         debugLog(".osz file is empty!\n");
         mz_zip_reader_end(&zip);
-        *progress = -1.f;
-        return;
+        return -1;
     }
-    if(!env->directoryExists(map_dir.toUtf8())) {
-        env->createDirectory(map_dir.toUtf8());
+    for(mz_uint i = 0; i < num_files; i++) {
+        if(!mz_zip_reader_file_stat(&zip, i, &file_stat)) continue;
+        if(mz_zip_reader_is_file_a_directory(&zip, i)) continue;
+        if(env->getFileExtensionFromFilePath(file_stat.m_filename).compare("osu") != 0) continue;
+
+        size_t s_osu_data = 0;
+        u8* osu_data = (u8*)mz_zip_reader_extract_to_heap(&zip, i, &s_osu_data, 0);
+        set_id = get_beatmapset_id_from_osu_file(osu_data, s_osu_data);
+        mz_free(osu_data);
+        if(set_id != -1) break;
+
+    skip_file:;
+        // When a file can't be extracted we just ignore it (as long as the archive is valid).
+        // We'll check for errors when loading the beatmap.
+    }
+
+    mz_zip_reader_end(&zip);
+    return set_id;
+}
+
+bool extract_beatmapset(const u8* data, size_t data_s, std::string map_dir) {
+    mz_zip_archive zip = {0};
+    mz_zip_archive_file_stat file_stat;
+    mz_uint num_files = 0;
+
+    debugLog("Extracting beatmapset (%d bytes)\n", data_s);
+    if(!mz_zip_reader_init_mem(&zip, data, data_s, 0)) {
+        debugLog("Failed to open .osz file\n");
+        return false;
+    }
+
+    num_files = mz_zip_reader_get_num_files(&zip);
+    if(num_files <= 0) {
+        debugLog(".osz file is empty!\n");
+        mz_zip_reader_end(&zip);
+        return false;
+    }
+    if(!env->directoryExists(map_dir)) {
+        env->createDirectory(map_dir);
     }
     for(mz_uint i = 0; i < num_files; i++) {
         if(!mz_zip_reader_file_stat(&zip, i, &file_stat)) continue;
         if(mz_zip_reader_is_file_a_directory(&zip, i)) continue;
 
         auto folders = UString(file_stat.m_filename).split("/");
-        std::string file_path = map_dir.toUtf8();
+        std::string file_path = map_dir;
         for(auto folder : folders) {
             if(!env->directoryExists(file_path)) {
                 env->createDirectory(file_path);
@@ -281,6 +328,29 @@ void download_beatmapset(u32 set_id, float* progress) {
 
     // Success
     mz_zip_reader_end(&zip);
+    return true;
+}
+
+void download_beatmapset(u32 set_id, float* progress) {
+    // Check if we already have downloaded it
+    auto map_dir = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_id);
+    if(env->directoryExists(map_dir.toUtf8())) {
+        *progress = 1.f;
+        return;
+    }
+
+    std::vector<u8> data;
+    auto mirror = convar->getConVarByName("beatmap_mirror")->getString();
+    mirror.append(UString::format("%d", set_id));
+    int response_code = 0;
+    download(mirror.toUtf8(), progress, data, &response_code);
+    if(response_code != 200) return;
+
+    // Download succeeded: save map to disk
+    if(!extract_beatmapset(data.data(), data.size(), map_dir.toUtf8())) {
+        *progress = -1.f;
+        return;
+    }
 }
 
 std::unordered_map<i32, i32> beatmap_to_beatmapset;

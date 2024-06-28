@@ -392,7 +392,8 @@ void Database::update() {
 
             // update progress (another thread checks if progress >= 1.f to know when we're done)
             float progress = (float)m_iCurRawBeatmapLoadIndex / (float)m_iNumBeatmapsToLoad;
-            if(progress >= 1.0f) progress = 0.99f;
+            if(progress == 0.f) progress = 0.01f;
+            if(progress >= 1.f) progress = 0.99f;
             m_fLoadingProgress = progress;
 
             // check if we are finished
@@ -768,7 +769,7 @@ int Database::getLevelForScore(unsigned long long score, int maxLevel) {
 }
 
 DatabaseBeatmap *Database::getBeatmapDifficulty(const MD5Hash &md5hash) {
-    if(!isFinished()) return NULL;
+    if(isLoading()) return NULL;
 
     for(size_t i = 0; i < m_databaseBeatmaps.size(); i++) {
         DatabaseBeatmap *beatmap = m_databaseBeatmaps[i];
@@ -785,7 +786,7 @@ DatabaseBeatmap *Database::getBeatmapDifficulty(const MD5Hash &md5hash) {
 }
 
 DatabaseBeatmap *Database::getBeatmapDifficulty(i32 map_id) {
-    if(!isFinished()) return NULL;
+    if(isLoading()) return NULL;
 
     for(size_t i = 0; i < m_databaseBeatmaps.size(); i++) {
         DatabaseBeatmap *beatmap = m_databaseBeatmaps[i];
@@ -802,7 +803,7 @@ DatabaseBeatmap *Database::getBeatmapDifficulty(i32 map_id) {
 }
 
 DatabaseBeatmap *Database::getBeatmapSet(i32 set_id) {
-    if(!isFinished()) return NULL;
+    if(isLoading()) return NULL;
 
     for(size_t i = 0; i < m_databaseBeatmaps.size(); i++) {
         DatabaseBeatmap *beatmap = m_databaseBeatmaps[i];
@@ -1008,6 +1009,7 @@ void Database::loadDB(Packet *db, bool &fallbackToRawLoad) {
 
         // update progress (another thread checks if progress >= 1.f to know when we're done)
         float progress = (float)i / (float)m_iNumBeatmapsToLoad;
+        if(progress == 0.f) progress = 0.01f;
         if(progress >= 1.f) progress = 0.99f;
         m_fLoadingProgress = progress;
 

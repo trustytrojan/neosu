@@ -7,8 +7,14 @@
 #include <shellapi.h>
 // clang-format on
 
+#include "Database.h"
+#include "DatabaseBeatmap.h"
+#include "Downloader.h"  // for extract_beatmapset
+#include "File.h"
+#include "MainMenu.h"
 #include "OptionsMenu.h"
 #include "Osu.h"
+#include "SongBrowser/SongBrowser.h"
 #include "Skin.h"
 
 // NEXTRAWINPUTBLOCK macro requires this
@@ -187,7 +193,35 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
                 if(utf8filepath.length() < 4) continue;
                 auto extension = env->getFileExtensionFromFilePath(utf8filepath);
-                if(!extension.compare("osk") || !extension.compare("zip")) {
+                if(!extension.compare("osz")) {
+                    File osz(utf8filepath);
+                    i32 set_id = extract_beatmapset_id(osz.readFile(), osz.getFileSize());
+                    if(set_id == -1) {
+                        osu->getNotificationOverlay()->addNotification("Beatmapset doesn't have a valid ID.");
+                        continue;
+                    }
+
+                    std::string mapset_dir = MCENGINE_DATA_DIR "maps\\";
+                    mapset_dir.append(std::to_string(set_id));
+                    mapset_dir.append("\\");
+                    if(!env->directoryExists(mapset_dir)) {
+                        env->createDirectory(mapset_dir);
+                    }
+                    if(!extract_beatmapset(osz.readFile(), osz.getFileSize(), mapset_dir)) {
+                        osu->getNotificationOverlay()->addNotification("Failed to extract beatmapset");
+                        continue;
+                    }
+
+                    osu->getSongBrowser()->getDatabase()->addBeatmap(mapset_dir);
+                    if(!osu->getSongBrowser()->selectBeatmapset(set_id)) {
+                        osu->getNotificationOverlay()->addNotification("Failed to import beatmapset");
+                        continue;
+                    }
+
+                    // prevent song browser from picking main menu song after database loads
+                    // (we just loaded and selected another song, so previous no longer applies)
+                    SAFE_DELETE(osu->m_mainMenu->preloaded_beatmapset);
+                } else if(!extension.compare("osk") || !extension.compare("zip")) {
                     Skin::unpack(utf8filepath.c_str());
                     if(first_skin.length() == 0) {
                         first_skin = utf8filepath;
