@@ -32,6 +32,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.changes.push_back("- Added ability to import .osk and .osz files (drop them onto the neosu window)");
     latest.changes.push_back("- Added persistent map database (downloaded or imported maps stay after restarting the game)");
     latest.changes.push_back("- Added skin folder");
+    latest.changes.push_back("- Now publishing 32-bit releases (for PCs running Windows 7)");
     latest.changes.push_back("- Fixed songs failing to restart");
     changelogs.push_back(latest);
 

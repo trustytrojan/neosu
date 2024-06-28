@@ -621,10 +621,15 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
             return false;
         }
 
-        // BASS_WASAPI_RAW ignores sound "enhancements" that some sound cards offer (adds latency)
         // BASS_MIXER_NONSTOP prevents some sound cards from going to sleep when there is no output
-        // BASS_WASAPI_RAW bypasses windows "sound enhancements"
-        auto flags = BASS_WASAPI_RAW | BASS_MIXER_NONSTOP | BASS_WASAPI_RAW;
+        auto flags = BASS_MIXER_NONSTOP;
+
+#ifdef _WIN64
+        // BASS_WASAPI_RAW ignores sound "enhancements" that some sound cards offer (adds latency)
+        // It is only available on Windows 8.1 or above
+        flags |= BASS_WASAPI_RAW;
+#endif
+
         if(convar->getConVarByName("win_snd_wasapi_exclusive")->getBool()) {
             // BASS_WASAPI_EXCLUSIVE makes neosu have exclusive output to the sound card
             // BASS_WASAPI_AUTOFORMAT chooses the best matching sample format, BASSWASAPI doesn't resample in exclusive
