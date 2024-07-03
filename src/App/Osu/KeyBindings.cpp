@@ -35,6 +35,7 @@ ConVar KeyBindings::INSTANT_REPLAY("osu_key_instant_replay", (int)KEY_F2, FCVAR_
 ConVar KeyBindings::TOGGLE_CHAT("osu_key_toggle_chat", (int)KEY_F8, FCVAR_DEFAULT);
 ConVar KeyBindings::SAVE_SCREENSHOT("osu_key_save_screenshot", (int)KEY_F12, FCVAR_DEFAULT);
 ConVar KeyBindings::DISABLE_MOUSE_BUTTONS("osu_key_disable_mouse_buttons", (int)KEY_F10, FCVAR_DEFAULT);
+ConVar KeyBindings::TOGGLE_MAP_BACKGROUND("key_toggle_map_background", 0, FCVAR_DEFAULT);
 ConVar KeyBindings::BOSS_KEY("osu_key_boss", (int)KEY_INSERT, FCVAR_DEFAULT);
 
 ConVar KeyBindings::TOGGLE_MODSELECT("osu_key_toggle_modselect", (int)KEY_F1, FCVAR_DEFAULT);
@@ -80,6 +81,7 @@ std::vector<ConVar*> KeyBindings::ALL = {&KeyBindings::LEFT_CLICK,
                                          &KeyBindings::TOGGLE_CHAT,
                                          &KeyBindings::SAVE_SCREENSHOT,
                                          &KeyBindings::DISABLE_MOUSE_BUTTONS,
+                                         &KeyBindings::TOGGLE_MAP_BACKGROUND,
                                          &KeyBindings::BOSS_KEY,
 
                                          &KeyBindings::TOGGLE_MODSELECT,

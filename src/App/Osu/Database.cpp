@@ -1248,6 +1248,10 @@ void Database::loadDB(Packet *db) {
                 diff->m_timingpoints.resize(numTimingPoints);
                 read_bytes(&neosu_maps, (u8 *)diff->m_timingpoints.data(), sizeof(TIMINGPOINT) * numTimingPoints);
 
+                if(version >= 20240703) {
+                    diff->draw_background = read<u8>(&neosu_maps);
+                }
+
                 diffs->push_back(diff);
             }
 
@@ -1402,6 +1406,8 @@ void Database::saveMaps() {
             u32 numTimingPoints = diff->m_timingpoints.size();
             write<u32>(&maps, numTimingPoints);
             write_bytes(&maps, (u8 *)diff->m_timingpoints.data(), sizeof(TIMINGPOINT) * numTimingPoints);
+
+            write<u8>(&maps, diff->draw_background);
         }
     }
 

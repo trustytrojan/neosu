@@ -991,6 +991,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     addKeyBindButton("Increase Volume", &KeyBindings::INCREASE_VOLUME);
     addKeyBindButton("Decrease Volume", &KeyBindings::DECREASE_VOLUME);
     addKeyBindButton("Disable Mouse Buttons", &KeyBindings::DISABLE_MOUSE_BUTTONS);
+    addKeyBindButton("Toggle Map Background", &KeyBindings::TOGGLE_MAP_BACKGROUND);
     addKeyBindButton("Boss Key (Minimize)", &KeyBindings::BOSS_KEY);
     addSubSection("Keys - Song Select", keyboardSectionTags);
     addKeyBindButton("Toggle Mod Selection Screen", &KeyBindings::TOGGLE_MODSELECT)

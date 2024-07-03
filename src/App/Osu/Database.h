@@ -15,7 +15,7 @@ typedef DatabaseBeatmap BeatmapDifficulty;
 typedef DatabaseBeatmap BeatmapSet;
 
 #define STARS_CACHE_VERSION 20240430
-#define NEOSU_MAPS_DB_VERSION 20240628
+#define NEOSU_MAPS_DB_VERSION 20240703
 
 // Field ordering matters here
 #pragma pack(push, 1)

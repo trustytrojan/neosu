@@ -189,6 +189,7 @@ class DatabaseBeatmap {
     inline long getLocalOffset() const { return m_iLocalOffset; }
     inline long getOnlineOffset() const { return m_iOnlineOffset; }
 
+    bool draw_background = true;
     bool do_not_store = false;
 
     // song select mod-adjusted pp/stars

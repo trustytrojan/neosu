@@ -41,6 +41,7 @@ class KeyBindings {
     static ConVar TOGGLE_CHAT;
     static ConVar SAVE_SCREENSHOT;
     static ConVar DISABLE_MOUSE_BUTTONS;
+    static ConVar TOGGLE_MAP_BACKGROUND;
     static ConVar BOSS_KEY;
 
     static ConVar TOGGLE_MODSELECT;

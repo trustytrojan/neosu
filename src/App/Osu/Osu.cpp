@@ -1238,6 +1238,15 @@ void Osu::onKeyDown(KeyboardEvent &key) {
         }
     }
 
+    if(key == (KEYCODE)KeyBindings::TOGGLE_MAP_BACKGROUND.getInt()) {
+        auto diff = getSelectedBeatmap()->getSelectedDifficulty2();
+        if(!diff) {
+            m_notificationOverlay->addNotification("No beatmap is currently selected.");
+        } else {
+            diff->draw_background = !diff->draw_background;
+        }
+    }
+
     // F8 toggle chat
     if(key == (KEYCODE)KeyBindings::TOGGLE_CHAT.getInt()) {
         // When options menu is open, instead of toggling chat, close options menu and open chat

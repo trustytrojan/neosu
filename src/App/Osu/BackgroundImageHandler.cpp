@@ -126,7 +126,7 @@ void BackgroundImageHandler::handleLoadImageForEntry(ENTRY &entry) {
 }
 
 Image *BackgroundImageHandler::getLoadBackgroundImage(const DatabaseBeatmap *beatmap) {
-    if(beatmap == NULL || !osu_load_beatmap_background_images.getBool()) return NULL;
+    if(beatmap == NULL || !osu_load_beatmap_background_images.getBool() || !beatmap->draw_background) return NULL;
 
     // NOTE: no references to beatmap are kept anywhere (database can safely be deleted/reloaded without having to
     // notify the BackgroundImageHandler)
