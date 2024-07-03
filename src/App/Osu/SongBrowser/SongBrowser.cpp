@@ -904,7 +904,7 @@ bool SongBrowser::selectBeatmapset(i32 set_id) {
         osu->m_songBrowser2->updateSongButtonSorting();
         debugLog("Finished loading beatmapset %d.\n", set_id);
 
-        beatmapset = getDatabase()->getBeatmapSet(set_autodl);
+        beatmapset = getDatabase()->getBeatmapSet(set_id);
     }
 
     if(beatmapset == NULL) {

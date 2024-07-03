@@ -29,6 +29,7 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
+    latest.changes.push_back("- Fixed beatmaps not getting selected properly in some cases");
     latest.changes.push_back("- Fixed crash when osu! folder couldn't be found");
     latest.changes.push_back("- Fixed skin selection menu being drawn behind back button");
     changelogs.push_back(latest);
