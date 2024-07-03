@@ -752,7 +752,7 @@ bool Beatmap::watch(FinishedScore score, double start_percent) {
     m_bContinueScheduled = false;
     unloadObjects();
 
-    osu->previous_mod_flags = osu->getScore()->getModsLegacy();
+    osu->previous_mods = osu->getModSelector()->getModSelection();
 
     osu->watched_user_name = score.playerName.c_str();
     osu->watched_user_id = score.player_id;
@@ -789,7 +789,7 @@ bool Beatmap::spectate() {
     osu->watched_user_name = user_info->name;
     is_spectating = true;
 
-    osu->previous_mod_flags = osu->getScore()->getModsLegacy();
+    osu->previous_mods = osu->getModSelector()->getModSelection();
 
     FinishedScore score;
     score.isLegacyScore = true;
@@ -1166,8 +1166,7 @@ void Beatmap::stop(bool quit) {
     }
 
     if(is_watching || is_spectating) {
-        osu->m_modSelector->resetMods();
-        osu->m_modSelector->enableModsFromFlags(osu->previous_mod_flags);
+        osu->getModSelector()->restoreMods(osu->previous_mods);
     }
 
     is_spectating = false;

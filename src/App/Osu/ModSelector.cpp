@@ -1218,6 +1218,59 @@ u32 ModSelector::getModFlags() {
     return osu->getScore()->getModsLegacy();
 }
 
+ModSelection ModSelector::getModSelection() {
+    ModSelection selection;
+
+    selection.flags = getModFlags();
+    selection.fposu = convar->getConVarByName("osu_mod_fposu")->getBool();
+
+    for(auto slider : m_overrideSliders) {
+        selection.override_locks.push_back(slider.lock ? slider.lock->isChecked() : false);
+        selection.override_values.push_back(slider.cvar ? slider.cvar->getFloat() + 1.0f : 0.f);
+    }
+
+    for(auto mod : m_experimentalMods) {
+        selection.experimental.push_back(mod.cvar ? mod.cvar->getBool() : false);
+    }
+
+    return selection;
+}
+
+void ModSelector::restoreMods(ModSelection selection) {
+    // Reset buttons and sliders to clean state
+    resetMods();
+
+    // Override sliders
+    for(int i = 0; i < m_overrideSliders.size(); i++) {
+        if(m_overrideSliders[i].lock != NULL) {
+            m_overrideSliders[i].lock->setChecked(selection.override_locks[i]);
+        }
+        if(m_overrideSliders[i].cvar != NULL) {
+            m_overrideSliders[i].slider->setValue(selection.override_values[i], m_bVisible);
+        }
+    }
+
+    // Non-experimental mods
+    convar->getConVarByName("osu_mod_fposu")->setValue(selection.fposu);
+
+    // Experimental mods
+    for(int i = 0; i < m_experimentalMods.size(); i++) {
+        ConVar *cvar = m_experimentalMods[i].cvar;
+        CBaseUICheckbox *checkboxPointer = dynamic_cast<CBaseUICheckbox *>(m_experimentalMods[i].element);
+        if(checkboxPointer != NULL) {
+            // HACKHACK: we update both just in case because if the mod selector was not yet visible after a convar
+            // change (e.g. because of "Use mods") then the checkbox has not yet updated its internal state
+            checkboxPointer->setChecked(selection.experimental[i]);
+            if(cvar != NULL) cvar->setValue(selection.experimental[i]);
+        }
+    }
+
+    // Legacy mods
+    enableModsFromFlags(selection.flags);
+
+    // osu->updateMods() is already called by enableModsFromFlags()
+}
+
 void ModSelector::enableModsFromFlags(u32 flags) {
     if(flags & ModFlags::DoubleTime) {
         m_modButtonDoubletime->setOn(true, true);
@@ -1250,6 +1303,8 @@ void ModSelector::enableModsFromFlags(u32 flags) {
     getModButtonOnGrid(4, 2)->setOn(flags & ModFlags::Target, true);
     m_modButtonFlashlight->setOn(flags & ModFlags::Flashlight, true);
     m_modButtonScoreV2->setOn(flags & ModFlags::ScoreV2, true);
+
+    osu->updateMods();
 }
 
 void ModSelector::close() {

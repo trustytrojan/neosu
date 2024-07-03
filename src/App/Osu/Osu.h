@@ -1,6 +1,7 @@
 #pragma once
 #include "App.h"
 #include "BanchoNetworking.h"
+#include "ModSelector.h"
 #include "MouseListener.h"
 #include "score.h"
 
@@ -15,7 +16,6 @@ class UIUserContextMenuScreen;
 class MainMenu;
 class PauseMenu;
 class OptionsMenu;
-class ModSelector;
 class SongBrowser;
 class SpectatorScreen;
 class BackgroundImageHandler;
@@ -274,7 +274,7 @@ class Osu : public App, public MouseListener {
     bool holding_slider = false;
 
     // mods
-    u32 previous_mod_flags = 0;   // mod flags before spectating/multiplaying/etc
+    ModSelection previous_mods;
     bool m_bModAutoTemp = false;  // when ctrl+clicking a map, the auto mod should disable itself after the map finishes
     bool m_bModAuto = false;
     bool m_bModAutopilot = false;

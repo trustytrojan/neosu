@@ -19,6 +19,14 @@ class UICheckbox;
 
 class ConVar;
 
+struct ModSelection {
+    u32 flags;
+    bool fposu;
+    std::vector<bool> override_locks;
+    std::vector<float> override_values;
+    std::vector<bool> experimental;
+};
+
 class ModSelector : public OsuScreen {
    public:
     ModSelector();
@@ -40,6 +48,9 @@ class ModSelector : public OsuScreen {
     void resetMods();
     u32 getModFlags();
     void enableModsFromFlags(u32 flags);
+
+    ModSelection getModSelection();
+    void restoreMods(ModSelection selection);
 
     void setWaitForF1KeyUp(bool waitForF1KeyUp) { m_bWaitForF1KeyUp = waitForF1KeyUp; }
 
