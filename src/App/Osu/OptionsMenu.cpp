@@ -1434,8 +1434,13 @@ void OptionsMenu::draw(Graphics *g) {
         if(!isPlayingBeatmap) osu->getHUD()->drawDummy(g);
     } else if(m_playfieldBorderSizeSlider->isActive()) {
         osu->getHUD()->drawPlayfieldBorder(g, GameRules::getPlayfieldCenter(), GameRules::getPlayfieldSize(), 100);
-    } else
+    } else {
         ScreenBackable::draw(g);
+    }
+
+    // Re-drawing context menu to make sure it's drawn on top of the back button
+    // Context menu input still gets processed first, so this is fine
+    m_contextMenu->draw(g);
 
     if(m_cursorSizeSlider->getFloat() < 0.15f) engine->getMouse()->drawDebug(g);
 
