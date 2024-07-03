@@ -29,12 +29,17 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
-    latest.changes.push_back("- Added ability to import .osk and .osz files (drop them onto the neosu window)");
-    latest.changes.push_back("- Added persistent map database (downloaded or imported maps stay after restarting the game)");
-    latest.changes.push_back("- Added skin folder");
-    latest.changes.push_back("- Now publishing 32-bit releases (for PCs running Windows 7)");
-    latest.changes.push_back("- Fixed songs failing to restart");
+    latest.changes.push_back("- Fixed crash when osu! folder couldn't be found");
     changelogs.push_back(latest);
+
+    CHANGELOG v35_08;
+    v35_08.title = "35.08 (2024-06-28)";
+    v35_08.changes.push_back("- Added ability to import .osk and .osz files (drop them onto the neosu window)");
+    v35_08.changes.push_back("- Added persistent map database (downloaded or imported maps stay after restarting the game)");
+    v35_08.changes.push_back("- Added skin folder");
+    v35_08.changes.push_back("- Now publishing 32-bit releases (for PCs running Windows 7)");
+    v35_08.changes.push_back("- Fixed songs failing to restart");
+    changelogs.push_back(v35_08);
 
     CHANGELOG v35_07;
     v35_07.title = "35.07 (2024-06-27)";

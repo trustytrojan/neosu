@@ -315,7 +315,7 @@ std::vector<std::string> WinEnvironment::getFoldersInFolder(std::string folder) 
 
         buffer = filename;
 
-        if(filename.length() > 0) {
+        if(filename.length() > 0 && filename.compare(L".") != 0 && filename.compare(L"..") != 0) {
             if((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) {
                 int size = WideCharToMultiByte(CP_UTF8, 0, filename.c_str(), filename.length(), NULL, 0, NULL, NULL);
                 std::string utf8filename(size, 0);

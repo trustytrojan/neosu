@@ -124,8 +124,6 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     void onOutputDeviceResetUpdate();
     void onOutputDeviceRestart();
     void onLogInClicked();
-    void onDownloadOsuClicked();
-    void onManuallyManageBeatmapsClicked();
     void onCM360CalculatorLinkClicked();
     void onNotelockSelect();
     void onNotelockSelect2(UString notelockType, int id = -1);

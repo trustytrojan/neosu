@@ -530,18 +530,6 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
 
     CBaseUIElement *sectionGeneral = addSection("General");
 
-    addSubSection("");
-    UIButton *downloadOsuButton = addButton("Download osu! and get some beatmaps!");
-    downloadOsuButton->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onDownloadOsuClicked));
-    downloadOsuButton->setColor(0xff00ff00);
-    downloadOsuButton->setTextColor(0xffffffff);
-
-    addLabel("... or ...")->setCenterText(true);
-    UIButton *manuallyManageBeatmapsButton = addButton("Manually manage beatmap files?");
-    manuallyManageBeatmapsButton->setClickCallback(
-        fastdelegate::MakeDelegate(this, &OptionsMenu::onManuallyManageBeatmapsClicked));
-    manuallyManageBeatmapsButton->setColor(0xff10667b);
-
     addSubSection("osu!folder");
     addLabel("1) If you have an existing osu! installation:")->setTextColor(0xff666666);
     addLabel("2) osu! > Options > \"Open osu! folder\"")->setTextColor(0xff666666);
@@ -2639,16 +2627,6 @@ void OptionsMenu::onLogInClicked() {
     } else {
         reconnect();
     }
-}
-
-void OptionsMenu::onDownloadOsuClicked() {
-    osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
-    env->openURLInDefaultBrowser("https://osu.ppy.sh/");
-}
-
-void OptionsMenu::onManuallyManageBeatmapsClicked() {
-    osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
-    env->openURLInDefaultBrowser("https://steamcommunity.com/sharedfiles/filedetails/?id=880768265");
 }
 
 void OptionsMenu::onCM360CalculatorLinkClicked() {
