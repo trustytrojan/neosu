@@ -122,7 +122,7 @@ struct FinishedScore {
 
 class LiveScore {
    public:
-    static const u32 VERSION = 20240412;
+    static const u32 VERSION = 20240704;
 
     enum class HIT {
         // score

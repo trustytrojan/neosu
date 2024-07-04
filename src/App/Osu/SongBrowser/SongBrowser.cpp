@@ -2754,7 +2754,7 @@ void SongBrowser::onDatabaseLoadingFinished() {
     // having a copy of the vector in here is actually completely unnecessary
     m_beatmaps = std::vector<DatabaseBeatmap *>(m_db->getDatabaseBeatmaps());
 
-    debugLog("SongBrowser::onDatabaseLoadingFinished() : %i beatmaps.\n", m_beatmaps.size());
+    debugLog("SongBrowser::onDatabaseLoadingFinished() : %i beatmapsets.\n", m_beatmaps.size());
 
     // initialize all collection (grouped) buttons
     {

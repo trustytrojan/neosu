@@ -33,6 +33,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.changes.push_back(
         "- Added \"tooearly.wav\" and \"toolate.wav\" hitsounds, which play when you hit too early or too late (if "
         "your skin has them)");
+    latest.changes.push_back("- Fixed local scores not saving avatar");
     latest.changes.push_back("- Fixed Nightcore getting auto-selected instead of Double Time in some cases");
     changelogs.push_back(latest);
 

@@ -264,7 +264,7 @@ class DatabaseLoader : public Resource {
         m_db->loadStars();
 
         // load database
-        m_db->m_beatmapsets.clear(); // TODO @kiwec: this just leaks memory?
+        m_db->m_beatmapsets.clear();  // TODO @kiwec: this just leaks memory?
         std::string osuDbFilePath = osu_folder.getString().toUtf8();
         osuDbFilePath.append("osu!.db");
         Packet db = load_db(osuDbFilePath);
@@ -441,8 +441,6 @@ void Database::deleteScore(MD5Hash beatmapMD5Hash, u64 scoreUnixTimestamp) {
 
             m_bDidScoresChangeForSave = true;
             m_bDidScoresChangeForStats = true;
-
-            // debugLog("Deleted score for %s at %llu\n", beatmapMD5Hash.c_str(), scoreUnixTimestamp);
 
             break;
         }
@@ -824,6 +822,9 @@ void Database::loadDB(Packet *db) {
 
     m_importTimer->start();
 
+    u32 nb_neosu_maps = 0;
+    u32 nb_peppy_maps = 0;
+
     bool should_read_peppy_database = db->size > 0;
     if(should_read_peppy_database) {
         // read header
@@ -834,25 +835,26 @@ void Database::loadDB(Packet *db) {
         auto playerName = read_stdstring(db);
         m_iNumBeatmapsToLoad = read<u32>(db);
 
-        debugLog("Database: version = %i, folderCount = %i, playerName = %s, numDiffs = %i\n", m_iVersion, m_iFolderCount,
-                 playerName.c_str(), m_iNumBeatmapsToLoad);
+        debugLog("Database: version = %i, folderCount = %i, playerName = %s, numDiffs = %i\n", m_iVersion,
+                 m_iFolderCount, playerName.c_str(), m_iNumBeatmapsToLoad);
 
         if(m_iVersion < 20170222) {
             debugLog("Database: Version is quite old, below 20170222 ...\n");
-            osu->getNotificationOverlay()->addNotification("osu!.db version too old, update osu! and try again!", 0xffff0000);
+            osu->getNotificationOverlay()->addNotification("osu!.db version too old, update osu! and try again!",
+                                                           0xffff0000);
             should_read_peppy_database = false;
         } else if(!osu_database_ignore_version_warnings.getBool()) {
             if(m_iVersion < 20190207) {  // xexxar angles star recalc
-                osu->getNotificationOverlay()->addNotification("osu!.db version is old, let osu! update when convenient.",
-                                                               0xffffff00, false, 3.0f);
+                osu->getNotificationOverlay()->addNotification(
+                    "osu!.db version is old, let osu! update when convenient.", 0xffffff00, false, 3.0f);
             }
         }
 
         // hard cap upper db version
         if(m_iVersion > osu_database_version.getInt() && !osu_database_ignore_version.getBool()) {
             osu->getNotificationOverlay()->addNotification(
-                UString::format("osu!.db version unknown (%i), osu!stable maps will not get loaded.", m_iVersion), 0xffffff00, false,
-                5.0f);
+                UString::format("osu!.db version unknown (%i), osu!stable maps will not get loaded.", m_iVersion),
+                0xffffff00, false, 5.0f);
             should_read_peppy_database = false;
         }
     }
@@ -881,8 +883,8 @@ void Database::loadDB(Packet *db) {
             if(m_iVersion < 20191107)  // see https://osu.ppy.sh/home/changelog/stable40/20191107.2
             {
                 // also see https://github.com/ppy/osu-wiki/commit/b90f312e06b4f86e509b397565f1fe014bb15943
-                // no idea why peppy decided to change the wiki version from 20191107 to 20191106, because that's not what
-                // stable is doing. the correct version is still 20191107
+                // no idea why peppy decided to change the wiki version from 20191107 to 20191106, because that's not
+                // what stable is doing. the correct version is still 20191107
 
                 /*unsigned int size = */ read<u32>(db);  // size in bytes of the beatmap entry
             }
@@ -912,20 +914,17 @@ void Database::loadDB(Packet *db) {
             double sliderMultiplier = read<f64>(db);
 
             unsigned int numOsuStandardStarRatings = read<u32>(db);
-            // debugLog("%i star ratings for osu!standard\n", numOsuStandardStarRatings);
             float numOsuStandardStars = 0.0f;
             for(int s = 0; s < numOsuStandardStarRatings; s++) {
                 read<u8>(db);  // ObjType
                 unsigned int mods = read<u32>(db);
                 read<u8>(db);  // ObjType
                 double starRating = read<f64>(db);
-                // debugLog("%f stars for %u\n", starRating, mods);
 
                 if(mods == 0) numOsuStandardStars = starRating;
             }
 
             unsigned int numTaikoStarRatings = read<u32>(db);
-            // debugLog("%i star ratings for taiko\n", numTaikoStarRatings);
             for(int s = 0; s < numTaikoStarRatings; s++) {
                 read<u8>(db);  // ObjType
                 read<u32>(db);
@@ -934,7 +933,6 @@ void Database::loadDB(Packet *db) {
             }
 
             unsigned int numCtbStarRatings = read<u32>(db);
-            // debugLog("%i star ratings for ctb\n", numCtbStarRatings);
             for(int s = 0; s < numCtbStarRatings; s++) {
                 read<u8>(db);  // ObjType
                 read<u32>(db);
@@ -943,7 +941,6 @@ void Database::loadDB(Packet *db) {
             }
 
             unsigned int numManiaStarRatings = read<u32>(db);
-            // debugLog("%i star ratings for mania\n", numManiaStarRatings);
             for(int s = 0; s < numManiaStarRatings; s++) {
                 read<u8>(db);  // ObjType
                 read<u32>(db);
@@ -956,14 +953,12 @@ void Database::loadDB(Packet *db) {
             duration = duration >= 0 ? duration : 0;      // sanity clamp
             int previewTime = read<u32>(db);
 
-            // debugLog("drainTime = %i sec, duration = %i ms, previewTime = %i ms\n", drainTime, duration, previewTime);
-
             unsigned int numTimingPoints = read<u32>(db);
             zarray<TIMINGPOINT> timingPoints(numTimingPoints);
             read_bytes(db, (u8 *)timingPoints.data(), sizeof(TIMINGPOINT) * numTimingPoints);
 
-            int beatmapID = read<i32>(db);     // fucking bullshit, this is NOT an unsigned integer as is described on the
-                                               // wiki, it can and is -1 sometimes
+            int beatmapID = read<i32>(db);  // fucking bullshit, this is NOT an unsigned integer as is described on the
+                                            // wiki, it can and is -1 sometimes
             int beatmapSetID = read<i32>(db);  // same here
             /*unsigned int threadID = */ read<u32>(db);
 
@@ -971,20 +966,15 @@ void Database::loadDB(Packet *db) {
             /*unsigned char taikoGrade = */ read<u8>(db);
             /*unsigned char ctbGrade = */ read<u8>(db);
             /*unsigned char maniaGrade = */ read<u8>(db);
-            // debugLog("beatmapID = %i, beatmapSetID = %i, threadID = %i, osuStandardGrade = %i, taikoGrade = %i, ctbGrade
-            // = %i, maniaGrade = %i\n", beatmapID, beatmapSetID, threadID, osuStandardGrade, taikoGrade, ctbGrade,
-            // maniaGrade);
 
             short localOffset = read<u16>(db);
             float stackLeniency = read<f32>(db);
             unsigned char mode = read<u8>(db);
-            // debugLog("localOffset = %i, stackLeniency = %f, mode = %i\n", localOffset, stackLeniency, mode);
 
             auto songSource = read_stdstring(db);
             auto songTags = read_stdstring(db);
             trim(&songSource);
             trim(&songTags);
-            // debugLog("songSource = %s, songTags = %s\n", songSource.toUtf8(), songTags.toUtf8());
 
             short onlineOffset = read<u16>(db);
             skip_string(db);  // song title font
@@ -998,9 +988,6 @@ void Database::loadDB(Packet *db) {
             trim(&path);
 
             /*long long lastOnlineCheck = */ read<u64>(db);
-            // debugLog("onlineOffset = %i, songTitleFont = %s, unplayed = %i, lastTimePlayed = %lu, isOsz2 = %i, path = %s,
-            // lastOnlineCheck = %lu\n", onlineOffset, songTitleFont.toUtf8(), (int)unplayed, lastTimePlayed, (int)isOsz2,
-            // path.c_str(), lastOnlineCheck);
 
             /*bool ignoreBeatmapSounds = */ read<u8>(db);
             /*bool ignoreBeatmapSkin = */ read<u8>(db);
@@ -1009,12 +996,9 @@ void Database::loadDB(Packet *db) {
             /*bool visualOverride = */ read<u8>(db);
             /*int lastEditTime = */ read<u32>(db);
             /*unsigned char maniaScrollSpeed = */ read<u8>(db);
-            // debugLog("ignoreBeatmapSounds = %i, ignoreBeatmapSkin = %i, disableStoryboard = %i, disableVideo = %i,
-            // visualOverride = %i, maniaScrollSpeed = %i\n", (int)ignoreBeatmapSounds, (int)ignoreBeatmapSkin,
-            // (int)disableStoryboard, (int)disableVideo, (int)visualOverride, maniaScrollSpeed);
 
-            // HACKHACK: workaround for linux and macos: it can happen that nested beatmaps are stored in the database, and
-            // that osu! stores that filepath with a backslash (because windows)
+            // HACKHACK: workaround for linux and macos: it can happen that nested beatmaps are stored in the database,
+            // and that osu! stores that filepath with a backslash (because windows)
             if(env->getOS() == Environment::OS::LINUX || env->getOS() == Environment::OS::MACOS) {
                 for(int c = 0; c < path.length(); c++) {
                     if(path[c] == '\\') {
@@ -1031,9 +1015,9 @@ void Database::loadDB(Packet *db) {
             fullFilePath.append(osuFileName);
 
             // skip invalid/corrupt entries
-            // the good way would be to check if the .osu file actually exists on disk, but that is slow af, ain't nobody
-            // got time for that so, since I've seen some concrete examples of what happens in such cases, we just exclude
-            // those
+            // the good way would be to check if the .osu file actually exists on disk, but that is slow af, ain't
+            // nobody got time for that so, since I've seen some concrete examples of what happens in such cases, we
+            // just exclude those
             if(artistName.length() < 1 && songTitle.length() < 1 && creatorName.length() < 1 &&
                difficultyName.length() < 1 && md5hash.hash[0] == 0)
                 continue;
@@ -1145,6 +1129,8 @@ void Database::loadDB(Packet *db) {
                 s.diffs2->push_back(diff2);
                 beatmapSets.push_back(s);
             }
+
+            nb_peppy_maps++;
         }
 
         // build beatmap sets
@@ -1202,7 +1188,7 @@ void Database::loadDB(Packet *db) {
             mapset_path.append(std::to_string(set_id));
             mapset_path.append("/");
 
-            std::vector<BeatmapDifficulty*> *diffs = new std::vector<DatabaseBeatmap*>();
+            std::vector<BeatmapDifficulty *> *diffs = new std::vector<DatabaseBeatmap *>();
             for(u16 j = 0; j < nb_diffs; j++) {
                 std::string osu_filename = read_stdstring(&neosu_maps);
 
@@ -1253,6 +1239,7 @@ void Database::loadDB(Packet *db) {
                 }
 
                 diffs->push_back(diff);
+                nb_neosu_maps++;
             }
 
             if(diffs->empty()) {
@@ -1267,11 +1254,11 @@ void Database::loadDB(Packet *db) {
         m_neosu_maps_loaded = true;
     }
 
-    load_collections();
-
     m_importTimer->update();
-    debugLog("Refresh finished, added %i beatmaps in %f seconds.\n", m_beatmapsets.size(),
-             m_importTimer->getElapsedTime());
+    debugLog("peppy+neosu maps: loading took %f seconds (%d peppy, %d neosu, %d maps total)\n",
+             m_importTimer->getElapsedTime(), nb_peppy_maps, nb_neosu_maps, nb_peppy_maps + nb_neosu_maps);
+
+    load_collections();
 
     // signal that we are done
     m_fLoadingProgress = 1.0f;
@@ -1517,6 +1504,10 @@ void Database::loadScores() {
                             sc.server = read_stdstring(&db);
                         }
 
+                        if(sc.version >= 20240704) {
+                            sc.player_id = read<u32>(&db);
+                        }
+
                         sc.experimentalModsConVars = read_stdstring(&db);
 
                         if(gamemode == 0x0 || (dbVersion > 20210103 && sc.version > 20190103)) {
@@ -1758,6 +1749,10 @@ void Database::saveScores() {
             if(score.version >= 20240412) {
                 write<u32>(&db, score.online_score_id);
                 write_string(&db, score.server.c_str());
+            }
+
+            if(score.version >= 20240704) {
+                write<u32>(&db, score.player_id);
             }
 
             write_string(&db, score.experimentalModsConVars.c_str());
