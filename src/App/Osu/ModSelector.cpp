@@ -537,10 +537,9 @@ void ModSelector::draw(Graphics *g) {
             g->pushTransform();
             {
                 g->rotate(90);
-                g->translate(
-                    (int)(experimentalTextHeight / 3.0f +
-                          max(0.0f, experimentalModsAnimationTranslation + m_experimentalContainer->getSize().x)),
-                    (int)(osu->getScreenHeight() / 2 - experimentalTextWidth / 2));
+                g->translate((int)(experimentalTextHeight / 3.0f + max(0.0f, experimentalModsAnimationTranslation +
+                                                                                 m_experimentalContainer->getSize().x)),
+                             (int)(osu->getScreenHeight() / 2 - experimentalTextWidth / 2));
                 g->setColor(0xff777777);
                 g->setAlpha(1.0f - m_fExperimentalAnimation * m_fExperimentalAnimation);
                 g->drawString(experimentalFont, experimentalText);
@@ -551,7 +550,7 @@ void ModSelector::draw(Graphics *g) {
             {
                 g->rotate(90);
                 g->translate((int)(rectHeight + max(0.0f, experimentalModsAnimationTranslation +
-                                                                   m_experimentalContainer->getSize().x)),
+                                                              m_experimentalContainer->getSize().x)),
                              (int)(osu->getScreenHeight() / 2 - rectWidth / 2));
                 g->drawRect(0, 0, rectWidth, rectHeight);
             }
@@ -1214,9 +1213,7 @@ void ModSelector::resetMods() {
     }
 }
 
-u32 ModSelector::getModFlags() {
-    return osu->getScore()->getModsLegacy();
-}
+u32 ModSelector::getModFlags() { return osu->getScore()->getModsLegacy(); }
 
 ModSelection ModSelector::getModSelection() {
     ModSelection selection;
@@ -1239,6 +1236,9 @@ ModSelection ModSelector::getModSelection() {
 void ModSelector::restoreMods(ModSelection selection) {
     // Reset buttons and sliders to clean state
     resetMods();
+
+    // Legacy mods
+    enableModsFromFlags(selection.flags);
 
     // Override sliders
     for(int i = 0; i < m_overrideSliders.size(); i++) {
@@ -1265,10 +1265,7 @@ void ModSelector::restoreMods(ModSelection selection) {
         }
     }
 
-    // Legacy mods
-    enableModsFromFlags(selection.flags);
-
-    // osu->updateMods() is already called by enableModsFromFlags()
+    osu->updateMods();
 }
 
 void ModSelector::enableModsFromFlags(u32 flags) {
