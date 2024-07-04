@@ -171,6 +171,7 @@ ConVar *Osu::ui_scale = &osu_ui_scale;
 Vector2 Osu::g_vInternalResolution;
 Vector2 Osu::osuBaseResolution = Vector2(640.0f, 480.0f);
 
+Shader *anti_flashlight_shader = NULL;
 Shader *flashlight_shader = NULL;
 
 Osu::Osu() {
@@ -206,7 +207,6 @@ Osu::Osu() {
 
     // experimental mods list
     m_experimentalMods.push_back(convar->getConVarByName("fposu_mod_strafing"));
-    m_experimentalMods.push_back(convar->getConVarByName("fposu_mod_3d_depthwobble"));
     m_experimentalMods.push_back(convar->getConVarByName("osu_mod_wobble"));
     m_experimentalMods.push_back(convar->getConVarByName("osu_mod_arwobble"));
     m_experimentalMods.push_back(convar->getConVarByName("osu_mod_timewarp"));
@@ -503,6 +503,24 @@ Osu::Osu() {
     m_osu_mod_fposu_ref->setCallback(fastdelegate::MakeDelegate(this, &Osu::onModFPoSuChange));
 
     // Not the type of shader you want players to tweak or delete, so loading from string
+    anti_flashlight_shader = engine->getGraphics()->createShaderFromSource(
+        "#version 110\n"
+        "varying vec2 tex_coord;\n"
+        "void main() {\n"
+        "    gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.x, gl_Vertex.y, 0.0, 1.0);\n"
+        "    gl_FrontColor = gl_Color;\n"
+        "    tex_coord = gl_MultiTexCoord0.xy;\n"
+        "}",
+        "#version 110\n"
+        "uniform float max_opacity;\n"
+        "uniform float flashlight_radius;\n"
+        "uniform vec2 flashlight_center;\n"
+        "void main(void) {\n"
+        "    float dist = distance(flashlight_center, gl_FragCoord.xy);\n"
+        "    float opacity = smoothstep(flashlight_radius, flashlight_radius * 1.4, dist);\n"
+        "    opacity = 1.0 - min(opacity, max_opacity);\n"
+        "    gl_FragColor = vec4(0.0, 0.0, 0.0, opacity);\n"
+        "}");
     flashlight_shader = engine->getGraphics()->createShaderFromSource(
         "#version 110\n"
         "varying vec2 tex_coord;\n"
@@ -521,6 +539,7 @@ Osu::Osu() {
         "    opacity = 1.0 - min(opacity, max_opacity);\n"
         "    gl_FragColor = vec4(0.0, 0.0, 0.0, opacity);\n"
         "}");
+    engine->getResourceManager()->loadResource(anti_flashlight_shader);
     engine->getResourceManager()->loadResource(flashlight_shader);
 }
 
@@ -568,7 +587,8 @@ void Osu::draw(Graphics *g) {
 
         getSelectedBeatmap()->draw(g);
 
-        if(m_bModFlashlight) {
+        auto anti_flashlight_enabled = convar->getConVarByName("mod_anti_flashlight")->getBool();
+        if(m_bModFlashlight || anti_flashlight_enabled) {
             // Dim screen when holding a slider
             float max_opacity = 1.f;
             if(holding_slider && !avoid_flashes.getBool()) {
@@ -589,20 +609,42 @@ void Osu::draw(Graphics *g) {
             Vector2 flashlightPos =
                 flashlight_position * GameRules::getPlayfieldScaleFactor() + GameRules::getPlayfieldOffset();
 
-            float fl_radius = flashlight_radius.getFloat() * GameRules::getPlayfieldScaleFactor();
+            float base_fl_radius = flashlight_radius.getFloat() * GameRules::getPlayfieldScaleFactor();
+
+            float anti_fl_radius = base_fl_radius * 0.625f;
+            float fl_radius = base_fl_radius;
             if(getScore()->getCombo() >= 200 || convar->getConVarByName("flashlight_always_hard")->getBool()) {
+                anti_fl_radius = base_fl_radius;
                 fl_radius *= 0.625f;
             } else if(getScore()->getCombo() >= 100) {
+                anti_fl_radius = base_fl_radius * 0.8125f;
                 fl_radius *= 0.8125f;
             }
 
-            flashlight_shader->enable();
-            flashlight_shader->setUniform1f("max_opacity", max_opacity);
-            flashlight_shader->setUniform1f("flashlight_radius", fl_radius);
-            flashlight_shader->setUniform2f("flashlight_center", flashlightPos.x, getScreenSize().y - flashlightPos.y);
-            g->setColor(COLOR(255, 0, 0, 0));
-            g->fillRect(0, 0, getScreenWidth(), getScreenHeight());
-            flashlight_shader->disable();
+            if(m_bModFlashlight) {
+                flashlight_shader->enable();
+                flashlight_shader->setUniform1f("max_opacity", max_opacity);
+                flashlight_shader->setUniform1f("flashlight_radius", fl_radius);
+                flashlight_shader->setUniform2f("flashlight_center", flashlightPos.x,
+                                                getScreenSize().y - flashlightPos.y);
+
+                g->setColor(COLOR(255, 0, 0, 0));
+                g->fillRect(0, 0, getScreenWidth(), getScreenHeight());
+
+                flashlight_shader->disable();
+            }
+            if(anti_flashlight_enabled) {
+                anti_flashlight_shader->enable();
+                anti_flashlight_shader->setUniform1f("max_opacity", max_opacity);
+                anti_flashlight_shader->setUniform1f("flashlight_radius", anti_fl_radius);
+                anti_flashlight_shader->setUniform2f("flashlight_center", flashlightPos.x,
+                                                     getScreenSize().y - flashlightPos.y);
+
+                g->setColor(COLOR(255, 0, 0, 0));
+                g->fillRect(0, 0, getScreenWidth(), getScreenHeight());
+
+                anti_flashlight_shader->disable();
+            }
         }
 
         if(!isFPoSu) m_hud->draw(g);

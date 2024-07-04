@@ -71,8 +71,6 @@ ConVar fposu_mod_strafing_frequency_y("fposu_mod_strafing_frequency_y", 0.2f, FC
 ConVar fposu_mod_strafing_strength_z("fposu_mod_strafing_strength_z", 0.15f, FCVAR_DEFAULT);
 ConVar fposu_mod_strafing_frequency_z("fposu_mod_strafing_frequency_z", 0.15f, FCVAR_DEFAULT);
 
-ConVar fposu_mod_3d_depthwobble("fposu_mod_3d_depthwobble", false, FCVAR_UNLOCKED);
-
 constexpr const float ModFPoSu::SIZEDIV3D;
 constexpr const int ModFPoSu::SUBDIVISIONS;
 
@@ -497,8 +495,7 @@ Vector2 ModFPoSu::intersectRayMesh(Vector3 pos, Vector3 dir) {
                         const float downLength = (Down - TopLeft).length();
                         const float x = u / (rightLength * rightLength);
                         const float y = v / (downLength * downLength);
-                        const float distancePerFace =
-                            (float)osu->getScreenWidth() / pow(2.0f, (float)SUBDIVISIONS);
+                        const float distancePerFace = (float)osu->getScreenWidth() / pow(2.0f, (float)SUBDIVISIONS);
                         const float distanceInFace = distancePerFace * x;
 
                         const Vector2 newMousePos =

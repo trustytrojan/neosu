@@ -32,6 +32,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.changes.push_back(
         "- Added \"tooearly.wav\" and \"toolate.wav\" hitsounds, which play when you hit too early or too late (if "
         "your skin has them)");
+    latest.changes.push_back("- Added \"Anti-flashlight\" experimental mod");
     latest.changes.push_back("- Added keybind to open skin selection menu");
     latest.changes.push_back("- Added slider instafade setting");
     latest.changes.push_back("- Fixed local scores not saving avatar");

@@ -1298,14 +1298,11 @@ void Skin::playHitCircleSound(int sampleType, float pan, long delta) {
         pan *= osu_sound_panning_multiplier.getFloat();
     }
 
-    debugLog("delta: %d\n", delta);
     if(delta < 0 && m_tooearly != NULL) {
-        debugLog("Too early!\n");
         engine->getSound()->play(m_tooearly, pan);
         return;
     }
     if(delta > 0 && m_toolate != NULL) {
-        debugLog("Too late!\n");
         engine->getSound()->play(m_toolate, pan);
         return;
     }

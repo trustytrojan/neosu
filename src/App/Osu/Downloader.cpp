@@ -269,10 +269,6 @@ i32 extract_beatmapset_id(const u8* data, size_t data_s) {
         set_id = get_beatmapset_id_from_osu_file(osu_data, s_osu_data);
         mz_free(osu_data);
         if(set_id != -1) break;
-
-    skip_file:;
-        // When a file can't be extracted we just ignore it (as long as the archive is valid).
-        // We'll check for errors when loading the beatmap.
     }
 
     mz_zip_reader_end(&zip);

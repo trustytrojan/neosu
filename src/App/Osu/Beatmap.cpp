@@ -119,6 +119,7 @@ ConVar osu_followpoints_prevfadetime("osu_followpoints_prevfadetime", 400.0f,
 
 ConVar osu_auto_and_relax_block_user_input("osu_auto_and_relax_block_user_input", true, FCVAR_DEFAULT);
 
+ConVar mod_anti_flashlight("mod_anti_flashlight", false, FCVAR_DEFAULT);
 ConVar osu_mod_timewarp("osu_mod_timewarp", false, FCVAR_UNLOCKED);
 ConVar osu_mod_timewarp_multiplier("osu_mod_timewarp_multiplier", 1.5f, FCVAR_DEFAULT);
 ConVar osu_mod_minimize("osu_mod_minimize", false, FCVAR_UNLOCKED);
@@ -293,7 +294,6 @@ Beatmap::Beatmap() {
     m_fposu_mod_strafing_strength_x_ref = convar->getConVarByName("fposu_mod_strafing_strength_x");
     m_fposu_mod_strafing_strength_y_ref = convar->getConVarByName("fposu_mod_strafing_strength_y");
     m_fposu_mod_strafing_strength_z_ref = convar->getConVarByName("fposu_mod_strafing_strength_z");
-    m_fposu_mod_3d_depthwobble_ref = convar->getConVarByName("fposu_mod_3d_depthwobble");
     m_osu_slider_scorev2_ref = convar->getConVarByName("osu_slider_scorev2");
 
     // vars

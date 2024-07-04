@@ -399,7 +399,6 @@ class Beatmap {
     ConVar *m_fposu_mod_strafing_strength_x_ref = NULL;
     ConVar *m_fposu_mod_strafing_strength_y_ref = NULL;
     ConVar *m_fposu_mod_strafing_strength_z_ref = NULL;
-    ConVar *m_fposu_mod_3d_depthwobble_ref = NULL;
     ConVar *m_osu_slider_scorev2_ref = NULL;
 
     static inline Vector2 mapNormalizedCoordsOntoUnitCircle(const Vector2 &in) {
