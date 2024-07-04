@@ -37,6 +37,7 @@ ConVar KeyBindings::SAVE_SCREENSHOT("osu_key_save_screenshot", (int)KEY_F12, FCV
 ConVar KeyBindings::DISABLE_MOUSE_BUTTONS("osu_key_disable_mouse_buttons", (int)KEY_F10, FCVAR_DEFAULT);
 ConVar KeyBindings::TOGGLE_MAP_BACKGROUND("key_toggle_map_background", 0, FCVAR_DEFAULT);
 ConVar KeyBindings::BOSS_KEY("osu_key_boss", (int)KEY_INSERT, FCVAR_DEFAULT);
+ConVar KeyBindings::OPEN_SKIN_SELECT_MENU("key_open_skin_select_menu", 0, FCVAR_DEFAULT);
 
 ConVar KeyBindings::TOGGLE_MODSELECT("osu_key_toggle_modselect", (int)KEY_F1, FCVAR_DEFAULT);
 ConVar KeyBindings::RANDOM_BEATMAP("osu_key_random_beatmap", (int)KEY_F2, FCVAR_DEFAULT);
@@ -83,6 +84,7 @@ std::vector<ConVar*> KeyBindings::ALL = {&KeyBindings::LEFT_CLICK,
                                          &KeyBindings::DISABLE_MOUSE_BUTTONS,
                                          &KeyBindings::TOGGLE_MAP_BACKGROUND,
                                          &KeyBindings::BOSS_KEY,
+                                         &KeyBindings::OPEN_SKIN_SELECT_MENU,
 
                                          &KeyBindings::TOGGLE_MODSELECT,
                                          &KeyBindings::RANDOM_BEATMAP,

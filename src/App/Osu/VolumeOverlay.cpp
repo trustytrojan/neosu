@@ -19,6 +19,7 @@
 #include "SongBrowser/SongBrowser.h"
 #include "Sound.h"
 #include "SoundEngine.h"
+#include "UIContextMenu.h"
 #include "UIVolumeSlider.h"
 
 VolumeOverlay::VolumeOverlay() : OsuScreen() {
@@ -244,6 +245,7 @@ bool VolumeOverlay::canChangeVolume() {
         can_scroll = false;
     }
     if(osu->m_optionsMenu->isVisible()) can_scroll = false;
+    if(osu->m_optionsMenu->m_contextMenu->isVisible()) can_scroll = false;
     if(osu->m_changelog->isVisible()) can_scroll = false;
     if(osu->m_rankingScreen->isVisible()) can_scroll = false;
     if(osu->m_modSelector->isMouseInScrollView()) can_scroll = false;

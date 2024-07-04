@@ -486,7 +486,8 @@ void Skin::load() {
     // skin ini
     randomizeFilePath();
     m_sSkinIniFilePath = m_sFilePath;
-    m_sSkinIniFilePath.append("skin.ini");
+    m_sSkinIniFilePath.append(fix_filename_casing(m_sFilePath, "skin.ini"));
+
     bool parseSkinIni1Status = true;
     bool parseSkinIni2Status = true;
     if(!parseSkinINI(m_sSkinIniFilePath)) {
@@ -1589,7 +1590,6 @@ void Skin::checkLoadSound(Sound **addressOfPointer, std::string skinElementName,
 
             std::string path = base_path;
             path.append(fn);
-            debugLog("Loading %s\n", path.c_str());
 
             if(env->fileExists(path)) {
                 if(osu_skin_async.getBool()) {
@@ -1598,8 +1598,6 @@ void Skin::checkLoadSound(Sound **addressOfPointer, std::string skinElementName,
                 return engine->getResourceManager()->loadSoundAbs(path, resource_name, !isSample, isOverlayable, loop);
             }
         }
-
-        debugLog("Failed to load %s\n", filename.c_str());
 
         return (Sound *)NULL;
     };

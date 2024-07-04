@@ -1227,6 +1227,12 @@ void Osu::onKeyDown(KeyboardEvent &key) {
         key.consume();
     }
 
+    if(key == (KEYCODE)KeyBindings::OPEN_SKIN_SELECT_MENU.getInt()) {
+        m_optionsMenu->onSkinSelect();
+        key.consume();
+        return;
+    }
+
     // disable mouse buttons hotkey
     if(key == (KEYCODE)KeyBindings::DISABLE_MOUSE_BUTTONS.getInt()) {
         if(osu_disable_mousebuttons.getBool()) {
@@ -1245,6 +1251,8 @@ void Osu::onKeyDown(KeyboardEvent &key) {
         } else {
             diff->draw_background = !diff->draw_background;
         }
+        key.consume();
+        return;
     }
 
     // F8 toggle chat

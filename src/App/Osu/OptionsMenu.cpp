@@ -994,6 +994,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     addKeyBindButton("Disable Mouse Buttons", &KeyBindings::DISABLE_MOUSE_BUTTONS);
     addKeyBindButton("Toggle Map Background", &KeyBindings::TOGGLE_MAP_BACKGROUND);
     addKeyBindButton("Boss Key (Minimize)", &KeyBindings::BOSS_KEY);
+    addKeyBindButton("Open Skin Selection Menu", &KeyBindings::OPEN_SKIN_SELECT_MENU);
     addSubSection("Keys - Song Select", keyboardSectionTags);
     addKeyBindButton("Toggle Mod Selection Screen", &KeyBindings::TOGGLE_MODSELECT)
         ->setTooltipText("(F1 can not be unbound. This is just an additional key.)");
@@ -1390,7 +1391,10 @@ OptionsMenu::~OptionsMenu() {
 
 void OptionsMenu::draw(Graphics *g) {
     const bool isAnimating = anim->isAnimating(&m_fAnimation);
-    if(!m_bVisible && !isAnimating) return;
+    if(!m_bVisible && !isAnimating) {
+        m_contextMenu->draw(g);
+        return;
+    }
 
     m_sliderPreviewElement->setDrawSliderHack(!isAnimating);
 
@@ -1468,11 +1472,11 @@ void OptionsMenu::draw(Graphics *g) {
 }
 
 void OptionsMenu::mouse_update(bool *propagate_clicks) {
-    if(!m_bVisible) return;
-
     // force context menu focus
     m_contextMenu->mouse_update(propagate_clicks);
     if(!*propagate_clicks) return;
+
+    if(!m_bVisible) return;
 
     ScreenBackable::mouse_update(propagate_clicks);
     if(!*propagate_clicks) return;
@@ -1749,13 +1753,10 @@ void OptionsMenu::setVisibleInt(bool visible, bool fromOnBack) {
     m_bVisible = visible;
     osu->m_chat->updateVisibility();
 
-    if(visible)
+    if(visible) {
         updateLayout();
-    else {
+    } else {
         m_contextMenu->setVisible2(false);
-
-        // anim->deleteExistingAnimation(&m_fAnimation);
-        // m_fAnimation = 0.0f;
     }
 
     // usability: auto scroll to fposu settings if opening options while in fposu gamemode
@@ -2406,6 +2407,8 @@ void OptionsMenu::openCurrentSkinFolder() {
 }
 
 void OptionsMenu::onSkinSelect() {
+    // XXX: Instead of a dropdown, we should make a dedicated skin select screen with search bar
+
     updateOsuFolder();
 
     if(osu->isSkinLoading()) return;
@@ -2448,8 +2451,16 @@ void OptionsMenu::onSkinSelect() {
     }
 
     if(skinFolders.size() > 0) {
-        m_contextMenu->setPos(m_skinSelectLocalButton->getPos());
-        m_contextMenu->setRelPos(m_skinSelectLocalButton->getRelPos());
+        m_contextMenu->setVisible2(false);
+
+        if(m_bVisible) {
+            m_contextMenu->setPos(m_skinSelectLocalButton->getPos());
+            m_contextMenu->setRelPos(m_skinSelectLocalButton->getRelPos());
+        } else {
+            // Put it 50px from top, we'll move it later
+            m_contextMenu->setPos(Vector2{0, 100});
+        }
+
         m_contextMenu->begin();
 
         const UString defaultText = "default";
@@ -2465,6 +2476,15 @@ void OptionsMenu::onSkinSelect() {
         }
         m_contextMenu->end(false, true);
         m_contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSkinSelect2));
+
+        if(!m_bVisible) {
+            // Center context menu
+            m_contextMenu->setPos(Vector2{
+                osu->getScreenWidth() / 2.f - m_contextMenu->getSize().x / 2.f,
+                osu->getScreenHeight() / 2.f - m_contextMenu->getSize().y / 2.f,
+            });
+            m_contextMenu->setVisible(true);
+        }
     } else {
         osu->getNotificationOverlay()->addNotification("Error: Couldn't find any skins", 0xffff0000);
         m_options->scrollToTop();

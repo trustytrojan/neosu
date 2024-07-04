@@ -43,6 +43,7 @@ class KeyBindings {
     static ConVar DISABLE_MOUSE_BUTTONS;
     static ConVar TOGGLE_MAP_BACKGROUND;
     static ConVar BOSS_KEY;
+    static ConVar OPEN_SKIN_SELECT_MENU;
 
     static ConVar TOGGLE_MODSELECT;
     static ConVar RANDOM_BEATMAP;
