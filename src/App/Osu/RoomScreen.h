@@ -6,6 +6,7 @@
 #include "BanchoProtocol.h"
 #include "CBaseUIScrollView.h"
 #include "OsuScreen.h"
+#include "score.h"
 
 class CBaseUICheckbox;
 class CBaseUILabel;
@@ -56,6 +57,8 @@ class RoomScreen : public OsuScreen {
     void on_match_aborted();
     void onClientScoreChange(bool force = false);
     void onReadyButtonClick();
+
+    FinishedScore get_approximate_score();
 
     // Host only
     void onStartGameClicked();

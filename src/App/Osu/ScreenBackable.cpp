@@ -1,10 +1,12 @@
 #include "ScreenBackable.h"
 
+#include "Engine.h"
 #include "KeyBindings.h"
 #include "Keyboard.h"
 #include "Osu.h"
 #include "ResourceManager.h"
 #include "Skin.h"
+#include "SoundEngine.h"
 #include "UIBackButton.h"
 
 ScreenBackable::ScreenBackable() : OsuScreen() {
@@ -34,6 +36,7 @@ void ScreenBackable::onKeyDown(KeyboardEvent &e) {
     if(!m_bVisible || e.isConsumed()) return;
 
     if(e == KEY_ESCAPE || e == (KEYCODE)KeyBindings::GAME_PAUSE.getInt()) {
+        engine->getSound()->play(osu->getSkin()->m_menuBack);
         onBack();
         e.consume();
         return;

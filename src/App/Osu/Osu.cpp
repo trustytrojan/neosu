@@ -1658,12 +1658,13 @@ void Osu::saveScreenshot() {
                        screenshot_path.toUtf8());
 }
 
-void Osu::onPlayEnd(bool quit, bool aborted) {
+void Osu::onPlayEnd(FinishedScore score, bool quit, bool aborted) {
     m_snd_change_check_interval_ref->setValue(m_snd_change_check_interval_ref->getDefaultFloat());
 
     if(!quit) {
         if(!osu_mod_endless.getBool()) {
-            m_rankingScreen->setScore(m_score);
+            // NOTE: the order of these two calls matters
+            m_rankingScreen->setScore(score);
             m_rankingScreen->setBeatmapInfo(getSelectedBeatmap(), getSelectedBeatmap()->getSelectedDifficulty2());
 
             engine->getSound()->play(m_skin->getApplause());

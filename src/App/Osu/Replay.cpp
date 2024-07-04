@@ -1,9 +1,12 @@
 #include "Replay.h"
 
+#ifndef LZMA_API_STATIC
 #define LZMA_API_STATIC
+#endif
 #include <lzma.h>
-#include <string>
+
 #include <sstream>
+#include <string>
 
 #include "Bancho.h"
 #include "BanchoProtocol.h"

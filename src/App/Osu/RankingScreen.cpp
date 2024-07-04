@@ -1,10 +1,3 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		score/results/ranking screen
-//
-// $NoKeywords: $osuss
-//===============================================================================//
-
 #include "RankingScreen.h"
 
 #include "AnimationHandler.h"
@@ -33,6 +26,7 @@
 #include "SongBrowser/SongBrowser.h"
 #include "SoundEngine.h"
 #include "TooltipOverlay.h"
+#include "UIButton.h"
 #include "UIRankingScreenInfoLabel.h"
 #include "UIRankingScreenRankingPanel.h"
 #include "score.h"
@@ -159,10 +153,10 @@ RankingScreen::RankingScreen() : ScreenBackable() {
 
     m_rankings = new CBaseUIScrollView(-1, 0, 0, 0, "");
     m_rankings->setHorizontalScrolling(false);
-    m_rankings->setVerticalScrolling(true);
+    m_rankings->setVerticalScrolling(false);
     m_rankings->setDrawFrame(false);
     m_rankings->setDrawBackground(false);
-    m_rankings->setDrawScrollbars(true);
+    m_rankings->setDrawScrollbars(false);
     addBaseUIElement(m_rankings);
 
     m_songInfo = new UIRankingScreenInfoLabel(5, 5, 0, 0, "");
@@ -193,19 +187,12 @@ RankingScreen::RankingScreen() : ScreenBackable() {
     m_rankingIndex->setTextColor(0xffffcb21);
     m_rankings->getContainer()->addBaseUIElement(m_rankingIndex);
 
-    m_rankingScrollDownInfoButton = new RankingScreenScrollDownInfoButton();
-    m_rankingScrollDownInfoButton->setFont(osu->getFontIcons());
-    m_rankingScrollDownInfoButton->setClickCallback(
-        fastdelegate::MakeDelegate(this, &RankingScreen::onScrollDownClicked));
-    UString iconString;
-    iconString.insert(0, Icons::ARROW_DOWN);
-    iconString.append("   ");
-    iconString.insert(iconString.length(), Icons::ARROW_DOWN);
-    iconString.append("   ");
-    iconString.insert(iconString.length(), Icons::ARROW_DOWN);
-    m_rankingScrollDownInfoButton->setText(iconString);
-    addBaseUIElement(m_rankingScrollDownInfoButton);
-    m_fRankingScrollDownInfoButtonAlphaAnim = 1.0f;
+    m_retry_btn = new UIButton(0, 0, 0, 0, "", "Retry");
+    m_retry_btn->setClickCallback(fastdelegate::MakeDelegate(this, &RankingScreen::onRetryClicked));
+    addBaseUIElement(m_retry_btn);
+    m_watch_btn = new UIButton(0, 0, 0, 0, "", "Watch replay");
+    m_watch_btn->setClickCallback(fastdelegate::MakeDelegate(this, &RankingScreen::onWatchClicked));
+    addBaseUIElement(m_watch_btn);
 
     setGrade(FinishedScore::Grade::D);
     setIndex(0);  // TEMP
@@ -333,7 +320,7 @@ void RankingScreen::draw(Graphics *g) {
     // draw pp
     if(osu_rankingscreen_pp.getBool() && !m_bIsLegacyScore) {
         const UString ppString = getPPString();
-        const Vector2 ppPos = getPPPosRaw() + m_vPPCursorMagnetAnimation;
+        const Vector2 ppPos = getPPPosRaw();
 
         g->pushTransform();
         {
@@ -346,8 +333,6 @@ void RankingScreen::draw(Graphics *g) {
         }
         g->popTransform();
     }
-
-    if(m_osu_scores_enabled->getBool()) m_rankingScrollDownInfoButton->draw(g);
 
     // draw top black bar
     g->setColor(0xff000000);
@@ -372,9 +357,6 @@ void RankingScreen::drawModImage(Graphics *g, SkinImage *image, Vector2 &pos, Ve
 void RankingScreen::mouse_update(bool *propagate_clicks) {
     if(!m_bVisible) return;
     ScreenBackable::mouse_update(propagate_clicks);
-
-    // HACKHACK:
-    if(osu->getOptionsMenu()->isMouseInside()) engine->getMouse()->resetWheelDelta();
 
     // tooltip (pp + accuracy + unstable rate)
     if(!osu->getOptionsMenu()->isMouseInside() && !m_bIsLegacyScore &&
@@ -401,33 +383,6 @@ void RankingScreen::mouse_update(bool *propagate_clicks) {
         }
         osu->getTooltipOverlay()->end();
     }
-
-    // frustration multiplier
-    Vector2 cursorDelta = getPPPosCenterRaw() - engine->getMouse()->getPos();
-    Vector2 norm;
-    const float dist = 150.0f;
-    if(cursorDelta.length() > dist) {
-        cursorDelta.x = 0;
-        cursorDelta.y = 0;
-    } else {
-        norm = cursorDelta;
-        norm.normalize();
-    }
-    float percent = 1.0f - (cursorDelta.length() / dist);
-    Vector2 target = norm * percent * percent * (dist + 50);
-    anim->moveQuadOut(&m_vPPCursorMagnetAnimation.x, target.x, 0.20f, true);
-    anim->moveQuadOut(&m_vPPCursorMagnetAnimation.y, target.y, 0.20f, true);
-
-    // button transparency
-    const float transparencyStart = getPos().y + getSize().y;
-    const float transparencyEnd = getPos().y + getSize().y + m_rankingIndex->getSize().y / 2;
-    const float alpha =
-        clamp<float>((m_rankingIndex->getPos().y + (transparencyEnd - transparencyStart) - transparencyStart) /
-                         (transparencyEnd - transparencyStart),
-                     0.0f, 1.0f);
-    anim->moveLinear(&m_fRankingScrollDownInfoButtonAlphaAnim, alpha, 0.075 * m_fRankingScrollDownInfoButtonAlphaAnim,
-                     true);
-    m_rankingScrollDownInfoButton->setAlpha(m_fRankingScrollDownInfoButtonAlphaAnim);
 }
 
 CBaseUIContainer *RankingScreen::setVisible(bool visible) {
@@ -435,77 +390,61 @@ CBaseUIContainer *RankingScreen::setVisible(bool visible) {
 
     if(m_bVisible) {
         m_backButton->resetAnimation();
-        m_rankings->scrollToY(0, false);
-
         updateLayout();
-    } else if(bancho.is_in_a_multi_room()) {
-        // We backed out of the ranking screen, display the room again
-        osu->m_room->setVisible(true);
-        osu->m_chat->updateVisibility();
-        engine->getSound()->play(osu->getSkin()->m_menuBack);
+    } else {
+        // Stop applause sound
+        if(osu->getSkin()->getApplause() != NULL && osu->getSkin()->getApplause()->isPlaying()) {
+            engine->getSound()->stop(osu->getSkin()->getApplause());
+        }
 
-        // Since we prevented on_map_change() from running while the ranking screen was visible, run it now.
-        osu->m_room->on_map_change();
+        if(bancho.is_in_a_multi_room()) {
+            // We backed out of the ranking screen, display the room again
+            osu->m_room->setVisible(true);
+            osu->m_chat->updateVisibility();
+
+            // Since we prevented on_map_change() from running while the ranking screen was visible, run it now.
+            osu->m_room->on_map_change();
+        } else {
+            osu->m_songBrowser2->setVisible(true);
+        }
     }
 
     return this;
 }
 
-void RankingScreen::setScore(LiveScore *score) {
-    m_rankingPanel->setScore(score);
-    setGrade(score->getGrade());
-    setIndex(score->getIndex());
-
-    m_fUnstableRate = score->getUnstableRate();
-    m_fHitErrorAvgMin = score->getHitErrorAvgMin();
-    m_fHitErrorAvgMax = score->getHitErrorAvgMax();
-    m_fStarsTomTotal = score->getStarsTomTotal();
-    m_fStarsTomAim = score->getStarsTomAim();
-    m_fStarsTomSpeed = score->getStarsTomSpeed();
-    m_fPPv2 = score->getPPv2();
-
-    const UString modsString = ScoreButton::getModsStringForDisplay(score->getModsLegacy());
-    if(modsString.length() > 0) {
-        m_sMods = "Mods: ";
-        m_sMods.append(modsString);
-    } else
-        m_sMods = "";
-
-    m_bModSS = osu->getModSS();
-    m_bModSD = osu->getModSD();
-    m_bModEZ = osu->getModEZ();
-    m_bModHD = osu->getModHD();
-    m_bModHR = osu->getModHR();
-    m_bModNC = osu->getModNC();
-    m_bModDT = osu->getModDT();
-    m_bModNightmare = osu->getModNightmare();
-    m_bModScorev2 = osu->getModScorev2();
-    m_bModTarget = osu->getModTarget();
-    m_bModSpunout = osu->getModSpunout();
-    m_bModRelax = osu->getModRelax();
-    m_bModNF = osu->getModNF();
-    m_bModHT = osu->getModHT();
-    m_bModAutopilot = osu->getModAutopilot();
-    m_bModAuto = osu->getModAuto();
-    m_bModTD = osu->getModTD();
-
-    m_enabledExperimentalMods.clear();
-    std::vector<ConVar *> allExperimentalMods = osu->getExperimentalMods();
-    for(int i = 0; i < allExperimentalMods.size(); i++) {
-        if(allExperimentalMods[i]->getBool()) m_enabledExperimentalMods.push_back(allExperimentalMods[i]);
-    }
-
-    m_bIsLegacyScore = false;
-    m_bIsImportedLegacyScore = false;
-    m_bIsUnranked = score->isUnranked();
+void RankingScreen::onRetryClicked() {
+    // TODO @kiwec: test this
+    setVisible(false);
+    osu->getSelectedBeatmap()->play();
 }
 
-void RankingScreen::setScore(FinishedScore score, UString dateTime) {
+void RankingScreen::onWatchClicked() {
+    // TODO @kiwec: doesn't work, just backs out to song browser, idk why
+    setVisible(false);
+    osu->getSelectedBeatmap()->watch(m_score, 0.0);
+}
+
+void RankingScreen::setScore(FinishedScore score) {
+    auto current_name = convar->getConVarByName("name")->getString();
+    bool is_same_player = !score.playerName.compare(current_name.toUtf8());
+
+    m_score = score;
+    // TODO @kiwec: broken
+    m_retry_btn->setVisible(false);
+    m_watch_btn->setVisible(false);
+    // m_retry_btn->setVisible(is_same_player && !bancho.is_in_a_multi_room());
+    // m_watch_btn->setVisible(score.has_replay && !bancho.is_in_a_multi_room());
+
     m_bIsLegacyScore = score.isLegacyScore;
     m_bIsImportedLegacyScore = score.isImportedLegacyScore;
     m_bIsUnranked = false;
 
-    m_songInfo->setDate(dateTime.toUtf8());
+    char dateString[64];
+    memset(dateString, '\0', 64);
+    std::tm *tm = std::localtime((std::time_t *)(&score.unixTimestamp));
+    std::strftime(dateString, 63, "%d-%b-%y %H:%M:%S", tm);
+
+    m_songInfo->setDate(dateString);
     m_songInfo->setPlayer(score.playerName);
 
     m_rankingPanel->setScore(score);
@@ -572,6 +511,7 @@ void RankingScreen::setScore(FinishedScore score, UString dateTime) {
 }
 
 void RankingScreen::setBeatmapInfo(Beatmap *beatmap, DatabaseBeatmap *diff2) {
+    m_score.diff2 = diff2;
     m_songInfo->setFromBeatmap(beatmap, diff2);
 
     UString local_name = convar->getConVarByName("name")->getString();
@@ -603,6 +543,14 @@ void RankingScreen::updateLayout() {
                         max(m_songInfo->getMinimumHeight(),
                             m_rankingTitle->getSize().y * osu_rankingscreen_topbar_height_percent.getFloat()));
 
+    // TODO @kiwec: buttons are not placed at the given coords, idk why
+    m_retry_btn->setSize(150 * uiScale, 50 * uiScale);
+    m_watch_btn->setSize(150 * uiScale, 50 * uiScale);
+    m_retry_btn->setPos(osu->getScreenSize().x - (150 * uiScale + 10.f * uiScale),
+                        osu->getScreenSize().y - (50 * uiScale + 10.f * uiScale));
+    m_watch_btn->setPos(osu->getScreenSize().x - (150 * uiScale + 10.f * uiScale),
+                        osu->getScreenSize().y - (50 * uiScale * 2.f + 20.f * uiScale));
+
     m_rankings->setSize(osu->getScreenSize().x + 2, osu->getScreenSize().y - m_songInfo->getSize().y + 3);
     m_rankings->setRelPosY(m_songInfo->getSize().y - 1);
     update_pos();
@@ -625,11 +573,6 @@ void RankingScreen::updateLayout() {
     m_rankingBottom->setSize(m_rankings->getSize().x + 2, osu->getScreenHeight() * 0.2f);
     m_rankingBottom->setRelPosY(m_rankingIndex->getRelPos().y + m_rankingIndex->getSize().y);
 
-    m_rankingScrollDownInfoButton->setSize(getSize().x * 0.2f * uiScale, getSize().y * 0.1f * uiScale);
-    m_rankingScrollDownInfoButton->setRelPos(
-        getPos().x + getSize().x / 2 - m_rankingScrollDownInfoButton->getSize().x / 2,
-        getSize().y - m_rankingScrollDownInfoButton->getSize().y);
-
     setGrade(m_grade);
 
     update_pos();
@@ -637,20 +580,7 @@ void RankingScreen::updateLayout() {
     m_rankings->setScrollSizeToContent(0);
 }
 
-void RankingScreen::onBack() {
-    engine->getSound()->play(osu->getSkin()->m_menuBack);
-
-    // stop applause sound
-    if(osu->getSkin()->getApplause() != NULL && osu->getSkin()->getApplause()->isPlaying())
-        engine->getSound()->stop(osu->getSkin()->getApplause());
-
-    setVisible(false);
-    if(!bancho.is_in_a_multi_room() && osu->m_songBrowser2 != NULL) {
-        osu->m_songBrowser2->setVisible(true);
-    }
-}
-
-void RankingScreen::onScrollDownClicked() { m_rankings->scrollToBottom(); }
+void RankingScreen::onBack() { setVisible(false); }
 
 void RankingScreen::setGrade(FinishedScore::Grade grade) {
     m_grade = grade;
@@ -712,11 +642,9 @@ void RankingScreen::setIndex(int index) {
         m_rankingIndex->setText(UString::format("You achieved the #%i score on local rankings!", (index + 1)));
         m_rankingIndex->setVisible2(true);
         m_rankingBottom->setVisible2(true);
-        m_rankingScrollDownInfoButton->setVisible2(index < 1);  // only show button if we made a new highscore
     } else {
         m_rankingIndex->setVisible2(false);
         m_rankingBottom->setVisible2(false);
-        m_rankingScrollDownInfoButton->setVisible2(false);
     }
 }
 

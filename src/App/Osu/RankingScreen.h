@@ -1,13 +1,4 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		score/results/ranking screen
-//
-// $NoKeywords: $osuss
-//===============================================================================//
-
-#ifndef OSU_OSURANKINGSCREEN_H
-#define OSU_OSURANKINGSCREEN_H
-
+#pragma once
 #include "Database.h"
 #include "ScreenBackable.h"
 #include "score.h"
@@ -20,13 +11,11 @@ class CBaseUILabel;
 class Beatmap;
 class DatabaseBeatmap;
 class SkinImage;
-
+class UIButton;
 class UIRankingScreenInfoLabel;
 class UIRankingScreenRankingPanel;
-
 class RankingScreenIndexLabel;
 class RankingScreenBottomElement;
-class RankingScreenScrollDownInfoButton;
 
 class ConVar;
 
@@ -39,8 +28,10 @@ class RankingScreen : public ScreenBackable {
 
     virtual CBaseUIContainer *setVisible(bool visible);
 
-    void setScore(LiveScore *score);
-    void setScore(FinishedScore score, UString dateTime);
+    void onRetryClicked();
+    void onWatchClicked();
+
+    void setScore(FinishedScore score);
     void setBeatmapInfo(Beatmap *beatmap, DatabaseBeatmap *diff2);
 
    private:
@@ -48,8 +39,6 @@ class RankingScreen : public ScreenBackable {
     virtual void onBack();
 
     void drawModImage(Graphics *g, SkinImage *image, Vector2 &pos, Vector2 &max);
-
-    void onScrollDownClicked();
 
     void setGrade(FinishedScore::Grade grade);
     void setIndex(int index);
@@ -69,8 +58,8 @@ class RankingScreen : public ScreenBackable {
     RankingScreenIndexLabel *m_rankingIndex;
     RankingScreenBottomElement *m_rankingBottom;
 
-    RankingScreenScrollDownInfoButton *m_rankingScrollDownInfoButton;
-    float m_fRankingScrollDownInfoButtonAlphaAnim;
+    UIButton *m_retry_btn;
+    UIButton *m_watch_btn;
 
     FinishedScore::Grade m_grade;
     float m_fUnstableRate;
@@ -110,10 +99,8 @@ class RankingScreen : public ScreenBackable {
     std::vector<ConVar *> m_enabledExperimentalMods;
 
     // custom
-    Vector2 m_vPPCursorMagnetAnimation;
+    FinishedScore m_score;
     bool m_bIsLegacyScore;
     bool m_bIsImportedLegacyScore;
     bool m_bIsUnranked;
 };
-
-#endif

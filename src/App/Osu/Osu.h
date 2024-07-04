@@ -81,8 +81,7 @@ class Osu : public App, public MouseListener {
     virtual void onMinimized();
     virtual bool onShutdown();
 
-    void onPlayEnd(bool quit = true,
-                   bool aborted = false);  // called when a beatmap is finished playing (or the player quit)
+    void onPlayEnd(FinishedScore score, bool quit = true, bool aborted = false);
 
     void toggleModSelection(bool waitForF1KeyUp = false);
     void toggleSongBrowser();

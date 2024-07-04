@@ -1155,7 +1155,7 @@ void Beatmap::stop(bool quit) {
     m_bIsPaused = false;
     m_bContinueScheduled = false;
 
-    saveAndSubmitScore(quit);
+    auto score = saveAndSubmitScore(quit);
 
     // Auto mod was "temporary" since it was set from Ctrl+Clicking a map, not from the mod selector
     if(osu->m_bModAutoTemp) {
@@ -1177,7 +1177,7 @@ void Beatmap::stop(bool quit) {
 
     if(bancho.is_playing_a_multi_map()) {
         if(quit) {
-            osu->onPlayEnd(true);
+            osu->onPlayEnd(score, true);
             osu->m_room->ragequit();
         } else {
             osu->m_room->onClientScoreChange(true);
@@ -1186,7 +1186,7 @@ void Beatmap::stop(bool quit) {
             send_packet(packet);
         }
     } else {
-        osu->onPlayEnd(quit);
+        osu->onPlayEnd(score, quit);
     }
 }
 
@@ -3701,7 +3701,7 @@ Vector2 Beatmap::getFirstPersonCursorDelta() const {
 
 float Beatmap::getHitcircleDiameter() const { return m_fHitcircleDiameter; }
 
-void Beatmap::saveAndSubmitScore(bool quit) {
+FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
     // calculate stars
     double aim = 0.0;
     double aimSliderFactor = 0.0;
@@ -3814,8 +3814,6 @@ void Beatmap::saveAndSubmitScore(bool quit) {
     score.has_replay = true;
     score.replay = live_replay;
 
-    int scoreIndex = -1;
-
     if(!isCheated) {
         RichPresence::onPlayEnd(quit);
 
@@ -3826,15 +3824,12 @@ void Beatmap::saveAndSubmitScore(bool quit) {
         }
 
         if(score.passed) {
-            scoreIndex = osu->getSongBrowser()->getDatabase()->addScore(m_selectedDifficulty2->getMD5Hash(), score);
+            int scoreIndex = osu->getSongBrowser()->getDatabase()->addScore(m_selectedDifficulty2->getMD5Hash(), score);
             if(scoreIndex == -1) {
                 osu->getNotificationOverlay()->addNotification("Failed saving score!", 0xffff0000, false, 3.0f);
             }
         }
     }
-
-    osu->getScore()->setIndex(scoreIndex);
-    osu->getScore()->setComboFull(maxPossibleCombo);  // used in RankingScreen/UIRankingScreenRankingPanel
 
     if(!bancho.spectators.empty()) {
         broadcast_spectator_frames();
@@ -3853,6 +3848,8 @@ void Beatmap::saveAndSubmitScore(bool quit) {
     if(!isComplete) {
         osu->getScore()->setPPv2(0.0f);
     }
+
+    return score;
 }
 
 void Beatmap::updateAutoCursorPos() {

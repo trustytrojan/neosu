@@ -178,7 +178,7 @@ class Beatmap {
                                                               m_speedNotesForNumHitObjects.size() - 1)]
                     : 0);
     }
-    
+
     std::vector<double> m_aimStrains;
     std::vector<double> m_speedStrains;
 
@@ -418,7 +418,7 @@ class Beatmap {
         }
     }
 
-    void saveAndSubmitScore(bool quit);
+    FinishedScore saveAndSubmitScore(bool quit);
 
     void drawFollowPoints(Graphics *g);
     void drawHitObjects(Graphics *g);

@@ -2467,10 +2467,7 @@ void SongBrowser::updateLayout() {
     m_search->setSize(m_songBrowser->getSize());
 }
 
-void SongBrowser::onBack() {
-    engine->getSound()->play(osu->getSkin()->m_menuBack);
-    osu->toggleSongBrowser();
-}
+void SongBrowser::onBack() { osu->toggleSongBrowser(); }
 
 void SongBrowser::updateScoreBrowserLayout() {
     const float dpiScale = Osu::getUIScale();
@@ -3544,10 +3541,9 @@ void SongBrowser::onUserCardChange(UString new_username) {
 void SongBrowser::onScoreClicked(CBaseUIButton *button) {
     ScoreButton *scoreButton = (ScoreButton *)button;
 
-    // NOTE: the order of these two calls matters (score data overwrites relevant fields, but base values are coming
-    // from the beatmap)
+    // NOTE: the order of these two calls matters
+    osu->getRankingScreen()->setScore(scoreButton->getScore());
     osu->getRankingScreen()->setBeatmapInfo(m_selectedBeatmap, m_selectedBeatmap->getSelectedDifficulty2());
-    osu->getRankingScreen()->setScore(scoreButton->getScore(), scoreButton->getDateTime());
 
     osu->getSongBrowser()->setVisible(false);
     osu->getRankingScreen()->setVisible(true);

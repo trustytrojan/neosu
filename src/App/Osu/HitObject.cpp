@@ -208,6 +208,9 @@ void HitObject::drawHitResult(Graphics *g, Skin *skin, float hitcircleDiameter, 
                 hitImageScale =
                     (rawHitcircleDiameter / skin->getHit300g()->getSizeBaseRaw().x) * osuCoordScaleMultiplier;
                 break;
+
+            default:
+                break;
         }
 
         // non-misses have a special scale animation (the type of which depends on hasParticle)
@@ -291,6 +294,9 @@ void HitObject::drawHitResult(Graphics *g, Skin *skin, float hitcircleDiameter, 
                         g, rawPos,
                         (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * osu_hitresult_scale.getFloat());
                 }
+                break;
+
+            default:
                 break;
         }
     }

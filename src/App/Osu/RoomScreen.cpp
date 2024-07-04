@@ -705,11 +705,46 @@ void RoomScreen::on_player_failed(i32 slot_id) {
     bancho.room.slots[slot_id].died = true;
 }
 
+FinishedScore RoomScreen::get_approximate_score() {
+    FinishedScore score;
+    score.isLegacyScore = true;
+    score.version = LiveScore::VERSION;
+    score.player_id = bancho.user_id;
+    score.playerName = bancho.username.toUtf8();
+    score.diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();
+
+    for(int i = 0; i < 16; i++) {
+        auto slot = &bancho.room.slots[i];
+        if(slot->player_id != bancho.user_id) continue;
+
+        score.modsLegacy = slot->mods;
+        score.passed = !slot->died;
+        score.unixTimestamp = slot->last_update_tms;
+        score.num300s = slot->num300;
+        score.num100s = slot->num100;
+        score.num50s = slot->num50;
+        score.numGekis = slot->num_geki;
+        score.numKatus = slot->num_katu;
+        score.numMisses = slot->num_miss;
+        score.score = slot->total_score;
+        score.comboMax = slot->max_combo;
+        score.perfect = slot->is_perfect;
+    }
+
+    score.grade =
+        LiveScore::calculateGrade(score.num300s, score.num100s, score.num50s, score.numMisses,
+                                  score.modsLegacy & ModFlags::Hidden, score.modsLegacy & ModFlags::Flashlight);
+
+    return score;
+}
+
 // All players have finished.
 void RoomScreen::on_match_finished() {
     if(!bancho.is_playing_a_multi_map()) return;
     memcpy(bancho.last_scores, bancho.room.slots, sizeof(bancho.room.slots));
-    osu->onPlayEnd(false, false);
+
+    osu->onPlayEnd(get_approximate_score(), false, false);
+
     bancho.match_started = false;
     osu->m_rankingScreen->setVisible(true);
     osu->m_chat->updateVisibility();
@@ -728,7 +763,7 @@ void RoomScreen::on_player_skip(i32 user_id) {
 
 void RoomScreen::on_match_aborted() {
     if(!bancho.is_playing_a_multi_map()) return;
-    osu->onPlayEnd(false, true);
+    osu->onPlayEnd(get_approximate_score(), false, true);
     m_bVisible = true;
     bancho.match_started = false;
 }
