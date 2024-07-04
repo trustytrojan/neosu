@@ -366,8 +366,9 @@ void Slider::draw(Graphics *g) {
     }
 
     // slider body fade animation, draw start/end circle hit animation
-    bool is_instafade = convar->getConVarByName("instafade")->getBool();
-    if(!is_instafade && m_fEndSliderBodyFadeAnimation > 0.0f && m_fEndSliderBodyFadeAnimation != 1.0f &&
+    bool instafade_slider_body = convar->getConVarByName("instafade_sliders")->getBool();
+    bool instafade_slider_head = convar->getConVarByName("instafade")->getBool();
+    if(!instafade_slider_body && m_fEndSliderBodyFadeAnimation > 0.0f && m_fEndSliderBodyFadeAnimation != 1.0f &&
        !osu->getModHD()) {
         std::vector<Vector2> emptyVector;
         std::vector<Vector2> alwaysPoints;
@@ -380,7 +381,7 @@ void Slider::draw(Graphics *g) {
                                  1.0f - m_fEndSliderBodyFadeAnimation, getTime());
     }
 
-    if(!is_instafade && osu_slider_sliderhead_fadeout.getBool() && m_fStartHitAnimation > 0.0f &&
+    if(!instafade_slider_head && osu_slider_sliderhead_fadeout.getBool() && m_fStartHitAnimation > 0.0f &&
        m_fStartHitAnimation != 1.0f && !osu->getModHD()) {
         float alpha = 1.0f - m_fStartHitAnimation;
 
@@ -419,7 +420,7 @@ void Slider::draw(Graphics *g) {
         g->popTransform();
     }
 
-    if(!is_instafade && m_fEndHitAnimation > 0.0f && m_fEndHitAnimation != 1.0f && !osu->getModHD()) {
+    if(!instafade_slider_head && m_fEndHitAnimation > 0.0f && m_fEndHitAnimation != 1.0f && !osu->getModHD()) {
         float alpha = 1.0f - m_fEndHitAnimation;
 
         float scale = m_fEndHitAnimation;

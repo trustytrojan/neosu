@@ -29,17 +29,23 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG latest;
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
-    latest.changes.push_back("- Added keybind to toggle current map background");
-    latest.changes.push_back("- Fixed beatmaps not getting selected properly in some cases");
-    latest.changes.push_back("- Fixed crash when osu! folder couldn't be found");
-    latest.changes.push_back("- Fixed mod selection not being restored properly");
-    latest.changes.push_back("- Fixed skin selection menu being drawn behind back button");
+    latest.changes.push_back("- Added slider instafade setting");
     changelogs.push_back(latest);
+
+    CHANGELOG v35_09;
+    v35_09.title = "35.09 (2024-07-03)";
+    v35_09.changes.push_back("- Added keybind to toggle current map background");
+    v35_09.changes.push_back("- Fixed beatmaps not getting selected properly in some cases");
+    v35_09.changes.push_back("- Fixed crash when osu! folder couldn't be found");
+    v35_09.changes.push_back("- Fixed mod selection not being restored properly");
+    v35_09.changes.push_back("- Fixed skin selection menu being drawn behind back button");
+    changelogs.push_back(v35_09);
 
     CHANGELOG v35_08;
     v35_08.title = "35.08 (2024-06-28)";
     v35_08.changes.push_back("- Added ability to import .osk and .osz files (drop them onto the neosu window)");
-    v35_08.changes.push_back("- Added persistent map database (downloaded or imported maps stay after restarting the game)");
+    v35_08.changes.push_back(
+        "- Added persistent map database (downloaded or imported maps stay after restarting the game)");
     v35_08.changes.push_back("- Added skin folder");
     v35_08.changes.push_back("- Now publishing 32-bit releases (for PCs running Windows 7)");
     v35_08.changes.push_back("- Fixed songs failing to restart");

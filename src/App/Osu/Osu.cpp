@@ -59,7 +59,7 @@ Osu *osu = NULL;
 
 // release configuration
 ConVar auto_update("auto_update", true, FCVAR_DEFAULT);
-ConVar osu_version("osu_version", 35.09f, FCVAR_DEFAULT | FCVAR_HIDDEN);
+ConVar osu_version("osu_version", 35.10f, FCVAR_DEFAULT | FCVAR_HIDDEN);
 
 #ifdef _DEBUG
 ConVar osu_debug("osu_debug", true, FCVAR_DEFAULT);
@@ -147,6 +147,7 @@ ConVar normalize_loudness("normalize_loudness", false, FCVAR_DEFAULT, "normalize
 ConVar restart_sound_engine_before_playing("restart_sound_engine_before_playing", false, FCVAR_DEFAULT,
                                            "jank fix for users who experience sound issues after playing for a while");
 ConVar instafade("instafade", false, FCVAR_DEFAULT, "don't draw hitcircle fadeout animations");
+ConVar instafade_sliders("instafade_sliders", false, FCVAR_DEFAULT, "don't draw slider fadeout animations");
 ConVar sort_skins_by_name("sort_skins_by_name", true, FCVAR_DEFAULT, "set to false to use old behavior");
 
 ConVar use_https("use_https", true, FCVAR_DEFAULT);
@@ -158,7 +159,6 @@ ConVar submit_after_pause("submit_after_pause", true, FCVAR_DEFAULT);
 
 // If catboy.best doesn't work for you, here are some alternatives:
 // - https://api.osu.direct/d/
-// - https://chimu.moe/d/
 // - https://api.nerinyan.moe/d/
 // - https://osu.gatari.pw/d/
 // - https://osu.sayobot.cn/osu.php?s=
