@@ -10,8 +10,7 @@ class SkinImage;
 
 class Skin {
    public:
-    static const char *OSUSKIN_DEFAULT_SKIN_PATH;
-    static void unpack(const char* filepath);
+    static void unpack(const char *filepath);
 
     static ConVar *m_osu_skin_async;
     static ConVar *m_osu_skin_hd;
@@ -35,7 +34,7 @@ class Skin {
     void setSampleVolume(float volume, bool force = false);
     void resetSampleVolume();
 
-    void playHitCircleSound(int sampleType, float pan = 0.0f);
+    void playHitCircleSound(int sampleType, float pan = 0.0f, long delta = 0);
     void playSliderTickSound(float pan = 0.0f);
     void playSliderSlideSound(float pan = 0.0f);
     void playSpinnerSpinSound();
@@ -583,6 +582,9 @@ class Skin {
 
     Sound *m_spinnerBonus;
     Sound *m_spinnerSpinSound;
+
+    Sound *m_tooearly;
+    Sound *m_toolate;
 
     // Plays when sending a message in chat
     Sound *m_messageSent = NULL;

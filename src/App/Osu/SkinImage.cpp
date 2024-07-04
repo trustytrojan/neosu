@@ -100,13 +100,11 @@ bool SkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin) {
     filepath2.append(skinElementName);
     filepath2.append(".png");
 
-    std::string defaultFilePath1 = "./materials/";
-    defaultFilePath1.append(Skin::OSUSKIN_DEFAULT_SKIN_PATH);
+    std::string defaultFilePath1 = MCENGINE_DATA_DIR "materials/default/";
     defaultFilePath1.append(skinElementName);
     defaultFilePath1.append("@2x.png");
 
-    std::string defaultFilePath2 = "./materials/";
-    defaultFilePath2.append(Skin::OSUSKIN_DEFAULT_SKIN_PATH);
+    std::string defaultFilePath2 = MCENGINE_DATA_DIR "materials/default/";
     defaultFilePath2.append(skinElementName);
     defaultFilePath2.append(".png");
 

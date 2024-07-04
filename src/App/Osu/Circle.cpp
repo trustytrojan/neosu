@@ -591,7 +591,8 @@ void Circle::onHit(LiveScore::HIT result, long delta, float targetDelta, float t
 
         const Vector2 osuCoords = m_beatmap->pixels2OsuCoords(m_beatmap->osuCoords2Pixels(m_vRawPos));
 
-        m_beatmap->getSkin()->playHitCircleSound(m_iSampleType, GameRules::osuCoords2Pan(osuCoords.x));
+        const long sound_delta = result == LiveScore::HIT::HIT_300 ? 0 : delta;
+        m_beatmap->getSkin()->playHitCircleSound(m_iSampleType, GameRules::osuCoords2Pan(osuCoords.x), sound_delta);
 
         m_fHitAnimation = 0.001f;  // quickfix for 1 frame missing images
         anim->moveQuadOut(&m_fHitAnimation, 1.0f, GameRules::getFadeOutTime(m_beatmap), true);

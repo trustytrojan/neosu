@@ -30,6 +30,9 @@ Changelog::Changelog() : ScreenBackable() {
     latest.title =
         UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
     latest.changes.push_back("- Added slider instafade setting");
+    latest.changes.push_back(
+        "- Added \"tooearly.wav\" and \"toolate.wav\" hitsounds, which play when you hit too early or too late (if "
+        "your skin has them)");
     latest.changes.push_back("- Fixed Nightcore getting auto-selected instead of Double Time in some cases");
     changelogs.push_back(latest);
 

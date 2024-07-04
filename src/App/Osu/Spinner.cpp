@@ -428,7 +428,7 @@ void Spinner::onHit() {
 
         const Vector2 osuCoords = m_beatmap->pixels2OsuCoords(m_beatmap->osuCoords2Pixels(m_vRawPos));
 
-        m_beatmap->getSkin()->playHitCircleSound(m_iSampleType, GameRules::osuCoords2Pan(osuCoords.x));
+        m_beatmap->getSkin()->playHitCircleSound(m_iSampleType, GameRules::osuCoords2Pan(osuCoords.x), 0);
     }
 
     // add it, and we are finished

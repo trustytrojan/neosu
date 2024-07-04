@@ -2028,18 +2028,25 @@ void Osu::onSkinChange(UString oldValue, UString newValue) {
         if(newValue.length() < 1) return;
     }
 
+    if(newValue == UString("default")) {
+        m_skinScheduledToLoad = new Skin(newValue, MCENGINE_DATA_DIR "materials/default/", true);
+        if(m_skin == NULL) m_skin = m_skinScheduledToLoad;
+        m_bSkinLoadScheduled = true;
+        return;
+    }
+
     std::string neosuSkinFolder = MCENGINE_DATA_DIR "skins/";
     neosuSkinFolder.append(newValue.toUtf8());
     neosuSkinFolder.append("/");
     if(env->directoryExists(neosuSkinFolder)) {
-        m_skinScheduledToLoad = new Skin(newValue, neosuSkinFolder, (newValue == UString("default")));
+        m_skinScheduledToLoad = new Skin(newValue, neosuSkinFolder, false);
     } else {
         UString ppySkinFolder = m_osu_folder_ref->getString();
         ppySkinFolder.append(m_osu_folder_sub_skins_ref->getString());
         ppySkinFolder.append(newValue);
         ppySkinFolder.append("/");
         std::string sf = ppySkinFolder.toUtf8();
-        m_skinScheduledToLoad = new Skin(newValue, sf, (newValue == UString("default")));
+        m_skinScheduledToLoad = new Skin(newValue, sf, false);
     }
 
     // initial load

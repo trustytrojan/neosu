@@ -1796,8 +1796,8 @@ void Beatmap::handlePreviewPlay() {
                 m_bWasSeekFrame = true;
             } else {
                 m_music->setPositionMS_fast(m_selectedDifficulty2->getPreviewTime() < 0
-                                           ? (unsigned long)(m_music->getLengthMS() * 0.40f)
-                                           : m_selectedDifficulty2->getPreviewTime());
+                                                ? (unsigned long)(m_music->getLengthMS() * 0.40f)
+                                                : m_selectedDifficulty2->getPreviewTime());
                 m_bWasSeekFrame = true;
             }
 
@@ -3071,7 +3071,7 @@ void Beatmap::update2() {
 
         // all remaining clicks which have not been consumed by any hitobjects can safely be deleted
         if(m_clicks.size() > 0) {
-            if(osu_play_hitsound_on_click_while_playing.getBool()) osu->getSkin()->playHitCircleSound(0);
+            if(osu_play_hitsound_on_click_while_playing.getBool()) osu->getSkin()->playHitCircleSound(0, 0.f, 0);
 
             // nightmare mod: extra clicks = sliderbreak
             if((osu->getModNightmare() || osu_mod_jigsaw1.getBool()) && !m_bIsInSkippableSection && !m_bInBreak &&

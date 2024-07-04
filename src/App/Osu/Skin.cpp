@@ -2,8 +2,6 @@
 
 #include <string.h>
 
-#include "miniz.h"
-
 #include "Beatmap.h"
 #include "ConVar.h"
 #include "Engine.h"
@@ -17,6 +15,7 @@
 #include "SkinImage.h"
 #include "SoundEngine.h"
 #include "VolumeOverlay.h"
+#include "miniz.h"
 
 using namespace std;
 
@@ -55,7 +54,6 @@ ConVar osu_sound_panning_multiplier("osu_sound_panning_multiplier", 1.0f, FCVAR_
 ConVar osu_ignore_beatmap_combo_colors("osu_ignore_beatmap_combo_colors", false, FCVAR_DEFAULT);
 ConVar osu_ignore_beatmap_sample_volume("osu_ignore_beatmap_sample_volume", false, FCVAR_DEFAULT);
 
-const char *Skin::OSUSKIN_DEFAULT_SKIN_PATH = "";  // set dynamically below in the constructor
 Image *Skin::m_missingTexture = NULL;
 
 ConVar *Skin::m_osu_skin_async = &osu_skin_async;
@@ -64,10 +62,10 @@ ConVar *Skin::m_osu_skin_hd = &osu_skin_hd;
 ConVar *Skin::m_osu_skin_ref = NULL;
 ConVar *Skin::m_osu_mod_fposu_ref = NULL;
 
-void Skin::unpack(const char* filepath) {
+void Skin::unpack(const char *filepath) {
     auto skin_name = env->getFileNameFromFilePath(filepath);
     debugLog("Extracting %s...\n", skin_name.c_str());
-    skin_name.erase(skin_name.size() - 4); // remove .osk extension
+    skin_name.erase(skin_name.size() - 4);  // remove .osk extension
 
     auto skin_root = std::string(MCENGINE_DATA_DIR "skins/");
     skin_root.append(skin_name);
@@ -137,8 +135,6 @@ Skin::Skin(UString name, std::string filepath, bool isDefaultSkin) {
     if(m_osu_mod_fposu_ref == NULL) m_osu_mod_fposu_ref = convar->getConVarByName("osu_mod_fposu");
 
     if(m_missingTexture == NULL) m_missingTexture = engine->getResourceManager()->getImage("MISSING_TEXTURE");
-
-    OSUSKIN_DEFAULT_SKIN_PATH = "default/";
 
     // vars
     m_hitCircle = m_missingTexture;
@@ -284,6 +280,9 @@ Skin::Skin(UString name, std::string filepath, bool isDefaultSkin) {
 
     m_spinnerBonus = NULL;
     m_spinnerSpinSound = NULL;
+
+    m_tooearly = NULL;
+    m_toolate = NULL;
 
     m_combobreak = NULL;
     m_failsound = NULL;
@@ -487,15 +486,12 @@ void Skin::load() {
     // skin ini
     randomizeFilePath();
     m_sSkinIniFilePath = m_sFilePath;
-    UString defaultSkinIniFilePath = MCENGINE_DATA_DIR "/materials/";
-    defaultSkinIniFilePath.append(OSUSKIN_DEFAULT_SKIN_PATH);
-    defaultSkinIniFilePath.append("skin.ini");
     m_sSkinIniFilePath.append("skin.ini");
     bool parseSkinIni1Status = true;
     bool parseSkinIni2Status = true;
     if(!parseSkinINI(m_sSkinIniFilePath)) {
         parseSkinIni1Status = false;
-        m_sSkinIniFilePath = defaultSkinIniFilePath;
+        m_sSkinIniFilePath = MCENGINE_DATA_DIR "materials/default/skin.ini";
         parseSkinIni2Status = parseSkinINI(m_sSkinIniFilePath);
     }
 
@@ -925,6 +921,9 @@ void Skin::load() {
     checkLoadSound(&m_spinnerBonus, "spinnerbonus", "OSU_SKIN_SPINNERBONUS_SND", true, true);
     checkLoadSound(&m_spinnerSpinSound, "spinnerspin", "OSU_SKIN_SPINNERSPIN_SND", false, true, true);
 
+    checkLoadSound(&m_tooearly, "tooearly", "OSU_SKIN_TOOEARLY_SND", true, true, false, false, 0.8f);
+    checkLoadSound(&m_toolate, "toolate", "OSU_SKIN_TOOLATE_SND", true, true, false, false, 0.85f);
+
     // others
     checkLoadSound(&m_combobreak, "combobreak", "OSU_SKIN_COMBOBREAK_SND", true, true);
     checkLoadSound(&m_failsound, "failsound", "OSU_SKIN_FAILSOUND_SND");
@@ -1286,7 +1285,7 @@ Color Skin::getComboColorForCounter(int i, int offset) {
 
 void Skin::setBeatmapComboColors(std::vector<Color> colors) { m_beatmapComboColors = colors; }
 
-void Skin::playHitCircleSound(int sampleType, float pan) {
+void Skin::playHitCircleSound(int sampleType, float pan, long delta) {
     if(m_iSampleVolume <= 0) {
         return;
     }
@@ -1296,6 +1295,18 @@ void Skin::playHitCircleSound(int sampleType, float pan) {
         pan = 0.0f;
     } else {
         pan *= osu_sound_panning_multiplier.getFloat();
+    }
+
+    debugLog("delta: %d\n", delta);
+    if(delta < 0 && m_tooearly != NULL) {
+        debugLog("Too early!\n");
+        engine->getSound()->play(m_tooearly, pan);
+        return;
+    }
+    if(delta > 0 && m_toolate != NULL) {
+        debugLog("Too late!\n");
+        engine->getSound()->play(m_toolate, pan);
+        return;
     }
 
     int actualSampleSet = m_iSampleSet;
@@ -1437,14 +1448,12 @@ void Skin::checkLoadImage(Image **addressOfPointer, std::string skinElementName,
     // NOTE: only the default skin is loaded with a resource name (it must never be unloaded by other instances), and it
     // is NOT added to the resources vector
 
-    std::string defaultFilePath1 = MCENGINE_DATA_DIR "/materials/";
-    defaultFilePath1.append(OSUSKIN_DEFAULT_SKIN_PATH);
+    std::string defaultFilePath1 = MCENGINE_DATA_DIR "materials/default/";
     defaultFilePath1.append(skinElementName);
     defaultFilePath1.append("@2x.");
     defaultFilePath1.append(fileExtension);
 
-    std::string defaultFilePath2 = MCENGINE_DATA_DIR "/materials/";
-    defaultFilePath2.append(OSUSKIN_DEFAULT_SKIN_PATH);
+    std::string defaultFilePath2 = MCENGINE_DATA_DIR "materials/default/";
     defaultFilePath2.append(skinElementName);
     defaultFilePath2.append(".");
     defaultFilePath2.append(fileExtension);
@@ -1580,6 +1589,7 @@ void Skin::checkLoadSound(Sound **addressOfPointer, std::string skinElementName,
 
             std::string path = base_path;
             path.append(fn);
+            debugLog("Loading %s\n", path.c_str());
 
             if(env->fileExists(path)) {
                 if(osu_skin_async.getBool()) {
@@ -1589,13 +1599,14 @@ void Skin::checkLoadSound(Sound **addressOfPointer, std::string skinElementName,
             }
         }
 
+        debugLog("Failed to load %s\n", filename.c_str());
+
         return (Sound *)NULL;
     };
 
     // load default skin
     if(fallback_to_default) {
-        std::string defaultpath = MCENGINE_DATA_DIR "./materials/";
-        defaultpath.append(OSUSKIN_DEFAULT_SKIN_PATH);
+        std::string defaultpath = MCENGINE_DATA_DIR "materials/default/";
         std::string defaultResourceName = resourceName;
         defaultResourceName.append("_DEFAULT");
         *addressOfPointer = try_load_sound(defaultpath, skinElementName, defaultResourceName, loop);

@@ -1124,10 +1124,11 @@ void Slider::onHit(LiveScore::HIT result, long delta, bool startOrEnd, float tar
 
             const Vector2 osuCoords = m_beatmap->pixels2OsuCoords(m_beatmap->osuCoords2Pixels(m_vCurPointRaw));
 
+            const long sound_delta = result == LiveScore::HIT::HIT_300 ? 0 : delta;
             m_beatmap->getSkin()->playHitCircleSound(m_iCurRepeatCounterForHitSounds < m_hitSounds.size()
                                                          ? m_hitSounds[m_iCurRepeatCounterForHitSounds]
                                                          : m_iSampleType,
-                                                     GameRules::osuCoords2Pan(osuCoords.x));
+                                                     GameRules::osuCoords2Pan(osuCoords.x), sound_delta);
 
             if(!startOrEnd) {
                 m_fStartHitAnimation = 0.001f;  // quickfix for 1 frame missing images
@@ -1246,7 +1247,7 @@ void Slider::onRepeatHit(bool successful, bool sliderend) {
         m_beatmap->getSkin()->playHitCircleSound(m_iCurRepeatCounterForHitSounds < m_hitSounds.size()
                                                      ? m_hitSounds[m_iCurRepeatCounterForHitSounds]
                                                      : m_iSampleType,
-                                                 GameRules::osuCoords2Pan(osuCoords.x));
+                                                 GameRules::osuCoords2Pan(osuCoords.x), 0);
 
         float animation_multiplier = osu->getSpeedMultiplier() / osu->getAnimationSpeedMultiplier();
         float tick_pulse_time = GameRules::osu_slider_followcircle_tick_pulse_time.getFloat() * animation_multiplier;
