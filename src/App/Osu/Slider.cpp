@@ -57,9 +57,7 @@ ConVar osu_slider_body_fade_out_time_multiplier("osu_slider_body_fade_out_time_m
 ConVar osu_slider_reverse_arrow_animated("osu_slider_reverse_arrow_animated", true, FCVAR_DEFAULT,
                                          "pulse animation on reverse arrows");
 ConVar osu_slider_reverse_arrow_alpha_multiplier("osu_slider_reverse_arrow_alpha_multiplier", 1.0f, FCVAR_DEFAULT);
-
-// osu!stable doesn't display a fadeout animation for sliderheads
-ConVar osu_slider_sliderhead_fadeout("osu_slider_sliderhead_fadeout", false, FCVAR_DEFAULT);
+ConVar osu_slider_sliderhead_fadeout("osu_slider_sliderhead_fadeout", true, FCVAR_DEFAULT);
 
 ConVar *Slider::m_osu_playfield_mirror_horizontal_ref = NULL;
 ConVar *Slider::m_osu_playfield_mirror_vertical_ref = NULL;
