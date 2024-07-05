@@ -1,15 +1,4 @@
-//================ Copyright (c) 2013, PG, All rights reserved. =================//
-//
-// Purpose:		box shadows
-//
-// $NoKeywords: $bshad
-//===============================================================================//
-
-// TODO: fix this
-
-#ifndef CBASEUIBOXSHADOW_H
-#define CBASEUIBOXSHADOW_H
-
+#pragma once
 #include "CBaseUIElement.h"
 
 class Shader;
@@ -22,8 +11,6 @@ class CBaseUIBoxShadow : public CBaseUIElement {
     CBaseUIBoxShadow(Color color = COLOR(0, 0, 0, 0), float radius = 0, float xPos = 0, float yPos = 0, float xSize = 0,
                      float ySize = 0, UString name = "");
     virtual ~CBaseUIBoxShadow();
-
-    ELEMENT_BODY(CBaseUIBoxShadow)
 
     virtual void draw(Graphics *g);
     void renderOffscreen(Graphics *g);
@@ -79,5 +66,3 @@ class GaussianBlur {
     GaussianBlurKernel *m_kernel;
     Shader *m_blurShader;
 };
-
-#endif

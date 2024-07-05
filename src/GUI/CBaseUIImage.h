@@ -1,13 +1,4 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		a simple image class
-//
-// $NoKeywords: $
-//===============================================================================//
-
-#ifndef CBASEUIIMAGE_H
-#define CBASEUIIMAGE_H
-
+#pragma once
 #include "CBaseUIElement.h"
 
 class CBaseUIImage : public CBaseUIElement {
@@ -15,8 +6,6 @@ class CBaseUIImage : public CBaseUIElement {
     CBaseUIImage(std::string imageResourceName = "", float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0,
                  UString name = "");
     virtual ~CBaseUIImage() { ; }
-
-    ELEMENT_BODY(CBaseUIImage)
 
     virtual void draw(Graphics *g);
 
@@ -86,5 +75,3 @@ class CBaseUIImage : public CBaseUIElement {
     float m_fRot;
     Vector2 m_vScale;
 };
-
-#endif

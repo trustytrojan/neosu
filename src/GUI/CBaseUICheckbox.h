@@ -1,13 +1,4 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		a simple checkbox
-//
-// $NoKeywords: $
-//===============================================================================//
-
-#ifndef CBASEUICHECKBOX_H
-#define CBASEUICHECKBOX_H
-
+#pragma once
 #include "CBaseUIButton.h"
 
 class CBaseUICheckbox : public CBaseUIButton {
@@ -15,8 +6,6 @@ class CBaseUICheckbox : public CBaseUIButton {
     CBaseUICheckbox(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "",
                     UString text = "");
     virtual ~CBaseUICheckbox() { ; }
-
-    ELEMENT_BODY(CBaseUICheckbox)
 
     virtual void draw(Graphics *g);
 
@@ -40,5 +29,3 @@ class CBaseUICheckbox : public CBaseUIButton {
     bool m_bChecked;
     CheckboxChangeCallback m_changeCallback;
 };
-
-#endif

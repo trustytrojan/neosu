@@ -10,8 +10,6 @@ class CBaseUISlider : public CBaseUIElement {
     CBaseUISlider(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "");
     virtual ~CBaseUISlider() { ; }
 
-    ELEMENT_BODY(CBaseUISlider)
-
     virtual void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);
 

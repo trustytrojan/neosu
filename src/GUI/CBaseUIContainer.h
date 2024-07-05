@@ -1,21 +1,10 @@
-//================ Copyright (c) 2011, PG, All rights reserved. =================//
-//
-// Purpose:		a container for UI elements
-//
-// $NoKeywords: $
-//===============================================================================//
-
-#ifndef CBASEUICONTAINER_H
-#define CBASEUICONTAINER_H
-
+#pragma once
 #include "CBaseUIElement.h"
 
 class CBaseUIContainer : public CBaseUIElement {
    public:
     CBaseUIContainer(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "");
     virtual ~CBaseUIContainer();
-
-    ELEMENT_BODY(CBaseUIContainer)
 
     void clear();
     void empty();
@@ -56,10 +45,7 @@ class CBaseUIContainer : public CBaseUIElement {
     virtual void onDisabled();
 
     void update_pos();
-    void update_pos(CBaseUIElement *element);
 
    protected:
     std::vector<CBaseUIElement *> m_vElements;
 };
-
-#endif

@@ -1,10 +1,3 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		a simple label
-//
-// $NoKeywords: $
-//===============================================================================//
-
 #include "CBaseUILabel.h"
 
 #include "Engine.h"

@@ -351,7 +351,6 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
     <ClCompile Include="src\gui\CBaseUIButton.cpp" />
     <ClCompile Include="src\gui\CBaseUICheckbox.cpp" />
     <ClCompile Include="src\gui\CBaseUIContainer.cpp" />
-    <ClCompile Include="src\gui\CBaseUIContainerBase.cpp" />
     <ClCompile Include="src\gui\CBaseUIElement.cpp" />
     <ClCompile Include="src\gui\CBaseUIImage.cpp" />
     <ClCompile Include="src\gui\CBaseUIImageButton.cpp" />

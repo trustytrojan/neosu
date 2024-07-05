@@ -244,7 +244,7 @@ void RankingScreen::draw(Graphics *g) {
 
     // draw active mods
     const Vector2 modPosStart =
-        Vector2(m_rankings->getSize().x - osu->getUIScale(20), m_rankings->getScrollPosY() + osu->getUIScale(260));
+        Vector2(m_rankings->getSize().x - osu->getUIScale(20), m_rankings->getRelPosY() + osu->getUIScale(260));
     Vector2 modPos = modPosStart;
     Vector2 modPosMax;
     if(m_bModTD) drawModImage(g, osu->getSkin()->getSelectionModTD(), modPos, modPosMax);
@@ -537,7 +537,7 @@ void RankingScreen::updateLayout() {
                              Osu::getImageScale(m_rankingTitle->getImage(), 75.0f) * uiScale);
     m_rankingTitle->setSize(m_rankingTitle->getImage()->getWidth() * m_rankingTitle->getScale().x,
                             m_rankingTitle->getImage()->getHeight() * m_rankingTitle->getScale().y);
-    m_rankingTitle->setScrollPos(getSize().x - m_rankingTitle->getSize().x - osu->getUIScale(20.0f), 0);
+    m_rankingTitle->setRelPos(getSize().x - m_rankingTitle->getSize().x - osu->getUIScale(20.0f), 0);
 
     m_songInfo->setSize(osu->getScreenWidth(),
                         max(m_songInfo->getMinimumHeight(),
@@ -552,7 +552,7 @@ void RankingScreen::updateLayout() {
                         osu->getScreenSize().y - (50 * uiScale * 2.f + 20.f * uiScale));
 
     m_rankings->setSize(osu->getScreenSize().x + 2, osu->getScreenSize().y - m_songInfo->getSize().y + 3);
-    m_rankings->setScrollPosY(m_songInfo->getSize().y - 1);
+    m_rankings->setRelPosY(m_songInfo->getSize().y - 1);
     update_pos();
 
     // NOTE: no uiScale for rankingPanel and rankingGrade, doesn't really work due to legacy layout expectations
@@ -568,10 +568,10 @@ void RankingScreen::updateLayout() {
 
     m_rankingIndex->setSize(m_rankings->getSize().x + 2, osu->getScreenHeight() * 0.07f * uiScale);
     m_rankingIndex->setBackgroundColor(0xff745e13);
-    m_rankingIndex->setScrollPosY(m_rankings->getSize().y + 1);
+    m_rankingIndex->setRelPosY(m_rankings->getSize().y + 1);
 
     m_rankingBottom->setSize(m_rankings->getSize().x + 2, osu->getScreenHeight() * 0.2f);
-    m_rankingBottom->setScrollPosY(m_rankingIndex->getRelPos().y + m_rankingIndex->getSize().y);
+    m_rankingBottom->setRelPosY(m_rankingIndex->getRelPos().y + m_rankingIndex->getSize().y);
 
     setGrade(m_grade);
 
@@ -628,7 +628,7 @@ void RankingScreen::setGrade(FinishedScore::Grade grade) {
     m_rankingGrade->setScale(rankingGradeImageScale, rankingGradeImageScale);
     m_rankingGrade->setSize(m_rankingGrade->getImage()->getWidth() * m_rankingGrade->getScale().x,
                             m_rankingGrade->getImage()->getHeight() * m_rankingGrade->getScale().y);
-    m_rankingGrade->setScrollPos(m_rankings->getSize().x - osu->getUIScale(120) -
+    m_rankingGrade->setRelPos(m_rankings->getSize().x - osu->getUIScale(120) -
                                   m_rankingGrade->getImage()->getWidth() * m_rankingGrade->getScale().x / 2.0f,
                               -m_rankings->getRelPos().y +
                                   osu->getUIScale(osu->getSkin()->getVersion() > 1.0f ? 200 : 170) -
@@ -655,11 +655,11 @@ Vector2 RankingScreen::getPPPosRaw() {
     float ppStringWidth = osu->getTitleFont()->getStringWidth(ppString);
     return Vector2(m_rankingGrade->getPos().x, 0) +
            Vector2(m_rankingGrade->getSize().x / 2 - ppStringWidth / 2,
-                   m_rankings->getScrollPosY() + osu->getUIScale(400) + osu->getTitleFont()->getHeight() / 2);
+                   m_rankings->getRelPosY() + osu->getUIScale(400) + osu->getTitleFont()->getHeight() / 2);
 }
 
 Vector2 RankingScreen::getPPPosCenterRaw() {
     return Vector2(m_rankingGrade->getPos().x, 0) +
            Vector2(m_rankingGrade->getSize().x / 2,
-                   m_rankings->getScrollPosY() + osu->getUIScale(400) + osu->getTitleFont()->getHeight() / 2);
+                   m_rankings->getRelPosY() + osu->getUIScale(400) + osu->getTitleFont()->getHeight() / 2);
 }

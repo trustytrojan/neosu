@@ -1,13 +1,4 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		a simple label
-//
-// $NoKeywords: $
-//===============================================================================//
-
-#ifndef CBASEUILABEL_H
-#define CBASEUILABEL_H
-
+#pragma once
 #include "CBaseUIElement.h"
 
 class CBaseUILabel : public CBaseUIElement {
@@ -19,10 +10,13 @@ class CBaseUILabel : public CBaseUIElement {
                  UString text = "");
     virtual ~CBaseUILabel() { ; }
 
-    ELEMENT_BODY(CBaseUILabel)
-
     virtual void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);
+
+    // cancer
+    void setRelSizeX(float x) {
+        m_vmSize.x = x;
+    }
 
     // set
     CBaseUILabel *setDrawFrame(bool drawFrame) {
@@ -103,5 +97,3 @@ class CBaseUILabel : public CBaseUIElement {
 
     TEXT_JUSTIFICATION m_textJustification;
 };
-
-#endif

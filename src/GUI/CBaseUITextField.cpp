@@ -32,8 +32,8 @@ void CBaseUITextField::onResized() {
     CBaseUIScrollView::onResized();
     m_textObject->setParentSize(m_vSize);
     // m_textObject->setSize(m_vSize);
-    scrollToX(getScrollPosX());
-    scrollToY(getScrollPosY());
+    scrollToX(getRelPosX());
+    scrollToY(getRelPosY());
     setScrollSizeToContent(0);
 }
 

@@ -1,15 +1,4 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		a not so simple textfield
-//
-// $NoKeywords: $
-//===============================================================================//
-
-#ifndef CBASEUITEXTFIELD_H
-#define CBASEUITEXTFIELD_H
-
-// TODO: finish this
-
+#pragma once
 #include "CBaseUIScrollView.h"
 
 class CBaseUITextField : public CBaseUIScrollView {
@@ -17,8 +6,6 @@ class CBaseUITextField : public CBaseUIScrollView {
     CBaseUITextField(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "",
                      UString text = "");
     virtual ~CBaseUITextField() { ; }
-
-    ELEMENT_BODY(CBaseUITextField)
 
     virtual void draw(Graphics *g);
 
@@ -79,5 +66,3 @@ class CBaseUITextField : public CBaseUIScrollView {
 
     TextObject *m_textObject;
 };
-
-#endif

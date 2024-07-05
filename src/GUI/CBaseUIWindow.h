@@ -1,13 +1,4 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		base class for windows
-//
-// $NoKeywords: $
-//===============================================================================//
-
-#ifndef CBASEUIWINDOW_H
-#define CBASEUIWINDOW_H
-
+#pragma once
 #include "CBaseUIElement.h"
 
 class CBaseUIButton;
@@ -20,8 +11,6 @@ class CBaseUIWindow : public CBaseUIElement {
    public:
     CBaseUIWindow(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "");
     ~CBaseUIWindow();
-
-    ELEMENT_BODY(CBaseUIWindow)
 
     virtual void draw(Graphics *g);
     virtual void drawCustomContent(Graphics *g) { (void)g; }
@@ -180,5 +169,3 @@ class CBaseUIWindow : public CBaseUIElement {
     RenderTarget *m_rt;
     CBaseUIBoxShadow *m_shadow;
 };
-
-#endif

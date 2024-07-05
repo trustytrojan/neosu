@@ -9,8 +9,6 @@ class CBaseUIButton : public CBaseUIElement {
                   UString text = "");
     virtual ~CBaseUIButton() { ; }
 
-    ELEMENT_BODY(CBaseUIButton);
-
     virtual void draw(Graphics *g);
 
     void click() { onClicked(); }

@@ -1,10 +1,3 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		a simple drive and file selector
-//
-// $NoKeywords: $
-//===============================================================================//
-
 #include "VSMusicBrowser.h"
 
 #include "AnimationHandler.h"
@@ -625,12 +618,12 @@ void VSMusicBrowser::onMoved() { m_mainContainer->setPos(m_vPos); }
 void VSMusicBrowser::onResized() {
     for(size_t i = 0; i < m_columns.size(); i++) {
         m_columns[i].view->setSizeY(m_vSize.y);
-        m_columns[i].view->scrollToY(m_columns[i].view->getScrollPosY());
+        m_columns[i].view->scrollToY(m_columns[i].view->getRelPosY());
     }
 
     m_mainContainer->setSize(m_vSize);
     m_mainContainer->setScrollSizeToContent(0);
-    m_mainContainer->scrollToX(m_mainContainer->getScrollPosX());
+    m_mainContainer->scrollToX(m_mainContainer->getRelPosX());
 }
 
 void VSMusicBrowser::onFocusStolen() {

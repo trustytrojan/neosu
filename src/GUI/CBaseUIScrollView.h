@@ -10,8 +10,6 @@ class CBaseUIScrollView : public CBaseUIElement {
 
     void clear();
 
-    ELEMENT_BODY(CBaseUIScrollView)
-
     virtual void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);
 
@@ -94,8 +92,8 @@ class CBaseUIScrollView : public CBaseUIElement {
 
     // get
     inline CBaseUIContainer *getContainer() const { return m_container; }
-    inline float getScrollPosY() const { return m_vScrollPos.y; }
-    inline float getScrollPosX() const { return m_vScrollPos.x; }
+    inline float getRelPosY() const { return m_vScrollPos.y; }
+    inline float getRelPosX() const { return m_vScrollPos.x; }
     inline Vector2 getScrollSize() const { return m_vScrollSize; }
     inline Vector2 getVelocity() const { return (m_vScrollPos - m_vVelocity); }
 

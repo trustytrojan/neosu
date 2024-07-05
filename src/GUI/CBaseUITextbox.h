@@ -8,8 +8,6 @@ class CBaseUITextbox : public CBaseUIElement {
     CBaseUITextbox(float xPos = 0.0f, float yPos = 0.0f, float xSize = 0.0f, float ySize = 0.0f, UString name = "");
     virtual ~CBaseUITextbox() { ; }
 
-    ELEMENT_BODY(CBaseUITextbox)
-
     virtual void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);
     virtual void onFocusStolen();

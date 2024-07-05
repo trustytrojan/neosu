@@ -211,8 +211,8 @@ void Button::updateLayoutEx() {
         m_view->getSize().x -
             getActualSize().x * 0.15f);  // WARNING: hardcoded to match 0.85f above for buttonWidthCompensation
 
-    setScrollPosX(offsetX);
-    setScrollPosY(m_fTargetRelPosY + getSize().y * 0.125f * m_fHoverMoveAwayAnimation);
+    setRelPosX(offsetX);
+    setRelPosY(m_fTargetRelPosY + getSize().y * 0.125f * m_fHoverMoveAwayAnimation);
 }
 
 Button *Button::setVisible(bool visible) {
@@ -233,7 +233,6 @@ Button *Button::setVisible(bool visible) {
         m_fCenterOffsetVelocityAnimation = centerOffsetVelocityAnimationTarget;
 
         // force early layout update
-        updateLayout();
         updateLayoutEx();
     }
 
@@ -310,7 +309,7 @@ void Button::onMouseOutside() {
 
 void Button::setTargetRelPosY(float targetRelPosY) {
     m_fTargetRelPosY = targetRelPosY;
-    setScrollPosY(m_fTargetRelPosY);
+    setRelPosY(m_fTargetRelPosY);
 }
 
 Vector2 Button::getActualOffset() const {

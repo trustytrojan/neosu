@@ -1,13 +1,4 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		a simple image button
-//
-// $NoKeywords: $
-//===============================================================================//
-
-#ifndef CBASEUIIMAGEBUTTON_H
-#define CBASEUIIMAGEBUTTON_H
-
+#pragma once
 #include "CBaseUIButton.h"
 
 class CBaseUIImageButton : public CBaseUIButton {
@@ -15,8 +6,6 @@ class CBaseUIImageButton : public CBaseUIButton {
     CBaseUIImageButton(std::string imageResourceName = "", float xPos = 0, float yPos = 0, float xSize = 0,
                        float ySize = 0, UString name = "");
     virtual ~CBaseUIImageButton() { ; }
-
-    ELEMENT_BODY(CBaseUIImageButton)
 
     virtual void draw(Graphics *g);
 
@@ -52,5 +41,3 @@ class CBaseUIImageButton : public CBaseUIButton {
     bool m_bScaleToFit;
     bool m_bKeepAspectRatio;
 };
-
-#endif
