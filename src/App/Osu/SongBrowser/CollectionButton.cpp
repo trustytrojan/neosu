@@ -100,7 +100,7 @@ void CollectionButton::triggerContextMenu(Vector2 pos) {
 
     if(m_contextMenu != NULL) {
         m_contextMenu->setPos(pos);
-        m_contextMenu->setRelPos(pos);
+        m_contextMenu->setScrollPos(pos);
         m_contextMenu->begin(0, true);
         {
             m_contextMenu->addButton("[...]      Rename Collection", 1);

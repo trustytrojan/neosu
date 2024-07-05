@@ -868,7 +868,7 @@ void Chat::updateButtonLayout(Vector2 screen) {
 
     std::sort(m_channels.begin(), m_channels.end(), [](ChatChannel *a, ChatChannel *b) { return a->name < b->name; });
 
-    // Look, I really tried. But for some reason setRelPos() doesn't work until we change
+    // Look, I really tried. But for some reason setPos() doesn't work until we change
     // the screen resolution once. So I'll just compute absolute position manually.
     float button_container_height = button_height + 2;
     for(auto chan : m_channels) {

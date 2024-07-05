@@ -259,16 +259,16 @@ void VSControlBar::onDisabled() {
 }
 
 void VSControlBar::onResized() {
-    m_play->setRelPosX(m_vSize.x / 2 - m_play->getSize().x / 2);
-    m_prev->setRelPosX(m_play->getRelPos().x - m_prev->getSize().x);
-    m_next->setRelPosX(m_play->getRelPos().x + m_play->getSize().x);
-    m_info->setRelPosX(m_next->getRelPos().x + m_next->getSize().x);
+    m_play->setScrollPosX(m_vSize.x / 2 - m_play->getSize().x / 2);
+    m_prev->setScrollPosX(m_play->getRelPos().x - m_prev->getSize().x);
+    m_next->setScrollPosX(m_play->getRelPos().x + m_play->getSize().x);
+    m_info->setScrollPosX(m_next->getRelPos().x + m_next->getSize().x);
     m_volume->setSizeX(m_prev->getRelPos().x);
 
-    m_shuffle->setRelPosX(m_vSize.x - m_shuffle->getSize().x);
-    m_repeat->setRelPosX(m_vSize.x - 2 * m_repeat->getSize().x);
-    m_eq->setRelPos(m_vSize.x - 2 * m_eq->getSize().x, m_eq->getSize().y);
-    m_settings->setRelPos(m_vSize.x - m_settings->getSize().x, m_settings->getSize().y);
+    m_shuffle->setScrollPosX(m_vSize.x - m_shuffle->getSize().x);
+    m_repeat->setScrollPosX(m_vSize.x - 2 * m_repeat->getSize().x);
+    m_eq->setScrollPos(m_vSize.x - 2 * m_eq->getSize().x, m_eq->getSize().y);
+    m_settings->setScrollPos(m_vSize.x - m_settings->getSize().x, m_settings->getSize().y);
 
     m_info->setSizeX(m_repeat->getRelPos().x - (m_next->getRelPos().x + m_next->getSize().x) + 1);  // +1 fudge
 

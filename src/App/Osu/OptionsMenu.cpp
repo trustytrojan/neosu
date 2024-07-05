@@ -1862,14 +1862,14 @@ void OptionsMenu::updateLayout() {
 
     const int categoriesWidth = optionsWidth * categoriesOptionsPercent;
 
-    m_options->setRelPosX((!m_bFullscreen ? -1 : osu->getScreenWidth() / 2 - (optionsWidth + categoriesWidth) / 2) +
+    m_options->setScrollPosX((!m_bFullscreen ? -1 : osu->getScreenWidth() / 2 - (optionsWidth + categoriesWidth) / 2) +
                           categoriesWidth);
     m_options->setSize(optionsWidth, osu->getScreenHeight() + 1);
 
-    m_search->setRelPos(m_options->getRelPos());
+    m_search->setScrollPos(m_options->getRelPos());
     m_search->setSize(m_options->getSize());
 
-    m_categories->setRelPosX(m_options->getRelPos().x - categoriesWidth);
+    m_categories->setScrollPosX(m_options->getRelPos().x - categoriesWidth);
     m_categories->setSize(categoriesWidth, osu->getScreenHeight() + 1);
 
     // reset
@@ -2024,8 +2024,8 @@ void OptionsMenu::updateLayout() {
         if(m_elements[i].resetButton != NULL) {
             CBaseUIButton *resetButton = m_elements[i].resetButton;
             resetButton->setSize(Vector2(35, 50) * dpiScale);
-            resetButton->setRelPosY(yCounter);
-            resetButton->setRelPosX(0);
+            resetButton->setScrollPosY(yCounter);
+            resetButton->setScrollPosX(0);
         }
 
         for(int j = 0; j < m_elements[i].elements.size(); j++) {
@@ -2059,8 +2059,8 @@ void OptionsMenu::updateLayout() {
             } else
                 e->setSizeX(elementWidth);
 
-            e->setRelPosX(sideMargin + sideMarginAdd);
-            e->setRelPosY(yCounter);
+            e->setScrollPosX(sideMargin + sideMarginAdd);
+            e->setScrollPosY(yCounter);
 
             yCounter += e->getSize().y;
         } else if(m_elements[i].elements.size() == 2 || isKeyBindButton) {
@@ -2087,22 +2087,22 @@ void OptionsMenu::updateLayout() {
                 const float dividerMiddle = 5.0f / 8.0f;
                 const float dividerEnd = 2.0f / 8.0f;
 
-                e1->setRelPos(sideMargin, yCounter);
+                e1->setScrollPos(sideMargin, yCounter);
                 e1->setSizeX(e1->getSize().y);
 
-                e2->setRelPos(sideMargin + e1->getSize().x + 0.5f * spacing, yCounter);
+                e2->setScrollPos(sideMargin + e1->getSize().x + 0.5f * spacing, yCounter);
                 e2->setSizeX(elementWidth * dividerMiddle - spacing);
 
-                e3->setRelPos(sideMargin + e1->getSize().x + e2->getSize().x + 1.5f * spacing, yCounter);
+                e3->setScrollPos(sideMargin + e1->getSize().x + e2->getSize().x + 1.5f * spacing, yCounter);
                 e3->setSizeX(elementWidth * dividerEnd - spacing);
             } else {
                 float dividerEnd = 1.0f / 2.0f;
                 float dividerBegin = 1.0f - dividerEnd;
 
-                e1->setRelPos(sideMargin + sideMarginAdd, yCounter);
+                e1->setScrollPos(sideMargin + sideMarginAdd, yCounter);
                 e1->setSizeX(elementWidth * dividerBegin - spacing);
 
-                e2->setRelPos(sideMargin + e1->getSize().x + 2 * spacing, yCounter);
+                e2->setScrollPos(sideMargin + e1->getSize().x + 2 * spacing, yCounter);
                 e2->setSizeX(elementWidth * dividerEnd - spacing);
             }
 
@@ -2129,9 +2129,9 @@ void OptionsMenu::updateLayout() {
                 e2->setSizeX(buttonSize);
                 e3->setSizeX(buttonSize);
 
-                e1->setRelPos(sideMargin, yCounter);
-                e2->setRelPos(e1->getRelPos().x + e1->getSize().x + buttonButtonLabelOffset, yCounter);
-                e3->setRelPos(e2->getRelPos().x + e2->getSize().x + buttonButtonLabelOffset, yCounter);
+                e1->setScrollPos(sideMargin, yCounter);
+                e2->setScrollPos(e1->getRelPos().x + e1->getSize().x + buttonButtonLabelOffset, yCounter);
+                e3->setScrollPos(e2->getRelPos().x + e2->getSize().x + buttonButtonLabelOffset, yCounter);
             } else {
                 const int labelSliderLabelOffset = 15 * dpiScale;
 
@@ -2163,12 +2163,12 @@ void OptionsMenu::updateLayout() {
                     sliderSize = 100;
                 }
 
-                e1->setRelPos(sideMargin + elementTextStartOffset, yCounter);
+                e1->setScrollPos(sideMargin + elementTextStartOffset, yCounter);
 
-                e2->setRelPos(e1->getRelPos().x + e1->getSize().x + labelSliderLabelOffset, yCounter);
+                e2->setScrollPos(e1->getRelPos().x + e1->getSize().x + labelSliderLabelOffset, yCounter);
                 e2->setSizeX(sliderSize - 2 * elementTextStartOffset - labelSliderLabelOffset * 2);
 
-                e3->setRelPos(e2->getRelPos().x + e2->getSize().x + labelSliderLabelOffset, yCounter);
+                e3->setScrollPos(e2->getRelPos().x + e2->getSize().x + labelSliderLabelOffset, yCounter);
             }
 
             yCounter += e2->getSize().y;
@@ -2206,7 +2206,7 @@ void OptionsMenu::updateLayout() {
     for(int i = 0; i < m_categoryButtons.size(); i++) {
         OptionsMenuCategoryButton *category = m_categoryButtons[i];
         category->onResized();  // HACKHACK: framework, setSize*() does not update string metrics
-        category->setRelPosY(categoryPaddingTopBottom + categoryHeight * i);
+        category->setScrollPosY(categoryPaddingTopBottom + categoryHeight * i);
         category->setSize(m_categories->getSize().x - 1, categoryHeight);
     }
     m_categories->getContainer()->update_pos();
@@ -2454,7 +2454,7 @@ void OptionsMenu::onSkinSelect() {
 
         if(m_bVisible) {
             m_contextMenu->setPos(m_skinSelectLocalButton->getPos());
-            m_contextMenu->setRelPos(m_skinSelectLocalButton->getRelPos());
+            m_contextMenu->setScrollPos(m_skinSelectLocalButton->getRelPos());
         } else {
             // Put it 50px from top, we'll move it later
             m_contextMenu->setPos(Vector2{0, 100});
@@ -2573,7 +2573,7 @@ void OptionsMenu::onResolutionSelect() {
 
     // build context menu
     m_contextMenu->setPos(m_resolutionSelectButton->getPos());
-    m_contextMenu->setRelPos(m_resolutionSelectButton->getRelPos());
+    m_contextMenu->setScrollPos(m_resolutionSelectButton->getRelPos());
     m_contextMenu->begin();
     for(int i = 0; i < resolutions.size(); i++) {
         if(resolutions[i].x > nativeResolution.x || resolutions[i].y > nativeResolution.y) continue;
@@ -2605,7 +2605,7 @@ void OptionsMenu::onOutputDeviceSelect() {
 
     // build context menu
     m_contextMenu->setPos(m_outputDeviceSelectButton->getPos());
-    m_contextMenu->setRelPos(m_outputDeviceSelectButton->getRelPos());
+    m_contextMenu->setScrollPos(m_outputDeviceSelectButton->getRelPos());
     m_contextMenu->begin();
     for(auto device : outputDevices) {
         CBaseUIButton *button = m_contextMenu->addButton(device.name);
@@ -2663,7 +2663,7 @@ void OptionsMenu::onCM360CalculatorLinkClicked() {
 void OptionsMenu::onNotelockSelect() {
     // build context menu
     m_contextMenu->setPos(m_notelockSelectButton->getPos());
-    m_contextMenu->setRelPos(m_notelockSelectButton->getRelPos());
+    m_contextMenu->setScrollPos(m_notelockSelectButton->getRelPos());
     m_contextMenu->begin(m_notelockSelectButton->getSize().x);
     {
         for(int i = 0; i < m_notelockTypes.size(); i++) {
@@ -2698,7 +2698,7 @@ void OptionsMenu::onNotelockSelectResetUpdate() {
 void OptionsMenu::onHPDrainSelect() {
     // build context menu
     m_contextMenu->setPos(m_hpDrainSelectButton->getPos());
-    m_contextMenu->setRelPos(m_hpDrainSelectButton->getRelPos());
+    m_contextMenu->setScrollPos(m_hpDrainSelectButton->getRelPos());
     m_contextMenu->begin(m_hpDrainSelectButton->getSize().x);
     {
         for(int i = 1; i < m_drainTypes.size(); i++) {

@@ -272,7 +272,7 @@ void SongButton::onRightMouseUpInside() { triggerContextMenu(engine->getMouse()-
 void SongButton::triggerContextMenu(Vector2 pos) {
     if(m_contextMenu != NULL) {
         m_contextMenu->setPos(pos);
-        m_contextMenu->setRelPos(pos);
+        m_contextMenu->setScrollPos(pos);
         m_contextMenu->begin(0, true);
         {
             if(m_databaseBeatmap != NULL && m_databaseBeatmap->getDifficulties().size() < 1)

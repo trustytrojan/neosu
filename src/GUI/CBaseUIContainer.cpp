@@ -21,7 +21,7 @@ void CBaseUIContainer::empty() { m_vElements = std::vector<CBaseUIElement *>(); 
 CBaseUIContainer *CBaseUIContainer::addBaseUIElement(CBaseUIElement *element, float xPos, float yPos) {
     if(element == NULL) return this;
 
-    element->setRelPos(xPos, yPos);
+    element->setScrollPos(xPos, yPos);
     element->setPos(m_vPos + element->getRelPos());
     m_vElements.push_back(element);
 
@@ -31,7 +31,7 @@ CBaseUIContainer *CBaseUIContainer::addBaseUIElement(CBaseUIElement *element, fl
 CBaseUIContainer *CBaseUIContainer::addBaseUIElement(CBaseUIElement *element) {
     if(element == NULL) return this;
 
-    element->setRelPos(element->getPos().x, element->getPos().y);
+    element->setScrollPos(element->getPos().x, element->getPos().y);
     element->setPos(m_vPos + element->getRelPos());
     m_vElements.push_back(element);
 
@@ -41,7 +41,7 @@ CBaseUIContainer *CBaseUIContainer::addBaseUIElement(CBaseUIElement *element) {
 CBaseUIContainer *CBaseUIContainer::addBaseUIElementBack(CBaseUIElement *element, float xPos, float yPos) {
     if(element == NULL) return this;
 
-    element->setRelPos(xPos, yPos);
+    element->setScrollPos(xPos, yPos);
     element->setPos(m_vPos + element->getRelPos());
     m_vElements.insert(m_vElements.begin(), element);
 
@@ -51,7 +51,7 @@ CBaseUIContainer *CBaseUIContainer::addBaseUIElementBack(CBaseUIElement *element
 CBaseUIContainer *CBaseUIContainer::addBaseUIElementBack(CBaseUIElement *element) {
     if(element == NULL) return this;
 
-    element->setRelPos(element->getPos().x, element->getPos().y);
+    element->setScrollPos(element->getPos().x, element->getPos().y);
     element->setPos(m_vPos + element->getRelPos());
     m_vElements.insert(m_vElements.begin(), element);
 
@@ -61,7 +61,7 @@ CBaseUIContainer *CBaseUIContainer::addBaseUIElementBack(CBaseUIElement *element
 CBaseUIContainer *CBaseUIContainer::insertBaseUIElement(CBaseUIElement *element, CBaseUIElement *index) {
     if(element == NULL || index == NULL) return this;
 
-    element->setRelPos(element->getPos().x, element->getPos().y);
+    element->setScrollPos(element->getPos().x, element->getPos().y);
     element->setPos(m_vPos + element->getRelPos());
     for(size_t i = 0; i < m_vElements.size(); i++) {
         if(m_vElements[i] == index) {
@@ -78,7 +78,7 @@ CBaseUIContainer *CBaseUIContainer::insertBaseUIElement(CBaseUIElement *element,
 CBaseUIContainer *CBaseUIContainer::insertBaseUIElementBack(CBaseUIElement *element, CBaseUIElement *index) {
     if(element == NULL || index == NULL) return this;
 
-    element->setRelPos(element->getPos().x, element->getPos().y);
+    element->setScrollPos(element->getPos().x, element->getPos().y);
     element->setPos(m_vPos + element->getRelPos());
     for(size_t i = 0; i < m_vElements.size(); i++) {
         if(m_vElements[i] == index) {

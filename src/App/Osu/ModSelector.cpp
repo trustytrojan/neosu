@@ -970,7 +970,7 @@ void ModSelector::updateExperimentalLayout() {
     int experimentalOffsetY = 6 * dpiScale;
     for(int i = 0; i < m_experimentalMods.size(); i++) {
         CBaseUIElement *e = m_experimentalMods[i].element;
-        e->setRelPosY(yCounter);
+        e->setScrollPosY(yCounter);
         e->setSizeY(e->getRelSize().y * dpiScale);
 
         // custom
@@ -1003,7 +1003,7 @@ void ModSelector::updateExperimentalLayout() {
 
     for(int i = 0; i < m_experimentalMods.size(); i++) {
         CBaseUIElement *e = m_experimentalMods[i].element;
-        e->setRelPosY(yCounter);
+        e->setScrollPosY(yCounter);
 
         if(e->getSize().x > experimentalMaxWidth) experimentalMaxWidth = e->getSize().x;
 

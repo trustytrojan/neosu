@@ -1165,11 +1165,11 @@ void MainMenu::updateLayout() {
     const float size = Osu::getUIScale(324.0f);
     m_vSize = Vector2(size, size);
 
-    m_cube->setRelPos(m_vCenter - m_vSize / 2.0f - Vector2(m_fCenterOffsetAnim, 0.0f));
+    m_cube->setScrollPos(m_vCenter - m_vSize / 2.0f - Vector2(m_fCenterOffsetAnim, 0.0f));
     m_cube->setSize(m_vSize);
 
     m_pauseButton->setSize(30 * dpiScale, 30 * dpiScale);
-    m_pauseButton->setRelPos(osu->getScreenWidth() - m_pauseButton->getSize().x * 2 - 10 * dpiScale,
+    m_pauseButton->setScrollPos(osu->getScreenWidth() - m_pauseButton->getSize().x * 2 - 10 * dpiScale,
                              m_pauseButton->getSize().y + 10 * dpiScale);
 
     if(m_updateAvailableButton != NULL) {
@@ -1180,7 +1180,7 @@ void MainMenu::updateLayout() {
 
     m_versionButton->onResized();  // HACKHACK: framework, setSizeToContent() does not update string metrics
     m_versionButton->setSizeToContent(8 * dpiScale, 8 * dpiScale);
-    m_versionButton->setRelPos(-1, osu->getScreenSize().y - m_versionButton->getSize().y);
+    m_versionButton->setScrollPos(-1, osu->getScreenSize().y - m_versionButton->getSize().y);
 
     int numButtons = m_menuElements.size();
     int menuElementHeight = m_vSize.y / numButtons;
@@ -1195,7 +1195,7 @@ void MainMenu::updateLayout() {
         curY += (i > 0 ? menuElementHeight + menuElementPadding : 0.0f);
 
         m_menuElements[i]->onResized();  // HACKHACK: framework, setSize() does not update string metrics
-        m_menuElements[i]->setRelPos(m_cube->getRelPos().x + m_cube->getSize().x * offsetPercent -
+        m_menuElements[i]->setScrollPos(m_cube->getRelPos().x + m_cube->getSize().x * offsetPercent -
                                          menuElementExtraWidth * offsetPercent +
                                          menuElementExtraWidth * (1.0f - offsetPercent),
                                      curY);

@@ -62,7 +62,7 @@
         return this;                                             \
     }                                                            \
                                                                  \
-    virtual T *setRelPos(float xPos, float yPos) {               \
+    virtual T *setScrollPos(float xPos, float yPos) {               \
         if(m_vmPos.x != xPos || m_vmPos.y != yPos) {             \
             m_vmPos.x = xPos - m_vSize.x * m_vAnchor.x;          \
             m_vmPos.y = yPos - m_vSize.y * m_vAnchor.y;          \
@@ -70,21 +70,21 @@
         }                                                        \
         return this;                                             \
     }                                                            \
-    virtual T *setRelPosX(float xPos) {                          \
+    virtual T *setScrollPosX(float xPos) {                          \
         if(m_vmPos.x != xPos) {                                  \
             m_vmPos.x = xPos - m_vSize.x * m_vAnchor.x;          \
             updateLayout();                                      \
         }                                                        \
         return this;                                             \
     }                                                            \
-    virtual T *setRelPosY(float yPos) {                          \
+    virtual T *setScrollPosY(float yPos) {                          \
         if(m_vmPos.y != yPos) {                                  \
             m_vmPos.y = yPos - m_vSize.x * m_vAnchor.y;          \
             updateLayout();                                      \
         }                                                        \
         return this;                                             \
     }                                                            \
-    virtual T *setRelPos(Vector2 position) {                     \
+    virtual T *setScrollPos(Vector2 position) {                     \
         if(m_vmPos != position) {                                \
             m_vmPos = position - m_vSize * m_vAnchor;            \
             updateLayout();                                      \
@@ -92,7 +92,7 @@
         return this;                                             \
     }                                                            \
                                                                  \
-    virtual T *setRelPosAbsolute(float xPos, float yPos) {       \
+    virtual T *setScrollPosAbsolute(float xPos, float yPos) {       \
         if(m_vmPos.x != xPos || m_vmPos.y != yPos) {             \
             m_vmPos.x = xPos;                                    \
             m_vmPos.y = yPos;                                    \
@@ -100,21 +100,21 @@
         }                                                        \
         return this;                                             \
     }                                                            \
-    virtual T *setRelPosAbsoluteX(float xPos) {                  \
+    virtual T *setScrollPosAbsoluteX(float xPos) {                  \
         if(m_vmPos.x != xPos) {                                  \
             m_vmPos.x = xPos;                                    \
             updateLayout();                                      \
         }                                                        \
         return this;                                             \
     }                                                            \
-    virtual T *setRelPosAbsoluteY(float yPos) {                  \
+    virtual T *setScrollPosAbsoluteY(float yPos) {                  \
         if(m_vmPos.y != yPos) {                                  \
             m_vmPos.y = yPos;                                    \
             updateLayout();                                      \
         }                                                        \
         return this;                                             \
     }                                                            \
-    virtual T *setRelPosAbsolute(Vector2 position) {             \
+    virtual T *setScrollPosAbsolute(Vector2 position) {             \
         if(m_vmPos != position) {                                \
             m_vmPos = position;                                  \
             updateLayout();                                      \

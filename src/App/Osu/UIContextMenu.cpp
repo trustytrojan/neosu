@@ -257,7 +257,7 @@ void UIContextMenu::end(bool invertAnimation, bool clampUnderflowAndOverflowAndE
             if(m_vPos.y < 0) {
                 const float underflow = std::abs(m_vPos.y);
 
-                setRelPosY(m_vPos.y + underflow);
+                setScrollPosY(m_vPos.y + underflow);
                 setPosY(m_vPos.y + underflow);
                 setSizeY(m_vSize.y - underflow);
 
@@ -295,7 +295,7 @@ void UIContextMenu::setVisible2(bool visible2) {
 void UIContextMenu::onResized() { setSize(m_vSize); }
 
 void UIContextMenu::onMoved() {
-    setRelPos(m_vPos);
+    setScrollPos(m_vPos);
     setPos(m_vPos);
 }
 
@@ -322,7 +322,7 @@ void UIContextMenu::onHitEnter(UIContextMenuTextbox *textbox) {
 void UIContextMenu::clampToBottomScreenEdge(UIContextMenu *menu) {
     if(menu->getRelPos().y + menu->getSize().y > osu->getScreenHeight()) {
         int newRelPosY = osu->getScreenHeight() - menu->getSize().y - 1;
-        menu->setRelPosY(newRelPosY);
+        menu->setScrollPosY(newRelPosY);
         menu->setPosY(newRelPosY);
     }
 }
@@ -330,7 +330,7 @@ void UIContextMenu::clampToBottomScreenEdge(UIContextMenu *menu) {
 void UIContextMenu::clampToRightScreenEdge(UIContextMenu *menu) {
     if(menu->getRelPos().x + menu->getSize().x > osu->getScreenWidth()) {
         const int newRelPosX = osu->getScreenWidth() - menu->getSize().x - 1;
-        menu->setRelPosX(newRelPosX);
+        menu->setScrollPosX(newRelPosX);
         menu->setPosX(newRelPosX);
     }
 }

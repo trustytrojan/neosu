@@ -511,7 +511,7 @@ void ScoreButton::onRightMouseUpInside() {
 
     if(m_contextMenu != NULL) {
         m_contextMenu->setPos(pos);
-        m_contextMenu->setRelPos(pos);
+        m_contextMenu->setScrollPos(pos);
         m_contextMenu->begin(0, true);
         {
             m_contextMenu->addButton("Use Mods", 1);  // for scores without mods this will just nomod

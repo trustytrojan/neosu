@@ -177,7 +177,7 @@ void VinylScratcher::onResized() {
 
     m_titleBar->setSizeX(m_vSize.x + 2);
     m_controlBar->setSizeX(m_vSize.x);
-    m_controlBar->setRelPosY(m_vSize.y - getTitleBarHeight() - m_controlBar->getSize().y);
+    m_controlBar->setScrollPosY(m_vSize.y - getTitleBarHeight() - m_controlBar->getSize().y);
     m_musicBrowser->setSize(m_vSize.x,
                             m_vSize.y - m_controlBar->getSize().y - m_titleBar->getSize().y - getTitleBarHeight());
 

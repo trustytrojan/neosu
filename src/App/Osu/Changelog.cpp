@@ -378,7 +378,7 @@ void Changelog::updateLayout() {
         changelog.title->setSizeToContent();
 
         yCounter += changelog.title->getSize().y;
-        changelog.title->setRelPos(15 * dpiScale, yCounter);
+        changelog.title->setScrollPos(15 * dpiScale, yCounter);
         /// yCounter += 10 * dpiScale;
 
         for(CBaseUIButton *change : changelog.changes) {
@@ -386,7 +386,7 @@ void Changelog::updateLayout() {
             change->setSizeToContent();
             change->setSizeY(change->getSize().y * 2.0f);
             yCounter += change->getSize().y /* + 13 * dpiScale*/;
-            change->setRelPos(35 * dpiScale, yCounter);
+            change->setScrollPos(35 * dpiScale, yCounter);
         }
 
         // gap to previous version

@@ -263,7 +263,7 @@ void Console::onResized() {
     /// m_newLog->setSize(m_vSize.x - 2*CONSOLE_BORDER, m_vSize.y - getTitleBarHeight() - 2*CONSOLE_BORDER -
     /// m_textbox->getSize().y - 1);
     m_textbox->setSize(m_vSize.x - 2 * CONSOLE_BORDER, m_textbox->getSize().y);
-    m_textbox->setRelPosY(m_log->getRelPos().y + m_log->getSize().y + CONSOLE_BORDER + 1);
+    m_textbox->setScrollPosY(m_log->getRelPos().y + m_log->getSize().y + CONSOLE_BORDER + 1);
 
     m_log->scrollToY(m_log->getScrollPosY());
     // m_newLog->scrollY(m_newLog->getScrollPosY());

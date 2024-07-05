@@ -2315,7 +2315,7 @@ void SongBrowser::updateLayout() {
                           max(osu->getSkin()->getSongSelectTop()->getHeight() * m_fSongSelectTopScale *
                                   osu_songbrowser_topbar_left_percent.getFloat(),
                               m_songInfo->getMinimumHeight() + margin));
-    m_songInfo->setRelPos(margin, margin);
+    m_songInfo->setScrollPos(margin, margin);
     m_songInfo->setSize(m_topbarLeft->getSize().x - margin,
                         max(m_topbarLeft->getSize().y * 0.75f, m_songInfo->getMinimumHeight() + margin));
 
@@ -2325,7 +2325,7 @@ void SongBrowser::updateLayout() {
     for(int i = 0; i < m_topbarLeftButtons.size(); i++) {
         m_topbarLeftButtons[i]->onResized();  // HACKHACK: framework bug (should update string metrics on setSize())
         m_topbarLeftButtons[i]->setSize(topbarLeftButtonWidth, topbarLeftButtonHeight);
-        m_topbarLeftButtons[i]->setRelPos(
+        m_topbarLeftButtons[i]->setScrollPos(
             m_topbarLeft->getSize().x - (i + 1) * (topbarLeftButtonMargin + topbarLeftButtonWidth),
             m_topbarLeft->getSize().y - m_topbarLeftButtons[i]->getSize().y);
     }
@@ -2337,7 +2337,7 @@ void SongBrowser::updateLayout() {
     for(int i = 0; i < m_topbarLeftTabButtons.size(); i++) {
         m_topbarLeftTabButtons[i]->onResized();  // HACKHACK: framework bug (should update string metrics on setSize())
         m_topbarLeftTabButtons[i]->setSize(topbarLeftTabButtonWidth, topbarLeftTabButtonHeight);
-        m_topbarLeftTabButtons[i]->setRelPos((topbarLeftTabButtonMargin + i * topbarLeftTabButtonWidth),
+        m_topbarLeftTabButtons[i]->setScrollPos((topbarLeftTabButtonMargin + i * topbarLeftTabButtonWidth),
                                              m_topbarLeft->getSize().y - m_topbarLeftTabButtons[i]->getSize().y);
     }
 
@@ -2358,7 +2358,7 @@ void SongBrowser::updateLayout() {
     for(int i = 0; i < m_topbarRightTabButtons.size(); i++) {
         m_topbarRightTabButtons[i]->onResized();  // HACKHACK: framework bug (should update string metrics on setSize())
         m_topbarRightTabButtons[i]->setSize(topbarRightTabButtonWidth, topbarRightTabButtonHeight);
-        m_topbarRightTabButtons[i]->setRelPos(
+        m_topbarRightTabButtons[i]->setScrollPos(
             m_topbarRight->getSize().x -
                 (topbarRightTabButtonMargin + (m_topbarRightTabButtons.size() - i) * topbarRightTabButtonWidth),
             m_topbarRight->getSize().y - m_topbarRightTabButtons[i]->getSize().y);
@@ -2367,7 +2367,7 @@ void SongBrowser::updateLayout() {
     if(m_topbarRightTabButtons.size() > 0) {
         m_groupLabel->onResized();  // HACKHACK: framework bug (should update string metrics on setSizeToContent())
         m_groupLabel->setSizeToContent(3 * dpiScale);
-        m_groupLabel->setRelPos(m_topbarRightTabButtons[0]->getRelPos() +
+        m_groupLabel->setScrollPos(m_topbarRightTabButtons[0]->getRelPos() +
                                 Vector2(-m_groupLabel->getSize().x, m_topbarRightTabButtons[0]->getSize().y / 2.0f -
                                                                         m_groupLabel->getSize().y / 2.0f));
     }
@@ -2379,14 +2379,14 @@ void SongBrowser::updateLayout() {
         0.0f, 200.0f * dpiScale);
     for(int i = 0; i < m_topbarRightSortButtons.size(); i++) {
         m_topbarRightSortButtons[i]->setSize(topbarRightSortButtonWidth, topbarRightSortButtonHeight);
-        m_topbarRightSortButtons[i]->setRelPos(
+        m_topbarRightSortButtons[i]->setScrollPos(
             m_topbarRight->getSize().x -
                 (topbarRightSortButtonMargin + (m_topbarRightTabButtons.size() - i) * topbarRightSortButtonWidth),
             topbarRightSortButtonMargin);
     }
     for(int i = 0; i < m_topbarRightGroupButtons.size(); i++) {
         m_topbarRightGroupButtons[i]->setSize(topbarRightSortButtonWidth, topbarRightSortButtonHeight);
-        m_topbarRightGroupButtons[i]->setRelPos(
+        m_topbarRightGroupButtons[i]->setScrollPos(
             m_topbarRight->getSize().x -
                 (topbarRightSortButtonMargin + (m_topbarRightTabButtons.size() - i) * topbarRightSortButtonWidth),
             topbarRightSortButtonMargin);
@@ -2395,7 +2395,7 @@ void SongBrowser::updateLayout() {
     if(m_topbarRightGroupButtons.size() > 0) {
         m_groupLabel->onResized();  // HACKHACK: framework bug (should update string metrics on setSizeToContent())
         m_groupLabel->setSizeToContent(3 * dpiScale);
-        m_groupLabel->setRelPos(
+        m_groupLabel->setScrollPos(
             m_topbarRightGroupButtons[m_topbarRightGroupButtons.size() - 1]->getRelPos() +
             Vector2(-m_groupLabel->getSize().x,
                     m_topbarRightGroupButtons[m_topbarRightGroupButtons.size() - 1]->getSize().y / 2.0f -
@@ -2404,7 +2404,7 @@ void SongBrowser::updateLayout() {
     if(m_topbarRightSortButtons.size() > 0) {
         m_sortLabel->onResized();  // HACKHACK: framework bug (should update string metrics on setSizeToContent())
         m_sortLabel->setSizeToContent(3 * dpiScale);
-        m_sortLabel->setRelPos(
+        m_sortLabel->setScrollPos(
             m_topbarRightSortButtons[m_topbarRightSortButtons.size() - 1]->getRelPos() +
             Vector2(-m_sortLabel->getSize().x,
                     m_topbarRightSortButtons[m_topbarRightSortButtons.size() - 1]->getSize().y / 2.0f -
@@ -2433,18 +2433,18 @@ void SongBrowser::updateLayout() {
 
         // new, hardcoded offsets instead of dynamically using the button skin image widths (except starting at 3rd
         // button)
-        m_bottombarNavButtons[i]->setRelPosX(
+        m_bottombarNavButtons[i]->setScrollPosX(
             navBarXCounter + gap + (i > 0 ? Osu::getUIScale(57.6f) : 0) +
             (i > 1 ? max((i - 1) * Osu::getUIScale(48.0f), m_bottombarNavButtons[i - 1]->getSize().x) : 0));
 
         // old, overflows with some skins (e.g. kyu)
-        // m_bottombarNavButtons[i]->setRelPosX((i == 0 ? navBarXCounter : 0) + gap + (i > 0 ?
+        // m_bottombarNavButtons[i]->setScrollPosX((i == 0 ? navBarXCounter : 0) + gap + (i > 0 ?
         // m_bottombarNavButtons[i-1]->getRelPos().x + m_bottombarNavButtons[i-1]->getSize().x : 0));
     }
 
     const int userButtonHeight = m_bottombar->getSize().y * 0.9f;
     m_userButton->setSize(userButtonHeight * 3.5f, userButtonHeight);
-    m_userButton->setRelPos(max(m_bottombar->getSize().x / 2 - m_userButton->getSize().x / 2,
+    m_userButton->setScrollPos(max(m_bottombar->getSize().x / 2 - m_userButton->getSize().x / 2,
                                 m_bottombarNavButtons[m_bottombarNavButtons.size() - 1]->getRelPos().x +
                                     m_bottombarNavButtons[m_bottombarNavButtons.size() - 1]->getSize().x + 10),
                             m_bottombar->getSize().y - m_userButton->getSize().y - 1);
@@ -2509,10 +2509,10 @@ void SongBrowser::updateScoreBrowserLayout() {
         m_localBestContainer->setPos(m_scoreBrowser->getPos().x,
                                      m_scoreBrowser->getPos().y + m_scoreBrowser->getSize().y);
         m_localBestContainer->setSize(m_scoreBrowser->getPos().x, local_best_size);
-        m_localBestLabel->setRelPos(m_scoreBrowser->getPos().x, 0);
+        m_localBestLabel->setScrollPos(m_scoreBrowser->getPos().x, 0);
         m_localBestLabel->setSize(m_scoreBrowser->getSize().x, 40);
         if(m_localBestButton) {
-            m_localBestButton->setRelPos(m_scoreBrowser->getPos().x, 40);
+            m_localBestButton->setScrollPos(m_scoreBrowser->getPos().x, 40);
             m_localBestButton->setSize(m_scoreBrowser->getSize().x, scoreHeight);
         }
     }
@@ -2521,19 +2521,19 @@ void SongBrowser::updateScoreBrowserLayout() {
     for(size_t i = 0; i < elements.size(); i++) {
         CBaseUIElement *scoreButton = elements[i];
         scoreButton->setSize(m_scoreBrowser->getSize().x, scoreHeight);
-        scoreButton->setRelPos(scoreBrowserExtraPaddingRight, i * scoreButton->getSize().y + 5 * dpiScale);
+        scoreButton->setScrollPos(scoreBrowserExtraPaddingRight, i * scoreButton->getSize().y + 5 * dpiScale);
     }
     m_scoreBrowserScoresStillLoadingElement->setSize(m_scoreBrowser->getSize().x * 0.9f, scoreHeight * 0.75f);
-    m_scoreBrowserScoresStillLoadingElement->setRelPos(
+    m_scoreBrowserScoresStillLoadingElement->setScrollPos(
         m_scoreBrowser->getSize().x / 2 - m_scoreBrowserScoresStillLoadingElement->getSize().x / 2,
         (browserHeight / 2) * 0.65f - m_scoreBrowserScoresStillLoadingElement->getSize().y / 2);
     m_scoreBrowserNoRecordsYetElement->setSize(m_scoreBrowser->getSize().x * 0.9f, scoreHeight * 0.75f);
     if(elements[0] == m_scoreBrowserNoRecordsYetElement) {
-        m_scoreBrowserNoRecordsYetElement->setRelPos(
+        m_scoreBrowserNoRecordsYetElement->setScrollPos(
             m_scoreBrowser->getSize().x / 2 - m_scoreBrowserScoresStillLoadingElement->getSize().x / 2,
             (browserHeight / 2) * 0.65f - m_scoreBrowserScoresStillLoadingElement->getSize().y / 2);
     } else {
-        m_scoreBrowserNoRecordsYetElement->setRelPos(
+        m_scoreBrowserNoRecordsYetElement->setScrollPos(
             m_scoreBrowser->getSize().x / 2 - m_scoreBrowserScoresStillLoadingElement->getSize().x / 2, 45);
     }
     m_localBestContainer->update_pos();
@@ -3095,7 +3095,7 @@ void SongBrowser::rebuildSongButtonsAndVisibleSongButtonsWithSearchMatchSupport(
 
 void SongBrowser::onSortScoresClicked(CBaseUIButton *button) {
     m_contextMenu->setPos(button->getPos());
-    m_contextMenu->setRelPos(button->getRelPos());
+    m_contextMenu->setScrollPos(button->getRelPos());
     m_contextMenu->begin(button->getSize().x);
     {
         CBaseUIButton *button = m_contextMenu->addButton("Online Leaderboard");
@@ -3144,7 +3144,7 @@ void SongBrowser::onWebClicked(CBaseUIButton *button) {
 
 void SongBrowser::onGroupClicked(CBaseUIButton *button) {
     m_contextMenu->setPos(button->getPos());
-    m_contextMenu->setRelPos(button->getRelPos());
+    m_contextMenu->setScrollPos(button->getRelPos());
     m_contextMenu->begin(button->getSize().x);
     {
         for(size_t i = 0; i < m_groupings.size(); i++) {
@@ -3219,7 +3219,7 @@ void SongBrowser::onGroupChange(UString text, int id) {
 
 void SongBrowser::onSortClicked(CBaseUIButton *button) {
     m_contextMenu->setPos(button->getPos());
-    m_contextMenu->setRelPos(button->getRelPos());
+    m_contextMenu->setScrollPos(button->getRelPos());
     m_contextMenu->begin(button->getSize().x);
     {
         for(size_t i = 0; i < m_sortingMethods.size(); i++) {
@@ -3235,7 +3235,7 @@ void SongBrowser::onSortClicked(CBaseUIButton *button) {
     // manual hack for small resolutions
     if(m_contextMenu->getRelPos().x + m_contextMenu->getSize().x > m_topbarRight->getSize().x) {
         int newRelPosX = m_topbarRight->getSize().x - m_contextMenu->getSize().x - 1;
-        m_contextMenu->setRelPosX(newRelPosX);
+        m_contextMenu->setScrollPosX(newRelPosX);
         m_contextMenu->setPosX(m_topbarRight->getPos().x + m_topbarRight->getSize().x - m_contextMenu->getSize().x - 1);
     }
 }
@@ -3463,7 +3463,7 @@ void SongBrowser::onAfterSortingOrGroupChangeUpdateInt(bool autoScroll) {
 
 void SongBrowser::onSelectionMode() {
     m_contextMenu->setPos(m_bottombarNavButtons[0]->getPos());
-    m_contextMenu->setRelPos(m_bottombarNavButtons[0]->getRelPos());
+    m_contextMenu->setScrollPos(m_bottombarNavButtons[0]->getRelPos());
     m_contextMenu->begin(0, true);
     {
         UIContextMenuButton *standardButton = m_contextMenu->addButton("Standard", 0);
@@ -3487,7 +3487,7 @@ void SongBrowser::onSelectionMode() {
     m_contextMenu->setPos(m_contextMenu->getPos() -
                           Vector2((m_contextMenu->getSize().x - m_bottombarNavButtons[0]->getSize().x) / 2.0f,
                                   m_contextMenu->getSize().y));
-    m_contextMenu->setRelPos(m_contextMenu->getRelPos() -
+    m_contextMenu->setScrollPos(m_contextMenu->getRelPos() -
                              Vector2((m_contextMenu->getSize().x - m_bottombarNavButtons[0]->getSize().x) / 2.0f,
                                      m_contextMenu->getSize().y));
     m_contextMenu->end(true, false);

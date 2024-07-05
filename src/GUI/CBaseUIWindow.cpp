@@ -491,10 +491,10 @@ void CBaseUIWindow::onMouseUpOutside() {
 }
 
 void CBaseUIWindow::updateTitleBarMetrics() {
-    m_closeButton->setRelPos(
+    m_closeButton->setScrollPos(
         m_vSize.x - m_closeButton->getSize().x - (m_iTitleBarHeight - m_closeButton->getSize().x) / 2.0f,
         m_iTitleBarHeight / 2.0f - m_closeButton->getSize().y / 2.0f);
-    m_minimizeButton->setRelPos(
+    m_minimizeButton->setScrollPos(
         m_vSize.x - m_minimizeButton->getSize().x * 2 - (m_iTitleBarHeight - m_minimizeButton->getSize().x) / 2.0f - 6,
         m_iTitleBarHeight / 2.0f - m_minimizeButton->getSize().y / 2.0f);
 
