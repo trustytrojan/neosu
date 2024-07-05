@@ -29,6 +29,7 @@
 #include "UIButton.h"
 #include "UIRankingScreenInfoLabel.h"
 #include "UIRankingScreenRankingPanel.h"
+#include "pp.h"
 #include "score.h"
 
 ConVar osu_rankingscreen_topbar_height_percent("osu_rankingscreen_topbar_height_percent", 0.785f, FCVAR_DEFAULT);
@@ -189,10 +190,10 @@ RankingScreen::RankingScreen() : ScreenBackable() {
 
     m_retry_btn = new UIButton(0, 0, 0, 0, "", "Retry");
     m_retry_btn->setClickCallback(fastdelegate::MakeDelegate(this, &RankingScreen::onRetryClicked));
-    addBaseUIElement(m_retry_btn);
+    m_rankings->getContainer()->addBaseUIElement(m_retry_btn);
     m_watch_btn = new UIButton(0, 0, 0, 0, "", "Watch replay");
     m_watch_btn->setClickCallback(fastdelegate::MakeDelegate(this, &RankingScreen::onWatchClicked));
-    addBaseUIElement(m_watch_btn);
+    m_rankings->getContainer()->addBaseUIElement(m_watch_btn);
 
     setGrade(FinishedScore::Grade::D);
     setIndex(0);  // TEMP
@@ -238,9 +239,16 @@ void RankingScreen::draw(Graphics *g) {
     if(!m_bVisible) return;
 
     // draw background image
-    if(osu_draw_rankingscreen_background_image.getBool()) SongBrowser::drawSelectedBeatmapBackgroundImage(g);
+    if(osu_draw_rankingscreen_background_image.getBool()) {
+        SongBrowser::drawSelectedBeatmapBackgroundImage(g);
 
-    m_rankings->draw(g);
+        // draw top black bar
+        g->setColor(0xff000000);
+        g->fillRect(0, 0, osu->getScreenWidth(),
+                    m_rankingTitle->getSize().y * osu_rankingscreen_topbar_height_percent.getFloat());
+    }
+
+    ScreenBackable::draw(g);
 
     // draw active mods
     const Vector2 modPosStart =
@@ -291,13 +299,11 @@ void RankingScreen::draw(Graphics *g) {
         const int backgroundWidth = maxStringWidth + 2 * backgroundMargin;
         const int backgroundHeight = experimentalModHeight * m_enabledExperimentalMods.size() + 2 * backgroundMargin;
 
-        // draw background
         g->setColor(0x77000000);
         g->fillRect((int)experimentalModPos.x - backgroundMargin,
                     (int)experimentalModPos.y - experimentalModFont->getHeight() - backgroundMargin, backgroundWidth,
                     backgroundHeight);
 
-        // draw mods
         g->pushTransform();
         {
             g->translate((int)experimentalModPos.x, (int)experimentalModPos.y);
@@ -318,7 +324,7 @@ void RankingScreen::draw(Graphics *g) {
     }
 
     // draw pp
-    if(osu_rankingscreen_pp.getBool() && !m_bIsLegacyScore) {
+    if(osu_rankingscreen_pp.getBool()) {
         const UString ppString = getPPString();
         const Vector2 ppPos = getPPPosRaw();
 
@@ -333,16 +339,6 @@ void RankingScreen::draw(Graphics *g) {
         }
         g->popTransform();
     }
-
-    // draw top black bar
-    g->setColor(0xff000000);
-    g->fillRect(0, 0, osu->getScreenWidth(),
-                m_rankingTitle->getSize().y * osu_rankingscreen_topbar_height_percent.getFloat());
-
-    m_rankingTitle->draw(g);
-    m_songInfo->draw(g);
-
-    ScreenBackable::draw(g);
 }
 
 void RankingScreen::drawModImage(Graphics *g, SkinImage *image, Vector2 &pos, Vector2 &max) {
@@ -390,6 +386,8 @@ CBaseUIContainer *RankingScreen::setVisible(bool visible) {
 
     if(m_bVisible) {
         m_backButton->resetAnimation();
+        m_rankings->scrollToY(0, false);
+
         updateLayout();
     } else {
         // Stop applause sound
@@ -413,7 +411,7 @@ CBaseUIContainer *RankingScreen::setVisible(bool visible) {
 }
 
 void RankingScreen::onRetryClicked() {
-    // TODO @kiwec: test this
+    // TODO @kiwec: doesn't work, just backs out to song browser, idk why
     setVisible(false);
     osu->getSelectedBeatmap()->play();
 }
@@ -429,11 +427,14 @@ void RankingScreen::setScore(FinishedScore score) {
     bool is_same_player = !score.playerName.compare(current_name.toUtf8());
 
     m_score = score;
-    // TODO @kiwec: broken
-    m_retry_btn->setVisible(false);
-    m_watch_btn->setVisible(false);
+
+    // TODO @kiwec: buttons don't work correctly
     // m_retry_btn->setVisible(is_same_player && !bancho.is_in_a_multi_room());
     // m_watch_btn->setVisible(score.has_replay && !bancho.is_in_a_multi_room());
+
+    // TODO @kiwec: i can't even setVisible(false) man this is so cancer
+    m_retry_btn->setVisible(false);
+    m_watch_btn->setVisible(false);
 
     m_bIsLegacyScore = score.isLegacyScore;
     m_bIsImportedLegacyScore = score.isImportedLegacyScore;
@@ -458,16 +459,26 @@ void RankingScreen::setScore(FinishedScore score) {
     m_fStarsTomTotal = score.starsTomTotal;
     m_fStarsTomAim = score.starsTomAim;
     m_fStarsTomSpeed = score.starsTomSpeed;
-    m_fPPv2 = score.pp;
-
     m_fSpeedMultiplier = std::round(score.speedMultiplier * 100.0f) / 100.0f;
+
+    if(!score.isLegacyScore) {
+        m_fSpeedMultiplier = 1.f;
+        if(score.modsLegacy & ModFlags::DoubleTime) {
+            m_fSpeedMultiplier = 1.5f;
+        } else if(score.modsLegacy & ModFlags::HalfTime) {
+            m_fSpeedMultiplier = 0.75f;
+        }
+
+        m_fPPv2 = score.pp;
+    }
+
     m_fCS = std::round(score.CS * 100.0f) / 100.0f;
     m_fAR = std::round(GameRules::getRawApproachRateForSpeedMultiplier(GameRules::getRawApproachTime(score.AR),
-                                                                       score.speedMultiplier) *
+                                                                       m_fSpeedMultiplier) *
                        100.0f) /
             100.0f;
     m_fOD = std::round(GameRules::getRawOverallDifficultyForSpeedMultiplier(GameRules::getRawHitWindow300(score.OD),
-                                                                            score.speedMultiplier) *
+                                                                            m_fSpeedMultiplier) *
                        100.0f) /
             100.0f;
     m_fHP = std::round(score.HP * 100.0f) / 100.0f;
@@ -517,12 +528,18 @@ void RankingScreen::setBeatmapInfo(Beatmap *beatmap, DatabaseBeatmap *diff2) {
     UString local_name = convar->getConVarByName("name")->getString();
     m_songInfo->setPlayer(m_bIsUnranked ? "neosu" : local_name.toUtf8());
 
-    // round all here to 2 decimal places
-    m_fSpeedMultiplier = std::round(osu->getSpeedMultiplier() * 100.0f) / 100.0f;
-    m_fCS = std::round(beatmap->getCS() * 100.0f) / 100.0f;
-    m_fAR = std::round(GameRules::getApproachRateForSpeedMultiplier(beatmap) * 100.0f) / 100.0f;
-    m_fOD = std::round(GameRules::getOverallDifficultyForSpeedMultiplier(beatmap) * 100.0f) / 100.0f;
-    m_fHP = std::round(beatmap->getHP() * 100.0f) / 100.0f;
+    if(m_score.isLegacyScore) {
+        gradual_pp *pp = init_gradual_pp(diff2, m_score.modsLegacy, m_fAR, m_fCS, m_fOD, m_fSpeedMultiplier);
+        pp = calculate_gradual_pp(pp, diff2->getNumObjects(), m_score.comboMax, m_score.num300s, m_score.num100s,
+                                  m_score.num50s, m_score.numMisses, &m_fStarsTomTotal, &m_fPPv2);
+        free_gradual_pp(pp);
+
+        // round all here to 2 decimal places
+        m_fCS = std::round(beatmap->getCS() * 100.0f) / 100.0f;
+        m_fAR = std::round(GameRules::getApproachRateForSpeedMultiplier(beatmap) * 100.0f) / 100.0f;
+        m_fOD = std::round(GameRules::getOverallDifficultyForSpeedMultiplier(beatmap) * 100.0f) / 100.0f;
+        m_fHP = std::round(beatmap->getHP() * 100.0f) / 100.0f;
+    }
 }
 
 void RankingScreen::updateLayout() {
@@ -543,13 +560,14 @@ void RankingScreen::updateLayout() {
                         max(m_songInfo->getMinimumHeight(),
                             m_rankingTitle->getSize().y * osu_rankingscreen_topbar_height_percent.getFloat()));
 
-    // TODO @kiwec: buttons are not placed at the given coords, idk why
-    m_retry_btn->setSize(150 * uiScale, 50 * uiScale);
-    m_watch_btn->setSize(150 * uiScale, 50 * uiScale);
-    m_retry_btn->setPos(osu->getScreenSize().x - (150 * uiScale + 10.f * uiScale),
-                        osu->getScreenSize().y - (50 * uiScale + 10.f * uiScale));
-    m_watch_btn->setPos(osu->getScreenSize().x - (150 * uiScale + 10.f * uiScale),
-                        osu->getScreenSize().y - (50 * uiScale * 2.f + 20.f * uiScale));
+    float btn_width = 150 * uiScale;
+    float btn_height = 50 * uiScale;
+    m_retry_btn->setSize(btn_width, btn_height);
+    m_watch_btn->setSize(btn_width, btn_height);
+    m_watch_btn->setRelPos(osu->getScreenSize().x - (btn_width + 10.f * uiScale),
+                           osu->getScreenSize().y - (btn_height + 130.f * uiScale));
+    m_retry_btn->setRelPos(osu->getScreenSize().x - (btn_width + 10.f * uiScale),
+                           m_watch_btn->getRelPos().y - (btn_height + 5.f * uiScale));
 
     m_rankings->setSize(osu->getScreenSize().x + 2, osu->getScreenSize().y - m_songInfo->getSize().y + 3);
     m_rankings->setRelPosY(m_songInfo->getSize().y - 1);
@@ -653,13 +671,7 @@ UString RankingScreen::getPPString() { return UString::format("%ipp", (int)(std:
 Vector2 RankingScreen::getPPPosRaw() {
     const UString ppString = getPPString();
     float ppStringWidth = osu->getTitleFont()->getStringWidth(ppString);
-    return Vector2(m_rankingGrade->getPos().x, 0) +
-           Vector2(m_rankingGrade->getSize().x / 2 - ppStringWidth / 2,
-                   m_rankings->getRelPosY() + osu->getUIScale(400) + osu->getTitleFont()->getHeight() / 2);
-}
-
-Vector2 RankingScreen::getPPPosCenterRaw() {
-    return Vector2(m_rankingGrade->getPos().x, 0) +
-           Vector2(m_rankingGrade->getSize().x / 2,
+    return Vector2(m_rankingGrade->getPos().x, Osu::ui_scale->getFloat() * 10.f) +
+           Vector2(m_rankingGrade->getSize().x / 2 - (ppStringWidth / 2 + Osu::ui_scale->getFloat() * 100.f),
                    m_rankings->getRelPosY() + osu->getUIScale(400) + osu->getTitleFont()->getHeight() / 2);
 }

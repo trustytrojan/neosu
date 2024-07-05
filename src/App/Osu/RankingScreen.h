@@ -45,7 +45,6 @@ class RankingScreen : public ScreenBackable {
 
     UString getPPString();
     Vector2 getPPPosRaw();
-    Vector2 getPPPosCenterRaw();
 
     ConVar *m_osu_scores_enabled;
 
@@ -66,10 +65,10 @@ class RankingScreen : public ScreenBackable {
     float m_fHitErrorAvgMin;
     float m_fHitErrorAvgMax;
 
-    float m_fStarsTomTotal;
+    f64 m_fStarsTomTotal;
     float m_fStarsTomAim;
     float m_fStarsTomSpeed;
-    float m_fPPv2;
+    f64 m_fPPv2;
 
     float m_fSpeedMultiplier;
     float m_fCS;
