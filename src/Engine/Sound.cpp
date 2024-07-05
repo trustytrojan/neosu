@@ -438,9 +438,6 @@ u32 Sound::getPositionMS() {
         delta = (engine->getTime() - m_fLastPlayTime) * speedMultiplier;
         f64 lerpPercent = clamp<f64>(((delta / interpDuration) - interp_ratio) / (1.0 - interp_ratio), 0.0, 1.0);
         positionMS = (u32)lerp<f64>(delta * 1000.0, (f64)positionMS, lerpPercent);
-        if(pre_interp_pos != positionMS) {
-            debugLog("Interpolating music position! %d ms -> %d ms\n", pre_interp_pos, positionMS);
-        }
     }
 
     return positionMS;

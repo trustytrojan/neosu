@@ -245,7 +245,7 @@ class NoRecordsSetElement : public CBaseUILabel {
     UString m_sIconString;
 };
 
-bool SongBrowser::SortByArtist::operator()(Button const *a, Button const *b) const {
+bool sort_by_artist(Button const *a, Button const *b) {
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
 
     int res = strcasecmp(a->getDatabaseBeatmap()->getArtist().c_str(), b->getDatabaseBeatmap()->getArtist().c_str());
@@ -253,7 +253,7 @@ bool SongBrowser::SortByArtist::operator()(Button const *a, Button const *b) con
     return res < 0;
 }
 
-bool SongBrowser::SortByBPM::operator()(Button const *a, Button const *b) const {
+bool sort_by_bpm(Button const *a, Button const *b) {
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
 
     int bpm1 = a->getDatabaseBeatmap()->getMostCommonBPM();
@@ -262,7 +262,7 @@ bool SongBrowser::SortByBPM::operator()(Button const *a, Button const *b) const 
     return bpm1 < bpm2;
 }
 
-bool SongBrowser::SortByCreator::operator()(Button const *a, Button const *b) const {
+bool sort_by_creator(Button const *a, Button const *b) {
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
 
     int res = strcasecmp(a->getDatabaseBeatmap()->getCreator().c_str(), b->getDatabaseBeatmap()->getCreator().c_str());
@@ -270,7 +270,7 @@ bool SongBrowser::SortByCreator::operator()(Button const *a, Button const *b) co
     return res < 0;
 }
 
-bool SongBrowser::SortByDateAdded::operator()(Button const *a, Button const *b) const {
+bool sort_by_date_added(Button const *a, Button const *b) {
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
 
     long long time1 = a->getDatabaseBeatmap()->last_modification_time;
@@ -279,7 +279,7 @@ bool SongBrowser::SortByDateAdded::operator()(Button const *a, Button const *b) 
     return time1 > time2;
 }
 
-bool SongBrowser::SortByDifficulty::operator()(Button const *a, Button const *b) const {
+bool sort_by_difficulty(Button const *a, Button const *b) {
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
 
     float stars1 = a->getDatabaseBeatmap()->getStarsNomod();
@@ -297,7 +297,7 @@ bool SongBrowser::SortByDifficulty::operator()(Button const *a, Button const *b)
     return a->getSortHack() < b->getSortHack();
 }
 
-bool SongBrowser::SortByLength::operator()(Button const *a, Button const *b) const {
+bool sort_by_length(Button const *a, Button const *b) {
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
 
     unsigned long length1 = a->getDatabaseBeatmap()->getLengthMS();
@@ -306,7 +306,7 @@ bool SongBrowser::SortByLength::operator()(Button const *a, Button const *b) con
     return length1 < length2;
 }
 
-bool SongBrowser::SortByTitle::operator()(Button const *a, Button const *b) const {
+bool sort_by_title(Button const *a, Button const *b) {
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
 
     int res = strcasecmp(a->getDatabaseBeatmap()->getTitle().c_str(), b->getDatabaseBeatmap()->getTitle().c_str());
@@ -330,17 +330,16 @@ SongBrowser::SongBrowser() : ScreenBackable() {
     }
 
     m_sortingMethod = SORT::SORT_ARTIST;
-    {
-        m_sortingMethods.push_back({SORT::SORT_ARTIST, "By Artist", new SortByArtist()});
-        m_sortingMethods.push_back({SORT::SORT_BPM, "By BPM", new SortByBPM()});
-        m_sortingMethods.push_back({SORT::SORT_CREATOR, "By Creator", new SortByCreator()});
-        m_sortingMethods.push_back({SORT::SORT_DATEADDED, "By Date Added", new SortByDateAdded()});
-        m_sortingMethods.push_back({SORT::SORT_DIFFICULTY, "By Difficulty", new SortByDifficulty()});
-        m_sortingMethods.push_back({SORT::SORT_LENGTH, "By Length", new SortByLength()});
-        /// m_sortingMethods.push_back({SORT::SORT_RANKACHIEVED, "By Rank Achieved", new SortByRankAchieved()}); // not
-        /// yet possible
-        m_sortingMethods.push_back({SORT::SORT_TITLE, "By Title", new SortByTitle()});
-    }
+    m_sortingComparator = sort_by_artist;
+
+    m_sortingMethods.push_back({SORT::SORT_ARTIST, "By Artist", sort_by_artist});
+    m_sortingMethods.push_back({SORT::SORT_BPM, "By BPM", sort_by_bpm});
+    m_sortingMethods.push_back({SORT::SORT_CREATOR, "By Creator", sort_by_creator});
+    m_sortingMethods.push_back({SORT::SORT_DATEADDED, "By Date Added", sort_by_date_added});
+    m_sortingMethods.push_back({SORT::SORT_DIFFICULTY, "By Difficulty", sort_by_difficulty});
+    m_sortingMethods.push_back({SORT::SORT_LENGTH, "By Length", sort_by_length});
+    m_sortingMethods.push_back({SORT::SORT_TITLE, "By Title", sort_by_title});
+    // m_sortingMethods.push_back({SORT::SORT_RANKACHIEVED, "By Rank Achieved", new SortByRankAchieved()}); // not yet possible
 
     // convar refs
     m_fps_max_ref = convar->getConVarByName("fps_max");
@@ -413,46 +412,29 @@ SongBrowser::SongBrowser() : ScreenBackable() {
     // build topbar right
     m_topbarRight = new CBaseUIContainer(0, 0, 0, 0, "");
 
-    addTopBarRightGroupButton("")->setVisible(false);  // NOTE: align with second tab
     {
         m_groupLabel = new CBaseUILabel(0, 0, 0, 0, "", "Group:");
         m_groupLabel->setSizeToContent(3);
         m_groupLabel->setDrawFrame(false);
         m_groupLabel->setDrawBackground(false);
-
         m_topbarRight->addBaseUIElement(m_groupLabel);
-    }
-    m_groupButton = addTopBarRightGroupButton("No Grouping");
-    m_groupButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onGroupClicked));
 
-    {
-        // TODO: Add hover sounds
+        m_groupButton = new CBaseUIButton(0, 0, 0, 0, "", "No Grouping");
+        m_groupButton->setDrawBackground(false);
+        m_groupButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onGroupClicked));
+        m_topbarRight->addBaseUIElement(m_groupButton);
 
-        // "hardcoded" grouping tabs
-        m_collectionsButton = addTopBarRightTabButton("Collections");
-        m_collectionsButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onGroupTabButtonClicked));
-        m_artistButton = addTopBarRightTabButton("By Artist");
-        m_artistButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onGroupTabButtonClicked));
-        m_difficultiesButton = addTopBarRightTabButton("By Difficulty");
-        m_difficultiesButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onGroupTabButtonClicked));
-        m_noGroupingButton = addTopBarRightTabButton("No Grouping");
-        m_noGroupingButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onGroupTabButtonClicked));
-        m_noGroupingButton->setTextBrightColor(COLOR(255, 0, 255, 0));
-    }
-
-    addTopBarRightSortButton("")->setVisible(false);  // NOTE: align with last tab (1)
-    addTopBarRightSortButton("")->setVisible(false);  // NOTE: align with last tab (2)
-    addTopBarRightSortButton("")->setVisible(false);  // NOTE: align with last tab (3)
-    {
         m_sortLabel = new CBaseUILabel(0, 0, 0, 0, "", "Sort:");
         m_sortLabel->setSizeToContent(3);
         m_sortLabel->setDrawFrame(false);
         m_sortLabel->setDrawBackground(false);
-
         m_topbarRight->addBaseUIElement(m_sortLabel);
+
+        m_sortButton = new CBaseUIButton(0, 0, 0, 0, "", "By Date Added");
+        m_sortButton->setDrawBackground(false);
+        m_sortButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onSortClicked));
+        m_topbarRight->addBaseUIElement(m_sortButton);
     }
-    m_sortButton = addTopBarRightSortButton("By Date Added");
-    m_sortButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onSortClicked));
 
     // context menu
     m_contextMenu = new UIContextMenu(50, 50, 150, 0, "");
@@ -522,8 +504,6 @@ SongBrowser::SongBrowser() : ScreenBackable() {
     m_bInSearch = (osu_songbrowser_search_hardcoded_filter.getString().length() > 0);
     m_searchPrevGroup = GROUP::GROUP_NO_GROUPING;
     m_backgroundSearchMatcher = new SongBrowserBackgroundSearchMatcher();
-    m_bOnAfterSortingOrGroupChangeUpdateScheduled = false;
-    m_bOnAfterSortingOrGroupChangeUpdateScheduledAutoScroll = false;
 
     updateLayout();
 }
@@ -569,10 +549,6 @@ SongBrowser::~SongBrowser() {
     }
     SAFE_DELETE(m_scoreBrowserScoresStillLoadingElement);
     SAFE_DELETE(m_scoreBrowserNoRecordsYetElement);
-
-    for(size_t i = 0; i < m_sortingMethods.size(); i++) {
-        delete m_sortingMethods[i].comparator;
-    }
 
     SAFE_DELETE(m_selectedBeatmap);
     SAFE_DELETE(m_search);
@@ -900,8 +876,7 @@ bool SongBrowser::selectBeatmapset(i32 set_id) {
     if(beatmapset == NULL) {
         // Pasted from Downloader::download_beatmap
         auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_id);
-        osu->m_songBrowser2->getDatabase()->addBeatmap(mapset_path.toUtf8());
-        osu->m_songBrowser2->updateSongButtonSorting();
+        getDatabase()->addBeatmapSet(mapset_path.toUtf8());
         debugLog("Finished loading beatmapset %d.\n", set_id);
 
         beatmapset = getDatabase()->getBeatmapSet(set_id);
@@ -925,8 +900,9 @@ bool SongBrowser::selectBeatmapset(i32 set_id) {
         osu->getNotificationOverlay()->addNotification("Beatmapset has no difficulties :/");
         return false;
     } else {
-        osu->m_songBrowser2->onDifficultySelected(best_diff, false);
-        osu->m_songBrowser2->selectSelectedBeatmapSongButton();
+        onSelectionChange(hashToSongButton[best_diff->getMD5Hash()], false);
+        onDifficultySelected(best_diff, false);
+        selectSelectedBeatmapSongButton();
         return true;
     }
 }
@@ -1064,8 +1040,9 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
     // if cursor is to the left edge of the screen, force center currently selected beatmap/diff
     // but only if the context menu is currently not visible (since we don't want move things while e.g. managing
     // collections etc.)
-    if(engine->getMouse()->getPos().x < osu->getScreenWidth() * 0.1f && !m_contextMenu->isVisible())
-        scrollToSelectedSongButton();
+    if(engine->getMouse()->getPos().x < osu->getScreenWidth() * 0.1f && !m_contextMenu->isVisible()) {
+        scrollToSongButton(m_selectedButton);
+    }
 
     // handle searching
     if(m_fSearchWaitTime != 0.0f && engine->getTime() > m_fSearchWaitTime) {
@@ -1083,9 +1060,11 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
         }
 
         if(m_backgroundSearchMatcher->isDead()) {
-            if(m_bOnAfterSortingOrGroupChangeUpdateScheduled) {
-                m_bOnAfterSortingOrGroupChangeUpdateScheduled = false;
-                onAfterSortingOrGroupChangeUpdateInt(m_bOnAfterSortingOrGroupChangeUpdateScheduledAutoScroll);
+            if(m_scheduled_scroll_to_selected_button) {
+                m_scheduled_scroll_to_selected_button = false;
+
+                // TODO @kiwec: This doesn't scroll if we switch between groupings
+                scrollToSongButton(m_selectedButton);
             }
         }
     }
@@ -1432,25 +1411,17 @@ CBaseUIContainer *SongBrowser::setVisible(bool visible) {
 void SongBrowser::selectSelectedBeatmapSongButton() {
     if(m_selectedBeatmap == NULL) return;
 
-    const std::vector<CBaseUIElement *> &elements = m_songBrowser->getContainer()->getElements();
-    for(auto elm : elements) {
-        SongButton *btn = dynamic_cast<SongButton *>(elm);
-        if(btn == NULL) continue;
-        if(btn->getDatabaseBeatmap() == NULL) continue;
+	auto diff = m_selectedBeatmap->getSelectedDifficulty2();
+    if(diff == NULL) return;
 
-        std::vector<DatabaseBeatmap *> diffs = btn->getDatabaseBeatmap()->getDifficulties();
-        diffs.push_back(btn->getDatabaseBeatmap());
-
-        for(auto diff : diffs) {
-            if(m_selectedBeatmap->getSelectedDifficulty2() == diff) {
-                btn->deselect();  // if we select() it when already selected, it would start playing!
-                btn->select();
-                return;
-            }
-        }
+    auto it = hashToSongButton.find(diff->getMD5Hash());
+    if(it == hashToSongButton.end()) {
+        debugLog("No song button found for currently selected beatmap...\n");
+        return;
     }
 
-    debugLog("No song button found for currently selected beatmap...\n");
+    it->second->deselect();  // if we select() it when already selected, it would start playing!
+    it->second->select();
 }
 
 void SongBrowser::onPlayEnd(bool quit) {
@@ -1460,8 +1431,7 @@ void SongBrowser::onPlayEnd(bool quit) {
     if(!quit) {
         rebuildScoreButtons();
 
-        SongDifficultyButton *selectedSongDiffButton =
-            dynamic_cast<SongDifficultyButton *>(findCurrentlySelectedSongButton());
+        SongDifficultyButton *selectedSongDiffButton = dynamic_cast<SongDifficultyButton *>(m_selectedButton);
         if(selectedSongDiffButton != NULL) selectedSongDiffButton->updateGrade();
     }
 
@@ -1471,6 +1441,7 @@ void SongBrowser::onPlayEnd(bool quit) {
 }
 
 void SongBrowser::onSelectionChange(Button *button, bool rebuild) {
+    m_selectedButton = button;
     if(button == NULL) return;
 
     m_contextMenu->setVisible2(false);
@@ -1482,9 +1453,6 @@ void SongBrowser::onSelectionChange(Button *button, bool rebuild) {
     SongButton *songButtonPointer = dynamic_cast<SongButton *>(button);
     SongDifficultyButton *songDiffButtonPointer = dynamic_cast<SongDifficultyButton *>(button);
     CollectionButton *collectionButtonPointer = dynamic_cast<CollectionButton *>(button);
-
-    /// debugLog("onSelectionChange(%i, %i, %i)\n", (int)(songButtonPointer != NULL), (int)(songDiffButtonPointer !=
-    /// NULL), (int)(collectionButtonPointer != NULL));
 
     if(songDiffButtonPointer != NULL) {
         if(m_selectionPreviousSongDiffButton != NULL && m_selectionPreviousSongDiffButton != songDiffButtonPointer)
@@ -1682,20 +1650,20 @@ void SongBrowser::refreshBeatmaps() {
     m_db->load();
 }
 
-void SongBrowser::addBeatmap(DatabaseBeatmap *beatmap) {
-    if(beatmap->getDifficulties().size() < 1) return;
+void SongBrowser::addBeatmapSet(BeatmapSet *mapset) {
+    if(mapset->getDifficulties().size() < 1) return;
 
     SongButton *songButton;
-    if(beatmap->getDifficulties().size() > 1) {
+    if(mapset->getDifficulties().size() > 1) {
         songButton =
-            new SongButton(this, m_songBrowser, m_contextMenu, 250, 250 + m_beatmaps.size() * 50, 200, 50, "", beatmap);
+            new SongButton(this, m_songBrowser, m_contextMenu, 250, 250 + m_beatmaps.size() * 50, 200, 50, "", mapset);
     } else {
         songButton = new SongDifficultyButton(this, m_songBrowser, m_contextMenu, 250, 250 + m_beatmaps.size() * 50,
-                                              200, 50, "", beatmap->getDifficulties()[0], NULL);
+                                              200, 50, "", mapset->getDifficulties()[0], NULL);
     }
 
     m_songButtons.push_back(songButton);
-    for(auto diff : beatmap->getDifficulties()) {
+    for(auto diff : mapset->getDifficulties()) {
         hashToSongButton[diff->getMD5Hash()] = songButton;
     }
 
@@ -1706,38 +1674,24 @@ void SongBrowser::addBeatmap(DatabaseBeatmap *beatmap) {
             for(Button *child : songButton->getChildren()) {
                 tempChildrenForGroups.push_back(child);
             }
-        } else
+        } else {
             tempChildrenForGroups.push_back(songButton);
+        }
     }
 
-    // add beatmap to all necessary groups
+    // add mapset to all necessary groups
     {
-        // artist
-        if(m_artistCollectionButtons.size() == 28) {
-            const std::string &artist = beatmap->getArtist();
-            if(artist.length() > 0) {
-                const char firstChar = artist[0];
-
-                const bool isNumber = (firstChar >= '0' && firstChar <= '9');
-                const bool isLowerCase = (firstChar >= 'a' && firstChar <= 'z');
-                const bool isUpperCase = (firstChar >= 'A' && firstChar <= 'Z');
-
-                if(isNumber)
-                    m_artistCollectionButtons[0]->getChildren().push_back(songButton);
-                else if(isLowerCase || isUpperCase) {
-                    const int index = 1 + (25 - (isLowerCase ? 'z' - firstChar : 'Z' - firstChar));
-                    if(index > 0 && index < 27) m_artistCollectionButtons[index]->getChildren().push_back(songButton);
-                } else
-                    m_artistCollectionButtons[27]->getChildren().push_back(songButton);
-            }
-        }
+        addSongButtonToAlphanumericGroup(songButton, m_artistCollectionButtons, mapset->getArtist());
+        addSongButtonToAlphanumericGroup(songButton, m_creatorCollectionButtons, mapset->getCreator());
+        addSongButtonToAlphanumericGroup(songButton, m_titleCollectionButtons, mapset->getTitle());
 
         // difficulty
         if(m_difficultyCollectionButtons.size() == 12) {
-            for(size_t i = 0; i < tempChildrenForGroups.size(); i++) {
-                const int index =
-                    clamp<int>((int)tempChildrenForGroups[i]->getDatabaseBeatmap()->getStarsNomod(), 0, 11);
-                m_difficultyCollectionButtons[index]->getChildren().push_back(tempChildrenForGroups[i]);
+            for(auto diff_btn : tempChildrenForGroups) {
+                const int index = clamp<int>((int)diff_btn->getDatabaseBeatmap()->getStarsNomod(), 0, 11);
+                auto children = &m_difficultyCollectionButtons[index]->getChildren();
+                auto it = std::lower_bound(children->begin(), children->end(), diff_btn, sort_by_difficulty);
+                children->insert(it, diff_btn);
             }
         }
 
@@ -1747,26 +1701,6 @@ void SongBrowser::addBeatmap(DatabaseBeatmap *beatmap) {
             // TODO: have to rip apart children and group separately depending on bpm, ffs
         }
 
-        // creator
-        if(m_creatorCollectionButtons.size() == 28) {
-            const std::string &creator = beatmap->getCreator();
-            if(creator.length() > 0) {
-                const char firstChar = creator[0];
-
-                const bool isNumber = (firstChar >= '0' && firstChar <= '9');
-                const bool isLowerCase = (firstChar >= 'a' && firstChar <= 'z');
-                const bool isUpperCase = (firstChar >= 'A' && firstChar <= 'Z');
-
-                if(isNumber)
-                    m_creatorCollectionButtons[0]->getChildren().push_back(songButton);
-                else if(isLowerCase || isUpperCase) {
-                    const int index = 1 + (25 - (isLowerCase ? 'z' - firstChar : 'Z' - firstChar));
-                    if(index > 0 && index < 27) m_creatorCollectionButtons[index]->getChildren().push_back(songButton);
-                } else
-                    m_creatorCollectionButtons[27]->getChildren().push_back(songButton);
-            }
-        }
-
         // dateadded
         {
             // TODO: extremely annoying
@@ -1774,45 +1708,57 @@ void SongBrowser::addBeatmap(DatabaseBeatmap *beatmap) {
 
         // length
         if(m_lengthCollectionButtons.size() == 7) {
-            for(size_t i = 0; i < tempChildrenForGroups.size(); i++) {
-                const unsigned long lengthMS = tempChildrenForGroups[i]->getDatabaseBeatmap()->getLengthMS();
-                if(lengthMS <= 1000 * 60)
-                    m_lengthCollectionButtons[0]->getChildren().push_back(tempChildrenForGroups[i]);
-                else if(lengthMS <= 1000 * 60 * 2)
-                    m_lengthCollectionButtons[1]->getChildren().push_back(tempChildrenForGroups[i]);
-                else if(lengthMS <= 1000 * 60 * 3)
-                    m_lengthCollectionButtons[2]->getChildren().push_back(tempChildrenForGroups[i]);
-                else if(lengthMS <= 1000 * 60 * 4)
-                    m_lengthCollectionButtons[3]->getChildren().push_back(tempChildrenForGroups[i]);
-                else if(lengthMS <= 1000 * 60 * 5)
-                    m_lengthCollectionButtons[4]->getChildren().push_back(tempChildrenForGroups[i]);
-                else if(lengthMS <= 1000 * 60 * 10)
-                    m_lengthCollectionButtons[5]->getChildren().push_back(tempChildrenForGroups[i]);
-                else
-                    m_lengthCollectionButtons[6]->getChildren().push_back(tempChildrenForGroups[i]);
-            }
-        }
+            for(auto diff_btn : tempChildrenForGroups) {
+                const u32 lengthMS = diff_btn->getDatabaseBeatmap()->getLengthMS();
 
-        // title
-        if(m_titleCollectionButtons.size() == 28) {
-            const std::string &creator = beatmap->getTitle();
-            if(creator.length() > 0) {
-                const char firstChar = creator[0];
+                std::vector<Button *> *children = NULL;
+                if(lengthMS <= 1000 * 60) {
+                    children = &m_lengthCollectionButtons[0]->getChildren();
+                } else if(lengthMS <= 1000 * 60 * 2) {
+                    children = &m_lengthCollectionButtons[1]->getChildren();
+                } else if(lengthMS <= 1000 * 60 * 3) {
+                    children = &m_lengthCollectionButtons[2]->getChildren();
+                } else if(lengthMS <= 1000 * 60 * 4) {
+                    children = &m_lengthCollectionButtons[3]->getChildren();
+                } else if(lengthMS <= 1000 * 60 * 5) {
+                    children = &m_lengthCollectionButtons[4]->getChildren();
+                } else if(lengthMS <= 1000 * 60 * 10) {
+                    children = &m_lengthCollectionButtons[5]->getChildren();
+                } else {
+                    children = &m_lengthCollectionButtons[6]->getChildren();
+                }
 
-                const bool isNumber = (firstChar >= '0' && firstChar <= '9');
-                const bool isLowerCase = (firstChar >= 'a' && firstChar <= 'z');
-                const bool isUpperCase = (firstChar >= 'A' && firstChar <= 'Z');
-
-                if(isNumber)
-                    m_titleCollectionButtons[0]->getChildren().push_back(songButton);
-                else if(isLowerCase || isUpperCase) {
-                    const int index = 1 + (25 - (isLowerCase ? 'z' - firstChar : 'Z' - firstChar));
-                    if(index > 0 && index < 27) m_titleCollectionButtons[index]->getChildren().push_back(songButton);
-                } else
-                    m_titleCollectionButtons[27]->getChildren().push_back(songButton);
+                auto it = std::lower_bound(children->begin(), children->end(), songButton, sort_by_length);
+                children->insert(it, diff_btn);
             }
         }
     }
+}
+
+void SongBrowser::addSongButtonToAlphanumericGroup(SongButton *btn, std::vector<CollectionButton *> &group, const std::string &name) {
+    if(group.size() != 28) {
+        debugLog("Alphanumeric group wasn't initialized!\n");
+        return;
+    }
+
+    const char firstChar = name.length() == 0 ? '#' : name[0];
+    const bool isNumber = (firstChar >= '0' && firstChar <= '9');
+    const bool isLowerCase = (firstChar >= 'a' && firstChar <= 'z');
+    const bool isUpperCase = (firstChar >= 'A' && firstChar <= 'Z');
+
+    std::vector<Button *> *children = NULL;
+    if(isNumber) {
+        children = &group[0]->getChildren();
+    } else if(isLowerCase || isUpperCase) {
+        const int index = 1 + (25 - (isLowerCase ? 'z' - firstChar : 'Z' - firstChar));
+        children = &group[index]->getChildren();
+    } else {
+        children = &group[27]->getChildren();
+    }
+
+    auto it = std::lower_bound(children->begin(), children->end(), btn, m_sortingComparator);
+    if(Osu::debug->getBool()) debugLog("Inserting %s at index %d\n", name.c_str(), it - children->begin());
+    children->insert(it, btn);
 }
 
 void SongBrowser::requestNextScrollToSongButtonJumpFix(SongDifficultyButton *diffButton) {
@@ -1826,7 +1772,11 @@ void SongBrowser::requestNextScrollToSongButtonJumpFix(SongDifficultyButton *dif
 }
 
 void SongBrowser::scrollToSongButton(Button *songButton, bool alignOnTop) {
-    if(songButton == NULL) return;
+    if(songButton == NULL) {
+        debugLog("scrollToSongButton(): songButton == NULL\n");
+        m_songBrowser->scrollToTop();
+        return;
+    }
 
     // NOTE: compensate potential scroll jump due to added/removed elements (feels a lot better this way, also easier on
     // the eyes)
@@ -1847,22 +1797,6 @@ void SongBrowser::scrollToSongButton(Button *songButton, bool alignOnTop) {
 
     m_songBrowser->scrollToY(-songButton->getRelPos().y +
                              (alignOnTop ? (0) : (m_songBrowser->getSize().y / 2 - songButton->getSize().y / 2)));
-}
-
-Button *SongBrowser::findCurrentlySelectedSongButton() const {
-    Button *selectedButton = NULL;
-    const std::vector<CBaseUIElement *> &elements = m_songBrowser->getContainer()->getElements();
-    for(size_t i = 0; i < elements.size(); i++) {
-        Button *button = dynamic_cast<Button *>(elements[i]);
-        if(button != NULL && button->isSelected())  // NOTE: fall through multiple selected buttons (e.g. collections)
-            selectedButton = button;
-    }
-    return selectedButton;
-}
-
-void SongBrowser::scrollToSelectedSongButton() {
-    auto selectedButton = findCurrentlySelectedSongButton();
-    scrollToSongButton(selectedButton);
 }
 
 void SongBrowser::rebuildSongButtons() {
@@ -1922,11 +1856,11 @@ void SongBrowser::rebuildSongButtons() {
 
     // TODO: regroup diffs which are next to each other into one song button (parent button)
     // TODO: regrouping is non-deterministic, depending on the searching method used.
-    // TODO: meaning that any number of "clusters" of diffs belonging to the same beatmap could build, requiring
-    // multiple song "parent" buttons for the same beatmap (if touching group size >= 2)
-    // TODO: when regrouping, these "fake" parent buttons have to be deleted on every reload. this means that the
-    // selection state logic has to be kept cleared of any invalid pointers!
-    // TODO: (including everything else which would rely on having a permanent pointer to an SongButton)
+    //       meaning that any number of "clusters" of diffs belonging to the same beatmap could build, requiring
+    //       multiple song "parent" buttons for the same beatmap (if touching group size >= 2)
+    //       when regrouping, these "fake" parent buttons have to be deleted on every reload. this means that the
+    //       selection state logic has to be kept cleared of any invalid pointers!
+    //       (including everything else which would rely on having a permanent pointer to an SongButton)
 
     updateSongButtonLayout();
 }
@@ -1979,8 +1913,6 @@ void SongBrowser::updateSongButtonLayout() {
     }
     m_songBrowser->setScrollSizeToContent(m_songBrowser->getSize().y / 2);
 }
-
-void SongBrowser::updateSongButtonSorting() { onSortChange(osu_songbrowser_scores_sortingtype.getString()); }
 
 bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
                                 const std::vector<UString> &searchStringTokens) {
@@ -2350,66 +2282,26 @@ void SongBrowser::updateLayout() {
                            osu->getSkin()->getSongSelectTop()->getHeight() * m_fSongSelectTopScale *
                                osu_songbrowser_topbar_right_height_percent.getFloat());
 
-    const int topbarRightTabButtonMargin = 10 * dpiScale;
-    const int topbarRightTabButtonHeight = 30 * dpiScale;
-    const int topbarRightTabButtonWidth = clamp<float>(
-        (float)(m_topbarRight->getSize().x - 2 * topbarRightTabButtonMargin) / (float)m_topbarRightTabButtons.size(),
-        0.0f, 200.0f * dpiScale);
-    for(int i = 0; i < m_topbarRightTabButtons.size(); i++) {
-        m_topbarRightTabButtons[i]->onResized();  // HACKHACK: framework bug (should update string metrics on setSize())
-        m_topbarRightTabButtons[i]->setSize(topbarRightTabButtonWidth, topbarRightTabButtonHeight);
-        m_topbarRightTabButtons[i]->setScrollPos(
-            m_topbarRight->getSize().x -
-                (topbarRightTabButtonMargin + (m_topbarRightTabButtons.size() - i) * topbarRightTabButtonWidth),
-            m_topbarRight->getSize().y - m_topbarRightTabButtons[i]->getSize().y);
-    }
+    float btn_margin = 10.f * dpiScale;
+    m_sortButton->setSize(200.f * dpiScale, 30.f * dpiScale);
+    m_sortButton->setScrollPos(m_topbarRight->getSize().x - (m_sortButton->getSize().x + btn_margin), btn_margin);
 
-    if(m_topbarRightTabButtons.size() > 0) {
-        m_groupLabel->onResized();  // HACKHACK: framework bug (should update string metrics on setSizeToContent())
-        m_groupLabel->setSizeToContent(3 * dpiScale);
-        m_groupLabel->setScrollPos(m_topbarRightTabButtons[0]->getRelPos() +
-                                Vector2(-m_groupLabel->getSize().x, m_topbarRightTabButtons[0]->getSize().y / 2.0f -
-                                                                        m_groupLabel->getSize().y / 2.0f));
-    }
+    m_sortLabel->onResized();  // HACKHACK: framework bug (should update string metrics on setSizeToContent())
+    m_sortLabel->setSizeToContent(3 * dpiScale);
+    m_sortLabel->setScrollPos(
+        m_sortButton->getRelPos().x - (m_sortLabel->getSize().x + btn_margin),
+        (m_sortLabel->getSize().y + btn_margin) / 2.f
+    );
 
-    const int topbarRightSortButtonMargin = 10 * dpiScale;
-    const int topbarRightSortButtonHeight = 30 * dpiScale;
-    const int topbarRightSortButtonWidth = clamp<float>(
-        (float)(m_topbarRight->getSize().x - 2 * topbarRightSortButtonMargin) / (float)m_topbarRightSortButtons.size(),
-        0.0f, 200.0f * dpiScale);
-    for(int i = 0; i < m_topbarRightSortButtons.size(); i++) {
-        m_topbarRightSortButtons[i]->setSize(topbarRightSortButtonWidth, topbarRightSortButtonHeight);
-        m_topbarRightSortButtons[i]->setScrollPos(
-            m_topbarRight->getSize().x -
-                (topbarRightSortButtonMargin + (m_topbarRightTabButtons.size() - i) * topbarRightSortButtonWidth),
-            topbarRightSortButtonMargin);
-    }
-    for(int i = 0; i < m_topbarRightGroupButtons.size(); i++) {
-        m_topbarRightGroupButtons[i]->setSize(topbarRightSortButtonWidth, topbarRightSortButtonHeight);
-        m_topbarRightGroupButtons[i]->setScrollPos(
-            m_topbarRight->getSize().x -
-                (topbarRightSortButtonMargin + (m_topbarRightTabButtons.size() - i) * topbarRightSortButtonWidth),
-            topbarRightSortButtonMargin);
-    }
+    m_groupButton->setSize(m_sortButton->getSize());
+    m_groupButton->setScrollPos(m_sortLabel->getRelPos().x - (m_sortButton->getSize().x + 30.f * dpiScale + btn_margin), btn_margin);
 
-    if(m_topbarRightGroupButtons.size() > 0) {
-        m_groupLabel->onResized();  // HACKHACK: framework bug (should update string metrics on setSizeToContent())
-        m_groupLabel->setSizeToContent(3 * dpiScale);
-        m_groupLabel->setScrollPos(
-            m_topbarRightGroupButtons[m_topbarRightGroupButtons.size() - 1]->getRelPos() +
-            Vector2(-m_groupLabel->getSize().x,
-                    m_topbarRightGroupButtons[m_topbarRightGroupButtons.size() - 1]->getSize().y / 2.0f -
-                        m_groupLabel->getSize().y / 2.0f));
-    }
-    if(m_topbarRightSortButtons.size() > 0) {
-        m_sortLabel->onResized();  // HACKHACK: framework bug (should update string metrics on setSizeToContent())
-        m_sortLabel->setSizeToContent(3 * dpiScale);
-        m_sortLabel->setScrollPos(
-            m_topbarRightSortButtons[m_topbarRightSortButtons.size() - 1]->getRelPos() +
-            Vector2(-m_sortLabel->getSize().x,
-                    m_topbarRightSortButtons[m_topbarRightSortButtons.size() - 1]->getSize().y / 2.0f -
-                        m_sortLabel->getSize().y / 2.0f));
-    }
+    m_groupLabel->onResized();  // HACKHACK: framework bug (should update string metrics on setSizeToContent())
+    m_groupLabel->setSizeToContent(3 * dpiScale);
+    m_groupLabel->setScrollPos(
+        m_groupButton->getRelPos().x - (m_groupLabel->getSize().x + btn_margin),
+        (m_groupLabel->getSize().y + btn_margin) / 2.f
+    );
 
     m_topbarRight->update_pos();
 
@@ -2692,45 +2584,6 @@ UISelectionButton *SongBrowser::addBottombarNavButton(std::function<SkinImage *(
     return btn;
 }
 
-CBaseUIButton *SongBrowser::addTopBarRightTabButton(UString text) {
-    // sanity check
-    {
-        bool isValid = false;
-        for(size_t i = 0; i < m_groupings.size(); i++) {
-            if(m_groupings[i].name == text) {
-                isValid = true;
-                break;
-            }
-        }
-
-        if(!isValid)
-            engine->showMessageError("Error",
-                                     UString::format("Invalid grouping name for tab button \"%s\"!", text.toUtf8()));
-    }
-
-    CBaseUIButton *btn = new CBaseUIButton(0, 0, 0, 0, "", text);
-    btn->setDrawBackground(false);
-    m_topbarRight->addBaseUIElement(btn);
-    m_topbarRightTabButtons.push_back(btn);
-    return btn;
-}
-
-CBaseUIButton *SongBrowser::addTopBarRightGroupButton(UString text) {
-    CBaseUIButton *btn = new CBaseUIButton(0, 0, 0, 0, "", text);
-    btn->setDrawBackground(false);
-    m_topbarRight->addBaseUIElement(btn);
-    m_topbarRightGroupButtons.push_back(btn);
-    return btn;
-}
-
-CBaseUIButton *SongBrowser::addTopBarRightSortButton(UString text) {
-    CBaseUIButton *btn = new CBaseUIButton(0, 0, 0, 0, "", text);
-    btn->setDrawBackground(false);
-    m_topbarRight->addBaseUIElement(btn);
-    m_topbarRightSortButtons.push_back(btn);
-    return btn;
-}
-
 CBaseUIButton *SongBrowser::addTopBarLeftTabButton(UString text) {
     CBaseUIButton *btn = new CBaseUIButton(0, 0, 0, 0, "", text);
     btn->setDrawBackground(false);
@@ -2901,7 +2754,7 @@ void SongBrowser::onDatabaseLoadingFinished() {
 
     // add all beatmaps (build buttons)
     for(size_t i = 0; i < m_beatmaps.size(); i++) {
-        addBeatmap(m_beatmaps[i]);
+        addBeatmapSet(m_beatmaps[i]);
     }
 
     // build collections
@@ -3172,19 +3025,6 @@ void SongBrowser::onGroupChange(UString text, int id) {
     // update group combobox button text
     m_groupButton->setText(grouping->name);
 
-    // highlight current tab (if any tab button exists for group)
-    bool hasTabButton = false;
-    for(size_t i = 0; i < m_topbarRightTabButtons.size(); i++) {
-        if(m_topbarRightTabButtons[i]->getText() == grouping->name) {
-            hasTabButton = true;
-            m_topbarRightTabButtons[i]->setTextBrightColor(highlightColor);
-        } else
-            m_topbarRightTabButtons[i]->setTextBrightColor(defaultColor);
-    }
-
-    // if there is no tab button for this group, then highlight combobox button instead
-    m_groupButton->setTextBrightColor(hasTabButton ? defaultColor : highlightColor);
-
     // and update the actual songbrowser contents
     switch(grouping->type) {
         case GROUP::GROUP_NO_GROUPING:
@@ -3229,43 +3069,27 @@ void SongBrowser::onSortClicked(CBaseUIButton *button) {
     }
     m_contextMenu->end(false, false);
     m_contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onSortChange));
-
-    // NOTE: don't remember group setting on shutdown
-
-    // manual hack for small resolutions
-    if(m_contextMenu->getRelPos().x + m_contextMenu->getSize().x > m_topbarRight->getSize().x) {
-        int newRelPosX = m_topbarRight->getSize().x - m_contextMenu->getSize().x - 1;
-        m_contextMenu->setScrollPosX(newRelPosX);
-        m_contextMenu->setPosX(m_topbarRight->getPos().x + m_topbarRight->getSize().x - m_contextMenu->getSize().x - 1);
-    }
 }
 
 void SongBrowser::onSortChange(UString text, int id) { onSortChangeInt(text, true); }
 
 void SongBrowser::onSortChangeInt(UString text, bool autoScroll) {
-    SORTING_METHOD *sortingMethod = (m_sortingMethods.size() > 3 ? &m_sortingMethods[3] : NULL);
+    SORTING_METHOD *sortingMethod = &m_sortingMethods[3];
     for(size_t i = 0; i < m_sortingMethods.size(); i++) {
         if(m_sortingMethods[i].name == text) {
             sortingMethod = &m_sortingMethods[i];
             break;
         }
     }
-    if(sortingMethod == NULL) return;
 
     m_sortingMethod = sortingMethod->type;
+    m_sortingComparator = sortingMethod->comparator;
     m_sortButton->setText(sortingMethod->name);
 
     osu_songbrowser_sortingtype.setValue(sortingMethod->name);  // NOTE: remember persistently
 
-    struct COMPARATOR_WRAPPER {
-        SORTING_COMPARATOR *comp;
-        bool operator()(Button const *a, Button const *b) const { return comp->operator()(a, b); }
-    };
-    COMPARATOR_WRAPPER comparatorWrapper;
-    comparatorWrapper.comp = sortingMethod->comparator;
-
     // resort primitive master button array (all songbuttons, No Grouping)
-    std::sort(m_songButtons.begin(), m_songButtons.end(), comparatorWrapper);
+    std::sort(m_songButtons.begin(), m_songButtons.end(), m_sortingComparator);
 
     // resort Collection buttons (one button for each collection)
     // these are always sorted alphabetically by name
@@ -3278,44 +3102,44 @@ void SongBrowser::onSortChangeInt(UString text, bool autoScroll) {
     // resort Collection button array (each group of songbuttons inside each Collection)
     for(size_t i = 0; i < m_collectionButtons.size(); i++) {
         std::vector<Button *> &children = m_collectionButtons[i]->getChildren();
-        std::sort(children.begin(), children.end(), comparatorWrapper);
+        std::sort(children.begin(), children.end(), m_sortingComparator);
         m_collectionButtons[i]->setChildren(children);
     }
 
     // etc.
     for(size_t i = 0; i < m_artistCollectionButtons.size(); i++) {
         std::vector<Button *> &children = m_artistCollectionButtons[i]->getChildren();
-        std::sort(children.begin(), children.end(), comparatorWrapper);
+        std::sort(children.begin(), children.end(), m_sortingComparator);
         m_artistCollectionButtons[i]->setChildren(children);
     }
     for(size_t i = 0; i < m_difficultyCollectionButtons.size(); i++) {
         std::vector<Button *> &children = m_difficultyCollectionButtons[i]->getChildren();
-        std::sort(children.begin(), children.end(), comparatorWrapper);
+        std::sort(children.begin(), children.end(), m_sortingComparator);
         m_difficultyCollectionButtons[i]->setChildren(children);
     }
     for(size_t i = 0; i < m_bpmCollectionButtons.size(); i++) {
         std::vector<Button *> &children = m_bpmCollectionButtons[i]->getChildren();
-        std::sort(children.begin(), children.end(), comparatorWrapper);
+        std::sort(children.begin(), children.end(), m_sortingComparator);
         m_bpmCollectionButtons[i]->setChildren(children);
     }
     for(size_t i = 0; i < m_creatorCollectionButtons.size(); i++) {
         std::vector<Button *> &children = m_creatorCollectionButtons[i]->getChildren();
-        std::sort(children.begin(), children.end(), comparatorWrapper);
+        std::sort(children.begin(), children.end(), m_sortingComparator);
         m_creatorCollectionButtons[i]->setChildren(children);
     }
     for(size_t i = 0; i < m_dateaddedCollectionButtons.size(); i++) {
         std::vector<Button *> &children = m_dateaddedCollectionButtons[i]->getChildren();
-        std::sort(children.begin(), children.end(), comparatorWrapper);
+        std::sort(children.begin(), children.end(), m_sortingComparator);
         m_dateaddedCollectionButtons[i]->setChildren(children);
     }
     for(size_t i = 0; i < m_lengthCollectionButtons.size(); i++) {
         std::vector<Button *> &children = m_lengthCollectionButtons[i]->getChildren();
-        std::sort(children.begin(), children.end(), comparatorWrapper);
+        std::sort(children.begin(), children.end(), m_sortingComparator);
         m_lengthCollectionButtons[i]->setChildren(children);
     }
     for(size_t i = 0; i < m_titleCollectionButtons.size(); i++) {
         std::vector<Button *> &children = m_titleCollectionButtons[i]->getChildren();
-        std::sort(children.begin(), children.end(), comparatorWrapper);
+        std::sort(children.begin(), children.end(), m_sortingComparator);
         m_titleCollectionButtons[i]->setChildren(children);
     }
 
@@ -3328,11 +3152,6 @@ void SongBrowser::onSortChangeInt(UString text, bool autoScroll) {
 
     rebuildSongButtons();
     onAfterSortingOrGroupChange(autoScroll);
-}
-
-void SongBrowser::onGroupTabButtonClicked(CBaseUIButton *groupTabButton) {
-    onGroupChange(groupTabButton->getText());
-    engine->getSound()->play(osu->getSkin()->m_clickButton);
 }
 
 void SongBrowser::onGroupNoGrouping() {
@@ -3437,28 +3256,7 @@ void SongBrowser::onAfterSortingOrGroupChange(bool autoScroll) {
     if(m_bInSearch) onSearchUpdate();
 
     // (can't call it right here because we maybe have async)
-    m_bOnAfterSortingOrGroupChangeUpdateScheduledAutoScroll = autoScroll;
-    m_bOnAfterSortingOrGroupChangeUpdateScheduled = true;
-}
-
-void SongBrowser::onAfterSortingOrGroupChangeUpdateInt(bool autoScroll) {
-    // if anything was selected, scroll to that. otherwise scroll to top
-    const std::vector<CBaseUIElement *> &elements = m_songBrowser->getContainer()->getElements();
-    bool isAnythingSelected = false;
-    for(size_t i = 0; i < elements.size(); i++) {
-        const Button *button = dynamic_cast<Button *>(elements[i]);
-        if(button != NULL && button->isSelected()) {
-            isAnythingSelected = true;
-            break;
-        }
-    }
-
-    if(autoScroll) {
-        if(isAnythingSelected)
-            scrollToSelectedSongButton();
-        else
-            m_songBrowser->scrollToTop();
-    }
+    m_scheduled_scroll_to_selected_button = autoScroll;
 }
 
 void SongBrowser::onSelectionMode() {
@@ -3510,15 +3308,14 @@ void SongBrowser::onSelectionRandom() {
 void SongBrowser::onSelectionOptions() {
     engine->getSound()->play(osu->getSkin()->m_clickButton);
 
-    Button *currentlySelectedSongButton = findCurrentlySelectedSongButton();
-    if(currentlySelectedSongButton != NULL) {
-        scrollToSongButton(currentlySelectedSongButton);
+    if(m_selectedButton != NULL) {
+        scrollToSongButton(m_selectedButton);
 
         const Vector2 heuristicSongButtonPositionAfterSmoothScrollFinishes =
             (m_songBrowser->getPos() + m_songBrowser->getSize() / 2);
 
-        SongButton *songButtonPointer = dynamic_cast<SongButton *>(currentlySelectedSongButton);
-        CollectionButton *collectionButtonPointer = dynamic_cast<CollectionButton *>(currentlySelectedSongButton);
+        SongButton *songButtonPointer = dynamic_cast<SongButton *>(m_selectedButton);
+        CollectionButton *collectionButtonPointer = dynamic_cast<CollectionButton *>(m_selectedButton);
         if(songButtonPointer != NULL)
             songButtonPointer->triggerContextMenu(heuristicSongButtonPositionAfterSmoothScrollFinishes);
         else if(collectionButtonPointer != NULL)

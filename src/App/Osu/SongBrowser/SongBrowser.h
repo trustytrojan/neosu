@@ -5,6 +5,8 @@
 class Beatmap;
 class Database;
 class DatabaseBeatmap;
+typedef DatabaseBeatmap BeatmapDifficulty;
+typedef DatabaseBeatmap BeatmapSet;
 class SkinImage;
 
 class UIContextMenu;
@@ -29,49 +31,18 @@ class ConVar;
 
 class SongBrowserBackgroundSearchMatcher;
 
+typedef bool (*SORTING_COMPARATOR)(const Button *a, const Button *b);
+bool sort_by_artist(const Button *a, const Button *b);
+bool sort_by_bpm(const Button *a, const Button *b);
+bool sort_by_creator(const Button *a, const Button *b);
+bool sort_by_date_added(const Button *a, const Button *b);
+bool sort_by_difficulty(const Button *a, const Button *b);
+bool sort_by_length(const Button *a, const Button *b);
+bool sort_by_title(const Button *a, const Button *b);
+
 class SongBrowser : public ScreenBackable {
    public:
     static void drawSelectedBeatmapBackgroundImage(Graphics *g, float alpha = 1.0f);
-
-    struct SORTING_COMPARATOR {
-        virtual ~SORTING_COMPARATOR() { ; }
-        virtual bool operator()(Button const *a, Button const *b) const = 0;
-    };
-
-    struct SortByArtist : public SORTING_COMPARATOR {
-        virtual ~SortByArtist() { ; }
-        virtual bool operator()(Button const *a, Button const *b) const;
-    };
-
-    struct SortByBPM : public SORTING_COMPARATOR {
-        virtual ~SortByBPM() { ; }
-        virtual bool operator()(Button const *a, Button const *b) const;
-    };
-
-    struct SortByCreator : public SORTING_COMPARATOR {
-        virtual ~SortByCreator() { ; }
-        virtual bool operator()(Button const *a, Button const *b) const;
-    };
-
-    struct SortByDateAdded : public SORTING_COMPARATOR {
-        virtual ~SortByDateAdded() { ; }
-        virtual bool operator()(Button const *a, Button const *b) const;
-    };
-
-    struct SortByDifficulty : public SORTING_COMPARATOR {
-        virtual ~SortByDifficulty() { ; }
-        virtual bool operator()(Button const *a, Button const *b) const;
-    };
-
-    struct SortByLength : public SORTING_COMPARATOR {
-        virtual ~SortByLength() { ; }
-        bool operator()(Button const *a, Button const *b) const;
-    };
-
-    struct SortByTitle : public SORTING_COMPARATOR {
-        virtual ~SortByTitle() { ; }
-        bool operator()(Button const *a, Button const *b) const;
-    };
 
     enum class GROUP {
         GROUP_NO_GROUPING,
@@ -121,18 +92,16 @@ class SongBrowser : public ScreenBackable {
     void recalculateStarsForSelectedBeatmap(bool force = false);
 
     void refreshBeatmaps();
-    void addBeatmap(DatabaseBeatmap *beatmap);
+    void addBeatmapSet(BeatmapSet *beatmap);
+    void addSongButtonToAlphanumericGroup(SongButton *btn, std::vector<CollectionButton *> &group, const std::string &name);
 
     void requestNextScrollToSongButtonJumpFix(SongDifficultyButton *diffButton);
     void scrollToSongButton(Button *songButton, bool alignOnTop = false);
-    void scrollToSelectedSongButton();
     void rebuildSongButtons();
     void recreateCollectionsButtons();
     void rebuildScoreButtons();
     void updateSongButtonLayout();
-    void updateSongButtonSorting();
 
-    Button *findCurrentlySelectedSongButton() const;
     inline const std::vector<CollectionButton *> &getCollectionButtons() const { return m_collectionButtons; }
 
     inline bool hasSelectedAndIsPlaying() const { return m_bHasSelectedAndIsPlaying; }
@@ -153,14 +122,14 @@ class SongBrowser : public ScreenBackable {
         SORT_DATEADDED,
         SORT_DIFFICULTY,
         SORT_LENGTH,
+        SORT_TITLE,
         SORT_RANKACHIEVED,
-        SORT_TITLE
     };
 
     struct SORTING_METHOD {
         SORT type;
         UString name;
-        SORTING_COMPARATOR *comparator;
+        SORTING_COMPARATOR comparator;
     };
 
     struct GROUPING {
@@ -183,9 +152,6 @@ class SongBrowser : public ScreenBackable {
 
     UISelectionButton *addBottombarNavButton(std::function<SkinImage *()> getImageFunc,
                                              std::function<SkinImage *()> getImageOverFunc);
-    CBaseUIButton *addTopBarRightTabButton(UString text);
-    CBaseUIButton *addTopBarRightGroupButton(UString text);
-    CBaseUIButton *addTopBarRightSortButton(UString text);
     CBaseUIButton *addTopBarLeftTabButton(UString text);
     CBaseUIButton *addTopBarLeftButton(UString text);
 
@@ -206,7 +172,6 @@ class SongBrowser : public ScreenBackable {
     void onSortChange(UString text, int id = -1);
     void onSortChangeInt(UString text, bool autoScroll);
 
-    void onGroupTabButtonClicked(CBaseUIButton *groupTabButton);
     void onGroupNoGrouping();
     void onGroupCollections(bool autoScroll = true);
     void onGroupArtist();
@@ -218,7 +183,6 @@ class SongBrowser : public ScreenBackable {
     void onGroupTitle();
 
     void onAfterSortingOrGroupChange(bool autoScroll = true);
-    void onAfterSortingOrGroupChangeUpdateInt(bool autoScroll);
 
     void onSelectionMode();
     void onSelectionMods();
@@ -257,6 +221,8 @@ class SongBrowser : public ScreenBackable {
 
     GROUP m_group;
     std::vector<GROUPING> m_groupings;
+
+    SORTING_COMPARATOR m_sortingComparator;
     SORT m_sortingMethod;
     std::vector<SORTING_METHOD> m_sortingMethods;
 
@@ -273,15 +239,8 @@ class SongBrowser : public ScreenBackable {
 
     // top bar right
     CBaseUIContainer *m_topbarRight;
-    std::vector<CBaseUIButton *> m_topbarRightTabButtons;
-    std::vector<CBaseUIButton *> m_topbarRightGroupButtons;
-    std::vector<CBaseUIButton *> m_topbarRightSortButtons;
     CBaseUILabel *m_groupLabel;
     CBaseUIButton *m_groupButton;
-    CBaseUIButton *m_noGroupingButton;
-    CBaseUIButton *m_collectionsButton;
-    CBaseUIButton *m_artistButton;
-    CBaseUIButton *m_difficultiesButton;
     CBaseUILabel *m_sortLabel;
     CBaseUIButton *m_sortButton;
     UIContextMenu *m_contextMenu;
@@ -302,10 +261,12 @@ class SongBrowser : public ScreenBackable {
 
     // song browser
     CBaseUIScrollView *m_songBrowser;
+    Button *m_selectedButton = NULL;
     bool m_bSongBrowserRightClickScrollCheck;
     bool m_bSongBrowserRightClickScrolling;
     bool m_bNextScrollToSongButtonJumpFixScheduled;
     bool m_bNextScrollToSongButtonJumpFixUseScrollSizeDelta;
+    bool m_scheduled_scroll_to_selected_button = false;
     float m_fNextScrollToSongButtonJumpFixOldRelPosY;
     float m_fNextScrollToSongButtonJumpFixOldScrollSizeY;
 
@@ -363,6 +324,4 @@ class SongBrowser : public ScreenBackable {
     bool m_bInSearch;
     GROUP m_searchPrevGroup;
     SongBrowserBackgroundSearchMatcher *m_backgroundSearchMatcher;
-    bool m_bOnAfterSortingOrGroupChangeUpdateScheduled;
-    bool m_bOnAfterSortingOrGroupChangeUpdateScheduledAutoScroll;
 };

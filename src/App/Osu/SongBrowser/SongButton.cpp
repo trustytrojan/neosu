@@ -217,7 +217,7 @@ void SongButton::drawSubTitle(Graphics *g, float deselectedAlpha, bool forceSele
     g->popTransform();
 }
 
-void SongButton::sortChildren() { std::sort(m_children.begin(), m_children.end(), SongBrowser::SortByDifficulty()); }
+void SongButton::sortChildren() { std::sort(m_children.begin(), m_children.end(), sort_by_difficulty); }
 
 void SongButton::updateLayoutEx() {
     Button::updateLayoutEx();

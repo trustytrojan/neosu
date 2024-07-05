@@ -8,6 +8,7 @@
 #include "BanchoNetworking.h"
 #include "Collections.h"
 #include "ConVar.h"
+#include "Database.h"
 #include "DatabaseBeatmap.h"
 #include "Engine.h"
 #include "File.h"
@@ -15,6 +16,7 @@
 #include "Osu.h"
 #include "Replay.h"
 #include "ResourceManager.h"
+#include "SongBrowser/SongBrowser.h"
 #include "Timer.h"
 #include "score.h"
 
@@ -362,12 +364,17 @@ void Database::save() {
     saveStars();
 }
 
-DatabaseBeatmap *Database::addBeatmap(std::string beatmapFolderPath) {
+BeatmapSet *Database::addBeatmapSet(std::string beatmapFolderPath) {
     BeatmapSet *beatmap = loadRawBeatmap(beatmapFolderPath);
-    if(beatmap != NULL) {
-        m_beatmapsets.push_back(beatmap);
-        m_neosu_sets.push_back(beatmap);
-    }
+    if(beatmap == NULL) return NULL;
+
+    m_beatmapsets.push_back(beatmap);
+    m_neosu_sets.push_back(beatmap);
+    osu->m_songBrowser2->addBeatmapSet(beatmap);
+
+    // XXX: Very slow
+    osu->m_songBrowser2->onSortChangeInt(convar->getConVarByName("osu_songbrowser_sortingtype")->getString(), false);
+
     return beatmap;
 }
 
