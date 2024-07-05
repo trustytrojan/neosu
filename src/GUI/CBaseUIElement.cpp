@@ -2,6 +2,8 @@
 
 #include "Engine.h"
 #include "Mouse.h"
+#include "Osu.h"
+#include "TooltipOverlay.h"
 
 void CBaseUIElement::mouse_update(bool *propagate_clicks) {
     // check if mouse is inside element
@@ -18,7 +20,17 @@ void CBaseUIElement::mouse_update(bool *propagate_clicks) {
         }
     }
 
-    if(!m_bVisible || !m_bEnabled) return;
+    if(!m_bVisible) return;
+
+    if(!m_bEnabled) {
+        if(m_bMouseInside && disabled_reason != NULL) {
+            osu->getTooltipOverlay()->begin();
+            osu->getTooltipOverlay()->addLine(disabled_reason);
+            osu->getTooltipOverlay()->end();
+        }
+
+        return;
+    }
 
     if(engine->getMouse()->isLeftDown() && *propagate_clicks) {
         m_bMouseUpCheck = true;

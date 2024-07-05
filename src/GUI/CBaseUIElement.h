@@ -123,12 +123,13 @@ class CBaseUIElement : public KeyboardListener {
         m_bKeepActive = keepActive;
         return this;
     }
-    virtual CBaseUIElement *setEnabled(bool enabled) {
+    virtual CBaseUIElement *setEnabled(bool enabled, const char *reason = NULL) {
         if(enabled != m_bEnabled) {
             m_bEnabled = enabled;
             if(m_bEnabled) {
                 onEnabled();
             } else {
+                disabled_reason = reason;
                 onDisabled();
             }
         }
@@ -183,6 +184,8 @@ class CBaseUIElement : public KeyboardListener {
     Vector2 m_vmPos;
     Vector2 m_vSize;
     Vector2 m_vmSize;
+
+    const char *disabled_reason = NULL;
 
    private:
     bool m_bMouseInsideCheck = false;
