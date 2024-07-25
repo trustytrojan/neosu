@@ -83,7 +83,7 @@ void submit_score(FinishedScore score) {
     {
         part = curl_mime_addpart(request.mime);
         curl_mime_name(part, "bmk");
-        curl_mime_data(part, score.md5hash.hash, CURL_ZERO_TERMINATED);
+        curl_mime_data(part, score.beatmap_hash.hash, CURL_ZERO_TERMINATED);
     }
     {
         auto unique_ids = UString::format("%s|%s", bancho.install_id.toUtf8(), bancho.disk_uuid.toUtf8());

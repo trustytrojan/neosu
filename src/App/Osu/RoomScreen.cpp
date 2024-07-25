@@ -707,8 +707,6 @@ void RoomScreen::on_player_failed(i32 slot_id) {
 
 FinishedScore RoomScreen::get_approximate_score() {
     FinishedScore score;
-    score.isLegacyScore = true;
-    score.version = LiveScore::VERSION;
     score.player_id = bancho.user_id;
     score.playerName = bancho.username.toUtf8();
     score.diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();

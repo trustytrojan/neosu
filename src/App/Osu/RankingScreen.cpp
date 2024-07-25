@@ -201,16 +201,6 @@ RankingScreen::RankingScreen() : ScreenBackable() {
     m_fUnstableRate = 0.0f;
     m_fHitErrorAvgMin = 0.0f;
     m_fHitErrorAvgMax = 0.0f;
-    m_fStarsTomTotal = 0.0f;
-    m_fStarsTomAim = 0.0f;
-    m_fStarsTomSpeed = 0.0f;
-    m_fPPv2 = 0.0f;
-
-    m_fSpeedMultiplier = 0.0f;
-    m_fCS = 0.0f;
-    m_fAR = 0.0f;
-    m_fOD = 0.0f;
-    m_fHP = 0.0f;
 
     m_bModSS = false;
     m_bModSD = false;
@@ -230,8 +220,6 @@ RankingScreen::RankingScreen() : ScreenBackable() {
     m_bModAuto = false;
     m_bModTD = false;
 
-    m_bIsLegacyScore = false;
-    m_bIsImportedLegacyScore = false;
     m_bIsUnranked = false;
 }
 
@@ -355,27 +343,29 @@ void RankingScreen::mouse_update(bool *propagate_clicks) {
     ScreenBackable::mouse_update(propagate_clicks);
 
     // tooltip (pp + accuracy + unstable rate)
-    if(!osu->getOptionsMenu()->isMouseInside() && !m_bIsLegacyScore &&
-       engine->getMouse()->getPos().x < osu->getScreenWidth() * 0.5f) {
+    if(!osu->getOptionsMenu()->isMouseInside() && engine->getMouse()->getPos().x < osu->getScreenWidth() * 0.5f) {
         osu->getTooltipOverlay()->begin();
         {
-            osu->getTooltipOverlay()->addLine(UString::format("%.2fpp", m_fPPv2));
+            osu->getTooltipOverlay()->addLine(UString::format("%.2fpp", m_score.ppv2_score));
             osu->getTooltipOverlay()->addLine("Difficulty:");
-            osu->getTooltipOverlay()->addLine(UString::format("Stars: %.2f (%.2f aim, %.2f speed)", m_fStarsTomTotal,
-                                                              m_fStarsTomAim, m_fStarsTomSpeed));
-            osu->getTooltipOverlay()->addLine(UString::format("Speed: %.3gx", m_fSpeedMultiplier));
+            osu->getTooltipOverlay()->addLine(UString::format("Stars: %.2f (%.2f aim, %.2f speed)",
+                                                              m_score.ppv2_total_stars, m_score.ppv2_aim_stars,
+                                                              m_score.ppv2_speed_stars));
+            osu->getTooltipOverlay()->addLine(UString::format("Speed: %.3gx", m_score.speedMultiplier));
             osu->getTooltipOverlay()->addLine(
-                UString::format("CS:%.4g AR:%.4g OD:%.4g HP:%.4g", m_fCS, m_fAR, m_fOD, m_fHP));
+                UString::format("CS:%.2f AR:%.2f OD:%.2f HP:%.2f", m_score.CS,
+                                GameRules::getRawApproachRateForSpeedMultiplier(
+                                    GameRules::getRawApproachTime(m_score.AR), m_score.speedMultiplier),
+                                GameRules::getRawOverallDifficultyForSpeedMultiplier(
+                                    GameRules::getRawHitWindow300(m_score.OD), m_score.speedMultiplier),
+                                m_score.HP));
 
             if(m_sMods.length() > 0) osu->getTooltipOverlay()->addLine(m_sMods);
 
-            if(!m_bIsImportedLegacyScore) {
-                osu->getTooltipOverlay()->addLine("Accuracy:");
-                osu->getTooltipOverlay()->addLine(
-                    UString::format("Error: %.2fms - %.2fms avg", m_fHitErrorAvgMin, m_fHitErrorAvgMax));
-                osu->getTooltipOverlay()->addLine(UString::format("Unstable Rate: %.2f", m_fUnstableRate));
-            } else
-                osu->getTooltipOverlay()->addLine("This score was imported from osu!");
+            osu->getTooltipOverlay()->addLine("Accuracy:");
+            osu->getTooltipOverlay()->addLine(
+                UString::format("Error: %.2fms - %.2fms avg", m_fHitErrorAvgMin, m_fHitErrorAvgMax));
+            osu->getTooltipOverlay()->addLine(UString::format("Unstable Rate: %.2f", m_fUnstableRate));
         }
         osu->getTooltipOverlay()->end();
     }
@@ -436,8 +426,6 @@ void RankingScreen::setScore(FinishedScore score) {
     m_retry_btn->setVisible(false);
     m_watch_btn->setVisible(false);
 
-    m_bIsLegacyScore = score.isLegacyScore;
-    m_bIsImportedLegacyScore = score.isImportedLegacyScore;
     m_bIsUnranked = false;
 
     char dateString[64];
@@ -456,32 +444,6 @@ void RankingScreen::setScore(FinishedScore score) {
     m_fUnstableRate = score.unstableRate;
     m_fHitErrorAvgMin = score.hitErrorAvgMin;
     m_fHitErrorAvgMax = score.hitErrorAvgMax;
-    m_fStarsTomTotal = score.starsTomTotal;
-    m_fStarsTomAim = score.starsTomAim;
-    m_fStarsTomSpeed = score.starsTomSpeed;
-    m_fSpeedMultiplier = std::round(score.speedMultiplier * 100.0f) / 100.0f;
-
-    if(!score.isLegacyScore) {
-        m_fSpeedMultiplier = 1.f;
-        if(score.modsLegacy & ModFlags::DoubleTime) {
-            m_fSpeedMultiplier = 1.5f;
-        } else if(score.modsLegacy & ModFlags::HalfTime) {
-            m_fSpeedMultiplier = 0.75f;
-        }
-
-        m_fPPv2 = score.pp;
-    }
-
-    m_fCS = std::round(score.CS * 100.0f) / 100.0f;
-    m_fAR = std::round(GameRules::getRawApproachRateForSpeedMultiplier(GameRules::getRawApproachTime(score.AR),
-                                                                       m_fSpeedMultiplier) *
-                       100.0f) /
-            100.0f;
-    m_fOD = std::round(GameRules::getRawOverallDifficultyForSpeedMultiplier(GameRules::getRawHitWindow300(score.OD),
-                                                                            m_fSpeedMultiplier) *
-                       100.0f) /
-            100.0f;
-    m_fHP = std::round(score.HP * 100.0f) / 100.0f;
 
     const UString modsString = ScoreButton::getModsStringForDisplay(score.modsLegacy);
     if(modsString.length() > 0) {
@@ -528,17 +490,19 @@ void RankingScreen::setBeatmapInfo(Beatmap *beatmap, DatabaseBeatmap *diff2) {
     UString local_name = convar->getConVarByName("name")->getString();
     m_songInfo->setPlayer(m_bIsUnranked ? "neosu" : local_name.toUtf8());
 
-    if(m_score.isLegacyScore) {
-        gradual_pp *pp = init_gradual_pp(diff2, m_score.modsLegacy, m_fAR, m_fCS, m_fOD, m_fSpeedMultiplier);
+    if(m_score.is_peppy_imported() && m_score.ppv2_score == 0.f) {
+        m_score.CS = diff2->getCS();
+        m_score.AR = diff2->getAR();
+        m_score.OD = diff2->getOD();
+        m_score.HP = diff2->getHP();
+
+        gradual_pp *pp =
+            init_gradual_pp(diff2, m_score.modsLegacy, m_score.AR, m_score.CS, m_score.OD, m_score.speedMultiplier);
         pp = calculate_gradual_pp(pp, diff2->getNumObjects(), m_score.comboMax, m_score.num300s, m_score.num100s,
-                                  m_score.num50s, m_score.numMisses, &m_fStarsTomTotal, &m_fPPv2);
+                                  m_score.num50s, m_score.numMisses, &m_score.ppv2_total_stars, &m_score.ppv2_score);
         free_gradual_pp(pp);
 
-        // round all here to 2 decimal places
-        m_fCS = std::round(beatmap->getCS() * 100.0f) / 100.0f;
-        m_fAR = std::round(GameRules::getApproachRateForSpeedMultiplier(beatmap) * 100.0f) / 100.0f;
-        m_fOD = std::round(GameRules::getOverallDifficultyForSpeedMultiplier(beatmap) * 100.0f) / 100.0f;
-        m_fHP = std::round(beatmap->getHP() * 100.0f) / 100.0f;
+        // @PPV3: update m_fStarsTomAim, m_fStarsTomSpeed, m_fHitErrorAvgMin, m_fHitErrorAvgMax, m_fUnstableRate
     }
 }
 
@@ -666,7 +630,7 @@ void RankingScreen::setIndex(int index) {
     }
 }
 
-UString RankingScreen::getPPString() { return UString::format("%ipp", (int)(std::round(m_fPPv2))); }
+UString RankingScreen::getPPString() { return UString::format("%ipp", (int)(std::round(m_score.ppv2_score))); }
 
 Vector2 RankingScreen::getPPPosRaw() {
     const UString ppString = getPPString();

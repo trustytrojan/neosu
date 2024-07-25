@@ -191,7 +191,7 @@ Replay::Info Replay::from_bytes(u8* data, int s_data) {
 bool Replay::load_from_disk(FinishedScore* score) {
     if(score->legacyReplayTimestamp > 0) {
         auto osu_folder = convar->getConVarByName("osu_folder")->getString();
-        auto path = UString::format("%s/Data/r/%s-%llu.osr", osu_folder.toUtf8(), score->md5hash.hash,
+        auto path = UString::format("%s/Data/r/%s-%llu.osr", osu_folder.toUtf8(), score->beatmap_hash.hash,
                                     score->legacyReplayTimestamp);
 
         FILE* replay_file = fopen(path.toUtf8(), "rb");
@@ -225,7 +225,7 @@ bool Replay::load_from_disk(FinishedScore* score) {
         delete[] compressed_replay;
     }
 
-    auto& map_scores = (*(osu->getSongBrowser()->getDatabase()->getScores()))[score->md5hash];
+    auto& map_scores = (*(osu->getSongBrowser()->getDatabase()->getScores()))[score->beatmap_hash];
     for(auto& db_score : map_scores) {
         if(db_score.unixTimestamp != score->unixTimestamp) continue;
         if(&db_score != score) {
@@ -255,7 +255,7 @@ void Replay::load_and_watch(FinishedScore score) {
             APIRequest request;
             request.type = GET_REPLAY;
             request.path = UString::format("/web/osu-getreplay.php?u=%s&h=%s&m=0&c=%d", bancho.username.toUtf8(),
-                                           bancho.pw_md5.toUtf8(), score.online_score_id);
+                                           bancho.pw_md5.toUtf8(), score.bancho_score_id);
             request.mime = NULL;
             request.extra = (u8*)score_cpy;
             send_api_request(request);
@@ -271,7 +271,7 @@ void Replay::load_and_watch(FinishedScore score) {
         return;
     }
 
-    auto beatmap = osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(score.md5hash.hash);
+    auto beatmap = osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(score.beatmap_hash);
     if(beatmap == NULL) {
         // XXX: Auto-download beatmap
         osu->m_notificationOverlay->addNotification("Missing beatmap for this replay");

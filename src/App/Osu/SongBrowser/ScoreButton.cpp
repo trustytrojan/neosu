@@ -190,14 +190,14 @@ void ScoreButton::draw(Graphics *g) {
         g->translate(0.75f, 0.75f);
         g->setColor(0xff000000);
         g->setAlpha(0.75f);
-        g->drawString(scoreFont, (m_osu_scores_sort_by_pp_ref->getBool() && !m_score.isLegacyScore
-                                      ? string
-                                      : (m_style == STYLE::TOP_RANKS ? string : m_sScoreScore)));
+        g->drawString(
+            scoreFont,
+            (m_osu_scores_sort_by_pp_ref->getBool() ? string : (m_style == STYLE::TOP_RANKS ? string : m_sScoreScore)));
         g->translate(-0.75f, -0.75f);
         g->setColor((m_style == STYLE::TOP_RANKS ? 0xffdeff87 : 0xffffffff));
-        g->drawString(scoreFont, (m_osu_scores_sort_by_pp_ref->getBool() && !m_score.isLegacyScore
-                                      ? string
-                                      : (m_style == STYLE::TOP_RANKS ? string : m_sScoreScore)));
+        g->drawString(
+            scoreFont,
+            (m_osu_scores_sort_by_pp_ref->getBool() ? string : (m_style == STYLE::TOP_RANKS ? string : m_sScoreScore)));
 
         if(m_style == STYLE::TOP_RANKS) {
             g->translate(scoreFont->getStringWidth(string) * scale, 0);
@@ -516,7 +516,7 @@ void ScoreButton::onRightMouseUpInside() {
         {
             m_contextMenu->addButton("Use Mods", 1);  // for scores without mods this will just nomod
 
-            if(m_score.has_replay) {
+            if(m_score.replay_location != FinishedScore::ReplayLocation::NO_REPLAY) {
                 m_contextMenu->addButton("View replay", 2);
             }
 
@@ -525,7 +525,9 @@ void ScoreButton::onRightMouseUpInside() {
             spacer->setTextColor(0xff888888);
             spacer->setTextDarkColor(0xff000000);
             CBaseUIButton *deleteButton = m_contextMenu->addButton("Delete Score", 3);
-            if(m_score.isLegacyScore) {
+            if(m_score.is_peppy_imported()) {
+                // XXX: gray it out and have hover reason why user can't delete instead
+                //      ...or allow delete and just store it as hidden in db
                 deleteButton->setEnabled(false);
                 deleteButton->setTextColor(0xff888888);
                 deleteButton->setTextDarkColor(0xff000000);
@@ -610,8 +612,8 @@ void ScoreButton::setScore(const FinishedScore &score, const DatabaseBeatmap *di
     const bool modHidden = score.modsLegacy & ModFlags::Hidden;
     const bool modFlashlight = score.modsLegacy & ModFlags::Flashlight;
 
-    const bool fullCombo = (!score.isImportedLegacyScore && !score.isLegacyScore && score.maxPossibleCombo > 0 &&
-                            score.numMisses == 0 && score.numSliderBreaks == 0);  // NOTE: allows dropped sliderends
+    // NOTE: Allows dropped sliderends. Should fix with @PPV3
+    const bool fullCombo = (score.maxPossibleCombo > 0 && score.numMisses == 0 && score.numSliderBreaks == 0);
 
     if(m_avatar) {
         delete m_avatar;
@@ -633,7 +635,7 @@ void ScoreButton::setScore(const FinishedScore &score, const DatabaseBeatmap *di
         score.score, score.comboMax);
     m_sScoreScorePP =
         UString::format((score.perfect ? "PP: %ipp (%ix PFC)" : (fullCombo ? "PP: %ipp (%ix FC)" : "PP: %ipp (%ix)")),
-                        (int)std::round(score.pp), score.comboMax);
+                        (int)std::round(score.ppv2_score), score.comboMax);  // @PPV3
     m_sScoreAccuracy = UString::format("%.2f%%", accuracy);
     m_sScoreAccuracyFC =
         UString::format((score.perfect ? "PFC %.2f%%" : (fullCombo ? "FC %.2f%%" : "%.2f%%")), accuracy);
@@ -648,7 +650,7 @@ void ScoreButton::setScore(const FinishedScore &score, const DatabaseBeatmap *di
         }
     }
     m_sCustom = (score.speedMultiplier != 1.0f ? UString::format("Spd: %gx", score.speedMultiplier) : UString(""));
-    if(diff2 != NULL && !score.isImportedLegacyScore && !score.isLegacyScore) {
+    if(diff2 != NULL) {
         const Replay::BEATMAP_VALUES beatmapValuesForModsLegacy = Replay::getBeatmapValuesForModsLegacy(
             score.modsLegacy, diff2->getAR(), diff2->getCS(), diff2->getOD(), diff2->getHP());
 
@@ -705,12 +707,8 @@ void ScoreButton::setScore(const FinishedScore &score, const DatabaseBeatmap *di
     m_tooltipLines.clear();
     m_tooltipLines.push_back(achievedOn);
 
-    if(m_score.isLegacyScore || m_score.isImportedLegacyScore)
-        m_tooltipLines.push_back(UString::format("300:%i 100:%i 50:%i Miss:%i", score.num300s, score.num100s,
-                                                 score.num50s, score.numMisses));
-    else
-        m_tooltipLines.push_back(UString::format("300:%i 100:%i 50:%i Miss:%i SBreak:%i", score.num300s, score.num100s,
-                                                 score.num50s, score.numMisses, score.numSliderBreaks));
+    m_tooltipLines.push_back(UString::format("300:%i 100:%i 50:%i Miss:%i SBreak:%i", score.num300s, score.num100s,
+                                             score.num50s, score.numMisses, score.numSliderBreaks));
 
     m_tooltipLines.push_back(UString::format("Accuracy: %.2f%%", accuracy));
 
@@ -735,28 +733,23 @@ void ScoreButton::setScore(const FinishedScore &score, const DatabaseBeatmap *di
 
     if(m_style == STYLE::TOP_RANKS) {
         const int weightRounded = std::round(weight * 100.0f);
-        const int ppWeightedRounded = std::round(score.pp * weight);
+        const int ppWeightedRounded = std::round(score.ppv2_score * weight);  // @PPV3
 
         m_sScoreTitle = titleString;
-        m_sScoreScorePPWeightedPP = UString::format("%ipp", (int)std::round(score.pp));
+        m_sScoreScorePPWeightedPP = UString::format("%ipp", (int)std::round(score.ppv2_score));  // @PPV3
         m_sScoreScorePPWeightedWeight = UString::format("     weighted %i%% (%ipp)", weightRounded, ppWeightedRounded);
         m_sScoreWeight = UString::format("weighted %i%%", weightRounded);
 
         // m_tooltipLines.push_back("Difficulty:");
-        m_tooltipLines.push_back(UString::format("Stars: %.2f (%.2f aim, %.2f speed)", score.starsTomTotal,
-                                                 score.starsTomAim, score.starsTomSpeed));
+        m_tooltipLines.push_back(UString::format("Stars: %.2f (%.2f aim, %.2f speed)", score.ppv2_total_stars,
+                                                 score.ppv2_aim_stars, score.ppv2_speed_stars));  // @PPV3
         m_tooltipLines.push_back(UString::format("Speed: %.3gx", score.speedMultiplier));
         m_tooltipLines.push_back(
             UString::format("CS:%.4g AR:%.4g OD:%.4g HP:%.4g", score.CS, score.AR, score.OD, score.HP));
         // m_tooltipLines.push_back("Accuracy:");
-        if(!score.isImportedLegacyScore) {
-            m_tooltipLines.push_back(
-                UString::format("Error: %.2fms - %.2fms avg", score.hitErrorAvgMin, score.hitErrorAvgMax));
-            m_tooltipLines.push_back(UString::format("Unstable Rate: %.2f", score.unstableRate));
-        } else
-            m_tooltipLines.push_back("This score was imported from osu!");
-
-        m_tooltipLines.push_back(UString::format("Version: %i", score.version));
+        m_tooltipLines.push_back(
+            UString::format("Error: %.2fms - %.2fms avg", score.hitErrorAvgMin, score.hitErrorAvgMax));
+        m_tooltipLines.push_back(UString::format("Unstable Rate: %.2f", score.unstableRate));
     }
 
     // custom

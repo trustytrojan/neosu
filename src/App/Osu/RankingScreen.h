@@ -65,17 +65,6 @@ class RankingScreen : public ScreenBackable {
     float m_fHitErrorAvgMin;
     float m_fHitErrorAvgMax;
 
-    f64 m_fStarsTomTotal;
-    float m_fStarsTomAim;
-    float m_fStarsTomSpeed;
-    f64 m_fPPv2;
-
-    float m_fSpeedMultiplier;
-    float m_fCS;
-    float m_fAR;
-    float m_fOD;
-    float m_fHP;
-
     UString m_sMods;
     bool m_bModSS;
     bool m_bModSD;
@@ -99,7 +88,5 @@ class RankingScreen : public ScreenBackable {
 
     // custom
     FinishedScore m_score;
-    bool m_bIsLegacyScore;
-    bool m_bIsImportedLegacyScore;
     bool m_bIsUnranked;
 };

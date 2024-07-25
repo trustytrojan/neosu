@@ -8,6 +8,15 @@ class Beatmap;
 class HitObject;
 
 struct FinishedScore {
+    u64 score = 0;
+    i32 modsLegacy = 0;
+
+    u64 unixTimestamp = 0;
+    u32 player_id = 0;
+    std::string playerName;
+    DatabaseBeatmap *diff2 = NULL;
+    u64 play_time_ms = 0;
+
     enum class Grade {
         XH,
         SH,
@@ -20,27 +29,26 @@ struct FinishedScore {
         F,
         N  // means "no grade"
     };
-
-    bool isLegacyScore;          // used for identifying loaded osu! scores (which don't have any custom data available)
-    bool isImportedLegacyScore;  // used for identifying imported osu! scores (which were previously legacy scores,
-                                 // so they don't have any
-                                 // numSliderBreaks/unstableRate/hitErrorAvgMin/hitErrorAvgMax)
-    u32 version;
-    u64 unixTimestamp = 0;
-
-    u32 player_id = 0;
-    std::string playerName;
-    bool passed = false;
-    bool ragequit = false;
     Grade grade = Grade::N;
-    DatabaseBeatmap *diff2;
-    u64 play_time_ms = 0;
 
-    std::string server;
-    u64 online_score_id = 0;
-    bool has_replay = false;
+    // TODO @kiwec: remove replay_location? we already know if a replay is legacy from bancho_score_id
+    //              also, online scores (eg from leaderboards) don't have legacyReplayTimestamp
+    //              neosu scores have replay in folder
+    enum class ReplayLocation {
+        NO_REPLAY,
+        NEOSU_FOLDER,
+        PEPPY_FOLDER,
+        ONLINE,
+    };
+    ReplayLocation replay_location = ReplayLocation::NO_REPLAY;
     std::vector<Replay::Frame> replay;
     u64 legacyReplayTimestamp = 0;
+
+    std::string server;
+    u64 bancho_score_id = 0;
+
+    // @PPV3: add neosu_score_id
+    // @PPV3: store spinner bonus
 
     int num300s = 0;
     int num100s = 0;
@@ -49,81 +57,40 @@ struct FinishedScore {
     int numKatus = 0;
     int numMisses = 0;
 
-    unsigned long long score = 0;
     int comboMax = 0;
     bool perfect = false;
-    int modsLegacy = 0;
+    bool passed = false;
+    bool ragequit = false;
 
-    // custom
-    int numSliderBreaks;
-    float pp;
-    float unstableRate;
-    float hitErrorAvgMin;
-    float hitErrorAvgMax;
-    float starsTomTotal;
-    float starsTomAim;
-    float starsTomSpeed;
-    float speedMultiplier;
-    float CS, AR, OD, HP;
-    int maxPossibleCombo;
-    int numHitObjects;
-    int numCircles;
+    u32 ppv2_version = 0;
+    float ppv2_score = 0.f;
+    float ppv2_total_stars = 0.f;
+    float ppv2_aim_stars = 0.f;
+    float ppv2_speed_stars = 0.f;
+
+    std::string ppv3_algorithm;
+    float ppv3_score = 0.f;
+    float ppv3_total_stars = 0.f;
+
+    int numSliderBreaks = 0;
+    float unstableRate = 0.f;
+    float hitErrorAvgMin = 0.f;
+    float hitErrorAvgMax = 0.f;
+    float speedMultiplier = -1.f;
+    float CS = -1.f, AR = -1.f, OD = -1.f, HP = -1.f;
+    int maxPossibleCombo = -1;
+    int numHitObjects = -1;
+    int numCircles = -1;
     std::string experimentalModsConVars;
 
-    // runtime
-    unsigned long long sortHack;
-    MD5Hash md5hash;
+    u64 sortHack;
+    MD5Hash beatmap_hash;
 
-    bool isLegacyScoreEqualToImportedLegacyScore(const FinishedScore &importedLegacyScore) const {
-        if(!isLegacyScore) return false;
-        if(!importedLegacyScore.isImportedLegacyScore) return false;
-
-        const bool isScoreValueEqual = (score == importedLegacyScore.score);
-        const bool isTimestampEqual = (unixTimestamp == importedLegacyScore.unixTimestamp);
-        const bool isComboMaxEqual = (comboMax == importedLegacyScore.comboMax);
-        const bool isModsLegacyEqual = (modsLegacy == importedLegacyScore.modsLegacy);
-        const bool isNum300sEqual = (num300s == importedLegacyScore.num300s);
-        const bool isNum100sEqual = (num100s == importedLegacyScore.num100s);
-        const bool isNum50sEqual = (num50s == importedLegacyScore.num50s);
-        const bool isNumGekisEqual = (numGekis == importedLegacyScore.numGekis);
-        const bool isNumKatusEqual = (numKatus == importedLegacyScore.numKatus);
-        const bool isNumMissesEqual = (numMisses == importedLegacyScore.numMisses);
-
-        return (isScoreValueEqual && isTimestampEqual && isComboMaxEqual && isModsLegacyEqual && isNum300sEqual &&
-                isNum100sEqual && isNum50sEqual && isNumGekisEqual && isNumKatusEqual && isNumMissesEqual);
-    }
-
-    bool isScoreEqualToCopiedScoreIgnoringPlayerName(const FinishedScore &copiedScore) const {
-        const bool isScoreValueEqual = (score == copiedScore.score);
-        const bool isTimestampEqual = (unixTimestamp == copiedScore.unixTimestamp);
-        const bool isComboMaxEqual = (comboMax == copiedScore.comboMax);
-        const bool isModsLegacyEqual = (modsLegacy == copiedScore.modsLegacy);
-        const bool isNum300sEqual = (num300s == copiedScore.num300s);
-        const bool isNum100sEqual = (num100s == copiedScore.num100s);
-        const bool isNum50sEqual = (num50s == copiedScore.num50s);
-        const bool isNumGekisEqual = (numGekis == copiedScore.numGekis);
-        const bool isNumKatusEqual = (numKatus == copiedScore.numKatus);
-        const bool isNumMissesEqual = (numMisses == copiedScore.numMisses);
-
-        const bool isSpeedMultiplierEqual = (speedMultiplier == copiedScore.speedMultiplier);
-        const bool isCSEqual = (CS == copiedScore.CS);
-        const bool isAREqual = (AR == copiedScore.AR);
-        const bool isODEqual = (OD == copiedScore.OD);
-        const bool isHPEqual = (HP == copiedScore.HP);
-        const bool areExperimentalModsConVarsEqual = (experimentalModsConVars == copiedScore.experimentalModsConVars);
-
-        return (isScoreValueEqual && isTimestampEqual && isComboMaxEqual && isModsLegacyEqual && isNum300sEqual &&
-                isNum100sEqual && isNum50sEqual && isNumGekisEqual && isNumKatusEqual && isNumMissesEqual
-
-                && isSpeedMultiplierEqual && isCSEqual && isAREqual && isODEqual && isHPEqual &&
-                areExperimentalModsConVarsEqual);
-    }
+    bool is_peppy_imported() { return replay_location == ReplayLocation::PEPPY_FOLDER; }
 };
 
 class LiveScore {
    public:
-    static const u32 VERSION = 20240704;
-
     enum class HIT {
         // score
         HIT_NULL,

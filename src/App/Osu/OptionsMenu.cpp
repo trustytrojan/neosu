@@ -545,9 +545,6 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
         "Load osu! collection.db (read-only)",
         "If you have an existing osu! installation,\nalso load and display your created collections from there.",
         convar->getConVarByName("osu_collections_legacy_enabled"));
-    addCheckbox("Load osu! scores.db (read-only)",
-                "If you have an existing osu! installation,\nalso load and display your achieved scores from there.",
-                convar->getConVarByName("osu_scores_legacy_enabled"));
 
     addSpacer();
     addCheckbox("Include Relax/Autopilot for total weighted pp/acc",
@@ -563,10 +560,6 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     addCheckbox("Always enable touch device pp nerf mod",
                 "Keep touch device pp nerf mod active even when resetting all mods.",
                 convar->getConVarByName("osu_mod_touchdevice"));
-    addCheckbox("Show osu! scores.db user names in user switcher",
-                "Only relevant if \"Load osu! scores.db\" is enabled.\nShould the user switcher show ALL user names "
-                "from ALL scores?\n(Even from ones you got in your database because you watched a replay?)",
-                convar->getConVarByName("osu_user_switcher_include_legacy_scores_for_names"));
 
     addSubSection("Songbrowser");
     addCheckbox("Draw Strain Graph in Songbrowser",

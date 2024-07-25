@@ -18,14 +18,12 @@
 FinishedScore parse_score(char *score_line) {
     FinishedScore score;
     score.server = bancho.endpoint.toUtf8();
-    score.isLegacyScore = true;
-    score.isImportedLegacyScore = true;
     score.speedMultiplier = 1.0;
 
     auto tokens = UString(score_line).split("|");
     if(tokens.size() < 15) return score;
 
-    score.online_score_id = strtoul(tokens[0].toUtf8(), NULL, 10);
+    score.bancho_score_id = strtoul(tokens[0].toUtf8(), NULL, 10);
     score.playerName = tokens[1].toUtf8();
     score.score = strtoul(tokens[2].toUtf8(), NULL, 10);
     score.comboMax = strtoul(tokens[3].toUtf8(), NULL, 10);
@@ -38,8 +36,14 @@ FinishedScore parse_score(char *score_line) {
     score.perfect = strtoul(tokens[10].toUtf8(), NULL, 10) == 1;
     score.modsLegacy = strtoul(tokens[11].toUtf8(), NULL, 10);
     score.player_id = strtoul(tokens[12].toUtf8(), NULL, 10);
-    score.has_replay = strtoul(tokens[13].toUtf8(), NULL, 10);
     score.unixTimestamp = strtoul(tokens[14].toUtf8(), NULL, 10);
+
+    if(strtoul(tokens[13].toUtf8(), NULL, 10)) {
+        score.replay_location = FinishedScore::ReplayLocation::ONLINE;
+    }
+
+    // @PPV3: score can only be ppv2, AND we need to recompute ppv2 on it
+    // might also be missing some important fields here, double check
 
     // Set username for given user id, since we now know both
     auto user = get_user_info(score.player_id);
@@ -152,7 +156,7 @@ void process_leaderboard_response(Packet response) {
     char *score_line = NULL;
     while((score_line = strtok_x('\n', &body))[0] != '\0') {
         FinishedScore score = parse_score(score_line);
-        score.md5hash = beatmap_hash;
+        score.beatmap_hash = beatmap_hash;
         scores.push_back(score);
     }
 

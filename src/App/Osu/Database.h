@@ -16,6 +16,7 @@ typedef DatabaseBeatmap BeatmapSet;
 
 #define STARS_CACHE_VERSION 20240430
 #define NEOSU_MAPS_DB_VERSION 20240703
+#define NEOSU_SCORE_DB_VERSION 20240725
 
 // Field ordering matters here
 #pragma pack(push, 1)
@@ -68,7 +69,7 @@ class Database {
 
     BeatmapSet *addBeatmapSet(std::string beatmapFolderPath);
 
-    int addScore(MD5Hash beatmapMD5Hash, FinishedScore score);
+    int addScore(FinishedScore score);
     void deleteScore(MD5Hash beatmapMD5Hash, u64 scoreUnixTimestamp);
     void sortScores(MD5Hash beatmapMD5Hash);
     void forceScoreUpdateOnNextCalculatePlayerStats() { m_bDidScoresChangeForStats = true; }
@@ -123,8 +124,6 @@ class Database {
     static ConVar *m_name_ref;
     static ConVar *m_osu_songbrowser_scores_sortingtype_ref;
 
-    void addScoreRaw(const MD5Hash &beatmapMD5Hash, const FinishedScore &score);
-
     std::string parseLegacyCfgBeatmapDirectoryParameter();
 
     void saveMaps();
@@ -133,10 +132,10 @@ class Database {
     void saveStars();
 
     void loadScores();
+    u32 importOldNeosuScores();
+    u32 importPeppyScores();
     void saveScores();
-
-    void onScoresRename(UString args);
-    void onScoresExport();
+    bool addScoreRaw(const FinishedScore &score);
 
     Timer *m_importTimer;
     bool m_bIsFirstLoad;   // only load differences after first raw load
@@ -155,7 +154,7 @@ class Database {
     int m_iFolderCount;
 
     // scores.db (legacy and custom)
-    bool m_bScoresLoaded;
+    bool m_bScoresLoaded = false;
     std::unordered_map<MD5Hash, std::vector<FinishedScore>> m_scores;
     bool m_bDidScoresChangeForSave;
     bool m_bDidScoresChangeForStats;

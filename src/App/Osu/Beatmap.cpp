@@ -792,7 +792,6 @@ bool Beatmap::spectate() {
     osu->previous_mods = osu->getModSelector()->getModSelection();
 
     FinishedScore score;
-    score.isLegacyScore = true;
     score.modsLegacy = user_info->mods;
     osu->useMods(&score);
 
@@ -3749,9 +3748,6 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
                      osu->getScore()->isUnranked() || is_watching || is_spectating;
 
     FinishedScore score;
-    score.isLegacyScore = false;
-    score.isImportedLegacyScore = false;
-    score.version = LiveScore::VERSION;
     score.unixTimestamp =
         std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
@@ -3781,13 +3777,9 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
     score.comboMax = osu->getScore()->getComboMax();
     score.perfect = (maxPossibleCombo > 0 && score.comboMax > 0 && score.comboMax >= maxPossibleCombo);
     score.numSliderBreaks = osu->getScore()->getNumSliderBreaks();
-    score.pp = pp;
     score.unstableRate = osu->getScore()->getUnstableRate();
     score.hitErrorAvgMin = osu->getScore()->getHitErrorAvgMin();
     score.hitErrorAvgMax = osu->getScore()->getHitErrorAvgMax();
-    score.starsTomTotal = totalStars;
-    score.starsTomAim = aim;
-    score.starsTomSpeed = speed;
     score.speedMultiplier = osu->getSpeedMultiplier();
     score.CS = CS;
     score.AR = AR;
@@ -3810,9 +3802,14 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
         }
     }
 
-    score.md5hash = m_selectedDifficulty2->getMD5Hash();  // NOTE: necessary for "Use Mods"
-    score.has_replay = true;
+    score.beatmap_hash = m_selectedDifficulty2->getMD5Hash();  // NOTE: necessary for "Use Mods"
     score.replay = live_replay;
+
+    // @PPV3: store ppv3 data if not already done. also double check replay is marked correctly
+    score.ppv2_score = pp;
+    score.ppv2_total_stars = totalStars;
+    score.ppv2_aim_stars = aim;
+    score.ppv2_speed_stars = speed;
 
     if(!isCheated) {
         RichPresence::onPlayEnd(quit);
@@ -3820,11 +3817,11 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
         if(bancho.submit_scores() && !isZero && vanilla) {
             score.server = bancho.endpoint.toUtf8();
             submit_score(score);
-            // XXX: Save online_score_id after getting submission result
+            // XXX: Save bancho_score_id after getting submission result
         }
 
         if(score.passed) {
-            int scoreIndex = osu->getSongBrowser()->getDatabase()->addScore(m_selectedDifficulty2->getMD5Hash(), score);
+            int scoreIndex = osu->getSongBrowser()->getDatabase()->addScore(score);
             if(scoreIndex == -1) {
                 osu->getNotificationOverlay()->addNotification("Failed saving score!", 0xffff0000, false, 3.0f);
             }

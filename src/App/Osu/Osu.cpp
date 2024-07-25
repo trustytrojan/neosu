@@ -180,8 +180,8 @@ Osu::Osu() {
     srand(time(NULL));
 
     bancho.neosu_version = UString::format("%.2f-" NEOSU_STREAM, osu_version.getFloat());
-    bancho.user_agent =
-        UString::format("Mozilla/5.0 (compatible; neosu/%s; +" NEOSU_URL "/)", bancho.neosu_version.toUtf8());
+    bancho.user_agent = UString::format("Mozilla/5.0 (compatible; neosu/%s; +https://" NEOSU_DOMAIN "/)",
+                                        bancho.neosu_version.toUtf8());
 
     // convar refs
     m_osu_folder_ref = convar->getConVarByName("osu_folder");
@@ -1058,12 +1058,12 @@ bool Osu::useMods(FinishedScore *score) {
     }
 
     // NOTE: We don't know whether the original score was only horizontal, only vertical, or both
-    if(score->isLegacyScore && score->modsLegacy & ModFlags::Mirror) {
+    if(score->is_peppy_imported() && score->modsLegacy & ModFlags::Mirror) {
         convar->getConVarByName("osu_playfield_mirror_horizontal")->setValue(true);
         convar->getConVarByName("osu_playfield_mirror_vertical")->setValue(true);
     }
 
-    if(!score->isLegacyScore && !score->isImportedLegacyScore) {
+    if(!score->is_peppy_imported()) {
         // neosu score, custom values for everything possible, have to calculate and check whether to apply any
         // overrides (or leave default)
         // reason being that just because the speedMultiplier stored in the score = 1.5x doesn't mean that we should
@@ -1078,7 +1078,7 @@ bool Osu::useMods(FinishedScore *score) {
         float tempCS = score->CS;
         float tempOD = score->OD;
         float tempHP = score->HP;
-        const DatabaseBeatmap *diff2 = getSongBrowser()->getDatabase()->getBeatmapDifficulty(score->md5hash);
+        const DatabaseBeatmap *diff2 = getSongBrowser()->getDatabase()->getBeatmapDifficulty(score->beatmap_hash);
         if(diff2 != NULL) {
             tempAR = diff2->getAR();
             tempCS = diff2->getCS();
@@ -1331,10 +1331,8 @@ void Osu::onKeyDown(KeyboardEvent &key) {
             if(!key.isConsumed() && key == (KEYCODE)KeyBindings::INSTANT_REPLAY.getInt()) {
                 if(!beatmap->is_watching && !beatmap->is_spectating) {
                     FinishedScore score;
-                    score.isLegacyScore = false;
-                    score.isImportedLegacyScore = false;
                     score.replay = beatmap->live_replay;
-                    score.md5hash = beatmap->getSelectedDifficulty2()->getMD5Hash();
+                    score.beatmap_hash = beatmap->getSelectedDifficulty2()->getMD5Hash();
                     score.modsLegacy = getScore()->getModsLegacy();
                     score.speedMultiplier = getSpeedMultiplier();
                     score.CS = beatmap->getCS();

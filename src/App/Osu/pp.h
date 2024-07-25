@@ -16,10 +16,10 @@ typedef struct {
     u32 num_circles;
     u32 num_spinners;
 
-    f64 *aim_strains;
+    f64* aim_strains;
     size_t aim_strains_len;
     size_t aim_strains_capacity;
-    f64 *speed_strains;
+    f64* speed_strains;
     size_t speed_strains_len;
     size_t speed_strains_capacity;
 
@@ -46,5 +46,5 @@ void free_map(gradual_pp* map);
 // These functions are blocking; you are expected to run them in a separate thread.
 gradual_pp* init_gradual_pp(DatabaseBeatmap* diff, u32 mod_flags, f32 ar, f32 cs, f32 od, f64 speed_multiplier);
 gradual_pp* calculate_gradual_pp(gradual_pp* pp, i32 cur_hitobject, i32 max_combo, i32 num_300, i32 num_100, i32 num_50,
-                                 i32 num_misses, f64* stars_out, f64* pp_out);
+                                 i32 num_misses, f32* stars_out, f32* pp_out);
 void free_gradual_pp(gradual_pp* pp);

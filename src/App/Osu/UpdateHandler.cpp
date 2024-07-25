@@ -92,7 +92,8 @@ void UpdateHandler::_requestUpdate() {
     debugLog("UpdateHandler::requestUpdate()\n");
     m_status = STATUS::STATUS_CHECKING_FOR_UPDATE;
 
-    UString latestVersion = engine->getNetworkHandler()->httpGet(NEOSU_URL "/update/" OS_NAME "/latest-version.txt");
+    UString latestVersion =
+        engine->getNetworkHandler()->httpGet("https://" NEOSU_DOMAIN "/update/" OS_NAME "/latest-version.txt");
     float fLatestVersion = strtof(latestVersion.toUtf8(), NULL);
     if(fLatestVersion == 0.f) {
         m_status = STATUS::STATUS_UP_TO_DATE;
@@ -109,7 +110,7 @@ void UpdateHandler::_requestUpdate() {
     }
 
     debugLog("Downloading latest update... (current v%.2f, latest v%.2f)\n", current_version, fLatestVersion);
-    update_url = UString::format(NEOSU_URL "/update/" OS_NAME "/v%.2f.zip", fLatestVersion);
+    update_url = UString::format("https://" NEOSU_DOMAIN "/update/" OS_NAME "/v%.2f.zip", fLatestVersion);
 }
 
 bool UpdateHandler::_downloadUpdate() {

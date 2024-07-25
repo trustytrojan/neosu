@@ -434,7 +434,6 @@ u32 Sound::getPositionMS() {
     f64 delta = channel_age * speedMultiplier;
     f64 interp_ratio = snd_play_interp_ratio.getFloat();
     if(delta < interpDuration) {
-        auto pre_interp_pos = positionMS;
         delta = (engine->getTime() - m_fLastPlayTime) * speedMultiplier;
         f64 lerpPercent = clamp<f64>(((delta / interpDuration) - interp_ratio) / (1.0 - interp_ratio), 0.0, 1.0);
         positionMS = (u32)lerp<f64>(delta * 1000.0, (f64)positionMS, lerpPercent);
