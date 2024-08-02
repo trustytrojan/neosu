@@ -34,14 +34,19 @@ struct BanchoFileReader {
         if(pos + sizeof(T) > avail) {
             pos = (pos + sizeof(T)) % READ_BUFFER_SIZE;
             avail = 0;
+            total_pos = total_size;
             return *(T*)NULL_ARRAY;
         } else {
             u8* out_ptr = buffer + pos;
             pos = (pos + sizeof(T)) % READ_BUFFER_SIZE;
             avail -= sizeof(T);
+            total_pos += sizeof(T);
             return *(T*)(out_ptr);
         }
     }
+
+    size_t total_size = 0;
+    size_t total_pos = 0;
 
    protected:
     FILE* file = NULL;

@@ -262,11 +262,7 @@ class DatabaseLoader : public Resource {
 
         // load database
         m_db->m_beatmapsets.clear();  // TODO @kiwec: this just leaks memory?
-        std::string osuDbFilePath = osu_folder.getString().toUtf8();
-        osuDbFilePath.append("osu!.db");
-        Packet db = load_db(osuDbFilePath);
-        m_db->loadDB(&db);
-        free(db.memory);
+        m_db->loadDB();
 
         m_bAsyncReady = true;
     }
@@ -780,9 +776,13 @@ std::string Database::getOsuSongsFolder() {
     return out;
 }
 
-void Database::loadDB(Packet *db) {
+void Database::loadDB() {
+    std::string osuDbFilePath = osu_folder.getString().toUtf8();
+    osuDbFilePath.append("osu!.db");
+    BanchoFileReader db(osuDbFilePath.c_str());
+
     auto neosu_maps = load_db("neosu_maps.db");
-    u32 db_size_sum = neosu_maps.size + db->size;
+    u32 db_size_sum = neosu_maps.size + db.total_size;
 
     // get BeatmapDirectory parameter from osu!.<OS_USERNAME>.cfg
     // fallback to /Songs/ if it doesn't exist
@@ -802,15 +802,15 @@ void Database::loadDB(Packet *db) {
     u32 nb_neosu_maps = 0;
     u32 nb_peppy_maps = 0;
 
-    bool should_read_peppy_database = db->size > 0;
+    bool should_read_peppy_database = db.total_size > 0;
     if(should_read_peppy_database) {
         // read header
-        m_iVersion = read<u32>(db);
-        m_iFolderCount = read<u32>(db);
-        read<u8>(db);
-        read<u64>(db) /* timestamp */;
-        auto playerName = read_stdstring(db);
-        m_iNumBeatmapsToLoad = read<u32>(db);
+        m_iVersion = db.read<u32>();
+        m_iFolderCount = db.read<u32>();
+        db.read<u8>();
+        db.read<u64>() /* timestamp */;
+        auto playerName = db.read_string();
+        m_iNumBeatmapsToLoad = db.read<u32>();
 
         debugLog("Database: version = %i, folderCount = %i, playerName = %s, numDiffs = %i\n", m_iVersion,
                  m_iFolderCount, playerName.c_str(), m_iNumBeatmapsToLoad);
@@ -851,7 +851,7 @@ void Database::loadDB(Packet *db) {
             if(Osu::debug->getBool()) debugLog("Database: Reading beatmap %i/%i ...\n", (i + 1), m_iNumBeatmapsToLoad);
 
             // update progress (another thread checks if progress >= 1.f to know when we're done)
-            u32 db_pos_sum = db->pos + neosu_maps.pos;
+            u32 db_pos_sum = db.total_pos + neosu_maps.pos;
             float progress = (float)db_pos_sum / (float)db_size_sum;
             if(progress == 0.f) progress = 0.01f;
             if(progress >= 1.f) progress = 0.99f;
@@ -863,116 +863,116 @@ void Database::loadDB(Packet *db) {
                 // no idea why peppy decided to change the wiki version from 20191107 to 20191106, because that's not
                 // what stable is doing. the correct version is still 20191107
 
-                /*unsigned int size = */ read<u32>(db);  // size in bytes of the beatmap entry
+                /*unsigned int size = */ db.read<u32>();  // size in bytes of the beatmap entry
             }
 
-            std::string artistName = read_stdstring(db);
+            std::string artistName = db.read_string();
             trim(&artistName);
-            std::string artistNameUnicode = read_stdstring(db);
-            std::string songTitle = read_stdstring(db);
+            std::string artistNameUnicode = db.read_string();
+            std::string songTitle = db.read_string();
             trim(&songTitle);
-            std::string songTitleUnicode = read_stdstring(db);
-            std::string creatorName = read_stdstring(db);
+            std::string songTitleUnicode = db.read_string();
+            std::string creatorName = db.read_string();
             trim(&creatorName);
-            std::string difficultyName = read_stdstring(db);
+            std::string difficultyName = db.read_string();
             trim(&difficultyName);
-            std::string audioFileName = read_stdstring(db);
-            auto md5hash = read_hash(db);
-            std::string osuFileName = read_stdstring(db);
-            /*unsigned char rankedStatus = */ read<u8>(db);
-            unsigned short numCircles = read<u16>(db);
-            unsigned short numSliders = read<u16>(db);
-            unsigned short numSpinners = read<u16>(db);
-            long long lastModificationTime = read<u64>(db);
-            float AR = read<f32>(db);
-            float CS = read<f32>(db);
-            float HP = read<f32>(db);
-            float OD = read<f32>(db);
-            double sliderMultiplier = read<f64>(db);
+            std::string audioFileName = db.read_string();
+            auto md5hash = db.read_hash();
+            std::string osuFileName = db.read_string();
+            /*unsigned char rankedStatus = */ db.read<u8>();
+            unsigned short numCircles = db.read<u16>();
+            unsigned short numSliders = db.read<u16>();
+            unsigned short numSpinners = db.read<u16>();
+            long long lastModificationTime = db.read<u64>();
+            float AR = db.read<f32>();
+            float CS = db.read<f32>();
+            float HP = db.read<f32>();
+            float OD = db.read<f32>();
+            double sliderMultiplier = db.read<f64>();
 
-            unsigned int numOsuStandardStarRatings = read<u32>(db);
+            unsigned int numOsuStandardStarRatings = db.read<u32>();
             float numOsuStandardStars = 0.0f;
             for(int s = 0; s < numOsuStandardStarRatings; s++) {
-                read<u8>(db);  // ObjType
-                unsigned int mods = read<u32>(db);
-                read<u8>(db);  // ObjType
-                double starRating = read<f64>(db);
+                db.read<u8>();  // ObjType
+                unsigned int mods = db.read<u32>();
+                db.read<u8>();  // ObjType
+                double starRating = db.read<f64>();
 
                 if(mods == 0) numOsuStandardStars = starRating;
             }
 
-            unsigned int numTaikoStarRatings = read<u32>(db);
+            unsigned int numTaikoStarRatings = db.read<u32>();
             for(int s = 0; s < numTaikoStarRatings; s++) {
-                read<u8>(db);  // ObjType
-                read<u32>(db);
-                read<u8>(db);  // ObjType
-                read<f64>(db);
+                db.read<u8>();  // ObjType
+                db.read<u32>();
+                db.read<u8>();  // ObjType
+                db.read<f64>();
             }
 
-            unsigned int numCtbStarRatings = read<u32>(db);
+            unsigned int numCtbStarRatings = db.read<u32>();
             for(int s = 0; s < numCtbStarRatings; s++) {
-                read<u8>(db);  // ObjType
-                read<u32>(db);
-                read<u8>(db);  // ObjType
-                read<f64>(db);
+                db.read<u8>();  // ObjType
+                db.read<u32>();
+                db.read<u8>();  // ObjType
+                db.read<f64>();
             }
 
-            unsigned int numManiaStarRatings = read<u32>(db);
+            unsigned int numManiaStarRatings = db.read<u32>();
             for(int s = 0; s < numManiaStarRatings; s++) {
-                read<u8>(db);  // ObjType
-                read<u32>(db);
-                read<u8>(db);  // ObjType
-                read<f64>(db);
+                db.read<u8>();  // ObjType
+                db.read<u32>();
+                db.read<u8>();  // ObjType
+                db.read<f64>();
             }
 
-            /*unsigned int drainTime = */ read<u32>(db);  // seconds
-            int duration = read<u32>(db);                 // milliseconds
-            duration = duration >= 0 ? duration : 0;      // sanity clamp
-            int previewTime = read<u32>(db);
+            /*unsigned int drainTime = */ db.read<u32>();  // seconds
+            int duration = db.read<u32>();                 // milliseconds
+            duration = duration >= 0 ? duration : 0;       // sanity clamp
+            int previewTime = db.read<u32>();
 
-            unsigned int numTimingPoints = read<u32>(db);
+            unsigned int numTimingPoints = db.read<u32>();
             zarray<TIMINGPOINT> timingPoints(numTimingPoints);
-            read_bytes(db, (u8 *)timingPoints.data(), sizeof(TIMINGPOINT) * numTimingPoints);
+            db.read_bytes((u8 *)timingPoints.data(), sizeof(TIMINGPOINT) * numTimingPoints);
 
-            int beatmapID = read<i32>(db);  // fucking bullshit, this is NOT an unsigned integer as is described on the
-                                            // wiki, it can and is -1 sometimes
-            int beatmapSetID = read<i32>(db);  // same here
-            /*unsigned int threadID = */ read<u32>(db);
+            int beatmapID = db.read<i32>();  // fucking bullshit, this is NOT an unsigned integer as is described on the
+                                             // wiki, it can and is -1 sometimes
+            int beatmapSetID = db.read<i32>();  // same here
+            /*unsigned int threadID = */ db.read<u32>();
 
-            /*unsigned char osuStandardGrade = */ read<u8>(db);
-            /*unsigned char taikoGrade = */ read<u8>(db);
-            /*unsigned char ctbGrade = */ read<u8>(db);
-            /*unsigned char maniaGrade = */ read<u8>(db);
+            /*unsigned char osuStandardGrade = */ db.read<u8>();
+            /*unsigned char taikoGrade = */ db.read<u8>();
+            /*unsigned char ctbGrade = */ db.read<u8>();
+            /*unsigned char maniaGrade = */ db.read<u8>();
 
-            short localOffset = read<u16>(db);
-            float stackLeniency = read<f32>(db);
-            unsigned char mode = read<u8>(db);
+            short localOffset = db.read<u16>();
+            float stackLeniency = db.read<f32>();
+            unsigned char mode = db.read<u8>();
 
-            auto songSource = read_stdstring(db);
-            auto songTags = read_stdstring(db);
+            auto songSource = db.read_string();
+            auto songTags = db.read_string();
             trim(&songSource);
             trim(&songTags);
 
-            short onlineOffset = read<u16>(db);
-            skip_string(db);  // song title font
-            /*bool unplayed = */ read<u8>(db);
-            /*long long lastTimePlayed = */ read<u64>(db);
-            /*bool isOsz2 = */ read<u8>(db);
+            short onlineOffset = db.read<u16>();
+            db.skip_string();  // song title font
+            /*bool unplayed = */ db.read<u8>();
+            /*long long lastTimePlayed = */ db.read<u64>();
+            /*bool isOsz2 = */ db.read<u8>();
 
             // somehow, some beatmaps may have spaces at the start/end of their
             // path, breaking the Windows API (e.g. https://osu.ppy.sh/s/215347)
-            auto path = read_stdstring(db);
+            auto path = db.read_string();
             trim(&path);
 
-            /*long long lastOnlineCheck = */ read<u64>(db);
+            /*long long lastOnlineCheck = */ db.read<u64>();
 
-            /*bool ignoreBeatmapSounds = */ read<u8>(db);
-            /*bool ignoreBeatmapSkin = */ read<u8>(db);
-            /*bool disableStoryboard = */ read<u8>(db);
-            /*bool disableVideo = */ read<u8>(db);
-            /*bool visualOverride = */ read<u8>(db);
-            /*int lastEditTime = */ read<u32>(db);
-            /*unsigned char maniaScrollSpeed = */ read<u8>(db);
+            /*bool ignoreBeatmapSounds = */ db.read<u8>();
+            /*bool ignoreBeatmapSkin = */ db.read<u8>();
+            /*bool disableStoryboard = */ db.read<u8>();
+            /*bool disableVideo = */ db.read<u8>();
+            /*bool visualOverride = */ db.read<u8>();
+            /*int lastEditTime = */ db.read<u32>();
+            /*unsigned char maniaScrollSpeed = */ db.read<u8>();
 
             // HACKHACK: workaround for linux and macos: it can happen that nested beatmaps are stored in the database,
             // and that osu! stores that filepath with a backslash (because windows)
@@ -1152,7 +1152,7 @@ void Database::loadDB(Packet *db) {
         u32 nb_sets = read<u32>(&neosu_maps);
 
         for(u32 i = 0; i < nb_sets; i++) {
-            u32 db_pos_sum = db->pos + neosu_maps.pos;
+            u32 db_pos_sum = db.total_pos + neosu_maps.pos;
             float progress = (float)db_pos_sum / (float)db_size_sum;
             if(progress == 0.f) progress = 0.01f;
             if(progress >= 1.f) progress = 0.99f;

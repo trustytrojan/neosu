@@ -9,6 +9,10 @@ BanchoFileReader::BanchoFileReader(const char *path) {
         return;
     }
 
+    fseek(file, 0, SEEK_END);
+    total_size = ftell(file);
+    rewind(file);
+
     buffer = (u8 *)malloc(READ_BUFFER_SIZE);
 }
 
@@ -41,12 +45,14 @@ void BanchoFileReader::read_bytes(u8 *out, size_t len) {
     if(pos + len > avail) {
         pos = (pos + len) % READ_BUFFER_SIZE;
         avail = 0;
+        total_pos = total_size;
     } else {
         if(out != NULL) {
             memcpy(out, buffer + pos, len);
         }
         pos = (pos + len) % READ_BUFFER_SIZE;
         avail -= len;
+        total_pos += len;
     }
 }
 

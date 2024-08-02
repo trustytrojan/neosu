@@ -107,7 +107,7 @@ class Database {
 
     BeatmapSet *loadRawBeatmap(std::string beatmapPath);  // only used for raw loading without db
 
-    void loadDB(Packet *db);
+    void loadDB();
 
     // stars.cache
     struct STARS_CACHE_ENTRY {
