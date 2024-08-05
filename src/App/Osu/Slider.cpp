@@ -67,7 +67,6 @@ ConVar *Slider::m_osu_mod_strict_tracking_ref = NULL;
 ConVar *Slider::m_osu_slider_border_size_multiplier_ref = NULL;
 ConVar *Slider::m_epilepsy_ref = NULL;
 ConVar *Slider::m_osu_auto_cursordance_ref = NULL;
-ConVar *Slider::m_osu_drain_type_ref = NULL;
 
 Slider::Slider(char type, int repeat, float pixelLength, std::vector<Vector2> points, std::vector<int> hitSounds,
                std::vector<float> ticks, float sliderTime, float sliderTimeWithoutRepeats, long time, int sampleType,
@@ -86,7 +85,6 @@ Slider::Slider(char type, int repeat, float pixelLength, std::vector<Vector2> po
         m_osu_slider_border_size_multiplier_ref = convar->getConVarByName("osu_slider_border_size_multiplier");
     if(m_epilepsy_ref == NULL) m_epilepsy_ref = convar->getConVarByName("epilepsy");
     if(m_osu_auto_cursordance_ref == NULL) m_osu_auto_cursordance_ref = convar->getConVarByName("osu_auto_cursordance");
-    if(m_osu_drain_type_ref == NULL) m_osu_drain_type_ref = convar->getConVarByName("osu_drain_type");
 
     m_cType = type;
     m_iRepeat = repeat;
@@ -1205,7 +1203,8 @@ void Slider::onHit(LiveScore::HIT result, long delta, bool startOrEnd, float tar
             // special case: osu!lazer 2020 only returns 1 judgement for the whole slider, but via the startcircle. i.e.
             // we are not allowed to drain again here in neosu logic (because startcircle judgement is handled at the
             // end here)
-            const bool isLazer2020Drain = (m_osu_drain_type_ref->getInt() == 3);  // osu!lazer 2020
+            // XXX: remove this
+            const bool isLazer2020Drain = false;
 
             addHitResult(result, delta, m_bIsEndOfCombo, getRawPosAt(m_iTime + m_iObjectDuration), -1.0f, 0.0f, true,
                          !m_bHeldTillEnd,

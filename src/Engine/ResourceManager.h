@@ -1,13 +1,4 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		resource manager
-//
-// $NoKeywords: $rm
-//===============================================================================//
-
-#ifndef RESOURCEMANAGER_H
-#define RESOURCEMANAGER_H
-
+#pragma once
 #include "Font.h"
 #include "Image.h"
 #include "RenderTarget.h"
@@ -89,7 +80,8 @@ class ResourceManager {
                      bool antialiasing = true, int fontDPI = 96);
 
     // sounds
-    Sound *loadSoundAbs(std::string filepath, std::string resourceName, bool stream = false, bool overlayable = false, bool loop = false);
+    Sound *loadSoundAbs(std::string filepath, std::string resourceName, bool stream = false, bool overlayable = false,
+                        bool loop = false);
 
     // shaders
     Shader *loadShader(std::string vertexShaderFilePath, std::string fragmentShaderFilePath, std::string resourceName);
@@ -146,5 +138,3 @@ class ResourceManager {
     std::vector<LOADING_WORK> m_loadingWork;
     std::vector<Resource *> m_loadingWorkAsyncDestroy;
 };
-
-#endif

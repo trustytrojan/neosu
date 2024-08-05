@@ -17,6 +17,7 @@
 
 FinishedScore parse_score(char *score_line) {
     FinishedScore score;
+    score.client = "peppy-unknown";
     score.server = bancho.endpoint.toUtf8();
     score.speedMultiplier = 1.0;
 
@@ -37,10 +38,6 @@ FinishedScore parse_score(char *score_line) {
     score.modsLegacy = strtoul(tokens[11].toUtf8(), NULL, 10);
     score.player_id = strtoul(tokens[12].toUtf8(), NULL, 10);
     score.unixTimestamp = strtoul(tokens[14].toUtf8(), NULL, 10);
-
-    if(strtoul(tokens[13].toUtf8(), NULL, 10)) {
-        score.replay_location = FinishedScore::ReplayLocation::ONLINE;
-    }
 
     // @PPV3: score can only be ppv2, AND we need to recompute ppv2 on it
     // might also be missing some important fields here, double check

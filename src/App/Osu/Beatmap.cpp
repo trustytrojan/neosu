@@ -161,18 +161,11 @@ ConVar osu_mod_suddendeath_restart("osu_mod_suddendeath_restart", false,
                                    "osu! has this set to false (i.e. you fail after missing). if set to true, then "
                                    "behave like SS/PF, instantly restarting the map");
 
-ConVar osu_drain_type(
-    "osu_drain_type", 2, FCVAR_LOCKED,
-    "which hp drain algorithm to use (1 = None, 2 = osu!stable, 3 = osu!lazer 2020, 4 = osu!lazer 2018)");
 ConVar osu_drain_kill("osu_drain_kill", true, FCVAR_DEFAULT, "whether to kill the player upon failing");
 ConVar osu_drain_kill_notification_duration(
     "osu_drain_kill_notification_duration", 1.0f, FCVAR_DEFAULT,
     "how long to display the \"You have failed, but you can keep playing!\" notification (0 = disabled)");
 
-ConVar osu_drain_vr_duration("osu_drain_vr_duration", 0.35f, FCVAR_DEFAULT);
-ConVar osu_drain_stable_passive_fail(
-    "osu_drain_stable_passive_fail", false, FCVAR_DEFAULT,
-    "whether to fail the player instantly if health = 0, or only once a negative judgement occurs");
 ConVar osu_drain_stable_break_before("osu_drain_stable_break_before", false, FCVAR_DEFAULT,
                                      "drain after last hitobject before a break actually starts");
 ConVar osu_drain_stable_break_before_old(
@@ -180,13 +173,6 @@ ConVar osu_drain_stable_break_before_old(
     "for beatmap versions < 8, drain after last hitobject before a break actually starts");
 ConVar osu_drain_stable_break_after("osu_drain_stable_break_after", false, FCVAR_DEFAULT,
                                     "drain after a break before the next hitobject can be clicked");
-ConVar osu_drain_lazer_passive_fail(
-    "osu_drain_lazer_passive_fail", false, FCVAR_DEFAULT,
-    "whether to fail the player instantly if health = 0, or only once a negative judgement occurs");
-ConVar osu_drain_lazer_break_before("osu_drain_lazer_break_before", false, FCVAR_DEFAULT,
-                                    "drain after last hitobject before a break actually starts");
-ConVar osu_drain_lazer_break_after("osu_drain_lazer_break_after", false, FCVAR_DEFAULT,
-                                   "drain after a break before the next hitobject can be clicked");
 ConVar osu_drain_stable_spinner_nerf("osu_drain_stable_spinner_nerf", 0.25f, FCVAR_LOCKED,
                                      "drain gets multiplied with this while a spinner is active");
 ConVar osu_drain_stable_hpbar_recovery("osu_drain_stable_hpbar_recovery", 160.0f, FCVAR_LOCKED,
@@ -242,10 +228,6 @@ ConVar osu_playfield_circular(
     "osu_playfield_circular", false, FCVAR_LOCKED,
     "whether the playfield area should be transformed from a rectangle into a circle/disc/oval");
 
-ConVar osu_drain_lazer_health_min("osu_drain_lazer_health_min", 0.95f, FCVAR_DEFAULT);
-ConVar osu_drain_lazer_health_mid("osu_drain_lazer_health_mid", 0.70f, FCVAR_DEFAULT);
-ConVar osu_drain_lazer_health_max("osu_drain_lazer_health_max", 0.30f, FCVAR_DEFAULT);
-
 ConVar osu_mod_wobble("osu_mod_wobble", false, FCVAR_UNLOCKED);
 ConVar osu_mod_wobble2("osu_mod_wobble2", false, FCVAR_UNLOCKED);
 ConVar osu_mod_wobble_strength("osu_mod_wobble_strength", 25.0f, FCVAR_DEFAULT);
@@ -258,9 +240,6 @@ ConVar osu_mod_shirone_combo("osu_mod_shirone_combo", 20.0f, FCVAR_DEFAULT);
 ConVar osu_mod_mafham_render_chunksize("osu_mod_mafham_render_chunksize", 15, FCVAR_DEFAULT,
                                        "render this many hitobjects per frame chunk into the scene buffer (spreads "
                                        "rendering across many frames to minimize lag)");
-
-ConVar osu_mandala("osu_mandala", false, FCVAR_LOCKED);
-ConVar osu_mandala_num("osu_mandala_num", 7, FCVAR_DEFAULT);
 
 ConVar osu_debug_hiterrorbar_misaims("osu_debug_hiterrorbar_misaims", false, FCVAR_DEFAULT);
 
@@ -276,7 +255,6 @@ Beatmap::Beatmap() {
     m_osu_universal_offset_ref = &osu_universal_offset;
     m_osu_early_note_time_ref = &osu_early_note_time;
     m_osu_fail_time_ref = &osu_fail_time;
-    m_osu_drain_type_ref = &osu_drain_type;
     m_osu_draw_hud_ref = convar->getConVarByName("osu_draw_hud");
     m_osu_draw_scorebarbg_ref = convar->getConVarByName("osu_draw_scorebarbg");
     m_osu_hud_scorebar_hide_during_breaks_ref = convar->getConVarByName("osu_hud_scorebar_hide_during_breaks");
@@ -350,8 +328,6 @@ Beatmap::Beatmap() {
     m_bPrevKeyWasKey1 = false;
     m_iAllowAnyNextKeyForFullAlternateUntilHitObjectIndex = 0;
 
-    m_iRandomSeed = 0;
-
     m_iNPS = 0;
     m_iND = 0;
     m_iCurrentHitObjectIndex = 0;
@@ -403,8 +379,6 @@ Beatmap::Beatmap() {
     m_iMafhamActiveRenderHitObjectIndex = 0;
     m_iMafhamFinishedRenderHitObjectIndex = 0;
     m_bInMafhamRenderChunk = false;
-
-    m_iMandalaIndex = 0;
 }
 
 Beatmap::~Beatmap() {
@@ -704,10 +678,15 @@ void Beatmap::selectDifficulty2(DatabaseBeatmap *difficulty2) {
 
         // Request full pp recomputation
         if(m_selectedDifficulty2 && !m_selectedDifficulty2->do_not_store) {
-            // TODO @kiwec: free pp_info of previous m_calculate_full_pp, if applicable
-            m_selectedDifficulty2->m_calculate_full_pp =
-                std::async(std::launch::async, calculate_full_pp, m_selectedDifficulty2->m_sFilePath.c_str(),
-                           osu->getScore()->getModsLegacy(), getAR(), getCS(), getOD(), osu->getSpeedMultiplier());
+            // TODO @kiwec: doing this sync for debugging
+            pp_info m_pp_info;
+            auto diffres = DatabaseBeatmap::loadDifficultyHitObjects(m_selectedDifficulty2->m_sFilePath, getAR(),
+                                                                     getCS(), osu->getSpeedMultiplier(), false);
+            m_pp_info.total_stars = DifficultyCalculator::calculateStarDiffForHitObjects(
+                diffres.diffobjects, getCS(), getOD(), osu->getSpeedMultiplier(), osu->getModRelax(), osu->getModTD(),
+                &m_pp_info.aim_stars, &m_pp_info.aim_slider_factor, &m_pp_info.speed_stars, &m_pp_info.speed_notes,
+                diffres.diffobjects.size() - 1, &m_aimStrains, &m_speedStrains);
+            // TODO @kiwec: calculate m_pp_info.pp
         }
     }
 }
@@ -792,6 +771,8 @@ bool Beatmap::spectate() {
     osu->previous_mods = osu->getModSelector()->getModSelection();
 
     FinishedScore score;
+    score.client = "peppy-unknown";
+    score.server = bancho.endpoint.toUtf8();
     score.modsLegacy = user_info->mods;
     osu->useMods(&score);
 
@@ -902,7 +883,6 @@ bool Beatmap::start() {
         }
 
         // move temp result data into beatmap
-        m_iRandomSeed = result.randomSeed;
         m_hitobjects = std::move(result.hitobjects);
         m_breaks = std::move(result.breaks);
         osu->getSkin()->setBeatmapComboColors(std::move(result.combocolors));  // update combo colors in skin
@@ -1674,9 +1654,6 @@ void Beatmap::addSliderBreak() {
 void Beatmap::addScorePoints(int points, bool isSpinner) { osu->getScore()->addPoints(points, isSpinner); }
 
 void Beatmap::addHealth(double percent, bool isFromHitResult) {
-    const int drainType = osu_drain_type.getInt();
-    if(drainType < 2) return;
-
     // never drain before first hitobject
     if(m_hitobjects.size() > 0 && m_iCurMusicPosWithOffsets < m_hitobjects[0]->getTime()) return;
 
@@ -1717,19 +1694,7 @@ void Beatmap::addHealth(double percent, bool isFromHitResult) {
             anim->deleteExistingAnimation(&m_fHealth2);
         } else if(isFromHitResult && percent < 0.0)  // judgement fail
         {
-            switch(drainType) {
-                case 2:  // osu!stable
-                    if(!osu_drain_stable_passive_fail.getBool()) fail();
-                    break;
-
-                case 3:  // osu!lazer 2020
-                    if(!osu_drain_lazer_passive_fail.getBool()) fail();
-                    break;
-
-                case 4:  // osu!lazer 2018
-                    fail();
-                    break;
-            }
+            fail();
         }
     }
 }
@@ -2021,13 +1986,6 @@ void Beatmap::draw(Graphics *g) {
 
     // draw all hitobjects in reverse
     if(m_osu_draw_hitobjects_ref->getBool()) drawHitObjects(g);
-
-    if(osu_mandala.getBool()) {
-        for(int i = 0; i < osu_mandala_num.getInt(); i++) {
-            m_iMandalaIndex = i;
-            drawHitObjects(g);
-        }
-    }
 
     // debug stuff
     if(osu_debug_hiterrorbar_misaims.getBool()) {
@@ -2414,40 +2372,7 @@ void Beatmap::update() {
 
     if(convar->getConVarByName("osu_draw_statistics_pp")->getBool() ||
        convar->getConVarByName("osu_draw_statistics_livestars")->getBool()) {
-        if(m_gradual_pp != NULL) {
-            if(m_calculate_gradual_pp.valid()) {
-                if(m_calculate_gradual_pp.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
-                    m_gradual_pp = m_calculate_gradual_pp.get();
-                    m_calculate_gradual_pp = std::future<gradual_pp *>();
-                }
-            }
-
-            if(m_gradual_pp != NULL && !m_calculate_gradual_pp.valid() &&
-               last_calculated_hitobject < m_iCurrentHitObjectIndex) {
-                auto score = osu->getScore();
-                m_calculate_gradual_pp =
-                    std::async(std::launch::async, calculate_gradual_pp, m_gradual_pp, m_iCurrentHitObjectIndex,
-                               score->getComboMax(), score->getNum300s(), score->getNum100s(), score->getNum50s(),
-                               score->getNumMisses(), &osu->getHUD()->live_stars, &osu->getHUD()->live_pp);
-            }
-        } else if(!m_init_gradual_pp.valid()) {
-            if(Osu::debug->getBool()) {
-                debugLog("m_gradual_pp is NULL, calling init_gradual_pp()\n");
-            }
-            m_init_gradual_pp =
-                std::async(std::launch::async, init_gradual_pp, m_selectedDifficulty2, osu->getScore()->getModsLegacy(),
-                           getAR(), getCS(), getOD(), osu->getSpeedMultiplier());
-        } else if(m_init_gradual_pp.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
-            m_gradual_pp = m_init_gradual_pp.get();
-            m_init_gradual_pp = std::future<gradual_pp *>();
-            last_calculated_hitobject = -1;
-
-            auto score = osu->getScore();
-            m_calculate_gradual_pp =
-                std::async(std::launch::async, calculate_gradual_pp, m_gradual_pp, m_iCurrentHitObjectIndex,
-                           score->getComboMax(), score->getNum300s(), score->getNum100s(), score->getNum50s(),
-                           score->getNumMisses(), &osu->getHUD()->live_stars, &osu->getHUD()->live_pp);
-        }
+        // @PPV3: fix this (broke when removing rosu-pp)
     }
 
     if(isLoading()) {
@@ -3199,98 +3124,61 @@ void Beatmap::update2() {
     }
 
     // hp drain & failing
-    if(osu_drain_type.getInt() > 1) {
-        const int drainType = osu_drain_type.getInt();
+    // handle constant drain
+    {
+        if(m_fDrainRate > 0.0) {
+            if(m_bIsPlaying                  // not paused
+               && !m_bInBreak                // not in a break
+               && !m_bIsInSkippableSection)  // not in a skippable section
+            {
+                // special case: break drain edge cases
+                bool drainAfterLastHitobjectBeforeBreakStart = false;
+                bool drainBeforeFirstHitobjectAfterBreakEnd = false;
 
-        // handle constant drain
-        if(drainType == 2 || drainType == 3)  // osu!stable + osu!lazer 2020
-        {
-            if(m_fDrainRate > 0.0) {
-                if(m_bIsPlaying                  // not paused
-                   && !m_bInBreak                // not in a break
-                   && !m_bIsInSkippableSection)  // not in a skippable section
-                {
-                    // special case: break drain edge cases
-                    bool drainAfterLastHitobjectBeforeBreakStart = false;
-                    bool drainBeforeFirstHitobjectAfterBreakEnd = false;
+                drainAfterLastHitobjectBeforeBreakStart =
+                    (m_selectedDifficulty2->getVersion() < 8 ? osu_drain_stable_break_before_old.getBool()
+                                                             : osu_drain_stable_break_before.getBool());
+                drainBeforeFirstHitobjectAfterBreakEnd = osu_drain_stable_break_after.getBool();
 
-                    if(drainType == 2)  // osu!stable
-                    {
-                        drainAfterLastHitobjectBeforeBreakStart =
-                            (m_selectedDifficulty2->getVersion() < 8 ? osu_drain_stable_break_before_old.getBool()
-                                                                     : osu_drain_stable_break_before.getBool());
-                        drainBeforeFirstHitobjectAfterBreakEnd = osu_drain_stable_break_after.getBool();
-                    } else if(drainType == 3)  // osu!lazer 2020
-                    {
-                        drainAfterLastHitobjectBeforeBreakStart = osu_drain_lazer_break_before.getBool();
-                        drainBeforeFirstHitobjectAfterBreakEnd = osu_drain_lazer_break_after.getBool();
-                    }
+                const bool isBetweenHitobjectsAndBreak = (int)m_iPreviousHitObjectTime <= breakEvent.startTime &&
+                                                         (int)m_iNextHitObjectTime >= breakEvent.endTime &&
+                                                         m_iCurMusicPosWithOffsets > m_iPreviousHitObjectTime;
+                const bool isLastHitobjectBeforeBreakStart =
+                    isBetweenHitobjectsAndBreak && (int)m_iCurMusicPosWithOffsets <= breakEvent.startTime;
+                const bool isFirstHitobjectAfterBreakEnd =
+                    isBetweenHitobjectsAndBreak && (int)m_iCurMusicPosWithOffsets >= breakEvent.endTime;
 
-                    const bool isBetweenHitobjectsAndBreak = (int)m_iPreviousHitObjectTime <= breakEvent.startTime &&
-                                                             (int)m_iNextHitObjectTime >= breakEvent.endTime &&
-                                                             m_iCurMusicPosWithOffsets > m_iPreviousHitObjectTime;
-                    const bool isLastHitobjectBeforeBreakStart =
-                        isBetweenHitobjectsAndBreak && (int)m_iCurMusicPosWithOffsets <= breakEvent.startTime;
-                    const bool isFirstHitobjectAfterBreakEnd =
-                        isBetweenHitobjectsAndBreak && (int)m_iCurMusicPosWithOffsets >= breakEvent.endTime;
+                if(!isBetweenHitobjectsAndBreak ||
+                   (drainAfterLastHitobjectBeforeBreakStart && isLastHitobjectBeforeBreakStart) ||
+                   (drainBeforeFirstHitobjectAfterBreakEnd && isFirstHitobjectAfterBreakEnd)) {
+                    // special case: spinner nerf
+                    double spinnerDrainNerf = 1.0;
 
-                    if(!isBetweenHitobjectsAndBreak ||
-                       (drainAfterLastHitobjectBeforeBreakStart && isLastHitobjectBeforeBreakStart) ||
-                       (drainBeforeFirstHitobjectAfterBreakEnd && isFirstHitobjectAfterBreakEnd)) {
-                        // special case: spinner nerf
-                        double spinnerDrainNerf = 1.0;
+                    if(isSpinnerActive()) spinnerDrainNerf = (double)osu_drain_stable_spinner_nerf.getFloat();
 
-                        if(drainType == 2)  // osu!stable
-                        {
-                            if(isSpinnerActive()) spinnerDrainNerf = (double)osu_drain_stable_spinner_nerf.getFloat();
-                        }
-
-                        addHealth(
-                            -m_fDrainRate * engine->getFrameTime() * (double)getSpeedMultiplier() * spinnerDrainNerf,
-                            false);
-                    }
+                    addHealth(-m_fDrainRate * engine->getFrameTime() * (double)getSpeedMultiplier() * spinnerDrainNerf,
+                              false);
                 }
             }
         }
+    }
 
-        // handle generic fail state (1) (see addHealth())
-        {
-            bool hasFailed = false;
+    // revive in mp
+    if(m_fHealth > 0.999 && osu->getScore()->isDead()) osu->getScore()->setDead(false);
 
-            switch(drainType) {
-                case 2:  // osu!stable
-                    hasFailed = (m_fHealth < 0.001) && osu_drain_stable_passive_fail.getBool();
-                    break;
+    // handle fail animation
+    if(m_bFailed) {
+        if(m_fFailAnim <= 0.0f) {
+            if(m_music->isPlaying() || !osu->getPauseMenu()->isVisible()) {
+                engine->getSound()->pause(m_music);
+                m_bIsPaused = true;
 
-                case 3:  // osu!lazer 2020
-                    hasFailed = (m_fHealth < 0.001) && osu_drain_lazer_passive_fail.getBool();
-                    break;
-
-                default:
-                    hasFailed = (m_fHealth < 0.001);
-                    break;
+                osu->getPauseMenu()->setVisible(true);
+                osu->updateConfineCursor();
             }
-
-            if(hasFailed && !osu->getModNF()) fail();
-        }
-
-        // revive in mp
-        if(m_fHealth > 0.999 && osu->getScore()->isDead()) osu->getScore()->setDead(false);
-
-        // handle fail animation
-        if(m_bFailed) {
-            if(m_fFailAnim <= 0.0f) {
-                if(m_music->isPlaying() || !osu->getPauseMenu()->isVisible()) {
-                    engine->getSound()->pause(m_music);
-                    m_bIsPaused = true;
-
-                    osu->getPauseMenu()->setVisible(true);
-                    osu->updateConfineCursor();
-                }
-            } else
-                m_music->setFrequency(
-                    m_fMusicFrequencyBackup * m_fFailAnim > 100 ? m_fMusicFrequencyBackup * m_fFailAnim : 100);
-        }
+        } else
+            m_music->setFrequency(m_fMusicFrequencyBackup * m_fFailAnim > 100 ? m_fMusicFrequencyBackup * m_fFailAnim
+                                                                              : 100);
     }
 }
 
@@ -3414,18 +3302,6 @@ void Beatmap::onModUpdate(bool rebuildSliderVertexBuffers, bool recomputeDrainRa
 void Beatmap::resetLiveStarsTasks() {
     if(Osu::debug->getBool()) debugLog("Beatmap::resetLiveStarsTasks() called\n");
 
-    if(m_init_gradual_pp.valid()) {
-        m_init_gradual_pp.wait();
-        m_init_gradual_pp = std::future<gradual_pp *>();
-    }
-    if(m_calculate_gradual_pp.valid()) {
-        m_calculate_gradual_pp.wait();
-        m_calculate_gradual_pp = std::future<gradual_pp *>();
-    }
-
-    free_gradual_pp(m_gradual_pp);
-    m_gradual_pp = NULL;
-
     osu->getHUD()->live_pp = 0.0;
     osu->getHUD()->live_stars = 0.0;
 }
@@ -3518,22 +3394,6 @@ Vector2 Beatmap::osuCoords2Pixels(Vector2 coords) const {
         Vector3 coords3 = Vector3(coords.x, coords.y, 0);
         Matrix4 rot;
         rot.rotateZ(m_fPlayfieldRotation + osu_playfield_rotation.getFloat());  // (m_iCurMusicPos/1000.0f)*30
-
-        coords3 = coords3 * rot;
-        coords3.x += GameRules::OSU_COORD_WIDTH / 2;
-        coords3.y += GameRules::OSU_COORD_HEIGHT / 2;
-
-        coords.x = coords3.x;
-        coords.y = coords3.y;
-    }
-
-    if(osu_mandala.getBool()) {
-        coords.x -= GameRules::OSU_COORD_WIDTH / 2;
-        coords.y -= GameRules::OSU_COORD_HEIGHT / 2;
-
-        Vector3 coords3 = Vector3(coords.x, coords.y, 0);
-        Matrix4 rot;
-        rot.rotateZ((360.0f / osu_mandala_num.getInt()) * (m_iMandalaIndex + 1));  // (m_iCurMusicPos/1000.0f)*30
 
         coords3 = coords3 * rot;
         coords3.x += GameRules::OSU_COORD_WIDTH / 2;
@@ -3717,7 +3577,8 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
     DatabaseBeatmap::LOAD_DIFFOBJ_RESULT diffres =
         DatabaseBeatmap::loadDifficultyHitObjects(osuFilePath, AR, CS, speedMultiplier);
     const double totalStars = DifficultyCalculator::calculateStarDiffForHitObjects(
-        diffres.diffobjects, CS, OD, speedMultiplier, relax, touchDevice, &aim, &aimSliderFactor, &speed, &speedNotes);
+        diffres.diffobjects, CS, OD, speedMultiplier, relax, touchDevice, &aim, &aimSliderFactor, &speed, &speedNotes,
+        -1, &m_aimStrains, &m_speedStrains);
 
     m_fAimStars = (float)aim;
     m_fSpeedStars = (float)speed;
@@ -3748,12 +3609,19 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
                      osu->getScore()->isUnranked() || is_watching || is_spectating;
 
     FinishedScore score;
+    UString client_ver = "neosu-" OS_NAME "-" NEOSU_STREAM "-";
+    client_ver.append(UString::format("%.2f", convar->getConVarByName("osu_version")->getFloat()));
+    score.client = client_ver.toUtf8();
+
     score.unixTimestamp =
         std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+
+    // @PPV3: check if we're connected to neonet
 
     if(bancho.is_online()) {
         score.player_id = bancho.user_id;
         score.playerName = bancho.username.toUtf8();
+        score.server = bancho.endpoint.toUtf8();
     } else {
         auto local_name = convar->getConVarByName("name")->getString();
         score.playerName = local_name.toUtf8();
@@ -4234,8 +4102,6 @@ void Beatmap::computeDrainRate() {
 
     debugLog("Beatmap: Calculating drain ...\n");
 
-    const int drainType = m_osu_drain_type_ref->getInt();
-    if(drainType == 2)  // osu!stable
     {
         // see https://github.com/ppy/osu-iPhone/blob/master/Classes/OsuPlayer.m
         // see calcHPDropRate() @ https://github.com/ppy/osu-iPhone/blob/master/Classes/OsuFiletype.m#L661
@@ -4441,91 +4307,5 @@ void Beatmap::computeDrainRate() {
             (testDrop / testPlayer.hpBarMaximum) * 1000.0;  // from [0, 200] to [0, 1], and from ms to seconds
         m_fHpMultiplierComboEnd = testPlayer.hpMultiplierComboEnd;
         m_fHpMultiplierNormal = testPlayer.hpMultiplierNormal;
-    } else if(drainType == 3)  // osu!lazer 2020
-    {
-        // build healthIncreases
-        std::vector<std::pair<double, double>> healthIncreases;  // [first = time, second = health]
-        healthIncreases.reserve(m_hitobjects.size());
-        const double healthIncreaseForHit300 = LiveScore::getHealthIncrease(LiveScore::HIT::HIT_300);
-        for(int i = 0; i < m_hitobjects.size(); i++) {
-            // nested hitobjects
-            const Slider *sliderPointer = dynamic_cast<Slider *>(m_hitobjects[i]);
-            if(sliderPointer != NULL) {
-                // startcircle
-                healthIncreases.push_back(
-                    std::pair<double, double>((double)m_hitobjects[i]->getTime(), healthIncreaseForHit300));
-
-                // ticks + repeats + repeat ticks
-                const std::vector<Slider::SLIDERCLICK> &clicks = sliderPointer->getClicks();
-                for(int c = 0; c < clicks.size(); c++) {
-                    healthIncreases.push_back(
-                        std::pair<double, double>((double)clicks[c].time, healthIncreaseForHit300));
-                }
-            }
-
-            // regular hitobject
-            healthIncreases.push_back(std::pair<double, double>(
-                m_hitobjects[i]->getTime() + m_hitobjects[i]->getDuration(), healthIncreaseForHit300));
-        }
-
-        const int numHealthIncreases = healthIncreases.size();
-        const int numBreaks = m_breaks.size();
-        const double drainStartTime = m_hitobjects[0]->getTime();
-
-        // see computeDrainRate() &
-        // https://github.com/ppy/osu/blob/master/osu.Game/Rulesets/Scoring/DrainingHealthProcessor.cs
-
-        const double minimum_health_error = 0.01;
-
-        const double min_health_target = osu_drain_lazer_health_min.getFloat();
-        const double mid_health_target = osu_drain_lazer_health_mid.getFloat();
-        const double max_health_target = osu_drain_lazer_health_max.getFloat();
-
-        const double targetMinimumHealth =
-            GameRules::mapDifficultyRange(getHP(), min_health_target, mid_health_target, max_health_target);
-
-        int adjustment = 1;
-        double result = 1.0;
-
-        // Although we expect the following loop to converge within 30 iterations (health within 1/2^31 accuracy of the
-        // target), we'll still keep a safety measure to avoid infinite loops by detecting overflows.
-        while(adjustment > 0) {
-            double currentHealth = 1.0;
-            double lowestHealth = 1.0;
-            int currentBreak = -1;
-
-            for(int i = 0; i < numHealthIncreases; i++) {
-                double currentTime = healthIncreases[i].first;
-                double lastTime = i > 0 ? healthIncreases[i - 1].first : drainStartTime;
-
-                // Subtract any break time from the duration since the last object
-                if(numBreaks > 0) {
-                    // Advance the last break occuring before the current time
-                    while(currentBreak + 1 < numBreaks && (double)m_breaks[currentBreak + 1].endTime < currentTime) {
-                        currentBreak++;
-                    }
-
-                    if(currentBreak >= 0) lastTime = max(lastTime, (double)m_breaks[currentBreak].endTime);
-                }
-
-                // Apply health adjustments
-                currentHealth -= (healthIncreases[i].first - lastTime) * result;
-                lowestHealth = min(lowestHealth, currentHealth);
-                currentHealth = min(1.0, currentHealth + healthIncreases[i].second);
-
-                // Common scenario for when the drain rate is definitely too harsh
-                if(lowestHealth < 0) break;
-            }
-
-            // Stop if the resulting health is within a reasonable offset from the target
-            if(std::abs(lowestHealth - targetMinimumHealth) <= minimum_health_error) break;
-
-            // This effectively works like a binary search - each iteration the search space moves closer to the target,
-            // but may exceed it.
-            adjustment *= 2;
-            result += 1.0 / adjustment * sign<double>(lowestHealth - targetMinimumHealth);
-        }
-
-        m_fDrainRate = result * 1000.0;  // from ms to seconds
     }
 }

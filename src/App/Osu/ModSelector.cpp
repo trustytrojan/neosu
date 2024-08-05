@@ -146,7 +146,6 @@ ModSelector::ModSelector() : OsuScreen() {
     m_bShowOverrideSliderALTHint = true;
 
     // convar refs
-    m_osu_drain_type_ref = convar->getConVarByName("osu_drain_type");
     m_osu_mod_touchdevice_ref = convar->getConVarByName("osu_mod_touchdevice");
 
     // build mod grid buttons
@@ -232,10 +231,6 @@ ModSelector::ModSelector() : OsuScreen() {
                             convar->getConVarByName("osu_mod_jigsaw1"));
     addExperimentalCheckbox("Jigsaw 2", "Massively reduced slider follow circle radius.",
                             convar->getConVarByName("osu_mod_jigsaw2"));
-    m_experimentalModRandomCheckbox = addExperimentalCheckbox(
-        "Random",
-        "Randomizes hitobject positions. (VERY experimental!)\nUse osu_mod_random_seed to set a fixed rng seed.",
-        convar->getConVarByName("osu_mod_random"));
     addExperimentalCheckbox("Reverse Sliders", "Reverses the direction of all sliders. (Reload beatmap to apply!)",
                             convar->getConVarByName("osu_mod_reverse_sliders"));
     addExperimentalCheckbox("No 50s", "Only 300s or 100s. Try harder.", convar->getConVarByName("osu_mod_no50s"));
@@ -296,7 +291,6 @@ void ModSelector::updateButtons(bool initial) {
                            "You can't fail. No matter what.\nNOTE: To disable drain completely:\nOptions > Gameplay > "
                            "Mechanics > \"Select HP Drain\" > \"None\".",
                            []() -> SkinImage * { return osu->getSkin()->getSelectionModNoFail(); });
-    m_modButtonNofail->setAvailable(m_osu_drain_type_ref->getInt() > 1);
     setModButtonOnGrid(4, 0, 0, initial && osu->getModNightmare(), "nightmare",
                        "Unnecessary clicks count as misses.\nMassively reduced slider follow circle radius.",
                        []() -> SkinImage * { return osu->getSkin()->getSelectionModNightmare(); });
@@ -612,11 +606,6 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
                 }
             }
         }
-
-        // some experimental mod tooltip overrides
-        if(m_experimentalModRandomCheckbox->isChecked())
-            m_experimentalModRandomCheckbox->setTooltipText(
-                UString::format("Seed = %i", osu->getSelectedBeatmap()->getRandomSeed()));
 
         // handle experimental mods visibility
         bool experimentalModEnabled = false;

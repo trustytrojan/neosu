@@ -159,7 +159,6 @@ class ModSelector : public OsuScreen {
 
     // experimental mods
     std::vector<EXPERIMENTAL_MOD> m_experimentalMods;
-    UICheckbox *m_experimentalModRandomCheckbox;
 
     // score multiplier info label
     CBaseUILabel *m_scoreMultiplierLabel;
@@ -170,6 +169,5 @@ class ModSelector : public OsuScreen {
     UIButton *m_closeButton;
 
     // convar refs
-    ConVar *m_osu_drain_type_ref;
     ConVar *m_osu_mod_touchdevice_ref;
 };

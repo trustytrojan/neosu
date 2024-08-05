@@ -104,7 +104,6 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     void updateFposuCMper360();
     void updateSkinNameLabel();
     void updateNotelockSelectLabel();
-    void updateHPDrainSelectLabel();
 
     // options
     void onFullscreenChange(CBaseUICheckbox *checkbox);
@@ -129,10 +128,6 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     void onNotelockSelect2(UString notelockType, int id = -1);
     void onNotelockSelectResetClicked();
     void onNotelockSelectResetUpdate();
-    void onHPDrainSelect();
-    void onHPDrainSelect2(UString hpDrainType, int id = -1);
-    void onHPDrainSelectResetClicked();
-    void onHPDrainSelectResetUpdate();
 
     void onCheckboxChange(CBaseUICheckbox *checkbox);
     void onSliderChange(CBaseUISlider *slider);
@@ -274,7 +269,6 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     ConVar *m_win_snd_wasapi_buffer_size_ref;
     ConVar *m_win_snd_wasapi_period_size_ref;
     ConVar *m_osu_notelock_type_ref;
-    ConVar *m_osu_drain_type_ref;
     ConVar *m_osu_background_color_r_ref;
     ConVar *m_osu_background_color_g_ref;
     ConVar *m_osu_background_color_b_ref;
@@ -298,9 +292,6 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
 
     // notelock
     std::vector<UString> m_notelockTypes;
-
-    // drain
-    std::vector<UString> m_drainTypes;
 
     bool m_updating_layout = false;
 };

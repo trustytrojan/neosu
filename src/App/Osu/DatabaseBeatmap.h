@@ -71,13 +71,7 @@ class DatabaseBeatmap {
         std::vector<BREAK> breaks;
         std::vector<Color> combocolors;
 
-        int randomSeed;
-
-        LOAD_GAMEPLAY_RESULT() {
-            errorCode = 0;
-
-            randomSeed = 0;
-        }
+        LOAD_GAMEPLAY_RESULT() { errorCode = 0; }
     };
 
     struct TIMING_INFO {
@@ -193,7 +187,6 @@ class DatabaseBeatmap {
     bool do_not_store = false;
 
     // song select mod-adjusted pp/stars
-    std::future<pp_info> m_calculate_full_pp;
     pp_info m_pp_info;
 
    private:
@@ -254,7 +247,7 @@ class DatabaseBeatmap {
 
     struct HITCIRCLE {
         int x, y;
-        unsigned long time;
+        u32 time;
         int sampleType;
         int number;
         int colorCounter;
@@ -267,7 +260,7 @@ class DatabaseBeatmap {
         char type;
         int repeat;
         float pixelLength;
-        long time;
+        u32 time;
         int sampleType;
         int number;
         int colorCounter;
@@ -284,9 +277,9 @@ class DatabaseBeatmap {
 
     struct SPINNER {
         int x, y;
-        unsigned long time;
+        u32 time;
         int sampleType;
-        unsigned long endTime;
+        u32 endTime;
     };
 
     struct PRIMITIVE_CONTAINER {
@@ -320,7 +313,6 @@ class DatabaseBeatmap {
     static unsigned long long sortHackCounter;
 
     static ConVar *m_osu_slider_curve_max_length_ref;
-    static ConVar *m_osu_stars_xexxar_angles_sliders_ref;
     static ConVar *m_osu_stars_stacking_ref;
     static ConVar *m_osu_debug_pp_ref;
     static ConVar *m_osu_slider_end_inside_check_offset_ref;

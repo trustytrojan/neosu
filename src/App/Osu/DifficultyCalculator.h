@@ -9,7 +9,7 @@ class ConVar;
 
 class OsuDifficultyHitObject {
    public:
-    enum class TYPE : char {
+    enum class TYPE : u8 {
         INVALID = 0,
         CIRCLE,
         SPINNER,
@@ -24,9 +24,9 @@ class OsuDifficultyHitObject {
         };
 
         TYPE type;
-        long time;
+        u32 time;
 
-        unsigned long long sortHack;
+        u64 sortHack;
     };
 
     struct SliderScoringTimeComparator {
@@ -40,11 +40,11 @@ class OsuDifficultyHitObject {
     };
 
    public:
-    OsuDifficultyHitObject(TYPE type, Vector2 pos, long time);                // circle
-    OsuDifficultyHitObject(TYPE type, Vector2 pos, long time, long endTime);  // spinner
-    OsuDifficultyHitObject(TYPE type, Vector2 pos, long time, long endTime, float spanDuration, char osuSliderCurveType,
-                           std::vector<Vector2> controlPoints, float pixelLength,
-                           std::vector<SLIDER_SCORING_TIME> scoringTimes, int repeats,
+    OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time);               // circle
+    OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time, i32 endTime);  // spinner
+    OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time, i32 endTime, f32 spanDuration, u8 osuSliderCurveType,
+                           std::vector<Vector2> controlPoints, f32 pixelLength,
+                           std::vector<SLIDER_SCORING_TIME> scoringTimes, i32 repeats,
                            bool calculateSliderCurveInConstructor);  // slider
     ~OsuDifficultyHitObject();
 
@@ -53,104 +53,72 @@ class OsuDifficultyHitObject {
 
     OsuDifficultyHitObject &operator=(OsuDifficultyHitObject &&dobj);
 
-    void updateStackPosition(float stackOffset);
-    void updateCurveStackPosition(float stackOffset);
+    void updateStackPosition(f32 stackOffset);
+    void updateCurveStackPosition(f32 stackOffset);
 
-    Vector2 getOriginalRawPosAt(
-        long pos);  // for stacking calculations, always returns the unstacked original position at that point in time
-    float getT(long pos, bool raw);
+    // for stacking calculations, always returns the unstacked original position at that point in time
+    Vector2 getOriginalRawPosAt(i32 pos);
 
-    inline long getDuration() const { return endTime - time; }
+    f32 getT(i32 pos, bool raw);
+
+    inline i32 getDuration() const { return endTime - time; }
 
     // circles (base)
     TYPE type;
     Vector2 pos;
-    long time;
+    i32 time;
 
     // spinners + sliders
-    long endTime;
+    i32 endTime;
 
     // sliders
-    float spanDuration;  // i.e. sliderTimeWithoutRepeats
-    char osuSliderCurveType;
-    float pixelLength;
+    f32 spanDuration;  // i.e. sliderTimeWithoutRepeats
+    u8 osuSliderCurveType;
+    f32 pixelLength;
     std::vector<SLIDER_SCORING_TIME> scoringTimes;
-    int repeats;
+    i32 repeats;
 
     // custom
     SliderCurve *curve;
     bool scheduledCurveAlloc;
     std::vector<Vector2> scheduledCurveAllocControlPoints;
-    float scheduledCurveAllocStackOffset;
+    f32 scheduledCurveAllocStackOffset;
 
-    int stack;
+    i32 stack;
     Vector2 originalPos;
 
-    unsigned long long sortHack;
+    u64 sortHack;
 
    private:
-    static unsigned long long sortHackCounter;
+    static u64 sortHackCounter;
 };
 
 class DifficultyCalculator {
    public:
-    static constexpr const int PP_ALGORITHM_VERSION = 20220902;
+    static constexpr const i32 PP_ALGORITHM_VERSION = 20220902;
 
    public:
     // stars, fully static
-    static double calculateStarDiffForHitObjects(std::vector<OsuDifficultyHitObject> &sortedHitObjects, float CS,
-                                                 float OD, float speedMultiplier, bool relax, bool touchDevice,
-                                                 double *aim, double *aimSliderFactor, double *speed,
-                                                 double *speedNotes, int upToObjectIndex = -1);
-    static double calculateStarDiffForHitObjects(std::vector<OsuDifficultyHitObject> &sortedHitObjects, float CS,
-                                                 float OD, float speedMultiplier, bool relax, bool touchDevice,
-                                                 double *aim, double *aimSliderFactor, double *speed,
-                                                 double *speedNotes, int upToObjectIndex,
-                                                 const std::atomic<bool> &dead);
+    static f64 calculateStarDiffForHitObjects(std::vector<OsuDifficultyHitObject> &sortedHitObjects, f32 CS, f32 OD,
+                                              f32 speedMultiplier, bool relax, bool touchDevice, f64 *aim,
+                                              f64 *aimSliderFactor, f64 *speed, f64 *speedNotes, i32 upToObjectIndex,
+                                              std::vector<f64> *outAimStrains, std::vector<f64> *outSpeedStrains);
+    static f64 calculateStarDiffForHitObjects(std::vector<OsuDifficultyHitObject> &sortedHitObjects, f32 CS, f32 OD,
+                                              f32 speedMultiplier, bool relax, bool touchDevice, f64 *aim,
+                                              f64 *aimSliderFactor, f64 *speed, f64 *speedNotes, i32 upToObjectIndex,
+                                              std::vector<f64> *outAimStrains, std::vector<f64> *outSpeedStrains,
+                                              const std::atomic<bool> &dead);
 
     // pp, use runtime mods (convenience)
-    static double calculatePPv2(Beatmap *beatmap, double aim, double aimSliderFactor, double speed, double speedNotes,
-                                int numHitObjects, int numCircles, int numSliders, int numSpinners,
-                                int maxPossibleCombo, int combo = -1, int misses = 0, int c300 = -1, int c100 = 0,
-                                int c50 = 0);
+    static f64 calculatePPv2(Beatmap *beatmap, f64 aim, f64 aimSliderFactor, f64 speed, f64 speedNotes,
+                             i32 numHitObjects, i32 numCircles, i32 numSliders, i32 numSpinners, i32 maxPossibleCombo,
+                             i32 combo = -1, i32 misses = 0, i32 c300 = -1, i32 c100 = 0, i32 c50 = 0);
 
     // pp, fully static
-    static double calculatePPv2(int modsLegacy, double timescale, double ar, double od, double aim,
-                                double aimSliderFactor, double speed, double speedNotes, int numHitObjects,
-                                int numCircles, int numSliders, int numSpinners, int maxPossibleCombo, int combo,
-                                int misses, int c300, int c100, int c50);
-
-    // helper functions
-    static double calculateTotalStarsFromSkills(double aim, double speed);
+    static f64 calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f64 od, f64 aim, f64 aimSliderFactor, f64 speed,
+                             f64 speedNotes, i32 numHitObjects, i32 numCircles, i32 numSliders, i32 numSpinners,
+                             i32 maxPossibleCombo, i32 combo, i32 misses, i32 c300, i32 c100, i32 c50);
 
    private:
     static ConVar *m_osu_slider_scorev2_ref;
-
-    struct Attributes {
-        double AimStrain;
-        double SliderFactor;
-        double SpeedStrain;
-        double SpeedNoteCount;
-        double ApproachRate;
-        double OverallDifficulty;
-        int SliderCount;
-    };
-
-    struct ScoreData {
-        double accuracy;
-        int modsLegacy;
-        int countGreat;
-        int countGood;
-        int countMeh;
-        int countMiss;
-        int totalHits;
-        int totalSuccessfulHits;
-        int beatmapMaxCombo;
-        int scoreMaxCombo;
-        int amountHitObjectsWithAccuracy;
-    };
-
-    static double computeAimValue(const ScoreData &score, const Attributes &attributes, double effectiveMissCount);
-    static double computeSpeedValue(const ScoreData &score, const Attributes &attributes, double effectiveMissCount);
-    static double computeAccuracyValue(const ScoreData &score, const Attributes &attributes);
 };

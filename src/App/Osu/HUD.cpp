@@ -1876,19 +1876,9 @@ void HUD::drawHitErrorBarInt(Graphics *g, float hitWindow300, float hitWindow100
             if(m_hiterrors[i].miss) missHeightMultiplier = 1.5f;
             if(m_hiterrors[i].misaim) missHeightMultiplier = 4.0f;
 
-            // Color leftColor = COLOR((int)((255/2) * alphaEntry * fade), COLOR_GET_Ri(barColor),
-            // COLOR_GET_Gi(barColor), COLOR_GET_Bi(barColor)); Color centerColor = COLOR((int)(COLOR_GET_Ai(barColor) *
-            // alphaEntry * fade), COLOR_GET_Ri(barColor), COLOR_GET_Gi(barColor), COLOR_GET_Bi(barColor)); Color
-            // rightColor = leftColor;
-
             g->fillRect(center.x - (entryWidth / 2.0f) + percent * (size.x / 2.0f),
                         center.y - (entryHeight * missHeightMultiplier) / 2.0f, entryWidth,
                         (entryHeight * missHeightMultiplier));
-            // g->fillGradient((int)(center.x - (entryWidth/2.0f) + percent*(size.x/2.0f)), center.y -
-            // (entryHeight*missHeightMultiplier)/2.0f, (int)(entryWidth/2.0f), (entryHeight*missHeightMultiplier),
-            // leftColor, centerColor, leftColor, centerColor); g->fillGradient((int)(center.x - (entryWidth/2.0f/2.0f)
-            // + percent*(size.x/2.0f)), center.y - (entryHeight*missHeightMultiplier)/2.0f, (int)(entryWidth/2.0f),
-            // (entryHeight*missHeightMultiplier), centerColor, rightColor, centerColor, rightColor);
         }
 
         if(osu_hud_hiterrorbar_entry_additive.getBool()) g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);

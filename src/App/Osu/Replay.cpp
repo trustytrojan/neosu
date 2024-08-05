@@ -189,10 +189,10 @@ Replay::Info Replay::from_bytes(u8* data, int s_data) {
 }
 
 bool Replay::load_from_disk(FinishedScore* score) {
-    if(score->legacyReplayTimestamp > 0) {
+    if(score->peppy_replay_tms > 0) {
         auto osu_folder = convar->getConVarByName("osu_folder")->getString();
         auto path = UString::format("%s/Data/r/%s-%llu.osr", osu_folder.toUtf8(), score->beatmap_hash.hash,
-                                    score->legacyReplayTimestamp);
+                                    score->peppy_replay_tms);
 
         FILE* replay_file = fopen(path.toUtf8(), "rb");
         if(replay_file == NULL) return false;
@@ -242,6 +242,8 @@ void Replay::load_and_watch(FinishedScore score) {
     // Check if replay is loaded
     if(score.replay.empty()) {
         if(!load_from_disk(&score)) {
+            // @PPV3: try loading replay from neonet
+
             if(strcmp(score.server.c_str(), bancho.endpoint.toUtf8()) != 0) {
                 auto msg = UString::format("Please connect to %s to view this replay!", score.server.c_str());
                 osu->m_notificationOverlay->addNotification(msg);

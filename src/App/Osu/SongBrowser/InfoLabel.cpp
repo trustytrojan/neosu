@@ -224,15 +224,6 @@ void InfoLabel::mouse_update(bool *propagate_clicks) {
                     int numSliders = beatmap->getSelectedDifficulty2()->getNumSliders();
                     unsigned long lengthMS = beatmap->getSelectedDifficulty2()->getLengthMS();
 
-                    if(osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.ok) {
-                        numObjects = osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.num_objects;
-                        numCircles = osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.num_circles;
-                        numSliders = max(
-                            0, numObjects -
-                                   (numCircles +
-                                    (i32)osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.num_spinners));
-                    }
-
                     const float opm =
                         (lengthMS > 0 ? ((float)numObjects / (float)(lengthMS / 1000.0f / 60.0f)) : 0.0f) *
                         osu->getSpeedMultiplier();
@@ -243,9 +234,9 @@ void InfoLabel::mouse_update(bool *propagate_clicks) {
                         (lengthMS > 0 ? ((float)numSliders / (float)(lengthMS / 1000.0f / 60.0f)) : 0.0f) *
                         osu->getSpeedMultiplier();
 
-                    osu->getTooltipOverlay()->addLine(
-                        UString::format("Circles: %i, Sliders: %i, Spinners: %i", numCircles, numSliders,
-                                        max(0, numObjects - numCircles - numSliders)));
+                    osu->getTooltipOverlay()->addLine(UString::format("Circles: %i, Sliders: %i, Spinners: %i",
+                                                                      numCircles, numSliders,
+                                                                      max(0, numObjects - numCircles - numSliders)));
                     osu->getTooltipOverlay()->addLine(
                         UString::format("OPM: %i, CPM: %i, SPM: %i", (int)opm, (int)cpm, (int)spm));
                     osu->getTooltipOverlay()->addLine(UString::format("ID: %i, SetID: %i",
@@ -316,11 +307,6 @@ UString InfoLabel::buildSongInfoString() {
     const int mostCommonBPM = m_iMostCommonBPM * osu->getSpeedMultiplier();
 
     int numObjects = m_iNumObjects;
-    auto diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();
-    if(diff2 && diff2->m_pp_info.ok) {
-        numObjects = diff2->m_pp_info.num_objects;
-	}
-
     if(m_iMinBPM == m_iMaxBPM) {
         return UString::format("Length: %02i:%02i BPM: %i Objects: %i", minutes, seconds, maxBPM, numObjects);
     } else {
@@ -338,11 +324,11 @@ UString InfoLabel::buildDiffInfoString() {
     float modStars = 0.f;
     float modPp = 0.f;
 
-	auto diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();
+    auto diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();
     if(diff2) {
         modStars = diff2->m_pp_info.total_stars;
         modPp = diff2->m_pp_info.pp;
-	}
+    }
 
     Beatmap *beatmap = osu->getSelectedBeatmap();
     if(beatmap != NULL) {
@@ -356,7 +342,7 @@ UString InfoLabel::buildDiffInfoString() {
     const bool starsAndModStarsAreEqual = (std::abs(stars - modStars) < starComparisonEpsilon);
 
     UString finalString;
-    if(!diff2 || !diff2->m_pp_info.ok)
+    if(!diff2)
         finalString = UString::format("CS:%.3g AR:%.3g OD:%.3g HP:%.3g Stars:%.3g *", CS, AR, OD, HP, stars);
     else if(!starsAndModStarsAreEqual)
         finalString = UString::format("CS:%.3g AR:%.3g OD:%.3g HP:%.3g Stars:%.3g -> %.3g (%ipp)", CS, AR, OD, HP,
@@ -379,8 +365,7 @@ float InfoLabel::getMinimumWidth() {
     float diffInfoWidth = m_font->getStringWidth(buildDiffInfoString()) * m_fDiffInfoScale;
     float offsetInfoWidth = m_font->getStringWidth(buildOffsetInfoString()) * m_fOffsetInfoScale;
 
-    return max(max(max(max(titleWidth, subTitleWidth), songInfoWidth), diffInfoWidth),
-                    offsetInfoWidth);
+    return max(max(max(max(titleWidth, subTitleWidth), songInfoWidth), diffInfoWidth), offsetInfoWidth);
 }
 
 float InfoLabel::getMinimumHeight() {

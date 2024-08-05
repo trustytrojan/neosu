@@ -366,8 +366,6 @@ BeatmapSet *Database::addBeatmapSet(std::string beatmapFolderPath) {
 }
 
 int Database::addScore(FinishedScore score) {
-    score.replay_location = FinishedScore::ReplayLocation::NEOSU_FOLDER;
-
     addScoreRaw(score);
     sortScores(score.beatmap_hash);
 
@@ -1416,20 +1414,17 @@ void Database::loadScores() {
             for(u32 s = 0; s < nb_beatmap_scores; s++) {
                 FinishedScore sc;
                 sc.score = db.read<u64>();
+                sc.spinner_bonus = db.read<u64>();
                 sc.modsLegacy = db.read<i32>();
                 sc.unixTimestamp = db.read<u64>();
                 sc.player_id = db.read<u32>();
                 sc.playerName = db.read_string();
                 sc.grade = (FinishedScore::Grade)db.read<u8>();
 
-                // TODO @kiwec: remove score.replay_location?
-                sc.replay_location = (FinishedScore::ReplayLocation)db.read<u8>();
-                if(sc.replay_location == FinishedScore::ReplayLocation::PEPPY_FOLDER) {
-                    sc.legacyReplayTimestamp = db.read<u64>();
-                }
-
+                sc.client = db.read_string();
                 sc.server = db.read_string();
                 sc.bancho_score_id = db.read<u64>();
+                sc.peppy_replay_tms = db.read<u64>();
 
                 sc.num300s = db.read<u16>();
                 sc.num100s = db.read<u16>();
@@ -1449,7 +1444,9 @@ void Database::loadScores() {
                 sc.ppv3_score = db.read<f32>();
                 sc.ppv3_total_stars = db.read<f32>();
 
-                // TODO @kiwec: scores still don't have ppv3 data
+                u32 nb_hitresults = db.read<u16>();
+                sc.hitdeltas.reserve(nb_hitresults);
+                db.read_bytes(sc.hitdeltas.data(), nb_hitresults);
 
                 sc.numSliderBreaks = db.read<u16>();
                 sc.unstableRate = db.read<f32>();
@@ -1541,10 +1538,10 @@ u32 Database::importOldNeosuScores() {
             sc.numHitObjects = db.read<u32>();
             sc.numCircles = db.read<u32>();
             sc.bancho_score_id = db.read<u32>();
+            sc.client = "neosu-win64-release-35.10";  // we don't know the actual version
             sc.server = db.read_string();
             sc.experimentalModsConVars = db.read_string();
 
-            sc.replay_location = FinishedScore::ReplayLocation::NEOSU_FOLDER;
             sc.sortHack = m_iSortHackCounter++;
             sc.beatmap_hash = md5hash;
             sc.perfect = sc.comboMax >= sc.maxPossibleCombo;
@@ -1579,15 +1576,20 @@ u32 Database::importPeppyScores() {
 
     debugLog("osu!stable scores.db: version = %i, nb_beatmaps = %i\n", db_version, nb_beatmaps);
 
+    char client_str[15] = "peppy-YYYYMMDD";
     for(int b = 0; b < nb_beatmaps; b++) {
         auto md5hash = db.read_hash();
         u32 nb_scores = db.read<u32>();
 
         for(int s = 0; s < nb_scores; s++) {
-            u8 gamemode = db.read<u8>();
-            u32 score_version = db.read<u32>();
-
             FinishedScore sc;
+
+            u8 gamemode = db.read<u8>();
+
+            u32 score_version = db.read<u32>();
+            snprintf(client_str, 14, "peppy-%d", score_version);
+            sc.client = client_str;
+
             sc.server = "ppy.sh";
             db.skip_string();  // beatmap hash (already have it)
             sc.playerName = db.read_string();
@@ -1617,8 +1619,7 @@ u32 Database::importPeppyScores() {
 
             u64 full_tms = db.read<u64>();
             sc.unixTimestamp = (full_tms - 621355968000000000) / 10000000;
-            sc.legacyReplayTimestamp = full_tms - 504911232000000000;
-            sc.replay_location = FinishedScore::ReplayLocation::PEPPY_FOLDER;
+            sc.peppy_replay_tms = full_tms - 504911232000000000;
 
             // Always -1, but let's skip it properly just in case
             i32 old_replay_size = db.read<u32>();
@@ -1687,20 +1688,17 @@ void Database::saveScores() {
 
         for(auto &score : it.second) {
             db.write<u64>(score.score);
+            db.write<u64>(score.spinner_bonus);
             db.write<i32>(score.modsLegacy);
             db.write<u64>(score.unixTimestamp);
             db.write<u32>(score.player_id);
             db.write_string(score.playerName);
             db.write<u8>((u8)score.grade);
 
-            // TODO @kiwec: remove score.replay_location?
-            db.write<u8>((u8)score.replay_location);
-            if(score.replay_location == FinishedScore::ReplayLocation::PEPPY_FOLDER) {
-                db.write<u64>(score.legacyReplayTimestamp);
-            }
-
+            db.write_string(score.client);
             db.write_string(score.server);
             db.write<u64>(score.bancho_score_id);
+            db.write<u64>(score.peppy_replay_tms);
 
             db.write<u16>(score.num300s);
             db.write<u16>(score.num100s);
@@ -1720,7 +1718,9 @@ void Database::saveScores() {
             db.write<f32>(score.ppv3_score);
             db.write<f32>(score.ppv3_total_stars);
 
-            // TODO @kiwec: scores still don't have ppv3 data
+            u16 nb_hitresults = score.hitdeltas.size();
+            db.write<u16>(nb_hitresults);
+            db.write_bytes(score.hitdeltas.data(), nb_hitresults);
 
             db.write<u16>(score.numSliderBreaks);
             db.write<f32>(score.unstableRate);

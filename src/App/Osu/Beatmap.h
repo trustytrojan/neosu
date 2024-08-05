@@ -214,7 +214,6 @@ class Beatmap {
 
     // used by HitObject children and ModSelector
     Skin *getSkin() const;  // maybe use this for beatmap skins, maybe
-    inline int getRandomSeed() const { return m_iRandomSeed; }
 
     inline long getCurMusicPos() const { return m_iCurMusicPos; }
     inline long getCurMusicPosWithOffsets() const { return m_iCurMusicPosWithOffsets; }
@@ -355,7 +354,6 @@ class Beatmap {
     std::vector<HitObject *> m_hitobjects;
     std::vector<HitObject *> m_hitobjectsSortedByEndTime;
     std::vector<HitObject *> m_misaimObjects;
-    int m_iRandomSeed;
 
     // statistics
     int m_iNPS;
@@ -381,7 +379,6 @@ class Beatmap {
     ConVar *m_osu_universal_offset_ref = NULL;
     ConVar *m_osu_early_note_time_ref = NULL;
     ConVar *m_osu_fail_time_ref = NULL;
-    ConVar *m_osu_drain_type_ref = NULL;
     ConVar *m_osu_draw_hud_ref = NULL;
     ConVar *m_osu_draw_scorebarbg_ref = NULL;
     ConVar *m_osu_hud_scorebar_hide_during_breaks_ref = NULL;
@@ -456,9 +453,6 @@ class Beatmap {
 
     // live pp/stars
     void resetLiveStarsTasks();
-    std::future<gradual_pp *> m_init_gradual_pp;
-    std::future<gradual_pp *> m_calculate_gradual_pp;
-    gradual_pp *m_gradual_pp = NULL;
 
     // pp calculation buffer (only needs to be recalculated in onModUpdate(), instead of on every hit)
     float m_fAimStars;
@@ -491,6 +485,4 @@ class Beatmap {
     int m_iMafhamFinishedRenderHitObjectIndex;
     bool m_bInMafhamRenderChunk;  // used by Slider to not animate the reverse arrow, and by Circle to not animate
                                   // note blocking shaking, while being rendered into the scene buffer
-
-    int m_iMandalaIndex;
 };

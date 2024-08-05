@@ -1,10 +1,3 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		freetype font wrapper
-//
-// $NoKeywords: $fnt
-//===============================================================================//
-
 #include "Font.h"
 
 #include "ConVar.h"

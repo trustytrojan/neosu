@@ -1,13 +1,4 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		base class for all gameplay objects
-//
-// $NoKeywords: $hitobj
-//===============================================================================//
-
-#ifndef OSUHITOBJECT_H
-#define OSUHITOBJECT_H
-
+#pragma once
 #include "Beatmap.h"
 
 class ConVar;
@@ -136,5 +127,3 @@ class HitObject {
 
     unsigned long long m_iSortHack;
 };
-
-#endif

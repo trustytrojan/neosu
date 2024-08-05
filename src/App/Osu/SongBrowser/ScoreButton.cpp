@@ -515,10 +515,7 @@ void ScoreButton::onRightMouseUpInside() {
         m_contextMenu->begin(0, true);
         {
             m_contextMenu->addButton("Use Mods", 1);  // for scores without mods this will just nomod
-
-            if(m_score.replay_location != FinishedScore::ReplayLocation::NO_REPLAY) {
-                m_contextMenu->addButton("View replay", 2);
-            }
+            m_contextMenu->addButton("View replay", 2);
 
             CBaseUIButton *spacer = m_contextMenu->addButton("---");
             spacer->setEnabled(false);

@@ -40,9 +40,7 @@ class Slider : public HitObject {
 
     virtual void updateStackPosition(float stackOffset);
     virtual void miss(long curPos);
-    virtual int getCombo() {
-        return 2 + max((m_iRepeat - 1), 0) + (max((m_iRepeat - 1), 0) + 1) * m_ticks.size();
-    }
+    virtual int getCombo() { return 2 + max((m_iRepeat - 1), 0) + (max((m_iRepeat - 1), 0) + 1) * m_ticks.size(); }
 
     Vector2 getRawPosAt(long pos);
     Vector2 getOriginalRawPosAt(long pos);
@@ -72,7 +70,6 @@ class Slider : public HitObject {
     static ConVar *m_osu_slider_border_size_multiplier_ref;
     static ConVar *m_epilepsy_ref;
     static ConVar *m_osu_auto_cursordance_ref;
-    static ConVar *m_osu_drain_type_ref;
 
     void drawStartCircle(Graphics *g, float alpha);
     void drawEndCircle(Graphics *g, float alpha, float sliderSnake = 1.0f);

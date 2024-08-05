@@ -31,28 +31,13 @@ ConVar osu_drain_vr_sliderbreak("osu_drain_vr_sliderbreak", -0.10f, FCVAR_DEFAUL
 
 ConVar osu_drain_stable_hpbar_maximum("osu_drain_stable_hpbar_maximum", 200.0f, FCVAR_LOCKED);
 
-ConVar osu_drain_lazer_multiplier("osu_drain_lazer_multiplier", 0.05f, FCVAR_DEFAULT,
-                                  "DEFAULT_MAX_HEALTH_INCREASE, expressed as a percentage of full health");
-ConVar osu_drain_lazer_300("osu_drain_lazer_300", 1.0f, FCVAR_DEFAULT);
-ConVar osu_drain_lazer_100("osu_drain_lazer_100", 0.5f, FCVAR_DEFAULT);
-ConVar osu_drain_lazer_50("osu_drain_lazer_50", -0.05f, FCVAR_DEFAULT);
-ConVar osu_drain_lazer_miss("osu_drain_lazer_miss", -1.0f, FCVAR_DEFAULT);
-
-ConVar osu_drain_lazer_2018_multiplier("osu_drain_lazer_2018_multiplier", 1.0f, FCVAR_DEFAULT);
-ConVar osu_drain_lazer_2018_300("osu_drain_lazer_2018_300", 0.01f, FCVAR_DEFAULT);
-ConVar osu_drain_lazer_2018_100("osu_drain_lazer_2018_100", 0.01f, FCVAR_DEFAULT);
-ConVar osu_drain_lazer_2018_50("osu_drain_lazer_2018_50", 0.01f, FCVAR_DEFAULT);
-ConVar osu_drain_lazer_2018_miss("osu_drain_lazer_2018_miss", -0.02f, FCVAR_DEFAULT);
-
 ConVar *LiveScore::m_osu_draw_statistics_pp_ref = NULL;
-ConVar *LiveScore::m_osu_drain_type_ref = NULL;
 
 LiveScore::LiveScore() {
     reset();
 
     if(m_osu_draw_statistics_pp_ref == NULL)
         m_osu_draw_statistics_pp_ref = convar->getConVarByName("osu_draw_statistics_pp");
-    if(m_osu_drain_type_ref == NULL) m_osu_drain_type_ref = convar->getConVarByName("osu_drain_type");
 }
 
 void LiveScore::reset() {
@@ -430,88 +415,47 @@ double LiveScore::getHealthIncrease(Beatmap *beatmap, HIT hit) {
 
 double LiveScore::getHealthIncrease(LiveScore::HIT hit, double HP, double hpMultiplierNormal,
                                     double hpMultiplierComboEnd, double hpBarMaximumForNormalization) {
-    const int drainType = m_osu_drain_type_ref->getInt();
-    if(drainType == 2)  // osu!stable
-    {
-        switch(hit) {
-            case LiveScore::HIT::HIT_MISS:
-                return (GameRules::mapDifficultyRangeDouble(HP, -6.0, -25.0, -40.0) / hpBarMaximumForNormalization);
+    switch(hit) {
+        case LiveScore::HIT::HIT_MISS:
+            return (GameRules::mapDifficultyRangeDouble(HP, -6.0, -25.0, -40.0) / hpBarMaximumForNormalization);
 
-            case LiveScore::HIT::HIT_50:
-                return (hpMultiplierNormal * GameRules::mapDifficultyRangeDouble(HP, 0.4 * 8.0, 0.4, 0.4) /
-                        hpBarMaximumForNormalization);
+        case LiveScore::HIT::HIT_50:
+            return (hpMultiplierNormal * GameRules::mapDifficultyRangeDouble(HP, 0.4 * 8.0, 0.4, 0.4) /
+                    hpBarMaximumForNormalization);
 
-            case LiveScore::HIT::HIT_100:
-                return (hpMultiplierNormal * GameRules::mapDifficultyRangeDouble(HP, 2.2 * 8.0, 2.2, 2.2) /
-                        hpBarMaximumForNormalization);
+        case LiveScore::HIT::HIT_100:
+            return (hpMultiplierNormal * GameRules::mapDifficultyRangeDouble(HP, 2.2 * 8.0, 2.2, 2.2) /
+                    hpBarMaximumForNormalization);
 
-            case LiveScore::HIT::HIT_300:
-                return (hpMultiplierNormal * 6.0 / hpBarMaximumForNormalization);
+        case LiveScore::HIT::HIT_300:
+            return (hpMultiplierNormal * 6.0 / hpBarMaximumForNormalization);
 
-            case LiveScore::HIT::HIT_MISS_SLIDERBREAK:
-                return (GameRules::mapDifficultyRangeDouble(HP, -4.0, -15.0, -28.0) / hpBarMaximumForNormalization);
+        case LiveScore::HIT::HIT_MISS_SLIDERBREAK:
+            return (GameRules::mapDifficultyRangeDouble(HP, -4.0, -15.0, -28.0) / hpBarMaximumForNormalization);
 
-            case LiveScore::HIT::HIT_MU:
-                return (hpMultiplierComboEnd * 6.0 / hpBarMaximumForNormalization);
+        case LiveScore::HIT::HIT_MU:
+            return (hpMultiplierComboEnd * 6.0 / hpBarMaximumForNormalization);
 
-            case LiveScore::HIT::HIT_100K:
-                return (hpMultiplierComboEnd * 10.0 / hpBarMaximumForNormalization);
+        case LiveScore::HIT::HIT_100K:
+            return (hpMultiplierComboEnd * 10.0 / hpBarMaximumForNormalization);
 
-            case LiveScore::HIT::HIT_300K:
-                return (hpMultiplierComboEnd * 10.0 / hpBarMaximumForNormalization);
+        case LiveScore::HIT::HIT_300K:
+            return (hpMultiplierComboEnd * 10.0 / hpBarMaximumForNormalization);
 
-            case LiveScore::HIT::HIT_300G:
-                return (hpMultiplierComboEnd * 14.0 / hpBarMaximumForNormalization);
+        case LiveScore::HIT::HIT_300G:
+            return (hpMultiplierComboEnd * 14.0 / hpBarMaximumForNormalization);
 
-            case LiveScore::HIT::HIT_SLIDER10:
-                return (hpMultiplierNormal * 3.0 / hpBarMaximumForNormalization);
+        case LiveScore::HIT::HIT_SLIDER10:
+            return (hpMultiplierNormal * 3.0 / hpBarMaximumForNormalization);
 
-            case LiveScore::HIT::HIT_SLIDER30:
-                return (hpMultiplierNormal * 4.0 / hpBarMaximumForNormalization);
+        case LiveScore::HIT::HIT_SLIDER30:
+            return (hpMultiplierNormal * 4.0 / hpBarMaximumForNormalization);
 
-            case LiveScore::HIT::HIT_SPINNERSPIN:
-                return (hpMultiplierNormal * 1.7 / hpBarMaximumForNormalization);
+        case LiveScore::HIT::HIT_SPINNERSPIN:
+            return (hpMultiplierNormal * 1.7 / hpBarMaximumForNormalization);
 
-            case LiveScore::HIT::HIT_SPINNERBONUS:
-                return (hpMultiplierNormal * 2.0 / hpBarMaximumForNormalization);
-        }
-    } else if(drainType == 3)  // osu!lazer 2020
-    {
-        switch(hit) {
-            case HIT::HIT_MISS:
-            case HIT::HIT_MISS_SLIDERBREAK:
-                return osu_drain_lazer_miss.getFloat() * osu_drain_lazer_multiplier.getFloat();
-
-            case HIT::HIT_50:
-                return osu_drain_lazer_50.getFloat() * osu_drain_lazer_multiplier.getFloat();
-
-            case HIT::HIT_100:
-                return osu_drain_lazer_100.getFloat() * osu_drain_lazer_multiplier.getFloat();
-
-            case HIT::HIT_300:
-            case HIT::HIT_SLIDER10:
-            case HIT::HIT_SLIDER30:
-                return osu_drain_lazer_300.getFloat() * osu_drain_lazer_multiplier.getFloat();
-        }
-    } else if(drainType == 4)  // osu!lazer 2018
-    {
-        switch(hit) {
-            case HIT::HIT_MISS:
-            case HIT::HIT_MISS_SLIDERBREAK:
-                return (HP)*osu_drain_lazer_2018_miss.getFloat() * osu_drain_lazer_2018_multiplier.getFloat();
-
-            case HIT::HIT_50:
-                return (4.0 - HP) * osu_drain_lazer_2018_50.getFloat() * osu_drain_lazer_2018_multiplier.getFloat();
-
-            case HIT::HIT_100:
-                return (8.0 - HP) * osu_drain_lazer_2018_100.getFloat() * osu_drain_lazer_2018_multiplier.getFloat();
-
-            case HIT::HIT_300:
-            case HIT::HIT_SLIDER10:
-            case HIT::HIT_SLIDER30:
-                return (10.2 - min(HP, 10.0)) * osu_drain_lazer_2018_300.getFloat() *
-                       osu_drain_lazer_2018_multiplier.getFloat();
-        }
+        case LiveScore::HIT::HIT_SPINNERBONUS:
+            return (hpMultiplierNormal * 2.0 / hpBarMaximumForNormalization);
     }
 
     return 0.0f;

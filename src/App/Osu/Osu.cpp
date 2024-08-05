@@ -217,7 +217,6 @@ Osu::Osu() {
     m_experimentalMods.push_back(convar->getConVarByName("osu_mod_jigsaw1"));
     m_experimentalMods.push_back(convar->getConVarByName("osu_mod_jigsaw2"));
     m_experimentalMods.push_back(convar->getConVarByName("osu_mod_fullalternate"));
-    m_experimentalMods.push_back(convar->getConVarByName("osu_mod_random"));
     m_experimentalMods.push_back(convar->getConVarByName("osu_mod_reverse_sliders"));
     m_experimentalMods.push_back(convar->getConVarByName("osu_mod_no50s"));
     m_experimentalMods.push_back(convar->getConVarByName("osu_mod_no100s"));
@@ -1231,7 +1230,7 @@ void Osu::updateMods() {
     // notify the possibly running beatmap of mod changes, for e.g. recalculating stacks dynamically if HR is toggled
     {
         getSelectedBeatmap()->onModUpdate();
-        getSelectedBeatmap()->vanilla = false;  // user just cheated, prevent score submission
+        osu->getScore()->setCheated();  // user just cheated, prevent score from saving/submitting
 
         if(m_songBrowser2 != NULL) {
             m_songBrowser2->recalculateStarsForSelectedBeatmap(true);

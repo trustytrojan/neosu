@@ -32,7 +32,6 @@ class ScoreButton : public CBaseUIButton {
     inline FinishedScore getScore() const { return m_score; }
     inline u64 getScoreUnixTimestamp() const { return m_score.unixTimestamp; }
     inline unsigned long long getScoreScore() const { return m_score.score; }
-    inline float getScorePP() const { return m_score.ppv2_score; }  // @PPV3
 
     inline UString getDateTime() const { return m_sScoreDateTime; }
     inline int getIndex() const { return m_iScoreIndexNumber; }

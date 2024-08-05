@@ -434,7 +434,6 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     m_win_snd_wasapi_buffer_size_ref = convar->getConVarByName("win_snd_wasapi_buffer_size", false);
     m_win_snd_wasapi_period_size_ref = convar->getConVarByName("win_snd_wasapi_period_size", false);
     m_osu_notelock_type_ref = convar->getConVarByName("osu_notelock_type");
-    m_osu_drain_type_ref = convar->getConVarByName("osu_drain_type");
     m_osu_background_color_r_ref = convar->getConVarByName("osu_background_color_r");
     m_osu_background_color_g_ref = convar->getConVarByName("osu_background_color_g");
     m_osu_background_color_b_ref = convar->getConVarByName("osu_background_color_b");
@@ -491,12 +490,6 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     m_notelockTypes.push_back("neosu");
     m_notelockTypes.push_back("osu!stable (default)");
     m_notelockTypes.push_back("osu!lazer 2020");
-
-    m_drainTypes.push_back("None");
-    m_drainTypes.push_back("None");  // was "VR" previously
-    m_drainTypes.push_back("osu!stable (default)");
-    m_drainTypes.push_back("osu!lazer 2020");
-    m_drainTypes.push_back("osu!lazer 2018");
 
     setPos(-1, 0);
 
@@ -1041,25 +1034,6 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     addSpacer();
     addLabel("");
 
-    /// addCheckbox("Notelock (note blocking/locking)", "NOTE: osu! has this always enabled, so leave it enabled for
-    /// practicing.\n\"Protects\" you by only allowing circles to be clicked in order.",
-    /// convar->getConVarByName("osu_note_blocking"));
-    OPTIONS_ELEMENT drainSelect = addButton("Select [HP Drain]", "None", true);
-    ((CBaseUIButton *)drainSelect.elements[0])
-        ->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onHPDrainSelect));
-    m_hpDrainSelectButton = drainSelect.elements[0];
-    m_hpDrainSelectLabel = (CBaseUILabel *)drainSelect.elements[1];
-    m_hpDrainSelectResetButton = drainSelect.resetButton;
-    m_hpDrainSelectResetButton->setClickCallback(
-        fastdelegate::MakeDelegate(this, &OptionsMenu::onHPDrainSelectResetClicked));
-    addLabel("");
-    addLabel("Info about different drain algorithms:")->setTextColor(0xff666666);
-    addLabel("");
-    addLabel("- osu!stable: Constant drain, moderately hard (default).")->setTextColor(0xff666666);
-    addLabel("- osu!lazer 2020: Constant drain, very easy (too easy?).")->setTextColor(0xff666666);
-    addLabel("- osu!lazer 2018: No constant drain, scales with HP.")->setTextColor(0xff666666);
-    addSpacer();
-    addSpacer();
     OPTIONS_ELEMENT notelockSelect = addButton("Select [Notelock]", "None", true);
     ((CBaseUIButton *)notelockSelect.elements[0])
         ->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onNotelockSelect));
@@ -1828,13 +1802,11 @@ void OptionsMenu::updateLayout() {
 
     updateSkinNameLabel();
     updateNotelockSelectLabel();
-    updateHPDrainSelectLabel();
 
     if(m_outputDeviceLabel != NULL) m_outputDeviceLabel->setText(engine->getSound()->getOutputDeviceName());
 
     onOutputDeviceResetUpdate();
     onNotelockSelectResetUpdate();
-    onHPDrainSelectResetUpdate();
 
     //************************************************************************************************************************************//
 
@@ -2298,12 +2270,6 @@ void OptionsMenu::updateNotelockSelectLabel() {
         m_notelockTypes[clamp<int>(m_osu_notelock_type_ref->getInt(), 0, m_notelockTypes.size() - 1)]);
 }
 
-void OptionsMenu::updateHPDrainSelectLabel() {
-    if(m_hpDrainSelectLabel == NULL) return;
-
-    m_hpDrainSelectLabel->setText(m_drainTypes[clamp<int>(m_osu_drain_type_ref->getInt(), 0, m_drainTypes.size() - 1)]);
-}
-
 void OptionsMenu::onFullscreenChange(CBaseUICheckbox *checkbox) {
     if(checkbox->isChecked())
         env->enableFullscreen();
@@ -2686,41 +2652,6 @@ void OptionsMenu::onNotelockSelectResetUpdate() {
     if(m_notelockSelectResetButton != NULL)
         m_notelockSelectResetButton->setEnabled(m_osu_notelock_type_ref->getInt() !=
                                                 (int)m_osu_notelock_type_ref->getDefaultFloat());
-}
-
-void OptionsMenu::onHPDrainSelect() {
-    // build context menu
-    m_contextMenu->setPos(m_hpDrainSelectButton->getPos());
-    m_contextMenu->setRelPos(m_hpDrainSelectButton->getRelPos());
-    m_contextMenu->begin(m_hpDrainSelectButton->getSize().x);
-    {
-        for(int i = 1; i < m_drainTypes.size(); i++) {
-            CBaseUIButton *button = m_contextMenu->addButton(m_drainTypes[i], i);
-            if(i == m_osu_drain_type_ref->getInt()) button->setTextBrightColor(0xff00ff00);
-        }
-    }
-    m_contextMenu->end(false, false);
-    m_contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onHPDrainSelect2));
-}
-
-void OptionsMenu::onHPDrainSelect2(UString hpDrainType, int id) {
-    m_osu_drain_type_ref->setValue(id);
-    updateHPDrainSelectLabel();
-
-    // and update the reset button as usual
-    onHPDrainSelectResetUpdate();
-}
-
-void OptionsMenu::onHPDrainSelectResetClicked() {
-    if((size_t)m_osu_drain_type_ref->getDefaultFloat() < m_drainTypes.size())
-        onHPDrainSelect2(m_drainTypes[(size_t)m_osu_drain_type_ref->getDefaultFloat()],
-                         (size_t)m_osu_drain_type_ref->getDefaultFloat());
-}
-
-void OptionsMenu::onHPDrainSelectResetUpdate() {
-    if(m_hpDrainSelectResetButton != NULL)
-        m_hpDrainSelectResetButton->setEnabled(m_osu_drain_type_ref->getInt() !=
-                                               (int)m_osu_drain_type_ref->getDefaultFloat());
 }
 
 void OptionsMenu::onCheckboxChange(CBaseUICheckbox *checkbox) {
@@ -3631,7 +3562,6 @@ void OptionsMenu::save() {
     manualConVars.push_back(convar->getConVarByName("mp_autologin"));
     manualConVars.push_back(convar->getConVarByName("restart_sound_engine_before_playing"));
     manualConVars.push_back(m_osu_notelock_type_ref);
-    manualConVars.push_back(m_osu_drain_type_ref);
 
     removeConCommands.push_back(convar->getConVarByName("monitor"));
     removeConCommands.push_back(convar->getConVarByName("windowed"));

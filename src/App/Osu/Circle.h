@@ -1,13 +1,4 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		circle
-//
-// $NoKeywords: $circle
-//===============================================================================//
-
-#ifndef OSUCIRCLE_H
-#define OSUCIRCLE_H
-
+#pragma once
 #include "HitObject.h"
 
 class ModFPoSu;
@@ -92,5 +83,3 @@ class Circle : public HitObject {
     float m_fHitAnimation;
     float m_fShakeAnimation;
 };
-
-#endif

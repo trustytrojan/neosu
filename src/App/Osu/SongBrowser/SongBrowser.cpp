@@ -339,7 +339,9 @@ SongBrowser::SongBrowser() : ScreenBackable() {
     m_sortingMethods.push_back({SORT::SORT_DIFFICULTY, "By Difficulty", sort_by_difficulty});
     m_sortingMethods.push_back({SORT::SORT_LENGTH, "By Length", sort_by_length});
     m_sortingMethods.push_back({SORT::SORT_TITLE, "By Title", sort_by_title});
-    // m_sortingMethods.push_back({SORT::SORT_RANKACHIEVED, "By Rank Achieved", new SortByRankAchieved()}); // not yet possible
+
+    // not yet possible
+    // m_sortingMethods.push_back({SORT::SORT_RANKACHIEVED, "By Rank Achieved", new SortByRankAchieved()});
 
     // convar refs
     m_fps_max_ref = convar->getConVarByName("fps_max");
@@ -911,23 +913,6 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
     if(!m_bVisible) return;
     ScreenBackable::mouse_update(propagate_clicks);
 
-    auto db_diff = m_selectedBeatmap->getSelectedDifficulty2();
-    if(db_diff != NULL && db_diff->m_calculate_full_pp.valid()) {
-        if(db_diff->m_calculate_full_pp.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
-            db_diff->m_pp_info = db_diff->m_calculate_full_pp.get();
-            db_diff->m_calculate_full_pp = std::future<pp_info>();
-
-            m_selectedBeatmap->m_aimStrains = std::vector<f64>(
-                db_diff->m_pp_info.aim_strains, &db_diff->m_pp_info.aim_strains[db_diff->m_pp_info.aim_strains_len]);
-            m_selectedBeatmap->m_speedStrains =
-                std::vector<f64>(db_diff->m_pp_info.speed_strains,
-                                 &db_diff->m_pp_info.speed_strains[db_diff->m_pp_info.speed_strains_len]);
-
-            // Free the strains, which we already copied into vectors
-            free_pp_info(db_diff->m_pp_info);
-        }
-    }
-
     // refresh logic (blocks every other call in the update() function below it!)
     if(m_bBeatmapRefreshScheduled) {
         m_db->update();
@@ -1411,7 +1396,7 @@ CBaseUIContainer *SongBrowser::setVisible(bool visible) {
 void SongBrowser::selectSelectedBeatmapSongButton() {
     if(m_selectedBeatmap == NULL) return;
 
-	auto diff = m_selectedBeatmap->getSelectedDifficulty2();
+    auto diff = m_selectedBeatmap->getSelectedDifficulty2();
     if(diff == NULL) return;
 
     auto it = hashToSongButton.find(diff->getMD5Hash());
@@ -1735,7 +1720,8 @@ void SongBrowser::addBeatmapSet(BeatmapSet *mapset) {
     }
 }
 
-void SongBrowser::addSongButtonToAlphanumericGroup(SongButton *btn, std::vector<CollectionButton *> &group, const std::string &name) {
+void SongBrowser::addSongButtonToAlphanumericGroup(SongButton *btn, std::vector<CollectionButton *> &group,
+                                                   const std::string &name) {
     if(group.size() != 28) {
         debugLog("Alphanumeric group wasn't initialized!\n");
         return;
@@ -2288,20 +2274,17 @@ void SongBrowser::updateLayout() {
 
     m_sortLabel->onResized();  // HACKHACK: framework bug (should update string metrics on setSizeToContent())
     m_sortLabel->setSizeToContent(3 * dpiScale);
-    m_sortLabel->setRelPos(
-        m_sortButton->getRelPos().x - (m_sortLabel->getSize().x + btn_margin),
-        (m_sortLabel->getSize().y + btn_margin) / 2.f
-    );
+    m_sortLabel->setRelPos(m_sortButton->getRelPos().x - (m_sortLabel->getSize().x + btn_margin),
+                           (m_sortLabel->getSize().y + btn_margin) / 2.f);
 
     m_groupButton->setSize(m_sortButton->getSize());
-    m_groupButton->setRelPos(m_sortLabel->getRelPos().x - (m_sortButton->getSize().x + 30.f * dpiScale + btn_margin), btn_margin);
+    m_groupButton->setRelPos(m_sortLabel->getRelPos().x - (m_sortButton->getSize().x + 30.f * dpiScale + btn_margin),
+                             btn_margin);
 
     m_groupLabel->onResized();  // HACKHACK: framework bug (should update string metrics on setSizeToContent())
     m_groupLabel->setSizeToContent(3 * dpiScale);
-    m_groupLabel->setRelPos(
-        m_groupButton->getRelPos().x - (m_groupLabel->getSize().x + btn_margin),
-        (m_groupLabel->getSize().y + btn_margin) / 2.f
-    );
+    m_groupLabel->setRelPos(m_groupButton->getRelPos().x - (m_groupLabel->getSize().x + btn_margin),
+                            (m_groupLabel->getSize().y + btn_margin) / 2.f);
 
     m_topbarRight->update_pos();
 

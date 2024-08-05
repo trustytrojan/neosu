@@ -9,6 +9,7 @@ class HitObject;
 
 struct FinishedScore {
     u64 score = 0;
+    u64 spinner_bonus = 0;
     i32 modsLegacy = 0;
 
     u64 unixTimestamp = 0;
@@ -31,24 +32,10 @@ struct FinishedScore {
     };
     Grade grade = Grade::N;
 
-    // TODO @kiwec: remove replay_location? we already know if a replay is legacy from bancho_score_id
-    //              also, online scores (eg from leaderboards) don't have legacyReplayTimestamp
-    //              neosu scores have replay in folder
-    enum class ReplayLocation {
-        NO_REPLAY,
-        NEOSU_FOLDER,
-        PEPPY_FOLDER,
-        ONLINE,
-    };
-    ReplayLocation replay_location = ReplayLocation::NO_REPLAY;
-    std::vector<Replay::Frame> replay;
-    u64 legacyReplayTimestamp = 0;
-
+    std::string client;
     std::string server;
     u64 bancho_score_id = 0;
-
-    // @PPV3: add neosu_score_id
-    // @PPV3: store spinner bonus
+    u64 peppy_replay_tms = 0;  // online scores don't have peppy_replay_tms
 
     int num300s = 0;
     int num100s = 0;
@@ -72,6 +59,10 @@ struct FinishedScore {
     float ppv3_score = 0.f;
     float ppv3_total_stars = 0.f;
 
+    // Absolute hit deltas of every hitobject (0-254). 255 == miss
+    // This is exclusive to PPV3-converted scores
+    std::vector<u8> hitdeltas;
+
     int numSliderBreaks = 0;
     float unstableRate = 0.f;
     float hitErrorAvgMin = 0.f;
@@ -85,8 +76,9 @@ struct FinishedScore {
 
     u64 sortHack;
     MD5Hash beatmap_hash;
+    std::vector<Replay::Frame> replay;  // not always loaded
 
-    bool is_peppy_imported() { return replay_location == ReplayLocation::PEPPY_FOLDER; }
+    bool is_peppy_imported() { return bancho_score_id != 0 || peppy_replay_tms != 0; }
 };
 
 class LiveScore {
@@ -172,6 +164,7 @@ class LiveScore {
     inline bool hasDied() const { return m_bDied; }
 
     inline bool isUnranked() const { return m_bIsUnranked; }
+    void setCheated() { m_bIsUnranked = true; }
 
     static double getHealthIncrease(Beatmap *beatmap, LiveScore::HIT hit);
     static double getHealthIncrease(LiveScore::HIT hit, double HP = 5.0f, double hpMultiplierNormal = 1.0f,
@@ -183,7 +176,6 @@ class LiveScore {
 
    private:
     static ConVar *m_osu_draw_statistics_pp_ref;
-    static ConVar *m_osu_drain_type_ref;
 
     void onScoreChange();
 

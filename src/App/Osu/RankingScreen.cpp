@@ -496,11 +496,8 @@ void RankingScreen::setBeatmapInfo(Beatmap *beatmap, DatabaseBeatmap *diff2) {
         m_score.OD = diff2->getOD();
         m_score.HP = diff2->getHP();
 
-        gradual_pp *pp =
-            init_gradual_pp(diff2, m_score.modsLegacy, m_score.AR, m_score.CS, m_score.OD, m_score.speedMultiplier);
-        pp = calculate_gradual_pp(pp, diff2->getNumObjects(), m_score.comboMax, m_score.num300s, m_score.num100s,
-                                  m_score.num50s, m_score.numMisses, &m_score.ppv2_total_stars, &m_score.ppv2_score);
-        free_gradual_pp(pp);
+        // @PPV3: fix this (broke when removing rosu-pp)
+        m_score.ppv2_score = 0.f;
 
         // @PPV3: update m_fStarsTomAim, m_fStarsTomSpeed, m_fHitErrorAvgMin, m_fHitErrorAvgMax, m_fUnstableRate
     }
