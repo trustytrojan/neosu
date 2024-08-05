@@ -226,8 +226,6 @@ class Osu : public App, public MouseListener {
     ConVar *m_osu_mod_wobble2_ref;
     ConVar *m_osu_mod_minimize_ref;
     ConVar *m_osu_playfield_rotation;
-    ConVar *m_osu_playfield_stretch_x;
-    ConVar *m_osu_playfield_stretch_y;
     ConVar *m_fposu_draw_cursor_trail_ref;
     ConVar *m_osu_mod_mafham_ref;
     ConVar *m_osu_mod_fposu_ref;
@@ -270,7 +268,6 @@ class Osu : public App, public MouseListener {
     RenderTarget *m_frameBuffer2;
     Vector2 m_vInternalResolution;
     Vector2 flashlight_position;
-    bool holding_slider = false;
 
     // mods
     ModSelection previous_mods;

@@ -1183,7 +1183,7 @@ bool DatabaseBeatmap::loadMetadata() {
 }
 
 DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeatmap *databaseBeatmap,
-                                                                    Beatmap *beatmap) {
+                                                                    BeatmapInterface *beatmap) {
     LOAD_GAMEPLAY_RESULT result = LOAD_GAMEPLAY_RESULT();
 
     // NOTE: reload metadata (force ensures that all necessary data is ready for creating hitobjects and playing etc.,
@@ -1272,7 +1272,7 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
         }
         maxPossibleCombo += c.spinners.size();
 
-        beatmap->setMaxPossibleCombo(maxPossibleCombo);
+        beatmap->m_iMaxPossibleCombo = maxPossibleCombo;
 
         // debug
         if(m_osu_debug_pp_ref->getBool()) {
@@ -1297,9 +1297,9 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
                 diffres.diffobjects, CS, OD, speedMultiplier, relax, touchDevice, &aim, &aimSliderFactor, &speed,
                 &speedNotes, -1, &m_aimStrains, &m_speedStrains);
             double pp = DifficultyCalculator::calculatePPv2(
-                beatmap, aim, aimSliderFactor, speed, speedNotes, databaseBeatmap->m_iNumObjects,
+                osu->getScore()->getModsLegacy(), speedMultiplier, AR, OD, aim, aimSliderFactor, speed, speedNotes,
                 databaseBeatmap->m_iNumCircles, databaseBeatmap->m_iNumSliders, databaseBeatmap->m_iNumSpinners,
-                maxPossibleCombo);
+                maxPossibleCombo, maxPossibleCombo, 0, databaseBeatmap->m_iNumObjects, 0, 0);
 
             engine->showMessageInfo(
                 "PP",
@@ -1357,7 +1357,7 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
             if(nextHitObject == NULL || nextHitObject->getComboNumber() == 1) currentHitObject->setIsEndOfCombo(true);
         }
 
-        beatmap->setScoreV2ComboPortionMaximum(scoreV2ComboPortionMaximum);
+        beatmap->m_iScoreV2ComboPortionMaximum = scoreV2ComboPortionMaximum;
     }
 
     // special rule for first hitobject (for 1 approach circle with HD)

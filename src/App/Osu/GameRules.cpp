@@ -41,9 +41,6 @@ ConVar GameRules::osu_slider_followcircle_tick_pulse_scale("osu_slider_followcir
 
 ConVar GameRules::osu_spinner_fade_out_time_multiplier("osu_spinner_fade_out_time_multiplier", 0.7f, FCVAR_LOCKED);
 
-ConVar GameRules::osu_slider_followcircle_size_multiplier("osu_slider_followcircle_size_multiplier", 2.4f,
-                                                          FCVAR_LOCKED);
-
 ConVar GameRules::osu_mod_fps("osu_mod_fps", false, FCVAR_UNLOCKED);
 ConVar GameRules::osu_mod_no50s("osu_mod_no50s", false, FCVAR_UNLOCKED);
 ConVar GameRules::osu_mod_no100s("osu_mod_no100s", false, FCVAR_UNLOCKED);
@@ -54,9 +51,6 @@ ConVar GameRules::osu_mod_mafham("osu_mod_mafham", false, FCVAR_UNLOCKED);
 ConVar GameRules::osu_mod_mafham_render_livesize(
     "osu_mod_mafham_render_livesize", 25, FCVAR_DEFAULT,
     "render this many hitobjects without any scene buffering, higher = more lag but more up-to-date scene");
-ConVar GameRules::osu_stacking_ar_override("osu_stacking_ar_override", -1, FCVAR_LOCKED,
-                                           "allows overriding the approach time used for the stacking calculations. "
-                                           "behaves as if disabled if the value is less than 0.");
 ConVar GameRules::osu_mod_halfwindow("osu_mod_halfwindow", false, FCVAR_UNLOCKED);
 ConVar GameRules::osu_mod_halfwindow_allow_300s("osu_mod_halfwindow_allow_300s", true, FCVAR_DEFAULT,
                                                 "should positive hit deltas be allowed within 300 range");
@@ -65,17 +59,3 @@ ConVar GameRules::osu_mod_halfwindow_allow_300s("osu_mod_halfwindow_allow_300s",
 ConVar GameRules::osu_approachtime_min("osu_approachtime_min", 1800, FCVAR_LOCKED);
 ConVar GameRules::osu_approachtime_mid("osu_approachtime_mid", 1200, FCVAR_LOCKED);
 ConVar GameRules::osu_approachtime_max("osu_approachtime_max", 450, FCVAR_LOCKED);
-
-ConVar GameRules::osu_hitwindow_300_min("osu_hitwindow_300_min", 80, FCVAR_LOCKED);
-ConVar GameRules::osu_hitwindow_300_mid("osu_hitwindow_300_mid", 50, FCVAR_LOCKED);
-ConVar GameRules::osu_hitwindow_300_max("osu_hitwindow_300_max", 20, FCVAR_LOCKED);
-
-ConVar GameRules::osu_hitwindow_100_min("osu_hitwindow_100_min", 140, FCVAR_LOCKED);
-ConVar GameRules::osu_hitwindow_100_mid("osu_hitwindow_100_mid", 100, FCVAR_LOCKED);
-ConVar GameRules::osu_hitwindow_100_max("osu_hitwindow_100_max", 60, FCVAR_LOCKED);
-
-ConVar GameRules::osu_hitwindow_50_min("osu_hitwindow_50_min", 200, FCVAR_LOCKED);
-ConVar GameRules::osu_hitwindow_50_mid("osu_hitwindow_50_mid", 150, FCVAR_LOCKED);
-ConVar GameRules::osu_hitwindow_50_max("osu_hitwindow_50_max", 100, FCVAR_LOCKED);
-
-ConVar GameRules::osu_hitwindow_miss("osu_hitwindow_miss", 400, FCVAR_LOCKED);

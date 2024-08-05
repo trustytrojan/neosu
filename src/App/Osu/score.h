@@ -4,7 +4,7 @@
 
 class ConVar;
 class DatabaseBeatmap;
-class Beatmap;
+class BeatmapInterface;
 class HitObject;
 
 struct FinishedScore {
@@ -112,8 +112,8 @@ class LiveScore {
 
     void reset();  // only Beatmap may call this function!
 
-    void addHitResult(Beatmap *beatmap, HitObject *hitObject, LiveScore::HIT hit, long delta, bool ignoreOnHitErrorBar,
-                      bool hitErrorBarOnly, bool ignoreCombo,
+    void addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, LiveScore::HIT hit, long delta,
+                      bool ignoreOnHitErrorBar, bool hitErrorBarOnly, bool ignoreCombo,
                       bool ignoreScore);  // only Beatmap may call this function!
     void addHitResultComboEnd(LiveScore::HIT hit);
     void addSliderBreak();  // only Beatmap may call this function!
@@ -166,7 +166,7 @@ class LiveScore {
     inline bool isUnranked() const { return m_bIsUnranked; }
     void setCheated() { m_bIsUnranked = true; }
 
-    static double getHealthIncrease(Beatmap *beatmap, LiveScore::HIT hit);
+    static double getHealthIncrease(BeatmapInterface *beatmap, LiveScore::HIT hit);
     static double getHealthIncrease(LiveScore::HIT hit, double HP = 5.0f, double hpMultiplierNormal = 1.0f,
                                     double hpMultiplierComboEnd = 1.0f, double hpBarMaximumForNormalization = 200.0f);
 

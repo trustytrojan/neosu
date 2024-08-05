@@ -21,7 +21,7 @@ class HitObject {
 
    public:
     HitObject(long time, int sampleType, int comboNumber, bool isEndOfCombo, int colorCounter, int colorOffset,
-              Beatmap *beatmap);
+              BeatmapInterface *beatmap);
     virtual ~HitObject() { ; }
 
     virtual void draw(Graphics *g) { ; }
@@ -30,8 +30,6 @@ class HitObject {
 
     virtual void updateStackPosition(float stackOffset) = 0;
     virtual void miss(long curPos) = 0;  // only used by notelock
-
-    inline Beatmap *getBeatmap() const { return m_beatmap; }
 
     virtual int getCombo() { return 1; }  // how much combo this hitobject is "worth"
     virtual bool isCircle() { return false; }
@@ -75,7 +73,8 @@ class HitObject {
     virtual void onReset(long curPos);
 
    protected:
-    Beatmap *m_beatmap;
+    BeatmapInterface *bi = NULL;
+    Beatmap *bm = NULL;  // NULL when simulating
 
     bool m_bVisible;
     bool m_bFinished;

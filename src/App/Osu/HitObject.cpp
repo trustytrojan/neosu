@@ -96,7 +96,7 @@ unsigned long long HitObject::sortHackCounter = 0;
 
 void HitObject::drawHitResult(Graphics *g, Beatmap *beatmap, Vector2 rawPos, LiveScore::HIT result,
                               float animPercentInv, float hitDeltaRangePercent) {
-    drawHitResult(g, beatmap->getSkin(), beatmap->getHitcircleDiameter(), beatmap->getRawHitcircleDiameter(), rawPos,
+    drawHitResult(g, beatmap->getSkin(), beatmap->m_fHitcircleDiameter, beatmap->m_fRawHitcircleDiameter, rawPos,
                   result, animPercentInv, hitDeltaRangePercent);
 }
 
@@ -304,14 +304,13 @@ void HitObject::drawHitResult(Graphics *g, Skin *skin, float hitcircleDiameter, 
 }
 
 HitObject::HitObject(long time, int sampleType, int comboNumber, bool isEndOfCombo, int colorCounter, int colorOffset,
-                     Beatmap *beatmap) {
+                     BeatmapInterface *beatmap) {
     m_iTime = time;
     m_iSampleType = sampleType;
     m_iComboNumber = comboNumber;
     m_bIsEndOfCombo = isEndOfCombo;
     m_iColorCounter = colorCounter;
     m_iColorOffset = colorOffset;
-    m_beatmap = beatmap;
 
     if(m_osu_mod_mafham_ref == NULL) m_osu_mod_mafham_ref = convar->getConVarByName("osu_mod_mafham");
 
@@ -340,6 +339,9 @@ HitObject::HitObject(long time, int sampleType, int comboNumber, bool isEndOfCom
     m_hitresultanim2.time = -9999.0f;
 
     m_iSortHack = sortHackCounter++;
+
+    bi = beatmap;
+    bm = dynamic_cast<Beatmap *>(beatmap);  // should be NULL if SimulatedBeatmap
 }
 
 void HitObject::draw2(Graphics *g) {
@@ -353,7 +355,7 @@ void HitObject::drawHitResultAnim(Graphics *g, const HITRESULTANIM &hitresultani
                               // scheduled with it, e.g. for slider end)
        && (hitresultanim.time + osu_hitresult_duration_max.getFloat() * (1.0f / osu->getAnimationSpeedMultiplier())) >
               engine->getTime()) {
-        Skin *skin = m_beatmap->getSkin();
+        Skin *skin = bm->getSkin();
         {
             const long skinAnimationTimeStartOffset =
                 m_iTime + (hitresultanim.addObjectDurationToSkinAnimationTimeStartOffset ? m_iObjectDuration : 0) +
@@ -378,9 +380,8 @@ void HitObject::drawHitResultAnim(Graphics *g, const HITRESULTANIM &hitresultani
                 1.0f - (((engine->getTime() - hitresultanim.time) * osu->getAnimationSpeedMultiplier()) /
                         osu_hitresult_duration.getFloat());
 
-            drawHitResult(g, m_beatmap, m_beatmap->osuCoords2Pixels(hitresultanim.rawPos), hitresultanim.result,
-                          animPercentInv,
-                          clamp<float>((float)hitresultanim.delta / GameRules::getHitWindow50(m_beatmap), -1.0f, 1.0f));
+            drawHitResult(g, bm, bm->osuCoords2Pixels(hitresultanim.rawPos), hitresultanim.result, animPercentInv,
+                          clamp<float>((float)hitresultanim.delta / bi->getHitWindow50(), -1.0f, 1.0f));
         }
     }
 }
@@ -391,7 +392,7 @@ void HitObject::update(long curPos) {
 
     double animationSpeedMultipler = osu->getSpeedMultiplier() / osu->getAnimationSpeedMultiplier();
     m_iApproachTime = (m_bUseFadeInTimeAsApproachTime ? (GameRules::getFadeInTime() * animationSpeedMultipler)
-                                                      : (long)GameRules::getApproachTime(m_beatmap));
+                                                      : (long)bi->getApproachTime());
     m_iFadeInTime = GameRules::getFadeInTime() * animationSpeedMultipler;
 
     m_iDelta = m_iTime - curPos;
@@ -497,7 +498,7 @@ void HitObject::update(long curPos) {
         // hittable dim, see https://github.com/ppy/osu/pull/20572
         if(GameRules::osu_hitobject_hittable_dim.getBool() &&
            (!m_osu_mod_mafham_ref->getBool() || !osu_mod_mafham_ignore_hittable_dim.getBool())) {
-            const long hittableDimFadeStart = m_iTime - (long)GameRules::getHitWindowMiss(m_beatmap);
+            const long hittableDimFadeStart = m_iTime - (long)GameRules::getHitWindowMiss();
             const long hittableDimFadeEnd =
                 hittableDimFadeStart +
                 (long)GameRules::osu_hitobject_hittable_dim_duration
@@ -537,8 +538,8 @@ void HitObject::addHitResult(LiveScore::HIT result, long delta, bool isEndOfComb
         osu->getHUD()->addTarget(targetDelta, targetAngle);
     }
 
-    const LiveScore::HIT returnedHit = m_beatmap->addHitResult(this, result, delta, isEndOfCombo, ignoreOnHitErrorBar,
-                                                               false, ignoreCombo, false, ignoreHealth);
+    const LiveScore::HIT returnedHit = bi->addHitResult(this, result, delta, isEndOfCombo, ignoreOnHitErrorBar, false,
+                                                        ignoreCombo, false, ignoreHealth);
 
     HITRESULTANIM hitresultanim;
     {

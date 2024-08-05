@@ -7,7 +7,7 @@
 
 using namespace std;
 
-class Beatmap;
+class BeatmapInterface;
 class HitObject;
 
 class Database;
@@ -96,7 +96,7 @@ class DatabaseBeatmap {
                                                         float speedMultiplier, bool calculateStarsInaccurately,
                                                         const std::atomic<bool> &dead);
     bool loadMetadata();
-    static LOAD_GAMEPLAY_RESULT loadGameplay(DatabaseBeatmap *databaseBeatmap, Beatmap *beatmap);
+    static LOAD_GAMEPLAY_RESULT loadGameplay(DatabaseBeatmap *databaseBeatmap, BeatmapInterface *beatmap);
 
     void setLengthMS(unsigned long lengthMS) { m_iLengthMS = lengthMS; }
 

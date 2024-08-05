@@ -1348,13 +1348,13 @@ void ModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
                         m_overrideSliders[i].cvar->setValue(sliderValue);
 
                         // force change all other depending sliders
-                        const float newAR =
-                            GameRules::getConstantApproachRateForSpeedMultiplier(osu->getSelectedBeatmap());
-                        const float newOD =
-                            GameRules::getConstantOverallDifficultyForSpeedMultiplier(osu->getSelectedBeatmap());
+                        const float newAR = osu->getSelectedBeatmap()->getConstantApproachRateForSpeedMultiplier(
+                            osu->getSpeedMultiplier());
+                        const float newOD = osu->getSelectedBeatmap()->getConstantOverallDifficultyForSpeedMultiplier(
+                            osu->getSpeedMultiplier());
 
-                        m_ARSlider->setValue(newAR + 1.0f,
-                                             false);  // '+1' to compensate for turn-off area of the override sliders
+                        // '+1' to compensate for turn-off area of the override sliders
+                        m_ARSlider->setValue(newAR + 1.0f, false);
                         m_ODSlider->setValue(newOD + 1.0f, false);
                     }
                 }
@@ -1466,22 +1466,22 @@ UString ModSelector::getOverrideSliderLabelText(ModSelector::OVERRIDE_SLIDER s, 
                 10.0f);
             convarValue = osu->getSelectedBeatmap()->getCS();
         } else if(s.label->getName().find("AR") != -1) {
-            beatmapValue = active ? GameRules::getRawApproachRateForSpeedMultiplier(osu->getSelectedBeatmap())
-                                  : GameRules::getApproachRateForSpeedMultiplier(osu->getSelectedBeatmap());
+            beatmapValue = active ? osu->getSelectedBeatmap()->getRawApproachRateForSpeedMultiplier(speedMultiplierLive)
+                                  : osu->getSelectedBeatmap()->getApproachRateForSpeedMultiplier(speedMultiplierLive);
 
             // compensate and round
-            convarValue = GameRules::getApproachRateForSpeedMultiplier(osu->getSelectedBeatmap(), speedMultiplierLive);
+            convarValue = osu->getSelectedBeatmap()->getApproachRateForSpeedMultiplier(speedMultiplierLive);
             if(!engine->getKeyboard()->isAltDown() && !forceDisplayTwoDecimalDigits)
                 convarValue = std::round(convarValue * 10.0f) / 10.0f;
             else
                 convarValue = std::round(convarValue * 100.0f) / 100.0f;
         } else if(s.label->getName().find("OD") != -1) {
-            beatmapValue = active ? GameRules::getRawOverallDifficultyForSpeedMultiplier(osu->getSelectedBeatmap())
-                                  : GameRules::getOverallDifficultyForSpeedMultiplier(osu->getSelectedBeatmap());
+            beatmapValue =
+                active ? osu->getSelectedBeatmap()->getRawOverallDifficultyForSpeedMultiplier(speedMultiplierLive)
+                       : osu->getSelectedBeatmap()->getOverallDifficultyForSpeedMultiplier(speedMultiplierLive);
 
             // compensate and round
-            convarValue =
-                GameRules::getOverallDifficultyForSpeedMultiplier(osu->getSelectedBeatmap(), speedMultiplierLive);
+            convarValue = osu->getSelectedBeatmap()->getOverallDifficultyForSpeedMultiplier(speedMultiplierLive);
             if(!engine->getKeyboard()->isAltDown() && !forceDisplayTwoDecimalDigits)
                 convarValue = std::round(convarValue * 10.0f) / 10.0f;
             else

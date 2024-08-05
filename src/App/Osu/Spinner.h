@@ -1,18 +1,9 @@
-//================ Copyright (c) 2015, PG & Jeffrey Han (opsu!), All rights reserved. =================//
-//
-// Purpose:		spinner. spin logic has been taken from opsu!, I didn't have time to rewrite it yet
-//
-// $NoKeywords: $spin
-//=====================================================================================================//
-
-#ifndef OSUSPINNER_H
-#define OSUSPINNER_H
-
+#pragma once
 #include "HitObject.h"
 
 class Spinner : public HitObject {
    public:
-    Spinner(int x, int y, long time, int sampleType, bool isEndOfCombo, long endTime, Beatmap *beatmap);
+    Spinner(int x, int y, long time, int sampleType, bool isEndOfCombo, long endTime, BeatmapInterface *beatmap);
     virtual ~Spinner();
 
     virtual void draw(Graphics *g);
@@ -33,8 +24,6 @@ class Spinner : public HitObject {
    private:
     void onHit();
     void rotate(float rad);
-
-    Beatmap *m_beatmap;
 
     Vector2 m_vRawPos;
     Vector2 m_vOriginalRawPos;
@@ -58,5 +47,3 @@ class Spinner : public HitObject {
     float m_fLastMouseAngle;
     float m_fRatio;
 };
-
-#endif

@@ -34,7 +34,6 @@ ConVar osu_slider_end_inside_check_offset("osu_slider_end_inside_check_offset", 
 ConVar osu_slider_end_miss_breaks_combo("osu_slider_end_miss_breaks_combo", false, FCVAR_DEFAULT,
                                         "should a missed sliderend break combo (aka cause a regular sliderbreak)");
 ConVar osu_slider_break_epilepsy("osu_slider_break_epilepsy", false, FCVAR_DEFAULT);
-ConVar osu_slider_scorev2("osu_slider_scorev2", false, FCVAR_LOCKED);
 
 ConVar osu_slider_draw_body("osu_slider_draw_body", true, FCVAR_DEFAULT);
 ConVar osu_slider_shrink("osu_slider_shrink", false, FCVAR_DEFAULT);
@@ -70,7 +69,7 @@ ConVar *Slider::m_osu_auto_cursordance_ref = NULL;
 
 Slider::Slider(char type, int repeat, float pixelLength, std::vector<Vector2> points, std::vector<int> hitSounds,
                std::vector<float> ticks, float sliderTime, float sliderTimeWithoutRepeats, long time, int sampleType,
-               int comboNumber, bool isEndOfCombo, int colorCounter, int colorOffset, Beatmap *beatmap)
+               int comboNumber, bool isEndOfCombo, int colorCounter, int colorOffset, BeatmapInterface *beatmap)
     : HitObject(time, sampleType, comboNumber, isEndOfCombo, colorCounter, colorOffset, beatmap) {
     if(m_osu_playfield_mirror_horizontal_ref == NULL)
         m_osu_playfield_mirror_horizontal_ref = convar->getConVarByName("osu_playfield_mirror_horizontal");
@@ -93,8 +92,6 @@ Slider::Slider(char type, int repeat, float pixelLength, std::vector<Vector2> po
     m_hitSounds = hitSounds;
     m_fSliderTime = sliderTime;
     m_fSliderTimeWithoutRepeats = sliderTimeWithoutRepeats;
-
-    m_beatmap = beatmap;
 
     // build raw ticks
     for(int i = 0; i < ticks.size(); i++) {
@@ -200,7 +197,7 @@ void Slider::draw(Graphics *g) {
     if(m_points.size() <= 0) return;
 
     const float foscale = GameRules::osu_circle_fade_out_scale.getFloat();
-    Skin *skin = m_beatmap->getSkin();
+    Skin *skin = bm->getSkin();
 
     const bool isCompletelyFinished = m_bStartFinished && m_bEndFinished && m_bFinished;
 
@@ -227,11 +224,11 @@ void Slider::draw(Graphics *g) {
                           (int)(COLOR_GET_Gi(tickColor) * m_fHittableDimRGBColorMultiplierPercent),
                           (int)(COLOR_GET_Bi(tickColor) * m_fHittableDimRGBColorMultiplierPercent));
         const float tickImageScale =
-            (m_beatmap->getHitcircleDiameter() / (16.0f * (skin->isSliderScorePoint2x() ? 2.0f : 1.0f))) * 0.125f;
+            (bm->m_fHitcircleDiameter / (16.0f * (skin->isSliderScorePoint2x() ? 2.0f : 1.0f))) * 0.125f;
         for(int t = 0; t < m_ticks.size(); t++) {
             if(m_ticks[t].finished || m_ticks[t].percent > sliderSnake) continue;
 
-            Vector2 pos = m_beatmap->osuCoords2Pixels(m_curve->pointAt(m_ticks[t].percent));
+            Vector2 pos = bm->osuCoords2Pixels(m_curve->pointAt(m_ticks[t].percent));
 
             g->setColor(tickColor);
             g->setAlpha(alpha);
@@ -295,26 +292,23 @@ void Slider::draw(Graphics *g) {
                           (int)(COLOR_GET_Bi(reverseArrowColor) * m_fHittableDimRGBColorMultiplierPercent));
 
                 float div = 0.30f;
-                float pulse = (div - fmod(std::abs(m_beatmap->getCurMusicPos()) / 1000.0f, div)) / div;
+                float pulse = (div - fmod(std::abs(bm->getCurMusicPos()) / 1000.0f, div)) / div;
                 pulse *= pulse;  // quad in
 
-                if(!osu_slider_reverse_arrow_animated.getBool() || m_beatmap->isInMafhamRenderChunk()) pulse = 0.0f;
+                if(!osu_slider_reverse_arrow_animated.getBool() || bm->isInMafhamRenderChunk()) pulse = 0.0f;
 
                 // end
                 if(m_iReverseArrowPos == 2 || m_iReverseArrowPos == 3) {
-                    /*Vector2 pos = m_beatmap->osuCoords2Pixels(m_curve->pointAt(sliderSnake));*/  // osu doesn't snake
-                                                                                                   // the reverse arrow
-                    Vector2 pos = m_beatmap->osuCoords2Pixels(m_curve->pointAt(1.0f));
-                    float rotation = m_curve->getEndAngle() - m_osu_playfield_rotation_ref->getFloat() -
-                                     m_beatmap->getPlayfieldRotation();
-                    if(osu->getModHR()) rotation = 360.0f - rotation;
+                    Vector2 pos = bm->osuCoords2Pixels(m_curve->pointAt(1.0f));
+                    float rotation =
+                        m_curve->getEndAngle() - m_osu_playfield_rotation_ref->getFloat() - bm->getPlayfieldRotation();
+                    if((bm->getModsLegacy() & ModFlags::HardRock)) rotation = 360.0f - rotation;
                     if(m_osu_playfield_mirror_horizontal_ref->getBool()) rotation = 360.0f - rotation;
                     if(m_osu_playfield_mirror_vertical_ref->getBool()) rotation = 180.0f - rotation;
 
-                    const float osuCoordScaleMultiplier =
-                        m_beatmap->getHitcircleDiameter() / m_beatmap->getRawHitcircleDiameter();
+                    const float osuCoordScaleMultiplier = bm->m_fHitcircleDiameter / bm->m_fRawHitcircleDiameter;
                     float reverseArrowImageScale =
-                        (m_beatmap->getRawHitcircleDiameter() / (128.0f * (skin->isReverseArrow2x() ? 2.0f : 1.0f))) *
+                        (bm->m_fRawHitcircleDiameter / (128.0f * (skin->isReverseArrow2x() ? 2.0f : 1.0f))) *
                         osuCoordScaleMultiplier;
 
                     reverseArrowImageScale *= 1.0f + pulse * 0.30f;
@@ -333,17 +327,16 @@ void Slider::draw(Graphics *g) {
 
                 // start
                 if(m_iReverseArrowPos == 1 || m_iReverseArrowPos == 3) {
-                    Vector2 pos = m_beatmap->osuCoords2Pixels(m_curve->pointAt(0.0f));
+                    Vector2 pos = bm->osuCoords2Pixels(m_curve->pointAt(0.0f));
                     float rotation = m_curve->getStartAngle() - m_osu_playfield_rotation_ref->getFloat() -
-                                     m_beatmap->getPlayfieldRotation();
-                    if(osu->getModHR()) rotation = 360.0f - rotation;
+                                     bm->getPlayfieldRotation();
+                    if((bm->getModsLegacy() & ModFlags::HardRock)) rotation = 360.0f - rotation;
                     if(m_osu_playfield_mirror_horizontal_ref->getBool()) rotation = 360.0f - rotation;
                     if(m_osu_playfield_mirror_vertical_ref->getBool()) rotation = 180.0f - rotation;
 
-                    const float osuCoordScaleMultiplier =
-                        m_beatmap->getHitcircleDiameter() / m_beatmap->getRawHitcircleDiameter();
+                    const float osuCoordScaleMultiplier = bm->m_fHitcircleDiameter / bm->m_fRawHitcircleDiameter;
                     float reverseArrowImageScale =
-                        (m_beatmap->getRawHitcircleDiameter() / (128.0f * (skin->isReverseArrow2x() ? 2.0f : 1.0f))) *
+                        (bm->m_fRawHitcircleDiameter / (128.0f * (skin->isReverseArrow2x() ? 2.0f : 1.0f))) *
                         osuCoordScaleMultiplier;
 
                     reverseArrowImageScale *= 1.0f + pulse * 0.30f;
@@ -367,20 +360,20 @@ void Slider::draw(Graphics *g) {
     bool instafade_slider_body = convar->getConVarByName("instafade_sliders")->getBool();
     bool instafade_slider_head = convar->getConVarByName("instafade")->getBool();
     if(!instafade_slider_body && m_fEndSliderBodyFadeAnimation > 0.0f && m_fEndSliderBodyFadeAnimation != 1.0f &&
-       !osu->getModHD()) {
+       !(bm->getModsLegacy() & ModFlags::Hidden)) {
         std::vector<Vector2> emptyVector;
         std::vector<Vector2> alwaysPoints;
-        alwaysPoints.push_back(m_beatmap->osuCoords2Pixels(m_curve->pointAt(m_fSlidePercent)));
+        alwaysPoints.push_back(bm->osuCoords2Pixels(m_curve->pointAt(m_fSlidePercent)));
         if(!osu_slider_shrink.getBool())
             drawBody(g, 1.0f - m_fEndSliderBodyFadeAnimation, 0, 1);
         else if(osu_slider_body_lazer_fadeout_style.getBool())
-            SliderRenderer::draw(g, emptyVector, alwaysPoints, m_beatmap->getHitcircleDiameter(), 0.0f, 0.0f,
-                                 m_beatmap->getSkin()->getComboColorForCounter(m_iColorCounter, m_iColorOffset), 1.0f,
+            SliderRenderer::draw(g, emptyVector, alwaysPoints, bm->m_fHitcircleDiameter, 0.0f, 0.0f,
+                                 bm->getSkin()->getComboColorForCounter(m_iColorCounter, m_iColorOffset), 1.0f,
                                  1.0f - m_fEndSliderBodyFadeAnimation, getTime());
     }
 
     if(!instafade_slider_head && osu_slider_sliderhead_fadeout.getBool() && m_fStartHitAnimation > 0.0f &&
-       m_fStartHitAnimation != 1.0f && !osu->getModHD()) {
+       m_fStartHitAnimation != 1.0f && !(bm->getModsLegacy() & ModFlags::Hidden)) {
         float alpha = 1.0f - m_fStartHitAnimation;
 
         float scale = m_fStartHitAnimation;
@@ -392,33 +385,32 @@ void Slider::draw(Graphics *g) {
         {
             g->scale((1.0f + scale * foscale), (1.0f + scale * foscale));
             if(m_iCurRepeat < 1) {
-                skin->getHitCircleOverlay2()->setAnimationTimeOffset(skin->getAnimationSpeed(),
-                                                                     !m_beatmap->isInMafhamRenderChunk()
-                                                                         ? m_iTime - m_iApproachTime
-                                                                         : m_beatmap->getCurMusicPosWithOffsets());
+                skin->getHitCircleOverlay2()->setAnimationTimeOffset(
+                    skin->getAnimationSpeed(),
+                    !bm->isInMafhamRenderChunk() ? m_iTime - m_iApproachTime : bm->getCurMusicPosWithOffsets());
                 skin->getSliderStartCircleOverlay2()->setAnimationTimeOffset(
-                    skin->getAnimationSpeed(), !m_beatmap->isInMafhamRenderChunk()
-                                                   ? m_iTime - m_iApproachTime
-                                                   : m_beatmap->getCurMusicPosWithOffsets());
+                    skin->getAnimationSpeed(),
+                    !bm->isInMafhamRenderChunk() ? m_iTime - m_iApproachTime : bm->getCurMusicPosWithOffsets());
 
-                Circle::drawSliderStartCircle(g, m_beatmap, m_curve->pointAt(0.0f), m_iComboNumber, m_iColorCounter,
+                Circle::drawSliderStartCircle(g, bm, m_curve->pointAt(0.0f), m_iComboNumber, m_iColorCounter,
                                               m_iColorOffset, 1.0f, 1.0f, alpha, alpha, drawNumber);
             } else {
                 skin->getHitCircleOverlay2()->setAnimationTimeOffset(
                     skin->getAnimationSpeed(),
-                    !m_beatmap->isInMafhamRenderChunk() ? m_iTime : m_beatmap->getCurMusicPosWithOffsets());
+                    !bm->isInMafhamRenderChunk() ? m_iTime : bm->getCurMusicPosWithOffsets());
                 skin->getSliderEndCircleOverlay2()->setAnimationTimeOffset(
                     skin->getAnimationSpeed(),
-                    !m_beatmap->isInMafhamRenderChunk() ? m_iTime : m_beatmap->getCurMusicPosWithOffsets());
+                    !bm->isInMafhamRenderChunk() ? m_iTime : bm->getCurMusicPosWithOffsets());
 
-                Circle::drawSliderEndCircle(g, m_beatmap, m_curve->pointAt(0.0f), m_iComboNumber, m_iColorCounter,
+                Circle::drawSliderEndCircle(g, bm, m_curve->pointAt(0.0f), m_iComboNumber, m_iColorCounter,
                                             m_iColorOffset, 1.0f, 1.0f, alpha, alpha, drawNumber);
             }
         }
         g->popTransform();
     }
 
-    if(!instafade_slider_head && m_fEndHitAnimation > 0.0f && m_fEndHitAnimation != 1.0f && !osu->getModHD()) {
+    if(!instafade_slider_head && m_fEndHitAnimation > 0.0f && m_fEndHitAnimation != 1.0f &&
+       !(bm->getModsLegacy() & ModFlags::Hidden)) {
         float alpha = 1.0f - m_fEndHitAnimation;
 
         float scale = m_fEndHitAnimation;
@@ -428,16 +420,14 @@ void Slider::draw(Graphics *g) {
         {
             g->scale((1.0f + scale * foscale), (1.0f + scale * foscale));
             {
-                skin->getHitCircleOverlay2()->setAnimationTimeOffset(skin->getAnimationSpeed(),
-                                                                     !m_beatmap->isInMafhamRenderChunk()
-                                                                         ? m_iTime - m_iFadeInTime
-                                                                         : m_beatmap->getCurMusicPosWithOffsets());
+                skin->getHitCircleOverlay2()->setAnimationTimeOffset(
+                    skin->getAnimationSpeed(),
+                    !bm->isInMafhamRenderChunk() ? m_iTime - m_iFadeInTime : bm->getCurMusicPosWithOffsets());
                 skin->getSliderEndCircleOverlay2()->setAnimationTimeOffset(
-                    skin->getAnimationSpeed(), !m_beatmap->isInMafhamRenderChunk()
-                                                   ? m_iTime - m_iFadeInTime
-                                                   : m_beatmap->getCurMusicPosWithOffsets());
+                    skin->getAnimationSpeed(),
+                    !bm->isInMafhamRenderChunk() ? m_iTime - m_iFadeInTime : bm->getCurMusicPosWithOffsets());
 
-                Circle::drawSliderEndCircle(g, m_beatmap, m_curve->pointAt(1.0f), m_iComboNumber, m_iColorCounter,
+                Circle::drawSliderEndCircle(g, bm, m_curve->pointAt(1.0f), m_iComboNumber, m_iColorCounter,
                                             m_iColorOffset, 1.0f, 1.0f, alpha, 0.0f, false);
             }
         }
@@ -452,7 +442,7 @@ void Slider::draw2(Graphics *g) { draw2(g, true, false); }
 void Slider::draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCircle) {
     HitObject::draw2(g);
 
-    Skin *skin = m_beatmap->getSkin();
+    Skin *skin = bm->getSkin();
 
     // HACKHACK: so much code duplication aaaaaaah
     if((m_bVisible || (m_bStartFinished && !m_bFinished)) &&
@@ -470,7 +460,7 @@ void Slider::draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCi
 
             // start circle
             if(!m_bStartFinished || !sliderRepeatStartCircleFinished || (!m_bEndFinished && m_iRepeat % 2 == 0)) {
-                Circle::drawApproachCircle(g, m_beatmap, m_curve->pointAt(0.0f), m_iComboNumber, m_iColorCounter,
+                Circle::drawApproachCircle(g, bm, m_curve->pointAt(0.0f), m_iComboNumber, m_iColorCounter,
                                            m_iColorOffset, m_fHittableDimRGBColorMultiplierPercent, m_fApproachScale,
                                            m_fAlphaForApproachCircle, m_bOverrideHDApproachCircle);
             }
@@ -482,9 +472,11 @@ void Slider::draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCi
     // draw followcircle
     // HACKHACK: this is not entirely correct (due to m_bHeldTillEnd, if held within 300 range but then released, will
     // flash followcircle at the end)
-    if((m_bVisible && m_bCursorInside && (isClickHeldSlider() || osu->getModAuto() || osu->getModRelax())) ||
+    if((m_bVisible && m_bCursorInside &&
+        (isClickHeldSlider() || (bm->getModsLegacy() & ModFlags::Autoplay) ||
+         (bm->getModsLegacy() & ModFlags::Relax))) ||
        (m_bFinished && m_fFollowCircleAnimationAlpha > 0.0f && m_bHeldTillEnd)) {
-        Vector2 point = m_beatmap->osuCoords2Pixels(m_vCurPointRaw);
+        Vector2 point = bm->osuCoords2Pixels(m_vCurPointRaw);
 
         // HACKHACK: this is shit
         float tickAnimation =
@@ -502,7 +494,7 @@ void Slider::draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCi
         skin->getSliderFollowCircle2()->setAnimationTimeOffset(skin->getAnimationSpeed(), m_iTime);
         skin->getSliderFollowCircle2()->drawRaw(
             g, point,
-            (m_beatmap->getSliderFollowCircleDiameter() / skin->getSliderFollowCircle2()->getSizeBaseRaw().x) *
+            (bm->m_fSliderFollowCircleDiameter / skin->getSliderFollowCircle2()->getSizeBaseRaw().x) *
                 tickAnimationScale * m_fFollowCircleAnimationScale *
                 0.85f);  // this is a bit strange, but seems to work perfectly with 0.85
     }
@@ -516,10 +508,10 @@ void Slider::draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCi
     {
         if(m_fSlidePercent > 0.0f) {
             // draw sliderb
-            Vector2 point = m_beatmap->osuCoords2Pixels(m_vCurPointRaw);
-            Vector2 c1 = m_beatmap->osuCoords2Pixels(
+            Vector2 point = bm->osuCoords2Pixels(m_vCurPointRaw);
+            Vector2 c1 = bm->osuCoords2Pixels(
                 m_curve->pointAt(m_fSlidePercent + 0.01f <= 1.0f ? m_fSlidePercent : m_fSlidePercent - 0.01f));
-            Vector2 c2 = m_beatmap->osuCoords2Pixels(
+            Vector2 c2 = bm->osuCoords2Pixels(
                 m_curve->pointAt(m_fSlidePercent + 0.01f <= 1.0f ? m_fSlidePercent + 0.01f : m_fSlidePercent));
             float ballAngle = rad2deg(atan2(c2.y - c1.y, c2.x - c1.x));
             if(skin->getSliderBallFlip()) ballAngle += (m_iCurRepeat % 2 == 0) ? 0 : 180;
@@ -534,7 +526,7 @@ void Slider::draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCi
                 g->rotate(ballAngle);
                 skin->getSliderb()->setAnimationTimeOffset(skin->getAnimationSpeed(), m_iTime);
                 skin->getSliderb()->drawRaw(g, point,
-                                            m_beatmap->getHitcircleDiameter() / skin->getSliderb()->getSizeBaseRaw().x);
+                                            bm->m_fHitcircleDiameter / skin->getSliderb()->getSizeBaseRaw().x);
             }
             g->popTransform();
         }
@@ -542,47 +534,42 @@ void Slider::draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCi
 }
 
 void Slider::drawStartCircle(Graphics *g, float alpha) {
-    Skin *skin = m_beatmap->getSkin();
+    Skin *skin = bm->getSkin();
 
     if(m_bStartFinished) {
         skin->getHitCircleOverlay2()->setAnimationTimeOffset(
-            skin->getAnimationSpeed(),
-            !m_beatmap->isInMafhamRenderChunk() ? m_iTime : m_beatmap->getCurMusicPosWithOffsets());
+            skin->getAnimationSpeed(), !bm->isInMafhamRenderChunk() ? m_iTime : bm->getCurMusicPosWithOffsets());
         skin->getSliderEndCircleOverlay2()->setAnimationTimeOffset(
-            skin->getAnimationSpeed(),
-            !m_beatmap->isInMafhamRenderChunk() ? m_iTime : m_beatmap->getCurMusicPosWithOffsets());
+            skin->getAnimationSpeed(), !bm->isInMafhamRenderChunk() ? m_iTime : bm->getCurMusicPosWithOffsets());
 
-        Circle::drawSliderEndCircle(g, m_beatmap, m_curve->pointAt(0.0f), m_iComboNumber, m_iColorCounter,
-                                    m_iColorOffset, m_fHittableDimRGBColorMultiplierPercent, 1.0f, m_fAlpha, 0.0f,
-                                    false, false);
+        Circle::drawSliderEndCircle(g, bm, m_curve->pointAt(0.0f), m_iComboNumber, m_iColorCounter, m_iColorOffset,
+                                    m_fHittableDimRGBColorMultiplierPercent, 1.0f, m_fAlpha, 0.0f, false, false);
     } else {
         skin->getHitCircleOverlay2()->setAnimationTimeOffset(
             skin->getAnimationSpeed(),
-            !m_beatmap->isInMafhamRenderChunk() ? m_iTime - m_iApproachTime : m_beatmap->getCurMusicPosWithOffsets());
+            !bm->isInMafhamRenderChunk() ? m_iTime - m_iApproachTime : bm->getCurMusicPosWithOffsets());
         skin->getSliderStartCircleOverlay2()->setAnimationTimeOffset(
             skin->getAnimationSpeed(),
-            !m_beatmap->isInMafhamRenderChunk() ? m_iTime - m_iApproachTime : m_beatmap->getCurMusicPosWithOffsets());
+            !bm->isInMafhamRenderChunk() ? m_iTime - m_iApproachTime : bm->getCurMusicPosWithOffsets());
 
-        Circle::drawSliderStartCircle(g, m_beatmap, m_curve->pointAt(0.0f), m_iComboNumber, m_iColorCounter,
-                                      m_iColorOffset, m_fHittableDimRGBColorMultiplierPercent, m_fApproachScale,
-                                      m_fAlpha, m_fAlpha, !m_bHideNumberAfterFirstRepeatHit,
-                                      m_bOverrideHDApproachCircle);
+        Circle::drawSliderStartCircle(g, bm, m_curve->pointAt(0.0f), m_iComboNumber, m_iColorCounter, m_iColorOffset,
+                                      m_fHittableDimRGBColorMultiplierPercent, m_fApproachScale, m_fAlpha, m_fAlpha,
+                                      !m_bHideNumberAfterFirstRepeatHit, m_bOverrideHDApproachCircle);
     }
 }
 
 void Slider::drawEndCircle(Graphics *g, float alpha, float sliderSnake) {
-    Skin *skin = m_beatmap->getSkin();
+    Skin *skin = bm->getSkin();
 
     skin->getHitCircleOverlay2()->setAnimationTimeOffset(
         skin->getAnimationSpeed(),
-        !m_beatmap->isInMafhamRenderChunk() ? m_iTime - m_iFadeInTime : m_beatmap->getCurMusicPosWithOffsets());
+        !bm->isInMafhamRenderChunk() ? m_iTime - m_iFadeInTime : bm->getCurMusicPosWithOffsets());
     skin->getSliderEndCircleOverlay2()->setAnimationTimeOffset(
         skin->getAnimationSpeed(),
-        !m_beatmap->isInMafhamRenderChunk() ? m_iTime - m_iFadeInTime : m_beatmap->getCurMusicPosWithOffsets());
+        !bm->isInMafhamRenderChunk() ? m_iTime - m_iFadeInTime : bm->getCurMusicPosWithOffsets());
 
-    Circle::drawSliderEndCircle(g, m_beatmap, m_curve->pointAt(sliderSnake), m_iComboNumber, m_iColorCounter,
-                                m_iColorOffset, m_fHittableDimRGBColorMultiplierPercent, 1.0f, m_fAlpha, 0.0f, false,
-                                false);
+    Circle::drawSliderEndCircle(g, bm, m_curve->pointAt(sliderSnake), m_iComboNumber, m_iColorCounter, m_iColorOffset,
+                                m_fHittableDimRGBColorMultiplierPercent, 1.0f, m_fAlpha, 0.0f, false, false);
 }
 
 void Slider::drawBody(Graphics *g, float alpha, float from, float to) {
@@ -590,27 +577,27 @@ void Slider::drawBody(Graphics *g, float alpha, float from, float to) {
     std::vector<Vector2> alwaysPoints;
     if(osu_slider_body_smoothsnake.getBool()) {
         if(osu_slider_shrink.getBool() && m_fSliderSnakePercent > 0.999f) {
-            alwaysPoints.push_back(m_beatmap->osuCoords2Pixels(m_curve->pointAt(m_fSlidePercent)));  // curpoint
-            alwaysPoints.push_back(m_beatmap->osuCoords2Pixels(
+            alwaysPoints.push_back(bm->osuCoords2Pixels(m_curve->pointAt(m_fSlidePercent)));  // curpoint
+            alwaysPoints.push_back(bm->osuCoords2Pixels(
                 getRawPosAt(m_iTime + m_iObjectDuration + 1)));  // endpoint (because setDrawPercent() causes the last
                                                                  // circle mesh to become invisible too quickly)
         }
         if(osu_snaking_sliders.getBool() && m_fSliderSnakePercent < 1.0f)
-            alwaysPoints.push_back(m_beatmap->osuCoords2Pixels(
+            alwaysPoints.push_back(bm->osuCoords2Pixels(
                 m_curve->pointAt(m_fSliderSnakePercent)));  // snakeoutpoint (only while snaking out)
     }
 
-    const Color undimmedComboColor = m_beatmap->getSkin()->getComboColorForCounter(m_iColorCounter, m_iColorOffset);
+    const Color undimmedComboColor = bm->getSkin()->getComboColorForCounter(m_iColorCounter, m_iColorOffset);
 
     if(osu->shouldFallBackToLegacySliderRenderer()) {
         std::vector<Vector2> screenPoints = m_curve->getPoints();
         for(int p = 0; p < screenPoints.size(); p++) {
-            screenPoints[p] = m_beatmap->osuCoords2Pixels(screenPoints[p]);
+            screenPoints[p] = bm->osuCoords2Pixels(screenPoints[p]);
         }
 
         // peppy sliders
-        SliderRenderer::draw(g, screenPoints, alwaysPoints, m_beatmap->getHitcircleDiameter(), from, to,
-                             undimmedComboColor, m_fHittableDimRGBColorMultiplierPercent, alpha, getTime());
+        SliderRenderer::draw(g, screenPoints, alwaysPoints, bm->m_fHitcircleDiameter, from, to, undimmedComboColor,
+                             m_fHittableDimRGBColorMultiplierPercent, alpha, getTime());
     } else {
         // vertex buffered sliders
         // as the base mesh is centered at (0, 0, 0) and in raw osu coordinates, we have to scale and translate it to
@@ -618,13 +605,13 @@ void Slider::drawBody(Graphics *g, float alpha, float from, float to) {
         const float scale = GameRules::getPlayfieldScaleFactor();
         Vector2 translation = GameRules::getPlayfieldCenter();
 
-        if(m_beatmap->hasFailed())
+        if(bm->hasFailed())
             translation =
-                m_beatmap->osuCoords2Pixels(Vector2(GameRules::OSU_COORD_WIDTH / 2, GameRules::OSU_COORD_HEIGHT / 2));
+                bm->osuCoords2Pixels(Vector2(GameRules::OSU_COORD_WIDTH / 2, GameRules::OSU_COORD_HEIGHT / 2));
 
-        if(m_osu_mod_fps_ref->getBool()) translation += m_beatmap->getFirstPersonCursorDelta();
+        if(m_osu_mod_fps_ref->getBool()) translation += bm->getFirstPersonCursorDelta();
 
-        SliderRenderer::draw(g, m_vao, alwaysPoints, translation, scale, m_beatmap->getHitcircleDiameter(), from, to,
+        SliderRenderer::draw(g, m_vao, alwaysPoints, translation, scale, bm->m_fHitcircleDiameter, from, to,
                              undimmedComboColor, m_fHittableDimRGBColorMultiplierPercent, alpha, getTime());
     }
 }
@@ -637,12 +624,15 @@ void Slider::update(long curPos) {
         m_epilepsy_ref->setValue(0.0f);
     }
 
-    // stop slide sound while paused
-    if(m_beatmap->isPaused() || !m_beatmap->isPlaying() || m_beatmap->hasFailed())
-        m_beatmap->getSkin()->stopSliderSlideSound();
+    if(bm != NULL) {
+        // stop slide sound while paused
+        if(bm->isPaused() || !bm->isPlaying() || bm->hasFailed()) {
+            bm->getSkin()->stopSliderSlideSound();
+        }
 
-    // animations must be updated even if we are finished
-    updateAnimations(curPos);
+        // animations must be updated even if we are finished
+        updateAnimations(curPos);
+    }
 
     // all further calculations are only done while we are active
     if(m_bFinished) return;
@@ -667,7 +657,7 @@ void Slider::update(long curPos) {
     m_fReverseArrowAlpha *= osu_slider_reverse_arrow_alpha_multiplier.getFloat();
 
     m_fBodyAlpha = m_fAlpha;
-    if(osu->getModHD())  // hidden modifies the body alpha
+    if((bi->getModsLegacy() & ModFlags::Hidden))  // hidden modifies the body alpha
     {
         m_fBodyAlpha = m_fAlphaWithoutHidden;  // fade in as usual
 
@@ -715,52 +705,51 @@ void Slider::update(long curPos) {
         }
 
         m_vCurPointRaw = m_curve->pointAt(m_fSlidePercent);
-        m_vCurPoint = m_beatmap->osuCoords2Pixels(m_vCurPointRaw);
+        m_vCurPoint = bi->osuCoords2Pixels(m_vCurPointRaw);
     } else {
         m_vCurPointRaw = m_curve->pointAt(0.0f);
-        m_vCurPoint = m_beatmap->osuCoords2Pixels(m_vCurPointRaw);
+        m_vCurPoint = bi->osuCoords2Pixels(m_vCurPointRaw);
     }
 
     // When fat finger key is released, remove isClickHeldSlider() restrictions
-    if(m_iFatFingerKey == 1 && !m_beatmap->isKey1Down()) m_iFatFingerKey = 0;
-    if(m_iFatFingerKey == 2 && !m_beatmap->isKey2Down()) m_iFatFingerKey = 0;
+    if(m_iFatFingerKey == 1 && !bi->isKey1Down()) m_iFatFingerKey = 0;
+    if(m_iFatFingerKey == 2 && !bi->isKey2Down()) m_iFatFingerKey = 0;
 
     // handle dynamic followradius
-    float followRadius =
-        m_bCursorLeft ? m_beatmap->getHitcircleDiameter() / 2.0f : m_beatmap->getSliderFollowCircleDiameter() / 2.0f;
-    const bool isBeatmapCursorInside = ((m_beatmap->getCursorPos() - m_vCurPoint).length() < followRadius);
+    float followRadius = m_bCursorLeft ? bi->m_fHitcircleDiameter / 2.0f : bi->m_fSliderFollowCircleDiameter / 2.0f;
+    const bool isBeatmapCursorInside = ((bi->getCursorPos() - m_vCurPoint).length() < followRadius);
     const bool isAutoCursorInside =
-        (osu->getModAuto() && (!m_osu_auto_cursordance_ref->getBool() ||
-                               ((m_beatmap->getCursorPos() - m_vCurPoint).length() < followRadius)));
+        ((bi->getModsLegacy() & ModFlags::Autoplay) &&
+         (!m_osu_auto_cursordance_ref->getBool() || ((bi->getCursorPos() - m_vCurPoint).length() < followRadius)));
     m_bCursorInside = (isAutoCursorInside || isBeatmapCursorInside);
     m_bCursorLeft = !m_bCursorInside;
 
     // handle slider start
     if(!m_bStartFinished) {
-        if(osu->getModAuto()) {
+        if((bi->getModsLegacy() & ModFlags::Autoplay)) {
             if(curPos >= m_iTime) {
                 onHit(LiveScore::HIT::HIT_300, 0, false);
-                osu->holding_slider = true;
+                bi->holding_slider = true;
             }
         } else {
             long delta = curPos - m_iTime;
 
-            if(osu->getModRelax()) {
-                if(curPos >= m_iTime + (long)m_osu_relax_offset_ref->getInt() && !m_beatmap->isPaused() &&
-                   !m_beatmap->isContinueScheduled()) {
-                    const Vector2 pos = m_beatmap->osuCoords2Pixels(m_curve->pointAt(0.0f));
-                    const float cursorDelta = (m_beatmap->getCursorPos() - pos).length();
-                    if((cursorDelta < m_beatmap->getHitcircleDiameter() / 2.0f && osu->getModRelax())) {
-                        LiveScore::HIT result = GameRules::getHitResult(delta, m_beatmap);
+            if((bi->getModsLegacy() & ModFlags::Relax)) {
+                if(curPos >= m_iTime + (long)m_osu_relax_offset_ref->getInt() && !bi->isPaused() &&
+                   !bi->isContinueScheduled()) {
+                    const Vector2 pos = bi->osuCoords2Pixels(m_curve->pointAt(0.0f));
+                    const float cursorDelta = (bi->getCursorPos() - pos).length();
+                    if((cursorDelta < bi->m_fHitcircleDiameter / 2.0f && (bi->getModsLegacy() & ModFlags::Relax))) {
+                        LiveScore::HIT result = bi->getHitResult(delta);
 
                         if(result != LiveScore::HIT::HIT_NULL) {
-                            const float targetDelta = cursorDelta / (m_beatmap->getHitcircleDiameter() / 2.0f);
-                            const float targetAngle = rad2deg(
-                                atan2(m_beatmap->getCursorPos().y - pos.y, m_beatmap->getCursorPos().x - pos.x));
+                            const float targetDelta = cursorDelta / (bi->m_fHitcircleDiameter / 2.0f);
+                            const float targetAngle =
+                                rad2deg(atan2(bi->getCursorPos().y - pos.y, bi->getCursorPos().x - pos.x));
 
                             m_startResult = result;
                             onHit(m_startResult, delta, false, targetDelta, targetAngle);
-                            osu->holding_slider = true;
+                            bi->holding_slider = true;
                         }
                     }
                 }
@@ -769,10 +758,10 @@ void Slider::update(long curPos) {
             // wait for a miss
             if(delta >= 0) {
                 // if this is a miss after waiting
-                if(delta > (long)GameRules::getHitWindow50(m_beatmap)) {
+                if(delta > (long)bi->getHitWindow50()) {
                     m_startResult = LiveScore::HIT::HIT_MISS;
                     onHit(m_startResult, delta, false);
-                    osu->holding_slider = false;
+                    bi->holding_slider = false;
                 }
             }
         }
@@ -794,7 +783,8 @@ void Slider::update(long curPos) {
         // because fuck you
         const long offset = (long)osu_slider_end_inside_check_offset.getInt();
         const long lenienceHackEndTime = max(m_iTime + m_iObjectDuration / 2, (m_iTime + m_iObjectDuration) - offset);
-        const bool isTrackingCorrectly = (isClickHeldSlider() || osu->getModRelax()) && m_bCursorInside;
+        const bool isTrackingCorrectly =
+            (isClickHeldSlider() || (bi->getModsLegacy() & ModFlags::Relax)) && m_bCursorInside;
         if(isTrackingCorrectly) {
             if(isTrackingStrictTrackingMod) {
                 m_iStrictTrackingModLastClickHeldTime = curPos;
@@ -854,8 +844,9 @@ void Slider::update(long curPos) {
         for(int i = 0; i < m_clicks.size(); i++) {
             if(!m_clicks[i].finished && curPos >= m_clicks[i].time) {
                 m_clicks[i].finished = true;
-                m_clicks[i].successful = (isClickHeldSlider() && m_bCursorInside) || osu->getModAuto() ||
-                                         (osu->getModRelax() && m_bCursorInside);
+                m_clicks[i].successful = (isClickHeldSlider() && m_bCursorInside) ||
+                                         (bi->getModsLegacy() & ModFlags::Autoplay) ||
+                                         ((bi->getModsLegacy() & ModFlags::Relax) && m_bCursorInside);
 
                 if(m_clicks[i].type == 0)
                     onRepeatHit(m_clicks[i].successful, m_clicks[i].sliderend);
@@ -865,11 +856,11 @@ void Slider::update(long curPos) {
         }
 
         // handle auto, and the last circle
-        if(osu->getModAuto()) {
+        if((bi->getModsLegacy() & ModFlags::Autoplay)) {
             if(curPos >= m_iTime + m_iObjectDuration) {
                 m_bHeldTillEnd = true;
                 onHit(LiveScore::HIT::HIT_300, 0, true);
-                osu->holding_slider = false;
+                bi->holding_slider = false;
             }
         } else {
             if(curPos >= m_iTime + m_iObjectDuration) {
@@ -882,8 +873,8 @@ void Slider::update(long curPos) {
 
                         // special case: missing the startcircle drains HIT_MISS_SLIDERBREAK health (and not HIT_MISS
                         // health)
-                        m_beatmap->addHitResult(this, LiveScore::HIT::HIT_MISS_SLIDERBREAK, 0, false, true, true, true,
-                                                true, false);  // only decrease health
+                        bi->addHitResult(this, LiveScore::HIT::HIT_MISS_SLIDERBREAK, 0, false, true, true, true, true,
+                                         false);  // only decrease health
 
                         m_startResult = LiveScore::HIT::HIT_MISS;
                     }
@@ -909,11 +900,10 @@ void Slider::update(long curPos) {
 
                     const float percent = numActualHits / numMaxPossibleHits;
 
-                    const bool allow300 = (osu_slider_scorev2.getBool() || osu->getModScorev2())
-                                              ? (m_startResult == LiveScore::HIT::HIT_300)
-                                              : true;
+                    const bool allow300 =
+                        (bi->getModsLegacy() & ModFlags::ScoreV2) ? (m_startResult == LiveScore::HIT::HIT_300) : true;
                     const bool allow100 =
-                        (osu_slider_scorev2.getBool() || osu->getModScorev2())
+                        (bi->getModsLegacy() & ModFlags::ScoreV2)
                             ? (m_startResult == LiveScore::HIT::HIT_300 || m_startResult == LiveScore::HIT::HIT_100)
                             : true;
 
@@ -936,27 +926,32 @@ void Slider::update(long curPos) {
                     isEndResultComingFromStrictTrackingMod = true;
 
                 onHit(m_endResult, 0, true, 0.0f, 0.0f, isEndResultComingFromStrictTrackingMod);
-                osu->holding_slider = false;
+                bi->holding_slider = false;
             }
         }
 
         // handle sliderslide sound
-        if(m_bStartFinished && !m_bEndFinished && m_bCursorInside && m_iDelta <= 0 &&
-           (isClickHeldSlider() || osu->getModAuto() || osu->getModRelax()) && !m_beatmap->isPaused() &&
-           !m_beatmap->isWaiting() && m_beatmap->isPlaying()) {
-            const Vector2 osuCoords = m_beatmap->pixels2OsuCoords(m_beatmap->osuCoords2Pixels(m_vCurPointRaw));
+        if(bm != NULL) {
+            bool sliding = m_bStartFinished && !m_bEndFinished && m_bCursorInside && m_iDelta <= 0;
+            sliding &= (isClickHeldSlider() || (bm->getModsLegacy() & ModFlags::Autoplay) ||
+                        (bm->getModsLegacy() & ModFlags::Relax));
+            sliding &= !bm->isPaused() && !bm->isWaiting() && bm->isPlaying();
 
-            m_beatmap->getSkin()->playSliderSlideSound(GameRules::osuCoords2Pan(osuCoords.x));
-            m_iPrevSliderSlideSoundSampleSet = m_beatmap->getSkin()->getSampleSet();
-        } else {
-            m_beatmap->getSkin()->stopSliderSlideSound(m_iPrevSliderSlideSoundSampleSet);
-            m_iPrevSliderSlideSoundSampleSet = -1;
+            if(sliding) {
+                const Vector2 osuCoords = bm->pixels2OsuCoords(bm->osuCoords2Pixels(m_vCurPointRaw));
+
+                bm->getSkin()->playSliderSlideSound(GameRules::osuCoords2Pan(osuCoords.x));
+                m_iPrevSliderSlideSoundSampleSet = bm->getSkin()->getSampleSet();
+            } else {
+                bm->getSkin()->stopSliderSlideSound(m_iPrevSliderSlideSoundSampleSet);
+                m_iPrevSliderSlideSoundSampleSet = -1;
+            }
         }
     }
 }
 
 void Slider::updateAnimations(long curPos) {
-    float animation_multiplier = osu->getSpeedMultiplier() / osu->getAnimationSpeedMultiplier();
+    float animation_multiplier = bi->getSpeedMultiplier() / osu->getAnimationSpeedMultiplier();
 
     float fadein_fade_time = GameRules::osu_slider_followcircle_fadein_fade_time.getFloat() * animation_multiplier;
     float fadeout_fade_time = GameRules::osu_slider_followcircle_fadeout_fade_time.getFloat() * animation_multiplier;
@@ -994,7 +989,8 @@ void Slider::updateAnimations(long curPos) {
 }
 
 void Slider::updateStackPosition(float stackOffset) {
-    if(m_curve != NULL) m_curve->updateStackPosition(m_iStack * stackOffset, osu->getModHR());
+    if(m_curve != NULL)
+        m_curve->updateStackPosition(m_iStack * stackOffset, (bi->getModsLegacy() & ModFlags::HardRock));
 }
 
 void Slider::miss(long curPos) {
@@ -1006,7 +1002,7 @@ void Slider::miss(long curPos) {
     if(!m_bStartFinished) {
         m_startResult = LiveScore::HIT::HIT_MISS;
         onHit(m_startResult, delta, false);
-        osu->holding_slider = false;
+        bi->holding_slider = false;
     }
 
     // endcircle, repeats, ticks
@@ -1034,7 +1030,7 @@ void Slider::miss(long curPos) {
 
             m_endResult = LiveScore::HIT::HIT_MISS;
             onHit(m_endResult, 0, true);
-            osu->holding_slider = false;
+            bi->holding_slider = false;
         }
     }
 }
@@ -1084,21 +1080,21 @@ void Slider::onClickEvent(std::vector<Click> &clicks) {
 
     if(!m_bStartFinished) {
         const Vector2 cursorPos = clicks[0].pos;
-        const Vector2 pos = m_beatmap->osuCoords2Pixels(m_curve->pointAt(0.0f));
+        const Vector2 pos = bi->osuCoords2Pixels(m_curve->pointAt(0.0f));
         const float cursorDelta = (cursorPos - pos).length();
 
-        if(cursorDelta < m_beatmap->getHitcircleDiameter() / 2.0f) {
+        if(cursorDelta < bi->m_fHitcircleDiameter / 2.0f) {
             const long delta = clicks[0].tms - (long)m_iTime;
 
-            LiveScore::HIT result = GameRules::getHitResult(delta, m_beatmap);
+            LiveScore::HIT result = bi->getHitResult(delta);
             if(result != LiveScore::HIT::HIT_NULL) {
-                const float targetDelta = cursorDelta / (m_beatmap->getHitcircleDiameter() / 2.0f);
+                const float targetDelta = cursorDelta / (bi->m_fHitcircleDiameter / 2.0f);
                 const float targetAngle = rad2deg(atan2(cursorPos.y - pos.y, cursorPos.x - pos.x));
 
                 clicks.erase(clicks.begin());
                 m_startResult = result;
                 onHit(m_startResult, delta, false, targetDelta, targetAngle);
-                osu->holding_slider = true;
+                bi->holding_slider = true;
             }
         }
     }
@@ -1116,40 +1112,40 @@ void Slider::onHit(LiveScore::HIT result, long delta, bool startOrEnd, float tar
     {
         if(result == LiveScore::HIT::HIT_MISS) {
             if(!isEndResultFromStrictTrackingMod) onSliderBreak();
-        } else {
+        } else if(bm != NULL) {
             if(m_osu_timingpoints_force->getBool())
-                m_beatmap->updateTimingPoints(m_iTime + (!startOrEnd ? 0 : m_iObjectDuration));
+                bm->updateTimingPoints(m_iTime + (!startOrEnd ? 0 : m_iObjectDuration));
 
-            const Vector2 osuCoords = m_beatmap->pixels2OsuCoords(m_beatmap->osuCoords2Pixels(m_vCurPointRaw));
+            const Vector2 osuCoords = bm->pixels2OsuCoords(bm->osuCoords2Pixels(m_vCurPointRaw));
 
             const long sound_delta = result == LiveScore::HIT::HIT_300 ? 0 : delta;
-            m_beatmap->getSkin()->playHitCircleSound(m_iCurRepeatCounterForHitSounds < m_hitSounds.size()
-                                                         ? m_hitSounds[m_iCurRepeatCounterForHitSounds]
-                                                         : m_iSampleType,
-                                                     GameRules::osuCoords2Pan(osuCoords.x), sound_delta);
+            bm->getSkin()->playHitCircleSound(m_iCurRepeatCounterForHitSounds < m_hitSounds.size()
+                                                  ? m_hitSounds[m_iCurRepeatCounterForHitSounds]
+                                                  : m_iSampleType,
+                                              GameRules::osuCoords2Pan(osuCoords.x), sound_delta);
 
             if(!startOrEnd) {
                 m_fStartHitAnimation = 0.001f;  // quickfix for 1 frame missing images
-                anim->moveQuadOut(&m_fStartHitAnimation, 1.0f, GameRules::getFadeOutTime(m_beatmap), true);
+                anim->moveQuadOut(&m_fStartHitAnimation, 1.0f, GameRules::getFadeOutTime(bm), true);
             } else {
                 if(m_iRepeat % 2 != 0) {
                     m_fEndHitAnimation = 0.001f;  // quickfix for 1 frame missing images
-                    anim->moveQuadOut(&m_fEndHitAnimation, 1.0f, GameRules::getFadeOutTime(m_beatmap), true);
+                    anim->moveQuadOut(&m_fEndHitAnimation, 1.0f, GameRules::getFadeOutTime(bm), true);
                 } else {
                     m_fStartHitAnimation = 0.001f;  // quickfix for 1 frame missing images
-                    anim->moveQuadOut(&m_fStartHitAnimation, 1.0f, GameRules::getFadeOutTime(m_beatmap), true);
+                    anim->moveQuadOut(&m_fStartHitAnimation, 1.0f, GameRules::getFadeOutTime(bm), true);
                 }
             }
         }
 
         // end body fadeout
-        if(startOrEnd) {
+        if(bm != NULL && startOrEnd) {
             m_fEndSliderBodyFadeAnimation = 0.001f;  // quickfix for 1 frame missing images
-            anim->moveQuadOut(
-                &m_fEndSliderBodyFadeAnimation, 1.0f,
-                GameRules::getFadeOutTime(m_beatmap) * osu_slider_body_fade_out_time_multiplier.getFloat(), true);
+            anim->moveQuadOut(&m_fEndSliderBodyFadeAnimation, 1.0f,
+                              GameRules::getFadeOutTime(bm) * osu_slider_body_fade_out_time_multiplier.getFloat(),
+                              true);
 
-            m_beatmap->getSkin()->stopSliderSlideSound();
+            bm->getSkin()->stopSliderSlideSound();
         }
     }
 
@@ -1160,8 +1156,8 @@ void Slider::onHit(LiveScore::HIT result, long delta, bool startOrEnd, float tar
         m_bStartFinished = true;
 
         // The player entered the slider by fat fingering, so...
-        if(m_beatmap->isKey1Down() && m_beatmap->isKey2Down()) {
-            if(m_beatmap->isLastKeyDownKey1()) {
+        if(bi->isKey1Down() && bi->isKey2Down()) {
+            if(bi->m_bPrevKeyWasKey1) {
                 // Player pressed K1 last: "fat finger" key is K2
                 m_iFatFingerKey = 2;
             } else {
@@ -1170,11 +1166,10 @@ void Slider::onHit(LiveScore::HIT result, long delta, bool startOrEnd, float tar
             }
         }
 
-        if(!osu->getModTarget())
-            m_beatmap->addHitResult(
-                this, result, delta, false, false, true, false, true,
-                true);  // not end of combo, show in hiterrorbar, ignore for accuracy, increase combo, don't count
-                        // towards score, depending on scorev2 ignore for health or not
+        if(!(bi->getModsLegacy() & ModFlags::Target))
+            bi->addHitResult(this, result, delta, false, false, true, false, true,
+                             true);  // not end of combo, show in hiterrorbar, ignore for accuracy, increase combo,
+                                     // don't count towards score, depending on scorev2 ignore for health or not
         else
             addHitResult(result, delta, false, m_curve->pointAt(0.0f), targetDelta, targetAngle, false, false, true,
                          false);  // not end of combo, show in hiterrorbar, use for accuracy, increase combo, increase
@@ -1184,13 +1179,13 @@ void Slider::onHit(LiveScore::HIT result, long delta, bool startOrEnd, float tar
         if(result != LiveScore::HIT::HIT_MISS) {
             LiveScore::HIT resultForHealth = LiveScore::HIT::HIT_SLIDER30;
 
-            m_beatmap->addHitResult(this, resultForHealth, 0, false, true, true, true, true,
-                                    false);  // only increase health
-            m_beatmap->addScorePoints(30);
+            bi->addHitResult(this, resultForHealth, 0, false, true, true, true, true,
+                             false);  // only increase health
+            bi->addScorePoints(30);
         } else {
             // special case: missing the startcircle drains HIT_MISS_SLIDERBREAK health (and not HIT_MISS health)
-            m_beatmap->addHitResult(this, LiveScore::HIT::HIT_MISS_SLIDERBREAK, 0, false, true, true, true, true,
-                                    false);  // only decrease health
+            bi->addHitResult(this, LiveScore::HIT::HIT_MISS_SLIDERBREAK, 0, false, true, true, true, true,
+                             false);  // only decrease health
         }
     } else {
         // endcircle
@@ -1213,15 +1208,15 @@ void Slider::onHit(LiveScore::HIT result, long delta, bool startOrEnd, float tar
 
             // add bonus score + extra health manually
             if(m_bHeldTillEnd) {
-                m_beatmap->addHitResult(this, LiveScore::HIT::HIT_SLIDER30, 0, false, true, true, true, true,
-                                        false);  // only increase health
-                m_beatmap->addScorePoints(30);
+                bi->addHitResult(this, LiveScore::HIT::HIT_SLIDER30, 0, false, true, true, true, true,
+                                 false);  // only increase health
+                bi->addScorePoints(30);
             } else {
                 // special case: missing the endcircle drains HIT_MISS_SLIDERBREAK health (and not HIT_MISS health)
                 // NOTE: yes, this will drain twice for the end of a slider (once for the judgement of the whole slider
                 // above, and once for the endcircle here)
-                m_beatmap->addHitResult(this, LiveScore::HIT::HIT_MISS_SLIDERBREAK, 0, false, true, true, true, true,
-                                        false);  // only decrease health
+                bi->addHitResult(this, LiveScore::HIT::HIT_MISS_SLIDERBREAK, 0, false, true, true, true, true,
+                                 false);  // only decrease health
             }
         }
     }
@@ -1235,20 +1230,20 @@ void Slider::onRepeatHit(bool successful, bool sliderend) {
     // repeat hit of a slider adds +30 points, if successful
 
     // sound and hit animation
-    if(!successful)
+    if(!successful) {
         onSliderBreak();
-    else {
+    } else if(bm != NULL) {
         if(m_osu_timingpoints_force->getBool())
-            m_beatmap->updateTimingPoints(m_iTime + (long)((float)m_iObjectDuration * m_fActualSlidePercent));
+            bm->updateTimingPoints(m_iTime + (long)((float)m_iObjectDuration * m_fActualSlidePercent));
 
-        const Vector2 osuCoords = m_beatmap->pixels2OsuCoords(m_beatmap->osuCoords2Pixels(m_vCurPointRaw));
+        const Vector2 osuCoords = bm->pixels2OsuCoords(bm->osuCoords2Pixels(m_vCurPointRaw));
 
-        m_beatmap->getSkin()->playHitCircleSound(m_iCurRepeatCounterForHitSounds < m_hitSounds.size()
-                                                     ? m_hitSounds[m_iCurRepeatCounterForHitSounds]
-                                                     : m_iSampleType,
-                                                 GameRules::osuCoords2Pan(osuCoords.x), 0);
+        bm->getSkin()->playHitCircleSound(m_iCurRepeatCounterForHitSounds < m_hitSounds.size()
+                                              ? m_hitSounds[m_iCurRepeatCounterForHitSounds]
+                                              : m_iSampleType,
+                                          GameRules::osuCoords2Pan(osuCoords.x), 0);
 
-        float animation_multiplier = osu->getSpeedMultiplier() / osu->getAnimationSpeedMultiplier();
+        float animation_multiplier = bm->getSpeedMultiplier() / osu->getAnimationSpeedMultiplier();
         float tick_pulse_time = GameRules::osu_slider_followcircle_tick_pulse_time.getFloat() * animation_multiplier;
 
         m_fFollowCircleTickAnimationScale = 0.0f;
@@ -1256,10 +1251,10 @@ void Slider::onRepeatHit(bool successful, bool sliderend) {
 
         if(sliderend) {
             m_fEndHitAnimation = 0.001f;  // quickfix for 1 frame missing images
-            anim->moveQuadOut(&m_fEndHitAnimation, 1.0f, GameRules::getFadeOutTime(m_beatmap), true);
+            anim->moveQuadOut(&m_fEndHitAnimation, 1.0f, GameRules::getFadeOutTime(bm), true);
         } else {
             m_fStartHitAnimation = 0.001f;  // quickfix for 1 frame missing images
-            anim->moveQuadOut(&m_fStartHitAnimation, 1.0f, GameRules::getFadeOutTime(m_beatmap), true);
+            anim->moveQuadOut(&m_fStartHitAnimation, 1.0f, GameRules::getFadeOutTime(bm), true);
         }
     }
 
@@ -1267,15 +1262,15 @@ void Slider::onRepeatHit(bool successful, bool sliderend) {
     if(!successful) {
         // add health manually
         // special case: missing a repeat drains HIT_MISS_SLIDERBREAK health (and not HIT_MISS health)
-        m_beatmap->addHitResult(this, LiveScore::HIT::HIT_MISS_SLIDERBREAK, 0, false, true, true, true, true,
-                                false);  // only decrease health
+        bi->addHitResult(this, LiveScore::HIT::HIT_MISS_SLIDERBREAK, 0, false, true, true, true, true,
+                         false);  // only decrease health
     } else {
-        m_beatmap->addHitResult(this, LiveScore::HIT::HIT_SLIDER30, 0, false, true, true, false, true,
-                                false);  // not end of combo, ignore in hiterrorbar, ignore for accuracy, increase
-                                         // combo, don't count towards score, increase health
+        bi->addHitResult(this, LiveScore::HIT::HIT_SLIDER30, 0, false, true, true, false, true,
+                         false);  // not end of combo, ignore in hiterrorbar, ignore for accuracy, increase
+                                  // combo, don't count towards score, increase health
 
         // add bonus score manually
-        m_beatmap->addScorePoints(30);
+        bi->addScorePoints(30);
     }
 
     m_iCurRepeatCounterForHitSounds++;
@@ -1294,17 +1289,17 @@ void Slider::onTickHit(bool successful, int tickIndex) {
     if(numMissingTickClicks == 0) m_ticks[tickIndex].finished = true;
 
     // sound and hit animation
-    if(!successful)
+    if(!successful) {
         onSliderBreak();
-    else {
+    } else if(bm != NULL) {
         if(m_osu_timingpoints_force->getBool())
-            m_beatmap->updateTimingPoints(m_iTime + (long)((float)m_iObjectDuration * m_fActualSlidePercent));
+            bm->updateTimingPoints(m_iTime + (long)((float)m_iObjectDuration * m_fActualSlidePercent));
 
-        const Vector2 osuCoords = m_beatmap->pixels2OsuCoords(m_beatmap->osuCoords2Pixels(m_vCurPointRaw));
+        const Vector2 osuCoords = bm->pixels2OsuCoords(bm->osuCoords2Pixels(m_vCurPointRaw));
 
-        m_beatmap->getSkin()->playSliderTickSound(GameRules::osuCoords2Pan(osuCoords.x));
+        bm->getSkin()->playSliderTickSound(GameRules::osuCoords2Pan(osuCoords.x));
 
-        float animation_multiplier = osu->getSpeedMultiplier() / osu->getAnimationSpeedMultiplier();
+        float animation_multiplier = bm->getSpeedMultiplier() / osu->getAnimationSpeedMultiplier();
         float tick_pulse_time = GameRules::osu_slider_followcircle_tick_pulse_time.getFloat() * animation_multiplier;
 
         m_fFollowCircleTickAnimationScale = 0.0f;
@@ -1315,20 +1310,20 @@ void Slider::onTickHit(bool successful, int tickIndex) {
     if(!successful) {
         // add health manually
         // special case: missing a tick drains HIT_MISS_SLIDERBREAK health (and not HIT_MISS health)
-        m_beatmap->addHitResult(this, LiveScore::HIT::HIT_MISS_SLIDERBREAK, 0, false, true, true, true, true,
-                                false);  // only decrease health
+        bi->addHitResult(this, LiveScore::HIT::HIT_MISS_SLIDERBREAK, 0, false, true, true, true, true,
+                         false);  // only decrease health
     } else {
-        m_beatmap->addHitResult(this, LiveScore::HIT::HIT_SLIDER10, 0, false, true, true, false, true,
-                                false);  // not end of combo, ignore in hiterrorbar, ignore for accuracy, increase
-                                         // combo, don't count towards score, increase health
+        bi->addHitResult(this, LiveScore::HIT::HIT_SLIDER10, 0, false, true, true, false, true,
+                         false);  // not end of combo, ignore in hiterrorbar, ignore for accuracy, increase
+                                  // combo, don't count towards score, increase health
 
         // add bonus score manually
-        m_beatmap->addScorePoints(10);
+        bi->addScorePoints(10);
     }
 }
 
 void Slider::onSliderBreak() {
-    m_beatmap->addSliderBreak();
+    bi->addSliderBreak();
 
     if(osu_slider_break_epilepsy.getBool()) {
         m_fSliderBreakRapeTime = engine->getTime() + 0.15f;
@@ -1339,7 +1334,9 @@ void Slider::onSliderBreak() {
 void Slider::onReset(long curPos) {
     HitObject::onReset(curPos);
 
-    m_beatmap->getSkin()->stopSliderSlideSound();
+    if(bm != NULL) {
+        bm->getSkin()->stopSliderSlideSound();
+    }
 
     m_iStrictTrackingModLastClickHeldTime = 0;
     m_iFatFingerKey = 0;
@@ -1410,11 +1407,11 @@ void Slider::rebuildVertexBuffer(bool useRawCoords) {
     std::vector<Vector2> osuCoordPoints = m_curve->getPoints();
     if(!useRawCoords) {
         for(int p = 0; p < osuCoordPoints.size(); p++) {
-            osuCoordPoints[p] = m_beatmap->osuCoords2LegacyPixels(osuCoordPoints[p]);
+            osuCoordPoints[p] = bi->osuCoords2LegacyPixels(osuCoordPoints[p]);
         }
     }
     SAFE_DELETE(m_vao);
-    m_vao = SliderRenderer::generateVAO(osuCoordPoints, m_beatmap->getRawHitcircleDiameter());
+    m_vao = SliderRenderer::generateVAO(osuCoordPoints, bi->m_fRawHitcircleDiameter);
 }
 
 bool Slider::isClickHeldSlider() {
@@ -1425,9 +1422,9 @@ bool Slider::isClickHeldSlider() {
     // The reason this exists is to prevent people from holding K1 the whole map and tapping with K2.
     // Holding is part of the rhythm flow, and this is a rhythm game right?
 
-    if(m_iFatFingerKey == 0) return m_beatmap->isClickHeld();
-    if(m_iFatFingerKey == 1) return m_beatmap->isKey2Down();
-    if(m_iFatFingerKey == 2) return m_beatmap->isKey1Down();
+    if(m_iFatFingerKey == 0) return bi->isClickHeld();
+    if(m_iFatFingerKey == 1) return bi->isKey2Down();
+    if(m_iFatFingerKey == 2) return bi->isKey1Down();
 
     return false;  // unreachable
 }

@@ -179,8 +179,6 @@ f32 OsuDifficultyHitObject::getT(i32 pos, bool raw) {
     }
 }
 
-ConVar *DifficultyCalculator::m_osu_slider_scorev2_ref = NULL;
-
 f64 DifficultyCalculator::calculateStarDiffForHitObjects(std::vector<OsuDifficultyHitObject> &sortedHitObjects, f32 CS,
                                                          f32 OD, f32 speedMultiplier, bool relax, bool touchDevice,
                                                          f64 *aim, f64 *aimSliderFactor, f64 *speed, f64 *speedNotes,
@@ -976,29 +974,9 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjects(std::vector<OsuDifficul
                : 0.0;
 }
 
-f64 DifficultyCalculator::calculatePPv2(Beatmap *beatmap, f64 aim, f64 aimSliderFactor, f64 speed, f64 speedNotes,
-                                        i32 numHitObjects, i32 numCircles, i32 numSliders, i32 numSpinners,
-                                        i32 maxPossibleCombo, i32 combo, i32 misses, i32 c300, i32 c100, i32 c50) {
-    // NOTE: depends on active mods + OD + AR
-
-    if(m_osu_slider_scorev2_ref == NULL) m_osu_slider_scorev2_ref = convar->getConVarByName("osu_slider_scorev2");
-
-    // get runtime mods
-    i32 modsLegacy = osu->getScore()->getModsLegacy();
-    {
-        // special case: manual slider accuracy has been enabled (affects pp but not score)
-        modsLegacy |= (m_osu_slider_scorev2_ref->getBool() ? ModFlags::ScoreV2 : 0);
-    }
-
-    return calculatePPv2(modsLegacy, osu->getSpeedMultiplier(), beatmap->getAR(), beatmap->getOD(), aim,
-                         aimSliderFactor, speed, speedNotes, numHitObjects, numCircles, numSliders, numSpinners,
-                         maxPossibleCombo, combo, misses, c300, c100, c50);
-}
-
 f64 DifficultyCalculator::calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f64 od, f64 aim, f64 aimSliderFactor,
-                                        f64 speed, f64 speedNotes, i32 numHitObjects, i32 numCircles, i32 numSliders,
-                                        i32 numSpinners, i32 maxPossibleCombo, i32 combo, i32 misses, i32 c300,
-                                        i32 c100, i32 c50) {
+                                        f64 speed, f64 speedNotes, i32 numCircles, i32 numSliders, i32 numSpinners,
+                                        i32 maxPossibleCombo, i32 combo, i32 misses, i32 c300, i32 c100, i32 c50) {
     // NOTE: depends on active mods + OD + AR
 
     // apply "timescale" aka speed multiplier to ar/od
@@ -1010,8 +988,6 @@ f64 DifficultyCalculator::calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f
     // values to the user. of course the mod selection screen does too.)
     od = GameRules::getRawOverallDifficultyForSpeedMultiplier(GameRules::getRawHitWindow300(od), timescale);
     ar = GameRules::getRawApproachRateForSpeedMultiplier(GameRules::getRawApproachTime(ar), timescale);
-
-    if(c300 < 0) c300 = numHitObjects - c100 - c50 - misses;
 
     if(combo < 0) combo = maxPossibleCombo;
 

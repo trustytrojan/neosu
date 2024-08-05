@@ -118,16 +118,8 @@ class DifficultyCalculator {
                                               std::vector<f64> *outAimStrains, std::vector<f64> *outSpeedStrains,
                                               const std::atomic<bool> &dead);
 
-    // pp, use runtime mods (convenience)
-    static f64 calculatePPv2(Beatmap *beatmap, f64 aim, f64 aimSliderFactor, f64 speed, f64 speedNotes,
-                             i32 numHitObjects, i32 numCircles, i32 numSliders, i32 numSpinners, i32 maxPossibleCombo,
-                             i32 combo = -1, i32 misses = 0, i32 c300 = -1, i32 c100 = 0, i32 c50 = 0);
-
     // pp, fully static
     static f64 calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f64 od, f64 aim, f64 aimSliderFactor, f64 speed,
-                             f64 speedNotes, i32 numHitObjects, i32 numCircles, i32 numSliders, i32 numSpinners,
-                             i32 maxPossibleCombo, i32 combo, i32 misses, i32 c300, i32 c100, i32 c50);
-
-   private:
-    static ConVar *m_osu_slider_scorev2_ref;
+                             f64 speedNotes, i32 numCircles, i32 numSliders, i32 numSpinners, i32 maxPossibleCombo,
+                             i32 combo, i32 misses, i32 c300, i32 c100, i32 c50);
 };

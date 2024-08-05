@@ -515,7 +515,6 @@ void RankingScreen::setBeatmapInfo(Beatmap *beatmap, DatabaseBeatmap *diff2) {
 
         FinishedScore score = m_score;
         std::string osufile_path = diff2->m_sFilePath;
-        auto nb_objects = diff2->m_iNumObjects;
         auto nb_circles = diff2->m_iNumCircles;
         auto nb_sliders = diff2->m_iNumSliders;
         auto nb_spinners = diff2->m_iNumSpinners;
@@ -537,8 +536,8 @@ void RankingScreen::setBeatmapInfo(Beatmap *beatmap, DatabaseBeatmap *diff2) {
 
             info.pp = DifficultyCalculator::calculatePPv2(
                 score.modsLegacy, score.speedMultiplier, score.AR, score.OD, info.aim_stars, info.aim_slider_factor,
-                info.speed_stars, info.speed_notes, nb_objects, nb_circles, nb_sliders, nb_spinners,
-                diffres.maxPossibleCombo, score.comboMax, score.numMisses, score.num300s, score.num100s, score.num50s);
+                info.speed_stars, info.speed_notes, nb_circles, nb_sliders, nb_spinners, diffres.maxPossibleCombo,
+                score.comboMax, score.numMisses, score.num300s, score.num100s, score.num50s);
 
             return info;
         });

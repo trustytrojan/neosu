@@ -195,8 +195,6 @@ Osu::Osu() {
     m_osu_mod_wobble_ref = convar->getConVarByName("osu_mod_wobble");
     m_osu_mod_wobble2_ref = convar->getConVarByName("osu_mod_wobble2");
     m_osu_playfield_rotation = convar->getConVarByName("osu_playfield_rotation");
-    m_osu_playfield_stretch_x = convar->getConVarByName("osu_playfield_stretch_x");
-    m_osu_playfield_stretch_y = convar->getConVarByName("osu_playfield_stretch_y");
     m_fposu_draw_cursor_trail_ref = convar->getConVarByName("fposu_draw_cursor_trail");
     m_osu_mod_mafham_ref = convar->getConVarByName("osu_mod_mafham");
     m_osu_mod_fposu_ref = convar->getConVarByName("osu_mod_fposu");
@@ -262,8 +260,6 @@ Osu::Osu() {
     osu_animation_speed_override.setCallback(fastdelegate::MakeDelegate(this, &Osu::onAnimationSpeedChange));
 
     m_osu_playfield_rotation->setCallback(fastdelegate::MakeDelegate(this, &Osu::onPlayfieldChange));
-    m_osu_playfield_stretch_x->setCallback(fastdelegate::MakeDelegate(this, &Osu::onPlayfieldChange));
-    m_osu_playfield_stretch_y->setCallback(fastdelegate::MakeDelegate(this, &Osu::onPlayfieldChange));
 
     osu_mods.setCallback(fastdelegate::MakeDelegate(this, &Osu::updateModsForConVarTemplate));
 
@@ -590,7 +586,7 @@ void Osu::draw(Graphics *g) {
         if(m_bModFlashlight || anti_flashlight_enabled) {
             // Dim screen when holding a slider
             float max_opacity = 1.f;
-            if(holding_slider && !avoid_flashes.getBool()) {
+            if(getSelectedBeatmap()->holding_slider && !avoid_flashes.getBool()) {
                 max_opacity = 0.2f;
             }
 

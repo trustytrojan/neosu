@@ -17,13 +17,10 @@ ConVar osu_spinner_use_ar_fadein(
     "osu_spinner_use_ar_fadein", false, FCVAR_DEFAULT,
     "whether spinners should fade in with AR (same as circles), or with hardcoded 400 ms fadein time (osu!default)");
 
-Spinner::Spinner(int x, int y, long time, int sampleType, bool isEndOfCombo, long endTime, Beatmap *beatmap)
+Spinner::Spinner(int x, int y, long time, int sampleType, bool isEndOfCombo, long endTime, BeatmapInterface *beatmap)
     : HitObject(time, sampleType, -1, isEndOfCombo, -1, -1, beatmap) {
     m_vOriginalRawPos = Vector2(x, y);
     m_vRawPos = m_vOriginalRawPos;
-
-    m_beatmap = beatmap;
-
     m_iObjectDuration = endTime - time;
     m_bClickedOnce = false;
     m_fRotationsNeeded = -1.0f;
@@ -69,12 +66,12 @@ Spinner::~Spinner() {
 void Spinner::draw(Graphics *g) {
     HitObject::draw(g);
     const float fadeOutMultiplier = GameRules::osu_spinner_fade_out_time_multiplier.getFloat();
-    const long fadeOutTimeMS = (long)(GameRules::getFadeOutTime(m_beatmap) * 1000.0f * fadeOutMultiplier);
+    const long fadeOutTimeMS = (long)(GameRules::getFadeOutTime(bm) * 1000.0f * fadeOutMultiplier);
     const long deltaEnd = m_iDelta + m_iObjectDuration;
     if((m_bFinished || !m_bVisible) && (deltaEnd > 0 || (deltaEnd < -fadeOutTimeMS))) return;
 
-    Skin *skin = m_beatmap->getSkin();
-    Vector2 center = m_beatmap->osuCoords2Pixels(m_vRawPos);
+    Skin *skin = bm->getSkin();
+    Vector2 center = bm->osuCoords2Pixels(m_vRawPos);
 
     const float alphaMultiplier =
         clamp<float>((deltaEnd < 0 ? 1.0f - ((float)std::abs(deltaEnd) / (float)fadeOutTimeMS) : 1.0f), 0.0f,
@@ -82,7 +79,7 @@ void Spinner::draw(Graphics *g) {
 
     const float globalScale = 1.0f;        // adjustments
     const float globalBaseSkinSize = 667;  // the width of spinner-bottom.png in the default skin
-    const float globalBaseSize = m_beatmap->getPlayfieldSize().y /* + m_beatmap->getHitcircleDiameter()/2*/;
+    const float globalBaseSize = bm->getPlayfieldSize().y;
 
     const float clampedRatio = clamp<float>(m_fRatio, 0.0f, 1.0f);
     float finishScaleRatio = clampedRatio;
@@ -112,7 +109,7 @@ void Spinner::draw(Graphics *g) {
         }
 
         // draw approach circle
-        if(!osu->getModHD() && m_fPercent > 0.0f) {
+        if(!(bi->getModsLegacy() & ModFlags::Hidden) && m_fPercent > 0.0f) {
             const float spinnerApproachCircleImageScale =
                 globalBaseSize / ((globalBaseSkinSize / 2) * (skin->isSpinnerApproachCircle2x() ? 2.0f : 1.0f));
 
@@ -200,7 +197,7 @@ void Spinner::draw(Graphics *g) {
         }
 
         // approach circle
-        if(!osu->getModHD() && m_fPercent > 0.0f) {
+        if(!(bi->getModsLegacy() & ModFlags::Hidden) && m_fPercent > 0.0f) {
             const float spinnerApproachCircleImageScale =
                 globalBaseSize / ((globalBaseSkinSize / 2) * (skin->isSpinnerApproachCircle2x() ? 2.0f : 1.0f));
 
@@ -226,7 +223,7 @@ void Spinner::draw(Graphics *g) {
         g->pushTransform();
         {
             g->scale(spinnerClearImageScale, spinnerClearImageScale);
-            g->translate(center.x, center.y - m_beatmap->getPlayfieldSize().y * 0.25f);
+            g->translate(center.x, center.y - bm->getPlayfieldSize().y * 0.25f);
             g->drawImage(skin->getSpinnerClear());
         }
         g->popTransform();
@@ -241,7 +238,7 @@ void Spinner::draw(Graphics *g) {
         g->pushTransform();
         {
             g->scale(spinerSpinImageScale, spinerSpinImageScale);
-            g->translate(center.x, center.y + m_beatmap->getPlayfieldSize().y * 0.30f);
+            g->translate(center.x, center.y + bm->getPlayfieldSize().y * 0.30f);
             g->drawImage(skin->getSpinnerSpin());
         }
         g->popTransform();
@@ -268,9 +265,10 @@ void Spinner::update(long curPos) {
     HitObject::update(curPos);
 
     // stop spinner sound and don't update() while paused
-    if(m_beatmap->isPaused() || !m_beatmap->isPlaying() || m_beatmap->hasFailed()) {
-        m_beatmap->getSkin()->stopSpinnerSpinSound();
-
+    if(bi->isPaused() || !bi->isPlaying() || bi->hasFailed()) {
+        if(bm != NULL) {
+            bm->getSkin()->stopSpinnerSpinSound();
+        }
         return;
     }
 
@@ -282,13 +280,12 @@ void Spinner::update(long curPos) {
             return;
         }
 
-        m_fRotationsNeeded = GameRules::getSpinnerRotationsForSpeedMultiplier(m_beatmap, m_iObjectDuration);
+        m_fRotationsNeeded = GameRules::getSpinnerRotationsForSpeedMultiplier(bi, m_iObjectDuration);
 
-        const float fixedRate = /*(1.0f / convar->getConVarByName("fps_max")->getFloat())*/ engine->getFrameTime();
+        const float fixedRate = engine->getFrameTime();
 
         const float DELTA_UPDATE_TIME = (fixedRate * 1000.0f);
         const float AUTO_MULTIPLIER = (1.0f / 20.0f);
-        // const float MAX_ANG_DIFF = ((1000.0f/60.0f) * AUTO_MULTIPLIER);
 
         // scale percent calculation
         long delta = (long)m_iTime - (long)curPos;
@@ -296,11 +293,11 @@ void Spinner::update(long curPos) {
 
         // handle auto, mouse spinning movement
         float angleDiff = 0;
-        if(osu->getModAuto() || osu->getModAutopilot() || osu->getModSpunout())
-            angleDiff = engine->getFrameTime() * 1000.0f * AUTO_MULTIPLIER * osu->getSpeedMultiplier();
-        else  // user spin
-        {
-            Vector2 mouseDelta = m_beatmap->getCursorPos() - m_beatmap->osuCoords2Pixels(m_vRawPos);
+        if((bi->getModsLegacy() & ModFlags::Autoplay) || (bi->getModsLegacy() & ModFlags::Autopilot) ||
+           (bi->getModsLegacy() & ModFlags::SpunOut)) {
+            angleDiff = engine->getFrameTime() * 1000.0f * AUTO_MULTIPLIER * bi->getSpeedMultiplier();
+        } else {  // user spin
+            Vector2 mouseDelta = bi->getCursorPos() - bi->osuCoords2Pixels(m_vRawPos);
             const float currentMouseAngle = (float)std::atan2(mouseDelta.y, mouseDelta.x);
             angleDiff = (currentMouseAngle - m_fLastMouseAngle);
 
@@ -313,8 +310,8 @@ void Spinner::update(long curPos) {
         // handle spinning
         // HACKHACK: rewrite this
         if(delta <= 0) {
-            bool isSpinning =
-                m_beatmap->isClickHeld() || osu->getModAuto() || osu->getModRelax() || osu->getModSpunout();
+            bool isSpinning = bi->isClickHeld() || (bi->getModsLegacy() & ModFlags::Autoplay) ||
+                              (bi->getModsLegacy() & ModFlags::Relax) || (bi->getModsLegacy() & ModFlags::SpunOut);
 
             m_fDeltaOverflow += engine->getFrameTime() * 1000.0f;
 
@@ -342,28 +339,16 @@ void Spinner::update(long curPos) {
                 m_iDeltaAngleIndex %= m_iMaxStoredDeltaAngles;
 
                 float rotationAngle = m_fSumDeltaAngle / m_iMaxStoredDeltaAngles;
-                // rotationAngle = clamp<float>(rotationAngle, -MAX_ANG_DIFF, MAX_ANG_DIFF);
                 float rotationPerSec = rotationAngle * (1000.0f / DELTA_UPDATE_TIME) / (2.0f * PI);
-
-                /// m_fRPM = std::abs(rotationPerSec*60.0f);
 
                 const float decay = pow(0.01f, (float)engine->getFrameTime());
                 m_fRPM = m_fRPM * decay + (1.0 - decay) * std::abs(rotationPerSec) * 60;
                 m_fRPM = min(m_fRPM, 477.0f);
 
-                /*
-                m_fRPM += std::abs(rotationPerSec*60.0f);
-                m_fRPM /= 2.0;
-                m_fRPM = min(m_fRPM, 477.0f);
-                */
-
                 if(std::abs(rotationAngle) > 0.0001f) rotate(rotationAngle);
             }
 
             m_fRatio = m_fRotations / (m_fRotationsNeeded * 360.0f);
-            /// debugLog("ratio = %f, rotations = %f, rotationsneeded = %f, sumdeltaangle = %f, maxStoredDeltaAngles =
-            /// %i\n", m_fRatio, m_fRotations/360.0f, m_fRotationsNeeded/360.0f, m_fSumDeltaAngle,
-            /// m_iMaxStoredDeltaAngles);
         }
     }
 }
@@ -381,7 +366,9 @@ void Spinner::onClickEvent(std::vector<Click> &clicks) {
 void Spinner::onReset(long curPos) {
     HitObject::onReset(curPos);
 
-    m_beatmap->getSkin()->stopSpinnerSpinSound();
+    if(bm != NULL) {
+        bm->getSkin()->stopSpinnerSpinSound();
+    }
 
     m_bClickedOnce = false;
 
@@ -408,12 +395,9 @@ void Spinner::onReset(long curPos) {
 }
 
 void Spinner::onHit() {
-    /// debugLog("ratio = %f\n", m_fRatio);
-    // m_bDrawRPM = false;
-
     // calculate hit result
     LiveScore::HIT result = LiveScore::HIT::HIT_NULL;
-    if(m_fRatio >= 1.0f || osu->getModAuto())
+    if(m_fRatio >= 1.0f || (bi->getModsLegacy() & ModFlags::Autoplay))
         result = LiveScore::HIT::HIT_300;
     else if(m_fRatio >= 0.9f && !GameRules::osu_mod_ming3012.getBool() && !GameRules::osu_mod_no100s.getBool())
         result = LiveScore::HIT::HIT_100;
@@ -423,19 +407,21 @@ void Spinner::onHit() {
         result = LiveScore::HIT::HIT_MISS;
 
     // sound
-    if(result != LiveScore::HIT::HIT_MISS) {
-        if(m_osu_timingpoints_force->getBool()) m_beatmap->updateTimingPoints(m_iTime + m_iObjectDuration);
+    if(bm != NULL && result != LiveScore::HIT::HIT_MISS) {
+        if(m_osu_timingpoints_force->getBool()) bm->updateTimingPoints(m_iTime + m_iObjectDuration);
 
-        const Vector2 osuCoords = m_beatmap->pixels2OsuCoords(m_beatmap->osuCoords2Pixels(m_vRawPos));
+        const Vector2 osuCoords = bm->pixels2OsuCoords(bm->osuCoords2Pixels(m_vRawPos));
 
-        m_beatmap->getSkin()->playHitCircleSound(m_iSampleType, GameRules::osuCoords2Pan(osuCoords.x), 0);
+        bm->getSkin()->playHitCircleSound(m_iSampleType, GameRules::osuCoords2Pan(osuCoords.x), 0);
     }
 
     // add it, and we are finished
     addHitResult(result, 0, m_bIsEndOfCombo, m_vRawPos, -1.0f);
     m_bFinished = true;
 
-    m_beatmap->getSkin()->stopSpinnerSpinSound();
+    if(bm != NULL) {
+        bm->getSkin()->stopSpinnerSpinSound();
+    }
 }
 
 void Spinner::rotate(float rad) {
@@ -448,28 +434,30 @@ void Spinner::rotate(float rad) {
     if(std::floor(newRotations / 360.0f) > m_fRotations / 360.0f) {
         if((int)(newRotations / 360.0f) > (int)(m_fRotationsNeeded) + 1) {
             // extra rotations and bonus sound
-            m_beatmap->getSkin()->playSpinnerBonusSound();
-            m_beatmap->addHitResult(this, LiveScore::HIT::HIT_SPINNERBONUS, 0, false, true, true, true, true,
-                                    false);  // only increase health
-            m_beatmap->addHitResult(this, LiveScore::HIT::HIT_SPINNERBONUS, 0, false, true, true, true, true,
-                                    false);  // HACKHACK: compensating for rotation logic differences
-            m_beatmap->addScorePoints(1100, true);
+            if(bm != NULL) {
+                bm->getSkin()->playSpinnerBonusSound();
+            }
+            bi->addHitResult(this, LiveScore::HIT::HIT_SPINNERBONUS, 0, false, true, true, true, true,
+                             false);  // only increase health
+            bi->addHitResult(this, LiveScore::HIT::HIT_SPINNERBONUS, 0, false, true, true, true, true,
+                             false);  // HACKHACK: compensating for rotation logic differences
+            bi->addScorePoints(1100, true);
         } else {
             // normal whole rotation
-            m_beatmap->addHitResult(this, LiveScore::HIT::HIT_SPINNERSPIN, 0, false, true, true, true, true,
-                                    false);  // only increase health
-            m_beatmap->addHitResult(this, LiveScore::HIT::HIT_SPINNERSPIN, 0, false, true, true, true, true,
-                                    false);  // HACKHACK: compensating for rotation logic differences
-            m_beatmap->addScorePoints(100, true);
+            bi->addHitResult(this, LiveScore::HIT::HIT_SPINNERSPIN, 0, false, true, true, true, true,
+                             false);  // only increase health
+            bi->addHitResult(this, LiveScore::HIT::HIT_SPINNERSPIN, 0, false, true, true, true, true,
+                             false);  // HACKHACK: compensating for rotation logic differences
+            bi->addScorePoints(100, true);
         }
     }
 
     // spinner sound
-    {
-        m_beatmap->getSkin()->playSpinnerSpinSound();
+    if(bm != NULL) {
+        bm->getSkin()->playSpinnerSpinSound();
 
         const float frequency = 20000.0f + (int)(clamp<float>(m_fRatio, 0.0f, 2.5f) * 40000.0f);
-        m_beatmap->getSkin()->getSpinnerSpinSound()->setFrequency(frequency);
+        bm->getSkin()->getSpinnerSpinSound()->setFrequency(frequency);
     }
 
     m_fRotations = newRotations;
@@ -485,10 +473,12 @@ Vector2 Spinner::getAutoCursorPos(long curPos) {
     else
         delta = curPos - m_iTime;
 
-    Vector2 actualPos = m_beatmap->osuCoords2Pixels(m_vRawPos);
+    Vector2 actualPos = bi->osuCoords2Pixels(m_vRawPos);
     const float AUTO_MULTIPLIER = (1.0f / 20.0f);
-    float multiplier = (osu->getModAuto() || osu->getModAutopilot()) ? AUTO_MULTIPLIER : 1.0f;
+    float multiplier = ((bi->getModsLegacy() & ModFlags::Autoplay) || (bi->getModsLegacy() & ModFlags::Autopilot))
+                           ? AUTO_MULTIPLIER
+                           : 1.0f;
     float angle = (delta * multiplier) - PI / 2.0f;
-    float r = m_beatmap->getPlayfieldSize().y / 10.0f;
+    float r = GameRules::getPlayfieldSize().y / 10.0f;  // XXX: slow?
     return Vector2((float)(actualPos.x + r * std::cos(angle)), (float)(actualPos.y + r * std::sin(angle)));
 }

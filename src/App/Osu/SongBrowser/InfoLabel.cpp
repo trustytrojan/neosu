@@ -195,14 +195,10 @@ void InfoLabel::mouse_update(bool *propagate_clicks) {
         if(beatmap != NULL) {
             const float speedMultiplierInv = (1.0f / osu->getSpeedMultiplier());
 
-            const float approachTimeRoundedCompensated =
-                ((int)GameRules::getApproachTime(beatmap)) * speedMultiplierInv;
-            const float hitWindow300RoundedCompensated =
-                ((int)GameRules::getHitWindow300(beatmap) - 0.5f) * speedMultiplierInv;
-            const float hitWindow100RoundedCompensated =
-                ((int)GameRules::getHitWindow100(beatmap) - 0.5f) * speedMultiplierInv;
-            const float hitWindow50RoundedCompensated =
-                ((int)GameRules::getHitWindow50(beatmap) - 0.5f) * speedMultiplierInv;
+            const float approachTimeRoundedCompensated = ((int)beatmap->getApproachTime()) * speedMultiplierInv;
+            const float hitWindow300RoundedCompensated = ((int)beatmap->getHitWindow300() - 0.5f) * speedMultiplierInv;
+            const float hitWindow100RoundedCompensated = ((int)beatmap->getHitWindow100() - 0.5f) * speedMultiplierInv;
+            const float hitWindow50RoundedCompensated = ((int)beatmap->getHitWindow50() - 0.5f) * speedMultiplierInv;
             const float hitobjectRadiusRoundedCompensated =
                 (GameRules::getRawHitCircleDiameter(beatmap->getCS()) / 2.0f);
 
@@ -333,8 +329,8 @@ UString InfoLabel::buildDiffInfoString() {
     Beatmap *beatmap = osu->getSelectedBeatmap();
     if(beatmap != NULL) {
         CS = beatmap->getCS();
-        AR = GameRules::getApproachRateForSpeedMultiplier(beatmap);
-        OD = GameRules::getOverallDifficultyForSpeedMultiplier(beatmap);
+        AR = beatmap->getApproachRateForSpeedMultiplier(osu->getSpeedMultiplier());
+        OD = beatmap->getOverallDifficultyForSpeedMultiplier(osu->getSpeedMultiplier());
         HP = beatmap->getHP();
     }
 

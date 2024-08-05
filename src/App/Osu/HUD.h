@@ -168,8 +168,6 @@ class HUD : public OsuScreen {
     ConVar *m_osu_mod_target_50_percent_ref;
     ConVar *m_osu_mod_fposu_ref;
     ConVar *m_fposu_draw_scorebarbg_on_top_ref;
-    ConVar *m_osu_playfield_stretch_x_ref;
-    ConVar *m_osu_playfield_stretch_y_ref;
     ConVar *m_osu_background_dim_ref;
     ConVar *m_osu_skip_intro_enabled_ref;
     ConVar *m_osu_skip_breaks_enabled_ref;

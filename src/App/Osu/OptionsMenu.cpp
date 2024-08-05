@@ -1199,10 +1199,6 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
                 "NOTE: osu! doesn't do this, so don't enable it for serious practicing.\nIf enabled: Fade out sliders "
                 "with the same speed as circles.",
                 convar->getConVarByName("osu_mod_hd_slider_fast_fade"));
-    addCheckbox("Use Score v2 Slider Accuracy",
-                "Affects pp and accuracy calculations, but does not affect score.\nUse the score v2 mod if you want "
-                "the 1000000 max score cap/calculation.",
-                convar->getConVarByName("osu_slider_scorev2"));
 
     //**************************************************************************************************************************//
 

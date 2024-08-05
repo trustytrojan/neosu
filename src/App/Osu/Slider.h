@@ -1,13 +1,4 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		slider
-//
-// $NoKeywords: $slider
-//===============================================================================//
-
-#ifndef OSUSLIDER_H
-#define OSUSLIDER_H
-
+#pragma once
 #include "HitObject.h"
 
 class SliderCurve;
@@ -28,7 +19,7 @@ class Slider : public HitObject {
    public:
     Slider(char type, int repeat, float pixelLength, std::vector<Vector2> points, std::vector<int> hitSounds,
            std::vector<float> ticks, float sliderTime, float sliderTimeWithoutRepeats, long time, int sampleType,
-           int comboNumber, bool isEndOfCombo, int colorCounter, int colorOffset, Beatmap *beatmap);
+           int comboNumber, bool isEndOfCombo, int colorCounter, int colorOffset, BeatmapInterface *beatmap);
     virtual ~Slider();
 
     virtual void draw(Graphics *g);
@@ -72,7 +63,7 @@ class Slider : public HitObject {
     static ConVar *m_osu_auto_cursordance_ref;
 
     void drawStartCircle(Graphics *g, float alpha);
-    void drawEndCircle(Graphics *g, float alpha, float sliderSnake = 1.0f);
+    void drawEndCircle(Graphics *g, float alpha, float sliderSnake);
     void drawBody(Graphics *g, float alpha, float from, float to);
 
     void updateAnimations(long curPos);
@@ -86,8 +77,6 @@ class Slider : public HitObject {
     float getT(long pos, bool raw);
 
     bool isClickHeldSlider();  // special logic to disallow hold tapping
-
-    Beatmap *m_beatmap;
 
     SliderCurve *m_curve;
 
@@ -146,5 +135,3 @@ class Slider : public HitObject {
 
     VertexArrayObject *m_vao;
 };
-
-#endif

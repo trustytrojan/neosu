@@ -48,7 +48,7 @@ class Circle : public HitObject {
 
    public:
     Circle(int x, int y, long time, int sampleType, int comboNumber, bool isEndOfCombo, int colorCounter,
-           int colorOffset, Beatmap *beatmap);
+           int colorOffset, BeatmapInterface *beatmap);
     virtual ~Circle();
 
     virtual void draw(Graphics *g);
@@ -73,8 +73,6 @@ class Circle : public HitObject {
     static int rainbowColorCounter;
 
     void onHit(LiveScore::HIT result, long delta, float targetDelta = 0.0f, float targetAngle = 0.0f);
-
-    Beatmap *m_beatmap;
 
     Vector2 m_vRawPos;
     Vector2 m_vOriginalRawPos;  // for live mod changing
