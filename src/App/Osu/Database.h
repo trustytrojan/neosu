@@ -14,8 +14,7 @@ class DatabaseLoader;
 typedef DatabaseBeatmap BeatmapDifficulty;
 typedef DatabaseBeatmap BeatmapSet;
 
-#define STARS_CACHE_VERSION 20240430
-#define NEOSU_MAPS_DB_VERSION 20240703
+#define NEOSU_MAPS_DB_VERSION 20240812
 #define NEOSU_SCORE_DB_VERSION 20240725
 
 // Field ordering matters here
@@ -29,6 +28,20 @@ struct TIMINGPOINT {
 
 Packet load_db(std::string path);
 bool save_db(Packet *db, std::string path);
+
+struct MapOverrides {
+    MD5Hash map_md5;
+    i16 local_offset = 0;
+    i16 online_offset = 0;
+    u16 nb_circles = 0;
+    u16 nb_sliders = 0;
+    u16 nb_spinners = 0;
+    f64 star_rating = 0.0;
+    i32 min_bpm = 0;
+    i32 max_bpm = 0;
+    i32 avg_bpm = 0;
+    u8 draw_background = 1;
+};
 
 class Database {
    public:
@@ -109,15 +122,6 @@ class Database {
 
     void loadDB();
 
-    // stars.cache
-    struct STARS_CACHE_ENTRY {
-        float starsNomod = -1;
-        i32 min_bpm = -1;
-        i32 max_bpm = -1;
-        i32 common_bpm = -1;
-    };
-    std::unordered_map<MD5Hash, STARS_CACHE_ENTRY> m_starsCache;
-
    private:
     friend class DatabaseLoader;
 
@@ -127,9 +131,6 @@ class Database {
     std::string parseLegacyCfgBeatmapDirectoryParameter();
 
     void saveMaps();
-
-    void loadStars();
-    void saveStars();
 
     void loadScores();
     u32 importOldNeosuScores();
@@ -147,7 +148,11 @@ class Database {
     std::atomic<bool> m_bInterruptLoad;
     std::vector<BeatmapSet *> m_beatmapsets;
     std::vector<BeatmapSet *> m_neosu_sets;
+    std::vector<MapOverrides> m_peppy_overrides;
+    std::unordered_map<MD5Hash, BeatmapDifficulty *> m_beatmap_difficulties;
     bool m_neosu_maps_loaded = false;
+
+    std::vector<BeatmapDifficulty *> m_maps_to_recalc;
 
     // osu!.db
     int m_iVersion;

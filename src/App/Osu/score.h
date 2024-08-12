@@ -57,7 +57,6 @@ struct FinishedScore {
 
     std::string ppv3_algorithm;
     float ppv3_score = 0.f;
-    float ppv3_total_stars = 0.f;
 
     // Absolute hit deltas of every hitobject (0-254). 255 == miss
     // This is exclusive to PPV3-converted scores

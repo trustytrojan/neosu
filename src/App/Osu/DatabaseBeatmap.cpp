@@ -1167,23 +1167,7 @@ bool DatabaseBeatmap::loadMetadata() {
         // sort timingpoints by time
         std::sort(m_timingpoints.begin(), m_timingpoints.end(), TimingPointSortComparator());
 
-        // NOTE: if we have our own stars/bpm cached then use that
-        bool bpm_was_cached = false;
-        auto db = osu->getSongBrowser()->getDatabase();
-        const auto result = db->m_starsCache.find(getMD5Hash());
-        if(result != db->m_starsCache.end()) {
-            if(result->second.starsNomod >= 0.f) {
-                m_fStarsNomod = result->second.starsNomod;
-            }
-            if(result->second.min_bpm >= 0) {
-                m_iMinBPM = result->second.min_bpm;
-                m_iMaxBPM = result->second.max_bpm;
-                m_iMostCommonBPM = result->second.common_bpm;
-                bpm_was_cached = true;
-            }
-        }
-
-        if(!bpm_was_cached) {
+        if(m_iMostCommonBPM == 0) {
             if(Osu::debug->getBool()) debugLog("DatabaseBeatmap::loadMetadata() : calculating BPM range ...\n");
             auto bpm = getBPM(m_timingpoints);
             m_iMinBPM = bpm.min;

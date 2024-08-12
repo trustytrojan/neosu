@@ -802,9 +802,8 @@ void SongBrowser::draw(Graphics *g) {
 
     // background task busy notification
     // TODO @kiwec
-    // UString busyMessage = "Calculating stars (";
-    // busyMessage.append(UString::format("%i/%i) ...", m_iBackgroundStarCalculationIndex, m_beatmaps.size()));
-    // McFont *font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    // UString busyMessage = UString::format("Calculating stars (%i/%i) ...", m_iBackgroundStarCalculationIndex,
+    // m_beatmaps.size()); McFont *font = engine->getResourceManager()->getFont("FONT_DEFAULT");
     // g->setColor(0xff333333);
     // g->pushTransform();
     // {

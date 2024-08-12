@@ -3697,6 +3697,7 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
     score.replay = live_replay;
 
     // @PPV3: store ppv3 data if not already done. also double check replay is marked correctly
+    score.ppv2_version = 20220902;
     score.ppv2_score = pp;
     score.ppv2_total_stars = totalStars;
     score.ppv2_aim_stars = aim;

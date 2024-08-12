@@ -36,10 +36,13 @@ Changelog::Changelog() : ScreenBackable() {
     latest.changes.push_back("- Added keybind to open skin selection menu");
     latest.changes.push_back("- Added slider instafade setting");
     latest.changes.push_back("- Fixed local scores not saving avatar");
+    latest.changes.push_back("- Fixed map settings (like local offset) not getting saved");
     latest.changes.push_back("- Fixed Nightcore getting auto-selected instead of Double Time in some cases");
-    latest.changes.push_back("- Linux: fixed \"Skin.ini\" failing to load");
+    latest.changes.push_back("- Optimized database loading");
     latest.changes.push_back("- Removed custom HP drain (use nofail instead)");
     latest.changes.push_back("- Removed mandala mod, random mod");
+    latest.changes.push_back("- Removed rosu-pp");
+    latest.changes.push_back("- Linux: Fixed \"Skin.ini\" failing to load");
     changelogs.push_back(latest);
 
     CHANGELOG v35_09;
