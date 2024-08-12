@@ -7,6 +7,15 @@ class SliderCurve;
 
 class ConVar;
 
+struct pp_info {
+    f64 total_stars = 0.0;
+    f64 aim_stars = 0.0;
+    f64 aim_slider_factor = 0.0;
+    f64 speed_stars = 0.0;
+    f64 speed_notes = 0.0;
+    f64 pp = 0.0;
+};
+
 class OsuDifficultyHitObject {
    public:
     enum class TYPE : u8 {

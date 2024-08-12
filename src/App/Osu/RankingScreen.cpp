@@ -9,6 +9,8 @@
 #include "CBaseUIScrollView.h"
 #include "Chat.h"
 #include "ConVar.h"
+#include "DatabaseBeatmap.h"
+#include "DifficultyCalculator.h"
 #include "Engine.h"
 #include "GameRules.h"
 #include "Icons.h"
@@ -29,7 +31,6 @@
 #include "UIButton.h"
 #include "UIRankingScreenInfoLabel.h"
 #include "UIRankingScreenRankingPanel.h"
-#include "pp.h"
 #include "score.h"
 
 ConVar osu_rankingscreen_topbar_height_percent("osu_rankingscreen_topbar_height_percent", 0.785f, FCVAR_DEFAULT);
@@ -132,11 +133,6 @@ class RankingScreenScrollDownInfoButton : public CBaseUIButton {
             g->drawString(m_font, m_sText);
         }
         g->popTransform();
-
-        /*
-        g->setColor(0xffffffff);
-        g->drawRect(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y);
-        */
     }
 
     void setAlpha(float alpha) { m_fAlpha = alpha; }
@@ -342,15 +338,25 @@ void RankingScreen::mouse_update(bool *propagate_clicks) {
     if(!m_bVisible) return;
     ScreenBackable::mouse_update(propagate_clicks);
 
+    // @PPV3
+    if(m_score.is_peppy_imported() && m_score.ppv2_score == 0.f) {
+        auto info = m_ppv2_calc.get();
+        m_score.ppv2_score = info.pp;
+        m_score.ppv2_total_stars = info.total_stars;  // (always 0)
+        m_score.ppv2_aim_stars = info.aim_stars;
+        m_score.ppv2_speed_stars = info.speed_stars;
+    }
+
     // tooltip (pp + accuracy + unstable rate)
     if(!osu->getOptionsMenu()->isMouseInside() && engine->getMouse()->getPos().x < osu->getScreenWidth() * 0.5f) {
         osu->getTooltipOverlay()->begin();
         {
-            osu->getTooltipOverlay()->addLine(UString::format("%.2fpp", m_score.ppv2_score));
-            osu->getTooltipOverlay()->addLine("Difficulty:");
-            osu->getTooltipOverlay()->addLine(UString::format("Stars: %.2f (%.2f aim, %.2f speed)",
-                                                              m_score.ppv2_total_stars, m_score.ppv2_aim_stars,
-                                                              m_score.ppv2_speed_stars));
+            osu->getTooltipOverlay()->addLine(UString::format("%.2fpp", m_score.ppv2_score));  // @PPV3
+            if(m_score.ppv2_total_stars > 0.0) {
+                osu->getTooltipOverlay()->addLine(UString::format("Stars: %.2f (%.2f aim, %.2f speed)",
+                                                                  m_score.ppv2_total_stars, m_score.ppv2_aim_stars,
+                                                                  m_score.ppv2_speed_stars));  // @PPV3
+            }
             osu->getTooltipOverlay()->addLine(UString::format("Speed: %.3gx", m_score.speedMultiplier));
             osu->getTooltipOverlay()->addLine(
                 UString::format("CS:%.2f AR:%.2f OD:%.2f HP:%.2f", m_score.CS,
@@ -362,10 +368,12 @@ void RankingScreen::mouse_update(bool *propagate_clicks) {
 
             if(m_sMods.length() > 0) osu->getTooltipOverlay()->addLine(m_sMods);
 
-            osu->getTooltipOverlay()->addLine("Accuracy:");
-            osu->getTooltipOverlay()->addLine(
-                UString::format("Error: %.2fms - %.2fms avg", m_fHitErrorAvgMin, m_fHitErrorAvgMax));
-            osu->getTooltipOverlay()->addLine(UString::format("Unstable Rate: %.2f", m_fUnstableRate));
+            if(m_fUnstableRate > 0.f) {
+                osu->getTooltipOverlay()->addLine("Accuracy:");
+                osu->getTooltipOverlay()->addLine(
+                    UString::format("Error: %.2fms - %.2fms avg", m_fHitErrorAvgMin, m_fHitErrorAvgMax));
+                osu->getTooltipOverlay()->addLine(UString::format("Unstable Rate: %.2f", m_fUnstableRate));
+            }
         }
         osu->getTooltipOverlay()->end();
     }
@@ -490,17 +498,55 @@ void RankingScreen::setBeatmapInfo(Beatmap *beatmap, DatabaseBeatmap *diff2) {
     UString local_name = convar->getConVarByName("name")->getString();
     m_songInfo->setPlayer(m_bIsUnranked ? "neosu" : local_name.toUtf8());
 
+    pp_info placeholder;
+    placeholder.pp = m_score.ppv2_score;
+    m_ppv2_calc.set(placeholder);
+
     if(m_score.is_peppy_imported() && m_score.ppv2_score == 0.f) {
         m_score.CS = diff2->getCS();
         m_score.AR = diff2->getAR();
         m_score.OD = diff2->getOD();
         m_score.HP = diff2->getHP();
 
-        // @PPV3: fix this (broke when removing rosu-pp)
-        m_score.ppv2_score = 0.f;
+        m_score.speedMultiplier = 1.0f;
+        if(m_score.modsLegacy & (ModFlags::DoubleTime | ModFlags::Nightcore))
+            m_score.speedMultiplier = 1.5f;
+        else if(m_score.modsLegacy & ModFlags::HalfTime)
+            m_score.speedMultiplier = 0.75f;
 
-        // @PPV3: update m_fStarsTomAim, m_fStarsTomSpeed, m_fHitErrorAvgMin, m_fHitErrorAvgMax, m_fUnstableRate
+        FinishedScore score = m_score;
+        std::string osufile_path = diff2->m_sFilePath;
+        auto nb_objects = diff2->m_iNumObjects;
+        auto nb_circles = diff2->m_iNumCircles;
+        auto nb_sliders = diff2->m_iNumSliders;
+        auto nb_spinners = diff2->m_iNumSpinners;
+
+        m_ppv2_calc.enqueue([=]() {
+            pp_info info;
+
+            // XXX: slow
+            auto diffres = DatabaseBeatmap::loadDifficultyHitObjects(osufile_path.c_str(), score.AR, score.CS,
+                                                                     score.speedMultiplier);
+
+            std::vector<double> aimStrains;
+            std::vector<double> speedStrains;
+
+            info.total_stars = DifficultyCalculator::calculateStarDiffForHitObjects(
+                diffres.diffobjects, score.CS, score.OD, score.speedMultiplier, score.modsLegacy & ModFlags::Relax,
+                score.modsLegacy & ModFlags::TouchDevice, &info.aim_stars, &info.aim_slider_factor, &info.speed_stars,
+                &info.speed_notes, -1, &aimStrains, &speedStrains);
+
+            info.pp = DifficultyCalculator::calculatePPv2(
+                score.modsLegacy, score.speedMultiplier, score.AR, score.OD, info.aim_stars, info.aim_slider_factor,
+                info.speed_stars, info.speed_notes, nb_objects, nb_circles, nb_sliders, nb_spinners,
+                diffres.maxPossibleCombo, score.comboMax, score.numMisses, score.num300s, score.num100s, score.num50s);
+
+            return info;
+        });
     }
+
+    // @PPV3: update m_score.ppv3_score, m_score.ppv3_aim_stars, m_score.ppv3_speed_stars,
+    //        m_fHitErrorAvgMin, m_fHitErrorAvgMax, m_fUnstableRate
 }
 
 void RankingScreen::updateLayout() {
@@ -627,7 +673,9 @@ void RankingScreen::setIndex(int index) {
     }
 }
 
-UString RankingScreen::getPPString() { return UString::format("%ipp", (int)(std::round(m_score.ppv2_score))); }
+UString RankingScreen::getPPString() {
+    return UString::format("%ipp", (int)(std::round(m_score.ppv2_score)));  // @PPV3
+}
 
 Vector2 RankingScreen::getPPPosRaw() {
     const UString ppString = getPPString();

@@ -1,7 +1,9 @@
 #pragma once
 #include "Database.h"
+#include "DifficultyCalculator.h"
 #include "ScreenBackable.h"
 #include "score.h"
+#include "uwu.h"
 
 class CBaseUIContainer;
 class CBaseUIScrollView;
@@ -87,6 +89,7 @@ class RankingScreen : public ScreenBackable {
     std::vector<ConVar *> m_enabledExperimentalMods;
 
     // custom
+    uwu::lazy_promise<std::function<pp_info()>, pp_info> m_ppv2_calc{pp_info{}};
     FinishedScore m_score;
     bool m_bIsUnranked;
 };

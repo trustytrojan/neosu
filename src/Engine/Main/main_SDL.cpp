@@ -1,10 +1,3 @@
-//================ Copyright (c) 2018, PG, All rights reserved. =================//
-//
-// Purpose:		main entry point
-//
-// $NoKeywords: $main
-//===============================================================================//
-
 #include "EngineFeatures.h"
 
 #ifdef MCENGINE_FEATURE_SDL

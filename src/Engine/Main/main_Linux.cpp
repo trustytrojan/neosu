@@ -1,10 +1,3 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		main entry point
-//
-// $NoKeywords: $main
-//===============================================================================//
-
 #ifdef __linux__
 
 #include <stdio.h>

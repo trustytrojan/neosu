@@ -658,8 +658,6 @@ void Beatmap::select() {
 }
 
 void Beatmap::selectDifficulty2(DatabaseBeatmap *difficulty2) {
-    auto previous_diff = m_selectedDifficulty2;
-
     if(difficulty2 != NULL) {
         m_selectedDifficulty2 = difficulty2;
 
@@ -669,26 +667,6 @@ void Beatmap::selectDifficulty2(DatabaseBeatmap *difficulty2) {
     }
 
     if(osu_beatmap_preview_mods_live.getBool()) onModUpdate();
-
-    if(previous_diff != difficulty2) {
-        // TODO @kiwec: commented out because this still gets triggered when
-        //              starting a map, thus erasing strains from schrubbing timeline
-        // m_aimStrains.clear();
-        // m_speedStrains.clear();
-
-        // Request full pp recomputation
-        if(m_selectedDifficulty2 && !m_selectedDifficulty2->do_not_store) {
-            // TODO @kiwec: doing this sync for debugging
-            pp_info m_pp_info;
-            auto diffres = DatabaseBeatmap::loadDifficultyHitObjects(m_selectedDifficulty2->m_sFilePath, getAR(),
-                                                                     getCS(), osu->getSpeedMultiplier(), false);
-            m_pp_info.total_stars = DifficultyCalculator::calculateStarDiffForHitObjects(
-                diffres.diffobjects, getCS(), getOD(), osu->getSpeedMultiplier(), osu->getModRelax(), osu->getModTD(),
-                &m_pp_info.aim_stars, &m_pp_info.aim_slider_factor, &m_pp_info.speed_stars, &m_pp_info.speed_notes,
-                diffres.diffobjects.size() - 1, &m_aimStrains, &m_speedStrains);
-            // TODO @kiwec: calculate m_pp_info.pp
-        }
-    }
 }
 
 void Beatmap::deselect() {
@@ -826,8 +804,6 @@ bool Beatmap::start() {
     // played
     unloadObjects();
     resetScore();
-    osu->getHUD()->live_pp = 0.0;
-    osu->getHUD()->live_stars = 0.0;
 
     // some hitobjects already need this information to be up-to-date before their constructor is called
     updatePlayfieldMetrics();
@@ -2321,6 +2297,57 @@ void Beatmap::update() {
     updateHitobjectMetrics();
     updatePlayfieldMetrics();
 
+    // @PPV3: also calculate live ppv3
+    if(convar->getConVarByName("osu_draw_statistics_pp")->getBool() ||
+       convar->getConVarByName("osu_draw_statistics_livestars")->getBool()) {
+        auto info = m_ppv2_calc.get();
+        osu->getHUD()->live_pp = info.pp;
+        osu->getHUD()->live_stars = info.total_stars;
+
+        if(last_calculated_hitobject < m_iCurrentHitObjectIndex) {
+            last_calculated_hitobject = m_iCurrentHitObjectIndex;
+
+            auto CS = getCS();
+            auto AR = getAR();
+            auto OD = getOD();
+            auto speedMultiplier = osu->getSpeedMultiplier();
+            auto osufile_path = m_selectedDifficulty2->getFilePath();
+            auto nb_objects = m_selectedDifficulty2->m_iNumObjects;
+            auto nb_circles = m_selectedDifficulty2->m_iNumCircles;
+            auto nb_sliders = m_selectedDifficulty2->m_iNumSliders;
+            auto nb_spinners = m_selectedDifficulty2->m_iNumSpinners;
+            auto modsLegacy = osu->getScore()->getModsLegacy();
+            auto relax = osu->getModRelax();
+            auto td = osu->getModTD();
+            auto highestCombo = osu->getScore()->getComboMax();
+            auto numMisses = osu->getScore()->getNumMisses();
+            auto num300s = osu->getScore()->getNum300s();
+            auto num100s = osu->getScore()->getNum100s();
+            auto num50s = osu->getScore()->getNum50s();
+
+            m_ppv2_calc.enqueue([=]() {
+                pp_info info;
+
+                // XXX: slow
+                auto diffres = DatabaseBeatmap::loadDifficultyHitObjects(osufile_path.c_str(), AR, CS, speedMultiplier);
+
+                std::vector<double> aimStrains;
+                std::vector<double> speedStrains;
+
+                info.total_stars = DifficultyCalculator::calculateStarDiffForHitObjects(
+                    diffres.diffobjects, CS, OD, speedMultiplier, relax, td, &info.aim_stars, &info.aim_slider_factor,
+                    &info.speed_stars, &info.speed_notes, -1, &aimStrains, &speedStrains);
+
+                info.pp = DifficultyCalculator::calculatePPv2(
+                    modsLegacy, speedMultiplier, AR, OD, info.aim_stars, info.aim_slider_factor, info.speed_stars,
+                    info.speed_notes, nb_objects, nb_circles, nb_sliders, nb_spinners, diffres.maxPossibleCombo,
+                    highestCombo, numMisses, num300s, num100s, num50s);
+
+                return info;
+            });
+        }
+    }
+
     // wobble mod
     if(osu_mod_wobble.getBool()) {
         const float speedMultiplierCompensation = 1.0f / getSpeedMultiplier();
@@ -2368,11 +2395,6 @@ void Beatmap::update() {
                 send_packet(packet);
             }
         }
-    }
-
-    if(convar->getConVarByName("osu_draw_statistics_pp")->getBool() ||
-       convar->getConVarByName("osu_draw_statistics_livestars")->getBool()) {
-        // @PPV3: fix this (broke when removing rosu-pp)
     }
 
     if(isLoading()) {
@@ -3304,6 +3326,8 @@ void Beatmap::resetLiveStarsTasks() {
 
     osu->getHUD()->live_pp = 0.0;
     osu->getHUD()->live_stars = 0.0;
+
+    last_calculated_hitobject = -1;
 }
 
 // HACK: Updates buffering state and pauses/unpauses the music!
@@ -3616,8 +3640,7 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
     score.unixTimestamp =
         std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
-    // @PPV3: check if we're connected to neonet
-
+    // @neonet: check if we're connected to neonet
     if(bancho.is_online()) {
         score.player_id = bancho.user_id;
         score.playerName = bancho.username.toUtf8();

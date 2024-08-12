@@ -4,7 +4,6 @@
 #include "DifficultyCalculator.h"
 #include "Osu.h"
 #include "Resource.h"
-#include "pp.h"
 
 using namespace std;
 
@@ -189,7 +188,6 @@ class DatabaseBeatmap {
     // song select mod-adjusted pp/stars
     pp_info m_pp_info;
 
-   private:
     // raw metadata
 
     int m_iVersion;   // e.g. "osu file format v12" -> 12

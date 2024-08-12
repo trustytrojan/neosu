@@ -2,12 +2,13 @@
 #include <future>
 
 #include "DatabaseBeatmap.h"
+#include "DifficultyCalculator.h"
 #include "Replay.h"
 #include "Timer.h"
 #include "UString.h"
 #include "cbase.h"
-#include "pp.h"
 #include "score.h"
+#include "uwu.h"
 
 class Sound;
 class ConVar;
@@ -274,6 +275,7 @@ class Beatmap {
     bool m_bForceStreamPlayback;
 
     // live pp/stars
+    uwu::lazy_promise<std::function<pp_info()>, pp_info> m_ppv2_calc{pp_info{}};
     i32 last_calculated_hitobject = -1;
 
    protected:

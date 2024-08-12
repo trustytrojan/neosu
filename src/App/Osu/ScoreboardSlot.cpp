@@ -64,6 +64,7 @@ void ScoreboardSlot::draw(Graphics *g) {
     g->setAlpha(0.3f * m_fAlpha);
 
     if(convar->getConVarByName("osu_hud_scoreboard_use_menubuttonbackground")->getBool()) {
+        // XXX: Doesn't work on resolutions more vertical than 4:3
         float bg_scale = 0.625f;
         auto bg_img = osu->getSkin()->getMenuButtonBackground2();
         float oScale = bg_img->getResolutionScale() * 0.99f;

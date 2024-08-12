@@ -17,6 +17,12 @@ static void *_resourceLoaderThread(void *data);
 
 class ResourceManagerLoaderThread {
    public:
+    ~ResourceManagerLoaderThread() {
+        running = false;
+        loadingMutex.unlock();
+        thread.join();
+    }
+
     // self
     std::thread thread;
 
@@ -59,7 +65,6 @@ ResourceManager::ResourceManager() {
         loaderThread->loadingWork = &m_loadingWork;
 
         loaderThread->thread = std::thread(_resourceLoaderThread, (void *)loaderThread);
-        loaderThread->thread.detach();
         m_threads.push_back(loaderThread);
     }
 }
@@ -68,30 +73,9 @@ ResourceManager::~ResourceManager() {
     // release all not-currently-being-loaded resources (1)
     destroyResources();
 
-    // let all loader threads exit
-    for(size_t i = 0; i < m_threads.size(); i++) {
-        m_threads[i]->running = false;
+    for(auto thread : m_threads) {
+        delete thread;
     }
-
-    for(size_t i = 0; i < m_threads.size(); i++) {
-        const size_t threadIndex = m_threads[i]->threadIndex.load();
-
-        bool hasLoadingWork = false;
-        for(size_t w = 0; w < m_loadingWork.size(); w++) {
-            if(m_loadingWork[w].threadIndex.atomic.load() == threadIndex) {
-                hasLoadingWork = true;
-                break;
-            }
-        }
-
-        if(!hasLoadingWork) m_threads[i]->loadingMutex.unlock();
-    }
-
-    // wait for threads to stop
-    for(size_t i = 0; i < m_threads.size(); i++) {
-        m_threads[i]->thread.join();
-    }
-
     m_threads.clear();
 
     // cleanup leftovers (can only do that after loader threads have exited) (2)
@@ -134,23 +118,6 @@ void ResourceManager::update() {
                 // unlock. this allows resources to trigger "recursive" loads within init()
                 g_resourceManagerMutex.unlock();
                 reLock = true;
-
-                // check if this was an async destroy, can skip load() if that is the case
-                // TODO: this will probably break stuff, needs in depth testing before change, think more about this
-                /*
-                bool isAsyncDestroy = false;
-                for (size_t a=0; a<m_loadingWorkAsyncDestroy.size(); a++)
-                {
-                        if (m_loadingWorkAsyncDestroy[a] == rs)
-                        {
-                                isAsyncDestroy = true;
-                                break;
-                        }
-                }
-                */
-
-                // finish (synchronous init())
-                // if (!isAsyncDestroy)
 
                 rs->load();
                 numResourceInitCounter++;

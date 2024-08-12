@@ -737,13 +737,11 @@ void ScoreButton::setScore(const FinishedScore &score, const DatabaseBeatmap *di
         m_sScoreScorePPWeightedWeight = UString::format("     weighted %i%% (%ipp)", weightRounded, ppWeightedRounded);
         m_sScoreWeight = UString::format("weighted %i%%", weightRounded);
 
-        // m_tooltipLines.push_back("Difficulty:");
         m_tooltipLines.push_back(UString::format("Stars: %.2f (%.2f aim, %.2f speed)", score.ppv2_total_stars,
                                                  score.ppv2_aim_stars, score.ppv2_speed_stars));  // @PPV3
         m_tooltipLines.push_back(UString::format("Speed: %.3gx", score.speedMultiplier));
         m_tooltipLines.push_back(
             UString::format("CS:%.4g AR:%.4g OD:%.4g HP:%.4g", score.CS, score.AR, score.OD, score.HP));
-        // m_tooltipLines.push_back("Accuracy:");
         m_tooltipLines.push_back(
             UString::format("Error: %.2fms - %.2fms avg", score.hitErrorAvgMin, score.hitErrorAvgMax));
         m_tooltipLines.push_back(UString::format("Unstable Rate: %.2f", score.unstableRate));
