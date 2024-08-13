@@ -632,7 +632,7 @@ void ScoreButton::setScore(const FinishedScore &score, const DatabaseBeatmap *di
         score.score, score.comboMax);
     m_sScoreScorePP =
         UString::format((score.perfect ? "PP: %ipp (%ix PFC)" : (fullCombo ? "PP: %ipp (%ix FC)" : "PP: %ipp (%ix)")),
-                        (int)std::round(score.ppv2_score), score.comboMax);  // @PPV3
+                        (int)std::round(score.get_pp()), score.comboMax);
     m_sScoreAccuracy = UString::format("%.2f%%", accuracy);
     m_sScoreAccuracyFC =
         UString::format((score.perfect ? "PFC %.2f%%" : (fullCombo ? "FC %.2f%%" : "%.2f%%")), accuracy);
@@ -730,15 +730,15 @@ void ScoreButton::setScore(const FinishedScore &score, const DatabaseBeatmap *di
 
     if(m_style == STYLE::TOP_RANKS) {
         const int weightRounded = std::round(weight * 100.0f);
-        const int ppWeightedRounded = std::round(score.ppv2_score * weight);  // @PPV3
+        const int ppWeightedRounded = std::round(score.get_pp() * weight);
 
         m_sScoreTitle = titleString;
-        m_sScoreScorePPWeightedPP = UString::format("%ipp", (int)std::round(score.ppv2_score));  // @PPV3
+        m_sScoreScorePPWeightedPP = UString::format("%ipp", (int)std::round(score.get_pp()));
         m_sScoreScorePPWeightedWeight = UString::format("     weighted %i%% (%ipp)", weightRounded, ppWeightedRounded);
         m_sScoreWeight = UString::format("weighted %i%%", weightRounded);
 
         m_tooltipLines.push_back(UString::format("Stars: %.2f (%.2f aim, %.2f speed)", score.ppv2_total_stars,
-                                                 score.ppv2_aim_stars, score.ppv2_speed_stars));  // @PPV3
+                                                 score.ppv2_aim_stars, score.ppv2_speed_stars));
         m_tooltipLines.push_back(UString::format("Speed: %.3gx", score.speedMultiplier));
         m_tooltipLines.push_back(
             UString::format("CS:%.4g AR:%.4g OD:%.4g HP:%.4g", score.CS, score.AR, score.OD, score.HP));

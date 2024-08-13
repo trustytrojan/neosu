@@ -212,9 +212,8 @@ struct SortScoreByPP : public Database::SCORE_SORTING_COMPARATOR {
     virtual ~SortScoreByPP() { ; }
     bool operator()(FinishedScore const &a, FinishedScore const &b) const {
         // first: pp
-        // @PPV3
-        u64 score1 = (u64)max(a.ppv2_score * 1000.0f, 0.0f);
-        u64 score2 = (u64)max(b.ppv2_score * 1000.0f, 0.0f);
+        u64 score1 = (u64)max(a.get_pp() * 1000.0, 0.0);
+        u64 score2 = (u64)max(b.get_pp() * 1000.0, 0.0);
 
         // second: score
         if(score1 == score2) {
@@ -518,14 +517,14 @@ Database::PlayerPPScores Database::getPlayerPPScores(UString playerName) {
 
     struct ScoreSortComparator {
         bool operator()(FinishedScore const *a, FinishedScore const *b) const {
-            // @PPV3
-
             // sort by pp
             // strict weak ordering!
-            if(a->ppv2_score == b->ppv2_score)
+            auto ppa = a->get_pp();
+            auto ppb = b->get_pp();
+            if(ppa == ppb)
                 return a->sortHack < b->sortHack;
             else
-                return a->ppv2_score < b->ppv2_score;
+                return ppa < ppb;
         }
     };
 
@@ -550,9 +549,8 @@ Database::PlayerPPScores Database::getPlayerPPScores(UString playerName) {
             totalScore += score.score;
             score.sortHack = m_iSortHackCounter++;
 
-            // @PPV3
-            if(score.ppv2_score > prevPP || prevPP < 0.0f) {
-                prevPP = score.ppv2_score;
+            if(score.get_pp() > prevPP || prevPP < 0.0f) {
+                prevPP = score.get_pp();
                 tempScore = &score;
             }
         }
@@ -586,7 +584,7 @@ Database::PlayerStats Database::calculatePlayerStats(UString playerName) {
     for(size_t i = 0; i < ps.ppScores.size(); i++) {
         const float weight = getWeightForIndex(ps.ppScores.size() - 1 - i);
 
-        pp += ps.ppScores[i]->ppv2_score * weight;  // @PPV3
+        pp += ps.ppScores[i]->get_pp() * weight;
         acc += LiveScore::calculateAccuracy(ps.ppScores[i]->num300s, ps.ppScores[i]->num100s, ps.ppScores[i]->num50s,
                                             ps.ppScores[i]->numMisses) *
                weight;

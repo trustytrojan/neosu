@@ -242,7 +242,7 @@ void Replay::load_and_watch(FinishedScore score) {
     // Check if replay is loaded
     if(score.replay.empty()) {
         if(!load_from_disk(&score)) {
-            // @PPV3: try loading replay from neonet
+            // @neonet: try loading replay from neonet
 
             if(strcmp(score.server.c_str(), bancho.endpoint.toUtf8()) != 0) {
                 auto msg = UString::format("Please connect to %s to view this replay!", score.server.c_str());

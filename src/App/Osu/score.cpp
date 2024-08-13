@@ -31,6 +31,8 @@ ConVar osu_drain_vr_sliderbreak("osu_drain_vr_sliderbreak", -0.10f, FCVAR_DEFAUL
 
 ConVar osu_drain_stable_hpbar_maximum("osu_drain_stable_hpbar_maximum", 200.0f, FCVAR_LOCKED);
 
+ConVar use_ppv3("use_ppv3", false, FCVAR_DEFAULT, "use ppv3 instead of ppv2 (experimental)");
+
 ConVar *LiveScore::m_osu_draw_statistics_pp_ref = NULL;
 
 LiveScore::LiveScore() {
@@ -553,6 +555,14 @@ float LiveScore::calculateAccuracy(int num300s, int num100s, int num50s, int num
     if(totalNumHits > 0.0f) return (totalHitPoints / totalNumHits);
 
     return 0.0f;
+}
+
+f64 FinishedScore::get_pp() const {
+    if(use_ppv3.getBool() && ppv3_algorithm.size() > 0) {
+        return ppv3_score;
+    }
+
+    return ppv2_score;
 }
 
 FinishedScore::Grade LiveScore::calculateGrade(int num300s, int num100s, int num50s, int numMisses, bool modHidden,

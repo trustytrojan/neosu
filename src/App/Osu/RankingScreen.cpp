@@ -338,7 +338,6 @@ void RankingScreen::mouse_update(bool *propagate_clicks) {
     if(!m_bVisible) return;
     ScreenBackable::mouse_update(propagate_clicks);
 
-    // @PPV3
     if(m_score.is_peppy_imported() && m_score.ppv2_score == 0.f) {
         auto info = m_ppv2_calc.get();
         m_score.ppv2_score = info.pp;
@@ -351,11 +350,11 @@ void RankingScreen::mouse_update(bool *propagate_clicks) {
     if(!osu->getOptionsMenu()->isMouseInside() && engine->getMouse()->getPos().x < osu->getScreenWidth() * 0.5f) {
         osu->getTooltipOverlay()->begin();
         {
-            osu->getTooltipOverlay()->addLine(UString::format("%.2fpp", m_score.ppv2_score));  // @PPV3
+            osu->getTooltipOverlay()->addLine(UString::format("%.2fpp", m_score.get_pp()));
             if(m_score.ppv2_total_stars > 0.0) {
                 osu->getTooltipOverlay()->addLine(UString::format("Stars: %.2f (%.2f aim, %.2f speed)",
                                                                   m_score.ppv2_total_stars, m_score.ppv2_aim_stars,
-                                                                  m_score.ppv2_speed_stars));  // @PPV3
+                                                                  m_score.ppv2_speed_stars));
             }
             osu->getTooltipOverlay()->addLine(UString::format("Speed: %.3gx", m_score.speedMultiplier));
             osu->getTooltipOverlay()->addLine(
@@ -673,9 +672,7 @@ void RankingScreen::setIndex(int index) {
     }
 }
 
-UString RankingScreen::getPPString() {
-    return UString::format("%ipp", (int)(std::round(m_score.ppv2_score)));  // @PPV3
-}
+UString RankingScreen::getPPString() { return UString::format("%ipp", (int)(std::round(m_score.get_pp()))); }
 
 Vector2 RankingScreen::getPPPosRaw() {
     const UString ppString = getPPString();

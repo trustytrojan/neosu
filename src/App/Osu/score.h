@@ -78,6 +78,7 @@ struct FinishedScore {
     std::vector<Replay::Frame> replay;  // not always loaded
 
     bool is_peppy_imported() { return bancho_score_id != 0 || peppy_replay_tms != 0; }
+    f64 get_pp() const;
 };
 
 class LiveScore {
