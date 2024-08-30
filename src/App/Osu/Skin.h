@@ -12,9 +12,6 @@ class Skin {
    public:
     static void unpack(const char *filepath);
 
-    static ConVar *m_osu_skin_async;
-    static ConVar *m_osu_skin_hd;
-
     Skin(UString name, std::string filepath, bool isDefaultSkin = false);
     virtual ~Skin();
 
@@ -326,9 +323,6 @@ class Skin {
     inline bool useSmoothCursorTrail() const { return m_cursorMiddle != m_missingTexture; }
     inline bool isDefaultSkin() const { return m_bIsDefaultSkin; }
     inline int getSampleSet() const { return m_iSampleSet; }
-
-    static ConVar *m_osu_skin_ref;
-    static ConVar *m_osu_mod_fposu_ref;
 
     static Image *m_missingTexture;
 

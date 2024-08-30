@@ -5,10 +5,6 @@
 #include "ResourceManager.h"
 #include "VertexArrayObject.h"
 
-ConVar r_drawstring_max_string_length("r_drawstring_max_string_length", 65536, FCVAR_LOCKED,
-                                      "maximum number of characters per call, sanity/memory buffer limit");
-ConVar r_debug_drawstring_unbind("r_debug_drawstring_unbind", false, FCVAR_DEFAULT);
-
 static unsigned char *unpackMonoBitmap(FT_Bitmap bitmap);
 
 const wchar_t McFont::UNKNOWN_CHAR;
@@ -137,7 +133,7 @@ bool McFont::addGlyph(wchar_t ch) {
 void McFont::drawString(Graphics *g, UString text) {
     if(!m_bReady) return;
 
-    const int maxNumGlyphs = r_drawstring_max_string_length.getInt();
+    const int maxNumGlyphs = cv_r_drawstring_max_string_length.getInt();
 
     // texture atlas rendering
     m_textureAtlas->getAtlasImage()->bind();
@@ -152,7 +148,7 @@ void McFont::drawString(Graphics *g, UString text) {
 
         g->drawVAO(&vao);
     }
-    if(r_debug_drawstring_unbind.getBool()) m_textureAtlas->getAtlasImage()->unbind();
+    if(cv_r_debug_drawstring_unbind.getBool()) m_textureAtlas->getAtlasImage()->unbind();
 }
 
 void McFont::addAtlasGlyphToVao(Graphics *g, wchar_t ch, float &advanceX, VertexArrayObject *vao) {

@@ -20,8 +20,6 @@ InfoLabel::InfoLabel(float xPos, float yPos, float xSize, float ySize, UString n
     : CBaseUIButton(xPos, yPos, xSize, ySize, name, "") {
     m_font = osu->getSubTitleFont();
 
-    m_osu_debug_ref = convar->getConVarByName("osu_debug");
-
     m_iMargin = 10;
 
     const float globalScaler = 1.3f;
@@ -57,7 +55,7 @@ InfoLabel::InfoLabel(float xPos, float yPos, float xSize, float ySize, UString n
 
 void InfoLabel::draw(Graphics *g) {
     // debug bounding box
-    if(m_osu_debug_ref->getBool()) {
+    if(cv_debug.getBool()) {
         g->setColor(0xffff0000);
         g->drawLine(m_vPos.x, m_vPos.y, m_vPos.x + m_vSize.x, m_vPos.y);
         g->drawLine(m_vPos.x, m_vPos.y, m_vPos.x, m_vPos.y + m_vSize.y);

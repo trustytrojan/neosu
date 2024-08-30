@@ -1,19 +1,8 @@
-//================ Copyright (c) 2013, PG, All rights reserved. =================//
-//
-// Purpose:		offscreen rendering
-//
-// $NoKeywords: $rt
-//===============================================================================//
-
 #include "RenderTarget.h"
 
 #include "ConVar.h"
 #include "Engine.h"
 #include "VertexArrayObject.h"
-
-ConVar _debug_rt("debug_rt", false, FCVAR_LOCKED, "draws all rendertargets with a translucent green background");
-
-ConVar *RenderTarget::debug_rt = &_debug_rt;
 
 RenderTarget::RenderTarget(int x, int y, int width, int height, Graphics::MULTISAMPLE_TYPE multiSampleType) {
     m_vPos = Vector2(x, y);
@@ -29,7 +18,7 @@ RenderTarget::RenderTarget(int x, int y, int width, int height, Graphics::MULTIS
 
 void RenderTarget::draw(Graphics *g, int x, int y) {
     if(!m_bReady) {
-        if(_debug_rt.getBool()) debugLog("WARNING: RenderTarget is not ready!\n");
+        if(cv_debug_rt.getBool()) debugLog("WARNING: RenderTarget is not ready!\n");
         return;
     }
 
@@ -72,7 +61,7 @@ void RenderTarget::draw(Graphics *g, int x, int y) {
 
 void RenderTarget::draw(Graphics *g, int x, int y, int width, int height) {
     if(!m_bReady) {
-        if(_debug_rt.getBool()) debugLog("WARNING: RenderTarget is not ready!\n");
+        if(cv_debug_rt.getBool()) debugLog("WARNING: RenderTarget is not ready!\n");
         return;
     }
 
@@ -107,7 +96,7 @@ void RenderTarget::draw(Graphics *g, int x, int y, int width, int height) {
 
 void RenderTarget::drawRect(Graphics *g, int x, int y, int width, int height) {
     if(!m_bReady) {
-        if(_debug_rt.getBool()) debugLog("WARNING: RenderTarget is not ready!\n");
+        if(cv_debug_rt.getBool()) debugLog("WARNING: RenderTarget is not ready!\n");
         return;
     }
 

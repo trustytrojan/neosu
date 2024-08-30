@@ -57,8 +57,7 @@ void *UpdateHandler::run(void *data) {
 UpdateHandler::UpdateHandler() {
     update_url = "";
 
-    m_status = convar->getConVarByName("auto_update")->getBool() ? STATUS::STATUS_CHECKING_FOR_UPDATE
-                                                                 : STATUS::STATUS_UP_TO_DATE;
+    m_status = cv_auto_update.getBool() ? STATUS::STATUS_CHECKING_FOR_UPDATE : STATUS::STATUS_UP_TO_DATE;
     m_iNumRetries = 0;
     _m_bKYS = false;
 }
@@ -77,8 +76,7 @@ void UpdateHandler::wait() {
 }
 
 void UpdateHandler::checkForUpdates() {
-    if(!convar->getConVarByName("auto_update")->getBool() || Osu::debug->getBool() ||
-       (m_updateThread != NULL && m_updateThread->joinable()))
+    if(!cv_auto_update.getBool() || cv_debug.getBool() || (m_updateThread != NULL && m_updateThread->joinable()))
         return;
     if(env->getOS() != Environment::OS::WINDOWS) return;  // only windows gets releases right now
 
@@ -101,7 +99,7 @@ void UpdateHandler::_requestUpdate() {
         return;
     }
 
-    float current_version = convar->getConVarByName("osu_version")->getFloat();
+    float current_version = cv_version.getFloat();
     if(current_version >= fLatestVersion) {
         // We're already up to date
         m_status = STATUS::STATUS_UP_TO_DATE;

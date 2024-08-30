@@ -33,10 +33,6 @@
 #include "UIRankingScreenRankingPanel.h"
 #include "score.h"
 
-ConVar osu_rankingscreen_topbar_height_percent("osu_rankingscreen_topbar_height_percent", 0.785f, FCVAR_DEFAULT);
-ConVar osu_rankingscreen_pp("osu_rankingscreen_pp", true, FCVAR_DEFAULT);
-ConVar osu_draw_rankingscreen_background_image("osu_draw_rankingscreen_background_image", true, FCVAR_DEFAULT);
-
 class RankingScreenIndexLabel : public CBaseUILabel {
    public:
     RankingScreenIndexLabel() : CBaseUILabel(-1, 0, 0, 0, "", "You achieved the #1 score on local rankings!") {
@@ -146,8 +142,6 @@ class RankingScreenScrollDownInfoButton : public CBaseUIButton {
 };
 
 RankingScreen::RankingScreen() : ScreenBackable() {
-    m_osu_scores_enabled = convar->getConVarByName("osu_scores_enabled");
-
     m_rankings = new CBaseUIScrollView(-1, 0, 0, 0, "");
     m_rankings->setHorizontalScrolling(false);
     m_rankings->setVerticalScrolling(false);
@@ -223,13 +217,13 @@ void RankingScreen::draw(Graphics *g) {
     if(!m_bVisible) return;
 
     // draw background image
-    if(osu_draw_rankingscreen_background_image.getBool()) {
+    if(cv_draw_rankingscreen_background_image.getBool()) {
         SongBrowser::drawSelectedBeatmapBackgroundImage(g);
 
         // draw top black bar
         g->setColor(0xff000000);
         g->fillRect(0, 0, osu->getScreenWidth(),
-                    m_rankingTitle->getSize().y * osu_rankingscreen_topbar_height_percent.getFloat());
+                    m_rankingTitle->getSize().y * cv_rankingscreen_topbar_height_percent.getFloat());
     }
 
     ScreenBackable::draw(g);
@@ -308,7 +302,7 @@ void RankingScreen::draw(Graphics *g) {
     }
 
     // draw pp
-    if(osu_rankingscreen_pp.getBool()) {
+    if(cv_rankingscreen_pp.getBool()) {
         const UString ppString = getPPString();
         const Vector2 ppPos = getPPPosRaw();
 
@@ -420,7 +414,7 @@ void RankingScreen::onWatchClicked() {
 }
 
 void RankingScreen::setScore(FinishedScore score) {
-    auto current_name = convar->getConVarByName("name")->getString();
+    auto current_name = cv_name.getString();
     bool is_same_player = !score.playerName.compare(current_name.toUtf8());
 
     m_score = score;
@@ -494,7 +488,7 @@ void RankingScreen::setBeatmapInfo(Beatmap *beatmap, DatabaseBeatmap *diff2) {
     m_score.diff2 = diff2;
     m_songInfo->setFromBeatmap(beatmap, diff2);
 
-    UString local_name = convar->getConVarByName("name")->getString();
+    UString local_name = cv_name.getString();
     m_songInfo->setPlayer(m_bIsUnranked ? "neosu" : local_name.toUtf8());
 
     pp_info placeholder;
@@ -550,7 +544,7 @@ void RankingScreen::setBeatmapInfo(Beatmap *beatmap, DatabaseBeatmap *diff2) {
 void RankingScreen::updateLayout() {
     ScreenBackable::updateLayout();
 
-    const float uiScale = Osu::ui_scale->getFloat();
+    const float uiScale = cv_ui_scale.getFloat();
 
     setSize(osu->getScreenSize());
 
@@ -563,7 +557,7 @@ void RankingScreen::updateLayout() {
 
     m_songInfo->setSize(osu->getScreenWidth(),
                         max(m_songInfo->getMinimumHeight(),
-                            m_rankingTitle->getSize().y * osu_rankingscreen_topbar_height_percent.getFloat()));
+                            m_rankingTitle->getSize().y * cv_rankingscreen_topbar_height_percent.getFloat()));
 
     float btn_width = 150 * uiScale;
     float btn_height = 50 * uiScale;
@@ -644,8 +638,8 @@ void RankingScreen::setGrade(FinishedScore::Grade grade) {
             break;
     }
 
-    const float uiScale = /*Osu::ui_scale->getFloat()*/ 1.0f;  // NOTE: no uiScale for rankingPanel and rankingGrade,
-                                                               // doesn't really work due to legacy layout expectations
+    const float uiScale = /*cv_ui_scale.getFloat()*/ 1.0f;  // NOTE: no uiScale for rankingPanel and rankingGrade,
+                                                            // doesn't really work due to legacy layout expectations
 
     const float rankingGradeImageScale = Osu::getImageScale(hardcodedOsuRankingGradeImageSize, 230.0f) * uiScale;
     m_rankingGrade->setScale(rankingGradeImageScale, rankingGradeImageScale);
@@ -659,7 +653,7 @@ void RankingScreen::setGrade(FinishedScore::Grade grade) {
 }
 
 void RankingScreen::setIndex(int index) {
-    if(!m_osu_scores_enabled->getBool()) index = -1;
+    if(!cv_scores_enabled.getBool()) index = -1;
 
     if(index > -1) {
         m_rankingIndex->setText(UString::format("You achieved the #%i score on local rankings!", (index + 1)));
@@ -676,7 +670,7 @@ UString RankingScreen::getPPString() { return UString::format("%ipp", (int)(std:
 Vector2 RankingScreen::getPPPosRaw() {
     const UString ppString = getPPString();
     float ppStringWidth = osu->getTitleFont()->getStringWidth(ppString);
-    return Vector2(m_rankingGrade->getPos().x, Osu::ui_scale->getFloat() * 10.f) +
-           Vector2(m_rankingGrade->getSize().x / 2 - (ppStringWidth / 2 + Osu::ui_scale->getFloat() * 100.f),
+    return Vector2(m_rankingGrade->getPos().x, cv_ui_scale.getFloat() * 10.f) +
+           Vector2(m_rankingGrade->getSize().x / 2 - (ppStringWidth / 2 + cv_ui_scale.getFloat() * 100.f),
                    m_rankings->getRelPosY() + osu->getUIScale(400) + osu->getTitleFont()->getHeight() / 2);
 }

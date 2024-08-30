@@ -7,8 +7,6 @@
 #include "Osu.h"
 #include "ResourceManager.h"
 
-ConVar osu_notification_duration("osu_notification_duration", 1.25f, FCVAR_DEFAULT);
-
 NotificationOverlay::NotificationOverlay() : OsuScreen() {
     m_bWaitForKey = false;
     m_bWaitForKeyDisallowsLeftClick = false;
@@ -74,7 +72,7 @@ void NotificationOverlay::onKeyDown(KeyboardEvent &e) {
     // key binding logic
     if(m_bWaitForKey) {
         /*
-        float prevDuration = osu_notification_duration.getFloat();
+        float prevDuration = cv_notification_duration.getFloat();
         osu_notification_duration.setValue(0.85f);
         addNotification(UString::format("The new key is (ASCII Keycode): %lu", e.getKeyCode()));
         osu_notification_duration.setValue(prevDuration); // restore convar
@@ -111,7 +109,7 @@ void NotificationOverlay::onChar(KeyboardEvent &e) {
 }
 
 void NotificationOverlay::addNotification(UString text, Color textColor, bool waitForKey, float duration) {
-    const float notificationDuration = (duration < 0.0f ? osu_notification_duration.getFloat() : duration);
+    const float notificationDuration = (duration < 0.0f ? cv_notification_duration.getFloat() : duration);
 
     // swap effect
     if(isVisible()) {

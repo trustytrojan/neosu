@@ -21,10 +21,6 @@
 #include "SoundEngine.h"
 #include "UIPauseMenuButton.h"
 
-ConVar osu_pause_dim_background("osu_pause_dim_background", true, FCVAR_DEFAULT);
-ConVar osu_pause_dim_alpha("osu_pause_dim_alpha", 0.58f, FCVAR_DEFAULT);
-ConVar osu_pause_anim_duration("osu_pause_anim_duration", 0.15f, FCVAR_DEFAULT);
-
 PauseMenu::PauseMenu() : OsuScreen() {
     m_bScheduledVisibility = false;
     m_bScheduledVisibilityChange = false;
@@ -61,8 +57,8 @@ void PauseMenu::draw(Graphics *g) {
     if(!m_bVisible && !isAnimating) return;
 
     // draw dim
-    if(osu_pause_dim_background.getBool()) {
-        g->setColor(COLORf(m_fDimAnim * osu_pause_dim_alpha.getFloat(), 0.078f, 0.078f, 0.078f));
+    if(cv_pause_dim_background.getBool()) {
+        g->setColor(COLORf(m_fDimAnim * cv_pause_dim_alpha.getFloat(), 0.078f, 0.078f, 0.078f));
         g->fillRect(0, 0, osu->getScreenWidth(), osu->getScreenHeight());
     }
 
@@ -180,16 +176,14 @@ void PauseMenu::onKeyDown(KeyboardEvent &e) {
     OsuScreen::onKeyDown(e);  // only used for options menu
     if(!m_bVisible || e.isConsumed()) return;
 
-    if(e == (KEYCODE)KeyBindings::LEFT_CLICK.getInt() || e == (KEYCODE)KeyBindings::RIGHT_CLICK.getInt() ||
-       e == (KEYCODE)KeyBindings::LEFT_CLICK_2.getInt() || e == (KEYCODE)KeyBindings::RIGHT_CLICK_2.getInt()) {
+    if(e == (KEYCODE)cv_LEFT_CLICK.getInt() || e == (KEYCODE)cv_RIGHT_CLICK.getInt() ||
+       e == (KEYCODE)cv_LEFT_CLICK_2.getInt() || e == (KEYCODE)cv_RIGHT_CLICK_2.getInt()) {
         bool fireButtonClick = false;
-        if((e == (KEYCODE)KeyBindings::LEFT_CLICK.getInt() || e == (KEYCODE)KeyBindings::LEFT_CLICK_2.getInt()) &&
-           !m_bClick1Down) {
+        if((e == (KEYCODE)cv_LEFT_CLICK.getInt() || e == (KEYCODE)cv_LEFT_CLICK_2.getInt()) && !m_bClick1Down) {
             m_bClick1Down = true;
             fireButtonClick = true;
         }
-        if((e == (KEYCODE)KeyBindings::RIGHT_CLICK.getInt() || e == (KEYCODE)KeyBindings::RIGHT_CLICK_2.getInt()) &&
-           !m_bClick2Down) {
+        if((e == (KEYCODE)cv_RIGHT_CLICK.getInt() || e == (KEYCODE)cv_RIGHT_CLICK_2.getInt()) && !m_bClick2Down) {
             m_bClick2Down = true;
             fireButtonClick = true;
         }
@@ -262,18 +256,15 @@ void PauseMenu::onKeyDown(KeyboardEvent &e) {
 
     // consume ALL events, except for a few special binds which are allowed through (e.g. for unpause or changing the
     // local offset in Osu.cpp)
-    if(e != KEY_ESCAPE && e != (KEYCODE)KeyBindings::GAME_PAUSE.getInt() &&
-       e != (KEYCODE)KeyBindings::INCREASE_LOCAL_OFFSET.getInt() &&
-       e != (KEYCODE)KeyBindings::DECREASE_LOCAL_OFFSET.getInt())
+    if(e != KEY_ESCAPE && e != (KEYCODE)cv_GAME_PAUSE.getInt() && e != (KEYCODE)cv_INCREASE_LOCAL_OFFSET.getInt() &&
+       e != (KEYCODE)cv_DECREASE_LOCAL_OFFSET.getInt())
         e.consume();
 }
 
 void PauseMenu::onKeyUp(KeyboardEvent &e) {
-    if(e == (KEYCODE)KeyBindings::LEFT_CLICK.getInt() || e == (KEYCODE)KeyBindings::LEFT_CLICK_2.getInt())
-        m_bClick1Down = false;
+    if(e == (KEYCODE)cv_LEFT_CLICK.getInt() || e == (KEYCODE)cv_LEFT_CLICK_2.getInt()) m_bClick1Down = false;
 
-    if(e == (KEYCODE)KeyBindings::RIGHT_CLICK.getInt() || e == (KEYCODE)KeyBindings::RIGHT_CLICK_2.getInt())
-        m_bClick2Down = false;
+    if(e == (KEYCODE)cv_RIGHT_CLICK.getInt() || e == (KEYCODE)cv_RIGHT_CLICK_2.getInt()) m_bClick2Down = false;
 }
 
 void PauseMenu::onChar(KeyboardEvent &e) {
@@ -395,7 +386,7 @@ CBaseUIContainer *PauseMenu::setVisible(bool visible) {
     osu->updateWindowsKeyDisable();
 
     anim->moveQuadOut(&m_fDimAnim, (m_bVisible ? 1.0f : 0.0f),
-                      osu_pause_anim_duration.getFloat() * (m_bVisible ? 1.0f - m_fDimAnim : m_fDimAnim), true);
+                      cv_pause_anim_duration.getFloat() * (m_bVisible ? 1.0f - m_fDimAnim : m_fDimAnim), true);
     osu->m_chat->updateVisibility();
     return this;
 }

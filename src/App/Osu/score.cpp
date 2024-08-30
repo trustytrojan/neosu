@@ -16,29 +16,7 @@
 
 using namespace std;
 
-ConVar osu_hiterrorbar_misses("osu_hiterrorbar_misses", true, FCVAR_DEFAULT);
-ConVar osu_debug_pp("osu_debug_pp", false, FCVAR_DEFAULT);
-
-ConVar osu_hud_statistics_hitdelta_chunksize("osu_hud_statistics_hitdelta_chunksize", 30, FCVAR_DEFAULT,
-                                             "how many recent hit deltas to average (-1 = all)");
-
-ConVar osu_drain_vr_multiplier("osu_drain_vr_multiplier", 1.0f, FCVAR_DEFAULT);
-ConVar osu_drain_vr_300("osu_drain_vr_300", 0.035f, FCVAR_DEFAULT);
-ConVar osu_drain_vr_100("osu_drain_vr_100", -0.10f, FCVAR_DEFAULT);
-ConVar osu_drain_vr_50("osu_drain_vr_50", -0.125f, FCVAR_DEFAULT);
-ConVar osu_drain_vr_miss("osu_drain_vr_miss", -0.15f, FCVAR_DEFAULT);
-ConVar osu_drain_vr_sliderbreak("osu_drain_vr_sliderbreak", -0.10f, FCVAR_DEFAULT);
-
-ConVar use_ppv3("use_ppv3", false, FCVAR_DEFAULT, "use ppv3 instead of ppv2 (experimental)");
-
-ConVar *LiveScore::m_osu_draw_statistics_pp_ref = NULL;
-
-LiveScore::LiveScore() {
-    reset();
-
-    if(m_osu_draw_statistics_pp_ref == NULL)
-        m_osu_draw_statistics_pp_ref = convar->getConVarByName("osu_draw_statistics_pp");
-}
+LiveScore::LiveScore() { reset(); }
 
 void LiveScore::reset() {
     m_hitresults = std::vector<HIT>();
@@ -107,7 +85,7 @@ void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, HI
         }
     } else  // misses
     {
-        if(osu_hiterrorbar_misses.getBool() && !ignoreOnHitErrorBar && delta <= (long)beatmap->getHitWindow50())
+        if(cv_hiterrorbar_misses.getBool() && !ignoreOnHitErrorBar && delta <= (long)beatmap->getHitWindow50())
             osu->getHUD()->addHitError(delta, true);
 
         m_iCombo = 0;
@@ -209,9 +187,9 @@ void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, HI
         int numCustomNegatives = 0;
 
         const int customStartIndex =
-            (osu_hud_statistics_hitdelta_chunksize.getInt() < 0
+            (cv_hud_statistics_hitdelta_chunksize.getInt() < 0
                  ? 0
-                 : max(0, (int)m_hitdeltas.size() - osu_hud_statistics_hitdelta_chunksize.getInt())) -
+                 : max(0, (int)m_hitdeltas.size() - cv_hud_statistics_hitdelta_chunksize.getInt())) -
             1;
 
         for(int i = 0; i < m_hitdeltas.size(); i++) {
@@ -420,9 +398,9 @@ u32 LiveScore::getModsLegacy() {
 
     // Set some unused (in osu!std) mod flags for non-vanilla mods
     // (these flags don't seem to cause issues on osu!stable or bancho.py)
-    if(convar->getConVarByName("osu_mod_fposu")->getBool()) modsLegacy |= ModFlags::FPoSu;
-    if(convar->getConVarByName("osu_playfield_mirror_horizontal")->getBool()) modsLegacy |= ModFlags::Mirror;
-    if(convar->getConVarByName("osu_playfield_mirror_vertical")->getBool()) modsLegacy |= ModFlags::Mirror;
+    if(cv_mod_fposu.getBool()) modsLegacy |= ModFlags::FPoSu;
+    if(cv_playfield_mirror_horizontal.getBool()) modsLegacy |= ModFlags::Mirror;
+    if(cv_playfield_mirror_vertical.getBool()) modsLegacy |= ModFlags::Mirror;
 
     return modsLegacy;
 }
@@ -475,7 +453,7 @@ float LiveScore::calculateAccuracy(int num300s, int num100s, int num50s, int num
 }
 
 f64 FinishedScore::get_pp() const {
-    if(use_ppv3.getBool() && ppv3_algorithm.size() > 0) {
+    if(cv_use_ppv3.getBool() && ppv3_algorithm.size() > 0) {
         return ppv3_score;
     }
 

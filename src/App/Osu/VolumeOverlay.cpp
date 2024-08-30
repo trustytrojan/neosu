@@ -23,20 +23,14 @@
 #include "UIVolumeSlider.h"
 
 VolumeOverlay::VolumeOverlay() : OsuScreen() {
-    osu_volume_master = convar->getConVarByName("osu_volume_master");
-    osu_volume_master->setCallback(fastdelegate::MakeDelegate(this, &VolumeOverlay::onMasterVolumeChange));
-    osu_volume_effects = convar->getConVarByName("osu_volume_effects");
-    osu_volume_effects->setCallback(fastdelegate::MakeDelegate(this, &VolumeOverlay::onEffectVolumeChange));
-    osu_volume_music = convar->getConVarByName("osu_volume_music");
-    osu_volume_music->setCallback(fastdelegate::MakeDelegate(this, &VolumeOverlay::onMusicVolumeChange));
-    osu_hud_volume_size_multiplier = convar->getConVarByName("osu_hud_volume_size_multiplier");
-    osu_hud_volume_size_multiplier->setCallback(fastdelegate::MakeDelegate(this, &VolumeOverlay::updateLayout));
-    osu_volume_master_inactive = convar->getConVarByName("osu_volume_master_inactive");
-    osu_volume_change_interval = convar->getConVarByName("osu_volume_change_interval");
+    cv_volume_master.setCallback(fastdelegate::MakeDelegate(this, &VolumeOverlay::onMasterVolumeChange));
+    cv_volume_effects.setCallback(fastdelegate::MakeDelegate(this, &VolumeOverlay::onEffectVolumeChange));
+    cv_volume_music.setCallback(fastdelegate::MakeDelegate(this, &VolumeOverlay::onMusicVolumeChange));
+    cv_hud_volume_size_multiplier.setCallback(fastdelegate::MakeDelegate(this, &VolumeOverlay::updateLayout));
 
     m_fVolumeChangeTime = 0.0f;
     m_fVolumeChangeFade = 1.0f;
-    m_fLastVolume = osu_volume_master->getFloat();
+    m_fLastVolume = cv_volume_master.getFloat();
     m_volumeSliderOverlayContainer = new CBaseUIContainer();
 
     m_volumeMaster = new UIVolumeSlider(0, 0, 450, 75, "");
@@ -50,26 +44,24 @@ VolumeOverlay::VolumeOverlay() : OsuScreen() {
     m_volumeEffects->setType(UIVolumeSlider::TYPE::EFFECTS);
     m_volumeEffects->setBlockSize((m_volumeMaster->getSize().y + 7) / 1.5f, m_volumeMaster->getSize().y / 1.5f);
     m_volumeEffects->setAllowMouseWheel(false);
-    m_volumeEffects->setKeyDelta(osu_volume_change_interval->getFloat());
+    m_volumeEffects->setKeyDelta(cv_volume_change_interval.getFloat());
     m_volumeEffects->setAnimated(false);
     m_volumeSliderOverlayContainer->addBaseUIElement(m_volumeEffects);
     m_volumeMusic = new UIVolumeSlider(0, 0, m_volumeMaster->getSize().x, m_volumeMaster->getSize().y / 1.5f, "");
     m_volumeMusic->setType(UIVolumeSlider::TYPE::MUSIC);
     m_volumeMusic->setBlockSize((m_volumeMaster->getSize().y + 7) / 1.5f, m_volumeMaster->getSize().y / 1.5f);
     m_volumeMusic->setAllowMouseWheel(false);
-    m_volumeMusic->setKeyDelta(osu_volume_change_interval->getFloat());
+    m_volumeMusic->setKeyDelta(cv_volume_change_interval.getFloat());
     m_volumeMusic->setAnimated(false);
     m_volumeSliderOverlayContainer->addBaseUIElement(m_volumeMusic);
 
-    engine->getSound()->setVolume(osu_volume_master->getFloat());
+    engine->getSound()->setVolume(cv_volume_master.getFloat());
     updateLayout();
 }
 
 void VolumeOverlay::animate() {
     const bool active = m_fVolumeChangeTime > engine->getTime();
-    auto osu_hud_volume_duration = convar->getConVarByName("osu_hud_volume_duration");
-
-    m_fVolumeChangeTime = engine->getTime() + osu_hud_volume_duration->getFloat() + 0.2f;
+    m_fVolumeChangeTime = engine->getTime() + cv_hud_volume_duration.getFloat() + 0.2f;
 
     if(!active) {
         m_fVolumeChangeFade = 0.0f;
@@ -77,15 +69,15 @@ void VolumeOverlay::animate() {
     } else
         anim->moveQuadOut(&m_fVolumeChangeFade, 1.0f, 0.1f * (1.0f - m_fVolumeChangeFade), true);
 
-    anim->moveQuadOut(&m_fVolumeChangeFade, 0.0f, 0.20f, osu_hud_volume_duration->getFloat(), false);
-    anim->moveQuadOut(&m_fLastVolume, osu_volume_master->getFloat(), 0.15f, 0.0f, true);
+    anim->moveQuadOut(&m_fVolumeChangeFade, 0.0f, 0.20f, cv_hud_volume_duration.getFloat(), false);
+    anim->moveQuadOut(&m_fLastVolume, cv_volume_master.getFloat(), 0.15f, 0.0f, true);
 }
 
 void VolumeOverlay::draw(Graphics *g) {
     if(!isVisible()) return;
 
     const float dpiScale = Osu::getUIScale();
-    const float sizeMultiplier = osu_hud_volume_size_multiplier->getFloat() * dpiScale;
+    const float sizeMultiplier = cv_hud_volume_size_multiplier.getFloat() * dpiScale;
 
     if(m_fVolumeChangeFade != 1.0f) {
         g->push3DScene(McRect(m_volumeMaster->getPos().x, m_volumeMaster->getPos().y, m_volumeMaster->getSize().x,
@@ -113,21 +105,21 @@ void VolumeOverlay::mouse_update(bool *propagate_clicks) {
     m_volumeSliderOverlayContainer->mouse_update(propagate_clicks);
 
     if(!m_volumeMaster->isBusy())
-        m_volumeMaster->setValue(osu_volume_master->getFloat(), false);
+        m_volumeMaster->setValue(cv_volume_master.getFloat(), false);
     else {
-        osu_volume_master->setValue(m_volumeMaster->getFloat());
+        cv_volume_master.setValue(m_volumeMaster->getFloat());
         m_fLastVolume = m_volumeMaster->getFloat();
     }
 
     if(!m_volumeMusic->isBusy())
-        m_volumeMusic->setValue(osu_volume_music->getFloat(), false);
+        m_volumeMusic->setValue(cv_volume_music.getFloat(), false);
     else
-        osu_volume_music->setValue(m_volumeMusic->getFloat());
+        cv_volume_music.setValue(m_volumeMusic->getFloat());
 
     if(!m_volumeEffects->isBusy())
-        m_volumeEffects->setValue(osu_volume_effects->getFloat(), false);
+        m_volumeEffects->setValue(cv_volume_effects.getFloat(), false);
     else
-        osu_volume_effects->setValue(m_volumeEffects->getFloat());
+        cv_volume_effects.setValue(m_volumeEffects->getFloat());
 
     // force focus back to master if no longer active
     if(engine->getTime() > m_fVolumeChangeTime && !m_volumeMaster->isSelected()) {
@@ -156,9 +148,8 @@ void VolumeOverlay::mouse_update(bool *propagate_clicks) {
 
     // volume inactive to active animation
     if(m_bVolumeInactiveToActiveScheduled && m_fVolumeInactiveToActiveAnim > 0.0f) {
-        engine->getSound()->setVolume(
-            lerp<float>(osu_volume_master_inactive->getFloat() * osu_volume_master->getFloat(),
-                        osu_volume_master->getFloat(), m_fVolumeInactiveToActiveAnim));
+        engine->getSound()->setVolume(lerp<float>(cv_volume_master_inactive.getFloat() * cv_volume_master.getFloat(),
+                                                  cv_volume_master.getFloat(), m_fVolumeInactiveToActiveAnim));
 
         // check if we're done
         if(m_fVolumeInactiveToActiveAnim == 1.0f) m_bVolumeInactiveToActiveScheduled = false;
@@ -177,7 +168,7 @@ void VolumeOverlay::mouse_update(bool *propagate_clicks) {
 
 void VolumeOverlay::updateLayout() {
     const float dpiScale = Osu::getUIScale();
-    const float sizeMultiplier = osu_hud_volume_size_multiplier->getFloat() * dpiScale;
+    const float sizeMultiplier = cv_hud_volume_size_multiplier.getFloat() * dpiScale;
 
     m_volumeMaster->setSize(300 * sizeMultiplier, 50 * sizeMultiplier);
     m_volumeMaster->setBlockSize(m_volumeMaster->getSize().y + 7 * dpiScale, m_volumeMaster->getSize().y);
@@ -196,10 +187,10 @@ void VolumeOverlay::onResolutionChange(Vector2 newResolution) { updateLayout(); 
 void VolumeOverlay::onKeyDown(KeyboardEvent &key) {
     if(!canChangeVolume()) return;
 
-    if(key == (KEYCODE)KeyBindings::INCREASE_VOLUME.getInt()) {
+    if(key == (KEYCODE)cv_INCREASE_VOLUME.getInt()) {
         volumeUp();
         key.consume();
-    } else if(key == (KEYCODE)KeyBindings::DECREASE_VOLUME.getInt()) {
+    } else if(key == (KEYCODE)cv_DECREASE_VOLUME.getInt()) {
         volumeDown();
         key.consume();
     } else if(isVisible()) {
@@ -250,9 +241,7 @@ bool VolumeOverlay::canChangeVolume() {
     if(osu->m_rankingScreen->isVisible()) can_scroll = false;
     if(osu->m_modSelector->isMouseInScrollView()) can_scroll = false;
     if(osu->m_chat->isMouseInChat()) can_scroll = false;
-    if(osu->isInPlayMode() && convar->getConVarByName("osu_disable_mousewheel")->getBool() &&
-       !osu->m_pauseMenu->isVisible())
-        can_scroll = false;
+    if(osu->isInPlayMode() && cv_disable_mousewheel.getBool() && !osu->m_pauseMenu->isVisible()) can_scroll = false;
 
     if(isBusy()) can_scroll = true;
     if(engine->getKeyboard()->isAltDown()) can_scroll = true;
@@ -273,7 +262,7 @@ void VolumeOverlay::loseFocus() {
     m_bVolumeInactiveToActiveScheduled = true;
     anim->deleteExistingAnimation(&m_fVolumeInactiveToActiveAnim);
     m_fVolumeInactiveToActiveAnim = 0.0f;
-    engine->getSound()->setVolume(osu_volume_master_inactive->getFloat() * osu_volume_master->getFloat());
+    engine->getSound()->setVolume(cv_volume_master_inactive.getFloat() * cv_volume_master.getFloat());
 }
 
 void VolumeOverlay::onVolumeChange(int multiplier) {
@@ -283,15 +272,15 @@ void VolumeOverlay::onVolumeChange(int multiplier) {
     m_fVolumeInactiveToActiveAnim = 0.0f;
 
     // chose which volume to change, depending on the volume overlay, default is master
-    ConVar *volumeConVar = osu_volume_master;
+    ConVar *volumeConVar = &cv_volume_master;
     if(m_volumeMusic->isSelected())
-        volumeConVar = osu_volume_music;
+        volumeConVar = &cv_volume_music;
     else if(m_volumeEffects->isSelected())
-        volumeConVar = osu_volume_effects;
+        volumeConVar = &cv_volume_effects;
 
     // change the volume
     float newVolume =
-        clamp<float>(volumeConVar->getFloat() + osu_volume_change_interval->getFloat() * multiplier, 0.0f, 1.0f);
+        clamp<float>(volumeConVar->getFloat() + cv_volume_change_interval.getFloat() * multiplier, 0.0f, 1.0f);
     volumeConVar->setValue(newVolume);
     animate();
 }
@@ -304,7 +293,7 @@ void VolumeOverlay::onMasterVolumeChange(UString oldValue, UString newValue) {
 }
 
 void VolumeOverlay::onEffectVolumeChange() {
-    float volume = osu_volume_effects->getFloat();
+    float volume = cv_volume_effects.getFloat();
 
     auto skin = osu->getSkin();
     for(int i = 0; i < skin->m_sounds.size(); i++) {

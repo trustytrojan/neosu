@@ -19,14 +19,7 @@ using namespace std;
 
 // NOTE: selected username is stored in m_sText
 
-ConVar osu_user_draw_pp("osu_user_draw_pp", true, FCVAR_DEFAULT);
-ConVar osu_user_draw_accuracy("osu_user_draw_accuracy", true, FCVAR_DEFAULT);
-ConVar osu_user_draw_level("osu_user_draw_level", true, FCVAR_DEFAULT);
-ConVar osu_user_draw_level_bar("osu_user_draw_level_bar", true, FCVAR_DEFAULT);
-
 UserCard::UserCard(i32 user_id) : CBaseUIButton() {
-    m_osu_scores_enabled_ref = convar->getConVarByName("osu_scores_enabled");
-
     setID(user_id);
 
     m_fPP = 0.0f;
@@ -101,7 +94,7 @@ void UserCard::draw(Graphics *g) {
     g->popTransform();
     g->popClipRect();
 
-    if(m_osu_scores_enabled_ref->getBool()) {
+    if(cv_scores_enabled.getBool()) {
         // draw performance (pp), and accuracy
         McFont *performanceFont = osu->getSubTitleFont();
         const float performanceScale = 0.3f;
@@ -122,12 +115,12 @@ void UserCard::draw(Graphics *g) {
             g->scale(scale, scale);
             g->translate((int)(m_vPos.x + iconWidth + usernamePaddingLeft), yCounter);
             g->setColor(0xffffffff);
-            if(osu_user_draw_pp.getBool()) g->drawString(performanceFont, performanceString);
+            if(cv_user_draw_pp.getBool()) g->drawString(performanceFont, performanceString);
 
             yCounter += performanceFont->getHeight() * scale + paddingMiddle;
 
             g->translate(0, performanceFont->getHeight() * scale + paddingMiddle);
-            if(osu_user_draw_accuracy.getBool()) g->drawString(performanceFont, accuracyString);
+            if(cv_user_draw_accuracy.getBool()) g->drawString(performanceFont, accuracyString);
         }
         g->popTransform();
 
@@ -148,12 +141,12 @@ void UserCard::draw(Graphics *g) {
             g->scale(scale, scale);
             g->translate((int)(m_vPos.x + iconWidth + usernamePaddingLeft), yCounter);
             g->setColor(0xffffffff);
-            if(osu_user_draw_level.getBool()) g->drawString(scoreFont, scoreString);
+            if(cv_user_draw_level.getBool()) g->drawString(scoreFont, scoreString);
         }
         g->popTransform();
 
         // draw level percentage bar (to next level)
-        if(osu_user_draw_level_bar.getBool()) {
+        if(cv_user_draw_level_bar.getBool()) {
             const float barBorder = (int)(iconBorder);
             const float barHeight = (int)(m_vSize.y - 2 * barBorder) * 0.1f;
             const float barWidth = (int)((m_vSize.x - 2 * barBorder) * 0.55f);
@@ -287,6 +280,6 @@ void UserCard::setID(i32 new_id) {
         m_avatar->on_screen = true;
         m_sText = "Mysterious user";
     } else {
-        m_sText = convar->getConVarByName("name")->getString();
+        m_sText = cv_name.getString();
     }
 }

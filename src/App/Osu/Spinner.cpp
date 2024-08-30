@@ -13,10 +13,6 @@
 
 using namespace std;
 
-ConVar osu_spinner_use_ar_fadein(
-    "osu_spinner_use_ar_fadein", false, FCVAR_DEFAULT,
-    "whether spinners should fade in with AR (same as circles), or with hardcoded 400 ms fadein time (osu!default)");
-
 Spinner::Spinner(int x, int y, long time, int sampleType, bool isEndOfCombo, long endTime, BeatmapInterface *beatmap)
     : HitObject(time, sampleType, -1, isEndOfCombo, -1, -1, beatmap) {
     m_vOriginalRawPos = Vector2(x, y);
@@ -53,7 +49,7 @@ Spinner::Spinner(int x, int y, long time, int sampleType, bool isEndOfCombo, lon
 
     // spinners don't use AR-dependent fadein, instead they always fade in with hardcoded 400 ms (see
     // GameRules::getFadeInTime())
-    m_bUseFadeInTimeAsApproachTime = !osu_spinner_use_ar_fadein.getBool();
+    m_bUseFadeInTimeAsApproachTime = !cv_spinner_use_ar_fadein.getBool();
 }
 
 Spinner::~Spinner() {
@@ -65,7 +61,7 @@ Spinner::~Spinner() {
 
 void Spinner::draw(Graphics *g) {
     HitObject::draw(g);
-    const float fadeOutMultiplier = GameRules::osu_spinner_fade_out_time_multiplier.getFloat();
+    const float fadeOutMultiplier = cv_spinner_fade_out_time_multiplier.getFloat();
     const long fadeOutTimeMS = (long)(GameRules::getFadeOutTime(bm) * 1000.0f * fadeOutMultiplier);
     const long deltaEnd = m_iDelta + m_iObjectDuration;
     if((m_bFinished || !m_bVisible) && (deltaEnd > 0 || (deltaEnd < -fadeOutTimeMS))) return;
@@ -399,16 +395,16 @@ void Spinner::onHit() {
     LiveScore::HIT result = LiveScore::HIT::HIT_NULL;
     if(m_fRatio >= 1.0f || (bi->getModsLegacy() & ModFlags::Autoplay))
         result = LiveScore::HIT::HIT_300;
-    else if(m_fRatio >= 0.9f && !GameRules::osu_mod_ming3012.getBool() && !GameRules::osu_mod_no100s.getBool())
+    else if(m_fRatio >= 0.9f && !cv_mod_ming3012.getBool() && !cv_mod_no100s.getBool())
         result = LiveScore::HIT::HIT_100;
-    else if(m_fRatio >= 0.75f && !GameRules::osu_mod_no100s.getBool() && !GameRules::osu_mod_no50s.getBool())
+    else if(m_fRatio >= 0.75f && !cv_mod_no100s.getBool() && !cv_mod_no50s.getBool())
         result = LiveScore::HIT::HIT_50;
     else
         result = LiveScore::HIT::HIT_MISS;
 
     // sound
     if(bm != NULL && result != LiveScore::HIT::HIT_MISS) {
-        if(m_osu_timingpoints_force->getBool()) bm->updateTimingPoints(m_iTime + m_iObjectDuration);
+        if(cv_timingpoints_force.getBool()) bm->updateTimingPoints(m_iTime + m_iObjectDuration);
 
         const Vector2 osuCoords = bm->pixels2OsuCoords(bm->osuCoords2Pixels(m_vRawPos));
 

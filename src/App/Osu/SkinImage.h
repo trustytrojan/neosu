@@ -58,8 +58,6 @@ class SkinImage {
     inline std::vector<std::string> getFilepathsForExport() const { return m_filepathsForExport; }
 
    private:
-    static ConVar *m_osu_skin_mipmaps_ref;
-
     bool load(std::string skinElementName, std::string animationSeparator, bool ignoreDefaultSkin);
     bool loadImage(std::string skinElementName, bool ignoreDefaultSkin);
 

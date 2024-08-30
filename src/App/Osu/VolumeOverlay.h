@@ -33,13 +33,6 @@ class VolumeOverlay : public OsuScreen {
     bool m_bVolumeInactiveToActiveScheduled = false;
     float m_fVolumeInactiveToActiveAnim = 0.f;
 
-    ConVar *osu_volume_master = NULL;
-    ConVar *osu_volume_effects = NULL;
-    ConVar *osu_volume_music = NULL;
-    ConVar *osu_hud_volume_size_multiplier = NULL;
-    ConVar *osu_volume_master_inactive = NULL;
-    ConVar *osu_volume_change_interval = NULL;
-
     CBaseUIContainer *m_volumeSliderOverlayContainer = NULL;
     UIVolumeSlider *m_volumeMaster = NULL;
     UIVolumeSlider *m_volumeEffects = NULL;

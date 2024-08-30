@@ -15,77 +15,33 @@ class GameRules {
     //	Hitobject Animations  //
     //************************//
 
-    static ConVar osu_hitobject_hittable_dim;
-    static ConVar osu_hitobject_hittable_dim_start_percent;
-    static ConVar osu_hitobject_hittable_dim_duration;
-
-    static ConVar osu_hitobject_fade_in_time;
-
-    static ConVar osu_hitobject_fade_out_time;
-    static ConVar osu_hitobject_fade_out_time_speed_multiplier_min;
-
-    static ConVar osu_circle_fade_out_scale;
-
-    static ConVar osu_slider_followcircle_fadein_fade_time;
-    static ConVar osu_slider_followcircle_fadeout_fade_time;
-    static ConVar osu_slider_followcircle_fadein_scale;
-    static ConVar osu_slider_followcircle_fadein_scale_time;
-    static ConVar osu_slider_followcircle_fadeout_scale;
-    static ConVar osu_slider_followcircle_fadeout_scale_time;
-    static ConVar osu_slider_followcircle_tick_pulse_time;
-    static ConVar osu_slider_followcircle_tick_pulse_scale;
-
-    static ConVar osu_spinner_fade_out_time_multiplier;
-
     // this scales the fadeout duration with the current speed multiplier
     static float getFadeOutTime(Beatmap *beatmap) {
-        const float fade_out_time = osu_hitobject_fade_out_time.getFloat();
-        const float multiplier_min = osu_hitobject_fade_out_time_speed_multiplier_min.getFloat();
+        const float fade_out_time = cv_hitobject_fade_out_time.getFloat();
+        const float multiplier_min = cv_hitobject_fade_out_time_speed_multiplier_min.getFloat();
         return fade_out_time * (1.0f / max(osu->getAnimationSpeedMultiplier(), multiplier_min));
     }
 
-    static inline long getFadeInTime() { return (long)osu_hitobject_fade_in_time.getInt(); }
-
-    //*********************//
-    //	Experimental Mods  //
-    //*********************//
-
-    static ConVar osu_mod_fps;
-    static ConVar osu_mod_no50s;
-    static ConVar osu_mod_no100s;
-    static ConVar osu_mod_ming3012;
-    static ConVar osu_mod_millhioref;
-    static ConVar osu_mod_millhioref_multiplier;
-    static ConVar osu_mod_mafham;
-    static ConVar osu_mod_mafham_render_livesize;
-    static ConVar osu_mod_halfwindow;
-    static ConVar osu_mod_halfwindow_allow_300s;
+    static inline long getFadeInTime() { return (long)cv_hitobject_fade_in_time.getInt(); }
 
     //********************//
     //	Hitobject Timing  //
     //********************//
 
-    static ConVar osu_approachtime_min;
-    static ConVar osu_approachtime_mid;
-    static ConVar osu_approachtime_max;
-
     // ignore all mods and overrides
-    static inline float getRawMinApproachTime() { return osu_approachtime_min.getFloat(); }
-    static inline float getRawMidApproachTime() { return osu_approachtime_mid.getFloat(); }
-    static inline float getRawMaxApproachTime() { return osu_approachtime_max.getFloat(); }
+    static inline float getRawMinApproachTime() { return cv_approachtime_min.getFloat(); }
+    static inline float getRawMidApproachTime() { return cv_approachtime_mid.getFloat(); }
+    static inline float getRawMaxApproachTime() { return cv_approachtime_max.getFloat(); }
 
     // respect mods and overrides
     static inline float getMinApproachTime() {
-        return getRawMinApproachTime() *
-               (osu_mod_millhioref.getBool() ? osu_mod_millhioref_multiplier.getFloat() : 1.0f);
+        return getRawMinApproachTime() * (cv_mod_millhioref.getBool() ? cv_mod_millhioref_multiplier.getFloat() : 1.0f);
     }
     static inline float getMidApproachTime() {
-        return getRawMidApproachTime() *
-               (osu_mod_millhioref.getBool() ? osu_mod_millhioref_multiplier.getFloat() : 1.0f);
+        return getRawMidApproachTime() * (cv_mod_millhioref.getBool() ? cv_mod_millhioref_multiplier.getFloat() : 1.0f);
     }
     static inline float getMaxApproachTime() {
-        return getRawMaxApproachTime() *
-               (osu_mod_millhioref.getBool() ? osu_mod_millhioref_multiplier.getFloat() : 1.0f);
+        return getRawMaxApproachTime() * (cv_mod_millhioref.getBool() ? cv_mod_millhioref_multiplier.getFloat() : 1.0f);
     }
 
     static inline float getMinHitWindow300() { return 80.f; }
@@ -215,16 +171,13 @@ class GameRules {
     //	Playfield  //
     //*************//
 
-    static ConVar osu_playfield_border_top_percent;
-    static ConVar osu_playfield_border_bottom_percent;
-
     static const int OSU_COORD_WIDTH;
     static const int OSU_COORD_HEIGHT;
 
     static float getPlayfieldScaleFactor() {
         const int engineScreenWidth = osu->getScreenWidth();
-        const int topBorderSize = osu_playfield_border_top_percent.getFloat() * osu->getScreenHeight();
-        const int bottomBorderSize = osu_playfield_border_bottom_percent.getFloat() * osu->getScreenHeight();
+        const int topBorderSize = cv_playfield_border_top_percent.getFloat() * osu->getScreenHeight();
+        const int bottomBorderSize = cv_playfield_border_bottom_percent.getFloat() * osu->getScreenHeight();
         const int engineScreenHeight = osu->getScreenHeight() - bottomBorderSize - topBorderSize;
 
         return osu->getScreenWidth() / (float)OSU_COORD_WIDTH > engineScreenHeight / (float)OSU_COORD_HEIGHT
@@ -240,10 +193,10 @@ class GameRules {
 
     static Vector2 getPlayfieldOffset() {
         const Vector2 playfieldSize = getPlayfieldSize();
-        const int bottomBorderSize = osu_playfield_border_bottom_percent.getFloat() * osu->getScreenHeight();
+        const int bottomBorderSize = cv_playfield_border_bottom_percent.getFloat() * osu->getScreenHeight();
         int playfieldYOffset = (osu->getScreenHeight() / 2.0f - (playfieldSize.y / 2.0f)) - bottomBorderSize;
 
-        if(osu_mod_fps.getBool())
+        if(cv_mod_fps.getBool())
             playfieldYOffset =
                 0;  // first person mode doesn't need any offsets, cursor/crosshair should be centered on screen
 

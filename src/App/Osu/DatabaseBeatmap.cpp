@@ -23,44 +23,7 @@
 #include "SongBrowser/SongBrowser.h"
 #include "Spinner.h"
 
-ConVar osu_mod_reverse_sliders("osu_mod_reverse_sliders", false, FCVAR_UNLOCKED);
-ConVar osu_mod_strict_tracking("osu_mod_strict_tracking", false, FCVAR_UNLOCKED);
-ConVar osu_mod_strict_tracking_remove_slider_ticks("osu_mod_strict_tracking_remove_slider_ticks", false, FCVAR_LOCKED,
-                                                   "whether the strict tracking mod should remove slider ticks or not, "
-                                                   "this changed after its initial implementation in lazer");
-
-ConVar osu_show_approach_circle_on_first_hidden_object("osu_show_approach_circle_on_first_hidden_object", true,
-                                                       FCVAR_DEFAULT);
-
-ConVar osu_stars_stacking("osu_stars_stacking", true, FCVAR_DEFAULT,
-                          "respect hitobject stacking before calculating stars/pp");
-
-ConVar osu_slider_max_repeats("osu_slider_max_repeats", 9000, FCVAR_LOCKED,
-                              "maximum number of repeats allowed per slider (clamp range)");
-ConVar osu_slider_max_ticks("osu_slider_max_ticks", 2048, FCVAR_LOCKED,
-                            "maximum number of ticks allowed per slider (clamp range)");
-
-ConVar osu_number_max("osu_number_max", 0, FCVAR_DEFAULT,
-                      "0 = disabled, 1/2/3/4/etc. limits visual circle numbers to this number");
-ConVar osu_ignore_beatmap_combo_numbers("osu_ignore_beatmap_combo_numbers", false, FCVAR_DEFAULT,
-                                        "may be used in conjunction with osu_number_max");
-
-ConVar osu_beatmap_version("osu_beatmap_version", 128, FCVAR_DEFAULT,
-                           "maximum supported .osu file version, above this will simply not load (this was 14 but got "
-                           "bumped to 128 due to lazer backports)");
-ConVar osu_beatmap_max_num_hitobjects(
-    "osu_beatmap_max_num_hitobjects", 40000, FCVAR_DEFAULT,
-    "maximum number of total allowed hitobjects per beatmap (prevent crashing on deliberate game-breaking beatmaps)");
-ConVar osu_beatmap_max_num_slider_scoringtimes("osu_beatmap_max_num_slider_scoringtimes", 32768, FCVAR_DEFAULT,
-                                               "maximum number of slider score increase events allowed per slider "
-                                               "(prevent crashing on deliberate game-breaking beatmaps)");
-
 unsigned long long DatabaseBeatmap::sortHackCounter = 0;
-
-ConVar *DatabaseBeatmap::m_osu_slider_curve_max_length_ref = NULL;
-ConVar *DatabaseBeatmap::m_osu_stars_stacking_ref = NULL;
-ConVar *DatabaseBeatmap::m_osu_debug_pp_ref = NULL;
-ConVar *DatabaseBeatmap::m_osu_slider_end_inside_check_offset_ref = NULL;
 
 DatabaseBeatmap::DatabaseBeatmap(std::string filePath, std::string folder) {
     m_sFilePath = filePath;
@@ -69,17 +32,9 @@ DatabaseBeatmap::DatabaseBeatmap(std::string filePath, std::string folder) {
 
     m_iSortHack = sortHackCounter++;
 
-    // convar refs
-    if(m_osu_slider_curve_max_length_ref == NULL)
-        m_osu_slider_curve_max_length_ref = convar->getConVarByName("osu_slider_curve_max_length");
-    if(m_osu_stars_stacking_ref == NULL) m_osu_stars_stacking_ref = convar->getConVarByName("osu_stars_stacking");
-    if(m_osu_debug_pp_ref == NULL) m_osu_debug_pp_ref = convar->getConVarByName("osu_debug_pp");
-    if(m_osu_slider_end_inside_check_offset_ref == NULL)
-        m_osu_slider_end_inside_check_offset_ref = convar->getConVarByName("osu_slider_end_inside_check_offset");
-
     // raw metadata (note the special default values)
 
-    m_iVersion = osu_beatmap_version.getInt();
+    m_iVersion = cv_beatmap_version.getInt();
     m_iGameMode = 0;
     m_iID = 0;
     m_iSetID = -1;
@@ -183,11 +138,10 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
         c.version = 14;
     }
 
-    const float sliderSanityRange =
-        m_osu_slider_curve_max_length_ref->getFloat();  // infinity sanity check, same as before
+    const float sliderSanityRange = cv_slider_curve_max_length.getFloat();  // infinity sanity check, same as before
     const int sliderMaxRepeatRange =
-        osu_slider_max_repeats.getInt();  // NOTE: osu! will refuse to play any beatmap which has sliders with more than
-                                          // 9000 repeats, here we just clamp it instead
+        cv_slider_max_repeats.getInt();  // NOTE: osu! will refuse to play any beatmap which has sliders with more than
+                                         // 9000 repeats, here we just clamp it instead
 
     // open osu file for parsing
     {
@@ -508,7 +462,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
 
     // late bail if too many hitobjects would run out of memory and crash
     const size_t numHitobjects = c.hitcircles.size() + c.sliders.size() + c.spinners.size();
-    if(numHitobjects > (size_t)osu_beatmap_max_num_hitobjects.getInt()) {
+    if(numHitobjects > (size_t)cv_beatmap_max_num_hitobjects.getInt()) {
         c.errorCode = 5;
         return c;
     }
@@ -599,7 +553,7 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
                                           SliderHelper::getTimingPointMultiplierForSlider(s, timingInfo));
             const float tickDurationPercentOfSliderLength =
                 tickPixelLength / (s.pixelLength == 0.0f ? 1.0f : s.pixelLength);
-            const int max_ticks = osu_slider_max_ticks.getInt();
+            const int max_ticks = cv_slider_max_ticks.getInt();
             const int tickCount = min((int)std::ceil(s.pixelLength / tickPixelLength) - 1,
                                       max_ticks);  // NOTE: hard sanity limit number of ticks per slider
 
@@ -620,7 +574,7 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
         }
 
         // bail if too many predicted heuristic scoringTimes would run out of memory and crash
-        if((size_t)std::abs(s.repeat) * s.ticks.size() > (size_t)osu_beatmap_max_num_slider_scoringtimes.getInt()) {
+        if((size_t)std::abs(s.repeat) * s.ticks.size() > (size_t)cv_beatmap_max_num_slider_scoringtimes.getInt()) {
             r.errorCode = 5;
             return r;
         }
@@ -628,7 +582,7 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
         // calculate s.scoringTimesForStarCalc, which should include every point in time where the cursor must be within
         // the followcircle radius and at least one key must be pressed: see
         // https://github.com/ppy/osu/blob/master/osu.Game.Rulesets.Osu/Difficulty/Preprocessing/OsuDifficultyHitObject.cs
-        const long osuSliderEndInsideCheckOffset = (long)m_osu_slider_end_inside_check_offset_ref->getInt();
+        const long osuSliderEndInsideCheckOffset = (long)cv_slider_end_inside_check_offset.getInt();
 
         // 1) "skip the head circle"
 
@@ -782,7 +736,7 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(c
     // see Beatmap.cpp
     // NOTE: this must be done before the speed multiplier is applied!
     // HACKHACK: code duplication ffs
-    if(m_osu_stars_stacking_ref->getBool() &&
+    if(cv_stars_stacking.getBool() &&
        !calculateStarsInaccurately)  // NOTE: ignore stacking when calculating inaccurately
     {
         const float finalAR = AR;
@@ -948,7 +902,7 @@ bool DatabaseBeatmap::loadMetadata() {
     // reset
     m_timingpoints.clear();
 
-    if(Osu::debug->getBool()) debugLog("DatabaseBeatmap::loadMetadata() : %s\n", m_sFilePath.c_str());
+    if(cv_debug.getBool()) debugLog("DatabaseBeatmap::loadMetadata() : %s\n", m_sFilePath.c_str());
 
     // generate MD5 hash (loads entire file, very slow)
     {
@@ -1010,7 +964,7 @@ bool DatabaseBeatmap::loadMetadata() {
             case -1:  // header (e.g. "osu file format v12")
             {
                 if(sscanf(curLineChar, " osu file format v %i \n", &m_iVersion) == 1) {
-                    if(m_iVersion > osu_beatmap_version.getInt()) {
+                    if(m_iVersion > cv_beatmap_version.getInt()) {
                         debugLog("Ignoring unknown/invalid beatmap version %i\n", m_iVersion);
                         return false;
                     }
@@ -1154,7 +1108,7 @@ bool DatabaseBeatmap::loadMetadata() {
 
     // general sanity checks
     if((m_timingpoints.size() < 1)) {
-        if(Osu::debug->getBool()) debugLog("DatabaseBeatmap::loadMetadata() : no timingpoints in beatmap!\n");
+        if(cv_debug.getBool()) debugLog("DatabaseBeatmap::loadMetadata() : no timingpoints in beatmap!\n");
         return false;  // nothing more to do here
     }
 
@@ -1168,7 +1122,7 @@ bool DatabaseBeatmap::loadMetadata() {
         std::sort(m_timingpoints.begin(), m_timingpoints.end(), TimingPointSortComparator());
 
         if(m_iMostCommonBPM == 0) {
-            if(Osu::debug->getBool()) debugLog("DatabaseBeatmap::loadMetadata() : calculating BPM range ...\n");
+            if(cv_debug.getBool()) debugLog("DatabaseBeatmap::loadMetadata() : calculating BPM range ...\n");
             auto bpm = getBPM(m_timingpoints);
             m_iMinBPM = bpm.min;
             m_iMaxBPM = bpm.max;
@@ -1253,10 +1207,10 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
         for(size_t i = 0; i < c.sliders.size(); i++) {
             SLIDER &s = c.sliders[i];
 
-            if(osu_mod_strict_tracking.getBool() && osu_mod_strict_tracking_remove_slider_ticks.getBool())
+            if(cv_mod_strict_tracking.getBool() && cv_mod_strict_tracking_remove_slider_ticks.getBool())
                 s.ticks.clear();
 
-            if(osu_mod_reverse_sliders.getBool()) std::reverse(s.points.begin(), s.points.end());
+            if(cv_mod_reverse_sliders.getBool()) std::reverse(s.points.begin(), s.points.end());
 
             result.hitobjects.push_back(new Slider(s.type, s.repeat, s.pixelLength, s.points, s.hitSounds, s.ticks,
                                                    s.sliderTime, s.sliderTimeWithoutRepeats, s.time, s.sampleType,
@@ -1275,7 +1229,7 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
         beatmap->m_iMaxPossibleCombo = maxPossibleCombo;
 
         // debug
-        if(m_osu_debug_pp_ref->getBool()) {
+        if(cv_debug_pp.getBool()) {
             const std::string &osuFilePath = databaseBeatmap->m_sFilePath;
             const float AR = beatmap->getAR();
             const float CS = beatmap->getCS();
@@ -1361,14 +1315,14 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
     }
 
     // special rule for first hitobject (for 1 approach circle with HD)
-    if(osu_show_approach_circle_on_first_hidden_object.getBool()) {
+    if(cv_show_approach_circle_on_first_hidden_object.getBool()) {
         if(result.hitobjects.size() > 0) result.hitobjects[0]->setForceDrawApproachCircle(true);
     }
 
     // custom override for forcing a hard number cap and/or sequence (visually only)
     // NOTE: this is done after we have already calculated/set isEndOfCombos
     {
-        if(osu_ignore_beatmap_combo_numbers.getBool()) {
+        if(cv_ignore_beatmap_combo_numbers.getBool()) {
             // NOTE: spinners don't increment the combo number
             int comboNumber = 1;
             for(size_t i = 0; i < result.hitobjects.size(); i++) {
@@ -1383,7 +1337,7 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
             }
         }
 
-        const int numberMax = osu_number_max.getInt();
+        const int numberMax = cv_number_max.getInt();
         if(numberMax > 0) {
             for(size_t i = 0; i < result.hitobjects.size(); i++) {
                 HitObject *currentHitObject = result.hitobjects[i];

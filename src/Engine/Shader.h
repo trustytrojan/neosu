@@ -1,21 +1,7 @@
-//================ Copyright (c) 2012, PG, All rights reserved. =================//
-//
-// Purpose:		shader wrapper
-//
-// $NoKeywords: $shader
-//===============================================================================//
-
-#ifndef SHADER_H
-#define SHADER_H
-
+#pragma once
 #include "Resource.h"
 
-class ConVar;
-
 class Shader : public Resource {
-   public:
-    static ConVar *debug_shaders;
-
    public:
     Shader() : Resource() { ; }
     virtual ~Shader() { ; }
@@ -39,5 +25,3 @@ class Shader : public Resource {
     virtual void initAsync() = 0;
     virtual void destroy() = 0;
 };
-
-#endif

@@ -1,10 +1,3 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		tooltips
-//
-// $NoKeywords: $osutt
-//===============================================================================//
-
 #include "TooltipOverlay.h"
 
 #include "AnimationHandler.h"
@@ -13,8 +6,6 @@
 #include "Mouse.h"
 #include "Osu.h"
 #include "ResourceManager.h"
-
-ConVar osu_tooltip_anim_duration("osu_tooltip_anim_duration", 0.4f, FCVAR_DEFAULT);
 
 TooltipOverlay::TooltipOverlay() : OsuScreen() {
     m_fAnim = 0.0f;
@@ -85,7 +76,7 @@ void TooltipOverlay::mouse_update(bool *propagate_clicks) {
     if(m_bDelayFadeout)
         m_bDelayFadeout = false;
     else if(m_fAnim > 0.0f)
-        anim->moveLinear(&m_fAnim, 0.0f, (m_fAnim)*osu_tooltip_anim_duration.getFloat(), true);
+        anim->moveLinear(&m_fAnim, 0.0f, (m_fAnim)*cv_tooltip_anim_duration.getFloat(), true);
 }
 
 void TooltipOverlay::begin() {
@@ -96,5 +87,5 @@ void TooltipOverlay::begin() {
 void TooltipOverlay::addLine(UString text) { m_lines.push_back(text); }
 
 void TooltipOverlay::end() {
-    anim->moveLinear(&m_fAnim, 1.0f, (1.0f - m_fAnim) * osu_tooltip_anim_duration.getFloat(), true);
+    anim->moveLinear(&m_fAnim, 1.0f, (1.0f - m_fAnim) * cv_tooltip_anim_duration.getFloat(), true);
 }

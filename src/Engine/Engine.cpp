@@ -58,30 +58,6 @@ class EngineLoadingScreenApp : public App {
     }
 };
 
-void _host_timescale_(UString oldValue, UString newValue);
-ConVar host_timescale("host_timescale", 1.0f, FCVAR_LOCKED,
-                      "Scale by which the engine measures elapsed time, affects engine->getTime()", _host_timescale_);
-void _host_timescale_(UString oldValue, UString newValue) {
-    if(newValue.toFloat() < 0.01f) {
-        debugLog(0xffff4444, UString::format("Value must be >= 0.01!\n").toUtf8());
-        host_timescale.setValue(1.0f);
-    }
-}
-ConVar epilepsy("epilepsy", false, FCVAR_DEFAULT);
-ConVar debug_engine("debug_engine", false, FCVAR_DEFAULT);
-ConVar minimize_on_focus_lost_if_fullscreen("minimize_on_focus_lost_if_fullscreen", true, FCVAR_DEFAULT);
-ConVar minimize_on_focus_lost_if_borderless_windowed_fullscreen(
-    "minimize_on_focus_lost_if_borderless_windowed_fullscreen", false, FCVAR_DEFAULT);
-ConVar _win_realtimestylus("win_realtimestylus", false, FCVAR_DEFAULT,
-                           "if compiled on Windows, enables native RealTimeStylus support for tablet clicks");
-ConVar _win_processpriority("win_processpriority", 1, FCVAR_DEFAULT,
-                            "if compiled on Windows, sets the main process priority (0 = normal, 1 = high)");
-ConVar _win_disable_windows_key(
-    "win_disable_windows_key", false, FCVAR_DEFAULT,
-    "if compiled on Windows, set to 0/1 to disable/enable all windows keys via low level keyboard hook");
-
-ConVar *win_realtimestylus = &_win_realtimestylus;  // extern
-
 Engine *engine = NULL;
 Environment *env = NULL;
 
@@ -334,7 +310,7 @@ void Engine::onPaint() {
                 m_inputDevices[i]->draw(m_graphics);
             }
 
-            if(epilepsy.getBool()) {
+            if(cv_epilepsy.getBool()) {
                 m_graphics->setColor(COLOR(255, rand() % 256, rand() % 256, rand() % 256));
                 m_graphics->fillRect(0, 0, engine->getScreenWidth(), engine->getScreenHeight());
             }
@@ -365,7 +341,7 @@ void Engine::onUpdate() {
     {
         m_timer->update();
         m_dRunTime = m_timer->getElapsedTime();
-        m_dFrameTime *= (double)host_timescale.getFloat();
+        m_dFrameTime *= (double)cv_host_timescale.getFloat();
         m_dTime += m_dFrameTime;
     }
 
@@ -373,7 +349,7 @@ void Engine::onUpdate() {
     if(m_bResolutionChange) {
         m_bResolutionChange = false;
 
-        if(debug_engine.getBool())
+        if(cv_debug_engine.getBool())
             debugLog("Engine: executing pending queued resolution change to (%i, %i)\n", (int)m_vNewScreenSize.x,
                      (int)m_vNewScreenSize.y);
 
@@ -431,7 +407,7 @@ void Engine::onUpdate() {
 void Engine::onFocusGained() {
     m_bHasFocus = true;
 
-    if(debug_engine.getBool()) debugLog("Engine: got focus\n");
+    if(cv_debug_engine.getBool()) debugLog("Engine: got focus\n");
 
     if(m_app != NULL) m_app->onFocusGained();
 }
@@ -439,7 +415,7 @@ void Engine::onFocusGained() {
 void Engine::onFocusLost() {
     m_bHasFocus = false;
 
-    if(debug_engine.getBool()) debugLog("Engine: lost focus\n");
+    if(cv_debug_engine.getBool()) debugLog("Engine: lost focus\n");
 
     for(size_t i = 0; i < m_keyboards.size(); i++) {
         m_keyboards[i]->reset();
@@ -449,9 +425,9 @@ void Engine::onFocusLost() {
 
     // auto minimize on certain conditions
     if(m_environment->isFullscreen() || m_environment->isFullscreenWindowedBorderless()) {
-        if((!m_environment->isFullscreenWindowedBorderless() && minimize_on_focus_lost_if_fullscreen.getBool()) ||
+        if((!m_environment->isFullscreenWindowedBorderless() && cv_minimize_on_focus_lost_if_fullscreen.getBool()) ||
            (m_environment->isFullscreenWindowedBorderless() &&
-            minimize_on_focus_lost_if_borderless_windowed_fullscreen.getBool())) {
+            cv_minimize_on_focus_lost_if_borderless_windowed_fullscreen.getBool())) {
             m_environment->minimize();
         }
     }
@@ -461,7 +437,7 @@ void Engine::onMinimized() {
     m_bIsMinimized = true;
     m_bHasFocus = false;
 
-    if(debug_engine.getBool()) debugLog("Engine: window minimized\n");
+    if(cv_debug_engine.getBool()) debugLog("Engine: window minimized\n");
 
     if(m_app != NULL) m_app->onMinimized();
 }
@@ -469,13 +445,13 @@ void Engine::onMinimized() {
 void Engine::onMaximized() {
     m_bIsMinimized = false;
 
-    if(debug_engine.getBool()) debugLog("Engine: window maximized\n");
+    if(cv_debug_engine.getBool()) debugLog("Engine: window maximized\n");
 }
 
 void Engine::onRestored() {
     m_bIsMinimized = false;
 
-    if(debug_engine.getBool()) debugLog("Engine: window restored\n");
+    if(cv_debug_engine.getBool()) debugLog("Engine: window restored\n");
 
     if(m_app != NULL) m_app->onRestored();
 }
@@ -564,15 +540,13 @@ void Engine::onKeyboardKeyDown(KEYCODE keyCode) {
 
         // handle CTRL+F11 profiler toggle
         if(m_keyboard->isControlDown() && keyCode == KEY_F11) {
-            ConVar *vprof = convar->getConVarByName("vprof");
-            vprof->setValue(vprof->getBool() ? 0.0f : 1.0f);
+            cv_vprof.setValue(cv_vprof.getBool() ? 0.0f : 1.0f);
             return;
         }
 
         // handle profiler display mode change
         if(m_keyboard->isControlDown() && keyCode == KEY_TAB) {
-            const ConVar *vprof = convar->getConVarByName("vprof");
-            if(vprof->getBool()) {
+            if(cv_vprof.getBool()) {
                 if(m_keyboard->isShiftDown())
                     m_visualProfiler->decrementInfoBladeDisplayMode();
                 else
@@ -773,15 +747,12 @@ void _printsize(void) {
 void _fullscreen(void) { engine->toggleFullscreen(); }
 
 void _borderless(void) {
-    ConVar *fullscreen_windowed_borderless_ref = convar->getConVarByName("fullscreen_windowed_borderless");
-    if(fullscreen_windowed_borderless_ref != NULL) {
-        if(fullscreen_windowed_borderless_ref->getBool()) {
-            fullscreen_windowed_borderless_ref->setValue(0.0f);
-            if(env->isFullscreen()) env->disableFullscreen();
-        } else {
-            fullscreen_windowed_borderless_ref->setValue(1.0f);
-            if(!env->isFullscreen()) env->enableFullscreen();
-        }
+    if(cv_fullscreen_windowed_borderless.getBool()) {
+        cv_fullscreen_windowed_borderless.setValue(0.0f);
+        if(env->isFullscreen()) env->disableFullscreen();
+    } else {
+        cv_fullscreen_windowed_borderless.setValue(1.0f);
+        if(!env->isFullscreen()) env->enableFullscreen();
     }
 }
 
@@ -829,26 +800,4 @@ void _errortest(void) {
         "This is an error message, fullscreen mode should be disabled and you should be able to read this");
 }
 
-void _crash(void) {
-    ConVar *nullPointer = NULL;
-    nullPointer->setValue(false);
-}
-
 void _dpiinfo(void) { debugLog("env->getDPI() = %i, env->getDPIScale() = %f\n", env->getDPI(), env->getDPIScale()); }
-
-ConVar _exit_("exit", FCVAR_DEFAULT, _exit);
-ConVar _shutdown_("shutdown", FCVAR_DEFAULT, _exit);
-ConVar _restart_("restart", FCVAR_DEFAULT, _restart);
-ConVar _printsize_("printsize", FCVAR_DEFAULT, _printsize);
-ConVar _fullscreen_("fullscreen", FCVAR_DEFAULT, _fullscreen);
-ConVar _borderless_("borderless", FCVAR_DEFAULT, _borderless);
-ConVar _windowed_("windowed", FCVAR_DEFAULT, _windowed);
-ConVar _minimize_("minimize", FCVAR_DEFAULT, _minimize);
-ConVar _maximize_("maximize", FCVAR_DEFAULT, _maximize);
-ConVar _resizable_toggle_("resizable_toggle", FCVAR_DEFAULT, _toggleresizable);
-ConVar _focus_("focus", FCVAR_DEFAULT, _focus);
-ConVar _center_("center", FCVAR_DEFAULT, _center);
-ConVar _corporeal_("debug_ghost", FCVAR_DEFAULT, false, _debugCorporeal);
-ConVar _errortest_("errortest", FCVAR_DEFAULT, _errortest);
-ConVar _crash_("crash", FCVAR_DEFAULT, _crash);
-ConVar _dpiinfo_("dpiinfo", FCVAR_DEFAULT, _dpiinfo);

@@ -171,10 +171,10 @@ void UIModSelectorModButton::setOn(bool on, bool silent) {
     if(on && !silent && !m_states.empty()) {
         if(m_states[0].modName == UString("dt") || m_states[0].modName == UString("nc")) {
             osu->m_modSelector->m_modButtonHalftime->setOn(false, true);
-            convar->getConVarByName("osu_speed_override")->setValue(-1.0f);
+            cv_speed_override.setValue(-1.0f);
         } else if(m_states[0].modName == UString("ht") || m_states[0].modName == UString("dc")) {
             osu->m_modSelector->m_modButtonDoubletime->setOn(false, true);
-            convar->getConVarByName("osu_speed_override")->setValue(-1.0f);
+            cv_speed_override.setValue(-1.0f);
         }
     }
 

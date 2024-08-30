@@ -30,16 +30,12 @@
 #include "UIAvatar.h"
 #include "UIContextMenu.h"
 
-ConVar *ScoreButton::m_osu_scores_sort_by_pp_ref = NULL;
 UString ScoreButton::recentScoreIconString;
 
 ScoreButton::ScoreButton(UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize, STYLE style)
     : CBaseUIButton(xPos, yPos, xSize, ySize, "", "") {
     m_contextMenu = contextMenu;
     m_style = style;
-
-    if(m_osu_scores_sort_by_pp_ref == NULL)
-        m_osu_scores_sort_by_pp_ref = convar->getConVarByName("osu_scores_sort_by_pp");
 
     if(recentScoreIconString.length() < 1) recentScoreIconString.insert(0, Icons::ARROW_CIRCLE_UP);
 
@@ -192,12 +188,12 @@ void ScoreButton::draw(Graphics *g) {
         g->setAlpha(0.75f);
         g->drawString(
             scoreFont,
-            (m_osu_scores_sort_by_pp_ref->getBool() ? string : (m_style == STYLE::TOP_RANKS ? string : m_sScoreScore)));
+            (cv_scores_sort_by_pp.getBool() ? string : (m_style == STYLE::TOP_RANKS ? string : m_sScoreScore)));
         g->translate(-0.75f, -0.75f);
         g->setColor((m_style == STYLE::TOP_RANKS ? 0xffdeff87 : 0xffffffff));
         g->drawString(
             scoreFont,
-            (m_osu_scores_sort_by_pp_ref->getBool() ? string : (m_style == STYLE::TOP_RANKS ? string : m_sScoreScore)));
+            (cv_scores_sort_by_pp.getBool() ? string : (m_style == STYLE::TOP_RANKS ? string : m_sScoreScore)));
 
         if(m_style == STYLE::TOP_RANKS) {
             g->translate(scoreFont->getStringWidth(string) * scale, 0);

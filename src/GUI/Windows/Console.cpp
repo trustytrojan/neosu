@@ -16,15 +16,12 @@
 
 #define CONSOLE_BORDER 6
 
-ConVar _console_logging("console_logging", true, FCVAR_DEFAULT);
-ConVar _clear("clear");
-
 std::vector<UString> Console::g_commandQueue;
 std::mutex g_consoleLogMutex;
 
 Console::Console() : CBaseUIWindow(350, 100, 620, 550, "Console") {
     // convar bindings
-    _clear.setCallback(fastdelegate::MakeDelegate(this, &Console::clear));
+    cmd_clear.setCallback(fastdelegate::MakeDelegate(this, &Console::clear));
 
     // resources
     m_logFont = engine->getResourceManager()->getFont("FONT_CONSOLE");
@@ -139,7 +136,7 @@ void Console::processCommand(UString command) {
     }
 
     // log
-    if(_console_logging.getBool()) {
+    if(cv_console_logging.getBool()) {
         UString logMessage;
 
         bool doLog = false;
@@ -268,19 +265,3 @@ void Console::onResized() {
     m_log->scrollToY(m_log->getRelPosY());
     // m_newLog->scrollY(m_newLog->getRelPosY());
 }
-
-//***********************//
-//	Console ConCommands  //
-//***********************//
-
-void _exec(UString args) { Console::execConfigFile(args.toUtf8()); }
-
-void _echo(UString args) {
-    if(args.length() > 0) {
-        args.append("\n");
-        debugLog("%s", args.toUtf8());
-    }
-}
-
-ConVar _exec_("exec", FCVAR_DEFAULT, _exec);
-ConVar _echo_("echo", FCVAR_DEFAULT, _echo);

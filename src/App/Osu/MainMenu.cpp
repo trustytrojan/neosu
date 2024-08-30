@@ -128,34 +128,7 @@ void MainMenuPauseButton::draw(Graphics *g) {
     if(m_bActive && m_bEnabled) drawHoverRect(g, 6);
 }
 
-ConVar osu_draw_menu_background("osu_draw_menu_background", false, FCVAR_DEFAULT);
-ConVar osu_main_menu_startup_anim_duration("osu_main_menu_startup_anim_duration", 0.25f, FCVAR_DEFAULT);
-ConVar osu_main_menu_alpha("osu_main_menu_alpha", 0.8f, FCVAR_DEFAULT);
-ConVar osu_main_menu_friend("osu_main_menu_friend", true, FCVAR_DEFAULT);
-
-ConVar osu_main_menu_banner_always_text("osu_main_menu_banner_always_text", "", FCVAR_DEFAULT);
-ConVar osu_main_menu_banner_ifupdatedfromoldversion_text("osu_main_menu_banner_ifupdatedfromoldversion_text", "",
-                                                         FCVAR_DEFAULT);
-ConVar osu_main_menu_banner_ifupdatedfromoldversion_le3300_text(
-    "osu_main_menu_banner_ifupdatedfromoldversion_le3300_text", "", FCVAR_DEFAULT);
-ConVar osu_main_menu_banner_ifupdatedfromoldversion_le3303_text(
-    "osu_main_menu_banner_ifupdatedfromoldversion_le3303_text", "", FCVAR_DEFAULT);
-
-ConVar *MainMenu::m_osu_universal_offset_ref = NULL;
-ConVar *MainMenu::m_osu_universal_offset_hardcoded_ref = NULL;
-ConVar *MainMenu::m_osu_old_beatmap_offset_ref = NULL;
-ConVar *MainMenu::m_osu_songbrowser_background_fade_in_duration_ref = NULL;
-
 MainMenu::MainMenu() : OsuScreen() {
-    if(m_osu_universal_offset_ref == NULL) m_osu_universal_offset_ref = convar->getConVarByName("osu_universal_offset");
-    if(m_osu_universal_offset_hardcoded_ref == NULL)
-        m_osu_universal_offset_hardcoded_ref = convar->getConVarByName("osu_universal_offset_hardcoded");
-    if(m_osu_old_beatmap_offset_ref == NULL)
-        m_osu_old_beatmap_offset_ref = convar->getConVarByName("osu_old_beatmap_offset");
-    if(m_osu_songbrowser_background_fade_in_duration_ref == NULL)
-        m_osu_songbrowser_background_fade_in_duration_ref =
-            convar->getConVarByName("osu_songbrowser_background_fade_in_duration");
-
     // engine settings
     engine->getMouse()->addListener(this);
 
@@ -209,22 +182,20 @@ MainMenu::MainMenu() : OsuScreen() {
             File versionFile(NEOSU_NEWVERSION_NOTIFICATION_TRIGGER_FILE);
             if(versionFile.canRead()) {
                 float version = std::stof(versionFile.readLine());
-                if(version < Osu::version->getFloat() - 0.0001f) m_bDrawVersionNotificationArrow = true;
+                if(version < cv_version.getFloat() - 0.0001f) m_bDrawVersionNotificationArrow = true;
                 if(version < 35.06) {
                     // SoundEngine choking issues have been fixed, option has been removed from settings menu
                     // We leave the cvar available as it could still be useful for some players
-                    convar->getConVarByName("restart_sound_engine_before_playing")->setValue(false);
+                    cv_restart_sound_engine_before_playing.setValue(false);
 
                     // 0.5 is shit default value
-                    auto search_delay = convar->getConVarByName("osu_songbrowser_search_delay");
-                    if(search_delay->getFloat() == 0.5f) {
-                        search_delay->setValue(0.2f);
+                    if(cv_songbrowser_search_delay.getFloat() == 0.5f) {
+                        cv_songbrowser_search_delay.setValue(0.2f);
                     }
 
                     // Match osu!stable value
-                    auto relax_offset = convar->getConVarByName("osu_relax_offset");
-                    if(relax_offset->getFloat() == 0.f) {
-                        relax_offset->setValue(-12.f);
+                    if(cv_relax_offset.getFloat() == 0.f) {
+                        cv_relax_offset.setValue(-12.f);
                     }
 
                     osu->getOptionsMenu()->save();
@@ -264,7 +235,7 @@ MainMenu::MainMenu() : OsuScreen() {
     }
 
     m_versionButton = new CBaseUIButton(0, 0, 0, 0, "", "");
-    UString versionString = UString::format("Version %.2f", Osu::version->getFloat());
+    UString versionString = UString::format("Version %.2f", cv_version.getFloat());
     m_versionButton->setText(versionString);
     m_versionButton->setDrawBackground(false);
     m_versionButton->setDrawFrame(false);
@@ -324,7 +295,7 @@ void MainMenu::draw(Graphics *g) {
     }
 
     // menu-background
-    if(osu_draw_menu_background.getBool()) {
+    if(cv_draw_menu_background.getBool()) {
         Image *backgroundImage = osu->getSkin()->getMenuBackground();
         if(backgroundImage != NULL && backgroundImage != osu->getSkin()->getMissingTexture() &&
            backgroundImage->isReady()) {
@@ -344,7 +315,7 @@ void MainMenu::draw(Graphics *g) {
 
     // XXX: Should do fade transition between beatmap backgrounds when switching to next song
     float alpha = 1.0f;
-    if(m_osu_songbrowser_background_fade_in_duration_ref->getFloat() > 0.0f) {
+    if(cv_songbrowser_background_fade_in_duration.getFloat() > 0.0f) {
         // handle fadein trigger after handler is finished loading
         const bool ready = osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL &&
                            osu->getBackgroundImageHandler()->getLoadBackgroundImage(
@@ -356,9 +327,9 @@ void MainMenu::draw(Graphics *g) {
         if(!ready)
             m_fBackgroundFadeInTime = engine->getTime();
         else if(m_fBackgroundFadeInTime > 0.0f && engine->getTime() > m_fBackgroundFadeInTime) {
-            alpha = clamp<float>((engine->getTime() - m_fBackgroundFadeInTime) /
-                                     m_osu_songbrowser_background_fade_in_duration_ref->getFloat(),
-                                 0.0f, 1.0f);
+            alpha = clamp<float>(
+                (engine->getTime() - m_fBackgroundFadeInTime) / cv_songbrowser_background_fade_in_duration.getFloat(),
+                0.0f, 1.0f);
             alpha = 1.0f - (1.0f - alpha) * (1.0f - alpha);
         }
     }
@@ -377,14 +348,14 @@ void MainMenu::draw(Graphics *g) {
        osu->getSelectedBeatmap()->getMusic()->isPlaying()) {
         haveTimingpoints = true;
 
-        const long curMusicPos = (long)osu->getSelectedBeatmap()->getMusic()->getPositionMS() +
-                                 (long)(m_osu_universal_offset_ref->getFloat() * osu->getSpeedMultiplier()) +
-                                 (long)m_osu_universal_offset_hardcoded_ref->getInt() -
-                                 osu->getSelectedBeatmap()->getSelectedDifficulty2()->getLocalOffset() -
-                                 osu->getSelectedBeatmap()->getSelectedDifficulty2()->getOnlineOffset() -
-                                 (osu->getSelectedBeatmap()->getSelectedDifficulty2()->getVersion() < 5
-                                      ? m_osu_old_beatmap_offset_ref->getInt()
-                                      : 0);
+        const long curMusicPos =
+            (long)osu->getSelectedBeatmap()->getMusic()->getPositionMS() +
+            (long)(cv_universal_offset.getFloat() * osu->getSpeedMultiplier()) +
+            (long)cv_universal_offset_hardcoded.getInt() -
+            osu->getSelectedBeatmap()->getSelectedDifficulty2()->getLocalOffset() -
+            osu->getSelectedBeatmap()->getSelectedDifficulty2()->getOnlineOffset() -
+            (osu->getSelectedBeatmap()->getSelectedDifficulty2()->getVersion() < 5 ? cv_old_beatmap_offset.getInt()
+                                                                                   : 0);
 
         DatabaseBeatmap::TIMING_INFO t =
             osu->getSelectedBeatmap()->getSelectedDifficulty2()->getTimingInfoForTime(curMusicPos);
@@ -515,7 +486,7 @@ void MainMenu::draw(Graphics *g) {
     g->pushTransform();
     g->translate(0, 0, inset);
     g->setColor(cubeColor);
-    g->setAlpha(osu_main_menu_alpha.getFloat());
+    g->setAlpha(cv_main_menu_alpha.getFloat());
     g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
                 mainButtonRect.getHeight() - 2 * inset);
     g->setColor(cubeBorderColor);
@@ -595,7 +566,7 @@ void MainMenu::draw(Graphics *g) {
 
             // left
             g->setColor(0xffc8faf1);
-            g->setAlpha(m_fMainMenuAnimFriendPercent * osu_main_menu_alpha.getFloat());
+            g->setAlpha(m_fMainMenuAnimFriendPercent * cv_main_menu_alpha.getFloat());
             g->drawVAO(&vao);
 
             // right
@@ -643,7 +614,7 @@ void MainMenu::draw(Graphics *g) {
                                  m_fMainMenuAnimFriendEyeFollowY * mainButtonRect.getWidth() * 0.5f);
 
                 g->setColor(0xff000000);
-                g->setAlpha(osu_main_menu_alpha.getFloat());
+                g->setAlpha(cv_main_menu_alpha.getFloat());
                 g->fillRect(0, 0, width, height);
                 g->fillRect(width - height / 2.0f, 0, height, width);
                 g->fillRect(width - height / 2.0f, width - height / 2.0f, width, height);
@@ -673,7 +644,7 @@ void MainMenu::draw(Graphics *g) {
                     mainButtonRect.getY() + offsetY - m_fMainMenuAnimFriendEyeFollowY * mainButtonRect.getWidth());
 
                 g->setColor(0xff000000);
-                g->setAlpha(osu_main_menu_alpha.getFloat());
+                g->setAlpha(cv_main_menu_alpha.getFloat());
                 g->fillRect(0, 0, width, height);
             }
             g->popTransform();
@@ -688,14 +659,14 @@ void MainMenu::draw(Graphics *g) {
                     mainButtonRect.getY() + offsetY - m_fMainMenuAnimFriendEyeFollowY * mainButtonRect.getWidth());
 
                 g->setColor(0xff000000);
-                g->setAlpha(osu_main_menu_alpha.getFloat());
+                g->setAlpha(cv_main_menu_alpha.getFloat());
                 g->fillRect(0, 0, width, height);
             }
             g->popTransform();
 
             // tear
             g->setColor(0xff000000);
-            g->setAlpha(osu_main_menu_alpha.getFloat());
+            g->setAlpha(cv_main_menu_alpha.getFloat());
             g->fillRect(mainButtonRect.getX() + offsetX + width * 0.375f -
                             m_fMainMenuAnimFriendEyeFollowX * mainButtonRect.getWidth(),
                         mainButtonRect.getY() + offsetY + width / 2.0f -
@@ -734,7 +705,7 @@ void MainMenu::draw(Graphics *g) {
 
             // left
             g->setColor(0xffd5f6fd);
-            g->setAlpha(m_fMainMenuAnimFriendPercent * osu_main_menu_alpha.getFloat());
+            g->setAlpha(m_fMainMenuAnimFriendPercent * cv_main_menu_alpha.getFloat());
             g->pushTransform();
             {
                 g->rotate(40 - (1.0f - customPulse) * 10 + animLeftMoveLeft * animLeftMoveLeft * 20);
@@ -767,8 +738,7 @@ void MainMenu::draw(Graphics *g) {
     // neosu/server logo
     {
         auto logo = logo_img;
-        if(bancho.server_icon != NULL && bancho.server_icon->isReady() &&
-           convar->getConVarByName("main_menu_use_server_logo")->getBool()) {
+        if(bancho.server_icon != NULL && bancho.server_icon->isReady() && cv_main_menu_use_server_logo.getBool()) {
             logo = bancho.server_icon;
         }
 
@@ -794,7 +764,7 @@ void MainMenu::draw(Graphics *g) {
         g->pushTransform();
         g->translate(0, 0, inset);
         g->setColor(cubeColor);
-        g->setAlpha(osu_main_menu_alpha.getFloat());
+        g->setAlpha(cv_main_menu_alpha.getFloat());
         g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
                     mainButtonRect.getHeight() - 2 * inset);
         g->setColor(cubeBorderColor);
@@ -808,7 +778,7 @@ void MainMenu::draw(Graphics *g) {
         g->pushTransform();
         g->translate(0, 0, inset);
         g->setColor(cubeColor);
-        g->setAlpha(osu_main_menu_alpha.getFloat());
+        g->setAlpha(cv_main_menu_alpha.getFloat());
         g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
                     mainButtonRect.getHeight() - 2 * inset);
         g->setColor(cubeBorderColor);
@@ -824,7 +794,7 @@ void MainMenu::draw(Graphics *g) {
         g->pushTransform();
         g->translate(0, 0, inset);
         g->setColor(cubeColor);
-        g->setAlpha(osu_main_menu_alpha.getFloat());
+        g->setAlpha(cv_main_menu_alpha.getFloat());
         g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
                     mainButtonRect.getHeight() - 2 * inset);
         g->setColor(cubeBorderColor);
@@ -840,7 +810,7 @@ void MainMenu::draw(Graphics *g) {
         g->pushTransform();
         g->translate(0, 0, inset);
         g->setColor(cubeColor);
-        g->setAlpha(osu_main_menu_alpha.getFloat());
+        g->setAlpha(cv_main_menu_alpha.getFloat());
         g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
                     mainButtonRect.getHeight() - 2 * inset);
         g->setColor(cubeBorderColor);
@@ -856,7 +826,7 @@ void MainMenu::draw(Graphics *g) {
         g->pushTransform();
         g->translate(0, 0, inset);
         g->setColor(cubeColor);
-        g->setAlpha(osu_main_menu_alpha.getFloat());
+        g->setAlpha(cv_main_menu_alpha.getFloat());
         g->fillRect(mainButtonRect.getX() + inset, mainButtonRect.getY() + inset, mainButtonRect.getWidth() - 2 * inset,
                     mainButtonRect.getHeight() - 2 * inset);
         g->setColor(cubeBorderColor);
@@ -1145,10 +1115,10 @@ CBaseUIContainer *MainMenu::setVisible(bool visible) {
 
         if(m_bStartupAnim) {
             m_bStartupAnim = false;
-            anim->moveQuadOut(&m_fStartupAnim, 1.0f, osu_main_menu_startup_anim_duration.getFloat(),
+            anim->moveQuadOut(&m_fStartupAnim, 1.0f, cv_main_menu_startup_anim_duration.getFloat(),
                               (float)engine->getTimeReal());
-            anim->moveQuartOut(&m_fStartupAnim2, 1.0f, osu_main_menu_startup_anim_duration.getFloat() * 6.0f,
-                               (float)engine->getTimeReal() + osu_main_menu_startup_anim_duration.getFloat() * 0.5f);
+            anim->moveQuartOut(&m_fStartupAnim2, 1.0f, cv_main_menu_startup_anim_duration.getFloat() * 6.0f,
+                               (float)engine->getTimeReal() + cv_main_menu_startup_anim_duration.getFloat() * 0.5f);
         }
     } else {
         setMenuElementsVisible(false, false);
@@ -1204,7 +1174,7 @@ void MainMenu::updateLayout() {
         m_menuElements[i]->setTextColor(
             COLORf(offsetPercent * offsetPercent * offsetPercent * offsetPercent, 1.0f, 1.0f, 1.0f));
         m_menuElements[i]->setFrameColor(COLORf(offsetPercent, 1.0f, 1.0f, 1.0f));
-        m_menuElements[i]->setBackgroundColor(COLORf(offsetPercent * osu_main_menu_alpha.getFloat(), 0.0f, 0.0f, 0.0f));
+        m_menuElements[i]->setBackgroundColor(COLORf(offsetPercent * cv_main_menu_alpha.getFloat(), 0.0f, 0.0f, 0.0f));
     }
 
     setSize(osu->getScreenSize() + Vector2(1, 1));
@@ -1215,7 +1185,7 @@ void MainMenu::animMainButton() {
     m_bInMainMenuRandomAnim = true;
 
     m_iMainMenuRandomAnimType = (rand() % 4) == 1 ? 1 : 0;
-    if(!m_bMainMenuAnimFadeToFriendForNextAnim && osu_main_menu_friend.getBool() &&
+    if(!m_bMainMenuAnimFadeToFriendForNextAnim && cv_main_menu_friend.getBool() &&
        env->getOS() == Environment::OS::WINDOWS)  // NOTE: z buffer bullshit on other platforms >:(
         m_bMainMenuAnimFadeToFriendForNextAnim = (rand() % 24) == 1;
 
@@ -1308,7 +1278,7 @@ void MainMenu::setMenuElementsVisible(bool visible, bool animate) {
 void MainMenu::writeVersionFile() {
     // remember, don't show the notification arrow until the version changes again
     std::ofstream versionFile(NEOSU_NEWVERSION_NOTIFICATION_TRIGGER_FILE, std::ios::out | std::ios::trunc);
-    if(versionFile.good()) versionFile << Osu::version->getFloat();
+    if(versionFile.good()) versionFile << cv_version.getFloat();
 }
 
 MainMenuButton *MainMenu::addMainMenuButton(UString text) {

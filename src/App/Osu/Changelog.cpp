@@ -27,8 +27,7 @@ Changelog::Changelog() : ScreenBackable() {
     std::vector<CHANGELOG> changelogs;
 
     CHANGELOG latest;
-    latest.title =
-        UString::format("%.2f (%s, %s)", convar->getConVarByName("osu_version")->getFloat(), __DATE__, __TIME__);
+    latest.title = UString::format("%.2f (%s, %s)", cv_version.getFloat(), __DATE__, __TIME__);
     latest.changes.push_back(
         "- Added \"tooearly.wav\" and \"toolate.wav\" hitsounds, which play when you hit too early or too late (if "
         "your skin has them)");

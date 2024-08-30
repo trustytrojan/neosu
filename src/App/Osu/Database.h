@@ -125,9 +125,6 @@ class Database {
    private:
     friend class DatabaseLoader;
 
-    static ConVar *m_name_ref;
-    static ConVar *m_osu_songbrowser_scores_sortingtype_ref;
-
     std::string parseLegacyCfgBeatmapDirectoryParameter();
 
     void saveMaps();

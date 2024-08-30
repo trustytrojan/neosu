@@ -7,18 +7,6 @@
 
 using namespace std;
 
-ConVar debug_mouse("debug_mouse", false, FCVAR_LOCKED);
-
-ConVar mouse_sensitivity("mouse_sensitivity", 1.0f, FCVAR_DEFAULT);
-ConVar mouse_raw_input("mouse_raw_input", false, FCVAR_DEFAULT);
-ConVar mouse_raw_input_absolute_to_window("mouse_raw_input_absolute_to_window", false, FCVAR_DEFAULT);
-ConVar mouse_fakelag("mouse_fakelag", 0.000f, FCVAR_DEFAULT,
-                     "delay all mouse movement by this many seconds (e.g. 0.1 = 100 ms delay)");
-
-ConVar tablet_sensitivity_ignore("tablet_sensitivity_ignore", false, FCVAR_DEFAULT);
-
-ConVar win_ink_workaround("win_ink_workaround", false, FCVAR_DEFAULT);
-
 Mouse::Mouse() : InputDevice() {
     m_bMouseLeftDown = false;
     m_bMouseMiddleDown = false;
@@ -41,7 +29,7 @@ Mouse::Mouse() : InputDevice() {
 }
 
 void Mouse::draw(Graphics *g) {
-    if(!debug_mouse.getBool()) return;
+    if(!cv_debug_mouse.getBool()) return;
 
     drawDebug(g);
 
@@ -127,20 +115,20 @@ void Mouse::update() {
 
     McRect windowRect = McRect(0, 0, engine->getScreenWidth(), engine->getScreenHeight());
     const bool osCursorVisible = env->isCursorVisible() || !env->isCursorInWindow() || !engine->hasFocus();
-    const bool sensitivityAdjustmentNeeded = mouse_sensitivity.getFloat() != 1.0f;
+    const bool sensitivityAdjustmentNeeded = cv_mouse_sensitivity.getFloat() != 1.0f;
 
     const Vector2 osMousePos = env->getMousePos();
 
     Vector2 nextPos = osMousePos;
 
-    if(osCursorVisible || (!sensitivityAdjustmentNeeded && !mouse_raw_input.getBool()) || m_bAbsolute ||
+    if(osCursorVisible || (!sensitivityAdjustmentNeeded && !cv_mouse_raw_input.getBool()) || m_bAbsolute ||
        env->getOS() == Environment::OS::LINUX)  // HACKHACK: linux hack
     {
         // this block handles visible/active OS cursor movement without sensitivity adjustments, and absolute input
         // device movement
         if(m_bAbsolute) {
             // absolute input (with sensitivity)
-            if(!tablet_sensitivity_ignore.getBool()) {
+            if(!cv_tablet_sensitivity_ignore.getBool()) {
                 // NOTE: these range values work on windows only!
                 // TODO: standardize the input values before they even reach the engine, this should not be in here
                 float rawRangeX = 65536;  // absolute coord range, but what if I want to have a tablet that's more
@@ -148,22 +136,22 @@ void Mouse::update() {
                 float rawRangeY = 65536;
 
                 // if enabled, uses the screen resolution as the coord range, instead of 65536
-                if(win_ink_workaround.getBool()) {
+                if(cv_win_ink_workaround.getBool()) {
                     rawRangeX = env->getNativeScreenSize().x;
                     rawRangeY = env->getNativeScreenSize().y;
                 }
 
                 // NOTE: mouse_raw_input_absolute_to_window only applies if raw input is enabled in general
-                if(mouse_raw_input.getBool() && mouse_raw_input_absolute_to_window.getBool()) {
+                if(cv_mouse_raw_input.getBool() && cv_mouse_raw_input_absolute_to_window.getBool()) {
                     const Vector2 scaledOffset = m_vOffset;
                     const Vector2 scaledEngineScreenSize = engine->getScreenSize() + 2 * scaledOffset;
 
-                    nextPos.x = (((float)((m_vRawDeltaAbsolute.x - rawRangeX / 2) * mouse_sensitivity.getFloat()) +
+                    nextPos.x = (((float)((m_vRawDeltaAbsolute.x - rawRangeX / 2) * cv_mouse_sensitivity.getFloat()) +
                                   rawRangeX / 2) /
                                  rawRangeX) *
                                     scaledEngineScreenSize.x -
                                 scaledOffset.x;
-                    nextPos.y = (((float)((m_vRawDeltaAbsolute.y - rawRangeY / 2) * mouse_sensitivity.getFloat()) +
+                    nextPos.y = (((float)((m_vRawDeltaAbsolute.y - rawRangeY / 2) * cv_mouse_sensitivity.getFloat()) +
                                   rawRangeY / 2) /
                                  rawRangeY) *
                                     scaledEngineScreenSize.y -
@@ -179,9 +167,9 @@ void Mouse::update() {
                     nextPos = posInScreenCoords - env->getWindowPos();
 
                     // apply sensitivity, scale and offset to engine
-                    nextPos.x = ((nextPos.x - engine->getScreenSize().x / 2) * mouse_sensitivity.getFloat() +
+                    nextPos.x = ((nextPos.x - engine->getScreenSize().x / 2) * cv_mouse_sensitivity.getFloat() +
                                  engine->getScreenSize().x / 2);
-                    nextPos.y = ((nextPos.y - engine->getScreenSize().y / 2) * mouse_sensitivity.getFloat() +
+                    nextPos.y = ((nextPos.y - engine->getScreenSize().y / 2) * cv_mouse_sensitivity.getFloat() +
                                  engine->getScreenSize().y / 2);
                 }
             }
@@ -195,13 +183,13 @@ void Mouse::update() {
         // this block handles relative input with sensitivity adjustments, either raw or non-raw
 
         // calculate delta (either raw, or non-raw)
-        if(mouse_raw_input.getBool())
+        if(cv_mouse_raw_input.getBool())
             m_vDelta = m_vRawDelta;  // this is already scaled to the sensitivity
         else {
             // non-raw input is always in pixels, sub-pixel movement is handled/buffered by the operating system
             if((int)osMousePos.x != (int)m_vPrevOsMousePos.x ||
                (int)osMousePos.y != (int)m_vPrevOsMousePos.y)  // without this check some people would get mouse drift
-                m_vDelta = (osMousePos - m_vPrevOsMousePos) * mouse_sensitivity.getFloat();
+                m_vDelta = (osMousePos - m_vPrevOsMousePos) * cv_mouse_sensitivity.getFloat();
         }
 
         nextPos = m_vPosWithoutOffset + m_vDelta;
@@ -233,7 +221,7 @@ void Mouse::update() {
     // raw input ALWAYS needs env->setPos()
     // first person games which call engine->getMouse()->setPos() every frame to manually re-center the cursor NEVER
     // need env->setPos() absolute input NEVER needs env->setPos() also update prevOsMousePos
-    if(windowRect.contains(osMousePos) && (sensitivityAdjustmentNeeded || mouse_raw_input.getBool()) &&
+    if(windowRect.contains(osMousePos) && (sensitivityAdjustmentNeeded || cv_mouse_raw_input.getBool()) &&
        !m_bSetPosWasCalledLastFrame && !m_bAbsolute && env->getOS() != Environment::OS::LINUX)  // HACKHACK: linux hack
     {
         const Vector2 newOsMousePos = m_vPosWithoutOffset;
@@ -305,9 +293,9 @@ void Mouse::onPosChange(Vector2 pos) {
 }
 
 void Mouse::setPosXY(float x, float y) {
-    if(mouse_fakelag.getFloat() > 0.0f) {
+    if(cv_mouse_fakelag.getFloat() > 0.0f) {
         FAKELAG_PACKET p;
-        p.time = engine->getTime() + mouse_fakelag.getFloat();
+        p.time = engine->getTime() + cv_mouse_fakelag.getFloat();
         p.pos = Vector2(x, y);
         m_fakelagBuffer.push_back(p);
 
@@ -334,7 +322,7 @@ void Mouse::onRawMove(int xDelta, int yDelta, bool absolute, bool virtualDesktop
     if(xDelta != 0 || yDelta != 0)  // sanity check, else some people get mouse drift like above, I don't even
     {
         if(!m_bAbsolute)  // mouse
-            m_vRawDeltaActual += Vector2(xDelta, yDelta) * mouse_sensitivity.getFloat();
+            m_vRawDeltaActual += Vector2(xDelta, yDelta) * cv_mouse_sensitivity.getFloat();
         else  // tablet
             m_vRawDeltaAbsoluteActual = Vector2(xDelta, yDelta);
     }

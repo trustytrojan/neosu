@@ -119,7 +119,7 @@ void OpenGLImage::initAsync() {
     if(m_GLTexture != 0) return;  // only load if we are not already loaded
 
     if(!m_bCreatedImage) {
-        if(ResourceManager::debug_rm->getBool()) debugLog("Resource Manager: Loading %s\n", m_sFilePath.c_str());
+        if(cv_debug_rm.getBool()) debugLog("Resource Manager: Loading %s\n", m_sFilePath.c_str());
 
         m_bAsyncReady = loadRawImage();
     }

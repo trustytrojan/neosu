@@ -37,9 +37,6 @@ class RenderTarget;
 
 class Osu : public App, public MouseListener {
    public:
-    static ConVar *version;
-    static ConVar *debug;
-    static ConVar *ui_scale;
     static bool autoUpdater;
 
     static Vector2 osuBaseResolution;
@@ -213,26 +210,6 @@ class Osu : public App, public MouseListener {
     void onLetterboxingOffsetChange(UString oldValue, UString newValue);
 
     void onNotification(UString args);
-
-    // convar refs
-    ConVar *m_osu_folder_ref;
-    ConVar *m_osu_folder_sub_skins_ref;
-    ConVar *m_osu_draw_hud_ref;
-    ConVar *m_osu_draw_scoreboard;
-    ConVar *m_osu_draw_scoreboard_mp;
-    ConVar *m_osu_draw_cursor_ripples_ref;
-    ConVar *m_osu_mod_fps_ref;
-    ConVar *m_osu_mod_wobble_ref;
-    ConVar *m_osu_mod_wobble2_ref;
-    ConVar *m_osu_mod_minimize_ref;
-    ConVar *m_osu_playfield_rotation;
-    ConVar *m_fposu_draw_cursor_trail_ref;
-    ConVar *m_osu_mod_mafham_ref;
-    ConVar *m_osu_mod_fposu_ref;
-    ConVar *m_snd_change_check_interval_ref;
-    ConVar *m_ui_scrollview_scrollbarwidth_ref;
-    ConVar *m_mouse_raw_input_absolute_to_window_ref;
-    ConVar *m_win_disable_windows_key_ref;
 
     // interfaces
     VolumeOverlay *m_volumeOverlay = NULL;

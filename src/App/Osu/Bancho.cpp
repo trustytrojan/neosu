@@ -47,7 +47,7 @@ bool print_new_channels = true;
 
 bool Bancho::submit_scores() {
     if(score_submission_policy == ServerPolicy::NO_PREFERENCE) {
-        return convar->getConVarByName("submit_scores")->getBool();
+        return cv_submit_scores.getBool();
     } else if(score_submission_policy == ServerPolicy::YES) {
         return true;
     } else {
@@ -203,7 +203,7 @@ void handle_packet(Packet *packet) {
             osu->m_optionsMenu->logInButton->setText("Disconnect");
             osu->m_optionsMenu->logInButton->setColor(0xffff0000);
             osu->m_optionsMenu->logInButton->is_loading = false;
-            convar->getConVarByName("mp_autologin")->setValue(true);
+            cv_mp_autologin.setValue(true);
             print_new_channels = true;
 
             auto avatar_dir = UString::format(MCENGINE_DATA_DIR "avatars/%s", bancho.endpoint.toUtf8());
@@ -238,7 +238,7 @@ void handle_packet(Packet *packet) {
             // start_spectating(4);  // TODO @kiwec: FOR DEBUGGING
             // clang-format on
         } else {
-            convar->getConVarByName("mp_autologin")->setValue(false);
+            cv_mp_autologin.setValue(false);
             osu->m_optionsMenu->logInButton->setText("Log in");
             osu->m_optionsMenu->logInButton->setColor(0xff00ff00);
             osu->m_optionsMenu->logInButton->is_loading = false;

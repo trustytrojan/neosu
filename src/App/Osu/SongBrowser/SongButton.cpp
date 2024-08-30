@@ -19,10 +19,6 @@
 #include "SkinImage.h"
 #include "UIContextMenu.h"
 
-ConVar osu_draw_songbrowser_thumbnails("osu_draw_songbrowser_thumbnails", true, FCVAR_DEFAULT);
-ConVar osu_songbrowser_thumbnail_delay("osu_songbrowser_thumbnail_delay", 0.1f, FCVAR_DEFAULT);
-ConVar osu_songbrowser_thumbnail_fade_in_duration("osu_songbrowser_thumbnail_fade_in_duration", 0.1f, FCVAR_DEFAULT);
-
 float SongButton::thumbnailYRatio = 1.333333f;
 
 SongButton::SongButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos,
@@ -101,15 +97,15 @@ void SongButton::draw(Graphics *g) {
 }
 
 void SongButton::drawBeatmapBackgroundThumbnail(Graphics *g, Image *image) {
-    if(!osu_draw_songbrowser_thumbnails.getBool() || osu->getSkin()->getVersion() < 2.2f) return;
+    if(!cv_draw_songbrowser_thumbnails.getBool() || osu->getSkin()->getVersion() < 2.2f) return;
 
     float alpha = 1.0f;
-    if(osu_songbrowser_thumbnail_fade_in_duration.getFloat() > 0.0f) {
+    if(cv_songbrowser_thumbnail_fade_in_duration.getFloat() > 0.0f) {
         if(image == NULL || !image->isReady())
             m_fThumbnailFadeInTime = engine->getTime();
         else if(m_fThumbnailFadeInTime > 0.0f && engine->getTime() > m_fThumbnailFadeInTime) {
             alpha = clamp<float>(
-                (engine->getTime() - m_fThumbnailFadeInTime) / osu_songbrowser_thumbnail_fade_in_duration.getFloat(),
+                (engine->getTime() - m_fThumbnailFadeInTime) / cv_songbrowser_thumbnail_fade_in_duration.getFloat(),
                 0.0f, 1.0f);
             alpha = 1.0f - (1.0f - alpha) * (1.0f - alpha);
         }
@@ -140,7 +136,7 @@ void SongButton::drawBeatmapBackgroundThumbnail(Graphics *g, Image *image) {
     g->popTransform();
 
     // debug cliprect bounding box
-    if(Osu::debug->getBool()) {
+    if(cv_debug.getBool()) {
         Vector2 clipRectPos = Vector2(clipRect.getX(), clipRect.getY() - 1);
         Vector2 clipRectSize = Vector2(clipRect.getWidth(), clipRect.getHeight());
 

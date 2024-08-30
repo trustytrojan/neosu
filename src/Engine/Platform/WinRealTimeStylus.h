@@ -7,7 +7,6 @@
 #include "Engine.h"
 
 extern Engine* g_engine;
-extern ConVar* win_realtimestylus;
 
 // most of this code was taken 1:1 from the windows sdk samples
 // the only interesting/useful functions here are StylusDown and StylusUp
@@ -207,7 +206,7 @@ IStylusSyncPlugin* CSyncEventHandlerRTS::Create(IRealTimeStylus* pRealTimeStylus
 //      HRESULT error code
 HRESULT CSyncEventHandlerRTS::StylusDown(IRealTimeStylus* /* piRtsSrc */, const StylusInfo* /* pStylusInfo */,
                                          ULONG /* cPropCountPerPkt */, LONG* /* pPacket */, LONG** /* ppInOutPkt */) {
-    if(win_realtimestylus->getBool()) g_engine->onMouseLeftChange(true);
+    if(cv_win_realtimestylus.getBool()) g_engine->onMouseLeftChange(true);
 
     return S_OK;
 }
@@ -225,7 +224,7 @@ HRESULT CSyncEventHandlerRTS::StylusDown(IRealTimeStylus* /* piRtsSrc */, const 
 //      HRESULT error code
 HRESULT CSyncEventHandlerRTS::StylusUp(IRealTimeStylus* /* piRtsSrc */, const StylusInfo* /* pStylusInfo */,
                                        ULONG /* cPropCountPerPkt */, LONG* /* pPacket */, LONG** /* ppInOutPkt */) {
-    if(win_realtimestylus->getBool()) g_engine->onMouseLeftChange(false);
+    if(cv_win_realtimestylus.getBool()) g_engine->onMouseLeftChange(false);
 
     return S_OK;
 }
@@ -363,14 +362,14 @@ BOOL InitRealTimeStylus(HINSTANCE hInstance, HWND hWnd)  // extern
     // NOTE: windows 10 gets wndproc congestion if the message pump is very slow (< ~36 fps), causing all raw WM_INPUT +
     // keyboard events to become massively delayed (as bad as mouse_fakelag) for some reason this is caused by having a
     // realtimestylus + event handler registered, so the workaround is to only register it if the user explicitly
-    // enabled win_realtimestylus
+    // enabled cv_win_realtimestylus
 
     g_hInstance = hInstance;
     g_hWnd = hWnd;
 
-    win_realtimestylus->setCallback(_win_realtimestylus_change);
+    cv_win_realtimestylus.setCallback(_win_realtimestylus_change);
 
-    if(win_realtimestylus->getBool()) return InitRealtimeStylusEx(hInstance, hWnd);
+    if(cv_win_realtimestylus.getBool()) return InitRealtimeStylusEx(hInstance, hWnd);
 
     return TRUE;
 }

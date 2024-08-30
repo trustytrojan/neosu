@@ -1,13 +1,4 @@
-//================ Copyright (c) 2012, PG, All rights reserved. =================//
-//
-// Purpose:		core
-//
-// $NoKeywords: $engine
-//===============================================================================//
-
-#ifndef ENGINE_H
-#define ENGINE_H
-
+#pragma once
 #include "cbase.h"
 
 class App;
@@ -187,4 +178,17 @@ extern Engine *engine;
 
 #define debugLog(format, ...) Engine::debugLog(format, ##__VA_ARGS__)
 
-#endif
+void _exit(void);
+void _restart(void);
+void _printsize(void);
+void _fullscreen(void);
+void _borderless(void);
+void _windowed(UString args);
+void _minimize(void);
+void _maximize(void);
+void _toggleresizable(void);
+void _focus(void);
+void _center(void);
+void _debugCorporeal(UString oldValue, UString args);
+void _errortest(void);
+void _dpiinfo(void);

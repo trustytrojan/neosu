@@ -5,8 +5,6 @@
 
 using namespace std;
 
-ConVar debug_anim("debug_anim", false, FCVAR_DEFAULT);
-
 AnimationHandler *anim = NULL;
 
 AnimationHandler::AnimationHandler() { anim = this; }
@@ -33,13 +31,13 @@ void AnimationHandler::update() {
         float percent =
             clamp<float>((engine->getTime() - animation.m_fStartTime) / (animation.m_fDuration), 0.0f, 1.0f);
 
-        if(debug_anim.getBool()) debugLog("animation #%i, percent = %f\n", i, percent);
+        if(cv_debug_anim.getBool()) debugLog("animation #%i, percent = %f\n", i, percent);
 
         // check if finished
         if(percent >= 1.0f) {
             *animation.m_fBase = animation.m_fTarget;
 
-            if(debug_anim.getBool())
+            if(cv_debug_anim.getBool())
                 debugLog("removing animation #%i, dtime = %f\n", i, engine->getTime() - animation.m_fStartTime);
 
             m_vAnimations.erase(m_vAnimations.begin() + i);

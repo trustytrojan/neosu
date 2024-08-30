@@ -175,8 +175,6 @@ class LiveScore {
     UString getModsStringForRichPresence();
 
    private:
-    static ConVar *m_osu_draw_statistics_pp_ref;
-
     void onScoreChange();
 
     std::vector<HIT> m_hitresults;

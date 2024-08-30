@@ -21,8 +21,6 @@ class RichPresence {
     static const UString KEY_DISCORD_STATUS;
     static const UString KEY_DISCORD_DETAILS;
 
-    static ConVar *m_name_ref;
-
     static void onRichPresenceEnable();
     static void onRichPresenceDisable();
 };

@@ -74,7 +74,7 @@ void UIBackButton::onMouseOutside() {
 }
 
 void UIBackButton::updateLayout() {
-    const float uiScale = Osu::ui_scale->getFloat();
+    const float uiScale = cv_ui_scale.getFloat();
 
     Vector2 newSize = osu->getSkin()->getMenuBack2()->getSize();
     newSize.y = clamp<float>(newSize.y, 0,

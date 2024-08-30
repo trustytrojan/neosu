@@ -334,7 +334,7 @@ void download_beatmapset(u32 set_id, float* progress) {
     }
 
     std::vector<u8> data;
-    auto mirror = convar->getConVarByName("beatmap_mirror")->getString();
+    auto mirror = cv_beatmap_mirror.getString();
     mirror.append(UString::format("%d", set_id));
     int response_code = 0;
     download(mirror.toUtf8(), progress, data, &response_code);

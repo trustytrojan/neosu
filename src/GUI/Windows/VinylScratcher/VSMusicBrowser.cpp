@@ -10,8 +10,6 @@
 #include "ResourceManager.h"
 #include "VinylScratcher.h"
 
-ConVar vs_browser_animspeed("vs_browser_animspeed", 0.15f, FCVAR_DEFAULT);
-
 struct VSMusicBrowserNaturalSortStringComparator {
     // heavily modified version of https://github.com/scopeInfinity/NaturalSort
 
@@ -228,9 +226,9 @@ class VSMusicBrowserButton : public CBaseUIButton {
 
     void setSelected(bool selected) {
         if(selected && !m_bSelected)
-            anim->moveQuadInOut(&m_fSelectionAnim, 1.0f, vs_browser_animspeed.getFloat(), 0.0f, true);
+            anim->moveQuadInOut(&m_fSelectionAnim, 1.0f, cv_vs_browser_animspeed.getFloat(), 0.0f, true);
         else if(!selected)
-            anim->moveQuadInOut(&m_fSelectionAnim, 0.0f, vs_browser_animspeed.getFloat(), 0.0f, true);
+            anim->moveQuadInOut(&m_fSelectionAnim, 0.0f, cv_vs_browser_animspeed.getFloat(), 0.0f, true);
 
         m_bSelected = selected;
     }
@@ -255,7 +253,7 @@ class VSMusicBrowserColumnScrollView : public CBaseUIScrollView {
         m_fAnim = 0.0f;
 
         // spawn animation
-        anim->moveQuadInOut(&m_fAnim, 1.0f, vs_browser_animspeed.getFloat(), 0.0f, true);
+        anim->moveQuadInOut(&m_fAnim, 1.0f, cv_vs_browser_animspeed.getFloat(), 0.0f, true);
     }
 
     virtual ~VSMusicBrowserColumnScrollView() { anim->deleteExistingAnimation(&m_fAnim); }

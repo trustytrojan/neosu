@@ -2,16 +2,13 @@
 
 #ifdef _WIN32
 
-#include "cbase.h"
-
 #include "Environment.h"
+#include "cbase.h"
 
 class WinEnvironment : public Environment {
    public:
     static long getWindowStyleWindowed();
     static long getWindowStyleFullscreen();
-
-    static void bluescreen();
 
    public:
     WinEnvironment(HWND hwnd, HINSTANCE hinstance);

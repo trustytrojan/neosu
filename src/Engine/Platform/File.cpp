@@ -1,16 +1,9 @@
-#include <filesystem>
-
 #include "File.h"
+
+#include <filesystem>
 
 #include "ConVar.h"
 #include "Engine.h"
-
-ConVar debug_file("debug_file", false, FCVAR_DEFAULT);
-ConVar file_size_max("file_size_max", 1024, FCVAR_DEFAULT,
-                     "maximum filesize sanity limit in MB, all files bigger than this are not allowed to load");
-
-ConVar *File::debug = &debug_file;
-ConVar *File::size_max = &file_size_max;
 
 File::File(std::string filePath, TYPE type) { m_file = new StdFile(filePath, type); }
 
@@ -60,9 +53,9 @@ StdFile::StdFile(std::string filePath, File::TYPE type) {
         if(m_iFileSize < 1) {
             debugLog("File Error: FileSize is < 0\n");
             return;
-        } else if(m_iFileSize > 1024 * 1024 * File::size_max->getInt())  // size sanity check
+        } else if(m_iFileSize > 1024 * 1024 * cv_file_size_max.getInt())  // size sanity check
         {
-            debugLog("File Error: FileSize is > %i MB!!!\n", File::size_max->getInt());
+            debugLog("File Error: FileSize is > %i MB!!!\n", cv_file_size_max.getInt());
             return;
         }
 
@@ -87,7 +80,7 @@ StdFile::StdFile(std::string filePath, File::TYPE type) {
         }
     }
 
-    if(File::debug->getBool()) debugLog("StdFile: Opening %s\n", filePath.c_str());
+    if(cv_debug.getBool()) debugLog("StdFile: Opening %s\n", filePath.c_str());
 
     m_bReady = true;
 }
@@ -121,7 +114,7 @@ std::string StdFile::readLine() {
 }
 
 const u8 *StdFile::readFile() {
-    if(File::debug->getBool()) debugLog("StdFile::readFile() on %s\n", m_sFilePath.c_str());
+    if(cv_debug.getBool()) debugLog("StdFile::readFile() on %s\n", m_sFilePath.c_str());
 
     if(m_fullBuffer.size() > 0) return &m_fullBuffer[0];
 

@@ -1,13 +1,4 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		console window, also handles ConVar parsing
-//
-// $NoKeywords: $con
-//===============================================================================//
-
-#ifndef CONSOLE_H
-#define CONSOLE_H
-
+#pragma once
 #include "CBaseUIWindow.h"
 
 class CBaseUITextbox;
@@ -41,5 +32,3 @@ class Console : public CBaseUIWindow {
 
     McFont *m_logFont;
 };
-
-#endif

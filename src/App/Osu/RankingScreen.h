@@ -48,8 +48,6 @@ class RankingScreen : public ScreenBackable {
     UString getPPString();
     Vector2 getPPPosRaw();
 
-    ConVar *m_osu_scores_enabled;
-
     CBaseUIScrollView *m_rankings;
 
     UIRankingScreenInfoLabel *m_songInfo;

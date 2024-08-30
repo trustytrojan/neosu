@@ -1,10 +1,3 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		play/pause/forward/shuffle/repeat/eq/settings/volume/time bar
-//
-// $NoKeywords: $
-//===============================================================================//
-
 #include "VSControlBar.h"
 
 #include "AnimationHandler.h"
@@ -15,10 +8,6 @@
 #include "Engine.h"
 #include "Keyboard.h"
 #include "ResourceManager.h"
-
-ConVar vs_repeat("vs_repeat", false, FCVAR_DEFAULT);
-ConVar vs_shuffle("vs_shuffle", false, FCVAR_DEFAULT);
-ConVar vs_volume("vs_volume", 1.0f, FCVAR_DEFAULT);
 
 class VSControlBarButton : public CBaseUIButton {
    public:
@@ -144,7 +133,7 @@ class VSControlBarCheckbox : public CBaseUICheckbox {
 };
 
 VSControlBar::VSControlBar(int x, int y, int xSize, int ySize, McFont *font) : CBaseUIElement(x, y, xSize, ySize, "") {
-    vs_volume.setCallback(fastdelegate::MakeDelegate(this, &VSControlBar::onVolumeChanged));
+    cv_vs_volume.setCallback(fastdelegate::MakeDelegate(this, &VSControlBar::onVolumeChanged));
 
     const float dpiScale = env->getDPIScale();
     const int height = 22 * dpiScale;
@@ -173,7 +162,7 @@ VSControlBar::VSControlBar(int x, int y, int xSize, int ySize, McFont *font) : C
     m_volume->setFrameColor(COLOR(255, 204, 204, 204));
     m_volume->setBackgroundColor(0xffffffff);
     m_volume->setBounds(0.0f, 1.0f);
-    m_volume->setInitialValue(vs_volume.getFloat());
+    m_volume->setInitialValue(cv_vs_volume.getFloat());
     m_volume->setLiveUpdate(true);
     m_container->addBaseUIElement(m_volume);
 
@@ -231,14 +220,14 @@ void VSControlBar::mouse_update(bool *propagate_clicks) {
     m_container->mouse_update(propagate_clicks);
 }
 
-void VSControlBar::onRepeatCheckboxChanged(CBaseUICheckbox *box) { vs_repeat.setValue((float)box->isChecked()); }
+void VSControlBar::onRepeatCheckboxChanged(CBaseUICheckbox *box) { cv_vs_repeat.setValue((float)box->isChecked()); }
 
-void VSControlBar::onShuffleCheckboxChanged(CBaseUICheckbox *box) { vs_shuffle.setValue((float)box->isChecked()); }
+void VSControlBar::onShuffleCheckboxChanged(CBaseUICheckbox *box) { cv_vs_shuffle.setValue((float)box->isChecked()); }
 
 void VSControlBar::onVolumeChanged(UString oldValue, UString newValue) {
     (void)oldValue;
     (void)newValue;
-    m_volume->setValue(vs_volume.getFloat());
+    m_volume->setValue(cv_vs_volume.getFloat());
 }
 
 void VSControlBar::onMoved() { m_container->setPos(m_vPos); }

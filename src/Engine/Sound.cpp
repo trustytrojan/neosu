@@ -12,17 +12,6 @@
 
 using namespace std;
 
-ConVar snd_play_interp_duration(
-    "snd_play_interp_duration", 0.75f, FCVAR_DEFAULT,
-    "smooth over freshly started channel position jitter with engine time over this duration in seconds");
-ConVar snd_play_interp_ratio("snd_play_interp_ratio", 0.50f, FCVAR_DEFAULT,
-                             "percentage of snd_play_interp_duration to use 100% engine time over audio time (some "
-                             "devices report 0 for very long)");
-
-ConVar snd_wav_file_min_size("snd_wav_file_min_size", 51, FCVAR_DEFAULT,
-                             "minimum file size in bytes for WAV files to be considered valid (everything below will "
-                             "fail to load), this is a workaround for BASS crashes");
-
 Sound::Sound(std::string filepath, bool stream, bool overlayable, bool loop) : Resource(filepath) {
     m_sample = 0;
     m_stream = 0;
@@ -87,11 +76,11 @@ void Sound::init() {
 }
 
 void Sound::initAsync() {
-    if(ResourceManager::debug_rm->getBool()) debugLog("Resource Manager: Loading %s\n", m_sFilePath.c_str());
+    if(cv_debug_rm.getBool()) debugLog("Resource Manager: Loading %s\n", m_sFilePath.c_str());
 
     // HACKHACK: workaround for BASS crashes on malformed WAV files
     {
-        const int minWavFileSize = snd_wav_file_min_size.getInt();
+        const int minWavFileSize = cv_snd_wav_file_min_size.getInt();
         if(minWavFileSize > 0) {
             auto fileExtensionLowerCase = UString(env->getFileExtensionFromFilePath(m_sFilePath).c_str());
             fileExtensionLowerCase.lowerCase();
@@ -118,7 +107,7 @@ void Sound::initAsync() {
 
     if(m_bStream) {
         auto flags = BASS_STREAM_DECODE | BASS_SAMPLE_FLOAT | BASS_STREAM_PRESCAN;
-        if(convar->getConVarByName("snd_async_buffer")->getInt() > 0) flags |= BASS_ASYNCFILE;
+        if(cv_snd_async_buffer.getInt() > 0) flags |= BASS_ASYNCFILE;
         if(env->getOS() == Environment::OS::WINDOWS) flags |= BASS_UNICODE;
 
         m_stream = BASS_StreamCreateFile(false, file_path.c_str(), 0, 0, flags);
@@ -226,7 +215,7 @@ void Sound::setPositionMS(unsigned long ms) {
         if(isPlaying()) {
             if(!BASS_Mixer_ChannelSetPosition(m_stream, target_pos,
                                               BASS_POS_BYTE | BASS_POS_DECODETO | BASS_POS_MIXER_RESET)) {
-                if(Osu::debug->getBool()) {
+                if(cv_debug.getBool()) {
                     debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
                              BASS_ErrorGetCode(), m_sFilePath.c_str());
                 }
@@ -235,7 +224,7 @@ void Sound::setPositionMS(unsigned long ms) {
             m_fLastPlayTime = m_fChannelCreationTime - ((f64)ms / 1000.0);
         } else {
             if(!BASS_ChannelSetPosition(m_stream, target_pos, BASS_POS_BYTE | BASS_POS_DECODETO | BASS_POS_FLUSH)) {
-                if(Osu::debug->getBool()) {
+                if(cv_debug.getBool()) {
                     debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
                              BASS_ErrorGetCode(), m_sFilePath.c_str());
                 }
@@ -256,7 +245,7 @@ void Sound::setPositionMS(unsigned long ms) {
         m_paused_position_ms = ms;
 
         if(!BASS_ChannelSetPosition(m_stream, target_pos, BASS_POS_BYTE | BASS_POS_DECODETO | BASS_POS_FLUSH)) {
-            if(Osu::debug->getBool()) {
+            if(cv_debug.getBool()) {
                 debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
                          BASS_ErrorGetCode(), m_sFilePath.c_str());
             }
@@ -284,7 +273,7 @@ void Sound::setPositionMS_fast(u32 ms) {
 
     if(isPlaying()) {
         if(!BASS_Mixer_ChannelSetPosition(m_stream, target_pos, BASS_POS_BYTE | BASS_POS_MIXER_RESET)) {
-            if(Osu::debug->getBool()) {
+            if(cv_debug.getBool()) {
                 debugLog("Sound::setPositionMS_fast( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
                          BASS_ErrorGetCode(), m_sFilePath.c_str());
             }
@@ -293,7 +282,7 @@ void Sound::setPositionMS_fast(u32 ms) {
         m_fLastPlayTime = m_fChannelCreationTime - ((f64)ms / 1000.0);
     } else {
         if(!BASS_ChannelSetPosition(m_stream, target_pos, BASS_POS_BYTE | BASS_POS_FLUSH)) {
-            if(Osu::debug->getBool()) {
+            if(cv_debug.getBool()) {
                 debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
                          BASS_ErrorGetCode(), m_sFilePath.c_str());
             }
@@ -320,7 +309,7 @@ void Sound::setSpeed(float speed) {
 
     speed = clamp<float>(speed, 0.05f, 50.0f);
 
-    float freq = convar->getConVarByName("snd_freq")->getFloat();
+    float freq = cv_snd_freq.getFloat();
     BASS_ChannelGetAttribute(m_stream, BASS_ATTRIB_FREQ, &freq);
 
     BASS_ChannelSetAttribute(m_stream, BASS_ATTRIB_TEMPO, 1.0f);
@@ -424,7 +413,7 @@ u32 Sound::getPositionMS() {
 
     // special case: a freshly started channel position jitters, lerp with engine time over a set duration to smooth
     // things over
-    f64 interpDuration = snd_play_interp_duration.getFloat();
+    f64 interpDuration = cv_snd_play_interp_duration.getFloat();
     if(interpDuration <= 0.0) return positionMS;
 
     f64 channel_age = engine->getTime() - m_fChannelCreationTime;
@@ -432,7 +421,7 @@ u32 Sound::getPositionMS() {
 
     f64 speedMultiplier = getSpeed();
     f64 delta = channel_age * speedMultiplier;
-    f64 interp_ratio = snd_play_interp_ratio.getFloat();
+    f64 interp_ratio = cv_snd_play_interp_ratio.getFloat();
     if(delta < interpDuration) {
         delta = (engine->getTime() - m_fLastPlayTime) * speedMultiplier;
         f64 lerpPercent = clamp<f64>(((delta / interpDuration) - interp_ratio) / (1.0 - interp_ratio), 0.0, 1.0);
@@ -450,7 +439,7 @@ u32 Sound::getLengthMS() {
 float Sound::getSpeed() { return m_fSpeed; }
 
 float Sound::getFrequency() {
-    auto default_freq = convar->getConVarByName("snd_freq")->getFloat();
+    auto default_freq = cv_snd_freq.getFloat();
     if(!m_bReady) return default_freq;
     if(!m_bStream) {
         engine->showMessageError("Programmer Error", "Called getFrequency on a sample!");

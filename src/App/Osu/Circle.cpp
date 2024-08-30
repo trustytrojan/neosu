@@ -17,21 +17,6 @@
 #include "SkinImage.h"
 #include "SoundEngine.h"
 
-ConVar osu_bug_flicker_log("osu_bug_flicker_log", false, FCVAR_DEFAULT);
-
-ConVar osu_circle_color_saturation("osu_circle_color_saturation", 1.0f, FCVAR_DEFAULT);
-ConVar osu_circle_rainbow("osu_circle_rainbow", false, FCVAR_DEFAULT);
-ConVar osu_circle_number_rainbow("osu_circle_number_rainbow", false, FCVAR_DEFAULT);
-ConVar osu_circle_shake_duration("osu_circle_shake_duration", 0.120f, FCVAR_DEFAULT);
-ConVar osu_circle_shake_strength("osu_circle_shake_strength", 8.0f, FCVAR_DEFAULT);
-ConVar osu_approach_circle_alpha_multiplier("osu_approach_circle_alpha_multiplier", 0.9f, FCVAR_DEFAULT);
-
-ConVar osu_draw_numbers("osu_draw_numbers", true, FCVAR_DEFAULT);
-ConVar osu_draw_circles("osu_draw_circles", true, FCVAR_DEFAULT);
-ConVar osu_draw_approach_circles("osu_draw_approach_circles", true, FCVAR_DEFAULT);
-
-ConVar osu_slider_draw_endcircle("osu_slider_draw_endcircle", true, FCVAR_DEFAULT);
-
 int Circle::rainbowNumber = 0;
 int Circle::rainbowColorCounter = 0;
 
@@ -43,9 +28,9 @@ void Circle::drawApproachCircle(Graphics *g, Beatmap *beatmap, Vector2 rawPos, i
 
     Color comboColor = beatmap->getSkin()->getComboColorForCounter(colorCounter, colorOffset);
     comboColor =
-        COLOR(255, (int)(COLOR_GET_Ri(comboColor) * colorRGBMultiplier * osu_circle_color_saturation.getFloat()),
-              (int)(COLOR_GET_Gi(comboColor) * colorRGBMultiplier * osu_circle_color_saturation.getFloat()),
-              (int)(COLOR_GET_Bi(comboColor) * colorRGBMultiplier * osu_circle_color_saturation.getFloat()));
+        COLOR(255, (int)(COLOR_GET_Ri(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()),
+              (int)(COLOR_GET_Gi(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()),
+              (int)(COLOR_GET_Bi(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()));
 
     drawApproachCircle(g, beatmap->getSkin(), beatmap->osuCoords2Pixels(rawPos), comboColor,
                        beatmap->m_fHitcircleDiameter, approachScale, alpha, osu->getModHD(), overrideHDApproachCircle);
@@ -63,16 +48,16 @@ void Circle::drawCircle(Graphics *g, Skin *skin, Vector2 pos, float hitcircleDia
                         float overlapScale, int number, int colorCounter, int colorOffset, float colorRGBMultiplier,
                         float approachScale, float alpha, float numberAlpha, bool drawNumber,
                         bool overrideHDApproachCircle) {
-    if(alpha <= 0.0f || !osu_draw_circles.getBool()) return;
+    if(alpha <= 0.0f || !cv_draw_circles.getBool()) return;
 
     rainbowNumber = number;
     rainbowColorCounter = colorCounter;
 
     Color comboColor = skin->getComboColorForCounter(colorCounter, colorOffset);
     comboColor =
-        COLOR(255, (int)(COLOR_GET_Ri(comboColor) * colorRGBMultiplier * osu_circle_color_saturation.getFloat()),
-              (int)(COLOR_GET_Gi(comboColor) * colorRGBMultiplier * osu_circle_color_saturation.getFloat()),
-              (int)(COLOR_GET_Bi(comboColor) * colorRGBMultiplier * osu_circle_color_saturation.getFloat()));
+        COLOR(255, (int)(COLOR_GET_Ri(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()),
+              (int)(COLOR_GET_Gi(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()),
+              (int)(COLOR_GET_Bi(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()));
 
     // approach circle
     /// drawApproachCircle(g, skin, pos, comboColor, hitcircleDiameter, approachScale, alpha, modHD,
@@ -121,7 +106,7 @@ void Circle::drawSliderStartCircle(Graphics *g, Skin *skin, Vector2 pos, float h
                                    float hitcircleOverlapScale, int number, int colorCounter, int colorOffset,
                                    float colorRGBMultiplier, float approachScale, float alpha, float numberAlpha,
                                    bool drawNumber, bool overrideHDApproachCircle) {
-    if(alpha <= 0.0f || !osu_draw_circles.getBool()) return;
+    if(alpha <= 0.0f || !cv_draw_circles.getBool()) return;
 
     // if no sliderstartcircle image is preset, fallback to default circle
     if(skin->getSliderStartCircle() == skin->getMissingTexture()) {
@@ -136,9 +121,9 @@ void Circle::drawSliderStartCircle(Graphics *g, Skin *skin, Vector2 pos, float h
 
     Color comboColor = skin->getComboColorForCounter(colorCounter, colorOffset);
     comboColor =
-        COLOR(255, (int)(COLOR_GET_Ri(comboColor) * colorRGBMultiplier * osu_circle_color_saturation.getFloat()),
-              (int)(COLOR_GET_Gi(comboColor) * colorRGBMultiplier * osu_circle_color_saturation.getFloat()),
-              (int)(COLOR_GET_Bi(comboColor) * colorRGBMultiplier * osu_circle_color_saturation.getFloat()));
+        COLOR(255, (int)(COLOR_GET_Ri(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()),
+              (int)(COLOR_GET_Gi(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()),
+              (int)(COLOR_GET_Bi(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()));
 
     // circle
     const float circleImageScale = hitcircleDiameter / (128.0f * (skin->isSliderStartCircle2x() ? 2.0f : 1.0f));
@@ -177,7 +162,7 @@ void Circle::drawSliderEndCircle(Graphics *g, Skin *skin, Vector2 pos, float hit
                                  float overlapScale, int number, int colorCounter, int colorOffset,
                                  float colorRGBMultiplier, float approachScale, float alpha, float numberAlpha,
                                  bool drawNumber, bool overrideHDApproachCircle) {
-    if(alpha <= 0.0f || !osu_slider_draw_endcircle.getBool() || !osu_draw_circles.getBool()) return;
+    if(alpha <= 0.0f || !cv_slider_draw_endcircle.getBool() || !cv_draw_circles.getBool()) return;
 
     // if no sliderendcircle image is preset, fallback to default circle
     if(skin->getSliderEndCircle() == skin->getMissingTexture()) {
@@ -191,9 +176,9 @@ void Circle::drawSliderEndCircle(Graphics *g, Skin *skin, Vector2 pos, float hit
 
     Color comboColor = skin->getComboColorForCounter(colorCounter, colorOffset);
     comboColor =
-        COLOR(255, (int)(COLOR_GET_Ri(comboColor) * colorRGBMultiplier * osu_circle_color_saturation.getFloat()),
-              (int)(COLOR_GET_Gi(comboColor) * colorRGBMultiplier * osu_circle_color_saturation.getFloat()),
-              (int)(COLOR_GET_Bi(comboColor) * colorRGBMultiplier * osu_circle_color_saturation.getFloat()));
+        COLOR(255, (int)(COLOR_GET_Ri(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()),
+              (int)(COLOR_GET_Gi(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()),
+              (int)(COLOR_GET_Bi(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()));
 
     // circle
     const float circleImageScale = hitcircleDiameter / (128.0f * (skin->isSliderEndCircle2x() ? 2.0f : 1.0f));
@@ -210,15 +195,14 @@ void Circle::drawSliderEndCircle(Graphics *g, Skin *skin, Vector2 pos, float hit
 
 void Circle::drawApproachCircle(Graphics *g, Skin *skin, Vector2 pos, Color comboColor, float hitcircleDiameter,
                                 float approachScale, float alpha, bool modHD, bool overrideHDApproachCircle) {
-    if((!modHD || overrideHDApproachCircle) && osu_draw_approach_circles.getBool() &&
-       !GameRules::osu_mod_mafham.getBool()) {
+    if((!modHD || overrideHDApproachCircle) && cv_draw_approach_circles.getBool() && !cv_mod_mafham.getBool()) {
         if(approachScale > 1.0f) {
             const float approachCircleImageScale =
                 hitcircleDiameter / (128.0f * (skin->isApproachCircle2x() ? 2.0f : 1.0f));
 
             g->setColor(comboColor);
 
-            if(osu_circle_rainbow.getBool()) {
+            if(cv_circle_rainbow.getBool()) {
                 float frequency = 0.3f;
                 float time = engine->getTime() * 20;
 
@@ -229,7 +213,7 @@ void Circle::drawApproachCircle(Graphics *g, Skin *skin, Vector2 pos, Color comb
                 g->setColor(COLOR(255, red1, green1, blue1));
             }
 
-            g->setAlpha(alpha * osu_approach_circle_alpha_multiplier.getFloat());
+            g->setAlpha(alpha * cv_approach_circle_alpha_multiplier.getFloat());
 
             g->pushTransform();
             {
@@ -253,7 +237,7 @@ void Circle::drawHitCircle(Graphics *g, Image *hitCircleImage, Vector2 pos, Colo
                            float alpha) {
     g->setColor(comboColor);
 
-    if(osu_circle_rainbow.getBool()) {
+    if(cv_circle_rainbow.getBool()) {
         float frequency = 0.3f;
         float time = engine->getTime() * 20;
 
@@ -277,7 +261,7 @@ void Circle::drawHitCircle(Graphics *g, Image *hitCircleImage, Vector2 pos, Colo
 
 void Circle::drawHitCircleNumber(Graphics *g, Skin *skin, float numberScale, float overlapScale, Vector2 pos,
                                  int number, float numberAlpha, float colorRGBMultiplier) {
-    if(!osu_draw_numbers.getBool()) return;
+    if(!cv_draw_numbers.getBool()) return;
 
     class DigitWidth {
        public:
@@ -321,7 +305,7 @@ void Circle::drawHitCircleNumber(Graphics *g, Skin *skin, float numberScale, flo
     // g->setColor(COLORf(1.0f, colorRGBMultiplier, colorRGBMultiplier, colorRGBMultiplier)); // see
     // https://github.com/ppy/osu/issues/24506
     g->setColor(0xffffffff);
-    if(osu_circle_number_rainbow.getBool()) {
+    if(cv_circle_number_rainbow.getBool()) {
         float frequency = 0.3f;
         float time = engine->getTime() * 20;
 
@@ -421,7 +405,7 @@ void Circle::draw(Graphics *g) {
     Skin *skin = osu->getSkin();
 
     // draw hit animation
-    bool is_instafade = convar->getConVarByName("instafade")->getBool();
+    bool is_instafade = cv_instafade.getBool();
     if(!is_instafade && m_fHitAnimation > 0.0f && m_fHitAnimation != 1.0f && !osu->getModHD()) {
         float alpha = 1.0f - m_fHitAnimation;
 
@@ -429,7 +413,7 @@ void Circle::draw(Graphics *g) {
         scale = -scale * (scale - 2.0f);  // quad out scale
 
         const bool drawNumber = skin->getVersion() > 1.0f ? false : true;
-        const float foscale = GameRules::osu_circle_fade_out_scale.getFloat();
+        const float foscale = cv_circle_fade_out_scale.getFloat();
 
         g->pushTransform();
         {
@@ -453,8 +437,8 @@ void Circle::draw(Graphics *g) {
     Vector2 shakeCorrectedPos = m_vRawPos;
     if(engine->getTime() < m_fShakeAnimation && !bm->isInMafhamRenderChunk())  // handle note blocking shaking
     {
-        float smooth = 1.0f - ((m_fShakeAnimation - engine->getTime()) /
-                               osu_circle_shake_duration.getFloat());  // goes from 0 to 1
+        float smooth =
+            1.0f - ((m_fShakeAnimation - engine->getTime()) / cv_circle_shake_duration.getFloat());  // goes from 0 to 1
         if(smooth < 0.5f)
             smooth = smooth / 0.5f;
         else
@@ -462,7 +446,7 @@ void Circle::draw(Graphics *g) {
         // (now smooth goes from 0 to 1 to 0 linearly)
         smooth = -smooth * (smooth - 2);  // quad out
         smooth = -smooth * (smooth - 2);  // quad out twice
-        shakeCorrectedPos.x += std::sin(engine->getTime() * 120) * smooth * osu_circle_shake_strength.getFloat();
+        shakeCorrectedPos.x += std::sin(engine->getTime() * 120) * smooth * cv_circle_shake_strength.getFloat();
     }
     skin->getHitCircleOverlay2()->setAnimationTimeOffset(
         skin->getAnimationSpeed(),
@@ -484,7 +468,7 @@ void Circle::draw2(Graphics *g) {
 
     // HACKHACK: don't fucking change this piece of code here, it fixes a heisenbug
     // (https://github.com/McKay42/McOsu/issues/165)
-    if(osu_bug_flicker_log.getBool()) {
+    if(cv_bug_flicker_log.getBool()) {
         const float approachCircleImageScale =
             bm->m_fHitcircleDiameter / (128.0f * (bm->getSkin()->isApproachCircle2x() ? 2.0f : 1.0f));
         debugLog("m_iTime = %ld, aScale = %f, iScale = %f\n", m_iTime, m_fApproachScale, approachCircleImageScale);
@@ -506,7 +490,7 @@ void Circle::update(long curPos) {
             const long delta = curPos - m_iTime;
 
             if((bi->getModsLegacy() & ModFlags::Relax)) {
-                if(curPos >= m_iTime + (long)m_osu_relax_offset_ref->getInt() && !bi->isPaused() &&
+                if(curPos >= m_iTime + (long)cv_relax_offset.getInt() && !bi->isPaused() &&
                    !bi->isContinueScheduled()) {
                     const Vector2 pos = bi->osuCoords2Pixels(m_vRawPos);
                     const float cursorDelta = (bi->getCursorPos() - pos).length();
@@ -559,7 +543,7 @@ void Circle::onClickEvent(std::vector<Click> &clicks) {
     if(cursorDelta < bi->m_fHitcircleDiameter / 2.0f) {
         // note blocking & shake
         if(m_bBlocked) {
-            m_fShakeAnimation = engine->getTime() + osu_circle_shake_duration.getFloat();
+            m_fShakeAnimation = engine->getTime() + cv_circle_shake_duration.getFloat();
             return;  // ignore click event completely
         }
 
@@ -579,7 +563,7 @@ void Circle::onClickEvent(std::vector<Click> &clicks) {
 void Circle::onHit(LiveScore::HIT result, long delta, float targetDelta, float targetAngle) {
     // sound and hit animation
     if(bm != NULL && result != LiveScore::HIT::HIT_MISS) {
-        if(m_osu_timingpoints_force->getBool()) bm->updateTimingPoints(m_iTime);
+        if(cv_timingpoints_force.getBool()) bm->updateTimingPoints(m_iTime);
 
         const Vector2 osuCoords = bm->pixels2OsuCoords(bm->osuCoords2Pixels(m_vRawPos));
 

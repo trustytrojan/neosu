@@ -148,7 +148,7 @@ void UIContextMenu::onKeyDown(KeyboardEvent &e) {
 
     // hide on ESC
     if(!e.isConsumed()) {
-        if(e == KEY_ESCAPE || e == (KEYCODE)KeyBindings::GAME_PAUSE.getInt()) {
+        if(e == KEY_ESCAPE || e == (KEYCODE)cv_GAME_PAUSE.getInt()) {
             e.consume();
             setVisible2(false);
         }

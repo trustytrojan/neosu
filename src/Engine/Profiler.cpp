@@ -1,10 +1,3 @@
-//================ Copyright (c) 2020, PG, All rights reserved. =================//
-//
-// Purpose:		real-time hierarchical profiling
-//
-// $NoKeywords: $vprof
-//===============================================================================//
-
 #include "Profiler.h"
 
 #include <string.h>
@@ -142,20 +135,3 @@ ProfilerNode *ProfilerNode::getSubNode(const char *name, const char *group) {
 
     return node;
 }
-
-//************************//
-//	Profiler ConCommands  //
-//************************//
-
-void _vprof(UString oldValue, UString newValue) {
-    const bool enable = (newValue.toFloat() > 0.0f);
-
-    if(enable != g_profCurrentProfile.isEnabled()) {
-        if(enable)
-            g_profCurrentProfile.start();
-        else
-            g_profCurrentProfile.stop();
-    }
-}
-
-ConVar _vprof_("vprof", false, FCVAR_DEFAULT, "enables/disables the visual profiler", _vprof);

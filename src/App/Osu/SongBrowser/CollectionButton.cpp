@@ -17,24 +17,6 @@
 
 using namespace std;
 
-ConVar osu_songbrowser_button_collection_active_color_a("osu_songbrowser_button_collection_active_color_a", 255,
-                                                        FCVAR_DEFAULT);
-ConVar osu_songbrowser_button_collection_active_color_r("osu_songbrowser_button_collection_active_color_r", 163,
-                                                        FCVAR_DEFAULT);
-ConVar osu_songbrowser_button_collection_active_color_g("osu_songbrowser_button_collection_active_color_g", 240,
-                                                        FCVAR_DEFAULT);
-ConVar osu_songbrowser_button_collection_active_color_b("osu_songbrowser_button_collection_active_color_b", 44,
-                                                        FCVAR_DEFAULT);
-
-ConVar osu_songbrowser_button_collection_inactive_color_a("osu_songbrowser_button_collection_inactive_color_a", 255,
-                                                          FCVAR_DEFAULT);
-ConVar osu_songbrowser_button_collection_inactive_color_r("osu_songbrowser_button_collection_inactive_color_r", 35,
-                                                          FCVAR_DEFAULT);
-ConVar osu_songbrowser_button_collection_inactive_color_g("osu_songbrowser_button_collection_inactive_color_g", 50,
-                                                          FCVAR_DEFAULT);
-ConVar osu_songbrowser_button_collection_inactive_color_b("osu_songbrowser_button_collection_inactive_color_b", 143,
-                                                          FCVAR_DEFAULT);
-
 CollectionButton::CollectionButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu,
                                    float xPos, float yPos, float xSize, float ySize, UString name,
                                    UString collectionName, std::vector<Button *> children)
@@ -196,15 +178,15 @@ void CollectionButton::onDeleteCollectionConfirmed(UString text, int id) {
 }
 
 Color CollectionButton::getActiveBackgroundColor() const {
-    return COLOR(clamp<int>(osu_songbrowser_button_collection_active_color_a.getInt(), 0, 255),
-                 clamp<int>(osu_songbrowser_button_collection_active_color_r.getInt(), 0, 255),
-                 clamp<int>(osu_songbrowser_button_collection_active_color_g.getInt(), 0, 255),
-                 clamp<int>(osu_songbrowser_button_collection_active_color_b.getInt(), 0, 255));
+    return COLOR(clamp<int>(cv_songbrowser_button_collection_active_color_a.getInt(), 0, 255),
+                 clamp<int>(cv_songbrowser_button_collection_active_color_r.getInt(), 0, 255),
+                 clamp<int>(cv_songbrowser_button_collection_active_color_g.getInt(), 0, 255),
+                 clamp<int>(cv_songbrowser_button_collection_active_color_b.getInt(), 0, 255));
 }
 
 Color CollectionButton::getInactiveBackgroundColor() const {
-    return COLOR(clamp<int>(osu_songbrowser_button_collection_inactive_color_a.getInt(), 0, 255),
-                 clamp<int>(osu_songbrowser_button_collection_inactive_color_r.getInt(), 0, 255),
-                 clamp<int>(osu_songbrowser_button_collection_inactive_color_g.getInt(), 0, 255),
-                 clamp<int>(osu_songbrowser_button_collection_inactive_color_b.getInt(), 0, 255));
+    return COLOR(clamp<int>(cv_songbrowser_button_collection_inactive_color_a.getInt(), 0, 255),
+                 clamp<int>(cv_songbrowser_button_collection_inactive_color_r.getInt(), 0, 255),
+                 clamp<int>(cv_songbrowser_button_collection_inactive_color_g.getInt(), 0, 255),
+                 clamp<int>(cv_songbrowser_button_collection_inactive_color_b.getInt(), 0, 255));
 }

@@ -15,15 +15,6 @@
 #include "SongBrowser/SongBrowser.h"
 #include "score.h"
 
-ConVar osu_rich_presence("osu_rich_presence", true, FCVAR_DEFAULT, RichPresence::onRichPresenceChange);
-ConVar osu_rich_presence_dynamic_windowtitle(
-    "osu_rich_presence_dynamic_windowtitle", true, FCVAR_DEFAULT,
-    "should the window title show the currently playing beatmap Artist - Title and [Difficulty] name");
-ConVar osu_rich_presence_show_recentplaystats("osu_rich_presence_show_recentplaystats", true, FCVAR_DEFAULT);
-ConVar osu_rich_presence_discord_show_totalpp("osu_rich_presence_discord_show_totalpp", true, FCVAR_DEFAULT);
-
-ConVar *RichPresence::m_name_ref = NULL;
-
 const UString RichPresence::KEY_STEAM_STATUS = "status";
 const UString RichPresence::KEY_DISCORD_STATUS = "state";
 const UString RichPresence::KEY_DISCORD_DETAILS = "details";
@@ -107,7 +98,7 @@ void RichPresence::onSongBrowser() {
     }
 
     // also update window title
-    if(osu_rich_presence_dynamic_windowtitle.getBool()) env->setWindowTitle("neosu");
+    if(cv_rich_presence_dynamic_windowtitle.getBool()) env->setWindowTitle("neosu");
 }
 
 void RichPresence::onPlayStart() {
@@ -123,7 +114,7 @@ void RichPresence::onPlayStart() {
     setBanchoStatus(playingInfo.toUtf8(), bancho.is_in_a_multi_room() ? MULTIPLAYER : PLAYING);
 
     // also update window title
-    if(osu_rich_presence_dynamic_windowtitle.getBool()) {
+    if(cv_rich_presence_dynamic_windowtitle.getBool()) {
         UString windowTitle = UString(playingInfo);
         windowTitle.insert(0, "neosu - ");
         env->setWindowTitle(windowTitle);
@@ -131,7 +122,7 @@ void RichPresence::onPlayStart() {
 }
 
 void RichPresence::onPlayEnd(bool quit) {
-    if(!quit && osu_rich_presence_show_recentplaystats.getBool()) {
+    if(!quit && cv_rich_presence_show_recentplaystats.getBool()) {
         // e.g.: 230pp 900x 95.50% HDHRDT 6*
 
         // pp
@@ -159,29 +150,27 @@ void RichPresence::onPlayEnd(bool quit) {
 }
 
 void RichPresence::setStatus(UString status, bool force) {
-    if(!osu_rich_presence.getBool() && !force) return;
+    if(!cv_rich_presence.getBool() && !force) return;
 
     // discord
     discord->setRichPresence("largeImageKey", "logo_512", true);
     discord->setRichPresence("smallImageKey", "logo_discord_512_blackfill", true);
     discord->setRichPresence("largeImageText",
-                             osu_rich_presence_discord_show_totalpp.getBool()
+                             cv_rich_presence_discord_show_totalpp.getBool()
                                  ? "Top = Status / Recent Play; Bottom = Total weighted pp (neosu scores only!)"
                                  : "",
                              true);
     discord->setRichPresence("smallImageText",
-                             osu_rich_presence_discord_show_totalpp.getBool()
+                             cv_rich_presence_discord_show_totalpp.getBool()
                                  ? "Total weighted pp only work after the database has been loaded!"
                                  : "",
                              true);
     discord->setRichPresence(KEY_DISCORD_DETAILS, status);
 
     if(osu->getSongBrowser() != NULL) {
-        if(osu_rich_presence_discord_show_totalpp.getBool()) {
-            if(m_name_ref == NULL) m_name_ref = convar->getConVarByName("name");
-
-            const int ppRounded = (int)(std::round(
-                osu->getSongBrowser()->getDatabase()->calculatePlayerStats(m_name_ref->getString()).pp));
+        if(cv_rich_presence_discord_show_totalpp.getBool()) {
+            const int ppRounded =
+                (int)(std::round(osu->getSongBrowser()->getDatabase()->calculatePlayerStats(cv_name.getString()).pp));
             if(ppRounded > 0) discord->setRichPresence(KEY_DISCORD_STATUS, UString::format("%ipp (Mc)", ppRounded));
         }
     } else if(force && status.length() < 1)
@@ -189,7 +178,7 @@ void RichPresence::setStatus(UString status, bool force) {
 }
 
 void RichPresence::onRichPresenceChange(UString oldValue, UString newValue) {
-    if(!osu_rich_presence.getBool())
+    if(!cv_rich_presence.getBool())
         onRichPresenceDisable();
     else
         onRichPresenceEnable();

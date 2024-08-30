@@ -1,13 +1,4 @@
-//================ Copyright (c) 2020, PG, All rights reserved. =================//
-//
-// Purpose:		real-time hierarchical profiling
-//
-// $NoKeywords: $vprof
-//===============================================================================//
-
-#ifndef PROFILER_H
-#define PROFILER_H
-
+#pragma once
 #define VPROF_MAIN()             \
     g_profCurrentProfile.main(); \
     VPROF("Main")
@@ -180,4 +171,4 @@ class ProfilerScope {
     inline ~ProfilerScope() { g_profCurrentProfile.exitScope(); }
 };
 
-#endif
+extern ProfilerProfile g_profCurrentProfile;

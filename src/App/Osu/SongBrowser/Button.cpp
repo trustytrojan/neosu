@@ -16,16 +16,6 @@
 
 using namespace std;
 
-ConVar osu_songbrowser_button_active_color_a("osu_songbrowser_button_active_color_a", 220 + 10, FCVAR_DEFAULT);
-ConVar osu_songbrowser_button_active_color_r("osu_songbrowser_button_active_color_r", 255, FCVAR_DEFAULT);
-ConVar osu_songbrowser_button_active_color_g("osu_songbrowser_button_active_color_g", 255, FCVAR_DEFAULT);
-ConVar osu_songbrowser_button_active_color_b("osu_songbrowser_button_active_color_b", 255, FCVAR_DEFAULT);
-
-ConVar osu_songbrowser_button_inactive_color_a("osu_songbrowser_button_inactive_color_a", 240, FCVAR_DEFAULT);
-ConVar osu_songbrowser_button_inactive_color_r("osu_songbrowser_button_inactive_color_r", 235, FCVAR_DEFAULT);
-ConVar osu_songbrowser_button_inactive_color_g("osu_songbrowser_button_inactive_color_g", 73, FCVAR_DEFAULT);
-ConVar osu_songbrowser_button_inactive_color_b("osu_songbrowser_button_inactive_color_b", 153, FCVAR_DEFAULT);
-
 int Button::marginPixelsX = 9;
 int Button::marginPixelsY = 9;
 float Button::lastHoverSoundTime = 0;
@@ -79,7 +69,7 @@ void Button::draw(Graphics *g) {
     drawMenuButtonBackground(g);
 
     // debug inner bounding box
-    if(Osu::debug->getBool()) {
+    if(cv_debug.getBool()) {
         // scaling
         const Vector2 pos = getActualPos();
         const Vector2 size = getActualSize();
@@ -92,7 +82,7 @@ void Button::draw(Graphics *g) {
     }
 
     // debug outer/actual bounding box
-    if(Osu::debug->getBool()) {
+    if(cv_debug.getBool()) {
         g->setColor(0xffff0000);
         g->drawLine(m_vPos.x, m_vPos.y, m_vPos.x + m_vSize.x, m_vPos.y);
         g->drawLine(m_vPos.x, m_vPos.y, m_vPos.x, m_vPos.y + m_vSize.y);
@@ -153,7 +143,7 @@ void Button::mouse_update(bool *propagate_clicks) {
 }
 
 void Button::updateLayoutEx() {
-    const float uiScale = Osu::ui_scale->getFloat();
+    const float uiScale = cv_ui_scale.getFloat();
 
     Image *menuButtonBackground = osu->getSkin()->getMenuButtonBackground();
     {
@@ -355,15 +345,15 @@ void Button::setMoveAwayState(Button::MOVE_AWAY_STATE moveAwayState, bool animat
 }
 
 Color Button::getActiveBackgroundColor() const {
-    return COLOR(clamp<int>(osu_songbrowser_button_active_color_a.getInt(), 0, 255),
-                 clamp<int>(osu_songbrowser_button_active_color_r.getInt(), 0, 255),
-                 clamp<int>(osu_songbrowser_button_active_color_g.getInt(), 0, 255),
-                 clamp<int>(osu_songbrowser_button_active_color_b.getInt(), 0, 255));
+    return COLOR(clamp<int>(cv_songbrowser_button_active_color_a.getInt(), 0, 255),
+                 clamp<int>(cv_songbrowser_button_active_color_r.getInt(), 0, 255),
+                 clamp<int>(cv_songbrowser_button_active_color_g.getInt(), 0, 255),
+                 clamp<int>(cv_songbrowser_button_active_color_b.getInt(), 0, 255));
 }
 
 Color Button::getInactiveBackgroundColor() const {
-    return COLOR(clamp<int>(osu_songbrowser_button_inactive_color_a.getInt(), 0, 255),
-                 clamp<int>(osu_songbrowser_button_inactive_color_r.getInt(), 0, 255),
-                 clamp<int>(osu_songbrowser_button_inactive_color_g.getInt(), 0, 255),
-                 clamp<int>(osu_songbrowser_button_inactive_color_b.getInt(), 0, 255));
+    return COLOR(clamp<int>(cv_songbrowser_button_inactive_color_a.getInt(), 0, 255),
+                 clamp<int>(cv_songbrowser_button_inactive_color_r.getInt(), 0, 255),
+                 clamp<int>(cv_songbrowser_button_inactive_color_g.getInt(), 0, 255),
+                 clamp<int>(cv_songbrowser_button_inactive_color_b.getInt(), 0, 255));
 }

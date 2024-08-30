@@ -12,16 +12,6 @@
 
 using namespace std;
 
-ConVar ui_scrollview_resistance("ui_scrollview_resistance", 5.0f, FCVAR_DEFAULT,
-                                "how many pixels you have to pull before you start scrolling");
-ConVar ui_scrollview_scrollbarwidth("ui_scrollview_scrollbarwidth", 15.0f, FCVAR_DEFAULT);
-ConVar ui_scrollview_kinetic_energy_multiplier("ui_scrollview_kinetic_energy_multiplier", 24.0f, FCVAR_DEFAULT,
-                                               "afterscroll delta multiplier");
-ConVar ui_scrollview_kinetic_approach_time("ui_scrollview_kinetic_approach_time", 0.075f, FCVAR_DEFAULT,
-                                           "approach target afterscroll delta over this duration");
-ConVar ui_scrollview_mousewheel_multiplier("ui_scrollview_mousewheel_multiplier", 3.5f, FCVAR_DEFAULT);
-ConVar ui_scrollview_mousewheel_overscrollbounce("ui_scrollview_mousewheel_overscrollbounce", true, FCVAR_DEFAULT);
-
 CBaseUIScrollView::CBaseUIScrollView(float xPos, float yPos, float xSize, float ySize, UString name)
     : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
     grabs_clicks = true;
@@ -54,7 +44,7 @@ CBaseUIScrollView::CBaseUIScrollView(float xPos, float yPos, float xSize, float 
     m_bBlockScrolling = false;
 
     m_bScrollResistanceCheck = false;
-    m_iScrollResistance = ui_scrollview_resistance.getInt();  // TODO: dpi handling
+    m_iScrollResistance = cv_ui_scrollview_resistance.getInt();  // TODO: dpi handling
 
     m_container = new CBaseUIContainer(xPos, yPos, xSize, ySize, name);
 }
@@ -159,8 +149,8 @@ void CBaseUIScrollView::mouse_update(bool *propagate_clicks) {
         const Vector2 deltaToAdd = (engine->getMouse()->getPos() - m_vMouseBackup2);
         // debugLog("+ (%f, %f)\n", deltaToAdd.x, deltaToAdd.y);
 
-        anim->moveQuadOut(&m_vKineticAverage.x, deltaToAdd.x, ui_scrollview_kinetic_approach_time.getFloat(), true);
-        anim->moveQuadOut(&m_vKineticAverage.y, deltaToAdd.y, ui_scrollview_kinetic_approach_time.getFloat(), true);
+        anim->moveQuadOut(&m_vKineticAverage.x, deltaToAdd.x, cv_ui_scrollview_kinetic_approach_time.getFloat(), true);
+        anim->moveQuadOut(&m_vKineticAverage.y, deltaToAdd.y, cv_ui_scrollview_kinetic_approach_time.getFloat(), true);
 
         m_vMouseBackup2 = engine->getMouse()->getPos();
     }
@@ -227,7 +217,7 @@ void CBaseUIScrollView::mouse_update(bool *propagate_clicks) {
 
         // calculate remaining kinetic energy
         if(!m_bScrollbarScrolling)
-            m_vVelocity = ui_scrollview_kinetic_energy_multiplier.getFloat() * delta *
+            m_vVelocity = cv_ui_scrollview_kinetic_energy_multiplier.getFloat() * delta *
                               (engine->getFrameTime() != 0.0 ? 1.0 / engine->getFrameTime() : 60.0) / 60.0 +
                           m_vScrollPos;
 
@@ -242,10 +232,10 @@ void CBaseUIScrollView::mouse_update(bool *propagate_clicks) {
     if(!engine->getKeyboard()->isAltDown() && m_bMouseInside && m_bEnabled) {
         if(engine->getMouse()->getWheelDeltaVertical() != 0)
             scrollY(engine->getMouse()->getWheelDeltaVertical() * m_fScrollMouseWheelMultiplier *
-                    ui_scrollview_mousewheel_multiplier.getFloat());
+                    cv_ui_scrollview_mousewheel_multiplier.getFloat());
         if(engine->getMouse()->getWheelDeltaHorizontal() != 0)
             scrollX(-engine->getMouse()->getWheelDeltaHorizontal() * m_fScrollMouseWheelMultiplier *
-                    ui_scrollview_mousewheel_multiplier.getFloat());
+                    cv_ui_scrollview_mousewheel_multiplier.getFloat());
     }
 
     // handle drag scrolling and rubber banding
@@ -352,7 +342,7 @@ void CBaseUIScrollView::scrollY(int delta, bool animated) {
     if(!m_bVerticalScrolling || delta == 0 || m_bScrolling || m_vSize.y >= m_vScrollSize.y || m_container->isBusy())
         return;
 
-    const bool allowOverscrollBounce = ui_scrollview_mousewheel_overscrollbounce.getBool();
+    const bool allowOverscrollBounce = cv_ui_scrollview_mousewheel_overscrollbounce.getBool();
 
     // keep velocity (partially animated/finished scrolls should not get lost, especially multiple scroll() calls in
     // quick succession)
@@ -506,7 +496,7 @@ void CBaseUIScrollView::updateClipping() {
 void CBaseUIScrollView::updateScrollbars() {
     // update vertical scrollbar
     if(m_bVerticalScrolling && m_vScrollSize.y > m_vSize.y) {
-        const float verticalBlockWidth = ui_scrollview_scrollbarwidth.getInt();
+        const float verticalBlockWidth = cv_ui_scrollview_scrollbarwidth.getInt();
 
         const float rawVerticalPercent =
             (m_vScrollPos.y > 0 ? -m_vScrollPos.y : std::abs(m_vScrollPos.y)) / (m_vScrollSize.y - m_vSize.y);
@@ -534,7 +524,7 @@ void CBaseUIScrollView::updateScrollbars() {
         const float horizontalPercent = clamp<float>(
             (m_vScrollPos.x > 0 ? -m_vScrollPos.x : std::abs(m_vScrollPos.x)) / (m_vScrollSize.x - m_vSize.x), 0.0f,
             1.0f);
-        const float horizontalBlockWidth = ui_scrollview_scrollbarwidth.getInt();
+        const float horizontalBlockWidth = cv_ui_scrollview_scrollbarwidth.getInt();
         const float horizontalHeightPercent = (m_vSize.x - (horizontalBlockWidth * 2)) / m_vScrollSize.x;
         const float horizontalBlockHeight = max(horizontalHeightPercent * m_vSize.x, horizontalBlockWidth);
 

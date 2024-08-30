@@ -20,17 +20,6 @@
 
 using namespace std;
 
-ConVar osu_songbrowser_button_difficulty_inactive_color_a("osu_songbrowser_button_difficulty_inactive_color_a", 255,
-                                                          FCVAR_DEFAULT);
-ConVar osu_songbrowser_button_difficulty_inactive_color_r("osu_songbrowser_button_difficulty_inactive_color_r", 0,
-                                                          FCVAR_DEFAULT);
-ConVar osu_songbrowser_button_difficulty_inactive_color_g("osu_songbrowser_button_difficulty_inactive_color_g", 150,
-                                                          FCVAR_DEFAULT);
-ConVar osu_songbrowser_button_difficulty_inactive_color_b("osu_songbrowser_button_difficulty_inactive_color_b", 236,
-                                                          FCVAR_DEFAULT);
-
-ConVar *SongDifficultyButton::m_osu_scores_enabled = NULL;
-
 SongDifficultyButton::SongDifficultyButton(SongBrowser *songBrowser, CBaseUIScrollView *view,
                                            UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,
                                            UString name, DatabaseBeatmap *diff2, SongButton *parentSongButton)
@@ -38,8 +27,6 @@ SongDifficultyButton::SongDifficultyButton(SongBrowser *songBrowser, CBaseUIScro
     m_databaseBeatmap = diff2;  // NOTE: can't use parent constructor for passing this argument, as it would otherwise
                                 // try to build a full button (and not just a diff button)
     m_parentSongButton = parentSongButton;
-
-    if(m_osu_scores_enabled == NULL) m_osu_scores_enabled = convar->getConVarByName("osu_scores_enabled");
 
     m_sTitle = m_databaseBeatmap->getTitle();
     m_sArtist = m_databaseBeatmap->getArtist();
@@ -194,7 +181,7 @@ void SongDifficultyButton::onSelected(bool wasSelected, bool autoSelectBottomMos
 }
 
 void SongDifficultyButton::updateGrade() {
-    if(!m_osu_scores_enabled->getBool()) {
+    if(!cv_scores_enabled.getBool()) {
         m_bHasGrade = false;
         return;
     }
@@ -223,8 +210,8 @@ Color SongDifficultyButton::getInactiveBackgroundColor() const {
     if(isIndependentDiffButton())
         return SongButton::getInactiveBackgroundColor();
     else
-        return COLOR(clamp<int>(osu_songbrowser_button_difficulty_inactive_color_a.getInt(), 0, 255),
-                     clamp<int>(osu_songbrowser_button_difficulty_inactive_color_r.getInt(), 0, 255),
-                     clamp<int>(osu_songbrowser_button_difficulty_inactive_color_g.getInt(), 0, 255),
-                     clamp<int>(osu_songbrowser_button_difficulty_inactive_color_b.getInt(), 0, 255));
+        return COLOR(clamp<int>(cv_songbrowser_button_difficulty_inactive_color_a.getInt(), 0, 255),
+                     clamp<int>(cv_songbrowser_button_difficulty_inactive_color_r.getInt(), 0, 255),
+                     clamp<int>(cv_songbrowser_button_difficulty_inactive_color_g.getInt(), 0, 255),
+                     clamp<int>(cv_songbrowser_button_difficulty_inactive_color_b.getInt(), 0, 255));
 }

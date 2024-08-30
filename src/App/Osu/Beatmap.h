@@ -330,29 +330,6 @@ class Beatmap : public BeatmapInterface {
     int m_iPreviousFollowPointObjectIndex;  // TODO: this shouldn't be in this class
 
    private:
-    ConVar *m_osu_pvs = NULL;
-    ConVar *m_osu_draw_hitobjects_ref = NULL;
-    ConVar *m_osu_followpoints_prevfadetime_ref = NULL;
-    ConVar *m_osu_universal_offset_ref = NULL;
-    ConVar *m_osu_early_note_time_ref = NULL;
-    ConVar *m_osu_fail_time_ref = NULL;
-    ConVar *m_osu_draw_hud_ref = NULL;
-    ConVar *m_osu_draw_scorebarbg_ref = NULL;
-    ConVar *m_osu_hud_scorebar_hide_during_breaks_ref = NULL;
-    ConVar *m_osu_volume_music_ref = NULL;
-    ConVar *m_osu_mod_fposu_ref = NULL;
-    ConVar *m_fposu_draw_scorebarbg_on_top_ref = NULL;
-    ConVar *m_osu_mod_fullalternate_ref = NULL;
-    ConVar *m_fposu_distance_ref = NULL;
-    ConVar *m_fposu_curved_ref = NULL;
-    ConVar *m_fposu_mod_strafing_ref = NULL;
-    ConVar *m_fposu_mod_strafing_frequency_x_ref = NULL;
-    ConVar *m_fposu_mod_strafing_frequency_y_ref = NULL;
-    ConVar *m_fposu_mod_strafing_frequency_z_ref = NULL;
-    ConVar *m_fposu_mod_strafing_strength_x_ref = NULL;
-    ConVar *m_fposu_mod_strafing_strength_y_ref = NULL;
-    ConVar *m_fposu_mod_strafing_strength_z_ref = NULL;
-
     static inline Vector2 mapNormalizedCoordsOntoUnitCircle(const Vector2 &in) {
         return Vector2(in.x * std::sqrt(1.0f - in.y * in.y / 2.0f), in.y * std::sqrt(1.0f - in.x * in.x / 2.0f));
     }

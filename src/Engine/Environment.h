@@ -108,8 +108,6 @@ class Environment {
     virtual float getDPIScale() { return (float)getDPI() / 96.0f; }
 
    protected:
-    static ConVar *debug_env;
-
     bool m_bFullscreenWindowedBorderless;
 };
 

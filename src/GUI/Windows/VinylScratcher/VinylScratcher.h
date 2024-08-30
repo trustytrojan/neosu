@@ -1,13 +1,4 @@
-//================ Copyright (c) 2014, PG, All rights reserved. =================//
-//
-// Purpose:		a music player with style
-//
-// $NoKeywords: $vs
-//===============================================================================//
-
-#ifndef VINYLSCRATCHER_H
-#define VINYLSCRATCHER_H
-
+#pragma once
 #include "CBaseUIWindow.h"
 
 class Sound;
@@ -51,8 +42,4 @@ class VinylScratcher : public CBaseUIWindow {
 
     Sound *m_stream;
     float m_fReverseMessageTimer;
-
-    ConVar *m_vs_percent_ref;
 };
-
-#endif

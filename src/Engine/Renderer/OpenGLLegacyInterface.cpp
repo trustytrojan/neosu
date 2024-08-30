@@ -29,8 +29,6 @@
 #define TEXTURE_FREE_MEMORY_ATI 0x87FC
 #define RENDERBUFFER_FREE_MEMORY_ATI 0x87FD
 
-ConVar r_image_unbind_after_drawimage("r_image_unbind_after_drawimage", true, FCVAR_DEFAULT);
-
 OpenGLLegacyInterface::OpenGLLegacyInterface() : Graphics() {
     // renderer
     m_bInScene = false;
@@ -101,7 +99,7 @@ void OpenGLLegacyInterface::beginScene() {
     // push main transforms
     pushTransform();
     setProjectionMatrix(defaultProjectionMatrix);
-    translate(r_globaloffset_x->getFloat(), r_globaloffset_y->getFloat());
+    translate(cv_r_globaloffset_x.getFloat(), cv_r_globaloffset_y.getFloat());
 
     // and apply them
     updateTransform();
@@ -387,9 +385,9 @@ void OpenGLLegacyInterface::drawImage(Image *image) {
         }
         glEnd();
     }
-    if(r_image_unbind_after_drawimage.getBool()) image->unbind();
+    if(cv_r_image_unbind_after_drawimage.getBool()) image->unbind();
 
-    if(r_debug_drawimage->getBool()) {
+    if(cv_r_debug_drawimage.getBool()) {
         setColor(0xbbff00ff);
         drawRect(x, y, width, height);
     }
@@ -400,7 +398,7 @@ void OpenGLLegacyInterface::drawString(McFont *font, UString text) {
 
     updateTransform();
 
-    if(r_debug_flush_drawstring->getBool()) {
+    if(cv_r_debug_flush_drawstring.getBool()) {
         glFinish();
         glFlush();
         glFinish();
@@ -447,7 +445,7 @@ void OpenGLLegacyInterface::drawVAO(VertexArrayObject *vao) {
 }
 
 void OpenGLLegacyInterface::setClipRect(McRect clipRect) {
-    if(r_debug_disable_cliprect->getBool()) return;
+    if(cv_r_debug_disable_cliprect.getBool()) return;
     // if (m_bIs3DScene) return; // HACKHACK:TODO:
 
     // HACKHACK: compensate for viewport changes caused by RenderTargets!

@@ -13,8 +13,6 @@ class ResourceManagerLoaderThread;
 
 class ResourceManager {
    public:
-    static ConVar *debug_rm;
-
     static const char *PATH_DEFAULT_IMAGES;
     static const char *PATH_DEFAULT_FONTS;
     static const char *PATH_DEFAULT_SHADERS;

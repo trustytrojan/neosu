@@ -1,10 +1,3 @@
-//================ Copyright (c) 2018, PG, All rights reserved. =================//
-//
-// Purpose:		SDL ("partial", SDL does not provide all functions!)
-//
-// $NoKeywords: $sdlenv
-//===============================================================================//
-
 #include "SDLEnvironment.h"
 
 #ifdef MCENGINE_FEATURE_SDL
@@ -19,8 +12,6 @@
 
 SDLEnvironment::SDLEnvironment(SDL_Window *window) : Environment() {
     m_window = window;
-
-    m_mouse_sensitivity_ref = convar->getConVarByName("mouse_sensitivity");
 
     m_bResizable = true;
     m_bFullscreen = false;
@@ -305,7 +296,7 @@ Vector2 SDLEnvironment::getMousePos() {
     int mouseY = 0;
 
     // HACKHACK: workaround, don't change this
-    if(m_mouse_sensitivity_ref->getFloat() == 1.0f) {
+    if(cv_mouse_sensitivity.getFloat() == 1.0f) {
         SDL_GetMouseState(&mouseX, &mouseY);
 
         return Vector2(mouseX, mouseY);

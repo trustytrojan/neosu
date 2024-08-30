@@ -190,7 +190,7 @@ Replay::Info Replay::from_bytes(u8* data, int s_data) {
 
 bool Replay::load_from_disk(FinishedScore* score) {
     if(score->peppy_replay_tms > 0) {
-        auto osu_folder = convar->getConVarByName("osu_folder")->getString();
+        auto osu_folder = cv_osu_folder.getString();
         auto path = UString::format("%s/Data/r/%s-%llu.osr", osu_folder.toUtf8(), score->beatmap_hash.hash,
                                     score->peppy_replay_tms);
 

@@ -1,21 +1,9 @@
-//================ Copyright (c) 2013, PG, All rights reserved. =================//
-//
-// Purpose:		offscreen rendering
-//
-// $NoKeywords: $rt
-//===============================================================================//
-
-#ifndef RENDERTARGET_H
-#define RENDERTARGET_H
-
+#pragma once
 #include "Resource.h"
 
 class ConVar;
 
 class RenderTarget : public Resource {
-   public:
-    static ConVar *debug_rt;
-
    public:
     RenderTarget(int x, int y, int width, int height,
                  Graphics::MULTISAMPLE_TYPE multiSampleType = Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X);
@@ -72,5 +60,3 @@ class RenderTarget : public Resource {
     Color m_color;
     Color m_clearColor;
 };
-
-#endif

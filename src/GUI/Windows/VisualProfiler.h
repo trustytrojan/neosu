@@ -72,8 +72,6 @@ class VisualProfiler : public CBaseUIElement {
     };
 
    private:
-    static ConVar *m_vprof_ref;
-
     static void collectProfilerNodesRecursive(const ProfilerNode *node, int depth, std::vector<NODE> &nodes,
                                               SPIKE &spike);
     static void collectProfilerNodesSpikeRecursive(const ProfilerNode *node, int depth, std::vector<SPIKE> &spikeNodes);

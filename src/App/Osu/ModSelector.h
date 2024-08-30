@@ -167,7 +167,4 @@ class ModSelector : public OsuScreen {
     std::vector<UIButton *> m_actionButtons;
     UIButton *m_resetModsButton;
     UIButton *m_closeButton;
-
-    // convar refs
-    ConVar *m_osu_mod_touchdevice_ref;
 };

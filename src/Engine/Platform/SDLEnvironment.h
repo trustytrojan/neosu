@@ -110,8 +110,6 @@ class SDLEnvironment : public Environment {
     SDL_Window *m_window;
 
    private:
-    ConVar *m_mouse_sensitivity_ref;
-
     // monitors
     std::vector<McRect> m_vMonitors;
 

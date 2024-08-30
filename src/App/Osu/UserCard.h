@@ -20,8 +20,6 @@ class UserCard : public CBaseUIButton {
     UIAvatar *m_avatar = NULL;
     i32 m_user_id = 0;
 
-    ConVar *m_osu_scores_enabled_ref;
-
     float m_fPP;
     float m_fAcc;
     int m_iLevel;

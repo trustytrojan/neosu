@@ -14,9 +14,6 @@
 
 using namespace std;
 
-ConVar ui_window_animspeed("ui_window_animspeed", 0.29f, FCVAR_DEFAULT);
-ConVar ui_window_shadow_radius("ui_window_shadow_radius", 13.0f, FCVAR_DEFAULT);
-
 CBaseUIWindow::CBaseUIWindow(float xPos, float yPos, float xSize, float ySize, UString name)
     : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
     const float dpiScale = env->getDPIScale();
@@ -417,7 +414,7 @@ void CBaseUIWindow::close() {
 
     m_bAnimIn = false;
     m_fAnimation = 1.0f;
-    anim->moveQuadInOut(&m_fAnimation, 0.0f, ui_window_animspeed.getFloat());
+    anim->moveQuadInOut(&m_fAnimation, 0.0f, cv_ui_window_animspeed.getFloat());
 
     onClosed();
 }
@@ -430,7 +427,7 @@ void CBaseUIWindow::open() {
     if(!m_bCoherenceMode) {
         m_bAnimIn = true;
         m_fAnimation = 0.001f;
-        anim->moveQuadOut(&m_fAnimation, 1.0f, ui_window_animspeed.getFloat());
+        anim->moveQuadOut(&m_fAnimation, 1.0f, cv_ui_window_animspeed.getFloat());
     } else
         m_fAnimation = 1.0f;
 }

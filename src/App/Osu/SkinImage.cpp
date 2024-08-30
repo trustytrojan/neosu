@@ -9,10 +9,6 @@
 
 using namespace std;
 
-ConVar osu_skin_animation_fps_override("osu_skin_animation_fps_override", -1.0f, FCVAR_DEFAULT);
-
-ConVar *SkinImage::m_osu_skin_mipmaps_ref = NULL;
-
 SkinImage::SkinImage(Skin *skin, std::string skinElementName, Vector2 baseSizeForScaling2x, float osuSize,
                      std::string animationSeparator, bool ignoreDefaultSkin) {
     m_skin = skin;
@@ -20,8 +16,6 @@ SkinImage::SkinImage(Skin *skin, std::string skinElementName, Vector2 baseSizeFo
     m_fOsuSize = osuSize;
 
     m_bReady = false;
-
-    if(m_osu_skin_mipmaps_ref == NULL) m_osu_skin_mipmaps_ref = convar->getConVarByName("osu_skin_mipmaps");
 
     m_iCurMusicPos = 0;
     m_iFrameCounter = 0;
@@ -116,15 +110,15 @@ bool SkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin) {
     // load user skin
 
     // check if an @2x version of this image exists
-    if(Skin::m_osu_skin_hd->getBool()) {
+    if(cv_skin_hd.getBool()) {
         // load user skin
 
         if(existsFilepath1) {
             IMAGE image;
 
-            if(Skin::m_osu_skin_async->getBool()) engine->getResourceManager()->requestNextLoadAsync();
+            if(cv_skin_async.getBool()) engine->getResourceManager()->requestNextLoadAsync();
 
-            image.img = engine->getResourceManager()->loadImageAbsUnnamed(filepath1, m_osu_skin_mipmaps_ref->getBool());
+            image.img = engine->getResourceManager()->loadImageAbsUnnamed(filepath1, cv_skin_mipmaps.getBool());
             image.scale = 2.0f;
 
             m_images.push_back(image);
@@ -146,9 +140,9 @@ bool SkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin) {
     if(existsFilepath2) {
         IMAGE image;
 
-        if(Skin::m_osu_skin_async->getBool()) engine->getResourceManager()->requestNextLoadAsync();
+        if(cv_skin_async.getBool()) engine->getResourceManager()->requestNextLoadAsync();
 
-        image.img = engine->getResourceManager()->loadImageAbsUnnamed(filepath2, m_osu_skin_mipmaps_ref->getBool());
+        image.img = engine->getResourceManager()->loadImageAbsUnnamed(filepath2, cv_skin_mipmaps.getBool());
         image.scale = 1.0f;
 
         m_images.push_back(image);
@@ -170,14 +164,13 @@ bool SkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin) {
     m_bIsFromDefaultSkin = true;
 
     // check if an @2x version of this image exists
-    if(Skin::m_osu_skin_hd->getBool()) {
+    if(cv_skin_hd.getBool()) {
         if(existsDefaultFilePath1) {
             IMAGE image;
 
-            if(Skin::m_osu_skin_async->getBool()) engine->getResourceManager()->requestNextLoadAsync();
+            if(cv_skin_async.getBool()) engine->getResourceManager()->requestNextLoadAsync();
 
-            image.img =
-                engine->getResourceManager()->loadImageAbsUnnamed(defaultFilePath1, m_osu_skin_mipmaps_ref->getBool());
+            image.img = engine->getResourceManager()->loadImageAbsUnnamed(defaultFilePath1, cv_skin_mipmaps.getBool());
             image.scale = 2.0f;
 
             m_images.push_back(image);
@@ -197,10 +190,9 @@ bool SkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin) {
     if(existsDefaultFilePath2) {
         IMAGE image;
 
-        if(Skin::m_osu_skin_async->getBool()) engine->getResourceManager()->requestNextLoadAsync();
+        if(cv_skin_async.getBool()) engine->getResourceManager()->requestNextLoadAsync();
 
-        image.img =
-            engine->getResourceManager()->loadImageAbsUnnamed(defaultFilePath2, m_osu_skin_mipmaps_ref->getBool());
+        image.img = engine->getResourceManager()->loadImageAbsUnnamed(defaultFilePath2, cv_skin_mipmaps.getBool());
         image.scale = 1.0f;
 
         m_images.push_back(image);
@@ -324,8 +316,8 @@ void SkinImage::update(float speedMultiplier, bool useEngineTimeForAnimations, l
     m_iCurMusicPos = curMusicPos;
 
     const float frameDurationInSeconds =
-        (osu_skin_animation_fps_override.getFloat() > 0.0f ? (1.0f / osu_skin_animation_fps_override.getFloat())
-                                                           : m_fFrameDuration) /
+        (cv_skin_animation_fps_override.getFloat() > 0.0f ? (1.0f / cv_skin_animation_fps_override.getFloat())
+                                                          : m_fFrameDuration) /
         speedMultiplier;
 
     if(useEngineTimeForAnimations) {

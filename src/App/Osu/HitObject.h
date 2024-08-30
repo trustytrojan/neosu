@@ -13,12 +13,6 @@ class HitObject {
     static void drawHitResult(Graphics *g, Skin *skin, float hitcircleDiameter, float rawHitcircleDiameter,
                               Vector2 rawPos, LiveScore::HIT result, float animPercentInv, float hitDeltaRangePercent);
 
-    static ConVar *m_osu_approach_scale_multiplier_ref;
-    static ConVar *m_osu_timingpoints_force;
-    static ConVar *m_osu_relax_offset_ref;
-
-    static ConVar *m_osu_mod_mafham_ref;
-
    public:
     HitObject(long time, int sampleType, int comboNumber, bool isEndOfCombo, int colorCounter, int colorOffset,
               BeatmapInterface *beatmap);

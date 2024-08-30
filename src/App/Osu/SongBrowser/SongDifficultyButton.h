@@ -23,8 +23,6 @@ class SongDifficultyButton : public SongButton {
     bool isIndependentDiffButton() const;
 
    private:
-    static ConVar *m_osu_scores_enabled;
-
     virtual void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected);
 
     std::string m_sDiff;

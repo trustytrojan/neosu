@@ -48,8 +48,6 @@ class InfoLabel : public CBaseUIButton {
     UString buildDiffInfoString();
     UString buildOffsetInfoString();
 
-    ConVar *m_osu_debug_ref;
-
     McFont *m_font;
 
     int m_iMargin;

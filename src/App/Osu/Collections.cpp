@@ -93,8 +93,8 @@ bool load_collections() {
 
     unload_collections();
 
-    auto osu_folder = convar->getConVarByName("osu_folder")->getString();
-    auto osu_database_version = convar->getConVarByName("osu_database_version")->getInt();
+    auto osu_folder = cv_osu_folder.getString();
+    auto osu_database_version = cv_database_version.getInt();
 
     std::string peppy_collections_path = osu_folder.toUtf8();
     peppy_collections_path.append("collection.db");

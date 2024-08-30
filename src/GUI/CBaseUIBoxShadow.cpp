@@ -1,10 +1,3 @@
-//================ Copyright (c) 2013, PG, All rights reserved. =================//
-//
-// Purpose:		box shadows
-//
-// $NoKeywords: $bshad
-//===============================================================================//
-
 // TODO: fix this
 
 #include "CBaseUIBoxShadow.h"
@@ -20,8 +13,6 @@
 // HACKHACK: renderer dependent
 #include "OpenGLHeaders.h"
 */
-
-ConVar debug_box_shadows("debug_box_shadows", false, FCVAR_DEFAULT);
 
 CBaseUIBoxShadow::CBaseUIBoxShadow(Color color, float radius, float xPos, float yPos, float xSize, float ySize,
                                    UString name)
@@ -43,7 +34,7 @@ void CBaseUIBoxShadow::draw(Graphics *g) {
         m_bNeedsRedraw = false;
     }
 
-    if(debug_box_shadows.getBool()) {
+    if(cv_debug_box_shadows.getBool()) {
         g->setColor(0xff00ff00);
         g->drawRect(m_vPos.x - m_fRadius, m_vPos.y - m_fRadius, m_blur->getSize().x, m_blur->getSize().y);
     }

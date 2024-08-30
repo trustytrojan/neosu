@@ -1,8 +1,9 @@
 #include "BanchoNetworking.h"
 
+#include <time.h>
+
 #include <mutex>
 #include <thread>
-#include <time.h>
 
 #ifndef _MSC_VER
 #include <unistd.h>
@@ -72,7 +73,7 @@ void disconnect() {
         struct curl_slist *chunk = NULL;
         chunk = curl_slist_append(chunk, auth_header.c_str());
         chunk = curl_slist_append(chunk, version_header.toUtf8());
-        auto scheme = convar->getConVarByName("use_https")->getBool() ? "https://" : "http://";
+        auto scheme = cv_use_https.getBool() ? "https://" : "http://";
         auto query_url = UString::format("%sc.%s/", scheme, bancho.endpoint.toUtf8());
         curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, packet.memory);
@@ -140,37 +141,37 @@ void reconnect() {
 
     // Disable autologin, in case there's an error while logging in
     // Will be reenabled after the login succeeds
-    convar->getConVarByName("mp_autologin")->setValue(false);
+    cv_mp_autologin.setValue(false);
 
-    bancho.username = convar->getConVarByName("name")->getString();
-    bancho.endpoint = convar->getConVarByName("mp_server")->getString();
+    bancho.username = cv_name.getString();
+    bancho.endpoint = cv_mp_server.getString();
 
     // Admins told me they don't want any clients to connect
-    const char* server_blacklist[] = {
+    const char *server_blacklist[] = {
         "ppy.sh",  // haven't asked, but the answer is obvious
         "gatari.pw",
     };
-    for(const char* endpoint : server_blacklist) {
+    for(const char *endpoint : server_blacklist) {
         if(!strcmp(endpoint, bancho.endpoint.toUtf8())) {
             osu->m_notificationOverlay->addNotification("This server does not allow neosu clients.");
             return;
         }
     }
 
-    UString cv_password = convar->getConVarByName("mp_password")->getString();
-    if(cv_password.length() == 0) {
+    UString password = cv_mp_password.getString();
+    if(password.length() == 0) {
         // No password: don't try to log in
         return;
     }
-    const char *pw = cv_password.toUtf8();  // cv_password needs to stay in scope!
+    const char *pw = password.toUtf8();  // password needs to stay in scope!
     bancho.pw_md5 = md5((u8 *)pw, strlen(pw));
 
     // Admins told me they don't want score submission enabled
-    const char* submit_blacklist[] = {
+    const char *submit_blacklist[] = {
         "akatsuki.gg",
         "ripple.moe",
     };
-    for(const char* endpoint : submit_blacklist) {
+    for(const char *endpoint : submit_blacklist) {
         if(!strcmp(endpoint, bancho.endpoint.toUtf8())) {
             bancho.score_submission_policy = ServerPolicy::NO;
             break;
@@ -216,7 +217,7 @@ static void send_api_request(CURL *curl, APIRequest api_out) {
     response.memory = (u8 *)malloc(2048);
 
     struct curl_slist *chunk = NULL;
-    auto scheme = convar->getConVarByName("use_https")->getBool() ? "https://" : "http://";
+    auto scheme = cv_use_https.getBool() ? "https://" : "http://";
     auto query_url = UString::format("%sosu.%s%s", scheme, bancho.endpoint.toUtf8(), api_out.path.toUtf8());
     curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
     if(api_out.type == SUBMIT_SCORE) {
@@ -261,7 +262,7 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
     }
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
 
-    auto scheme = convar->getConVarByName("use_https")->getBool() ? "https://" : "http://";
+    auto scheme = cv_use_https.getBool() ? "https://" : "http://";
     auto query_url = UString::format("%sc.%s/", scheme, bancho.endpoint.toUtf8());
     curl_easy_setopt(curl, CURLOPT_URL, query_url.toUtf8());
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, outgoing.memory);
@@ -441,7 +442,8 @@ static void handle_api_response(Packet packet) {
             }
 
             FinishedScore *score = (FinishedScore *)packet.extra;
-            auto replay_path = UString::format(MCENGINE_DATA_DIR "replays/%s/%d.replay.lzma", score->server.c_str(), score->unixTimestamp);
+            auto replay_path = UString::format(MCENGINE_DATA_DIR "replays/%s/%d.replay.lzma", score->server.c_str(),
+                                               score->unixTimestamp);
 
             // XXX: this is blocking main thread
             FILE *replay_file = fopen(replay_path.toUtf8(), "wb");

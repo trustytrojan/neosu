@@ -28,8 +28,8 @@ ScoreboardSlot::~ScoreboardSlot() {
 
 void ScoreboardSlot::draw(Graphics *g) {
     if(m_fAlpha == 0.f) return;
-    if(!convar->getConVarByName("osu_draw_scoreboard")->getBool() && !bancho.is_playing_a_multi_map()) return;
-    if(!convar->getConVarByName("osu_draw_scoreboard_mp")->getBool() && bancho.is_playing_a_multi_map()) return;
+    if(!cv_draw_scoreboard.getBool() && !bancho.is_playing_a_multi_map()) return;
+    if(!cv_draw_scoreboard_mp.getBool() && bancho.is_playing_a_multi_map()) return;
 
     g->pushTransform();
 
@@ -45,7 +45,7 @@ void ScoreboardSlot::draw(Graphics *g) {
     start_y += m_y * height;
     start_y = roundf(start_y);
 
-    if(m_fFlash > 0.f && !convar->getConVarByName("avoid_flashes")->getBool()) {
+    if(m_fFlash > 0.f && !cv_avoid_flashes.getBool()) {
         g->setColor(0xffffffff);
         g->setAlpha(m_fFlash);
         g->fillRect(0, start_y, avatar_width + width, height);
@@ -63,7 +63,7 @@ void ScoreboardSlot::draw(Graphics *g) {
     }
     g->setAlpha(0.3f * m_fAlpha);
 
-    if(convar->getConVarByName("osu_hud_scoreboard_use_menubuttonbackground")->getBool()) {
+    if(cv_hud_scoreboard_use_menubuttonbackground.getBool()) {
         // XXX: Doesn't work on resolutions more vertical than 4:3
         float bg_scale = 0.625f;
         auto bg_img = osu->getSkin()->getMenuButtonBackground2();
@@ -110,7 +110,7 @@ void ScoreboardSlot::draw(Graphics *g) {
     g->popTransform();
 
     // Draw name
-    const bool drawTextShadow = (convar->getConVarByName("osu_background_dim")->getFloat() < 0.7f);
+    const bool drawTextShadow = (cv_background_dim.getFloat() < 0.7f);
     const Color textShadowColor = 0x66000000;
     const float nameScale = 0.315f;
     g->pushTransform();

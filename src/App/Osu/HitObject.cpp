@@ -13,85 +13,6 @@
 
 using namespace std;
 
-ConVar osu_hitresult_draw_300s("osu_hitresult_draw_300s", false, FCVAR_DEFAULT);
-
-ConVar osu_hitresult_scale("osu_hitresult_scale", 1.0f, FCVAR_DEFAULT);
-ConVar osu_hitresult_duration(
-    "osu_hitresult_duration", 1.100f, FCVAR_DEFAULT,
-    "max duration of the entire hitresult in seconds (this limits all other values, except for animated skins!)");
-ConVar osu_hitresult_duration_max("osu_hitresult_duration_max", 5.0f, FCVAR_DEFAULT,
-                                  "absolute hard limit in seconds, even for animated skins");
-ConVar osu_hitresult_animated(
-    "osu_hitresult_animated", true, FCVAR_DEFAULT,
-    "whether to animate hitresult scales (depending on particle<SCORE>.png, either scale wobble or smooth scale)");
-ConVar osu_hitresult_fadein_duration("osu_hitresult_fadein_duration", 0.120f, FCVAR_DEFAULT);
-ConVar osu_hitresult_fadeout_start_time("osu_hitresult_fadeout_start_time", 0.500f, FCVAR_DEFAULT);
-ConVar osu_hitresult_fadeout_duration("osu_hitresult_fadeout_duration", 0.600f, FCVAR_DEFAULT);
-ConVar osu_hitresult_miss_fadein_scale("osu_hitresult_miss_fadein_scale", 2.0f, FCVAR_DEFAULT);
-ConVar osu_hitresult_delta_colorize("osu_hitresult_delta_colorize", false, FCVAR_DEFAULT,
-                                    "whether to colorize hitresults depending on how early/late the hit (delta) was");
-ConVar osu_hitresult_delta_colorize_interpolate("osu_hitresult_delta_colorize_interpolate", true, FCVAR_DEFAULT,
-                                                "whether colorized hitresults should smoothly interpolate between "
-                                                "early/late colors depending on the hit delta amount");
-ConVar osu_hitresult_delta_colorize_multiplier(
-    "osu_hitresult_delta_colorize_multiplier", 2.0f, FCVAR_DEFAULT,
-    "early/late colors are multiplied by this (assuming interpolation is enabled, increasing this will make early/late "
-    "colors appear fully earlier)");
-ConVar osu_hitresult_delta_colorize_early_r("osu_hitresult_delta_colorize_early_r", 255, FCVAR_DEFAULT,
-                                            "from 0 to 255");
-ConVar osu_hitresult_delta_colorize_early_g("osu_hitresult_delta_colorize_early_g", 0, FCVAR_DEFAULT, "from 0 to 255");
-ConVar osu_hitresult_delta_colorize_early_b("osu_hitresult_delta_colorize_early_b", 0, FCVAR_DEFAULT, "from 0 to 255");
-ConVar osu_hitresult_delta_colorize_late_r("osu_hitresult_delta_colorize_late_r", 0, FCVAR_DEFAULT, "from 0 to 255");
-ConVar osu_hitresult_delta_colorize_late_g("osu_hitresult_delta_colorize_late_g", 0, FCVAR_DEFAULT, "from 0 to 255");
-ConVar osu_hitresult_delta_colorize_late_b("osu_hitresult_delta_colorize_late_b", 255, FCVAR_DEFAULT, "from 0 to 255");
-
-ConVar osu_approach_scale_multiplier("osu_approach_scale_multiplier", 3.0f, FCVAR_DEFAULT);
-
-ConVar osu_timingpoints_force("osu_timingpoints_force", true, FCVAR_DEFAULT,
-                              "Forces the correct sample type and volume to be used, by getting the active timingpoint "
-                              "through iteration EVERY TIME a hitsound is played (performance!)");
-
-ConVar osu_mod_hd_circle_fadein_start_percent(
-    "osu_mod_hd_circle_fadein_start_percent", 1.0f, FCVAR_LOCKED,
-    "hiddenFadeInStartTime = circleTime - approachTime * osu_mod_hd_circle_fadein_start_percent");
-ConVar osu_mod_hd_circle_fadein_end_percent(
-    "osu_mod_hd_circle_fadein_end_percent", 0.6f, FCVAR_LOCKED,
-    "hiddenFadeInEndTime = circleTime - approachTime * osu_mod_hd_circle_fadein_end_percent");
-ConVar osu_mod_hd_circle_fadeout_start_percent(
-    "osu_mod_hd_circle_fadeout_start_percent", 0.6f, FCVAR_LOCKED,
-    "hiddenFadeOutStartTime = circleTime - approachTime * osu_mod_hd_circle_fadeout_start_percent");
-ConVar osu_mod_hd_circle_fadeout_end_percent(
-    "osu_mod_hd_circle_fadeout_end_percent", 0.3f, FCVAR_LOCKED,
-    "hiddenFadeOutEndTime = circleTime - approachTime * osu_mod_hd_circle_fadeout_end_percent");
-
-ConVar osu_mod_target_300_percent("osu_mod_target_300_percent", 0.5f, FCVAR_LOCKED);
-ConVar osu_mod_target_100_percent("osu_mod_target_100_percent", 0.7f, FCVAR_LOCKED);
-ConVar osu_mod_target_50_percent("osu_mod_target_50_percent", 0.95f, FCVAR_LOCKED);
-
-ConVar osu_mod_mafham_ignore_hittable_dim("osu_mod_mafham_ignore_hittable_dim", true, FCVAR_DEFAULT,
-                                          "having hittable dim enabled makes it possible to \"read\" the beatmap by "
-                                          "looking at the un-dim animations (thus making it a lot easier)");
-
-ConVar osu_mod_approach_different("osu_mod_approach_different", false, FCVAR_UNLOCKED,
-                                  "replicates osu!lazer's \"Approach Different\" mod");
-ConVar osu_mod_approach_different_initial_size(
-    "osu_mod_approach_different_initial_size", 4.0f, FCVAR_DEFAULT,
-    "initial size of the approach circles, relative to hit circles (as a multiplier)");
-ConVar osu_mod_approach_different_style(
-    "osu_mod_approach_different_style", 1, FCVAR_DEFAULT,
-    "0 = linear, 1 = gravity, 2 = InOut1, 3 = InOut2, 4 = Accelerate1, 5 = Accelerate2, 6 = Accelerate3, 7 = "
-    "Decelerate1, 8 = Decelerate2, 9 = Decelerate3");
-
-ConVar osu_relax_offset(
-    "osu_relax_offset", -12, FCVAR_DEFAULT,
-    "osu!relax always hits -12 ms too early, so set this to -12 (note the negative) if you want it to be the same");
-
-ConVar *HitObject::m_osu_approach_scale_multiplier_ref = &osu_approach_scale_multiplier;
-ConVar *HitObject::m_osu_timingpoints_force = &osu_timingpoints_force;
-ConVar *HitObject::m_osu_relax_offset_ref = &osu_relax_offset;
-
-ConVar *HitObject::m_osu_mod_mafham_ref = NULL;
-
 unsigned long long HitObject::sortHackCounter = 0;
 
 void HitObject::drawHitResult(Graphics *g, Beatmap *beatmap, Vector2 rawPos, LiveScore::HIT result,
@@ -106,11 +27,11 @@ void HitObject::drawHitResult(Graphics *g, Skin *skin, float hitcircleDiameter, 
 
     const float animPercent = 1.0f - animPercentInv;
 
-    const float fadeInEndPercent = osu_hitresult_fadein_duration.getFloat() / osu_hitresult_duration.getFloat();
+    const float fadeInEndPercent = cv_hitresult_fadein_duration.getFloat() / cv_hitresult_duration.getFloat();
 
     // determine color/transparency
     {
-        if(!osu_hitresult_delta_colorize.getBool() || result == LiveScore::HIT::HIT_MISS)
+        if(!cv_hitresult_delta_colorize.getBool() || result == LiveScore::HIT::HIT_MISS)
             g->setColor(0xffffffff);
         else {
             // NOTE: hitDeltaRangePercent is within -1.0f to 1.0f
@@ -121,22 +42,22 @@ void HitObject::drawHitResult(Graphics *g, Skin *skin, float hitcircleDiameter, 
             // percentage scale is linear with respect to the entire hittable 50s range in both directions (contrary to
             // OD brackets which are nonlinear of course)
             if(hitDeltaRangePercent != 0.0f) {
-                hitDeltaRangePercent = clamp<float>(
-                    hitDeltaRangePercent * osu_hitresult_delta_colorize_multiplier.getFloat(), -1.0f, 1.0f);
+                hitDeltaRangePercent =
+                    clamp<float>(hitDeltaRangePercent * cv_hitresult_delta_colorize_multiplier.getFloat(), -1.0f, 1.0f);
 
-                const float rf = lerp3f(osu_hitresult_delta_colorize_early_r.getFloat() / 255.0f, 1.0f,
-                                        osu_hitresult_delta_colorize_late_r.getFloat() / 255.0f,
-                                        osu_hitresult_delta_colorize_interpolate.getBool()
+                const float rf = lerp3f(cv_hitresult_delta_colorize_early_r.getFloat() / 255.0f, 1.0f,
+                                        cv_hitresult_delta_colorize_late_r.getFloat() / 255.0f,
+                                        cv_hitresult_delta_colorize_interpolate.getBool()
                                             ? hitDeltaRangePercent / 2.0f + 0.5f
                                             : (hitDeltaRangePercent < 0.0f ? -1.0f : 1.0f));
-                const float gf = lerp3f(osu_hitresult_delta_colorize_early_g.getFloat() / 255.0f, 1.0f,
-                                        osu_hitresult_delta_colorize_late_g.getFloat() / 255.0f,
-                                        osu_hitresult_delta_colorize_interpolate.getBool()
+                const float gf = lerp3f(cv_hitresult_delta_colorize_early_g.getFloat() / 255.0f, 1.0f,
+                                        cv_hitresult_delta_colorize_late_g.getFloat() / 255.0f,
+                                        cv_hitresult_delta_colorize_interpolate.getBool()
                                             ? hitDeltaRangePercent / 2.0f + 0.5f
                                             : (hitDeltaRangePercent < 0.0f ? -1.0f : 1.0f));
-                const float bf = lerp3f(osu_hitresult_delta_colorize_early_b.getFloat() / 255.0f, 1.0f,
-                                        osu_hitresult_delta_colorize_late_b.getFloat() / 255.0f,
-                                        osu_hitresult_delta_colorize_interpolate.getBool()
+                const float bf = lerp3f(cv_hitresult_delta_colorize_early_b.getFloat() / 255.0f, 1.0f,
+                                        cv_hitresult_delta_colorize_late_b.getFloat() / 255.0f,
+                                        cv_hitresult_delta_colorize_interpolate.getBool()
                                             ? hitDeltaRangePercent / 2.0f + 0.5f
                                             : (hitDeltaRangePercent < 0.0f ? -1.0f : 1.0f));
 
@@ -144,10 +65,9 @@ void HitObject::drawHitResult(Graphics *g, Skin *skin, float hitcircleDiameter, 
             }
         }
 
-        const float fadeOutStartPercent =
-            osu_hitresult_fadeout_start_time.getFloat() / osu_hitresult_duration.getFloat();
+        const float fadeOutStartPercent = cv_hitresult_fadeout_start_time.getFloat() / cv_hitresult_duration.getFloat();
         const float fadeOutDurationPercent =
-            osu_hitresult_fadeout_duration.getFloat() / osu_hitresult_duration.getFloat();
+            cv_hitresult_fadeout_duration.getFloat() / cv_hitresult_duration.getFloat();
 
         g->setAlpha(clamp<float>(animPercent < fadeInEndPercent
                                      ? animPercent / fadeInEndPercent
@@ -215,7 +135,7 @@ void HitObject::drawHitResult(Graphics *g, Skin *skin, float hitcircleDiameter, 
 
         // non-misses have a special scale animation (the type of which depends on hasParticle)
         float scale = 1.0f;
-        if(doScaleOrRotateAnim && osu_hitresult_animated.getBool()) {
+        if(doScaleOrRotateAnim && cv_hitresult_animated.getBool()) {
             if(!hasParticle) {
                 if(animPercent < fadeInEndPercent * 0.8f)
                     scale = lerp<float>(0.6f, 1.1f, clamp<float>(animPercent / (fadeInEndPercent * 0.8f), 0.0f, 1.0f));
@@ -246,53 +166,53 @@ void HitObject::drawHitResult(Graphics *g, Skin *skin, float hitcircleDiameter, 
                         osuCoordScaleMultiplier;
 
                 float missScale = 1.0f + clamp<float>((1.0f - (animPercent / fadeInEndPercent)), 0.0f, 1.0f) *
-                                             (osu_hitresult_miss_fadein_scale.getFloat() - 1.0f);
-                if(!osu_hitresult_animated.getBool()) missScale = 1.0f;
+                                             (cv_hitresult_miss_fadein_scale.getFloat() - 1.0f);
+                if(!cv_hitresult_animated.getBool()) missScale = 1.0f;
 
                 // TODO: rotation anim (only for all non-animated skins), rot = rng(-0.15f, 0.15f), anim1 = 120 ms to
                 // rot, anim2 = rest to rot*2, all ease in
 
                 skin->getHit0()->drawRaw(
                     g, rawPos + downAnim,
-                    (doScaleOrRotateAnim ? missScale : 1.0f) * hitImageScale * osu_hitresult_scale.getFloat());
+                    (doScaleOrRotateAnim ? missScale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
             } break;
 
             case LiveScore::HIT::HIT_50:
                 skin->getHit50()->drawRaw(
-                    g, rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * osu_hitresult_scale.getFloat());
+                    g, rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
                 break;
 
             case LiveScore::HIT::HIT_100:
                 skin->getHit100()->drawRaw(
-                    g, rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * osu_hitresult_scale.getFloat());
+                    g, rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
                 break;
 
             case LiveScore::HIT::HIT_300:
-                if(osu_hitresult_draw_300s.getBool()) {
+                if(cv_hitresult_draw_300s.getBool()) {
                     skin->getHit300()->drawRaw(
                         g, rawPos,
-                        (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * osu_hitresult_scale.getFloat());
+                        (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
                 }
                 break;
 
             case LiveScore::HIT::HIT_100K:
                 skin->getHit100k()->drawRaw(
-                    g, rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * osu_hitresult_scale.getFloat());
+                    g, rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
                 break;
 
             case LiveScore::HIT::HIT_300K:
-                if(osu_hitresult_draw_300s.getBool()) {
+                if(cv_hitresult_draw_300s.getBool()) {
                     skin->getHit300k()->drawRaw(
                         g, rawPos,
-                        (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * osu_hitresult_scale.getFloat());
+                        (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
                 }
                 break;
 
             case LiveScore::HIT::HIT_300G:
-                if(osu_hitresult_draw_300s.getBool()) {
+                if(cv_hitresult_draw_300s.getBool()) {
                     skin->getHit300g()->drawRaw(
                         g, rawPos,
-                        (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * osu_hitresult_scale.getFloat());
+                        (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
                 }
                 break;
 
@@ -311,8 +231,6 @@ HitObject::HitObject(long time, int sampleType, int comboNumber, bool isEndOfCom
     m_bIsEndOfCombo = isEndOfCombo;
     m_iColorCounter = colorCounter;
     m_iColorOffset = colorOffset;
-
-    if(m_osu_mod_mafham_ref == NULL) m_osu_mod_mafham_ref = convar->getConVarByName("osu_mod_mafham");
 
     m_fAlpha = 0.0f;
     m_fAlphaWithoutHidden = 0.0f;
@@ -350,10 +268,10 @@ void HitObject::draw2(Graphics *g) {
 }
 
 void HitObject::drawHitResultAnim(Graphics *g, const HITRESULTANIM &hitresultanim) {
-    if((hitresultanim.time - osu_hitresult_duration.getFloat()) <
+    if((hitresultanim.time - cv_hitresult_duration.getFloat()) <
            engine->getTime()  // NOTE: this is written like that on purpose, don't change it ("future" results can be
                               // scheduled with it, e.g. for slider end)
-       && (hitresultanim.time + osu_hitresult_duration_max.getFloat() * (1.0f / osu->getAnimationSpeedMultiplier())) >
+       && (hitresultanim.time + cv_hitresult_duration_max.getFloat() * (1.0f / osu->getAnimationSpeedMultiplier())) >
               engine->getTime()) {
         Skin *skin = bm->getSkin();
         {
@@ -378,7 +296,7 @@ void HitObject::drawHitResultAnim(Graphics *g, const HITRESULTANIM &hitresultani
 
             const float animPercentInv =
                 1.0f - (((engine->getTime() - hitresultanim.time) * osu->getAnimationSpeedMultiplier()) /
-                        osu_hitresult_duration.getFloat());
+                        cv_hitresult_duration.getFloat());
 
             drawHitResult(g, bm, bm->osuCoords2Pixels(hitresultanim.rawPos), hitresultanim.result, animPercentInv,
                           clamp<float>((float)hitresultanim.delta / bi->getHitWindow50(), -1.0f, 1.0f));
@@ -402,13 +320,13 @@ void HitObject::update(long curPos) {
     {
         // approach circle scale
         const float scale = clamp<float>((float)m_iDelta / (float)m_iApproachTime, 0.0f, 1.0f);
-        m_fApproachScale = 1 + (scale * osu_approach_scale_multiplier.getFloat());
-        if(osu_mod_approach_different.getBool()) {
+        m_fApproachScale = 1 + (scale * cv_approach_scale_multiplier.getFloat());
+        if(cv_mod_approach_different.getBool()) {
             const float back_const = 1.70158;
 
             float time = 1.0f - scale;
             {
-                switch(osu_mod_approach_different_style.getInt()) {
+                switch(cv_mod_approach_different_style.getInt()) {
                     default:  // "Linear"
                         break;
                     case 1:  // "Gravity" / InBack
@@ -454,7 +372,7 @@ void HitObject::update(long curPos) {
                 // NOTE: some of the easing functions will overflow/underflow, don't clamp and instead allow it on
                 // purpose
             }
-            m_fApproachScale = 1 + lerp<float>(osu_mod_approach_different_initial_size.getFloat() - 1.0f, 0.0f, time);
+            m_fApproachScale = 1 + lerp<float>(cv_mod_approach_different_initial_size.getFloat() - 1.0f, 0.0f, time);
         }
 
         // hitobject body fadein
@@ -468,10 +386,10 @@ void HitObject::update(long curPos) {
 
         if(osu->getModHD()) {
             // hidden hitobject body fadein
-            const float fin_start_percent = osu_mod_hd_circle_fadein_start_percent.getFloat();
-            const float fin_end_percent = osu_mod_hd_circle_fadein_end_percent.getFloat();
-            const float fout_start_percent = osu_mod_hd_circle_fadeout_start_percent.getFloat();
-            const float fout_end_percent = osu_mod_hd_circle_fadeout_end_percent.getFloat();
+            const float fin_start_percent = cv_mod_hd_circle_fadein_start_percent.getFloat();
+            const float fin_end_percent = cv_mod_hd_circle_fadein_end_percent.getFloat();
+            const float fout_start_percent = cv_mod_hd_circle_fadeout_start_percent.getFloat();
+            const float fout_end_percent = cv_mod_hd_circle_fadeout_end_percent.getFloat();
             const long hiddenFadeInStart = m_iTime - (long)(m_iApproachTime * fin_start_percent);
             const long hiddenFadeInEnd = m_iTime - (long)(m_iApproachTime * fin_end_percent);
             m_fAlpha = clamp<float>(
@@ -496,16 +414,15 @@ void HitObject::update(long curPos) {
             0.0f, 1.0f);
 
         // hittable dim, see https://github.com/ppy/osu/pull/20572
-        if(GameRules::osu_hitobject_hittable_dim.getBool() &&
-           (!m_osu_mod_mafham_ref->getBool() || !osu_mod_mafham_ignore_hittable_dim.getBool())) {
+        if(cv_hitobject_hittable_dim.getBool() &&
+           (!cv_mod_mafham.getBool() || !cv_mod_mafham_ignore_hittable_dim.getBool())) {
             const long hittableDimFadeStart = m_iTime - (long)GameRules::getHitWindowMiss();
-            const long hittableDimFadeEnd =
-                hittableDimFadeStart +
-                (long)GameRules::osu_hitobject_hittable_dim_duration
-                    .getInt();  // yes, this means the un-dim animation cuts into the already clickable range
+
+            // yes, this means the un-dim animation cuts into the already clickable range
+            const long hittableDimFadeEnd = hittableDimFadeStart + (long)cv_hitobject_hittable_dim_duration.getInt();
 
             m_fHittableDimRGBColorMultiplierPercent =
-                lerp<float>(GameRules::osu_hitobject_hittable_dim_start_percent.getFloat(), 1.0f,
+                lerp<float>(cv_hitobject_hittable_dim_start_percent.getFloat(), 1.0f,
                             clamp<float>(1.0f - (float)(hittableDimFadeEnd - curPos) /
                                                     (float)(hittableDimFadeEnd - hittableDimFadeStart),
                                          0.0f, 1.0f));
@@ -522,9 +439,9 @@ void HitObject::addHitResult(LiveScore::HIT result, long delta, bool isEndOfComb
                              float targetAngle, bool ignoreOnHitErrorBar, bool ignoreCombo, bool ignoreHealth,
                              bool addObjectDurationToSkinAnimationTimeStartOffset) {
     if(osu->getModTarget() && result != LiveScore::HIT::HIT_MISS && targetDelta >= 0.0f) {
-        const float p300 = osu_mod_target_300_percent.getFloat();
-        const float p100 = osu_mod_target_100_percent.getFloat();
-        const float p50 = osu_mod_target_50_percent.getFloat();
+        const float p300 = cv_mod_target_300_percent.getFloat();
+        const float p100 = cv_mod_target_100_percent.getFloat();
+        const float p50 = cv_mod_target_50_percent.getFloat();
 
         if(targetDelta < p300 && (result == LiveScore::HIT::HIT_300 || result == LiveScore::HIT::HIT_100))
             result = LiveScore::HIT::HIT_300;
@@ -552,7 +469,7 @@ void HitObject::addHitResult(LiveScore::HIT result, long delta, bool isEndOfComb
 
     // currently a maximum of 2 simultaneous results are supported (for drawing, per hitobject)
     if(engine->getTime() >
-       m_hitresultanim1.time + osu_hitresult_duration_max.getFloat() * (1.0f / osu->getAnimationSpeedMultiplier()))
+       m_hitresultanim1.time + cv_hitresult_duration_max.getFloat() * (1.0f / osu->getAnimationSpeedMultiplier()))
         m_hitresultanim1 = hitresultanim;
     else
         m_hitresultanim2 = hitresultanim;

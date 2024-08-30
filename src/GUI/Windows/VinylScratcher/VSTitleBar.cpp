@@ -10,8 +10,6 @@
 
 using namespace std;
 
-ConVar vs_percent("vs_percent", 0.0f, FCVAR_DEFAULT);
-
 class VSTitleBarButton : public CBaseUIButton {
    public:
     VSTitleBarButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
@@ -33,7 +31,7 @@ class VSTitleBarButton : public CBaseUIButton {
 
         // blue seekbar overlay
         {
-            const float seekBarPercent = vs_percent.getFloat();
+            const float seekBarPercent = cv_vs_percent.getFloat();
             if(seekBarPercent > 0.0f) {
                 const Color middle = COLOR(255, 0, 50, 119);
                 const Color third = COLOR(255, 0, 113 - 50, 207 - 50);
@@ -138,9 +136,9 @@ void VSTitleBar::draw(Graphics *g) {
 
 void VSTitleBar::drawTitle1(Graphics *g) {
     m_title->draw(g);
-    if(vs_percent.getFloat() > 0) {
+    if(cv_vs_percent.getFloat() > 0) {
         m_title->setTextColor(0xffffffff);
-        g->pushClipRect(McRect(m_vPos.x, m_vPos.y, vs_percent.getFloat() * m_vSize.x, m_title2->getSize().y));
+        g->pushClipRect(McRect(m_vPos.x, m_vPos.y, cv_vs_percent.getFloat() * m_vSize.x, m_title2->getSize().y));
         { m_title->draw(g); }
         g->popClipRect();
         m_title->setTextColor(COLOR(255, 55, 55, 55));
@@ -149,9 +147,9 @@ void VSTitleBar::drawTitle1(Graphics *g) {
 
 void VSTitleBar::drawTitle2(Graphics *g) {
     m_title2->draw(g);
-    if(vs_percent.getFloat() > 0) {
+    if(cv_vs_percent.getFloat() > 0) {
         m_title2->setTextColor(0xffffffff);
-        g->pushClipRect(McRect(m_vPos.x, m_vPos.y, vs_percent.getFloat() * m_vSize.x, m_title2->getSize().y));
+        g->pushClipRect(McRect(m_vPos.x, m_vPos.y, cv_vs_percent.getFloat() * m_vSize.x, m_title2->getSize().y));
         { m_title2->draw(g); }
         g->popClipRect();
         m_title2->setTextColor(COLOR(255, 55, 55, 55));
@@ -183,7 +181,7 @@ void VSTitleBar::mouse_update(bool *propagate_clicks) {
         m_bIsSeeking = true;
         const float percent =
             clamp<float>((engine->getMouse()->getPos().x + 1 - m_vPos.x) / m_title->getSize().x, 0.0f, 1.0f);
-        vs_percent.setValue(percent);
+        cv_vs_percent.setValue(percent);
     } else {
         // fire seek callback once scrubbing stops
         if(m_bIsSeeking) {

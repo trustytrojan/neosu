@@ -29,19 +29,6 @@
 i32 current_map_id = 0;
 i32 current_user_id = 0;
 
-void spectate_by_username(UString username) {
-    auto user = find_user(username);
-    if(user == NULL) {
-        debugLog("Couldn't find user \"%s\"!", username.toUtf8());
-        return;
-    }
-
-    debugLog("Spectating %s (user %d)...\n", username.toUtf8(), user->user_id);
-    start_spectating(user->user_id);
-}
-
-ConVar spectate_cmd("spectate", FCVAR_HIDDEN, spectate_by_username);
-
 #define INIT_LABEL(label_name, default_text, is_big)                      \
     do {                                                                  \
         label_name = new CBaseUILabel(0, 0, 0, 0, "label", default_text); \

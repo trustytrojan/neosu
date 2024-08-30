@@ -14,8 +14,8 @@
 #include "MainMenu.h"
 #include "OptionsMenu.h"
 #include "Osu.h"
-#include "SongBrowser/SongBrowser.h"
 #include "Skin.h"
+#include "SongBrowser/SongBrowser.h"
 
 // NEXTRAWINPUTBLOCK macro requires this
 typedef uint64_t QWORD;
@@ -66,7 +66,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 #ifdef MCENGINE_WINDOWS_TOUCH_SUPPORT
 #include <winuser.h>
-typedef BOOL(WINAPI * PGPI)(UINT32 pointerId, POINTER_INFO *pointerInfo);
+typedef BOOL(WINAPI *PGPI)(UINT32 pointerId, POINTER_INFO *pointerInfo);
 PGPI g_GetPointerInfo = (PGPI)GetProcAddress(GetModuleHandle(TEXT("user32.dll")), "GetPointerInfo");
 #ifndef TWF_WANTPALM
 #define TWF_WANTPALM 0x00000002
@@ -142,23 +142,6 @@ __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance =
     0x00000001;  // https://community.amd.com/thread/169965
 }
 
-ConVar fps_max("fps_max", 60.0f, FCVAR_DEFAULT, "framerate limiter, foreground");
-ConVar fps_max_yield("fps_max_yield", false, FCVAR_DEFAULT,
-                     "always release rest of timeslice once per frame (call scheduler via sleep(0))");
-ConVar fps_max_background("fps_max_background", 30.0f, FCVAR_DEFAULT, "framerate limiter, background");
-ConVar fps_max_background_interleaved("fps_max_background_interleaved", 1, FCVAR_DEFAULT,
-                                      "experimental, update normally but only draw every n-th frame");
-ConVar fps_unlimited("fps_unlimited", false, FCVAR_DEFAULT);
-ConVar fps_unlimited_yield(
-    "fps_unlimited_yield", false, FCVAR_DEFAULT,
-    "always release rest of timeslice once per frame (call scheduler via sleep(0)), even if unlimited fps are enabled");
-
-ConVar win_mouse_raw_input_buffer("win_mouse_raw_input_buffer", false, FCVAR_DEFAULT,
-                                  "use GetRawInputBuffer() to reduce wndproc event queue overflow stalls on insane "
-                                  "mouse usb polling rates above 1000 Hz");
-
-extern ConVar *win_realtimestylus;
-
 //****************//
 //	Message loop  //
 //****************//
@@ -180,7 +163,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
             std::string first_skin;
 
-            for (UINT i = 0; i < fileCount; i++) {
+            for(UINT i = 0; i < fileCount; i++) {
                 UINT pathLength = DragQueryFileW(hDrop, i, NULL, 0);
                 wchar_t *filePath = new wchar_t[pathLength + 1];
                 DragQueryFileW(hDrop, i, filePath, pathLength + 1);
@@ -189,7 +172,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 int size = WideCharToMultiByte(CP_UTF8, 0, filePath, pathLength, NULL, 0, NULL, NULL);
                 std::string utf8filepath(size, 0);
                 WideCharToMultiByte(CP_UTF8, 0, filePath, size, (LPSTR)utf8filepath.c_str(), size, NULL, NULL);
-				delete[] filePath;
+                delete[] filePath;
 
                 if(utf8filepath.length() < 4) continue;
                 auto extension = env->getFileExtensionFromFilePath(utf8filepath);
@@ -197,7 +180,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                     File osz(utf8filepath);
                     i32 set_id = extract_beatmapset_id(osz.readFile(), osz.getFileSize());
                     if(set_id < 0) {
-                        // special case: legacy fallback behavior for invalid beatmapSetID, try to parse the ID from the path
+                        // special case: legacy fallback behavior for invalid beatmapSetID, try to parse the ID from the
+                        // path
                         auto mapset_name = UString(env->getFileNameFromFilePath(utf8filepath).c_str());
                         const std::vector<UString> tokens = mapset_name.split(" ");
                         for(auto token : tokens) {
@@ -242,15 +226,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
             if(first_skin.length() > 0) {
                 auto folder_name = env->getFileNameFromFilePath(first_skin);
-                folder_name.erase(folder_name.size() - 4); // remove .osk extension
+                folder_name.erase(folder_name.size() - 4);  // remove .osk extension
 
-                convar->getConVarByName("osu_skin")->setValue(env->getFileNameFromFilePath(folder_name).c_str());
+                cv_skin.setValue(env->getFileNameFromFilePath(folder_name).c_str());
                 osu->m_optionsMenu->updateSkinNameLabel();
             }
 
             return 0;
         }
-
 
 #if defined(WINDOW_FRAMELESS) && !defined(WINDOW_GHOST)
         case WM_NCCALCSIZE: {
@@ -410,7 +393,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
         // left mouse button, inject as keyboard key as well
         case WM_LBUTTONDOWN:
-            if(g_engine != NULL && (!win_realtimestylus->getBool() ||
+            if(g_engine != NULL && (!cv_win_realtimestylus.getBool() ||
                                     !IsPenEvent(GetMessageExtraInfo())))  // if realtimestylus support is enabled, all
                                                                           // clicks are handled by it and not here
             {
@@ -445,7 +428,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
         // right mouse button, inject as keyboard key as well
         case WM_RBUTTONDOWN:
-            if(g_engine != NULL && (!win_realtimestylus->getBool() ||
+            if(g_engine != NULL && (!cv_win_realtimestylus.getBool() ||
                                     !IsPenEvent(GetMessageExtraInfo())))  // if realtimestylus support is enabled, all
                                                                           // pen clicks are handled by it and not here
             {
@@ -1025,8 +1008,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             float displayFrequency = static_cast<float>(lpDevMode.dmDisplayFrequency);
             /// printf("Display Refresh Rate is %.2f Hz, setting fps_max to %i.\n\n", displayFrequency,
             /// (int)displayFrequency);
-            fps_max.setValue((int)displayFrequency);
-            fps_max.setDefaultFloat((int)displayFrequency);
+            cv_fps_max.setValue((int)displayFrequency);
+            cv_fps_max.setDefaultFloat((int)displayFrequency);
         }
     }
 
@@ -1127,7 +1110,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         {
             VPROF_BUDGET("Windows", VPROF_BUDGETGROUP_WNDPROC);
 
-            if(win_mouse_raw_input_buffer.getBool()) {
+            if(cv_win_mouse_raw_input_buffer.getBool()) {
                 UINT minRawInputBufferNumBytes = 0;
                 UINT hr = GetRawInputBuffer(NULL, &minRawInputBufferNumBytes, sizeof(RAWINPUTHEADER));
                 if(hr != (UINT)-1 && minRawInputBufferNumBytes > 0) {
@@ -1207,7 +1190,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
         // draw
         {
-            const unsigned long interleaved = fps_max_background_interleaved.getInt();
+            const unsigned long interleaved = cv_fps_max_background_interleaved.getInt();
             if(g_bDraw && (!inBackground || interleaved < 2 || tickCounter % interleaved == 0)) {
                 g_engine->onPaint();
             }
@@ -1221,19 +1204,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
             frameTimer->update();
 
-            if((!fps_unlimited.getBool() && fps_max.getInt() > 0) || inBackground) {
+            if((!cv_fps_unlimited.getBool() && cv_fps_max.getInt() > 0) || inBackground) {
                 double delayStart = frameTimer->getElapsedTime();
                 double delayTime;
                 if(inBackground)
-                    delayTime = (1.0 / (double)fps_max_background.getFloat()) - frameTimer->getDelta();
+                    delayTime = (1.0 / (double)cv_fps_max_background.getFloat()) - frameTimer->getDelta();
                 else
-                    delayTime = (1.0 / (double)fps_max.getFloat()) - frameTimer->getDelta();
+                    delayTime = (1.0 / (double)cv_fps_max.getFloat()) - frameTimer->getDelta();
 
                 const bool didSleep = delayTime > 0.0;
                 while(delayTime > 0.0) {
                     if(inBackground)  // real waiting (very inaccurate, but very good for little background cpu
                                       // utilization)
-                        Sleep((int)((1.0f / fps_max_background.getFloat()) * 1000.0f));
+                        Sleep((int)((1.0f / cv_fps_max_background.getFloat()) * 1000.0f));
                     else           // more or less "busy" waiting, but giving away the rest of the timeslice at least
                         Sleep(0);  // yes, there is a zero in there
 
@@ -1246,8 +1229,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
                     delayTime -= (frameTimer->getElapsedTime() - delayStart);
                 }
 
-                if(!didSleep && fps_max_yield.getBool()) Sleep(0);  // yes, there is a zero in there
-            } else if(fps_unlimited_yield.getBool())
+                if(!didSleep && cv_fps_max_yield.getBool()) Sleep(0);  // yes, there is a zero in there
+            } else if(cv_fps_unlimited_yield.getBool())
                 Sleep(0);  // yes, there is a zero in there
         }
     }

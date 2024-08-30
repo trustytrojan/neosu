@@ -10,10 +10,6 @@
 
 using namespace std;
 
-ConVar osu_stars_slider_curve_points_separation(
-    "osu_stars_slider_curve_points_separation", 20.0f, FCVAR_DEFAULT,
-    "massively reduce curve accuracy for star calculations to save memory/performance");
-
 u64 OsuDifficultyHitObject::sortHackCounter = 0;
 
 OsuDifficultyHitObject::OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time)
@@ -66,7 +62,7 @@ OsuDifficultyHitObject::OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time,
             // [Weriko Rank the dream (nerf) but loli].osu
 
             this->curve = SliderCurve::createCurve(this->osuSliderCurveType, controlPoints, this->pixelLength,
-                                                   osu_stars_slider_curve_points_separation.getFloat());
+                                                   cv_stars_slider_curve_points_separation.getFloat());
         } else {
             // new: delay curve creation to when it's needed, and also immediately delete afterwards (at the cost of
             // having to store a copy of the control points)
@@ -849,7 +845,7 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjects(std::vector<OsuDifficul
     const size_t numDiffObjects = diffObjects.size();
 
     // calculate angles and travel/jump distances (before calculating strains)
-    const f32 starsSliderCurvePointsSeparation = osu_stars_slider_curve_points_separation.getFloat();
+    const f32 starsSliderCurvePointsSeparation = cv_stars_slider_curve_points_separation.getFloat();
     for(size_t i = 0; i < numDiffObjects; i++) {
         if(dead.load()) return 0.0;
 

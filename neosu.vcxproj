@@ -337,7 +337,6 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
     <ClCompile Include="src\engine\RenderTarget.cpp" />
     <ClCompile Include="src\engine\Resource.cpp" />
     <ClCompile Include="src\engine\ResourceManager.cpp" />
-    <ClCompile Include="src\engine\Shader.cpp" />
     <ClCompile Include="src\engine\Sound.cpp" />
     <ClCompile Include="src\engine\SoundEngine.cpp" />
     <ClCompile Include="src\engine\TextureAtlas.cpp" />

@@ -310,11 +310,6 @@ class DatabaseBeatmap {
 
     static unsigned long long sortHackCounter;
 
-    static ConVar *m_osu_slider_curve_max_length_ref;
-    static ConVar *m_osu_stars_stacking_ref;
-    static ConVar *m_osu_debug_pp_ref;
-    static ConVar *m_osu_slider_end_inside_check_offset_ref;
-
     static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string osuFilePath);
     static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string osuFilePath, const std::atomic<bool> &dead);
     static CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT calculateSliderTimesClicksTicks(int beatmapVersion,

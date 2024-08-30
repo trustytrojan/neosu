@@ -16,19 +16,6 @@
 
 using namespace std;
 
-ConVar showconsolebox("showconsolebox");
-
-ConVar consolebox_animspeed("consolebox_animspeed", 12.0f, FCVAR_DEFAULT);
-ConVar consolebox_draw_preview("consolebox_draw_preview", true, FCVAR_DEFAULT,
-                               "whether the textbox shows the topmost suggestion while typing");
-ConVar consolebox_draw_helptext("consolebox_draw_helptext", true, FCVAR_DEFAULT,
-                                "whether convar suggestions also draw their helptext");
-
-ConVar console_overlay("console_overlay", false, FCVAR_DEFAULT,
-                       "should the log overlay always be visible (or only if the console is out)");
-ConVar console_overlay_lines("console_overlay_lines", 6, FCVAR_DEFAULT, "max number of lines of text");
-ConVar console_overlay_scale("console_overlay_scale", 1.0f, FCVAR_DEFAULT, "log text size multiplier");
-
 class ConsoleBoxTextbox : public CBaseUITextbox {
    public:
     ConsoleBoxTextbox(float xPos, float yPos, float xSize, float ySize, UString name)
@@ -38,7 +25,7 @@ class ConsoleBoxTextbox : public CBaseUITextbox {
 
    protected:
     virtual void drawText(Graphics *g) {
-        if(consolebox_draw_preview.getBool()) {
+        if(cv_consolebox_draw_preview.getBool()) {
             if(m_sSuggestion.length() > 0 && m_sSuggestion.find(m_sText) == 0) {
                 g->setColor(0xff444444);
                 g->pushTransform();
@@ -70,7 +57,7 @@ class ConsoleBoxSuggestionButton : public CBaseUIButton {
     virtual void drawText(Graphics *g) {
         if(m_font == NULL || m_sText.length() < 1) return;
 
-        if(consolebox_draw_helptext.getBool()) {
+        if(cv_consolebox_draw_helptext.getBool()) {
             if(m_sHelpText.length() > 0) {
                 const UString helpTextSeparator = "-";
                 const int helpTextOffset = std::round(2.0f * m_font->getStringWidth(helpTextSeparator) *
@@ -155,7 +142,7 @@ ConsoleBox::ConsoleBox() : CBaseUIElement(0, 0, 0, 0, "") {
     clearSuggestions();
 
     // convar callbacks
-    showconsolebox.setCallback(fastdelegate::MakeDelegate(this, &ConsoleBox::show));
+    cmd_showconsolebox.setCallback(fastdelegate::MakeDelegate(this, &ConsoleBox::show));
 }
 
 ConsoleBox::~ConsoleBox() {
@@ -174,7 +161,7 @@ void ConsoleBox::draw(Graphics *g) {
         if(engine->getMouse()->isMiddleDown())
             g->translate(0, engine->getMouse()->getPos().y - engine->getScreenHeight());
 
-        if(console_overlay.getBool() || m_textbox->isVisible()) drawLogOverlay(g);
+        if(cv_console_overlay.getBool() || m_textbox->isVisible()) drawLogOverlay(g);
 
         if(anim->isAnimating(&m_fConsoleAnimation)) {
             g->push3DScene(
@@ -199,12 +186,12 @@ void ConsoleBox::drawLogOverlay(Graphics *g) {
 
     const float dpiScale = getDPIScale();
 
-    const float logScale = std::round(dpiScale + 0.255f) * console_overlay_scale.getFloat();
+    const float logScale = std::round(dpiScale + 0.255f) * cv_console_overlay_scale.getFloat();
 
     const int shadowOffset = 1 * logScale;
 
     g->setColor(0xff000000);
-    const float alpha = 1.0f - (m_fLogYPos / (m_logFont->getHeight() * (console_overlay_lines.getInt() + 1)));
+    const float alpha = 1.0f - (m_fLogYPos / (m_logFont->getHeight() * (cv_console_overlay_lines.getInt() + 1)));
     if(m_fLogYPos != 0.0f) g->setAlpha(alpha);
 
     g->pushTransform();
@@ -290,7 +277,7 @@ void ConsoleBox::mouse_update(bool *propagate_clicks) {
     if(m_bSuggestionAnimateOut) {
         if(m_fSuggestionAnimation <= m_fSuggestionY) {
             m_suggestion->setPosY(engine->getScreenHeight() - (m_fSuggestionY - m_fSuggestionAnimation));
-            m_fSuggestionAnimation += consolebox_animspeed.getFloat();
+            m_fSuggestionAnimation += cv_consolebox_animspeed.getFloat();
         } else {
             m_bSuggestionAnimateOut = false;
             m_fSuggestionAnimation = m_fSuggestionY;
@@ -302,7 +289,7 @@ void ConsoleBox::mouse_update(bool *propagate_clicks) {
     if(m_bSuggestionAnimateIn) {
         if(m_fSuggestionAnimation >= 0) {
             m_suggestion->setPosY(engine->getScreenHeight() - (m_fSuggestionY - m_fSuggestionAnimation));
-            m_fSuggestionAnimation -= consolebox_animspeed.getFloat();
+            m_fSuggestionAnimation -= cv_consolebox_animspeed.getFloat();
         } else {
             m_bSuggestionAnimateIn = false;
             m_fSuggestionAnimation = 0.0f;
@@ -319,9 +306,9 @@ void ConsoleBox::mouse_update(bool *propagate_clicks) {
     // handle overlay animation and timeout
     if(engine->getTime() > m_fLogTime) {
         if(!anim->isAnimating(&m_fLogYPos) && m_fLogYPos == 0.0f)
-            anim->moveQuadInOut(&m_fLogYPos, m_logFont->getHeight() * (console_overlay_lines.getFloat() + 1), 0.5f);
+            anim->moveQuadInOut(&m_fLogYPos, m_logFont->getHeight() * (cv_console_overlay_lines.getFloat() + 1), 0.5f);
 
-        if(m_fLogYPos == m_logFont->getHeight() * (console_overlay_lines.getInt() + 1)) m_log.clear();
+        if(m_fLogYPos == m_logFont->getHeight() * (cv_console_overlay_lines.getInt() + 1)) m_log.clear();
     }
 }
 
@@ -627,7 +614,7 @@ void ConsoleBox::log(UString text, Color textColor) {
         m_log.push_back(logEntry);
     }
 
-    while(m_log.size() > console_overlay_lines.getInt()) {
+    while(m_log.size() > cv_console_overlay_lines.getInt()) {
         m_log.erase(m_log.begin());
     }
 

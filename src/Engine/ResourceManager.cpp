@@ -35,16 +35,6 @@ class ResourceManagerLoaderThread {
     std::vector<ResourceManager::LOADING_WORK> *loadingWork;
 };
 
-ConVar rm_numthreads(
-    "rm_numthreads", 3, FCVAR_DEFAULT,
-    "how many parallel resource loader threads are spawned once on startup (!), and subsequently used during runtime");
-ConVar rm_warnings("rm_warnings", false, FCVAR_DEFAULT);
-ConVar rm_debug_async_delay("rm_debug_async_delay", 0.0f, FCVAR_LOCKED);
-ConVar rm_interrupt_on_destroy("rm_interrupt_on_destroy", true, FCVAR_LOCKED);
-ConVar debug_rm_("debug_rm", false, FCVAR_DEFAULT);
-
-ConVar *ResourceManager::debug_rm = &debug_rm_;
-
 const char *ResourceManager::PATH_DEFAULT_IMAGES = MCENGINE_DATA_DIR "materials/";
 const char *ResourceManager::PATH_DEFAULT_FONTS = MCENGINE_DATA_DIR "fonts/";
 const char *ResourceManager::PATH_DEFAULT_SHADERS = MCENGINE_DATA_DIR "shaders/";
@@ -56,7 +46,7 @@ ResourceManager::ResourceManager() {
     m_loadingWork.reserve(32);
 
     // create loader threads
-    for(int i = 0; i < rm_numthreads.getInt(); i++) {
+    for(int i = 0; i < cv_rm_numthreads.getInt(); i++) {
         ResourceManagerLoaderThread *loaderThread = new ResourceManagerLoaderThread();
 
         loaderThread->loadingMutex.lock();  // stop loader thread immediately, wait for work
@@ -93,7 +83,7 @@ void ResourceManager::update() {
         size_t numResourceInitCounter = 0;
         for(size_t i = 0; i < m_loadingWork.size(); i++) {
             if(m_loadingWork[i].done.atomic.load()) {
-                if(debug_rm->getBool()) debugLog("Resource Manager: Worker thread #%i finished.\n", i);
+                if(cv_debug_rm.getBool()) debugLog("Resource Manager: Worker thread #%i finished.\n", i);
 
                 // copy pointer, so we can stop everything before finishing
                 Resource *rs = m_loadingWork[i].resource.atomic.load();
@@ -146,7 +136,7 @@ void ResourceManager::update() {
             bool canBeDestroyed = true;
             for(size_t w = 0; w < m_loadingWork.size(); w++) {
                 if(m_loadingWork[w].resource.atomic.load() == m_loadingWorkAsyncDestroy[i]) {
-                    if(debug_rm->getBool()) debugLog("Resource Manager: Waiting for async destroy of #%i ...\n", i);
+                    if(cv_debug_rm.getBool()) debugLog("Resource Manager: Waiting for async destroy of #%i ...\n", i);
 
                     canBeDestroyed = false;
                     break;
@@ -154,7 +144,7 @@ void ResourceManager::update() {
             }
 
             if(canBeDestroyed) {
-                if(debug_rm->getBool()) debugLog("Resource Manager: Async destroy of #%i\n", i);
+                if(cv_debug_rm.getBool()) debugLog("Resource Manager: Async destroy of #%i\n", i);
 
                 delete m_loadingWorkAsyncDestroy[i];  // implicitly calls release() through the Resource destructor
                 m_loadingWorkAsyncDestroy.erase(m_loadingWorkAsyncDestroy.begin() + i);
@@ -174,11 +164,11 @@ void ResourceManager::destroyResources() {
 
 void ResourceManager::destroyResource(Resource *rs) {
     if(rs == NULL) {
-        if(rm_warnings.getBool()) debugLog("RESOURCE MANAGER Warning: destroyResource(NULL)!\n");
+        if(cv_rm_warnings.getBool()) debugLog("RESOURCE MANAGER Warning: destroyResource(NULL)!\n");
         return;
     }
 
-    if(debug_rm->getBool()) debugLog("ResourceManager: Destroying %s\n", rs->getName().c_str());
+    if(cv_debug_rm.getBool()) debugLog("ResourceManager: Destroying %s\n", rs->getName().c_str());
 
     g_resourceManagerMutex.lock();
     {
@@ -195,10 +185,10 @@ void ResourceManager::destroyResource(Resource *rs) {
         // handle async destroy
         for(size_t w = 0; w < m_loadingWork.size(); w++) {
             if(m_loadingWork[w].resource.atomic.load() == rs) {
-                if(debug_rm->getBool())
+                if(cv_debug_rm.getBool())
                     debugLog("Resource Manager: Scheduled async destroy of %s\n", rs->getName().c_str());
 
-                if(rm_interrupt_on_destroy.getBool()) rs->interruptLoad();
+                if(cv_rm_interrupt_on_destroy.getBool()) rs->interruptLoad();
 
                 m_loadingWorkAsyncDestroy.push_back(rs);
                 if(isManagedResource) m_vResources.erase(m_vResources.begin() + managedResourceIndex);
@@ -486,7 +476,7 @@ void ResourceManager::loadResource(Resource *res, bool load) {
         res->loadAsync();
         res->load();
     } else {
-        if(rm_numthreads.getInt() > 0) {
+        if(cv_rm_numthreads.getInt() > 0) {
             g_resourceManagerMutex.lock();
             {
                 // TODO: prefer thread which currently doesn't have anything to do (i.e. allow n-1 "permanent"
@@ -504,7 +494,7 @@ void ResourceManager::loadResource(Resource *res, bool load) {
                 work.done = MobileAtomicBool(false);
 
                 threadIndexCounter =
-                    (threadIndexCounter + 1) % (min(m_threads.size(), (size_t)max(rm_numthreads.getInt(), 1)));
+                    (threadIndexCounter + 1) % (min(m_threads.size(), (size_t)max(cv_rm_numthreads.getInt(), 1)));
 
                 g_resourceManagerLoadingWorkMutex.lock();
                 {
@@ -534,7 +524,7 @@ void ResourceManager::loadResource(Resource *res, bool load) {
 }
 
 void ResourceManager::doesntExistWarning(std::string resourceName) const {
-    if(rm_warnings.getBool()) {
+    if(cv_rm_warnings.getBool()) {
         UString errormsg = "Resource \"";
         errormsg.append(resourceName.c_str());
         errormsg.append("\" does not exist!");
@@ -545,7 +535,7 @@ void ResourceManager::doesntExistWarning(std::string resourceName) const {
 Resource *ResourceManager::checkIfExistsAndHandle(std::string resourceName) {
     for(size_t i = 0; i < m_vResources.size(); i++) {
         if(m_vResources[i]->getName() == resourceName) {
-            if(rm_warnings.getBool())
+            if(cv_rm_warnings.getBool())
                 debugLog("RESOURCE MANAGER: Resource \"%s\" already loaded!\n", resourceName.c_str());
 
             // handle flags (reset them)
@@ -593,7 +583,7 @@ static void *_resourceLoaderThread(void *data) {
         // if we have work
         if(resourceToLoad != NULL) {
             // debug
-            if(rm_debug_async_delay.getFloat() > 0.0f) env->sleep(rm_debug_async_delay.getFloat() * 1000 * 1000);
+            if(cv_rm_debug_async_delay.getFloat() > 0.0f) env->sleep(cv_rm_debug_async_delay.getFloat() * 1000 * 1000);
 
             // asynchronous initAsync()
             resourceToLoad->loadAsync();

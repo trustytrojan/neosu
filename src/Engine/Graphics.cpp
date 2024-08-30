@@ -1,32 +1,8 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		top level graphics interface
-//
-// $NoKeywords: $graphics
-//===============================================================================//
-
 #include "Graphics.h"
 
 #include "Camera.h"
 #include "ConVar.h"
 #include "Engine.h"
-
-ConVar r_3dscene_zn("r_3dscene_zn", 5.0f, FCVAR_LOCKED);
-ConVar r_3dscene_zf("r_3dscene_zf", 5000.0f, FCVAR_LOCKED);
-
-ConVar _r_globaloffset_x("r_globaloffset_x", 0.0f, FCVAR_LOCKED);
-ConVar _r_globaloffset_y("r_globaloffset_y", 0.0f, FCVAR_LOCKED);
-ConVar _r_debug_disable_cliprect("r_debug_disable_cliprect", false, FCVAR_LOCKED);
-ConVar _r_debug_disable_3dscene("r_debug_disable_3dscene", false, FCVAR_LOCKED);
-ConVar _r_debug_flush_drawstring("r_debug_flush_drawstring", false, FCVAR_DEFAULT);
-ConVar _r_debug_drawimage("r_debug_drawimage", false, FCVAR_LOCKED);
-
-ConVar *Graphics::r_globaloffset_x = &_r_globaloffset_x;
-ConVar *Graphics::r_globaloffset_y = &_r_globaloffset_y;
-ConVar *Graphics::r_debug_disable_cliprect = &_r_debug_disable_cliprect;
-ConVar *Graphics::r_debug_disable_3dscene = &_r_debug_disable_3dscene;
-ConVar *Graphics::r_debug_flush_drawstring = &_r_debug_flush_drawstring;
-ConVar *Graphics::r_debug_drawimage = &_r_debug_drawimage;
 
 Graphics::Graphics() {
     // init matrix stacks
@@ -111,7 +87,7 @@ Matrix4 Graphics::getWorldMatrix() { return m_worldTransformStack.top(); }
 Matrix4 Graphics::getProjectionMatrix() { return m_projectionTransformStack.top(); }
 
 void Graphics::push3DScene(McRect region) {
-    if(r_debug_disable_3dscene->getBool()) return;
+    if(cv_r_debug_disable_3dscene.getBool()) return;
 
     // you can't yet stack 3d scenes!
     if(m_3dSceneStack.top()) {
@@ -145,7 +121,7 @@ void Graphics::push3DScene(McRect region) {
     Matrix4 projectionMatrix =
         trans2 * Camera::buildMatrixPerspectiveFov(
                      deg2rad(m_fFov), ((float)engine->getScreenWidth()) / ((float)engine->getScreenHeight()),
-                     r_3dscene_zn.getFloat(), r_3dscene_zf.getFloat());
+                     cv_r_3dscene_zn.getFloat(), cv_r_3dscene_zf.getFloat());
     m_3dSceneProjectionMatrix = projectionMatrix;
 
     // set world matrix
@@ -237,23 +213,3 @@ void Graphics::checkStackLeaks() {
         engine->shutdown();
     }
 }
-
-//************************//
-//	Graphics ConCommands  //
-//************************//
-
-void _vsync(UString oldValue, UString newValue) {
-    if(newValue.length() < 1)
-        debugLog("Usage: 'vsync 1' to turn vsync on, 'vsync 0' to turn vsync off\n");
-    else {
-        bool vsync = newValue.toFloat() > 0.0f;
-        engine->getGraphics()->setVSync(vsync);
-    }
-}
-
-void _mat_wireframe(UString oldValue, UString newValue) {
-    engine->getGraphics()->setWireframe(newValue.toFloat() > 0.0f);
-}
-
-ConVar _mat_wireframe_("mat_wireframe", false, FCVAR_LOCKED, _mat_wireframe);
-ConVar _vsync_("vsync", false, FCVAR_DEFAULT, _vsync);
