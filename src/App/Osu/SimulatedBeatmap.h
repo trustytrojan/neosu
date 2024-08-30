@@ -41,6 +41,7 @@ class SimulatedBeatmap : public BeatmapInterface {
     f32 osu_mod_jigsaw_followcircle_radius_factor = 0.f;
     bool osu_mod_shirone = false;
     f32 osu_mod_shirone_combo = 20.f;
+    bool osu_mod_mafham = false;
     // Also set these, inherited from BeatmapInterface
     // bool mod_halfwindow = false;
     // bool mod_halfwindow_allow_300s = false;
@@ -124,6 +125,20 @@ class SimulatedBeatmap : public BeatmapInterface {
     virtual bool isKey2Down() const;
     virtual bool isClickHeld() const;
 
+    virtual bool isPlaying() const { return true; }
+    virtual i32 getModsLegacy() const { return mod_flags; }
+    virtual f32 getSpeedMultiplier() const { return speed; }
+    virtual f32 getRawAR() const {
+        return 9.f;  // TODO @kiwec
+    }
+    virtual f32 getAR() const {
+        return 9.f;  // TODO @kiwec
+    }
+    virtual f32 getRawApproachTime() const;
+    virtual f32 getApproachTime() const;
+    virtual u32 getLength() const;
+    virtual u32 getLengthPlayable() const;
+    virtual u32 getBreakDurationTotal() const;
     DatabaseBeatmap::BREAK getBreakForTimeRange(long startMS, long positionMS, long endMS) const;
 
     // HitObject and other helper functions

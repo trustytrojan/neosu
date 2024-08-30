@@ -261,7 +261,7 @@ void Spinner::update(long curPos) {
     HitObject::update(curPos);
 
     // stop spinner sound and don't update() while paused
-    if(bi->isPaused() || !bi->isPlaying() || bi->hasFailed()) {
+    if(bi->isPaused() || !bi->isPlaying() || (bm && bm->hasFailed())) {
         if(bm != NULL) {
             bm->getSkin()->stopSpinnerSpinSound();
         }

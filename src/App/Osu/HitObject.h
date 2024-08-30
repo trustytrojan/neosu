@@ -6,6 +6,12 @@ class ConVar;
 class ModFPoSu;
 class Beatmap;
 
+enum class HitObjectType {
+    CIRCLE,
+    SLIDER,
+    SPINNER,
+};
+
 class HitObject {
    public:
     static void drawHitResult(Graphics *g, Beatmap *beatmap, Vector2 rawPos, LiveScore::HIT result,
@@ -26,9 +32,9 @@ class HitObject {
     virtual void miss(long curPos) = 0;  // only used by notelock
 
     virtual int getCombo() { return 1; }  // how much combo this hitobject is "worth"
-    virtual bool isCircle() { return false; }
-    virtual bool isSlider() { return false; }
-    virtual bool isSpinner() { return false; }
+
+    HitObjectType type;
+
     void addHitResult(LiveScore::HIT result, long delta, bool isEndOfCombo, Vector2 posRaw, float targetDelta = 0.0f,
                       float targetAngle = 0.0f, bool ignoreOnHitErrorBar = false, bool ignoreCombo = false,
                       bool ignoreHealth = false, bool addObjectDurationToSkinAnimationTimeStartOffset = true);

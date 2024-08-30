@@ -2550,9 +2550,9 @@ void Beatmap::update2() {
             // (because the hitobjects need to know about note blocking before handling the click events)
 
             // ************ live pp block start ************ //
-            const bool isCircle = m_hitobjects[i]->isCircle();
-            const bool isSlider = m_hitobjects[i]->isSlider();
-            const bool isSpinner = m_hitobjects[i]->isSpinner();
+            const bool isCircle = m_hitobjects[i]->type == HitObjectType::CIRCLE;
+            const bool isSlider = m_hitobjects[i]->type == HitObjectType::SLIDER;
+            const bool isSpinner = m_hitobjects[i]->type == HitObjectType::SPINNER;
             // ************ live pp block end ************** //
 
             // determine previous & next object time, used for auto + followpoints + warning arrows + empty section

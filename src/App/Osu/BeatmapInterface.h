@@ -18,7 +18,6 @@ class BeatmapInterface {
     virtual bool isPaused() const = 0;
     virtual bool isPlaying() const = 0;
     virtual bool isWaiting() const = 0;
-    virtual bool hasFailed() const = 0;
     virtual bool isClickHeld() const = 0;
     virtual bool isKey1Down() const = 0;
     virtual bool isKey2Down() const = 0;

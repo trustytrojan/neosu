@@ -27,7 +27,7 @@ class Slider : public HitObject {
     void draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCircle);
     virtual void update(long curPos);
 
-    virtual bool isSlider() { return true; }
+    HitObjectType type = HitObjectType::SLIDER;
 
     virtual void updateStackPosition(float stackOffset);
     virtual void miss(long curPos);

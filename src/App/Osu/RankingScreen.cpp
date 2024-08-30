@@ -409,6 +409,7 @@ void RankingScreen::onRetryClicked() {
 
 void RankingScreen::onWatchClicked() {
     // TODO @kiwec: doesn't work, just backs out to song browser, idk why
+    //              actually it's obvious: replay isn't loaded yet
     setVisible(false);
     osu->getSelectedBeatmap()->watch(m_score, 0.0);
 }

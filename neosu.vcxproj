@@ -249,6 +249,7 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
     <ClCompile Include="src\app\osu\score.cpp" />
     <ClCompile Include="src\app\osu\ScoreboardSlot.cpp" />
     <ClCompile Include="src\app\osu\ScreenBackable.cpp" />
+    <ClCompile Include="src\App\Osu\SimulatedBeatmap.cpp" />
     <ClCompile Include="src\app\osu\Skin.cpp" />
     <ClCompile Include="src\app\osu\SkinImage.cpp" />
     <ClCompile Include="src\app\osu\Slider.cpp" />

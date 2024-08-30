@@ -202,6 +202,26 @@ bool SimulatedBeatmap::isKey1Down() const { return current_keys & (Replay::M1 | 
 bool SimulatedBeatmap::isKey2Down() const { return current_keys & (Replay::M2 | Replay::K2); }
 bool SimulatedBeatmap::isClickHeld() const { return isKey1Down() || isKey2Down(); }
 
+u32 SimulatedBeatmap::getLength() const { return m_selectedDifficulty2->getLengthMS(); }
+
+u32 SimulatedBeatmap::getLengthPlayable() const {
+    if(m_hitobjects.size() > 0)
+        return (u32)((m_hitobjects[m_hitobjects.size() - 1]->getTime() +
+                      m_hitobjects[m_hitobjects.size() - 1]->getDuration()) -
+                     m_hitobjects[0]->getTime());
+    else
+        return getLength();
+}
+
+u32 SimulatedBeatmap::getBreakDurationTotal() const {
+    u32 breakDurationTotal = 0;
+    for(int i = 0; i < m_breaks.size(); i++) {
+        breakDurationTotal += (u32)(m_breaks[i].endTime - m_breaks[i].startTime);
+    }
+
+    return breakDurationTotal;
+}
+
 DatabaseBeatmap::BREAK SimulatedBeatmap::getBreakForTimeRange(long startMS, long positionMS, long endMS) const {
     DatabaseBeatmap::BREAK curBreak;
 
@@ -401,9 +421,9 @@ void SimulatedBeatmap::update() {
             // (because the hitobjects need to know about note blocking before handling the click events)
 
             // ************ live pp block start ************ //
-            const bool isCircle = m_hitobjects[i]->isCircle();
-            const bool isSlider = m_hitobjects[i]->isSlider();
-            const bool isSpinner = m_hitobjects[i]->isSpinner();
+            const bool isCircle = m_hitobjects[i]->type == HitObjectType::CIRCLE;
+            const bool isSlider = m_hitobjects[i]->type == HitObjectType::SLIDER;
+            const bool isSpinner = m_hitobjects[i]->type == HitObjectType::SPINNER;
             // ************ live pp block end ************** //
 
             // determine previous & next object time, used for auto + followpoints + warning arrows + empty section
@@ -1197,4 +1217,18 @@ void SimulatedBeatmap::computeDrainRate() {
         m_fHpMultiplierComboEnd = testPlayer.hpMultiplierComboEnd;
         m_fHpMultiplierNormal = testPlayer.hpMultiplierNormal;
     }
+}
+
+f32 SimulatedBeatmap::getApproachTime() const {
+    return osu_mod_mafham
+               ? getLength() * 2
+               : GameRules::mapDifficultyRange(getAR(), GameRules::getMinApproachTime(),
+                                               GameRules::getMidApproachTime(), GameRules::getMaxApproachTime());
+}
+
+f32 SimulatedBeatmap::getRawApproachTime() const {
+    return osu_mod_mafham
+               ? getLength() * 2
+               : GameRules::mapDifficultyRange(getRawAR(), GameRules::getMinApproachTime(),
+                                               GameRules::getMidApproachTime(), GameRules::getMaxApproachTime());
 }
