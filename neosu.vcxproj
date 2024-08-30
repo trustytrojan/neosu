@@ -96,7 +96,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalOptions>/VERBOSE:LIB %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>ktmw32.lib;wbemuuid.lib;ntdll.lib;Shlwapi.lib;userenv.lib;oleaut32.lib;winmm.lib;ws2_32.lib;psapi.lib;Comdlg32.lib;Dwmapi.lib;comctl32.lib;OpenGL32.lib;glu32.lib;Ole32.lib;Uuid.lib;libraries\bass\$(Platform)\bass.lib;libraries\bassfx\$(Platform)\bass_fx.lib;libraries\bassasio\$(Platform)\bassasio.lib;libraries\bassloud\$(Platform)\bassloud.lib;libraries\bassmix\$(Platform)\bassmix.lib;libraries\basswasapi\$(Platform)\basswasapi.lib;libraries\rosu-pp-c\$(Platform)\rosu_pp_c.lib;libraries\discord-rpc\$(Platform)\discord-rpc.lib;libraries\freetype\$(Platform)\freetype.lib;libraries\libjpeg\$(Platform)\jpeg-static.lib;libraries\xinput\$(Platform)\libxinput9_1_0.a;libraries\libcurl\$(Platform)\libcurl.dll.a;libraries\lzma\$(Platform)\liblzma.a;libraries\glew\$(Platform)\glew32s.lib;libraries\glew\$(Platform)\glew32mxs.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ktmw32.lib;wbemuuid.lib;ntdll.lib;Shlwapi.lib;userenv.lib;oleaut32.lib;winmm.lib;ws2_32.lib;psapi.lib;Comdlg32.lib;Dwmapi.lib;comctl32.lib;OpenGL32.lib;glu32.lib;Ole32.lib;Uuid.lib;libraries\bass\$(Platform)\bass.lib;libraries\bassfx\$(Platform)\bass_fx.lib;libraries\bassasio\$(Platform)\bassasio.lib;libraries\bassloud\$(Platform)\bassloud.lib;libraries\bassmix\$(Platform)\bassmix.lib;libraries\basswasapi\$(Platform)\basswasapi.lib;libraries\discord-rpc\$(Platform)\discord-rpc.lib;libraries\freetype\$(Platform)\freetype.lib;libraries\libjpeg\$(Platform)\jpeg-static.lib;libraries\xinput\$(Platform)\libxinput9_1_0.a;libraries\libcurl\$(Platform)\libcurl.dll.a;libraries\lzma\$(Platform)\liblzma.a;libraries\glew\$(Platform)\glew32s.lib;libraries\glew\$(Platform)\glew32mxs.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
       <SubSystem>Windows</SubSystem>
     </Link>
@@ -125,7 +125,7 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ktmw32.lib;wbemuuid.lib;ntdll.lib;Shlwapi.lib;userenv.lib;oleaut32.lib;winmm.lib;ws2_32.lib;psapi.lib;Comdlg32.lib;Dwmapi.lib;comctl32.lib;OpenGL32.lib;glu32.lib;Ole32.lib;Uuid.lib;libraries\bass\$(Platform)\bass.lib;libraries\bassfx\$(Platform)\bass_fx.lib;libraries\bassasio\$(Platform)\bassasio.lib;libraries\bassloud\$(Platform)\bassloud.lib;libraries\bassmix\$(Platform)\bassmix.lib;libraries\basswasapi\$(Platform)\basswasapi.lib;libraries\rosu-pp-c\$(Platform)\rosu_pp_c.lib;libraries\discord-rpc\$(Platform)\discord-rpc.lib;libraries\freetype\$(Platform)\freetype.lib;libraries\libjpeg\$(Platform)\jpeg-static.lib;libraries\xinput\$(Platform)\libxinput9_1_0.a;libraries\libcurl\$(Platform)\libcurl.dll.a;libraries\lzma\$(Platform)\liblzma.a;libraries\glew\$(Platform)\glew32s.lib;libraries\glew\$(Platform)\glew32mxs.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ktmw32.lib;wbemuuid.lib;ntdll.lib;Shlwapi.lib;userenv.lib;oleaut32.lib;winmm.lib;ws2_32.lib;psapi.lib;Comdlg32.lib;Dwmapi.lib;comctl32.lib;OpenGL32.lib;glu32.lib;Ole32.lib;Uuid.lib;libraries\bass\$(Platform)\bass.lib;libraries\bassfx\$(Platform)\bass_fx.lib;libraries\bassasio\$(Platform)\bassasio.lib;libraries\bassloud\$(Platform)\bassloud.lib;libraries\bassmix\$(Platform)\bassmix.lib;libraries\basswasapi\$(Platform)\basswasapi.lib;libraries\discord-rpc\$(Platform)\discord-rpc.lib;libraries\freetype\$(Platform)\freetype.lib;libraries\libjpeg\$(Platform)\jpeg-static.lib;libraries\xinput\$(Platform)\libxinput9_1_0.a;libraries\libcurl\$(Platform)\libcurl.dll.a;libraries\lzma\$(Platform)\liblzma.a;libraries\glew\$(Platform)\glew32s.lib;libraries\glew\$(Platform)\glew32mxs.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
       <SubSystem>Windows</SubSystem>
     </Link>
@@ -156,7 +156,7 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalOptions>/VERBOSE:LIB %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>ktmw32.lib;wbemuuid.lib;ntdll.lib;Shlwapi.lib;userenv.lib;oleaut32.lib;winmm.lib;ws2_32.lib;psapi.lib;Comdlg32.lib;Dwmapi.lib;comctl32.lib;OpenGL32.lib;glu32.lib;Ole32.lib;Uuid.lib;libraries\bass\$(Platform)\bass.lib;libraries\bassfx\$(Platform)\bass_fx.lib;libraries\bassasio\$(Platform)\bassasio.lib;libraries\bassloud\$(Platform)\bassloud.lib;libraries\bassmix\$(Platform)\bassmix.lib;libraries\basswasapi\$(Platform)\basswasapi.lib;libraries\rosu-pp-c\$(Platform)\rosu_pp_c.lib;libraries\discord-rpc\$(Platform)\discord-rpc.lib;libraries\freetype\$(Platform)\freetype.lib;libraries\libjpeg\$(Platform)\jpeg-static.lib;libraries\xinput\$(Platform)\libxinput9_1_0.a;libraries\libcurl\$(Platform)\libcurl.dll.a;libraries\lzma\$(Platform)\liblzma.a;libraries\glew\$(Platform)\glew32s.lib;libraries\glew\$(Platform)\glew32mxs.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ktmw32.lib;wbemuuid.lib;ntdll.lib;Shlwapi.lib;userenv.lib;oleaut32.lib;winmm.lib;ws2_32.lib;psapi.lib;Comdlg32.lib;Dwmapi.lib;comctl32.lib;OpenGL32.lib;glu32.lib;Ole32.lib;Uuid.lib;libraries\bass\$(Platform)\bass.lib;libraries\bassfx\$(Platform)\bass_fx.lib;libraries\bassasio\$(Platform)\bassasio.lib;libraries\bassloud\$(Platform)\bassloud.lib;libraries\bassmix\$(Platform)\bassmix.lib;libraries\basswasapi\$(Platform)\basswasapi.lib;libraries\discord-rpc\$(Platform)\discord-rpc.lib;libraries\freetype\$(Platform)\freetype.lib;libraries\libjpeg\$(Platform)\jpeg-static.lib;libraries\xinput\$(Platform)\libxinput9_1_0.a;libraries\libcurl\$(Platform)\libcurl.dll.a;libraries\lzma\$(Platform)\liblzma.a;libraries\glew\$(Platform)\glew32s.lib;libraries\glew\$(Platform)\glew32mxs.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
       <SubSystem>Windows</SubSystem>
       <ImageHasSafeExceptionHandlers />
@@ -187,7 +187,7 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>ktmw32.lib;wbemuuid.lib;ntdll.lib;Shlwapi.lib;userenv.lib;oleaut32.lib;winmm.lib;ws2_32.lib;psapi.lib;Comdlg32.lib;Dwmapi.lib;comctl32.lib;OpenGL32.lib;glu32.lib;Ole32.lib;Uuid.lib;libraries\bass\$(Platform)\bass.lib;libraries\bassfx\$(Platform)\bass_fx.lib;libraries\bassasio\$(Platform)\bassasio.lib;libraries\bassloud\$(Platform)\bassloud.lib;libraries\bassmix\$(Platform)\bassmix.lib;libraries\basswasapi\$(Platform)\basswasapi.lib;libraries\rosu-pp-c\$(Platform)\rosu_pp_c.lib;libraries\discord-rpc\$(Platform)\discord-rpc.lib;libraries\freetype\$(Platform)\freetype.lib;libraries\libjpeg\$(Platform)\jpeg-static.lib;libraries\xinput\$(Platform)\libxinput9_1_0.a;libraries\libcurl\$(Platform)\libcurl.dll.a;libraries\lzma\$(Platform)\liblzma.a;libraries\glew\$(Platform)\glew32s.lib;libraries\glew\$(Platform)\glew32mxs.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ktmw32.lib;wbemuuid.lib;ntdll.lib;Shlwapi.lib;userenv.lib;oleaut32.lib;winmm.lib;ws2_32.lib;psapi.lib;Comdlg32.lib;Dwmapi.lib;comctl32.lib;OpenGL32.lib;glu32.lib;Ole32.lib;Uuid.lib;libraries\bass\$(Platform)\bass.lib;libraries\bassfx\$(Platform)\bass_fx.lib;libraries\bassasio\$(Platform)\bassasio.lib;libraries\bassloud\$(Platform)\bassloud.lib;libraries\bassmix\$(Platform)\bassmix.lib;libraries\basswasapi\$(Platform)\basswasapi.lib;libraries\discord-rpc\$(Platform)\discord-rpc.lib;libraries\freetype\$(Platform)\freetype.lib;libraries\libjpeg\$(Platform)\jpeg-static.lib;libraries\xinput\$(Platform)\libxinput9_1_0.a;libraries\libcurl\$(Platform)\libcurl.dll.a;libraries\lzma\$(Platform)\liblzma.a;libraries\glew\$(Platform)\glew32s.lib;libraries\glew\$(Platform)\glew32mxs.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
       <SubSystem>Windows</SubSystem>
     </Link>
@@ -208,6 +208,7 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
     <ClCompile Include="src\app\osu\BackgroundImageHandler.cpp" />
     <ClCompile Include="src\app\osu\Bancho.cpp" />
     <ClCompile Include="src\app\osu\BanchoAes.cpp" />
+    <ClCompile Include="src\App\Osu\BanchoFile.cpp" />
     <ClCompile Include="src\app\osu\BanchoLeaderboard.cpp" />
     <ClCompile Include="src\app\osu\BanchoNetworking.cpp" />
     <ClCompile Include="src\app\osu\BanchoProtocol.cpp" />
@@ -215,6 +216,7 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
     <ClCompile Include="src\app\osu\BanchoUsers.cpp" />
     <ClCompile Include="src\app\osu\base64.cpp" />
     <ClCompile Include="src\app\osu\Beatmap.cpp" />
+    <ClCompile Include="src\App\Osu\BeatmapInterface.cpp" />
     <ClCompile Include="src\app\osu\Changelog.cpp" />
     <ClCompile Include="src\app\osu\Chat.cpp" />
     <ClCompile Include="src\App\Osu\ChatLink.cpp" />
@@ -239,7 +241,6 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
     <ClCompile Include="src\app\osu\OptionsMenu.cpp" />
     <ClCompile Include="src\app\osu\Osu.cpp" />
     <ClCompile Include="src\app\osu\PauseMenu.cpp" />
-    <ClCompile Include="src\app\osu\pp.cpp" />
     <ClCompile Include="src\app\osu\PromptScreen.cpp" />
     <ClCompile Include="src\app\osu\RankingScreen.cpp" />
     <ClCompile Include="src\app\osu\Replay.cpp" />
@@ -295,8 +296,6 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
     <ClCompile Include="src\engine\input\KeyboardEvent.cpp" />
     <ClCompile Include="src\engine\input\Mouse.cpp" />
     <ClCompile Include="src\engine\main\main_Linux.cpp" />
-    <ClCompile Include="src\engine\main\main_OSX_cpp.cpp" />
-    <ClCompile Include="src\engine\main\main_OSX_sdl.cpp" />
     <ClCompile Include="src\engine\main\main_SDL.cpp" />
     <ClCompile Include="src\engine\main\main_Windows.cpp" />
     <ClCompile Include="src\engine\NetworkHandler.cpp" />
@@ -306,10 +305,6 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
     <ClCompile Include="src\engine\platform\LinuxGLLegacyInterface.cpp" />
     <ClCompile Include="src\engine\platform\LinuxSDLEnvironment.cpp" />
     <ClCompile Include="src\engine\platform\LinuxTimer.cpp" />
-    <ClCompile Include="src\engine\platform\MacOSEnvironment.cpp" />
-    <ClCompile Include="src\engine\platform\MacOSGLLegacyInterface.cpp" />
-    <ClCompile Include="src\engine\platform\MacOSSDLEnvironment.cpp" />
-    <ClCompile Include="src\engine\platform\MacOSTimer.cpp" />
     <ClCompile Include="src\engine\platform\NullContextMenu.cpp" />
     <ClCompile Include="src\engine\platform\NullEnvironment.cpp" />
     <ClCompile Include="src\engine\platform\SDLEnvironment.cpp" />

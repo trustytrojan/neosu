@@ -544,10 +544,6 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
                 "NOTE: osu! does not allow this (since these mods are unranked).\nShould relax/autopilot scores be "
                 "included in the weighted pp/acc calculation?",
                 convar->getConVarByName("osu_user_include_relax_and_autopilot_for_stats"));
-    addCheckbox("Disable osu!lazer star/pp Relax/Autopilot nerfs",
-                "Disabled: osu!lazer algorithm default. Relax/Autopilot scores are nerfed.\nEnabled: neosu default. "
-                "All Relax/Autopilot nerfs are disabled.",
-                convar->getConVarByName("osu_stars_and_pp_lazer_relax_autopilot_nerf_disabled"));
     addCheckbox("Show pp instead of score in scorebrowser", "Only neosu scores will show pp.",
                 convar->getConVarByName("osu_scores_sort_by_pp"));
     addCheckbox("Always enable touch device pp nerf mod",
