@@ -29,8 +29,6 @@ struct BEATMAP_VALUES {
     float OD;
     float HP;
 
-    float speedMultiplier;
-
     float difficultyMultiplier;
     float csDifficultyMultiplier;
 };

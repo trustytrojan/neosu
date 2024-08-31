@@ -367,16 +367,23 @@ void Chat::handle_command(UString msg) {
             return;
         }
 
-        UString song_name = UString::format("%s - %s [%s]", diff->getArtist().c_str(), diff->getTitle().c_str(), diff->getDifficultyName().c_str());
-        UString song_link = UString::format("[https://osu.%s/beatmaps/%d %s]", bancho.endpoint.toUtf8(), diff->getID(), song_name.toUtf8());
+        UString song_name = UString::format("%s - %s [%s]", diff->getArtist().c_str(), diff->getTitle().c_str(),
+                                            diff->getDifficultyName().c_str());
+        UString song_link = UString::format("[https://osu.%s/beatmaps/%d %s]", bancho.endpoint.toUtf8(), diff->getID(),
+                                            song_name.toUtf8());
 
         UString np_msg;
         if(osu->isInPlayMode()) {
             np_msg = UString::format("\001ACTION is playing %s", song_link.toUtf8());
 
-            auto mod_string = ScoreButton::getModsStringForDisplay(osu->getScore()->getModsLegacy());
+            auto mods = osu->getScore()->getMods();
+            if(mods.speed != 1.f) {
+                auto speed_modifier = UString::format(" x%.1f", mods.speed);
+                np_msg.append(speed_modifier);
+            }
+            auto mod_string = ScoreButton::getModsStringForDisplay(mods);
             if(mod_string.length() > 0) {
-                np_msg.append("(+");
+                np_msg.append(" (+");
                 np_msg.append(mod_string);
                 np_msg.append(")");
             }
@@ -479,7 +486,8 @@ void Chat::handle_command(UString msg) {
         }
 
         auto username = msg.substr(8);
-        auto invite_msg = UString::format("\001ACTION has invited you to join [osump://%d/%s %s]\001", bancho.room.id, bancho.room.password.toUtf8(), bancho.room.name.toUtf8());
+        auto invite_msg = UString::format("\001ACTION has invited you to join [osump://%d/%s %s]\001", bancho.room.id,
+                                          bancho.room.password.toUtf8(), bancho.room.name.toUtf8());
 
         Packet packet;
         packet.id = SEND_PRIVATE_MESSAGE;

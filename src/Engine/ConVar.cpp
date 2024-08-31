@@ -1477,7 +1477,6 @@ ConVar cv_mod_wobble2("osu_mod_wobble2", false, FCVAR_UNLOCKED);
 ConVar cv_mod_wobble_frequency("osu_mod_wobble_frequency", 1.0f, FCVAR_DEFAULT);
 ConVar cv_mod_wobble_rotation_speed("osu_mod_wobble_rotation_speed", 1.0f, FCVAR_DEFAULT);
 ConVar cv_mod_wobble_strength("osu_mod_wobble_strength", 25.0f, FCVAR_DEFAULT);
-ConVar cv_mods("osu_mods", "", FCVAR_DEFAULT);
 ConVar cv_monitor("monitor", 0, FCVAR_DEFAULT, "monitor/display device to switch to, 0 = primary monitor", _monitor);
 ConVar cv_mouse_fakelag("mouse_fakelag", 0.000f, FCVAR_DEFAULT,
                         "delay all mouse movement by this many seconds (e.g. 0.1 = 100 ms delay)");

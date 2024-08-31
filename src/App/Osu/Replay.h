@@ -45,6 +45,18 @@ enum ModFlags {
     Ming3012 = 1 << 31,
     No100s = 1 << 32,
     No50s = 1 << 33,
+    MirrorHorizontal = 1 << 34,
+    MirrorVertical = 1 << 35,
+    FPoSu_Strafing = 1 << 36,
+    FadingCursor = 1 << 37,
+    FPS = 1 << 38,
+    ReverseSliders = 1 << 39,
+    Millhioref = 1 << 40,
+    StrictTracking = 1 << 41,
+    ApproachDifferent = 1 << 42,
+
+    // Non-submittable
+    Autoplay = 1 << 63,
 };
 
 struct Mods {
@@ -88,6 +100,10 @@ struct Mods {
         if(legacy_flags & LegacyFlags::ScoreV2) neoflags |= ModFlags::ScoreV2;
         if(legacy_flags & LegacyFlags::Nightmare) neoflags |= ModFlags::Nightmare;
         if(legacy_flags & LegacyFlags::FPoSu) neoflags |= ModFlags::FPoSu;
+        if(legacy_flags & LegacyFlags::Mirror) {
+            // NOTE: We don't know whether the original score was only horizontal, only vertical, or both
+            neoflags |= (ModFlags::MirrorHorizontal | ModFlags::MirrorVertical);
+        }
 
         Mods mods;
         mods.flags = neoflags;

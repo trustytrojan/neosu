@@ -31,8 +31,6 @@ struct Bancho {
     bool prefer_daycore = false;
 
     ServerPolicy score_submission_policy = ServerPolicy::NO_PREFERENCE;
-    bool set_fposu_flag = false;
-    bool set_mirror_flag = false;
     bool submit_scores();
 
     UString user_agent;

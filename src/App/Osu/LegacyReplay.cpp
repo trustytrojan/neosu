@@ -22,13 +22,6 @@ LegacyReplay::BEATMAP_VALUES LegacyReplay::getBeatmapValuesForModsLegacy(int mod
                                                                          float legacyOD, float legacyHP) {
     LegacyReplay::BEATMAP_VALUES v;
 
-    // HACKHACK: code duplication, see Osu::getRawSpeedMultiplier()
-    v.speedMultiplier = 1.0f;
-    {
-        if(modsLegacy & LegacyFlags::HalfTime) v.speedMultiplier = 0.75f;
-        if((modsLegacy & LegacyFlags::DoubleTime) || (modsLegacy & LegacyFlags::Nightcore)) v.speedMultiplier = 1.5f;
-    }
-
     // HACKHACK: code duplication, see Osu::getDifficultyMultiplier()
     v.difficultyMultiplier = 1.0f;
     {

@@ -127,7 +127,6 @@ Osu::Osu() {
     cv_speed_override.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSpeedChange));
     cv_animation_speed_override.setCallback(fastdelegate::MakeDelegate(this, &Osu::onAnimationSpeedChange));
     cv_playfield_rotation.setCallback(fastdelegate::MakeDelegate(this, &Osu::onPlayfieldChange));
-    cv_mods.setCallback(fastdelegate::MakeDelegate(this, &Osu::updateModsForConVarTemplate));
     cv_resolution.setCallback(fastdelegate::MakeDelegate(this, &Osu::onInternalResolutionChanged));
     cv_ui_scale.setCallback(fastdelegate::MakeDelegate(this, &Osu::onUIScaleChange));
     cv_ui_scale_to_dpi.setCallback(fastdelegate::MakeDelegate(this, &Osu::onUIScaleToDPIChange));
@@ -897,98 +896,45 @@ UString getModsStringForConVar(int mods) {
     return modsString;
 }
 
-bool Osu::useMods(FinishedScore *score) {
-    bool nomod = (score->modsLegacy == 0);
-
-    // legacy mods (common to all scores)
+void Osu::useMods(FinishedScore *score) {
     getModSelector()->resetMods();
-    cv_mods.setValue(getModsStringForConVar(score->modsLegacy));
 
-    if(score->modsLegacy & LegacyFlags::FPoSu) {
-        cv_mod_fposu.setValue(true);
+    cv_ar_override.setValue(score->mods.ar_override);
+    cv_cs_override.setValue(score->mods.cs_override);
+    cv_od_override.setValue(score->mods.od_override);
+    cv_hp_override.setValue(score->mods.hp_override);
+
+    if(score->mods.speed != 1.f) {
+        cv_speed_override.setValue(score->mods.speed);
     }
 
-    // NOTE: We don't know whether the original score was only horizontal, only vertical, or both
-    if(score->is_peppy_imported() && score->modsLegacy & LegacyFlags::Mirror) {
-        cv_playfield_mirror_horizontal.setValue(true);
-        cv_playfield_mirror_vertical.setValue(true);
-    }
+    cv_playfield_mirror_horizontal.setValue(score->mods.flags & Replay::ModFlags::MirrorHorizontal);
+    cv_playfield_mirror_vertical.setValue(score->mods.flags & Replay::ModFlags::MirrorVertical);
+    cv_mod_fposu.setValue(score->mods.flags & Replay::ModFlags::FPoSu);
+    cv_fposu_mod_strafing.setValue(score->mods.flags & Replay::ModFlags::FPoSu_Strafing);
+    cv_mod_wobble.setValue(score->mods.flags & Replay::ModFlags::Wobble1);
+    cv_mod_wobble2.setValue(score->mods.flags & Replay::ModFlags::Wobble2);
+    cv_mod_arwobble.setValue(score->mods.flags & Replay::ModFlags::ARWobble);
+    cv_mod_timewarp.setValue(score->mods.flags & Replay::ModFlags::Timewarp);
+    cv_mod_artimewarp.setValue(score->mods.flags & Replay::ModFlags::ARTimewarp);
+    cv_mod_minimize.setValue(score->mods.flags & Replay::ModFlags::Minimize);
+    cv_mod_fadingcursor.setValue(score->mods.flags & Replay::ModFlags::FadingCursor);
+    cv_mod_fps.setValue(score->mods.flags & Replay::ModFlags::FPS);
+    cv_mod_jigsaw1.setValue(score->mods.flags & Replay::ModFlags::Jigsaw1);
+    cv_mod_jigsaw2.setValue(score->mods.flags & Replay::ModFlags::Jigsaw2);
+    cv_mod_fullalternate.setValue(score->mods.flags & Replay::ModFlags::FullAlternate);
+    cv_mod_reverse_sliders.setValue(score->mods.flags & Replay::ModFlags::ReverseSliders);
+    cv_mod_no50s.setValue(score->mods.flags & Replay::ModFlags::No50s);
+    cv_mod_no100s.setValue(score->mods.flags & Replay::ModFlags::No100s);
+    cv_mod_ming3012.setValue(score->mods.flags & Replay::ModFlags::Ming3012);
+    cv_mod_halfwindow.setValue(score->mods.flags & Replay::ModFlags::HalfWindow);
+    cv_mod_millhioref.setValue(score->mods.flags & Replay::ModFlags::Millhioref);
+    cv_mod_mafham.setValue(score->mods.flags & Replay::ModFlags::Mafham);
+    cv_mod_strict_tracking.setValue(score->mods.flags & Replay::ModFlags::StrictTracking);
+    cv_mod_shirone.setValue(score->mods.flags & Replay::ModFlags::Shirone);
+    cv_mod_approach_different.setValue(score->mods.flags & Replay::ModFlags::ApproachDifferent);
 
-    if(!score->is_peppy_imported()) {
-        // neosu score, custom values for everything possible, have to calculate and check whether to apply any
-        // overrides (or leave default)
-        // reason being that just because the speedMultiplier stored in the score = 1.5x doesn't mean that we should
-        // move the override slider to 1.5x especially for CS/AR/OD/HP, because those get stored in the score as
-        // directly coming from Beatmap::getAR() (so with pre-applied difficultyMultiplier etc.)
-
-        // overrides
-
-        // NOTE: if the beatmap is loaded (in db), then use the raw base values from there, otherwise trust potentially
-        // incorrect stored values from score (see explanation above)
-        float tempAR = score->AR;
-        float tempCS = score->CS;
-        float tempOD = score->OD;
-        float tempHP = score->HP;
-        const DatabaseBeatmap *diff2 = getSongBrowser()->getDatabase()->getBeatmapDifficulty(score->beatmap_hash);
-        if(diff2 != NULL) {
-            tempAR = diff2->getAR();
-            tempCS = diff2->getCS();
-            tempOD = diff2->getOD();
-            tempHP = diff2->getHP();
-        }
-
-        const LegacyReplay::BEATMAP_VALUES legacyValues =
-            LegacyReplay::getBeatmapValuesForModsLegacy(score->modsLegacy, tempAR, tempCS, tempOD, tempHP);
-
-        // beatmap values
-        {
-            const float beatmapValueComparisonEpsilon = 0.0001f;
-            if(std::abs(legacyValues.AR - score->AR) >= beatmapValueComparisonEpsilon) {
-                cv_ar_override.setValue(score->AR);
-                nomod = false;
-            }
-            if(std::abs(legacyValues.CS - score->CS) >= beatmapValueComparisonEpsilon) {
-                cv_cs_override.setValue(score->CS);
-                nomod = false;
-            }
-            if(std::abs(legacyValues.OD - score->OD) >= beatmapValueComparisonEpsilon) {
-                cv_od_override.setValue(score->OD);
-                nomod = false;
-            }
-            if(std::abs(legacyValues.HP - score->HP) >= beatmapValueComparisonEpsilon) {
-                cv_hp_override.setValue(score->HP);
-                nomod = false;
-            }
-        }
-
-        // speed multiplier
-        {
-            const float speedMultiplierComparisonEpsilon = 0.0001f;
-            if(std::abs(legacyValues.speedMultiplier - score->speedMultiplier) >= speedMultiplierComparisonEpsilon) {
-                cv_speed_override.setValue(score->speedMultiplier);
-                nomod = false;
-            }
-        }
-
-        // experimental mods
-        {
-            auto cv = UString(score->experimentalModsConVars.c_str());
-            const std::vector<UString> experimentalMods = cv.split(";");
-            for(size_t i = 0; i < experimentalMods.size(); i++) {
-                if(experimentalMods[i] == UString("")) continue;
-
-                ConVar *cvar = convar->getConVarByName(experimentalMods[i], false);
-                if(cvar != NULL) {
-                    cvar->setValue(1.0f);  // enable experimental mod (true, 1.0f)
-                    nomod = false;
-                } else {
-                    debugLog("couldn't find \"%s\"\n", experimentalMods[i].toUtf8());
-                }
-            }
-        }
-    }
-
-    return nomod;
+    updateMods();
 }
 
 void Osu::updateMods() {
@@ -1041,26 +987,6 @@ void Osu::updateMods() {
                 m_bModTarget = bancho.room.slots[i].mods & LegacyFlags::Target;
             }
         }
-    } else {
-        m_bModAuto = cv_mods.getString().find("auto") != -1;
-        m_bModAutopilot = cv_mods.getString().find("autopilot") != -1;
-        m_bModRelax = cv_mods.getString().find("relax") != -1;
-        m_bModSpunout = cv_mods.getString().find("spunout") != -1;
-        m_bModTarget = cv_mods.getString().find("practicetarget") != -1;
-        m_bModScorev2 = cv_mods.getString().find("v2") != -1;
-        m_bModFlashlight = cv_mods.getString().find("fl") != -1;
-        m_bModDT = cv_mods.getString().find("dt") != -1;
-        m_bModNC = cv_mods.getString().find("nc") != -1;
-        m_bModNF = cv_mods.getString().find("nf") != -1;
-        m_bModHT = cv_mods.getString().find("ht") != -1;
-        m_bModDC = cv_mods.getString().find("dc") != -1;
-        m_bModHD = cv_mods.getString().find("hd") != -1;
-        m_bModHR = cv_mods.getString().find("hr") != -1;
-        m_bModEZ = cv_mods.getString().find("ez") != -1;
-        m_bModSD = cv_mods.getString().find("sd") != -1;
-        m_bModSS = cv_mods.getString().find("ss") != -1;
-        m_bModNightmare = cv_mods.getString().find("nightmare") != -1;
-        m_bModTD = cv_mods.getString().find("nerftd") != -1;
     }
 
     // static overrides
@@ -1184,20 +1110,7 @@ void Osu::onKeyDown(KeyboardEvent &key) {
                     FinishedScore score;
                     score.replay = beatmap->live_replay;
                     score.beatmap_hash = beatmap->getSelectedDifficulty2()->getMD5Hash();
-                    score.modsLegacy = getScore()->getModsLegacy();
-                    score.speedMultiplier = getSpeedMultiplier();
-                    score.CS = beatmap->getCS();
-                    score.AR = beatmap->getAR();
-                    score.OD = beatmap->getOD();
-                    score.HP = beatmap->getHP();
-
-                    std::vector<ConVar *> allExperimentalMods = getExperimentalMods();
-                    for(int i = 0; i < allExperimentalMods.size(); i++) {
-                        if(allExperimentalMods[i]->getBool()) {
-                            score.experimentalModsConVars.append(allExperimentalMods[i]->getName());
-                            score.experimentalModsConVars.append(";");
-                        }
-                    }
+                    score.mods = getScore()->getMods();
 
                     if(bancho.is_online()) {
                         score.player_id = bancho.user_id;

@@ -19,7 +19,6 @@ FinishedScore parse_score(char *score_line) {
     FinishedScore score;
     score.client = "peppy-unknown";
     score.server = bancho.endpoint.toUtf8();
-    score.speedMultiplier = 1.0;
 
     auto tokens = UString(score_line).split("|");
     if(tokens.size() < 15) return score;
@@ -35,7 +34,7 @@ FinishedScore parse_score(char *score_line) {
     score.numKatus = strtoul(tokens[8].toUtf8(), NULL, 10);
     score.numGekis = strtoul(tokens[9].toUtf8(), NULL, 10);
     score.perfect = strtoul(tokens[10].toUtf8(), NULL, 10) == 1;
-    score.modsLegacy = strtoul(tokens[11].toUtf8(), NULL, 10);
+    score.mods = Replay::Mods::from_legacy(strtoul(tokens[11].toUtf8(), NULL, 10));
     score.player_id = strtoul(tokens[12].toUtf8(), NULL, 10);
     score.unixTimestamp = strtoul(tokens[14].toUtf8(), NULL, 10);
 

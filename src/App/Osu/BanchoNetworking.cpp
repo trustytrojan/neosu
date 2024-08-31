@@ -112,8 +112,6 @@ void disconnect() {
     }
 
     bancho.score_submission_policy = ServerPolicy::NO_PREFERENCE;
-    bancho.set_fposu_flag = false;
-    bancho.set_mirror_flag = false;
     osu->m_optionsMenu->updateLayout();
 
     osu->m_optionsMenu->logInButton->setText("Log in");
@@ -304,13 +302,6 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
         } else if(strstr(header->value, "submit=1") != NULL) {
             bancho.score_submission_policy = ServerPolicy::YES;
             debugLog("Server wants score submission! :D\n");
-        }
-
-        if(strstr(header->value, "fposu=1") != NULL) {
-            bancho.set_fposu_flag = true;
-        }
-        if(strstr(header->value, "mirror=1") != NULL) {
-            bancho.set_mirror_flag = true;
         }
     }
 

@@ -692,7 +692,6 @@ extern ConVar cv_mod_wobble2;
 extern ConVar cv_mod_wobble_frequency;
 extern ConVar cv_mod_wobble_rotation_speed;
 extern ConVar cv_mod_wobble_strength;
-extern ConVar cv_mods;
 extern ConVar cv_monitor;
 extern ConVar cv_mouse_fakelag;
 extern ConVar cv_mouse_raw_input;

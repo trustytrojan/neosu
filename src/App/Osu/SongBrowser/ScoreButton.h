@@ -11,7 +11,7 @@ class UIContextMenu;
 class ScoreButton : public CBaseUIButton {
    public:
     static SkinImage *getGradeImage(FinishedScore::Grade grade);
-    static UString getModsStringForDisplay(int mods);
+    static UString getModsStringForDisplay(Replay::Mods mods);
 
     enum class STYLE { SCORE_BROWSER, TOP_RANKS };
 

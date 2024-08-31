@@ -1004,8 +1004,7 @@ void ModSelector::updateModConVar() {
         if(button->isOn()) modString.append(button->getActiveModName());
     }
 
-    cv_mods.setValue(modString);
-
+    osu->updateMods();  // XXX: not needed?
     updateScoreMultiplierLabelText();
     updateOverrideSliderLabels();
     osu->updateMods();

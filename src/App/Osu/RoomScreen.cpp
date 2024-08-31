@@ -715,7 +715,7 @@ FinishedScore RoomScreen::get_approximate_score() {
         auto slot = &bancho.room.slots[i];
         if(slot->player_id != bancho.user_id) continue;
 
-        score.modsLegacy = slot->mods;
+        score.mods = Replay::Mods::from_legacy(slot->mods);
         score.passed = !slot->died;
         score.unixTimestamp = slot->last_update_tms;
         score.num300s = slot->num300;
@@ -729,9 +729,7 @@ FinishedScore RoomScreen::get_approximate_score() {
         score.perfect = slot->is_perfect;
     }
 
-    score.grade =
-        LiveScore::calculateGrade(score.num300s, score.num100s, score.num50s, score.numMisses,
-                                  score.modsLegacy & LegacyFlags::Hidden, score.modsLegacy & LegacyFlags::Flashlight);
+    score.grade = score.calculate_grade();
 
     return score;
 }

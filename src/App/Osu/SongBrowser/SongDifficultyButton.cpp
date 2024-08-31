@@ -194,9 +194,7 @@ void SongDifficultyButton::updateGrade() {
         const FinishedScore &score =
             (*osu->getSongBrowser()->getDatabase()->getScores())[m_databaseBeatmap->getMD5Hash()][0];
         hasGrade = true;
-        grade = LiveScore::calculateGrade(score.num300s, score.num100s, score.num50s, score.numMisses,
-                                          score.modsLegacy & LegacyFlags::Hidden,
-                                          score.modsLegacy & LegacyFlags::Flashlight);
+        grade = score.calculate_grade();
     }
 
     m_bHasGrade = hasGrade;

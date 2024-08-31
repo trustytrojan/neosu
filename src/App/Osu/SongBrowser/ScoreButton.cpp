@@ -555,8 +555,8 @@ void ScoreButton::onContextMenu(UString text, int id) {
 }
 
 void ScoreButton::onUseModsClicked() {
-    bool nomod = osu->useMods(&m_score);
-    engine->getSound()->play(nomod ? osu->getSkin()->getCheckOff() : osu->getSkin()->getCheckOn());
+    osu->useMods(&m_score);
+    engine->getSound()->play(osu->getSkin()->getCheckOn());
 }
 
 void ScoreButton::onDeleteScoreClicked() {
@@ -600,10 +600,13 @@ void ScoreButton::setScore(const FinishedScore &score, const DatabaseBeatmap *di
     m_score = score;
     m_iScoreIndexNumber = index;
 
+    f32 AR = score.mods.ar_override;
+    f32 OD = score.mods.od_override;
+    f32 HP = score.mods.hp_override;
+    f32 CS = score.mods.cs_override;
+
     const float accuracy =
         LiveScore::calculateAccuracy(score.num300s, score.num100s, score.num50s, score.numMisses) * 100.0f;
-    const bool modHidden = score.modsLegacy & LegacyFlags::Hidden;
-    const bool modFlashlight = score.modsLegacy & LegacyFlags::Flashlight;
 
     // NOTE: Allows dropped sliderends. Should fix with @PPV3
     const bool fullCombo = (score.maxPossibleCombo > 0 && score.numMisses == 0 && score.numSliderBreaks == 0);
@@ -620,8 +623,7 @@ void ScoreButton::setScore(const FinishedScore &score, const DatabaseBeatmap *di
     }
 
     // display
-    m_scoreGrade = LiveScore::calculateGrade(score.num300s, score.num100s, score.num50s, score.numMisses, modHidden,
-                                             modFlashlight);
+    m_scoreGrade = score.calculate_grade();
     m_sScoreUsername = UString(score.playerName.c_str());
     m_sScoreScore = UString::format(
         (score.perfect ? "Score: %llu (%ix PFC)" : (fullCombo ? "Score: %llu (%ix FC)" : "Score: %llu (%ix)")),
@@ -632,54 +634,56 @@ void ScoreButton::setScore(const FinishedScore &score, const DatabaseBeatmap *di
     m_sScoreAccuracy = UString::format("%.2f%%", accuracy);
     m_sScoreAccuracyFC =
         UString::format((score.perfect ? "PFC %.2f%%" : (fullCombo ? "FC %.2f%%" : "%.2f%%")), accuracy);
-    m_sScoreMods = getModsStringForDisplay(score.modsLegacy);
-    if(score.experimentalModsConVars.length() > 0) {
-        if(m_sScoreMods.length() > 0) m_sScoreMods.append(",");
-
-        auto cv = UString(score.experimentalModsConVars.c_str());
-        std::vector<UString> experimentalMods = cv.split(";");
-        for(int i = 0; i < experimentalMods.size(); i++) {
-            if(experimentalMods[i].length() > 0) m_sScoreMods.append("+");
-        }
-    }
-    m_sCustom = (score.speedMultiplier != 1.0f ? UString::format("Spd: %gx", score.speedMultiplier) : UString(""));
+    m_sScoreMods = getModsStringForDisplay(score.mods);
+    m_sCustom = (score.mods.speed != 1.0f ? UString::format("Spd: %gx", score.mods.speed) : UString(""));
     if(diff2 != NULL) {
-        const LegacyReplay::BEATMAP_VALUES beatmapValuesForModsLegacy = LegacyReplay::getBeatmapValuesForModsLegacy(
-            score.modsLegacy, diff2->getAR(), diff2->getCS(), diff2->getOD(), diff2->getHP());
+        if(AR == -1.f) {
+            AR = GameRules::getRawApproachRateForSpeedMultiplier(GameRules::getRawApproachTime(diff2->getAR()),
+                                                                 score.mods.speed);
+        }
+        if(OD == -1.f) {
+            OD = GameRules::getRawOverallDifficultyForSpeedMultiplier(GameRules::getRawHitWindow300(diff2->getOD()),
+                                                                      score.mods.speed);
+        }
+        if(HP == -1.f) HP = diff2->getHP();
+        if(CS == -1.f) CS = diff2->getCS();
 
-        const float compensatedCS = std::round(score.CS * 100.0f) / 100.0f;
+        const LegacyReplay::BEATMAP_VALUES beatmapValuesForModsLegacy = LegacyReplay::getBeatmapValuesForModsLegacy(
+            score.mods.to_legacy(), diff2->getAR(), diff2->getCS(), diff2->getOD(), diff2->getHP());
+
+        const float compensatedCS = std::round(CS * 100.0f) / 100.0f;
         const float compensatedAR = std::round(GameRules::getRawApproachRateForSpeedMultiplier(
-                                                   GameRules::getRawApproachTime(score.AR), score.speedMultiplier) *
+                                                   GameRules::getRawApproachTime(AR), score.mods.speed) *
                                                100.0f) /
                                     100.0f;
         const float compensatedOD = std::round(GameRules::getRawOverallDifficultyForSpeedMultiplier(
-                                                   GameRules::getRawHitWindow300(score.OD), score.speedMultiplier) *
+                                                   GameRules::getRawHitWindow300(OD), score.mods.speed) *
                                                100.0f) /
                                     100.0f;
-        const float compensatedHP = std::round(score.HP * 100.0f) / 100.0f;
+        const float compensatedHP = std::round(HP * 100.0f) / 100.0f;
 
         // only show these values if they are not default (or default with applied mods)
         // only show these values if they are not default with applied mods
 
-        if(beatmapValuesForModsLegacy.CS != score.CS) {
+        if(beatmapValuesForModsLegacy.CS != CS) {
             if(m_sCustom.length() > 0) m_sCustom.append(", ");
 
             m_sCustom.append(UString::format("CS:%.4g", compensatedCS));
         }
 
-        if(beatmapValuesForModsLegacy.AR != score.AR) {
+        if(beatmapValuesForModsLegacy.AR != AR) {
             if(m_sCustom.length() > 0) m_sCustom.append(", ");
 
             m_sCustom.append(UString::format("AR:%.4g", compensatedAR));
         }
 
-        if(beatmapValuesForModsLegacy.OD != score.OD) {
+        if(beatmapValuesForModsLegacy.OD != OD) {
             if(m_sCustom.length() > 0) m_sCustom.append(", ");
 
             m_sCustom.append(UString::format("OD:%.4g", compensatedOD));
         }
 
-        if(beatmapValuesForModsLegacy.HP != score.HP) {
+        if(beatmapValuesForModsLegacy.HP != HP) {
             if(m_sCustom.length() > 0) m_sCustom.append(", ");
 
             m_sCustom.append(UString::format("HP:%.4g", compensatedHP));
@@ -712,17 +716,30 @@ void ScoreButton::setScore(const FinishedScore &score, const DatabaseBeatmap *di
         tooltipMods.append("None");
 
     m_tooltipLines.push_back(tooltipMods);
-    if(score.experimentalModsConVars.length() > 0) {
-        auto cv = UString(score.experimentalModsConVars.c_str());
-        std::vector<UString> experimentalMods = cv.split(";");
-        for(int i = 0; i < experimentalMods.size(); i++) {
-            if(experimentalMods[i].length() > 0) {
-                UString experimentalModString = "+ ";
-                experimentalModString.append(experimentalMods[i]);
-                m_tooltipLines.push_back(experimentalModString);
-            }
-        }
-    }
+    if(score.mods.flags & Replay::ModFlags::ApproachDifferent) m_tooltipLines.push_back("+ approach different");
+    if(score.mods.flags & Replay::ModFlags::ARTimewarp) m_tooltipLines.push_back("+ AR timewarp");
+    if(score.mods.flags & Replay::ModFlags::ARWobble) m_tooltipLines.push_back("+ AR wobble");
+    if(score.mods.flags & Replay::ModFlags::FadingCursor) m_tooltipLines.push_back("+ fading cursor");
+    if(score.mods.flags & Replay::ModFlags::FullAlternate) m_tooltipLines.push_back("+ full alternate");
+    if(score.mods.flags & Replay::ModFlags::FPoSu_Strafing) m_tooltipLines.push_back("+ FPoSu strafing");
+    if(score.mods.flags & Replay::ModFlags::FPS) m_tooltipLines.push_back("+ FPS");
+    if(score.mods.flags & Replay::ModFlags::HalfWindow) m_tooltipLines.push_back("+ half window");
+    if(score.mods.flags & Replay::ModFlags::Jigsaw1) m_tooltipLines.push_back("+ jigsaw1");
+    if(score.mods.flags & Replay::ModFlags::Jigsaw2) m_tooltipLines.push_back("+ jigsaw2");
+    if(score.mods.flags & Replay::ModFlags::Mafham) m_tooltipLines.push_back("+ mafham");
+    if(score.mods.flags & Replay::ModFlags::Millhioref) m_tooltipLines.push_back("+ millhioref");
+    if(score.mods.flags & Replay::ModFlags::Minimize) m_tooltipLines.push_back("+ minimize");
+    if(score.mods.flags & Replay::ModFlags::Ming3012) m_tooltipLines.push_back("+ ming3012");
+    if(score.mods.flags & Replay::ModFlags::MirrorHorizontal) m_tooltipLines.push_back("+ mirror (horizontal)");
+    if(score.mods.flags & Replay::ModFlags::MirrorVertical) m_tooltipLines.push_back("+ mirror (vertical)");
+    if(score.mods.flags & Replay::ModFlags::No50s) m_tooltipLines.push_back("+ no 50s");
+    if(score.mods.flags & Replay::ModFlags::No100s) m_tooltipLines.push_back("+ no 100s");
+    if(score.mods.flags & Replay::ModFlags::ReverseSliders) m_tooltipLines.push_back("+ reverse sliders");
+    if(score.mods.flags & Replay::ModFlags::Timewarp) m_tooltipLines.push_back("+ timewarp");
+    if(score.mods.flags & Replay::ModFlags::Shirone) m_tooltipLines.push_back("+ shirone");
+    if(score.mods.flags & Replay::ModFlags::StrictTracking) m_tooltipLines.push_back("+ strict tracking");
+    if(score.mods.flags & Replay::ModFlags::Wobble1) m_tooltipLines.push_back("+ wobble1");
+    if(score.mods.flags & Replay::ModFlags::Wobble2) m_tooltipLines.push_back("+ wobble2");
 
     if(m_style == STYLE::TOP_RANKS) {
         const int weightRounded = std::round(weight * 100.0f);
@@ -735,9 +752,8 @@ void ScoreButton::setScore(const FinishedScore &score, const DatabaseBeatmap *di
 
         m_tooltipLines.push_back(UString::format("Stars: %.2f (%.2f aim, %.2f speed)", score.ppv2_total_stars,
                                                  score.ppv2_aim_stars, score.ppv2_speed_stars));
-        m_tooltipLines.push_back(UString::format("Speed: %.3gx", score.speedMultiplier));
-        m_tooltipLines.push_back(
-            UString::format("CS:%.4g AR:%.4g OD:%.4g HP:%.4g", score.CS, score.AR, score.OD, score.HP));
+        m_tooltipLines.push_back(UString::format("Speed: %.3gx", score.mods.speed));
+        m_tooltipLines.push_back(UString::format("CS:%.4g AR:%.4g OD:%.4g HP:%.4g", CS, AR, OD, HP));
         m_tooltipLines.push_back(
             UString::format("Error: %.2fms - %.2fms avg", score.hitErrorAvgMin, score.hitErrorAvgMax));
         m_tooltipLines.push_back(UString::format("Unstable Rate: %.2f", score.unstableRate));
@@ -770,31 +786,26 @@ SkinImage *ScoreButton::getGradeImage(FinishedScore::Grade grade) {
     }
 }
 
-UString ScoreButton::getModsStringForDisplay(int mods) {
+UString ScoreButton::getModsStringForDisplay(Replay::Mods mods) {
     UString modsString;
 
-    if(mods & LegacyFlags::NoFail) modsString.append("NF,");
-    if(mods & LegacyFlags::Easy) modsString.append("EZ,");
-    if(mods & LegacyFlags::TouchDevice) modsString.append("TD,");
-    if(mods & LegacyFlags::Hidden) modsString.append("HD,");
-    if(mods & LegacyFlags::HardRock) modsString.append("HR,");
-    if(mods & LegacyFlags::SuddenDeath) modsString.append("SD,");
-    if(mods & LegacyFlags::Nightcore)
-        modsString.append("NC,");
-    else if(mods & LegacyFlags::DoubleTime)
-        modsString.append("DT,");
-    if(mods & LegacyFlags::Relax) modsString.append("Relax,");
-    if(mods & LegacyFlags::HalfTime) modsString.append("HT,");
-    if(mods & LegacyFlags::Flashlight) modsString.append("FL,");
-    if(mods & LegacyFlags::Autoplay) modsString.append("AT,");
-    if(mods & LegacyFlags::SpunOut) modsString.append("SO,");
-    if(mods & LegacyFlags::Autopilot) modsString.append("AP,");
-    if(mods & LegacyFlags::Perfect) modsString.append("PF,");
-    if(mods & LegacyFlags::ScoreV2) modsString.append("v2,");
-    if(mods & LegacyFlags::Target) modsString.append("Target,");
-    if(mods & LegacyFlags::Nightmare) modsString.append("NM,");
-    if(mods & LegacyFlags::Mirror) modsString.append("Mirror,");
-    if(mods & LegacyFlags::FPoSu) modsString.append("FPoSu,");
+    if(mods.flags & Replay::ModFlags::NoFail) modsString.append("NF,");
+    if(mods.flags & Replay::ModFlags::Easy) modsString.append("EZ,");
+    if(mods.flags & Replay::ModFlags::TouchDevice) modsString.append("TD,");
+    if(mods.flags & Replay::ModFlags::Hidden) modsString.append("HD,");
+    if(mods.flags & Replay::ModFlags::HardRock) modsString.append("HR,");
+    if(mods.flags & Replay::ModFlags::SuddenDeath) modsString.append("SD,");
+    if(mods.flags & Replay::ModFlags::Relax) modsString.append("Relax,");
+    if(mods.flags & Replay::ModFlags::Flashlight) modsString.append("FL,");
+    if(mods.flags & Replay::ModFlags::SpunOut) modsString.append("SO,");
+    if(mods.flags & Replay::ModFlags::Autopilot) modsString.append("AP,");
+    if(mods.flags & Replay::ModFlags::Perfect) modsString.append("PF,");
+    if(mods.flags & Replay::ModFlags::ScoreV2) modsString.append("v2,");
+    if(mods.flags & Replay::ModFlags::Target) modsString.append("Target,");
+    if(mods.flags & Replay::ModFlags::Nightmare) modsString.append("Nightmare,");
+    if(mods.flags & (Replay::ModFlags::MirrorHorizontal | Replay::ModFlags::MirrorVertical))
+        modsString.append("Mirror,");
+    if(mods.flags & Replay::ModFlags::FPoSu) modsString.append("FPoSu,");
 
     if(modsString.length() > 0) modsString = modsString.substr(0, modsString.length() - 1);
 

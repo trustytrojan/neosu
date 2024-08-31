@@ -524,7 +524,7 @@ bool Beatmap::spectate() {
     FinishedScore score;
     score.client = "peppy-unknown";
     score.server = bancho.endpoint.toUtf8();
-    score.modsLegacy = user_info->mods;
+    score.mods = Replay::Mods::from_legacy(user_info->mods);
     osu->useMods(&score);
 
     if(!start()) {
@@ -3400,24 +3400,10 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
     score.unstableRate = osu->getScore()->getUnstableRate();
     score.hitErrorAvgMin = osu->getScore()->getHitErrorAvgMin();
     score.hitErrorAvgMax = osu->getScore()->getHitErrorAvgMax();
-    score.speedMultiplier = osu->getSpeedMultiplier();
-    score.CS = CS;
-    score.AR = AR;
-    score.OD = getOD();
-    score.HP = getHP();
     score.maxPossibleCombo = m_iMaxPossibleCombo;
     score.numHitObjects = numHitObjects;
     score.numCircles = numCircles;
-    score.modsLegacy = osu->getScore()->getModsLegacy();
-
-    std::vector<ConVar *> allExperimentalMods = osu->getExperimentalMods();
-    for(int i = 0; i < allExperimentalMods.size(); i++) {
-        if(allExperimentalMods[i]->getBool()) {
-            score.experimentalModsConVars.append(allExperimentalMods[i]->getName());
-            score.experimentalModsConVars.append(";");
-        }
-    }
-
+    score.mods = osu->getScore()->getMods();
     score.beatmap_hash = m_selectedDifficulty2->getMD5Hash();  // NOTE: necessary for "Use Mods"
     score.replay = live_replay;
 

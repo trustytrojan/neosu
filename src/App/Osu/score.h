@@ -1,5 +1,5 @@
 #pragma once
-#include "LegacyReplay.h"
+#include "Replay.h"
 #include "cbase.h"
 
 class ConVar;
@@ -10,7 +10,7 @@ class HitObject;
 struct FinishedScore {
     u64 score = 0;
     u64 spinner_bonus = 0;
-    i32 modsLegacy = 0;
+    Replay::Mods mods;
 
     u64 unixTimestamp = 0;
     u32 player_id = 0;
@@ -66,12 +66,9 @@ struct FinishedScore {
     float unstableRate = 0.f;
     float hitErrorAvgMin = 0.f;
     float hitErrorAvgMax = 0.f;
-    float speedMultiplier = -1.f;
-    float CS = -1.f, AR = -1.f, OD = -1.f, HP = -1.f;
     int maxPossibleCombo = -1;
     int numHitObjects = -1;
     int numCircles = -1;
-    std::string experimentalModsConVars;
 
     u64 sortHack;
     MD5Hash beatmap_hash;
@@ -79,6 +76,7 @@ struct FinishedScore {
 
     bool is_peppy_imported() { return bancho_score_id != 0 || peppy_replay_tms != 0; }
     f64 get_pp() const;
+    Grade calculate_grade() const;
 };
 
 class LiveScore {
@@ -104,8 +102,6 @@ class LiveScore {
     };
 
     static float calculateAccuracy(int num300s, int num100s, int num50s, int numMisses);
-    static FinishedScore::Grade calculateGrade(int num300s, int num100s, int num50s, int numMisses, bool modHidden,
-                                               bool modFlashlight);
 
    public:
     LiveScore();
@@ -171,6 +167,7 @@ class LiveScore {
                                     double hpMultiplierComboEnd = 1.0f, double hpBarMaximumForNormalization = 200.0f);
 
     int getKeyCount(int key);
+    Replay::Mods getMods();
     u32 getModsLegacy();
     UString getModsStringForRichPresence();
 
