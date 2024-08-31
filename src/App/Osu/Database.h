@@ -93,7 +93,7 @@ class Database {
     PlayerPPScores getPlayerPPScores(UString playerName);
     PlayerStats calculatePlayerStats(UString playerName);
     static float getWeightForIndex(int i);
-    static float getBonusPPForNumScores(int numScores);
+    static float getBonusPPForNumScores(size_t numScores);
     static unsigned long long getRequiredScoreForLevel(int level);
     static int getLevelForScore(unsigned long long score, int maxLevel = 120);
 

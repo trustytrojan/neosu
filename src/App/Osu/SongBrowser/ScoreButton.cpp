@@ -637,19 +637,12 @@ void ScoreButton::setScore(const FinishedScore &score, const DatabaseBeatmap *di
     m_sScoreMods = getModsStringForDisplay(score.mods);
     m_sCustom = (score.mods.speed != 1.0f ? UString::format("Spd: %gx", score.mods.speed) : UString(""));
     if(diff2 != NULL) {
-        if(AR == -1.f) {
-            AR = GameRules::getRawApproachRateForSpeedMultiplier(GameRules::getRawApproachTime(diff2->getAR()),
-                                                                 score.mods.speed);
-        }
-        if(OD == -1.f) {
-            OD = GameRules::getRawOverallDifficultyForSpeedMultiplier(GameRules::getRawHitWindow300(diff2->getOD()),
-                                                                      score.mods.speed);
-        }
-        if(HP == -1.f) HP = diff2->getHP();
-        if(CS == -1.f) CS = diff2->getCS();
-
         const LegacyReplay::BEATMAP_VALUES beatmapValuesForModsLegacy = LegacyReplay::getBeatmapValuesForModsLegacy(
             score.mods.to_legacy(), diff2->getAR(), diff2->getCS(), diff2->getOD(), diff2->getHP());
+        if(AR == -1.f) AR = beatmapValuesForModsLegacy.AR;
+        if(OD == -1.f) OD = beatmapValuesForModsLegacy.OD;
+        if(HP == -1.f) HP = beatmapValuesForModsLegacy.HP;
+        if(CS == -1.f) CS = beatmapValuesForModsLegacy.CS;
 
         const float compensatedCS = std::round(CS * 100.0f) / 100.0f;
         const float compensatedAR = std::round(GameRules::getRawApproachRateForSpeedMultiplier(

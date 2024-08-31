@@ -572,17 +572,8 @@ Database::PlayerStats Database::calculatePlayerStats(UString playerName) {
 
 float Database::getWeightForIndex(int i) { return pow(0.95, (double)i); }
 
-float Database::getBonusPPForNumScores(int numScores) {
-    // TODO: rework to take size_t numScores instead of useless early int conversion
-    // TODO: not actually sure if the new version is even correct, not on any official osu github repositories yet, so
-    // still waiting for confirmation see
-    // https://github.com/ppy/osu-queue-score-statistics/blob/185ad3c00423f6209bcfd8f7177fbe915179055a/osu.Server.Queues.ScoreStatisticsProcessor/Processors/UserTotalPerformanceProcessor.cs#L72
-
-    // old
-    return (416.6667 * (1.0 - pow(0.9994, (double)numScores)));
-
-    // new
-    // return ((417.0 - 1.0 / 3.0) * (1.0 - pow(0.995, (double)min(1000, numScores))));
+float Database::getBonusPPForNumScores(size_t numScores) {
+    return (417.0 - 1.0 / 3.0) * (1.0 - pow(0.995, min(1000.0, (f64)numScores)));
 }
 
 unsigned long long Database::getRequiredScoreForLevel(int level) {

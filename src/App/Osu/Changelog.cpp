@@ -31,12 +31,13 @@ Changelog::Changelog() : ScreenBackable() {
     latest.changes.push_back(
         "- Added \"tooearly.wav\" and \"toolate.wav\" hitsounds, which play when you hit too early or too late (if "
         "your skin has them)");
-    latest.changes.push_back("- Added \"Anti-flashlight\" mod");
+    latest.changes.push_back("- Added \"Actual Flashlight\" mod");
     latest.changes.push_back("- Added keybind to open skin selection menu");
     latest.changes.push_back("- Added slider instafade setting");
     latest.changes.push_back("- Fixed local scores not saving avatar");
     latest.changes.push_back("- Fixed map settings (like local offset) not getting saved");
     latest.changes.push_back("- Fixed Nightcore getting auto-selected instead of Double Time in some cases");
+    latest.changes.push_back("- Merged pp calculation optimizations from McOsu");
     latest.changes.push_back("- Optimized database loading");
     latest.changes.push_back("- Removed custom HP drain (use nofail instead)");
     latest.changes.push_back("- Removed mandala mod, random mod");
