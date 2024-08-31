@@ -13,9 +13,9 @@
 #include "DatabaseBeatmap.h"
 #include "Engine.h"
 #include "File.h"
+#include "LegacyReplay.h"
 #include "NotificationOverlay.h"
 #include "Osu.h"
-#include "Replay.h"
 #include "ResourceManager.h"
 #include "SongBrowser/SongBrowser.h"
 #include "Timer.h"
@@ -330,7 +330,7 @@ int Database::addScore(FinishedScore score) {
     // XXX: this is blocking main thread
     u8 *compressed_replay = NULL;
     size_t s_compressed_replay = 0;
-    Replay::compress_frames(score.replay, &compressed_replay, &s_compressed_replay);
+    LegacyReplay::compress_frames(score.replay, &compressed_replay, &s_compressed_replay);
     if(s_compressed_replay > 0) {
         auto replay_path = UString::format(MCENGINE_DATA_DIR "replays/%d.replay.lzma", score.unixTimestamp);
         FILE *replay_file = fopen(replay_path.toUtf8(), "wb");
@@ -490,7 +490,7 @@ Database::PlayerPPScores Database::getPlayerPPScores(UString playerName) {
         for(auto &score : m_scores[key]) {
             UString uName = UString(score.playerName.c_str());
 
-            auto uses_rx_or_ap = score.modsLegacy & ModFlags::Relax || score.modsLegacy & ModFlags::Autopilot;
+            auto uses_rx_or_ap = score.modsLegacy & LegacyFlags::Relax || score.modsLegacy & LegacyFlags::Autopilot;
             if(uses_rx_or_ap && !cv_user_include_relax_and_autopilot_for_stats.getBool()) continue;
 
             if(uName != playerName) continue;
@@ -1430,7 +1430,7 @@ u32 Database::importOldNeosuScores() {
             sc.perfect = sc.comboMax >= sc.maxPossibleCombo;
             sc.grade =
                 LiveScore::calculateGrade(sc.num300s, sc.num100s, sc.num50s, sc.numMisses,
-                                          sc.modsLegacy & ModFlags::Hidden, sc.modsLegacy & ModFlags::Flashlight);
+                                          sc.modsLegacy & LegacyFlags::Hidden, sc.modsLegacy & LegacyFlags::Flashlight);
 
             if(addScoreRaw(sc)) {
                 nb_imported++;
@@ -1492,9 +1492,9 @@ u32 Database::importPeppyScores() {
             sc.perfect = db.read<u8>();
             sc.modsLegacy = db.read<u32>();
             sc.speedMultiplier = 1.0f;
-            if(sc.modsLegacy & ModFlags::HalfTime) {
+            if(sc.modsLegacy & LegacyFlags::HalfTime) {
                 sc.speedMultiplier = 0.75f;
-            } else if((sc.modsLegacy & ModFlags::DoubleTime) || (sc.modsLegacy & ModFlags::Nightcore)) {
+            } else if((sc.modsLegacy & LegacyFlags::DoubleTime) || (sc.modsLegacy & LegacyFlags::Nightcore)) {
                 sc.speedMultiplier = 1.5f;
             }
 
@@ -1518,16 +1518,16 @@ u32 Database::importPeppyScores() {
                 sc.bancho_score_id = 0;
             }
 
-            if(sc.modsLegacy & ModFlags::Target) {
+            if(sc.modsLegacy & LegacyFlags::Target) {
                 db.read<f64>();  // total accuracy
             }
 
             if(gamemode == 0 && sc.bancho_score_id != 0) {
                 sc.sortHack = m_iSortHackCounter++;
                 sc.beatmap_hash = md5hash;
-                sc.grade =
-                    LiveScore::calculateGrade(sc.num300s, sc.num100s, sc.num50s, sc.numMisses,
-                                              sc.modsLegacy & ModFlags::Hidden, sc.modsLegacy & ModFlags::Flashlight);
+                sc.grade = LiveScore::calculateGrade(sc.num300s, sc.num100s, sc.num50s, sc.numMisses,
+                                                     sc.modsLegacy & LegacyFlags::Hidden,
+                                                     sc.modsLegacy & LegacyFlags::Flashlight);
 
                 if(addScoreRaw(sc)) {
                     nb_imported++;

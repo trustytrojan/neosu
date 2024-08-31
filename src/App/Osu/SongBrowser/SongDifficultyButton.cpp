@@ -11,8 +11,8 @@
 #include "Database.h"
 #include "DatabaseBeatmap.h"
 #include "Engine.h"
+#include "LegacyReplay.h"
 #include "Osu.h"
-#include "Replay.h"
 #include "ResourceManager.h"
 #include "Skin.h"
 #include "SoundEngine.h"
@@ -195,7 +195,8 @@ void SongDifficultyButton::updateGrade() {
             (*osu->getSongBrowser()->getDatabase()->getScores())[m_databaseBeatmap->getMD5Hash()][0];
         hasGrade = true;
         grade = LiveScore::calculateGrade(score.num300s, score.num100s, score.num50s, score.numMisses,
-                                          score.modsLegacy & ModFlags::Hidden, score.modsLegacy & ModFlags::Flashlight);
+                                          score.modsLegacy & LegacyFlags::Hidden,
+                                          score.modsLegacy & LegacyFlags::Flashlight);
     }
 
     m_bHasGrade = hasGrade;

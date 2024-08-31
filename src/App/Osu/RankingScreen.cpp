@@ -15,11 +15,11 @@
 #include "GameRules.h"
 #include "Icons.h"
 #include "Keyboard.h"
+#include "LegacyReplay.h"
 #include "ModSelector.h"
 #include "Mouse.h"
 #include "OptionsMenu.h"
 #include "Osu.h"
-#include "Replay.h"
 #include "ResourceManager.h"
 #include "RoomScreen.h"
 #include "Skin.h"
@@ -440,7 +440,8 @@ void RankingScreen::setScore(FinishedScore score) {
 
     m_rankingPanel->setScore(score);
     setGrade(LiveScore::calculateGrade(score.num300s, score.num100s, score.num50s, score.numMisses,
-                                       score.modsLegacy & ModFlags::Hidden, score.modsLegacy & ModFlags::Flashlight));
+                                       score.modsLegacy & LegacyFlags::Hidden,
+                                       score.modsLegacy & LegacyFlags::Flashlight));
     setIndex(-1);
 
     m_fUnstableRate = score.unstableRate;
@@ -454,23 +455,23 @@ void RankingScreen::setScore(FinishedScore score) {
     } else
         m_sMods = "";
 
-    m_bModSS = score.modsLegacy & ModFlags::Perfect;
-    m_bModSD = score.modsLegacy & ModFlags::SuddenDeath;
-    m_bModEZ = score.modsLegacy & ModFlags::Easy;
-    m_bModHD = score.modsLegacy & ModFlags::Hidden;
-    m_bModHR = score.modsLegacy & ModFlags::HardRock;
-    m_bModNC = score.modsLegacy & ModFlags::Nightcore;
-    m_bModDT = score.modsLegacy & ModFlags::DoubleTime;
-    m_bModNightmare = score.modsLegacy & ModFlags::Nightmare;
-    m_bModScorev2 = score.modsLegacy & ModFlags::ScoreV2;
-    m_bModTarget = score.modsLegacy & ModFlags::Target;
-    m_bModSpunout = score.modsLegacy & ModFlags::SpunOut;
-    m_bModRelax = score.modsLegacy & ModFlags::Relax;
-    m_bModNF = score.modsLegacy & ModFlags::NoFail;
-    m_bModHT = score.modsLegacy & ModFlags::HalfTime;
-    m_bModAutopilot = score.modsLegacy & ModFlags::Autopilot;
-    m_bModAuto = score.modsLegacy & ModFlags::Autoplay;
-    m_bModTD = score.modsLegacy & ModFlags::TouchDevice;
+    m_bModSS = score.modsLegacy & LegacyFlags::Perfect;
+    m_bModSD = score.modsLegacy & LegacyFlags::SuddenDeath;
+    m_bModEZ = score.modsLegacy & LegacyFlags::Easy;
+    m_bModHD = score.modsLegacy & LegacyFlags::Hidden;
+    m_bModHR = score.modsLegacy & LegacyFlags::HardRock;
+    m_bModNC = score.modsLegacy & LegacyFlags::Nightcore;
+    m_bModDT = score.modsLegacy & LegacyFlags::DoubleTime;
+    m_bModNightmare = score.modsLegacy & LegacyFlags::Nightmare;
+    m_bModScorev2 = score.modsLegacy & LegacyFlags::ScoreV2;
+    m_bModTarget = score.modsLegacy & LegacyFlags::Target;
+    m_bModSpunout = score.modsLegacy & LegacyFlags::SpunOut;
+    m_bModRelax = score.modsLegacy & LegacyFlags::Relax;
+    m_bModNF = score.modsLegacy & LegacyFlags::NoFail;
+    m_bModHT = score.modsLegacy & LegacyFlags::HalfTime;
+    m_bModAutopilot = score.modsLegacy & LegacyFlags::Autopilot;
+    m_bModAuto = score.modsLegacy & LegacyFlags::Autoplay;
+    m_bModTD = score.modsLegacy & LegacyFlags::TouchDevice;
 
     m_enabledExperimentalMods.clear();
     if(score.experimentalModsConVars.length() > 0) {
@@ -503,9 +504,9 @@ void RankingScreen::setBeatmapInfo(Beatmap *beatmap, DatabaseBeatmap *diff2) {
         m_score.HP = diff2->getHP();
 
         m_score.speedMultiplier = 1.0f;
-        if(m_score.modsLegacy & (ModFlags::DoubleTime | ModFlags::Nightcore))
+        if(m_score.modsLegacy & (LegacyFlags::DoubleTime | LegacyFlags::Nightcore))
             m_score.speedMultiplier = 1.5f;
-        else if(m_score.modsLegacy & ModFlags::HalfTime)
+        else if(m_score.modsLegacy & LegacyFlags::HalfTime)
             m_score.speedMultiplier = 0.75f;
 
         FinishedScore score = m_score;
@@ -525,9 +526,9 @@ void RankingScreen::setBeatmapInfo(Beatmap *beatmap, DatabaseBeatmap *diff2) {
             std::vector<double> speedStrains;
 
             info.total_stars = DifficultyCalculator::calculateStarDiffForHitObjects(
-                diffres.diffobjects, score.CS, score.OD, score.speedMultiplier, score.modsLegacy & ModFlags::Relax,
-                score.modsLegacy & ModFlags::TouchDevice, &info.aim_stars, &info.aim_slider_factor, &info.speed_stars,
-                &info.speed_notes, -1, &aimStrains, &speedStrains);
+                diffres.diffobjects, score.CS, score.OD, score.speedMultiplier, score.modsLegacy & LegacyFlags::Relax,
+                score.modsLegacy & LegacyFlags::TouchDevice, &info.aim_stars, &info.aim_slider_factor,
+                &info.speed_stars, &info.speed_notes, -1, &aimStrains, &speedStrains);
 
             info.pp = DifficultyCalculator::calculatePPv2(
                 score.modsLegacy, score.speedMultiplier, score.AR, score.OD, info.aim_stars, info.aim_slider_factor,

@@ -484,17 +484,17 @@ void Circle::update(long curPos) {
 
     // if we have not been clicked yet, check if we are in the timeframe of a miss, also handle auto and relax
     if(!m_bFinished) {
-        if((bi->getModsLegacy() & ModFlags::Autoplay)) {
+        if((bi->getModsLegacy() & LegacyFlags::Autoplay)) {
             if(curPos >= m_iTime) onHit(LiveScore::HIT::HIT_300, 0);
         } else {
             const long delta = curPos - m_iTime;
 
-            if((bi->getModsLegacy() & ModFlags::Relax)) {
+            if((bi->getModsLegacy() & LegacyFlags::Relax)) {
                 if(curPos >= m_iTime + (long)cv_relax_offset.getInt() && !bi->isPaused() &&
                    !bi->isContinueScheduled()) {
                     const Vector2 pos = bi->osuCoords2Pixels(m_vRawPos);
                     const float cursorDelta = (bi->getCursorPos() - pos).length();
-                    if((cursorDelta < bi->m_fHitcircleDiameter / 2.0f && (bi->getModsLegacy() & ModFlags::Relax))) {
+                    if((cursorDelta < bi->m_fHitcircleDiameter / 2.0f && (bi->getModsLegacy() & LegacyFlags::Relax))) {
                         LiveScore::HIT result = bi->getHitResult(delta);
 
                         if(result != LiveScore::HIT::HIT_NULL) {
@@ -522,7 +522,7 @@ void Circle::update(long curPos) {
 void Circle::updateStackPosition(float stackOffset) {
     m_vRawPos = m_vOriginalRawPos -
                 Vector2(m_iStack * stackOffset,
-                        m_iStack * stackOffset * ((bi->getModsLegacy() & ModFlags::HardRock) ? -1.0f : 1.0f));
+                        m_iStack * stackOffset * ((bi->getModsLegacy() & LegacyFlags::HardRock) ? -1.0f : 1.0f));
 }
 
 void Circle::miss(long curPos) {

@@ -1,58 +1,19 @@
 #pragma once
 
 #include "Beatmap.h"
+#include "Replay.h"
 
 class SimulatedBeatmap : public BeatmapInterface {
    public:
-    SimulatedBeatmap(DatabaseBeatmap *diff2);
+    SimulatedBeatmap(DatabaseBeatmap *diff2, Replay::Mods mods_);
     ~SimulatedBeatmap();
 
-    // Important convars
-    // TODO @kiwec: set these after initializing object, include in score
-    i32 mod_flags = 0;
-    float speed = 1.f;
-    i32 osu_notelock_type = 2;
-    f32 osu_autopilot_lenience = 0.75f;
-
-    // Experimental mods
-    // TODO @kiwec: set these after initializing object
-    f32 osu_cs_override = -1.f;
-    f32 osu_cs_overridenegative = 0.f;
-    f32 osu_hp_override = -1.f;
-    f32 osu_od_override = -1.f;
-    bool osu_od_override_lock = false;
-    bool osu_mod_timewarp = false;
-    bool osu_mod_timewarp_multiplier = false;
-    bool osu_mod_minimize = false;
-    bool osu_mod_minimize_multiplier = false;
-    bool osu_mod_jigsaw1 = false;
-    bool osu_mod_artimewarp = false;
-    bool osu_mod_artimewarp_multiplier = false;
-    bool osu_mod_arwobble = false;
-    bool osu_mod_arwobble_strength = false;
-    bool osu_mod_arwobble_interval = false;
-    bool osu_mod_fullalternate = false;
-    bool osu_mod_wobble = false;
-    bool osu_mod_wobble2 = false;
-    f32 osu_mod_wobble_strength = 25.f;
-    f32 osu_mod_wobble_frequency = 1.f;
-    f32 osu_mod_wobble_rotation_speed = 1.f;
-    bool osu_mod_jigsaw2 = false;
-    f32 osu_mod_jigsaw_followcircle_radius_factor = 0.f;
-    bool osu_mod_shirone = false;
-    f32 osu_mod_shirone_combo = 20.f;
-    bool osu_mod_mafham = false;
-    // Also set these, inherited from BeatmapInterface
-    // bool mod_halfwindow = false;
-    // bool mod_halfwindow_allow_300s = false;
-    // bool mod_ming3012 = false;
-    // bool mod_no100s = false;
-    // bool mod_no50s = false;
-
+    Replay::Mods mods;
     LiveScore live_score;
 
     void simulate_to(i32 music_pos);
 
+    bool start();
     void update();
 
     // Potentially Visible Set gate time size, for optimizing draw() and update() when iterating over all hitobjects
@@ -82,7 +43,6 @@ class SimulatedBeatmap : public BeatmapInterface {
         return m_fXMultiplier;
     }  // multiply osu!pixels with this to get screen pixels
 
-    bool start();
     void fail();
     void cancelFailing();
     void resetScore();
@@ -95,45 +55,33 @@ class SimulatedBeatmap : public BeatmapInterface {
     inline int getNumSlidersForCurrentTime() const { return m_iCurrentNumSliders; }
     inline int getNumSpinnersForCurrentTime() const { return m_iCurrentNumSpinners; }
 
-    std::vector<f64> m_aimStrains;
-    std::vector<f64> m_speedStrains;
-
-    // set to false when using non-vanilla mods (disables score submission)
-    bool vanilla = true;
-
     // replay recording
     u8 current_keys = 0;
     u8 last_keys = 0;
 
     // replay replaying (prerecorded)
     // current_keys, last_keys also reused
-    std::vector<Replay::Frame> spectated_replay;
+    std::vector<LegacyReplay::Frame> spectated_replay;
     Vector2 m_interpolatedMousePos;
     long current_frame_idx = 0;
-
-    virtual u32 getScoreV1DifficultyMultiplier() const;
-    virtual f32 getCS() const;
-    virtual f32 getHP() const;
-    virtual f32 getRawOD() const;
-    virtual f32 getOD() const;
-
-    virtual bool isContinueScheduled() const { return false; }
-    virtual bool isPaused() const { return false; }
 
     // generic state
     virtual bool isKey1Down() const;
     virtual bool isKey2Down() const;
     virtual bool isClickHeld() const;
 
+    virtual bool isContinueScheduled() const { return false; }
+    virtual bool isPaused() const { return false; }
     virtual bool isPlaying() const { return true; }
-    virtual i32 getModsLegacy() const { return mod_flags; }
-    virtual f32 getSpeedMultiplier() const { return speed; }
-    virtual f32 getRawAR() const {
-        return 9.f;  // TODO @kiwec
-    }
-    virtual f32 getAR() const {
-        return 9.f;  // TODO @kiwec
-    }
+    virtual i32 getModsLegacy() const { return mods.to_legacy(); }
+    virtual u32 getScoreV1DifficultyMultiplier() const;
+    virtual f32 getSpeedMultiplier() const { return mods.speed; }
+    virtual f32 getRawAR() const;
+    virtual f32 getAR() const;
+    virtual f32 getCS() const;
+    virtual f32 getHP() const;
+    virtual f32 getRawOD() const;
+    virtual f32 getOD() const;
     virtual f32 getRawApproachTime() const;
     virtual f32 getApproachTime() const;
     virtual u32 getLength() const;

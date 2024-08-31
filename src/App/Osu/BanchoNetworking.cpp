@@ -454,7 +454,7 @@ static void handle_api_response(Packet packet) {
 
             fwrite(packet.memory, packet.size, 1, replay_file);
             fclose(replay_file);
-            Replay::load_and_watch(*score);
+            LegacyReplay::load_and_watch(*score);
             break;
         }
 

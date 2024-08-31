@@ -321,7 +321,7 @@ void handle_packet(Packet *packet) {
             u16 nb_frames = read<u16>(packet);
             for(u16 i = 0; i < nb_frames; i++) {
                 auto frame = read<LiveReplayFrame>(packet);
-                osu->getSelectedBeatmap()->spectated_replay.push_back(Replay::Frame{
+                osu->getSelectedBeatmap()->spectated_replay.push_back(LegacyReplay::Frame{
                     .cur_music_pos = frame.time,
                     .milliseconds_since_last_frame = frame.time - osu->getSelectedBeatmap()->last_frame_ms,
                     .x = frame.mouse_x,

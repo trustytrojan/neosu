@@ -4,9 +4,9 @@
 #include "Bancho.h"
 #include "BanchoNetworking.h"
 #include "Engine.h"
+#include "LegacyReplay.h"
 #include "ModSelector.h"
 #include "Osu.h"
-#include "Replay.h"
 #include "ResourceManager.h"
 #include "RichPresence.h"
 #include "RoomScreen.h"
@@ -123,7 +123,7 @@ void UIModSelectorModButton::onClicked() {
                 bancho.room.mods = m_osuModSelector->getModFlags();
                 if(bancho.room.freemods) {
                     // When freemod is enabled, we only want to force DT, HT, or Target.
-                    bancho.room.mods &= ModFlags::DoubleTime | ModFlags::HalfTime | ModFlags::Target;
+                    bancho.room.mods &= LegacyFlags::DoubleTime | LegacyFlags::HalfTime | LegacyFlags::Target;
                 }
             }
 

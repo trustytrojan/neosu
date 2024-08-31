@@ -231,6 +231,7 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
     <ClCompile Include="src\app\osu\HUD.cpp" />
     <ClCompile Include="src\app\osu\Icons.cpp" />
     <ClCompile Include="src\app\osu\KeyBindings.cpp" />
+    <ClCompile Include="src\App\Osu\LegacyReplay.cpp" />
     <ClCompile Include="src\app\osu\Lobby.cpp" />
     <ClCompile Include="src\app\osu\MainMenu.cpp" />
     <ClCompile Include="src\app\osu\ModFPoSu.cpp" />

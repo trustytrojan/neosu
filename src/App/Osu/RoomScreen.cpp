@@ -18,6 +18,7 @@
 #include "Engine.h"
 #include "HUD.h"
 #include "Keyboard.h"
+#include "LegacyReplay.h"
 #include "Lobby.h"
 #include "MainMenu.h"
 #include "ModSelector.h"
@@ -25,7 +26,6 @@
 #include "Osu.h"
 #include "PromptScreen.h"
 #include "RankingScreen.h"
-#include "Replay.h"
 #include "ResourceManager.h"
 #include "RichPresence.h"
 #include "Skin.h"
@@ -43,33 +43,33 @@
 void UIModList::draw(Graphics *g) {
     std::vector<SkinImage *> mods;
 
-    if(*m_flags & ModFlags::Nightcore)
+    if(*m_flags & LegacyFlags::Nightcore)
         mods.push_back(osu->getSkin()->getSelectionModNightCore());
-    else if(*m_flags & ModFlags::DoubleTime)
+    else if(*m_flags & LegacyFlags::DoubleTime)
         mods.push_back(osu->getSkin()->getSelectionModDoubleTime());
 
-    bool ht_enabled = *m_flags & ModFlags::HalfTime;
+    bool ht_enabled = *m_flags & LegacyFlags::HalfTime;
     if(ht_enabled && bancho.prefer_daycore)
         mods.push_back(osu->getSkin()->getSelectionModDayCore());
     else if(ht_enabled)
         mods.push_back(osu->getSkin()->getSelectionModHalfTime());
 
-    if(*m_flags & ModFlags::Perfect)
+    if(*m_flags & LegacyFlags::Perfect)
         mods.push_back(osu->getSkin()->getSelectionModPerfect());
-    else if(*m_flags & ModFlags::SuddenDeath)
+    else if(*m_flags & LegacyFlags::SuddenDeath)
         mods.push_back(osu->getSkin()->getSelectionModSuddenDeath());
 
-    if(*m_flags & ModFlags::NoFail) mods.push_back(osu->getSkin()->getSelectionModNoFail());
-    if(*m_flags & ModFlags::Easy) mods.push_back(osu->getSkin()->getSelectionModEasy());
-    if(*m_flags & ModFlags::TouchDevice) mods.push_back(osu->getSkin()->getSelectionModTD());
-    if(*m_flags & ModFlags::Hidden) mods.push_back(osu->getSkin()->getSelectionModHidden());
-    if(*m_flags & ModFlags::HardRock) mods.push_back(osu->getSkin()->getSelectionModHardRock());
-    if(*m_flags & ModFlags::Relax) mods.push_back(osu->getSkin()->getSelectionModRelax());
-    if(*m_flags & ModFlags::Autoplay) mods.push_back(osu->getSkin()->getSelectionModAutoplay());
-    if(*m_flags & ModFlags::SpunOut) mods.push_back(osu->getSkin()->getSelectionModSpunOut());
-    if(*m_flags & ModFlags::Autopilot) mods.push_back(osu->getSkin()->getSelectionModAutopilot());
-    if(*m_flags & ModFlags::Target) mods.push_back(osu->getSkin()->getSelectionModTarget());
-    if(*m_flags & ModFlags::ScoreV2) mods.push_back(osu->getSkin()->getSelectionModScorev2());
+    if(*m_flags & LegacyFlags::NoFail) mods.push_back(osu->getSkin()->getSelectionModNoFail());
+    if(*m_flags & LegacyFlags::Easy) mods.push_back(osu->getSkin()->getSelectionModEasy());
+    if(*m_flags & LegacyFlags::TouchDevice) mods.push_back(osu->getSkin()->getSelectionModTD());
+    if(*m_flags & LegacyFlags::Hidden) mods.push_back(osu->getSkin()->getSelectionModHidden());
+    if(*m_flags & LegacyFlags::HardRock) mods.push_back(osu->getSkin()->getSelectionModHardRock());
+    if(*m_flags & LegacyFlags::Relax) mods.push_back(osu->getSkin()->getSelectionModRelax());
+    if(*m_flags & LegacyFlags::Autoplay) mods.push_back(osu->getSkin()->getSelectionModAutoplay());
+    if(*m_flags & LegacyFlags::SpunOut) mods.push_back(osu->getSkin()->getSelectionModSpunOut());
+    if(*m_flags & LegacyFlags::Autopilot) mods.push_back(osu->getSkin()->getSelectionModAutopilot());
+    if(*m_flags & LegacyFlags::Target) mods.push_back(osu->getSkin()->getSelectionModTarget());
+    if(*m_flags & LegacyFlags::ScoreV2) mods.push_back(osu->getSkin()->getSelectionModScorev2());
 
     g->setColor(0xffffffff);
     Vector2 modPos = m_vPos;
@@ -731,7 +731,7 @@ FinishedScore RoomScreen::get_approximate_score() {
 
     score.grade =
         LiveScore::calculateGrade(score.num300s, score.num100s, score.num50s, score.numMisses,
-                                  score.modsLegacy & ModFlags::Hidden, score.modsLegacy & ModFlags::Flashlight);
+                                  score.modsLegacy & LegacyFlags::Hidden, score.modsLegacy & LegacyFlags::Flashlight);
 
     return score;
 }

@@ -10,8 +10,8 @@
 #include "GameRules.h"
 #include "HUD.h"
 #include "HitObject.h"
+#include "LegacyReplay.h"
 #include "Osu.h"
-#include "Replay.h"
 #include "RoomScreen.h"
 
 using namespace std;
@@ -376,31 +376,31 @@ int LiveScore::getKeyCount(int key) {
 u32 LiveScore::getModsLegacy() {
     int modsLegacy = 0;
 
-    modsLegacy |= (osu->getModAuto() ? ModFlags::Autoplay : 0);
-    modsLegacy |= (osu->getModAutopilot() ? ModFlags::Autopilot : 0);
-    modsLegacy |= (osu->getModRelax() ? ModFlags::Relax : 0);
-    modsLegacy |= (osu->getModSpunout() ? ModFlags::SpunOut : 0);
-    modsLegacy |= (osu->getModTarget() ? ModFlags::Target : 0);
-    modsLegacy |= (osu->getModScorev2() ? ModFlags::ScoreV2 : 0);
-    modsLegacy |= (osu->getModDT() ? ModFlags::DoubleTime : 0);
-    modsLegacy |= (osu->getModNC() ? (ModFlags::DoubleTime | ModFlags::Nightcore) : 0);
-    modsLegacy |= (osu->getModNF() ? ModFlags::NoFail : 0);
-    modsLegacy |= (osu->getModHT() ? ModFlags::HalfTime : 0);
-    modsLegacy |= (osu->getModDC() ? ModFlags::HalfTime : 0);
-    modsLegacy |= (osu->getModHD() ? ModFlags::Hidden : 0);
-    modsLegacy |= (osu->getModHR() ? ModFlags::HardRock : 0);
-    modsLegacy |= (osu->getModEZ() ? ModFlags::Easy : 0);
-    modsLegacy |= (osu->getModSD() ? ModFlags::SuddenDeath : 0);
-    modsLegacy |= (osu->getModSS() ? ModFlags::Perfect : 0);
-    modsLegacy |= (osu->getModNightmare() ? ModFlags::Nightmare : 0);
-    modsLegacy |= (osu->getModTD() ? ModFlags::TouchDevice : 0);
-    modsLegacy |= (osu->getModFlashlight() ? ModFlags::Flashlight : 0);
+    modsLegacy |= (osu->getModAuto() ? LegacyFlags::Autoplay : 0);
+    modsLegacy |= (osu->getModAutopilot() ? LegacyFlags::Autopilot : 0);
+    modsLegacy |= (osu->getModRelax() ? LegacyFlags::Relax : 0);
+    modsLegacy |= (osu->getModSpunout() ? LegacyFlags::SpunOut : 0);
+    modsLegacy |= (osu->getModTarget() ? LegacyFlags::Target : 0);
+    modsLegacy |= (osu->getModScorev2() ? LegacyFlags::ScoreV2 : 0);
+    modsLegacy |= (osu->getModDT() ? LegacyFlags::DoubleTime : 0);
+    modsLegacy |= (osu->getModNC() ? (LegacyFlags::DoubleTime | LegacyFlags::Nightcore) : 0);
+    modsLegacy |= (osu->getModNF() ? LegacyFlags::NoFail : 0);
+    modsLegacy |= (osu->getModHT() ? LegacyFlags::HalfTime : 0);
+    modsLegacy |= (osu->getModDC() ? LegacyFlags::HalfTime : 0);
+    modsLegacy |= (osu->getModHD() ? LegacyFlags::Hidden : 0);
+    modsLegacy |= (osu->getModHR() ? LegacyFlags::HardRock : 0);
+    modsLegacy |= (osu->getModEZ() ? LegacyFlags::Easy : 0);
+    modsLegacy |= (osu->getModSD() ? LegacyFlags::SuddenDeath : 0);
+    modsLegacy |= (osu->getModSS() ? LegacyFlags::Perfect : 0);
+    modsLegacy |= (osu->getModNightmare() ? LegacyFlags::Nightmare : 0);
+    modsLegacy |= (osu->getModTD() ? LegacyFlags::TouchDevice : 0);
+    modsLegacy |= (osu->getModFlashlight() ? LegacyFlags::Flashlight : 0);
 
     // Set some unused (in osu!std) mod flags for non-vanilla mods
     // (these flags don't seem to cause issues on osu!stable or bancho.py)
-    if(cv_mod_fposu.getBool()) modsLegacy |= ModFlags::FPoSu;
-    if(cv_playfield_mirror_horizontal.getBool()) modsLegacy |= ModFlags::Mirror;
-    if(cv_playfield_mirror_vertical.getBool()) modsLegacy |= ModFlags::Mirror;
+    if(cv_mod_fposu.getBool()) modsLegacy |= LegacyFlags::FPoSu;
+    if(cv_playfield_mirror_horizontal.getBool()) modsLegacy |= LegacyFlags::Mirror;
+    if(cv_playfield_mirror_vertical.getBool()) modsLegacy |= LegacyFlags::Mirror;
 
     return modsLegacy;
 }

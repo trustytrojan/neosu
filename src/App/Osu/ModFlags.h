@@ -1,6 +1,6 @@
 #pragma once
 
-namespace ModFlags {
+namespace LegacyFlags {
 enum {
     NoFail = 1 << 0,
     Easy = 1 << 1,

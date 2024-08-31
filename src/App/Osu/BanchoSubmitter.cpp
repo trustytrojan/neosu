@@ -22,8 +22,8 @@ void submit_score(FinishedScore score) {
     const char *GRADES[] = {"XH", "SH", "X", "S", "A", "B", "C", "D", "F", "N"};
 
     // We set custom mod flags, but not every server supports them.
-    if(!bancho.set_fposu_flag) score.modsLegacy &= ~ModFlags::FPoSu;
-    if(!bancho.set_mirror_flag) score.modsLegacy &= ~ModFlags::Mirror;
+    if(!bancho.set_fposu_flag) score.modsLegacy &= ~LegacyFlags::FPoSu;
+    if(!bancho.set_mirror_flag) score.modsLegacy &= ~LegacyFlags::Mirror;
 
     u8 *compressed_data = NULL;
 
@@ -168,7 +168,7 @@ void submit_score(FinishedScore score) {
     }
     {
         size_t s_compressed_data = 0;
-        Replay::compress_frames(score.replay, &compressed_data, &s_compressed_data);
+        LegacyReplay::compress_frames(score.replay, &compressed_data, &s_compressed_data);
         if(s_compressed_data <= 24) {
             debugLog("Replay too small to submit! Compressed size: %d bytes\n", s_compressed_data);
             goto err;

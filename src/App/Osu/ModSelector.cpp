@@ -19,10 +19,10 @@
 #include "Icons.h"
 #include "KeyBindings.h"
 #include "Keyboard.h"
+#include "LegacyReplay.h"
 #include "Mouse.h"
 #include "OptionsMenu.h"
 #include "Osu.h"
-#include "Replay.h"
 #include "ResourceManager.h"
 #include "RichPresence.h"
 #include "RoomScreen.h"
@@ -1243,37 +1243,37 @@ void ModSelector::restoreMods(ModSelection selection) {
 }
 
 void ModSelector::enableModsFromFlags(u32 flags) {
-    if(flags & ModFlags::DoubleTime) {
+    if(flags & LegacyFlags::DoubleTime) {
         m_modButtonDoubletime->setOn(true, true);
-        if(flags & ModFlags::Nightcore) {
+        if(flags & LegacyFlags::Nightcore) {
             m_modButtonDoubletime->setState(1, true);
         }
     }
 
-    if(flags & ModFlags::Perfect) {
+    if(flags & LegacyFlags::Perfect) {
         m_modButtonSuddendeath->setOn(true, true);
         m_modButtonSuddendeath->setState(1, true);
-    } else if(flags & ModFlags::SuddenDeath) {
+    } else if(flags & LegacyFlags::SuddenDeath) {
         m_modButtonSuddendeath->setOn(true, true);
         m_modButtonSuddendeath->setState(0, true);
     }
 
-    if(flags & ModFlags::HalfTime) {
+    if(flags & LegacyFlags::HalfTime) {
         m_modButtonHalftime->setOn(true, true);
         m_modButtonHalftime->setState(bancho.prefer_daycore ? 1 : 0, true);
     }
 
-    m_modButtonNofail->setOn(flags & ModFlags::NoFail, true);
-    m_modButtonEasy->setOn(flags & ModFlags::Easy, true);
-    m_modButtonTD->setOn(flags & ModFlags::TouchDevice, true);
-    m_modButtonHidden->setOn(flags & ModFlags::Hidden, true);
-    m_modButtonHardrock->setOn(flags & ModFlags::HardRock, true);
-    m_modButtonRelax->setOn(flags & ModFlags::Relax, true);
-    m_modButtonSpunout->setOn(flags & ModFlags::SpunOut, true);
-    m_modButtonAutopilot->setOn(flags & ModFlags::Autopilot, true);
-    getModButtonOnGrid(4, 2)->setOn(flags & ModFlags::Target, true);
-    m_modButtonFlashlight->setOn(flags & ModFlags::Flashlight, true);
-    m_modButtonScoreV2->setOn(flags & ModFlags::ScoreV2, true);
+    m_modButtonNofail->setOn(flags & LegacyFlags::NoFail, true);
+    m_modButtonEasy->setOn(flags & LegacyFlags::Easy, true);
+    m_modButtonTD->setOn(flags & LegacyFlags::TouchDevice, true);
+    m_modButtonHidden->setOn(flags & LegacyFlags::Hidden, true);
+    m_modButtonHardrock->setOn(flags & LegacyFlags::HardRock, true);
+    m_modButtonRelax->setOn(flags & LegacyFlags::Relax, true);
+    m_modButtonSpunout->setOn(flags & LegacyFlags::SpunOut, true);
+    m_modButtonAutopilot->setOn(flags & LegacyFlags::Autopilot, true);
+    getModButtonOnGrid(4, 2)->setOn(flags & LegacyFlags::Target, true);
+    m_modButtonFlashlight->setOn(flags & LegacyFlags::Flashlight, true);
+    m_modButtonScoreV2->setOn(flags & LegacyFlags::ScoreV2, true);
 
     osu->updateMods();
 }

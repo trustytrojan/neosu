@@ -4,7 +4,7 @@
 #include "BeatmapInterface.h"
 #include "DatabaseBeatmap.h"
 #include "DifficultyCalculator.h"
-#include "Replay.h"
+#include "LegacyReplay.h"
 #include "Timer.h"
 #include "UString.h"
 #include "cbase.h"
@@ -151,7 +151,7 @@ class Beatmap : public BeatmapInterface {
 
     // replay recording
     void write_frame();
-    std::vector<Replay::Frame> live_replay;
+    std::vector<LegacyReplay::Frame> live_replay;
     f64 last_event_time = 0.0;
     long last_event_ms = 0;
     u8 current_keys = 0;
@@ -159,7 +159,7 @@ class Beatmap : public BeatmapInterface {
 
     // replay replaying (prerecorded)
     // current_keys, last_keys also reused
-    std::vector<Replay::Frame> spectated_replay;
+    std::vector<LegacyReplay::Frame> spectated_replay;
     Vector2 m_interpolatedMousePos;
     bool is_watching = false;
     long current_frame_idx = 0;

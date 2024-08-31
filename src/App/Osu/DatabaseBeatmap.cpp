@@ -1227,41 +1227,6 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
         maxPossibleCombo += c.spinners.size();
 
         beatmap->m_iMaxPossibleCombo = maxPossibleCombo;
-
-        // debug
-        if(cv_debug_pp.getBool()) {
-            const std::string &osuFilePath = databaseBeatmap->m_sFilePath;
-            const float AR = beatmap->getAR();
-            const float CS = beatmap->getCS();
-            const float OD = beatmap->getOD();
-            const float speedMultiplier = osu->getSpeedMultiplier();  // NOTE: not this->getSpeedMultiplier()!
-            const bool relax = osu->getModRelax();
-            const bool touchDevice = osu->getModTD();
-
-            LOAD_DIFFOBJ_RESULT diffres =
-                DatabaseBeatmap::loadDifficultyHitObjects(osuFilePath, AR, CS, speedMultiplier);
-
-            double aim = 0.0;
-            double aimSliderFactor = 0.0;
-            double speed = 0.0;
-            double speedNotes = 0.0;
-            std::vector<double> m_aimStrains;
-            std::vector<double> m_speedStrains;
-            double stars = DifficultyCalculator::calculateStarDiffForHitObjects(
-                diffres.diffobjects, CS, OD, speedMultiplier, relax, touchDevice, &aim, &aimSliderFactor, &speed,
-                &speedNotes, -1, &m_aimStrains, &m_speedStrains);
-            double pp = DifficultyCalculator::calculatePPv2(
-                osu->getScore()->getModsLegacy(), speedMultiplier, AR, OD, aim, aimSliderFactor, speed, speedNotes,
-                databaseBeatmap->m_iNumCircles, databaseBeatmap->m_iNumSliders, databaseBeatmap->m_iNumSpinners,
-                maxPossibleCombo, maxPossibleCombo, 0, databaseBeatmap->m_iNumObjects, 0, 0);
-
-            engine->showMessageInfo(
-                "PP",
-                UString::format("pp = %f, stars = %f, aimstars = %f, speedstars = %f, %i circles, %i "
-                                "sliders, %i spinners, %i hitobjects, maxcombo = %i",
-                                pp, stars, aim, speed, databaseBeatmap->m_iNumCircles, databaseBeatmap->m_iNumSliders,
-                                databaseBeatmap->m_iNumSpinners, databaseBeatmap->m_iNumObjects, maxPossibleCombo));
-        }
     }
 
     // sort hitobjects by starttime

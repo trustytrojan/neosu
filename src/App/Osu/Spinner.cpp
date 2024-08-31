@@ -105,7 +105,7 @@ void Spinner::draw(Graphics *g) {
         }
 
         // draw approach circle
-        if(!(bi->getModsLegacy() & ModFlags::Hidden) && m_fPercent > 0.0f) {
+        if(!(bi->getModsLegacy() & LegacyFlags::Hidden) && m_fPercent > 0.0f) {
             const float spinnerApproachCircleImageScale =
                 globalBaseSize / ((globalBaseSkinSize / 2) * (skin->isSpinnerApproachCircle2x() ? 2.0f : 1.0f));
 
@@ -193,7 +193,7 @@ void Spinner::draw(Graphics *g) {
         }
 
         // approach circle
-        if(!(bi->getModsLegacy() & ModFlags::Hidden) && m_fPercent > 0.0f) {
+        if(!(bi->getModsLegacy() & LegacyFlags::Hidden) && m_fPercent > 0.0f) {
             const float spinnerApproachCircleImageScale =
                 globalBaseSize / ((globalBaseSkinSize / 2) * (skin->isSpinnerApproachCircle2x() ? 2.0f : 1.0f));
 
@@ -289,8 +289,8 @@ void Spinner::update(long curPos) {
 
         // handle auto, mouse spinning movement
         float angleDiff = 0;
-        if((bi->getModsLegacy() & ModFlags::Autoplay) || (bi->getModsLegacy() & ModFlags::Autopilot) ||
-           (bi->getModsLegacy() & ModFlags::SpunOut)) {
+        if((bi->getModsLegacy() & LegacyFlags::Autoplay) || (bi->getModsLegacy() & LegacyFlags::Autopilot) ||
+           (bi->getModsLegacy() & LegacyFlags::SpunOut)) {
             angleDiff = engine->getFrameTime() * 1000.0f * AUTO_MULTIPLIER * bi->getSpeedMultiplier();
         } else {  // user spin
             Vector2 mouseDelta = bi->getCursorPos() - bi->osuCoords2Pixels(m_vRawPos);
@@ -306,8 +306,9 @@ void Spinner::update(long curPos) {
         // handle spinning
         // HACKHACK: rewrite this
         if(delta <= 0) {
-            bool isSpinning = bi->isClickHeld() || (bi->getModsLegacy() & ModFlags::Autoplay) ||
-                              (bi->getModsLegacy() & ModFlags::Relax) || (bi->getModsLegacy() & ModFlags::SpunOut);
+            bool isSpinning = bi->isClickHeld() || (bi->getModsLegacy() & LegacyFlags::Autoplay) ||
+                              (bi->getModsLegacy() & LegacyFlags::Relax) ||
+                              (bi->getModsLegacy() & LegacyFlags::SpunOut);
 
             m_fDeltaOverflow += engine->getFrameTime() * 1000.0f;
 
@@ -393,7 +394,7 @@ void Spinner::onReset(long curPos) {
 void Spinner::onHit() {
     // calculate hit result
     LiveScore::HIT result = LiveScore::HIT::HIT_NULL;
-    if(m_fRatio >= 1.0f || (bi->getModsLegacy() & ModFlags::Autoplay))
+    if(m_fRatio >= 1.0f || (bi->getModsLegacy() & LegacyFlags::Autoplay))
         result = LiveScore::HIT::HIT_300;
     else if(m_fRatio >= 0.9f && !cv_mod_ming3012.getBool() && !cv_mod_no100s.getBool())
         result = LiveScore::HIT::HIT_100;
@@ -471,7 +472,7 @@ Vector2 Spinner::getAutoCursorPos(long curPos) {
 
     Vector2 actualPos = bi->osuCoords2Pixels(m_vRawPos);
     const float AUTO_MULTIPLIER = (1.0f / 20.0f);
-    float multiplier = ((bi->getModsLegacy() & ModFlags::Autoplay) || (bi->getModsLegacy() & ModFlags::Autopilot))
+    float multiplier = ((bi->getModsLegacy() & LegacyFlags::Autoplay) || (bi->getModsLegacy() & LegacyFlags::Autopilot))
                            ? AUTO_MULTIPLIER
                            : 1.0f;
     float angle = (delta * multiplier) - PI / 2.0f;

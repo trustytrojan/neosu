@@ -26,6 +26,7 @@
 #include "Icons.h"
 #include "KeyBindings.h"
 #include "Keyboard.h"
+#include "LegacyReplay.h"
 #include "Lobby.h"
 #include "MainMenu.h"
 #include "ModFPoSu.h"
@@ -37,7 +38,6 @@
 #include "PromptScreen.h"
 #include "RankingScreen.h"
 #include "RenderTarget.h"
-#include "Replay.h"
 #include "ResourceManager.h"
 #include "RichPresence.h"
 #include "RoomScreen.h"
@@ -876,23 +876,23 @@ UString getModsStringForConVar(int mods) {
 
     // NOTE: the order here is different on purpose, to avoid name collisions during parsing (see Osu::updateMods())
     // order is the same as in ModSelector::updateModConVar()
-    if(mods & ModFlags::Easy) modsString.append("ez");
-    if(mods & ModFlags::HardRock) modsString.append("hr");
-    if(mods & ModFlags::Relax) modsString.append("relax");
-    if(mods & ModFlags::NoFail) modsString.append("nf");
-    if(mods & ModFlags::SuddenDeath) modsString.append("sd");
-    if(mods & ModFlags::Perfect) modsString.append("ss,");
-    if(mods & ModFlags::Autopilot) modsString.append("autopilot");
-    if(mods & ModFlags::HalfTime) modsString.append("ht");
-    if(mods & ModFlags::DoubleTime) modsString.append("dt");
-    if(mods & ModFlags::Nightcore) modsString.append("nc");
-    if(mods & ModFlags::SpunOut) modsString.append("spunout");
-    if(mods & ModFlags::Hidden) modsString.append("hd");
-    if(mods & ModFlags::Autoplay) modsString.append("auto");
-    if(mods & ModFlags::Nightmare) modsString.append("nightmare");
-    if(mods & ModFlags::Target) modsString.append("practicetarget");
-    if(mods & ModFlags::TouchDevice) modsString.append("nerftd");
-    if(mods & ModFlags::ScoreV2) modsString.append("v2");
+    if(mods & LegacyFlags::Easy) modsString.append("ez");
+    if(mods & LegacyFlags::HardRock) modsString.append("hr");
+    if(mods & LegacyFlags::Relax) modsString.append("relax");
+    if(mods & LegacyFlags::NoFail) modsString.append("nf");
+    if(mods & LegacyFlags::SuddenDeath) modsString.append("sd");
+    if(mods & LegacyFlags::Perfect) modsString.append("ss,");
+    if(mods & LegacyFlags::Autopilot) modsString.append("autopilot");
+    if(mods & LegacyFlags::HalfTime) modsString.append("ht");
+    if(mods & LegacyFlags::DoubleTime) modsString.append("dt");
+    if(mods & LegacyFlags::Nightcore) modsString.append("nc");
+    if(mods & LegacyFlags::SpunOut) modsString.append("spunout");
+    if(mods & LegacyFlags::Hidden) modsString.append("hd");
+    if(mods & LegacyFlags::Autoplay) modsString.append("auto");
+    if(mods & LegacyFlags::Nightmare) modsString.append("nightmare");
+    if(mods & LegacyFlags::Target) modsString.append("practicetarget");
+    if(mods & LegacyFlags::TouchDevice) modsString.append("nerftd");
+    if(mods & LegacyFlags::ScoreV2) modsString.append("v2");
 
     return modsString;
 }
@@ -904,12 +904,12 @@ bool Osu::useMods(FinishedScore *score) {
     getModSelector()->resetMods();
     cv_mods.setValue(getModsStringForConVar(score->modsLegacy));
 
-    if(score->modsLegacy & ModFlags::FPoSu) {
+    if(score->modsLegacy & LegacyFlags::FPoSu) {
         cv_mod_fposu.setValue(true);
     }
 
     // NOTE: We don't know whether the original score was only horizontal, only vertical, or both
-    if(score->is_peppy_imported() && score->modsLegacy & ModFlags::Mirror) {
+    if(score->is_peppy_imported() && score->modsLegacy & LegacyFlags::Mirror) {
         cv_playfield_mirror_horizontal.setValue(true);
         cv_playfield_mirror_vertical.setValue(true);
     }
@@ -937,8 +937,8 @@ bool Osu::useMods(FinishedScore *score) {
             tempHP = diff2->getHP();
         }
 
-        const Replay::BEATMAP_VALUES legacyValues =
-            Replay::getBeatmapValuesForModsLegacy(score->modsLegacy, tempAR, tempCS, tempOD, tempHP);
+        const LegacyReplay::BEATMAP_VALUES legacyValues =
+            LegacyReplay::getBeatmapValuesForModsLegacy(score->modsLegacy, tempAR, tempCS, tempOD, tempHP);
 
         // beatmap values
         {
@@ -993,52 +993,52 @@ bool Osu::useMods(FinishedScore *score) {
 
 void Osu::updateMods() {
     if(bancho.is_in_a_multi_room()) {
-        m_bModNC = bancho.room.mods & ModFlags::Nightcore;
+        m_bModNC = bancho.room.mods & LegacyFlags::Nightcore;
         if(m_bModNC) {
             m_bModDT = false;
-        } else if(bancho.room.mods & ModFlags::DoubleTime) {
+        } else if(bancho.room.mods & LegacyFlags::DoubleTime) {
             m_bModDT = true;
         }
 
-        m_bModHT = (bancho.room.mods & ModFlags::HalfTime);
+        m_bModHT = (bancho.room.mods & LegacyFlags::HalfTime);
         m_bModDC = false;
         if(m_bModHT && bancho.prefer_daycore) {
             m_bModHT = false;
             m_bModDC = true;
         }
 
-        m_bModNF = bancho.room.mods & ModFlags::NoFail;
-        m_bModEZ = bancho.room.mods & ModFlags::Easy;
-        m_bModTD = bancho.room.mods & ModFlags::TouchDevice;
-        m_bModHD = bancho.room.mods & ModFlags::Hidden;
-        m_bModHR = bancho.room.mods & ModFlags::HardRock;
-        m_bModSD = bancho.room.mods & ModFlags::SuddenDeath;
-        m_bModRelax = bancho.room.mods & ModFlags::Relax;
-        m_bModAuto = bancho.room.mods & ModFlags::Autoplay;
-        m_bModSpunout = bancho.room.mods & ModFlags::SpunOut;
-        m_bModAutopilot = bancho.room.mods & ModFlags::Autopilot;
-        m_bModSS = bancho.room.mods & ModFlags::Perfect;
-        m_bModTarget = bancho.room.mods & ModFlags::Target;
+        m_bModNF = bancho.room.mods & LegacyFlags::NoFail;
+        m_bModEZ = bancho.room.mods & LegacyFlags::Easy;
+        m_bModTD = bancho.room.mods & LegacyFlags::TouchDevice;
+        m_bModHD = bancho.room.mods & LegacyFlags::Hidden;
+        m_bModHR = bancho.room.mods & LegacyFlags::HardRock;
+        m_bModSD = bancho.room.mods & LegacyFlags::SuddenDeath;
+        m_bModRelax = bancho.room.mods & LegacyFlags::Relax;
+        m_bModAuto = bancho.room.mods & LegacyFlags::Autoplay;
+        m_bModSpunout = bancho.room.mods & LegacyFlags::SpunOut;
+        m_bModAutopilot = bancho.room.mods & LegacyFlags::Autopilot;
+        m_bModSS = bancho.room.mods & LegacyFlags::Perfect;
+        m_bModTarget = bancho.room.mods & LegacyFlags::Target;
         m_bModScorev2 = bancho.room.win_condition == SCOREV2;
-        m_bModFlashlight = bancho.room.mods & ModFlags::Flashlight;
+        m_bModFlashlight = bancho.room.mods & LegacyFlags::Flashlight;
         m_bModNightmare = false;
 
         if(bancho.room.freemods) {
             for(int i = 0; i < 16; i++) {
                 if(bancho.room.slots[i].player_id != bancho.user_id) continue;
 
-                m_bModNF = bancho.room.slots[i].mods & ModFlags::NoFail;
-                m_bModEZ = bancho.room.slots[i].mods & ModFlags::Easy;
-                m_bModTD = bancho.room.slots[i].mods & ModFlags::TouchDevice;
-                m_bModHD = bancho.room.slots[i].mods & ModFlags::Hidden;
-                m_bModHR = bancho.room.slots[i].mods & ModFlags::HardRock;
-                m_bModSD = bancho.room.slots[i].mods & ModFlags::SuddenDeath;
-                m_bModRelax = bancho.room.slots[i].mods & ModFlags::Relax;
-                m_bModAuto = bancho.room.slots[i].mods & ModFlags::Autoplay;
-                m_bModSpunout = bancho.room.slots[i].mods & ModFlags::SpunOut;
-                m_bModAutopilot = bancho.room.slots[i].mods & ModFlags::Autopilot;
-                m_bModSS = bancho.room.slots[i].mods & ModFlags::Perfect;
-                m_bModTarget = bancho.room.slots[i].mods & ModFlags::Target;
+                m_bModNF = bancho.room.slots[i].mods & LegacyFlags::NoFail;
+                m_bModEZ = bancho.room.slots[i].mods & LegacyFlags::Easy;
+                m_bModTD = bancho.room.slots[i].mods & LegacyFlags::TouchDevice;
+                m_bModHD = bancho.room.slots[i].mods & LegacyFlags::Hidden;
+                m_bModHR = bancho.room.slots[i].mods & LegacyFlags::HardRock;
+                m_bModSD = bancho.room.slots[i].mods & LegacyFlags::SuddenDeath;
+                m_bModRelax = bancho.room.slots[i].mods & LegacyFlags::Relax;
+                m_bModAuto = bancho.room.slots[i].mods & LegacyFlags::Autoplay;
+                m_bModSpunout = bancho.room.slots[i].mods & LegacyFlags::SpunOut;
+                m_bModAutopilot = bancho.room.slots[i].mods & LegacyFlags::Autopilot;
+                m_bModSS = bancho.room.slots[i].mods & LegacyFlags::Perfect;
+                m_bModTarget = bancho.room.slots[i].mods & LegacyFlags::Target;
             }
         }
     } else {

@@ -1,6 +1,6 @@
 #pragma once
 #include "BanchoProtocol.h"  // Packet
-#include "Replay.h"
+#include "LegacyReplay.h"
 #include "UString.h"
 #include "cbase.h"
 #include "score.h"

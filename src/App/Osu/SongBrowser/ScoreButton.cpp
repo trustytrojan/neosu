@@ -17,11 +17,11 @@
 #include "GameRules.h"
 #include "Icons.h"
 #include "Keyboard.h"
+#include "LegacyReplay.h"
 #include "ModSelector.h"
 #include "Mouse.h"
 #include "NotificationOverlay.h"
 #include "Osu.h"
-#include "Replay.h"
 #include "ResourceManager.h"
 #include "Skin.h"
 #include "SkinImage.h"
@@ -540,7 +540,7 @@ void ScoreButton::onContextMenu(UString text, int id) {
     }
 
     if(id == 2) {
-        Replay::load_and_watch(m_score);
+        LegacyReplay::load_and_watch(m_score);
         return;
     }
 
@@ -602,8 +602,8 @@ void ScoreButton::setScore(const FinishedScore &score, const DatabaseBeatmap *di
 
     const float accuracy =
         LiveScore::calculateAccuracy(score.num300s, score.num100s, score.num50s, score.numMisses) * 100.0f;
-    const bool modHidden = score.modsLegacy & ModFlags::Hidden;
-    const bool modFlashlight = score.modsLegacy & ModFlags::Flashlight;
+    const bool modHidden = score.modsLegacy & LegacyFlags::Hidden;
+    const bool modFlashlight = score.modsLegacy & LegacyFlags::Flashlight;
 
     // NOTE: Allows dropped sliderends. Should fix with @PPV3
     const bool fullCombo = (score.maxPossibleCombo > 0 && score.numMisses == 0 && score.numSliderBreaks == 0);
@@ -644,7 +644,7 @@ void ScoreButton::setScore(const FinishedScore &score, const DatabaseBeatmap *di
     }
     m_sCustom = (score.speedMultiplier != 1.0f ? UString::format("Spd: %gx", score.speedMultiplier) : UString(""));
     if(diff2 != NULL) {
-        const Replay::BEATMAP_VALUES beatmapValuesForModsLegacy = Replay::getBeatmapValuesForModsLegacy(
+        const LegacyReplay::BEATMAP_VALUES beatmapValuesForModsLegacy = LegacyReplay::getBeatmapValuesForModsLegacy(
             score.modsLegacy, diff2->getAR(), diff2->getCS(), diff2->getOD(), diff2->getHP());
 
         const float compensatedCS = std::round(score.CS * 100.0f) / 100.0f;
@@ -773,28 +773,28 @@ SkinImage *ScoreButton::getGradeImage(FinishedScore::Grade grade) {
 UString ScoreButton::getModsStringForDisplay(int mods) {
     UString modsString;
 
-    if(mods & ModFlags::NoFail) modsString.append("NF,");
-    if(mods & ModFlags::Easy) modsString.append("EZ,");
-    if(mods & ModFlags::TouchDevice) modsString.append("TD,");
-    if(mods & ModFlags::Hidden) modsString.append("HD,");
-    if(mods & ModFlags::HardRock) modsString.append("HR,");
-    if(mods & ModFlags::SuddenDeath) modsString.append("SD,");
-    if(mods & ModFlags::Nightcore)
+    if(mods & LegacyFlags::NoFail) modsString.append("NF,");
+    if(mods & LegacyFlags::Easy) modsString.append("EZ,");
+    if(mods & LegacyFlags::TouchDevice) modsString.append("TD,");
+    if(mods & LegacyFlags::Hidden) modsString.append("HD,");
+    if(mods & LegacyFlags::HardRock) modsString.append("HR,");
+    if(mods & LegacyFlags::SuddenDeath) modsString.append("SD,");
+    if(mods & LegacyFlags::Nightcore)
         modsString.append("NC,");
-    else if(mods & ModFlags::DoubleTime)
+    else if(mods & LegacyFlags::DoubleTime)
         modsString.append("DT,");
-    if(mods & ModFlags::Relax) modsString.append("Relax,");
-    if(mods & ModFlags::HalfTime) modsString.append("HT,");
-    if(mods & ModFlags::Flashlight) modsString.append("FL,");
-    if(mods & ModFlags::Autoplay) modsString.append("AT,");
-    if(mods & ModFlags::SpunOut) modsString.append("SO,");
-    if(mods & ModFlags::Autopilot) modsString.append("AP,");
-    if(mods & ModFlags::Perfect) modsString.append("PF,");
-    if(mods & ModFlags::ScoreV2) modsString.append("v2,");
-    if(mods & ModFlags::Target) modsString.append("Target,");
-    if(mods & ModFlags::Nightmare) modsString.append("NM,");
-    if(mods & ModFlags::Mirror) modsString.append("Mirror,");
-    if(mods & ModFlags::FPoSu) modsString.append("FPoSu,");
+    if(mods & LegacyFlags::Relax) modsString.append("Relax,");
+    if(mods & LegacyFlags::HalfTime) modsString.append("HT,");
+    if(mods & LegacyFlags::Flashlight) modsString.append("FL,");
+    if(mods & LegacyFlags::Autoplay) modsString.append("AT,");
+    if(mods & LegacyFlags::SpunOut) modsString.append("SO,");
+    if(mods & LegacyFlags::Autopilot) modsString.append("AP,");
+    if(mods & LegacyFlags::Perfect) modsString.append("PF,");
+    if(mods & LegacyFlags::ScoreV2) modsString.append("v2,");
+    if(mods & LegacyFlags::Target) modsString.append("Target,");
+    if(mods & LegacyFlags::Nightmare) modsString.append("NM,");
+    if(mods & LegacyFlags::Mirror) modsString.append("Mirror,");
+    if(mods & LegacyFlags::FPoSu) modsString.append("FPoSu,");
 
     if(modsString.length() > 0) modsString = modsString.substr(0, modsString.length() - 1);
 

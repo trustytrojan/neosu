@@ -30,6 +30,7 @@
 #include "HitObject.h"
 #include "KeyBindings.h"
 #include "Keyboard.h"
+#include "LegacyReplay.h"
 #include "MainMenu.h"
 #include "ModFPoSu.h"
 #include "ModSelector.h"
@@ -38,7 +39,6 @@
 #include "OptionsMenu.h"
 #include "Osu.h"
 #include "PauseMenu.h"
-#include "Replay.h"
 #include "ResourceManager.h"
 #include "RichPresence.h"
 #include "RoomScreen.h"
@@ -353,9 +353,9 @@ void Beatmap::keyPressed1(bool mouse) {
         });
 
     if(mouse) {
-        current_keys = current_keys | Replay::M1;
+        current_keys = current_keys | LegacyReplay::M1;
     } else {
-        current_keys = current_keys | Replay::M1 | Replay::K1;
+        current_keys = current_keys | LegacyReplay::M1 | LegacyReplay::K1;
     }
 }
 
@@ -388,9 +388,9 @@ void Beatmap::keyPressed2(bool mouse) {
         });
 
     if(mouse) {
-        current_keys = current_keys | Replay::M2;
+        current_keys = current_keys | LegacyReplay::M2;
     } else {
-        current_keys = current_keys | Replay::M2 | Replay::K2;
+        current_keys = current_keys | LegacyReplay::M2 | LegacyReplay::K2;
     }
 }
 
@@ -403,7 +403,7 @@ void Beatmap::keyReleased1(bool mouse) {
 
     m_bClick1Held = false;
 
-    current_keys = current_keys & ~(Replay::M1 | Replay::K1);
+    current_keys = current_keys & ~(LegacyReplay::M1 | LegacyReplay::K1);
 }
 
 void Beatmap::keyReleased2(bool mouse) {
@@ -415,7 +415,7 @@ void Beatmap::keyReleased2(bool mouse) {
 
     m_bClick2Held = false;
 
-    current_keys = current_keys & ~(Replay::M2 | Replay::K2);
+    current_keys = current_keys & ~(LegacyReplay::M2 | LegacyReplay::K2);
 }
 
 void Beatmap::select() {
@@ -1248,7 +1248,7 @@ f32 Beatmap::getOD() const {
 
 bool Beatmap::isKey1Down() const {
     if(is_watching || is_spectating) {
-        return current_keys & (Replay::M1 | Replay::K1);
+        return current_keys & (LegacyReplay::M1 | LegacyReplay::K1);
     } else {
         return m_bClick1Held;
     }
@@ -1256,7 +1256,7 @@ bool Beatmap::isKey1Down() const {
 
 bool Beatmap::isKey2Down() const {
     if(is_watching || is_spectating) {
-        return current_keys & (Replay::M2 | Replay::K2);
+        return current_keys & (LegacyReplay::M2 | LegacyReplay::K2);
     } else {
         return m_bClick2Held;
     }
@@ -1582,14 +1582,14 @@ void Beatmap::resetScore() {
     vanilla = convar->isVanilla();
 
     live_replay.clear();
-    live_replay.push_back(Replay::Frame{
+    live_replay.push_back(LegacyReplay::Frame{
         .cur_music_pos = -1,
         .milliseconds_since_last_frame = 0,
         .x = 256,
         .y = -500,
         .key_flags = 0,
     });
-    live_replay.push_back(Replay::Frame{
+    live_replay.push_back(LegacyReplay::Frame{
         .cur_music_pos = -1,
         .milliseconds_since_last_frame = -1,
         .x = 256,
@@ -2402,8 +2402,8 @@ void Beatmap::update2() {
     }
 
     if(is_watching || is_spectating) {
-        Replay::Frame current_frame = spectated_replay[current_frame_idx];
-        Replay::Frame next_frame = spectated_replay[current_frame_idx + 1];
+        LegacyReplay::Frame current_frame = spectated_replay[current_frame_idx];
+        LegacyReplay::Frame next_frame = spectated_replay[current_frame_idx + 1];
 
         while(next_frame.cur_music_pos <= m_iCurMusicPosWithOffsets) {
             if(current_frame_idx + 2 >= spectated_replay.size()) break;
@@ -2423,33 +2423,33 @@ void Beatmap::update2() {
             click.pos += GameRules::getPlayfieldOffset();
 
             // Flag fix to simplify logic (stable sets both K1 and M1 when K1 is pressed)
-            if(current_keys & Replay::K1) current_keys &= ~Replay::M1;
-            if(current_keys & Replay::K2) current_keys &= ~Replay::M2;
+            if(current_keys & LegacyReplay::K1) current_keys &= ~LegacyReplay::M1;
+            if(current_keys & LegacyReplay::K2) current_keys &= ~LegacyReplay::M2;
 
             // Released key 1
-            if(last_keys & Replay::K1 && !(current_keys & Replay::K1)) {
+            if(last_keys & LegacyReplay::K1 && !(current_keys & LegacyReplay::K1)) {
                 osu->getHUD()->animateInputoverlay(1, false);
             }
-            if(last_keys & Replay::M1 && !(current_keys & Replay::M1)) {
+            if(last_keys & LegacyReplay::M1 && !(current_keys & LegacyReplay::M1)) {
                 osu->getHUD()->animateInputoverlay(3, false);
             }
 
             // Released key 2
-            if(last_keys & Replay::K2 && !(current_keys & Replay::K2)) {
+            if(last_keys & LegacyReplay::K2 && !(current_keys & LegacyReplay::K2)) {
                 osu->getHUD()->animateInputoverlay(2, false);
             }
-            if(last_keys & Replay::M2 && !(current_keys & Replay::M2)) {
+            if(last_keys & LegacyReplay::M2 && !(current_keys & LegacyReplay::M2)) {
                 osu->getHUD()->animateInputoverlay(4, false);
             }
 
             // Pressed key 1
-            if(!(last_keys & Replay::K1) && current_keys & Replay::K1) {
+            if(!(last_keys & LegacyReplay::K1) && current_keys & LegacyReplay::K1) {
                 m_bPrevKeyWasKey1 = true;
                 osu->getHUD()->animateInputoverlay(1, true);
                 m_clicks.push_back(click);
                 if(!m_bInBreak && !m_bIsInSkippableSection) osu->getScore()->addKeyCount(1);
             }
-            if(!(last_keys & Replay::M1) && current_keys & Replay::M1) {
+            if(!(last_keys & LegacyReplay::M1) && current_keys & LegacyReplay::M1) {
                 m_bPrevKeyWasKey1 = true;
                 osu->getHUD()->animateInputoverlay(3, true);
                 m_clicks.push_back(click);
@@ -2457,13 +2457,13 @@ void Beatmap::update2() {
             }
 
             // Pressed key 2
-            if(!(last_keys & Replay::K2) && current_keys & Replay::K2) {
+            if(!(last_keys & LegacyReplay::K2) && current_keys & LegacyReplay::K2) {
                 m_bPrevKeyWasKey1 = false;
                 osu->getHUD()->animateInputoverlay(2, true);
                 m_clicks.push_back(click);
                 if(!m_bInBreak && !m_bIsInSkippableSection) osu->getScore()->addKeyCount(2);
             }
-            if(!(last_keys & Replay::M2) && current_keys & Replay::M2) {
+            if(!(last_keys & LegacyReplay::M2) && current_keys & LegacyReplay::M2) {
                 m_bPrevKeyWasKey1 = false;
                 osu->getHUD()->animateInputoverlay(4, true);
                 m_clicks.push_back(click);
@@ -3023,7 +3023,7 @@ void Beatmap::write_frame() {
         pos.y = coords3.y;
     }
 
-    live_replay.push_back(Replay::Frame{
+    live_replay.push_back(LegacyReplay::Frame{
         .cur_music_pos = m_iCurMusicPosWithOffsets,
         .milliseconds_since_last_frame = delta,
         .x = pos.x,
