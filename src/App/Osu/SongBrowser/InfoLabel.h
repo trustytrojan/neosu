@@ -14,7 +14,6 @@ class InfoLabel : public CBaseUIButton {
     virtual void mouse_update(bool *propagate_clicks);
 
     void setFromBeatmap(Beatmap *beatmap, DatabaseBeatmap *diff2);
-    void setFromMissingBeatmap(long beatmapId);
 
     void setArtist(std::string artist) { m_sArtist = artist; }
     void setTitle(std::string title) { m_sTitle = title; }

@@ -29,6 +29,7 @@
 #include "InfoLabel.h"
 #include "KeyBindings.h"
 #include "Keyboard.h"
+#include "LeaderboardPPCalcThread.h"
 #include "MainMenu.h"
 #include "ModSelector.h"
 #include "Mouse.h"
@@ -447,6 +448,7 @@ SongBrowser::SongBrowser() : ScreenBackable() {
 }
 
 SongBrowser::~SongBrowser() {
+    lct_set_map(NULL);
     checkHandleKillBackgroundSearchMatcher();
 
     engine->getResourceManager()->destroyResource(m_backgroundSearchMatcher);
@@ -857,6 +859,31 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
             onDatabaseLoadingFinished();
         }
         return;
+    }
+
+    auto diff2 = m_selectedBeatmap->getSelectedDifficulty2();
+    lct_set_map(diff2);
+    if(diff2->m_pp_info.pp == -1.0) {
+        auto mods = osu->getScore()->getMods();
+
+        pp_calc_request request;
+        request.mods_legacy = mods.to_legacy();
+        request.speed = mods.speed;
+        request.AR = diff2->getAR();
+        request.CS = diff2->getCS();
+        request.OD = diff2->getOD();
+        if(mods.ar_override != -1.f) request.AR = mods.ar_override;
+        if(mods.cs_override != -1.f) request.CS = mods.cs_override;
+        if(mods.od_override != -1.f) request.OD = mods.od_override;
+        request.rx = mods.flags & Replay::ModFlags::Relax;
+        request.td = mods.flags & Replay::ModFlags::TouchDevice;
+        request.comboMax = -1;
+        request.numMisses = 0;
+        request.num300s = diff2->getNumObjects();
+        request.num100s = 0;
+        request.num50s = 0;
+
+        diff2->m_pp_info = lct_get_pp(request);
     }
 
     // auto-download
@@ -2373,60 +2400,6 @@ void SongBrowser::rebuildScoreButtons() {
             auto search = m_db->m_online_scores.find(diff2->getMD5Hash());
             if(search != m_db->m_online_scores.end()) {
                 scores = search->second;
-
-                // TODO @kiwec: don't block main thread here, display "PP: ???" instead
-                std::atomic<bool> dead = false;
-                static pp_info info;
-                static std::vector<f64> aimStrains;
-                static std::vector<f64> speedStrains;
-                static std::vector<DifficultyCalculator::DiffObject> cachedDiffObjects;
-                static std::vector<DifficultyCalculator::DiffObject> diffObjects;
-                static DatabaseBeatmap::LOAD_DIFFOBJ_RESULT diffres;
-                f32 last_speed = -1.f;
-                f32 last_ar = -1.f;
-                f32 last_cs = -1.f;
-                f32 last_od = -1.f;
-                i32 last_rx = -1;
-                i32 last_td = -1;
-                for(auto &online_score : scores) {
-                    if(online_score.ppv2_version < DifficultyCalculator::PP_ALGORITHM_VERSION) {
-                        auto speed = online_score.mods.speed;
-                        auto AR = diff2->getAR();
-                        auto CS = diff2->getCS();
-                        auto OD = diff2->getOD();
-                        if(online_score.mods.ar_override != -1.f) AR = online_score.mods.ar_override;
-                        if(online_score.mods.cs_override != -1.f) CS = online_score.mods.cs_override;
-                        if(online_score.mods.od_override != -1.f) OD = online_score.mods.od_override;
-                        i32 rx = online_score.mods.flags & Replay::ModFlags::Relax;
-                        i32 td = online_score.mods.flags & Replay::ModFlags::TouchDevice;
-                        if(speed != last_speed || AR != last_ar || CS != last_cs || OD != last_od || rx != last_rx ||
-                           td != last_td) {
-                            aimStrains.clear();
-                            speedStrains.clear();
-                            cachedDiffObjects.clear();
-                            diffObjects.clear();
-                            diffres = DatabaseBeatmap::loadDifficultyHitObjects(diff2->getFilePath(), AR, CS, speed);
-                            info.total_stars = DifficultyCalculator::calculateStarDiffForHitObjectsInt(
-                                cachedDiffObjects, diffObjects, diffres.diffobjects, CS, OD, speed, rx, td,
-                                &info.aim_stars, &info.aim_slider_factor, &info.speed_stars, &info.speed_notes, -1,
-                                &aimStrains, &speedStrains, dead);
-                        }
-
-                        online_score.ppv2_version = DifficultyCalculator::PP_ALGORITHM_VERSION;
-                        online_score.ppv2_score = DifficultyCalculator::calculatePPv2(
-                            online_score.mods.to_legacy(), speed, AR, OD, info.aim_stars, info.aim_slider_factor,
-                            info.speed_stars, info.speed_notes, diff2->m_iNumCircles, diff2->m_iNumSliders,
-                            diff2->m_iNumSpinners, diffres.maxPossibleCombo, online_score.comboMax,
-                            online_score.numMisses, online_score.num300s, online_score.num100s, online_score.num50s);
-
-                        last_speed = speed;
-                        last_ar = AR;
-                        last_cs = CS;
-                        last_od = OD;
-                        last_rx = rx;
-                        last_td = td;
-                    }
-                }
 
                 if(local_best == local_scores.end()) {
                     if(!scores.empty()) {

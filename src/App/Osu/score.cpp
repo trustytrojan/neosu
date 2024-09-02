@@ -511,7 +511,11 @@ f64 FinishedScore::get_pp() const {
         return ppv3_score;
     }
 
-    return ppv2_score;
+    if(ppv2_version < DifficultyCalculator::PP_ALGORITHM_VERSION) {
+        return -1.0;
+    } else {
+        return ppv2_score;
+    }
 }
 
 FinishedScore::Grade FinishedScore::calculate_grade() const {

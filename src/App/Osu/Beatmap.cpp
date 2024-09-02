@@ -45,6 +45,7 @@
 #include "Skin.h"
 #include "SkinImage.h"
 #include "Slider.h"
+#include "SongBrowser/LeaderboardPPCalcThread.h"
 #include "SongBrowser/SongBrowser.h"
 #include "SoundEngine.h"
 #include "SpectatorScreen.h"
@@ -429,6 +430,8 @@ void Beatmap::select() {
 }
 
 void Beatmap::selectDifficulty2(DatabaseBeatmap *difficulty2) {
+    lct_set_map(difficulty2);
+
     if(difficulty2 != NULL) {
         m_selectedDifficulty2 = difficulty2;
 

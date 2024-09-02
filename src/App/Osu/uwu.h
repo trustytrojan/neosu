@@ -7,23 +7,6 @@
 // Unified Wait Utilities (◕‿◕✿)
 namespace uwu {
 
-// Promise for enqueuing a bunch of work and issuing progress reports.
-// Implementation is left as an exercise to the reader.
-struct multi_promise {
-    ~multi_promise() { cancel(); }
-
-    void cancel() {
-        killed = true;
-        thread.join();
-    }
-
-    bool killed = false;
-    std::thread thread;
-
-    std::atomic<u32> nb_completed;
-    std::atomic<u32> total_tasks;
-};
-
 // Promise for queuing work, but only the latest function will be run.
 template <typename Func, typename Ret>
 struct lazy_promise {
@@ -63,7 +46,10 @@ struct lazy_promise {
             std::unique_lock<std::mutex> lock(m_funcs_mtx);
             m_cv.wait(lock, [this]() { return !m_funcs.empty() || !keep_running; });
             if(!keep_running) break;
-            if(m_funcs.empty()) continue;
+            if(m_funcs.empty()) {
+                lock.unlock();
+                continue;
+            }
 
             Func func = m_funcs[m_funcs.size() - 1];
             m_funcs.clear();

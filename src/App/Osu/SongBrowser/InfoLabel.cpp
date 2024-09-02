@@ -267,28 +267,6 @@ void InfoLabel::setFromBeatmap(Beatmap *beatmap, DatabaseBeatmap *diff2) {
     setOnlineOffset(diff2->getOnlineOffset());
 }
 
-void InfoLabel::setFromMissingBeatmap(long beatmapId) {
-    m_iBeatmapId = beatmapId;
-
-    setArtist(m_iBeatmapId > 0 ? "CLICK HERE TO DOWNLOAD!" : "MISSING BEATMAP!");
-    setTitle("");
-    setDiff("no map");
-    setMapper("MISSING BEATMAP!");
-
-    setLengthMS(0);
-    setBPM(0, 0, 0);
-    setNumObjects(0);
-
-    setCS(0);
-    setAR(0);
-    setOD(0);
-    setHP(0);
-    setStars(0);
-
-    setLocalOffset(0);
-    setOnlineOffset(0);
-}
-
 UString InfoLabel::buildSongInfoString() {
     unsigned long lengthMS = m_iLengthMS;
 
@@ -310,6 +288,7 @@ UString InfoLabel::buildSongInfoString() {
 }
 
 UString InfoLabel::buildDiffInfoString() {
+    bool pp_available = false;
     float CS = m_fCS;
     float AR = m_fAR;
     float OD = m_fOD;
@@ -318,32 +297,38 @@ UString InfoLabel::buildDiffInfoString() {
     float modStars = 0.f;
     float modPp = 0.f;
 
-    auto diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();
-    if(diff2) {
-        modStars = diff2->m_pp_info.total_stars;
-        modPp = diff2->m_pp_info.pp;
-    }
-
     Beatmap *beatmap = osu->getSelectedBeatmap();
     if(beatmap != NULL) {
         CS = beatmap->getCS();
         AR = beatmap->getApproachRateForSpeedMultiplier(osu->getSpeedMultiplier());
         OD = beatmap->getOverallDifficultyForSpeedMultiplier(osu->getSpeedMultiplier());
         HP = beatmap->getHP();
+
+        auto diff2 = beatmap->getSelectedDifficulty2();
+        if(diff2) {
+            modStars = diff2->m_pp_info.total_stars;
+            modPp = diff2->m_pp_info.pp;
+            if(diff2->m_pp_info.pp != -1.0) {
+                pp_available = true;
+            }
+        }
     }
 
     const float starComparisonEpsilon = 0.01f;
     const bool starsAndModStarsAreEqual = (std::abs(stars - modStars) < starComparisonEpsilon);
 
     UString finalString;
-    if(!diff2)
-        finalString = UString::format("CS:%.3g AR:%.3g OD:%.3g HP:%.3g Stars:%.3g *", CS, AR, OD, HP, stars);
-    else if(!starsAndModStarsAreEqual)
-        finalString = UString::format("CS:%.3g AR:%.3g OD:%.3g HP:%.3g Stars:%.3g -> %.3g (%ipp)", CS, AR, OD, HP,
-                                      stars, modStars, (int)(std::round(modPp)));
-    else
-        finalString = UString::format("CS:%.3g AR:%.3g OD:%.3g HP:%.3g Stars:%.3g (%ipp)", CS, AR, OD, HP, stars,
-                                      (int)(std::round(modPp)));
+    if(pp_available) {
+        if(starsAndModStarsAreEqual) {
+            finalString = UString::format("CS:%.3g AR:%.3g OD:%.3g HP:%.3g Stars:%.3g (%ipp)", CS, AR, OD, HP, stars,
+                                          (int)(std::round(modPp)));
+        } else {
+            finalString = UString::format("CS:%.3g AR:%.3g OD:%.3g HP:%.3g Stars:%.3g -> %.3g (%ipp)", CS, AR, OD, HP,
+                                          stars, modStars, (int)(std::round(modPp)));
+        }
+    } else {
+        finalString = UString::format("CS:%.3g AR:%.3g OD:%.3g HP:%.3g Stars:%.3g * (??? pp)", CS, AR, OD, HP, stars);
+    }
 
     return finalString;
 }

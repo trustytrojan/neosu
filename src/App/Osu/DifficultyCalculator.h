@@ -13,7 +13,7 @@ struct pp_info {
     f64 aim_slider_factor = 0.0;
     f64 speed_stars = 0.0;
     f64 speed_notes = 0.0;
-    f64 pp = 0.0;
+    f64 pp = -1.0;
 };
 
 class OsuDifficultyHitObject {
@@ -182,9 +182,8 @@ class DifficultyCalculator {
 
         inline const DiffObject *get_previous(int backwardsIdx) const {
             int foo = prevObjectIndex - backwardsIdx;
-            if(foo < 0) foo = 0; // msvc
-            return (objects.size() > 0 && prevObjectIndex - backwardsIdx < (int)objects.size() ? &objects[foo]
-                        : NULL);
+            if(foo < 0) foo = 0;  // msvc
+            return (objects.size() > 0 && prevObjectIndex - backwardsIdx < (int)objects.size() ? &objects[foo] : NULL);
         }
         inline static double applyDiminishingExp(double val) { return std::pow(val, 0.99); }
         inline static double strainDecay(Skills::Skill type, double ms) {

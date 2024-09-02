@@ -17,6 +17,7 @@
 #include "NotificationOverlay.h"
 #include "Osu.h"
 #include "ResourceManager.h"
+#include "SongBrowser/LeaderboardPPCalcThread.h"
 #include "SongBrowser/SongBrowser.h"
 #include "Timer.h"
 #include "score.h"
@@ -216,6 +217,7 @@ class DatabaseLoader : public Resource {
         m_db->loadScores();
 
         // load database
+        lct_set_map(NULL);
         m_db->m_beatmapsets.clear();  // TODO @kiwec: this just leaks memory?
         m_db->loadDB();
 
@@ -263,6 +265,7 @@ Database::Database() {
 Database::~Database() {
     SAFE_DELETE(m_importTimer);
 
+    lct_set_map(NULL);
     for(int i = 0; i < m_beatmapsets.size(); i++) {
         delete m_beatmapsets[i];
     }

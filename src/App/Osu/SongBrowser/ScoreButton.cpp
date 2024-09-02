@@ -17,6 +17,7 @@
 #include "GameRules.h"
 #include "Icons.h"
 #include "Keyboard.h"
+#include "LeaderboardPPCalcThread.h"
 #include "LegacyReplay.h"
 #include "ModSelector.h"
 #include "Mouse.h"
@@ -372,6 +373,39 @@ void ScoreButton::draw(Graphics *g) {
 void ScoreButton::mouse_update(bool *propagate_clicks) {
     if(!m_bVisible) return;
 
+    // Update pp
+    if(m_score.get_pp() == -1.0) {
+        pp_calc_request request;
+        request.mods_legacy = m_score.mods.to_legacy();
+        request.speed = m_score.mods.speed;
+        request.AR = m_score.diff2->getAR();
+        request.CS = m_score.diff2->getCS();
+        request.OD = m_score.diff2->getOD();
+        if(m_score.mods.ar_override != -1.f) request.AR = m_score.mods.ar_override;
+        if(m_score.mods.cs_override != -1.f) request.CS = m_score.mods.cs_override;
+        if(m_score.mods.od_override != -1.f) request.OD = m_score.mods.od_override;
+        request.rx = m_score.mods.flags & Replay::ModFlags::Relax;
+        request.td = m_score.mods.flags & Replay::ModFlags::TouchDevice;
+        request.comboMax = m_score.comboMax;
+        request.numMisses = m_score.numMisses;
+        request.num300s = m_score.num300s;
+        request.num100s = m_score.num100s;
+        request.num50s = m_score.num50s;
+
+        auto info = lct_get_pp(request);
+        if(info.pp != -1.0) {
+            // NOTE: Allows dropped sliderends. Should fix with @PPV3
+            const bool fullCombo =
+                (m_score.maxPossibleCombo > 0 && m_score.numMisses == 0 && m_score.numSliderBreaks == 0);
+
+            m_score.ppv2_score = info.pp;
+            m_score.ppv2_version = DifficultyCalculator::PP_ALGORITHM_VERSION;
+            m_sScoreScorePP = UString::format(
+                (m_score.perfect ? "PP: %ipp (%ix PFC)" : (fullCombo ? "PP: %ipp (%ix FC)" : "PP: %ipp (%ix)")),
+                (int)std::round(m_score.get_pp()), m_score.comboMax);
+        }
+    }
+
     if(m_avatar) {
         m_avatar->mouse_update(propagate_clicks);
         if(!*propagate_clicks) return;
@@ -595,9 +629,10 @@ void ScoreButton::onDeleteScoreConfirmed(UString text, int id) {
     }
 }
 
-void ScoreButton::setScore(const FinishedScore &score, const DatabaseBeatmap *diff2, int index, UString titleString,
+void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, int index, UString titleString,
                            float weight) {
     m_score = score;
+    m_score.diff2 = diff2;
     m_iScoreIndexNumber = index;
 
     f32 AR = score.mods.ar_override;
@@ -628,9 +663,16 @@ void ScoreButton::setScore(const FinishedScore &score, const DatabaseBeatmap *di
     m_sScoreScore = UString::format(
         (score.perfect ? "Score: %llu (%ix PFC)" : (fullCombo ? "Score: %llu (%ix FC)" : "Score: %llu (%ix)")),
         score.score, score.comboMax);
-    m_sScoreScorePP =
-        UString::format((score.perfect ? "PP: %ipp (%ix PFC)" : (fullCombo ? "PP: %ipp (%ix FC)" : "PP: %ipp (%ix)")),
-                        (int)std::round(score.get_pp()), score.comboMax);
+
+    if(score.get_pp() == -1.0) {
+        m_sScoreScorePP = UString::format(
+            (score.perfect ? "PP: ??? (%ix PFC)" : (fullCombo ? "PP: ??? (%ix FC)" : "PP: ??? (%ix)")), score.comboMax);
+    } else {
+        m_sScoreScorePP = UString::format(
+            (score.perfect ? "PP: %ipp (%ix PFC)" : (fullCombo ? "PP: %ipp (%ix FC)" : "PP: %ipp (%ix)")),
+            (int)std::round(score.get_pp()), score.comboMax);
+    }
+
     m_sScoreAccuracy = UString::format("%.2f%%", accuracy);
     m_sScoreAccuracyFC =
         UString::format((score.perfect ? "PFC %.2f%%" : (fullCombo ? "FC %.2f%%" : "%.2f%%")), accuracy);

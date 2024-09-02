@@ -25,8 +25,8 @@ class ScoreButton : public CBaseUIButton {
     void highlight();
     void resetHighlight();
 
-    void setScore(const FinishedScore &score, const DatabaseBeatmap *diff2 = NULL, int index = 1,
-                  UString titleString = "", float weight = 1.0f);
+    void setScore(const FinishedScore &score, DatabaseBeatmap *diff2, int index = 1, UString titleString = "",
+                  float weight = 1.0f);
     void setIndex(int index) { m_iScoreIndexNumber = index; }
 
     inline FinishedScore getScore() const { return m_score; }
