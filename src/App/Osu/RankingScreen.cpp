@@ -24,6 +24,7 @@
 #include "RoomScreen.h"
 #include "Skin.h"
 #include "SkinImage.h"
+#include "SongBrowser/LeaderboardPPCalcThread.h"
 #include "SongBrowser/ScoreButton.h"
 #include "SongBrowser/SongBrowser.h"
 #include "SoundEngine.h"
@@ -197,15 +198,12 @@ RankingScreen::RankingScreen() : ScreenBackable() {
     m_bModEZ = false;
     m_bModHD = false;
     m_bModHR = false;
-    m_bModNC = false;
-    m_bModDT = false;
     m_bModNightmare = false;
     m_bModScorev2 = false;
     m_bModTarget = false;
     m_bModSpunout = false;
     m_bModRelax = false;
     m_bModNF = false;
-    m_bModHT = false;
     m_bModAutopilot = false;
     m_bModAuto = false;
     m_bModTD = false;
@@ -241,17 +239,12 @@ void RankingScreen::draw(Graphics *g) {
     if(m_bModEZ) drawModImage(g, osu->getSkin()->getSelectionModEasy(), modPos, modPosMax);
     if(m_bModHD) drawModImage(g, osu->getSkin()->getSelectionModHidden(), modPos, modPosMax);
     if(m_bModHR) drawModImage(g, osu->getSkin()->getSelectionModHardRock(), modPos, modPosMax);
-    if(m_bModNC)
-        drawModImage(g, osu->getSkin()->getSelectionModNightCore(), modPos, modPosMax);
-    else if(m_bModDT)
-        drawModImage(g, osu->getSkin()->getSelectionModDoubleTime(), modPos, modPosMax);
     if(m_bModNightmare) drawModImage(g, osu->getSkin()->getSelectionModNightmare(), modPos, modPosMax);
     if(m_bModScorev2) drawModImage(g, osu->getSkin()->getSelectionModScorev2(), modPos, modPosMax);
     if(m_bModTarget) drawModImage(g, osu->getSkin()->getSelectionModTarget(), modPos, modPosMax);
     if(m_bModSpunout) drawModImage(g, osu->getSkin()->getSelectionModSpunOut(), modPos, modPosMax);
     if(m_bModRelax) drawModImage(g, osu->getSkin()->getSelectionModRelax(), modPos, modPosMax);
     if(m_bModNF) drawModImage(g, osu->getSkin()->getSelectionModNoFail(), modPos, modPosMax);
-    if(m_bModHT) drawModImage(g, osu->getSkin()->getSelectionModHalfTime(), modPos, modPosMax);
     if(m_bModAutopilot) drawModImage(g, osu->getSkin()->getSelectionModAutopilot(), modPos, modPosMax);
     if(m_bModAuto) drawModImage(g, osu->getSkin()->getSelectionModAutoplay(), modPos, modPosMax);
 
@@ -332,12 +325,32 @@ void RankingScreen::mouse_update(bool *propagate_clicks) {
     if(!m_bVisible) return;
     ScreenBackable::mouse_update(propagate_clicks);
 
-    if(m_score.is_peppy_imported() && m_score.ppv2_score == 0.f) {
-        auto info = m_ppv2_calc.get();
-        m_score.ppv2_score = info.pp;
-        m_score.ppv2_total_stars = info.total_stars;  // (always 0)
-        m_score.ppv2_aim_stars = info.aim_stars;
-        m_score.ppv2_speed_stars = info.speed_stars;
+    if(m_score.get_pp() == -1.0) {
+        pp_calc_request request;
+        request.mods_legacy = m_score.mods.to_legacy();
+        request.speed = m_score.mods.speed;
+        request.AR = m_score.diff2->getAR();
+        request.CS = m_score.diff2->getCS();
+        request.OD = m_score.diff2->getOD();
+        if(m_score.mods.ar_override != -1.f) request.AR = m_score.mods.ar_override;
+        if(m_score.mods.cs_override != -1.f) request.CS = m_score.mods.cs_override;
+        if(m_score.mods.od_override != -1.f) request.OD = m_score.mods.od_override;
+        request.rx = m_score.mods.flags & Replay::ModFlags::Relax;
+        request.td = m_score.mods.flags & Replay::ModFlags::TouchDevice;
+        request.comboMax = m_score.comboMax;
+        request.numMisses = m_score.numMisses;
+        request.num300s = m_score.num300s;
+        request.num100s = m_score.num100s;
+        request.num50s = m_score.num50s;
+
+        auto info = lct_get_pp(request);
+        if(info.pp != -1.0) {
+            m_score.ppv2_score = info.pp;
+            m_score.ppv2_version = DifficultyCalculator::PP_ALGORITHM_VERSION;
+            m_score.ppv2_total_stars = info.total_stars;
+            m_score.ppv2_aim_stars = info.aim_stars;
+            m_score.ppv2_speed_stars = info.speed_stars;
+        }
     }
 
     // tooltip (pp + accuracy + unstable rate)
@@ -466,9 +479,6 @@ void RankingScreen::setScore(FinishedScore score) {
     m_bModEZ = score.mods.flags & Replay::ModFlags::Easy;
     m_bModHD = score.mods.flags & Replay::ModFlags::Hidden;
     m_bModHR = score.mods.flags & Replay::ModFlags::HardRock;
-    m_bModHT = score.mods.speed < 1.f;
-    m_bModDT = score.mods.speed > 1.f;
-    m_bModNC = m_bModDT && cv_nightcore_enjoyer.getBool();
     m_bModNightmare = score.mods.flags & Replay::ModFlags::Nightmare;
     m_bModScorev2 = score.mods.flags & Replay::ModFlags::ScoreV2;
     m_bModTarget = score.mods.flags & Replay::ModFlags::Target;
@@ -517,46 +527,6 @@ void RankingScreen::setBeatmapInfo(Beatmap *beatmap, DatabaseBeatmap *diff2) {
 
     UString local_name = cv_name.getString();
     m_songInfo->setPlayer(m_bIsUnranked ? "neosu" : local_name.toUtf8());
-
-    pp_info placeholder;
-    placeholder.pp = m_score.ppv2_score;
-    m_ppv2_calc.set(placeholder);
-
-    if(m_score.is_peppy_imported() && m_score.ppv2_score == 0.f) {
-        FinishedScore score = m_score;
-        std::string osufile_path = diff2->m_sFilePath;
-        auto nb_circles = diff2->m_iNumCircles;
-        auto nb_sliders = diff2->m_iNumSliders;
-        auto nb_spinners = diff2->m_iNumSpinners;
-        auto AR = diff2->getAR();
-        auto CS = diff2->getCS();
-        auto OD = diff2->getOD();
-        if(score.mods.ar_override != -1.f) AR = score.mods.ar_override;
-        if(score.mods.cs_override != -1.f) CS = score.mods.cs_override;
-        if(score.mods.od_override != -1.f) OD = score.mods.od_override;
-
-        m_ppv2_calc.enqueue([=]() {
-            pp_info info;
-
-            // XXX: slow
-            auto diffres = DatabaseBeatmap::loadDifficultyHitObjects(osufile_path.c_str(), AR, CS, score.mods.speed);
-
-            std::vector<double> aimStrains;
-            std::vector<double> speedStrains;
-
-            info.total_stars = DifficultyCalculator::calculateStarDiffForHitObjects(
-                diffres.diffobjects, CS, OD, score.mods.speed, score.mods.flags & Replay::ModFlags::Relax,
-                score.mods.flags & Replay::ModFlags::TouchDevice, &info.aim_stars, &info.aim_slider_factor,
-                &info.speed_stars, &info.speed_notes, -1, &aimStrains, &speedStrains);
-
-            info.pp = DifficultyCalculator::calculatePPv2(
-                score.mods.to_legacy(), score.mods.speed, AR, OD, info.aim_stars, info.aim_slider_factor,
-                info.speed_stars, info.speed_notes, nb_circles, nb_sliders, nb_spinners, diffres.maxPossibleCombo,
-                score.comboMax, score.numMisses, score.num300s, score.num100s, score.num50s);
-
-            return info;
-        });
-    }
 
     // @PPV3: update m_score.ppv3_score, m_score.ppv3_aim_stars, m_score.ppv3_speed_stars,
     //        m_fHitErrorAvgMin, m_fHitErrorAvgMax, m_fUnstableRate
@@ -686,7 +656,14 @@ void RankingScreen::setIndex(int index) {
     }
 }
 
-UString RankingScreen::getPPString() { return UString::format("%ipp", (int)(std::round(m_score.get_pp()))); }
+UString RankingScreen::getPPString() {
+    f32 pp = m_score.get_pp();
+    if(pp == -1.0) {
+        return UString("??? pp");
+    } else {
+        return UString::format("%ipp", (int)(std::round(pp)));
+    }
+}
 
 Vector2 RankingScreen::getPPPosRaw() {
     const UString ppString = getPPString();

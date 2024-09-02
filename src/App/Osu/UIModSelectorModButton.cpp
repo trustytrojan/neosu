@@ -107,14 +107,6 @@ void UIModSelectorModButton::onClicked() {
     }
 
     if(bancho.is_in_a_multi_room()) {
-        // Since osu!stable doesn't have daycore, here's a hack to still allow
-        // it to be selected client-side.
-        if(m_states[m_iState].modName == UString("dc")) {
-            bancho.prefer_daycore = true;
-        } else if(m_states[m_iState].modName == UString("ht")) {
-            bancho.prefer_daycore = false;
-        }
-
         for(int i = 0; i < 16; i++) {
             if(bancho.room.slots[i].player_id != bancho.user_id) continue;
 
@@ -167,17 +159,6 @@ void UIModSelectorModButton::setOn(bool on, bool silent) {
         animationDuration = 0.f;
     }
 
-    // Prevent DT and HT from being selected at the same time
-    if(on && !silent && !m_states.empty()) {
-        if(m_states[0].modName == UString("dt") || m_states[0].modName == UString("nc")) {
-            osu->m_modSelector->m_modButtonHalftime->setOn(false, true);
-            cv_speed_override.setValue(-1.0f);
-        } else if(m_states[0].modName == UString("ht") || m_states[0].modName == UString("dc")) {
-            osu->m_modSelector->m_modButtonDoubletime->setOn(false, true);
-            cv_speed_override.setValue(-1.0f);
-        }
-    }
-
     if(m_bOn) {
         if(prevState) {
             // swap effect
@@ -224,15 +205,6 @@ void UIModSelectorModButton::setState(int state, bool updateModConVar) {
 
     // update mods
     if(updateModConVar) {
-        // We want to sync "nightcore" status between both buttons
-        if(!m_states.empty()) {
-            if(m_states[0].modName == UString("dt") || m_states[0].modName == UString("nc")) {
-                osu->m_modSelector->m_modButtonHalftime->setState(m_iState, false);
-            } else if(m_states[0].modName == UString("ht") || m_states[0].modName == UString("dc")) {
-                osu->m_modSelector->m_modButtonDoubletime->setState(m_iState, false);
-            }
-        }
-
         m_osuModSelector->updateModConVar();
     }
 }

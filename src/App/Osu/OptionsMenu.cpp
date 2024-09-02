@@ -717,8 +717,8 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
 
     addSubSection("Gameplay");
     addCheckbox("Prefer Nightcore over Double Time",
-                "Automatically selects Nightcore or Daycore when using speed modification mods.", &cv_nightcore_enjoyer)
-        ->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onNightcorePreferenceChange));
+                "Automatically selects Nightcore or Daycore when using speed modification mods.",
+                &cv_nightcore_enjoyer);
 
     //**************************************************************************************************************************//
 
@@ -3583,17 +3583,4 @@ void OptionsMenu::openAndScrollToSkinSection() {
 
     if(!m_skinSelectLocalButton->isVisible() || !wasVisible)
         m_options->scrollToElement(m_skinSection, 0, 100 * Osu::getUIScale());
-}
-
-void OptionsMenu::onNightcorePreferenceChange(CBaseUICheckbox *checkbox) {
-    onCheckboxChange(checkbox);
-
-    int prev_state = osu->m_modSelector->m_modButtonHalftime->getState();
-
-    osu->m_modSelector->updateButtons();
-
-    if(osu->m_modSelector->m_modButtonHalftime->isOn() || osu->m_modSelector->m_modButtonDoubletime->isOn()) {
-        osu->m_modSelector->m_modButtonHalftime->setState(prev_state ? 0 : 1);
-        osu->m_modSelector->m_modButtonDoubletime->setState(prev_state ? 0 : 1);
-    }
 }

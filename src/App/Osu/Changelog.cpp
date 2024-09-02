@@ -39,6 +39,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.changes.push_back("- Fixed Nightcore getting auto-selected instead of Double Time in some cases");
     latest.changes.push_back("- Merged pp calculation optimizations from McOsu");
     latest.changes.push_back("- Optimized database loading");
+    latest.changes.push_back("- Removed DT/HT mods (use speed slider instead)");
     latest.changes.push_back("- Removed custom HP drain (use nofail instead)");
     latest.changes.push_back("- Removed mandala mod, random mod");
     latest.changes.push_back("- Removed rosu-pp");

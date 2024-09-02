@@ -71,15 +71,12 @@ class RankingScreen : public ScreenBackable {
     bool m_bModEZ;
     bool m_bModHD;
     bool m_bModHR;
-    bool m_bModNC;
-    bool m_bModDT;
     bool m_bModNightmare;
     bool m_bModScorev2;
     bool m_bModTarget;
     bool m_bModSpunout;
     bool m_bModRelax;
     bool m_bModNF;
-    bool m_bModHT;
     bool m_bModAutopilot;
     bool m_bModAuto;
     bool m_bModTD;

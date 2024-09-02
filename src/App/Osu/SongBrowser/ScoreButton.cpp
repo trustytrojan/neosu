@@ -400,6 +400,9 @@ void ScoreButton::mouse_update(bool *propagate_clicks) {
 
             m_score.ppv2_score = info.pp;
             m_score.ppv2_version = DifficultyCalculator::PP_ALGORITHM_VERSION;
+            m_score.ppv2_total_stars = info.total_stars;
+            m_score.ppv2_aim_stars = info.aim_stars;
+            m_score.ppv2_speed_stars = info.speed_stars;
             m_sScoreScorePP = UString::format(
                 (m_score.perfect ? "PP: %ipp (%ix PFC)" : (fullCombo ? "PP: %ipp (%ix FC)" : "PP: %ipp (%ix)")),
                 (int)std::round(m_score.get_pp()), m_score.comboMax);

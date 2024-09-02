@@ -43,17 +43,6 @@
 void UIModList::draw(Graphics *g) {
     std::vector<SkinImage *> mods;
 
-    if(*m_flags & LegacyFlags::Nightcore)
-        mods.push_back(osu->getSkin()->getSelectionModNightCore());
-    else if(*m_flags & LegacyFlags::DoubleTime)
-        mods.push_back(osu->getSkin()->getSelectionModDoubleTime());
-
-    bool ht_enabled = *m_flags & LegacyFlags::HalfTime;
-    if(ht_enabled && bancho.prefer_daycore)
-        mods.push_back(osu->getSkin()->getSelectionModDayCore());
-    else if(ht_enabled)
-        mods.push_back(osu->getSkin()->getSelectionModHalfTime());
-
     if(*m_flags & LegacyFlags::Perfect)
         mods.push_back(osu->getSkin()->getSelectionModPerfect());
     else if(*m_flags & LegacyFlags::SuddenDeath)

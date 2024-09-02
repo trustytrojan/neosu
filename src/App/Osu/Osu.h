@@ -124,8 +124,7 @@ class Osu : public App, public MouseListener {
     float getDifficultyMultiplier();
     float getCSDifficultyMultiplier();
     float getScoreMultiplier();
-    float getRawSpeedMultiplier();  // without override
-    float getSpeedMultiplier();     // with override
+    float getSpeedMultiplier();  // with override
     float getAnimationSpeedMultiplier();
 
     inline bool getModAuto() const { return m_bModAuto; }
@@ -135,11 +134,7 @@ class Osu : public App, public MouseListener {
     inline bool getModTarget() const { return m_bModTarget; }
     inline bool getModScorev2() const { return m_bModScorev2; }
     inline bool getModFlashlight() const { return m_bModFlashlight; }
-    inline bool getModDT() const { return m_bModDT; }
-    inline bool getModNC() const { return m_bModNC; }
     inline bool getModNF() const { return m_bModNF; }
-    inline bool getModHT() const { return m_bModHT; }
-    inline bool getModDC() const { return m_bModDC; }
     inline bool getModHD() const { return m_bModHD; }
     inline bool getModHR() const { return m_bModHR; }
     inline bool getModEZ() const { return m_bModEZ; }
@@ -256,11 +251,7 @@ class Osu : public App, public MouseListener {
     bool m_bModTarget = false;
     bool m_bModScorev2 = false;
     bool m_bModFlashlight = false;
-    bool m_bModDT = false;
-    bool m_bModNC = false;
     bool m_bModNF = false;
-    bool m_bModHT = false;
-    bool m_bModDC = false;
     bool m_bModHD = false;
     bool m_bModHR = false;
     bool m_bModEZ = false;

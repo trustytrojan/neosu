@@ -1678,8 +1678,7 @@ u32 Beatmap::getMusicPositionMSInterpolated() {
             // calculate final return value
             returnPos = (u32)std::round(m_fInterpolatedMusicPos);
 
-            bool nightcoring = osu->getModNC() || osu->getModDC();
-            if(speed < 1.0f && cv_compensate_music_speed.getBool() && !nightcoring) {
+            if(speed < 1.0f && cv_compensate_music_speed.getBool() && !cv_nightcore_enjoyer.getBool()) {
                 returnPos += (u32)(((1.0f - speed) / 0.75f) * 5);
             }
         } else  // no interpolation

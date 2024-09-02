@@ -498,6 +498,9 @@ SongBrowser::~SongBrowser() {
     SAFE_DELETE(m_scoreBrowser);
     SAFE_DELETE(m_songBrowser);
     SAFE_DELETE(m_db);
+
+    // Memory leak on shutdown, maybe
+    empty();
 }
 
 void SongBrowser::draw(Graphics *g) {

@@ -177,11 +177,7 @@ Osu::Osu() {
     m_bModTarget = false;
     m_bModScorev2 = false;
     m_bModFlashlight = false;
-    m_bModDT = false;
-    m_bModNC = false;
     m_bModNF = false;
-    m_bModHT = false;
-    m_bModDC = false;
     m_bModHD = false;
     m_bModHR = false;
     m_bModEZ = false;
@@ -899,6 +895,22 @@ UString getModsStringForConVar(int mods) {
 void Osu::useMods(FinishedScore *score) {
     getModSelector()->resetMods();
 
+    m_bModAuto = score->mods.flags & Replay::ModFlags::Autoplay;
+    m_bModAutopilot = score->mods.flags & Replay::ModFlags::Autopilot;
+    m_bModRelax = score->mods.flags & Replay::ModFlags::Relax;
+    m_bModSpunout = score->mods.flags & Replay::ModFlags::SpunOut;
+    m_bModTarget = score->mods.flags & Replay::ModFlags::Target;
+    m_bModScorev2 = score->mods.flags & Replay::ModFlags::ScoreV2;
+    m_bModFlashlight = score->mods.flags & Replay::ModFlags::Flashlight;
+    m_bModNF = score->mods.flags & Replay::ModFlags::NoFail;
+    m_bModHD = score->mods.flags & Replay::ModFlags::Hidden;
+    m_bModHR = score->mods.flags & Replay::ModFlags::HardRock;
+    m_bModEZ = score->mods.flags & Replay::ModFlags::Easy;
+    m_bModSD = score->mods.flags & Replay::ModFlags::SuddenDeath;
+    m_bModSS = score->mods.flags & Replay::ModFlags::Perfect;
+    m_bModNightmare = score->mods.flags & Replay::ModFlags::Nightmare;
+    m_bModTD = score->mods.flags & Replay::ModFlags::TouchDevice;
+
     cv_ar_override.setValue(score->mods.ar_override);
     cv_cs_override.setValue(score->mods.cs_override);
     cv_od_override.setValue(score->mods.od_override);
@@ -939,18 +951,10 @@ void Osu::useMods(FinishedScore *score) {
 
 void Osu::updateMods() {
     if(bancho.is_in_a_multi_room()) {
-        m_bModNC = bancho.room.mods & LegacyFlags::Nightcore;
-        if(m_bModNC) {
-            m_bModDT = false;
-        } else if(bancho.room.mods & LegacyFlags::DoubleTime) {
-            m_bModDT = true;
-        }
-
-        m_bModHT = (bancho.room.mods & LegacyFlags::HalfTime);
-        m_bModDC = false;
-        if(m_bModHT && bancho.prefer_daycore) {
-            m_bModHT = false;
-            m_bModDC = true;
+        if(bancho.room.mods & (LegacyFlags::DoubleTime | LegacyFlags::Nightcore)) {
+            cv_speed_override.setValue(1.5);
+        } else if(bancho.room.mods & (LegacyFlags::HalfTime)) {
+            cv_speed_override.setValue(0.75);
         }
 
         m_bModNF = bancho.room.mods & LegacyFlags::NoFail;
@@ -1529,19 +1533,20 @@ float Osu::getCSDifficultyMultiplier() {
 float Osu::getScoreMultiplier() {
     float multiplier = 1.0f;
 
+    // Dumb formula, but the values for HT/DT were dumb to begin with
+    f32 s = getSpeedMultiplier();
+    if(s > 1.f) {
+        multiplier *= (0.24 * s) + 0.76;
+    } else if(s < 1.f) {
+        multiplier *= 0.008 * std::exp(4.81588 * s);
+    }
+
     if(m_bModEZ || (m_bModNF && !m_bModScorev2)) multiplier *= 0.50f;
-    if(m_bModHT || m_bModDC) multiplier *= 0.30f;
     if(m_bModHR) {
         if(m_bModScorev2)
             multiplier *= 1.10f;
         else
             multiplier *= 1.06f;
-    }
-    if(m_bModDT || m_bModNC) {
-        if(m_bModScorev2)
-            multiplier *= 1.20f;
-        else
-            multiplier *= 1.12f;
     }
     if(m_bModFlashlight) multiplier *= 1.12f;
     if(m_bModHD) multiplier *= 1.06f;
@@ -1552,25 +1557,11 @@ float Osu::getScoreMultiplier() {
     return multiplier;
 }
 
-float Osu::getRawSpeedMultiplier() {
-    float speedMultiplier = 1.0f;
-
-    if(m_bModDT || m_bModNC || m_bModHT || m_bModDC) {
-        if(m_bModDT || m_bModNC)
-            speedMultiplier = 1.5f;
-        else
-            speedMultiplier = 0.75f;
-    }
-
-    return speedMultiplier;
-}
-
 float Osu::getSpeedMultiplier() {
-    float speedMultiplier = getRawSpeedMultiplier();
-
-    if(cv_speed_override.getFloat() >= 0.0f) return max(cv_speed_override.getFloat(), 0.05f);
-
-    return speedMultiplier;
+    if(cv_speed_override.getFloat() >= 0.0f)
+        return max(cv_speed_override.getFloat(), 0.05f);
+    else
+        return 1.f;
 }
 
 float Osu::getAnimationSpeedMultiplier() {
@@ -1877,38 +1868,6 @@ void Osu::onSpeedChange(UString oldValue, UString newValue) {
     float speed = newValue.toFloat();
     getSelectedBeatmap()->setSpeed(speed >= 0.0f ? speed : getSpeedMultiplier());
     updateAnimationSpeed();
-
-    if(m_modSelector != NULL) {
-        int btn_state = (getModNC() || getModDC() || bancho.prefer_daycore) ? 1 : 0;
-
-        // nightcore_enjoyer reverses button order so NC appears first
-        if(cv_nightcore_enjoyer.getBool()) {
-            btn_state = (getModDT() || getModHT()) ? 1 : 0;
-        }
-
-        // Why 0.0001f you ask? See ModSelector::resetMods()
-        if(speed > 0.0001f && speed < 1.0) {
-            m_modSelector->m_modButtonDoubletime->setOn(false, true);
-            m_modSelector->m_modButtonDoubletime->setState(btn_state, false);
-            m_modSelector->m_modButtonHalftime->setOn(true, true);
-            m_modSelector->m_modButtonHalftime->setState(btn_state, false);
-            m_bModDT = false;
-            m_bModNC = false;
-            m_bModHT = m_modSelector->m_modButtonHalftime->getActiveModName() == UString("ht");
-            m_bModDC = m_modSelector->m_modButtonHalftime->getActiveModName() == UString("dc");
-            bancho.prefer_daycore = m_modSelector->m_modButtonHalftime->getActiveModName() == UString("dc");
-        } else if(speed > 1.0) {
-            m_modSelector->m_modButtonDoubletime->setOn(true, true);
-            m_modSelector->m_modButtonDoubletime->setState(btn_state, false);
-            m_modSelector->m_modButtonHalftime->setOn(false, true);
-            m_modSelector->m_modButtonHalftime->setState(btn_state, false);
-            m_bModHT = false;
-            m_bModDC = false;
-            m_bModDT = m_modSelector->m_modButtonDoubletime->getActiveModName() == UString("dt");
-            m_bModNC = m_modSelector->m_modButtonDoubletime->getActiveModName() == UString("nc");
-            bancho.prefer_daycore = m_modSelector->m_modButtonDoubletime->getActiveModName() == UString("nc");
-        }
-    }
 }
 
 void Osu::onPlayfieldChange(UString oldValue, UString newValue) { getSelectedBeatmap()->onModUpdate(); }

@@ -63,8 +63,6 @@ class ModSelector : public OsuScreen {
     void updateModConVar();
 
     CBaseUILabel *m_nonVanillaWarning;
-    UIModSelectorModButton *m_modButtonHalftime;
-    UIModSelectorModButton *m_modButtonDoubletime;
     UIModSelectorModButton *m_modButtonAuto;
 
    private:

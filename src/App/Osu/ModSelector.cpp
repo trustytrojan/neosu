@@ -293,32 +293,6 @@ void ModSelector::updateButtons(bool initial) {
     setModButtonOnGrid(1, 1, 1, initial && osu->getModSS(), "ss", "SS or quit.",
                        []() -> SkinImage * { return osu->getSkin()->getSelectionModPerfect(); });
 
-    if(cv_nightcore_enjoyer.getBool()) {
-        m_modButtonHalftime =
-            setModButtonOnGrid(2, 0, 0, initial && osu->getModDC(), "dc", "A E S T H E T I C",
-                               []() -> SkinImage * { return osu->getSkin()->getSelectionModDayCore(); });
-        setModButtonOnGrid(2, 0, 1, initial && osu->getModHT(), "ht", "Less zoom.",
-                           []() -> SkinImage * { return osu->getSkin()->getSelectionModHalfTime(); });
-
-        m_modButtonDoubletime =
-            setModButtonOnGrid(2, 1, 0, initial && osu->getModNC(), "nc", "uguuuuuuuu",
-                               []() -> SkinImage * { return osu->getSkin()->getSelectionModNightCore(); });
-        setModButtonOnGrid(2, 1, 1, initial && osu->getModDT(), "dt", "Zoooooooooom.",
-                           []() -> SkinImage * { return osu->getSkin()->getSelectionModDoubleTime(); });
-    } else {
-        m_modButtonHalftime =
-            setModButtonOnGrid(2, 0, 0, initial && osu->getModHT(), "ht", "Less zoom.",
-                               []() -> SkinImage * { return osu->getSkin()->getSelectionModHalfTime(); });
-        setModButtonOnGrid(2, 0, 1, initial && osu->getModDC(), "dc", "A E S T H E T I C",
-                           []() -> SkinImage * { return osu->getSkin()->getSelectionModDayCore(); });
-
-        m_modButtonDoubletime =
-            setModButtonOnGrid(2, 1, 0, initial && osu->getModDT(), "dt", "Zoooooooooom.",
-                               []() -> SkinImage * { return osu->getSkin()->getSelectionModDoubleTime(); });
-        setModButtonOnGrid(2, 1, 1, initial && osu->getModNC(), "nc", "uguuuuuuuu",
-                           []() -> SkinImage * { return osu->getSkin()->getSelectionModNightCore(); });
-    }
-
     m_modButtonHidden =
         setModButtonOnGrid(3, 1, 0, initial && osu->getModHD(), "hd",
                            "Play with no approach circles and fading notes for a slight score advantage.",
@@ -679,10 +653,8 @@ void ModSelector::onKeyDown(KeyboardEvent &key) {
     // mod hotkeys
     if(key == (KEYCODE)cv_MOD_EASY.getInt()) m_modButtonEasy->click();
     if(key == (KEYCODE)cv_MOD_NOFAIL.getInt()) m_modButtonNofail->click();
-    if(key == (KEYCODE)cv_MOD_HALFTIME.getInt()) m_modButtonHalftime->click();
     if(key == (KEYCODE)cv_MOD_HARDROCK.getInt()) m_modButtonHardrock->click();
     if(key == (KEYCODE)cv_MOD_SUDDENDEATH.getInt()) m_modButtonSuddendeath->click();
-    if(key == (KEYCODE)cv_MOD_DOUBLETIME.getInt()) m_modButtonDoubletime->click();
     if(key == (KEYCODE)cv_MOD_HIDDEN.getInt()) m_modButtonHidden->click();
     if(key == (KEYCODE)cv_MOD_FLASHLIGHT.getInt()) m_modButtonFlashlight->click();
     if(key == (KEYCODE)cv_MOD_RELAX.getInt()) m_modButtonRelax->click();
@@ -690,6 +662,12 @@ void ModSelector::onKeyDown(KeyboardEvent &key) {
     if(key == (KEYCODE)cv_MOD_SPUNOUT.getInt()) m_modButtonSpunout->click();
     if(key == (KEYCODE)cv_MOD_AUTO.getInt()) m_modButtonAuto->click();
     if(key == (KEYCODE)cv_MOD_SCOREV2.getInt()) m_modButtonScoreV2->click();
+    if(key == (KEYCODE)cv_MOD_HALFTIME.getInt()) {
+        cv_speed_override.setValue(0.75);
+    }
+    if(key == (KEYCODE)cv_MOD_DOUBLETIME.getInt()) {
+        cv_speed_override.setValue(1.5);
+    }
 
     key.consume();
 }
@@ -1122,7 +1100,6 @@ UICheckbox *ModSelector::addExperimentalCheckbox(UString text, UString tooltipTe
 }
 
 void ModSelector::resetModsUserInitiated() {
-    bancho.prefer_daycore = false;
     resetMods();
 
     engine->getSound()->play(osu->getSkin()->getCheckOff());
@@ -1242,11 +1219,10 @@ void ModSelector::restoreMods(ModSelection selection) {
 }
 
 void ModSelector::enableModsFromFlags(u32 flags) {
-    if(flags & LegacyFlags::DoubleTime) {
-        m_modButtonDoubletime->setOn(true, true);
-        if(flags & LegacyFlags::Nightcore) {
-            m_modButtonDoubletime->setState(1, true);
-        }
+    if(flags & (LegacyFlags::DoubleTime | LegacyFlags::Nightcore)) {
+        cv_speed_override.setValue(1.5);
+    } else if(flags & LegacyFlags::HalfTime) {
+        cv_speed_override.setValue(0.75);
     }
 
     if(flags & LegacyFlags::Perfect) {
@@ -1255,11 +1231,6 @@ void ModSelector::enableModsFromFlags(u32 flags) {
     } else if(flags & LegacyFlags::SuddenDeath) {
         m_modButtonSuddendeath->setOn(true, true);
         m_modButtonSuddendeath->setState(0, true);
-    }
-
-    if(flags & LegacyFlags::HalfTime) {
-        m_modButtonHalftime->setOn(true, true);
-        m_modButtonHalftime->setState(bancho.prefer_daycore ? 1 : 0, true);
     }
 
     m_modButtonNofail->setOn(flags & LegacyFlags::NoFail, true);
@@ -1478,7 +1449,7 @@ UString ModSelector::getOverrideSliderLabelText(ModSelector::OVERRIDE_SLIDER s, 
                 10.0f);
             convarValue = osu->getSelectedBeatmap()->getHP();
         } else if(s.desc->getText().find("Speed") != -1) {
-            beatmapValue = active ? osu->getRawSpeedMultiplier() : osu->getSpeedMultiplier();
+            beatmapValue = active ? 1.f : osu->getSpeedMultiplier();
 
             wasSpeedSlider = true;
             {

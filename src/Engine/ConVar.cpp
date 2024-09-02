@@ -502,7 +502,8 @@ bool ConVarHandler::isVanilla() {
         if(osu->getModTarget()) return false;
         if(osu->getModNightmare()) return false;
         if(osu->getModEZ() && osu->getModHR()) return false;
-        if((osu->getModDT() || osu->getModNC()) && (osu->getModHT() || osu->getModDC())) return false;
+        f32 speed = cv_speed_override.getFloat();
+        if(speed != 0.75 && speed != 1.0 && speed != 1.5) return false;
     }
 
     return true;

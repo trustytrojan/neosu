@@ -28,8 +28,6 @@ struct Bancho {
     UString server_icon_url;
     Image *server_icon = NULL;
 
-    bool prefer_daycore = false;
-
     ServerPolicy score_submission_policy = ServerPolicy::NO_PREFERENCE;
     bool submit_scores();
 

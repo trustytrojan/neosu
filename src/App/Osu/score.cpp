@@ -386,7 +386,7 @@ Replay::Mods LiveScore::getMods() {
     if(osu->m_bModSD) mods.flags |= Replay::ModFlags::SuddenDeath;
     if(osu->m_bModSS) mods.flags |= Replay::ModFlags::Perfect;
     if(osu->m_bModNightmare) mods.flags |= Replay::ModFlags::Nightmare;
-    if(osu->getModNC() || osu->getModDC() || bancho.prefer_daycore) mods.flags |= Replay::ModFlags::NoPitchCorrection;
+    if(cv_nightcore_enjoyer.getBool()) mods.flags |= Replay::ModFlags::NoPitchCorrection;
     if(osu->m_bModTD) mods.flags |= Replay::ModFlags::TouchDevice;
     if(osu->m_bModSpunout) mods.flags |= Replay::ModFlags::SpunOut;
     if(osu->m_bModScorev2) mods.flags |= Replay::ModFlags::ScoreV2;
@@ -433,31 +433,7 @@ Replay::Mods LiveScore::getMods() {
     return mods;
 }
 
-u32 LiveScore::getModsLegacy() {
-    int modsLegacy = 0;
-
-    modsLegacy |= (osu->getModAuto() ? LegacyFlags::Autoplay : 0);
-    modsLegacy |= (osu->getModAutopilot() ? LegacyFlags::Autopilot : 0);
-    modsLegacy |= (osu->getModRelax() ? LegacyFlags::Relax : 0);
-    modsLegacy |= (osu->getModSpunout() ? LegacyFlags::SpunOut : 0);
-    modsLegacy |= (osu->getModTarget() ? LegacyFlags::Target : 0);
-    modsLegacy |= (osu->getModScorev2() ? LegacyFlags::ScoreV2 : 0);
-    modsLegacy |= (osu->getModDT() ? LegacyFlags::DoubleTime : 0);
-    modsLegacy |= (osu->getModNC() ? (LegacyFlags::DoubleTime | LegacyFlags::Nightcore) : 0);
-    modsLegacy |= (osu->getModNF() ? LegacyFlags::NoFail : 0);
-    modsLegacy |= (osu->getModHT() ? LegacyFlags::HalfTime : 0);
-    modsLegacy |= (osu->getModDC() ? LegacyFlags::HalfTime : 0);
-    modsLegacy |= (osu->getModHD() ? LegacyFlags::Hidden : 0);
-    modsLegacy |= (osu->getModHR() ? LegacyFlags::HardRock : 0);
-    modsLegacy |= (osu->getModEZ() ? LegacyFlags::Easy : 0);
-    modsLegacy |= (osu->getModSD() ? LegacyFlags::SuddenDeath : 0);
-    modsLegacy |= (osu->getModSS() ? LegacyFlags::Perfect : 0);
-    modsLegacy |= (osu->getModNightmare() ? LegacyFlags::Nightmare : 0);
-    modsLegacy |= (osu->getModTD() ? LegacyFlags::TouchDevice : 0);
-    modsLegacy |= (osu->getModFlashlight() ? LegacyFlags::Flashlight : 0);
-
-    return modsLegacy;
-}
+u32 LiveScore::getModsLegacy() { return getMods().to_legacy(); }
 
 UString LiveScore::getModsStringForRichPresence() {
     UString modsString;
@@ -467,10 +443,7 @@ UString LiveScore::getModsStringForRichPresence() {
     if(osu->getModHD()) modsString.append("HD");
     if(osu->getModHR()) modsString.append("HR");
     if(osu->getModSD()) modsString.append("SD");
-    if(osu->getModDT()) modsString.append("DT");
     if(osu->getModRelax()) modsString.append("RX");
-    if(osu->getModHT()) modsString.append("HT");
-    if(osu->getModNC()) modsString.append("NC");
     if(osu->getModAuto()) modsString.append("AT");
     if(osu->getModSpunout()) modsString.append("SO");
     if(osu->getModAutopilot()) modsString.append("AP");

@@ -315,8 +315,7 @@ void Sound::setSpeed(float speed) {
     BASS_ChannelSetAttribute(m_stream, BASS_ATTRIB_TEMPO, 1.0f);
     BASS_ChannelSetAttribute(m_stream, BASS_ATTRIB_TEMPO_FREQ, freq);
 
-    bool nightcoring = osu->getModNC() || osu->getModDC();
-    if(nightcoring) {
+    if(cv_nightcore_enjoyer.getBool()) {
         BASS_ChannelSetAttribute(m_stream, BASS_ATTRIB_TEMPO_FREQ, speed * freq);
     } else {
         BASS_ChannelSetAttribute(m_stream, BASS_ATTRIB_TEMPO, (speed - 1.0f) * 100.0f);
