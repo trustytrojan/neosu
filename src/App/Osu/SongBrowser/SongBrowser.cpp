@@ -31,6 +31,7 @@
 #include "Keyboard.h"
 #include "LeaderboardPPCalcThread.h"
 #include "MainMenu.h"
+#include "MapCalcThread.h"
 #include "ModSelector.h"
 #include "Mouse.h"
 #include "NotificationOverlay.h"
@@ -449,6 +450,7 @@ SongBrowser::SongBrowser() : ScreenBackable() {
 
 SongBrowser::~SongBrowser() {
     lct_set_map(NULL);
+    mct_abort();
     checkHandleKillBackgroundSearchMatcher();
 
     engine->getResourceManager()->destroyResource(m_backgroundSearchMatcher);
@@ -741,18 +743,17 @@ void SongBrowser::draw(Graphics *g) {
     if(cv_debug.getBool()) m_bottombar->draw_debug(g);
 
     // background task busy notification
-    // TODO @kiwec
-    // UString busyMessage = UString::format("Calculating stars (%i/%i) ...", m_iBackgroundStarCalculationIndex,
-    // m_beatmaps.size()); McFont *font = engine->getResourceManager()->getFont("FONT_DEFAULT");
-    // g->setColor(0xff333333);
-    // g->pushTransform();
-    // {
-    //     g->translate(
-    //         (int)(m_bottombar->getPos().x + m_bottombar->getSize().x - font->getStringWidth(busyMessage) - 20),
-    //         (int)(m_bottombar->getPos().y + m_bottombar->getSize().y / 2 - font->getHeight() / 2));
-    //     g->drawString(font, busyMessage);
-    // }
-    // g->popTransform();
+    if(mct_total.load() > 0) {
+        McFont *font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+        UString bpmMsg = UString::format("Processing maps (%i/%i) ...", mct_computed.load(), mct_total.load());
+
+        g->setColor(0xff333333);
+        g->pushTransform();
+        g->translate((int)(m_bottombar->getPos().x + m_bottombar->getSize().x - font->getStringWidth(bpmMsg) - 20),
+                     (int)(m_bottombar->getPos().y + m_bottombar->getSize().y / 2 - font->getHeight() / 2));
+        g->drawString(font, bpmMsg);
+        g->popTransform();
+    }
 
     // no beatmaps found (osu folder is probably invalid)
     if(m_beatmaps.size() == 0 && !m_bBeatmapRefreshScheduled) {
@@ -864,6 +865,30 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
         return;
     }
 
+    // map star/bpm/other calc
+    if(mct_total.load() > 0 && (mct_computed.load() == mct_total.load())) {
+        mct_abort();  // join thread
+
+        // XXX: this is mega freezing. maybe do in steps instead of all at once
+        auto &maps = getDatabase()->m_maps_to_recalc;
+        for(int i = 0; i < mct_results.size(); i++) {
+            // NOTE: not double checking md5 here. might be a mistake
+            auto diff = maps[i];
+            auto res = mct_results[i];
+            diff->m_iNumCircles = res.nb_circles;
+            diff->m_iNumSliders = res.nb_sliders;
+            diff->m_iNumSpinners = res.nb_spinners;
+            diff->m_fStarsNomod = res.star_rating;
+            diff->m_iMinBPM = res.min_bpm;
+            diff->m_iMaxBPM = res.max_bpm;
+            diff->m_iMostCommonBPM = res.avg_bpm;
+            diff->update_overrides();
+        }
+
+        maps.clear();
+    }
+
+    // leaderboard pp calc
     auto diff2 = m_selectedBeatmap->getSelectedDifficulty2();
     lct_set_map(diff2);
     if(diff2->m_pp_info.pp == -1.0) {

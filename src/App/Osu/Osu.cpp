@@ -1073,6 +1073,7 @@ void Osu::onKeyDown(KeyboardEvent &key) {
             m_notificationOverlay->addNotification("No beatmap is currently selected.");
         } else {
             diff->draw_background = !diff->draw_background;
+            diff->update_overrides();
         }
         key.consume();
         return;

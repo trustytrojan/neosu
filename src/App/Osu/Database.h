@@ -1,6 +1,7 @@
 #pragma once
 #include "BanchoProtocol.h"  // Packet
 #include "LegacyReplay.h"
+#include "Overrides.h"
 #include "UString.h"
 #include "cbase.h"
 #include "score.h"
@@ -28,20 +29,6 @@ struct TIMINGPOINT {
 
 Packet load_db(std::string path);
 bool save_db(Packet *db, std::string path);
-
-struct MapOverrides {
-    MD5Hash map_md5;
-    i16 local_offset = 0;
-    i16 online_offset = 0;
-    u16 nb_circles = 0;
-    u16 nb_sliders = 0;
-    u16 nb_spinners = 0;
-    f64 star_rating = 0.0;
-    i32 min_bpm = 0;
-    i32 max_bpm = 0;
-    i32 avg_bpm = 0;
-    u8 draw_background = 1;
-};
 
 class Database {
    public:
@@ -121,6 +108,8 @@ class Database {
     BeatmapSet *loadRawBeatmap(std::string beatmapPath);  // only used for raw loading without db
 
     void loadDB();
+    std::vector<MapOverrides> m_peppy_overrides;
+    std::vector<BeatmapDifficulty *> m_maps_to_recalc;
 
    private:
     friend class DatabaseLoader;
@@ -145,11 +134,8 @@ class Database {
     std::atomic<bool> m_bInterruptLoad;
     std::vector<BeatmapSet *> m_beatmapsets;
     std::vector<BeatmapSet *> m_neosu_sets;
-    std::vector<MapOverrides> m_peppy_overrides;
     std::unordered_map<MD5Hash, BeatmapDifficulty *> m_beatmap_difficulties;
     bool m_neosu_maps_loaded = false;
-
-    std::vector<BeatmapDifficulty *> m_maps_to_recalc;
 
     // osu!.db
     int m_iVersion;

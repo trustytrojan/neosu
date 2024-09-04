@@ -3,6 +3,7 @@
 
 #include "DifficultyCalculator.h"
 #include "Osu.h"
+#include "Overrides.h"
 #include "Resource.h"
 
 using namespace std;
@@ -86,8 +87,78 @@ class DatabaseBeatmap {
         bool isNaN;
     };
 
-    DatabaseBeatmap(std::string filePath, std::string folder);
-    DatabaseBeatmap(std::vector<DatabaseBeatmap *> *difficulties);
+    enum class BeatmapType {
+        NEOSU_BEATMAPSET,
+        PEPPY_BEATMAPSET,
+        NEOSU_DIFFICULTY,
+        PEPPY_DIFFICULTY,
+    };
+
+    // primitive objects
+
+    struct HITCIRCLE {
+        int x, y;
+        u32 time;
+        int sampleType;
+        int number;
+        int colorCounter;
+        int colorOffset;
+        bool clicked;
+    };
+
+    struct SLIDER {
+        int x, y;
+        char type;
+        int repeat;
+        float pixelLength;
+        u32 time;
+        int sampleType;
+        int number;
+        int colorCounter;
+        int colorOffset;
+        std::vector<Vector2> points;
+        std::vector<int> hitSounds;
+
+        float sliderTime;
+        float sliderTimeWithoutRepeats;
+        std::vector<float> ticks;
+
+        std::vector<OsuDifficultyHitObject::SLIDER_SCORING_TIME> scoringTimesForStarCalc;
+    };
+
+    struct SPINNER {
+        int x, y;
+        u32 time;
+        int sampleType;
+        u32 endTime;
+    };
+
+    struct PRIMITIVE_CONTAINER {
+        int errorCode;
+
+        std::vector<HITCIRCLE> hitcircles;
+        std::vector<SLIDER> sliders;
+        std::vector<SPINNER> spinners;
+        std::vector<BREAK> breaks;
+
+        zarray<TIMINGPOINT> timingpoints;
+        std::vector<Color> combocolors;
+
+        float stackLeniency;
+
+        float sliderMultiplier;
+        float sliderTickRate;
+
+        u32 numCircles;
+        u32 numSliders;
+        u32 numSpinners;
+        u32 numHitobjects;
+
+        int version;
+    };
+
+    DatabaseBeatmap(std::string filePath, std::string folder, BeatmapType type);
+    DatabaseBeatmap(std::vector<DatabaseBeatmap *> *difficulties, BeatmapType type);
     ~DatabaseBeatmap();
 
     static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string osuFilePath, float AR, float CS,
@@ -95,19 +166,24 @@ class DatabaseBeatmap {
     static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string osuFilePath, float AR, float CS,
                                                         float speedMultiplier, bool calculateStarsInaccurately,
                                                         const std::atomic<bool> &dead);
+    static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(PRIMITIVE_CONTAINER &c, float AR, float CS,
+                                                        float speedMultiplier, bool calculateStarsInaccurately,
+                                                        const std::atomic<bool> &dead);
     bool loadMetadata(bool compute_md5 = true);
     static LOAD_GAMEPLAY_RESULT loadGameplay(DatabaseBeatmap *databaseBeatmap, BeatmapInterface *beatmap);
+    MapOverrides get_overrides();
+    void update_overrides();
 
-    void setLengthMS(unsigned long lengthMS) { m_iLengthMS = lengthMS; }
+    void setLocalOffset(long localOffset) {
+        m_iLocalOffset = localOffset;
+        update_overrides();
+    }
 
-    void setStarsNoMod(float starsNoMod) { m_fStarsNomod = starsNoMod; }
-
-    void setNumObjects(int numObjects) { m_iNumObjects = numObjects; }
-    void setNumCircles(int numCircles) { m_iNumCircles = numCircles; }
-    void setNumSliders(int numSliders) { m_iNumSliders = numSliders; }
-    void setNumSpinners(int numSpinners) { m_iNumSpinners = numSpinners; }
-
-    void setLocalOffset(long localOffset) { m_iLocalOffset = localOffset; }
+    // TODO @kiwec: unused
+    void setOnlineOffset(long onlineOffset) {
+        m_iOnlineOffset = onlineOffset;
+        update_overrides();
+    }
 
     std::string m_sFolder;    // path to folder containing .osu file (e.g. "/path/to/beatmapfolder/")
     std::string m_sFilePath;  // path to .osu file (e.g. "/path/to/beatmapfolder/beatmap.osu")
@@ -241,64 +317,6 @@ class DatabaseBeatmap {
     long m_iLocalOffset;
     long m_iOnlineOffset;
 
-    // primitive objects
-
-    struct HITCIRCLE {
-        int x, y;
-        u32 time;
-        int sampleType;
-        int number;
-        int colorCounter;
-        int colorOffset;
-        bool clicked;
-    };
-
-    struct SLIDER {
-        int x, y;
-        char type;
-        int repeat;
-        float pixelLength;
-        u32 time;
-        int sampleType;
-        int number;
-        int colorCounter;
-        int colorOffset;
-        std::vector<Vector2> points;
-        std::vector<int> hitSounds;
-
-        float sliderTime;
-        float sliderTimeWithoutRepeats;
-        std::vector<float> ticks;
-
-        std::vector<OsuDifficultyHitObject::SLIDER_SCORING_TIME> scoringTimesForStarCalc;
-    };
-
-    struct SPINNER {
-        int x, y;
-        u32 time;
-        int sampleType;
-        u32 endTime;
-    };
-
-    struct PRIMITIVE_CONTAINER {
-        int errorCode;
-
-        std::vector<HITCIRCLE> hitcircles;
-        std::vector<SLIDER> sliders;
-        std::vector<SPINNER> spinners;
-        std::vector<BREAK> breaks;
-
-        zarray<TIMINGPOINT> timingpoints;
-        std::vector<Color> combocolors;
-
-        float stackLeniency;
-
-        float sliderMultiplier;
-        float sliderTickRate;
-
-        int version;
-    };
-
     struct CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT {
         int errorCode;
     };
@@ -324,6 +342,7 @@ class DatabaseBeatmap {
     unsigned long long m_iSortHack;
 
     std::vector<DatabaseBeatmap *> *m_difficulties = NULL;
+    BeatmapType m_type;
 
     MD5Hash m_sMD5Hash;
 

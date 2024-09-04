@@ -260,6 +260,7 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
     <ClCompile Include="src\app\osu\songbrowser\CollectionButton.cpp" />
     <ClCompile Include="src\app\osu\songbrowser\InfoLabel.cpp" />
     <ClCompile Include="src\App\Osu\SongBrowser\LeaderboardPPCalcThread.cpp" />
+    <ClCompile Include="src\App\Osu\SongBrowser\MapCalcThread.cpp" />
     <ClCompile Include="src\app\osu\songbrowser\ScoreButton.cpp" />
     <ClCompile Include="src\app\osu\songbrowser\SongBrowser.cpp" />
     <ClCompile Include="src\app\osu\songbrowser\SongButton.cpp" />

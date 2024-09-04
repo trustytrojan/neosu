@@ -33,7 +33,7 @@ static BeatmapDifficulty* diff = NULL;
 
 static std::condition_variable cv;
 static std::thread thr;
-static std::atomic<bool> dead = false;
+static std::atomic<bool> dead = true;
 
 static std::mutex work_mtx;
 static std::vector<pp_calc_request> work;

@@ -25,10 +25,10 @@
 
 unsigned long long DatabaseBeatmap::sortHackCounter = 0;
 
-DatabaseBeatmap::DatabaseBeatmap(std::string filePath, std::string folder) {
+DatabaseBeatmap::DatabaseBeatmap(std::string filePath, std::string folder, BeatmapType type) {
     m_sFilePath = filePath;
-
     m_sFolder = folder;
+    m_type = type;
 
     m_iSortHack = sortHackCounter++;
 
@@ -72,7 +72,8 @@ DatabaseBeatmap::DatabaseBeatmap(std::string filePath, std::string folder) {
     m_iOnlineOffset = 0;
 }
 
-DatabaseBeatmap::DatabaseBeatmap(std::vector<DatabaseBeatmap *> *difficulties) : DatabaseBeatmap("", "") {
+DatabaseBeatmap::DatabaseBeatmap(std::vector<DatabaseBeatmap *> *difficulties, BeatmapType type)
+    : DatabaseBeatmap("", "", type) {
     m_difficulties = difficulties;
     if(m_difficulties->empty()) return;
 
@@ -134,6 +135,11 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
 
         c.sliderMultiplier = 1.0f;
         c.sliderTickRate = 1.0f;
+
+        c.numCircles = 0;
+        c.numSliders = 0;
+        c.numSpinners = 0;
+        c.numHitobjects = 0;
 
         c.version = 14;
     }
@@ -461,8 +467,11 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
     }
 
     // late bail if too many hitobjects would run out of memory and crash
-    const size_t numHitobjects = c.hitcircles.size() + c.sliders.size() + c.spinners.size();
-    if(numHitobjects > (size_t)cv_beatmap_max_num_hitobjects.getInt()) {
+    c.numCircles = c.hitcircles.size();
+    c.numSliders = c.sliders.size();
+    c.numSpinners = c.spinners.size();
+    c.numHitobjects = c.numCircles + c.numSliders + c.numSpinners;
+    if(c.numHitobjects > (size_t)cv_beatmap_max_num_hitobjects.getInt()) {
         c.errorCode = 5;
         return c;
     }
@@ -643,14 +652,21 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(c
                                                                                float CS, float speedMultiplier,
                                                                                bool calculateStarsInaccurately,
                                                                                const std::atomic<bool> &dead) {
+    // load primitive arrays
+    PRIMITIVE_CONTAINER c = loadPrimitiveObjects(osuFilePath, dead);
+    return loadDifficultyHitObjects(c, AR, CS, speedMultiplier, calculateStarsInaccurately, dead);
+}
+
+DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(PRIMITIVE_CONTAINER &c, float AR,
+                                                                               float CS, float speedMultiplier,
+                                                                               bool calculateStarsInaccurately,
+                                                                               const std::atomic<bool> &dead) {
     LOAD_DIFFOBJ_RESULT result = LOAD_DIFFOBJ_RESULT();
 
     // build generalized OsuDifficultyHitObjects from the vectors (hitcircles, sliders, spinners)
     // the OsuDifficultyHitObject class is the one getting used in all pp/star calculations, it encompasses every object
     // type for simplicity
 
-    // load primitive arrays
-    PRIMITIVE_CONTAINER c = loadPrimitiveObjects(osuFilePath, dead);
     if(c.errorCode != 0) {
         result.errorCode = c.errorCode;
         return result;
@@ -1137,6 +1153,7 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
 
     // NOTE: reload metadata (force ensures that all necessary data is ready for creating hitobjects and playing etc.,
     // also if beatmap file is changed manually in the meantime)
+    // XXX: file io, md5 calc, all on main thread!!
     if(!databaseBeatmap->loadMetadata()) {
         result.errorCode = 1;
         return result;
@@ -1166,10 +1183,10 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
     }
 
     // update numObjects
-    databaseBeatmap->m_iNumObjects = c.hitcircles.size() + c.sliders.size() + c.spinners.size();
-    databaseBeatmap->m_iNumCircles = c.hitcircles.size();
-    databaseBeatmap->m_iNumSliders = c.sliders.size();
-    databaseBeatmap->m_iNumSpinners = c.spinners.size();
+    databaseBeatmap->m_iNumObjects = c.numHitobjects;
+    databaseBeatmap->m_iNumCircles = c.numCircles;
+    databaseBeatmap->m_iNumSliders = c.numSliders;
+    databaseBeatmap->m_iNumSpinners = c.numSpinners;
 
     // check if we have any hitobjects at all
     if(databaseBeatmap->m_iNumObjects < 1) {
@@ -1313,6 +1330,35 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
     debugLog("DatabaseBeatmap::load() loaded %i hitobjects\n", result.hitobjects.size());
 
     return result;
+}
+
+MapOverrides DatabaseBeatmap::get_overrides() {
+    MapOverrides overrides;
+    overrides.map_md5 = m_sMD5Hash;
+    overrides.local_offset = m_iLocalOffset;
+    overrides.online_offset = m_iOnlineOffset;
+    overrides.nb_circles = m_iNumCircles;
+    overrides.nb_sliders = m_iNumSliders;
+    overrides.nb_spinners = m_iNumSpinners;
+    overrides.star_rating = m_fStarsNomod;
+    overrides.min_bpm = m_iMinBPM;
+    overrides.max_bpm = m_iMaxBPM;
+    overrides.avg_bpm = m_iMostCommonBPM;
+    overrides.draw_background = draw_background;
+    return overrides;
+}
+
+void DatabaseBeatmap::update_overrides() {
+    if(m_type != BeatmapType::PEPPY_DIFFICULTY) return;
+
+    for(auto &override : osu->getSongBrowser()->getDatabase()->m_peppy_overrides) {
+        if(override.map_md5 == m_sMD5Hash) {
+            override = get_overrides();
+            return;
+        }
+    }
+
+    osu->getSongBrowser()->getDatabase()->m_peppy_overrides.push_back(get_overrides());
 }
 
 DatabaseBeatmap::TIMING_INFO DatabaseBeatmap::getTimingInfoForTime(unsigned long positionMS) {

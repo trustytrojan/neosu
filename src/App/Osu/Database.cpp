@@ -18,6 +18,7 @@
 #include "Osu.h"
 #include "ResourceManager.h"
 #include "SongBrowser/LeaderboardPPCalcThread.h"
+#include "SongBrowser/MapCalcThread.h"
 #include "SongBrowser/SongBrowser.h"
 #include "Timer.h"
 #include "score.h"
@@ -218,6 +219,7 @@ class DatabaseLoader : public Resource {
 
         // load database
         lct_set_map(NULL);
+        mct_abort();
         m_db->m_beatmapsets.clear();  // TODO @kiwec: this just leaks memory?
         m_db->loadDB();
 
@@ -266,6 +268,7 @@ Database::~Database() {
     SAFE_DELETE(m_importTimer);
 
     lct_set_map(NULL);
+    mct_abort();
     for(int i = 0; i < m_beatmapsets.size(); i++) {
         delete m_beatmapsets[i];
     }
@@ -771,7 +774,8 @@ void Database::loadDB() {
                 std::string map_path = mapset_path;
                 map_path.append(osu_filename);
 
-                auto diff = new BeatmapDifficulty(map_path, mapset_path);
+                auto diff =
+                    new BeatmapDifficulty(map_path, mapset_path, DatabaseBeatmap::BeatmapType::NEOSU_DIFFICULTY);
                 diff->m_iID = neosu_maps.read<i32>();
                 diff->m_iSetID = set_id;
                 diff->m_sTitle = neosu_maps.read_string();
@@ -820,7 +824,7 @@ void Database::loadDB() {
             if(diffs->empty()) {
                 delete diffs;
             } else {
-                auto set = new BeatmapSet(diffs);
+                auto set = new BeatmapSet(diffs, DatabaseBeatmap::BeatmapType::NEOSU_BEATMAPSET);
                 m_neosu_sets.push_back(set);
 
                 setIDToIndex[set_id] = beatmapSets.size();
@@ -1040,7 +1044,8 @@ void Database::loadDB() {
             // fill diff with data
             if(mode != 0) continue;
 
-            DatabaseBeatmap *diff2 = new DatabaseBeatmap(fullFilePath, beatmapPath);
+            DatabaseBeatmap *diff2 =
+                new DatabaseBeatmap(fullFilePath, beatmapPath, DatabaseBeatmap::BeatmapType::PEPPY_DIFFICULTY);
             {
                 diff2->m_sTitle = songTitle;
                 diff2->m_sAudioFileName = audioFileName;
@@ -1096,6 +1101,9 @@ void Database::loadDB() {
                 }
 
                 if(!bpm_was_cached) {
+                    // TODO @kiwec: this is stupid, if you have 100k maps it will take ages to process
+                    //              instead we should just load timing points if we don't have peppy_overrides for the
+                    //              map and ONLY push to calc if star rating is negative
                     m_maps_to_recalc.push_back(diff2);
                 }
             }
@@ -1152,7 +1160,7 @@ void Database::loadDB() {
             if(beatmapSets[i].diffs2->empty()) continue;  // sanity check
 
             if(beatmapSets[i].setID > 0) {
-                BeatmapSet *set = new BeatmapSet(beatmapSets[i].diffs2);
+                BeatmapSet *set = new BeatmapSet(beatmapSets[i].diffs2, DatabaseBeatmap::BeatmapType::PEPPY_BEATMAPSET);
                 m_beatmapsets.push_back(set);
             } else {
                 // set with invalid ID: treat all its diffs separately. we'll group the diffs by title+artist.
@@ -1171,7 +1179,8 @@ void Database::loadDB() {
                 }
 
                 for(auto scuffed_set : titleArtistToBeatmap) {
-                    BeatmapSet *set = new BeatmapSet(scuffed_set.second);
+                    BeatmapSet *set =
+                        new BeatmapSet(scuffed_set.second, DatabaseBeatmap::BeatmapType::PEPPY_BEATMAPSET);
                     m_beatmapsets.push_back(set);
                 }
             }
@@ -1183,6 +1192,7 @@ void Database::loadDB() {
              m_importTimer->getElapsedTime(), nb_peppy_maps, nb_neosu_maps, nb_peppy_maps + nb_neosu_maps);
 
     debugLog("Maps to recalc: %d\n", m_maps_to_recalc.size());
+    mct_calc(m_maps_to_recalc);
 
     load_collections();
 
@@ -1713,7 +1723,8 @@ BeatmapSet *Database::loadRawBeatmap(std::string beatmapPath) {
         std::string fullFilePath = beatmapPath;
         fullFilePath.append(beatmapFiles[i]);
 
-        BeatmapDifficulty *diff2 = new BeatmapDifficulty(fullFilePath, beatmapPath);
+        BeatmapDifficulty *diff2 =
+            new BeatmapDifficulty(fullFilePath, beatmapPath, DatabaseBeatmap::BeatmapType::NEOSU_DIFFICULTY);
         if(diff2->loadMetadata()) {
             diffs2->push_back(diff2);
         } else {
@@ -1728,7 +1739,7 @@ BeatmapSet *Database::loadRawBeatmap(std::string beatmapPath) {
     if(diffs2->empty()) {
         delete diffs2;
     } else {
-        set = new BeatmapSet(diffs2);
+        set = new BeatmapSet(diffs2, DatabaseBeatmap::BeatmapType::NEOSU_BEATMAPSET);
     }
 
     return set;

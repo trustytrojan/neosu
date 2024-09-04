@@ -999,7 +999,7 @@ ConVar cv_database_ignore_version("osu_database_ignore_version", true, FCVAR_DEF
 ConVar cv_database_ignore_version_warnings("osu_database_ignore_version_warnings", false, FCVAR_DEFAULT);
 ConVar cv_database_version("osu_database_version", OSU_VERSION_DATEONLY, FCVAR_DEFAULT,
                            "maximum supported osu!.db version, above this will use fallback loader");
-ConVar cv_debug("osu_debug", true, FCVAR_DEFAULT);
+ConVar cv_debug("osu_debug", false, FCVAR_DEFAULT);
 ConVar cv_debug_anim("debug_anim", false, FCVAR_DEFAULT);
 ConVar cv_debug_background_star_calc(
     "osu_debug_background_star_calc", false, FCVAR_DEFAULT,
