@@ -896,7 +896,7 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(c
     return result;
 }
 
-bool DatabaseBeatmap::loadMetadata() {
+bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
     if(m_difficulties != NULL) return false;  // we are a beatmapset, not a difficulty
 
     // reset
@@ -904,43 +904,38 @@ bool DatabaseBeatmap::loadMetadata() {
 
     if(cv_debug.getBool()) debugLog("DatabaseBeatmap::loadMetadata() : %s\n", m_sFilePath.c_str());
 
-    // generate MD5 hash (loads entire file, very slow)
-    {
-        File file(m_sFilePath);
-
-        const u8 *beatmapFile = NULL;
-        size_t beatmapFileSize = 0;
-        {
-            if(file.canRead()) {
-                beatmapFile = file.readFile();
-                beatmapFileSize = file.getFileSize();
-            }
-        }
-
-        if(beatmapFile != NULL) {
-            auto hash = md5((u8 *)beatmapFile, beatmapFileSize);
-            m_sMD5Hash = MD5Hash(hash.toUtf8());
-        }
-    }
-
-    // open osu file again, but this time for parsing
-    bool foundAR = false;
-
     File file(m_sFilePath);
-    if(!file.canRead()) {
+    const u8 *beatmapFile = NULL;
+    size_t beatmapFileSize = 0;
+    if(file.canRead()) {
+        beatmapFile = file.readFile();
+        beatmapFileSize = file.getFileSize();
+    } else {
         debugLog("Osu Error: Couldn't read file %s\n", m_sFilePath.c_str());
         return false;
     }
 
-    std::istringstream ss("");
+    // compute MD5 hash (very slow)
+    if(compute_md5) {
+        auto hash = md5((u8 *)beatmapFile, beatmapFileSize);
+        m_sMD5Hash = MD5Hash(hash.toUtf8());
+    }
 
-    // load metadata only
+    // load metadata
+    bool foundAR = false;
     int curBlock = -1;
     unsigned long long timingPointSortHack = 0;
     char stringBuffer[1024];
     std::string curLine;
-    while(file.canRead()) {
-        curLine = file.readLine();
+
+    const u8 *start = beatmapFile;
+    const u8 *end = beatmapFile + beatmapFileSize;
+    while(start < end) {
+        const u8 *lineEnd = (u8 *)memchr(start, '\n', end - start);
+        if(!lineEnd) lineEnd = end;
+
+        std::string curLine((const char *)start, lineEnd - start);
+        start = lineEnd + 1;
 
         // ignore comments, but only if at the beginning of
         // a line (e.g. allow Artist:DJ'TEKINA//SOMETHING)

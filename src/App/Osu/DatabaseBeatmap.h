@@ -95,7 +95,7 @@ class DatabaseBeatmap {
     static LOAD_DIFFOBJ_RESULT loadDifficultyHitObjects(const std::string osuFilePath, float AR, float CS,
                                                         float speedMultiplier, bool calculateStarsInaccurately,
                                                         const std::atomic<bool> &dead);
-    bool loadMetadata();
+    bool loadMetadata(bool compute_md5 = true);
     static LOAD_GAMEPLAY_RESULT loadGameplay(DatabaseBeatmap *databaseBeatmap, BeatmapInterface *beatmap);
 
     void setLengthMS(unsigned long lengthMS) { m_iLengthMS = lengthMS; }
