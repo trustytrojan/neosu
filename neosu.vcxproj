@@ -237,7 +237,6 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
     <ClCompile Include="src\app\osu\ModFPoSu.cpp" />
     <ClCompile Include="src\app\osu\ModSelector.cpp" />
     <ClCompile Include="src\app\osu\Multiplayer.cpp" />
-    <ClCompile Include="src\app\osu\NeosuSettings.cpp" />
     <ClCompile Include="src\app\osu\NotificationOverlay.cpp" />
     <ClCompile Include="src\app\osu\OptionsMenu.cpp" />
     <ClCompile Include="src\app\osu\Osu.cpp" />

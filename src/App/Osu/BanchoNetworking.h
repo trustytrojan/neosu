@@ -23,7 +23,6 @@ enum APIRequestType {
     GET_REPLAY,
     MARK_AS_READ,
     SUBMIT_SCORE,
-    GET_NEOSU_SETTINGS,
 };
 
 struct APIRequest {

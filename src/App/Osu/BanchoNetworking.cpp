@@ -22,7 +22,6 @@
 #include "Engine.h"
 #include "File.h"
 #include "Lobby.h"
-#include "NeosuSettings.h"
 #include "OptionsMenu.h"
 #include "ResourceManager.h"
 #include "RoomScreen.h"
@@ -410,11 +409,6 @@ static void *do_networking() {
 
 static void handle_api_response(Packet packet) {
     switch(packet.id) {
-        case GET_NEOSU_SETTINGS: {
-            process_neosu_settings(packet);
-            break;
-        }
-
         case GET_BEATMAPSET_INFO: {
             process_beatmapset_info_response(packet);
             break;
