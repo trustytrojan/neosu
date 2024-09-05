@@ -1,4 +1,6 @@
 #pragma once
+#include <mutex>
+
 #include "BanchoProtocol.h"  // Packet
 #include "LegacyReplay.h"
 #include "Overrides.h"
@@ -108,8 +110,10 @@ class Database {
     BeatmapSet *loadRawBeatmap(std::string beatmapPath);  // only used for raw loading without db
 
     void loadDB();
+    std::mutex m_peppy_overrides_mtx;
     std::unordered_map<MD5Hash, MapOverrides> m_peppy_overrides;
     std::vector<BeatmapDifficulty *> m_maps_to_recalc;
+    std::vector<BeatmapDifficulty *> m_loudness_to_calc;
 
    private:
     friend class DatabaseLoader;

@@ -1340,6 +1340,7 @@ MapOverrides DatabaseBeatmap::get_overrides() {
     overrides.nb_sliders = m_iNumSliders;
     overrides.nb_spinners = m_iNumSpinners;
     overrides.star_rating = m_fStarsNomod;
+    overrides.loudness = loudness.load();
     overrides.min_bpm = m_iMinBPM;
     overrides.max_bpm = m_iMaxBPM;
     overrides.avg_bpm = m_iMostCommonBPM;
@@ -1349,7 +1350,13 @@ MapOverrides DatabaseBeatmap::get_overrides() {
 
 void DatabaseBeatmap::update_overrides() {
     if(m_type != BeatmapType::PEPPY_DIFFICULTY) return;
-    osu->getSongBrowser()->getDatabase()->m_peppy_overrides[m_sMD5Hash] = get_overrides();
+    auto db = osu->getSongBrowser()->getDatabase();
+
+    // XXX: not actually thread safe, if m_sMD5Hash gets updated by loadGameplay()
+    //      or other values in get_overrides()
+    db->m_peppy_overrides_mtx.lock();
+    db->m_peppy_overrides[m_sMD5Hash] = get_overrides();
+    db->m_peppy_overrides_mtx.unlock();
 }
 
 DatabaseBeatmap::TIMING_INFO DatabaseBeatmap::getTimingInfoForTime(unsigned long positionMS) {

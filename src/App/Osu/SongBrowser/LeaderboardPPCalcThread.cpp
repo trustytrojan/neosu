@@ -2,6 +2,7 @@
 
 #include <mutex>
 
+#include "ConVar.h"
 #include "DatabaseBeatmap.h"
 
 struct hitobject_cache {

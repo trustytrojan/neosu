@@ -625,6 +625,8 @@ extern ConVar cv_letterboxing;
 extern ConVar cv_letterboxing_offset_x;
 extern ConVar cv_letterboxing_offset_y;
 extern ConVar cv_load_beatmap_background_images;
+extern ConVar cv_loudness_fallback;
+extern ConVar cv_loudness_target;
 extern ConVar cv_main_menu_alpha;
 extern ConVar cv_main_menu_banner_always_text;
 extern ConVar cv_main_menu_banner_ifupdatedfromoldversion_le3300_text;

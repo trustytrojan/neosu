@@ -970,60 +970,14 @@ f32 Beatmap::getIdealVolume() {
     if(m_music == NULL) return 1.f;
 
     f32 volume = cv_volume_music.getFloat();
-    if(!cv_normalize_loudness.getBool()) {
-        return volume;
-    }
+    f32 modifier = 1.f;
 
-    static std::string last_song = "";
-    static f32 modifier = 1.f;
-
-    if(m_selectedDifficulty2->getFullSoundFilePath() == last_song) {
-        // We already did the calculation
-        return volume * modifier;
-    }
-
-    auto decoder = BASS_StreamCreateFile(false, m_selectedDifficulty2->getFullSoundFilePath().c_str(), 0, 0,
-                                         BASS_STREAM_DECODE | BASS_SAMPLE_FLOAT);
-    if(!decoder) {
-        debugLog("BASS_StreamCreateFile() returned error %d on file %s\n", BASS_ErrorGetCode(),
-                 m_selectedDifficulty2->getFullSoundFilePath().c_str());
-        return volume;
-    }
-
-    f32 preview_point = m_selectedDifficulty2->getPreviewTime();
-    if(preview_point < 0) preview_point = 0;
-    const QWORD position = BASS_ChannelSeconds2Bytes(decoder, preview_point / 1000.0);
-    if(!BASS_ChannelSetPosition(decoder, position, BASS_POS_BYTE)) {
-        debugLog("BASS_ChannelSetPosition() returned error %d\n", BASS_ErrorGetCode());
-        BASS_ChannelFree(decoder);
-        return volume;
-    }
-
-    auto loudness = BASS_Loudness_Start(decoder, MAKELONG(BASS_LOUDNESS_INTEGRATED, 3000), 0);
-    if(!loudness) {
-        debugLog("BASS_Loudness_Start() returned error %d\n", BASS_ErrorGetCode());
-        BASS_ChannelFree(decoder);
-        return volume;
-    }
-
-    // Process 4 seconds of audio, should be enough for the loudness measurement
-    f32 buf[44100 * 4];
-    BASS_ChannelGetData(decoder, buf, sizeof(buf));
-
-    f32 level = -13.f;
-    BASS_Loudness_GetLevel(loudness, BASS_LOUDNESS_INTEGRATED, &level);
-    if(level == -HUGE_VAL) {
-        debugLog("No loudness information available (silent song?)\n");
-    }
-
-    BASS_Loudness_Stop(loudness);
-    BASS_ChannelFree(decoder);
-
-    last_song = m_selectedDifficulty2->getFullSoundFilePath();
-    modifier = (level / -16.f);
-
-    if(cv_debug.getBool()) {
-        debugLog("Volume set to %.2fx for this song\n", modifier);
+    if(cv_normalize_loudness.getBool()) {
+        if(m_selectedDifficulty2->loudness == 0.f) {
+            modifier = std::pow(10, (cv_loudness_target.getFloat() - cv_loudness_fallback.getFloat()) / 20);
+        } else {
+            modifier = std::pow(10, (cv_loudness_target.getFloat() - m_selectedDifficulty2->loudness) / 20);
+        }
     }
 
     return volume * modifier;

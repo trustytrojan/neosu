@@ -7,7 +7,8 @@ struct MapOverrides {
     u16 nb_circles = 0;
     u16 nb_sliders = 0;
     u16 nb_spinners = 0;
-    f64 star_rating = 0.0;
+    f32 star_rating = 0.0;
+    f32 loudness = 0.f;
     i32 min_bpm = 0;
     i32 max_bpm = 0;
     i32 avg_bpm = 0;

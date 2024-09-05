@@ -1,4 +1,5 @@
 #pragma once
+#include <atomic>
 #include <future>
 
 #include "DifficultyCalculator.h"
@@ -316,6 +317,7 @@ class DatabaseBeatmap {
 
     long m_iLocalOffset;
     long m_iOnlineOffset;
+    std::atomic<f32> loudness = 0.f;
 
     struct CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT {
         int errorCode;

@@ -37,6 +37,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.changes.push_back("- Fixed local scores not saving avatar");
     latest.changes.push_back("- Fixed map settings (like local offset) not getting saved");
     latest.changes.push_back("- Fixed Nightcore getting auto-selected instead of Double Time in some cases");
+    latest.changes.push_back("- Improved loudness normalization");
     latest.changes.push_back("- Merged pp calculation optimizations from McOsu");
     latest.changes.push_back("- Optimized database loading");
     latest.changes.push_back("- Removed DT/HT mods (use speed slider instead)");

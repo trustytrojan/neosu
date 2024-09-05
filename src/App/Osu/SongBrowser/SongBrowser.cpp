@@ -30,6 +30,7 @@
 #include "KeyBindings.h"
 #include "Keyboard.h"
 #include "LeaderboardPPCalcThread.h"
+#include "LoudnessCalcThread.h"
 #include "MainMenu.h"
 #include "MapCalcThread.h"
 #include "ModSelector.h"
@@ -450,6 +451,7 @@ SongBrowser::SongBrowser() : ScreenBackable() {
 
 SongBrowser::~SongBrowser() {
     lct_set_map(NULL);
+    loct_abort();
     mct_abort();
     checkHandleKillBackgroundSearchMatcher();
 
@@ -743,16 +745,26 @@ void SongBrowser::draw(Graphics *g) {
     if(cv_debug.getBool()) m_bottombar->draw_debug(g);
 
     // background task busy notification
+    McFont *font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    i32 calcx = m_userButton->getPos().x + m_userButton->getSize().x + 20;
+    i32 calcy = m_userButton->getPos().y + 30;
     if(mct_total.load() > 0) {
-        McFont *font = engine->getResourceManager()->getFont("FONT_DEFAULT");
-        UString bpmMsg = UString::format("Processing maps (%i/%i) ...", mct_computed.load(), mct_total.load());
-
+        UString msg = UString::format("Calculating stars (%i/%i) ...", mct_computed.load(), mct_total.load());
         g->setColor(0xff333333);
         g->pushTransform();
-        g->translate((int)(m_bottombar->getPos().x + m_bottombar->getSize().x - font->getStringWidth(bpmMsg) - 20),
-                     (int)(m_bottombar->getPos().y + m_bottombar->getSize().y / 2 - font->getHeight() / 2));
-        g->drawString(font, bpmMsg);
+        g->translate(calcx, calcy);
+        g->drawString(font, msg);
         g->popTransform();
+        calcy += font->getHeight() + 10;
+    }
+    if(cv_normalize_loudness.getBool() && loct_total.load() > 0 && loct_computed.load() < loct_total.load()) {
+        UString msg = UString::format("Calculating loudness (%i/%i) ...", loct_computed.load(), loct_total.load());
+        g->setColor(0xff333333);
+        g->pushTransform();
+        g->translate(calcx, calcy);
+        g->drawString(font, msg);
+        g->popTransform();
+        calcy += font->getHeight() + 10;
     }
 
     // no beatmaps found (osu folder is probably invalid)

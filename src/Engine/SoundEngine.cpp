@@ -5,12 +5,15 @@
 #include "CBaseUILabel.h"
 #include "CBaseUISlider.h"
 #include "ConVar.h"
+#include "Database.h"
 #include "Engine.h"
 #include "Environment.h"
 #include "OptionsMenu.h"
 #include "Osu.h"
 #include "PauseMenu.h"
 #include "Skin.h"
+#include "SongBrowser/LoudnessCalcThread.h"
+#include "SongBrowser/SongBrowser.h"
 #include "Sound.h"
 #include "WinEnvironment.h"
 
@@ -627,6 +630,8 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
 void SoundEngine::restart() { setOutputDevice(m_currentOutputDevice); }
 
 void SoundEngine::shutdown() {
+    loct_abort();
+
     if(m_currentOutputDevice.driver == OutputDriver::BASS) {
         BASS_SetDevice(m_currentOutputDevice.id);
         BASS_Free();
@@ -794,6 +799,9 @@ void SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
             osu->getSelectedBeatmap()->getMusic()->setPositionMS(prevMusicPositionMS);
         }
     }
+
+    // resume loudness calc
+    loct_calc(osu->getSongBrowser()->getDatabase()->m_loudness_to_calc);
 
     if(was_playing) {
         osu->music_unpause_scheduled = true;

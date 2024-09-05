@@ -1382,6 +1382,8 @@ ConVar cv_letterboxing("osu_letterboxing", true, FCVAR_DEFAULT);
 ConVar cv_letterboxing_offset_x("osu_letterboxing_offset_x", 0.0f, FCVAR_DEFAULT);
 ConVar cv_letterboxing_offset_y("osu_letterboxing_offset_y", 0.0f, FCVAR_DEFAULT);
 ConVar cv_load_beatmap_background_images("osu_load_beatmap_background_images", true, FCVAR_DEFAULT);
+ConVar cv_loudness_fallback("loudness_fallback", -12.f, FCVAR_DEFAULT | FCVAR_PRIVATE);
+ConVar cv_loudness_target("loudness_target", -14.f, FCVAR_DEFAULT | FCVAR_PRIVATE);
 ConVar cv_main_menu_alpha("osu_main_menu_alpha", 0.8f, FCVAR_DEFAULT);
 ConVar cv_main_menu_banner_always_text("osu_main_menu_banner_always_text", "", FCVAR_DEFAULT);
 ConVar cv_main_menu_banner_ifupdatedfromoldversion_le3300_text(

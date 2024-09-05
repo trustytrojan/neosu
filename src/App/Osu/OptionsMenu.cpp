@@ -30,6 +30,8 @@
 #include "ResourceManager.h"
 #include "Skin.h"
 #include "SliderRenderer.h"
+#include "SongBrowser/LoudnessCalcThread.h"
+#include "SongBrowser/SongBrowser.h"
 #include "SoundEngine.h"
 #include "TooltipOverlay.h"
 #include "UIBackButton.h"
@@ -2954,6 +2956,12 @@ void OptionsMenu::onLoudnessNormalizationToggle(CBaseUICheckbox *checkbox) {
     auto music = osu->getSelectedBeatmap()->getMusic();
     if(music != NULL) {
         music->setVolume(osu->getSelectedBeatmap()->getIdealVolume());
+    }
+
+    if(cv_normalize_loudness.getBool()) {
+        loct_calc(osu->getSongBrowser()->getDatabase()->m_loudness_to_calc);
+    } else {
+        loct_abort();
     }
 }
 

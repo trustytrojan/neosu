@@ -18,6 +18,7 @@
 #include "Osu.h"
 #include "ResourceManager.h"
 #include "SongBrowser/LeaderboardPPCalcThread.h"
+#include "SongBrowser/LoudnessCalcThread.h"
 #include "SongBrowser/MapCalcThread.h"
 #include "SongBrowser/SongBrowser.h"
 #include "Timer.h"
@@ -219,6 +220,7 @@ class DatabaseLoader : public Resource {
 
         // load database
         lct_set_map(NULL);
+        loct_abort();
         mct_abort();
         m_db->m_beatmapsets.clear();  // TODO @kiwec: this just leaks memory?
         m_db->loadDB();
@@ -268,6 +270,7 @@ Database::~Database() {
     SAFE_DELETE(m_importTimer);
 
     lct_set_map(NULL);
+    loct_abort();
     mct_abort();
     for(int i = 0; i < m_beatmapsets.size(); i++) {
         delete m_beatmapsets[i];
@@ -711,6 +714,8 @@ std::string Database::getOsuSongsFolder() {
 }
 
 void Database::loadDB() {
+    m_peppy_overrides_mtx.lock();
+
     std::string osuDbFilePath = cv_osu_folder.getString().toUtf8();
     osuDbFilePath.append("osu!.db");
     BanchoFileReader db(osuDbFilePath.c_str());
@@ -817,6 +822,16 @@ void Database::loadDB() {
                     diff->draw_background = neosu_maps.read<u8>();
                 }
 
+                f32 loudness = 0.f;
+                if(version >= 20240812) {
+                    loudness = neosu_maps.read<f32>();
+                }
+                if(loudness == 0.f) {
+                    m_loudness_to_calc.push_back(diff);
+                } else {
+                    diff->loudness = loudness;
+                }
+
                 diffs->push_back(diff);
                 nb_neosu_maps++;
             }
@@ -842,7 +857,8 @@ void Database::loadDB() {
                 auto map_md5 = neosu_maps.read_hash();
                 over.local_offset = neosu_maps.read<i16>();
                 over.online_offset = neosu_maps.read<i16>();
-                over.star_rating = neosu_maps.read<f64>();
+                over.star_rating = neosu_maps.read<f32>();
+                over.loudness = neosu_maps.read<f32>();
                 over.min_bpm = neosu_maps.read<i32>();
                 over.max_bpm = neosu_maps.read<i32>();
                 over.avg_bpm = neosu_maps.read<i32>();
@@ -1097,12 +1113,18 @@ void Database::loadDB() {
                 diff2->m_iMaxBPM = bpm.max;
                 diff2->m_iMostCommonBPM = bpm.most_common;
 
+                bool loudness_found = false;
                 if(overrides_found) {
                     MapOverrides over = overrides->second;
                     diff2->m_iLocalOffset = over.local_offset;
                     diff2->m_iOnlineOffset = over.online_offset;
                     diff2->m_fStarsNomod = over.star_rating;
+                    diff2->loudness = over.loudness;
                     diff2->draw_background = over.draw_background;
+
+                    if(over.loudness != 0.f) {
+                        loudness_found = true;
+                    }
                 } else {
                     if(numOsuStandardStars <= 0.f) {
                         numOsuStandardStars *= -1.f;
@@ -1113,6 +1135,10 @@ void Database::loadDB() {
                     diff2->m_iOnlineOffset = (long)onlineOffset;
                     diff2->m_fStarsNomod = numOsuStandardStars;
                     diff2->draw_background = 1;
+                }
+
+                if(!loudness_found) {
+                    m_loudness_to_calc.push_back(diff2);
                 }
             }
 
@@ -1199,13 +1225,16 @@ void Database::loadDB() {
     debugLog("peppy+neosu maps: loading took %f seconds (%d peppy, %d neosu, %d maps total)\n",
              m_importTimer->getElapsedTime(), nb_peppy_maps, nb_neosu_maps, nb_peppy_maps + nb_neosu_maps);
 
-    debugLog("Maps to recalc: %d\n", m_maps_to_recalc.size());
+    debugLog("Star calculations to do: %d\n", m_maps_to_recalc.size());
+    debugLog("Maps without loudness info: %d\n", m_loudness_to_calc.size());
     mct_calc(m_maps_to_recalc);
+    loct_calc(m_loudness_to_calc);
 
     load_collections();
 
     // signal that we are done
     m_fLoadingProgress = 1.0f;
+    m_peppy_overrides_mtx.unlock();
 }
 
 void Database::saveMaps() {
@@ -1254,21 +1283,25 @@ void Database::saveMaps() {
             write<i32>(&maps, diff->m_iMaxBPM);
             write<i32>(&maps, diff->m_iMostCommonBPM);
             write<u8>(&maps, diff->draw_background);
+            write<f32>(&maps, diff->loudness.load());
         }
     }
 
     // We want to save settings we applied on peppy-imported maps
+    m_peppy_overrides_mtx.lock();
     write<u32>(&maps, m_peppy_overrides.size());
     for(auto pair : m_peppy_overrides) {
         write_hash(&maps, pair.first);
         write<i16>(&maps, pair.second.local_offset);
         write<i16>(&maps, pair.second.online_offset);
-        write<f64>(&maps, pair.second.star_rating);
+        write<f32>(&maps, pair.second.star_rating);
+        write<f32>(&maps, pair.second.loudness);
         write<i32>(&maps, pair.second.min_bpm);
         write<i32>(&maps, pair.second.max_bpm);
         write<i32>(&maps, pair.second.avg_bpm);
         write<u8>(&maps, pair.second.draw_background);
     }
+    m_peppy_overrides_mtx.unlock();
 
     if(!save_db(&maps, "neosu_maps.db")) {
         debugLog("Couldn't write neosu_maps.db!\n");
