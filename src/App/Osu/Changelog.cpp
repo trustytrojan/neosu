@@ -44,6 +44,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.changes.push_back("- Removed custom HP drain (use nofail instead)");
     latest.changes.push_back("- Removed mandala mod, random mod");
     latest.changes.push_back("- Removed rosu-pp");
+    latest.changes.push_back("- Updated osu! version to b20240820.1");
     latest.changes.push_back("- Linux: Fixed \"Skin.ini\" failing to load");
     changelogs.push_back(latest);
 
