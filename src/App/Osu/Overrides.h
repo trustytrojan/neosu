@@ -2,7 +2,6 @@
 #include "UString.h"
 
 struct MapOverrides {
-    MD5Hash map_md5;
     i16 local_offset = 0;
     i16 online_offset = 0;
     u16 nb_circles = 0;

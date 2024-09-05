@@ -839,7 +839,7 @@ void Database::loadDB() {
             u32 nb_overrides = neosu_maps.read<u32>();
             for(u32 i = 0; i < nb_overrides; i++) {
                 MapOverrides over;
-                over.map_md5 = neosu_maps.read_hash();
+                auto map_md5 = neosu_maps.read_hash();
                 over.local_offset = neosu_maps.read<i16>();
                 over.online_offset = neosu_maps.read<i16>();
                 over.star_rating = neosu_maps.read<f64>();
@@ -847,7 +847,7 @@ void Database::loadDB() {
                 over.max_bpm = neosu_maps.read<i32>();
                 over.avg_bpm = neosu_maps.read<i32>();
                 over.draw_background = neosu_maps.read<u8>();
-                m_peppy_overrides.push_back(over);
+                m_peppy_overrides[map_md5] = over;
             }
         }
     }
@@ -920,7 +920,11 @@ void Database::loadDB() {
             std::string difficultyName = db.read_string();
             trim(&difficultyName);
             std::string audioFileName = db.read_string();
+
             auto md5hash = db.read_hash();
+            auto overrides = m_peppy_overrides.find(md5hash);
+            bool overrides_found = overrides != m_peppy_overrides.end();
+
             std::string osuFileName = db.read_string();
             /*unsigned char rankedStatus = */ db.read<u8>();
             unsigned short numCircles = db.read<u16>();
@@ -973,8 +977,18 @@ void Database::loadDB() {
             duration = duration >= 0 ? duration : 0;       // sanity clamp
             int previewTime = db.read<u32>();
 
+            BPMInfo bpm;
             unsigned int nb_timing_points = db.read<u32>();
-            db.skip_bytes(sizeof(TIMINGPOINT) * nb_timing_points);
+            if(overrides_found) {
+                db.skip_bytes(sizeof(TIMINGPOINT) * nb_timing_points);
+                bpm.min = overrides->second.min_bpm;
+                bpm.max = overrides->second.max_bpm;
+                bpm.most_common = overrides->second.avg_bpm;
+            } else {
+                zarray<TIMINGPOINT> timingPoints(nb_timing_points);
+                db.read_bytes((u8 *)timingPoints.data(), sizeof(TIMINGPOINT) * nb_timing_points);
+                bpm = getBPM(timingPoints);
+            }
 
             int beatmapID = db.read<i32>();  // fucking bullshit, this is NOT an unsigned integer as is described on the
                                              // wiki, it can and is -1 sometimes
@@ -1075,36 +1089,30 @@ void Database::loadDB() {
 
                 diff2->m_sFullSoundFilePath = beatmapPath;
                 diff2->m_sFullSoundFilePath.append(diff2->m_sAudioFileName);
-                diff2->m_iLocalOffset = localOffset;
-                diff2->m_iOnlineOffset = (long)onlineOffset;
                 diff2->m_iNumObjects = numCircles + numSliders + numSpinners;
                 diff2->m_iNumCircles = numCircles;
                 diff2->m_iNumSliders = numSliders;
                 diff2->m_iNumSpinners = numSpinners;
+                diff2->m_iMinBPM = bpm.min;
+                diff2->m_iMaxBPM = bpm.max;
+                diff2->m_iMostCommonBPM = bpm.most_common;
 
-                // NOTE: if we have our own stars/bpm cached then use that
-                bool bpm_was_cached = false;
-                diff2->m_fStarsNomod = numOsuStandardStars;
-
-                for(auto over : m_peppy_overrides) {
-                    if(over.map_md5 == md5hash) {
-                        diff2->m_iLocalOffset = over.local_offset;
-                        diff2->m_iOnlineOffset = over.online_offset;
-                        diff2->m_fStarsNomod = over.star_rating;
-                        diff2->m_iMinBPM = over.min_bpm;
-                        diff2->m_iMaxBPM = over.max_bpm;
-                        diff2->m_iMostCommonBPM = over.avg_bpm;
-                        diff2->draw_background = over.draw_background;
-                        bpm_was_cached = true;
-                        break;
+                if(overrides_found) {
+                    MapOverrides over = overrides->second;
+                    diff2->m_iLocalOffset = over.local_offset;
+                    diff2->m_iOnlineOffset = over.online_offset;
+                    diff2->m_fStarsNomod = over.star_rating;
+                    diff2->draw_background = over.draw_background;
+                } else {
+                    if(numOsuStandardStars <= 0.f) {
+                        numOsuStandardStars *= -1.f;
+                        m_maps_to_recalc.push_back(diff2);
                     }
-                }
 
-                if(!bpm_was_cached) {
-                    // TODO @kiwec: this is stupid, if you have 100k maps it will take ages to process
-                    //              instead we should just load timing points if we don't have peppy_overrides for the
-                    //              map and ONLY push to calc if star rating is negative
-                    m_maps_to_recalc.push_back(diff2);
+                    diff2->m_iLocalOffset = localOffset;
+                    diff2->m_iOnlineOffset = (long)onlineOffset;
+                    diff2->m_fStarsNomod = numOsuStandardStars;
+                    diff2->draw_background = 1;
                 }
             }
 
@@ -1251,15 +1259,15 @@ void Database::saveMaps() {
 
     // We want to save settings we applied on peppy-imported maps
     write<u32>(&maps, m_peppy_overrides.size());
-    for(MapOverrides over : m_peppy_overrides) {
-        write_hash(&maps, over.map_md5);
-        write<i16>(&maps, over.local_offset);
-        write<i16>(&maps, over.online_offset);
-        write<f64>(&maps, over.star_rating);
-        write<i32>(&maps, over.min_bpm);
-        write<i32>(&maps, over.max_bpm);
-        write<i32>(&maps, over.avg_bpm);
-        write<u8>(&maps, over.draw_background);
+    for(auto pair : m_peppy_overrides) {
+        write_hash(&maps, pair.first);
+        write<i16>(&maps, pair.second.local_offset);
+        write<i16>(&maps, pair.second.online_offset);
+        write<f64>(&maps, pair.second.star_rating);
+        write<i32>(&maps, pair.second.min_bpm);
+        write<i32>(&maps, pair.second.max_bpm);
+        write<i32>(&maps, pair.second.avg_bpm);
+        write<u8>(&maps, pair.second.draw_background);
     }
 
     if(!save_db(&maps, "neosu_maps.db")) {

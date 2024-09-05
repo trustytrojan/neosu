@@ -1334,7 +1334,6 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
 
 MapOverrides DatabaseBeatmap::get_overrides() {
     MapOverrides overrides;
-    overrides.map_md5 = m_sMD5Hash;
     overrides.local_offset = m_iLocalOffset;
     overrides.online_offset = m_iOnlineOffset;
     overrides.nb_circles = m_iNumCircles;
@@ -1350,15 +1349,7 @@ MapOverrides DatabaseBeatmap::get_overrides() {
 
 void DatabaseBeatmap::update_overrides() {
     if(m_type != BeatmapType::PEPPY_DIFFICULTY) return;
-
-    for(auto &override : osu->getSongBrowser()->getDatabase()->m_peppy_overrides) {
-        if(override.map_md5 == m_sMD5Hash) {
-            override = get_overrides();
-            return;
-        }
-    }
-
-    osu->getSongBrowser()->getDatabase()->m_peppy_overrides.push_back(get_overrides());
+    osu->getSongBrowser()->getDatabase()->m_peppy_overrides[m_sMD5Hash] = get_overrides();
 }
 
 DatabaseBeatmap::TIMING_INFO DatabaseBeatmap::getTimingInfoForTime(unsigned long positionMS) {

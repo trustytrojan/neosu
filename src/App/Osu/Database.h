@@ -108,7 +108,7 @@ class Database {
     BeatmapSet *loadRawBeatmap(std::string beatmapPath);  // only used for raw loading without db
 
     void loadDB();
-    std::vector<MapOverrides> m_peppy_overrides;
+    std::unordered_map<MD5Hash, MapOverrides> m_peppy_overrides;
     std::vector<BeatmapDifficulty *> m_maps_to_recalc;
 
    private:
