@@ -28,11 +28,9 @@ Changelog::Changelog() : ScreenBackable() {
 
     CHANGELOG latest;
     latest.title = UString::format("%.2f (%s, %s)", cv_version.getFloat(), __DATE__, __TIME__);
-    latest.changes.push_back(
-        "- Added \"tooearly.wav\" and \"toolate.wav\" hitsounds, which play when you hit too early or too late (if "
-        "your skin has them)");
     latest.changes.push_back("- Added \"Actual Flashlight\" mod");
     latest.changes.push_back("- Added keybind to open skin selection menu");
+    latest.changes.push_back("- Added option to change pitch based on hit accuracy");
     latest.changes.push_back("- Added slider instafade setting");
     latest.changes.push_back("- Fixed local scores not saving avatar");
     latest.changes.push_back("- Fixed map settings (like local offset) not getting saved");

@@ -240,9 +240,6 @@ Skin::Skin(UString name, std::string filepath, bool isDefaultSkin) {
     m_spinnerBonus = NULL;
     m_spinnerSpinSound = NULL;
 
-    m_tooearly = NULL;
-    m_toolate = NULL;
-
     m_combobreak = NULL;
     m_failsound = NULL;
     m_applause = NULL;
@@ -881,9 +878,6 @@ void Skin::load() {
     checkLoadSound(&m_spinnerBonus, "spinnerbonus", "OSU_SKIN_SPINNERBONUS_SND", true, true);
     checkLoadSound(&m_spinnerSpinSound, "spinnerspin", "OSU_SKIN_SPINNERSPIN_SND", false, true, true);
 
-    checkLoadSound(&m_tooearly, "tooearly", "OSU_SKIN_TOOEARLY_SND", true, true, false, false, 0.8f);
-    checkLoadSound(&m_toolate, "toolate", "OSU_SKIN_TOOLATE_SND", true, true, false, false, 0.85f);
-
     // others
     checkLoadSound(&m_combobreak, "combobreak", "OSU_SKIN_COMBOBREAK_SND", true, true);
     checkLoadSound(&m_failsound, "failsound", "OSU_SKIN_FAILSOUND_SND");
@@ -1256,13 +1250,12 @@ void Skin::playHitCircleSound(int sampleType, float pan, long delta) {
         pan *= cv_sound_panning_multiplier.getFloat();
     }
 
-    if(delta < 0 && m_tooearly != NULL) {
-        engine->getSound()->play(m_tooearly, pan);
-        return;
-    }
-    if(delta > 0 && m_toolate != NULL) {
-        engine->getSound()->play(m_toolate, pan);
-        return;
+    f32 pitch = 1.f;
+    if(cv_snd_pitch_hitsounds.getBool()) {
+        auto bm = osu->getSelectedBeatmap();
+        if(bm) {
+            pitch += (f32)delta * cv_snd_pitch_hitsounds_factor.getFloat();
+        }
     }
 
     int actualSampleSet = m_iSampleSet;

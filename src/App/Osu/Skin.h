@@ -577,9 +577,6 @@ class Skin {
     Sound *m_spinnerBonus;
     Sound *m_spinnerSpinSound;
 
-    Sound *m_tooearly;
-    Sound *m_toolate;
-
     // Plays when sending a message in chat
     Sound *m_messageSent = NULL;
 

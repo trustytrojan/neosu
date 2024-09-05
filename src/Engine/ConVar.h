@@ -842,6 +842,8 @@ extern ConVar cv_snd_dev_buffer;
 extern ConVar cv_snd_dev_period;
 extern ConVar cv_snd_freq;
 extern ConVar cv_snd_output_device;
+extern ConVar cv_snd_pitch_hitsounds;
+extern ConVar cv_snd_pitch_hitsounds_factor;
 extern ConVar cv_snd_play_interp_duration;
 extern ConVar cv_snd_play_interp_ratio;
 extern ConVar cv_snd_ready_delay;

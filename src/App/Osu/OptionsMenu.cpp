@@ -718,6 +718,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
                 "Whether to always apply all mods, or keep the preview music normal.", &cv_beatmap_preview_mods_live);
 
     addSubSection("Gameplay");
+    addCheckbox("Change hitsound pitch based on accuracy", &cv_snd_pitch_hitsounds);
     addCheckbox("Prefer Nightcore over Double Time",
                 "Automatically selects Nightcore or Daycore when using speed modification mods.",
                 &cv_nightcore_enjoyer);
