@@ -169,8 +169,7 @@ void RichPresence::setStatus(UString status, bool force) {
 
     if(osu->getSongBrowser() != NULL) {
         if(cv_rich_presence_discord_show_totalpp.getBool()) {
-            const int ppRounded =
-                (int)(std::round(osu->getSongBrowser()->getDatabase()->calculatePlayerStats(cv_name.getString()).pp));
+            const int ppRounded = (int)(std::round(db->calculatePlayerStats(cv_name.getString()).pp));
             if(ppRounded > 0) discord->setRichPresence(KEY_DISCORD_STATUS, UString::format("%ipp (Mc)", ppRounded));
         }
     } else if(force && status.length() < 1)

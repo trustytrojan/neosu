@@ -518,7 +518,7 @@ void RoomScreen::on_map_change() {
         m_map_title->setSizeToContent(0, 0);
         m_ready_btn->is_loading = true;
     } else {
-        auto beatmap = osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(bancho.room.map_md5);
+        auto beatmap = db->getBeatmapDifficulty(bancho.room.map_md5);
         if(beatmap != NULL) {
             osu->m_songBrowser2->onDifficultySelected(beatmap, false);
             m_map_title->setText(bancho.room.map_name);

@@ -1311,7 +1311,7 @@ LiveScore::HIT Beatmap::addHitResult(HitObject *hitObject, LiveScore::HIT hit, i
 
     // score
     osu->getScore()->addHitResult(this, hitObject, hit, delta, ignoreOnHitErrorBar, hitErrorBarOnly, ignoreCombo,
-                                  ignoreScore);
+                                  ignoreScore, false);
 
     // health
     LiveScore::HIT returnedHit = LiveScore::HIT::HIT_MISS;
@@ -3380,7 +3380,7 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
         }
 
         if(score.passed) {
-            int scoreIndex = osu->getSongBrowser()->getDatabase()->addScore(score);
+            int scoreIndex = db->addScore(score);
             if(scoreIndex == -1) {
                 osu->getNotificationOverlay()->addNotification("Failed saving score!", 0xffff0000, false, 3.0f);
             }

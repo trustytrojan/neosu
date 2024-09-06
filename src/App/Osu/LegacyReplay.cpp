@@ -182,7 +182,7 @@ LegacyReplay::Info LegacyReplay::from_bytes(u8* data, int s_data) {
     return info;
 }
 
-bool LegacyReplay::load_from_disk(FinishedScore* score) {
+bool LegacyReplay::load_from_disk(FinishedScore* score, bool update_db) {
     if(score->peppy_replay_tms > 0) {
         auto osu_folder = cv_osu_folder.getString();
         auto path = UString::format("%s/Data/r/%s-%llu.osr", osu_folder.toUtf8(), score->beatmap_hash.hash,
@@ -219,14 +219,17 @@ bool LegacyReplay::load_from_disk(FinishedScore* score) {
         delete[] compressed_replay;
     }
 
-    auto& map_scores = (*(osu->getSongBrowser()->getDatabase()->getScores()))[score->beatmap_hash];
-    for(auto& db_score : map_scores) {
-        if(db_score.unixTimestamp != score->unixTimestamp) continue;
-        if(&db_score != score) {
-            db_score.replay = score->replay;
-        }
+    if(update_db) {
+        std::lock_guard<std::mutex> lock(db->m_scores_mtx);
+        auto& map_scores = (*(db->getScores()))[score->beatmap_hash];
+        for(auto& db_score : map_scores) {
+            if(db_score.unixTimestamp != score->unixTimestamp) continue;
+            if(&db_score != score) {
+                db_score.replay = score->replay;
+            }
 
-        break;
+            break;
+        }
     }
 
     return true;
@@ -235,7 +238,7 @@ bool LegacyReplay::load_from_disk(FinishedScore* score) {
 void LegacyReplay::load_and_watch(FinishedScore score) {
     // Check if replay is loaded
     if(score.replay.empty()) {
-        if(!load_from_disk(&score)) {
+        if(!load_from_disk(&score, true)) {
             // @neonet: try loading replay from neonet
 
             if(strcmp(score.server.c_str(), bancho.endpoint.toUtf8()) != 0) {
@@ -267,7 +270,7 @@ void LegacyReplay::load_and_watch(FinishedScore score) {
         return;
     }
 
-    auto beatmap = osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(score.beatmap_hash);
+    auto beatmap = db->getBeatmapDifficulty(score.beatmap_hash);
     if(beatmap == NULL) {
         // XXX: Auto-download beatmap
         osu->m_notificationOverlay->addNotification("Missing beatmap for this replay");

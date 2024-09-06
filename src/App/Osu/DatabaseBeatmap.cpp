@@ -1350,7 +1350,6 @@ MapOverrides DatabaseBeatmap::get_overrides() {
 
 void DatabaseBeatmap::update_overrides() {
     if(m_type != BeatmapType::PEPPY_DIFFICULTY) return;
-    auto db = osu->getSongBrowser()->getDatabase();
 
     // XXX: not actually thread safe, if m_sMD5Hash gets updated by loadGameplay()
     //      or other values in get_overrides()

@@ -159,6 +159,6 @@ void process_leaderboard_response(Packet response) {
     // XXX: We should also separately display either the "personal best" the server sent us,
     //      or the local best, depending on which score is better.
     debugLog("Received online leaderbord for Beatmap ID %d\n", info.beatmap_id);
-    osu->getSongBrowser()->getDatabase()->m_online_scores[beatmap_hash] = std::move(scores);
+    db->m_online_scores[beatmap_hash] = std::move(scores);
     osu->getSongBrowser()->rebuildScoreButtons();
 }

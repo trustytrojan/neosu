@@ -351,7 +351,7 @@ std::unordered_map<i32, i32> beatmap_to_beatmapset;
 DatabaseBeatmap* download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* progress) {
     static i32 queried_map_id = 0;
 
-    auto beatmap = osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(beatmap_md5);
+    auto beatmap = db->getBeatmapDifficulty(beatmap_md5);
     if(beatmap != NULL) {
         *progress = 1.f;
         return beatmap;
@@ -397,10 +397,10 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* pr
     if(*progress != 1.f) return NULL;
 
     auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_id);
-    osu->m_songBrowser2->getDatabase()->addBeatmapSet(mapset_path.toUtf8());
+    db->addBeatmapSet(mapset_path.toUtf8());
     debugLog("Finished loading beatmapset %d.\n", set_id);
 
-    beatmap = osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(beatmap_md5);
+    beatmap = db->getBeatmapDifficulty(beatmap_md5);
     if(beatmap == NULL) {
         beatmap_to_beatmapset[beatmap_id] = 0;
         *progress = -1.f;
@@ -414,7 +414,7 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* pr
 DatabaseBeatmap* download_beatmap(i32 beatmap_id, i32 beatmapset_id, float* progress) {
     static i32 queried_map_id = 0;
 
-    auto beatmap = osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(beatmap_id);
+    auto beatmap = db->getBeatmapDifficulty(beatmap_id);
     if(beatmap != NULL) {
         *progress = 1.f;
         return beatmap;
@@ -467,10 +467,10 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, i32 beatmapset_id, float* prog
     if(*progress != 1.f) return NULL;
 
     auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_id);
-    osu->m_songBrowser2->getDatabase()->addBeatmapSet(mapset_path.toUtf8());
+    db->addBeatmapSet(mapset_path.toUtf8());
     debugLog("Finished loading beatmapset %d.\n", set_id);
 
-    beatmap = osu->getSongBrowser()->getDatabase()->getBeatmapDifficulty(beatmap_id);
+    beatmap = db->getBeatmapDifficulty(beatmap_id);
     if(beatmap == NULL) {
         beatmap_to_beatmapset[beatmap_id] = 0;
         *progress = -1.f;

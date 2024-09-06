@@ -43,6 +43,7 @@
 #include "RoomScreen.h"
 #include "Shader.h"
 #include "Skin.h"
+#include "SongBrowser/ScoreConverterThread.h"
 #include "SongBrowser/SongBrowser.h"
 #include "SoundEngine.h"
 #include "SpectatorScreen.h"
@@ -390,6 +391,8 @@ Osu::Osu() {
 }
 
 Osu::~Osu() {
+    sct_abort();
+
     osu = NULL;
 
     // "leak" UpdateHandler object, but not relevant since shutdown:
@@ -1810,7 +1813,7 @@ bool Osu::onShutdown() {
 
     // save everything
     m_optionsMenu->save();
-    m_songBrowser2->getDatabase()->save();
+    db->save();
 
     disconnect();
 

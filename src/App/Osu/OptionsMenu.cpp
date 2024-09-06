@@ -2960,7 +2960,7 @@ void OptionsMenu::onLoudnessNormalizationToggle(CBaseUICheckbox *checkbox) {
     }
 
     if(cv_normalize_loudness.getBool()) {
-        loct_calc(osu->getSongBrowser()->getDatabase()->m_loudness_to_calc);
+        loct_calc(db->m_loudness_to_calc);
     } else {
         loct_abort();
     }

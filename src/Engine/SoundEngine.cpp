@@ -801,7 +801,7 @@ void SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
     }
 
     // resume loudness calc
-    loct_calc(osu->getSongBrowser()->getDatabase()->m_loudness_to_calc);
+    loct_calc(db->m_loudness_to_calc);
 
     if(was_playing) {
         osu->music_unpause_scheduled = true;

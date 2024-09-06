@@ -109,7 +109,6 @@ class SongBrowser : public ScreenBackable {
     inline bool isInSearch() const { return m_bInSearch; }
     inline bool isRightClickScrolling() const { return m_bSongBrowserRightClickScrolling; }
 
-    inline Database *getDatabase() const { return m_db; }
     inline Beatmap *getSelectedBeatmap() const { return m_selectedBeatmap; }
 
     inline InfoLabel *getInfoLabel() { return m_songInfo; }

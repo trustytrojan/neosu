@@ -20,9 +20,12 @@
 #include "SongBrowser/LeaderboardPPCalcThread.h"
 #include "SongBrowser/LoudnessCalcThread.h"
 #include "SongBrowser/MapCalcThread.h"
+#include "SongBrowser/ScoreConverterThread.h"
 #include "SongBrowser/SongBrowser.h"
 #include "Timer.h"
 #include "score.h"
+
+Database *db = NULL;
 
 // @PPV3: drop load_db/save_db
 Packet load_db(std::string path) {
@@ -216,6 +219,7 @@ class DatabaseLoader : public Resource {
         debugLog("DatabaseLoader::initAsync()\n");
 
         // load scores
+        sct_abort();
         m_db->loadScores();
 
         // load database
@@ -247,7 +251,6 @@ Database::Database() {
     m_iVersion = 0;
     m_iFolderCount = 0;
 
-    m_bDidScoresChangeForSave = false;
     m_bDidScoresChangeForStats = true;
     m_iSortHackCounter = 0;
 
@@ -269,6 +272,7 @@ Database::Database() {
 Database::~Database() {
     SAFE_DELETE(m_importTimer);
 
+    sct_abort();
     lct_set_map(NULL);
     loct_abort();
     mct_abort();
@@ -313,9 +317,11 @@ BeatmapSet *Database::addBeatmapSet(std::string beatmapFolderPath) {
     m_beatmapsets.push_back(beatmap);
     m_neosu_sets.push_back(beatmap);
 
+    m_beatmap_difficulties_mtx.lock();
     for(auto diff : beatmap->getDifficulties()) {
         m_beatmap_difficulties[diff->getMD5Hash()] = diff;
     }
+    m_beatmap_difficulties_mtx.unlock();
 
     osu->m_songBrowser2->addBeatmapSet(beatmap);
 
@@ -329,7 +335,6 @@ int Database::addScore(FinishedScore score) {
     addScoreRaw(score);
     sortScores(score.beatmap_hash);
 
-    m_bDidScoresChangeForSave = true;
     m_bDidScoresChangeForStats = true;
 
     if(cv_scores_save_immediately.getBool()) saveScores();
@@ -350,6 +355,7 @@ int Database::addScore(FinishedScore score) {
     }
 
     // return sorted index
+    std::lock_guard<std::mutex> lock(m_scores_mtx);
     for(int i = 0; i < m_scores[score.beatmap_hash].size(); i++) {
         if(m_scores[score.beatmap_hash][i].unixTimestamp == score.unixTimestamp) return i;
     }
@@ -358,6 +364,7 @@ int Database::addScore(FinishedScore score) {
 }
 
 bool Database::addScoreRaw(const FinishedScore &score) {
+    std::lock_guard<std::mutex> lock(m_scores_mtx);
     for(auto other : m_scores[score.beatmap_hash]) {
         if(other.unixTimestamp == score.unixTimestamp) {
             // Score has already been added
@@ -366,23 +373,26 @@ bool Database::addScoreRaw(const FinishedScore &score) {
     }
 
     m_scores[score.beatmap_hash].push_back(score);
+    if(score.hitdeltas.empty()) {
+        m_scores_to_convert.push_back(score);
+    }
+
     return true;
 }
 
 void Database::deleteScore(MD5Hash beatmapMD5Hash, u64 scoreUnixTimestamp) {
+    std::lock_guard<std::mutex> lock(m_scores_mtx);
     for(int i = 0; i < m_scores[beatmapMD5Hash].size(); i++) {
         if(m_scores[beatmapMD5Hash][i].unixTimestamp == scoreUnixTimestamp) {
             m_scores[beatmapMD5Hash].erase(m_scores[beatmapMD5Hash].begin() + i);
-
-            m_bDidScoresChangeForSave = true;
             m_bDidScoresChangeForStats = true;
-
             break;
         }
     }
 }
 
 void Database::sortScores(MD5Hash beatmapMD5Hash) {
+    std::lock_guard<std::mutex> lock(m_scores_mtx);
     if(m_scores[beatmapMD5Hash].size() < 2) return;
 
     if(cv_songbrowser_scores_sortingtype.getString() == UString("Online Leaderboard")) {
@@ -410,6 +420,7 @@ void Database::sortScores(MD5Hash beatmapMD5Hash) {
 }
 
 std::vector<UString> Database::getPlayerNamesWithPPScores() {
+    std::lock_guard<std::mutex> lock(m_scores_mtx);
     std::vector<MD5Hash> keys;
     keys.reserve(m_scores.size());
 
@@ -438,6 +449,7 @@ std::vector<UString> Database::getPlayerNamesWithPPScores() {
 }
 
 std::vector<UString> Database::getPlayerNamesWithScoresForUserSwitcher() {
+    std::lock_guard<std::mutex> lock(m_scores_mtx);
     std::unordered_set<std::string> tempNames;
     for(auto kv : m_scores) {
         const MD5Hash &key = kv.first;
@@ -460,6 +472,7 @@ std::vector<UString> Database::getPlayerNamesWithScoresForUserSwitcher() {
 }
 
 Database::PlayerPPScores Database::getPlayerPPScores(UString playerName) {
+    std::lock_guard<std::mutex> lock(m_scores_mtx);
     PlayerPPScores ppScores;
     ppScores.totalScore = 0;
     if(getProgress() < 1.0f) return ppScores;
@@ -615,6 +628,7 @@ int Database::getLevelForScore(unsigned long long score, int maxLevel) {
 DatabaseBeatmap *Database::getBeatmapDifficulty(const MD5Hash &md5hash) {
     if(isLoading()) return NULL;
 
+    std::lock_guard<std::mutex> lock(m_beatmap_difficulties_mtx);
     auto it = m_beatmap_difficulties.find(md5hash);
     if(it == m_beatmap_difficulties.end()) {
         return NULL;
@@ -626,6 +640,7 @@ DatabaseBeatmap *Database::getBeatmapDifficulty(const MD5Hash &md5hash) {
 DatabaseBeatmap *Database::getBeatmapDifficulty(i32 map_id) {
     if(isLoading()) return NULL;
 
+    std::lock_guard<std::mutex> lock(m_beatmap_difficulties_mtx);
     for(auto pair : m_beatmap_difficulties) {
         if(pair.second->getID() == map_id) {
             return pair.second;
@@ -714,6 +729,7 @@ std::string Database::getOsuSongsFolder() {
 }
 
 void Database::loadDB() {
+    std::lock_guard<std::mutex> lock(m_beatmap_difficulties_mtx);
     m_peppy_overrides_mtx.lock();
 
     std::string osuDbFilePath = cv_osu_folder.getString().toUtf8();
@@ -832,6 +848,7 @@ void Database::loadDB() {
                     diff->loudness = loudness;
                 }
 
+                m_beatmap_difficulties[diff->m_sMD5Hash] = diff;
                 diffs->push_back(diff);
                 nb_neosu_maps++;
             }
@@ -1157,7 +1174,6 @@ void Database::loadDB() {
             }
 
             // (the diff is now fully built)
-
             m_beatmap_difficulties[md5hash] = diff2;
 
             // now, search if the current set (to which this diff would belong) already exists and add it there, or if
@@ -1229,6 +1245,9 @@ void Database::loadDB() {
     debugLog("Maps without loudness info: %d\n", m_loudness_to_calc.size());
     mct_calc(m_maps_to_recalc);
     loct_calc(m_loudness_to_calc);
+
+    sct_calc(m_scores_to_convert);
+    // @PPV3: save neosu_scores.db once all scores are converted
 
     load_collections();
 
@@ -1314,6 +1333,8 @@ void Database::saveMaps() {
 
 void Database::loadScores() {
     debugLog("Database::loadScores()\n");
+
+    m_scores_to_convert.clear();
 
     if(env->fileExists("neosu_scores.db") && !m_bScoresLoaded) {
         int nb_neosu_scores = 0;
@@ -1434,9 +1455,6 @@ void Database::loadScores() {
 
     u32 nb_old_neosu_imported = importOldNeosuScores();
     u32 nb_peppy_imported = importPeppyScores();
-
-    // TODO @kiwec: convert scores to ppv3 format in the background
-    //              then if nb_old_neosu_imported > 0, delete scores.db after saving neosu_scores.db
 }
 
 u32 Database::importOldNeosuScores() {
@@ -1638,9 +1656,7 @@ u32 Database::importPeppyScores() {
 }
 
 void Database::saveScores() {
-    if(!m_bDidScoresChangeForSave) return;
-    m_bDidScoresChangeForSave = false;
-
+    std::lock_guard<std::mutex> lock(m_scores_mtx);
     if(m_scores.empty()) return;
 
     debugLog("Osu: Saving scores ...\n");
@@ -1667,7 +1683,6 @@ void Database::saveScores() {
         db.write<u32>(it.second.size());
 
         for(auto &score : it.second) {
-            // TODO @kiwec: only read/write mod modifier cvars if relevant mod flag is set
             db.write<u64>(score.mods.flags);
             db.write<f32>(score.mods.speed);
             db.write<i32>(score.mods.notelock_type);

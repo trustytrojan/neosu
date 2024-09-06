@@ -242,7 +242,8 @@ f32 SimulatedBeatmap::getOD() const {
     if(mods.od_override >= 0.0f) OD = mods.od_override;
 
     if(mods.flags & Replay::ModFlags::ODOverrideLock)
-        OD = GameRules::getRawConstantOverallDifficultyForSpeedMultiplier(GameRules::getRawHitWindow300(OD), mods.speed);
+        OD =
+            GameRules::getRawConstantOverallDifficultyForSpeedMultiplier(GameRules::getRawHitWindow300(OD), mods.speed);
 
     return OD;
 }
@@ -305,8 +306,8 @@ LiveScore::HIT SimulatedBeatmap::addHitResult(HitObject *hitObject, LiveScore::H
     }
 
     // score
-    live_score.addHitResult(this, hitObject, hit, delta, ignoreOnHitErrorBar, hitErrorBarOnly, ignoreCombo,
-                            ignoreScore);
+    live_score.addHitResult(this, hitObject, hit, delta, ignoreOnHitErrorBar, hitErrorBarOnly, ignoreCombo, ignoreScore,
+                            true);
 
     // health
     LiveScore::HIT returnedHit = LiveScore::HIT::HIT_MISS;

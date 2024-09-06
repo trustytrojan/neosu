@@ -262,6 +262,7 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
     <ClCompile Include="src\App\Osu\SongBrowser\LoudnessCalcThread.cpp" />
     <ClCompile Include="src\App\Osu\SongBrowser\MapCalcThread.cpp" />
     <ClCompile Include="src\app\osu\songbrowser\ScoreButton.cpp" />
+    <ClCompile Include="src\App\Osu\SongBrowser\ScoreConverterThread.cpp" />
     <ClCompile Include="src\app\osu\songbrowser\SongBrowser.cpp" />
     <ClCompile Include="src\app\osu\songbrowser\SongButton.cpp" />
     <ClCompile Include="src\app\osu\songbrowser\SongDifficultyButton.cpp" />

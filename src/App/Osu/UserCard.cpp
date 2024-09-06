@@ -225,7 +225,7 @@ void UserCard::mouse_update(bool *propagate_clicks) {
 }
 
 void UserCard::updateUserStats() {
-    Database::PlayerStats stats = osu->getSongBrowser()->getDatabase()->calculatePlayerStats(m_sText);
+    Database::PlayerStats stats = db->calculatePlayerStats(m_sText);
 
     if(m_user_id > 0) {
         UserInfo *my = get_user_info(m_user_id);

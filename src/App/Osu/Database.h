@@ -75,7 +75,6 @@ class Database {
     void deleteScore(MD5Hash beatmapMD5Hash, u64 scoreUnixTimestamp);
     void sortScores(MD5Hash beatmapMD5Hash);
     void forceScoreUpdateOnNextCalculatePlayerStats() { m_bDidScoresChangeForStats = true; }
-    void forceScoresSaveOnNextShutdown() { m_bDidScoresChangeForSave = true; }
 
     std::vector<UString> getPlayerNamesWithPPScores();
     std::vector<UString> getPlayerNamesWithScoresForUserSwitcher();
@@ -114,6 +113,9 @@ class Database {
     std::unordered_map<MD5Hash, MapOverrides> m_peppy_overrides;
     std::vector<BeatmapDifficulty *> m_maps_to_recalc;
     std::vector<BeatmapDifficulty *> m_loudness_to_calc;
+    std::vector<FinishedScore> m_scores_to_convert;
+
+    std::mutex m_scores_mtx;
 
    private:
     friend class DatabaseLoader;
@@ -138,7 +140,10 @@ class Database {
     std::atomic<bool> m_bInterruptLoad;
     std::vector<BeatmapSet *> m_beatmapsets;
     std::vector<BeatmapSet *> m_neosu_sets;
+
+    std::mutex m_beatmap_difficulties_mtx;
     std::unordered_map<MD5Hash, BeatmapDifficulty *> m_beatmap_difficulties;
+
     bool m_neosu_maps_loaded = false;
 
     // osu!.db
@@ -147,10 +152,13 @@ class Database {
 
     // scores.db (legacy and custom)
     bool m_bScoresLoaded = false;
+
     std::unordered_map<MD5Hash, std::vector<FinishedScore>> m_scores;
-    bool m_bDidScoresChangeForSave;
+
     bool m_bDidScoresChangeForStats;
     unsigned long long m_iSortHackCounter;
     PlayerStats m_prevPlayerStats;
     std::vector<SCORE_SORTING_METHOD> m_scoreSortingMethods;
 };
+
+extern Database *db;

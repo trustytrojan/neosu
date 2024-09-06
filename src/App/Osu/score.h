@@ -108,9 +108,11 @@ class LiveScore {
 
     void reset();  // only Beatmap may call this function!
 
+    // only Beatmap/SimulatedBeatmap may call this function!
     void addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, LiveScore::HIT hit, long delta,
-                      bool ignoreOnHitErrorBar, bool hitErrorBarOnly, bool ignoreCombo,
-                      bool ignoreScore);  // only Beatmap may call this function!
+                      bool ignoreOnHitErrorBar, bool hitErrorBarOnly, bool ignoreCombo, bool ignoreScore,
+                      bool simulating);
+
     void addHitResultComboEnd(LiveScore::HIT hit);
     void addSliderBreak();  // only Beatmap may call this function!
     void addPoints(int points, bool isSpinner);

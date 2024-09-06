@@ -205,7 +205,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                         continue;
                     }
 
-                    osu->getSongBrowser()->getDatabase()->addBeatmapSet(mapset_dir);
+                    db->addBeatmapSet(mapset_dir);
                     if(!osu->getSongBrowser()->selectBeatmapset(set_id)) {
                         osu->getNotificationOverlay()->addNotification("Failed to import beatmapset");
                         continue;

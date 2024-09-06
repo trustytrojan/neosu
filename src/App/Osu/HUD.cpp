@@ -1271,12 +1271,12 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
             scores.push_back(std::move(scoreEntry));
         }
     } else {
-        auto m_db = osu->getSongBrowser()->getDatabase();
-        std::vector<FinishedScore> *singleplayer_scores = &((*m_db->getScores())[beatmap_md5]);
+        std::lock_guard<std::mutex> lock(db->m_scores_mtx);
+        std::vector<FinishedScore> *singleplayer_scores = &((*db->getScores())[beatmap_md5]);
         bool is_online = cv_songbrowser_scores_sortingtype.getString() == UString("Online Leaderboard");
         if(is_online) {
-            auto search = m_db->m_online_scores.find(beatmap_md5);
-            if(search != m_db->m_online_scores.end()) {
+            auto search = db->m_online_scores.find(beatmap_md5);
+            if(search != db->m_online_scores.end()) {
                 singleplayer_scores = &search->second;
             }
         }

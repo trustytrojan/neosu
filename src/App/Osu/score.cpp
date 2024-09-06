@@ -68,7 +68,8 @@ void LiveScore::reset() {
 }
 
 void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, HIT hit, long delta,
-                             bool ignoreOnHitErrorBar, bool hitErrorBarOnly, bool ignoreCombo, bool ignoreScore) {
+                             bool ignoreOnHitErrorBar, bool hitErrorBarOnly, bool ignoreCombo, bool ignoreScore,
+                             bool simulating) {
     const int scoreComboMultiplier =
         max(m_iCombo - 1, 0);  // current combo, excluding the current hitobject which caused the addHitResult() call
 
@@ -76,17 +77,19 @@ void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, HI
     if(hit != LiveScore::HIT::HIT_MISS) {
         if(!ignoreOnHitErrorBar) {
             m_hitdeltas.push_back((int)delta);
-            osu->getHUD()->addHitError(delta);
+            if(!simulating) osu->getHUD()->addHitError(delta);
         }
 
         if(!ignoreCombo) {
             m_iCombo++;
-            osu->getHUD()->animateCombo();
+            if(!simulating) osu->getHUD()->animateCombo();
         }
     } else  // misses
     {
-        if(cv_hiterrorbar_misses.getBool() && !ignoreOnHitErrorBar && delta <= (long)beatmap->getHitWindow50())
+        if(!simulating && !ignoreOnHitErrorBar && cv_hiterrorbar_misses.getBool() &&
+           delta <= (long)beatmap->getHitWindow50()) {
             osu->getHUD()->addHitError(delta, true);
+        }
 
         m_iCombo = 0;
     }
@@ -132,6 +135,7 @@ void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, HI
     if(!ignoreScore) {
         const int difficultyMultiplier = beatmap->getScoreV1DifficultyMultiplier();
         m_iScoreV1 += hitValue;
+        // @PPV3: invalid simulation due to global access
         m_iScoreV1 += ((hitValue *
                         (u32)((f64)scoreComboMultiplier * (f64)difficultyMultiplier * (f64)osu->getScoreMultiplier())) /
                        (u32)25);
@@ -151,10 +155,11 @@ void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, HI
 
     // recalculate score v2
     m_iScoreV2ComboPortion += (unsigned long long)((double)hitValue * (1.0 + (double)scoreComboMultiplier / 10.0));
-    if(osu->getModScorev2()) {
+    if(osu->getModScorev2()) {  // @PPV3: invalid simulation due to global access
         const double maximumAccurateHits = beatmap->nb_hitobjects;
 
         if(totalNumHits > 0)
+            // @PPV3: invalid simulation due to global access
             m_iScoreV2 = (unsigned long long)(((double)m_iScoreV2ComboPortion /
                                                    (double)beatmap->m_iScoreV2ComboPortionMaximum * 700000.0 +
                                                pow((double)m_fAccuracy, 10.0) *
@@ -168,10 +173,14 @@ void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, HI
     if(percent300s > 0.6f) m_grade = FinishedScore::Grade::C;
     if((percent300s > 0.7f && m_iNumMisses == 0) || (percent300s > 0.8f)) m_grade = FinishedScore::Grade::B;
     if((percent300s > 0.8f && m_iNumMisses == 0) || (percent300s > 0.9f)) m_grade = FinishedScore::Grade::A;
-    if(percent300s > 0.9f && percent50s <= 0.01f && m_iNumMisses == 0)
+    if(percent300s > 0.9f && percent50s <= 0.01f && m_iNumMisses == 0) {
+        // @PPV3: invalid simulation due to global access
         m_grade = osu->getModHD() || osu->getModFlashlight() ? FinishedScore::Grade::SH : FinishedScore::Grade::S;
-    if(m_iNumMisses == 0 && m_iNum50s == 0 && m_iNum100s == 0)
+    }
+    if(m_iNumMisses == 0 && m_iNum50s == 0 && m_iNum100s == 0) {
+        // @PPV3: invalid simulation due to global access
         m_grade = osu->getModHD() || osu->getModFlashlight() ? FinishedScore::Grade::XH : FinishedScore::Grade::X;
+    }
 
     // recalculate unstable rate
     float averageDelta = 0.0f;
@@ -243,7 +252,9 @@ void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, HI
     // recalculate max combo
     if(m_iCombo > m_iComboMax) m_iComboMax = m_iCombo;
 
-    onScoreChange();
+    if(!simulating) {
+        onScoreChange();
+    }
 }
 
 void LiveScore::addHitResultComboEnd(LiveScore::HIT hit) {

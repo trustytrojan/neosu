@@ -43,6 +43,7 @@
 #include "RichPresence.h"
 #include "RoomScreen.h"
 #include "ScoreButton.h"
+#include "ScoreConverterThread.h"
 #include "Skin.h"
 #include "SkinImage.h"
 #include "SongBrowser.h"
@@ -430,6 +431,7 @@ SongBrowser::SongBrowser() : ScreenBackable() {
 
     // beatmap database
     m_db = new Database();
+    db = m_db;
     m_bBeatmapRefreshScheduled = true;
 
     // behaviour
@@ -450,6 +452,7 @@ SongBrowser::SongBrowser() : ScreenBackable() {
 }
 
 SongBrowser::~SongBrowser() {
+    sct_abort();
     lct_set_map(NULL);
     loct_abort();
     mct_abort();
@@ -766,6 +769,15 @@ void SongBrowser::draw(Graphics *g) {
         g->popTransform();
         calcy += font->getHeight() + 10;
     }
+    if(sct_total.load() > 0 && sct_computed.load() < sct_total.load()) {
+        UString msg = UString::format("Converting scores (%i/%i) ...", sct_computed.load(), sct_total.load());
+        g->setColor(0xff333333);
+        g->pushTransform();
+        g->translate(calcx, calcy);
+        g->drawString(font, msg);
+        g->popTransform();
+        calcy += font->getHeight() + 10;
+    }
 
     // no beatmaps found (osu folder is probably invalid)
     if(m_beatmaps.size() == 0 && !m_bBeatmapRefreshScheduled) {
@@ -826,14 +838,14 @@ void SongBrowser::drawSelectedBeatmapBackgroundImage(Graphics *g, float alpha) {
 }
 
 bool SongBrowser::selectBeatmapset(i32 set_id) {
-    auto beatmapset = getDatabase()->getBeatmapSet(set_id);
+    auto beatmapset = db->getBeatmapSet(set_id);
     if(beatmapset == NULL) {
         // Pasted from Downloader::download_beatmap
         auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_id);
-        getDatabase()->addBeatmapSet(mapset_path.toUtf8());
+        db->addBeatmapSet(mapset_path.toUtf8());
         debugLog("Finished loading beatmapset %d.\n", set_id);
 
-        beatmapset = getDatabase()->getBeatmapSet(set_id);
+        beatmapset = db->getBeatmapSet(set_id);
     }
 
     if(beatmapset == NULL) {
@@ -882,7 +894,7 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
         mct_abort();  // join thread
 
         // XXX: this is mega freezing. maybe do in steps instead of all at once
-        auto &maps = getDatabase()->m_maps_to_recalc;
+        auto &maps = db->m_maps_to_recalc;
         for(int i = 0; i < mct_results.size(); i++) {
             // NOTE: not double checking md5 here. might be a mistake
             auto diff = maps[i];
@@ -2431,6 +2443,7 @@ void SongBrowser::rebuildScoreButtons() {
 
     std::vector<FinishedScore> scores;
     if(validBeatmap) {
+        std::lock_guard<std::mutex> lock(m_db->m_scores_mtx);
         auto diff2 = m_selectedBeatmap->getSelectedDifficulty2();
         auto local_scores = (*m_db->getScores())[diff2->getMD5Hash()];
         auto local_best = max_element(local_scores.begin(), local_scores.end(),
@@ -2754,7 +2767,7 @@ void SongBrowser::onDatabaseLoadingFinished() {
     if(cv_songbrowser_search_hardcoded_filter.getString().length() > 0) onSearchUpdate();
 
     if(beatmap_to_reselect_after_db_load.hash[0] != 0) {
-        auto beatmap = getDatabase()->getBeatmapDifficulty(beatmap_to_reselect_after_db_load);
+        auto beatmap = db->getBeatmapDifficulty(beatmap_to_reselect_after_db_load);
         if(beatmap) {
             onDifficultySelected(beatmap, false);
             selectSelectedBeatmapSongButton();
