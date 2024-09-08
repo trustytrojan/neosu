@@ -585,7 +585,9 @@ void Circle::onReset(long curPos) {
     m_bWaiting = false;
     m_fShakeAnimation = 0.0f;
 
-    anim->deleteExistingAnimation(&m_fHitAnimation);
+    if(bm != NULL) {
+        anim->deleteExistingAnimation(&m_fHitAnimation);
+    }
 
     if(m_iTime > curPos) {
         m_bFinished = false;

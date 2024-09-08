@@ -1259,6 +1259,11 @@ void Slider::onReset(long curPos) {
 
     if(bm != NULL) {
         bm->getSkin()->stopSliderSlideSound();
+
+        anim->deleteExistingAnimation(&m_fFollowCircleTickAnimationScale);
+        anim->deleteExistingAnimation(&m_fStartHitAnimation);
+        anim->deleteExistingAnimation(&m_fEndHitAnimation);
+        anim->deleteExistingAnimation(&m_fEndSliderBodyFadeAnimation);
     }
 
     m_iStrictTrackingModLastClickHeldTime = 0;
@@ -1272,11 +1277,6 @@ void Slider::onReset(long curPos) {
     m_endResult = LiveScore::HIT::HIT_NULL;
 
     m_iCurRepeatCounterForHitSounds = 0;
-
-    anim->deleteExistingAnimation(&m_fFollowCircleTickAnimationScale);
-    anim->deleteExistingAnimation(&m_fStartHitAnimation);
-    anim->deleteExistingAnimation(&m_fEndHitAnimation);
-    anim->deleteExistingAnimation(&m_fEndSliderBodyFadeAnimation);
 
     if(m_iTime > curPos) {
         m_bStartFinished = false;

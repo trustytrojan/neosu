@@ -29,7 +29,7 @@ void trim(std::string *str) {
     while(!str->empty() && str->front() == ' ') {
         str->erase(0, 1);
     }
-    while(!str->empty() && str->back() == ' ') {
+    while(!str->empty() && (str->back() == ' ' || str->back() == '\r')) {
         str->pop_back();
     }
 }
