@@ -451,7 +451,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     m_fSearchOnCharKeybindHackTime = 0.0f;
 
     m_notelockTypes.push_back("None");
-    m_notelockTypes.push_back("neosu");
+    m_notelockTypes.push_back("McOsu");
     m_notelockTypes.push_back("osu!stable (default)");
     m_notelockTypes.push_back("osu!lazer 2020");
 
@@ -972,7 +972,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     addLabel("");
     addLabel("Info about different notelock algorithms:")->setTextColor(0xff666666);
     addLabel("");
-    addLabel("- neosu: Auto miss previous circle, always.")->setTextColor(0xff666666);
+    addLabel("- McOsu: Auto miss previous circle, always.")->setTextColor(0xff666666);
     addLabel("- osu!stable: Locked until previous circle is miss.")->setTextColor(0xff666666);
     addLabel("- osu!lazer 2020: Auto miss previous circle if > time.")->setTextColor(0xff666666);
     addLabel("");
