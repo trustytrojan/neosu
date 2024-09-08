@@ -545,6 +545,8 @@ bool Beatmap::spectate() {
 bool Beatmap::start() {
     if(m_selectedDifficulty2 == NULL) return false;
 
+    osu->should_pause_background_threads = true;
+
     engine->getSound()->play(osu->m_skin->getMenuHit());
 
     osu->updateMods();
@@ -631,6 +633,7 @@ bool Beatmap::start() {
                 } break;
             }
 
+            osu->should_pause_background_threads = false;
             return false;
         }
 
@@ -919,6 +922,8 @@ void Beatmap::stop(bool quit) {
     } else {
         osu->onPlayEnd(score, quit);
     }
+
+    osu->should_pause_background_threads = false;
 }
 
 void Beatmap::fail() {

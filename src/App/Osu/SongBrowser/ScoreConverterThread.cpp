@@ -1,5 +1,7 @@
 #include "ScoreConverterThread.h"
 
+#include <chrono>
+
 #include "Database.h"
 #include "DatabaseBeatmap.h"
 #include "Engine.h"
@@ -18,6 +20,10 @@ static void run_sct() {
 
     i32 idx = 0;
     for(auto score : scores) {
+        while(osu->should_pause_background_threads.load() && !dead.load()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+
         if(dead.load()) return;
 
         if(score.replay.empty()) {

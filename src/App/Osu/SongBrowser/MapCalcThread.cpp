@@ -1,5 +1,6 @@
 #include "MapCalcThread.h"
 
+#include <chrono>
 #include <thread>
 
 #include "DatabaseBeatmap.h"
@@ -18,6 +19,10 @@ static void run_mct() {
     std::vector<f64> speedStrains;
 
     for(auto diff2 : maps) {
+        while(osu->should_pause_background_threads.load() && !dead.load()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+
         if(dead.load()) return;
         aimStrains.clear();
         speedStrains.clear();

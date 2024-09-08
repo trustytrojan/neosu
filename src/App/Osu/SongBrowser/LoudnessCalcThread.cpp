@@ -1,5 +1,7 @@
 #include "LoudnessCalcThread.h"
 
+#include <chrono>
+
 #include "DatabaseBeatmap.h"
 #include "Engine.h"
 #include "Sound.h"
@@ -24,6 +26,10 @@ static void run_loct() {
     // XXX: This seems really slow. Need to find out how to get BASS to do more work.
 
     for(auto diff2 : maps) {
+        while(osu->should_pause_background_threads.load() && !dead.load()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+
         if(dead.load()) return;
         if(diff2->loudness.load() != 0.f) continue;
 

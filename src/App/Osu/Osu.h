@@ -306,6 +306,7 @@ class Osu : public App, public MouseListener {
     bool m_bFontReloadScheduled;
     bool m_bFireResolutionChangedScheduled;
     bool m_bFireDelayedFontReloadAndResolutionChangeToFixDesyncedUIScaleScheduled;
+    std::atomic<bool> should_pause_background_threads = false;
 };
 
 extern Osu *osu;
