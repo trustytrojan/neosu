@@ -23,6 +23,7 @@ void LiveScore::reset() {
     m_hitdeltas = std::vector<int>();
 
     m_grade = FinishedScore::Grade::N;
+    updateMods();
 
     m_fStarsTomTotal = 0.0f;
     m_fStarsTomAim = 0.0f;
@@ -385,62 +386,6 @@ int LiveScore::getKeyCount(int key) {
 }
 
 Replay::Mods LiveScore::getMods() {
-    // XXX: Ideally we would only use Replay::Mods instead of setting 100000 bools across the codebase
-    Replay::Mods mods;
-    if(osu->m_bModNF) mods.flags |= Replay::ModFlags::NoFail;
-    if(osu->m_bModEZ) mods.flags |= Replay::ModFlags::Easy;
-    if(osu->m_bModAutopilot) mods.flags |= Replay::ModFlags::Autopilot;
-    if(osu->m_bModRelax) mods.flags |= Replay::ModFlags::Relax;
-    if(osu->m_bModHD) mods.flags |= Replay::ModFlags::Hidden;
-    if(osu->m_bModHR) mods.flags |= Replay::ModFlags::HardRock;
-    if(osu->m_bModFlashlight) mods.flags |= Replay::ModFlags::Flashlight;
-    if(osu->m_bModSD) mods.flags |= Replay::ModFlags::SuddenDeath;
-    if(osu->m_bModSS) mods.flags |= Replay::ModFlags::Perfect;
-    if(osu->m_bModNightmare) mods.flags |= Replay::ModFlags::Nightmare;
-    if(cv_nightcore_enjoyer.getBool()) mods.flags |= Replay::ModFlags::NoPitchCorrection;
-    if(osu->m_bModTD) mods.flags |= Replay::ModFlags::TouchDevice;
-    if(osu->m_bModSpunout) mods.flags |= Replay::ModFlags::SpunOut;
-    if(osu->m_bModScorev2) mods.flags |= Replay::ModFlags::ScoreV2;
-    if(cv_mod_fposu.getBool()) mods.flags |= Replay::ModFlags::FPoSu;
-    if(osu->m_bModTarget) mods.flags |= Replay::ModFlags::Target;
-    if(cv_ar_override_lock.getBool()) mods.flags |= Replay::ModFlags::AROverrideLock;
-    if(cv_od_override_lock.getBool()) mods.flags |= Replay::ModFlags::ODOverrideLock;
-    if(cv_mod_timewarp.getBool()) mods.flags |= Replay::ModFlags::Timewarp;
-    if(cv_mod_artimewarp.getBool()) mods.flags |= Replay::ModFlags::ARTimewarp;
-    if(cv_mod_minimize.getBool()) mods.flags |= Replay::ModFlags::Minimize;
-    if(cv_mod_jigsaw1.getBool()) mods.flags |= Replay::ModFlags::Jigsaw1;
-    if(cv_mod_jigsaw2.getBool()) mods.flags |= Replay::ModFlags::Jigsaw2;
-    if(cv_mod_wobble.getBool()) mods.flags |= Replay::ModFlags::Wobble1;
-    if(cv_mod_wobble2.getBool()) mods.flags |= Replay::ModFlags::Wobble2;
-    if(cv_mod_arwobble.getBool()) mods.flags |= Replay::ModFlags::ARWobble;
-    if(cv_mod_fullalternate.getBool()) mods.flags |= Replay::ModFlags::FullAlternate;
-    if(cv_mod_shirone.getBool()) mods.flags |= Replay::ModFlags::Shirone;
-    if(cv_mod_mafham.getBool()) mods.flags |= Replay::ModFlags::Mafham;
-    if(cv_mod_halfwindow.getBool()) mods.flags |= Replay::ModFlags::HalfWindow;
-    if(cv_mod_halfwindow_allow_300s.getBool()) mods.flags |= Replay::ModFlags::HalfWindowAllow300s;
-    if(cv_mod_ming3012.getBool()) mods.flags |= Replay::ModFlags::Ming3012;
-    if(cv_mod_no100s.getBool()) mods.flags |= Replay::ModFlags::No100s;
-    if(cv_mod_no50s.getBool()) mods.flags |= Replay::ModFlags::No50s;
-
-    mods.speed = osu->getSpeedMultiplier();
-    mods.notelock_type = cv_notelock_type.getInt();
-    mods.autopilot_lenience = cv_autopilot_lenience.getFloat();
-    mods.ar_override = cv_ar_override.getFloat();
-    mods.ar_overridenegative = cv_ar_overridenegative.getFloat();
-    mods.cs_override = cv_cs_override.getFloat();
-    mods.cs_overridenegative = cv_cs_overridenegative.getFloat();
-    mods.hp_override = cv_hp_override.getFloat();
-    mods.od_override = cv_od_override.getFloat();
-    mods.timewarp_multiplier = cv_mod_timewarp_multiplier.getFloat();
-    mods.minimize_multiplier = cv_mod_minimize_multiplier.getFloat();
-    mods.artimewarp_multiplier = cv_mod_artimewarp_multiplier.getFloat();
-    mods.arwobble_strength = cv_mod_arwobble_strength.getFloat();
-    mods.arwobble_interval = cv_mod_arwobble_interval.getFloat();
-    mods.wobble_strength = cv_mod_wobble_strength.getFloat();
-    mods.wobble_rotation_speed = cv_mod_wobble_rotation_speed.getFloat();
-    mods.jigsaw_followcircle_radius_factor = cv_mod_jigsaw_followcircle_radius_factor.getFloat();
-    mods.shirone_combo = cv_mod_shirone_combo.getFloat();
-
     return mods;
 }
 

@@ -61,7 +61,7 @@ Osu *osu = NULL;
 Vector2 Osu::g_vInternalResolution;
 Vector2 Osu::osuBaseResolution = Vector2(640.0f, 480.0f);
 
-Shader *anti_flashlight_shader = NULL;
+Shader *actual_flashlight_shader = NULL;
 Shader *flashlight_shader = NULL;
 
 Osu::Osu() {
@@ -125,6 +125,7 @@ Osu::Osu() {
     }
 
     // convar callbacks
+    cv_mod_autopilot.setCallback(fastdelegate::MakeDelegate(this, &Osu::onAutopilotChange));
     cv_speed_override.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSpeedChange));
     cv_animation_speed_override.setCallback(fastdelegate::MakeDelegate(this, &Osu::onAnimationSpeedChange));
     cv_playfield_rotation.setCallback(fastdelegate::MakeDelegate(this, &Osu::onPlayfieldChange));
@@ -170,22 +171,6 @@ Osu::Osu() {
     m_bOptionsMenuFullscreen = true;
     m_bToggleChangelogScheduled = false;
     m_bToggleEditorScheduled = false;
-
-    m_bModAuto = false;
-    m_bModAutopilot = false;
-    m_bModRelax = false;
-    m_bModSpunout = false;
-    m_bModTarget = false;
-    m_bModScorev2 = false;
-    m_bModFlashlight = false;
-    m_bModNF = false;
-    m_bModHD = false;
-    m_bModHR = false;
-    m_bModEZ = false;
-    m_bModSD = false;
-    m_bModSS = false;
-    m_bModNightmare = false;
-    m_bModTD = false;
 
     m_bShouldCursorBeVisible = false;
 
@@ -350,7 +335,7 @@ Osu::Osu() {
     cv_mod_fposu.setCallback(fastdelegate::MakeDelegate(this, &Osu::onModFPoSuChange));
 
     // Not the type of shader you want players to tweak or delete, so loading from string
-    anti_flashlight_shader = engine->getGraphics()->createShaderFromSource(
+    actual_flashlight_shader = engine->getGraphics()->createShaderFromSource(
         "#version 110\n"
         "varying vec2 tex_coord;\n"
         "void main() {\n"
@@ -386,7 +371,7 @@ Osu::Osu() {
         "    opacity = 1.0 - min(opacity, max_opacity);\n"
         "    gl_FragColor = vec4(0.0, 0.0, 0.0, opacity);\n"
         "}");
-    engine->getResourceManager()->loadResource(anti_flashlight_shader);
+    engine->getResourceManager()->loadResource(actual_flashlight_shader);
     engine->getResourceManager()->loadResource(flashlight_shader);
 }
 
@@ -436,8 +421,8 @@ void Osu::draw(Graphics *g) {
 
         getSelectedBeatmap()->draw(g);
 
-        auto anti_flashlight_enabled = cv_mod_anti_flashlight.getBool();
-        if(m_bModFlashlight || anti_flashlight_enabled) {
+        auto actual_flashlight_enabled = cv_mod_actual_flashlight.getBool();
+        if(cv_mod_flashlight.getBool() || actual_flashlight_enabled) {
             // Dim screen when holding a slider
             float max_opacity = 1.f;
             if(getSelectedBeatmap()->holding_slider && !cv_avoid_flashes.getBool()) {
@@ -470,7 +455,7 @@ void Osu::draw(Graphics *g) {
                 fl_radius *= 0.8125f;
             }
 
-            if(m_bModFlashlight) {
+            if(cv_mod_flashlight.getBool()) {
                 flashlight_shader->enable();
                 flashlight_shader->setUniform1f("max_opacity", max_opacity);
                 flashlight_shader->setUniform1f("flashlight_radius", fl_radius);
@@ -482,17 +467,17 @@ void Osu::draw(Graphics *g) {
 
                 flashlight_shader->disable();
             }
-            if(anti_flashlight_enabled) {
-                anti_flashlight_shader->enable();
-                anti_flashlight_shader->setUniform1f("max_opacity", max_opacity);
-                anti_flashlight_shader->setUniform1f("flashlight_radius", anti_fl_radius);
-                anti_flashlight_shader->setUniform2f("flashlight_center", flashlightPos.x,
-                                                     getScreenSize().y - flashlightPos.y);
+            if(actual_flashlight_enabled) {
+                actual_flashlight_shader->enable();
+                actual_flashlight_shader->setUniform1f("max_opacity", max_opacity);
+                actual_flashlight_shader->setUniform1f("flashlight_radius", anti_fl_radius);
+                actual_flashlight_shader->setUniform2f("flashlight_center", flashlightPos.x,
+                                                       getScreenSize().y - flashlightPos.y);
 
                 g->setColor(COLOR(255, 0, 0, 0));
                 g->fillRect(0, 0, getScreenWidth(), getScreenHeight());
 
-                anti_flashlight_shader->disable();
+                actual_flashlight_shader->disable();
             }
         }
 
@@ -536,7 +521,8 @@ void Osu::draw(Graphics *g) {
 
         // draw player cursor
         Vector2 cursorPos = beatmap->getCursorPos();
-        bool drawSecondTrail = (m_bModAuto || m_bModAutopilot || beatmap->is_watching || beatmap->is_spectating);
+        bool drawSecondTrail =
+            (cv_mod_autoplay.getBool() || cv_mod_autopilot.getBool() || beatmap->is_watching || beatmap->is_spectating);
         bool updateAndDrawTrail = true;
         if(isFPoSu) {
             cursorPos = getScreenSize() / 2.0f;
@@ -898,22 +884,6 @@ UString getModsStringForConVar(int mods) {
 void Osu::useMods(FinishedScore *score) {
     getModSelector()->resetMods();
 
-    m_bModAuto = score->mods.flags & Replay::ModFlags::Autoplay;
-    m_bModAutopilot = score->mods.flags & Replay::ModFlags::Autopilot;
-    m_bModRelax = score->mods.flags & Replay::ModFlags::Relax;
-    m_bModSpunout = score->mods.flags & Replay::ModFlags::SpunOut;
-    m_bModTarget = score->mods.flags & Replay::ModFlags::Target;
-    m_bModScorev2 = score->mods.flags & Replay::ModFlags::ScoreV2;
-    m_bModFlashlight = score->mods.flags & Replay::ModFlags::Flashlight;
-    m_bModNF = score->mods.flags & Replay::ModFlags::NoFail;
-    m_bModHD = score->mods.flags & Replay::ModFlags::Hidden;
-    m_bModHR = score->mods.flags & Replay::ModFlags::HardRock;
-    m_bModEZ = score->mods.flags & Replay::ModFlags::Easy;
-    m_bModSD = score->mods.flags & Replay::ModFlags::SuddenDeath;
-    m_bModSS = score->mods.flags & Replay::ModFlags::Perfect;
-    m_bModNightmare = score->mods.flags & Replay::ModFlags::Nightmare;
-    m_bModTD = score->mods.flags & Replay::ModFlags::TouchDevice;
-
     cv_ar_override.setValue(score->mods.ar_override);
     cv_cs_override.setValue(score->mods.cs_override);
     cv_od_override.setValue(score->mods.od_override);
@@ -923,6 +893,21 @@ void Osu::useMods(FinishedScore *score) {
         cv_speed_override.setValue(score->mods.speed);
     }
 
+    cv_mod_autoplay.setValue(score->mods.flags & Replay::ModFlags::Autoplay);
+    cv_mod_autopilot.setValue(score->mods.flags & Replay::ModFlags::Autopilot);
+    cv_mod_relax.setValue(score->mods.flags & Replay::ModFlags::Relax);
+    cv_mod_spunout.setValue(score->mods.flags & Replay::ModFlags::SpunOut);
+    cv_mod_target.setValue(score->mods.flags & Replay::ModFlags::Target);
+    cv_mod_scorev2.setValue(score->mods.flags & Replay::ModFlags::ScoreV2);
+    cv_mod_flashlight.setValue(score->mods.flags & Replay::ModFlags::Flashlight);
+    cv_mod_nofail.setValue(score->mods.flags & Replay::ModFlags::NoFail);
+    cv_mod_hidden.setValue(score->mods.flags & Replay::ModFlags::Hidden);
+    cv_mod_hardrock.setValue(score->mods.flags & Replay::ModFlags::HardRock);
+    cv_mod_easy.setValue(score->mods.flags & Replay::ModFlags::Easy);
+    cv_mod_suddendeath.setValue(score->mods.flags & Replay::ModFlags::SuddenDeath);
+    cv_mod_perfect.setValue(score->mods.flags & Replay::ModFlags::Perfect);
+    cv_mod_nightmare.setValue(score->mods.flags & Replay::ModFlags::Nightmare);
+    cv_mod_touchdevice.setValue(score->mods.flags & Replay::ModFlags::TouchDevice);
     cv_playfield_mirror_horizontal.setValue(score->mods.flags & Replay::ModFlags::MirrorHorizontal);
     cv_playfield_mirror_vertical.setValue(score->mods.flags & Replay::ModFlags::MirrorVertical);
     cv_mod_fposu.setValue(score->mods.flags & Replay::ModFlags::FPoSu);
@@ -960,38 +945,39 @@ void Osu::updateMods() {
             cv_speed_override.setValue(0.75);
         }
 
-        m_bModNF = bancho.room.mods & LegacyFlags::NoFail;
-        m_bModEZ = bancho.room.mods & LegacyFlags::Easy;
-        m_bModTD = bancho.room.mods & LegacyFlags::TouchDevice;
-        m_bModHD = bancho.room.mods & LegacyFlags::Hidden;
-        m_bModHR = bancho.room.mods & LegacyFlags::HardRock;
-        m_bModSD = bancho.room.mods & LegacyFlags::SuddenDeath;
-        m_bModRelax = bancho.room.mods & LegacyFlags::Relax;
-        m_bModAuto = bancho.room.mods & LegacyFlags::Autoplay;
-        m_bModSpunout = bancho.room.mods & LegacyFlags::SpunOut;
-        m_bModAutopilot = bancho.room.mods & LegacyFlags::Autopilot;
-        m_bModSS = bancho.room.mods & LegacyFlags::Perfect;
-        m_bModTarget = bancho.room.mods & LegacyFlags::Target;
-        m_bModScorev2 = bancho.room.win_condition == SCOREV2;
-        m_bModFlashlight = bancho.room.mods & LegacyFlags::Flashlight;
-        m_bModNightmare = false;
+        cv_mod_nofail.setValue(bancho.room.mods & LegacyFlags::NoFail);
+        cv_mod_easy.setValue(bancho.room.mods & LegacyFlags::Easy);
+        cv_mod_touchdevice.setValue(bancho.room.mods & LegacyFlags::TouchDevice);
+        cv_mod_hidden.setValue(bancho.room.mods & LegacyFlags::Hidden);
+        cv_mod_hardrock.setValue(bancho.room.mods & LegacyFlags::HardRock);
+        cv_mod_suddendeath.setValue(bancho.room.mods & LegacyFlags::SuddenDeath);
+        cv_mod_relax.setValue(bancho.room.mods & LegacyFlags::Relax);
+        cv_mod_autoplay.setValue(bancho.room.mods & LegacyFlags::Autoplay);
+        cv_mod_spunout.setValue(bancho.room.mods & LegacyFlags::SpunOut);
+        cv_mod_autopilot.setValue(bancho.room.mods & LegacyFlags::Autopilot);
+        cv_mod_perfect.setValue(bancho.room.mods & LegacyFlags::Perfect);
+        cv_mod_target.setValue(bancho.room.mods & LegacyFlags::Target);
+        cv_mod_scorev2.setValue(bancho.room.win_condition == SCOREV2);
+        cv_mod_flashlight.setValue(bancho.room.mods & LegacyFlags::Flashlight);
+        cv_mod_nightmare.setValue(false);
+        cv_mod_actual_flashlight.setValue(false);
 
         if(bancho.room.freemods) {
             for(int i = 0; i < 16; i++) {
                 if(bancho.room.slots[i].player_id != bancho.user_id) continue;
 
-                m_bModNF = bancho.room.slots[i].mods & LegacyFlags::NoFail;
-                m_bModEZ = bancho.room.slots[i].mods & LegacyFlags::Easy;
-                m_bModTD = bancho.room.slots[i].mods & LegacyFlags::TouchDevice;
-                m_bModHD = bancho.room.slots[i].mods & LegacyFlags::Hidden;
-                m_bModHR = bancho.room.slots[i].mods & LegacyFlags::HardRock;
-                m_bModSD = bancho.room.slots[i].mods & LegacyFlags::SuddenDeath;
-                m_bModRelax = bancho.room.slots[i].mods & LegacyFlags::Relax;
-                m_bModAuto = bancho.room.slots[i].mods & LegacyFlags::Autoplay;
-                m_bModSpunout = bancho.room.slots[i].mods & LegacyFlags::SpunOut;
-                m_bModAutopilot = bancho.room.slots[i].mods & LegacyFlags::Autopilot;
-                m_bModSS = bancho.room.slots[i].mods & LegacyFlags::Perfect;
-                m_bModTarget = bancho.room.slots[i].mods & LegacyFlags::Target;
+                cv_mod_nofail.setValue(bancho.room.slots[i].mods & LegacyFlags::NoFail);
+                cv_mod_easy.setValue(bancho.room.slots[i].mods & LegacyFlags::Easy);
+                cv_mod_touchdevice.setValue(bancho.room.slots[i].mods & LegacyFlags::TouchDevice);
+                cv_mod_hidden.setValue(bancho.room.slots[i].mods & LegacyFlags::Hidden);
+                cv_mod_hardrock.setValue(bancho.room.slots[i].mods & LegacyFlags::HardRock);
+                cv_mod_suddendeath.setValue(bancho.room.slots[i].mods & LegacyFlags::SuddenDeath);
+                cv_mod_relax.setValue(bancho.room.slots[i].mods & LegacyFlags::Relax);
+                cv_mod_autoplay.setValue(bancho.room.slots[i].mods & LegacyFlags::Autoplay);
+                cv_mod_spunout.setValue(bancho.room.slots[i].mods & LegacyFlags::SpunOut);
+                cv_mod_autopilot.setValue(bancho.room.slots[i].mods & LegacyFlags::Autopilot);
+                cv_mod_perfect.setValue(bancho.room.slots[i].mods & LegacyFlags::Perfect);
+                cv_mod_target.setValue(bancho.room.slots[i].mods & LegacyFlags::Target);
             }
         }
     }
@@ -999,13 +985,10 @@ void Osu::updateMods() {
     // static overrides
     onSpeedChange("", cv_speed_override.getString());
 
-    // autopilot overrides auto
-    if(m_bModAutopilot) m_bModAuto = false;
-
     // handle auto/pilot cursor visibility
     if(isInPlayMode()) {
-        m_bShouldCursorBeVisible =
-            m_bModAuto || m_bModAutopilot || getSelectedBeatmap()->is_watching || getSelectedBeatmap()->is_spectating;
+        m_bShouldCursorBeVisible = cv_mod_autoplay.getBool() || cv_mod_autopilot.getBool() ||
+                                   getSelectedBeatmap()->is_watching || getSelectedBeatmap()->is_spectating;
         env->setCursorVisible(m_bShouldCursorBeVisible);
     }
 
@@ -1519,8 +1502,8 @@ Beatmap *Osu::getSelectedBeatmap() {
 float Osu::getDifficultyMultiplier() {
     float difficultyMultiplier = 1.0f;
 
-    if(m_bModHR) difficultyMultiplier = 1.4f;
-    if(m_bModEZ) difficultyMultiplier = 0.5f;
+    if(cv_mod_hardrock.getBool()) difficultyMultiplier = 1.4f;
+    if(cv_mod_easy.getBool()) difficultyMultiplier = 0.5f;
 
     return difficultyMultiplier;
 }
@@ -1528,8 +1511,8 @@ float Osu::getDifficultyMultiplier() {
 float Osu::getCSDifficultyMultiplier() {
     float difficultyMultiplier = 1.0f;
 
-    if(m_bModHR) difficultyMultiplier = 1.3f;  // different!
-    if(m_bModEZ) difficultyMultiplier = 0.5f;
+    if(cv_mod_hardrock.getBool()) difficultyMultiplier = 1.3f;  // different!
+    if(cv_mod_easy.getBool()) difficultyMultiplier = 0.5f;
 
     return difficultyMultiplier;
 }
@@ -1545,18 +1528,18 @@ float Osu::getScoreMultiplier() {
         multiplier *= 0.008 * std::exp(4.81588 * s);
     }
 
-    if(m_bModEZ || (m_bModNF && !m_bModScorev2)) multiplier *= 0.50f;
-    if(m_bModHR) {
-        if(m_bModScorev2)
+    if(cv_mod_easy.getBool() || (cv_mod_nofail.getBool() && !cv_mod_scorev2.getBool())) multiplier *= 0.50f;
+    if(cv_mod_hardrock.getBool()) {
+        if(cv_mod_scorev2.getBool())
             multiplier *= 1.10f;
         else
             multiplier *= 1.06f;
     }
-    if(m_bModFlashlight) multiplier *= 1.12f;
-    if(m_bModHD) multiplier *= 1.06f;
-    if(m_bModSpunout) multiplier *= 0.90f;
+    if(cv_mod_flashlight.getBool()) multiplier *= 1.12f;
+    if(cv_mod_hidden.getBool()) multiplier *= 1.06f;
+    if(cv_mod_spunout.getBool()) multiplier *= 0.90f;
 
-    if(m_bModRelax || m_bModAutopilot) multiplier *= 0.f;
+    if(cv_mod_relax.getBool() || cv_mod_autopilot.getBool()) multiplier *= 0.f;
 
     return multiplier;
 }
@@ -1720,7 +1703,8 @@ void Osu::updateWindowsKeyDisable() {
     if(cv_win_disable_windows_key_while_playing.getBool()) {
         const bool isPlayerPlaying =
             engine->hasFocus() && isInPlayMode() &&
-            (!getSelectedBeatmap()->isPaused() || getSelectedBeatmap()->isRestartScheduled()) && !m_bModAuto;
+            (!getSelectedBeatmap()->isPaused() || getSelectedBeatmap()->isRestartScheduled()) &&
+            !cv_mod_autoplay.getBool();
         cv_win_disable_windows_key.setValue(isPlayerPlaying ? 1.0f : 0.0f);
     }
 }
@@ -1872,6 +1856,13 @@ void Osu::onSpeedChange(UString oldValue, UString newValue) {
     float speed = newValue.toFloat();
     getSelectedBeatmap()->setSpeed(speed >= 0.0f ? speed : getSpeedMultiplier());
     updateAnimationSpeed();
+}
+
+void Osu::onAutopilotChange(UString oldValue, UString newValue) {
+    // Autopilot overrides Autoplay
+    if(cv_mod_autopilot.getBool()) {
+        cv_mod_autoplay.setValue(false);
+    }
 }
 
 void Osu::onPlayfieldChange(UString oldValue, UString newValue) { getSelectedBeatmap()->onModUpdate(); }

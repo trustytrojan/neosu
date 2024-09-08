@@ -122,7 +122,5 @@ class Slider : public HitObject {
     bool m_bInReverse;
     bool m_bHideNumberAfterFirstRepeatHit;
 
-    float m_fSliderBreakRapeTime;
-
     VertexArrayObject *m_vao;
 };

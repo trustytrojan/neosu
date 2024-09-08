@@ -509,7 +509,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
                 &cv_user_include_relax_and_autopilot_for_stats);
     addCheckbox("Show pp instead of score in scorebrowser", "Only neosu scores will show pp.", &cv_scores_sort_by_pp);
     addCheckbox("Always enable touch device pp nerf mod",
-                "Keep touch device pp nerf mod active even when resetting all mods.", &cv_mod_touchdevice);
+                "Keep touch device pp nerf mod active even when resetting all mods.", &cv_mod_touchdevice_always);
 
     addSubSection("Songbrowser");
     addCheckbox("Draw Strain Graph in Songbrowser",
@@ -1201,7 +1201,6 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     addCheckbox("Rainbow Circles", &cv_circle_rainbow);
     addCheckbox("Rainbow Sliders", &cv_slider_rainbow);
     addCheckbox("Rainbow Numbers", &cv_circle_number_rainbow);
-    addCheckbox("SliderBreak Epilepsy", &cv_slider_break_epilepsy);
     addCheckbox("Draw 300s", &cv_hitresult_draw_300s);
 
     addSection("Maintenance");

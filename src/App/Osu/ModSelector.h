@@ -60,7 +60,6 @@ class ModSelector : public OsuScreen {
     bool isMouseInside();
 
     void updateButtons(bool initial = false);
-    void updateModConVar();
 
     CBaseUILabel *m_nonVanillaWarning;
     UIModSelectorModButton *m_modButtonAuto;
@@ -94,8 +93,9 @@ class ModSelector : public OsuScreen {
     void updateLayout();
     void updateExperimentalLayout();
 
-    UIModSelectorModButton *setModButtonOnGrid(int x, int y, int state, bool initialState, UString modName,
-                                               UString tooltipText, std::function<SkinImage *()> getImageFunc);
+    UIModSelectorModButton *setModButtonOnGrid(int x, int y, int state, bool initialState, ConVar *modCvar,
+                                               UString modName, UString tooltipText,
+                                               std::function<SkinImage *()> getImageFunc);
     UIModSelectorModButton *getModButtonOnGrid(int x, int y);
 
     OVERRIDE_SLIDER addOverrideSlider(UString text, UString labelText, ConVar *cvar, float min, float max,

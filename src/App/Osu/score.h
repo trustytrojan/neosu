@@ -170,6 +170,7 @@ class LiveScore {
 
     int getKeyCount(int key);
     Replay::Mods getMods();
+    void updateMods() { mods = Replay::Mods::from_cvars(); }
     u32 getModsLegacy();
     UString getModsStringForRichPresence();
 
@@ -180,6 +181,7 @@ class LiveScore {
     std::vector<int> m_hitdeltas;
 
     FinishedScore::Grade m_grade;
+    Replay::Mods mods;
 
     float m_fStarsTomTotal;
     float m_fStarsTomAim;

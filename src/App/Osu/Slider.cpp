@@ -122,8 +122,6 @@ Slider::Slider(char type, int repeat, float pixelLength, std::vector<Vector2> po
     m_bInReverse = false;
     m_bHideNumberAfterFirstRepeatHit = false;
 
-    m_fSliderBreakRapeTime = 0.0f;
-
     m_vao = NULL;
 }
 
@@ -558,11 +556,6 @@ void Slider::drawBody(Graphics *g, float alpha, float from, float to) {
 
 void Slider::update(long curPos) {
     HitObject::update(curPos);
-
-    if(m_fSliderBreakRapeTime != 0.0f && engine->getTime() > m_fSliderBreakRapeTime) {
-        m_fSliderBreakRapeTime = 0.0f;
-        cv_epilepsy.setValue(0.0f);
-    }
 
     if(bm != NULL) {
         // stop slide sound while paused
@@ -1259,14 +1252,7 @@ void Slider::onTickHit(bool successful, int tickIndex) {
     }
 }
 
-void Slider::onSliderBreak() {
-    bi->addSliderBreak();
-
-    if(cv_slider_break_epilepsy.getBool()) {
-        m_fSliderBreakRapeTime = engine->getTime() + 0.15f;
-        cv_epilepsy.setValue(1.0f);
-    }
-}
+void Slider::onSliderBreak() { bi->addSliderBreak(); }
 
 void Slider::onReset(long curPos) {
     HitObject::onReset(curPos);
@@ -1333,9 +1319,6 @@ void Slider::onReset(long curPos) {
         }
         m_ticks[i].finished = numMissingTickClicks == 0;
     }
-
-    m_fSliderBreakRapeTime = 0.0f;
-    cv_epilepsy.setValue(0.0f);
 }
 
 void Slider::rebuildVertexBuffer(bool useRawCoords) {

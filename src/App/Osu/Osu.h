@@ -127,21 +127,21 @@ class Osu : public App, public MouseListener {
     float getSpeedMultiplier();  // with override
     float getAnimationSpeedMultiplier();
 
-    inline bool getModAuto() const { return m_bModAuto; }
-    inline bool getModAutopilot() const { return m_bModAutopilot; }
-    inline bool getModRelax() const { return m_bModRelax; }
-    inline bool getModSpunout() const { return m_bModSpunout; }
-    inline bool getModTarget() const { return m_bModTarget; }
-    inline bool getModScorev2() const { return m_bModScorev2; }
-    inline bool getModFlashlight() const { return m_bModFlashlight; }
-    inline bool getModNF() const { return m_bModNF; }
-    inline bool getModHD() const { return m_bModHD; }
-    inline bool getModHR() const { return m_bModHR; }
-    inline bool getModEZ() const { return m_bModEZ; }
-    inline bool getModSD() const { return m_bModSD; }
-    inline bool getModSS() const { return m_bModSS; }
-    inline bool getModNightmare() const { return m_bModNightmare; }
-    inline bool getModTD() const { return m_bModTD; }
+    inline bool getModAuto() const { return cv_mod_autoplay.getBool(); }
+    inline bool getModAutopilot() const { return cv_mod_autopilot.getBool(); }
+    inline bool getModRelax() const { return cv_mod_relax.getBool(); }
+    inline bool getModSpunout() const { return cv_mod_spunout.getBool(); }
+    inline bool getModTarget() const { return cv_mod_target.getBool(); }
+    inline bool getModScorev2() const { return cv_mod_scorev2.getBool(); }
+    inline bool getModFlashlight() const { return cv_mod_flashlight.getBool(); }
+    inline bool getModNF() const { return cv_mod_nofail.getBool(); }
+    inline bool getModHD() const { return cv_mod_hidden.getBool(); }
+    inline bool getModHR() const { return cv_mod_hardrock.getBool(); }
+    inline bool getModEZ() const { return cv_mod_easy.getBool(); }
+    inline bool getModSD() const { return cv_mod_suddendeath.getBool(); }
+    inline bool getModSS() const { return cv_mod_perfect.getBool(); }
+    inline bool getModNightmare() const { return cv_mod_nightmare.getBool(); }
+    inline bool getModTD() const { return cv_mod_touchdevice.getBool() || cv_mod_touchdevice_always.getBool(); }
 
     inline std::vector<ConVar *> getExperimentalMods() const { return m_experimentalMods; }
 
@@ -183,6 +183,7 @@ class Osu : public App, public MouseListener {
     void updateAnimationSpeed();
 
     void onSpeedChange(UString oldValue, UString newValue);
+    void onAutopilotChange(UString oldValue, UString newValue);
 
     void onPlayfieldChange(UString oldValue, UString newValue);
 
@@ -244,21 +245,6 @@ class Osu : public App, public MouseListener {
     // mods
     ModSelection previous_mods;
     bool m_bModAutoTemp = false;  // when ctrl+clicking a map, the auto mod should disable itself after the map finishes
-    bool m_bModAuto = false;
-    bool m_bModAutopilot = false;
-    bool m_bModRelax = false;
-    bool m_bModSpunout = false;
-    bool m_bModTarget = false;
-    bool m_bModScorev2 = false;
-    bool m_bModFlashlight = false;
-    bool m_bModNF = false;
-    bool m_bModHD = false;
-    bool m_bModHR = false;
-    bool m_bModEZ = false;
-    bool m_bModSD = false;
-    bool m_bModSS = false;
-    bool m_bModNightmare = false;
-    bool m_bModTD = false;
 
     std::vector<ConVar *> m_experimentalMods;
 

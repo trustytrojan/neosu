@@ -5,23 +5,26 @@
 #include "UString.h"
 
 enum FCVAR_FLAGS {
-    // not visible in find/listcommands results etc., but is settable/gettable via console/help
-    FCVAR_HIDDEN = (1 << 0),
-
-    // if flag is not set, value will be forced to default when online
-    FCVAR_UNLOCK_SINGLEPLAYER = (1 << 1),
-    FCVAR_UNLOCK_MULTIPLAYER = (1 << 2),
-    FCVAR_UNLOCKED = (FCVAR_UNLOCK_SINGLEPLAYER | FCVAR_UNLOCK_MULTIPLAYER),
-
-    // if flag is not set, score will not submit when value is not default
-    FCVAR_ALWAYS_SUBMIT = (1 << 3),
-
-    // don't allow server to modify this cvar
-    FCVAR_PRIVATE = (1 << 4),
-
-    // legacy definitions
+    // No flags: cvar is only allowed offline.
     FCVAR_LOCKED = 0,
-    FCVAR_DEFAULT = FCVAR_UNLOCKED | FCVAR_ALWAYS_SUBMIT,
+
+    // If the cvar is modified, scores will not submit unless this flag is set.
+    FCVAR_BANCHO_SUBMITTABLE = (1 << 0),
+
+    // Legacy servers only support a limited number of cvars.
+    // Unless this flag is set, the cvar will be forced to its default value
+    // when playing in a multiplayer lobby on a legacy server.
+    FCVAR_BANCHO_MULTIPLAYABLE = (1 << 1),  // NOTE: flag shouldn't be set without BANCHO_SUBMITTABLE
+    FCVAR_BANCHO_COMPATIBLE = FCVAR_BANCHO_SUBMITTABLE | FCVAR_BANCHO_MULTIPLAYABLE,
+
+    // hide cvar from console suggestions
+    FCVAR_HIDDEN = (1 << 2),
+
+    // prevent servers from touching this cvar
+    FCVAR_PRIVATE = (1 << 3),
+
+    // this cvar affects gameplay
+    FCVAR_GAMEPLAY = (1 << 4),
 };
 
 class ConVar {
@@ -329,7 +332,6 @@ extern ConVar cv_database_ignore_version_warnings;
 extern ConVar cv_database_version;
 extern ConVar cv_debug;
 extern ConVar cv_debug_anim;
-extern ConVar cv_debug_background_star_calc;
 extern ConVar cv_debug_box_shadows;
 extern ConVar cv_debug_corporeal;
 extern ConVar cv_debug_draw_timingpoints;
@@ -347,12 +349,6 @@ extern ConVar cv_disable_mousebuttons;
 extern ConVar cv_disable_mousewheel;
 extern ConVar cv_drain_kill;
 extern ConVar cv_drain_kill_notification_duration;
-extern ConVar cv_drain_vr_100;
-extern ConVar cv_drain_vr_300;
-extern ConVar cv_drain_vr_50;
-extern ConVar cv_drain_vr_miss;
-extern ConVar cv_drain_vr_multiplier;
-extern ConVar cv_drain_vr_sliderbreak;
 extern ConVar cv_draw_accuracy;
 extern ConVar cv_draw_approach_circles;
 extern ConVar cv_draw_beatmap_background_image;
@@ -413,7 +409,6 @@ extern ConVar cv_early_note_time;
 extern ConVar cv_end_delay_time;
 extern ConVar cv_end_skip;
 extern ConVar cv_end_skip_time;
-extern ConVar cv_epilepsy;
 extern ConVar cv_fail_time;
 extern ConVar cv_file_size_max;
 extern ConVar cv_flashlight_always_hard;
@@ -474,7 +469,6 @@ extern ConVar cv_fps_max_yield;
 extern ConVar cv_fps_unlimited;
 extern ConVar cv_fps_unlimited_yield;
 extern ConVar cv_fullscreen_windowed_borderless;
-extern ConVar cv_gamemode;
 extern ConVar cv_hiterrorbar_misaims;
 extern ConVar cv_hiterrorbar_misses;
 extern ConVar cv_hitobject_fade_in_time;
@@ -501,7 +495,6 @@ extern ConVar cv_hitresult_fadeout_duration;
 extern ConVar cv_hitresult_fadeout_start_time;
 extern ConVar cv_hitresult_miss_fadein_scale;
 extern ConVar cv_hitresult_scale;
-extern ConVar cv_host_timescale;
 extern ConVar cv_hp_override;
 extern ConVar cv_hud_accuracy_scale;
 extern ConVar cv_hud_combo_scale;
@@ -635,10 +628,26 @@ extern ConVar cv_main_menu_banner_ifupdatedfromoldversion_text;
 extern ConVar cv_main_menu_friend;
 extern ConVar cv_main_menu_startup_anim_duration;
 extern ConVar cv_main_menu_use_server_logo;
-extern ConVar cv_mat_wireframe_;
 extern ConVar cv_minimize_on_focus_lost_if_borderless_windowed_fullscreen;
 extern ConVar cv_minimize_on_focus_lost_if_fullscreen;
-extern ConVar cv_mod_anti_flashlight;
+extern ConVar cv_mod_hidden;
+extern ConVar cv_mod_autoplay;
+extern ConVar cv_mod_autopilot;
+extern ConVar cv_mod_relax;
+extern ConVar cv_mod_spunout;
+extern ConVar cv_mod_target;
+extern ConVar cv_mod_scorev2;
+extern ConVar cv_mod_flashlight;
+extern ConVar cv_mod_doubletime;
+extern ConVar cv_mod_nofail;
+extern ConVar cv_mod_hardrock;
+extern ConVar cv_mod_easy;
+extern ConVar cv_mod_suddendeath;
+extern ConVar cv_mod_perfect;
+extern ConVar cv_mod_nightmare;
+extern ConVar cv_mod_touchdevice;
+extern ConVar cv_mod_touchdevice_always;
+extern ConVar cv_mod_actual_flashlight;
 extern ConVar cv_mod_approach_different;
 extern ConVar cv_mod_approach_different_initial_size;
 extern ConVar cv_mod_approach_different_style;
@@ -688,7 +697,6 @@ extern ConVar cv_mod_target_300_percent;
 extern ConVar cv_mod_target_50_percent;
 extern ConVar cv_mod_timewarp;
 extern ConVar cv_mod_timewarp_multiplier;
-extern ConVar cv_mod_touchdevice;
 extern ConVar cv_mod_wobble;
 extern ConVar cv_mod_wobble2;
 extern ConVar cv_mod_wobble_frequency;
@@ -734,7 +742,6 @@ extern ConVar cv_playfield_border_top_percent;
 extern ConVar cv_playfield_mirror_horizontal;
 extern ConVar cv_playfield_mirror_vertical;
 extern ConVar cv_playfield_rotation;
-extern ConVar cv_pp_live_timeout;
 extern ConVar cv_pvs;
 extern ConVar cv_quick_retry_delay;
 extern ConVar cv_quick_retry_time;
@@ -803,7 +810,6 @@ extern ConVar cv_slider_body_unit_circle_subdivisions;
 extern ConVar cv_slider_border_feather;
 extern ConVar cv_slider_border_size_multiplier;
 extern ConVar cv_slider_border_tint_combo_color;
-extern ConVar cv_slider_break_epilepsy;
 extern ConVar cv_slider_curve_max_length;
 extern ConVar cv_slider_curve_max_points;
 extern ConVar cv_slider_curve_points_separation;
@@ -852,7 +858,6 @@ extern ConVar cv_snd_restrict_play_frame;
 extern ConVar cv_snd_updateperiod;
 extern ConVar cv_snd_wav_file_min_size;
 extern ConVar cv_songbrowser_background_fade_in_duration;
-extern ConVar cv_songbrowser_background_star_calculation;
 extern ConVar cv_songbrowser_bottombar_percent;
 extern ConVar cv_songbrowser_button_active_color_a;
 extern ConVar cv_songbrowser_button_active_color_b;

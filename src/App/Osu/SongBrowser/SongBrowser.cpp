@@ -312,9 +312,6 @@ SongBrowser::SongBrowser() : ScreenBackable() {
     // not yet possible
     // m_sortingMethods.push_back({SORT::SORT_RANKACHIEVED, "By Rank Achieved", new SortByRankAchieved()});
 
-    // convar callbacks
-    cv_gamemode.setCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onModeChange));
-
     // vars
     m_bSongBrowserRightClickScrollCheck = false;
     m_bSongBrowserRightClickScrolling = false;

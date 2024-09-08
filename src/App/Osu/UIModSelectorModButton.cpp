@@ -6,6 +6,7 @@
 #include "Engine.h"
 #include "LegacyReplay.h"
 #include "ModSelector.h"
+#include "OpenGLHeaders.h"
 #include "Osu.h"
 #include "ResourceManager.h"
 #include "RichPresence.h"
@@ -44,7 +45,20 @@ void UIModSelectorModButton::draw(Graphics *g) {
             if(m_fRot != 0.0f) g->rotate(m_fRot);
 
             g->setColor(0xffffffff);
+
+            // HACK: For "Actual Flashlight" mod, I'm too lazy to add a new skin element
+            bool draw_inverted_colors = getActiveModName() == UString("afl");
+
+            if(draw_inverted_colors) {
+                glEnable(GL_COLOR_LOGIC_OP);
+                glLogicOp(GL_COPY_INVERTED);
+            }
+
             getActiveImageFunc()->draw(g, m_vPos + m_vSize / 2);
+
+            if(draw_inverted_colors) {
+                glDisable(GL_COLOR_LOGIC_OP);
+            }
         }
         g->popTransform();
     }
@@ -90,6 +104,11 @@ void UIModSelectorModButton::onClicked() {
     // increase state, wrap around, switch on and off
     if(m_bOn) {
         m_iState = (m_iState + 1) % m_states.size();
+
+        // HACK: In multi, skip "Actual Flashlight" mod
+        if(bancho.is_in_a_multi_room() && m_states[0].modName == UString("fl")) {
+            m_iState = m_iState % m_states.size() - 1;
+        }
 
         if(m_iState == 0)
             setOn(false);
@@ -196,27 +215,24 @@ void UIModSelectorModButton::setOn(bool on, bool silent) {
     }
 }
 
-void UIModSelectorModButton::setState(int state, bool updateModConVar) {
+void UIModSelectorModButton::setState(int state) {
     m_iState = state;
 
     // update image
-    if(m_iState < m_states.size() && m_states.size() > 0 && m_states[m_iState].getImageFunc != NULL)
+    if(m_iState < m_states.size() && m_states[m_iState].getImageFunc != NULL) {
         getActiveImageFunc = m_states[m_iState].getImageFunc;
-
-    // update mods
-    if(updateModConVar) {
-        m_osuModSelector->updateModConVar();
     }
 }
 
-void UIModSelectorModButton::setState(unsigned int state, bool initialState, UString modName, UString tooltipText,
-                                      std::function<SkinImage *()> getImageFunc) {
+void UIModSelectorModButton::setState(unsigned int state, bool initialState, ConVar *cvar, UString modName,
+                                      UString tooltipText, std::function<SkinImage *()> getImageFunc) {
     // dynamically add new state
     while(m_states.size() < state + 1) {
         STATE t;
         t.getImageFunc = NULL;
         m_states.push_back(t);
     }
+    m_states[state].cvar = cvar;
     m_states[state].modName = modName;
     m_states[state].tooltipTextLines = tooltipText.split("\n");
     m_states[state].getImageFunc = getImageFunc;
@@ -229,7 +245,7 @@ void UIModSelectorModButton::setState(unsigned int state, bool initialState, USt
 
     // set initial state on (but without firing callbacks)
     if(initialState) {
-        setState(state, false);
+        setState(state);
         setOn(true, true);
     }
 }

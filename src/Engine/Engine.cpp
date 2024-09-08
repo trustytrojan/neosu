@@ -306,11 +306,6 @@ void Engine::onPaint() {
             for(size_t i = 0; i < m_inputDevices.size(); i++) {
                 m_inputDevices[i]->draw(m_graphics);
             }
-
-            if(cv_epilepsy.getBool()) {
-                m_graphics->setColor(COLOR(255, rand() % 256, rand() % 256, rand() % 256));
-                m_graphics->fillRect(0, 0, engine->getScreenWidth(), engine->getScreenHeight());
-            }
         }
 
         // end
@@ -338,7 +333,6 @@ void Engine::onUpdate() {
     {
         m_timer->update();
         m_dRunTime = m_timer->getElapsedTime();
-        m_dFrameTime *= (double)cv_host_timescale.getFloat();
         m_dTime += m_dFrameTime;
     }
 

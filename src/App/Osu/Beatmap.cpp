@@ -704,7 +704,7 @@ bool Beatmap::start() {
 
     cv_snd_change_check_interval.setValue(0.0f);
 
-    if(osu->m_bModAuto || osu->m_bModAutopilot || is_watching || is_spectating) {
+    if(cv_mod_autoplay.getBool() || cv_mod_autopilot.getBool() || is_watching || is_spectating) {
         osu->m_bShouldCursorBeVisible = true;
         env->setCursorVisible(osu->m_bShouldCursorBeVisible);
     }

@@ -82,65 +82,10 @@ struct Mods {
     f32 jigsaw_followcircle_radius_factor = 0.f;
     f32 shirone_combo = 20.f;
 
-    static Mods from_legacy(i32 legacy_flags) {
-        u64 neoflags = 0;
-        if(legacy_flags & LegacyFlags::NoFail) neoflags |= ModFlags::NoFail;
-        if(legacy_flags & LegacyFlags::Easy) neoflags |= ModFlags::Easy;
-        if(legacy_flags & LegacyFlags::TouchDevice) neoflags |= ModFlags::TouchDevice;
-        if(legacy_flags & LegacyFlags::Hidden) neoflags |= ModFlags::Hidden;
-        if(legacy_flags & LegacyFlags::HardRock) neoflags |= ModFlags::HardRock;
-        if(legacy_flags & LegacyFlags::SuddenDeath) neoflags |= ModFlags::SuddenDeath;
-        if(legacy_flags & LegacyFlags::Relax) neoflags |= ModFlags::Relax;
-        if(legacy_flags & LegacyFlags::Nightcore) neoflags |= ModFlags::NoPitchCorrection;
-        if(legacy_flags & LegacyFlags::Flashlight) neoflags |= ModFlags::Flashlight;
-        if(legacy_flags & LegacyFlags::SpunOut) neoflags |= ModFlags::SpunOut;
-        if(legacy_flags & LegacyFlags::Autopilot) neoflags |= ModFlags::Autopilot;
-        if(legacy_flags & LegacyFlags::Perfect) neoflags |= ModFlags::Perfect;
-        if(legacy_flags & LegacyFlags::Target) neoflags |= ModFlags::Target;
-        if(legacy_flags & LegacyFlags::ScoreV2) neoflags |= ModFlags::ScoreV2;
-        if(legacy_flags & LegacyFlags::Nightmare) neoflags |= ModFlags::Nightmare;
-        if(legacy_flags & LegacyFlags::FPoSu) neoflags |= ModFlags::FPoSu;
-        if(legacy_flags & LegacyFlags::Mirror) {
-            // NOTE: We don't know whether the original score was only horizontal, only vertical, or both
-            neoflags |= (ModFlags::MirrorHorizontal | ModFlags::MirrorVertical);
-        }
+    i32 to_legacy() const;
 
-        Mods mods;
-        mods.flags = neoflags;
-        if(legacy_flags & LegacyFlags::DoubleTime)
-            mods.speed = 1.5f;
-        else if(legacy_flags & LegacyFlags::HalfTime)
-            mods.speed = 0.75f;
-        return mods;
-    }
-
-    i32 to_legacy() const {
-        i32 legacy_flags = 0;
-        if(speed > 1.f) {
-            legacy_flags |= LegacyFlags::DoubleTime;
-            if(flags & ModFlags::NoPitchCorrection) legacy_flags |= LegacyFlags::Nightcore;
-        } else if(speed < 1.f) {
-            legacy_flags |= LegacyFlags::HalfTime;
-        }
-
-        if(flags & ModFlags::NoFail) legacy_flags |= LegacyFlags::NoFail;
-        if(flags & ModFlags::Easy) legacy_flags |= LegacyFlags::Easy;
-        if(flags & ModFlags::TouchDevice) legacy_flags |= LegacyFlags::TouchDevice;
-        if(flags & ModFlags::Hidden) legacy_flags |= LegacyFlags::Hidden;
-        if(flags & ModFlags::HardRock) legacy_flags |= LegacyFlags::HardRock;
-        if(flags & ModFlags::SuddenDeath) legacy_flags |= LegacyFlags::SuddenDeath;
-        if(flags & ModFlags::Relax) legacy_flags |= LegacyFlags::Relax;
-        if(flags & ModFlags::Flashlight) legacy_flags |= LegacyFlags::Flashlight;
-        if(flags & ModFlags::SpunOut) legacy_flags |= LegacyFlags::SpunOut;
-        if(flags & ModFlags::Autopilot) legacy_flags |= LegacyFlags::Autopilot;
-        if(flags & ModFlags::Perfect) legacy_flags |= LegacyFlags::Perfect;
-        if(flags & ModFlags::Target) legacy_flags |= LegacyFlags::Target;
-        if(flags & ModFlags::ScoreV2) legacy_flags |= LegacyFlags::ScoreV2;
-
-        // NOTE: Ignoring nightmare, fposu
-
-        return legacy_flags;
-    }
+    static Mods from_cvars();
+    static Mods from_legacy(i32 legacy_flags);
 };
 
 }  // namespace Replay

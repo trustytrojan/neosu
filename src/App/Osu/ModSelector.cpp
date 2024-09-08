@@ -200,7 +200,6 @@ ModSelector::ModSelector() : OsuScreen() {
 
     // build experimental buttons
     addExperimentalLabel(" Experimental Mods (!)");
-    addExperimentalCheckbox("Anti-flashlight", "Flashlight, but reversed", &cv_mod_anti_flashlight);
     addExperimentalCheckbox("FPoSu: Strafing",
                             "Playfield moves in 3D space (see fposu_mod_strafing_...).\nOnly works in FPoSu mode!",
                             &cv_fposu_mod_strafing);
@@ -272,58 +271,63 @@ ModSelector::ModSelector() : OsuScreen() {
 
 void ModSelector::updateButtons(bool initial) {
     m_modButtonEasy = setModButtonOnGrid(
-        0, 0, 0, initial && osu->getModEZ(), "ez",
+        0, 0, 0, initial && osu->getModEZ(), &cv_mod_easy, "ez",
         "Reduces overall difficulty - larger circles, more forgiving HP drain, less accuracy required.",
         []() -> SkinImage * { return osu->getSkin()->getSelectionModEasy(); });
     m_modButtonNofail =
-        setModButtonOnGrid(1, 0, 0, initial && osu->getModNF(), "nf",
+        setModButtonOnGrid(1, 0, 0, initial && osu->getModNF(), &cv_mod_nofail, "nf",
                            "You can't fail. No matter what.\nNOTE: To disable drain completely:\nOptions > Gameplay > "
                            "Mechanics > \"Select HP Drain\" > \"None\".",
                            []() -> SkinImage * { return osu->getSkin()->getSelectionModNoFail(); });
-    setModButtonOnGrid(4, 0, 0, initial && osu->getModNightmare(), "nightmare",
+    setModButtonOnGrid(4, 0, 0, initial && osu->getModNightmare(), &cv_mod_nightmare, "nightmare",
                        "Unnecessary clicks count as misses.\nMassively reduced slider follow circle radius.",
                        []() -> SkinImage * { return osu->getSkin()->getSelectionModNightmare(); });
 
-    m_modButtonHardrock =
-        setModButtonOnGrid(0, 1, 0, initial && osu->getModHR(), "hr", "Everything just got a bit harder...",
-                           []() -> SkinImage * { return osu->getSkin()->getSelectionModHardRock(); });
+    m_modButtonHardrock = setModButtonOnGrid(0, 1, 0, initial && osu->getModHR(), &cv_mod_hardrock, "hr",
+                                             "Everything just got a bit harder...",
+                                             []() -> SkinImage * { return osu->getSkin()->getSelectionModHardRock(); });
     m_modButtonSuddendeath =
-        setModButtonOnGrid(1, 1, 0, initial && osu->getModSD(), "sd", "Miss a note and fail.",
+        setModButtonOnGrid(1, 1, 0, initial && osu->getModSD(), &cv_mod_suddendeath, "sd", "Miss a note and fail.",
                            []() -> SkinImage * { return osu->getSkin()->getSelectionModSuddenDeath(); });
-    setModButtonOnGrid(1, 1, 1, initial && osu->getModSS(), "ss", "SS or quit.",
+    setModButtonOnGrid(1, 1, 1, initial && osu->getModSS(), &cv_mod_perfect, "ss", "SS or quit.",
                        []() -> SkinImage * { return osu->getSkin()->getSelectionModPerfect(); });
 
     m_modButtonHidden =
-        setModButtonOnGrid(3, 1, 0, initial && osu->getModHD(), "hd",
+        setModButtonOnGrid(3, 1, 0, initial && osu->getModHD(), &cv_mod_hidden, "hd",
                            "Play with no approach circles and fading notes for a slight score advantage.",
                            []() -> SkinImage * { return osu->getSkin()->getSelectionModHidden(); });
-    m_modButtonFlashlight = setModButtonOnGrid(4, 1, 0, false, "fl", "Restricted view area.", []() -> SkinImage * {
-        return osu->getSkin()->getSelectionModFlashlight();
-    });
-    m_modButtonTD = setModButtonOnGrid(5, 1, 0, initial && (osu->getModTD() || cv_mod_touchdevice.getBool()), "nerftd",
+
+    m_modButtonFlashlight = setModButtonOnGrid(
+        4, 1, 0, initial && osu->getModFlashlight(), &cv_mod_flashlight, "fl", "Restricted view area.",
+        []() -> SkinImage * { return osu->getSkin()->getSelectionModFlashlight(); });
+    setModButtonOnGrid(4, 1, 1, initial && cv_mod_actual_flashlight.getBool(), &cv_mod_actual_flashlight, "afl",
+                       "Actual flashlight.",
+                       []() -> SkinImage * { return osu->getSkin()->getSelectionModFlashlight(); });
+
+    m_modButtonTD = setModButtonOnGrid(5, 1, 0, initial && osu->getModTD(), &cv_mod_touchdevice, "nerftd",
                                        "Simulate pp nerf for touch devices.\nOnly affects pp calculation.",
                                        []() -> SkinImage * { return osu->getSkin()->getSelectionModTD(); });
-    getModButtonOnGrid(5, 1)->setAvailable(!cv_mod_touchdevice.getBool());
+    getModButtonOnGrid(5, 1)->setAvailable(!cv_mod_touchdevice_always.getBool());
 
     m_modButtonRelax = setModButtonOnGrid(
-        0, 2, 0, initial && osu->getModRelax(), "relax",
+        0, 2, 0, initial && osu->getModRelax(), &cv_mod_relax, "relax",
         "You don't need to click.\nGive your clicking/tapping fingers a break from the heat of things.\n** UNRANKED **",
         []() -> SkinImage * { return osu->getSkin()->getSelectionModRelax(); });
     m_modButtonAutopilot =
-        setModButtonOnGrid(1, 2, 0, initial && osu->getModAutopilot(), "autopilot",
+        setModButtonOnGrid(1, 2, 0, initial && osu->getModAutopilot(), &cv_mod_autopilot, "autopilot",
                            "Automatic cursor movement - just follow the rhythm.\n** UNRANKED **",
                            []() -> SkinImage * { return osu->getSkin()->getSelectionModAutopilot(); });
-    m_modButtonSpunout = setModButtonOnGrid(2, 2, 0, initial && osu->getModSpunout(), "spunout",
+    m_modButtonSpunout = setModButtonOnGrid(2, 2, 0, initial && osu->getModSpunout(), &cv_mod_spunout, "spunout",
                                             "Spinners will be automatically completed.",
                                             []() -> SkinImage * { return osu->getSkin()->getSelectionModSpunOut(); });
-    m_modButtonAuto = setModButtonOnGrid(3, 2, 0, initial && osu->getModAuto(), "auto",
+    m_modButtonAuto = setModButtonOnGrid(3, 2, 0, initial && osu->getModAuto(), &cv_mod_autoplay, "auto",
                                          "Watch a perfect automated play through the song.",
                                          []() -> SkinImage * { return osu->getSkin()->getSelectionModAutoplay(); });
-    setModButtonOnGrid(4, 2, 0, initial && osu->getModTarget(), "practicetarget",
+    setModButtonOnGrid(4, 2, 0, initial && osu->getModTarget(), &cv_mod_target, "practicetarget",
                        "Accuracy is based on the distance to the center of all hitobjects.\n300s still require at "
                        "least being in the hit window of a 100 in addition to the rule above.",
                        []() -> SkinImage * { return osu->getSkin()->getSelectionModTarget(); });
-    m_modButtonScoreV2 = setModButtonOnGrid(5, 2, 0, initial && osu->getModScorev2(), "v2",
+    m_modButtonScoreV2 = setModButtonOnGrid(5, 2, 0, initial && osu->getModScorev2(), &cv_mod_scorev2, "v2",
                                             "Try the future scoring system.\n** UNRANKED **",
                                             []() -> SkinImage * { return osu->getSkin()->getSelectionModScorev2(); });
 
@@ -716,7 +720,8 @@ CBaseUIContainer *ModSelector::setVisible(bool visible) {
 
         m_fAnimation = 1.0f;
         anim->moveQuadIn(&m_fAnimation, 0.0f, 0.06f, 0.0f, true);
-        updateModConVar();
+        updateScoreMultiplierLabelText();
+        updateOverrideSliderLabels();
 
         m_bExperimentalVisible = false;
         anim->moveQuadIn(&m_fExperimentalAnimation, 0.0f, 0.06f, 0.0f, true);
@@ -975,26 +980,13 @@ void ModSelector::updateExperimentalLayout() {
     m_experimentalContainer->setVisible(!bancho.is_in_a_multi_room());
 }
 
-void ModSelector::updateModConVar() {
-    UString modString = "";
-    for(int i = 0; i < m_modButtons.size(); i++) {
-        UIModSelectorModButton *button = m_modButtons[i];
-        if(button->isOn()) modString.append(button->getActiveModName());
-    }
-
-    osu->updateMods();  // XXX: not needed?
-    updateScoreMultiplierLabelText();
-    updateOverrideSliderLabels();
-    osu->updateMods();
-}
-
-UIModSelectorModButton *ModSelector::setModButtonOnGrid(int x, int y, int state, bool initialState, UString modName,
-                                                        UString tooltipText,
+UIModSelectorModButton *ModSelector::setModButtonOnGrid(int x, int y, int state, bool initialState, ConVar *modCvar,
+                                                        UString modName, UString tooltipText,
                                                         std::function<SkinImage *()> getImageFunc) {
     UIModSelectorModButton *modButton = getModButtonOnGrid(x, y);
 
     if(modButton != NULL) {
-        modButton->setState(state, initialState, modName, tooltipText, getImageFunc);
+        modButton->setState(state, initialState, modCvar, modName, tooltipText, getImageFunc);
         modButton->setVisible(true);
     }
 
@@ -1225,12 +1217,14 @@ void ModSelector::enableModsFromFlags(u32 flags) {
         cv_speed_override.setValue(0.75);
     }
 
+    cv_mod_suddendeath.setValue(false);
+    cv_mod_perfect.setValue(false);
     if(flags & LegacyFlags::Perfect) {
+        m_modButtonSuddendeath->setState(1);
         m_modButtonSuddendeath->setOn(true, true);
-        m_modButtonSuddendeath->setState(1, true);
     } else if(flags & LegacyFlags::SuddenDeath) {
+        m_modButtonSuddendeath->setState(0);
         m_modButtonSuddendeath->setOn(true, true);
-        m_modButtonSuddendeath->setState(0, true);
     }
 
     m_modButtonNofail->setOn(flags & LegacyFlags::NoFail, true);
