@@ -365,17 +365,17 @@ int main(int argc, char *argv[]) {
         // delay the next frame
         frameTimer->update();
         const bool inBackground = /*g_bMinimized ||*/ !g_bHasFocus;
-        if((!fps_unlimited.getBool() && fps_max.getInt() > 0) || inBackground) {
+        if((!cv_fps_unlimited.getBool() && cv_fps_max.getInt() > 0) || inBackground) {
             double delayStart = frameTimer->getElapsedTime();
             double delayTime;
             if(inBackground)
-                delayTime = (1.0 / (double)fps_max_background.getFloat()) - frameTimer->getDelta();
+                delayTime = (1.f / cv_fps_max_background.getFloat()) - frameTimer->getDelta();
             else
-                delayTime = (1.0 / (double)fps_max.getFloat()) - frameTimer->getDelta();
+                delayTime = (1.f / cv_fps_max.getFloat()) - frameTimer->getDelta();
 
             while(delayTime > 0.0) {
                 if(inBackground)  // real waiting (very inaccurate, but very good for little background cpu utilization)
-                    usleep(1000 * (unsigned int)((1.0f / fps_max_background.getFloat()) * 1000.0f));
+                    usleep(1000 * (unsigned int)((1.f / cv_fps_max_background.getFloat()) * 1000.0f));
                 else  // more or less "busy" waiting, but giving away the rest of the timeslice at least
                     usleep(0);
 
