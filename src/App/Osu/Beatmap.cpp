@@ -512,7 +512,6 @@ bool Beatmap::watch(FinishedScore score, f64 start_percent) {
 
     sim = new SimulatedBeatmap(m_selectedDifficulty2, score.mods);
     sim->spectated_replay = score.replay;
-    sim->start();
 
     return true;
 }
@@ -550,7 +549,6 @@ bool Beatmap::spectate() {
     score.mods.flags |= Replay::ModFlags::NoFail;
     sim = new SimulatedBeatmap(m_selectedDifficulty2, score.mods);
     sim->spectated_replay.clear();
-    sim->start();
 
     return true;
 }
@@ -1037,7 +1035,6 @@ void Beatmap::seekPercent(f64 percent) {
         SAFE_DELETE(sim);
         sim = new SimulatedBeatmap(m_selectedDifficulty2, osu->getScore()->getMods());
         sim->spectated_replay = spectated_replay;
-        sim->start();
     }
 
     if(!is_watching && !is_spectating) {  // score submission already disabled when watching replay

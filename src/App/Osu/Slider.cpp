@@ -1096,14 +1096,16 @@ void Slider::onHit(LiveScore::HIT result, long delta, bool startOrEnd, float tar
             }
         }
 
-        if(!(bi->getModsLegacy() & LegacyFlags::Target))
-            bi->addHitResult(this, result, delta, false, false, true, false, true,
-                             true);  // not end of combo, show in hiterrorbar, ignore for accuracy, increase combo,
-                                     // don't count towards score, depending on scorev2 ignore for health or not
-        else
+        if(bi->getModsLegacy() & LegacyFlags::Target) {
+            // not end of combo, show in hiterrorbar, use for accuracy, increase combo, increase
+            // score, ignore for health, don't add object duration to result anim
             addHitResult(result, delta, false, m_curve->pointAt(0.0f), targetDelta, targetAngle, false, false, true,
-                         false);  // not end of combo, show in hiterrorbar, use for accuracy, increase combo, increase
-                                  // score, ignore for health, don't add object duration to result anim
+                         false);
+        } else {
+            // not end of combo, show in hiterrorbar, ignore for accuracy, increase combo,
+            // don't count towards score, depending on scorev2 ignore for health or not
+            bi->addHitResult(this, result, delta, false, false, true, false, true, true);
+        }
 
         // add bonus score + health manually
         if(result != LiveScore::HIT::HIT_MISS) {

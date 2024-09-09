@@ -438,7 +438,7 @@ void HitObject::update(long curPos) {
 void HitObject::addHitResult(LiveScore::HIT result, long delta, bool isEndOfCombo, Vector2 posRaw, float targetDelta,
                              float targetAngle, bool ignoreOnHitErrorBar, bool ignoreCombo, bool ignoreHealth,
                              bool addObjectDurationToSkinAnimationTimeStartOffset) {
-    if(osu->getModTarget() && result != LiveScore::HIT::HIT_MISS && targetDelta >= 0.0f) {
+    if(bm != NULL && osu->getModTarget() && result != LiveScore::HIT::HIT_MISS && targetDelta >= 0.0f) {
         const float p300 = cv_mod_target_300_percent.getFloat();
         const float p100 = cv_mod_target_100_percent.getFloat();
         const float p50 = cv_mod_target_50_percent.getFloat();
@@ -457,6 +457,7 @@ void HitObject::addHitResult(LiveScore::HIT result, long delta, bool isEndOfComb
 
     const LiveScore::HIT returnedHit = bi->addHitResult(this, result, delta, isEndOfCombo, ignoreOnHitErrorBar, false,
                                                         ignoreCombo, false, ignoreHealth);
+    if(bm == NULL) return;
 
     HITRESULTANIM hitresultanim;
     {

@@ -6,6 +6,8 @@ class HitObject;
 
 class BeatmapInterface {
    public:
+    virtual ~BeatmapInterface() = default;
+
     virtual LiveScore::HIT addHitResult(HitObject *hitObject, LiveScore::HIT hit, i32 delta, bool isEndOfCombo = false,
                                         bool ignoreOnHitErrorBar = false, bool hitErrorBarOnly = false,
                                         bool ignoreCombo = false, bool ignoreScore = false,

@@ -38,7 +38,6 @@ static void run_sct() {
         auto diff = db->getBeatmapDifficulty(score.beatmap_hash);
         SimulatedBeatmap smap(diff, score.mods);
         smap.spectated_replay = score.replay;
-        smap.start();
         smap.simulate_to(diff->getLengthMS());
 
         if(score.comboMax != smap.live_score.getComboMax())

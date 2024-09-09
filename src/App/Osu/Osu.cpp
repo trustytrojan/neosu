@@ -43,6 +43,9 @@
 #include "RoomScreen.h"
 #include "Shader.h"
 #include "Skin.h"
+#include "SongBrowser/LeaderboardPPCalcThread.h"
+#include "SongBrowser/LoudnessCalcThread.h"
+#include "SongBrowser/MapCalcThread.h"
 #include "SongBrowser/ScoreConverterThread.h"
 #include "SongBrowser/SongBrowser.h"
 #include "SoundEngine.h"
@@ -377,6 +380,9 @@ Osu::Osu() {
 
 Osu::~Osu() {
     sct_abort();
+    lct_set_map(NULL);
+    loct_abort();
+    mct_abort();
 
     osu = NULL;
 

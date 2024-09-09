@@ -1327,7 +1327,7 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
         }
     }
 
-    debugLog("DatabaseBeatmap::load() loaded %i hitobjects\n", result.hitobjects.size());
+    debugLog("DatabaseBeatmap::loadGameplay() loaded %i hitobjects\n", result.hitobjects.size());
 
     return result;
 }
