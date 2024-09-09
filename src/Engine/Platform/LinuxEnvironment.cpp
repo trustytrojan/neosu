@@ -501,10 +501,6 @@ void LinuxEnvironment::setWindowResizableInt(bool resizable, Vector2 windowSize)
     XFlush(m_display);
 }
 
-void LinuxEnvironment::setWindowGhostCorporeal(bool corporeal) {
-    // TODO:
-}
-
 void LinuxEnvironment::setMonitor(int monitor) {
     // TODO:
     center();

@@ -182,7 +182,7 @@ MainMenu::MainMenu() : OsuScreen() {
             File versionFile(NEOSU_NEWVERSION_NOTIFICATION_TRIGGER_FILE);
             if(versionFile.canRead()) {
                 float version = std::stof(versionFile.readLine());
-                if(version < cv_version.getFloat() - 0.0001f) m_bDrawVersionNotificationArrow = true;
+                if(version < cv_version.getFloat()) m_bDrawVersionNotificationArrow = true;
                 if(version < 35.06) {
                     // SoundEngine choking issues have been fixed, option has been removed from settings menu
                     // We leave the cvar available as it could still be useful for some players
@@ -199,6 +199,11 @@ MainMenu::MainMenu() : OsuScreen() {
                     }
 
                     osu->getOptionsMenu()->save();
+                }
+
+                // Old value was invalid
+                if(cv_beatmap_mirror.getString() == UString("https://catboy.best/s/")) {
+                    cv_beatmap_mirror.setValue("https://catboy.best/d/");
                 }
             } else {
                 m_bDrawVersionNotificationArrow = true;

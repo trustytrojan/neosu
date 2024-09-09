@@ -74,7 +74,6 @@ class SDLEnvironment : public Environment {
     virtual void setWindowPos(int x, int y);
     virtual void setWindowSize(int width, int height);
     virtual void setWindowResizable(bool resizable);
-    virtual void setWindowGhostCorporeal(bool corporeal);
     virtual void setMonitor(int monitor);
     virtual Vector2 getWindowPos();
     virtual Vector2 getWindowSize();

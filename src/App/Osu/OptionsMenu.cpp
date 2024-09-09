@@ -3451,138 +3451,58 @@ void OptionsMenu::save() {
     userConfigFile.append(OSU_CONFIG_FILE_NAME);
     userConfigFile.append(".cfg");
 
-    // manual commands (e.g. fullscreen, windowed, cv_resolution); meaning commands which are not necessarily visible
-    // in the options menu, or which need special handling & ordering
-    std::vector<ConVar *> manualConCommands;
-    std::vector<ConVar *> manualConVars;
-    std::vector<ConVar *> removeConCommands;
-
-    manualConVars.push_back(&cv_relax_offset);
-    manualConVars.push_back(&cv_songbrowser_sortingtype);
-    manualConVars.push_back(&cv_songbrowser_scores_sortingtype);
-    manualConVars.push_back(&cv_songbrowser_search_delay);
-    manualConVars.push_back(&cv_mp_autologin);
-    manualConVars.push_back(&cv_restart_sound_engine_before_playing);
-    manualConVars.push_back(&cv_notelock_type);
-
-    removeConCommands.push_back(&cv_monitor);
-    removeConCommands.push_back(&cmd_windowed);
-    removeConCommands.push_back(&cv_snd_output_device);
-    removeConCommands.push_back(&cv_skin);
-
-    if(m_fullscreenCheckbox != NULL) {
-        if(m_fullscreenCheckbox->isChecked()) {
-            manualConCommands.push_back(&cmd_fullscreen);
-            if(cv_resolution_enabled.getBool())
-                manualConVars.push_back(&cv_resolution);
-            else
-                removeConCommands.push_back(&cv_resolution);
-        } else {
-            removeConCommands.push_back(&cmd_fullscreen);
-            removeConCommands.push_back(&cv_resolution);
-        }
-    }
-
-    // get user stuff in the config file
-    std::vector<UString> keepLines;
+    std::vector<UString> user_lines;
     {
-        // in extra block because the File class would block the following std::ofstream from writing to it until it's
-        // destroyed
         File in(userConfigFile.toUtf8());
-        if(!in.canRead())
-            debugLog("Osu Error: Couldn't read user config file!\n");
-        else {
-            while(in.canRead()) {
-                std::string line = in.readLine();
-                bool keepLine = true;
-                for(int i = 0; i < m_elements.size(); i++) {
-                    if(m_elements[i].cvar != NULL &&
-                       line.find(m_elements[i].cvar->getName().toUtf8()) != std::string::npos) {
-                        // we don't want to remove custom convars which start with options entry convars (e.g.
-                        // cv_rich_presence and cv_rich_presence_dynamic_windowtitle) so, keep lines which only have
-                        // partial matches
+        while(in.canRead()) {
+            UString line = in.readLine().c_str();
+            if(line == UString("")) continue;
+            if(line.startsWith("#")) {
+                user_lines.push_back(line);
+                continue;
+            }
 
-                        const size_t firstSpaceIndex = line.find(" ");
-                        const size_t endOfConVarNameIndex =
-                            (firstSpaceIndex != std::string::npos ? firstSpaceIndex : line.length());
-
-                        if(std::string(m_elements[i].cvar->getName().toUtf8())
-                               .find(line.c_str(), 0, endOfConVarNameIndex) != std::string::npos) {
-                            keepLine = false;
-                            break;
-                        }
-                        // else
-                        //	debugLog("ignoring match %s with %s\n", m_elements[i].cvar->getName().toUtf8(),
-                        // line.c_str());
-                    }
+            bool cvar_found = false;
+            auto parts = line.split(" ");
+            for(auto convar : convar->getConVarArray()) {
+                if(convar->getName() == parts[0]) {
+                    cvar_found = true;
+                    break;
                 }
+            }
 
-                for(int i = 0; i < manualConCommands.size(); i++) {
-                    if(line.find(manualConCommands[i]->getName().toUtf8()) != std::string::npos) {
-                        keepLine = false;
-                        break;
-                    }
-                }
-
-                for(int i = 0; i < manualConVars.size(); i++) {
-                    if(line.find(manualConVars[i]->getName().toUtf8()) != std::string::npos) {
-                        keepLine = false;
-                        break;
-                    }
-                }
-
-                for(int i = 0; i < removeConCommands.size(); i++) {
-                    if(line.find(removeConCommands[i]->getName().toUtf8()) != std::string::npos) {
-                        keepLine = false;
-                        break;
-                    }
-                }
-
-                if(keepLine && line.size() > 0) keepLines.push_back(line.c_str());
+            if(!cvar_found) {
+                user_lines.push_back(line);
+                continue;
             }
         }
     }
 
-    // write new config file
-    // thankfully this path is relative and hardcoded, and thus not susceptible to unicode characters
-    std::ofstream out(userConfigFile.toUtf8());
-    if(!out.good()) {
-        engine->showMessageError("Osu Error", "Couldn't write user config file!");
-        return;
-    }
-
-    // write user stuff back
-    for(int i = 0; i < keepLines.size(); i++) {
-        out << keepLines[i].toUtf8() << "\n";
-    }
-    out << "\n";
-
-    // write manual convars
-    for(int i = 0; i < manualConCommands.size(); i++) {
-        out << manualConCommands[i]->getName().toUtf8() << "\n";
-    }
-    for(int i = 0; i < manualConVars.size(); i++) {
-        out << manualConVars[i]->getName().toUtf8() << " " << manualConVars[i]->getString().toUtf8() << "\n";
-    }
-
-    // hardcoded (!)
-    out << "monitor " << env->getMonitor() << "\n";
-    if(engine->getSound()->getOutputDeviceName() != UString("Default"))
-        out << "snd_output_device " << engine->getSound()->getOutputDeviceName().toUtf8() << "\n";
-    if(m_fullscreenCheckbox != NULL && !m_fullscreenCheckbox->isChecked())
-        out << "windowed " << engine->getScreenWidth() << "x" << engine->getScreenHeight() << "\n";
-
-    // write options elements convars
-    for(int i = 0; i < m_elements.size(); i++) {
-        if(m_elements[i].cvar != NULL) {
-            out << m_elements[i].cvar->getName().toUtf8() << " " << m_elements[i].cvar->getString().toUtf8() << "\n";
+    {
+        std::ofstream out(userConfigFile.toUtf8());
+        if(!out.good()) {
+            engine->showMessageError("Osu Error", "Couldn't write user config file!");
+            return;
         }
+
+        for(auto line : user_lines) {
+            out << line.toUtf8() << "\n";
+        }
+        out << "\n";
+
+        if(m_fullscreenCheckbox->isChecked()) {
+            out << cmd_fullscreen.getName().toUtf8() << "\n";
+        }
+        out << "\n";
+
+        for(auto convar : convar->getConVarArray()) {
+            if(!convar->hasValue()) continue;
+            if(convar->getString() == convar->getDefaultString()) continue;
+            out << convar->getName().toUtf8() << " " << convar->getString().toUtf8() << "\n";
+        }
+
+        out.close();
     }
-
-    out << "osu_skin_mipmaps " << cv_skin_mipmaps.getString().toUtf8() << "\n";
-    out << "osu_skin " << cv_skin.getString().toUtf8() << "\n";
-
-    out.close();
 }
 
 void OptionsMenu::openAndScrollToSkinSection() {

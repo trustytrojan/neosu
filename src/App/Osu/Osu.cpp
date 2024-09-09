@@ -115,8 +115,6 @@ Osu::Osu() {
     cv_snd_change_check_interval.setDefaultFloat(0.5f);
     cv_snd_change_check_interval.setValue(cv_snd_change_check_interval.getDefaultFloat());
 
-    cv_resolution.setValue(UString::format("%ix%i", engine->getScreenWidth(), engine->getScreenHeight()));
-
     env->setWindowResizable(false);
 
     // generate default osu! appdata user path
@@ -128,11 +126,9 @@ Osu::Osu() {
     }
 
     // convar callbacks
-    cv_mod_autopilot.setCallback(fastdelegate::MakeDelegate(this, &Osu::onAutopilotChange));
-    cv_speed_override.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSpeedChange));
-    cv_animation_speed_override.setCallback(fastdelegate::MakeDelegate(this, &Osu::onAnimationSpeedChange));
-    cv_playfield_rotation.setCallback(fastdelegate::MakeDelegate(this, &Osu::onPlayfieldChange));
+    cv_resolution.setValue(UString::format("%ix%i", engine->getScreenWidth(), engine->getScreenHeight()));
     cv_resolution.setCallback(fastdelegate::MakeDelegate(this, &Osu::onInternalResolutionChanged));
+    cv_animation_speed_override.setCallback(fastdelegate::MakeDelegate(this, &Osu::onAnimationSpeedChange));
     cv_ui_scale.setCallback(fastdelegate::MakeDelegate(this, &Osu::onUIScaleChange));
     cv_ui_scale_to_dpi.setCallback(fastdelegate::MakeDelegate(this, &Osu::onUIScaleToDPIChange));
     cv_letterboxing.setCallback(fastdelegate::MakeDelegate(this, &Osu::onLetterboxingChange));
@@ -140,8 +136,6 @@ Osu::Osu() {
     cv_letterboxing_offset_y.setCallback(fastdelegate::MakeDelegate(this, &Osu::onLetterboxingOffsetChange));
     cv_confine_cursor_windowed.setCallback(fastdelegate::MakeDelegate(this, &Osu::onConfineCursorWindowedChange));
     cv_confine_cursor_fullscreen.setCallback(fastdelegate::MakeDelegate(this, &Osu::onConfineCursorFullscreenChange));
-    cv_playfield_mirror_horizontal.setCallback(fastdelegate::MakeDelegate(this, &Osu::updateModsForConVarTemplate));
-    cv_playfield_mirror_vertical.setCallback(fastdelegate::MakeDelegate(this, &Osu::updateModsForConVarTemplate));
     cv_notification.setCallback(fastdelegate::MakeDelegate(this, &Osu::onNotification));
 
     // vars
@@ -209,11 +203,6 @@ Osu::Osu() {
     Console::execConfigFile("osu");
     Console::execConfigFile("override");  // used for quickfixing live builds without redeploying/recompiling
 
-    // Old value was invalid
-    if(cv_beatmap_mirror.getString() == UString("https://catboy.best/s/")) {
-        cv_beatmap_mirror.setValue("https://catboy.best/d/");
-    }
-
     // Initialize sound here so we can load the preferred device from config
     // Avoids initializing the sound device twice, which can take a while depending on the driver
     auto sound_engine = engine->getSound();
@@ -231,6 +220,14 @@ Osu::Osu() {
     cv_skin.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSkinChange));
     cv_skin_reload.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSkinReload));
     onSkinChange("", cv_skin.getString());
+
+    // Convar callbacks that should be set after loading the config
+    cv_mod_mafham.setCallback(fastdelegate::MakeDelegate(this, &Osu::onModMafhamChange));
+    cv_mod_fposu.setCallback(fastdelegate::MakeDelegate(this, &Osu::onModFPoSuChange));
+    cv_playfield_mirror_horizontal.setCallback(fastdelegate::MakeDelegate(this, &Osu::updateModsForConVarTemplate));
+    cv_playfield_mirror_vertical.setCallback(fastdelegate::MakeDelegate(this, &Osu::updateModsForConVarTemplate));
+    cv_playfield_rotation.setCallback(fastdelegate::MakeDelegate(this, &Osu::onPlayfieldChange));
+    cv_speed_override.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSpeedChange));
 
     // load global resources
     const int baseDPI = 96;
@@ -320,6 +317,7 @@ Osu::Osu() {
     m_screens.push_back(m_changelog);
     m_screens.push_back(m_mainMenu);
     m_screens.push_back(m_tooltipOverlay);
+    m_mainMenu->setVisible(true);
 
     // update mod settings
     updateMods();
@@ -330,12 +328,7 @@ Osu::Osu() {
         reconnect();
     }
 
-    m_mainMenu->setVisible(true);
     m_updateHandler->checkForUpdates();
-
-    // memory/performance optimization; if osu_mod_mafham is not enabled, reduce the two rendertarget sizes to 64x64,
-    cv_mod_mafham.setCallback(fastdelegate::MakeDelegate(this, &Osu::onModMafhamChange));
-    cv_mod_fposu.setCallback(fastdelegate::MakeDelegate(this, &Osu::onModFPoSuChange));
 
     // Not the type of shader you want players to tweak or delete, so loading from string
     actual_flashlight_shader = engine->getGraphics()->createShaderFromSource(
@@ -993,9 +986,6 @@ void Osu::updateMods() {
             }
         }
     }
-
-    // static overrides
-    onSpeedChange("", cv_speed_override.getString());
 
     // handle auto/pilot cursor visibility
     if(isInPlayMode()) {
@@ -1868,13 +1858,6 @@ void Osu::onSpeedChange(UString oldValue, UString newValue) {
     float speed = newValue.toFloat();
     getSelectedBeatmap()->setSpeed(speed >= 0.0f ? speed : getSpeedMultiplier());
     updateAnimationSpeed();
-}
-
-void Osu::onAutopilotChange(UString oldValue, UString newValue) {
-    // Autopilot overrides Autoplay
-    if(cv_mod_autopilot.getBool()) {
-        cv_mod_autoplay.setValue(false);
-    }
 }
 
 void Osu::onPlayfieldChange(UString oldValue, UString newValue) { getSelectedBeatmap()->onModUpdate(); }

@@ -189,6 +189,5 @@ void _maximize(void);
 void _toggleresizable(void);
 void _focus(void);
 void _center(void);
-void _debugCorporeal(UString oldValue, UString args);
 void _errortest(void);
 void _dpiinfo(void);

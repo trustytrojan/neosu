@@ -71,7 +71,6 @@ class Environment {
     virtual void setWindowPos(int x, int y) = 0;
     virtual void setWindowSize(int width, int height) = 0;
     virtual void setWindowResizable(bool resizable) = 0;
-    virtual void setWindowGhostCorporeal(bool corporeal) = 0;
     virtual void setMonitor(int monitor) = 0;
     virtual Vector2 getWindowPos() = 0;
     virtual Vector2 getWindowSize() = 0;

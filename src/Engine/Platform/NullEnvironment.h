@@ -126,7 +126,6 @@ class NullEnvironment : public Environment {
         (void)height;
     }
     void setWindowResizable(bool resizable) { (void)resizable; }
-    void setWindowGhostCorporeal(bool corporeal) { (void)corporeal; }
     void setMonitor(int monitor) { (void)monitor; }
     Vector2 getWindowPos() { return Vector2(0, 0); }
     Vector2 getWindowSize() { return Vector2(1280, 720); }

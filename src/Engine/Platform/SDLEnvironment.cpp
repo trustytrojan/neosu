@@ -234,10 +234,6 @@ void SDLEnvironment::setWindowResizable(bool resizable) {
     m_bResizable = resizable;
 }
 
-void SDLEnvironment::setWindowGhostCorporeal(bool corporeal) {
-    // TODO
-}
-
 void SDLEnvironment::setMonitor(int monitor) {
     // TODO:
     center();

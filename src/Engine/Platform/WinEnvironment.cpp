@@ -557,16 +557,6 @@ void WinEnvironment::setWindowResizable(bool resizable) {
     SetWindowLongPtr(m_hwnd, GWL_STYLE, getWindowStyleWindowed());
 }
 
-void WinEnvironment::setWindowGhostCorporeal(bool corporeal) {
-    LONG_PTR exStyle = 0;
-    if(corporeal)
-        exStyle = WS_EX_WINDOWEDGE;
-    else
-        exStyle = WS_EX_LAYERED | WS_EX_TOPMOST | WS_EX_TRANSPARENT;
-
-    SetWindowLongPtr(m_hwnd, GWL_EXSTYLE, exStyle);
-}
-
 void WinEnvironment::setMonitor(int monitor) {
     monitor = clamp<int>(monitor, 0, m_vMonitors.size() - 1);
     if(monitor == getMonitor()) return;

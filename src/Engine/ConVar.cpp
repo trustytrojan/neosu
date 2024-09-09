@@ -1019,7 +1019,6 @@ ConVar cv_database_version("osu_database_version", OSU_VERSION_DATEONLY, FCVAR_B
 ConVar cv_debug("osu_debug", false, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_debug_anim("debug_anim", false, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_debug_box_shadows("debug_box_shadows", false, FCVAR_BANCHO_COMPATIBLE);
-ConVar cv_debug_corporeal("debug_ghost", FCVAR_BANCHO_COMPATIBLE, false, _debugCorporeal);
 ConVar cv_debug_draw_timingpoints("osu_debug_draw_timingpoints", false, FCVAR_LOCKED | FCVAR_GAMEPLAY);
 ConVar cv_debug_engine("debug_engine", false, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_debug_env("debug_env", false, FCVAR_BANCHO_COMPATIBLE);

@@ -69,7 +69,6 @@ class WinEnvironment : public Environment {
     void setWindowPos(int x, int y);
     void setWindowSize(int width, int height);
     void setWindowResizable(bool resizable);
-    void setWindowGhostCorporeal(bool corporeal);
     void setMonitor(int monitor);
     Vector2 getWindowPos();
     Vector2 getWindowSize();

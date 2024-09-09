@@ -333,7 +333,6 @@ extern ConVar cv_database_version;
 extern ConVar cv_debug;
 extern ConVar cv_debug_anim;
 extern ConVar cv_debug_box_shadows;
-extern ConVar cv_debug_corporeal;
 extern ConVar cv_debug_draw_timingpoints;
 extern ConVar cv_debug_engine;
 extern ConVar cv_debug_env;

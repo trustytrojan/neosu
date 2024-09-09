@@ -778,13 +778,6 @@ void _focus(void) { engine->focus(); }
 
 void _center(void) { engine->center(); }
 
-void _debugCorporeal(UString oldValue, UString args) {
-    (void)oldValue;
-    bool corporeal = !(args.toFloat() > 0.0f);
-    debugLog("setting it to %i\n", (int)corporeal);
-    env->setWindowGhostCorporeal(corporeal);
-}
-
 void _errortest(void) {
     engine->showMessageError(
         "Error Test",
