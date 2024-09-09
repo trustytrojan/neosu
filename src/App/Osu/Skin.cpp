@@ -1263,25 +1263,25 @@ void Skin::playHitCircleSound(int sampleType, float pan, long delta) {
 
     switch(actualSampleSet) {
         case 3:
-            engine->getSound()->play(m_drumHitNormal, pan);
+            engine->getSound()->play(m_drumHitNormal, pan, pitch);
 
-            if(sampleType & OSU_BITMASK_HITWHISTLE) engine->getSound()->play(m_drumHitWhistle, pan);
-            if(sampleType & OSU_BITMASK_HITFINISH) engine->getSound()->play(m_drumHitFinish, pan);
-            if(sampleType & OSU_BITMASK_HITCLAP) engine->getSound()->play(m_drumHitClap, pan);
+            if(sampleType & OSU_BITMASK_HITWHISTLE) engine->getSound()->play(m_drumHitWhistle, pan, pitch);
+            if(sampleType & OSU_BITMASK_HITFINISH) engine->getSound()->play(m_drumHitFinish, pan, pitch);
+            if(sampleType & OSU_BITMASK_HITCLAP) engine->getSound()->play(m_drumHitClap, pan, pitch);
             break;
         case 2:
-            engine->getSound()->play(m_softHitNormal, pan);
+            engine->getSound()->play(m_softHitNormal, pan, pitch);
 
-            if(sampleType & OSU_BITMASK_HITWHISTLE) engine->getSound()->play(m_softHitWhistle, pan);
-            if(sampleType & OSU_BITMASK_HITFINISH) engine->getSound()->play(m_softHitFinish, pan);
-            if(sampleType & OSU_BITMASK_HITCLAP) engine->getSound()->play(m_softHitClap, pan);
+            if(sampleType & OSU_BITMASK_HITWHISTLE) engine->getSound()->play(m_softHitWhistle, pan, pitch);
+            if(sampleType & OSU_BITMASK_HITFINISH) engine->getSound()->play(m_softHitFinish, pan, pitch);
+            if(sampleType & OSU_BITMASK_HITCLAP) engine->getSound()->play(m_softHitClap, pan, pitch);
             break;
         default:
-            engine->getSound()->play(m_normalHitNormal, pan);
+            engine->getSound()->play(m_normalHitNormal, pan, pitch);
 
-            if(sampleType & OSU_BITMASK_HITWHISTLE) engine->getSound()->play(m_normalHitWhistle, pan);
-            if(sampleType & OSU_BITMASK_HITFINISH) engine->getSound()->play(m_normalHitFinish, pan);
-            if(sampleType & OSU_BITMASK_HITCLAP) engine->getSound()->play(m_normalHitClap, pan);
+            if(sampleType & OSU_BITMASK_HITWHISTLE) engine->getSound()->play(m_normalHitWhistle, pan, pitch);
+            if(sampleType & OSU_BITMASK_HITFINISH) engine->getSound()->play(m_normalHitFinish, pan, pitch);
+            if(sampleType & OSU_BITMASK_HITCLAP) engine->getSound()->play(m_normalHitClap, pan, pitch);
             break;
     }
 }
