@@ -110,10 +110,11 @@ void UIModSelectorModButton::onClicked() {
             m_iState = m_iState % m_states.size() - 1;
         }
 
-        if(m_iState == 0)
+        if(m_iState == 0) {
             setOn(false);
-        else
+        } else {
             setOn(true);
+        }
     } else {
         setOn(true);
     }
@@ -176,6 +177,17 @@ void UIModSelectorModButton::setOn(bool on, bool silent) {
     float animationDuration = 0.05f;
     if(silent) {
         animationDuration = 0.f;
+    }
+
+    // Disable all states except current
+    for(int i = 0; i < m_states.size(); i++) {
+        if(i == m_iState) {
+            m_states[i].cvar->setValue(on);
+        } else {
+            if(m_states[i].cvar->getBool()) {
+                m_states[i].cvar->setValue(false);
+            }
+        }
     }
 
     if(m_bOn) {
