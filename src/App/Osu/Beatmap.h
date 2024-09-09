@@ -16,6 +16,7 @@ class ConVar;
 class Skin;
 class HitObject;
 class DatabaseBeatmap;
+class SimulatedBeatmap;
 
 struct Click {
     long tms;
@@ -163,6 +164,7 @@ class Beatmap : public BeatmapInterface {
     Vector2 m_interpolatedMousePos;
     bool is_watching = false;
     long current_frame_idx = 0;
+    SimulatedBeatmap *sim = NULL;
 
     // getting spectated (live)
     void broadcast_spectator_frames();

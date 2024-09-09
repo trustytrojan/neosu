@@ -42,6 +42,7 @@
 #include "ResourceManager.h"
 #include "RichPresence.h"
 #include "RoomScreen.h"
+#include "SimulatedBeatmap.h"
 #include "Skin.h"
 #include "SkinImage.h"
 #include "Slider.h"
@@ -475,6 +476,7 @@ bool Beatmap::play() {
 }
 
 bool Beatmap::watch(FinishedScore score, f64 start_percent) {
+    SAFE_DELETE(sim);
     if(score.replay.size() < 3) {
         // Replay is invalid
         return false;
@@ -508,6 +510,10 @@ bool Beatmap::watch(FinishedScore score, f64 start_percent) {
         seekPercent(start_percent);
     }
 
+    sim = new SimulatedBeatmap(m_selectedDifficulty2, score.mods);
+    sim->spectated_replay = score.replay;
+    sim->start();
+
     return true;
 }
 
@@ -539,6 +545,13 @@ bool Beatmap::spectate() {
 
     osu->m_songBrowser2->m_bHasSelectedAndIsPlaying = true;
     osu->m_songBrowser2->setVisible(false);
+
+    SAFE_DELETE(sim);
+    score.mods.flags |= Replay::ModFlags::NoFail;
+    sim = new SimulatedBeatmap(m_selectedDifficulty2, score.mods);
+    sim->spectated_replay.clear();
+    sim->start();
+
     return true;
 }
 
@@ -906,6 +919,7 @@ void Beatmap::stop(bool quit) {
     is_spectating = false;
     is_watching = false;
     spectated_replay.clear();
+    SAFE_DELETE(sim);
 
     unloadObjects();
 
@@ -1016,6 +1030,14 @@ void Beatmap::seekPercent(f64 percent) {
 
         // if there are calculations in there that need the hitobjects to be loaded, also applies speed/pitch
         onModUpdate(false, false);
+    }
+
+    if(is_watching) {
+        // XXX: should only reset if seeking backwards
+        SAFE_DELETE(sim);
+        sim = new SimulatedBeatmap(m_selectedDifficulty2, osu->getScore()->getMods());
+        sim->spectated_replay = spectated_replay;
+        sim->start();
     }
 
     if(!is_watching && !is_spectating) {  // score submission already disabled when watching replay
@@ -1680,6 +1702,13 @@ void Beatmap::draw(Graphics *g) {
 
         // only start drawing the rest of the playfield if everything has loaded
         return;
+    }
+
+    if(is_watching) {
+        // XXX: while this fixes HUD desyncing, it's not perfect replay playback
+        sim->simulate_to(m_iCurMusicPosWithOffsets);
+        *osu->getScore() = sim->live_score;
+        osu->getScore()->setCheated();
     }
 
     // draw playfield border
