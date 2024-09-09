@@ -354,7 +354,7 @@ Osu::Osu() {
         "    float dist = distance(flashlight_center, gl_FragCoord.xy);\n"
         "    float opacity = smoothstep(flashlight_radius, flashlight_radius * 1.4, dist);\n"
         "    opacity = 1.0 - min(opacity, max_opacity);\n"
-        "    gl_FragColor = vec4(0.0, 0.0, 0.0, opacity);\n"
+        "    gl_FragColor = vec4(1.0, 1.0, 0.9, opacity);\n"
         "}");
     flashlight_shader = engine->getGraphics()->createShaderFromSource(
         "#version 110\n"
@@ -429,12 +429,6 @@ void Osu::draw(Graphics *g) {
 
         auto actual_flashlight_enabled = cv_mod_actual_flashlight.getBool();
         if(cv_mod_flashlight.getBool() || actual_flashlight_enabled) {
-            // Dim screen when holding a slider
-            float max_opacity = 1.f;
-            if(getSelectedBeatmap()->holding_slider && !cv_avoid_flashes.getBool()) {
-                max_opacity = 0.2f;
-            }
-
             // Convert screen mouse -> osu mouse pos
             Vector2 cursorPos = beatmap->getCursorPos();
             Vector2 mouse_position = cursorPos - GameRules::getPlayfieldOffset();
@@ -462,8 +456,14 @@ void Osu::draw(Graphics *g) {
             }
 
             if(cv_mod_flashlight.getBool()) {
+                // Dim screen when holding a slider
+                float opacity = 1.f;
+                if(getSelectedBeatmap()->holding_slider && !cv_avoid_flashes.getBool()) {
+                    opacity = 0.2f;
+                }
+
                 flashlight_shader->enable();
-                flashlight_shader->setUniform1f("max_opacity", max_opacity);
+                flashlight_shader->setUniform1f("max_opacity", opacity);
                 flashlight_shader->setUniform1f("flashlight_radius", fl_radius);
                 flashlight_shader->setUniform2f("flashlight_center", flashlightPos.x,
                                                 getScreenSize().y - flashlightPos.y);
@@ -474,8 +474,14 @@ void Osu::draw(Graphics *g) {
                 flashlight_shader->disable();
             }
             if(actual_flashlight_enabled) {
+                // Brighten screen when holding a slider
+                float opacity = 1.f;
+                if(getSelectedBeatmap()->holding_slider && !cv_avoid_flashes.getBool()) {
+                    opacity = 0.8f;
+                }
+
                 actual_flashlight_shader->enable();
-                actual_flashlight_shader->setUniform1f("max_opacity", max_opacity);
+                actual_flashlight_shader->setUniform1f("max_opacity", opacity);
                 actual_flashlight_shader->setUniform1f("flashlight_radius", anti_fl_radius);
                 actual_flashlight_shader->setUniform2f("flashlight_center", flashlightPos.x,
                                                        getScreenSize().y - flashlightPos.y);
