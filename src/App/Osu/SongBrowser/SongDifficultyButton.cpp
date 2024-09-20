@@ -43,6 +43,7 @@ SongDifficultyButton::SongDifficultyButton(SongBrowser *songBrowser, CBaseUIScro
     setHideIfSelected(false);
 
     updateLayoutEx();
+    updateGrade();
 }
 
 SongDifficultyButton::~SongDifficultyButton() { anim->deleteExistingAnimation(&m_fOffsetPercentAnim); }
@@ -62,8 +63,7 @@ void SongDifficultyButton::draw(Graphics *g) {
     // draw background image
     drawBeatmapBackgroundThumbnail(g, osu->getBackgroundImageHandler()->getLoadBackgroundImage(m_databaseBeatmap));
 
-    if(m_bHasGrade) drawGrade(g);
-
+    if(m_grade != FinishedScore::Grade::N) drawGrade(g);
     drawTitle(g, !isIndependentDiff ? 0.2f : 1.0f);
     drawSubTitle(g, !isIndependentDiff ? 0.2f : 1.0f);
 
@@ -182,16 +182,18 @@ void SongDifficultyButton::onSelected(bool wasSelected, bool autoSelectBottomMos
 
 void SongDifficultyButton::updateGrade() {
     if(!cv_scores_enabled.getBool()) {
-        m_bHasGrade = false;
         return;
     }
 
     std::lock_guard<std::mutex> lock(db->m_scores_mtx);
     auto db_scores = db->getScores();
     for(auto &score : (*db_scores)[m_databaseBeatmap->getMD5Hash()]) {
-        m_bHasGrade = true;
         if(score.grade < m_grade) {
             m_grade = score.grade;
+
+            if(m_parentSongButton != NULL && m_parentSongButton->m_grade > m_grade) {
+                m_parentSongButton->m_grade = m_grade;
+            }
         }
     }
 }

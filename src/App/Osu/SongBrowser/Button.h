@@ -3,6 +3,7 @@
 
 class DatabaseBeatmap;
 class SongBrowser;
+class SongButton;
 class UIContextMenu;
 
 class CBaseUIScrollView;
@@ -27,7 +28,7 @@ class Button : public CBaseUIButton {
     void resetAnimations();
 
     void setTargetRelPosY(float targetRelPosY);
-    void setChildren(std::vector<Button *> children) { m_children = children; }
+    void setChildren(std::vector<SongButton *> children) { m_children = children; }
     void setOffsetPercent(float offsetPercent) { m_fOffsetPercent = offsetPercent; }
     void setHideIfSelected(bool hideIfSelected) { m_bHideIfSelected = hideIfSelected; }
     void setIsSearchMatch(bool isSearchMatch) { m_bIsSearchMatch = isSearchMatch; }
@@ -35,7 +36,7 @@ class Button : public CBaseUIButton {
     Vector2 getActualOffset() const;
     inline Vector2 getActualSize() const { return m_vSize - 2 * getActualOffset(); }
     inline Vector2 getActualPos() const { return m_vPos + getActualOffset(); }
-    inline std::vector<Button *> &getChildren() { return m_children; }
+    inline std::vector<SongButton *> &getChildren() { return m_children; }
     inline int getSortHack() const { return m_iSortHack; }
 
     virtual DatabaseBeatmap *getDatabaseBeatmap() const { return NULL; }
@@ -61,7 +62,7 @@ class Button : public CBaseUIButton {
 
     bool m_bSelected;
 
-    std::vector<Button *> m_children;
+    std::vector<SongButton *> m_children;
 
    private:
     static int marginPixelsX;

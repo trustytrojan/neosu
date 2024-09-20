@@ -1,6 +1,7 @@
 #include "CollectionButton.h"
 
 #include "SongBrowser.h"
+#include "SongButton.h"
 // ---
 
 #include "Collections.h"
@@ -19,7 +20,7 @@ using namespace std;
 
 CollectionButton::CollectionButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu,
                                    float xPos, float yPos, float xSize, float ySize, UString name,
-                                   UString collectionName, std::vector<Button *> children)
+                                   UString collectionName, std::vector<SongButton *> children)
     : Button(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, name) {
     m_sCollectionName = collectionName;
     m_children = children;
@@ -45,7 +46,7 @@ void CollectionButton::draw(Graphics *g) {
     int numChildren = 0;
     {
         for(size_t c = 0; c < m_children.size(); c++) {
-            const std::vector<Button *> &childrenChildren = m_children[c]->getChildren();
+            const auto &childrenChildren = m_children[c]->getChildren();
             if(childrenChildren.size() > 0) {
                 for(size_t cc = 0; cc < childrenChildren.size(); cc++) {
                     if(childrenChildren[cc]->isSearchMatch()) numChildren++;

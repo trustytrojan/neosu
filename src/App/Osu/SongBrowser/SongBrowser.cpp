@@ -93,7 +93,7 @@ class SongBrowserBackgroundSearchMatcher : public Resource {
         // flag matches across entire database
         const std::vector<UString> searchStringTokens = m_sSearchString.split(" ");
         for(size_t i = 0; i < m_songButtons.size(); i++) {
-            const std::vector<Button *> &children = m_songButtons[i]->getChildren();
+            const auto &children = m_songButtons[i]->getChildren();
             if(children.size() > 0) {
                 for(size_t c = 0; c < children.size(); c++) {
                     children[c]->setIsSearchMatch(
@@ -214,7 +214,7 @@ class NoRecordsSetElement : public CBaseUILabel {
     UString m_sIconString;
 };
 
-bool sort_by_artist(Button const *a, Button const *b) {
+bool sort_by_artist(SongButton const *a, SongButton const *b) {
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
 
     int res = strcasecmp(a->getDatabaseBeatmap()->getArtist().c_str(), b->getDatabaseBeatmap()->getArtist().c_str());
@@ -222,7 +222,7 @@ bool sort_by_artist(Button const *a, Button const *b) {
     return res < 0;
 }
 
-bool sort_by_bpm(Button const *a, Button const *b) {
+bool sort_by_bpm(SongButton const *a, SongButton const *b) {
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
 
     int bpm1 = a->getDatabaseBeatmap()->getMostCommonBPM();
@@ -231,7 +231,7 @@ bool sort_by_bpm(Button const *a, Button const *b) {
     return bpm1 < bpm2;
 }
 
-bool sort_by_creator(Button const *a, Button const *b) {
+bool sort_by_creator(SongButton const *a, SongButton const *b) {
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
 
     int res = strcasecmp(a->getDatabaseBeatmap()->getCreator().c_str(), b->getDatabaseBeatmap()->getCreator().c_str());
@@ -239,7 +239,7 @@ bool sort_by_creator(Button const *a, Button const *b) {
     return res < 0;
 }
 
-bool sort_by_date_added(Button const *a, Button const *b) {
+bool sort_by_date_added(SongButton const *a, SongButton const *b) {
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
 
     long long time1 = a->getDatabaseBeatmap()->last_modification_time;
@@ -248,7 +248,7 @@ bool sort_by_date_added(Button const *a, Button const *b) {
     return time1 > time2;
 }
 
-bool sort_by_difficulty(Button const *a, Button const *b) {
+bool sort_by_difficulty(SongButton const *a, SongButton const *b) {
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
 
     float stars1 = a->getDatabaseBeatmap()->getStarsNomod();
@@ -266,7 +266,7 @@ bool sort_by_difficulty(Button const *a, Button const *b) {
     return a->getSortHack() < b->getSortHack();
 }
 
-bool sort_by_length(Button const *a, Button const *b) {
+bool sort_by_length(SongButton const *a, SongButton const *b) {
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
 
     unsigned long length1 = a->getDatabaseBeatmap()->getLengthMS();
@@ -275,12 +275,17 @@ bool sort_by_length(Button const *a, Button const *b) {
     return length1 < length2;
 }
 
-bool sort_by_title(Button const *a, Button const *b) {
+bool sort_by_title(SongButton const *a, SongButton const *b) {
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
 
     int res = strcasecmp(a->getDatabaseBeatmap()->getTitle().c_str(), b->getDatabaseBeatmap()->getTitle().c_str());
     if(res == 0) return a->getSortHack() < b->getSortHack();
     return res < 0;
+}
+
+bool sort_by_grade(SongButton const *a, SongButton const *b) {
+    if(a->m_grade == b->m_grade) return a->getSortHack() < b->getSortHack();
+    return a->m_grade < b->m_grade;
 }
 
 SongBrowser::SongBrowser() : ScreenBackable() {
@@ -289,7 +294,7 @@ SongBrowser::SongBrowser() : ScreenBackable() {
     {
         m_groupings.push_back({GROUP::GROUP_NO_GROUPING, "No Grouping", 0});
         m_groupings.push_back({GROUP::GROUP_ARTIST, "By Artist", 1});
-        /// m_groupings.push_back({GROUP::GROUP_BPM, "By BPM", 2}); // not yet possible
+        m_groupings.push_back({GROUP::GROUP_BPM, "By BPM", 2});
         m_groupings.push_back({GROUP::GROUP_CREATOR, "By Creator", 3});
         /// m_groupings.push_back({GROUP::GROUP_DATEADDED, "By Date Added", 4}); // not yet possible
         m_groupings.push_back({GROUP::GROUP_DIFFICULTY, "By Difficulty", 5});
@@ -308,9 +313,7 @@ SongBrowser::SongBrowser() : ScreenBackable() {
     m_sortingMethods.push_back({SORT::SORT_DIFFICULTY, "By Difficulty", sort_by_difficulty});
     m_sortingMethods.push_back({SORT::SORT_LENGTH, "By Length", sort_by_length});
     m_sortingMethods.push_back({SORT::SORT_TITLE, "By Title", sort_by_title});
-
-    // not yet possible
-    // m_sortingMethods.push_back({SORT::SORT_RANKACHIEVED, "By Rank Achieved", new SortByRankAchieved()});
+    m_sortingMethods.push_back({SORT::SORT_RANKACHIEVED, "By Rank Achieved", sort_by_grade});
 
     // vars
     m_bSongBrowserRightClickScrollCheck = false;
@@ -1172,7 +1175,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
 
                 // if this is a song button, select top child
                 if(songButton != NULL) {
-                    const std::vector<Button *> &children = songButton->getChildren();
+                    const auto &children = songButton->getChildren();
                     if(children.size() > 0 && !children[0]->isSelected()) children[0]->select(true, false, false);
                 }
             }
@@ -1206,7 +1209,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
                     if(nextCollectionButton != NULL) {
                         nextCollectionButton->select();
 
-                        std::vector<Button *> children = nextCollectionButton->getChildren();
+                        const auto &children = nextCollectionButton->getChildren();
                         if(children.size() > 0 && !children[children.size() - 1]->isSelected())
                             children[children.size() - 1]->select();
                     }
@@ -1241,7 +1244,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
                         // automatically open collection below and go to bottom child
                         CollectionButton *collectionButton = dynamic_cast<CollectionButton *>(elements[i]);
                         if(collectionButton != NULL) {
-                            std::vector<Button *> children = collectionButton->getChildren();
+                            const auto &children = collectionButton->getChildren();
                             if(children.size() > 0 && !children[children.size() - 1]->isSelected())
                                 children[children.size() - 1]->select();
                         }
@@ -1662,10 +1665,10 @@ void SongBrowser::addBeatmapSet(BeatmapSet *mapset) {
     }
 
     // prebuild temporary list of all relevant buttons, used by some groups
-    std::vector<Button *> tempChildrenForGroups;
+    std::vector<SongButton *> tempChildrenForGroups;
     {
         if(songButton->getChildren().size() > 0) {
-            for(Button *child : songButton->getChildren()) {
+            for(SongButton *child : songButton->getChildren()) {
                 tempChildrenForGroups.push_back(child);
             }
         } else {
@@ -1681,11 +1684,11 @@ void SongBrowser::addBeatmapSet(BeatmapSet *mapset) {
 
         // difficulty
         if(m_difficultyCollectionButtons.size() == 12) {
-            for(auto diff_btn : tempChildrenForGroups) {
+            for(SongButton *diff_btn : tempChildrenForGroups) {
                 const int index = clamp<int>((int)diff_btn->getDatabaseBeatmap()->getStarsNomod(), 0, 11);
-                auto children = &m_difficultyCollectionButtons[index]->getChildren();
-                auto it = std::lower_bound(children->begin(), children->end(), diff_btn, sort_by_difficulty);
-                children->insert(it, diff_btn);
+                auto &children = m_difficultyCollectionButtons[index]->getChildren();
+                auto it = std::lower_bound(children.begin(), children.end(), diff_btn, sort_by_difficulty);
+                children.insert(it, diff_btn);
             }
         }
 
@@ -1705,7 +1708,7 @@ void SongBrowser::addBeatmapSet(BeatmapSet *mapset) {
             for(auto diff_btn : tempChildrenForGroups) {
                 const u32 lengthMS = diff_btn->getDatabaseBeatmap()->getLengthMS();
 
-                std::vector<Button *> *children = NULL;
+                std::vector<SongButton *> *children = NULL;
                 if(lengthMS <= 1000 * 60) {
                     children = &m_lengthCollectionButtons[0]->getChildren();
                 } else if(lengthMS <= 1000 * 60 * 2) {
@@ -1741,7 +1744,7 @@ void SongBrowser::addSongButtonToAlphanumericGroup(SongButton *btn, std::vector<
     const bool isLowerCase = (firstChar >= 'a' && firstChar <= 'z');
     const bool isUpperCase = (firstChar >= 'A' && firstChar <= 'Z');
 
-    std::vector<Button *> *children = NULL;
+    std::vector<SongButton *> *children = NULL;
     if(isNumber) {
         children = &group[0]->getChildren();
     } else if(isLowerCase || isUpperCase) {
@@ -1807,13 +1810,13 @@ void SongBrowser::rebuildSongButtons() {
 
         // children
         if(button->isSelected()) {
-            const std::vector<Button *> &children = m_visibleSongButtons[i]->getChildren();
+            const auto &children = m_visibleSongButtons[i]->getChildren();
             for(size_t c = 0; c < children.size(); c++) {
                 Button *button2 = children[c];
 
                 bool isButton2SearchMatch = false;
                 if(button2->getChildren().size() > 0) {
-                    const std::vector<Button *> &children2 = button2->getChildren();
+                    const auto &children2 = button2->getChildren();
                     for(size_t c2 = 0; c2 < children2.size(); c2++) {
                         const Button *button3 = children2[c2];
                         if(button3->isSearchMatch()) {
@@ -1833,7 +1836,7 @@ void SongBrowser::rebuildSongButtons() {
 
                 // child children
                 if(button2->isSelected()) {
-                    const std::vector<Button *> &children2 = button2->getChildren();
+                    const auto &children2 = button2->getChildren();
                     for(size_t c2 = 0; c2 < children2.size(); c2++) {
                         Button *button3 = children2[c2];
 
@@ -2605,7 +2608,7 @@ void SongBrowser::onDatabaseLoadingFinished() {
             // 0-9
             {
                 CollectionButton *b = new CollectionButton(this, m_songBrowser, m_contextMenu, 250, 250, 200, 50, "",
-                                                           "0-9", std::vector<Button *>());
+                                                           "0-9", std::vector<SongButton *>());
                 m_artistCollectionButtons.push_back(b);
             }
 
@@ -2614,14 +2617,14 @@ void SongBrowser::onDatabaseLoadingFinished() {
                 UString artistCollectionName = UString::format("%c", 'A' + i);
 
                 CollectionButton *b = new CollectionButton(this, m_songBrowser, m_contextMenu, 250, 250, 200, 50, "",
-                                                           artistCollectionName, std::vector<Button *>());
+                                                           artistCollectionName, std::vector<SongButton *>());
                 m_artistCollectionButtons.push_back(b);
             }
 
             // Other
             {
                 CollectionButton *b = new CollectionButton(this, m_songBrowser, m_contextMenu, 250, 250, 200, 50, "",
-                                                           "Other", std::vector<Button *>());
+                                                           "Other", std::vector<SongButton *>());
                 m_artistCollectionButtons.push_back(b);
             }
         }
@@ -2632,7 +2635,7 @@ void SongBrowser::onDatabaseLoadingFinished() {
             if(i < 1) difficultyCollectionName = "Below 1 star";
             if(i > 10) difficultyCollectionName = "Above 10 stars";
 
-            std::vector<Button *> children;
+            std::vector<SongButton *> children;
 
             CollectionButton *b = new CollectionButton(this, m_songBrowser, m_contextMenu, 250, 250, 200, 50, "",
                                                        difficultyCollectionName, children);
@@ -2642,22 +2645,22 @@ void SongBrowser::onDatabaseLoadingFinished() {
         // bpm
         {
             CollectionButton *b = new CollectionButton(this, m_songBrowser, m_contextMenu, 250, 250, 200, 50, "",
-                                                       "Under 60 BPM", std::vector<Button *>());
+                                                       "Under 60 BPM", std::vector<SongButton *>());
             m_bpmCollectionButtons.push_back(b);
             b = new CollectionButton(this, m_songBrowser, m_contextMenu, 250, 250, 200, 50, "", "Under 120 BPM",
-                                     std::vector<Button *>());
+                                     std::vector<SongButton *>());
             m_bpmCollectionButtons.push_back(b);
             b = new CollectionButton(this, m_songBrowser, m_contextMenu, 250, 250, 200, 50, "", "Under 180 BPM",
-                                     std::vector<Button *>());
+                                     std::vector<SongButton *>());
             m_bpmCollectionButtons.push_back(b);
             b = new CollectionButton(this, m_songBrowser, m_contextMenu, 250, 250, 200, 50, "", "Under 240 BPM",
-                                     std::vector<Button *>());
+                                     std::vector<SongButton *>());
             m_bpmCollectionButtons.push_back(b);
             b = new CollectionButton(this, m_songBrowser, m_contextMenu, 250, 250, 200, 50, "", "Under 300 BPM",
-                                     std::vector<Button *>());
+                                     std::vector<SongButton *>());
             m_bpmCollectionButtons.push_back(b);
             b = new CollectionButton(this, m_songBrowser, m_contextMenu, 250, 250, 200, 50, "", "Over 300 BPM",
-                                     std::vector<Button *>());
+                                     std::vector<SongButton *>());
             m_bpmCollectionButtons.push_back(b);
         }
 
@@ -2666,7 +2669,7 @@ void SongBrowser::onDatabaseLoadingFinished() {
             // 0-9
             {
                 CollectionButton *b = new CollectionButton(this, m_songBrowser, m_contextMenu, 250, 250, 200, 50, "",
-                                                           "0-9", std::vector<Button *>());
+                                                           "0-9", std::vector<SongButton *>());
                 m_creatorCollectionButtons.push_back(b);
             }
 
@@ -2675,14 +2678,14 @@ void SongBrowser::onDatabaseLoadingFinished() {
                 UString artistCollectionName = UString::format("%c", 'A' + i);
 
                 CollectionButton *b = new CollectionButton(this, m_songBrowser, m_contextMenu, 250, 250, 200, 50, "",
-                                                           artistCollectionName, std::vector<Button *>());
+                                                           artistCollectionName, std::vector<SongButton *>());
                 m_creatorCollectionButtons.push_back(b);
             }
 
             // Other
             {
                 CollectionButton *b = new CollectionButton(this, m_songBrowser, m_contextMenu, 250, 250, 200, 50, "",
-                                                           "Other", std::vector<Button *>());
+                                                           "Other", std::vector<SongButton *>());
                 m_creatorCollectionButtons.push_back(b);
             }
         }
@@ -2695,25 +2698,25 @@ void SongBrowser::onDatabaseLoadingFinished() {
         // length
         {
             CollectionButton *b = new CollectionButton(this, m_songBrowser, m_contextMenu, 250, 250, 200, 50, "",
-                                                       "1 minute or less", std::vector<Button *>());
+                                                       "1 minute or less", std::vector<SongButton *>());
             m_lengthCollectionButtons.push_back(b);
             b = new CollectionButton(this, m_songBrowser, m_contextMenu, 250, 250, 200, 50, "", "2 minutes or less",
-                                     std::vector<Button *>());
+                                     std::vector<SongButton *>());
             m_lengthCollectionButtons.push_back(b);
             b = new CollectionButton(this, m_songBrowser, m_contextMenu, 250, 250, 200, 50, "", "3 minutes or less",
-                                     std::vector<Button *>());
+                                     std::vector<SongButton *>());
             m_lengthCollectionButtons.push_back(b);
             b = new CollectionButton(this, m_songBrowser, m_contextMenu, 250, 250, 200, 50, "", "4 minutes or less",
-                                     std::vector<Button *>());
+                                     std::vector<SongButton *>());
             m_lengthCollectionButtons.push_back(b);
             b = new CollectionButton(this, m_songBrowser, m_contextMenu, 250, 250, 200, 50, "", "5 minutes or less",
-                                     std::vector<Button *>());
+                                     std::vector<SongButton *>());
             m_lengthCollectionButtons.push_back(b);
             b = new CollectionButton(this, m_songBrowser, m_contextMenu, 250, 250, 200, 50, "", "10 minutes or less",
-                                     std::vector<Button *>());
+                                     std::vector<SongButton *>());
             m_lengthCollectionButtons.push_back(b);
             b = new CollectionButton(this, m_songBrowser, m_contextMenu, 250, 250, 200, 50, "", "Over 10 minutes",
-                                     std::vector<Button *>());
+                                     std::vector<SongButton *>());
             m_lengthCollectionButtons.push_back(b);
         }
 
@@ -2722,7 +2725,7 @@ void SongBrowser::onDatabaseLoadingFinished() {
             // 0-9
             {
                 CollectionButton *b = new CollectionButton(this, m_songBrowser, m_contextMenu, 250, 250, 200, 50, "",
-                                                           "0-9", std::vector<Button *>());
+                                                           "0-9", std::vector<SongButton *>());
                 m_titleCollectionButtons.push_back(b);
             }
 
@@ -2731,14 +2734,14 @@ void SongBrowser::onDatabaseLoadingFinished() {
                 UString artistCollectionName = UString::format("%c", 'A' + i);
 
                 CollectionButton *b = new CollectionButton(this, m_songBrowser, m_contextMenu, 250, 250, 200, 50, "",
-                                                           artistCollectionName, std::vector<Button *>());
+                                                           artistCollectionName, std::vector<SongButton *>());
                 m_titleCollectionButtons.push_back(b);
             }
 
             // Other
             {
                 CollectionButton *b = new CollectionButton(this, m_songBrowser, m_contextMenu, 250, 250, 200, 50, "",
-                                                           "Other", std::vector<Button *>());
+                                                           "Other", std::vector<SongButton *>());
                 m_titleCollectionButtons.push_back(b);
             }
         }
@@ -2820,7 +2823,7 @@ void SongBrowser::onSearchUpdate() {
 
         // reset all search flags
         for(size_t i = 0; i < m_songButtons.size(); i++) {
-            const std::vector<Button *> &children = m_songButtons[i]->getChildren();
+            const auto &children = m_songButtons[i]->getChildren();
             if(children.size() > 0) {
                 for(size_t c = 0; c < children.size(); c++) {
                     children[c]->setIsSearchMatch(true);
@@ -2850,7 +2853,7 @@ void SongBrowser::rebuildSongButtonsAndVisibleSongButtonsWithSearchMatchSupport(
     {
         if(m_group == GROUP::GROUP_NO_GROUPING) {
             for(size_t i = 0; i < m_songButtons.size(); i++) {
-                const std::vector<Button *> &children = m_songButtons[i]->getChildren();
+                const auto &children = m_songButtons[i]->getChildren();
                 if(children.size() > 0) {
                     // if all children match, then we still want to display the parent wrapper button (without expanding
                     // all diffs)
@@ -2901,9 +2904,9 @@ void SongBrowser::rebuildSongButtonsAndVisibleSongButtonsWithSearchMatchSupport(
                 for(size_t i = 0; i < groupButtons->size(); i++) {
                     bool isAnyMatchInGroup = false;
 
-                    const std::vector<Button *> &children = (*groupButtons)[i]->getChildren();
+                    const auto &children = (*groupButtons)[i]->getChildren();
                     for(size_t c = 0; c < children.size(); c++) {
-                        const std::vector<Button *> &childrenChildren = children[c]->getChildren();
+                        const auto &childrenChildren = children[c]->getChildren();
                         if(childrenChildren.size() > 0) {
                             for(size_t cc = 0; cc < childrenChildren.size(); cc++) {
                                 if(childrenChildren[cc]->isSearchMatch()) {
@@ -3093,44 +3096,44 @@ void SongBrowser::onSortChangeInt(UString text, bool autoScroll) {
 
     // resort Collection button array (each group of songbuttons inside each Collection)
     for(size_t i = 0; i < m_collectionButtons.size(); i++) {
-        std::vector<Button *> &children = m_collectionButtons[i]->getChildren();
+        auto &children = m_collectionButtons[i]->getChildren();
         std::sort(children.begin(), children.end(), m_sortingComparator);
         m_collectionButtons[i]->setChildren(children);
     }
 
     // etc.
     for(size_t i = 0; i < m_artistCollectionButtons.size(); i++) {
-        std::vector<Button *> &children = m_artistCollectionButtons[i]->getChildren();
+        auto &children = m_artistCollectionButtons[i]->getChildren();
         std::sort(children.begin(), children.end(), m_sortingComparator);
         m_artistCollectionButtons[i]->setChildren(children);
     }
     for(size_t i = 0; i < m_difficultyCollectionButtons.size(); i++) {
-        std::vector<Button *> &children = m_difficultyCollectionButtons[i]->getChildren();
+        auto &children = m_difficultyCollectionButtons[i]->getChildren();
         std::sort(children.begin(), children.end(), m_sortingComparator);
         m_difficultyCollectionButtons[i]->setChildren(children);
     }
     for(size_t i = 0; i < m_bpmCollectionButtons.size(); i++) {
-        std::vector<Button *> &children = m_bpmCollectionButtons[i]->getChildren();
+        auto &children = m_bpmCollectionButtons[i]->getChildren();
         std::sort(children.begin(), children.end(), m_sortingComparator);
         m_bpmCollectionButtons[i]->setChildren(children);
     }
     for(size_t i = 0; i < m_creatorCollectionButtons.size(); i++) {
-        std::vector<Button *> &children = m_creatorCollectionButtons[i]->getChildren();
+        auto &children = m_creatorCollectionButtons[i]->getChildren();
         std::sort(children.begin(), children.end(), m_sortingComparator);
         m_creatorCollectionButtons[i]->setChildren(children);
     }
     for(size_t i = 0; i < m_dateaddedCollectionButtons.size(); i++) {
-        std::vector<Button *> &children = m_dateaddedCollectionButtons[i]->getChildren();
+        auto &children = m_dateaddedCollectionButtons[i]->getChildren();
         std::sort(children.begin(), children.end(), m_sortingComparator);
         m_dateaddedCollectionButtons[i]->setChildren(children);
     }
     for(size_t i = 0; i < m_lengthCollectionButtons.size(); i++) {
-        std::vector<Button *> &children = m_lengthCollectionButtons[i]->getChildren();
+        auto &children = m_lengthCollectionButtons[i]->getChildren();
         std::sort(children.begin(), children.end(), m_sortingComparator);
         m_lengthCollectionButtons[i]->setChildren(children);
     }
     for(size_t i = 0; i < m_titleCollectionButtons.size(); i++) {
-        std::vector<Button *> &children = m_titleCollectionButtons[i]->getChildren();
+        auto &children = m_titleCollectionButtons[i]->getChildren();
         std::sort(children.begin(), children.end(), m_sortingComparator);
         m_titleCollectionButtons[i]->setChildren(children);
     }
@@ -3356,7 +3359,7 @@ void SongBrowser::onSongButtonContextMenu(SongButton *songButton, UString text, 
         static std::vector<MD5Hash> getBeatmapSetHashesForSongButton(SongButton *songButton, Database *db) {
             std::vector<MD5Hash> beatmapSetHashes;
             {
-                const std::vector<Button *> &songButtonChildren = songButton->getChildren();
+                const auto &songButtonChildren = songButton->getChildren();
                 if(songButtonChildren.size() > 0) {
                     for(size_t i = 0; i < songButtonChildren.size(); i++) {
                         beatmapSetHashes.push_back(songButtonChildren[i]->getDatabaseBeatmap()->getMD5Hash());
@@ -3601,7 +3604,7 @@ void SongBrowser::selectPreviousRandomBeatmap() {
                 break;
             }
 
-            const std::vector<Button *> &children = songButtons[i]->getChildren();
+            const auto &children = songButtons[i]->getChildren();
             for(size_t c = 0; c < children.size(); c++) {
                 if(children[c]->getDatabaseBeatmap() == previousRandomBeatmap) {
                     m_previousRandomBeatmaps.pop_back();
@@ -3652,7 +3655,7 @@ void SongBrowser::recreateCollectionsButtons() {
     for(auto collection : collections) {
         if(collection->maps.empty()) continue;
 
-        std::vector<Button *> folder;
+        std::vector<SongButton *> folder;
         std::vector<u32> matched_sets;
 
         for(auto &map : collection->maps) {
@@ -3661,9 +3664,9 @@ void SongBrowser::recreateCollectionsButtons() {
 
             u32 set_id = 0;
             auto song_button = it->second;
-            const std::vector<Button *> &songButtonChildren = song_button->getChildren();
-            std::vector<Button *> matching_diffs;
-            for(Button *sbc : songButtonChildren) {
+            const auto &songButtonChildren = song_button->getChildren();
+            std::vector<SongButton *> matching_diffs;
+            for(SongButton *sbc : songButtonChildren) {
                 for(auto &map2 : collection->maps) {
                     if(sbc->getDatabaseBeatmap()->getMD5Hash() == map2) {
                         matching_diffs.push_back(sbc);

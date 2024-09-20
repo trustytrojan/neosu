@@ -5,7 +5,7 @@ class CollectionButton : public Button {
    public:
     CollectionButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos,
                      float yPos, float xSize, float ySize, UString name, UString collectionName,
-                     std::vector<Button *> children);
+                     std::vector<SongButton *> children);
 
     virtual void draw(Graphics *g);
 

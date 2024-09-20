@@ -89,6 +89,7 @@ void SongButton::draw(Graphics *g) {
         }
     }
 
+    if(m_grade != FinishedScore::Grade::N) drawGrade(g);
     drawTitle(g);
     drawSubTitle(g);
 }
@@ -221,11 +222,11 @@ void SongButton::updateLayoutEx() {
     m_fTextOffset = 0.0f;
     m_fGradeOffset = 0.0f;
 
-    if(m_bHasGrade) m_fTextOffset += calculateGradeWidth();
+    if(m_grade != FinishedScore::Grade::N) m_fTextOffset += calculateGradeWidth();
 
     if(osu->getSkin()->getVersion() < 2.2f) {
         m_fTextOffset += size.x * 0.02f * 2.0f;
-        if(m_bHasGrade) m_fGradeOffset += calculateGradeWidth() / 2;
+        if(m_grade != FinishedScore::Grade::N) m_fGradeOffset += calculateGradeWidth() / 2;
     } else {
         m_fTextOffset += size.y * thumbnailYRatio + size.x * 0.02f;
         m_fGradeOffset += size.y * thumbnailYRatio + size.x * 0.0125f;

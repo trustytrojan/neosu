@@ -21,6 +21,7 @@ class SongButton : public Button {
     virtual void updateGrade() { ; }
 
     virtual DatabaseBeatmap *getDatabaseBeatmap() const { return m_databaseBeatmap; }
+    FinishedScore::Grade m_grade = FinishedScore::Grade::N;
 
    protected:
     virtual void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected);
@@ -43,8 +44,6 @@ class SongButton : public Button {
     std::string m_sTitle;
     std::string m_sArtist;
     std::string m_sMapper;
-    FinishedScore::Grade m_grade = FinishedScore::Grade::N;
-    bool m_bHasGrade = false;
 
     float m_fTextOffset;
     float m_fGradeOffset;

@@ -89,7 +89,7 @@
       <WarningLevel>Level3</WarningLevel>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>libraries/glew/include;libraries/freetype/include;libraries/libcurl/include;libraries/libjpeg/include;libraries/lzma/include;libraries/bassloud/include;libraries/basswasapi/include;libraries/bassmix/include;libraries/bassfx/include;libraries/bassasio/include;libraries/bass/include;src/Util;src/Engine/Renderer;src/Engine/Main;src/Engine/Platform;src/Engine/Input;src/Engine;src/GUI/Windows/VinylScratcher;src/GUI/Windows;src/GUI;src/App/Osu;src/App;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
@@ -119,7 +119,7 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
       <WarningLevel>Level3</WarningLevel>
       <AdditionalIncludeDirectories>libraries/glew/include;libraries/freetype/include;libraries/libcurl/include;libraries/libjpeg/include;libraries/lzma/include;libraries/bassloud/include;libraries/basswasapi/include;libraries/bassmix/include;libraries/bassfx/include;libraries/bassasio/include;libraries/bass/include;src/Util;src/Engine/Renderer;src/Engine/Main;src/Engine/Platform;src/Engine/Input;src/Engine;src/GUI/Windows/VinylScratcher;src/GUI/Windows;src/GUI;src/App/Osu;src/App;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
@@ -148,7 +148,7 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
       <WarningLevel>Level3</WarningLevel>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>libraries/glew/include;libraries/freetype/include;libraries/libcurl/include;libraries/libjpeg/include;libraries/lzma/include;libraries/bassloud/include;libraries/basswasapi/include;libraries/bassmix/include;libraries/bassfx/include;libraries/bassasio/include;libraries/bass/include;src/Util;src/Engine/Renderer;src/Engine/Main;src/Engine/Platform;src/Engine/Input;src/Engine;src/GUI/Windows/VinylScratcher;src/GUI/Windows;src/GUI;src/App/Osu;src/App;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -180,7 +180,7 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
       <WarningLevel>Level3</WarningLevel>
       <AdditionalIncludeDirectories>libraries/glew/include;libraries/freetype/include;libraries/libcurl/include;libraries/libjpeg/include;libraries/lzma/include;libraries/bassloud/include;libraries/basswasapi/include;libraries/bassmix/include;libraries/bassfx/include;libraries/bassasio/include;libraries/bass/include;src/Util;src/Engine/Renderer;src/Engine/Main;src/Engine/Platform;src/Engine/Input;src/Engine;src/GUI/Windows/VinylScratcher;src/GUI/Windows;src/GUI;src/App/Osu;src/App;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
