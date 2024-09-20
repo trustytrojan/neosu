@@ -58,6 +58,9 @@
 #include "UserCard.h"
 #include "VertexArrayObject.h"
 
+const Color highlightColor = COLOR(255, 0, 255, 0);
+const Color defaultColor = COLOR(255, 255, 255, 255);
+
 class SongBrowserBackgroundSearchMatcher : public Resource {
    public:
     SongBrowserBackgroundSearchMatcher() : Resource() {
@@ -353,7 +356,6 @@ SongBrowser::SongBrowser() : ScreenBackable() {
 
     // build topbar right
     m_topbarRight = new CBaseUIContainer(0, 0, 0, 0, "");
-
     {
         m_groupLabel = new CBaseUILabel(0, 0, 0, 0, "", "Group:");
         m_groupLabel->setSizeToContent(3);
@@ -376,6 +378,24 @@ SongBrowser::SongBrowser() : ScreenBackable() {
         m_sortButton->setDrawBackground(false);
         m_sortButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onSortClicked));
         m_topbarRight->addBaseUIElement(m_sortButton);
+
+        // "hardcoded" grouping tabs
+        m_groupByCollectionBtn = new CBaseUIButton(0, 0, 0, 0, "", "Collections");
+        m_groupByCollectionBtn->setDrawBackground(false);
+        m_groupByCollectionBtn->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onQuickGroupClicked));
+        m_topbarRight->addBaseUIElement(m_groupByCollectionBtn);
+        m_groupByArtistBtn = new CBaseUIButton(0, 0, 0, 0, "", "By Artist");
+        m_groupByArtistBtn->setDrawBackground(false);
+        m_groupByArtistBtn->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onQuickGroupClicked));
+        m_topbarRight->addBaseUIElement(m_groupByArtistBtn);
+        m_groupByDifficultyBtn = new CBaseUIButton(0, 0, 0, 0, "", "By Difficulty");
+        m_groupByDifficultyBtn->setDrawBackground(false);
+        m_groupByDifficultyBtn->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onQuickGroupClicked));
+        m_topbarRight->addBaseUIElement(m_groupByDifficultyBtn);
+        m_groupByNothingBtn = new CBaseUIButton(0, 0, 0, 0, "", "No Grouping");
+        m_groupByNothingBtn->setDrawBackground(false);
+        m_groupByNothingBtn->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onQuickGroupClicked));
+        m_topbarRight->addBaseUIElement(m_groupByNothingBtn);
     }
 
     // context menu
@@ -2316,6 +2336,21 @@ void SongBrowser::updateLayout() {
     m_groupLabel->setRelPos(m_groupButton->getRelPos().x - (m_groupLabel->getSize().x + btn_margin),
                             (m_groupLabel->getSize().y + btn_margin) / 2.f);
 
+    // "hardcoded" group buttons
+    const i32 group_btn_width = clamp<i32>((m_topbarRight->getSize().x - 2 * btn_margin) / 4, 0, 200 * dpiScale);
+    m_groupByCollectionBtn->setSize(group_btn_width, 30 * dpiScale);
+    m_groupByCollectionBtn->setRelPos(m_topbarRight->getSize().x - (btn_margin + (4 * group_btn_width)),
+                                      m_topbarRight->getSize().y - 30 * dpiScale);
+    m_groupByArtistBtn->setSize(group_btn_width, 30 * dpiScale);
+    m_groupByArtistBtn->setRelPos(m_topbarRight->getSize().x - (btn_margin + (3 * group_btn_width)),
+                                  m_topbarRight->getSize().y - 30 * dpiScale);
+    m_groupByDifficultyBtn->setSize(group_btn_width, 30 * dpiScale);
+    m_groupByDifficultyBtn->setRelPos(m_topbarRight->getSize().x - (btn_margin + (2 * group_btn_width)),
+                                      m_topbarRight->getSize().y - 30 * dpiScale);
+    m_groupByNothingBtn->setSize(group_btn_width, 30 * dpiScale);
+    m_groupByNothingBtn->setRelPos(m_topbarRight->getSize().x - (btn_margin + (1 * group_btn_width)),
+                                   m_topbarRight->getSize().y - 30 * dpiScale);
+
     m_topbarRight->update_pos();
 
     // bottombar
@@ -3011,6 +3046,15 @@ void SongBrowser::onWebClicked(CBaseUIButton *button) {
     }
 }
 
+void SongBrowser::onQuickGroupClicked(CBaseUIButton *button) {
+    for(auto group : m_groupings) {
+        if(group.name == button->getText()) {
+            onGroupChange(group.name, group.id);
+            return;
+        }
+    }
+}
+
 void SongBrowser::onGroupClicked(CBaseUIButton *button) {
     m_contextMenu->setPos(button->getPos());
     m_contextMenu->setRelPos(button->getRelPos());
@@ -3026,6 +3070,11 @@ void SongBrowser::onGroupClicked(CBaseUIButton *button) {
 }
 
 void SongBrowser::onGroupChange(UString text, int id) {
+    m_groupByCollectionBtn->setTextBrightColor(defaultColor);
+    m_groupByArtistBtn->setTextBrightColor(defaultColor);
+    m_groupByDifficultyBtn->setTextBrightColor(defaultColor);
+    m_groupByNothingBtn->setTextBrightColor(defaultColor);
+
     GROUPING *grouping = (m_groupings.size() > 0 ? &m_groupings[0] : NULL);
     for(size_t i = 0; i < m_groupings.size(); i++) {
         if(m_groupings[i].id == id || (text.length() > 1 && m_groupings[i].name == text)) {
@@ -3034,9 +3083,6 @@ void SongBrowser::onGroupChange(UString text, int id) {
         }
     }
     if(grouping == NULL) return;
-
-    const Color highlightColor = COLOR(255, 0, 255, 0);
-    const Color defaultColor = COLOR(255, 255, 255, 255);
 
     // update group combobox button text
     m_groupButton->setText(grouping->name);
@@ -3177,6 +3223,7 @@ void SongBrowser::onSortChangeInt(UString text, bool autoScroll) {
 
 void SongBrowser::onGroupNoGrouping() {
     m_group = GROUP::GROUP_NO_GROUPING;
+    m_groupByNothingBtn->setTextBrightColor(highlightColor);
 
     m_visibleSongButtons.clear();
     m_visibleSongButtons.insert(m_visibleSongButtons.end(), m_songButtons.begin(), m_songButtons.end());
@@ -3187,6 +3234,7 @@ void SongBrowser::onGroupNoGrouping() {
 
 void SongBrowser::onGroupCollections(bool autoScroll) {
     m_group = GROUP::GROUP_COLLECTIONS;
+    m_groupByCollectionBtn->setTextBrightColor(highlightColor);
 
     m_visibleSongButtons.clear();
     m_visibleSongButtons.insert(m_visibleSongButtons.end(), m_collectionButtons.begin(), m_collectionButtons.end());
@@ -3197,6 +3245,7 @@ void SongBrowser::onGroupCollections(bool autoScroll) {
 
 void SongBrowser::onGroupArtist() {
     m_group = GROUP::GROUP_ARTIST;
+    m_groupByArtistBtn->setTextBrightColor(highlightColor);
 
     m_visibleSongButtons.clear();
     m_visibleSongButtons.insert(m_visibleSongButtons.end(), m_artistCollectionButtons.begin(),
@@ -3208,6 +3257,7 @@ void SongBrowser::onGroupArtist() {
 
 void SongBrowser::onGroupDifficulty() {
     m_group = GROUP::GROUP_DIFFICULTY;
+    m_groupByDifficultyBtn->setTextBrightColor(highlightColor);
 
     m_visibleSongButtons.clear();
     m_visibleSongButtons.insert(m_visibleSongButtons.end(), m_difficultyCollectionButtons.begin(),

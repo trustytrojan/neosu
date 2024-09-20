@@ -165,6 +165,7 @@ class SongBrowser : public ScreenBackable {
     void onSortScoresChange(UString text, int id = -1);
     void onWebClicked(CBaseUIButton *button);
 
+    void onQuickGroupClicked(CBaseUIButton *button);
     void onGroupClicked(CBaseUIButton *button);
     void onGroupChange(UString text, int id = -1);
 
@@ -225,6 +226,11 @@ class SongBrowser : public ScreenBackable {
     CBaseUILabel *m_sortLabel;
     CBaseUIButton *m_sortButton;
     UIContextMenu *m_contextMenu;
+
+    CBaseUIButton *m_groupByCollectionBtn;
+    CBaseUIButton *m_groupByArtistBtn;
+    CBaseUIButton *m_groupByDifficultyBtn;
+    CBaseUIButton *m_groupByNothingBtn;
 
     // bottom bar
     CBaseUIContainer *m_bottombar;
