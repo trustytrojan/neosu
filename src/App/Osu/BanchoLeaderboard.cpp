@@ -136,15 +136,14 @@ void process_leaderboard_response(Packet response) {
     char *fa_license_text = strtok_x('\n', &body);
     (void)fa_license_text;
 
-    // I'm guessing this is online offset, but idk
     char *online_offset = strtok_x('\n', &body);
-    (void)online_offset;
+    info.online_offset = strtol(online_offset, NULL, 10);
 
     char *map_name = strtok_x('\n', &body);
     (void)map_name;
 
-    char *online_star_rating = strtok_x('\n', &body);
-    (void)online_star_rating;
+    char *user_ratings = strtok_x('\n', &body);
+    (void)user_ratings;  // no longer used
 
     char *pb_score = strtok_x('\n', &body);
     (void)pb_score;
@@ -159,6 +158,10 @@ void process_leaderboard_response(Packet response) {
     // XXX: We should also separately display either the "personal best" the server sent us,
     //      or the local best, depending on which score is better.
     debugLog("Received online leaderbord for Beatmap ID %d\n", info.beatmap_id);
+    auto diff = db->getBeatmapDifficulty(beatmap_hash);
+    if(diff) {
+        diff->setOnlineOffset(info.online_offset);
+    }
     db->m_online_scores[beatmap_hash] = std::move(scores);
     osu->getSongBrowser()->rebuildScoreButtons();
 }

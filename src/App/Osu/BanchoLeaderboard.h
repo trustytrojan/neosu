@@ -7,6 +7,7 @@ struct OnlineMapInfo {
     bool server_has_osz2;
     u32 beatmap_id;
     u32 beatmap_set_id;
+    i32 online_offset;
     int nb_scores;
 };
 

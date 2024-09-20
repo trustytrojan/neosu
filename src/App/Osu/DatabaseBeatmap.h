@@ -180,7 +180,6 @@ class DatabaseBeatmap {
         update_overrides();
     }
 
-    // TODO @kiwec: unused
     void setOnlineOffset(long onlineOffset) {
         m_iOnlineOffset = onlineOffset;
         update_overrides();
