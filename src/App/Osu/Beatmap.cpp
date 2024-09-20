@@ -689,6 +689,7 @@ bool Beatmap::start() {
     if(cv_restart_sound_engine_before_playing.getBool()) {
         // HACKHACK: Reload sound engine before starting the song, as it starts lagging after a while
         //           (i haven't figured out the root cause yet)
+        engine->getSound()->pause(m_music);
         engine->getSound()->restart();
 
         // Restarting sound engine already reloads the music
@@ -1010,11 +1011,11 @@ void Beatmap::seekPercent(f64 percent) {
     m_bWasSeekFrame = true;
     m_fWaitTime = 0.0f;
 
-    m_music->setPosition(percent);
+    u32 ms = m_music->setPosition(percent);
     m_music->setVolume(getIdealVolume());
     m_music->setSpeed(osu->getSpeedMultiplier());
 
-    resetHitObjects(m_music->getPositionMS());
+    resetHitObjects(ms);
     resetScore();
 
     m_iPreviousSectionPassFailTime = -1;
@@ -1031,10 +1032,12 @@ void Beatmap::seekPercent(f64 percent) {
     }
 
     if(is_watching) {
-        // XXX: should only reset if seeking backwards
-        SAFE_DELETE(sim);
-        sim = new SimulatedBeatmap(m_selectedDifficulty2, osu->getScore()->mods);
-        sim->spectated_replay = spectated_replay;
+        // When seeking backwards, restart simulation from beginning
+        if(ms < m_iCurMusicPos) {
+            SAFE_DELETE(sim);
+            sim = new SimulatedBeatmap(m_selectedDifficulty2, osu->getScore()->mods);
+            sim->spectated_replay = spectated_replay;
+        }
     }
 
     if(!is_watching && !is_spectating) {  // score submission already disabled when watching replay
@@ -2265,8 +2268,9 @@ void Beatmap::update2() {
 
             // if the first hitobject starts immediately, add artificial wait time before starting the music
             if(!m_bIsRestartScheduledQuick && m_hitobjects.size() > 0) {
-                if(m_hitobjects[0]->getTime() < (long)cv_early_note_time.getInt())
+                if(m_hitobjects[0]->getTime() < (long)cv_early_note_time.getInt()) {
                     m_fWaitTime = engine->getTimeReal() + cv_early_note_time.getFloat() / 1000.0f;
+                }
             }
         } else {
             if(engine->getTimeReal() > m_fWaitTime) {
@@ -2283,10 +2287,12 @@ void Beatmap::update2() {
 
                     // if we are quick restarting, jump just before the first hitobject (even if there is a long waiting
                     // period at the beginning with nothing etc.)
-                    if(m_bIsRestartScheduledQuick && m_hitobjects.size() > 0 &&
-                       m_hitobjects[0]->getTime() > (long)cv_quick_retry_time.getInt())
-                        m_music->setPositionMS(
-                            max((long)0, m_hitobjects[0]->getTime() - (long)cv_quick_retry_time.getInt()));
+                    bool quick_restarting = m_bIsRestartScheduledQuick;
+                    quick_restarting &=
+                        m_hitobjects.size() > 0 && m_hitobjects[0]->getTime() > cv_quick_retry_time.getInt();
+                    if(quick_restarting) {
+                        m_music->setPositionMS(max(0L, m_hitobjects[0]->getTime() - cv_quick_retry_time.getInt()));
+                    }
                     m_bWasSeekFrame = true;
 
                     m_bIsRestartScheduledQuick = false;
@@ -2295,8 +2301,9 @@ void Beatmap::update2() {
                     // speed/pitch
                     onModUpdate(false, false);
                 }
-            } else
+            } else {
                 m_iCurMusicPos = (engine->getTimeReal() - m_fWaitTime) * 1000.0f * osu->getSpeedMultiplier();
+            }
         }
 
         // ugh. force update all hitobjects while waiting (necessary because of pvs optimization)
@@ -3657,7 +3664,7 @@ void Beatmap::updateSliderVertexBuffers() {
     updatePlayfieldMetrics();
     updateHitobjectMetrics();
 
-    m_bWasEZEnabled = osu->getModEZ();                // to avoid useless f64 updates in onModUpdate()
+    m_bWasEZEnabled = osu->getModEZ();                // to avoid useless double updates in onModUpdate()
     m_fPrevHitCircleDiameter = m_fHitcircleDiameter;  // same here
     m_fPrevPlayfieldRotationFromConVar = cv_playfield_rotation.getFloat();  // same here
 
