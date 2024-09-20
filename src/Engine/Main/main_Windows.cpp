@@ -825,6 +825,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #endif
 #endif
 
+    // fix working directory when dropping files onto neosu.exe
+    wchar_t exePath[MAX_PATH];
+    GetModuleFileNameW(NULL, exePath, MAX_PATH);
+    wchar_t *last_slash = wcsrchr(exePath, L'\\');
+    if(last_slash != NULL) *last_slash = L'\0';
+    SetCurrentDirectoryW(exePath);
+
     // disable IME text input
     if(strstr(lpCmdLine, "-noime") != NULL) {
         typedef BOOL(WINAPI * pfnImmDisableIME)(DWORD);
@@ -910,51 +917,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         MessageBox(NULL, "Couldn't createWinWindow()!", "Fatal Error", MB_ICONEXCLAMATION | MB_OK);
         return -1;
     }
-
-#ifdef MCENGINE_FEATURE_OPENGL
-
-    // try to enable OpenGL MSAA
-    // lots of windows api bullshit behaviour here
-    /*
-    if (!g_bARBMultisampleSupported && true)
-    {
-            FAKE_CONTEXT context = WinGLLegacyInterface::createAndMakeCurrentWGLContext(hwnd,
-    getPixelFormatDescriptor());
-
-            if (initWinGLMultisample(context.hdc, hInstance, hwnd, 4))
-            {
-                    printf("OpenGL: MSAA is supported!\n");
-
-                    // we have AA support, delete EVERYTHING up until now
-                    wglMakeCurrent(context.hdc, NULL);
-                    wglDeleteContext(context.hglrc);
-                    ReleaseDC(hwnd, context.hdc);
-                    DestroyWindow(hwnd);
-                    hwnd = NULL;
-
-                    // create second window, which will be the real one
-                    hwnd = createWinWindow(hInstance);
-                    if (hwnd == NULL)
-                    {
-                            printf("FATAL ERROR: hwnd == NULL!!!\n");
-                            MessageBox(NULL, "Couldn't createWinWindow()!", "Fatal Error", MB_ICONEXCLAMATION | MB_OK);
-                            return -1;
-                    }
-            }
-            else
-            {
-                    printf("OpenGL: MSAA is NOT supported.\n");
-
-                    // no AA support, destroy all temporaries and continue with the first window
-                    wglMakeCurrent(context.hdc, NULL);
-                    wglDeleteContext(context.hglrc);
-                    ReleaseDC(hwnd, context.hdc);
-            }
-            printf("\n");
-    }
-    */
-
-#endif
 
 #ifdef WINDOW_FRAMELESS
     {
