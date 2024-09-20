@@ -77,8 +77,11 @@ std::vector<LegacyReplay::Frame> LegacyReplay::get_frames(u8* replay_data, i32 r
 
     while(std::getline(ss, frame_str, ',')) {
         LegacyReplay::Frame frame;
-        sscanf(frame_str.c_str(), "%lld|%f|%f|%hhu", &frame.milliseconds_since_last_frame, &frame.x, &frame.y,
-               &frame.key_flags);
+        char delimiter;  // ignored, should be '|'
+
+        std::istringstream line(frame_str);
+        line >> frame.milliseconds_since_last_frame >> delimiter >> frame.x >> delimiter >> frame.y >> delimiter >>
+            frame.key_flags;
 
         if(frame.milliseconds_since_last_frame != -12345) {
             cur_music_pos += frame.milliseconds_since_last_frame;

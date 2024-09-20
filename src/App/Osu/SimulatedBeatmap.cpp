@@ -52,6 +52,8 @@ SimulatedBeatmap::~SimulatedBeatmap() {
 }
 
 void SimulatedBeatmap::simulate_to(i32 music_pos) {
+    if(spectated_replay.size() < 2) return;
+
     LegacyReplay::Frame current_frame = spectated_replay[current_frame_idx];
     LegacyReplay::Frame next_frame = spectated_replay[current_frame_idx + 1];
 
