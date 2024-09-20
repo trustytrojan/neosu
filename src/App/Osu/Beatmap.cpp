@@ -1704,6 +1704,7 @@ void Beatmap::draw(Graphics *g) {
         // XXX: while this fixes HUD desyncing, it's not perfect replay playback
         sim->simulate_to(m_iCurMusicPosWithOffsets);
         *osu->getScore() = sim->live_score;
+        osu->getScore()->m_simulating = false;
         osu->getScore()->setCheated();
     }
 

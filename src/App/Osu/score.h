@@ -171,10 +171,9 @@ class LiveScore {
     u32 getModsLegacy();
     UString getModsStringForRichPresence();
     Replay::Mods mods;
-
-   private:
     bool m_simulating;
 
+   private:
     f32 getScoreMultiplier();
     void onScoreChange();
 
