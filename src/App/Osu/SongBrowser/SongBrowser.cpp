@@ -471,11 +471,11 @@ SongBrowser::~SongBrowser() {
     for(size_t i = 0; i < m_artistCollectionButtons.size(); i++) {
         delete m_artistCollectionButtons[i];
     }
-    for(size_t i = 0; i < m_difficultyCollectionButtons.size(); i++) {
-        delete m_difficultyCollectionButtons[i];
-    }
     for(size_t i = 0; i < m_bpmCollectionButtons.size(); i++) {
         delete m_bpmCollectionButtons[i];
+    }
+    for(size_t i = 0; i < m_difficultyCollectionButtons.size(); i++) {
+        delete m_difficultyCollectionButtons[i];
     }
     for(size_t i = 0; i < m_creatorCollectionButtons.size(); i++) {
         delete m_creatorCollectionButtons[i];
@@ -1601,14 +1601,14 @@ void SongBrowser::refreshBeatmaps() {
         delete m_artistCollectionButtons[i];
     }
     m_artistCollectionButtons.clear();
-    for(size_t i = 0; i < m_difficultyCollectionButtons.size(); i++) {
-        delete m_difficultyCollectionButtons[i];
-    }
-    m_difficultyCollectionButtons.clear();
     for(size_t i = 0; i < m_bpmCollectionButtons.size(); i++) {
         delete m_bpmCollectionButtons[i];
     }
     m_bpmCollectionButtons.clear();
+    for(size_t i = 0; i < m_difficultyCollectionButtons.size(); i++) {
+        delete m_difficultyCollectionButtons[i];
+    }
+    m_difficultyCollectionButtons.clear();
     for(size_t i = 0; i < m_creatorCollectionButtons.size(); i++) {
         delete m_creatorCollectionButtons[i];
     }
@@ -1694,8 +1694,26 @@ void SongBrowser::addBeatmapSet(BeatmapSet *mapset) {
 
         // bpm
         if(m_bpmCollectionButtons.size() == 6) {
-            // TODO: 6 buttons (60, 120, 180, 240, 300, >300)
-            // TODO: have to rip apart children and group separately depending on bpm, ffs
+            for(SongButton *diff_btn : tempChildrenForGroups) {
+                auto bpm = diff_btn->getDatabaseBeatmap()->getMostCommonBPM();
+                int index;
+                if(bpm < 60) {
+                    index = 0;
+                } else if(bpm < 120) {
+                    index = 1;
+                } else if(bpm < 180) {
+                    index = 2;
+                } else if(bpm < 240) {
+                    index = 3;
+                } else if(bpm < 300) {
+                    index = 4;
+                } else {
+                    index = 5;
+                }
+                auto &children = m_bpmCollectionButtons[index]->getChildren();
+                auto it = std::lower_bound(children.begin(), children.end(), diff_btn, sort_by_bpm);
+                children.insert(it, diff_btn);
+            }
         }
 
         // dateadded
@@ -2882,6 +2900,9 @@ void SongBrowser::rebuildSongButtonsAndVisibleSongButtonsWithSearchMatchSupport(
                     case GROUP::GROUP_ARTIST:
                         groupButtons = &m_artistCollectionButtons;
                         break;
+                    case GROUP::GROUP_BPM:
+                        groupButtons = &m_bpmCollectionButtons;
+                        break;
                     case GROUP::GROUP_CREATOR:
                         groupButtons = &m_creatorCollectionButtons;
                         break;
@@ -3106,6 +3127,11 @@ void SongBrowser::onSortChangeInt(UString text, bool autoScroll) {
         auto &children = m_artistCollectionButtons[i]->getChildren();
         std::sort(children.begin(), children.end(), m_sortingComparator);
         m_artistCollectionButtons[i]->setChildren(children);
+    }
+    for(size_t i = 0; i < m_bpmCollectionButtons.size(); i++) {
+        auto &children = m_bpmCollectionButtons[i]->getChildren();
+        std::sort(children.begin(), children.end(), m_sortingComparator);
+        m_bpmCollectionButtons[i]->setChildren(children);
     }
     for(size_t i = 0; i < m_difficultyCollectionButtons.size(); i++) {
         auto &children = m_difficultyCollectionButtons[i]->getChildren();

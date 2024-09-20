@@ -29,6 +29,8 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG latest;
     latest.title = UString::format("%.2f (%s, %s)", cv_version.getFloat(), __DATE__, __TIME__);
     latest.changes.push_back("- Added \"Actual Flashlight\" mod");
+    latest.changes.push_back("- Added \"Rank Achieved\" sort option");
+    latest.changes.push_back("- Added BPM song grouping");
     latest.changes.push_back("- Added keybind to open skin selection menu");
     latest.changes.push_back("- Added option to change pitch based on hit accuracy");
     latest.changes.push_back("- Added slider instafade setting");
