@@ -43,8 +43,8 @@ class SongButton : public Button {
     std::string m_sTitle;
     std::string m_sArtist;
     std::string m_sMapper;
-    FinishedScore::Grade m_grade;
-    bool m_bHasGrade;
+    FinishedScore::Grade m_grade = FinishedScore::Grade::N;
+    bool m_bHasGrade = false;
 
     float m_fTextOffset;
     float m_fGradeOffset;

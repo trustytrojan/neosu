@@ -186,22 +186,14 @@ void SongDifficultyButton::updateGrade() {
         return;
     }
 
-    bool hasGrade = false;
-    FinishedScore::Grade grade;
-
-    db->sortScores(m_databaseBeatmap->getMD5Hash());
-
     std::lock_guard<std::mutex> lock(db->m_scores_mtx);
     auto db_scores = db->getScores();
-
-    if((*db_scores)[m_databaseBeatmap->getMD5Hash()].size() > 0) {
-        const FinishedScore &score = (*db_scores)[m_databaseBeatmap->getMD5Hash()][0];
-        hasGrade = true;
-        grade = score.calculate_grade();
+    for(auto &score : (*db_scores)[m_databaseBeatmap->getMD5Hash()]) {
+        m_bHasGrade = true;
+        if(score.grade < m_grade) {
+            m_grade = score.grade;
+        }
     }
-
-    m_bHasGrade = hasGrade;
-    if(m_bHasGrade) m_grade = grade;
 }
 
 bool SongDifficultyButton::isIndependentDiffButton() const {

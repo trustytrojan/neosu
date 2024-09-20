@@ -33,6 +33,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.changes.push_back("- Added option to change pitch based on hit accuracy");
     latest.changes.push_back("- Added slider instafade setting");
     latest.changes.push_back("- Fixed local scores not saving avatar");
+    latest.changes.push_back("- Fixed song buttons not always displaying best grade");
     latest.changes.push_back("- Fixed map settings (like local offset) not getting saved");
     latest.changes.push_back("- Fixed Nightcore getting auto-selected instead of Double Time in some cases");
     latest.changes.push_back("- Improved loudness normalization");

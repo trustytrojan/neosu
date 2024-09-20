@@ -26,9 +26,6 @@ SongButton::SongButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UICont
     : Button(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, name) {
     m_databaseBeatmap = databaseBeatmap;
 
-    m_grade = FinishedScore::Grade::D;
-    m_bHasGrade = false;
-
     // settings
     setHideIfSelected(true);
 
