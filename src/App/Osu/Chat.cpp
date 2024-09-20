@@ -376,7 +376,7 @@ void Chat::handle_command(UString msg) {
         if(osu->isInPlayMode()) {
             np_msg = UString::format("\001ACTION is playing %s", song_link.toUtf8());
 
-            auto mods = osu->getScore()->getMods();
+            auto mods = osu->getScore()->mods;
             if(mods.speed != 1.f) {
                 auto speed_modifier = UString::format(" x%.1f", mods.speed);
                 np_msg.append(speed_modifier);

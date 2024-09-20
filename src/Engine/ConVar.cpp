@@ -345,7 +345,7 @@ void ConVar::setValue(float value) {
             osu->getScore()->setCheated();
         }
 
-        osu->getScore()->updateMods();
+        osu->getScore()->mods = Replay::Mods::from_cvars();
     }
 
     // TODO: make this less unsafe in multithreaded environments (for float convars at least)
@@ -386,7 +386,7 @@ void ConVar::setValue(UString sValue) {
             osu->getScore()->setCheated();
         }
 
-        osu->getScore()->updateMods();
+        osu->getScore()->mods = Replay::Mods::from_cvars();
     }
 
     // backup previous value

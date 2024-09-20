@@ -479,8 +479,8 @@ void Circle::draw2(Graphics *g) {
                        m_bWaiting && !hd ? 1.0f : m_fAlphaForApproachCircle, m_bOverrideHDApproachCircle);
 }
 
-void Circle::update(long curPos) {
-    HitObject::update(curPos);
+void Circle::update(long curPos, f64 frame_time) {
+    HitObject::update(curPos, frame_time);
 
     // if we have not been clicked yet, check if we are in the timeframe of a miss, also handle auto and relax
     if(!m_bFinished) {

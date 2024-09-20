@@ -45,8 +45,8 @@ class DatabaseBeatmap {
     };
 
     struct BREAK {
-        int startTime;
-        int endTime;
+        i64 startTime;
+        i64 endTime;
     };
 
     // custom structs

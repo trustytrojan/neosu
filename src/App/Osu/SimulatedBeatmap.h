@@ -14,7 +14,7 @@ class SimulatedBeatmap : public BeatmapInterface {
     void simulate_to(i32 music_pos);
 
     bool start();
-    void update();
+    void update(f64 frame_time);
 
     // Potentially Visible Set gate time size, for optimizing draw() and update() when iterating over all hitobjects
     long getPVS();
@@ -99,9 +99,6 @@ class SimulatedBeatmap : public BeatmapInterface {
     virtual void addScorePoints(int points, bool isSpinner = false);
     virtual bool isWaiting() const { return false; }
 
-    // live pp/stars
-    i32 last_calculated_hitobject = -1;
-
    protected:
     // database
     DatabaseBeatmap *m_selectedDifficulty2;
@@ -136,7 +133,6 @@ class SimulatedBeatmap : public BeatmapInterface {
     i32 m_iCurrentNumCircles;
     i32 m_iCurrentNumSliders;
     i32 m_iCurrentNumSpinners;
-    u64 m_iScoreV2ComboPortionMaximum;
 
    private:
     static inline Vector2 mapNormalizedCoordsOntoUnitCircle(const Vector2 &in) {
@@ -173,7 +169,6 @@ class SimulatedBeatmap : public BeatmapInterface {
 
     // hitobject scaling
     float m_fXMultiplier;
-    float m_fSliderFollowCircleDiameter;
 
     // auto
     Vector2 m_vAutoCursorPos;

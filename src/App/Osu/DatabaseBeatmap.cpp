@@ -213,8 +213,8 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
 
                     case 3:  // Events
                     {
-                        int type, startTime, endTime;
-                        if(sscanf(curLineChar, " %i , %i , %i \n", &type, &startTime, &endTime) == 3) {
+                        i64 type, startTime, endTime;
+                        if(sscanf(curLineChar, " %lld , %lld , %lld \n", &type, &startTime, &endTime) == 3) {
                             if(type == 2) {
                                 BREAK b;
                                 {

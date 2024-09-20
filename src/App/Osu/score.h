@@ -104,14 +104,13 @@ class LiveScore {
     static float calculateAccuracy(int num300s, int num100s, int num50s, int numMisses);
 
    public:
-    LiveScore();
+    LiveScore(bool simulating = true);
 
     void reset();  // only Beatmap may call this function!
 
     // only Beatmap/SimulatedBeatmap may call this function!
     void addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, LiveScore::HIT hit, long delta,
-                      bool ignoreOnHitErrorBar, bool hitErrorBarOnly, bool ignoreCombo, bool ignoreScore,
-                      bool simulating);
+                      bool ignoreOnHitErrorBar, bool hitErrorBarOnly, bool ignoreCombo, bool ignoreScore);
 
     void addHitResultComboEnd(LiveScore::HIT hit);
     void addSliderBreak();  // only Beatmap may call this function!
@@ -169,19 +168,20 @@ class LiveScore {
                                     double hpMultiplierComboEnd = 1.0f, double hpBarMaximumForNormalization = 200.0f);
 
     int getKeyCount(int key);
-    Replay::Mods getMods();
-    void updateMods() { mods = Replay::Mods::from_cvars(); }
     u32 getModsLegacy();
     UString getModsStringForRichPresence();
+    Replay::Mods mods;
 
    private:
+    bool m_simulating;
+
+    f32 getScoreMultiplier();
     void onScoreChange();
 
     std::vector<HIT> m_hitresults;
     std::vector<int> m_hitdeltas;
 
     FinishedScore::Grade m_grade;
-    Replay::Mods mods;
 
     float m_fStarsTomTotal;
     float m_fStarsTomAim;

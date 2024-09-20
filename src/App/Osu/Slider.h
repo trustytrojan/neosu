@@ -25,7 +25,7 @@ class Slider : public HitObject {
     virtual void draw(Graphics *g);
     virtual void draw2(Graphics *g);
     void draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCircle);
-    virtual void update(long curPos);
+    virtual void update(long curPos, f64 frame_time);
 
     HitObjectType type = HitObjectType::SLIDER;
 

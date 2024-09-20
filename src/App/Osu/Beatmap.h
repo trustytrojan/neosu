@@ -222,7 +222,7 @@ class Beatmap : public BeatmapInterface {
 
     inline const std::vector<DatabaseBeatmap::BREAK> &getBreaks() const { return m_breaks; }
     u32 getBreakDurationTotal() const;
-    DatabaseBeatmap::BREAK getBreakForTimeRange(long startMS, long positionMS, long endMS) const;
+    DatabaseBeatmap::BREAK getBreakForTimeRange(i64 startMS, i64 positionMS, i64 endMS) const;
 
     // HitObject and other helper functions
     virtual LiveScore::HIT addHitResult(HitObject *hitObject, LiveScore::HIT hit, i32 delta, bool isEndOfCombo = false,

@@ -1033,7 +1033,7 @@ void Beatmap::seekPercent(f64 percent) {
     if(is_watching) {
         // XXX: should only reset if seeking backwards
         SAFE_DELETE(sim);
-        sim = new SimulatedBeatmap(m_selectedDifficulty2, osu->getScore()->getMods());
+        sim = new SimulatedBeatmap(m_selectedDifficulty2, osu->getScore()->mods);
         sim->spectated_replay = spectated_replay;
     }
 
@@ -1268,15 +1268,15 @@ u32 Beatmap::getBreakDurationTotal() const {
     return breakDurationTotal;
 }
 
-DatabaseBeatmap::BREAK Beatmap::getBreakForTimeRange(long startMS, long positionMS, long endMS) const {
+DatabaseBeatmap::BREAK Beatmap::getBreakForTimeRange(i64 startMS, i64 positionMS, i64 endMS) const {
     DatabaseBeatmap::BREAK curBreak;
 
     curBreak.startTime = -1;
     curBreak.endTime = -1;
 
     for(int i = 0; i < m_breaks.size(); i++) {
-        if(m_breaks[i].startTime >= (int)startMS && m_breaks[i].endTime <= (int)endMS) {
-            if((int)positionMS >= curBreak.startTime) curBreak = m_breaks[i];
+        if(m_breaks[i].startTime >= startMS && m_breaks[i].endTime <= endMS) {
+            if(positionMS >= curBreak.startTime) curBreak = m_breaks[i];
         }
     }
 
@@ -1335,7 +1335,7 @@ LiveScore::HIT Beatmap::addHitResult(HitObject *hitObject, LiveScore::HIT hit, i
 
     // score
     osu->getScore()->addHitResult(this, hitObject, hit, delta, ignoreOnHitErrorBar, hitErrorBarOnly, ignoreCombo,
-                                  ignoreScore, false);
+                                  ignoreScore);
 
     // health
     LiveScore::HIT returnedHit = LiveScore::HIT::HIT_MISS;
@@ -1553,7 +1553,7 @@ void Beatmap::unloadObjects() {
 void Beatmap::resetHitObjects(long curPos) {
     for(int i = 0; i < m_hitobjects.size(); i++) {
         m_hitobjects[i]->onReset(curPos);
-        m_hitobjects[i]->update(curPos);
+        m_hitobjects[i]->update(curPos, engine->getFrameTime());
         m_hitobjects[i]->onReset(curPos);
     }
     osu->getHUD()->resetHitErrorBar();
@@ -2309,7 +2309,7 @@ void Beatmap::update2() {
             curPos = -1;
 
         for(int i = 0; i < m_hitobjects.size(); i++) {
-            m_hitobjects[i]->update(curPos);
+            m_hitobjects[i]->update(curPos, engine->getFrameTime());
         }
     }
 
@@ -2584,7 +2584,7 @@ void Beatmap::update2() {
             // ************ live pp block end ************** //
 
             // main hitobject update
-            m_hitobjects[i]->update(m_iCurMusicPosWithOffsets);
+            m_hitobjects[i]->update(m_iCurMusicPosWithOffsets, engine->getFrameTime());
 
             // note blocking / notelock (1)
             const Slider *currentSliderPointer = dynamic_cast<Slider *>(m_hitobjects[i]);
@@ -3078,7 +3078,7 @@ void Beatmap::onModUpdate(bool rebuildSliderVertexBuffers, bool recomputeDrainRa
     if(cv_mod_mafham.getBool() != m_bWasMafhamEnabled) {
         m_bWasMafhamEnabled = cv_mod_mafham.getBool();
         for(int i = 0; i < m_hitobjects.size(); i++) {
-            m_hitobjects[i]->update(m_iCurMusicPosWithOffsets);
+            m_hitobjects[i]->update(m_iCurMusicPosWithOffsets, engine->getFrameTime());
         }
     }
 
@@ -3390,7 +3390,7 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
     score.maxPossibleCombo = m_iMaxPossibleCombo;
     score.numHitObjects = numHitObjects;
     score.numCircles = numCircles;
-    score.mods = osu->getScore()->getMods();
+    score.mods = osu->getScore()->mods;
     score.beatmap_hash = m_selectedDifficulty2->getMD5Hash();  // NOTE: necessary for "Use Mods"
     score.replay = live_replay;
 

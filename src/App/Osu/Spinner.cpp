@@ -257,8 +257,8 @@ void Spinner::draw(Graphics *g) {
     }
 }
 
-void Spinner::update(long curPos) {
-    HitObject::update(curPos);
+void Spinner::update(long curPos, f64 frame_time) {
+    HitObject::update(curPos, frame_time);
 
     // stop spinner sound and don't update() while paused
     if(bi->isPaused() || !bi->isPlaying() || (bm && bm->hasFailed())) {
@@ -276,11 +276,14 @@ void Spinner::update(long curPos) {
             return;
         }
 
+        // Skip calculations
+        if(frame_time == 0.0) {
+            return;
+        }
+
         m_fRotationsNeeded = GameRules::getSpinnerRotationsForSpeedMultiplier(bi, m_iObjectDuration);
 
-        const float fixedRate = engine->getFrameTime();
-
-        const float DELTA_UPDATE_TIME = (fixedRate * 1000.0f);
+        const float DELTA_UPDATE_TIME = (frame_time * 1000.0f);
         const float AUTO_MULTIPLIER = (1.0f / 20.0f);
 
         // scale percent calculation
@@ -291,7 +294,7 @@ void Spinner::update(long curPos) {
         float angleDiff = 0;
         if((bi->getModsLegacy() & LegacyFlags::Autoplay) || (bi->getModsLegacy() & LegacyFlags::Autopilot) ||
            (bi->getModsLegacy() & LegacyFlags::SpunOut)) {
-            angleDiff = engine->getFrameTime() * 1000.0f * AUTO_MULTIPLIER * bi->getSpeedMultiplier();
+            angleDiff = frame_time * 1000.0f * AUTO_MULTIPLIER * bi->getSpeedMultiplier();
         } else {  // user spin
             Vector2 mouseDelta = bi->getCursorPos() - bi->osuCoords2Pixels(m_vRawPos);
             const float currentMouseAngle = (float)std::atan2(mouseDelta.y, mouseDelta.x);
@@ -310,7 +313,7 @@ void Spinner::update(long curPos) {
                               (bi->getModsLegacy() & LegacyFlags::Relax) ||
                               (bi->getModsLegacy() & LegacyFlags::SpunOut);
 
-            m_fDeltaOverflow += engine->getFrameTime() * 1000.0f;
+            m_fDeltaOverflow += frame_time * 1000.0f;
 
             if(angleDiff < -PI)
                 angleDiff += 2 * PI;
@@ -338,7 +341,7 @@ void Spinner::update(long curPos) {
                 float rotationAngle = m_fSumDeltaAngle / m_iMaxStoredDeltaAngles;
                 float rotationPerSec = rotationAngle * (1000.0f / DELTA_UPDATE_TIME) / (2.0f * PI);
 
-                const float decay = pow(0.01f, (float)engine->getFrameTime());
+                f32 decay = pow(0.01f, (f32)frame_time);
                 m_fRPM = m_fRPM * decay + (1.0 - decay) * std::abs(rotationPerSec) * 60;
                 m_fRPM = min(m_fRPM, 477.0f);
 

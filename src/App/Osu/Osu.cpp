@@ -195,7 +195,7 @@ Osu::Osu() {
 
     // load a few select subsystems very early
     m_notificationOverlay = new NotificationOverlay();
-    m_score = new LiveScore();
+    m_score = new LiveScore(false);
     m_updateHandler = new UpdateHandler();
 
     // exec the main config file (this must be right here!)
@@ -377,8 +377,6 @@ Osu::~Osu() {
     loct_abort();
     mct_abort();
 
-    osu = NULL;
-
     // "leak" UpdateHandler object, but not relevant since shutdown:
     // this is the only way of handling instant user shutdown requests properly, there is no solution for active working
     // threads besides letting the OS kill them when the main threads exits. we must not delete the update handler
@@ -396,6 +394,8 @@ Osu::~Osu() {
     SAFE_DELETE(m_score);
     SAFE_DELETE(m_skin);
     SAFE_DELETE(m_backgroundImageHandler);
+
+    osu = NULL;
 }
 
 void Osu::draw(Graphics *g) {
@@ -1103,7 +1103,7 @@ void Osu::onKeyDown(KeyboardEvent &key) {
                     FinishedScore score;
                     score.replay = beatmap->live_replay;
                     score.beatmap_hash = beatmap->getSelectedDifficulty2()->getMD5Hash();
-                    score.mods = getScore()->getMods();
+                    score.mods = getScore()->mods;
 
                     if(bancho.is_online()) {
                         score.player_id = bancho.user_id;

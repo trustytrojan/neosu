@@ -22,6 +22,7 @@ using namespace std;
 SimulatedBeatmap::SimulatedBeatmap(DatabaseBeatmap *diff2, Replay::Mods mods_) {
     m_selectedDifficulty2 = diff2;
     mods = mods_;
+    live_score.mods = mods_;
     mod_halfwindow = mods.flags & Replay::ModFlags::HalfWindow;
     mod_halfwindow_allow_300s = mods.flags & Replay::ModFlags::HalfWindowAllow300s;
     mod_ming3012 = mods.flags & Replay::ModFlags::Ming3012;
@@ -61,6 +62,7 @@ void SimulatedBeatmap::simulate_to(i32 music_pos) {
         if(current_frame_idx + 2 >= spectated_replay.size()) break;
 
         last_keys = current_keys;
+        f64 frame_time = (f64)(next_frame.cur_music_pos - current_frame.cur_music_pos) / 1000.0;
 
         current_frame_idx++;
         current_frame = spectated_replay[current_frame_idx];
@@ -103,7 +105,7 @@ void SimulatedBeatmap::simulate_to(i32 music_pos) {
         m_interpolatedMousePos = {current_frame.x, current_frame.y};
         m_iCurMusicPos = current_frame.cur_music_pos;
 
-        update();
+        update(frame_time);
     }
 }
 
@@ -147,7 +149,10 @@ bool SimulatedBeatmap::start() {
     return true;
 }
 
-void SimulatedBeatmap::fail() { m_bFailed = true; }
+void SimulatedBeatmap::fail() {
+    debugLog("SimulatedBeatmap::fail called!\n");
+    m_bFailed = true;
+}
 
 void SimulatedBeatmap::cancelFailing() { m_bFailed = false; }
 
@@ -308,8 +313,8 @@ LiveScore::HIT SimulatedBeatmap::addHitResult(HitObject *hitObject, LiveScore::H
     }
 
     // score
-    live_score.addHitResult(this, hitObject, hit, delta, ignoreOnHitErrorBar, hitErrorBarOnly, ignoreCombo, ignoreScore,
-                            true);
+    live_score.addHitResult(this, hitObject, hit, delta, ignoreOnHitErrorBar, hitErrorBarOnly, ignoreCombo,
+                            ignoreScore);
 
     // health
     LiveScore::HIT returnedHit = LiveScore::HIT::HIT_MISS;
@@ -371,7 +376,6 @@ void SimulatedBeatmap::addHealth(f64 percent, bool isFromHitResult) {
 
     if(m_bFailed) {
         m_fHealth = 0.0;
-
         return;
     }
 
@@ -411,7 +415,7 @@ void SimulatedBeatmap::resetScore() {
     live_score.reset();
 }
 
-void SimulatedBeatmap::update() {
+void SimulatedBeatmap::update(f64 frame_time) {
     if(m_hitobjects.empty()) return;
 
     auto last_hitobject = m_hitobjectsSortedByEndTime[m_hitobjectsSortedByEndTime.size() - 1];
@@ -511,7 +515,7 @@ void SimulatedBeatmap::update() {
             // ************ live pp block end ************** //
 
             // main hitobject update
-            m_hitobjects[i]->update(m_iCurMusicPos);
+            m_hitobjects[i]->update(m_iCurMusicPos, frame_time);
 
             // note blocking / notelock (1)
             const Slider *currentSliderPointer = dynamic_cast<Slider *>(m_hitobjects[i]);
@@ -717,7 +721,7 @@ void SimulatedBeatmap::update() {
                    (drainAfterLastHitobjectBeforeBreakStart && isLastHitobjectBeforeBreakStart)) {
                     // special case: spinner nerf
                     f64 spinnerDrainNerf = m_bIsSpinnerActive ? 0.25 : 1.0;
-                    addHealth(-m_fDrainRate * engine->getFrameTime() * (f64)mods.speed * spinnerDrainNerf, false);
+                    addHealth(-m_fDrainRate * frame_time * (f64)mods.speed * spinnerDrainNerf, false);
                 }
             }
         }
@@ -793,10 +797,7 @@ Vector2 SimulatedBeatmap::osuCoords2LegacyPixels(Vector2 coords) const {
     return coords;
 }
 
-Vector2 SimulatedBeatmap::getCursorPos() const {
-    // TODO @kiwec
-    return m_interpolatedMousePos;
-}
+Vector2 SimulatedBeatmap::getCursorPos() const { return m_interpolatedMousePos; }
 
 Vector2 SimulatedBeatmap::getFirstPersonCursorDelta() const {
     return m_vPlayfieldCenter - ((mods.flags & Replay::ModFlags::Autopilot) ? m_vAutoCursorPos : getCursorPos());

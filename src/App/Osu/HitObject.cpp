@@ -304,7 +304,7 @@ void HitObject::drawHitResultAnim(Graphics *g, const HITRESULTANIM &hitresultani
     }
 }
 
-void HitObject::update(long curPos) {
+void HitObject::update(long curPos, f64 frame_time) {
     m_fAlphaForApproachCircle = 0.0f;
     m_fHittableDimRGBColorMultiplierPercent = 1.0f;
 

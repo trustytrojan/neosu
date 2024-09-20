@@ -554,8 +554,8 @@ void Slider::drawBody(Graphics *g, float alpha, float from, float to) {
     }
 }
 
-void Slider::update(long curPos) {
-    HitObject::update(curPos);
+void Slider::update(long curPos, f64 frame_time) {
+    HitObject::update(curPos, frame_time);
 
     if(bm != NULL) {
         // stop slide sound while paused

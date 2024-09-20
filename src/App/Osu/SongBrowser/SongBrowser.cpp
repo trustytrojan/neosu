@@ -936,7 +936,7 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
     auto diff2 = m_selectedBeatmap->getSelectedDifficulty2();
     lct_set_map(diff2);
     if(diff2->m_pp_info.pp == -1.0) {
-        auto mods = osu->getScore()->getMods();
+        auto mods = osu->getScore()->mods;
 
         pp_calc_request request;
         request.mods_legacy = mods.to_legacy();

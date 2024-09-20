@@ -5,31 +5,7 @@
 #include "ConVar.h"
 #include "Engine.h"
 
-File::File(std::string filePath, TYPE type) { m_file = new StdFile(filePath, type); }
-
-File::~File() { SAFE_DELETE(m_file); }
-
-bool File::canRead() const { return m_file->canRead(); }
-
-bool File::canWrite() const { return m_file->canWrite(); }
-
-void File::write(const u8 *buffer, size_t size) { m_file->write(buffer, size); }
-
-std::string File::readLine() { return m_file->readLine(); }
-
-std::string File::readString() {
-    const int size = getFileSize();
-    if(size < 1) return std::string();
-
-    return std::string((const char *)readFile(), size);
-}
-
-const u8 *File::readFile() { return m_file->readFile(); }
-
-size_t File::getFileSize() const { return m_file->getFileSize(); }
-
-// std implementation of File
-StdFile::StdFile(std::string filePath, File::TYPE type) {
+File::File(std::string filePath, TYPE type) {
     m_sFilePath = filePath;
     m_bRead = (type == File::TYPE::READ);
 
@@ -80,27 +56,29 @@ StdFile::StdFile(std::string filePath, File::TYPE type) {
         }
     }
 
-    if(cv_debug.getBool()) debugLog("StdFile: Opening %s\n", filePath.c_str());
+    if(cv_debug.getBool()) debugLog("File: Opening %s\n", filePath.c_str());
 
     m_bReady = true;
 }
 
-StdFile::~StdFile() {
-    m_ofstream.close();  // unnecessary
-    m_ifstream.close();  // unnecessary
+std::string File::readString() {
+    const int size = getFileSize();
+    if(size < 1) return std::string();
+
+    return std::string((const char *)readFile(), size);
 }
 
-bool StdFile::canRead() const { return m_bReady && m_ifstream.good() && m_bRead; }
+bool File::canRead() const { return m_bReady && m_ifstream.good() && m_bRead; }
 
-bool StdFile::canWrite() const { return m_bReady && m_ofstream.good() && !m_bRead; }
+bool File::canWrite() const { return m_bReady && m_ofstream.good() && !m_bRead; }
 
-void StdFile::write(const u8 *buffer, size_t size) {
+void File::write(const u8 *buffer, size_t size) {
     if(!canWrite()) return;
 
     m_ofstream.write((const char *)buffer, size);
 }
 
-std::string StdFile::readLine() {
+std::string File::readLine() {
     if(!canRead()) return "";
 
     std::string line;
@@ -113,8 +91,8 @@ std::string StdFile::readLine() {
     return line;
 }
 
-const u8 *StdFile::readFile() {
-    if(cv_debug.getBool()) debugLog("StdFile::readFile() on %s\n", m_sFilePath.c_str());
+const u8 *File::readFile() {
+    if(cv_debug.getBool()) debugLog("File::readFile() on %s\n", m_sFilePath.c_str());
 
     if(m_fullBuffer.size() > 0) return &m_fullBuffer[0];
 
@@ -124,4 +102,4 @@ const u8 *StdFile::readFile() {
     return (m_ifstream.read((char *)m_fullBuffer.data(), m_iFileSize) ? &m_fullBuffer[0] : NULL);
 }
 
-size_t StdFile::getFileSize() const { return m_iFileSize; }
+size_t File::getFileSize() const { return m_iFileSize; }

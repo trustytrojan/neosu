@@ -163,6 +163,8 @@ inline unsigned long &floatBits(float &f) { return *reinterpret_cast<unsigned lo
 
 inline bool isFinite(float f) { return ((floatBits(f) & 0x7F800000) != 0x7F800000); }
 
+char *strtok_x(char d, char **str);
+
 // zero-initialized dynamic array, similar to std::vector but way faster when you don't need constructors
 // obviously don't use it on complex types :)
 template <class T>

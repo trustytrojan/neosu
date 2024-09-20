@@ -7,7 +7,7 @@ class Spinner : public HitObject {
     virtual ~Spinner();
 
     virtual void draw(Graphics *g);
-    virtual void update(long curPos);
+    virtual void update(long curPos, f64 frame_time);
 
     HitObjectType type = HitObjectType::SPINNER;
 

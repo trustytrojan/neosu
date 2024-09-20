@@ -26,7 +26,7 @@ class HitObject {
 
     virtual void draw(Graphics *g) { ; }
     virtual void draw2(Graphics *g);
-    virtual void update(long curPos);
+    virtual void update(long curPos, f64 frame_time);
 
     virtual void updateStackPosition(float stackOffset) = 0;
     virtual void miss(long curPos) = 0;  // only used by notelock

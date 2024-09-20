@@ -16,14 +16,19 @@
 
 using namespace std;
 
-LiveScore::LiveScore() { reset(); }
+LiveScore::LiveScore(bool simulating) {
+    m_simulating = simulating;
+    reset();
+}
 
 void LiveScore::reset() {
     m_hitresults = std::vector<HIT>();
     m_hitdeltas = std::vector<int>();
 
     m_grade = FinishedScore::Grade::N;
-    updateMods();
+    if(!m_simulating) {
+        mods = Replay::Mods::from_cvars();
+    }
 
     m_fStarsTomTotal = 0.0f;
     m_fStarsTomAim = 0.0f;
@@ -68,9 +73,38 @@ void LiveScore::reset() {
     onScoreChange();
 }
 
+float LiveScore::getScoreMultiplier() {
+    bool ez = mods.flags & Replay::ModFlags::Easy;
+    bool nf = mods.flags & Replay::ModFlags::NoFail;
+    bool sv2 = mods.flags & Replay::ModFlags::ScoreV2;
+    bool hr = mods.flags & Replay::ModFlags::HardRock;
+    bool fl = mods.flags & Replay::ModFlags::Flashlight;
+    bool hd = mods.flags & Replay::ModFlags::Hidden;
+    bool so = mods.flags & Replay::ModFlags::SpunOut;
+    bool rx = mods.flags & Replay::ModFlags::Relax;
+    bool ap = mods.flags & Replay::ModFlags::Autopilot;
+
+    float multiplier = 1.0f;
+
+    // Dumb formula, but the values for HT/DT were dumb to begin with
+    if(mods.speed > 1.f) {
+        multiplier *= (0.24 * mods.speed) + 0.76;
+    } else if(mods.speed < 1.f) {
+        multiplier *= 0.008 * std::exp(4.81588 * mods.speed);
+    }
+
+    if(ez || (nf && !sv2)) multiplier *= 0.5f;
+    if(hr) multiplier *= sv2 ? 1.1f : 1.06f;
+    if(fl) multiplier *= 1.12f;
+    if(hd) multiplier *= 1.06f;
+    if(so) multiplier *= 0.90f;
+    if(rx || ap) multiplier *= 0.f;
+
+    return multiplier;
+}
+
 void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, HIT hit, long delta,
-                             bool ignoreOnHitErrorBar, bool hitErrorBarOnly, bool ignoreCombo, bool ignoreScore,
-                             bool simulating) {
+                             bool ignoreOnHitErrorBar, bool hitErrorBarOnly, bool ignoreCombo, bool ignoreScore) {
     const int scoreComboMultiplier =
         max(m_iCombo - 1, 0);  // current combo, excluding the current hitobject which caused the addHitResult() call
 
@@ -78,16 +112,16 @@ void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, HI
     if(hit != LiveScore::HIT::HIT_MISS) {
         if(!ignoreOnHitErrorBar) {
             m_hitdeltas.push_back((int)delta);
-            if(!simulating) osu->getHUD()->addHitError(delta);
+            if(!m_simulating) osu->getHUD()->addHitError(delta);
         }
 
         if(!ignoreCombo) {
             m_iCombo++;
-            if(!simulating) osu->getHUD()->animateCombo();
+            if(!m_simulating) osu->getHUD()->animateCombo();
         }
     } else  // misses
     {
-        if(!simulating && !ignoreOnHitErrorBar && cv_hiterrorbar_misses.getBool() &&
+        if(!m_simulating && !ignoreOnHitErrorBar && cv_hiterrorbar_misses.getBool() &&
            delta <= (long)beatmap->getHitWindow50()) {
             osu->getHUD()->addHitError(delta, true);
         }
@@ -136,10 +170,9 @@ void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, HI
     if(!ignoreScore) {
         const int difficultyMultiplier = beatmap->getScoreV1DifficultyMultiplier();
         m_iScoreV1 += hitValue;
-        // @PPV3: invalid simulation due to global access
-        m_iScoreV1 += ((hitValue *
-                        (u32)((f64)scoreComboMultiplier * (f64)difficultyMultiplier * (f64)osu->getScoreMultiplier())) /
-                       (u32)25);
+        m_iScoreV1 +=
+            ((hitValue * (u32)((f64)scoreComboMultiplier * (f64)difficultyMultiplier * (f64)getScoreMultiplier())) /
+             (u32)25);
     }
 
     const float totalHitPoints = m_iNum50s * (1.0f / 6.0f) + m_iNum100s * (2.0f / 6.0f) + m_iNum300s;
@@ -156,31 +189,31 @@ void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, HI
 
     // recalculate score v2
     m_iScoreV2ComboPortion += (unsigned long long)((double)hitValue * (1.0 + (double)scoreComboMultiplier / 10.0));
-    if(osu->getModScorev2()) {  // @PPV3: invalid simulation due to global access
+    if(mods.flags & Replay::ModFlags::ScoreV2) {
         const double maximumAccurateHits = beatmap->nb_hitobjects;
 
-        if(totalNumHits > 0)
-            // @PPV3: invalid simulation due to global access
-            m_iScoreV2 = (unsigned long long)(((double)m_iScoreV2ComboPortion /
-                                                   (double)beatmap->m_iScoreV2ComboPortionMaximum * 700000.0 +
-                                               pow((double)m_fAccuracy, 10.0) *
-                                                   ((double)totalNumHits / maximumAccurateHits) * 300000.0 +
-                                               (double)m_iBonusPoints) *
-                                              (double)osu->getScoreMultiplier());
+        if(totalNumHits > 0) {
+            m_iScoreV2 = (u64)(((f64)m_iScoreV2ComboPortion / (f64)beatmap->m_iScoreV2ComboPortionMaximum * 700000.0 +
+                                pow((f64)m_fAccuracy, 10.0) * ((f64)totalNumHits / maximumAccurateHits) * 300000.0 +
+                                (f64)m_iBonusPoints) *
+                               (f64)getScoreMultiplier());
+        }
     }
 
     // recalculate grade
     m_grade = FinishedScore::Grade::D;
+
+    bool hd = mods.flags & Replay::ModFlags::Hidden;
+    bool fl = mods.flags & Replay::ModFlags::Flashlight;
+
     if(percent300s > 0.6f) m_grade = FinishedScore::Grade::C;
     if((percent300s > 0.7f && m_iNumMisses == 0) || (percent300s > 0.8f)) m_grade = FinishedScore::Grade::B;
     if((percent300s > 0.8f && m_iNumMisses == 0) || (percent300s > 0.9f)) m_grade = FinishedScore::Grade::A;
     if(percent300s > 0.9f && percent50s <= 0.01f && m_iNumMisses == 0) {
-        // @PPV3: invalid simulation due to global access
-        m_grade = osu->getModHD() || osu->getModFlashlight() ? FinishedScore::Grade::SH : FinishedScore::Grade::S;
+        m_grade = (hd || fl) ? FinishedScore::Grade::SH : FinishedScore::Grade::S;
     }
     if(m_iNumMisses == 0 && m_iNum50s == 0 && m_iNum100s == 0) {
-        // @PPV3: invalid simulation due to global access
-        m_grade = osu->getModHD() || osu->getModFlashlight() ? FinishedScore::Grade::XH : FinishedScore::Grade::X;
+        m_grade = (hd || fl) ? FinishedScore::Grade::XH : FinishedScore::Grade::X;
     }
 
     // recalculate unstable rate
@@ -253,7 +286,7 @@ void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, HI
     // recalculate max combo
     if(m_iCombo > m_iComboMax) m_iComboMax = m_iCombo;
 
-    if(!simulating) {
+    if(!m_simulating) {
         onScoreChange();
     }
 }
@@ -385,11 +418,7 @@ int LiveScore::getKeyCount(int key) {
     return 0;
 }
 
-Replay::Mods LiveScore::getMods() {
-    return mods;
-}
-
-u32 LiveScore::getModsLegacy() { return getMods().to_legacy(); }
+u32 LiveScore::getModsLegacy() { return mods.to_legacy(); }
 
 UString LiveScore::getModsStringForRichPresence() {
     UString modsString;
@@ -412,9 +441,11 @@ UString LiveScore::getModsStringForRichPresence() {
     return modsString;
 }
 
-unsigned long long LiveScore::getScore() { return osu->getModScorev2() ? m_iScoreV2 : m_iScoreV1; }
+unsigned long long LiveScore::getScore() { return mods.flags & Replay::ModFlags::ScoreV2 ? m_iScoreV2 : m_iScoreV1; }
 
 void LiveScore::onScoreChange() {
+    if(m_simulating) return;
+
     osu->m_room->onClientScoreChange();
 
     // only used to block local scores for people who think they are very clever by quickly disabling auto just before

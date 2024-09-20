@@ -53,7 +53,7 @@ class Circle : public HitObject {
 
     virtual void draw(Graphics *g);
     virtual void draw2(Graphics *g);
-    virtual void update(long curPos);
+    virtual void update(long curPos, f64 frame_time);
 
     HitObjectType type = HitObjectType::CIRCLE;
 

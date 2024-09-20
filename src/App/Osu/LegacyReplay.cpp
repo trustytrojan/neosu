@@ -57,9 +57,8 @@ std::vector<LegacyReplay::Frame> LegacyReplay::get_frames(u8* replay_data, i32 r
     }
 
     long cur_music_pos = 0;
-    std::stringstream ss;
-    std::string frame_str;
     u8 outbuf[BUFSIZ];
+    Packet output;
     strm.next_in = replay_data;
     strm.avail_in = replay_size;
     do {
@@ -72,25 +71,37 @@ std::vector<LegacyReplay::Frame> LegacyReplay::get_frames(u8* replay_data, i32 r
             goto end;
         }
 
-        ss.write((const char*)outbuf, sizeof(outbuf) - strm.avail_out);
+        write_bytes(&output, outbuf, sizeof(outbuf) - strm.avail_out);
     } while(strm.avail_out == 0);
+    write<u8>(&output, '\0');
 
-    while(std::getline(ss, frame_str, ',')) {
-        LegacyReplay::Frame frame;
-        char delimiter;  // ignored, should be '|'
+    {
+        char* line = (char*)output.memory;
+        while(*line) {
+            LegacyReplay::Frame frame;
 
-        std::istringstream line(frame_str);
-        line >> frame.milliseconds_since_last_frame >> delimiter >> frame.x >> delimiter >> frame.y >> delimiter >>
-            frame.key_flags;
+            char* ms = strtok_x('|', &line);
+            frame.milliseconds_since_last_frame = strtoul(ms, NULL, 10);
 
-        if(frame.milliseconds_since_last_frame != -12345) {
-            cur_music_pos += frame.milliseconds_since_last_frame;
-            frame.cur_music_pos = cur_music_pos;
-            replay_frames.push_back(frame);
+            char* x = strtok_x('|', &line);
+            frame.x = strtof(x, NULL);
+
+            char* y = strtok_x('|', &line);
+            frame.y = strtof(y, NULL);
+
+            char* flags = strtok_x(',', &line);
+            frame.key_flags = strtoul(flags, NULL, 10);
+
+            if(frame.milliseconds_since_last_frame != -12345) {
+                cur_music_pos += frame.milliseconds_since_last_frame;
+                frame.cur_music_pos = cur_music_pos;
+                replay_frames.push_back(frame);
+            }
         }
     }
 
 end:
+    free(output.memory);
     lzma_end(&strm);
     return replay_frames;
 }
