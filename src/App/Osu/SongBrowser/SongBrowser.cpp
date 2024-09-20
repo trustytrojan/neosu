@@ -1007,6 +1007,7 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
     m_songBrowser->mouse_update(propagate_clicks);
     m_songBrowser->getContainer()->update_pos();  // necessary due to constant animations
     m_bottombar->mouse_update(propagate_clicks);
+    if(m_localBestButton) m_localBestButton->mouse_update(propagate_clicks);
     m_scoreBrowser->mouse_update(propagate_clicks);
     m_topbarLeft->mouse_update(propagate_clicks);
     m_topbarRight->mouse_update(propagate_clicks);
@@ -2523,6 +2524,7 @@ void SongBrowser::rebuildScoreButtons() {
                     m_localBestButton->map_hash = diff2->getMD5Hash();
                     m_localBestButton->setScore(*local_best, diff2);
                     m_localBestButton->resetHighlight();
+                    m_localBestButton->grabs_clicks = true;
                     m_localBestContainer->addBaseUIElement(m_localBestLabel);
                     m_localBestContainer->addBaseUIElement(m_localBestButton);
                     m_localBestContainer->setVisible(true);
@@ -2544,6 +2546,7 @@ void SongBrowser::rebuildScoreButtons() {
                     m_localBestButton->map_hash = diff2->getMD5Hash();
                     m_localBestButton->setScore(*local_best, diff2);
                     m_localBestButton->resetHighlight();
+                    m_localBestButton->grabs_clicks = true;
                     m_localBestContainer->addBaseUIElement(m_localBestLabel);
                     m_localBestContainer->addBaseUIElement(m_localBestButton);
                     m_localBestContainer->setVisible(true);
