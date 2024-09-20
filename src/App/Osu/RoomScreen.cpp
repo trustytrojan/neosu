@@ -511,7 +511,7 @@ void RoomScreen::on_map_change() {
 
     // Deselect current map
     m_pauseButton->setPaused(true);
-    osu->m_songBrowser2->m_selectedBeatmap->deselect();
+    osu->m_songBrowser2->m_beatmap->deselect();
 
     if(bancho.room.map_id == 0) {
         m_map_title->setText("(no map selected)");

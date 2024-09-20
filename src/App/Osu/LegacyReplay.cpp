@@ -284,12 +284,13 @@ void LegacyReplay::load_and_watch(FinishedScore score) {
         return;
     }
 
-    auto beatmap = db->getBeatmapDifficulty(score.beatmap_hash);
-    if(beatmap == NULL) {
+    auto diff = db->getBeatmapDifficulty(score.beatmap_hash);
+    if(diff == NULL) {
         // XXX: Auto-download beatmap
         osu->m_notificationOverlay->addNotification("Missing beatmap for this replay");
     } else {
-        osu->getSongBrowser()->onDifficultySelected(beatmap, false);
+        osu->getSongBrowser()->onDifficultySelected(diff, false);
+        osu->getSongBrowser()->selectSelectedBeatmapSongButton();
         osu->getSelectedBeatmap()->watch(score, 0.f);
     }
 }

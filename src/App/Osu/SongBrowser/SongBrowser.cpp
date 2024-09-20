@@ -456,7 +456,7 @@ SongBrowser::SongBrowser() : ScreenBackable() {
 
     // behaviour
     m_bHasSelectedAndIsPlaying = false;
-    m_selectedBeatmap = new Beatmap();
+    m_beatmap = new Beatmap();
     m_fPulseAnimation = 0.0f;
     m_fBackgroundFadeInTime = 0.0f;
 
@@ -517,7 +517,7 @@ SongBrowser::~SongBrowser() {
     SAFE_DELETE(m_scoreBrowserScoresStillLoadingElement);
     SAFE_DELETE(m_scoreBrowserNoRecordsYetElement);
 
-    SAFE_DELETE(m_selectedBeatmap);
+    SAFE_DELETE(m_beatmap);
     SAFE_DELETE(m_search);
     SAFE_DELETE(m_topbarLeft);
     SAFE_DELETE(m_topbarRight);
@@ -933,7 +933,7 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
     }
 
     // leaderboard pp calc
-    auto diff2 = m_selectedBeatmap->getSelectedDifficulty2();
+    auto diff2 = m_beatmap->getSelectedDifficulty2();
     lct_set_map(diff2);
     if(diff2->m_pp_info.pp == -1.0) {
         auto mods = osu->getScore()->mods;
@@ -1387,7 +1387,7 @@ CBaseUIContainer *SongBrowser::setVisible(bool visible) {
         updateLayout();
 
         // we have to re-select the current beatmap to start playing music again
-        if(m_selectedBeatmap != NULL) m_selectedBeatmap->select();
+        if(m_beatmap != NULL) m_beatmap->select();
 
         m_bHasSelectedAndIsPlaying = false;  // sanity
 
@@ -1405,10 +1405,10 @@ CBaseUIContainer *SongBrowser::setVisible(bool visible) {
         engine->getMouse()->onLeftChange(false);
         engine->getMouse()->onRightChange(false);
 
-        if(m_selectedBeatmap != NULL) {
+        if(m_beatmap != NULL) {
             // For multiplayer: if the host exits song selection without selecting a song, we want to be able to revert
             // to that previous song.
-            m_lastSelectedBeatmap = m_selectedBeatmap->getSelectedDifficulty2();
+            m_lastSelectedBeatmap = m_beatmap->getSelectedDifficulty2();
 
             // Select button matching current song preview
             selectSelectedBeatmapSongButton();
@@ -1422,9 +1422,9 @@ CBaseUIContainer *SongBrowser::setVisible(bool visible) {
 }
 
 void SongBrowser::selectSelectedBeatmapSongButton() {
-    if(m_selectedBeatmap == NULL) return;
+    if(m_beatmap == NULL) return;
 
-    auto diff = m_selectedBeatmap->getSelectedDifficulty2();
+    auto diff = m_beatmap->getSelectedDifficulty2();
     if(diff == NULL) return;
 
     auto it = hashToSongButton.find(diff->getMD5Hash());
@@ -1433,8 +1433,23 @@ void SongBrowser::selectSelectedBeatmapSongButton() {
         return;
     }
 
-    it->second->deselect();  // if we select() it when already selected, it would start playing!
-    it->second->select();
+    auto btn = it->second;
+    for(auto sub_btn : btn->getChildren()) {
+        // hashToSongButton points to the *beatmap* song button.
+        // We want to select the *difficulty* song button.
+        if(sub_btn->getDatabaseBeatmap() == diff) {
+            btn = sub_btn;
+            break;
+        }
+    }
+
+    if(btn->getDatabaseBeatmap() != diff) {
+        debugLog("Found matching beatmap, but not matching difficulty.\n");
+        return;
+    }
+
+    btn->deselect();  // if we select() it when already selected, it would start playing!
+    btn->select();
 }
 
 void SongBrowser::onPlayEnd(bool quit) {
@@ -1449,8 +1464,9 @@ void SongBrowser::onPlayEnd(bool quit) {
     }
 
     // update song info
-    if(m_selectedBeatmap != NULL && m_selectedBeatmap->getSelectedDifficulty2() != NULL)
-        m_songInfo->setFromBeatmap(m_selectedBeatmap, m_selectedBeatmap->getSelectedDifficulty2());
+    if(m_beatmap != NULL && m_beatmap->getSelectedDifficulty2() != NULL) {
+        m_songInfo->setFromBeatmap(m_beatmap, m_beatmap->getSelectedDifficulty2());
+    }
 }
 
 void SongBrowser::onSelectionChange(Button *button, bool rebuild) {
@@ -1518,17 +1534,17 @@ void SongBrowser::onSelectionChange(Button *button, bool rebuild) {
 
 void SongBrowser::onDifficultySelected(DatabaseBeatmap *diff2, bool play) {
     // deselect = unload
-    auto prev_diff2 = m_selectedBeatmap->getSelectedDifficulty2();
-    m_selectedBeatmap->deselect();
+    auto prev_diff2 = m_beatmap->getSelectedDifficulty2();
+    m_beatmap->deselect();
     if(diff2 != prev_diff2 && !diff2->do_not_store) {
         m_previousRandomBeatmaps.push_back(diff2);
     }
 
     // select = play preview music
-    m_selectedBeatmap->selectDifficulty2(diff2);
+    m_beatmap->selectDifficulty2(diff2);
 
     // update song info
-    m_songInfo->setFromBeatmap(m_selectedBeatmap, diff2);
+    m_songInfo->setFromBeatmap(m_beatmap, diff2);
 
     // start playing
     if(play) {
@@ -1553,7 +1569,7 @@ void SongBrowser::onDifficultySelected(DatabaseBeatmap *diff2, bool play) {
                 osu->getModSelector()->enableAuto();
             }
 
-            if(m_selectedBeatmap->play()) {
+            if(m_beatmap->play()) {
                 m_bHasSelectedAndIsPlaying = true;
                 setVisible(false);
             }
@@ -1583,19 +1599,19 @@ void SongBrowser::refreshBeatmaps() {
     // don't pause the music the first time we load the song database
     static bool first_refresh = true;
     if(first_refresh) {
-        m_selectedBeatmap->m_music = NULL;
+        m_beatmap->m_music = NULL;
         first_refresh = false;
     }
 
-    auto diff2 = m_selectedBeatmap->getSelectedDifficulty2();
+    auto diff2 = m_beatmap->getSelectedDifficulty2();
     if(diff2) {
         beatmap_to_reselect_after_db_load = diff2->getMD5Hash();
     }
 
-    m_selectedBeatmap->pausePreviewMusic();
-    m_selectedBeatmap->deselect();
-    SAFE_DELETE(m_selectedBeatmap);
-    m_selectedBeatmap = new Beatmap();
+    m_beatmap->pausePreviewMusic();
+    m_beatmap->deselect();
+    SAFE_DELETE(m_beatmap);
+    m_beatmap = new Beatmap();
 
     m_selectionPreviousSongButton = NULL;
     m_selectionPreviousSongDiffButton = NULL;
@@ -2531,13 +2547,13 @@ void SongBrowser::rebuildScoreButtons() {
     m_localBestContainer->empty();
     m_localBestContainer->setVisible(false);
 
-    const bool validBeatmap = (m_selectedBeatmap != NULL && m_selectedBeatmap->getSelectedDifficulty2() != NULL);
+    const bool validBeatmap = (m_beatmap != NULL && m_beatmap->getSelectedDifficulty2() != NULL);
     bool is_online = cv_songbrowser_scores_sortingtype.getString() == UString("Online Leaderboard");
 
     std::vector<FinishedScore> scores;
     if(validBeatmap) {
         std::lock_guard<std::mutex> lock(m_db->m_scores_mtx);
-        auto diff2 = m_selectedBeatmap->getSelectedDifficulty2();
+        auto diff2 = m_beatmap->getSelectedDifficulty2();
         auto local_scores = (*m_db->getScores())[diff2->getMD5Hash()];
         auto local_best = max_element(local_scores.begin(), local_scores.end(),
                                       [](FinishedScore const &a, FinishedScore const &b) { return a.score < b.score; });
@@ -2621,14 +2637,14 @@ void SongBrowser::rebuildScoreButtons() {
         }
     } else {
         // sort
-        m_db->sortScores(m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash());
+        m_db->sortScores(m_beatmap->getSelectedDifficulty2()->getMD5Hash());
 
         // build
         std::vector<ScoreButton *> scoreButtons;
         for(size_t i = 0; i < numScores; i++) {
             ScoreButton *button = m_scoreButtonCache[i];
-            button->map_hash = m_selectedBeatmap->getSelectedDifficulty2()->getMD5Hash();
-            button->setScore(scores[i], m_selectedBeatmap->getSelectedDifficulty2(), i + 1);
+            button->map_hash = m_beatmap->getSelectedDifficulty2()->getMD5Hash();
+            button->setScore(scores[i], m_beatmap->getSelectedDifficulty2(), i + 1);
             scoreButtons.push_back(button);
         }
 
@@ -2872,7 +2888,7 @@ void SongBrowser::onDatabaseLoadingFinished() {
     }
 
     // ok, if we still haven't selected a song, do so now
-    if(m_selectedBeatmap->getSelectedDifficulty2() == NULL) {
+    if(m_beatmap->getSelectedDifficulty2() == NULL) {
         selectRandomBeatmap();
     }
 }
@@ -3065,9 +3081,9 @@ void SongBrowser::onSortScoresChange(UString text, int id) {
     m_scoreBrowser->scrollToTop();
 
     // update grades of all visible songdiffbuttons
-    if(m_selectedBeatmap != NULL) {
+    if(m_beatmap != NULL) {
         for(size_t i = 0; i < m_visibleSongButtons.size(); i++) {
-            if(m_visibleSongButtons[i]->getDatabaseBeatmap() == m_selectedBeatmap->getSelectedDifficulty2()) {
+            if(m_visibleSongButtons[i]->getDatabaseBeatmap() == m_beatmap->getSelectedDifficulty2()) {
                 SongButton *songButtonPointer = dynamic_cast<SongButton *>(m_visibleSongButtons[i]);
                 if(songButtonPointer != NULL) {
                     for(Button *diffButton : songButtonPointer->getChildren()) {
@@ -3450,7 +3466,7 @@ void SongBrowser::onScoreClicked(CBaseUIButton *button) {
 
     // NOTE: the order of these two calls matters
     osu->getRankingScreen()->setScore(scoreButton->getScore());
-    osu->getRankingScreen()->setBeatmapInfo(m_selectedBeatmap, m_selectedBeatmap->getSelectedDifficulty2());
+    osu->getRankingScreen()->setBeatmapInfo(m_beatmap, m_beatmap->getSelectedDifficulty2());
 
     osu->getSongBrowser()->setVisible(false);
     osu->getRankingScreen()->setVisible(true);
@@ -3643,7 +3659,7 @@ void SongBrowser::highlightScore(u64 unixTimestamp) {
 }
 
 void SongBrowser::recalculateStarsForSelectedBeatmap(bool force) {
-    if(m_selectedBeatmap->getSelectedDifficulty2() == NULL) return;
+    if(m_beatmap->getSelectedDifficulty2() == NULL) return;
 
     // TODO @kiwec
 }
@@ -3672,9 +3688,8 @@ void SongBrowser::selectRandomBeatmap() {
     if(songButtons.size() < 1) return;
 
     // remember previous
-    if(m_previousRandomBeatmaps.size() == 0 && m_selectedBeatmap != NULL &&
-       m_selectedBeatmap->getSelectedDifficulty2() != NULL)
-        m_previousRandomBeatmaps.push_back(m_selectedBeatmap->getSelectedDifficulty2());
+    if(m_previousRandomBeatmaps.size() == 0 && m_beatmap != NULL && m_beatmap->getSelectedDifficulty2() != NULL)
+        m_previousRandomBeatmaps.push_back(m_beatmap->getSelectedDifficulty2());
 
     size_t rng;
 #ifdef _WIN32
@@ -3694,8 +3709,8 @@ void SongBrowser::selectRandomBeatmap() {
 void SongBrowser::selectPreviousRandomBeatmap() {
     if(m_previousRandomBeatmaps.size() > 0) {
         DatabaseBeatmap *currentRandomBeatmap = m_previousRandomBeatmaps.back();
-        if(m_previousRandomBeatmaps.size() > 1 && m_selectedBeatmap != NULL &&
-           m_previousRandomBeatmaps[m_previousRandomBeatmaps.size() - 1] == m_selectedBeatmap->getSelectedDifficulty2())
+        if(m_previousRandomBeatmaps.size() > 1 && m_beatmap != NULL &&
+           m_previousRandomBeatmaps[m_previousRandomBeatmaps.size() - 1] == m_beatmap->getSelectedDifficulty2())
             m_previousRandomBeatmaps.pop_back();  // deletes the current beatmap which may also be at the top (so we
                                                   // don't switch to ourself)
 

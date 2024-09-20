@@ -111,7 +111,7 @@ class SongBrowser : public ScreenBackable {
     inline bool isInSearch() const { return m_bInSearch; }
     inline bool isRightClickScrolling() const { return m_bSongBrowserRightClickScrolling; }
 
-    inline Beatmap *getSelectedBeatmap() const { return m_selectedBeatmap; }
+    inline Beatmap *getSelectedBeatmap() const { return m_beatmap; }
 
     inline InfoLabel *getInfoLabel() { return m_songInfo; }
 
@@ -294,7 +294,7 @@ class SongBrowser : public ScreenBackable {
 
     // behaviour
     DatabaseBeatmap *m_lastSelectedBeatmap = NULL;
-    Beatmap *m_selectedBeatmap;
+    Beatmap *m_beatmap;
     bool m_bHasSelectedAndIsPlaying;
     float m_fPulseAnimation;
     float m_fBackgroundFadeInTime;

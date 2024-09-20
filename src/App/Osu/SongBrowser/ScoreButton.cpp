@@ -635,6 +635,7 @@ void ScoreButton::onDeleteScoreConfirmed(UString text, int id) {
 void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, int index, UString titleString,
                            float weight) {
     m_score = score;
+    m_score.beatmap_hash = diff2->getMD5Hash();
     m_score.diff2 = diff2;
     m_iScoreIndexNumber = index;
 
