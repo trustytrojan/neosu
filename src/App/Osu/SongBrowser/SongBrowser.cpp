@@ -1040,10 +1040,11 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
             m_bSongBrowserRightClickScrolling = false;
         }
 
-        if(m_bSongBrowserRightClickScrolling)
+        if(m_bSongBrowserRightClickScrolling) {
             m_songBrowser->scrollToY(
                 -((engine->getMouse()->getPos().y - 2 - m_songBrowser->getPos().y) / m_songBrowser->getSize().y) *
                 m_songBrowser->getScrollSize().y);
+        }
     }
 
     // handle async random beatmap selection
@@ -1060,7 +1061,7 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
     // but only if the context menu is currently not visible (since we don't want move things while e.g. managing
     // collections etc.)
     if(engine->getMouse()->getPos().x < osu->getScreenWidth() * 0.1f && !m_contextMenu->isVisible()) {
-        scrollToSongButton(m_selectedButton);
+        m_scheduled_scroll_to_selected_button = true;
     }
 
     // handle searching
@@ -1074,16 +1075,12 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
         if(!m_backgroundSearchMatcher->isDead() && m_backgroundSearchMatcher->isAsyncReady()) {
             // we have the results, now update the UI
             rebuildSongButtonsAndVisibleSongButtonsWithSearchMatchSupport(true);
-
             m_backgroundSearchMatcher->kill();
         }
-
         if(m_backgroundSearchMatcher->isDead()) {
             if(m_scheduled_scroll_to_selected_button) {
                 m_scheduled_scroll_to_selected_button = false;
-
-                // TODO @kiwec: This doesn't scroll if we switch between groupings
-                scrollToSongButton(m_selectedButton);
+                scrollToBestButton();
             }
         }
     }
@@ -1327,9 +1324,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
 
             if(collectionButtonPointer != NULL && button != NULL && button->isSelected()) {
                 button->select();  // deselect
-
                 scrollToSongButton(button);
-
                 break;
             }
         }
@@ -1808,10 +1803,54 @@ void SongBrowser::requestNextScrollToSongButtonJumpFix(SongDifficultyButton *dif
     m_fNextScrollToSongButtonJumpFixOldScrollSizeY = m_songBrowser->getScrollSize().y;
 }
 
+bool SongBrowser::isButtonVisible(Button *songButton) {
+    for(auto &btn : m_visibleSongButtons) {
+        if(btn == songButton) {
+            return true;
+        }
+        for(auto &child : btn->getChildren()) {
+            if(child == songButton) {
+                return true;
+            }
+
+            for(auto &grandchild : child->getChildren()) {
+                if(grandchild == songButton) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+void SongBrowser::scrollToBestButton() {
+    for(auto &collection : m_visibleSongButtons) {
+        for(auto &mapset : collection->getChildren()) {
+            for(auto &diff : mapset->getChildren()) {
+                if(diff->isSelected()) {
+                    scrollToSongButton(diff);
+                    return;
+                }
+            }
+
+            if(mapset->isSelected()) {
+                scrollToSongButton(mapset);
+                return;
+            }
+        }
+
+        if(collection->isSelected()) {
+            scrollToSongButton(collection);
+            return;
+        }
+    }
+
+    m_songBrowser->scrollToTop();
+}
+
 void SongBrowser::scrollToSongButton(Button *songButton, bool alignOnTop) {
-    if(songButton == NULL) {
-        debugLog("scrollToSongButton(): songButton == NULL\n");
-        m_songBrowser->scrollToTop();
+    if(songButton == NULL || !isButtonVisible(songButton)) {
         return;
     }
 
@@ -2990,11 +3029,10 @@ void SongBrowser::rebuildSongButtonsAndVisibleSongButtonsWithSearchMatchSupport(
 
         // scroll to top search result, or auto select the only result
         if(scrollToTop) {
-            if(m_visibleSongButtons.size() > 1)
+            if(m_visibleSongButtons.size() > 1) {
                 scrollToSongButton(m_visibleSongButtons[0]);
-            else if(m_visibleSongButtons.size() > 0) {
+            } else if(m_visibleSongButtons.size() > 0) {
                 selectSongButton(m_visibleSongButtons[0]);
-                m_songBrowser->scrollY(1);
             }
         }
     }
@@ -3221,7 +3259,7 @@ void SongBrowser::onSortChangeInt(UString text, bool autoScroll) {
     }
 
     rebuildSongButtons();
-    onAfterSortingOrGroupChange(autoScroll);
+    onAfterSortingOrGroupChange();
 }
 
 void SongBrowser::onGroupNoGrouping() {
@@ -3243,7 +3281,7 @@ void SongBrowser::onGroupCollections(bool autoScroll) {
     m_visibleSongButtons.insert(m_visibleSongButtons.end(), m_collectionButtons.begin(), m_collectionButtons.end());
 
     rebuildSongButtons();
-    onAfterSortingOrGroupChange(autoScroll);
+    onAfterSortingOrGroupChange();
 }
 
 void SongBrowser::onGroupArtist() {
@@ -3325,12 +3363,12 @@ void SongBrowser::onGroupTitle() {
     onAfterSortingOrGroupChange();
 }
 
-void SongBrowser::onAfterSortingOrGroupChange(bool autoScroll) {
+void SongBrowser::onAfterSortingOrGroupChange() {
     // keep search state consistent between tab changes
     if(m_bInSearch) onSearchUpdate();
 
     // (can't call it right here because we maybe have async)
-    m_scheduled_scroll_to_selected_button = autoScroll;
+    m_scheduled_scroll_to_selected_button = true;
 }
 
 void SongBrowser::onSelectionMode() {

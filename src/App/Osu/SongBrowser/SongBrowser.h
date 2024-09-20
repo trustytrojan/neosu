@@ -97,6 +97,8 @@ class SongBrowser : public ScreenBackable {
                                           const std::string &name);
 
     void requestNextScrollToSongButtonJumpFix(SongDifficultyButton *diffButton);
+    bool isButtonVisible(Button *songButton);
+    void scrollToBestButton();
     void scrollToSongButton(Button *songButton, bool alignOnTop = false);
     void rebuildSongButtons();
     void recreateCollectionsButtons();
@@ -183,7 +185,7 @@ class SongBrowser : public ScreenBackable {
     void onGroupLength();
     void onGroupTitle();
 
-    void onAfterSortingOrGroupChange(bool autoScroll = true);
+    void onAfterSortingOrGroupChange();
 
     void onSelectionMode();
     void onSelectionMods();
