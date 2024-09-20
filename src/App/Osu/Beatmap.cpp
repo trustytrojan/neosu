@@ -1305,9 +1305,8 @@ LiveScore::HIT Beatmap::addHitResult(HitObject *hitObject, LiveScore::HIT hit, i
             should_write_frame |= (hit == LiveScore::HIT::HIT_MISS);
         }
 
-        Beatmap *beatmap = (Beatmap *)osu->getSelectedBeatmap();
-        if(should_write_frame && !hitErrorBarOnly && beatmap != NULL) {
-            beatmap->write_frame();
+        if(should_write_frame && !hitErrorBarOnly) {
+            write_frame();
         }
     }
 

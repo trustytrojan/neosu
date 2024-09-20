@@ -184,7 +184,11 @@ void Sound::destroy() {
     }
 }
 
-void Sound::setPosition(double percent) { return setPositionMS(clamp<f64>(percent, 0.0, 1.0) * m_length); }
+u32 Sound::setPosition(f64 percent) {
+    u32 ms = clamp<f64>(percent, 0.0, 1.0) * m_length;
+    setPositionMS(ms);
+    return ms;
+}
 
 void Sound::setPositionMS(unsigned long ms) {
     if(!m_bReady || ms > getLengthMS()) return;

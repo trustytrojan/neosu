@@ -40,6 +40,8 @@ std::vector<Packet> incoming_queue;
 time_t last_packet_tms = {0};
 double seconds_between_pings = 1.0;
 
+std::atomic<bool> dead = true;
+
 std::string auth_header = "";
 UString cho_token = "";
 
@@ -344,7 +346,7 @@ static void *do_networking() {
         return NULL;
     }
 
-    while(osu != NULL) {
+    while(!dead.load()) {
         api_requests_mutex.lock();
         if(api_request_queue.empty()) {
             api_requests_mutex.unlock();
@@ -534,6 +536,9 @@ void send_packet(Packet &packet) {
 }
 
 void init_networking_thread() {
+    dead = false;
     auto net_thread = std::thread(do_networking);
     net_thread.detach();
 }
+
+void kill_networking_thread() { dead = true; }

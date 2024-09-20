@@ -28,7 +28,7 @@ class Sound : public Resource {
     std::vector<HCHANNEL> getActiveChannels();
     HCHANNEL getChannel();
 
-    void setPosition(double percent);
+    u32 setPosition(f64 percent);
     void setPositionMS(unsigned long ms);
     void setPositionMS_fast(u32 ms);
 

@@ -376,6 +376,7 @@ Osu::~Osu() {
     lct_set_map(NULL);
     loct_abort();
     mct_abort();
+    kill_networking_thread();
 
     // "leak" UpdateHandler object, but not relevant since shutdown:
     // this is the only way of handling instant user shutdown requests properly, there is no solution for active working

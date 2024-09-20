@@ -56,6 +56,9 @@ void receive_bancho_packets();
 // Initialize networking thread. Should be called once when starting neosu.
 void init_networking_thread();
 
+// Stop networking thread. Should be called once when exiting neosu.
+void kill_networking_thread();
+
 size_t curl_write(void *contents, size_t size, size_t nmemb, void *userp);
 
 extern UString cho_token;
