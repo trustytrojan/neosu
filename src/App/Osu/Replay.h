@@ -3,61 +3,63 @@
 
 namespace Replay {
 
-enum ModFlags {
-    // Green mods
-    NoFail = 1 << 0,
-    Easy = 1 << 1,
-    Autopilot = 1 << 2,
-    Relax = 1 << 3,
+namespace ModFlags {
 
-    // Red mods
-    Hidden = 1 << 4,
-    HardRock = 1 << 5,
-    Flashlight = 1 << 6,
-    SuddenDeath = 1 << 7,
-    Perfect = SuddenDeath | (1 << 8),
-    Nightmare = 1 << 9,
+// Green mods
+const u64 NoFail = 1ULL << 0;
+const u64 Easy = 1ULL << 1;
+const u64 Autopilot = 1ULL << 2;
+const u64 Relax = 1ULL << 3;
 
-    // Special mods
-    NoPitchCorrection = 1 << 10,
-    TouchDevice = 1 << 11,
-    SpunOut = 1 << 12,
-    ScoreV2 = 1 << 13,
-    FPoSu = 1 << 14,
-    Target = 1 << 15,
+// Red mods
+const u64 Hidden = 1ULL << 4;
+const u64 HardRock = 1ULL << 5;
+const u64 Flashlight = 1ULL << 6;
+const u64 SuddenDeath = 1ULL << 7;
+const u64 Perfect = SuddenDeath | (1ULL << 8);
+const u64 Nightmare = 1ULL << 9;
 
-    // Experimental mods
-    AROverrideLock = 1 << 16,
-    ODOverrideLock = 1 << 17,
-    Timewarp = 1 << 18,
-    ARTimewarp = 1 << 19,
-    Minimize = 1 << 20,
-    Jigsaw1 = 1 << 21,
-    Jigsaw2 = 1 << 22,
-    Wobble1 = 1 << 23,
-    Wobble2 = 1 << 24,
-    ARWobble = 1 << 25,
-    FullAlternate = 1 << 26,
-    Shirone = 1 << 27,
-    Mafham = 1 << 28,
-    HalfWindow = 1 << 29,
-    HalfWindowAllow300s = 1 << 30,
-    Ming3012 = 1 << 31,
-    No100s = 1 << 32,
-    No50s = 1 << 33,
-    MirrorHorizontal = 1 << 34,
-    MirrorVertical = 1 << 35,
-    FPoSu_Strafing = 1 << 36,
-    FadingCursor = 1 << 37,
-    FPS = 1 << 38,
-    ReverseSliders = 1 << 39,
-    Millhioref = 1 << 40,
-    StrictTracking = 1 << 41,
-    ApproachDifferent = 1 << 42,
+// Special mods
+const u64 NoPitchCorrection = 1ULL << 10;
+const u64 TouchDevice = 1ULL << 11;
+const u64 SpunOut = 1ULL << 12;
+const u64 ScoreV2 = 1ULL << 13;
+const u64 FPoSu = 1ULL << 14;
+const u64 Target = 1ULL << 15;
 
-    // Non-submittable
-    Autoplay = 1 << 63,
-};
+// Experimental mods
+const u64 AROverrideLock = 1ULL << 16;
+const u64 ODOverrideLock = 1ULL << 17;
+const u64 Timewarp = 1ULL << 18;
+const u64 ARTimewarp = 1ULL << 19;
+const u64 Minimize = 1ULL << 20;
+const u64 Jigsaw1 = 1ULL << 21;
+const u64 Jigsaw2 = 1ULL << 22;
+const u64 Wobble1 = 1ULL << 23;
+const u64 Wobble2 = 1ULL << 24;
+const u64 ARWobble = 1ULL << 25;
+const u64 FullAlternate = 1ULL << 26;
+const u64 Shirone = 1ULL << 27;
+const u64 Mafham = 1ULL << 28;
+const u64 HalfWindow = 1ULL << 29;
+const u64 HalfWindowAllow300s = 1ULL << 30;
+const u64 Ming3012 = 1ULL << 31;
+const u64 No100s = 1ULL << 32;
+const u64 No50s = 1ULL << 33;
+const u64 MirrorHorizontal = 1ULL << 34;
+const u64 MirrorVertical = 1ULL << 35;
+const u64 FPoSu_Strafing = 1ULL << 36;
+const u64 FadingCursor = 1ULL << 37;
+const u64 FPS = 1ULL << 38;
+const u64 ReverseSliders = 1ULL << 39;
+const u64 Millhioref = 1ULL << 40;
+const u64 StrictTracking = 1ULL << 41;
+const u64 ApproachDifferent = 1ULL << 42;
+
+// Non-submittable
+const u64 Autoplay = 1ULL << 63;
+
+}  // namespace ModFlags
 
 struct Mods {
     u64 flags = 0;

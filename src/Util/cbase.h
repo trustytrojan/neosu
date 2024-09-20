@@ -151,9 +151,9 @@ inline int sign(T val) {
     return val > 0 ? 1 : (val == 0 ? 0 : -1);
 }
 
-inline float deg2rad(float deg) { return deg * PI / 180.0f; }
+inline float deg2rad(float deg) { return deg * (f32)PI / 180.0f; }
 
-inline float rad2deg(float rad) { return rad * 180.0f / PI; }
+inline float rad2deg(float rad) { return rad * 180.0f / (f32)PI; }
 
 inline bool isInt(float f) { return (f == static_cast<float>(static_cast<int>(f))); }
 
