@@ -23,6 +23,9 @@ class UIButton : public CBaseUIButton {
     void animateClickColor();
     bool is_loading = false;
 
+    // HACKHACK: enough is enough
+    bool m_bVisible2 = true;
+
    private:
     virtual void onClicked();
     virtual void onFocusStolen();

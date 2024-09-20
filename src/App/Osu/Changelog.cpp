@@ -33,6 +33,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.changes.push_back("- Added BPM song grouping");
     latest.changes.push_back("- Added keybind to open skin selection menu");
     latest.changes.push_back("- Added option to change pitch based on hit accuracy");
+    latest.changes.push_back("- Added retry/watch buttons on score screen");
     latest.changes.push_back("- Added slider instafade setting");
     latest.changes.push_back("- Fixed \"Personal Best\" score button not being clickable");
     latest.changes.push_back("- Fixed local scores not saving avatar");

@@ -57,12 +57,16 @@ static void run_thread() {
         if(dead.load()) return;
 
         while(!work.empty()) {
+            if(dead.load()) return;
+            if(osu->should_pause_background_threads.load()) {
+                work_mtx.unlock();
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                work_mtx.lock();
+                continue;
+            }
+
             pp_calc_request rqt = work[0];
             work.erase(work.begin());
-            while(osu->should_pause_background_threads.load() && !dead.load()) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            }
-            if(dead.load()) return;
             work_mtx.unlock();
 
             // Make sure we haven't already computed it

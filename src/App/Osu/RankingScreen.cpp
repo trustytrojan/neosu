@@ -423,16 +423,16 @@ CBaseUIContainer *RankingScreen::setVisible(bool visible) {
 }
 
 void RankingScreen::onRetryClicked() {
-    // TODO @kiwec: doesn't work, just backs out to song browser, idk why
     setVisible(false);
-    osu->getSelectedBeatmap()->play();
+    if(osu->getSelectedBeatmap()->play()) {
+        osu->m_songBrowser2->m_bHasSelectedAndIsPlaying = true;
+        osu->m_songBrowser2->setVisible(false);
+    }
 }
 
 void RankingScreen::onWatchClicked() {
-    // TODO @kiwec: doesn't work, just backs out to song browser, idk why
-    //              actually it's obvious: replay isn't loaded yet
     setVisible(false);
-    osu->getSelectedBeatmap()->watch(m_score, 0.0);
+    LegacyReplay::load_and_watch(m_score);
 }
 
 void RankingScreen::setScore(FinishedScore score) {
@@ -441,13 +441,8 @@ void RankingScreen::setScore(FinishedScore score) {
 
     m_score = score;
 
-    // TODO @kiwec: buttons don't work correctly
-    // m_retry_btn->setVisible(is_same_player && !bancho.is_in_a_multi_room());
-    // m_watch_btn->setVisible(score.has_replay && !bancho.is_in_a_multi_room());
-
-    // TODO @kiwec: i can't even setVisible(false) man this is so cancer
-    m_retry_btn->setVisible(false);
-    m_watch_btn->setVisible(false);
+    m_retry_btn->m_bVisible2 = is_same_player && !bancho.is_in_a_multi_room();
+    m_watch_btn->m_bVisible2 = !bancho.is_in_a_multi_room();
 
     m_bIsUnranked = false;
 

@@ -25,7 +25,7 @@ UIButton::UIButton(float xPos, float yPos, float xSize, float ySize, UString nam
 }
 
 void UIButton::draw(Graphics *g) {
-    if(!m_bVisible) return;
+    if(!m_bVisible || !m_bVisible2) return;
 
     Image *buttonLeft = m_bDefaultSkin ? osu->getSkin()->getDefaultButtonLeft() : osu->getSkin()->getButtonLeft();
     Image *buttonMiddle = m_bDefaultSkin ? osu->getSkin()->getDefaultButtonMiddle() : osu->getSkin()->getButtonMiddle();
@@ -74,7 +74,7 @@ void UIButton::draw(Graphics *g) {
 }
 
 void UIButton::mouse_update(bool *propagate_clicks) {
-    if(!m_bVisible) return;
+    if(!m_bVisible || !m_bVisible2) return;
     CBaseUIButton::mouse_update(propagate_clicks);
 
     if(isMouseInside() && m_tooltipTextLines.size() > 0 && !m_bFocusStolenDelay) {
