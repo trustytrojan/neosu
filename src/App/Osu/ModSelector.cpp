@@ -665,9 +665,11 @@ void ModSelector::onKeyDown(KeyboardEvent &key) {
     if(key == (KEYCODE)cv_MOD_SCOREV2.getInt()) m_modButtonScoreV2->click();
     if(key == (KEYCODE)cv_MOD_HALFTIME.getInt()) {
         cv_speed_override.setValue(0.75);
+        osu->updateMods();
     }
     if(key == (KEYCODE)cv_MOD_DOUBLETIME.getInt()) {
         cv_speed_override.setValue(1.5);
+        osu->updateMods();
     }
 
     key.consume();
@@ -1267,6 +1269,8 @@ void ModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
             break;
         }
     }
+
+    osu->updateMods();
 }
 
 void ModSelector::onOverrideSliderLockChange(CBaseUICheckbox *checkbox) {
@@ -1297,6 +1301,8 @@ void ModSelector::onOverrideSliderLockChange(CBaseUICheckbox *checkbox) {
             break;
         }
     }
+
+    osu->updateMods();
 }
 
 void ModSelector::onOverrideARSliderDescClicked(CBaseUIButton *button) { m_ARLock->click(); }
@@ -1458,6 +1464,8 @@ void ModSelector::onCheckboxChange(CBaseUICheckbox *checkbox) {
             break;
         }
     }
+
+    osu->updateMods();
 }
 
 void ModSelector::onResolutionChange(Vector2 newResolution) {

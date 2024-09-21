@@ -207,8 +207,6 @@ Database::~Database() {
     unload_collections();
 }
 
-void Database::update() {}
-
 void Database::load() {
     m_bInterruptLoad = false;
     m_fLoadingProgress = 0.0f;

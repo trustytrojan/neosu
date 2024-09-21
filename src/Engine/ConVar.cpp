@@ -341,7 +341,9 @@ void ConVar::setValue(float value) {
             debugLog("Can't edit %s while in a multiplayer match.\n", m_sName.toUtf8());
             return;
         } else {
-            debugLog("%s affects gameplay: won't submit score.\n", m_sName.toUtf8());
+            if(osu->isInPlayMode()) {
+                debugLog("%s affects gameplay: won't submit score.\n", m_sName.toUtf8());
+            }
             osu->getScore()->setCheated();
         }
 

@@ -189,6 +189,9 @@ void UIModSelectorModButton::setOn(bool on, bool silent) {
             }
         }
     }
+    if(!silent) {
+        osu->updateMods();
+    }
 
     if(m_bOn) {
         if(prevState) {

@@ -899,8 +899,6 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
 
     // refresh logic (blocks every other call in the update() function below it!)
     if(m_bBeatmapRefreshScheduled) {
-        m_db->update();
-
         // check if we are finished loading
         if(m_db->isFinished()) {
             m_bBeatmapRefreshScheduled = false;
@@ -932,7 +930,7 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
         maps.clear();
     }
 
-    // leaderboard pp calc
+    // selected mods pp calc
     auto diff2 = m_beatmap->getSelectedDifficulty2();
     lct_set_map(diff2);
     if(diff2->m_pp_info.pp == -1.0) {
@@ -3662,7 +3660,7 @@ void SongBrowser::highlightScore(u64 unixTimestamp) {
 void SongBrowser::recalculateStarsForSelectedBeatmap(bool force) {
     if(m_beatmap->getSelectedDifficulty2() == NULL) return;
 
-    // TODO @kiwec
+    m_beatmap->getSelectedDifficulty2()->m_pp_info.pp = -1.0;
 }
 
 void SongBrowser::selectSongButton(Button *songButton) {

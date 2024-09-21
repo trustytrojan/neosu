@@ -63,8 +63,6 @@ class Database {
     Database();
     ~Database();
 
-    void update();
-
     void load();
     void cancel();
     void save();

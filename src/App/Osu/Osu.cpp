@@ -910,25 +910,27 @@ void Osu::updateMods() {
         }
     }
 
-    // handle auto/pilot cursor visibility
+    osu->getScore()->mods = Replay::Mods::from_cvars();
+    osu->getScore()->setCheated();
+
+    if(m_songBrowser2 != NULL) {
+        // Update pp/stars display for current map
+        m_songBrowser2->recalculateStarsForSelectedBeatmap(true);
+    }
+
     if(isInPlayMode()) {
+        // handle auto/pilot cursor visibility
         m_bShouldCursorBeVisible = cv_mod_autoplay.getBool() || cv_mod_autopilot.getBool() ||
                                    getSelectedBeatmap()->is_watching || getSelectedBeatmap()->is_spectating;
         env->setCursorVisible(m_bShouldCursorBeVisible);
+
+        // notify the possibly running beatmap of mod changes
+        // e.g. recalculating stacks dynamically if HR is toggled
+        getSelectedBeatmap()->onModUpdate();
     }
 
     // handle windows key disable/enable
     updateWindowsKeyDisable();
-
-    // notify the possibly running beatmap of mod changes, for e.g. recalculating stacks dynamically if HR is toggled
-    {
-        getSelectedBeatmap()->onModUpdate();
-        osu->getScore()->setCheated();  // user just cheated, prevent score from saving/submitting
-
-        if(m_songBrowser2 != NULL) {
-            m_songBrowser2->recalculateStarsForSelectedBeatmap(true);
-        }
-    }
 }
 
 void Osu::onKeyDown(KeyboardEvent &key) {
