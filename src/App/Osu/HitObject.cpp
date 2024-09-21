@@ -13,8 +13,6 @@
 
 using namespace std;
 
-unsigned long long HitObject::sortHackCounter = 0;
-
 void HitObject::drawHitResult(Graphics *g, Beatmap *beatmap, Vector2 rawPos, LiveScore::HIT result,
                               float animPercentInv, float hitDeltaRangePercent) {
     drawHitResult(g, beatmap->getSkin(), beatmap->m_fHitcircleDiameter, beatmap->m_fRawHitcircleDiameter, rawPos,
@@ -256,8 +254,6 @@ HitObject::HitObject(long time, int sampleType, int comboNumber, bool isEndOfCom
     m_hitresultanim1.time = -9999.0f;
     m_hitresultanim2.time = -9999.0f;
 
-    m_iSortHack = sortHackCounter++;
-
     bi = beatmap;
     bm = dynamic_cast<Beatmap *>(beatmap);  // should be NULL if SimulatedBeatmap
 }
@@ -378,10 +374,10 @@ void HitObject::update(long curPos, f64 frame_time) {
 
         // hitobject body fadein
         const long fadeInStart = click_time - m_iApproachTime;
-        const long fadeInEnd =
-            min(click_time,
-                click_time - m_iApproachTime + m_iFadeInTime);  // min() ensures that the fade always finishes at click_time
-                                                             // (even if the fadeintime is longer than the approachtime)
+        const long fadeInEnd = min(
+            click_time,
+            click_time - m_iApproachTime + m_iFadeInTime);  // min() ensures that the fade always finishes at click_time
+                                                            // (even if the fadeintime is longer than the approachtime)
         m_fAlpha = clamp<float>(1.0f - ((float)(fadeInEnd - curPos) / (float)(fadeInEnd - fadeInStart)), 0.0f, 1.0f);
         m_fAlphaWithoutHidden = m_fAlpha;
 
@@ -408,8 +404,8 @@ void HitObject::update(long curPos, f64 frame_time) {
         const long approachCircleFadeStart = click_time - m_iApproachTime;
         const long approachCircleFadeEnd =
             min(click_time, click_time - m_iApproachTime +
-                             2 * m_iFadeInTime);  // min() ensures that the fade always finishes at click_time (even
-                                                  // if the fadeintime is longer than the approachtime)
+                                2 * m_iFadeInTime);  // min() ensures that the fade always finishes at click_time (even
+                                                     // if the fadeintime is longer than the approachtime)
         m_fAlphaForApproachCircle = clamp<float>(
             1.0f - ((float)(approachCircleFadeEnd - curPos) / (float)(approachCircleFadeEnd - approachCircleFadeStart)),
             0.0f, 1.0f);

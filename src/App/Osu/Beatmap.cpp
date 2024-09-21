@@ -667,7 +667,7 @@ bool Beatmap::start() {
         bool operator()(HitObject const *a, HitObject const *b) const {
             // strict weak ordering!
             if((a->click_time + a->duration) == (b->click_time + b->duration))
-                return a->getSortHack() < b->getSortHack();
+                return a < b;
             else
                 return (a->click_time + a->duration) < (b->click_time + b->duration);
         }

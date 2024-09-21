@@ -101,8 +101,6 @@ class Database {
     inline std::unordered_map<MD5Hash, std::vector<FinishedScore>> *getScores() { return &m_scores; }
     inline const std::vector<SCORE_SORTING_METHOD> &getScoreSortingMethods() const { return m_scoreSortingMethods; }
 
-    inline unsigned long long getAndIncrementScoreSortHackCounter() { return m_iSortHackCounter++; }
-
     std::unordered_map<MD5Hash, std::vector<FinishedScore>> m_online_scores;
     std::string getOsuSongsFolder();
 
@@ -156,7 +154,6 @@ class Database {
     std::unordered_map<MD5Hash, std::vector<FinishedScore>> m_scores;
 
     bool m_bDidScoresChangeForStats;
-    unsigned long long m_iSortHackCounter;
     PlayerStats m_prevPlayerStats;
     std::vector<SCORE_SORTING_METHOD> m_scoreSortingMethods;
 };

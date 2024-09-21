@@ -35,15 +35,15 @@ class HitObject {
 
     HitObjectType type;
 
-	// the time at which this object must be clicked
+    // the time at which this object must be clicked
     i64 click_time;
 
-	// how long this object takes to click
-	//   circle = 0
-	//   slider = sliderTime
-	//   spinner = spinnerTime
-	// the object will stay visible for (click_time + duration)
-	i64 duration;
+    // how long this object takes to click
+    //   circle = 0
+    //   slider = sliderTime
+    //   spinner = spinnerTime
+    // the object will stay visible for (click_time + duration)
+    i64 duration;
 
     void addHitResult(LiveScore::HIT result, long delta, bool isEndOfCombo, Vector2 posRaw, float targetDelta = 0.0f,
                       float targetAngle = 0.0f, bool ignoreOnHitErrorBar = false, bool ignoreCombo = false,
@@ -70,7 +70,6 @@ class HitObject {
     inline long getDelta() const { return m_iDelta; }
     inline long getApproachTime() const { return m_iApproachTime; }
     inline long getAutopilotDelta() const { return m_iAutopilotDelta; }
-    inline unsigned long long getSortHack() const { return m_iSortHack; }
 
     inline bool isVisible() const { return m_bVisible; }
     inline bool isFinished() const { return m_bFinished; }
@@ -100,7 +99,7 @@ class HitObject {
     float m_fHittableDimRGBColorMultiplierPercent;
     long m_iDelta;  // this must be signed
     long m_iApproachTime;
-    long m_iFadeInTime;      // extra time added before the approachTime to let the object smoothly become visible
+    long m_iFadeInTime;  // extra time added before the approachTime to let the object smoothly become visible
 
     int m_iStack;
 
@@ -111,8 +110,6 @@ class HitObject {
     bool m_bUseFadeInTimeAsApproachTime;
 
    private:
-    static unsigned long long sortHackCounter;
-
     static float lerp3f(float a, float b, float c, float percent);
 
     struct HITRESULTANIM {
@@ -127,6 +124,4 @@ class HitObject {
 
     HITRESULTANIM m_hitresultanim1;
     HITRESULTANIM m_hitresultanim2;
-
-    unsigned long long m_iSortHack;
 };

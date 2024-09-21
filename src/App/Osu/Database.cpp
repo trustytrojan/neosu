@@ -62,140 +62,61 @@ bool save_db(Packet *db, std::string path) {
 struct SortScoreByScore : public Database::SCORE_SORTING_COMPARATOR {
     virtual ~SortScoreByScore() { ; }
     bool operator()(FinishedScore const &a, FinishedScore const &b) const {
-        // first: score
-        unsigned long long score1 = a.score;
-        unsigned long long score2 = b.score;
-
-        // second: time
-        if(score1 == score2) {
-            score1 = a.unixTimestamp;
-            score2 = b.unixTimestamp;
-        }
-
-        // strict weak ordering!
-        if(score1 == score2) return a.sortHack > b.sortHack;
-
-        return score1 > score2;
+        if(a.score != b.score) return a.score > b.score;
+        if(a.unixTimestamp != b.unixTimestamp) return a.unixTimestamp > b.unixTimestamp;
+        return &a > &b;
     }
 };
 
 struct SortScoreByCombo : public Database::SCORE_SORTING_COMPARATOR {
     virtual ~SortScoreByCombo() { ; }
     bool operator()(FinishedScore const &a, FinishedScore const &b) const {
-        // first: combo
-        unsigned long long score1 = a.comboMax;
-        unsigned long long score2 = b.comboMax;
-
-        // second: score
-        if(score1 == score2) {
-            score1 = a.score;
-            score2 = b.score;
-        }
-
-        // third: time
-        if(score1 == score2) {
-            score1 = a.unixTimestamp;
-            score2 = b.unixTimestamp;
-        }
-
-        // strict weak ordering!
-        if(score1 == score2) return a.sortHack > b.sortHack;
-
-        return score1 > score2;
+        if(a.comboMax != b.comboMax) return a.comboMax > b.comboMax;
+        if(a.score != b.score) return a.score > b.score;
+        if(a.unixTimestamp != b.unixTimestamp) return a.unixTimestamp > b.unixTimestamp;
+        return &a > &b;
     }
 };
 
 struct SortScoreByDate : public Database::SCORE_SORTING_COMPARATOR {
     virtual ~SortScoreByDate() { ; }
     bool operator()(FinishedScore const &a, FinishedScore const &b) const {
-        // first: time
-        unsigned long long score1 = a.unixTimestamp;
-        unsigned long long score2 = b.unixTimestamp;
-
-        // strict weak ordering!
-        if(score1 == score2) return a.sortHack > b.sortHack;
-
-        return score1 > score2;
+        if(a.unixTimestamp != b.unixTimestamp) return a.unixTimestamp > b.unixTimestamp;
+        return &a > &b;
     }
 };
 
 struct SortScoreByMisses : public Database::SCORE_SORTING_COMPARATOR {
     virtual ~SortScoreByMisses() { ; }
     bool operator()(FinishedScore const &a, FinishedScore const &b) const {
-        // first: misses
-        unsigned long long score1 = b.numMisses;  // swapped (lower numMisses is better)
-        unsigned long long score2 = a.numMisses;
-
-        // second: score
-        if(score1 == score2) {
-            score1 = a.score;
-            score2 = b.score;
-        }
-
-        // third: time
-        if(score1 == score2) {
-            score1 = a.unixTimestamp;
-            score2 = b.unixTimestamp;
-        }
-
-        // strict weak ordering!
-        if(score1 == score2) return a.sortHack > b.sortHack;
-
-        return score1 > score2;
+        if(a.numMisses != b.numMisses) return a.numMisses < b.numMisses;
+        if(a.score != b.score) return a.score > b.score;
+        if(a.unixTimestamp != b.unixTimestamp) return a.unixTimestamp > b.unixTimestamp;
+        return &a > &b;
     }
 };
 
 struct SortScoreByAccuracy : public Database::SCORE_SORTING_COMPARATOR {
     virtual ~SortScoreByAccuracy() { ; }
     bool operator()(FinishedScore const &a, FinishedScore const &b) const {
-        // first: accuracy
-        unsigned long long score1 =
-            (unsigned long long)(LiveScore::calculateAccuracy(a.num300s, a.num100s, a.num50s, a.numMisses) * 10000.0f);
-        unsigned long long score2 =
-            (unsigned long long)(LiveScore::calculateAccuracy(b.num300s, b.num100s, b.num50s, b.numMisses) * 10000.0f);
-
-        // second: score
-        if(score1 == score2) {
-            score1 = a.score;
-            score2 = b.score;
-        }
-
-        // third: time
-        if(score1 == score2) {
-            score1 = a.unixTimestamp;
-            score2 = b.unixTimestamp;
-        }
-
-        // strict weak ordering!
-        if(score1 == score2) return a.sortHack > b.sortHack;
-
-        return score1 > score2;
+        auto a_acc = LiveScore::calculateAccuracy(a.num300s, a.num100s, a.num50s, a.numMisses);
+        auto b_acc = LiveScore::calculateAccuracy(b.num300s, b.num100s, b.num50s, b.numMisses);
+        if(a_acc != b_acc) return a_acc > b_acc;
+        if(a.score != b.score) return a.score > b.score;
+        if(a.unixTimestamp != b.unixTimestamp) return a.unixTimestamp > b.unixTimestamp;
+        return &a > &b;
     }
 };
 
 struct SortScoreByPP : public Database::SCORE_SORTING_COMPARATOR {
     virtual ~SortScoreByPP() { ; }
     bool operator()(FinishedScore const &a, FinishedScore const &b) const {
-        // first: pp
-        u64 score1 = (u64)max(a.get_pp() * 1000.0, 0.0);
-        u64 score2 = (u64)max(b.get_pp() * 1000.0, 0.0);
-
-        // second: score
-        if(score1 == score2) {
-            score1 = a.score;
-            score2 = b.score;
-        }
-
-        // third: time
-        if(score1 == score2) {
-            score1 = a.unixTimestamp;
-            score2 = b.unixTimestamp;
-        }
-
-        // strict weak ordering!
-        if(score1 == score2) return a.sortHack > b.sortHack;
-
-        return score1 > score2;
+        auto a_pp = max(a.get_pp() * 1000.0, 0.0);
+        auto b_pp = max(b.get_pp() * 1000.0, 0.0);
+        if(a_pp != b_pp) return a_pp > b_pp;
+        if(a.score != b.score) return a.score > b.score;
+        if(a.unixTimestamp != b.unixTimestamp) return a.unixTimestamp > b.unixTimestamp;
+        return &a > &b;
     }
 };
 
@@ -252,7 +173,6 @@ Database::Database() {
     m_iFolderCount = 0;
 
     m_bDidScoresChangeForStats = true;
-    m_iSortHackCounter = 0;
 
     m_prevPlayerStats.pp = 0.0f;
     m_prevPlayerStats.accuracy = 0.0f;
@@ -489,14 +409,10 @@ Database::PlayerPPScores Database::getPlayerPPScores(UString playerName) {
 
     struct ScoreSortComparator {
         bool operator()(FinishedScore const *a, FinishedScore const *b) const {
-            // sort by pp
-            // strict weak ordering!
             auto ppa = a->get_pp();
             auto ppb = b->get_pp();
-            if(ppa == ppb)
-                return a->sortHack < b->sortHack;
-            else
-                return ppa < ppb;
+            if(ppa != ppb) return ppa < ppb;
+            return a < b;
         }
     };
 
@@ -520,7 +436,6 @@ Database::PlayerPPScores Database::getPlayerPPScores(UString playerName) {
 
             foundValidScore = true;
             totalScore += score.score;
-            score.sortHack = m_iSortHackCounter++;
 
             if(score.get_pp() > prevPP || prevPP < 0.0f) {
                 prevPP = score.get_pp();
@@ -1550,7 +1465,6 @@ u32 Database::importOldNeosuScores() {
                 if(mod == UString("osu_mod_approach_different")) sc.mods.flags |= Replay::ModFlags::ApproachDifferent;
             }
 
-            sc.sortHack = m_iSortHackCounter++;
             sc.beatmap_hash = md5hash;
             sc.perfect = sc.comboMax >= sc.maxPossibleCombo;
             sc.grade = sc.calculate_grade();
@@ -1640,7 +1554,6 @@ u32 Database::importPeppyScores() {
             }
 
             if(gamemode == 0 && sc.bancho_score_id != 0) {
-                sc.sortHack = m_iSortHackCounter++;
                 sc.beatmap_hash = md5hash;
                 sc.grade = sc.calculate_grade();
 

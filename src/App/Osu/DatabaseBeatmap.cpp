@@ -23,14 +23,10 @@
 #include "SongBrowser/SongBrowser.h"
 #include "Spinner.h"
 
-unsigned long long DatabaseBeatmap::sortHackCounter = 0;
-
 DatabaseBeatmap::DatabaseBeatmap(std::string filePath, std::string folder, BeatmapType type) {
     m_sFilePath = filePath;
     m_sFolder = folder;
     m_type = type;
-
-    m_iSortHack = sortHackCounter++;
 
     // raw metadata (note the special default values)
 
@@ -65,9 +61,6 @@ DatabaseBeatmap::DatabaseBeatmap(std::string filePath, std::string folder, Beatm
     m_iNumSpinners = 0;
 
     // custom data
-
-    last_modification_time = ((std::numeric_limits<long long>::max)() / 2) + m_iSortHack;
-
     m_iLocalOffset = 0;
     m_iOnlineOffset = 0;
 }
@@ -160,7 +153,6 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
         std::istringstream ss("");
 
         // load the actual beatmap
-        unsigned long long timingPointSortHack = 0;
         int hitobjectsWithoutSpinnerCounter = 0;
         int colorCounter = 1;
         int colorOffset = 0;
@@ -255,8 +247,6 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
 
                                 t.timingChange = tpTimingChange == 1;
                                 t.kiai = tpKiai > 0;
-
-                                t.sortHack = timingPointSortHack++;
                             }
                             c.timingpoints.push_back(t);
                         } else if(sscanf(curLineChar, " %lf , %f", &tpOffset, &tpMSPerBeat) == 2) {
@@ -271,8 +261,6 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
 
                                 t.timingChange = true;
                                 t.kiai = false;
-
-                                t.sortHack = timingPointSortHack++;
                             }
                             c.timingpoints.push_back(t);
                         }
@@ -534,7 +522,6 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
         }
     };
 
-    unsigned long long sortHackCounter = 0;
     for(int i = 0; i < sliders.size(); i++) {
         if(dead.load()) {
             r.errorCode = 6;
@@ -601,7 +588,6 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
             s.scoringTimesForStarCalc.push_back(OsuDifficultyHitObject::SLIDER_SCORING_TIME{
                 .type = OsuDifficultyHitObject::SLIDER_SCORING_TIME::TYPE::REPEAT,
                 .time = time,
-                .sortHack = sortHackCounter++,
             });
         }
 
@@ -616,7 +602,6 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
                 s.scoringTimesForStarCalc.push_back(OsuDifficultyHitObject::SLIDER_SCORING_TIME{
                     .type = OsuDifficultyHitObject::SLIDER_SCORING_TIME::TYPE::TICK,
                     .time = time,
-                    .sortHack = sortHackCounter++,
                 });
             }
         }
@@ -629,7 +614,6 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
         s.scoringTimesForStarCalc.push_back(OsuDifficultyHitObject::SLIDER_SCORING_TIME{
             .type = OsuDifficultyHitObject::SLIDER_SCORING_TIME::TYPE::END,
             .time = time,
-            .sortHack = sortHackCounter++,
         });
 
         // 5) sort scoringTimes from earliest to latest
@@ -739,11 +723,8 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
     // sort hitobjects by time
     struct DiffHitObjectSortComparator {
         bool operator()(const OsuDifficultyHitObject &a, const OsuDifficultyHitObject &b) const {
-            // strict weak ordering!
-            if(a.time == b.time)
-                return a.sortHack < b.sortHack;
-            else
-                return a.time < b.time;
+            if(a.time != b.time) return a.time < b.time;
+            return &a < &b;
         }
     };
     std::sort(result.diffobjects.begin(), result.diffobjects.end(), DiffHitObjectSortComparator());
@@ -940,7 +921,6 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
     // load metadata
     bool foundAR = false;
     int curBlock = -1;
-    unsigned long long timingPointSortHack = 0;
     char stringBuffer[1024];
     std::string curLine;
 
@@ -1089,8 +1069,6 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
 
                         t.timingChange = tpTimingChange == 1;
                         t.kiai = tpKiai > 0;
-
-                        t.sortHack = timingPointSortHack++;
                     }
                     m_timingpoints.push_back(t);
                 } else if(sscanf(curLineChar, " %lf , %f", &tpOffset, &tpMSPerBeat) == 2) {
@@ -1105,8 +1083,6 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
 
                         t.timingChange = true;
                         t.kiai = false;
-
-                        t.sortHack = timingPointSortHack++;
                     }
                     m_timingpoints.push_back(t);
                 }
@@ -1246,7 +1222,7 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
         bool operator()(HitObject const *a, HitObject const *b) const {
             // strict weak ordering!
             if(a->click_time == b->click_time)
-                return a->getSortHack() < b->getSortHack();
+                return a < b;
             else
                 return a->click_time < b->click_time;
         }

@@ -40,8 +40,6 @@ class DatabaseBeatmap {
 
         bool timingChange;
         bool kiai;
-
-        unsigned long long sortHack;
     };
 
     struct BREAK {
@@ -190,8 +188,6 @@ class DatabaseBeatmap {
     inline std::string getFolder() const { return m_sFolder; }
     inline std::string getFilePath() const { return m_sFilePath; }
 
-    inline unsigned long long getSortHack() const { return m_iSortHack; }
-
     inline const std::vector<DatabaseBeatmap *> &getDifficulties() const {
         static std::vector<DatabaseBeatmap *> empty;
         return m_difficulties == NULL ? empty : *m_difficulties;
@@ -253,7 +249,7 @@ class DatabaseBeatmap {
 
     // custom data
 
-    long long last_modification_time;
+    i64 last_modification_time = 0;
 
     inline long getLocalOffset() const { return m_iLocalOffset; }
     inline long getOnlineOffset() const { return m_iOnlineOffset; }
@@ -327,8 +323,6 @@ class DatabaseBeatmap {
     friend class Database;
     friend class BackgroundImageHandler;
 
-    static unsigned long long sortHackCounter;
-
     static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string osuFilePath);
     static PRIMITIVE_CONTAINER loadPrimitiveObjects(const std::string osuFilePath, const std::atomic<bool> &dead);
     static CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT calculateSliderTimesClicksTicks(int beatmapVersion,
@@ -340,8 +334,6 @@ class DatabaseBeatmap {
         int beatmapVersion, std::vector<SLIDER> &sliders, zarray<TIMINGPOINT> &timingpoints, float sliderMultiplier,
         float sliderTickRate, const std::atomic<bool> &dead);
 
-    unsigned long long m_iSortHack;
-
     std::vector<DatabaseBeatmap *> *m_difficulties = NULL;
     BeatmapType m_type;
 
@@ -351,14 +343,14 @@ class DatabaseBeatmap {
 
     struct TimingPointSortComparator {
         bool operator()(DatabaseBeatmap::TIMINGPOINT const &a, DatabaseBeatmap::TIMINGPOINT const &b) const {
-            // first condition: offset
-            // second condition: if offset is the same, non-inherited timingpoints go before inherited timingpoints
+            if(a.offset != b.offset) return a.offset < b.offset;
 
-            // strict weak ordering!
-            if(a.offset == b.offset && ((a.msPerBeat >= 0 && b.msPerBeat < 0) == (b.msPerBeat >= 0 && a.msPerBeat < 0)))
-                return a.sortHack < b.sortHack;
-            else
-                return (a.offset < b.offset) || (a.offset == b.offset && a.msPerBeat >= 0 && b.msPerBeat < 0);
+            // non-inherited timingpoints go before inherited timingpoints
+            bool a_inherited = a.msPerBeat >= 0;
+            bool b_inherited = b.msPerBeat >= 0;
+            if(a_inherited != b_inherited) return a_inherited;
+
+            return &a < &b;
         }
     };
 };

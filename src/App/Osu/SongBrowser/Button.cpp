@@ -19,7 +19,6 @@ using namespace std;
 int Button::marginPixelsX = 9;
 int Button::marginPixelsY = 9;
 float Button::lastHoverSoundTime = 0;
-int Button::sortHackCounter = 0;
 
 // Color Button::inactiveDifficultyBackgroundColor = COLOR(255, 0, 150, 236); // blue
 
@@ -46,8 +45,6 @@ Button::Button(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu 
     m_fHoverOffsetAnimation = 0.0f;
     m_fCenterOffsetAnimation = 0.0f;
     m_fCenterOffsetVelocityAnimation = 0.0f;
-
-    m_iSortHack = sortHackCounter++;
     m_bIsSearchMatch = true;
 
     m_fHoverMoveAwayAnimation = 0.0f;

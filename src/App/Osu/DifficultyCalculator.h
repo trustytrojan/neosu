@@ -34,17 +34,12 @@ class OsuDifficultyHitObject {
 
         TYPE type;
         u32 time;
-
-        u64 sortHack;
     };
 
     struct SliderScoringTimeComparator {
         bool operator()(const SLIDER_SCORING_TIME &a, const SLIDER_SCORING_TIME &b) const {
-            // strict weak ordering!
-            if(a.time == b.time)
-                return a.sortHack < b.sortHack;
-            else
-                return a.time < b.time;
+            if(a.time != b.time) return a.time < b.time;
+            return &a < &b;
         }
     };
 
@@ -95,11 +90,6 @@ class OsuDifficultyHitObject {
 
     i32 stack;
     Vector2 originalPos;
-
-    u64 sortHack;
-
-   private:
-    static u64 sortHackCounter;
 };
 
 class DifficultyCalculator {

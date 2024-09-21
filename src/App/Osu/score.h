@@ -70,7 +70,6 @@ struct FinishedScore {
     int numHitObjects = -1;
     int numCircles = -1;
 
-    u64 sortHack;
     MD5Hash beatmap_hash;
     std::vector<LegacyReplay::Frame> replay;  // not always loaded
 

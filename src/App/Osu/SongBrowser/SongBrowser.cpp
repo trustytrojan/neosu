@@ -218,41 +218,41 @@ class NoRecordsSetElement : public CBaseUILabel {
 };
 
 bool sort_by_artist(SongButton const *a, SongButton const *b) {
-    if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
+    if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a < b;
 
     int res = strcasecmp(a->getDatabaseBeatmap()->getArtist().c_str(), b->getDatabaseBeatmap()->getArtist().c_str());
-    if(res == 0) return a->getSortHack() < b->getSortHack();
+    if(res == 0) return a < b;
     return res < 0;
 }
 
 bool sort_by_bpm(SongButton const *a, SongButton const *b) {
-    if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
+    if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a < b;
 
     int bpm1 = a->getDatabaseBeatmap()->getMostCommonBPM();
     int bpm2 = b->getDatabaseBeatmap()->getMostCommonBPM();
-    if(bpm1 == bpm2) return a->getSortHack() < b->getSortHack();
+    if(bpm1 == bpm2) return a < b;
     return bpm1 < bpm2;
 }
 
 bool sort_by_creator(SongButton const *a, SongButton const *b) {
-    if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
+    if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a < b;
 
     int res = strcasecmp(a->getDatabaseBeatmap()->getCreator().c_str(), b->getDatabaseBeatmap()->getCreator().c_str());
-    if(res == 0) return a->getSortHack() < b->getSortHack();
+    if(res == 0) return a < b;
     return res < 0;
 }
 
 bool sort_by_date_added(SongButton const *a, SongButton const *b) {
-    if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
+    if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a < b;
 
     long long time1 = a->getDatabaseBeatmap()->last_modification_time;
     long long time2 = b->getDatabaseBeatmap()->last_modification_time;
-    if(time1 == time2) return a->getSortHack() > b->getSortHack();
+    if(time1 == time2) return a > b;
     return time1 > time2;
 }
 
 bool sort_by_difficulty(SongButton const *a, SongButton const *b) {
-    if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
+    if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a < b;
 
     float stars1 = a->getDatabaseBeatmap()->getStarsNomod();
     float stars2 = b->getDatabaseBeatmap()->getStarsNomod();
@@ -266,28 +266,28 @@ bool sort_by_difficulty(SongButton const *a, SongButton const *b) {
                   (max(b->getDatabaseBeatmap()->getMostCommonBPM(), 1));
     if(diff1 != diff2) return diff1 < diff2;
 
-    return a->getSortHack() < b->getSortHack();
+    return a < b;
 }
 
 bool sort_by_length(SongButton const *a, SongButton const *b) {
-    if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
+    if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a < b;
 
     unsigned long length1 = a->getDatabaseBeatmap()->getLengthMS();
     unsigned long length2 = b->getDatabaseBeatmap()->getLengthMS();
-    if(length1 == length2) return a->getSortHack() < b->getSortHack();
+    if(length1 == length2) return a < b;
     return length1 < length2;
 }
 
 bool sort_by_title(SongButton const *a, SongButton const *b) {
-    if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a->getSortHack() < b->getSortHack();
+    if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a < b;
 
     int res = strcasecmp(a->getDatabaseBeatmap()->getTitle().c_str(), b->getDatabaseBeatmap()->getTitle().c_str());
-    if(res == 0) return a->getSortHack() < b->getSortHack();
+    if(res == 0) return a < b;
     return res < 0;
 }
 
 bool sort_by_grade(SongButton const *a, SongButton const *b) {
-    if(a->m_grade == b->m_grade) return a->getSortHack() < b->getSortHack();
+    if(a->m_grade == b->m_grade) return a < b;
     return a->m_grade < b->m_grade;
 }
 
@@ -3215,7 +3215,7 @@ void SongBrowser::onSortChangeInt(UString text, bool autoScroll) {
     // these are always sorted alphabetically by name
     std::sort(m_collectionButtons.begin(), m_collectionButtons.end(), [](CollectionButton *a, CollectionButton *b) {
         int res = strcasecmp(a->getCollectionName().c_str(), b->getCollectionName().c_str());
-        if(res == 0) return a->getSortHack() < b->getSortHack();
+        if(res == 0) return a < b;
         return res < 0;
     });
 

@@ -37,7 +37,6 @@ class Button : public CBaseUIButton {
     inline Vector2 getActualSize() const { return m_vSize - 2 * getActualOffset(); }
     inline Vector2 getActualPos() const { return m_vPos + getActualOffset(); }
     inline std::vector<SongButton *> &getChildren() { return m_children; }
-    inline int getSortHack() const { return m_iSortHack; }
 
     virtual DatabaseBeatmap *getDatabaseBeatmap() const { return NULL; }
     virtual Color getActiveBackgroundColor() const;
@@ -68,7 +67,6 @@ class Button : public CBaseUIButton {
     static int marginPixelsX;
     static int marginPixelsY;
     static float lastHoverSoundTime;
-    static int sortHackCounter;
 
     enum class MOVE_AWAY_STATE { MOVE_CENTER, MOVE_UP, MOVE_DOWN };
 
@@ -89,7 +87,6 @@ class Button : public CBaseUIButton {
     float m_fCenterOffsetAnimation;
     float m_fCenterOffsetVelocityAnimation;
 
-    int m_iSortHack;
     std::atomic<bool> m_bIsSearchMatch;
 
     bool m_bHideIfSelected;

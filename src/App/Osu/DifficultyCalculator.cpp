@@ -10,8 +10,6 @@
 
 using namespace std;
 
-u64 OsuDifficultyHitObject::sortHackCounter = 0;
-
 OsuDifficultyHitObject::OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time)
     : OsuDifficultyHitObject(type, pos, time, time) {}
 
@@ -39,7 +37,6 @@ OsuDifficultyHitObject::OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time,
 
     this->stack = 0;
     this->originalPos = this->pos;
-    this->sortHack = sortHackCounter++;
 
     // build slider curve, if this is a (valid) slider
     if(this->type == TYPE::SLIDER && controlPoints.size() > 1) {
@@ -93,7 +90,6 @@ OsuDifficultyHitObject::OsuDifficultyHitObject(OsuDifficultyHitObject &&dobj) {
 
     this->stack = dobj.stack;
     this->originalPos = dobj.originalPos;
-    this->sortHack = dobj.sortHack;
 
     // reset source
     dobj.curve = NULL;
@@ -119,7 +115,6 @@ OsuDifficultyHitObject &OsuDifficultyHitObject::operator=(OsuDifficultyHitObject
 
     this->stack = dobj.stack;
     this->originalPos = dobj.originalPos;
-    this->sortHack = dobj.sortHack;
 
     // reset source
     dobj.curve = NULL;
