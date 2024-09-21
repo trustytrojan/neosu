@@ -15,9 +15,11 @@ using namespace std;
 
 Spinner::Spinner(int x, int y, long time, int sampleType, bool isEndOfCombo, long endTime, BeatmapInterface *beatmap)
     : HitObject(time, sampleType, -1, isEndOfCombo, -1, -1, beatmap) {
+    type = HitObjectType::SPINNER;
+
     m_vOriginalRawPos = Vector2(x, y);
     m_vRawPos = m_vOriginalRawPos;
-    m_iObjectDuration = endTime - time;
+    duration = endTime - time;
     m_bClickedOnce = false;
     m_fRotationsNeeded = -1.0f;
 
@@ -63,7 +65,7 @@ void Spinner::draw(Graphics *g) {
     HitObject::draw(g);
     const float fadeOutMultiplier = cv_spinner_fade_out_time_multiplier.getFloat();
     const long fadeOutTimeMS = (long)(GameRules::getFadeOutTime(bm) * 1000.0f * fadeOutMultiplier);
-    const long deltaEnd = m_iDelta + m_iObjectDuration;
+    const long deltaEnd = m_iDelta + duration;
     if((m_bFinished || !m_bVisible) && (deltaEnd > 0 || (deltaEnd < -fadeOutTimeMS))) return;
 
     Skin *skin = bm->getSkin();
@@ -271,7 +273,7 @@ void Spinner::update(long curPos, f64 frame_time) {
     // if we have not been clicked yet, check if we are in the timeframe of a miss, also handle auto and relax
     if(!m_bFinished) {
         // handle spinner ending
-        if(curPos >= m_iTime + m_iObjectDuration) {
+        if(curPos >= click_time + duration) {
             onHit();
             return;
         }
@@ -281,14 +283,14 @@ void Spinner::update(long curPos, f64 frame_time) {
             return;
         }
 
-        m_fRotationsNeeded = GameRules::getSpinnerRotationsForSpeedMultiplier(bi, m_iObjectDuration);
+        m_fRotationsNeeded = GameRules::getSpinnerRotationsForSpeedMultiplier(bi, duration);
 
         const float DELTA_UPDATE_TIME = (frame_time * 1000.0f);
         const float AUTO_MULTIPLIER = (1.0f / 20.0f);
 
         // scale percent calculation
-        long delta = (long)m_iTime - (long)curPos;
-        m_fPercent = 1.0f - clamp<float>((float)delta / -(float)(m_iObjectDuration), 0.0f, 1.0f);
+        long delta = (long)click_time - (long)curPos;
+        m_fPercent = 1.0f - clamp<float>((float)delta / -(float)(duration), 0.0f, 1.0f);
 
         // handle auto, mouse spinning movement
         float angleDiff = 0;
@@ -388,7 +390,7 @@ void Spinner::onReset(long curPos) {
         m_storedDeltaAngles[i] = 0.0f;
     }
 
-    if(curPos > m_iTime + m_iObjectDuration)
+    if(curPos > click_time + duration)
         m_bFinished = true;
     else
         m_bFinished = false;
@@ -408,7 +410,7 @@ void Spinner::onHit() {
 
     // sound
     if(bm != NULL && result != LiveScore::HIT::HIT_MISS) {
-        if(cv_timingpoints_force.getBool()) bm->updateTimingPoints(m_iTime + m_iObjectDuration);
+        if(cv_timingpoints_force.getBool()) bm->updateTimingPoints(click_time + duration);
 
         const Vector2 osuCoords = bm->pixels2OsuCoords(bm->osuCoords2Pixels(m_vRawPos));
 
@@ -466,12 +468,12 @@ void Spinner::rotate(float rad) {
 Vector2 Spinner::getAutoCursorPos(long curPos) {
     // calculate point
     long delta = 0;
-    if(curPos <= m_iTime)
+    if(curPos <= click_time)
         delta = 0;
-    else if(curPos >= m_iTime + m_iObjectDuration)
-        delta = m_iObjectDuration;
+    else if(curPos >= click_time + duration)
+        delta = duration;
     else
-        delta = curPos - m_iTime;
+        delta = curPos - click_time;
 
     Vector2 actualPos = bi->osuCoords2Pixels(m_vRawPos);
     const float AUTO_MULTIPLIER = (1.0f / 20.0f);

@@ -122,7 +122,9 @@ void InfoLabel::draw(Graphics *g) {
 
     // draw song info (length, bpm, objects)
     const Color songInfoColor =
-        (osu->getSpeedMultiplier() != 1.0f ? (osu->getSpeedMultiplier() > 1.0f ? 0xffff7f7f : 0xffadd8e6) : 0xffffffff);
+        (osu->getSelectedBeatmap()->getSpeedMultiplier() != 1.0f
+             ? (osu->getSelectedBeatmap()->getSpeedMultiplier() > 1.0f ? 0xffff7f7f : 0xffadd8e6)
+             : 0xffffffff);
     g->pushTransform();
     {
         const float scale = m_fSongInfoScale * globalScale * 0.9f;
@@ -191,7 +193,7 @@ void InfoLabel::mouse_update(bool *propagate_clicks) {
     if(isMouseInside() && !osu->getOptionsMenu()->isMouseInside()) {
         Beatmap *beatmap = osu->getSelectedBeatmap();
         if(beatmap != NULL) {
-            const float speedMultiplierInv = (1.0f / osu->getSpeedMultiplier());
+            const float speedMultiplierInv = (1.0f / beatmap->getSpeedMultiplier());
 
             const float approachTimeRoundedCompensated = ((int)beatmap->getApproachTime()) * speedMultiplierInv;
             const float hitWindow300RoundedCompensated = ((int)beatmap->getHitWindow300() - 0.5f) * speedMultiplierInv;
@@ -220,13 +222,13 @@ void InfoLabel::mouse_update(bool *propagate_clicks) {
 
                     const float opm =
                         (lengthMS > 0 ? ((float)numObjects / (float)(lengthMS / 1000.0f / 60.0f)) : 0.0f) *
-                        osu->getSpeedMultiplier();
+                        beatmap->getSpeedMultiplier();
                     const float cpm =
                         (lengthMS > 0 ? ((float)numCircles / (float)(lengthMS / 1000.0f / 60.0f)) : 0.0f) *
-                        osu->getSpeedMultiplier();
+                        beatmap->getSpeedMultiplier();
                     const float spm =
                         (lengthMS > 0 ? ((float)numSliders / (float)(lengthMS / 1000.0f / 60.0f)) : 0.0f) *
-                        osu->getSpeedMultiplier();
+                        beatmap->getSpeedMultiplier();
 
                     osu->getTooltipOverlay()->addLine(UString::format("Circles: %i, Sliders: %i, Spinners: %i",
                                                                       numCircles, numSliders,
@@ -269,14 +271,15 @@ void InfoLabel::setFromBeatmap(Beatmap *beatmap, DatabaseBeatmap *diff2) {
 
 UString InfoLabel::buildSongInfoString() {
     unsigned long lengthMS = m_iLengthMS;
+    auto speed = osu->getSelectedBeatmap()->getSpeedMultiplier();
 
-    const unsigned long fullSeconds = (lengthMS * (1.0 / osu->getSpeedMultiplier())) / 1000.0;
+    const unsigned long fullSeconds = (lengthMS * (1.0 / speed)) / 1000.0;
     const int minutes = fullSeconds / 60;
     const int seconds = fullSeconds % 60;
 
-    const int minBPM = m_iMinBPM * osu->getSpeedMultiplier();
-    const int maxBPM = m_iMaxBPM * osu->getSpeedMultiplier();
-    const int mostCommonBPM = m_iMostCommonBPM * osu->getSpeedMultiplier();
+    const int minBPM = m_iMinBPM * speed;
+    const int maxBPM = m_iMaxBPM * speed;
+    const int mostCommonBPM = m_iMostCommonBPM * speed;
 
     int numObjects = m_iNumObjects;
     if(m_iMinBPM == m_iMaxBPM) {
@@ -300,8 +303,8 @@ UString InfoLabel::buildDiffInfoString() {
     Beatmap *beatmap = osu->getSelectedBeatmap();
     if(beatmap != NULL) {
         CS = beatmap->getCS();
-        AR = beatmap->getApproachRateForSpeedMultiplier(osu->getSpeedMultiplier());
-        OD = beatmap->getOverallDifficultyForSpeedMultiplier(osu->getSpeedMultiplier());
+        AR = beatmap->getApproachRateForSpeedMultiplier();
+        OD = beatmap->getOverallDifficultyForSpeedMultiplier();
         HP = beatmap->getHP();
 
         auto diff2 = beatmap->getSelectedDifficulty2();

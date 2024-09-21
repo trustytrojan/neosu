@@ -73,6 +73,7 @@ class SimulatedBeatmap : public BeatmapInterface {
     virtual bool isContinueScheduled() const { return false; }
     virtual bool isPaused() const { return false; }
     virtual bool isPlaying() const { return true; }
+    virtual Replay::Mods getMods() const { return mods; }
     virtual i32 getModsLegacy() const { return mods.to_legacy(); }
     virtual u32 getScoreV1DifficultyMultiplier() const;
     virtual f32 getSpeedMultiplier() const { return mods.speed; }

@@ -391,6 +391,8 @@ void Circle::drawHitCircleNumber(Graphics *g, Skin *skin, float numberScale, flo
 Circle::Circle(int x, int y, long time, int sampleType, int comboNumber, bool isEndOfCombo, int colorCounter,
                int colorOffset, BeatmapInterface *beatmap)
     : HitObject(time, sampleType, comboNumber, isEndOfCombo, colorCounter, colorOffset, beatmap) {
+    type = HitObjectType::CIRCLE;
+
     m_vOriginalRawPos = Vector2(x, y);
     m_vRawPos = m_vOriginalRawPos;
     m_bWaiting = false;
@@ -420,7 +422,7 @@ void Circle::draw(Graphics *g) {
             g->scale((1.0f + scale * foscale), (1.0f + scale * foscale));
             skin->getHitCircleOverlay2()->setAnimationTimeOffset(
                 skin->getAnimationSpeed(),
-                !bm->isInMafhamRenderChunk() ? m_iTime - m_iApproachTime : bm->getCurMusicPosWithOffsets());
+                !bm->isInMafhamRenderChunk() ? click_time - m_iApproachTime : bm->getCurMusicPosWithOffsets());
             drawCircle(g, bm, m_vRawPos, m_iComboNumber, m_iColorCounter, m_iColorOffset, 1.0f, 1.0f, alpha, alpha,
                        drawNumber);
         }
@@ -450,7 +452,7 @@ void Circle::draw(Graphics *g) {
     }
     skin->getHitCircleOverlay2()->setAnimationTimeOffset(
         skin->getAnimationSpeed(),
-        !bm->isInMafhamRenderChunk() ? m_iTime - m_iApproachTime : bm->getCurMusicPosWithOffsets());
+        !bm->isInMafhamRenderChunk() ? click_time - m_iApproachTime : bm->getCurMusicPosWithOffsets());
     drawCircle(g, bm, shakeCorrectedPos, m_iComboNumber, m_iColorCounter, m_iColorOffset,
                m_fHittableDimRGBColorMultiplierPercent, m_bWaiting && !hd ? 1.0f : m_fApproachScale,
                m_bWaiting && !hd ? 1.0f : m_fAlpha, m_bWaiting && !hd ? 1.0f : m_fAlpha, true,
@@ -471,7 +473,7 @@ void Circle::draw2(Graphics *g) {
     if(cv_bug_flicker_log.getBool()) {
         const float approachCircleImageScale =
             bm->m_fHitcircleDiameter / (128.0f * (bm->getSkin()->isApproachCircle2x() ? 2.0f : 1.0f));
-        debugLog("m_iTime = %ld, aScale = %f, iScale = %f\n", m_iTime, m_fApproachScale, approachCircleImageScale);
+        debugLog("click_time = %ld, aScale = %f, iScale = %f\n", click_time, m_fApproachScale, approachCircleImageScale);
     }
 
     drawApproachCircle(g, bm, m_vRawPos, m_iComboNumber, m_iColorCounter, m_iColorOffset,
@@ -481,41 +483,45 @@ void Circle::draw2(Graphics *g) {
 
 void Circle::update(long curPos, f64 frame_time) {
     HitObject::update(curPos, frame_time);
+    if(m_bFinished) return;
 
-    // if we have not been clicked yet, check if we are in the timeframe of a miss, also handle auto and relax
-    if(!m_bFinished) {
-        if((bi->getModsLegacy() & LegacyFlags::Autoplay)) {
-            if(curPos >= m_iTime) onHit(LiveScore::HIT::HIT_300, 0);
-        } else {
-            const long delta = curPos - m_iTime;
+    const auto mods = bi->getMods();
+    const long delta = curPos - click_time;
 
-            if((bi->getModsLegacy() & LegacyFlags::Relax)) {
-                if(curPos >= m_iTime + (long)cv_relax_offset.getInt() && !bi->isPaused() &&
-                   !bi->isContinueScheduled()) {
-                    const Vector2 pos = bi->osuCoords2Pixels(m_vRawPos);
-                    const float cursorDelta = (bi->getCursorPos() - pos).length();
-                    if((cursorDelta < bi->m_fHitcircleDiameter / 2.0f && (bi->getModsLegacy() & LegacyFlags::Relax))) {
-                        LiveScore::HIT result = bi->getHitResult(delta);
+    if(mods.flags & Replay::ModFlags::Autoplay) {
+        if(curPos >= click_time) {
+            onHit(LiveScore::HIT::HIT_300, 0);
+        }
+        return;
+    }
 
-                        if(result != LiveScore::HIT::HIT_NULL) {
-                            const float targetDelta = cursorDelta / (bi->m_fHitcircleDiameter / 2.0f);
-                            const float targetAngle =
-                                rad2deg(atan2(bi->getCursorPos().y - pos.y, bi->getCursorPos().x - pos.x));
+    if(mods.flags & Replay::ModFlags::Relax) {
+        if(curPos >= click_time + (long)cv_relax_offset.getInt() && !bi->isPaused() && !bi->isContinueScheduled()) {
+            const Vector2 pos = bi->osuCoords2Pixels(m_vRawPos);
+            const float cursorDelta = (bi->getCursorPos() - pos).length();
+            if((cursorDelta < bi->m_fHitcircleDiameter / 2.0f && (bi->getModsLegacy() & LegacyFlags::Relax))) {
+                LiveScore::HIT result = bi->getHitResult(delta);
 
-                            onHit(result, delta, targetDelta, targetAngle);
-                        }
-                    }
+                if(result != LiveScore::HIT::HIT_NULL) {
+                    const float targetDelta = cursorDelta / (bi->m_fHitcircleDiameter / 2.0f);
+                    const float targetAngle =
+                        rad2deg(atan2(bi->getCursorPos().y - pos.y, bi->getCursorPos().x - pos.x));
+
+                    onHit(result, delta, targetDelta, targetAngle);
                 }
             }
-
-            if(delta >= 0) {
-                m_bWaiting = true;
-
-                // if this is a miss after waiting
-                if(delta > (long)bi->getHitWindow50()) onHit(LiveScore::HIT::HIT_MISS, delta);
-            } else
-                m_bWaiting = false;
         }
+    }
+
+    if(delta >= 0) {
+        m_bWaiting = true;
+
+        // if this is a miss after waiting
+        if(delta > (long)bi->getHitWindow50()) {
+            onHit(LiveScore::HIT::HIT_MISS, delta);
+        }
+    } else {
+        m_bWaiting = false;
     }
 }
 
@@ -528,7 +534,7 @@ void Circle::updateStackPosition(float stackOffset) {
 void Circle::miss(long curPos) {
     if(m_bFinished) return;
 
-    const long delta = curPos - m_iTime;
+    const long delta = curPos - click_time;
 
     onHit(LiveScore::HIT::HIT_MISS, delta);
 }
@@ -547,7 +553,7 @@ void Circle::onClickEvent(std::vector<Click> &clicks) {
             return;  // ignore click event completely
         }
 
-        const long delta = clicks[0].tms - (long)m_iTime;
+        const long delta = clicks[0].click_time - (long)click_time;
 
         LiveScore::HIT result = bi->getHitResult(delta);
         if(result != LiveScore::HIT::HIT_NULL) {
@@ -563,7 +569,7 @@ void Circle::onClickEvent(std::vector<Click> &clicks) {
 void Circle::onHit(LiveScore::HIT result, long delta, float targetDelta, float targetAngle) {
     // sound and hit animation
     if(bm != NULL && result != LiveScore::HIT::HIT_MISS) {
-        if(cv_timingpoints_force.getBool()) bm->updateTimingPoints(m_iTime);
+        if(cv_timingpoints_force.getBool()) bm->updateTimingPoints(click_time);
 
         const Vector2 osuCoords = bm->pixels2OsuCoords(bm->osuCoords2Pixels(m_vRawPos));
 
@@ -589,7 +595,7 @@ void Circle::onReset(long curPos) {
         anim->deleteExistingAnimation(&m_fHitAnimation);
     }
 
-    if(m_iTime > curPos) {
+    if(click_time > curPos) {
         m_bFinished = false;
         m_fHitAnimation = 0.0f;
     } else {

@@ -139,11 +139,11 @@ class GameRules {
         return (int)((((float)spinnerDuration / 1000.0f * getSpinnerSpinsPerSecond(beatmap)) * 0.5f) *
                      (min(1.0f / speedMultiplier, 1.0f)));  // Mc
     }
-    static float getSpinnerRotationsForSpeedMultiplier(
-        BeatmapInterface *beatmap,
-        long spinnerDuration)  // spinner length compensated rotations // respect all mods and overrides
-    {
-        return getSpinnerRotationsForSpeedMultiplier(beatmap, spinnerDuration, osu->getSpeedMultiplier());
+
+    // spinner length compensated rotations
+    // respect all mods and overrides
+    static float getSpinnerRotationsForSpeedMultiplier(BeatmapInterface *beatmap, long spinnerDuration) {
+        return getSpinnerRotationsForSpeedMultiplier(beatmap, spinnerDuration, beatmap->getSpeedMultiplier());
     }
 
     //*********************//

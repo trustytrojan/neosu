@@ -9,8 +9,6 @@ class Spinner : public HitObject {
     virtual void draw(Graphics *g);
     virtual void update(long curPos, f64 frame_time);
 
-    HitObjectType type = HitObjectType::SPINNER;
-
     void updateStackPosition(float stackOffset) { ; }
     void miss(long curPos) { ; }
 

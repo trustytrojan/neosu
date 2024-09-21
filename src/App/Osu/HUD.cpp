@@ -89,16 +89,15 @@ void HUD::draw(Graphics *g) {
                 g->translate(0, beatmap->m_fHitcircleDiameter *
                                     (1.0f / (cv_hud_scale.getFloat() * cv_hud_statistics_scale.getFloat())));
 
-            drawStatistics(
-                g, osu->getScore()->getNumMisses(), osu->getScore()->getNumSliderBreaks(), beatmap->m_iMaxPossibleCombo,
-                live_stars, osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.total_stars,
-                beatmap->getMostCommonBPM(), beatmap->getApproachRateForSpeedMultiplier(beatmap->getSpeedMultiplier()),
-                beatmap->getCS(), beatmap->getOverallDifficultyForSpeedMultiplier(beatmap->getSpeedMultiplier()),
-                beatmap->getHP(), beatmap->getNPS(), beatmap->getND(), osu->getScore()->getUnstableRate(), live_pp,
-                osu->getSelectedBeatmap()->getSelectedDifficulty2()->m_pp_info.pp,
-                ((int)beatmap->getHitWindow300() - 0.5f) *
-                    (1.0f / osu->getSpeedMultiplier()),  // see InfoLabel::update()
-                osu->getScore()->getHitErrorAvgCustomMin(), osu->getScore()->getHitErrorAvgCustomMax());
+            auto diff2 = beatmap->getSelectedDifficulty2();
+            drawStatistics(g, osu->getScore()->getNumMisses(), osu->getScore()->getNumSliderBreaks(),
+                           beatmap->m_iMaxPossibleCombo, live_stars, diff2->m_pp_info.total_stars,
+                           beatmap->getMostCommonBPM(), beatmap->getApproachRateForSpeedMultiplier(), beatmap->getCS(),
+                           beatmap->getOverallDifficultyForSpeedMultiplier(), beatmap->getHP(), beatmap->getNPS(),
+                           beatmap->getND(), osu->getScore()->getUnstableRate(), live_pp, diff2->m_pp_info.pp,
+                           ((int)beatmap->getHitWindow300() - 0.5f) *
+                               (1.0f / beatmap->getSpeedMultiplier()),  // see InfoLabel::update()
+                           osu->getScore()->getHitErrorAvgCustomMin(), osu->getScore()->getHitErrorAvgCustomMax());
         }
         g->popTransform();
 
@@ -2030,7 +2029,7 @@ void HUD::drawScrubbingTimeline(Graphics *g, unsigned long beatmapTime, unsigned
     if(cv_draw_scrubbing_timeline_strain_graph.getBool()) {
         const std::vector<double> &aimStrains = osu->getSelectedBeatmap()->m_aimStrains;
         const std::vector<double> &speedStrains = osu->getSelectedBeatmap()->m_speedStrains;
-        const float speedMultiplier = osu->getSpeedMultiplier();
+        const float speedMultiplier = osu->getSelectedBeatmap()->getSpeedMultiplier();
 
         if(aimStrains.size() > 0 && aimStrains.size() == speedStrains.size()) {
             const float strainStepMS = 400.0f * speedMultiplier;

@@ -1245,18 +1245,18 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
     struct HitObjectSortComparator {
         bool operator()(HitObject const *a, HitObject const *b) const {
             // strict weak ordering!
-            if(a->getTime() == b->getTime())
+            if(a->click_time == b->click_time)
                 return a->getSortHack() < b->getSortHack();
             else
-                return a->getTime() < b->getTime();
+                return a->click_time < b->click_time;
         }
     };
     std::sort(result.hitobjects.begin(), result.hitobjects.end(), HitObjectSortComparator());
 
     // update beatmap length stat
     if(databaseBeatmap->m_iLengthMS == 0 && result.hitobjects.size() > 0)
-        databaseBeatmap->m_iLengthMS = result.hitobjects[result.hitobjects.size() - 1]->getTime() +
-                                       result.hitobjects[result.hitobjects.size() - 1]->getDuration();
+        databaseBeatmap->m_iLengthMS = result.hitobjects[result.hitobjects.size() - 1]->click_time +
+                                       result.hitobjects[result.hitobjects.size() - 1]->duration;
 
     // set isEndOfCombo + precalculate Score v2 combo portion maximum
     if(beatmap != NULL) {

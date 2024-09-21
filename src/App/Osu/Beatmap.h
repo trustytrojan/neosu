@@ -19,7 +19,7 @@ class DatabaseBeatmap;
 class SimulatedBeatmap;
 
 struct Click {
-    long tms;
+    long click_time;
     Vector2 pos;
 };
 
@@ -215,6 +215,7 @@ class Beatmap : public BeatmapInterface {
     virtual bool isKey1Down() const;
     virtual bool isKey2Down() const;
     virtual bool isClickHeld() const;
+    virtual Replay::Mods getMods() const;
     virtual i32 getModsLegacy() const;
 
     std::string getTitle() const;

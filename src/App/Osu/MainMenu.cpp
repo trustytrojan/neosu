@@ -355,7 +355,7 @@ void MainMenu::draw(Graphics *g) {
 
         const long curMusicPos =
             (long)osu->getSelectedBeatmap()->getMusic()->getPositionMS() +
-            (long)(cv_universal_offset.getFloat() * osu->getSpeedMultiplier()) +
+            (long)(cv_universal_offset.getFloat() * osu->getSelectedBeatmap()->getSpeedMultiplier()) +
             (long)cv_universal_offset_hardcoded.getInt() -
             osu->getSelectedBeatmap()->getSelectedDifficulty2()->getLocalOffset() -
             osu->getSelectedBeatmap()->getSelectedDifficulty2()->getOnlineOffset() -

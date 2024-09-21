@@ -22,38 +22,38 @@ f32 BeatmapInterface::getHitWindow50() {
                                          GameRules::getMaxHitWindow50());
 }
 
-f32 BeatmapInterface::getApproachRateForSpeedMultiplier(f32 speedMultiplier) {
-    return GameRules::mapDifficultyRangeInv((f32)getApproachTime() * (1.0f / speedMultiplier),
+f32 BeatmapInterface::getApproachRateForSpeedMultiplier() {
+    return GameRules::mapDifficultyRangeInv((f32)getApproachTime() * (1.0f / getSpeedMultiplier()),
                                             GameRules::getMinApproachTime(), GameRules::getMidApproachTime(),
                                             GameRules::getMaxApproachTime());
 }
 
-f32 BeatmapInterface::getRawApproachRateForSpeedMultiplier(f32 speedMultiplier) {
-    return GameRules::mapDifficultyRangeInv((f32)getRawApproachTime() * (1.0f / speedMultiplier),
+f32 BeatmapInterface::getRawApproachRateForSpeedMultiplier() {
+    return GameRules::mapDifficultyRangeInv((f32)getRawApproachTime() * (1.0f / getSpeedMultiplier()),
                                             GameRules::getMinApproachTime(), GameRules::getMidApproachTime(),
                                             GameRules::getMaxApproachTime());
 }
 
-f32 BeatmapInterface::getConstantApproachRateForSpeedMultiplier(f32 speedMultiplier) {
-    return GameRules::mapDifficultyRangeInv((f32)getRawApproachTime() * speedMultiplier,
+f32 BeatmapInterface::getConstantApproachRateForSpeedMultiplier() {
+    return GameRules::mapDifficultyRangeInv((f32)getRawApproachTime() * getSpeedMultiplier(),
                                             GameRules::getMinApproachTime(), GameRules::getMidApproachTime(),
                                             GameRules::getMaxApproachTime());
 }
 
-f32 BeatmapInterface::getOverallDifficultyForSpeedMultiplier(f32 speedMultiplier) {
-    return GameRules::mapDifficultyRangeInv((f32)getHitWindow300() * (1.0f / speedMultiplier),
+f32 BeatmapInterface::getOverallDifficultyForSpeedMultiplier() {
+    return GameRules::mapDifficultyRangeInv((f32)getHitWindow300() * (1.0f / getSpeedMultiplier()),
                                             GameRules::getMinHitWindow300(), GameRules::getMidHitWindow300(),
                                             GameRules::getMaxHitWindow300());
 }
 
-f32 BeatmapInterface::getRawOverallDifficultyForSpeedMultiplier(f32 speedMultiplier) {
-    return GameRules::mapDifficultyRangeInv((f32)getRawHitWindow300() * (1.0f / speedMultiplier),
+f32 BeatmapInterface::getRawOverallDifficultyForSpeedMultiplier() {
+    return GameRules::mapDifficultyRangeInv((f32)getRawHitWindow300() * (1.0f / getSpeedMultiplier()),
                                             GameRules::getMinHitWindow300(), GameRules::getMidHitWindow300(),
                                             GameRules::getMaxHitWindow300());
 }
 
-f32 BeatmapInterface::getConstantOverallDifficultyForSpeedMultiplier(f32 speedMultiplier) {
-    return GameRules::mapDifficultyRangeInv((f32)getRawHitWindow300() * speedMultiplier,
+f32 BeatmapInterface::getConstantOverallDifficultyForSpeedMultiplier() {
+    return GameRules::mapDifficultyRangeInv((f32)getRawHitWindow300() * getSpeedMultiplier(),
                                             GameRules::getMinHitWindow300(), GameRules::getMidHitWindow300(),
                                             GameRules::getMaxHitWindow300());
 }

@@ -69,6 +69,8 @@ static void run_sct() {
 }
 
 void sct_calc(std::vector<FinishedScore> scores_to_calc) {
+    return;  // TODO @kiwec: disabled for now
+
     sct_abort();
     if(scores_to_calc.empty()) return;
 

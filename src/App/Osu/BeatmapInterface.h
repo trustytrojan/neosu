@@ -1,5 +1,5 @@
 #pragma once
-#include "cbase.h"
+#include "Replay.h"
 #include "score.h"
 
 class HitObject;
@@ -28,6 +28,7 @@ class BeatmapInterface {
     virtual void addSliderBreak() = 0;
     virtual u32 getScoreV1DifficultyMultiplier() const = 0;
 
+    virtual Replay::Mods getMods() const = 0;
     virtual i32 getModsLegacy() const = 0;
     virtual f32 getSpeedMultiplier() const = 0;
     virtual f32 getRawAR() const = 0;
@@ -71,10 +72,10 @@ class BeatmapInterface {
     f32 getRawHitWindow300();
     f32 getHitWindow100();
     f32 getHitWindow50();
-    f32 getApproachRateForSpeedMultiplier(f32 speedMultiplier);
-    f32 getRawApproachRateForSpeedMultiplier(f32 speedMultiplier);
-    f32 getConstantApproachRateForSpeedMultiplier(f32 speedMultiplier);
-    f32 getOverallDifficultyForSpeedMultiplier(f32 speedMultiplier);
-    f32 getRawOverallDifficultyForSpeedMultiplier(f32 speedMultiplier);
-    f32 getConstantOverallDifficultyForSpeedMultiplier(f32 speedMultiplier);
+    f32 getApproachRateForSpeedMultiplier();
+    f32 getRawApproachRateForSpeedMultiplier();
+    f32 getConstantApproachRateForSpeedMultiplier();
+    f32 getOverallDifficultyForSpeedMultiplier();
+    f32 getRawOverallDifficultyForSpeedMultiplier();
+    f32 getConstantOverallDifficultyForSpeedMultiplier();
 };

@@ -22,11 +22,13 @@
 
 using namespace std;
 
-Slider::Slider(char type, int repeat, float pixelLength, std::vector<Vector2> points, std::vector<int> hitSounds,
+Slider::Slider(char stype, int repeat, float pixelLength, std::vector<Vector2> points, std::vector<int> hitSounds,
                std::vector<float> ticks, float sliderTime, float sliderTimeWithoutRepeats, long time, int sampleType,
                int comboNumber, bool isEndOfCombo, int colorCounter, int colorOffset, BeatmapInterface *beatmap)
     : HitObject(time, sampleType, comboNumber, isEndOfCombo, colorCounter, colorOffset, beatmap) {
-    m_cType = type;
+    type = HitObjectType::SLIDER;
+
+    m_cType = stype;
     m_iRepeat = repeat;
     m_fPixelLength = pixelLength;
     m_points = points;
@@ -53,7 +55,7 @@ Slider::Slider(char type, int repeat, float pixelLength, std::vector<Vector2> po
         sc.successful = false;
         sc.type = 0;
         sc.sliderend = ((i % 2) == 0);  // for hit animation on repeat hit
-        sc.time = m_iTime + (long)(m_fSliderTimeWithoutRepeats * (i + 1));
+        sc.time = click_time + (long)(m_fSliderTimeWithoutRepeats * (i + 1));
 
         m_clicks.push_back(sc);
     }
@@ -66,8 +68,8 @@ Slider::Slider(char type, int repeat, float pixelLength, std::vector<Vector2> po
             // e.g. this slider: [1]=======*==[2]
             //
             // the '*' is where the tick is, let's say percent = 0.75
-            // on repeat 0, the tick is at: m_iTime + 0.75*m_fSliderTimeWithoutRepeats
-            // but on repeat 1, the tick is at: m_iTime + 1*m_fSliderTimeWithoutRepeats + (1.0 -
+            // on repeat 0, the tick is at: click_time + 0.75*m_fSliderTimeWithoutRepeats
+            // but on repeat 1, the tick is at: click_time + 1*m_fSliderTimeWithoutRepeats + (1.0 -
             // 0.75)*m_fSliderTimeWithoutRepeats this gives better readability at the cost of invalid rhythms: ticks are
             // guaranteed to always be at the same position, even in repeats so, depending on which repeat we are in
             // (even or odd), we either do (percent) or (1.0 - percent)
@@ -77,7 +79,7 @@ Slider::Slider(char type, int repeat, float pixelLength, std::vector<Vector2> po
 
             SLIDERCLICK sc;
 
-            sc.time = m_iTime + (long)(m_fSliderTimeWithoutRepeats * i) +
+            sc.time = click_time + (long)(m_fSliderTimeWithoutRepeats * i) +
                       (long)(tickPercentRelativeToRepeatFromStartAbs * m_fSliderTimeWithoutRepeats);
             sc.finished = false;
             sc.successful = false;
@@ -88,8 +90,8 @@ Slider::Slider(char type, int repeat, float pixelLength, std::vector<Vector2> po
         }
     }
 
-    m_iObjectDuration = (long)m_fSliderTime;
-    m_iObjectDuration = m_iObjectDuration >= 0 ? m_iObjectDuration : 1;  // force clamp to positive range
+    duration = (long)m_fSliderTime;
+    duration = duration >= 0 ? duration : 1;  // force clamp to positive range
 
     m_fSlidePercent = 0.0f;
     m_fActualSlidePercent = 0.0f;
@@ -308,7 +310,7 @@ void Slider::draw(Graphics *g) {
         else if(cv_slider_body_lazer_fadeout_style.getBool())
             SliderRenderer::draw(g, emptyVector, alwaysPoints, bm->m_fHitcircleDiameter, 0.0f, 0.0f,
                                  bm->getSkin()->getComboColorForCounter(m_iColorCounter, m_iColorOffset), 1.0f,
-                                 1.0f - m_fEndSliderBodyFadeAnimation, getTime());
+                                 1.0f - m_fEndSliderBodyFadeAnimation, click_time);
     }
 
     if(!instafade_slider_head && cv_slider_sliderhead_fadeout.getBool() && m_fStartHitAnimation > 0.0f &&
@@ -326,20 +328,20 @@ void Slider::draw(Graphics *g) {
             if(m_iCurRepeat < 1) {
                 skin->getHitCircleOverlay2()->setAnimationTimeOffset(
                     skin->getAnimationSpeed(),
-                    !bm->isInMafhamRenderChunk() ? m_iTime - m_iApproachTime : bm->getCurMusicPosWithOffsets());
+                    !bm->isInMafhamRenderChunk() ? click_time - m_iApproachTime : bm->getCurMusicPosWithOffsets());
                 skin->getSliderStartCircleOverlay2()->setAnimationTimeOffset(
                     skin->getAnimationSpeed(),
-                    !bm->isInMafhamRenderChunk() ? m_iTime - m_iApproachTime : bm->getCurMusicPosWithOffsets());
+                    !bm->isInMafhamRenderChunk() ? click_time - m_iApproachTime : bm->getCurMusicPosWithOffsets());
 
                 Circle::drawSliderStartCircle(g, bm, m_curve->pointAt(0.0f), m_iComboNumber, m_iColorCounter,
                                               m_iColorOffset, 1.0f, 1.0f, alpha, alpha, drawNumber);
             } else {
                 skin->getHitCircleOverlay2()->setAnimationTimeOffset(
                     skin->getAnimationSpeed(),
-                    !bm->isInMafhamRenderChunk() ? m_iTime : bm->getCurMusicPosWithOffsets());
+                    !bm->isInMafhamRenderChunk() ? click_time : bm->getCurMusicPosWithOffsets());
                 skin->getSliderEndCircleOverlay2()->setAnimationTimeOffset(
                     skin->getAnimationSpeed(),
-                    !bm->isInMafhamRenderChunk() ? m_iTime : bm->getCurMusicPosWithOffsets());
+                    !bm->isInMafhamRenderChunk() ? click_time : bm->getCurMusicPosWithOffsets());
 
                 Circle::drawSliderEndCircle(g, bm, m_curve->pointAt(0.0f), m_iComboNumber, m_iColorCounter,
                                             m_iColorOffset, 1.0f, 1.0f, alpha, alpha, drawNumber);
@@ -361,10 +363,10 @@ void Slider::draw(Graphics *g) {
             {
                 skin->getHitCircleOverlay2()->setAnimationTimeOffset(
                     skin->getAnimationSpeed(),
-                    !bm->isInMafhamRenderChunk() ? m_iTime - m_iFadeInTime : bm->getCurMusicPosWithOffsets());
+                    !bm->isInMafhamRenderChunk() ? click_time - m_iFadeInTime : bm->getCurMusicPosWithOffsets());
                 skin->getSliderEndCircleOverlay2()->setAnimationTimeOffset(
                     skin->getAnimationSpeed(),
-                    !bm->isInMafhamRenderChunk() ? m_iTime - m_iFadeInTime : bm->getCurMusicPosWithOffsets());
+                    !bm->isInMafhamRenderChunk() ? click_time - m_iFadeInTime : bm->getCurMusicPosWithOffsets());
 
                 Circle::drawSliderEndCircle(g, bm, m_curve->pointAt(1.0f), m_iComboNumber, m_iColorCounter,
                                             m_iColorOffset, 1.0f, 1.0f, alpha, 0.0f, false);
@@ -429,7 +431,7 @@ void Slider::draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCi
 
         g->setColor(0xffffffff);
         g->setAlpha(m_fFollowCircleAnimationAlpha);
-        skin->getSliderFollowCircle2()->setAnimationTimeOffset(skin->getAnimationSpeed(), m_iTime);
+        skin->getSliderFollowCircle2()->setAnimationTimeOffset(skin->getAnimationSpeed(), click_time);
         skin->getSliderFollowCircle2()->drawRaw(
             g, point,
             (bm->m_fSliderFollowCircleDiameter / skin->getSliderFollowCircle2()->getSizeBaseRaw().x) *
@@ -462,7 +464,7 @@ void Slider::draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCi
             g->pushTransform();
             {
                 g->rotate(ballAngle);
-                skin->getSliderb()->setAnimationTimeOffset(skin->getAnimationSpeed(), m_iTime);
+                skin->getSliderb()->setAnimationTimeOffset(skin->getAnimationSpeed(), click_time);
                 skin->getSliderb()->drawRaw(g, point,
                                             bm->m_fHitcircleDiameter / skin->getSliderb()->getSizeBaseRaw().x);
             }
@@ -476,19 +478,19 @@ void Slider::drawStartCircle(Graphics *g, float alpha) {
 
     if(m_bStartFinished) {
         skin->getHitCircleOverlay2()->setAnimationTimeOffset(
-            skin->getAnimationSpeed(), !bm->isInMafhamRenderChunk() ? m_iTime : bm->getCurMusicPosWithOffsets());
+            skin->getAnimationSpeed(), !bm->isInMafhamRenderChunk() ? click_time : bm->getCurMusicPosWithOffsets());
         skin->getSliderEndCircleOverlay2()->setAnimationTimeOffset(
-            skin->getAnimationSpeed(), !bm->isInMafhamRenderChunk() ? m_iTime : bm->getCurMusicPosWithOffsets());
+            skin->getAnimationSpeed(), !bm->isInMafhamRenderChunk() ? click_time : bm->getCurMusicPosWithOffsets());
 
         Circle::drawSliderEndCircle(g, bm, m_curve->pointAt(0.0f), m_iComboNumber, m_iColorCounter, m_iColorOffset,
                                     m_fHittableDimRGBColorMultiplierPercent, 1.0f, m_fAlpha, 0.0f, false, false);
     } else {
         skin->getHitCircleOverlay2()->setAnimationTimeOffset(
             skin->getAnimationSpeed(),
-            !bm->isInMafhamRenderChunk() ? m_iTime - m_iApproachTime : bm->getCurMusicPosWithOffsets());
+            !bm->isInMafhamRenderChunk() ? click_time - m_iApproachTime : bm->getCurMusicPosWithOffsets());
         skin->getSliderStartCircleOverlay2()->setAnimationTimeOffset(
             skin->getAnimationSpeed(),
-            !bm->isInMafhamRenderChunk() ? m_iTime - m_iApproachTime : bm->getCurMusicPosWithOffsets());
+            !bm->isInMafhamRenderChunk() ? click_time - m_iApproachTime : bm->getCurMusicPosWithOffsets());
 
         Circle::drawSliderStartCircle(g, bm, m_curve->pointAt(0.0f), m_iComboNumber, m_iColorCounter, m_iColorOffset,
                                       m_fHittableDimRGBColorMultiplierPercent, m_fApproachScale, m_fAlpha, m_fAlpha,
@@ -501,10 +503,10 @@ void Slider::drawEndCircle(Graphics *g, float alpha, float sliderSnake) {
 
     skin->getHitCircleOverlay2()->setAnimationTimeOffset(
         skin->getAnimationSpeed(),
-        !bm->isInMafhamRenderChunk() ? m_iTime - m_iFadeInTime : bm->getCurMusicPosWithOffsets());
+        !bm->isInMafhamRenderChunk() ? click_time - m_iFadeInTime : bm->getCurMusicPosWithOffsets());
     skin->getSliderEndCircleOverlay2()->setAnimationTimeOffset(
         skin->getAnimationSpeed(),
-        !bm->isInMafhamRenderChunk() ? m_iTime - m_iFadeInTime : bm->getCurMusicPosWithOffsets());
+        !bm->isInMafhamRenderChunk() ? click_time - m_iFadeInTime : bm->getCurMusicPosWithOffsets());
 
     Circle::drawSliderEndCircle(g, bm, m_curve->pointAt(sliderSnake), m_iComboNumber, m_iColorCounter, m_iColorOffset,
                                 m_fHittableDimRGBColorMultiplierPercent, 1.0f, m_fAlpha, 0.0f, false, false);
@@ -517,7 +519,7 @@ void Slider::drawBody(Graphics *g, float alpha, float from, float to) {
         if(cv_slider_shrink.getBool() && m_fSliderSnakePercent > 0.999f) {
             alwaysPoints.push_back(bm->osuCoords2Pixels(m_curve->pointAt(m_fSlidePercent)));  // curpoint
             alwaysPoints.push_back(bm->osuCoords2Pixels(
-                getRawPosAt(m_iTime + m_iObjectDuration + 1)));  // endpoint (because setDrawPercent() causes the last
+                getRawPosAt(click_time + duration + 1)));  // endpoint (because setDrawPercent() causes the last
                                                                  // circle mesh to become invisible too quickly)
         }
         if(cv_snaking_sliders.getBool() && m_fSliderSnakePercent < 1.0f)
@@ -535,7 +537,7 @@ void Slider::drawBody(Graphics *g, float alpha, float from, float to) {
 
         // peppy sliders
         SliderRenderer::draw(g, screenPoints, alwaysPoints, bm->m_fHitcircleDiameter, from, to, undimmedComboColor,
-                             m_fHittableDimRGBColorMultiplierPercent, alpha, getTime());
+                             m_fHittableDimRGBColorMultiplierPercent, alpha, click_time);
     } else {
         // vertex buffered sliders
         // as the base mesh is centered at (0, 0, 0) and in raw osu coordinates, we have to scale and translate it to
@@ -550,7 +552,7 @@ void Slider::drawBody(Graphics *g, float alpha, float from, float to) {
         if(cv_mod_fps.getBool()) translation += bm->getFirstPersonCursorDelta();
 
         SliderRenderer::draw(g, m_vao, alwaysPoints, translation, scale, bm->m_fHitcircleDiameter, from, to,
-                             undimmedComboColor, m_fHittableDimRGBColorMultiplierPercent, alpha, getTime());
+                             undimmedComboColor, m_fHittableDimRGBColorMultiplierPercent, alpha, click_time);
     }
 }
 
@@ -572,17 +574,17 @@ void Slider::update(long curPos, f64 frame_time) {
 
     // slider slide percent
     m_fSlidePercent = 0.0f;
-    if(curPos > m_iTime)
+    if(curPos > click_time)
         m_fSlidePercent =
-            clamp<float>(clamp<long>((curPos - (m_iTime)), 0, (long)m_fSliderTime) / m_fSliderTime, 0.0f, 1.0f);
+            clamp<float>(clamp<long>((curPos - (click_time)), 0, (long)m_fSliderTime) / m_fSliderTime, 0.0f, 1.0f);
 
     m_fActualSlidePercent = m_fSlidePercent;
 
     const float sliderSnakeDuration = (1.0f / 3.0f) * m_iApproachTime * cv_slider_snake_duration_multiplier.getFloat();
-    m_fSliderSnakePercent = min(1.0f, (curPos - (m_iTime - m_iApproachTime)) / (sliderSnakeDuration));
+    m_fSliderSnakePercent = min(1.0f, (curPos - (click_time - m_iApproachTime)) / (sliderSnakeDuration));
 
     const long reverseArrowFadeInStart =
-        m_iTime - (cv_snaking_sliders.getBool() ? (m_iApproachTime - sliderSnakeDuration) : m_iApproachTime);
+        click_time - (cv_snaking_sliders.getBool() ? (m_iApproachTime - sliderSnakeDuration) : m_iApproachTime);
     const long reverseArrowFadeInEnd = reverseArrowFadeInStart + cv_slider_reverse_arrow_fadein_duration.getInt();
     m_fReverseArrowAlpha = 1.0f - clamp<float>(((float)(reverseArrowFadeInEnd - curPos) /
                                                 (float)(reverseArrowFadeInEnd - reverseArrowFadeInStart)),
@@ -596,11 +598,11 @@ void Slider::update(long curPos, f64 frame_time) {
 
         // fade out over the duration of the slider, starting exactly when the default fadein finishes
         const long hiddenSliderBodyFadeOutStart =
-            min(m_iTime,
-                m_iTime - m_iApproachTime + m_iFadeInTime);  // min() ensures that the fade always starts at m_iTime
+            min(click_time,
+                click_time - m_iApproachTime + m_iFadeInTime);  // min() ensures that the fade always starts at click_time
                                                              // (even if the fadeintime is longer than the approachtime)
         const float fade_percent = cv_mod_hd_slider_fade_percent.getFloat();
-        const long hiddenSliderBodyFadeOutEnd = m_iTime + (long)(fade_percent * m_fSliderTime);
+        const long hiddenSliderBodyFadeOutEnd = click_time + (long)(fade_percent * m_fSliderTime);
         if(curPos >= hiddenSliderBodyFadeOutStart) {
             m_fBodyAlpha = clamp<float>(((float)(hiddenSliderBodyFadeOutEnd - curPos) /
                                          (float)(hiddenSliderBodyFadeOutEnd - hiddenSliderBodyFadeOutStart)),
@@ -660,15 +662,15 @@ void Slider::update(long curPos, f64 frame_time) {
     // handle slider start
     if(!m_bStartFinished) {
         if((bi->getModsLegacy() & LegacyFlags::Autoplay)) {
-            if(curPos >= m_iTime) {
+            if(curPos >= click_time) {
                 onHit(LiveScore::HIT::HIT_300, 0, false);
                 bi->holding_slider = true;
             }
         } else {
-            long delta = curPos - m_iTime;
+            long delta = curPos - click_time;
 
             if((bi->getModsLegacy() & LegacyFlags::Relax)) {
-                if(curPos >= m_iTime + (long)cv_relax_offset.getInt() && !bi->isPaused() &&
+                if(curPos >= click_time + (long)cv_relax_offset.getInt() && !bi->isPaused() &&
                    !bi->isContinueScheduled()) {
                     const Vector2 pos = bi->osuCoords2Pixels(m_curve->pointAt(0.0f));
                     const float cursorDelta = (bi->getCursorPos() - pos).length();
@@ -708,14 +710,14 @@ void Slider::update(long curPos, f64 frame_time) {
         // started sliding, you will be punished for leaving the (still invisible) followcircle area after having
         // clicked the startcircle, always.
         const bool isTrackingStrictTrackingMod =
-            ((m_bStartFinished || curPos >= m_iTime) && cv_mod_strict_tracking.getBool());
+            ((m_bStartFinished || curPos >= click_time) && cv_mod_strict_tracking.getBool());
 
         // slider tail lenience bullshit: see
         // https://github.com/ppy/osu/blob/master/osu.Game.Rulesets.Osu/Objects/Slider.cs#L123 being "inside the slider"
         // (for the end of the slider) is NOT checked at the exact end of the slider, but somewhere random before,
         // because fuck you
         const long offset = (long)cv_slider_end_inside_check_offset.getInt();
-        const long lenienceHackEndTime = max(m_iTime + m_iObjectDuration / 2, (m_iTime + m_iObjectDuration) - offset);
+        const long lenienceHackEndTime = max(click_time + duration / 2, (click_time + duration) - offset);
         const bool isTrackingCorrectly =
             (isClickHeldSlider() || (bi->getModsLegacy() & LegacyFlags::Relax)) && m_bCursorInside;
         if(isTrackingCorrectly) {
@@ -731,43 +733,41 @@ void Slider::update(long curPos, f64 frame_time) {
             if(curPos >= lenienceHackEndTime) {
                 // ... once (like a tick)
                 if(!m_bHeldTillEndForLenienceHackCheck) {
+                    // player was correctly clicking/holding inside slider at lenienceHackEndTime
                     m_bHeldTillEndForLenienceHackCheck = true;
-                    m_bHeldTillEndForLenienceHack =
-                        true;  // player was correctly clicking/holding inside slider at lenienceHackEndTime
+                    m_bHeldTillEndForLenienceHack = true;
                 }
             }
-        } else
-            m_bCursorLeft = true;  // do not allow empty clicks outside of the circle radius to prevent the
-                                   // m_bCursorInside flag from resetting
+        } else {
+            // do not allow empty clicks outside of the circle radius to prevent the
+            // m_bCursorInside flag from resetting
+            m_bCursorLeft = true;
+        }
 
-        // can't be "inside the slider" after lenienceHackEndTime (even though the slider is still going, which is
-        // madness)
+        // can't be "inside the slider" after lenienceHackEndTime
+        // (even though the slider is still going, which is madness)
         if(curPos >= lenienceHackEndTime) m_bHeldTillEndForLenienceHackCheck = true;
 
         // handle strict tracking mod
         if(isTrackingStrictTrackingMod) {
             const bool wasTrackingCorrectlyAtLeastOnce = (m_iStrictTrackingModLastClickHeldTime != 0);
             if(wasTrackingCorrectlyAtLeastOnce && !isTrackingCorrectly) {
-                if(!m_bHeldTillEndForLenienceHack)  // if past lenience end time then don't trigger a strict tracking
-                                                    // miss, since the slider is then already considered fully finished
-                                                    // gameplay wise
-                {
-                    if(m_endResult == LiveScore::HIT::HIT_NULL)  // force miss the end once, if it has not already been
-                                                                 // force missed by notelock
-                    {
+                // if past lenience end time then don't trigger a strict tracking miss,
+                // since the slider is then already considered fully finished gameplay wise
+                if(!m_bHeldTillEndForLenienceHack) {
+                    // force miss the end once, if it has not already been force missed by notelock
+                    if(m_endResult == LiveScore::HIT::HIT_NULL) {
                         // force miss endcircle
-                        {
-                            onSliderBreak();
+                        onSliderBreak();
 
-                            m_bHeldTillEnd = false;
-                            m_bHeldTillEndForLenienceHack = false;
-                            m_bHeldTillEndForLenienceHackCheck = true;
-                            m_endResult = LiveScore::HIT::HIT_MISS;
+                        m_bHeldTillEnd = false;
+                        m_bHeldTillEndForLenienceHack = false;
+                        m_bHeldTillEndForLenienceHackCheck = true;
+                        m_endResult = LiveScore::HIT::HIT_MISS;
 
-                            addHitResult(m_endResult, 0, m_bIsEndOfCombo, getRawPosAt(m_iTime + m_iObjectDuration),
-                                         -1.0f, 0.0f, true, true,
-                                         false);  // end of combo, ignore in hiterrorbar, ignore combo, subtract health
-                        }
+                        // end of combo, ignore in hiterrorbar, ignore combo, subtract health
+                        addHitResult(m_endResult, 0, m_bIsEndOfCombo, getRawPosAt(click_time + duration), -1.0f,
+                                     0.0f, true, true, false);
                     }
                 }
             }
@@ -781,22 +781,23 @@ void Slider::update(long curPos, f64 frame_time) {
                                          (bi->getModsLegacy() & LegacyFlags::Autoplay) ||
                                          ((bi->getModsLegacy() & LegacyFlags::Relax) && m_bCursorInside);
 
-                if(m_clicks[i].type == 0)
+                if(m_clicks[i].type == 0) {
                     onRepeatHit(m_clicks[i].successful, m_clicks[i].sliderend);
-                else
+                } else {
                     onTickHit(m_clicks[i].successful, m_clicks[i].tickIndex);
+                }
             }
         }
 
         // handle auto, and the last circle
         if((bi->getModsLegacy() & LegacyFlags::Autoplay)) {
-            if(curPos >= m_iTime + m_iObjectDuration) {
+            if(curPos >= click_time + duration) {
                 m_bHeldTillEnd = true;
                 onHit(LiveScore::HIT::HIT_300, 0, true);
                 bi->holding_slider = false;
             }
         } else {
-            if(curPos >= m_iTime + m_iObjectDuration) {
+            if(curPos >= click_time + duration) {
                 // handle leftover startcircle
                 {
                     // this may happen (if the slider time is shorter than the miss window of the startcircle)
@@ -844,9 +845,9 @@ void Slider::update(long curPos, f64 frame_time) {
                     // rewrite m_endResult as the whole slider result, then use it for the final onHit()
                     if(percent >= 0.999f && allow300)
                         m_endResult = LiveScore::HIT::HIT_300;
-                    else if(percent >= 0.5f && allow100 && !cv_mod_ming3012.getBool() && !cv_mod_no100s.getBool())
+                    else if(percent >= 0.5f && allow100 && !bi->mod_ming3012 && !bi->mod_no100s)
                         m_endResult = LiveScore::HIT::HIT_100;
-                    else if(percent > 0.0f && !cv_mod_no100s.getBool() && !cv_mod_no50s.getBool())
+                    else if(percent > 0.0f && !bi->mod_no100s && !bi->mod_no50s)
                         m_endResult = LiveScore::HIT::HIT_50;
                     else
                         m_endResult = LiveScore::HIT::HIT_MISS;
@@ -892,21 +893,21 @@ void Slider::updateAnimations(long curPos) {
 
     // handle followcircle animations
     m_fFollowCircleAnimationAlpha = clamp<float>(
-        (float)((curPos - m_iTime)) / 1000.0f / clamp<float>(fadein_fade_time, 0.0f, m_iObjectDuration / 1000.0f), 0.0f,
+        (float)((curPos - click_time)) / 1000.0f / clamp<float>(fadein_fade_time, 0.0f, duration / 1000.0f), 0.0f,
         1.0f);
     if(m_bFinished) {
         m_fFollowCircleAnimationAlpha =
             1.0f -
-            clamp<float>((float)((curPos - (m_iTime + m_iObjectDuration))) / 1000.0f / fadeout_fade_time, 0.0f, 1.0f);
+            clamp<float>((float)((curPos - (click_time + duration))) / 1000.0f / fadeout_fade_time, 0.0f, 1.0f);
         m_fFollowCircleAnimationAlpha *= m_fFollowCircleAnimationAlpha;  // quad in
     }
 
     m_fFollowCircleAnimationScale = clamp<float>(
-        (float)((curPos - m_iTime)) / 1000.0f / clamp<float>(fadein_scale_time, 0.0f, m_iObjectDuration / 1000.0f),
+        (float)((curPos - click_time)) / 1000.0f / clamp<float>(fadein_scale_time, 0.0f, duration / 1000.0f),
         0.0f, 1.0f);
     if(m_bFinished) {
         m_fFollowCircleAnimationScale =
-            clamp<float>((float)((curPos - (m_iTime + m_iObjectDuration))) / 1000.0f / fadeout_scale_time, 0.0f, 1.0f);
+            clamp<float>((float)((curPos - (click_time + duration))) / 1000.0f / fadeout_scale_time, 0.0f, 1.0f);
     }
     m_fFollowCircleAnimationScale =
         -m_fFollowCircleAnimationScale * (m_fFollowCircleAnimationScale - 2.0f);  // quad out
@@ -928,7 +929,7 @@ void Slider::updateStackPosition(float stackOffset) {
 void Slider::miss(long curPos) {
     if(m_bFinished) return;
 
-    const long delta = curPos - m_iTime;
+    const long delta = curPos - click_time;
 
     // startcircle
     if(!m_bStartFinished) {
@@ -970,9 +971,9 @@ void Slider::miss(long curPos) {
 Vector2 Slider::getRawPosAt(long pos) {
     if(m_curve == NULL) return Vector2(0, 0);
 
-    if(pos <= m_iTime)
+    if(pos <= click_time)
         return m_curve->pointAt(0.0f);
-    else if(pos >= m_iTime + m_fSliderTime) {
+    else if(pos >= click_time + m_fSliderTime) {
         if(m_iRepeat % 2 == 0)
             return m_curve->pointAt(0.0f);
         else
@@ -984,9 +985,9 @@ Vector2 Slider::getRawPosAt(long pos) {
 Vector2 Slider::getOriginalRawPosAt(long pos) {
     if(m_curve == NULL) return Vector2(0, 0);
 
-    if(pos <= m_iTime)
+    if(pos <= click_time)
         return m_curve->originalPointAt(0.0f);
-    else if(pos >= m_iTime + m_fSliderTime) {
+    else if(pos >= click_time + m_fSliderTime) {
         if(m_iRepeat % 2 == 0)
             return m_curve->originalPointAt(0.0f);
         else
@@ -996,7 +997,7 @@ Vector2 Slider::getOriginalRawPosAt(long pos) {
 }
 
 float Slider::getT(long pos, bool raw) {
-    float t = (float)((long)pos - (long)m_iTime) / m_fSliderTimeWithoutRepeats;
+    float t = (float)((long)pos - (long)click_time) / m_fSliderTimeWithoutRepeats;
     if(raw)
         return t;
     else {
@@ -1016,7 +1017,7 @@ void Slider::onClickEvent(std::vector<Click> &clicks) {
         const float cursorDelta = (cursorPos - pos).length();
 
         if(cursorDelta < bi->m_fHitcircleDiameter / 2.0f) {
-            const long delta = clicks[0].tms - (long)m_iTime;
+            const long delta = clicks[0].click_time - (long)click_time;
 
             LiveScore::HIT result = bi->getHitResult(delta);
             if(result != LiveScore::HIT::HIT_NULL) {
@@ -1045,7 +1046,7 @@ void Slider::onHit(LiveScore::HIT result, long delta, bool startOrEnd, float tar
         if(result == LiveScore::HIT::HIT_MISS) {
             if(!isEndResultFromStrictTrackingMod) onSliderBreak();
         } else if(bm != NULL) {
-            if(cv_timingpoints_force.getBool()) bm->updateTimingPoints(m_iTime + (!startOrEnd ? 0 : m_iObjectDuration));
+            if(cv_timingpoints_force.getBool()) bm->updateTimingPoints(click_time + (!startOrEnd ? 0 : duration));
 
             const Vector2 osuCoords = bm->pixels2OsuCoords(bm->osuCoords2Pixels(m_vCurPointRaw));
 
@@ -1133,7 +1134,7 @@ void Slider::onHit(LiveScore::HIT result, long delta, bool startOrEnd, float tar
             // XXX: remove this
             const bool isLazer2020Drain = false;
 
-            addHitResult(result, delta, m_bIsEndOfCombo, getRawPosAt(m_iTime + m_iObjectDuration), -1.0f, 0.0f, true,
+            addHitResult(result, delta, m_bIsEndOfCombo, getRawPosAt(click_time + duration), -1.0f, 0.0f, true,
                          !m_bHeldTillEnd,
                          isLazer2020Drain);  // end of combo, ignore in hiterrorbar, depending on heldTillEnd increase
                                              // combo or not, increase score, increase health depending on drain type
@@ -1166,7 +1167,7 @@ void Slider::onRepeatHit(bool successful, bool sliderend) {
         onSliderBreak();
     } else if(bm != NULL) {
         if(cv_timingpoints_force.getBool())
-            bm->updateTimingPoints(m_iTime + (long)((float)m_iObjectDuration * m_fActualSlidePercent));
+            bm->updateTimingPoints(click_time + (long)((float)duration * m_fActualSlidePercent));
 
         const Vector2 osuCoords = bm->pixels2OsuCoords(bm->osuCoords2Pixels(m_vCurPointRaw));
 
@@ -1225,7 +1226,7 @@ void Slider::onTickHit(bool successful, int tickIndex) {
         onSliderBreak();
     } else if(bm != NULL) {
         if(cv_timingpoints_force.getBool())
-            bm->updateTimingPoints(m_iTime + (long)((float)m_iObjectDuration * m_fActualSlidePercent));
+            bm->updateTimingPoints(click_time + (long)((float)duration * m_fActualSlidePercent));
 
         const Vector2 osuCoords = bm->pixels2OsuCoords(bm->osuCoords2Pixels(m_vCurPointRaw));
 
@@ -1280,14 +1281,14 @@ void Slider::onReset(long curPos) {
 
     m_iCurRepeatCounterForHitSounds = 0;
 
-    if(m_iTime > curPos) {
+    if(click_time > curPos) {
         m_bStartFinished = false;
         m_fStartHitAnimation = 0.0f;
         m_bEndFinished = false;
         m_bFinished = false;
         m_fEndHitAnimation = 0.0f;
         m_fEndSliderBodyFadeAnimation = 0.0f;
-    } else if(curPos < m_iTime + m_iObjectDuration) {
+    } else if(curPos < click_time + duration) {
         m_bStartFinished = true;
         m_fStartHitAnimation = 1.0f;
 

@@ -124,7 +124,6 @@ class Osu : public App, public MouseListener {
     float getDifficultyMultiplier();
     float getCSDifficultyMultiplier();
     float getScoreMultiplier();
-    float getSpeedMultiplier();  // with override
     float getAnimationSpeedMultiplier();
 
     inline bool getModAuto() const { return cv_mod_autoplay.getBool(); }

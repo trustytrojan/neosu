@@ -1299,10 +1299,8 @@ void ModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
                         m_overrideSliders[i].cvar->setValue(sliderValue);
 
                         // force change all other depending sliders
-                        const float newAR = osu->getSelectedBeatmap()->getConstantApproachRateForSpeedMultiplier(
-                            osu->getSpeedMultiplier());
-                        const float newOD = osu->getSelectedBeatmap()->getConstantOverallDifficultyForSpeedMultiplier(
-                            osu->getSpeedMultiplier());
+                        const float newAR = osu->getSelectedBeatmap()->getConstantApproachRateForSpeedMultiplier();
+                        const float newOD = osu->getSelectedBeatmap()->getConstantOverallDifficultyForSpeedMultiplier();
 
                         // '+1' to compensate for turn-off area of the override sliders
                         m_ARSlider->setValue(newAR + 1.0f, false);
@@ -1397,15 +1395,10 @@ UString ModSelector::getOverrideSliderLabelText(ModSelector::OVERRIDE_SLIDER s, 
 
     UString newLabelText = s.label->getName();
     if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL) {
-        // used for compensating speed changing experimental mods (which cause osu->getSpeedMultiplier() !=
-        // beatmap->getSpeedMultiplier()) to keep the AR/OD display correct
-        const float speedMultiplierLive =
-            osu->isInPlayMode() ? osu->getSelectedBeatmap()->getSpeedMultiplier() : osu->getSpeedMultiplier();
-
         // for relevant values (AR/OD), any non-1.0x speed multiplier should show the fractional parts caused by such a
         // speed multiplier (same for non-1.0x difficulty multiplier)
         const bool forceDisplayTwoDecimalDigits =
-            (speedMultiplierLive != 1.0f || osu->getDifficultyMultiplier() != 1.0f ||
+            (osu->getSelectedBeatmap()->getSpeedMultiplier() != 1.0f || osu->getDifficultyMultiplier() != 1.0f ||
              osu->getCSDifficultyMultiplier() != 1.0f);
 
         // HACKHACK: dirty
@@ -1417,22 +1410,21 @@ UString ModSelector::getOverrideSliderLabelText(ModSelector::OVERRIDE_SLIDER s, 
                 10.0f);
             convarValue = osu->getSelectedBeatmap()->getCS();
         } else if(s.label->getName().find("AR") != -1) {
-            beatmapValue = active ? osu->getSelectedBeatmap()->getRawApproachRateForSpeedMultiplier(speedMultiplierLive)
-                                  : osu->getSelectedBeatmap()->getApproachRateForSpeedMultiplier(speedMultiplierLive);
+            beatmapValue = active ? osu->getSelectedBeatmap()->getRawApproachRateForSpeedMultiplier()
+                                  : osu->getSelectedBeatmap()->getApproachRateForSpeedMultiplier();
 
             // compensate and round
-            convarValue = osu->getSelectedBeatmap()->getApproachRateForSpeedMultiplier(speedMultiplierLive);
+            convarValue = osu->getSelectedBeatmap()->getApproachRateForSpeedMultiplier();
             if(!engine->getKeyboard()->isAltDown() && !forceDisplayTwoDecimalDigits)
                 convarValue = std::round(convarValue * 10.0f) / 10.0f;
             else
                 convarValue = std::round(convarValue * 100.0f) / 100.0f;
         } else if(s.label->getName().find("OD") != -1) {
-            beatmapValue =
-                active ? osu->getSelectedBeatmap()->getRawOverallDifficultyForSpeedMultiplier(speedMultiplierLive)
-                       : osu->getSelectedBeatmap()->getOverallDifficultyForSpeedMultiplier(speedMultiplierLive);
+            beatmapValue = active ? osu->getSelectedBeatmap()->getRawOverallDifficultyForSpeedMultiplier()
+                                  : osu->getSelectedBeatmap()->getOverallDifficultyForSpeedMultiplier();
 
             // compensate and round
-            convarValue = osu->getSelectedBeatmap()->getOverallDifficultyForSpeedMultiplier(speedMultiplierLive);
+            convarValue = osu->getSelectedBeatmap()->getOverallDifficultyForSpeedMultiplier();
             if(!engine->getKeyboard()->isAltDown() && !forceDisplayTwoDecimalDigits)
                 convarValue = std::round(convarValue * 10.0f) / 10.0f;
             else
@@ -1443,7 +1435,7 @@ UString ModSelector::getOverrideSliderLabelText(ModSelector::OVERRIDE_SLIDER s, 
                 10.0f);
             convarValue = osu->getSelectedBeatmap()->getHP();
         } else if(s.desc->getText().find("Speed") != -1) {
-            beatmapValue = active ? 1.f : osu->getSpeedMultiplier();
+            beatmapValue = active ? 1.f : osu->getSelectedBeatmap()->getSpeedMultiplier();
 
             wasSpeedSlider = true;
             {
@@ -1459,10 +1451,10 @@ UString ModSelector::getOverrideSliderLabelText(ModSelector::OVERRIDE_SLIDER s, 
                 int minBPM = osu->getSelectedBeatmap()->getSelectedDifficulty2()->getMinBPM();
                 int maxBPM = osu->getSelectedBeatmap()->getSelectedDifficulty2()->getMaxBPM();
                 int mostCommonBPM = osu->getSelectedBeatmap()->getSelectedDifficulty2()->getMostCommonBPM();
-                int newMinBPM = minBPM * osu->getSpeedMultiplier();
-                int newMaxBPM = maxBPM * osu->getSpeedMultiplier();
-                int newMostCommonBPM = mostCommonBPM * osu->getSpeedMultiplier();
-                if(!active || osu->getSpeedMultiplier() == 1.0f) {
+                int newMinBPM = minBPM * osu->getSelectedBeatmap()->getSpeedMultiplier();
+                int newMaxBPM = maxBPM * osu->getSelectedBeatmap()->getSpeedMultiplier();
+                int newMostCommonBPM = mostCommonBPM * osu->getSelectedBeatmap()->getSpeedMultiplier();
+                if(!active || osu->getSelectedBeatmap()->getSpeedMultiplier() == 1.0f) {
                     if(minBPM == maxBPM)
                         newLabelText.append(UString::format("%i", newMaxBPM));
                     else

@@ -1,5 +1,6 @@
 #include "Replay.h"
 
+#include "Beatmap.h"
 #include "Osu.h"
 
 i32 Replay::Mods::to_legacy() const {
@@ -68,7 +69,11 @@ Replay::Mods Replay::Mods::from_cvars() {
     if(cv_mod_no100s.getBool()) mods.flags |= Replay::ModFlags::No100s;
     if(cv_mod_no50s.getBool()) mods.flags |= Replay::ModFlags::No50s;
 
-    mods.speed = osu->getSpeedMultiplier();
+    auto beatmap = osu->getSelectedBeatmap();
+    if(beatmap != NULL) {
+        mods.speed = beatmap->getSpeedMultiplier();
+    }
+
     mods.notelock_type = cv_notelock_type.getInt();
     mods.autopilot_lenience = cv_autopilot_lenience.getFloat();
     mods.ar_override = cv_ar_override.getFloat();

@@ -105,11 +105,17 @@ float LiveScore::getScoreMultiplier() {
 
 void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, HIT hit, long delta,
                              bool ignoreOnHitErrorBar, bool hitErrorBarOnly, bool ignoreCombo, bool ignoreScore) {
-    const int scoreComboMultiplier =
-        max(m_iCombo - 1, 0);  // current combo, excluding the current hitobject which caused the addHitResult() call
+    // current combo, excluding the current hitobject which caused the addHitResult() call
+    const int scoreComboMultiplier = max(m_iCombo - 1, 0);
 
-    // handle hits (and misses)
-    if(hit != LiveScore::HIT::HIT_MISS) {
+    if(hit == LiveScore::HIT::HIT_MISS) {
+        m_iCombo = 0;
+
+        if(!m_simulating && !ignoreOnHitErrorBar && cv_hiterrorbar_misses.getBool() &&
+           delta <= (long)beatmap->getHitWindow50()) {
+            osu->getHUD()->addHitError(delta, true);
+        }
+    } else {
         if(!ignoreOnHitErrorBar) {
             m_hitdeltas.push_back((int)delta);
             if(!m_simulating) osu->getHUD()->addHitError(delta);
@@ -119,14 +125,6 @@ void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, HI
             m_iCombo++;
             if(!m_simulating) osu->getHUD()->animateCombo();
         }
-    } else  // misses
-    {
-        if(!m_simulating && !ignoreOnHitErrorBar && cv_hiterrorbar_misses.getBool() &&
-           delta <= (long)beatmap->getHitWindow50()) {
-            osu->getHUD()->addHitError(delta, true);
-        }
-
-        m_iCombo = 0;
     }
 
     // keep track of the maximum possible combo at this time, for live pp calculation
@@ -229,11 +227,10 @@ void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, HI
         int numCustomPositives = 0;
         int numCustomNegatives = 0;
 
-        const int customStartIndex =
-            (cv_hud_statistics_hitdelta_chunksize.getInt() < 0
-                 ? 0
-                 : max(0, (int)m_hitdeltas.size() - cv_hud_statistics_hitdelta_chunksize.getInt())) -
-            1;
+        int customStartIndex = -1;
+        if(cv_hud_statistics_hitdelta_chunksize.getInt() >= 0) {
+            customStartIndex += max(0, (int)m_hitdeltas.size() - cv_hud_statistics_hitdelta_chunksize.getInt());
+        }
 
         for(int i = 0; i < m_hitdeltas.size(); i++) {
             averageDelta += (float)m_hitdeltas[i];

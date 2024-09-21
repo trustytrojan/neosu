@@ -334,7 +334,7 @@ void SkinImage::update(float speedMultiplier, bool useEngineTimeForAnimations, l
         // wouldn't work with the engine time method) therefore we need an offset parameter in the same time-space as
         // the beatmap (m_iBeatmapTimeAnimationStartOffset), and we need the beatmap time (curMusicPos) as a relative
         // base m_iBeatmapAnimationTimeStartOffset must be set by all hitobjects live while drawing (e.g. to their
-        // m_iTime-m_iObjectTime), since we don't have any animation state saved in the hitobjects!
+        // click_time-m_iObjectTime), since we don't have any animation state saved in the hitobjects!
 
 		long frame_duration_ms = frameDurationInSeconds * 1000.0f;
         if(frame_duration_ms == 0) {

@@ -225,7 +225,7 @@ void HitObject::drawHitResult(Graphics *g, Skin *skin, float hitcircleDiameter, 
 
 HitObject::HitObject(long time, int sampleType, int comboNumber, bool isEndOfCombo, int colorCounter, int colorOffset,
                      BeatmapInterface *beatmap) {
-    m_iTime = time;
+    click_time = time;
     m_iSampleType = sampleType;
     m_iComboNumber = comboNumber;
     m_bIsEndOfCombo = isEndOfCombo;
@@ -239,9 +239,9 @@ HitObject::HitObject(long time, int sampleType, int comboNumber, bool isEndOfCom
     m_fHittableDimRGBColorMultiplierPercent = 1.0f;
     m_iApproachTime = 0;
     m_iFadeInTime = 0;
-    m_iObjectDuration = 0;
+    duration = 0;
     m_iDelta = 0;
-    m_iObjectDuration = 0;
+    duration = 0;
 
     m_bVisible = false;
     m_bFinished = false;
@@ -276,7 +276,7 @@ void HitObject::drawHitResultAnim(Graphics *g, const HITRESULTANIM &hitresultani
         Skin *skin = bm->getSkin();
         {
             const long skinAnimationTimeStartOffset =
-                m_iTime + (hitresultanim.addObjectDurationToSkinAnimationTimeStartOffset ? m_iObjectDuration : 0) +
+                click_time + (hitresultanim.addObjectDurationToSkinAnimationTimeStartOffset ? duration : 0) +
                 hitresultanim.delta;
 
             skin->getHit0()->setAnimationTimeOffset(skin->getAnimationSpeed(), skinAnimationTimeStartOffset);
@@ -308,16 +308,17 @@ void HitObject::update(long curPos, f64 frame_time) {
     m_fAlphaForApproachCircle = 0.0f;
     m_fHittableDimRGBColorMultiplierPercent = 1.0f;
 
-    double animationSpeedMultipler = osu->getSpeedMultiplier() / osu->getAnimationSpeedMultiplier();
+    const auto mods = bi->getMods();
+
+    double animationSpeedMultipler = mods.speed / osu->getAnimationSpeedMultiplier();
     m_iApproachTime = (m_bUseFadeInTimeAsApproachTime ? (GameRules::getFadeInTime() * animationSpeedMultipler)
                                                       : (long)bi->getApproachTime());
     m_iFadeInTime = GameRules::getFadeInTime() * animationSpeedMultipler;
 
-    m_iDelta = m_iTime - curPos;
+    m_iDelta = click_time - curPos;
 
-    if(curPos >= (m_iTime - m_iApproachTime) &&
-       curPos < (m_iTime + m_iObjectDuration))  // 1 ms fudge by using >=, shouldn't really be a problem
-    {
+    // 1 ms fudge by using >=, shouldn't really be a problem
+    if(curPos >= (click_time - m_iApproachTime) && curPos < (click_time + duration)) {
         // approach circle scale
         const float scale = clamp<float>((float)m_iDelta / (float)m_iApproachTime, 0.0f, 1.0f);
         m_fApproachScale = 1 + (scale * cv_approach_scale_multiplier.getFloat());
@@ -376,38 +377,38 @@ void HitObject::update(long curPos, f64 frame_time) {
         }
 
         // hitobject body fadein
-        const long fadeInStart = m_iTime - m_iApproachTime;
+        const long fadeInStart = click_time - m_iApproachTime;
         const long fadeInEnd =
-            min(m_iTime,
-                m_iTime - m_iApproachTime + m_iFadeInTime);  // min() ensures that the fade always finishes at m_iTime
+            min(click_time,
+                click_time - m_iApproachTime + m_iFadeInTime);  // min() ensures that the fade always finishes at click_time
                                                              // (even if the fadeintime is longer than the approachtime)
         m_fAlpha = clamp<float>(1.0f - ((float)(fadeInEnd - curPos) / (float)(fadeInEnd - fadeInStart)), 0.0f, 1.0f);
         m_fAlphaWithoutHidden = m_fAlpha;
 
-        if(osu->getModHD()) {
+        if(mods.flags & Replay::ModFlags::Hidden) {
             // hidden hitobject body fadein
             const float fin_start_percent = cv_mod_hd_circle_fadein_start_percent.getFloat();
             const float fin_end_percent = cv_mod_hd_circle_fadein_end_percent.getFloat();
             const float fout_start_percent = cv_mod_hd_circle_fadeout_start_percent.getFloat();
             const float fout_end_percent = cv_mod_hd_circle_fadeout_end_percent.getFloat();
-            const long hiddenFadeInStart = m_iTime - (long)(m_iApproachTime * fin_start_percent);
-            const long hiddenFadeInEnd = m_iTime - (long)(m_iApproachTime * fin_end_percent);
+            const long hiddenFadeInStart = click_time - (long)(m_iApproachTime * fin_start_percent);
+            const long hiddenFadeInEnd = click_time - (long)(m_iApproachTime * fin_end_percent);
             m_fAlpha = clamp<float>(
                 1.0f - ((float)(hiddenFadeInEnd - curPos) / (float)(hiddenFadeInEnd - hiddenFadeInStart)), 0.0f, 1.0f);
 
             // hidden hitobject body fadeout
-            const long hiddenFadeOutStart = m_iTime - (long)(m_iApproachTime * fout_start_percent);
-            const long hiddenFadeOutEnd = m_iTime - (long)(m_iApproachTime * fout_end_percent);
+            const long hiddenFadeOutStart = click_time - (long)(m_iApproachTime * fout_start_percent);
+            const long hiddenFadeOutEnd = click_time - (long)(m_iApproachTime * fout_end_percent);
             if(curPos >= hiddenFadeOutStart)
                 m_fAlpha = clamp<float>(
                     ((float)(hiddenFadeOutEnd - curPos) / (float)(hiddenFadeOutEnd - hiddenFadeOutStart)), 0.0f, 1.0f);
         }
 
         // approach circle fadein (doubled fadeintime)
-        const long approachCircleFadeStart = m_iTime - m_iApproachTime;
+        const long approachCircleFadeStart = click_time - m_iApproachTime;
         const long approachCircleFadeEnd =
-            min(m_iTime, m_iTime - m_iApproachTime +
-                             2 * m_iFadeInTime);  // min() ensures that the fade always finishes at m_iTime (even
+            min(click_time, click_time - m_iApproachTime +
+                             2 * m_iFadeInTime);  // min() ensures that the fade always finishes at click_time (even
                                                   // if the fadeintime is longer than the approachtime)
         m_fAlphaForApproachCircle = clamp<float>(
             1.0f - ((float)(approachCircleFadeEnd - curPos) / (float)(approachCircleFadeEnd - approachCircleFadeStart)),
@@ -415,8 +416,8 @@ void HitObject::update(long curPos, f64 frame_time) {
 
         // hittable dim, see https://github.com/ppy/osu/pull/20572
         if(cv_hitobject_hittable_dim.getBool() &&
-           (!cv_mod_mafham.getBool() || !cv_mod_mafham_ignore_hittable_dim.getBool())) {
-            const long hittableDimFadeStart = m_iTime - (long)GameRules::getHitWindowMiss();
+           (!(bi->getMods().flags & Replay::ModFlags::Mafham) || !cv_mod_mafham_ignore_hittable_dim.getBool())) {
+            const long hittableDimFadeStart = click_time - (long)GameRules::getHitWindowMiss();
 
             // yes, this means the un-dim animation cuts into the already clickable range
             const long hittableDimFadeEnd = hittableDimFadeStart + (long)cv_hitobject_hittable_dim_duration.getInt();

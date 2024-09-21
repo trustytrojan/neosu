@@ -35,6 +35,16 @@ class HitObject {
 
     HitObjectType type;
 
+	// the time at which this object must be clicked
+    i64 click_time;
+
+	// how long this object takes to click
+	//   circle = 0
+	//   slider = sliderTime
+	//   spinner = spinnerTime
+	// the object will stay visible for (click_time + duration)
+	i64 duration;
+
     void addHitResult(LiveScore::HIT result, long delta, bool isEndOfCombo, Vector2 posRaw, float targetDelta = 0.0f,
                       float targetAngle = 0.0f, bool ignoreOnHitErrorBar = false, bool ignoreCombo = false,
                       bool ignoreHealth = false, bool addObjectDurationToSkinAnimationTimeStartOffset = true);
@@ -51,8 +61,6 @@ class HitObject {
     virtual Vector2 getOriginalRawPosAt(long pos) = 0;  // without stack calculations
     virtual Vector2 getAutoCursorPos(long curPos) = 0;
 
-    inline long getTime() const { return m_iTime; }
-    inline long getDuration() const { return m_iObjectDuration; }
     inline int getStack() const { return m_iStack; }
     inline int getComboNumber() const { return m_iComboNumber; }
     inline bool isEndOfCombo() const { return m_bIsEndOfCombo; }
@@ -79,7 +87,6 @@ class HitObject {
     bool m_bVisible;
     bool m_bFinished;
 
-    long m_iTime;  // the time at which this object must be clicked
     int m_iSampleType;
     int m_iComboNumber;
     bool m_bIsEndOfCombo;
@@ -94,9 +101,6 @@ class HitObject {
     long m_iDelta;  // this must be signed
     long m_iApproachTime;
     long m_iFadeInTime;      // extra time added before the approachTime to let the object smoothly become visible
-    long m_iObjectDuration;  // how long this object takes to click (circle = 0, slider = sliderTime, spinner =
-                             // spinnerTime etc.), the object will stay visible this long extra after m_iTime; it should
-                             // be set by the actual object inheriting from this class
 
     int m_iStack;
 

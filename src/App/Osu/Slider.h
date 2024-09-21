@@ -17,7 +17,7 @@ class Slider : public HitObject {
     };
 
    public:
-    Slider(char type, int repeat, float pixelLength, std::vector<Vector2> points, std::vector<int> hitSounds,
+    Slider(char stype, int repeat, float pixelLength, std::vector<Vector2> points, std::vector<int> hitSounds,
            std::vector<float> ticks, float sliderTime, float sliderTimeWithoutRepeats, long time, int sampleType,
            int comboNumber, bool isEndOfCombo, int colorCounter, int colorOffset, BeatmapInterface *beatmap);
     virtual ~Slider();
@@ -26,8 +26,6 @@ class Slider : public HitObject {
     virtual void draw2(Graphics *g);
     void draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCircle);
     virtual void update(long curPos, f64 frame_time);
-
-    HitObjectType type = HitObjectType::SLIDER;
 
     virtual void updateStackPosition(float stackOffset);
     virtual void miss(long curPos);

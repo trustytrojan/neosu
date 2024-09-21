@@ -1524,7 +1524,7 @@ float Osu::getScoreMultiplier() {
     float multiplier = 1.0f;
 
     // Dumb formula, but the values for HT/DT were dumb to begin with
-    f32 s = getSpeedMultiplier();
+    f32 s = getSelectedBeatmap()->getSpeedMultiplier();
     if(s > 1.f) {
         multiplier *= (0.24 * s) + 0.76;
     } else if(s < 1.f) {
@@ -1547,15 +1547,8 @@ float Osu::getScoreMultiplier() {
     return multiplier;
 }
 
-float Osu::getSpeedMultiplier() {
-    if(cv_speed_override.getFloat() >= 0.0f)
-        return max(cv_speed_override.getFloat(), 0.05f);
-    else
-        return 1.f;
-}
-
 float Osu::getAnimationSpeedMultiplier() {
-    float animationSpeedMultiplier = getSpeedMultiplier();
+    float animationSpeedMultiplier = getSelectedBeatmap()->getSpeedMultiplier();
 
     if(cv_animation_speed_override.getFloat() >= 0.0f) return max(cv_animation_speed_override.getFloat(), 0.05f);
 
@@ -1848,7 +1841,7 @@ void Osu::onSkinChange(UString oldValue, UString newValue) {
 
 void Osu::updateAnimationSpeed() {
     if(getSkin() != NULL) {
-        float speed = getAnimationSpeedMultiplier() / getSpeedMultiplier();
+        float speed = getAnimationSpeedMultiplier() / getSelectedBeatmap()->getSpeedMultiplier();
         getSkin()->setAnimationSpeed(speed >= 0.0f ? speed : 0.0f);
     }
 }
@@ -1857,7 +1850,7 @@ void Osu::onAnimationSpeedChange(UString oldValue, UString newValue) { updateAni
 
 void Osu::onSpeedChange(UString oldValue, UString newValue) {
     float speed = newValue.toFloat();
-    getSelectedBeatmap()->setSpeed(speed >= 0.0f ? speed : getSpeedMultiplier());
+    getSelectedBeatmap()->setSpeed(speed >= 0.0f ? speed : getSelectedBeatmap()->getSpeedMultiplier());
     updateAnimationSpeed();
 }
 

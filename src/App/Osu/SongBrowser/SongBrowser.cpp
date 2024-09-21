@@ -602,7 +602,7 @@ void SongBrowser::draw(Graphics *g) {
     if(cv_draw_songbrowser_strain_graph.getBool()) {
         const std::vector<double> &aimStrains = getSelectedBeatmap()->m_aimStrains;
         const std::vector<double> &speedStrains = getSelectedBeatmap()->m_speedStrains;
-        const float speedMultiplier = osu->getSpeedMultiplier();
+        const float speedMultiplier = getSelectedBeatmap()->getSpeedMultiplier();
 
         if(aimStrains.size() > 0 && aimStrains.size() == speedStrains.size()) {
             const float strainStepMS = 400.0f * speedMultiplier;
@@ -2013,6 +2013,7 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
     const std::vector<DatabaseBeatmap *> &diffs = databaseBeatmap->getDifficulties();
     const bool isContainer = (diffs.size() > 0);
     const int numDiffs = (isContainer ? diffs.size() : 1);
+    auto speed = osu->getSelectedBeatmap()->getSpeedMultiplier();
 
     // TODO: optimize this dumpster fire. can at least cache the parsed tokens and literal strings array instead of
     // parsing every single damn time
@@ -2128,21 +2129,21 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
                                             (diff->getLengthMS() > 0 ? ((float)diff->getNumObjects() /
                                                                         (float)(diff->getLengthMS() / 1000.0f / 60.0f))
                                                                      : 0.0f) *
-                                            osu->getSpeedMultiplier();
+                                            speed;
                                         break;
                                     case CPM:
                                         compareValue =
                                             (diff->getLengthMS() > 0 ? ((float)diff->getNumCircles() /
                                                                         (float)(diff->getLengthMS() / 1000.0f / 60.0f))
                                                                      : 0.0f) *
-                                            osu->getSpeedMultiplier();
+                                            speed;
                                         break;
                                     case SPM:
                                         compareValue =
                                             (diff->getLengthMS() > 0 ? ((float)diff->getNumSliders() /
                                                                         (float)(diff->getLengthMS() / 1000.0f / 60.0f))
                                                                      : 0.0f) *
-                                            osu->getSpeedMultiplier();
+                                            speed;
                                         break;
                                     case OBJECTS:
                                         compareValue = diff->getNumObjects();
