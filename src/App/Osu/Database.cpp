@@ -181,12 +181,12 @@ Database::Database() {
     m_prevPlayerStats.percentToNextLevel = 0.0f;
     m_prevPlayerStats.totalScore = 0;
 
-    m_scoreSortingMethods.push_back({"Sort By Accuracy", new SortScoreByAccuracy()});
-    m_scoreSortingMethods.push_back({"Sort By Combo", new SortScoreByCombo()});
-    m_scoreSortingMethods.push_back({"Sort By Date", new SortScoreByDate()});
-    m_scoreSortingMethods.push_back({"Sort By Misses", new SortScoreByMisses()});
-    m_scoreSortingMethods.push_back({"Sort By pp (Mc)", new SortScoreByPP()});
-    m_scoreSortingMethods.push_back({"Sort By Score", new SortScoreByScore()});
+    m_scoreSortingMethods.push_back({"Sort by Accuracy", new SortScoreByAccuracy()});
+    m_scoreSortingMethods.push_back({"Sort by Combo", new SortScoreByCombo()});
+    m_scoreSortingMethods.push_back({"Sort by Date", new SortScoreByDate()});
+    m_scoreSortingMethods.push_back({"Sort by Misses", new SortScoreByMisses()});
+    m_scoreSortingMethods.push_back({"Sort by pp", new SortScoreByPP()});
+    m_scoreSortingMethods.push_back({"Sort by Score", new SortScoreByScore()});
 }
 
 Database::~Database() {
@@ -309,9 +309,8 @@ void Database::deleteScore(MD5Hash beatmapMD5Hash, u64 scoreUnixTimestamp) {
     }
 }
 
-void Database::sortScores(MD5Hash beatmapMD5Hash) {
-    std::lock_guard<std::mutex> lock(m_scores_mtx);
-    if(m_scores[beatmapMD5Hash].size() < 2) return;
+void Database::sortScoresInPlace(std::vector<FinishedScore> &scores) {
+    if(scores.size() < 2) return;
 
     if(cv_songbrowser_scores_sortingtype.getString() == UString("Online Leaderboard")) {
         // Online scores are already sorted
@@ -327,7 +326,7 @@ void Database::sortScores(MD5Hash beatmapMD5Hash) {
             COMPARATOR_WRAPPER comparatorWrapper;
             comparatorWrapper.comp = m_scoreSortingMethods[i].comparator;
 
-            std::sort(m_scores[beatmapMD5Hash].begin(), m_scores[beatmapMD5Hash].end(), comparatorWrapper);
+            std::sort(scores.begin(), scores.end(), comparatorWrapper);
             return;
         }
     }
@@ -335,6 +334,11 @@ void Database::sortScores(MD5Hash beatmapMD5Hash) {
     if(cv_debug.getBool()) {
         debugLog("ERROR: Invalid score sortingtype \"%s\"\n", cv_songbrowser_scores_sortingtype.getString().toUtf8());
     }
+}
+
+void Database::sortScores(MD5Hash beatmapMD5Hash) {
+    std::lock_guard<std::mutex> lock(m_scores_mtx);
+    sortScoresInPlace(m_scores[beatmapMD5Hash]);
 }
 
 std::vector<UString> Database::getPlayerNamesWithPPScores() {

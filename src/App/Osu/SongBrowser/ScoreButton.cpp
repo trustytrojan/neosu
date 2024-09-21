@@ -403,6 +403,16 @@ void ScoreButton::mouse_update(bool *propagate_clicks) {
             m_score.ppv2_total_stars = info.total_stars;
             m_score.ppv2_aim_stars = info.aim_stars;
             m_score.ppv2_speed_stars = info.speed_stars;
+
+            std::lock_guard<std::mutex> lock(db->m_scores_mtx);
+            for(auto &other : db->m_scores[m_score.beatmap_hash]) {
+                if(other.unixTimestamp == m_score.unixTimestamp) {
+                    other = m_score;
+                    osu->getSongBrowser()->score_resort_scheduled = true;
+                    break;
+                }
+            }
+
             m_sScoreScorePP = UString::format(
                 (m_score.perfect ? "PP: %ipp (%ix PFC)" : (fullCombo ? "PP: %ipp (%ix FC)" : "PP: %ipp (%ix)")),
                 (int)std::round(m_score.get_pp()), m_score.comboMax);

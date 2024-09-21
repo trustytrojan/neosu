@@ -349,7 +349,7 @@ SongBrowser::SongBrowser() : ScreenBackable() {
         m_topbarLeft->addBaseUIElement(m_songInfo);
     }
 
-    m_scoreSortButton = addTopBarLeftTabButton("Sort By Score");
+    m_scoreSortButton = addTopBarLeftTabButton("Sort by Score");
     m_scoreSortButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onSortScoresClicked));
     m_webButton = addTopBarLeftButton("Web");
     m_webButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onWebClicked));
@@ -996,6 +996,11 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
                 set_autodl = 0;
             }
         }
+    }
+
+    if(score_resort_scheduled) {
+        rebuildScoreButtons();
+        score_resort_scheduled = false;
     }
 
     // update and focus handling
@@ -2551,7 +2556,7 @@ void SongBrowser::rebuildScoreButtons() {
     if(validBeatmap) {
         std::lock_guard<std::mutex> lock(m_db->m_scores_mtx);
         auto diff2 = m_beatmap->getSelectedDifficulty2();
-        auto local_scores = (*m_db->getScores())[diff2->getMD5Hash()];
+        auto local_scores = m_db->m_scores[diff2->getMD5Hash()];
         auto local_best = max_element(local_scores.begin(), local_scores.end(),
                                       [](FinishedScore const &a, FinishedScore const &b) { return a.score < b.score; });
 
@@ -2634,7 +2639,7 @@ void SongBrowser::rebuildScoreButtons() {
         }
     } else {
         // sort
-        m_db->sortScores(m_beatmap->getSelectedDifficulty2()->getMD5Hash());
+        m_db->sortScoresInPlace(scores);
 
         // build
         std::vector<ScoreButton *> scoreButtons;
@@ -3078,6 +3083,7 @@ void SongBrowser::onSortScoresChange(UString text, int id) {
     m_scoreBrowser->scrollToTop();
 
     // update grades of all visible songdiffbuttons
+    // NOTE(kiwec): why here???? wtf lol
     if(m_beatmap != NULL) {
         for(size_t i = 0; i < m_visibleSongButtons.size(); i++) {
             if(m_visibleSongButtons[i]->getDatabaseBeatmap() == m_beatmap->getSelectedDifficulty2()) {

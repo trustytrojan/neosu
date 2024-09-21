@@ -204,6 +204,7 @@ MainMenu::MainMenu() : OsuScreen() {
                 // Old value was invalid
                 if(cv_beatmap_mirror.getString() == UString("https://catboy.best/s/")) {
                     cv_beatmap_mirror.setValue("https://catboy.best/d/");
+                    osu->getOptionsMenu()->save();
                 }
             } else {
                 m_bDrawVersionNotificationArrow = true;

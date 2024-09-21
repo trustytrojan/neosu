@@ -71,6 +71,7 @@ class Database {
 
     int addScore(FinishedScore score);
     void deleteScore(MD5Hash beatmapMD5Hash, u64 scoreUnixTimestamp);
+    void sortScoresInPlace(std::vector<FinishedScore> &scores);
     void sortScores(MD5Hash beatmapMD5Hash);
     void forceScoreUpdateOnNextCalculatePlayerStats() { m_bDidScoresChangeForStats = true; }
 
@@ -112,6 +113,7 @@ class Database {
     std::vector<FinishedScore> m_scores_to_convert;
 
     std::mutex m_scores_mtx;
+    std::unordered_map<MD5Hash, std::vector<FinishedScore>> m_scores;
 
    private:
     friend class DatabaseLoader;
@@ -148,8 +150,6 @@ class Database {
 
     // scores.db (legacy and custom)
     bool m_bScoresLoaded = false;
-
-    std::unordered_map<MD5Hash, std::vector<FinishedScore>> m_scores;
 
     bool m_bDidScoresChangeForStats;
     PlayerStats m_prevPlayerStats;

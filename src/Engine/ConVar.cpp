@@ -1835,8 +1835,7 @@ ConVar cv_songbrowser_button_inactive_color_b("osu_songbrowser_button_inactive_c
 ConVar cv_songbrowser_button_inactive_color_g("osu_songbrowser_button_inactive_color_g", 73, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_songbrowser_button_inactive_color_r("osu_songbrowser_button_inactive_color_r", 235, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_songbrowser_scorebrowser_enabled("osu_songbrowser_scorebrowser_enabled", true, FCVAR_BANCHO_COMPATIBLE);
-ConVar cv_songbrowser_scores_sortingtype("osu_songbrowser_scores_sortingtype", "Sort By Score",
-                                         FCVAR_BANCHO_COMPATIBLE);
+ConVar cv_songbrowser_scores_sortingtype("songbrowser_scores_sortingtype", "Sort by pp", FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_songbrowser_search_delay("osu_songbrowser_search_delay", 0.2f, FCVAR_BANCHO_COMPATIBLE,
                                    "delay until search update when entering text");
 ConVar cv_songbrowser_search_hardcoded_filter("osu_songbrowser_search_hardcoded_filter", "", FCVAR_BANCHO_COMPATIBLE,

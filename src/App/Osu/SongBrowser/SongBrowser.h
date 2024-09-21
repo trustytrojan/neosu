@@ -247,6 +247,7 @@ class SongBrowser : public ScreenBackable {
     CBaseUIContainer *m_localBestContainer;
     CBaseUILabel *m_localBestLabel;
     ScoreButton *m_localBestButton = NULL;
+    bool score_resort_scheduled = false;
 
     // song browser
     CBaseUIScrollView *m_songBrowser;

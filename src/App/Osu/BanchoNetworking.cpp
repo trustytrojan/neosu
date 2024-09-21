@@ -130,7 +130,7 @@ void disconnect() {
     // XXX: We should toggle between "offline" sorting options and "online" ones
     //      Online ones would be "Local scores", "Global", "Country", "Selected mods" etc
     //      While offline ones would be "By score", "By pp", etc
-    osu->m_songBrowser2->onSortScoresChange(UString("Sort By Score"), 0);
+    osu->m_songBrowser2->onSortScoresChange(UString("Sort by pp"), 0);
 
     abort_downloads();
 }
