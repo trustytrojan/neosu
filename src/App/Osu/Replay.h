@@ -1,6 +1,8 @@
 #pragma once
 #include "LegacyReplay.h"
 
+class DatabaseBeatmap;
+
 namespace Replay {
 
 namespace ModFlags {
@@ -85,6 +87,11 @@ struct Mods {
     f32 shirone_combo = 20.f;
 
     i32 to_legacy() const;
+
+    // Get AR/OD, ignoring mods which change it over time
+    // Used for ppv2 calculations.
+    f32 get_naive_ar(DatabaseBeatmap *diff2) const;
+    f32 get_naive_od(DatabaseBeatmap *diff2) const;
 
     static Mods from_cvars();
     static Mods from_legacy(i32 legacy_flags);

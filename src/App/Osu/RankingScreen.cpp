@@ -329,12 +329,10 @@ void RankingScreen::mouse_update(bool *propagate_clicks) {
         pp_calc_request request;
         request.mods_legacy = m_score.mods.to_legacy();
         request.speed = m_score.mods.speed;
-        request.AR = m_score.diff2->getAR();
+        request.AR = m_score.mods.get_naive_ar(m_score.diff2);
+        request.OD = m_score.mods.get_naive_od(m_score.diff2);
         request.CS = m_score.diff2->getCS();
-        request.OD = m_score.diff2->getOD();
-        if(m_score.mods.ar_override != -1.f) request.AR = m_score.mods.ar_override;
         if(m_score.mods.cs_override != -1.f) request.CS = m_score.mods.cs_override;
-        if(m_score.mods.od_override != -1.f) request.OD = m_score.mods.od_override;
         request.rx = m_score.mods.flags & Replay::ModFlags::Relax;
         request.td = m_score.mods.flags & Replay::ModFlags::TouchDevice;
         request.comboMax = m_score.comboMax;

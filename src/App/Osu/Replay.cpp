@@ -3,6 +3,8 @@
 #include "Beatmap.h"
 #include "CBaseUICheckbox.h"
 #include "CBaseUISlider.h"
+#include "DatabaseBeatmap.h"
+#include "GameRules.h"
 #include "Osu.h"
 
 i32 Replay::Mods::to_legacy() const {
@@ -35,6 +37,37 @@ i32 Replay::Mods::to_legacy() const {
     // NOTE: Ignoring nightmare, fposu
 
     return legacy_flags;
+}
+
+f32 Replay::Mods::get_naive_ar(DatabaseBeatmap *diff2) const {
+    float ARdifficultyMultiplier = 1.0f;
+    if((flags & Replay::ModFlags::HardRock)) ARdifficultyMultiplier = 1.4f;
+    if((flags & Replay::ModFlags::Easy)) ARdifficultyMultiplier = 0.5f;
+
+    f32 AR = clamp<f32>(diff2->getAR() * ARdifficultyMultiplier, 0.0f, 10.0f);
+    if(ar_override >= 0.0f) AR = ar_override;
+    if(ar_overridenegative < 0.0f) AR = ar_overridenegative;
+
+    if(flags & Replay::ModFlags::AROverrideLock) {
+        AR = GameRules::getRawConstantApproachRateForSpeedMultiplier(GameRules::getRawApproachTime(AR), speed);
+    }
+
+    return AR;
+}
+
+f32 Replay::Mods::get_naive_od(DatabaseBeatmap *diff2) const {
+    float ODdifficultyMultiplier = 1.0f;
+    if((flags & Replay::ModFlags::HardRock)) ODdifficultyMultiplier = 1.4f;
+    if((flags & Replay::ModFlags::Easy)) ODdifficultyMultiplier = 0.5f;
+
+    f32 OD = clamp<f32>(diff2->getOD() * ODdifficultyMultiplier, 0.0f, 10.0f);
+    if(od_override >= 0.0f) OD = od_override;
+
+    if(flags & Replay::ModFlags::ODOverrideLock) {
+        OD = GameRules::getRawConstantOverallDifficultyForSpeedMultiplier(GameRules::getRawHitWindow300(OD), speed);
+    }
+
+    return OD;
 }
 
 Replay::Mods Replay::Mods::from_cvars() {

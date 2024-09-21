@@ -939,12 +939,10 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
         pp_calc_request request;
         request.mods_legacy = mods.to_legacy();
         request.speed = mods.speed;
-        request.AR = diff2->getAR();
+        request.AR = mods.get_naive_ar(diff2);
+        request.OD = mods.get_naive_od(diff2);
         request.CS = diff2->getCS();
-        request.OD = diff2->getOD();
-        if(mods.ar_override != -1.f) request.AR = mods.ar_override;
         if(mods.cs_override != -1.f) request.CS = mods.cs_override;
-        if(mods.od_override != -1.f) request.OD = mods.od_override;
         request.rx = mods.flags & Replay::ModFlags::Relax;
         request.td = mods.flags & Replay::ModFlags::TouchDevice;
         request.comboMax = -1;
