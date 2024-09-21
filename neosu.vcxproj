@@ -85,7 +85,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WIN32_WINNT=0x0601;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>libraries/glew/include;libraries/freetype/include;libraries/libcurl/include;libraries/libjpeg/include;libraries/lzma/include;libraries/bassloud/include;libraries/basswasapi/include;libraries/bassmix/include;libraries/bassfx/include;libraries/bassasio/include;libraries/bass/include;src/Util;src/Engine/Renderer;src/Engine/Main;src/Engine/Platform;src/Engine/Input;src/Engine;src/GUI/Windows/VinylScratcher;src/GUI/Windows;src/GUI;src/App/Osu;src/App;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -99,6 +99,7 @@
       <AdditionalDependencies>ktmw32.lib;wbemuuid.lib;ntdll.lib;Shlwapi.lib;userenv.lib;oleaut32.lib;winmm.lib;ws2_32.lib;psapi.lib;Comdlg32.lib;Dwmapi.lib;comctl32.lib;OpenGL32.lib;glu32.lib;Ole32.lib;Uuid.lib;libraries\bass\$(Platform)\bass.lib;libraries\bassfx\$(Platform)\bass_fx.lib;libraries\bassasio\$(Platform)\bassasio.lib;libraries\bassloud\$(Platform)\bassloud.lib;libraries\bassmix\$(Platform)\bassmix.lib;libraries\basswasapi\$(Platform)\basswasapi.lib;libraries\discord-rpc\$(Platform)\discord-rpc.lib;libraries\freetype\$(Platform)\freetype.lib;libraries\libjpeg\$(Platform)\jpeg-static.lib;libraries\xinput\$(Platform)\libxinput9_1_0.a;libraries\libcurl\$(Platform)\libcurl.dll.a;libraries\lzma\$(Platform)\liblzma.a;libraries\glew\$(Platform)\glew32s.lib;libraries\glew\$(Platform)\glew32mxs.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
       <SubSystem>Windows</SubSystem>
+      <MinimumRequiredVersion>6.01</MinimumRequiredVersion>
     </Link>
     <PostBuildEvent />
     <PostBuildEvent>
@@ -144,7 +145,7 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WIN32_WINNT=0x0601;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>libraries/glew/include;libraries/freetype/include;libraries/libcurl/include;libraries/libjpeg/include;libraries/lzma/include;libraries/bassloud/include;libraries/basswasapi/include;libraries/bassmix/include;libraries/bassfx/include;libraries/bassasio/include;libraries/bass/include;src/Util;src/Engine/Renderer;src/Engine/Main;src/Engine/Platform;src/Engine/Input;src/Engine;src/GUI/Windows/VinylScratcher;src/GUI/Windows;src/GUI;src/App/Osu;src/App;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -160,6 +161,7 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
       <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
       <SubSystem>Windows</SubSystem>
       <ImageHasSafeExceptionHandlers />
+      <MinimumRequiredVersion>6.01</MinimumRequiredVersion>
     </Link>
     <PostBuildEvent />
     <PostBuildEvent>

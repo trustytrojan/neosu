@@ -29,9 +29,6 @@ struct TIMINGPOINT {
 };
 #pragma pack(pop)
 
-Packet load_db(std::string path);
-bool save_db(Packet *db, std::string path);
-
 class Database {
    public:
     struct PlayerStats {

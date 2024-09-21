@@ -63,6 +63,8 @@ static void run_sct() {
         }
         db->m_scores_mtx.unlock();
 
+        // TODO @kiwec: update & save scores/pp
+
         sct_computed++;
         idx++;
     }

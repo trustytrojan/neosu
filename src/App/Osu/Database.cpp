@@ -27,38 +27,6 @@
 
 Database *db = NULL;
 
-// @PPV3: drop load_db/save_db
-Packet load_db(std::string path) {
-    Packet db;
-
-    FILE *dbfile = fopen(path.c_str(), "rb");
-    if(dbfile == NULL) {
-        debugLog("Failed to open '%s': %s\n", path.c_str(), strerror(errno));
-    } else {
-        fseek(dbfile, 0, SEEK_END);
-        size_t dblen = ftell(dbfile);
-        rewind(dbfile);
-
-        db.memory = (u8 *)malloc(dblen);
-        db.size = dblen;
-        fread(db.memory, dblen, 1, dbfile);
-        fclose(dbfile);
-    }
-
-    return db;
-}
-
-bool save_db(Packet *db, std::string path) {
-    FILE *dbfile = fopen(path.c_str(), "wb");
-    if(dbfile == NULL) {
-        return false;
-    }
-
-    fwrite(db->memory, db->pos, 1, dbfile);
-    fclose(dbfile);
-    return true;
-}
-
 struct SortScoreByScore : public Database::SCORE_SORTING_COMPARATOR {
     virtual ~SortScoreByScore() { ; }
     bool operator()(FinishedScore const &a, FinishedScore const &b) const {
@@ -181,12 +149,12 @@ Database::Database() {
     m_prevPlayerStats.percentToNextLevel = 0.0f;
     m_prevPlayerStats.totalScore = 0;
 
-    m_scoreSortingMethods.push_back({"Sort by Accuracy", new SortScoreByAccuracy()});
-    m_scoreSortingMethods.push_back({"Sort by Combo", new SortScoreByCombo()});
-    m_scoreSortingMethods.push_back({"Sort by Date", new SortScoreByDate()});
-    m_scoreSortingMethods.push_back({"Sort by Misses", new SortScoreByMisses()});
+    m_scoreSortingMethods.push_back({"Sort by accuracy", new SortScoreByAccuracy()});
+    m_scoreSortingMethods.push_back({"Sort by combo", new SortScoreByCombo()});
+    m_scoreSortingMethods.push_back({"Sort by date", new SortScoreByDate()});
+    m_scoreSortingMethods.push_back({"Sort by misses", new SortScoreByMisses()});
+    m_scoreSortingMethods.push_back({"Sort by score", new SortScoreByScore()});
     m_scoreSortingMethods.push_back({"Sort by pp", new SortScoreByPP()});
-    m_scoreSortingMethods.push_back({"Sort by Score", new SortScoreByScore()});
 }
 
 Database::~Database() {
@@ -1180,46 +1148,46 @@ void Database::saveMaps() {
     Timer t;
     t.start();
 
-    Packet maps;
-    write<u32>(&maps, NEOSU_MAPS_DB_VERSION);
+    BanchoFileWriter maps("neosu_maps.db");
+    maps.write<u32>(NEOSU_MAPS_DB_VERSION);
 
     // Save neosu-downloaded maps
-    write<u32>(&maps, m_neosu_sets.size());
+    maps.write<u32>(m_neosu_sets.size());
     for(BeatmapSet *beatmap : m_neosu_sets) {
-        write<i32>(&maps, beatmap->getSetID());
-        write<u16>(&maps, beatmap->getDifficulties().size());
+        maps.write<i32>(beatmap->getSetID());
+        maps.write<u16>(beatmap->getDifficulties().size());
 
         for(BeatmapDifficulty *diff : beatmap->getDifficulties()) {
-            write_string(&maps, env->getFileNameFromFilePath(diff->m_sFilePath).c_str());
-            write<i32>(&maps, diff->m_iID);
-            write_string(&maps, diff->m_sTitle.c_str());
-            write_string(&maps, diff->m_sAudioFileName.c_str());
-            write<i32>(&maps, diff->m_iLengthMS);
-            write<f32>(&maps, diff->m_fStackLeniency);
-            write_string(&maps, diff->m_sArtist.c_str());
-            write_string(&maps, diff->m_sCreator.c_str());
-            write_string(&maps, diff->m_sDifficultyName.c_str());
-            write_string(&maps, diff->m_sSource.c_str());
-            write_string(&maps, diff->m_sTags.c_str());
-            write_hash(&maps, diff->m_sMD5Hash);
-            write<f32>(&maps, diff->m_fAR);
-            write<f32>(&maps, diff->m_fCS);
-            write<f32>(&maps, diff->m_fHP);
-            write<f32>(&maps, diff->m_fOD);
-            write<f64>(&maps, diff->m_fSliderMultiplier);
-            write<u32>(&maps, diff->m_iPreviewTime);
-            write<u64>(&maps, diff->last_modification_time);
-            write<i16>(&maps, diff->m_iLocalOffset);
-            write<i16>(&maps, diff->m_iOnlineOffset);
-            write<u16>(&maps, diff->m_iNumCircles);
-            write<u16>(&maps, diff->m_iNumSliders);
-            write<u16>(&maps, diff->m_iNumSpinners);
-            write<f64>(&maps, diff->m_fStarsNomod);
-            write<i32>(&maps, diff->m_iMinBPM);
-            write<i32>(&maps, diff->m_iMaxBPM);
-            write<i32>(&maps, diff->m_iMostCommonBPM);
-            write<u8>(&maps, diff->draw_background);
-            write<f32>(&maps, diff->loudness.load());
+            maps.write_string(env->getFileNameFromFilePath(diff->m_sFilePath).c_str());
+            maps.write<i32>(diff->m_iID);
+            maps.write_string(diff->m_sTitle.c_str());
+            maps.write_string(diff->m_sAudioFileName.c_str());
+            maps.write<i32>(diff->m_iLengthMS);
+            maps.write<f32>(diff->m_fStackLeniency);
+            maps.write_string(diff->m_sArtist.c_str());
+            maps.write_string(diff->m_sCreator.c_str());
+            maps.write_string(diff->m_sDifficultyName.c_str());
+            maps.write_string(diff->m_sSource.c_str());
+            maps.write_string(diff->m_sTags.c_str());
+            maps.write_hash(diff->m_sMD5Hash);
+            maps.write<f32>(diff->m_fAR);
+            maps.write<f32>(diff->m_fCS);
+            maps.write<f32>(diff->m_fHP);
+            maps.write<f32>(diff->m_fOD);
+            maps.write<f64>(diff->m_fSliderMultiplier);
+            maps.write<u32>(diff->m_iPreviewTime);
+            maps.write<u64>(diff->last_modification_time);
+            maps.write<i16>(diff->m_iLocalOffset);
+            maps.write<i16>(diff->m_iOnlineOffset);
+            maps.write<u16>(diff->m_iNumCircles);
+            maps.write<u16>(diff->m_iNumSliders);
+            maps.write<u16>(diff->m_iNumSpinners);
+            maps.write<f64>(diff->m_fStarsNomod);
+            maps.write<i32>(diff->m_iMinBPM);
+            maps.write<i32>(diff->m_iMaxBPM);
+            maps.write<i32>(diff->m_iMostCommonBPM);
+            maps.write<u8>(diff->draw_background);
+            maps.write<f32>(diff->loudness.load());
         }
     }
 
@@ -1233,24 +1201,19 @@ void Database::saveMaps() {
         m_peppy_overrides[diff2->getMD5Hash()] = diff2->get_overrides();
     }
 
-    write<u32>(&maps, m_peppy_overrides.size());
-    for(auto& pair : m_peppy_overrides) {
-        write_hash(&maps, pair.first);
-        write<i16>(&maps, pair.second.local_offset);
-        write<i16>(&maps, pair.second.online_offset);
-        write<f32>(&maps, pair.second.star_rating);
-        write<f32>(&maps, pair.second.loudness);
-        write<i32>(&maps, pair.second.min_bpm);
-        write<i32>(&maps, pair.second.max_bpm);
-        write<i32>(&maps, pair.second.avg_bpm);
-        write<u8>(&maps, pair.second.draw_background);
+    maps.write<u32>(m_peppy_overrides.size());
+    for(auto &pair : m_peppy_overrides) {
+        maps.write_hash(pair.first);
+        maps.write<i16>(pair.second.local_offset);
+        maps.write<i16>(pair.second.online_offset);
+        maps.write<f32>(pair.second.star_rating);
+        maps.write<f32>(pair.second.loudness);
+        maps.write<i32>(pair.second.min_bpm);
+        maps.write<i32>(pair.second.max_bpm);
+        maps.write<i32>(pair.second.avg_bpm);
+        maps.write<u8>(pair.second.draw_background);
     }
     m_peppy_overrides_mtx.unlock();
-
-    if(!save_db(&maps, "neosu_maps.db")) {
-        debugLog("Couldn't write neosu_maps.db!\n");
-    }
-    free(maps.memory);
 
     t.update();
     debugLog("Saving maps took %f seconds.\n", t.getElapsedTime());
@@ -1352,13 +1315,6 @@ void Database::loadScores() {
                 sc.ppv2_total_stars = db.read<f32>();
                 sc.ppv2_aim_stars = db.read<f32>();
                 sc.ppv2_speed_stars = db.read<f32>();
-
-                sc.ppv3_algorithm = db.read_string();
-                sc.ppv3_score = db.read<f32>();
-
-                u32 nb_hitresults = db.read<u16>();
-                sc.hitdeltas.reserve(nb_hitresults);
-                db.read_bytes(sc.hitdeltas.data(), nb_hitresults);
 
                 sc.numSliderBreaks = db.read<u16>();
                 sc.unstableRate = db.read<f32>();
@@ -1668,13 +1624,6 @@ void Database::saveScores() {
             db.write<f32>(score.ppv2_total_stars);
             db.write<f32>(score.ppv2_aim_stars);
             db.write<f32>(score.ppv2_speed_stars);
-
-            db.write_string(score.ppv3_algorithm);
-            db.write<f32>(score.ppv3_score);
-
-            u16 nb_hitresults = score.hitdeltas.size();
-            db.write<u16>(nb_hitresults);
-            db.write_bytes(score.hitdeltas.data(), nb_hitresults);
 
             db.write<u16>(score.numSliderBreaks);
             db.write<f32>(score.unstableRate);

@@ -349,7 +349,7 @@ SongBrowser::SongBrowser() : ScreenBackable() {
         m_topbarLeft->addBaseUIElement(m_songInfo);
     }
 
-    m_scoreSortButton = addTopBarLeftTabButton("Sort by Score");
+    m_scoreSortButton = addTopBarLeftTabButton("Sort by score");
     m_scoreSortButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onSortScoresClicked));
     m_webButton = addTopBarLeftButton("Web");
     m_webButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onWebClicked));
