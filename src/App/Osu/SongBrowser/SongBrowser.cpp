@@ -780,8 +780,8 @@ void SongBrowser::draw(Graphics *g) {
         g->popTransform();
         calcy += font->getHeight() + 10;
     }
-    if(cv_normalize_loudness.getBool() && loct_total.load() > 0 && loct_computed.load() < loct_total.load()) {
-        UString msg = UString::format("Calculating loudness (%i/%i) ...", loct_computed.load(), loct_total.load());
+    if(cv_normalize_loudness.getBool() && loct_total() > 0 && loct_computed() < loct_total()) {
+        UString msg = UString::format("Computing loudness (%i/%i) ...", loct_computed(), loct_total());
         g->setColor(0xff333333);
         g->pushTransform();
         g->translate(calcx, calcy);
@@ -911,10 +911,10 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
     if(mct_total.load() > 0 && (mct_computed.load() == mct_total.load())) {
         mct_abort();  // join thread
 
-        // XXX: this is mega freezing. maybe do in steps instead of all at once
         auto &maps = db->m_maps_to_recalc;
+
+        db->m_peppy_overrides_mtx.lock();
         for(int i = 0; i < mct_results.size(); i++) {
-            // NOTE: not double checking md5 here. might be a mistake
             auto diff = maps[i];
             auto res = mct_results[i];
             diff->m_iNumCircles = res.nb_circles;
@@ -924,8 +924,9 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
             diff->m_iMinBPM = res.min_bpm;
             diff->m_iMaxBPM = res.max_bpm;
             diff->m_iMostCommonBPM = res.avg_bpm;
-            diff->update_overrides();
+            db->m_peppy_overrides[diff->m_sMD5Hash] = diff->get_overrides();
         }
+        db->m_peppy_overrides_mtx.unlock();
 
         maps.clear();
     }

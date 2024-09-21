@@ -5,12 +5,14 @@
 #include "Beatmap.h"
 #include "CBaseUILabel.h"
 #include "Console.h"
+#include "Database.h"
 #include "Engine.h"
 #include "Keyboard.h"
 #include "ModSelector.h"
 #include "Osu.h"
 #include "Profiler.h"
 #include "RichPresence.h"
+#include "SongBrowser/LoudnessCalcThread.h"
 #include "SoundEngine.h"
 #include "SpectatorScreen.h"
 
@@ -790,6 +792,14 @@ void _osu_songbrowser_search_hardcoded_filter(UString oldValue, UString newValue
     if(newValue.length() == 1 && newValue.isWhitespaceOnly()) cv_songbrowser_search_hardcoded_filter.setValue("");
 }
 
+void loudness_cb(UString oldValue, UString newValue) {
+    // Restart loudness calc.
+    loct_abort();
+    if(db && cv_normalize_loudness.getBool()) {
+        loct_calc(db->m_loudness_to_calc);
+    }
+}
+
 ConVar cmd_borderless("borderless", FCVAR_BANCHO_COMPATIBLE, _borderless);
 ConVar cmd_center("center", FCVAR_BANCHO_COMPATIBLE, _center);
 ConVar cmd_clear("clear");
@@ -1424,6 +1434,7 @@ ConVar cv_letterboxing("osu_letterboxing", true, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_letterboxing_offset_x("osu_letterboxing_offset_x", 0.0f, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_letterboxing_offset_y("osu_letterboxing_offset_y", 0.0f, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_load_beatmap_background_images("osu_load_beatmap_background_images", true, FCVAR_BANCHO_COMPATIBLE);
+ConVar cv_loudness_calc_threads("loudness_calc_threads", 1, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE, loudness_cb);
 ConVar cv_loudness_fallback("loudness_fallback", -12.f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 ConVar cv_loudness_target("loudness_target", -14.f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 ConVar cv_main_menu_alpha("osu_main_menu_alpha", 0.8f, FCVAR_BANCHO_COMPATIBLE);

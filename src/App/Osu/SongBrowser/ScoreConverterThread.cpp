@@ -26,6 +26,8 @@ static void run_sct() {
 
         if(dead.load()) return;
 
+        // TODO @kiwec: compute ppv2 if missing
+
         if(score.replay.empty()) {
             if(!LegacyReplay::load_from_disk(&score, false)) {
                 debugLog("Failed to load replay for score %d\n", idx);

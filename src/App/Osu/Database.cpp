@@ -1225,8 +1225,16 @@ void Database::saveMaps() {
 
     // We want to save settings we applied on peppy-imported maps
     m_peppy_overrides_mtx.lock();
+
+    // When calculating loudness we don't call update_overrides() for performance reasons
+    for(auto diff2 : m_loudness_to_calc) {
+        if(diff2->m_type != DatabaseBeatmap::BeatmapType::PEPPY_DIFFICULTY) continue;
+        if(diff2->loudness.load() == 0.f) continue;
+        m_peppy_overrides[diff2->getMD5Hash()] = diff2->get_overrides();
+    }
+
     write<u32>(&maps, m_peppy_overrides.size());
-    for(auto pair : m_peppy_overrides) {
+    for(auto& pair : m_peppy_overrides) {
         write_hash(&maps, pair.first);
         write<i16>(&maps, pair.second.local_offset);
         write<i16>(&maps, pair.second.online_offset);
