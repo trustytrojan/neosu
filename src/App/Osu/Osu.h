@@ -3,6 +3,7 @@
 #include "BanchoNetworking.h"
 #include "ModSelector.h"
 #include "MouseListener.h"
+#include "Replay.h"
 #include "score.h"
 
 class CWindowManager;
@@ -240,7 +241,7 @@ class Osu : public App, public MouseListener {
     Vector2 flashlight_position;
 
     // mods
-    ModSelection previous_mods;
+    Replay::Mods previous_mods;
     bool m_bModAutoTemp = false;  // when ctrl+clicking a map, the auto mod should disable itself after the map finishes
 
     std::vector<ConVar *> m_experimentalMods;

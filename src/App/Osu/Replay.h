@@ -88,6 +88,7 @@ struct Mods {
 
     static Mods from_cvars();
     static Mods from_legacy(i32 legacy_flags);
+    static void use(Mods mods);
 };
 
 }  // namespace Replay

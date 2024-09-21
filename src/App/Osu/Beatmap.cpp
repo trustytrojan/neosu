@@ -487,7 +487,7 @@ bool Beatmap::watch(FinishedScore score, f64 start_percent) {
     m_bContinueScheduled = false;
     unloadObjects();
 
-    osu->previous_mods = osu->getModSelector()->getModSelection();
+    osu->previous_mods = Replay::Mods::from_cvars();
 
     osu->watched_user_name = score.playerName.c_str();
     osu->watched_user_id = score.player_id;
@@ -527,7 +527,7 @@ bool Beatmap::spectate() {
     osu->watched_user_name = user_info->name;
     is_spectating = true;
 
-    osu->previous_mods = osu->getModSelector()->getModSelection();
+    osu->previous_mods = Replay::Mods::from_cvars();
 
     FinishedScore score;
     score.client = "peppy-unknown";
@@ -912,7 +912,7 @@ void Beatmap::stop(bool quit) {
     }
 
     if(is_watching || is_spectating) {
-        osu->getModSelector()->restoreMods(osu->previous_mods);
+        Replay::Mods::use(osu->previous_mods);
     }
 
     is_spectating = false;

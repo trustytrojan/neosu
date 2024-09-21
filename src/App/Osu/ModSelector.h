@@ -19,14 +19,6 @@ class UICheckbox;
 
 class ConVar;
 
-struct ModSelection {
-    u32 flags;
-    bool fposu;
-    std::vector<bool> override_locks;
-    std::vector<float> override_values;
-    std::vector<bool> experimental;
-};
-
 class ModSelector : public OsuScreen {
    public:
     ModSelector();
@@ -49,9 +41,6 @@ class ModSelector : public OsuScreen {
     u32 getModFlags();
     void enableModsFromFlags(u32 flags);
 
-    ModSelection getModSelection();
-    void restoreMods(ModSelection selection);
-
     void setWaitForF1KeyUp(bool waitForF1KeyUp) { m_bWaitForF1KeyUp = waitForF1KeyUp; }
 
     bool isInCompactMode();
@@ -60,9 +49,19 @@ class ModSelector : public OsuScreen {
     bool isMouseInside();
 
     void updateButtons(bool initial = false);
+    void updateExperimentalButtons();
+    void updateOverrideSliderLabels();
 
     CBaseUILabel *m_nonVanillaWarning;
     UIModSelectorModButton *m_modButtonAuto;
+
+    CBaseUISlider *m_CSSlider;
+    CBaseUISlider *m_ARSlider;
+    CBaseUISlider *m_ODSlider;
+    CBaseUISlider *m_HPSlider;
+    CBaseUISlider *m_speedSlider;
+    CBaseUICheckbox *m_ARLock;
+    CBaseUICheckbox *m_ODLock;
 
    private:
     struct OVERRIDE_SLIDER {
@@ -89,7 +88,6 @@ class ModSelector : public OsuScreen {
     };
 
     void updateScoreMultiplierLabelText();
-    void updateExperimentalButtons(bool initial);
     void updateLayout();
     void updateExperimentalLayout();
 
@@ -104,7 +102,6 @@ class ModSelector : public OsuScreen {
     void onOverrideSliderLockChange(CBaseUICheckbox *checkbox);
     void onOverrideARSliderDescClicked(CBaseUIButton *button);
     void onOverrideODSliderDescClicked(CBaseUIButton *button);
-    void updateOverrideSliderLabels();
     UString getOverrideSliderLabelText(OVERRIDE_SLIDER s, bool active);
 
     CBaseUILabel *addExperimentalLabel(UString text);
@@ -130,13 +127,6 @@ class ModSelector : public OsuScreen {
 
     // override sliders
     std::vector<OVERRIDE_SLIDER> m_overrideSliders;
-    CBaseUISlider *m_CSSlider;
-    CBaseUISlider *m_ARSlider;
-    CBaseUISlider *m_ODSlider;
-    CBaseUISlider *m_HPSlider;
-    CBaseUISlider *m_speedSlider;
-    CBaseUICheckbox *m_ARLock;
-    CBaseUICheckbox *m_ODLock;
     bool m_bShowOverrideSliderALTHint;
 
     // mod grid buttons

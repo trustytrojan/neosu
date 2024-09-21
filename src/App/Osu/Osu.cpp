@@ -861,68 +861,16 @@ void Osu::update() {
     }
 }
 
-void Osu::useMods(FinishedScore *score) {
-    getModSelector()->resetMods();
-
-    cv_ar_override.setValue(score->mods.ar_override);
-    cv_cs_override.setValue(score->mods.cs_override);
-    cv_od_override.setValue(score->mods.od_override);
-    cv_hp_override.setValue(score->mods.hp_override);
-
-    if(score->mods.speed != 1.f) {
-        cv_speed_override.setValue(score->mods.speed);
-    }
-
-    cv_mod_autoplay.setValue(score->mods.flags & Replay::ModFlags::Autoplay);
-    cv_mod_autopilot.setValue(score->mods.flags & Replay::ModFlags::Autopilot);
-    cv_mod_relax.setValue(score->mods.flags & Replay::ModFlags::Relax);
-    cv_mod_spunout.setValue(score->mods.flags & Replay::ModFlags::SpunOut);
-    cv_mod_target.setValue(score->mods.flags & Replay::ModFlags::Target);
-    cv_mod_scorev2.setValue(score->mods.flags & Replay::ModFlags::ScoreV2);
-    cv_mod_flashlight.setValue(score->mods.flags & Replay::ModFlags::Flashlight);
-    cv_mod_nofail.setValue(score->mods.flags & Replay::ModFlags::NoFail);
-    cv_mod_hidden.setValue(score->mods.flags & Replay::ModFlags::Hidden);
-    cv_mod_hardrock.setValue(score->mods.flags & Replay::ModFlags::HardRock);
-    cv_mod_easy.setValue(score->mods.flags & Replay::ModFlags::Easy);
-    cv_mod_suddendeath.setValue(score->mods.flags & Replay::ModFlags::SuddenDeath);
-    cv_mod_perfect.setValue(score->mods.flags & Replay::ModFlags::Perfect);
-    cv_mod_nightmare.setValue(score->mods.flags & Replay::ModFlags::Nightmare);
-    cv_mod_touchdevice.setValue(score->mods.flags & Replay::ModFlags::TouchDevice);
-    cv_playfield_mirror_horizontal.setValue(score->mods.flags & Replay::ModFlags::MirrorHorizontal);
-    cv_playfield_mirror_vertical.setValue(score->mods.flags & Replay::ModFlags::MirrorVertical);
-    cv_mod_fposu.setValue(score->mods.flags & Replay::ModFlags::FPoSu);
-    cv_fposu_mod_strafing.setValue(score->mods.flags & Replay::ModFlags::FPoSu_Strafing);
-    cv_mod_wobble.setValue(score->mods.flags & Replay::ModFlags::Wobble1);
-    cv_mod_wobble2.setValue(score->mods.flags & Replay::ModFlags::Wobble2);
-    cv_mod_arwobble.setValue(score->mods.flags & Replay::ModFlags::ARWobble);
-    cv_mod_timewarp.setValue(score->mods.flags & Replay::ModFlags::Timewarp);
-    cv_mod_artimewarp.setValue(score->mods.flags & Replay::ModFlags::ARTimewarp);
-    cv_mod_minimize.setValue(score->mods.flags & Replay::ModFlags::Minimize);
-    cv_mod_fadingcursor.setValue(score->mods.flags & Replay::ModFlags::FadingCursor);
-    cv_mod_fps.setValue(score->mods.flags & Replay::ModFlags::FPS);
-    cv_mod_jigsaw1.setValue(score->mods.flags & Replay::ModFlags::Jigsaw1);
-    cv_mod_jigsaw2.setValue(score->mods.flags & Replay::ModFlags::Jigsaw2);
-    cv_mod_fullalternate.setValue(score->mods.flags & Replay::ModFlags::FullAlternate);
-    cv_mod_reverse_sliders.setValue(score->mods.flags & Replay::ModFlags::ReverseSliders);
-    cv_mod_no50s.setValue(score->mods.flags & Replay::ModFlags::No50s);
-    cv_mod_no100s.setValue(score->mods.flags & Replay::ModFlags::No100s);
-    cv_mod_ming3012.setValue(score->mods.flags & Replay::ModFlags::Ming3012);
-    cv_mod_halfwindow.setValue(score->mods.flags & Replay::ModFlags::HalfWindow);
-    cv_mod_millhioref.setValue(score->mods.flags & Replay::ModFlags::Millhioref);
-    cv_mod_mafham.setValue(score->mods.flags & Replay::ModFlags::Mafham);
-    cv_mod_strict_tracking.setValue(score->mods.flags & Replay::ModFlags::StrictTracking);
-    cv_mod_shirone.setValue(score->mods.flags & Replay::ModFlags::Shirone);
-    cv_mod_approach_different.setValue(score->mods.flags & Replay::ModFlags::ApproachDifferent);
-
-    updateMods();
-}
+void Osu::useMods(FinishedScore *score) { Replay::Mods::use(score->mods); }
 
 void Osu::updateMods() {
     if(bancho.is_in_a_multi_room()) {
         if(bancho.room.mods & (LegacyFlags::DoubleTime | LegacyFlags::Nightcore)) {
-            cv_speed_override.setValue(1.5);
+            cv_speed_override.setValue(1.5f);
         } else if(bancho.room.mods & (LegacyFlags::HalfTime)) {
-            cv_speed_override.setValue(0.75);
+            cv_speed_override.setValue(0.75f);
+        } else {
+            cv_speed_override.setValue(-1.f);
         }
 
         cv_mod_nofail.setValue(bancho.room.mods & LegacyFlags::NoFail);
