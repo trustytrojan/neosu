@@ -1261,7 +1261,9 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
                 combo++;
             }
 
-            if(nextHitObject == NULL || nextHitObject->getComboNumber() == 1) currentHitObject->setIsEndOfCombo(true);
+            if(nextHitObject == NULL || nextHitObject->combo_number == 1) {
+                currentHitObject->is_end_of_combo = true;
+            }
         }
 
         beatmap->m_iScoreV2ComboPortionMaximum = scoreV2ComboPortionMaximum;
@@ -1284,7 +1286,7 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
                 const Spinner *spinnerPointer = dynamic_cast<Spinner *>(currentHitObject);
 
                 if(spinnerPointer == NULL) {
-                    currentHitObject->setComboNumber(comboNumber);
+                    currentHitObject->combo_number = comboNumber;
                     comboNumber++;
                 }
             }
@@ -1295,10 +1297,10 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
             for(size_t i = 0; i < result.hitobjects.size(); i++) {
                 HitObject *currentHitObject = result.hitobjects[i];
 
-                const int currentComboNumber = currentHitObject->getComboNumber();
+                const int currentComboNumber = currentHitObject->combo_number;
                 const int newComboNumber = (currentComboNumber % numberMax);
 
-                currentHitObject->setComboNumber(newComboNumber == 0 ? numberMax : newComboNumber);
+                currentHitObject->combo_number = (newComboNumber == 0) ? numberMax : newComboNumber;
             }
         }
     }

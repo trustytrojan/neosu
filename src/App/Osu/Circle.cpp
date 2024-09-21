@@ -423,7 +423,7 @@ void Circle::draw(Graphics *g) {
             skin->getHitCircleOverlay2()->setAnimationTimeOffset(
                 skin->getAnimationSpeed(),
                 !bm->isInMafhamRenderChunk() ? click_time - m_iApproachTime : bm->getCurMusicPosWithOffsets());
-            drawCircle(g, bm, m_vRawPos, m_iComboNumber, m_iColorCounter, m_iColorOffset, 1.0f, 1.0f, alpha, alpha,
+            drawCircle(g, bm, m_vRawPos, combo_number, m_iColorCounter, m_iColorOffset, 1.0f, 1.0f, alpha, alpha,
                        drawNumber);
         }
         g->popTransform();
@@ -453,7 +453,7 @@ void Circle::draw(Graphics *g) {
     skin->getHitCircleOverlay2()->setAnimationTimeOffset(
         skin->getAnimationSpeed(),
         !bm->isInMafhamRenderChunk() ? click_time - m_iApproachTime : bm->getCurMusicPosWithOffsets());
-    drawCircle(g, bm, shakeCorrectedPos, m_iComboNumber, m_iColorCounter, m_iColorOffset,
+    drawCircle(g, bm, shakeCorrectedPos, combo_number, m_iColorCounter, m_iColorOffset,
                m_fHittableDimRGBColorMultiplierPercent, m_bWaiting && !hd ? 1.0f : m_fApproachScale,
                m_bWaiting && !hd ? 1.0f : m_fAlpha, m_bWaiting && !hd ? 1.0f : m_fAlpha, true,
                m_bOverrideHDApproachCircle);
@@ -476,7 +476,7 @@ void Circle::draw2(Graphics *g) {
         debugLog("click_time = %ld, aScale = %f, iScale = %f\n", click_time, m_fApproachScale, approachCircleImageScale);
     }
 
-    drawApproachCircle(g, bm, m_vRawPos, m_iComboNumber, m_iColorCounter, m_iColorOffset,
+    drawApproachCircle(g, bm, m_vRawPos, combo_number, m_iColorCounter, m_iColorOffset,
                        m_fHittableDimRGBColorMultiplierPercent, m_bWaiting && !hd ? 1.0f : m_fApproachScale,
                        m_bWaiting && !hd ? 1.0f : m_fAlphaForApproachCircle, m_bOverrideHDApproachCircle);
 }
@@ -581,7 +581,7 @@ void Circle::onHit(LiveScore::HIT result, long delta, float targetDelta, float t
     }
 
     // add it, and we are finished
-    addHitResult(result, delta, m_bIsEndOfCombo, m_vRawPos, targetDelta, targetAngle);
+    addHitResult(result, delta, is_end_of_combo, m_vRawPos, targetDelta, targetAngle);
     m_bFinished = true;
 }
 

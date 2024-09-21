@@ -1175,7 +1175,7 @@ void SimulatedBeatmap::computeDrainRate() {
                                                          testPlayer.hpMultiplierComboEnd, 1.0));  // 300
 
                         // end of combo (new combo starts at next hitobject)
-                        if((i == m_hitobjects.size() - 1) || m_hitobjects[i]->isEndOfCombo()) {
+                        if((i == m_hitobjects.size() - 1) || m_hitobjects[i]->is_end_of_combo) {
                             testPlayer.increaseHealth(LiveScore::getHealthIncrease(
                                 LiveScore::HIT::HIT_300G, HP, testPlayer.hpMultiplierNormal,
                                 testPlayer.hpMultiplierComboEnd, 1.0));  // geki

@@ -333,7 +333,7 @@ void Slider::draw(Graphics *g) {
                     skin->getAnimationSpeed(),
                     !bm->isInMafhamRenderChunk() ? click_time - m_iApproachTime : bm->getCurMusicPosWithOffsets());
 
-                Circle::drawSliderStartCircle(g, bm, m_curve->pointAt(0.0f), m_iComboNumber, m_iColorCounter,
+                Circle::drawSliderStartCircle(g, bm, m_curve->pointAt(0.0f), combo_number, m_iColorCounter,
                                               m_iColorOffset, 1.0f, 1.0f, alpha, alpha, drawNumber);
             } else {
                 skin->getHitCircleOverlay2()->setAnimationTimeOffset(
@@ -343,7 +343,7 @@ void Slider::draw(Graphics *g) {
                     skin->getAnimationSpeed(),
                     !bm->isInMafhamRenderChunk() ? click_time : bm->getCurMusicPosWithOffsets());
 
-                Circle::drawSliderEndCircle(g, bm, m_curve->pointAt(0.0f), m_iComboNumber, m_iColorCounter,
+                Circle::drawSliderEndCircle(g, bm, m_curve->pointAt(0.0f), combo_number, m_iColorCounter,
                                             m_iColorOffset, 1.0f, 1.0f, alpha, alpha, drawNumber);
             }
         }
@@ -368,7 +368,7 @@ void Slider::draw(Graphics *g) {
                     skin->getAnimationSpeed(),
                     !bm->isInMafhamRenderChunk() ? click_time - m_iFadeInTime : bm->getCurMusicPosWithOffsets());
 
-                Circle::drawSliderEndCircle(g, bm, m_curve->pointAt(1.0f), m_iComboNumber, m_iColorCounter,
+                Circle::drawSliderEndCircle(g, bm, m_curve->pointAt(1.0f), combo_number, m_iColorCounter,
                                             m_iColorOffset, 1.0f, 1.0f, alpha, 0.0f, false);
             }
         }
@@ -401,7 +401,7 @@ void Slider::draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCi
 
             // start circle
             if(!m_bStartFinished || !sliderRepeatStartCircleFinished || (!m_bEndFinished && m_iRepeat % 2 == 0)) {
-                Circle::drawApproachCircle(g, bm, m_curve->pointAt(0.0f), m_iComboNumber, m_iColorCounter,
+                Circle::drawApproachCircle(g, bm, m_curve->pointAt(0.0f), combo_number, m_iColorCounter,
                                            m_iColorOffset, m_fHittableDimRGBColorMultiplierPercent, m_fApproachScale,
                                            m_fAlphaForApproachCircle, m_bOverrideHDApproachCircle);
             }
@@ -482,7 +482,7 @@ void Slider::drawStartCircle(Graphics *g, float alpha) {
         skin->getSliderEndCircleOverlay2()->setAnimationTimeOffset(
             skin->getAnimationSpeed(), !bm->isInMafhamRenderChunk() ? click_time : bm->getCurMusicPosWithOffsets());
 
-        Circle::drawSliderEndCircle(g, bm, m_curve->pointAt(0.0f), m_iComboNumber, m_iColorCounter, m_iColorOffset,
+        Circle::drawSliderEndCircle(g, bm, m_curve->pointAt(0.0f), combo_number, m_iColorCounter, m_iColorOffset,
                                     m_fHittableDimRGBColorMultiplierPercent, 1.0f, m_fAlpha, 0.0f, false, false);
     } else {
         skin->getHitCircleOverlay2()->setAnimationTimeOffset(
@@ -492,7 +492,7 @@ void Slider::drawStartCircle(Graphics *g, float alpha) {
             skin->getAnimationSpeed(),
             !bm->isInMafhamRenderChunk() ? click_time - m_iApproachTime : bm->getCurMusicPosWithOffsets());
 
-        Circle::drawSliderStartCircle(g, bm, m_curve->pointAt(0.0f), m_iComboNumber, m_iColorCounter, m_iColorOffset,
+        Circle::drawSliderStartCircle(g, bm, m_curve->pointAt(0.0f), combo_number, m_iColorCounter, m_iColorOffset,
                                       m_fHittableDimRGBColorMultiplierPercent, m_fApproachScale, m_fAlpha, m_fAlpha,
                                       !m_bHideNumberAfterFirstRepeatHit, m_bOverrideHDApproachCircle);
     }
@@ -508,7 +508,7 @@ void Slider::drawEndCircle(Graphics *g, float alpha, float sliderSnake) {
         skin->getAnimationSpeed(),
         !bm->isInMafhamRenderChunk() ? click_time - m_iFadeInTime : bm->getCurMusicPosWithOffsets());
 
-    Circle::drawSliderEndCircle(g, bm, m_curve->pointAt(sliderSnake), m_iComboNumber, m_iColorCounter, m_iColorOffset,
+    Circle::drawSliderEndCircle(g, bm, m_curve->pointAt(sliderSnake), combo_number, m_iColorCounter, m_iColorOffset,
                                 m_fHittableDimRGBColorMultiplierPercent, 1.0f, m_fAlpha, 0.0f, false, false);
 }
 
@@ -766,7 +766,7 @@ void Slider::update(long curPos, f64 frame_time) {
                         m_endResult = LiveScore::HIT::HIT_MISS;
 
                         // end of combo, ignore in hiterrorbar, ignore combo, subtract health
-                        addHitResult(m_endResult, 0, m_bIsEndOfCombo, getRawPosAt(click_time + duration), -1.0f,
+                        addHitResult(m_endResult, 0, is_end_of_combo, getRawPosAt(click_time + duration), -1.0f,
                                      0.0f, true, true, false);
                     }
                 }
@@ -1134,7 +1134,7 @@ void Slider::onHit(LiveScore::HIT result, long delta, bool startOrEnd, float tar
             // XXX: remove this
             const bool isLazer2020Drain = false;
 
-            addHitResult(result, delta, m_bIsEndOfCombo, getRawPosAt(click_time + duration), -1.0f, 0.0f, true,
+            addHitResult(result, delta, is_end_of_combo, getRawPosAt(click_time + duration), -1.0f, 0.0f, true,
                          !m_bHeldTillEnd,
                          isLazer2020Drain);  // end of combo, ignore in hiterrorbar, depending on heldTillEnd increase
                                              // combo or not, increase score, increase health depending on drain type

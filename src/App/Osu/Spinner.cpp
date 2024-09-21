@@ -418,7 +418,7 @@ void Spinner::onHit() {
     }
 
     // add it, and we are finished
-    addHitResult(result, 0, m_bIsEndOfCombo, m_vRawPos, -1.0f);
+    addHitResult(result, 0, is_end_of_combo, m_vRawPos, -1.0f);
     m_bFinished = true;
 
     if(bm != NULL) {

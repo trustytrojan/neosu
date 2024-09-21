@@ -33,37 +33,30 @@ class HitObject {
 
     virtual int getCombo() { return 1; }  // how much combo this hitobject is "worth"
 
+	// Gameplay logic
     HitObjectType type;
-
-    // the time at which this object must be clicked
     i64 click_time;
-
-    // how long this object takes to click
-    //   circle = 0
-    //   slider = sliderTime
-    //   spinner = spinnerTime
-    // the object will stay visible for (click_time + duration)
     i64 duration;
+
+	// Visual
+    i32 combo_number;
+    bool is_end_of_combo = false;
 
     void addHitResult(LiveScore::HIT result, long delta, bool isEndOfCombo, Vector2 posRaw, float targetDelta = 0.0f,
                       float targetAngle = 0.0f, bool ignoreOnHitErrorBar = false, bool ignoreCombo = false,
                       bool ignoreHealth = false, bool addObjectDurationToSkinAnimationTimeStartOffset = true);
     void misAimed() { m_bMisAim = true; }
 
-    void setIsEndOfCombo(bool isEndOfCombo) { m_bIsEndOfCombo = isEndOfCombo; }
     void setStack(int stack) { m_iStack = stack; }
     void setForceDrawApproachCircle(bool firstNote) { m_bOverrideHDApproachCircle = firstNote; }
     void setAutopilotDelta(long delta) { m_iAutopilotDelta = delta; }
     void setBlocked(bool blocked) { m_bBlocked = blocked; }
-    void setComboNumber(int comboNumber) { m_iComboNumber = comboNumber; }
 
     virtual Vector2 getRawPosAt(long pos) = 0;          // with stack calculation modifications
     virtual Vector2 getOriginalRawPosAt(long pos) = 0;  // without stack calculations
     virtual Vector2 getAutoCursorPos(long curPos) = 0;
 
     inline int getStack() const { return m_iStack; }
-    inline int getComboNumber() const { return m_iComboNumber; }
-    inline bool isEndOfCombo() const { return m_bIsEndOfCombo; }
     inline int getColorCounter() const { return m_iColorCounter; }
     inline int getColorOffset() const { return m_iColorOffset; }
     inline float getApproachScale() const { return m_fApproachScale; }
@@ -87,8 +80,6 @@ class HitObject {
     bool m_bFinished;
 
     int m_iSampleType;
-    int m_iComboNumber;
-    bool m_bIsEndOfCombo;
     int m_iColorCounter;
     int m_iColorOffset;
 

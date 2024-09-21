@@ -225,8 +225,8 @@ HitObject::HitObject(long time, int sampleType, int comboNumber, bool isEndOfCom
                      BeatmapInterface *beatmap) {
     click_time = time;
     m_iSampleType = sampleType;
-    m_iComboNumber = comboNumber;
-    m_bIsEndOfCombo = isEndOfCombo;
+    combo_number = comboNumber;
+    is_end_of_combo = isEndOfCombo;
     m_iColorCounter = colorCounter;
     m_iColorOffset = colorOffset;
 

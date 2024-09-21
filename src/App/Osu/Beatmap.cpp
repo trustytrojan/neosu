@@ -1782,11 +1782,8 @@ void Beatmap::drawFollowPoints(Graphics *g) {
             continue;
         }
 
-        // NOTE: "m_hitobjects[index]->getComboNumber() != 1" breaks (not literally) on new combos
-        // NOTE: the "getComboNumber()" call has been replaced with isEndOfCombo() because of
-        // osu_ignore_beatmap_combo_numbers and osu_number_max
         const bool isCurrentHitObjectNewCombo =
-            (lastObjectIndex >= 0 ? m_hitobjects[lastObjectIndex]->isEndOfCombo() : false);
+            (lastObjectIndex >= 0 ? m_hitobjects[lastObjectIndex]->is_end_of_combo : false);
         const bool isCurrentHitObjectSpinner = (lastObjectIndex >= 0 && followPointsConnectSpinners
                                                     ? dynamic_cast<Spinner *>(m_hitobjects[lastObjectIndex]) != NULL
                                                     : false);
@@ -3973,7 +3970,7 @@ void Beatmap::computeDrainRate() {
                                                          testPlayer.hpMultiplierComboEnd, 1.0));  // 300
 
                         // end of combo (new combo starts at next hitobject)
-                        if((i == m_hitobjects.size() - 1) || m_hitobjects[i]->isEndOfCombo()) {
+                        if((i == m_hitobjects.size() - 1) || m_hitobjects[i]->is_end_of_combo) {
                             testPlayer.increaseHealth(LiveScore::getHealthIncrease(
                                 LiveScore::HIT::HIT_300G, HP, testPlayer.hpMultiplierNormal,
                                 testPlayer.hpMultiplierComboEnd, 1.0));  // geki
