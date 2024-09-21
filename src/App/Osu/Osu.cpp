@@ -861,32 +861,6 @@ void Osu::update() {
     }
 }
 
-UString getModsStringForConVar(int mods) {
-    UString modsString = "  ";  // double space to reset if emtpy
-
-    // NOTE: the order here is different on purpose, to avoid name collisions during parsing (see Osu::updateMods())
-    // order is the same as in ModSelector::updateModConVar()
-    if(mods & LegacyFlags::Easy) modsString.append("ez");
-    if(mods & LegacyFlags::HardRock) modsString.append("hr");
-    if(mods & LegacyFlags::Relax) modsString.append("relax");
-    if(mods & LegacyFlags::NoFail) modsString.append("nf");
-    if(mods & LegacyFlags::SuddenDeath) modsString.append("sd");
-    if(mods & LegacyFlags::Perfect) modsString.append("ss,");
-    if(mods & LegacyFlags::Autopilot) modsString.append("autopilot");
-    if(mods & LegacyFlags::HalfTime) modsString.append("ht");
-    if(mods & LegacyFlags::DoubleTime) modsString.append("dt");
-    if(mods & LegacyFlags::Nightcore) modsString.append("nc");
-    if(mods & LegacyFlags::SpunOut) modsString.append("spunout");
-    if(mods & LegacyFlags::Hidden) modsString.append("hd");
-    if(mods & LegacyFlags::Autoplay) modsString.append("auto");
-    if(mods & LegacyFlags::Nightmare) modsString.append("nightmare");
-    if(mods & LegacyFlags::Target) modsString.append("practicetarget");
-    if(mods & LegacyFlags::TouchDevice) modsString.append("nerftd");
-    if(mods & LegacyFlags::ScoreV2) modsString.append("v2");
-
-    return modsString;
-}
-
 void Osu::useMods(FinishedScore *score) {
     getModSelector()->resetMods();
 

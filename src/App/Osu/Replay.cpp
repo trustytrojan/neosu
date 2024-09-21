@@ -25,6 +25,10 @@ i32 Replay::Mods::to_legacy() const {
     if(flags & ModFlags::Perfect) legacy_flags |= LegacyFlags::Perfect;
     if(flags & ModFlags::Target) legacy_flags |= LegacyFlags::Target;
     if(flags & ModFlags::ScoreV2) legacy_flags |= LegacyFlags::ScoreV2;
+    if(flags & ModFlags::Autoplay) {
+        legacy_flags &= ~(LegacyFlags::Relax | LegacyFlags::Autopilot);
+        legacy_flags |= LegacyFlags::Autoplay;
+    }
 
     // NOTE: Ignoring nightmare, fposu
 
@@ -68,6 +72,10 @@ Replay::Mods Replay::Mods::from_cvars() {
     if(cv_mod_ming3012.getBool()) mods.flags |= Replay::ModFlags::Ming3012;
     if(cv_mod_no100s.getBool()) mods.flags |= Replay::ModFlags::No100s;
     if(cv_mod_no50s.getBool()) mods.flags |= Replay::ModFlags::No50s;
+    if(cv_mod_autoplay.getBool()) {
+        mods.flags &= ~(Replay::ModFlags::Relax | Replay::ModFlags::Autopilot);
+        mods.flags |= Replay::ModFlags::Autoplay;
+    }
 
     auto beatmap = osu->getSelectedBeatmap();
     if(beatmap != NULL) {
@@ -116,6 +124,10 @@ Replay::Mods Replay::Mods::from_legacy(i32 legacy_flags) {
     if(legacy_flags & LegacyFlags::Mirror) {
         // NOTE: We don't know whether the original score was only horizontal, only vertical, or both
         neoflags |= (ModFlags::MirrorHorizontal | ModFlags::MirrorVertical);
+    }
+    if(legacy_flags & LegacyFlags::Autoplay) {
+        neoflags &= ~(Replay::ModFlags::Relax | Replay::ModFlags::Autopilot);
+        neoflags |= Replay::ModFlags::Autoplay;
     }
 
     Mods mods;
