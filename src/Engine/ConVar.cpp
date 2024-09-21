@@ -1662,6 +1662,8 @@ ConVar cv_seek_delta("osu_seek_delta", 5, FCVAR_BANCHO_COMPATIBLE,
                      "how many seconds to skip backward/forward when quick seeking");
 ConVar cv_show_approach_circle_on_first_hidden_object("osu_show_approach_circle_on_first_hidden_object", true,
                                                       FCVAR_BANCHO_COMPATIBLE);
+ConVar cv_simulate_replays("simulate_replays", false, FCVAR_BANCHO_COMPATIBLE,
+                           "experimental \"improved\" replay playback");
 ConVar cv_skin("osu_skin", "default", FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_skin_animation_force("osu_skin_animation_force", false, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_skin_animation_fps_override("osu_skin_animation_fps_override", -1.0f, FCVAR_BANCHO_COMPATIBLE);

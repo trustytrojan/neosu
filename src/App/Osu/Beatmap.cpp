@@ -1705,7 +1705,7 @@ void Beatmap::draw(Graphics *g) {
         return;
     }
 
-    if(is_watching) {
+    if(is_watching && cv_simulate_replays.getBool()) {
         // XXX: while this fixes HUD desyncing, it's not perfect replay playback
         sim->simulate_to(m_iCurMusicPosWithOffsets);
         *osu->getScore() = sim->live_score;

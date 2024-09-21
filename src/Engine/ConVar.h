@@ -783,6 +783,7 @@ extern ConVar cv_sdl_joystick_zl_threshold;
 extern ConVar cv_sdl_joystick_zr_threshold;
 extern ConVar cv_seek_delta;
 extern ConVar cv_show_approach_circle_on_first_hidden_object;
+extern ConVar cv_simulate_replays;
 extern ConVar cv_skin;
 extern ConVar cv_skin_animation_force;
 extern ConVar cv_skin_animation_fps_override;
