@@ -133,6 +133,7 @@ BanchoFileWriter::~BanchoFileWriter() {
     fclose(file);
 
     if(!errored) {
+        env->deleteFile(file_path);  // Windows (the Microsoft docs are LYING)
         env->renameFile(tmp_file_path, file_path);
     }
 }
@@ -196,5 +197,19 @@ void BanchoFileWriter::write_uleb128(u32 num) {
             next |= 0x80;
         }
         write<u8>(next);
+    }
+}
+
+void copy(const char *from_path, const char *to_path) {
+    BanchoFileReader from(from_path);
+    BanchoFileWriter to(to_path);
+
+    u8 buf[READ_BUFFER_SIZE];
+    u32 remaining = from.total_size;
+    while(remaining > 0) {
+        u32 len = std::min(remaining, (u32)READ_BUFFER_SIZE);
+        from.read_bytes(buf, len);
+        to.write_bytes(buf, len);
+        remaining -= len;
     }
 }

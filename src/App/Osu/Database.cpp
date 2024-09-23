@@ -192,6 +192,7 @@ void Database::cancel() {
 }
 
 void Database::save() {
+    save_collections();
     saveMaps();
     saveScores();
 }
@@ -641,6 +642,7 @@ void Database::loadDB() {
 
     u32 nb_neosu_maps = 0;
     u32 nb_peppy_maps = 0;
+    u32 nb_overrides = 0;
 
     // read beatmapInfos, and also build two hashmaps (diff hash -> BeatmapDifficulty, diff hash -> Beatmap)
     struct Beatmap_Set {
@@ -657,8 +659,13 @@ void Database::loadDB() {
         first_load = false;
 
         u32 version = neosu_maps.read<u32>();
-        u32 nb_sets = neosu_maps.read<u32>();
+        if(version < NEOSU_MAPS_DB_VERSION) {
+            // Reading from older database version: backup just in case
+            auto backup_path = UString::format("neosu_maps.db.%d", version);
+            copy("neosu_maps.db", backup_path.toUtf8());
+        }
 
+        u32 nb_sets = neosu_maps.read<u32>();
         for(u32 i = 0; i < nb_sets; i++) {
             u32 db_pos_sum = db.total_pos + neosu_maps.total_pos;
             float progress = (float)db_pos_sum / (float)db_size_sum;
@@ -753,7 +760,7 @@ void Database::loadDB() {
         }
 
         if(version >= 20240812) {
-            u32 nb_overrides = neosu_maps.read<u32>();
+            nb_overrides = neosu_maps.read<u32>();
             for(u32 i = 0; i < nb_overrides; i++) {
                 MapOverrides over;
                 auto map_md5 = neosu_maps.read_hash();
@@ -1125,9 +1132,8 @@ void Database::loadDB() {
     m_importTimer->update();
     debugLog("peppy+neosu maps: loading took %f seconds (%d peppy, %d neosu, %d maps total)\n",
              m_importTimer->getElapsedTime(), nb_peppy_maps, nb_neosu_maps, nb_peppy_maps + nb_neosu_maps);
-
-    debugLog("Star calculations to do: %d\n", m_maps_to_recalc.size());
-    debugLog("Maps without loudness info: %d\n", m_loudness_to_calc.size());
+    debugLog("Found %d overrides; %d maps need star recalc, %d maps need loudness recalc\n", nb_overrides,
+             m_maps_to_recalc.size(), m_loudness_to_calc.size());
     mct_calc(m_maps_to_recalc);
     loct_calc(m_loudness_to_calc);
 
@@ -1142,9 +1148,12 @@ void Database::loadDB() {
 }
 
 void Database::saveMaps() {
-    if(!m_neosu_maps_loaded) return;
-
     debugLog("Osu: Saving maps ...\n");
+    if(!m_neosu_maps_loaded) {
+        debugLog("Cannot save maps since they weren't loaded properly first!\n");
+        return;
+    }
+
     Timer t;
     t.start();
 
@@ -1152,6 +1161,7 @@ void Database::saveMaps() {
     maps.write<u32>(NEOSU_MAPS_DB_VERSION);
 
     // Save neosu-downloaded maps
+    u32 nb_diffs_saved = 0;
     maps.write<u32>(m_neosu_sets.size());
     for(BeatmapSet *beatmap : m_neosu_sets) {
         maps.write<i32>(beatmap->getSetID());
@@ -1188,6 +1198,8 @@ void Database::saveMaps() {
             maps.write<i32>(diff->m_iMostCommonBPM);
             maps.write<u8>(diff->draw_background);
             maps.write<f32>(diff->loudness.load());
+
+            nb_diffs_saved++;
         }
     }
 
@@ -1201,6 +1213,7 @@ void Database::saveMaps() {
         m_peppy_overrides[diff2->getMD5Hash()] = diff2->get_overrides();
     }
 
+    u32 nb_overrides = 0;
     maps.write<u32>(m_peppy_overrides.size());
     for(auto &pair : m_peppy_overrides) {
         maps.write_hash(pair.first);
@@ -1212,11 +1225,13 @@ void Database::saveMaps() {
         maps.write<i32>(pair.second.max_bpm);
         maps.write<i32>(pair.second.avg_bpm);
         maps.write<u8>(pair.second.draw_background);
+
+        nb_overrides++;
     }
     m_peppy_overrides_mtx.unlock();
 
     t.update();
-    debugLog("Saving maps took %f seconds.\n", t.getElapsedTime());
+    debugLog("Saved %d maps (+ %d overrides) in %f seconds.\n", nb_diffs_saved, nb_overrides, t.getElapsedTime());
 }
 
 void Database::loadScores() {
@@ -1224,11 +1239,9 @@ void Database::loadScores() {
 
     m_scores_to_convert.clear();
 
-    if(env->fileExists("neosu_scores.db") && !m_bScoresLoaded) {
-        int nb_neosu_scores = 0;
-
-        BanchoFileReader db("neosu_scores.db");
-
+    u32 nb_neosu_scores = 0;
+    BanchoFileReader db("neosu_scores.db");
+    if(!m_bScoresLoaded && db.total_size > 0) {
         u8 magic_bytes[6] = {0};
         db.read_bytes(magic_bytes, 5);
         if(memcmp(magic_bytes, "NEOSC", 5) != 0) {
@@ -1240,10 +1253,14 @@ void Database::loadScores() {
         if(db_version > NEOSU_SCORE_DB_VERSION) {
             debugLog("neosu_scores.db version is newer than current neosu version!\n");
             return;
+        } else if(db_version < NEOSU_SCORE_DB_VERSION) {
+            // Reading from older database version: backup just in case
+            auto backup_path = UString::format("neosu_scores.db.%d", db_version);
+            copy("neosu_scores.db", backup_path.toUtf8());
         }
 
         u32 nb_beatmaps = db.read<u32>();
-        db.read<u32>();  // nb_scores
+        u32 nb_scores = db.read<u32>();
         m_scores.reserve(nb_beatmaps);
 
         for(u32 b = 0; b < nb_beatmaps; b++) {
@@ -1327,15 +1344,22 @@ void Database::loadScores() {
                 sc.beatmap_hash = beatmap_hash;
 
                 addScoreRaw(sc);
+                nb_neosu_scores++;
             }
         }
 
-        debugLog("Loaded %i scores from neosu.\n", nb_neosu_scores);
-        m_bScoresLoaded = true;
+        if(nb_neosu_scores != nb_scores) {
+            debugLog("Inconsistency in neosu_scores.db! Expected %d scores, found %d!\n", nb_scores, nb_neosu_scores);
+        }
     }
 
     u32 nb_old_neosu_imported = importOldNeosuScores();
     u32 nb_peppy_imported = importPeppyScores();
+    m_bScoresLoaded = true;
+
+    u32 scores_total = nb_old_neosu_imported + nb_neosu_scores + nb_peppy_imported;
+    debugLog("Loaded %i scores (%d old neosu, %d neosu, %d peppy)\n", scores_total, nb_old_neosu_imported,
+             nb_neosu_scores, nb_peppy_imported);
 }
 
 u32 Database::importOldNeosuScores() {
@@ -1343,8 +1367,6 @@ u32 Database::importOldNeosuScores() {
 
     u32 db_version = db.read<u32>();
     u32 nb_beatmaps = db.read<u32>();
-    debugLog("Old scores: version = %u, nb_beatmaps = %u\n", db_version, nb_beatmaps);
-
     if(db_version == 0) {
         // scores.db doesn't exist
         return 0;
@@ -1441,7 +1463,6 @@ u32 Database::importOldNeosuScores() {
         }
     }
 
-    debugLog("Imported %i scores from neosu v35.\n", nb_imported);
     return nb_imported;
 }
 
@@ -1535,20 +1556,23 @@ u32 Database::importPeppyScores() {
 }
 
 void Database::saveScores() {
-    std::lock_guard<std::mutex> lock(m_scores_mtx);
-    if(m_scores.empty()) return;
-
     debugLog("Osu: Saving scores ...\n");
+    if(!m_bScoresLoaded) {
+        debugLog("Cannot save scores since they weren't loaded properly first!\n");
+        return;
+    }
+
     const double startTime = engine->getTimeReal();
 
+    std::lock_guard<std::mutex> lock(m_scores_mtx);
     BanchoFileWriter db("neosu_scores.db");
     db.write_bytes((u8 *)"NEOSC", 5);
     db.write<u32>(NEOSU_SCORE_DB_VERSION);
 
-    int nb_beatmaps = 0;
-    int nb_scores = 0;
-    for(auto it = m_scores.begin(); it != m_scores.end(); ++it) {
-        u32 beatmap_scores = it->second.size();
+    u32 nb_beatmaps = 0;
+    u32 nb_scores = 0;
+    for(auto &it : m_scores) {
+        u32 beatmap_scores = it.second.size();
         if(beatmap_scores > 0) {
             nb_beatmaps++;
             nb_scores += beatmap_scores;
@@ -1558,6 +1582,8 @@ void Database::saveScores() {
     db.write<u32>(nb_scores);
 
     for(auto &it : m_scores) {
+        if(it.second.empty()) continue;
+
         db.write_hash(it.first);
         db.write<u32>(it.second.size());
 
@@ -1635,7 +1661,7 @@ void Database::saveScores() {
         }
     }
 
-    debugLog("Took %f seconds.\n", (engine->getTimeReal() - startTime));
+    debugLog("Saved %d scores in %f seconds.\n", nb_scores, (engine->getTimeReal() - startTime));
 }
 
 BeatmapSet *Database::loadRawBeatmap(std::string beatmapPath) {

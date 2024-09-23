@@ -49,6 +49,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.changes.push_back("- Removed rosu-pp");
     latest.changes.push_back("- Updated osu! version to b20240820.1");
     latest.changes.push_back("- Linux: Fixed \"Skin.ini\" failing to load");
+    latest.changes.push_back("- Windows: Fixed collections/maps/scores not getting saved");
     changelogs.push_back(latest);
 
     CHANGELOG v35_09;

@@ -190,6 +190,7 @@ extern ConVar cmd_minimize;
 extern ConVar cmd_printsize;
 extern ConVar cmd_resizable_toggle;
 extern ConVar cmd_restart;
+extern ConVar cmd_save;
 extern ConVar cmd_showconsolebox;
 extern ConVar cmd_shutdown;
 extern ConVar cmd_spectate;

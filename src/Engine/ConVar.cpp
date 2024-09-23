@@ -800,6 +800,8 @@ void loudness_cb(UString oldValue, UString newValue) {
     }
 }
 
+void _save(void) { db->save(); }
+
 ConVar cmd_borderless("borderless", FCVAR_BANCHO_COMPATIBLE, _borderless);
 ConVar cmd_center("center", FCVAR_BANCHO_COMPATIBLE, _center);
 ConVar cmd_clear("clear");
@@ -819,6 +821,7 @@ ConVar cmd_minimize("minimize", FCVAR_BANCHO_COMPATIBLE, _minimize);
 ConVar cmd_printsize("printsize", FCVAR_BANCHO_COMPATIBLE, _printsize);
 ConVar cmd_resizable_toggle("resizable_toggle", FCVAR_BANCHO_COMPATIBLE, _toggleresizable);
 ConVar cmd_restart("restart", FCVAR_BANCHO_COMPATIBLE, _restart);
+ConVar cmd_save("save", FCVAR_BANCHO_COMPATIBLE, _save);
 ConVar cmd_showconsolebox("showconsolebox");
 ConVar cmd_shutdown("shutdown", FCVAR_BANCHO_COMPATIBLE, _exit);
 ConVar cmd_spectate("spectate", FCVAR_HIDDEN, spectate_by_username);

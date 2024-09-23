@@ -134,6 +134,10 @@ bool load_collections() {
             debugLog("neosu collections.db version is too recent! Cannot load it without stuff breaking.\n");
             unload_collections();
             return false;
+        } else if(version < COLLECTIONS_DB_VERSION) {
+            // Reading from older database version: backup just in case
+            auto backup_path = UString::format("collections.db.%d", version);
+            copy("collections.db", backup_path.toUtf8());
         }
 
         for(int c = 0; c < nb_collections; c++) {
@@ -199,6 +203,7 @@ void unload_collections() {
 }
 
 bool save_collections() {
+    debugLog("Osu: Saving collections ...\n");
     if(!collections_loaded) {
         debugLog("Cannot save collections since they weren't loaded properly first!\n");
         return false;

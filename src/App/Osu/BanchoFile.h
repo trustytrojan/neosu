@@ -80,3 +80,5 @@ struct BanchoFileWriter {
     size_t pos = 0;
     bool errored = false;
 };
+
+void copy(const char* from_path, const char* to_path);
