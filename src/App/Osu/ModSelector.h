@@ -51,8 +51,13 @@ class ModSelector : public OsuScreen {
     void updateButtons(bool initial = false);
     void updateExperimentalButtons();
     void updateOverrideSliderLabels();
+    void updateScoreMultiplierLabelText();
+    void updateLayout();
+    void updateExperimentalLayout();
 
     CBaseUILabel *m_nonVanillaWarning;
+    UIModSelectorModButton *m_modButtonHalftime;
+    UIModSelectorModButton *m_modButtonDoubletime;
     UIModSelectorModButton *m_modButtonAuto;
 
     CBaseUISlider *m_CSSlider;
@@ -86,10 +91,6 @@ class ModSelector : public OsuScreen {
         CBaseUIElement *element;
         ConVar *cvar;
     };
-
-    void updateScoreMultiplierLabelText();
-    void updateLayout();
-    void updateExperimentalLayout();
 
     UIModSelectorModButton *setModButtonOnGrid(int x, int y, int state, bool initialState, ConVar *modCvar,
                                                UString modName, UString tooltipText,

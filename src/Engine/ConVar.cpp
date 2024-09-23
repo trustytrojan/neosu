@@ -335,7 +335,7 @@ void ConVar::setDefaultString(UString defaultValue) {
     m_sDefaultValue = defaultValue;
 }
 
-void ConVar::setValue(float value) {
+void ConVar::setValue(float value, bool fire_callbacks) {
     if(!isUnlocked()) return;
 
     if(osu && isFlagSet(FCVAR_GAMEPLAY)) {
@@ -366,7 +366,7 @@ void ConVar::setValue(float value) {
     }
 
     // handle callbacks
-    {
+    if(fire_callbacks) {
         // possible void callback
         exec();
 
@@ -378,7 +378,7 @@ void ConVar::setValue(float value) {
     }
 }
 
-void ConVar::setValue(UString sValue) {
+void ConVar::setValue(UString sValue, bool fire_callbacks) {
     if(!isUnlocked()) return;
 
     if(osu && isFlagSet(FCVAR_GAMEPLAY)) {
@@ -405,7 +405,7 @@ void ConVar::setValue(UString sValue) {
     }
 
     // handle callbacks
-    {
+    if(fire_callbacks) {
         // possible void callback
         exec();
 
@@ -1454,6 +1454,10 @@ ConVar cv_main_menu_use_server_logo("main_menu_use_server_logo", true, FCVAR_BAN
 ConVar cv_minimize_on_focus_lost_if_borderless_windowed_fullscreen(
     "minimize_on_focus_lost_if_borderless_windowed_fullscreen", false, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_minimize_on_focus_lost_if_fullscreen("minimize_on_focus_lost_if_fullscreen", true, FCVAR_BANCHO_COMPATIBLE);
+
+// These don't affect gameplay, but change cv_speed_override when changed.
+ConVar cv_mod_doubletime_dummy("mod_doubletime_dummy", false, FCVAR_BANCHO_COMPATIBLE);
+ConVar cv_mod_halftime_dummy("mod_halftime_dummy", false, FCVAR_BANCHO_COMPATIBLE);
 
 ConVar cv_mod_hidden("mod_hidden", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_GAMEPLAY);
 ConVar cv_mod_autoplay("mod_autoplay", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_GAMEPLAY);

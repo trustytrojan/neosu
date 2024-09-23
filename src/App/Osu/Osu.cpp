@@ -8,6 +8,7 @@
 #include "BanchoNetworking.h"
 #include "Beatmap.h"
 #include "CBaseUIScrollView.h"
+#include "CBaseUISlider.h"
 #include "CBaseUITextbox.h"
 #include "CWindowManager.h"
 #include "Changelog.h"
@@ -228,6 +229,8 @@ Osu::Osu() {
     cv_playfield_mirror_vertical.setCallback(fastdelegate::MakeDelegate(this, &Osu::updateModsForConVarTemplate));
     cv_playfield_rotation.setCallback(fastdelegate::MakeDelegate(this, &Osu::onPlayfieldChange));
     cv_speed_override.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSpeedChange));
+    cv_mod_doubletime_dummy.setCallback(fastdelegate::MakeDelegate(this, &Osu::onDTPresetChange));
+    cv_mod_halftime_dummy.setCallback(fastdelegate::MakeDelegate(this, &Osu::onHTPresetChange));
 
     // load global resources
     const int baseDPI = 96;
@@ -1776,6 +1779,25 @@ void Osu::onSpeedChange(UString oldValue, UString newValue) {
     float speed = newValue.toFloat();
     getSelectedBeatmap()->setSpeed(speed >= 0.0f ? speed : getSelectedBeatmap()->getSpeedMultiplier());
     updateAnimationSpeed();
+
+    // HACKHACK: Update DT/HT buttons, speed slider etc
+    cv_mod_doubletime_dummy.setValue(speed == 1.5f, false);
+    osu->getModSelector()->m_modButtonDoubletime->setOn(speed == 1.5f, true);
+    cv_mod_halftime_dummy.setValue(speed == 0.75f, false);
+    osu->getModSelector()->m_modButtonHalftime->setOn(speed == 0.75f, true);
+    osu->getModSelector()->updateButtons(true);
+    osu->getModSelector()->updateScoreMultiplierLabelText();
+    osu->getModSelector()->updateOverrideSliderLabels();
+}
+
+void Osu::onDTPresetChange(UString oldValue, UString newValue) {
+    cv_speed_override.setValue(cv_mod_doubletime_dummy.getBool() ? 1.5f : -1.f);
+    osu->getModSelector()->m_speedSlider->setValue(cv_speed_override.getFloat(), false, false);
+}
+
+void Osu::onHTPresetChange(UString oldValue, UString newValue) {
+    cv_speed_override.setValue(cv_mod_halftime_dummy.getBool() ? 0.75f : -1.f);
+    osu->getModSelector()->m_speedSlider->setValue(cv_speed_override.getFloat(), false, false);
 }
 
 void Osu::onPlayfieldChange(UString oldValue, UString newValue) { getSelectedBeatmap()->onModUpdate(); }

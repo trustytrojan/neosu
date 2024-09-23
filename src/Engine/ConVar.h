@@ -85,8 +85,8 @@ class ConVar {
     void setDefaultFloat(float defaultValue);
     void setDefaultString(UString defaultValue);
 
-    void setValue(float value);
-    void setValue(UString sValue);
+    void setValue(float value, bool fire_callbacks = true);
+    void setValue(UString sValue, bool fire_callbacks = true);
 
     void setCallback(NativeConVarCallback callback);
     void setCallback(NativeConVarCallbackArgs callback);
@@ -631,6 +631,8 @@ extern ConVar cv_main_menu_startup_anim_duration;
 extern ConVar cv_main_menu_use_server_logo;
 extern ConVar cv_minimize_on_focus_lost_if_borderless_windowed_fullscreen;
 extern ConVar cv_minimize_on_focus_lost_if_fullscreen;
+extern ConVar cv_mod_doubletime_dummy;
+extern ConVar cv_mod_halftime_dummy;
 extern ConVar cv_mod_hidden;
 extern ConVar cv_mod_autoplay;
 extern ConVar cv_mod_autopilot;

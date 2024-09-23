@@ -3046,6 +3046,7 @@ void Beatmap::onModUpdate(bool rebuildSliderVertexBuffers, bool recomputeDrainRa
     if(recomputeDrainRate) computeDrainRate();
 
     if(m_music != NULL) {
+        // Updates not just speed but also nightcore state
         m_music->setSpeed(getSpeedMultiplier());
     }
 

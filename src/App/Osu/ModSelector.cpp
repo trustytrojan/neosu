@@ -292,6 +292,22 @@ void ModSelector::updateButtons(bool initial) {
     setModButtonOnGrid(1, 1, 1, initial && osu->getModSS(), &cv_mod_perfect, "ss", "SS or quit.",
                        []() -> SkinImage * { return osu->getSkin()->getSelectionModPerfect(); });
 
+    if(cv_nightcore_enjoyer.getBool()) {
+        m_modButtonHalftime = setModButtonOnGrid(
+            2, 0, 0, initial && cv_mod_halftime_dummy.getBool(), &cv_mod_halftime_dummy, "dc", "A E S T H E T I C",
+            []() -> SkinImage * { return osu->getSkin()->getSelectionModDayCore(); });
+        m_modButtonDoubletime = setModButtonOnGrid(
+            2, 1, 0, initial && cv_mod_doubletime_dummy.getBool(), &cv_mod_doubletime_dummy, "nc", "uguuuuuuuu",
+            []() -> SkinImage * { return osu->getSkin()->getSelectionModNightCore(); });
+    } else {
+        m_modButtonHalftime =
+            setModButtonOnGrid(2, 0, 0, initial && cv_mod_halftime_dummy.getBool(), &cv_mod_halftime_dummy, "ht",
+                               "Less zoom.", []() -> SkinImage * { return osu->getSkin()->getSelectionModHalfTime(); });
+        m_modButtonDoubletime = setModButtonOnGrid(
+            2, 1, 0, initial && cv_mod_doubletime_dummy.getBool(), &cv_mod_doubletime_dummy, "dt", "Zoooooooooom.",
+            []() -> SkinImage * { return osu->getSkin()->getSelectionModDoubleTime(); });
+    }
+
     m_modButtonHidden =
         setModButtonOnGrid(3, 1, 0, initial && osu->getModHD(), &cv_mod_hidden, "hd",
                            "Play with no approach circles and fading notes for a slight score advantage.",
@@ -663,14 +679,8 @@ void ModSelector::onKeyDown(KeyboardEvent &key) {
     if(key == (KEYCODE)cv_MOD_SPUNOUT.getInt()) m_modButtonSpunout->click();
     if(key == (KEYCODE)cv_MOD_AUTO.getInt()) m_modButtonAuto->click();
     if(key == (KEYCODE)cv_MOD_SCOREV2.getInt()) m_modButtonScoreV2->click();
-    if(key == (KEYCODE)cv_MOD_HALFTIME.getInt()) {
-        cv_speed_override.setValue(0.75);
-        osu->updateMods();
-    }
-    if(key == (KEYCODE)cv_MOD_DOUBLETIME.getInt()) {
-        cv_speed_override.setValue(1.5);
-        osu->updateMods();
-    }
+    if(key == (KEYCODE)cv_MOD_HALFTIME.getInt()) m_modButtonHalftime->click();
+    if(key == (KEYCODE)cv_MOD_DOUBLETIME.getInt()) m_modButtonDoubletime->click();
 
     key.consume();
 }

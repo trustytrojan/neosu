@@ -151,6 +151,7 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     void onWASAPIBufferChange(CBaseUISlider *slider);
     void onWASAPIPeriodChange(CBaseUISlider *slider);
     void onLoudnessNormalizationToggle(CBaseUICheckbox *checkbox);
+    void onNightcoreToggle(CBaseUICheckbox *checkbox);
 
     void onUseSkinsSoundSamplesChange(UString oldValue, UString newValue);
     void onHighQualitySlidersCheckboxChange(CBaseUICheckbox *checkbox);

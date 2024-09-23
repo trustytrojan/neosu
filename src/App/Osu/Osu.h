@@ -183,6 +183,9 @@ class Osu : public App, public MouseListener {
     void updateAnimationSpeed();
 
     void onSpeedChange(UString oldValue, UString newValue);
+    void onDTPresetChange(UString oldValue, UString newValue);
+    void onHTPresetChange(UString oldValue, UString newValue);
+
     void onPlayfieldChange(UString oldValue, UString newValue);
 
     void onUIScaleChange(UString oldValue, UString newValue);

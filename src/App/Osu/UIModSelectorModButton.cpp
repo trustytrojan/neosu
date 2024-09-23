@@ -182,7 +182,9 @@ void UIModSelectorModButton::setOn(bool on, bool silent) {
     // Disable all states except current
     for(int i = 0; i < m_states.size(); i++) {
         if(i == m_iState) {
-            m_states[i].cvar->setValue(on);
+            if(m_states[i].cvar->getBool() != on) {
+                m_states[i].cvar->setValue(on);
+            }
         } else {
             if(m_states[i].cvar->getBool()) {
                 m_states[i].cvar->setValue(false);

@@ -719,9 +719,8 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
 
     addSubSection("Gameplay");
     addCheckbox("Change hitsound pitch based on accuracy", &cv_snd_pitch_hitsounds);
-    addCheckbox("Prefer Nightcore over Double Time",
-                "Automatically selects Nightcore or Daycore when using speed modification mods.",
-                &cv_nightcore_enjoyer);
+    addCheckbox("Prefer Nightcore over Double Time", &cv_nightcore_enjoyer)
+        ->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onNightcoreToggle));
 
     //**************************************************************************************************************************//
 
@@ -2963,6 +2962,12 @@ void OptionsMenu::onLoudnessNormalizationToggle(CBaseUICheckbox *checkbox) {
     } else {
         loct_abort();
     }
+}
+
+void OptionsMenu::onNightcoreToggle(CBaseUICheckbox *checkbox) {
+    onCheckboxChange(checkbox);
+    osu->getModSelector()->updateButtons();
+    osu->updateMods();
 }
 
 void OptionsMenu::onUseSkinsSoundSamplesChange(UString oldValue, UString newValue) { osu->reloadSkin(); }
