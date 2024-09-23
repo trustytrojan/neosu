@@ -543,17 +543,18 @@ void RankingScreen::updateLayout() {
                         max(m_songInfo->getMinimumHeight(),
                             m_rankingTitle->getSize().y * cv_rankingscreen_topbar_height_percent.getFloat()));
 
-    float btn_width = 150 * uiScale;
-    float btn_height = 50 * uiScale;
-    m_retry_btn->setSize(btn_width, btn_height);
-    m_watch_btn->setSize(btn_width, btn_height);
-    m_watch_btn->setRelPos(osu->getScreenSize().x - (btn_width + 10.f * uiScale),
-                           osu->getScreenSize().y - (btn_height + 130.f * uiScale));
-    m_retry_btn->setRelPos(osu->getScreenSize().x - (btn_width + 10.f * uiScale),
-                           m_watch_btn->getRelPos().y - (btn_height + 5.f * uiScale));
-
     m_rankings->setSize(osu->getScreenSize().x + 2, osu->getScreenSize().y - m_songInfo->getSize().y + 3);
     m_rankings->setRelPosY(m_songInfo->getSize().y - 1);
+
+    float btn_width = 150.f * uiScale;
+    float btn_height = 50.f * uiScale;
+    m_retry_btn->setSize(btn_width, btn_height);
+    m_watch_btn->setSize(btn_width, btn_height);
+    Vector2 btn_pos(m_rankings->getSize().x * 0.98f - btn_width, m_rankings->getSize().y * 0.90f - btn_height);
+    m_watch_btn->setRelPos(btn_pos);
+    btn_pos.y -= btn_height + 5.f * uiScale;
+    m_retry_btn->setRelPos(btn_pos);
+
     update_pos();
 
     // NOTE: no uiScale for rankingPanel and rankingGrade, doesn't really work due to legacy layout expectations
