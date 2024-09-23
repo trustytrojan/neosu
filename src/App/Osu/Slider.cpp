@@ -401,8 +401,8 @@ void Slider::draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCi
 
             // start circle
             if(!m_bStartFinished || !sliderRepeatStartCircleFinished || (!m_bEndFinished && m_iRepeat % 2 == 0)) {
-                Circle::drawApproachCircle(g, bm, m_curve->pointAt(0.0f), combo_number, m_iColorCounter,
-                                           m_iColorOffset, m_fHittableDimRGBColorMultiplierPercent, m_fApproachScale,
+                Circle::drawApproachCircle(g, bm, m_curve->pointAt(0.0f), combo_number, m_iColorCounter, m_iColorOffset,
+                                           m_fHittableDimRGBColorMultiplierPercent, m_fApproachScale,
                                            m_fAlphaForApproachCircle, m_bOverrideHDApproachCircle);
             }
         }
@@ -520,7 +520,7 @@ void Slider::drawBody(Graphics *g, float alpha, float from, float to) {
             alwaysPoints.push_back(bm->osuCoords2Pixels(m_curve->pointAt(m_fSlidePercent)));  // curpoint
             alwaysPoints.push_back(bm->osuCoords2Pixels(
                 getRawPosAt(click_time + duration + 1)));  // endpoint (because setDrawPercent() causes the last
-                                                                 // circle mesh to become invisible too quickly)
+                                                           // circle mesh to become invisible too quickly)
         }
         if(cv_snaking_sliders.getBool() && m_fSliderSnakePercent < 1.0f)
             alwaysPoints.push_back(bm->osuCoords2Pixels(
@@ -597,10 +597,10 @@ void Slider::update(long curPos, f64 frame_time) {
         m_fBodyAlpha = m_fAlphaWithoutHidden;  // fade in as usual
 
         // fade out over the duration of the slider, starting exactly when the default fadein finishes
-        const long hiddenSliderBodyFadeOutStart =
-            min(click_time,
-                click_time - m_iApproachTime + m_iFadeInTime);  // min() ensures that the fade always starts at click_time
-                                                             // (even if the fadeintime is longer than the approachtime)
+        const long hiddenSliderBodyFadeOutStart = min(
+            click_time,
+            click_time - m_iApproachTime + m_iFadeInTime);  // min() ensures that the fade always starts at click_time
+                                                            // (even if the fadeintime is longer than the approachtime)
         const float fade_percent = cv_mod_hd_slider_fade_percent.getFloat();
         const long hiddenSliderBodyFadeOutEnd = click_time + (long)(fade_percent * m_fSliderTime);
         if(curPos >= hiddenSliderBodyFadeOutStart) {
@@ -766,8 +766,8 @@ void Slider::update(long curPos, f64 frame_time) {
                         m_endResult = LiveScore::HIT::HIT_MISS;
 
                         // end of combo, ignore in hiterrorbar, ignore combo, subtract health
-                        addHitResult(m_endResult, 0, is_end_of_combo, getRawPosAt(click_time + duration), -1.0f,
-                                     0.0f, true, true, false);
+                        addHitResult(m_endResult, 0, is_end_of_combo, getRawPosAt(click_time + duration), -1.0f, 0.0f,
+                                     true, true, false);
                     }
                 }
             }
@@ -897,14 +897,13 @@ void Slider::updateAnimations(long curPos) {
         1.0f);
     if(m_bFinished) {
         m_fFollowCircleAnimationAlpha =
-            1.0f -
-            clamp<float>((float)((curPos - (click_time + duration))) / 1000.0f / fadeout_fade_time, 0.0f, 1.0f);
+            1.0f - clamp<float>((float)((curPos - (click_time + duration))) / 1000.0f / fadeout_fade_time, 0.0f, 1.0f);
         m_fFollowCircleAnimationAlpha *= m_fFollowCircleAnimationAlpha;  // quad in
     }
 
     m_fFollowCircleAnimationScale = clamp<float>(
-        (float)((curPos - click_time)) / 1000.0f / clamp<float>(fadein_scale_time, 0.0f, duration / 1000.0f),
-        0.0f, 1.0f);
+        (float)((curPos - click_time)) / 1000.0f / clamp<float>(fadein_scale_time, 0.0f, duration / 1000.0f), 0.0f,
+        1.0f);
     if(m_bFinished) {
         m_fFollowCircleAnimationScale =
             clamp<float>((float)((curPos - (click_time + duration))) / 1000.0f / fadeout_scale_time, 0.0f, 1.0f);
@@ -1050,11 +1049,10 @@ void Slider::onHit(LiveScore::HIT result, long delta, bool startOrEnd, float tar
 
             const Vector2 osuCoords = bm->pixels2OsuCoords(bm->osuCoords2Pixels(m_vCurPointRaw));
 
-            const long sound_delta = result == LiveScore::HIT::HIT_300 ? 0 : delta;
             bm->getSkin()->playHitCircleSound(m_iCurRepeatCounterForHitSounds < m_hitSounds.size()
                                                   ? m_hitSounds[m_iCurRepeatCounterForHitSounds]
                                                   : m_iSampleType,
-                                              GameRules::osuCoords2Pan(osuCoords.x), sound_delta);
+                                              GameRules::osuCoords2Pan(osuCoords.x), delta);
 
             if(!startOrEnd) {
                 m_fStartHitAnimation = 0.001f;  // quickfix for 1 frame missing images

@@ -1802,7 +1802,7 @@ ConVar cv_snd_play_interp_duration(
     "smooth over freshly started channel position jitter with engine time over this duration in seconds");
 ConVar cv_snd_pitch_hitsounds("snd_pitch_hitsounds", false, FCVAR_BANCHO_COMPATIBLE,
                               "change hitsound pitch based on accuracy");
-ConVar cv_snd_pitch_hitsounds_factor("snd_pitch_hitsounds_factor", 0.1f, FCVAR_BANCHO_COMPATIBLE,
+ConVar cv_snd_pitch_hitsounds_factor("snd_pitch_hitsounds_factor", -0.5f, FCVAR_BANCHO_COMPATIBLE,
                                      "how much to change the pitch");
 ConVar cv_snd_play_interp_ratio("snd_play_interp_ratio", 0.50f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
                                 "percentage of snd_play_interp_duration to use 100% engine time over audio time (some "

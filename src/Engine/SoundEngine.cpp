@@ -673,15 +673,13 @@ bool SoundEngine::play(Sound *snd, float pan, float pitch) {
     }
 
     pan = clamp<float>(pan, -1.0f, 1.0f);
-    pitch = clamp<float>(pitch, 0.0f, 2.0f);
     BASS_ChannelSetAttribute(channel, BASS_ATTRIB_VOL, snd->m_fVolume);
     BASS_ChannelSetAttribute(channel, BASS_ATTRIB_PAN, pan);
     BASS_ChannelSetAttribute(channel, BASS_ATTRIB_NORAMP, snd->isStream() ? 0 : 1);
-    if(pitch != 1.0f) {
-        const float semitonesShift = lerp<float>(-60.0f, 60.0f, pitch / 2.0f);
-        float freq = cv_snd_freq.getFloat();
+    if(pitch != 0.0f) {
+        f32 freq = cv_snd_freq.getFloat();
         BASS_ChannelGetAttribute(channel, BASS_ATTRIB_FREQ, &freq);
-        BASS_ChannelSetAttribute(channel, BASS_ATTRIB_FREQ, pow(2.0f, (semitonesShift / 12.0f)) * freq);
+        BASS_ChannelSetAttribute(channel, BASS_ATTRIB_FREQ, pow(2.0f, pitch) * freq);
     }
 
     BASS_ChannelFlags(channel, snd->isLooped() ? BASS_SAMPLE_LOOP : 0, BASS_SAMPLE_LOOP);

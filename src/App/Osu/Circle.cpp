@@ -473,7 +473,8 @@ void Circle::draw2(Graphics *g) {
     if(cv_bug_flicker_log.getBool()) {
         const float approachCircleImageScale =
             bm->m_fHitcircleDiameter / (128.0f * (bm->getSkin()->isApproachCircle2x() ? 2.0f : 1.0f));
-        debugLog("click_time = %ld, aScale = %f, iScale = %f\n", click_time, m_fApproachScale, approachCircleImageScale);
+        debugLog("click_time = %ld, aScale = %f, iScale = %f\n", click_time, m_fApproachScale,
+                 approachCircleImageScale);
     }
 
     drawApproachCircle(g, bm, m_vRawPos, combo_number, m_iColorCounter, m_iColorOffset,
@@ -573,8 +574,7 @@ void Circle::onHit(LiveScore::HIT result, long delta, float targetDelta, float t
 
         const Vector2 osuCoords = bm->pixels2OsuCoords(bm->osuCoords2Pixels(m_vRawPos));
 
-        const long sound_delta = result == LiveScore::HIT::HIT_300 ? 0 : delta;
-        bm->getSkin()->playHitCircleSound(m_iSampleType, GameRules::osuCoords2Pan(osuCoords.x), sound_delta);
+        bm->getSkin()->playHitCircleSound(m_iSampleType, GameRules::osuCoords2Pan(osuCoords.x), delta);
 
         m_fHitAnimation = 0.001f;  // quickfix for 1 frame missing images
         anim->moveQuadOut(&m_fHitAnimation, 1.0f, GameRules::getFadeOutTime(bm), true);

@@ -1250,11 +1250,12 @@ void Skin::playHitCircleSound(int sampleType, float pan, long delta) {
         pan *= cv_sound_panning_multiplier.getFloat();
     }
 
-    f32 pitch = 1.f;
+    f32 pitch = 0.f;
     if(cv_snd_pitch_hitsounds.getBool()) {
         auto bm = osu->getSelectedBeatmap();
         if(bm) {
-            pitch += (f32)delta * cv_snd_pitch_hitsounds_factor.getFloat();
+            f32 range = bm->getHitWindow100();
+            pitch = (f32)delta / range * cv_snd_pitch_hitsounds_factor.getFloat();
         }
     }
 

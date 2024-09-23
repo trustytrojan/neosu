@@ -28,7 +28,7 @@ class SoundEngine {
 
     void update();
 
-    bool play(Sound *snd, float pan = 0.0f, float pitch = 1.0f);
+    bool play(Sound *snd, float pan = 0.0f, float pitch = 0.f);
     void pause(Sound *snd);
     void stop(Sound *snd);
 
