@@ -100,6 +100,7 @@ class Environment {
 
    public:
     // built-in convenience
+    i32 get_nb_cpu_cores();
 
     // window
     virtual void setFullscreenWindowedBorderless(bool fullscreenWindowedBorderless);

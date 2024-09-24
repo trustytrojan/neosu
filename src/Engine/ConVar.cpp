@@ -1437,7 +1437,8 @@ ConVar cv_letterboxing("osu_letterboxing", true, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_letterboxing_offset_x("osu_letterboxing_offset_x", 0.0f, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_letterboxing_offset_y("osu_letterboxing_offset_y", 0.0f, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_load_beatmap_background_images("osu_load_beatmap_background_images", true, FCVAR_BANCHO_COMPATIBLE);
-ConVar cv_loudness_calc_threads("loudness_calc_threads", 1, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE, loudness_cb);
+ConVar cv_loudness_calc_threads("loudness_calc_threads", 0.f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+                                "0 = autodetect. do not use too many threads or your PC will explode", loudness_cb);
 ConVar cv_loudness_fallback("loudness_fallback", -12.f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 ConVar cv_loudness_target("loudness_target", -14.f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 ConVar cv_main_menu_alpha("osu_main_menu_alpha", 0.8f, FCVAR_BANCHO_COMPATIBLE);
