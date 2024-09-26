@@ -96,7 +96,7 @@ struct LoudnessCalcThread {
     }
 };
 
-std::vector<LoudnessCalcThread*> threads;
+static std::vector<LoudnessCalcThread*> threads;
 
 u32 loct_computed() {
     u32 x = 0;

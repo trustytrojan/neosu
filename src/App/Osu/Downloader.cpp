@@ -29,8 +29,8 @@ struct DownloadThread {
     std::vector<DownloadResult*> downloads;
 };
 
-std::mutex threads_mtx;
-std::vector<DownloadThread*> threads;
+static std::mutex threads_mtx;
+static std::vector<DownloadThread*> threads;
 
 void abort_downloads() {
     std::lock_guard<std::mutex> lock(threads_mtx);

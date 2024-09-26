@@ -2286,7 +2286,7 @@ void Beatmap::update2() {
                     quick_restarting &=
                         m_hitobjects.size() > 0 && m_hitobjects[0]->click_time > cv_quick_retry_time.getInt();
                     if(quick_restarting) {
-                        m_music->setPositionMS(max(0LL, m_hitobjects[0]->click_time - cv_quick_retry_time.getInt()));
+                        m_music->setPositionMS(max((i64)0, m_hitobjects[0]->click_time - cv_quick_retry_time.getInt()));
                     }
                     m_bWasSeekFrame = true;
 
