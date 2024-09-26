@@ -1575,7 +1575,7 @@ ConVar cv_mp_password("mp_password", "", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE
 ConVar cv_mp_server("mp_server", "akatsuki.gg", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 ConVar cv_name("name", "Guest", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 ConVar cv_nightcore_enjoyer("nightcore_enjoyer", false, FCVAR_BANCHO_COMPATIBLE);
-ConVar cv_normalize_loudness("normalize_loudness", false, FCVAR_BANCHO_COMPATIBLE, "normalize loudness across songs");
+ConVar cv_normalize_loudness("normalize_loudness", true, FCVAR_BANCHO_COMPATIBLE, "normalize loudness across songs");
 ConVar cv_notelock_stable_tolerance2b("osu_notelock_stable_tolerance2b", 3, FCVAR_LOCKED | FCVAR_GAMEPLAY,
                                       "time tolerance in milliseconds to allow hitting simultaneous objects close "
                                       "together (e.g. circle at end of slider)");
