@@ -2099,17 +2099,33 @@ void Beatmap::update() {
                 // XXX: slow
                 auto diffres = DatabaseBeatmap::loadDifficultyHitObjects(osufile_path.c_str(), AR, CS, speedMultiplier);
 
+                DifficultyCalculator::StarCalcParams params;
+                params.CS = CS;
+                params.OD = OD;
+                params.speedMultiplier = speedMultiplier;
+                params.relax = relax;
+                params.touchDevice = td;
+                params.upToObjectIndex = -1;
+                params.sortedHitObjects.swap(diffres.diffobjects);
+
                 std::vector<f64> aimStrains;
                 std::vector<f64> speedStrains;
+                params.aim = &info.aim_stars;
+                params.aimSliderFactor = &info.aim_slider_factor;
+                params.difficultAimStrains = &info.difficult_aim_strains;
+                params.speed = &info.speed_stars;
+                params.speedNotes = &info.speed_notes;
+                params.difficultSpeedStrains = &info.difficult_speed_strains;
+                params.outAimStrains = &aimStrains;
+                params.outSpeedStrains = &speedStrains;
 
-                info.total_stars = DifficultyCalculator::calculateStarDiffForHitObjects(
-                    diffres.diffobjects, CS, OD, speedMultiplier, relax, td, &info.aim_stars, &info.aim_slider_factor,
-                    &info.speed_stars, &info.speed_notes, -1, &aimStrains, &speedStrains);
+                info.total_stars = DifficultyCalculator::calculateStarDiffForHitObjects(params);
 
                 info.pp = DifficultyCalculator::calculatePPv2(
-                    modsLegacy, speedMultiplier, AR, OD, info.aim_stars, info.aim_slider_factor, info.speed_stars,
-                    info.speed_notes, nb_circles, nb_sliders, nb_spinners, diffres.maxPossibleCombo, highestCombo,
-                    numMisses, num300s, num100s, num50s);
+                    modsLegacy, params.speedMultiplier, AR, params.OD, info.aim_stars, info.aim_slider_factor,
+                    info.difficult_aim_strains, info.speed_stars, info.speed_notes, info.difficult_speed_strains,
+                    nb_circles, nb_sliders, nb_spinners, diffres.maxPossibleCombo, highestCombo, numMisses, num300s,
+                    num100s, num50s);
 
                 return info;
             });
@@ -3310,6 +3326,8 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
     f64 aimSliderFactor = 0.0;
     f64 speed = 0.0;
     f64 speedNotes = 0.0;
+    f64 difficultAimStrains = 0.0;
+    f64 difficultSpeedStrains = 0.0;
     const std::string &osuFilePath = m_selectedDifficulty2->getFilePath();
     const f32 AR = getAR();
     const f32 CS = getCS();
@@ -3318,11 +3336,25 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
     const bool relax = osu->getModRelax();
     const bool touchDevice = osu->getModTD();
 
-    DatabaseBeatmap::LOAD_DIFFOBJ_RESULT diffres =
-        DatabaseBeatmap::loadDifficultyHitObjects(osuFilePath, AR, CS, speedMultiplier);
-    const f64 totalStars = DifficultyCalculator::calculateStarDiffForHitObjects(
-        diffres.diffobjects, CS, OD, speedMultiplier, relax, touchDevice, &aim, &aimSliderFactor, &speed, &speedNotes,
-        -1, &m_aimStrains, &m_speedStrains);
+    auto diffres = DatabaseBeatmap::loadDifficultyHitObjects(osuFilePath, AR, CS, speedMultiplier);
+
+    DifficultyCalculator::StarCalcParams params;
+    params.sortedHitObjects.swap(diffres.diffobjects);
+    params.CS = CS;
+    params.OD = OD;
+    params.speedMultiplier = speedMultiplier;
+    params.relax = relax;
+    params.touchDevice = touchDevice;
+    params.aim = &aim;
+    params.aimSliderFactor = &aimSliderFactor;
+    params.difficultAimStrains = &difficultAimStrains;
+    params.speed = &speed;
+    params.speedNotes = &speedNotes;
+    params.difficultSpeedStrains = &difficultSpeedStrains;
+    params.upToObjectIndex = -1;
+    params.outAimStrains = &m_aimStrains;
+    params.outSpeedStrains = &m_speedStrains;
+    const f64 totalStars = DifficultyCalculator::calculateStarDiffForHitObjects(params);
 
     m_fAimStars = (f32)aim;
     m_fSpeedStars = (f32)speed;
@@ -3338,8 +3370,9 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
     const int num100s = osu->getScore()->getNum100s();
     const int num50s = osu->getScore()->getNum50s();
     const f32 pp = DifficultyCalculator::calculatePPv2(
-        osu->getScore()->getModsLegacy(), speedMultiplier, AR, OD, aim, aimSliderFactor, speed, speedNotes, numCircles,
-        numSliders, numSpinners, m_iMaxPossibleCombo, highestCombo, numMisses, num300s, num100s, num50s);
+        osu->getScore()->getModsLegacy(), speedMultiplier, AR, OD, aim, aimSliderFactor, difficultAimStrains, speed,
+        speedNotes, difficultSpeedStrains, numCircles, numSliders, numSpinners, m_iMaxPossibleCombo, highestCombo,
+        numMisses, num300s, num100s, num50s);
     osu->getScore()->setStarsTomTotal(totalStars);
     osu->getScore()->setStarsTomAim(m_fAimStars);
     osu->getScore()->setStarsTomSpeed(m_fSpeedStars);
@@ -3397,8 +3430,8 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
     score.beatmap_hash = m_selectedDifficulty2->getMD5Hash();  // NOTE: necessary for "Use Mods"
     score.replay = live_replay;
 
-    // @PPV3: store ppv3 data if not already done. also f64 check replay is marked correctly
-    score.ppv2_version = 20220902;
+    // @PPV3: store ppv3 data if not already done. also double check replay is marked correctly
+    score.ppv2_version = DifficultyCalculator::PP_ALGORITHM_VERSION;
     score.ppv2_score = pp;
     score.ppv2_total_stars = totalStars;
     score.ppv2_aim_stars = aim;

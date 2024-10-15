@@ -170,54 +170,35 @@ f32 OsuDifficultyHitObject::getT(i32 pos, bool raw) {
     }
 }
 
-f64 DifficultyCalculator::calculateStarDiffForHitObjects(std::vector<OsuDifficultyHitObject> &sortedHitObjects, f32 CS,
-                                                         f32 OD, f32 speedMultiplier, bool relax, bool touchDevice,
-                                                         f64 *aim, f64 *aimSliderFactor, f64 *speed, f64 *speedNotes,
-                                                         i32 upToObjectIndex, std::vector<f64> *outAimStrains,
-                                                         std::vector<f64> *outSpeedStrains) {
+f64 DifficultyCalculator::calculateStarDiffForHitObjects(StarCalcParams &params) {
     std::atomic<bool> dead;
     dead = false;
-    return calculateStarDiffForHitObjects(sortedHitObjects, CS, OD, speedMultiplier, relax, touchDevice, aim,
-                                          aimSliderFactor, speed, speedNotes, upToObjectIndex, outAimStrains,
-                                          outSpeedStrains, dead);
+    return calculateStarDiffForHitObjects(params, dead);
 }
 
-f64 DifficultyCalculator::calculateStarDiffForHitObjects(std::vector<OsuDifficultyHitObject> &sortedHitObjects, f32 CS,
-                                                         f32 OD, f32 speedMultiplier, bool relax, bool touchDevice,
-                                                         f64 *aim, f64 *aimSliderFactor, f64 *speed, f64 *speedNotes,
-                                                         i32 upToObjectIndex, std::vector<f64> *outAimStrains,
-                                                         std::vector<f64> *outSpeedStrains,
-                                                         const std::atomic<bool> &dead) {
+f64 DifficultyCalculator::calculateStarDiffForHitObjects(StarCalcParams &params, const std::atomic<bool> &dead) {
     std::vector<DiffObject> emptyCachedDiffObjects;
-    std::vector<DiffObject> diffObjects;
-    return calculateStarDiffForHitObjectsInt(emptyCachedDiffObjects, diffObjects, sortedHitObjects, CS, OD,
-                                             speedMultiplier, relax, touchDevice, aim, aimSliderFactor, speed,
-                                             speedNotes, upToObjectIndex, outAimStrains, outSpeedStrains, dead);
+    return calculateStarDiffForHitObjectsInt(emptyCachedDiffObjects, params, NULL, dead);
 }
 
-f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(
-    std::vector<DiffObject> &cachedDiffObjects, std::vector<DiffObject> &diffObjects,
-    std::vector<OsuDifficultyHitObject> &sortedHitObjects, f32 CS, f32 OD, f32 speedMultiplier, bool relax,
-    bool touchDevice, f64 *aim, f64 *aimSliderFactor, f64 *speed, f64 *speedNotes, i32 upToObjectIndex,
-    std::vector<f64> *outAimStrains, std::vector<f64> *outSpeedStrains, const std::atomic<bool> &dead) {
+f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(std::vector<DiffObject> &cachedDiffObjects,
+                                                            StarCalcParams &params, IncrementalState *incremental,
+                                                            const std::atomic<bool> &dead) {
     // NOTE: depends on speed multiplier + CS + OD + relax + touchDevice
 
     // NOTE: upToObjectIndex is applied way below, during the construction of the 'dobjects'
 
     // NOTE: osu always returns 0 stars for beatmaps with only 1 object, except if that object is a slider
-    if(sortedHitObjects.size() < 2) {
-        if(sortedHitObjects.size() < 1) return 0.0;
-        if(sortedHitObjects[0].type != OsuDifficultyHitObject::TYPE::SLIDER) return 0.0;
+    if(params.sortedHitObjects.size() < 2) {
+        if(params.sortedHitObjects.size() < 1) return 0.0;
+        if(params.sortedHitObjects[0].type != OsuDifficultyHitObject::TYPE::SLIDER) return 0.0;
     }
 
     // global independent variables/constants
-    const bool applyBrokenGamefieldRoundingAllowance =
-        false;  // NOTE: un-compensate because lazer doesn't use this (and lazer code is used for calculating global
-                // online ranking pp/stars now)
-    f32 circleRadiusInOsuPixels =
-        GameRules::getRawHitCircleDiameter(clamp<float>(CS, 0.0f, 12.142f), applyBrokenGamefieldRoundingAllowance) /
-        2.0f;  // NOTE: clamped CS because neosu allows CS > ~12.1429 (at which poi32 the diameter becomes negative)
-    const f32 hitWindow300 = 2.0f * GameRules::getRawHitWindow300(OD) / speedMultiplier;
+
+    // NOTE: clamped CS because neosu allows CS > ~12.1429 (at which point the diameter becomes negative)
+    f32 circleRadiusInOsuPixels = 64.0f * GameRules::getRawHitCircleScale(clamp<f32>(params.CS, 0.0f, 12.142f));
+    const f32 hitWindow300 = 2.0f * GameRules::getRawHitWindow300(params.OD) / params.speedMultiplier;
 
     // ******************************************************************************************************************************************
     // //
@@ -250,7 +231,24 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(
         static void computeSliderCursorPosition(DiffObject &slider, f32 circleRadius) {
             if(slider.lazyCalcFinished || slider.ho->curve == NULL) return;
 
-            slider.lazyTravelTime = slider.ho->scoringTimes.back().time - slider.ho->time;
+            // NOTE: lazer won't load sliders above a certain length, but neosu will
+            // this isn't entirely accurate to how lazer does it (as that skips loading the object entirely),
+            // but this is a good middle ground for maps that aren't completely aspire and still have relatively normal
+            // star counts on lazer see: DJ Noriken - Stargazer feat. YUC'e (PSYQUI Remix) (Hishiro Chizuru) [Starg-Azer
+            // isn't so great? Are you kidding me?]
+            if(cv_stars_ignore_clamped_sliders.getBool()) {
+                if(slider.ho->curve->m_fPixelLength >= cv_slider_curve_max_length.getFloat()) return;
+            }
+
+            // NOTE: although this looks like a duplicate of the end tick time, this really does have a noticeable
+            // impact on some maps due to precision issues see: Ocelot - KAEDE (Hollow Wings) [EX EX]
+            const f64 tailLeniency = (f64)cv_slider_end_inside_check_offset.getInt();
+            const f64 totalDuration = (f64)slider.ho->spanDuration * slider.ho->repeats;
+            f64 trackingEndTime = (f64)slider.ho->time + max(totalDuration - tailLeniency, totalDuration / 2.0);
+
+            // NOTE: lazer has logic to reorder the last slider tick if it happens after trackingEndTime here, which
+            // already happens in neosu
+            slider.lazyTravelTime = trackingEndTime - (f64)slider.ho->time;
 
             f64 endTimeMin = slider.lazyTravelTime / slider.ho->spanDuration;
             if(std::fmod(endTimeMin, 2.0) >= 1.0)
@@ -271,9 +269,9 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(
                     // scoring end
                     diff = slider.ho->curve->pointAt(slider.ho->repeats % 2 ? 1.0 : 0.0) - cursor_pos;
                 } else {
-                    f64 progress =
-                        (clamp<long>(slider.ho->scoringTimes[i].time - slider.ho->time, 0, slider.ho->getDuration())) /
-                        slider.ho->spanDuration;
+                    f64 progress = (clamp<f64>(slider.ho->scoringTimes[i].time - (f64)slider.ho->time, 0.f,
+                                               slider.ho->getDuration())) /
+                                   slider.ho->spanDuration;
                     if(std::fmod(progress, 2.0) >= 1.0)
                         progress = 1.0 - std::fmod(progress, 1.0);
                     else
@@ -324,30 +322,23 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(
     // //
 
     // initialize dobjects
+    const size_t numDiffObjects =
+        (params.upToObjectIndex < 0) ? params.sortedHitObjects.size() : params.upToObjectIndex + 1;
     const bool isUsingCachedDiffObjects = (cachedDiffObjects.size() > 0);
-    diffObjects.clear();
-    diffObjects.reserve((upToObjectIndex < 0) ? sortedHitObjects.size() : upToObjectIndex + 1);
-    if(isUsingCachedDiffObjects) {
-        // cached (assumption is cache always contains all, so we build up the partial set of diffObjects we need from
-        // it here)
-        // respect upToObjectIndex!
-        for(size_t i = 0; i < sortedHitObjects.size() && (upToObjectIndex < 0 || i < upToObjectIndex + 1); i++) {
-            if(dead.load()) return 0.0;
+    if(!isUsingCachedDiffObjects) {
+        cachedDiffObjects.reserve(numDiffObjects);
 
-            diffObjects.push_back(cachedDiffObjects[i]);
-        }
-    } else {
-        // not cached (full rebuild computation)
         // respect upToObjectIndex!
-        for(size_t i = 0; i < sortedHitObjects.size() && (upToObjectIndex < 0 || i < upToObjectIndex + 1); i++) {
+        for(size_t i = 0; i < numDiffObjects; i++) {
             if(dead.load()) return 0.0;
 
             // this already initializes the angle to NaN
-            diffObjects.push_back(DiffObject(&sortedHitObjects[i], radius_scaling_factor, diffObjects, (i32)i - 1));
+            cachedDiffObjects.push_back(
+                DiffObject(&params.sortedHitObjects[i], radius_scaling_factor, cachedDiffObjects, (i32)i - 1));
         }
     }
 
-    const size_t numDiffObjects = diffObjects.size();
+    DiffObject *diffObjects = cachedDiffObjects.data();
 
     // calculate angles and travel/jump distances (before calculating strains)
     if(!isUsingCachedDiffObjects) {
@@ -455,45 +446,46 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(
     }
 
     // calculate final difficulty (weigh strains)
-    f64 aimNoSliders = DiffObject::calculate_difficulty(Skills::Skill::AIM_NO_SLIDERS, diffObjects);
-    *aim = DiffObject::calculate_difficulty(Skills::Skill::AIM_SLIDERS, diffObjects, outAimStrains);
-    *speed = DiffObject::calculate_difficulty(Skills::Skill::SPEED, diffObjects, outSpeedStrains, speedNotes);
+    f64 aimNoSliders =
+        DiffObject::calculate_difficulty(Skills::Skill::AIM_NO_SLIDERS, diffObjects, numDiffObjects,
+                                         incremental ? &incremental[(size_t)Skills::Skill::AIM_NO_SLIDERS] : NULL);
+    *params.aim =
+        DiffObject::calculate_difficulty(Skills::Skill::AIM_SLIDERS, diffObjects, numDiffObjects,
+                                         incremental ? &incremental[(size_t)Skills::Skill::AIM_SLIDERS] : NULL,
+                                         params.outAimStrains, params.difficultAimStrains);
+    *params.speed =
+        DiffObject::calculate_difficulty(Skills::Skill::SPEED, diffObjects, numDiffObjects,
+                                         incremental ? &incremental[(size_t)Skills::Skill::SPEED] : NULL,
+                                         params.outSpeedStrains, params.difficultSpeedStrains, params.speedNotes);
 
     static const f64 star_scaling_factor = 0.0675;
 
     aimNoSliders = std::sqrt(aimNoSliders) * star_scaling_factor;
-    *aim = std::sqrt(*aim) * star_scaling_factor;
-    *speed = std::sqrt(*speed) * star_scaling_factor;
+    *params.aim = std::sqrt(*params.aim) * star_scaling_factor;
+    *params.speed = std::sqrt(*params.speed) * star_scaling_factor;
 
-    *aimSliderFactor = (*aim > 0) ? aimNoSliders / *aim : 1.0;
+    *params.aimSliderFactor = (*params.aim > 0) ? aimNoSliders / *params.aim : 1.0;
 
-    if(touchDevice) *aim = pow(*aim, 0.8);
+    if(params.touchDevice) *params.aim = pow(*params.aim, 0.8);
 
-    if(relax) {
-        *aim *= 0.9;
-        *speed = 0.0;
+    if(params.relax) {
+        *params.aim *= 0.9;
+        *params.speed = 0.0;
     }
 
-    // fill cache
-    if(!isUsingCachedDiffObjects) {
-        // XXX: just do cachedDiffObjects = diffObjects?
-        for(size_t i = 0; i < diffObjects.size(); i++) {
-            cachedDiffObjects.push_back(diffObjects[i]);
-        }
-    }
-
-    f64 baseAimPerformance = pow(5.0 * max(1.0, *aim / 0.0675) - 4.0, 3.0) / 100000.0;
-    f64 baseSpeedPerformance = pow(5.0 * max(1.0, *speed / 0.0675) - 4.0, 3.0) / 100000.0;
+    f64 baseAimPerformance = pow(5.0 * max(1.0, *params.aim / 0.0675) - 4.0, 3.0) / 100000.0;
+    f64 baseSpeedPerformance = pow(5.0 * max(1.0, *params.speed / 0.0675) - 4.0, 3.0) / 100000.0;
     f64 basePerformance = pow(pow(baseAimPerformance, 1.1) + pow(baseSpeedPerformance, 1.1), 1.0 / 1.1);
     return basePerformance > 0.00001
-               ? 1.04464392682 /* Math.Cbrt(OsuPerformanceCalculator.PERFORMANCE_BASE_MULTIPLIER) */ * 0.027 *
+               ? 1.0476895531716472 /* Math.Cbrt(OsuPerformanceCalculator.PERFORMANCE_BASE_MULTIPLIER) */ * 0.027 *
                      (std::cbrt(100000.0 / pow(2.0, 1 / 1.1) * basePerformance) + 4.0)
                : 0.0;
 }
 
 f64 DifficultyCalculator::calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f64 od, f64 aim, f64 aimSliderFactor,
-                                        f64 speed, f64 speedNotes, i32 numCircles, i32 numSliders, i32 numSpinners,
-                                        i32 maxPossibleCombo, i32 combo, i32 misses, i32 c300, i32 c100, i32 c50) {
+                                        f64 aimDifficultStrains, f64 speed, f64 speedNotes, f64 speedDifficultStrains,
+                                        i32 numCircles, i32 numSliders, i32 numSpinners, i32 maxPossibleCombo,
+                                        i32 combo, i32 misses, i32 c300, i32 c100, i32 c50) {
     // NOTE: depends on active mods + OD + AR
 
     // apply "timescale" aka speed multiplier to ar/od
@@ -512,7 +504,7 @@ f64 DifficultyCalculator::calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f
 
     i32 totalHits = c300 + c100 + c50 + misses;
     f64 accuracy = (totalHits > 0 ? (f64)(c300 * 300 + c100 * 100 + c50 * 50) / (f64)(totalHits * 300) : 0.0);
-    i32 amountHitObjectsWithAccuracy = (modsLegacy & LegacyFlags::ScoreV2 ? totalHits : numCircles);
+    i32 amountHitObjectsWithAccuracy = (modsLegacy & LegacyFlags::ScoreV2 ? (numCircles + numSliders) : numCircles);
 
     // calculateEffectiveMissCount @
     // https://github.com/ppy/osu/blob/master/osu.Game.Rulesets.Osu/Difficulty/OsuPerformanceCalculator.cs required
@@ -520,13 +512,14 @@ f64 DifficultyCalculator::calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f
     f64 comboBasedMissCount = 0.0;
     if(numSliders > 0) {
         f64 fullComboThreshold = maxPossibleCombo - (0.1 * numSliders);
-        if(maxPossibleCombo < fullComboThreshold)
-            comboBasedMissCount = fullComboThreshold / max(1.0, (f64)maxPossibleCombo);
+        if((f64)combo < fullComboThreshold) {
+            comboBasedMissCount = fullComboThreshold / max(1.0, (f64)combo);
+        }
     }
     f64 effectiveMissCount = clamp<f64>(comboBasedMissCount, (f64)misses, (f64)(c50 + c100 + misses));
 
     // custom multipliers for nofail and spunout
-    f64 multiplier = 1.14;  // keep final pp normalized across changes
+    f64 multiplier = 1.15;  // keep final pp normalized across changes
     {
         if(modsLegacy & LegacyFlags::NoFail)
             multiplier *=
@@ -553,18 +546,15 @@ f64 DifficultyCalculator::calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f
                           (totalHits > 2000 ? std::log10(((f64)totalHits / 2000.0)) * 0.5 : 0.0);
         aimValue *= lengthBonus;
 
-        // see https://github.com/ppy/osu-performance/pull/129/
-        // Penalize misses by assessing # of misses relative to the total # of objects. Default a 3% reduction for any #
-        // of misses.
-        if(effectiveMissCount > 0 && totalHits > 0)
-            aimValue *= 0.97 * pow(1.0 - pow(effectiveMissCount / (f64)totalHits, 0.775), effectiveMissCount);
-
-        // combo scaling
-        if(maxPossibleCombo > 0) aimValue *= min(pow((f64)combo, 0.8) / pow((f64)maxPossibleCombo, 0.8), 1.0);
+        // miss penalty
+        // see https://github.com/ppy/osu/pull/16280/
+        if(effectiveMissCount > 0 && totalHits > 0) {
+            aimValue *= 0.96 / ((effectiveMissCount / (4.0 * pow(log(aimDifficultStrains), 0.94))) + 1.0);
+        }
 
         // ar bonus
         f64 approachRateFactor = 0.0;  // see https://github.com/ppy/osu-performance/pull/125/
-        if((modsLegacy & LegacyFlags::Relax) == 0) {
+        if(!(modsLegacy & LegacyFlags::Relax)) {
             if(ar > 10.33)
                 approachRateFactor =
                     0.3 *
@@ -612,15 +602,11 @@ f64 DifficultyCalculator::calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f
                           (totalHits > 2000 ? std::log10(((f64)totalHits / 2000.0)) * 0.5 : 0.0);
         speedValue *= lengthBonus;
 
-        // see https://github.com/ppy/osu-performance/pull/129/
-        // Penalize misses by assessing # of misses relative to the total # of objects. Default a 3% reduction for any #
-        // of misses.
-        if(effectiveMissCount > 0 && totalHits > 0)
-            speedValue *=
-                0.97 * pow(1.0 - pow(effectiveMissCount / (f64)totalHits, 0.775), pow(effectiveMissCount, 0.875));
-
-        // combo scaling
-        if(maxPossibleCombo > 0) speedValue *= min(pow((f64)combo, 0.8) / pow((f64)maxPossibleCombo, 0.8), 1.0);
+        // miss penalty
+        // see https://github.com/ppy/osu/pull/16280/
+        if(effectiveMissCount > 0) {
+            speedValue *= 0.96 / ((effectiveMissCount / (4.0 * pow(log(speedDifficultStrains), 0.94))) + 1.0);
+        }
 
         // ar bonus
         f64 approachRateFactor = 0.0;  // see https://github.com/ppy/osu-performance/pull/125/
@@ -647,14 +633,13 @@ f64 DifficultyCalculator::calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f
 
         // see https://github.com/ppy/osu-performance/pull/128/
         // Scale the speed value with accuracy and OD
-        speedValue *=
-            (0.95 + pow(od, 2.0) / 750.0) * pow((accuracy + relevantAccuracy) / 2.0, (14.5 - max(od, 8.0)) / 2.0);
+        speedValue *= (0.95 + pow(od, 2.0) / 750.0) * pow((accuracy + relevantAccuracy) / 2.0, (14.5 - od) / 2.0);
         // Scale the speed value with # of 50s to punish doubletapping.
         speedValue *= pow(0.99, c50 < (totalHits / 500.0) ? 0.0 : c50 - (totalHits / 500.0));
     }
 
     f64 accuracyValue = 0.0;
-    {
+    if(!(modsLegacy & LegacyFlags::Relax)) {
         f64 betterAccuracyPercentage;
         if(amountHitObjectsWithAccuracy > 0)
             betterAccuracyPercentage =
@@ -754,67 +739,105 @@ void DifficultyCalculator::DiffObject::calculate_strain(const DiffObject &prev, 
     strains[Skills::skillToIndex(dtype)] = currentStrain;
 }
 
-double DifficultyCalculator::DiffObject::calculate_difficulty(const Skills::Skill type,
-                                                              const std::vector<DiffObject> &dobjects,
-                                                              std::vector<double> *outStrains,
+double DifficultyCalculator::DiffObject::calculate_difficulty(const Skills::Skill type, const DiffObject *dobjects,
+                                                              size_t dobjectCount, IncrementalState *incremental,
+                                                              std::vector<double> *outStrains, f64 *outDifficultStrains,
                                                               double *outRelevantNotes) {
     // (old) see https://github.com/ppy/osu/blob/master/osu.Game/Rulesets/Difficulty/Skills/Skill.cs
     // (new) see https://github.com/ppy/osu/blob/master/osu.Game/Rulesets/Difficulty/Skills/StrainSkill.cs
 
-    static const double strain_step = 400.0;  // the length of each strain section
-    static const double decay_weight =
-        0.9;  // max strains are weighted from highest to lowest, and this is how much the weight decays.
+    static const f64 strain_step = 400.0;  // the length of each strain section
 
-    if(dobjects.size() < 1) return 0.0;
+    // max strains are weighted from highest to lowest, and this is how much the weight decays.
+    static const f64 decay_weight = 0.9;
 
-    double interval_end = std::ceil((double)dobjects[0].ho->time / strain_step) * strain_step;
-    double max_strain = 0.0;
+    if(dobjectCount < 1) return 0.0;
 
-    // used for calculating relevant note count for speed pp
-    std::vector<double> objectStrains;
+    f64 interval_end =
+        incremental ? incremental->interval_end : (std::ceil((f64)dobjects[0].ho->time / strain_step) * strain_step);
+    f64 max_strain = incremental ? incremental->max_strain : 0.0;
 
-    std::vector<double> highestStrains;
-    for(size_t i = 0; i < dobjects.size(); i++) {
+    std::vector<f64> highestStrains;
+    std::vector<f64> *highestStrainsRef = incremental ? &incremental->highest_strains : &highestStrains;
+    for(size_t i = (incremental ? dobjectCount - 1 : 0); i < dobjectCount; i++) {
         const DiffObject &cur = dobjects[i];
         const DiffObject &prev = dobjects[i > 0 ? i - 1 : i];
 
         // make previous peak strain decay until the current object
         while(cur.ho->time > interval_end) {
-            highestStrains.push_back(max_strain);
+            if(incremental) {
+                highestStrainsRef->insert(
+                    std::upper_bound(highestStrainsRef->begin(), highestStrainsRef->end(), max_strain), max_strain);
+            } else {
+                highestStrainsRef->push_back(max_strain);
+            }
 
-            if(i < 1)  // !prev
+            // skip calculating strain decay for very long breaks (e.g. beatmap upload size limit hack diffs)
+            // strainDecay with a base of 0.3 at 60 seconds is 4.23911583e-32, well below any meaningful difference even
+            // after being multiplied by object strain
+            double strainDelta = interval_end - (double)prev.ho->time;
+            if(i < 1 || strainDelta > 600000.0) {  // !prev
                 max_strain = 0.0;
-            else
-                max_strain = prev.strains[Skills::skillToIndex(type)] *
-                             (type == Skills::Skill::SPEED ? prev.rhythm : 1.0) *
-                             strainDecay(type, (interval_end - (double)prev.ho->time));
+            } else {
+                max_strain = prev.get_strain(type) * strainDecay(type, strainDelta);
+            }
 
             interval_end += strain_step;
         }
 
         // calculate max strain for this interval
-        double cur_strain = cur.strains[Skills::skillToIndex(type)] * (type == Skills::Skill::SPEED ? cur.rhythm : 1.0);
+        double cur_strain = cur.get_strain(type);
         max_strain = std::max(max_strain, cur_strain);
-        if(outRelevantNotes) objectStrains.push_back(cur_strain);
     }
 
     // the peak strain will not be saved for the last section in the above loop
-    highestStrains.push_back(max_strain);
+    if(incremental) {
+        incremental->interval_end = interval_end;
+        incremental->max_strain = max_strain;
+        highestStrains.reserve(incremental->highest_strains.size() + 1);  // required so insert call doesn't reallocate
+        highestStrains = incremental->highest_strains;
+        highestStrains.insert(std::upper_bound(highestStrains.begin(), highestStrains.end(), max_strain), max_strain);
+    } else {
+        highestStrains.push_back(max_strain);
+    }
 
-    if(outStrains != NULL) (*outStrains) = highestStrains;  // save a copy
+    if(outStrains != NULL) {
+        (*outStrains) = highestStrains;  // save a copy
+    }
 
     // calculate relevant speed note count
     // RelevantNoteCount @ https://github.com/ppy/osu/blob/master/osu.Game.Rulesets.Osu/Difficulty/Skills/Speed.cs
     if(outRelevantNotes) {
-        double maxStrain =
-            (objectStrains.size() < 1 ? 0.0 : *std::max_element(objectStrains.begin(), objectStrains.end()));
-        if(objectStrains.size() < 1 || maxStrain == 0.0) {
+        const auto diffObjCompare = [=](const DiffObject &x, const DiffObject &y) {
+            return x.get_strain(type) < y.get_strain(type);
+        };
+
+        f64 maxObjectStrain;
+        if(incremental) {
+            maxObjectStrain = max(incremental->max_object_strain, dobjects[dobjectCount - 1].get_strain(type));
+        } else {
+            maxObjectStrain = (*std::max_element(dobjects, dobjects + dobjectCount, diffObjCompare)).get_strain(type);
+        }
+
+        if(dobjectCount < 1 || maxObjectStrain == 0.0) {
             *outRelevantNotes = 0.0;
         } else {
-            double tempSum = 0.0;
-            for(size_t i = 0; i < objectStrains.size(); i++) {
-                tempSum += 1.0 / (1.0 + std::exp(-(objectStrains[i] / maxStrain * 12.0 - 6.0)));
+            f64 tempSum = 0.0;
+            if(incremental && std::abs(incremental->max_object_strain - maxObjectStrain) < DIFFCALC_EPSILON) {
+                incremental->relevant_note_sum +=
+                    1.0 /
+                    (1.0 + std::exp(-(dobjects[dobjectCount - 1].get_strain(type) / maxObjectStrain * 12.0 - 6.0)));
+                tempSum = incremental->relevant_note_sum;
+            } else {
+                for(size_t i = 0; i < dobjectCount; i++) {
+                    tempSum += 1.0 / (1.0 + std::exp(-(dobjects[i].get_strain(type) / maxObjectStrain * 12.0 - 6.0)));
+                }
+                if(incremental) {
+                    incremental->max_object_strain = maxObjectStrain;
+                    incremental->relevant_note_sum = tempSum;
+                }
             }
+
             *outRelevantNotes = tempSum;
         }
     }
@@ -827,26 +850,16 @@ double DifficultyCalculator::DiffObject::calculate_difficulty(const Skills::Skil
 
     static const size_t reducedSectionCount = 10;
     static const double reducedStrainBaseline = 0.75;
-    static const double difficultyMultiplier = 1.06;
 
     double difficulty = 0.0;
     double weight = 1.0;
 
-    // sort strains from greatest to lowest
-    std::sort(highestStrains.begin(), highestStrains.end(), std::greater<double>());
-
-    // old implementation
-    /*
-    {
-        // weigh the top strains
-        for (size_t i=0; i<highestStrains.size(); i++)
-        {
-            difficulty += highestStrains[i] * weight;
-            weight *= decay_weight;
-        }
+    // sort strains
+    // NOTE: lazer does this from highest to lowest, but sorting it in reverse lets the reduced top section loop below
+    // have a better average insertion time
+    if(!incremental) {
+        std::sort(highestStrains.begin(), highestStrains.end());
     }
-    return difficulty;
-    */
 
     // new implementation (https://github.com/ppy/osu/pull/13483/)
     {
@@ -863,35 +876,60 @@ double DifficultyCalculator::DiffObject::calculate_difficulty(const Skills::Skil
         }
 
         // "We are reducing the highest strains first to account for extreme difficulty spikes"
-        for(size_t i = 0; i < std::min(highestStrains.size(), skillSpecificReducedSectionCount); i++) {
-            const double scale = std::log10(
-                lerp<double>(1.0, 10.0, clamp<double>((double)i / (double)skillSpecificReducedSectionCount, 0.0, 1.0)));
-            highestStrains[i] *= lerp<double>(reducedStrainBaseline, 1.0, scale);
+        size_t actualReducedSectionCount = std::min(highestStrains.size(), skillSpecificReducedSectionCount);
+        for(size_t i = 0; i < actualReducedSectionCount; i++) {
+            const f64 scale =
+                std::log10(lerp<f64>(1.0, 10.0, clamp<f64>((f64)i / (f64)skillSpecificReducedSectionCount, 0.0, 1.0)));
+            highestStrains[highestStrains.size() - i - 1] *= lerp<f64>(reducedStrainBaseline, 1.0, scale);
         }
 
         // re-sort
-        std::sort(highestStrains.begin(), highestStrains.end(), std::greater<double>());
+        double reducedSections[reducedSectionCount];  // actualReducedSectionCount <= skillSpecificReducedSectionCount
+                                                      // <= reducedSectionCount
+        memcpy(reducedSections, &highestStrains[highestStrains.size() - actualReducedSectionCount],
+               actualReducedSectionCount * sizeof(f64));
+        highestStrains.erase(highestStrains.end() - actualReducedSectionCount, highestStrains.end());
+        for(size_t i = 0; i < actualReducedSectionCount; i++) {
+            highestStrains.insert(std::upper_bound(highestStrains.begin(), highestStrains.end(), reducedSections[i]),
+                                  reducedSections[i]);
+        }
 
         // weigh the top strains
         for(size_t i = 0; i < highestStrains.size(); i++) {
-            difficulty += highestStrains[i] * weight;
+            f64 last = difficulty;
+            difficulty += highestStrains[highestStrains.size() - i - 1] * weight;
             weight *= decay_weight;
+            if(std::abs(difficulty - last) < DIFFCALC_EPSILON) {
+                break;
+            }
         }
     }
 
-    double skillSpecificDifficultyMultiplier = difficultyMultiplier;
-    {
-        switch(type) {
-            case Skills::Skill::SPEED:
-                skillSpecificDifficultyMultiplier = 1.04;
-                break;
-            case Skills::Skill::AIM_SLIDERS:
-            case Skills::Skill::AIM_NO_SLIDERS:
-                break;
+    if(outDifficultStrains) {
+        if(difficulty == 0.0) {
+            *outDifficultStrains = difficulty;
+        } else {
+            f64 consistentTopStrain = difficulty / 10.0;
+            f64 tempSum = 0.0;
+            if(incremental && std::abs(incremental->consistent_top_strain - consistentTopStrain) < DIFFCALC_EPSILON) {
+                incremental->difficult_strains +=
+                    1.1 /
+                    (1 + std::exp(-10 * (dobjects[dobjectCount - 1].get_strain(type) / consistentTopStrain - 0.88)));
+                tempSum = incremental->difficult_strains;
+            } else {
+                for(size_t i = 0; i < dobjectCount; i++) {
+                    tempSum += 1.1 / (1 + std::exp(-10 * (dobjects[i].get_strain(type) / consistentTopStrain - 0.88)));
+                }
+                if(incremental) {
+                    incremental->consistent_top_strain = consistentTopStrain;
+                    incremental->difficult_strains = tempSum;
+                }
+            }
+            *outDifficultStrains = tempSum;
         }
     }
 
-    return difficulty * skillSpecificDifficultyMultiplier;
+    return difficulty;
 }
 
 // old implementation (ppv2.0)
@@ -932,9 +970,12 @@ double DifficultyCalculator::DiffObject::spacing_weight2(const Skills::Skill dif
 
     static const double min_speed_bonus = 75.0; /* ~200BPM 1/4 streams */
     static const double speed_balancing_factor = 40.0;
+    static const double distance_multiplier = 0.94;
 
     static const int history_time_max = 5000;
-    static const double rhythm_multiplier = 0.75;
+    static const int history_objects_max = 32;
+    static const double rhythm_overall_multiplier = 0.95;
+    static const double rhythm_ratio_multiplier = 12.0;
 
     // double angle_bonus = 1.0; // (apparently unused now in lazer?)
 
@@ -954,34 +995,30 @@ double DifficultyCalculator::DiffObject::spacing_weight2(const Skills::Skill dif
             double strain_time = this->strain_time;
             strain_time /= clamp<double>((strain_time / hitWindow300) / 0.93, 0.92, 1.0);
 
-            double doubletapness = 1.0;
-            if(next != NULL) {
-                double cur_delta = std::max(1.0, delta_time);
-                double next_delta = std::max(1, next->ho->time - ho->time);  // next delta time isn't initialized yet
-                double delta_diff = std::abs(next_delta - cur_delta);
-                double speedRatio = cur_delta / std::max(cur_delta, delta_diff);
-                double windowRatio = std::pow(std::min(1.0, cur_delta / hitWindow300), 2.0);
+            f64 doubletapness = 1.0 - get_doubletapness(next, hitWindow300);
 
-                doubletapness = std::pow(speedRatio, 1 - windowRatio);
+            f64 speed_bonus = 0.0;
+            if(strain_time < min_speed_bonus) {
+                speed_bonus = 0.75 * pow((min_speed_bonus - strain_time) / speed_balancing_factor, 2.0);
             }
 
-            double speed_bonus = 1.0;
-            if(strain_time < min_speed_bonus)
-                speed_bonus = 1.0 + 0.75 * std::pow((min_speed_bonus - strain_time) / speed_balancing_factor, 2.0);
-
-            raw_speed_strain = (speed_bonus + speed_bonus * std::pow(distance / single_spacing_threshold, 3.5)) *
-                               doubletapness / strain_time;
+            f64 distance_bonus = pow(distance / single_spacing_threshold, 3.95) * distance_multiplier;
+            raw_speed_strain = (1.0 + speed_bonus + distance_bonus) * 1000.0 * doubletapness / strain_time;
 
             // https://github.com/ppy/osu/blob/master/osu.Game.Rulesets.Osu/Difficulty/Evaluators/RhythmEvaluator.cs
-            int previousIslandSize = 0;
+            f64 rhythmComplexitySum = 0;
+            const f64 deltaDifferenceEpsilon = hitWindow300 * 0.3;
 
-            double rhythmComplexitySum = 0;
-            int islandSize = 1;
-            double startRatio = 0;  // store the ratio of the current start of an island to buff for tighter rhythms
+            RhythmIsland island{INT_MAX, 0};
+            RhythmIsland previousIsland{INT_MAX, 0};
+
+            std::vector<std::pair<RhythmIsland, i32>> islandCounts;
+
+            f64 startRatio = 0.0;  // store the ratio of the current start of an island to buff for tighter rhythms
 
             bool firstDeltaSwitch = false;
 
-            int historicalNoteCount = std::min(prevObjectIndex, 32);
+            int historicalNoteCount = min(prevObjectIndex, history_objects_max);
 
             int rhythmStart = 0;
 
@@ -990,81 +1027,132 @@ double DifficultyCalculator::DiffObject::spacing_weight2(const Skills::Skill dif
                 rhythmStart++;
             }
 
+            const DiffObject *prevObj = get_previous(rhythmStart);
+            const DiffObject *lastObj = get_previous(rhythmStart + 1);
             for(int i = rhythmStart; i > 0; i--) {
                 const DiffObject *currObj = get_previous(i - 1);
-                const DiffObject *prevObj = get_previous(i);
-                const DiffObject *lastObj = get_previous(i + 1);
 
-                double currHistoricalDecay = (double)(history_time_max - (ho->time - currObj->ho->time)) /
-                                             history_time_max;  // scales note 0 to 1 from history to now
-
-                currHistoricalDecay =
-                    std::min((double)(historicalNoteCount - i) / historicalNoteCount,
-                             currHistoricalDecay);  // either we're limited by time or limited by object count.
+                // scales note 0 to 1 from history to now
+                f64 timeDecay = (history_time_max - (ho->time - currObj->ho->time)) / (f64)history_time_max;
+                f64 noteDecay = (f64)(historicalNoteCount - i) / historicalNoteCount;
+                f64 currHistoricalDecay = min(noteDecay, timeDecay);
 
                 double currDelta = currObj->strain_time;
                 double prevDelta = prevObj->strain_time;
                 double lastDelta = lastObj->strain_time;
-                double currRatio =
-                    1.0 + 6.0 * std::min(0.5, std::pow(std::sin(PI / (std::min(prevDelta, currDelta) /
-                                                                      std::max(prevDelta, currDelta))),
-                                                       2.0));  // fancy function to calculate rhythmbonuses.
 
-                double windowPenalty = std::min(
-                    1.0, std::max(0.0, std::abs(prevDelta - currDelta) - hitWindow300 * 0.3) / (hitWindow300 * 0.3));
+                // calculate how much current delta difference deserves a rhythm bonus
+                // this function is meant to reduce rhythm bonus for deltas that are multiples of each other (i.e 100
+                // and 200)
+                f64 deltaDifferenceRatio = min(prevDelta, currDelta) / max(prevDelta, currDelta);
+                f64 currRatio = 1.0 + rhythm_ratio_multiplier * min(0.5, pow(std::sin(PI / deltaDifferenceRatio), 2.0));
 
-                windowPenalty = std::min(1.0, windowPenalty);
+                // reduce ratio bonus if delta difference is too big
+                f64 fraction = max(prevDelta / currDelta, currDelta / prevDelta);
+                f64 fractionMultiplier = clamp<f64>(2.0 - fraction / 8.0, 0.0, 1.0);
 
-                double effectiveRatio = windowPenalty * currRatio;
+                f64 windowPenalty = min(
+                    1.0, max(0.0, std::abs(prevDelta - currDelta) - deltaDifferenceEpsilon) / deltaDifferenceEpsilon);
+
+                f64 effectiveRatio = windowPenalty * currRatio * fractionMultiplier;
 
                 if(firstDeltaSwitch) {
-                    if(!(prevDelta > 1.25 * currDelta || prevDelta * 1.25 < currDelta)) {
-                        if(islandSize < 7) islandSize++;  // island is still progressing, count size.
+                    if(std::abs(prevDelta - currDelta) < deltaDifferenceEpsilon) {
+                        // island is still progressing
+                        if(island.delta == INT_MAX) {
+                            island.delta = max((int)currDelta, 25);
+                        }
+                        island.deltaCount++;
                     } else {
-                        if(get_previous(i - 1)->ho->type ==
-                           OsuDifficultyHitObject::TYPE::SLIDER)  // bpm change is into slider, this is easy acc window
+                        // bpm change is into slider, this is easy acc window
+                        if(currObj->ho->type == OsuDifficultyHitObject::TYPE::SLIDER) {
                             effectiveRatio *= 0.125;
+                        }
 
-                        if(get_previous(i)->ho->type ==
-                           OsuDifficultyHitObject::TYPE::SLIDER)  // bpm change was from a slider, this is easier
-                                                                  // typically than circle -> circle
-                            effectiveRatio *= 0.25;
+                        // bpm change was from a slider, this is easier typically than circle -> circle
+                        if(prevObj->ho->type == OsuDifficultyHitObject::TYPE::SLIDER) {
+                            effectiveRatio *= 0.3;
+                        }
 
-                        if(previousIslandSize == islandSize)  // repeated island size (ex: triplet -> triplet)
-                            effectiveRatio *= 0.25;
+                        // repeated island polarity (2 -> 4, 3 -> 5)
+                        if(island.deltaCount % 2 == previousIsland.deltaCount % 2) {
+                            effectiveRatio *= 0.5;
+                        }
 
-                        if(previousIslandSize % 2 == islandSize % 2)  // repeated island polartiy (2 -> 4, 3 -> 5)
-                            effectiveRatio *= 0.50;
-
-                        if(lastDelta > prevDelta + 10.0 &&
-                           prevDelta > currDelta + 10.0)  // previous increase happened a note ago, 1/1->1/2-1/4, dont
-                                                          // want to buff this.
+                        // previous increase happened a note ago, 1/1->1/2-1/4, dont want to buff this.
+                        if(lastDelta > prevDelta + deltaDifferenceEpsilon &&
+                           prevDelta > currDelta + deltaDifferenceEpsilon) {
                             effectiveRatio *= 0.125;
+                        }
 
-                        rhythmComplexitySum += std::sqrt(effectiveRatio * startRatio) * currHistoricalDecay *
-                                               std::sqrt(4.0 + islandSize) / 2.0 * std::sqrt(4.0 + previousIslandSize) /
-                                               2.0;
+                        // repeated island size (ex: triplet -> triplet)
+                        if(previousIsland.deltaCount == island.deltaCount) {
+                            effectiveRatio *= 0.5;
+                        }
+
+                        std::pair<RhythmIsland, int> *islandCount = nullptr;
+                        for(int i = 0; i < islandCounts.size(); i++) {
+                            if(islandCounts[i].first.equals(island, deltaDifferenceEpsilon)) {
+                                islandCount = &islandCounts[i];
+                                break;
+                            }
+                        }
+
+                        if(islandCount != NULL) {
+                            // only add island to island counts if they're going one after another
+                            if(previousIsland.equals(island, deltaDifferenceEpsilon)) islandCount->second++;
+
+                            // repeated island (ex: triplet -> triplet)
+                            static const f64 E = 2.7182818284590451;
+                            f64 power = 2.75 / (1.0 + std::pow(E, 14.0 - (0.24 * island.delta)));
+                            effectiveRatio *=
+                                std::min(3.0 / islandCount->second, std::pow(1.0 / islandCount->second, power));
+                        } else {
+                            islandCounts.emplace_back(island, 1);
+                        }
+
+                        // scale down the difficulty if the object is doubletappable
+                        f64 doubletapness = prevObj->get_doubletapness(currObj, hitWindow300);
+                        effectiveRatio *= 1.0 - doubletapness * 0.75;
+
+                        rhythmComplexitySum += std::sqrt(effectiveRatio * startRatio) * currHistoricalDecay;
 
                         startRatio = effectiveRatio;
 
-                        previousIslandSize = islandSize;  // log the last island size.
+                        previousIsland = island;
 
-                        if(prevDelta * 1.25 < currDelta)  // we're slowing down, stop counting
-                            firstDeltaSwitch =
-                                false;  // if we're speeding up, this stays true and  we keep counting island size.
+                        // we're slowing down, stop counting
+                        if(prevDelta + deltaDifferenceEpsilon < currDelta) {
+                            // if we're speeding up, this stays true and  we keep counting island size.
+                            firstDeltaSwitch = false;
+                        }
 
-                        islandSize = 1;
+                        island = RhythmIsland{max((i32)currDelta, 25), 1};
                     }
-                } else if(prevDelta > 1.25 * currDelta)  // we want to be speeding up.
-                {
+                } else if(prevDelta > currDelta + deltaDifferenceEpsilon) {  // we want to be speeding up.
                     // Begin counting island until we change speed again.
                     firstDeltaSwitch = true;
+
+                    // bpm change is into slider, this is easy acc window
+                    if(currObj->ho->type == OsuDifficultyHitObject::TYPE::SLIDER) {
+                        effectiveRatio *= 0.6;
+                    }
+
+                    // bpm change was from a slider, this is easier typically than circle -> circle
+                    if(prevObj->ho->type == OsuDifficultyHitObject::TYPE::SLIDER) {
+                        effectiveRatio *= 0.6;
+                    }
+
                     startRatio = effectiveRatio;
-                    islandSize = 1;
+
+                    island = RhythmIsland{max((i32)currDelta, 25), 1};
                 }
+
+                lastObj = prevObj;
+                prevObj = currObj;
             }
 
-            rhythm = std::sqrt(4.0 + rhythmComplexitySum * rhythm_multiplier) / 2.0;
+            rhythm = std::sqrt(4.0 + rhythmComplexitySum * rhythm_overall_multiplier) / 2.0;
 
             return raw_speed_strain;
         } break;
@@ -1159,5 +1247,19 @@ double DifficultyCalculator::DiffObject::spacing_weight2(const Skills::Skill dif
         } break;
     }
 
+    return 0.0;
+}
+
+f64 DifficultyCalculator::DiffObject::get_doubletapness(const DifficultyCalculator::DiffObject *next,
+                                                        f64 hitWindow300) const {
+    if(next != NULL) {
+        f64 cur_delta = max(1.0, delta_time);
+        f64 next_delta = max(1, next->ho->time - ho->time);  // next delta time isn't initialized yet
+        f64 delta_diff = abs(next_delta - cur_delta);
+        f64 speedRatio = cur_delta / max(cur_delta, delta_diff);
+        f64 windowRatio = pow(min(1.0, cur_delta / hitWindow300), 2.0);
+
+        return 1.0 - pow(speedRatio, 1.0 - windowRatio);
+    }
     return 0.0;
 }

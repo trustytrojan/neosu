@@ -28,8 +28,14 @@ Changelog::Changelog() : ScreenBackable() {
 
     CHANGELOG latest;
     latest.title = UString::format("%.2f (%s, %s)", cv_version.getFloat(), __DATE__, __TIME__);
-    latest.changes.push_back("- Fixed crash when opening song browser");
+    latest.changes.push_back("- Updated star/pp algorithms (thanks @Khangaroo and @McKay)");
+    latest.changes.push_back("- Updated osu! version to b20241001");
     changelogs.push_back(latest);
+
+    CHANGELOG v36_01;
+    v36_01.title = "36.01 (2024-09-25)";
+    v36_01.changes.push_back("- Fixed crash when opening song browser");
+    changelogs.push_back(v36_01);
 
     CHANGELOG v36_00;
     v36_00.title = "36.00 (2024-09-24)";

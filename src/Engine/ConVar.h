@@ -901,6 +901,7 @@ extern ConVar cv_sound_panning_multiplier;
 extern ConVar cv_speed_override;
 extern ConVar cv_spinner_fade_out_time_multiplier;
 extern ConVar cv_spinner_use_ar_fadein;
+extern ConVar cv_stars_ignore_clamped_sliders;
 extern ConVar cv_stars_slider_curve_points_separation;
 extern ConVar cv_stars_stacking;
 extern ConVar cv_start_first_main_menu_song_at_preview_point;

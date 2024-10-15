@@ -584,7 +584,7 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
 
         // 2) add repeat times (either at slider begin or end)
         for(int i = 0; i < (s.repeat - 1); i++) {
-            const u32 time = s.time + (u32)(s.sliderTimeWithoutRepeats * (i + 1));  // see Slider.cpp
+            const f32 time = s.time + (s.sliderTimeWithoutRepeats * (i + 1));  // see Slider.cpp
             s.scoringTimesForStarCalc.push_back(OsuDifficultyHitObject::SLIDER_SCORING_TIME{
                 .type = OsuDifficultyHitObject::SLIDER_SCORING_TIME::TYPE::REPEAT,
                 .time = time,
@@ -596,9 +596,9 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
             for(int t = 0; t < s.ticks.size(); t++) {
                 const float tickPercentRelativeToRepeatFromStartAbs =
                     (((i + 1) % 2) != 0 ? s.ticks[t] : 1.0f - s.ticks[t]);  // see Slider.cpp
-                const u32 time =
-                    s.time + (u32)(s.sliderTimeWithoutRepeats * i) +
-                    (u32)(tickPercentRelativeToRepeatFromStartAbs * s.sliderTimeWithoutRepeats);  // see Slider.cpp
+                const f32 time =
+                    s.time + (s.sliderTimeWithoutRepeats * i) +
+                    (tickPercentRelativeToRepeatFromStartAbs * s.sliderTimeWithoutRepeats);  // see Slider.cpp
                 s.scoringTimesForStarCalc.push_back(OsuDifficultyHitObject::SLIDER_SCORING_TIME{
                     .type = OsuDifficultyHitObject::SLIDER_SCORING_TIME::TYPE::TICK,
                     .time = time,
@@ -608,9 +608,9 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
 
         // 4) add slider end (potentially before last tick for bullshit sliders, but sorting takes care of that)
         // see https://github.com/ppy/osu/pull/4193#issuecomment-460127543
-        u32 time_a = s.time + (u32)s.sliderTime / 2;
-        u32 time_b = (s.time + (u32)s.sliderTime) - osuSliderEndInsideCheckOffset;
-        const u32 time = max(time_a, time_b);
+        u32 time_a = (f32)s.time + s.sliderTime / 2.f;
+        u32 time_b = ((f32)s.time + s.sliderTime) - osuSliderEndInsideCheckOffset;
+        const f32 time = max(time_a, time_b);
         s.scoringTimesForStarCalc.push_back(OsuDifficultyHitObject::SLIDER_SCORING_TIME{
             .type = OsuDifficultyHitObject::SLIDER_SCORING_TIME::TYPE::END,
             .time = time,
@@ -884,7 +884,7 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
                 result.diffobjects[i].spanDuration = (double)result.diffobjects[i].spanDuration * invSpeedMultiplier;
                 for(int s = 0; s < result.diffobjects[i].scoringTimes.size(); s++) {
                     result.diffobjects[i].scoringTimes[s].time =
-                        (long)((double)result.diffobjects[i].scoringTimes[s].time * invSpeedMultiplier);
+                        ((f64)result.diffobjects[i].scoringTimes[s].time * invSpeedMultiplier);
                 }
             }
         }

@@ -13,6 +13,8 @@ struct pp_info {
     f64 aim_slider_factor = 0.0;
     f64 speed_stars = 0.0;
     f64 speed_notes = 0.0;
+    f64 difficult_aim_strains = 0.0;
+    f64 difficult_speed_strains = 0.0;
     f64 pp = -1.0;
 };
 
@@ -33,7 +35,7 @@ class OsuDifficultyHitObject {
         };
 
         TYPE type;
-        u32 time;
+        f32 time;
     };
 
     struct SliderScoringTimeComparator {
@@ -94,7 +96,7 @@ class OsuDifficultyHitObject {
 
 class DifficultyCalculator {
    public:
-    static constexpr const i32 PP_ALGORITHM_VERSION = 20220902;
+    static constexpr const i32 PP_ALGORITHM_VERSION = 20241007;
 
     class Skills {
        public:
@@ -126,10 +128,22 @@ class DifficultyCalculator {
 
     // how much strains decay per interval (if the previous interval's peak strains after applying decay are
     // still higher than the current one's, they will be used as the peak strains).
-    static constexpr const double decay_base[Skills::NUM_SKILLS] = {0.3, 0.15, 0.15};
+    static constexpr const f64 decay_base[Skills::NUM_SKILLS] = {0.3, 0.15, 0.15};
 
     // used to keep speed and aim balanced between eachother
-    static constexpr const double weight_scaling[Skills::NUM_SKILLS] = {1375.0, 23.55, 23.55};
+    static constexpr const f64 weight_scaling[Skills::NUM_SKILLS] = {1.430, 25.18, 25.18};
+
+    static constexpr const f64 DIFFCALC_EPSILON = 1e-32;
+
+    struct IncrementalState {
+        f64 interval_end;
+        f64 max_strain;
+        f64 max_object_strain;
+        f64 relevant_note_sum;  // speed only
+        f64 consistent_top_strain;
+        f64 difficult_strains;
+        std::vector<f64> highest_strains;
+    };
 
     class DiffObject {
        public:
@@ -175,6 +189,9 @@ class DifficultyCalculator {
             if(foo < 0) foo = 0;  // msvc
             return (objects.size() > 0 && prevObjectIndex - backwardsIdx < (int)objects.size() ? &objects[foo] : NULL);
         }
+        inline f64 get_strain(Skills::Skill type) const {
+            return strains[Skills::skillToIndex(type)] * (type == Skills::Skill::SPEED ? rhythm : 1.0);
+        }
         inline static double applyDiminishingExp(double val) { return std::pow(val, 0.99); }
         inline static double strainDecay(Skills::Skill type, double ms) {
             return std::pow(decay_base[Skills::skillToIndex(type)], ms / 1000.0);
@@ -183,33 +200,58 @@ class DifficultyCalculator {
         void calculate_strains(const DiffObject &prev, const DiffObject *next, double hitWindow300);
         void calculate_strain(const DiffObject &prev, const DiffObject *next, double hitWindow300,
                               const Skills::Skill dtype);
-        static double calculate_difficulty(const Skills::Skill type, const std::vector<DiffObject> &dobjects,
-                                           std::vector<double> *outStrains = NULL, double *outRelevantNotes = NULL);
+        static f64 calculate_difficulty(const Skills::Skill type, const DiffObject *dobjects, size_t dobjectCount,
+                                        IncrementalState *incremental, std::vector<f64> *outStrains = NULL,
+                                        f64 *outDifficultStrains = NULL, f64 *outRelevantNotes = NULL);
         static double spacing_weight1(const double distance, const Skills::Skill diff_type);
         double spacing_weight2(const Skills::Skill diff_type, const DiffObject &prev, const DiffObject *next,
                                double hitWindow300);
+        f64 get_doubletapness(const DiffObject *next, f64 hitWindow300) const;
+    };
+
+    struct StarCalcParams {
+        std::vector<OsuDifficultyHitObject> sortedHitObjects;
+        f32 CS;
+        f32 OD;
+        f32 speedMultiplier;
+        bool relax;
+        bool touchDevice;
+        f64 *aim;
+        f64 *aimSliderFactor;
+        f64 *difficultAimStrains;
+        f64 *speed;
+        f64 *speedNotes;
+        f64 *difficultSpeedStrains;
+        i32 upToObjectIndex = -1;
+        std::vector<f64> *outAimStrains = NULL;
+        std::vector<f64> *outSpeedStrains = NULL;
+    };
+
+    struct RhythmIsland {
+        // NOTE: lazer stores "deltaDifferenceEpsilon" (hitWindow300 * 0.3) in this struct, but OD is constant here
+        i32 delta;
+        i32 deltaCount;
+
+        inline bool equals(RhythmIsland &other, f64 deltaDifferenceEpsilon) const {
+            return std::abs(delta - other.delta) < deltaDifferenceEpsilon && deltaCount == other.deltaCount;
+        }
     };
 
     // stars, fully static
-    static f64 calculateStarDiffForHitObjects(std::vector<OsuDifficultyHitObject> &sortedHitObjects, f32 CS, f32 OD,
-                                              f32 speedMultiplier, bool relax, bool touchDevice, f64 *aim,
-                                              f64 *aimSliderFactor, f64 *speed, f64 *speedNotes, i32 upToObjectIndex,
-                                              std::vector<f64> *outAimStrains, std::vector<f64> *outSpeedStrains);
-    static f64 calculateStarDiffForHitObjects(std::vector<OsuDifficultyHitObject> &sortedHitObjects, f32 CS, f32 OD,
-                                              f32 speedMultiplier, bool relax, bool touchDevice, f64 *aim,
-                                              f64 *aimSliderFactor, f64 *speed, f64 *speedNotes, i32 upToObjectIndex,
-                                              std::vector<f64> *outAimStrains, std::vector<f64> *outSpeedStrains,
-                                              const std::atomic<bool> &dead);
-    static f64 calculateStarDiffForHitObjectsInt(std::vector<DiffObject> &cachedDiffObjects,
-                                                 std::vector<DiffObject> &diffObjects,
-                                                 std::vector<OsuDifficultyHitObject> &sortedHitObjects, f32 CS, f32 OD,
-                                                 f32 speedMultiplier, bool relax, bool touchDevice, f64 *aim,
-                                                 f64 *aimSliderFactor, f64 *speed, f64 *speedNotes, i32 upToObjectIndex,
-                                                 std::vector<f64> *outAimStrains, std::vector<f64> *outSpeedStrains,
-                                                 const std::atomic<bool> &dead);
+    static f64 calculateStarDiffForHitObjects(StarCalcParams &params);
+    static f64 calculateStarDiffForHitObjects(StarCalcParams &params, const std::atomic<bool> &dead);
+    static f64 calculateStarDiffForHitObjectsInt(std::vector<DiffObject> &cachedDiffObjects, StarCalcParams &params,
+                                                 IncrementalState *incremental, const std::atomic<bool> &dead);
+
+    // pp, use runtime mods (convenience)
+    static f64 calculatePPv2(Beatmap *beatmap, f64 aim, f64 aimSliderFactor, f64 difficultAimStrains, f64 speed,
+                             f64 speedNotes, f64 difficultSpeedStrains, i32 numHitObjects, i32 numCircles,
+                             i32 numSliders, i32 numSpinners, i32 maxPossibleCombo, i32 combo = -1, i32 misses = 0,
+                             i32 c300 = -1, i32 c100 = 0, i32 c50 = 0);
 
     // pp, fully static
-    static f64 calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f64 od, f64 aim, f64 aimSliderFactor, f64 speed,
-                             f64 speedNotes, i32 numCircles, i32 numSliders, i32 numSpinners, i32 maxPossibleCombo,
-                             i32 combo, i32 misses, i32 c300, i32 c100, i32 c50);
+    static f64 calculatePPv2(i32 modsLegacy, f64 timescale, f64 ar, f64 od, f64 aim, f64 aimSliderFactor,
+                             f64 aimDifficultStrains, f64 speed, f64 speedNotes, f64 speedDifficultStrains,
+                             i32 numCircles, i32 numSliders, i32 numSpinners, i32 maxPossibleCombo, i32 combo,
+                             i32 misses, i32 c300, i32 c100, i32 c50);
 };

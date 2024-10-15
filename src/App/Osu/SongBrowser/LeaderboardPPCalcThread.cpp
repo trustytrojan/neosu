@@ -154,12 +154,30 @@ static void run_thread() {
                     work_mtx.lock();
                     return;
                 }
+
+                DifficultyCalculator::StarCalcParams params;
+                params.sortedHitObjects.swap(computed_ho->diffres.diffobjects);
+                params.CS = rqt.CS;
+                params.OD = rqt.OD;
+                params.speedMultiplier = rqt.speed;
+                params.relax = rqt.rx;
+                params.touchDevice = rqt.td;
+                params.aim = &computed_info->info.aim_stars;
+                params.aimSliderFactor = &computed_info->info.aim_slider_factor;
+                params.difficultAimStrains = &computed_info->info.difficult_aim_strains;
+                params.speed = &computed_info->info.speed_stars;
+                params.speedNotes = &computed_info->info.speed_notes;
+                params.difficultSpeedStrains = &computed_info->info.difficult_speed_strains;
+                params.upToObjectIndex = -1;
+                params.outAimStrains = &aimStrains;
+                params.outSpeedStrains = &speedStrains;
                 computed_info->info.total_stars = DifficultyCalculator::calculateStarDiffForHitObjectsInt(
-                    computed_info->cachedDiffObjects, computed_info->diffObjects, computed_ho->diffres.diffobjects,
-                    rqt.CS, rqt.OD, rqt.speed, rqt.rx, rqt.td, &computed_info->info.aim_stars,
-                    &computed_info->info.aim_slider_factor, &computed_info->info.speed_stars,
-                    &computed_info->info.speed_notes, -1, &aimStrains, &speedStrains, dead);
+                    computed_info->cachedDiffObjects, params, NULL, dead);
+
                 inf_cache.push_back(computed_info);
+
+                // swap back
+                computed_ho->diffres.diffobjects.swap(params.sortedHitObjects);
             }
 
             if(dead.load()) {
@@ -168,9 +186,11 @@ static void run_thread() {
             }
             computed_info->info.pp = DifficultyCalculator::calculatePPv2(
                 rqt.mods_legacy, rqt.speed, rqt.AR, rqt.OD, computed_info->info.aim_stars,
-                computed_info->info.aim_slider_factor, computed_info->info.speed_stars, computed_info->info.speed_notes,
-                diff->m_iNumCircles, diff->m_iNumSliders, diff->m_iNumSpinners, computed_ho->diffres.maxPossibleCombo,
-                rqt.comboMax, rqt.numMisses, rqt.num300s, rqt.num100s, rqt.num50s);
+                computed_info->info.aim_slider_factor, computed_info->info.difficult_aim_strains,
+                computed_info->info.speed_stars, computed_info->info.speed_notes,
+                computed_info->info.difficult_speed_strains, diff->m_iNumCircles, diff->m_iNumSliders,
+                diff->m_iNumSpinners, computed_ho->diffres.maxPossibleCombo, rqt.comboMax, rqt.numMisses, rqt.num300s,
+                rqt.num100s, rqt.num50s);
 
             cache_mtx.lock();
             cache.push_back(std::pair(rqt, computed_info->info));

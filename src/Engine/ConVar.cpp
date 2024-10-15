@@ -1888,6 +1888,8 @@ ConVar cv_spinner_fade_out_time_multiplier("osu_spinner_fade_out_time_multiplier
 ConVar cv_spinner_use_ar_fadein(
     "osu_spinner_use_ar_fadein", false, FCVAR_BANCHO_COMPATIBLE,
     "whether spinners should fade in with AR (same as circles), or with hardcoded 400 ms fadein time (osu!default)");
+ConVar cv_stars_ignore_clamped_sliders("osu_stars_ignore_clamped_sliders", true, FCVAR_BANCHO_COMPATIBLE,
+                                       "skips processing sliders limited by osu_slider_curve_max_length");
 ConVar cv_stars_slider_curve_points_separation(
     "osu_stars_slider_curve_points_separation", 20.0f, FCVAR_BANCHO_COMPATIBLE,
     "massively reduce curve accuracy for star calculations to save memory/performance");

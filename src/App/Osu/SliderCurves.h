@@ -1,14 +1,4 @@
-//================ Copyright (c) 2015, PG & Jeffrey Han (opsu!), All rights reserved. =================//
-//
-// Purpose:		curve classes have been taken from opsu!, albeit heavily modified.
-//				contains all classes and functions for calculating slider curves
-//
-// $NoKeywords: $slidercurves
-//=====================================================================================================//
-
-#ifndef OSUSLIDERCURVES_H
-#define OSUSLIDERCURVES_H
-
+#pragma once
 #include "cbase.h"
 
 //**********************//
@@ -43,8 +33,6 @@ class SliderCurve {
     inline const std::vector<Vector2> &getPoints() const { return m_curvePoints; }
     inline const std::vector<std::vector<Vector2>> &getPointSegments() const { return m_curvePointSegments; }
 
-   protected:
-    // original input values
     float m_fPixelLength;
     std::vector<Vector2> m_controlPoints;
 
@@ -190,5 +178,3 @@ class SliderBezierApproximator {
     std::vector<Vector2> m_subdivisionBuffer1;
     std::vector<Vector2> m_subdivisionBuffer2;
 };
-
-#endif

@@ -37,9 +37,24 @@ static void run_mct() {
 
         pp_info info;
         auto diffres = DatabaseBeatmap::loadDifficultyHitObjects(c, diff2->getAR(), diff2->getCS(), 1.f, false, dead);
-        result.star_rating = DifficultyCalculator::calculateStarDiffForHitObjects(
-            diffres.diffobjects, diff2->getCS(), diff2->getOD(), 1.f, false, false, &info.aim_stars,
-            &info.aim_slider_factor, &info.speed_stars, &info.speed_notes, -1, &aimStrains, &speedStrains, dead);
+
+        DifficultyCalculator::StarCalcParams params;
+        params.sortedHitObjects.swap(diffres.diffobjects);
+        params.CS = diff2->getCS();
+        params.OD = diff2->getOD();
+        params.speedMultiplier = 1.f;
+        params.relax = false;
+        params.touchDevice = false;
+        params.aim = &info.aim_stars;
+        params.aimSliderFactor = &info.aim_slider_factor;
+        params.difficultAimStrains = &info.difficult_aim_strains;
+        params.speed = &info.speed_stars;
+        params.speedNotes = &info.speed_notes;
+        params.difficultSpeedStrains = &info.difficult_speed_strains;
+        params.upToObjectIndex = -1;
+        params.outAimStrains = &aimStrains;
+        params.outSpeedStrains = &speedStrains;
+        result.star_rating = DifficultyCalculator::calculateStarDiffForHitObjects(params, dead);
 
         BPMInfo bpm = getBPM(c.timingpoints);
         result.min_bpm = bpm.min;
