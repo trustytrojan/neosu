@@ -6,7 +6,6 @@
 class ToastElement : public CBaseUIButton {
    public:
     ToastElement(UString text, Color borderColor_arg);
-    // ToastElement(UString text) : ToastElement(text, 0xffdd0000);
     virtual ~ToastElement() { ; }
 
     virtual void draw(Graphics *g);

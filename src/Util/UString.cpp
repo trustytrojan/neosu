@@ -5,6 +5,8 @@
 #include <wchar.h>
 #include <wctype.h>
 
+#include "Font.h"
+
 #define USTRING_MASK_1BYTE 0x80  /* 1000 0000 */
 #define USTRING_VALUE_1BYTE 0x00 /* 0000 0000 */
 #define USTRING_MASK_2BYTE 0xE0  /* 1110 0000 */
@@ -301,6 +303,72 @@ int UString::findIgnoreCase(const UString &str, int start, int end) const {
     }
 
     return -1;
+}
+
+std::vector<UString> UString::wrap(McFont *font, f64 max_width) {
+    std::vector<UString> lines;
+    lines.push_back(UString());
+
+    UString word = "";
+    u32 line = 0;
+    f64 line_width = 0.0;
+    f64 word_width = 0.0;
+    for(int i = 0; i < length(); i++) {
+        if(mUnicode[i] == '\n') {
+            lines[line].append(word);
+            lines.push_back(UString());
+            line++;
+            line_width = 0.0;
+            word = "";
+            word_width = 0.0;
+            continue;
+        }
+
+        f32 char_width = font->getGlyphMetrics(mUnicode[i]).advance_x;
+
+        if(mUnicode[i] == ' ') {
+            lines[line].append(word);
+            line_width += word_width;
+            word = "";
+            word_width = 0.0;
+
+            if(line_width + char_width > max_width) {
+                // Ignore spaces at the end of a line
+                lines.push_back(UString());
+                line++;
+                line_width = 0.0;
+            } else if(line_width > 0.0) {
+                lines[line].append(' ');
+                line_width += char_width;
+            }
+        } else {
+            if(word_width + char_width > max_width) {
+                // Split word onto new line
+                lines[line].append(word);
+                lines.push_back(UString());
+                line++;
+                line_width = 0.0;
+                word = "";
+                word_width = 0.0;
+            } else if(line_width + word_width + char_width > max_width) {
+                // Wrap word on new line
+                lines.push_back(UString());
+                line++;
+                line_width = 0.0;
+                word.append(mUnicode[i]);
+                word_width += char_width;
+            } else {
+                // Add character to word
+                word.append(mUnicode[i]);
+                word_width += char_width;
+            }
+        }
+    }
+
+    // Don't forget! ;)
+    lines[line].append(word);
+
+    return lines;
 }
 
 void UString::collapseEscapes() {

@@ -4,6 +4,9 @@
 #include <string>
 #include <vector>
 
+#include "types.h"
+
+class McFont;
 class UString;
 
 void trim(std::string *str);
@@ -53,6 +56,8 @@ class UString {
 
     int findIgnoreCase(const UString &str, int start = 0) const;
     int findIgnoreCase(const UString &str, int start, int end) const;
+
+    std::vector<UString> wrap(McFont *font, f64 max_width);
 
     // modifiers
     void collapseEscapes();

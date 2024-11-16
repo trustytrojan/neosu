@@ -16,7 +16,7 @@ NotificationOverlay::NotificationOverlay() : OsuScreen() {
     m_keyListener = NULL;
 }
 
-static const f64 TOAST_WIDTH = 300.0;
+static const f64 TOAST_WIDTH = 350.0;
 static const f64 TOAST_INNER_X_MARGIN = 5.0;
 static const f64 TOAST_INNER_Y_MARGIN = 5.0;
 static const f64 TOAST_OUTER_Y_MARGIN = 10.0;
@@ -27,38 +27,15 @@ ToastElement::ToastElement(UString text, Color borderColor_arg) : CBaseUIButton(
     grabs_clicks = true;
 
     // TODO: animations
-
     // TODO: ui scaling
-    const f64 max_width = 300.0;
-    const auto font = engine->getResourceManager()->getFont("FONT_DEFAULT");
-
-    borderColor = borderColor_arg;
-
-    lines.push_back(UString());
-    f64 line = 0;
-    f64 line_width = 0;
-    for(int i = 0; i < text.length(); i++) {
-        if(text[i] == '\n') {
-            lines.push_back(UString());
-            line++;
-            line_width = 0;
-            continue;
-        }
-
-        f32 char_width = font->getGlyphMetrics(text[i]).advance_x;
-        if(line_width + char_width > max_width) {
-            lines.push_back(UString());
-            line++;
-            line_width = 0;
-        }
-
-        lines[line].append(text[i]);
-        line_width += char_width;
-    }
 
     alpha = 0.9;  // TODO: fade in/out
-    setSize(TOAST_WIDTH, (font->getHeight() * 1.5 * (line + 1.0)) + (TOAST_INNER_Y_MARGIN * 2.0));
+    borderColor = borderColor_arg;
     creationTime = engine->getTime();
+
+    const auto font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    lines = text.wrap(font, TOAST_WIDTH - TOAST_INNER_X_MARGIN * 2.0);
+    setSize(TOAST_WIDTH, (font->getHeight() * 1.5 * lines.size()) + (TOAST_INNER_Y_MARGIN * 2.0));
 }
 
 void ToastElement::onClicked() {
