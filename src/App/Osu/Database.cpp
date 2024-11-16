@@ -793,21 +793,20 @@ void Database::loadDB() {
 
         if(m_iVersion < 20170222) {
             debugLog("Database: Version is quite old, below 20170222 ...\n");
-            osu->getNotificationOverlay()->addNotification("osu!.db version too old, update osu! and try again!",
-                                                           0xffff0000);
+            osu->getNotificationOverlay()->addToast("osu!.db version too old, update osu! and try again!", 0xffff0000);
             should_read_peppy_database = false;
         } else if(!cv_database_ignore_version_warnings.getBool()) {
             if(m_iVersion < 20190207) {  // xexxar angles star recalc
-                osu->getNotificationOverlay()->addNotification(
-                    "osu!.db version is old, let osu! update when convenient.", 0xffffff00, false, 3.0f);
+                osu->getNotificationOverlay()->addToast("osu!.db version is old, let osu! update when convenient.",
+                                                        0xffffff00);
             }
         }
 
         // hard cap upper db version
         if(m_iVersion > cv_database_version.getInt() && !cv_database_ignore_version.getBool()) {
-            osu->getNotificationOverlay()->addNotification(
+            osu->getNotificationOverlay()->addToast(
                 UString::format("osu!.db version unknown (%i), osu!stable maps will not get loaded.", m_iVersion),
-                0xffffff00, false, 5.0f);
+                0xffffff00);
             should_read_peppy_database = false;
         }
     }
@@ -1245,7 +1244,7 @@ void Database::loadScores() {
         u8 magic_bytes[6] = {0};
         db.read_bytes(magic_bytes, 5);
         if(memcmp(magic_bytes, "NEOSC", 5) != 0) {
-            osu->getNotificationOverlay()->addNotification("Failed to load neosu_scores.db!", 0xffff0000);
+            osu->getNotificationOverlay()->addToast("Failed to load neosu_scores.db!", 0xffff0000);
             return;
         }
 

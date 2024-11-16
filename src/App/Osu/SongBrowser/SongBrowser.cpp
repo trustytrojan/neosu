@@ -883,7 +883,7 @@ bool SongBrowser::selectBeatmapset(i32 set_id) {
     }
 
     if(best_diff == NULL) {
-        osu->getNotificationOverlay()->addNotification("Beatmapset has no difficulties :/");
+        osu->getNotificationOverlay()->addToast("Beatmapset has no difficulties :/");
         return false;
     } else {
         onSelectionChange(hashToSongButton[best_diff->getMD5Hash()], false);
@@ -961,7 +961,7 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
         auto beatmap = download_beatmap(map_autodl, set_autodl, &progress);
         if(progress == -1.f) {
             auto error_str = UString::format("Failed to download Beatmap #%d :(", map_autodl);
-            osu->getNotificationOverlay()->addNotification(error_str);
+            osu->getNotificationOverlay()->addToast(error_str);
             map_autodl = 0;
             set_autodl = 0;
         } else if(progress < 1.f) {
@@ -983,7 +983,7 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
             download_beatmapset(set_autodl, &progress);
             if(progress == -1.f) {
                 auto error_str = UString::format("Failed to download Beatmapset #%d :(", set_autodl);
-                osu->getNotificationOverlay()->addNotification(error_str);
+                osu->getNotificationOverlay()->addToast(error_str);
                 map_autodl = 0;
                 set_autodl = 0;
             } else if(progress < 1.f) {

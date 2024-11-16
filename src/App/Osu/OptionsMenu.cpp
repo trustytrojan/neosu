@@ -2341,7 +2341,7 @@ void OptionsMenu::onSkinSelect() {
             m_contextMenu->setVisible(true);
         }
     } else {
-        osu->getNotificationOverlay()->addNotification("Error: Couldn't find any skins", 0xffff0000);
+        osu->getNotificationOverlay()->addToast("Error: Couldn't find any skins", 0xffff0000);
         m_options->scrollToTop();
         m_fOsuFolderTextboxInvalidAnim = engine->getTime() + 3.0f;
     }

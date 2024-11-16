@@ -609,7 +609,7 @@ bool Beatmap::start() {
                     debugLog("Osu Error: Couldn't load beatmap metadata %s\n",
                              m_selectedDifficulty2->getFilePath().c_str());
 
-                    osu->getNotificationOverlay()->addNotification(errorMessage, 0xffff0000);
+                    osu->getNotificationOverlay()->addToast(errorMessage, 0xffff0000);
                 } break;
 
                 case 2: {
@@ -617,7 +617,7 @@ bool Beatmap::start() {
                     debugLog("Osu Error: Couldn't load beatmap file %s\n",
                              m_selectedDifficulty2->getFilePath().c_str());
 
-                    osu->getNotificationOverlay()->addNotification(errorMessage, 0xffff0000);
+                    osu->getNotificationOverlay()->addToast(errorMessage, 0xffff0000);
                 } break;
 
                 case 3: {
@@ -625,14 +625,14 @@ bool Beatmap::start() {
                     debugLog("Osu Error: No timingpoints in beatmap %s\n",
                              m_selectedDifficulty2->getFilePath().c_str());
 
-                    osu->getNotificationOverlay()->addNotification(errorMessage, 0xffff0000);
+                    osu->getNotificationOverlay()->addToast(errorMessage, 0xffff0000);
                 } break;
 
                 case 4: {
                     UString errorMessage = "Error: No hitobjects in beatmap :(";
                     debugLog("Osu Error: No hitobjects in beatmap %s\n", m_selectedDifficulty2->getFilePath().c_str());
 
-                    osu->getNotificationOverlay()->addNotification(errorMessage, 0xffff0000);
+                    osu->getNotificationOverlay()->addToast(errorMessage, 0xffff0000);
                 } break;
 
                 case 5: {
@@ -640,7 +640,7 @@ bool Beatmap::start() {
                     debugLog("Osu Error: Too many hitobjects in beatmap %s\n",
                              m_selectedDifficulty2->getFilePath().c_str());
 
-                    osu->getNotificationOverlay()->addNotification(errorMessage, 0xffff0000);
+                    osu->getNotificationOverlay()->addToast(errorMessage, 0xffff0000);
                 } break;
             }
 
@@ -2351,7 +2351,7 @@ void Beatmap::update2() {
         } else if(m_iResourceLoadUpdateDelayHack >
                   3)  // second: if that still doesn't work, stop and display an error message
         {
-            osu->getNotificationOverlay()->addNotification("Couldn't load music file :(", 0xffff0000);
+            osu->getNotificationOverlay()->addToast("Couldn't load music file :(", 0xffff0000);
             stop(true);
         }
     }
@@ -3449,7 +3449,7 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
         if(score.passed) {
             int scoreIndex = db->addScore(score);
             if(scoreIndex == -1) {
-                osu->getNotificationOverlay()->addNotification("Failed saving score!", 0xffff0000, false, 3.0f);
+                osu->getNotificationOverlay()->addToast("Failed saving score!", 0xffff0000);
             }
         }
     }

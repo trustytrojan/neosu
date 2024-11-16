@@ -1,6 +1,23 @@
 #pragma once
+#include "CBaseUIButton.h"
 #include "KeyboardEvent.h"
 #include "OsuScreen.h"
+
+class ToastElement : public CBaseUIButton {
+   public:
+    ToastElement(UString text, Color borderColor_arg);
+    // ToastElement(UString text) : ToastElement(text, 0xffdd0000);
+    virtual ~ToastElement() { ; }
+
+    virtual void draw(Graphics *g);
+    virtual void onClicked() override;
+
+    std::vector<UString> lines;
+    Color borderColor;
+    f32 alpha = 0.f;
+    f32 height = 0.f;
+    f64 creationTime;
+};
 
 class NotificationOverlayKeyListener {
    public:
@@ -13,11 +30,15 @@ class NotificationOverlay : public OsuScreen {
     NotificationOverlay();
     virtual ~NotificationOverlay() { ; }
 
+    virtual void mouse_update(bool *propagate_clicks);
     virtual void draw(Graphics *g);
 
     virtual void onKeyDown(KeyboardEvent &e);
     virtual void onKeyUp(KeyboardEvent &e);
     virtual void onChar(KeyboardEvent &e);
+
+    typedef fastdelegate::FastDelegate0<> ToastClickCallback;
+    void addToast(UString text, Color borderColor = 0xffdd0000, ToastClickCallback callback = NULL);
 
     void addNotification(UString text, Color textColor = 0xffffffff, bool waitForKey = false, float duration = -1.0f);
     void setDisallowWaitForKeyLeftClick(bool disallowWaitForKeyLeftClick) {
@@ -45,6 +66,8 @@ class NotificationOverlay : public OsuScreen {
 
     void drawNotificationText(Graphics *g, NOTIFICATION &n);
     void drawNotificationBackground(Graphics *g, NOTIFICATION &n);
+
+    std::vector<ToastElement *> toasts;
 
     NOTIFICATION m_notification1;
     NOTIFICATION m_notification2;

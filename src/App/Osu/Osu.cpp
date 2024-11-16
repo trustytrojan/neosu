@@ -137,7 +137,6 @@ Osu::Osu() {
     cv_letterboxing_offset_y.setCallback(fastdelegate::MakeDelegate(this, &Osu::onLetterboxingOffsetChange));
     cv_confine_cursor_windowed.setCallback(fastdelegate::MakeDelegate(this, &Osu::onConfineCursorWindowedChange));
     cv_confine_cursor_fullscreen.setCallback(fastdelegate::MakeDelegate(this, &Osu::onConfineCursorFullscreenChange));
-    cv_notification.setCallback(fastdelegate::MakeDelegate(this, &Osu::onNotification));
 
     // vars
     m_skin = NULL;
@@ -415,6 +414,8 @@ void Osu::draw(Graphics *g) {
 
     if(isBufferedDraw) m_backBuffer->enable();
 
+    f32 fadingCursorAlpha = 1.f;
+
     // draw everything in the correct order
     if(isInPlayMode()) {  // if we are playing a beatmap
         Beatmap *beatmap = getSelectedBeatmap();
@@ -441,7 +442,6 @@ void Osu::draw(Graphics *g) {
                 flashlight_position * GameRules::getPlayfieldScaleFactor() + GameRules::getPlayfieldOffset();
 
             float base_fl_radius = cv_flashlight_radius.getFloat() * GameRules::getPlayfieldScaleFactor();
-
             float anti_fl_radius = base_fl_radius * 0.625f;
             float fl_radius = base_fl_radius;
             if(getScore()->getCombo() >= 200 || cv_flashlight_always_hard.getBool()) {
@@ -513,7 +513,7 @@ void Osu::draw(Graphics *g) {
         if(isFPoSu && cv_draw_cursor_ripples.getBool()) m_hud->drawCursorRipples(g);
 
         // draw FPoSu cursor trail
-        float fadingCursorAlpha =
+        fadingCursorAlpha =
             1.0f - clamp<float>((float)m_score->getCombo() / cv_mod_fadingcursor_combo.getFloat(), 0.0f, 1.0f);
         if(m_pauseMenu->isVisible() || getSelectedBeatmap()->isContinueScheduled() || !cv_mod_fadingcursor.getBool())
             fadingCursorAlpha = 1.0f;
@@ -527,17 +527,6 @@ void Osu::draw(Graphics *g) {
 
             if(cv_draw_fps.getBool()) m_hud->drawFps(g);
         }
-
-        // draw player cursor
-        Vector2 cursorPos = beatmap->getCursorPos();
-        bool drawSecondTrail =
-            (cv_mod_autoplay.getBool() || cv_mod_autopilot.getBool() || beatmap->is_watching || beatmap->is_spectating);
-        bool updateAndDrawTrail = true;
-        if(isFPoSu) {
-            cursorPos = getScreenSize() / 2.0f;
-            updateAndDrawTrail = false;
-        }
-        m_hud->drawCursor(g, cursorPos, fadingCursorAlpha, drawSecondTrail, updateAndDrawTrail);
     } else {  // if we are not playing
         m_spectatorScreen->draw(g);
 
@@ -558,7 +547,6 @@ void Osu::draw(Graphics *g) {
         if(cv_draw_fps.getBool()) m_hud->drawFps(g);
 
         m_windowManager->draw(g);
-        m_hud->drawCursor(g, engine->getMouse()->getPos());
     }
 
     m_tooltipOverlay->draw(g);
@@ -568,6 +556,22 @@ void Osu::draw(Graphics *g) {
     // loading spinner for some async tasks
     if((m_bSkinLoadScheduled && m_skin != m_skinScheduledToLoad)) {
         m_hud->drawLoadingSmall(g, "");
+    }
+
+    // draw cursor
+    if(isInPlayMode()) {
+        Beatmap *beatmap = getSelectedBeatmap();
+        Vector2 cursorPos = beatmap->getCursorPos();
+        bool drawSecondTrail =
+            (cv_mod_autoplay.getBool() || cv_mod_autopilot.getBool() || beatmap->is_watching || beatmap->is_spectating);
+        bool updateAndDrawTrail = true;
+        if(cv_mod_fposu.getBool()) {
+            cursorPos = getScreenSize() / 2.0f;
+            updateAndDrawTrail = false;
+        }
+        m_hud->drawCursor(g, cursorPos, fadingCursorAlpha, drawSecondTrail, updateAndDrawTrail);
+    } else {
+        m_hud->drawCursor(g, engine->getMouse()->getPos());
     }
 
     // if we are not using the native window resolution
@@ -1938,12 +1942,6 @@ void Osu::onModFPoSu3DSpheresChange(UString oldValue, UString newValue) { rebuil
 void Osu::onModFPoSu3DSpheresAAChange(UString oldValue, UString newValue) { rebuildRenderTargets(); }
 
 void Osu::onLetterboxingOffsetChange(UString oldValue, UString newValue) { updateMouseSettings(); }
-
-void Osu::onNotification(UString args) {
-    m_notificationOverlay->addNotification(
-        args, COLOR(255, cv_notification_color_r.getInt(), cv_notification_color_g.getInt(),
-                    cv_notification_color_b.getInt()));
-}
 
 float Osu::getImageScaleToFitResolution(Vector2 size, Vector2 resolution) {
     return resolution.x / size.x > resolution.y / size.y ? resolution.y / size.y : resolution.x / size.x;

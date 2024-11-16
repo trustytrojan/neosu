@@ -190,7 +190,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                         }
                     }
                     if(set_id == -1) {
-                        osu->getNotificationOverlay()->addNotification("Beatmapset doesn't have a valid ID.");
+                        osu->getNotificationOverlay()->addToast("Beatmapset doesn't have a valid ID.");
                         continue;
                     }
 
@@ -201,13 +201,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                         env->createDirectory(mapset_dir);
                     }
                     if(!extract_beatmapset(osz.readFile(), osz.getFileSize(), mapset_dir)) {
-                        osu->getNotificationOverlay()->addNotification("Failed to extract beatmapset");
+                        osu->getNotificationOverlay()->addToast("Failed to extract beatmapset");
                         continue;
                     }
 
                     db->addBeatmapSet(mapset_dir);
                     if(!osu->getSongBrowser()->selectBeatmapset(set_id)) {
-                        osu->getNotificationOverlay()->addNotification("Failed to import beatmapset");
+                        osu->getNotificationOverlay()->addToast("Failed to import beatmapset");
                         continue;
                     }
 

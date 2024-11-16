@@ -152,7 +152,7 @@ void reconnect() {
     };
     for(const char *endpoint : server_blacklist) {
         if(!strcmp(endpoint, bancho.endpoint.toUtf8())) {
-            osu->m_notificationOverlay->addNotification("This server does not allow neosu clients.");
+            osu->m_notificationOverlay->addToast("This server does not allow neosu clients.");
             return;
         }
     }
@@ -282,7 +282,7 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
         if(auth_header.empty()) {
             // XXX: Not thread safe, playing with fire here
             auto errmsg = UString::format("Failed to log in: %s", curl_easy_strerror(res));
-            osu->getNotificationOverlay()->addNotification(errmsg);
+            osu->getNotificationOverlay()->addToast(errmsg);
         }
         goto end;
     }
@@ -424,7 +424,7 @@ static void handle_api_response(Packet packet) {
         case GET_REPLAY: {
             if(packet.size == 0) {
                 // Most likely, 404
-                osu->m_notificationOverlay->addNotification("Failed to download replay");
+                osu->m_notificationOverlay->addToast("Failed to download replay");
                 break;
             }
 
@@ -435,7 +435,7 @@ static void handle_api_response(Packet packet) {
             // XXX: this is blocking main thread
             FILE *replay_file = fopen(replay_path.toUtf8(), "wb");
             if(replay_file == NULL) {
-                osu->m_notificationOverlay->addNotification("Failed to save replay");
+                osu->m_notificationOverlay->addToast("Failed to save replay");
                 break;
             }
 

@@ -3,7 +3,9 @@
 #include "AnimationHandler.h"
 #include "ConVar.h"
 #include "Engine.h"
+#include "Environment.h"
 #include "Keyboard.h"
+#include "Mouse.h"
 #include "Osu.h"
 #include "ResourceManager.h"
 
@@ -14,7 +16,119 @@ NotificationOverlay::NotificationOverlay() : OsuScreen() {
     m_keyListener = NULL;
 }
 
+static const f64 TOAST_WIDTH = 300.0;
+static const f64 TOAST_INNER_X_MARGIN = 5.0;
+static const f64 TOAST_INNER_Y_MARGIN = 5.0;
+static const f64 TOAST_OUTER_Y_MARGIN = 10.0;
+static const f64 TOAST_SCREEN_BOTTOM_MARGIN = 20.0;
+static const f64 TOAST_SCREEN_RIGHT_MARGIN = 10.0;
+
+ToastElement::ToastElement(UString text, Color borderColor_arg) : CBaseUIButton(0, 0, 0, 0, "", "") {
+    grabs_clicks = true;
+
+    // TODO: animations
+
+    // TODO: ui scaling
+    const f64 max_width = 300.0;
+    const auto font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+
+    borderColor = borderColor_arg;
+
+    lines.push_back(UString());
+    f64 line = 0;
+    f64 line_width = 0;
+    for(int i = 0; i < text.length(); i++) {
+        if(text[i] == '\n') {
+            lines.push_back(UString());
+            line++;
+            line_width = 0;
+            continue;
+        }
+
+        f32 char_width = font->getGlyphMetrics(text[i]).advance_x;
+        if(line_width + char_width > max_width) {
+            lines.push_back(UString());
+            line++;
+            line_width = 0;
+        }
+
+        lines[line].append(text[i]);
+        line_width += char_width;
+    }
+
+    alpha = 0.9;  // TODO: fade in/out
+    setSize(TOAST_WIDTH, (font->getHeight() * 1.5 * (line + 1.0)) + (TOAST_INNER_Y_MARGIN * 2.0));
+    creationTime = engine->getTime();
+}
+
+void ToastElement::onClicked() {
+    // Set creationTime to -10 so toast is deleted in NotificationOverlay::mouse_update
+    creationTime = -10.0;
+
+    CBaseUIButton::onClicked();
+}
+
+void ToastElement::draw(Graphics *g) {
+    const auto font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+
+    // background
+    g->setColor(isMouseInside() ? 0xff222222 : 0xff111111);
+    g->setAlpha(alpha);
+    g->fillRect(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y);
+
+    // border
+    g->setColor(isMouseInside() ? 0xffffffff : borderColor);
+    g->setAlpha(alpha);
+    g->drawRect(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y);
+
+    // text
+    f64 y = m_vPos.y;
+    for(const auto &line : lines) {
+        y += (font->getHeight() * 1.5);
+        g->setColor(0xffffffff);
+        g->setAlpha(alpha);
+        g->pushTransform();
+        g->translate(m_vPos.x + TOAST_INNER_X_MARGIN, y);
+        g->drawString(font, line);
+        g->popTransform();
+    }
+}
+
+void NotificationOverlay::mouse_update(bool *propagate_clicks) {
+    // HACKHACK: should put all toasts in a container instead
+    bool a_toast_is_hovered = false;
+    Vector2 screen = engine->getScreenSize();
+    f64 bottom_y = screen.y - TOAST_SCREEN_BOTTOM_MARGIN;
+    for(auto t : toasts) {
+        bottom_y -= TOAST_OUTER_Y_MARGIN + t->getSize().y;
+        t->setPos(screen.x - (TOAST_SCREEN_RIGHT_MARGIN + TOAST_WIDTH), bottom_y);
+        t->mouse_update(propagate_clicks);
+        a_toast_is_hovered |= t->isMouseInside();
+    }
+
+    if(a_toast_is_hovered) {
+        for(auto t : toasts) {
+            // Delay toast disappearance
+            t->creationTime += engine->getFrameTime();
+        }
+    }
+
+    f64 current_time = engine->getTime();
+    for(auto it = toasts.begin(); it != toasts.end(); it++) {
+        auto toast = *it;
+        if(toast->creationTime + 10.0 < current_time) {
+            toasts.erase(it);
+            delete toast;
+            return;
+        }
+    }
+}
+
 void NotificationOverlay::draw(Graphics *g) {
+    for(auto t : toasts) {
+        t->draw(g);
+    }
+
     if(!isVisible()) return;
 
     if(m_bWaitForKey) {
@@ -71,13 +185,6 @@ void NotificationOverlay::onKeyDown(KeyboardEvent &e) {
 
     // key binding logic
     if(m_bWaitForKey) {
-        /*
-        float prevDuration = cv_notification_duration.getFloat();
-        osu_notification_duration.setValue(0.85f);
-        addNotification(UString::format("The new key is (ASCII Keycode): %lu", e.getKeyCode()));
-        osu_notification_duration.setValue(prevDuration); // restore convar
-        */
-
         // HACKHACK: prevent left mouse click bindings if relevant
         if(env->getOS() == Environment::OS::WINDOWS && m_bWaitForKeyDisallowsLeftClick &&
            e.getKeyCode() == 0x01)  // 0x01 == VK_LBUTTON
@@ -154,6 +261,12 @@ void NotificationOverlay::addNotification(UString text, Color textColor, bool wa
     if(!waitForKey) anim->moveQuadOut(&m_notification1.alpha, 0.0f, fadeOutTime, notificationDuration, false);
 
     anim->moveQuadOut(&m_notification1.backgroundAnim, 1.0f, 0.15f, 0.0f, true);
+}
+
+void NotificationOverlay::addToast(UString text, Color borderColor, ToastClickCallback callback) {
+    auto toast = new ToastElement(text, borderColor);
+    toast->setClickCallback(callback);
+    toasts.push_back(toast);
 }
 
 void NotificationOverlay::stopWaitingForKey(bool stillConsumeNextChar) {

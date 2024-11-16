@@ -1581,10 +1581,6 @@ ConVar cv_notelock_stable_tolerance2b("osu_notelock_stable_tolerance2b", 3, FCVA
                                       "together (e.g. circle at end of slider)");
 ConVar cv_notelock_type("osu_notelock_type", 2, FCVAR_LOCKED | FCVAR_GAMEPLAY,
                         "which notelock algorithm to use (0 = None, 1 = neosu, 2 = osu!stable, 3 = osu!lazer 2020)");
-ConVar cv_notification("osu_notification");
-ConVar cv_notification_color_b("osu_notification_color_b", 255, FCVAR_BANCHO_COMPATIBLE);
-ConVar cv_notification_color_g("osu_notification_color_g", 255, FCVAR_BANCHO_COMPATIBLE);
-ConVar cv_notification_color_r("osu_notification_color_r", 255, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_notification_duration("osu_notification_duration", 1.25f, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_number_max("osu_number_max", 0, FCVAR_BANCHO_COMPATIBLE,
                      "0 = disabled, 1/2/3/4/etc. limits visual circle numbers to this number");

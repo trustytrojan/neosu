@@ -206,8 +206,6 @@ class Osu : public App, public MouseListener {
 
     void onLetterboxingOffsetChange(UString oldValue, UString newValue);
 
-    void onNotification(UString args);
-
     // interfaces
     VolumeOverlay *m_volumeOverlay = NULL;
     MainMenu *m_mainMenu = NULL;

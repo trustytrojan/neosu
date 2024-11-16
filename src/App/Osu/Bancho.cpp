@@ -258,7 +258,7 @@ void handle_packet(Packet *packet) {
                     errmsg = "Please contact an administrator of the server.";
                 }
             }
-            osu->getNotificationOverlay()->addNotification(errmsg);
+            osu->getNotificationOverlay()->addToast(errmsg);
         }
     } else if(packet->id == RECV_MESSAGE) {
         UString sender = read_string(packet);
@@ -369,11 +369,7 @@ void handle_packet(Packet *packet) {
         // (nothing to do)
     } else if(packet->id == NOTIFICATION) {
         UString notification = read_string(packet);
-        osu->getNotificationOverlay()->addNotification(notification);
-        // XXX: don't do McOsu style notifications, since:
-        // 1) they can't do multiline text
-        // 2) they don't stack, if the server sends >1 you only see the latest
-        // Maybe log them in the chat + display in bottom right like ppy client?
+        osu->getNotificationOverlay()->addToast(notification, 0xffffdd00);
     } else if(packet->id == ROOM_UPDATED) {
         auto room = Room(packet);
         if(osu->m_lobby->isVisible()) {
@@ -391,7 +387,7 @@ void handle_packet(Packet *packet) {
         auto room = Room(packet);
         osu->m_room->on_room_joined(room);
     } else if(packet->id == ROOM_JOIN_FAIL) {
-        osu->getNotificationOverlay()->addNotification("Failed to join room.");
+        osu->getNotificationOverlay()->addToast("Failed to join room.");
         osu->m_lobby->on_room_join_failed();
     } else if(packet->id == MATCH_STARTED) {
         auto room = Room(packet);
@@ -446,7 +442,7 @@ void handle_packet(Packet *packet) {
     } else if(packet->id == PROTOCOL_VERSION) {
         int protocol_version = read<u32>(packet);
         if(protocol_version != 19) {
-            osu->getNotificationOverlay()->addNotification("This server may use an unsupported protocol version.");
+            osu->getNotificationOverlay()->addToast("This server may use an unsupported protocol version.");
         }
     } else if(packet->id == MAIN_MENU_ICON) {
         UString icon = read_string(packet);
@@ -536,9 +532,9 @@ void handle_packet(Packet *packet) {
         // (nothing to do)
     } else if(packet->id == VERSION_UPDATE_FORCED) {
         disconnect();
-        osu->getNotificationOverlay()->addNotification("This server requires a newer client version.");
+        osu->getNotificationOverlay()->addToast("This server requires a newer client version.");
     } else if(packet->id == ACCOUNT_RESTRICTED) {
-        osu->getNotificationOverlay()->addNotification("Account restricted.");
+        osu->getNotificationOverlay()->addToast("Account restricted.");
         disconnect();
     } else if(packet->id == MATCH_ABORT) {
         osu->m_room->on_match_aborted();
