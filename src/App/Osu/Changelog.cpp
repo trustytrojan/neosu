@@ -30,7 +30,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.title = UString::format("%.2f (%s, %s)", cv_version.getFloat(), __DATE__, __TIME__);
     latest.changes.push_back("- Added toast notifications");
     latest.changes.push_back("- Updated star/pp algorithms (thanks @Khangaroo and @McKay)");
-    latest.changes.push_back("- Updated osu! version to b20241001");
+    latest.changes.push_back("- Updated osu! version to b20241030");
     changelogs.push_back(latest);
 
     CHANGELOG v36_01;
