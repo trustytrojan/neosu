@@ -28,10 +28,15 @@ Changelog::Changelog() : ScreenBackable() {
 
     CHANGELOG latest;
     latest.title = UString::format("%.2f (%s, %s)", cv_version.getFloat(), __DATE__, __TIME__);
-    latest.changes.push_back("- Added toast notifications");
-    latest.changes.push_back("- Updated star/pp algorithms (thanks @Khangaroo and @McKay)");
-    latest.changes.push_back("- Updated osu! version to b20241030");
+    latest.changes.push_back("- Added checkbox to disable auto-updater");
     changelogs.push_back(latest);
+
+    CHANGELOG v36_02;
+    v36_02.title = "36.02 (2024-11-16)";
+    v36_02.changes.push_back("- Added toast notifications");
+    v36_02.changes.push_back("- Updated star/pp algorithms (thanks @Khangaroo and @McKay)");
+    v36_02.changes.push_back("- Updated osu! version to b20241030");
+    changelogs.push_back(v36_02);
 
     CHANGELOG v36_01;
     v36_01.title = "36.01 (2024-09-25)";
