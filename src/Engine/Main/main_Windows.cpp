@@ -20,50 +20,6 @@
 // NEXTRAWINPUTBLOCK macro requires this
 typedef uint64_t QWORD;
 
-#ifdef MCENGINE_FEATURE_SDL
-
-#include "WinSDLEnvironment.h"
-
-extern int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment);
-
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-    // disable IME text input
-    if(strstr(lpCmdLine, "-noime") != NULL) {
-        typedef BOOL(WINAPI * pfnImmDisableIME)(DWORD);
-
-        HMODULE hImm32 = LoadLibrary("imm32.dll");
-        if(hImm32 != NULL) {
-            pfnImmDisableIME pImmDisableIME = (pfnImmDisableIME)GetProcAddress(hImm32, "ImmDisableIME");
-            if(pImmDisableIME == NULL)
-                FreeLibrary(hImm32);
-            else {
-                pImmDisableIME(-1);
-                FreeLibrary(hImm32);
-            }
-        }
-    }
-
-    // if supported (>= Windows Vista), enable DPI awareness so that GetSystemMetrics returns correct values
-    // without this, on e.g. 150% scaling, the screen pixels of a 1080p monitor would be reported by
-    // GetSystemMetrics(SM_CXSCREEN/SM_CYSCREEN) as only 720p!
-    if(strstr(lpCmdLine, "-nodpi") == NULL) {
-        typedef WINBOOL(WINAPI * PSPDA)(void);
-        PSPDA g_SetProcessDPIAware = (PSPDA)GetProcAddress(GetModuleHandle(TEXT("user32.dll")), "SetProcessDPIAware");
-        if(g_SetProcessDPIAware != NULL) g_SetProcessDPIAware();
-    }
-
-    // build "fake" argc + argv
-    const int argc = 2;
-    char *argv[argc];
-    char arg1 = '\0';
-    argv[0] = &arg1;
-    argv[1] = lpCmdLine;
-
-    return mainSDL(argc, argv, new WinSDLEnvironment());
-}
-
-#else
-
 #ifdef MCENGINE_WINDOWS_TOUCH_SUPPORT
 #include <winuser.h>
 typedef BOOL(WINAPI *PGPI)(UINT32 pointerId, POINTER_INFO *pointerInfo);
@@ -95,12 +51,8 @@ PGPI g_GetPointerInfo = (PGPI)GetProcAddress(GetModuleHandle(TEXT("user32.dll"))
 #include "WinEnvironment.h"
 #include "WinGLLegacyInterface.h"
 
-#define WINDOW_TITLE L"McEngine"
-
-// #define WINDOW_FRAMELESS
-// #define WINDOW_MAXIMIZED // start maximized
-// #define WINDOW_GHOST // click-through overlay mode (experimental); NOTE: must uncomment "pfd.cAlphaBits = 8;" in
-// WinGLLegacyInterface.cpp!
+#define WINDOW_TITLE L"neosu"
+#define WM_NEOSU_PROTOCOL (WM_USER + 1)
 
 #define WINDOW_WIDTH 1280
 #define WINDOW_HEIGHT 720
@@ -142,6 +94,127 @@ __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance =
     0x00000001;  // https://community.amd.com/thread/169965
 }
 
+static void handle_osk(const char *osk_path) {
+    Skin::unpack(osk_path);
+
+    auto folder_name = env->getFileNameFromFilePath(osk_path);
+    folder_name.erase(folder_name.size() - 4);  // remove .osk extension
+
+    cv_skin.setValue(env->getFileNameFromFilePath(folder_name).c_str());
+    osu->m_optionsMenu->updateSkinNameLabel();
+}
+
+static void handle_osz(const char *osz_path) {
+    File osz(osz_path);
+    i32 set_id = extract_beatmapset_id(osz.readFile(), osz.getFileSize());
+    if(set_id < 0) {
+        // special case: legacy fallback behavior for invalid beatmapSetID, try to parse the ID from the
+        // path
+        auto mapset_name = UString(env->getFileNameFromFilePath(osz_path).c_str());
+        const std::vector<UString> tokens = mapset_name.split(" ");
+        for(auto token : tokens) {
+            i32 id = token.toInt();
+            if(id > 0) set_id = id;
+        }
+    }
+    if(set_id == -1) {
+        osu->getNotificationOverlay()->addToast("Beatmapset doesn't have a valid ID.");
+        return;
+    }
+
+    std::string mapset_dir = MCENGINE_DATA_DIR "maps\\";
+    mapset_dir.append(std::to_string(set_id));
+    mapset_dir.append("\\");
+    if(!env->directoryExists(mapset_dir)) {
+        env->createDirectory(mapset_dir);
+    }
+    if(!extract_beatmapset(osz.readFile(), osz.getFileSize(), mapset_dir)) {
+        osu->getNotificationOverlay()->addToast("Failed to extract beatmapset");
+        return;
+    }
+
+    db->addBeatmapSet(mapset_dir);
+    if(!osu->getSongBrowser()->selectBeatmapset(set_id)) {
+        osu->getNotificationOverlay()->addToast("Failed to import beatmapset");
+        return;
+    }
+
+    // prevent song browser from picking main menu song after database loads
+    // (we just loaded and selected another song, so previous no longer applies)
+    SAFE_DELETE(osu->m_mainMenu->preloaded_beatmapset);
+}
+
+static void handle_neosu_url(const char *url) {
+    if(!strcmp(url, "neosu://run")) {
+        // nothing to do
+        return;
+    }
+
+    if(strstr(url, "neosu://join_lobby/") == url) {
+        // TODO @kiwec: lobby id
+        return;
+    }
+
+    if(strstr(url, "neosu://select_map/") == url) {
+        // TODO @kiwec: beatmapset + md5 combo
+        return;
+    }
+
+    if(strstr(url, "neosu://spectate/") == url) {
+        // TODO @kiwec: user id
+        return;
+    }
+
+    if(strstr(url, "neosu://watch_replay/") == url) {
+        // TODO @kiwec: replay md5
+        return;
+    }
+}
+
+void handle_cmdline_args(const char *args) {
+    if(args[0] == '-') return;
+    if(strlen(args) < 4) return;
+
+    if(strstr(args, "neosu://") == args) {
+        handle_neosu_url(args);
+    } else {
+        auto extension = env->getFileExtensionFromFilePath(args);
+        if(!extension.compare("osz")) {
+            handle_osz(args);
+        } else if(!extension.compare("osk") || !extension.compare("zip")) {
+            handle_osk(args);
+        }
+    }
+}
+
+static bool register_neosu_protocol_handler() {
+    // Claude wrote this. Blame him if it's buggy.
+    HKEY protoKey;
+    if(RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\Classes\\neosu", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE,
+                       NULL, &protoKey, NULL) != ERROR_SUCCESS) {
+        return false;
+    }
+
+    RegSetValueExW(protoKey, L"", 0, REG_SZ, (BYTE *)L"neosu", 34);
+    RegSetValueExW(protoKey, L"URL Protocol", 0, REG_SZ, (BYTE *)L"", 2);
+
+    HKEY cmdKey;
+    if(RegCreateKeyExW(protoKey, L"shell\\open\\command", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &cmdKey,
+                       NULL) != ERROR_SUCCESS) {
+        RegCloseKey(protoKey);
+        return false;
+    }
+
+    wchar_t exePath[MAX_PATH];
+    GetModuleFileNameW(NULL, exePath, MAX_PATH);
+    std::wstring cmdValue = L"\"" + std::wstring(exePath) + L"\" \"%1\"";
+    RegSetValueExW(cmdKey, L"", 0, REG_SZ, (BYTE *)cmdValue.c_str(), (cmdValue.length() + 1) * sizeof(wchar_t));
+
+    RegCloseKey(cmdKey);
+    RegCloseKey(protoKey);
+    return true;
+}
+
 //****************//
 //	Message loop  //
 //****************//
@@ -161,8 +234,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             HDROP hDrop = (HDROP)wParam;
             UINT fileCount = DragQueryFileW(hDrop, 0xFFFFFFFF, NULL, 0);
 
-            std::string first_skin;
-
             for(UINT i = 0; i < fileCount; i++) {
                 UINT pathLength = DragQueryFileW(hDrop, i, NULL, 0);
                 wchar_t *filePath = new wchar_t[pathLength + 1];
@@ -174,139 +245,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 WideCharToMultiByte(CP_UTF8, 0, filePath, size, (LPSTR)utf8filepath.c_str(), size, NULL, NULL);
                 delete[] filePath;
 
-                if(utf8filepath.length() < 4) continue;
-                auto extension = env->getFileExtensionFromFilePath(utf8filepath);
-                if(!extension.compare("osz")) {
-                    File osz(utf8filepath);
-                    i32 set_id = extract_beatmapset_id(osz.readFile(), osz.getFileSize());
-                    if(set_id < 0) {
-                        // special case: legacy fallback behavior for invalid beatmapSetID, try to parse the ID from the
-                        // path
-                        auto mapset_name = UString(env->getFileNameFromFilePath(utf8filepath).c_str());
-                        const std::vector<UString> tokens = mapset_name.split(" ");
-                        for(auto token : tokens) {
-                            i32 id = token.toInt();
-                            if(id > 0) set_id = id;
-                        }
-                    }
-                    if(set_id == -1) {
-                        osu->getNotificationOverlay()->addToast("Beatmapset doesn't have a valid ID.");
-                        continue;
-                    }
-
-                    std::string mapset_dir = MCENGINE_DATA_DIR "maps\\";
-                    mapset_dir.append(std::to_string(set_id));
-                    mapset_dir.append("\\");
-                    if(!env->directoryExists(mapset_dir)) {
-                        env->createDirectory(mapset_dir);
-                    }
-                    if(!extract_beatmapset(osz.readFile(), osz.getFileSize(), mapset_dir)) {
-                        osu->getNotificationOverlay()->addToast("Failed to extract beatmapset");
-                        continue;
-                    }
-
-                    db->addBeatmapSet(mapset_dir);
-                    if(!osu->getSongBrowser()->selectBeatmapset(set_id)) {
-                        osu->getNotificationOverlay()->addToast("Failed to import beatmapset");
-                        continue;
-                    }
-
-                    // prevent song browser from picking main menu song after database loads
-                    // (we just loaded and selected another song, so previous no longer applies)
-                    SAFE_DELETE(osu->m_mainMenu->preloaded_beatmapset);
-                } else if(!extension.compare("osk") || !extension.compare("zip")) {
-                    Skin::unpack(utf8filepath.c_str());
-                    if(first_skin.length() == 0) {
-                        first_skin = utf8filepath;
-                    }
-                }
+                handle_cmdline_args(utf8filepath.c_str());
             }
 
             DragFinish(hDrop);
 
-            if(first_skin.length() > 0) {
-                auto folder_name = env->getFileNameFromFilePath(first_skin);
-                folder_name.erase(folder_name.size() - 4);  // remove .osk extension
-
-                cv_skin.setValue(env->getFileNameFromFilePath(folder_name).c_str());
-                osu->m_optionsMenu->updateSkinNameLabel();
-            }
-
             return 0;
         }
-
-#if defined(WINDOW_FRAMELESS) && !defined(WINDOW_GHOST)
-        case WM_NCCALCSIZE: {
-            if(wParam == TRUE) {
-                LPNCCALCSIZE_PARAMS pncc = (LPNCCALCSIZE_PARAMS)lParam;
-
-                if(IsZoomed(hwnd)) {
-                    // HACKHACK: use center instead of MonitorFromWindow() in order to workaround windows display
-                    // scaling bullshit bug
-                    POINT centerOfWindow;
-                    {
-                        centerOfWindow.x = pncc->rgrc[0].left + (pncc->rgrc[0].right - pncc->rgrc[0].left) / 2;
-                        centerOfWindow.y = pncc->rgrc[0].top + (pncc->rgrc[0].bottom - pncc->rgrc[0].top) / 2;
-                    }
-                    HMONITOR monitor = MonitorFromPoint(centerOfWindow, MONITOR_DEFAULTTONEAREST);
-
-                    MONITORINFO info;
-                    info.cbSize = sizeof(MONITORINFO);
-                    GetMonitorInfo(monitor, &info);
-
-                    pncc->rgrc[0].right += pncc->rgrc[0].left - info.rcMonitor.left;
-                    pncc->rgrc[0].bottom += pncc->rgrc[0].top - info.rcMonitor.top;
-                    pncc->rgrc[0].top = info.rcMonitor.top;
-                    pncc->rgrc[0].left = info.rcMonitor.left;
-                }
-            }
-        }
-            // "When wParam is TRUE, simply returning 0 without processing the NCCALCSIZE_PARAMS rectangles will cause
-            // the client area to resize to the size of the window, including the window frame. This will remove the
-            // window frame and caption items from your window, leaving only the client area displayed." "Starting with
-            // Windows Vista, removing the standard frame by simply returning 0 when the wParam is TRUE does not affect
-            // frames that are extended into the client area using the DwmExtendFrameIntoClientArea function. Only the
-            // standard frame will be removed."
-            return 0;
-
-        // window border
-        case WM_NCHITTEST: {
-            if(g_engine != NULL) {
-                long val = DefWindowProcW(hwnd, msg, wParam, lParam);
-                if(val != HTCLIENT) return val;
-
-                const float dpiScale = g_engine->getEnvironment()->getDPIScale();
-
-                // fake window moving
-                Vector2 mousePos = g_engine->getEnvironment()->getMousePos();
-                McRect dragging = McRect(40 * dpiScale, 4 * dpiScale, engine->getScreenWidth() - 80 * dpiScale,
-                                         20 * dpiScale);  // HACKHACK: hardcoded 40 for stuff
-                if(dragging.contains(mousePos)) val = HTCAPTION;
-
-                if(IsZoomed(hwnd)) return val;
-
-                // fake window resizing
-                McRect resizeN = McRect(0, 0, engine->getScreenWidth(), 4 * dpiScale);
-                McRect resizeW = McRect(0, 0, 4 * dpiScale, engine->getScreenHeight());
-                McRect resizeO = McRect(engine->getScreenWidth() - 5 * dpiScale, 0, engine->getScreenWidth(),
-                                        engine->getScreenHeight());
-                McRect resizeS = McRect(0, engine->getScreenHeight() - 5 * dpiScale, engine->getScreenWidth(),
-                                        engine->getScreenHeight());
-                if(resizeN.contains(mousePos)) val = HTTOP;
-                if(resizeW.contains(mousePos)) val = HTLEFT;
-                if(resizeO.contains(mousePos)) val = HTRIGHT;
-                if(resizeS.contains(mousePos)) val = HTBOTTOM;
-
-                if(resizeN.contains(mousePos) && resizeW.contains(mousePos)) val = HTTOPLEFT;
-                if(resizeN.contains(mousePos) && resizeO.contains(mousePos)) val = HTTOPRIGHT;
-                if(resizeO.contains(mousePos) && resizeS.contains(mousePos)) val = HTBOTTOMRIGHT;
-                if(resizeS.contains(mousePos) && resizeW.contains(mousePos)) val = HTBOTTOMLEFT;
-
-                return val;
-            } else
-                return DefWindowProcW(hwnd, msg, wParam, lParam);
-        } break;
-#endif
 
         // graceful shutdown request
         case WM_DESTROY:
@@ -740,20 +685,7 @@ HWND createWinWindow(HINSTANCE hInstance) {
 
     // window style
     LONG_PTR style = WinEnvironment::getWindowStyleWindowed();
-#ifdef WINDOW_FRAMELESS
-    /// style = WS_OVERLAPPEDWINDOW & (~WS_SYSMENU);
-    style = WS_POPUP | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_CAPTION;
-#endif
     LONG_PTR exStyle = WS_EX_WINDOWEDGE;
-
-#ifdef WINDOW_GHOST
-    style = WS_POPUP;
-#endif
-
-#ifdef WINDOW_GHOST
-    /// exStyle = WS_EX_COMPOSITED | WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOPMOST;
-    exStyle = WS_EX_LAYERED | WS_EX_TOPMOST | WS_EX_TRANSPARENT;
-#endif
 
     style &= ~WS_VISIBLE;  // always start out invisible, we have a ShowWindow() call later anyway
 
@@ -773,23 +705,6 @@ HWND createWinWindow(HINSTANCE hInstance) {
     yPos = clientArea.top;
     width = clientArea.right - clientArea.left;
     height = clientArea.bottom - clientArea.top;
-
-#ifdef WINDOW_MAXIMIZED
-    RECT workArea;
-    if(SystemParametersInfoW(SPI_GETWORKAREA, 0, &workArea, 0)) {
-        xPos = yPos = 0;
-        width = workArea.right;
-        height = workArea.bottom;
-    }
-#endif
-
-#ifdef WINDOW_GHOST
-    xPos = yPos = 0;
-    width = GetSystemMetrics(SM_CXSCREEN) + 1;
-    height =
-        GetSystemMetrics(SM_CYSCREEN);  // WTF: if these are both equal to exactly the current screen size, Windows will
-                                        // NOT draw anything behind the engine even though the window is transparent!
-#endif
 
     // create the window
     hwnd = CreateWindowExW(exStyle, WINDOW_TITLE, WINDOW_TITLE, style, xPos, yPos, width, height, NULL, NULL, hInstance,
@@ -831,6 +746,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     wchar_t *last_slash = wcsrchr(exePath, L'\\');
     if(last_slash != NULL) *last_slash = L'\0';
     SetCurrentDirectoryW(exePath);
+
+    // register neosu:// protocol
+    register_neosu_protocol_handler();
+
+    // if a neosu instance is already running, send it a message then quit
+    HWND existing_window = FindWindowW(L"neosu", NULL);
+    if(existing_window) {
+        COPYDATASTRUCT cds;
+        cds.dwData = WM_NEOSU_PROTOCOL;
+        cds.cbData = strlen(lpCmdLine + 1);
+        cds.lpData = lpCmdLine;
+        SendMessage(existing_window, WM_COPYDATA, (WPARAM)NULL, (LPARAM)&cds);
+        SetForegroundWindow(existing_window);
+        return 0;
+    }
 
     // disable IME text input
     if(strstr(lpCmdLine, "-noime") != NULL) {
@@ -918,47 +848,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         return -1;
     }
 
-#ifdef WINDOW_FRAMELESS
-    {
-        MARGINS m;
-        {
-            m.cxLeftWidth = 1;
-            m.cxRightWidth = 1;
-            m.cyTopHeight = 1;
-            m.cyBottomHeight = 1;
-        }
-        // HRESULT result = DwmExtendFrameIntoClientArea(hwnd, &m);
-        DwmExtendFrameIntoClientArea(hwnd, &m);
-        // printf("DwmExtendFrameIntoClientArea() = %x\n", (int)result);
-        SetWindowPos(hwnd, NULL, 0, 0, 0, 0,
-                     SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
-
-        // DWM_BLURBEHIND bb;
-        //{
-        //	bb.dwFlags = DWM_BB_ENABLE;
-        //	bb.fEnable = 0;
-        //	bb.hRgnBlur = NULL;
-        //	bb.fTransitionOnMaximized = FALSE;
-        // }
-        // DwmEnableBlurBehindWindow(hwnd, &bb);
-    }
-#endif
-
-#ifdef WINDOW_GHOST
-    {
-        DWM_BLURBEHIND bb = {0};
-        HRGN hRgn = CreateRectRgn(0, 0, -1, -1);
-
-        bb.dwFlags = DWM_BB_ENABLE | DWM_BB_BLURREGION;
-        bb.hRgnBlur = hRgn;
-        bb.fEnable = TRUE;
-
-        printf("DwmEnableBlurBehindWindow() = %x\n", (int)DwmEnableBlurBehindWindow(hwnd, &bb));
-
-        SetLayeredWindowAttributes(hwnd, RGB(0, 0, 0), 0, LWA_COLORKEY);
-    }
-#endif
-
     // get the screen refresh rate, and set fps_max to that as default
     {
         DEVMODE lpDevMode;
@@ -1040,9 +929,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     // make the window visible
     ShowWindow(hwnd, nCmdShow);
-#ifdef WINDOW_MAXIMIZED
-    ShowWindow(hwnd, SW_MAXIMIZE);
-#endif
 
     // initialize engine
     WinEnvironment *environment = new WinEnvironment(hwnd, hInstance);
@@ -1215,17 +1101,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     // finally, destroy the window
     DestroyWindow(hwnd);
 
-    // IPC (3)
-    /*
-            {
-                    if (ipcSharedMemory != NULL)
-                            UnmapViewOfFile(ipcSharedMemory);
-
-                    if (ipcMappedFile != NULL)
-                            CloseHandle(ipcMappedFile);
-            }
-    */
-
     // handle potential restart
     if(isRestartScheduled) {
         wchar_t full_path[MAX_PATH];
@@ -1238,7 +1113,5 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     return 0;
 }
-
-#endif
 
 #endif

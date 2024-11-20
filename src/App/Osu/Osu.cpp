@@ -58,6 +58,10 @@
 #include "VolumeOverlay.h"
 #include "score.h"
 
+#ifdef _WIN32
+#include "WinEnvironment.h"
+#endif
+
 using namespace std;
 
 Osu *osu = NULL;
@@ -331,6 +335,12 @@ Osu::Osu() {
     }
 
     m_updateHandler->checkForUpdates();
+
+#ifdef _WIN32
+    // Process cmdline args now, after everything has been initialized
+    auto cmd_args = engine->getArgs();
+    handle_cmdline_args(cmd_args.toUtf8());
+#endif
 
     // Not the type of shader you want players to tweak or delete, so loading from string
     actual_flashlight_shader = engine->getGraphics()->createShaderFromSource(
