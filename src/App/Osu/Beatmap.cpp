@@ -2081,9 +2081,9 @@ void Beatmap::update() {
             auto OD = getOD();
             auto speedMultiplier = getSpeedMultiplier();
             auto osufile_path = m_selectedDifficulty2->getFilePath();
-            auto nb_circles = m_selectedDifficulty2->m_iNumCircles;
-            auto nb_sliders = m_selectedDifficulty2->m_iNumSliders;
-            auto nb_spinners = m_selectedDifficulty2->m_iNumSpinners;
+            auto nb_circles = m_iCurrentNumCircles;
+            auto nb_sliders = m_iCurrentNumSliders;
+            auto nb_spinners = m_iCurrentNumSpinners;
             auto modsLegacy = osu->getScore()->getModsLegacy();
             auto relax = osu->getModRelax();
             auto td = osu->getModTD();
@@ -2105,7 +2105,7 @@ void Beatmap::update() {
                 params.speedMultiplier = speedMultiplier;
                 params.relax = relax;
                 params.touchDevice = td;
-                params.upToObjectIndex = -1;
+                params.upToObjectIndex = m_iCurrentHitObjectIndex;
                 params.sortedHitObjects.swap(diffres.diffobjects);
 
                 std::vector<f64> aimStrains;

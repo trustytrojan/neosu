@@ -50,10 +50,6 @@ class SimulatedBeatmap : public BeatmapInterface {
     // live statistics
     inline int getNPS() const { return m_iNPS; }
     inline int getND() const { return m_iND; }
-    inline int getHitObjectIndexForCurrentTime() const { return m_iCurrentHitObjectIndex; }
-    inline int getNumCirclesForCurrentTime() const { return m_iCurrentNumCircles; }
-    inline int getNumSlidersForCurrentTime() const { return m_iCurrentNumSliders; }
-    inline int getNumSpinnersForCurrentTime() const { return m_iCurrentNumSpinners; }
 
     // replay recording
     u8 current_keys = 0;

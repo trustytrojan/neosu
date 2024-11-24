@@ -672,9 +672,9 @@ void Osu::update() {
 
             if(getSelectedBeatmap()->isInSkippableSection() && !getSelectedBeatmap()->isPaused() && !isLoading) {
                 bool can_skip_intro =
-                    (cv_skip_intro_enabled.getBool() && getSelectedBeatmap()->getHitObjectIndexForCurrentTime() < 1);
+                    (cv_skip_intro_enabled.getBool() && getSelectedBeatmap()->m_iCurrentHitObjectIndex < 1);
                 bool can_skip_break =
-                    (cv_skip_breaks_enabled.getBool() && getSelectedBeatmap()->getHitObjectIndexForCurrentTime() > 0);
+                    (cv_skip_breaks_enabled.getBool() && getSelectedBeatmap()->m_iCurrentHitObjectIndex > 0);
                 if(bancho.is_playing_a_multi_map()) {
                     can_skip_intro = bancho.room.all_players_skipped;
                     can_skip_break = false;

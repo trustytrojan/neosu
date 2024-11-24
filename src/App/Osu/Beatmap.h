@@ -139,10 +139,6 @@ class Beatmap : public BeatmapInterface {
     f32 getSpeedMultiplier() const;
     inline int getNPS() const { return m_iNPS; }
     inline int getND() const { return m_iND; }
-    inline int getHitObjectIndexForCurrentTime() const { return m_iCurrentHitObjectIndex; }
-    inline int getNumCirclesForCurrentTime() const { return m_iCurrentNumCircles; }
-    inline int getNumSlidersForCurrentTime() const { return m_iCurrentNumSliders; }
-    inline int getNumSpinnersForCurrentTime() const { return m_iCurrentNumSpinners; }
 
     std::vector<f64> m_aimStrains;
     std::vector<f64> m_speedStrains;
@@ -244,6 +240,10 @@ class Beatmap : public BeatmapInterface {
     // live pp/stars
     uwu::lazy_promise<std::function<pp_info()>, pp_info> m_ppv2_calc{pp_info{}};
     i32 last_calculated_hitobject = -1;
+    int m_iCurrentHitObjectIndex;
+    int m_iCurrentNumCircles;
+    int m_iCurrentNumSliders;
+    int m_iCurrentNumSpinners;
 
    protected:
     // internal
@@ -324,10 +324,6 @@ class Beatmap : public BeatmapInterface {
     // statistics
     int m_iNPS;
     int m_iND;
-    int m_iCurrentHitObjectIndex;
-    int m_iCurrentNumCircles;
-    int m_iCurrentNumSliders;
-    int m_iCurrentNumSpinners;
 
     // custom
     int m_iPreviousFollowPointObjectIndex;  // TODO: this shouldn't be in this class

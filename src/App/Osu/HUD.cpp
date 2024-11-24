@@ -199,8 +199,8 @@ void HUD::draw(Graphics *g) {
     }
 
     if(!osu->isSkipScheduled() && beatmap->isInSkippableSection() &&
-       ((cv_skip_intro_enabled.getBool() && beatmap->getHitObjectIndexForCurrentTime() < 1) ||
-        (cv_skip_breaks_enabled.getBool() && beatmap->getHitObjectIndexForCurrentTime() > 0)))
+       ((cv_skip_intro_enabled.getBool() && beatmap->m_iCurrentHitObjectIndex < 1) ||
+        (cv_skip_breaks_enabled.getBool() && beatmap->m_iCurrentHitObjectIndex > 0)))
         drawSkip(g);
 
     u32 nb_spectators = bancho.spectated_player_id == 0 ? bancho.spectators.size() : bancho.fellow_spectators.size();
@@ -1254,8 +1254,7 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
             if(slot->has_quit()) {
                 slot->current_hp = 0;
                 scoreEntry.name = UString::format("%s [quit]", user_info->name.toUtf8());
-            } else if(beatmap != NULL && beatmap->isInSkippableSection() &&
-                      beatmap->getHitObjectIndexForCurrentTime() < 1) {
+            } else if(beatmap != NULL && beatmap->isInSkippableSection() && beatmap->m_iCurrentHitObjectIndex < 1) {
                 if(slot->skipped) {
                     // XXX: Draw pretty "Skip" image instead
                     scoreEntry.name = UString::format("%s [skip]", user_info->name.toUtf8());
