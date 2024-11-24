@@ -30,6 +30,7 @@ Changelog::Changelog() : ScreenBackable() {
     latest.title = UString::format("%.2f (%s, %s)", cv_version.getFloat(), __DATE__, __TIME__);
     latest.changes.push_back("- Added checkbox to disable auto-updater");
     latest.changes.push_back("- Added Discord Rich Presence integration");
+    latest.changes.push_back("- Updated neosu icon");
     changelogs.push_back(latest);
 
     CHANGELOG v36_02;
