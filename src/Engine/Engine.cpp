@@ -137,7 +137,7 @@ Engine::Engine(Environment *environment, const char *args) {
         m_sound = new SoundEngine();
         m_animationHandler = new AnimationHandler();
         m_networkHandler = new NetworkHandler();
-        m_discord = new DiscordInterface();
+        init_discord_sdk();
 
         // default launch overrides
         m_graphics->setVSync(false);
@@ -178,9 +178,6 @@ Engine::~Engine() {
     debugLog("Engine: Freeing network handler...\n");
     SAFE_DELETE(m_networkHandler);
 
-    debugLog("Engine: Freeing Discord...\n");
-    SAFE_DELETE(m_discord);
-
     debugLog("Engine: Freeing input devices...\n");
     for(size_t i = 0; i < m_inputDevices.size(); i++) {
         delete m_inputDevices[i];
@@ -195,6 +192,7 @@ Engine::~Engine() {
 
     debugLog("Engine: Freeing environment...\n");
     SAFE_DELETE(m_environment);
+    destroy_discord_sdk();
 
     debugLog("Engine: Goodbye.");
 
@@ -387,6 +385,9 @@ void Engine::onUpdate() {
         VPROF_BUDGET("App::update", VPROF_BUDGETGROUP_UPDATE);
         m_app->update();
     }
+
+    // update discord presence
+    tick_discord_sdk();
 
     // update environment (after app, at the end here)
     {

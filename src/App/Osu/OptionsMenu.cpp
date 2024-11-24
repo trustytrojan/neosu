@@ -1186,7 +1186,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     addSubSection("Online settings");
     addCheckbox("Automatically update neosu to the latest version", &cv_auto_update);
     addCheckbox("Replace main menu logo with server logo", &cv_main_menu_use_server_logo);
-    addCheckbox("Rich Presence (Discord + Steam)",
+    addCheckbox("Enable Discord Rich Presence",
                 "Shows your current game state in your friends' friendslists.\ne.g.: Playing Gavin G - Reach Out "
                 "[Cherry Blossom's Insane]",
                 &cv_rich_presence);

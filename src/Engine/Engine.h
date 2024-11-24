@@ -134,7 +134,6 @@ class Engine {
     NetworkHandler *m_networkHandler;
     ResourceManager *m_resourceManager;
     AnimationHandler *m_animationHandler;
-    DiscordInterface *m_discord;
 
     // input devices
     Mouse *m_mouse;

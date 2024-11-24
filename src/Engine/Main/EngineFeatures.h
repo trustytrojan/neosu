@@ -21,8 +21,3 @@
  * OpenGL graphics (Mobile, ES/EGL)
  */
 // #define MCENGINE_FEATURE_OPENGLES
-
-/*
- * Discord RPC (rich presence)
- */
-// #define MCENGINE_FEATURE_DISCORD

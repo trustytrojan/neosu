@@ -1649,11 +1649,6 @@ ConVar cv_restart_sound_engine_before_playing(
     "restart_sound_engine_before_playing", false, FCVAR_BANCHO_COMPATIBLE,
     "jank fix for users who experience sound issues after playing for a while");
 ConVar cv_rich_presence("osu_rich_presence", true, FCVAR_BANCHO_COMPATIBLE, RichPresence::onRichPresenceChange);
-ConVar cv_rich_presence_discord_show_totalpp("osu_rich_presence_discord_show_totalpp", true, FCVAR_BANCHO_COMPATIBLE);
-ConVar cv_rich_presence_dynamic_windowtitle(
-    "osu_rich_presence_dynamic_windowtitle", true, FCVAR_BANCHO_COMPATIBLE,
-    "should the window title show the currently playing beatmap Artist - Title and [Difficulty] name");
-ConVar cv_rich_presence_show_recentplaystats("osu_rich_presence_show_recentplaystats", true, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_rm_debug_async_delay("rm_debug_async_delay", 0.0f, FCVAR_LOCKED);
 ConVar cv_rm_interrupt_on_destroy("rm_interrupt_on_destroy", true, FCVAR_LOCKED);
 ConVar cv_rm_numthreads(

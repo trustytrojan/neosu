@@ -29,6 +29,7 @@ Changelog::Changelog() : ScreenBackable() {
     CHANGELOG latest;
     latest.title = UString::format("%.2f (%s, %s)", cv_version.getFloat(), __DATE__, __TIME__);
     latest.changes.push_back("- Added checkbox to disable auto-updater");
+    latest.changes.push_back("- Added Discord Rich Presence integration");
     changelogs.push_back(latest);
 
     CHANGELOG v36_02;

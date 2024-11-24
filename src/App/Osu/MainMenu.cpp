@@ -1011,6 +1011,7 @@ void MainMenu::selectRandomBeatmap() {
     auto sb = osu->getSongBrowser();
     if(db->isFinished() && !sb->m_beatmaps.empty()) {
         sb->selectRandomBeatmap();
+        RichPresence::onMainMenu();
     } else {
         // Database is not loaded yet, load a random map and select it
         auto songs_folder = db->getOsuSongsFolder();
@@ -1053,6 +1054,7 @@ void MainMenu::selectRandomBeatmap() {
             preloaded_beatmap->do_not_store = true;
 
             osu->getSongBrowser()->onDifficultySelected(preloaded_beatmap, false);
+            RichPresence::onMainMenu();
 
             return;
         }

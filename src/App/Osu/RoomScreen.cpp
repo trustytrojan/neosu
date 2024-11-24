@@ -261,6 +261,9 @@ void RoomScreen::mouse_update(bool *propagate_clicks) {
         packet.id = MATCH_CHANGE_SETTINGS;
         bancho.room.pack(&packet);
         send_packet(packet);
+
+        // Update room name in rich presence info
+        RichPresence::onMultiplayerLobby();
     }
 
     m_pauseButton->setPaused(!osu->getSelectedBeatmap()->isPreviewMusicPlaying());
@@ -532,6 +535,7 @@ void RoomScreen::on_map_change() {
             m_map_attributes2->setText(attributes2);
             m_map_attributes2->setSizeToContent(0, 0);
 
+            // TODO @kiwec: calc actual star rating on the fly and update
             auto stars = UString::format("Star rating: %.2f*", beatmap->getStarsNomod());
             m_map_stars->setText(stars);
             m_map_stars->setSizeToContent(0, 0);
@@ -577,6 +581,7 @@ void RoomScreen::on_room_joined(Room room) {
     m_bVisible = true;
 
     RichPresence::setBanchoStatus(room.name.toUtf8(), MULTIPLAYER);
+    RichPresence::onMultiplayerLobby();
     osu->m_chat->addChannel("#multiplayer");
     osu->m_chat->updateVisibility();
 
@@ -625,7 +630,12 @@ void RoomScreen::on_room_updated(Room room) {
     }
 
     if(!was_host && bancho.room.is_host()) {
-        m_room_name_ipt->setText(bancho.room.name);
+        if(m_room_name_ipt->getText() != bancho.room.name) {
+            m_room_name_ipt->setText(bancho.room.name);
+
+            // Update room name in rich presence info
+            RichPresence::onMultiplayerLobby();
+        }
     }
 
     osu->m_modSelector->updateButtons();
@@ -733,6 +743,9 @@ void RoomScreen::on_match_finished() {
     bancho.match_started = false;
     osu->m_rankingScreen->setVisible(true);
     osu->m_chat->updateVisibility();
+
+    // Display room presence instead of map again
+    RichPresence::onMultiplayerLobby();
 }
 
 void RoomScreen::on_all_players_skipped() { bancho.room.all_players_skipped = true; }
@@ -751,6 +764,9 @@ void RoomScreen::on_match_aborted() {
     osu->onPlayEnd(get_approximate_score(), false, true);
     m_bVisible = true;
     bancho.match_started = false;
+
+    // Display room presence instead of map again
+    RichPresence::onMultiplayerLobby();
 }
 
 void RoomScreen::onClientScoreChange(bool force) {

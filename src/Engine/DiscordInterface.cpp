@@ -1,134 +1,123 @@
-//================ Copyright (c) 2018, PG, All rights reserved. =================//
-//
-// Purpose:		discord rpc handler
-//
-// $NoKeywords: $discord-rpc
-//===============================================================================//
-
 #include "DiscordInterface.h"
 
+#include "ConVar.h"
 #include "Engine.h"
 
-#define DISCORD_APPID "0"
-#define DISCORD_STEAMWORKS_APPID "0"
+#define DISCORD_CLIENT_ID 1288141291686989846
 
-DiscordInterface *discord = NULL;
+struct Application {
+    struct IDiscordCore *core;
+    struct IDiscordUserManager *users;
+    struct IDiscordAchievementManager *achievements;
+    struct IDiscordActivityManager *activities;
+    struct IDiscordRelationshipManager *relationships;
+    struct IDiscordApplicationManager *application;
+    struct IDiscordLobbyManager *lobbies;
+    DiscordUserId user_id;
+};
 
-DiscordInterface::DiscordInterface() {
-    discord = this;
+static struct Application app;
+static struct IDiscordActivityEvents activities_events;
+static struct IDiscordRelationshipEvents relationships_events;
+static struct IDiscordUserEvents users_events;
 
-    m_bReady = false;
-
-    if(engine->getArgs().length() > 0 && engine->getArgs().find("nodiscord") != -1) return;
-
-#ifdef MCENGINE_FEATURE_DISCORD
-
-    memset(&m_presence, 0, sizeof(DiscordRichPresence));
-
-    DiscordEventHandlers handlers;
-    memset(&handlers, 0, sizeof(handlers));
-
-    handlers.ready = DiscordInterface::onReady;
-    handlers.errored = DiscordInterface::onError;
-    handlers.disconnected = DiscordInterface::onDisconnected;
-    handlers.joinGame = DiscordInterface::onJoinGame;
-    handlers.spectateGame = DiscordInterface::onSpectateGame;
-    handlers.joinRequest = DiscordInterface::onJoinRequest;
-
-    Discord_Initialize(DISCORD_APPID, &handlers, 1, DISCORD_STEAMWORKS_APPID);
-
-    m_bReady = true;
-
-#endif
+static void on_discord_log(void *cdata, enum EDiscordLogLevel level, const char *message) {
+    (void)cdata;
+    if(level == DiscordLogLevel_Error) {
+        debugLog("[Discord] ERROR: %s\n", message);
+    } else {
+        debugLog("[Discord] %s\n", message);
+    }
 }
 
-DiscordInterface::~DiscordInterface() {
-    discord = NULL;
+void init_discord_sdk() {
+    memset(&app, 0, sizeof(app));
+    memset(&activities_events, 0, sizeof(activities_events));
+    memset(&relationships_events, 0, sizeof(relationships_events));
+    memset(&users_events, 0, sizeof(users_events));
 
-#ifdef MCENGINE_FEATURE_DISCORD
+    // users_events.on_current_user_update = OnUserUpdated;
+    // relationships_events.on_refresh = OnRelationshipsRefresh;
 
-    if(m_bReady) Discord_Shutdown();
+    struct DiscordCreateParams params;
+    params.client_id = DISCORD_CLIENT_ID;
+    params.flags = DiscordCreateFlags_Default;
+    params.event_data = &app;
+    params.activity_events = &activities_events;
+    params.relationship_events = &relationships_events;
+    params.user_events = &users_events;
 
-#endif
+    int res = DiscordCreate(DISCORD_VERSION, &params, &app.core);
+    if(res != DiscordResult_Ok) {
+        debugLog("Failed to initialize Discord SDK! (error %d)\n", res);
+        return;
+    }
 
-    m_bReady = false;
+    app.core->set_log_hook(app.core, DiscordLogLevel_Warn, NULL, on_discord_log);
+    app.activities = app.core->get_activity_manager(app.core);
+
+    app.activities->register_command(app.activities, "neosu://run");
+
+    // app.users = app.core->get_user_manager(app.core);
+    // app.achievements = app.core->get_achievement_manager(app.core);
+    // app.application = app.core->get_application_manager(app.core);
+    // app.lobbies = app.core->get_lobby_manager(app.core);
+    // app.lobbies->connect_lobby_with_activity_secret(app.lobbies, "invalid_secret", &app, OnLobbyConnect);
+    // app.application->get_oauth2_token(app.application, &app, OnOAuth2Token);
+    // app.relationships = app.core->get_relationship_manager(app.core);
 }
 
-#ifdef MCENGINE_FEATURE_DISCORD
+void tick_discord_sdk() { app.core->run_callbacks(app.core); }
 
-void DiscordInterface::onReady(const DiscordUser *request) {
-    // unused
+void destroy_discord_sdk() {
+    app.core->destroy(app.core);  // bye
 }
 
-void DiscordInterface::onError(int errorCode, const char *message) {
-    debugLog("DISCORD: Error, %i, %s\n", errorCode, message);
+void clear_discord_presence() {
+    // TODO @kiwec: test if this works
+    struct DiscordActivity activity;
+    memset(&activity, 0, sizeof(activity));
+    app.activities->update_activity(app.activities, &activity, NULL, NULL);
 }
 
-void DiscordInterface::onDisconnected(int errorCode, const char *message) {
-    // unused
+void set_discord_presence(struct DiscordActivity *activity) {
+    if(!cv_rich_presence.getBool()) return;
+
+    // activity->type: int
+    //     DiscordActivityType_Playing,
+    //     DiscordActivityType_Streaming,
+    //     DiscordActivityType_Listening,
+    //     DiscordActivityType_Watching,
+
+    // activity->details: char[128]; // what the player is doing
+    // activity->state:   char[128]; // party status
+
+    // Only set "end" if in multiplayer lobby, else it doesn't make sense since user can pause
+    // Keep "start" across retries
+    // activity->timestamps->start: int64_t
+    // activity->timestamps->end:   int64_t
+
+    // activity->party: DiscordActivityParty
+    // activity->secrets: DiscordActivitySecrets
+    // currently unused. should be lobby id, etc
+
+    activity->application_id = DISCORD_CLIENT_ID;
+    strcpy(activity->name, "neosu");
+    strcpy(activity->assets.large_image, "neosu_icon");
+    activity->assets.large_text[0] = '\0';
+    strcpy(activity->assets.small_image, "None");
+    activity->assets.small_text[0] = '\0';
+
+    app.activities->update_activity(app.activities, activity, NULL, NULL);
 }
 
-void DiscordInterface::onJoinGame(const char *joinSecret) {
-    // unused
-}
+// void (DISCORD_API *send_request_reply)(struct IDiscordActivityManager* manager, DiscordUserId user_id, enum
+//     EDiscordActivityJoinRequestReply reply, void* callback_data, void (DISCORD_API *callback)(void* callback_data,
+//     enum EDiscordResult result));
 
-void DiscordInterface::onSpectateGame(const char *spectateSecret) {
-    // unused
-}
+// void (DISCORD_API *send_invite)(struct IDiscordActivityManager* manager, DiscordUserId user_id, enum
+//     EDiscordActivityActionType type, const char* content, void* callback_data, void (DISCORD_API *callback)(void*
+//     callback_data, enum EDiscordResult result));
 
-void DiscordInterface::onJoinRequest(const DiscordUser *request) {
-    // unused
-}
-
-#endif
-
-void DiscordInterface::setRichPresence(UString key, UString value, bool pool) {
-#ifdef MCENGINE_FEATURE_DISCORD
-
-    if(!m_bReady || value.length() > 128) return;
-
-    if(key == "state") {
-        m_sPresenceState = value;
-        m_presence.state = m_sPresenceState.toUtf8();
-    } else if(key == "details") {
-        m_sPresenceDetails = value;
-        m_presence.details = m_sPresenceDetails.toUtf8();
-    } else if(key == "startTimestamp")
-        m_presence.startTimestamp = (i64)value.toLong();
-    else if(key == "endTimestamp")
-        m_presence.endTimestamp = (i64)value.toLong();
-    else if(key == "largeImageKey" && value.length() <= 32) {
-        m_sPresenceLargeImageKey = value;
-        m_presence.largeImageKey = m_sPresenceLargeImageKey.toUtf8();
-    } else if(key == "largeImageText") {
-        m_sPresenceLargeImageText = value;
-        m_presence.largeImageText = m_sPresenceLargeImageText.toUtf8();
-    } else if(key == "smallImageKey" && value.length() <= 32) {
-        m_sPresenceSmallImageKey = value;
-        m_presence.smallImageKey = m_sPresenceSmallImageKey.toUtf8();
-    } else if(key == "smallImageText") {
-        m_sPresenceSmallImageText = value;
-        m_presence.smallImageText = m_sPresenceSmallImageText.toUtf8();
-    } else if(key == "partyId") {
-        m_sPresencePartyID = value;
-        m_presence.partyId = m_sPresencePartyID.toUtf8();
-    } else if(key == "partySize")
-        m_presence.partySize = value.toInt();
-    else if(key == "partyMax")
-        m_presence.partyMax = value.toInt();
-    else if(key == "matchSecret") {
-        m_sPresenceMatchSecret = value;
-        m_presence.matchSecret = m_sPresenceMatchSecret.toUtf8();
-    } else if(key == "joinSecret") {
-        m_sPresenceJoinSecret = value;
-        m_presence.joinSecret = m_sPresenceJoinSecret.toUtf8();
-    } else if(key == "spectateSecret") {
-        m_sPresenceSpectateSecret = value;
-        m_presence.spectateSecret = m_sPresenceSpectateSecret.toUtf8();
-    } else if(key == "instance")
-        m_presence.instance = (i8)value.toInt();
-
-    if(!pool) Discord_UpdatePresence(&m_presence);
-
-#endif
-}
+// void (DISCORD_API *accept_invite)(struct IDiscordActivityManager* manager, DiscordUserId user_id, void*
+//     callback_data, void (DISCORD_API *callback)(void* callback_data, enum EDiscordResult result));

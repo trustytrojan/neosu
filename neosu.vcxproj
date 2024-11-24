@@ -88,7 +88,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WIN32_WINNT=0x0601;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>libraries/glew/include;libraries/freetype/include;libraries/libcurl/include;libraries/libjpeg/include;libraries/lzma/include;libraries/bassloud/include;libraries/basswasapi/include;libraries/bassmix/include;libraries/bassfx/include;libraries/bassasio/include;libraries/bass/include;src/Util;src/Engine/Renderer;src/Engine/Main;src/Engine/Platform;src/Engine/Input;src/Engine;src/GUI/Windows/VinylScratcher;src/GUI/Windows;src/GUI;src/App/Osu;src/App;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>libraries/discord-sdk/include;libraries/glew/include;libraries/freetype/include;libraries/libcurl/include;libraries/libjpeg/include;libraries/lzma/include;libraries/bassloud/include;libraries/basswasapi/include;libraries/bassmix/include;libraries/bassfx/include;libraries/bassasio/include;libraries/bass/include;src/Util;src/Engine/Renderer;src/Engine/Main;src/Engine/Platform;src/Engine/Input;src/Engine;src/GUI/Windows/VinylScratcher;src/GUI/Windows;src/GUI;src/App/Osu;src/App;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -96,7 +96,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalOptions>/VERBOSE:LIB %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>ktmw32.lib;wbemuuid.lib;ntdll.lib;Shlwapi.lib;userenv.lib;oleaut32.lib;winmm.lib;ws2_32.lib;psapi.lib;Comdlg32.lib;Dwmapi.lib;comctl32.lib;OpenGL32.lib;glu32.lib;Ole32.lib;Uuid.lib;libraries\bass\$(Platform)\bass.lib;libraries\bassfx\$(Platform)\bass_fx.lib;libraries\bassasio\$(Platform)\bassasio.lib;libraries\bassloud\$(Platform)\bassloud.lib;libraries\bassmix\$(Platform)\bassmix.lib;libraries\basswasapi\$(Platform)\basswasapi.lib;libraries\discord-rpc\$(Platform)\discord-rpc.lib;libraries\freetype\$(Platform)\freetype.lib;libraries\libjpeg\$(Platform)\jpeg-static.lib;libraries\xinput\$(Platform)\libxinput9_1_0.a;libraries\libcurl\$(Platform)\libcurl.dll.a;libraries\lzma\$(Platform)\liblzma.a;libraries\glew\$(Platform)\glew32s.lib;libraries\glew\$(Platform)\glew32mxs.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ktmw32.lib;wbemuuid.lib;ntdll.lib;Shlwapi.lib;userenv.lib;oleaut32.lib;winmm.lib;ws2_32.lib;psapi.lib;Comdlg32.lib;Dwmapi.lib;comctl32.lib;OpenGL32.lib;glu32.lib;Ole32.lib;Uuid.lib;libraries\bass\$(Platform)\bass.lib;libraries\bassfx\$(Platform)\bass_fx.lib;libraries\bassasio\$(Platform)\bassasio.lib;libraries\bassloud\$(Platform)\bassloud.lib;libraries\bassmix\$(Platform)\bassmix.lib;libraries\basswasapi\$(Platform)\basswasapi.lib;libraries\discord-sdk\$(Platform)\discord_game_sdk.dll.lib;libraries\freetype\$(Platform)\freetype.lib;libraries\libjpeg\$(Platform)\jpeg-static.lib;libraries\xinput\$(Platform)\libxinput9_1_0.a;libraries\libcurl\$(Platform)\libcurl.dll.a;libraries\lzma\$(Platform)\liblzma.a;libraries\glew\$(Platform)\glew32s.lib;libraries\glew\$(Platform)\glew32mxs.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
       <SubSystem>Windows</SubSystem>
       <MinimumRequiredVersion>6.01</MinimumRequiredVersion>
@@ -111,14 +111,15 @@ copy $(SolutionDir)libraries\bassloud\$(Platform)\bassloud.dll $(SolutionDir)bui
 copy $(SolutionDir)libraries\bassmix\$(Platform)\bassmix.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
 copy $(SolutionDir)libraries\basswasapi\$(Platform)\basswasapi.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
 copy $(SolutionDir)libraries\libcurl\$(Platform)\*.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
-copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Platform)\$(Configuration)\</Command>
+copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Platform)\$(Configuration)\
+copy $(SolutionDir)libraries\discord-sdk\$(Platform)\*.dll $(SolutionDir)build\$(Platform)\$(Configuration)\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>libraries/glew/include;libraries/freetype/include;libraries/libcurl/include;libraries/libjpeg/include;libraries/lzma/include;libraries/bassloud/include;libraries/basswasapi/include;libraries/bassmix/include;libraries/bassfx/include;libraries/bassasio/include;libraries/bass/include;src/Util;src/Engine/Renderer;src/Engine/Main;src/Engine/Platform;src/Engine/Input;src/Engine;src/GUI/Windows/VinylScratcher;src/GUI/Windows;src/GUI;src/App/Osu;src/App;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>libraries/discord-sdk/include;libraries/glew/include;libraries/freetype/include;libraries/libcurl/include;libraries/libjpeg/include;libraries/lzma/include;libraries/bassloud/include;libraries/basswasapi/include;libraries/bassmix/include;libraries/bassfx/include;libraries/bassasio/include;libraries/bass/include;src/Util;src/Engine/Renderer;src/Engine/Main;src/Engine/Platform;src/Engine/Input;src/Engine;src/GUI/Windows/VinylScratcher;src/GUI/Windows;src/GUI;src/App/Osu;src/App;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -126,7 +127,7 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ktmw32.lib;wbemuuid.lib;ntdll.lib;Shlwapi.lib;userenv.lib;oleaut32.lib;winmm.lib;ws2_32.lib;psapi.lib;Comdlg32.lib;Dwmapi.lib;comctl32.lib;OpenGL32.lib;glu32.lib;Ole32.lib;Uuid.lib;libraries\bass\$(Platform)\bass.lib;libraries\bassfx\$(Platform)\bass_fx.lib;libraries\bassasio\$(Platform)\bassasio.lib;libraries\bassloud\$(Platform)\bassloud.lib;libraries\bassmix\$(Platform)\bassmix.lib;libraries\basswasapi\$(Platform)\basswasapi.lib;libraries\discord-rpc\$(Platform)\discord-rpc.lib;libraries\freetype\$(Platform)\freetype.lib;libraries\libjpeg\$(Platform)\jpeg-static.lib;libraries\xinput\$(Platform)\libxinput9_1_0.a;libraries\libcurl\$(Platform)\libcurl.dll.a;libraries\lzma\$(Platform)\liblzma.a;libraries\glew\$(Platform)\glew32s.lib;libraries\glew\$(Platform)\glew32mxs.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ktmw32.lib;wbemuuid.lib;ntdll.lib;Shlwapi.lib;userenv.lib;oleaut32.lib;winmm.lib;ws2_32.lib;psapi.lib;Comdlg32.lib;Dwmapi.lib;comctl32.lib;OpenGL32.lib;glu32.lib;Ole32.lib;Uuid.lib;libraries\bass\$(Platform)\bass.lib;libraries\bassfx\$(Platform)\bass_fx.lib;libraries\bassasio\$(Platform)\bassasio.lib;libraries\bassloud\$(Platform)\bassloud.lib;libraries\bassmix\$(Platform)\bassmix.lib;libraries\basswasapi\$(Platform)\basswasapi.lib;libraries\discord-sdk\$(Platform)\discord_game_sdk.dll.lib;libraries\freetype\$(Platform)\freetype.lib;libraries\libjpeg\$(Platform)\jpeg-static.lib;libraries\xinput\$(Platform)\libxinput9_1_0.a;libraries\libcurl\$(Platform)\libcurl.dll.a;libraries\lzma\$(Platform)\liblzma.a;libraries\glew\$(Platform)\glew32s.lib;libraries\glew\$(Platform)\glew32mxs.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
       <SubSystem>Windows</SubSystem>
     </Link>
@@ -140,7 +141,8 @@ copy $(SolutionDir)libraries\bassloud\$(Platform)\bassloud.dll $(SolutionDir)bui
 copy $(SolutionDir)libraries\bassmix\$(Platform)\bassmix.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
 copy $(SolutionDir)libraries\basswasapi\$(Platform)\basswasapi.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
 copy $(SolutionDir)libraries\libcurl\$(Platform)\*.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
-copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Platform)\$(Configuration)\</Command>
+copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Platform)\$(Configuration)\
+copy $(SolutionDir)libraries\discord-sdk\$(Platform)\*.dll $(SolutionDir)build\$(Platform)\$(Configuration)\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -148,7 +150,7 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
       <PreprocessorDefinitions>WIN32;NDEBUG;_WIN32_WINNT=0x0601;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>libraries/glew/include;libraries/freetype/include;libraries/libcurl/include;libraries/libjpeg/include;libraries/lzma/include;libraries/bassloud/include;libraries/basswasapi/include;libraries/bassmix/include;libraries/bassfx/include;libraries/bassasio/include;libraries/bass/include;src/Util;src/Engine/Renderer;src/Engine/Main;src/Engine/Platform;src/Engine/Input;src/Engine;src/GUI/Windows/VinylScratcher;src/GUI/Windows;src/GUI;src/App/Osu;src/App;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>libraries/discord-sdk/include;libraries/glew/include;libraries/freetype/include;libraries/libcurl/include;libraries/libjpeg/include;libraries/lzma/include;libraries/bassloud/include;libraries/basswasapi/include;libraries/bassmix/include;libraries/bassfx/include;libraries/bassasio/include;libraries/bass/include;src/Util;src/Engine/Renderer;src/Engine/Main;src/Engine/Platform;src/Engine/Input;src/Engine;src/GUI/Windows/VinylScratcher;src/GUI/Windows;src/GUI;src/App/Osu;src/App;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -157,7 +159,7 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalOptions>/VERBOSE:LIB %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>ktmw32.lib;wbemuuid.lib;ntdll.lib;Shlwapi.lib;userenv.lib;oleaut32.lib;winmm.lib;ws2_32.lib;psapi.lib;Comdlg32.lib;Dwmapi.lib;comctl32.lib;OpenGL32.lib;glu32.lib;Ole32.lib;Uuid.lib;libraries\bass\$(Platform)\bass.lib;libraries\bassfx\$(Platform)\bass_fx.lib;libraries\bassasio\$(Platform)\bassasio.lib;libraries\bassloud\$(Platform)\bassloud.lib;libraries\bassmix\$(Platform)\bassmix.lib;libraries\basswasapi\$(Platform)\basswasapi.lib;libraries\discord-rpc\$(Platform)\discord-rpc.lib;libraries\freetype\$(Platform)\freetype.lib;libraries\libjpeg\$(Platform)\jpeg-static.lib;libraries\xinput\$(Platform)\libxinput9_1_0.a;libraries\libcurl\$(Platform)\libcurl.dll.a;libraries\lzma\$(Platform)\liblzma.a;libraries\glew\$(Platform)\glew32s.lib;libraries\glew\$(Platform)\glew32mxs.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ktmw32.lib;wbemuuid.lib;ntdll.lib;Shlwapi.lib;userenv.lib;oleaut32.lib;winmm.lib;ws2_32.lib;psapi.lib;Comdlg32.lib;Dwmapi.lib;comctl32.lib;OpenGL32.lib;glu32.lib;Ole32.lib;Uuid.lib;libraries\bass\$(Platform)\bass.lib;libraries\bassfx\$(Platform)\bass_fx.lib;libraries\bassasio\$(Platform)\bassasio.lib;libraries\bassloud\$(Platform)\bassloud.lib;libraries\bassmix\$(Platform)\bassmix.lib;libraries\basswasapi\$(Platform)\basswasapi.lib;libraries\discord-sdk\$(Platform)\discord_game_sdk.dll.lib;libraries\freetype\$(Platform)\freetype.lib;libraries\libjpeg\$(Platform)\jpeg-static.lib;libraries\xinput\$(Platform)\libxinput9_1_0.a;libraries\libcurl\$(Platform)\libcurl.dll.a;libraries\lzma\$(Platform)\liblzma.a;libraries\glew\$(Platform)\glew32s.lib;libraries\glew\$(Platform)\glew32mxs.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
       <SubSystem>Windows</SubSystem>
       <ImageHasSafeExceptionHandlers />
@@ -173,14 +175,15 @@ copy $(SolutionDir)libraries\bassloud\$(Platform)\bassloud.dll $(SolutionDir)bui
 copy $(SolutionDir)libraries\bassmix\$(Platform)\bassmix.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
 copy $(SolutionDir)libraries\basswasapi\$(Platform)\basswasapi.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
 copy $(SolutionDir)libraries\libcurl\$(Platform)\*.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
-copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Platform)\$(Configuration)\</Command>
+copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Platform)\$(Configuration)\
+copy $(SolutionDir)libraries\discord-sdk\$(Platform)\*.dll $(SolutionDir)build\$(Platform)\$(Configuration)\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>libraries/glew/include;libraries/freetype/include;libraries/libcurl/include;libraries/libjpeg/include;libraries/lzma/include;libraries/bassloud/include;libraries/basswasapi/include;libraries/bassmix/include;libraries/bassfx/include;libraries/bassasio/include;libraries/bass/include;src/Util;src/Engine/Renderer;src/Engine/Main;src/Engine/Platform;src/Engine/Input;src/Engine;src/GUI/Windows/VinylScratcher;src/GUI/Windows;src/GUI;src/App/Osu;src/App;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>libraries/discord-sdk/include;libraries/glew/include;libraries/freetype/include;libraries/libcurl/include;libraries/libjpeg/include;libraries/lzma/include;libraries/bassloud/include;libraries/basswasapi/include;libraries/bassmix/include;libraries/bassfx/include;libraries/bassasio/include;libraries/bass/include;src/Util;src/Engine/Renderer;src/Engine/Main;src/Engine/Platform;src/Engine/Input;src/Engine;src/GUI/Windows/VinylScratcher;src/GUI/Windows;src/GUI;src/App/Osu;src/App;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -189,7 +192,7 @@ copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Pl
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>ktmw32.lib;wbemuuid.lib;ntdll.lib;Shlwapi.lib;userenv.lib;oleaut32.lib;winmm.lib;ws2_32.lib;psapi.lib;Comdlg32.lib;Dwmapi.lib;comctl32.lib;OpenGL32.lib;glu32.lib;Ole32.lib;Uuid.lib;libraries\bass\$(Platform)\bass.lib;libraries\bassfx\$(Platform)\bass_fx.lib;libraries\bassasio\$(Platform)\bassasio.lib;libraries\bassloud\$(Platform)\bassloud.lib;libraries\bassmix\$(Platform)\bassmix.lib;libraries\basswasapi\$(Platform)\basswasapi.lib;libraries\discord-rpc\$(Platform)\discord-rpc.lib;libraries\freetype\$(Platform)\freetype.lib;libraries\libjpeg\$(Platform)\jpeg-static.lib;libraries\xinput\$(Platform)\libxinput9_1_0.a;libraries\libcurl\$(Platform)\libcurl.dll.a;libraries\lzma\$(Platform)\liblzma.a;libraries\glew\$(Platform)\glew32s.lib;libraries\glew\$(Platform)\glew32mxs.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ktmw32.lib;wbemuuid.lib;ntdll.lib;Shlwapi.lib;userenv.lib;oleaut32.lib;winmm.lib;ws2_32.lib;psapi.lib;Comdlg32.lib;Dwmapi.lib;comctl32.lib;OpenGL32.lib;glu32.lib;Ole32.lib;Uuid.lib;libraries\bass\$(Platform)\bass.lib;libraries\bassfx\$(Platform)\bass_fx.lib;libraries\bassasio\$(Platform)\bassasio.lib;libraries\bassloud\$(Platform)\bassloud.lib;libraries\bassmix\$(Platform)\bassmix.lib;libraries\basswasapi\$(Platform)\basswasapi.lib;libraries\discord-sdk\$(Platform)\discord_game_sdk.dll.lib;libraries\freetype\$(Platform)\freetype.lib;libraries\libjpeg\$(Platform)\jpeg-static.lib;libraries\xinput\$(Platform)\libxinput9_1_0.a;libraries\libcurl\$(Platform)\libcurl.dll.a;libraries\lzma\$(Platform)\liblzma.a;libraries\glew\$(Platform)\glew32s.lib;libraries\glew\$(Platform)\glew32mxs.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
       <SubSystem>Windows</SubSystem>
     </Link>
@@ -203,7 +206,8 @@ copy $(SolutionDir)libraries\bassloud\$(Platform)\bassloud.dll $(SolutionDir)bui
 copy $(SolutionDir)libraries\bassmix\$(Platform)\bassmix.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
 copy $(SolutionDir)libraries\basswasapi\$(Platform)\basswasapi.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
 copy $(SolutionDir)libraries\libcurl\$(Platform)\*.dll $(SolutionDir)build\$(Platform)\$(Configuration)\
-copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Platform)\$(Configuration)\</Command>
+copy $(SolutionDir)libraries\libcurl\curl-ca-bundle.crt $(SolutionDir)build\$(Platform)\$(Configuration)\
+copy $(SolutionDir)libraries\discord-sdk\$(Platform)\*.dll $(SolutionDir)build\$(Platform)\$(Configuration)\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

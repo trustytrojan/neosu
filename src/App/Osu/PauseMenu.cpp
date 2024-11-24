@@ -337,7 +337,6 @@ CBaseUIContainer *PauseMenu::setVisible(bool visible) {
         engine->getSound()->play(osu->getSkin()->m_pauseLoop);
 
         if(m_bContinueEnabled) {
-            RichPresence::setStatus("Paused");
             RichPresence::setBanchoStatus("Taking a break", PAUSED);
 
             if(!bancho.spectators.empty()) {
