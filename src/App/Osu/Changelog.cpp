@@ -26,13 +26,13 @@ Changelog::Changelog() : ScreenBackable() {
 
     std::vector<CHANGELOG> changelogs;
 
-    CHANGELOG latest;
-    latest.title = UString::format("%.2f (%s, %s)", cv_version.getFloat(), __DATE__, __TIME__);
-    latest.changes.push_back("- Added checkbox to disable auto-updater");
-    latest.changes.push_back("- Added Discord Rich Presence integration");
-    latest.changes.push_back("- Fixed live pp calculations");
-    latest.changes.push_back("- Updated neosu icon");
-    changelogs.push_back(latest);
+    CHANGELOG v36_03;
+    v36_03.title = "36.03 (2024-11-24)";
+    v36_03.changes.push_back("- Added checkbox to disable auto-updater");
+    v36_03.changes.push_back("- Added Discord Rich Presence integration");
+    v36_03.changes.push_back("- Fixed live pp calculations");
+    v36_03.changes.push_back("- Updated neosu icon");
+    changelogs.push_back(v36_03);
 
     CHANGELOG v36_02;
     v36_02.title = "36.02 (2024-11-16)";

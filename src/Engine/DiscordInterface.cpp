@@ -53,7 +53,9 @@ void init_discord_sdk() {
         return;
     }
 
+#ifdef _WIN64
     app.core->set_log_hook(app.core, DiscordLogLevel_Warn, NULL, on_discord_log);
+#endif
     app.activities = app.core->get_activity_manager(app.core);
 
     app.activities->register_command(app.activities, "neosu://run");
