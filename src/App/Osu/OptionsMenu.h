@@ -53,8 +53,6 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     bool isBusy();
 
    public:
-    static const char *OSU_CONFIG_FILE_NAME;
-
     enum class RenderCondition {
         NONE,
         ASIO_ENABLED,
@@ -164,6 +162,7 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     void onResetUpdate(CBaseUIButton *button);
     void onResetClicked(CBaseUIButton *button);
     void onResetEverythingClicked(CBaseUIButton *button);
+    void onImportSettingsFromStable(CBaseUIButton *button);
 
     // options
     void addSpacer();

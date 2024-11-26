@@ -36,6 +36,7 @@
 #include "NotificationOverlay.h"
 #include "OptionsMenu.h"
 #include "PauseMenu.h"
+#include "PeppyImporter.h"
 #include "PromptScreen.h"
 #include "RankingScreen.h"
 #include "RenderTarget.h"
@@ -206,6 +207,11 @@ Osu::Osu() {
     Console::execConfigFile("underride");  // same as override, but for defaults
     Console::execConfigFile("osu");
     Console::execConfigFile("override");  // used for quickfixing live builds without redeploying/recompiling
+
+    std::ifstream osuCfgFile(MCENGINE_DATA_DIR "cfg/osu.cfg");
+    if(!osuCfgFile.good()) {
+        import_settings_from_osu_stable();
+    }
 
     // Initialize sound here so we can load the preferred device from config
     // Avoids initializing the sound device twice, which can take a while depending on the driver

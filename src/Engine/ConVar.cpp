@@ -1140,8 +1140,9 @@ ConVar cv_osu_folder("osu_folder", "/osu!/", FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_osu_folder("osu_folder", "", FCVAR_BANCHO_COMPATIBLE);
 #endif
 
+ConVar cv_songs_folder("osu_songs_folder", "Songs/", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
+
 ConVar cv_osu_folder_sub_skins("osu_folder_sub_skins", "Skins/", FCVAR_BANCHO_COMPATIBLE);
-ConVar cv_osu_folder_sub_songs("osu_folder_sub_songs", "Songs/", FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_followpoints_anim("osu_followpoints_anim", false, FCVAR_BANCHO_COMPATIBLE,
                             "scale + move animation while fading in followpoints (osu only does this when its "
                             "internal default skin is being used)");
@@ -1980,3 +1981,33 @@ ConVar cv_win_snd_wasapi_exclusive("win_snd_wasapi_exclusive", true, FCVAR_BANCH
 ConVar cv_win_snd_wasapi_period_size(
     "win_snd_wasapi_period_size", 0.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
     "interval between OutputWasapiProc calls in seconds (e.g. 0.016 = 16 ms) (0 = use default)");
+
+// Convars below are UNUSED!
+// TODO @kiwec: use them!
+ConVar cv_allow_mp_invites("allow_mp_invites", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+                           "allow multiplayer game invites from all users");
+ConVar cv_allow_stranger_dms("allow_stranger_dms", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+                             "allow private messages from non-friends");
+ConVar cv_chat_auto_hide("chat_auto_hide", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+                         "automatically hide chat during gameplay");
+ConVar cv_chat_highlight_words("chat_highlight_words", "", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+                               "space-separated list of words to treat as a mention");
+ConVar cv_chat_ignore_list("chat_ignore_list", "", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+                           "space-separated list of users to ignore");
+ConVar cv_chat_notify_on_mention("chat_notify_on_mention", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+                                 "get notified when someone says your name");
+ConVar cv_chat_ping_on_mention("chat_ping_on_mention", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+                               "play a sound when someone says your name");
+ConVar cv_chat_ticker("chat_ticker", true, FCVAR_BANCHO_COMPATIBLE);
+ConVar cv_ignore_beatmap_samples("ignore_beatmap_samples", false, FCVAR_BANCHO_COMPATIBLE, "ignore beatmap hitsounds");
+ConVar cv_ignore_beatmap_skins("ignore_beatmap_skins", false, FCVAR_BANCHO_COMPATIBLE, "ignore beatmap skins");
+ConVar cv_language("language", "en", FCVAR_BANCHO_COMPATIBLE);
+ConVar cv_notify_friends("notify_friend_status_change", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+                         "notify when friends change status");
+ConVar cv_notify_during_gameplay("notify_during_gameplay", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+                                 "show notification popups instantly during gameplay");
+ConVar cv_draw_storyboard("draw_storyboard", true, FCVAR_BANCHO_COMPATIBLE);
+ConVar cv_draw_video("draw_video", true, FCVAR_BANCHO_COMPATIBLE);
+ConVar cv_prefer_cjk("prefer_cjk", false, FCVAR_BANCHO_COMPATIBLE, "prefer metadata in original language");
+ConVar cv_SMOKE("key_smoke", 0, FCVAR_BANCHO_COMPATIBLE);
+ConVar cv_TOGGLE_EXTENDED_CHAT("osu_key_toggle_extended_chat", (int)KEY_F9, FCVAR_BANCHO_COMPATIBLE);

@@ -12,8 +12,6 @@
 #include "Engine.h"
 #include "ResourceManager.h"
 
-#define CFG_FOLDER MCENGINE_DATA_DIR "cfg/"
-
 #define CONSOLE_BORDER 6
 
 std::vector<UString> Console::g_commandQueue;
@@ -172,7 +170,7 @@ void Console::processCommand(UString command) {
 
 void Console::execConfigFile(std::string filename) {
     // handle extension
-    filename.insert(0, CFG_FOLDER);
+    filename.insert(0, MCENGINE_DATA_DIR "cfg/");
     if(filename.find(".cfg", (filename.length() - 4), filename.length()) == -1) filename.append(".cfg");
 
     // open it

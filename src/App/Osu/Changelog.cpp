@@ -26,6 +26,11 @@ Changelog::Changelog() : ScreenBackable() {
 
     std::vector<CHANGELOG> changelogs;
 
+    CHANGELOG latest;
+    latest.title = "next version";
+    latest.changes.push_back("- Settings will now auto-import from osu!stable on first launch");
+    changelogs.push_back(latest);
+
     CHANGELOG v36_03;
     v36_03.title = "36.03 (2024-11-24)";
     v36_03.changes.push_back("- Added checkbox to disable auto-updater");

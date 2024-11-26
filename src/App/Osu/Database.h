@@ -115,8 +115,6 @@ class Database {
    private:
     friend class DatabaseLoader;
 
-    std::string parseLegacyCfgBeatmapDirectoryParameter();
-
     void saveMaps();
 
     void loadScores();

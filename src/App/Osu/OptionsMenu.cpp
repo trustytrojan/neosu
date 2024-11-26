@@ -27,6 +27,7 @@
 #include "Mouse.h"
 #include "NotificationOverlay.h"
 #include "Osu.h"
+#include "PeppyImporter.h"
 #include "ResourceManager.h"
 #include "Skin.h"
 #include "SliderRenderer.h"
@@ -43,8 +44,6 @@
 #include "UISlider.h"
 
 using namespace std;
-
-const char *OptionsMenu::OSU_CONFIG_FILE_NAME = "";  // set dynamically below in the constructor
 
 class OptionsMenuSkinPreviewElement : public CBaseUIElement {
    public:
@@ -407,8 +406,6 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
         fastdelegate::MakeDelegate(this, &OptionsMenu::onUseSkinsSoundSamplesChange));
     cv_options_high_quality_sliders.setCallback(
         fastdelegate::MakeDelegate(this, &OptionsMenu::onHighQualitySlidersConVarChange));
-
-    OSU_CONFIG_FILE_NAME = "osu";
 
     osu->getNotificationOverlay()->addKeyListener(this);
 
@@ -1206,6 +1203,9 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     UIButton *resetAllSettingsButton = addButton("Reset all settings");
     resetAllSettingsButton->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onResetEverythingClicked));
     resetAllSettingsButton->setColor(0xffff0000);
+    UIButton *importSettingsButton = addButton("Import settings from osu!stable");
+    importSettingsButton->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onImportSettingsFromStable));
+    importSettingsButton->setColor(0xffff0000);
     addSpacer();
     addSpacer();
     addSpacer();
@@ -3109,6 +3109,8 @@ void OptionsMenu::onResetEverythingClicked(CBaseUIButton *button) {
     }
 }
 
+void OptionsMenu::onImportSettingsFromStable(CBaseUIButton *button) { import_settings_from_osu_stable(); }
+
 void OptionsMenu::addSpacer() {
     OPTIONS_ELEMENT e;
     e.type = 0;
@@ -3451,9 +3453,7 @@ void OptionsMenu::save() {
 
     debugLog("Osu: Saving user config file ...\n");
 
-    UString userConfigFile = MCENGINE_DATA_DIR "cfg/";
-    userConfigFile.append(OSU_CONFIG_FILE_NAME);
-    userConfigFile.append(".cfg");
+    UString userConfigFile = MCENGINE_DATA_DIR "cfg/osu.cfg";
 
     std::vector<UString> user_lines;
     {

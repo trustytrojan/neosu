@@ -549,69 +549,21 @@ DatabaseBeatmap *Database::getBeatmapSet(i32 set_id) {
     return NULL;
 }
 
-std::string Database::parseLegacyCfgBeatmapDirectoryParameter() {
-    // get BeatmapDirectory parameter from osu!.<OS_USERNAME>.cfg
-    debugLog("Database::parseLegacyCfgBeatmapDirectoryParameter() : username = %s\n", env->getUsername().toUtf8());
-    if(env->getUsername().length() > 0) {
-        std::string osuUserConfigFilePath = cv_osu_folder.getString().toUtf8();
-        osuUserConfigFilePath.append("osu!.");
-        osuUserConfigFilePath.append(env->getUsername());
-        osuUserConfigFilePath.append(".cfg");
-
-        File file(osuUserConfigFilePath);
-        char stringBuffer[1024];
-        while(file.canRead()) {
-            std::string curLine = file.readLine();
-            memset(stringBuffer, '\0', 1024);
-            if(sscanf(curLine.c_str(), " BeatmapDirectory = %1023[^\n]", stringBuffer) == 1) {
-                std::string beatmapDirectory = stringBuffer;
-                trim(&beatmapDirectory);
-
-                if(beatmapDirectory.length() > 2) {
-                    // if we have an absolute path, use it in its entirety.
-                    // otherwise, append the beatmapDirectory to the songFolder (which uses the osu_folder as the
-                    // starting point)
-                    std::string songsFolder = cv_osu_folder.getString().toUtf8();
-
-                    if(beatmapDirectory.find(':') != -1)
-                        songsFolder = beatmapDirectory;
-                    else {
-                        // ensure that beatmapDirectory doesn't start with a slash
-                        if(beatmapDirectory[0] == '/' || beatmapDirectory[0] == '\\') beatmapDirectory.erase(0, 1);
-
-                        songsFolder.append(beatmapDirectory);
-                    }
-
-                    // ensure that the songFolder ends with a slash
-                    if(songsFolder.length() > 0) {
-                        if(songsFolder[songsFolder.length() - 1] != '/' &&
-                           songsFolder[songsFolder.length() - 1] != '\\')
-                            songsFolder.append("/");
-                    }
-
-                    return songsFolder;
-                }
-
-                break;
-            }
-        }
-    }
-
-    return "";
-}
-
 std::string Database::getOsuSongsFolder() {
-    auto song_folder = cv_osu_folder.getString();
-    {
-        const std::string customBeatmapDirectory = parseLegacyCfgBeatmapDirectoryParameter();
-        if(customBeatmapDirectory.length() < 1)
-            song_folder.append(cv_osu_folder_sub_songs.getString());
-        else
-            song_folder = customBeatmapDirectory.c_str();
+    std::string songs_folder;
+
+    if(cv_songs_folder.getString().findChar(':') == -1) {
+        // Relative path (yes, the check is Windows-only)
+        songs_folder = cv_osu_folder.getString().toUtf8();
+        songs_folder.append("/");
+        songs_folder.append(cv_songs_folder.getString().toUtf8());
+    } else {
+        // Absolute path
+        songs_folder = cv_songs_folder.getString().toUtf8();
     }
 
-    std::string out(song_folder.toUtf8());
-    return out;
+    songs_folder.append("/");
+    return songs_folder;
 }
 
 void Database::loadDB() {
@@ -625,17 +577,7 @@ void Database::loadDB() {
 
     u32 db_size_sum = neosu_maps.total_size + db.total_size;
 
-    // get BeatmapDirectory parameter from osu!.<OS_USERNAME>.cfg
-    // fallback to /Songs/ if it doesn't exist
-    std::string songFolder = cv_osu_folder.getString().toUtf8();
-    {
-        const std::string customBeatmapDirectory = parseLegacyCfgBeatmapDirectoryParameter();
-        if(customBeatmapDirectory.length() < 1)
-            songFolder.append(cv_osu_folder_sub_songs.getString().toUtf8());
-        else
-            songFolder = customBeatmapDirectory;
-    }
-
+    std::string songFolder = getOsuSongsFolder();
     debugLog("Database: songFolder = %s\n", songFolder.c_str());
 
     m_importTimer->start();
