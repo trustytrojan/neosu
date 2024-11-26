@@ -680,7 +680,10 @@ UString LinuxEnvironment::keyCodeToString(KEYCODE keyCode) {
 
 int LinuxEnvironment::getFilesInFolderFilter(const struct dirent *entry) { return 1; }
 
-int LinuxEnvironment::getFoldersInFolderFilter(const struct dirent *entry) { return 1; }
+int LinuxEnvironment::getFoldersInFolderFilter(const struct dirent *entry) {
+    if(!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) return 0;
+    return 1;
+}
 
 Cursor LinuxEnvironment::makeBlankCursor() {
     static char data[1] = {0};
