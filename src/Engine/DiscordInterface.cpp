@@ -31,6 +31,7 @@ static void on_discord_log(void *cdata, enum EDiscordLogLevel level, const char 
 }
 
 void init_discord_sdk() {
+#ifdef _WIN32
     memset(&app, 0, sizeof(app));
     memset(&activities_events, 0, sizeof(activities_events));
     memset(&relationships_events, 0, sizeof(relationships_events));
@@ -67,22 +68,40 @@ void init_discord_sdk() {
     // app.lobbies->connect_lobby_with_activity_secret(app.lobbies, "invalid_secret", &app, OnLobbyConnect);
     // app.application->get_oauth2_token(app.application, &app, OnOAuth2Token);
     // app.relationships = app.core->get_relationship_manager(app.core);
+#else
+    // not enabled on linux cuz the sdk is broken there
+#endif
 }
 
-void tick_discord_sdk() { app.core->run_callbacks(app.core); }
+void tick_discord_sdk() {
+#ifdef _WIN32
+    app.core->run_callbacks(app.core);
+#else
+    // not enabled on linux cuz the sdk is broken there
+#endif
+}
 
 void destroy_discord_sdk() {
+#ifdef _WIN32
     app.core->destroy(app.core);  // bye
+#else
+    // not enabled on linux cuz the sdk is broken there
+#endif
 }
 
 void clear_discord_presence() {
+#ifdef _WIN32
     // TODO @kiwec: test if this works
     struct DiscordActivity activity;
     memset(&activity, 0, sizeof(activity));
     app.activities->update_activity(app.activities, &activity, NULL, NULL);
+#else
+    // not enabled on linux cuz the sdk is broken there
+#endif
 }
 
 void set_discord_presence(struct DiscordActivity *activity) {
+#ifdef _WIN32
     if(!cv_rich_presence.getBool()) return;
 
     // activity->type: int
@@ -111,6 +130,9 @@ void set_discord_presence(struct DiscordActivity *activity) {
     activity->assets.small_text[0] = '\0';
 
     app.activities->update_activity(app.activities, activity, NULL, NULL);
+#else
+    // not enabled on linux cuz the sdk is broken there
+#endif
 }
 
 // void (DISCORD_API *send_request_reply)(struct IDiscordActivityManager* manager, DiscordUserId user_id, enum

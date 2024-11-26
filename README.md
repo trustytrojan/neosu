@@ -17,7 +17,6 @@ Required dependencies:
 - [bass_fx](https://www.un4seen.com/download.php?z/0/bass_fx24-linux)
 - [BASSloud](https://www.un4seen.com/download.php?bassloud24-linux)
 - blkid
-- discord-rpc
 - freetype2
 - glew
 - libenet
