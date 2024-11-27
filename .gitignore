@@ -3,6 +3,9 @@
 *.vcxproj.filters
 *.vcxproj.user
 
+.cache/
 build/
 obj/
 resources/cfg/osu.cfg
+resources/version.txt
+resources/*.db
