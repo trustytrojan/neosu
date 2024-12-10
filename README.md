@@ -6,7 +6,9 @@ If you need help, contact `kiwec` on Discord, either by direct message or via [h
 
 ### Building (windows)
 
-Open `neosu.vcxproj` with Visual Studio then press F5.
+Make sure you pulled Git LFS files (method varies depending on your Git client).
+
+To run neosu, open `neosu.vcxproj` with Visual Studio then press F5.
 
 ### Building (linux)
 

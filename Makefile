@@ -24,9 +24,20 @@ obj/%.o: src/%.cpp
 	@mkdir -p $(dir $@)
 	@$(CXX) -c $< -o $@ $(CXXFLAGS)
 
-build:
+.PHONY: build clean ensure-lfs
+build: ensure-lfs
 	cp -nr resources build
 
-.PHONY: clean
 clean:
 	rm -rf build obj
+
+ensure-lfs:
+	@if [ ! -f .git/hooks/pre-push ]; then \
+		echo "Git LFS not installed. Installing..."; \
+		git lfs install; \
+	fi
+	@if git lfs ls-files | grep -q '^[a-f0-9]\{64\} ' > /dev/null 2>&1; then \
+		echo "Pulling Git LFS files..."; \
+		git lfs pull; \
+	fi
+
