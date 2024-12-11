@@ -395,6 +395,7 @@ void Skin::load() {
                 auto osu_folder = cv_osu_folder.getString();
                 auto osu_folder_sub_skins = cv_osu_folder_sub_skins.getString();
                 std::string skinFolder = osu_folder.toUtf8();
+                skinFolder.append("/");
                 skinFolder.append(osu_folder_sub_skins.toUtf8());
                 std::vector<std::string> skinFolders = env->getFoldersInFolder(skinFolder);
 

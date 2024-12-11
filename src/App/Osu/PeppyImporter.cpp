@@ -155,8 +155,44 @@ void try_set_key(const char* str, ConVar* cvar) {
 }
 
 void import_settings_from_osu_stable() {
-    // TODO @kiwec: set cv_osu_folder from registry
     auto osu_folder = cv_osu_folder.getString();
+
+#ifdef _WIN32
+    while(osu_folder.isWhitespaceOnly()) {
+        LSTATUS status;
+        HKEY hKey;
+        status = RegOpenKeyExW(HKEY_CLASSES_ROOT, L"osu\\shell\\open\\command", 0, KEY_READ, &hKey);
+        if(status != ERROR_SUCCESS) {
+            debugLog("osu:// protocol handler not found!\n");
+            break;
+        }
+
+        DWORD dwType = REG_SZ;
+        WCHAR szPath[MAX_PATH];
+        DWORD dwSize = sizeof(szPath);
+        status = RegQueryValueExW(hKey, NULL, NULL, &dwType, (LPBYTE)szPath, &dwSize);
+        RegCloseKey(hKey);
+        if(status != ERROR_SUCCESS) {
+            debugLog("Failed to get path of osu:// protocol handler.\n");
+            break;
+        }
+
+        // The path is in format: "C:\Path\To\osu!.exe" "%1"
+        WCHAR* endQuote = wcschr(szPath + 1, L'"');
+        if(endQuote) {
+            *endQuote = L'\0';
+        }
+        WCHAR* path = szPath + 1;
+        WCHAR* lastBackslash = wcsrchr(path, L'\\');
+        if(lastBackslash) {
+            *lastBackslash = L'\0';
+
+            debugLog("Found osu! folder from registry: %s\n", path);
+            cv_osu_folder.setValue(path);
+            osu_folder = path;
+        }
+#endif
+    }
 
     auto username = env->getUsername();
     if(username.length() == 0) {
@@ -165,7 +201,7 @@ void import_settings_from_osu_stable() {
     }
 
     std::string cfg_path = osu_folder.toUtf8();
-    cfg_path.append("osu!.");
+    cfg_path.append("/osu!.");
     cfg_path.append(username.toUtf8());
     cfg_path.append(".cfg");
     File file(cfg_path);
@@ -215,8 +251,6 @@ void import_settings_from_osu_stable() {
             cv_background_dim.setValue((f32)num / 100.f);
         } else if(sscanf(curLine.c_str(), " IHateHavingFun = %i[^\n]", &num) == 1) {
             cv_background_dont_fade_during_breaks.setValue(num == 1);
-        } else if(sscanf(curLine.c_str(), " Display = %i[^\n]", &num) == 1) {
-            cv_monitor.setValue(num);
         } else if(sscanf(curLine.c_str(), " DiscordRichPresence = %i[^\n]", &num) == 1) {
             cv_rich_presence.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " FpsCounter = %i[^\n]", &num) == 1) {

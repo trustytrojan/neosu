@@ -123,14 +123,6 @@ Osu::Osu() {
 
     env->setWindowResizable(false);
 
-    // generate default osu! appdata user path
-    std::string userDataPath = env->getUserDataPath();
-    if(userDataPath.length() > 1) {
-        std::string defaultOsuFolder = userDataPath;
-        defaultOsuFolder.append(env->getOS() == Environment::OS::WINDOWS ? "\\osu!\\" : "/osu!/");
-        cv_osu_folder.setValue(defaultOsuFolder.c_str());
-    }
-
     // convar callbacks
     cv_resolution.setValue(UString::format("%ix%i", engine->getScreenWidth(), engine->getScreenHeight()));
     cv_resolution.setCallback(fastdelegate::MakeDelegate(this, &Osu::onInternalResolutionChanged));
@@ -281,6 +273,7 @@ Osu::Osu() {
     // load skin
     {
         UString skinFolder = cv_osu_folder.getString();
+        skinFolder.append("/");
         skinFolder.append(cv_osu_folder_sub_skins.getString());
         skinFolder.append(cv_skin.getString());
         skinFolder.append("/");
@@ -1773,6 +1766,7 @@ void Osu::onSkinChange(UString oldValue, UString newValue) {
         m_skinScheduledToLoad = new Skin(newValue, neosuSkinFolder, false);
     } else {
         UString ppySkinFolder = cv_osu_folder.getString();
+        ppySkinFolder.append("/");
         ppySkinFolder.append(cv_osu_folder_sub_skins.getString());
         ppySkinFolder.append(newValue);
         ppySkinFolder.append("/");

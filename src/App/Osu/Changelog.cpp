@@ -30,6 +30,8 @@ Changelog::Changelog() : ScreenBackable() {
     latest.title = "next version";
     latest.changes.push_back("- Fixed Discord integration crashes");
     latest.changes.push_back("- Settings will now auto-import from osu!stable on first launch");
+    latest.changes.push_back("- You can also re-import them manually from the settings menu");
+    latest.changes.push_back("- Linux: Fixed crash when osu!folder wasn't set");
     changelogs.push_back(latest);
 
     CHANGELOG v36_03;

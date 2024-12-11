@@ -2253,6 +2253,7 @@ void OptionsMenu::openCurrentSkinFolder() {
             env->openDirectory(neosuSkinFolder);
         } else {
             UString skinFolder = cv_osu_folder.getString();
+            skinFolder.append("/");
             skinFolder.append(cv_osu_folder_sub_skins.getString());
             skinFolder.append(current_skin);
             env->openDirectory(skinFolder.toUtf8());
@@ -2268,6 +2269,7 @@ void OptionsMenu::onSkinSelect() {
     if(osu->isSkinLoading()) return;
 
     UString skinFolder = cv_osu_folder.getString();
+    skinFolder.append("/");
     skinFolder.append(cv_osu_folder_sub_skins.getString());
 
     std::vector<std::string> skinFolders;
@@ -2284,11 +2286,11 @@ void OptionsMenu::onSkinSelect() {
             int i = 0;
             int j = 0;
             while(i < a.length() && j < b.length()) {
-                if(!isalnum(a[i])) {
+                if(!isalnum((u8)a[i])) {
                     i++;
                     continue;
                 }
-                if(!isalnum(b[j])) {
+                if(!isalnum((u8)b[j])) {
                     j++;
                     continue;
                 }

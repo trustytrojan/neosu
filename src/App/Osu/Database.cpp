@@ -571,7 +571,7 @@ void Database::loadDB() {
     m_peppy_overrides_mtx.lock();
 
     std::string osuDbFilePath = cv_osu_folder.getString().toUtf8();
-    osuDbFilePath.append("osu!.db");
+    osuDbFilePath.append("/osu!.db");
     BanchoFileReader db(osuDbFilePath.c_str());
     BanchoFileReader neosu_maps("neosu_maps.db");
 
@@ -1411,7 +1411,7 @@ u32 Database::importPeppyScores() {
     int nb_imported = 0;
 
     std::string scoresPath = cv_osu_folder.getString().toUtf8();
-    scoresPath.append("scores.db");
+    scoresPath.append("/scores.db");
     BanchoFileReader db(scoresPath.c_str());
 
     u32 db_version = db.read<u32>();

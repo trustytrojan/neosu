@@ -1132,14 +1132,7 @@ ConVar cv_flashlight_always_hard("flashlight_always_hard", false, FCVAR_BANCHO_C
 ConVar cv_flashlight_follow_delay("flashlight_follow_delay", 0.120f, FCVAR_LOCKED | FCVAR_GAMEPLAY);
 ConVar cv_flashlight_radius("flashlight_radius", 100.f, FCVAR_LOCKED | FCVAR_GAMEPLAY);
 
-#ifdef _WIN32
-ConVar cv_osu_folder("osu_folder", "C:/Program Files (x86)/osu!/", FCVAR_BANCHO_COMPATIBLE);
-#elif defined __APPLE__
-ConVar cv_osu_folder("osu_folder", "/osu!/", FCVAR_BANCHO_COMPATIBLE);
-#else
 ConVar cv_osu_folder("osu_folder", "", FCVAR_BANCHO_COMPATIBLE);
-#endif
-
 ConVar cv_songs_folder("osu_songs_folder", "Songs/", FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
 
 ConVar cv_osu_folder_sub_skins("osu_folder_sub_skins", "Skins/", FCVAR_BANCHO_COMPATIBLE);
