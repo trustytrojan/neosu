@@ -210,12 +210,6 @@ void import_settings_from_osu_stable() {
     int num;
     f32 flt;
 
-    int windowed_height = 0;
-    int windowed_width = 0;
-    int fullscreen_height = 0;
-    int fullscreen_width = 0;
-    int display_mode = 0;
-
     while(file.canRead()) {
         std::string curLine = file.readLine();
         memset(str, '\0', 1024);
@@ -293,14 +287,6 @@ void import_settings_from_osu_stable() {
             cv_universal_offset.setValue((f32)num);
         } else if(sscanf(curLine.c_str(), " ScoreMeterScale = %f[^\n]", &flt) == 1) {
             cv_hud_score_scale.setValue(flt);
-        } else if(sscanf(curLine.c_str(), " Height = %i[^\n]", &num) == 1) {
-            windowed_height = num;
-        } else if(sscanf(curLine.c_str(), " Width = %i[^\n]", &num) == 1) {
-            windowed_width = num;
-        } else if(sscanf(curLine.c_str(), " HeightFullscreen = %i[^\n]", &num) == 1) {
-            fullscreen_height = num;
-        } else if(sscanf(curLine.c_str(), " WidthFullscreen = %i[^\n]", &num) == 1) {
-            fullscreen_width = num;
         } else if(sscanf(curLine.c_str(), " NotifyFriends = %i[^\n]", &num) == 1) {
             cv_notify_friends.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " PopupDuringGameplay = %i[^\n]", &num) == 1) {
@@ -324,10 +310,6 @@ void import_settings_from_osu_stable() {
             cv_snaking_sliders.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " Video = %i[^\n]", &num) == 1) {
             cv_draw_video.setValue(num == 1);
-        } else if(sscanf(curLine.c_str(), " Fullscreen = %i[^\n]", &num) == 1) {
-            if(num == 1) {
-                display_mode = 2;
-            }
         } else if(sscanf(curLine.c_str(), " RawInput = %i[^\n]", &num) == 1) {
             cv_mouse_raw_input.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " AbsoluteToOsuWindow = %i[^\n]", &num) == 1) {
@@ -420,13 +402,5 @@ void import_settings_from_osu_stable() {
         } else if(sscanf(curLine.c_str(), " keyScoreV2 = %1023[^\n]", str) == 1) {
             try_set_key(str, &cv_MOD_SCOREV2);
         }
-    }
-
-    if(display_mode == 1 && windowed_height && windowed_width) {
-        auto res = UString::format("%dx%d", windowed_width, windowed_height);
-        cmd_windowed.setValue(res);
-    } else if(display_mode == 2 && fullscreen_height && fullscreen_width) {
-        auto res = UString::format("%dx%d", fullscreen_width, fullscreen_height);
-        cmd_fullscreen.setValue(res);
     }
 }
