@@ -43,7 +43,7 @@ void init_discord_sdk() {
 
     struct DiscordCreateParams params;
     params.client_id = DISCORD_CLIENT_ID;
-    params.flags = DiscordCreateFlags_Default;
+    params.flags = DiscordCreateFlags_NoRequireDiscord;
     params.event_data = &app;
     params.activity_events = &activities_events;
     params.relationship_events = &relationships_events;
@@ -87,16 +87,7 @@ void tick_discord_sdk() {
 }
 
 void destroy_discord_sdk() {
-    if(!initialized) return;
-
-#ifdef _WIN32
-    app.core->destroy(app.core);  // bye
-    app.core = NULL;
-
-    initialized = false;
-#else
-        // not enabled on linux cuz the sdk is broken there
-#endif
+    // not doing anything because it will fucking CRASH if you close discord first
 }
 
 void clear_discord_presence() {
