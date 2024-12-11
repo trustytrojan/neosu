@@ -20,6 +20,7 @@ static struct Application app;
 static struct IDiscordActivityEvents activities_events;
 static struct IDiscordRelationshipEvents relationships_events;
 static struct IDiscordUserEvents users_events;
+static bool initialized = false;
 
 static void on_discord_log(void *cdata, enum EDiscordLogLevel level, const char *message) {
     (void)cdata;
@@ -68,39 +69,52 @@ void init_discord_sdk() {
     // app.lobbies->connect_lobby_with_activity_secret(app.lobbies, "invalid_secret", &app, OnLobbyConnect);
     // app.application->get_oauth2_token(app.application, &app, OnOAuth2Token);
     // app.relationships = app.core->get_relationship_manager(app.core);
+
+    initialized = true;
 #else
     // not enabled on linux cuz the sdk is broken there
 #endif
 }
 
 void tick_discord_sdk() {
+    if(!initialized) return;
+
 #ifdef _WIN32
     app.core->run_callbacks(app.core);
 #else
-    // not enabled on linux cuz the sdk is broken there
+        // not enabled on linux cuz the sdk is broken there
 #endif
 }
 
 void destroy_discord_sdk() {
+    if(!initialized) return;
+
 #ifdef _WIN32
     app.core->destroy(app.core);  // bye
+    app.core = NULL;
+
+    initialized = false;
 #else
-    // not enabled on linux cuz the sdk is broken there
+        // not enabled on linux cuz the sdk is broken there
 #endif
 }
 
 void clear_discord_presence() {
+    if(!initialized) return;
+
 #ifdef _WIN32
     // TODO @kiwec: test if this works
     struct DiscordActivity activity;
     memset(&activity, 0, sizeof(activity));
     app.activities->update_activity(app.activities, &activity, NULL, NULL);
 #else
-    // not enabled on linux cuz the sdk is broken there
+        // not enabled on linux cuz the sdk is broken there
 #endif
 }
 
 void set_discord_presence(struct DiscordActivity *activity) {
+    if(!initialized) return;
+
 #ifdef _WIN32
     if(!cv_rich_presence.getBool()) return;
 
@@ -131,7 +145,7 @@ void set_discord_presence(struct DiscordActivity *activity) {
 
     app.activities->update_activity(app.activities, activity, NULL, NULL);
 #else
-    // not enabled on linux cuz the sdk is broken there
+        // not enabled on linux cuz the sdk is broken there
 #endif
 }
 

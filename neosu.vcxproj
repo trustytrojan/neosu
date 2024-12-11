@@ -247,6 +247,7 @@ copy $(SolutionDir)libraries\discord-sdk\$(Platform)\*.dll $(SolutionDir)build\$
     <ClCompile Include="src\app\osu\OptionsMenu.cpp" />
     <ClCompile Include="src\app\osu\Osu.cpp" />
     <ClCompile Include="src\app\osu\PauseMenu.cpp" />
+    <ClCompile Include="src\App\Osu\PeppyImporter.cpp" />
     <ClCompile Include="src\app\osu\PromptScreen.cpp" />
     <ClCompile Include="src\app\osu\RankingScreen.cpp" />
     <ClCompile Include="src\app\osu\Replay.cpp" />
