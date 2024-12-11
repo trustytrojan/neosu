@@ -26,13 +26,13 @@ Changelog::Changelog() : ScreenBackable() {
 
     std::vector<CHANGELOG> changelogs;
 
-    CHANGELOG latest;
-    latest.title = "next version";
-    latest.changes.push_back("- Fixed Discord integration crashes");
-    latest.changes.push_back("- Settings will now auto-import from osu!stable on first launch");
-    latest.changes.push_back("- You can also re-import them manually from the settings menu");
-    latest.changes.push_back("- Linux: Fixed crash when osu!folder wasn't set");
-    changelogs.push_back(latest);
+    CHANGELOG v36_04;
+    v36_04.title = "36.04 (2024-12-11)";
+    v36_04.changes.push_back("- Settings will now auto-import from osu!stable on first launch");
+    v36_04.changes.push_back("- You can also re-import them manually from the settings menu");
+    v36_04.changes.push_back("- Fixed Discord integration being retarded");
+    v36_04.changes.push_back("- Linux: Fixed crash when osu!folder wasn't set");
+    changelogs.push_back(v36_04);
 
     CHANGELOG v36_03;
     v36_03.title = "36.03 (2024-11-24)";
