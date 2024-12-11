@@ -1,7 +1,11 @@
 #include "DiscordInterface.h"
 
+#include "Bancho.h"
+#include "Beatmap.h"
 #include "ConVar.h"
 #include "Engine.h"
+#include "Osu.h"
+#include "Sound.h"
 
 #define DISCORD_CLIENT_ID 1288141291686989846
 
@@ -133,6 +137,24 @@ void set_discord_presence(struct DiscordActivity *activity) {
     activity->assets.large_text[0] = '\0';
     strcpy(activity->assets.small_image, "None");
     activity->assets.small_text[0] = '\0';
+
+    auto diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();
+    auto music = osu->getSelectedBeatmap()->getMusic();
+    bool listening = diff2 != NULL && music != NULL && music->isPlaying();
+    bool playing = diff2 != NULL && osu->isInPlayMode();
+    if(listening || playing) {
+        auto url = UString::format("https://assets.ppy.sh/beatmaps/%d/covers/list@2x.jpg?%d", diff2->getSetID(),
+                                   diff2->getID());
+        strncpy(activity->assets.large_image, url.toUtf8(), 128);
+
+        if(bancho.server_icon_url.length() > 0 && cv_main_menu_use_server_logo.getBool()) {
+            strncpy(activity->assets.small_image, bancho.server_icon_url.toUtf8(), 128);
+            strncpy(activity->assets.small_text, bancho.endpoint.toUtf8(), 128);
+        } else {
+            strcpy(activity->assets.small_image, "neosu_icon");
+            activity->assets.small_text[0] = '\0';
+        }
+    }
 
     app.activities->update_activity(app.activities, activity, NULL, NULL);
 #else

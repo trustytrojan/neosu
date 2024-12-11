@@ -296,7 +296,6 @@ void MainMenu::draw(Graphics *g) {
             }
 
             bancho.server_icon = engine->getResourceManager()->loadImageAbs(icon_path.toUtf8(), icon_path.toUtf8());
-            bancho.server_icon_url = "";
         }
     }
 
