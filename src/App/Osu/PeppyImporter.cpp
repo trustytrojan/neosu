@@ -191,8 +191,10 @@ void import_settings_from_osu_stable() {
             cv_osu_folder.setValue(path);
             osu_folder = path;
         }
-#endif
+
+        break;
     }
+#endif
 
     auto username = env->getUsername();
     if(username.length() == 0) {
