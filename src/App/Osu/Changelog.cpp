@@ -26,6 +26,14 @@ Changelog::Changelog() : ScreenBackable() {
 
     std::vector<CHANGELOG> changelogs;
 
+    CHANGELOG v36_05;
+    v36_05.title = "36.05 (2024-12-26)";
+    v36_05.changes.push_back("- Fixed crash when loading old scores");
+    v36_05.changes.push_back("- Fixed crash when alt-tabbing");
+    v36_05.changes.push_back("- Improved Discord integration");
+    v36_05.changes.push_back("- Linux: Fixed osu!stable settings import");
+    changelogs.push_back(v36_05);
+
     CHANGELOG v36_04;
     v36_04.title = "36.04 (2024-12-11)";
     v36_04.changes.push_back("- Settings will now auto-import from osu!stable on first launch");
