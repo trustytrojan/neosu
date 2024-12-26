@@ -1469,7 +1469,7 @@ u32 Database::importPeppyScores() {
                 db.skip_bytes(old_replay_size);
             }
 
-            if(score_version >= 20140721) {
+            if(score_version >= 20131110) {
                 sc.bancho_score_id = db.read<u64>();
             } else if(score_version >= 20121008) {
                 sc.bancho_score_id = db.read<i32>();
