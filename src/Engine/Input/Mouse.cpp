@@ -210,8 +210,10 @@ void Mouse::update() {
         const float maxX = minX + cursorClip.getWidth() * m_vScale.x;
         const float maxY = minY + cursorClip.getHeight() * m_vScale.y;
 
-        nextPos.x = clamp<float>(nextPos.x, minX + 1, maxX - 1);
-        nextPos.y = clamp<float>(nextPos.y, minY + 1, maxY - 1);
+        if(maxX > 0 && maxY > 0) {
+            nextPos.x = clamp<float>(nextPos.x, minX + 1, maxX - 1);
+            nextPos.y = clamp<float>(nextPos.y, minY + 1, maxY - 1);
+        }
     }
 
     // set new virtual cursor position (this applies the offset as well)
