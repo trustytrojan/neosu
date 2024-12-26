@@ -25,7 +25,9 @@ BanchoFileReader::~BanchoFileReader() {
 
 void BanchoFileReader::read_bytes(u8 *out, size_t len) {
     if(file == NULL) {
-        memset(out, 0, len);
+        if(out != NULL) {
+            memset(out, 0, len);
+        }
         return;
     }
 
@@ -63,11 +65,15 @@ MD5Hash BanchoFileReader::read_hash() {
     if(empty_check == 0) return hash;
 
     u32 len = read_uleb128();
+	u32 extra = 0;
     if(len > 32) {
+        debugLog("WARNING: Expected 32 bytes for hash, got %d!\n");
+        extra = len - 32;
         len = 32;
     }
 
     read_bytes((u8 *)hash.hash, len);
+    skip_bytes(extra);
     hash.hash[len] = '\0';
     return hash;
 }
@@ -100,7 +106,17 @@ u32 BanchoFileReader::read_uleb128() {
     return result;
 }
 
-void BanchoFileReader::skip_bytes(u32 n) { read_bytes(NULL, n); }
+void BanchoFileReader::skip_bytes(u32 n) {
+    if(n > READ_BUFFER_SIZE) {
+        debugLog("WARNING: Skipping %d bytes (exceeding %d)!\n", n, READ_BUFFER_SIZE);
+    }
+
+    while(n > 0) {
+        u32 chunk_len = n > READ_BUFFER_SIZE ? READ_BUFFER_SIZE : n;
+        read_bytes(NULL, chunk_len);
+        n -= chunk_len;
+    }
+}
 
 void BanchoFileReader::skip_string() {
     u8 empty_check = read<u8>();
@@ -204,7 +220,7 @@ void copy(const char *from_path, const char *to_path) {
     BanchoFileReader from(from_path);
     BanchoFileWriter to(to_path);
 
-    u8 buf[READ_BUFFER_SIZE];
+    u8 *buf = (u8 *)malloc(READ_BUFFER_SIZE);
     u32 remaining = from.total_size;
     while(remaining > 0) {
         u32 len = std::min(remaining, (u32)READ_BUFFER_SIZE);
@@ -212,4 +228,5 @@ void copy(const char *from_path, const char *to_path) {
         to.write_bytes(buf, len);
         remaining -= len;
     }
+    free(buf);
 }

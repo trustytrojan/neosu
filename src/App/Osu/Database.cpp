@@ -1450,7 +1450,7 @@ u32 Database::importPeppyScores() {
             sc.numKatus = db.read<u16>();
             sc.numMisses = db.read<u16>();
 
-            i32 score = db.read<u32>();
+            i32 score = db.read<i32>();
             sc.score = (score < 0 ? 0 : score);
 
             sc.comboMax = db.read<u16>();
@@ -1464,7 +1464,7 @@ u32 Database::importPeppyScores() {
             sc.peppy_replay_tms = full_tms - 504911232000000000;
 
             // Always -1, but let's skip it properly just in case
-            i32 old_replay_size = db.read<u32>();
+            i32 old_replay_size = db.read<i32>();
             if(old_replay_size > 0) {
                 db.skip_bytes(old_replay_size);
             }
@@ -1472,7 +1472,7 @@ u32 Database::importPeppyScores() {
             if(score_version >= 20140721) {
                 sc.bancho_score_id = db.read<u64>();
             } else if(score_version >= 20121008) {
-                sc.bancho_score_id = db.read<u32>();
+                sc.bancho_score_id = db.read<i32>();
             } else {
                 sc.bancho_score_id = 0;
             }
