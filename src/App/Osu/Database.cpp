@@ -809,9 +809,17 @@ void Database::loadDB() {
                 db.read<u8>();  // ObjType
                 unsigned int mods = db.read<u32>();
                 db.read<u8>();  // ObjType
-                double starRating = db.read<f64>();
 
-                if(mods == 0) numOsuStandardStars = starRating;
+                f32 sr = 0.f;
+
+                // https://osu.ppy.sh/home/changelog/stable40/20250108.3
+                if(m_iVersion >= 20250108) {
+                    sr = db.read<f32>();
+                } else {
+                    sr = db.read<f64>();
+                }
+
+                if(mods == 0) numOsuStandardStars = sr;
             }
 
             unsigned int numTaikoStarRatings = db.read<u32>();
@@ -819,7 +827,13 @@ void Database::loadDB() {
                 db.read<u8>();  // ObjType
                 db.read<u32>();
                 db.read<u8>();  // ObjType
-                db.read<f64>();
+
+                // https://osu.ppy.sh/home/changelog/stable40/20250108.3
+                if(m_iVersion >= 20250108) {
+                    db.read<f32>();
+                } else {
+                    db.read<f64>();
+                }
             }
 
             unsigned int numCtbStarRatings = db.read<u32>();
@@ -827,7 +841,13 @@ void Database::loadDB() {
                 db.read<u8>();  // ObjType
                 db.read<u32>();
                 db.read<u8>();  // ObjType
-                db.read<f64>();
+
+                // https://osu.ppy.sh/home/changelog/stable40/20250108.3
+                if(m_iVersion >= 20250108) {
+                    db.read<f32>();
+                } else {
+                    db.read<f64>();
+                }
             }
 
             unsigned int numManiaStarRatings = db.read<u32>();
@@ -835,7 +855,13 @@ void Database::loadDB() {
                 db.read<u8>();  // ObjType
                 db.read<u32>();
                 db.read<u8>();  // ObjType
-                db.read<f64>();
+
+                // https://osu.ppy.sh/home/changelog/stable40/20250108.3
+                if(m_iVersion >= 20250108) {
+                    db.read<f32>();
+                } else {
+                    db.read<f64>();
+                }
             }
 
             /*unsigned int drainTime = */ db.read<u32>();  // seconds

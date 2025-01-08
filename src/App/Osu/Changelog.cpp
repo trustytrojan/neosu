@@ -26,6 +26,11 @@ Changelog::Changelog() : ScreenBackable() {
 
     std::vector<CHANGELOG> changelogs;
 
+    CHANGELOG v36_06;
+    v36_06.title = "36.06 (2025-01-08)";
+    v36_06.changes.push_back("- Added support for new osu!.db format");
+    changelogs.push_back(v36_06);
+
     CHANGELOG v36_05;
     v36_05.title = "36.05 (2024-12-26)";
     v36_05.changes.push_back("- Fixed crash when loading old scores");
