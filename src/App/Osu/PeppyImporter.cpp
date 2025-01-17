@@ -154,47 +154,58 @@ void try_set_key(const char* str, ConVar* cvar) {
     }
 }
 
-void import_settings_from_osu_stable() {
-    auto osu_folder = cv_osu_folder.getString();
-
+static UString get_osu_folder_from_registry() {
 #ifdef _WIN32
-    while(osu_folder.isWhitespaceOnly()) {
-        LSTATUS status;
-        HKEY hKey;
-        status = RegOpenKeyExW(HKEY_CLASSES_ROOT, L"osu\\shell\\open\\command", 0, KEY_READ, &hKey);
-        if(status != ERROR_SUCCESS) {
-            debugLog("osu:// protocol handler not found!\n");
-            break;
-        }
+    i32 err;
+    HKEY key;
 
-        DWORD dwType = REG_SZ;
-        WCHAR szPath[MAX_PATH];
-        DWORD dwSize = sizeof(szPath);
-        status = RegQueryValueExW(hKey, NULL, NULL, &dwType, (LPBYTE)szPath, &dwSize);
-        RegCloseKey(hKey);
-        if(status != ERROR_SUCCESS) {
-            debugLog("Failed to get path of osu:// protocol handler.\n");
-            break;
-        }
+    auto key_path = L"Software\\Classes\\osustable.File.osk\\Shell\\Open\\Command";
+    err = RegOpenKeyExW(HKEY_CURRENT_USER, key_path, 0, KEY_READ, &key);
+    if(err != ERROR_SUCCESS) {
+        // Older registry key, in case the user isn't on latest osu!stable version
+        // See https://osu.ppy.sh/home/changelog/cuttingedge/20250111
+        err = RegOpenKeyExW(HKEY_CLASSES_ROOT, L"osu\\shell\\open\\command", 0, KEY_READ, &key);
+    }
+    if(err != ERROR_SUCCESS) {
+        debugLog("osu!stable not found in registry!\n");
+        return "";
+    }
 
-        // The path is in format: "C:\Path\To\osu!.exe" "%1"
-        WCHAR* endQuote = wcschr(szPath + 1, L'"');
-        if(endQuote) {
-            *endQuote = L'\0';
-        }
-        WCHAR* path = szPath + 1;
-        WCHAR* lastBackslash = wcsrchr(path, L'\\');
-        if(lastBackslash) {
-            *lastBackslash = L'\0';
+    DWORD dwType = REG_SZ;
+    WCHAR szPath[MAX_PATH];
+    DWORD dwSize = sizeof(szPath);
+    err = RegQueryValueExW(key, NULL, NULL, &dwType, (LPBYTE)szPath, &dwSize);
+    RegCloseKey(key);
+    if(err != ERROR_SUCCESS) {
+        debugLog("Failed to get path of osu:// protocol handler.\n");
+        return "";
+    }
 
-            debugLog("Found osu! folder from registry: %s\n", path);
-            cv_osu_folder.setValue(path);
-            osu_folder = path;
-        }
-
-        break;
+    // The path is in format: "C:\Path\To\osu!.exe" "%1"
+    WCHAR* endQuote = wcschr(szPath + 1, L'"');
+    if(endQuote) {
+        *endQuote = L'\0';
+    }
+    WCHAR* path = szPath + 1;
+    WCHAR* lastBackslash = wcsrchr(path, L'\\');
+    if(lastBackslash) {
+        *lastBackslash = L'\0';
+        return path;
     }
 #endif
+
+    return "";
+}
+
+void import_settings_from_osu_stable() {
+    auto osu_folder = cv_osu_folder.getString();
+    if(osu_folder.isWhitespaceOnly()) {
+        osu_folder = get_osu_folder_from_registry();
+        if(!osu_folder.isWhitespaceOnly()) {
+            debugLog("Found osu! folder from registry: %s\n", osu_folder.toUtf8());
+            cv_osu_folder.setValue(osu_folder);
+        }
+    }
 
     auto username = env->getUsername();
     if(username.length() == 0) {

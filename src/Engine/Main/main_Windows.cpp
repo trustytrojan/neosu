@@ -187,32 +187,78 @@ void handle_cmdline_args(const char *args) {
     }
 }
 
-static bool register_neosu_protocol_handler() {
-    // Claude wrote this. Blame him if it's buggy.
-    HKEY protoKey;
-    if(RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\Classes\\neosu", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE,
-                       NULL, &protoKey, NULL) != ERROR_SUCCESS) {
-        return false;
-    }
-
-    RegSetValueExW(protoKey, L"", 0, REG_SZ, (BYTE *)L"neosu", 34);
-    RegSetValueExW(protoKey, L"URL Protocol", 0, REG_SZ, (BYTE *)L"", 2);
-
-    HKEY cmdKey;
-    if(RegCreateKeyExW(protoKey, L"shell\\open\\command", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &cmdKey,
-                       NULL) != ERROR_SUCCESS) {
-        RegCloseKey(protoKey);
-        return false;
-    }
-
+static void register_neosu_file_associations() {
     wchar_t exePath[MAX_PATH];
     GetModuleFileNameW(NULL, exePath, MAX_PATH);
-    std::wstring cmdValue = L"\"" + std::wstring(exePath) + L"\" \"%1\"";
-    RegSetValueExW(cmdKey, L"", 0, REG_SZ, (BYTE *)cmdValue.c_str(), (cmdValue.length() + 1) * sizeof(wchar_t));
 
-    RegCloseKey(cmdKey);
-    RegCloseKey(protoKey);
-    return true;
+    // Register neosu as an application
+    HKEY neosu_key;
+    i32 err = RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\Classes\\neosu", 0, NULL, REG_OPTION_NON_VOLATILE,
+                              KEY_WRITE, NULL, &neosu_key, NULL);
+    if(err != ERROR_SUCCESS) {
+        debugLog("Failed to register neosu as an application. Error: %d (root)\n", err);
+        return;
+    }
+    RegSetValueExW(neosu_key, L"", 0, REG_SZ, (BYTE *)L"neosu", 12);
+    RegSetValueExW(neosu_key, L"URL Protocol", 0, REG_SZ, (BYTE *)L"", 2);
+
+    HKEY app_key;
+    err = RegCreateKeyExW(neosu_key, L"Application", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &app_key, NULL);
+    if(err != ERROR_SUCCESS) {
+        debugLog("Failed to register neosu as an application. Error: %d (app)\n", err);
+        RegCloseKey(neosu_key);
+        return;
+    }
+    RegSetValueExW(app_key, L"ApplicationName", 0, REG_SZ, (BYTE *)L"neosu", 12);
+    RegCloseKey(app_key);
+
+    HKEY cmd_key;
+    wchar_t command[MAX_PATH + 10];
+    swprintf_s(command, _countof(command), L"\"%s\" \"%%1\"", exePath);
+    err = RegCreateKeyExW(neosu_key, L"shell\\open\\command", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL,
+                          &cmd_key, NULL);
+    if(err != ERROR_SUCCESS) {
+        debugLog("Failed to register neosu as an application. Error: %d (command)\n", err);
+        RegCloseKey(neosu_key);
+        return;
+    }
+    RegSetValueExW(cmd_key, L"", 0, REG_SZ, (BYTE *)command, (wcslen(command) + 1) * sizeof(wchar_t));
+    RegCloseKey(cmd_key);
+
+    RegCloseKey(neosu_key);
+
+    // Register neosu as .osk handler
+    HKEY osk_key;
+    err = RegCreateKeyEx(HKEY_CURRENT_USER, "Software\\Classes\\.osk\\OpenWithProgids", 0, NULL,
+                         REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &osk_key, NULL);
+    if(err != ERROR_SUCCESS) {
+        debugLog("Failed to register neosu as .osk format handler. Error: %d\n", err);
+        return;
+    }
+    RegSetValueEx(osk_key, "neosu", 0, REG_SZ, (BYTE *)L"", 2);
+    RegCloseKey(osk_key);
+
+    // Register neosu as .osr handler
+    HKEY osr_key;
+    err = RegCreateKeyEx(HKEY_CURRENT_USER, "Software\\Classes\\.osr\\OpenWithProgids", 0, NULL,
+                         REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &osr_key, NULL);
+    if(err != ERROR_SUCCESS) {
+        debugLog("Failed to register neosu as .osr format handler. Error: %d\n", err);
+        return;
+    }
+    RegSetValueEx(osr_key, "neosu", 0, REG_SZ, (BYTE *)L"", 2);
+    RegCloseKey(osr_key);
+
+    // Register neosu as .osz handler
+    HKEY osz_key;
+    err = RegCreateKeyEx(HKEY_CURRENT_USER, "Software\\Classes\\.osz\\OpenWithProgids", 0, NULL,
+                         REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &osz_key, NULL);
+    if(err != ERROR_SUCCESS) {
+        debugLog("Failed to register neosu as .osz format handler. Error: %d\n", err);
+        return;
+    }
+    RegSetValueEx(osz_key, "neosu", 0, REG_SZ, (BYTE *)L"", 2);
+    RegCloseKey(osz_key);
 }
 
 //****************//
@@ -747,8 +793,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     if(last_slash != NULL) *last_slash = L'\0';
     SetCurrentDirectoryW(exePath);
 
-    // register neosu:// protocol
-    register_neosu_protocol_handler();
+    // register .osk, .osr, .osz, and neosu:// protocol
+    register_neosu_file_associations();
 
     // if a neosu instance is already running, send it a message then quit
     HWND existing_window = FindWindowW(L"neosu", NULL);

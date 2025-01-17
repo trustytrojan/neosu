@@ -36,8 +36,6 @@ using namespace std;
 UString MainMenu::NEOSU_MAIN_BUTTON_TEXT = UString("neosu");
 UString MainMenu::NEOSU_MAIN_BUTTON_SUBTEXT = UString("Multiplayer Client");
 
-#define NEOSU_NEWVERSION_NOTIFICATION_TRIGGER_FILE "version.txt"
-
 class MainMenuCubeButton : public CBaseUIButton {
    public:
     MainMenuCubeButton(MainMenu *mainMenu, float xPos, float yPos, float xSize, float ySize, UString name,
@@ -178,8 +176,8 @@ MainMenu::MainMenu() : OsuScreen() {
     m_bDidUserUpdateFromOlderVersion = false;
     m_bDrawVersionNotificationArrow = false;
     {
-        if(env->fileExists(NEOSU_NEWVERSION_NOTIFICATION_TRIGGER_FILE)) {
-            File versionFile(NEOSU_NEWVERSION_NOTIFICATION_TRIGGER_FILE);
+        if(env->fileExists("version.txt")) {
+            File versionFile("version.txt");
             if(versionFile.canRead()) {
                 float version = std::stof(versionFile.readLine());
                 if(version < cv_version.getFloat()) m_bDrawVersionNotificationArrow = true;
@@ -1291,7 +1289,7 @@ void MainMenu::setMenuElementsVisible(bool visible, bool animate) {
 
 void MainMenu::writeVersionFile() {
     // remember, don't show the notification arrow until the version changes again
-    std::ofstream versionFile(NEOSU_NEWVERSION_NOTIFICATION_TRIGGER_FILE, std::ios::out | std::ios::trunc);
+    std::ofstream versionFile("version.txt", std::ios::out | std::ios::trunc);
     if(versionFile.good()) versionFile << cv_version.getFloat();
 }
 
