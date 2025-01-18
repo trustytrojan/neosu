@@ -2067,85 +2067,22 @@ void Beatmap::update() {
     updateHitobjectMetrics();
     updatePlayfieldMetrics();
 
-    // @PPV3: also calculate live ppv3
-    if(cv_draw_statistics_pp.getBool() || cv_draw_statistics_livestars.getBool()) {
-        auto info = m_ppv2_calc.get();
-        osu->getHUD()->live_pp = info.pp;
-        osu->getHUD()->live_stars = info.total_stars;
-
-        if(last_calculated_hitobject < m_iCurrentHitObjectIndex) {
-            last_calculated_hitobject = m_iCurrentHitObjectIndex;
-
-            auto CS = getCS();
-            auto AR = getAR();
-            auto OD = getOD();
-            auto speedMultiplier = getSpeedMultiplier();
-            auto osufile_path = m_selectedDifficulty2->getFilePath();
-            auto nb_circles = m_iCurrentNumCircles;
-            auto nb_sliders = m_iCurrentNumSliders;
-            auto nb_spinners = m_iCurrentNumSpinners;
-            auto modsLegacy = osu->getScore()->getModsLegacy();
-            auto relax = osu->getModRelax();
-            auto td = osu->getModTD();
-            auto highestCombo = osu->getScore()->getComboMax();
-            auto numMisses = osu->getScore()->getNumMisses();
-            auto num300s = osu->getScore()->getNum300s();
-            auto num100s = osu->getScore()->getNum100s();
-            auto num50s = osu->getScore()->getNum50s();
-
-            m_ppv2_calc.enqueue([=]() {
-                pp_info info;
-
-                // XXX: slow
-                auto diffres = DatabaseBeatmap::loadDifficultyHitObjects(osufile_path.c_str(), AR, CS, speedMultiplier);
-
-                DifficultyCalculator::StarCalcParams params;
-                params.CS = CS;
-                params.OD = OD;
-                params.speedMultiplier = speedMultiplier;
-                params.relax = relax;
-                params.touchDevice = td;
-                params.upToObjectIndex = m_iCurrentHitObjectIndex;
-                params.sortedHitObjects.swap(diffres.diffobjects);
-
-                std::vector<f64> aimStrains;
-                std::vector<f64> speedStrains;
-                params.aim = &info.aim_stars;
-                params.aimSliderFactor = &info.aim_slider_factor;
-                params.difficultAimStrains = &info.difficult_aim_strains;
-                params.speed = &info.speed_stars;
-                params.speedNotes = &info.speed_notes;
-                params.difficultSpeedStrains = &info.difficult_speed_strains;
-                params.outAimStrains = &aimStrains;
-                params.outSpeedStrains = &speedStrains;
-
-                info.total_stars = DifficultyCalculator::calculateStarDiffForHitObjects(params);
-
-                info.pp = DifficultyCalculator::calculatePPv2(
-                    modsLegacy, params.speedMultiplier, AR, params.OD, info.aim_stars, info.aim_slider_factor,
-                    info.difficult_aim_strains, info.speed_stars, info.speed_notes, info.difficult_speed_strains,
-                    nb_circles, nb_sliders, nb_spinners, diffres.maxPossibleCombo, highestCombo, numMisses, num300s,
-                    num100s, num50s);
-
-                return info;
-            });
-        }
-    }
-
     // wobble mod
     if(cv_mod_wobble.getBool()) {
         const f32 speedMultiplierCompensation = 1.0f / getSpeedMultiplier();
         m_fPlayfieldRotation =
             (m_iCurMusicPos / 1000.0f) * 30.0f * speedMultiplierCompensation * cv_mod_wobble_rotation_speed.getFloat();
         m_fPlayfieldRotation = std::fmod(m_fPlayfieldRotation, 360.0f);
-    } else
+    } else {
         m_fPlayfieldRotation = 0.0f;
+    }
 
     // do hitobject updates among other things
     // yes, this needs to happen after updating metrics and playfield rotation
     update2();
 
     // handle preloading (only for distributed slider vertexbuffer generation atm)
+    bool was_preloading = m_bIsPreLoading;
     if(m_bIsPreLoading) {
         if(cv_debug.getBool() && m_iPreLoadingIndex == 0) debugLog("Beatmap: Preloading slider vertexbuffers ...\n");
 
@@ -2181,9 +2118,77 @@ void Beatmap::update() {
         }
     }
 
-    if(isLoading()) {
-        // only continue if we have loaded everything
+    if(isLoading() || was_preloading) {
+        // Only continue if we have loaded everything.
+        // We also return if we just finished preloading, since we need an extra update loop
+        // to correctly initialize the beatmap.
         return;
+    }
+
+    // @PPV3: also calculate live ppv3
+    if(cv_draw_statistics_pp.getBool() || cv_draw_statistics_livestars.getBool()) {
+        auto info = m_ppv2_calc.get();
+        osu->getHUD()->live_pp = info.pp;
+        osu->getHUD()->live_stars = info.total_stars;
+
+        if(last_calculated_hitobject < m_iCurrentHitObjectIndex) {
+            last_calculated_hitobject = m_iCurrentHitObjectIndex;
+
+            auto current_hitobject = m_iCurrentHitObjectIndex;
+            auto CS = getCS();
+            auto AR = getAR();
+            auto OD = getOD();
+            auto speedMultiplier = getSpeedMultiplier();
+            auto osufile_path = m_selectedDifficulty2->getFilePath();
+            auto nb_circles = m_iCurrentNumCircles;
+            auto nb_sliders = m_iCurrentNumSliders;
+            auto nb_spinners = m_iCurrentNumSpinners;
+            auto modsLegacy = osu->getScore()->getModsLegacy();
+            auto relax = osu->getModRelax();
+            auto td = osu->getModTD();
+            auto highestCombo = osu->getScore()->getComboMax();
+            auto numMisses = osu->getScore()->getNumMisses();
+            auto num300s = osu->getScore()->getNum300s();
+            auto num100s = osu->getScore()->getNum100s();
+            auto num50s = osu->getScore()->getNum50s();
+
+            m_ppv2_calc.enqueue([=]() {
+                pp_info info;
+
+                // XXX: slow
+                auto diffres = DatabaseBeatmap::loadDifficultyHitObjects(osufile_path.c_str(), AR, CS, speedMultiplier);
+
+                DifficultyCalculator::StarCalcParams params;
+                params.CS = CS;
+                params.OD = OD;
+                params.speedMultiplier = speedMultiplier;
+                params.relax = relax;
+                params.touchDevice = td;
+                params.upToObjectIndex = current_hitobject;
+                params.sortedHitObjects.swap(diffres.diffobjects);
+
+                std::vector<f64> aimStrains;
+                std::vector<f64> speedStrains;
+                params.aim = &info.aim_stars;
+                params.aimSliderFactor = &info.aim_slider_factor;
+                params.difficultAimStrains = &info.difficult_aim_strains;
+                params.speed = &info.speed_stars;
+                params.speedNotes = &info.speed_notes;
+                params.difficultSpeedStrains = &info.difficult_speed_strains;
+                params.outAimStrains = &aimStrains;
+                params.outSpeedStrains = &speedStrains;
+
+                info.total_stars = DifficultyCalculator::calculateStarDiffForHitObjects(params);
+
+                info.pp = DifficultyCalculator::calculatePPv2(
+                    modsLegacy, params.speedMultiplier, AR, params.OD, info.aim_stars, info.aim_slider_factor,
+                    info.difficult_aim_strains, info.speed_stars, info.speed_notes, info.difficult_speed_strains,
+                    nb_circles, nb_sliders, nb_spinners, diffres.maxPossibleCombo, highestCombo, numMisses, num300s,
+                    num100s, num50s);
+
+                return info;
+            });
+        }
     }
 
     // update auto (after having updated the hitobjects)
