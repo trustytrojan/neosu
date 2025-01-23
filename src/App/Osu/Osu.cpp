@@ -200,6 +200,10 @@ Osu::Osu() {
     Console::execConfigFile("osu");
     Console::execConfigFile("override");  // used for quickfixing live builds without redeploying/recompiling
 
+    // clear screen in case cfg switched to fullscreen mode
+    // (loading the rest of the app can take a bit of time)
+    engine->onPaint();
+
     std::ifstream osuCfgFile(MCENGINE_DATA_DIR "cfg/osu.cfg");
     if(!osuCfgFile.good()) {
         import_settings_from_osu_stable();
@@ -411,9 +415,9 @@ Osu::~Osu() {
 }
 
 void Osu::draw(Graphics *g) {
-    if(m_skin == NULL)  // sanity check
+    if(m_skin == NULL || flashlight_shader == NULL)  // sanity check
     {
-        g->setColor(0xffff0000);
+        g->setColor(0xff000000);
         g->fillRect(0, 0, getScreenWidth(), getScreenHeight());
         return;
     }

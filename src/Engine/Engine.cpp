@@ -24,40 +24,6 @@
 
 using namespace std;
 
-class EngineLoadingScreenApp : public App {
-   public:
-    virtual ~EngineLoadingScreenApp() { ; }
-
-    virtual void draw(Graphics *g) override {
-        McFont *consoleFont = engine->getResourceManager()->getFont("FONT_CONSOLE");
-        if(consoleFont != NULL) {
-            UString loadingText = "Loading ...";
-
-            const float dpiScale = std::round(env->getDPIScale() + 0.255f);
-
-            const float stringHeight = consoleFont->getHeight() * dpiScale;
-            const float stringWidth = consoleFont->getStringWidth(loadingText) * dpiScale;
-
-            const float margin = 5 * dpiScale;
-
-            g->pushTransform();
-            {
-                g->scale(dpiScale, dpiScale);
-                g->translate((int)(engine->getScreenWidth() / 2 - stringWidth / 2),
-                             (int)(engine->getScreenHeight() / 2 + stringHeight / 2));
-                g->setColor(0xffffffff);
-                g->drawString(consoleFont, loadingText);
-            }
-            g->popTransform();
-
-            g->setColor(0xffffffff);
-            g->drawRect(engine->getScreenWidth() / 2 - stringWidth / 2 - margin,
-                        engine->getScreenHeight() / 2 - stringHeight / 2 - margin, stringWidth + margin * 2,
-                        stringHeight + margin * 2);
-        }
-    }
-};
-
 Engine *engine = NULL;
 Environment *env = NULL;
 
@@ -107,7 +73,6 @@ Engine::Engine(Environment *environment, const char *args) {
 
     // custom
     m_bDrawing = false;
-    m_iLoadingScreenDelay = 0;  // 0 == enabled, -2 == disabled (-1 is reserved)
 
     // initialize all engine subsystems (the order does matter!)
     debugLog("\nEngine: Initializing subsystems ...\n");
@@ -220,25 +185,11 @@ void Engine::loadApp() {
         env->createDirectory(MCENGINE_DATA_DIR "skins");
     }
 
-    // load core default resources (these are required to be able to draw the loading screen)
-    if(m_iLoadingScreenDelay == 0 || m_iLoadingScreenDelay == -2) {
-        debugLog("Engine: Loading default resources ...\n");
-        {
-            engine->getResourceManager()->loadFont("weblysleekuisb.ttf", "FONT_DEFAULT", 15, true,
-                                                   m_environment->getDPI());
-            engine->getResourceManager()->loadFont("tahoma.ttf", "FONT_CONSOLE", 8, false, 96);
-        }
-        debugLog("Engine: Loading default resources done.\n");
-    }
-
-    // allow the engine to draw an initial loading screen before the real app is loaded
-    // this schedules another delayed loadApp() call in update()
-    if(m_iLoadingScreenDelay == 0) {
-        m_app = new EngineLoadingScreenApp();
-        m_iLoadingScreenDelay = 1;  // allow drawing 1 single frame
-        return;                     // NOTE: early return
-    } else
-        SAFE_DELETE(m_app);
+    // load core default resources
+    debugLog("Engine: Loading default resources ...\n");
+    engine->getResourceManager()->loadFont("weblysleekuisb.ttf", "FONT_DEFAULT", 15, true, m_environment->getDPI());
+    engine->getResourceManager()->loadFont("tahoma.ttf", "FONT_CONSOLE", 8, false, 96);
+    debugLog("Engine: Loading default resources done.\n");
 
     // load other default resources and things which are not strictly necessary
     {
@@ -319,11 +270,6 @@ void Engine::onPaint() {
 
 void Engine::onUpdate() {
     VPROF_BUDGET("Engine::onUpdate", VPROF_BUDGETGROUP_UPDATE);
-
-    if(m_iLoadingScreenDelay > 0 && m_iFrameCount >= m_iLoadingScreenDelay) {
-        m_iLoadingScreenDelay = -1;
-        loadApp();
-    }
 
     if(m_bBlackout) return;
 

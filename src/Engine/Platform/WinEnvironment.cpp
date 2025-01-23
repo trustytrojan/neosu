@@ -484,7 +484,7 @@ void WinEnvironment::enableFullscreen() {
     const int height = desktopRect.getHeight() + (m_bFullscreenWindowedBorderless ? 1 : 0);
 
     // and apply everything (move + resize)
-    SetWindowLongPtr(m_hwnd, GWL_STYLE, getWindowStyleFullscreen());
+    SetWindowLongPtr(m_hwnd, GWL_STYLE, WS_SYSMENU | WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE);
     MoveWindow(m_hwnd, (int)(desktopRect.getX()), (int)(desktopRect.getY()), width, height, FALSE);
 
     m_bFullScreen = true;
@@ -912,10 +912,6 @@ long WinEnvironment::getWindowStyleWindowed() {
     if(!m_bResizable) style = style & (~WS_SIZEBOX);
 
     return style;
-}
-
-long WinEnvironment::getWindowStyleFullscreen() {
-    return WS_SYSMENU | WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE;
 }
 
 BOOL CALLBACK WinEnvironment::monitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {

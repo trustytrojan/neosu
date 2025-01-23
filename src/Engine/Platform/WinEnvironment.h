@@ -11,7 +11,6 @@ void handle_cmdline_args(const char *args);
 class WinEnvironment : public Environment {
    public:
     static long getWindowStyleWindowed();
-    static long getWindowStyleFullscreen();
 
    public:
     WinEnvironment(HWND hwnd, HINSTANCE hinstance);

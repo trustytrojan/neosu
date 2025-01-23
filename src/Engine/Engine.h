@@ -170,7 +170,6 @@ class Engine {
     UString m_sArgs;
     bool m_bBlackout;
     bool m_bDrawing;
-    int m_iLoadingScreenDelay;
 };
 
 extern Engine *engine;
