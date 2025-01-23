@@ -31,7 +31,7 @@ if(LINUX)
     find_or_fetch_bass("loud" "")
 
     include(FindPkgConfig)
-    pkg_check_modules(PKGCONF REQUIRED blkid freetype2 glew libenet libjpeg liblzma xi zlib)
+    pkg_check_modules(PKGCONF REQUIRED blkid freetype2 glew libjpeg liblzma xi zlib)
     link_libraries(${PKGCONF_STATIC_LIBRARIES})
     include_directories(${PKGCONF_INCLUDE_DIRS})
 elseif(WIN32)

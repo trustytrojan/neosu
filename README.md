@@ -21,10 +21,14 @@ Required dependencies:
 - blkid
 - freetype2
 - glew
-- libenet
 - libjpeg
 - liblzma
 - xi
 - zlib
+
+On Debian, this should be:
+```
+apt install pkgconf git-lfs libcurl4-openssl-dev libfreetype-dev libblkid-dev libglew-dev libjpeg-dev liblzma-dev libxi-dev
+```
 
 Once those are installed, just run `make -j8`.

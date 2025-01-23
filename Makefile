@@ -3,7 +3,7 @@ SOURCES = $(shell find src -type f -name '*.cpp')
 OBJECTS = $(patsubst src/%.cpp, obj/%.o, $(SOURCES))
 HEADERS = $(shell find src -type f -name '*.h')
 
-LIBS = blkid freetype2 glew libenet libjpeg liblzma xi zlib
+LIBS = blkid freetype2 glew libjpeg liblzma xi zlib
 
 CXXFLAGS = -std=c++2a -fmessage-length=0 -fno-exceptions -Wno-sign-compare -Wno-unused-local-typedefs -Wno-reorder -Wno-switch -Wall
 CXXFLAGS += `pkgconf --static --cflags $(LIBS)` `curl-config --cflags`

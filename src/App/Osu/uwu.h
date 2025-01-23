@@ -3,6 +3,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <thread>
+#include <vector>
 
 // Unified Wait Utilities (◕‿◕✿)
 namespace uwu {
