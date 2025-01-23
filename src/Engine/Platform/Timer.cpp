@@ -22,19 +22,19 @@
 #endif
 
 Timer::Timer() {
-    m_timer = NULL;
+    this->timer = NULL;
 
 #ifdef _WIN32
 
-    m_timer = new WinTimer();
+    this->timer = new WinTimer();
 
 #elif defined __linux__
 
-    m_timer = new LinuxTimer();
+    this->timer = new LinuxTimer();
 
 #elif defined __APPLE__
 
-    m_timer = new MacOSTimer();
+    this->timer = new MacOSTimer();
 
 #else
 
@@ -43,4 +43,4 @@ Timer::Timer() {
 #endif
 }
 
-Timer::~Timer() { SAFE_DELETE(m_timer); }
+Timer::~Timer() { SAFE_DELETE(this->timer); }

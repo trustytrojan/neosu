@@ -14,16 +14,16 @@ class UIPauseMenuButton : public CBaseUIButton {
     virtual void onMouseOutside();
 
     void setBaseScale(float xScale, float yScale);
-    void setAlpha(float alpha) { m_fAlpha = alpha; }
+    void setAlpha(float alpha) { this->fAlpha = alpha; }
 
-    Image *getImage() { return getImageFunc != NULL ? getImageFunc() : NULL; }
+    Image *getImage() { return this->getImageFunc != NULL ? this->getImageFunc() : NULL; }
 
    private:
-    Vector2 m_vScale;
-    Vector2 m_vBaseScale;
-    float m_fScaleMultiplier;
+    Vector2 vScale;
+    Vector2 vBaseScale;
+    float fScaleMultiplier;
 
-    float m_fAlpha;
+    float fAlpha;
 
     std::function<Image *()> getImageFunc;
 };

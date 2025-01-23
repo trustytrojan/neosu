@@ -80,7 +80,7 @@ void RichPresence::setBanchoStatus(const char* info_text, Action action) {
     write<u8>(&packet, action);
     write_string(&packet, fancy_text);
     write_string(&packet, map_md5.hash);
-    write<u32>(&packet, osu->m_modSelector->getModFlags());
+    write<u32>(&packet, osu->modSelector->getModFlags());
     write<u8>(&packet, 0);  // osu!std
     write<u32>(&packet, map_id);
     send_packet(packet);
@@ -104,15 +104,15 @@ void RichPresence::updateBanchoMods() {
     write<u8>(&packet, last_action);
     write_string(&packet, last_status.toUtf8());
     write_string(&packet, map_md5.hash);
-    write<u32>(&packet, osu->m_modSelector->getModFlags());
+    write<u32>(&packet, osu->modSelector->getModFlags());
     write<u8>(&packet, 0);  // osu!std
     write<u32>(&packet, map_id);
     send_packet(packet);
 
     // Servers like akatsuki send different leaderboards based on what mods
     // you have selected. Reset leaderboard when switching mods.
-    osu->m_songBrowser2->m_db->m_online_scores.clear();
-    osu->m_songBrowser2->rebuildScoreButtons();
+    db->online_scores.clear();
+    osu->songBrowser2->rebuildScoreButtons();
 }
 
 void RichPresence::onMainMenu() {
@@ -140,7 +140,7 @@ void RichPresence::onSongBrowser() {
     activity.type = DiscordActivityType_Playing;
     strcpy(activity.details, "Picking a map");
 
-    if(osu->m_room->isVisible()) {
+    if(osu->room->isVisible()) {
         setBanchoStatus("Picking a map", MULTIPLAYER);
 
         strcpy(activity.state, "Multiplayer");

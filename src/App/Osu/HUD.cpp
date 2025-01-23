@@ -33,38 +33,39 @@ using namespace std;
 
 HUD::HUD() : OsuScreen() {
     // resources
-    m_tempFont = engine->getResourceManager()->getFont("FONT_DEFAULT");
-    m_cursorTrailShader = engine->getResourceManager()->loadShader("cursortrail.vsh", "cursortrail.fsh", "cursortrail");
-    m_cursorTrail.reserve(cv_cursor_trail_max_size.getInt() * 2);
-    m_cursorTrailVAO = engine->getResourceManager()->createVertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_QUADS,
-                                                                             Graphics::USAGE_TYPE::USAGE_DYNAMIC);
+    this->tempFont = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    this->cursorTrailShader =
+        engine->getResourceManager()->loadShader("cursortrail.vsh", "cursortrail.fsh", "cursortrail");
+    this->cursorTrail.reserve(cv_cursor_trail_max_size.getInt() * 2);
+    this->cursorTrailVAO = engine->getResourceManager()->createVertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_QUADS,
+                                                                                 Graphics::USAGE_TYPE::USAGE_DYNAMIC);
 
-    m_fCurFps = 60.0f;
-    m_fCurFpsSmooth = 60.0f;
-    m_fFpsUpdate = 0.0f;
+    this->fCurFps = 60.0f;
+    this->fCurFpsSmooth = 60.0f;
+    this->fFpsUpdate = 0.0f;
 
-    m_fInputoverlayK1AnimScale = 1.0f;
-    m_fInputoverlayK2AnimScale = 1.0f;
-    m_fInputoverlayM1AnimScale = 1.0f;
-    m_fInputoverlayM2AnimScale = 1.0f;
+    this->fInputoverlayK1AnimScale = 1.0f;
+    this->fInputoverlayK2AnimScale = 1.0f;
+    this->fInputoverlayM1AnimScale = 1.0f;
+    this->fInputoverlayM2AnimScale = 1.0f;
 
-    m_fInputoverlayK1AnimColor = 0.0f;
-    m_fInputoverlayK2AnimColor = 0.0f;
-    m_fInputoverlayM1AnimColor = 0.0f;
-    m_fInputoverlayM2AnimColor = 0.0f;
+    this->fInputoverlayK1AnimColor = 0.0f;
+    this->fInputoverlayK2AnimColor = 0.0f;
+    this->fInputoverlayM1AnimColor = 0.0f;
+    this->fInputoverlayM2AnimColor = 0.0f;
 
-    m_fAccuracyXOffset = 0.0f;
-    m_fAccuracyYOffset = 0.0f;
-    m_fScoreHeight = 0.0f;
+    this->fAccuracyXOffset = 0.0f;
+    this->fAccuracyYOffset = 0.0f;
+    this->fScoreHeight = 0.0f;
 
-    m_fComboAnim1 = 0.0f;
-    m_fComboAnim2 = 0.0f;
+    this->fComboAnim1 = 0.0f;
+    this->fComboAnim2 = 0.0f;
 
-    m_fCursorExpandAnim = 1.0f;
+    this->fCursorExpandAnim = 1.0f;
 
-    m_fHealth = 1.0f;
-    m_fScoreBarBreakAnim = 0.0f;
-    m_fKiScaleAnim = 0.8f;
+    this->fHealth = 1.0f;
+    this->fScoreBarBreakAnim = 0.0f;
+    this->fKiScaleAnim = 0.8f;
 }
 
 HUD::~HUD() {}
@@ -77,41 +78,42 @@ void HUD::draw(Graphics *g) {
         if(cv_draw_inputoverlay.getBool()) {
             const bool isAutoClicking = (osu->getModAuto() || osu->getModRelax());
             if(!isAutoClicking)
-                drawInputOverlay(g, osu->getScore()->getKeyCount(1), osu->getScore()->getKeyCount(2),
-                                 osu->getScore()->getKeyCount(3), osu->getScore()->getKeyCount(4));
+                this->drawInputOverlay(g, osu->getScore()->getKeyCount(1), osu->getScore()->getKeyCount(2),
+                                       osu->getScore()->getKeyCount(3), osu->getScore()->getKeyCount(4));
         }
 
-        drawFancyScoreboard(g);
+        this->drawFancyScoreboard(g);
 
         g->pushTransform();
         {
             if(osu->getModTarget() && cv_draw_target_heatmap.getBool())
-                g->translate(0, beatmap->m_fHitcircleDiameter *
+                g->translate(0, beatmap->fHitcircleDiameter *
                                     (1.0f / (cv_hud_scale.getFloat() * cv_hud_statistics_scale.getFloat())));
 
             auto diff2 = beatmap->getSelectedDifficulty2();
-            drawStatistics(g, osu->getScore()->getNumMisses(), osu->getScore()->getNumSliderBreaks(),
-                           beatmap->m_iMaxPossibleCombo, live_stars, diff2->m_pp_info.total_stars,
-                           beatmap->getMostCommonBPM(), beatmap->getApproachRateForSpeedMultiplier(), beatmap->getCS(),
-                           beatmap->getOverallDifficultyForSpeedMultiplier(), beatmap->getHP(), beatmap->getNPS(),
-                           beatmap->getND(), osu->getScore()->getUnstableRate(), live_pp, diff2->m_pp_info.pp,
-                           ((int)beatmap->getHitWindow300() - 0.5f) *
-                               (1.0f / beatmap->getSpeedMultiplier()),  // see InfoLabel::update()
-                           osu->getScore()->getHitErrorAvgCustomMin(), osu->getScore()->getHitErrorAvgCustomMax());
+            this->drawStatistics(
+                g, osu->getScore()->getNumMisses(), osu->getScore()->getNumSliderBreaks(), beatmap->iMaxPossibleCombo,
+                this->live_stars, diff2->pp.total_stars, beatmap->getMostCommonBPM(),
+                beatmap->getApproachRateForSpeedMultiplier(), beatmap->getCS(),
+                beatmap->getOverallDifficultyForSpeedMultiplier(), beatmap->getHP(), beatmap->getNPS(),
+                beatmap->getND(), osu->getScore()->getUnstableRate(), this->live_pp, diff2->pp.pp,
+                ((int)beatmap->getHitWindow300() - 0.5f) *
+                    (1.0f / beatmap->getSpeedMultiplier()),  // see InfoLabel::update()
+                osu->getScore()->getHitErrorAvgCustomMin(), osu->getScore()->getHitErrorAvgCustomMax());
         }
         g->popTransform();
 
         // NOTE: special case for FPoSu, if players manually set fposu_draw_scorebarbg_on_top to 1
         if(cv_draw_scorebarbg.getBool() && cv_mod_fposu.getBool() && cv_fposu_draw_scorebarbg_on_top.getBool())
-            drawScorebarBg(
+            this->drawScorebarBg(
                 g, cv_hud_scorebar_hide_during_breaks.getBool() ? (1.0f - beatmap->getBreakBackgroundFadeAnim()) : 1.0f,
-                m_fScoreBarBreakAnim);
+                this->fScoreBarBreakAnim);
 
         if(cv_draw_scorebar.getBool())
-            drawHPBar(
-                g, m_fHealth,
+            this->drawHPBar(
+                g, this->fHealth,
                 cv_hud_scorebar_hide_during_breaks.getBool() ? (1.0f - beatmap->getBreakBackgroundFadeAnim()) : 1.0f,
-                m_fScoreBarBreakAnim);
+                this->fScoreBarBreakAnim);
 
         // NOTE: moved to draw behind hitobjects in Beatmap::draw()
         if(cv_mod_fposu.getBool()) {
@@ -119,27 +121,29 @@ void HUD::draw(Graphics *g) {
                (beatmap == NULL ||
                 (!beatmap->isSpinnerActive() || !cv_hud_hiterrorbar_hide_during_spinner.getBool())) &&
                !beatmap->isLoading()) {
-                drawHitErrorBar(g, beatmap->getHitWindow300(), beatmap->getHitWindow100(), beatmap->getHitWindow50(),
-                                GameRules::getHitWindowMiss(), osu->getScore()->getUnstableRate());
+                this->drawHitErrorBar(g, beatmap->getHitWindow300(), beatmap->getHitWindow100(),
+                                      beatmap->getHitWindow50(), GameRules::getHitWindowMiss(),
+                                      osu->getScore()->getUnstableRate());
             }
         }
 
-        if(cv_draw_score.getBool()) drawScore(g, osu->getScore()->getScore());
+        if(cv_draw_score.getBool()) this->drawScore(g, osu->getScore()->getScore());
 
-        if(cv_draw_combo.getBool()) drawCombo(g, osu->getScore()->getCombo());
+        if(cv_draw_combo.getBool()) this->drawCombo(g, osu->getScore()->getCombo());
 
         if(cv_draw_progressbar.getBool())
-            drawProgressBar(g, beatmap->getPercentFinishedPlayable(), beatmap->isWaiting());
+            this->drawProgressBar(g, beatmap->getPercentFinishedPlayable(), beatmap->isWaiting());
 
-        if(cv_draw_accuracy.getBool()) drawAccuracy(g, osu->getScore()->getAccuracy() * 100.0f);
+        if(cv_draw_accuracy.getBool()) this->drawAccuracy(g, osu->getScore()->getAccuracy() * 100.0f);
 
-        if(osu->getModTarget() && cv_draw_target_heatmap.getBool()) drawTargetHeatmap(g, beatmap->m_fHitcircleDiameter);
+        if(osu->getModTarget() && cv_draw_target_heatmap.getBool())
+            this->drawTargetHeatmap(g, beatmap->fHitcircleDiameter);
     } else if(!cv_hud_shift_tab_toggles_everything.getBool()) {
         if(cv_draw_inputoverlay.getBool()) {
             const bool isAutoClicking = (osu->getModAuto() || osu->getModRelax());
             if(!isAutoClicking)
-                drawInputOverlay(g, osu->getScore()->getKeyCount(1), osu->getScore()->getKeyCount(2),
-                                 osu->getScore()->getKeyCount(3), osu->getScore()->getKeyCount(4));
+                this->drawInputOverlay(g, osu->getScore()->getKeyCount(1), osu->getScore()->getKeyCount(2),
+                                       osu->getScore()->getKeyCount(3), osu->getScore()->getKeyCount(4));
         }
 
         // NOTE: moved to draw behind hitobjects in Beatmap::draw()
@@ -148,19 +152,20 @@ void HUD::draw(Graphics *g) {
                (beatmap == NULL ||
                 (!beatmap->isSpinnerActive() || !cv_hud_hiterrorbar_hide_during_spinner.getBool())) &&
                !beatmap->isLoading()) {
-                drawHitErrorBar(g, beatmap->getHitWindow300(), beatmap->getHitWindow100(), beatmap->getHitWindow50(),
-                                GameRules::getHitWindowMiss(), osu->getScore()->getUnstableRate());
+                this->drawHitErrorBar(g, beatmap->getHitWindow300(), beatmap->getHitWindow100(),
+                                      beatmap->getHitWindow50(), GameRules::getHitWindowMiss(),
+                                      osu->getScore()->getUnstableRate());
             }
         }
     }
 
-    if(beatmap->shouldFlashSectionPass()) drawSectionPass(g, beatmap->shouldFlashSectionPass());
-    if(beatmap->shouldFlashSectionFail()) drawSectionFail(g, beatmap->shouldFlashSectionFail());
+    if(beatmap->shouldFlashSectionPass()) this->drawSectionPass(g, beatmap->shouldFlashSectionPass());
+    if(beatmap->shouldFlashSectionFail()) this->drawSectionFail(g, beatmap->shouldFlashSectionFail());
 
-    if(beatmap->shouldFlashWarningArrows()) drawWarningArrows(g, beatmap->m_fHitcircleDiameter);
+    if(beatmap->shouldFlashWarningArrows()) this->drawWarningArrows(g, beatmap->fHitcircleDiameter);
 
     if(beatmap->isContinueScheduled() && cv_draw_continue.getBool())
-        drawContinue(g, beatmap->getContinueCursorPoint(), beatmap->m_fHitcircleDiameter);
+        this->drawContinue(g, beatmap->getContinueCursorPoint(), beatmap->fHitcircleDiameter);
 
     if(cv_draw_scrubbing_timeline.getBool() && osu->isSeeking()) {
         static std::vector<BREAK> breaks;
@@ -194,14 +199,14 @@ void HUD::draw(Graphics *g) {
             }
         }
 
-        drawScrubbingTimeline(g, beatmap->getTime(), beatmap->getLength(), beatmap->getLengthPlayable(),
-                              beatmap->getStartTimePlayable(), beatmap->getPercentFinishedPlayable(), breaks);
+        this->drawScrubbingTimeline(g, beatmap->getTime(), beatmap->getLength(), beatmap->getLengthPlayable(),
+                                    beatmap->getStartTimePlayable(), beatmap->getPercentFinishedPlayable(), breaks);
     }
 
     if(!osu->isSkipScheduled() && beatmap->isInSkippableSection() &&
-       ((cv_skip_intro_enabled.getBool() && beatmap->m_iCurrentHitObjectIndex < 1) ||
-        (cv_skip_breaks_enabled.getBool() && beatmap->m_iCurrentHitObjectIndex > 0)))
-        drawSkip(g);
+       ((cv_skip_intro_enabled.getBool() && beatmap->iCurrentHitObjectIndex < 1) ||
+        (cv_skip_breaks_enabled.getBool() && beatmap->iCurrentHitObjectIndex > 0)))
+        this->drawSkip(g);
 
     u32 nb_spectators = bancho.spectated_player_id == 0 ? bancho.spectators.size() : bancho.fellow_spectators.size();
     if(nb_spectators > 0 && cv_draw_spectator_list.getBool()) {
@@ -237,57 +242,60 @@ void HUD::mouse_update(bool *propagate_clicks) {
         const double elapsedMS = engine->getFrameTime() * 1000.0;
         const double frameAimTime = 1000.0 / 60.0;
         const double frameRatio = elapsedMS / frameAimTime;
-        if(m_fHealth < currentHealth)
-            m_fHealth = min(1.0, m_fHealth + std::abs(currentHealth - m_fHealth) / 4.0 * frameRatio);
-        else if(m_fHealth > currentHealth)
-            m_fHealth = max(0.0, m_fHealth - std::abs(m_fHealth - currentHealth) / 6.0 * frameRatio);
+        if(this->fHealth < currentHealth)
+            this->fHealth = min(1.0, this->fHealth + std::abs(currentHealth - this->fHealth) / 4.0 * frameRatio);
+        else if(this->fHealth > currentHealth)
+            this->fHealth = max(0.0, this->fHealth - std::abs(this->fHealth - currentHealth) / 6.0 * frameRatio);
 
         if(cv_hud_scorebar_hide_during_breaks.getBool()) {
-            if(!anim->isAnimating(&m_fScoreBarBreakAnim) && !beatmap->isWaiting()) {
-                if(m_fScoreBarBreakAnim == 0.0f && beatmap->isInBreak())
-                    anim->moveLinear(&m_fScoreBarBreakAnim, 1.0f, cv_hud_scorebar_hide_anim_duration.getFloat(), true);
-                else if(m_fScoreBarBreakAnim == 1.0f && !beatmap->isInBreak())
-                    anim->moveLinear(&m_fScoreBarBreakAnim, 0.0f, cv_hud_scorebar_hide_anim_duration.getFloat(), true);
+            if(!anim->isAnimating(&this->fScoreBarBreakAnim) && !beatmap->isWaiting()) {
+                if(this->fScoreBarBreakAnim == 0.0f && beatmap->isInBreak())
+                    anim->moveLinear(&this->fScoreBarBreakAnim, 1.0f, cv_hud_scorebar_hide_anim_duration.getFloat(),
+                                     true);
+                else if(this->fScoreBarBreakAnim == 1.0f && !beatmap->isInBreak())
+                    anim->moveLinear(&this->fScoreBarBreakAnim, 0.0f, cv_hud_scorebar_hide_anim_duration.getFloat(),
+                                     true);
             }
         } else
-            m_fScoreBarBreakAnim = 0.0f;
+            this->fScoreBarBreakAnim = 0.0f;
     }
 
     // dynamic hud scaling updates
-    m_fScoreHeight = osu->getSkin()->getScore0()->getHeight() * getScoreScale();
+    this->fScoreHeight = osu->getSkin()->getScore0()->getHeight() * this->getScoreScale();
 
     // fps string update
     if(cv_hud_fps_smoothing.getBool()) {
         const float smooth = pow(0.05, engine->getFrameTime());
-        m_fCurFpsSmooth = smooth * m_fCurFpsSmooth + (1.0f - smooth) * (1.0f / engine->getFrameTime());
-        if(engine->getTime() > m_fFpsUpdate || std::abs(m_fCurFpsSmooth - m_fCurFps) > 2.0f) {
-            m_fFpsUpdate = engine->getTime() + 0.25f;
-            m_fCurFps = m_fCurFpsSmooth;
+        this->fCurFpsSmooth = smooth * this->fCurFpsSmooth + (1.0f - smooth) * (1.0f / engine->getFrameTime());
+        if(engine->getTime() > this->fFpsUpdate || std::abs(this->fCurFpsSmooth - this->fCurFps) > 2.0f) {
+            this->fFpsUpdate = engine->getTime() + 0.25f;
+            this->fCurFps = this->fCurFpsSmooth;
         }
     } else {
-        m_fCurFps = (1.0f / engine->getFrameTime());
+        this->fCurFps = (1.0f / engine->getFrameTime());
     }
 
     // target heatmap cleanup
     if(osu->getModTarget()) {
-        if(m_targets.size() > 0 && engine->getTime() > m_targets[0].time) m_targets.erase(m_targets.begin());
+        if(this->targets.size() > 0 && engine->getTime() > this->targets[0].time)
+            this->targets.erase(this->targets.begin());
     }
 
     // cursor ripples cleanup
     if(cv_draw_cursor_ripples.getBool()) {
-        if(m_cursorRipples.size() > 0 && engine->getTime() > m_cursorRipples[0].time)
-            m_cursorRipples.erase(m_cursorRipples.begin());
+        if(this->cursorRipples.size() > 0 && engine->getTime() > this->cursorRipples[0].time)
+            this->cursorRipples.erase(this->cursorRipples.begin());
     }
 }
 
 void HUD::drawDummy(Graphics *g) {
-    drawPlayfieldBorder(g, GameRules::getPlayfieldCenter(), GameRules::getPlayfieldSize(), 0);
+    this->drawPlayfieldBorder(g, GameRules::getPlayfieldCenter(), GameRules::getPlayfieldSize(), 0);
 
-    if(cv_draw_scorebarbg.getBool()) drawScorebarBg(g, 1.0f, 0.0f);
+    if(cv_draw_scorebarbg.getBool()) this->drawScorebarBg(g, 1.0f, 0.0f);
 
-    if(cv_draw_scorebar.getBool()) drawHPBar(g, 1.0, 1.0f, 0.0);
+    if(cv_draw_scorebar.getBool()) this->drawHPBar(g, 1.0, 1.0f, 0.0);
 
-    if(cv_draw_inputoverlay.getBool()) drawInputOverlay(g, 0, 0, 0, 0);
+    if(cv_draw_inputoverlay.getBool()) this->drawInputOverlay(g, 0, 0, 0, 0);
 
     SCORE_ENTRY scoreEntry;
     scoreEntry.name = cv_name.getString();
@@ -303,29 +311,30 @@ void HUD::drawDummy(Graphics *g) {
         { scoreEntries.push_back(scoreEntry); }
     }
 
-    drawSkip(g);
+    this->drawSkip(g);
 
-    drawStatistics(g, 0, 0, 727, 2.3f, 5.5f, 180, 9.0f, 4.0f, 8.0f, 6.0f, 4, 6, 90.0f, 123, 1234, 25, -5, 15);
+    this->drawStatistics(g, 0, 0, 727, 2.3f, 5.5f, 180, 9.0f, 4.0f, 8.0f, 6.0f, 4, 6, 90.0f, 123, 1234, 25, -5, 15);
 
-    drawWarningArrows(g);
+    this->drawWarningArrows(g);
 
-    if(cv_draw_combo.getBool()) drawCombo(g, scoreEntry.combo);
+    if(cv_draw_combo.getBool()) this->drawCombo(g, scoreEntry.combo);
 
-    if(cv_draw_score.getBool()) drawScore(g, scoreEntry.score);
+    if(cv_draw_score.getBool()) this->drawScore(g, scoreEntry.score);
 
-    if(cv_draw_progressbar.getBool()) drawProgressBar(g, 0.25f, false);
+    if(cv_draw_progressbar.getBool()) this->drawProgressBar(g, 0.25f, false);
 
-    if(cv_draw_accuracy.getBool()) drawAccuracy(g, scoreEntry.accuracy * 100.0f);
+    if(cv_draw_accuracy.getBool()) this->drawAccuracy(g, scoreEntry.accuracy * 100.0f);
 
-    if(cv_draw_hiterrorbar.getBool()) drawHitErrorBar(g, 50, 100, 150, 400, 70);
+    if(cv_draw_hiterrorbar.getBool()) this->drawHitErrorBar(g, 50, 100, 150, 400, 70);
 }
 
 void HUD::drawCursor(Graphics *g, Vector2 pos, float alphaMultiplier, bool secondTrail, bool updateAndDrawTrail) {
-    if(cv_draw_cursor_ripples.getBool() && (!cv_mod_fposu.getBool() || !osu->isInPlayMode())) drawCursorRipples(g);
+    if(cv_draw_cursor_ripples.getBool() && (!cv_mod_fposu.getBool() || !osu->isInPlayMode()))
+        this->drawCursorRipples(g);
 
     Matrix4 mvp;
-    drawCursorInt(g, m_cursorTrailShader, secondTrail ? m_cursorTrail2 : m_cursorTrail, mvp, pos, alphaMultiplier,
-                  false, updateAndDrawTrail);
+    this->drawCursorInt(g, this->cursorTrailShader, secondTrail ? this->cursorTrail2 : this->cursorTrail, mvp, pos,
+                        alphaMultiplier, false, updateAndDrawTrail);
 }
 
 void HUD::drawCursorTrail(Graphics *g, Vector2 pos, float alphaMultiplier, bool secondTrail) {
@@ -333,15 +342,15 @@ void HUD::drawCursorTrail(Graphics *g, Vector2 pos, float alphaMultiplier, bool 
         (cv_mod_fposu.getBool() && osu->isInPlayMode() && !osu->getFPoSu()->isCrosshairIntersectingScreen());
 
     Matrix4 mvp;
-    drawCursorTrailInt(g, m_cursorTrailShader, secondTrail ? m_cursorTrail2 : m_cursorTrail, mvp, pos, alphaMultiplier,
-                       fposuTrailJumpFix);
+    this->drawCursorTrailInt(g, this->cursorTrailShader, secondTrail ? this->cursorTrail2 : this->cursorTrail, mvp, pos,
+                             alphaMultiplier, fposuTrailJumpFix);
 }
 
 void HUD::drawCursorInt(Graphics *g, Shader *trailShader, std::vector<CURSORTRAIL> &trail, Matrix4 &mvp, Vector2 pos,
                         float alphaMultiplier, bool emptyTrailFrame, bool updateAndDrawTrail) {
-    if(updateAndDrawTrail) drawCursorTrailInt(g, trailShader, trail, mvp, pos, alphaMultiplier, emptyTrailFrame);
+    if(updateAndDrawTrail) this->drawCursorTrailInt(g, trailShader, trail, mvp, pos, alphaMultiplier, emptyTrailFrame);
 
-    drawCursorRaw(g, pos, alphaMultiplier);
+    this->drawCursorRaw(g, pos, alphaMultiplier);
 }
 
 void HUD::drawCursorTrailInt(Graphics *g, Shader *trailShader, std::vector<CURSORTRAIL> &trail, Matrix4 &mvp,
@@ -351,13 +360,15 @@ void HUD::drawCursorTrailInt(Graphics *g, Shader *trailShader, std::vector<CURSO
     if(cv_draw_cursor_trail.getBool() && trailImage->isReady()) {
         const bool smoothCursorTrail = osu->getSkin()->useSmoothCursorTrail() || cv_cursor_trail_smooth_force.getBool();
 
-        const float trailWidth = trailImage->getWidth() * getCursorTrailScaleFactor() * cv_cursor_scale.getFloat();
-        const float trailHeight = trailImage->getHeight() * getCursorTrailScaleFactor() * cv_cursor_scale.getFloat();
+        const float trailWidth =
+            trailImage->getWidth() * this->getCursorTrailScaleFactor() * cv_cursor_scale.getFloat();
+        const float trailHeight =
+            trailImage->getHeight() * this->getCursorTrailScaleFactor() * cv_cursor_scale.getFloat();
 
-        if(smoothCursorTrail) m_cursorTrailVAO->empty();
+        if(smoothCursorTrail) this->cursorTrailVAO->empty();
 
         // add the sample for the current frame
-        addCursorTrailPosition(trail, pos, emptyTrailFrame);
+        this->addCursorTrailPosition(trail, pos, emptyTrailFrame);
 
         // this loop draws the old style trail, and updates the alpha values for each segment, and fills the vao for the
         // new style trail
@@ -375,26 +386,26 @@ void HUD::drawCursorTrailInt(Graphics *g, Shader *trailShader, std::vector<CURSO
 
                 const Vector3 topLeft = Vector3(trail[i].pos.x - scaleAnimTrailWidthHalf,
                                                 trail[i].pos.y - scaleAnimTrailHeightHalf, trail[i].alpha);
-                m_cursorTrailVAO->addVertex(topLeft);
-                m_cursorTrailVAO->addTexcoord(0, 0);
+                this->cursorTrailVAO->addVertex(topLeft);
+                this->cursorTrailVAO->addTexcoord(0, 0);
 
                 const Vector3 topRight = Vector3(trail[i].pos.x + scaleAnimTrailWidthHalf,
                                                  trail[i].pos.y - scaleAnimTrailHeightHalf, trail[i].alpha);
-                m_cursorTrailVAO->addVertex(topRight);
-                m_cursorTrailVAO->addTexcoord(1, 0);
+                this->cursorTrailVAO->addVertex(topRight);
+                this->cursorTrailVAO->addTexcoord(1, 0);
 
                 const Vector3 bottomRight = Vector3(trail[i].pos.x + scaleAnimTrailWidthHalf,
                                                     trail[i].pos.y + scaleAnimTrailHeightHalf, trail[i].alpha);
-                m_cursorTrailVAO->addVertex(bottomRight);
-                m_cursorTrailVAO->addTexcoord(1, 1);
+                this->cursorTrailVAO->addVertex(bottomRight);
+                this->cursorTrailVAO->addTexcoord(1, 1);
 
                 const Vector3 bottomLeft = Vector3(trail[i].pos.x - scaleAnimTrailWidthHalf,
                                                    trail[i].pos.y + scaleAnimTrailHeightHalf, trail[i].alpha);
-                m_cursorTrailVAO->addVertex(bottomLeft);
-                m_cursorTrailVAO->addTexcoord(0, 1);
+                this->cursorTrailVAO->addVertex(bottomLeft);
+                this->cursorTrailVAO->addTexcoord(0, 1);
             } else  // old style trail
             {
-                if(trail[i].alpha > 0.0f) drawCursorTrailRaw(g, trail[i].alpha, trail[i].pos);
+                if(trail[i].alpha > 0.0f) this->drawCursorTrailRaw(g, trail[i].alpha, trail[i].pos);
             }
 
             i--;
@@ -422,7 +433,7 @@ void HUD::drawCursorTrailInt(Graphics *g, Shader *trailShader, std::vector<CURSO
                     g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ADDITIVE);
                     {
                         g->setColor(0xffffffff);
-                        g->drawVAO(m_cursorTrailVAO);
+                        g->drawVAO(this->cursorTrailVAO);
                     }
                     g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
                 }
@@ -442,8 +453,8 @@ void HUD::drawCursorTrailInt(Graphics *g, Shader *trailShader, std::vector<CURSO
 
 void HUD::drawCursorRaw(Graphics *g, Vector2 pos, float alphaMultiplier) {
     Image *cursor = osu->getSkin()->getCursor();
-    const float scale = getCursorScaleFactor() * (osu->getSkin()->isCursor2x() ? 0.5f : 1.0f);
-    const float animatedScale = scale * (osu->getSkin()->getCursorExpand() ? m_fCursorExpandAnim : 1.0f);
+    const float scale = this->getCursorScaleFactor() * (osu->getSkin()->isCursor2x() ? 0.5f : 1.0f);
+    const float animatedScale = scale * (osu->getSkin()->getCursorExpand() ? this->fCursorExpandAnim : 1.0f);
 
     // draw cursor
     g->setColor(0xffffffff);
@@ -485,9 +496,10 @@ void HUD::drawCursorRaw(Graphics *g, Vector2 pos, float alphaMultiplier) {
 
 void HUD::drawCursorTrailRaw(Graphics *g, float alpha, Vector2 pos) {
     Image *trailImage = osu->getSkin()->getCursorTrail();
-    const float scale = getCursorTrailScaleFactor();
+    const float scale = this->getCursorTrailScaleFactor();
     const float animatedScale =
-        scale * (osu->getSkin()->getCursorExpand() && cv_cursor_trail_expand.getBool() ? m_fCursorExpandAnim : 1.0f) *
+        scale *
+        (osu->getSkin()->getCursorExpand() && cv_cursor_trail_expand.getBool() ? this->fCursorExpandAnim : 1.0f) *
         cv_cursor_trail_scale.getFloat();
 
     g->setColor(0xffffffff);
@@ -523,9 +535,9 @@ void HUD::drawCursorRipples(Graphics *g) {
                       clamp<int>(cv_cursor_ripple_tint_b.getInt(), 0, 255)));
     osu->getSkin()->getCursorRipple()->bind();
     {
-        for(int i = 0; i < m_cursorRipples.size(); i++) {
-            const Vector2 &pos = m_cursorRipples[i].pos;
-            const float &time = m_cursorRipples[i].time;
+        for(int i = 0; i < this->cursorRipples.size(); i++) {
+            const Vector2 &pos = this->cursorRipples[i].pos;
+            const float &time = this->cursorRipples[i].time;
 
             const float animPercent = 1.0f - clamp<float>((time - engine->getTime()) / duration, 0.0f, 1.0f);
             const float fadePercent = 1.0f - clamp<float>((time - engine->getTime()) / fadeDuration, 0.0f, 1.0f);
@@ -618,7 +630,8 @@ void HUD::drawFps(Graphics *g, McFont *font, float fps) {
 }
 
 void HUD::drawPlayfieldBorder(Graphics *g, Vector2 playfieldCenter, Vector2 playfieldSize, float hitcircleDiameter) {
-    drawPlayfieldBorder(g, playfieldCenter, playfieldSize, hitcircleDiameter, cv_hud_playfield_border_size.getInt());
+    this->drawPlayfieldBorder(g, playfieldCenter, playfieldSize, hitcircleDiameter,
+                              cv_hud_playfield_border_size.getInt());
 }
 
 void HUD::drawPlayfieldBorder(Graphics *g, Vector2 playfieldCenter, Vector2 playfieldSize, float hitcircleDiameter,
@@ -908,7 +921,7 @@ void HUD::drawComboNumber(Graphics *g, unsigned long long number, float scale, b
 void HUD::drawComboSimple(Graphics *g, int combo, float scale) {
     g->pushTransform();
     {
-        drawComboNumber(g, combo, scale);
+        this->drawComboNumber(g, combo, scale);
 
         // draw 'x' at the end
         if(osu->getSkin()->getComboX() != osu->getSkin()->getMissingTexture()) {
@@ -925,17 +938,17 @@ void HUD::drawCombo(Graphics *g, int combo) {
     const int offset = 5;
 
     // draw back (anim)
-    float animScaleMultiplier = 1.0f + m_fComboAnim2 * cv_combo_anim2_size.getFloat();
+    float animScaleMultiplier = 1.0f + this->fComboAnim2 * cv_combo_anim2_size.getFloat();
     float scale = osu->getImageScale(osu->getSkin()->getCombo0(), 32) * animScaleMultiplier * cv_hud_scale.getFloat() *
                   cv_hud_combo_scale.getFloat();
-    if(m_fComboAnim2 > 0.01f) {
-        g->setAlpha(m_fComboAnim2 * 0.65f);
+    if(this->fComboAnim2 > 0.01f) {
+        g->setAlpha(this->fComboAnim2 * 0.65f);
         g->pushTransform();
         {
             g->scale(scale, scale);
             g->translate(offset, osu->getScreenHeight() - osu->getSkin()->getCombo0()->getHeight() * scale / 2.0f,
                          0.0f);
-            drawComboNumber(g, combo, scale);
+            this->drawComboNumber(g, combo, scale);
 
             // draw 'x' at the end
             if(osu->getSkin()->getComboX() != osu->getSkin()->getMissingTexture()) {
@@ -948,7 +961,7 @@ void HUD::drawCombo(Graphics *g, int combo) {
 
     // draw front
     g->setAlpha(1.0f);
-    const float animPercent = (m_fComboAnim1 < 1.0f ? m_fComboAnim1 : 2.0f - m_fComboAnim1);
+    const float animPercent = (this->fComboAnim1 < 1.0f ? this->fComboAnim1 : 2.0f - this->fComboAnim1);
     animScaleMultiplier = 1.0f + (0.5f * animPercent * animPercent) * cv_combo_anim1_size.getFloat();
     scale = osu->getImageScale(osu->getSkin()->getCombo0(), 32) * animScaleMultiplier * cv_hud_scale.getFloat() *
             cv_hud_combo_scale.getFloat();
@@ -956,7 +969,7 @@ void HUD::drawCombo(Graphics *g, int combo) {
     {
         g->scale(scale, scale);
         g->translate(offset, osu->getScreenHeight() - osu->getSkin()->getCombo0()->getHeight() * scale / 2.0f, 0.0f);
-        drawComboNumber(g, combo, scale);
+        this->drawComboNumber(g, combo, scale);
 
         // draw 'x' at the end
         if(osu->getSkin()->getComboX() != osu->getSkin()->getMissingTexture()) {
@@ -977,7 +990,7 @@ void HUD::drawScore(Graphics *g, unsigned long long score) {
         numDigits++;
     }
 
-    const float scale = getScoreScale();
+    const float scale = this->getScoreScale();
     g->pushTransform();
     {
         g->scale(scale, scale);
@@ -985,7 +998,7 @@ void HUD::drawScore(Graphics *g, unsigned long long score) {
             osu->getScreenWidth() - osu->getSkin()->getScore0()->getWidth() * scale * numDigits +
                 osu->getSkin()->getScoreOverlap() * (osu->getSkin()->isScore02x() ? 2 : 1) * scale * (numDigits - 1),
             osu->getSkin()->getScore0()->getHeight() * scale / 2);
-        drawScoreNumber(g, score, scale, false);
+        this->drawScoreNumber(g, score, scale, false);
     }
     g->popTransform();
 }
@@ -1075,7 +1088,7 @@ void HUD::drawHPBar(Graphics *g, double health, float alpha, float breakAnim) {
 
         if(ki != NULL && !ki->isMissingTexture()) {
             if(!useNewDefault || health >= 0.2) {
-                ki->draw(g, (markerOffset * scale) + (breakAnimOffset * scale), scale * m_fKiScaleAnim);
+                ki->draw(g, (markerOffset * scale) + (breakAnimOffset * scale), scale * this->fKiScaleAnim);
             }
         }
     }
@@ -1089,7 +1102,7 @@ void HUD::drawAccuracySimple(Graphics *g, float accuracy, float scale) {
     // draw it
     g->pushTransform();
     {
-        drawScoreNumber(g, accuracyInt, scale, true);
+        this->drawScoreNumber(g, accuracyInt, scale, true);
 
         // draw dot '.' between the integer and fractional part
         if(osu->getSkin()->getScoreDot() != osu->getSkin()->getMissingTexture()) {
@@ -1100,7 +1113,7 @@ void HUD::drawAccuracySimple(Graphics *g, float accuracy, float scale) {
             g->translate(-osu->getSkin()->getScoreOverlap() * (osu->getSkin()->isScore02x() ? 2 : 1) * scale, 0);
         }
 
-        drawScoreNumber(g, accuracyFrac, scale, true);
+        this->drawScoreNumber(g, accuracyFrac, scale, true);
 
         // draw '%' at the end
         if(osu->getSkin()->getScorePercent() != osu->getSkin()->getMissingTexture()) {
@@ -1138,14 +1151,14 @@ void HUD::drawAccuracy(Graphics *g, float accuracy) {
                 scale -
             osu->getSkin()->getScoreOverlap() * (osu->getSkin()->isScore02x() ? 2 : 1) * scale * (numDigits + 1);
 
-        m_fAccuracyXOffset = osu->getScreenWidth() - xOffset - offset;
-        m_fAccuracyYOffset = (cv_draw_score.getBool() ? m_fScoreHeight : 0.0f) +
-                             osu->getSkin()->getScore0()->getHeight() * scale / 2 + offset * 2;
+        this->fAccuracyXOffset = osu->getScreenWidth() - xOffset - offset;
+        this->fAccuracyYOffset = (cv_draw_score.getBool() ? this->fScoreHeight : 0.0f) +
+                                 osu->getSkin()->getScore0()->getHeight() * scale / 2 + offset * 2;
 
         g->scale(scale, scale);
-        g->translate(m_fAccuracyXOffset, m_fAccuracyYOffset);
+        g->translate(this->fAccuracyXOffset, this->fAccuracyYOffset);
 
-        drawScoreNumber(g, accuracyInt, scale, true);
+        this->drawScoreNumber(g, accuracyInt, scale, true);
 
         // draw dot '.' between the integer and fractional part
         if(osu->getSkin()->getScoreDot() != osu->getSkin()->getMissingTexture()) {
@@ -1156,7 +1169,7 @@ void HUD::drawAccuracy(Graphics *g, float accuracy) {
             g->translate(-osu->getSkin()->getScoreOverlap() * (osu->getSkin()->isScore02x() ? 2 : 1) * scale, 0);
         }
 
-        drawScoreNumber(g, accuracyFrac, scale, true);
+        this->drawScoreNumber(g, accuracyFrac, scale, true);
 
         // draw '%' at the end
         if(osu->getSkin()->getScorePercent() != osu->getSkin()->getMissingTexture()) {
@@ -1196,20 +1209,20 @@ void HUD::drawWarningArrows(Graphics *g, float hitcircleDiameter) {
     const float part = GameRules::getPlayfieldSize().y * (1.0f / divider);
 
     g->setColor(0xffffffff);
-    drawWarningArrow(g,
-                     Vector2(osu->getUIScale(28),
-                             GameRules::getPlayfieldCenter().y - GameRules::getPlayfieldSize().y / 2 + part * 2),
-                     false);
-    drawWarningArrow(g,
-                     Vector2(osu->getUIScale(28), GameRules::getPlayfieldCenter().y -
-                                                      GameRules::getPlayfieldSize().y / 2 + part * 2 + part * 13),
-                     false);
+    this->drawWarningArrow(g,
+                           Vector2(osu->getUIScale(28),
+                                   GameRules::getPlayfieldCenter().y - GameRules::getPlayfieldSize().y / 2 + part * 2),
+                           false);
+    this->drawWarningArrow(g,
+                           Vector2(osu->getUIScale(28), GameRules::getPlayfieldCenter().y -
+                                                            GameRules::getPlayfieldSize().y / 2 + part * 2 + part * 13),
+                           false);
 
-    drawWarningArrow(g,
-                     Vector2(osu->getScreenWidth() - osu->getUIScale(28),
-                             GameRules::getPlayfieldCenter().y - GameRules::getPlayfieldSize().y / 2 + part * 2),
-                     true);
-    drawWarningArrow(
+    this->drawWarningArrow(g,
+                           Vector2(osu->getScreenWidth() - osu->getUIScale(28),
+                                   GameRules::getPlayfieldCenter().y - GameRules::getPlayfieldSize().y / 2 + part * 2),
+                           true);
+    this->drawWarningArrow(
         g,
         Vector2(osu->getScreenWidth() - osu->getUIScale(28),
                 GameRules::getPlayfieldCenter().y - GameRules::getPlayfieldSize().y / 2 + part * 2 + part * 13),
@@ -1254,7 +1267,7 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
             if(slot->has_quit()) {
                 slot->current_hp = 0;
                 scoreEntry.name = UString::format("%s [quit]", user_info->name.toUtf8());
-            } else if(beatmap != NULL && beatmap->isInSkippableSection() && beatmap->m_iCurrentHitObjectIndex < 1) {
+            } else if(beatmap != NULL && beatmap->isInSkippableSection() && beatmap->iCurrentHitObjectIndex < 1) {
                 if(slot->skipped) {
                     // XXX: Draw pretty "Skip" image instead
                     scoreEntry.name = UString::format("%s [skip]", user_info->name.toUtf8());
@@ -1269,12 +1282,12 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
             scores.push_back(std::move(scoreEntry));
         }
     } else {
-        std::lock_guard<std::mutex> lock(db->m_scores_mtx);
-        std::vector<FinishedScore> *singleplayer_scores = &((*db->getScores())[beatmap_md5]);
+        std::lock_guard<std::mutex> lock(db->scores_mtx);
+        std::vector<FinishedScore> *singleplayer_scores = &((*db->getScores())[this->beatmap_md5]);
         bool is_online = cv_songbrowser_scores_sortingtype.getString() == UString("Online Leaderboard");
         if(is_online) {
-            auto search = db->m_online_scores.find(beatmap_md5);
-            if(search != db->m_online_scores.end()) {
+            auto search = db->online_scores.find(this->beatmap_md5);
+            if(search != db->online_scores.end()) {
                 singleplayer_scores = &search->second;
             }
         }
@@ -1338,26 +1351,26 @@ void HUD::resetScoreboard() {
     DatabaseBeatmap *diff2 = beatmap->getSelectedDifficulty2();
     if(diff2 == NULL) return;
 
-    beatmap_md5 = diff2->getMD5Hash();
-    player_slot = NULL;
-    for(auto slot : slots) {
+    this->beatmap_md5 = diff2->getMD5Hash();
+    this->player_slot = NULL;
+    for(auto slot : this->slots) {
         delete slot;
     }
-    slots.clear();
+    this->slots.clear();
 
     int player_entry_id = bancho.is_in_a_multi_room() ? bancho.user_id : 0;
-    auto scores = getCurrentScores();
+    auto scores = this->getCurrentScores();
     int i = 0;
     for(auto score : scores) {
         auto slot = new ScoreboardSlot(score, i);
         if(score.entry_id == player_entry_id) {
-            player_slot = slot;
+            this->player_slot = slot;
         }
-        slots.push_back(slot);
+        this->slots.push_back(slot);
         i++;
     }
 
-    updateScoreboard(false);
+    this->updateScoreboard(false);
 }
 
 void HUD::updateScoreboard(bool animate) {
@@ -1371,31 +1384,31 @@ void HUD::updateScoreboard(bool animate) {
     }
 
     // Update player slot first
-    auto new_scores = getCurrentScores();
+    auto new_scores = this->getCurrentScores();
     for(int i = 0; i < new_scores.size(); i++) {
-        if(new_scores[i].entry_id != player_slot->m_score.entry_id) continue;
+        if(new_scores[i].entry_id != this->player_slot->score.entry_id) continue;
 
-        player_slot->updateIndex(i, animate);
-        player_slot->m_score = new_scores[i];
+        this->player_slot->updateIndex(i, animate);
+        this->player_slot->score = new_scores[i];
         break;
     }
 
     // Update other slots
     for(int i = 0; i < new_scores.size(); i++) {
-        if(new_scores[i].entry_id == player_slot->m_score.entry_id) continue;
+        if(new_scores[i].entry_id == this->player_slot->score.entry_id) continue;
 
-        for(auto slot : slots) {
-            if(slot->m_score.entry_id != new_scores[i].entry_id) continue;
+        for(auto slot : this->slots) {
+            if(slot->score.entry_id != new_scores[i].entry_id) continue;
 
             slot->updateIndex(i, animate);
-            slot->m_score = new_scores[i];
+            slot->score = new_scores[i];
             break;
         }
     }
 }
 
 void HUD::drawFancyScoreboard(Graphics *g) {
-    for(auto slot : slots) {
+    for(auto slot : this->slots) {
         slot->draw(g);
     }
 }
@@ -1451,8 +1464,8 @@ void HUD::drawHitErrorBar(Graphics *g, Beatmap *beatmap) {
     if(cv_draw_hud.getBool() || !cv_hud_shift_tab_toggles_everything.getBool()) {
         if(cv_draw_hiterrorbar.getBool() &&
            (!beatmap->isSpinnerActive() || !cv_hud_hiterrorbar_hide_during_spinner.getBool()) && !beatmap->isLoading())
-            drawHitErrorBar(g, beatmap->getHitWindow300(), beatmap->getHitWindow100(), beatmap->getHitWindow50(),
-                            GameRules::getHitWindowMiss(), osu->getScore()->getUnstableRate());
+            this->drawHitErrorBar(g, beatmap->getHitWindow300(), beatmap->getHitWindow100(), beatmap->getHitWindow50(),
+                                  GameRules::getHitWindowMiss(), osu->getScore()->getUnstableRate());
     }
 }
 
@@ -1470,9 +1483,9 @@ void HUD::drawHitErrorBar(Graphics *g, float hitWindow300, float hitWindow100, f
             const Vector2 localCenter = Vector2(
                 center.x, center.y - (osu->getScreenHeight() * cv_hud_hiterrorbar_offset_bottom_percent.getFloat()));
 
-            drawHitErrorBarInt2(g, localCenter, ur);
+            this->drawHitErrorBarInt2(g, localCenter, ur);
             g->translate(localCenter.x, localCenter.y);
-            drawHitErrorBarInt(g, hitWindow300, hitWindow100, hitWindow50, hitWindowMiss);
+            this->drawHitErrorBarInt(g, hitWindow300, hitWindow100, hitWindow50, hitWindowMiss);
         }
         g->popTransform();
     }
@@ -1487,7 +1500,7 @@ void HUD::drawHitErrorBar(Graphics *g, float hitWindow300, float hitWindow100, f
             g->scale(1, -1);
             // drawHitErrorBarInt2(g, localCenter, ur);
             g->translate(localCenter.x, localCenter.y);
-            drawHitErrorBarInt(g, hitWindow300, hitWindow100, hitWindow50, hitWindowMiss);
+            this->drawHitErrorBarInt(g, hitWindow300, hitWindow100, hitWindow50, hitWindowMiss);
         }
         g->popTransform();
     }
@@ -1503,7 +1516,7 @@ void HUD::drawHitErrorBar(Graphics *g, float hitWindow300, float hitWindow100, f
             g->rotate(90);
             // drawHitErrorBarInt2(g, localCenter, ur);
             g->translate(localCenter.x, localCenter.y);
-            drawHitErrorBarInt(g, hitWindow300, hitWindow100, hitWindow50, hitWindowMiss);
+            this->drawHitErrorBarInt(g, hitWindow300, hitWindow100, hitWindow50, hitWindowMiss);
         }
         g->popTransform();
     }
@@ -1520,7 +1533,7 @@ void HUD::drawHitErrorBar(Graphics *g, float hitWindow300, float hitWindow100, f
             g->rotate(-90);
             // drawHitErrorBarInt2(g, localCenter, ur);
             g->translate(localCenter.x, localCenter.y);
-            drawHitErrorBarInt(g, hitWindow300, hitWindow100, hitWindow50, hitWindowMiss);
+            this->drawHitErrorBarInt(g, hitWindow300, hitWindow100, hitWindow50, hitWindowMiss);
         }
         g->popTransform();
     }
@@ -1603,17 +1616,18 @@ void HUD::drawHitErrorBarInt(Graphics *g, float hitWindow300, float hitWindow100
         const bool modMing3012 = cv_mod_ming3012.getBool();
         const float hitFadeDuration = cv_hud_hiterrorbar_entry_hit_fade_time.getFloat();
         const float missFadeDuration = cv_hud_hiterrorbar_entry_miss_fade_time.getFloat();
-        for(int i = m_hiterrors.size() - 1; i >= 0; i--) {
-            const float percent = clamp<float>((float)m_hiterrors[i].delta / (float)totalHitWindowLength, -5.0f, 5.0f);
-            float fade =
-                clamp<float>((m_hiterrors[i].time - engine->getTime()) /
-                                 (m_hiterrors[i].miss || m_hiterrors[i].misaim ? missFadeDuration : hitFadeDuration),
-                             0.0f, 1.0f);
+        for(int i = this->hiterrors.size() - 1; i >= 0; i--) {
+            const float percent =
+                clamp<float>((float)this->hiterrors[i].delta / (float)totalHitWindowLength, -5.0f, 5.0f);
+            float fade = clamp<float>(
+                (this->hiterrors[i].time - engine->getTime()) /
+                    (this->hiterrors[i].miss || this->hiterrors[i].misaim ? missFadeDuration : hitFadeDuration),
+                0.0f, 1.0f);
             fade *= fade;  // quad out
 
             Color barColor;
             {
-                if(m_hiterrors[i].miss || m_hiterrors[i].misaim)
+                if(this->hiterrors[i].miss || this->hiterrors[i].misaim)
                     barColor = colorMiss;
                 else
                     barColor = (std::abs(percent) <= percent300
@@ -1625,8 +1639,8 @@ void HUD::drawHitErrorBarInt(Graphics *g, float hitWindow300, float hitWindow100
             g->setAlpha(alphaEntry * fade);
 
             float missHeightMultiplier = 1.0f;
-            if(m_hiterrors[i].miss) missHeightMultiplier = 1.5f;
-            if(m_hiterrors[i].misaim) missHeightMultiplier = 4.0f;
+            if(this->hiterrors[i].miss) missHeightMultiplier = 1.5f;
+            if(this->hiterrors[i].misaim) missHeightMultiplier = 4.0f;
 
             g->fillRect(center.x - (entryWidth / 2.0f) + percent * (size.x / 2.0f),
                         center.y - (entryHeight * missHeightMultiplier) / 2.0f, entryWidth,
@@ -1692,7 +1706,7 @@ void HUD::drawHitErrorBarInt2(Graphics *g, Vector2 center, int ur) {
 }
 
 void HUD::drawProgressBar(Graphics *g, float percent, bool waiting) {
-    if(!cv_draw_accuracy.getBool()) m_fAccuracyXOffset = osu->getScreenWidth();
+    if(!cv_draw_accuracy.getBool()) this->fAccuracyXOffset = osu->getScreenWidth();
 
     const float num_segments = 15 * 8;
     const int offset = 20;
@@ -1700,7 +1714,7 @@ void HUD::drawProgressBar(Graphics *g, float percent, bool waiting) {
     const float circularMetreScale =
         ((2 * radius) / osu->getSkin()->getCircularmetre()->getWidth()) * 1.3f;  // hardcoded 1.3 multiplier?!
     const float actualCircularMetreScale = ((2 * radius) / osu->getSkin()->getCircularmetre()->getWidth());
-    Vector2 center = Vector2(m_fAccuracyXOffset - radius - offset, m_fAccuracyYOffset);
+    Vector2 center = Vector2(this->fAccuracyXOffset - radius - offset, this->fAccuracyYOffset);
 
     // clamp to top edge of screen
     if(center.y - (osu->getSkin()->getCircularmetre()->getHeight() * actualCircularMetreScale + 5) / 2.0f < 0)
@@ -1708,7 +1722,7 @@ void HUD::drawProgressBar(Graphics *g, float percent, bool waiting) {
                              (osu->getSkin()->getCircularmetre()->getHeight() * actualCircularMetreScale + 5) / 2.0f);
 
     // clamp to bottom edge of score numbers
-    if(cv_draw_score.getBool() && center.y - radius < m_fScoreHeight) center.y = m_fScoreHeight + radius;
+    if(cv_draw_score.getBool() && center.y - radius < this->fScoreHeight) center.y = this->fScoreHeight + radius;
 
     const float theta = 2 * PI / float(num_segments);
     const float s = sinf(theta);  // precalculate the sine and cosine
@@ -1785,7 +1799,7 @@ void HUD::drawStatistics(Graphics *g, int misses, int sliderbreaks, int maxPossi
                                  cv_hud_statistics_scale.getFloat() * cv_hud_statistics_spacing_scale.getFloat());
         if(cv_draw_statistics_pp.getBool()) {
             g->translate(cv_hud_statistics_pp_offset_x.getInt(), cv_hud_statistics_pp_offset_y.getInt());
-            drawStatisticText(
+            this->drawStatisticText(
                 g, (cv_hud_statistics_pp_decimal_places.getInt() < 1
                         ? UString::format("%ipp", (int)std::round(pp))
                         : (cv_hud_statistics_pp_decimal_places.getInt() > 1 ? UString::format("%.2fpp", pp)
@@ -1794,7 +1808,7 @@ void HUD::drawStatistics(Graphics *g, int misses, int sliderbreaks, int maxPossi
         }
         if(cv_draw_statistics_perfectpp.getBool()) {
             g->translate(cv_hud_statistics_perfectpp_offset_x.getInt(), cv_hud_statistics_perfectpp_offset_y.getInt());
-            drawStatisticText(
+            this->drawStatisticText(
                 g, (cv_hud_statistics_pp_decimal_places.getInt() < 1
                         ? UString::format("SS: %ipp", (int)std::round(ppfc))
                         : (cv_hud_statistics_pp_decimal_places.getInt() > 1 ? UString::format("SS: %.2fpp", ppfc)
@@ -1804,91 +1818,91 @@ void HUD::drawStatistics(Graphics *g, int misses, int sliderbreaks, int maxPossi
         }
         if(cv_draw_statistics_misses.getBool()) {
             g->translate(cv_hud_statistics_misses_offset_x.getInt(), cv_hud_statistics_misses_offset_y.getInt());
-            drawStatisticText(g, UString::format("Miss: %i", misses));
+            this->drawStatisticText(g, UString::format("Miss: %i", misses));
             g->translate(-cv_hud_statistics_misses_offset_x.getInt(),
                          yDelta - cv_hud_statistics_misses_offset_y.getInt());
         }
         if(cv_draw_statistics_sliderbreaks.getBool()) {
             g->translate(cv_hud_statistics_sliderbreaks_offset_x.getInt(),
                          cv_hud_statistics_sliderbreaks_offset_y.getInt());
-            drawStatisticText(g, UString::format("SBrk: %i", sliderbreaks));
+            this->drawStatisticText(g, UString::format("SBrk: %i", sliderbreaks));
             g->translate(-cv_hud_statistics_sliderbreaks_offset_x.getInt(),
                          yDelta - cv_hud_statistics_sliderbreaks_offset_y.getInt());
         }
         if(cv_draw_statistics_maxpossiblecombo.getBool()) {
             g->translate(cv_hud_statistics_maxpossiblecombo_offset_x.getInt(),
                          cv_hud_statistics_maxpossiblecombo_offset_y.getInt());
-            drawStatisticText(g, UString::format("FC: %ix", maxPossibleCombo));
+            this->drawStatisticText(g, UString::format("FC: %ix", maxPossibleCombo));
             g->translate(-cv_hud_statistics_maxpossiblecombo_offset_x.getInt(),
                          yDelta - cv_hud_statistics_maxpossiblecombo_offset_y.getInt());
         }
         if(cv_draw_statistics_livestars.getBool()) {
             g->translate(cv_hud_statistics_livestars_offset_x.getInt(), cv_hud_statistics_livestars_offset_y.getInt());
-            drawStatisticText(g, UString::format("%.3g***", liveStars));
+            this->drawStatisticText(g, UString::format("%.3g***", liveStars));
             g->translate(-cv_hud_statistics_livestars_offset_x.getInt(),
                          yDelta - cv_hud_statistics_livestars_offset_y.getInt());
         }
         if(cv_draw_statistics_totalstars.getBool()) {
             g->translate(cv_hud_statistics_totalstars_offset_x.getInt(),
                          cv_hud_statistics_totalstars_offset_y.getInt());
-            drawStatisticText(g, UString::format("%.3g*", totalStars));
+            this->drawStatisticText(g, UString::format("%.3g*", totalStars));
             g->translate(-cv_hud_statistics_totalstars_offset_x.getInt(),
                          yDelta - cv_hud_statistics_totalstars_offset_y.getInt());
         }
         if(cv_draw_statistics_bpm.getBool()) {
             g->translate(cv_hud_statistics_bpm_offset_x.getInt(), cv_hud_statistics_bpm_offset_y.getInt());
-            drawStatisticText(g, UString::format("BPM: %i", bpm));
+            this->drawStatisticText(g, UString::format("BPM: %i", bpm));
             g->translate(-cv_hud_statistics_bpm_offset_x.getInt(), yDelta - cv_hud_statistics_bpm_offset_y.getInt());
         }
         if(cv_draw_statistics_ar.getBool()) {
             ar = std::round(ar * 100.0f) / 100.0f;
             g->translate(cv_hud_statistics_ar_offset_x.getInt(), cv_hud_statistics_ar_offset_y.getInt());
-            drawStatisticText(g, UString::format("AR: %g", ar));
+            this->drawStatisticText(g, UString::format("AR: %g", ar));
             g->translate(-cv_hud_statistics_ar_offset_x.getInt(), yDelta - cv_hud_statistics_ar_offset_y.getInt());
         }
         if(cv_draw_statistics_cs.getBool()) {
             cs = std::round(cs * 100.0f) / 100.0f;
             g->translate(cv_hud_statistics_cs_offset_x.getInt(), cv_hud_statistics_cs_offset_y.getInt());
-            drawStatisticText(g, UString::format("CS: %g", cs));
+            this->drawStatisticText(g, UString::format("CS: %g", cs));
             g->translate(-cv_hud_statistics_cs_offset_x.getInt(), yDelta - cv_hud_statistics_cs_offset_y.getInt());
         }
         if(cv_draw_statistics_od.getBool()) {
             od = std::round(od * 100.0f) / 100.0f;
             g->translate(cv_hud_statistics_od_offset_x.getInt(), cv_hud_statistics_od_offset_y.getInt());
-            drawStatisticText(g, UString::format("OD: %g", od));
+            this->drawStatisticText(g, UString::format("OD: %g", od));
             g->translate(-cv_hud_statistics_od_offset_x.getInt(), yDelta - cv_hud_statistics_od_offset_y.getInt());
         }
         if(cv_draw_statistics_hp.getBool()) {
             hp = std::round(hp * 100.0f) / 100.0f;
             g->translate(cv_hud_statistics_hp_offset_x.getInt(), cv_hud_statistics_hp_offset_y.getInt());
-            drawStatisticText(g, UString::format("HP: %g", hp));
+            this->drawStatisticText(g, UString::format("HP: %g", hp));
             g->translate(-cv_hud_statistics_hp_offset_x.getInt(), yDelta - cv_hud_statistics_hp_offset_y.getInt());
         }
         if(cv_draw_statistics_hitwindow300.getBool()) {
             g->translate(cv_hud_statistics_hitwindow300_offset_x.getInt(),
                          cv_hud_statistics_hitwindow300_offset_y.getInt());
-            drawStatisticText(g, UString::format("300: +-%ims", (int)hitWindow300));
+            this->drawStatisticText(g, UString::format("300: +-%ims", (int)hitWindow300));
             g->translate(-cv_hud_statistics_hitwindow300_offset_x.getInt(),
                          yDelta - cv_hud_statistics_hitwindow300_offset_y.getInt());
         }
         if(cv_draw_statistics_nps.getBool()) {
             g->translate(cv_hud_statistics_nps_offset_x.getInt(), cv_hud_statistics_nps_offset_y.getInt());
-            drawStatisticText(g, UString::format("NPS: %i", nps));
+            this->drawStatisticText(g, UString::format("NPS: %i", nps));
             g->translate(-cv_hud_statistics_nps_offset_x.getInt(), yDelta - cv_hud_statistics_nps_offset_y.getInt());
         }
         if(cv_draw_statistics_nd.getBool()) {
             g->translate(cv_hud_statistics_nd_offset_x.getInt(), cv_hud_statistics_nd_offset_y.getInt());
-            drawStatisticText(g, UString::format("ND: %i", nd));
+            this->drawStatisticText(g, UString::format("ND: %i", nd));
             g->translate(-cv_hud_statistics_nd_offset_x.getInt(), yDelta - cv_hud_statistics_nd_offset_y.getInt());
         }
         if(cv_draw_statistics_ur.getBool()) {
             g->translate(cv_hud_statistics_ur_offset_x.getInt(), cv_hud_statistics_ur_offset_y.getInt());
-            drawStatisticText(g, UString::format("UR: %i", ur));
+            this->drawStatisticText(g, UString::format("UR: %i", ur));
             g->translate(-cv_hud_statistics_ur_offset_x.getInt(), yDelta - cv_hud_statistics_ur_offset_y.getInt());
         }
         if(cv_draw_statistics_hitdelta.getBool()) {
             g->translate(cv_hud_statistics_hitdelta_offset_x.getInt(), cv_hud_statistics_hitdelta_offset_y.getInt());
-            drawStatisticText(g, UString::format("-%ims +%ims", std::abs(hitdeltaMin), hitdeltaMax));
+            this->drawStatisticText(g, UString::format("-%ims +%ims", std::abs(hitdeltaMin), hitdeltaMax));
             g->translate(-cv_hud_statistics_hitdelta_offset_x.getInt(),
                          yDelta - cv_hud_statistics_hitdelta_offset_y.getInt());
         }
@@ -1924,8 +1938,8 @@ void HUD::drawTargetHeatmap(Graphics *g, float hitcircleDiameter) {
     Circle::drawCircle(g, osu->getSkin(), center, hitcircleDiameter, COLOR(255, 50, 50, 50));
 
     const int size = hitcircleDiameter * 0.075f;
-    for(int i = 0; i < m_targets.size(); i++) {
-        const float delta = m_targets[i].delta;
+    for(int i = 0; i < this->targets.size(); i++) {
+        const float delta = this->targets[i].delta;
         const float p300 = cv_mod_target_300_percent.getFloat();
         const float p100 = cv_mod_target_100_percent.getFloat();
         const float p50 = cv_mod_target_50_percent.getFloat();
@@ -1954,9 +1968,9 @@ void HUD::drawTargetHeatmap(Graphics *g, float hitcircleDiameter) {
             color = colorMiss;
 
         g->setColor(color);
-        g->setAlpha(clamp<float>((m_targets[i].time - engine->getTime()) / 3.5f, 0.0f, 1.0f));
+        g->setAlpha(clamp<float>((this->targets[i].time - engine->getTime()) / 3.5f, 0.0f, 1.0f));
 
-        const float theta = deg2rad(m_targets[i].angle);
+        const float theta = deg2rad(this->targets[i].angle);
         const float cs = std::cos(theta);
         const float sn = std::sin(theta);
 
@@ -2026,8 +2040,8 @@ void HUD::drawScrubbingTimeline(Graphics *g, unsigned long beatmapTime, unsigned
 
     // draw strain graph
     if(cv_draw_scrubbing_timeline_strain_graph.getBool()) {
-        const std::vector<double> &aimStrains = osu->getSelectedBeatmap()->m_aimStrains;
-        const std::vector<double> &speedStrains = osu->getSelectedBeatmap()->m_speedStrains;
+        const std::vector<double> &aimStrains = osu->getSelectedBeatmap()->aimStrains;
+        const std::vector<double> &speedStrains = osu->getSelectedBeatmap()->speedStrains;
         const float speedMultiplier = osu->getSelectedBeatmap()->getSpeedMultiplier();
 
         if(aimStrains.size() > 0 && aimStrains.size() == speedStrains.size()) {
@@ -2233,7 +2247,7 @@ void HUD::drawScrubbingTimeline(Graphics *g, unsigned long beatmapTime, unsigned
                                        currentTimeLeftRightTextOffset) +
                       1),
                 (int)(triangleTip.y + startAndEndTimeTextOffset + timeFont->getHeight() * 2.2f + 1 +
-                      currentTimeTopTextOffset * max(1.0f, getCursorScaleFactor() * cv_cursor_scale.getFloat()) *
+                      currentTimeTopTextOffset * max(1.0f, this->getCursorScaleFactor() * cv_cursor_scale.getFloat()) *
                           cv_hud_scrubbing_timeline_hover_tooltip_offset_multiplier.getFloat()));
             g->setColor(0xff000000);
             g->setAlpha(galpha);
@@ -2259,7 +2273,7 @@ void HUD::drawScrubbingTimeline(Graphics *g, unsigned long beatmapTime, unsigned
                 osu->getScreenWidth() - timeFont->getStringWidth(currentTimeText) - currentTimeLeftRightTextOffset) +
                 1,
             (int)(triangleTip.y - osu->getSkin()->getSeekTriangle()->getHeight() - timeFont->getHeight() * 1.2f -
-                  currentTimeTopTextOffset * max(1.0f, getCursorScaleFactor() * cv_cursor_scale.getFloat()) *
+                  currentTimeTopTextOffset * max(1.0f, this->getCursorScaleFactor() * cv_cursor_scale.getFloat()) *
                       cv_hud_scrubbing_timeline_hover_tooltip_offset_multiplier.getFloat() * 2.0f -
                   1));
         g->setColor(0xff000000);
@@ -2328,29 +2342,29 @@ void HUD::drawInputOverlay(Graphics *g, int numK1, int numK2, int numM1, int num
                 case 0:
                     text = numK1 > 0 ? UString::format("%i", numK1) : UString("K1");
                     color = colorKeyboard;
-                    animScale = m_fInputoverlayK1AnimScale;
-                    animColor = m_fInputoverlayK1AnimColor;
+                    animScale = this->fInputoverlayK1AnimScale;
+                    animColor = this->fInputoverlayK1AnimColor;
                     if(numK1 > 0) textFont = textFontBold;
                     break;
                 case 1:
                     text = numK2 > 0 ? UString::format("%i", numK2) : UString("K2");
                     color = colorKeyboard;
-                    animScale = m_fInputoverlayK2AnimScale;
-                    animColor = m_fInputoverlayK2AnimColor;
+                    animScale = this->fInputoverlayK2AnimScale;
+                    animColor = this->fInputoverlayK2AnimColor;
                     if(numK2 > 0) textFont = textFontBold;
                     break;
                 case 2:
                     text = numM1 > 0 ? UString::format("%i", numM1) : UString("M1");
                     color = colorMouse;
-                    animScale = m_fInputoverlayM1AnimScale;
-                    animColor = m_fInputoverlayM1AnimColor;
+                    animScale = this->fInputoverlayM1AnimScale;
+                    animColor = this->fInputoverlayM1AnimColor;
                     if(numM1 > 0) textFont = textFontBold;
                     break;
                 case 3:
                     text = numM2 > 0 ? UString::format("%i", numM2) : UString("M2");
                     color = colorMouse;
-                    animScale = m_fInputoverlayM2AnimScale;
-                    animColor = m_fInputoverlayM2AnimColor;
+                    animScale = this->fInputoverlayM2AnimScale;
+                    animColor = this->fInputoverlayM2AnimColor;
                     if(numM2 > 0) textFont = textFontBold;
                     break;
             }
@@ -2393,7 +2407,7 @@ float HUD::getCursorScaleFactor() {
 }
 
 float HUD::getCursorTrailScaleFactor() {
-    return getCursorScaleFactor() * (osu->getSkin()->isCursorTrail2x() ? 0.5f : 1.0f);
+    return this->getCursorScaleFactor() * (osu->getSkin()->isCursorTrail2x() ? 0.5f : 1.0f);
 }
 
 float HUD::getScoreScale() {
@@ -2402,11 +2416,11 @@ float HUD::getScoreScale() {
 }
 
 void HUD::animateCombo() {
-    m_fComboAnim1 = 0.0f;
-    m_fComboAnim2 = 1.0f;
+    this->fComboAnim1 = 0.0f;
+    this->fComboAnim2 = 1.0f;
 
-    anim->moveLinear(&m_fComboAnim1, 2.0f, cv_combo_anim1_duration.getFloat(), true);
-    anim->moveQuadOut(&m_fComboAnim2, 0.0f, cv_combo_anim2_duration.getFloat(), 0.0f, true);
+    anim->moveLinear(&this->fComboAnim1, 2.0f, cv_combo_anim1_duration.getFloat(), true);
+    anim->moveQuadOut(&this->fComboAnim2, 0.0f, cv_combo_anim2_duration.getFloat(), 0.0f, true);
 }
 
 void HUD::addHitError(long delta, bool miss, bool misaim) {
@@ -2420,18 +2434,18 @@ void HUD::addHitError(long delta, bool miss, bool misaim) {
         h.miss = miss;
         h.misaim = misaim;
 
-        m_hiterrors.push_back(h);
+        this->hiterrors.push_back(h);
     }
 
     // remove old
-    for(int i = 0; i < m_hiterrors.size(); i++) {
-        if(engine->getTime() > m_hiterrors[i].time) {
-            m_hiterrors.erase(m_hiterrors.begin() + i);
+    for(int i = 0; i < this->hiterrors.size(); i++) {
+        if(engine->getTime() > this->hiterrors[i].time) {
+            this->hiterrors.erase(this->hiterrors.begin() + i);
             i--;
         }
     }
 
-    if(m_hiterrors.size() > cv_hud_hiterrorbar_max_entries.getInt()) m_hiterrors.erase(m_hiterrors.begin());
+    if(this->hiterrors.size() > cv_hud_hiterrorbar_max_entries.getInt()) this->hiterrors.erase(this->hiterrors.begin());
 }
 
 void HUD::addTarget(float delta, float angle) {
@@ -2440,32 +2454,32 @@ void HUD::addTarget(float delta, float angle) {
     t.delta = delta;
     t.angle = angle;
 
-    m_targets.push_back(t);
+    this->targets.push_back(t);
 }
 
 void HUD::animateInputoverlay(int key, bool down) {
     if(!cv_draw_inputoverlay.getBool() || (!cv_draw_hud.getBool() && cv_hud_shift_tab_toggles_everything.getBool()))
         return;
 
-    float *animScale = &m_fInputoverlayK1AnimScale;
-    float *animColor = &m_fInputoverlayK1AnimColor;
+    float *animScale = &this->fInputoverlayK1AnimScale;
+    float *animColor = &this->fInputoverlayK1AnimColor;
 
     switch(key) {
         case 1:
-            animScale = &m_fInputoverlayK1AnimScale;
-            animColor = &m_fInputoverlayK1AnimColor;
+            animScale = &this->fInputoverlayK1AnimScale;
+            animColor = &this->fInputoverlayK1AnimColor;
             break;
         case 2:
-            animScale = &m_fInputoverlayK2AnimScale;
-            animColor = &m_fInputoverlayK2AnimColor;
+            animScale = &this->fInputoverlayK2AnimScale;
+            animColor = &this->fInputoverlayK2AnimColor;
             break;
         case 3:
-            animScale = &m_fInputoverlayM1AnimScale;
-            animColor = &m_fInputoverlayM1AnimColor;
+            animScale = &this->fInputoverlayM1AnimScale;
+            animColor = &this->fInputoverlayM1AnimColor;
             break;
         case 4:
-            animScale = &m_fInputoverlayM2AnimScale;
-            animColor = &m_fInputoverlayM2AnimColor;
+            animScale = &this->fInputoverlayM2AnimScale;
+            animColor = &this->fInputoverlayM2AnimColor;
             break;
     }
 
@@ -2500,22 +2514,22 @@ void HUD::addCursorRipple(Vector2 pos) {
     ripple.pos = pos;
     ripple.time = engine->getTime() + cv_cursor_ripple_duration.getFloat();
 
-    m_cursorRipples.push_back(ripple);
+    this->cursorRipples.push_back(ripple);
 }
 
 void HUD::animateCursorExpand() {
-    m_fCursorExpandAnim = 1.0f;
-    anim->moveQuadOut(&m_fCursorExpandAnim, cv_cursor_expand_scale_multiplier.getFloat(),
+    this->fCursorExpandAnim = 1.0f;
+    anim->moveQuadOut(&this->fCursorExpandAnim, cv_cursor_expand_scale_multiplier.getFloat(),
                       cv_cursor_expand_duration.getFloat(), 0.0f, true);
 }
 
 void HUD::animateCursorShrink() {
-    anim->moveQuadOut(&m_fCursorExpandAnim, 1.0f, cv_cursor_expand_duration.getFloat(), 0.0f, true);
+    anim->moveQuadOut(&this->fCursorExpandAnim, 1.0f, cv_cursor_expand_duration.getFloat(), 0.0f, true);
 }
 
 void HUD::animateKiBulge() {
-    m_fKiScaleAnim = 1.2f;
-    anim->moveLinear(&m_fKiScaleAnim, 0.8f, 0.150f, true);
+    this->fKiScaleAnim = 1.2f;
+    anim->moveLinear(&this->fKiScaleAnim, 0.8f, 0.150f, true);
 }
 
 void HUD::animateKiExplode() {
@@ -2535,10 +2549,10 @@ void HUD::addCursorTrailPosition(std::vector<CURSORTRAIL> &trail, Vector2 pos, b
     const bool smoothCursorTrail = osu->getSkin()->useSmoothCursorTrail() || cv_cursor_trail_smooth_force.getBool();
 
     const float scaleAnim =
-        (osu->getSkin()->getCursorExpand() && cv_cursor_trail_expand.getBool() ? m_fCursorExpandAnim : 1.0f) *
+        (osu->getSkin()->getCursorExpand() && cv_cursor_trail_expand.getBool() ? this->fCursorExpandAnim : 1.0f) *
         cv_cursor_trail_scale.getFloat();
     const float trailWidth =
-        trailImage->getWidth() * getCursorTrailScaleFactor() * scaleAnim * cv_cursor_scale.getFloat();
+        trailImage->getWidth() * this->getCursorTrailScaleFactor() * scaleAnim * cv_cursor_scale.getFloat();
 
     CURSORTRAIL ct;
     ct.pos = pos;
@@ -2594,7 +2608,7 @@ void HUD::addCursorTrailPosition(std::vector<CURSORTRAIL> &trail, Vector2 pos, b
     }
 }
 
-void HUD::resetHitErrorBar() { m_hiterrors.clear(); }
+void HUD::resetHitErrorBar() { this->hiterrors.clear(); }
 
 McRect HUD::getSkipClickRect() {
     const float skipScale = cv_hud_scale.getFloat();

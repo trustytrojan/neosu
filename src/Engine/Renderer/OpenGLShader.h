@@ -15,7 +15,7 @@
 class OpenGLShader : public Shader {
    public:
     OpenGLShader(std::string vertexShader, std::string fragmentShader, bool source);
-    virtual ~OpenGLShader() { destroy(); }
+    virtual ~OpenGLShader() { this->destroy(); }
 
     virtual void enable();
     virtual void disable();
@@ -44,17 +44,17 @@ class OpenGLShader : public Shader {
     int createShaderFromString(std::string shaderSource, int shaderType);
     int createShaderFromFile(std::string fileName, int shaderType);
 
-    std::string m_sVsh, m_sFsh;
+    std::string sVsh, sFsh;
 
-    bool m_bSource;
-    int m_iVertexShader;
-    int m_iFragmentShader;
-    int m_iProgram;
+    bool bSource;
+    int iVertexShader;
+    int iFragmentShader;
+    int iProgram;
 
-    int m_iProgramBackup;
+    int iProgramBackup;
 
-    std::unordered_map<std::string, int> m_uniformLocationCache;
-    std::string m_sTempStringBuffer;
+    std::unordered_map<std::string, int> uniformLocationCache;
+    std::string sTempStringBuffer;
 };
 
 #endif

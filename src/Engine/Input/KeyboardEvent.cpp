@@ -8,8 +8,8 @@
 #include "KeyboardEvent.h"
 
 KeyboardEvent::KeyboardEvent(KEYCODE keyCode) {
-    m_keyCode = keyCode;
-    m_bConsumed = false;
+    this->keyCode = keyCode;
+    this->bConsumed = false;
 }
 
-void KeyboardEvent::consume() { m_bConsumed = true; }
+void KeyboardEvent::consume() { this->bConsumed = true; }

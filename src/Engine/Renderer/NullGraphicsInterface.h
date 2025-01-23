@@ -146,7 +146,7 @@ class NullGraphicsInterface : public Graphics {
     virtual std::vector<unsigned char> getScreenshot() { return std::vector<unsigned char>(); }
 
     // renderer info
-    virtual Vector2 getResolution() const { return m_vResolution; }
+    virtual Vector2 getResolution() const { return this->vResolution; }
     virtual UString getVendor();
     virtual UString getModel();
     virtual UString getVersion();
@@ -154,7 +154,7 @@ class NullGraphicsInterface : public Graphics {
     virtual int getVRAMRemaining() { return -1; }
 
     // callbacks
-    virtual void onResolutionChange(Vector2 newResolution) { m_vResolution = newResolution; }
+    virtual void onResolutionChange(Vector2 newResolution) { this->vResolution = newResolution; }
 
     // factory
     virtual Image *createImage(std::string filePath, bool mipmapped);
@@ -175,7 +175,7 @@ class NullGraphicsInterface : public Graphics {
 
    private:
     // renderer
-    Vector2 m_vResolution;
+    Vector2 vResolution;
 };
 
 #endif

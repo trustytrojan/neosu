@@ -18,24 +18,24 @@ class UIModSelectorModButton : public CBaseUIButton {
     void setState(unsigned int state, bool initialState, ConVar *cvar, UString modName, UString tooltipText,
                   std::function<SkinImage *()> getImageFunc);
     void setBaseScale(float xScale, float yScale);
-    void setAvailable(bool available) { m_bAvailable = available; }
+    void setAvailable(bool available) { this->bAvailable = available; }
 
     UString getActiveModName();
-    inline int getState() const { return m_iState; }
-    inline bool isOn() const { return m_bOn; }
+    inline int getState() const { return this->iState; }
+    inline bool isOn() const { return this->bOn; }
     void setOn(bool on, bool silent = false);
 
    private:
     virtual void onFocusStolen();
 
-    ModSelector *m_osuModSelector;
+    ModSelector *osuModSelector;
 
-    bool m_bOn;
-    bool m_bAvailable;
-    int m_iState;
-    float m_fEnabledScaleMultiplier;
-    float m_fEnabledRotationDeg;
-    Vector2 m_vBaseScale;
+    bool bOn;
+    bool bAvailable;
+    int iState;
+    float fEnabledScaleMultiplier;
+    float fEnabledRotationDeg;
+    Vector2 vBaseScale;
 
     struct STATE {
         ConVar *cvar;
@@ -43,11 +43,11 @@ class UIModSelectorModButton : public CBaseUIButton {
         std::vector<UString> tooltipTextLines;
         std::function<SkinImage *()> getImageFunc;
     };
-    std::vector<STATE> m_states;
+    std::vector<STATE> states;
 
-    Vector2 m_vScale;
-    float m_fRot;
+    Vector2 vScale;
+    float fRot;
     std::function<SkinImage *()> getActiveImageFunc;
 
-    bool m_bFocusStolenDelay;
+    bool bFocusStolenDelay;
 };

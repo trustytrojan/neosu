@@ -20,8 +20,8 @@ class SongButton : public Button {
     virtual void updateLayoutEx();
     virtual void updateGrade() { ; }
 
-    virtual DatabaseBeatmap *getDatabaseBeatmap() const { return m_databaseBeatmap; }
-    FinishedScore::Grade m_grade = FinishedScore::Grade::N;
+    virtual DatabaseBeatmap *getDatabaseBeatmap() const { return this->databaseBeatmap; }
+    FinishedScore::Grade grade = FinishedScore::Grade::N;
 
    protected:
     virtual void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected);
@@ -39,22 +39,22 @@ class SongButton : public Button {
     float calculateGradeScale();
     float calculateGradeWidth();
 
-    DatabaseBeatmap *m_databaseBeatmap;
+    DatabaseBeatmap *databaseBeatmap;
 
-    std::string m_sTitle;
-    std::string m_sArtist;
-    std::string m_sMapper;
+    std::string sTitle;
+    std::string sArtist;
+    std::string sMapper;
 
-    float m_fTextOffset;
-    float m_fGradeOffset;
-    float m_fTextSpacingScale;
-    float m_fTextMarginScale;
-    float m_fTitleScale;
-    float m_fSubTitleScale;
-    float m_fGradeScale;
+    float fTextOffset;
+    float fGradeOffset;
+    float fTextSpacingScale;
+    float fTextMarginScale;
+    float fTitleScale;
+    float fSubTitleScale;
+    float fGradeScale;
 
    private:
     static float thumbnailYRatio;
 
-    float m_fThumbnailFadeInTime;
+    float fThumbnailFadeInTime;
 };

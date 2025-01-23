@@ -12,66 +12,66 @@ class CBaseUIImage : public CBaseUIElement {
     void setImage(Image *img);
 
     CBaseUIImage *setDrawFrame(bool drawFrame) {
-        m_bDrawFrame = drawFrame;
+        this->bDrawFrame = drawFrame;
         return this;
     }
     CBaseUIImage *setDrawBackground(bool drawBackground) {
-        m_bDrawBackground = drawBackground;
+        this->bDrawBackground = drawBackground;
         return this;
     }
 
     CBaseUIImage *setFrameColor(Color frameColor) {
-        m_frameColor = frameColor;
+        this->frameColor = frameColor;
         return this;
     }
     CBaseUIImage *setColor(Color color) {
-        m_color = color;
+        this->color = color;
         return this;
     }
     CBaseUIImage *setAlpha(float alpha) {
-        m_color &= 0x00ffffff;
-        m_color |= ((int)(255.0f * alpha)) << 24;
+        this->color &= 0x00ffffff;
+        this->color |= ((int)(255.0f * alpha)) << 24;
         return this;
     }
     CBaseUIImage *setBackgroundColor(Color backgroundColor) {
-        m_backgroundColor = backgroundColor;
+        this->backgroundColor = backgroundColor;
         return this;
     }
 
     CBaseUIImage *setRotationDeg(float rotation) {
-        m_fRot = rotation;
+        this->fRot = rotation;
         return this;
     }
     CBaseUIImage *setScale(float xScale, float yScale) {
-        m_vScale.x = xScale;
-        m_vScale.y = yScale;
+        this->vScale.x = xScale;
+        this->vScale.y = yScale;
         return this;
     }
     CBaseUIImage *setScale(Vector2 scale) {
-        m_vScale.x = scale.x;
-        m_vScale.y = scale.y;
+        this->vScale.x = scale.x;
+        this->vScale.y = scale.y;
         return this;
     }
     CBaseUIImage *setScaleToFit(bool scaleToFit) {
-        m_bScaleToFit = scaleToFit;
+        this->bScaleToFit = scaleToFit;
         return this;
     }
 
-    inline float getRotationDeg() const { return m_fRot; }
-    inline Vector2 getScale() const { return m_vScale; }
-    inline Image *getImage() const { return m_image; }
+    inline float getRotationDeg() const { return this->fRot; }
+    inline Vector2 getScale() const { return this->vScale; }
+    inline Image *getImage() const { return this->image; }
 
    private:
-    Image *m_image;
+    Image *image;
 
-    Color m_frameColor;
-    Color m_backgroundColor;
-    Color m_color;
+    Color frameColor;
+    Color backgroundColor;
+    Color color;
 
-    bool m_bDrawFrame;
-    bool m_bDrawBackground;
-    bool m_bScaleToFit;
+    bool bDrawFrame;
+    bool bDrawBackground;
+    bool bScaleToFit;
 
-    float m_fRot;
-    Vector2 m_vScale;
+    float fRot;
+    Vector2 vScale;
 };

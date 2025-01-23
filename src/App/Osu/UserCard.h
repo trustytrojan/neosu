@@ -17,14 +17,14 @@ class UserCard : public CBaseUIButton {
     void setID(i32 new_id);
 
    private:
-    UIAvatar *m_avatar = NULL;
-    i32 m_user_id = 0;
+    UIAvatar *avatar = NULL;
+    i32 user_id = 0;
 
-    float m_fPP;
-    float m_fAcc;
-    int m_iLevel;
-    float m_fPercentToNextLevel;
+    float fPP;
+    float fAcc;
+    int iLevel;
+    float fPercentToNextLevel;
 
-    float m_fPPDelta;
-    float m_fPPDeltaAnim;
+    float fPPDelta;
+    float fPPDeltaAnim;
 };

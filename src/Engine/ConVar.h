@@ -80,8 +80,8 @@ class ConVar {
 
     // set
     void resetDefaults();
-    void setDefaultBool(bool defaultValue) { setDefaultFloat(defaultValue ? 1.f : 0.f); }
-    void setDefaultInt(int defaultValue) { setDefaultFloat((float)defaultValue); }
+    void setDefaultBool(bool defaultValue) { this->setDefaultFloat(defaultValue ? 1.f : 0.f); }
+    void setDefaultInt(int defaultValue) { this->setDefaultFloat((float)defaultValue); }
     void setDefaultFloat(float defaultValue);
     void setDefaultString(UString defaultValue);
 
@@ -95,8 +95,8 @@ class ConVar {
     void setHelpString(UString helpString);
 
     // get
-    inline float getDefaultFloat() const { return m_fDefaultValue.load(); }
-    inline const UString &getDefaultString() const { return m_sDefaultValue; }
+    inline float getDefaultFloat() const { return this->fDefaultValue.load(); }
+    inline const UString &getDefaultString() const { return this->sDefaultValue; }
 
     bool isUnlocked() const;
     std::string getFancyDefaultValue();
@@ -106,15 +106,15 @@ class ConVar {
     int getInt();
     const UString &getString();
 
-    inline const UString &getHelpstring() const { return m_sHelpString; }
-    inline const UString &getName() const { return m_sName; }
-    inline CONVAR_TYPE getType() const { return m_type; }
-    inline int getFlags() const { return m_iFlags; }
-    inline void setFlags(int new_flags) { m_iFlags = new_flags; }
+    inline const UString &getHelpstring() const { return this->sHelpString; }
+    inline const UString &getName() const { return this->sName; }
+    inline CONVAR_TYPE getType() const { return this->type; }
+    inline int getFlags() const { return this->iFlags; }
+    inline void setFlags(int new_flags) { this->iFlags = new_flags; }
 
-    inline bool hasValue() const { return m_bHasValue; }
-    inline bool hasCallbackArgs() const { return (m_callbackfuncargs || m_changecallback); }
-    inline bool isFlagSet(int flag) const { return (bool)(m_iFlags & flag); }
+    inline bool hasValue() const { return this->bHasValue; }
+    inline bool hasCallbackArgs() const { return (this->callbackfuncargs || this->changecallback); }
+    inline bool isFlagSet(int flag) const { return (bool)(this->iFlags & flag); }
 
    private:
     void init(int flags);
@@ -127,25 +127,25 @@ class ConVar {
     void init(UString &name, UString defaultValue, int flags, UString helpString, ConVarChangeCallback callback);
 
    private:
-    bool m_bHasValue;
-    CONVAR_TYPE m_type;
-    int m_iDefaultFlags;
-    int m_iFlags;
+    bool bHasValue;
+    CONVAR_TYPE type;
+    int iDefaultFlags;
+    int iFlags;
 
-    UString m_sName;
-    UString m_sHelpString;
+    UString sName;
+    UString sHelpString;
 
-    std::atomic<float> m_fValue;
-    std::atomic<float> m_fDefaultValue;
-    float m_fDefaultDefaultValue;
+    std::atomic<float> fValue;
+    std::atomic<float> fDefaultValue;
+    float fDefaultDefaultValue;
 
-    UString m_sValue;
-    UString m_sDefaultValue;
-    UString m_sDefaultDefaultValue;
+    UString sValue;
+    UString sDefaultValue;
+    UString sDefaultDefaultValue;
 
-    NativeConVarCallback m_callbackfunc;
-    NativeConVarCallbackArgs m_callbackfuncargs;
-    NativeConVarChangeCallback m_changecallback;
+    NativeConVarCallback callbackfunc;
+    NativeConVarCallbackArgs callbackfuncargs;
+    NativeConVarChangeCallback changecallback;
 };
 
 //*******************//

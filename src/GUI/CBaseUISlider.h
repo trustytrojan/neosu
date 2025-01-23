@@ -18,50 +18,50 @@ class CBaseUISlider : public CBaseUIElement {
     void fireChangeCallback();
 
     void setOrientation(bool horizontal) {
-        m_bHorizontal = horizontal;
-        onResized();
+        this->bHorizontal = horizontal;
+        this->onResized();
     }
 
-    void setDrawFrame(bool drawFrame) { m_bDrawFrame = drawFrame; }
-    void setDrawBackground(bool drawBackground) { m_bDrawBackground = drawBackground; }
+    void setDrawFrame(bool drawFrame) { this->bDrawFrame = drawFrame; }
+    void setDrawBackground(bool drawBackground) { this->bDrawBackground = drawBackground; }
 
-    void setFrameColor(Color frameColor) { m_frameColor = frameColor; }
-    void setBackgroundColor(Color backgroundColor) { m_backgroundColor = backgroundColor; }
+    void setFrameColor(Color frameColor) { this->frameColor = frameColor; }
+    void setBackgroundColor(Color backgroundColor) { this->backgroundColor = backgroundColor; }
 
     void setBlockSize(float xSize, float ySize);
 
     // callbacks, either void or with ourself as the argument
     typedef fastdelegate::FastDelegate1<CBaseUISlider *> SliderChangeCallback;
     CBaseUISlider *setChangeCallback(SliderChangeCallback changeCallback) {
-        m_sliderChangeCallback = changeCallback;
+        this->sliderChangeCallback = changeCallback;
         return this;
     }
 
     CBaseUISlider *setAllowMouseWheel(bool allowMouseWheel) {
-        m_bAllowMouseWheel = allowMouseWheel;
+        this->bAllowMouseWheel = allowMouseWheel;
         return this;
     }
     CBaseUISlider *setAnimated(bool animated) {
-        m_bAnimated = animated;
+        this->bAnimated = animated;
         return this;
     }
     CBaseUISlider *setLiveUpdate(bool liveUpdate) {
-        m_bLiveUpdate = liveUpdate;
+        this->bLiveUpdate = liveUpdate;
         return this;
     }
     CBaseUISlider *setBounds(float minValue, float maxValue);
     CBaseUISlider *setKeyDelta(float keyDelta) {
-        m_fKeyDelta = keyDelta;
+        this->fKeyDelta = keyDelta;
         return this;
     }
     CBaseUISlider *setValue(float value, bool animate = true, bool call_callback = true);
     CBaseUISlider *setInitialValue(float value);
 
-    inline float getFloat() { return m_fCurValue; }
-    inline int getInt() { return (int)m_fCurValue; }
-    inline bool getBool() { return (bool)m_fCurValue; }
-    inline float getMax() { return m_fMaxValue; }
-    inline float getMin() { return m_fMinValue; }
+    inline float getFloat() { return this->fCurValue; }
+    inline int getInt() { return (int)this->fCurValue; }
+    inline bool getBool() { return (bool)this->fCurValue; }
+    inline float getMax() { return this->fMaxValue; }
+    inline float getMin() { return this->fMinValue; }
     float getPercent();
 
     // TODO: DEPRECATED, don't use this function anymore, use setChangeCallback() instead
@@ -78,22 +78,22 @@ class CBaseUISlider : public CBaseUIElement {
 
     void updateBlockPos();
 
-    bool m_bDrawFrame, m_bDrawBackground;
-    bool m_bHorizontal;
-    bool m_bHasChanged;
-    bool m_bAnimated;
-    bool m_bLiveUpdate;
-    bool m_bAllowMouseWheel;
-    Color m_frameColor, m_backgroundColor;
+    bool bDrawFrame, bDrawBackground;
+    bool bHorizontal;
+    bool bHasChanged;
+    bool bAnimated;
+    bool bLiveUpdate;
+    bool bAllowMouseWheel;
+    Color frameColor, backgroundColor;
 
-    float m_fMinValue, m_fMaxValue, m_fCurValue, m_fCurPercent;
-    Vector2 m_vBlockSize, m_vBlockPos;
+    float fMinValue, fMaxValue, fCurValue, fCurPercent;
+    Vector2 vBlockSize, vBlockPos;
 
-    Vector2 m_vGrabBackup;
-    float m_fPrevValue;
+    Vector2 vGrabBackup;
+    float fPrevValue;
 
-    float m_fKeyDelta;
-    float m_fLastSoundPlayTime = 0.f;
+    float fKeyDelta;
+    float fLastSoundPlayTime = 0.f;
 
-    SliderChangeCallback m_sliderChangeCallback;
+    SliderChangeCallback sliderChangeCallback;
 };

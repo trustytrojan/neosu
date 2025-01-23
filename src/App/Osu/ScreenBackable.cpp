@@ -10,42 +10,42 @@
 #include "UIBackButton.h"
 
 ScreenBackable::ScreenBackable() : OsuScreen() {
-    m_backButton = new UIBackButton(-1, 0, 0, 0, "");
-    m_backButton->setClickCallback(fastdelegate::MakeDelegate(this, &ScreenBackable::onBack));
+    this->backButton = new UIBackButton(-1, 0, 0, 0, "");
+    this->backButton->setClickCallback(fastdelegate::MakeDelegate(this, &ScreenBackable::onBack));
 
-    updateLayout();
+    this->updateLayout();
 }
 
-ScreenBackable::~ScreenBackable() { SAFE_DELETE(m_backButton); }
+ScreenBackable::~ScreenBackable() { SAFE_DELETE(this->backButton); }
 
 void ScreenBackable::draw(Graphics *g) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
     OsuScreen::draw(g);
-    m_backButton->draw(g);
+    this->backButton->draw(g);
 }
 
 void ScreenBackable::mouse_update(bool *propagate_clicks) {
-    if(!m_bVisible) return;
-    m_backButton->mouse_update(propagate_clicks);
+    if(!this->bVisible) return;
+    this->backButton->mouse_update(propagate_clicks);
     if(!*propagate_clicks) return;
     OsuScreen::mouse_update(propagate_clicks);
 }
 
 void ScreenBackable::onKeyDown(KeyboardEvent &e) {
     OsuScreen::onKeyDown(e);
-    if(!m_bVisible || e.isConsumed()) return;
+    if(!this->bVisible || e.isConsumed()) return;
 
     if(e == KEY_ESCAPE || e == (KEYCODE)cv_GAME_PAUSE.getInt()) {
-        engine->getSound()->play(osu->getSkin()->m_menuBack);
-        onBack();
+        engine->getSound()->play(osu->getSkin()->menuBack);
+        this->onBack();
         e.consume();
         return;
     }
 }
 
 void ScreenBackable::updateLayout() {
-    m_backButton->updateLayout();
-    m_backButton->setPosY(osu->getScreenHeight() - m_backButton->getSize().y);
+    this->backButton->updateLayout();
+    this->backButton->setPosY(osu->getScreenHeight() - this->backButton->getSize().y);
 }
 
-void ScreenBackable::onResolutionChange(Vector2 newResolution) { updateLayout(); }
+void ScreenBackable::onResolutionChange(Vector2 newResolution) { this->updateLayout(); }

@@ -11,12 +11,12 @@
 #include "Environment.h"
 
 Resource::Resource(std::string filepath) {
-    m_sFilePath = filepath;
+    this->sFilePath = filepath;
 
-    if(m_sFilePath.length() > 0 && !env->fileExists(m_sFilePath)) {
+    if(this->sFilePath.length() > 0 && !env->fileExists(this->sFilePath)) {
         UString errorMessage = "File does not exist: ";
-        errorMessage.append(m_sFilePath.c_str());
-        debugLog("Resource Warning: File %s does not exist!\n", m_sFilePath.c_str());
+        errorMessage.append(this->sFilePath.c_str());
+        debugLog("Resource Warning: File %s does not exist!\n", this->sFilePath.c_str());
         /// engine->showMessageError("Resource Error", errorMessage);
 
         // HACKHACK: workaround retry different case variations due to linux fs case sensitivity
@@ -27,74 +27,74 @@ Resource::Resource(std::string filepath) {
             // try loading a toUpper() version of the file extension
 
             // search backwards from end to first dot, then toUpper() forwards till end of string
-            for(int s = m_sFilePath.size(); s >= 0; s--) {
-                if(m_sFilePath[s] == '.') {
-                    for(int i = s + 1; i < m_sFilePath.size(); i++) {
-                        m_sFilePath[i] = std::toupper(m_sFilePath[i]);
+            for(int s = this->sFilePath.size(); s >= 0; s--) {
+                if(this->sFilePath[s] == '.') {
+                    for(int i = s + 1; i < this->sFilePath.size(); i++) {
+                        this->sFilePath[i] = std::toupper(this->sFilePath[i]);
                     }
                     break;
                 }
             }
 
-            if(!env->fileExists(m_sFilePath)) {
+            if(!env->fileExists(this->sFilePath)) {
                 // if still not found, try with toLower() filename (keeping uppercase extension)
 
                 // search backwards from end to first dot, then toLower() everything until first slash
                 bool foundFilenameStart = false;
-                for(int s = m_sFilePath.size(); s >= 0; s--) {
+                for(int s = this->sFilePath.size(); s >= 0; s--) {
                     if(foundFilenameStart) {
-                        if(m_sFilePath[s] == '/') break;
-                        m_sFilePath[s] = std::tolower(m_sFilePath[s]);
+                        if(this->sFilePath[s] == '/') break;
+                        this->sFilePath[s] = std::tolower(this->sFilePath[s]);
                     }
 
-                    if(m_sFilePath[s] == '.') {
+                    if(this->sFilePath[s] == '.') {
                         foundFilenameStart = true;
                     }
                 }
 
-                if(!env->fileExists(m_sFilePath)) {
+                if(!env->fileExists(this->sFilePath)) {
                     // last chance, try with toLower() filename + extension
 
                     // toLower() backwards until first slash
-                    for(int s = m_sFilePath.size(); s >= 0; s--) {
-                        if(m_sFilePath[s] == '/') {
+                    for(int s = this->sFilePath.size(); s >= 0; s--) {
+                        if(this->sFilePath[s] == '/') {
                             break;
                         }
 
-                        m_sFilePath[s] = std::tolower(m_sFilePath[s]);
+                        this->sFilePath[s] = std::tolower(this->sFilePath[s]);
                     }
                 }
             }
         }
     }
 
-    m_bReady = false;
-    m_bAsyncReady = false;
-    m_bInterrupted = false;
+    this->bReady = false;
+    this->bAsyncReady = false;
+    this->bInterrupted = false;
 }
 
 Resource::Resource() {
-    m_bReady = false;
-    m_bAsyncReady = false;
-    m_bInterrupted = false;
+    this->bReady = false;
+    this->bAsyncReady = false;
+    this->bInterrupted = false;
 }
 
-void Resource::load() { init(); }
+void Resource::load() { this->init(); }
 
-void Resource::loadAsync() { initAsync(); }
+void Resource::loadAsync() { this->initAsync(); }
 
 void Resource::reload() {
-    release();
-    loadAsync();  // TODO: this should also be reloaded asynchronously if it was initially loaded so, maybe
-    load();
+    this->release();
+    this->loadAsync();  // TODO: this should also be reloaded asynchronously if it was initially loaded so, maybe
+    this->load();
 }
 
 void Resource::release() {
-    destroy();
+    this->destroy();
 
     // NOTE: these are set afterwards on purpose
-    m_bReady = false;
-    m_bAsyncReady = false;
+    this->bReady = false;
+    this->bAsyncReady = false;
 }
 
-void Resource::interruptLoad() { m_bInterrupted = true; }
+void Resource::interruptLoad() { this->bInterrupted = true; }

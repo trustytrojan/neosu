@@ -12,30 +12,30 @@
 #include "ResourceManager.h"
 
 CWindowManager::CWindowManager() {
-    m_bVisible = true;
-    m_bEnabled = true;
-    m_iLastEnabledWindow = 0;
-    m_iCurrentEnabledWindow = 0;
+    this->bVisible = true;
+    this->bEnabled = true;
+    this->iLastEnabledWindow = 0;
+    this->iCurrentEnabledWindow = 0;
 }
 
 CWindowManager::~CWindowManager() {
-    for(size_t i = 0; i < m_windows.size(); i++) {
-        delete m_windows[i];
+    for(size_t i = 0; i < this->windows.size(); i++) {
+        delete this->windows[i];
     }
 }
 
 void CWindowManager::draw(Graphics *g) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
-    for(int i = m_windows.size() - 1; i >= 0; i--) {
-        m_windows[i]->draw(g);
+    for(int i = this->windows.size() - 1; i >= 0; i--) {
+        this->windows[i]->draw(g);
     }
 
     /*
     for (size_t i=0; i<m_windows.size(); i++)
     {
             UString text = UString::format(" -%i-  ", i);
-            text.append(m_windows[i]->getName());
+            text.append(this->windows[i]->getName());
             g->pushTransform();
                     g->translate(20, i*40+350);
                     g->drawString(engine->getResourceManager()->getFont("FONT_DEFAULT"), text);
@@ -45,37 +45,38 @@ void CWindowManager::draw(Graphics *g) {
     g->pushTransform();
     g->translate(20, 500);
     g->drawString(engine->getResourceManager()->getFont("FONT_DEFAULT"), UString::format("currentEnabled = %i,
-    lastEnabled = %i, topIndex = %i", m_iCurrentEnabledWindow, m_iLastEnabledWindow, getTopMouseWindowIndex()));
+    lastEnabled = %i, topIndex = %i", this->iCurrentEnabledWindow, this->iLastEnabledWindow, getTopMouseWindowIndex()));
     g->popTransform();
     */
 }
 
 void CWindowManager::mouse_update(bool *propagate_clicks) {
-    if(!m_bVisible || m_windows.size() == 0) return;
+    if(!this->bVisible || this->windows.size() == 0) return;
 
     // update all windows, detect depth changes
-    for(size_t i = 0; i < m_windows.size(); i++) {
-        m_windows[i]->mouse_update(propagate_clicks);
+    for(size_t i = 0; i < this->windows.size(); i++) {
+        this->windows[i]->mouse_update(propagate_clicks);
         if(!*propagate_clicks) break;
     }
-    int topMouseWindowIndex = getTopMouseWindowIndex();
+    int topMouseWindowIndex = this->getTopMouseWindowIndex();
 
     // don't event think about switching if we are disabled
-    if(!m_bEnabled) return;
+    if(!this->bEnabled) return;
 
     // TODO: the logic here is fucked
     // if the topmost window isn't doing anything, we may be switching
-    if(!m_windows[0]->isBusy()) {
-        if(topMouseWindowIndex < m_windows.size()) m_iCurrentEnabledWindow = topMouseWindowIndex;
+    if(!this->windows[0]->isBusy()) {
+        if(topMouseWindowIndex < this->windows.size()) this->iCurrentEnabledWindow = topMouseWindowIndex;
 
         // enable the closest window under the cursor on a change, disable the others
-        if(m_iCurrentEnabledWindow != m_iLastEnabledWindow) {
-            m_iLastEnabledWindow = m_iCurrentEnabledWindow;
-            if(m_iLastEnabledWindow < m_windows.size()) {
-                m_windows[m_iLastEnabledWindow]->setEnabled(true);
-                // debugLog("enabled %s @%f\n", m_windows[m_iLastEnabledWindow]->getName().toUtf8(), engine->getTime());
-                for(size_t i = 0; i < m_windows.size(); i++) {
-                    if(i != m_iLastEnabledWindow) m_windows[i]->setEnabled(false);
+        if(this->iCurrentEnabledWindow != this->iLastEnabledWindow) {
+            this->iLastEnabledWindow = this->iCurrentEnabledWindow;
+            if(this->iLastEnabledWindow < this->windows.size()) {
+                this->windows[this->iLastEnabledWindow]->setEnabled(true);
+                // debugLog("enabled %s @%f\n", this->windows[m_iLastEnabledWindow]->getName().toUtf8(),
+                // engine->getTime());
+                for(size_t i = 0; i < this->windows.size(); i++) {
+                    if(i != this->iLastEnabledWindow) this->windows[i]->setEnabled(false);
                 }
             }
         }
@@ -83,8 +84,8 @@ void CWindowManager::mouse_update(bool *propagate_clicks) {
         // now check if we have to switch any windows
         bool topSwitch = false;
         int newTop = 0;
-        for(size_t i = 0; i < m_windows.size(); i++) {
-            if(m_windows[i]->isBusy() && !topSwitch) {
+        for(size_t i = 0; i < this->windows.size(); i++) {
+            if(this->windows[i]->isBusy() && !topSwitch) {
                 topSwitch = true;
                 newTop = i;
             }
@@ -93,25 +94,25 @@ void CWindowManager::mouse_update(bool *propagate_clicks) {
         // switch top window to m_windows[0], all others get pushed down
         if(topSwitch && newTop != 0) {
             // debugLog("top switch @%f\n", engine->getTime());
-            if(m_windows.size() > 1) {
-                CBaseUIWindow *newTopWindow = m_windows[newTop];
+            if(this->windows.size() > 1) {
+                CBaseUIWindow *newTopWindow = this->windows[newTop];
                 newTopWindow->setEnabled(true);
 
                 for(int i = newTop - 1; i >= 0; i--) {
-                    m_windows[i + 1] = m_windows[i];
+                    this->windows[i + 1] = this->windows[i];
                 }
 
-                m_windows[0] = newTopWindow;
-                m_iCurrentEnabledWindow = m_iLastEnabledWindow = 0;
+                this->windows[0] = newTopWindow;
+                this->iCurrentEnabledWindow = this->iLastEnabledWindow = 0;
             }
         }
     }
 }
 
 int CWindowManager::getTopMouseWindowIndex() {
-    int tempEnabledWindow = m_windows.size() - 1;
-    for(size_t i = 0; i < m_windows.size(); i++) {
-        if(m_windows[i]->isMouseInside() && i < tempEnabledWindow) tempEnabledWindow = i;
+    int tempEnabledWindow = this->windows.size() - 1;
+    for(size_t i = 0; i < this->windows.size(); i++) {
+        if(this->windows[i]->isMouseInside() && i < tempEnabledWindow) tempEnabledWindow = i;
     }
     return tempEnabledWindow;
 }
@@ -119,102 +120,102 @@ int CWindowManager::getTopMouseWindowIndex() {
 void CWindowManager::addWindow(CBaseUIWindow *window) {
     if(window == NULL) engine->showMessageError("Window Manager Error", "addWindow(NULL), you maggot!");
 
-    m_windows.insert(m_windows.begin(), window);
+    this->windows.insert(this->windows.begin(), window);
 
     // disable all other windows
-    for(size_t i = 1; i < (int)(m_windows.size() - 1); i++) {
-        m_windows[i]->setEnabled(false);
+    for(size_t i = 1; i < (int)(this->windows.size() - 1); i++) {
+        this->windows[i]->setEnabled(false);
     }
 }
 
 void CWindowManager::onResolutionChange(Vector2 newResolution) {
-    for(size_t i = 0; i < m_windows.size(); i++) {
-        m_windows[i]->onResolutionChange(newResolution);
+    for(size_t i = 0; i < this->windows.size(); i++) {
+        this->windows[i]->onResolutionChange(newResolution);
     }
 }
 
 void CWindowManager::setFocus(CBaseUIWindow *window) {
     if(window == NULL) engine->showMessageError("Window Manager Error", "setFocus(NULL), you noodle!");
 
-    for(int i = 0; i < m_windows.size(); i++) {
-        if(m_windows[i] == window && i != 0) {
-            CBaseUIWindow *newTopWindow = m_windows[i];
+    for(int i = 0; i < this->windows.size(); i++) {
+        if(this->windows[i] == window && i != 0) {
+            CBaseUIWindow *newTopWindow = this->windows[i];
             for(int i2 = i - 1; i2 >= 0; i2--) {
-                m_windows[i2 + 1] = m_windows[i2];
+                this->windows[i2 + 1] = this->windows[i2];
             }
-            m_windows[0] = newTopWindow;
+            this->windows[0] = newTopWindow;
             break;
         }
     }
 }
 
 void CWindowManager::openAll() {
-    for(size_t i = 0; i < m_windows.size(); i++) {
-        m_windows[i]->open();
+    for(size_t i = 0; i < this->windows.size(); i++) {
+        this->windows[i]->open();
     }
 }
 
 void CWindowManager::closeAll() {
-    for(size_t i = 0; i < m_windows.size(); i++) {
-        m_windows[i]->close();
+    for(size_t i = 0; i < this->windows.size(); i++) {
+        this->windows[i]->close();
     }
 }
 
 bool CWindowManager::isMouseInside() {
-    for(size_t i = 0; i < m_windows.size(); i++) {
-        if(m_windows[i]->isMouseInside()) return true;
+    for(size_t i = 0; i < this->windows.size(); i++) {
+        if(this->windows[i]->isMouseInside()) return true;
     }
     return false;
 }
 
 bool CWindowManager::isVisible() {
-    if(!m_bVisible) return false;
+    if(!this->bVisible) return false;
 
-    for(size_t i = 0; i < m_windows.size(); i++) {
-        if(m_windows[i]->isVisible()) return true;
+    for(size_t i = 0; i < this->windows.size(); i++) {
+        if(this->windows[i]->isVisible()) return true;
     }
     return false;
 }
 
 bool CWindowManager::isActive() {
-    if(!m_bVisible) return false;
-    for(size_t i = 0; i < m_windows.size(); i++) {
-        if(m_windows[i]->isActive() || m_windows[i]->isBusy())  // TODO: is this correct? (busy)
+    if(!this->bVisible) return false;
+    for(size_t i = 0; i < this->windows.size(); i++) {
+        if(this->windows[i]->isActive() || this->windows[i]->isBusy())  // TODO: is this correct? (busy)
             return true;
     }
     return false;
 }
 
 void CWindowManager::onKeyDown(KeyboardEvent &e) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
-    for(size_t i = 0; i < m_windows.size(); i++) {
-        m_windows[i]->onKeyDown(e);
+    for(size_t i = 0; i < this->windows.size(); i++) {
+        this->windows[i]->onKeyDown(e);
     }
 }
 
 void CWindowManager::onKeyUp(KeyboardEvent &e) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
-    for(size_t i = 0; i < m_windows.size(); i++) {
-        m_windows[i]->onKeyUp(e);
+    for(size_t i = 0; i < this->windows.size(); i++) {
+        this->windows[i]->onKeyUp(e);
     }
 }
 
 void CWindowManager::onChar(KeyboardEvent &e) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
-    for(size_t i = 0; i < m_windows.size(); i++) {
-        m_windows[i]->onChar(e);
+    for(size_t i = 0; i < this->windows.size(); i++) {
+        this->windows[i]->onChar(e);
     }
 }
 
 void CWindowManager::setEnabled(bool enabled) {
-    m_bEnabled = enabled;
-    if(!m_bEnabled) {
-        for(size_t i = 0; i < m_windows.size(); i++) {
-            m_windows[i]->setEnabled(false);
+    this->bEnabled = enabled;
+    if(!this->bEnabled) {
+        for(size_t i = 0; i < this->windows.size(); i++) {
+            this->windows[i]->setEnabled(false);
         }
     } else
-        m_windows[m_iCurrentEnabledWindow]->setEnabled(true);
+        this->windows[this->iCurrentEnabledWindow]->setEnabled(true);
 }

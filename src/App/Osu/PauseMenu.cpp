@@ -22,50 +22,51 @@
 #include "UIPauseMenuButton.h"
 
 PauseMenu::PauseMenu() : OsuScreen() {
-    m_bScheduledVisibility = false;
-    m_bScheduledVisibilityChange = false;
+    this->bScheduledVisibility = false;
+    this->bScheduledVisibilityChange = false;
 
-    m_selectedButton = NULL;
-    m_fWarningArrowsAnimStartTime = 0.0f;
-    m_fWarningArrowsAnimAlpha = 0.0f;
-    m_fWarningArrowsAnimX = 0.0f;
-    m_fWarningArrowsAnimY = 0.0f;
-    m_bInitialWarningArrowFlyIn = true;
+    this->selectedButton = NULL;
+    this->fWarningArrowsAnimStartTime = 0.0f;
+    this->fWarningArrowsAnimAlpha = 0.0f;
+    this->fWarningArrowsAnimX = 0.0f;
+    this->fWarningArrowsAnimY = 0.0f;
+    this->bInitialWarningArrowFlyIn = true;
 
-    m_bContinueEnabled = true;
-    m_bClick1Down = false;
-    m_bClick2Down = false;
+    this->bContinueEnabled = true;
+    this->bClick1Down = false;
+    this->bClick2Down = false;
 
-    m_fDimAnim = 0.0f;
+    this->fDimAnim = 0.0f;
 
-    setSize(osu->getScreenWidth(), osu->getScreenHeight());
+    this->setSize(osu->getScreenWidth(), osu->getScreenHeight());
 
     UIPauseMenuButton *continueButton =
-        addButton([]() -> Image * { return osu->getSkin()->getPauseContinue(); }, "Resume");
-    UIPauseMenuButton *retryButton = addButton([]() -> Image * { return osu->getSkin()->getPauseRetry(); }, "Retry");
-    UIPauseMenuButton *backButton = addButton([]() -> Image * { return osu->getSkin()->getPauseBack(); }, "Quit");
+        this->addButton([]() -> Image * { return osu->getSkin()->getPauseContinue(); }, "Resume");
+    UIPauseMenuButton *retryButton =
+        this->addButton([]() -> Image * { return osu->getSkin()->getPauseRetry(); }, "Retry");
+    UIPauseMenuButton *backButton = this->addButton([]() -> Image * { return osu->getSkin()->getPauseBack(); }, "Quit");
 
     continueButton->setClickCallback(fastdelegate::MakeDelegate(this, &PauseMenu::onContinueClicked));
     retryButton->setClickCallback(fastdelegate::MakeDelegate(this, &PauseMenu::onRetryClicked));
     backButton->setClickCallback(fastdelegate::MakeDelegate(this, &PauseMenu::onBackClicked));
 
-    updateLayout();
+    this->updateLayout();
 }
 
 void PauseMenu::draw(Graphics *g) {
-    const bool isAnimating = anim->isAnimating(&m_fDimAnim);
-    if(!m_bVisible && !isAnimating) return;
+    const bool isAnimating = anim->isAnimating(&this->fDimAnim);
+    if(!this->bVisible && !isAnimating) return;
 
     // draw dim
     if(cv_pause_dim_background.getBool()) {
-        g->setColor(COLORf(m_fDimAnim * cv_pause_dim_alpha.getFloat(), 0.078f, 0.078f, 0.078f));
+        g->setColor(COLORf(this->fDimAnim * cv_pause_dim_alpha.getFloat(), 0.078f, 0.078f, 0.078f));
         g->fillRect(0, 0, osu->getScreenWidth(), osu->getScreenHeight());
     }
 
     // draw background image
-    if((m_bVisible || isAnimating)) {
+    if((this->bVisible || isAnimating)) {
         Image *image = NULL;
-        if(m_bContinueEnabled)
+        if(this->bContinueEnabled)
             image = osu->getSkin()->getPauseOverlay();
         else
             image = osu->getSkin()->getFailBackground();
@@ -74,7 +75,7 @@ void PauseMenu::draw(Graphics *g) {
             const float scale = Osu::getImageScaleToFillResolution(image, osu->getScreenSize());
             const Vector2 centerTrans = (osu->getScreenSize() / 2);
 
-            g->setColor(COLORf(m_fDimAnim, 1.0f, 1.0f, 1.0f));
+            g->setColor(COLORf(this->fDimAnim, 1.0f, 1.0f, 1.0f));
             g->pushTransform();
             {
                 g->scale(scale, scale);
@@ -86,111 +87,112 @@ void PauseMenu::draw(Graphics *g) {
     }
 
     // draw buttons
-    for(int i = 0; i < m_buttons.size(); i++) {
-        m_buttons[i]->setAlpha(1.0f - (1.0f - m_fDimAnim) * (1.0f - m_fDimAnim) * (1.0f - m_fDimAnim));
+    for(int i = 0; i < this->buttons.size(); i++) {
+        this->buttons[i]->setAlpha(1.0f - (1.0f - this->fDimAnim) * (1.0f - this->fDimAnim) * (1.0f - this->fDimAnim));
     }
     OsuScreen::draw(g);
 
     // draw selection arrows
-    if(m_selectedButton != NULL) {
+    if(this->selectedButton != NULL) {
         const Color arrowColor = COLOR(255, 0, 114, 255);
-        float animation = fmod((float)(engine->getTime() - m_fWarningArrowsAnimStartTime) * 3.2f, 2.0f);
+        float animation = fmod((float)(engine->getTime() - this->fWarningArrowsAnimStartTime) * 3.2f, 2.0f);
         if(animation > 1.0f) animation = 2.0f - animation;
 
         animation = -animation * (animation - 2);  // quad out
         const float offset = osu->getUIScale(20.0f + 45.0f * animation);
 
         g->setColor(arrowColor);
-        g->setAlpha(m_fWarningArrowsAnimAlpha * m_fDimAnim);
+        g->setAlpha(this->fWarningArrowsAnimAlpha * this->fDimAnim);
         osu->getHUD()->drawWarningArrow(g,
-                                        Vector2(m_fWarningArrowsAnimX, m_fWarningArrowsAnimY) +
-                                            Vector2(0, m_selectedButton->getSize().y / 2) - Vector2(offset, 0),
+                                        Vector2(this->fWarningArrowsAnimX, this->fWarningArrowsAnimY) +
+                                            Vector2(0, this->selectedButton->getSize().y / 2) - Vector2(offset, 0),
                                         false, false);
-        osu->getHUD()->drawWarningArrow(g,
-                                        Vector2(osu->getScreenWidth() - m_fWarningArrowsAnimX, m_fWarningArrowsAnimY) +
-                                            Vector2(0, m_selectedButton->getSize().y / 2) + Vector2(offset, 0),
-                                        true, false);
+        osu->getHUD()->drawWarningArrow(
+            g,
+            Vector2(osu->getScreenWidth() - this->fWarningArrowsAnimX, this->fWarningArrowsAnimY) +
+                Vector2(0, this->selectedButton->getSize().y / 2) + Vector2(offset, 0),
+            true, false);
     }
 }
 
 void PauseMenu::mouse_update(bool *propagate_clicks) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
     // update and focus handling
     OsuScreen::mouse_update(propagate_clicks);
 
-    if(m_bScheduledVisibilityChange) {
-        m_bScheduledVisibilityChange = false;
-        setVisible(m_bScheduledVisibility);
+    if(this->bScheduledVisibilityChange) {
+        this->bScheduledVisibilityChange = false;
+        this->setVisible(this->bScheduledVisibility);
     }
 
-    if(anim->isAnimating(&m_fWarningArrowsAnimX)) m_fWarningArrowsAnimStartTime = engine->getTime();
+    if(anim->isAnimating(&this->fWarningArrowsAnimX)) this->fWarningArrowsAnimStartTime = engine->getTime();
 }
 
 void PauseMenu::onContinueClicked() {
-    if(!m_bContinueEnabled) return;
-    if(anim->isAnimating(&m_fDimAnim)) return;
+    if(!this->bContinueEnabled) return;
+    if(anim->isAnimating(&this->fDimAnim)) return;
 
-    engine->getSound()->play(osu->getSkin()->m_clickPauseContinue);
+    engine->getSound()->play(osu->getSkin()->clickPauseContinue);
     osu->getSelectedBeatmap()->pause();
 
-    scheduleVisibilityChange(false);
+    this->scheduleVisibilityChange(false);
 }
 
 void PauseMenu::onRetryClicked() {
-    if(anim->isAnimating(&m_fDimAnim)) return;
+    if(anim->isAnimating(&this->fDimAnim)) return;
 
-    engine->getSound()->play(osu->getSkin()->m_clickPauseRetry);
+    engine->getSound()->play(osu->getSkin()->clickPauseRetry);
     osu->getSelectedBeatmap()->restart();
 
-    scheduleVisibilityChange(false);
+    this->scheduleVisibilityChange(false);
 }
 
 void PauseMenu::onBackClicked() {
-    if(anim->isAnimating(&m_fDimAnim)) return;
+    if(anim->isAnimating(&this->fDimAnim)) return;
 
-    engine->getSound()->play(osu->getSkin()->m_clickPauseBack);
+    engine->getSound()->play(osu->getSkin()->clickPauseBack);
     osu->getSelectedBeatmap()->stop();
 
-    scheduleVisibilityChange(false);
+    this->scheduleVisibilityChange(false);
 }
 
 void PauseMenu::onSelectionChange() {
-    if(m_selectedButton != NULL) {
-        if(m_bInitialWarningArrowFlyIn) {
-            m_bInitialWarningArrowFlyIn = false;
+    if(this->selectedButton != NULL) {
+        if(this->bInitialWarningArrowFlyIn) {
+            this->bInitialWarningArrowFlyIn = false;
 
-            m_fWarningArrowsAnimY = m_selectedButton->getPos().y;
-            m_fWarningArrowsAnimX = m_selectedButton->getPos().x - osu->getUIScale(170.0f);
+            this->fWarningArrowsAnimY = this->selectedButton->getPos().y;
+            this->fWarningArrowsAnimX = this->selectedButton->getPos().x - osu->getUIScale(170.0f);
 
-            anim->moveLinear(&m_fWarningArrowsAnimAlpha, 1.0f, 0.3f);
-            anim->moveQuadIn(&m_fWarningArrowsAnimX, m_selectedButton->getPos().x, 0.3f);
+            anim->moveLinear(&this->fWarningArrowsAnimAlpha, 1.0f, 0.3f);
+            anim->moveQuadIn(&this->fWarningArrowsAnimX, this->selectedButton->getPos().x, 0.3f);
         } else
-            m_fWarningArrowsAnimX = m_selectedButton->getPos().x;
+            this->fWarningArrowsAnimX = this->selectedButton->getPos().x;
 
-        anim->moveQuadOut(&m_fWarningArrowsAnimY, m_selectedButton->getPos().y, 0.1f);
+        anim->moveQuadOut(&this->fWarningArrowsAnimY, this->selectedButton->getPos().y, 0.1f);
     }
 }
 
 void PauseMenu::onKeyDown(KeyboardEvent &e) {
     OsuScreen::onKeyDown(e);  // only used for options menu
-    if(!m_bVisible || e.isConsumed()) return;
+    if(!this->bVisible || e.isConsumed()) return;
 
     if(e == (KEYCODE)cv_LEFT_CLICK.getInt() || e == (KEYCODE)cv_RIGHT_CLICK.getInt() ||
        e == (KEYCODE)cv_LEFT_CLICK_2.getInt() || e == (KEYCODE)cv_RIGHT_CLICK_2.getInt()) {
         bool fireButtonClick = false;
-        if((e == (KEYCODE)cv_LEFT_CLICK.getInt() || e == (KEYCODE)cv_LEFT_CLICK_2.getInt()) && !m_bClick1Down) {
-            m_bClick1Down = true;
+        if((e == (KEYCODE)cv_LEFT_CLICK.getInt() || e == (KEYCODE)cv_LEFT_CLICK_2.getInt()) && !this->bClick1Down) {
+            this->bClick1Down = true;
             fireButtonClick = true;
         }
-        if((e == (KEYCODE)cv_RIGHT_CLICK.getInt() || e == (KEYCODE)cv_RIGHT_CLICK_2.getInt()) && !m_bClick2Down) {
-            m_bClick2Down = true;
+        if((e == (KEYCODE)cv_RIGHT_CLICK.getInt() || e == (KEYCODE)cv_RIGHT_CLICK_2.getInt()) && !this->bClick2Down) {
+            this->bClick2Down = true;
             fireButtonClick = true;
         }
         if(fireButtonClick) {
-            for(int i = 0; i < m_buttons.size(); i++) {
-                if(m_buttons[i]->isMouseInside()) {
-                    m_buttons[i]->click();
+            for(int i = 0; i < this->buttons.size(); i++) {
+                if(this->buttons[i]->isMouseInside()) {
+                    this->buttons[i]->click();
                     break;
                 }
             }
@@ -198,60 +200,60 @@ void PauseMenu::onKeyDown(KeyboardEvent &e) {
     }
 
     // handle arrow keys selection
-    if(m_buttons.size() > 0) {
+    if(this->buttons.size() > 0) {
         if(!engine->getKeyboard()->isAltDown() && e == KEY_DOWN) {
-            UIPauseMenuButton *nextSelectedButton = m_buttons[0];
+            UIPauseMenuButton *nextSelectedButton = this->buttons[0];
 
             // get first visible button
-            for(int i = 0; i < m_buttons.size(); i++) {
-                if(!m_buttons[i]->isVisible()) continue;
+            for(int i = 0; i < this->buttons.size(); i++) {
+                if(!this->buttons[i]->isVisible()) continue;
 
-                nextSelectedButton = m_buttons[i];
+                nextSelectedButton = this->buttons[i];
                 break;
             }
 
             // next selection logic
             bool next = false;
-            for(int i = 0; i < m_buttons.size(); i++) {
-                if(!m_buttons[i]->isVisible()) continue;
+            for(int i = 0; i < this->buttons.size(); i++) {
+                if(!this->buttons[i]->isVisible()) continue;
 
                 if(next) {
-                    nextSelectedButton = m_buttons[i];
+                    nextSelectedButton = this->buttons[i];
                     break;
                 }
-                if(m_selectedButton == m_buttons[i]) next = true;
+                if(this->selectedButton == this->buttons[i]) next = true;
             }
-            m_selectedButton = nextSelectedButton;
-            onSelectionChange();
+            this->selectedButton = nextSelectedButton;
+            this->onSelectionChange();
         }
 
         if(!engine->getKeyboard()->isAltDown() && e == KEY_UP) {
-            UIPauseMenuButton *nextSelectedButton = m_buttons[m_buttons.size() - 1];
+            UIPauseMenuButton *nextSelectedButton = this->buttons[this->buttons.size() - 1];
 
             // get first visible button
-            for(int i = m_buttons.size() - 1; i >= 0; i--) {
-                if(!m_buttons[i]->isVisible()) continue;
+            for(int i = this->buttons.size() - 1; i >= 0; i--) {
+                if(!this->buttons[i]->isVisible()) continue;
 
-                nextSelectedButton = m_buttons[i];
+                nextSelectedButton = this->buttons[i];
                 break;
             }
 
             // next selection logic
             bool next = false;
-            for(int i = m_buttons.size() - 1; i >= 0; i--) {
-                if(!m_buttons[i]->isVisible()) continue;
+            for(int i = this->buttons.size() - 1; i >= 0; i--) {
+                if(!this->buttons[i]->isVisible()) continue;
 
                 if(next) {
-                    nextSelectedButton = m_buttons[i];
+                    nextSelectedButton = this->buttons[i];
                     break;
                 }
-                if(m_selectedButton == m_buttons[i]) next = true;
+                if(this->selectedButton == this->buttons[i]) next = true;
             }
-            m_selectedButton = nextSelectedButton;
-            onSelectionChange();
+            this->selectedButton = nextSelectedButton;
+            this->onSelectionChange();
         }
 
-        if(m_selectedButton != NULL && e == KEY_ENTER) m_selectedButton->click();
+        if(this->selectedButton != NULL && e == KEY_ENTER) this->selectedButton->click();
     }
 
     // consume ALL events, except for a few special binds which are allowed through (e.g. for unpause or changing the
@@ -262,47 +264,47 @@ void PauseMenu::onKeyDown(KeyboardEvent &e) {
 }
 
 void PauseMenu::onKeyUp(KeyboardEvent &e) {
-    if(e == (KEYCODE)cv_LEFT_CLICK.getInt() || e == (KEYCODE)cv_LEFT_CLICK_2.getInt()) m_bClick1Down = false;
+    if(e == (KEYCODE)cv_LEFT_CLICK.getInt() || e == (KEYCODE)cv_LEFT_CLICK_2.getInt()) this->bClick1Down = false;
 
-    if(e == (KEYCODE)cv_RIGHT_CLICK.getInt() || e == (KEYCODE)cv_RIGHT_CLICK_2.getInt()) m_bClick2Down = false;
+    if(e == (KEYCODE)cv_RIGHT_CLICK.getInt() || e == (KEYCODE)cv_RIGHT_CLICK_2.getInt()) this->bClick2Down = false;
 }
 
 void PauseMenu::onChar(KeyboardEvent &e) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
     e.consume();
 }
 
 void PauseMenu::scheduleVisibilityChange(bool visible) {
-    if(visible != m_bVisible) {
-        m_bScheduledVisibilityChange = true;
-        m_bScheduledVisibility = visible;
+    if(visible != this->bVisible) {
+        this->bScheduledVisibilityChange = true;
+        this->bScheduledVisibility = visible;
     }
 
     // HACKHACK:
-    if(!visible) setContinueEnabled(true);
+    if(!visible) this->setContinueEnabled(true);
 }
 
 void PauseMenu::updateLayout() {
-    const float height = (osu->getScreenHeight() / (float)m_buttons.size());
-    const float half = (m_buttons.size() - 1) / 2.0f;
+    const float height = (osu->getScreenHeight() / (float)this->buttons.size());
+    const float half = (this->buttons.size() - 1) / 2.0f;
 
     float maxWidth = 0.0f;
     float maxHeight = 0.0f;
-    for(int i = 0; i < m_buttons.size(); i++) {
-        Image *img = m_buttons[i]->getImage();
+    for(int i = 0; i < this->buttons.size(); i++) {
+        Image *img = this->buttons[i]->getImage();
         if(img == NULL) img = osu->getSkin()->getMissingTexture();
 
         const float scale = osu->getUIScale(256) / (411.0f * (osu->getSkin()->isPauseContinue2x() ? 2.0f : 1.0f));
 
-        m_buttons[i]->setBaseScale(scale, scale);
-        m_buttons[i]->setSize(img->getWidth() * scale, img->getHeight() * scale);
+        this->buttons[i]->setBaseScale(scale, scale);
+        this->buttons[i]->setSize(img->getWidth() * scale, img->getHeight() * scale);
 
-        if(m_buttons[i]->getSize().x > maxWidth) maxWidth = m_buttons[i]->getSize().x;
-        if(m_buttons[i]->getSize().y > maxHeight) maxHeight = m_buttons[i]->getSize().y;
+        if(this->buttons[i]->getSize().x > maxWidth) maxWidth = this->buttons[i]->getSize().x;
+        if(this->buttons[i]->getSize().y > maxHeight) maxHeight = this->buttons[i]->getSize().y;
     }
 
-    for(int i = 0; i < m_buttons.size(); i++) {
+    for(int i = 0; i < this->buttons.size(); i++) {
         Vector2 newPos =
             Vector2(osu->getScreenWidth() / 2.0f - maxWidth / 2, (i + 1) * height - height / 2.0f - maxHeight / 2.0f);
 
@@ -312,31 +314,31 @@ void PauseMenu::updateLayout() {
         else if((float)i > half)
             newPos.y -= pinch;
 
-        m_buttons[i]->setPos(newPos);
-        m_buttons[i]->setSize(maxWidth, maxHeight);
+        this->buttons[i]->setPos(newPos);
+        this->buttons[i]->setSize(maxWidth, maxHeight);
     }
 
-    onSelectionChange();
+    this->onSelectionChange();
 }
 
 void PauseMenu::onResolutionChange(Vector2 newResolution) {
-    setSize(newResolution);
-    updateLayout();
+    this->setSize(newResolution);
+    this->updateLayout();
 }
 
 CBaseUIContainer *PauseMenu::setVisible(bool visible) {
-    m_bVisible = visible;
+    this->bVisible = visible;
 
     if(osu->isInPlayMode()) {
-        setContinueEnabled(!osu->getSelectedBeatmap()->hasFailed());
+        this->setContinueEnabled(!osu->getSelectedBeatmap()->hasFailed());
     } else {
-        setContinueEnabled(true);
+        this->setContinueEnabled(true);
     }
 
     if(visible) {
-        engine->getSound()->play(osu->getSkin()->m_pauseLoop);
+        engine->getSound()->play(osu->getSkin()->pauseLoop);
 
-        if(m_bContinueEnabled) {
+        if(this->bContinueEnabled) {
             RichPresence::setBanchoStatus("Taking a break", PAUSED);
 
             if(!bancho.spectators.empty()) {
@@ -353,7 +355,7 @@ CBaseUIContainer *PauseMenu::setVisible(bool visible) {
             RichPresence::setBanchoStatus("Failed", SUBMITTING);
         }
     } else {
-        engine->getSound()->stop(osu->getSkin()->m_pauseLoop);
+        engine->getSound()->stop(osu->getSkin()->pauseLoop);
 
         RichPresence::onPlayStart();
 
@@ -373,31 +375,32 @@ CBaseUIContainer *PauseMenu::setVisible(bool visible) {
     osu->getModSelector()->setVisible(false);
 
     // reset
-    m_selectedButton = NULL;
-    m_bInitialWarningArrowFlyIn = true;
-    m_fWarningArrowsAnimAlpha = 0.0f;
-    m_bScheduledVisibility = visible;
-    m_bScheduledVisibilityChange = false;
+    this->selectedButton = NULL;
+    this->bInitialWarningArrowFlyIn = true;
+    this->fWarningArrowsAnimAlpha = 0.0f;
+    this->bScheduledVisibility = visible;
+    this->bScheduledVisibilityChange = false;
 
-    if(m_bVisible) updateLayout();
+    if(this->bVisible) this->updateLayout();
 
     osu->updateConfineCursor();
     osu->updateWindowsKeyDisable();
 
-    anim->moveQuadOut(&m_fDimAnim, (m_bVisible ? 1.0f : 0.0f),
-                      cv_pause_anim_duration.getFloat() * (m_bVisible ? 1.0f - m_fDimAnim : m_fDimAnim), true);
-    osu->m_chat->updateVisibility();
+    anim->moveQuadOut(&this->fDimAnim, (this->bVisible ? 1.0f : 0.0f),
+                      cv_pause_anim_duration.getFloat() * (this->bVisible ? 1.0f - this->fDimAnim : this->fDimAnim),
+                      true);
+    osu->chat->updateVisibility();
     return this;
 }
 
 void PauseMenu::setContinueEnabled(bool continueEnabled) {
-    m_bContinueEnabled = continueEnabled;
-    if(m_buttons.size() > 0) m_buttons[0]->setVisible(m_bContinueEnabled);
+    this->bContinueEnabled = continueEnabled;
+    if(this->buttons.size() > 0) this->buttons[0]->setVisible(this->bContinueEnabled);
 }
 
 UIPauseMenuButton *PauseMenu::addButton(std::function<Image *()> getImageFunc, UString btn_name) {
     UIPauseMenuButton *button = new UIPauseMenuButton(getImageFunc, 0, 0, 0, 0, btn_name);
-    addBaseUIElement(button);
-    m_buttons.push_back(button);
+    this->addBaseUIElement(button);
+    this->buttons.push_back(button);
     return button;
 }

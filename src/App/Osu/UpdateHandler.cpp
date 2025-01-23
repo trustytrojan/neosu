@@ -30,7 +30,7 @@ void *UpdateHandler::run(void *data) {
     if(handler->_m_bKYS) return NULL;  // cancellation point
 
     // continue if we have one. reset the thread in both cases after we're done
-    if(handler->m_status != STATUS::STATUS_UP_TO_DATE) {
+    if(handler->status != STATUS::STATUS_UP_TO_DATE) {
         // try to download and install the update
         if(handler->_downloadUpdate()) {
             if(handler->_m_bKYS) return NULL;  // cancellation point
@@ -38,63 +38,64 @@ void *UpdateHandler::run(void *data) {
             handler->_installUpdate(TEMP_UPDATE_DOWNLOAD_FILEPATH);
         }
 
-        handler->m_updateThread = NULL;  // reset
+        handler->updateThread = NULL;  // reset
 
         if(handler->_m_bKYS) return NULL;  // cancellation point
 
         // retry up to 3 times if something went wrong
         if(handler->getStatus() != STATUS::STATUS_SUCCESS_INSTALLATION) {
-            handler->m_iNumRetries++;
-            if(handler->m_iNumRetries < 4) handler->checkForUpdates();
+            handler->iNumRetries++;
+            if(handler->iNumRetries < 4) handler->checkForUpdates();
         }
     } else {
-        handler->m_updateThread = NULL;  // reset
+        handler->updateThread = NULL;  // reset
     }
 
     return NULL;
 }
 
 UpdateHandler::UpdateHandler() {
-    update_url = "";
+    this->update_url = "";
 
-    m_status = cv_auto_update.getBool() ? STATUS::STATUS_CHECKING_FOR_UPDATE : STATUS::STATUS_UP_TO_DATE;
-    m_iNumRetries = 0;
-    _m_bKYS = false;
+    this->status = cv_auto_update.getBool() ? STATUS::STATUS_CHECKING_FOR_UPDATE : STATUS::STATUS_UP_TO_DATE;
+    this->iNumRetries = 0;
+    this->_m_bKYS = false;
 }
 
 UpdateHandler::~UpdateHandler() {}
 
 void UpdateHandler::stop() {
-    _m_bKYS = true;
-    m_updateThread = NULL;
+    this->_m_bKYS = true;
+    this->updateThread = NULL;
 }
 
 void UpdateHandler::wait() {
-    if(m_updateThread != NULL) {
-        m_updateThread->join();
+    if(this->updateThread != NULL) {
+        this->updateThread->join();
     }
 }
 
 void UpdateHandler::checkForUpdates() {
-    if(!cv_auto_update.getBool() || cv_debug.getBool() || (m_updateThread != NULL && m_updateThread->joinable()))
+    if(!cv_auto_update.getBool() || cv_debug.getBool() ||
+       (this->updateThread != NULL && this->updateThread->joinable()))
         return;
     if(env->getOS() != Environment::OS::WINDOWS) return;  // only windows gets releases right now
 
-    m_updateThread = new std::thread(UpdateHandler::run, (void *)this);
-    m_updateThread->detach();
+    this->updateThread = new std::thread(UpdateHandler::run, (void *)this);
+    this->updateThread->detach();
 
-    if(m_iNumRetries > 0) debugLog("UpdateHandler::checkForUpdates() retry %i ...\n", m_iNumRetries);
+    if(this->iNumRetries > 0) debugLog("UpdateHandler::checkForUpdates() retry %i ...\n", this->iNumRetries);
 }
 
 void UpdateHandler::_requestUpdate() {
     debugLog("UpdateHandler::requestUpdate()\n");
-    m_status = STATUS::STATUS_CHECKING_FOR_UPDATE;
+    this->status = STATUS::STATUS_CHECKING_FOR_UPDATE;
 
     UString latestVersion =
         engine->getNetworkHandler()->httpGet("https://" NEOSU_DOMAIN "/update/" OS_NAME "/latest-version.txt");
     float fLatestVersion = strtof(latestVersion.toUtf8(), NULL);
     if(fLatestVersion == 0.f) {
-        m_status = STATUS::STATUS_UP_TO_DATE;
+        this->status = STATUS::STATUS_UP_TO_DATE;
         debugLog("Failed to check for updates :/\n");
         return;
     }
@@ -102,20 +103,20 @@ void UpdateHandler::_requestUpdate() {
     float current_version = cv_version.getFloat();
     if(current_version >= fLatestVersion) {
         // We're already up to date
-        m_status = STATUS::STATUS_UP_TO_DATE;
+        this->status = STATUS::STATUS_UP_TO_DATE;
         debugLog("We're already up to date (current v%.2f, latest v%.2f)\n", current_version, fLatestVersion);
         return;
     }
 
     debugLog("Downloading latest update... (current v%.2f, latest v%.2f)\n", current_version, fLatestVersion);
-    update_url = UString::format("https://" NEOSU_DOMAIN "/update/" OS_NAME "/v%.2f.zip", fLatestVersion);
+    this->update_url = UString::format("https://" NEOSU_DOMAIN "/update/" OS_NAME "/v%.2f.zip", fLatestVersion);
 }
 
 bool UpdateHandler::_downloadUpdate() {
-    UString url = update_url;
+    UString url = this->update_url;
 
     debugLog("UpdateHandler::downloadUpdate( %s )\n", url.toUtf8());
-    m_status = STATUS::STATUS_DOWNLOADING_UPDATE;
+    this->status = STATUS::STATUS_DOWNLOADING_UPDATE;
 
     // setting the status in every error check return is retarded
 
@@ -123,7 +124,7 @@ bool UpdateHandler::_downloadUpdate() {
     std::string data = engine->getNetworkHandler()->httpDownload(url);
     if(data.length() < 2) {
         debugLog("UpdateHandler::downloadUpdate() error, downloaded file is too small (%i)!\n", data.length());
-        m_status = STATUS::STATUS_ERROR;
+        this->status = STATUS::STATUS_ERROR;
         return false;
     }
 
@@ -135,7 +136,7 @@ bool UpdateHandler::_downloadUpdate() {
         file.close();
     } else {
         debugLog("UpdateHandler::downloadUpdate() error, can't write file!\n");
-        m_status = STATUS::STATUS_ERROR;
+        this->status = STATUS::STATUS_ERROR;
         return false;
     }
 
@@ -145,13 +146,13 @@ bool UpdateHandler::_downloadUpdate() {
 
 void UpdateHandler::_installUpdate(std::string zipFilePath) {
     debugLog("UpdateHandler::installUpdate( %s )\n", zipFilePath.c_str());
-    m_status = STATUS::STATUS_INSTALLING_UPDATE;
+    this->status = STATUS::STATUS_INSTALLING_UPDATE;
 
     // setting the status in every error check return is retarded
 
     if(!env->fileExists(zipFilePath)) {
         debugLog("UpdateHandler::installUpdate() error, \"%s\" does not exist!\n", zipFilePath.c_str());
-        m_status = STATUS::STATUS_ERROR;
+        this->status = STATUS::STATUS_ERROR;
         return;
     }
 
@@ -159,7 +160,7 @@ void UpdateHandler::_installUpdate(std::string zipFilePath) {
     File f(zipFilePath);
     if(!f.canRead()) {
         debugLog("UpdateHandler::installUpdate() error, can't read file!\n");
-        m_status = STATUS::STATUS_ERROR;
+        this->status = STATUS::STATUS_ERROR;
         return;
     }
     const u8 *content = f.readFile();
@@ -169,19 +170,19 @@ void UpdateHandler::_installUpdate(std::string zipFilePath) {
     memset(&zip_archive, 0, sizeof(zip_archive));
     if(!mz_zip_reader_init_mem(&zip_archive, content, f.getFileSize(), 0)) {
         debugLog("UpdateHandler::installUpdate() error, couldn't mz_zip_reader_init_mem()!\n");
-        m_status = STATUS::STATUS_ERROR;
+        this->status = STATUS::STATUS_ERROR;
         return;
     }
 
     mz_uint numFiles = mz_zip_reader_get_num_files(&zip_archive);
     if(numFiles <= 0) {
         debugLog("UpdateHandler::installUpdate() error, %u files!\n", numFiles);
-        m_status = STATUS::STATUS_ERROR;
+        this->status = STATUS::STATUS_ERROR;
         return;
     }
     if(!mz_zip_reader_is_file_a_directory(&zip_archive, 0)) {
         debugLog("UpdateHandler::installUpdate() error, first index is not the main directory!\n");
-        m_status = STATUS::STATUS_ERROR;
+        this->status = STATUS::STATUS_ERROR;
         return;
     }
 
@@ -260,6 +261,6 @@ void UpdateHandler::_installUpdate(std::string zipFilePath) {
 
     mz_zip_reader_end(&zip_archive);
 
-    m_status = STATUS::STATUS_SUCCESS_INSTALLATION;
+    this->status = STATUS::STATUS_SUCCESS_INSTALLATION;
     env->deleteFile(zipFilePath);
 }

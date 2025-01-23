@@ -19,44 +19,44 @@ VisualProfiler *vprof = NULL;
 VisualProfiler::VisualProfiler() : CBaseUIElement(0, 0, 0, 0, "") {
     vprof = this;
 
-    m_spike.node.depth = -1;
-    m_spike.node.node = NULL;
-    m_spike.timeLastFrame = 0.0;
+    this->spike.node.depth = -1;
+    this->spike.node.node = NULL;
+    this->spike.timeLastFrame = 0.0;
 
-    m_iPrevVaoWidth = 0;
-    m_iPrevVaoHeight = 0;
-    m_iPrevVaoGroups = 0;
-    m_fPrevVaoMaxRange = 0.0f;
-    m_fPrevVaoAlpha = -1.0f;
+    this->iPrevVaoWidth = 0;
+    this->iPrevVaoHeight = 0;
+    this->iPrevVaoGroups = 0;
+    this->fPrevVaoMaxRange = 0.0f;
+    this->fPrevVaoAlpha = -1.0f;
 
-    m_iCurLinePos = 0;
+    this->iCurLinePos = 0;
 
-    m_iDrawGroupID = -1;
-    m_iDrawSwapBuffersGroupID = -1;
+    this->iDrawGroupID = -1;
+    this->iDrawSwapBuffersGroupID = -1;
 
-    m_spikeIDCounter = 0;
+    this->spikeIDCounter = 0;
 
-    setProfile(&g_profCurrentProfile);  // by default we look at the standard full engine-wide profile
+    this->setProfile(&g_profCurrentProfile);  // by default we look at the standard full engine-wide profile
 
-    m_font = engine->getResourceManager()->getFont("FONT_DEFAULT");
-    m_fontConsole = engine->getResourceManager()->getFont("FONT_CONSOLE");
-    m_lineVao = engine->getResourceManager()->createVertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_LINES,
-                                                                      Graphics::USAGE_TYPE::USAGE_DYNAMIC, true);
+    this->font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    this->fontConsole = engine->getResourceManager()->getFont("FONT_CONSOLE");
+    this->lineVao = engine->getResourceManager()->createVertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_LINES,
+                                                                          Graphics::USAGE_TYPE::USAGE_DYNAMIC, true);
 
-    m_bScheduledForceRebuildLineVao = false;
-    m_bRequiresAltShiftKeysToFreeze = false;
+    this->bScheduledForceRebuildLineVao = false;
+    this->bRequiresAltShiftKeysToFreeze = false;
 }
 
 VisualProfiler::~VisualProfiler() { vprof = NULL; }
 
 void VisualProfiler::draw(Graphics *g) {
     VPROF_BUDGET("VisualProfiler::draw", VPROF_BUDGETGROUP_DRAW);
-    if(!cv_vprof.getBool() || !m_bVisible) return;
+    if(!cv_vprof.getBool() || !this->bVisible) return;
 
     // draw miscellaneous debug infos
     const int displayMode = cv_vprof_display_mode.getInt();
     if(displayMode != INFO_BLADE_DISPLAY_MODE::INFO_BLADE_DISPLAY_MODE_DEFAULT) {
-        McFont *textFont = m_font;
+        McFont *textFont = this->font;
         float textScale = 1.0f;
         {
             switch(displayMode) {
@@ -70,29 +70,29 @@ void VisualProfiler::draw(Graphics *g) {
 
                     UString line1 = "GPU Vendor: ";
                     line1.append(vendor);
-                    addTextLine(line1, textFont, m_textLines);
+                    addTextLine(line1, textFont, this->textLines);
                     UString line2 = "Model: ";
                     line2.append(model);
-                    addTextLine(line2, textFont, m_textLines);
+                    addTextLine(line2, textFont, this->textLines);
                     UString line3 = "Version: ";
                     line3.append(version);
-                    addTextLine(line3, textFont, m_textLines);
+                    addTextLine(line3, textFont, this->textLines);
                     addTextLine(
                         UString::format("Resolution: %i x %i", (int)g->getResolution().x, (int)g->getResolution().y),
-                        textFont, m_textLines);
+                        textFont, this->textLines);
                     addTextLine(UString::format("NativeRes: %i x %i", (int)env->getNativeScreenSize().x,
                                                 (int)env->getNativeScreenSize().y),
-                                textFont, m_textLines);
-                    addTextLine(UString::format("Env DPI Scale: %f", env->getDPIScale()), textFont, m_textLines);
-                    addTextLine(UString::format("Env DPI: %i", (int)env->getDPI()), textFont, m_textLines);
-                    // addTextLine(UString::format("Renderer: %s", typeid(g).name()), textFont, m_textLines); // TODO:
-                    // add g->getName() or something
+                                textFont, this->textLines);
+                    addTextLine(UString::format("Env DPI Scale: %f", env->getDPIScale()), textFont, this->textLines);
+                    addTextLine(UString::format("Env DPI: %i", (int)env->getDPI()), textFont, this->textLines);
+                    // addTextLine(UString::format("Renderer: %s", typeid(g).name()), textFont, this->textLines); //
+                    // TODO: add g->getName() or something
                     addTextLine(UString::format("VRAM: %i MB / %i MB", vramRemainingMB, vramTotalMB), textFont,
-                                m_textLines);
+                                this->textLines);
                 } break;
 
                 case INFO_BLADE_DISPLAY_MODE::INFO_BLADE_DISPLAY_MODE_ENGINE_INFO: {
-                    textFont = m_fontConsole;
+                    textFont = this->fontConsole;
                     textScale = std::round(env->getDPIScale() + 0.255f);
 
                     const double time = engine->getTime();
@@ -101,54 +101,54 @@ void VisualProfiler::draw(Graphics *g) {
                     const Vector2 envMousePos = env->getMousePos();
 
                     addTextLine(UString::format("ConVars: %zu", convar->getConVarArray().size()), textFont,
-                                m_textLines);
+                                this->textLines);
                     addTextLine(UString::format("Monitor: [%i] of %zu", env->getMonitor(), env->getMonitors().size()),
-                                textFont, m_textLines);
+                                textFont, this->textLines);
                     addTextLine(UString::format("Env Mouse Pos: %i x %i", (int)envMousePos.x, (int)envMousePos.y),
-                                textFont, m_textLines);
+                                textFont, this->textLines);
                     addTextLine(UString::format("Sound Device: %s", engine->getSound()->getOutputDeviceName().toUtf8()),
-                                textFont, m_textLines);
+                                textFont, this->textLines);
                     addTextLine(UString::format("Sound Volume: %f", engine->getSound()->getVolume()), textFont,
-                                m_textLines);
+                                this->textLines);
                     addTextLine(UString::format("RM Threads: %zu", engine->getResourceManager()->getNumThreads()),
-                                textFont, m_textLines);
+                                textFont, this->textLines);
                     addTextLine(
                         UString::format("RM LoadingWork: %zu", engine->getResourceManager()->getNumLoadingWork()),
-                        textFont, m_textLines);
+                        textFont, this->textLines);
                     addTextLine(UString::format("RM LoadingWorkAD: %zu",
                                                 engine->getResourceManager()->getNumLoadingWorkAsyncDestroy()),
-                                textFont, m_textLines);
+                                textFont, this->textLines);
                     addTextLine(
                         UString::format("RM Named Resources: %zu", engine->getResourceManager()->getResources().size()),
-                        textFont, m_textLines);
+                        textFont, this->textLines);
                     addTextLine(UString::format("Animations: %zu", anim->getNumActiveAnimations()), textFont,
-                                m_textLines);
-                    addTextLine(UString::format("Frame: %lu", engine->getFrameCount()), textFont, m_textLines);
-                    addTextLine(UString::format("Time: %f", time), textFont, m_textLines);
-                    addTextLine(UString::format("Realtime: %f", timeRunning), textFont, m_textLines);
-                    addTextLine(UString::format("Time Dilation: %f", dilation), textFont, m_textLines);
+                                this->textLines);
+                    addTextLine(UString::format("Frame: %lu", engine->getFrameCount()), textFont, this->textLines);
+                    addTextLine(UString::format("Time: %f", time), textFont, this->textLines);
+                    addTextLine(UString::format("Realtime: %f", timeRunning), textFont, this->textLines);
+                    addTextLine(UString::format("Time Dilation: %f", dilation), textFont, this->textLines);
                 } break;
 
                 case INFO_BLADE_DISPLAY_MODE::INFO_BLADE_DISPLAY_MODE_APP_INFO: {
-                    textFont = m_fontConsole;
+                    textFont = this->fontConsole;
                     textScale = std::round(env->getDPIScale() + 0.255f);
 
-                    for(size_t i = 0; i < m_appTextLines.size(); i++) {
-                        addTextLine(m_appTextLines[i], textFont, m_textLines);
+                    for(size_t i = 0; i < this->appTextLines.size(); i++) {
+                        addTextLine(this->appTextLines[i], textFont, this->textLines);
                     }
 
-                    if(m_appTextLines.size() < 1) addTextLine("(Empty)", textFont, m_textLines);
+                    if(this->appTextLines.size() < 1) addTextLine("(Empty)", textFont, this->textLines);
                 } break;
             }
         }
 
-        if(m_textLines.size() > 0) {
+        if(this->textLines.size() > 0) {
             const Color textColor = 0xffffffff;
             const int margin = cv_vprof_graph_margin.getFloat() * env->getDPIScale();
             const int marginBox = 6 * env->getDPIScale();
 
             int largestLineWidth = 0;
-            for(const TEXT_LINE &textLine : m_textLines) {
+            for(const TEXT_LINE &textLine : this->textLines) {
                 if(textLine.width > largestLineWidth) largestLineWidth = textLine.width;
             }
             largestLineWidth *= textScale;
@@ -157,7 +157,7 @@ void VisualProfiler::draw(Graphics *g) {
             const int boxY = margin - marginBox;
             const int boxWidth = largestLineWidth + 2 * marginBox;
             const int boxHeight = marginBox * 2 + textFont->getHeight() * textScale +
-                                  (textFont->getHeight() * textScale * 1.5f) * (m_textLines.size() - 1);
+                                  (textFont->getHeight() * textScale * 1.5f) * (this->textLines.size() - 1);
 
             // draw background
             g->setColor(0xaa000000);
@@ -171,13 +171,13 @@ void VisualProfiler::draw(Graphics *g) {
                 g->scale(textScale, textScale);
                 g->translate(-margin, (int)(textFont->getHeight() * textScale + margin));
 
-                for(size_t i = 0; i < m_textLines.size(); i++) {
+                for(size_t i = 0; i < this->textLines.size(); i++) {
                     if(i > 0) g->translate(0, (int)(textFont->getHeight() * textScale * 1.5f));
 
                     g->pushTransform();
                     {
-                        g->translate(engine->getScreenWidth() - m_textLines[i].width * textScale, 0);
-                        drawStringWithShadow(g, textFont, m_textLines[i].text, textColor);
+                        g->translate(engine->getScreenWidth() - this->textLines[i].width * textScale, 0);
+                        drawStringWithShadow(g, textFont, this->textLines[i].text, textColor);
                     }
                     g->popTransform();
                 }
@@ -185,8 +185,8 @@ void VisualProfiler::draw(Graphics *g) {
             g->popTransform();
         }
 
-        m_textLines.clear();
-        m_appTextLines.clear();
+        this->textLines.clear();
+        this->appTextLines.clear();
     }
 
     // draw profiler node tree extended details
@@ -196,39 +196,40 @@ void VisualProfiler::draw(Graphics *g) {
         g->setColor(0xffcccccc);
         g->pushTransform();
         {
-            g->translate(0, m_font->getHeight());
+            g->translate(0, this->font->getHeight());
 
-            g->drawString(m_font, UString::format("%i nodes", m_profile->getNumNodes()));
-            g->translate(0, m_font->getHeight() * 1.5f);
+            g->drawString(this->font, UString::format("%i nodes", this->profile->getNumNodes()));
+            g->translate(0, this->font->getHeight() * 1.5f);
 
-            g->drawString(m_font, UString::format("%i groups", m_profile->getNumGroups()));
-            g->translate(0, m_font->getHeight() * 1.5f);
+            g->drawString(this->font, UString::format("%i groups", this->profile->getNumGroups()));
+            g->translate(0, this->font->getHeight() * 1.5f);
 
-            g->drawString(m_font, "----------------------------------------------------");
-            g->translate(0, m_font->getHeight() * 1.5f);
+            g->drawString(this->font, "----------------------------------------------------");
+            g->translate(0, this->font->getHeight() * 1.5f);
 
-            for(int i = m_nodes.size() - 1; i >= 0; i--) {
+            for(int i = this->nodes.size() - 1; i >= 0; i--) {
                 g->pushTransform();
                 {
-                    g->translate(m_font->getHeight() * 3 * (m_nodes[i].depth - 1), 0);
-                    g->drawString(m_font, UString::format("[%s] - %s = %f ms", m_nodes[i].node->getName(),
-                                                          m_profile->getGroupName(m_nodes[i].node->getGroupID()),
-                                                          m_nodes[i].node->getTimeLastFrame() * 1000.0));
+                    g->translate(this->font->getHeight() * 3 * (this->nodes[i].depth - 1), 0);
+                    g->drawString(this->font,
+                                  UString::format("[%s] - %s = %f ms", this->nodes[i].node->getName(),
+                                                  this->profile->getGroupName(this->nodes[i].node->getGroupID()),
+                                                  this->nodes[i].node->getTimeLastFrame() * 1000.0));
                 }
                 g->popTransform();
 
-                g->translate(0, m_font->getHeight() * 1.5f);
+                g->translate(0, this->font->getHeight() * 1.5f);
             }
 
-            g->drawString(m_font, "----------------------------------------------------");
-            g->translate(0, m_font->getHeight() * 1.5f);
+            g->drawString(this->font, "----------------------------------------------------");
+            g->translate(0, this->font->getHeight() * 1.5f);
 
-            for(int i = 0; i < m_profile->getNumGroups(); i++) {
-                const char *groupName = m_profile->getGroupName(i);
-                const double sum = m_profile->sumTimes(i);
+            for(int i = 0; i < this->profile->getNumGroups(); i++) {
+                const char *groupName = this->profile->getGroupName(i);
+                const double sum = this->profile->sumTimes(i);
 
-                g->drawString(m_font, UString::format("%s = %f ms", groupName, sum * 1000.0));
-                g->translate(0, m_font->getHeight() * 1.5f);
+                g->drawString(this->font, UString::format("%s = %f ms", groupName, sum * 1000.0));
+                g->translate(0, this->font->getHeight() * 1.5f);
             }
         }
         g->popTransform();
@@ -236,27 +237,28 @@ void VisualProfiler::draw(Graphics *g) {
 
     // draw extended spike details tree (profiler node snapshot)
     if(cv_vprof_spike.getBool() && !cv_debug_vprof.getBool()) {
-        if(m_spike.node.node != NULL) {
+        if(this->spike.node.node != NULL) {
             if(cv_vprof_spike.getInt() == 2) {
                 VPROF_BUDGET("DebugText", VPROF_BUDGETGROUP_DRAW);
 
                 g->setColor(0xffcccccc);
                 g->pushTransform();
                 {
-                    g->translate(0, m_font->getHeight());
+                    g->translate(0, this->font->getHeight());
 
-                    for(int i = m_spikeNodes.size() - 1; i >= 0; i--) {
+                    for(int i = this->spikeNodes.size() - 1; i >= 0; i--) {
                         g->pushTransform();
                         {
-                            g->translate(m_font->getHeight() * 3 * (m_spikeNodes[i].node.depth - 1), 0);
-                            g->drawString(m_font, UString::format(
-                                                      "[%s] - %s = %f ms", m_spikeNodes[i].node.node->getName(),
-                                                      m_profile->getGroupName(m_spikeNodes[i].node.node->getGroupID()),
-                                                      m_spikeNodes[i].timeLastFrame * 1000.0));
+                            g->translate(this->font->getHeight() * 3 * (this->spikeNodes[i].node.depth - 1), 0);
+                            g->drawString(this->font,
+                                          UString::format(
+                                              "[%s] - %s = %f ms", this->spikeNodes[i].node.node->getName(),
+                                              this->profile->getGroupName(this->spikeNodes[i].node.node->getGroupID()),
+                                              this->spikeNodes[i].timeLastFrame * 1000.0));
                         }
                         g->popTransform();
 
-                        g->translate(0, m_font->getHeight() * 1.5f);
+                        g->translate(0, this->font->getHeight() * 1.5f);
                     }
                 }
                 g->popTransform();
@@ -287,17 +289,17 @@ void VisualProfiler::draw(Graphics *g) {
         g->setColor(0xff00aa00);
         g->pushTransform();
         {
-            const int stride = 2 * m_iPrevVaoGroups;
+            const int stride = 2 * this->iPrevVaoGroups;
 
             // behind
-            m_lineVao->setDrawRange(m_iCurLinePos * stride, m_iPrevVaoWidth * stride);
-            g->translate(xPos + 1 - m_iCurLinePos, yPos + height);
-            g->drawVAO(m_lineVao);
+            this->lineVao->setDrawRange(this->iCurLinePos * stride, this->iPrevVaoWidth * stride);
+            g->translate(xPos + 1 - this->iCurLinePos, yPos + height);
+            g->drawVAO(this->lineVao);
 
             // forward
-            m_lineVao->setDrawRange(0, m_iCurLinePos * stride);
-            g->translate(m_iPrevVaoWidth, 0);
-            g->drawVAO(m_lineVao);
+            this->lineVao->setDrawRange(0, this->iCurLinePos * stride);
+            g->translate(this->iPrevVaoWidth, 0);
+            g->drawVAO(this->lineVao);
         }
         g->popTransform();
 
@@ -308,12 +310,12 @@ void VisualProfiler::draw(Graphics *g) {
             // y-axis range
             g->pushTransform();
             {
-                g->translate((int)(xPos + margin), (int)(yPos + m_font->getHeight() + margin));
-                drawStringWithShadow(g, m_font, UString::format("%g ms", cv_vprof_graph_range_max.getFloat()),
+                g->translate((int)(xPos + margin), (int)(yPos + this->font->getHeight() + margin));
+                drawStringWithShadow(g, this->font, UString::format("%g ms", cv_vprof_graph_range_max.getFloat()),
                                      0xffffffff);
 
-                g->translate(0, (int)(height - m_font->getHeight() - 2 * margin));
-                drawStringWithShadow(g, m_font, "0 ms", 0xffffffff);
+                g->translate(0, (int)(height - this->font->getHeight() - 2 * margin));
+                drawStringWithShadow(g, this->font, "0 ms", 0xffffffff);
             }
             g->popTransform();
 
@@ -324,11 +326,11 @@ void VisualProfiler::draw(Graphics *g) {
 
                 g->translate((int)(xPos - 3 * margin), (int)(yPos + height - padding));
 
-                for(size_t i = 1; i < m_groups.size(); i++) {
-                    const int stringWidth = (int)(m_font->getStringWidth(m_groups[i].name));
+                for(size_t i = 1; i < this->groups.size(); i++) {
+                    const int stringWidth = (int)(this->font->getStringWidth(this->groups[i].name));
                     g->translate(-stringWidth, 0);
-                    drawStringWithShadow(g, m_font, m_groups[i].name, m_groups[i].color);
-                    g->translate(stringWidth, (int)(-m_font->getHeight() - padding));
+                    drawStringWithShadow(g, this->font, this->groups[i].name, this->groups[i].color);
+                    g->translate(stringWidth, (int)(-this->font->getHeight() - padding));
                 }
             }
             g->popTransform();
@@ -336,7 +338,7 @@ void VisualProfiler::draw(Graphics *g) {
 
         // draw top spike text above graph
         if(cv_vprof_spike.getBool() && !cv_debug_vprof.getBool()) {
-            if(m_spike.node.node != NULL) {
+            if(this->spike.node.node != NULL) {
                 if(cv_vprof_spike.getInt() == 1) {
                     const int margin = 6 * env->getDPIScale();
 
@@ -344,9 +346,9 @@ void VisualProfiler::draw(Graphics *g) {
                     g->pushTransform();
                     {
                         g->translate((int)(xPos + margin), (int)(yPos - 2 * margin));
-                        /// drawStringWithShadow(g, UString::format("[%s] = %g ms", m_spike.node.node->getName(),
-                        /// m_spike.timeLastFrame * 1000.0), m_groups[m_spike.node.node->getGroupID()].color);
-                        g->drawString(m_font, UString::format("Spike = %g ms", m_spike.timeLastFrame * 1000.0));
+                        /// drawStringWithShadow(g, UString::format("[%s] = %g ms", this->spike.node.node->getName(),
+                        /// m_spike.timeLastFrame * 1000.0), this->groups[m_spike.node.node->getGroupID()].color);
+                        g->drawString(this->font, UString::format("Spike = %g ms", this->spike.timeLastFrame * 1000.0));
                     }
                     g->popTransform();
                 }
@@ -375,10 +377,10 @@ void VisualProfiler::drawStringWithShadow(Graphics *g, McFont *font, const UStri
 void VisualProfiler::mouse_update(bool *propagate_clicks) {
     VPROF_BUDGET("VisualProfiler::update", VPROF_BUDGETGROUP_UPDATE);
     CBaseUIElement::mouse_update(propagate_clicks);
-    if(!cv_vprof.getBool() || !m_bVisible) return;
+    if(!cv_vprof.getBool() || !this->bVisible) return;
 
     const bool isFrozen = (engine->getKeyboard()->isShiftDown() &&
-                           (!m_bRequiresAltShiftKeysToFreeze || engine->getKeyboard()->isAltDown()));
+                           (!this->bRequiresAltShiftKeysToFreeze || engine->getKeyboard()->isAltDown()));
 
     if(cv_debug_vprof.getBool() || cv_vprof_spike.getBool()) {
         if(!isFrozen) {
@@ -387,40 +389,41 @@ void VisualProfiler::mouse_update(bool *propagate_clicks) {
                 spike.node.depth = -1;
                 spike.node.node = NULL;
                 spike.timeLastFrame = 0.0;
-                spike.id = m_spikeIDCounter++;
+                spike.id = this->spikeIDCounter++;
             }
 
             // run regular debug node collector
-            m_nodes.clear();
-            collectProfilerNodesRecursive(m_profile->getRoot(), 0, m_nodes, spike);
+            this->nodes.clear();
+            collectProfilerNodesRecursive(this->profile->getRoot(), 0, this->nodes, spike);
 
             // run spike collector and updater
             if(cv_vprof_spike.getBool()) {
                 const int graphWidth = getGraphWidth();
 
-                m_spikes.push_back(spike);
+                this->spikes.push_back(spike);
 
-                if(m_spikes.size() > graphWidth) m_spikes.erase(m_spikes.begin());
+                if(this->spikes.size() > graphWidth) this->spikes.erase(this->spikes.begin());
 
-                SPIKE &newSpike = m_spikes[0];
+                SPIKE &newSpike = this->spikes[0];
 
-                for(size_t i = 0; i < m_spikes.size(); i++) {
-                    if(m_spikes[i].timeLastFrame > newSpike.timeLastFrame) newSpike = m_spikes[i];
+                for(size_t i = 0; i < this->spikes.size(); i++) {
+                    if(this->spikes[i].timeLastFrame > newSpike.timeLastFrame) newSpike = this->spikes[i];
                 }
 
-                if(newSpike.id != m_spike.id) {
-                    const bool isNewSpikeLarger = (newSpike.timeLastFrame > m_spike.timeLastFrame);
+                if(newSpike.id != this->spike.id) {
+                    const bool isNewSpikeLarger = (newSpike.timeLastFrame > this->spike.timeLastFrame);
 
-                    m_spike = newSpike;
+                    this->spike = newSpike;
 
-                    // NOTE: since we only store 1 spike snapshot, once that is erased (m_spikes.size() > graphWidth)
-                    // and we have to "fall back" to a "lower" spike, we don't have any data on that lower spike anymore
-                    // so, we simply only create a new snapshot if we have a new larger spike (since that is guaranteed
-                    // to be the currently active one, i.e. going through node data in m_profile will return its data)
-                    // (storing graphWidth amounts of snapshots seems unnecessarily wasteful, and I like this solution)
+                    // NOTE: since we only store 1 spike snapshot, once that is erased (this->spikes.size() >
+                    // graphWidth) and we have to "fall back" to a "lower" spike, we don't have any data on that lower
+                    // spike anymore so, we simply only create a new snapshot if we have a new larger spike (since that
+                    // is guaranteed to be the currently active one, i.e. going through node data in m_profile will
+                    // return its data) (storing graphWidth amounts of snapshots seems unnecessarily wasteful, and I
+                    // like this solution)
                     if(isNewSpikeLarger) {
-                        m_spikeNodes.clear();
-                        collectProfilerNodesSpikeRecursive(m_spike.node.node, 1, m_spikeNodes);
+                        this->spikeNodes.clear();
+                        collectProfilerNodesSpikeRecursive(this->spike.node.node, 1, this->spikeNodes);
                     }
                 }
             }
@@ -428,18 +431,18 @@ void VisualProfiler::mouse_update(bool *propagate_clicks) {
     }
 
     // lazy rebuild group/color list
-    if(m_groups.size() < m_profile->getNumGroups()) {
+    if(this->groups.size() < this->profile->getNumGroups()) {
         // reset
-        m_iDrawGroupID = -1;
-        m_iDrawSwapBuffersGroupID = -1;
+        this->iDrawGroupID = -1;
+        this->iDrawSwapBuffersGroupID = -1;
 
-        const int curNumGroups = m_groups.size();
-        const int actualNumGroups = m_profile->getNumGroups();
+        const int curNumGroups = this->groups.size();
+        const int actualNumGroups = this->profile->getNumGroups();
 
         for(int i = curNumGroups; i < actualNumGroups; i++) {
             GROUP group;
 
-            group.name = m_profile->getGroupName(i);
+            group.name = this->profile->getGroupName(i);
             group.id = i;
 
             // hardcoded colors for some groups
@@ -455,64 +458,65 @@ void VisualProfiler::mouse_update(bool *propagate_clicks) {
                 group.color = 0xff00bb00;
             else if(strcmp(group.name, VPROF_BUDGETGROUP_DRAW) == 0) {
                 group.color = 0xffbf6500;
-                m_iDrawGroupID = group.id;
+                this->iDrawGroupID = group.id;
             } else if(strcmp(group.name, VPROF_BUDGETGROUP_DRAW_SWAPBUFFERS) == 0) {
                 group.color = 0xffff0000;
-                m_iDrawSwapBuffersGroupID = group.id;
+                this->iDrawSwapBuffersGroupID = group.id;
             } else
                 group.color = 0xff00ffff;  // default to turquoise
 
-            m_groups.push_back(group);
+            this->groups.push_back(group);
         }
     }
 
     // and handle line updates
     {
-        const int numGroups = m_groups.size();
+        const int numGroups = this->groups.size();
         const int graphWidth = getGraphWidth();
         const int graphHeight = getGraphHeight();
         const float maxRange = cv_vprof_graph_range_max.getFloat();
         const float alpha = cv_vprof_graph_alpha.getFloat();
 
         // lazy rebuild line vao if parameters change
-        if(m_bScheduledForceRebuildLineVao || m_iPrevVaoWidth != graphWidth || m_iPrevVaoHeight != graphHeight ||
-           m_iPrevVaoGroups != numGroups || m_fPrevVaoMaxRange != maxRange || m_fPrevVaoAlpha != alpha) {
-            m_bScheduledForceRebuildLineVao = false;
+        if(this->bScheduledForceRebuildLineVao || this->iPrevVaoWidth != graphWidth ||
+           this->iPrevVaoHeight != graphHeight || this->iPrevVaoGroups != numGroups ||
+           this->fPrevVaoMaxRange != maxRange || this->fPrevVaoAlpha != alpha) {
+            this->bScheduledForceRebuildLineVao = false;
 
-            m_iPrevVaoWidth = graphWidth;
-            m_iPrevVaoHeight = graphHeight;
-            m_iPrevVaoGroups = numGroups;
-            m_fPrevVaoMaxRange = maxRange;
-            m_fPrevVaoAlpha = alpha;
+            this->iPrevVaoWidth = graphWidth;
+            this->iPrevVaoHeight = graphHeight;
+            this->iPrevVaoGroups = numGroups;
+            this->fPrevVaoMaxRange = maxRange;
+            this->fPrevVaoAlpha = alpha;
 
-            m_lineVao->release();
+            this->lineVao->release();
 
             // preallocate 2 vertices per line
             for(int x = 0; x < graphWidth; x++) {
                 for(int g = 0; g < numGroups; g++) {
                     const Color color =
-                        COLOR((unsigned char)(m_fPrevVaoAlpha * 255.0f), COLOR_GET_Ri(m_groups[g].color),
-                              COLOR_GET_Gi(m_groups[g].color), COLOR_GET_Bi(m_groups[g].color));
+                        COLOR((unsigned char)(this->fPrevVaoAlpha * 255.0f), COLOR_GET_Ri(this->groups[g].color),
+                              COLOR_GET_Gi(this->groups[g].color), COLOR_GET_Bi(this->groups[g].color));
 
                     // m_lineVao->addVertex(x, -(((float)graphHeight)/(float)numGroups)*g, 0);
-                    m_lineVao->addVertex(x, 0, 0);
-                    m_lineVao->addColor(color);
+                    this->lineVao->addVertex(x, 0, 0);
+                    this->lineVao->addColor(color);
 
                     // m_lineVao->addVertex(x, -(((float)graphHeight)/(float)numGroups)*(g + 1), 0);
-                    m_lineVao->addVertex(x, 0, 0);
-                    m_lineVao->addColor(color);
+                    this->lineVao->addVertex(x, 0, 0);
+                    this->lineVao->addColor(color);
                 }
             }
 
             // and bake
-            engine->getResourceManager()->loadResource(m_lineVao);
+            engine->getResourceManager()->loadResource(this->lineVao);
         }
 
         // regular line update
         if(!isFrozen) {
-            if(m_lineVao->isReady()) {
+            if(this->lineVao->isReady()) {
                 // one new multi-line per frame
-                m_iCurLinePos = m_iCurLinePos % graphWidth;
+                this->iCurLinePos = this->iCurLinePos % graphWidth;
 
                 // if enabled, calculate and draw overhead
                 // the overhead is the time spent between not having any profiler node active/alive, and should always
@@ -525,35 +529,37 @@ void VisualProfiler::mouse_update(bool *propagate_clicks) {
                     const int rootGroupID = 0;
                     double sumGroupTimes = 0.0;
                     {
-                        for(size_t i = 1; i < m_groups.size(); i++)  // NOTE: start at 1, ignore rootGroupID
+                        for(size_t i = 1; i < this->groups.size(); i++)  // NOTE: start at 1, ignore rootGroupID
                         {
-                            sumGroupTimes += m_profile->sumTimes(m_groups[i].id);
+                            sumGroupTimes += this->profile->sumTimes(this->groups[i].id);
                         }
                     }
-                    profilingOverheadTime = max(0.0, m_profile->sumTimes(rootGroupID) - sumGroupTimes);
+                    profilingOverheadTime = max(0.0, this->profile->sumTimes(rootGroupID) - sumGroupTimes);
                 }
 
                 // go through every group and build the new multi-line
                 int heightCounter = 0;
-                for(int i = 0; i < numGroups && (size_t)i < m_groups.size(); i++) {
-                    const double rawDuration = (i == 0 ? profilingOverheadTime : m_profile->sumTimes(m_groups[i].id));
+                for(int i = 0; i < numGroups && (size_t)i < this->groups.size(); i++) {
+                    const double rawDuration =
+                        (i == 0 ? profilingOverheadTime : this->profile->sumTimes(this->groups[i].id));
                     const double duration =
-                        (i == m_iDrawGroupID
-                             ? rawDuration - m_profile->sumTimes(m_iDrawSwapBuffersGroupID)
+                        (i == this->iDrawGroupID
+                             ? rawDuration - this->profile->sumTimes(this->iDrawSwapBuffersGroupID)
                              : rawDuration);  // special case: hardcoded fix for nested groups (only draw + swap atm)
                     const int lineHeight = (int)(((duration * 1000.0) / (double)maxRange) * (double)graphHeight);
 
-                    m_lineVao->setVertex(m_iCurLinePos * numGroups * 2 + i * 2, m_iCurLinePos, heightCounter);
-                    m_lineVao->setVertex(m_iCurLinePos * numGroups * 2 + i * 2 + 1, m_iCurLinePos,
-                                         heightCounter - lineHeight);
+                    this->lineVao->setVertex(this->iCurLinePos * numGroups * 2 + i * 2, this->iCurLinePos,
+                                             heightCounter);
+                    this->lineVao->setVertex(this->iCurLinePos * numGroups * 2 + i * 2 + 1, this->iCurLinePos,
+                                             heightCounter - lineHeight);
 
                     heightCounter -= lineHeight;
                 }
 
                 // re-bake
-                engine->getResourceManager()->loadResource(m_lineVao);
+                engine->getResourceManager()->loadResource(this->lineVao);
 
-                m_iCurLinePos++;
+                this->iCurLinePos++;
             }
         }
     }
@@ -572,21 +578,21 @@ void VisualProfiler::decrementInfoBladeDisplayMode() {
 }
 
 void VisualProfiler::addInfoBladeAppTextLine(const UString &text) {
-    if(!cv_vprof.getBool() || !m_bVisible ||
+    if(!cv_vprof.getBool() || !this->bVisible ||
        cv_vprof_display_mode.getInt() != INFO_BLADE_DISPLAY_MODE::INFO_BLADE_DISPLAY_MODE_APP_INFO)
         return;
 
-    m_appTextLines.push_back(text);
+    this->appTextLines.push_back(text);
 }
 
 void VisualProfiler::setProfile(ProfilerProfile *profile) {
-    m_profile = profile;
+    this->profile = profile;
 
     // force everything to get re-built for the new profile with the next frame
     {
-        m_groups.clear();
+        this->groups.clear();
 
-        m_bScheduledForceRebuildLineVao = true;
+        this->bScheduledForceRebuildLineVao = true;
     }
 }
 

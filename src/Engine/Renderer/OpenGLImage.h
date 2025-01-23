@@ -16,7 +16,7 @@ class OpenGLImage : public Image {
    public:
     OpenGLImage(std::string filepath, bool mipmapped = false);
     OpenGLImage(int width, int height, bool mipmapped = false);
-    virtual ~OpenGLImage() { destroy(); }
+    virtual ~OpenGLImage() { this->destroy(); }
 
     virtual void bind(unsigned int textureUnit = 0);
     virtual void unbind();
@@ -31,8 +31,8 @@ class OpenGLImage : public Image {
 
     void handleGLErrors();
 
-    unsigned int m_GLTexture;
-    unsigned int m_iTextureUnitBackup;
+    unsigned int GLTexture;
+    unsigned int iTextureUnitBackup;
 };
 
 #endif

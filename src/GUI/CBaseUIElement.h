@@ -10,15 +10,15 @@
 class CBaseUIElement : public KeyboardListener {
    public:
     CBaseUIElement(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "") {
-        m_vPos.x = xPos;
-        m_vPos.y = yPos;
-        m_vmPos.x = m_vPos.x;
-        m_vmPos.y = m_vPos.y;
-        m_vSize.x = xSize;
-        m_vSize.y = ySize;
-        m_vmSize.x = m_vSize.x;
-        m_vmSize.y = m_vSize.y;
-        m_sName = name;
+        this->vPos.x = xPos;
+        this->vPos.y = yPos;
+        this->vmPos.x = this->vPos.x;
+        this->vmPos.y = this->vPos.y;
+        this->vSize.x = xSize;
+        this->vSize.y = ySize;
+        this->vmSize.x = this->vSize.x;
+        this->vmSize.y = this->vSize.y;
+        this->sName = name;
     }
     virtual ~CBaseUIElement() { ; }
 
@@ -33,122 +33,122 @@ class CBaseUIElement : public KeyboardListener {
     virtual void onChar(KeyboardEvent &e) { (void)e; }
 
     // getters
-    inline const Vector2 &getPos() const { return m_vPos; }
-    inline const Vector2 &getSize() const { return m_vSize; }
-    inline UString getName() const { return m_sName; }
-    inline const Vector2 &getRelPos() const { return m_vmPos; }
-    inline const Vector2 &getRelSize() const { return m_vmSize; }
+    inline const Vector2 &getPos() const { return this->vPos; }
+    inline const Vector2 &getSize() const { return this->vSize; }
+    inline UString getName() const { return this->sName; }
+    inline const Vector2 &getRelPos() const { return this->vmPos; }
+    inline const Vector2 &getRelSize() const { return this->vmSize; }
 
-    virtual bool isActive() { return m_bActive || isBusy(); }
-    virtual bool isVisible() { return m_bVisible; }
-    virtual bool isEnabled() { return m_bEnabled; }
-    virtual bool isBusy() { return m_bBusy && isVisible(); }
-    virtual bool isMouseInside() { return m_bMouseInside && isVisible(); }
+    virtual bool isActive() { return this->bActive || this->isBusy(); }
+    virtual bool isVisible() { return this->bVisible; }
+    virtual bool isEnabled() { return this->bEnabled; }
+    virtual bool isBusy() { return this->bBusy && this->isVisible(); }
+    virtual bool isMouseInside() { return this->bMouseInside && this->isVisible(); }
 
     virtual CBaseUIElement *setPos(float xPos, float yPos) {
-        if(m_vPos.x != xPos || m_vPos.y != yPos) {
-            m_vPos.x = xPos;
-            m_vPos.y = yPos;
-            onMoved();
+        if(this->vPos.x != xPos || this->vPos.y != yPos) {
+            this->vPos.x = xPos;
+            this->vPos.y = yPos;
+            this->onMoved();
         }
         return this;
     }
     virtual CBaseUIElement *setPosX(float xPos) {
-        if(m_vPos.x != xPos) {
-            m_vPos.x = xPos;
-            onMoved();
+        if(this->vPos.x != xPos) {
+            this->vPos.x = xPos;
+            this->onMoved();
         }
         return this;
     }
     virtual CBaseUIElement *setPosY(float yPos) {
-        if(m_vPos.y != yPos) {
-            m_vPos.y = yPos;
-            onMoved();
+        if(this->vPos.y != yPos) {
+            this->vPos.y = yPos;
+            this->onMoved();
         }
         return this;
     }
-    virtual CBaseUIElement *setPos(Vector2 position) { return setPos(position.x, position.y); }
+    virtual CBaseUIElement *setPos(Vector2 position) { return this->setPos(position.x, position.y); }
 
     virtual CBaseUIElement *setRelPos(float xPos, float yPos) {
-        m_vmPos.x = xPos;
-        m_vmPos.y = yPos;
+        this->vmPos.x = xPos;
+        this->vmPos.y = yPos;
         return this;
     }
     virtual CBaseUIElement *setRelPosX(float xPos) {
-        m_vmPos.x = xPos;
+        this->vmPos.x = xPos;
         return this;
     }
     virtual CBaseUIElement *setRelPosY(float yPos) {
-        m_vmPos.y = yPos;
+        this->vmPos.y = yPos;
         return this;
     }
-    virtual CBaseUIElement *setRelPos(Vector2 position) { return setRelPos(position.x, position.y); }
+    virtual CBaseUIElement *setRelPos(Vector2 position) { return this->setRelPos(position.x, position.y); }
 
     virtual CBaseUIElement *setSize(float xSize, float ySize) {
-        if(m_vSize.x != xSize || m_vSize.y != ySize) {
-            m_vSize.x = xSize;
-            m_vSize.y = ySize;
-            onResized();
-            onMoved();
+        if(this->vSize.x != xSize || this->vSize.y != ySize) {
+            this->vSize.x = xSize;
+            this->vSize.y = ySize;
+            this->onResized();
+            this->onMoved();
         }
         return this;
     }
     virtual CBaseUIElement *setSizeX(float xSize) {
-        if(m_vSize.x != xSize) {
-            m_vSize.x = xSize;
-            onResized();
-            onMoved();
+        if(this->vSize.x != xSize) {
+            this->vSize.x = xSize;
+            this->onResized();
+            this->onMoved();
         }
         return this;
     }
     virtual CBaseUIElement *setSizeY(float ySize) {
-        if(m_vSize.y != ySize) {
-            m_vSize.y = ySize;
-            onResized();
-            onMoved();
+        if(this->vSize.y != ySize) {
+            this->vSize.y = ySize;
+            this->onResized();
+            this->onMoved();
         }
         return this;
     }
-    virtual CBaseUIElement *setSize(Vector2 size) { return setSize(size.x, size.y); }
+    virtual CBaseUIElement *setSize(Vector2 size) { return this->setSize(size.x, size.y); }
 
     virtual CBaseUIElement *setVisible(bool visible) {
-        m_bVisible = visible;
+        this->bVisible = visible;
         return this;
     }
     virtual CBaseUIElement *setActive(bool active) {
-        m_bActive = active;
+        this->bActive = active;
         return this;
     }
     virtual CBaseUIElement *setKeepActive(bool keepActive) {
-        m_bKeepActive = keepActive;
+        this->bKeepActive = keepActive;
         return this;
     }
     virtual CBaseUIElement *setEnabled(bool enabled, const char *reason = NULL) {
-        if(enabled != m_bEnabled) {
-            m_bEnabled = enabled;
-            if(m_bEnabled) {
-                onEnabled();
+        if(enabled != this->bEnabled) {
+            this->bEnabled = enabled;
+            if(this->bEnabled) {
+                this->onEnabled();
             } else {
-                disabled_reason = reason;
-                onDisabled();
+                this->disabled_reason = reason;
+                this->onDisabled();
             }
         }
         return this;
     }
     virtual CBaseUIElement *setBusy(bool busy) {
-        m_bBusy = busy;
+        this->bBusy = busy;
         return this;
     }
     virtual CBaseUIElement *setName(UString name) {
-        m_sName = name;
+        this->sName = name;
         return this;
     }
 
     // actions
     void stealFocus() {
-        m_bMouseInsideCheck = true;
-        m_bActive = false;
-        onFocusStolen();
+        this->bMouseInsideCheck = true;
+        this->bActive = false;
+        this->onFocusStolen();
     }
 
    protected:
@@ -168,26 +168,26 @@ class CBaseUIElement : public KeyboardListener {
     virtual void onMouseUpOutside() { ; }
 
     // vars
-    UString m_sName;
+    UString sName;
 
     // attributes
-    bool m_bVisible = true;
-    bool m_bActive = false;  // we are doing something, e.g. textbox is blinking and ready to receive input
-    bool m_bBusy = false;    // we demand the focus to be kept on us, e.g. click-drag scrolling in a scrollview
-    bool m_bEnabled = true;
+    bool bVisible = true;
+    bool bActive = false;  // we are doing something, e.g. textbox is blinking and ready to receive input
+    bool bBusy = false;    // we demand the focus to be kept on us, e.g. click-drag scrolling in a scrollview
+    bool bEnabled = true;
 
-    bool m_bKeepActive = false;  // once clicked, don't lose m_bActive, we have to manually release it (e.g. textbox)
-    bool m_bMouseInside = false;
+    bool bKeepActive = false;  // once clicked, don't lose m_bActive, we have to manually release it (e.g. textbox)
+    bool bMouseInside = false;
 
     // position and size
-    Vector2 m_vPos;
-    Vector2 m_vmPos;
-    Vector2 m_vSize;
-    Vector2 m_vmSize;
+    Vector2 vPos;
+    Vector2 vmPos;
+    Vector2 vSize;
+    Vector2 vmSize;
 
     const char *disabled_reason = NULL;
 
    private:
-    bool m_bMouseInsideCheck = false;
-    bool m_bMouseUpCheck = false;
+    bool bMouseInsideCheck = false;
+    bool bMouseUpCheck = false;
 };

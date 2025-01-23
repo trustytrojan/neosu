@@ -11,56 +11,56 @@ using namespace std;
 
 SkinImage::SkinImage(Skin *skin, std::string skinElementName, Vector2 baseSizeForScaling2x, float osuSize,
                      std::string animationSeparator, bool ignoreDefaultSkin) {
-    m_skin = skin;
-    m_vBaseSizeForScaling2x = baseSizeForScaling2x;
-    m_fOsuSize = osuSize;
+    this->skin = skin;
+    this->vBaseSizeForScaling2x = baseSizeForScaling2x;
+    this->fOsuSize = osuSize;
 
-    m_bReady = false;
+    this->bReady = false;
 
-    m_iCurMusicPos = 0;
-    m_iFrameCounter = 0;
-    m_iFrameCounterUnclamped = 0;
-    m_fLastFrameTime = 0.0f;
-    m_iBeatmapAnimationTimeStartOffset = 0;
+    this->iCurMusicPos = 0;
+    this->iFrameCounter = 0;
+    this->iFrameCounterUnclamped = 0;
+    this->fLastFrameTime = 0.0f;
+    this->iBeatmapAnimationTimeStartOffset = 0;
 
-    m_bIsMissingTexture = false;
-    m_bIsFromDefaultSkin = false;
+    this->bIsMissingTexture = false;
+    this->bIsFromDefaultSkin = false;
 
-    m_fDrawClipWidthPercent = 1.0f;
+    this->fDrawClipWidthPercent = 1.0f;
 
     // logic: first load user skin (true), and if no image could be found then load the default skin (false)
     // this is necessary so that all elements can be correctly overridden with a user skin (e.g. if the user skin only
     // has sliderb.png, but the default skin has sliderb0.png!)
-    if(!load(skinElementName, animationSeparator, true)) {
-        if(!ignoreDefaultSkin) load(skinElementName, animationSeparator, false);
+    if(!this->load(skinElementName, animationSeparator, true)) {
+        if(!ignoreDefaultSkin) this->load(skinElementName, animationSeparator, false);
     }
 
     // if we couldn't load ANYTHING at all, gracefully fallback to missing texture
-    if(m_images.size() < 1) {
-        m_bIsMissingTexture = true;
+    if(this->images.size() < 1) {
+        this->bIsMissingTexture = true;
 
         IMAGE missingTexture;
 
-        missingTexture.img = m_skin->getMissingTexture();
+        missingTexture.img = this->skin->getMissingTexture();
         missingTexture.scale = 2;
 
-        m_images.push_back(missingTexture);
+        this->images.push_back(missingTexture);
     }
 
     // if AnimationFramerate is defined in skin, use that. otherwise derive framerate from number of frames
-    if(m_skin->getAnimationFramerate() > 0.0f)
-        m_fFrameDuration = 1.0f / m_skin->getAnimationFramerate();
-    else if(m_images.size() > 0)
-        m_fFrameDuration = 1.0f / (float)m_images.size();
+    if(this->skin->getAnimationFramerate() > 0.0f)
+        this->fFrameDuration = 1.0f / this->skin->getAnimationFramerate();
+    else if(this->images.size() > 0)
+        this->fFrameDuration = 1.0f / (float)this->images.size();
 }
 
 bool SkinImage::load(std::string skinElementName, std::string animationSeparator, bool ignoreDefaultSkin) {
     std::string animatedSkinElementStartName = skinElementName;
     animatedSkinElementStartName.append(animationSeparator);
     animatedSkinElementStartName.append("0");
-    if(loadImage(animatedSkinElementStartName,
-                 ignoreDefaultSkin))  // try loading the first animated element (if this exists then we continue loading
-                                      // until the first missing frame)
+    if(this->loadImage(animatedSkinElementStartName,
+                       ignoreDefaultSkin))  // try loading the first animated element (if this exists then we continue
+                                            // loading until the first missing frame)
     {
         int frame = 1;
         while(true) {
@@ -68,7 +68,7 @@ bool SkinImage::load(std::string skinElementName, std::string animationSeparator
             currentAnimatedSkinElementFrameName.append(animationSeparator);
             currentAnimatedSkinElementFrameName.append(std::to_string(frame));
 
-            if(!loadImage(currentAnimatedSkinElementFrameName, ignoreDefaultSkin))
+            if(!this->loadImage(currentAnimatedSkinElementFrameName, ignoreDefaultSkin))
                 break;  // stop loading on the first missing frame
 
             frame++;
@@ -80,17 +80,17 @@ bool SkinImage::load(std::string skinElementName, std::string animationSeparator
             }
         }
     } else  // load non-animated skin element
-        loadImage(skinElementName, ignoreDefaultSkin);
+        this->loadImage(skinElementName, ignoreDefaultSkin);
 
-    return m_images.size() > 0;  // if any image was found
+    return this->images.size() > 0;  // if any image was found
 }
 
 bool SkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin) {
-    std::string filepath1 = m_skin->getFilePath();
+    std::string filepath1 = this->skin->getFilePath();
     filepath1.append(skinElementName);
     filepath1.append("@2x.png");
 
-    std::string filepath2 = m_skin->getFilePath();
+    std::string filepath2 = this->skin->getFilePath();
     filepath2.append(skinElementName);
     filepath2.append(".png");
 
@@ -121,13 +121,13 @@ bool SkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin) {
             image.img = engine->getResourceManager()->loadImageAbsUnnamed(filepath1, cv_skin_mipmaps.getBool());
             image.scale = 2.0f;
 
-            m_images.push_back(image);
+            this->images.push_back(image);
 
             // export
             {
-                m_filepathsForExport.push_back(filepath1);
+                this->filepathsForExport.push_back(filepath1);
 
-                if(existsFilepath2) m_filepathsForExport.push_back(filepath2);
+                if(existsFilepath2) this->filepathsForExport.push_back(filepath2);
             }
 
             return true;  // nothing more to do here
@@ -145,13 +145,13 @@ bool SkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin) {
         image.img = engine->getResourceManager()->loadImageAbsUnnamed(filepath2, cv_skin_mipmaps.getBool());
         image.scale = 1.0f;
 
-        m_images.push_back(image);
+        this->images.push_back(image);
 
         // export
         {
-            m_filepathsForExport.push_back(filepath2);
+            this->filepathsForExport.push_back(filepath2);
 
-            if(existsFilepath1) m_filepathsForExport.push_back(filepath1);
+            if(existsFilepath1) this->filepathsForExport.push_back(filepath1);
         }
 
         return true;  // nothing more to do here
@@ -161,7 +161,7 @@ bool SkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin) {
 
     // load default skin
 
-    m_bIsFromDefaultSkin = true;
+    this->bIsFromDefaultSkin = true;
 
     // check if an @2x version of this image exists
     if(cv_skin_hd.getBool()) {
@@ -173,13 +173,13 @@ bool SkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin) {
             image.img = engine->getResourceManager()->loadImageAbsUnnamed(defaultFilePath1, cv_skin_mipmaps.getBool());
             image.scale = 2.0f;
 
-            m_images.push_back(image);
+            this->images.push_back(image);
 
             // export
             {
-                m_filepathsForExport.push_back(defaultFilePath1);
+                this->filepathsForExport.push_back(defaultFilePath1);
 
-                if(existsDefaultFilePath2) m_filepathsForExport.push_back(defaultFilePath2);
+                if(existsDefaultFilePath2) this->filepathsForExport.push_back(defaultFilePath2);
             }
 
             return true;  // nothing more to do here
@@ -195,13 +195,13 @@ bool SkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin) {
         image.img = engine->getResourceManager()->loadImageAbsUnnamed(defaultFilePath2, cv_skin_mipmaps.getBool());
         image.scale = 1.0f;
 
-        m_images.push_back(image);
+        this->images.push_back(image);
 
         // export
         {
-            m_filepathsForExport.push_back(defaultFilePath2);
+            this->filepathsForExport.push_back(defaultFilePath2);
 
-            if(existsDefaultFilePath1) m_filepathsForExport.push_back(defaultFilePath1);
+            if(existsDefaultFilePath1) this->filepathsForExport.push_back(defaultFilePath1);
         }
 
         return true;  // nothing more to do here
@@ -211,34 +211,34 @@ bool SkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin) {
 }
 
 SkinImage::~SkinImage() {
-    for(int i = 0; i < m_images.size(); i++) {
-        if(m_images[i].img != m_skin->getMissingTexture())
-            engine->getResourceManager()->destroyResource(m_images[i].img);
+    for(int i = 0; i < this->images.size(); i++) {
+        if(this->images[i].img != this->skin->getMissingTexture())
+            engine->getResourceManager()->destroyResource(this->images[i].img);
     }
-    m_images.clear();
+    this->images.clear();
 
-    m_filepathsForExport.clear();
+    this->filepathsForExport.clear();
 }
 
 void SkinImage::draw(Graphics *g, Vector2 pos, float scale) {
-    if(m_images.size() < 1) return;
+    if(this->images.size() < 1) return;
 
-    scale *= getScale();  // auto scale to current resolution
+    scale *= this->getScale();  // auto scale to current resolution
 
     g->pushTransform();
     {
         g->scale(scale, scale);
         g->translate(pos.x, pos.y);
 
-        Image *img = getImageForCurrentFrame().img;
+        Image *img = this->getImageForCurrentFrame().img;
 
-        if(m_fDrawClipWidthPercent == 1.0f)
+        if(this->fDrawClipWidthPercent == 1.0f)
             g->drawImage(img);
         else if(img->isReady()) {
             const float realWidth = img->getWidth();
             const float realHeight = img->getHeight();
 
-            const float width = realWidth * m_fDrawClipWidthPercent;
+            const float width = realWidth * this->fDrawClipWidthPercent;
             const float height = realHeight;
 
             const float x = -realWidth / 2;
@@ -253,10 +253,10 @@ void SkinImage::draw(Graphics *g, Vector2 pos, float scale) {
             vao.addTexcoord(0, 1);
 
             vao.addVertex((x + width), (y + height));
-            vao.addTexcoord(m_fDrawClipWidthPercent, 1);
+            vao.addTexcoord(this->fDrawClipWidthPercent, 1);
 
             vao.addVertex((x + width), y);
-            vao.addTexcoord(m_fDrawClipWidthPercent, 0);
+            vao.addTexcoord(this->fDrawClipWidthPercent, 0);
 
             img->bind();
             { g->drawVAO(&vao); }
@@ -267,22 +267,22 @@ void SkinImage::draw(Graphics *g, Vector2 pos, float scale) {
 }
 
 void SkinImage::drawRaw(Graphics *g, Vector2 pos, float scale) {
-    if(m_images.size() < 1) return;
+    if(this->images.size() < 1) return;
 
     g->pushTransform();
     {
         g->scale(scale, scale);
         g->translate(pos.x, pos.y);
 
-        Image *img = getImageForCurrentFrame().img;
+        Image *img = this->getImageForCurrentFrame().img;
 
-        if(m_fDrawClipWidthPercent == 1.0f)
+        if(this->fDrawClipWidthPercent == 1.0f)
             g->drawImage(img);
         else if(img->isReady()) {
             const float realWidth = img->getWidth();
             const float realHeight = img->getHeight();
 
-            const float width = realWidth * m_fDrawClipWidthPercent;
+            const float width = realWidth * this->fDrawClipWidthPercent;
             const float height = realHeight;
 
             const float x = -realWidth / 2;
@@ -297,10 +297,10 @@ void SkinImage::drawRaw(Graphics *g, Vector2 pos, float scale) {
             vao.addTexcoord(0, 1);
 
             vao.addVertex((x + width), (y + height));
-            vao.addTexcoord(m_fDrawClipWidthPercent, 1);
+            vao.addTexcoord(this->fDrawClipWidthPercent, 1);
 
             vao.addVertex((x + width), y);
-            vao.addTexcoord(m_fDrawClipWidthPercent, 0);
+            vao.addTexcoord(this->fDrawClipWidthPercent, 0);
 
             img->bind();
             { g->drawVAO(&vao); }
@@ -311,104 +311,106 @@ void SkinImage::drawRaw(Graphics *g, Vector2 pos, float scale) {
 }
 
 void SkinImage::update(float speedMultiplier, bool useEngineTimeForAnimations, long curMusicPos) {
-    if(m_images.size() < 1) return;
+    if(this->images.size() < 1) return;
 
-    m_iCurMusicPos = curMusicPos;
+    this->iCurMusicPos = curMusicPos;
 
     const float frameDurationInSeconds =
         (cv_skin_animation_fps_override.getFloat() > 0.0f ? (1.0f / cv_skin_animation_fps_override.getFloat())
-                                                          : m_fFrameDuration) /
+                                                          : this->fFrameDuration) /
         speedMultiplier;
 
     if(useEngineTimeForAnimations) {
         // as expected
-        if(engine->getTime() >= m_fLastFrameTime) {
-            m_fLastFrameTime = engine->getTime() + frameDurationInSeconds;
+        if(engine->getTime() >= this->fLastFrameTime) {
+            this->fLastFrameTime = engine->getTime() + frameDurationInSeconds;
 
-            m_iFrameCounter++;
-            m_iFrameCounterUnclamped++;
-            m_iFrameCounter = m_iFrameCounter % m_images.size();
+            this->iFrameCounter++;
+            this->iFrameCounterUnclamped++;
+            this->iFrameCounter = this->iFrameCounter % this->images.size();
         }
     } else {
         // when playing a beatmap, objects start the animation at frame 0 exactly when they first become visible (this
         // wouldn't work with the engine time method) therefore we need an offset parameter in the same time-space as
-        // the beatmap (m_iBeatmapTimeAnimationStartOffset), and we need the beatmap time (curMusicPos) as a relative
-        // base m_iBeatmapAnimationTimeStartOffset must be set by all hitobjects live while drawing (e.g. to their
-        // click_time-m_iObjectTime), since we don't have any animation state saved in the hitobjects!
+        // the beatmap (this->iBeatmapTimeAnimationStartOffset), and we need the beatmap time (curMusicPos) as a
+        // relative base m_iBeatmapAnimationTimeStartOffset must be set by all hitobjects live while drawing (e.g. to
+        // their click_time-m_iObjectTime), since we don't have any animation state saved in the hitobjects!
 
-		long frame_duration_ms = frameDurationInSeconds * 1000.0f;
+        long frame_duration_ms = frameDurationInSeconds * 1000.0f;
         if(frame_duration_ms == 0) {
-            m_iFrameCounter = 0;
-            m_iFrameCounterUnclamped = 0;
-		} else {
+            this->iFrameCounter = 0;
+            this->iFrameCounterUnclamped = 0;
+        } else {
             // freeze animation on frame 0 on negative offsets
-            m_iFrameCounter = max((int)((curMusicPos - m_iBeatmapAnimationTimeStartOffset) / frame_duration_ms), 0);
+            this->iFrameCounter =
+                max((int)((curMusicPos - this->iBeatmapAnimationTimeStartOffset) / frame_duration_ms), 0);
 
-            m_iFrameCounterUnclamped = m_iFrameCounter;
+            this->iFrameCounterUnclamped = this->iFrameCounter;
 
-			// clamp and wrap around to the number of frames we have
-            m_iFrameCounter = m_iFrameCounter % m_images.size();
-		}
+            // clamp and wrap around to the number of frames we have
+            this->iFrameCounter = this->iFrameCounter % this->images.size();
+        }
     }
 }
 
 void SkinImage::setAnimationTimeOffset(float speedMultiplier, long offset) {
-    m_iBeatmapAnimationTimeStartOffset = offset;
-    update(speedMultiplier, false, m_iCurMusicPos);  // force update
+    this->iBeatmapAnimationTimeStartOffset = offset;
+    this->update(speedMultiplier, false, this->iCurMusicPos);  // force update
 }
 
 void SkinImage::setAnimationFrameForce(int frame) {
-    if(m_images.size() < 1) return;
-    m_iFrameCounter = frame % m_images.size();
-    m_iFrameCounterUnclamped = m_iFrameCounter;
+    if(this->images.size() < 1) return;
+    this->iFrameCounter = frame % this->images.size();
+    this->iFrameCounterUnclamped = this->iFrameCounter;
 }
 
 void SkinImage::setAnimationFrameClampUp() {
-    if(m_images.size() > 0 && m_iFrameCounterUnclamped > m_images.size() - 1) m_iFrameCounter = m_images.size() - 1;
+    if(this->images.size() > 0 && this->iFrameCounterUnclamped > this->images.size() - 1)
+        this->iFrameCounter = this->images.size() - 1;
 }
 
 Vector2 SkinImage::getSize() {
-    if(m_images.size() > 0)
-        return getImageForCurrentFrame().img->getSize() * getScale();
+    if(this->images.size() > 0)
+        return this->getImageForCurrentFrame().img->getSize() * this->getScale();
     else
-        return getSizeBase();
+        return this->getSizeBase();
 }
 
-Vector2 SkinImage::getSizeBase() { return m_vBaseSizeForScaling2x * getResolutionScale(); }
+Vector2 SkinImage::getSizeBase() { return this->vBaseSizeForScaling2x * this->getResolutionScale(); }
 
-Vector2 SkinImage::getSizeBaseRaw() { return m_vBaseSizeForScaling2x * getImageForCurrentFrame().scale; }
+Vector2 SkinImage::getSizeBaseRaw() { return this->vBaseSizeForScaling2x * this->getImageForCurrentFrame().scale; }
 
-Vector2 SkinImage::getImageSizeForCurrentFrame() { return getImageForCurrentFrame().img->getSize(); }
+Vector2 SkinImage::getImageSizeForCurrentFrame() { return this->getImageForCurrentFrame().img->getSize(); }
 
-float SkinImage::getScale() { return getImageScale() * getResolutionScale(); }
+float SkinImage::getScale() { return this->getImageScale() * this->getResolutionScale(); }
 
 float SkinImage::getImageScale() {
-    if(m_images.size() > 0)
-        return m_vBaseSizeForScaling2x.x / getSizeBaseRaw().x;  // allow overscale and underscale
+    if(this->images.size() > 0)
+        return this->vBaseSizeForScaling2x.x / this->getSizeBaseRaw().x;  // allow overscale and underscale
     else
         return 1.0f;
 }
 
-float SkinImage::getResolutionScale() { return Osu::getImageScale(m_vBaseSizeForScaling2x, m_fOsuSize); }
+float SkinImage::getResolutionScale() { return Osu::getImageScale(this->vBaseSizeForScaling2x, this->fOsuSize); }
 
 bool SkinImage::isReady() {
-    if(m_bReady) return true;
+    if(this->bReady) return true;
 
-    for(int i = 0; i < m_images.size(); i++) {
-        if(engine->getResourceManager()->isLoadingResource(m_images[i].img)) return false;
+    for(int i = 0; i < this->images.size(); i++) {
+        if(engine->getResourceManager()->isLoadingResource(this->images[i].img)) return false;
     }
 
-    m_bReady = true;
-    return m_bReady;
+    this->bReady = true;
+    return this->bReady;
 }
 
 SkinImage::IMAGE SkinImage::getImageForCurrentFrame() {
-    if(m_images.size() > 0)
-        return m_images[m_iFrameCounter % m_images.size()];
+    if(this->images.size() > 0)
+        return this->images[this->iFrameCounter % this->images.size()];
     else {
         IMAGE image;
 
-        image.img = m_skin->getMissingTexture();
+        image.img = this->skin->getMissingTexture();
         image.scale = 1.0f;
 
         return image;

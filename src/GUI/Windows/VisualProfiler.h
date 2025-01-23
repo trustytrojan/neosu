@@ -32,7 +32,7 @@ class VisualProfiler : public CBaseUIElement {
 
     void setProfile(ProfilerProfile *profile);
     void setRequiresAltShiftKeysToFreeze(bool requiresAltShiftKeysToFreeze) {
-        m_bRequiresAltShiftKeysToFreeze = requiresAltShiftKeysToFreeze;
+        this->bRequiresAltShiftKeysToFreeze = requiresAltShiftKeysToFreeze;
     }
 
     virtual bool isEnabled();
@@ -83,35 +83,35 @@ class VisualProfiler : public CBaseUIElement {
 
     static void drawStringWithShadow(Graphics *g, McFont *font, const UString &string, Color color);
 
-    int m_iPrevVaoWidth;
-    int m_iPrevVaoHeight;
-    int m_iPrevVaoGroups;
-    float m_fPrevVaoMaxRange;
-    float m_fPrevVaoAlpha;
+    int iPrevVaoWidth;
+    int iPrevVaoHeight;
+    int iPrevVaoGroups;
+    float fPrevVaoMaxRange;
+    float fPrevVaoAlpha;
 
-    int m_iCurLinePos;
+    int iCurLinePos;
 
-    int m_iDrawGroupID;
-    int m_iDrawSwapBuffersGroupID;
+    int iDrawGroupID;
+    int iDrawSwapBuffersGroupID;
 
-    ProfilerProfile *m_profile;
-    std::vector<GROUP> m_groups;
-    std::vector<NODE> m_nodes;
-    std::vector<SPIKE> m_spikes;
+    ProfilerProfile *profile;
+    std::vector<GROUP> groups;
+    std::vector<NODE> nodes;
+    std::vector<SPIKE> spikes;
 
-    SPIKE m_spike;
-    std::vector<SPIKE> m_spikeNodes;
-    u32 m_spikeIDCounter;
+    SPIKE spike;
+    std::vector<SPIKE> spikeNodes;
+    u32 spikeIDCounter;
 
-    McFont *m_font;
-    McFont *m_fontConsole;
-    VertexArrayObject *m_lineVao;
+    McFont *font;
+    McFont *fontConsole;
+    VertexArrayObject *lineVao;
 
-    bool m_bScheduledForceRebuildLineVao;
-    bool m_bRequiresAltShiftKeysToFreeze;
+    bool bScheduledForceRebuildLineVao;
+    bool bRequiresAltShiftKeysToFreeze;
 
-    std::vector<TEXT_LINE> m_textLines;
-    std::vector<UString> m_appTextLines;
+    std::vector<TEXT_LINE> textLines;
+    std::vector<UString> appTextLines;
 };
 
 extern VisualProfiler *vprof;

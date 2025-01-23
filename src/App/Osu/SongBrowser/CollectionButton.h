@@ -14,7 +14,7 @@ class CollectionButton : public Button {
     virtual Color getActiveBackgroundColor() const;
     virtual Color getInactiveBackgroundColor() const;
 
-    const std::string &getCollectionName() const { return m_sCollectionName; }
+    const std::string &getCollectionName() const { return this->sCollectionName; }
 
    private:
     virtual void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected);
@@ -24,7 +24,7 @@ class CollectionButton : public Button {
     void onRenameCollectionConfirmed(UString text, int id = -1);
     void onDeleteCollectionConfirmed(UString text, int id = -1);
 
-    std::string m_sCollectionName;
+    std::string sCollectionName;
 
-    float m_fTitleScale;
+    float fTitleScale;
 };

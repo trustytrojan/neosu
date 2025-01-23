@@ -46,11 +46,11 @@ OpenGLES2Interface::OpenGLES2Interface() : NullGraphicsInterface() {
 }
 
 OpenGLES2Interface::~OpenGLES2Interface() {
-    SAFE_DELETE(m_shaderTexturedGeneric);
+    SAFE_DELETE(this->shaderTexturedGeneric);
 
-    if(m_iVBOVertices != 0) glDeleteBuffers(1, &m_iVBOVertices);
-    if(m_iVBOTexcoords != 0) glDeleteBuffers(1, &m_iVBOTexcoords);
-    if(m_iVBOTexcolors != 0) glDeleteBuffers(1, &m_iVBOTexcolors);
+    if(this->iVBOVertices != 0) glDeleteBuffers(1, &m_iVBOVertices);
+    if(this->iVBOTexcoords != 0) glDeleteBuffers(1, &m_iVBOTexcoords);
+    if(this->iVBOTexcolors != 0) glDeleteBuffers(1, &m_iVBOTexcolors);
 }
 
 void OpenGLES2Interface::init() {
@@ -123,21 +123,23 @@ void OpenGLES2Interface::init() {
     m_iShaderTexturedGenericAttribCol = m_shaderTexturedGeneric->getAttribLocation("vcolor");
 
     // TODO: handle cases where more than 16384 elements are in an unbaked vao
-    glBindBuffer(GL_ARRAY_BUFFER, m_iVBOVertices);
-    glVertexAttribPointer(m_iShaderTexturedGenericAttribPosition, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat),
+    glBindBuffer(GL_ARRAY_BUFFER, this->iVBOVertices);
+    glVertexAttribPointer(this->iShaderTexturedGenericAttribPosition, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat),
                           (GLvoid *)0);
     glBufferData(GL_ARRAY_BUFFER, 16384 * sizeof(Vector3), NULL, GL_STREAM_DRAW);
-    glEnableVertexAttribArray(m_iShaderTexturedGenericAttribPosition);
+    glEnableVertexAttribArray(this->iShaderTexturedGenericAttribPosition);
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_iVBOTexcoords);
-    glVertexAttribPointer(m_iShaderTexturedGenericAttribUV, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid *)0);
+    glBindBuffer(GL_ARRAY_BUFFER, this->iVBOTexcoords);
+    glVertexAttribPointer(this->iShaderTexturedGenericAttribUV, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat),
+                          (GLvoid *)0);
     glBufferData(GL_ARRAY_BUFFER, 16384 * sizeof(Vector2), NULL, GL_STREAM_DRAW);
-    glEnableVertexAttribArray(m_iShaderTexturedGenericAttribUV);
+    glEnableVertexAttribArray(this->iShaderTexturedGenericAttribUV);
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_iVBOTexcolors);
-    glVertexAttribPointer(m_iShaderTexturedGenericAttribCol, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid *)0);
+    glBindBuffer(GL_ARRAY_BUFFER, this->iVBOTexcolors);
+    glVertexAttribPointer(this->iShaderTexturedGenericAttribCol, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat),
+                          (GLvoid *)0);
     glBufferData(GL_ARRAY_BUFFER, 16384 * sizeof(Vector4), NULL, GL_STREAM_DRAW);
-    glEnableVertexAttribArray(m_iShaderTexturedGenericAttribCol);
+    glEnableVertexAttribArray(this->iShaderTexturedGenericAttribCol);
 }
 
 void OpenGLES2Interface::beginScene() {
@@ -146,7 +148,8 @@ void OpenGLES2Interface::beginScene() {
     // enable default shader (must happen before any uniform calls)
     m_shaderTexturedGeneric->enable();
 
-    Matrix4 defaultProjectionMatrix = Camera::buildMatrixOrtho2D(0, m_vResolution.x, m_vResolution.y, 0, -1.0f, 1.0f);
+    Matrix4 defaultProjectionMatrix =
+        Camera::buildMatrixOrtho2D(0, this->vResolution.x, this->vResolution.y, 0, -1.0f, 1.0f);
 
     // push main transforms
     pushTransform();
@@ -171,7 +174,7 @@ void OpenGLES2Interface::endScene() {
 
     checkStackLeaks();
 
-    if(m_clipRectStack.size() > 0) {
+    if(this->clipRectStack.size() > 0) {
         engine->showMessageErrorFatal("ClipRect Stack Leak", "Make sure all push*() have a pop*()!");
         engine->shutdown();
     }
@@ -184,11 +187,11 @@ void OpenGLES2Interface::clearDepthBuffer() { glClear(GL_DEPTH_BUFFER_BIT); }
 void OpenGLES2Interface::setColor(Color color) {
     if(color == m_color) return;
 
-    if(m_shaderTexturedGeneric->isActive()) {
+    if(this->shaderTexturedGeneric->isActive()) {
         m_color = color;
         m_shaderTexturedGeneric->setUniform4f(
-            "col", ((unsigned char)(m_color >> 16)) / 255.0f, ((unsigned char)(m_color >> 8)) / 255.0f,
-            ((unsigned char)(m_color >> 0)) / 255.0f, ((unsigned char)(m_color >> 24)) / 255.0f);
+            "col", ((unsigned char)(this->color >> 16)) / 255.0f, ((unsigned char)(this->color >> 8)) / 255.0f,
+            ((unsigned char)(this->color >> 0)) / 255.0f, ((unsigned char)(this->color >> 24)) / 255.0f);
     }
 }
 
@@ -347,13 +350,13 @@ void OpenGLES2Interface::drawVAO(VertexArrayObject *vao) {
         OpenGLES2VertexArrayObject *glvao = (OpenGLES2VertexArrayObject *)vao;
 
         // configure shader
-        if(m_shaderTexturedGeneric->isActive()) {
+        if(this->shaderTexturedGeneric->isActive()) {
             if(glvao->getNumTexcoords0() > 0) {
-                if(m_iShaderTexturedGenericPrevType != 1) {
+                if(this->iShaderTexturedGenericPrevType != 1) {
                     m_shaderTexturedGeneric->setUniform1f("type", 1.0f);
                     m_iShaderTexturedGenericPrevType = 1;
                 }
-            } else if(m_iShaderTexturedGenericPrevType != 0) {
+            } else if(this->iShaderTexturedGenericPrevType != 0) {
                 m_shaderTexturedGeneric->setUniform1f("type", 0.0f);
                 m_iShaderTexturedGenericPrevType = 0;
             }
@@ -436,37 +439,37 @@ void OpenGLES2Interface::drawVAO(VertexArrayObject *vao) {
 
     // upload vertices to gpu
     if(finalVertices.size() > 0) {
-        glBindBuffer(GL_ARRAY_BUFFER, m_iVBOVertices);
+        glBindBuffer(GL_ARRAY_BUFFER, this->iVBOVertices);
         glBufferSubData(GL_ARRAY_BUFFER, 0, finalVertices.size() * sizeof(Vector3), &(finalVertices[0]));
     }
 
     // upload texcoords to gpu
     if(finalTexcoords.size() > 0 && finalTexcoords[0].size() > 0) {
-        glBindBuffer(GL_ARRAY_BUFFER, m_iVBOTexcoords);
+        glBindBuffer(GL_ARRAY_BUFFER, this->iVBOTexcoords);
         glBufferSubData(GL_ARRAY_BUFFER, 0, finalTexcoords[0].size() * sizeof(Vector2), &(finalTexcoords[0][0]));
     }
 
     // upload vertex colors to gpu
     if(finalColors.size() > 0) {
-        glBindBuffer(GL_ARRAY_BUFFER, m_iVBOTexcolors);
+        glBindBuffer(GL_ARRAY_BUFFER, this->iVBOTexcolors);
         glBufferSubData(GL_ARRAY_BUFFER, 0, finalColors.size() * sizeof(Vector4), &(finalColors[0]));
     }
 
     // configure shader
-    if(m_shaderTexturedGeneric->isActive()) {
+    if(this->shaderTexturedGeneric->isActive()) {
         // TODO: multitexturing support
         if(finalTexcoords.size() > 0 && finalTexcoords[0].size() > 0) {
-            if(m_iShaderTexturedGenericPrevType != 1) {
+            if(this->iShaderTexturedGenericPrevType != 1) {
                 m_shaderTexturedGeneric->setUniform1f("type", 1.0f);
                 m_iShaderTexturedGenericPrevType = 1;
             }
-        } else if(m_iShaderTexturedGenericPrevType != 0) {
+        } else if(this->iShaderTexturedGenericPrevType != 0) {
             m_shaderTexturedGeneric->setUniform1f("type", 0.0f);
             m_iShaderTexturedGenericPrevType = 0;
         }
 
         if(finalColors.size() > 0) {
-            if(m_iShaderTexturedGenericPrevType != 2) {
+            if(this->iShaderTexturedGenericPrevType != 2) {
                 m_shaderTexturedGeneric->setUniform1f("type", 2.0f);
                 m_iShaderTexturedGenericPrevType = 2;
             }
@@ -479,7 +482,7 @@ void OpenGLES2Interface::drawVAO(VertexArrayObject *vao) {
 
 void OpenGLES2Interface::setClipRect(McRect clipRect) {
     if(r_debug_disable_cliprect->getBool()) return;
-    // if (m_bIs3DScene) return; // HACKHACK:TODO:
+    // if (this->bIs3DScene) return; // HACKHACK:TODO:
 
     // HACKHACK: compensate for viewport changes caused by RenderTargets!
     int viewport[4];
@@ -498,26 +501,26 @@ void OpenGLES2Interface::setClipRect(McRect clipRect) {
 }
 
 void OpenGLES2Interface::pushClipRect(McRect clipRect) {
-    if(m_clipRectStack.size() > 0)
-        m_clipRectStack.push(m_clipRectStack.top().intersect(clipRect));
+    if(this->clipRectStack.size() > 0)
+        m_clipRectStack.push(this->clipRectStack.top().intersect(clipRect));
     else
         m_clipRectStack.push(clipRect);
 
-    setClipRect(m_clipRectStack.top());
+    setClipRect(this->clipRectStack.top());
 }
 
 void OpenGLES2Interface::popClipRect() {
     m_clipRectStack.pop();
 
-    if(m_clipRectStack.size() > 0)
-        setClipRect(m_clipRectStack.top());
+    if(this->clipRectStack.size() > 0)
+        setClipRect(this->clipRectStack.top());
     else
         setClipping(false);
 }
 
 void OpenGLES2Interface::setClipping(bool enabled) {
     if(enabled) {
-        if(m_clipRectStack.size() > 0) glEnable(GL_SCISSOR_TEST);
+        if(this->clipRectStack.size() > 0) glEnable(GL_SCISSOR_TEST);
     } else
         glDisable(GL_SCISSOR_TEST);
 }
@@ -608,12 +611,12 @@ int OpenGLES2Interface::getVRAMRemaining() {
 void OpenGLES2Interface::onResolutionChange(Vector2 newResolution) {
     // rebuild viewport
     m_vResolution = newResolution;
-    glViewport(0, 0, m_vResolution.x, m_vResolution.y);
+    glViewport(0, 0, this->vResolution.x, this->vResolution.y);
 
     // special case: custom rendertarget resolution rendering, update active projection matrix immediately
-    if(m_bInScene) {
+    if(this->bInScene) {
         m_projectionTransformStack.top() =
-            Camera::buildMatrixOrtho2D(0, m_vResolution.x, m_vResolution.y, 0, -1.0f, 1.0f);
+            Camera::buildMatrixOrtho2D(0, this->vResolution.x, this->vResolution.y, 0, -1.0f, 1.0f);
         m_bTransformUpToDate = false;
     }
 }
@@ -652,7 +655,7 @@ void OpenGLES2Interface::onTransformUpdate(Matrix4 &projectionMatrix, Matrix4 &w
 
     m_MP = m_projectionMatrix * m_worldMatrix;
 
-    if(m_shaderTexturedGeneric->isActive()) m_shaderTexturedGeneric->setUniformMatrix4fv("mvp", m_MP);
+    if(this->shaderTexturedGeneric->isActive()) m_shaderTexturedGeneric->setUniformMatrix4fv("mvp", this->MP);
 }
 
 void OpenGLES2Interface::handleGLErrors() {

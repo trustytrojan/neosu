@@ -24,7 +24,7 @@ SDLEnvironment::SDLEnvironment(SDL_Window *window) : Environment() {
     m_sPrevClipboardTextSDL = NULL;
 
     // TODO: init monitors
-    if(m_vMonitors.size() < 1) {
+    if(this->vMonitors.size() < 1) {
         /// debugLog("WARNING: No monitors found! Adding default monitor ...\n");
 
         const Vector2 windowSize = getWindowSize();
@@ -40,17 +40,17 @@ void SDLEnvironment::update() {
 
 Graphics *SDLEnvironment::createRenderer() {
     // return new NullGraphicsInterface();
-    return new SDLGLLegacyInterface(m_window);
+    return new SDLGLLegacyInterface(this->window);
 
 #ifdef MCENGINE_FEATURE_OPENGLES
 
 #ifdef _WIN32
 
-    return new WinSDLGLES2Interface(m_window);
+    return new WinSDLGLES2Interface(this->window);
 
 #else
 
-    return new SDLGLES2Interface(m_window);
+    return new SDLGLES2Interface(this->window);
 
 #endif
 
@@ -163,25 +163,25 @@ std::string SDLEnvironment::getFileNameFromFilePath(std::string filePath) {
 }
 
 UString SDLEnvironment::getClipBoardText() {
-    if(m_sPrevClipboardTextSDL != NULL) SDL_free((void *)m_sPrevClipboardTextSDL);
+    if(this->sPrevClipboardTextSDL != NULL) SDL_free((void *)this->sPrevClipboardTextSDL);
 
     m_sPrevClipboardTextSDL = SDL_GetClipboardText();
 
-    return (m_sPrevClipboardTextSDL != NULL ? UString(m_sPrevClipboardTextSDL) : UString(""));
+    return (this->sPrevClipboardTextSDL != NULL ? UString(this->sPrevClipboardTextSDL) : UString(""));
 }
 
 void SDLEnvironment::setClipBoardText(UString text) { SDL_SetClipboardText(text.toUtf8()); }
 
 void SDLEnvironment::showMessageInfo(UString title, UString message) {
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, title.toUtf8(), message.toUtf8(), m_window);
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, title.toUtf8(), message.toUtf8(), this->window);
 }
 
 void SDLEnvironment::showMessageWarning(UString title, UString message) {
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, title.toUtf8(), message.toUtf8(), m_window);
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, title.toUtf8(), message.toUtf8(), this->window);
 }
 
 void SDLEnvironment::showMessageError(UString title, UString message) {
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title.toUtf8(), message.toUtf8(), m_window);
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title.toUtf8(), message.toUtf8(), this->window);
 }
 
 void SDLEnvironment::showMessageErrorFatal(UString title, UString message) { showMessageError(title, message); }
@@ -196,7 +196,7 @@ UString SDLEnvironment::openFolderWindow(UString title, UString initialpath) {
     return UString("");
 }
 
-void SDLEnvironment::focus() { SDL_RaiseWindow(m_window); }
+void SDLEnvironment::focus() { SDL_RaiseWindow(this->window); }
 
 void SDLEnvironment::center() {
     // TODO: use nearest monitor
@@ -205,14 +205,14 @@ void SDLEnvironment::center() {
     setWindowPos(screenSize.x / 2 - windowSize.x / 2, screenSize.y / 2 - windowSize.y / 2);
 }
 
-void SDLEnvironment::minimize() { SDL_MinimizeWindow(m_window); }
+void SDLEnvironment::minimize() { SDL_MinimizeWindow(this->window); }
 
-void SDLEnvironment::maximize() { SDL_MaximizeWindow(m_window); }
+void SDLEnvironment::maximize() { SDL_MaximizeWindow(this->window); }
 
 void SDLEnvironment::enableFullscreen() {
-    if(m_bFullscreen) return;
+    if(this->bFullscreen) return;
 
-    if(SDL_SetWindowFullscreen(m_window, SDL_WINDOW_FULLSCREEN_DESKTOP) ==
+    if(SDL_SetWindowFullscreen(this->window, SDL_WINDOW_FULLSCREEN_DESKTOP) ==
        0)  // NOTE: "fake" fullscreen since we don't want a videomode change
         m_bFullscreen = true;
 }
@@ -220,17 +220,17 @@ void SDLEnvironment::enableFullscreen() {
 void SDLEnvironment::disableFullscreen() {
     if(!m_bFullscreen) return;
 
-    if(SDL_SetWindowFullscreen(m_window, 0) == 0) m_bFullscreen = false;
+    if(SDL_SetWindowFullscreen(this->window, 0) == 0) m_bFullscreen = false;
 }
 
-void SDLEnvironment::setWindowTitle(UString title) { SDL_SetWindowTitle(m_window, title.toUtf8()); }
+void SDLEnvironment::setWindowTitle(UString title) { SDL_SetWindowTitle(this->window, title.toUtf8()); }
 
-void SDLEnvironment::setWindowPos(int x, int y) { SDL_SetWindowPosition(m_window, x, y); }
+void SDLEnvironment::setWindowPos(int x, int y) { SDL_SetWindowPosition(this->window, x, y); }
 
-void SDLEnvironment::setWindowSize(int width, int height) { SDL_SetWindowSize(m_window, width, height); }
+void SDLEnvironment::setWindowSize(int width, int height) { SDL_SetWindowSize(this->window, width, height); }
 
 void SDLEnvironment::setWindowResizable(bool resizable) {
-    SDL_SetWindowResizable(m_window, resizable ? SDL_TRUE : SDL_FALSE);
+    SDL_SetWindowResizable(this->window, resizable ? SDL_TRUE : SDL_FALSE);
     m_bResizable = resizable;
 }
 
@@ -242,21 +242,21 @@ void SDLEnvironment::setMonitor(int monitor) {
 Vector2 SDLEnvironment::getWindowPos() {
     int x = 0;
     int y = 0;
-    { SDL_GetWindowPosition(m_window, &x, &y); }
+    { SDL_GetWindowPosition(this->window, &x, &y); }
     return Vector2(x, y);
 }
 
 Vector2 SDLEnvironment::getWindowSize() {
     int width = 100;
     int height = 100;
-    { SDL_GetWindowSize(m_window, &width, &height); }
+    { SDL_GetWindowSize(this->window, &width, &height); }
     return Vector2(width, height);
 }
 
 int SDLEnvironment::getMonitor() {
     // TODO: needs to be implemented in combination with center() etc.
     return 0;
-    // const int monitor = SDL_GetWindowDisplayIndex(m_window);
+    // const int monitor = SDL_GetWindowDisplayIndex(this->window);
     // return (monitor != -1 ? monitor : 0);
 }
 
@@ -301,7 +301,7 @@ Vector2 SDLEnvironment::getMousePos() {
         int windowY = 0;
 
         SDL_GetGlobalMouseState(&mouseX, &mouseY);
-        SDL_GetWindowPosition(m_window, &windowX, &windowY);
+        SDL_GetWindowPosition(this->window, &windowX, &windowY);
 
         return Vector2(mouseX - windowX, mouseY - windowY);
     }
@@ -316,7 +316,7 @@ void SDLEnvironment::setCursorVisible(bool visible) {
     m_bCursorVisible = visible;
 }
 
-void SDLEnvironment::setMousePos(int x, int y) { SDL_WarpMouseInWindow(m_window, x, y); }
+void SDLEnvironment::setMousePos(int x, int y) { SDL_WarpMouseInWindow(this->window, x, y); }
 
 void SDLEnvironment::setCursorClip(bool clip, McRect rect) {
     m_cursorClip = rect;
@@ -329,7 +329,7 @@ void SDLEnvironment::setCursorClip(bool clip, McRect rect) {
         // TODO: custom rect (only fullscreen works atm)
     }
 
-    SDL_SetWindowGrab(m_window, clip ? SDL_TRUE : SDL_FALSE);
+    SDL_SetWindowGrab(this->window, clip ? SDL_TRUE : SDL_FALSE);
 }
 
 UString SDLEnvironment::keyCodeToString(KEYCODE keyCode) {

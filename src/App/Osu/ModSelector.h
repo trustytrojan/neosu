@@ -41,7 +41,7 @@ class ModSelector : public OsuScreen {
     u32 getModFlags();
     void enableModsFromFlags(u32 flags);
 
-    void setWaitForF1KeyUp(bool waitForF1KeyUp) { m_bWaitForF1KeyUp = waitForF1KeyUp; }
+    void setWaitForF1KeyUp(bool waitForF1KeyUp) { this->bWaitForF1KeyUp = waitForF1KeyUp; }
 
     bool isInCompactMode();
     bool isCSOverrideSliderActive();
@@ -55,28 +55,28 @@ class ModSelector : public OsuScreen {
     void updateLayout();
     void updateExperimentalLayout();
 
-    CBaseUILabel *m_nonVanillaWarning;
-    UIModSelectorModButton *m_modButtonHalftime;
-    UIModSelectorModButton *m_modButtonDoubletime;
-    UIModSelectorModButton *m_modButtonAuto;
+    CBaseUILabel *nonVanillaWarning;
+    UIModSelectorModButton *modButtonHalftime;
+    UIModSelectorModButton *modButtonDoubletime;
+    UIModSelectorModButton *modButtonAuto;
 
-    CBaseUISlider *m_CSSlider;
-    CBaseUISlider *m_ARSlider;
-    CBaseUISlider *m_ODSlider;
-    CBaseUISlider *m_HPSlider;
-    CBaseUISlider *m_speedSlider;
-    CBaseUICheckbox *m_ARLock;
-    CBaseUICheckbox *m_ODLock;
+    CBaseUISlider *CSSlider;
+    CBaseUISlider *ARSlider;
+    CBaseUISlider *ODSlider;
+    CBaseUISlider *HPSlider;
+    CBaseUISlider *speedSlider;
+    CBaseUICheckbox *ARLock;
+    CBaseUICheckbox *ODLock;
 
    private:
     struct OVERRIDE_SLIDER {
         OVERRIDE_SLIDER() {
-            lock = NULL;
-            desc = NULL;
-            slider = NULL;
-            label = NULL;
-            cvar = NULL;
-            lockCvar = NULL;
+            this->lock = NULL;
+            this->desc = NULL;
+            this->slider = NULL;
+            this->label = NULL;
+            this->cvar = NULL;
+            this->lockCvar = NULL;
         }
 
         CBaseUICheckbox *lock;
@@ -113,47 +113,47 @@ class ModSelector : public OsuScreen {
 
     void close();
 
-    float m_fAnimation;
-    float m_fExperimentalAnimation;
-    bool m_bScheduledHide;
-    bool m_bExperimentalVisible;
-    CBaseUIContainer *m_overrideSliderContainer;
-    CBaseUIScrollView *m_experimentalContainer;
+    float fAnimation;
+    float fExperimentalAnimation;
+    bool bScheduledHide;
+    bool bExperimentalVisible;
+    CBaseUIContainer *overrideSliderContainer;
+    CBaseUIScrollView *experimentalContainer;
 
-    bool m_bWaitForF1KeyUp;
+    bool bWaitForF1KeyUp;
 
-    bool m_bWaitForCSChangeFinished;
-    bool m_bWaitForSpeedChangeFinished;
-    bool m_bWaitForHPChangeFinished;
+    bool bWaitForCSChangeFinished;
+    bool bWaitForSpeedChangeFinished;
+    bool bWaitForHPChangeFinished;
 
     // override sliders
-    std::vector<OVERRIDE_SLIDER> m_overrideSliders;
-    bool m_bShowOverrideSliderALTHint;
+    std::vector<OVERRIDE_SLIDER> overrideSliders;
+    bool bShowOverrideSliderALTHint;
 
     // mod grid buttons
-    int m_iGridWidth;
-    int m_iGridHeight;
-    std::vector<UIModSelectorModButton *> m_modButtons;
-    UIModSelectorModButton *m_modButtonEasy;
-    UIModSelectorModButton *m_modButtonNofail;
-    UIModSelectorModButton *m_modButtonHardrock;
-    UIModSelectorModButton *m_modButtonSuddendeath;
-    UIModSelectorModButton *m_modButtonHidden;
-    UIModSelectorModButton *m_modButtonFlashlight;
-    UIModSelectorModButton *m_modButtonRelax;
-    UIModSelectorModButton *m_modButtonAutopilot;
-    UIModSelectorModButton *m_modButtonSpunout;
-    UIModSelectorModButton *m_modButtonScoreV2;
-    UIModSelectorModButton *m_modButtonTD;
+    int iGridWidth;
+    int iGridHeight;
+    std::vector<UIModSelectorModButton *> modButtons;
+    UIModSelectorModButton *modButtonEasy;
+    UIModSelectorModButton *modButtonNofail;
+    UIModSelectorModButton *modButtonHardrock;
+    UIModSelectorModButton *modButtonSuddendeath;
+    UIModSelectorModButton *modButtonHidden;
+    UIModSelectorModButton *modButtonFlashlight;
+    UIModSelectorModButton *modButtonRelax;
+    UIModSelectorModButton *modButtonAutopilot;
+    UIModSelectorModButton *modButtonSpunout;
+    UIModSelectorModButton *modButtonScoreV2;
+    UIModSelectorModButton *modButtonTD;
 
     // experimental mods
-    std::vector<EXPERIMENTAL_MOD> m_experimentalMods;
+    std::vector<EXPERIMENTAL_MOD> experimentalMods;
 
     // score multiplier info label
-    CBaseUILabel *m_scoreMultiplierLabel;
+    CBaseUILabel *scoreMultiplierLabel;
 
     // action buttons
-    std::vector<UIButton *> m_actionButtons;
-    UIButton *m_resetModsButton;
-    UIButton *m_closeButton;
+    std::vector<UIButton *> actionButtons;
+    UIButton *resetModsButton;
+    UIButton *closeButton;
 };

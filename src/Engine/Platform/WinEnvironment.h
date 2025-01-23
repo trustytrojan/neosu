@@ -80,8 +80,8 @@ class WinEnvironment : public Environment {
     McRect getVirtualScreenRect();
     McRect getDesktopRect();
     int getDPI();
-    bool isFullscreen() { return m_bFullScreen; }
-    bool isWindowResizable() { return m_bResizable; }
+    bool isFullscreen() { return this->bFullScreen; }
+    bool isWindowResizable() { return this->bResizable; }
 
     // mouse
     bool isCursorInWindow();
@@ -100,14 +100,14 @@ class WinEnvironment : public Environment {
 
     // ILLEGAL:
     // (also custom)
-    void setDPIOverride(int newForcedDPI) { m_iDPIOverride = newForcedDPI; }
+    void setDPIOverride(int newForcedDPI) { this->iDPIOverride = newForcedDPI; }
     bool setProcessPriority(int priority);  // 0 = normal, 1 = high
     bool setProcessAffinity(int affinity);  // -1 = reset (all cores), 0 = first core, 1 = last core
     void disableWindowsKey();
     void enableWindowsKey();
-    inline HWND getHwnd() const { return m_hwnd; }
-    inline HINSTANCE getHInstance() const { return m_hInstance; }
-    inline bool isRestartScheduled() const { return m_bIsRestartScheduled; }
+    inline HWND getHwnd() const { return this->hwnd; }
+    inline HINSTANCE getHInstance() const { return this->hInstance; }
+    inline bool isRestartScheduled() const { return this->bIsRestartScheduled; }
 
    private:
     static BOOL CALLBACK monitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData);
@@ -119,32 +119,32 @@ class WinEnvironment : public Environment {
     void onProcessPriorityChange(UString oldValue, UString newValue);
     void onDisableWindowsKeyChange(UString oldValue, UString newValue);
 
-    HWND m_hwnd;
-    HINSTANCE m_hInstance;
+    HWND hwnd;
+    HINSTANCE hInstance;
 
     // monitors
-    static std::vector<McRect> m_vMonitors;
+    static std::vector<McRect> vMonitors;
 
     // window
-    static bool m_bResizable;
-    bool m_bFullScreen;
-    Vector2 m_vWindowSize;
-    Vector2 m_vLastWindowPos;
-    Vector2 m_vLastWindowSize;
+    static bool bResizable;
+    bool bFullScreen;
+    Vector2 vWindowSize;
+    Vector2 vLastWindowPos;
+    Vector2 vLastWindowSize;
 
     // mouse
-    bool m_bCursorClipped;
-    McRect m_cursorClip;
-    bool m_bIsCursorInsideWindow;
-    bool m_bHasCursorTypeChanged;
-    HCURSOR m_mouseCursor;
-    CURSORTYPE m_cursorType;
+    bool bCursorClipped;
+    McRect cursorClip;
+    bool bIsCursorInsideWindow;
+    bool bHasCursorTypeChanged;
+    HCURSOR mouseCursor;
+    CURSORTYPE cursorType;
 
     // custom
-    int m_iDPIOverride;
-    bool m_bIsRestartScheduled;
-    static int m_iNumCoresForProcessAffinity;
-    static HHOOK g_hKeyboardHook;
+    int iDPIOverride;
+    bool bIsRestartScheduled;
+    static int iNumCoresForProcessAffinity;
+    static HHOOK hKeyboardHook;
 };
 
 #endif

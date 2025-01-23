@@ -25,11 +25,11 @@ class VSControlBar : public CBaseUIElement {
     virtual void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);
 
-    inline CBaseUISlider *getVolumeSlider() const { return m_volume; }
-    inline CBaseUIButton *getPlayButton() const { return m_play; }
-    inline CBaseUIButton *getPrevButton() const { return m_prev; }
-    inline CBaseUIButton *getNextButton() const { return m_next; }
-    inline CBaseUIButton *getInfoButton() const { return m_info; }
+    inline CBaseUISlider *getVolumeSlider() const { return this->volume; }
+    inline CBaseUIButton *getPlayButton() const { return this->play; }
+    inline CBaseUIButton *getPrevButton() const { return this->prev; }
+    inline CBaseUIButton *getNextButton() const { return this->next; }
+    inline CBaseUIButton *getInfoButton() const { return this->info; }
 
    protected:
     virtual void onResized();
@@ -43,19 +43,19 @@ class VSControlBar : public CBaseUIElement {
     void onShuffleCheckboxChanged(CBaseUICheckbox *box);
     void onVolumeChanged(UString oldValue, UString newValue);
 
-    CBaseUIContainer *m_container;
+    CBaseUIContainer *container;
 
-    CBaseUISlider *m_volume;
-    CBaseUIButton *m_play;
-    CBaseUIButton *m_prev;
-    CBaseUIButton *m_next;
+    CBaseUISlider *volume;
+    CBaseUIButton *play;
+    CBaseUIButton *prev;
+    CBaseUIButton *next;
 
-    CBaseUIButton *m_info;
+    CBaseUIButton *info;
 
-    CBaseUIButton *m_settings;
-    CBaseUICheckbox *m_shuffle;
-    CBaseUICheckbox *m_eq;
-    CBaseUICheckbox *m_repeat;
+    CBaseUIButton *settings;
+    CBaseUICheckbox *shuffle;
+    CBaseUICheckbox *eq;
+    CBaseUICheckbox *repeat;
 };
 
 #endif

@@ -42,16 +42,16 @@ class VertexArrayObject : public Resource {
     void setDrawRange(int fromIndex, int toIndex);
     void setDrawPercent(float fromPercent = 0.0f, float toPercent = 1.0f, int nearestMultiple = 0);  // DEPRECATED
 
-    inline Graphics::PRIMITIVE getPrimitive() const { return m_primitive; }
-    inline Graphics::USAGE_TYPE getUsage() const { return m_usage; }
+    inline Graphics::PRIMITIVE getPrimitive() const { return this->primitive; }
+    inline Graphics::USAGE_TYPE getUsage() const { return this->usage; }
 
-    const std::vector<Vector3> &getVertices() const { return m_vertices; }
-    const std::vector<std::vector<Vector2>> &getTexcoords() const { return m_texcoords; }
-    const std::vector<Vector3> &getNormals() const { return m_normals; }
-    const std::vector<Color> &getColors() const { return m_colors; }
+    const std::vector<Vector3> &getVertices() const { return this->vertices; }
+    const std::vector<std::vector<Vector2>> &getTexcoords() const { return this->texcoords; }
+    const std::vector<Vector3> &getNormals() const { return this->normals; }
+    const std::vector<Color> &getColors() const { return this->colors; }
 
-    inline unsigned int getNumVertices() const { return m_iNumVertices; }
-    inline bool hasTexcoords() const { return m_bHasTexcoords; }
+    inline unsigned int getNumVertices() const { return this->iNumVertices; }
+    inline bool hasTexcoords() const { return this->bHasTexcoords; }
 
    protected:
     static int nearestMultipleUp(int number, int multiple);
@@ -63,27 +63,27 @@ class VertexArrayObject : public Resource {
 
     void updateTexcoordArraySize(unsigned int textureUnit);
 
-    Graphics::PRIMITIVE m_primitive;
-    Graphics::USAGE_TYPE m_usage;
-    bool m_bKeepInSystemMemory;
+    Graphics::PRIMITIVE primitive;
+    Graphics::USAGE_TYPE usage;
+    bool bKeepInSystemMemory;
 
-    std::vector<Vector3> m_vertices;
-    std::vector<std::vector<Vector2>> m_texcoords;
-    std::vector<Vector3> m_normals;
-    std::vector<Color> m_colors;
+    std::vector<Vector3> vertices;
+    std::vector<std::vector<Vector2>> texcoords;
+    std::vector<Vector3> normals;
+    std::vector<Color> colors;
 
-    unsigned int m_iNumVertices;
-    bool m_bHasTexcoords;
+    unsigned int iNumVertices;
+    bool bHasTexcoords;
 
-    std::vector<int> m_partialUpdateVertexIndices;
-    std::vector<int> m_partialUpdateColorIndices;
+    std::vector<int> partialUpdateVertexIndices;
+    std::vector<int> partialUpdateColorIndices;
 
     // custom
-    int m_iDrawRangeFromIndex;
-    int m_iDrawRangeToIndex;
-    int m_iDrawPercentNearestMultiple;
-    float m_fDrawPercentFromPercent;
-    float m_fDrawPercentToPercent;
+    int iDrawRangeFromIndex;
+    int iDrawRangeToIndex;
+    int iDrawPercentNearestMultiple;
+    float fDrawPercentFromPercent;
+    float fDrawPercentToPercent;
 };
 
 #endif

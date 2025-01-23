@@ -10,12 +10,12 @@ struct ScoreboardSlot {
     void draw(Graphics *g);
     void updateIndex(int new_index, bool animate);
 
-    UIAvatar *m_avatar = NULL;
-    SCORE_ENTRY m_score;
-    int m_index;
-    float m_y = 0.f;
-    float m_fAlpha = 0.f;
-    float m_fFlash = 0.f;
+    UIAvatar *avatar = NULL;
+    SCORE_ENTRY score;
+    int index;
+    float y = 0.f;
+    float fAlpha = 0.f;
+    float fFlash = 0.f;
     bool is_friend = false;
     bool was_visible = false;
 };

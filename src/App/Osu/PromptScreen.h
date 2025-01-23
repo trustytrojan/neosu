@@ -24,9 +24,9 @@ class PromptScreen : public OsuScreen {
     void on_ok();
     void on_cancel();
 
-    CBaseUILabel *m_prompt_label;
-    CBaseUITextbox *m_prompt_input;
-    UIButton *m_ok_btn;
-    UIButton *m_cancel_btn;
-    PromptResponseCallback m_callback;
+    CBaseUILabel *prompt_label;
+    CBaseUITextbox *prompt_input;
+    UIButton *ok_btn;
+    UIButton *cancel_btn;
+    PromptResponseCallback callback;
 };

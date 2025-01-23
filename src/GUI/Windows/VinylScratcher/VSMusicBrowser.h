@@ -32,7 +32,7 @@ class VSMusicBrowser : public CBaseUIElement {
 
     void onInvalidFile();
 
-    void setFileClickedCallback(FileClickedCallback callback) { m_fileClickedCallback = callback; }
+    void setFileClickedCallback(FileClickedCallback callback) { this->fileClickedCallback = callback; }
 
    protected:
     virtual void onMoved();
@@ -46,7 +46,7 @@ class VSMusicBrowser : public CBaseUIElement {
         CBaseUIScrollView *view;
         std::vector<VSMusicBrowserButton *> buttons;
 
-        COLUMN() { view = NULL; }
+        COLUMN() { this->view = NULL; }
     };
 
    private:
@@ -56,20 +56,20 @@ class VSMusicBrowser : public CBaseUIElement {
 
     void onButtonClicked(CBaseUIButton *button);
 
-    FileClickedCallback m_fileClickedCallback;
+    FileClickedCallback fileClickedCallback;
 
-    McFont *m_font;
+    McFont *font;
 
-    Color m_defaultTextColor;
-    Color m_playingTextBrightColor;
-    Color m_playingTextDarkColor;
+    Color defaultTextColor;
+    Color playingTextBrightColor;
+    Color playingTextDarkColor;
 
-    CBaseUIScrollView *m_mainContainer;
-    std::vector<COLUMN> m_columns;
+    CBaseUIScrollView *mainContainer;
+    std::vector<COLUMN> columns;
 
-    std::string m_activeSong;
-    std::string m_previousActiveSong;
-    std::vector<std::string> m_playlist;
+    std::string activeSong;
+    std::string previousActiveSong;
+    std::vector<std::string> playlist;
 };
 
 #endif

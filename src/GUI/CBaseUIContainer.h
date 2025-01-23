@@ -30,10 +30,10 @@ class CBaseUIContainer : public CBaseUIElement {
 
     CBaseUIElement *getBaseUIElement(UString name);
 
-    inline const std::vector<CBaseUIElement *> &getElements() const { return m_vElements; }
+    inline const std::vector<CBaseUIElement *> &getElements() const { return this->vElements; }
 
-    virtual void onMoved() { update_pos(); }
-    virtual void onResized() { update_pos(); }
+    virtual void onMoved() { this->update_pos(); }
+    virtual void onResized() { this->update_pos(); }
 
     virtual bool isBusy();
     virtual bool isActive();
@@ -47,5 +47,5 @@ class CBaseUIContainer : public CBaseUIElement {
     void update_pos();
 
    protected:
-    std::vector<CBaseUIElement *> m_vElements;
+    std::vector<CBaseUIElement *> vElements;
 };

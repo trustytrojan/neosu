@@ -48,17 +48,17 @@ class BeatmapInterface {
     virtual Vector2 osuCoords2RawPixels(Vector2 coords) const = 0;
     virtual Vector2 osuCoords2LegacyPixels(Vector2 coords) const = 0;
 
-    f64 m_fHpMultiplierComboEnd = 1.0;
-    f64 m_fHpMultiplierNormal = 1.0;
-    u32 m_iMaxPossibleCombo = 0;
-    u32 m_iScoreV2ComboPortionMaximum = 0;
+    f64 fHpMultiplierComboEnd = 1.0;
+    f64 fHpMultiplierNormal = 1.0;
+    u32 iMaxPossibleCombo = 0;
+    u32 iScoreV2ComboPortionMaximum = 0;
 
     // It is assumed these values are set correctly
     u32 nb_hitobjects = 0;
-    f32 m_fHitcircleDiameter = 0.f;
-    f32 m_fRawHitcircleDiameter = 0.f;
-    f32 m_fSliderFollowCircleDiameter = 0.f;
-    bool m_bPrevKeyWasKey1 = false;
+    f32 fHitcircleDiameter = 0.f;
+    f32 fRawHitcircleDiameter = 0.f;
+    f32 fSliderFollowCircleDiameter = 0.f;
+    bool bPrevKeyWasKey1 = false;
     bool holding_slider = false;
     bool mod_halfwindow = false;
     bool mod_halfwindow_allow_300s = false;

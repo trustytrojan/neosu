@@ -17,18 +17,18 @@ static float button_sound_cooldown = 0.f;
 UIContextMenuButton::UIContextMenuButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text,
                                          int id)
     : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {
-    m_iID = id;
+    this->iID = id;
 }
 
 void UIContextMenuButton::mouse_update(bool *propagate_clicks) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
     CBaseUIButton::mouse_update(propagate_clicks);
 
-    if(isMouseInside() && m_tooltipTextLines.size() > 0) {
+    if(this->isMouseInside() && this->tooltipTextLines.size() > 0) {
         osu->getTooltipOverlay()->begin();
         {
-            for(int i = 0; i < m_tooltipTextLines.size(); i++) {
-                osu->getTooltipOverlay()->addLine(m_tooltipTextLines[i]);
+            for(int i = 0; i < this->tooltipTextLines.size(); i++) {
+                osu->getTooltipOverlay()->addLine(this->tooltipTextLines[i]);
             }
         }
         osu->getTooltipOverlay()->end();
@@ -37,112 +37,113 @@ void UIContextMenuButton::mouse_update(bool *propagate_clicks) {
 
 void UIContextMenuButton::onMouseInside() {
     if(button_sound_cooldown + 0.05f < engine->getTime()) {
-        engine->getSound()->play(osu->getSkin()->m_hoverButton);
+        engine->getSound()->play(osu->getSkin()->hoverButton);
         button_sound_cooldown = engine->getTime();
     }
 }
 
-void UIContextMenuButton::onMouseDownInside() { engine->getSound()->play(osu->getSkin()->m_clickButton); }
+void UIContextMenuButton::onMouseDownInside() { engine->getSound()->play(osu->getSkin()->clickButton); }
 
-void UIContextMenuButton::setTooltipText(UString text) { m_tooltipTextLines = text.split("\n"); }
+void UIContextMenuButton::setTooltipText(UString text) { this->tooltipTextLines = text.split("\n"); }
 
 UIContextMenuTextbox::UIContextMenuTextbox(float xPos, float yPos, float xSize, float ySize, UString name, int id)
     : CBaseUITextbox(xPos, yPos, xSize, ySize, name) {
-    m_iID = id;
+    this->iID = id;
 }
 
 UIContextMenu::UIContextMenu(float xPos, float yPos, float xSize, float ySize, UString name, CBaseUIScrollView *parent)
     : CBaseUIScrollView(xPos, yPos, xSize, ySize, name) {
-    m_parent = parent;
+    this->parent = parent;
 
-    setPos(xPos, yPos);
-    setSize(xSize, ySize);
-    setName(name);
+    this->setPos(xPos, yPos);
+    this->setSize(xSize, ySize);
+    this->setName(name);
 
-    setHorizontalScrolling(false);
-    setDrawBackground(false);
-    setDrawFrame(false);
-    setScrollbarSizeMultiplier(0.5f);
+    this->setHorizontalScrolling(false);
+    this->setDrawBackground(false);
+    this->setDrawFrame(false);
+    this->setScrollbarSizeMultiplier(0.5f);
 
-    m_containedTextbox = NULL;
+    this->containedTextbox = NULL;
 
-    m_iYCounter = 0;
-    m_iWidthCounter = 0;
+    this->iYCounter = 0;
+    this->iWidthCounter = 0;
 
-    m_bVisible = false;
-    m_bVisible2 = false;
-    m_clickCallback = NULL;
+    this->bVisible = false;
+    this->bVisible2 = false;
+    this->clickCallback = NULL;
 
-    m_fAnimation = 0.0f;
-    m_bInvertAnimation = false;
+    this->fAnimation = 0.0f;
+    this->bInvertAnimation = false;
 
-    m_bBigStyle = false;
-    m_bClampUnderflowAndOverflowAndEnableScrollingIfNecessary = false;
+    this->bBigStyle = false;
+    this->bClampUnderflowAndOverflowAndEnableScrollingIfNecessary = false;
 }
 
 void UIContextMenu::draw(Graphics *g) {
-    if(!m_bVisible || !m_bVisible2) return;
+    if(!this->bVisible || !this->bVisible2) return;
 
-    if(m_fAnimation > 0.0f && m_fAnimation < 1.0f) {
-        g->push3DScene(McRect(m_vPos.x, m_vPos.y + ((m_vSize.y / 2.0f) * (m_bInvertAnimation ? 1.0f : -1.0f)),
-                              m_vSize.x, m_vSize.y));
-        g->rotate3DScene((1.0f - m_fAnimation) * 90.0f * (m_bInvertAnimation ? 1.0f : -1.0f), 0, 0);
+    if(this->fAnimation > 0.0f && this->fAnimation < 1.0f) {
+        g->push3DScene(McRect(this->vPos.x,
+                              this->vPos.y + ((this->vSize.y / 2.0f) * (this->bInvertAnimation ? 1.0f : -1.0f)),
+                              this->vSize.x, this->vSize.y));
+        g->rotate3DScene((1.0f - this->fAnimation) * 90.0f * (this->bInvertAnimation ? 1.0f : -1.0f), 0, 0);
     }
 
     // draw background
     g->setColor(0xff222222);
-    g->setAlpha(m_fAnimation);
-    g->fillRect(m_vPos.x + 1, m_vPos.y + 1, m_vSize.x - 1, m_vSize.y - 1);
+    g->setAlpha(this->fAnimation);
+    g->fillRect(this->vPos.x + 1, this->vPos.y + 1, this->vSize.x - 1, this->vSize.y - 1);
 
     // draw frame
     g->setColor(0xffffffff);
-    g->setAlpha(m_fAnimation * m_fAnimation);
-    g->drawRect(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y);
+    g->setAlpha(this->fAnimation * this->fAnimation);
+    g->drawRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
 
     CBaseUIScrollView::draw(g);
 
-    if(m_fAnimation > 0.0f && m_fAnimation < 1.0f) g->pop3DScene();
+    if(this->fAnimation > 0.0f && this->fAnimation < 1.0f) g->pop3DScene();
 }
 
 void UIContextMenu::mouse_update(bool *propagate_clicks) {
-    if(!m_bVisible || !m_bVisible2) return;
+    if(!this->bVisible || !this->bVisible2) return;
     CBaseUIScrollView::mouse_update(propagate_clicks);
 
-    if(m_containedTextbox != NULL) {
-        if(m_containedTextbox->hitEnter()) onHitEnter(m_containedTextbox);
+    if(this->containedTextbox != NULL) {
+        if(this->containedTextbox->hitEnter()) this->onHitEnter(this->containedTextbox);
     }
 
     // HACKHACK: mouse wheel handling order
-    if(m_bClampUnderflowAndOverflowAndEnableScrollingIfNecessary) {
-        if(isMouseInside()) engine->getMouse()->resetWheelDelta();
+    if(this->bClampUnderflowAndOverflowAndEnableScrollingIfNecessary) {
+        if(this->isMouseInside()) engine->getMouse()->resetWheelDelta();
     }
 
-    if(m_selfDeletionCrashWorkaroundScheduledElementDeleteHack.size() > 0) {
-        for(size_t i = 0; i < m_selfDeletionCrashWorkaroundScheduledElementDeleteHack.size(); i++) {
-            delete m_selfDeletionCrashWorkaroundScheduledElementDeleteHack[i];
+    if(this->selfDeletionCrashWorkaroundScheduledElementDeleteHack.size() > 0) {
+        for(size_t i = 0; i < this->selfDeletionCrashWorkaroundScheduledElementDeleteHack.size(); i++) {
+            delete this->selfDeletionCrashWorkaroundScheduledElementDeleteHack[i];
         }
 
-        m_selfDeletionCrashWorkaroundScheduledElementDeleteHack.clear();
+        this->selfDeletionCrashWorkaroundScheduledElementDeleteHack.clear();
     }
 }
 
 void UIContextMenu::onKeyUp(KeyboardEvent &e) {
-    if(!m_bVisible || !m_bVisible2) return;
+    if(!this->bVisible || !this->bVisible2) return;
 
     CBaseUIScrollView::onKeyUp(e);
 }
 
 void UIContextMenu::onKeyDown(KeyboardEvent &e) {
-    if(!m_bVisible || !m_bVisible2) return;
+    if(!this->bVisible || !this->bVisible2) return;
 
     CBaseUIScrollView::onKeyDown(e);
 
     // also force ENTER event if context menu textbox has lost focus (but context menu is still visible, e.g. if the
     // user clicks inside the context menu but outside the textbox)
-    if(m_containedTextbox != NULL) {
+    if(this->containedTextbox != NULL) {
         if(e == KEY_ENTER) {
             e.consume();
-            onHitEnter(m_containedTextbox);
+            this->onHitEnter(this->containedTextbox);
         }
     }
 
@@ -150,51 +151,51 @@ void UIContextMenu::onKeyDown(KeyboardEvent &e) {
     if(!e.isConsumed()) {
         if(e == KEY_ESCAPE || e == (KEYCODE)cv_GAME_PAUSE.getInt()) {
             e.consume();
-            setVisible2(false);
+            this->setVisible2(false);
         }
     }
 }
 
 void UIContextMenu::onChar(KeyboardEvent &e) {
-    if(!m_bVisible || !m_bVisible2) return;
+    if(!this->bVisible || !this->bVisible2) return;
 
     CBaseUIScrollView::onChar(e);
 }
 
 void UIContextMenu::begin(int minWidth, bool bigStyle) {
-    m_iWidthCounter = minWidth;
-    m_bBigStyle = bigStyle;
+    this->iWidthCounter = minWidth;
+    this->bBigStyle = bigStyle;
 
-    m_iYCounter = 0;
-    m_clickCallback = NULL;
+    this->iYCounter = 0;
+    this->clickCallback = NULL;
 
-    setSizeX(m_iWidthCounter);
+    this->setSizeX(this->iWidthCounter);
 
     // HACKHACK: bad design workaround.
     // HACKHACK: callbacks from the same context menu which call begin() to create a new context menu may crash because
     // begin() deletes the object the callback is currently being called from HACKHACK: so, instead we just keep a list
     // of things to delete whenever we get to the next update() tick
     {
-        const std::vector<CBaseUIElement *> &oldElementsWeCanNotDeleteYet = getContainer()->getElements();
-        m_selfDeletionCrashWorkaroundScheduledElementDeleteHack.insert(
-            m_selfDeletionCrashWorkaroundScheduledElementDeleteHack.end(), oldElementsWeCanNotDeleteYet.begin(),
+        const std::vector<CBaseUIElement *> &oldElementsWeCanNotDeleteYet = this->getContainer()->getElements();
+        this->selfDeletionCrashWorkaroundScheduledElementDeleteHack.insert(
+            this->selfDeletionCrashWorkaroundScheduledElementDeleteHack.end(), oldElementsWeCanNotDeleteYet.begin(),
             oldElementsWeCanNotDeleteYet.end());
-        getContainer()->empty();  // ensure nothing is deleted yet
+        this->getContainer()->empty();  // ensure nothing is deleted yet
     }
 
-    clear();
+    this->clear();
 
-    m_containedTextbox = NULL;
+    this->containedTextbox = NULL;
 }
 
 UIContextMenuButton *UIContextMenu::addButton(UString text, int id) {
-    const int buttonHeight = 30 * Osu::getUIScale() * (m_bBigStyle ? 1.27f : 1.0f);
+    const int buttonHeight = 30 * Osu::getUIScale() * (this->bBigStyle ? 1.27f : 1.0f);
     const int margin = 9 * Osu::getUIScale();
 
     UIContextMenuButton *button =
-        new UIContextMenuButton(margin, m_iYCounter + margin, 0, buttonHeight, text, text, id);
+        new UIContextMenuButton(margin, this->iYCounter + margin, 0, buttonHeight, text, text, id);
     {
-        if(m_bBigStyle) button->setFont(osu->getSubTitleFont());
+        if(this->bBigStyle) button->setFont(osu->getSubTitleFont());
 
         button->setClickCallback(fastdelegate::MakeDelegate(this, &UIContextMenu::onClick));
         button->setWidthToContent(3 * Osu::getUIScale());
@@ -202,121 +203,123 @@ UIContextMenuButton *UIContextMenu::addButton(UString text, int id) {
         button->setDrawFrame(false);
         button->setDrawBackground(false);
     }
-    getContainer()->addBaseUIElement(button);
+    this->getContainer()->addBaseUIElement(button);
 
-    if(button->getSize().x + 2 * margin > m_iWidthCounter) {
-        m_iWidthCounter = button->getSize().x + 2 * margin;
-        setSizeX(m_iWidthCounter);
+    if(button->getSize().x + 2 * margin > this->iWidthCounter) {
+        this->iWidthCounter = button->getSize().x + 2 * margin;
+        this->setSizeX(this->iWidthCounter);
     }
 
-    m_iYCounter += buttonHeight;
-    setSizeY(m_iYCounter + 2 * margin);
+    this->iYCounter += buttonHeight;
+    this->setSizeY(this->iYCounter + 2 * margin);
 
     return button;
 }
 
 UIContextMenuTextbox *UIContextMenu::addTextbox(UString text, int id) {
-    const int buttonHeight = 30 * Osu::getUIScale() * (m_bBigStyle ? 1.27f : 1.0f);
+    const int buttonHeight = 30 * Osu::getUIScale() * (this->bBigStyle ? 1.27f : 1.0f);
     const int margin = 9 * Osu::getUIScale();
 
-    UIContextMenuTextbox *textbox = new UIContextMenuTextbox(margin, m_iYCounter + margin, 0, buttonHeight, text, id);
+    UIContextMenuTextbox *textbox =
+        new UIContextMenuTextbox(margin, this->iYCounter + margin, 0, buttonHeight, text, id);
     {
         textbox->setText(text);
 
-        if(m_bBigStyle) textbox->setFont(osu->getSubTitleFont());
+        if(this->bBigStyle) textbox->setFont(osu->getSubTitleFont());
 
         textbox->setActive(true);
     }
-    getContainer()->addBaseUIElement(textbox);
+    this->getContainer()->addBaseUIElement(textbox);
 
-    m_iYCounter += buttonHeight;
-    setSizeY(m_iYCounter + 2 * margin);
+    this->iYCounter += buttonHeight;
+    this->setSizeY(this->iYCounter + 2 * margin);
 
     // NOTE: only one single textbox is supported currently
-    m_containedTextbox = textbox;
+    this->containedTextbox = textbox;
 
     return textbox;
 }
 
 void UIContextMenu::end(bool invertAnimation, bool clampUnderflowAndOverflowAndEnableScrollingIfNecessary) {
-    m_bInvertAnimation = invertAnimation;
-    m_bClampUnderflowAndOverflowAndEnableScrollingIfNecessary = clampUnderflowAndOverflowAndEnableScrollingIfNecessary;
+    this->bInvertAnimation = invertAnimation;
+    this->bClampUnderflowAndOverflowAndEnableScrollingIfNecessary =
+        clampUnderflowAndOverflowAndEnableScrollingIfNecessary;
 
     const int margin = 9 * Osu::getUIScale();
 
-    const std::vector<CBaseUIElement *> &elements = getContainer()->getElements();
+    const std::vector<CBaseUIElement *> &elements = this->getContainer()->getElements();
     for(size_t i = 0; i < elements.size(); i++) {
-        (elements[i])->setSizeX(m_iWidthCounter - 2 * margin);
+        (elements[i])->setSizeX(this->iWidthCounter - 2 * margin);
     }
 
     // scrollview handling and edge cases
     {
-        setVerticalScrolling(false);
+        this->setVerticalScrolling(false);
 
-        if(m_bClampUnderflowAndOverflowAndEnableScrollingIfNecessary) {
-            if(m_vPos.y < 0) {
-                const float underflow = std::abs(m_vPos.y);
+        if(this->bClampUnderflowAndOverflowAndEnableScrollingIfNecessary) {
+            if(this->vPos.y < 0) {
+                const float underflow = std::abs(this->vPos.y);
 
-                setRelPosY(m_vPos.y + underflow);
-                setPosY(m_vPos.y + underflow);
-                setSizeY(m_vSize.y - underflow);
+                this->setRelPosY(this->vPos.y + underflow);
+                this->setPosY(this->vPos.y + underflow);
+                this->setSizeY(this->vSize.y - underflow);
 
-                setVerticalScrolling(true);
+                this->setVerticalScrolling(true);
             }
 
-            if(m_vPos.y + m_vSize.y > osu->getScreenHeight()) {
-                const float overflow = std::abs(m_vPos.y + m_vSize.y - osu->getScreenHeight());
+            if(this->vPos.y + this->vSize.y > osu->getScreenHeight()) {
+                const float overflow = std::abs(this->vPos.y + this->vSize.y - osu->getScreenHeight());
 
-                setSizeY(m_vSize.y - overflow - 1);
+                this->setSizeY(this->vSize.y - overflow - 1);
 
-                setVerticalScrolling(true);
+                this->setVerticalScrolling(true);
             }
         }
 
-        setScrollSizeToContent();
+        this->setScrollSizeToContent();
     }
 
-    setVisible2(true);
+    this->setVisible2(true);
 
-    m_fAnimation = 0.001f;
-    anim->moveQuartOut(&m_fAnimation, 1.0f, 0.15f, true);
+    this->fAnimation = 0.001f;
+    anim->moveQuartOut(&this->fAnimation, 1.0f, 0.15f, true);
 
-    engine->getSound()->play(osu->getSkin()->m_expand);
+    engine->getSound()->play(osu->getSkin()->expand);
 }
 
 void UIContextMenu::setVisible2(bool visible2) {
-    m_bVisible2 = visible2;
+    this->bVisible2 = visible2;
 
-    if(!m_bVisible2) setSize(1, 1);  // reset size
+    if(!this->bVisible2) this->setSize(1, 1);  // reset size
 
-    if(m_parent != NULL) m_parent->setScrollSizeToContent();  // and update parent scroll size
+    if(this->parent != NULL) this->parent->setScrollSizeToContent();  // and update parent scroll size
 }
 
-void UIContextMenu::onResized() { setSize(m_vSize); }
+void UIContextMenu::onResized() { this->setSize(this->vSize); }
 
 void UIContextMenu::onMoved() {
-    setRelPos(m_vPos);
-    setPos(m_vPos);
+    this->setRelPos(this->vPos);
+    this->setPos(this->vPos);
 }
 
-void UIContextMenu::onMouseDownOutside() { setVisible2(false); }
+void UIContextMenu::onMouseDownOutside() { this->setVisible2(false); }
 
 void UIContextMenu::onClick(CBaseUIButton *button) {
-    setVisible2(false);
+    this->setVisible2(false);
 
-    if(m_clickCallback != NULL) {
+    if(this->clickCallback != NULL) {
         // special case: if text input exists, then override with its text
-        if(m_containedTextbox != NULL)
-            m_clickCallback(m_containedTextbox->getText(), ((UIContextMenuButton *)button)->getID());
+        if(this->containedTextbox != NULL)
+            this->clickCallback(this->containedTextbox->getText(), ((UIContextMenuButton *)button)->getID());
         else
-            m_clickCallback(button->getName(), ((UIContextMenuButton *)button)->getID());
+            this->clickCallback(button->getName(), ((UIContextMenuButton *)button)->getID());
     }
 }
 
 void UIContextMenu::onHitEnter(UIContextMenuTextbox *textbox) {
-    setVisible2(false);
+    this->setVisible2(false);
 
-    if(m_clickCallback != NULL) m_clickCallback(textbox->getText(), textbox->getID());
+    if(this->clickCallback != NULL) this->clickCallback(textbox->getText(), textbox->getID());
 }
 
 void UIContextMenu::clampToBottomScreenEdge(UIContextMenu *menu) {

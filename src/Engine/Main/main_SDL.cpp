@@ -510,16 +510,16 @@ int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
                     const float joystick0DeadzoneY = sdl_joystick0_deadzone.getFloat();
 
                     if(joystick0DeadzoneX > 0.0f && joystick0DeadzoneX < 1.0f) {
-                        const float deltaAbs = (std::abs(m_fJoystick0XPercent) - joystick0DeadzoneX);
+                        const float deltaAbs = (std::abs(this->fJoystick0XPercent) - joystick0DeadzoneX);
                         joystick0XPercent = (deltaAbs > 0.0f ? (deltaAbs / (1.0f - joystick0DeadzoneX)) *
-                                                                   (float)sign<float>(m_fJoystick0XPercent)
+                                                                   (float)sign<float>(this->fJoystick0XPercent)
                                                              : 0.0f);
                     }
 
                     if(joystick0DeadzoneY > 0.0f && joystick0DeadzoneY < 1.0f) {
-                        const float deltaAbs = (std::abs(m_fJoystick0YPercent) - joystick0DeadzoneY);
+                        const float deltaAbs = (std::abs(this->fJoystick0YPercent) - joystick0DeadzoneY);
                         joystick0YPercent = (deltaAbs > 0.0f ? (deltaAbs / (1.0f - joystick0DeadzoneY)) *
-                                                                   (float)sign<float>(m_fJoystick0YPercent)
+                                                                   (float)sign<float>(this->fJoystick0YPercent)
                                                              : 0.0f);
                     }
                 }

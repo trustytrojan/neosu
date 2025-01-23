@@ -17,5 +17,5 @@ class ScreenBackable : public OsuScreen {
 
     virtual void updateLayout();
 
-    UIBackButton *m_backButton;
+    UIBackButton *backButton;
 };

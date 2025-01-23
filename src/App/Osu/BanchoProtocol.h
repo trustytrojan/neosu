@@ -144,9 +144,9 @@ struct Packet {
     i32 extra_int = 0;  // lazy
 
     void reserve(u32 newsize) {
-        if(newsize <= size) return;
-        memory = (u8 *)realloc(memory, newsize);
-        size = newsize;
+        if(newsize <= this->size) return;
+        this->memory = (u8 *)realloc(this->memory, newsize);
+        this->size = newsize;
     }
 };
 
@@ -181,26 +181,26 @@ struct Slot {
     double sv2_bonus = 0.0;
 
     // locked
-    bool is_locked() { return (status & 0b00000010); }
+    bool is_locked() { return (this->status & 0b00000010); }
 
     // ready
-    bool is_ready() { return (status & 0b00001000); }
+    bool is_ready() { return (this->status & 0b00001000); }
 
     // no_map
-    bool no_map() { return (status & 0b00010000); }
+    bool no_map() { return (this->status & 0b00010000); }
 
     // playing
-    bool is_player_playing() { return (status & 0b00100000); }
-    bool has_finished_playing() { return (status & 0b01000000); }
+    bool is_player_playing() { return (this->status & 0b00100000); }
+    bool has_finished_playing() { return (this->status & 0b01000000); }
 
     // no_map
-    bool is_missing_beatmap() { return (status & 0b00010000); }
+    bool is_missing_beatmap() { return (this->status & 0b00010000); }
 
     // quit
-    bool has_quit() { return (status & 0b10000000); }
+    bool has_quit() { return (this->status & 0b10000000); }
 
     // not_ready | ready | no_map | playing | complete
-    bool has_player() { return (status & 0b01111100); }
+    bool has_player() { return (this->status & 0b01111100); }
 };
 
 class Room {
@@ -238,7 +238,7 @@ class Room {
     bool nb_ready() {
         u8 nb = 0;
         for(int i = 0; i < 16; i++) {
-            if(slots[i].has_player() && slots[i].is_ready()) {
+            if(this->slots[i].has_player() && this->slots[i].is_ready()) {
                 nb++;
             }
         }
@@ -247,7 +247,7 @@ class Room {
 
     bool all_players_ready() {
         for(int i = 0; i < 16; i++) {
-            if(slots[i].has_player() && !slots[i].is_ready()) {
+            if(this->slots[i].has_player() && !this->slots[i].is_ready()) {
                 return false;
             }
         }

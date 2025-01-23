@@ -33,13 +33,13 @@ class Image : public Resource {
 
     Color getPixel(int x, int y) const;
 
-    inline Image::TYPE getType() const { return m_type; }
-    inline int getNumChannels() const { return m_iNumChannels; }
-    inline int getWidth() const { return m_iWidth; }
-    inline int getHeight() const { return m_iHeight; }
-    inline Vector2 getSize() const { return Vector2(m_iWidth, m_iHeight); }
+    inline Image::TYPE getType() const { return this->type; }
+    inline int getNumChannels() const { return this->iNumChannels; }
+    inline int getWidth() const { return this->iWidth; }
+    inline int getHeight() const { return this->iHeight; }
+    inline Vector2 getSize() const { return Vector2(this->iWidth, this->iHeight); }
 
-    inline bool hasAlphaChannel() const { return m_bHasAlphaChannel; }
+    inline bool hasAlphaChannel() const { return this->bHasAlphaChannel; }
 
    protected:
     virtual void init() = 0;
@@ -48,19 +48,19 @@ class Image : public Resource {
 
     bool loadRawImage();
 
-    Image::TYPE m_type;
-    Graphics::FILTER_MODE m_filterMode;
-    Graphics::WRAP_MODE m_wrapMode;
+    Image::TYPE type;
+    Graphics::FILTER_MODE filterMode;
+    Graphics::WRAP_MODE wrapMode;
 
-    int m_iNumChannels;
-    int m_iWidth;
-    int m_iHeight;
+    int iNumChannels;
+    int iWidth;
+    int iHeight;
 
-    bool m_bHasAlphaChannel;
-    bool m_bMipmapped;
-    bool m_bCreatedImage;
+    bool bHasAlphaChannel;
+    bool bMipmapped;
+    bool bCreatedImage;
 
-    std::vector<unsigned char> m_rawImage;
+    std::vector<unsigned char> rawImage;
 };
 
 #endif

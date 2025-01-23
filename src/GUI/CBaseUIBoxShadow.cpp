@@ -17,41 +17,43 @@
 CBaseUIBoxShadow::CBaseUIBoxShadow(Color color, float radius, float xPos, float yPos, float xSize, float ySize,
                                    UString name)
     : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
-    m_shadowColor = color;
-    m_color = color;
-    m_fRadius = radius;
-    m_bNeedsRedraw = true;
-    m_bColoredContent = false;
+    this->shadowColor = color;
+    this->color = color;
+    this->fRadius = radius;
+    this->bNeedsRedraw = true;
+    this->bColoredContent = false;
 
-    m_blur = new GaussianBlur(0, 0, m_vSize.x + m_fRadius * 2, m_vSize.y + m_fRadius * 2, 91, m_fRadius);
+    this->blur =
+        new GaussianBlur(0, 0, this->vSize.x + this->fRadius * 2, this->vSize.y + this->fRadius * 2, 91, this->fRadius);
 }
 
-CBaseUIBoxShadow::~CBaseUIBoxShadow() { SAFE_DELETE(m_blur); }
+CBaseUIBoxShadow::~CBaseUIBoxShadow() { SAFE_DELETE(this->blur); }
 
 void CBaseUIBoxShadow::draw(Graphics *g) {
-    if(m_bNeedsRedraw) {
-        render(g);
-        m_bNeedsRedraw = false;
+    if(this->bNeedsRedraw) {
+        this->render(g);
+        this->bNeedsRedraw = false;
     }
 
     if(cv_debug_box_shadows.getBool()) {
         g->setColor(0xff00ff00);
-        g->drawRect(m_vPos.x - m_fRadius, m_vPos.y - m_fRadius, m_blur->getSize().x, m_blur->getSize().y);
+        g->drawRect(this->vPos.x - this->fRadius, this->vPos.y - this->fRadius, this->blur->getSize().x,
+                    this->blur->getSize().y);
     }
 
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
     /*
     // HACKHACK: switching blend funcs
-    if (m_bColoredContent)
+    if (this->bColoredContent)
             glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     */
 
-    g->setColor(m_color);
-    m_blur->draw(g, m_vPos.x - m_fRadius, m_vPos.y - m_fRadius);
+    g->setColor(this->color);
+    this->blur->draw(g, this->vPos.x - this->fRadius, this->vPos.y - this->fRadius);
 
     /*
-    if (m_bColoredContent)
+    if (this->bColoredContent)
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     */
 }
@@ -59,59 +61,61 @@ void CBaseUIBoxShadow::draw(Graphics *g) {
 void CBaseUIBoxShadow::render(Graphics *g) {
     /*
     // HACKHACK: switching blend funcs
-    if (m_bColoredContent)
+    if (this->bColoredContent)
             glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     */
 
     g->setClipping(false);
-    m_blur->enable();
-    g->setColor(m_shadowColor);
-    g->fillRect(m_fRadius + 2, m_blur->getSize().y / 2.0f - m_vSize.y / 2.0f, m_vSize.x - 4, m_vSize.y);
-    m_blur->disable(g);
+    this->blur->enable();
+    g->setColor(this->shadowColor);
+    g->fillRect(this->fRadius + 2, this->blur->getSize().y / 2.0f - this->vSize.y / 2.0f, this->vSize.x - 4,
+                this->vSize.y);
+    this->blur->disable(g);
     g->setClipping(true);
 
     /*
-    if (m_bColoredContent)
+    if (this->bColoredContent)
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     */
 }
 
 void CBaseUIBoxShadow::renderOffscreen(Graphics *g) {
-    if(m_bNeedsRedraw) {
-        render(g);
-        m_bNeedsRedraw = false;
+    if(this->bNeedsRedraw) {
+        this->render(g);
+        this->bNeedsRedraw = false;
     }
 }
 
 CBaseUIBoxShadow *CBaseUIBoxShadow::setColor(Color color) {
-    m_blur->setColor(color);
-    m_color = color;
+    this->blur->setColor(color);
+    this->color = color;
     return this;
 }
 
 CBaseUIBoxShadow *CBaseUIBoxShadow::setShadowColor(Color color) {
-    m_bNeedsRedraw = true;
-    m_shadowColor = color;
+    this->bNeedsRedraw = true;
+    this->shadowColor = color;
     return this;
 }
 
 CBaseUIBoxShadow *CBaseUIBoxShadow::setColoredContent(bool coloredContent) {
-    m_bColoredContent = coloredContent;
+    this->bColoredContent = coloredContent;
 
-    if(m_bColoredContent) m_blur->setSize(Vector2(m_vSize.x + m_fRadius * 5, m_vSize.y + m_fRadius * 5));
+    if(this->bColoredContent)
+        this->blur->setSize(Vector2(this->vSize.x + this->fRadius * 5, this->vSize.y + this->fRadius * 5));
 
-    m_bNeedsRedraw = true;
+    this->bNeedsRedraw = true;
 
     return this;
 }
 
 void CBaseUIBoxShadow::onResized() {
-    if(m_bColoredContent)
-        m_blur->setSize(Vector2(m_vSize.x + m_fRadius * 5, m_vSize.y + m_fRadius * 5));
+    if(this->bColoredContent)
+        this->blur->setSize(Vector2(this->vSize.x + this->fRadius * 5, this->vSize.y + this->fRadius * 5));
     else
-        m_blur->setSize(Vector2(m_vSize.x + m_fRadius * 2, m_vSize.y + m_fRadius * 2));
+        this->blur->setSize(Vector2(this->vSize.x + this->fRadius * 2, this->vSize.y + this->fRadius * 2));
 
-    m_bNeedsRedraw = true;
+    this->bNeedsRedraw = true;
 }
 
 //*******************************************************************************************************************************************************************************************
@@ -121,71 +125,71 @@ void CBaseUIBoxShadow::onResized() {
 //**********************************//
 
 GaussianBlur::GaussianBlur(int x, int y, int width, int height, int kernelSize, float radius) {
-    m_vPos = Vector2(x, y);
-    m_vSize = Vector2(width, height);
-    m_iKernelSize = kernelSize;
-    m_fRadius = radius;
+    this->vPos = Vector2(x, y);
+    this->vSize = Vector2(width, height);
+    this->iKernelSize = kernelSize;
+    this->fRadius = radius;
 
-    m_kernel = new GaussianBlurKernel(kernelSize, radius, width, height);
-    m_rt = engine->getResourceManager()->createRenderTarget(x, y, width, height);
-    m_rt2 = engine->getResourceManager()->createRenderTarget(x, y, width, height);
-    m_blurShader = engine->getResourceManager()->loadShader("blur.vsh", "blur.fsh", "gblur");
+    this->kernel = new GaussianBlurKernel(kernelSize, radius, width, height);
+    this->rt = engine->getResourceManager()->createRenderTarget(x, y, width, height);
+    this->rt2 = engine->getResourceManager()->createRenderTarget(x, y, width, height);
+    this->blurShader = engine->getResourceManager()->loadShader("blur.vsh", "blur.fsh", "gblur");
 }
 
 GaussianBlur::~GaussianBlur() {
-    engine->getResourceManager()->destroyResource(m_rt);
-    m_rt = NULL;
-    engine->getResourceManager()->destroyResource(m_rt2);
-    m_rt2 = NULL;
-    SAFE_DELETE(m_kernel);
+    engine->getResourceManager()->destroyResource(this->rt);
+    this->rt = NULL;
+    engine->getResourceManager()->destroyResource(this->rt2);
+    this->rt2 = NULL;
+    SAFE_DELETE(this->kernel);
 }
 
 void GaussianBlur::draw(Graphics *g, int x, int y) {
-    m_rt->draw(g, x, y);
+    this->rt->draw(g, x, y);
 
     // g->setColor(0xffff0000);
-    // g->fillRect(x,y,m_vSize.x, m_vSize.y);
+    // g->fillRect(x,y,m_vSize.x, this->vSize.y);
 }
 
-void GaussianBlur::enable() { m_rt->enable(); }
+void GaussianBlur::enable() { this->rt->enable(); }
 
 void GaussianBlur::disable(Graphics *g) {
-    m_rt->disable();
+    this->rt->disable();
 
-    Shader *blur = m_blurShader;
+    Shader *blur = this->blurShader;
 
-    m_rt2->enable();
+    this->rt2->enable();
     blur->enable();
-    blur->setUniform1i("kernelSize", m_kernel->getKernelSize());
-    blur->setUniform1fv("weights", m_kernel->getKernelSize(), m_kernel->getKernel());
-    blur->setUniform1fv("offsets", m_kernel->getKernelSize(), m_kernel->getOffsetsVertical());
+    blur->setUniform1i("kernelSize", this->kernel->getKernelSize());
+    blur->setUniform1fv("weights", this->kernel->getKernelSize(), this->kernel->getKernel());
+    blur->setUniform1fv("offsets", this->kernel->getKernelSize(), this->kernel->getOffsetsVertical());
     blur->setUniform1i("orientation", 1);
-    m_rt->draw(g, 0, 0);
+    this->rt->draw(g, 0, 0);
     blur->disable();
-    m_rt2->disable();
+    this->rt2->disable();
 
-    m_rt->enable();
+    this->rt->enable();
     blur->enable();
-    blur->setUniform1i("kernelSize", m_kernel->getKernelSize());
-    blur->setUniform1fv("weights", m_kernel->getKernelSize(), m_kernel->getKernel());
-    blur->setUniform1fv("offsets", m_kernel->getKernelSize(), m_kernel->getOffsetsHorizontal());
+    blur->setUniform1i("kernelSize", this->kernel->getKernelSize());
+    blur->setUniform1fv("weights", this->kernel->getKernelSize(), this->kernel->getKernel());
+    blur->setUniform1fv("offsets", this->kernel->getKernelSize(), this->kernel->getOffsetsHorizontal());
     blur->setUniform1i("orientation", 0);
-    m_rt2->draw(g, m_vPos.x, m_vPos.y);
+    this->rt2->draw(g, this->vPos.x, this->vPos.y);
     blur->disable();
-    m_rt->disable();
+    this->rt->disable();
 }
 
 void GaussianBlur::setColor(Color color) {
-    m_rt->setColor(color);
-    m_rt2->setColor(color);
+    this->rt->setColor(color);
+    this->rt2->setColor(color);
 }
 
 void GaussianBlur::setSize(Vector2 size) {
-    m_vSize = size;
+    this->vSize = size;
 
-    SAFE_DELETE(m_kernel);
-    m_kernel = new GaussianBlurKernel(m_iKernelSize, m_fRadius, m_vSize.x, m_vSize.y);
+    SAFE_DELETE(this->kernel);
+    this->kernel = new GaussianBlurKernel(this->iKernelSize, this->fRadius, this->vSize.x, this->vSize.y);
 
-    m_rt->rebuild(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y);
-    m_rt2->rebuild(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y);
+    this->rt->rebuild(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
+    this->rt2->rebuild(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
 }

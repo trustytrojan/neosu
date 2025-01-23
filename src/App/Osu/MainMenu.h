@@ -24,14 +24,14 @@ class MainMenuPauseButton : public CBaseUIButton {
    public:
     MainMenuPauseButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
         : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {
-        m_bIsPaused = true;
+        this->bIsPaused = true;
     }
 
     virtual void draw(Graphics *g);
-    void setPaused(bool paused) { m_bIsPaused = paused; }
+    void setPaused(bool paused) { this->bIsPaused = paused; }
 
    private:
-    bool m_bIsPaused;
+    bool bIsPaused;
 };
 
 class MainMenu : public OsuScreen, public MouseListener {
@@ -68,8 +68,8 @@ class MainMenu : public OsuScreen, public MouseListener {
     virtual CBaseUIContainer *setVisible(bool visible);
 
     void setStartupAnim(bool startupAnim) {
-        m_bStartupAnim = startupAnim;
-        m_fStartupAnim = m_fStartupAnim2 = (m_bStartupAnim ? 0.0f : 1.0f);
+        this->bStartupAnim = startupAnim;
+        this->fStartupAnim = this->fStartupAnim2 = (this->bStartupAnim ? 0.0f : 1.0f);
     }
 
    private:
@@ -93,60 +93,60 @@ class MainMenu : public OsuScreen, public MouseListener {
     void onUpdatePressed();
     void onVersionPressed();
 
-    float m_fUpdateStatusTime;
-    float m_fUpdateButtonTextTime;
-    float m_fUpdateButtonAnimTime;
-    float m_fUpdateButtonAnim;
-    bool m_bHasClickedUpdate;
+    float fUpdateStatusTime;
+    float fUpdateButtonTextTime;
+    float fUpdateButtonAnimTime;
+    float fUpdateButtonAnim;
+    bool bHasClickedUpdate;
     bool shuffling = false;
 
-    Vector2 m_vSize;
-    Vector2 m_vCenter;
-    float m_fSizeAddAnim;
-    float m_fCenterOffsetAnim;
+    Vector2 vSize;
+    Vector2 vCenter;
+    float fSizeAddAnim;
+    float fCenterOffsetAnim;
 
-    bool m_bMenuElementsVisible;
-    float m_fMainMenuButtonCloseTime = 0.f;
+    bool bMenuElementsVisible;
+    float fMainMenuButtonCloseTime = 0.f;
 
-    MainMenuCubeButton *m_cube;
-    std::vector<MainMenuButton *> m_menuElements;
+    MainMenuCubeButton *cube;
+    std::vector<MainMenuButton *> menuElements;
 
-    MainMenuPauseButton *m_pauseButton;
-    UIButton *m_updateAvailableButton = NULL;
-    CBaseUIButton *m_versionButton;
+    MainMenuPauseButton *pauseButton;
+    UIButton *updateAvailableButton = NULL;
+    CBaseUIButton *versionButton;
 
-    bool m_bDrawVersionNotificationArrow;
-    bool m_bDidUserUpdateFromOlderVersion;
+    bool bDrawVersionNotificationArrow;
+    bool bDidUserUpdateFromOlderVersion;
 
     // custom
-    float m_fMainMenuAnimTime;
-    float m_fMainMenuAnimDuration;
-    float m_fMainMenuAnim;
-    float m_fMainMenuAnim1;
-    float m_fMainMenuAnim2;
-    float m_fMainMenuAnim3;
-    float m_fMainMenuAnim1Target;
-    float m_fMainMenuAnim2Target;
-    float m_fMainMenuAnim3Target;
-    bool m_bInMainMenuRandomAnim;
-    int m_iMainMenuRandomAnimType;
-    unsigned int m_iMainMenuAnimBeatCounter;
+    float fMainMenuAnimTime;
+    float fMainMenuAnimDuration;
+    float fMainMenuAnim;
+    float fMainMenuAnim1;
+    float fMainMenuAnim2;
+    float fMainMenuAnim3;
+    float fMainMenuAnim1Target;
+    float fMainMenuAnim2Target;
+    float fMainMenuAnim3Target;
+    bool bInMainMenuRandomAnim;
+    int iMainMenuRandomAnimType;
+    unsigned int iMainMenuAnimBeatCounter;
 
-    bool m_bMainMenuAnimFriend;
-    bool m_bMainMenuAnimFadeToFriendForNextAnim;
-    bool m_bMainMenuAnimFriendScheduled;
-    float m_fMainMenuAnimFriendPercent;
-    float m_fMainMenuAnimFriendEyeFollowX;
-    float m_fMainMenuAnimFriendEyeFollowY;
+    bool bMainMenuAnimFriend;
+    bool bMainMenuAnimFadeToFriendForNextAnim;
+    bool bMainMenuAnimFriendScheduled;
+    float fMainMenuAnimFriendPercent;
+    float fMainMenuAnimFriendEyeFollowX;
+    float fMainMenuAnimFriendEyeFollowY;
 
-    float m_fShutdownScheduledTime;
-    bool m_bWasCleanShutdown;
+    float fShutdownScheduledTime;
+    bool bWasCleanShutdown;
 
-    bool m_bStartupAnim;
-    float m_fStartupAnim;
-    float m_fStartupAnim2;
-    float m_fPrevShuffleTime;
-    float m_fBackgroundFadeInTime;
+    bool bStartupAnim;
+    float fStartupAnim;
+    float fStartupAnim2;
+    float fPrevShuffleTime;
+    float fBackgroundFadeInTime;
 
     Image *logo_img;
     Shader *background_shader = NULL;

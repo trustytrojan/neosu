@@ -30,14 +30,16 @@ class ConsoleBox : public CBaseUIElement {
     void log(UString text, Color textColor = 0xffffffff);
 
     // set
-    void setRequireShiftToActivate(bool requireShiftToActivate) { m_bRequireShiftToActivate = requireShiftToActivate; }
+    void setRequireShiftToActivate(bool requireShiftToActivate) {
+        this->bRequireShiftToActivate = requireShiftToActivate;
+    }
 
     // get
     bool isBusy();
     bool isActive();
 
     // ILLEGAL:
-    inline ConsoleBoxTextbox *getTextbox() const { return m_textbox; }
+    inline ConsoleBoxTextbox *getTextbox() const { return this->textbox; }
 
    private:
     struct LOG_ENTRY {
@@ -58,32 +60,32 @@ class ConsoleBox : public CBaseUIElement {
 
     float getDPIScale();
 
-    int m_iSuggestionCount;
-    int m_iSelectedSuggestion;  // for up/down buttons
+    int iSuggestionCount;
+    int iSelectedSuggestion;  // for up/down buttons
 
-    ConsoleBoxTextbox *m_textbox;
-    CBaseUIScrollView *m_suggestion;
-    std::vector<CBaseUIButton *> m_vSuggestionButtons;
-    float m_fSuggestionY;
+    ConsoleBoxTextbox *textbox;
+    CBaseUIScrollView *suggestion;
+    std::vector<CBaseUIButton *> vSuggestionButtons;
+    float fSuggestionY;
 
-    bool m_bRequireShiftToActivate;
-    bool m_bConsoleAnimateOnce;
-    float m_fConsoleDelay;
-    float m_fConsoleAnimation;
-    bool m_bConsoleAnimateIn;
-    bool m_bConsoleAnimateOut;
+    bool bRequireShiftToActivate;
+    bool bConsoleAnimateOnce;
+    float fConsoleDelay;
+    float fConsoleAnimation;
+    bool bConsoleAnimateIn;
+    bool bConsoleAnimateOut;
 
-    bool m_bSuggestionAnimateIn;
-    bool m_bSuggestionAnimateOut;
-    float m_fSuggestionAnimation;
+    bool bSuggestionAnimateIn;
+    bool bSuggestionAnimateOut;
+    float fSuggestionAnimation;
 
-    float m_fLogTime;
-    float m_fLogYPos;
-    std::vector<LOG_ENTRY> m_log;
-    McFont *m_logFont;
+    float fLogTime;
+    float fLogYPos;
+    std::vector<LOG_ENTRY> log_entries;
+    McFont *logFont;
 
-    std::vector<UString> m_commandHistory;
-    int m_iSelectedHistory;
+    std::vector<UString> commandHistory;
+    int iSelectedHistory;
 
-    std::mutex m_logMutex;
+    std::mutex logMutex;
 };

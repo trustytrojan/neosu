@@ -23,25 +23,25 @@ class Resource {
 
     void interruptLoad();
 
-    void setName(std::string name) { m_sName = name; }
+    void setName(std::string name) { this->sName = name; }
 
-    inline std::string getName() const { return m_sName; }
-    inline std::string getFilePath() const { return m_sFilePath; }
+    inline std::string getName() const { return this->sName; }
+    inline std::string getFilePath() const { return this->sFilePath; }
 
-    inline bool isReady() const { return m_bReady.load(); }
-    inline bool isAsyncReady() const { return m_bAsyncReady.load(); }
+    inline bool isReady() const { return this->bReady.load(); }
+    inline bool isAsyncReady() const { return this->bAsyncReady.load(); }
 
    protected:
     virtual void init() = 0;
     virtual void initAsync() = 0;
     virtual void destroy() = 0;
 
-    std::string m_sFilePath;
-    std::string m_sName;
+    std::string sFilePath;
+    std::string sName;
 
-    std::atomic<bool> m_bReady;
-    std::atomic<bool> m_bAsyncReady;
-    std::atomic<bool> m_bInterrupted;
+    std::atomic<bool> bReady;
+    std::atomic<bool> bAsyncReady;
+    std::atomic<bool> bInterrupted;
 };
 
 #endif

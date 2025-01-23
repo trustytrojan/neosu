@@ -10,7 +10,7 @@ class CBaseUITextField : public CBaseUIScrollView {
     virtual void draw(Graphics *g);
 
     CBaseUITextField *setFont(McFont *font) {
-        m_textObject->setFont(font);
+        this->textObject->setFont(font);
         return this;
     }
 
@@ -31,38 +31,38 @@ class CBaseUITextField : public CBaseUIScrollView {
 
         CBaseUIElement *setText(UString text);
         CBaseUIElement *setFont(McFont *font) {
-            m_font = font;
-            updateStringMetrics();
+            this->font = font;
+            this->updateStringMetrics();
             return this;
         }
 
         CBaseUIElement *setTextColor(Color textColor) {
-            m_textColor = textColor;
+            this->textColor = textColor;
             return this;
         }
         CBaseUIElement *setParentSize(Vector2 parentSize) {
-            m_vParentSize = parentSize;
-            onResized();
+            this->vParentSize = parentSize;
+            this->onResized();
             return this;
         }
 
-        inline Color getTextColor() const { return m_textColor; }
+        inline Color getTextColor() const { return this->textColor; }
 
-        inline UString getText() const { return m_sText; }
-        inline McFont *getFont() const { return m_font; }
+        inline UString getText() const { return this->sText; }
+        inline McFont *getFont() const { return this->font; }
 
         void onResized();
 
        private:
         void updateStringMetrics();
 
-        Vector2 m_vParentSize;
+        Vector2 vParentSize;
 
-        UString m_sText;
-        Color m_textColor;
-        McFont *m_font;
-        float m_fStringHeight;
+        UString sText;
+        Color textColor;
+        McFont *font;
+        float fStringHeight;
     };
 
-    TextObject *m_textObject;
+    TextObject *textObject;
 };

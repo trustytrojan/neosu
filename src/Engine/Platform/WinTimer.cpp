@@ -1,10 +1,3 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		fps timer
-//
-// $NoKeywords: $wintime $os
-//===============================================================================//
-
 #ifdef _WIN32
 
 #include "WinTimer.h"
@@ -13,34 +6,34 @@ WinTimer::WinTimer() : BaseTimer() {
     LARGE_INTEGER ticks;
     QueryPerformanceFrequency(&ticks);
 
-    m_secondsPerTick = 1.0 / (double)ticks.QuadPart;
-    m_ticksPerSecond = ticks.QuadPart;
+    this->secondsPerTick = 1.0 / (double)ticks.QuadPart;
+    this->ticksPerSecond = ticks.QuadPart;
 
-    m_startTime.QuadPart = 0;
-    m_currentTime.QuadPart = 0;
+    this->startTime.QuadPart = 0;
+    this->currentTime.QuadPart = 0;
 
-    m_delta = 0.0;
-    m_elapsedTime = 0.0;
-    m_elapsedTimeMS = 0;
+    this->delta = 0.0;
+    this->elapsedTime = 0.0;
+    this->elapsedTimeMS = 0;
 }
 
 void WinTimer::start() {
-    QueryPerformanceCounter(&m_startTime);
-    m_currentTime = m_startTime;
+    QueryPerformanceCounter(&this->startTime);
+    this->currentTime = this->startTime;
 
-    m_delta = 0.0;
-    m_elapsedTime = 0.0;
-    m_elapsedTimeMS = 0;
+    this->delta = 0.0;
+    this->elapsedTime = 0.0;
+    this->elapsedTimeMS = 0;
 }
 
 void WinTimer::update() {
     LARGE_INTEGER nowTime;
     QueryPerformanceCounter(&nowTime);
 
-    m_delta = (double)(nowTime.QuadPart - m_currentTime.QuadPart) * m_secondsPerTick;
-    m_elapsedTime = (double)(nowTime.QuadPart - m_startTime.QuadPart) * m_secondsPerTick;
-    m_elapsedTimeMS = (u64)(((nowTime.QuadPart - m_startTime.QuadPart) * 1000) / m_ticksPerSecond);
-    m_currentTime = nowTime;
+    this->delta = (double)(nowTime.QuadPart - this->currentTime.QuadPart) * this->secondsPerTick;
+    this->elapsedTime = (double)(nowTime.QuadPart - this->startTime.QuadPart) * this->secondsPerTick;
+    this->elapsedTimeMS = (u64)(((nowTime.QuadPart - this->startTime.QuadPart) * 1000) / this->ticksPerSecond);
+    this->currentTime = nowTime;
 }
 
 #endif

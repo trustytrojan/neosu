@@ -15,13 +15,13 @@ void Quaternion::set(float x, float y, float z, float w) {
 }
 
 void Quaternion::normalize() {
-    float magnitudeSquared = w * w + x * x + y * y + z * z;
+    float magnitudeSquared = this->w * this->w + this->x * this->x + this->y * this->y + this->z * this->z;
     if(std::abs(magnitudeSquared) > EPSILON && std::abs(magnitudeSquared - 1.0f) > EPSILON) {
         float magnitude = std::sqrt(magnitudeSquared);
-        w /= magnitude;
-        x /= magnitude;
-        y /= magnitude;
-        z /= magnitude;
+        this->w /= magnitude;
+        this->x /= magnitude;
+        this->y /= magnitude;
+        this->z /= magnitude;
     }
 }
 
@@ -36,10 +36,10 @@ void Quaternion::fromAxis(const Vector3 &axis, float angleDeg) {
 
     sinAngle = std::sin(angleDeg);
 
-    x = (axisCopy.x * sinAngle);
-    y = (axisCopy.y * sinAngle);
-    z = (axisCopy.z * sinAngle);
-    w = std::cos(angleDeg);
+    this->x = (axisCopy.x * sinAngle);
+    this->y = (axisCopy.y * sinAngle);
+    this->z = (axisCopy.z * sinAngle);
+    this->w = std::cos(angleDeg);
 }
 
 void Quaternion::fromEuler(float yawDeg, float pitchDeg, float rollDeg) {
@@ -60,26 +60,32 @@ void Quaternion::fromEuler(float yawDeg, float pitchDeg, float rollDeg) {
     this->z = cosRoll * cosPitch * sinYaw - sinRoll * sinPitch * cosYaw;
     this->w = cosRoll * cosPitch * cosYaw + sinRoll * sinPitch * sinYaw;
 
-    normalize();
+    this->normalize();
 }
 
 Matrix4 Quaternion::getMatrix() const {
-    return Matrix4(1.0f - 2.0f * y * y - 2.0f * z * z, 2.0f * x * y - 2.0f * z * w, 2.0f * x * z + 2.0f * y * w, 0.0f,
-                   2.0f * x * y + 2.0f * z * w, 1.0f - 2.0f * x * x - 2.0f * z * z, 2.0f * y * z - 2.0f * x * w, 0.0f,
-                   2.0f * x * z - 2.0f * y * w, 2.0f * y * z + 2.0f * x * w, 1.0f - 2.0f * x * x - 2.0f * y * y, 0.0f,
-                   0.0f, 0.0f, 0.0f, 1.0f);
+    return Matrix4(
+        1.0f - 2.0f * this->y * this->y - 2.0f * this->z * this->z, 2.0f * this->x * this->y - 2.0f * this->z * this->w,
+        2.0f * this->x * this->z + 2.0f * this->y * this->w, 0.0f, 2.0f * this->x * this->y + 2.0f * this->z * this->w,
+        1.0f - 2.0f * this->x * this->x - 2.0f * this->z * this->z, 2.0f * this->y * this->z - 2.0f * this->x * this->w,
+        0.0f, 2.0f * this->x * this->z - 2.0f * this->y * this->w, 2.0f * this->y * this->z + 2.0f * this->x * this->w,
+        1.0f - 2.0f * this->x * this->x - 2.0f * this->y * this->y, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 Matrix3 Quaternion::getMatrix3() const {
-    return Matrix3(1.0f - 2.0f * y * y - 2.0f * z * z, 2.0f * x * y - 2.0f * z * w, 2.0f * x * z + 2.0f * y * w,
-                   2.0f * x * y + 2.0f * z * w, 1.0f - 2.0f * x * x - 2.0f * z * z, 2.0f * y * z - 2.0f * x * w,
-                   2.0f * x * z - 2.0f * y * w, 2.0f * y * z + 2.0f * x * w, 1.0f - 2.0f * x * x - 2.0f * y * y);
+    return Matrix3(
+        1.0f - 2.0f * this->y * this->y - 2.0f * this->z * this->z, 2.0f * this->x * this->y - 2.0f * this->z * this->w,
+        2.0f * this->x * this->z + 2.0f * this->y * this->w, 2.0f * this->x * this->y + 2.0f * this->z * this->w,
+        1.0f - 2.0f * this->x * this->x - 2.0f * this->z * this->z, 2.0f * this->y * this->z - 2.0f * this->x * this->w,
+        2.0f * this->x * this->z - 2.0f * this->y * this->w, 2.0f * this->y * this->z + 2.0f * this->x * this->w,
+        1.0f - 2.0f * this->x * this->x - 2.0f * this->y * this->y);
 }
 
 Quaternion Quaternion::operator*(const Quaternion &quat) const {
-    return Quaternion(
-        w * quat.x + x * quat.w + y * quat.z - z * quat.y, w * quat.y + y * quat.w + z * quat.x - x * quat.z,
-        w * quat.z + z * quat.w + x * quat.y - y * quat.x, w * quat.w - x * quat.x - y * quat.y - z * quat.z);
+    return Quaternion(this->w * quat.x + this->x * quat.w + this->y * quat.z - this->z * quat.y,
+                      this->w * quat.y + this->y * quat.w + this->z * quat.x - this->x * quat.z,
+                      this->w * quat.z + this->z * quat.w + this->x * quat.y - this->y * quat.x,
+                      this->w * quat.w - this->x * quat.x - this->y * quat.y - this->z * quat.z);
 }
 
 Vector3 Quaternion::operator*(const Vector3 &vec) const {
@@ -91,7 +97,7 @@ Vector3 Quaternion::operator*(const Vector3 &vec) const {
     vecQuaternion.z = vecCopy.z;
     vecQuaternion.w = 0.0f;
 
-    resQuaternion = vecQuaternion * getConjugate();
+    resQuaternion = vecQuaternion * this->getConjugate();
     resQuaternion = *this * resQuaternion;
 
     return (Vector3(resQuaternion.x, resQuaternion.y, resQuaternion.z));

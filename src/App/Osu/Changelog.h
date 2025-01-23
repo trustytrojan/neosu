@@ -21,7 +21,7 @@ class Changelog : public ScreenBackable {
 
     void onChangeClicked(CBaseUIButton *button);
 
-    CBaseUIScrollView *m_scrollView;
+    CBaseUIScrollView *scrollView;
 
     struct CHANGELOG {
         UString title;
@@ -33,5 +33,5 @@ class Changelog : public ScreenBackable {
         std::vector<CBaseUIButton *> changes;
     };
 
-    std::vector<CHANGELOG_UI> m_changelogs;
+    std::vector<CHANGELOG_UI> changelogs;
 };

@@ -53,16 +53,16 @@ void start_spectating(i32 user_id) {
     auto notif = UString::format("Started spectating %s", user_info->name.toUtf8());
     osu->getNotificationOverlay()->addNotification(notif);
 
-    osu->m_prompt->setVisible(false);
-    osu->m_modSelector->setVisible(false);
-    osu->m_songBrowser2->setVisible(false);
-    osu->m_lobby->setVisible(false);
-    osu->m_changelog->setVisible(false);
-    osu->m_mainMenu->setVisible(false);
-    if(osu->m_room->isVisible()) osu->m_room->ragequit(false);
+    osu->prompt->setVisible(false);
+    osu->modSelector->setVisible(false);
+    osu->songBrowser2->setVisible(false);
+    osu->lobby->setVisible(false);
+    osu->changelog->setVisible(false);
+    osu->mainMenu->setVisible(false);
+    if(osu->room->isVisible()) osu->room->ragequit(false);
 
-    osu->m_spectatorScreen->setVisible(true);
-    engine->getSound()->play(osu->getSkin()->m_menuHit);
+    osu->spectatorScreen->setVisible(true);
+    engine->getSound()->play(osu->getSkin()->menuHit);
 }
 
 void stop_spectating() {
@@ -83,107 +83,108 @@ void stop_spectating() {
     auto notif = UString::format("Stopped spectating %s", user_info->name.toUtf8());
     osu->getNotificationOverlay()->addNotification(notif);
 
-    osu->m_spectatorScreen->setVisible(false);
-    osu->m_mainMenu->setVisible(true);
-    engine->getSound()->play(osu->getSkin()->m_menuBack);
+    osu->spectatorScreen->setVisible(false);
+    osu->mainMenu->setVisible(true);
+    engine->getSound()->play(osu->getSkin()->menuBack);
 }
 
 SpectatorScreen::SpectatorScreen() {
-    font = engine->getResourceManager()->getFont("FONT_DEFAULT");
-    lfont = osu->getSubTitleFont();
+    this->font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    this->lfont = osu->getSubTitleFont();
 
-    m_pauseButton = new MainMenuPauseButton(0, 0, 0, 0, "pause_btn", "");
-    m_pauseButton->setClickCallback(fastdelegate::MakeDelegate(osu->m_mainMenu, &MainMenu::onPausePressed));
-    addBaseUIElement(m_pauseButton);
+    this->pauseButton = new MainMenuPauseButton(0, 0, 0, 0, "pause_btn", "");
+    this->pauseButton->setClickCallback(fastdelegate::MakeDelegate(osu->mainMenu, &MainMenu::onPausePressed));
+    this->addBaseUIElement(this->pauseButton);
 
-    m_background = new CBaseUIScrollView(0, 0, 0, 0, "spectator_bg");
-    m_background->setDrawFrame(true);
-    m_background->setDrawBackground(true);
-    m_background->setBackgroundColor(0xdd000000);
-    m_background->setHorizontalScrolling(false);
-    m_background->setVerticalScrolling(false);
-    addBaseUIElement(m_background);
+    this->background = new CBaseUIScrollView(0, 0, 0, 0, "spectator_bg");
+    this->background->setDrawFrame(true);
+    this->background->setDrawBackground(true);
+    this->background->setBackgroundColor(0xdd000000);
+    this->background->setHorizontalScrolling(false);
+    this->background->setVerticalScrolling(false);
+    this->addBaseUIElement(this->background);
 
-    INIT_LABEL(m_spectating, "Spectating", true);
-    m_background->getContainer()->addBaseUIElement(m_spectating);
+    INIT_LABEL(this->spectating, "Spectating", true);
+    this->background->getContainer()->addBaseUIElement(this->spectating);
 
-    m_userCard = new UserCard(0);
-    m_background->getContainer()->addBaseUIElement(m_userCard);
+    this->userCard = new UserCard(0);
+    this->background->getContainer()->addBaseUIElement(this->userCard);
 
-    INIT_LABEL(m_status, "...", false);
-    m_background->getContainer()->addBaseUIElement(m_status);
+    INIT_LABEL(this->status, "...", false);
+    this->background->getContainer()->addBaseUIElement(this->status);
 
-    m_stop_btn = new UIButton(0, 0, 190, 40, "stop_spec_btn", "Stop spectating");
-    m_stop_btn->setColor(0xff00ff00);
-    m_stop_btn->setUseDefaultSkin();
-    m_stop_btn->setClickCallback(fastdelegate::MakeDelegate(this, &SpectatorScreen::onStopSpectatingClicked));
-    addBaseUIElement(m_stop_btn);
+    this->stop_btn = new UIButton(0, 0, 190, 40, "stop_spec_btn", "Stop spectating");
+    this->stop_btn->setColor(0xff00ff00);
+    this->stop_btn->setUseDefaultSkin();
+    this->stop_btn->setClickCallback(fastdelegate::MakeDelegate(this, &SpectatorScreen::onStopSpectatingClicked));
+    this->addBaseUIElement(this->stop_btn);
 }
 
 void SpectatorScreen::draw(Graphics *g) {
-    if(!isVisible()) return;
+    if(!this->isVisible()) return;
 
     auto user_info = get_user_info(bancho.spectated_player_id);
 
     if(bancho.spectated_player_id != current_user_id) {
-        m_spectating->setText(UString::format("Spectating %s", user_info->name.toUtf8()));
-        m_userCard->setID(bancho.spectated_player_id);
+        this->spectating->setText(UString::format("Spectating %s", user_info->name.toUtf8()));
+        this->userCard->setID(bancho.spectated_player_id);
         current_user_id = bancho.spectated_player_id;
     }
 
     if(user_info->mode != STANDARD) {
-        m_status->setText(UString::format("%s is playing minigames", user_info->name.toUtf8()));
+        this->status->setText(UString::format("%s is playing minigames", user_info->name.toUtf8()));
     } else if(user_info->map_id == -1 || user_info->map_id == 0) {
-        m_status->setText(UString::format("%s is picking a map...", user_info->name.toUtf8()));
-    } else if(user_info->map_id != current_map_id) {
+        this->status->setText(UString::format("%s is picking a map...", user_info->name.toUtf8()));
+    } else if(user_info->map_id != this->current_map_id) {
         float progress = -1.f;
         auto beatmap = download_beatmap(user_info->map_id, user_info->map_md5, &progress);
         if(progress == -1.f) {
             auto error_str = UString::format("Failed to download Beatmap #%d :(", user_info->map_id);
-            m_status->setText(error_str);
+            this->status->setText(error_str);
         } else if(progress < 1.f) {
             auto text = UString::format("Downloading map... %.2f%%", progress * 100.f);
-            m_status->setText(text);
+            this->status->setText(text);
         } else if(beatmap != NULL) {
-            current_map_id = user_info->map_id;
-            osu->m_songBrowser2->onDifficultySelected(beatmap, false);
+            this->current_map_id = user_info->map_id;
+            osu->songBrowser2->onDifficultySelected(beatmap, false);
             osu->getSelectedBeatmap()->spectate();
         }
     }
 
     const float dpiScale = Osu::getUIScale();
     auto resolution = osu->getScreenSize();
-    setSize(resolution);
+    this->setSize(resolution);
 
-    m_pauseButton->setSize(30 * dpiScale, 30 * dpiScale);
-    m_pauseButton->setPos(resolution.x - m_pauseButton->getSize().x * 2 - 10 * dpiScale,
-                          m_pauseButton->getSize().y + 10 * dpiScale);
-    m_pauseButton->setPaused(!osu->getSelectedBeatmap()->isPreviewMusicPlaying());
+    this->pauseButton->setSize(30 * dpiScale, 30 * dpiScale);
+    this->pauseButton->setPos(resolution.x - this->pauseButton->getSize().x * 2 - 10 * dpiScale,
+                              this->pauseButton->getSize().y + 10 * dpiScale);
+    this->pauseButton->setPaused(!osu->getSelectedBeatmap()->isPreviewMusicPlaying());
 
-    m_background->setPos(resolution.x * 0.2, resolution.y + 50 * dpiScale);
-    m_background->setSize(resolution.x * 0.6, resolution.y * 0.6 - 110 * dpiScale);
-    resolution = m_background->getSize();
+    this->background->setPos(resolution.x * 0.2, resolution.y + 50 * dpiScale);
+    this->background->setSize(resolution.x * 0.6, resolution.y * 0.6 - 110 * dpiScale);
+    resolution = this->background->getSize();
     {
-        m_spectating->setSizeToContent();
-        m_spectating->setPos(resolution.x / 2.f - m_spectating->getSize().x / 2.f, resolution.y / 2.f - 100 * dpiScale);
+        this->spectating->setSizeToContent();
+        this->spectating->setPos(resolution.x / 2.f - this->spectating->getSize().x / 2.f,
+                                 resolution.y / 2.f - 100 * dpiScale);
 
-        m_userCard->setPos(resolution.x / 2.f - 100 * dpiScale, resolution.y / 2.f + 20 * dpiScale);
+        this->userCard->setPos(resolution.x / 2.f - 100 * dpiScale, resolution.y / 2.f + 20 * dpiScale);
 
-        m_status->setSizeToContent();
-        m_status->setPos(resolution.x / 2.f - m_status->getSize().x / 2.f, resolution.y / 2.f + 150 * dpiScale);
+        this->status->setSizeToContent();
+        this->status->setPos(resolution.x / 2.f - this->status->getSize().x / 2.f, resolution.y / 2.f + 150 * dpiScale);
     }
-    m_background->setScrollSizeToContent();
+    this->background->setScrollSizeToContent();
 
-    auto stop_pos = m_background->getPos();
-    stop_pos.x += m_background->getSize().x / 2.f;
+    auto stop_pos = this->background->getPos();
+    stop_pos.x += this->background->getSize().x / 2.f;
     stop_pos.y += 20 * dpiScale;
-    m_stop_btn->setPos(stop_pos);
+    this->stop_btn->setPos(stop_pos);
 
     // XXX: Add convar for toggling spectator background
     SongBrowser::drawSelectedBeatmapBackgroundImage(g, 1.0);
 
     OsuScreen::draw(g);
-    m_background->getContainer()->draw_debug(g);
+    this->background->getContainer()->draw_debug(g);
 }
 
 bool SpectatorScreen::isVisible() {
@@ -191,11 +192,11 @@ bool SpectatorScreen::isVisible() {
 }
 
 void SpectatorScreen::onKeyDown(KeyboardEvent &key) {
-    if(!isVisible()) return;
+    if(!this->isVisible()) return;
 
     if(key.getKeyCode() == KEY_ESCAPE) {
         key.consume();
-        onStopSpectatingClicked();
+        this->onStopSpectatingClicked();
         return;
     }
 

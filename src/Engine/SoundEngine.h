@@ -33,8 +33,8 @@ class SoundEngine {
     void stop(Sound *snd);
 
     bool isReady();
-    bool isASIO() { return m_currentOutputDevice.driver == OutputDriver::BASS_ASIO; }
-    bool isWASAPI() { return m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI; }
+    bool isASIO() { return this->currentOutputDevice.driver == OutputDriver::BASS_ASIO; }
+    bool isWASAPI() { return this->currentOutputDevice.driver == OutputDriver::BASS_WASAPI; }
     bool hasExclusiveOutput();
 
     void setOutputDevice(OUTPUT_DEVICE device);
@@ -44,8 +44,8 @@ class SoundEngine {
     OUTPUT_DEVICE getWantedDevice();
     std::vector<OUTPUT_DEVICE> getOutputDevices();
 
-    inline const UString &getOutputDeviceName() const { return m_currentOutputDevice.name; }
-    inline float getVolume() const { return m_fVolume; }
+    inline const UString &getOutputDeviceName() const { return this->currentOutputDevice.name; }
+    inline float getVolume() const { return this->fVolume; }
 
     void updateOutputDevices(bool printInfo);
     bool initializeOutputDevice(OUTPUT_DEVICE device);
@@ -55,12 +55,12 @@ class SoundEngine {
     void onFreqChanged(UString oldValue, UString newValue);
 
    private:
-    std::vector<OUTPUT_DEVICE> m_outputDevices;
+    std::vector<OUTPUT_DEVICE> outputDevices;
 
-    OUTPUT_DEVICE m_currentOutputDevice;
+    OUTPUT_DEVICE currentOutputDevice;
 
     double ready_since = -1.0;
-    float m_fVolume = 1.0f;
+    float fVolume = 1.0f;
 };
 
 DWORD ASIO_clamp(BASS_ASIO_INFO info, DWORD buflen);

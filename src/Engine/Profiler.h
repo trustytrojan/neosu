@@ -38,17 +38,17 @@ class ProfilerNode {
     void enterScope();
     bool exitScope();
 
-    inline const char *getName() const { return m_name; }
-    inline int getGroupID() const { return m_iGroupID; }
+    inline const char *getName() const { return this->name; }
+    inline int getGroupID() const { return this->iGroupID; }
 
-    inline ProfilerNode *getParent() const { return m_parent; }
-    inline ProfilerNode *getChild() const { return m_child; }
-    inline ProfilerNode *getSibling() const { return m_sibling; }
+    inline ProfilerNode *getParent() const { return this->parent; }
+    inline ProfilerNode *getChild() const { return this->child; }
+    inline ProfilerNode *getSibling() const { return this->sibling; }
 
     inline double getTimeCurrentFrame() const {
-        return m_fTimeCurrentFrame;
+        return this->fTimeCurrentFrame;
     }  // NOTE: this is incomplete if retrieved within engine update(), use getTimeLastFrame() instead
-    inline double getTimeLastFrame() const { return m_fTimeLastFrame; }
+    inline double getTimeLastFrame() const { return this->fTimeLastFrame; }
 
    private:
     inline void constructor(const char *name, const char *group, ProfilerNode *parent);
@@ -57,17 +57,17 @@ class ProfilerNode {
 
     static int s_iNodeCounter;
 
-    const char *m_name;
-    int m_iGroupID;
+    const char *name;
+    int iGroupID;
 
-    ProfilerNode *m_parent;
-    ProfilerNode *m_child;
-    ProfilerNode *m_sibling;
+    ProfilerNode *parent;
+    ProfilerNode *child;
+    ProfilerNode *sibling;
 
-    int m_iNumRecursions;
-    double m_fTime;
-    double m_fTimeCurrentFrame;
-    double m_fTimeLastFrame;
+    int iNumRecursions;
+    double fTime;
+    double fTimeCurrentFrame;
+    double fTimeLastFrame;
 };
 
 class ProfilerProfile {
@@ -77,65 +77,65 @@ class ProfilerProfile {
     ProfilerProfile(bool manualStartViaMain = false);
 
     inline void main() {
-        if(m_bEnableScheduled) {
-            m_bEnableScheduled = false;
-            m_root.enterScope();
+        if(this->bEnableScheduled) {
+            this->bEnableScheduled = false;
+            this->root.enterScope();
         }
 
         // collect all durations from the last frame and store them as a complete set
-        if(m_iEnabled > 0) {
-            for(int i = 0; i < m_iNumNodes; i++) {
-                m_nodes[i].m_fTimeLastFrame = m_nodes[i].m_fTimeCurrentFrame;
+        if(this->iEnabled > 0) {
+            for(int i = 0; i < this->iNumNodes; i++) {
+                this->nodes[i].fTimeLastFrame = this->nodes[i].fTimeCurrentFrame;
             }
         }
     }
 
     inline void start() {
-        if(++m_iEnabled == 1) {
-            if(m_bManualStartViaMain)
-                m_bEnableScheduled = true;
+        if(++this->iEnabled == 1) {
+            if(this->bManualStartViaMain)
+                this->bEnableScheduled = true;
             else
-                m_root.enterScope();
+                this->root.enterScope();
         }
     }
 
     inline void stop() {
-        if(--m_iEnabled == 0) {
-            if(!m_bEnableScheduled) m_root.exitScope();
+        if(--this->iEnabled == 0) {
+            if(!this->bEnableScheduled) this->root.exitScope();
 
-            m_bEnableScheduled = false;
+            this->bEnableScheduled = false;
         }
     }
 
     inline void enterScope(const char *name, const char *group) {
-        if((m_iEnabled != 0 && !m_bEnableScheduled) || !m_bAtRoot) {
-            if(name != m_curNode->m_name)  // NOTE: pointer comparison
-                m_curNode = m_curNode->getSubNode(name, group);
+        if((this->iEnabled != 0 && !this->bEnableScheduled) || !this->bAtRoot) {
+            if(name != this->curNode->name)  // NOTE: pointer comparison
+                this->curNode = this->curNode->getSubNode(name, group);
 
-            m_curNode->enterScope();
+            this->curNode->enterScope();
 
-            m_bAtRoot = (m_curNode == &m_root);
+            this->bAtRoot = (this->curNode == &this->root);
         }
     }
 
     inline void exitScope() {
-        if(!m_bAtRoot || (m_iEnabled != 0 && !m_bEnableScheduled)) {
-            if(!m_bAtRoot && m_curNode->exitScope()) m_curNode = m_curNode->m_parent;
+        if(!this->bAtRoot || (this->iEnabled != 0 && !this->bEnableScheduled)) {
+            if(!this->bAtRoot && this->curNode->exitScope()) this->curNode = this->curNode->parent;
 
-            m_bAtRoot = (m_curNode == &m_root);
+            this->bAtRoot = (this->curNode == &this->root);
         }
     }
 
-    inline bool isEnabled() const { return (m_iEnabled != 0 || m_bEnableScheduled); }
-    inline bool isAtRoot() const { return m_bAtRoot; }
+    inline bool isEnabled() const { return (this->iEnabled != 0 || this->bEnableScheduled); }
+    inline bool isAtRoot() const { return this->bAtRoot; }
 
-    inline int getNumGroups() const { return m_iNumGroups; }
-    inline int getNumNodes() const { return m_iNumNodes; }
+    inline int getNumGroups() const { return this->iNumGroups; }
+    inline int getNumNodes() const { return this->iNumNodes; }
 
-    inline const ProfilerNode *getRoot() const { return &m_root; }
+    inline const ProfilerNode *getRoot() const { return &this->root; }
 
     inline const char *getGroupName(int groupID) {
-        return m_groups[groupID < 0 ? 0 : (groupID > m_iNumGroups - 1 ? m_iNumGroups - 1 : groupID)].name;
+        return this->groups[groupID < 0 ? 0 : (groupID > this->iNumGroups - 1 ? this->iNumGroups - 1 : groupID)].name;
     }
 
     double sumTimes(int groupID);
@@ -148,19 +148,19 @@ class ProfilerProfile {
 
     int groupNameToID(const char *group);
 
-    int m_iNumGroups;
-    BUDGETGROUP m_groups[VPROF_MAX_NUM_BUDGETGROUPS];
+    int iNumGroups;
+    BUDGETGROUP groups[VPROF_MAX_NUM_BUDGETGROUPS];
 
-    bool m_bManualStartViaMain;
+    bool bManualStartViaMain;
 
-    int m_iEnabled;
-    bool m_bEnableScheduled;
-    bool m_bAtRoot;
-    ProfilerNode m_root;
-    ProfilerNode *m_curNode;
+    int iEnabled;
+    bool bEnableScheduled;
+    bool bAtRoot;
+    ProfilerNode root;
+    ProfilerNode *curNode;
 
-    int m_iNumNodes;
-    ProfilerNode m_nodes[VPROF_MAX_NUM_NODES];
+    int iNumNodes;
+    ProfilerNode nodes[VPROF_MAX_NUM_NODES];
 };
 
 extern ProfilerProfile g_profCurrentProfile;

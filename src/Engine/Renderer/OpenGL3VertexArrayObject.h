@@ -17,11 +17,11 @@ class OpenGL3VertexArrayObject : public VertexArrayObject {
     OpenGL3VertexArrayObject(Graphics::PRIMITIVE primitive = Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES,
                              Graphics::USAGE_TYPE usage = Graphics::USAGE_TYPE::USAGE_STATIC,
                              bool keepInSystemMemory = false);
-    virtual ~OpenGL3VertexArrayObject() { destroy(); }
+    virtual ~OpenGL3VertexArrayObject() { this->destroy(); }
 
     void draw();
 
-    inline unsigned int const getNumTexcoords0() const { return m_iNumTexcoords; }
+    inline unsigned int const getNumTexcoords0() const { return this->iNumTexcoords; }
 
    private:
     static int primitiveToOpenGL(Graphics::PRIMITIVE primitive);
@@ -31,11 +31,11 @@ class OpenGL3VertexArrayObject : public VertexArrayObject {
     virtual void initAsync();
     virtual void destroy();
 
-    unsigned int m_iVAO;
-    unsigned int m_iVertexBuffer;
-    unsigned int m_iTexcoordBuffer;
+    unsigned int iVAO;
+    unsigned int iVertexBuffer;
+    unsigned int iTexcoordBuffer;
 
-    unsigned int m_iNumTexcoords;
+    unsigned int iNumTexcoords;
 };
 
 #endif

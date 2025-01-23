@@ -25,14 +25,14 @@ OpenGLES2Shader::OpenGLES2Shader(std::string vertexShader, std::string fragmentS
     m_iProgramBackup = 0;
 }
 
-void OpenGLES2Shader::init() { m_bReady = compile(m_sVsh, m_sFsh, m_bSource); }
+void OpenGLES2Shader::init() { m_bReady = compile(this->sVsh, this->sFsh, this->bSource); }
 
 void OpenGLES2Shader::initAsync() { m_bAsyncReady = true; }
 
 void OpenGLES2Shader::destroy() {
-    if(m_iProgram != 0) glDeleteProgram(m_iProgram);
-    if(m_iFragmentShader != 0) glDeleteShader(m_iFragmentShader);
-    if(m_iVertexShader != 0) glDeleteShader(m_iVertexShader);
+    if(this->iProgram != 0) glDeleteProgram(this->iProgram);
+    if(this->iFragmentShader != 0) glDeleteShader(this->iFragmentShader);
+    if(this->iVertexShader != 0) glDeleteShader(this->iVertexShader);
 
     m_iProgram = 0;
     m_iFragmentShader = 0;
@@ -45,18 +45,18 @@ void OpenGLES2Shader::enable() {
     if(!m_bReady) return;
 
     glGetIntegerv(GL_CURRENT_PROGRAM, &m_iProgramBackup);  // backup
-    glUseProgram(m_iProgram);
+    glUseProgram(this->iProgram);
 }
 
 void OpenGLES2Shader::disable() {
     if(!m_bReady) return;
 
-    glUseProgram(m_iProgramBackup);  // restore
+    glUseProgram(this->iProgramBackup);  // restore
 }
 
 void OpenGLES2Shader::setUniform1f(UString name, float value) {
     if(!m_bReady) return;
-    int id = glGetUniformLocation(m_iProgram, name.toUtf8());
+    int id = glGetUniformLocation(this->iProgram, name.toUtf8());
     if(id != -1)
         glUniform1f(id, value);
     else if(debug_shaders->getBool())
@@ -65,7 +65,7 @@ void OpenGLES2Shader::setUniform1f(UString name, float value) {
 
 void OpenGLES2Shader::setUniform1fv(UString name, int count, float *values) {
     if(!m_bReady) return;
-    int id = glGetUniformLocation(m_iProgram, name.toUtf8());
+    int id = glGetUniformLocation(this->iProgram, name.toUtf8());
     if(id != -1)
         glUniform1fv(id, count, values);
     else if(debug_shaders->getBool())
@@ -74,7 +74,7 @@ void OpenGLES2Shader::setUniform1fv(UString name, int count, float *values) {
 
 void OpenGLES2Shader::setUniform1i(UString name, int value) {
     if(!m_bReady) return;
-    int id = glGetUniformLocation(m_iProgram, name.toUtf8());
+    int id = glGetUniformLocation(this->iProgram, name.toUtf8());
     if(id != -1)
         glUniform1i(id, value);
     else if(debug_shaders->getBool())
@@ -83,7 +83,7 @@ void OpenGLES2Shader::setUniform1i(UString name, int value) {
 
 void OpenGLES2Shader::setUniform2f(UString name, float value1, float value2) {
     if(!m_bReady) return;
-    int id = glGetUniformLocation(m_iProgram, name.toUtf8());
+    int id = glGetUniformLocation(this->iProgram, name.toUtf8());
     if(id != -1)
         glUniform2f(id, value1, value2);
     else if(debug_shaders->getBool())
@@ -92,7 +92,7 @@ void OpenGLES2Shader::setUniform2f(UString name, float value1, float value2) {
 
 void OpenGLES2Shader::setUniform2fv(UString name, int count, float *vectors) {
     if(!m_bReady) return;
-    int id = glGetUniformLocation(m_iProgram, name.toUtf8());
+    int id = glGetUniformLocation(this->iProgram, name.toUtf8());
     if(id != -1)
         glUniform2fv(id, count, (float *)&vectors[0]);
     else if(debug_shaders->getBool())
@@ -101,7 +101,7 @@ void OpenGLES2Shader::setUniform2fv(UString name, int count, float *vectors) {
 
 void OpenGLES2Shader::setUniform3f(UString name, float x, float y, float z) {
     if(!m_bReady) return;
-    int id = glGetUniformLocation(m_iProgram, name.toUtf8());
+    int id = glGetUniformLocation(this->iProgram, name.toUtf8());
     if(id != -1)
         glUniform3f(id, x, y, z);
     else if(debug_shaders->getBool())
@@ -110,7 +110,7 @@ void OpenGLES2Shader::setUniform3f(UString name, float x, float y, float z) {
 
 void OpenGLES2Shader::setUniform3fv(UString name, int count, float *vectors) {
     if(!m_bReady) return;
-    int id = glGetUniformLocation(m_iProgram, name.toUtf8());
+    int id = glGetUniformLocation(this->iProgram, name.toUtf8());
     if(id != -1)
         glUniform3fv(id, count, (float *)&vectors[0]);
     else if(debug_shaders->getBool())
@@ -119,7 +119,7 @@ void OpenGLES2Shader::setUniform3fv(UString name, int count, float *vectors) {
 
 void OpenGLES2Shader::setUniform4f(UString name, float x, float y, float z, float w) {
     if(!m_bReady) return;
-    int id = glGetUniformLocation(m_iProgram, name.toUtf8());
+    int id = glGetUniformLocation(this->iProgram, name.toUtf8());
     if(id != -1)
         glUniform4f(id, x, y, z, w);
     else if(debug_shaders->getBool())
@@ -128,7 +128,7 @@ void OpenGLES2Shader::setUniform4f(UString name, float x, float y, float z, floa
 
 void OpenGLES2Shader::setUniformMatrix4fv(UString name, Matrix4 &matrix) {
     if(!m_bReady) return;
-    int id = glGetUniformLocation(m_iProgram, name.toUtf8());
+    int id = glGetUniformLocation(this->iProgram, name.toUtf8());
     if(id != -1)
         glUniformMatrix4fv(id, 1, GL_FALSE, matrix.get());
     else if(debug_shaders->getBool())
@@ -137,7 +137,7 @@ void OpenGLES2Shader::setUniformMatrix4fv(UString name, Matrix4 &matrix) {
 
 void OpenGLES2Shader::setUniformMatrix4fv(UString name, float *v) {
     if(!m_bReady) return;
-    int id = glGetUniformLocation(m_iProgram, name.toUtf8());
+    int id = glGetUniformLocation(this->iProgram, name.toUtf8());
     if(id != -1)
         glUniformMatrix4fv(id, 1, GL_FALSE, v);
     else if(debug_shaders->getBool())
@@ -146,13 +146,13 @@ void OpenGLES2Shader::setUniformMatrix4fv(UString name, float *v) {
 
 int OpenGLES2Shader::getAttribLocation(UString name) {
     if(!m_bReady) return -1;
-    return glGetAttribLocation(m_iProgram, name.toUtf8());
+    return glGetAttribLocation(this->iProgram, name.toUtf8());
 }
 
 bool OpenGLES2Shader::isActive() {
     int currentProgram = 0;
     glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
-    return (m_bReady && currentProgram == m_iProgram);
+    return (this->bReady && currentProgram == m_iProgram);
 }
 
 bool OpenGLES2Shader::compile(std::string vertexShader, std::string fragmentShader, bool source) {
@@ -164,27 +164,27 @@ bool OpenGLES2Shader::compile(std::string vertexShader, std::string fragmentShad
     m_iFragmentShader = source ? createShaderFromString(fragmentShader, GL_FRAGMENT_SHADER)
                                : createShaderFromFile(fragmentShader, GL_FRAGMENT_SHADER);
 
-    if(m_iVertexShader == 0 || m_iFragmentShader == 0) {
+    if(this->iVertexShader == 0 || m_iFragmentShader == 0) {
         engine->showMessageError("OpenGLES2Shader Error", "Couldn't createShader()");
         return false;
     }
 
     // create program
     m_iProgram = (int)glCreateProgram();
-    if(m_iProgram == 0) {
+    if(this->iProgram == 0) {
         engine->showMessageError("OpenGLES2Shader Error", "Couldn't glCreateProgram()");
         return false;
     }
 
     // attach
-    glAttachShader(m_iProgram, m_iVertexShader);
-    glAttachShader(m_iProgram, m_iFragmentShader);
+    glAttachShader(this->iProgram, this->iVertexShader);
+    glAttachShader(this->iProgram, this->iFragmentShader);
 
     // link
-    glLinkProgram(m_iProgram);
+    glLinkProgram(this->iProgram);
 
     GLint ret = GL_FALSE;
-    glGetProgramiv(m_iProgram, GL_LINK_STATUS, &ret);
+    glGetProgramiv(this->iProgram, GL_LINK_STATUS, &ret);
     if(ret == GL_FALSE) {
         engine->showMessageError("OpenGLES2Shader Error", "Couldn't glLinkProgram()");
         return false;
@@ -192,8 +192,8 @@ bool OpenGLES2Shader::compile(std::string vertexShader, std::string fragmentShad
 
     // validate
     ret = GL_FALSE;
-    glValidateProgram(m_iProgram);
-    glGetProgramiv(m_iProgram, GL_VALIDATE_STATUS, &ret);
+    glValidateProgram(this->iProgram);
+    glGetProgramiv(this->iProgram, GL_VALIDATE_STATUS, &ret);
     if(ret == GL_FALSE) {
         engine->showMessageError("OpenGLES2Shader Error", "Couldn't glValidateProgram()");
         return false;

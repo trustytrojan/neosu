@@ -27,7 +27,7 @@ class UISelectionButton : public CBaseUIButton {
     void keyboardPulse();
 
    private:
-    float m_fAnimation;
+    float fAnimation;
 
     std::function<SkinImage *()> getImageFunc;
     std::function<SkinImage *()> getImageOverFunc;

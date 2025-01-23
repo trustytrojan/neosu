@@ -17,15 +17,15 @@ struct LoudnessCalcThread {
 
    public:
     LoudnessCalcThread(std::vector<BeatmapDifficulty*> maps_to_calc) {
-        dead = false;
-        maps = maps_to_calc;
-        nb_total = maps.size() + 1;
-        thr = std::thread(&LoudnessCalcThread::run, this);
+        this->dead = false;
+        this->maps = maps_to_calc;
+        this->nb_total = this->maps.size() + 1;
+        this->thr = std::thread(&LoudnessCalcThread::run, this);
     }
 
     ~LoudnessCalcThread() {
-        dead = true;
-        thr.join();
+        this->dead = true;
+        this->thr.join();
     }
 
    private:
@@ -37,25 +37,25 @@ struct LoudnessCalcThread {
         BASS_SetDevice(0);
         BASS_SetConfig(BASS_CONFIG_UPDATETHREADS, 0);
 
-        for(auto diff2 : maps) {
-            while(osu->should_pause_background_threads.load() && !dead.load()) {
+        for(auto diff2 : this->maps) {
+            while(osu->should_pause_background_threads.load() && !this->dead.load()) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
 
-            if(dead.load()) return;
+            if(this->dead.load()) return;
             if(diff2->loudness.load() != 0.f) continue;
 
             auto song = diff2->getFullSoundFilePath();
             if(song == last_song) {
                 diff2->loudness = last_loudness;
-                nb_computed++;
+                this->nb_computed++;
                 continue;
             }
 
             auto decoder = BASS_StreamCreateFile(false, song.c_str(), 0, 0, BASS_STREAM_DECODE | BASS_SAMPLE_MONO);
             if(!decoder) {
                 debugLog("BASS_StreamCreateFile() returned error %d on file %s\n", BASS_ErrorGetCode(), song.c_str());
-                nb_computed++;
+                this->nb_computed++;
                 continue;
             }
 
@@ -63,7 +63,7 @@ struct LoudnessCalcThread {
             if(!loudness) {
                 debugLog("BASS_Loudness_Start() returned error %d\n", BASS_ErrorGetCode());
                 BASS_ChannelFree(decoder);
-                nb_computed++;
+                this->nb_computed++;
                 continue;
             }
 
@@ -89,10 +89,10 @@ struct LoudnessCalcThread {
                 last_song = song;
             }
 
-            nb_computed++;
+            this->nb_computed++;
         }
 
-        nb_computed++;
+        this->nb_computed++;
     }
 };
 

@@ -9,11 +9,11 @@ class UIButton : public CBaseUIButton {
     virtual void mouse_update(bool *propagate_clicks);
 
     void setColor(Color color) {
-        m_color = color;
-        m_backupColor = color;
+        this->color = color;
+        this->backupColor = color;
     }
-    void setUseDefaultSkin() { m_bDefaultSkin = true; }
-    void setAlphaAddOnHover(float alphaAddOnHover) { m_fAlphaAddOnHover = alphaAddOnHover; }
+    void setUseDefaultSkin() { this->bDefaultSkin = true; }
+    void setAlphaAddOnHover(float alphaAddOnHover) { this->fAlphaAddOnHover = alphaAddOnHover; }
 
     void setTooltipText(UString text);
 
@@ -24,19 +24,19 @@ class UIButton : public CBaseUIButton {
     bool is_loading = false;
 
     // HACKHACK: enough is enough
-    bool m_bVisible2 = true;
+    bool bVisible2 = true;
 
    private:
     virtual void onClicked();
     virtual void onFocusStolen();
 
-    bool m_bDefaultSkin;
-    Color m_color;
-    Color m_backupColor;
-    float m_fBrightness;
-    float m_fAnim;
-    float m_fAlphaAddOnHover;
+    bool bDefaultSkin;
+    Color color;
+    Color backupColor;
+    float fBrightness;
+    float fAnim;
+    float fAlphaAddOnHover;
 
-    std::vector<UString> m_tooltipTextLines;
-    bool m_bFocusStolenDelay;
+    std::vector<UString> tooltipTextLines;
+    bool bFocusStolenDelay;
 };

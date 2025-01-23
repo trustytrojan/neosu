@@ -13,75 +13,75 @@
 CBaseUIImage::CBaseUIImage(std::string imageResourceName, float xPos, float yPos, float xSize, float ySize,
                            UString name)
     : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
-    m_bScaleToFit = true;  // must be up here because it's used in setImage()
-    setImage(engine->getResourceManager()->getImage(imageResourceName));
+    this->bScaleToFit = true;  // must be up here because it's used in setImage()
+    this->setImage(engine->getResourceManager()->getImage(imageResourceName));
 
-    m_fRot = 0.0f;
-    m_vScale.x = 1.0f;
-    m_vScale.y = 1.0f;
+    this->fRot = 0.0f;
+    this->vScale.x = 1.0f;
+    this->vScale.y = 1.0f;
 
     // if our image is null, autosize to the element size
-    if(m_image == NULL) {
-        m_vSize.x = xSize;
-        m_vSize.y = ySize;
+    if(this->image == NULL) {
+        this->vSize.x = xSize;
+        this->vSize.y = ySize;
     }
 
-    m_frameColor = COLOR(255, 255, 255, 255);
-    m_backgroundColor = COLOR(255, 0, 0, 0);
-    m_color = 0xffffffff;
+    this->frameColor = COLOR(255, 255, 255, 255);
+    this->backgroundColor = COLOR(255, 0, 0, 0);
+    this->color = 0xffffffff;
 
-    m_bDrawFrame = false;
-    m_bDrawBackground = false;
+    this->bDrawFrame = false;
+    this->bDrawBackground = false;
 }
 
 void CBaseUIImage::draw(Graphics *g) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
     // draw background
-    if(m_bDrawBackground) {
-        g->setColor(m_backgroundColor);
-        g->fillRect(m_vPos.x + 1, m_vPos.y + 1, m_vSize.x - 1, m_vSize.y - 1);
+    if(this->bDrawBackground) {
+        g->setColor(this->backgroundColor);
+        g->fillRect(this->vPos.x + 1, this->vPos.y + 1, this->vSize.x - 1, this->vSize.y - 1);
     }
 
     // draw image
-    if(m_image != NULL) {
-        g->setColor(m_color);
+    if(this->image != NULL) {
+        g->setColor(this->color);
         g->pushTransform();
 
         // scale
-        if(m_bScaleToFit) g->scale(m_vScale.x, m_vScale.y);
+        if(this->bScaleToFit) g->scale(this->vScale.x, this->vScale.y);
 
         // rotate
-        if(m_fRot != 0.0f) g->rotate(m_fRot);
+        if(this->fRot != 0.0f) g->rotate(this->fRot);
 
         // center and draw
-        g->translate(m_vPos.x + (m_vSize.x / 2) + (!m_bScaleToFit ? 1 : 0),
-                     m_vPos.y + (m_vSize.y / 2) + (!m_bScaleToFit ? 1 : 0));
-        g->drawImage(m_image);
+        g->translate(this->vPos.x + (this->vSize.x / 2) + (!this->bScaleToFit ? 1 : 0),
+                     this->vPos.y + (this->vSize.y / 2) + (!this->bScaleToFit ? 1 : 0));
+        g->drawImage(this->image);
 
         g->popTransform();
     }
 
     // draw frame
-    if(m_bDrawFrame) {
-        g->setColor(m_frameColor);
-        g->drawRect(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y);
+    if(this->bDrawFrame) {
+        g->setColor(this->frameColor);
+        g->drawRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
     }
 }
 
 void CBaseUIImage::setImage(Image *img) {
-    m_image = img;
+    this->image = img;
 
-    if(m_image != NULL) {
-        if(m_bScaleToFit) {
-            m_vSize.x = m_image->getWidth();
-            m_vSize.y = m_image->getHeight();
+    if(this->image != NULL) {
+        if(this->bScaleToFit) {
+            this->vSize.x = this->image->getWidth();
+            this->vSize.y = this->image->getHeight();
         }
 
-        m_vScale.x = m_vSize.x / (float)m_image->getWidth();
-        m_vScale.y = m_vSize.y / (float)m_image->getHeight();
+        this->vScale.x = this->vSize.x / (float)this->image->getWidth();
+        this->vScale.y = this->vSize.y / (float)this->image->getHeight();
     } else {
-        m_vScale.x = 1;
-        m_vScale.y = 1;
+        this->vScale.x = 1;
+        this->vScale.y = 1;
     }
 }

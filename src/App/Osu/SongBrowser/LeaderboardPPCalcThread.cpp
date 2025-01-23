@@ -188,8 +188,8 @@ static void run_thread() {
                 rqt.mods_legacy, rqt.speed, rqt.AR, rqt.OD, computed_info->info.aim_stars,
                 computed_info->info.aim_slider_factor, computed_info->info.difficult_aim_strains,
                 computed_info->info.speed_stars, computed_info->info.speed_notes,
-                computed_info->info.difficult_speed_strains, diff->m_iNumCircles, diff->m_iNumSliders,
-                diff->m_iNumSpinners, computed_ho->diffres.maxPossibleCombo, rqt.comboMax, rqt.numMisses, rqt.num300s,
+                computed_info->info.difficult_speed_strains, diff->iNumCircles, diff->iNumSliders,
+                diff->iNumSpinners, computed_ho->diffres.maxPossibleCombo, rqt.comboMax, rqt.numMisses, rqt.num300s,
                 rqt.num100s, rqt.num50s);
 
             cache_mtx.lock();

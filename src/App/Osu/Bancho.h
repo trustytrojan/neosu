@@ -36,13 +36,13 @@ struct Bancho {
     UString disk_uuid;
     UString install_id;
 
-    bool is_online() { return user_id > 0; }
+    bool is_online() { return this->user_id > 0; }
 
     // Room ID can be 0 on private servers! So we check if the room has players instead.
-    bool is_in_a_multi_room() { return room.nb_players > 0; }
+    bool is_in_a_multi_room() { return this->room.nb_players > 0; }
 
     bool match_started = false;
-    bool is_playing_a_multi_map() { return match_started; }
+    bool is_playing_a_multi_map() { return this->match_started; }
 
     Slot last_scores[16];
 };

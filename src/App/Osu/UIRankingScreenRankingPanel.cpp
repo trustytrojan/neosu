@@ -10,24 +10,24 @@
 #include "score.h"
 
 UIRankingScreenRankingPanel::UIRankingScreenRankingPanel() : CBaseUIImage("", 0, 0, 0, 0, "") {
-    setImage(osu->getSkin()->getRankingPanel());
-    setDrawFrame(true);
+    this->setImage(osu->getSkin()->getRankingPanel());
+    this->setDrawFrame(true);
 
-    m_iScore = 0;
-    m_iNum300s = 0;
-    m_iNum300gs = 0;
-    m_iNum100s = 0;
-    m_iNum100ks = 0;
-    m_iNum50s = 0;
-    m_iNumMisses = 0;
-    m_iCombo = 0;
-    m_fAccuracy = 0.0f;
-    m_bPerfect = false;
+    this->iScore = 0;
+    this->iNum300s = 0;
+    this->iNum300gs = 0;
+    this->iNum100s = 0;
+    this->iNum100ks = 0;
+    this->iNum50s = 0;
+    this->iNumMisses = 0;
+    this->iCombo = 0;
+    this->fAccuracy = 0.0f;
+    this->bPerfect = false;
 }
 
 void UIRankingScreenRankingPanel::draw(Graphics *g) {
     CBaseUIImage::draw(g);
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
     const float uiScale = /*cv_ui_scale.getFloat()*/ 1.0f;  // NOTE: commented for now, doesn't really work due to
                                                             // legacy layout expectations
@@ -43,10 +43,10 @@ void UIRankingScreenRankingPanel::draw(Graphics *g) {
     g->pushTransform();
     {
         g->scale(scale, scale);
-        g->translate(m_vPos.x + osu->getUIScale(111.0f) * uiScale,
-                     m_vPos.y + (osu->getSkin()->getScore0()->getHeight() / 2) * scale +
+        g->translate(this->vPos.x + osu->getUIScale(111.0f) * uiScale,
+                     this->vPos.y + (osu->getSkin()->getScore0()->getHeight() / 2) * scale +
                          (osu->getUIScale(11.0f) + globalYOffset) * uiScale);
-        osu->getHUD()->drawScoreNumber(g, m_iScore, scale);
+        osu->getHUD()->drawScoreNumber(g, this->iScore, scale);
     }
     g->popTransform();
 
@@ -55,24 +55,24 @@ void UIRankingScreenRankingPanel::draw(Graphics *g) {
     const Vector2 hitGridOffsetX = Vector2(200, 0);
     const Vector2 hitGridOffsetY = Vector2(0, 60);
 
-    drawHitImage(g, osu->getSkin()->getHit300(), scale, hitImageStartPos);
-    drawHitImage(g, osu->getSkin()->getHit100(), scale, hitImageStartPos + hitGridOffsetY);
-    drawHitImage(g, osu->getSkin()->getHit50(), scale, hitImageStartPos + hitGridOffsetY * 2);
-    drawHitImage(g, osu->getSkin()->getHit300g(), scale, hitImageStartPos + hitGridOffsetX);
-    drawHitImage(g, osu->getSkin()->getHit100k(), scale, hitImageStartPos + hitGridOffsetX + hitGridOffsetY);
-    drawHitImage(g, osu->getSkin()->getHit0(), scale, hitImageStartPos + hitGridOffsetX + hitGridOffsetY * 2);
+    this->drawHitImage(g, osu->getSkin()->getHit300(), scale, hitImageStartPos);
+    this->drawHitImage(g, osu->getSkin()->getHit100(), scale, hitImageStartPos + hitGridOffsetY);
+    this->drawHitImage(g, osu->getSkin()->getHit50(), scale, hitImageStartPos + hitGridOffsetY * 2);
+    this->drawHitImage(g, osu->getSkin()->getHit300g(), scale, hitImageStartPos + hitGridOffsetX);
+    this->drawHitImage(g, osu->getSkin()->getHit100k(), scale, hitImageStartPos + hitGridOffsetX + hitGridOffsetY);
+    this->drawHitImage(g, osu->getSkin()->getHit0(), scale, hitImageStartPos + hitGridOffsetX + hitGridOffsetY * 2);
 
     // draw numHits
     const Vector2 numHitStartPos = hitImageStartPos + Vector2(40, osu->getSkin()->getVersion() > 1.0f ? -16 : -25);
     scale = osu->getImageScale(osu->getSkin()->getScore0(), 17.0f) * globalScoreScale;
 
-    drawNumHits(g, m_iNum300s, scale, numHitStartPos);
-    drawNumHits(g, m_iNum100s, scale, numHitStartPos + hitGridOffsetY);
-    drawNumHits(g, m_iNum50s, scale, numHitStartPos + hitGridOffsetY * 2);
+    this->drawNumHits(g, this->iNum300s, scale, numHitStartPos);
+    this->drawNumHits(g, this->iNum100s, scale, numHitStartPos + hitGridOffsetY);
+    this->drawNumHits(g, this->iNum50s, scale, numHitStartPos + hitGridOffsetY * 2);
 
-    drawNumHits(g, m_iNum300gs, scale, numHitStartPos + hitGridOffsetX);
-    drawNumHits(g, m_iNum100ks, scale, numHitStartPos + hitGridOffsetX + hitGridOffsetY);
-    drawNumHits(g, m_iNumMisses, scale, numHitStartPos + hitGridOffsetX + hitGridOffsetY * 2);
+    this->drawNumHits(g, this->iNum300gs, scale, numHitStartPos + hitGridOffsetX);
+    this->drawNumHits(g, this->iNum100ks, scale, numHitStartPos + hitGridOffsetX + hitGridOffsetY);
+    this->drawNumHits(g, this->iNumMisses, scale, numHitStartPos + hitGridOffsetX + hitGridOffsetY * 2);
 
     const int row4 = 260;
     const int row4ImageOffset = (osu->getSkin()->getVersion() > 1.0f ? 20 : 8) - 20;
@@ -82,10 +82,10 @@ void UIRankingScreenRankingPanel::draw(Graphics *g) {
     g->pushTransform();
     {
         g->scale(scale, scale);
-        g->translate(m_vPos.x + osu->getUIScale(15.0f) * uiScale,
-                     m_vPos.y + (osu->getSkin()->getScore0()->getHeight() / 2) * scale +
+        g->translate(this->vPos.x + osu->getUIScale(15.0f) * uiScale,
+                     this->vPos.y + (osu->getSkin()->getScore0()->getHeight() / 2) * scale +
                          (osu->getUIScale(row4 + 10) + globalYOffset) * uiScale);
-        osu->getHUD()->drawComboSimple(g, m_iCombo, scale);
+        osu->getHUD()->drawComboSimple(g, this->iCombo, scale);
     }
     g->popTransform();
 
@@ -96,9 +96,9 @@ void UIRankingScreenRankingPanel::draw(Graphics *g) {
     g->pushTransform();
     {
         g->scale(scale, scale);
-        g->translate(m_vPos.x + osu->getSkin()->getRankingMaxCombo()->getWidth() * scale * 0.5f +
+        g->translate(this->vPos.x + osu->getSkin()->getRankingMaxCombo()->getWidth() * scale * 0.5f +
                          osu->getUIScale(4.0f) * uiScale,
-                     m_vPos.y + (osu->getUIScale(row4 - 5 - row4ImageOffset) + globalYOffset) * uiScale);
+                     this->vPos.y + (osu->getUIScale(row4 - 5 - row4ImageOffset) + globalYOffset) * uiScale);
         g->drawImage(osu->getSkin()->getRankingMaxCombo());
     }
     g->popTransform();
@@ -108,10 +108,10 @@ void UIRankingScreenRankingPanel::draw(Graphics *g) {
     g->pushTransform();
     {
         g->scale(scale, scale);
-        g->translate(m_vPos.x + osu->getUIScale(195.0f) * uiScale,
-                     m_vPos.y + (osu->getSkin()->getScore0()->getHeight() / 2) * scale +
+        g->translate(this->vPos.x + osu->getUIScale(195.0f) * uiScale,
+                     this->vPos.y + (osu->getSkin()->getScore0()->getHeight() / 2) * scale +
                          (osu->getUIScale(row4 + 10) + globalYOffset) * uiScale);
-        osu->getHUD()->drawAccuracySimple(g, m_fAccuracy * 100.0f, scale);
+        osu->getHUD()->drawAccuracySimple(g, this->fAccuracy * 100.0f, scale);
     }
     g->popTransform();
 
@@ -122,19 +122,19 @@ void UIRankingScreenRankingPanel::draw(Graphics *g) {
     g->pushTransform();
     {
         g->scale(scale, scale);
-        g->translate(m_vPos.x + osu->getSkin()->getRankingAccuracy()->getWidth() * scale * 0.5f +
+        g->translate(this->vPos.x + osu->getSkin()->getRankingAccuracy()->getWidth() * scale * 0.5f +
                          osu->getUIScale(183.0f) * uiScale,
-                     m_vPos.y + (osu->getUIScale(row4 - 3 - row4ImageOffset) + globalYOffset) * uiScale);
+                     this->vPos.y + (osu->getUIScale(row4 - 3 - row4ImageOffset) + globalYOffset) * uiScale);
         g->drawImage(osu->getSkin()->getRankingAccuracy());
     }
     g->popTransform();
 
     // draw perfect
-    if(m_bPerfect) {
+    if(this->bPerfect) {
         scale = osu->getImageScale(osu->getSkin()->getRankingPerfect()->getSizeBaseRaw(), 94.0f) * uiScale;
         osu->getSkin()->getRankingPerfect()->drawRaw(
             g,
-            m_vPos +
+            this->vPos +
                 Vector2(osu->getUIScale(osu->getSkin()->getVersion() > 1.0f ? 260 : 200),
                         osu->getUIScale(430.0f) + globalYOffset) *
                     Vector2(1.0f, 0.97f) * uiScale -
@@ -148,8 +148,10 @@ void UIRankingScreenRankingPanel::drawHitImage(Graphics *g, SkinImage *img, floa
                                                             // legacy layout expectations
 
     /// img->setAnimationFrameForce(0);
-    img->draw(g, Vector2(m_vPos.x + osu->getUIScale(pos.x) * uiScale, m_vPos.y + osu->getUIScale(pos.y) * uiScale),
-              uiScale);
+    img->draw(
+        g,
+        Vector2(this->vPos.x + osu->getUIScale(pos.x) * uiScale, this->vPos.y + osu->getUIScale(pos.y) * uiScale),
+        uiScale);
 }
 
 void UIRankingScreenRankingPanel::drawNumHits(Graphics *g, int numHits, float scale, Vector2 pos) {
@@ -160,38 +162,38 @@ void UIRankingScreenRankingPanel::drawNumHits(Graphics *g, int numHits, float sc
     {
         g->scale(scale, scale);
         g->translate(
-            m_vPos.x + osu->getUIScale(pos.x) * uiScale,
-            m_vPos.y + (osu->getSkin()->getScore0()->getHeight() / 2) * scale + osu->getUIScale(pos.y) * uiScale);
+            this->vPos.x + osu->getUIScale(pos.x) * uiScale,
+            this->vPos.y + (osu->getSkin()->getScore0()->getHeight() / 2) * scale + osu->getUIScale(pos.y) * uiScale);
         osu->getHUD()->drawComboSimple(g, numHits, scale);
     }
     g->popTransform();
 }
 
 void UIRankingScreenRankingPanel::setScore(LiveScore *score) {
-    m_iScore = score->getScore();
-    m_iNum300s = score->getNum300s();
-    m_iNum300gs = score->getNum300gs();
-    m_iNum100s = score->getNum100s();
-    m_iNum100ks = score->getNum100ks();
-    m_iNum50s = score->getNum50s();
-    m_iNumMisses = score->getNumMisses();
-    m_iCombo = score->getComboMax();
-    m_fAccuracy = score->getAccuracy();
-    m_bPerfect = (score->getComboFull() > 0 && m_iCombo >= score->getComboFull());
+    this->iScore = score->getScore();
+    this->iNum300s = score->getNum300s();
+    this->iNum300gs = score->getNum300gs();
+    this->iNum100s = score->getNum100s();
+    this->iNum100ks = score->getNum100ks();
+    this->iNum50s = score->getNum50s();
+    this->iNumMisses = score->getNumMisses();
+    this->iCombo = score->getComboMax();
+    this->fAccuracy = score->getAccuracy();
+    this->bPerfect = (score->getComboFull() > 0 && this->iCombo >= score->getComboFull());
 }
 
 void UIRankingScreenRankingPanel::setScore(FinishedScore score) {
-    m_iScore = score.score;
-    m_iNum300s = score.num300s;
-    m_iNum300gs = score.numGekis;
-    m_iNum100s = score.num100s;
-    m_iNum100ks = score.numKatus;
-    m_iNum50s = score.num50s;
-    m_iNumMisses = score.numMisses;
-    m_iCombo = score.comboMax;
-    m_fAccuracy = LiveScore::calculateAccuracy(score.num300s, score.num100s, score.num50s, score.numMisses);
-    m_bPerfect = score.perfect;
+    this->iScore = score.score;
+    this->iNum300s = score.num300s;
+    this->iNum300gs = score.numGekis;
+    this->iNum100s = score.num100s;
+    this->iNum100ks = score.numKatus;
+    this->iNum50s = score.num50s;
+    this->iNumMisses = score.numMisses;
+    this->iCombo = score.comboMax;
+    this->fAccuracy = LiveScore::calculateAccuracy(score.num300s, score.num100s, score.num50s, score.numMisses);
+    this->bPerfect = score.perfect;
 
     // round acc up from two decimal places
-    if(m_fAccuracy > 0.0f) m_fAccuracy = std::round(m_fAccuracy * 10000.0f) / 10000.0f;
+    if(this->fAccuracy > 0.0f) this->fAccuracy = std::round(this->fAccuracy * 10000.0f) / 10000.0f;
 }

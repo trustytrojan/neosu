@@ -44,11 +44,11 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
 
     void openAndScrollToSkinSection();
 
-    void setFullscreen(bool fullscreen) { m_bFullscreen = fullscreen; }
+    void setFullscreen(bool fullscreen) { this->bFullscreen = fullscreen; }
 
     void setUsername(UString username);
 
-    inline bool isFullscreen() const { return m_bFullscreen; }
+    inline bool isFullscreen() const { return this->bFullscreen; }
     bool isMouseInside();
     bool isBusy();
 
@@ -62,16 +62,16 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
 
     struct OPTIONS_ELEMENT {
         OPTIONS_ELEMENT() {
-            resetButton = NULL;
-            cvar = NULL;
-            type = -1;
+            this->resetButton = NULL;
+            this->cvar = NULL;
+            this->type = -1;
 
-            label1Width = 0.0f;
-            relSizeDPI = 96.0f;
+            this->label1Width = 0.0f;
+            this->relSizeDPI = 96.0f;
 
-            allowOverscale = false;
-            allowUnderscale = false;
-            render_condition = RenderCondition::NONE;
+            this->allowOverscale = false;
+            this->allowUnderscale = false;
+            this->render_condition = RenderCondition::NONE;
         }
 
         OptionsMenuResetButton *resetButton;
@@ -187,97 +187,97 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     OptionsMenuCategoryButton *addCategory(CBaseUIElement *section, wchar_t icon);
 
     // vars
-    CBaseUIScrollView *m_categories;
-    CBaseUIScrollView *m_options;
-    UIContextMenu *m_contextMenu;
-    UISearchOverlay *m_search;
-    CBaseUILabel *m_spacer;
-    OptionsMenuCategoryButton *m_fposuCategoryButton;
+    CBaseUIScrollView *categories;
+    CBaseUIScrollView *options;
+    UIContextMenu *contextMenu;
+    UISearchOverlay *search;
+    CBaseUILabel *spacer;
+    OptionsMenuCategoryButton *fposuCategoryButton;
 
-    std::vector<OptionsMenuCategoryButton *> m_categoryButtons;
-    std::vector<OPTIONS_ELEMENT> m_elements;
+    std::vector<OptionsMenuCategoryButton *> categoryButtons;
+    std::vector<OPTIONS_ELEMENT> elements;
 
     // custom
-    bool m_bFullscreen;
-    float m_fAnimation;
+    bool bFullscreen;
+    float fAnimation;
 
-    CBaseUICheckbox *m_fullscreenCheckbox;
-    CBaseUISlider *m_backgroundDimSlider;
-    CBaseUISlider *m_backgroundBrightnessSlider;
-    CBaseUISlider *m_hudSizeSlider;
-    CBaseUISlider *m_hudComboScaleSlider;
-    CBaseUISlider *m_hudScoreScaleSlider;
-    CBaseUISlider *m_hudAccuracyScaleSlider;
-    CBaseUISlider *m_hudHiterrorbarScaleSlider;
-    CBaseUISlider *m_hudHiterrorbarURScaleSlider;
-    CBaseUISlider *m_hudProgressbarScaleSlider;
-    CBaseUISlider *m_hudScoreBarScaleSlider;
-    CBaseUISlider *m_hudScoreBoardScaleSlider;
-    CBaseUISlider *m_hudInputoverlayScaleSlider;
-    CBaseUISlider *m_playfieldBorderSizeSlider;
-    CBaseUISlider *m_statisticsOverlayScaleSlider;
-    CBaseUISlider *m_statisticsOverlayXOffsetSlider;
-    CBaseUISlider *m_statisticsOverlayYOffsetSlider;
-    CBaseUISlider *m_cursorSizeSlider;
-    CBaseUILabel *m_skinLabel;
-    CBaseUIElement *m_skinSelectLocalButton;
-    CBaseUIButton *m_resolutionSelectButton;
-    CBaseUILabel *m_resolutionLabel;
-    CBaseUITextbox *m_osuFolderTextbox;
-    CBaseUIButton *m_outputDeviceSelectButton;
-    CBaseUILabel *m_outputDeviceLabel;
-    OptionsMenuResetButton *m_outputDeviceResetButton;
-    CBaseUISlider *m_wasapiBufferSizeSlider;
-    CBaseUISlider *m_wasapiPeriodSizeSlider;
-    OptionsMenuResetButton *m_asioBufferSizeResetButton;
-    OptionsMenuResetButton *m_wasapiBufferSizeResetButton;
-    OptionsMenuResetButton *m_wasapiPeriodSizeResetButton;
-    CBaseUISlider *m_asioBufferSizeSlider = NULL;
-    CBaseUISlider *m_sliderQualitySlider;
-    CBaseUISlider *m_letterboxingOffsetXSlider;
-    CBaseUISlider *m_letterboxingOffsetYSlider;
-    CBaseUIButton *m_letterboxingOffsetResetButton;
-    OptionsMenuSliderPreviewElement *m_sliderPreviewElement;
-    CBaseUITextbox *m_dpiTextbox;
-    CBaseUITextbox *m_cm360Textbox;
-    CBaseUIElement *m_skinSection;
-    CBaseUISlider *m_uiScaleSlider;
-    OptionsMenuResetButton *m_uiScaleResetButton;
-    CBaseUIElement *m_notelockSelectButton;
-    CBaseUILabel *m_notelockSelectLabel;
-    OptionsMenuResetButton *m_notelockSelectResetButton;
-    CBaseUIElement *m_hpDrainSelectButton;
-    CBaseUILabel *m_hpDrainSelectLabel;
-    OptionsMenuResetButton *m_hpDrainSelectResetButton;
+    CBaseUICheckbox *fullscreenCheckbox;
+    CBaseUISlider *backgroundDimSlider;
+    CBaseUISlider *backgroundBrightnessSlider;
+    CBaseUISlider *hudSizeSlider;
+    CBaseUISlider *hudComboScaleSlider;
+    CBaseUISlider *hudScoreScaleSlider;
+    CBaseUISlider *hudAccuracyScaleSlider;
+    CBaseUISlider *hudHiterrorbarScaleSlider;
+    CBaseUISlider *hudHiterrorbarURScaleSlider;
+    CBaseUISlider *hudProgressbarScaleSlider;
+    CBaseUISlider *hudScoreBarScaleSlider;
+    CBaseUISlider *hudScoreBoardScaleSlider;
+    CBaseUISlider *hudInputoverlayScaleSlider;
+    CBaseUISlider *playfieldBorderSizeSlider;
+    CBaseUISlider *statisticsOverlayScaleSlider;
+    CBaseUISlider *statisticsOverlayXOffsetSlider;
+    CBaseUISlider *statisticsOverlayYOffsetSlider;
+    CBaseUISlider *cursorSizeSlider;
+    CBaseUILabel *skinLabel;
+    CBaseUIElement *skinSelectLocalButton;
+    CBaseUIButton *resolutionSelectButton;
+    CBaseUILabel *resolutionLabel;
+    CBaseUITextbox *osuFolderTextbox;
+    CBaseUIButton *outputDeviceSelectButton;
+    CBaseUILabel *outputDeviceLabel;
+    OptionsMenuResetButton *outputDeviceResetButton;
+    CBaseUISlider *wasapiBufferSizeSlider;
+    CBaseUISlider *wasapiPeriodSizeSlider;
+    OptionsMenuResetButton *asioBufferSizeResetButton;
+    OptionsMenuResetButton *wasapiBufferSizeResetButton;
+    OptionsMenuResetButton *wasapiPeriodSizeResetButton;
+    CBaseUISlider *asioBufferSizeSlider = NULL;
+    CBaseUISlider *sliderQualitySlider;
+    CBaseUISlider *letterboxingOffsetXSlider;
+    CBaseUISlider *letterboxingOffsetYSlider;
+    CBaseUIButton *letterboxingOffsetResetButton;
+    OptionsMenuSliderPreviewElement *sliderPreviewElement;
+    CBaseUITextbox *dpiTextbox;
+    CBaseUITextbox *cm360Textbox;
+    CBaseUIElement *skinSection;
+    CBaseUISlider *uiScaleSlider;
+    OptionsMenuResetButton *uiScaleResetButton;
+    CBaseUIElement *notelockSelectButton;
+    CBaseUILabel *notelockSelectLabel;
+    OptionsMenuResetButton *notelockSelectResetButton;
+    CBaseUIElement *hpDrainSelectButton;
+    CBaseUILabel *hpDrainSelectLabel;
+    OptionsMenuResetButton *hpDrainSelectResetButton;
 
     CBaseUIElement *sectionOnline;
-    CBaseUITextbox *m_serverTextbox;
-    CBaseUICheckbox *m_submitScoresCheckbox;
-    CBaseUITextbox *m_nameTextbox;
-    CBaseUITextbox *m_passwordTextbox;
+    CBaseUITextbox *serverTextbox;
+    CBaseUICheckbox *submitScoresCheckbox;
+    CBaseUITextbox *nameTextbox;
+    CBaseUITextbox *passwordTextbox;
     UIButton *logInButton;
 
-    ConVar *m_waitingKey = NULL;
+    ConVar *waitingKey = NULL;
 
-    float m_fOsuFolderTextboxInvalidAnim;
-    float m_fVibrationStrengthExampleTimer;
-    bool m_bLetterboxingOffsetUpdateScheduled;
-    bool m_bUIScaleChangeScheduled;
-    bool m_bUIScaleScrollToSliderScheduled;
-    bool m_bDPIScalingScrollToSliderScheduled;
-    bool m_bASIOBufferChangeScheduled;
-    bool m_bWASAPIBufferChangeScheduled;
-    bool m_bWASAPIPeriodChangeScheduled;
+    float fOsuFolderTextboxInvalidAnim;
+    float fVibrationStrengthExampleTimer;
+    bool bLetterboxingOffsetUpdateScheduled;
+    bool bUIScaleChangeScheduled;
+    bool bUIScaleScrollToSliderScheduled;
+    bool bDPIScalingScrollToSliderScheduled;
+    bool bASIOBufferChangeScheduled;
+    bool bWASAPIBufferChangeScheduled;
+    bool bWASAPIPeriodChangeScheduled;
 
-    int m_iNumResetAllKeyBindingsPressed;
-    int m_iNumResetEverythingPressed;
+    int iNumResetAllKeyBindingsPressed;
+    int iNumResetEverythingPressed;
 
     // search
-    UString m_sSearchString;
-    float m_fSearchOnCharKeybindHackTime;
+    UString sSearchString;
+    float fSearchOnCharKeybindHackTime;
 
     // notelock
-    std::vector<UString> m_notelockTypes;
+    std::vector<UString> notelockTypes;
 
-    bool m_updating_layout = false;
+    bool updating_layout = false;
 };

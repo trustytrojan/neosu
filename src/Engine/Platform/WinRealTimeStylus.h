@@ -137,18 +137,18 @@ class CSyncEventHandlerRTS : public IStylusSyncPlugin {
     STDMETHOD(QueryInterface)(REFIID riid, LPVOID* ppvObj);
 
    private:
-    LONG m_cRefCount;              // COM object reference count
-    IUnknown* m_punkFTMarshaller;  // free-threaded marshaller
-    int m_nContacts;               // number of fingers currently in the contact with the touch digitizer
+    LONG cRefCount;              // COM object reference count
+    IUnknown* punkFTMarshaller;  // free-threaded marshaller
+    int nContacts;               // number of fingers currently in the contact with the touch digitizer
 };
 
 // CSyncEventHandlerRTS constructor.
-CSyncEventHandlerRTS::CSyncEventHandlerRTS() : m_cRefCount(1), m_punkFTMarshaller(NULL), m_nContacts(0) {}
+CSyncEventHandlerRTS::CSyncEventHandlerRTS() : cRefCount(1), punkFTMarshaller(NULL), nContacts(0) {}
 
 // CSyncEventHandlerRTS destructor.
 CSyncEventHandlerRTS::~CSyncEventHandlerRTS() {
-    if(m_punkFTMarshaller != NULL) {
-        m_punkFTMarshaller->Release();
+    if(this->punkFTMarshaller != NULL) {
+        this->punkFTMarshaller->Release();
     }
 }
 
@@ -173,7 +173,7 @@ IStylusSyncPlugin* CSyncEventHandlerRTS::Create(IRealTimeStylus* pRealTimeStylus
     }
 
     // Create free-threaded marshaller for this object and aggregate it.
-    HRESULT hr = CoCreateFreeThreadedMarshaler(pSyncEventHandlerRTS, &pSyncEventHandlerRTS->m_punkFTMarshaller);
+    HRESULT hr = CoCreateFreeThreadedMarshaler(pSyncEventHandlerRTS, &pSyncEventHandlerRTS->punkFTMarshaller);
     if(FAILED(hr)) {
         printf("CSyncEventHandlerRTS::Create: cannot create free-threaded marshaller");
         pSyncEventHandlerRTS->Release();
@@ -263,14 +263,14 @@ HRESULT CSyncEventHandlerRTS::DataInterest(RealTimeStylusDataInterest* pDataInte
 // Increments reference count of the COM object.
 // returns:
 //      reference count
-ULONG CSyncEventHandlerRTS::AddRef() { return InterlockedIncrement(&m_cRefCount); }
+ULONG CSyncEventHandlerRTS::AddRef() { return InterlockedIncrement(&this->cRefCount); }
 
 // Decrements reference count of the COM object, and deletes it
 // if there are no more references left.
 // returns:
 //      reference count
 ULONG CSyncEventHandlerRTS::Release() {
-    ULONG cNewRefCount = InterlockedDecrement(&m_cRefCount);
+    ULONG cNewRefCount = InterlockedDecrement(&this->cRefCount);
     if(cNewRefCount == 0) {
         delete this;
     }
@@ -288,8 +288,8 @@ HRESULT CSyncEventHandlerRTS::QueryInterface(REFIID riid, LPVOID* ppvObj) {
         *ppvObj = this;
         AddRef();
         return S_OK;
-    } else if((riid == IID_IMarshal) && (m_punkFTMarshaller != NULL)) {
-        return m_punkFTMarshaller->QueryInterface(riid, ppvObj);
+    } else if((riid == IID_IMarshal) && (this->punkFTMarshaller != NULL)) {
+        return this->punkFTMarshaller->QueryInterface(riid, ppvObj);
     }
 
     *ppvObj = NULL;

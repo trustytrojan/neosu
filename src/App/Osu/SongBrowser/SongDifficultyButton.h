@@ -18,20 +18,20 @@ class SongDifficultyButton : public SongButton {
 
     virtual Color getInactiveBackgroundColor() const;
 
-    inline SongButton *getParentSongButton() const { return m_parentSongButton; }
+    inline SongButton *getParentSongButton() const { return this->parentSongButton; }
 
     bool isIndependentDiffButton() const;
 
    private:
     virtual void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected);
 
-    std::string m_sDiff;
+    std::string sDiff;
 
-    float m_fDiffScale;
-    float m_fOffsetPercentAnim;
+    float fDiffScale;
+    float fOffsetPercentAnim;
 
-    SongButton *m_parentSongButton;
+    SongButton *parentSongButton;
 
-    bool m_bUpdateGradeScheduled;
-    bool m_bPrevOffsetPercentSelectionState;
+    bool bUpdateGradeScheduled;
+    bool bPrevOffsetPercentSelectionState;
 };

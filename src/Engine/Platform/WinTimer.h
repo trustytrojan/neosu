@@ -1,14 +1,5 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		fps timer
-//
-// $NoKeywords: $wintime $os
-//===============================================================================//
-
+#pragma once
 #ifdef _WIN32
-
-#ifndef WINTIMER_H
-#define WINTIMER_H
 
 #include "Timer.h"
 
@@ -26,22 +17,20 @@ class WinTimer : public BaseTimer {
     virtual void start() override;
     virtual void update() override;
 
-    virtual inline double getDelta() const override { return m_delta; }
-    virtual inline double getElapsedTime() const override { return m_elapsedTime; }
-    virtual inline u64 getElapsedTimeMS() const override { return m_elapsedTimeMS; }
+    virtual inline double getDelta() const override { return this->delta; }
+    virtual inline double getElapsedTime() const override { return this->elapsedTime; }
+    virtual inline u64 getElapsedTimeMS() const override { return this->elapsedTimeMS; }
 
    private:
-    double m_secondsPerTick;
-    LONGLONG m_ticksPerSecond;
+    double secondsPerTick;
+    LONGLONG ticksPerSecond;
 
-    LARGE_INTEGER m_currentTime;
-    LARGE_INTEGER m_startTime;
+    LARGE_INTEGER currentTime;
+    LARGE_INTEGER startTime;
 
-    double m_delta;
-    double m_elapsedTime;
-    u64 m_elapsedTimeMS;
+    double delta;
+    double elapsedTime;
+    u64 elapsedTimeMS;
 };
-
-#endif
 
 #endif

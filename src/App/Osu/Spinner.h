@@ -12,8 +12,8 @@ class Spinner : public HitObject {
     void updateStackPosition(float stackOffset) { ; }
     void miss(long curPos) { ; }
 
-    Vector2 getRawPosAt(long pos) { return m_vRawPos; }
-    Vector2 getOriginalRawPosAt(long pos) { return m_vOriginalRawPos; }
+    Vector2 getRawPosAt(long pos) { return this->vRawPos; }
+    Vector2 getOriginalRawPosAt(long pos) { return this->vOriginalRawPos; }
     Vector2 getAutoCursorPos(long curPos);
 
     virtual void onClickEvent(std::vector<Click> &clicks);
@@ -23,25 +23,25 @@ class Spinner : public HitObject {
     void onHit();
     void rotate(float rad);
 
-    Vector2 m_vRawPos;
-    Vector2 m_vOriginalRawPos;
+    Vector2 vRawPos;
+    Vector2 vOriginalRawPos;
 
-    bool m_bClickedOnce;
-    float m_fPercent;
+    bool bClickedOnce;
+    float fPercent;
 
-    float m_fDrawRot;
-    float m_fRotations;
-    float m_fRotationsNeeded;
-    float m_fDeltaOverflow;
-    float m_fSumDeltaAngle;
+    float fDrawRot;
+    float fRotations;
+    float fRotationsNeeded;
+    float fDeltaOverflow;
+    float fSumDeltaAngle;
 
-    int m_iMaxStoredDeltaAngles;
-    float *m_storedDeltaAngles;
-    int m_iDeltaAngleIndex;
-    float m_fDeltaAngleOverflow;
+    int iMaxStoredDeltaAngles;
+    float *storedDeltaAngles;
+    int iDeltaAngleIndex;
+    float fDeltaAngleOverflow;
 
-    float m_fRPM;
+    float fRPM;
 
-    float m_fLastMouseAngle;
-    float m_fRatio;
+    float fLastMouseAngle;
+    float fRatio;
 };

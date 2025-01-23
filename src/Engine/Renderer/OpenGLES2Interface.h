@@ -74,7 +74,7 @@ class OpenGLES2Interface : public NullGraphicsInterface {
     // TODO
 
     // renderer info
-    virtual Vector2 getResolution() const { return m_vResolution; }
+    virtual Vector2 getResolution() const { return this->vResolution; }
     virtual int getVRAMTotal();
     virtual int getVRAMRemaining();
 
@@ -94,15 +94,15 @@ class OpenGLES2Interface : public NullGraphicsInterface {
     // ILLEGAL:
     void forceUpdateTransform();
 
-    inline const int getShaderGenericAttribPosition() const { return m_iShaderTexturedGenericAttribPosition; }
-    inline const int getShaderGenericAttribUV() const { return m_iShaderTexturedGenericAttribUV; }
-    inline const int getShaderGenericAttribCol() const { return m_iShaderTexturedGenericAttribCol; }
+    inline const int getShaderGenericAttribPosition() const { return this->iShaderTexturedGenericAttribPosition; }
+    inline const int getShaderGenericAttribUV() const { return this->iShaderTexturedGenericAttribUV; }
+    inline const int getShaderGenericAttribCol() const { return this->iShaderTexturedGenericAttribCol; }
 
-    inline const int getVBOVertices() const { return m_iVBOVertices; }
-    inline const int getVBOTexcoords() const { return m_iVBOTexcoords; }
-    inline const int getVBOTexcolors() const { return m_iVBOTexcolors; }
+    inline const int getVBOVertices() const { return this->iVBOVertices; }
+    inline const int getVBOTexcoords() const { return this->iVBOTexcoords; }
+    inline const int getVBOTexcolors() const { return this->iVBOTexcolors; }
 
-    Matrix4 getMVP() const { return m_MP; }
+    Matrix4 getMVP() const { return this->MP; }
 
    protected:
     virtual void init();

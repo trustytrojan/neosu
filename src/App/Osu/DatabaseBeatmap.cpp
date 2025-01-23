@@ -24,91 +24,92 @@
 #include "Spinner.h"
 
 DatabaseBeatmap::DatabaseBeatmap(std::string filePath, std::string folder, BeatmapType type) {
-    m_sFilePath = filePath;
-    m_sFolder = folder;
-    m_type = type;
+    this->sFilePath = filePath;
+    this->sFolder = folder;
+    this->type = type;
 
     // raw metadata (note the special default values)
 
-    m_iVersion = cv_beatmap_version.getInt();
-    m_iGameMode = 0;
-    m_iID = 0;
-    m_iSetID = -1;
+    this->iVersion = cv_beatmap_version.getInt();
+    this->iGameMode = 0;
+    this->iID = 0;
+    this->iSetID = -1;
 
-    m_iLengthMS = 0;
-    m_iPreviewTime = -1;
+    this->iLengthMS = 0;
+    this->iPreviewTime = -1;
 
-    m_fAR = 5.0f;
-    m_fCS = 5.0f;
-    m_fHP = 5.0f;
-    m_fOD = 5.0f;
+    this->fAR = 5.0f;
+    this->fCS = 5.0f;
+    this->fHP = 5.0f;
+    this->fOD = 5.0f;
 
-    m_fStackLeniency = 0.7f;
-    m_fSliderTickRate = 1.0f;
-    m_fSliderMultiplier = 1.0f;
+    this->fStackLeniency = 0.7f;
+    this->fSliderTickRate = 1.0f;
+    this->fSliderMultiplier = 1.0f;
 
     // precomputed data
 
-    m_fStarsNomod = 0.0f;
+    this->fStarsNomod = 0.0f;
 
-    m_iMinBPM = 0;
-    m_iMaxBPM = 0;
-    m_iMostCommonBPM = 0;
+    this->iMinBPM = 0;
+    this->iMaxBPM = 0;
+    this->iMostCommonBPM = 0;
 
-    m_iNumObjects = 0;
-    m_iNumCircles = 0;
-    m_iNumSliders = 0;
-    m_iNumSpinners = 0;
+    this->iNumObjects = 0;
+    this->iNumCircles = 0;
+    this->iNumSliders = 0;
+    this->iNumSpinners = 0;
 
     // custom data
-    m_iLocalOffset = 0;
-    m_iOnlineOffset = 0;
+    this->iLocalOffset = 0;
+    this->iOnlineOffset = 0;
 }
 
 DatabaseBeatmap::DatabaseBeatmap(std::vector<DatabaseBeatmap *> *difficulties, BeatmapType type)
     : DatabaseBeatmap("", "", type) {
-    m_difficulties = difficulties;
-    if(m_difficulties->empty()) return;
+    this->difficulties = difficulties;
+    if(this->difficulties->empty()) return;
 
     // set representative values for this container (i.e. use values from first difficulty)
-    m_sTitle = (*m_difficulties)[0]->m_sTitle;
-    m_sArtist = (*m_difficulties)[0]->m_sArtist;
-    m_sCreator = (*m_difficulties)[0]->m_sCreator;
-    m_sBackgroundImageFileName = (*m_difficulties)[0]->m_sBackgroundImageFileName;
-    m_iSetID = (*m_difficulties)[0]->m_iSetID;
+    this->sTitle = (*this->difficulties)[0]->sTitle;
+    this->sArtist = (*this->difficulties)[0]->sArtist;
+    this->sCreator = (*this->difficulties)[0]->sCreator;
+    this->sBackgroundImageFileName = (*this->difficulties)[0]->sBackgroundImageFileName;
+    this->iSetID = (*this->difficulties)[0]->iSetID;
 
     // also calculate largest representative values
-    m_iLengthMS = 0;
-    m_fCS = 99.f;
-    m_fAR = 0.0f;
-    m_fOD = 0.0f;
-    m_fHP = 0.0f;
-    m_fStarsNomod = 0.0f;
-    m_iMinBPM = 9001;
-    m_iMaxBPM = 0;
-    m_iMostCommonBPM = 0;
-    last_modification_time = 0;
-    for(auto diff : (*m_difficulties)) {
-        if(diff->getLengthMS() > m_iLengthMS) m_iLengthMS = diff->getLengthMS();
-        if(diff->getCS() < m_fCS) m_fCS = diff->getCS();
-        if(diff->getAR() > m_fAR) m_fAR = diff->getAR();
-        if(diff->getHP() > m_fHP) m_fHP = diff->getHP();
-        if(diff->getOD() > m_fOD) m_fOD = diff->getOD();
-        if(diff->getStarsNomod() > m_fStarsNomod) m_fStarsNomod = diff->getStarsNomod();
-        if(diff->getMinBPM() < m_iMinBPM) m_iMinBPM = diff->getMinBPM();
-        if(diff->getMaxBPM() > m_iMaxBPM) m_iMaxBPM = diff->getMaxBPM();
-        if(diff->getMostCommonBPM() > m_iMostCommonBPM) m_iMostCommonBPM = diff->getMostCommonBPM();
-        if(diff->last_modification_time > last_modification_time) last_modification_time = diff->last_modification_time;
+    this->iLengthMS = 0;
+    this->fCS = 99.f;
+    this->fAR = 0.0f;
+    this->fOD = 0.0f;
+    this->fHP = 0.0f;
+    this->fStarsNomod = 0.0f;
+    this->iMinBPM = 9001;
+    this->iMaxBPM = 0;
+    this->iMostCommonBPM = 0;
+    this->last_modification_time = 0;
+    for(auto diff : (*this->difficulties)) {
+        if(diff->getLengthMS() > this->iLengthMS) this->iLengthMS = diff->getLengthMS();
+        if(diff->getCS() < this->fCS) this->fCS = diff->getCS();
+        if(diff->getAR() > this->fAR) this->fAR = diff->getAR();
+        if(diff->getHP() > this->fHP) this->fHP = diff->getHP();
+        if(diff->getOD() > this->fOD) this->fOD = diff->getOD();
+        if(diff->getStarsNomod() > this->fStarsNomod) this->fStarsNomod = diff->getStarsNomod();
+        if(diff->getMinBPM() < this->iMinBPM) this->iMinBPM = diff->getMinBPM();
+        if(diff->getMaxBPM() > this->iMaxBPM) this->iMaxBPM = diff->getMaxBPM();
+        if(diff->getMostCommonBPM() > this->iMostCommonBPM) this->iMostCommonBPM = diff->getMostCommonBPM();
+        if(diff->last_modification_time > this->last_modification_time)
+            this->last_modification_time = diff->last_modification_time;
     }
 }
 
 DatabaseBeatmap::~DatabaseBeatmap() {
-    if(m_difficulties != NULL) {
-        for(auto diff : (*m_difficulties)) {
-            assert(diff->m_difficulties == NULL);
+    if(this->difficulties != NULL) {
+        for(auto diff : (*this->difficulties)) {
+            assert(diff->difficulties == NULL);
             delete diff;
         }
-        delete m_difficulties;
+        delete this->difficulties;
     }
 }
 
@@ -344,7 +345,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                              curLineChar);
                                     continue;
                                     // engine->showMessageError("Error", UString::format("Invalid slider in beatmap:
-                                    // %s\n\ncurLine = %s", m_sFilePath.c_str(), curLine)); return false;
+                                    // %s\n\ncurLine = %s", this->sFilePath.c_str(), curLine)); return false;
                                 }
 
                                 std::vector<UString> sliderTokens = tokens[5].split("|");
@@ -355,7 +356,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                              osuFilePath.c_str());
                                     continue;
                                     // engine->showMessageError("Error", UString::format("Invalid slider tokens:
-                                    // %s\n\nIn beatmap: %s", curLineChar, m_sFilePath.c_str())); return false;
+                                    // %s\n\nIn beatmap: %s", curLineChar, this->sFilePath.c_str())); return false;
                                 }
 
                                 std::vector<Vector2> points;
@@ -374,7 +375,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                                  osuFilePath.c_str());
                                         continue;
                                         // engine->showMessageError("Error", UString::format("Invalid slider positions:
-                                        // %s\n\nIn beatmap: %s", curLine, m_sFilePath.c_str())); return false;
+                                        // %s\n\nIn beatmap: %s", curLine, this->sFilePath.c_str())); return false;
                                     }
 
                                     points.push_back(Vector2(
@@ -434,7 +435,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                              curLineChar);
                                     continue;
                                     // engine->showMessageError("Error", UString::format("Invalid spinner in beatmap:
-                                    // %s\n\ncurLine = %s", m_sFilePath.c_str(), curLine)); return false;
+                                    // %s\n\ncurLine = %s", this->sFilePath.c_str(), curLine)); return false;
                                 }
 
                                 SPINNER s;
@@ -894,28 +895,28 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
 }
 
 bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
-    if(m_difficulties != NULL) return false;  // we are a beatmapset, not a difficulty
+    if(this->difficulties != NULL) return false;  // we are a beatmapset, not a difficulty
 
     // reset
-    m_timingpoints.clear();
+    this->timingpoints.clear();
 
-    if(cv_debug.getBool()) debugLog("DatabaseBeatmap::loadMetadata() : %s\n", m_sFilePath.c_str());
+    if(cv_debug.getBool()) debugLog("DatabaseBeatmap::loadMetadata() : %s\n", this->sFilePath.c_str());
 
-    File file(m_sFilePath);
+    File file(this->sFilePath);
     const u8 *beatmapFile = NULL;
     size_t beatmapFileSize = 0;
     if(file.canRead()) {
         beatmapFile = file.readFile();
         beatmapFileSize = file.getFileSize();
     } else {
-        debugLog("Osu Error: Couldn't read file %s\n", m_sFilePath.c_str());
+        debugLog("Osu Error: Couldn't read file %s\n", this->sFilePath.c_str());
         return false;
     }
 
     // compute MD5 hash (very slow)
     if(compute_md5) {
         auto hash = md5((u8 *)beatmapFile, beatmapFileSize);
-        m_sMD5Hash = MD5Hash(hash.toUtf8());
+        this->sMD5Hash = MD5Hash(hash.toUtf8());
     }
 
     // load metadata
@@ -954,9 +955,9 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
         switch(curBlock) {
             case -1:  // header (e.g. "osu file format v12")
             {
-                if(sscanf(curLineChar, " osu file format v %i \n", &m_iVersion) == 1) {
-                    if(m_iVersion > cv_beatmap_version.getInt()) {
-                        debugLog("Ignoring unknown/invalid beatmap version %i\n", m_iVersion);
+                if(sscanf(curLineChar, " osu file format v %i \n", &this->iVersion) == 1) {
+                    if(this->iVersion > cv_beatmap_version.getInt()) {
+                        debugLog("Ignoring unknown/invalid beatmap version %i\n", this->iVersion);
                         return false;
                     }
                 }
@@ -966,65 +967,65 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
             {
                 memset(stringBuffer, '\0', 1024);
                 if(sscanf(curLineChar, " AudioFilename : %1023[^\n]", stringBuffer) == 1) {
-                    m_sAudioFileName = stringBuffer;
-                    trim(&m_sAudioFileName);
+                    this->sAudioFileName = stringBuffer;
+                    trim(&this->sAudioFileName);
                 }
 
-                sscanf(curLineChar, " StackLeniency : %f \n", &m_fStackLeniency);
-                sscanf(curLineChar, " PreviewTime : %i \n", &m_iPreviewTime);
-                sscanf(curLineChar, " Mode : %i \n", &m_iGameMode);
+                sscanf(curLineChar, " StackLeniency : %f \n", &this->fStackLeniency);
+                sscanf(curLineChar, " PreviewTime : %i \n", &this->iPreviewTime);
+                sscanf(curLineChar, " Mode : %i \n", &this->iGameMode);
             } break;
 
             case 1:  // Metadata
             {
                 memset(stringBuffer, '\0', 1024);
                 if(sscanf(curLineChar, " Title :%1023[^\n]", stringBuffer) == 1) {
-                    m_sTitle = UString(stringBuffer);
-                    trim(&m_sTitle);
+                    this->sTitle = UString(stringBuffer);
+                    trim(&this->sTitle);
                 }
 
                 memset(stringBuffer, '\0', 1024);
                 if(sscanf(curLineChar, " Artist :%1023[^\n]", stringBuffer) == 1) {
-                    m_sArtist = UString(stringBuffer);
-                    trim(&m_sArtist);
+                    this->sArtist = UString(stringBuffer);
+                    trim(&this->sArtist);
                 }
 
                 memset(stringBuffer, '\0', 1024);
                 if(sscanf(curLineChar, " Creator :%1023[^\n]", stringBuffer) == 1) {
-                    m_sCreator = UString(stringBuffer);
-                    trim(&m_sCreator);
+                    this->sCreator = UString(stringBuffer);
+                    trim(&this->sCreator);
                 }
 
                 memset(stringBuffer, '\0', 1024);
                 if(sscanf(curLineChar, " Version :%1023[^\n]", stringBuffer) == 1) {
-                    m_sDifficultyName = UString(stringBuffer);
-                    trim(&m_sDifficultyName);
+                    this->sDifficultyName = UString(stringBuffer);
+                    trim(&this->sDifficultyName);
                 }
 
                 memset(stringBuffer, '\0', 1024);
                 if(sscanf(curLineChar, " Source :%1023[^\n]", stringBuffer) == 1) {
-                    m_sSource = stringBuffer;
-                    trim(&m_sSource);
+                    this->sSource = stringBuffer;
+                    trim(&this->sSource);
                 }
 
                 memset(stringBuffer, '\0', 1024);
                 if(sscanf(curLineChar, " Tags :%1023[^\n]", stringBuffer) == 1) {
-                    m_sTags = stringBuffer;
-                    trim(&m_sTags);
+                    this->sTags = stringBuffer;
+                    trim(&this->sTags);
                 }
 
-                sscanf(curLineChar, " BeatmapID : %ld \n", &m_iID);
-                sscanf(curLineChar, " BeatmapSetID : %i \n", &m_iSetID);
+                sscanf(curLineChar, " BeatmapID : %ld \n", &this->iID);
+                sscanf(curLineChar, " BeatmapSetID : %i \n", &this->iSetID);
             } break;
 
             case 2:  // Difficulty
             {
-                sscanf(curLineChar, " CircleSize : %f \n", &m_fCS);
-                if(sscanf(curLineChar, " ApproachRate : %f \n", &m_fAR) == 1) foundAR = true;
-                sscanf(curLineChar, " HPDrainRate : %f \n", &m_fHP);
-                sscanf(curLineChar, " OverallDifficulty : %f \n", &m_fOD);
-                sscanf(curLineChar, " SliderMultiplier : %f \n", &m_fSliderMultiplier);
-                sscanf(curLineChar, " SliderTickRate : %f \n", &m_fSliderTickRate);
+                sscanf(curLineChar, " CircleSize : %f \n", &this->fCS);
+                if(sscanf(curLineChar, " ApproachRate : %f \n", &this->fAR) == 1) foundAR = true;
+                sscanf(curLineChar, " HPDrainRate : %f \n", &this->fHP);
+                sscanf(curLineChar, " OverallDifficulty : %f \n", &this->fOD);
+                sscanf(curLineChar, " SliderMultiplier : %f \n", &this->fSliderMultiplier);
+                sscanf(curLineChar, " SliderTickRate : %f \n", &this->fSliderTickRate);
             } break;
 
             case 3:  // Events
@@ -1033,9 +1034,9 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
                 int type, startTime;
                 if(sscanf(curLineChar, " %i , %i , \"%1023[^\"]\"", &type, &startTime, stringBuffer) == 3) {
                     if(type == 0) {
-                        m_sBackgroundImageFileName = UString(stringBuffer);
-                        m_sFullBackgroundImageFilePath = m_sFolder;
-                        m_sFullBackgroundImageFilePath.append(m_sBackgroundImageFileName);
+                        this->sBackgroundImageFileName = UString(stringBuffer);
+                        this->sFullBackgroundImageFilePath = this->sFolder;
+                        this->sFullBackgroundImageFilePath.append(this->sBackgroundImageFileName);
                     }
                 }
             } break;
@@ -1070,7 +1071,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
                         t.timingChange = tpTimingChange == 1;
                         t.kiai = tpKiai > 0;
                     }
-                    m_timingpoints.push_back(t);
+                    this->timingpoints.push_back(t);
                 } else if(sscanf(curLineChar, " %lf , %f", &tpOffset, &tpMSPerBeat) == 2) {
                     TIMINGPOINT t;
                     {
@@ -1084,41 +1085,41 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
                         t.timingChange = true;
                         t.kiai = false;
                     }
-                    m_timingpoints.push_back(t);
+                    this->timingpoints.push_back(t);
                 }
             } break;
         }
     }
 
     // gamemode filter
-    if(m_iGameMode != 0) return false;  // nothing more to do here
+    if(this->iGameMode != 0) return false;  // nothing more to do here
 
     // general sanity checks
-    if((m_timingpoints.size() < 1)) {
+    if((this->timingpoints.size() < 1)) {
         if(cv_debug.getBool()) debugLog("DatabaseBeatmap::loadMetadata() : no timingpoints in beatmap!\n");
         return false;  // nothing more to do here
     }
 
     // build sound file path
-    m_sFullSoundFilePath = m_sFolder;
-    m_sFullSoundFilePath.append(m_sAudioFileName);
+    this->sFullSoundFilePath = this->sFolder;
+    this->sFullSoundFilePath.append(this->sAudioFileName);
 
     // sort timingpoints and calculate BPM range
-    if(m_timingpoints.size() > 0) {
+    if(this->timingpoints.size() > 0) {
         // sort timingpoints by time
-        std::sort(m_timingpoints.begin(), m_timingpoints.end(), TimingPointSortComparator());
+        std::sort(this->timingpoints.begin(), this->timingpoints.end(), TimingPointSortComparator());
 
-        if(m_iMostCommonBPM == 0) {
+        if(this->iMostCommonBPM == 0) {
             if(cv_debug.getBool()) debugLog("DatabaseBeatmap::loadMetadata() : calculating BPM range ...\n");
-            auto bpm = getBPM(m_timingpoints);
-            m_iMinBPM = bpm.min;
-            m_iMaxBPM = bpm.max;
-            m_iMostCommonBPM = bpm.most_common;
+            auto bpm = getBPM(this->timingpoints);
+            this->iMinBPM = bpm.min;
+            this->iMaxBPM = bpm.max;
+            this->iMostCommonBPM = bpm.most_common;
         }
     }
 
     // special case: old beatmaps have AR = OD, there is no ApproachRate stored
-    if(!foundAR) m_fAR = m_fOD;
+    if(!foundAR) this->fAR = this->fOD;
 
     return true;
 }
@@ -1136,7 +1137,7 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
     }
 
     // load primitives, put in temporary container
-    PRIMITIVE_CONTAINER c = loadPrimitiveObjects(databaseBeatmap->m_sFilePath);
+    PRIMITIVE_CONTAINER c = loadPrimitiveObjects(databaseBeatmap->sFilePath);
     if(c.errorCode != 0) {
         result.errorCode = c.errorCode;
         return result;
@@ -1146,34 +1147,34 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
 
     // override some values with data from primitive load, even though they should already be loaded from metadata
     // (sanity)
-    databaseBeatmap->m_timingpoints.swap(c.timingpoints);
-    databaseBeatmap->m_fSliderMultiplier = c.sliderMultiplier;
-    databaseBeatmap->m_fSliderTickRate = c.sliderTickRate;
-    databaseBeatmap->m_fStackLeniency = c.stackLeniency;
-    databaseBeatmap->m_iVersion = c.version;
+    databaseBeatmap->timingpoints.swap(c.timingpoints);
+    databaseBeatmap->fSliderMultiplier = c.sliderMultiplier;
+    databaseBeatmap->fSliderTickRate = c.sliderTickRate;
+    databaseBeatmap->fStackLeniency = c.stackLeniency;
+    databaseBeatmap->iVersion = c.version;
 
     // check if we have any timingpoints at all
-    if(databaseBeatmap->m_timingpoints.size() == 0) {
+    if(databaseBeatmap->timingpoints.size() == 0) {
         result.errorCode = 3;
         return result;
     }
 
     // update numObjects
-    databaseBeatmap->m_iNumObjects = c.numHitobjects;
-    databaseBeatmap->m_iNumCircles = c.numCircles;
-    databaseBeatmap->m_iNumSliders = c.numSliders;
-    databaseBeatmap->m_iNumSpinners = c.numSpinners;
+    databaseBeatmap->iNumObjects = c.numHitobjects;
+    databaseBeatmap->iNumCircles = c.numCircles;
+    databaseBeatmap->iNumSliders = c.numSliders;
+    databaseBeatmap->iNumSpinners = c.numSpinners;
 
     // check if we have any hitobjects at all
-    if(databaseBeatmap->m_iNumObjects < 1) {
+    if(databaseBeatmap->iNumObjects < 1) {
         result.errorCode = 4;
         return result;
     }
 
     // calculate sliderTimes, and build slider clicks and ticks
     CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT sliderTimeCalcResult =
-        calculateSliderTimesClicksTicks(c.version, c.sliders, databaseBeatmap->m_timingpoints,
-                                        databaseBeatmap->m_fSliderMultiplier, databaseBeatmap->m_fSliderTickRate);
+        calculateSliderTimesClicksTicks(c.version, c.sliders, databaseBeatmap->timingpoints,
+                                        databaseBeatmap->fSliderMultiplier, databaseBeatmap->fSliderTickRate);
     if(sliderTimeCalcResult.errorCode != 0) {
         result.errorCode = sliderTimeCalcResult.errorCode;
         return result;
@@ -1214,7 +1215,7 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
         }
         maxPossibleCombo += c.spinners.size();
 
-        beatmap->m_iMaxPossibleCombo = maxPossibleCombo;
+        beatmap->iMaxPossibleCombo = maxPossibleCombo;
     }
 
     // sort hitobjects by starttime
@@ -1230,9 +1231,9 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
     std::sort(result.hitobjects.begin(), result.hitobjects.end(), HitObjectSortComparator());
 
     // update beatmap length stat
-    if(databaseBeatmap->m_iLengthMS == 0 && result.hitobjects.size() > 0)
-        databaseBeatmap->m_iLengthMS = result.hitobjects[result.hitobjects.size() - 1]->click_time +
-                                       result.hitobjects[result.hitobjects.size() - 1]->duration;
+    if(databaseBeatmap->iLengthMS == 0 && result.hitobjects.size() > 0)
+        databaseBeatmap->iLengthMS = result.hitobjects[result.hitobjects.size() - 1]->click_time +
+                                     result.hitobjects[result.hitobjects.size() - 1]->duration;
 
     // set isEndOfCombo + precalculate Score v2 combo portion maximum
     if(beatmap != NULL) {
@@ -1266,7 +1267,7 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
             }
         }
 
-        beatmap->m_iScoreV2ComboPortionMaximum = scoreV2ComboPortionMaximum;
+        beatmap->iScoreV2ComboPortionMaximum = scoreV2ComboPortionMaximum;
     }
 
     // special rule for first hitobject (for 1 approach circle with HD)
@@ -1312,32 +1313,32 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
 
 MapOverrides DatabaseBeatmap::get_overrides() {
     MapOverrides overrides;
-    overrides.local_offset = m_iLocalOffset;
-    overrides.online_offset = m_iOnlineOffset;
-    overrides.nb_circles = m_iNumCircles;
-    overrides.nb_sliders = m_iNumSliders;
-    overrides.nb_spinners = m_iNumSpinners;
-    overrides.star_rating = m_fStarsNomod;
-    overrides.loudness = loudness.load();
-    overrides.min_bpm = m_iMinBPM;
-    overrides.max_bpm = m_iMaxBPM;
-    overrides.avg_bpm = m_iMostCommonBPM;
-    overrides.draw_background = draw_background;
+    overrides.local_offset = this->iLocalOffset;
+    overrides.online_offset = this->iOnlineOffset;
+    overrides.nb_circles = this->iNumCircles;
+    overrides.nb_sliders = this->iNumSliders;
+    overrides.nb_spinners = this->iNumSpinners;
+    overrides.star_rating = this->fStarsNomod;
+    overrides.loudness = this->loudness.load();
+    overrides.min_bpm = this->iMinBPM;
+    overrides.max_bpm = this->iMaxBPM;
+    overrides.avg_bpm = this->iMostCommonBPM;
+    overrides.draw_background = this->draw_background;
     return overrides;
 }
 
 void DatabaseBeatmap::update_overrides() {
-    if(m_type != BeatmapType::PEPPY_DIFFICULTY) return;
+    if(this->type != BeatmapType::PEPPY_DIFFICULTY) return;
 
     // XXX: not actually thread safe, if m_sMD5Hash gets updated by loadGameplay()
     //      or other values in get_overrides()
-    db->m_peppy_overrides_mtx.lock();
-    db->m_peppy_overrides[m_sMD5Hash] = get_overrides();
-    db->m_peppy_overrides_mtx.unlock();
+    db->peppy_overrides_mtx.lock();
+    db->peppy_overrides[this->sMD5Hash] = this->get_overrides();
+    db->peppy_overrides_mtx.unlock();
 }
 
 DatabaseBeatmap::TIMING_INFO DatabaseBeatmap::getTimingInfoForTime(unsigned long positionMS) {
-    return getTimingInfoForTimeAndTimingPoints(positionMS, m_timingpoints);
+    return getTimingInfoForTimeAndTimingPoints(positionMS, this->timingpoints);
 }
 
 DatabaseBeatmap::TIMING_INFO DatabaseBeatmap::getTimingInfoForTimeAndTimingPoints(
@@ -1404,16 +1405,16 @@ DatabaseBeatmap::TIMING_INFO DatabaseBeatmap::getTimingInfoForTimeAndTimingPoint
 
 DatabaseBeatmapBackgroundImagePathLoader::DatabaseBeatmapBackgroundImagePathLoader(const std::string &filePath)
     : Resource() {
-    m_sFilePath = filePath;
+    this->sFilePath = filePath;
 }
 
 void DatabaseBeatmapBackgroundImagePathLoader::init() {
     // (nothing)
-    m_bReady = true;
+    this->bReady = true;
 }
 
 void DatabaseBeatmapBackgroundImagePathLoader::initAsync() {
-    File file(m_sFilePath);
+    File file(this->sFilePath);
     if(!file.canRead()) return;
 
     int curBlock = -1;
@@ -1440,62 +1441,62 @@ void DatabaseBeatmapBackgroundImagePathLoader::initAsync() {
                     memset(stringBuffer, '\0', 1024);
                     int type, startTime;
                     if(sscanf(curLine.c_str(), " %i , %i , \"%1023[^\"]\"", &type, &startTime, stringBuffer) == 3) {
-                        if(type == 0) m_sLoadedBackgroundImageFileName = UString(stringBuffer);
+                        if(type == 0) this->sLoadedBackgroundImageFileName = UString(stringBuffer);
                     }
                 } break;
             }
         }
     }
 
-    m_bAsyncReady = true;
-    m_bReady = true;  // NOTE: on purpose. there is nothing to do in init(), so finish 1 frame early
+    this->bAsyncReady = true;
+    this->bReady = true;  // NOTE: on purpose. there is nothing to do in init(), so finish 1 frame early
 }
 
 std::string DatabaseBeatmap::getFullSoundFilePath() {
     // On linux, paths are case sensitive, so we retry different variations
-    if(env->getOS() != Environment::OS::LINUX || env->fileExists(m_sFullSoundFilePath)) {
-        return m_sFullSoundFilePath;
+    if(env->getOS() != Environment::OS::LINUX || env->fileExists(this->sFullSoundFilePath)) {
+        return this->sFullSoundFilePath;
     }
 
     // try uppercasing file extension
-    for(int s = m_sFullSoundFilePath.size(); s >= 0; s--) {
-        if(m_sFullSoundFilePath[s] == '.') {
-            for(int i = s + 1; i < m_sFullSoundFilePath.size(); i++) {
-                m_sFullSoundFilePath[i] = std::toupper(m_sFullSoundFilePath[i]);
+    for(int s = this->sFullSoundFilePath.size(); s >= 0; s--) {
+        if(this->sFullSoundFilePath[s] == '.') {
+            for(int i = s + 1; i < this->sFullSoundFilePath.size(); i++) {
+                this->sFullSoundFilePath[i] = std::toupper(this->sFullSoundFilePath[i]);
             }
             break;
         }
     }
-    if(env->fileExists(m_sFullSoundFilePath)) {
-        return m_sFullSoundFilePath;
+    if(env->fileExists(this->sFullSoundFilePath)) {
+        return this->sFullSoundFilePath;
     }
 
     // try lowercasing filename, uppercasing file extension
     bool foundFilenameStart = false;
-    for(int s = m_sFullSoundFilePath.size(); s >= 0; s--) {
+    for(int s = this->sFullSoundFilePath.size(); s >= 0; s--) {
         if(foundFilenameStart) {
-            if(m_sFullSoundFilePath[s] == '/') break;
-            m_sFullSoundFilePath[s] = std::tolower(m_sFullSoundFilePath[s]);
+            if(this->sFullSoundFilePath[s] == '/') break;
+            this->sFullSoundFilePath[s] = std::tolower(this->sFullSoundFilePath[s]);
         }
-        if(m_sFullSoundFilePath[s] == '.') {
+        if(this->sFullSoundFilePath[s] == '.') {
             foundFilenameStart = true;
         }
     }
-    if(env->fileExists(m_sFullSoundFilePath)) {
-        return m_sFullSoundFilePath;
+    if(env->fileExists(this->sFullSoundFilePath)) {
+        return this->sFullSoundFilePath;
     }
 
     // try lowercasing everything
-    for(int s = m_sFullSoundFilePath.size(); s >= 0; s--) {
-        if(m_sFullSoundFilePath[s] == '/') {
+    for(int s = this->sFullSoundFilePath.size(); s >= 0; s--) {
+        if(this->sFullSoundFilePath[s] == '/') {
             break;
         }
-        m_sFullSoundFilePath[s] = std::tolower(m_sFullSoundFilePath[s]);
+        this->sFullSoundFilePath[s] = std::tolower(this->sFullSoundFilePath[s]);
     }
-    if(env->fileExists(m_sFullSoundFilePath)) {
-        return m_sFullSoundFilePath;
+    if(env->fileExists(this->sFullSoundFilePath)) {
+        return this->sFullSoundFilePath;
     }
 
     // give up
-    return m_sFullSoundFilePath;
+    return this->sFullSoundFilePath;
 }

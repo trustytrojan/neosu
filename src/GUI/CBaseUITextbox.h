@@ -16,56 +16,56 @@ class CBaseUITextbox : public CBaseUIElement {
     virtual void onKeyDown(KeyboardEvent &e);
 
     UString getVisibleText();
-    inline const UString getText() const { return m_sText; }
-    inline UString &getTextRef() { return m_sText; }  // DEPRECATED
-    inline McFont *getFont() const { return m_font; }
+    inline const UString getText() const { return this->sText; }
+    inline UString &getTextRef() { return this->sText; }  // DEPRECATED
+    inline McFont *getFont() const { return this->font; }
 
     CBaseUITextbox *setDrawFrame(bool drawFrame) {
-        m_bDrawFrame = drawFrame;
+        this->bDrawFrame = drawFrame;
         return this;
     }
     CBaseUITextbox *setDrawBackground(bool drawBackground) {
-        m_bDrawBackground = drawBackground;
+        this->bDrawBackground = drawBackground;
         return this;
     }
 
     CBaseUITextbox *setBackgroundColor(Color backgroundColor) {
-        m_backgroundColor = backgroundColor;
+        this->backgroundColor = backgroundColor;
         return this;
     }
     CBaseUITextbox *setTextColor(Color textColor) {
-        m_textColor = textColor;
+        this->textColor = textColor;
         return this;
     }
     CBaseUITextbox *setCaretColor(Color caretColor) {
-        m_caretColor = caretColor;
+        this->caretColor = caretColor;
         return this;
     }
     CBaseUITextbox *setFrameColor(Color frameColor) {
-        m_frameColor = frameColor;
+        this->frameColor = frameColor;
         return this;
     }
     CBaseUITextbox *setFrameBrightColor(Color frameBrightColor) {
-        m_frameBrightColor = frameBrightColor;
+        this->frameBrightColor = frameBrightColor;
         return this;
     }
     CBaseUITextbox *setFrameDarkColor(Color frameDarkColor) {
-        m_frameDarkColor = frameDarkColor;
+        this->frameDarkColor = frameDarkColor;
         return this;
     }
 
     CBaseUITextbox *setFont(McFont *font);
     CBaseUITextbox *setTextAddX(float textAddX) {
-        m_iTextAddX = textAddX;
+        this->iTextAddX = textAddX;
         return this;
     }
     CBaseUITextbox *setCaretWidth(int caretWidth) {
-        m_iCaretWidth = caretWidth;
+        this->iCaretWidth = caretWidth;
         return this;
     }
     CBaseUITextbox *setTextJustification(int textJustification) {
-        m_iTextJustification = textJustification;
-        setText(m_sText);
+        this->iTextJustification = textJustification;
+        this->setText(this->sText);
         return this;
     }
 
@@ -80,8 +80,8 @@ class CBaseUITextbox : public CBaseUIElement {
 
     bool is_password = false;
 
-    UString m_sText;
-    int m_iCaretPosition;
+    UString sText;
+    int iCaretPosition;
     void tickCaret();
     void updateTextPos();
 
@@ -104,36 +104,36 @@ class CBaseUITextbox : public CBaseUIElement {
     void deselectText();
     UString getSelectedText();
 
-    McFont *m_font;
+    McFont *font;
 
-    Color m_textColor;
-    Color m_frameColor;
-    Color m_frameBrightColor;
-    Color m_frameDarkColor;
-    Color m_caretColor;
-    Color m_backgroundColor;
+    Color textColor;
+    Color frameColor;
+    Color frameBrightColor;
+    Color frameDarkColor;
+    Color caretColor;
+    Color backgroundColor;
 
-    bool m_bContextMouse;
-    bool m_bBlockMouse;
-    bool m_bCatchMouse;
-    bool m_bDrawFrame;
-    bool m_bDrawBackground;
-    bool m_bLine;
+    bool bContextMouse;
+    bool bBlockMouse;
+    bool bCatchMouse;
+    bool bDrawFrame;
+    bool bDrawBackground;
+    bool bLine;
 
-    int m_iTextAddX;
-    int m_iTextAddY;
-    float m_fTextScrollAddX;
-    int m_iCaretX;
-    int m_iCaretWidth;
-    int m_iTextJustification;
+    int iTextAddX;
+    int iTextAddY;
+    float fTextScrollAddX;
+    int iCaretX;
+    int iCaretWidth;
+    int iTextJustification;
 
-    float m_fLinetime;
-    float m_fTextWidth;
+    float fLinetime;
+    float fTextWidth;
 
-    bool m_bHitenter;
+    bool bHitenter;
 
-    bool m_bSelectCheck;
-    int m_iSelectStart;
-    int m_iSelectEnd;
-    int m_iSelectX;
+    bool bSelectCheck;
+    int iSelectStart;
+    int iSelectEnd;
+    int iSelectX;
 };

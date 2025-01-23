@@ -11,15 +11,15 @@ using namespace std;
 OpenGL3VertexArrayObject::OpenGL3VertexArrayObject(Graphics::PRIMITIVE primitive, Graphics::USAGE_TYPE usage,
                                                    bool keepInSystemMemory)
     : VertexArrayObject(primitive, usage, keepInSystemMemory) {
-    m_iVAO = 0;
-    m_iVertexBuffer = 0;
-    m_iTexcoordBuffer = 0;
+    this->iVAO = 0;
+    this->iVertexBuffer = 0;
+    this->iTexcoordBuffer = 0;
 
-    m_iNumTexcoords = 0;
+    this->iNumTexcoords = 0;
 }
 
 void OpenGL3VertexArrayObject::init() {
-    if(m_vertices.size() < 2) return;
+    if(this->vertices.size() < 2) return;
 
     OpenGL3Interface *g = (OpenGL3Interface *)engine->getGraphics();
 
@@ -28,26 +28,27 @@ void OpenGL3VertexArrayObject::init() {
     glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &vaoBackup);
 
     // create and bind a VAO to hold state for this model
-    glGenVertexArrays(1, &m_iVAO);
-    glBindVertexArray(m_iVAO);
+    glGenVertexArrays(1, &this->iVAO);
+    glBindVertexArray(this->iVAO);
     {
         // populate a vertex buffer
-        glGenBuffers(1, &m_iVertexBuffer);
-        glBindBuffer(GL_ARRAY_BUFFER, m_iVertexBuffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3) * m_vertices.size(), &(m_vertices[0]), usageToOpenGL(m_usage));
+        glGenBuffers(1, &this->iVertexBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, this->iVertexBuffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3) * this->vertices.size(), &(this->vertices[0]),
+                     usageToOpenGL(this->usage));
 
         // identify the components in the vertex buffer
         glEnableVertexAttribArray(g->getShaderGenericAttribPosition());
         glVertexAttribPointer(g->getShaderGenericAttribPosition(), 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), (GLvoid *)0);
 
         // populate texcoord buffer
-        if(m_texcoords.size() > 0 && m_texcoords[0].size() > 0) {
-            m_iNumTexcoords = m_texcoords[0].size();
+        if(this->texcoords.size() > 0 && this->texcoords[0].size() > 0) {
+            this->iNumTexcoords = this->texcoords[0].size();
 
-            glGenBuffers(1, &m_iTexcoordBuffer);
-            glBindBuffer(GL_ARRAY_BUFFER, m_iTexcoordBuffer);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2) * m_texcoords[0].size(), &(m_texcoords[0][0]),
-                         usageToOpenGL(m_usage));
+            glGenBuffers(1, &this->iTexcoordBuffer);
+            glBindBuffer(GL_ARRAY_BUFFER, this->iTexcoordBuffer);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2) * this->texcoords[0].size(), &(this->texcoords[0][0]),
+                         usageToOpenGL(this->usage));
 
             // identify the components in the texcoord buffer
             glEnableVertexAttribArray(g->getShaderGenericAttribUV());
@@ -57,39 +58,39 @@ void OpenGL3VertexArrayObject::init() {
     glBindVertexArray(vaoBackup);  // restore vao
 
     // free memory
-    if(!m_bKeepInSystemMemory) clear();
+    if(!this->bKeepInSystemMemory) this->clear();
 
-    m_bReady = true;
+    this->bReady = true;
 }
 
-void OpenGL3VertexArrayObject::initAsync() { m_bAsyncReady = true; }
+void OpenGL3VertexArrayObject::initAsync() { this->bAsyncReady = true; }
 
 void OpenGL3VertexArrayObject::destroy() {
     VertexArrayObject::destroy();
 
-    if(m_iVAO > 0) {
-        glDeleteBuffers(1, &m_iVertexBuffer);
-        glDeleteBuffers(1, &m_iTexcoordBuffer);
-        glDeleteVertexArrays(1, &m_iVAO);
+    if(this->iVAO > 0) {
+        glDeleteBuffers(1, &this->iVertexBuffer);
+        glDeleteBuffers(1, &this->iTexcoordBuffer);
+        glDeleteVertexArrays(1, &this->iVAO);
 
-        m_iVAO = 0;
-        m_iVertexBuffer = 0;
-        m_iTexcoordBuffer = 0;
+        this->iVAO = 0;
+        this->iVertexBuffer = 0;
+        this->iTexcoordBuffer = 0;
     }
 }
 
 void OpenGL3VertexArrayObject::draw() {
-    if(!m_bReady) {
+    if(!this->bReady) {
         debugLog("WARNING: OpenGL3VertexArrayObject::draw() called, but was not ready!\n");
         return;
     }
 
-    int start =
-        clamp<int>(nearestMultipleUp((int)(m_iNumVertices * m_fDrawPercentFromPercent), m_iDrawPercentNearestMultiple),
-                   0, m_iNumVertices);  // HACKHACK: osu sliders
-    int end =
-        clamp<int>(nearestMultipleDown((int)(m_iNumVertices * m_fDrawPercentToPercent), m_iDrawPercentNearestMultiple),
-                   0, m_iNumVertices);  // HACKHACK: osu sliders
+    int start = clamp<int>(nearestMultipleUp((int)(this->iNumVertices * this->fDrawPercentFromPercent),
+                                             this->iDrawPercentNearestMultiple),
+                           0, this->iNumVertices);  // HACKHACK: osu sliders
+    int end = clamp<int>(nearestMultipleDown((int)(this->iNumVertices * this->fDrawPercentToPercent),
+                                             this->iDrawPercentNearestMultiple),
+                         0, this->iNumVertices);  // HACKHACK: osu sliders
 
     if(start > end || std::abs(end - start) == 0) return;
 
@@ -98,8 +99,8 @@ void OpenGL3VertexArrayObject::draw() {
     glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &vaoBackup);
 
     // bind and draw
-    glBindVertexArray(m_iVAO);
-    { glDrawArrays(primitiveToOpenGL(m_primitive), start, end - start); }
+    glBindVertexArray(this->iVAO);
+    { glDrawArrays(primitiveToOpenGL(this->primitive), start, end - start); }
     glBindVertexArray(vaoBackup);  // restore vao
 }
 

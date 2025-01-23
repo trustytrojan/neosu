@@ -36,12 +36,12 @@ class LinuxGLLegacyInterface : public OpenGLLegacyInterface {
     void setVSync(bool vsync);
 
     // ILLEGAL:
-    inline GLXContext getGLXContext() const { return m_glc; }
+    inline GLXContext getGLXContext() const { return this->glc; }
 
    private:
-    Display *m_display;
-    Window m_window;
-    GLXContext m_glc;
+    Display *display;
+    Window window;
+    GLXContext glc;
 };
 
 #endif

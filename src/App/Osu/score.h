@@ -73,7 +73,7 @@ struct FinishedScore {
     MD5Hash beatmap_hash;
     std::vector<LegacyReplay::Frame> replay;  // not always loaded
 
-    bool is_peppy_imported() { return bancho_score_id != 0 || peppy_replay_tms != 0; }
+    bool is_peppy_imported() { return this->bancho_score_id != 0 || this->peppy_replay_tms != 0; }
     f64 get_pp() const;
     Grade calculate_grade() const;
 };
@@ -114,53 +114,53 @@ class LiveScore {
     void addHitResultComboEnd(LiveScore::HIT hit);
     void addSliderBreak();  // only Beatmap may call this function!
     void addPoints(int points, bool isSpinner);
-    void setComboFull(int comboFull) { m_iComboFull = comboFull; }
-    void setComboEndBitmask(int comboEndBitmask) { m_iComboEndBitmask = comboEndBitmask; }
+    void setComboFull(int comboFull) { this->iComboFull = comboFull; }
+    void setComboEndBitmask(int comboEndBitmask) { this->iComboEndBitmask = comboEndBitmask; }
     void setDead(bool dead);
 
     void addKeyCount(int key);
 
-    void setStarsTomTotal(float starsTomTotal) { m_fStarsTomTotal = starsTomTotal; }
-    void setStarsTomAim(float starsTomAim) { m_fStarsTomAim = starsTomAim; }
-    void setStarsTomSpeed(float starsTomSpeed) { m_fStarsTomSpeed = starsTomSpeed; }
-    void setPPv2(float ppv2) { m_fPPv2 = ppv2; }
-    void setIndex(int index) { m_iIndex = index; }
+    void setStarsTomTotal(float starsTomTotal) { this->fStarsTomTotal = starsTomTotal; }
+    void setStarsTomAim(float starsTomAim) { this->fStarsTomAim = starsTomAim; }
+    void setStarsTomSpeed(float starsTomSpeed) { this->fStarsTomSpeed = starsTomSpeed; }
+    void setPPv2(float ppv2) { this->fPPv2 = ppv2; }
+    void setIndex(int index) { this->iIndex = index; }
 
-    void setNumEZRetries(int numEZRetries) { m_iNumEZRetries = numEZRetries; }
+    void setNumEZRetries(int numEZRetries) { this->iNumEZRetries = numEZRetries; }
 
-    inline float getStarsTomTotal() const { return m_fStarsTomTotal; }
-    inline float getStarsTomAim() const { return m_fStarsTomAim; }
-    inline float getStarsTomSpeed() const { return m_fStarsTomSpeed; }
-    inline float getPPv2() const { return m_fPPv2; }
-    inline int getIndex() const { return m_iIndex; }
+    inline float getStarsTomTotal() const { return this->fStarsTomTotal; }
+    inline float getStarsTomAim() const { return this->fStarsTomAim; }
+    inline float getStarsTomSpeed() const { return this->fStarsTomSpeed; }
+    inline float getPPv2() const { return this->fPPv2; }
+    inline int getIndex() const { return this->iIndex; }
 
     unsigned long long getScore();
-    inline FinishedScore::Grade getGrade() const { return m_grade; }
-    inline int getCombo() const { return m_iCombo; }
-    inline int getComboMax() const { return m_iComboMax; }
-    inline int getComboFull() const { return m_iComboFull; }
-    inline int getComboEndBitmask() const { return m_iComboEndBitmask; }
-    inline float getAccuracy() const { return m_fAccuracy; }
-    inline float getUnstableRate() const { return m_fUnstableRate; }
-    inline float getHitErrorAvgMin() const { return m_fHitErrorAvgMin; }
-    inline float getHitErrorAvgMax() const { return m_fHitErrorAvgMax; }
-    inline float getHitErrorAvgCustomMin() const { return m_fHitErrorAvgCustomMin; }
-    inline float getHitErrorAvgCustomMax() const { return m_fHitErrorAvgCustomMax; }
-    inline int getNumMisses() const { return m_iNumMisses; }
-    inline int getNumSliderBreaks() const { return m_iNumSliderBreaks; }
-    inline int getNum50s() const { return m_iNum50s; }
-    inline int getNum100s() const { return m_iNum100s; }
-    inline int getNum100ks() const { return m_iNum100ks; }
-    inline int getNum300s() const { return m_iNum300s; }
-    inline int getNum300gs() const { return m_iNum300gs; }
+    inline FinishedScore::Grade getGrade() const { return this->grade; }
+    inline int getCombo() const { return this->iCombo; }
+    inline int getComboMax() const { return this->iComboMax; }
+    inline int getComboFull() const { return this->iComboFull; }
+    inline int getComboEndBitmask() const { return this->iComboEndBitmask; }
+    inline float getAccuracy() const { return this->fAccuracy; }
+    inline float getUnstableRate() const { return this->fUnstableRate; }
+    inline float getHitErrorAvgMin() const { return this->fHitErrorAvgMin; }
+    inline float getHitErrorAvgMax() const { return this->fHitErrorAvgMax; }
+    inline float getHitErrorAvgCustomMin() const { return this->fHitErrorAvgCustomMin; }
+    inline float getHitErrorAvgCustomMax() const { return this->fHitErrorAvgCustomMax; }
+    inline int getNumMisses() const { return this->iNumMisses; }
+    inline int getNumSliderBreaks() const { return this->iNumSliderBreaks; }
+    inline int getNum50s() const { return this->iNum50s; }
+    inline int getNum100s() const { return this->iNum100s; }
+    inline int getNum100ks() const { return this->iNum100ks; }
+    inline int getNum300s() const { return this->iNum300s; }
+    inline int getNum300gs() const { return this->iNum300gs; }
 
-    inline int getNumEZRetries() const { return m_iNumEZRetries; }
+    inline int getNumEZRetries() const { return this->iNumEZRetries; }
 
-    inline bool isDead() const { return m_bDead; }
-    inline bool hasDied() const { return m_bDied; }
+    inline bool isDead() const { return this->bDead; }
+    inline bool hasDied() const { return this->bDied; }
 
-    inline bool isUnranked() const { return m_bIsUnranked; }
-    void setCheated() { m_bIsUnranked = true; }
+    inline bool isUnranked() const { return this->bIsUnranked; }
+    void setCheated() { this->bIsUnranked = true; }
 
     static double getHealthIncrease(BeatmapInterface *beatmap, LiveScore::HIT hit);
     static double getHealthIncrease(LiveScore::HIT hit, double HP = 5.0f, double hpMultiplierNormal = 1.0f,
@@ -170,55 +170,55 @@ class LiveScore {
     u32 getModsLegacy();
     UString getModsStringForRichPresence();
     Replay::Mods mods;
-    bool m_simulating;
+    bool simulating;
 
    private:
     f32 getScoreMultiplier();
     void onScoreChange();
 
-    std::vector<HIT> m_hitresults;
-    std::vector<int> m_hitdeltas;
+    std::vector<HIT> hitresults;
+    std::vector<int> hitdeltas;
 
-    FinishedScore::Grade m_grade;
+    FinishedScore::Grade grade;
 
-    float m_fStarsTomTotal;
-    float m_fStarsTomAim;
-    float m_fStarsTomSpeed;
-    float m_fPPv2;
-    int m_iIndex;
+    float fStarsTomTotal;
+    float fStarsTomAim;
+    float fStarsTomSpeed;
+    float fPPv2;
+    int iIndex;
 
-    unsigned long long m_iScoreV1;
-    unsigned long long m_iScoreV2;
-    unsigned long long m_iScoreV2ComboPortion;
-    unsigned long long m_iBonusPoints;
-    int m_iCombo;
-    int m_iComboMax;
-    int m_iComboFull;
-    int m_iComboEndBitmask;
-    float m_fAccuracy;
-    float m_fHitErrorAvgMin;
-    float m_fHitErrorAvgMax;
-    float m_fHitErrorAvgCustomMin;
-    float m_fHitErrorAvgCustomMax;
-    float m_fUnstableRate;
+    unsigned long long iScoreV1;
+    unsigned long long iScoreV2;
+    unsigned long long iScoreV2ComboPortion;
+    unsigned long long iBonusPoints;
+    int iCombo;
+    int iComboMax;
+    int iComboFull;
+    int iComboEndBitmask;
+    float fAccuracy;
+    float fHitErrorAvgMin;
+    float fHitErrorAvgMax;
+    float fHitErrorAvgCustomMin;
+    float fHitErrorAvgCustomMax;
+    float fUnstableRate;
 
-    int m_iNumMisses;
-    int m_iNumSliderBreaks;
-    int m_iNum50s;
-    int m_iNum100s;
-    int m_iNum100ks;
-    int m_iNum300s;
-    int m_iNum300gs;
+    int iNumMisses;
+    int iNumSliderBreaks;
+    int iNum50s;
+    int iNum100s;
+    int iNum100ks;
+    int iNum300s;
+    int iNum300gs;
 
-    bool m_bDead;
-    bool m_bDied;
+    bool bDead;
+    bool bDied;
 
-    int m_iNumK1;
-    int m_iNumK2;
-    int m_iNumM1;
-    int m_iNumM2;
+    int iNumK1;
+    int iNumK2;
+    int iNumM1;
+    int iNumM2;
 
     // custom
-    int m_iNumEZRetries;
-    bool m_bIsUnranked;
+    int iNumEZRetries;
+    bool bIsUnranked;
 };

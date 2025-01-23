@@ -5,62 +5,63 @@
 
 CBaseUILabel::CBaseUILabel(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
     : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
-    m_font = engine->getResourceManager()->getFont("FONT_DEFAULT");
-    setText(text);
+    this->font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    this->setText(text);
 
     // colors
-    m_frameColor = 0xffffffff;
-    m_backgroundColor = 0xff000000;
-    m_textColor = 0xffffffff;
+    this->frameColor = 0xffffffff;
+    this->backgroundColor = 0xff000000;
+    this->textColor = 0xffffffff;
 
     // settings
-    m_bDrawFrame = true;
-    m_bDrawBackground = true;
-    m_bCenterText = false;
-    m_textJustification = TEXT_JUSTIFICATION::TEXT_JUSTIFICATION_LEFT;
+    this->bDrawFrame = true;
+    this->bDrawBackground = true;
+    this->bCenterText = false;
+    this->textJustification = TEXT_JUSTIFICATION::TEXT_JUSTIFICATION_LEFT;
 }
 
 void CBaseUILabel::draw(Graphics *g) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
     // draw background
-    if(m_bDrawBackground) {
-        g->setColor(m_backgroundColor);
-        g->fillRect(m_vPos.x + 1, m_vPos.y + 1, m_vSize.x - 1, m_vSize.y - 1);
+    if(this->bDrawBackground) {
+        g->setColor(this->backgroundColor);
+        g->fillRect(this->vPos.x + 1, this->vPos.y + 1, this->vSize.x - 1, this->vSize.y - 1);
     }
 
     // draw frame
-    if(m_bDrawFrame) {
-        g->setColor(m_frameColor);
-        g->drawRect(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y);
+    if(this->bDrawFrame) {
+        g->setColor(this->frameColor);
+        g->drawRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
     }
 
     // draw text
-    drawText(g);
+    this->drawText(g);
 }
 
 void CBaseUILabel::drawText(Graphics *g) {
-    if(m_font != NULL && m_sText.length() > 0) {
+    if(this->font != NULL && this->sText.length() > 0) {
         float xPosAdd = 0;
-        switch(m_textJustification) {
+        switch(this->textJustification) {
             case TEXT_JUSTIFICATION_LEFT:
                 break;
             case TEXT_JUSTIFICATION_CENTERED:
-                xPosAdd = m_vSize.x / 2.0f - m_fStringWidth / 2.0f;
+                xPosAdd = this->vSize.x / 2.0f - this->fStringWidth / 2.0f;
                 break;
             case TEXT_JUSTIFICATION_RIGHT:
-                xPosAdd = m_vSize.x - m_fStringWidth;
+                xPosAdd = this->vSize.x - this->fStringWidth;
                 break;
         }
 
-        // g->pushClipRect(McRect(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y));
+        // g->pushClipRect(McRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y));
 
-        g->setColor(m_textColor);
+        g->setColor(this->textColor);
         g->pushTransform();
         {
-            g->translate((int)(m_vPos.x + (m_bCenterText ? +m_vSize.x / 2.0f - m_fStringWidth / 2.0f : xPosAdd)),
-                         (int)(m_vPos.y + m_vSize.y / 2.0f + m_fStringHeight / 2.0f));
-            g->drawString(m_font, m_sText);
+            g->translate(
+                (int)(this->vPos.x + (this->bCenterText ? +this->vSize.x / 2.0f - this->fStringWidth / 2.0f : xPosAdd)),
+                (int)(this->vPos.y + this->vSize.y / 2.0f + this->fStringHeight / 2.0f));
+            g->drawString(this->font, this->sText);
         }
         g->popTransform();
 
@@ -71,8 +72,8 @@ void CBaseUILabel::drawText(Graphics *g) {
 void CBaseUILabel::mouse_update(bool *propagate_clicks) { CBaseUIElement::mouse_update(propagate_clicks); }
 
 void CBaseUILabel::updateStringMetrics() {
-    if(m_font != NULL) {
-        m_fStringWidth = m_font->getStringWidth(m_sText);
-        m_fStringHeight = m_font->getHeight();
+    if(this->font != NULL) {
+        this->fStringWidth = this->font->getStringWidth(this->sText);
+        this->fStringHeight = this->font->getHeight();
     }
 }

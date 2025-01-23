@@ -10,34 +10,34 @@
 
 UIRankingScreenInfoLabel::UIRankingScreenInfoLabel(float xPos, float yPos, float xSize, float ySize, UString name)
     : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
-    m_font = osu->getSubTitleFont();
+    this->font = osu->getSubTitleFont();
 
-    m_iMargin = 10;
+    this->iMargin = 10;
 
     float globalScaler = 1.3f;
-    m_fSubTitleScale = 0.6f * globalScaler;
+    this->fSubTitleScale = 0.6f * globalScaler;
 
-    m_sArtist = "Artist";
-    m_sTitle = "Title";
-    m_sDiff = "Difficulty";
-    m_sMapper = "Mapper";
-    m_sPlayer = "Guest";
-    m_sDate = "?";
+    this->sArtist = "Artist";
+    this->sTitle = "Title";
+    this->sDiff = "Difficulty";
+    this->sMapper = "Mapper";
+    this->sPlayer = "Guest";
+    this->sDate = "?";
 }
 
 void UIRankingScreenInfoLabel::draw(Graphics *g) {
     // build strings
-    UString titleText = m_sArtist.c_str();
+    UString titleText = this->sArtist.c_str();
     titleText.append(" - ");
-    titleText.append(m_sTitle.c_str());
+    titleText.append(this->sTitle.c_str());
     titleText.append(" [");
-    titleText.append(m_sDiff.c_str());
+    titleText.append(this->sDiff.c_str());
     titleText.append("]");
     UString subTitleText = "Beatmap by ";
-    subTitleText.append(m_sMapper.c_str());
-    const UString playerText = buildPlayerString();
+    subTitleText.append(this->sMapper.c_str());
+    const UString playerText = this->buildPlayerString();
 
-    const float globalScale = max((m_vSize.y / getMinimumHeight()) * 0.741f, 1.0f);
+    const float globalScale = max((this->vSize.y / this->getMinimumHeight()) * 0.741f, 1.0f);
 
     // draw title
     g->setColor(0xffffffff);
@@ -46,8 +46,8 @@ void UIRankingScreenInfoLabel::draw(Graphics *g) {
         const float scale = globalScale;
 
         g->scale(scale, scale);
-        g->translate(m_vPos.x, m_vPos.y + m_font->getHeight() * scale);
-        g->drawString(m_font, titleText);
+        g->translate(this->vPos.x, this->vPos.y + this->font->getHeight() * scale);
+        g->drawString(this->font, titleText);
     }
     g->popTransform();
 
@@ -55,16 +55,16 @@ void UIRankingScreenInfoLabel::draw(Graphics *g) {
     g->setColor(0xffffffff);
     g->pushTransform();
     {
-        const float scale = m_fSubTitleScale * globalScale;
+        const float scale = this->fSubTitleScale * globalScale;
 
-        const float subTitleStringWidth = m_font->getStringWidth(subTitleText);
+        const float subTitleStringWidth = this->font->getStringWidth(subTitleText);
 
-        g->translate((int)(-subTitleStringWidth / 2), (int)(m_font->getHeight() / 2));
+        g->translate((int)(-subTitleStringWidth / 2), (int)(this->font->getHeight() / 2));
         g->scale(scale, scale);
         g->translate(
-            (int)(m_vPos.x + (subTitleStringWidth / 2) * scale),
-            (int)(m_vPos.y + m_font->getHeight() * globalScale + (m_font->getHeight() / 2) * scale + m_iMargin));
-        g->drawString(m_font, subTitleText);
+            (int)(this->vPos.x + (subTitleStringWidth / 2) * scale),
+            (int)(this->vPos.y + this->font->getHeight() * globalScale + (this->font->getHeight() / 2) * scale + this->iMargin));
+        g->drawString(this->font, subTitleText);
     }
     g->popTransform();
 
@@ -72,36 +72,36 @@ void UIRankingScreenInfoLabel::draw(Graphics *g) {
     g->setColor(0xffffffff);
     g->pushTransform();
     {
-        const float scale = m_fSubTitleScale * globalScale;
+        const float scale = this->fSubTitleScale * globalScale;
 
-        const float playerStringWidth = m_font->getStringWidth(playerText);
+        const float playerStringWidth = this->font->getStringWidth(playerText);
 
-        g->translate((int)(-playerStringWidth / 2), (int)(m_font->getHeight() / 2));
+        g->translate((int)(-playerStringWidth / 2), (int)(this->font->getHeight() / 2));
         g->scale(scale, scale);
-        g->translate((int)(m_vPos.x + (playerStringWidth / 2) * scale),
-                     (int)(m_vPos.y + m_font->getHeight() * globalScale + m_font->getHeight() * scale +
-                           (m_font->getHeight() / 2) * scale + m_iMargin * 2));
-        g->drawString(m_font, playerText);
+        g->translate((int)(this->vPos.x + (playerStringWidth / 2) * scale),
+                     (int)(this->vPos.y + this->font->getHeight() * globalScale + this->font->getHeight() * scale +
+                           (this->font->getHeight() / 2) * scale + this->iMargin * 2));
+        g->drawString(this->font, playerText);
     }
     g->popTransform();
 }
 
 void UIRankingScreenInfoLabel::setFromBeatmap(Beatmap *beatmap, DatabaseBeatmap *diff2) {
-    setArtist(diff2->getArtist());
-    setTitle(diff2->getTitle());
-    setDiff(diff2->getDifficultyName());
-    setMapper(diff2->getCreator());
+    this->setArtist(diff2->getArtist());
+    this->setTitle(diff2->getTitle());
+    this->setDiff(diff2->getDifficultyName());
+    this->setMapper(diff2->getCreator());
 
     std::time_t now_c = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    m_sDate = std::ctime(&now_c);
-    trim(&m_sDate);
+    this->sDate = std::ctime(&now_c);
+    trim(&this->sDate);
 }
 
 UString UIRankingScreenInfoLabel::buildPlayerString() {
     UString playerString = "Played by ";
-    playerString.append(m_sPlayer.c_str());
+    playerString.append(this->sPlayer.c_str());
     playerString.append(" on ");
-    playerString.append(m_sDate.c_str());
+    playerString.append(this->sDate.c_str());
 
     return playerString;
 }
@@ -109,15 +109,15 @@ UString UIRankingScreenInfoLabel::buildPlayerString() {
 float UIRankingScreenInfoLabel::getMinimumWidth() {
     float titleWidth = 0;
     float subTitleWidth = 0;
-    float playerWidth = m_font->getStringWidth(buildPlayerString()) * m_fSubTitleScale;
+    float playerWidth = this->font->getStringWidth(this->buildPlayerString()) * this->fSubTitleScale;
 
     return max(max(titleWidth, subTitleWidth), playerWidth);
 }
 
 float UIRankingScreenInfoLabel::getMinimumHeight() {
-    float titleHeight = m_font->getHeight();
-    float subTitleHeight = m_font->getHeight() * m_fSubTitleScale;
-    float playerHeight = m_font->getHeight() * m_fSubTitleScale;
+    float titleHeight = this->font->getHeight();
+    float subTitleHeight = this->font->getHeight() * this->fSubTitleScale;
+    float playerHeight = this->font->getHeight() * this->fSubTitleScale;
 
-    return titleHeight + subTitleHeight + playerHeight + m_iMargin * 2;
+    return titleHeight + subTitleHeight + playerHeight + this->iMargin * 2;
 }

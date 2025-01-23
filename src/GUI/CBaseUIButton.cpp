@@ -6,84 +6,84 @@
 
 CBaseUIButton::CBaseUIButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
     : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
-    m_font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    this->font = engine->getResourceManager()->getFont("FONT_DEFAULT");
 
     // settings
-    m_bDrawFrame = true;
-    m_bDrawBackground = true;
-    m_bTextLeft = false;
+    this->bDrawFrame = true;
+    this->bDrawBackground = true;
+    this->bTextLeft = false;
 
     // colors
-    m_frameColor = COLOR(255, 255, 255, 255);
-    m_backgroundColor = COLOR(255, 0, 0, 0);
-    m_textColor = COLOR(255, 255, 255, 255);
-    m_textBrightColor = m_textDarkColor = COLOR(0, 0, 0, 0);
+    this->frameColor = COLOR(255, 255, 255, 255);
+    this->backgroundColor = COLOR(255, 0, 0, 0);
+    this->textColor = COLOR(255, 255, 255, 255);
+    this->textBrightColor = this->textDarkColor = COLOR(0, 0, 0, 0);
 
-    setText(text);
+    this->setText(text);
 }
 
 void CBaseUIButton::draw(Graphics *g) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
     // draw background
-    if(m_bDrawBackground) {
-        g->setColor(m_backgroundColor);
-        g->fillRect(m_vPos.x + 1, m_vPos.y + 1, m_vSize.x - 1, m_vSize.y - 1);
+    if(this->bDrawBackground) {
+        g->setColor(this->backgroundColor);
+        g->fillRect(this->vPos.x + 1, this->vPos.y + 1, this->vSize.x - 1, this->vSize.y - 1);
     }
 
     // draw frame
-    if(m_bDrawFrame) {
-        g->setColor(m_frameColor);
-        g->drawRect(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y);
+    if(this->bDrawFrame) {
+        g->setColor(this->frameColor);
+        g->drawRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
     }
 
     // draw hover rects
-    const int hoverRectOffset = std::round(3.0f * ((float)m_font->getDPI() / 96.0f));  // NOTE: abusing font dpi
-    g->setColor(m_frameColor);
-    if(m_bMouseInside && m_bEnabled) {
-        if(!m_bActive && !engine->getMouse()->isLeftDown())
-            drawHoverRect(g, hoverRectOffset);
-        else if(m_bActive)
-            drawHoverRect(g, hoverRectOffset);
+    const int hoverRectOffset = std::round(3.0f * ((float)this->font->getDPI() / 96.0f));  // NOTE: abusing font dpi
+    g->setColor(this->frameColor);
+    if(this->bMouseInside && this->bEnabled) {
+        if(!this->bActive && !engine->getMouse()->isLeftDown())
+            this->drawHoverRect(g, hoverRectOffset);
+        else if(this->bActive)
+            this->drawHoverRect(g, hoverRectOffset);
     }
-    if(m_bActive && m_bEnabled) drawHoverRect(g, hoverRectOffset * 2);
+    if(this->bActive && this->bEnabled) this->drawHoverRect(g, hoverRectOffset * 2);
 
     // draw text
-    drawText(g);
+    this->drawText(g);
 }
 
 void CBaseUIButton::drawText(Graphics *g) {
-    if(m_font == NULL || m_sText.length() < 1) return;
+    if(this->font == NULL || this->sText.length() < 1) return;
 
-    const int shadowOffset = std::round(1.0f * ((float)m_font->getDPI() / 96.0f));  // NOTE: abusing font dpi
+    const int shadowOffset = std::round(1.0f * ((float)this->font->getDPI() / 96.0f));  // NOTE: abusing font dpi
 
-    g->pushClipRect(McRect(m_vPos.x + 1, m_vPos.y + 1, m_vSize.x - 1, m_vSize.y - 1));
+    g->pushClipRect(McRect(this->vPos.x + 1, this->vPos.y + 1, this->vSize.x - 1, this->vSize.y - 1));
     {
-        g->setColor(m_textColor);
+        g->setColor(this->textColor);
         g->pushTransform();
         {
-            g->translate((int)(m_vPos.x + m_vSize.x / 2.0f - m_fStringWidth / 2.0f),
-                         (int)(m_vPos.y + m_vSize.y / 2.0f + m_fStringHeight / 2.0f));
+            g->translate((int)(this->vPos.x + this->vSize.x / 2.0f - this->fStringWidth / 2.0f),
+                         (int)(this->vPos.y + this->vSize.y / 2.0f + this->fStringHeight / 2.0f));
 
             // shadow
             g->translate(shadowOffset, shadowOffset);
             {
-                if(m_textDarkColor != 0)
-                    g->setColor(m_textDarkColor);
+                if(this->textDarkColor != 0)
+                    g->setColor(this->textDarkColor);
                 else
-                    g->setColor(COLOR_INVERT(m_textColor));
+                    g->setColor(COLOR_INVERT(this->textColor));
             }
-            g->drawString(m_font, m_sText);
+            g->drawString(this->font, this->sText);
 
             // top
             g->translate(-shadowOffset, -shadowOffset);
             {
-                if(m_textBrightColor != 0)
-                    g->setColor(m_textBrightColor);
+                if(this->textBrightColor != 0)
+                    g->setColor(this->textBrightColor);
                 else
-                    g->setColor(m_textColor);
+                    g->setColor(this->textColor);
             }
-            g->drawString(m_font, m_sText);
+            g->drawString(this->font, this->sText);
         }
         g->popTransform();
     }
@@ -91,28 +91,30 @@ void CBaseUIButton::drawText(Graphics *g) {
 }
 
 void CBaseUIButton::drawHoverRect(Graphics *g, int distance) {
-    g->drawLine(m_vPos.x, m_vPos.y - distance, m_vPos.x + m_vSize.x + 1, m_vPos.y - distance);
-    g->drawLine(m_vPos.x, m_vPos.y + m_vSize.y + distance, m_vPos.x + m_vSize.x + 1, m_vPos.y + m_vSize.y + distance);
-    g->drawLine(m_vPos.x - distance, m_vPos.y, m_vPos.x - distance, m_vPos.y + m_vSize.y + 1);
-    g->drawLine(m_vPos.x + m_vSize.x + distance, m_vPos.y, m_vPos.x + m_vSize.x + distance, m_vPos.y + m_vSize.y + 1);
+    g->drawLine(this->vPos.x, this->vPos.y - distance, this->vPos.x + this->vSize.x + 1, this->vPos.y - distance);
+    g->drawLine(this->vPos.x, this->vPos.y + this->vSize.y + distance, this->vPos.x + this->vSize.x + 1,
+                this->vPos.y + this->vSize.y + distance);
+    g->drawLine(this->vPos.x - distance, this->vPos.y, this->vPos.x - distance, this->vPos.y + this->vSize.y + 1);
+    g->drawLine(this->vPos.x + this->vSize.x + distance, this->vPos.y, this->vPos.x + this->vSize.x + distance,
+                this->vPos.y + this->vSize.y + 1);
 }
 
-void CBaseUIButton::onMouseUpInside() { onClicked(); }
+void CBaseUIButton::onMouseUpInside() { this->onClicked(); }
 
 void CBaseUIButton::onClicked() {
-    if(m_clickCallback != NULL) m_clickCallback(this);
+    if(this->clickCallback != NULL) this->clickCallback(this);
 
-    if(m_clickVoidCallback != NULL) m_clickVoidCallback();
+    if(this->clickVoidCallback != NULL) this->clickVoidCallback();
 }
 
 void CBaseUIButton::updateStringMetrics() {
-    if(m_font != NULL) {
-        m_fStringHeight = m_font->getHeight();
+    if(this->font != NULL) {
+        this->fStringHeight = this->font->getHeight();
 
-        if(m_bTextLeft)
-            m_fStringWidth =
-                m_vSize.x - 4;  // TODO: this is broken af, why is it like this? where is this even used/needed
+        if(this->bTextLeft)
+            this->fStringWidth =
+                this->vSize.x - 4;  // TODO: this is broken af, why is it like this? where is this even used/needed
         else
-            m_fStringWidth = m_font->getStringWidth(m_sText);
+            this->fStringWidth = this->font->getStringWidth(this->sText);
     }
 }

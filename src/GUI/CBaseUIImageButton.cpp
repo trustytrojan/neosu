@@ -13,31 +13,31 @@
 CBaseUIImageButton::CBaseUIImageButton(std::string imageResourceName, float xPos, float yPos, float xSize, float ySize,
                                        UString name)
     : CBaseUIButton(xPos, yPos, xSize, ySize, name, "") {
-    setImageResourceName(imageResourceName);
+    this->setImageResourceName(imageResourceName);
 
-    m_fRot = 0.0f;
-    m_vScale = Vector2(1, 1);
-    m_bScaleToFit = false;
-    m_bKeepAspectRatio = true;
+    this->fRot = 0.0f;
+    this->vScale = Vector2(1, 1);
+    this->bScaleToFit = false;
+    this->bKeepAspectRatio = true;
 }
 
 void CBaseUIImageButton::draw(Graphics *g) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
     // draw image
-    Image *image = engine->getResourceManager()->getImage(m_sImageResourceName);
+    Image *image = engine->getResourceManager()->getImage(this->sImageResourceName);
     if(image != NULL) {
         g->setColor(0xffffffff);
         g->pushTransform();
 
         // scale
-        g->scale(m_vScale.x, m_vScale.y);
+        g->scale(this->vScale.x, this->vScale.y);
 
         // rotate
-        if(m_fRot != 0.0f) g->rotate(m_fRot);
+        if(this->fRot != 0.0f) g->rotate(this->fRot);
 
         // center and draw
-        g->translate(m_vPos.x + (int)(m_vSize.x / 2), m_vPos.y + (int)(m_vSize.y / 2));
+        g->translate(this->vPos.x + (int)(this->vSize.x / 2), this->vPos.y + (int)(this->vSize.y / 2));
         g->drawImage(image);
 
         g->popTransform();
@@ -45,10 +45,10 @@ void CBaseUIImageButton::draw(Graphics *g) {
 }
 
 CBaseUIImageButton *CBaseUIImageButton::setImageResourceName(std::string imageResourceName) {
-    m_sImageResourceName = imageResourceName;
+    this->sImageResourceName = imageResourceName;
 
-    Image *image = engine->getResourceManager()->getImage(m_sImageResourceName);
-    if(image != NULL) setSize(Vector2(image->getWidth(), image->getHeight()));
+    Image *image = engine->getResourceManager()->getImage(this->sImageResourceName);
+    if(image != NULL) this->setSize(Vector2(image->getWidth(), image->getHeight()));
 
     return this;
 }
@@ -56,19 +56,19 @@ CBaseUIImageButton *CBaseUIImageButton::setImageResourceName(std::string imageRe
 void CBaseUIImageButton::onResized() {
     CBaseUIButton::onResized();
 
-    Image *image = engine->getResourceManager()->getImage(m_sImageResourceName);
-    if(m_bScaleToFit && image != NULL) {
-        if(!m_bKeepAspectRatio) {
-            m_vScale = Vector2(m_vSize.x / image->getWidth(), m_vSize.y / image->getHeight());
-            m_vSize.x = (int)(image->getWidth() * m_vScale.x);
-            m_vSize.y = (int)(image->getHeight() * m_vScale.y);
+    Image *image = engine->getResourceManager()->getImage(this->sImageResourceName);
+    if(this->bScaleToFit && image != NULL) {
+        if(!this->bKeepAspectRatio) {
+            this->vScale = Vector2(this->vSize.x / image->getWidth(), this->vSize.y / image->getHeight());
+            this->vSize.x = (int)(image->getWidth() * this->vScale.x);
+            this->vSize.y = (int)(image->getHeight() * this->vScale.y);
         } else {
-            float scaleFactor = m_vSize.x / image->getWidth() < m_vSize.y / image->getHeight()
-                                    ? m_vSize.x / image->getWidth()
-                                    : m_vSize.y / image->getHeight();
-            m_vScale = Vector2(scaleFactor, scaleFactor);
-            m_vSize.x = (int)(image->getWidth() * m_vScale.x);
-            m_vSize.y = (int)(image->getHeight() * m_vScale.y);
+            float scaleFactor = this->vSize.x / image->getWidth() < this->vSize.y / image->getHeight()
+                                    ? this->vSize.x / image->getWidth()
+                                    : this->vSize.y / image->getHeight();
+            this->vScale = Vector2(scaleFactor, scaleFactor);
+            this->vSize.x = (int)(image->getWidth() * this->vScale.x);
+            this->vSize.y = (int)(image->getHeight() * this->vScale.y);
         }
     }
 }

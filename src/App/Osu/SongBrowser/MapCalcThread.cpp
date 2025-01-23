@@ -30,7 +30,7 @@ static void run_mct() {
         mct_result result;
         result.diff2 = diff2;
 
-        auto c = DatabaseBeatmap::loadPrimitiveObjects(diff2->m_sFilePath, dead);
+        auto c = DatabaseBeatmap::loadPrimitiveObjects(diff2->sFilePath, dead);
         result.nb_circles = c.numCircles;
         result.nb_sliders = c.numSliders;
         result.nb_spinners = c.numSpinners;

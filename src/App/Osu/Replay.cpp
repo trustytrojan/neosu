@@ -9,27 +9,27 @@
 
 i32 Replay::Mods::to_legacy() const {
     i32 legacy_flags = 0;
-    if(speed > 1.f) {
+    if(this->speed > 1.f) {
         legacy_flags |= LegacyFlags::DoubleTime;
-        if(flags & ModFlags::NoPitchCorrection) legacy_flags |= LegacyFlags::Nightcore;
-    } else if(speed < 1.f) {
+        if(this->flags & ModFlags::NoPitchCorrection) legacy_flags |= LegacyFlags::Nightcore;
+    } else if(this->speed < 1.f) {
         legacy_flags |= LegacyFlags::HalfTime;
     }
 
-    if(flags & ModFlags::NoFail) legacy_flags |= LegacyFlags::NoFail;
-    if(flags & ModFlags::Easy) legacy_flags |= LegacyFlags::Easy;
-    if(flags & ModFlags::TouchDevice) legacy_flags |= LegacyFlags::TouchDevice;
-    if(flags & ModFlags::Hidden) legacy_flags |= LegacyFlags::Hidden;
-    if(flags & ModFlags::HardRock) legacy_flags |= LegacyFlags::HardRock;
-    if(flags & ModFlags::SuddenDeath) legacy_flags |= LegacyFlags::SuddenDeath;
-    if(flags & ModFlags::Relax) legacy_flags |= LegacyFlags::Relax;
-    if(flags & ModFlags::Flashlight) legacy_flags |= LegacyFlags::Flashlight;
-    if(flags & ModFlags::SpunOut) legacy_flags |= LegacyFlags::SpunOut;
-    if(flags & ModFlags::Autopilot) legacy_flags |= LegacyFlags::Autopilot;
-    if(flags & ModFlags::Perfect) legacy_flags |= LegacyFlags::Perfect;
-    if(flags & ModFlags::Target) legacy_flags |= LegacyFlags::Target;
-    if(flags & ModFlags::ScoreV2) legacy_flags |= LegacyFlags::ScoreV2;
-    if(flags & ModFlags::Autoplay) {
+    if(this->flags & ModFlags::NoFail) legacy_flags |= LegacyFlags::NoFail;
+    if(this->flags & ModFlags::Easy) legacy_flags |= LegacyFlags::Easy;
+    if(this->flags & ModFlags::TouchDevice) legacy_flags |= LegacyFlags::TouchDevice;
+    if(this->flags & ModFlags::Hidden) legacy_flags |= LegacyFlags::Hidden;
+    if(this->flags & ModFlags::HardRock) legacy_flags |= LegacyFlags::HardRock;
+    if(this->flags & ModFlags::SuddenDeath) legacy_flags |= LegacyFlags::SuddenDeath;
+    if(this->flags & ModFlags::Relax) legacy_flags |= LegacyFlags::Relax;
+    if(this->flags & ModFlags::Flashlight) legacy_flags |= LegacyFlags::Flashlight;
+    if(this->flags & ModFlags::SpunOut) legacy_flags |= LegacyFlags::SpunOut;
+    if(this->flags & ModFlags::Autopilot) legacy_flags |= LegacyFlags::Autopilot;
+    if(this->flags & ModFlags::Perfect) legacy_flags |= LegacyFlags::Perfect;
+    if(this->flags & ModFlags::Target) legacy_flags |= LegacyFlags::Target;
+    if(this->flags & ModFlags::ScoreV2) legacy_flags |= LegacyFlags::ScoreV2;
+    if(this->flags & ModFlags::Autoplay) {
         legacy_flags &= ~(LegacyFlags::Relax | LegacyFlags::Autopilot);
         legacy_flags |= LegacyFlags::Autoplay;
     }
@@ -41,15 +41,15 @@ i32 Replay::Mods::to_legacy() const {
 
 f32 Replay::Mods::get_naive_ar(DatabaseBeatmap *diff2) const {
     float ARdifficultyMultiplier = 1.0f;
-    if((flags & Replay::ModFlags::HardRock)) ARdifficultyMultiplier = 1.4f;
-    if((flags & Replay::ModFlags::Easy)) ARdifficultyMultiplier = 0.5f;
+    if((this->flags & Replay::ModFlags::HardRock)) ARdifficultyMultiplier = 1.4f;
+    if((this->flags & Replay::ModFlags::Easy)) ARdifficultyMultiplier = 0.5f;
 
     f32 AR = clamp<f32>(diff2->getAR() * ARdifficultyMultiplier, 0.0f, 10.0f);
-    if(ar_override >= 0.0f) AR = ar_override;
-    if(ar_overridenegative < 0.0f) AR = ar_overridenegative;
+    if(this->ar_override >= 0.0f) AR = this->ar_override;
+    if(this->ar_overridenegative < 0.0f) AR = this->ar_overridenegative;
 
-    if(flags & Replay::ModFlags::AROverrideLock) {
-        AR = GameRules::getRawConstantApproachRateForSpeedMultiplier(GameRules::getRawApproachTime(AR), speed);
+    if(this->flags & Replay::ModFlags::AROverrideLock) {
+        AR = GameRules::getRawConstantApproachRateForSpeedMultiplier(GameRules::getRawApproachTime(AR), this->speed);
     }
 
     return AR;
@@ -57,14 +57,14 @@ f32 Replay::Mods::get_naive_ar(DatabaseBeatmap *diff2) const {
 
 f32 Replay::Mods::get_naive_od(DatabaseBeatmap *diff2) const {
     float ODdifficultyMultiplier = 1.0f;
-    if((flags & Replay::ModFlags::HardRock)) ODdifficultyMultiplier = 1.4f;
-    if((flags & Replay::ModFlags::Easy)) ODdifficultyMultiplier = 0.5f;
+    if((this->flags & Replay::ModFlags::HardRock)) ODdifficultyMultiplier = 1.4f;
+    if((this->flags & Replay::ModFlags::Easy)) ODdifficultyMultiplier = 0.5f;
 
     f32 OD = clamp<f32>(diff2->getOD() * ODdifficultyMultiplier, 0.0f, 10.0f);
-    if(od_override >= 0.0f) OD = od_override;
+    if(this->od_override >= 0.0f) OD = this->od_override;
 
-    if(flags & Replay::ModFlags::ODOverrideLock) {
-        OD = GameRules::getRawConstantOverallDifficultyForSpeedMultiplier(GameRules::getRawHitWindow300(OD), speed);
+    if(this->flags & Replay::ModFlags::ODOverrideLock) {
+        OD = GameRules::getRawConstantOverallDifficultyForSpeedMultiplier(GameRules::getRawHitWindow300(OD), this->speed);
     }
 
     return OD;
@@ -245,13 +245,13 @@ void Replay::Mods::use(Mods mods) {
     // Update mod selector UI
     mod_selector->enableModsFromFlags(mods.to_legacy());
     cv_speed_override.setValue(speed_override);  // enableModsFromFlags() edits cv_speed_override
-    mod_selector->m_ARLock->setChecked(mods.flags & Replay::ModFlags::AROverrideLock);
-    mod_selector->m_ODLock->setChecked(mods.flags & Replay::ModFlags::AROverrideLock);
-    mod_selector->m_speedSlider->setValue(mods.speed, false, false);
-    mod_selector->m_CSSlider->setValue(mods.cs_override, false, false);
-    mod_selector->m_ARSlider->setValue(mods.ar_override, false, false);
-    mod_selector->m_ODSlider->setValue(mods.od_override, false, false);
-    mod_selector->m_HPSlider->setValue(mods.hp_override, false, false);
+    mod_selector->ARLock->setChecked(mods.flags & Replay::ModFlags::AROverrideLock);
+    mod_selector->ODLock->setChecked(mods.flags & Replay::ModFlags::AROverrideLock);
+    mod_selector->speedSlider->setValue(mods.speed, false, false);
+    mod_selector->CSSlider->setValue(mods.cs_override, false, false);
+    mod_selector->ARSlider->setValue(mods.ar_override, false, false);
+    mod_selector->ODSlider->setValue(mods.od_override, false, false);
+    mod_selector->HPSlider->setValue(mods.hp_override, false, false);
     mod_selector->updateOverrideSliderLabels();
     mod_selector->updateExperimentalButtons();
 

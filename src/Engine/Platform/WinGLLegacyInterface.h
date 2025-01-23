@@ -42,14 +42,14 @@ class WinGLLegacyInterface : public OpenGLLegacyInterface {
 
     // ILLEGAL:
     bool checkGLHardwareAcceleration();
-    inline HGLRC getGLContext() const { return m_hglrc; }
-    inline HDC getGLHDC() const { return m_hdc; }
+    inline HGLRC getGLContext() const { return this->hglrc; }
+    inline HDC getGLHDC() const { return this->hdc; }
 
    private:
     // device context
-    HWND m_hwnd;
-    HGLRC m_hglrc;
-    HDC m_hdc;
+    HWND hwnd;
+    HGLRC hglrc;
+    HDC hdc;
 };
 
 #endif

@@ -12,65 +12,66 @@ using namespace std;
 
 UIBackButton::UIBackButton(float xPos, float yPos, float xSize, float ySize, UString name)
     : CBaseUIButton(xPos, yPos, xSize, ySize, name, "") {
-    m_fAnimation = 0.0f;
-    m_fImageScale = 1.0f;
+    this->fAnimation = 0.0f;
+    this->fImageScale = 1.0f;
 }
 
 void UIBackButton::draw(Graphics *g) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
     const float scaleAnimMultiplier = 0.01f;
 
     // draw button image
     g->pushTransform();
     {
-        g->translate(m_vSize.x / 2, -m_vSize.y / 2);
-        g->scale((1.0f + m_fAnimation * scaleAnimMultiplier), (1.0f + m_fAnimation * scaleAnimMultiplier));
-        g->translate(-m_vSize.x / 2, m_vSize.y / 2);
+        g->translate(this->vSize.x / 2, -this->vSize.y / 2);
+        g->scale((1.0f + this->fAnimation * scaleAnimMultiplier), (1.0f + this->fAnimation * scaleAnimMultiplier));
+        g->translate(-this->vSize.x / 2, this->vSize.y / 2);
         g->setColor(0xffffffff);
         osu->getSkin()->getMenuBack2()->draw(
-            g, m_vPos + (osu->getSkin()->getMenuBack2()->getSize() / 2) * m_fImageScale, m_fImageScale);
+            g, this->vPos + (osu->getSkin()->getMenuBack2()->getSize() / 2) * this->fImageScale,
+            this->fImageScale);
     }
     g->popTransform();
 
     // draw anim highlight overlay
-    if(m_fAnimation > 0.0f) {
+    if(this->fAnimation > 0.0f) {
         g->pushTransform();
         {
             g->setColor(0xffffffff);
-            g->setAlpha(m_fAnimation * 0.15f);
-            g->translate(m_vSize.x / 2, -m_vSize.y / 2);
-            g->scale(1.0f + m_fAnimation * scaleAnimMultiplier, 1.0f + m_fAnimation * scaleAnimMultiplier);
-            g->translate(-m_vSize.x / 2, m_vSize.y / 2);
-            g->translate(m_vPos.x + m_vSize.x / 2, m_vPos.y + m_vSize.y / 2);
-            g->fillRect(-m_vSize.x / 2, -m_vSize.y / 2, m_vSize.x, m_vSize.y + 5);
+            g->setAlpha(this->fAnimation * 0.15f);
+            g->translate(this->vSize.x / 2, -this->vSize.y / 2);
+            g->scale(1.0f + this->fAnimation * scaleAnimMultiplier, 1.0f + this->fAnimation * scaleAnimMultiplier);
+            g->translate(-this->vSize.x / 2, this->vSize.y / 2);
+            g->translate(this->vPos.x + this->vSize.x / 2, this->vPos.y + this->vSize.y / 2);
+            g->fillRect(-this->vSize.x / 2, -this->vSize.y / 2, this->vSize.x, this->vSize.y + 5);
         }
         g->popTransform();
     }
 }
 
 void UIBackButton::mouse_update(bool *propagate_clicks) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
     CBaseUIButton::mouse_update(propagate_clicks);
 }
 
 void UIBackButton::onMouseDownInside() {
     CBaseUIButton::onMouseDownInside();
 
-    engine->getSound()->play(osu->getSkin()->m_backButtonClick);
+    engine->getSound()->play(osu->getSkin()->backButtonClick);
 }
 
 void UIBackButton::onMouseInside() {
     CBaseUIButton::onMouseInside();
 
-    anim->moveQuadOut(&m_fAnimation, 1.0f, 0.1f, 0.0f, true);
-    engine->getSound()->play(osu->getSkin()->m_backButtonHover);
+    anim->moveQuadOut(&this->fAnimation, 1.0f, 0.1f, 0.0f, true);
+    engine->getSound()->play(osu->getSkin()->backButtonHover);
 }
 
 void UIBackButton::onMouseOutside() {
     CBaseUIButton::onMouseOutside();
 
-    anim->moveQuadOut(&m_fAnimation, 0.0f, m_fAnimation * 0.1f, 0.0f, true);
+    anim->moveQuadOut(&this->fAnimation, 0.0f, this->fAnimation * 0.1f, 0.0f, true);
 }
 
 void UIBackButton::updateLayout() {
@@ -81,11 +82,11 @@ void UIBackButton::updateLayout() {
                              osu->getSkin()->getMenuBack2()->getSizeBase().y *
                                  1.5f);  // clamp the height down if it exceeds 1.5x the base height
     newSize *= uiScale;
-    m_fImageScale = (newSize.y / osu->getSkin()->getMenuBack2()->getSize().y);
-    setSize(newSize);
+    this->fImageScale = (newSize.y / osu->getSkin()->getMenuBack2()->getSize().y);
+    this->setSize(newSize);
 }
 
 void UIBackButton::resetAnimation() {
-    anim->deleteExistingAnimation(&m_fAnimation);
-    m_fAnimation = 0.0f;
+    anim->deleteExistingAnimation(&this->fAnimation);
+    this->fAnimation = 0.0f;
 }

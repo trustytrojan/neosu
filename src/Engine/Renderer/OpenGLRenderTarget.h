@@ -16,7 +16,7 @@ class OpenGLRenderTarget : public RenderTarget {
    public:
     OpenGLRenderTarget(int x, int y, int width, int height,
                        Graphics::MULTISAMPLE_TYPE multiSampleType = Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X);
-    virtual ~OpenGLRenderTarget() { destroy(); }
+    virtual ~OpenGLRenderTarget() { this->destroy(); }
 
     virtual void enable();
     virtual void disable();
@@ -27,25 +27,25 @@ class OpenGLRenderTarget : public RenderTarget {
     // ILLEGAL:
     void blitResolveFrameBufferIntoFrameBuffer(OpenGLRenderTarget *rt);
     void blitFrameBufferIntoFrameBuffer(OpenGLRenderTarget *rt);
-    inline unsigned int getFrameBuffer() const { return m_iFrameBuffer; }
-    inline unsigned int getRenderTexture() const { return m_iRenderTexture; }
-    inline unsigned int getResolveFrameBuffer() const { return m_iResolveFrameBuffer; }
-    inline unsigned int getResolveTexture() const { return m_iResolveTexture; }
+    inline unsigned int getFrameBuffer() const { return this->iFrameBuffer; }
+    inline unsigned int getRenderTexture() const { return this->iRenderTexture; }
+    inline unsigned int getResolveFrameBuffer() const { return this->iResolveFrameBuffer; }
+    inline unsigned int getResolveTexture() const { return this->iResolveTexture; }
 
    private:
     virtual void init();
     virtual void initAsync();
     virtual void destroy();
 
-    unsigned int m_iFrameBuffer;
-    unsigned int m_iRenderTexture;
-    unsigned int m_iDepthBuffer;
-    unsigned int m_iResolveFrameBuffer;
-    unsigned int m_iResolveTexture;
+    unsigned int iFrameBuffer;
+    unsigned int iRenderTexture;
+    unsigned int iDepthBuffer;
+    unsigned int iResolveFrameBuffer;
+    unsigned int iResolveTexture;
 
-    int m_iFrameBufferBackup;
-    unsigned int m_iTextureUnitBackup;
-    int m_iViewportBackup[4];
+    int iFrameBufferBackup;
+    unsigned int iTextureUnitBackup;
+    int iViewportBackup[4];
 };
 
 #endif

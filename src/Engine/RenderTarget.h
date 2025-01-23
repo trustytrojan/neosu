@@ -26,37 +26,37 @@ class RenderTarget : public Resource {
 
     // set
     void setPos(int x, int y) {
-        m_vPos.x = x;
-        m_vPos.y = y;
+        this->vPos.x = x;
+        this->vPos.y = y;
     }
-    void setPos(Vector2 pos) { m_vPos = pos; }
-    void setColor(Color color) { m_color = color; }
-    void setClearColor(Color clearColor) { m_clearColor = clearColor; }
-    void setClearColorOnDraw(bool clearColorOnDraw) { m_bClearColorOnDraw = clearColorOnDraw; }
-    void setClearDepthOnDraw(bool clearDepthOnDraw) { m_bClearDepthOnDraw = clearDepthOnDraw; }
+    void setPos(Vector2 pos) { this->vPos = pos; }
+    void setColor(Color color) { this->color = color; }
+    void setClearColor(Color clearColor) { this->clearColor = clearColor; }
+    void setClearColorOnDraw(bool clearColorOnDraw) { this->bClearColorOnDraw = clearColorOnDraw; }
+    void setClearDepthOnDraw(bool clearDepthOnDraw) { this->bClearDepthOnDraw = clearDepthOnDraw; }
 
     // get
-    float getWidth() const { return m_vSize.x; }
-    float getHeight() const { return m_vSize.y; }
-    inline Vector2 getSize() const { return m_vSize; }
-    inline Vector2 getPos() const { return m_vPos; }
-    inline Graphics::MULTISAMPLE_TYPE getMultiSampleType() const { return m_multiSampleType; }
+    float getWidth() const { return this->vSize.x; }
+    float getHeight() const { return this->vSize.y; }
+    inline Vector2 getSize() const { return this->vSize; }
+    inline Vector2 getPos() const { return this->vPos; }
+    inline Graphics::MULTISAMPLE_TYPE getMultiSampleType() const { return this->multiSampleType; }
 
-    inline bool isMultiSampled() const { return m_multiSampleType != Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X; }
+    inline bool isMultiSampled() const { return this->multiSampleType != Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X; }
 
    protected:
     virtual void init() = 0;
     virtual void initAsync() = 0;
     virtual void destroy() = 0;
 
-    bool m_bClearColorOnDraw;
-    bool m_bClearDepthOnDraw;
+    bool bClearColorOnDraw;
+    bool bClearDepthOnDraw;
 
-    Vector2 m_vPos;
-    Vector2 m_vSize;
+    Vector2 vPos;
+    Vector2 vSize;
 
-    Graphics::MULTISAMPLE_TYPE m_multiSampleType;
+    Graphics::MULTISAMPLE_TYPE multiSampleType;
 
-    Color m_color;
-    Color m_clearColor;
+    Color color;
+    Color clearColor;
 };

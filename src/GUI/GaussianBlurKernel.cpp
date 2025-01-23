@@ -10,61 +10,61 @@
 #include "Engine.h"
 
 GaussianBlurKernel::GaussianBlurKernel(int kernelSize, float radius, int targetWidth, int targetHeight) {
-    m_iKernelSize = kernelSize;
-    m_fRadius = radius;
-    m_iTargetWidth = targetWidth;
-    m_iTargetHeight = targetHeight;
+    this->iKernelSize = kernelSize;
+    this->fRadius = radius;
+    this->iTargetWidth = targetWidth;
+    this->iTargetHeight = targetHeight;
 
-    build();
+    this->build();
 }
 
-GaussianBlurKernel::~GaussianBlurKernel() { release(); }
+GaussianBlurKernel::~GaussianBlurKernel() { this->release(); }
 
 void GaussianBlurKernel::build() {
     // allocate kernel
-    m_kernel.reserve(m_iKernelSize);
+    this->kernel.reserve(this->iKernelSize);
 
     // allocate offsets
-    m_offsetsHorizontal.reserve(m_iKernelSize);
-    m_offsetsVertical.reserve(m_iKernelSize);
+    this->offsetsHorizontal.reserve(this->iKernelSize);
+    this->offsetsVertical.reserve(this->iKernelSize);
 
     // calculate kernel
-    int center = m_iKernelSize / 2;
+    int center = this->iKernelSize / 2;
     double sum = 0.0f;
     double result = 0.0f;
-    double _sigma = m_fRadius;
+    double _sigma = this->fRadius;
     double sigmaRoot = (double)std::sqrt(2 * _sigma * _sigma * PI);
 
     // dummy fill kernel
-    for(int i = 0; i < m_iKernelSize; i++) {
-        m_kernel.push_back(0.0f);
+    for(int i = 0; i < this->iKernelSize; i++) {
+        this->kernel.push_back(0.0f);
     }
 
     // now set the real values
     for(int i = 0; i < center; i++) {
         result = exp(-(i * i) / (double)(2 * _sigma * _sigma)) / sigmaRoot;
-        m_kernel[center + i] = m_kernel[center - i] = (float)result;
+        this->kernel[center + i] = this->kernel[center - i] = (float)result;
         sum += result;
         if(i != 0) sum += result;
     }
 
     // normalize kernel
     for(int i = 0; i < center; i++) {
-        m_kernel[center + i] = m_kernel[center - i] /= (float)sum;
+        this->kernel[center + i] = this->kernel[center - i] /= (float)sum;
     }
 
     // calculate offsets
-    double xInc = 1.0 / (double)m_iTargetWidth;
-    double yInc = 1.0 / (double)m_iTargetHeight;
+    double xInc = 1.0 / (double)this->iTargetWidth;
+    double yInc = 1.0 / (double)this->iTargetHeight;
 
     for(int i = -center; i < center; i++) {
-        m_offsetsHorizontal.push_back((float)(i * xInc));
-        m_offsetsVertical.push_back((float)(i * yInc));
+        this->offsetsHorizontal.push_back((float)(i * xInc));
+        this->offsetsVertical.push_back((float)(i * yInc));
     }
 }
 
 void GaussianBlurKernel::release() {
-    m_kernel = std::vector<float>();
-    m_offsetsHorizontal = std::vector<float>();
-    m_offsetsVertical = std::vector<float>();
+    this->kernel = std::vector<float>();
+    this->offsetsHorizontal = std::vector<float>();
+    this->offsetsVertical = std::vector<float>();
 }

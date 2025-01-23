@@ -35,20 +35,20 @@ class PauseMenu : public OsuScreen {
 
     UIPauseMenuButton *addButton(std::function<Image *()> getImageFunc, UString name);
 
-    bool m_bScheduledVisibilityChange;
-    bool m_bScheduledVisibility;
+    bool bScheduledVisibilityChange;
+    bool bScheduledVisibility;
 
-    std::vector<UIPauseMenuButton *> m_buttons;
-    UIPauseMenuButton *m_selectedButton;
-    float m_fWarningArrowsAnimStartTime;
-    float m_fWarningArrowsAnimAlpha;
-    float m_fWarningArrowsAnimX;
-    float m_fWarningArrowsAnimY;
-    bool m_bInitialWarningArrowFlyIn;
+    std::vector<UIPauseMenuButton *> buttons;
+    UIPauseMenuButton *selectedButton;
+    float fWarningArrowsAnimStartTime;
+    float fWarningArrowsAnimAlpha;
+    float fWarningArrowsAnimX;
+    float fWarningArrowsAnimY;
+    bool bInitialWarningArrowFlyIn;
 
-    bool m_bContinueEnabled;
-    bool m_bClick1Down;
-    bool m_bClick2Down;
+    bool bContinueEnabled;
+    bool bClick1Down;
+    bool bClick2Down;
 
-    float m_fDimAnim;
+    float fDimAnim;
 };

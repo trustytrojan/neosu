@@ -33,32 +33,32 @@
 #include "UIUserContextMenu.h"
 
 ChatChannel::ChatChannel(Chat *chat, UString name_arg) {
-    m_chat = chat;
-    name = name_arg;
+    this->chat = chat;
+    this->name = name_arg;
 
-    ui = new CBaseUIScrollView(0, 0, 0, 0, "");
-    ui->setDrawFrame(false);
-    ui->setDrawBackground(true);
-    ui->setBackgroundColor(0xdd000000);
-    ui->setHorizontalScrolling(false);
-    ui->setDrawScrollbars(true);
-    ui->sticky = true;
+    this->ui = new CBaseUIScrollView(0, 0, 0, 0, "");
+    this->ui->setDrawFrame(false);
+    this->ui->setDrawBackground(true);
+    this->ui->setBackgroundColor(0xdd000000);
+    this->ui->setHorizontalScrolling(false);
+    this->ui->setDrawScrollbars(true);
+    this->ui->sticky = true;
 
-    btn = new UIButton(0, 0, 0, 0, "button", name);
-    btn->grabs_clicks = true;
-    btn->setUseDefaultSkin();
-    btn->setClickCallback(fastdelegate::MakeDelegate(this, &ChatChannel::onChannelButtonClick));
-    m_chat->m_button_container->addBaseUIElement(btn);
+    this->btn = new UIButton(0, 0, 0, 0, "button", this->name);
+    this->btn->grabs_clicks = true;
+    this->btn->setUseDefaultSkin();
+    this->btn->setClickCallback(fastdelegate::MakeDelegate(this, &ChatChannel::onChannelButtonClick));
+    this->chat->button_container->addBaseUIElement(this->btn);
 }
 
 ChatChannel::~ChatChannel() {
-    delete ui;
-    m_chat->m_button_container->deleteBaseUIElement(btn);
+    delete this->ui;
+    this->chat->button_container->deleteBaseUIElement(this->btn);
 }
 
 void ChatChannel::onChannelButtonClick(CBaseUIButton *btn) {
-    engine->getSound()->play(osu->getSkin()->m_clickButton);
-    m_chat->switchToChannel(this);
+    engine->getSound()->play(osu->getSkin()->clickButton);
+    this->chat->switchToChannel(this);
 }
 
 void ChatChannel::add_message(ChatMessage msg) {
@@ -78,21 +78,21 @@ void ChatChannel::add_message(ChatMessage msg) {
     struct tm *tm = localtime(&msg.tms);
     auto timestamp_str = UString::format("%02d:%02d ", tm->tm_hour, tm->tm_min);
     if(is_action) timestamp_str.append("*");
-    float time_width = m_chat->font->getStringWidth(timestamp_str);
-    CBaseUILabel *timestamp = new CBaseUILabel(x, y_total, time_width, line_height, "", timestamp_str);
+    float time_width = this->chat->font->getStringWidth(timestamp_str);
+    CBaseUILabel *timestamp = new CBaseUILabel(x, this->y_total, time_width, line_height, "", timestamp_str);
     timestamp->setDrawFrame(false);
     timestamp->setDrawBackground(false);
-    ui->getContainer()->addBaseUIElement(timestamp);
+    this->ui->getContainer()->addBaseUIElement(timestamp);
     x += time_width;
 
     bool is_system_message = msg.author_name.length() == 0;
     if(!is_system_message) {
-        float name_width = m_chat->font->getStringWidth(msg.author_name);
+        float name_width = this->chat->font->getStringWidth(msg.author_name);
         auto user_box = new UIUserLabel(msg.author_id, msg.author_name);
         user_box->setTextColor(0xff2596be);
-        user_box->setPos(x, y_total);
+        user_box->setPos(x, this->y_total);
         user_box->setSize(name_width, line_height);
-        ui->getContainer()->addBaseUIElement(user_box);
+        this->ui->getContainer()->addBaseUIElement(user_box);
         x += name_width;
 
         if(!is_action) {
@@ -196,25 +196,25 @@ void ChatChannel::add_message(ChatMessage msg) {
         auto fragment_text = fragment->getText();
 
         for(int i = 0; i < fragment_text.length(); i++) {
-            float char_width = m_chat->font->getGlyphMetrics(fragment_text[i]).advance_x;
-            if(line_width + char_width + 20 >= m_chat->getSize().x) {
+            float char_width = this->chat->font->getGlyphMetrics(fragment_text[i]).advance_x;
+            if(line_width + char_width + 20 >= this->chat->getSize().x) {
                 ChatLink *link_fragment = dynamic_cast<ChatLink *>(fragment);
                 if(link_fragment == NULL) {
-                    CBaseUILabel *text = new CBaseUILabel(x, y_total, line_width - x, line_height, "", text_str);
+                    CBaseUILabel *text = new CBaseUILabel(x, this->y_total, line_width - x, line_height, "", text_str);
                     text->setDrawFrame(false);
                     text->setDrawBackground(false);
                     if(is_system_message) {
                         text->setTextColor(system_color);
                     }
-                    ui->getContainer()->addBaseUIElement(text);
+                    this->ui->getContainer()->addBaseUIElement(text);
                 } else {
                     ChatLink *link =
-                        new ChatLink(x, y_total, line_width - x, line_height, fragment->getName(), text_str);
-                    ui->getContainer()->addBaseUIElement(link);
+                        new ChatLink(x, this->y_total, line_width - x, line_height, fragment->getName(), text_str);
+                    this->ui->getContainer()->addBaseUIElement(link);
                 }
 
                 x = 10;
-                y_total += line_height;
+                this->y_total += line_height;
                 line_width = x;
                 text_str = "";
             }
@@ -225,64 +225,64 @@ void ChatChannel::add_message(ChatMessage msg) {
 
         ChatLink *link_fragment = dynamic_cast<ChatLink *>(fragment);
         if(link_fragment == NULL) {
-            CBaseUILabel *text = new CBaseUILabel(x, y_total, line_width - x, line_height, "", text_str);
+            CBaseUILabel *text = new CBaseUILabel(x, this->y_total, line_width - x, line_height, "", text_str);
             text->setDrawFrame(false);
             text->setDrawBackground(false);
             if(is_system_message) {
                 text->setTextColor(system_color);
             }
-            ui->getContainer()->addBaseUIElement(text);
+            this->ui->getContainer()->addBaseUIElement(text);
         } else {
-            ChatLink *link = new ChatLink(x, y_total, line_width - x, line_height, fragment->getName(), text_str);
-            ui->getContainer()->addBaseUIElement(link);
+            ChatLink *link = new ChatLink(x, this->y_total, line_width - x, line_height, fragment->getName(), text_str);
+            this->ui->getContainer()->addBaseUIElement(link);
         }
 
         x = line_width;
     }
 
-    y_total += line_height;
-    ui->setScrollSizeToContent();
+    this->y_total += line_height;
+    this->ui->setScrollSizeToContent();
 }
 
 void ChatChannel::updateLayout(Vector2 pos, Vector2 size) {
-    ui->clear();
-    ui->setPos(pos);
-    ui->setSize(size);
-    y_total = 7;
+    this->ui->clear();
+    this->ui->setPos(pos);
+    this->ui->setSize(size);
+    this->y_total = 7;
 
-    for(auto msg : messages) {
-        add_message(msg);
+    for(auto msg : this->messages) {
+        this->add_message(msg);
     }
 
-    ui->setScrollSizeToContent();
+    this->ui->setScrollSizeToContent();
 }
 
 Chat::Chat() : OsuScreen() {
-    font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    this->font = engine->getResourceManager()->getFont("FONT_DEFAULT");
 
-    m_button_container = new CBaseUIContainer(0, 0, 0, 0, "");
+    this->button_container = new CBaseUIContainer(0, 0, 0, 0, "");
 
-    join_channel_btn = new UIButton(0, 0, 0, 0, "button", "+");
-    join_channel_btn->setUseDefaultSkin();
-    join_channel_btn->setColor(0xffffff55);
-    join_channel_btn->setSize(button_height + 2, button_height + 2);
-    join_channel_btn->setClickCallback(fastdelegate::MakeDelegate(this, &Chat::askWhatChannelToJoin));
-    m_button_container->addBaseUIElement(join_channel_btn);
+    this->join_channel_btn = new UIButton(0, 0, 0, 0, "button", "+");
+    this->join_channel_btn->setUseDefaultSkin();
+    this->join_channel_btn->setColor(0xffffff55);
+    this->join_channel_btn->setSize(this->button_height + 2, this->button_height + 2);
+    this->join_channel_btn->setClickCallback(fastdelegate::MakeDelegate(this, &Chat::askWhatChannelToJoin));
+    this->button_container->addBaseUIElement(this->join_channel_btn);
 
-    m_input_box = new CBaseUITextbox(0, 0, 0, 0, "");
-    m_input_box->setDrawFrame(false);
-    m_input_box->setDrawBackground(true);
-    m_input_box->setBackgroundColor(0xdd000000);
-    addBaseUIElement(m_input_box);
+    this->input_box = new CBaseUITextbox(0, 0, 0, 0, "");
+    this->input_box->setDrawFrame(false);
+    this->input_box->setDrawBackground(true);
+    this->input_box->setBackgroundColor(0xdd000000);
+    this->addBaseUIElement(this->input_box);
 
-    updateLayout(osu->getScreenSize());
+    this->updateLayout(osu->getScreenSize());
 }
 
-Chat::~Chat() { delete m_button_container; }
+Chat::~Chat() { delete this->button_container; }
 
 void Chat::draw(Graphics *g) {
-    const bool isAnimating = anim->isAnimating(&m_fAnimation);
-    if(!m_bVisible && !isAnimating) return;
+    const bool isAnimating = anim->isAnimating(&this->fAnimation);
+    if(!this->bVisible && !isAnimating) return;
 
     if(isAnimating) {
         // XXX: Setting BLEND_MODE_PREMUL_ALPHA is not enough, transparency is still incorrect
@@ -290,28 +290,28 @@ void Chat::draw(Graphics *g) {
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_PREMUL_ALPHA);
     }
 
-    if(m_selected_channel == NULL) {
-        const float chat_h = round(getSize().y * 0.3f);
-        const float chat_y = getSize().y - chat_h;
-        float chat_w = getSize().x;
-        if(isSmallChat()) {
+    if(this->selected_channel == NULL) {
+        const float chat_h = round(this->getSize().y * 0.3f);
+        const float chat_y = this->getSize().y - chat_h;
+        float chat_w = this->getSize().x;
+        if(this->isSmallChat()) {
             // In the lobby and in multi rooms, don't take the full horizontal width to allow for cleaner UI designs.
             chat_w = round(chat_w * 0.6);
         }
 
         g->setColor(COLOR(100, 0, 10, 50));
-        g->fillRect(0, chat_y - (button_height + 2.f), chat_w, (button_height + 2.f));
+        g->fillRect(0, chat_y - (this->button_height + 2.f), chat_w, (this->button_height + 2.f));
         g->setColor(COLOR(150, 0, 0, 0));
         g->fillRect(0, chat_y, chat_w, chat_h);
     } else {
         g->setColor(COLOR(100, 0, 10, 50));
-        g->fillRect(m_button_container->getPos().x, m_button_container->getPos().y, m_button_container->getSize().x,
-                    m_button_container->getSize().y);
-        m_button_container->draw(g);
+        g->fillRect(this->button_container->getPos().x, this->button_container->getPos().y,
+                    this->button_container->getSize().x, this->button_container->getSize().y);
+        this->button_container->draw(g);
 
         OsuScreen::draw(g);
-        if(m_selected_channel != NULL) {
-            m_selected_channel->ui->draw(g);
+        if(this->selected_channel != NULL) {
+            this->selected_channel->ui->draw(g);
         }
     }
 
@@ -319,12 +319,13 @@ void Chat::draw(Graphics *g) {
         osu->getSliderFrameBuffer()->disable();
 
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
-        g->push3DScene(McRect(0, 0, getSize().x, getSize().y));
+        g->push3DScene(McRect(0, 0, this->getSize().x, this->getSize().y));
         {
-            g->rotate3DScene(-(1.0f - m_fAnimation) * 90, 0, 0);
-            g->translate3DScene(0, -(1.0f - m_fAnimation) * getSize().y * 1.25f, -(1.0f - m_fAnimation) * 700);
+            g->rotate3DScene(-(1.0f - this->fAnimation) * 90, 0, 0);
+            g->translate3DScene(0, -(1.0f - this->fAnimation) * this->getSize().y * 1.25f,
+                                -(1.0f - this->fAnimation) * 700);
 
-            osu->getSliderFrameBuffer()->setColor(COLORf(m_fAnimation, 1.0f, 1.0f, 1.0f));
+            osu->getSliderFrameBuffer()->setColor(COLORf(this->fAnimation, 1.0f, 1.0f, 1.0f));
             osu->getSliderFrameBuffer()->draw(g, 0, 0);
         }
         g->pop3DScene();
@@ -332,26 +333,26 @@ void Chat::draw(Graphics *g) {
 }
 
 void Chat::mouse_update(bool *propagate_clicks) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
     OsuScreen::mouse_update(propagate_clicks);
-    m_button_container->mouse_update(propagate_clicks);
-    if(m_selected_channel) {
-        m_selected_channel->ui->mouse_update(propagate_clicks);
+    this->button_container->mouse_update(propagate_clicks);
+    if(this->selected_channel) {
+        this->selected_channel->ui->mouse_update(propagate_clicks);
     }
 
     // Focus without placing the cursor at the end of the field
-    m_input_box->focus(false);
+    this->input_box->focus(false);
 }
 
 void Chat::handle_command(UString msg) {
     if(msg == UString("/clear")) {
-        m_selected_channel->messages.clear();
-        updateLayout(osu->getScreenSize());
+        this->selected_channel->messages.clear();
+        this->updateLayout(osu->getScreenSize());
         return;
     }
 
     if(msg == UString("/close") || msg == UString("/p") || msg == UString("/part")) {
-        leave(m_selected_channel->name);
+        this->leave(this->selected_channel->name);
         return;
     }
 
@@ -363,7 +364,7 @@ void Chat::handle_command(UString msg) {
     if(msg == UString("/np")) {
         auto diff = osu->getSelectedBeatmap()->getSelectedDifficulty2();
         if(diff == NULL) {
-            addSystemMessage("You are not listening to anything.");
+            this->addSystemMessage("You are not listening to anything.");
             return;
         }
 
@@ -393,7 +394,7 @@ void Chat::handle_command(UString msg) {
             np_msg = UString::format("\001ACTION is listening to %s\001", song_link.toUtf8());
         }
 
-        send_message(np_msg);
+        this->send_message(np_msg);
         return;
     }
 
@@ -401,12 +402,12 @@ void Chat::handle_command(UString msg) {
         auto friend_name = msg.substr(11);
         auto user = find_user(friend_name);
         if(!user) {
-            addSystemMessage(UString::format("User '%s' not found. Are they online?", friend_name.toUtf8()));
+            this->addSystemMessage(UString::format("User '%s' not found. Are they online?", friend_name.toUtf8()));
             return;
         }
 
         if(user->is_friend()) {
-            addSystemMessage(UString::format("You are already friends with %s!", friend_name.toUtf8()));
+            this->addSystemMessage(UString::format("You are already friends with %s!", friend_name.toUtf8()));
         } else {
             Packet packet;
             packet.id = FRIEND_ADD;
@@ -415,26 +416,26 @@ void Chat::handle_command(UString msg) {
 
             friends.push_back(user->user_id);
 
-            addSystemMessage(UString::format("You are now friends with %s.", friend_name.toUtf8()));
+            this->addSystemMessage(UString::format("You are now friends with %s.", friend_name.toUtf8()));
         }
 
         return;
     }
 
     if(msg.startsWith("/bb ")) {
-        addChannel("BanchoBot", true);
-        send_message(msg.substr(4));
+        this->addChannel("BanchoBot", true);
+        this->send_message(msg.substr(4));
         return;
     }
 
     if(msg == UString("/away")) {
-        away_msg = "";
-        addSystemMessage("Away message removed.");
+        this->away_msg = "";
+        this->addSystemMessage("Away message removed.");
         return;
     }
     if(msg.startsWith("/away ")) {
-        away_msg = msg.substr(6);
-        addSystemMessage(UString::format("Away message set to '%s'.", away_msg.toUtf8()));
+        this->away_msg = msg.substr(6);
+        this->addSystemMessage(UString::format("Away message set to '%s'.", this->away_msg.toUtf8()));
         return;
     }
 
@@ -442,7 +443,7 @@ void Chat::handle_command(UString msg) {
         auto friend_name = msg.substr(11);
         auto user = find_user(friend_name);
         if(!user) {
-            addSystemMessage(UString::format("User '%s' not found. Are they online?", friend_name.toUtf8()));
+            this->addSystemMessage(UString::format("User '%s' not found. Are they online?", friend_name.toUtf8()));
             return;
         }
 
@@ -457,9 +458,9 @@ void Chat::handle_command(UString msg) {
                 friends.erase(it);
             }
 
-            addSystemMessage(UString::format("You are no longer friends with %s.", friend_name.toUtf8()));
+            this->addSystemMessage(UString::format("You are no longer friends with %s.", friend_name.toUtf8()));
         } else {
-            addSystemMessage(UString::format("You aren't friends with %s!", friend_name.toUtf8()));
+            this->addSystemMessage(UString::format("You aren't friends with %s!", friend_name.toUtf8()));
         }
 
         return;
@@ -469,19 +470,19 @@ void Chat::handle_command(UString msg) {
         auto new_text = msg.substr(3);
         new_text.insert(0, "\001ACTION");
         new_text.append("\001");
-        send_message(new_text);
+        this->send_message(new_text);
         return;
     }
 
     if(msg.startsWith("/chat ") || msg.startsWith("/msg ") || msg.startsWith("/query ")) {
         auto username = msg.substr(msg.find(L" "));
-        addChannel(username, true);
+        this->addChannel(username, true);
         return;
     }
 
     if(msg.startsWith("/invite ")) {
         if(!bancho.is_in_a_multi_room()) {
-            addSystemMessage("You are not in a multiplayer room!");
+            this->addSystemMessage("You are not in a multiplayer room!");
             return;
         }
 
@@ -497,27 +498,27 @@ void Chat::handle_command(UString msg) {
         write<u32>(&packet, bancho.user_id);
         send_packet(packet);
 
-        addSystemMessage(UString::format("%s has been invited to the game.", username.toUtf8()));
+        this->addSystemMessage(UString::format("%s has been invited to the game.", username.toUtf8()));
         return;
     }
 
     if(msg.startsWith("/j ") || msg.startsWith("/join ")) {
         auto channel = msg.substr(msg.find(L" "));
-        join(channel);
+        this->join(channel);
         return;
     }
 
     if(msg.startsWith("/p ") || msg.startsWith("/part ")) {
         auto channel = msg.substr(msg.find(L" "));
-        leave(channel);
+        this->leave(channel);
         return;
     }
 
-    addSystemMessage("This command is not supported.");
+    this->addSystemMessage("This command is not supported.");
 }
 
 void Chat::onKeyDown(KeyboardEvent &key) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
     if(engine->getKeyboard()->isAltDown()) {
         i32 tab_select = -1;
@@ -533,66 +534,66 @@ void Chat::onKeyDown(KeyboardEvent &key) {
         if(key.getKeyCode() == KEY_0) tab_select = 9;
 
         if(tab_select != -1) {
-            if(tab_select >= m_channels.size()) {
+            if(tab_select >= this->channels.size()) {
                 key.consume();
                 return;
             }
 
             key.consume();
-            switchToChannel(m_channels[tab_select]);
+            this->switchToChannel(this->channels[tab_select]);
             return;
         }
     }
 
     if(key.getKeyCode() == KEY_PAGEUP) {
-        if(m_selected_channel != NULL) {
+        if(this->selected_channel != NULL) {
             key.consume();
-            m_selected_channel->ui->scrollY(getSize().y - input_box_height);
+            this->selected_channel->ui->scrollY(this->getSize().y - this->input_box_height);
             return;
         }
     }
 
     if(key.getKeyCode() == KEY_PAGEDOWN) {
-        if(m_selected_channel != NULL) {
+        if(this->selected_channel != NULL) {
             key.consume();
-            m_selected_channel->ui->scrollY(-(getSize().y - input_box_height));
+            this->selected_channel->ui->scrollY(-(this->getSize().y - this->input_box_height));
             return;
         }
     }
 
     // Escape: close chat
     if(key.getKeyCode() == KEY_ESCAPE) {
-        if(isVisibilityForced()) return;
+        if(this->isVisibilityForced()) return;
 
         key.consume();
-        user_wants_chat = false;
-        updateVisibility();
+        this->user_wants_chat = false;
+        this->updateVisibility();
         return;
     }
 
     // Return: send message
     if(key.getKeyCode() == KEY_ENTER) {
         key.consume();
-        if(m_selected_channel != NULL && m_input_box->getText().length() > 0) {
-            if(m_input_box->getText()[0] == L'/') {
-                handle_command(m_input_box->getText());
+        if(this->selected_channel != NULL && this->input_box->getText().length() > 0) {
+            if(this->input_box->getText()[0] == L'/') {
+                this->handle_command(this->input_box->getText());
             } else {
-                send_message(m_input_box->getText());
+                this->send_message(this->input_box->getText());
             }
 
-            engine->getSound()->play(osu->getSkin()->m_messageSent);
-            m_input_box->clear();
+            engine->getSound()->play(osu->getSkin()->messageSent);
+            this->input_box->clear();
         }
-        tab_completion_prefix = "";
-        tab_completion_match = "";
+        this->tab_completion_prefix = "";
+        this->tab_completion_match = "";
         return;
     }
 
     // Ctrl+W: Close current channel
     if(engine->getKeyboard()->isControlDown() && key.getKeyCode() == KEY_W) {
         key.consume();
-        if(m_selected_channel != NULL) {
-            leave(m_selected_channel->name);
+        if(this->selected_channel != NULL) {
+            this->leave(this->selected_channel->name);
         }
         return;
     }
@@ -601,10 +602,10 @@ void Chat::onKeyDown(KeyboardEvent &key) {
     // KEY_TAB doesn't work on Linux
     if(engine->getKeyboard()->isControlDown() && (key.getKeyCode() == 65056 || key.getKeyCode() == KEY_TAB)) {
         key.consume();
-        if(m_selected_channel == NULL) return;
-        int chan_index = m_channels.size();
-        for(auto chan : m_channels) {
-            if(chan == m_selected_channel) {
+        if(this->selected_channel == NULL) return;
+        int chan_index = this->channels.size();
+        for(auto chan : this->channels) {
+            if(chan == this->selected_channel) {
                 break;
             }
             chan_index++;
@@ -612,15 +613,15 @@ void Chat::onKeyDown(KeyboardEvent &key) {
 
         if(engine->getKeyboard()->isShiftDown()) {
             // Ctrl+Shift+Tab: Go to previous channel
-            auto new_chan = m_channels[(chan_index - 1) % m_channels.size()];
-            switchToChannel(new_chan);
+            auto new_chan = this->channels[(chan_index - 1) % this->channels.size()];
+            this->switchToChannel(new_chan);
         } else {
             // Ctrl+Tab: Go to next channel
-            auto new_chan = m_channels[(chan_index + 1) % m_channels.size()];
-            switchToChannel(new_chan);
+            auto new_chan = this->channels[(chan_index + 1) % this->channels.size()];
+            this->switchToChannel(new_chan);
         }
 
-        engine->getSound()->play(osu->getSkin()->m_clickButton);
+        engine->getSound()->play(osu->getSkin()->clickButton);
 
         return;
     }
@@ -630,33 +631,33 @@ void Chat::onKeyDown(KeyboardEvent &key) {
     if(key.getKeyCode() == 65056 || key.getKeyCode() == KEY_TAB) {
         key.consume();
 
-        auto text = m_input_box->getText();
-        i32 username_start_idx = text.findLast(" ", 0, m_input_box->m_iCaretPosition) + 1;
-        i32 username_end_idx = m_input_box->m_iCaretPosition;
+        auto text = this->input_box->getText();
+        i32 username_start_idx = text.findLast(" ", 0, this->input_box->iCaretPosition) + 1;
+        i32 username_end_idx = this->input_box->iCaretPosition;
         i32 username_len = username_end_idx - username_start_idx;
 
-        if(tab_completion_prefix.length() == 0) {
-            tab_completion_prefix = text.substr(username_start_idx, username_len);
+        if(this->tab_completion_prefix.length() == 0) {
+            this->tab_completion_prefix = text.substr(username_start_idx, username_len);
         } else {
-            username_start_idx = m_input_box->m_iCaretPosition - tab_completion_match.length();
+            username_start_idx = this->input_box->iCaretPosition - this->tab_completion_match.length();
             username_len = username_end_idx - username_start_idx;
         }
 
-        auto user = find_user_starting_with(tab_completion_prefix, tab_completion_match);
+        auto user = find_user_starting_with(this->tab_completion_prefix, this->tab_completion_match);
         if(user) {
-            tab_completion_match = user->name;
+            this->tab_completion_match = user->name;
 
             // Remove current username, add new username
-            m_input_box->m_sText.erase(m_input_box->m_iCaretPosition - username_len, username_len);
-            m_input_box->m_iCaretPosition -= username_len;
-            m_input_box->m_sText.insert(m_input_box->m_iCaretPosition, tab_completion_match);
-            m_input_box->m_iCaretPosition += tab_completion_match.length();
-            m_input_box->setText(m_input_box->m_sText);
-            m_input_box->updateTextPos();
-            m_input_box->tickCaret();
+            this->input_box->sText.erase(this->input_box->iCaretPosition - username_len, username_len);
+            this->input_box->iCaretPosition -= username_len;
+            this->input_box->sText.insert(this->input_box->iCaretPosition, this->tab_completion_match);
+            this->input_box->iCaretPosition += this->tab_completion_match.length();
+            this->input_box->setText(this->input_box->sText);
+            this->input_box->updateTextPos();
+            this->input_box->tickCaret();
 
-            Sound *sounds[] = {osu->getSkin()->m_typing1, osu->getSkin()->m_typing2, osu->getSkin()->m_typing3,
-                               osu->getSkin()->m_typing4};
+            Sound *sounds[] = {osu->getSkin()->typing1, osu->getSkin()->typing2, osu->getSkin()->typing3,
+                               osu->getSkin()->typing4};
             engine->getSound()->play(sounds[rand() % 4]);
         }
 
@@ -665,30 +666,30 @@ void Chat::onKeyDown(KeyboardEvent &key) {
 
     // Typing in chat: capture keypresses
     if(!engine->getKeyboard()->isAltDown()) {
-        tab_completion_prefix = "";
-        tab_completion_match = "";
-        m_input_box->onKeyDown(key);
+        this->tab_completion_prefix = "";
+        this->tab_completion_match = "";
+        this->input_box->onKeyDown(key);
         key.consume();
         return;
     }
 }
 
 void Chat::onKeyUp(KeyboardEvent &key) {
-    if(!m_bVisible || key.isConsumed()) return;
+    if(!this->bVisible || key.isConsumed()) return;
 
-    m_input_box->onKeyUp(key);
+    this->input_box->onKeyUp(key);
     key.consume();
 }
 
 void Chat::onChar(KeyboardEvent &key) {
-    if(!m_bVisible || key.isConsumed()) return;
+    if(!this->bVisible || key.isConsumed()) return;
 
-    m_input_box->onChar(key);
+    this->input_box->onChar(key);
     key.consume();
 }
 
 void Chat::mark_as_read(ChatChannel *chan) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
     // XXX: Only mark as read after 500ms
     chan->read = true;
@@ -718,40 +719,40 @@ void Chat::mark_as_read(ChatChannel *chan) {
 }
 
 void Chat::switchToChannel(ChatChannel *chan) {
-    m_selected_channel = chan;
+    this->selected_channel = chan;
     if(!chan->read) {
-        mark_as_read(m_selected_channel);
+        this->mark_as_read(this->selected_channel);
     }
 
     // Update button colors
-    updateButtonLayout(getSize());
+    this->updateButtonLayout(this->getSize());
 }
 
 void Chat::addChannel(UString channel_name, bool switch_to) {
-    for(auto chan : m_channels) {
+    for(auto chan : this->channels) {
         if(chan->name == channel_name) {
             if(switch_to) {
-                switchToChannel(chan);
+                this->switchToChannel(chan);
             }
             return;
         }
     }
 
     ChatChannel *chan = new ChatChannel(this, channel_name);
-    m_channels.push_back(chan);
+    this->channels.push_back(chan);
 
-    if(m_selected_channel == NULL && m_channels.size() == 1) {
-        switchToChannel(chan);
+    if(this->selected_channel == NULL && this->channels.size() == 1) {
+        this->switchToChannel(chan);
     } else if(channel_name == UString("#multiplayer") || channel_name == UString("#lobby")) {
-        switchToChannel(chan);
+        this->switchToChannel(chan);
     } else if(switch_to) {
-        switchToChannel(chan);
+        this->switchToChannel(chan);
     }
 
-    updateLayout(osu->getScreenSize());
+    this->updateLayout(osu->getScreenSize());
 
-    if(isVisible()) {
-        engine->getSound()->play(osu->getSkin()->m_expand);
+    if(this->isVisible()) {
+        engine->getSound()->play(osu->getSkin()->expand);
     }
 }
 
@@ -762,18 +763,18 @@ void Chat::addMessage(UString channel_name, ChatMessage msg, bool mark_unread) {
         channel_name = msg.author_name;
     }
 
-    addChannel(channel_name);
-    for(auto chan : m_channels) {
+    this->addChannel(channel_name);
+    for(auto chan : this->channels) {
         if(chan->name != channel_name) continue;
         chan->messages.push_back(msg);
         chan->add_message(msg);
 
         if(mark_unread) {
             chan->read = false;
-            if(chan == m_selected_channel) {
-                mark_as_read(chan);
+            if(chan == this->selected_channel) {
+                this->mark_as_read(chan);
             } else {
-                updateButtonLayout(getSize());
+                this->updateButtonLayout(this->getSize());
             }
         }
 
@@ -784,37 +785,37 @@ void Chat::addMessage(UString channel_name, ChatMessage msg, bool mark_unread) {
         break;
     }
 
-    if(is_pm && away_msg.length() > 0) {
+    if(is_pm && this->away_msg.length() > 0) {
         Packet packet;
         packet.id = SEND_PRIVATE_MESSAGE;
         write_string(&packet, (char *)bancho.username.toUtf8());
-        write_string(&packet, (char *)away_msg.toUtf8());
+        write_string(&packet, (char *)this->away_msg.toUtf8());
         write_string(&packet, (char *)msg.author_name.toUtf8());
         write<u32>(&packet, bancho.user_id);
         send_packet(packet);
 
         // Server doesn't echo the message back
-        addMessage(channel_name, ChatMessage{
-                                     .tms = time(NULL),
-                                     .author_id = bancho.user_id,
-                                     .author_name = bancho.username,
-                                     .text = away_msg,
-                                 });
+        this->addMessage(channel_name, ChatMessage{
+                                           .tms = time(NULL),
+                                           .author_id = bancho.user_id,
+                                           .author_name = bancho.username,
+                                           .text = this->away_msg,
+                                       });
     }
 }
 
 void Chat::addSystemMessage(UString msg) {
-    addMessage(m_selected_channel->name, ChatMessage{
-                                             .tms = time(NULL),
-                                             .author_id = 0,
-                                             .author_name = "",
-                                             .text = msg,
-                                         });
+    this->addMessage(this->selected_channel->name, ChatMessage{
+                                                       .tms = time(NULL),
+                                                       .author_id = 0,
+                                                       .author_name = "",
+                                                       .text = msg,
+                                                   });
 }
 
 void Chat::removeChannel(UString channel_name) {
     ChatChannel *chan = NULL;
-    for(auto c : m_channels) {
+    for(auto c : this->channels) {
         if(c->name == channel_name) {
             chan = c;
             break;
@@ -823,70 +824,71 @@ void Chat::removeChannel(UString channel_name) {
 
     if(chan == NULL) return;
 
-    auto it = std::find(m_channels.begin(), m_channels.end(), chan);
-    m_channels.erase(it);
-    if(m_selected_channel == chan) {
-        m_selected_channel = NULL;
-        if(!m_channels.empty()) {
-            switchToChannel(m_channels[0]);
+    auto it = std::find(this->channels.begin(), this->channels.end(), chan);
+    this->channels.erase(it);
+    if(this->selected_channel == chan) {
+        this->selected_channel = NULL;
+        if(!this->channels.empty()) {
+            this->switchToChannel(this->channels[0]);
         }
     }
 
     delete chan;
-    updateButtonLayout(getSize());
+    this->updateButtonLayout(this->getSize());
 }
 
 void Chat::updateLayout(Vector2 newResolution) {
     // We don't want to update while the chat is hidden, to avoid lagspikes during gameplay
-    if(!m_bVisible) {
-        layout_update_scheduled = true;
+    if(!this->bVisible) {
+        this->layout_update_scheduled = true;
         return;
     }
 
     // In the lobby and in multi rooms don't take the full horizontal width to allow for cleaner UI designs.
-    if(isSmallChat()) {
+    if(this->isSmallChat()) {
         newResolution.x = round(newResolution.x * 0.6);
     }
 
-    setSize(newResolution);
+    this->setSize(newResolution);
 
     const float chat_w = newResolution.x;
-    const float chat_h = round(newResolution.y * 0.3f) - input_box_height;
-    const float chat_y = newResolution.y - (chat_h + input_box_height);
-    for(auto chan : m_channels) {
+    const float chat_h = round(newResolution.y * 0.3f) - this->input_box_height;
+    const float chat_y = newResolution.y - (chat_h + this->input_box_height);
+    for(auto chan : this->channels) {
         chan->updateLayout(Vector2{0.f, chat_y}, Vector2{chat_w, chat_h});
     }
 
-    m_input_box->setPos(Vector2{0.f, chat_y + chat_h});
-    m_input_box->setSize(Vector2{chat_w, input_box_height});
+    this->input_box->setPos(Vector2{0.f, chat_y + chat_h});
+    this->input_box->setSize(Vector2{chat_w, this->input_box_height});
 
-    if(m_selected_channel == NULL && !m_channels.empty()) {
-        m_selected_channel = m_channels[0];
-        m_selected_channel->read = true;
+    if(this->selected_channel == NULL && !this->channels.empty()) {
+        this->selected_channel = this->channels[0];
+        this->selected_channel->read = true;
     }
 
-    updateButtonLayout(newResolution);
-    updateButtonLayout(newResolution);  // idk
-    layout_update_scheduled = false;
+    this->updateButtonLayout(newResolution);
+    this->updateButtonLayout(newResolution);  // idk
+    this->layout_update_scheduled = false;
 }
 
 void Chat::updateButtonLayout(Vector2 screen) {
     const float initial_x = 2;
     float total_x = initial_x;
 
-    std::sort(m_channels.begin(), m_channels.end(), [](ChatChannel *a, ChatChannel *b) { return a->name < b->name; });
+    std::sort(this->channels.begin(), this->channels.end(),
+              [](ChatChannel *a, ChatChannel *b) { return a->name < b->name; });
 
     // Look, I really tried. But for some reason setPos() doesn't work until we change
     // the screen resolution once. So I'll just compute absolute position manually.
-    float button_container_height = button_height + 2;
-    for(auto chan : m_channels) {
+    float button_container_height = this->button_height + 2;
+    for(auto chan : this->channels) {
         UIButton *btn = chan->btn;
-        float button_width = font->getStringWidth(btn->getText()) + 20;
+        float button_width = this->font->getStringWidth(btn->getText()) + 20;
 
         // Wrap channel buttons
         if(total_x + button_width > screen.x - 20) {
             total_x = initial_x;
-            button_container_height += button_height;
+            button_container_height += this->button_height;
         }
 
         total_x += button_width;
@@ -895,21 +897,21 @@ void Chat::updateButtonLayout(Vector2 screen) {
     const float chat_y = round(screen.y * 0.7f);
     float total_y = 0.f;
     total_x = initial_x;
-    for(auto chan : m_channels) {
+    for(auto chan : this->channels) {
         UIButton *btn = chan->btn;
-        float button_width = font->getStringWidth(btn->getText()) + 20;
+        float button_width = this->font->getStringWidth(btn->getText()) + 20;
 
         // Wrap channel buttons
         if(total_x + button_width > screen.x - 20) {
             total_x = initial_x;
-            total_y += button_height;
+            total_y += this->button_height;
         }
 
         btn->setPos(total_x, chat_y - button_container_height + total_y);
         // Buttons are drawn a bit smaller than they should, so we up the size here
-        btn->setSize(button_width + 2, button_height + 2);
+        btn->setSize(button_width + 2, this->button_height + 2);
 
-        if(m_selected_channel->name == btn->getText()) {
+        if(this->selected_channel->name == btn->getText()) {
             btn->setColor(0xfffefffd);
         } else {
             if(chan->read) {
@@ -922,9 +924,9 @@ void Chat::updateButtonLayout(Vector2 screen) {
         total_x += button_width;
     }
 
-    join_channel_btn->setPos(total_x, chat_y - button_container_height + total_y);
-    m_button_container->setPos(0, chat_y - button_container_height);
-    m_button_container->setSize(screen.x, button_container_height);
+    this->join_channel_btn->setPos(total_x, chat_y - button_container_height + total_y);
+    this->button_container->setPos(0, chat_y - button_container_height);
+    this->button_container->setSize(screen.x, button_container_height);
 }
 
 void Chat::join(UString channel_name) {
@@ -949,62 +951,62 @@ void Chat::leave(UString channel_name) {
         send_packet(packet);
     }
 
-    removeChannel(channel_name);
+    this->removeChannel(channel_name);
 
-    engine->getSound()->play(osu->getSkin()->m_closeChatTab);
+    engine->getSound()->play(osu->getSkin()->closeChatTab);
 }
 
 void Chat::send_message(UString msg) {
     Packet packet;
-    packet.id = m_selected_channel->name[0] == '#' ? SEND_PUBLIC_MESSAGE : SEND_PRIVATE_MESSAGE;
+    packet.id = this->selected_channel->name[0] == '#' ? SEND_PUBLIC_MESSAGE : SEND_PRIVATE_MESSAGE;
     write_string(&packet, (char *)bancho.username.toUtf8());
     write_string(&packet, (char *)msg.toUtf8());
-    write_string(&packet, (char *)m_selected_channel->name.toUtf8());
+    write_string(&packet, (char *)this->selected_channel->name.toUtf8());
     write<u32>(&packet, bancho.user_id);
     send_packet(packet);
 
     // Server doesn't echo the message back
-    addMessage(m_selected_channel->name, ChatMessage{
-                                             .tms = time(NULL),
-                                             .author_id = bancho.user_id,
-                                             .author_name = bancho.username,
-                                             .text = msg,
-                                         });
+    this->addMessage(this->selected_channel->name, ChatMessage{
+                                                       .tms = time(NULL),
+                                                       .author_id = bancho.user_id,
+                                                       .author_name = bancho.username,
+                                                       .text = msg,
+                                                   });
 }
 
 void Chat::onDisconnect() {
-    for(auto chan : m_channels) {
+    for(auto chan : this->channels) {
         delete chan;
     }
-    m_channels.clear();
+    this->channels.clear();
 
     for(auto chan : chat_channels) {
         delete chan.second;
     }
     chat_channels.clear();
 
-    m_selected_channel = NULL;
-    updateLayout(osu->getScreenSize());
+    this->selected_channel = NULL;
+    this->updateLayout(osu->getScreenSize());
 
-    updateVisibility();
+    this->updateVisibility();
 }
 
-void Chat::onResolutionChange(Vector2 newResolution) { updateLayout(newResolution); }
+void Chat::onResolutionChange(Vector2 newResolution) { this->updateLayout(newResolution); }
 
 bool Chat::isSmallChat() {
-    if(osu->m_room == NULL || osu->m_lobby == NULL || osu->m_songBrowser2 == NULL) return false;
+    if(osu->room == NULL || osu->lobby == NULL || osu->songBrowser2 == NULL) return false;
     bool sitting_in_room =
-        osu->m_room->isVisible() && !osu->m_songBrowser2->isVisible() && !bancho.is_playing_a_multi_map();
-    bool sitting_in_lobby = osu->m_lobby->isVisible();
+        osu->room->isVisible() && !osu->songBrowser2->isVisible() && !bancho.is_playing_a_multi_map();
+    bool sitting_in_lobby = osu->lobby->isVisible();
     return sitting_in_room || sitting_in_lobby;
 }
 
 bool Chat::isVisibilityForced() {
-    bool is_forced = (isSmallChat() || osu->m_spectatorScreen->isVisible());
-    if(is_forced != visibility_was_forced) {
+    bool is_forced = (this->isSmallChat() || osu->spectatorScreen->isVisible());
+    if(is_forced != this->visibility_was_forced) {
         // Chat width changed: update the layout now
-        visibility_was_forced = is_forced;
-        updateLayout(osu->getScreenSize());
+        this->visibility_was_forced = is_forced;
+        this->updateLayout(osu->getScreenSize());
     }
     return is_forced;
 }
@@ -1014,59 +1016,59 @@ void Chat::updateVisibility() {
     bool can_skip = (selected_beatmap != NULL) && (selected_beatmap->isInSkippableSection());
     bool is_spectating = cv_mod_autoplay.getBool() || (cv_mod_autopilot.getBool() && cv_mod_relax.getBool()) ||
                          (selected_beatmap != NULL && selected_beatmap->is_watching) || bancho.spectated_player_id != 0;
-    bool is_clicking_circles = osu->isInPlayMode() && !can_skip && !is_spectating && !osu->m_pauseMenu->isVisible();
+    bool is_clicking_circles = osu->isInPlayMode() && !can_skip && !is_spectating && !osu->pauseMenu->isVisible();
     if(bancho.is_playing_a_multi_map() && !bancho.room.all_players_loaded) {
         is_clicking_circles = false;
     }
-    bool force_hide = osu->m_optionsMenu->isVisible() || osu->m_modSelector->isVisible() || is_clicking_circles;
+    bool force_hide = osu->optionsMenu->isVisible() || osu->modSelector->isVisible() || is_clicking_circles;
     if(!bancho.is_online()) force_hide = true;
 
     if(force_hide) {
-        setVisible(false);
-    } else if(isVisibilityForced()) {
-        setVisible(true);
+        this->setVisible(false);
+    } else if(this->isVisibilityForced()) {
+        this->setVisible(true);
     } else {
-        setVisible(user_wants_chat);
+        this->setVisible(this->user_wants_chat);
     }
 }
 
 CBaseUIContainer *Chat::setVisible(bool visible) {
-    if(visible == m_bVisible) return this;
+    if(visible == this->bVisible) return this;
 
-    engine->getSound()->play(osu->getSkin()->m_clickButton);
+    engine->getSound()->play(osu->getSkin()->clickButton);
 
     if(visible && bancho.user_id <= 0) {
-        osu->m_optionsMenu->askForLoginDetails();
+        osu->optionsMenu->askForLoginDetails();
         return this;
     }
 
-    m_bVisible = visible;
+    this->bVisible = visible;
     if(visible) {
-        osu->m_optionsMenu->setVisible(false);
-        anim->moveQuartOut(&m_fAnimation, 1.0f, 0.25f * (1.0f - m_fAnimation), true);
+        osu->optionsMenu->setVisible(false);
+        anim->moveQuartOut(&this->fAnimation, 1.0f, 0.25f * (1.0f - this->fAnimation), true);
 
-        if(m_selected_channel != NULL && !m_selected_channel->read) {
-            mark_as_read(m_selected_channel);
+        if(this->selected_channel != NULL && !this->selected_channel->read) {
+            this->mark_as_read(this->selected_channel);
         }
 
-        if(layout_update_scheduled) {
-            updateLayout(osu->getScreenSize());
+        if(this->layout_update_scheduled) {
+            this->updateLayout(osu->getScreenSize());
         }
     } else {
-        anim->moveQuadOut(&m_fAnimation, 0.0f, 0.25f * m_fAnimation, true);
+        anim->moveQuadOut(&this->fAnimation, 0.0f, 0.25f * this->fAnimation, true);
     }
 
     return this;
 }
 
 bool Chat::isMouseInChat() {
-    if(!isVisible()) return false;
-    if(m_selected_channel == NULL) return false;
-    return m_input_box->isMouseInside() || m_selected_channel->ui->isMouseInside();
+    if(!this->isVisible()) return false;
+    if(this->selected_channel == NULL) return false;
+    return this->input_box->isMouseInside() || this->selected_channel->ui->isMouseInside();
 }
 
 void Chat::askWhatChannelToJoin(CBaseUIButton *btn) {
     // XXX: Could display nicer UI with full channel list (chat_channels in Bancho.cpp)
-    osu->m_prompt->prompt("Type in the channel you want to join (e.g. '#osu'):",
-                          fastdelegate::MakeDelegate(this, &Chat::join));
+    osu->prompt->prompt("Type in the channel you want to join (e.g. '#osu'):",
+                        fastdelegate::MakeDelegate(this, &Chat::join));
 }

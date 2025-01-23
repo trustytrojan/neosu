@@ -7,52 +7,52 @@
 #include "OpenGLHeaders.h"
 
 OpenGLShader::OpenGLShader(std::string vertexShader, std::string fragmentShader, bool source) : Shader() {
-    m_sVsh = vertexShader;
-    m_sFsh = fragmentShader;
-    m_bSource = source;
+    this->sVsh = vertexShader;
+    this->sFsh = fragmentShader;
+    this->bSource = source;
 
-    m_iProgram = 0;
-    m_iVertexShader = 0;
-    m_iFragmentShader = 0;
+    this->iProgram = 0;
+    this->iVertexShader = 0;
+    this->iFragmentShader = 0;
 
-    m_iProgramBackup = 0;
+    this->iProgramBackup = 0;
 }
 
-void OpenGLShader::init() { m_bReady = compile(m_sVsh, m_sFsh, m_bSource); }
+void OpenGLShader::init() { this->bReady = this->compile(this->sVsh, this->sFsh, this->bSource); }
 
-void OpenGLShader::initAsync() { m_bAsyncReady = true; }
+void OpenGLShader::initAsync() { this->bAsyncReady = true; }
 
 void OpenGLShader::destroy() {
-    if(m_iProgram != 0) glDeleteObjectARB(m_iProgram);
-    if(m_iFragmentShader != 0) glDeleteObjectARB(m_iFragmentShader);
-    if(m_iVertexShader != 0) glDeleteObjectARB(m_iVertexShader);
+    if(this->iProgram != 0) glDeleteObjectARB(this->iProgram);
+    if(this->iFragmentShader != 0) glDeleteObjectARB(this->iFragmentShader);
+    if(this->iVertexShader != 0) glDeleteObjectARB(this->iVertexShader);
 
-    m_iProgram = 0;
-    m_iFragmentShader = 0;
-    m_iVertexShader = 0;
+    this->iProgram = 0;
+    this->iFragmentShader = 0;
+    this->iVertexShader = 0;
 
-    m_iProgramBackup = 0;
+    this->iProgramBackup = 0;
 
-    m_uniformLocationCache.clear();
+    this->uniformLocationCache.clear();
 }
 
 void OpenGLShader::enable() {
-    if(!m_bReady) return;
+    if(!this->bReady) return;
 
-    glGetIntegerv(GL_CURRENT_PROGRAM, &m_iProgramBackup);  // backup
-    glUseProgramObjectARB(m_iProgram);
+    glGetIntegerv(GL_CURRENT_PROGRAM, &this->iProgramBackup);  // backup
+    glUseProgramObjectARB(this->iProgram);
 }
 
 void OpenGLShader::disable() {
-    if(!m_bReady) return;
+    if(!this->bReady) return;
 
-    glUseProgramObjectARB(m_iProgramBackup);  // restore
+    glUseProgramObjectARB(this->iProgramBackup);  // restore
 }
 
 void OpenGLShader::setUniform1f(UString name, float value) {
-    if(!m_bReady) return;
+    if(!this->bReady) return;
 
-    const int id = getAndCacheUniformLocation(name);
+    const int id = this->getAndCacheUniformLocation(name);
     if(id != -1)
         glUniform1fARB(id, value);
     else if(cv_debug_shaders.getBool())
@@ -60,9 +60,9 @@ void OpenGLShader::setUniform1f(UString name, float value) {
 }
 
 void OpenGLShader::setUniform1fv(UString name, int count, float *values) {
-    if(!m_bReady) return;
+    if(!this->bReady) return;
 
-    const int id = getAndCacheUniformLocation(name);
+    const int id = this->getAndCacheUniformLocation(name);
     if(id != -1)
         glUniform1fvARB(id, count, values);
     else if(cv_debug_shaders.getBool())
@@ -70,9 +70,9 @@ void OpenGLShader::setUniform1fv(UString name, int count, float *values) {
 }
 
 void OpenGLShader::setUniform1i(UString name, int value) {
-    if(!m_bReady) return;
+    if(!this->bReady) return;
 
-    const int id = getAndCacheUniformLocation(name);
+    const int id = this->getAndCacheUniformLocation(name);
     if(id != -1)
         glUniform1iARB(id, value);
     else if(cv_debug_shaders.getBool())
@@ -80,9 +80,9 @@ void OpenGLShader::setUniform1i(UString name, int value) {
 }
 
 void OpenGLShader::setUniform2f(UString name, float value1, float value2) {
-    if(!m_bReady) return;
+    if(!this->bReady) return;
 
-    const int id = getAndCacheUniformLocation(name);
+    const int id = this->getAndCacheUniformLocation(name);
     if(id != -1)
         glUniform2fARB(id, value1, value2);
     else if(cv_debug_shaders.getBool())
@@ -90,9 +90,9 @@ void OpenGLShader::setUniform2f(UString name, float value1, float value2) {
 }
 
 void OpenGLShader::setUniform2fv(UString name, int count, float *vectors) {
-    if(!m_bReady) return;
+    if(!this->bReady) return;
 
-    const int id = getAndCacheUniformLocation(name);
+    const int id = this->getAndCacheUniformLocation(name);
     if(id != -1)
         glUniform2fv(id, count, (float *)&vectors[0]);
     else if(cv_debug_shaders.getBool())
@@ -100,9 +100,9 @@ void OpenGLShader::setUniform2fv(UString name, int count, float *vectors) {
 }
 
 void OpenGLShader::setUniform3f(UString name, float x, float y, float z) {
-    if(!m_bReady) return;
+    if(!this->bReady) return;
 
-    const int id = getAndCacheUniformLocation(name);
+    const int id = this->getAndCacheUniformLocation(name);
     if(id != -1)
         glUniform3fARB(id, x, y, z);
     else if(cv_debug_shaders.getBool())
@@ -110,9 +110,9 @@ void OpenGLShader::setUniform3f(UString name, float x, float y, float z) {
 }
 
 void OpenGLShader::setUniform3fv(UString name, int count, float *vectors) {
-    if(!m_bReady) return;
+    if(!this->bReady) return;
 
-    const int id = getAndCacheUniformLocation(name);
+    const int id = this->getAndCacheUniformLocation(name);
     if(id != -1)
         glUniform3fv(id, count, (float *)&vectors[0]);
     else if(cv_debug_shaders.getBool())
@@ -120,9 +120,9 @@ void OpenGLShader::setUniform3fv(UString name, int count, float *vectors) {
 }
 
 void OpenGLShader::setUniform4f(UString name, float x, float y, float z, float w) {
-    if(!m_bReady) return;
+    if(!this->bReady) return;
 
-    const int id = getAndCacheUniformLocation(name);
+    const int id = this->getAndCacheUniformLocation(name);
     if(id != -1)
         glUniform4fARB(id, x, y, z, w);
     else if(cv_debug_shaders.getBool())
@@ -130,9 +130,9 @@ void OpenGLShader::setUniform4f(UString name, float x, float y, float z, float w
 }
 
 void OpenGLShader::setUniformMatrix4fv(UString name, Matrix4 &matrix) {
-    if(!m_bReady) return;
+    if(!this->bReady) return;
 
-    const int id = getAndCacheUniformLocation(name);
+    const int id = this->getAndCacheUniformLocation(name);
     if(id != -1)
         glUniformMatrix4fv(id, 1, GL_FALSE, matrix.get());
     else if(cv_debug_shaders.getBool())
@@ -140,9 +140,9 @@ void OpenGLShader::setUniformMatrix4fv(UString name, Matrix4 &matrix) {
 }
 
 void OpenGLShader::setUniformMatrix4fv(UString name, float *v) {
-    if(!m_bReady) return;
+    if(!this->bReady) return;
 
-    const int id = getAndCacheUniformLocation(name);
+    const int id = this->getAndCacheUniformLocation(name);
     if(id != -1)
         glUniformMatrix4fv(id, 1, GL_FALSE, v);
     else if(cv_debug_shaders.getBool())
@@ -150,22 +150,22 @@ void OpenGLShader::setUniformMatrix4fv(UString name, float *v) {
 }
 
 int OpenGLShader::getAttribLocation(UString name) {
-    if(!m_bReady) return -1;
+    if(!this->bReady) return -1;
 
-    return glGetAttribLocation(m_iProgram, name.toUtf8());
+    return glGetAttribLocation(this->iProgram, name.toUtf8());
 }
 
 int OpenGLShader::getAndCacheUniformLocation(const UString &name) {
-    if(!m_bReady) return -1;
+    if(!this->bReady) return -1;
 
-    m_sTempStringBuffer.reserve(name.lengthUtf8());
-    m_sTempStringBuffer.assign(name.toUtf8(), name.lengthUtf8());
+    this->sTempStringBuffer.reserve(name.lengthUtf8());
+    this->sTempStringBuffer.assign(name.toUtf8(), name.lengthUtf8());
 
-    const auto cachedValue = m_uniformLocationCache.find(m_sTempStringBuffer);
-    const bool cached = (cachedValue != m_uniformLocationCache.end());
+    const auto cachedValue = this->uniformLocationCache.find(this->sTempStringBuffer);
+    const bool cached = (cachedValue != this->uniformLocationCache.end());
 
-    const int id = (cached ? cachedValue->second : glGetUniformLocationARB(m_iProgram, name.toUtf8()));
-    if(!cached && id != -1) m_uniformLocationCache[m_sTempStringBuffer] = id;
+    const int id = (cached ? cachedValue->second : glGetUniformLocationARB(this->iProgram, name.toUtf8()));
+    if(!cached && id != -1) this->uniformLocationCache[this->sTempStringBuffer] = id;
 
     return id;
 }
@@ -173,42 +173,42 @@ int OpenGLShader::getAndCacheUniformLocation(const UString &name) {
 bool OpenGLShader::compile(std::string vertexShader, std::string fragmentShader, bool source) {
     // load & compile shaders
     debugLog("OpenGLShader: Compiling %s ...\n", (source ? "vertex source" : vertexShader.c_str()));
-    m_iVertexShader = source ? createShaderFromString(vertexShader, GL_VERTEX_SHADER_ARB)
-                             : createShaderFromFile(vertexShader, GL_VERTEX_SHADER_ARB);
+    this->iVertexShader = source ? this->createShaderFromString(vertexShader, GL_VERTEX_SHADER_ARB)
+                             : this->createShaderFromFile(vertexShader, GL_VERTEX_SHADER_ARB);
     debugLog("OpenGLShader: Compiling %s ...\n", (source ? "fragment source" : fragmentShader.c_str()));
-    m_iFragmentShader = source ? createShaderFromString(fragmentShader, GL_FRAGMENT_SHADER_ARB)
-                               : createShaderFromFile(fragmentShader, GL_FRAGMENT_SHADER_ARB);
+    this->iFragmentShader = source ? this->createShaderFromString(fragmentShader, GL_FRAGMENT_SHADER_ARB)
+                               : this->createShaderFromFile(fragmentShader, GL_FRAGMENT_SHADER_ARB);
 
-    if(m_iVertexShader == 0 || m_iFragmentShader == 0) {
+    if(this->iVertexShader == 0 || this->iFragmentShader == 0) {
         engine->showMessageError("OpenGLShader Error", "Couldn't createShader()");
         return false;
     }
 
     // create program
-    m_iProgram = glCreateProgramObjectARB();
-    if(m_iProgram == 0) {
+    this->iProgram = glCreateProgramObjectARB();
+    if(this->iProgram == 0) {
         engine->showMessageError("OpenGLShader Error", "Couldn't glCreateProgramObjectARB()");
         return false;
     }
 
     // attach
-    glAttachObjectARB(m_iProgram, m_iVertexShader);
-    glAttachObjectARB(m_iProgram, m_iFragmentShader);
+    glAttachObjectARB(this->iProgram, this->iVertexShader);
+    glAttachObjectARB(this->iProgram, this->iFragmentShader);
 
     // link
-    glLinkProgramARB(m_iProgram);
+    glLinkProgramARB(this->iProgram);
 
     int returnValue = GL_TRUE;
-    glGetObjectParameterivARB(m_iProgram, GL_OBJECT_LINK_STATUS_ARB, &returnValue);
+    glGetObjectParameterivARB(this->iProgram, GL_OBJECT_LINK_STATUS_ARB, &returnValue);
     if(returnValue == GL_FALSE) {
         engine->showMessageError("OpenGLShader Error", "Couldn't glLinkProgramARB()");
         return false;
     }
 
     // validate
-    glValidateProgramARB(m_iProgram);
+    glValidateProgramARB(this->iProgram);
     returnValue = GL_TRUE;
-    glGetObjectParameterivARB(m_iProgram, GL_OBJECT_VALIDATE_STATUS_ARB, &returnValue);
+    glGetObjectParameterivARB(this->iProgram, GL_OBJECT_VALIDATE_STATUS_ARB, &returnValue);
     if(returnValue == GL_FALSE) {
         engine->showMessageError("OpenGLShader Error", "Couldn't glValidateProgramARB()");
         return false;
@@ -271,7 +271,7 @@ int OpenGLShader::createShaderFromFile(std::string fileName, int shaderType) {
 
     std::string shaderSourcePtr = shaderSource;
 
-    return createShaderFromString(shaderSourcePtr, shaderType);
+    return this->createShaderFromString(shaderSourcePtr, shaderType);
 }
 
 #endif

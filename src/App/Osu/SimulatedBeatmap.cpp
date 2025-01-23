@@ -20,54 +20,54 @@
 using namespace std;
 
 SimulatedBeatmap::SimulatedBeatmap(DatabaseBeatmap *diff2, Replay::Mods mods_) {
-    m_selectedDifficulty2 = diff2;
-    mods = mods_;
-    live_score.mods = mods_;
-    mod_halfwindow = mods.flags & Replay::ModFlags::HalfWindow;
-    mod_halfwindow_allow_300s = mods.flags & Replay::ModFlags::HalfWindowAllow300s;
-    mod_ming3012 = mods.flags & Replay::ModFlags::Ming3012;
-    mod_no100s = mods.flags & Replay::ModFlags::No100s;
-    mod_no50s = mods.flags & Replay::ModFlags::No50s;
+    this->selectedDifficulty2 = diff2;
+    this->mods = mods_;
+    this->live_score.mods = mods_;
+    this->mod_halfwindow = this->mods.flags & Replay::ModFlags::HalfWindow;
+    this->mod_halfwindow_allow_300s = this->mods.flags & Replay::ModFlags::HalfWindowAllow300s;
+    this->mod_ming3012 = this->mods.flags & Replay::ModFlags::Ming3012;
+    this->mod_no100s = this->mods.flags & Replay::ModFlags::No100s;
+    this->mod_no50s = this->mods.flags & Replay::ModFlags::No50s;
 
-    nb_hitobjects = diff2->getNumObjects();
+    this->nb_hitobjects = diff2->getNumObjects();
 
-    m_iNPS = 0;
-    m_iND = 0;
-    m_iCurrentHitObjectIndex = 0;
-    m_iCurrentNumCircles = 0;
-    m_iCurrentNumSliders = 0;
-    m_iCurrentNumSpinners = 0;
-    m_bIsSpinnerActive = false;
-    m_fPlayfieldRotation = 0.0f;
-    m_fXMultiplier = 1.0f;
-    m_fRawHitcircleDiameter = 27.35f * 2.0f;
-    m_fSliderFollowCircleDiameter = 0.0f;
+    this->iNPS = 0;
+    this->iND = 0;
+    this->iCurrentHitObjectIndex = 0;
+    this->iCurrentNumCircles = 0;
+    this->iCurrentNumSliders = 0;
+    this->iCurrentNumSpinners = 0;
+    this->bIsSpinnerActive = false;
+    this->fPlayfieldRotation = 0.0f;
+    this->fXMultiplier = 1.0f;
+    this->fRawHitcircleDiameter = 27.35f * 2.0f;
+    this->fSliderFollowCircleDiameter = 0.0f;
 
-    start();
+    this->start();
 }
 
 SimulatedBeatmap::~SimulatedBeatmap() {
-    for(int i = 0; i < m_hitobjects.size(); i++) {
-        delete m_hitobjects[i];
+    for(int i = 0; i < this->hitobjects.size(); i++) {
+        delete this->hitobjects[i];
     }
 }
 
 void SimulatedBeatmap::simulate_to(i32 music_pos) {
-    if(spectated_replay.size() < 2) return;
+    if(this->spectated_replay.size() < 2) return;
 
-    LegacyReplay::Frame current_frame = spectated_replay[current_frame_idx];
-    LegacyReplay::Frame next_frame = spectated_replay[current_frame_idx + 1];
+    LegacyReplay::Frame current_frame = this->spectated_replay[this->current_frame_idx];
+    LegacyReplay::Frame next_frame = this->spectated_replay[this->current_frame_idx + 1];
 
     while(next_frame.cur_music_pos <= music_pos) {
-        if(current_frame_idx + 2 >= spectated_replay.size()) break;
+        if(this->current_frame_idx + 2 >= this->spectated_replay.size()) break;
 
-        last_keys = current_keys;
+        this->last_keys = this->current_keys;
         f64 frame_time = (f64)(next_frame.cur_music_pos - current_frame.cur_music_pos) / 1000.0;
 
-        current_frame_idx++;
-        current_frame = spectated_replay[current_frame_idx];
-        next_frame = spectated_replay[current_frame_idx + 1];
-        current_keys = current_frame.key_flags;
+        this->current_frame_idx++;
+        current_frame = this->spectated_replay[this->current_frame_idx];
+        next_frame = this->spectated_replay[this->current_frame_idx + 1];
+        this->current_keys = current_frame.key_flags;
 
         Click click;
         click.click_time = current_frame.cur_music_pos;
@@ -75,59 +75,59 @@ void SimulatedBeatmap::simulate_to(i32 music_pos) {
         click.pos.y = current_frame.y;
 
         // Flag fix to simplify logic (stable sets both K1 and M1 when K1 is pressed)
-        if(current_keys & LegacyReplay::K1) current_keys &= ~LegacyReplay::M1;
-        if(current_keys & LegacyReplay::K2) current_keys &= ~LegacyReplay::M2;
+        if(this->current_keys & LegacyReplay::K1) this->current_keys &= ~LegacyReplay::M1;
+        if(this->current_keys & LegacyReplay::K2) this->current_keys &= ~LegacyReplay::M2;
 
         // Pressed key 1
-        if(!(last_keys & LegacyReplay::K1) && current_keys & LegacyReplay::K1) {
-            m_bPrevKeyWasKey1 = true;
-            m_clicks.push_back(click);
-            if(!m_bInBreak) live_score.addKeyCount(1);
+        if(!(this->last_keys & LegacyReplay::K1) && this->current_keys & LegacyReplay::K1) {
+            this->bPrevKeyWasKey1 = true;
+            this->clicks.push_back(click);
+            if(!this->bInBreak) this->live_score.addKeyCount(1);
         }
-        if(!(last_keys & LegacyReplay::M1) && current_keys & LegacyReplay::M1) {
-            m_bPrevKeyWasKey1 = true;
-            m_clicks.push_back(click);
-            if(!m_bInBreak) live_score.addKeyCount(3);
+        if(!(this->last_keys & LegacyReplay::M1) && this->current_keys & LegacyReplay::M1) {
+            this->bPrevKeyWasKey1 = true;
+            this->clicks.push_back(click);
+            if(!this->bInBreak) this->live_score.addKeyCount(3);
         }
 
         // Pressed key 2
-        if(!(last_keys & LegacyReplay::K2) && current_keys & LegacyReplay::K2) {
-            m_bPrevKeyWasKey1 = false;
-            m_clicks.push_back(click);
-            if(!m_bInBreak) live_score.addKeyCount(2);
+        if(!(this->last_keys & LegacyReplay::K2) && this->current_keys & LegacyReplay::K2) {
+            this->bPrevKeyWasKey1 = false;
+            this->clicks.push_back(click);
+            if(!this->bInBreak) this->live_score.addKeyCount(2);
         }
-        if(!(last_keys & LegacyReplay::M2) && current_keys & LegacyReplay::M2) {
-            m_bPrevKeyWasKey1 = false;
-            m_clicks.push_back(click);
-            if(!m_bInBreak) live_score.addKeyCount(4);
+        if(!(this->last_keys & LegacyReplay::M2) && this->current_keys & LegacyReplay::M2) {
+            this->bPrevKeyWasKey1 = false;
+            this->clicks.push_back(click);
+            if(!this->bInBreak) this->live_score.addKeyCount(4);
         }
 
-        m_interpolatedMousePos = {current_frame.x, current_frame.y};
-        m_iCurMusicPos = current_frame.cur_music_pos;
+        this->interpolatedMousePos = {current_frame.x, current_frame.y};
+        this->iCurMusicPos = current_frame.cur_music_pos;
 
-        update(frame_time);
+        this->update(frame_time);
     }
 }
 
 bool SimulatedBeatmap::start() {
     // reset everything, including deleting any previously loaded hitobjects from another diff which we might just have
     // played
-    resetScore();
+    this->resetScore();
 
     // some hitobjects already need this information to be up-to-date before their constructor is called
-    updatePlayfieldMetrics();
-    updateHitobjectMetrics();
+    this->updatePlayfieldMetrics();
+    this->updateHitobjectMetrics();
 
     // actually load the difficulty (and the hitobjects)
-    DatabaseBeatmap::LOAD_GAMEPLAY_RESULT result = DatabaseBeatmap::loadGameplay(m_selectedDifficulty2, this);
+    DatabaseBeatmap::LOAD_GAMEPLAY_RESULT result = DatabaseBeatmap::loadGameplay(this->selectedDifficulty2, this);
     if(result.errorCode != 0) {
         return false;
     }
-    m_hitobjects = std::move(result.hitobjects);
-    m_breaks = std::move(result.breaks);
+    this->hitobjects = std::move(result.hitobjects);
+    this->breaks = std::move(result.breaks);
 
     // sort hitobjects by endtime
-    m_hitobjectsSortedByEndTime = m_hitobjects;
+    this->hitobjectsSortedByEndTime = this->hitobjects;
     struct HitObjectSortComparator {
         bool operator()(HitObject const *a, HitObject const *b) const {
             // strict weak ordering!
@@ -137,13 +137,14 @@ bool SimulatedBeatmap::start() {
                 return (a->click_time + a->duration) < (b->click_time + b->duration);
         }
     };
-    std::sort(m_hitobjectsSortedByEndTime.begin(), m_hitobjectsSortedByEndTime.end(), HitObjectSortComparator());
+    std::sort(this->hitobjectsSortedByEndTime.begin(), this->hitobjectsSortedByEndTime.end(),
+              HitObjectSortComparator());
 
     // after the hitobjects have been loaded we can calculate the stacks
-    calculateStacks();
-    computeDrainRate();
+    this->calculateStacks();
+    this->computeDrainRate();
 
-    m_bInBreak = false;
+    this->bInBreak = false;
 
     // NOTE: loading failures are handled dynamically in update(), so temporarily assume everything has worked in here
     return true;
@@ -151,38 +152,38 @@ bool SimulatedBeatmap::start() {
 
 void SimulatedBeatmap::fail() {
     debugLog("SimulatedBeatmap::fail called!\n");
-    m_bFailed = true;
+    this->bFailed = true;
 }
 
-void SimulatedBeatmap::cancelFailing() { m_bFailed = false; }
+void SimulatedBeatmap::cancelFailing() { this->bFailed = false; }
 
 u32 SimulatedBeatmap::getScoreV1DifficultyMultiplier() const {
     // NOTE: We intentionally get CS/HP/OD from beatmap data, not "real" CS/HP/OD
     //       Since this multiplier is only used for ScoreV1
-    u32 breakTimeMS = getBreakDurationTotal();
-    f32 drainLength = max(getLengthPlayable() - min(breakTimeMS, getLengthPlayable()), (u32)1000) / 1000;
-    return std::round((m_selectedDifficulty2->getCS() + m_selectedDifficulty2->getHP() +
-                       m_selectedDifficulty2->getOD() +
-                       clamp<f32>((f32)m_selectedDifficulty2->getNumObjects() / drainLength * 8.0f, 0.0f, 16.0f)) /
+    u32 breakTimeMS = this->getBreakDurationTotal();
+    f32 drainLength = max(this->getLengthPlayable() - min(breakTimeMS, this->getLengthPlayable()), (u32)1000) / 1000;
+    return std::round((this->selectedDifficulty2->getCS() + this->selectedDifficulty2->getHP() +
+                       this->selectedDifficulty2->getOD() +
+                       clamp<f32>((f32)this->selectedDifficulty2->getNumObjects() / drainLength * 8.0f, 0.0f, 16.0f)) /
                       38.0f * 5.0f);
 }
 
 f32 SimulatedBeatmap::getCS() const {
     float CSdifficultyMultiplier = 1.0f;
-    if((mods.flags & Replay::ModFlags::HardRock)) CSdifficultyMultiplier = 1.3f;
-    if((mods.flags & Replay::ModFlags::Easy)) CSdifficultyMultiplier = 0.5f;
+    if((this->mods.flags & Replay::ModFlags::HardRock)) CSdifficultyMultiplier = 1.3f;
+    if((this->mods.flags & Replay::ModFlags::Easy)) CSdifficultyMultiplier = 0.5f;
 
-    f32 CS = clamp<f32>(m_selectedDifficulty2->getCS() * CSdifficultyMultiplier, 0.0f, 10.0f);
+    f32 CS = clamp<f32>(this->selectedDifficulty2->getCS() * CSdifficultyMultiplier, 0.0f, 10.0f);
 
-    if(mods.cs_override >= 0.0f) CS = mods.cs_override;
-    if(mods.cs_overridenegative < 0.0f) CS = mods.cs_overridenegative;
+    if(this->mods.cs_override >= 0.0f) CS = this->mods.cs_override;
+    if(this->mods.cs_overridenegative < 0.0f) CS = this->mods.cs_overridenegative;
 
-    if(mods.flags & Replay::ModFlags::Minimize) {
+    if(this->mods.flags & Replay::ModFlags::Minimize) {
         const f32 percent =
-            1.0f + ((f64)(m_iCurMusicPos - m_hitobjects[0]->click_time) /
-                    (f64)(m_hitobjects[m_hitobjects.size() - 1]->click_time +
-                          m_hitobjects[m_hitobjects.size() - 1]->duration - m_hitobjects[0]->click_time)) *
-                       mods.minimize_multiplier;
+            1.0f + ((f64)(this->iCurMusicPos - this->hitobjects[0]->click_time) /
+                    (f64)(this->hitobjects[this->hitobjects.size() - 1]->click_time +
+                          this->hitobjects[this->hitobjects.size() - 1]->duration - this->hitobjects[0]->click_time)) *
+                       this->mods.minimize_multiplier;
         CS *= percent;
     }
 
@@ -193,43 +194,44 @@ f32 SimulatedBeatmap::getCS() const {
 
 f32 SimulatedBeatmap::getHP() const {
     float HPdifficultyMultiplier = 1.0f;
-    if((mods.flags & Replay::ModFlags::HardRock)) HPdifficultyMultiplier = 1.4f;
-    if((mods.flags & Replay::ModFlags::Easy)) HPdifficultyMultiplier = 0.5f;
+    if((this->mods.flags & Replay::ModFlags::HardRock)) HPdifficultyMultiplier = 1.4f;
+    if((this->mods.flags & Replay::ModFlags::Easy)) HPdifficultyMultiplier = 0.5f;
 
-    f32 HP = clamp<f32>(m_selectedDifficulty2->getHP() * HPdifficultyMultiplier, 0.0f, 10.0f);
-    if(mods.hp_override >= 0.0f) HP = mods.hp_override;
+    f32 HP = clamp<f32>(this->selectedDifficulty2->getHP() * HPdifficultyMultiplier, 0.0f, 10.0f);
+    if(this->mods.hp_override >= 0.0f) HP = this->mods.hp_override;
 
     return HP;
 }
 
 f32 SimulatedBeatmap::getRawAR() const {
     float ARdifficultyMultiplier = 1.0f;
-    if((mods.flags & Replay::ModFlags::HardRock)) ARdifficultyMultiplier = 1.4f;
-    if((mods.flags & Replay::ModFlags::Easy)) ARdifficultyMultiplier = 0.5f;
+    if((this->mods.flags & Replay::ModFlags::HardRock)) ARdifficultyMultiplier = 1.4f;
+    if((this->mods.flags & Replay::ModFlags::Easy)) ARdifficultyMultiplier = 0.5f;
 
-    return clamp<f32>(m_selectedDifficulty2->getAR() * ARdifficultyMultiplier, 0.0f, 10.0f);
+    return clamp<f32>(this->selectedDifficulty2->getAR() * ARdifficultyMultiplier, 0.0f, 10.0f);
 }
 
 f32 SimulatedBeatmap::getAR() const {
-    f32 AR = getRawAR();
-    if(mods.ar_override >= 0.0f) AR = mods.ar_override;
-    if(mods.ar_overridenegative < 0.0f) AR = mods.ar_overridenegative;
+    f32 AR = this->getRawAR();
+    if(this->mods.ar_override >= 0.0f) AR = this->mods.ar_override;
+    if(this->mods.ar_overridenegative < 0.0f) AR = this->mods.ar_overridenegative;
 
-    if(mods.flags & Replay::ModFlags::AROverrideLock) {
-        AR = GameRules::getRawConstantApproachRateForSpeedMultiplier(GameRules::getRawApproachTime(AR), mods.speed);
+    if(this->mods.flags & Replay::ModFlags::AROverrideLock) {
+        AR = GameRules::getRawConstantApproachRateForSpeedMultiplier(GameRules::getRawApproachTime(AR),
+                                                                     this->mods.speed);
     }
 
-    if((mods.flags & Replay::ModFlags::ARTimewarp) && m_hitobjects.size() > 0) {
+    if((this->mods.flags & Replay::ModFlags::ARTimewarp) && this->hitobjects.size() > 0) {
         const f32 percent =
-            1.0f - ((f64)(m_iCurMusicPos - m_hitobjects[0]->click_time) /
-                    (f64)(m_hitobjects[m_hitobjects.size() - 1]->click_time +
-                          m_hitobjects[m_hitobjects.size() - 1]->duration - m_hitobjects[0]->click_time)) *
-                       (1.0f - mods.artimewarp_multiplier);
+            1.0f - ((f64)(this->iCurMusicPos - this->hitobjects[0]->click_time) /
+                    (f64)(this->hitobjects[this->hitobjects.size() - 1]->click_time +
+                          this->hitobjects[this->hitobjects.size() - 1]->duration - this->hitobjects[0]->click_time)) *
+                       (1.0f - this->mods.artimewarp_multiplier);
         AR *= percent;
     }
 
-    if(mods.flags & Replay::ModFlags::ARWobble) {
-        AR += std::sin((m_iCurMusicPos / 1000.0f) * mods.arwobble_interval) * mods.arwobble_strength;
+    if(this->mods.flags & Replay::ModFlags::ARWobble) {
+        AR += std::sin((this->iCurMusicPos / 1000.0f) * this->mods.arwobble_interval) * this->mods.arwobble_strength;
     }
 
     return AR;
@@ -237,43 +239,43 @@ f32 SimulatedBeatmap::getAR() const {
 
 f32 SimulatedBeatmap::getRawOD() const {
     float ODdifficultyMultiplier = 1.0f;
-    if((mods.flags & Replay::ModFlags::HardRock)) ODdifficultyMultiplier = 1.4f;
-    if((mods.flags & Replay::ModFlags::Easy)) ODdifficultyMultiplier = 0.5f;
+    if((this->mods.flags & Replay::ModFlags::HardRock)) ODdifficultyMultiplier = 1.4f;
+    if((this->mods.flags & Replay::ModFlags::Easy)) ODdifficultyMultiplier = 0.5f;
 
-    return clamp<f32>(m_selectedDifficulty2->getOD() * ODdifficultyMultiplier, 0.0f, 10.0f);
+    return clamp<f32>(this->selectedDifficulty2->getOD() * ODdifficultyMultiplier, 0.0f, 10.0f);
 }
 
 f32 SimulatedBeatmap::getOD() const {
-    f32 OD = getRawOD();
+    f32 OD = this->getRawOD();
 
-    if(mods.od_override >= 0.0f) OD = mods.od_override;
+    if(this->mods.od_override >= 0.0f) OD = this->mods.od_override;
 
-    if(mods.flags & Replay::ModFlags::ODOverrideLock)
-        OD =
-            GameRules::getRawConstantOverallDifficultyForSpeedMultiplier(GameRules::getRawHitWindow300(OD), mods.speed);
+    if(this->mods.flags & Replay::ModFlags::ODOverrideLock)
+        OD = GameRules::getRawConstantOverallDifficultyForSpeedMultiplier(GameRules::getRawHitWindow300(OD),
+                                                                          this->mods.speed);
 
     return OD;
 }
 
-bool SimulatedBeatmap::isKey1Down() const { return current_keys & (LegacyReplay::M1 | LegacyReplay::K1); }
-bool SimulatedBeatmap::isKey2Down() const { return current_keys & (LegacyReplay::M2 | LegacyReplay::K2); }
-bool SimulatedBeatmap::isClickHeld() const { return isKey1Down() || isKey2Down(); }
+bool SimulatedBeatmap::isKey1Down() const { return this->current_keys & (LegacyReplay::M1 | LegacyReplay::K1); }
+bool SimulatedBeatmap::isKey2Down() const { return this->current_keys & (LegacyReplay::M2 | LegacyReplay::K2); }
+bool SimulatedBeatmap::isClickHeld() const { return this->isKey1Down() || this->isKey2Down(); }
 
-u32 SimulatedBeatmap::getLength() const { return m_selectedDifficulty2->getLengthMS(); }
+u32 SimulatedBeatmap::getLength() const { return this->selectedDifficulty2->getLengthMS(); }
 
 u32 SimulatedBeatmap::getLengthPlayable() const {
-    if(m_hitobjects.size() > 0)
-        return (
-            u32)((m_hitobjects[m_hitobjects.size() - 1]->click_time + m_hitobjects[m_hitobjects.size() - 1]->duration) -
-                 m_hitobjects[0]->click_time);
+    if(this->hitobjects.size() > 0)
+        return (u32)((this->hitobjects[this->hitobjects.size() - 1]->click_time +
+                      this->hitobjects[this->hitobjects.size() - 1]->duration) -
+                     this->hitobjects[0]->click_time);
     else
-        return getLength();
+        return this->getLength();
 }
 
 u32 SimulatedBeatmap::getBreakDurationTotal() const {
     u32 breakDurationTotal = 0;
-    for(int i = 0; i < m_breaks.size(); i++) {
-        breakDurationTotal += (u32)(m_breaks[i].endTime - m_breaks[i].startTime);
+    for(int i = 0; i < this->breaks.size(); i++) {
+        breakDurationTotal += (u32)(this->breaks[i].endTime - this->breaks[i].startTime);
     }
 
     return breakDurationTotal;
@@ -285,9 +287,9 @@ DatabaseBeatmap::BREAK SimulatedBeatmap::getBreakForTimeRange(long startMS, long
     curBreak.startTime = -1;
     curBreak.endTime = -1;
 
-    for(int i = 0; i < m_breaks.size(); i++) {
-        if(m_breaks[i].startTime >= (int)startMS && m_breaks[i].endTime <= (int)endMS) {
-            if((int)positionMS >= curBreak.startTime) curBreak = m_breaks[i];
+    for(int i = 0; i < this->breaks.size(); i++) {
+        if(this->breaks[i].startTime >= (int)startMS && this->breaks[i].endTime <= (int)endMS) {
+            if((int)positionMS >= curBreak.startTime) curBreak = this->breaks[i];
         }
     }
 
@@ -298,51 +300,51 @@ LiveScore::HIT SimulatedBeatmap::addHitResult(HitObject *hitObject, LiveScore::H
                                               bool ignoreOnHitErrorBar, bool hitErrorBarOnly, bool ignoreCombo,
                                               bool ignoreScore, bool ignoreHealth) {
     // handle perfect & sudden death
-    if(mods.flags & Replay::ModFlags::Perfect) {
+    if(this->mods.flags & Replay::ModFlags::Perfect) {
         if(!hitErrorBarOnly && hit != LiveScore::HIT::HIT_300 && hit != LiveScore::HIT::HIT_300G &&
            hit != LiveScore::HIT::HIT_SLIDER10 && hit != LiveScore::HIT::HIT_SLIDER30 &&
            hit != LiveScore::HIT::HIT_SPINNERSPIN && hit != LiveScore::HIT::HIT_SPINNERBONUS) {
-            fail();
+            this->fail();
             return LiveScore::HIT::HIT_MISS;
         }
-    } else if(mods.flags & Replay::ModFlags::SuddenDeath) {
+    } else if(this->mods.flags & Replay::ModFlags::SuddenDeath) {
         if(hit == LiveScore::HIT::HIT_MISS) {
-            fail();
+            this->fail();
             return LiveScore::HIT::HIT_MISS;
         }
     }
 
     // score
-    live_score.addHitResult(this, hitObject, hit, delta, ignoreOnHitErrorBar, hitErrorBarOnly, ignoreCombo,
-                            ignoreScore);
+    this->live_score.addHitResult(this, hitObject, hit, delta, ignoreOnHitErrorBar, hitErrorBarOnly, ignoreCombo,
+                                  ignoreScore);
 
     // health
     LiveScore::HIT returnedHit = LiveScore::HIT::HIT_MISS;
     if(!ignoreHealth) {
-        addHealth(live_score.getHealthIncrease((BeatmapInterface *)this, hit), true);
+        this->addHealth(this->live_score.getHealthIncrease((BeatmapInterface *)this, hit), true);
 
         // geki/katu handling
         if(isEndOfCombo) {
-            const int comboEndBitmask = live_score.getComboEndBitmask();
+            const int comboEndBitmask = this->live_score.getComboEndBitmask();
 
             if(comboEndBitmask == 0) {
                 returnedHit = LiveScore::HIT::HIT_300G;
-                addHealth(live_score.getHealthIncrease(this, returnedHit), true);
-                live_score.addHitResultComboEnd(returnedHit);
+                this->addHealth(this->live_score.getHealthIncrease(this, returnedHit), true);
+                this->live_score.addHitResultComboEnd(returnedHit);
             } else if((comboEndBitmask & 2) == 0) {
                 if(hit == LiveScore::HIT::HIT_100) {
                     returnedHit = LiveScore::HIT::HIT_100K;
-                    addHealth(live_score.getHealthIncrease(this, returnedHit), true);
-                    live_score.addHitResultComboEnd(returnedHit);
+                    this->addHealth(this->live_score.getHealthIncrease(this, returnedHit), true);
+                    this->live_score.addHitResultComboEnd(returnedHit);
                 } else if(hit == LiveScore::HIT::HIT_300) {
                     returnedHit = LiveScore::HIT::HIT_300K;
-                    addHealth(live_score.getHealthIncrease(this, returnedHit), true);
-                    live_score.addHitResultComboEnd(returnedHit);
+                    this->addHealth(this->live_score.getHealthIncrease(this, returnedHit), true);
+                    this->live_score.addHitResultComboEnd(returnedHit);
                 }
             } else if(hit != LiveScore::HIT::HIT_MISS)
-                addHealth(live_score.getHealthIncrease(this, LiveScore::HIT::HIT_MU), true);
+                this->addHealth(this->live_score.getHealthIncrease(this, LiveScore::HIT::HIT_MU), true);
 
-            live_score.setComboEndBitmask(0);
+            this->live_score.setComboEndBitmask(0);
         }
     }
 
@@ -351,48 +353,48 @@ LiveScore::HIT SimulatedBeatmap::addHitResult(HitObject *hitObject, LiveScore::H
 
 void SimulatedBeatmap::addSliderBreak() {
     // handle perfect & sudden death
-    if(mods.flags & Replay::ModFlags::Perfect) {
-        fail();
+    if(this->mods.flags & Replay::ModFlags::Perfect) {
+        this->fail();
         return;
-    } else if(mods.flags & Replay::ModFlags::SuddenDeath) {
-        fail();
+    } else if(this->mods.flags & Replay::ModFlags::SuddenDeath) {
+        this->fail();
         return;
     }
 
     // score
-    live_score.addSliderBreak();
+    this->live_score.addSliderBreak();
 }
 
-void SimulatedBeatmap::addScorePoints(int points, bool isSpinner) { live_score.addPoints(points, isSpinner); }
+void SimulatedBeatmap::addScorePoints(int points, bool isSpinner) { this->live_score.addPoints(points, isSpinner); }
 
 void SimulatedBeatmap::addHealth(f64 percent, bool isFromHitResult) {
     // never drain before first hitobject
-    if(m_iCurMusicPos < m_hitobjects[0]->click_time) return;
+    if(this->iCurMusicPos < this->hitobjects[0]->click_time) return;
 
     // never drain after last hitobject
-    if(m_iCurMusicPos > (m_hitobjectsSortedByEndTime[m_hitobjectsSortedByEndTime.size() - 1]->click_time +
-                         m_hitobjectsSortedByEndTime[m_hitobjectsSortedByEndTime.size() - 1]->duration))
+    if(this->iCurMusicPos > (this->hitobjectsSortedByEndTime[this->hitobjectsSortedByEndTime.size() - 1]->click_time +
+                             this->hitobjectsSortedByEndTime[this->hitobjectsSortedByEndTime.size() - 1]->duration))
         return;
 
-    if(m_bFailed) {
-        m_fHealth = 0.0;
+    if(this->bFailed) {
+        this->fHealth = 0.0;
         return;
     }
 
-    m_fHealth = clamp<f64>(m_fHealth + percent, 0.0, 1.0);
+    this->fHealth = clamp<f64>(this->fHealth + percent, 0.0, 1.0);
 
     // handle generic fail state (2)
-    const bool isDead = m_fHealth < 0.001;
-    if(isDead && !(mods.flags & Replay::ModFlags::NoFail)) {
-        if((mods.flags & Replay::ModFlags::Easy) && live_score.getNumEZRetries() > 0)  // retries with ez
+    const bool isDead = this->fHealth < 0.001;
+    if(isDead && !(this->mods.flags & Replay::ModFlags::NoFail)) {
+        if((this->mods.flags & Replay::ModFlags::Easy) && this->live_score.getNumEZRetries() > 0)  // retries with ez
         {
-            live_score.setNumEZRetries(live_score.getNumEZRetries() - 1);
+            this->live_score.setNumEZRetries(this->live_score.getNumEZRetries() - 1);
 
             // special case: set health to 160/200 (osu!stable behavior, seems fine for all drains)
-            m_fHealth = 160.0f / 200.f;
+            this->fHealth = 160.0f / 200.f;
         } else if(isFromHitResult && percent < 0.0) {
             // judgement fail
-            fail();
+            this->fail();
         }
     }
 }
@@ -401,41 +403,41 @@ long SimulatedBeatmap::getPVS() {
     // this is an approximation with generous boundaries, it doesn't need to be exact (just good enough to filter 10000
     // hitobjects down to a few hundred or so) it will be used in both positive and negative directions (previous and
     // future hitobjects) to speed up loops which iterate over all hitobjects
-    return getApproachTime() + GameRules::getFadeInTime() + (long)GameRules::getHitWindowMiss() + 1500;  // sanity
+    return this->getApproachTime() + GameRules::getFadeInTime() + (long)GameRules::getHitWindowMiss() + 1500;  // sanity
 }
 
 void SimulatedBeatmap::resetScore() {
-    current_keys = 0;
-    last_keys = 0;
-    current_frame_idx = 0;
+    this->current_keys = 0;
+    this->last_keys = 0;
+    this->current_frame_idx = 0;
 
-    m_fHealth = 1.0;
-    m_bFailed = false;
+    this->fHealth = 1.0;
+    this->bFailed = false;
 
-    live_score.reset();
+    this->live_score.reset();
 }
 
 void SimulatedBeatmap::update(f64 frame_time) {
-    if(m_hitobjects.empty()) return;
+    if(this->hitobjects.empty()) return;
 
-    auto last_hitobject = m_hitobjectsSortedByEndTime[m_hitobjectsSortedByEndTime.size() - 1];
-    const bool isAfterLastHitObject = (m_iCurMusicPos > (last_hitobject->click_time + last_hitobject->duration));
+    auto last_hitobject = this->hitobjectsSortedByEndTime[this->hitobjectsSortedByEndTime.size() - 1];
+    const bool isAfterLastHitObject = (this->iCurMusicPos > (last_hitobject->click_time + last_hitobject->duration));
     if(isAfterLastHitObject) {
         return;
     }
 
     // live update hitobject and playfield metrics
-    updateHitobjectMetrics();
-    updatePlayfieldMetrics();
+    this->updateHitobjectMetrics();
+    this->updatePlayfieldMetrics();
 
     // wobble mod
-    if(mods.flags & Replay::ModFlags::Wobble1) {
-        const f32 speedMultiplierCompensation = 1.0f / mods.speed;
-        m_fPlayfieldRotation =
-            (m_iCurMusicPos / 1000.0f) * 30.0f * speedMultiplierCompensation * mods.wobble_rotation_speed;
-        m_fPlayfieldRotation = std::fmod(m_fPlayfieldRotation, 360.0f);
+    if(this->mods.flags & Replay::ModFlags::Wobble1) {
+        const f32 speedMultiplierCompensation = 1.0f / this->mods.speed;
+        this->fPlayfieldRotation =
+            (this->iCurMusicPos / 1000.0f) * 30.0f * speedMultiplierCompensation * this->mods.wobble_rotation_speed;
+        this->fPlayfieldRotation = std::fmod(this->fPlayfieldRotation, 360.0f);
     } else {
-        m_fPlayfieldRotation = 0.0f;
+        this->fPlayfieldRotation = 0.0f;
     }
 
     // for performance reasons, a lot of operations are crammed into 1 loop over all hitobjects:
@@ -446,24 +448,24 @@ void SimulatedBeatmap::update(f64 frame_time) {
     // also handle miss hiterrorbar slots,
     // also calculate nps and nd,
     // also handle note blocking
-    m_currentHitObject = NULL;
-    m_iNextHitObjectTime = 0;
-    m_iPreviousHitObjectTime = 0;
-    m_iNPS = 0;
-    m_iND = 0;
-    m_iCurrentNumCircles = 0;
-    m_iCurrentNumSliders = 0;
-    m_iCurrentNumSpinners = 0;
+    this->currentHitObject = NULL;
+    this->iNextHitObjectTime = 0;
+    this->iPreviousHitObjectTime = 0;
+    this->iNPS = 0;
+    this->iND = 0;
+    this->iCurrentNumCircles = 0;
+    this->iCurrentNumSliders = 0;
+    this->iCurrentNumSpinners = 0;
     {
         bool blockNextNotes = false;
 
-        const long pvs = getPVS();
-        const int notelockType = mods.notelock_type;
+        const long pvs = this->getPVS();
+        const int notelockType = this->mods.notelock_type;
         const long tolerance2B = 3;
 
-        m_iCurrentHitObjectIndex = 0;  // reset below here, since it's needed for mafham pvs
+        this->iCurrentHitObjectIndex = 0;  // reset below here, since it's needed for mafham pvs
 
-        for(int i = 0; i < m_hitobjects.size(); i++) {
+        for(int i = 0; i < this->hitobjects.size(); i++) {
             // the order must be like this:
             // 0) miscellaneous stuff (minimal performance impact)
             // 1) prev + next time vars
@@ -475,60 +477,62 @@ void SimulatedBeatmap::update(f64 frame_time) {
             // (because the hitobjects need to know about note blocking before handling the click events)
 
             // ************ live pp block start ************ //
-            const bool isCircle = m_hitobjects[i]->type == HitObjectType::CIRCLE;
-            const bool isSlider = m_hitobjects[i]->type == HitObjectType::SLIDER;
-            const bool isSpinner = m_hitobjects[i]->type == HitObjectType::SPINNER;
+            const bool isCircle = this->hitobjects[i]->type == HitObjectType::CIRCLE;
+            const bool isSlider = this->hitobjects[i]->type == HitObjectType::SLIDER;
+            const bool isSpinner = this->hitobjects[i]->type == HitObjectType::SPINNER;
             // ************ live pp block end ************** //
 
             // determine previous & next object time, used for auto + followpoints + warning arrows + empty section
             // skipping
-            if(m_iNextHitObjectTime == 0) {
-                if(m_hitobjects[i]->click_time > m_iCurMusicPos) {
-                    m_iNextHitObjectTime = m_hitobjects[i]->click_time;
+            if(this->iNextHitObjectTime == 0) {
+                if(this->hitobjects[i]->click_time > this->iCurMusicPos) {
+                    this->iNextHitObjectTime = this->hitobjects[i]->click_time;
                 } else {
-                    m_currentHitObject = m_hitobjects[i];
-                    const long actualPrevHitObjectTime = m_hitobjects[i]->click_time + m_hitobjects[i]->duration;
-                    m_iPreviousHitObjectTime = actualPrevHitObjectTime;
+                    this->currentHitObject = this->hitobjects[i];
+                    const long actualPrevHitObjectTime =
+                        this->hitobjects[i]->click_time + this->hitobjects[i]->duration;
+                    this->iPreviousHitObjectTime = actualPrevHitObjectTime;
                 }
             }
 
             // PVS optimization
-            if(m_hitobjects[i]->isFinished() &&
-               (m_iCurMusicPos - pvs > m_hitobjects[i]->click_time + m_hitobjects[i]->duration))  // past objects
+            if(this->hitobjects[i]->isFinished() &&
+               (this->iCurMusicPos - pvs >
+                this->hitobjects[i]->click_time + this->hitobjects[i]->duration))  // past objects
             {
                 // ************ live pp block start ************ //
-                if(isCircle) m_iCurrentNumCircles++;
-                if(isSlider) m_iCurrentNumSliders++;
-                if(isSpinner) m_iCurrentNumSpinners++;
+                if(isCircle) this->iCurrentNumCircles++;
+                if(isSlider) this->iCurrentNumSliders++;
+                if(isSpinner) this->iCurrentNumSpinners++;
 
-                m_iCurrentHitObjectIndex = i;
+                this->iCurrentHitObjectIndex = i;
                 // ************ live pp block end ************** //
 
                 continue;
             }
-            if(m_hitobjects[i]->click_time > m_iCurMusicPos + pvs)  // future objects
+            if(this->hitobjects[i]->click_time > this->iCurMusicPos + pvs)  // future objects
                 break;
 
             // ************ live pp block start ************ //
-            if(m_iCurMusicPos >= m_hitobjects[i]->click_time + m_hitobjects[i]->duration) {
-                m_iCurrentHitObjectIndex = i;
+            if(this->iCurMusicPos >= this->hitobjects[i]->click_time + this->hitobjects[i]->duration) {
+                this->iCurrentHitObjectIndex = i;
             }
             // ************ live pp block end ************** //
 
             // main hitobject update
-            m_hitobjects[i]->update(m_iCurMusicPos, frame_time);
+            this->hitobjects[i]->update(this->iCurMusicPos, frame_time);
 
             // note blocking / notelock (1)
-            const Slider *currentSliderPointer = dynamic_cast<Slider *>(m_hitobjects[i]);
+            const Slider *currentSliderPointer = dynamic_cast<Slider *>(this->hitobjects[i]);
             if(notelockType > 0) {
-                m_hitobjects[i]->setBlocked(blockNextNotes);
+                this->hitobjects[i]->setBlocked(blockNextNotes);
 
                 if(notelockType == 1)  // neosu
                 {
                     // (nothing, handled in (2) block)
                 } else if(notelockType == 2)  // osu!stable
                 {
-                    if(!m_hitobjects[i]->isFinished()) {
+                    if(!this->hitobjects[i]->isFinished()) {
                         blockNextNotes = true;
 
                         // Sliders are "finished" after they end
@@ -536,20 +540,20 @@ void SimulatedBeatmap::update(f64 frame_time) {
                         // NOTE: this will still unlock some simultaneous/2b patterns too early
                         //       (slider slider circle [circle]), but nobody from that niche has complained so far
                         if(isSlider || isSpinner) {
-                            if((i + 1) < m_hitobjects.size()) {
+                            if((i + 1) < this->hitobjects.size()) {
                                 if((isSpinner || currentSliderPointer->isStartCircleFinished()) &&
-                                   (m_hitobjects[i + 1]->click_time <=
-                                    (m_hitobjects[i]->click_time + m_hitobjects[i]->duration + tolerance2B)))
+                                   (this->hitobjects[i + 1]->click_time <=
+                                    (this->hitobjects[i]->click_time + this->hitobjects[i]->duration + tolerance2B)))
                                     blockNextNotes = false;
                             }
                         }
                     }
                 } else if(notelockType == 3)  // osu!lazer 2020
                 {
-                    if(!m_hitobjects[i]->isFinished()) {
+                    if(!this->hitobjects[i]->isFinished()) {
                         // spinners are completely ignored (transparent)
                         if(!isSpinner) {
-                            blockNextNotes = (m_iCurMusicPos <= m_hitobjects[i]->click_time);
+                            blockNextNotes = (this->iCurMusicPos <= this->hitobjects[i]->click_time);
 
                             // sliders are "finished" after their startcircle
                             if(isSlider && currentSliderPointer->isStartCircleFinished()) {
@@ -560,17 +564,17 @@ void SimulatedBeatmap::update(f64 frame_time) {
                     }
                 }
             } else {
-                m_hitobjects[i]->setBlocked(false);
+                this->hitobjects[i]->setBlocked(false);
             }
 
             // click events (this also handles hitsounds!)
             const bool isCurrentHitObjectASliderAndHasItsStartCircleFinishedBeforeClickEvents =
                 (currentSliderPointer != NULL && currentSliderPointer->isStartCircleFinished());
-            const bool isCurrentHitObjectFinishedBeforeClickEvents = m_hitobjects[i]->isFinished();
+            const bool isCurrentHitObjectFinishedBeforeClickEvents = this->hitobjects[i]->isFinished();
             {
-                if(m_clicks.size() > 0) m_hitobjects[i]->onClickEvent(m_clicks);
+                if(this->clicks.size() > 0) this->hitobjects[i]->onClickEvent(this->clicks);
             }
-            const bool isCurrentHitObjectFinishedAfterClickEvents = m_hitobjects[i]->isFinished();
+            const bool isCurrentHitObjectFinishedAfterClickEvents = this->hitobjects[i]->isFinished();
             const bool isCurrentHitObjectASliderAndHasItsStartCircleFinishedAfterClickEvents =
                 (currentSliderPointer != NULL && currentSliderPointer->isStartCircleFinished());
 
@@ -583,13 +587,13 @@ void SimulatedBeatmap::update(f64 frame_time) {
                 {
                     // edge case: frame perfect double tapping on overlapping sliders would incorrectly eat the second
                     // input, because the isStartCircleFinished() 2b edge case check handling happens before
-                    // m_hitobjects[i]->onClickEvent(m_clicks); so, we check if the currentSliderPointer got its
-                    // isStartCircleFinished() within this m_hitobjects[i]->onClickEvent(m_clicks); and unlock
+                    // m_hitobjects[i]->onClickEvent(this->clicks); so, we check if the currentSliderPointer got its
+                    // isStartCircleFinished() within this m_hitobjects[i]->onClickEvent(this->clicks); and unlock
                     // blockNextNotes if that is the case note that we still only unlock within duration + tolerance2B
                     // (same as in (1))
-                    if((i + 1) < m_hitobjects.size()) {
-                        if((m_hitobjects[i + 1]->click_time <=
-                            (m_hitobjects[i]->click_time + m_hitobjects[i]->duration + tolerance2B)))
+                    if((i + 1) < this->hitobjects.size()) {
+                        if((this->hitobjects[i + 1]->click_time <=
+                            (this->hitobjects[i]->click_time + this->hitobjects[i]->duration + tolerance2B)))
                             blockNextNotes = false;
                     }
                 }
@@ -608,14 +612,15 @@ void SimulatedBeatmap::update(f64 frame_time) {
                     // (can stop reverse iteration once we get to the first finished hitobject)
 
                     for(int m = i - 1; m >= 0; m--) {
-                        if(m_hitobjects[m]->isFinished()) break;
+                        if(this->hitobjects[m]->isFinished()) break;
 
                         // spinners are completely ignored (transparent)
-                        if(m_hitobjects[m]->type == HitObjectType::SPINNER) continue;
+                        if(this->hitobjects[m]->type == HitObjectType::SPINNER) continue;
 
                         // NOTE: 2b exception. only force miss if objects are not overlapping.
-                        if(m_hitobjects[i]->click_time > (m_hitobjects[m]->click_time + m_hitobjects[m]->duration)) {
-                            m_hitobjects[m]->miss(m_iCurMusicPos);
+                        if(this->hitobjects[i]->click_time >
+                           (this->hitobjects[m]->click_time + this->hitobjects[m]->duration)) {
+                            this->hitobjects[m]->miss(this->iCurMusicPos);
                         }
                     }
                 } else if(notelockType == 2)  // osu!stable
@@ -627,16 +632,16 @@ void SimulatedBeatmap::update(f64 frame_time) {
                     // (can stop reverse iteration once we get to the first finished hitobject)
 
                     for(int m = i - 1; m >= 0; m--) {
-                        if(m_hitobjects[m]->isFinished()) break;
+                        if(this->hitobjects[m]->isFinished()) break;
 
                         // spinners are completely ignored (transparent)
-                        if(m_hitobjects[m]->type == HitObjectType::SPINNER) continue;
+                        if(this->hitobjects[m]->type == HitObjectType::SPINNER) continue;
 
-                        if(m_iCurMusicPos > m_hitobjects[m]->click_time) {
+                        if(this->iCurMusicPos > this->hitobjects[m]->click_time) {
                             // NOTE: 2b exception. only force miss if objects are not overlapping.
-                            if(m_hitobjects[i]->click_time >
-                               (m_hitobjects[m]->click_time + m_hitobjects[m]->duration)) {
-                                m_hitobjects[m]->miss(m_iCurMusicPos);
+                            if(this->hitobjects[i]->click_time >
+                               (this->hitobjects[m]->click_time + this->hitobjects[m]->duration)) {
+                                this->hitobjects[m]->miss(this->iCurMusicPos);
                             }
                         }
                     }
@@ -644,121 +649,126 @@ void SimulatedBeatmap::update(f64 frame_time) {
             }
 
             // ************ live pp block start ************ //
-            if(isCircle && m_hitobjects[i]->isFinished()) m_iCurrentNumCircles++;
-            if(isSlider && m_hitobjects[i]->isFinished()) m_iCurrentNumSliders++;
-            if(isSpinner && m_hitobjects[i]->isFinished()) m_iCurrentNumSpinners++;
+            if(isCircle && this->hitobjects[i]->isFinished()) this->iCurrentNumCircles++;
+            if(isSlider && this->hitobjects[i]->isFinished()) this->iCurrentNumSliders++;
+            if(isSpinner && this->hitobjects[i]->isFinished()) this->iCurrentNumSpinners++;
 
-            if(m_hitobjects[i]->isFinished()) m_iCurrentHitObjectIndex = i;
+            if(this->hitobjects[i]->isFinished()) this->iCurrentHitObjectIndex = i;
             // ************ live pp block end ************** //
 
             // notes per second
-            const long npsHalfGateSizeMS = (long)(500.0f * mods.speed);
-            if(m_hitobjects[i]->click_time > m_iCurMusicPos - npsHalfGateSizeMS &&
-               m_hitobjects[i]->click_time < m_iCurMusicPos + npsHalfGateSizeMS)
-                m_iNPS++;
+            const long npsHalfGateSizeMS = (long)(500.0f * this->mods.speed);
+            if(this->hitobjects[i]->click_time > this->iCurMusicPos - npsHalfGateSizeMS &&
+               this->hitobjects[i]->click_time < this->iCurMusicPos + npsHalfGateSizeMS)
+                this->iNPS++;
 
             // note density
-            if(m_hitobjects[i]->isVisible()) m_iND++;
+            if(this->hitobjects[i]->isVisible()) this->iND++;
         }
 
         // all remaining clicks which have not been consumed by any hitobjects can safely be deleted
-        if(m_clicks.size() > 0) {
+        if(this->clicks.size() > 0) {
             // nightmare mod: extra clicks = sliderbreak
             bool break_on_extra_click =
-                (mods.flags & Replay::ModFlags::Nightmare) || (mods.flags & Replay::ModFlags::Jigsaw1);
-            if(break_on_extra_click && !m_bInBreak && m_iCurrentHitObjectIndex > 0) {
-                addSliderBreak();
-                addHitResult(NULL, LiveScore::HIT::HIT_MISS_SLIDERBREAK, 0, false, true, true, true, true,
-                             false);  // only decrease health
+                (this->mods.flags & Replay::ModFlags::Nightmare) || (this->mods.flags & Replay::ModFlags::Jigsaw1);
+            if(break_on_extra_click && !this->bInBreak && this->iCurrentHitObjectIndex > 0) {
+                this->addSliderBreak();
+                this->addHitResult(NULL, LiveScore::HIT::HIT_MISS_SLIDERBREAK, 0, false, true, true, true, true,
+                                   false);  // only decrease health
             }
 
-            m_clicks.clear();
+            this->clicks.clear();
         }
     }
 
     // break time detection
     const DatabaseBeatmap::BREAK breakEvent =
-        getBreakForTimeRange(m_iPreviousHitObjectTime, m_iCurMusicPos, m_iNextHitObjectTime);
-    const bool isInBreak = ((int)m_iCurMusicPos >= breakEvent.startTime && (int)m_iCurMusicPos <= breakEvent.endTime);
-    if(isInBreak != m_bInBreak) {
-        m_bInBreak = !m_bInBreak;
+        this->getBreakForTimeRange(this->iPreviousHitObjectTime, this->iCurMusicPos, this->iNextHitObjectTime);
+    const bool isInBreak =
+        ((int)this->iCurMusicPos >= breakEvent.startTime && (int)this->iCurMusicPos <= breakEvent.endTime);
+    if(isInBreak != this->bInBreak) {
+        this->bInBreak = !this->bInBreak;
     }
 
     // hp drain & failing
     // handle constant drain
     {
-        if(m_fDrainRate > 0.0) {
-            if(!m_bInBreak) {
+        if(this->fDrainRate > 0.0) {
+            if(!this->bInBreak) {
                 // special case: break drain edge cases
-                bool drainAfterLastHitobjectBeforeBreakStart = (m_selectedDifficulty2->getVersion() < 8);
+                bool drainAfterLastHitobjectBeforeBreakStart = (this->selectedDifficulty2->getVersion() < 8);
 
-                const bool isBetweenHitobjectsAndBreak = (int)m_iPreviousHitObjectTime <= breakEvent.startTime &&
-                                                         (int)m_iNextHitObjectTime >= breakEvent.endTime &&
-                                                         m_iCurMusicPos > m_iPreviousHitObjectTime;
+                const bool isBetweenHitobjectsAndBreak = (int)this->iPreviousHitObjectTime <= breakEvent.startTime &&
+                                                         (int)this->iNextHitObjectTime >= breakEvent.endTime &&
+                                                         this->iCurMusicPos > this->iPreviousHitObjectTime;
                 const bool isLastHitobjectBeforeBreakStart =
-                    isBetweenHitobjectsAndBreak && (int)m_iCurMusicPos <= breakEvent.startTime;
+                    isBetweenHitobjectsAndBreak && (int)this->iCurMusicPos <= breakEvent.startTime;
 
                 if(!isBetweenHitobjectsAndBreak ||
                    (drainAfterLastHitobjectBeforeBreakStart && isLastHitobjectBeforeBreakStart)) {
                     // special case: spinner nerf
-                    f64 spinnerDrainNerf = m_bIsSpinnerActive ? 0.25 : 1.0;
-                    addHealth(-m_fDrainRate * frame_time * (f64)mods.speed * spinnerDrainNerf, false);
+                    f64 spinnerDrainNerf = this->bIsSpinnerActive ? 0.25 : 1.0;
+                    this->addHealth(-this->fDrainRate * frame_time * (f64)this->mods.speed * spinnerDrainNerf, false);
                 }
             }
         }
     }
 
     // revive in mp
-    if(m_fHealth > 0.999 && live_score.isDead()) live_score.setDead(false);
+    if(this->fHealth > 0.999 && this->live_score.isDead()) this->live_score.setDead(false);
 
     // update auto (after having updated the hitobjects)
-    if((mods.flags & Replay::ModFlags::Autopilot)) updateAutoCursorPos();
+    if((this->mods.flags & Replay::ModFlags::Autopilot)) this->updateAutoCursorPos();
 
     // spinner detection (used by osu!stable drain, and by HUD for not drawing the hiterrorbar)
-    if(m_currentHitObject != NULL) {
-        Spinner *spinnerPointer = dynamic_cast<Spinner *>(m_currentHitObject);
-        if(spinnerPointer != NULL && m_iCurMusicPos > m_currentHitObject->click_time &&
-           m_iCurMusicPos < m_currentHitObject->click_time + m_currentHitObject->duration)
-            m_bIsSpinnerActive = true;
+    if(this->currentHitObject != NULL) {
+        Spinner *spinnerPointer = dynamic_cast<Spinner *>(this->currentHitObject);
+        if(spinnerPointer != NULL && this->iCurMusicPos > this->currentHitObject->click_time &&
+           this->iCurMusicPos < this->currentHitObject->click_time + this->currentHitObject->duration)
+            this->bIsSpinnerActive = true;
         else
-            m_bIsSpinnerActive = false;
+            this->bIsSpinnerActive = false;
     }
 
     // full alternate mod lenience
-    if(mods.flags & Replay::ModFlags::FullAlternate) {
-        if(m_bInBreak || m_bIsSpinnerActive || m_iCurrentHitObjectIndex < 1)
-            m_iAllowAnyNextKeyForFullAlternateUntilHitObjectIndex = m_iCurrentHitObjectIndex + 1;
+    if(this->mods.flags & Replay::ModFlags::FullAlternate) {
+        if(this->bInBreak || this->bIsSpinnerActive || this->iCurrentHitObjectIndex < 1)
+            this->iAllowAnyNextKeyForFullAlternateUntilHitObjectIndex = this->iCurrentHitObjectIndex + 1;
     }
 }
 
 Vector2 SimulatedBeatmap::pixels2OsuCoords(Vector2 pixelCoords) const { return pixelCoords; }
 
 Vector2 SimulatedBeatmap::osuCoords2Pixels(Vector2 coords) const {
-    if((mods.flags & Replay::ModFlags::HardRock)) coords.y = GameRules::OSU_COORD_HEIGHT - coords.y;
+    if((this->mods.flags & Replay::ModFlags::HardRock)) coords.y = GameRules::OSU_COORD_HEIGHT - coords.y;
 
     // wobble
-    if(mods.flags & Replay::ModFlags::Wobble1) {
-        const f32 speedMultiplierCompensation = 1.0f / mods.speed;
-        coords.x += std::sin((m_iCurMusicPos / 1000.0f) * 5 * speedMultiplierCompensation * mods.wobble_frequency) *
-                    mods.wobble_strength;
-        coords.y += std::sin((m_iCurMusicPos / 1000.0f) * 4 * speedMultiplierCompensation * mods.wobble_frequency) *
-                    mods.wobble_strength;
+    if(this->mods.flags & Replay::ModFlags::Wobble1) {
+        const f32 speedMultiplierCompensation = 1.0f / this->mods.speed;
+        coords.x +=
+            std::sin((this->iCurMusicPos / 1000.0f) * 5 * speedMultiplierCompensation * this->mods.wobble_frequency) *
+            this->mods.wobble_strength;
+        coords.y +=
+            std::sin((this->iCurMusicPos / 1000.0f) * 4 * speedMultiplierCompensation * this->mods.wobble_frequency) *
+            this->mods.wobble_strength;
     }
 
     // wobble2
-    if(mods.flags & Replay::ModFlags::Wobble2) {
-        const f32 speedMultiplierCompensation = 1.0f / mods.speed;
+    if(this->mods.flags & Replay::ModFlags::Wobble2) {
+        const f32 speedMultiplierCompensation = 1.0f / this->mods.speed;
         Vector2 centerDelta = coords - Vector2(GameRules::OSU_COORD_WIDTH, GameRules::OSU_COORD_HEIGHT) / 2;
-        coords.x += centerDelta.x * 0.25f *
-                    std::sin((m_iCurMusicPos / 1000.0f) * 5 * speedMultiplierCompensation * mods.wobble_frequency) *
-                    mods.wobble_strength;
-        coords.y += centerDelta.y * 0.25f *
-                    std::sin((m_iCurMusicPos / 1000.0f) * 3 * speedMultiplierCompensation * mods.wobble_frequency) *
-                    mods.wobble_strength;
+        coords.x +=
+            centerDelta.x * 0.25f *
+            std::sin((this->iCurMusicPos / 1000.0f) * 5 * speedMultiplierCompensation * this->mods.wobble_frequency) *
+            this->mods.wobble_strength;
+        coords.y +=
+            centerDelta.y * 0.25f *
+            std::sin((this->iCurMusicPos / 1000.0f) * 3 * speedMultiplierCompensation * this->mods.wobble_frequency) *
+            this->mods.wobble_strength;
     }
 
     // if wobble, clamp coordinates
-    if(mods.flags & (Replay::ModFlags::Wobble1 | Replay::ModFlags::Wobble2)) {
+    if(this->mods.flags & (Replay::ModFlags::Wobble1 | Replay::ModFlags::Wobble2)) {
         coords.x = clamp<f32>(coords.x, 0.0f, GameRules::OSU_COORD_WIDTH);
         coords.y = clamp<f32>(coords.y, 0.0f, GameRules::OSU_COORD_HEIGHT);
     }
@@ -769,7 +779,7 @@ Vector2 SimulatedBeatmap::osuCoords2Pixels(Vector2 coords) const {
 Vector2 SimulatedBeatmap::osuCoords2RawPixels(Vector2 coords) const { return coords; }
 
 Vector2 SimulatedBeatmap::osuCoords2LegacyPixels(Vector2 coords) const {
-    if((mods.flags & Replay::ModFlags::HardRock)) coords.y = GameRules::OSU_COORD_HEIGHT - coords.y;
+    if((this->mods.flags & Replay::ModFlags::HardRock)) coords.y = GameRules::OSU_COORD_HEIGHT - coords.y;
 
     // VR center
     coords.x -= GameRules::OSU_COORD_WIDTH / 2;
@@ -778,51 +788,53 @@ Vector2 SimulatedBeatmap::osuCoords2LegacyPixels(Vector2 coords) const {
     return coords;
 }
 
-Vector2 SimulatedBeatmap::getCursorPos() const { return m_interpolatedMousePos; }
+Vector2 SimulatedBeatmap::getCursorPos() const { return this->interpolatedMousePos; }
 
 Vector2 SimulatedBeatmap::getFirstPersonCursorDelta() const {
-    return m_vPlayfieldCenter - ((mods.flags & Replay::ModFlags::Autopilot) ? m_vAutoCursorPos : getCursorPos());
+    return this->vPlayfieldCenter -
+           ((this->mods.flags & Replay::ModFlags::Autopilot) ? this->vAutoCursorPos : this->getCursorPos());
 }
 
 void SimulatedBeatmap::updateAutoCursorPos() {
-    m_vAutoCursorPos = m_vPlayfieldCenter;
-    m_vAutoCursorPos.y *= 2.5f;  // start moving in offscreen from bottom
+    this->vAutoCursorPos = this->vPlayfieldCenter;
+    this->vAutoCursorPos.y *= 2.5f;  // start moving in offscreen from bottom
 
-    if(m_hitobjects.size() < 1) {
-        m_vAutoCursorPos = m_vPlayfieldCenter;
+    if(this->hitobjects.size() < 1) {
+        this->vAutoCursorPos = this->vPlayfieldCenter;
         return;
     }
 
     // general
     long prevTime = 0;
-    long nextTime = m_hitobjects[0]->click_time;
-    Vector2 prevPos = m_vAutoCursorPos;
-    Vector2 curPos = m_vAutoCursorPos;
-    Vector2 nextPos = m_vAutoCursorPos;
+    long nextTime = this->hitobjects[0]->click_time;
+    Vector2 prevPos = this->vAutoCursorPos;
+    Vector2 curPos = this->vAutoCursorPos;
+    Vector2 nextPos = this->vAutoCursorPos;
     bool haveCurPos = false;
 
-    if((mods.flags & Replay::ModFlags::Autopilot)) {
-        for(int i = 0; i < m_hitobjects.size(); i++) {
-            HitObject *o = m_hitobjects[i];
+    if((this->mods.flags & Replay::ModFlags::Autopilot)) {
+        for(int i = 0; i < this->hitobjects.size(); i++) {
+            HitObject *o = this->hitobjects[i];
 
             // get previous object
             if(o->isFinished() ||
-               (m_iCurMusicPos > o->click_time + o->duration + (long)(getHitWindow50() * mods.autopilot_lenience))) {
+               (this->iCurMusicPos >
+                o->click_time + o->duration + (long)(this->getHitWindow50() * this->mods.autopilot_lenience))) {
                 prevTime = o->click_time + o->duration + o->getAutopilotDelta();
-                prevPos = o->getAutoCursorPos(m_iCurMusicPos);
+                prevPos = o->getAutoCursorPos(this->iCurMusicPos);
             } else if(!o->isFinished())  // get next object
             {
-                nextPos = o->getAutoCursorPos(m_iCurMusicPos);
+                nextPos = o->getAutoCursorPos(this->iCurMusicPos);
                 nextTime = o->click_time;
 
                 // wait for the user to click
-                if(m_iCurMusicPos >= nextTime + o->duration) {
+                if(this->iCurMusicPos >= nextTime + o->duration) {
                     haveCurPos = true;
                     curPos = nextPos;
 
                     // long delta = m_iCurMusicPos - (nextTime + o->duration);
-                    o->setAutopilotDelta(m_iCurMusicPos - (nextTime + o->duration));
-                } else if(o->duration > 0 && m_iCurMusicPos >= nextTime)  // handle objects with duration
+                    o->setAutopilotDelta(this->iCurMusicPos - (nextTime + o->duration));
+                } else if(o->duration > 0 && this->iCurMusicPos >= nextTime)  // handle objects with duration
                 {
                     haveCurPos = true;
                     curPos = nextPos;
@@ -835,72 +847,73 @@ void SimulatedBeatmap::updateAutoCursorPos() {
     }
 
     if(haveCurPos)  // in active hitObject
-        m_vAutoCursorPos = curPos;
+        this->vAutoCursorPos = curPos;
     else {
         // interpolation
         f32 percent = 1.0f;
         if((nextTime == 0 && prevTime == 0) || (nextTime - prevTime) == 0)
             percent = 1.0f;
         else
-            percent = (f32)((long)m_iCurMusicPos - prevTime) / (f32)(nextTime - prevTime);
+            percent = (f32)((long)this->iCurMusicPos - prevTime) / (f32)(nextTime - prevTime);
 
         percent = clamp<f32>(percent, 0.0f, 1.0f);
 
         // scaled distance (not osucoords)
         f32 distance = (nextPos - prevPos).length();
-        if(distance > m_fHitcircleDiameter * 1.05f)  // snap only if not in a stream (heuristic)
+        if(distance > this->fHitcircleDiameter * 1.05f)  // snap only if not in a stream (heuristic)
         {
             percent = 1.f;
         }
 
-        m_vAutoCursorPos = prevPos + (nextPos - prevPos) * percent;
+        this->vAutoCursorPos = prevPos + (nextPos - prevPos) * percent;
     }
 }
 
 void SimulatedBeatmap::updatePlayfieldMetrics() {
-    m_vPlayfieldSize = GameRules::getPlayfieldSize();
-    m_vPlayfieldCenter = GameRules::getPlayfieldCenter();
+    this->vPlayfieldSize = GameRules::getPlayfieldSize();
+    this->vPlayfieldCenter = GameRules::getPlayfieldCenter();
 }
 
 void SimulatedBeatmap::updateHitobjectMetrics() {
-    m_fRawHitcircleDiameter = GameRules::getRawHitCircleDiameter(getCS());
-    m_fXMultiplier = GameRules::getHitCircleXMultiplier();
-    m_fHitcircleDiameter = GameRules::getRawHitCircleDiameter(getCS()) * GameRules::getHitCircleXMultiplier();
+    this->fRawHitcircleDiameter = GameRules::getRawHitCircleDiameter(this->getCS());
+    this->fXMultiplier = GameRules::getHitCircleXMultiplier();
+    this->fHitcircleDiameter = GameRules::getRawHitCircleDiameter(this->getCS()) * GameRules::getHitCircleXMultiplier();
 
     const f32 followcircle_size_multiplier = 2.4f;
     const f32 sliderFollowCircleDiameterMultiplier =
-        ((mods.flags & Replay::ModFlags::Nightmare) || (mods.flags & Replay::ModFlags::Jigsaw2)
-             ? (1.0f * (1.0f - mods.jigsaw_followcircle_radius_factor) +
-                mods.jigsaw_followcircle_radius_factor * followcircle_size_multiplier)
+        ((this->mods.flags & Replay::ModFlags::Nightmare) || (this->mods.flags & Replay::ModFlags::Jigsaw2)
+             ? (1.0f * (1.0f - this->mods.jigsaw_followcircle_radius_factor) +
+                this->mods.jigsaw_followcircle_radius_factor * followcircle_size_multiplier)
              : followcircle_size_multiplier);
-    m_fSliderFollowCircleDiameter = m_fHitcircleDiameter * sliderFollowCircleDiameterMultiplier;
+    this->fSliderFollowCircleDiameter = this->fHitcircleDiameter * sliderFollowCircleDiameterMultiplier;
 }
 
 void SimulatedBeatmap::calculateStacks() {
-    updateHitobjectMetrics();
+    this->updateHitobjectMetrics();
 
     debugLog("Beatmap: Calculating stacks ...\n");
 
     // reset
-    for(int i = 0; i < m_hitobjects.size(); i++) {
-        m_hitobjects[i]->setStack(0);
+    for(int i = 0; i < this->hitobjects.size(); i++) {
+        this->hitobjects[i]->setStack(0);
     }
 
     const f32 STACK_LENIENCE = 3.0f;
     const f32 STACK_OFFSET = 0.05f;
 
-    const f32 approachTime = GameRules::mapDifficultyRange(
-        getAR(), GameRules::getMinApproachTime(), GameRules::getMidApproachTime(), GameRules::getMaxApproachTime());
-    const f32 stackLeniency = m_selectedDifficulty2->getStackLeniency();
+    const f32 approachTime =
+        GameRules::mapDifficultyRange(this->getAR(), GameRules::getMinApproachTime(), GameRules::getMidApproachTime(),
+                                      GameRules::getMaxApproachTime());
+    const f32 stackLeniency = this->selectedDifficulty2->getStackLeniency();
 
-    if(m_selectedDifficulty2->getVersion() > 5) {
+    if(this->selectedDifficulty2->getVersion() > 5) {
         // peppy's algorithm
         // https://gist.github.com/peppy/1167470
 
-        for(int i = m_hitobjects.size() - 1; i >= 0; i--) {
+        for(int i = this->hitobjects.size() - 1; i >= 0; i--) {
             int n = i;
 
-            HitObject *objectI = m_hitobjects[i];
+            HitObject *objectI = this->hitobjects[i];
 
             bool isSpinner = dynamic_cast<Spinner *>(objectI) != NULL;
 
@@ -911,7 +924,7 @@ void SimulatedBeatmap::calculateStacks() {
 
             if(isHitCircle) {
                 while(--n >= 0) {
-                    HitObject *objectN = m_hitobjects[n];
+                    HitObject *objectN = this->hitobjects[n];
 
                     bool isSpinnerN = dynamic_cast<Spinner *>(objectN);
 
@@ -926,9 +939,10 @@ void SimulatedBeatmap::calculateStacks() {
                            STACK_LENIENCE) {
                         int offset = objectI->getStack() - objectN->getStack() + 1;
                         for(int j = n + 1; j <= i; j++) {
-                            if((objectNEndPosition - m_hitobjects[j]->getOriginalRawPosAt(m_hitobjects[j]->click_time))
+                            if((objectNEndPosition -
+                                this->hitobjects[j]->getOriginalRawPosAt(this->hitobjects[j]->click_time))
                                    .length() < STACK_LENIENCE)
-                                m_hitobjects[j]->setStack(m_hitobjects[j]->getStack() - offset);
+                                this->hitobjects[j]->setStack(this->hitobjects[j]->getStack() - offset);
                         }
 
                         break;
@@ -943,7 +957,7 @@ void SimulatedBeatmap::calculateStacks() {
                 }
             } else if(isSlider) {
                 while(--n >= 0) {
-                    HitObject *objectN = m_hitobjects[n];
+                    HitObject *objectN = this->hitobjects[n];
 
                     bool isSpinner = dynamic_cast<Spinner *>(objectN) != NULL;
 
@@ -966,8 +980,8 @@ void SimulatedBeatmap::calculateStacks() {
         // old stacking algorithm for old beatmaps
         // https://github.com/ppy/osu/blob/master/osu.Game.Rulesets.Osu/Beatmaps/BeatmapProcessor.cs
 
-        for(int i = 0; i < m_hitobjects.size(); i++) {
-            HitObject *currHitObject = m_hitobjects[i];
+        for(int i = 0; i < this->hitobjects.size(); i++) {
+            HitObject *currHitObject = this->hitobjects[i];
             Slider *sliderPointer = dynamic_cast<Slider *>(currHitObject);
 
             const bool isSlider = (sliderPointer != NULL);
@@ -977,8 +991,8 @@ void SimulatedBeatmap::calculateStacks() {
             long startTime = currHitObject->click_time + currHitObject->duration;
             int sliderStack = 0;
 
-            for(int j = i + 1; j < m_hitobjects.size(); j++) {
-                HitObject *objectJ = m_hitobjects[j];
+            for(int j = i + 1; j < this->hitobjects.size(); j++) {
+                HitObject *objectJ = this->hitobjects[j];
 
                 if(objectJ->click_time - (approachTime * stackLeniency) > startTime) break;
 
@@ -1004,18 +1018,18 @@ void SimulatedBeatmap::calculateStacks() {
     }
 
     // update hitobject positions
-    f32 stackOffset = m_fRawHitcircleDiameter * STACK_OFFSET;
-    for(int i = 0; i < m_hitobjects.size(); i++) {
-        if(m_hitobjects[i]->getStack() != 0) m_hitobjects[i]->updateStackPosition(stackOffset);
+    f32 stackOffset = this->fRawHitcircleDiameter * STACK_OFFSET;
+    for(int i = 0; i < this->hitobjects.size(); i++) {
+        if(this->hitobjects[i]->getStack() != 0) this->hitobjects[i]->updateStackPosition(stackOffset);
     }
 }
 
 void SimulatedBeatmap::computeDrainRate() {
-    m_fDrainRate = 0.0;
-    m_fHpMultiplierNormal = 1.0;
-    m_fHpMultiplierComboEnd = 1.0;
+    this->fDrainRate = 0.0;
+    this->fHpMultiplierNormal = 1.0;
+    this->fHpMultiplierComboEnd = 1.0;
 
-    if(m_hitobjects.size() < 1) return;
+    if(this->hitobjects.size() < 1) return;
 
     debugLog("Beatmap: Calculating drain ...\n");
 
@@ -1032,38 +1046,38 @@ void SimulatedBeatmap::computeDrainRate() {
             TestPlayer(f64 hpBarMaximum) {
                 this->hpBarMaximum = hpBarMaximum;
 
-                hpMultiplierNormal = 1.0;
-                hpMultiplierComboEnd = 1.0;
+                this->hpMultiplierNormal = 1.0;
+                this->hpMultiplierComboEnd = 1.0;
 
-                resetHealth();
+                this->resetHealth();
             }
 
             void resetHealth() {
-                health = hpBarMaximum;
-                healthUncapped = hpBarMaximum;
+                this->health = this->hpBarMaximum;
+                this->healthUncapped = this->hpBarMaximum;
             }
 
             void increaseHealth(f64 amount) {
-                healthUncapped += amount;
-                health += amount;
+                this->healthUncapped += amount;
+                this->health += amount;
 
-                if(health > hpBarMaximum) health = hpBarMaximum;
+                if(this->health > this->hpBarMaximum) this->health = this->hpBarMaximum;
 
-                if(health < 0.0) health = 0.0;
+                if(this->health < 0.0) this->health = 0.0;
 
-                if(healthUncapped < 0.0) healthUncapped = 0.0;
+                if(this->healthUncapped < 0.0) this->healthUncapped = 0.0;
             }
 
             void decreaseHealth(f64 amount) {
-                health -= amount;
+                this->health -= amount;
 
-                if(health < 0.0) health = 0.0;
+                if(this->health < 0.0) this->health = 0.0;
 
-                if(health > hpBarMaximum) health = hpBarMaximum;
+                if(this->health > this->hpBarMaximum) this->health = this->hpBarMaximum;
 
-                healthUncapped -= amount;
+                this->healthUncapped -= amount;
 
-                if(healthUncapped < 0.0) healthUncapped = 0.0;
+                if(this->healthUncapped < 0.0) this->healthUncapped = 0.0;
             }
 
             f64 hpBarMaximum;
@@ -1076,8 +1090,8 @@ void SimulatedBeatmap::computeDrainRate() {
         };
         TestPlayer testPlayer(200.f);
 
-        const f64 HP = getHP();
-        const int version = m_selectedDifficulty2->getVersion();
+        const f64 HP = this->getHP();
+        const int version = this->selectedDifficulty2->getVersion();
 
         f64 testDrop = 0.05;
 
@@ -1092,16 +1106,16 @@ void SimulatedBeatmap::computeDrainRate() {
             testPlayer.resetHealth();
 
             f64 lowestHp = testPlayer.health;
-            int lastTime = (int)(m_hitobjects[0]->click_time - (long)getApproachTime());
+            int lastTime = (int)(this->hitobjects[0]->click_time - (long)this->getApproachTime());
             fail = false;
 
-            const int breakCount = m_breaks.size();
+            const int breakCount = this->breaks.size();
             int breakNumber = 0;
 
             int comboTooLowCount = 0;
 
-            for(int i = 0; i < m_hitobjects.size(); i++) {
-                const HitObject *h = m_hitobjects[i];
+            for(int i = 0; i < this->hitobjects.size(); i++) {
+                const HitObject *h = this->hitobjects[i];
                 const Slider *sliderPointer = dynamic_cast<const Slider *>(h);
                 const Spinner *spinnerPointer = dynamic_cast<const Spinner *>(h);
 
@@ -1109,7 +1123,7 @@ void SimulatedBeatmap::computeDrainRate() {
 
                 int breakTime = 0;
                 if(breakCount > 0 && breakNumber < breakCount) {
-                    const DatabaseBeatmap::BREAK &e = m_breaks[breakNumber];
+                    const DatabaseBeatmap::BREAK &e = this->breaks[breakNumber];
                     if(e.startTime >= localLastTime && e.endTime <= h->click_time) {
                         // consider break start equal to object end time for version 8+ since drain stops during this
                         // time
@@ -1175,7 +1189,7 @@ void SimulatedBeatmap::computeDrainRate() {
                                                          testPlayer.hpMultiplierComboEnd, 1.0));  // 300
 
                         // end of combo (new combo starts at next hitobject)
-                        if((i == m_hitobjects.size() - 1) || m_hitobjects[i]->is_end_of_combo) {
+                        if((i == this->hitobjects.size() - 1) || this->hitobjects[i]->is_end_of_combo) {
                             testPlayer.increaseHealth(LiveScore::getHealthIncrease(
                                 LiveScore::HIT::HIT_300G, HP, testPlayer.hpMultiplierNormal,
                                 testPlayer.hpMultiplierComboEnd, 1.0));  // geki
@@ -1210,7 +1224,7 @@ void SimulatedBeatmap::computeDrainRate() {
                 testPlayer.hpMultiplierNormal *= 1.01;
             }
 
-            const f64 recovery = (testPlayer.healthUncapped - testPlayer.hpBarMaximum) / (f64)m_hitobjects.size();
+            const f64 recovery = (testPlayer.healthUncapped - testPlayer.hpBarMaximum) / (f64)this->hitobjects.size();
             if(!fail && recovery < HpRecoveryAvailable) {
                 fail = true;
                 testDrop *= 0.96;
@@ -1219,23 +1233,23 @@ void SimulatedBeatmap::computeDrainRate() {
             }
         } while(fail);
 
-        m_fDrainRate =
+        this->fDrainRate =
             (testDrop / testPlayer.hpBarMaximum) * 1000.0;  // from [0, 200] to [0, 1], and from ms to seconds
-        m_fHpMultiplierComboEnd = testPlayer.hpMultiplierComboEnd;
-        m_fHpMultiplierNormal = testPlayer.hpMultiplierNormal;
+        this->fHpMultiplierComboEnd = testPlayer.hpMultiplierComboEnd;
+        this->fHpMultiplierNormal = testPlayer.hpMultiplierNormal;
     }
 }
 
 f32 SimulatedBeatmap::getApproachTime() const {
-    return (mods.flags & Replay::ModFlags::Mafham)
-               ? getLength() * 2
-               : GameRules::mapDifficultyRange(getAR(), GameRules::getMinApproachTime(),
+    return (this->mods.flags & Replay::ModFlags::Mafham)
+               ? this->getLength() * 2
+               : GameRules::mapDifficultyRange(this->getAR(), GameRules::getMinApproachTime(),
                                                GameRules::getMidApproachTime(), GameRules::getMaxApproachTime());
 }
 
 f32 SimulatedBeatmap::getRawApproachTime() const {
-    return (mods.flags & Replay::ModFlags::Mafham)
-               ? getLength() * 2
-               : GameRules::mapDifficultyRange(getRawAR(), GameRules::getMinApproachTime(),
+    return (this->mods.flags & Replay::ModFlags::Mafham)
+               ? this->getLength() * 2
+               : GameRules::mapDifficultyRange(this->getRawAR(), GameRules::getMinApproachTime(),
                                                GameRules::getMidApproachTime(), GameRules::getMaxApproachTime());
 }

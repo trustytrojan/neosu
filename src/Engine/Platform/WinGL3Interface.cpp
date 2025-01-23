@@ -1,10 +1,4 @@
-//================ Copyright (c) 2017, PG, All rights reserved. =================//
-//
-// Purpose:		windows opengl 3.x interface
-//
-// $NoKeywords: $wingl3i
-//===============================================================================//
-
+#pragma once
 #ifdef _WIN32
 
 #include "WinGL3Interface.h"
@@ -35,9 +29,9 @@ PIXELFORMATDESCRIPTOR WinGL3Interface::getPixelFormatDescriptor() {
 }
 
 WinGL3Interface::WinGL3Interface(HWND hwnd) : OpenGL3Interface() {
-    m_hwnd = hwnd;
-    m_hglrc = NULL;
-    m_hdc = NULL;
+    this->hwnd = hwnd;
+    this->hglrc = NULL;
+    this->hdc = NULL;
 
     if(!checkGLHardwareAcceleration()) {
         engine->showMessageErrorFatal("Fatal Engine Error",
@@ -46,11 +40,11 @@ WinGL3Interface::WinGL3Interface(HWND hwnd) : OpenGL3Interface() {
     }
 
     // get device context
-    m_hdc = GetDC(m_hwnd);
+    this->hdc = GetDC(this->hwnd);
 
     // get pixel format
     PIXELFORMATDESCRIPTOR pfd = getPixelFormatDescriptor();
-    int pixelFormat = ChoosePixelFormat(m_hdc, &pfd);
+    int pixelFormat = ChoosePixelFormat(this->hdc, &pfd);
     debugLog("OpenGL: PixelFormat = %i\n", pixelFormat);
 
     if(pixelFormat == 0) {
@@ -62,7 +56,7 @@ WinGL3Interface::WinGL3Interface(HWND hwnd) : OpenGL3Interface() {
     }
 
     // set pixel format
-    BOOL result = SetPixelFormat(m_hdc, pixelFormat, &pfd);
+    BOOL result = SetPixelFormat(this->hdc, pixelFormat, &pfd);
     debugLog("OpenGL: SetPixelFormat() = %i\n", result);
 
     if(result == FALSE) {
@@ -74,8 +68,8 @@ WinGL3Interface::WinGL3Interface(HWND hwnd) : OpenGL3Interface() {
     }
 
     // WINDOWS: create temp context and make current
-    HGLRC tempContext = wglCreateContext(m_hdc);
-    wglMakeCurrent(m_hdc, tempContext);
+    HGLRC tempContext = wglCreateContext(this->hdc);
+    wglMakeCurrent(this->hdc, tempContext);
 
     // so that we can get to wglCreateContextAttribsARB
     PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribs =
@@ -90,25 +84,25 @@ WinGL3Interface::WinGL3Interface(HWND hwnd) : OpenGL3Interface() {
         WGL_CONTEXT_MAJOR_VERSION_ARB,          3, WGL_CONTEXT_MINOR_VERSION_ARB, 0, WGL_CONTEXT_FLAGS_ARB,
         WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB, 0};
 
-    m_hglrc = wglCreateContextAttribs(m_hdc, 0, attribs);
-    wglMakeCurrent(m_hdc, m_hglrc);
+    this->hglrc = wglCreateContextAttribs(this->hdc, 0, attribs);
+    wglMakeCurrent(this->hdc, this->hglrc);
     wglDeleteContext(tempContext);
 
-    if(!m_hglrc) {
+    if(!this->hglrc) {
         engine->showMessageErrorFatal("Fatal OpenGL Error", "Couldn't wglCreateContext()!\nThe engine will quit now.");
         exit(0);
     }
 }
 
 WinGL3Interface::~WinGL3Interface() {
-    if(m_hdc != NULL) wglMakeCurrent(m_hdc, NULL);  // deselect gl
-    if(m_hglrc != NULL) wglDeleteContext(m_hglrc);  // delete gl
-    if(m_hdc != NULL) DeleteDC(m_hdc);              // delete hdc
+    if(this->hdc != NULL) wglMakeCurrent(this->hdc, NULL);  // deselect gl
+    if(this->hglrc != NULL) wglDeleteContext(this->hglrc);  // delete gl
+    if(this->hdc != NULL) DeleteDC(this->hdc);              // delete hdc
 }
 
 void WinGL3Interface::endScene() {
     OpenGL3Interface::endScene();
-    SwapBuffers(m_hdc);
+    SwapBuffers(this->hdc);
 }
 
 void WinGL3Interface::setVSync(bool vsync) {

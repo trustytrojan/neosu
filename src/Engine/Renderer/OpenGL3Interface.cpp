@@ -16,28 +16,28 @@ using namespace std;
 
 OpenGL3Interface::OpenGL3Interface() : Graphics() {
     // renderer
-    m_bInScene = false;
-    m_vResolution = engine->getScreenSize();  // initial viewport size = window size
+    this->bInScene = false;
+    this->vResolution = engine->getScreenSize();  // initial viewport size = window size
 
-    m_shaderTexturedGeneric = NULL;
+    this->shaderTexturedGeneric = NULL;
 
-    m_iShaderTexturedGenericAttribPosition = 0;
-    m_iShaderTexturedGenericAttribUV = 1;
-    m_iShaderTexturedGenericAttribCol = 2;
-    m_bShaderTexturedGenericIsTextureEnabled = false;
-    m_iVA = 0;
-    m_iVBOVertices = 0;
-    m_iVBOTexcoords = 0;
-    m_iVBOTexcolors = 0;
+    this->iShaderTexturedGenericAttribPosition = 0;
+    this->iShaderTexturedGenericAttribUV = 1;
+    this->iShaderTexturedGenericAttribCol = 2;
+    this->bShaderTexturedGenericIsTextureEnabled = false;
+    this->iVA = 0;
+    this->iVBOVertices = 0;
+    this->iVBOTexcoords = 0;
+    this->iVBOTexcolors = 0;
 
     // persistent vars
-    m_color = 0xffffffff;
+    this->color = 0xffffffff;
 }
 
 OpenGL3Interface::~OpenGL3Interface() {
-    SAFE_DELETE(m_shaderTexturedGeneric);
+    SAFE_DELETE(this->shaderTexturedGeneric);
 
-    glDeleteVertexArrays(1, &m_iVA);
+    glDeleteVertexArrays(1, &this->iVA);
 }
 
 void OpenGL3Interface::init() {
@@ -125,50 +125,53 @@ void OpenGL3Interface::init() {
         "	}\n"
         "}\n"
         "\n";
-    m_shaderTexturedGeneric = (OpenGLShader *)createShaderFromSource(texturedGenericV, texturedGenericP);
-    m_shaderTexturedGeneric->load();
+    this->shaderTexturedGeneric = (OpenGLShader *)this->createShaderFromSource(texturedGenericV, texturedGenericP);
+    this->shaderTexturedGeneric->load();
 
-    glGenVertexArrays(1, &m_iVA);
-    glGenBuffers(1, &m_iVBOVertices);
-    glGenBuffers(1, &m_iVBOTexcoords);
-    glGenBuffers(1, &m_iVBOTexcolors);
+    glGenVertexArrays(1, &this->iVA);
+    glGenBuffers(1, &this->iVBOVertices);
+    glGenBuffers(1, &this->iVBOTexcoords);
+    glGenBuffers(1, &this->iVBOTexcolors);
 
-    m_iShaderTexturedGenericAttribPosition = m_shaderTexturedGeneric->getAttribLocation("position");
-    m_iShaderTexturedGenericAttribUV = m_shaderTexturedGeneric->getAttribLocation("uv");
-    m_iShaderTexturedGenericAttribCol = m_shaderTexturedGeneric->getAttribLocation("vcolor");
+    this->iShaderTexturedGenericAttribPosition = this->shaderTexturedGeneric->getAttribLocation("position");
+    this->iShaderTexturedGenericAttribUV = this->shaderTexturedGeneric->getAttribLocation("uv");
+    this->iShaderTexturedGenericAttribCol = this->shaderTexturedGeneric->getAttribLocation("vcolor");
 
-    glBindVertexArray(m_iVA);
+    glBindVertexArray(this->iVA);
 
     // TODO: handle cases where more than 512 elements are in a vao
-    glBindBuffer(GL_ARRAY_BUFFER, m_iVBOVertices);
-    glVertexAttribPointer(m_iShaderTexturedGenericAttribPosition, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat),
+    glBindBuffer(GL_ARRAY_BUFFER, this->iVBOVertices);
+    glVertexAttribPointer(this->iShaderTexturedGenericAttribPosition, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat),
                           (GLvoid *)0);
     glBufferData(GL_ARRAY_BUFFER, 512 * sizeof(Vector3), NULL, GL_STREAM_DRAW);
-    glEnableVertexAttribArray(m_iShaderTexturedGenericAttribPosition);
+    glEnableVertexAttribArray(this->iShaderTexturedGenericAttribPosition);
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_iVBOTexcoords);
-    glVertexAttribPointer(m_iShaderTexturedGenericAttribUV, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid *)0);
+    glBindBuffer(GL_ARRAY_BUFFER, this->iVBOTexcoords);
+    glVertexAttribPointer(this->iShaderTexturedGenericAttribUV, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat),
+                          (GLvoid *)0);
     glBufferData(GL_ARRAY_BUFFER, 512 * sizeof(Vector2), NULL, GL_STREAM_DRAW);
-    glEnableVertexAttribArray(m_iShaderTexturedGenericAttribUV);
+    glEnableVertexAttribArray(this->iShaderTexturedGenericAttribUV);
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_iVBOTexcolors);
-    glVertexAttribPointer(m_iShaderTexturedGenericAttribCol, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid *)0);
+    glBindBuffer(GL_ARRAY_BUFFER, this->iVBOTexcolors);
+    glVertexAttribPointer(this->iShaderTexturedGenericAttribCol, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat),
+                          (GLvoid *)0);
     glBufferData(GL_ARRAY_BUFFER, 512 * sizeof(Vector4), NULL, GL_STREAM_DRAW);
-    glEnableVertexAttribArray(m_iShaderTexturedGenericAttribCol);
+    glEnableVertexAttribArray(this->iShaderTexturedGenericAttribCol);
 }
 
 void OpenGL3Interface::beginScene() {
-    m_bInScene = true;
+    this->bInScene = true;
 
-    Matrix4 defaultProjectionMatrix = Camera::buildMatrixOrtho2D(0, m_vResolution.x, m_vResolution.y, 0, -1.0f, 1.0f);
+    Matrix4 defaultProjectionMatrix =
+        Camera::buildMatrixOrtho2D(0, this->vResolution.x, this->vResolution.y, 0, -1.0f, 1.0f);
 
     // push main transforms
-    pushTransform();
-    setProjectionMatrix(defaultProjectionMatrix);
-    translate(cv_r_globaloffset_x.getFloat(), cv_r_globaloffset_y.getFloat());
+    this->pushTransform();
+    this->setProjectionMatrix(defaultProjectionMatrix);
+    this->translate(cv_r_globaloffset_x.getFloat(), cv_r_globaloffset_y.getFloat());
 
     // and apply them
-    updateTransform();
+    this->updateTransform();
 
     // set clear color and clear
     // glClearColor(1, 1, 1, 1);
@@ -177,38 +180,38 @@ void OpenGL3Interface::beginScene() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     // display any errors of previous frames
-    handleGLErrors();
+    this->handleGLErrors();
 
     // enable default shader
-    m_shaderTexturedGeneric->enable();
+    this->shaderTexturedGeneric->enable();
 }
 
 void OpenGL3Interface::endScene() {
-    popTransform();
+    this->popTransform();
 
-    checkStackLeaks();
+    this->checkStackLeaks();
 
-    if(m_clipRectStack.size() > 0) {
+    if(this->clipRectStack.size() > 0) {
         engine->showMessageErrorFatal("ClipRect Stack Leak", "Make sure all push*() have a pop*()!");
         engine->shutdown();
     }
 
-    m_bInScene = false;
+    this->bInScene = false;
 }
 
 void OpenGL3Interface::clearDepthBuffer() { glClear(GL_DEPTH_BUFFER_BIT); }
 
 void OpenGL3Interface::setColor(Color color) {
-    m_color = color;
-    m_shaderTexturedGeneric->setUniform4f(
-        "col", ((unsigned char)(m_color >> 16)) / 255.0f, ((unsigned char)(m_color >> 8)) / 255.0f,
-        ((unsigned char)(m_color >> 0)) / 255.0f, ((unsigned char)(m_color >> 24)) / 255.0f);
+    this->color = color;
+    this->shaderTexturedGeneric->setUniform4f(
+        "col", ((unsigned char)(this->color >> 16)) / 255.0f, ((unsigned char)(this->color >> 8)) / 255.0f,
+        ((unsigned char)(this->color >> 0)) / 255.0f, ((unsigned char)(this->color >> 24)) / 255.0f);
 }
 
 void OpenGL3Interface::setAlpha(float alpha) {
-    m_color &= 0x00ffffff;
-    m_color |= ((int)(255.0f * alpha)) << 24;
-    setColor(m_color);
+    this->color &= 0x00ffffff;
+    this->color |= ((int)(255.0f * alpha)) << 24;
+    this->setColor(this->color);
 }
 
 void OpenGL3Interface::drawPixels(int x, int y, int width, int height, Graphics::DRAWPIXELS_TYPE type,
@@ -222,56 +225,56 @@ void OpenGL3Interface::drawPixels(int x, int y, int width, int height, Graphics:
 }
 
 void OpenGL3Interface::drawPixel(int x, int y) {
-    updateTransform();
+    this->updateTransform();
 
     VertexArrayObject vao(Graphics::PRIMITIVE::PRIMITIVE_LINES);
     vao.addVertex(x - 0.45f, y - 0.45f);
     vao.addVertex(x + 0.45f, y + 0.45f);
-    drawVAO(&vao);
+    this->drawVAO(&vao);
 }
 
 void OpenGL3Interface::drawLine(int x1, int y1, int x2, int y2) {
-    updateTransform();
+    this->updateTransform();
 
     VertexArrayObject vao(Graphics::PRIMITIVE::PRIMITIVE_LINES);
     vao.addVertex(x1 + 0.5f, y1 + 0.5f);
     vao.addVertex(x2 + 0.5f, y2 + 0.5f);
-    drawVAO(&vao);
+    this->drawVAO(&vao);
 }
 
-void OpenGL3Interface::drawLine(Vector2 pos1, Vector2 pos2) { drawLine(pos1.x, pos1.y, pos2.x, pos2.y); }
+void OpenGL3Interface::drawLine(Vector2 pos1, Vector2 pos2) { this->drawLine(pos1.x, pos1.y, pos2.x, pos2.y); }
 
 void OpenGL3Interface::drawRect(int x, int y, int width, int height) {
-    drawLine(x, y, x + width, y);
-    drawLine(x, y, x, y + height);
-    drawLine(x, y + height, x + width + 1, y + height);
-    drawLine(x + width, y, x + width, y + height);
+    this->drawLine(x, y, x + width, y);
+    this->drawLine(x, y, x, y + height);
+    this->drawLine(x, y + height, x + width + 1, y + height);
+    this->drawLine(x + width, y, x + width, y + height);
 }
 
 void OpenGL3Interface::drawRect(int x, int y, int width, int height, Color top, Color right, Color bottom, Color left) {
-    setColor(top);
-    drawLine(x, y, x + width, y);
-    setColor(left);
-    drawLine(x, y, x, y + height);
-    setColor(bottom);
-    drawLine(x, y + height, x + width + 1, y + height);
-    setColor(right);
-    drawLine(x + width, y, x + width, y + height);
+    this->setColor(top);
+    this->drawLine(x, y, x + width, y);
+    this->setColor(left);
+    this->drawLine(x, y, x, y + height);
+    this->setColor(bottom);
+    this->drawLine(x, y + height, x + width + 1, y + height);
+    this->setColor(right);
+    this->drawLine(x + width, y, x + width, y + height);
 }
 
 void OpenGL3Interface::fillRect(int x, int y, int width, int height) {
-    updateTransform();
+    this->updateTransform();
 
     VertexArrayObject vao(Graphics::PRIMITIVE::PRIMITIVE_QUADS);
     vao.addVertex(x, y);
     vao.addVertex(x, y + height);
     vao.addVertex(x + width, y + height);
     vao.addVertex(x + width, y);
-    drawVAO(&vao);
+    this->drawVAO(&vao);
 }
 
 void OpenGL3Interface::fillRoundedRect(int x, int y, int width, int height, int radius) {
-    updateTransform();
+    this->updateTransform();
 
     // TODO
     /*
@@ -313,7 +316,7 @@ void OpenGL3Interface::fillRoundedRect(int x, int y, int width, int height, int 
 
 void OpenGL3Interface::fillGradient(int x, int y, int width, int height, Color topLeftColor, Color topRightColor,
                                     Color bottomLeftColor, Color bottomRightColor) {
-    updateTransform();
+    this->updateTransform();
 
     VertexArrayObject vao(Graphics::PRIMITIVE::PRIMITIVE_QUADS);
     vao.addVertex(x, y);
@@ -324,11 +327,11 @@ void OpenGL3Interface::fillGradient(int x, int y, int width, int height, Color t
     vao.addColor(bottomRightColor);
     vao.addVertex(x, y + height);
     vao.addColor(bottomLeftColor);
-    drawVAO(&vao);
+    this->drawVAO(&vao);
 }
 
 void OpenGL3Interface::drawQuad(int x, int y, int width, int height) {
-    updateTransform();
+    this->updateTransform();
 
     VertexArrayObject vao(Graphics::PRIMITIVE::PRIMITIVE_QUADS);
     vao.addVertex(x, y);
@@ -339,13 +342,13 @@ void OpenGL3Interface::drawQuad(int x, int y, int width, int height) {
     vao.addTexcoord(1, 1);
     vao.addVertex(x + width, y);
     vao.addTexcoord(1, 0);
-    drawVAO(&vao);
+    this->drawVAO(&vao);
 }
 
 void OpenGL3Interface::drawQuad(Vector2 topLeft, Vector2 topRight, Vector2 bottomRight, Vector2 bottomLeft,
                                 Color topLeftColor, Color topRightColor, Color bottomRightColor,
                                 Color bottomLeftColor) {
-    updateTransform();
+    this->updateTransform();
 
     VertexArrayObject vao(Graphics::PRIMITIVE::PRIMITIVE_QUADS);
     vao.addVertex(topLeft.x, topLeft.y);
@@ -360,7 +363,7 @@ void OpenGL3Interface::drawQuad(Vector2 topLeft, Vector2 topRight, Vector2 botto
     vao.addVertex(topRight.x, topRight.y);
     vao.addColor(topRightColor);
     vao.addTexcoord(1, 0);
-    drawVAO(&vao);
+    this->drawVAO(&vao);
 }
 
 void OpenGL3Interface::drawImage(Image *image) {
@@ -370,7 +373,7 @@ void OpenGL3Interface::drawImage(Image *image) {
     }
     if(!image->isReady()) return;
 
-    updateTransform();
+    this->updateTransform();
 
     float width = image->getWidth();
     float height = image->getHeight();
@@ -389,19 +392,19 @@ void OpenGL3Interface::drawImage(Image *image) {
     vao.addTexcoord(1, 0);
 
     image->bind();
-    drawVAO(&vao);
+    this->drawVAO(&vao);
     image->unbind();
 
     if(cv_r_debug_drawimage.getBool()) {
-        setColor(0xbbff00ff);
-        drawRect(x, y, width, height);
+        this->setColor(0xbbff00ff);
+        this->drawRect(x, y, width, height);
     }
 }
 
 void OpenGL3Interface::drawString(McFont *font, UString text) {
     if(font == NULL || text.length() < 1 || !font->isReady()) return;
 
-    updateTransform();
+    this->updateTransform();
 
     font->drawString(this, text);
 }
@@ -409,7 +412,7 @@ void OpenGL3Interface::drawString(McFont *font, UString text) {
 void OpenGL3Interface::drawVAO(VertexArrayObject *vao) {
     if(vao == NULL) return;
 
-    updateTransform();
+    this->updateTransform();
 
     // if baked, then we can directly draw the buffer
     if(vao->isReady()) {
@@ -417,13 +420,13 @@ void OpenGL3Interface::drawVAO(VertexArrayObject *vao) {
 
         // configure shader
         if(glvao->getNumTexcoords0() > 0) {
-            if(!m_bShaderTexturedGenericIsTextureEnabled) {
-                m_shaderTexturedGeneric->setUniform1i("type", 1);
-                m_bShaderTexturedGenericIsTextureEnabled = true;
+            if(!this->bShaderTexturedGenericIsTextureEnabled) {
+                this->shaderTexturedGeneric->setUniform1i("type", 1);
+                this->bShaderTexturedGenericIsTextureEnabled = true;
             }
-        } else if(m_bShaderTexturedGenericIsTextureEnabled) {
-            m_bShaderTexturedGenericIsTextureEnabled = false;
-            m_shaderTexturedGeneric->setUniform1i("type", 0);
+        } else if(this->bShaderTexturedGenericIsTextureEnabled) {
+            this->bShaderTexturedGenericIsTextureEnabled = false;
+            this->shaderTexturedGeneric->setUniform1i("type", 0);
         }
 
         // draw
@@ -501,41 +504,41 @@ void OpenGL3Interface::drawVAO(VertexArrayObject *vao) {
 
     // upload vertices to gpu
     if(finalVertices.size() > 0) {
-        glBindBuffer(GL_ARRAY_BUFFER, m_iVBOVertices);
+        glBindBuffer(GL_ARRAY_BUFFER, this->iVBOVertices);
         glBufferSubData(GL_ARRAY_BUFFER, 0, finalVertices.size() * sizeof(Vector3), &(finalVertices[0]));
     }
 
     // upload texcoords to gpu
     if(finalTexcoords.size() > 0 && finalTexcoords[0].size() > 0) {
-        glBindBuffer(GL_ARRAY_BUFFER, m_iVBOTexcoords);
+        glBindBuffer(GL_ARRAY_BUFFER, this->iVBOTexcoords);
         glBufferSubData(GL_ARRAY_BUFFER, 0, finalTexcoords[0].size() * sizeof(Vector2), &(finalTexcoords[0][0]));
     }
 
     // upload vertex colors to gpu
     if(finalColors.size() > 0) {
-        glBindBuffer(GL_ARRAY_BUFFER, m_iVBOTexcolors);
+        glBindBuffer(GL_ARRAY_BUFFER, this->iVBOTexcolors);
         glBufferSubData(GL_ARRAY_BUFFER, 0, finalColors.size() * sizeof(Vector4), &(finalColors[0]));
     }
 
     // TODO: multitexturing support
     // TODO: textured vertexcolors
     if(finalTexcoords.size() > 0 && finalTexcoords[0].size() > 0) {
-        if(!m_bShaderTexturedGenericIsTextureEnabled) {
-            m_bShaderTexturedGenericIsTextureEnabled = true;
+        if(!this->bShaderTexturedGenericIsTextureEnabled) {
+            this->bShaderTexturedGenericIsTextureEnabled = true;
             // GLint currentlyBoundTextureUnit = 0;
             // glGetIntegerv(GL_TEXTURE_BINDING_2D, &currentlyBoundTextureUnit);
 
-            m_shaderTexturedGeneric->setUniform1i("type", 1);
+            this->shaderTexturedGeneric->setUniform1i("type", 1);
             // m_shaderTexturedGeneric->setUniform1i("tex", currentlyBoundTextureUnit);
         }
-    } else if(m_bShaderTexturedGenericIsTextureEnabled) {
-        m_bShaderTexturedGenericIsTextureEnabled = false;
-        m_shaderTexturedGeneric->setUniform1i("type", 0);
+    } else if(this->bShaderTexturedGenericIsTextureEnabled) {
+        this->bShaderTexturedGenericIsTextureEnabled = false;
+        this->shaderTexturedGeneric->setUniform1i("type", 0);
     }
 
     if(finalColors.size() > 0) {
-        m_bShaderTexturedGenericIsTextureEnabled = false;
-        m_shaderTexturedGeneric->setUniform1i("type", 2);
+        this->bShaderTexturedGenericIsTextureEnabled = false;
+        this->shaderTexturedGeneric->setUniform1i("type", 2);
     }
 
     // draw it
@@ -544,7 +547,7 @@ void OpenGL3Interface::drawVAO(VertexArrayObject *vao) {
 
 void OpenGL3Interface::setClipRect(McRect clipRect) {
     if(cv_r_debug_disable_cliprect.getBool()) return;
-    // if (m_bIs3DScene) return; // HACKHACK:TODO:
+    // if (this->bIs3DScene) return; // HACKHACK:TODO:
 
     // HACKHACK: compensate for viewport changes caused by RenderTargets!
     int viewport[4];
@@ -563,21 +566,21 @@ void OpenGL3Interface::setClipRect(McRect clipRect) {
 }
 
 void OpenGL3Interface::pushClipRect(McRect clipRect) {
-    if(m_clipRectStack.size() > 0)
-        m_clipRectStack.push(m_clipRectStack.top().intersect(clipRect));
+    if(this->clipRectStack.size() > 0)
+        this->clipRectStack.push(this->clipRectStack.top().intersect(clipRect));
     else
-        m_clipRectStack.push(clipRect);
+        this->clipRectStack.push(clipRect);
 
-    setClipRect(m_clipRectStack.top());
+    this->setClipRect(this->clipRectStack.top());
 }
 
 void OpenGL3Interface::popClipRect() {
-    m_clipRectStack.pop();
+    this->clipRectStack.pop();
 
-    if(m_clipRectStack.size() > 0)
-        setClipRect(m_clipRectStack.top());
+    if(this->clipRectStack.size() > 0)
+        this->setClipRect(this->clipRectStack.top());
     else
-        setClipping(false);
+        this->setClipping(false);
 }
 
 void OpenGL3Interface::pushStencil() {
@@ -602,7 +605,7 @@ void OpenGL3Interface::popStencil() { glDisable(GL_STENCIL_TEST); }
 
 void OpenGL3Interface::setClipping(bool enabled) {
     if(enabled) {
-        if(m_clipRectStack.size() > 0) glEnable(GL_SCISSOR_TEST);
+        if(this->clipRectStack.size() > 0) glEnable(GL_SCISSOR_TEST);
     } else
         glDisable(GL_SCISSOR_TEST);
 }
@@ -705,14 +708,14 @@ int OpenGL3Interface::getVRAMRemaining() {
 
 void OpenGL3Interface::onResolutionChange(Vector2 newResolution) {
     // rebuild viewport
-    m_vResolution = newResolution;
-    glViewport(0, 0, m_vResolution.x, m_vResolution.y);
+    this->vResolution = newResolution;
+    glViewport(0, 0, this->vResolution.x, this->vResolution.y);
 
     // special case: custom rendertarget resolution rendering, update active projection matrix immediately
-    if(m_bInScene) {
-        m_projectionTransformStack.top() =
-            Camera::buildMatrixOrtho2D(0, m_vResolution.x, m_vResolution.y, 0, -1.0f, 1.0f);
-        m_bTransformUpToDate = false;
+    if(this->bInScene) {
+        this->projectionTransformStack.top() =
+            Camera::buildMatrixOrtho2D(0, this->vResolution.x, this->vResolution.y, 0, -1.0f, 1.0f);
+        this->bTransformUpToDate = false;
     }
 }
 
@@ -743,11 +746,11 @@ VertexArrayObject *OpenGL3Interface::createVertexArrayObject(Graphics::PRIMITIVE
 }
 
 void OpenGL3Interface::onTransformUpdate(Matrix4 &projectionMatrix, Matrix4 &worldMatrix) {
-    m_projectionMatrix = projectionMatrix;
-    m_worldMatrix = worldMatrix;
+    this->projectionMatrix = projectionMatrix;
+    this->worldMatrix = worldMatrix;
 
-    m_MP = m_projectionMatrix * m_worldMatrix;
-    m_shaderTexturedGeneric->setUniformMatrix4fv("mvp", m_MP);
+    this->MP = this->projectionMatrix * this->worldMatrix;
+    this->shaderTexturedGeneric->setUniformMatrix4fv("mvp", this->MP);
 }
 
 void OpenGL3Interface::handleGLErrors() {

@@ -38,26 +38,26 @@ class Gamepad : public InputDevice {
     virtual int getPort() = 0;
 
     void setLeftStickDeadZone(float leftStickDeadZoneX, float leftStickDeadZoneY) {
-        m_fLeftStickDeadZoneX = leftStickDeadZoneX;
-        m_fLeftStickDeadZoneY = leftStickDeadZoneY;
+        this->fLeftStickDeadZoneX = leftStickDeadZoneX;
+        this->fLeftStickDeadZoneY = leftStickDeadZoneY;
     }
-    void setLeftStickDeadZoneX(float leftStickDeadZoneX) { m_fLeftStickDeadZoneX = leftStickDeadZoneX; }
-    void setLeftStickDeadZoneY(float leftStickDeadZoneY) { m_fLeftStickDeadZoneY = leftStickDeadZoneY; }
+    void setLeftStickDeadZoneX(float leftStickDeadZoneX) { this->fLeftStickDeadZoneX = leftStickDeadZoneX; }
+    void setLeftStickDeadZoneY(float leftStickDeadZoneY) { this->fLeftStickDeadZoneY = leftStickDeadZoneY; }
     void setRightStickDeadZone(float rightStickDeadZoneX, float rightStickDeadZoneY) {
-        m_fRightStickDeadZoneX = rightStickDeadZoneX;
-        m_fRightStickDeadZoneY = rightStickDeadZoneY;
+        this->fRightStickDeadZoneX = rightStickDeadZoneX;
+        this->fRightStickDeadZoneY = rightStickDeadZoneY;
     }
-    void setRightStickDeadZoneX(float rightStickDeadZoneX) { m_fRightStickDeadZoneX = rightStickDeadZoneX; }
-    void setRightStickDeadZoneY(float rightStickDeadZoneY) { m_fRightStickDeadZoneY = rightStickDeadZoneY; }
+    void setRightStickDeadZoneX(float rightStickDeadZoneX) { this->fRightStickDeadZoneX = rightStickDeadZoneX; }
+    void setRightStickDeadZoneY(float rightStickDeadZoneY) { this->fRightStickDeadZoneY = rightStickDeadZoneY; }
 
    protected:
-    float m_fLeftStickDeadZoneX;
-    float m_fLeftStickDeadZoneY;
-    float m_fRightStickDeadZoneX;
-    float m_fRightStickDeadZoneY;
+    float fLeftStickDeadZoneX;
+    float fLeftStickDeadZoneY;
+    float fRightStickDeadZoneX;
+    float fRightStickDeadZoneY;
 
    private:
-    std::vector<GamepadListener *> m_listeners;
+    std::vector<GamepadListener *> listeners;
 };
 
 #endif

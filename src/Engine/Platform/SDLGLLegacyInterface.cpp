@@ -17,7 +17,7 @@ SDLGLLegacyInterface::~SDLGLLegacyInterface() {}
 
 void SDLGLLegacyInterface::endScene() {
     OpenGLLegacyInterface::endScene();
-    SDL_GL_SwapWindow(m_window);
+    SDL_GL_SwapWindow(this->window);
 }
 
 void SDLGLLegacyInterface::setVSync(bool vsync) { SDL_GL_SetSwapInterval(vsync ? 1 : 0); }

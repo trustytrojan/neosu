@@ -80,7 +80,7 @@ class OpenGL3Interface : public Graphics {
     virtual std::vector<unsigned char> getScreenshot();
 
     // renderer info
-    virtual Vector2 getResolution() const { return m_vResolution; }
+    virtual Vector2 getResolution() const { return this->vResolution; }
     virtual UString getVendor();
     virtual UString getModel();
     virtual UString getVersion();
@@ -101,8 +101,8 @@ class OpenGL3Interface : public Graphics {
                                                        bool keepInSystemMemory);
 
     // ILLEGAL:
-    inline const int getShaderGenericAttribPosition() const { return m_iShaderTexturedGenericAttribPosition; }
-    inline const int getShaderGenericAttribUV() const { return m_iShaderTexturedGenericAttribUV; }
+    inline const int getShaderGenericAttribPosition() const { return this->iShaderTexturedGenericAttribPosition; }
+    inline const int getShaderGenericAttribUV() const { return this->iShaderTexturedGenericAttribUV; }
 
    protected:
     virtual void init();
@@ -115,28 +115,28 @@ class OpenGL3Interface : public Graphics {
     static int compareFuncToOpenGL(Graphics::COMPARE_FUNC compareFunc);
 
     // renderer
-    bool m_bInScene;
-    Vector2 m_vResolution;
-    Matrix4 m_projectionMatrix;
-    Matrix4 m_worldMatrix;
-    Matrix4 m_MP;
+    bool bInScene;
+    Vector2 vResolution;
+    Matrix4 projectionMatrix;
+    Matrix4 worldMatrix;
+    Matrix4 MP;
 
-    OpenGLShader *m_shaderTexturedGeneric;
-    int m_iShaderTexturedGenericAttribPosition;
-    int m_iShaderTexturedGenericAttribUV;
-    int m_iShaderTexturedGenericAttribCol;
-    bool m_bShaderTexturedGenericIsTextureEnabled;
+    OpenGLShader *shaderTexturedGeneric;
+    int iShaderTexturedGenericAttribPosition;
+    int iShaderTexturedGenericAttribUV;
+    int iShaderTexturedGenericAttribCol;
+    bool bShaderTexturedGenericIsTextureEnabled;
 
-    unsigned int m_iVA;
-    unsigned int m_iVBOVertices;
-    unsigned int m_iVBOTexcoords;
-    unsigned int m_iVBOTexcolors;
+    unsigned int iVA;
+    unsigned int iVBOVertices;
+    unsigned int iVBOTexcoords;
+    unsigned int iVBOTexcolors;
 
     // persistent vars
-    Color m_color;
+    Color color;
 
     // clipping
-    std::stack<McRect> m_clipRectStack;
+    std::stack<McRect> clipRectStack;
 };
 
 #endif

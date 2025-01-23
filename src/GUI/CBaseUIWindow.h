@@ -32,70 +32,70 @@ class CBaseUIWindow : public CBaseUIElement {
     // set
     CBaseUIWindow *setSizeToContent(int horizontalBorderSize = 1, int verticalBorderSize = 1);
     CBaseUIWindow *setTitleBarHeight(int height) {
-        m_iTitleBarHeight = height;
-        updateTitleBarMetrics();
+        this->iTitleBarHeight = height;
+        this->updateTitleBarMetrics();
         return this;
     }
     CBaseUIWindow *setTitle(UString text);
     CBaseUIWindow *setTitleFont(McFont *titleFont) {
-        m_titleFont = titleFont;
-        updateTitleBarMetrics();
+        this->titleFont = titleFont;
+        this->updateTitleBarMetrics();
         return this;
     }
     CBaseUIWindow *setResizeLimit(int maxWidth, int maxHeight) {
-        m_vResizeLimit = Vector2(maxWidth, maxHeight);
+        this->vResizeLimit = Vector2(maxWidth, maxHeight);
         return this;
     }
     CBaseUIWindow *setResizeable(bool resizeable) {
-        m_bResizeable = resizeable;
+        this->bResizeable = resizeable;
         return this;
     }
     CBaseUIWindow *setDrawTitleBarLine(bool drawTitleBarLine) {
-        m_bDrawTitleBarLine = drawTitleBarLine;
+        this->bDrawTitleBarLine = drawTitleBarLine;
         return this;
     }
     CBaseUIWindow *setDrawFrame(bool drawFrame) {
-        m_bDrawFrame = drawFrame;
+        this->bDrawFrame = drawFrame;
         return this;
     }
     CBaseUIWindow *setDrawBackground(bool drawBackground) {
-        m_bDrawBackground = drawBackground;
+        this->bDrawBackground = drawBackground;
         return this;
     }
     CBaseUIWindow *setRoundedRectangle(bool roundedRectangle) {
-        m_bRoundedRectangle = roundedRectangle;
+        this->bRoundedRectangle = roundedRectangle;
         return this;
     }
 
     CBaseUIWindow *setBackgroundColor(Color backgroundColor) {
-        m_backgroundColor = backgroundColor;
+        this->backgroundColor = backgroundColor;
         return this;
     }
     CBaseUIWindow *setFrameColor(Color frameColor) {
-        m_frameColor = frameColor;
+        this->frameColor = frameColor;
         return this;
     }
     CBaseUIWindow *setFrameBrightColor(Color frameBrightColor) {
-        m_frameBrightColor = frameBrightColor;
+        this->frameBrightColor = frameBrightColor;
         return this;
     }
     CBaseUIWindow *setFrameDarkColor(Color frameDarkColor) {
-        m_frameDarkColor = frameDarkColor;
+        this->frameDarkColor = frameDarkColor;
         return this;
     }
     CBaseUIWindow *setTitleColor(Color titleColor) {
-        m_titleColor = titleColor;
+        this->titleColor = titleColor;
         return this;
     }
 
     // get
     virtual bool isBusy();
     virtual bool isActive();
-    inline bool isMoving() const { return m_bMoving; }
-    inline bool isResizing() const { return m_bResizing; }
-    inline CBaseUIContainer *getContainer() const { return m_container; }
-    inline CBaseUIContainer *getTitleBarContainer() const { return m_titleBarContainer; }
-    inline int getTitleBarHeight() { return m_iTitleBarHeight; }
+    inline bool isMoving() const { return this->bMoving; }
+    inline bool isResizing() const { return this->bResizing; }
+    inline CBaseUIContainer *getContainer() const { return this->container; }
+    inline CBaseUIContainer *getTitleBarContainer() const { return this->titleBarContainer; }
+    inline int getTitleBarHeight() { return this->iTitleBarHeight; }
 
     // events
     virtual void onMouseDownInside();
@@ -117,55 +117,55 @@ class CBaseUIWindow : public CBaseUIElement {
 
     virtual void onClosed();
 
-    inline CBaseUIButton *getCloseButton() { return m_closeButton; }
-    inline CBaseUIButton *getMinimizeButton() { return m_minimizeButton; }
+    inline CBaseUIButton *getCloseButton() { return this->closeButton; }
+    inline CBaseUIButton *getMinimizeButton() { return this->minimizeButton; }
 
    private:
     // colors
-    Color m_frameColor;
-    Color m_frameBrightColor;
-    Color m_frameDarkColor;
-    Color m_backgroundColor;
-    Color m_titleColor;
+    Color frameColor;
+    Color frameBrightColor;
+    Color frameDarkColor;
+    Color backgroundColor;
+    Color titleColor;
 
     // window properties
-    bool m_bIsOpen;
-    bool m_bAnimIn;
-    bool m_bResizeable;
-    bool m_bCoherenceMode;
-    float m_fAnimation;
+    bool bIsOpen;
+    bool bAnimIn;
+    bool bResizeable;
+    bool bCoherenceMode;
+    float fAnimation;
 
-    bool m_bDrawFrame;
-    bool m_bDrawBackground;
-    bool m_bRoundedRectangle;
+    bool bDrawFrame;
+    bool bDrawBackground;
+    bool bRoundedRectangle;
 
     // title bar
-    bool m_bDrawTitleBarLine;
-    CBaseUIContainer *m_titleBarContainer;
-    McFont *m_titleFont;
-    float m_fTitleFontWidth;
-    float m_fTitleFontHeight;
-    int m_iTitleBarHeight;
-    UString m_sTitle;
+    bool bDrawTitleBarLine;
+    CBaseUIContainer *titleBarContainer;
+    McFont *titleFont;
+    float fTitleFontWidth;
+    float fTitleFontHeight;
+    int iTitleBarHeight;
+    UString sTitle;
 
-    CBaseUIButton *m_closeButton;
-    CBaseUIButton *m_minimizeButton;
+    CBaseUIButton *closeButton;
+    CBaseUIButton *minimizeButton;
 
     // main container
-    CBaseUIContainer *m_container;
+    CBaseUIContainer *container;
 
     // moving
-    bool m_bMoving;
-    Vector2 m_vMousePosBackup;
-    Vector2 m_vLastPos;
+    bool bMoving;
+    Vector2 vMousePosBackup;
+    Vector2 vLastPos;
 
     // resizing
-    Vector2 m_vResizeLimit;
-    bool m_bResizing;
-    int m_iResizeType;
-    Vector2 m_vLastSize;
+    Vector2 vResizeLimit;
+    bool bResizing;
+    int iResizeType;
+    Vector2 vLastSize;
 
     // test features
-    RenderTarget *m_rt;
-    CBaseUIBoxShadow *m_shadow;
+    RenderTarget *rt;
+    CBaseUIBoxShadow *shadow;
 };

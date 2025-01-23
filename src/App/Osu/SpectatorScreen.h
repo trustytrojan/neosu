@@ -22,12 +22,12 @@ class SpectatorScreen : public OsuScreen {
    private:
     McFont* font = NULL;
     McFont* lfont = NULL;
-    MainMenuPauseButton* m_pauseButton = NULL;
-    CBaseUIScrollView* m_background = NULL;
-    UserCard* m_userCard = NULL;
-    UIButton* m_stop_btn = NULL;
-    CBaseUILabel* m_spectating = NULL;
-    CBaseUILabel* m_status = NULL;
+    MainMenuPauseButton* pauseButton = NULL;
+    CBaseUIScrollView* background = NULL;
+    UserCard* userCard = NULL;
+    UIButton* stop_btn = NULL;
+    CBaseUILabel* spectating = NULL;
+    CBaseUILabel* status = NULL;
 };
 
 void start_spectating(i32 user_id);

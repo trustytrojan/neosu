@@ -19,9 +19,9 @@ class UIContextMenu;
 
 class UIModList : public CBaseUIContainer {
    public:
-    UIModList(u32 *flags) : CBaseUIContainer(0, 0, 0, 0, "mod_list") { m_flags = flags; }
+    UIModList(u32 *flags) : CBaseUIContainer(0, 0, 0, 0, "mod_list") { this->flags = flags; }
 
-    u32 *m_flags;
+    u32 *flags;
 
     virtual void draw(Graphics *g) override;
     virtual bool isVisible() override;
@@ -72,29 +72,29 @@ class RoomScreen : public OsuScreen {
 
     CBaseUILabel *map_label = NULL;
     CBaseUILabel *mods_label = NULL;
-    CBaseUIScrollView *m_settings = NULL;
-    CBaseUIScrollView *m_slotlist = NULL;
-    CBaseUIScrollView *m_map = NULL;
-    CBaseUILabel *m_host = NULL;
-    CBaseUILabel *m_room_name = NULL;
-    CBaseUILabel *m_room_name_iptl = NULL;
-    CBaseUITextbox *m_room_name_ipt = NULL;
-    UIButton *m_change_password_btn = NULL;
-    CBaseUILabel *m_win_condition = NULL;
-    UIButton *m_change_win_condition_btn = NULL;
-    CBaseUILabel *m_map_title = NULL;
-    CBaseUILabel *m_map_attributes = NULL;
-    CBaseUILabel *m_map_attributes2 = NULL;
-    CBaseUILabel *m_map_stars = NULL;
-    UIButton *m_select_map_btn = NULL;
-    UIButton *m_select_mods_btn = NULL;
-    UICheckbox *m_freemod = NULL;
-    UIModList *m_mods = NULL;
-    CBaseUILabel *m_no_mods_selected = NULL;
-    UIButton *m_ready_btn = NULL;
-    UIContextMenu *m_contextMenu = NULL;
+    CBaseUIScrollView *settings = NULL;
+    CBaseUIScrollView *slotlist = NULL;
+    CBaseUIScrollView *map = NULL;
+    CBaseUILabel *host = NULL;
+    CBaseUILabel *room_name = NULL;
+    CBaseUILabel *room_name_iptl = NULL;
+    CBaseUITextbox *room_name_ipt = NULL;
+    UIButton *change_password_btn = NULL;
+    CBaseUILabel *win_condition = NULL;
+    UIButton *change_win_condition_btn = NULL;
+    CBaseUILabel *map_title = NULL;
+    CBaseUILabel *map_attributes = NULL;
+    CBaseUILabel *map_attributes2 = NULL;
+    CBaseUILabel *map_stars = NULL;
+    UIButton *select_map_btn = NULL;
+    UIButton *select_mods_btn = NULL;
+    UICheckbox *freemod = NULL;
+    UIModList *mods = NULL;
+    CBaseUILabel *no_mods_selected = NULL;
+    UIButton *ready_btn = NULL;
+    UIContextMenu *contextMenu = NULL;
 
-    MainMenuPauseButton *m_pauseButton = NULL;
+    MainMenuPauseButton *pauseButton = NULL;
     McFont *font = NULL;
     McFont *lfont = NULL;
     time_t last_packet_tms = {0};

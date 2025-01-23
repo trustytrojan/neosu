@@ -9,9 +9,9 @@ class CBaseUICheckbox : public CBaseUIButton {
 
     virtual void draw(Graphics *g);
 
-    inline float getBlockSize() { return m_vSize.y / 2; }
-    inline float getBlockBorder() { return m_vSize.y / 4; }
-    inline bool isChecked() const { return m_bChecked; }
+    inline float getBlockSize() { return this->vSize.y / 2; }
+    inline float getBlockBorder() { return this->vSize.y / 4; }
+    inline bool isChecked() const { return this->bChecked; }
 
     CBaseUICheckbox *setChecked(bool checked, bool fireChangeEvent = true);
     CBaseUICheckbox *setSizeToContent(int horizontalBorderSize = 1, int verticalBorderSize = 1);
@@ -19,13 +19,13 @@ class CBaseUICheckbox : public CBaseUIButton {
 
     typedef fastdelegate::FastDelegate1<CBaseUICheckbox *> CheckboxChangeCallback;
     CBaseUICheckbox *setChangeCallback(CheckboxChangeCallback clickCallback) {
-        m_changeCallback = clickCallback;
+        this->changeCallback = clickCallback;
         return this;
     }
 
    protected:
     virtual void onPressed();
 
-    bool m_bChecked;
-    CheckboxChangeCallback m_changeCallback;
+    bool bChecked;
+    CheckboxChangeCallback changeCallback;
 };

@@ -17,6 +17,6 @@ class UIBackButton : public CBaseUIButton {
     void resetAnimation();
 
    private:
-    float m_fAnimation;
-    float m_fImageScale;
+    float fAnimation;
+    float fImageScale;
 };

@@ -22,17 +22,17 @@ class LinuxTimer : public BaseTimer {
     virtual void start() override;
     virtual void update() override;
 
-    virtual inline double getDelta() const override { return m_delta; }
-    virtual inline double getElapsedTime() const override { return m_elapsedTime; }
-    virtual inline u64 getElapsedTimeMS() const override { return m_elapsedTimeMS; }
+    virtual inline double getDelta() const override { return this->delta; }
+    virtual inline double getElapsedTime() const override { return this->elapsedTime; }
+    virtual inline u64 getElapsedTimeMS() const override { return this->elapsedTimeMS; }
 
    private:
-    timespec m_startTime;
-    timespec m_currentTime;
+    timespec startTime;
+    timespec currentTime;
 
-    double m_delta;
-    double m_elapsedTime;
-    u64 m_elapsedTimeMS;
+    double delta;
+    double elapsedTime;
+    u64 elapsedTimeMS;
 };
 
 #endif

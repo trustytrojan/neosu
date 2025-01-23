@@ -89,7 +89,7 @@ class Osu : public App, public MouseListener {
 
     void saveScreenshot();
 
-    void reloadSkin() { onSkinReload(); }
+    void reloadSkin() { this->onSkinReload(); }
 
     inline Vector2 getScreenSize() const { return g_vInternalResolution; }
     inline int getScreenWidth() const { return (int)g_vInternalResolution.x; }
@@ -97,30 +97,30 @@ class Osu : public App, public MouseListener {
 
     Beatmap *getSelectedBeatmap();
 
-    inline OptionsMenu *getOptionsMenu() const { return m_optionsMenu; }
-    inline SongBrowser *getSongBrowser() const { return m_songBrowser2; }
-    inline BackgroundImageHandler *getBackgroundImageHandler() const { return m_backgroundImageHandler; }
-    inline Skin *getSkin() const { return m_skin; }
-    inline HUD *getHUD() const { return m_hud; }
-    inline NotificationOverlay *getNotificationOverlay() const { return m_notificationOverlay; }
-    inline TooltipOverlay *getTooltipOverlay() const { return m_tooltipOverlay; }
-    inline ModSelector *getModSelector() const { return m_modSelector; }
-    inline ModFPoSu *getFPoSu() const { return m_fposu; }
-    inline PauseMenu *getPauseMenu() const { return m_pauseMenu; }
-    inline MainMenu *getMainMenu() const { return m_mainMenu; }
-    inline RankingScreen *getRankingScreen() const { return m_rankingScreen; }
-    inline LiveScore *getScore() const { return m_score; }
-    inline UpdateHandler *getUpdateHandler() const { return m_updateHandler; }
+    inline OptionsMenu *getOptionsMenu() const { return this->optionsMenu; }
+    inline SongBrowser *getSongBrowser() const { return this->songBrowser2; }
+    inline BackgroundImageHandler *getBackgroundImageHandler() const { return this->backgroundImageHandler; }
+    inline Skin *getSkin() const { return this->skin; }
+    inline HUD *getHUD() const { return this->hud; }
+    inline NotificationOverlay *getNotificationOverlay() const { return this->notificationOverlay; }
+    inline TooltipOverlay *getTooltipOverlay() const { return this->tooltipOverlay; }
+    inline ModSelector *getModSelector() const { return this->modSelector; }
+    inline ModFPoSu *getFPoSu() const { return this->fposu; }
+    inline PauseMenu *getPauseMenu() const { return this->pauseMenu; }
+    inline MainMenu *getMainMenu() const { return this->mainMenu; }
+    inline RankingScreen *getRankingScreen() const { return this->rankingScreen; }
+    inline LiveScore *getScore() const { return this->score; }
+    inline UpdateHandler *getUpdateHandler() const { return this->updateHandler; }
 
-    inline RenderTarget *getPlayfieldBuffer() const { return m_playfieldBuffer; }
-    inline RenderTarget *getSliderFrameBuffer() const { return m_sliderFrameBuffer; }
-    inline RenderTarget *getFrameBuffer() const { return m_frameBuffer; }
-    inline RenderTarget *getFrameBuffer2() const { return m_frameBuffer2; }
-    inline McFont *getTitleFont() const { return m_titleFont; }
-    inline McFont *getSubTitleFont() const { return m_subTitleFont; }
-    inline McFont *getSongBrowserFont() const { return m_songBrowserFont; }
-    inline McFont *getSongBrowserFontBold() const { return m_songBrowserFontBold; }
-    inline McFont *getFontIcons() const { return m_fontIcons; }
+    inline RenderTarget *getPlayfieldBuffer() const { return this->playfieldBuffer; }
+    inline RenderTarget *getSliderFrameBuffer() const { return this->sliderFrameBuffer; }
+    inline RenderTarget *getFrameBuffer() const { return this->frameBuffer; }
+    inline RenderTarget *getFrameBuffer2() const { return this->frameBuffer2; }
+    inline McFont *getTitleFont() const { return this->titleFont; }
+    inline McFont *getSubTitleFont() const { return this->subTitleFont; }
+    inline McFont *getSongBrowserFont() const { return this->songBrowserFont; }
+    inline McFont *getSongBrowserFontBold() const { return this->songBrowserFontBold; }
+    inline McFont *getFontIcons() const { return this->fontIcons; }
 
     float getDifficultyMultiplier();
     float getCSDifficultyMultiplier();
@@ -143,15 +143,15 @@ class Osu : public App, public MouseListener {
     inline bool getModNightmare() const { return cv_mod_nightmare.getBool(); }
     inline bool getModTD() const { return cv_mod_touchdevice.getBool() || cv_mod_touchdevice_always.getBool(); }
 
-    inline std::vector<ConVar *> getExperimentalMods() const { return m_experimentalMods; }
+    inline std::vector<ConVar *> getExperimentalMods() const { return this->experimentalMods; }
 
     bool isInPlayMode();
     bool isNotInPlayModeOrPaused();
-    inline bool isSkinLoading() const { return m_bSkinLoadScheduled; }
+    inline bool isSkinLoading() const { return this->bSkinLoadScheduled; }
 
-    inline bool isSkipScheduled() const { return m_bSkipScheduled; }
-    inline bool isSeeking() const { return m_bSeeking; }
-    inline float getQuickSaveTime() const { return m_fQuickSaveTime; }
+    inline bool isSkipScheduled() const { return this->bSkipScheduled; }
+    inline bool isSeeking() const { return this->bSeeking; }
+    inline float getQuickSaveTime() const { return this->fQuickSaveTime; }
 
     bool shouldFallBackToLegacySliderRenderer();  // certain mods or actions require Sliders to render dynamically
                                                   // (e.g. wobble or the CS override slider)
@@ -167,7 +167,7 @@ class Osu : public App, public MouseListener {
     void updateModsForConVarTemplate(UString oldValue, UString newValue) {
         (void)oldValue;
         (void)newValue;
-        updateMods();
+        this->updateMods();
     }
 
     void rebuildRenderTargets();
@@ -207,88 +207,88 @@ class Osu : public App, public MouseListener {
     void onLetterboxingOffsetChange(UString oldValue, UString newValue);
 
     // interfaces
-    VolumeOverlay *m_volumeOverlay = NULL;
-    MainMenu *m_mainMenu = NULL;
-    OptionsMenu *m_optionsMenu = NULL;
-    Chat *m_chat = NULL;
-    Lobby *m_lobby = NULL;
-    RoomScreen *m_room = NULL;
-    PromptScreen *m_prompt = NULL;
-    UIUserContextMenuScreen *m_user_actions = NULL;
-    SongBrowser *m_songBrowser2 = NULL;
-    BackgroundImageHandler *m_backgroundImageHandler = NULL;
-    ModSelector *m_modSelector = NULL;
-    RankingScreen *m_rankingScreen = NULL;
-    PauseMenu *m_pauseMenu = NULL;
-    Skin *m_skin = NULL;
-    HUD *m_hud = NULL;
-    TooltipOverlay *m_tooltipOverlay = NULL;
-    NotificationOverlay *m_notificationOverlay = NULL;
-    LiveScore *m_score = NULL;
-    Changelog *m_changelog = NULL;
-    UpdateHandler *m_updateHandler = NULL;
-    ModFPoSu *m_fposu = NULL;
-    SpectatorScreen *m_spectatorScreen = NULL;
+    VolumeOverlay *volumeOverlay = NULL;
+    MainMenu *mainMenu = NULL;
+    OptionsMenu *optionsMenu = NULL;
+    Chat *chat = NULL;
+    Lobby *lobby = NULL;
+    RoomScreen *room = NULL;
+    PromptScreen *prompt = NULL;
+    UIUserContextMenuScreen *user_actions = NULL;
+    SongBrowser *songBrowser2 = NULL;
+    BackgroundImageHandler *backgroundImageHandler = NULL;
+    ModSelector *modSelector = NULL;
+    RankingScreen *rankingScreen = NULL;
+    PauseMenu *pauseMenu = NULL;
+    Skin *skin = NULL;
+    HUD *hud = NULL;
+    TooltipOverlay *tooltipOverlay = NULL;
+    NotificationOverlay *notificationOverlay = NULL;
+    LiveScore *score = NULL;
+    Changelog *changelog = NULL;
+    UpdateHandler *updateHandler = NULL;
+    ModFPoSu *fposu = NULL;
+    SpectatorScreen *spectatorScreen = NULL;
 
-    std::vector<OsuScreen *> m_screens;
+    std::vector<OsuScreen *> screens;
 
     // rendering
-    RenderTarget *m_backBuffer;
-    RenderTarget *m_playfieldBuffer;
-    RenderTarget *m_sliderFrameBuffer;
-    RenderTarget *m_frameBuffer;
-    RenderTarget *m_frameBuffer2;
-    Vector2 m_vInternalResolution;
+    RenderTarget *backBuffer;
+    RenderTarget *playfieldBuffer;
+    RenderTarget *sliderFrameBuffer;
+    RenderTarget *frameBuffer;
+    RenderTarget *frameBuffer2;
+    Vector2 vInternalResolution;
     Vector2 flashlight_position;
 
     // mods
     Replay::Mods previous_mods;
-    bool m_bModAutoTemp = false;  // when ctrl+clicking a map, the auto mod should disable itself after the map finishes
+    bool bModAutoTemp = false;  // when ctrl+clicking a map, the auto mod should disable itself after the map finishes
 
-    std::vector<ConVar *> m_experimentalMods;
+    std::vector<ConVar *> experimentalMods;
 
     // keys
-    bool m_bF1;
-    bool m_bUIToggleCheck;
-    bool m_bScoreboardToggleCheck;
-    bool m_bEscape;
-    bool m_bKeyboardKey1Down;
-    bool m_bKeyboardKey12Down;
-    bool m_bKeyboardKey2Down;
-    bool m_bKeyboardKey22Down;
-    bool m_bMouseKey1Down;
-    bool m_bMouseKey2Down;
-    bool m_bSkipScheduled;
-    bool m_bQuickRetryDown;
-    float m_fQuickRetryTime;
-    bool m_bSeekKey;
-    bool m_bSeeking;
-    bool m_bClickedSkipButton = false;
-    float m_fPrevSeekMousePosX;
-    float m_fQuickSaveTime;
+    bool bF1;
+    bool bUIToggleCheck;
+    bool bScoreboardToggleCheck;
+    bool bEscape;
+    bool bKeyboardKey1Down;
+    bool bKeyboardKey12Down;
+    bool bKeyboardKey2Down;
+    bool bKeyboardKey22Down;
+    bool bMouseKey1Down;
+    bool bMouseKey2Down;
+    bool bSkipScheduled;
+    bool bQuickRetryDown;
+    float fQuickRetryTime;
+    bool bSeekKey;
+    bool bSeeking;
+    bool bClickedSkipButton = false;
+    float fPrevSeekMousePosX;
+    float fQuickSaveTime;
 
     // async toggles
     // TODO: this way of doing things is bullshit
-    bool m_bToggleModSelectionScheduled;
-    bool m_bToggleSongBrowserScheduled;
-    bool m_bToggleOptionsMenuScheduled;
-    bool m_bOptionsMenuFullscreen;
-    bool m_bToggleChangelogScheduled;
-    bool m_bToggleEditorScheduled;
+    bool bToggleModSelectionScheduled;
+    bool bToggleSongBrowserScheduled;
+    bool bToggleOptionsMenuScheduled;
+    bool bOptionsMenuFullscreen;
+    bool bToggleChangelogScheduled;
+    bool bToggleEditorScheduled;
 
     // cursor
-    bool m_bShouldCursorBeVisible;
+    bool bShouldCursorBeVisible;
 
     // global resources
-    std::vector<McFont *> m_fonts;
-    McFont *m_titleFont;
-    McFont *m_subTitleFont;
-    McFont *m_songBrowserFont;
-    McFont *m_songBrowserFontBold;
-    McFont *m_fontIcons;
+    std::vector<McFont *> fonts;
+    McFont *titleFont;
+    McFont *subTitleFont;
+    McFont *songBrowserFont;
+    McFont *songBrowserFontBold;
+    McFont *fontIcons;
 
     // debugging
-    CWindowManager *m_windowManager;
+    CWindowManager *windowManager;
 
     // replay
     UString watched_user_name;
@@ -296,15 +296,15 @@ class Osu : public App, public MouseListener {
 
     // custom
     bool music_unpause_scheduled = false;
-    bool m_bScheduleEndlessModNextBeatmap;
-    int m_iMultiplayerClientNumEscPresses;
-    bool m_bWasBossKeyPaused;
-    bool m_bSkinLoadScheduled;
-    bool m_bSkinLoadWasReload;
-    Skin *m_skinScheduledToLoad;
-    bool m_bFontReloadScheduled;
-    bool m_bFireResolutionChangedScheduled;
-    bool m_bFireDelayedFontReloadAndResolutionChangeToFixDesyncedUIScaleScheduled;
+    bool bScheduleEndlessModNextBeatmap;
+    int iMultiplayerClientNumEscPresses;
+    bool bWasBossKeyPaused;
+    bool bSkinLoadScheduled;
+    bool bSkinLoadWasReload;
+    Skin *skinScheduledToLoad;
+    bool bFontReloadScheduled;
+    bool bFireResolutionChangedScheduled;
+    bool bFireDelayedFontReloadAndResolutionChangeToFixDesyncedUIScaleScheduled;
     std::atomic<bool> should_pause_background_threads = false;
 };
 

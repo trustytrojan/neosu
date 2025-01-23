@@ -41,7 +41,7 @@ class HUD : public OsuScreen {
         Graphics *g, Vector2 pos, float alphaMultiplier = 1.0f,
         bool secondTrail = false);  // NOTE: only use if drawCursor() with updateAndDrawTrail = false (FPoSu)
     void drawCursorRipples(Graphics *g);
-    void drawFps(Graphics *g) { drawFps(g, m_tempFont, m_fCurFps); }
+    void drawFps(Graphics *g) { this->drawFps(g, this->tempFont, this->fCurFps); }
     void drawHitErrorBar(Graphics *g, Beatmap *beatmap);
     void drawPlayfieldBorder(Graphics *g, Vector2 playfieldCenter, Vector2 playfieldSize, float hitcircleDiameter);
     void drawPlayfieldBorder(Graphics *g, Vector2 playfieldCenter, Vector2 playfieldSize, float hitcircleDiameter,
@@ -81,7 +81,7 @@ class HUD : public OsuScreen {
     void drawSkip(Graphics *g);
 
     // ILLEGAL:
-    inline float getScoreBarBreakAnim() const { return m_fScoreBarBreakAnim; }
+    inline float getScoreBarBreakAnim() const { return this->fScoreBarBreakAnim; }
 
     ScoreboardSlot *player_slot = NULL;
     std::vector<ScoreboardSlot *> slots;
@@ -159,52 +159,52 @@ class HUD : public OsuScreen {
 
     float getScoreScale();
 
-    McFont *m_tempFont;
+    McFont *tempFont;
 
     // shit code
-    float m_fAccuracyXOffset;
-    float m_fAccuracyYOffset;
-    float m_fScoreHeight;
+    float fAccuracyXOffset;
+    float fAccuracyYOffset;
+    float fScoreHeight;
 
-    float m_fComboAnim1;
-    float m_fComboAnim2;
+    float fComboAnim1;
+    float fComboAnim2;
 
     // fps counter
-    float m_fCurFps;
-    float m_fCurFpsSmooth;
-    float m_fFpsUpdate;
+    float fCurFps;
+    float fCurFpsSmooth;
+    float fFpsUpdate;
 
     // hit error bar
-    std::vector<HITERROR> m_hiterrors;
+    std::vector<HITERROR> hiterrors;
 
     // inputoverlay / key overlay
-    float m_fInputoverlayK1AnimScale;
-    float m_fInputoverlayK2AnimScale;
-    float m_fInputoverlayM1AnimScale;
-    float m_fInputoverlayM2AnimScale;
+    float fInputoverlayK1AnimScale;
+    float fInputoverlayK2AnimScale;
+    float fInputoverlayM1AnimScale;
+    float fInputoverlayM2AnimScale;
 
-    float m_fInputoverlayK1AnimColor;
-    float m_fInputoverlayK2AnimColor;
-    float m_fInputoverlayM1AnimColor;
-    float m_fInputoverlayM2AnimColor;
+    float fInputoverlayK1AnimColor;
+    float fInputoverlayK2AnimColor;
+    float fInputoverlayM1AnimColor;
+    float fInputoverlayM2AnimColor;
 
     // cursor & trail & ripples
-    float m_fCursorExpandAnim;
-    std::vector<CURSORTRAIL> m_cursorTrail;
-    std::vector<CURSORTRAIL> m_cursorTrail2;
-    std::vector<CURSORTRAIL> m_cursorTrailSpectator1;
-    std::vector<CURSORTRAIL> m_cursorTrailSpectator2;
-    Shader *m_cursorTrailShader;
-    VertexArrayObject *m_cursorTrailVAO;
-    std::vector<CURSORRIPPLE> m_cursorRipples;
+    float fCursorExpandAnim;
+    std::vector<CURSORTRAIL> cursorTrail;
+    std::vector<CURSORTRAIL> cursorTrail2;
+    std::vector<CURSORTRAIL> cursorTrailSpectator1;
+    std::vector<CURSORTRAIL> cursorTrailSpectator2;
+    Shader *cursorTrailShader;
+    VertexArrayObject *cursorTrailVAO;
+    std::vector<CURSORRIPPLE> cursorRipples;
 
     // target heatmap
-    std::vector<TARGET> m_targets;
+    std::vector<TARGET> targets;
 
-    std::vector<UIAvatar *> m_avatars;
+    std::vector<UIAvatar *> avatars;
 
     // health
-    double m_fHealth;
-    float m_fScoreBarBreakAnim;
-    float m_fKiScaleAnim;
+    double fHealth;
+    float fScoreBarBreakAnim;
+    float fKiScaleAnim;
 };

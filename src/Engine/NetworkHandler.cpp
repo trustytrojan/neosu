@@ -32,7 +32,7 @@ UString NetworkHandler::httpGet(UString url, long timeout, long connectTimeout) 
 
         curl_easy_cleanup(curl);
 
-        return UString(curlReadBuffer.c_str());
+        return UString(this->curlReadBuffer.c_str());
     } else {
         debugLog("NetworkHandler::httpGet() error, curl == NULL!\n");
         return "";

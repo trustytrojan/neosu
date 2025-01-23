@@ -46,42 +46,42 @@ class Camera {
     // set
     void setType(CAMERA_TYPE camType);
     void setPos(Vector3 pos);
-    void setFov(float fovDeg) { m_fFov = deg2rad(fovDeg); }
-    void setFovRad(float fovRad) { m_fFov = fovRad; }
+    void setFov(float fovDeg) { this->fFov = deg2rad(fovDeg); }
+    void setFovRad(float fovRad) { this->fFov = fovRad; }
     void setOrbitDistance(float orbitDistance);
-    void setOrbitYAxis(bool orbitYAxis) { m_bOrbitYAxis = orbitYAxis; }
+    void setOrbitYAxis(bool orbitYAxis) { this->bOrbitYAxis = orbitYAxis; }
 
     void setRotation(float yawDeg, float pitchDeg, float rollDeg);
     void setYaw(float yawDeg);
     void setPitch(float pitchDeg);
     void setRoll(float rollDeg);
     void setWorldOrientation(Quaternion worldRotation) {
-        m_worldRotation = worldRotation;
-        updateVectors();
+        this->worldRotation = worldRotation;
+        this->updateVectors();
     }
 
     // get
-    inline CAMERA_TYPE getType() const { return m_camType; }
-    inline Vector3 getPos() const { return m_vPos; }
+    inline CAMERA_TYPE getType() const { return this->camType; }
+    inline Vector3 getPos() const { return this->vPos; }
     Vector3 getNextPosition(Vector3 velocity) const;
 
-    inline float getFov() const { return rad2deg(m_fFov); }
-    inline float getFovRad() const { return m_fFov; }
-    inline float getOrbitDistance() const { return m_fOrbitDistance; }
+    inline float getFov() const { return rad2deg(this->fFov); }
+    inline float getFovRad() const { return this->fFov; }
+    inline float getOrbitDistance() const { return this->fOrbitDistance; }
 
-    inline Vector3 getWorldXAxis() const { return m_worldRotation * m_vXAxis; }
-    inline Vector3 getWorldYAxis() const { return m_worldRotation * m_vYAxis; }
-    inline Vector3 getWorldZAxis() const { return m_worldRotation * m_vZAxis; }
+    inline Vector3 getWorldXAxis() const { return this->worldRotation * this->vXAxis; }
+    inline Vector3 getWorldYAxis() const { return this->worldRotation * this->vYAxis; }
+    inline Vector3 getWorldZAxis() const { return this->worldRotation * this->vZAxis; }
 
-    inline Vector3 getViewDirection() const { return m_vViewDir; }
-    inline Vector3 getViewUp() const { return m_vViewUp; }
-    inline Vector3 getViewRight() const { return m_vViewRight; }
+    inline Vector3 getViewDirection() const { return this->vViewDir; }
+    inline Vector3 getViewUp() const { return this->vViewUp; }
+    inline Vector3 getViewRight() const { return this->vViewRight; }
 
-    inline float getPitch() const { return m_fPitch; }
-    inline float getYaw() const { return m_fYaw; }
-    inline float getRoll() const { return m_fRoll; }
+    inline float getPitch() const { return this->fPitch; }
+    inline float getYaw() const { return this->fYaw; }
+    inline float getRoll() const { return this->fRoll; }
 
-    inline Quaternion getRotation() const { return m_rotation; }
+    inline Quaternion getRotation() const { return this->rotation; }
 
     Vector3 getProjectedVector(Vector3 point, float screenWidth, float screenHeight, float zn = 0.1f,
                                float zf = 1.0f) const;
@@ -105,37 +105,37 @@ class Camera {
     void lookAt(Vector3 eye, Vector3 target);
 
     // vars
-    CAMERA_TYPE m_camType;
-    Vector3 m_vPos;
-    Vector3 m_vOrbitTarget;
-    float m_fFov;
-    float m_fOrbitDistance;
-    bool m_bOrbitYAxis;
+    CAMERA_TYPE camType;
+    Vector3 vPos;
+    Vector3 vOrbitTarget;
+    float fFov;
+    float fOrbitDistance;
+    bool bOrbitYAxis;
 
     // base axes
-    Vector3 m_vWorldXAxis;
-    Vector3 m_vWorldYAxis;
-    Vector3 m_vWorldZAxis;
+    Vector3 vWorldXAxis;
+    Vector3 vWorldYAxis;
+    Vector3 vWorldZAxis;
 
     // derived axes
-    Vector3 m_vXAxis;
-    Vector3 m_vYAxis;
-    Vector3 m_vZAxis;
+    Vector3 vXAxis;
+    Vector3 vYAxis;
+    Vector3 vZAxis;
 
     // rotation
-    Quaternion m_rotation;
-    Quaternion m_worldRotation;
-    float m_fPitch;
-    float m_fYaw;
-    float m_fRoll;
+    Quaternion rotation;
+    Quaternion worldRotation;
+    float fPitch;
+    float fYaw;
+    float fRoll;
 
     // relative coordinate system
-    Vector3 m_vViewDir;
-    Vector3 m_vViewRight;
-    Vector3 m_vViewUp;
+    Vector3 vViewDir;
+    Vector3 vViewRight;
+    Vector3 vViewUp;
 
     // custom
-    CAM_PLANE m_viewFrustum[4];
+    CAM_PLANE viewFrustum[4];
 };
 
 #endif

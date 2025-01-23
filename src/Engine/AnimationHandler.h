@@ -29,28 +29,28 @@ class AnimationHandler {
 
     // simplified, without delay
     void moveLinear(float *base, float target, float duration, bool overrideExisting = false) {
-        moveLinear(base, target, duration, 0.0f, overrideExisting);
+        this->moveLinear(base, target, duration, 0.0f, overrideExisting);
     }
     void moveQuadIn(float *base, float target, float duration, bool overrideExisting = false) {
-        moveQuadIn(base, target, duration, 0.0f, overrideExisting);
+        this->moveQuadIn(base, target, duration, 0.0f, overrideExisting);
     }
     void moveQuadOut(float *base, float target, float duration, bool overrideExisting = false) {
-        moveQuadOut(base, target, duration, 0.0f, overrideExisting);
+        this->moveQuadOut(base, target, duration, 0.0f, overrideExisting);
     }
     void moveQuadInOut(float *base, float target, float duration, bool overrideExisting = false) {
-        moveQuadInOut(base, target, duration, 0.0f, overrideExisting);
+        this->moveQuadInOut(base, target, duration, 0.0f, overrideExisting);
     }
     void moveCubicIn(float *base, float target, float duration, bool overrideExisting = false) {
-        moveCubicIn(base, target, duration, 0.0f, overrideExisting);
+        this->moveCubicIn(base, target, duration, 0.0f, overrideExisting);
     }
     void moveCubicOut(float *base, float target, float duration, bool overrideExisting = false) {
-        moveCubicOut(base, target, duration, 0.0f, overrideExisting);
+        this->moveCubicOut(base, target, duration, 0.0f, overrideExisting);
     }
     void moveQuartIn(float *base, float target, float duration, bool overrideExisting = false) {
-        moveQuartIn(base, target, duration, 0.0f, overrideExisting);
+        this->moveQuartIn(base, target, duration, 0.0f, overrideExisting);
     }
     void moveQuartOut(float *base, float target, float duration, bool overrideExisting = false) {
-        moveQuartOut(base, target, duration, 0.0f, overrideExisting);
+        this->moveQuartOut(base, target, duration, 0.0f, overrideExisting);
     }
 
     // DEPRECATED:
@@ -61,7 +61,7 @@ class AnimationHandler {
     float getRemainingDuration(float *base) const;
     bool isAnimating(float *base) const;
 
-    inline size_t getNumActiveAnimations() const { return m_vAnimations.size(); }
+    inline size_t getNumActiveAnimations() const { return this->vAnimations.size(); }
 
    private:
     enum class ANIMATION_TYPE {
@@ -77,23 +77,23 @@ class AnimationHandler {
     };
 
     struct Animation {
-        float *m_fBase;
-        float m_fTarget;
-        float m_fDuration;
+        float *fBase;
+        float fTarget;
+        float fDuration;
 
-        float m_fStartValue;
-        float m_fStartTime;
-        ANIMATION_TYPE m_animType;
+        float fStartValue;
+        float fStartTime;
+        ANIMATION_TYPE animType;
 
-        float m_fFactor;
-        bool m_bStarted;
+        float fFactor;
+        bool bStarted;
     };
 
     void addAnimation(float *base, float target, float duration, float delay, bool overrideExisting,
                       ANIMATION_TYPE type, float smoothFactor = 0.0f);
     void overrideExistingAnimation(float *base);
 
-    std::vector<Animation> m_vAnimations;
+    std::vector<Animation> vAnimations;
 };
 
 extern AnimationHandler *anim;

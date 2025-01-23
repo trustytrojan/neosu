@@ -78,21 +78,21 @@ class SDLEnvironment : public Environment {
     virtual Vector2 getWindowPos();
     virtual Vector2 getWindowSize();
     virtual int getMonitor();
-    virtual std::vector<McRect> getMonitors() { return m_vMonitors; }
+    virtual std::vector<McRect> getMonitors() { return this->vMonitors; }
     virtual Vector2 getNativeScreenSize();
     virtual McRect getVirtualScreenRect();
     virtual McRect getDesktopRect();
     virtual int getDPI();
-    virtual bool isFullscreen() { return m_bFullscreen; }
-    virtual bool isWindowResizable() { return m_bResizable; }
+    virtual bool isFullscreen() { return this->bFullscreen; }
+    virtual bool isWindowResizable() { return this->bResizable; }
 
     // mouse
-    virtual bool isCursorInWindow() { return m_bIsCursorInsideWindow; }
-    virtual bool isCursorVisible() { return m_bCursorVisible; }
-    virtual bool isCursorClipped() { return m_bCursorClipped; }
+    virtual bool isCursorInWindow() { return this->bIsCursorInsideWindow; }
+    virtual bool isCursorVisible() { return this->bCursorVisible; }
+    virtual bool isCursorClipped() { return this->bCursorClipped; }
     virtual Vector2 getMousePos();
-    virtual McRect getCursorClip() { return m_cursorClip; }
-    virtual CURSORTYPE getCursor() { return m_cursorType; }
+    virtual McRect getCursorClip() { return this->cursorClip; }
+    virtual CURSORTYPE getCursor() { return this->cursorType; }
     virtual void setCursor(CURSORTYPE cur);
     virtual void setCursorVisible(bool visible);
     virtual void setMousePos(int x, int y);
@@ -103,7 +103,7 @@ class SDLEnvironment : public Environment {
 
     // ILLEGAL:
     void setWindow(SDL_Window *window) { m_window = window; }
-    inline SDL_Window *getWindow() { return m_window; }
+    inline SDL_Window *getWindow() { return this->window; }
 
    protected:
     SDL_Window *m_window;

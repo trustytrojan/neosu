@@ -19,42 +19,42 @@
 UIModSelectorModButton::UIModSelectorModButton(ModSelector *osuModSelector, float xPos, float yPos, float xSize,
                                                float ySize, UString name)
     : CBaseUIButton(xPos, yPos, xSize, ySize, name, "") {
-    m_osuModSelector = osuModSelector;
-    m_iState = 0;
-    m_vScale = m_vBaseScale = Vector2(1, 1);
-    m_fRot = 0.0f;
+    this->osuModSelector = osuModSelector;
+    this->iState = 0;
+    this->vScale = this->vBaseScale = Vector2(1, 1);
+    this->fRot = 0.0f;
 
-    m_fEnabledScaleMultiplier = 1.25f;
-    m_fEnabledRotationDeg = 6.0f;
-    m_bAvailable = true;
-    m_bOn = false;
+    this->fEnabledScaleMultiplier = 1.25f;
+    this->fEnabledRotationDeg = 6.0f;
+    this->bAvailable = true;
+    this->bOn = false;
 
-    getActiveImageFunc = NULL;
+    this->getActiveImageFunc = NULL;
 
-    m_bFocusStolenDelay = false;
+    this->bFocusStolenDelay = false;
 }
 
 void UIModSelectorModButton::draw(Graphics *g) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
-    if(getActiveImageFunc != NULL && getActiveImageFunc()) {
+    if(this->getActiveImageFunc != NULL && this->getActiveImageFunc()) {
         g->pushTransform();
         {
-            g->scale(m_vScale.x, m_vScale.y);
+            g->scale(this->vScale.x, this->vScale.y);
 
-            if(m_fRot != 0.0f) g->rotate(m_fRot);
+            if(this->fRot != 0.0f) g->rotate(this->fRot);
 
             g->setColor(0xffffffff);
 
             // HACK: For "Actual Flashlight" mod, I'm too lazy to add a new skin element
-            bool draw_inverted_colors = getActiveModName() == UString("afl");
+            bool draw_inverted_colors = this->getActiveModName() == UString("afl");
 
             if(draw_inverted_colors) {
                 glEnable(GL_COLOR_LOGIC_OP);
                 glLogicOp(GL_COPY_INVERTED);
             }
 
-            getActiveImageFunc()->draw(g, m_vPos + m_vSize / 2);
+            this->getActiveImageFunc()->draw(g, this->vPos + this->vSize / 2);
 
             if(draw_inverted_colors) {
                 glDisable(GL_COLOR_LOGIC_OP);
@@ -63,64 +63,64 @@ void UIModSelectorModButton::draw(Graphics *g) {
         g->popTransform();
     }
 
-    if(!m_bAvailable) {
-        const int size = m_vSize.x > m_vSize.y ? m_vSize.x : m_vSize.y;
+    if(!this->bAvailable) {
+        const int size = this->vSize.x > this->vSize.y ? this->vSize.x : this->vSize.y;
 
         g->setColor(0xff000000);
-        g->drawLine(m_vPos.x + 1, m_vPos.y, m_vPos.x + size + 1, m_vPos.y + size);
+        g->drawLine(this->vPos.x + 1, this->vPos.y, this->vPos.x + size + 1, this->vPos.y + size);
         g->setColor(0xffffffff);
-        g->drawLine(m_vPos.x, m_vPos.y, m_vPos.x + size, m_vPos.y + size);
+        g->drawLine(this->vPos.x, this->vPos.y, this->vPos.x + size, this->vPos.y + size);
         g->setColor(0xff000000);
-        g->drawLine(m_vPos.x + size + 1, m_vPos.y, m_vPos.x + 1, m_vPos.y + size);
+        g->drawLine(this->vPos.x + size + 1, this->vPos.y, this->vPos.x + 1, this->vPos.y + size);
         g->setColor(0xffffffff);
-        g->drawLine(m_vPos.x + size, m_vPos.y, m_vPos.x, m_vPos.y + size);
+        g->drawLine(this->vPos.x + size, this->vPos.y, this->vPos.x, this->vPos.y + size);
     }
 }
 
 void UIModSelectorModButton::mouse_update(bool *propagate_clicks) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
     CBaseUIButton::mouse_update(propagate_clicks);
 
     // handle tooltips
-    if(isMouseInside() && m_bAvailable && m_states.size() > 0 && !m_bFocusStolenDelay) {
+    if(this->isMouseInside() && this->bAvailable && this->states.size() > 0 && !this->bFocusStolenDelay) {
         osu->getTooltipOverlay()->begin();
-        for(int i = 0; i < m_states[m_iState].tooltipTextLines.size(); i++) {
-            osu->getTooltipOverlay()->addLine(m_states[m_iState].tooltipTextLines[i]);
+        for(int i = 0; i < this->states[this->iState].tooltipTextLines.size(); i++) {
+            osu->getTooltipOverlay()->addLine(this->states[this->iState].tooltipTextLines[i]);
         }
         osu->getTooltipOverlay()->end();
     }
 
-    m_bFocusStolenDelay = false;
+    this->bFocusStolenDelay = false;
 }
 
 void UIModSelectorModButton::resetState() {
-    setOn(false, true);
-    setState(0);
+    this->setOn(false, true);
+    this->setState(0);
 }
 
 void UIModSelectorModButton::onClicked() {
-    if(!m_bAvailable) return;
+    if(!this->bAvailable) return;
 
     // increase state, wrap around, switch on and off
-    if(m_bOn) {
-        m_iState = (m_iState + 1) % m_states.size();
+    if(this->bOn) {
+        this->iState = (this->iState + 1) % this->states.size();
 
         // HACK: In multi, skip "Actual Flashlight" mod
-        if(bancho.is_in_a_multi_room() && m_states[0].modName == UString("fl")) {
-            m_iState = m_iState % m_states.size() - 1;
+        if(bancho.is_in_a_multi_room() && this->states[0].modName == UString("fl")) {
+            this->iState = this->iState % this->states.size() - 1;
         }
 
-        if(m_iState == 0) {
-            setOn(false);
+        if(this->iState == 0) {
+            this->setOn(false);
         } else {
-            setOn(true);
+            this->setOn(true);
         }
     } else {
-        setOn(true);
+        this->setOn(true);
     }
 
     // set new state
-    setState(m_iState);
+    this->setState(this->iState);
 
     if(bancho.is_online()) {
         RichPresence::updateBanchoMods();
@@ -130,9 +130,9 @@ void UIModSelectorModButton::onClicked() {
         for(int i = 0; i < 16; i++) {
             if(bancho.room.slots[i].player_id != bancho.user_id) continue;
 
-            bancho.room.slots[i].mods = m_osuModSelector->getModFlags();
+            bancho.room.slots[i].mods = this->osuModSelector->getModFlags();
             if(bancho.room.is_host()) {
-                bancho.room.mods = m_osuModSelector->getModFlags();
+                bancho.room.mods = this->osuModSelector->getModFlags();
                 if(bancho.room.freemods) {
                     // When freemod is enabled, we only want to force DT, HT, or Target.
                     bancho.room.mods &= LegacyFlags::DoubleTime | LegacyFlags::HalfTime | LegacyFlags::Target;
@@ -145,7 +145,7 @@ void UIModSelectorModButton::onClicked() {
             write<u32>(&packet, bancho.room.slots[i].mods);
             send_packet(packet);
 
-            osu->m_room->on_room_updated(bancho.room);
+            osu->room->on_room_updated(bancho.room);
             break;
         }
     }
@@ -154,40 +154,40 @@ void UIModSelectorModButton::onClicked() {
 void UIModSelectorModButton::onFocusStolen() {
     CBaseUIButton::onFocusStolen();
 
-    m_bMouseInside = false;
-    m_bFocusStolenDelay = true;
+    this->bMouseInside = false;
+    this->bFocusStolenDelay = true;
 }
 
 void UIModSelectorModButton::setBaseScale(float xScale, float yScale) {
-    m_vBaseScale.x = xScale;
-    m_vBaseScale.y = yScale;
-    m_vScale = m_vBaseScale;
+    this->vBaseScale.x = xScale;
+    this->vBaseScale.y = yScale;
+    this->vScale = this->vBaseScale;
 
-    if(m_bOn) {
-        m_vScale = m_vBaseScale * m_fEnabledScaleMultiplier;
-        m_fRot = m_fEnabledRotationDeg;
+    if(this->bOn) {
+        this->vScale = this->vBaseScale * this->fEnabledScaleMultiplier;
+        this->fRot = this->fEnabledRotationDeg;
     }
 }
 
 void UIModSelectorModButton::setOn(bool on, bool silent) {
-    if(!m_bAvailable) return;
+    if(!this->bAvailable) return;
 
-    bool prevState = m_bOn;
-    m_bOn = on;
+    bool prevState = this->bOn;
+    this->bOn = on;
     float animationDuration = 0.05f;
     if(silent) {
         animationDuration = 0.f;
     }
 
     // Disable all states except current
-    for(int i = 0; i < m_states.size(); i++) {
-        if(i == m_iState) {
-            if(m_states[i].cvar->getBool() != on) {
-                m_states[i].cvar->setValue(on);
+    for(int i = 0; i < this->states.size(); i++) {
+        if(i == this->iState) {
+            if(this->states[i].cvar->getBool() != on) {
+                this->states[i].cvar->setValue(on);
             }
         } else {
-            if(m_states[i].cvar->getBool()) {
-                m_states[i].cvar->setValue(false);
+            if(this->states[i].cvar->getBool()) {
+                this->states[i].cvar->setValue(false);
             }
         }
     }
@@ -195,37 +195,39 @@ void UIModSelectorModButton::setOn(bool on, bool silent) {
         osu->updateMods();
     }
 
-    if(m_bOn) {
+    if(this->bOn) {
         if(prevState) {
             // swap effect
             float swapDurationMultiplier = 0.65f;
-            anim->moveLinear(&m_fRot, 0.0f, animationDuration * swapDurationMultiplier, true);
-            anim->moveLinear(&m_vScale.x, m_vBaseScale.x, animationDuration * swapDurationMultiplier, true);
-            anim->moveLinear(&m_vScale.y, m_vBaseScale.y, animationDuration * swapDurationMultiplier, true);
+            anim->moveLinear(&this->fRot, 0.0f, animationDuration * swapDurationMultiplier, true);
+            anim->moveLinear(&this->vScale.x, this->vBaseScale.x, animationDuration * swapDurationMultiplier, true);
+            anim->moveLinear(&this->vScale.y, this->vBaseScale.y, animationDuration * swapDurationMultiplier, true);
 
-            anim->moveLinear(&m_fRot, m_fEnabledRotationDeg, animationDuration * swapDurationMultiplier,
+            anim->moveLinear(&this->fRot, this->fEnabledRotationDeg, animationDuration * swapDurationMultiplier,
                              animationDuration * swapDurationMultiplier, false);
-            anim->moveLinear(&m_vScale.x, m_vBaseScale.x * m_fEnabledScaleMultiplier,
+            anim->moveLinear(&this->vScale.x, this->vBaseScale.x * this->fEnabledScaleMultiplier,
                              animationDuration * swapDurationMultiplier, animationDuration * swapDurationMultiplier,
                              false);
-            anim->moveLinear(&m_vScale.y, m_vBaseScale.y * m_fEnabledScaleMultiplier,
+            anim->moveLinear(&this->vScale.y, this->vBaseScale.y * this->fEnabledScaleMultiplier,
                              animationDuration * swapDurationMultiplier, animationDuration * swapDurationMultiplier,
                              false);
         } else {
-            anim->moveLinear(&m_fRot, m_fEnabledRotationDeg, animationDuration, true);
-            anim->moveLinear(&m_vScale.x, m_vBaseScale.x * m_fEnabledScaleMultiplier, animationDuration, true);
-            anim->moveLinear(&m_vScale.y, m_vBaseScale.y * m_fEnabledScaleMultiplier, animationDuration, true);
+            anim->moveLinear(&this->fRot, this->fEnabledRotationDeg, animationDuration, true);
+            anim->moveLinear(&this->vScale.x, this->vBaseScale.x * this->fEnabledScaleMultiplier,
+                             animationDuration, true);
+            anim->moveLinear(&this->vScale.y, this->vBaseScale.y * this->fEnabledScaleMultiplier,
+                             animationDuration, true);
         }
 
         if(!silent) {
             engine->getSound()->play(osu->getSkin()->getCheckOn());
         }
     } else {
-        anim->moveLinear(&m_fRot, 0.0f, animationDuration, true);
-        anim->moveLinear(&m_vScale.x, m_vBaseScale.x, animationDuration, true);
-        anim->moveLinear(&m_vScale.y, m_vBaseScale.y, animationDuration, true);
+        anim->moveLinear(&this->fRot, 0.0f, animationDuration, true);
+        anim->moveLinear(&this->vScale.x, this->vBaseScale.x, animationDuration, true);
+        anim->moveLinear(&this->vScale.y, this->vBaseScale.y, animationDuration, true);
 
-        if(prevState && !m_bOn && !silent) {
+        if(prevState && !this->bOn && !silent) {
             // only play sound on specific change
             engine->getSound()->play(osu->getSkin()->getCheckOff());
         }
@@ -233,43 +235,43 @@ void UIModSelectorModButton::setOn(bool on, bool silent) {
 }
 
 void UIModSelectorModButton::setState(int state) {
-    m_iState = state;
+    this->iState = state;
 
     // update image
-    if(m_iState < m_states.size() && m_states[m_iState].getImageFunc != NULL) {
-        getActiveImageFunc = m_states[m_iState].getImageFunc;
+    if(this->iState < this->states.size() && this->states[this->iState].getImageFunc != NULL) {
+        this->getActiveImageFunc = this->states[this->iState].getImageFunc;
     }
 }
 
 void UIModSelectorModButton::setState(unsigned int state, bool initialState, ConVar *cvar, UString modName,
                                       UString tooltipText, std::function<SkinImage *()> getImageFunc) {
     // dynamically add new state
-    while(m_states.size() < state + 1) {
+    while(this->states.size() < state + 1) {
         STATE t;
         t.getImageFunc = NULL;
-        m_states.push_back(t);
+        this->states.push_back(t);
     }
-    m_states[state].cvar = cvar;
-    m_states[state].modName = modName;
-    m_states[state].tooltipTextLines = tooltipText.split("\n");
-    m_states[state].getImageFunc = getImageFunc;
+    this->states[state].cvar = cvar;
+    this->states[state].modName = modName;
+    this->states[state].tooltipTextLines = tooltipText.split("\n");
+    this->states[state].getImageFunc = getImageFunc;
 
     // set initial state image
-    if(m_states.size() == 1)
-        getActiveImageFunc = m_states[0].getImageFunc;
-    else if(m_iState > -1 && m_iState < m_states.size())  // update current state image
-        getActiveImageFunc = m_states[m_iState].getImageFunc;
+    if(this->states.size() == 1)
+        this->getActiveImageFunc = this->states[0].getImageFunc;
+    else if(this->iState > -1 && this->iState < this->states.size())  // update current state image
+        this->getActiveImageFunc = this->states[this->iState].getImageFunc;
 
     // set initial state on (but without firing callbacks)
     if(initialState) {
-        setState(state);
-        setOn(true, true);
+        this->setState(state);
+        this->setOn(true, true);
     }
 }
 
 UString UIModSelectorModButton::getActiveModName() {
-    if(m_states.size() > 0 && m_iState < m_states.size())
-        return m_states[m_iState].modName;
+    if(this->states.size() > 0 && this->iState < this->states.size())
+        return this->states[this->iState].modName;
     else
         return "";
 }

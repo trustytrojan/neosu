@@ -11,65 +11,65 @@
 
 CBaseUICheckbox::CBaseUICheckbox(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
     : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {
-    m_bChecked = false;
-    m_changeCallback = NULL;
+    this->bChecked = false;
+    this->changeCallback = NULL;
 
     CBaseUIButton::setClickCallback(fastdelegate::MakeDelegate(this, &CBaseUICheckbox::onPressed));
 }
 
 void CBaseUICheckbox::draw(Graphics *g) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
-    const float dpiScale = ((float)m_font->getDPI() / 96.0f);  // NOTE: abusing font dpi
+    const float dpiScale = ((float)this->font->getDPI() / 96.0f);  // NOTE: abusing font dpi
 
     // draw background
-    if(m_bDrawBackground) {
-        g->setColor(m_backgroundColor);
-        g->fillRect(m_vPos.x + 1, m_vPos.y + 1, m_vSize.x - 1, m_vSize.y - 1);
+    if(this->bDrawBackground) {
+        g->setColor(this->backgroundColor);
+        g->fillRect(this->vPos.x + 1, this->vPos.y + 1, this->vSize.x - 1, this->vSize.y - 1);
     }
 
     // draw frame
-    if(m_bDrawFrame) {
-        g->setColor(m_frameColor);
-        g->drawRect(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y);
+    if(this->bDrawFrame) {
+        g->setColor(this->frameColor);
+        g->drawRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
     }
 
     // draw hover rects
     const int hoverRectOffset = std::round(3.0f * dpiScale);
-    g->setColor(m_frameColor);
-    if(m_bMouseInside && m_bEnabled) drawHoverRect(g, hoverRectOffset);
-    if(m_bActive) drawHoverRect(g, hoverRectOffset * 2);
+    g->setColor(this->frameColor);
+    if(this->bMouseInside && this->bEnabled) this->drawHoverRect(g, hoverRectOffset);
+    if(this->bActive) this->drawHoverRect(g, hoverRectOffset * 2);
 
     // draw block
     const int innerBlockPosOffset = std::round(2.0f * dpiScale);
-    const int blockBorder = std::round(getBlockBorder());
-    const int blockSize = std::round(getBlockSize());
+    const int blockBorder = std::round(this->getBlockBorder());
+    const int blockSize = std::round(this->getBlockSize());
     const int innerBlockSizeOffset = 2 * innerBlockPosOffset - 1;
-    g->drawRect(m_vPos.x + blockBorder, m_vPos.y + blockBorder, blockSize, blockSize);
-    if(m_bChecked)
-        g->fillRect(m_vPos.x + blockBorder + innerBlockPosOffset, m_vPos.y + blockBorder + innerBlockPosOffset,
+    g->drawRect(this->vPos.x + blockBorder, this->vPos.y + blockBorder, blockSize, blockSize);
+    if(this->bChecked)
+        g->fillRect(this->vPos.x + blockBorder + innerBlockPosOffset, this->vPos.y + blockBorder + innerBlockPosOffset,
                     blockSize - innerBlockSizeOffset, blockSize - innerBlockSizeOffset);
 
     // draw text
     const int shadowOffset = std::round(1.0f * dpiScale);
-    if(m_font != NULL && m_sText.length() > 0) {
-        // g->pushClipRect(McRect(m_vPos.x + 1, m_vPos.y + 1, m_vSize.x - 1, m_vSize.y - 1));
+    if(this->font != NULL && this->sText.length() > 0) {
+        // g->pushClipRect(McRect(this->vPos.x + 1, this->vPos.y + 1, this->vSize.x - 1, this->vSize.y - 1));
 
-        g->setColor(m_textColor);
+        g->setColor(this->textColor);
         g->pushTransform();
         {
-            g->translate((int)(m_vPos.x + getBlockBorder() * 2 + getBlockSize()),
-                         (int)(m_vPos.y + m_vSize.y / 2.0f + m_fStringHeight / 2.0f));
-            /// g->translate(m_vPos.x + (m_vSize.x - blockBorder*2 - blockSize)/2.0f - m_fStringWidth/2.0f +
-            /// blockBorder*2 + blockSize, m_vPos.y + m_vSize.y/2.0f + m_fStringHeight/2.0f);
+            g->translate((int)(this->vPos.x + this->getBlockBorder() * 2 + this->getBlockSize()),
+                         (int)(this->vPos.y + this->vSize.y / 2.0f + this->fStringHeight / 2.0f));
+            /// g->translate(this->vPos.x + (this->vSize.x - blockBorder*2 - blockSize)/2.0f - m_fStringWidth/2.0f +
+            /// blockBorder*2 + blockSize, this->vPos.y + m_vSize.y/2.0f + m_fStringHeight/2.0f);
 
             g->translate(shadowOffset, shadowOffset);
             g->setColor(0xff212121);
-            g->drawString(m_font, m_sText);
+            g->drawString(this->font, this->sText);
 
             g->translate(-shadowOffset, -shadowOffset);
-            g->setColor(m_textColor);
-            g->drawString(m_font, m_sText);
+            g->setColor(this->textColor);
+            g->drawString(this->font, this->sText);
         }
         g->popTransform();
 
@@ -78,27 +78,28 @@ void CBaseUICheckbox::draw(Graphics *g) {
 }
 
 CBaseUICheckbox *CBaseUICheckbox::setChecked(bool checked, bool fireChangeEvent) {
-    if(m_bChecked != checked) {
+    if(this->bChecked != checked) {
         if(fireChangeEvent)
-            onPressed();
+            this->onPressed();
         else
-            m_bChecked = checked;
+            this->bChecked = checked;
     }
 
     return this;
 }
 
 void CBaseUICheckbox::onPressed() {
-    m_bChecked = !m_bChecked;
-    if(m_changeCallback != NULL) m_changeCallback(this);
+    this->bChecked = !this->bChecked;
+    if(this->changeCallback != NULL) this->changeCallback(this);
 }
 
 CBaseUICheckbox *CBaseUICheckbox::setSizeToContent(int horizontalBorderSize, int verticalBorderSize) {
     // HACKHACK: broken
     CBaseUIButton::setSizeToContent(horizontalBorderSize, verticalBorderSize);
-    /// setSize(m_fStringWidth+2*horizontalBorderSize, m_fStringHeight + 2*verticalBorderSize);
-    setSize(getBlockBorder() * 2 + getBlockSize() + getBlockBorder() + m_fStringWidth + horizontalBorderSize * 2,
-            m_fStringHeight + verticalBorderSize * 2);
+    /// setSize(this->fStringWidth+2*horizontalBorderSize, this->fStringHeight + 2*verticalBorderSize);
+    this->setSize(this->getBlockBorder() * 2 + this->getBlockSize() + this->getBlockBorder() + this->fStringWidth +
+                      horizontalBorderSize * 2,
+                  this->fStringHeight + verticalBorderSize * 2);
 
     return this;
 }
@@ -106,8 +107,9 @@ CBaseUICheckbox *CBaseUICheckbox::setSizeToContent(int horizontalBorderSize, int
 CBaseUICheckbox *CBaseUICheckbox::setWidthToContent(int horizontalBorderSize) {
     // HACKHACK: broken
     CBaseUIButton::setWidthToContent(horizontalBorderSize);
-    /// setSize(m_fStringWidth+2*horizontalBorderSize, m_fStringHeight + 2*verticalBorderSize);
-    setSizeX(getBlockBorder() * 2 + getBlockSize() + getBlockBorder() + m_fStringWidth + horizontalBorderSize * 2);
+    /// setSize(this->fStringWidth+2*horizontalBorderSize, this->fStringHeight + 2*verticalBorderSize);
+    this->setSizeX(this->getBlockBorder() * 2 + this->getBlockSize() + this->getBlockBorder() + this->fStringWidth +
+                   horizontalBorderSize * 2);
 
     return this;
 }

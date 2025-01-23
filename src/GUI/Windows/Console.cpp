@@ -22,7 +22,7 @@ Console::Console() : CBaseUIWindow(350, 100, 620, 550, "Console") {
     cmd_clear.setCallback(fastdelegate::MakeDelegate(this, &Console::clear));
 
     // resources
-    m_logFont = engine->getResourceManager()->getFont("FONT_CONSOLE");
+    this->logFont = engine->getResourceManager()->getFont("FONT_CONSOLE");
     McFont *textboxFont = engine->getResourceManager()->loadFont("tahoma.ttf", "FONT_CONSOLE_TEXTBOX", 9.0f, false);
     McFont *titleFont = engine->getResourceManager()->loadFont("tahoma.ttf", "FONT_CONSOLE_TITLE", 10.0f, false);
 
@@ -33,54 +33,44 @@ Console::Console() : CBaseUIWindow(350, 100, 620, 550, "Console") {
     Color backgroundColor = 0xff555555;
     Color windowBackgroundColor = 0xff7b7b7b;
 
-    setTitleFont(titleFont);
-    setDrawTitleBarLine(false);
-    setDrawFrame(false);
-    setRoundedRectangle(true);
+    this->setTitleFont(titleFont);
+    this->setDrawTitleBarLine(false);
+    this->setDrawFrame(false);
+    this->setRoundedRectangle(true);
 
-    setBackgroundColor(windowBackgroundColor);
+    this->setBackgroundColor(windowBackgroundColor);
 
     // setFrameColor(frameColor);
-    setFrameDarkColor(0xff9a9a9a);
-    setFrameBrightColor(0xff8a8a8a);
+    this->setFrameDarkColor(0xff9a9a9a);
+    this->setFrameBrightColor(0xff8a8a8a);
 
-    getCloseButton()->setBackgroundColor(0xffbababa);
-    getCloseButton()->setDrawBackground(false);
+    this->getCloseButton()->setBackgroundColor(0xffbababa);
+    this->getCloseButton()->setDrawBackground(false);
 
     int textboxHeight = 20;
 
     // log scrollview
-    m_log =
-        new CBaseUIScrollView(CONSOLE_BORDER, 0, m_vSize.x - 2 * CONSOLE_BORDER,
-                              m_vSize.y - getTitleBarHeight() - 2 * CONSOLE_BORDER - textboxHeight - 1, "consolelog");
-    m_log->setHorizontalScrolling(false);
-    m_log->setVerticalScrolling(true);
-    m_log->setBackgroundColor(backgroundColor);
-    m_log->setFrameDarkColor(darkColor);
-    m_log->setFrameBrightColor(brightColor);
-    getContainer()->addBaseUIElement(m_log);
-
-    /*
-    m_newLog = new CBaseUITextField(CONSOLE_BORDER, 0, m_vSize.x - 2*CONSOLE_BORDER, m_vSize.y - getTitleBarHeight() -
-    2*CONSOLE_BORDER - textboxHeight - 1, "newconsolelog", ""); m_newLog->setFont(m_logFont);
-    m_newLog->setHorizontalScrolling(false);
-    m_newLog->setVerticalScrolling(true);
-    m_newLog->setBackgroundColor(backgroundColor);
-    m_newLog->setFrameDarkColor(darkColor);
-    m_newLog->setFrameBrightColor(brightColor);
-    getContainer()->addBaseUIElement(m_newLog);
-    */
+    this->log_view = new CBaseUIScrollView(
+        CONSOLE_BORDER, 0, this->vSize.x - 2 * CONSOLE_BORDER,
+        this->vSize.y - this->getTitleBarHeight() - 2 * CONSOLE_BORDER - textboxHeight - 1, "consolelog");
+    this->log_view->setHorizontalScrolling(false);
+    this->log_view->setVerticalScrolling(true);
+    this->log_view->setBackgroundColor(backgroundColor);
+    this->log_view->setFrameDarkColor(darkColor);
+    this->log_view->setFrameBrightColor(brightColor);
+    this->getContainer()->addBaseUIElement(this->log_view);
 
     // textbox
-    m_textbox = new CBaseUITextbox(CONSOLE_BORDER, m_vSize.y - getTitleBarHeight() - textboxHeight - CONSOLE_BORDER,
-                                   m_vSize.x - 2 * CONSOLE_BORDER, textboxHeight, "consoletextbox");
-    m_textbox->setText("");
-    m_textbox->setFont(textboxFont);
-    m_textbox->setBackgroundColor(backgroundColor);
-    m_textbox->setFrameDarkColor(darkColor);
-    m_textbox->setFrameBrightColor(brightColor);
-    m_textbox->setCaretWidth(1);
-    getContainer()->addBaseUIElement(m_textbox);
+    this->textbox =
+        new CBaseUITextbox(CONSOLE_BORDER, this->vSize.y - this->getTitleBarHeight() - textboxHeight - CONSOLE_BORDER,
+                           this->vSize.x - 2 * CONSOLE_BORDER, textboxHeight, "consoletextbox");
+    this->textbox->setText("");
+    this->textbox->setFont(textboxFont);
+    this->textbox->setBackgroundColor(backgroundColor);
+    this->textbox->setFrameDarkColor(darkColor);
+    this->textbox->setFrameBrightColor(brightColor);
+    this->textbox->setCaretWidth(1);
+    this->getContainer()->addBaseUIElement(this->textbox);
 
     // notify engine, exec autoexec
     engine->setConsole(this);
@@ -202,13 +192,13 @@ void Console::execConfigFile(std::string filename) {
 }
 
 void Console::mouse_update(bool *propagate_clicks) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
     CBaseUIWindow::mouse_update(propagate_clicks);
 
     // TODO: this needs proper callbacks in the textbox class
-    if(m_textbox->hitEnter()) {
-        processCommand(m_textbox->getText());
-        m_textbox->clear();
+    if(this->textbox->hitEnter()) {
+        processCommand(this->textbox->getText());
+        this->textbox->clear();
     }
 }
 
@@ -225,7 +215,7 @@ void Console::log(UString text, Color textColor) {
     }
 
     // get index
-    const int index = m_log->getContainer()->getElements().size();
+    const int index = this->log_view->getContainer()->getElements().size();
     int height = 13;
 
     // create new label, add it
@@ -233,33 +223,25 @@ void Console::log(UString text, Color textColor) {
     logEntry->setDrawFrame(false);
     logEntry->setDrawBackground(false);
     logEntry->setTextColor(textColor);
-    logEntry->setFont(m_logFont);
+    logEntry->setFont(this->logFont);
     logEntry->setSizeToContent(1, 4);
-    m_log->getContainer()->addBaseUIElement(logEntry);
+    this->log_view->getContainer()->addBaseUIElement(logEntry);
 
     // update scrollsize, scroll to bottom, clear textbox
-    m_log->setScrollSizeToContent();
-    m_log->scrollToBottom();
-
-    /// m_newLog->append(text);
-    /// m_newLog->scrollToBottom();
+    this->log_view->setScrollSizeToContent();
+    this->log_view->scrollToBottom();
 }
 
-void Console::clear() {
-    m_log->clear();
-    /// m_newLog->clear();
-}
+void Console::clear() { this->log_view->clear(); }
 
 void Console::onResized() {
     CBaseUIWindow::onResized();
 
-    m_log->setSize(m_vSize.x - 2 * CONSOLE_BORDER,
-                   m_vSize.y - getTitleBarHeight() - 2 * CONSOLE_BORDER - m_textbox->getSize().y - 1);
-    /// m_newLog->setSize(m_vSize.x - 2*CONSOLE_BORDER, m_vSize.y - getTitleBarHeight() - 2*CONSOLE_BORDER -
-    /// m_textbox->getSize().y - 1);
-    m_textbox->setSize(m_vSize.x - 2 * CONSOLE_BORDER, m_textbox->getSize().y);
-    m_textbox->setRelPosY(m_log->getRelPos().y + m_log->getSize().y + CONSOLE_BORDER + 1);
+    this->log_view->setSize(
+        this->vSize.x - 2 * CONSOLE_BORDER,
+        this->vSize.y - this->getTitleBarHeight() - 2 * CONSOLE_BORDER - this->textbox->getSize().y - 1);
+    this->textbox->setSize(this->vSize.x - 2 * CONSOLE_BORDER, this->textbox->getSize().y);
+    this->textbox->setRelPosY(this->log_view->getRelPos().y + this->log_view->getSize().y + CONSOLE_BORDER + 1);
 
-    m_log->scrollToY(m_log->getRelPosY());
-    // m_newLog->scrollY(m_newLog->getRelPosY());
+    this->log_view->scrollToY(this->log_view->getRelPosY());
 }

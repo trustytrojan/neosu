@@ -20,7 +20,7 @@ struct ChatChannel {
     ChatChannel(Chat *chat, UString name_arg);
     ~ChatChannel();
 
-    Chat *m_chat;
+    Chat *chat;
     CBaseUIScrollView *ui;
     UIButton *btn;
     UString name;
@@ -69,13 +69,13 @@ class Chat : public OsuScreen {
     void askWhatChannelToJoin(CBaseUIButton *btn);
     UIButton *join_channel_btn;
 
-    ChatChannel *m_selected_channel = NULL;
-    std::vector<ChatChannel *> m_channels;
-    CBaseUIContainer *m_button_container;
-    CBaseUITextbox *m_input_box;
+    ChatChannel *selected_channel = NULL;
+    std::vector<ChatChannel *> channels;
+    CBaseUIContainer *button_container;
+    CBaseUITextbox *input_box;
 
     McFont *font;
-    float m_fAnimation = 0.f;
+    float fAnimation = 0.f;
     bool user_wants_chat = false;
     bool visibility_was_forced = false;
     bool layout_update_scheduled = false;

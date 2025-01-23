@@ -70,7 +70,7 @@ class Database {
     void deleteScore(MD5Hash beatmapMD5Hash, u64 scoreUnixTimestamp);
     void sortScoresInPlace(std::vector<FinishedScore> &scores);
     void sortScores(MD5Hash beatmapMD5Hash);
-    void forceScoreUpdateOnNextCalculatePlayerStats() { m_bDidScoresChangeForStats = true; }
+    void forceScoreUpdateOnNextCalculatePlayerStats() { this->bDidScoresChangeForStats = true; }
 
     std::vector<UString> getPlayerNamesWithPPScores();
     std::vector<UString> getPlayerNamesWithScoresForUserSwitcher();
@@ -81,36 +81,36 @@ class Database {
     static unsigned long long getRequiredScoreForLevel(int level);
     static int getLevelForScore(unsigned long long score, int maxLevel = 120);
 
-    inline float getProgress() const { return m_fLoadingProgress.load(); }
+    inline float getProgress() const { return this->fLoadingProgress.load(); }
     inline bool isLoading() const {
-        float progress = getProgress();
+        float progress = this->getProgress();
         return progress > 0.f && progress < 1.f;
     }
-    inline bool isFinished() const { return (getProgress() >= 1.0f); }
-    inline bool foundChanges() const { return m_bFoundChanges; }
+    inline bool isFinished() const { return (this->getProgress() >= 1.0f); }
+    inline bool foundChanges() const { return this->bFoundChanges; }
 
-    inline const std::vector<DatabaseBeatmap *> getDatabaseBeatmaps() const { return m_beatmapsets; }
+    inline const std::vector<DatabaseBeatmap *> getDatabaseBeatmaps() const { return this->beatmapsets; }
     DatabaseBeatmap *getBeatmapDifficulty(const MD5Hash &md5hash);
     DatabaseBeatmap *getBeatmapDifficulty(i32 map_id);
     DatabaseBeatmap *getBeatmapSet(i32 set_id);
 
-    inline std::unordered_map<MD5Hash, std::vector<FinishedScore>> *getScores() { return &m_scores; }
-    inline const std::vector<SCORE_SORTING_METHOD> &getScoreSortingMethods() const { return m_scoreSortingMethods; }
+    inline std::unordered_map<MD5Hash, std::vector<FinishedScore>> *getScores() { return &this->scores; }
+    inline const std::vector<SCORE_SORTING_METHOD> &getScoreSortingMethods() const { return this->scoreSortingMethods; }
 
-    std::unordered_map<MD5Hash, std::vector<FinishedScore>> m_online_scores;
+    std::unordered_map<MD5Hash, std::vector<FinishedScore>> online_scores;
     std::string getOsuSongsFolder();
 
     BeatmapSet *loadRawBeatmap(std::string beatmapPath);  // only used for raw loading without db
 
     void loadDB();
-    std::mutex m_peppy_overrides_mtx;
-    std::unordered_map<MD5Hash, MapOverrides> m_peppy_overrides;
-    std::vector<BeatmapDifficulty *> m_maps_to_recalc;
-    std::vector<BeatmapDifficulty *> m_loudness_to_calc;
-    std::vector<FinishedScore> m_scores_to_convert;
+    std::mutex peppy_overrides_mtx;
+    std::unordered_map<MD5Hash, MapOverrides> peppy_overrides;
+    std::vector<BeatmapDifficulty *> maps_to_recalc;
+    std::vector<BeatmapDifficulty *> loudness_to_calc;
+    std::vector<FinishedScore> scores_to_convert;
 
-    std::mutex m_scores_mtx;
-    std::unordered_map<MD5Hash, std::vector<FinishedScore>> m_scores;
+    std::mutex scores_mtx;
+    std::unordered_map<MD5Hash, std::vector<FinishedScore>> scores;
 
    private:
     friend class DatabaseLoader;
@@ -123,32 +123,32 @@ class Database {
     void saveScores();
     bool addScoreRaw(const FinishedScore &score);
 
-    Timer *m_importTimer;
-    bool m_bIsFirstLoad;   // only load differences after first raw load
-    bool m_bFoundChanges;  // for total refresh detection of raw loading
+    Timer *importTimer;
+    bool bIsFirstLoad;   // only load differences after first raw load
+    bool bFoundChanges;  // for total refresh detection of raw loading
 
     // global
-    int m_iNumBeatmapsToLoad;
-    std::atomic<float> m_fLoadingProgress;
-    std::atomic<bool> m_bInterruptLoad;
-    std::vector<BeatmapSet *> m_beatmapsets;
-    std::vector<BeatmapSet *> m_neosu_sets;
+    int iNumBeatmapsToLoad;
+    std::atomic<float> fLoadingProgress;
+    std::atomic<bool> bInterruptLoad;
+    std::vector<BeatmapSet *> beatmapsets;
+    std::vector<BeatmapSet *> neosu_sets;
 
-    std::mutex m_beatmap_difficulties_mtx;
-    std::unordered_map<MD5Hash, BeatmapDifficulty *> m_beatmap_difficulties;
+    std::mutex beatmap_difficulties_mtx;
+    std::unordered_map<MD5Hash, BeatmapDifficulty *> beatmap_difficulties;
 
-    bool m_neosu_maps_loaded = false;
+    bool neosu_maps_loaded = false;
 
     // osu!.db
-    int m_iVersion;
-    int m_iFolderCount;
+    int iVersion;
+    int iFolderCount;
 
     // scores.db (legacy and custom)
-    bool m_bScoresLoaded = false;
+    bool bScoresLoaded = false;
 
-    bool m_bDidScoresChangeForStats;
-    PlayerStats m_prevPlayerStats;
-    std::vector<SCORE_SORTING_METHOD> m_scoreSortingMethods;
+    bool bDidScoresChangeForStats;
+    PlayerStats prevPlayerStats;
+    std::vector<SCORE_SORTING_METHOD> scoreSortingMethods;
 };
 
 extern Database *db;

@@ -12,5 +12,5 @@ class ChatLink : public CBaseUILabel {
 
     void open_beatmap_link(i32 map_id, i32 set_id);
 
-    UString m_link;
+    UString link;
 };

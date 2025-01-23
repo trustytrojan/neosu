@@ -11,89 +11,89 @@ class CBaseUIButton : public CBaseUIElement {
 
     virtual void draw(Graphics *g);
 
-    void click() { onClicked(); }
+    void click() { this->onClicked(); }
 
     // callbacks, either void or with ourself as the argument
     typedef fastdelegate::FastDelegate0<> ButtonClickVoidCallback;
     CBaseUIButton *setClickCallback(ButtonClickVoidCallback clickCallback) {
-        m_clickVoidCallback = clickCallback;
+        this->clickVoidCallback = clickCallback;
         return this;
     }
     typedef fastdelegate::FastDelegate1<CBaseUIButton *> ButtonClickCallback;
     CBaseUIButton *setClickCallback(ButtonClickCallback clickCallback) {
-        m_clickCallback = clickCallback;
+        this->clickCallback = clickCallback;
         return this;
     }
 
     // set
     CBaseUIButton *setDrawFrame(bool drawFrame) {
-        m_bDrawFrame = drawFrame;
+        this->bDrawFrame = drawFrame;
         return this;
     }
     CBaseUIButton *setDrawBackground(bool drawBackground) {
-        m_bDrawBackground = drawBackground;
+        this->bDrawBackground = drawBackground;
         return this;
     }
     CBaseUIButton *setTextLeft(bool textLeft) {
-        m_bTextLeft = textLeft;
-        updateStringMetrics();
+        this->bTextLeft = textLeft;
+        this->updateStringMetrics();
         return this;
     }
 
     CBaseUIButton *setFrameColor(Color frameColor) {
-        m_frameColor = frameColor;
+        this->frameColor = frameColor;
         return this;
     }
     CBaseUIButton *setBackgroundColor(Color backgroundColor) {
-        m_backgroundColor = backgroundColor;
+        this->backgroundColor = backgroundColor;
         return this;
     }
     CBaseUIButton *setTextColor(Color textColor) {
-        m_textColor = textColor;
-        m_textBrightColor = m_textDarkColor = 0;
+        this->textColor = textColor;
+        this->textBrightColor = this->textDarkColor = 0;
         return this;
     }
     CBaseUIButton *setTextBrightColor(Color textBrightColor) {
-        m_textBrightColor = textBrightColor;
+        this->textBrightColor = textBrightColor;
         return this;
     }
     CBaseUIButton *setTextDarkColor(Color textDarkColor) {
-        m_textDarkColor = textDarkColor;
+        this->textDarkColor = textDarkColor;
         return this;
     }
 
     CBaseUIButton *setText(UString text) {
-        m_sText = text;
-        updateStringMetrics();
+        this->sText = text;
+        this->updateStringMetrics();
         return this;
     }
     CBaseUIButton *setFont(McFont *font) {
-        m_font = font;
-        updateStringMetrics();
+        this->font = font;
+        this->updateStringMetrics();
         return this;
     }
 
     CBaseUIButton *setSizeToContent(int horizontalBorderSize = 1, int verticalBorderSize = 1) {
-        setSize(m_fStringWidth + 2 * horizontalBorderSize, m_fStringHeight + 2 * verticalBorderSize);
+        this->setSize(this->fStringWidth + 2 * horizontalBorderSize, this->fStringHeight + 2 * verticalBorderSize);
         return this;
     }
     CBaseUIButton *setWidthToContent(int horizontalBorderSize = 1) {
-        setSizeX(m_fStringWidth + 2 * horizontalBorderSize);
+        this->setSizeX(this->fStringWidth + 2 * horizontalBorderSize);
         return this;
     }
 
     // get
-    inline Color getFrameColor() const { return m_frameColor; }
-    inline Color getBackgroundColor() const { return m_backgroundColor; }
-    inline Color getTextColor() const { return m_textColor; }
-    inline UString getText() const { return m_sText; }
-    inline McFont *getFont() const { return m_font; }
-    inline ButtonClickCallback getClickCallback() const { return m_clickCallback; }
-    inline bool isTextLeft() const { return m_bTextLeft; }
+    inline Color getFrameColor() const { return this->frameColor; }
+    inline Color getBackgroundColor() const { return this->backgroundColor; }
+    inline Color getTextColor() const { return this->textColor; }
+    inline UString getText() const { return this->sText; }
+    inline McFont *getFont() const { return this->font; }
+    inline ButtonClickCallback getClickCallback() const { return this->clickCallback; }
+    inline bool isTextLeft() const { return this->bTextLeft; }
 
     // events
     virtual void onMouseUpInside();
-    virtual void onResized() { updateStringMetrics(); }
+    virtual void onResized() { this->updateStringMetrics(); }
 
    protected:
     virtual void onClicked();
@@ -104,21 +104,21 @@ class CBaseUIButton : public CBaseUIElement {
 
     void updateStringMetrics();
 
-    bool m_bDrawFrame;
-    bool m_bDrawBackground;
-    bool m_bTextLeft;
+    bool bDrawFrame;
+    bool bDrawBackground;
+    bool bTextLeft;
 
-    Color m_frameColor;
-    Color m_backgroundColor;
-    Color m_textColor;
-    Color m_textBrightColor;
-    Color m_textDarkColor;
+    Color frameColor;
+    Color backgroundColor;
+    Color textColor;
+    Color textBrightColor;
+    Color textDarkColor;
 
-    McFont *m_font;
-    UString m_sText;
-    float m_fStringWidth;
-    float m_fStringHeight;
+    McFont *font;
+    UString sText;
+    float fStringWidth;
+    float fStringHeight;
 
-    ButtonClickVoidCallback m_clickVoidCallback;
-    ButtonClickCallback m_clickCallback;
+    ButtonClickVoidCallback clickVoidCallback;
+    ButtonClickCallback clickCallback;
 };

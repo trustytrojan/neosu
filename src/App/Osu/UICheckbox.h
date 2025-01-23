@@ -12,7 +12,7 @@ class UICheckbox : public CBaseUICheckbox {
    private:
     virtual void onFocusStolen();
 
-    std::vector<UString> m_tooltipTextLines;
+    std::vector<UString> tooltipTextLines;
 
-    bool m_bFocusStolenDelay;
+    bool bFocusStolenDelay;
 };

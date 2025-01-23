@@ -146,124 +146,131 @@ class VSMusicBrowserButton : public CBaseUIButton {
    public:
     VSMusicBrowserButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
         : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {
-        m_bSelected = false;
-        m_bIsDirectory = false;
-        m_bPlaying = false;
+        this->bSelected = false;
+        this->bIsDirectory = false;
+        this->bPlaying = false;
 
-        m_fSelectionAnim = 0.0f;
+        this->fSelectionAnim = 0.0f;
     }
 
-    virtual ~VSMusicBrowserButton() { anim->deleteExistingAnimation(&m_fSelectionAnim); }
+    virtual ~VSMusicBrowserButton() { anim->deleteExistingAnimation(&this->fSelectionAnim); }
 
     virtual void draw(Graphics *g) {
-        if(!m_bVisible) return;
+        if(!this->bVisible) return;
 
-        const bool isAnimatingSelectionAnim = anim->isAnimating(&m_fSelectionAnim);
+        const bool isAnimatingSelectionAnim = anim->isAnimating(&this->fSelectionAnim);
 
         // draw regular line
-        if(!m_bSelected && !isAnimatingSelectionAnim) {
-            g->setColor(m_frameColor);
-            g->drawLine(m_vPos.x + m_vSize.x, m_vPos.y, m_vPos.x + m_vSize.x, m_vPos.y + m_vSize.y);
-            g->drawLine(m_vPos.x + m_vSize.x - 1, m_vPos.y, m_vPos.x + m_vSize.x - 1, m_vPos.y + m_vSize.y);
+        if(!this->bSelected && !isAnimatingSelectionAnim) {
+            g->setColor(this->frameColor);
+            g->drawLine(this->vPos.x + this->vSize.x, this->vPos.y, this->vPos.x + this->vSize.x,
+                        this->vPos.y + this->vSize.y);
+            g->drawLine(this->vPos.x + this->vSize.x - 1, this->vPos.y, this->vPos.x + this->vSize.x - 1,
+                        this->vPos.y + this->vSize.y);
         }
 
         // draw animated arrow and/or animated splitting line
         // NOTE: the arrow relies on the height being evenly divisible by 2 in order for the lines to not appear
         // crooked/aliased
-        if(m_bSelected || isAnimatingSelectionAnim) {
-            g->setColor(m_frameColor);
-            g->setAlpha(m_fSelectionAnim * m_fSelectionAnim);
+        if(this->bSelected || isAnimatingSelectionAnim) {
+            g->setColor(this->frameColor);
+            g->setAlpha(this->fSelectionAnim * this->fSelectionAnim);
 
-            g->pushClipRect(McRect(m_vPos.x + m_vSize.x / 2.0f, m_vPos.y, m_vSize.x / 2.0f + 2, m_vSize.y + 1));
+            g->pushClipRect(
+                McRect(this->vPos.x + this->vSize.x / 2.0f, this->vPos.y, this->vSize.x / 2.0f + 2, this->vSize.y + 1));
             {
-                float xAdd = (1.0f - m_fSelectionAnim) * (m_vSize.y / 2.0f);
+                float xAdd = (1.0f - this->fSelectionAnim) * (this->vSize.y / 2.0f);
 
-                g->drawLine(m_vPos.x + m_vSize.x + xAdd, m_vPos.y, m_vPos.x + m_vSize.x - m_vSize.y / 2.0f + xAdd,
-                            m_vPos.y + m_vSize.y / 2.0f);
-                g->drawLine(m_vPos.x + m_vSize.x - m_vSize.y / 2.0f + xAdd, m_vPos.y + m_vSize.y / 2.0f,
-                            m_vPos.x + m_vSize.x + xAdd, m_vPos.y + m_vSize.y);
+                g->drawLine(this->vPos.x + this->vSize.x + xAdd, this->vPos.y,
+                            this->vPos.x + this->vSize.x - this->vSize.y / 2.0f + xAdd,
+                            this->vPos.y + this->vSize.y / 2.0f);
+                g->drawLine(this->vPos.x + this->vSize.x - this->vSize.y / 2.0f + xAdd,
+                            this->vPos.y + this->vSize.y / 2.0f, this->vPos.x + this->vSize.x + xAdd,
+                            this->vPos.y + this->vSize.y);
 
-                g->drawLine(m_vPos.x + m_vSize.x - 1 + xAdd, m_vPos.y,
-                            m_vPos.x + m_vSize.x - m_vSize.y / 2.0f - 1 + xAdd, m_vPos.y + m_vSize.y / 2.0f);
-                g->drawLine(m_vPos.x + m_vSize.x - m_vSize.y / 2.0f - 1 + xAdd, m_vPos.y + m_vSize.y / 2.0f,
-                            m_vPos.x + m_vSize.x - 1 + xAdd, m_vPos.y + m_vSize.y);
+                g->drawLine(this->vPos.x + this->vSize.x - 1 + xAdd, this->vPos.y,
+                            this->vPos.x + this->vSize.x - this->vSize.y / 2.0f - 1 + xAdd,
+                            this->vPos.y + this->vSize.y / 2.0f);
+                g->drawLine(this->vPos.x + this->vSize.x - this->vSize.y / 2.0f - 1 + xAdd,
+                            this->vPos.y + this->vSize.y / 2.0f, this->vPos.x + this->vSize.x - 1 + xAdd,
+                            this->vPos.y + this->vSize.y);
 
-                if(m_fSelectionAnim < 1.0f) {
+                if(this->fSelectionAnim < 1.0f) {
                     g->setAlpha(1.0f);
 
-                    g->drawLine(m_vPos.x + m_vSize.x, m_vPos.y, m_vPos.x + m_vSize.x,
-                                m_vPos.y + (m_vSize.y / 2.0f) * (1.0f - m_fSelectionAnim));
-                    g->drawLine(m_vPos.x + m_vSize.x - 1, m_vPos.y, m_vPos.x + m_vSize.x - 1,
-                                m_vPos.y + (m_vSize.y / 2.0f) * (1.0f - m_fSelectionAnim));
+                    g->drawLine(this->vPos.x + this->vSize.x, this->vPos.y, this->vPos.x + this->vSize.x,
+                                this->vPos.y + (this->vSize.y / 2.0f) * (1.0f - this->fSelectionAnim));
+                    g->drawLine(this->vPos.x + this->vSize.x - 1, this->vPos.y, this->vPos.x + this->vSize.x - 1,
+                                this->vPos.y + (this->vSize.y / 2.0f) * (1.0f - this->fSelectionAnim));
 
-                    g->drawLine(m_vPos.x + m_vSize.x,
-                                m_vPos.y + m_vSize.y / 2.0f + (m_vSize.y / 2.0f) * (m_fSelectionAnim),
-                                m_vPos.x + m_vSize.x, m_vPos.y + m_vSize.y);
-                    g->drawLine(m_vPos.x + m_vSize.x - 1,
-                                m_vPos.y + m_vSize.y / 2.0f + (m_vSize.y / 2.0f) * (m_fSelectionAnim),
-                                m_vPos.x + m_vSize.x - 1, m_vPos.y + m_vSize.y);
+                    g->drawLine(this->vPos.x + this->vSize.x,
+                                this->vPos.y + this->vSize.y / 2.0f + (this->vSize.y / 2.0f) * (this->fSelectionAnim),
+                                this->vPos.x + this->vSize.x, this->vPos.y + this->vSize.y);
+                    g->drawLine(this->vPos.x + this->vSize.x - 1,
+                                this->vPos.y + this->vSize.y / 2.0f + (this->vSize.y / 2.0f) * (this->fSelectionAnim),
+                                this->vPos.x + this->vSize.x - 1, this->vPos.y + this->vSize.y);
                 }
             }
             g->popClipRect();
         }
 
         // highlight currently playing
-        if(m_bPlaying) {
+        if(this->bPlaying) {
             float alpha = std::abs(std::sin(engine->getTime() * 3));
 
             // don't animate unnecessarily while not in focus/foreground
             if(!engine->hasFocus()) alpha = 0.75f;
 
             g->setColor(COLOR((int)(alpha * 50.0f), 0, 196, 223));
-            g->fillRect(m_vPos.x, m_vPos.y - 1, m_vSize.x, m_vSize.y + 2);
+            g->fillRect(this->vPos.x, this->vPos.y - 1, this->vSize.x, this->vSize.y + 2);
         }
 
         // g->setColor(0xffff0000);
-        // g->drawRect(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y);
+        // g->drawRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
 
-        drawText(g);
+        this->drawText(g);
     }
 
     void setSelected(bool selected) {
-        if(selected && !m_bSelected)
-            anim->moveQuadInOut(&m_fSelectionAnim, 1.0f, cv_vs_browser_animspeed.getFloat(), 0.0f, true);
+        if(selected && !this->bSelected)
+            anim->moveQuadInOut(&this->fSelectionAnim, 1.0f, cv_vs_browser_animspeed.getFloat(), 0.0f, true);
         else if(!selected)
-            anim->moveQuadInOut(&m_fSelectionAnim, 0.0f, cv_vs_browser_animspeed.getFloat(), 0.0f, true);
+            anim->moveQuadInOut(&this->fSelectionAnim, 0.0f, cv_vs_browser_animspeed.getFloat(), 0.0f, true);
 
-        m_bSelected = selected;
+        this->bSelected = selected;
     }
 
-    void setDirectory(bool directory) { m_bIsDirectory = directory; }
-    void setPlaying(bool playing) { m_bPlaying = playing; }
+    void setDirectory(bool directory) { this->bIsDirectory = directory; }
+    void setPlaying(bool playing) { this->bPlaying = playing; }
 
-    inline bool isDirectory() const { return m_bIsDirectory; }
+    inline bool isDirectory() const { return this->bIsDirectory; }
 
    private:
-    bool m_bSelected;
-    bool m_bIsDirectory;
-    bool m_bPlaying;
+    bool bSelected;
+    bool bIsDirectory;
+    bool bPlaying;
 
-    float m_fSelectionAnim;
+    float fSelectionAnim;
 };
 
 class VSMusicBrowserColumnScrollView : public CBaseUIScrollView {
    public:
     VSMusicBrowserColumnScrollView(float xPos, float yPos, float xSize, float ySize, UString name)
         : CBaseUIScrollView(xPos, yPos, xSize, ySize, name) {
-        m_fAnim = 0.0f;
+        this->fAnim = 0.0f;
 
         // spawn animation
-        anim->moveQuadInOut(&m_fAnim, 1.0f, cv_vs_browser_animspeed.getFloat(), 0.0f, true);
+        anim->moveQuadInOut(&this->fAnim, 1.0f, cv_vs_browser_animspeed.getFloat(), 0.0f, true);
     }
 
-    virtual ~VSMusicBrowserColumnScrollView() { anim->deleteExistingAnimation(&m_fAnim); }
+    virtual ~VSMusicBrowserColumnScrollView() { anim->deleteExistingAnimation(&this->fAnim); }
 
     virtual void draw(Graphics *g) {
-        if(anim->isAnimating(&m_fAnim)) {
-            g->push3DScene(McRect(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y));
+        if(anim->isAnimating(&this->fAnim)) {
+            g->push3DScene(McRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y));
             {
-                g->offset3DScene(-m_vSize.x / 2, 0, 0);
-                g->rotate3DScene(0, 100 - m_fAnim * 100, 0);
+                g->offset3DScene(-this->vSize.x / 2, 0, 0);
+                g->rotate3DScene(0, 100 - this->fAnim * 100, 0);
                 CBaseUIScrollView::draw(g);
             }
             g->pop3DScene();
@@ -272,35 +279,35 @@ class VSMusicBrowserColumnScrollView : public CBaseUIScrollView {
     }
 
    private:
-    float m_fAnim;
+    float fAnim;
 };
 
 VSMusicBrowser::VSMusicBrowser(int x, int y, int xSize, int ySize, McFont *font)
     : CBaseUIElement(x, y, xSize, ySize, "") {
-    m_font = font;
+    this->font = font;
 
-    m_defaultTextColor = COLOR(215, 55, 55, 55);
-    m_playingTextBrightColor = COLOR(255, 0, 196, 223);
-    m_playingTextDarkColor = COLOR(150, 0, 80, 130);
+    this->defaultTextColor = COLOR(215, 55, 55, 55);
+    this->playingTextBrightColor = COLOR(255, 0, 196, 223);
+    this->playingTextDarkColor = COLOR(150, 0, 80, 130);
 
-    m_mainContainer = new CBaseUIScrollView(x, y, xSize, ySize, "");
-    m_mainContainer->setDrawBackground(false);
-    m_mainContainer->setDrawFrame(false);
-    m_mainContainer->setVerticalScrolling(false);
-    m_mainContainer->setScrollbarColor(0x99666666);
+    this->mainContainer = new CBaseUIScrollView(x, y, xSize, ySize, "");
+    this->mainContainer->setDrawBackground(false);
+    this->mainContainer->setDrawFrame(false);
+    this->mainContainer->setVerticalScrolling(false);
+    this->mainContainer->setScrollbarColor(0x99666666);
 
-    updateDrives();
+    this->updateDrives();
 }
 
-VSMusicBrowser::~VSMusicBrowser() { SAFE_DELETE(m_mainContainer); }
+VSMusicBrowser::~VSMusicBrowser() { SAFE_DELETE(this->mainContainer); }
 
-void VSMusicBrowser::draw(Graphics *g) { m_mainContainer->draw(g); }
+void VSMusicBrowser::draw(Graphics *g) { this->mainContainer->draw(g); }
 
 void VSMusicBrowser::mouse_update(bool *propagate_clicks) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
     CBaseUIElement::mouse_update(propagate_clicks);
 
-    m_mainContainer->mouse_update(propagate_clicks);
+    this->mainContainer->mouse_update(propagate_clicks);
 }
 
 void VSMusicBrowser::onButtonClicked(CBaseUIButton *button) {
@@ -311,41 +318,41 @@ void VSMusicBrowser::onButtonClicked(CBaseUIButton *button) {
     if(btn->isDirectory())
         btn->setSelected(true);
     else {
-        m_previousActiveSong = m_activeSong;
-        m_activeSong = btn->getName();
+        this->previousActiveSong = this->activeSong;
+        this->activeSong = btn->getName();
 
         btn->setPlaying(true);
-        btn->setTextDarkColor(m_playingTextDarkColor);
-        btn->setTextBrightColor(m_playingTextBrightColor);
+        btn->setTextDarkColor(this->playingTextDarkColor);
+        btn->setTextBrightColor(this->playingTextBrightColor);
     }
 
     // get column this press came from and deselect all others, also rebuild all columns > current
     bool fromInvalidSelection = true;
-    for(size_t i = 0; i < m_columns.size(); i++) {
-        for(size_t b = 0; b < m_columns[i].buttons.size(); b++) {
-            if(m_columns[i].buttons[b]->getName() == btn->getName()) {
+    for(size_t i = 0; i < this->columns.size(); i++) {
+        for(size_t b = 0; b < this->columns[i].buttons.size(); b++) {
+            if(this->columns[i].buttons[b]->getName() == btn->getName()) {
                 if(btn->isDirectory()) {
                     // rebuild it
-                    updateFolder(std::string(btn->getName().toUtf8()), i);
+                    this->updateFolder(std::string(btn->getName().toUtf8()), i);
 
                     // reset selection flag of all buttons in THIS column except the one we just clicked
-                    for(size_t r = 0; r < m_columns[i].buttons.size(); r++) {
-                        if(m_columns[i].buttons[r] != btn) m_columns[i].buttons[r]->setSelected(false);
+                    for(size_t r = 0; r < this->columns[i].buttons.size(); r++) {
+                        if(this->columns[i].buttons[r] != btn) this->columns[i].buttons[r]->setSelected(false);
                     }
-                } else if(m_fileClickedCallback != NULL) {
+                } else if(this->fileClickedCallback != NULL) {
                     // rebuild playlist, but only if this click would result in a successful play
                     if(VinylScratcher::tryPlayFile(std::string(btn->getName().toUtf8()))) {
                         fromInvalidSelection = false;
 
-                        m_playlist.clear();
-                        for(size_t p = 0; p < m_columns[i].buttons.size(); p++) {
-                            if(!m_columns[i].buttons[p]->isDirectory())
-                                m_playlist.push_back(m_columns[i].buttons[p]->getName().toUtf8());
+                        this->playlist.clear();
+                        for(size_t p = 0; p < this->columns[i].buttons.size(); p++) {
+                            if(!this->columns[i].buttons[p]->isDirectory())
+                                this->playlist.push_back(this->columns[i].buttons[p]->getName().toUtf8());
                         }
                     }
 
                     // fire play event
-                    m_fileClickedCallback(std::string(btn->getName().toUtf8()), false);
+                    this->fileClickedCallback(std::string(btn->getName().toUtf8()), false);
                 }
 
                 break;
@@ -354,27 +361,28 @@ void VSMusicBrowser::onButtonClicked(CBaseUIButton *button) {
     }
 
     // update button highlight
-    updatePlayingSelection(fromInvalidSelection);
+    this->updatePlayingSelection(fromInvalidSelection);
 }
 
 void VSMusicBrowser::updatePlayingSelection(bool fromInvalidSelection) {
-    for(size_t i = 0; i < m_columns.size(); i++) {
-        for(size_t b = 0; b < m_columns[i].buttons.size(); b++) {
-            VSMusicBrowserButton *button = m_columns[i].buttons[b];
+    for(size_t i = 0; i < this->columns.size(); i++) {
+        for(size_t b = 0; b < this->columns[i].buttons.size(); b++) {
+            VSMusicBrowserButton *button = this->columns[i].buttons[b];
 
-            if(button->getName() != UString(m_activeSong.c_str())) {
-                button->setTextColor(m_defaultTextColor);
+            if(button->getName() != UString(this->activeSong.c_str())) {
+                button->setTextColor(this->defaultTextColor);
                 button->setPlaying(false);
             } else {
-                button->setTextBrightColor(m_playingTextBrightColor);
-                button->setTextDarkColor(m_playingTextDarkColor);
+                button->setTextBrightColor(this->playingTextBrightColor);
+                button->setTextDarkColor(this->playingTextDarkColor);
                 button->setPlaying(true);
 
                 if(!fromInvalidSelection) {
-                    const float relativeButtonY = button->getPos().y - m_columns[i].view->getPos().y;
-                    if(relativeButtonY <= 0 || relativeButtonY + button->getSize().y >= m_columns[i].view->getSize().y)
-                        m_columns[i].view->scrollToElement(
-                            button, 0, m_columns[i].view->getSize().y / 2 - button->getSize().y / 2);
+                    const float relativeButtonY = button->getPos().y - this->columns[i].view->getPos().y;
+                    if(relativeButtonY <= 0 ||
+                       relativeButtonY + button->getSize().y >= this->columns[i].view->getSize().y)
+                        this->columns[i].view->scrollToElement(
+                            button, 0, this->columns[i].view->getSize().y / 2 - button->getSize().y / 2);
                 }
             }
         }
@@ -382,14 +390,14 @@ void VSMusicBrowser::updatePlayingSelection(bool fromInvalidSelection) {
 }
 
 void VSMusicBrowser::updateFolder(std::string baseFolder, size_t fromDepth) {
-    if(m_columns.size() < 1) return;
+    if(this->columns.size() < 1) return;
 
     // remove all columns > fromDepth
-    if(fromDepth + 1 < m_columns.size()) {
-        for(size_t i = fromDepth + 1; i < m_columns.size(); i++) {
-            m_mainContainer->getContainer()->deleteBaseUIElement(m_columns[i].view);
+    if(fromDepth + 1 < this->columns.size()) {
+        for(size_t i = fromDepth + 1; i < this->columns.size(); i++) {
+            this->mainContainer->getContainer()->deleteBaseUIElement(this->columns[i].view);
 
-            m_columns.erase(m_columns.begin() + i);
+            this->columns.erase(this->columns.begin() + i);
             i--;
         }
     }
@@ -397,7 +405,7 @@ void VSMusicBrowser::updateFolder(std::string baseFolder, size_t fromDepth) {
     // create column
     COLUMN col;
     {
-        const CBaseUIScrollView *previousView = m_columns[m_columns.size() - 1].view;
+        const CBaseUIScrollView *previousView = this->columns[this->columns.size() - 1].view;
         const int xPos = previousView->getRelPos().x + previousView->getSize().x;
 
         const float dpiScale = env->getDPIScale();
@@ -405,7 +413,7 @@ void VSMusicBrowser::updateFolder(std::string baseFolder, size_t fromDepth) {
         const int height = 28 * dpiScale;
         const Color frameColor = COLOR(255, 150, 150, 150);
 
-        col.view = new VSMusicBrowserColumnScrollView(xPos, -1, 100, m_vSize.y, "");
+        col.view = new VSMusicBrowserColumnScrollView(xPos, -1, 100, this->vSize.y, "");
         col.view->setScrollMouseWheelMultiplier((1 / 3.5f) * 0.5f);
         col.view->setDrawBackground(false);
         col.view->setFrameColor(0xffff0000);
@@ -436,7 +444,7 @@ void VSMusicBrowser::updateFolder(std::string baseFolder, size_t fromDepth) {
                 new VSMusicBrowserButton(border, border + elementCounter * height, 50 * dpiScale, height,
                                          UString(completeName.c_str()), UString(folder.c_str()));
             folderButton->setClickCallback(fastdelegate::MakeDelegate(this, &VSMusicBrowser::onButtonClicked));
-            folderButton->setTextColor(m_defaultTextColor);
+            folderButton->setTextColor(this->defaultTextColor);
             folderButton->setFrameColor(frameColor);
             folderButton->setSizeToContent(12 * dpiScale, 5 * dpiScale);
             folderButton->setSizeY(height);
@@ -462,16 +470,16 @@ void VSMusicBrowser::updateFolder(std::string baseFolder, size_t fromDepth) {
                                          UString(completeName.c_str()), UString(file.c_str()));
             fileButton->setClickCallback(fastdelegate::MakeDelegate(this, &VSMusicBrowser::onButtonClicked));
             fileButton->setDrawBackground(false);
-            fileButton->setTextColor(m_defaultTextColor);
+            fileButton->setTextColor(this->defaultTextColor);
             fileButton->setFrameColor(frameColor);
             fileButton->setSizeToContent(12 * dpiScale, 5 * dpiScale);
             fileButton->setSizeY(height);
             fileButton->setDirectory(false);
 
             // preemptively updatePlayingSelection() manually here, code duplication ahoy
-            if(completeName == m_activeSong) {
-                fileButton->setTextBrightColor(m_playingTextBrightColor);
-                fileButton->setTextDarkColor(m_playingTextDarkColor);
+            if(completeName == this->activeSong) {
+                fileButton->setTextBrightColor(this->playingTextBrightColor);
+                fileButton->setTextDarkColor(this->playingTextDarkColor);
                 fileButton->setPlaying(true);
             }
 
@@ -493,29 +501,29 @@ void VSMusicBrowser::updateFolder(std::string baseFolder, size_t fromDepth) {
         col.view->setSizeX(border + maxWidthCounter + 20 * dpiScale);
         col.view->setScrollSizeToContent(20 * dpiScale);
     }
-    m_columns.push_back(col);
-    m_mainContainer->getContainer()->addBaseUIElement(col.view);
-    m_mainContainer->setScrollSizeToContent(0);
-    m_mainContainer->scrollToRight();
+    this->columns.push_back(col);
+    this->mainContainer->getContainer()->addBaseUIElement(col.view);
+    this->mainContainer->setScrollSizeToContent(0);
+    this->mainContainer->scrollToRight();
 }
 
 void VSMusicBrowser::updateDrives() {
     // drive selection is always at column 0
-    if(m_columns.size() < 1) {
+    if(this->columns.size() < 1) {
         COLUMN col;
         {
-            col.view = new CBaseUIScrollView(-1, -1, 100, m_vSize.y, "");
+            col.view = new CBaseUIScrollView(-1, -1, 100, this->vSize.y, "");
             col.view->setDrawBackground(false);
             col.view->setFrameColor(0xffff0000);
             col.view->setDrawFrame(false);
             col.view->setHorizontalScrolling(false);
             col.view->setScrollbarColor(0x99666666);
 
-            m_mainContainer->getContainer()->addBaseUIElement(col.view);
+            this->mainContainer->getContainer()->addBaseUIElement(col.view);
         }
-        m_columns.push_back(col);
+        this->columns.push_back(col);
     }
-    COLUMN &driveColumn = m_columns[0];
+    COLUMN &driveColumn = this->columns[0];
 
     driveColumn.view->clear();
 
@@ -534,13 +542,13 @@ void VSMusicBrowser::updateDrives() {
 
         VSMusicBrowserButton *driveButton =
             new VSMusicBrowserButton(border, border + i * height, 50, height, drive, drive.substr(0, 1));
-        driveButton->setTextColor(m_defaultTextColor);
+        driveButton->setTextColor(this->defaultTextColor);
         driveButton->setClickCallback(fastdelegate::MakeDelegate(this, &VSMusicBrowser::onButtonClicked));
         driveButton->setDirectory(true);
         driveButton->setDrawBackground(false);
         driveButton->setFrameColor(frameColor);
-        driveButton->setFont(m_font);
-        driveButton->setSizeToContent(m_font->getHeight() / 1.5f, 5 * dpiScale);
+        driveButton->setFont(this->font);
+        driveButton->setSizeToContent(this->font->getHeight() / 1.5f, 5 * dpiScale);
         driveButton->setTextLeft(true);
         driveButton->setSizeY(height);
 
@@ -558,30 +566,30 @@ void VSMusicBrowser::updateDrives() {
     // update & add everything
     driveColumn.view->setSizeX(border + maxWidthCounter + 15 * dpiScale);
     driveColumn.view->setScrollSizeToContent(15 * dpiScale);
-    m_mainContainer->setScrollSizeToContent(0);
+    this->mainContainer->setScrollSizeToContent(0);
 }
 
 void VSMusicBrowser::fireNextSong(bool previous) {
-    for(int i = 0; i < (int)m_playlist.size(); i++) {
+    for(int i = 0; i < (int)this->playlist.size(); i++) {
         // find current position
-        if(m_playlist[i] == m_activeSong) {
+        if(this->playlist[i] == this->activeSong) {
             // look for the next playable file, if we can find one
             int breaker = 0;
             while(true) {
-                int nextSongIndex = ((i + 1) < m_playlist.size() ? (i + 1) : 0);
-                if(previous) nextSongIndex = ((i - 1) >= 0 ? (i - 1) : m_playlist.size() - 1);
+                int nextSongIndex = ((i + 1) < this->playlist.size() ? (i + 1) : 0);
+                if(previous) nextSongIndex = ((i - 1) >= 0 ? (i - 1) : this->playlist.size() - 1);
 
                 // if we have found the next playable file
-                if(VinylScratcher::tryPlayFile(m_playlist[nextSongIndex])) {
+                if(VinylScratcher::tryPlayFile(this->playlist[nextSongIndex])) {
                     // set it, update the possibly visible button of the current song (and reset all others), and play
                     // it
-                    m_previousActiveSong = m_activeSong;
-                    m_activeSong = m_playlist[nextSongIndex];
+                    this->previousActiveSong = this->activeSong;
+                    this->activeSong = this->playlist[nextSongIndex];
 
-                    updatePlayingSelection();
+                    this->updatePlayingSelection();
 
                     // fire play event
-                    m_fileClickedCallback(m_activeSong, previous);
+                    this->fileClickedCallback(this->activeSong, previous);
 
                     return;
                 } else {
@@ -591,14 +599,14 @@ void VSMusicBrowser::fireNextSong(bool previous) {
                         i++;
 
                     if(previous) {
-                        if(i < 0) i = m_playlist.size() - 1;
+                        if(i < 0) i = this->playlist.size() - 1;
                     } else {
-                        if(i >= m_playlist.size()) i = 0;
+                        if(i >= this->playlist.size()) i = 0;
                     }
                 }
                 breaker++;
 
-                if(breaker > 2 * m_playlist.size()) return;
+                if(breaker > 2 * this->playlist.size()) return;
             }
 
             return;
@@ -607,34 +615,34 @@ void VSMusicBrowser::fireNextSong(bool previous) {
 }
 
 void VSMusicBrowser::onInvalidFile() {
-    m_activeSong = m_previousActiveSong;
-    updatePlayingSelection(true);
+    this->activeSong = this->previousActiveSong;
+    this->updatePlayingSelection(true);
 }
 
-void VSMusicBrowser::onMoved() { m_mainContainer->setPos(m_vPos); }
+void VSMusicBrowser::onMoved() { this->mainContainer->setPos(this->vPos); }
 
 void VSMusicBrowser::onResized() {
-    for(size_t i = 0; i < m_columns.size(); i++) {
-        m_columns[i].view->setSizeY(m_vSize.y);
-        m_columns[i].view->scrollToY(m_columns[i].view->getRelPosY());
+    for(size_t i = 0; i < this->columns.size(); i++) {
+        this->columns[i].view->setSizeY(this->vSize.y);
+        this->columns[i].view->scrollToY(this->columns[i].view->getRelPosY());
     }
 
-    m_mainContainer->setSize(m_vSize);
-    m_mainContainer->setScrollSizeToContent(0);
-    m_mainContainer->scrollToX(m_mainContainer->getRelPosX());
+    this->mainContainer->setSize(this->vSize);
+    this->mainContainer->setScrollSizeToContent(0);
+    this->mainContainer->scrollToX(this->mainContainer->getRelPosX());
 }
 
 void VSMusicBrowser::onFocusStolen() {
     // forward
-    m_mainContainer->stealFocus();
+    this->mainContainer->stealFocus();
 }
 
 void VSMusicBrowser::onEnabled() {
     // forward
-    m_mainContainer->setEnabled(true);
+    this->mainContainer->setEnabled(true);
 }
 
 void VSMusicBrowser::onDisabled() {
     // forward
-    m_mainContainer->setEnabled(false);
+    this->mainContainer->setEnabled(false);
 }

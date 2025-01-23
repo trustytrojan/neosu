@@ -34,12 +34,12 @@ class VinylScratcher : public CBaseUIWindow {
     void onNextClicked();
     void onPrevClicked();
 
-    static Sound *m_stream2;
+    static Sound *stream2;
 
-    VSTitleBar *m_titleBar;
-    VSControlBar *m_controlBar;
-    VSMusicBrowser *m_musicBrowser;
+    VSTitleBar *titleBar;
+    VSControlBar *controlBar;
+    VSMusicBrowser *musicBrowser;
 
-    Sound *m_stream;
-    float m_fReverseMessageTimer;
+    Sound *stream;
+    float fReverseMessageTimer;
 };

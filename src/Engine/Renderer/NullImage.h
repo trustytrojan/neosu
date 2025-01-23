@@ -14,7 +14,7 @@ class NullImage : public Image {
    public:
     NullImage(std::string filePath, bool mipmapped = false) : Image(filePath, mipmapped) { ; }
     NullImage(int width, int height, bool mipmapped = false) : Image(width, height, mipmapped) { ; }
-    virtual ~NullImage() { destroy(); }
+    virtual ~NullImage() { this->destroy(); }
 
     virtual void bind(unsigned int textureUnit = 0) { ; }
     virtual void unbind() { ; }
@@ -23,8 +23,8 @@ class NullImage : public Image {
     virtual void setWrapMode(Graphics::WRAP_MODE wrapMode);
 
    private:
-    virtual void init() { m_bReady = true; }
-    virtual void initAsync() { m_bAsyncReady = true; }
+    virtual void init() { this->bReady = true; }
+    virtual void initAsync() { this->bAsyncReady = true; }
     virtual void destroy() { ; }
 };
 

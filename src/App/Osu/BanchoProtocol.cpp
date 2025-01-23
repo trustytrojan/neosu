@@ -15,94 +15,94 @@ Room::Room() {
 }
 
 Room::Room(Packet *packet) {
-    id = read<u16>(packet);
-    in_progress = read<u8>(packet);
-    match_type = read<u8>(packet);
-    mods = read<u32>(packet);
-    name = read_string(packet);
+    this->id = read<u16>(packet);
+    this->in_progress = read<u8>(packet);
+    this->match_type = read<u8>(packet);
+    this->mods = read<u32>(packet);
+    this->name = read_string(packet);
 
-    has_password = read<u8>(packet) > 0;
-    if(has_password) {
+    this->has_password = read<u8>(packet) > 0;
+    if(this->has_password) {
         // Discard password. It should be an empty string, but just in case, read it properly.
         packet->pos--;
         read_string(packet);
     }
 
-    map_name = read_string(packet);
-    map_id = read<u32>(packet);
+    this->map_name = read_string(packet);
+    this->map_id = read<u32>(packet);
 
     auto hash_str = read_string(packet);
-    map_md5 = hash_str.toUtf8();
+    this->map_md5 = hash_str.toUtf8();
 
-    nb_players = 0;
+    this->nb_players = 0;
     for(int i = 0; i < 16; i++) {
-        slots[i].status = read<u8>(packet);
+        this->slots[i].status = read<u8>(packet);
     }
     for(int i = 0; i < 16; i++) {
-        slots[i].team = read<u8>(packet);
+        this->slots[i].team = read<u8>(packet);
     }
     for(int s = 0; s < 16; s++) {
-        if(!slots[s].is_locked()) {
-            nb_open_slots++;
+        if(!this->slots[s].is_locked()) {
+            this->nb_open_slots++;
         }
 
-        if(slots[s].has_player()) {
-            slots[s].player_id = read<u32>(packet);
-            nb_players++;
+        if(this->slots[s].has_player()) {
+            this->slots[s].player_id = read<u32>(packet);
+            this->nb_players++;
         }
     }
 
-    host_id = read<u32>(packet);
-    mode = read<u8>(packet);
-    win_condition = read<u8>(packet);
-    team_type = read<u8>(packet);
-    freemods = read<u8>(packet);
-    if(freemods) {
+    this->host_id = read<u32>(packet);
+    this->mode = read<u8>(packet);
+    this->win_condition = read<u8>(packet);
+    this->team_type = read<u8>(packet);
+    this->freemods = read<u8>(packet);
+    if(this->freemods) {
         for(int i = 0; i < 16; i++) {
-            slots[i].mods = read<u32>(packet);
+            this->slots[i].mods = read<u32>(packet);
         }
     }
 
-    seed = read<u32>(packet);
+    this->seed = read<u32>(packet);
 }
 
 void Room::pack(Packet *packet) {
-    write<u16>(packet, id);
-    write<u8>(packet, in_progress);
-    write<u8>(packet, match_type);
-    write<u32>(packet, mods);
-    write_string(packet, name.toUtf8());
-    write_string(packet, password.toUtf8());
-    write_string(packet, map_name.toUtf8());
-    write<u32>(packet, map_id);
-    write_string(packet, map_md5.toUtf8());
+    write<u16>(packet, this->id);
+    write<u8>(packet, this->in_progress);
+    write<u8>(packet, this->match_type);
+    write<u32>(packet, this->mods);
+    write_string(packet, this->name.toUtf8());
+    write_string(packet, this->password.toUtf8());
+    write_string(packet, this->map_name.toUtf8());
+    write<u32>(packet, this->map_id);
+    write_string(packet, this->map_md5.toUtf8());
     for(int i = 0; i < 16; i++) {
-        write<u8>(packet, slots[i].status);
+        write<u8>(packet, this->slots[i].status);
     }
     for(int i = 0; i < 16; i++) {
-        write<u8>(packet, slots[i].team);
+        write<u8>(packet, this->slots[i].team);
     }
     for(int s = 0; s < 16; s++) {
-        if(slots[s].has_player()) {
-            write<u32>(packet, slots[s].player_id);
+        if(this->slots[s].has_player()) {
+            write<u32>(packet, this->slots[s].player_id);
         }
     }
 
-    write<u32>(packet, host_id);
-    write<u8>(packet, mode);
-    write<u8>(packet, win_condition);
-    write<u8>(packet, team_type);
-    write<u8>(packet, freemods);
-    if(freemods) {
+    write<u32>(packet, this->host_id);
+    write<u8>(packet, this->mode);
+    write<u8>(packet, this->win_condition);
+    write<u8>(packet, this->team_type);
+    write<u8>(packet, this->freemods);
+    if(this->freemods) {
         for(int i = 0; i < 16; i++) {
-            write<u32>(packet, slots[i].mods);
+            write<u32>(packet, this->slots[i].mods);
         }
     }
 
-    write<u32>(packet, seed);
+    write<u32>(packet, this->seed);
 }
 
-bool Room::is_host() { return host_id == bancho.user_id; }
+bool Room::is_host() { return this->host_id == bancho.user_id; }
 
 void read_bytes(Packet *packet, u8 *bytes, size_t n) {
     if(packet->pos + n > packet->size) {

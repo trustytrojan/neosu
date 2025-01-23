@@ -19,37 +19,43 @@ UISelectionButton::UISelectionButton(std::function<SkinImage *()> getImageFunc,
     this->getImageFunc = getImageFunc;
     this->getImageOverFunc = getImageOverFunc;
 
-    m_fAnimation = 0.0f;
+    this->fAnimation = 0.0f;
 }
 
 void UISelectionButton::draw(Graphics *g) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
     // draw image
-    SkinImage *image = getImageFunc();
+    SkinImage *image = this->getImageFunc();
     if(image != NULL) {
         const Vector2 imageSize = image->getImageSizeForCurrentFrame();
 
         const float scale =
-            (m_vSize.x / imageSize.x < m_vSize.y / imageSize.y ? m_vSize.x / imageSize.x : m_vSize.y / imageSize.y);
+            (this->vSize.x / imageSize.x < this->vSize.y / imageSize.y ? this->vSize.x / imageSize.x
+                                                                           : this->vSize.y / imageSize.y);
 
         g->setColor(0xffffffff);
-        image->drawRaw(g, Vector2(m_vPos.x + (int)(m_vSize.x / 2), m_vPos.y + (int)(m_vSize.y / 2)), scale);
+        image->drawRaw(
+            g, Vector2(this->vPos.x + (int)(this->vSize.x / 2), this->vPos.y + (int)(this->vSize.y / 2)),
+            scale);
     }
 
     // draw over image
-    if(m_fAnimation > 0.0f) {
-        SkinImage *overImage = getImageOverFunc();
+    if(this->fAnimation > 0.0f) {
+        SkinImage *overImage = this->getImageOverFunc();
         if(overImage != NULL) {
             const Vector2 imageSize = overImage->getImageSizeForCurrentFrame();
 
             const float scale =
-                (m_vSize.x / imageSize.x < m_vSize.y / imageSize.y ? m_vSize.x / imageSize.x : m_vSize.y / imageSize.y);
+                (this->vSize.x / imageSize.x < this->vSize.y / imageSize.y ? this->vSize.x / imageSize.x
+                                                                               : this->vSize.y / imageSize.y);
 
             g->setColor(0xffffffff);
-            g->setAlpha(m_fAnimation);
+            g->setAlpha(this->fAnimation);
 
-            overImage->drawRaw(g, Vector2(m_vPos.x + (int)(m_vSize.x / 2), m_vPos.y + (int)(m_vSize.y / 2)), scale);
+            overImage->drawRaw(
+                g, Vector2(this->vPos.x + (int)(this->vSize.x / 2), this->vPos.y + (int)(this->vSize.y / 2)),
+                scale);
         }
     }
 
@@ -59,13 +65,13 @@ void UISelectionButton::draw(Graphics *g) {
 void UISelectionButton::onMouseInside() {
     CBaseUIButton::onMouseInside();
 
-    anim->moveLinear(&m_fAnimation, 1.0f, 0.1f, true);
+    anim->moveLinear(&this->fAnimation, 1.0f, 0.1f, true);
 }
 
 void UISelectionButton::onMouseOutside() {
     CBaseUIButton::onMouseOutside();
 
-    anim->moveLinear(&m_fAnimation, 0.0f, m_fAnimation * 0.1f, true);
+    anim->moveLinear(&this->fAnimation, 0.0f, this->fAnimation * 0.1f, true);
 }
 
 void UISelectionButton::onResized() {
@@ -74,17 +80,17 @@ void UISelectionButton::onResized() {
     // NOTE: we get the height set to the current bottombarheight, so use that with the aspect ratio to get the correct
     // relative "hardcoded" width
 
-    SkinImage *image = getImageFunc();
+    SkinImage *image = this->getImageFunc();
     if(image != NULL) {
         float aspectRatio = image->getSizeBaseRaw().x / image->getSizeBaseRaw().y;
         aspectRatio += 0.025f;  // very slightly overscale to make most skins fit better with the bottombar blue line
-        m_vSize.x = aspectRatio * m_vSize.y;
+        this->vSize.x = aspectRatio * this->vSize.y;
     }
 }
 
 void UISelectionButton::keyboardPulse() {
-    if(isMouseInside()) return;
+    if(this->isMouseInside()) return;
 
-    m_fAnimation = 1.0f;
-    anim->moveLinear(&m_fAnimation, 0.0f, 0.1f, 0.05f, true);
+    this->fAnimation = 1.0f;
+    anim->moveLinear(&this->fAnimation, 0.0f, 0.1f, 0.05f, true);
 }

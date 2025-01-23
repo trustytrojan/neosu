@@ -15,7 +15,7 @@
 
 using namespace std;
 
-Sound *VinylScratcher::m_stream2 = NULL;
+Sound *VinylScratcher::stream2 = NULL;
 
 VinylScratcher::VinylScratcher() : CBaseUIWindow(220, 90, 1000, 700, "Vinyl Scratcher") {
     const float dpiScale = env->getDPIScale();
@@ -28,43 +28,47 @@ VinylScratcher::VinylScratcher() : CBaseUIWindow(220, 90, 1000, 700, "Vinyl Scra
     McFont *controlBarFont = font;
     McFont *musicBrowserFont = font;
 
-    m_titleBar = new VSTitleBar(0, 0, m_vSize.x + 2, font);
-    m_controlBar = new VSControlBar(0, m_vSize.y - getTitleBarHeight() - m_titleBar->getSize().y, m_vSize.x,
-                                    m_titleBar->getSize().y, controlBarFont);
-    m_musicBrowser = new VSMusicBrowser(
-        0, m_titleBar->getRelPos().y + m_titleBar->getSize().y, m_vSize.x,
-        m_vSize.y - m_controlBar->getSize().y - m_titleBar->getSize().y - getTitleBarHeight() - 1, musicBrowserFont);
+    this->titleBar = new VSTitleBar(0, 0, this->vSize.x + 2, font);
+    this->controlBar = new VSControlBar(0, this->vSize.y - this->getTitleBarHeight() - this->titleBar->getSize().y,
+                                        this->vSize.x, this->titleBar->getSize().y, controlBarFont);
+    this->musicBrowser = new VSMusicBrowser(
+        0, this->titleBar->getRelPos().y + this->titleBar->getSize().y, this->vSize.x,
+        this->vSize.y - this->controlBar->getSize().y - this->titleBar->getSize().y - this->getTitleBarHeight() - 1,
+        musicBrowserFont);
 
-    getContainer()->addBaseUIElement(m_musicBrowser);
-    getContainer()->addBaseUIElement(m_controlBar);
-    getContainer()->addBaseUIElement(m_titleBar);
+    this->getContainer()->addBaseUIElement(this->musicBrowser);
+    this->getContainer()->addBaseUIElement(this->controlBar);
+    this->getContainer()->addBaseUIElement(this->titleBar);
 
-    m_controlBar->getPlayButton()->setClickCallback(fastdelegate::MakeDelegate(this, &VinylScratcher::onPlayClicked));
-    m_controlBar->getNextButton()->setClickCallback(fastdelegate::MakeDelegate(this, &VinylScratcher::onNextClicked));
-    m_controlBar->getPrevButton()->setClickCallback(fastdelegate::MakeDelegate(this, &VinylScratcher::onPrevClicked));
-    m_musicBrowser->setFileClickedCallback(fastdelegate::MakeDelegate(this, &VinylScratcher::onFileClicked));
-    m_titleBar->setSeekCallback(fastdelegate::MakeDelegate(this, &VinylScratcher::onSeek));
-    m_controlBar->getVolumeSlider()->setChangeCallback(
+    this->controlBar->getPlayButton()->setClickCallback(
+        fastdelegate::MakeDelegate(this, &VinylScratcher::onPlayClicked));
+    this->controlBar->getNextButton()->setClickCallback(
+        fastdelegate::MakeDelegate(this, &VinylScratcher::onNextClicked));
+    this->controlBar->getPrevButton()->setClickCallback(
+        fastdelegate::MakeDelegate(this, &VinylScratcher::onPrevClicked));
+    this->musicBrowser->setFileClickedCallback(fastdelegate::MakeDelegate(this, &VinylScratcher::onFileClicked));
+    this->titleBar->setSeekCallback(fastdelegate::MakeDelegate(this, &VinylScratcher::onSeek));
+    this->controlBar->getVolumeSlider()->setChangeCallback(
         fastdelegate::MakeDelegate(this, &VinylScratcher::onVolumeChanged));
 
     // vars
-    m_stream = engine->getResourceManager()->loadSoundAbs("", "SND_VS_STREAM", true);
-    m_stream2 = engine->getResourceManager()->loadSoundAbs("", "SND_VS_STREAM2", true);
-    m_fReverseMessageTimer = 0.0f;
+    this->stream = engine->getResourceManager()->loadSoundAbs("", "SND_VS_STREAM", true);
+    VinylScratcher::stream2 = engine->getResourceManager()->loadSoundAbs("", "SND_VS_STREAM2", true);
+    this->fReverseMessageTimer = 0.0f;
 
     // window colors
-    setBackgroundColor(0xffffffff);
-    setTitleColor(0xff000000);
-    setFrameColor(0xffcccccc);
-    setTitleColor(0xff555555);
-    getCloseButton()->setFrameColor(0xff888888);
-    getMinimizeButton()->setFrameColor(0xff888888);
+    this->setBackgroundColor(0xffffffff);
+    this->setTitleColor(0xff000000);
+    this->setFrameColor(0xffcccccc);
+    this->setTitleColor(0xff555555);
+    this->getCloseButton()->setFrameColor(0xff888888);
+    this->getMinimizeButton()->setFrameColor(0xff888888);
 
     // window settings
-    setResizeLimit(240 * dpiScale, 160 * dpiScale);
-    setTitleFont(windowTitleFont);
-    getCloseButton()->setDrawBackground(false);
-    getMinimizeButton()->setDrawBackground(false);
+    this->setResizeLimit(240 * dpiScale, 160 * dpiScale);
+    this->setTitleFont(windowTitleFont);
+    this->getCloseButton()->setDrawBackground(false);
+    this->getMinimizeButton()->setDrawBackground(false);
 
     // open();
 }
@@ -73,56 +77,56 @@ void VinylScratcher::mouse_update(bool *propagate_clicks) {
     CBaseUIWindow::mouse_update(propagate_clicks);
     {
         // NOTE: do this even if the window is not visible
-        if(m_stream->isFinished()) onFinished();
+        if(this->stream->isFinished()) this->onFinished();
     }
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
     // restore title text after timer
-    if(m_fReverseMessageTimer != 0.0f && engine->getTime() > m_fReverseMessageTimer) {
-        m_fReverseMessageTimer = 0.0f;
-        auto title =
-            UString(m_stream->getFilePath().length() > 1 ? env->getFileNameFromFilePath(m_stream->getFilePath()).c_str()
-                                                         : "Ready");
-        m_titleBar->setTitle(title, true);
+    if(this->fReverseMessageTimer != 0.0f && engine->getTime() > this->fReverseMessageTimer) {
+        this->fReverseMessageTimer = 0.0f;
+        auto title = UString(this->stream->getFilePath().length() > 1
+                                 ? env->getFileNameFromFilePath(this->stream->getFilePath()).c_str()
+                                 : "Ready");
+        this->titleBar->setTitle(title, true);
     }
 
     // update seekbar
-    if(m_stream->isPlaying() && !m_titleBar->isSeeking()) cv_vs_percent.setValue(m_stream->getPosition());
+    if(this->stream->isPlaying() && !this->titleBar->isSeeking()) cv_vs_percent.setValue(this->stream->getPosition());
 
     // update info text
     {
-        unsigned long lengthMS = m_stream->getLengthMS();
-        unsigned long positionMS = m_stream->getPositionMS();
-        if(m_titleBar->isSeeking()) positionMS = (unsigned long)((float)lengthMS * cv_vs_percent.getFloat());
+        unsigned long lengthMS = this->stream->getLengthMS();
+        unsigned long positionMS = this->stream->getPositionMS();
+        if(this->titleBar->isSeeking()) positionMS = (unsigned long)((float)lengthMS * cv_vs_percent.getFloat());
 
-        m_controlBar->getInfoButton()->setText(UString::format("  %i:%02i / %i:%02i", (positionMS / 1000) / 60,
-                                                               (positionMS / 1000) % 60, (lengthMS / 1000) / 60,
-                                                               (lengthMS / 1000) % 60));
+        this->controlBar->getInfoButton()->setText(UString::format("  %i:%02i / %i:%02i", (positionMS / 1000) / 60,
+                                                                   (positionMS / 1000) % 60, (lengthMS / 1000) / 60,
+                                                                   (lengthMS / 1000) % 60));
     }
 }
 
 void VinylScratcher::onKeyDown(KeyboardEvent &e) {
     CBaseUIWindow::onKeyDown(e);
 
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
     // hotkeys
-    if(e == KEY_LEFT || e == KEY_UP || e == KEY_A) onPrevClicked();
-    if(e == KEY_SPACE || e == KEY_ENTER) onPlayClicked();
-    if(e == KEY_RIGHT || e == KEY_DOWN || e == KEY_D) onNextClicked();
+    if(e == KEY_LEFT || e == KEY_UP || e == KEY_A) this->onPrevClicked();
+    if(e == KEY_SPACE || e == KEY_ENTER) this->onPlayClicked();
+    if(e == KEY_RIGHT || e == KEY_DOWN || e == KEY_D) this->onNextClicked();
 }
 
 void VinylScratcher::onFinished() {
     if(cv_vs_repeat.getBool())
-        engine->getSound()->play(m_stream);
+        engine->getSound()->play(this->stream);
     else {
         // reset and stop (since we can't know yet if there even is a next song)
-        m_stream->setPosition(0);
-        engine->getSound()->pause(m_stream);
-        m_controlBar->getPlayButton()->setText(">");
+        this->stream->setPosition(0);
+        engine->getSound()->pause(this->stream);
+        this->controlBar->getPlayButton()->setText(">");
 
         // play the next song
-        m_musicBrowser->fireNextSong(false);
+        this->musicBrowser->fireNextSong(false);
     }
 
     // update seekbar
@@ -132,61 +136,61 @@ void VinylScratcher::onFinished() {
 void VinylScratcher::onFileClicked(std::string filepath, bool reverse) {
     // check if the file is valid and can be played, if it's valid then play it
     if(tryPlayFile(filepath)) {
-        engine->getSound()->stop(m_stream);
+        engine->getSound()->stop(this->stream);
 
-        m_stream->rebuild(filepath);
-        m_stream->setVolume(m_controlBar->getVolumeSlider()->getFloat());
+        this->stream->rebuild(filepath);
+        this->stream->setVolume(this->controlBar->getVolumeSlider()->getFloat());
 
-        if(engine->getSound()->play(m_stream)) {
-            m_controlBar->getPlayButton()->setText("II");
+        if(engine->getSound()->play(this->stream)) {
+            this->controlBar->getPlayButton()->setText("II");
             auto title = UString(env->getFileNameFromFilePath(filepath).c_str());
-            m_titleBar->setTitle(title, reverse);
+            this->titleBar->setTitle(title, reverse);
 
-            if(m_fReverseMessageTimer > 0.0f) m_fReverseMessageTimer = 0.0f;
+            if(this->fReverseMessageTimer > 0.0f) this->fReverseMessageTimer = 0.0f;
         }
     } else {
-        if(m_fReverseMessageTimer == 0.0f) {
-            m_titleBar->setTitle("Not a valid audio file!");
-            m_fReverseMessageTimer = engine->getTime() + 1.5f;
+        if(this->fReverseMessageTimer == 0.0f) {
+            this->titleBar->setTitle("Not a valid audio file!");
+            this->fReverseMessageTimer = engine->getTime() + 1.5f;
         }
-        m_musicBrowser->onInvalidFile();
+        this->musicBrowser->onInvalidFile();
     }
 }
 
-void VinylScratcher::onVolumeChanged(CBaseUISlider *slider) { m_stream->setVolume(slider->getFloat()); }
+void VinylScratcher::onVolumeChanged(CBaseUISlider *slider) { this->stream->setVolume(slider->getFloat()); }
 
-void VinylScratcher::onSeek() { m_stream->setPosition(cv_vs_percent.getFloat()); }
+void VinylScratcher::onSeek() { this->stream->setPosition(cv_vs_percent.getFloat()); }
 
 void VinylScratcher::onPlayClicked() {
-    if(m_stream->isPlaying()) {
-        engine->getSound()->pause(m_stream);
-        m_controlBar->getPlayButton()->setText(">");
+    if(this->stream->isPlaying()) {
+        engine->getSound()->pause(this->stream);
+        this->controlBar->getPlayButton()->setText(">");
     } else {
-        if(engine->getSound()->play(m_stream)) m_controlBar->getPlayButton()->setText("II");
+        if(engine->getSound()->play(this->stream)) this->controlBar->getPlayButton()->setText("II");
     }
 }
 
-void VinylScratcher::onNextClicked() { m_musicBrowser->fireNextSong(false); }
+void VinylScratcher::onNextClicked() { this->musicBrowser->fireNextSong(false); }
 
-void VinylScratcher::onPrevClicked() { m_musicBrowser->fireNextSong(true); }
+void VinylScratcher::onPrevClicked() { this->musicBrowser->fireNextSong(true); }
 
 void VinylScratcher::onResized() {
     CBaseUIWindow::onResized();
 
-    m_titleBar->setSizeX(m_vSize.x + 2);
-    m_controlBar->setSizeX(m_vSize.x);
-    m_controlBar->setRelPosY(m_vSize.y - getTitleBarHeight() - m_controlBar->getSize().y);
-    m_musicBrowser->setSize(m_vSize.x,
-                            m_vSize.y - m_controlBar->getSize().y - m_titleBar->getSize().y - getTitleBarHeight());
+    this->titleBar->setSizeX(this->vSize.x + 2);
+    this->controlBar->setSizeX(this->vSize.x);
+    this->controlBar->setRelPosY(this->vSize.y - this->getTitleBarHeight() - this->controlBar->getSize().y);
+    this->musicBrowser->setSize(this->vSize.x, this->vSize.y - this->controlBar->getSize().y -
+                                                   this->titleBar->getSize().y - this->getTitleBarHeight());
 
-    getContainer()->update_pos();
+    this->getContainer()->update_pos();
 }
 
 bool VinylScratcher::tryPlayFile(std::string filepath) {
-    m_stream2->rebuild(filepath);
+    VinylScratcher::stream2->rebuild(filepath);
 
-    if(engine->getSound()->play(m_stream2)) {
-        engine->getSound()->stop(m_stream2);
+    if(engine->getSound()->play(VinylScratcher::stream2)) {
+        engine->getSound()->stop(VinylScratcher::stream2);
         return true;
     }
 

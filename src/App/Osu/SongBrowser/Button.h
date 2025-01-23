@@ -28,23 +28,23 @@ class Button : public CBaseUIButton {
     void resetAnimations();
 
     void setTargetRelPosY(float targetRelPosY);
-    void setChildren(std::vector<SongButton *> children) { m_children = children; }
-    void setOffsetPercent(float offsetPercent) { m_fOffsetPercent = offsetPercent; }
-    void setHideIfSelected(bool hideIfSelected) { m_bHideIfSelected = hideIfSelected; }
-    void setIsSearchMatch(bool isSearchMatch) { m_bIsSearchMatch = isSearchMatch; }
+    void setChildren(std::vector<SongButton *> children) { this->children = children; }
+    void setOffsetPercent(float offsetPercent) { this->fOffsetPercent = offsetPercent; }
+    void setHideIfSelected(bool hideIfSelected) { this->bHideIfSelected = hideIfSelected; }
+    void setIsSearchMatch(bool isSearchMatch) { this->bIsSearchMatch = isSearchMatch; }
 
     Vector2 getActualOffset() const;
-    inline Vector2 getActualSize() const { return m_vSize - 2 * getActualOffset(); }
-    inline Vector2 getActualPos() const { return m_vPos + getActualOffset(); }
-    inline std::vector<SongButton *> &getChildren() { return m_children; }
+    inline Vector2 getActualSize() const { return this->vSize - 2 * this->getActualOffset(); }
+    inline Vector2 getActualPos() const { return this->vPos + this->getActualOffset(); }
+    inline std::vector<SongButton *> &getChildren() { return this->children; }
 
     virtual DatabaseBeatmap *getDatabaseBeatmap() const { return NULL; }
     virtual Color getActiveBackgroundColor() const;
     virtual Color getInactiveBackgroundColor() const;
 
-    inline bool isSelected() const { return m_bSelected; }
-    inline bool isHiddenIfSelected() const { return m_bHideIfSelected; }
-    inline bool isSearchMatch() const { return m_bIsSearchMatch.load(); }
+    inline bool isSelected() const { return this->bSelected; }
+    inline bool isHiddenIfSelected() const { return this->bHideIfSelected; }
+    inline bool isSearchMatch() const { return this->bIsSearchMatch.load(); }
 
    protected:
     void drawMenuButtonBackground(Graphics *g);
@@ -52,16 +52,16 @@ class Button : public CBaseUIButton {
     virtual void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected) { ; }
     virtual void onRightMouseUpInside() { ; }
 
-    CBaseUIScrollView *m_view;
-    SongBrowser *m_songBrowser;
-    UIContextMenu *m_contextMenu;
+    CBaseUIScrollView *view;
+    SongBrowser *songBrowser;
+    UIContextMenu *contextMenu;
 
-    McFont *m_font;
-    McFont *m_fontBold;
+    McFont *font;
+    McFont *fontBold;
 
-    bool m_bSelected;
+    bool bSelected;
 
-    std::vector<SongButton *> m_children;
+    std::vector<SongButton *> children;
 
    private:
     static int marginPixelsX;
@@ -76,20 +76,20 @@ class Button : public CBaseUIButton {
 
     void setMoveAwayState(MOVE_AWAY_STATE moveAwayState, bool animate = true);
 
-    bool m_bRightClick;
-    bool m_bRightClickCheck;
+    bool bRightClick;
+    bool bRightClickCheck;
 
-    float m_fTargetRelPosY;
-    float m_fScale;
-    float m_fOffsetPercent;
-    float m_fHoverOffsetAnimation;
-    float m_fHoverMoveAwayAnimation;
-    float m_fCenterOffsetAnimation;
-    float m_fCenterOffsetVelocityAnimation;
+    float fTargetRelPosY;
+    float fScale;
+    float fOffsetPercent;
+    float fHoverOffsetAnimation;
+    float fHoverMoveAwayAnimation;
+    float fCenterOffsetAnimation;
+    float fCenterOffsetVelocityAnimation;
 
-    std::atomic<bool> m_bIsSearchMatch;
+    std::atomic<bool> bIsSearchMatch;
 
-    bool m_bHideIfSelected;
+    bool bHideIfSelected;
 
-    MOVE_AWAY_STATE m_moveAwayState;
+    MOVE_AWAY_STATE moveAwayState;
 };

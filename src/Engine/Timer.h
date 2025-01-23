@@ -27,15 +27,15 @@ class Timer {
     Timer();
     ~Timer();
 
-    inline void start() { m_timer->start(); }
-    inline void update() { m_timer->update(); }
+    inline void start() { this->timer->start(); }
+    inline void update() { this->timer->update(); }
 
-    inline double getDelta() const { return m_timer->getDelta(); }
-    inline double getElapsedTime() const { return m_timer->getElapsedTime(); }
-    inline u64 getElapsedTimeMS() const { return m_timer->getElapsedTimeMS(); }
+    inline double getDelta() const { return this->timer->getDelta(); }
+    inline double getElapsedTime() const { return this->timer->getElapsedTime(); }
+    inline u64 getElapsedTimeMS() const { return this->timer->getElapsedTimeMS(); }
 
    private:
-    BaseTimer *m_timer;
+    BaseTimer *timer;
 };
 
 #endif

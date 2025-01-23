@@ -15,28 +15,28 @@ class CBaseUIBoxShadow : public CBaseUIElement {
     virtual void draw(Graphics *g);
     void renderOffscreen(Graphics *g);
 
-    void forceRedraw() { m_bNeedsRedraw = true; }
+    void forceRedraw() { this->bNeedsRedraw = true; }
 
     CBaseUIBoxShadow *setColoredContent(bool coloredContent);
     CBaseUIBoxShadow *setColor(Color color);
     CBaseUIBoxShadow *setShadowColor(Color color);
 
-    inline float getRadius() const { return m_fRadius; }
+    inline float getRadius() const { return this->fRadius; }
 
     virtual void onResized();
 
    private:
     void render(Graphics *g);
 
-    bool m_bNeedsRedraw;
-    bool m_bColoredContent;
+    bool bNeedsRedraw;
+    bool bColoredContent;
 
-    float m_fRadius;
+    float fRadius;
 
-    Color m_shadowColor;
-    Color m_color;
+    Color shadowColor;
+    Color color;
 
-    GaussianBlur *m_blur;
+    GaussianBlur *blur;
 };
 
 class GaussianBlur {
@@ -52,17 +52,17 @@ class GaussianBlur {
 
     void setSize(Vector2 size);
 
-    inline const Vector2 getPos() const { return m_vPos; }
-    inline const Vector2 getSize() const { return m_vSize; }
+    inline const Vector2 getPos() const { return this->vPos; }
+    inline const Vector2 getSize() const { return this->vSize; }
 
    private:
-    Vector2 m_vPos;
-    Vector2 m_vSize;
-    int m_iKernelSize;
-    float m_fRadius;
+    Vector2 vPos;
+    Vector2 vSize;
+    int iKernelSize;
+    float fRadius;
 
-    RenderTarget *m_rt;
-    RenderTarget *m_rt2;
-    GaussianBlurKernel *m_kernel;
-    Shader *m_blurShader;
+    RenderTarget *rt;
+    RenderTarget *rt2;
+    GaussianBlurKernel *kernel;
+    Shader *blurShader;
 };

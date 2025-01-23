@@ -53,7 +53,7 @@ static void run_sct() {
         if(score.numMisses != smap.live_score.getNumMisses())
             debugLog("Score %d: nMisses was %d, simulated %d\n", idx, score.numMisses, smap.live_score.getNumMisses());
 
-        db->m_scores_mtx.lock();
+        db->scores_mtx.lock();
         for(auto& other : (*db->getScores())[score.beatmap_hash]) {
             if(other.unixTimestamp == score.unixTimestamp) {
                 // @PPV3: currently hitdeltas is always empty
@@ -61,7 +61,7 @@ static void run_sct() {
                 break;
             }
         }
-        db->m_scores_mtx.unlock();
+        db->scores_mtx.unlock();
 
         // TODO @kiwec: update & save scores/pp
 

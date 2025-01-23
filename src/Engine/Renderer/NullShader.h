@@ -13,7 +13,7 @@
 class NullShader : public Shader {
    public:
     NullShader(std::string vertexShader, std::string fragmentShader, bool source) : Shader() { ; }
-    virtual ~NullShader() { destroy(); }
+    virtual ~NullShader() { this->destroy(); }
 
     virtual void enable() { ; }
     virtual void disable() { ; }
@@ -69,8 +69,8 @@ class NullShader : public Shader {
     }
 
    private:
-    virtual void init() { m_bReady = true; }
-    virtual void initAsync() { m_bAsyncReady = true; }
+    virtual void init() { this->bReady = true; }
+    virtual void initAsync() { this->bAsyncReady = true; }
     virtual void destroy() { ; }
 };
 

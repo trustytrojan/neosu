@@ -15,7 +15,7 @@ using namespace std;
 
 void HitObject::drawHitResult(Graphics *g, Beatmap *beatmap, Vector2 rawPos, LiveScore::HIT result,
                               float animPercentInv, float hitDeltaRangePercent) {
-    drawHitResult(g, beatmap->getSkin(), beatmap->m_fHitcircleDiameter, beatmap->m_fRawHitcircleDiameter, rawPos,
+    drawHitResult(g, beatmap->getSkin(), beatmap->fHitcircleDiameter, beatmap->fRawHitcircleDiameter, rawPos,
                   result, animPercentInv, hitDeltaRangePercent);
 }
 
@@ -223,44 +223,44 @@ void HitObject::drawHitResult(Graphics *g, Skin *skin, float hitcircleDiameter, 
 
 HitObject::HitObject(long time, int sampleType, int comboNumber, bool isEndOfCombo, int colorCounter, int colorOffset,
                      BeatmapInterface *beatmap) {
-    click_time = time;
-    m_iSampleType = sampleType;
-    combo_number = comboNumber;
-    is_end_of_combo = isEndOfCombo;
-    m_iColorCounter = colorCounter;
-    m_iColorOffset = colorOffset;
+    this->click_time = time;
+    this->iSampleType = sampleType;
+    this->combo_number = comboNumber;
+    this->is_end_of_combo = isEndOfCombo;
+    this->iColorCounter = colorCounter;
+    this->iColorOffset = colorOffset;
 
-    m_fAlpha = 0.0f;
-    m_fAlphaWithoutHidden = 0.0f;
-    m_fAlphaForApproachCircle = 0.0f;
-    m_fApproachScale = 0.0f;
-    m_fHittableDimRGBColorMultiplierPercent = 1.0f;
-    m_iApproachTime = 0;
-    m_iFadeInTime = 0;
-    duration = 0;
-    m_iDelta = 0;
-    duration = 0;
+    this->fAlpha = 0.0f;
+    this->fAlphaWithoutHidden = 0.0f;
+    this->fAlphaForApproachCircle = 0.0f;
+    this->fApproachScale = 0.0f;
+    this->fHittableDimRGBColorMultiplierPercent = 1.0f;
+    this->iApproachTime = 0;
+    this->iFadeInTime = 0;
+    this->duration = 0;
+    this->iDelta = 0;
+    this->duration = 0;
 
-    m_bVisible = false;
-    m_bFinished = false;
-    m_bBlocked = false;
-    m_bMisAim = false;
-    m_iAutopilotDelta = 0;
-    m_bOverrideHDApproachCircle = false;
-    m_bUseFadeInTimeAsApproachTime = false;
+    this->bVisible = false;
+    this->bFinished = false;
+    this->bBlocked = false;
+    this->bMisAim = false;
+    this->iAutopilotDelta = 0;
+    this->bOverrideHDApproachCircle = false;
+    this->bUseFadeInTimeAsApproachTime = false;
 
-    m_iStack = 0;
+    this->iStack = 0;
 
-    m_hitresultanim1.time = -9999.0f;
-    m_hitresultanim2.time = -9999.0f;
+    this->hitresultanim1.time = -9999.0f;
+    this->hitresultanim2.time = -9999.0f;
 
-    bi = beatmap;
-    bm = dynamic_cast<Beatmap *>(beatmap);  // should be NULL if SimulatedBeatmap
+    this->bi = beatmap;
+    this->bm = dynamic_cast<Beatmap *>(beatmap);  // should be NULL if SimulatedBeatmap
 }
 
 void HitObject::draw2(Graphics *g) {
-    drawHitResultAnim(g, m_hitresultanim1);
-    drawHitResultAnim(g, m_hitresultanim2);
+    this->drawHitResultAnim(g, this->hitresultanim1);
+    this->drawHitResultAnim(g, this->hitresultanim2);
 }
 
 void HitObject::drawHitResultAnim(Graphics *g, const HITRESULTANIM &hitresultanim) {
@@ -269,10 +269,10 @@ void HitObject::drawHitResultAnim(Graphics *g, const HITRESULTANIM &hitresultani
                               // scheduled with it, e.g. for slider end)
        && (hitresultanim.time + cv_hitresult_duration_max.getFloat() * (1.0f / osu->getAnimationSpeedMultiplier())) >
               engine->getTime()) {
-        Skin *skin = bm->getSkin();
+        Skin *skin = this->bm->getSkin();
         {
             const long skinAnimationTimeStartOffset =
-                click_time + (hitresultanim.addObjectDurationToSkinAnimationTimeStartOffset ? duration : 0) +
+                this->click_time + (hitresultanim.addObjectDurationToSkinAnimationTimeStartOffset ? this->duration : 0) +
                 hitresultanim.delta;
 
             skin->getHit0()->setAnimationTimeOffset(skin->getAnimationSpeed(), skinAnimationTimeStartOffset);
@@ -294,30 +294,30 @@ void HitObject::drawHitResultAnim(Graphics *g, const HITRESULTANIM &hitresultani
                 1.0f - (((engine->getTime() - hitresultanim.time) * osu->getAnimationSpeedMultiplier()) /
                         cv_hitresult_duration.getFloat());
 
-            drawHitResult(g, bm, bm->osuCoords2Pixels(hitresultanim.rawPos), hitresultanim.result, animPercentInv,
-                          clamp<float>((float)hitresultanim.delta / bi->getHitWindow50(), -1.0f, 1.0f));
+            drawHitResult(g, this->bm, this->bm->osuCoords2Pixels(hitresultanim.rawPos), hitresultanim.result, animPercentInv,
+                          clamp<float>((float)hitresultanim.delta / this->bi->getHitWindow50(), -1.0f, 1.0f));
         }
     }
 }
 
 void HitObject::update(long curPos, f64 frame_time) {
-    m_fAlphaForApproachCircle = 0.0f;
-    m_fHittableDimRGBColorMultiplierPercent = 1.0f;
+    this->fAlphaForApproachCircle = 0.0f;
+    this->fHittableDimRGBColorMultiplierPercent = 1.0f;
 
-    const auto mods = bi->getMods();
+    const auto mods = this->bi->getMods();
 
     double animationSpeedMultipler = mods.speed / osu->getAnimationSpeedMultiplier();
-    m_iApproachTime = (m_bUseFadeInTimeAsApproachTime ? (GameRules::getFadeInTime() * animationSpeedMultipler)
-                                                      : (long)bi->getApproachTime());
-    m_iFadeInTime = GameRules::getFadeInTime() * animationSpeedMultipler;
+    this->iApproachTime = (this->bUseFadeInTimeAsApproachTime ? (GameRules::getFadeInTime() * animationSpeedMultipler)
+                                                      : (long)this->bi->getApproachTime());
+    this->iFadeInTime = GameRules::getFadeInTime() * animationSpeedMultipler;
 
-    m_iDelta = click_time - curPos;
+    this->iDelta = this->click_time - curPos;
 
     // 1 ms fudge by using >=, shouldn't really be a problem
-    if(curPos >= (click_time - m_iApproachTime) && curPos < (click_time + duration)) {
+    if(curPos >= (this->click_time - this->iApproachTime) && curPos < (this->click_time + this->duration)) {
         // approach circle scale
-        const float scale = clamp<float>((float)m_iDelta / (float)m_iApproachTime, 0.0f, 1.0f);
-        m_fApproachScale = 1 + (scale * cv_approach_scale_multiplier.getFloat());
+        const float scale = clamp<float>((float)this->iDelta / (float)this->iApproachTime, 0.0f, 1.0f);
+        this->fApproachScale = 1 + (scale * cv_approach_scale_multiplier.getFloat());
         if(cv_mod_approach_different.getBool()) {
             const float back_const = 1.70158;
 
@@ -369,17 +369,17 @@ void HitObject::update(long curPos, f64 frame_time) {
                 // NOTE: some of the easing functions will overflow/underflow, don't clamp and instead allow it on
                 // purpose
             }
-            m_fApproachScale = 1 + lerp<float>(cv_mod_approach_different_initial_size.getFloat() - 1.0f, 0.0f, time);
+            this->fApproachScale = 1 + lerp<float>(cv_mod_approach_different_initial_size.getFloat() - 1.0f, 0.0f, time);
         }
 
         // hitobject body fadein
-        const long fadeInStart = click_time - m_iApproachTime;
+        const long fadeInStart = this->click_time - this->iApproachTime;
         const long fadeInEnd = min(
-            click_time,
-            click_time - m_iApproachTime + m_iFadeInTime);  // min() ensures that the fade always finishes at click_time
+            this->click_time,
+            this->click_time - this->iApproachTime + this->iFadeInTime);  // min() ensures that the fade always finishes at click_time
                                                             // (even if the fadeintime is longer than the approachtime)
-        m_fAlpha = clamp<float>(1.0f - ((float)(fadeInEnd - curPos) / (float)(fadeInEnd - fadeInStart)), 0.0f, 1.0f);
-        m_fAlphaWithoutHidden = m_fAlpha;
+        this->fAlpha = clamp<float>(1.0f - ((float)(fadeInEnd - curPos) / (float)(fadeInEnd - fadeInStart)), 0.0f, 1.0f);
+        this->fAlphaWithoutHidden = this->fAlpha;
 
         if(mods.flags & Replay::ModFlags::Hidden) {
             // hidden hitobject body fadein
@@ -387,55 +387,55 @@ void HitObject::update(long curPos, f64 frame_time) {
             const float fin_end_percent = cv_mod_hd_circle_fadein_end_percent.getFloat();
             const float fout_start_percent = cv_mod_hd_circle_fadeout_start_percent.getFloat();
             const float fout_end_percent = cv_mod_hd_circle_fadeout_end_percent.getFloat();
-            const long hiddenFadeInStart = click_time - (long)(m_iApproachTime * fin_start_percent);
-            const long hiddenFadeInEnd = click_time - (long)(m_iApproachTime * fin_end_percent);
-            m_fAlpha = clamp<float>(
+            const long hiddenFadeInStart = this->click_time - (long)(this->iApproachTime * fin_start_percent);
+            const long hiddenFadeInEnd = this->click_time - (long)(this->iApproachTime * fin_end_percent);
+            this->fAlpha = clamp<float>(
                 1.0f - ((float)(hiddenFadeInEnd - curPos) / (float)(hiddenFadeInEnd - hiddenFadeInStart)), 0.0f, 1.0f);
 
             // hidden hitobject body fadeout
-            const long hiddenFadeOutStart = click_time - (long)(m_iApproachTime * fout_start_percent);
-            const long hiddenFadeOutEnd = click_time - (long)(m_iApproachTime * fout_end_percent);
+            const long hiddenFadeOutStart = this->click_time - (long)(this->iApproachTime * fout_start_percent);
+            const long hiddenFadeOutEnd = this->click_time - (long)(this->iApproachTime * fout_end_percent);
             if(curPos >= hiddenFadeOutStart)
-                m_fAlpha = clamp<float>(
+                this->fAlpha = clamp<float>(
                     ((float)(hiddenFadeOutEnd - curPos) / (float)(hiddenFadeOutEnd - hiddenFadeOutStart)), 0.0f, 1.0f);
         }
 
         // approach circle fadein (doubled fadeintime)
-        const long approachCircleFadeStart = click_time - m_iApproachTime;
+        const long approachCircleFadeStart = this->click_time - this->iApproachTime;
         const long approachCircleFadeEnd =
-            min(click_time, click_time - m_iApproachTime +
-                                2 * m_iFadeInTime);  // min() ensures that the fade always finishes at click_time (even
+            min(this->click_time, this->click_time - this->iApproachTime +
+                                2 * this->iFadeInTime);  // min() ensures that the fade always finishes at click_time (even
                                                      // if the fadeintime is longer than the approachtime)
-        m_fAlphaForApproachCircle = clamp<float>(
+        this->fAlphaForApproachCircle = clamp<float>(
             1.0f - ((float)(approachCircleFadeEnd - curPos) / (float)(approachCircleFadeEnd - approachCircleFadeStart)),
             0.0f, 1.0f);
 
         // hittable dim, see https://github.com/ppy/osu/pull/20572
         if(cv_hitobject_hittable_dim.getBool() &&
-           (!(bi->getMods().flags & Replay::ModFlags::Mafham) || !cv_mod_mafham_ignore_hittable_dim.getBool())) {
-            const long hittableDimFadeStart = click_time - (long)GameRules::getHitWindowMiss();
+           (!(this->bi->getMods().flags & Replay::ModFlags::Mafham) || !cv_mod_mafham_ignore_hittable_dim.getBool())) {
+            const long hittableDimFadeStart = this->click_time - (long)GameRules::getHitWindowMiss();
 
             // yes, this means the un-dim animation cuts into the already clickable range
             const long hittableDimFadeEnd = hittableDimFadeStart + (long)cv_hitobject_hittable_dim_duration.getInt();
 
-            m_fHittableDimRGBColorMultiplierPercent =
+            this->fHittableDimRGBColorMultiplierPercent =
                 lerp<float>(cv_hitobject_hittable_dim_start_percent.getFloat(), 1.0f,
                             clamp<float>(1.0f - (float)(hittableDimFadeEnd - curPos) /
                                                     (float)(hittableDimFadeEnd - hittableDimFadeStart),
                                          0.0f, 1.0f));
         }
 
-        m_bVisible = true;
+        this->bVisible = true;
     } else {
-        m_fApproachScale = 1.0f;
-        m_bVisible = false;
+        this->fApproachScale = 1.0f;
+        this->bVisible = false;
     }
 }
 
 void HitObject::addHitResult(LiveScore::HIT result, long delta, bool isEndOfCombo, Vector2 posRaw, float targetDelta,
                              float targetAngle, bool ignoreOnHitErrorBar, bool ignoreCombo, bool ignoreHealth,
                              bool addObjectDurationToSkinAnimationTimeStartOffset) {
-    if(bm != NULL && osu->getModTarget() && result != LiveScore::HIT::HIT_MISS && targetDelta >= 0.0f) {
+    if(this->bm != NULL && osu->getModTarget() && result != LiveScore::HIT::HIT_MISS && targetDelta >= 0.0f) {
         const float p300 = cv_mod_target_300_percent.getFloat();
         const float p100 = cv_mod_target_100_percent.getFloat();
         const float p50 = cv_mod_target_50_percent.getFloat();
@@ -452,9 +452,9 @@ void HitObject::addHitResult(LiveScore::HIT result, long delta, bool isEndOfComb
         osu->getHUD()->addTarget(targetDelta, targetAngle);
     }
 
-    const LiveScore::HIT returnedHit = bi->addHitResult(this, result, delta, isEndOfCombo, ignoreOnHitErrorBar, false,
+    const LiveScore::HIT returnedHit = this->bi->addHitResult(this, result, delta, isEndOfCombo, ignoreOnHitErrorBar, false,
                                                         ignoreCombo, false, ignoreHealth);
-    if(bm == NULL) return;
+    if(this->bm == NULL) return;
 
     HITRESULTANIM hitresultanim;
     {
@@ -467,18 +467,18 @@ void HitObject::addHitResult(LiveScore::HIT result, long delta, bool isEndOfComb
 
     // currently a maximum of 2 simultaneous results are supported (for drawing, per hitobject)
     if(engine->getTime() >
-       m_hitresultanim1.time + cv_hitresult_duration_max.getFloat() * (1.0f / osu->getAnimationSpeedMultiplier()))
-        m_hitresultanim1 = hitresultanim;
+       this->hitresultanim1.time + cv_hitresult_duration_max.getFloat() * (1.0f / osu->getAnimationSpeedMultiplier()))
+        this->hitresultanim1 = hitresultanim;
     else
-        m_hitresultanim2 = hitresultanim;
+        this->hitresultanim2 = hitresultanim;
 }
 
 void HitObject::onReset(long curPos) {
-    m_bMisAim = false;
-    m_iAutopilotDelta = 0;
+    this->bMisAim = false;
+    this->iAutopilotDelta = 0;
 
-    m_hitresultanim1.time = -9999.0f;
-    m_hitresultanim2.time = -9999.0f;
+    this->hitresultanim1.time = -9999.0f;
+    this->hitresultanim2.time = -9999.0f;
 }
 
 float HitObject::lerp3f(float a, float b, float c, float percent) {

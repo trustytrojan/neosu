@@ -45,7 +45,7 @@ class OpenGLES2Shader : public Shader {
     int createShaderFromString(std::string shaderSource, int shaderType);
     int createShaderFromFile(std::string fileName, int shaderType);
 
-    std::string m_sVsh, m_sFsh;
+    std::string m_sVsh, this->sFsh;
 
     bool m_bSource;
     int m_iVertexShader;

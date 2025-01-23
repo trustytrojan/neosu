@@ -17,34 +17,34 @@
 #include "ResourceManager.h"
 
 OpenGLImage::OpenGLImage(std::string filepath, bool mipmapped) : Image(filepath, mipmapped) {
-    m_GLTexture = 0;
-    m_iTextureUnitBackup = 0;
+    this->GLTexture = 0;
+    this->iTextureUnitBackup = 0;
 }
 
 OpenGLImage::OpenGLImage(int width, int height, bool mipmapped) : Image(width, height, mipmapped) {
-    m_GLTexture = 0;
-    m_iTextureUnitBackup = 0;
+    this->GLTexture = 0;
+    this->iTextureUnitBackup = 0;
 }
 
 void OpenGLImage::init() {
-    if(m_GLTexture != 0 || !m_bAsyncReady) return;  // only load if we are not already loaded
+    if(this->GLTexture != 0 || !this->bAsyncReady) return;  // only load if we are not already loaded
 
     // create texture object
-    if(m_GLTexture == 0) {
+    if(this->GLTexture == 0) {
         // DEPRECATED LEGACY (1)
         glEnable(GL_TEXTURE_2D);
         glGetError();  // clear gl error state
 
         // create texture and bind
-        glGenTextures(1, &m_GLTexture);
-        glBindTexture(GL_TEXTURE_2D, m_GLTexture);
+        glGenTextures(1, &this->GLTexture);
+        glBindTexture(GL_TEXTURE_2D, this->GLTexture);
 
         // DEPRECATED LEGACY (2)
         glEnable(GL_TEXTURE_2D);
         glGetError();  // clear gl error state
 
         // set texture filtering mode (mipmapping is disabled by default)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_bMipmapped ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, this->bMipmapped ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 #ifdef MCENGINE_FEATURE_OPENGL
@@ -67,26 +67,28 @@ void OpenGLImage::init() {
     // upload to gpu
     int GLerror = 0;
     {
-        glBindTexture(GL_TEXTURE_2D, m_GLTexture);
+        glBindTexture(GL_TEXTURE_2D, this->GLTexture);
 
         const int jpgUnpackAlignment = 1;
         int prevUnpackAlignment = 4;
-        if(m_type == Image::TYPE::TYPE_JPG)  // HACKHACK: wat
+        if(this->type == Image::TYPE::TYPE_JPG)  // HACKHACK: wat
         {
             glGetIntegerv(GL_UNPACK_ALIGNMENT, &prevUnpackAlignment);
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         }
 
         const GLint internalFormat =
-            (m_iNumChannels == 4 ? GL_RGBA
-                                 : (m_iNumChannels == 3 ? GL_RGB : (m_iNumChannels == 1 ? GL_LUMINANCE : GL_RGBA)));
+            (this->iNumChannels == 4
+                 ? GL_RGBA
+                 : (this->iNumChannels == 3 ? GL_RGB : (this->iNumChannels == 1 ? GL_LUMINANCE : GL_RGBA)));
         const GLint format =
-            (m_iNumChannels == 4 ? GL_RGBA
-                                 : (m_iNumChannels == 3 ? GL_RGB : (m_iNumChannels == 1 ? GL_LUMINANCE : GL_RGBA)));
+            (this->iNumChannels == 4
+                 ? GL_RGBA
+                 : (this->iNumChannels == 3 ? GL_RGB : (this->iNumChannels == 1 ? GL_LUMINANCE : GL_RGBA)));
 
-        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_iWidth, m_iHeight, 0, format, GL_UNSIGNED_BYTE,
-                     &m_rawImage[0]);
-        if(m_bMipmapped) {
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, this->iWidth, this->iHeight, 0, format, GL_UNSIGNED_BYTE,
+                     &this->rawImage[0]);
+        if(this->bMipmapped) {
             // DEPRECATED LEGACY (1) (ignore mipmap generation errors)
             GLerror = (GLerror == 0 ? glGetError() : GLerror);
 
@@ -96,54 +98,54 @@ void OpenGLImage::init() {
             glGetError();  // clear gl error state
         }
 
-        if(m_type == Image::TYPE::TYPE_JPG && prevUnpackAlignment != jpgUnpackAlignment)
+        if(this->type == Image::TYPE::TYPE_JPG && prevUnpackAlignment != jpgUnpackAlignment)
             glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpackAlignment);
     }
 
     // check for errors
     GLerror = (GLerror == 0 ? glGetError() : GLerror);
     if(GLerror != 0) {
-        m_GLTexture = 0;
-        debugLog("OpenGL Image Error: %i on file %s!\n", GLerror, m_sFilePath.c_str());
+        this->GLTexture = 0;
+        debugLog("OpenGL Image Error: %i on file %s!\n", GLerror, this->sFilePath.c_str());
         return;
     }
 
-    m_bReady = true;
+    this->bReady = true;
 
-    if(m_filterMode != Graphics::FILTER_MODE::FILTER_MODE_LINEAR) setFilterMode(m_filterMode);
+    if(this->filterMode != Graphics::FILTER_MODE::FILTER_MODE_LINEAR) this->setFilterMode(this->filterMode);
 
-    if(m_wrapMode != Graphics::WRAP_MODE::WRAP_MODE_CLAMP) setWrapMode(m_wrapMode);
+    if(this->wrapMode != Graphics::WRAP_MODE::WRAP_MODE_CLAMP) this->setWrapMode(this->wrapMode);
 }
 
 void OpenGLImage::initAsync() {
-    if(m_GLTexture != 0) return;  // only load if we are not already loaded
+    if(this->GLTexture != 0) return;  // only load if we are not already loaded
 
-    if(!m_bCreatedImage) {
-        if(cv_debug_rm.getBool()) debugLog("Resource Manager: Loading %s\n", m_sFilePath.c_str());
+    if(!this->bCreatedImage) {
+        if(cv_debug_rm.getBool()) debugLog("Resource Manager: Loading %s\n", this->sFilePath.c_str());
 
-        m_bAsyncReady = loadRawImage();
+        this->bAsyncReady = this->loadRawImage();
     }
 }
 
 void OpenGLImage::destroy() {
-    if(m_GLTexture != 0) {
-        glDeleteTextures(1, &m_GLTexture);
-        m_GLTexture = 0;
+    if(this->GLTexture != 0) {
+        glDeleteTextures(1, &this->GLTexture);
+        this->GLTexture = 0;
     }
 
-    m_rawImage = std::vector<unsigned char>();
+    this->rawImage = std::vector<unsigned char>();
 }
 
 void OpenGLImage::bind(unsigned int textureUnit) {
-    if(!m_bReady) return;
+    if(!this->bReady) return;
 
-    m_iTextureUnitBackup = textureUnit;
+    this->iTextureUnitBackup = textureUnit;
 
     // switch texture units before enabling+binding
     glActiveTexture(GL_TEXTURE0 + textureUnit);
 
     // set texture
-    glBindTexture(GL_TEXTURE_2D, m_GLTexture);
+    glBindTexture(GL_TEXTURE_2D, this->GLTexture);
 
     // needed for legacy support (OpenGLLegacyInterface)
     // DEPRECATED LEGACY
@@ -152,21 +154,21 @@ void OpenGLImage::bind(unsigned int textureUnit) {
 }
 
 void OpenGLImage::unbind() {
-    if(!m_bReady) return;
+    if(!this->bReady) return;
 
     // restore texture unit (just in case) and set to no texture
-    glActiveTexture(GL_TEXTURE0 + m_iTextureUnitBackup);
+    glActiveTexture(GL_TEXTURE0 + this->iTextureUnitBackup);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     // restore default texture unit
-    if(m_iTextureUnitBackup != 0) glActiveTexture(GL_TEXTURE0);
+    if(this->iTextureUnitBackup != 0) glActiveTexture(GL_TEXTURE0);
 }
 
 void OpenGLImage::setFilterMode(Graphics::FILTER_MODE filterMode) {
     Image::setFilterMode(filterMode);
-    if(!m_bReady) return;
+    if(!this->bReady) return;
 
-    bind();
+    this->bind();
     {
         switch(filterMode) {
             case Graphics::FILTER_MODE::FILTER_MODE_NONE:
@@ -183,14 +185,14 @@ void OpenGLImage::setFilterMode(Graphics::FILTER_MODE filterMode) {
                 break;
         }
     }
-    unbind();
+    this->unbind();
 }
 
 void OpenGLImage::setWrapMode(Graphics::WRAP_MODE wrapMode) {
     Image::setWrapMode(wrapMode);
-    if(!m_bReady) return;
+    if(!this->bReady) return;
 
-    bind();
+    this->bind();
     {
         switch(wrapMode) {
             case Graphics::WRAP_MODE::WRAP_MODE_CLAMP:  // NOTE: there is also GL_CLAMP, which works a bit differently
@@ -204,12 +206,12 @@ void OpenGLImage::setWrapMode(Graphics::WRAP_MODE wrapMode) {
                 break;
         }
     }
-    unbind();
+    this->unbind();
 }
 
 void OpenGLImage::handleGLErrors() {
     int GLerror = glGetError();
-    if(GLerror != 0) debugLog("OpenGL Image Error: %i on file %s!\n", GLerror, m_sFilePath.c_str());
+    if(GLerror != 0) debugLog("OpenGL Image Error: %i on file %s!\n", GLerror, this->sFilePath.c_str());
 }
 
 #endif

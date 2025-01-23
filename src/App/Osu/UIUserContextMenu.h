@@ -26,7 +26,7 @@ class UIUserContextMenuScreen : public OsuScreen {
     void close();
     void on_action(UString text, int user_action);
 
-    u32 m_user_id;
+    u32 user_id;
     UIContextMenu *menu = NULL;
 };
 
@@ -36,5 +36,5 @@ class UIUserLabel : public CBaseUILabel {
 
     virtual void onMouseUpInside();
 
-    u32 m_user_id;
+    u32 user_id;
 };

@@ -15,14 +15,14 @@
 #include "SoundEngine.h"
 
 Changelog::Changelog() : ScreenBackable() {
-    setPos(-1, -1);
-    m_scrollView = new CBaseUIScrollView(-1, -1, 0, 0, "");
-    m_scrollView->setVerticalScrolling(true);
-    m_scrollView->setHorizontalScrolling(true);
-    m_scrollView->setDrawBackground(false);
-    m_scrollView->setDrawFrame(false);
-    m_scrollView->setScrollResistance(0);
-    addBaseUIElement(m_scrollView);
+    this->setPos(-1, -1);
+    this->scrollView = new CBaseUIScrollView(-1, -1, 0, 0, "");
+    this->scrollView->setVerticalScrolling(true);
+    this->scrollView->setHorizontalScrolling(true);
+    this->scrollView->setDrawBackground(false);
+    this->scrollView->setDrawFrame(false);
+    this->scrollView->setScrollResistance(0);
+    this->addBaseUIElement(this->scrollView);
 
     std::vector<CHANGELOG> changelogs;
 
@@ -352,7 +352,7 @@ Changelog::Changelog() : ScreenBackable() {
         changelog.title->setDrawBackground(false);
         changelog.title->setDrawFrame(false);
 
-        m_scrollView->getContainer()->addBaseUIElement(changelog.title);
+        this->scrollView->getContainer()->addBaseUIElement(changelog.title);
 
         // changes
         for(int c = 0; c < changelogs[i].changes.size(); c++) {
@@ -361,23 +361,23 @@ Changelog::Changelog() : ScreenBackable() {
                 CustomCBaseUILabel(UString text) : CBaseUIButton(0, 0, 0, 0, "", text) { ; }
 
                 virtual void draw(Graphics *g) {
-                    if(m_bVisible && isMouseInside()) {
+                    if(this->bVisible && this->isMouseInside()) {
                         g->setColor(0x3fffffff);
 
                         const int margin = 0;
                         const int marginX = margin + 10;
-                        g->fillRect(m_vPos.x - marginX, m_vPos.y - margin, m_vSize.x + marginX * 2,
-                                    m_vSize.y + margin * 2);
+                        g->fillRect(this->vPos.x - marginX, this->vPos.y - margin, this->vSize.x + marginX * 2,
+                                    this->vSize.y + margin * 2);
                     }
 
-                    if(!m_bVisible) return;
+                    if(!this->bVisible) return;
 
-                    g->setColor(m_textColor);
+                    g->setColor(this->textColor);
                     g->pushTransform();
                     {
-                        g->translate((int)(m_vPos.x + m_vSize.x / 2.0f - m_fStringWidth / 2.0f),
-                                     (int)(m_vPos.y + m_vSize.y / 2.0f + m_fStringHeight / 2.0f));
-                        g->drawString(m_font, m_sText);
+                        g->translate((int)(this->vPos.x + this->vSize.x / 2.0f - this->fStringWidth / 2.0f),
+                                     (int)(this->vPos.y + this->vSize.y / 2.0f + this->fStringHeight / 2.0f));
+                        g->drawString(this->font, this->sText);
                     }
                     g->popTransform();
                 }
@@ -394,24 +394,24 @@ Changelog::Changelog() : ScreenBackable() {
 
             changelog.changes.push_back(change);
 
-            m_scrollView->getContainer()->addBaseUIElement(change);
+            this->scrollView->getContainer()->addBaseUIElement(change);
         }
 
-        m_changelogs.push_back(changelog);
+        this->changelogs.push_back(changelog);
     }
 }
 
-Changelog::~Changelog() { m_changelogs.clear(); }
+Changelog::~Changelog() { this->changelogs.clear(); }
 
 void Changelog::mouse_update(bool *propagate_clicks) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
     ScreenBackable::mouse_update(propagate_clicks);
 }
 
 CBaseUIContainer *Changelog::setVisible(bool visible) {
     ScreenBackable::setVisible(visible);
 
-    if(m_bVisible) updateLayout();
+    if(this->bVisible) this->updateLayout();
 
     return this;
 }
@@ -421,11 +421,11 @@ void Changelog::updateLayout() {
 
     const float dpiScale = Osu::getUIScale();
 
-    setSize(osu->getScreenSize() + Vector2(2, 2));
-    m_scrollView->setSize(osu->getScreenSize() + Vector2(2, 2));
+    this->setSize(osu->getScreenSize() + Vector2(2, 2));
+    this->scrollView->setSize(osu->getScreenSize() + Vector2(2, 2));
 
     float yCounter = 0;
-    for(const CHANGELOG_UI &changelog : m_changelogs) {
+    for(const CHANGELOG_UI &changelog : this->changelogs) {
         changelog.title->onResized();  // HACKHACK: framework, setSizeToContent() does not update string metrics
         changelog.title->setSizeToContent();
 
@@ -445,7 +445,7 @@ void Changelog::updateLayout() {
         yCounter += 65 * dpiScale;
     }
 
-    m_scrollView->setScrollSizeToContent(15 * dpiScale);
+    this->scrollView->setScrollSizeToContent(15 * dpiScale);
 }
 
 void Changelog::onBack() { osu->toggleChangelog(); }

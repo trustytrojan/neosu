@@ -10,25 +10,25 @@ class UIVolumeSlider : public CBaseUISlider {
    public:
     UIVolumeSlider(float xPos, float yPos, float xSize, float ySize, UString name);
 
-    void setType(TYPE type) { m_type = type; }
+    void setType(TYPE type) { this->type = type; }
     void setSelected(bool selected);
 
     bool checkWentMouseInside();
 
     float getMinimumExtraTextWidth();
 
-    inline bool isSelected() const { return m_bSelected; }
+    inline bool isSelected() const { return this->bSelected; }
 
    private:
     virtual void drawBlock(Graphics *g);
 
     virtual void onMouseInside();
 
-    TYPE m_type;
-    bool m_bSelected;
+    TYPE type;
+    bool bSelected;
 
-    bool m_bWentMouseInside;
-    float m_fSelectionAnim;
+    bool bWentMouseInside;
+    float fSelectionAnim;
 
-    McFont *m_font;
+    McFont *font;
 };

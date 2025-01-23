@@ -22,49 +22,49 @@ CollectionButton::CollectionButton(SongBrowser *songBrowser, CBaseUIScrollView *
                                    float xPos, float yPos, float xSize, float ySize, UString name,
                                    UString collectionName, std::vector<SongButton *> children)
     : Button(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, name) {
-    m_sCollectionName = collectionName;
-    m_children = children;
+    this->sCollectionName = collectionName;
+    this->children = children;
 
-    m_fTitleScale = 0.35f;
+    this->fTitleScale = 0.35f;
 
     // settings
-    setOffsetPercent(0.075f * 0.5f);
+    this->setOffsetPercent(0.075f * 0.5f);
 }
 
 void CollectionButton::draw(Graphics *g) {
     Button::draw(g);
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
     Skin *skin = osu->getSkin();
 
     // scaling
-    const Vector2 pos = getActualPos();
-    const Vector2 size = getActualSize();
+    const Vector2 pos = this->getActualPos();
+    const Vector2 size = this->getActualSize();
 
     // draw title
-    UString titleString = m_sCollectionName.c_str();
+    UString titleString = this->sCollectionName.c_str();
     int numChildren = 0;
     {
-        for(size_t c = 0; c < m_children.size(); c++) {
-            const auto &childrenChildren = m_children[c]->getChildren();
+        for(size_t c = 0; c < this->children.size(); c++) {
+            const auto &childrenChildren = this->children[c]->getChildren();
             if(childrenChildren.size() > 0) {
                 for(size_t cc = 0; cc < childrenChildren.size(); cc++) {
                     if(childrenChildren[cc]->isSearchMatch()) numChildren++;
                 }
-            } else if(m_children[c]->isSearchMatch())
+            } else if(this->children[c]->isSearchMatch())
                 numChildren++;
         }
     }
     titleString.append(UString::format((numChildren == 1 ? " (%i map)" : " (%i maps)"), numChildren));
 
     int textXOffset = size.x * 0.02f;
-    float titleScale = (size.y * m_fTitleScale) / m_font->getHeight();
-    g->setColor(m_bSelected ? skin->getSongSelectActiveText() : skin->getSongSelectInactiveText());
+    float titleScale = (size.y * this->fTitleScale) / this->font->getHeight();
+    g->setColor(this->bSelected ? skin->getSongSelectActiveText() : skin->getSongSelectInactiveText());
     g->pushTransform();
     {
         g->scale(titleScale, titleScale);
-        g->translate(pos.x + textXOffset, pos.y + size.y / 2 + (m_font->getHeight() * titleScale) / 2);
-        g->drawString(m_font, titleString);
+        g->translate(pos.x + textXOffset, pos.y + size.y / 2 + (this->font->getHeight() * titleScale) / 2);
+        g->drawString(this->font, titleString);
     }
     g->popTransform();
 }
@@ -72,89 +72,89 @@ void CollectionButton::draw(Graphics *g) {
 void CollectionButton::onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected) {
     Button::onSelected(wasSelected, autoSelectBottomMostChild, wasParentSelected);
 
-    m_songBrowser->onSelectionChange(this, true);
-    m_songBrowser->scrollToSongButton(this, true);
+    this->songBrowser->onSelectionChange(this, true);
+    this->songBrowser->scrollToSongButton(this, true);
 }
 
-void CollectionButton::onRightMouseUpInside() { triggerContextMenu(engine->getMouse()->getPos()); }
+void CollectionButton::onRightMouseUpInside() { this->triggerContextMenu(engine->getMouse()->getPos()); }
 
 void CollectionButton::triggerContextMenu(Vector2 pos) {
     if(osu->getSongBrowser()->getGroupingMode() != SongBrowser::GROUP::GROUP_COLLECTIONS) return;
 
-    if(m_contextMenu != NULL) {
-        m_contextMenu->setPos(pos);
-        m_contextMenu->setRelPos(pos);
-        m_contextMenu->begin(0, true);
+    if(this->contextMenu != NULL) {
+        this->contextMenu->setPos(pos);
+        this->contextMenu->setRelPos(pos);
+        this->contextMenu->begin(0, true);
         {
-            m_contextMenu->addButton("[...]      Rename Collection", 1);
+            this->contextMenu->addButton("[...]      Rename Collection", 1);
 
-            CBaseUIButton *spacer = m_contextMenu->addButton("---");
+            CBaseUIButton *spacer = this->contextMenu->addButton("---");
             spacer->setTextLeft(false);
             spacer->setEnabled(false);
             spacer->setTextColor(0xff888888);
             spacer->setTextDarkColor(0xff000000);
 
-            m_contextMenu->addButton("[-]         Delete Collection", 2);
+            this->contextMenu->addButton("[-]         Delete Collection", 2);
         }
-        m_contextMenu->end(false, false);
-        m_contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &CollectionButton::onContextMenu));
-        UIContextMenu::clampToRightScreenEdge(m_contextMenu);
-        UIContextMenu::clampToBottomScreenEdge(m_contextMenu);
+        this->contextMenu->end(false, false);
+        this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &CollectionButton::onContextMenu));
+        UIContextMenu::clampToRightScreenEdge(this->contextMenu);
+        UIContextMenu::clampToBottomScreenEdge(this->contextMenu);
     }
 }
 
 void CollectionButton::onContextMenu(UString text, int id) {
     if(id == 1) {
-        m_contextMenu->begin(0, true);
+        this->contextMenu->begin(0, true);
         {
-            CBaseUIButton *label = m_contextMenu->addButton("Enter Collection Name:");
+            CBaseUIButton *label = this->contextMenu->addButton("Enter Collection Name:");
             label->setTextLeft(false);
             label->setEnabled(false);
 
-            CBaseUIButton *spacer = m_contextMenu->addButton("---");
+            CBaseUIButton *spacer = this->contextMenu->addButton("---");
             spacer->setTextLeft(false);
             spacer->setEnabled(false);
             spacer->setTextColor(0xff888888);
             spacer->setTextDarkColor(0xff000000);
 
-            m_contextMenu->addTextbox(m_sCollectionName.c_str(), id)->setCursorPosRight();
+            this->contextMenu->addTextbox(this->sCollectionName.c_str(), id)->setCursorPosRight();
 
-            spacer = m_contextMenu->addButton("---");
+            spacer = this->contextMenu->addButton("---");
             spacer->setTextLeft(false);
             spacer->setEnabled(false);
             spacer->setTextColor(0xff888888);
             spacer->setTextDarkColor(0xff000000);
 
-            label = m_contextMenu->addButton("(Press ENTER to confirm.)", id);
+            label = this->contextMenu->addButton("(Press ENTER to confirm.)", id);
             label->setTextLeft(false);
             label->setTextColor(0xff555555);
             label->setTextDarkColor(0xff000000);
         }
-        m_contextMenu->end(false, false);
-        m_contextMenu->setClickCallback(
+        this->contextMenu->end(false, false);
+        this->contextMenu->setClickCallback(
             fastdelegate::MakeDelegate(this, &CollectionButton::onRenameCollectionConfirmed));
-        UIContextMenu::clampToRightScreenEdge(m_contextMenu);
-        UIContextMenu::clampToBottomScreenEdge(m_contextMenu);
+        UIContextMenu::clampToRightScreenEdge(this->contextMenu);
+        UIContextMenu::clampToBottomScreenEdge(this->contextMenu);
     } else if(id == 2) {
         if(engine->getKeyboard()->isShiftDown())
-            onDeleteCollectionConfirmed(text, id);
+            this->onDeleteCollectionConfirmed(text, id);
         else {
-            m_contextMenu->begin(0, true);
+            this->contextMenu->begin(0, true);
             {
-                m_contextMenu->addButton("Really delete collection?")->setEnabled(false);
-                CBaseUIButton *spacer = m_contextMenu->addButton("---");
+                this->contextMenu->addButton("Really delete collection?")->setEnabled(false);
+                CBaseUIButton *spacer = this->contextMenu->addButton("---");
                 spacer->setTextLeft(false);
                 spacer->setEnabled(false);
                 spacer->setTextColor(0xff888888);
                 spacer->setTextDarkColor(0xff000000);
-                m_contextMenu->addButton("Yes", 2)->setTextLeft(false);
-                m_contextMenu->addButton("No")->setTextLeft(false);
+                this->contextMenu->addButton("Yes", 2)->setTextLeft(false);
+                this->contextMenu->addButton("No")->setTextLeft(false);
             }
-            m_contextMenu->end(false, false);
-            m_contextMenu->setClickCallback(
+            this->contextMenu->end(false, false);
+            this->contextMenu->setClickCallback(
                 fastdelegate::MakeDelegate(this, &CollectionButton::onDeleteCollectionConfirmed));
-            UIContextMenu::clampToRightScreenEdge(m_contextMenu);
-            UIContextMenu::clampToBottomScreenEdge(m_contextMenu);
+            UIContextMenu::clampToRightScreenEdge(this->contextMenu);
+            UIContextMenu::clampToBottomScreenEdge(this->contextMenu);
         }
     }
 }
@@ -162,12 +162,12 @@ void CollectionButton::onContextMenu(UString text, int id) {
 void CollectionButton::onRenameCollectionConfirmed(UString text, int id) {
     if(text.length() > 0) {
         std::string new_name = text.toUtf8();
-        auto collection = get_or_create_collection(m_sCollectionName);
+        auto collection = get_or_create_collection(this->sCollectionName);
         collection->rename_to(new_name);
         save_collections();
 
         // (trigger re-sorting of collection buttons)
-        osu->getSongBrowser()->onCollectionButtonContextMenu(this, m_sCollectionName.c_str(), 3);
+        osu->getSongBrowser()->onCollectionButtonContextMenu(this, this->sCollectionName.c_str(), 3);
     }
 }
 
@@ -175,7 +175,7 @@ void CollectionButton::onDeleteCollectionConfirmed(UString text, int id) {
     if(id != 2) return;
 
     // just forward it
-    osu->getSongBrowser()->onCollectionButtonContextMenu(this, m_sCollectionName.c_str(), id);
+    osu->getSongBrowser()->onCollectionButtonContextMenu(this, this->sCollectionName.c_str(), id);
 }
 
 Color CollectionButton::getActiveBackgroundColor() const {

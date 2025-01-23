@@ -45,29 +45,29 @@ class HitObject {
     void addHitResult(LiveScore::HIT result, long delta, bool isEndOfCombo, Vector2 posRaw, float targetDelta = 0.0f,
                       float targetAngle = 0.0f, bool ignoreOnHitErrorBar = false, bool ignoreCombo = false,
                       bool ignoreHealth = false, bool addObjectDurationToSkinAnimationTimeStartOffset = true);
-    void misAimed() { m_bMisAim = true; }
+    void misAimed() { this->bMisAim = true; }
 
-    void setStack(int stack) { m_iStack = stack; }
-    void setForceDrawApproachCircle(bool firstNote) { m_bOverrideHDApproachCircle = firstNote; }
-    void setAutopilotDelta(long delta) { m_iAutopilotDelta = delta; }
-    void setBlocked(bool blocked) { m_bBlocked = blocked; }
+    void setStack(int stack) { this->iStack = stack; }
+    void setForceDrawApproachCircle(bool firstNote) { this->bOverrideHDApproachCircle = firstNote; }
+    void setAutopilotDelta(long delta) { this->iAutopilotDelta = delta; }
+    void setBlocked(bool blocked) { this->bBlocked = blocked; }
 
     virtual Vector2 getRawPosAt(long pos) = 0;          // with stack calculation modifications
     virtual Vector2 getOriginalRawPosAt(long pos) = 0;  // without stack calculations
     virtual Vector2 getAutoCursorPos(long curPos) = 0;
 
-    inline int getStack() const { return m_iStack; }
-    inline int getColorCounter() const { return m_iColorCounter; }
-    inline int getColorOffset() const { return m_iColorOffset; }
-    inline float getApproachScale() const { return m_fApproachScale; }
-    inline long getDelta() const { return m_iDelta; }
-    inline long getApproachTime() const { return m_iApproachTime; }
-    inline long getAutopilotDelta() const { return m_iAutopilotDelta; }
+    inline int getStack() const { return this->iStack; }
+    inline int getColorCounter() const { return this->iColorCounter; }
+    inline int getColorOffset() const { return this->iColorOffset; }
+    inline float getApproachScale() const { return this->fApproachScale; }
+    inline long getDelta() const { return this->iDelta; }
+    inline long getApproachTime() const { return this->iApproachTime; }
+    inline long getAutopilotDelta() const { return this->iAutopilotDelta; }
 
-    inline bool isVisible() const { return m_bVisible; }
-    inline bool isFinished() const { return m_bFinished; }
-    inline bool isBlocked() const { return m_bBlocked; }
-    inline bool hasMisAimed() const { return m_bMisAim; }
+    inline bool isVisible() const { return this->bVisible; }
+    inline bool isFinished() const { return this->bFinished; }
+    inline bool isBlocked() const { return this->bBlocked; }
+    inline bool hasMisAimed() const { return this->bMisAim; }
 
     virtual void onClickEvent(std::vector<Click> &clicks) { ; }
     virtual void onReset(long curPos);
@@ -76,29 +76,29 @@ class HitObject {
     BeatmapInterface *bi = NULL;
     Beatmap *bm = NULL;  // NULL when simulating
 
-    bool m_bVisible;
-    bool m_bFinished;
+    bool bVisible;
+    bool bFinished;
 
-    int m_iSampleType;
-    int m_iColorCounter;
-    int m_iColorOffset;
+    int iSampleType;
+    int iColorCounter;
+    int iColorOffset;
 
-    float m_fAlpha;
-    float m_fAlphaWithoutHidden;
-    float m_fAlphaForApproachCircle;
-    float m_fApproachScale;
-    float m_fHittableDimRGBColorMultiplierPercent;
-    long m_iDelta;  // this must be signed
-    long m_iApproachTime;
-    long m_iFadeInTime;  // extra time added before the approachTime to let the object smoothly become visible
+    float fAlpha;
+    float fAlphaWithoutHidden;
+    float fAlphaForApproachCircle;
+    float fApproachScale;
+    float fHittableDimRGBColorMultiplierPercent;
+    long iDelta;  // this must be signed
+    long iApproachTime;
+    long iFadeInTime;  // extra time added before the approachTime to let the object smoothly become visible
 
-    int m_iStack;
+    int iStack;
 
-    bool m_bBlocked;
-    bool m_bOverrideHDApproachCircle;
-    bool m_bMisAim;
-    long m_iAutopilotDelta;
-    bool m_bUseFadeInTimeAsApproachTime;
+    bool bBlocked;
+    bool bOverrideHDApproachCircle;
+    bool bMisAim;
+    long iAutopilotDelta;
+    bool bUseFadeInTimeAsApproachTime;
 
    private:
     static float lerp3f(float a, float b, float c, float percent);
@@ -113,6 +113,6 @@ class HitObject {
 
     void drawHitResultAnim(Graphics *g, const HITRESULTANIM &hitresultanim);
 
-    HITRESULTANIM m_hitresultanim1;
-    HITRESULTANIM m_hitresultanim2;
+    HITRESULTANIM hitresultanim1;
+    HITRESULTANIM hitresultanim2;
 };

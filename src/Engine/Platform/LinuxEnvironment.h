@@ -76,8 +76,8 @@ class LinuxEnvironment : public Environment {
     McRect getVirtualScreenRect();
     McRect getDesktopRect();
     int getDPI();
-    bool isFullscreen() { return m_bFullScreen; }
-    bool isWindowResizable() { return m_bResizable; }
+    bool isFullscreen() { return this->bFullScreen; }
+    bool isWindowResizable() { return this->bResizable; }
 
     // mouse
     bool isCursorInWindow();
@@ -95,9 +95,9 @@ class LinuxEnvironment : public Environment {
     UString keyCodeToString(KEYCODE keyCode);
 
     // ILLEGAL:
-    inline Display *getDisplay() const { return m_display; }
-    inline Window getWindow() const { return m_window; }
-    inline bool isRestartScheduled() const { return m_bIsRestartScheduled; }
+    inline Display *getDisplay() const { return this->display; }
+    inline Window getWindow() const { return this->window; }
+    inline bool isRestartScheduled() const { return this->bIsRestartScheduled; }
 
     void handleSelectionRequest(XSelectionRequestEvent &evt);
 
@@ -117,43 +117,43 @@ class LinuxEnvironment : public Environment {
     void setClipBoardTextInt(UString clipText);
     UString getClipboardTextInt();
 
-    Display *m_display;
-    Window m_window;
+    Display *display;
+    Window window;
 
     // monitors
-    static std::vector<McRect> m_vMonitors;
+    static std::vector<McRect> vMonitors;
 
     // window
-    static bool m_bResizable;
-    bool m_bFullScreen;
-    Vector2 m_vLastWindowPos;
-    Vector2 m_vLastWindowSize;
-    int m_iDPI;
+    static bool bResizable;
+    bool bFullScreen;
+    Vector2 vLastWindowPos;
+    Vector2 vLastWindowSize;
+    int iDPI;
 
     // mouse
-    bool m_bCursorClipped;
-    McRect m_cursorClip;
-    bool m_bCursorRequest;
-    bool m_bCursorReset;
-    bool m_bCursorVisible;
-    bool m_bIsCursorInsideWindow;
-    Cursor m_mouseCursor;
-    Cursor m_invisibleCursor;
-    CURSORTYPE m_cursorType;
+    bool bCursorClipped;
+    McRect cursorClip;
+    bool bCursorRequest;
+    bool bCursorReset;
+    bool bCursorVisible;
+    bool bIsCursorInsideWindow;
+    Cursor mouseCursor;
+    Cursor invisibleCursor;
+    CURSORTYPE cursorType;
 
     // clipboard
-    UString m_sLocalClipboardContent;
-    Atom m_atom_UTF8_STRING;
-    Atom m_atom_CLIPBOARD;
-    Atom m_atom_TARGETS;
+    UString sLocalClipboardContent;
+    Atom atom_UTF8_STRING;
+    Atom atom_CLIPBOARD;
+    Atom atom_TARGETS;
 
     // custom
-    bool m_bIsRestartScheduled;
-    bool m_bResizeDelayHack;
-    Vector2 m_vResizeHackSize;
-    bool m_bPrevCursorHack;
-    bool m_bFullscreenWasResizable;
-    Vector2 m_vPrevDisableFullscreenWindowSize;
+    bool bIsRestartScheduled;
+    bool bResizeDelayHack;
+    Vector2 vResizeHackSize;
+    bool bPrevCursorHack;
+    bool bFullscreenWasResizable;
+    Vector2 vPrevDisableFullscreenWindowSize;
 };
 
 #endif

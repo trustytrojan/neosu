@@ -20,21 +20,21 @@ class VolumeOverlay : public OsuScreen {
     void gainFocus();
     void loseFocus();
 
-    void volumeUp(int multiplier = 1) { onVolumeChange(multiplier); }
-    void volumeDown(int multiplier = 1) { onVolumeChange(-multiplier); }
+    void volumeUp(int multiplier = 1) { this->onVolumeChange(multiplier); }
+    void volumeDown(int multiplier = 1) { this->onVolumeChange(-multiplier); }
     void onVolumeChange(int multiplier);
     void onMasterVolumeChange(UString oldValue, UString newValue);
     void onEffectVolumeChange();
     void onMusicVolumeChange(UString oldValue, UString newValue);
 
-    float m_fLastVolume;
-    float m_fVolumeChangeTime;
-    float m_fVolumeChangeFade;
-    bool m_bVolumeInactiveToActiveScheduled = false;
-    float m_fVolumeInactiveToActiveAnim = 0.f;
+    float fLastVolume;
+    float fVolumeChangeTime;
+    float fVolumeChangeFade;
+    bool bVolumeInactiveToActiveScheduled = false;
+    float fVolumeInactiveToActiveAnim = 0.f;
 
-    CBaseUIContainer *m_volumeSliderOverlayContainer = NULL;
-    UIVolumeSlider *m_volumeMaster = NULL;
-    UIVolumeSlider *m_volumeEffects = NULL;
-    UIVolumeSlider *m_volumeMusic = NULL;
+    CBaseUIContainer *volumeSliderOverlayContainer = NULL;
+    UIVolumeSlider *volumeMaster = NULL;
+    UIVolumeSlider *volumeEffects = NULL;
+    UIVolumeSlider *volumeMusic = NULL;
 };

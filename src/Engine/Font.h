@@ -36,18 +36,18 @@ class McFont : public Resource {
     McFont(std::string filepath, int fontSize = 16, bool antialiasing = true, int fontDPI = 96);
     McFont(std::string filepath, std::vector<wchar_t> characters, int fontSize = 16, bool antialiasing = true,
            int fontDPI = 96);
-    virtual ~McFont() { destroy(); }
+    virtual ~McFont() { this->destroy(); }
 
     void drawString(Graphics *g, UString text);
     void drawTextureAtlas(Graphics *g);
 
-    void setSize(int fontSize) { m_iFontSize = fontSize; }
-    void setDPI(int dpi) { m_iFontDPI = dpi; }
-    void setHeight(float height) { m_fHeight = height; }
+    void setSize(int fontSize) { this->iFontSize = fontSize; }
+    void setDPI(int dpi) { this->iFontDPI = dpi; }
+    void setHeight(float height) { this->fHeight = height; }
 
-    inline int getSize() const { return m_iFontSize; }
-    inline int getDPI() const { return m_iFontDPI; }
-    inline float getHeight() const { return m_fHeight; }  // precomputed average height (fast)
+    inline int getSize() const { return this->iFontSize; }
+    inline int getDPI() const { return this->iFontDPI; }
+    inline float getHeight() const { return this->fHeight; }  // precomputed average height (fast)
 
     float getStringWidth(UString text) const;
     float getStringHeight(UString text) const;
@@ -56,7 +56,7 @@ class McFont : public Resource {
     bool hasGlyph(wchar_t ch) const;
 
     // ILLEGAL:
-    inline TextureAtlas *getTextureAtlas() const { return m_textureAtlas; }
+    inline TextureAtlas *getTextureAtlas() const { return this->textureAtlas; }
 
    protected:
     void constructor(std::vector<wchar_t> characters, int fontSize, bool antialiasing, int fontDPI);
@@ -72,18 +72,18 @@ class McFont : public Resource {
                                      bool antialiasing,
                                      std::unordered_map<wchar_t, McFont::GLYPH_METRICS> *glyphMetrics);
 
-    int m_iFontSize;
-    bool m_bAntialiasing;
-    int m_iFontDPI;
+    int iFontSize;
+    bool bAntialiasing;
+    int iFontDPI;
 
     // glyphs
-    TextureAtlas *m_textureAtlas;
+    TextureAtlas *textureAtlas;
 
-    std::vector<wchar_t> m_vGlyphs;
-    std::unordered_map<wchar_t, bool> m_vGlyphExistence;
-    std::unordered_map<wchar_t, GLYPH_METRICS> m_vGlyphMetrics;
+    std::vector<wchar_t> vGlyphs;
+    std::unordered_map<wchar_t, bool> vGlyphExistence;
+    std::unordered_map<wchar_t, GLYPH_METRICS> vGlyphMetrics;
 
-    float m_fHeight;
+    float fHeight;
 
-    GLYPH_METRICS m_errorGlyph;
+    GLYPH_METRICS errorGlyph;
 };

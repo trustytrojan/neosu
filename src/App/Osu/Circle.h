@@ -58,8 +58,8 @@ class Circle : public HitObject {
     void updateStackPosition(float stackOffset);
     void miss(long curPos);
 
-    Vector2 getRawPosAt(long pos) { return m_vRawPos; }
-    Vector2 getOriginalRawPosAt(long pos) { return m_vOriginalRawPos; }
+    Vector2 getRawPosAt(long pos) { return this->vRawPos; }
+    Vector2 getOriginalRawPosAt(long pos) { return this->vOriginalRawPos; }
     Vector2 getAutoCursorPos(long curPos);
 
     virtual void onClickEvent(std::vector<Click> &clicks);
@@ -72,10 +72,10 @@ class Circle : public HitObject {
 
     void onHit(LiveScore::HIT result, long delta, float targetDelta = 0.0f, float targetAngle = 0.0f);
 
-    Vector2 m_vRawPos;
-    Vector2 m_vOriginalRawPos;  // for live mod changing
+    Vector2 vRawPos;
+    Vector2 vOriginalRawPos;  // for live mod changing
 
-    bool m_bWaiting;
-    float m_fHitAnimation;
-    float m_fShakeAnimation;
+    bool bWaiting;
+    float fHitAnimation;
+    float fShakeAnimation;
 };

@@ -14,86 +14,84 @@ class CBaseUILabel : public CBaseUIElement {
     virtual void mouse_update(bool *propagate_clicks);
 
     // cancer
-    void setRelSizeX(float x) {
-        m_vmSize.x = x;
-    }
+    void setRelSizeX(float x) { this->vmSize.x = x; }
 
     // set
     CBaseUILabel *setDrawFrame(bool drawFrame) {
-        m_bDrawFrame = drawFrame;
+        this->bDrawFrame = drawFrame;
         return this;
     }
     CBaseUILabel *setDrawBackground(bool drawBackground) {
-        m_bDrawBackground = drawBackground;
+        this->bDrawBackground = drawBackground;
         return this;
     }
 
     CBaseUILabel *setFrameColor(Color frameColor) {
-        m_frameColor = frameColor;
+        this->frameColor = frameColor;
         return this;
     }
     CBaseUILabel *setBackgroundColor(Color backgroundColor) {
-        m_backgroundColor = backgroundColor;
+        this->backgroundColor = backgroundColor;
         return this;
     }
     CBaseUILabel *setTextColor(Color textColor) {
-        m_textColor = textColor;
+        this->textColor = textColor;
         return this;
     }
 
     CBaseUILabel *setText(UString text) {
-        m_sText = text;
-        updateStringMetrics();
+        this->sText = text;
+        this->updateStringMetrics();
         return this;
     }
     CBaseUILabel *setFont(McFont *font) {
-        m_font = font;
-        updateStringMetrics();
+        this->font = font;
+        this->updateStringMetrics();
         return this;
     }
 
     CBaseUILabel *setSizeToContent(int horizontalBorderSize = 1, int verticalBorderSize = 1) {
-        setSize(m_fStringWidth + 2 * horizontalBorderSize, m_fStringHeight + 2 * verticalBorderSize);
+        this->setSize(this->fStringWidth + 2 * horizontalBorderSize, this->fStringHeight + 2 * verticalBorderSize);
         return this;
     }
     CBaseUILabel *setWidthToContent(int horizontalBorderSize = 1) {
-        setSizeX(m_fStringWidth + 2 * horizontalBorderSize);
+        this->setSizeX(this->fStringWidth + 2 * horizontalBorderSize);
         return this;
     }
     CBaseUILabel *setTextJustification(TEXT_JUSTIFICATION textJustification) {
-        m_textJustification = textJustification;
+        this->textJustification = textJustification;
         return this;
     }
 
     // DEPRECATED! use setTextJustification() instead
-    void setCenterText(bool centerText) { m_bCenterText = centerText; }
+    void setCenterText(bool centerText) { this->bCenterText = centerText; }
 
     // get
-    inline Color getFrameColor() const { return m_frameColor; }
-    inline Color getBackgroundColor() const { return m_backgroundColor; }
-    inline Color getTextColor() const { return m_textColor; }
-    inline McFont *getFont() const { return m_font; }
-    inline UString getText() const { return m_sText; }
+    inline Color getFrameColor() const { return this->frameColor; }
+    inline Color getBackgroundColor() const { return this->backgroundColor; }
+    inline Color getTextColor() const { return this->textColor; }
+    inline McFont *getFont() const { return this->font; }
+    inline UString getText() const { return this->sText; }
 
-    virtual void onResized() { updateStringMetrics(); }
+    virtual void onResized() { this->updateStringMetrics(); }
 
    protected:
     virtual void drawText(Graphics *g);
 
     void updateStringMetrics();
 
-    McFont *m_font;
-    UString m_sText;
-    float m_fStringWidth;
-    float m_fStringHeight;
+    McFont *font;
+    UString sText;
+    float fStringWidth;
+    float fStringHeight;
 
-    bool m_bDrawFrame;
-    bool m_bDrawBackground;
-    bool m_bCenterText;
+    bool bDrawFrame;
+    bool bDrawBackground;
+    bool bCenterText;
 
-    Color m_frameColor;
-    Color m_backgroundColor;
-    Color m_textColor;
+    Color frameColor;
+    Color backgroundColor;
+    Color textColor;
 
-    TEXT_JUSTIFICATION m_textJustification;
+    TEXT_JUSTIFICATION textJustification;
 };

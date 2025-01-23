@@ -113,11 +113,11 @@ void disconnect() {
     }
 
     bancho.score_submission_policy = ServerPolicy::NO_PREFERENCE;
-    osu->m_optionsMenu->updateLayout();
+    osu->optionsMenu->updateLayout();
 
-    osu->m_optionsMenu->logInButton->setText("Log in");
-    osu->m_optionsMenu->logInButton->setColor(0xff00ff00);
-    osu->m_optionsMenu->logInButton->is_loading = false;
+    osu->optionsMenu->logInButton->setText("Log in");
+    osu->optionsMenu->logInButton->setColor(0xff00ff00);
+    osu->optionsMenu->logInButton->is_loading = false;
 
     for(auto pair : online_users) {
         delete pair.second;
@@ -125,12 +125,12 @@ void disconnect() {
     online_users.clear();
     friends.clear();
 
-    osu->m_chat->onDisconnect();
+    osu->chat->onDisconnect();
 
     // XXX: We should toggle between "offline" sorting options and "online" ones
     //      Online ones would be "Local scores", "Global", "Country", "Selected mods" etc
     //      While offline ones would be "By score", "By pp", etc
-    osu->m_songBrowser2->onSortScoresChange(UString("Sort by pp"), 0);
+    osu->songBrowser2->onSortScoresChange(UString("Sort by pp"), 0);
 
     abort_downloads();
 }
@@ -152,7 +152,7 @@ void reconnect() {
     };
     for(const char *endpoint : server_blacklist) {
         if(!strcmp(endpoint, bancho.endpoint.toUtf8())) {
-            osu->m_notificationOverlay->addToast("This server does not allow neosu clients.");
+            osu->notificationOverlay->addToast("This server does not allow neosu clients.");
             return;
         }
     }
@@ -177,7 +177,7 @@ void reconnect() {
         }
     }
 
-    osu->m_optionsMenu->logInButton->is_loading = true;
+    osu->optionsMenu->logInButton->is_loading = true;
     Packet new_login_packet = build_login_packet();
 
     outgoing_mutex.lock();
@@ -358,7 +358,7 @@ static void *do_networking() {
             send_api_request(curl, api_out);
         }
 
-        if(osu && osu->m_lobby->isVisible()) seconds_between_pings = 1;
+        if(osu && osu->lobby->isVisible()) seconds_between_pings = 1;
         if(bancho.spectated_player_id != 0) seconds_between_pings = 1;
         if(bancho.is_in_a_multi_room() && seconds_between_pings > 3) seconds_between_pings = 3;
         bool should_ping = difftime(time(NULL), last_packet_tms) > seconds_between_pings;
@@ -424,7 +424,7 @@ static void handle_api_response(Packet packet) {
         case GET_REPLAY: {
             if(packet.size == 0) {
                 // Most likely, 404
-                osu->m_notificationOverlay->addToast("Failed to download replay");
+                osu->notificationOverlay->addToast("Failed to download replay");
                 break;
             }
 
@@ -435,7 +435,7 @@ static void handle_api_response(Packet packet) {
             // XXX: this is blocking main thread
             FILE *replay_file = fopen(replay_path.toUtf8(), "wb");
             if(replay_file == NULL) {
-                osu->m_notificationOverlay->addToast("Failed to save replay");
+                osu->notificationOverlay->addToast("Failed to save replay");
                 break;
             }
 
@@ -455,7 +455,7 @@ static void handle_api_response(Packet packet) {
             debugLog("Score submit result: %s\n", packet.memory);
 
             // Reset leaderboards so new score will appear
-            osu->getSongBrowser()->m_db->m_online_scores.clear();
+            db->online_scores.clear();
             osu->getSongBrowser()->rebuildScoreButtons();
             break;
         }

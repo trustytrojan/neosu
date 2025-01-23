@@ -30,10 +30,10 @@ VertexArrayObject *SliderRenderer::UNIT_CIRCLE_VAO_BAKED = NULL;
 VertexArrayObject *SliderRenderer::UNIT_CIRCLE_VAO_TRIANGLES = NULL;
 float SliderRenderer::UNIT_CIRCLE_VAO_DIAMETER = 0.0f;
 
-float SliderRenderer::m_fBoundingBoxMinX = (std::numeric_limits<float>::max)();
-float SliderRenderer::m_fBoundingBoxMaxX = 0.0f;
-float SliderRenderer::m_fBoundingBoxMinY = (std::numeric_limits<float>::max)();
-float SliderRenderer::m_fBoundingBoxMaxY = 0.0f;
+float SliderRenderer::fBoundingBoxMinX = (std::numeric_limits<float>::max)();
+float SliderRenderer::fBoundingBoxMaxX = 0.0f;
+float SliderRenderer::fBoundingBoxMinY = (std::numeric_limits<float>::max)();
+float SliderRenderer::fBoundingBoxMaxY = 0.0f;
 
 VertexArrayObject *SliderRenderer::generateVAO(const std::vector<Vector2> &points, float hitcircleDiameter,
                                                Vector3 translation, bool skipOOBPoints) {
@@ -237,15 +237,15 @@ void SliderRenderer::draw(Graphics *g, const std::vector<Vector2> &points, const
 
     // now draw the slider to the screen (with alpha blending enabled again)
     const int pixelFudge = 2;
-    m_fBoundingBoxMinX -= pixelFudge;
-    m_fBoundingBoxMaxX += pixelFudge;
-    m_fBoundingBoxMinY -= pixelFudge;
-    m_fBoundingBoxMaxY += pixelFudge;
+    SliderRenderer::fBoundingBoxMinX -= pixelFudge;
+    SliderRenderer::fBoundingBoxMaxX += pixelFudge;
+    SliderRenderer::fBoundingBoxMinY -= pixelFudge;
+    SliderRenderer::fBoundingBoxMaxY += pixelFudge;
 
     osu->getSliderFrameBuffer()->setColor(COLORf(alpha * cv_slider_alpha_multiplier.getFloat(), 1.0f, 1.0f, 1.0f));
-    osu->getSliderFrameBuffer()->drawRect(g, m_fBoundingBoxMinX, m_fBoundingBoxMinY,
-                                          m_fBoundingBoxMaxX - m_fBoundingBoxMinX,
-                                          m_fBoundingBoxMaxY - m_fBoundingBoxMinY);
+    osu->getSliderFrameBuffer()->drawRect(g, SliderRenderer::fBoundingBoxMinX, SliderRenderer::fBoundingBoxMinY,
+                                          SliderRenderer::fBoundingBoxMaxX - SliderRenderer::fBoundingBoxMinX,
+                                          SliderRenderer::fBoundingBoxMaxY - SliderRenderer::fBoundingBoxMinY);
 }
 
 void SliderRenderer::draw(Graphics *g, VertexArrayObject *vao, const std::vector<Vector2> &alwaysPoints,
@@ -467,14 +467,15 @@ void SliderRenderer::drawMM(Graphics *g, const std::vector<Vector2> &points, flo
 
     // now draw the slider to the screen (with alpha blending enabled again)
     int pixelFudge = 2;
-    m_fBoundingBoxMinX -= pixelFudge;
-    m_fBoundingBoxMaxX += pixelFudge;
-    m_fBoundingBoxMinY -= pixelFudge;
-    m_fBoundingBoxMaxY += pixelFudge;
+    SliderRenderer::fBoundingBoxMinX -= pixelFudge;
+    SliderRenderer::fBoundingBoxMaxX += pixelFudge;
+    SliderRenderer::fBoundingBoxMinY -= pixelFudge;
+    SliderRenderer::fBoundingBoxMaxY += pixelFudge;
 
     osu->getSliderFrameBuffer()->setColor(COLORf(alpha * cv_slider_alpha_multiplier.getFloat(), 1.0f, 1.0f, 1.0f));
-    /// osu->getSliderFrameBuffer()->drawRect(g, m_fBoundingBoxMinX, m_fBoundingBoxMinY, m_fBoundingBoxMaxX -
-    /// m_fBoundingBoxMinX, m_fBoundingBoxMaxY - m_fBoundingBoxMinY);
+    /// osu->getSliderFrameBuffer()->drawRect(g, SliderRenderer::fBoundingBoxMinX, SliderRenderer::fBoundingBoxMinY,
+    /// SliderRenderer::fBoundingBoxMaxX
+    /// - SliderRenderer::fBoundingBoxMinX, SliderRenderer::fBoundingBoxMaxY - SliderRenderer::fBoundingBoxMinY);
     osu->getSliderFrameBuffer()->draw(g, 0, 0);
 }
 
@@ -521,10 +522,10 @@ void SliderRenderer::drawFillSliderBodyPeppy(Graphics *g, const std::vector<Vect
             startX = x;
             startY = y;
 
-            if(x - radius < m_fBoundingBoxMinX) m_fBoundingBoxMinX = x - radius;
-            if(x + radius > m_fBoundingBoxMaxX) m_fBoundingBoxMaxX = x + radius;
-            if(y - radius < m_fBoundingBoxMinY) m_fBoundingBoxMinY = y - radius;
-            if(y + radius > m_fBoundingBoxMaxY) m_fBoundingBoxMaxY = y + radius;
+            if(x - radius < SliderRenderer::fBoundingBoxMinX) SliderRenderer::fBoundingBoxMinX = x - radius;
+            if(x + radius > SliderRenderer::fBoundingBoxMaxX) SliderRenderer::fBoundingBoxMaxX = x + radius;
+            if(y - radius < SliderRenderer::fBoundingBoxMinY) SliderRenderer::fBoundingBoxMinY = y - radius;
+            if(y + radius > SliderRenderer::fBoundingBoxMaxY) SliderRenderer::fBoundingBoxMaxY = y + radius;
         }
     }
     g->popTransform();
@@ -784,8 +785,8 @@ void SliderRenderer::checkUpdateVars(float hitcircleDiameter) {
 }
 
 void SliderRenderer::resetRenderTargetBoundingBox() {
-    SliderRenderer::m_fBoundingBoxMinX = (std::numeric_limits<float>::max)();
-    SliderRenderer::m_fBoundingBoxMaxX = 0.0f;
-    SliderRenderer::m_fBoundingBoxMinY = (std::numeric_limits<float>::max)();
-    SliderRenderer::m_fBoundingBoxMaxY = 0.0f;
+    SliderRenderer::fBoundingBoxMinX = (std::numeric_limits<float>::max)();
+    SliderRenderer::fBoundingBoxMaxX = 0.0f;
+    SliderRenderer::fBoundingBoxMinY = (std::numeric_limits<float>::max)();
+    SliderRenderer::fBoundingBoxMaxY = 0.0f;
 }

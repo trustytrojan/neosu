@@ -8,14 +8,14 @@
 #include "ResourceManager.h"
 
 TooltipOverlay::TooltipOverlay() : OsuScreen() {
-    m_fAnim = 0.0f;
-    m_bDelayFadeout = false;
+    this->fAnim = 0.0f;
+    this->bDelayFadeout = false;
 }
 
 TooltipOverlay::~TooltipOverlay() {}
 
 void TooltipOverlay::draw(Graphics *g) {
-    if(m_fAnim > 0.0f) {
+    if(this->fAnim > 0.0f) {
         const float dpiScale = Osu::getUIScale();
 
         McFont *font = engine->getResourceManager()->getFont("FONT_DEFAULT");
@@ -23,14 +23,14 @@ void TooltipOverlay::draw(Graphics *g) {
         const Vector2 offset = Vector2(10, 10) * dpiScale;
         const int margin = 5 * dpiScale;
         const int lineSpacing = 8 * dpiScale;
-        const float alpha = m_fAnim * m_fAnim * m_fAnim;
+        const float alpha = this->fAnim * this->fAnim * this->fAnim;
 
         int width = 0;
-        for(int i = 0; i < m_lines.size(); i++) {
-            float lineWidth = font->getStringWidth(m_lines[i]);
+        for(int i = 0; i < this->lines.size(); i++) {
+            float lineWidth = font->getStringWidth(this->lines[i]);
             if(lineWidth > width) width = lineWidth;
         }
-        const int height = font->getHeight() * m_lines.size() + lineSpacing * (m_lines.size() - 1) + 3 * dpiScale;
+        const int height = font->getHeight() * this->lines.size() + lineSpacing * (this->lines.size() - 1) + 3 * dpiScale;
 
         Vector2 cursorPos = engine->getMouse()->getPos();
 
@@ -59,8 +59,8 @@ void TooltipOverlay::draw(Graphics *g) {
         g->pushTransform();
         g->translate((int)(cursorPos.x + offset.x + margin),
                      (int)(cursorPos.y + offset.y + margin + font->getHeight()));
-        for(int i = 0; i < m_lines.size(); i++) {
-            g->drawString(font, m_lines[i]);
+        for(int i = 0; i < this->lines.size(); i++) {
+            g->drawString(font, this->lines[i]);
             g->translate(0, (int)(font->getHeight() + lineSpacing));
         }
         g->popTransform();
@@ -73,19 +73,19 @@ void TooltipOverlay::draw(Graphics *g) {
 }
 
 void TooltipOverlay::mouse_update(bool *propagate_clicks) {
-    if(m_bDelayFadeout)
-        m_bDelayFadeout = false;
-    else if(m_fAnim > 0.0f)
-        anim->moveLinear(&m_fAnim, 0.0f, (m_fAnim)*cv_tooltip_anim_duration.getFloat(), true);
+    if(this->bDelayFadeout)
+        this->bDelayFadeout = false;
+    else if(this->fAnim > 0.0f)
+        anim->moveLinear(&this->fAnim, 0.0f, (this->fAnim)*cv_tooltip_anim_duration.getFloat(), true);
 }
 
 void TooltipOverlay::begin() {
-    m_lines.clear();
-    m_bDelayFadeout = true;
+    this->lines.clear();
+    this->bDelayFadeout = true;
 }
 
-void TooltipOverlay::addLine(UString text) { m_lines.push_back(text); }
+void TooltipOverlay::addLine(UString text) { this->lines.push_back(text); }
 
 void TooltipOverlay::end() {
-    anim->moveLinear(&m_fAnim, 1.0f, (1.0f - m_fAnim) * cv_tooltip_anim_duration.getFloat(), true);
+    anim->moveLinear(&this->fAnim, 1.0f, (1.0f - this->fAnim) * cv_tooltip_anim_duration.getFloat(), true);
 }

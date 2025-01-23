@@ -4,39 +4,41 @@
 
 using namespace std;
 
-McRect::McRect(float x, float y, float width, float height, bool isCentered) { set(x, y, width, height, isCentered); }
+McRect::McRect(float x, float y, float width, float height, bool isCentered) {
+    this->set(x, y, width, height, isCentered);
+}
 
-McRect::McRect(Vector2 pos, Vector2 size, bool isCentered) { set(pos.x, pos.y, size.x, size.y, isCentered); }
+McRect::McRect(Vector2 pos, Vector2 size, bool isCentered) { this->set(pos.x, pos.y, size.x, size.y, isCentered); }
 
 void McRect::set(float x, float y, float width, float height, bool isCentered) {
     if(isCentered) {
-        m_fMinX = x - (width / 2.0f);
-        m_fMaxX = x + (width / 2.0f);
-        m_fMinY = y - (height / 2.0f);
-        m_fMaxY = y + (height / 2.0f);
+        this->fMinX = x - (width / 2.0f);
+        this->fMaxX = x + (width / 2.0f);
+        this->fMinY = y - (height / 2.0f);
+        this->fMaxY = y + (height / 2.0f);
     } else {
-        m_fMinX = x;
-        m_fMaxX = x + width;
-        m_fMinY = y;
-        m_fMaxY = y + height;
+        this->fMinX = x;
+        this->fMaxX = x + width;
+        this->fMinY = y;
+        this->fMaxY = y + height;
     }
 }
 
 McRect McRect::intersect(const McRect &rect) const {
     McRect intersection;
 
-    intersection.m_fMinX = max(m_fMinX, rect.m_fMinX);
-    intersection.m_fMinY = max(m_fMinY, rect.m_fMinY);
-    intersection.m_fMaxX = min(m_fMaxX, rect.m_fMaxX);
-    intersection.m_fMaxY = min(m_fMaxY, rect.m_fMaxY);
+    intersection.fMinX = max(this->fMinX, rect.fMinX);
+    intersection.fMinY = max(this->fMinY, rect.fMinY);
+    intersection.fMaxX = min(this->fMaxX, rect.fMaxX);
+    intersection.fMaxY = min(this->fMaxY, rect.fMaxY);
 
     // if the rects don't intersect
-    if(intersection.m_fMinX > intersection.m_fMaxX || intersection.m_fMinY > intersection.m_fMaxY) {
+    if(intersection.fMinX > intersection.fMaxX || intersection.fMinY > intersection.fMaxY) {
         // then reset the rect to a null rect
-        intersection.m_fMinX = 0.0f;
-        intersection.m_fMaxX = 0.0f;
-        intersection.m_fMinY = 0.0f;
-        intersection.m_fMaxY = 0.0f;
+        intersection.fMinX = 0.0f;
+        intersection.fMaxX = 0.0f;
+        intersection.fMinY = 0.0f;
+        intersection.fMaxY = 0.0f;
     }
 
     return intersection;
@@ -45,19 +47,19 @@ McRect McRect::intersect(const McRect &rect) const {
 McRect McRect::Union(const McRect &rect) const {
     McRect Union;
 
-    Union.m_fMinX = min(m_fMinX, rect.m_fMinX);
-    Union.m_fMinY = min(m_fMinY, rect.m_fMinY);
-    Union.m_fMaxX = max(m_fMaxX, rect.m_fMaxX);
-    Union.m_fMaxY = max(m_fMaxY, rect.m_fMaxY);
+    Union.fMinX = min(this->fMinX, rect.fMinX);
+    Union.fMinY = min(this->fMinY, rect.fMinY);
+    Union.fMaxX = max(this->fMaxX, rect.fMaxX);
+    Union.fMaxY = max(this->fMaxY, rect.fMaxY);
 
     return Union;
 }
 
 bool McRect::intersects(const McRect &rect) const {
-    const float minx = max(m_fMinX, rect.m_fMinX);
-    const float miny = max(m_fMinY, rect.m_fMinY);
-    const float maxx = min(m_fMaxX, rect.m_fMaxX);
-    const float maxy = min(m_fMaxY, rect.m_fMaxY);
+    const float minx = max(this->fMinX, rect.fMinX);
+    const float miny = max(this->fMinY, rect.fMinY);
+    const float maxx = min(this->fMaxX, rect.fMaxX);
+    const float maxy = min(this->fMaxY, rect.fMaxY);
 
     return (minx < maxx && miny < maxy);
 }

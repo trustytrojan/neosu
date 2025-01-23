@@ -14,7 +14,7 @@ class Quaternion {
    public:
     float x, y, z, w;
 
-    Quaternion() { identity(); }
+    Quaternion() { this->identity(); }
     Quaternion(float x, float y, float z, float w) {
         this->x = x;
         this->y = y;
@@ -23,8 +23,8 @@ class Quaternion {
     }
 
     void identity() {
-        x = y = z = 0.0f;
-        w = 1.0f;
+        this->x = this->y = this->z = 0.0f;
+        this->w = 1.0f;
     }
     void set(float x, float y, float z, float w);
     void normalize();
@@ -32,11 +32,17 @@ class Quaternion {
     void fromAxis(const Vector3 &axis, float angleDeg);
     void fromEuler(float yawDeg, float pitchDeg, float rollDeg);
 
-    inline float getYaw() const { return rad2deg(std::atan2(2.0f * (y * z + w * x), w * w - x * x - y * y + z * z)); }
-    inline float getPitch() const { return rad2deg(std::asin(-2.0f * (x * z - w * y))); }
-    inline float getRoll() const { return rad2deg(std::atan2(2.0f * (x * y + w * z), w * w + x * x - y * y - z * z)); }
+    inline float getYaw() const {
+        return rad2deg(std::atan2(2.0f * (this->y * this->z + this->w * this->x),
+                                  this->w * this->w - this->x * this->x - this->y * this->y + this->z * this->z));
+    }
+    inline float getPitch() const { return rad2deg(std::asin(-2.0f * (this->x * this->z - this->w * this->y))); }
+    inline float getRoll() const {
+        return rad2deg(std::atan2(2.0f * (this->x * this->y + this->w * this->z),
+                                  this->w * this->w + this->x * this->x - this->y * this->y - this->z * this->z));
+    }
 
-    inline Quaternion getConjugate() const { return Quaternion(-x, -y, -z, w); }
+    inline Quaternion getConjugate() const { return Quaternion(-this->x, -this->y, -this->z, this->w); }
     Matrix4 getMatrix() const;
     Matrix3 getMatrix3() const;
 

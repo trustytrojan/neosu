@@ -7,31 +7,32 @@
 
 ProfilerProfile g_profCurrentProfile(true);
 
-ProfilerProfile::ProfilerProfile(bool manualStartViaMain) : m_root("Root", VPROF_BUDGETGROUP_ROOT, NULL) {
-    m_bManualStartViaMain = manualStartViaMain;
+ProfilerProfile::ProfilerProfile(bool manualStartViaMain) : root("Root", VPROF_BUDGETGROUP_ROOT, NULL) {
+    this->bManualStartViaMain = manualStartViaMain;
 
-    m_iEnabled = 0;
-    m_bEnableScheduled = false;
-    m_bAtRoot = true;
-    m_curNode = &m_root;
+    this->iEnabled = 0;
+    this->bEnableScheduled = false;
+    this->bAtRoot = true;
+    this->curNode = &this->root;
 
-    m_iNumGroups = 0;
+    this->iNumGroups = 0;
     for(size_t i = 0; i < VPROF_MAX_NUM_BUDGETGROUPS; i++) {
-        m_groups[i].name = NULL;
+        this->groups[i].name = NULL;
     }
 
-    m_iNumNodes = 0;
+    this->iNumNodes = 0;
 
     // create all groups in predefined order
-    groupNameToID(VPROF_BUDGETGROUP_ROOT);  // NOTE: the root group must always be the first group to be created here
-    groupNameToID(VPROF_BUDGETGROUP_SLEEP);
-    groupNameToID(VPROF_BUDGETGROUP_WNDPROC);
-    groupNameToID(VPROF_BUDGETGROUP_UPDATE);
-    groupNameToID(VPROF_BUDGETGROUP_DRAW);
-    groupNameToID(VPROF_BUDGETGROUP_DRAW_SWAPBUFFERS);
+    this->groupNameToID(
+        VPROF_BUDGETGROUP_ROOT);  // NOTE: the root group must always be the first group to be created here
+    this->groupNameToID(VPROF_BUDGETGROUP_SLEEP);
+    this->groupNameToID(VPROF_BUDGETGROUP_WNDPROC);
+    this->groupNameToID(VPROF_BUDGETGROUP_UPDATE);
+    this->groupNameToID(VPROF_BUDGETGROUP_DRAW);
+    this->groupNameToID(VPROF_BUDGETGROUP_DRAW_SWAPBUFFERS);
 }
 
-double ProfilerProfile::sumTimes(int groupID) { return sumTimes(&m_root, groupID); }
+double ProfilerProfile::sumTimes(int groupID) { return this->sumTimes(&this->root, groupID); }
 
 double ProfilerProfile::sumTimes(ProfilerNode *node, int groupID) {
     if(node == NULL) return 0.0;
@@ -40,37 +41,37 @@ double ProfilerProfile::sumTimes(ProfilerNode *node, int groupID) {
 
     ProfilerNode *sibling = node;
     while(sibling != NULL) {
-        if(sibling->m_iGroupID == groupID) {
-            if(sibling == &m_root)
-                return (m_root.m_child != NULL
-                            ? m_root.m_child->m_fTimeLastFrame
-                            : m_root.m_fTimeLastFrame);  // special case: early return for the root group (total
-                                                         // duration of the entire frame)
+        if(sibling->iGroupID == groupID) {
+            if(sibling == &this->root)
+                return (this->root.child != NULL
+                            ? this->root.child->fTimeLastFrame
+                            : this->root.fTimeLastFrame);  // special case: early return for the root group (total
+                                                           // duration of the entire frame)
             else
-                return (sum + sibling->m_fTimeLastFrame);
+                return (sum + sibling->fTimeLastFrame);
         } else {
-            if(sibling->m_child != NULL) sum += sumTimes(sibling->m_child, groupID);
+            if(sibling->child != NULL) sum += this->sumTimes(sibling->child, groupID);
         }
 
-        sibling = sibling->m_sibling;
+        sibling = sibling->sibling;
     }
 
     return sum;
 }
 
 int ProfilerProfile::groupNameToID(const char *group) {
-    if(m_iNumGroups >= VPROF_MAX_NUM_BUDGETGROUPS) {
+    if(this->iNumGroups >= VPROF_MAX_NUM_BUDGETGROUPS) {
         engine->showMessageErrorFatal("Engine", "Increase VPROF_MAX_NUM_BUDGETGROUPS");
         engine->shutdown();
         return -1;
     }
 
-    for(int i = 0; i < m_iNumGroups; i++) {
-        if(m_groups[i].name != NULL && group != NULL && strcmp(m_groups[i].name, group) == 0) return i;
+    for(int i = 0; i < this->iNumGroups; i++) {
+        if(this->groups[i].name != NULL && group != NULL && strcmp(this->groups[i].name, group) == 0) return i;
     }
 
-    const int newID = m_iNumGroups;
-    m_groups[m_iNumGroups++].name = group;
+    const int newID = this->iNumGroups;
+    this->groups[this->iNumGroups++].name = group;
     return newID;
 }
 
@@ -79,59 +80,59 @@ int ProfilerNode::s_iNodeCounter = 0;
 ProfilerNode::ProfilerNode() : ProfilerNode(NULL, NULL, NULL) {}
 
 ProfilerNode::ProfilerNode(const char *name, const char *group, ProfilerNode *parent) {
-    constructor(name, group, parent);
+    this->constructor(name, group, parent);
 }
 
 void ProfilerNode::constructor(const char *name, const char *group, ProfilerNode *parent) {
-    m_name = name;
-    m_parent = parent;
-    m_child = NULL;
-    m_sibling = NULL;
+    this->name = name;
+    this->parent = parent;
+    this->child = NULL;
+    this->sibling = NULL;
 
-    m_iNumRecursions = 0;
-    m_fTime = 0.0;
-    m_fTimeCurrentFrame = 0.0;
-    m_fTimeLastFrame = 0.0;
+    this->iNumRecursions = 0;
+    this->fTime = 0.0;
+    this->fTimeCurrentFrame = 0.0;
+    this->fTimeLastFrame = 0.0;
 
-    m_iGroupID = (s_iNodeCounter++ > 0 ? g_profCurrentProfile.groupNameToID(group) : 0);
+    this->iGroupID = (s_iNodeCounter++ > 0 ? g_profCurrentProfile.groupNameToID(group) : 0);
 }
 
 void ProfilerNode::enterScope() {
-    if(m_iNumRecursions++ == 0) {
-        m_fTime = engine->getTimeReal();
+    if(this->iNumRecursions++ == 0) {
+        this->fTime = engine->getTimeReal();
     }
 }
 
 bool ProfilerNode::exitScope() {
-    if(--m_iNumRecursions == 0) {
-        m_fTime = engine->getTimeReal() - m_fTime;
-        m_fTimeCurrentFrame = m_fTime;
+    if(--this->iNumRecursions == 0) {
+        this->fTime = engine->getTimeReal() - this->fTime;
+        this->fTimeCurrentFrame = this->fTime;
     }
 
-    return (m_iNumRecursions == 0);
+    return (this->iNumRecursions == 0);
 }
 
 ProfilerNode *ProfilerNode::getSubNode(const char *name, const char *group) {
     // find existing node
-    ProfilerNode *child = m_child;
+    ProfilerNode *child = this->child;
     while(child != NULL) {
-        if(child->m_name == name)  // NOTE: pointer comparison
+        if(child->name == name)  // NOTE: pointer comparison
             return child;
 
-        child = child->m_sibling;
+        child = child->sibling;
     }
 
     // "add" new node
-    if(g_profCurrentProfile.m_iNumNodes >= VPROF_MAX_NUM_NODES) {
+    if(g_profCurrentProfile.iNumNodes >= VPROF_MAX_NUM_NODES) {
         engine->showMessageErrorFatal("Engine", "Increase VPROF_MAX_NUM_NODES");
         engine->shutdown();
         return NULL;
     }
 
-    ProfilerNode *node = &(g_profCurrentProfile.m_nodes[g_profCurrentProfile.m_iNumNodes++]);
+    ProfilerNode *node = &(g_profCurrentProfile.nodes[g_profCurrentProfile.iNumNodes++]);
     node->constructor(name, group, this);
-    node->m_sibling = m_child;
-    m_child = node;
+    node->sibling = this->child;
+    this->child = node;
 
     return node;
 }

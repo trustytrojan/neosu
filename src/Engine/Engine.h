@@ -78,98 +78,98 @@ class Engine {
     void showMessageErrorFatal(UString title, UString message);
 
     // engine specifics
-    void blackout() { m_bBlackout = true; }
+    void blackout() { this->bBlackout = true; }
     void addGamepad(Gamepad *gamepad);
     void removeGamepad(Gamepad *gamepad);
 
     // interfaces
-    inline App *getApp() const { return m_app; }
-    inline Graphics *getGraphics() const { return m_graphics; }
-    inline SoundEngine *getSound() const { return m_sound; }
-    inline ResourceManager *getResourceManager() const { return m_resourceManager; }
-    inline Environment *getEnvironment() const { return m_environment; }
-    inline NetworkHandler *getNetworkHandler() const { return m_networkHandler; }
+    inline App *getApp() const { return this->app; }
+    inline Graphics *getGraphics() const { return this->graphics; }
+    inline SoundEngine *getSound() const { return this->sound; }
+    inline ResourceManager *getResourceManager() const { return this->resourceManager; }
+    inline Environment *getEnvironment() const { return this->environment; }
+    inline NetworkHandler *getNetworkHandler() const { return this->networkHandler; }
 
     // input devices
-    inline Mouse *getMouse() const { return m_mouse; }
-    inline Keyboard *getKeyboard() const { return m_keyboard; }
-    inline Gamepad *getGamepad() const { return m_gamepad; }
-    inline const std::vector<Mouse *> &getMice() const { return m_mice; }
-    inline const std::vector<Keyboard *> &getKeyboards() const { return m_keyboards; }
-    inline const std::vector<Gamepad *> &getGamepads() const { return m_gamepads; }
+    inline Mouse *getMouse() const { return this->mouse; }
+    inline Keyboard *getKeyboard() const { return this->keyboard; }
+    inline Gamepad *getGamepad() const { return this->gamepad; }
+    inline const std::vector<Mouse *> &getMice() const { return this->mice; }
+    inline const std::vector<Keyboard *> &getKeyboards() const { return this->keyboards; }
+    inline const std::vector<Gamepad *> &getGamepads() const { return this->gamepads; }
 
     // screen
     void requestResolutionChange(Vector2 newResolution);
-    inline Vector2 getScreenSize() const { return m_vScreenSize; }
-    inline int getScreenWidth() const { return (int)m_vScreenSize.x; }
-    inline int getScreenHeight() const { return (int)m_vScreenSize.y; }
+    inline Vector2 getScreenSize() const { return this->vScreenSize; }
+    inline int getScreenWidth() const { return (int)this->vScreenSize.x; }
+    inline int getScreenHeight() const { return (int)this->vScreenSize.y; }
 
     // vars
     void setFrameTime(double delta);
-    inline double getTime() const { return m_dTime; }
+    inline double getTime() const { return this->dTime; }
     double getTimeReal();
-    inline double getTimeRunning() const { return m_dRunTime; }
-    inline double getFrameTime() const { return m_dFrameTime; }
-    inline unsigned long getFrameCount() const { return m_iFrameCount; }
+    inline double getTimeRunning() const { return this->dRunTime; }
+    inline double getFrameTime() const { return this->dFrameTime; }
+    inline unsigned long getFrameCount() const { return this->iFrameCount; }
 
-    UString getArgs() const { return m_sArgs; }
+    UString getArgs() const { return this->sArgs; }
 
-    inline bool hasFocus() const { return m_bHasFocus; }
-    inline bool isDrawing() const { return m_bDrawing; }
-    inline bool isMinimized() const { return m_bIsMinimized; }
+    inline bool hasFocus() const { return this->bHasFocus; }
+    inline bool isDrawing() const { return this->bDrawing; }
+    inline bool isMinimized() const { return this->bIsMinimized; }
 
     // debugging/console
-    void setConsole(Console *console) { m_console = console; }
-    inline ConsoleBox *getConsoleBox() const { return m_consoleBox; }
-    inline Console *getConsole() const { return m_console; }
-    inline CBaseUIContainer *getGUI() const { return m_guiContainer; }
+    void setConsole(Console *console) { this->console = console; }
+    inline ConsoleBox *getConsoleBox() const { return this->consoleBox; }
+    inline Console *getConsole() const { return this->console; }
+    inline CBaseUIContainer *getGUI() const { return this->guiContainer; }
 
    private:
     // interfaces
-    App *m_app;
-    Graphics *m_graphics;
-    SoundEngine *m_sound;
-    ContextMenu *m_contextMenu;
-    Environment *m_environment;
-    NetworkHandler *m_networkHandler;
-    ResourceManager *m_resourceManager;
-    AnimationHandler *m_animationHandler;
+    App *app;
+    Graphics *graphics;
+    SoundEngine *sound;
+    ContextMenu *contextMenu;
+    Environment *environment;
+    NetworkHandler *networkHandler;
+    ResourceManager *resourceManager;
+    AnimationHandler *animationHandler;
 
     // input devices
-    Mouse *m_mouse;
-    Keyboard *m_keyboard;
-    Gamepad *m_gamepad;
-    std::vector<Mouse *> m_mice;
-    std::vector<Keyboard *> m_keyboards;
-    std::vector<Gamepad *> m_gamepads;
-    std::vector<InputDevice *> m_inputDevices;
+    Mouse *mouse;
+    Keyboard *keyboard;
+    Gamepad *gamepad;
+    std::vector<Mouse *> mice;
+    std::vector<Keyboard *> keyboards;
+    std::vector<Gamepad *> gamepads;
+    std::vector<InputDevice *> inputDevices;
 
     // timing
-    Timer *m_timer;
-    double m_dTime;
-    double m_dRunTime;
-    unsigned long m_iFrameCount;
-    double m_dFrameTime;
+    Timer *timer;
+    double dTime;
+    double dRunTime;
+    unsigned long iFrameCount;
+    double dFrameTime;
 
     // primary screen
-    Vector2 m_vScreenSize;
-    Vector2 m_vNewScreenSize;
-    bool m_bResolutionChange;
+    Vector2 vScreenSize;
+    Vector2 vNewScreenSize;
+    bool bResolutionChange;
 
     // window
-    bool m_bHasFocus;
-    bool m_bIsMinimized;
+    bool bHasFocus;
+    bool bIsMinimized;
 
     // engine gui, mostly for debugging
-    CBaseUIContainer *m_guiContainer;
-    VisualProfiler *m_visualProfiler;
-    static ConsoleBox *m_consoleBox;
-    static Console *m_console;
+    CBaseUIContainer *guiContainer;
+    VisualProfiler *visualProfiler;
+    static ConsoleBox *consoleBox;
+    static Console *console;
 
     // custom
-    UString m_sArgs;
-    bool m_bBlackout;
-    bool m_bDrawing;
+    UString sArgs;
+    bool bBlackout;
+    bool bDrawing;
 };
 
 extern Engine *engine;

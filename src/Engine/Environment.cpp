@@ -2,7 +2,7 @@
 
 #include "ConVar.h"
 
-Environment::Environment() { m_bFullscreenWindowedBorderless = false; }
+Environment::Environment() { this->bFullscreenWindowedBorderless = false; }
 
 #ifdef _WIN32
 i32 Environment::get_nb_cpu_cores() {
@@ -16,7 +16,7 @@ i32 Environment::get_nb_cpu_cores() { return sysconf(_SC_NPROCESSORS_ONLN); }
 #endif
 
 void Environment::setFullscreenWindowedBorderless(bool fullscreenWindowedBorderless) {
-    m_bFullscreenWindowedBorderless = fullscreenWindowedBorderless;
+    this->bFullscreenWindowedBorderless = fullscreenWindowedBorderless;
 
     if(env->isFullscreen()) {
         env->disableFullscreen();

@@ -17,20 +17,20 @@
 #include "SpectatorScreen.h"
 
 bool ConVar::isUnlocked() const {
-    if(isFlagSet(FCVAR_PRIVATE)) return true;
+    if(this->isFlagSet(FCVAR_PRIVATE)) return true;
     if(!bancho.is_online()) return true;
 
     if(bancho.is_in_a_multi_room()) {
-        return isFlagSet(FCVAR_BANCHO_COMPATIBLE);
+        return this->isFlagSet(FCVAR_BANCHO_COMPATIBLE);
     } else {
         return true;
     }
 }
 
-bool ConVar::getBool() const { return getFloat() > 0; }
-int ConVar::getInt() { return (int)getFloat(); }
-float ConVar::getFloat() const { return isUnlocked() ? m_fValue.load() : m_fDefaultValue.load(); }
-const UString &ConVar::getString() { return isUnlocked() ? m_sValue : m_sDefaultValue; }
+bool ConVar::getBool() const { return this->getFloat() > 0; }
+int ConVar::getInt() { return (int)this->getFloat(); }
+float ConVar::getFloat() const { return this->isUnlocked() ? this->fValue.load() : this->fDefaultValue.load(); }
+const UString &ConVar::getString() { return this->isUnlocked() ? this->sValue : this->sDefaultValue; }
 
 static std::vector<ConVar *> &_getGlobalConVarArray() {
     static std::vector<ConVar *> g_vConVars;  // (singleton)
@@ -66,16 +66,16 @@ static ConVar *_getConVar(const UString &name) {
 }
 
 std::string ConVar::getFancyDefaultValue() {
-    switch(getType()) {
+    switch(this->getType()) {
         case ConVar::CONVAR_TYPE::CONVAR_TYPE_BOOL:
-            return m_fDefaultDefaultValue == 0 ? "false" : "true";
+            return this->fDefaultDefaultValue == 0 ? "false" : "true";
         case ConVar::CONVAR_TYPE::CONVAR_TYPE_INT:
-            return std::to_string((int)m_fDefaultDefaultValue);
+            return std::to_string((int)this->fDefaultDefaultValue);
         case ConVar::CONVAR_TYPE::CONVAR_TYPE_FLOAT:
-            return std::to_string(m_fDefaultDefaultValue);
+            return std::to_string(this->fDefaultDefaultValue);
         case ConVar::CONVAR_TYPE::CONVAR_TYPE_STRING: {
             std::string out = "\"";
-            out.append(m_sDefaultDefaultValue.toUtf8());
+            out.append(this->sDefaultDefaultValue.toUtf8());
             out.append("\"");
             return out;
         }
@@ -100,199 +100,199 @@ UString ConVar::typeToString(CONVAR_TYPE type) {
 }
 
 void ConVar::init(int flags) {
-    m_callbackfunc = NULL;
-    m_callbackfuncargs = NULL;
-    m_changecallback = NULL;
+    this->callbackfunc = NULL;
+    this->callbackfuncargs = NULL;
+    this->changecallback = NULL;
 
-    m_fValue = 0.0f;
-    m_fDefaultDefaultValue = 0.0f;
-    m_fDefaultValue = 0.0f;
-    m_sDefaultDefaultValue = "";
-    m_sDefaultValue = "";
+    this->fValue = 0.0f;
+    this->fDefaultDefaultValue = 0.0f;
+    this->fDefaultValue = 0.0f;
+    this->sDefaultDefaultValue = "";
+    this->sDefaultValue = "";
 
-    m_bHasValue = false;
-    m_type = CONVAR_TYPE::CONVAR_TYPE_FLOAT;
-    m_iDefaultFlags = flags;
-    m_iFlags = flags;
+    this->bHasValue = false;
+    this->type = CONVAR_TYPE::CONVAR_TYPE_FLOAT;
+    this->iDefaultFlags = flags;
+    this->iFlags = flags;
 }
 
 void ConVar::init(UString &name, int flags) {
-    init(flags);
+    this->init(flags);
 
-    m_sName = name;
-    m_type = CONVAR_TYPE::CONVAR_TYPE_STRING;
+    this->sName = name;
+    this->type = CONVAR_TYPE::CONVAR_TYPE_STRING;
 }
 
 void ConVar::init(UString &name, int flags, ConVarCallback callback) {
-    init(flags);
+    this->init(flags);
 
-    m_sName = name;
-    m_callbackfunc = callback;
-    m_type = CONVAR_TYPE::CONVAR_TYPE_STRING;
+    this->sName = name;
+    this->callbackfunc = callback;
+    this->type = CONVAR_TYPE::CONVAR_TYPE_STRING;
 }
 
 void ConVar::init(UString &name, int flags, UString helpString, ConVarCallback callback) {
-    init(name, flags, callback);
+    this->init(name, flags, callback);
 
-    m_sHelpString = helpString;
+    this->sHelpString = helpString;
 }
 
 void ConVar::init(UString &name, int flags, ConVarCallbackArgs callbackARGS) {
-    init(flags);
+    this->init(flags);
 
-    m_sName = name;
-    m_callbackfuncargs = callbackARGS;
-    m_type = CONVAR_TYPE::CONVAR_TYPE_STRING;
+    this->sName = name;
+    this->callbackfuncargs = callbackARGS;
+    this->type = CONVAR_TYPE::CONVAR_TYPE_STRING;
 }
 
 void ConVar::init(UString &name, int flags, UString helpString, ConVarCallbackArgs callbackARGS) {
-    init(name, flags, callbackARGS);
+    this->init(name, flags, callbackARGS);
 
-    m_sHelpString = helpString;
+    this->sHelpString = helpString;
 }
 
 void ConVar::init(UString &name, float defaultValue, int flags, UString helpString, ConVarChangeCallback callback) {
-    init(flags);
+    this->init(flags);
 
-    m_type = CONVAR_TYPE::CONVAR_TYPE_FLOAT;
-    m_sName = name;
-    m_fDefaultValue = defaultValue;
-    m_fDefaultDefaultValue = defaultValue;
-    m_sDefaultValue = UString::format("%g", defaultValue);
-    m_sDefaultDefaultValue = m_sDefaultValue;
-    setValue(defaultValue);
-    m_sHelpString = helpString;
-    m_changecallback = callback;
+    this->type = CONVAR_TYPE::CONVAR_TYPE_FLOAT;
+    this->sName = name;
+    this->fDefaultValue = defaultValue;
+    this->fDefaultDefaultValue = defaultValue;
+    this->sDefaultValue = UString::format("%g", defaultValue);
+    this->sDefaultDefaultValue = this->sDefaultValue;
+    this->setValue(defaultValue);
+    this->sHelpString = helpString;
+    this->changecallback = callback;
 }
 
 void ConVar::init(UString &name, UString defaultValue, int flags, UString helpString, ConVarChangeCallback callback) {
-    init(flags);
+    this->init(flags);
 
-    m_type = CONVAR_TYPE::CONVAR_TYPE_STRING;
-    m_sName = name;
-    m_sDefaultValue = defaultValue;
-    m_sDefaultDefaultValue = defaultValue;
-    setValue(defaultValue);
-    m_sHelpString = helpString;
-    m_changecallback = callback;
+    this->type = CONVAR_TYPE::CONVAR_TYPE_STRING;
+    this->sName = name;
+    this->sDefaultValue = defaultValue;
+    this->sDefaultDefaultValue = defaultValue;
+    this->setValue(defaultValue);
+    this->sHelpString = helpString;
+    this->changecallback = callback;
 }
 
 ConVar::ConVar(UString name) {
-    init(name, FCVAR_BANCHO_COMPATIBLE);
+    this->init(name, FCVAR_BANCHO_COMPATIBLE);
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, int flags, ConVarCallback callback) {
-    init(name, flags, callback);
+    this->init(name, flags, callback);
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, int flags, const char *helpString, ConVarCallback callback) {
-    init(name, flags, helpString, callback);
+    this->init(name, flags, helpString, callback);
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, int flags, ConVarCallbackArgs callbackARGS) {
-    init(name, flags, callbackARGS);
+    this->init(name, flags, callbackARGS);
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, int flags, const char *helpString, ConVarCallbackArgs callbackARGS) {
-    init(name, flags, helpString, callbackARGS);
+    this->init(name, flags, helpString, callbackARGS);
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, float fDefaultValue, int flags) {
-    init(name, fDefaultValue, flags, UString(""), NULL);
+    this->init(name, fDefaultValue, flags, UString(""), NULL);
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, float fDefaultValue, int flags, ConVarChangeCallback callback) {
-    init(name, fDefaultValue, flags, UString(""), callback);
+    this->init(name, fDefaultValue, flags, UString(""), callback);
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, float fDefaultValue, int flags, const char *helpString) {
-    init(name, fDefaultValue, flags, UString(helpString), NULL);
+    this->init(name, fDefaultValue, flags, UString(helpString), NULL);
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, float fDefaultValue, int flags, const char *helpString, ConVarChangeCallback callback) {
-    init(name, fDefaultValue, flags, UString(helpString), callback);
+    this->init(name, fDefaultValue, flags, UString(helpString), callback);
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, int iDefaultValue, int flags) {
-    init(name, (float)iDefaultValue, flags, "", NULL);
-    m_type = CONVAR_TYPE::CONVAR_TYPE_INT;
+    this->init(name, (float)iDefaultValue, flags, "", NULL);
+    this->type = CONVAR_TYPE::CONVAR_TYPE_INT;
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, int iDefaultValue, int flags, ConVarChangeCallback callback) {
-    init(name, (float)iDefaultValue, flags, "", callback);
-    m_type = CONVAR_TYPE::CONVAR_TYPE_INT;
+    this->init(name, (float)iDefaultValue, flags, "", callback);
+    this->type = CONVAR_TYPE::CONVAR_TYPE_INT;
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, int iDefaultValue, int flags, const char *helpString) {
-    init(name, (float)iDefaultValue, flags, UString(helpString), NULL);
-    m_type = CONVAR_TYPE::CONVAR_TYPE_INT;
+    this->init(name, (float)iDefaultValue, flags, UString(helpString), NULL);
+    this->type = CONVAR_TYPE::CONVAR_TYPE_INT;
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, int iDefaultValue, int flags, const char *helpString, ConVarChangeCallback callback) {
-    init(name, (float)iDefaultValue, flags, UString(helpString), callback);
-    m_type = CONVAR_TYPE::CONVAR_TYPE_INT;
+    this->init(name, (float)iDefaultValue, flags, UString(helpString), callback);
+    this->type = CONVAR_TYPE::CONVAR_TYPE_INT;
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, bool bDefaultValue, int flags) {
-    init(name, bDefaultValue ? 1.0f : 0.0f, flags, "", NULL);
-    m_type = CONVAR_TYPE::CONVAR_TYPE_BOOL;
+    this->init(name, bDefaultValue ? 1.0f : 0.0f, flags, "", NULL);
+    this->type = CONVAR_TYPE::CONVAR_TYPE_BOOL;
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, bool bDefaultValue, int flags, ConVarChangeCallback callback) {
-    init(name, bDefaultValue ? 1.0f : 0.0f, flags, "", callback);
-    m_type = CONVAR_TYPE::CONVAR_TYPE_BOOL;
+    this->init(name, bDefaultValue ? 1.0f : 0.0f, flags, "", callback);
+    this->type = CONVAR_TYPE::CONVAR_TYPE_BOOL;
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, bool bDefaultValue, int flags, const char *helpString) {
-    init(name, bDefaultValue ? 1.0f : 0.0f, flags, UString(helpString), NULL);
-    m_type = CONVAR_TYPE::CONVAR_TYPE_BOOL;
+    this->init(name, bDefaultValue ? 1.0f : 0.0f, flags, UString(helpString), NULL);
+    this->type = CONVAR_TYPE::CONVAR_TYPE_BOOL;
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, bool bDefaultValue, int flags, const char *helpString, ConVarChangeCallback callback) {
-    init(name, bDefaultValue ? 1.0f : 0.0f, flags, UString(helpString), callback);
-    m_type = CONVAR_TYPE::CONVAR_TYPE_BOOL;
+    this->init(name, bDefaultValue ? 1.0f : 0.0f, flags, UString(helpString), callback);
+    this->type = CONVAR_TYPE::CONVAR_TYPE_BOOL;
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, const char *sDefaultValue, int flags) {
-    init(name, UString(sDefaultValue), flags, UString(""), NULL);
+    this->init(name, UString(sDefaultValue), flags, UString(""), NULL);
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, const char *sDefaultValue, int flags, const char *helpString) {
-    init(name, UString(sDefaultValue), flags, UString(helpString), NULL);
+    this->init(name, UString(sDefaultValue), flags, UString(helpString), NULL);
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, const char *sDefaultValue, int flags, ConVarChangeCallback callback) {
-    init(name, UString(sDefaultValue), flags, UString(""), callback);
+    this->init(name, UString(sDefaultValue), flags, UString(""), callback);
     _addConVar(this);
 }
 
 ConVar::ConVar(UString name, const char *sDefaultValue, int flags, const char *helpString,
                ConVarChangeCallback callback) {
-    init(name, UString(sDefaultValue), flags, UString(helpString), callback);
+    this->init(name, UString(sDefaultValue), flags, UString(helpString), callback);
     _addConVar(this);
 }
 
 void ConVar::exec() {
-    if(!isUnlocked()) return;
+    if(!this->isUnlocked()) return;
 
     if(osu != NULL) {
         auto is_vanilla = convar->isVanilla();
@@ -302,49 +302,49 @@ void ConVar::exec() {
             beatmap->vanilla &= is_vanilla;
         }
 
-        auto mod_selector = osu->m_modSelector;
-        if(mod_selector && mod_selector->m_nonVanillaWarning) {
-            mod_selector->m_nonVanillaWarning->setVisible(!is_vanilla && bancho.submit_scores());
+        auto mod_selector = osu->modSelector;
+        if(mod_selector && mod_selector->nonVanillaWarning) {
+            mod_selector->nonVanillaWarning->setVisible(!is_vanilla && bancho.submit_scores());
         }
     }
 
-    if(m_callbackfunc != NULL) m_callbackfunc();
+    if(this->callbackfunc != NULL) this->callbackfunc();
 }
 
 void ConVar::execArgs(UString args) {
-    if(!isUnlocked()) return;
+    if(!this->isUnlocked()) return;
 
-    if(m_callbackfuncargs != NULL) m_callbackfuncargs(args);
+    if(this->callbackfuncargs != NULL) this->callbackfuncargs(args);
 }
 
 // Reset default values to the actual defaults (before neosu.json overrides)
 void ConVar::resetDefaults() {
-    m_iFlags = m_iDefaultFlags;
-    m_fDefaultValue = m_fDefaultDefaultValue;
-    m_sDefaultValue = m_sDefaultDefaultValue;
+    this->iFlags = this->iDefaultFlags;
+    this->fDefaultValue = this->fDefaultDefaultValue;
+    this->sDefaultValue = this->sDefaultDefaultValue;
 }
 
 void ConVar::setDefaultFloat(float defaultValue) {
-    if(isFlagSet(FCVAR_PRIVATE)) return;
-    m_fDefaultValue = defaultValue;
-    m_sDefaultValue = UString::format("%g", defaultValue);
+    if(this->isFlagSet(FCVAR_PRIVATE)) return;
+    this->fDefaultValue = defaultValue;
+    this->sDefaultValue = UString::format("%g", defaultValue);
 }
 
 void ConVar::setDefaultString(UString defaultValue) {
-    if(isFlagSet(FCVAR_PRIVATE)) return;
-    m_sDefaultValue = defaultValue;
+    if(this->isFlagSet(FCVAR_PRIVATE)) return;
+    this->sDefaultValue = defaultValue;
 }
 
 void ConVar::setValue(float value, bool fire_callbacks) {
-    if(!isUnlocked()) return;
+    if(!this->isUnlocked()) return;
 
-    if(osu && isFlagSet(FCVAR_GAMEPLAY)) {
+    if(osu && this->isFlagSet(FCVAR_GAMEPLAY)) {
         if(bancho.is_playing_a_multi_map()) {
-            debugLog("Can't edit %s while in a multiplayer match.\n", m_sName.toUtf8());
+            debugLog("Can't edit %s while in a multiplayer match.\n", this->sName.toUtf8());
             return;
         } else {
             if(osu->isInPlayMode()) {
-                debugLog("%s affects gameplay: won't submit score.\n", m_sName.toUtf8());
+                debugLog("%s affects gameplay: won't submit score.\n", this->sName.toUtf8());
             }
             osu->getScore()->setCheated();
         }
@@ -355,38 +355,38 @@ void ConVar::setValue(float value, bool fire_callbacks) {
     // TODO: make this less unsafe in multithreaded environments (for float convars at least)
 
     // backup previous value
-    const float oldValue = m_fValue.load();
+    const float oldValue = this->fValue.load();
 
     // then set the new value
     const UString newStringValue = UString::format("%g", value);
     {
-        m_fValue = value;
-        m_sValue = newStringValue;
-        m_bHasValue = true;
+        this->fValue = value;
+        this->sValue = newStringValue;
+        this->bHasValue = true;
     }
 
     // handle callbacks
     if(fire_callbacks) {
         // possible void callback
-        exec();
+        this->exec();
 
         // possible change callback
-        if(m_changecallback != NULL) m_changecallback(UString::format("%g", oldValue), newStringValue);
+        if(this->changecallback != NULL) this->changecallback(UString::format("%g", oldValue), newStringValue);
 
         // possible arg callback
-        execArgs(newStringValue);
+        this->execArgs(newStringValue);
     }
 }
 
 void ConVar::setValue(UString sValue, bool fire_callbacks) {
-    if(!isUnlocked()) return;
+    if(!this->isUnlocked()) return;
 
-    if(osu && isFlagSet(FCVAR_GAMEPLAY)) {
+    if(osu && this->isFlagSet(FCVAR_GAMEPLAY)) {
         if(bancho.is_playing_a_multi_map()) {
-            debugLog("Can't edit %s while in a multiplayer match.\n", m_sName.toUtf8());
+            debugLog("Can't edit %s while in a multiplayer match.\n", this->sName.toUtf8());
             return;
         } else {
-            debugLog("%s affects gameplay: won't submit score.\n", m_sName.toUtf8());
+            debugLog("%s affects gameplay: won't submit score.\n", this->sName.toUtf8());
             osu->getScore()->setCheated();
         }
 
@@ -394,36 +394,36 @@ void ConVar::setValue(UString sValue, bool fire_callbacks) {
     }
 
     // backup previous value
-    const UString oldValue = m_sValue;
+    const UString oldValue = this->sValue;
 
     // then set the new value
     {
-        m_sValue = sValue;
-        m_bHasValue = true;
+        this->sValue = sValue;
+        this->bHasValue = true;
 
-        if(sValue.length() > 0) m_fValue = sValue.toFloat();
+        if(sValue.length() > 0) this->fValue = sValue.toFloat();
     }
 
     // handle callbacks
     if(fire_callbacks) {
         // possible void callback
-        exec();
+        this->exec();
 
         // possible change callback
-        if(m_changecallback != NULL) m_changecallback(oldValue, sValue);
+        if(this->changecallback != NULL) this->changecallback(oldValue, sValue);
 
         // possible arg callback
-        execArgs(sValue);
+        this->execArgs(sValue);
     }
 }
 
-void ConVar::setCallback(NativeConVarCallback callback) { m_callbackfunc = callback; }
+void ConVar::setCallback(NativeConVarCallback callback) { this->callbackfunc = callback; }
 
-void ConVar::setCallback(NativeConVarCallbackArgs callback) { m_callbackfuncargs = callback; }
+void ConVar::setCallback(NativeConVarCallbackArgs callback) { this->callbackfuncargs = callback; }
 
-void ConVar::setCallback(NativeConVarChangeCallback callback) { m_changecallback = callback; }
+void ConVar::setCallback(NativeConVarChangeCallback callback) { this->changecallback = callback; }
 
-void ConVar::setHelpString(UString helpString) { m_sHelpString = helpString; }
+void ConVar::setHelpString(UString helpString) { this->sHelpString = helpString; }
 
 //********************************//
 //  ConVarHandler Implementation  //
@@ -467,7 +467,7 @@ std::vector<ConVar *> ConVarHandler::getConVarByLetter(UString letters) const {
     {
         if(letters.length() < 1) return matchingConVars;
 
-        const std::vector<ConVar *> &convars = getConVarArray();
+        const std::vector<ConVar *> &convars = this->getConVarArray();
 
         // first try matching exactly
         for(size_t i = 0; i < convars.size(); i++) {
@@ -796,7 +796,7 @@ void loudness_cb(UString oldValue, UString newValue) {
     // Restart loudness calc.
     loct_abort();
     if(db && cv_normalize_loudness.getBool()) {
-        loct_calc(db->m_loudness_to_calc);
+        loct_calc(db->loudness_to_calc);
     }
 }
 

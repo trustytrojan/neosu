@@ -15,9 +15,9 @@ struct MD5Hash {
     char hash[33];
 
     MD5Hash(const char *str);
-    MD5Hash() { hash[0] = 0; }
+    MD5Hash() { this->hash[0] = 0; }
 
-    inline const char *toUtf8() const { return hash; }
+    inline const char *toUtf8() const { return this->hash; }
     bool operator==(const MD5Hash &other) const;
     bool operator==(const UString &other) const;
 };
@@ -38,13 +38,13 @@ class UString {
     void clear();
 
     // get
-    operator char *() const { return mUtf8; }
-    operator wchar_t *() const { return mUnicode; }
-    inline int length() const { return mLength; }
-    inline int lengthUtf8() const { return mLengthUtf8; }
-    inline const char *toUtf8() const { return mUtf8; }
-    inline const wchar_t *wc_str() const { return mUnicode; }
-    inline bool isAsciiOnly() const { return mIsAsciiOnly; }
+    operator char *() const { return this->mUtf8; }
+    operator wchar_t *() const { return this->mUnicode; }
+    inline int length() const { return this->mLength; }
+    inline int lengthUtf8() const { return this->mLengthUtf8; }
+    inline const char *toUtf8() const { return this->mUtf8; }
+    inline const wchar_t *wc_str() const { return this->mUnicode; }
+    inline bool isAsciiOnly() const { return this->mIsAsciiOnly; }
     bool isWhitespaceOnly() const;
 
     int findChar(wchar_t ch, int start = 0, bool respectEscapeChars = false) const;
@@ -114,19 +114,19 @@ class UString {
 
     // inline deletes, guarantee valid empty string
     inline void deleteUnicode() {
-        if(mUnicode != NULL && mUnicode != nullWString) delete[] mUnicode;
+        if(this->mUnicode != NULL && this->mUnicode != nullWString) delete[] this->mUnicode;
 
-        mUnicode = (wchar_t *)nullWString;
+        this->mUnicode = (wchar_t *)nullWString;
     }
 
     inline void deleteUtf8() {
-        if(mUtf8 != NULL && mUtf8 != nullString) delete[] mUtf8;
+        if(this->mUtf8 != NULL && this->mUtf8 != nullString) delete[] this->mUtf8;
 
-        mUtf8 = (char *)nullString;
+        this->mUtf8 = (char *)nullString;
     }
 
-    inline bool isUnicodeNull() const { return (mUnicode == NULL || mUnicode == nullWString); }
-    inline bool isUtf8Null() const { return (mUtf8 == NULL || mUtf8 == nullString); }
+    inline bool isUnicodeNull() const { return (this->mUnicode == NULL || this->mUnicode == nullWString); }
+    inline bool isUtf8Null() const { return (this->mUtf8 == NULL || this->mUtf8 == nullString); }
 
    private:
     static constexpr char nullString[] = "";

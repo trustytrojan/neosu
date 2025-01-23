@@ -21,4 +21,4 @@ ContextMenu *NullEnvironment::createContextMenu() { return new NullContextMenu()
 
 void NullEnvironment::shutdown() { g_bRunning = false; }
 
-void NullEnvironment::restart() { shutdown(); }
+void NullEnvironment::restart() { this->shutdown(); }

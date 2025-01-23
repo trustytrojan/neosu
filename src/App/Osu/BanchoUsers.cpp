@@ -60,6 +60,6 @@ UserInfo* get_user_info(u32 user_id, bool fetch) {
 }
 
 bool UserInfo::is_friend() {
-    auto it = std::find(friends.begin(), friends.end(), user_id);
+    auto it = std::find(friends.begin(), friends.end(), this->user_id);
     return it != friends.end();
 }

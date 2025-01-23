@@ -88,7 +88,7 @@ typedef unsigned char COLORPART;
         }               \
     }
 
-#define COLOR(a, r, g, b) ((Color)((((a) & 0xff) << 24) | (((r) & 0xff) << 16) | (((g) & 0xff) << 8) | ((b) & 0xff)))
+#define COLOR(a, r, g, b) ((Color)((((a)&0xff) << 24) | (((r)&0xff) << 16) | (((g)&0xff) << 8) | ((b)&0xff)))
 
 #define COLORf(a, r, g, b)                                                    \
     ((Color)(((((int)(clamp<float>(a, 0.0f, 1.0f) * 255.0f)) & 0xff) << 24) | \
@@ -171,63 +171,63 @@ template <class T>
 struct zarray {
     zarray(size_t nb_initial = 0) {
         if(nb_initial > 0) {
-            reserve(nb_initial);
-            nb = nb_initial;
+            this->reserve(nb_initial);
+            this->nb = nb_initial;
         }
     }
-    ~zarray() { free(memory); }
+    ~zarray() { free(this->memory); }
 
     void push_back(T t) {
-        if(nb + 1 > max) {
-            reserve(max + max / 2 + 1);
+        if(this->nb + 1 > this->max) {
+            this->reserve(this->max + this->max / 2 + 1);
         }
 
-        memory[nb] = t;
-        nb++;
+        this->memory[this->nb] = t;
+        this->nb++;
     }
 
     void reserve(size_t new_max) {
-        if(max == 0) {
-            memory = (T *)calloc(new_max, sizeof(T));
+        if(this->max == 0) {
+            this->memory = (T *)calloc(new_max, sizeof(T));
         } else {
-            memory = (T *)reallocarray(memory, new_max, sizeof(T));
-            memset(&memory[max], 0, (new_max - max) * sizeof(T));
+            this->memory = (T *)reallocarray(this->memory, new_max, sizeof(T));
+            memset(&this->memory[this->max], 0, (new_max - this->max) * sizeof(T));
         }
 
-        max = new_max;
+        this->max = new_max;
     }
 
     void resize(size_t new_nb) {
-        if(new_nb < nb) {
-            memset(&memory[new_nb], 0, (nb - new_nb) * sizeof(T));
-        } else if(new_nb > max) {
-            reserve(new_nb);
+        if(new_nb < this->nb) {
+            memset(&this->memory[new_nb], 0, (this->nb - new_nb) * sizeof(T));
+        } else if(new_nb > this->max) {
+            this->reserve(new_nb);
         }
 
-        nb = new_nb;
+        this->nb = new_nb;
     }
 
     void swap(zarray<T> &other) {
-        size_t omax = max;
-        size_t onb = nb;
-        T *omemory = memory;
+        size_t omax = this->max;
+        size_t onb = this->nb;
+        T *omemory = this->memory;
 
-        max = other.max;
-        nb = other.nb;
-        memory = other.memory;
+        this->max = other.max;
+        this->nb = other.nb;
+        this->memory = other.memory;
 
         other.max = omax;
         other.nb = onb;
         other.memory = omemory;
     }
 
-    T &operator[](size_t index) const { return memory[index]; }
-    void clear() { nb = 0; }
-    T *begin() const { return memory; }
-    T *data() { return memory; }
-    bool empty() const { return nb == 0; }
-    T *end() const { return &memory[nb]; }
-    size_t size() const { return nb; }
+    T &operator[](size_t index) const { return this->memory[index]; }
+    void clear() { this->nb = 0; }
+    T *begin() const { return this->memory; }
+    T *data() { return this->memory; }
+    bool empty() const { return this->nb == 0; }
+    T *end() const { return &this->memory[this->nb]; }
+    size_t size() const { return this->nb; }
 
    private:
     size_t max = 0;

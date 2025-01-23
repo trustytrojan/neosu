@@ -80,7 +80,7 @@ class OpenGLLegacyInterface : public Graphics {
     virtual std::vector<unsigned char> getScreenshot();
 
     // renderer info
-    virtual Vector2 getResolution() const { return m_vResolution; }
+    virtual Vector2 getResolution() const { return this->vResolution; }
     virtual UString getVendor();
     virtual UString getModel();
     virtual UString getVersion();
@@ -111,17 +111,17 @@ class OpenGLLegacyInterface : public Graphics {
     void handleGLErrors();
 
     // renderer
-    bool m_bInScene;
-    Vector2 m_vResolution;
+    bool bInScene;
+    Vector2 vResolution;
 
     // persistent vars
-    bool m_bAntiAliasing;
-    Color m_color;
-    float m_fZ;
-    float m_fClearZ;
+    bool bAntiAliasing;
+    Color color;
+    float fZ;
+    float fClearZ;
 
     // clipping
-    std::stack<McRect> m_clipRectStack;
+    std::stack<McRect> clipRectStack;
 };
 
 #endif

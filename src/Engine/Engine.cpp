@@ -27,22 +27,22 @@ using namespace std;
 Engine *engine = NULL;
 Environment *env = NULL;
 
-Console *Engine::m_console = NULL;
-ConsoleBox *Engine::m_consoleBox = NULL;
+Console *Engine::console = NULL;
+ConsoleBox *Engine::consoleBox = NULL;
 
 Engine::Engine(Environment *environment, const char *args) {
     // XXX: run curl_global_cleanup() after waiting for network threads to terminate
     curl_global_init(CURL_GLOBAL_DEFAULT);
 
     engine = this;
-    m_environment = environment;
+    this->environment = environment;
     env = environment;
-    m_sArgs = UString(args);
+    this->sArgs = UString(args);
 
-    m_graphics = NULL;
-    m_guiContainer = NULL;
-    m_visualProfiler = NULL;
-    m_app = NULL;
+    this->graphics = NULL;
+    this->guiContainer = NULL;
+    this->visualProfiler = NULL;
+    this->app = NULL;
 
     // disable output buffering (else we get multithreading issues due to blocking)
     setvbuf(stdout, NULL, _IONBF, 0);
@@ -50,65 +50,65 @@ Engine::Engine(Environment *environment, const char *args) {
 
     // print debug information
     debugLog("-= Engine Startup =-\n");
-    debugLog("Engine: args = %s\n", m_sArgs.toUtf8());
+    debugLog("Engine: args = %s\n", this->sArgs.toUtf8());
 
     // timing
-    m_timer = new Timer();
-    m_dTime = 0;
-    m_dRunTime = 0;
-    m_iFrameCount = 0;
-    m_dFrameTime = 0.016f;
+    this->timer = new Timer();
+    this->dTime = 0;
+    this->dRunTime = 0;
+    this->iFrameCount = 0;
+    this->dFrameTime = 0.016f;
 
     // window
-    m_bBlackout = false;
-    m_bHasFocus = false;
-    m_bIsMinimized = false;
+    this->bBlackout = false;
+    this->bHasFocus = false;
+    this->bIsMinimized = false;
 
     // screen
-    m_bResolutionChange = false;
-    m_vScreenSize = m_environment->getWindowSize();
-    m_vNewScreenSize = m_vScreenSize;
+    this->bResolutionChange = false;
+    this->vScreenSize = this->environment->getWindowSize();
+    this->vNewScreenSize = this->vScreenSize;
 
-    debugLog("Engine: OsuScreenSize = (%ix%i)\n", (int)m_vScreenSize.x, (int)m_vScreenSize.y);
+    debugLog("Engine: OsuScreenSize = (%ix%i)\n", (int)this->vScreenSize.x, (int)this->vScreenSize.y);
 
     // custom
-    m_bDrawing = false;
+    this->bDrawing = false;
 
     // initialize all engine subsystems (the order does matter!)
     debugLog("\nEngine: Initializing subsystems ...\n");
     {
         // input devices
-        m_mouse = new Mouse();
-        m_inputDevices.push_back(m_mouse);
-        m_mice.push_back(m_mouse);
+        this->mouse = new Mouse();
+        this->inputDevices.push_back(this->mouse);
+        this->mice.push_back(this->mouse);
 
-        m_keyboard = new Keyboard();
-        m_inputDevices.push_back(m_keyboard);
-        m_keyboards.push_back(m_keyboard);
+        this->keyboard = new Keyboard();
+        this->inputDevices.push_back(this->keyboard);
+        this->keyboards.push_back(this->keyboard);
 
-        m_gamepad = new XInputGamepad();
-        m_inputDevices.push_back(m_gamepad);
-        m_gamepads.push_back(m_gamepad);
+        this->gamepad = new XInputGamepad();
+        this->inputDevices.push_back(this->gamepad);
+        this->gamepads.push_back(this->gamepad);
 
         // init platform specific interfaces
-        m_graphics = m_environment->createRenderer();
+        this->graphics = this->environment->createRenderer();
         {
-            m_graphics->init();  // needs init() separation due to potential engine->getGraphics() access
+            this->graphics->init();  // needs init() separation due to potential engine->getGraphics() access
         }
-        m_contextMenu = m_environment->createContextMenu();
+        this->contextMenu = this->environment->createContextMenu();
 
         // and the rest
-        m_resourceManager = new ResourceManager();
-        m_sound = new SoundEngine();
-        m_animationHandler = new AnimationHandler();
-        m_networkHandler = new NetworkHandler();
+        this->resourceManager = new ResourceManager();
+        this->sound = new SoundEngine();
+        this->animationHandler = new AnimationHandler();
+        this->networkHandler = new NetworkHandler();
         init_discord_sdk();
 
         // default launch overrides
-        m_graphics->setVSync(false);
+        this->graphics->setVSync(false);
 
         // engine time starts now
-        m_timer->start();
+        this->timer->start();
     }
     debugLog("Engine: Initializing subsystems done.\n\n");
 }
@@ -117,46 +117,44 @@ Engine::~Engine() {
     debugLog("\n-= Engine Shutdown =-\n");
 
     debugLog("Engine: Freeing app...\n");
-    SAFE_DELETE(m_app);
+    SAFE_DELETE(this->app);
 
-    if(m_console != NULL) showMessageErrorFatal("Engine Error", "m_console not set to NULL before shutdown!");
+    if(this->console != NULL) this->showMessageErrorFatal("Engine Error", "console not set to NULL before shutdown!");
 
     debugLog("Engine: Freeing engine GUI...\n");
-    {
-        m_console = NULL;
-        m_consoleBox = NULL;
-    }
-    SAFE_DELETE(m_guiContainer);
+    Engine::console = NULL;
+    Engine::consoleBox = NULL;
+    SAFE_DELETE(this->guiContainer);
 
     debugLog("Engine: Freeing resource manager...\n");
-    SAFE_DELETE(m_resourceManager);
+    SAFE_DELETE(this->resourceManager);
 
     debugLog("Engine: Freeing Sound...\n");
-    SAFE_DELETE(m_sound);
+    SAFE_DELETE(this->sound);
 
     debugLog("Engine: Freeing context menu...\n");
-    SAFE_DELETE(m_contextMenu);
+    SAFE_DELETE(this->contextMenu);
 
     debugLog("Engine: Freeing animation handler...\n");
-    SAFE_DELETE(m_animationHandler);
+    SAFE_DELETE(this->animationHandler);
 
     debugLog("Engine: Freeing network handler...\n");
-    SAFE_DELETE(m_networkHandler);
+    SAFE_DELETE(this->networkHandler);
 
     debugLog("Engine: Freeing input devices...\n");
-    for(size_t i = 0; i < m_inputDevices.size(); i++) {
-        delete m_inputDevices[i];
+    for(size_t i = 0; i < this->inputDevices.size(); i++) {
+        delete this->inputDevices[i];
     }
-    m_inputDevices.clear();
+    this->inputDevices.clear();
 
     debugLog("Engine: Freeing timer...\n");
-    SAFE_DELETE(m_timer);
+    SAFE_DELETE(this->timer);
 
     debugLog("Engine: Freeing graphics...\n");
-    SAFE_DELETE(m_graphics);
+    SAFE_DELETE(this->graphics);
 
     debugLog("Engine: Freeing environment...\n");
-    SAFE_DELETE(m_environment);
+    SAFE_DELETE(this->environment);
     destroy_discord_sdk();
 
     debugLog("Engine: Goodbye.");
@@ -187,7 +185,7 @@ void Engine::loadApp() {
 
     // load core default resources
     debugLog("Engine: Loading default resources ...\n");
-    engine->getResourceManager()->loadFont("weblysleekuisb.ttf", "FONT_DEFAULT", 15, true, m_environment->getDPI());
+    engine->getResourceManager()->loadFont("weblysleekuisb.ttf", "FONT_DEFAULT", 15, true, this->environment->getDPI());
     engine->getResourceManager()->loadFont("tahoma.ttf", "FONT_CONSOLE", 8, false, 96);
     debugLog("Engine: Loading default resources done.\n");
 
@@ -206,14 +204,14 @@ void Engine::loadApp() {
         missingTexture->load();
 
         // create engine gui
-        m_guiContainer = new CBaseUIContainer(0, 0, engine->getScreenWidth(), engine->getScreenHeight(), "");
-        m_consoleBox = new ConsoleBox();
-        m_guiContainer->addBaseUIElement(m_consoleBox);
-        m_visualProfiler = new VisualProfiler();
-        m_guiContainer->addBaseUIElement(m_visualProfiler);
+        this->guiContainer = new CBaseUIContainer(0, 0, engine->getScreenWidth(), engine->getScreenHeight(), "");
+        Engine::consoleBox = new ConsoleBox();
+        this->guiContainer->addBaseUIElement(this->consoleBox);
+        this->visualProfiler = new VisualProfiler();
+        this->guiContainer->addBaseUIElement(this->visualProfiler);
 
         // (engine gui comes first)
-        m_keyboard->addListener(m_guiContainer, true);
+        this->keyboard->addListener(this->guiContainer, true);
     }
 
     debugLog("\nEngine: Loading app ...\n");
@@ -222,99 +220,99 @@ void Engine::loadApp() {
         //	Load App here  //
         //*****************//
         osu = new Osu();
-        m_app = osu;
+        this->app = osu;
 
         // start listening to the default keyboard input
-        if(m_app != NULL) m_keyboard->addListener(m_app);
+        if(this->app != NULL) this->keyboard->addListener(this->app);
     }
     debugLog("Engine: Loading app done.\n\n");
 }
 
 void Engine::onPaint() {
     VPROF_BUDGET("Engine::onPaint", VPROF_BUDGETGROUP_DRAW);
-    if(m_bBlackout || m_bIsMinimized) return;
+    if(this->bBlackout || this->bIsMinimized) return;
 
-    m_bDrawing = true;
+    this->bDrawing = true;
     {
         // begin
         {
             VPROF_BUDGET("Graphics::beginScene", VPROF_BUDGETGROUP_DRAW);
-            m_graphics->beginScene();
+            this->graphics->beginScene();
         }
 
         // middle
         {
-            if(m_app != NULL) {
+            if(this->app != NULL) {
                 VPROF_BUDGET("App::draw", VPROF_BUDGETGROUP_DRAW);
-                m_app->draw(m_graphics);
+                this->app->draw(this->graphics);
             }
 
-            if(m_guiContainer != NULL) m_guiContainer->draw(m_graphics);
+            if(this->guiContainer != NULL) this->guiContainer->draw(this->graphics);
 
             // debug input devices
-            for(size_t i = 0; i < m_inputDevices.size(); i++) {
-                m_inputDevices[i]->draw(m_graphics);
+            for(size_t i = 0; i < this->inputDevices.size(); i++) {
+                this->inputDevices[i]->draw(this->graphics);
             }
         }
 
         // end
         {
             VPROF_BUDGET("Graphics::endScene", VPROF_BUDGETGROUP_DRAW_SWAPBUFFERS);
-            m_graphics->endScene();
+            this->graphics->endScene();
         }
     }
-    m_bDrawing = false;
+    this->bDrawing = false;
 
-    m_iFrameCount++;
+    this->iFrameCount++;
 }
 
 void Engine::onUpdate() {
     VPROF_BUDGET("Engine::onUpdate", VPROF_BUDGETGROUP_UPDATE);
 
-    if(m_bBlackout) return;
+    if(this->bBlackout) return;
 
     // update time
     {
-        m_timer->update();
-        m_dRunTime = m_timer->getElapsedTime();
-        m_dTime += m_dFrameTime;
+        this->timer->update();
+        this->dRunTime = this->timer->getElapsedTime();
+        this->dTime += this->dFrameTime;
     }
 
     // handle pending queued resolution changes
-    if(m_bResolutionChange) {
-        m_bResolutionChange = false;
+    if(this->bResolutionChange) {
+        this->bResolutionChange = false;
 
         if(cv_debug_engine.getBool())
-            debugLog("Engine: executing pending queued resolution change to (%i, %i)\n", (int)m_vNewScreenSize.x,
-                     (int)m_vNewScreenSize.y);
+            debugLog("Engine: executing pending queued resolution change to (%i, %i)\n", (int)this->vNewScreenSize.x,
+                     (int)this->vNewScreenSize.y);
 
-        onResolutionChange(m_vNewScreenSize);
+        this->onResolutionChange(this->vNewScreenSize);
     }
 
     // update miscellaneous engine subsystems
     {
-        for(size_t i = 0; i < m_inputDevices.size(); i++) {
-            m_inputDevices[i]->update();
+        for(size_t i = 0; i < this->inputDevices.size(); i++) {
+            this->inputDevices[i]->update();
         }
 
         {
             VPROF_BUDGET("AnimationHandler::update", VPROF_BUDGETGROUP_UPDATE);
-            m_animationHandler->update();
+            this->animationHandler->update();
         }
 
         {
             VPROF_BUDGET("SoundEngine::update", VPROF_BUDGETGROUP_UPDATE);
-            m_sound->update();
+            this->sound->update();
         }
 
         {
             VPROF_BUDGET("ResourceManager::update", VPROF_BUDGETGROUP_UPDATE);
-            m_resourceManager->update();
+            this->resourceManager->update();
         }
 
         // update gui
         bool propagate_clicks = true;
-        if(m_guiContainer != NULL) m_guiContainer->mouse_update(&propagate_clicks);
+        if(this->guiContainer != NULL) this->guiContainer->mouse_update(&propagate_clicks);
 
         // execute queued commands
         // TODO: this is shit
@@ -327,9 +325,9 @@ void Engine::onUpdate() {
     }
 
     // update app
-    if(m_app != NULL) {
+    if(this->app != NULL) {
         VPROF_BUDGET("App::update", VPROF_BUDGETGROUP_UPDATE);
-        m_app->update();
+        this->app->update();
     }
 
     // update discord presence
@@ -338,106 +336,107 @@ void Engine::onUpdate() {
     // update environment (after app, at the end here)
     {
         VPROF_BUDGET("Environment::update", VPROF_BUDGETGROUP_UPDATE);
-        m_environment->update();
+        this->environment->update();
     }
 }
 
 void Engine::onFocusGained() {
-    m_bHasFocus = true;
+    this->bHasFocus = true;
 
     if(cv_debug_engine.getBool()) debugLog("Engine: got focus\n");
 
-    if(m_app != NULL) m_app->onFocusGained();
+    if(this->app != NULL) this->app->onFocusGained();
 }
 
 void Engine::onFocusLost() {
-    m_bHasFocus = false;
+    this->bHasFocus = false;
 
     if(cv_debug_engine.getBool()) debugLog("Engine: lost focus\n");
 
-    for(size_t i = 0; i < m_keyboards.size(); i++) {
-        m_keyboards[i]->reset();
+    for(size_t i = 0; i < this->keyboards.size(); i++) {
+        this->keyboards[i]->reset();
     }
 
-    if(m_app != NULL) m_app->onFocusLost();
+    if(this->app != NULL) this->app->onFocusLost();
 
     // auto minimize on certain conditions
-    if(m_environment->isFullscreen() || m_environment->isFullscreenWindowedBorderless()) {
-        if((!m_environment->isFullscreenWindowedBorderless() && cv_minimize_on_focus_lost_if_fullscreen.getBool()) ||
-           (m_environment->isFullscreenWindowedBorderless() &&
+    if(this->environment->isFullscreen() || this->environment->isFullscreenWindowedBorderless()) {
+        if((!this->environment->isFullscreenWindowedBorderless() &&
+            cv_minimize_on_focus_lost_if_fullscreen.getBool()) ||
+           (this->environment->isFullscreenWindowedBorderless() &&
             cv_minimize_on_focus_lost_if_borderless_windowed_fullscreen.getBool())) {
-            m_environment->minimize();
+            this->environment->minimize();
         }
     }
 }
 
 void Engine::onMinimized() {
-    m_bIsMinimized = true;
-    m_bHasFocus = false;
+    this->bIsMinimized = true;
+    this->bHasFocus = false;
 
     if(cv_debug_engine.getBool()) debugLog("Engine: window minimized\n");
 
-    if(m_app != NULL) m_app->onMinimized();
+    if(this->app != NULL) this->app->onMinimized();
 }
 
 void Engine::onMaximized() {
-    m_bIsMinimized = false;
+    this->bIsMinimized = false;
 
     if(cv_debug_engine.getBool()) debugLog("Engine: window maximized\n");
 }
 
 void Engine::onRestored() {
-    m_bIsMinimized = false;
+    this->bIsMinimized = false;
 
     if(cv_debug_engine.getBool()) debugLog("Engine: window restored\n");
 
-    if(m_app != NULL) m_app->onRestored();
+    if(this->app != NULL) this->app->onRestored();
 }
 
 void Engine::onResolutionChange(Vector2 newResolution) {
-    debugLog(0xff00ff00, "Engine: onResolutionChange() (%i, %i) -> (%i, %i)\n", (int)m_vScreenSize.x,
-             (int)m_vScreenSize.y, (int)newResolution.x, (int)newResolution.y);
+    debugLog(0xff00ff00, "Engine: onResolutionChange() (%i, %i) -> (%i, %i)\n", (int)this->vScreenSize.x,
+             (int)this->vScreenSize.y, (int)newResolution.x, (int)newResolution.y);
 
     // NOTE: Windows [Show Desktop] button in the superbar causes (0,0)
     if(newResolution.x < 2 || newResolution.y < 2) {
-        m_bIsMinimized = true;
+        this->bIsMinimized = true;
         newResolution = Vector2(2, 2);
     }
 
     // to avoid double resolutionChange
-    m_bResolutionChange = false;
-    m_vNewScreenSize = newResolution;
+    this->bResolutionChange = false;
+    this->vNewScreenSize = newResolution;
 
-    if(m_guiContainer != NULL) m_guiContainer->setSize(newResolution.x, newResolution.y);
-    if(m_consoleBox != NULL) m_consoleBox->onResolutionChange(newResolution);
+    if(this->guiContainer != NULL) this->guiContainer->setSize(newResolution.x, newResolution.y);
+    if(this->consoleBox != NULL) Engine::consoleBox->onResolutionChange(newResolution);
 
     // update everything
-    m_vScreenSize = newResolution;
-    if(m_graphics != NULL) m_graphics->onResolutionChange(newResolution);
-    if(m_app != NULL) m_app->onResolutionChanged(newResolution);
+    this->vScreenSize = newResolution;
+    if(this->graphics != NULL) this->graphics->onResolutionChange(newResolution);
+    if(this->app != NULL) this->app->onResolutionChanged(newResolution);
 }
 
 void Engine::onDPIChange() {
-    debugLog(0xff00ff00, "Engine: DPI changed to %i\n", m_environment->getDPI());
+    debugLog(0xff00ff00, "Engine: DPI changed to %i\n", this->environment->getDPI());
 
-    if(m_app != NULL) m_app->onDPIChanged();
+    if(this->app != NULL) this->app->onDPIChanged();
 }
 
 void Engine::onShutdown() {
-    if(m_bBlackout || (m_app != NULL && !m_app->onShutdown())) return;
+    if(this->bBlackout || (this->app != NULL && !this->app->onShutdown())) return;
 
-    m_bBlackout = true;
-    m_sound->shutdown();
-    m_environment->shutdown();
+    this->bBlackout = true;
+    this->sound->shutdown();
+    this->environment->shutdown();
 }
 
 void Engine::onMouseRawMove(int xDelta, int yDelta, bool absolute, bool virtualDesktop) {
-    m_mouse->onRawMove(xDelta, yDelta, absolute, virtualDesktop);
+    this->mouse->onRawMove(xDelta, yDelta, absolute, virtualDesktop);
 }
 
-void Engine::onMouseWheelVertical(int delta) { m_mouse->onWheelVertical(delta); }
+void Engine::onMouseWheelVertical(int delta) { this->mouse->onWheelVertical(delta); }
 
-void Engine::onMouseWheelHorizontal(int delta) { m_mouse->onWheelHorizontal(delta); }
+void Engine::onMouseWheelHorizontal(int delta) { this->mouse->onWheelHorizontal(delta); }
 
 std::mutex g_engineMouseLeftClickMutex;
 
@@ -445,146 +444,146 @@ void Engine::onMouseLeftChange(bool mouseLeftDown) {
     // async calls from WinRealTimeStylus must be protected
     std::lock_guard<std::mutex> lk(g_engineMouseLeftClickMutex);
 
-    if(m_mouse->isLeftDown() !=
+    if(this->mouse->isLeftDown() !=
        mouseLeftDown)  // necessary due to WinRealTimeStylus and Touch, would cause double clicks otherwise
-        m_mouse->onLeftChange(mouseLeftDown);
+        this->mouse->onLeftChange(mouseLeftDown);
 }
 
-void Engine::onMouseMiddleChange(bool mouseMiddleDown) { m_mouse->onMiddleChange(mouseMiddleDown); }
+void Engine::onMouseMiddleChange(bool mouseMiddleDown) { this->mouse->onMiddleChange(mouseMiddleDown); }
 
 void Engine::onMouseRightChange(bool mouseRightDown) {
-    if(m_mouse->isRightDown() != mouseRightDown)  // necessary due to Touch, would cause double clicks otherwise
-        m_mouse->onRightChange(mouseRightDown);
+    if(this->mouse->isRightDown() != mouseRightDown)  // necessary due to Touch, would cause double clicks otherwise
+        this->mouse->onRightChange(mouseRightDown);
 }
 
-void Engine::onMouseButton4Change(bool mouse4down) { m_mouse->onButton4Change(mouse4down); }
+void Engine::onMouseButton4Change(bool mouse4down) { this->mouse->onButton4Change(mouse4down); }
 
-void Engine::onMouseButton5Change(bool mouse5down) { m_mouse->onButton5Change(mouse5down); }
+void Engine::onMouseButton5Change(bool mouse5down) { this->mouse->onButton5Change(mouse5down); }
 
 void Engine::onKeyboardKeyDown(KEYCODE keyCode) {
     // hardcoded engine hotkeys
     {
         // handle ALT+F4 quit
-        if(m_keyboard->isAltDown() && keyCode == KEY_F4) {
-            shutdown();
+        if(this->keyboard->isAltDown() && keyCode == KEY_F4) {
+            this->shutdown();
             return;
         }
 
         // handle ALT+ENTER fullscreen toggle
-        if(m_keyboard->isAltDown() && keyCode == KEY_ENTER) {
-            toggleFullscreen();
+        if(this->keyboard->isAltDown() && keyCode == KEY_ENTER) {
+            this->toggleFullscreen();
             return;
         }
 
         // handle CTRL+F11 profiler toggle
-        if(m_keyboard->isControlDown() && keyCode == KEY_F11) {
+        if(this->keyboard->isControlDown() && keyCode == KEY_F11) {
             cv_vprof.setValue(cv_vprof.getBool() ? 0.0f : 1.0f);
             return;
         }
 
         // handle profiler display mode change
-        if(m_keyboard->isControlDown() && keyCode == KEY_TAB) {
+        if(this->keyboard->isControlDown() && keyCode == KEY_TAB) {
             if(cv_vprof.getBool()) {
-                if(m_keyboard->isShiftDown())
-                    m_visualProfiler->decrementInfoBladeDisplayMode();
+                if(this->keyboard->isShiftDown())
+                    this->visualProfiler->decrementInfoBladeDisplayMode();
                 else
-                    m_visualProfiler->incrementInfoBladeDisplayMode();
+                    this->visualProfiler->incrementInfoBladeDisplayMode();
                 return;
             }
         }
     }
 
-    m_keyboard->onKeyDown(keyCode);
+    this->keyboard->onKeyDown(keyCode);
 }
 
-void Engine::onKeyboardKeyUp(KEYCODE keyCode) { m_keyboard->onKeyUp(keyCode); }
+void Engine::onKeyboardKeyUp(KEYCODE keyCode) { this->keyboard->onKeyUp(keyCode); }
 
-void Engine::onKeyboardChar(KEYCODE charCode) { m_keyboard->onChar(charCode); }
+void Engine::onKeyboardChar(KEYCODE charCode) { this->keyboard->onChar(charCode); }
 
-void Engine::shutdown() { onShutdown(); }
+void Engine::shutdown() { this->onShutdown(); }
 
 void Engine::restart() {
-    onShutdown();
-    m_environment->restart();
+    this->onShutdown();
+    this->environment->restart();
 }
 
-void Engine::sleep(unsigned int us) { m_environment->sleep(us); }
+void Engine::sleep(unsigned int us) { this->environment->sleep(us); }
 
-void Engine::focus() { m_environment->focus(); }
+void Engine::focus() { this->environment->focus(); }
 
-void Engine::center() { m_environment->center(); }
+void Engine::center() { this->environment->center(); }
 
 void Engine::toggleFullscreen() {
-    if(m_environment->isFullscreen())
-        m_environment->disableFullscreen();
+    if(this->environment->isFullscreen())
+        this->environment->disableFullscreen();
     else
-        m_environment->enableFullscreen();
+        this->environment->enableFullscreen();
 }
 
-void Engine::disableFullscreen() { m_environment->disableFullscreen(); }
+void Engine::disableFullscreen() { this->environment->disableFullscreen(); }
 
 void Engine::showMessageInfo(UString title, UString message) {
     debugLog("INFO: [%s] | %s\n", title.toUtf8(), message.toUtf8());
-    m_environment->showMessageInfo(title, message);
+    this->environment->showMessageInfo(title, message);
 }
 
 void Engine::showMessageWarning(UString title, UString message) {
     debugLog("WARNING: [%s] | %s\n", title.toUtf8(), message.toUtf8());
-    m_environment->showMessageWarning(title, message);
+    this->environment->showMessageWarning(title, message);
 }
 
 void Engine::showMessageError(UString title, UString message) {
     debugLog("ERROR: [%s] | %s\n", title.toUtf8(), message.toUtf8());
-    m_environment->showMessageError(title, message);
+    this->environment->showMessageError(title, message);
 }
 
 void Engine::showMessageErrorFatal(UString title, UString message) {
     debugLog("FATAL ERROR: [%s] | %s\n", title.toUtf8(), message.toUtf8());
-    m_environment->showMessageErrorFatal(title, message);
+    this->environment->showMessageErrorFatal(title, message);
 }
 
 void Engine::addGamepad(Gamepad *gamepad) {
     if(gamepad == NULL) {
-        showMessageError("Engine Error", "addGamepad(NULL)!");
+        this->showMessageError("Engine Error", "addGamepad(NULL)!");
         return;
     }
 
-    m_gamepads.push_back(gamepad);
+    this->gamepads.push_back(gamepad);
 }
 
 void Engine::removeGamepad(Gamepad *gamepad) {
     if(gamepad == NULL) {
-        showMessageError("Engine Error", "removeGamepad(NULL)!");
+        this->showMessageError("Engine Error", "removeGamepad(NULL)!");
         return;
     }
 
-    for(size_t i = 0; i < m_gamepads.size(); i++) {
-        if(m_gamepads[i] == gamepad) {
-            m_gamepads.erase(m_gamepads.begin() + i);
+    for(size_t i = 0; i < this->gamepads.size(); i++) {
+        if(this->gamepads[i] == gamepad) {
+            this->gamepads.erase(this->gamepads.begin() + i);
             break;
         }
     }
 }
 
 void Engine::requestResolutionChange(Vector2 newResolution) {
-    if(newResolution == m_vNewScreenSize) return;
+    if(newResolution == this->vNewScreenSize) return;
 
-    m_vNewScreenSize = newResolution;
-    m_bResolutionChange = true;
+    this->vNewScreenSize = newResolution;
+    this->bResolutionChange = true;
 }
 
 void Engine::setFrameTime(double delta) {
     // NOTE: clamp to between 10000 fps and 1 fps, very small/big timesteps could cause problems
     // NOTE: special case for loading screen and first app frame
-    if(m_iFrameCount < 3)
-        m_dFrameTime = delta;
+    if(this->iFrameCount < 3)
+        this->dFrameTime = delta;
     else
-        m_dFrameTime = clamp<double>(delta, 0.0001, 1.0);
+        this->dFrameTime = clamp<double>(delta, 0.0001, 1.0);
 }
 
 double Engine::getTimeReal() {
-    m_timer->update();
-    return m_timer->getElapsedTime();
+    this->timer->update();
+    return this->timer->getElapsedTime();
 }
 
 void Engine::debugLog(const char *fmt, va_list args) {
@@ -609,8 +608,8 @@ void Engine::debugLog(const char *fmt, va_list args) {
         delete[] buffer;
 
         // WARNING: these calls here are not threadsafe by default
-        if(m_consoleBox != NULL) m_consoleBox->log(actualBuffer);
-        if(m_console != NULL) m_console->log(actualBuffer);
+        if(Engine::consoleBox != NULL) Engine::consoleBox->log(actualBuffer);
+        if(Engine::console != NULL) Engine::console->log(actualBuffer);
     }
 
 cleanup:
@@ -639,8 +638,8 @@ void Engine::debugLog(Color color, const char *fmt, va_list args) {
         delete[] buffer;
 
         // WARNING: these calls here are not threadsafe by default
-        if(m_consoleBox != NULL) m_consoleBox->log(actualBuffer, color);
-        if(m_console != NULL) m_console->log(actualBuffer, color);
+        if(Engine::consoleBox != NULL) Engine::consoleBox->log(actualBuffer, color);
+        if(Engine::console != NULL) Engine::console->log(actualBuffer, color);
     }
 
 cleanup:

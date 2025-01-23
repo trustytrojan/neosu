@@ -27,17 +27,17 @@ class ScoreButton : public CBaseUIButton {
 
     void setScore(const FinishedScore &score, DatabaseBeatmap *diff2, int index = 1, UString titleString = "",
                   float weight = 1.0f);
-    void setIndex(int index) { m_iScoreIndexNumber = index; }
+    void setIndex(int index) { this->iScoreIndexNumber = index; }
 
-    inline FinishedScore getScore() const { return m_score; }
-    inline u64 getScoreUnixTimestamp() const { return m_score.unixTimestamp; }
-    inline unsigned long long getScoreScore() const { return m_score.score; }
+    inline FinishedScore getScore() const { return this->score; }
+    inline u64 getScoreUnixTimestamp() const { return this->score.unixTimestamp; }
+    inline unsigned long long getScoreScore() const { return this->score.score; }
 
-    inline UString getDateTime() const { return m_sScoreDateTime; }
-    inline int getIndex() const { return m_iScoreIndexNumber; }
+    inline UString getDateTime() const { return this->sScoreDateTime; }
+    inline int getIndex() const { return this->iScoreIndexNumber; }
 
     bool is_friend = false;
-    UIAvatar *m_avatar = NULL;
+    UIAvatar *avatar = NULL;
     MD5Hash map_hash;
 
    private:
@@ -60,38 +60,38 @@ class ScoreButton : public CBaseUIButton {
 
     bool isContextMenuVisible();
 
-    UIContextMenu *m_contextMenu;
-    STYLE m_style;
-    float m_fIndexNumberAnim;
-    bool m_bIsPulseAnim;
+    UIContextMenu *contextMenu;
+    STYLE style;
+    float fIndexNumberAnim;
+    bool bIsPulseAnim;
 
-    bool m_bRightClick;
-    bool m_bRightClickCheck;
+    bool bRightClick;
+    bool bRightClickCheck;
 
     // score data
-    FinishedScore m_score;
+    FinishedScore score;
 
-    int m_iScoreIndexNumber;
-    u64 m_iScoreUnixTimestamp;
+    int iScoreIndexNumber;
+    u64 iScoreUnixTimestamp;
 
-    FinishedScore::Grade m_scoreGrade;
+    FinishedScore::Grade scoreGrade;
 
     // STYLE::SCORE_BROWSER
-    UString m_sScoreTime;
-    UString m_sScoreUsername;
-    UString m_sScoreScore;
-    UString m_sScoreScorePP;
-    UString m_sScoreAccuracy;
-    UString m_sScoreAccuracyFC;
-    UString m_sScoreMods;
-    UString m_sCustom;
+    UString sScoreTime;
+    UString sScoreUsername;
+    UString sScoreScore;
+    UString sScoreScorePP;
+    UString sScoreAccuracy;
+    UString sScoreAccuracyFC;
+    UString sScoreMods;
+    UString sCustom;
 
     // STYLE::TOP_RANKS
-    UString m_sScoreTitle;
-    UString m_sScoreScorePPWeightedPP;
-    UString m_sScoreScorePPWeightedWeight;
-    UString m_sScoreWeight;
+    UString sScoreTitle;
+    UString sScoreScorePPWeightedPP;
+    UString sScoreScorePPWeightedWeight;
+    UString sScoreWeight;
 
-    std::vector<UString> m_tooltipLines;
-    UString m_sScoreDateTime;
+    std::vector<UString> tooltipLines;
+    UString sScoreDateTime;
 };

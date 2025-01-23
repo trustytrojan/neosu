@@ -15,67 +15,67 @@ class InfoLabel : public CBaseUIButton {
 
     void setFromBeatmap(Beatmap *beatmap, DatabaseBeatmap *diff2);
 
-    void setArtist(std::string artist) { m_sArtist = artist; }
-    void setTitle(std::string title) { m_sTitle = title; }
-    void setDiff(std::string diff) { m_sDiff = diff; }
-    void setMapper(std::string mapper) { m_sMapper = mapper; }
+    void setArtist(std::string artist) { this->sArtist = artist; }
+    void setTitle(std::string title) { this->sTitle = title; }
+    void setDiff(std::string diff) { this->sDiff = diff; }
+    void setMapper(std::string mapper) { this->sMapper = mapper; }
 
-    void setLengthMS(unsigned long lengthMS) { m_iLengthMS = lengthMS; }
+    void setLengthMS(unsigned long lengthMS) { this->iLengthMS = lengthMS; }
     void setBPM(int minBPM, int maxBPM, int mostCommonBPM) {
-        m_iMinBPM = minBPM;
-        m_iMaxBPM = maxBPM;
-        m_iMostCommonBPM = mostCommonBPM;
+        this->iMinBPM = minBPM;
+        this->iMaxBPM = maxBPM;
+        this->iMostCommonBPM = mostCommonBPM;
     }
-    void setNumObjects(int numObjects) { m_iNumObjects = numObjects; }
+    void setNumObjects(int numObjects) { this->iNumObjects = numObjects; }
 
-    void setCS(float CS) { m_fCS = CS; }
-    void setAR(float AR) { m_fAR = AR; }
-    void setOD(float OD) { m_fOD = OD; }
-    void setHP(float HP) { m_fHP = HP; }
-    void setStars(float stars) { m_fStars = stars; }
+    void setCS(float CS) { this->fCS = CS; }
+    void setAR(float AR) { this->fAR = AR; }
+    void setOD(float OD) { this->fOD = OD; }
+    void setHP(float HP) { this->fHP = HP; }
+    void setStars(float stars) { this->fStars = stars; }
 
-    void setLocalOffset(long localOffset) { m_iLocalOffset = localOffset; }
-    void setOnlineOffset(long onlineOffset) { m_iOnlineOffset = onlineOffset; }
+    void setLocalOffset(long localOffset) { this->iLocalOffset = localOffset; }
+    void setOnlineOffset(long onlineOffset) { this->iOnlineOffset = onlineOffset; }
 
     float getMinimumWidth();
     float getMinimumHeight();
 
-    long getBeatmapID() const { return m_iBeatmapId; }
+    long getBeatmapID() const { return this->iBeatmapId; }
 
    private:
     UString buildSongInfoString();
     UString buildDiffInfoString();
     UString buildOffsetInfoString();
 
-    McFont *m_font;
+    McFont *font;
 
-    int m_iMargin;
-    float m_fTitleScale;
-    float m_fSubTitleScale;
-    float m_fSongInfoScale;
-    float m_fDiffInfoScale;
-    float m_fOffsetInfoScale;
+    int iMargin;
+    float fTitleScale;
+    float fSubTitleScale;
+    float fSongInfoScale;
+    float fDiffInfoScale;
+    float fOffsetInfoScale;
 
-    std::string m_sArtist;
-    std::string m_sTitle;
-    std::string m_sDiff;
-    std::string m_sMapper;
+    std::string sArtist;
+    std::string sTitle;
+    std::string sDiff;
+    std::string sMapper;
 
-    unsigned long m_iLengthMS;
-    int m_iMinBPM;
-    int m_iMaxBPM;
-    int m_iMostCommonBPM;
-    int m_iNumObjects;
+    unsigned long iLengthMS;
+    int iMinBPM;
+    int iMaxBPM;
+    int iMostCommonBPM;
+    int iNumObjects;
 
-    float m_fCS;
-    float m_fAR;
-    float m_fOD;
-    float m_fHP;
-    float m_fStars;
+    float fCS;
+    float fAR;
+    float fOD;
+    float fHP;
+    float fStars;
 
-    long m_iLocalOffset;
-    long m_iOnlineOffset;
+    long iLocalOffset;
+    long iOnlineOffset;
 
     // custom
-    long m_iBeatmapId;
+    long iBeatmapId;
 };

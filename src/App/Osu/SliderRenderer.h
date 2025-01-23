@@ -45,8 +45,8 @@ class SliderRenderer {
     static VertexArrayObject *UNIT_CIRCLE_VAO_TRIANGLES;
 
     // tiny rendering optimization for RenderTarget
-    static float m_fBoundingBoxMinX;
-    static float m_fBoundingBoxMaxX;
-    static float m_fBoundingBoxMinY;
-    static float m_fBoundingBoxMaxY;
+    static float fBoundingBoxMinX;
+    static float fBoundingBoxMaxX;
+    static float fBoundingBoxMinY;
+    static float fBoundingBoxMaxY;
 };

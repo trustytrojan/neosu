@@ -7,25 +7,25 @@
 
 void CBaseUIElement::mouse_update(bool *propagate_clicks) {
     // check if mouse is inside element
-    McRect temp = McRect(m_vPos.x + 1, m_vPos.y + 1, m_vSize.x - 1, m_vSize.y - 1);
+    McRect temp = McRect(this->vPos.x + 1, this->vPos.y + 1, this->vSize.x - 1, this->vSize.y - 1);
     if(temp.contains(engine->getMouse()->getPos())) {
-        if(!m_bMouseInside) {
-            m_bMouseInside = true;
-            if(m_bVisible && m_bEnabled) onMouseInside();
+        if(!this->bMouseInside) {
+            this->bMouseInside = true;
+            if(this->bVisible && this->bEnabled) this->onMouseInside();
         }
     } else {
-        if(m_bMouseInside) {
-            m_bMouseInside = false;
-            if(m_bVisible && m_bEnabled) onMouseOutside();
+        if(this->bMouseInside) {
+            this->bMouseInside = false;
+            if(this->bVisible && this->bEnabled) this->onMouseOutside();
         }
     }
 
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
-    if(!m_bEnabled) {
-        if(m_bMouseInside && disabled_reason != NULL) {
+    if(!this->bEnabled) {
+        if(this->bMouseInside && this->disabled_reason != NULL) {
             osu->getTooltipOverlay()->begin();
-            osu->getTooltipOverlay()->addLine(disabled_reason);
+            osu->getTooltipOverlay()->addLine(this->disabled_reason);
             osu->getTooltipOverlay()->end();
         }
 
@@ -33,36 +33,36 @@ void CBaseUIElement::mouse_update(bool *propagate_clicks) {
     }
 
     if(engine->getMouse()->isLeftDown() && *propagate_clicks) {
-        m_bMouseUpCheck = true;
-        if(m_bMouseInside) {
-            *propagate_clicks = !grabs_clicks;
+        this->bMouseUpCheck = true;
+        if(this->bMouseInside) {
+            *propagate_clicks = !this->grabs_clicks;
         }
 
         // onMouseDownOutside
-        if(!m_bMouseInside && !m_bMouseInsideCheck) {
-            m_bMouseInsideCheck = true;
-            onMouseDownOutside();
+        if(!this->bMouseInside && !this->bMouseInsideCheck) {
+            this->bMouseInsideCheck = true;
+            this->onMouseDownOutside();
         }
 
         // onMouseDownInside
-        if(m_bMouseInside && !m_bMouseInsideCheck) {
-            m_bActive = true;
-            m_bMouseInsideCheck = true;
-            onMouseDownInside();
+        if(this->bMouseInside && !this->bMouseInsideCheck) {
+            this->bActive = true;
+            this->bMouseInsideCheck = true;
+            this->onMouseDownInside();
         }
     } else {
-        if(m_bMouseUpCheck) {
-            if(m_bActive) {
-                if(m_bMouseInside)
-                    onMouseUpInside();
+        if(this->bMouseUpCheck) {
+            if(this->bActive) {
+                if(this->bMouseInside)
+                    this->onMouseUpInside();
                 else
-                    onMouseUpOutside();
+                    this->onMouseUpOutside();
 
-                if(!m_bKeepActive) m_bActive = false;
+                if(!this->bKeepActive) this->bActive = false;
             }
         }
 
-        m_bMouseInsideCheck = false;
-        m_bMouseUpCheck = false;
+        this->bMouseInsideCheck = false;
+        this->bMouseUpCheck = false;
     }
 }

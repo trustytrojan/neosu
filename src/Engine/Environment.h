@@ -104,11 +104,11 @@ class Environment {
 
     // window
     virtual void setFullscreenWindowedBorderless(bool fullscreenWindowedBorderless);
-    virtual bool isFullscreenWindowedBorderless() { return m_bFullscreenWindowedBorderless; }
-    virtual float getDPIScale() { return (float)getDPI() / 96.0f; }
+    virtual bool isFullscreenWindowedBorderless() { return this->bFullscreenWindowedBorderless; }
+    virtual float getDPIScale() { return (float)this->getDPI() / 96.0f; }
 
    protected:
-    bool m_bFullscreenWindowedBorderless;
+    bool bFullscreenWindowedBorderless;
 };
 
 extern Environment *env;

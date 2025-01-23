@@ -22,7 +22,7 @@ class Sound : public Resource {
 
    public:
     Sound(std::string filepath, bool stream, bool overlayable, bool loop);
-    virtual ~Sound() { destroy(); }
+    virtual ~Sound() { this->destroy(); }
 
     std::vector<HCHANNEL> mixer_channels;
     std::vector<HCHANNEL> getActiveChannels();
@@ -41,16 +41,16 @@ class Sound : public Resource {
     float getPosition();
     u32 getPositionMS();
     u32 getLengthMS();
-    float getPan() { return m_fPan; }
+    float getPan() { return this->fPan; }
     float getSpeed();
     float getFrequency();
 
     bool isPlaying();
     bool isFinished();
 
-    inline bool isStream() const { return m_bStream; }
-    inline bool isLooped() const { return m_bIsLooped; }
-    inline bool isOverlayable() const { return m_bIsOverlayable; }
+    inline bool isStream() const { return this->bStream; }
+    inline bool isLooped() const { return this->bIsLooped; }
+    inline bool isOverlayable() const { return this->bIsOverlayable; }
 
     void rebuild(std::string newFilePath);
 
@@ -59,20 +59,20 @@ class Sound : public Resource {
     virtual void initAsync();
     virtual void destroy();
 
-    SOUNDHANDLE m_stream = 0;
-    SOUNDHANDLE m_sample = 0;
+    SOUNDHANDLE stream = 0;
+    SOUNDHANDLE sample = 0;
 
-    bool m_bStarted = false;
-    bool m_bPaused = false;
-    bool m_bStream;
-    bool m_bIsLooped;
-    bool m_bIsOverlayable;
+    bool bStarted = false;
+    bool bPaused = false;
+    bool bStream;
+    bool bIsLooped;
+    bool bIsOverlayable;
 
-    float m_fPan;
-    float m_fSpeed;
-    float m_fVolume;
-    f64 m_fLastPlayTime = 0.0;
-    f64 m_fChannelCreationTime = 0.0;
-    u32 m_paused_position_ms = 0;
-    u32 m_length = 0;
+    float fPan;
+    float fSpeed;
+    float fVolume;
+    f64 fLastPlayTime = 0.0;
+    f64 fChannelCreationTime = 0.0;
+    u32 paused_position_ms = 0;
+    u32 length = 0;
 };

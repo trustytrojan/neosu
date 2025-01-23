@@ -29,39 +29,39 @@ typedef struct {
     unsigned long status;
 } Hints;
 
-bool LinuxEnvironment::m_bResizable = true;
-std::vector<McRect> LinuxEnvironment::m_vMonitors;
+bool LinuxEnvironment::bResizable = true;
+std::vector<McRect> LinuxEnvironment::vMonitors;
 
 LinuxEnvironment::LinuxEnvironment(Display *display, Window window) : Environment() {
-    m_display = display;
-    m_window = window;
+    this->display = display;
+    this->window = window;
 
-    m_bCursorClipped = false;
-    m_bCursorRequest = false;
-    m_bCursorReset = false;
-    m_bCursorVisible = true;
-    m_bIsCursorInsideWindow = false;
-    m_mouseCursor = XCreateFontCursor(m_display, XC_left_ptr);
-    m_invisibleCursor = makeBlankCursor();
-    m_cursorType = CURSORTYPE::CURSOR_NORMAL;
+    this->bCursorClipped = false;
+    this->bCursorRequest = false;
+    this->bCursorReset = false;
+    this->bCursorVisible = true;
+    this->bIsCursorInsideWindow = false;
+    this->mouseCursor = XCreateFontCursor(this->display, XC_left_ptr);
+    this->invisibleCursor = this->makeBlankCursor();
+    this->cursorType = CURSORTYPE::CURSOR_NORMAL;
 
-    m_atom_UTF8_STRING = XInternAtom(m_display, "UTF8_STRING", False);
-    m_atom_CLIPBOARD = XInternAtom(m_display, "CLIPBOARD", False);
-    m_atom_TARGETS = XInternAtom(m_display, "TARGETS", False);
+    this->atom_UTF8_STRING = XInternAtom(this->display, "UTF8_STRING", False);
+    this->atom_CLIPBOARD = XInternAtom(this->display, "CLIPBOARD", False);
+    this->atom_TARGETS = XInternAtom(this->display, "TARGETS", False);
 
-    m_bFullScreen = false;
-    m_iDPI = 96;
+    this->bFullScreen = false;
+    this->iDPI = 96;
 
-    m_bIsRestartScheduled = false;
-    m_bResizeDelayHack = false;
-    m_bPrevCursorHack = false;
-    m_bFullscreenWasResizable = true;
+    this->bIsRestartScheduled = false;
+    this->bResizeDelayHack = false;
+    this->bPrevCursorHack = false;
+    this->bFullscreenWasResizable = true;
 
     // init dpi
     {
         XrmInitialize();
 
-        char *resourceString = XResourceManagerString(m_display);
+        char *resourceString = XResourceManagerString(this->display);
 
         if(resourceString) {
             XrmDatabase db = XrmGetStringDatabase(resourceString);
@@ -71,37 +71,38 @@ LinuxEnvironment::LinuxEnvironment(Display *display, Window window) : Environmen
 
             if(XrmGetResource(db, "Xft.dpi", "String", &type, &value) == True) {
                 if(value.addr) {
-                    m_iDPI = (int)std::atof(value.addr);
-                    /// debugLog("m_iDPI = %i\n", m_iDPI);
+                    this->iDPI = (int)std::atof(value.addr);
+                    /// debugLog("m_iDPI = %i\n", this->iDPI);
                 }
             }
         }
     }
 
     // TODO: init monitors
-    if(m_vMonitors.size() < 1) {
+    if(LinuxEnvironment::vMonitors.size() < 1) {
         /// debugLog("WARNING: No monitors found! Adding default monitor ...\n");
 
-        const Vector2 windowSize = getWindowSize();
-        m_vMonitors.push_back(McRect(0, 0, windowSize.x, windowSize.y));
+        const Vector2 windowSize = this->getWindowSize();
+        LinuxEnvironment::vMonitors.push_back(McRect(0, 0, windowSize.x, windowSize.y));
     }
 }
 
-LinuxEnvironment::~LinuxEnvironment() { XFreeCursor(m_display, m_invisibleCursor); }
+LinuxEnvironment::~LinuxEnvironment() { XFreeCursor(this->display, this->invisibleCursor); }
 
 void LinuxEnvironment::update() {
-    if(!m_bCursorRequest) {
-        if(m_bCursorReset) {
-            m_bCursorReset = false;
-            setCursor(CURSORTYPE::CURSOR_NORMAL);
+    if(!this->bCursorRequest) {
+        if(this->bCursorReset) {
+            this->bCursorReset = false;
+            this->setCursor(CURSORTYPE::CURSOR_NORMAL);
         }
     }
-    m_bCursorRequest = false;
+    this->bCursorRequest = false;
 
-    m_bIsCursorInsideWindow = McRect(0, 0, engine->getScreenWidth(), engine->getScreenHeight()).contains(getMousePos());
+    this->bIsCursorInsideWindow =
+        McRect(0, 0, engine->getScreenWidth(), engine->getScreenHeight()).contains(this->getMousePos());
 }
 
-Graphics *LinuxEnvironment::createRenderer() { return new LinuxGLLegacyInterface(m_display, m_window); }
+Graphics *LinuxEnvironment::createRenderer() { return new LinuxGLLegacyInterface(this->display, this->window); }
 
 ContextMenu *LinuxEnvironment::createContextMenu() { return new LinuxContextMenu(); }
 
@@ -113,18 +114,18 @@ void LinuxEnvironment::shutdown() {
 
     ev.type = ClientMessage;
     ev.xclient.type = ClientMessage;
-    ev.xclient.window = m_window;
-    ev.xclient.message_type = XInternAtom(m_display, "WM_PROTOCOLS", True);
+    ev.xclient.window = this->window;
+    ev.xclient.message_type = XInternAtom(this->display, "WM_PROTOCOLS", True);
     ev.xclient.format = 32;
-    ev.xclient.data.l[0] = XInternAtom(m_display, "WM_DELETE_WINDOW", False);
+    ev.xclient.data.l[0] = XInternAtom(this->display, "WM_DELETE_WINDOW", False);
     ev.xclient.data.l[1] = CurrentTime;
 
-    XSendEvent(m_display, m_window, false, NoEventMask, &ev);
+    XSendEvent(this->display, this->window, false, NoEventMask, &ev);
 }
 
 void LinuxEnvironment::restart() {
-    m_bIsRestartScheduled = true;
-    shutdown();
+    this->bIsRestartScheduled = true;
+    this->shutdown();
 }
 
 void LinuxEnvironment::sleep(unsigned int us) { usleep(us); }
@@ -257,7 +258,7 @@ std::vector<UString> LinuxEnvironment::getLogicalDrives() {
 }
 
 std::string LinuxEnvironment::getFolderFromFilePath(std::string filepath) {
-    if(directoryExists(filepath))  // indirect check if this is already a valid directory (and not a file)
+    if(this->directoryExists(filepath))  // indirect check if this is already a valid directory (and not a file)
         return filepath;
     else
         return std::string(dirname((char *)filepath.c_str()));
@@ -280,9 +281,9 @@ std::string LinuxEnvironment::getFileNameFromFilePath(std::string filePath) {
     return filePath;
 }
 
-UString LinuxEnvironment::getClipBoardText() { return getClipboardTextInt(); }
+UString LinuxEnvironment::getClipBoardText() { return this->getClipboardTextInt(); }
 
-void LinuxEnvironment::setClipBoardText(UString text) { setClipBoardTextInt(text); }
+void LinuxEnvironment::setClipBoardText(UString text) { this->setClipBoardTextInt(text); }
 
 void LinuxEnvironment::showMessageInfo(UString title, UString message) {
     // TODO:
@@ -311,199 +312,201 @@ UString LinuxEnvironment::openFolderWindow(UString title, UString initialpath) {
 }
 
 void LinuxEnvironment::focus() {
-    XRaiseWindow(m_display, m_window);
-    XMapRaised(m_display, m_window);
+    XRaiseWindow(this->display, this->window);
+    XMapRaised(this->display, this->window);
 }
 
 void LinuxEnvironment::center() {
-    Vector2 windowSize = getWindowSize();
-    if(m_bResizeDelayHack) windowSize = m_vResizeHackSize;
-    m_bResizeDelayHack = false;
+    Vector2 windowSize = this->getWindowSize();
+    if(this->bResizeDelayHack) windowSize = this->vResizeHackSize;
+    this->bResizeDelayHack = false;
 
-    Screen *defaultScreen = XDefaultScreenOfDisplay(m_display);
-    XMoveResizeWindow(m_display, m_window, WidthOfScreen(defaultScreen) / 2 - (unsigned int)(windowSize.x / 2),
+    Screen *defaultScreen = XDefaultScreenOfDisplay(this->display);
+    XMoveResizeWindow(this->display, this->window, WidthOfScreen(defaultScreen) / 2 - (unsigned int)(windowSize.x / 2),
                       HeightOfScreen(defaultScreen) / 2 - (unsigned int)(windowSize.y / 2), (unsigned int)windowSize.x,
                       (unsigned int)windowSize.y);
 }
 
-void LinuxEnvironment::minimize() { XIconifyWindow(m_display, m_window, 0); }
+void LinuxEnvironment::minimize() { XIconifyWindow(this->display, this->window, 0); }
 
 void LinuxEnvironment::maximize() {
-    XMapWindow(m_display, m_window);
+    XMapWindow(this->display, this->window);
 
     // set size to fill entire screen (also fill borders)
     // the "x" and "y" members of "attributes" are the window's coordinates relative to its parent, i.e. to the
     // decoration window
     XWindowAttributes attributes;
-    XGetWindowAttributes(m_display, m_window, &attributes);
-    XMoveResizeWindow(m_display, m_window, -attributes.x, -attributes.y, (unsigned int)getNativeScreenSize().x,
-                      (unsigned int)getNativeScreenSize().y);
+    XGetWindowAttributes(this->display, this->window, &attributes);
+    XMoveResizeWindow(this->display, this->window, -attributes.x, -attributes.y,
+                      (unsigned int)this->getNativeScreenSize().x, (unsigned int)this->getNativeScreenSize().y);
 }
 
 void LinuxEnvironment::enableFullscreen() {
-    if(m_bFullScreen) return;
+    if(this->bFullScreen) return;
 
     // backup
-    if(m_vPrevDisableFullscreenWindowSize != getWindowSize()) {
-        m_vLastWindowPos = getWindowPos();
-        m_vLastWindowSize = getWindowSize();
+    if(this->vPrevDisableFullscreenWindowSize != this->getWindowSize()) {
+        this->vLastWindowPos = this->getWindowPos();
+        this->vLastWindowSize = this->getWindowSize();
     }
 
     // handle resizability (force enable while fullscreen)
-    m_bFullscreenWasResizable = m_bResizable;
-    setWindowResizable(true);
+    this->bFullscreenWasResizable = LinuxEnvironment::bResizable;
+    this->setWindowResizable(true);
 
     // disable window decorations
     Hints hints;
     Atom property;
     hints.flags = 2;        // specify that we're changing the window decorations
     hints.decorations = 0;  // 0 (false) = disable decorations
-    property = XInternAtom(m_display, "_MOTIF_WM_HINTS", True);
-    XChangeProperty(m_display, m_window, property, property, 32, PropModeReplace, (unsigned char *)&hints, 5);
+    property = XInternAtom(this->display, "_MOTIF_WM_HINTS", True);
+    XChangeProperty(this->display, this->window, property, property, 32, PropModeReplace, (unsigned char *)&hints, 5);
 
     // set size to fill entire screen (also fill borders)
     // the "x" and "y" members of "attributes" are the window's coordinates relative to its parent, i.e. to the
     // decoration window
     XWindowAttributes attributes;
-    XGetWindowAttributes(m_display, m_window, &attributes);
-    XMoveResizeWindow(m_display, m_window, -attributes.x, -attributes.y, (unsigned int)getNativeScreenSize().x,
-                      (unsigned int)getNativeScreenSize().y);
+    XGetWindowAttributes(this->display, this->window, &attributes);
+    XMoveResizeWindow(this->display, this->window, -attributes.x, -attributes.y,
+                      (unsigned int)this->getNativeScreenSize().x, (unsigned int)this->getNativeScreenSize().y);
 
     // suggest fullscreen mode
-    Atom atom = XInternAtom(m_display, "_NET_WM_STATE_FULLSCREEN", True);
-    XChangeProperty(m_display, m_window, XInternAtom(m_display, "_NET_WM_STATE", True), XA_ATOM, 32, PropModeReplace,
-                    (unsigned char *)&atom, 1);
+    Atom atom = XInternAtom(this->display, "_NET_WM_STATE_FULLSCREEN", True);
+    XChangeProperty(this->display, this->window, XInternAtom(this->display, "_NET_WM_STATE", True), XA_ATOM, 32,
+                    PropModeReplace, (unsigned char *)&atom, 1);
 
     // get identifiers for the provided atom name strings
-    Atom wm_state = XInternAtom(m_display, "_NET_WM_STATE", False);
-    Atom fullscreen = XInternAtom(m_display, "_NET_WM_STATE_FULLSCREEN", False);
+    Atom wm_state = XInternAtom(this->display, "_NET_WM_STATE", False);
+    Atom fullscreen = XInternAtom(this->display, "_NET_WM_STATE_FULLSCREEN", False);
 
     XEvent xev;
     memset(&xev, 0, sizeof(xev));
 
     xev.type = ClientMessage;
-    xev.xclient.window = m_window;
+    xev.xclient.window = this->window;
     xev.xclient.message_type = wm_state;
     xev.xclient.format = 32;
     xev.xclient.data.l[0] = 1;  // enable fullscreen (1 == true)
     xev.xclient.data.l[1] = fullscreen;
 
     // send an event mask to the X-server
-    XSendEvent(m_display, DefaultRootWindow(m_display), False, SubstructureNotifyMask, &xev);
+    XSendEvent(this->display, DefaultRootWindow(this->display), False, SubstructureNotifyMask, &xev);
 
     // force top window
-    focus();
+    this->focus();
 
-    m_bFullScreen = true;
+    this->bFullScreen = true;
 }
 
 void LinuxEnvironment::disableFullscreen() {
-    if(!m_bFullScreen) return;
+    if(!this->bFullScreen) return;
 
     // unsuggest fullscreen mode
-    Atom atom = XInternAtom(m_display, "_NET_WM_STATE_FULLSCREEN", True);
-    XChangeProperty(m_display, m_window, XInternAtom(m_display, "_NET_WM_STATE", True), XA_ATOM, 32, PropModeReplace,
-                    (unsigned char *)&atom, 1);
+    Atom atom = XInternAtom(this->display, "_NET_WM_STATE_FULLSCREEN", True);
+    XChangeProperty(this->display, this->window, XInternAtom(this->display, "_NET_WM_STATE", True), XA_ATOM, 32,
+                    PropModeReplace, (unsigned char *)&atom, 1);
 
     // get identifiers for the provided atom name strings
-    Atom wm_state = XInternAtom(m_display, "_NET_WM_STATE", False);
-    Atom fullscreen = XInternAtom(m_display, "_NET_WM_STATE_FULLSCREEN", False);
+    Atom wm_state = XInternAtom(this->display, "_NET_WM_STATE", False);
+    Atom fullscreen = XInternAtom(this->display, "_NET_WM_STATE_FULLSCREEN", False);
 
     XEvent xev;
     memset(&xev, 0, sizeof(xev));
 
     xev.type = ClientMessage;
-    xev.xclient.window = m_window;
+    xev.xclient.window = this->window;
     xev.xclient.message_type = wm_state;
     xev.xclient.format = 32;
     xev.xclient.data.l[0] = 0;  // disable fullscreen (0 == false)
     xev.xclient.data.l[1] = fullscreen;
 
     // send an event mask to the X-server
-    XSendEvent(m_display, DefaultRootWindow(m_display), False, SubstructureNotifyMask, &xev);
+    XSendEvent(this->display, DefaultRootWindow(this->display), False, SubstructureNotifyMask, &xev);
 
     // enable window decorations
     Hints hints;
     Atom property;
     hints.flags = 2;
     hints.decorations = 1;
-    property = XInternAtom(m_display, "_MOTIF_WM_HINTS", True);
-    XChangeProperty(m_display, m_window, property, property, 32, PropModeReplace, (unsigned char *)&hints, 5);
+    property = XInternAtom(this->display, "_MOTIF_WM_HINTS", True);
+    XChangeProperty(this->display, this->window, property, property, 32, PropModeReplace, (unsigned char *)&hints, 5);
 
     // restore previous size and position
     // NOTE: the y-position is not consistent, the window keeps going down when toggling fullscreen (probably due to
     // decorations), force center() workaround
-    XMoveResizeWindow(m_display, m_window, (int)m_vLastWindowPos.x, (int)m_vLastWindowPos.y,
-                      (unsigned int)m_vLastWindowSize.x, (unsigned int)m_vLastWindowSize.y);
-    m_vResizeHackSize = m_vLastWindowSize;
-    m_bResizeDelayHack = true;
+    XMoveResizeWindow(this->display, this->window, (int)this->vLastWindowPos.x, (int)this->vLastWindowPos.y,
+                      (unsigned int)this->vLastWindowSize.x, (unsigned int)this->vLastWindowSize.y);
+    this->vResizeHackSize = this->vLastWindowSize;
+    this->bResizeDelayHack = true;
 
     // update resizability with new resolution
-    setWindowResizableInt(m_bFullscreenWasResizable, m_vLastWindowSize);
+    this->setWindowResizableInt(this->bFullscreenWasResizable, this->vLastWindowSize);
 
-    center();
+    this->center();
 
-    m_vPrevDisableFullscreenWindowSize = getWindowSize();
-    m_bFullScreen = false;
+    this->vPrevDisableFullscreenWindowSize = this->getWindowSize();
+    this->bFullScreen = false;
 }
 
-void LinuxEnvironment::setWindowTitle(UString title) { XStoreName(m_display, m_window, title.toUtf8()); }
+void LinuxEnvironment::setWindowTitle(UString title) { XStoreName(this->display, this->window, title.toUtf8()); }
 
 void LinuxEnvironment::setWindowPos(int x, int y) {
-    XMapWindow(m_display, m_window);
-    XMoveWindow(m_display, m_window, x, y);
+    XMapWindow(this->display, this->window);
+    XMoveWindow(this->display, this->window, x, y);
 }
 
 void LinuxEnvironment::setWindowSize(int width, int height) {
     // due to the way resizability works, we have to temporarily disable it to be able to resize the window (because
     // min/max is fixed)
-    const Vector2 windowPos = getWindowPos();
-    const bool wasWindowResizable = m_bResizable;
-    if(!wasWindowResizable) setWindowResizableInt(true, Vector2(width, height));
+    const Vector2 windowPos = this->getWindowPos();
+    const bool wasWindowResizable = LinuxEnvironment::bResizable;
+    if(!wasWindowResizable) this->setWindowResizableInt(true, Vector2(width, height));
 
-    m_vResizeHackSize = Vector2(width, height);
-    m_bResizeDelayHack = true;
+    this->vResizeHackSize = Vector2(width, height);
+    this->bResizeDelayHack = true;
 
     // hack to force update the XSizeHints state
-    XResizeWindow(m_display, m_window, (unsigned int)width, (unsigned int)height);
-    XMoveWindow(m_display, m_window, (int)windowPos.x, (int)windowPos.y);
-    XRaiseWindow(m_display, m_window);
+    XResizeWindow(this->display, this->window, (unsigned int)width, (unsigned int)height);
+    XMoveWindow(this->display, this->window, (int)windowPos.x, (int)windowPos.y);
+    XRaiseWindow(this->display, this->window);
 
-    if(!wasWindowResizable) setWindowResizableInt(false, Vector2(width, height));
+    if(!wasWindowResizable) this->setWindowResizableInt(false, Vector2(width, height));
 
-    XFlush(m_display);
+    XFlush(this->display);
 }
 
-void LinuxEnvironment::setWindowResizable(bool resizable) { setWindowResizableInt(resizable, getWindowSize()); }
+void LinuxEnvironment::setWindowResizable(bool resizable) {
+    this->setWindowResizableInt(resizable, this->getWindowSize());
+}
 
 void LinuxEnvironment::setWindowResizableInt(bool resizable, Vector2 windowSize) {
-    m_bResizable = resizable;
+    LinuxEnvironment::bResizable = resizable;
 
-    const Vector2 windowPos = getWindowPos();
+    const Vector2 windowPos = this->getWindowPos();
 
     // window managers may ignore this completely, there is no way to force it
     XSizeHints wmsize;
     memset(&wmsize, 0, sizeof(XSizeHints));
 
     wmsize.flags = PMinSize | PMaxSize;
-    wmsize.min_width = m_bResizable ? 100 : (int)windowSize.x;
-    wmsize.min_height = m_bResizable ? 100 : (int)windowSize.y;
-    wmsize.max_width = m_bResizable ? 16384 : (int)windowSize.x;
-    wmsize.max_height = m_bResizable ? 16384 : (int)windowSize.y;
+    wmsize.min_width = LinuxEnvironment::bResizable ? 100 : (int)windowSize.x;
+    wmsize.min_height = LinuxEnvironment::bResizable ? 100 : (int)windowSize.y;
+    wmsize.max_width = LinuxEnvironment::bResizable ? 16384 : (int)windowSize.x;
+    wmsize.max_height = LinuxEnvironment::bResizable ? 16384 : (int)windowSize.y;
 
-    XSetWMNormalHints(m_display, m_window, &wmsize);
+    XSetWMNormalHints(this->display, this->window, &wmsize);
 
     // hack to force update the XSizeHints state
-    XResizeWindow(m_display, m_window, (unsigned int)windowSize.x, (unsigned int)windowSize.y);
-    XMoveWindow(m_display, m_window, (int)windowPos.x, (int)windowPos.y);
-    XRaiseWindow(m_display, m_window);
+    XResizeWindow(this->display, this->window, (unsigned int)windowSize.x, (unsigned int)windowSize.y);
+    XMoveWindow(this->display, this->window, (int)windowPos.x, (int)windowPos.y);
+    XRaiseWindow(this->display, this->window);
 
-    XFlush(m_display);
+    XFlush(this->display);
 }
 
 void LinuxEnvironment::setMonitor(int monitor) {
     // TODO:
-    center();
+    this->center();
 }
 
 Vector2 LinuxEnvironment::getWindowPos() {
@@ -516,7 +519,7 @@ Vector2 LinuxEnvironment::getWindowPos() {
     unsigned int width = 1;
     unsigned int height = 1;
 
-    XGetGeometry(m_display, m_window, &rootRet, &x, &y, &width, &height, &borderWidth, &depth);
+    XGetGeometry(this->display, this->window, &rootRet, &x, &y, &width, &height, &borderWidth, &depth);
 
     return Vector2(x, y);
 
@@ -526,8 +529,8 @@ Vector2 LinuxEnvironment::getWindowPos() {
     int y = 0;
     Window child;
     XWindowAttributes xwa;
-    XTranslateCoordinates(m_display, m_window, DefaultRootWindow(m_display), 0, 0, &x, &y, &child );
-    XGetWindowAttributes(m_display, m_window, &xwa);
+    XTranslateCoordinates(this->display, this->window, DefaultRootWindow(this->display), 0, 0, &x, &y, &child );
+    XGetWindowAttributes(this->display, this->window, &xwa);
 
     return Vector2(x - xwa.x, y - xwa.y);
     */
@@ -543,7 +546,7 @@ Vector2 LinuxEnvironment::getWindowSize() {
     unsigned int width = 1;
     unsigned int height = 1;
 
-    XGetGeometry(m_display, m_window, &rootRet, &x, &y, &width, &height, &borderWidth, &depth);
+    XGetGeometry(this->display, this->window, &rootRet, &x, &y, &width, &height, &borderWidth, &depth);
 
     return Vector2(width, height);
 }
@@ -551,7 +554,7 @@ Vector2 LinuxEnvironment::getWindowSize() {
 Vector2 LinuxEnvironment::getWindowSizeServer() {
     // server size
     XWindowAttributes xwa;
-    XGetWindowAttributes(m_display, m_window, &xwa);
+    XGetWindowAttributes(this->display, this->window, &xwa);
 
     return Vector2(xwa.width, xwa.height);
 }
@@ -561,10 +564,11 @@ int LinuxEnvironment::getMonitor() {
     return 0;
 }
 
-std::vector<McRect> LinuxEnvironment::getMonitors() { return m_vMonitors; }
+std::vector<McRect> LinuxEnvironment::getMonitors() { return LinuxEnvironment::vMonitors; }
 
 Vector2 LinuxEnvironment::getNativeScreenSize() {
-    return Vector2(WidthOfScreen(DefaultScreenOfDisplay(m_display)), HeightOfScreen(DefaultScreenOfDisplay(m_display)));
+    return Vector2(WidthOfScreen(DefaultScreenOfDisplay(this->display)),
+                   HeightOfScreen(DefaultScreenOfDisplay(this->display)));
 }
 
 McRect LinuxEnvironment::getVirtualScreenRect() {
@@ -574,19 +578,19 @@ McRect LinuxEnvironment::getVirtualScreenRect() {
 
 McRect LinuxEnvironment::getDesktopRect() {
     // TODO:
-    Vector2 screen = getNativeScreenSize();
+    Vector2 screen = this->getNativeScreenSize();
     return McRect(0, 0, screen.x, screen.y);
 }
 
 int LinuxEnvironment::getDPI() {
-    return clamp<int>(m_iDPI, 96, 96 * 2);  // sanity clamp
+    return clamp<int>(this->iDPI, 96, 96 * 2);  // sanity clamp
 }
 
-bool LinuxEnvironment::isCursorInWindow() { return m_bIsCursorInsideWindow; }
+bool LinuxEnvironment::isCursorInWindow() { return this->bIsCursorInsideWindow; }
 
-bool LinuxEnvironment::isCursorVisible() { return m_bCursorVisible; }
+bool LinuxEnvironment::isCursorVisible() { return this->bCursorVisible; }
 
-bool LinuxEnvironment::isCursorClipped() { return m_bCursorClipped; }
+bool LinuxEnvironment::isCursorClipped() { return this->bCursorClipped; }
 
 Vector2 LinuxEnvironment::getMousePos() {
     Window rootRet, childRet;
@@ -595,79 +599,79 @@ Vector2 LinuxEnvironment::getMousePos() {
     int rootX = 0;
     int rootY = 0;
 
-    XQueryPointer(m_display, m_window, &rootRet, &childRet, &rootX, &rootY, &childX, &childY, &mask);
+    XQueryPointer(this->display, this->window, &rootRet, &childRet, &rootX, &rootY, &childX, &childY, &mask);
 
     return Vector2(childX, childY);
 }
 
-McRect LinuxEnvironment::getCursorClip() { return m_cursorClip; }
+McRect LinuxEnvironment::getCursorClip() { return this->cursorClip; }
 
-CURSORTYPE LinuxEnvironment::getCursor() { return m_cursorType; }
+CURSORTYPE LinuxEnvironment::getCursor() { return this->cursorType; }
 
 void LinuxEnvironment::setCursor(CURSORTYPE cur) {
-    m_cursorType = cur;
+    this->cursorType = cur;
 
-    if(!m_bCursorVisible) return;
+    if(!this->bCursorVisible) return;
 
     switch(cur) {
         case CURSORTYPE::CURSOR_NORMAL:
-            m_mouseCursor = XCreateFontCursor(m_display, XC_left_ptr);
+            this->mouseCursor = XCreateFontCursor(this->display, XC_left_ptr);
             break;
         case CURSORTYPE::CURSOR_WAIT:
-            m_mouseCursor = XCreateFontCursor(m_display, XC_circle);
+            this->mouseCursor = XCreateFontCursor(this->display, XC_circle);
             break;
         case CURSORTYPE::CURSOR_SIZE_H:
-            m_mouseCursor = XCreateFontCursor(m_display, XC_sb_h_double_arrow);
+            this->mouseCursor = XCreateFontCursor(this->display, XC_sb_h_double_arrow);
             break;
         case CURSORTYPE::CURSOR_SIZE_V:
-            m_mouseCursor = XCreateFontCursor(m_display, XC_sb_v_double_arrow);
+            this->mouseCursor = XCreateFontCursor(this->display, XC_sb_v_double_arrow);
             break;
         case CURSORTYPE::CURSOR_SIZE_HV:
-            m_mouseCursor = XCreateFontCursor(m_display, XC_bottom_left_corner);
+            this->mouseCursor = XCreateFontCursor(this->display, XC_bottom_left_corner);
             break;
         case CURSORTYPE::CURSOR_SIZE_VH:
-            m_mouseCursor = XCreateFontCursor(m_display, XC_bottom_right_corner);
+            this->mouseCursor = XCreateFontCursor(this->display, XC_bottom_right_corner);
             break;
         case CURSORTYPE::CURSOR_TEXT:
-            m_mouseCursor = XCreateFontCursor(m_display, XC_xterm);
+            this->mouseCursor = XCreateFontCursor(this->display, XC_xterm);
             break;
         default:
-            m_mouseCursor = XCreateFontCursor(m_display, XC_left_ptr);
+            this->mouseCursor = XCreateFontCursor(this->display, XC_left_ptr);
             break;
     }
 
-    setCursorInt(m_mouseCursor);
+    this->setCursorInt(this->mouseCursor);
 
-    m_bCursorReset = true;
-    m_bCursorRequest = true;
+    this->bCursorReset = true;
+    this->bCursorRequest = true;
 }
 
 void LinuxEnvironment::setCursorVisible(bool visible) {
-    m_bCursorVisible = visible;
-    setCursorInt(visible ? m_mouseCursor : m_invisibleCursor);
+    this->bCursorVisible = visible;
+    this->setCursorInt(visible ? this->mouseCursor : this->invisibleCursor);
 }
 
 void LinuxEnvironment::setMousePos(int x, int y) {
-    XWarpPointer(m_display, None, m_window, 0, 0, 0, 0, x, y);
-    XSync(m_display, False);
+    XWarpPointer(this->display, None, this->window, 0, 0, 0, 0, x, y);
+    XSync(this->display, False);
 }
 
 void LinuxEnvironment::setCursorClip(bool clip, McRect rect) {
     if(clip) {
         const unsigned int eventMask = ButtonPressMask | ButtonReleaseMask | PointerMotionMask | FocusChangeMask;
-        m_bCursorClipped = (XGrabPointer(m_display, m_window, True, eventMask, GrabModeAsync, GrabModeAsync, m_window,
-                                         None, CurrentTime) == GrabSuccess);
+        this->bCursorClipped = (XGrabPointer(this->display, this->window, True, eventMask, GrabModeAsync, GrabModeAsync,
+                                             this->window, None, CurrentTime) == GrabSuccess);
 
         if(rect.getWidth() == 0 && rect.getHeight() == 0) {
-            m_cursorClip = McRect(0, 0, engine->getScreenWidth(), engine->getScreenHeight());
+            this->cursorClip = McRect(0, 0, engine->getScreenWidth(), engine->getScreenHeight());
         }
 
         // TODO: custom rect (only fullscreen works atm)
     } else {
-        m_bCursorClipped = false;
+        this->bCursorClipped = false;
 
-        XUngrabPointer(m_display, CurrentTime);
-        XSync(m_display, False);
+        XUngrabPointer(this->display, CurrentTime);
+        XSync(this->display, False);
     }
 }
 
@@ -691,22 +695,22 @@ Cursor LinuxEnvironment::makeBlankCursor() {
     Pixmap blank;
     XColor dummy;
 
-    blank = XCreateBitmapFromData(m_display, m_window, data, 1, 1);
+    blank = XCreateBitmapFromData(this->display, this->window, data, 1, 1);
     if(blank == None) {
         debugLog("LinuxEnvironment::makeBlankCursor() fatal error, XCreateBitmapFromData() out of memory!\n");
         return 0;
     }
-    cursor = XCreatePixmapCursor(m_display, blank, blank, &dummy, &dummy, 0, 0);
-    XFreePixmap(m_display, blank);
+    cursor = XCreatePixmapCursor(this->display, blank, blank, &dummy, &dummy, 0, 0);
+    XFreePixmap(this->display, blank);
 
     return cursor;
 }
 
 void LinuxEnvironment::setCursorInt(Cursor cursor) {
-    if(m_bPrevCursorHack) XUndefineCursor(m_display, m_window);
-    m_bPrevCursorHack = true;
+    if(this->bPrevCursorHack) XUndefineCursor(this->display, this->window);
+    this->bPrevCursorHack = true;
 
-    XDefineCursor(m_display, m_window, cursor);
+    XDefineCursor(this->display, this->window, cursor);
 }
 
 UString LinuxEnvironment::readWindowProperty(Window window, Atom prop, Atom fmt /* XA_STRING or UTF8_STRING */,
@@ -716,10 +720,10 @@ UString LinuxEnvironment::readWindowProperty(Window window, Atom prop, Atom fmt 
     Atom actualType;
     int actualFormat;
     unsigned long nitems, bytesLeft;
-    if(XGetWindowProperty(m_display, m_window, prop, 0L /* offset */, 1000000 /* length (max) */, False,
+    if(XGetWindowProperty(this->display, this->window, prop, 0L /* offset */, 1000000 /* length (max) */, False,
                           AnyPropertyType /* format */, &actualType, &actualFormat, &nitems, &bytesLeft,
                           &clipData) == Success) {
-        if(actualType == m_atom_UTF8_STRING && actualFormat == 8) {
+        if(actualType == this->atom_UTF8_STRING && actualFormat == 8) {
             // very inefficient, but whatever
             std::string temp;
             for(size_t i = 0; i < nitems; i++) {
@@ -738,7 +742,7 @@ UString LinuxEnvironment::readWindowProperty(Window window, Atom prop, Atom fmt 
         if(clipData != 0) XFree(clipData);
     }
 
-    if(deleteAfterReading) XDeleteProperty(m_display, window, prop);
+    if(deleteAfterReading) XDeleteProperty(this->display, window, prop);
 
     return returnData;
 }
@@ -746,17 +750,17 @@ UString LinuxEnvironment::readWindowProperty(Window window, Atom prop, Atom fmt 
 bool LinuxEnvironment::requestSelectionContent(UString &selection_content, Atom selection, Atom requested_format) {
     // send a SelectionRequest to the window owning the selection and waits for its answer (with a timeout)
     // the selection owner will be asked to set the MCENGINE_SEL property on m_window with the selection content
-    Atom property_name = XInternAtom(m_display, "MCENGINE_SEL", false);
-    XConvertSelection(m_display, selection, requested_format, property_name, m_window, CurrentTime);
+    Atom property_name = XInternAtom(this->display, "MCENGINE_SEL", false);
+    XConvertSelection(this->display, selection, requested_format, property_name, this->window, CurrentTime);
     bool gotReply = false;
     int timeoutMs = 200;  // will wait at most for 200 ms
     do {
         XEvent event;
-        gotReply = XCheckTypedWindowEvent(m_display, m_window, SelectionNotify, &event);
+        gotReply = XCheckTypedWindowEvent(this->display, this->window, SelectionNotify, &event);
         if(gotReply) {
             if(event.xselection.property == property_name) {
-                selection_content =
-                    readWindowProperty(event.xselection.requestor, event.xselection.property, requested_format, true);
+                selection_content = this->readWindowProperty(event.xselection.requestor, event.xselection.property,
+                                                             requested_format, true);
                 return true;
             } else  // the format we asked for was denied.. (event.xselection.property == None)
                 return false;
@@ -786,23 +790,23 @@ void LinuxEnvironment::handleSelectionRequest(XSelectionRequestEvent &evt) {
 
     char *data = 0;
     int property_format = 0, data_nitems = 0;
-    if(evt.selection == XA_PRIMARY || evt.selection == m_atom_CLIPBOARD) {
+    if(evt.selection == XA_PRIMARY || evt.selection == this->atom_CLIPBOARD) {
         if(evt.target == XA_STRING) {
             // format data according to system locale
-            data = strdup((const char *)m_sLocalClipboardContent.toUtf8());
+            data = strdup((const char *)this->sLocalClipboardContent.toUtf8());
             data_nitems = strlen(data);
             property_format = 8;  // bits/item
-        } else if(evt.target == m_atom_UTF8_STRING) {
+        } else if(evt.target == this->atom_UTF8_STRING) {
             // translate to utf8
-            data = strdup((const char *)m_sLocalClipboardContent.toUtf8());
+            data = strdup((const char *)this->sLocalClipboardContent.toUtf8());
             data_nitems = strlen(data);
             property_format = 8;  // bits/item
-        } else if(evt.target == m_atom_TARGETS) {
+        } else if(evt.target == this->atom_TARGETS) {
             // another application wants to know what we are able to send
             data_nitems = 2;
             property_format = 32;  // atoms are 32-bit
             data = (char *)malloc(data_nitems * 4);
-            ((Atom *)data)[0] = m_atom_UTF8_STRING;
+            ((Atom *)data)[0] = this->atom_UTF8_STRING;
             ((Atom *)data)[1] = XA_STRING;
         }
     } else
@@ -824,9 +828,9 @@ void LinuxEnvironment::handleSelectionRequest(XSelectionRequestEvent &evt) {
 }
 
 void LinuxEnvironment::setClipBoardTextInt(UString clipText) {
-    m_sLocalClipboardContent = clipText;
-    XSetSelectionOwner(m_display, XA_PRIMARY, m_window, CurrentTime);
-    XSetSelectionOwner(m_display, m_atom_CLIPBOARD, m_window, CurrentTime);
+    this->sLocalClipboardContent = clipText;
+    XSetSelectionOwner(this->display, XA_PRIMARY, this->window, CurrentTime);
+    XSetSelectionOwner(this->display, this->atom_CLIPBOARD, this->window, CurrentTime);
 }
 
 UString LinuxEnvironment::getClipboardTextInt() {
@@ -854,19 +858,19 @@ UString LinuxEnvironment::getClipboardTextInt() {
 
     Atom selection = XA_PRIMARY;
     Window selection_owner = None;
-    if((selection_owner = XGetSelectionOwner(m_display, selection)) == None) {
-        selection = m_atom_CLIPBOARD;
-        selection_owner = XGetSelectionOwner(m_display, selection);
+    if((selection_owner = XGetSelectionOwner(this->display, selection)) == None) {
+        selection = this->atom_CLIPBOARD;
+        selection_owner = XGetSelectionOwner(this->display, selection);
     }
 
     if(selection_owner != None) {
-        if(selection_owner == m_window)          // ourself
-            content = m_sLocalClipboardContent;  // just return the local clipboard
+        if(selection_owner == this->window)          // ourself
+            content = this->sLocalClipboardContent;  // just return the local clipboard
         else {
             // first try: we want an utf8 string
-            bool ok = requestSelectionContent(content, selection, m_atom_UTF8_STRING);
+            bool ok = this->requestSelectionContent(content, selection, this->atom_UTF8_STRING);
             if(!ok)  // second chance, ask for a good old locale-dependent string
-                ok = requestSelectionContent(content, selection, XA_STRING);
+                ok = this->requestSelectionContent(content, selection, XA_STRING);
         }
     }
 

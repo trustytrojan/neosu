@@ -160,19 +160,19 @@ class Graphics {
     // 2D
     // TODO: rename these to translate2D() etc.
     void translate(float x, float y, float z = 0);
-    void translate(Vector2 translation) { translate(translation.x, translation.y); }
-    void translate(Vector3 translation) { translate(translation.x, translation.y, translation.z); }
+    void translate(Vector2 translation) { this->translate(translation.x, translation.y); }
+    void translate(Vector3 translation) { this->translate(translation.x, translation.y, translation.z); }
     void rotate(float deg, float x = 0, float y = 0, float z = 1);
-    void rotate(float deg, Vector3 axis) { rotate(deg, axis.x, axis.y, axis.z); }
+    void rotate(float deg, Vector3 axis) { this->rotate(deg, axis.x, axis.y, axis.z); }
     void scale(float x, float y, float z = 1);
-    void scale(Vector2 scaling) { scale(scaling.x, scaling.y, 1); }
-    void scale(Vector3 scaling) { scale(scaling.x, scaling.y, scaling.z); }
+    void scale(Vector2 scaling) { this->scale(scaling.x, scaling.y, 1); }
+    void scale(Vector3 scaling) { this->scale(scaling.x, scaling.y, scaling.z); }
 
     // 3D
     void translate3D(float x, float y, float z);
-    void translate3D(Vector3 translation) { translate3D(translation.x, translation.y, translation.z); }
+    void translate3D(Vector3 translation) { this->translate3D(translation.x, translation.y, translation.z); }
     void rotate3D(float deg, float x, float y, float z);
-    void rotate3D(float deg, Vector3 axis) { rotate3D(deg, axis.x, axis.y, axis.z); }
+    void rotate3D(float deg, Vector3 axis) { this->rotate3D(deg, axis.x, axis.y, axis.z); }
     void setWorldMatrix(Matrix4 &worldMatrix);
     void setWorldMatrixMul(Matrix4 &worldMatrix);
     void setProjectionMatrix(Matrix4 &projectionMatrix);
@@ -197,15 +197,15 @@ class Graphics {
     void checkStackLeaks();
 
     // transforms
-    bool m_bTransformUpToDate;
-    std::stack<Matrix4> m_worldTransformStack;
-    std::stack<Matrix4> m_projectionTransformStack;
+    bool bTransformUpToDate;
+    std::stack<Matrix4> worldTransformStack;
+    std::stack<Matrix4> projectionTransformStack;
 
     // 3d gui scenes
-    bool m_bIs3dScene;
-    std::stack<bool> m_3dSceneStack;
-    McRect m_3dSceneRegion;
-    Vector3 m_v3dSceneOffset;
-    Matrix4 m_3dSceneWorldMatrix;
-    Matrix4 m_3dSceneProjectionMatrix;
+    bool bIs3dScene;
+    std::stack<bool> scene_stack;
+    McRect scene_region;
+    Vector3 v3dSceneOffset;
+    Matrix4 scene_world_matrix;
+    Matrix4 scene_projection_matrix;
 };

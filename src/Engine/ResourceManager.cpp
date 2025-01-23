@@ -18,9 +18,9 @@ static void *_resourceLoaderThread(void *data);
 class ResourceManagerLoaderThread {
    public:
     ~ResourceManagerLoaderThread() {
-        running = false;
-        loadingMutex.unlock();
-        thread.join();
+        this->running = false;
+        this->loadingMutex.unlock();
+        this->thread.join();
     }
 
     // self
@@ -40,10 +40,10 @@ const char *ResourceManager::PATH_DEFAULT_FONTS = MCENGINE_DATA_DIR "fonts/";
 const char *ResourceManager::PATH_DEFAULT_SHADERS = MCENGINE_DATA_DIR "shaders/";
 
 ResourceManager::ResourceManager() {
-    m_bNextLoadAsync = false;
-    m_iNumResourceInitPerFrameLimit = 1;
+    this->bNextLoadAsync = false;
+    this->iNumResourceInitPerFrameLimit = 1;
 
-    m_loadingWork.reserve(32);
+    this->loadingWork.reserve(32);
 
     // create loader threads
     for(int i = 0; i < cv_rm_numthreads.getInt(); i++) {
@@ -52,27 +52,27 @@ ResourceManager::ResourceManager() {
         loaderThread->loadingMutex.lock();  // stop loader thread immediately, wait for work
         loaderThread->threadIndex = i;
         loaderThread->running = true;
-        loaderThread->loadingWork = &m_loadingWork;
+        loaderThread->loadingWork = &this->loadingWork;
 
         loaderThread->thread = std::thread(_resourceLoaderThread, (void *)loaderThread);
-        m_threads.push_back(loaderThread);
+        this->threads.push_back(loaderThread);
     }
 }
 
 ResourceManager::~ResourceManager() {
     // release all not-currently-being-loaded resources (1)
-    destroyResources();
+    this->destroyResources();
 
-    for(auto thread : m_threads) {
+    for(auto thread : this->threads) {
         delete thread;
     }
-    m_threads.clear();
+    this->threads.clear();
 
     // cleanup leftovers (can only do that after loader threads have exited) (2)
-    for(size_t i = 0; i < m_loadingWorkAsyncDestroy.size(); i++) {
-        delete m_loadingWorkAsyncDestroy[i];
+    for(size_t i = 0; i < this->loadingWorkAsyncDestroy.size(); i++) {
+        delete this->loadingWorkAsyncDestroy[i];
     }
-    m_loadingWorkAsyncDestroy.clear();
+    this->loadingWorkAsyncDestroy.clear();
 }
 
 void ResourceManager::update() {
@@ -81,28 +81,28 @@ void ResourceManager::update() {
     {
         // handle load finish (and synchronous init())
         size_t numResourceInitCounter = 0;
-        for(size_t i = 0; i < m_loadingWork.size(); i++) {
-            if(m_loadingWork[i].done.atomic.load()) {
+        for(size_t i = 0; i < this->loadingWork.size(); i++) {
+            if(this->loadingWork[i].done.atomic.load()) {
                 if(cv_debug_rm.getBool()) debugLog("Resource Manager: Worker thread #%i finished.\n", i);
 
                 // copy pointer, so we can stop everything before finishing
-                Resource *rs = m_loadingWork[i].resource.atomic.load();
-                const size_t threadIndex = m_loadingWork[i].threadIndex.atomic.load();
+                Resource *rs = this->loadingWork[i].resource.atomic.load();
+                const size_t threadIndex = this->loadingWork[i].threadIndex.atomic.load();
 
                 g_resourceManagerLoadingWorkMutex.lock();
-                { m_loadingWork.erase(m_loadingWork.begin() + i); }
+                { this->loadingWork.erase(this->loadingWork.begin() + i); }
                 g_resourceManagerLoadingWorkMutex.unlock();
 
                 i--;
 
                 // stop this worker thread if everything has been loaded
                 int numLoadingWorkForThreadIndex = 0;
-                for(size_t w = 0; w < m_loadingWork.size(); w++) {
-                    if(m_loadingWork[w].threadIndex.atomic.load() == threadIndex) numLoadingWorkForThreadIndex++;
+                for(size_t w = 0; w < this->loadingWork.size(); w++) {
+                    if(this->loadingWork[w].threadIndex.atomic.load() == threadIndex) numLoadingWorkForThreadIndex++;
                 }
 
                 if(numLoadingWorkForThreadIndex < 1) {
-                    if(m_threads.size() > 0) m_threads[threadIndex]->loadingMutex.lock();
+                    if(this->threads.size() > 0) this->threads[threadIndex]->loadingMutex.lock();
                 }
 
                 // unlock. this allows resources to trigger "recursive" loads within init()
@@ -115,7 +115,8 @@ void ResourceManager::update() {
                 // else if (debug_rm->getBool())
                 //	debugLog("Resource Manager: Skipping load() due to async destroy of #%i\n", (i + 1));
 
-                if(m_iNumResourceInitPerFrameLimit > 0 && numResourceInitCounter >= m_iNumResourceInitPerFrameLimit)
+                if(this->iNumResourceInitPerFrameLimit > 0 &&
+                   numResourceInitCounter >= this->iNumResourceInitPerFrameLimit)
                     break;  // NOTE: only allow 1 work item to finish per frame (avoid stutters for e.g. texture
                             // uploads)
                 else {
@@ -132,10 +133,10 @@ void ResourceManager::update() {
         }
 
         // handle async destroy
-        for(size_t i = 0; i < m_loadingWorkAsyncDestroy.size(); i++) {
+        for(size_t i = 0; i < this->loadingWorkAsyncDestroy.size(); i++) {
             bool canBeDestroyed = true;
-            for(size_t w = 0; w < m_loadingWork.size(); w++) {
-                if(m_loadingWork[w].resource.atomic.load() == m_loadingWorkAsyncDestroy[i]) {
+            for(size_t w = 0; w < this->loadingWork.size(); w++) {
+                if(this->loadingWork[w].resource.atomic.load() == this->loadingWorkAsyncDestroy[i]) {
                     if(cv_debug_rm.getBool()) debugLog("Resource Manager: Waiting for async destroy of #%i ...\n", i);
 
                     canBeDestroyed = false;
@@ -146,8 +147,8 @@ void ResourceManager::update() {
             if(canBeDestroyed) {
                 if(cv_debug_rm.getBool()) debugLog("Resource Manager: Async destroy of #%i\n", i);
 
-                delete m_loadingWorkAsyncDestroy[i];  // implicitly calls release() through the Resource destructor
-                m_loadingWorkAsyncDestroy.erase(m_loadingWorkAsyncDestroy.begin() + i);
+                delete this->loadingWorkAsyncDestroy[i];  // implicitly calls release() through the Resource destructor
+                this->loadingWorkAsyncDestroy.erase(this->loadingWorkAsyncDestroy.begin() + i);
                 i--;
             }
         }
@@ -156,10 +157,10 @@ void ResourceManager::update() {
 }
 
 void ResourceManager::destroyResources() {
-    while(m_vResources.size() > 0) {
-        destroyResource(m_vResources[0]);
+    while(this->vResources.size() > 0) {
+        this->destroyResource(this->vResources[0]);
     }
-    m_vResources.clear();
+    this->vResources.clear();
 }
 
 void ResourceManager::destroyResource(Resource *rs) {
@@ -174,8 +175,8 @@ void ResourceManager::destroyResource(Resource *rs) {
     {
         bool isManagedResource = false;
         int managedResourceIndex = -1;
-        for(size_t i = 0; i < m_vResources.size(); i++) {
-            if(m_vResources[i] == rs) {
+        for(size_t i = 0; i < this->vResources.size(); i++) {
+            if(this->vResources[i] == rs) {
                 isManagedResource = true;
                 managedResourceIndex = i;
                 break;
@@ -183,15 +184,15 @@ void ResourceManager::destroyResource(Resource *rs) {
         }
 
         // handle async destroy
-        for(size_t w = 0; w < m_loadingWork.size(); w++) {
-            if(m_loadingWork[w].resource.atomic.load() == rs) {
+        for(size_t w = 0; w < this->loadingWork.size(); w++) {
+            if(this->loadingWork[w].resource.atomic.load() == rs) {
                 if(cv_debug_rm.getBool())
                     debugLog("Resource Manager: Scheduled async destroy of %s\n", rs->getName().c_str());
 
                 if(cv_rm_interrupt_on_destroy.getBool()) rs->interruptLoad();
 
-                m_loadingWorkAsyncDestroy.push_back(rs);
-                if(isManagedResource) m_vResources.erase(m_vResources.begin() + managedResourceIndex);
+                this->loadingWorkAsyncDestroy.push_back(rs);
+                if(isManagedResource) this->vResources.erase(this->vResources.begin() + managedResourceIndex);
 
                 // NOTE: ugly
                 g_resourceManagerMutex.unlock();
@@ -202,25 +203,25 @@ void ResourceManager::destroyResource(Resource *rs) {
         // standard destroy
         SAFE_DELETE(rs);
 
-        if(isManagedResource) m_vResources.erase(m_vResources.begin() + managedResourceIndex);
+        if(isManagedResource) this->vResources.erase(this->vResources.begin() + managedResourceIndex);
     }
     g_resourceManagerMutex.unlock();
 }
 
 void ResourceManager::reloadResources() {
-    for(size_t i = 0; i < m_vResources.size(); i++) {
-        m_vResources[i]->reload();
+    for(size_t i = 0; i < this->vResources.size(); i++) {
+        this->vResources[i]->reload();
     }
 }
 
-void ResourceManager::requestNextLoadAsync() { m_bNextLoadAsync = true; }
+void ResourceManager::requestNextLoadAsync() { this->bNextLoadAsync = true; }
 
-void ResourceManager::requestNextLoadUnmanaged() { m_nextLoadUnmanagedStack.push(true); }
+void ResourceManager::requestNextLoadUnmanaged() { this->nextLoadUnmanagedStack.push(true); }
 
 Image *ResourceManager::loadImage(std::string filepath, std::string resourceName, bool mipmapped) {
     // check if it already exists
     if(resourceName.length() > 0) {
-        Resource *temp = checkIfExistsAndHandle(resourceName);
+        Resource *temp = this->checkIfExistsAndHandle(resourceName);
         if(temp != NULL) return dynamic_cast<Image *>(temp);
     }
 
@@ -229,7 +230,7 @@ Image *ResourceManager::loadImage(std::string filepath, std::string resourceName
     Image *img = engine->getGraphics()->createImage(filepath, mipmapped);
     img->setName(resourceName);
 
-    loadResource(img, true);
+    this->loadResource(img, true);
 
     return img;
 }
@@ -237,7 +238,7 @@ Image *ResourceManager::loadImage(std::string filepath, std::string resourceName
 Image *ResourceManager::loadImageAbs(std::string absoluteFilepath, std::string resourceName, bool mipmapped) {
     // check if it already exists
     if(resourceName.length() > 0) {
-        Resource *temp = checkIfExistsAndHandle(resourceName);
+        Resource *temp = this->checkIfExistsAndHandle(resourceName);
         if(temp != NULL) return dynamic_cast<Image *>(temp);
     }
 
@@ -245,7 +246,7 @@ Image *ResourceManager::loadImageAbs(std::string absoluteFilepath, std::string r
     Image *img = engine->getGraphics()->createImage(absoluteFilepath, mipmapped);
     img->setName(resourceName);
 
-    loadResource(img, true);
+    this->loadResource(img, true);
 
     return img;
 }
@@ -253,7 +254,7 @@ Image *ResourceManager::loadImageAbs(std::string absoluteFilepath, std::string r
 Image *ResourceManager::loadImageAbsUnnamed(std::string absoluteFilepath, bool mipmapped) {
     Image *img = engine->getGraphics()->createImage(absoluteFilepath, mipmapped);
 
-    loadResource(img, true);
+    this->loadResource(img, true);
 
     return img;
 }
@@ -268,7 +269,7 @@ Image *ResourceManager::createImage(unsigned int width, unsigned int height, boo
 
     Image *img = engine->getGraphics()->createImage(width, height, mipmapped);
 
-    loadResource(img, false);
+    this->loadResource(img, false);
 
     return img;
 }
@@ -277,7 +278,7 @@ McFont *ResourceManager::loadFont(std::string filepath, std::string resourceName
                                   int fontDPI) {
     // check if it already exists
     if(resourceName.length() > 0) {
-        Resource *temp = checkIfExistsAndHandle(resourceName);
+        Resource *temp = this->checkIfExistsAndHandle(resourceName);
         if(temp != NULL) return dynamic_cast<McFont *>(temp);
     }
 
@@ -286,7 +287,7 @@ McFont *ResourceManager::loadFont(std::string filepath, std::string resourceName
     McFont *fnt = new McFont(filepath, fontSize, antialiasing, fontDPI);
     fnt->setName(resourceName);
 
-    loadResource(fnt, true);
+    this->loadResource(fnt, true);
 
     return fnt;
 }
@@ -295,7 +296,7 @@ McFont *ResourceManager::loadFont(std::string filepath, std::string resourceName
                                   int fontSize, bool antialiasing, int fontDPI) {
     // check if it already exists
     if(resourceName.length() > 0) {
-        Resource *temp = checkIfExistsAndHandle(resourceName);
+        Resource *temp = this->checkIfExistsAndHandle(resourceName);
         if(temp != NULL) return dynamic_cast<McFont *>(temp);
     }
 
@@ -304,7 +305,7 @@ McFont *ResourceManager::loadFont(std::string filepath, std::string resourceName
     McFont *fnt = new McFont(filepath, characters, fontSize, antialiasing, fontDPI);
     fnt->setName(resourceName);
 
-    loadResource(fnt, true);
+    this->loadResource(fnt, true);
 
     return fnt;
 }
@@ -313,7 +314,7 @@ Sound *ResourceManager::loadSoundAbs(std::string filepath, std::string resourceN
                                      bool loop) {
     // check if it already exists
     if(resourceName.length() > 0) {
-        Resource *temp = checkIfExistsAndHandle(resourceName);
+        Resource *temp = this->checkIfExistsAndHandle(resourceName);
         if(temp != NULL) return dynamic_cast<Sound *>(temp);
     }
 
@@ -321,7 +322,7 @@ Sound *ResourceManager::loadSoundAbs(std::string filepath, std::string resourceN
     Sound *snd = new Sound(filepath, stream, overlayable, loop);
     snd->setName(resourceName);
 
-    loadResource(snd, true);
+    this->loadResource(snd, true);
 
     return snd;
 }
@@ -330,7 +331,7 @@ Shader *ResourceManager::loadShader(std::string vertexShaderFilePath, std::strin
                                     std::string resourceName) {
     // check if it already exists
     if(resourceName.length() > 0) {
-        Resource *temp = checkIfExistsAndHandle(resourceName);
+        Resource *temp = this->checkIfExistsAndHandle(resourceName);
         if(temp != NULL) return dynamic_cast<Shader *>(temp);
     }
 
@@ -340,7 +341,7 @@ Shader *ResourceManager::loadShader(std::string vertexShaderFilePath, std::strin
     Shader *shader = engine->getGraphics()->createShaderFromFile(vertexShaderFilePath, fragmentShaderFilePath);
     shader->setName(resourceName);
 
-    loadResource(shader, true);
+    this->loadResource(shader, true);
 
     return shader;
 }
@@ -350,7 +351,7 @@ Shader *ResourceManager::loadShader(std::string vertexShaderFilePath, std::strin
     fragmentShaderFilePath.insert(0, PATH_DEFAULT_SHADERS);
     Shader *shader = engine->getGraphics()->createShaderFromFile(vertexShaderFilePath, fragmentShaderFilePath);
 
-    loadResource(shader, true);
+    this->loadResource(shader, true);
 
     return shader;
 }
@@ -358,7 +359,7 @@ Shader *ResourceManager::loadShader(std::string vertexShaderFilePath, std::strin
 Shader *ResourceManager::createShader(std::string vertexShader, std::string fragmentShader, std::string resourceName) {
     // check if it already exists
     if(resourceName.length() > 0) {
-        Resource *temp = checkIfExistsAndHandle(resourceName);
+        Resource *temp = this->checkIfExistsAndHandle(resourceName);
         if(temp != NULL) return dynamic_cast<Shader *>(temp);
     }
 
@@ -366,7 +367,7 @@ Shader *ResourceManager::createShader(std::string vertexShader, std::string frag
     Shader *shader = engine->getGraphics()->createShaderFromSource(vertexShader, fragmentShader);
     shader->setName(resourceName);
 
-    loadResource(shader, true);
+    this->loadResource(shader, true);
 
     return shader;
 }
@@ -374,7 +375,7 @@ Shader *ResourceManager::createShader(std::string vertexShader, std::string frag
 Shader *ResourceManager::createShader(std::string vertexShader, std::string fragmentShader) {
     Shader *shader = engine->getGraphics()->createShaderFromSource(vertexShader, fragmentShader);
 
-    loadResource(shader, true);
+    this->loadResource(shader, true);
 
     return shader;
 }
@@ -385,13 +386,13 @@ RenderTarget *ResourceManager::createRenderTarget(int x, int y, int width, int h
     auto name = UString::format("_RT_%ix%i", width, height);
     rt->setName(name.toUtf8());
 
-    loadResource(rt, true);
+    this->loadResource(rt, true);
 
     return rt;
 }
 
 RenderTarget *ResourceManager::createRenderTarget(int width, int height, Graphics::MULTISAMPLE_TYPE multiSampleType) {
-    return createRenderTarget(0, 0, width, height, multiSampleType);
+    return this->createRenderTarget(0, 0, width, height, multiSampleType);
 }
 
 TextureAtlas *ResourceManager::createTextureAtlas(int width, int height) {
@@ -399,7 +400,7 @@ TextureAtlas *ResourceManager::createTextureAtlas(int width, int height) {
     auto name = UString::format("_TA_%ix%i", width, height);
     ta->setName(name.toUtf8());
 
-    loadResource(ta, false);
+    this->loadResource(ta, false);
 
     return ta;
 }
@@ -408,52 +409,52 @@ VertexArrayObject *ResourceManager::createVertexArrayObject(Graphics::PRIMITIVE 
                                                             bool keepInSystemMemory) {
     VertexArrayObject *vao = engine->getGraphics()->createVertexArrayObject(primitive, usage, keepInSystemMemory);
 
-    loadResource(vao, false);
+    this->loadResource(vao, false);
 
     return vao;
 }
 
 Image *ResourceManager::getImage(std::string resourceName) const {
-    for(size_t i = 0; i < m_vResources.size(); i++) {
-        if(m_vResources[i]->getName() == resourceName) return dynamic_cast<Image *>(m_vResources[i]);
+    for(size_t i = 0; i < this->vResources.size(); i++) {
+        if(this->vResources[i]->getName() == resourceName) return dynamic_cast<Image *>(this->vResources[i]);
     }
 
-    doesntExistWarning(resourceName);
+    this->doesntExistWarning(resourceName);
     return NULL;
 }
 
 McFont *ResourceManager::getFont(std::string resourceName) const {
-    for(size_t i = 0; i < m_vResources.size(); i++) {
-        if(m_vResources[i]->getName() == resourceName) return dynamic_cast<McFont *>(m_vResources[i]);
+    for(size_t i = 0; i < this->vResources.size(); i++) {
+        if(this->vResources[i]->getName() == resourceName) return dynamic_cast<McFont *>(this->vResources[i]);
     }
 
-    doesntExistWarning(resourceName);
+    this->doesntExistWarning(resourceName);
     return NULL;
 }
 
 Sound *ResourceManager::getSound(std::string resourceName) const {
-    for(size_t i = 0; i < m_vResources.size(); i++) {
-        if(m_vResources[i]->getName() == resourceName) return dynamic_cast<Sound *>(m_vResources[i]);
+    for(size_t i = 0; i < this->vResources.size(); i++) {
+        if(this->vResources[i]->getName() == resourceName) return dynamic_cast<Sound *>(this->vResources[i]);
     }
 
-    doesntExistWarning(resourceName);
+    this->doesntExistWarning(resourceName);
     return NULL;
 }
 
 Shader *ResourceManager::getShader(std::string resourceName) const {
-    for(size_t i = 0; i < m_vResources.size(); i++) {
-        if(m_vResources[i]->getName() == resourceName) return dynamic_cast<Shader *>(m_vResources[i]);
+    for(size_t i = 0; i < this->vResources.size(); i++) {
+        if(this->vResources[i]->getName() == resourceName) return dynamic_cast<Shader *>(this->vResources[i]);
     }
 
-    doesntExistWarning(resourceName);
+    this->doesntExistWarning(resourceName);
     return NULL;
 }
 
-bool ResourceManager::isLoading() const { return (m_loadingWork.size() > 0); }
+bool ResourceManager::isLoading() const { return (this->loadingWork.size() > 0); }
 
 bool ResourceManager::isLoadingResource(Resource *rs) const {
-    for(size_t i = 0; i < m_loadingWork.size(); i++) {
-        if(m_loadingWork[i].resource.atomic.load() == rs) return true;
+    for(size_t i = 0; i < this->loadingWork.size(); i++) {
+        if(this->loadingWork[i].resource.atomic.load() == rs) return true;
     }
 
     return false;
@@ -461,13 +462,13 @@ bool ResourceManager::isLoadingResource(Resource *rs) const {
 
 void ResourceManager::loadResource(Resource *res, bool load) {
     // handle flags
-    if(m_nextLoadUnmanagedStack.size() < 1 || !m_nextLoadUnmanagedStack.top())
-        m_vResources.push_back(res);  // add managed resource
+    if(this->nextLoadUnmanagedStack.size() < 1 || !this->nextLoadUnmanagedStack.top())
+        this->vResources.push_back(res);  // add managed resource
 
-    const bool isNextLoadAsync = m_bNextLoadAsync;
+    const bool isNextLoadAsync = this->bNextLoadAsync;
 
     // flags must be reset on every load, to not carry over
-    resetFlags();
+    this->resetFlags();
 
     if(!load) return;
 
@@ -494,22 +495,23 @@ void ResourceManager::loadResource(Resource *res, bool load) {
                 work.done = MobileAtomicBool(false);
 
                 threadIndexCounter =
-                    (threadIndexCounter + 1) % (min(m_threads.size(), (size_t)max(cv_rm_numthreads.getInt(), 1)));
+                    (threadIndexCounter + 1) % (min(this->threads.size(), (size_t)max(cv_rm_numthreads.getInt(), 1)));
 
                 g_resourceManagerLoadingWorkMutex.lock();
                 {
-                    m_loadingWork.push_back(work);
+                    this->loadingWork.push_back(work);
 
                     int numLoadingWorkForThreadIndex = 0;
-                    for(size_t i = 0; i < m_loadingWork.size(); i++) {
-                        if(m_loadingWork[i].threadIndex.atomic.load() == threadIndex) numLoadingWorkForThreadIndex++;
+                    for(size_t i = 0; i < this->loadingWork.size(); i++) {
+                        if(this->loadingWork[i].threadIndex.atomic.load() == threadIndex)
+                            numLoadingWorkForThreadIndex++;
                     }
 
                     // let the loading thread run
                     if(numLoadingWorkForThreadIndex == 1)  // only necessary if thread is waiting (otherwise it will
                                                            // already be picked up by the next iteration)
                     {
-                        if(m_threads.size() > 0) m_threads[threadIndex]->loadingMutex.unlock();
+                        if(this->threads.size() > 0) this->threads[threadIndex]->loadingMutex.unlock();
                     }
                 }
                 g_resourceManagerLoadingWorkMutex.unlock();
@@ -533,15 +535,15 @@ void ResourceManager::doesntExistWarning(std::string resourceName) const {
 }
 
 Resource *ResourceManager::checkIfExistsAndHandle(std::string resourceName) {
-    for(size_t i = 0; i < m_vResources.size(); i++) {
-        if(m_vResources[i]->getName() == resourceName) {
+    for(size_t i = 0; i < this->vResources.size(); i++) {
+        if(this->vResources[i]->getName() == resourceName) {
             if(cv_rm_warnings.getBool())
                 debugLog("RESOURCE MANAGER: Resource \"%s\" already loaded!\n", resourceName.c_str());
 
             // handle flags (reset them)
-            resetFlags();
+            this->resetFlags();
 
-            return m_vResources[i];
+            return this->vResources[i];
         }
     }
 
@@ -549,9 +551,9 @@ Resource *ResourceManager::checkIfExistsAndHandle(std::string resourceName) {
 }
 
 void ResourceManager::resetFlags() {
-    if(m_nextLoadUnmanagedStack.size() > 0) m_nextLoadUnmanagedStack.pop();
+    if(this->nextLoadUnmanagedStack.size() > 0) this->nextLoadUnmanagedStack.pop();
 
-    m_bNextLoadAsync = false;
+    this->bNextLoadAsync = false;
 }
 
 static void *_resourceLoaderThread(void *data) {

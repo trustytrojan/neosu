@@ -18,105 +18,107 @@
 
 InfoLabel::InfoLabel(float xPos, float yPos, float xSize, float ySize, UString name)
     : CBaseUIButton(xPos, yPos, xSize, ySize, name, "") {
-    m_font = osu->getSubTitleFont();
+    this->font = osu->getSubTitleFont();
 
-    m_iMargin = 10;
+    this->iMargin = 10;
 
     const float globalScaler = 1.3f;
 
-    m_fTitleScale = 0.77f * globalScaler;
-    m_fSubTitleScale = 0.6f * globalScaler;
-    m_fSongInfoScale = 0.7f * globalScaler;
-    m_fDiffInfoScale = 0.65f * globalScaler;
-    m_fOffsetInfoScale = 0.6f * globalScaler;
+    this->fTitleScale = 0.77f * globalScaler;
+    this->fSubTitleScale = 0.6f * globalScaler;
+    this->fSongInfoScale = 0.7f * globalScaler;
+    this->fDiffInfoScale = 0.65f * globalScaler;
+    this->fOffsetInfoScale = 0.6f * globalScaler;
 
-    m_sArtist = "Artist";
-    m_sTitle = "Title";
-    m_sDiff = "Difficulty";
-    m_sMapper = "Mapper";
+    this->sArtist = "Artist";
+    this->sTitle = "Title";
+    this->sDiff = "Difficulty";
+    this->sMapper = "Mapper";
 
-    m_iLengthMS = 0;
-    m_iMinBPM = 0;
-    m_iMaxBPM = 0;
-    m_iMostCommonBPM = 0;
-    m_iNumObjects = 0;
+    this->iLengthMS = 0;
+    this->iMinBPM = 0;
+    this->iMaxBPM = 0;
+    this->iMostCommonBPM = 0;
+    this->iNumObjects = 0;
 
-    m_fCS = 5.0f;
-    m_fAR = 5.0f;
-    m_fOD = 5.0f;
-    m_fHP = 5.0f;
-    m_fStars = 5.0f;
+    this->fCS = 5.0f;
+    this->fAR = 5.0f;
+    this->fOD = 5.0f;
+    this->fHP = 5.0f;
+    this->fStars = 5.0f;
 
-    m_iLocalOffset = 0;
-    m_iOnlineOffset = 0;
+    this->iLocalOffset = 0;
+    this->iOnlineOffset = 0;
 
-    m_iBeatmapId = -1;
+    this->iBeatmapId = -1;
 }
 
 void InfoLabel::draw(Graphics *g) {
     // debug bounding box
     if(cv_debug.getBool()) {
         g->setColor(0xffff0000);
-        g->drawLine(m_vPos.x, m_vPos.y, m_vPos.x + m_vSize.x, m_vPos.y);
-        g->drawLine(m_vPos.x, m_vPos.y, m_vPos.x, m_vPos.y + m_vSize.y);
-        g->drawLine(m_vPos.x, m_vPos.y + m_vSize.y, m_vPos.x + m_vSize.x, m_vPos.y + m_vSize.y);
-        g->drawLine(m_vPos.x + m_vSize.x, m_vPos.y, m_vPos.x + m_vSize.x, m_vPos.y + m_vSize.y);
+        g->drawLine(this->vPos.x, this->vPos.y, this->vPos.x + this->vSize.x, this->vPos.y);
+        g->drawLine(this->vPos.x, this->vPos.y, this->vPos.x, this->vPos.y + this->vSize.y);
+        g->drawLine(this->vPos.x, this->vPos.y + this->vSize.y, this->vPos.x + this->vSize.x,
+                    this->vPos.y + this->vSize.y);
+        g->drawLine(this->vPos.x + this->vSize.x, this->vPos.y, this->vPos.x + this->vSize.x,
+                    this->vPos.y + this->vSize.y);
     }
 
     // build strings
-    UString titleText = m_sArtist.c_str();
+    UString titleText = this->sArtist.c_str();
     titleText.append(" - ");
-    titleText.append(m_sTitle.c_str());
+    titleText.append(this->sTitle.c_str());
     titleText.append(" [");
-    titleText.append(m_sDiff.c_str());
+    titleText.append(this->sDiff.c_str());
     titleText.append("]");
     UString subTitleText = "Mapped by ";
-    subTitleText.append(m_sMapper.c_str());
-    const UString songInfoText = buildSongInfoString();
-    const UString diffInfoText = buildDiffInfoString();
-    const UString offsetInfoText = buildOffsetInfoString();
+    subTitleText.append(this->sMapper.c_str());
+    const UString songInfoText = this->buildSongInfoString();
+    const UString diffInfoText = this->buildDiffInfoString();
+    const UString offsetInfoText = this->buildOffsetInfoString();
 
-    const float globalScale = max((m_vSize.y / getMinimumHeight()) * 0.91f, 1.0f);
+    const float globalScale = max((this->vSize.y / this->getMinimumHeight()) * 0.91f, 1.0f);
 
-    const int shadowOffset = std::round(1.0f * ((float)m_font->getDPI() / 96.0f));  // NOTE: abusing font dpi
+    const int shadowOffset = std::round(1.0f * ((float)this->font->getDPI() / 96.0f));  // NOTE: abusing font dpi
 
-    int yCounter = m_vPos.y;
+    int yCounter = this->vPos.y;
 
     // draw title
     g->pushTransform();
     {
-        const float scale = m_fTitleScale * globalScale;
+        const float scale = this->fTitleScale * globalScale;
 
-        yCounter += m_font->getHeight() * scale;
+        yCounter += this->font->getHeight() * scale;
 
         g->scale(scale, scale);
-        g->translate((int)(m_vPos.x), yCounter);
+        g->translate((int)(this->vPos.x), yCounter);
 
         g->translate(shadowOffset, shadowOffset);
         g->setColor(0xff000000);
-        g->drawString(m_font, titleText);
+        g->drawString(this->font, titleText);
         g->translate(-shadowOffset, -shadowOffset);
         g->setColor(0xffffffff);
-        g->drawString(m_font, titleText);
+        g->drawString(this->font, titleText);
     }
     g->popTransform();
 
     // draw subtitle (mapped by)
     g->pushTransform();
     {
-        const float scale = m_fSubTitleScale * globalScale;
+        const float scale = this->fSubTitleScale * globalScale;
 
-        yCounter += m_font->getHeight() * scale + m_iMargin * globalScale * 1.0f;
+        yCounter += this->font->getHeight() * scale + this->iMargin * globalScale * 1.0f;
 
         g->scale(scale, scale);
-        g->translate((int)(m_vPos.x), yCounter);
+        g->translate((int)(this->vPos.x), yCounter);
 
         g->translate(shadowOffset, shadowOffset);
         g->setColor(0xff000000);
-        g->drawString(m_font, subTitleText);
+        g->drawString(this->font, subTitleText);
         g->translate(-shadowOffset, -shadowOffset);
         g->setColor(0xffffffff);
-        g->drawString(m_font, subTitleText);
+        g->drawString(this->font, subTitleText);
     }
     g->popTransform();
 
@@ -127,19 +129,19 @@ void InfoLabel::draw(Graphics *g) {
              : 0xffffffff);
     g->pushTransform();
     {
-        const float scale = m_fSongInfoScale * globalScale * 0.9f;
+        const float scale = this->fSongInfoScale * globalScale * 0.9f;
 
-        yCounter += m_font->getHeight() * scale + m_iMargin * globalScale * 1.0f;
+        yCounter += this->font->getHeight() * scale + this->iMargin * globalScale * 1.0f;
 
         g->scale(scale, scale);
-        g->translate((int)(m_vPos.x), yCounter);
+        g->translate((int)(this->vPos.x), yCounter);
 
         g->translate(shadowOffset, shadowOffset);
         g->setColor(0xff000000);
-        g->drawString(m_font, songInfoText);
+        g->drawString(this->font, songInfoText);
         g->translate(-shadowOffset, -shadowOffset);
         g->setColor(songInfoColor);
-        g->drawString(m_font, songInfoText);
+        g->drawString(this->font, songInfoText);
     }
     g->popTransform();
 
@@ -147,50 +149,50 @@ void InfoLabel::draw(Graphics *g) {
     const Color diffInfoColor = osu->getModEZ() ? 0xffadd8e6 : (osu->getModHR() ? 0xffff7f7f : 0xffffffff);
     g->pushTransform();
     {
-        const float scale = m_fDiffInfoScale * globalScale * 0.9f;
+        const float scale = this->fDiffInfoScale * globalScale * 0.9f;
 
-        yCounter += m_font->getHeight() * scale + m_iMargin * globalScale * 0.85f;
+        yCounter += this->font->getHeight() * scale + this->iMargin * globalScale * 0.85f;
 
         g->scale(scale, scale);
-        g->translate((int)(m_vPos.x), yCounter);
+        g->translate((int)(this->vPos.x), yCounter);
 
         g->translate(shadowOffset, shadowOffset);
         g->setColor(0xff000000);
-        g->drawString(m_font, diffInfoText);
+        g->drawString(this->font, diffInfoText);
         g->translate(-shadowOffset, -shadowOffset);
         g->setColor(diffInfoColor);
-        g->drawString(m_font, diffInfoText);
+        g->drawString(this->font, diffInfoText);
     }
     g->popTransform();
 
     // draw offset (local, online)
-    if(m_iLocalOffset != 0 || m_iOnlineOffset != 0) {
+    if(this->iLocalOffset != 0 || this->iOnlineOffset != 0) {
         g->pushTransform();
         {
-            const float scale = m_fOffsetInfoScale * globalScale * 0.8f;
+            const float scale = this->fOffsetInfoScale * globalScale * 0.8f;
 
-            yCounter += m_font->getHeight() * scale + m_iMargin * globalScale * 0.85f;
+            yCounter += this->font->getHeight() * scale + this->iMargin * globalScale * 0.85f;
 
             g->scale(scale, scale);
-            g->translate((int)(m_vPos.x), yCounter);
+            g->translate((int)(this->vPos.x), yCounter);
 
             g->translate(shadowOffset, shadowOffset);
             g->setColor(0xff000000);
-            g->drawString(m_font, offsetInfoText);
+            g->drawString(this->font, offsetInfoText);
             g->translate(-shadowOffset, -shadowOffset);
             g->setColor(0xffffffff);
-            g->drawString(m_font, offsetInfoText);
+            g->drawString(this->font, offsetInfoText);
         }
         g->popTransform();
     }
 }
 
 void InfoLabel::mouse_update(bool *propagate_clicks) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
     CBaseUIButton::mouse_update(propagate_clicks);
 
     // detail info tooltip when hovering over diff info
-    if(isMouseInside() && !osu->getOptionsMenu()->isMouseInside()) {
+    if(this->isMouseInside() && !osu->getOptionsMenu()->isMouseInside()) {
         Beatmap *beatmap = osu->getSelectedBeatmap();
         if(beatmap != NULL) {
             const float speedMultiplierInv = (1.0f / beatmap->getSpeedMultiplier());
@@ -248,41 +250,41 @@ void InfoLabel::mouse_update(bool *propagate_clicks) {
 }
 
 void InfoLabel::setFromBeatmap(Beatmap *beatmap, DatabaseBeatmap *diff2) {
-    m_iBeatmapId = diff2->getID();
+    this->iBeatmapId = diff2->getID();
 
-    setArtist(diff2->getArtist());
-    setTitle(diff2->getTitle());
-    setDiff(diff2->getDifficultyName());
-    setMapper(diff2->getCreator());
+    this->setArtist(diff2->getArtist());
+    this->setTitle(diff2->getTitle());
+    this->setDiff(diff2->getDifficultyName());
+    this->setMapper(diff2->getCreator());
 
-    setLengthMS(diff2->getLengthMS());
-    setBPM(diff2->getMinBPM(), diff2->getMaxBPM(), diff2->getMostCommonBPM());
-    setNumObjects(diff2->getNumObjects());
+    this->setLengthMS(diff2->getLengthMS());
+    this->setBPM(diff2->getMinBPM(), diff2->getMaxBPM(), diff2->getMostCommonBPM());
+    this->setNumObjects(diff2->getNumObjects());
 
-    setCS(diff2->getCS());
-    setAR(diff2->getAR());
-    setOD(diff2->getOD());
-    setHP(diff2->getHP());
-    setStars(diff2->getStarsNomod());
+    this->setCS(diff2->getCS());
+    this->setAR(diff2->getAR());
+    this->setOD(diff2->getOD());
+    this->setHP(diff2->getHP());
+    this->setStars(diff2->getStarsNomod());
 
-    setLocalOffset(diff2->getLocalOffset());
-    setOnlineOffset(diff2->getOnlineOffset());
+    this->setLocalOffset(diff2->getLocalOffset());
+    this->setOnlineOffset(diff2->getOnlineOffset());
 }
 
 UString InfoLabel::buildSongInfoString() {
-    unsigned long lengthMS = m_iLengthMS;
+    unsigned long lengthMS = this->iLengthMS;
     auto speed = osu->getSelectedBeatmap()->getSpeedMultiplier();
 
     const unsigned long fullSeconds = (lengthMS * (1.0 / speed)) / 1000.0;
     const int minutes = fullSeconds / 60;
     const int seconds = fullSeconds % 60;
 
-    const int minBPM = m_iMinBPM * speed;
-    const int maxBPM = m_iMaxBPM * speed;
-    const int mostCommonBPM = m_iMostCommonBPM * speed;
+    const int minBPM = this->iMinBPM * speed;
+    const int maxBPM = this->iMaxBPM * speed;
+    const int mostCommonBPM = this->iMostCommonBPM * speed;
 
-    int numObjects = m_iNumObjects;
-    if(m_iMinBPM == m_iMaxBPM) {
+    int numObjects = this->iNumObjects;
+    if(this->iMinBPM == this->iMaxBPM) {
         return UString::format("Length: %02i:%02i BPM: %i Objects: %i", minutes, seconds, maxBPM, numObjects);
     } else {
         return UString::format("Length: %02i:%02i BPM: %i-%i (%i) Objects: %i", minutes, seconds, minBPM, maxBPM,
@@ -292,11 +294,11 @@ UString InfoLabel::buildSongInfoString() {
 
 UString InfoLabel::buildDiffInfoString() {
     bool pp_available = false;
-    float CS = m_fCS;
-    float AR = m_fAR;
-    float OD = m_fOD;
-    float HP = m_fHP;
-    float stars = m_fStars;
+    float CS = this->fCS;
+    float AR = this->fAR;
+    float OD = this->fOD;
+    float HP = this->fHP;
+    float stars = this->fStars;
     float modStars = 0.f;
     float modPp = 0.f;
 
@@ -309,9 +311,9 @@ UString InfoLabel::buildDiffInfoString() {
 
         auto diff2 = beatmap->getSelectedDifficulty2();
         if(diff2) {
-            modStars = diff2->m_pp_info.total_stars;
-            modPp = diff2->m_pp_info.pp;
-            if(diff2->m_pp_info.pp != -1.0) {
+            modStars = diff2->pp.total_stars;
+            modPp = diff2->pp.pp;
+            if(diff2->pp.pp != -1.0) {
                 pp_available = true;
             }
         }
@@ -337,26 +339,27 @@ UString InfoLabel::buildDiffInfoString() {
 }
 
 UString InfoLabel::buildOffsetInfoString() {
-    return UString::format("Your Offset: %ld ms / Online Offset: %ld ms", m_iLocalOffset, m_iOnlineOffset);
+    return UString::format("Your Offset: %ld ms / Online Offset: %ld ms", this->iLocalOffset, this->iOnlineOffset);
 }
 
 float InfoLabel::getMinimumWidth() {
     float titleWidth = 0;
     float subTitleWidth = 0;
-    float songInfoWidth = m_font->getStringWidth(buildSongInfoString()) * m_fSongInfoScale;
-    float diffInfoWidth = m_font->getStringWidth(buildDiffInfoString()) * m_fDiffInfoScale;
-    float offsetInfoWidth = m_font->getStringWidth(buildOffsetInfoString()) * m_fOffsetInfoScale;
+    float songInfoWidth = this->font->getStringWidth(this->buildSongInfoString()) * this->fSongInfoScale;
+    float diffInfoWidth = this->font->getStringWidth(this->buildDiffInfoString()) * this->fDiffInfoScale;
+    float offsetInfoWidth = this->font->getStringWidth(this->buildOffsetInfoString()) * this->fOffsetInfoScale;
 
     return max(max(max(max(titleWidth, subTitleWidth), songInfoWidth), diffInfoWidth), offsetInfoWidth);
 }
 
 float InfoLabel::getMinimumHeight() {
-    float titleHeight = m_font->getHeight() * m_fTitleScale;
-    float subTitleHeight = m_font->getHeight() * m_fSubTitleScale;
-    float songInfoHeight = m_font->getHeight() * m_fSongInfoScale;
-    float diffInfoHeight = m_font->getHeight() * m_fDiffInfoScale;
+    float titleHeight = this->font->getHeight() * this->fTitleScale;
+    float subTitleHeight = this->font->getHeight() * this->fSubTitleScale;
+    float songInfoHeight = this->font->getHeight() * this->fSongInfoScale;
+    float diffInfoHeight = this->font->getHeight() * this->fDiffInfoScale;
     /// float offsetInfoHeight = m_font->getHeight() * m_fOffsetInfoScale;
 
     return titleHeight + subTitleHeight + songInfoHeight + diffInfoHeight /* + offsetInfoHeight*/ +
-           m_iMargin * 3;  // this is commented on purpose (also, it should be m_iMargin*4 but the 3 is also on purpose)
+           this->iMargin *
+               3;  // this is commented on purpose (also, it should be m_iMargin*4 but the 3 is also on purpose)
 }

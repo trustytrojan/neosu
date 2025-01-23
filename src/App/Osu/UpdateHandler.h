@@ -25,7 +25,7 @@ class UpdateHandler {
 
     void checkForUpdates();
 
-    inline STATUS getStatus() const { return m_status; }
+    inline STATUS getStatus() const { return this->status; }
     UString update_url;
 
    private:
@@ -36,10 +36,10 @@ class UpdateHandler {
     bool _downloadUpdate();
     void _installUpdate(std::string zipFilePath);
 
-    std::thread* m_updateThread = NULL;
+    std::thread* updateThread = NULL;
     bool _m_bKYS;
 
     // status
-    STATUS m_status;
-    int m_iNumRetries;
+    STATUS status;
+    int iNumRetries;
 };

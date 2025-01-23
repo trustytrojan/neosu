@@ -10,8 +10,8 @@
 #include "Engine.h"
 
 Gamepad::Gamepad() : InputDevice() {
-    m_fLeftStickDeadZoneX = m_fRightStickDeadZoneX = 0.28f;
-    m_fLeftStickDeadZoneY = m_fRightStickDeadZoneY = 0.28f;
+    this->fLeftStickDeadZoneX = this->fRightStickDeadZoneX = 0.28f;
+    this->fLeftStickDeadZoneY = this->fRightStickDeadZoneY = 0.28f;
 }
 
 void Gamepad::addListener(GamepadListener *gamepadListener, bool insertOnTop) {
@@ -21,40 +21,40 @@ void Gamepad::addListener(GamepadListener *gamepadListener, bool insertOnTop) {
     }
 
     if(insertOnTop)
-        m_listeners.insert(m_listeners.begin(), gamepadListener);
+        this->listeners.insert(this->listeners.begin(), gamepadListener);
     else
-        m_listeners.push_back(gamepadListener);
+        this->listeners.push_back(gamepadListener);
 }
 
 void Gamepad::removeListener(GamepadListener *gamepadListener) {
-    for(size_t i = 0; i < m_listeners.size(); i++) {
-        if(m_listeners[i] == gamepadListener) {
-            m_listeners.erase(m_listeners.begin() + i);
+    for(size_t i = 0; i < this->listeners.size(); i++) {
+        if(this->listeners[i] == gamepadListener) {
+            this->listeners.erase(this->listeners.begin() + i);
             i--;
         }
     }
 }
 
 void Gamepad::onButtonDown(GAMEPADBUTTON b) {
-    for(size_t i = 0; i < m_listeners.size(); i++) {
-        m_listeners[i]->onButtonDown(b);
+    for(size_t i = 0; i < this->listeners.size(); i++) {
+        this->listeners[i]->onButtonDown(b);
     }
 }
 
 void Gamepad::onButtonUp(GAMEPADBUTTON b) {
-    for(size_t i = 0; i < m_listeners.size(); i++) {
-        m_listeners[i]->onButtonUp(b);
+    for(size_t i = 0; i < this->listeners.size(); i++) {
+        this->listeners[i]->onButtonUp(b);
     }
 }
 
 void Gamepad::onConnected() {
-    for(size_t i = 0; i < m_listeners.size(); i++) {
-        m_listeners[i]->onConnected();
+    for(size_t i = 0; i < this->listeners.size(); i++) {
+        this->listeners[i]->onConnected();
     }
 }
 
 void Gamepad::onDisconnected() {
-    for(size_t i = 0; i < m_listeners.size(); i++) {
-        m_listeners[i]->onDisconnected();
+    for(size_t i = 0; i < this->listeners.size(); i++) {
+        this->listeners[i]->onDisconnected();
     }
 }

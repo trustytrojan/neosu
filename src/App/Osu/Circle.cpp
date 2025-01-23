@@ -33,13 +33,13 @@ void Circle::drawApproachCircle(Graphics *g, Beatmap *beatmap, Vector2 rawPos, i
               (int)(COLOR_GET_Bi(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()));
 
     drawApproachCircle(g, beatmap->getSkin(), beatmap->osuCoords2Pixels(rawPos), comboColor,
-                       beatmap->m_fHitcircleDiameter, approachScale, alpha, osu->getModHD(), overrideHDApproachCircle);
+                       beatmap->fHitcircleDiameter, approachScale, alpha, osu->getModHD(), overrideHDApproachCircle);
 }
 
 void Circle::drawCircle(Graphics *g, Beatmap *beatmap, Vector2 rawPos, int number, int colorCounter, int colorOffset,
                         float colorRGBMultiplier, float approachScale, float alpha, float numberAlpha, bool drawNumber,
                         bool overrideHDApproachCircle) {
-    drawCircle(g, beatmap->getSkin(), beatmap->osuCoords2Pixels(rawPos), beatmap->m_fHitcircleDiameter,
+    drawCircle(g, beatmap->getSkin(), beatmap->osuCoords2Pixels(rawPos), beatmap->fHitcircleDiameter,
                beatmap->getNumberScale(), beatmap->getHitcircleOverlapScale(), number, colorCounter, colorOffset,
                colorRGBMultiplier, approachScale, alpha, numberAlpha, drawNumber, overrideHDApproachCircle);
 }
@@ -96,7 +96,7 @@ void Circle::drawCircle(Graphics *g, Skin *skin, Vector2 pos, float hitcircleDia
 void Circle::drawSliderStartCircle(Graphics *g, Beatmap *beatmap, Vector2 rawPos, int number, int colorCounter,
                                    int colorOffset, float colorRGBMultiplier, float approachScale, float alpha,
                                    float numberAlpha, bool drawNumber, bool overrideHDApproachCircle) {
-    drawSliderStartCircle(g, beatmap->getSkin(), beatmap->osuCoords2Pixels(rawPos), beatmap->m_fHitcircleDiameter,
+    drawSliderStartCircle(g, beatmap->getSkin(), beatmap->osuCoords2Pixels(rawPos), beatmap->fHitcircleDiameter,
                           beatmap->getNumberScale(), beatmap->getHitcircleOverlapScale(), number, colorCounter,
                           colorOffset, colorRGBMultiplier, approachScale, alpha, numberAlpha, drawNumber,
                           overrideHDApproachCircle);
@@ -152,7 +152,7 @@ void Circle::drawSliderStartCircle(Graphics *g, Skin *skin, Vector2 pos, float h
 void Circle::drawSliderEndCircle(Graphics *g, Beatmap *beatmap, Vector2 rawPos, int number, int colorCounter,
                                  int colorOffset, float colorRGBMultiplier, float approachScale, float alpha,
                                  float numberAlpha, bool drawNumber, bool overrideHDApproachCircle) {
-    drawSliderEndCircle(g, beatmap->getSkin(), beatmap->osuCoords2Pixels(rawPos), beatmap->m_fHitcircleDiameter,
+    drawSliderEndCircle(g, beatmap->getSkin(), beatmap->osuCoords2Pixels(rawPos), beatmap->fHitcircleDiameter,
                         beatmap->getNumberScale(), beatmap->getHitcircleOverlapScale(), number, colorCounter,
                         colorOffset, colorRGBMultiplier, approachScale, alpha, numberAlpha, drawNumber,
                         overrideHDApproachCircle);
@@ -391,16 +391,16 @@ void Circle::drawHitCircleNumber(Graphics *g, Skin *skin, float numberScale, flo
 Circle::Circle(int x, int y, long time, int sampleType, int comboNumber, bool isEndOfCombo, int colorCounter,
                int colorOffset, BeatmapInterface *beatmap)
     : HitObject(time, sampleType, comboNumber, isEndOfCombo, colorCounter, colorOffset, beatmap) {
-    type = HitObjectType::CIRCLE;
+    this->type = HitObjectType::CIRCLE;
 
-    m_vOriginalRawPos = Vector2(x, y);
-    m_vRawPos = m_vOriginalRawPos;
-    m_bWaiting = false;
-    m_fHitAnimation = 0.0f;
-    m_fShakeAnimation = 0.0f;
+    this->vOriginalRawPos = Vector2(x, y);
+    this->vRawPos = this->vOriginalRawPos;
+    this->bWaiting = false;
+    this->fHitAnimation = 0.0f;
+    this->fShakeAnimation = 0.0f;
 }
 
-Circle::~Circle() { onReset(0); }
+Circle::~Circle() { this->onReset(0); }
 
 void Circle::draw(Graphics *g) {
     HitObject::draw(g);
@@ -408,10 +408,10 @@ void Circle::draw(Graphics *g) {
 
     // draw hit animation
     bool is_instafade = cv_instafade.getBool();
-    if(!is_instafade && m_fHitAnimation > 0.0f && m_fHitAnimation != 1.0f && !osu->getModHD()) {
-        float alpha = 1.0f - m_fHitAnimation;
+    if(!is_instafade && this->fHitAnimation > 0.0f && this->fHitAnimation != 1.0f && !osu->getModHD()) {
+        float alpha = 1.0f - this->fHitAnimation;
 
-        float scale = m_fHitAnimation;
+        float scale = this->fHitAnimation;
         scale = -scale * (scale - 2.0f);  // quad out scale
 
         const bool drawNumber = skin->getVersion() > 1.0f ? false : true;
@@ -421,26 +421,26 @@ void Circle::draw(Graphics *g) {
         {
             g->scale((1.0f + scale * foscale), (1.0f + scale * foscale));
             skin->getHitCircleOverlay2()->setAnimationTimeOffset(
-                skin->getAnimationSpeed(),
-                !bm->isInMafhamRenderChunk() ? click_time - m_iApproachTime : bm->getCurMusicPosWithOffsets());
-            drawCircle(g, bm, m_vRawPos, combo_number, m_iColorCounter, m_iColorOffset, 1.0f, 1.0f, alpha, alpha,
-                       drawNumber);
+                skin->getAnimationSpeed(), !this->bm->isInMafhamRenderChunk() ? this->click_time - this->iApproachTime
+                                                                              : this->bm->getCurMusicPosWithOffsets());
+            drawCircle(g, this->bm, this->vRawPos, this->combo_number, this->iColorCounter, this->iColorOffset, 1.0f,
+                       1.0f, alpha, alpha, drawNumber);
         }
         g->popTransform();
     }
 
-    if(m_bFinished ||
-       (!m_bVisible && !m_bWaiting))  // special case needed for when we are past this objects time, but still within
-                                      // not-miss range, because we still need to draw the object
+    if(this->bFinished ||
+       (!this->bVisible && !this->bWaiting))  // special case needed for when we are past this objects time, but still
+                                              // within not-miss range, because we still need to draw the object
         return;
 
     // draw circle
     const bool hd = osu->getModHD();
-    Vector2 shakeCorrectedPos = m_vRawPos;
-    if(engine->getTime() < m_fShakeAnimation && !bm->isInMafhamRenderChunk())  // handle note blocking shaking
+    Vector2 shakeCorrectedPos = this->vRawPos;
+    if(engine->getTime() < this->fShakeAnimation && !this->bm->isInMafhamRenderChunk())  // handle note blocking shaking
     {
-        float smooth =
-            1.0f - ((m_fShakeAnimation - engine->getTime()) / cv_circle_shake_duration.getFloat());  // goes from 0 to 1
+        float smooth = 1.0f - ((this->fShakeAnimation - engine->getTime()) /
+                               cv_circle_shake_duration.getFloat());  // goes from 0 to 1
         if(smooth < 0.5f)
             smooth = smooth / 0.5f;
         else
@@ -451,17 +451,17 @@ void Circle::draw(Graphics *g) {
         shakeCorrectedPos.x += std::sin(engine->getTime() * 120) * smooth * cv_circle_shake_strength.getFloat();
     }
     skin->getHitCircleOverlay2()->setAnimationTimeOffset(
-        skin->getAnimationSpeed(),
-        !bm->isInMafhamRenderChunk() ? click_time - m_iApproachTime : bm->getCurMusicPosWithOffsets());
-    drawCircle(g, bm, shakeCorrectedPos, combo_number, m_iColorCounter, m_iColorOffset,
-               m_fHittableDimRGBColorMultiplierPercent, m_bWaiting && !hd ? 1.0f : m_fApproachScale,
-               m_bWaiting && !hd ? 1.0f : m_fAlpha, m_bWaiting && !hd ? 1.0f : m_fAlpha, true,
-               m_bOverrideHDApproachCircle);
+        skin->getAnimationSpeed(), !this->bm->isInMafhamRenderChunk() ? this->click_time - this->iApproachTime
+                                                                      : this->bm->getCurMusicPosWithOffsets());
+    drawCircle(g, this->bm, shakeCorrectedPos, this->combo_number, this->iColorCounter, this->iColorOffset,
+               this->fHittableDimRGBColorMultiplierPercent, this->bWaiting && !hd ? 1.0f : this->fApproachScale,
+               this->bWaiting && !hd ? 1.0f : this->fAlpha, this->bWaiting && !hd ? 1.0f : this->fAlpha, true,
+               this->bOverrideHDApproachCircle);
 }
 
 void Circle::draw2(Graphics *g) {
     HitObject::draw2(g);
-    if(m_bFinished || (!m_bVisible && !m_bWaiting))
+    if(this->bFinished || (!this->bVisible && !this->bWaiting))
         return;  // special case needed for when we are past this objects time, but still within not-miss range, because
                  // we still need to draw the object
 
@@ -472,136 +472,139 @@ void Circle::draw2(Graphics *g) {
     // (https://github.com/McKay42/McOsu/issues/165)
     if(cv_bug_flicker_log.getBool()) {
         const float approachCircleImageScale =
-            bm->m_fHitcircleDiameter / (128.0f * (bm->getSkin()->isApproachCircle2x() ? 2.0f : 1.0f));
-        debugLog("click_time = %ld, aScale = %f, iScale = %f\n", click_time, m_fApproachScale,
+            this->bm->fHitcircleDiameter / (128.0f * (this->bm->getSkin()->isApproachCircle2x() ? 2.0f : 1.0f));
+        debugLog("click_time = %ld, aScale = %f, iScale = %f\n", click_time, this->fApproachScale,
                  approachCircleImageScale);
     }
 
-    drawApproachCircle(g, bm, m_vRawPos, combo_number, m_iColorCounter, m_iColorOffset,
-                       m_fHittableDimRGBColorMultiplierPercent, m_bWaiting && !hd ? 1.0f : m_fApproachScale,
-                       m_bWaiting && !hd ? 1.0f : m_fAlphaForApproachCircle, m_bOverrideHDApproachCircle);
+    drawApproachCircle(g, this->bm, this->vRawPos, this->combo_number, this->iColorCounter, this->iColorOffset,
+                       this->fHittableDimRGBColorMultiplierPercent, this->bWaiting && !hd ? 1.0f : this->fApproachScale,
+                       this->bWaiting && !hd ? 1.0f : this->fAlphaForApproachCircle, this->bOverrideHDApproachCircle);
 }
 
 void Circle::update(long curPos, f64 frame_time) {
     HitObject::update(curPos, frame_time);
-    if(m_bFinished) return;
+    if(this->bFinished) return;
 
-    const auto mods = bi->getMods();
-    const long delta = curPos - click_time;
+    const auto mods = this->bi->getMods();
+    const long delta = curPos - this->click_time;
 
     if(mods.flags & Replay::ModFlags::Autoplay) {
-        if(curPos >= click_time) {
-            onHit(LiveScore::HIT::HIT_300, 0);
+        if(curPos >= this->click_time) {
+            this->onHit(LiveScore::HIT::HIT_300, 0);
         }
         return;
     }
 
     if(mods.flags & Replay::ModFlags::Relax) {
-        if(curPos >= click_time + (long)cv_relax_offset.getInt() && !bi->isPaused() && !bi->isContinueScheduled()) {
-            const Vector2 pos = bi->osuCoords2Pixels(m_vRawPos);
-            const float cursorDelta = (bi->getCursorPos() - pos).length();
-            if((cursorDelta < bi->m_fHitcircleDiameter / 2.0f && (bi->getModsLegacy() & LegacyFlags::Relax))) {
-                LiveScore::HIT result = bi->getHitResult(delta);
+        if(curPos >= this->click_time + (long)cv_relax_offset.getInt() && !this->bi->isPaused() &&
+           !this->bi->isContinueScheduled()) {
+            const Vector2 pos = this->bi->osuCoords2Pixels(this->vRawPos);
+            const float cursorDelta = (this->bi->getCursorPos() - pos).length();
+            if((cursorDelta < this->bi->fHitcircleDiameter / 2.0f &&
+                (this->bi->getModsLegacy() & LegacyFlags::Relax))) {
+                LiveScore::HIT result = this->bi->getHitResult(delta);
 
                 if(result != LiveScore::HIT::HIT_NULL) {
-                    const float targetDelta = cursorDelta / (bi->m_fHitcircleDiameter / 2.0f);
+                    const float targetDelta = cursorDelta / (this->bi->fHitcircleDiameter / 2.0f);
                     const float targetAngle =
-                        rad2deg(atan2(bi->getCursorPos().y - pos.y, bi->getCursorPos().x - pos.x));
+                        rad2deg(atan2(this->bi->getCursorPos().y - pos.y, this->bi->getCursorPos().x - pos.x));
 
-                    onHit(result, delta, targetDelta, targetAngle);
+                    this->onHit(result, delta, targetDelta, targetAngle);
                 }
             }
         }
     }
 
     if(delta >= 0) {
-        m_bWaiting = true;
+        this->bWaiting = true;
 
         // if this is a miss after waiting
-        if(delta > (long)bi->getHitWindow50()) {
-            onHit(LiveScore::HIT::HIT_MISS, delta);
+        if(delta > (long)this->bi->getHitWindow50()) {
+            this->onHit(LiveScore::HIT::HIT_MISS, delta);
         }
     } else {
-        m_bWaiting = false;
+        this->bWaiting = false;
     }
 }
 
 void Circle::updateStackPosition(float stackOffset) {
-    m_vRawPos = m_vOriginalRawPos -
-                Vector2(m_iStack * stackOffset,
-                        m_iStack * stackOffset * ((bi->getModsLegacy() & LegacyFlags::HardRock) ? -1.0f : 1.0f));
+    this->vRawPos =
+        this->vOriginalRawPos -
+        Vector2(this->iStack * stackOffset,
+                this->iStack * stackOffset * ((this->bi->getModsLegacy() & LegacyFlags::HardRock) ? -1.0f : 1.0f));
 }
 
 void Circle::miss(long curPos) {
-    if(m_bFinished) return;
+    if(this->bFinished) return;
 
-    const long delta = curPos - click_time;
+    const long delta = curPos - this->click_time;
 
-    onHit(LiveScore::HIT::HIT_MISS, delta);
+    this->onHit(LiveScore::HIT::HIT_MISS, delta);
 }
 
 void Circle::onClickEvent(std::vector<Click> &clicks) {
-    if(m_bFinished) return;
+    if(this->bFinished) return;
 
     const Vector2 cursorPos = clicks[0].pos;
-    const Vector2 pos = bi->osuCoords2Pixels(m_vRawPos);
+    const Vector2 pos = this->bi->osuCoords2Pixels(this->vRawPos);
     const float cursorDelta = (cursorPos - pos).length();
 
-    if(cursorDelta < bi->m_fHitcircleDiameter / 2.0f) {
+    if(cursorDelta < this->bi->fHitcircleDiameter / 2.0f) {
         // note blocking & shake
-        if(m_bBlocked) {
-            m_fShakeAnimation = engine->getTime() + cv_circle_shake_duration.getFloat();
+        if(this->bBlocked) {
+            this->fShakeAnimation = engine->getTime() + cv_circle_shake_duration.getFloat();
             return;  // ignore click event completely
         }
 
-        const long delta = clicks[0].click_time - (long)click_time;
+        const long delta = clicks[0].click_time - (long)this->click_time;
 
-        LiveScore::HIT result = bi->getHitResult(delta);
+        LiveScore::HIT result = this->bi->getHitResult(delta);
         if(result != LiveScore::HIT::HIT_NULL) {
-            const float targetDelta = cursorDelta / (bi->m_fHitcircleDiameter / 2.0f);
+            const float targetDelta = cursorDelta / (this->bi->fHitcircleDiameter / 2.0f);
             const float targetAngle = rad2deg(atan2(cursorPos.y - pos.y, cursorPos.x - pos.x));
 
             clicks.erase(clicks.begin());
-            onHit(result, delta, targetDelta, targetAngle);
+            this->onHit(result, delta, targetDelta, targetAngle);
         }
     }
 }
 
 void Circle::onHit(LiveScore::HIT result, long delta, float targetDelta, float targetAngle) {
     // sound and hit animation
-    if(bm != NULL && result != LiveScore::HIT::HIT_MISS) {
-        if(cv_timingpoints_force.getBool()) bm->updateTimingPoints(click_time);
+    if(this->bm != NULL && result != LiveScore::HIT::HIT_MISS) {
+        if(cv_timingpoints_force.getBool()) this->bm->updateTimingPoints(this->click_time);
 
-        const Vector2 osuCoords = bm->pixels2OsuCoords(bm->osuCoords2Pixels(m_vRawPos));
+        const Vector2 osuCoords = this->bm->pixels2OsuCoords(this->bm->osuCoords2Pixels(this->vRawPos));
 
-        bm->getSkin()->playHitCircleSound(m_iSampleType, GameRules::osuCoords2Pan(osuCoords.x), delta);
+        this->bm->getSkin()->playHitCircleSound(this->iSampleType, GameRules::osuCoords2Pan(osuCoords.x), delta);
 
-        m_fHitAnimation = 0.001f;  // quickfix for 1 frame missing images
-        anim->moveQuadOut(&m_fHitAnimation, 1.0f, GameRules::getFadeOutTime(bm), true);
+        this->fHitAnimation = 0.001f;  // quickfix for 1 frame missing images
+        anim->moveQuadOut(&this->fHitAnimation, 1.0f, GameRules::getFadeOutTime(this->bm), true);
     }
 
     // add it, and we are finished
-    addHitResult(result, delta, is_end_of_combo, m_vRawPos, targetDelta, targetAngle);
-    m_bFinished = true;
+    this->addHitResult(result, delta, this->is_end_of_combo, this->vRawPos, targetDelta, targetAngle);
+    this->bFinished = true;
 }
 
 void Circle::onReset(long curPos) {
     HitObject::onReset(curPos);
 
-    m_bWaiting = false;
-    m_fShakeAnimation = 0.0f;
+    this->bWaiting = false;
+    this->fShakeAnimation = 0.0f;
 
-    if(bm != NULL) {
-        anim->deleteExistingAnimation(&m_fHitAnimation);
+    if(this->bm != NULL) {
+        anim->deleteExistingAnimation(&this->fHitAnimation);
     }
 
-    if(click_time > curPos) {
-        m_bFinished = false;
-        m_fHitAnimation = 0.0f;
+    if(this->click_time > curPos) {
+        this->bFinished = false;
+        this->fHitAnimation = 0.0f;
     } else {
-        m_bFinished = true;
-        m_fHitAnimation = 1.0f;
+        this->bFinished = true;
+        this->fHitAnimation = 1.0f;
     }
 }
 
-Vector2 Circle::getAutoCursorPos(long curPos) { return bi->osuCoords2Pixels(m_vRawPos); }
+Vector2 Circle::getAutoCursorPos(long curPos) { return this->bi->osuCoords2Pixels(this->vRawPos); }

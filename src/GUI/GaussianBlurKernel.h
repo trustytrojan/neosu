@@ -16,28 +16,28 @@ class GaussianBlurKernel {
     ~GaussianBlurKernel();
 
     void rebuild() {
-        release();
-        build();
+        this->release();
+        this->build();
     }
     void release();
 
-    inline const int getKernelSize() { return m_iKernelSize; }
-    inline const float getRadius() { return m_fRadius; }
+    inline const int getKernelSize() { return this->iKernelSize; }
+    inline const float getRadius() { return this->fRadius; }
 
-    inline float* getKernel() { return &m_kernel.front(); }
-    inline float* getOffsetsHorizontal() { return &m_offsetsHorizontal.front(); }
-    inline float* getOffsetsVertical() { return &m_offsetsVertical.front(); }
+    inline float* getKernel() { return &this->kernel.front(); }
+    inline float* getOffsetsHorizontal() { return &this->offsetsHorizontal.front(); }
+    inline float* getOffsetsVertical() { return &this->offsetsVertical.front(); }
 
    private:
     void build();
 
-    float m_fRadius;
-    int m_iKernelSize;
-    int m_iTargetWidth, m_iTargetHeight;
+    float fRadius;
+    int iKernelSize;
+    int iTargetWidth, iTargetHeight;
 
-    std::vector<float> m_kernel;
-    std::vector<float> m_offsetsHorizontal;
-    std::vector<float> m_offsetsVertical;
+    std::vector<float> kernel;
+    std::vector<float> offsetsHorizontal;
+    std::vector<float> offsetsVertical;
 };
 
 #endif

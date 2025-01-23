@@ -20,27 +20,27 @@ struct BanchoFileReader {
         static_assert(sizeof(T) < READ_BUFFER_SIZE);
         static u8 NULL_ARRAY[sizeof(T)] = {0};
 
-        if(file == NULL) {
+        if(this->file == NULL) {
             return *(T*)NULL_ARRAY;
         }
 
         // XXX: Use proper ring buffer instead of memmove
-        if(pos + sizeof(T) > avail) {
-            memmove(buffer, buffer + pos, avail);
-            pos = 0;
-            avail += fread(buffer + avail, 1, READ_BUFFER_SIZE - avail, file);
+        if(this->pos + sizeof(T) > this->avail) {
+            memmove(this->buffer, this->buffer + this->pos, this->avail);
+            this->pos = 0;
+            this->avail += fread(this->buffer + this->avail, 1, READ_BUFFER_SIZE - this->avail, this->file);
         }
 
-        if(pos + sizeof(T) > avail) {
-            pos = (pos + sizeof(T)) % READ_BUFFER_SIZE;
-            avail = 0;
-            total_pos = total_size;
+        if(this->pos + sizeof(T) > this->avail) {
+            this->pos = (this->pos + sizeof(T)) % READ_BUFFER_SIZE;
+            this->avail = 0;
+            this->total_pos = this->total_size;
             return *(T*)NULL_ARRAY;
         } else {
-            u8* out_ptr = buffer + pos;
-            pos = (pos + sizeof(T)) % READ_BUFFER_SIZE;
-            avail -= sizeof(T);
-            total_pos += sizeof(T);
+            u8* out_ptr = this->buffer + this->pos;
+            this->pos = (this->pos + sizeof(T)) % READ_BUFFER_SIZE;
+            this->avail -= sizeof(T);
+            this->total_pos += sizeof(T);
             return *(T*)(out_ptr);
         }
     }
@@ -68,7 +68,7 @@ struct BanchoFileWriter {
 
     template <typename T>
     void write(T t) {
-        write_bytes((u8*)&t, sizeof(T));
+        this->write_bytes((u8*)&t, sizeof(T));
     }
 
    protected:

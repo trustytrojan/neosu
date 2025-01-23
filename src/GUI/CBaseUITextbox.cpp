@@ -21,129 +21,130 @@ using namespace std;
 
 CBaseUITextbox::CBaseUITextbox(float xPos, float yPos, float xSize, float ySize, UString name)
     : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
-    setKeepActive(true);
+    this->setKeepActive(true);
 
-    grabs_clicks = true;
+    this->grabs_clicks = true;
 
-    m_font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    this->font = engine->getResourceManager()->getFont("FONT_DEFAULT");
 
-    m_textColor = m_frameColor = m_caretColor = 0xffffffff;
-    m_backgroundColor = 0xff000000;
-    m_frameBrightColor = 0;
-    m_frameDarkColor = 0;
+    this->textColor = this->frameColor = this->caretColor = 0xffffffff;
+    this->backgroundColor = 0xff000000;
+    this->frameBrightColor = 0;
+    this->frameDarkColor = 0;
 
-    m_bDrawFrame = true;
-    m_bDrawBackground = true;
+    this->bDrawFrame = true;
+    this->bDrawBackground = true;
 
-    m_iTextJustification = 0;
-    m_iTextAddX = cv_ui_textbox_text_offset_x.getInt();
-    m_iTextAddY = 0;
-    m_fTextScrollAddX = 0;
-    m_iSelectX = 0;
-    m_iCaretX = 0;
-    m_iCaretWidth = 2;
+    this->iTextJustification = 0;
+    this->iTextAddX = cv_ui_textbox_text_offset_x.getInt();
+    this->iTextAddY = 0;
+    this->fTextScrollAddX = 0;
+    this->iSelectX = 0;
+    this->iCaretX = 0;
+    this->iCaretWidth = 2;
 
-    m_bHitenter = false;
-    m_bContextMouse = false;
-    m_bBlockMouse = false;
-    m_bCatchMouse = false;
-    m_bSelectCheck = false;
-    m_iSelectStart = 0;
-    m_iSelectEnd = 0;
+    this->bHitenter = false;
+    this->bContextMouse = false;
+    this->bBlockMouse = false;
+    this->bCatchMouse = false;
+    this->bSelectCheck = false;
+    this->iSelectStart = 0;
+    this->iSelectEnd = 0;
 
-    m_bLine = false;
-    m_fLinetime = 0.0f;
-    m_fTextWidth = 0.0f;
-    m_iCaretPosition = 0;
+    this->bLine = false;
+    this->fLinetime = 0.0f;
+    this->fTextWidth = 0.0f;
+    this->iCaretPosition = 0;
 }
 
 UString CBaseUITextbox::getVisibleText() {
-    if(is_password) {
+    if(this->is_password) {
         UString stars;
-        for(int i = 0; i < m_sText.length(); i++) {
+        for(int i = 0; i < this->sText.length(); i++) {
             stars.append(L'*');
         }
         return stars;
     } else {
-        return m_sText;
+        return this->sText;
     }
 }
 
 void CBaseUITextbox::draw(Graphics *g) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
-    const float dpiScale = ((float)m_font->getDPI() / 96.0f);  // NOTE: abusing font dpi
+    const float dpiScale = ((float)this->font->getDPI() / 96.0f);  // NOTE: abusing font dpi
 
     // draw background
-    if(m_bDrawBackground) {
-        g->setColor(m_backgroundColor);
-        g->fillRect(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y);
+    if(this->bDrawBackground) {
+        g->setColor(this->backgroundColor);
+        g->fillRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
     }
 
     // draw base frame
-    if(m_bDrawFrame) {
-        if(m_frameDarkColor != 0 || m_frameBrightColor != 0)
-            g->drawRect(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y, m_frameDarkColor, m_frameBrightColor,
-                        m_frameBrightColor, m_frameDarkColor);
+    if(this->bDrawFrame) {
+        if(this->frameDarkColor != 0 || this->frameBrightColor != 0)
+            g->drawRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y, this->frameDarkColor,
+                        this->frameBrightColor, this->frameBrightColor, this->frameDarkColor);
         else {
-            g->setColor(m_frameColor);
-            g->drawRect(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y);
+            g->setColor(this->frameColor);
+            g->drawRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
         }
     }
 
     // draw text
 
-    if(m_font == NULL) return;
+    if(this->font == NULL) return;
 
-    g->pushClipRect(McRect(m_vPos.x + 1, m_vPos.y + 1, m_vSize.x - 1, m_vSize.y));
+    g->pushClipRect(McRect(this->vPos.x + 1, this->vPos.y + 1, this->vSize.x - 1, this->vSize.y));
     {
         // draw selection box
-        if(hasSelectedText()) {
-            const int xpos1 = m_vPos.x + m_iTextAddX + m_iCaretX + m_fTextScrollAddX;
-            const int xpos2 = m_vPos.x + m_iSelectX + m_iTextAddX + m_fTextScrollAddX;
+        if(this->hasSelectedText()) {
+            const int xpos1 = this->vPos.x + this->iTextAddX + this->iCaretX + this->fTextScrollAddX;
+            const int xpos2 = this->vPos.x + this->iSelectX + this->iTextAddX + this->fTextScrollAddX;
 
             g->setColor(0xff56bcff);
             if(xpos1 > xpos2)
-                g->fillRect(xpos2, m_vPos.y + 1, xpos1 - xpos2 + 2, m_vSize.y - 1);
+                g->fillRect(xpos2, this->vPos.y + 1, xpos1 - xpos2 + 2, this->vSize.y - 1);
             else
-                g->fillRect(xpos1, m_vPos.y + 1, xpos2 - xpos1, m_vSize.y - 1);
+                g->fillRect(xpos1, this->vPos.y + 1, xpos2 - xpos1, this->vSize.y - 1);
         }
 
-        drawText(g);
+        this->drawText(g);
 
         // draw caret
-        if(m_bActive && m_bLine) {
-            const int caretWidth = std::round((float)m_iCaretWidth * dpiScale);
-            const int height = std::round(m_vSize.y - 2 * 3 * dpiScale);
+        if(this->bActive && this->bLine) {
+            const int caretWidth = std::round((float)this->iCaretWidth * dpiScale);
+            const int height = std::round(this->vSize.y - 2 * 3 * dpiScale);
             const float yadd = std::round(height / 2.0f);
 
-            g->setColor(m_caretColor);
-            g->fillRect((int)(m_vPos.x + m_iTextAddX + m_iCaretX + m_fTextScrollAddX),
-                        (int)(m_vPos.y + m_vSize.y / 2.0f - yadd), caretWidth, height);
+            g->setColor(this->caretColor);
+            g->fillRect((int)(this->vPos.x + this->iTextAddX + this->iCaretX + this->fTextScrollAddX),
+                        (int)(this->vPos.y + this->vSize.y / 2.0f - yadd), caretWidth, height);
         }
     }
     g->popClipRect();
 }
 
 void CBaseUITextbox::drawText(Graphics *g) {
-    g->setColor(m_textColor);
+    g->setColor(this->textColor);
     g->pushTransform();
     {
-        g->translate((int)(m_vPos.x + m_iTextAddX + m_fTextScrollAddX), (int)(m_vPos.y + m_iTextAddY));
-        g->drawString(m_font, getVisibleText());
+        g->translate((int)(this->vPos.x + this->iTextAddX + this->fTextScrollAddX),
+                     (int)(this->vPos.y + this->iTextAddY));
+        g->drawString(this->font, this->getVisibleText());
     }
     g->popTransform();
 }
 
 void CBaseUITextbox::mouse_update(bool *propagate_clicks) {
-    if(!m_bVisible) return;
-    bool was_active = m_bActive;
+    if(!this->bVisible) return;
+    bool was_active = this->bActive;
     CBaseUIElement::mouse_update(propagate_clicks);
 
     // Steal focus from all other Textboxes
-    if(!was_active && m_bActive) {
+    if(!was_active && this->bActive) {
         engine->getApp()->stealFocus();
-        m_bActive = true;
+        this->bActive = true;
     }
 
     const Vector2 mousepos = engine->getMouse()->getPos();
@@ -152,279 +153,284 @@ void CBaseUITextbox::mouse_update(bool *propagate_clicks) {
 
     // HACKHACK: should do this with the proper events! this will only work properly though if we can event.consume()
     // charDown's
-    if(!m_bEnabled && m_bActive && mleft && !m_bMouseInside) m_bActive = false;
+    if(!this->bEnabled && this->bActive && mleft && !this->bMouseInside) this->bActive = false;
 
-    if((m_bMouseInside || (m_bBusy && (mleft || mright))) && (m_bActive || (!mleft && !mright)) && m_bEnabled)
+    if((this->bMouseInside || (this->bBusy && (mleft || mright))) && (this->bActive || (!mleft && !mright)) &&
+       this->bEnabled)
         engine->getMouse()->setCursorType(CURSORTYPE::CURSOR_TEXT);
 
     // update caret blinking
     {
-        if(!m_bActive) {
-            m_bLine = true;
-            m_fLinetime = engine->getTime();
+        if(!this->bActive) {
+            this->bLine = true;
+            this->fLinetime = engine->getTime();
         } else {
-            if((engine->getTime() - m_fLinetime) >= cv_ui_textbox_caret_blink_time.getFloat() && !m_bLine) {
-                m_bLine = true;
-                m_fLinetime = engine->getTime();
+            if((engine->getTime() - this->fLinetime) >= cv_ui_textbox_caret_blink_time.getFloat() && !this->bLine) {
+                this->bLine = true;
+                this->fLinetime = engine->getTime();
             }
 
-            if((engine->getTime() - m_fLinetime) >= cv_ui_textbox_caret_blink_time.getFloat() && m_bLine) {
-                m_bLine = false;
-                m_fLinetime = engine->getTime();
+            if((engine->getTime() - this->fLinetime) >= cv_ui_textbox_caret_blink_time.getFloat() && this->bLine) {
+                this->bLine = false;
+                this->fLinetime = engine->getTime();
             }
         }
     }
 
     // handle mouse input
     {
-        if(!m_bMouseInside && mleft && !m_bActive) m_bBlockMouse = true;
+        if(!this->bMouseInside && mleft && !this->bActive) this->bBlockMouse = true;
 
-        if(m_bMouseInside && (mleft || mright) && m_bActive) {
-            m_bCatchMouse = true;
-            tickCaret();
+        if(this->bMouseInside && (mleft || mright) && this->bActive) {
+            this->bCatchMouse = true;
+            this->tickCaret();
 
-            if(mright) m_bContextMouse = true;
+            if(mright) this->bContextMouse = true;
         }
 
         if(!mleft) {
-            m_bCatchMouse = false;
-            m_bBlockMouse = false;
-            m_bSelectCheck = false;
+            this->bCatchMouse = false;
+            this->bBlockMouse = false;
+            this->bSelectCheck = false;
         }
     }
 
     // handle selecting and scrolling
-    if(m_bBusy && m_bActive && (mleft || mright) && !m_bBlockMouse && m_sText.length() > 0) {
-        tickCaret();
+    if(this->bBusy && this->bActive && (mleft || mright) && !this->bBlockMouse && this->sText.length() > 0) {
+        this->tickCaret();
 
-        const int mouseX = mousepos.x - m_vPos.x;
-        auto visible_text = getVisibleText();
+        const int mouseX = mousepos.x - this->vPos.x;
+        auto visible_text = this->getVisibleText();
 
         // handle scrolling
         if(mleft) {
-            if(m_fTextWidth > m_vSize.x) {
-                if(mouseX < m_vSize.x * 0.15f) {
+            if(this->fTextWidth > this->vSize.x) {
+                if(mouseX < this->vSize.x * 0.15f) {
                     const int scrollspeed = mouseX < 0 ? std::abs(mouseX) / 2 + 1 : 3;
 
                     // TODO: animations which don't suck for usability
-                    m_fTextScrollAddX = clamp<int>(m_fTextScrollAddX + scrollspeed, 0,
-                                                   m_fTextWidth - m_vSize.x + cv_ui_textbox_text_offset_x.getInt() * 2);
-                    /// animation->moveSmoothEnd(&m_fTextScrollAddX, clampi(m_fTextScrollAddX+scrollspeed, 0,
+                    this->fTextScrollAddX =
+                        clamp<int>(this->fTextScrollAddX + scrollspeed, 0,
+                                   this->fTextWidth - this->vSize.x + cv_ui_textbox_text_offset_x.getInt() * 2);
+                    /// animation->moveSmoothEnd(&m_fTextScrollAddX, clampi(this->fTextScrollAddX+scrollspeed, 0,
                     /// m_fTextWidth-m_vSize.x+cv_ui_textbox_text_offset_x.getInt()*2), 1);
                 }
 
-                if(mouseX > m_vSize.x * 0.85f) {
-                    const int scrollspeed = mouseX > m_vSize.x ? std::abs(mouseX - m_vSize.x) / 2 + 1 : 1;
+                if(mouseX > this->vSize.x * 0.85f) {
+                    const int scrollspeed = mouseX > this->vSize.x ? std::abs(mouseX - this->vSize.x) / 2 + 1 : 1;
 
                     // TODO: animations which don't suck for usability
-                    m_fTextScrollAddX = clamp<int>(m_fTextScrollAddX - scrollspeed, 0,
-                                                   m_fTextWidth - m_vSize.x + cv_ui_textbox_text_offset_x.getInt() * 2);
-                    /// animation->moveSmoothEnd(&m_fTextScrollAddX, clampi(m_fTextScrollAddX-scrollspeed, 0,
+                    this->fTextScrollAddX =
+                        clamp<int>(this->fTextScrollAddX - scrollspeed, 0,
+                                   this->fTextWidth - this->vSize.x + cv_ui_textbox_text_offset_x.getInt() * 2);
+                    /// animation->moveSmoothEnd(&m_fTextScrollAddX, clampi(this->fTextScrollAddX-scrollspeed, 0,
                     /// m_fTextWidth-m_vSize.x+cv_ui_textbox_text_offset_x.getInt()*2), 1);
                 }
             }
 
             // handle selecting begin, once per grab
-            if(!m_bSelectCheck) {
-                m_bSelectCheck = true;
+            if(!this->bSelectCheck) {
+                this->bSelectCheck = true;
                 for(int i = 0; i <= visible_text.length(); i++) {
                     const float curGlyphWidth =
-                        m_font->getStringWidth(visible_text.substr(i - 1 > 0 ? i - 1 : 0, 1)) / 2;
-                    if(mouseX >= m_font->getStringWidth(visible_text.substr(0, i)) + m_iTextAddX + m_fTextScrollAddX -
-                                     curGlyphWidth)
-                        m_iSelectStart = i;
+                        this->font->getStringWidth(visible_text.substr(i - 1 > 0 ? i - 1 : 0, 1)) / 2;
+                    if(mouseX >= this->font->getStringWidth(visible_text.substr(0, i)) + this->iTextAddX +
+                                     this->fTextScrollAddX - curGlyphWidth)
+                        this->iSelectStart = i;
                 }
-                m_iSelectX = m_font->getStringWidth(visible_text.substr(0, m_iSelectStart));
+                this->iSelectX = this->font->getStringWidth(visible_text.substr(0, this->iSelectStart));
             }
 
             // handle selecting end
-            m_iSelectEnd = 0;
+            this->iSelectEnd = 0;
             for(int i = 0; i <= visible_text.length(); i++) {
-                const float curGlyphWidth = m_font->getStringWidth(visible_text.substr(i - 1 > 0 ? i - 1 : 0, 1)) / 2;
-                if(mouseX >=
-                   m_font->getStringWidth(visible_text.substr(0, i)) + m_iTextAddX + m_fTextScrollAddX - curGlyphWidth)
-                    m_iSelectEnd = i;
+                const float curGlyphWidth =
+                    this->font->getStringWidth(visible_text.substr(i - 1 > 0 ? i - 1 : 0, 1)) / 2;
+                if(mouseX >= this->font->getStringWidth(visible_text.substr(0, i)) + this->iTextAddX +
+                                 this->fTextScrollAddX - curGlyphWidth)
+                    this->iSelectEnd = i;
             }
-            m_iCaretPosition = m_iSelectEnd;
+            this->iCaretPosition = this->iSelectEnd;
         } else {
-            if(!hasSelectedText()) {
+            if(!this->hasSelectedText()) {
                 for(int i = 0; i <= visible_text.length(); i++) {
                     const float curGlyphWidth =
-                        m_font->getStringWidth(visible_text.substr(i - 1 > 0 ? i - 1 : 0, 1)) / 2;
-                    if(mouseX >= m_font->getStringWidth(visible_text.substr(0, i)) + m_iTextAddX + m_fTextScrollAddX -
-                                     curGlyphWidth)
-                        m_iCaretPosition = i;
+                        this->font->getStringWidth(visible_text.substr(i - 1 > 0 ? i - 1 : 0, 1)) / 2;
+                    if(mouseX >= this->font->getStringWidth(visible_text.substr(0, i)) + this->iTextAddX +
+                                     this->fTextScrollAddX - curGlyphWidth)
+                        this->iCaretPosition = i;
                 }
             }
         }
 
         // update caretx
-        updateCaretX();
+        this->updateCaretX();
     }
 
     // handle context menu
-    if(!mright && m_bContextMouse && isMouseInside()) {
-        m_bContextMouse = false;
+    if(!mright && this->bContextMouse && this->isMouseInside()) {
+        this->bContextMouse = false;
     }
 }
 
-void CBaseUITextbox::onFocusStolen() { deselectText(); }
+void CBaseUITextbox::onFocusStolen() { this->deselectText(); }
 
 void CBaseUITextbox::onKeyDown(KeyboardEvent &e) {
-    if(!m_bActive || !m_bVisible) return;
+    if(!this->bActive || !this->bVisible) return;
 
     e.consume();
 
     switch(e.getKeyCode()) {
         case KEY_DELETE:
-            engine->getSound()->play(osu->getSkin()->m_deletingText);
-            if(m_sText.length() > 0) {
-                if(hasSelectedText())
-                    handleDeleteSelectedText();
-                else if(m_iCaretPosition < m_sText.length()) {
-                    m_sText.erase(m_iCaretPosition, 1);
+            engine->getSound()->play(osu->getSkin()->deletingText);
+            if(this->sText.length() > 0) {
+                if(this->hasSelectedText())
+                    this->handleDeleteSelectedText();
+                else if(this->iCaretPosition < this->sText.length()) {
+                    this->sText.erase(this->iCaretPosition, 1);
 
-                    setText(m_sText);
-                    updateTextPos();
+                    this->setText(this->sText);
+                    this->updateTextPos();
                 }
             }
-            tickCaret();
+            this->tickCaret();
             break;
 
         case KEY_RETURN:
-            m_bHitenter = true;
+            this->bHitenter = true;
             break;
 
         case KEY_ESCAPE:
-            m_bActive = false;
+            this->bActive = false;
             break;
 
         case KEY_BACKSPACE:
-            engine->getSound()->play(osu->getSkin()->m_deletingText);
-            if(m_sText.length() > 0) {
-                if(hasSelectedText())
-                    handleDeleteSelectedText();
-                else if(m_iCaretPosition - 1 >= 0) {
+            engine->getSound()->play(osu->getSkin()->deletingText);
+            if(this->sText.length() > 0) {
+                if(this->hasSelectedText())
+                    this->handleDeleteSelectedText();
+                else if(this->iCaretPosition - 1 >= 0) {
                     if(engine->getKeyboard()->isControlDown()) {
-                        if(is_password) {
-                            setText("");
+                        if(this->is_password) {
+                            this->setText("");
                         }
 
                         // delete everything from the current caret position to the left, until after the first
                         // non-space character (but including it)
                         bool foundNonSpaceChar = false;
-                        while(m_sText.length() > 0 && (m_iCaretPosition - 1) >= 0) {
-                            UString curChar = m_sText.substr(m_iCaretPosition - 1, 1);
+                        while(this->sText.length() > 0 && (this->iCaretPosition - 1) >= 0) {
+                            UString curChar = this->sText.substr(this->iCaretPosition - 1, 1);
 
                             if(foundNonSpaceChar && curChar.isWhitespaceOnly()) break;
 
                             if(!curChar.isWhitespaceOnly()) foundNonSpaceChar = true;
 
-                            m_sText.erase(m_iCaretPosition - 1, 1);
-                            m_iCaretPosition--;
+                            this->sText.erase(this->iCaretPosition - 1, 1);
+                            this->iCaretPosition--;
                         }
                     } else {
-                        m_sText.erase(m_iCaretPosition - 1, 1);
-                        m_iCaretPosition--;
+                        this->sText.erase(this->iCaretPosition - 1, 1);
+                        this->iCaretPosition--;
                     }
 
-                    setText(m_sText);
-                    updateTextPos();
+                    this->setText(this->sText);
+                    this->updateTextPos();
                 }
             }
-            tickCaret();
+            this->tickCaret();
             break;
 
         case KEY_LEFT: {
-            const bool hadSelectedText = hasSelectedText();
-            const int prevSelectPos = min(m_iSelectStart, m_iSelectEnd);
+            const bool hadSelectedText = this->hasSelectedText();
+            const int prevSelectPos = min(this->iSelectStart, this->iSelectEnd);
 
-            deselectText();
+            this->deselectText();
 
             if(!hadSelectedText)
-                m_iCaretPosition = clamp<int>(m_iCaretPosition - 1, 0, m_sText.length());
+                this->iCaretPosition = clamp<int>(this->iCaretPosition - 1, 0, this->sText.length());
             else
-                m_iCaretPosition = clamp<int>(prevSelectPos, 0, m_sText.length());
+                this->iCaretPosition = clamp<int>(prevSelectPos, 0, this->sText.length());
 
-            tickCaret();
-            handleCaretKeyboardMove();
-            updateCaretX();
+            this->tickCaret();
+            this->handleCaretKeyboardMove();
+            this->updateCaretX();
 
-            engine->getSound()->play(osu->getSkin()->m_movingTextCursor);
+            engine->getSound()->play(osu->getSkin()->movingTextCursor);
         } break;
 
         case KEY_RIGHT: {
-            const bool hadSelectedText = hasSelectedText();
-            const int prevSelectPos = max(m_iSelectStart, m_iSelectEnd);
+            const bool hadSelectedText = this->hasSelectedText();
+            const int prevSelectPos = max(this->iSelectStart, this->iSelectEnd);
 
-            deselectText();
+            this->deselectText();
 
             if(!hadSelectedText)
-                m_iCaretPosition = clamp<int>(m_iCaretPosition + 1, 0, m_sText.length());
+                this->iCaretPosition = clamp<int>(this->iCaretPosition + 1, 0, this->sText.length());
             else
-                m_iCaretPosition = clamp<int>(prevSelectPos, 0, m_sText.length());
+                this->iCaretPosition = clamp<int>(prevSelectPos, 0, this->sText.length());
 
-            tickCaret();
-            handleCaretKeyboardMove();
-            updateCaretX();
+            this->tickCaret();
+            this->handleCaretKeyboardMove();
+            this->updateCaretX();
 
-            engine->getSound()->play(osu->getSkin()->m_movingTextCursor);
+            engine->getSound()->play(osu->getSkin()->movingTextCursor);
         } break;
 
         case KEY_C:
-            if(engine->getKeyboard()->isControlDown()) env->setClipBoardText(getSelectedText());
+            if(engine->getKeyboard()->isControlDown()) env->setClipBoardText(this->getSelectedText());
             break;
 
         case KEY_V:
-            if(engine->getKeyboard()->isControlDown()) insertTextFromClipboard();
+            if(engine->getKeyboard()->isControlDown()) this->insertTextFromClipboard();
             break;
 
         case KEY_A:
             if(engine->getKeyboard()->isControlDown()) {
                 // HACKHACK: make proper setSelectedText() function
-                m_iSelectStart = 0;
-                m_iSelectEnd = m_sText.length();
+                this->iSelectStart = 0;
+                this->iSelectEnd = this->sText.length();
 
-                m_iCaretPosition = m_iSelectEnd;
-                m_iSelectX = m_font->getStringWidth(getVisibleText());
-                m_iCaretX = 0;
-                m_fTextScrollAddX =
-                    m_fTextWidth < m_vSize.x ? 0 : m_fTextWidth - m_vSize.x + cv_ui_textbox_text_offset_x.getInt() * 2;
+                this->iCaretPosition = this->iSelectEnd;
+                this->iSelectX = this->font->getStringWidth(this->getVisibleText());
+                this->iCaretX = 0;
+                this->fTextScrollAddX = this->fTextWidth < this->vSize.x ? 0
+                                                                         : this->fTextWidth - this->vSize.x +
+                                                                               cv_ui_textbox_text_offset_x.getInt() * 2;
             }
             break;
 
         case KEY_X:
-            if(engine->getKeyboard()->isControlDown() && hasSelectedText()) {
-                engine->getSound()->play(osu->getSkin()->m_deletingText);
-                env->setClipBoardText(getSelectedText());
-                handleDeleteSelectedText();
+            if(engine->getKeyboard()->isControlDown() && this->hasSelectedText()) {
+                engine->getSound()->play(osu->getSkin()->deletingText);
+                env->setClipBoardText(this->getSelectedText());
+                this->handleDeleteSelectedText();
             }
             break;
 
         case KEY_HOME:
-            deselectText();
-            m_iCaretPosition = 0;
-            tickCaret();
-            handleCaretKeyboardMove();
-            updateCaretX();
+            this->deselectText();
+            this->iCaretPosition = 0;
+            this->tickCaret();
+            this->handleCaretKeyboardMove();
+            this->updateCaretX();
 
-            engine->getSound()->play(osu->getSkin()->m_movingTextCursor);
+            engine->getSound()->play(osu->getSkin()->movingTextCursor);
             break;
 
         case KEY_END:
-            deselectText();
-            m_iCaretPosition = m_sText.length();
-            tickCaret();
-            handleCaretKeyboardMove();
-            updateCaretX();
+            this->deselectText();
+            this->iCaretPosition = this->sText.length();
+            this->tickCaret();
+            this->handleCaretKeyboardMove();
+            this->updateCaretX();
 
-            engine->getSound()->play(osu->getSkin()->m_movingTextCursor);
+            engine->getSound()->play(osu->getSkin()->movingTextCursor);
             break;
     }
 }
 
 void CBaseUITextbox::onChar(KeyboardEvent &e) {
-    if(!m_bActive || !m_bVisible) return;
+    if(!this->bActive || !this->bVisible) return;
 
     e.consume();
 
@@ -437,152 +443,155 @@ void CBaseUITextbox::onChar(KeyboardEvent &e) {
     if(e.getCharCode() == 127) return;
 
     // delete any potentially selected text
-    handleDeleteSelectedText();
+    this->handleDeleteSelectedText();
 
     // add the pressed letter to the text
     {
         const KEYCODE charCode = e.getCharCode();
 
-        m_sText.insert(m_iCaretPosition, (wchar_t)charCode);
-        m_iCaretPosition++;
+        this->sText.insert(this->iCaretPosition, (wchar_t)charCode);
+        this->iCaretPosition++;
 
-        setText(m_sText);
+        this->setText(this->sText);
     }
 
-    tickCaret();
+    this->tickCaret();
 
-    Sound *sounds[] = {osu->getSkin()->m_typing1, osu->getSkin()->m_typing2, osu->getSkin()->m_typing3,
-                       osu->getSkin()->m_typing4};
+    Sound *sounds[] = {osu->getSkin()->typing1, osu->getSkin()->typing2, osu->getSkin()->typing3,
+                       osu->getSkin()->typing4};
     engine->getSound()->play(sounds[rand() % 4]);
 }
 
 void CBaseUITextbox::handleCaretKeyboardMove() {
-    const int caretPosition =
-        m_iTextAddX + m_font->getStringWidth(getVisibleText().substr(0, m_iCaretPosition)) + m_fTextScrollAddX;
+    const int caretPosition = this->iTextAddX +
+                              this->font->getStringWidth(this->getVisibleText().substr(0, this->iCaretPosition)) +
+                              this->fTextScrollAddX;
     if(caretPosition < 0)
-        m_fTextScrollAddX += std::abs(caretPosition) + cv_ui_textbox_text_offset_x.getInt();
-    else if(caretPosition > (m_vSize.x - cv_ui_textbox_text_offset_x.getInt()))
-        m_fTextScrollAddX -= std::abs(caretPosition - m_vSize.x) + cv_ui_textbox_text_offset_x.getInt();
+        this->fTextScrollAddX += std::abs(caretPosition) + cv_ui_textbox_text_offset_x.getInt();
+    else if(caretPosition > (this->vSize.x - cv_ui_textbox_text_offset_x.getInt()))
+        this->fTextScrollAddX -= std::abs(caretPosition - this->vSize.x) + cv_ui_textbox_text_offset_x.getInt();
 }
 
 void CBaseUITextbox::handleCaretKeyboardDelete() {
-    if(m_fTextWidth > m_vSize.x) {
-        const int caretPosition =
-            m_iTextAddX + m_font->getStringWidth(getVisibleText().substr(0, m_iCaretPosition)) + m_fTextScrollAddX;
-        if(caretPosition < (m_vSize.x - cv_ui_textbox_text_offset_x.getInt()))
-            m_fTextScrollAddX += std::abs(m_vSize.x - cv_ui_textbox_text_offset_x.getInt() - caretPosition);
+    if(this->fTextWidth > this->vSize.x) {
+        const int caretPosition = this->iTextAddX +
+                                  this->font->getStringWidth(this->getVisibleText().substr(0, this->iCaretPosition)) +
+                                  this->fTextScrollAddX;
+        if(caretPosition < (this->vSize.x - cv_ui_textbox_text_offset_x.getInt()))
+            this->fTextScrollAddX += std::abs(this->vSize.x - cv_ui_textbox_text_offset_x.getInt() - caretPosition);
     }
 }
 
 void CBaseUITextbox::tickCaret() {
-    m_bLine = true;
-    m_fLinetime = engine->getTime();
+    this->bLine = true;
+    this->fLinetime = engine->getTime();
 }
 
 bool CBaseUITextbox::hitEnter() {
-    if(m_bHitenter) {
-        m_bHitenter = false;
+    if(this->bHitenter) {
+        this->bHitenter = false;
         return true;
     } else
         return false;
 }
 
-bool CBaseUITextbox::hasSelectedText() const { return ((m_iSelectStart - m_iSelectEnd) != 0); }
+bool CBaseUITextbox::hasSelectedText() const { return ((this->iSelectStart - this->iSelectEnd) != 0); }
 
 void CBaseUITextbox::clear() {
-    deselectText();
-    setText("");
+    this->deselectText();
+    this->setText("");
 }
 
 void CBaseUITextbox::focus(bool move_caret) {
-    m_bActive = true;
-    m_bBusy = true;
-    m_bMouseInside = true;
+    this->bActive = true;
+    this->bBusy = true;
+    this->bMouseInside = true;
 
     if(move_caret) {
-        setCursorPosRight();
+        this->setCursorPosRight();
     }
 }
 
 CBaseUITextbox *CBaseUITextbox::setFont(McFont *font) {
-    m_font = font;
-    setText(m_sText);
+    this->font = font;
+    this->setText(this->sText);
 
     return this;
 }
 
 CBaseUITextbox *CBaseUITextbox::setText(UString text) {
-    m_sText = text;
-    m_iCaretPosition = clamp<int>(m_iCaretPosition, 0, text.length());
+    this->sText = text;
+    this->iCaretPosition = clamp<int>(this->iCaretPosition, 0, text.length());
 
     // handle text justification
-    m_fTextWidth = m_font->getStringWidth(getVisibleText());
-    switch(m_iTextJustification) {
+    this->fTextWidth = this->font->getStringWidth(this->getVisibleText());
+    switch(this->iTextJustification) {
         case 0:  // left
-            m_iTextAddX = cv_ui_textbox_text_offset_x.getInt();
+            this->iTextAddX = cv_ui_textbox_text_offset_x.getInt();
             break;
 
         case 1:  // middle
-            m_iTextAddX = -(m_fTextWidth - m_vSize.x) / 2.0f;
-            m_iTextAddX = m_iTextAddX > 0 ? m_iTextAddX : cv_ui_textbox_text_offset_x.getInt();
+            this->iTextAddX = -(this->fTextWidth - this->vSize.x) / 2.0f;
+            this->iTextAddX = this->iTextAddX > 0 ? this->iTextAddX : cv_ui_textbox_text_offset_x.getInt();
             break;
 
         case 2:  // right
-            m_iTextAddX = (m_vSize.x - m_fTextWidth) - cv_ui_textbox_text_offset_x.getInt();
-            m_iTextAddX = m_iTextAddX > 0 ? m_iTextAddX : cv_ui_textbox_text_offset_x.getInt();
+            this->iTextAddX = (this->vSize.x - this->fTextWidth) - cv_ui_textbox_text_offset_x.getInt();
+            this->iTextAddX = this->iTextAddX > 0 ? this->iTextAddX : cv_ui_textbox_text_offset_x.getInt();
             break;
     }
 
     // handle over-text
-    if(m_fTextWidth > m_vSize.x) {
-        m_iTextAddX -= m_fTextWidth - m_vSize.x + cv_ui_textbox_text_offset_x.getInt() * 2;
-        handleCaretKeyboardMove();
+    if(this->fTextWidth > this->vSize.x) {
+        this->iTextAddX -= this->fTextWidth - this->vSize.x + cv_ui_textbox_text_offset_x.getInt() * 2;
+        this->handleCaretKeyboardMove();
     } else
-        m_fTextScrollAddX = 0;
+        this->fTextScrollAddX = 0;
 
     // TODO: force stop animation, it will fuck shit up
-    /// animation->moveSmoothEnd(&m_fTextScrollAddX, m_fTextScrollAddX, 0.1f);
+    /// animation->moveSmoothEnd(&m_fTextScrollAddX, this->fTextScrollAddX, 0.1f);
 
     // center vertically
-    const float addY = std::round(m_vSize.y / 2.0f + m_font->getHeight() / 2.0f);
-    m_iTextAddY = addY > 0 ? addY : 0;
+    const float addY = std::round(this->vSize.y / 2.0f + this->font->getHeight() / 2.0f);
+    this->iTextAddY = addY > 0 ? addY : 0;
 
-    updateCaretX();
+    this->updateCaretX();
 
     return this;
 }
 
 void CBaseUITextbox::setCursorPosRight() {
-    m_iCaretPosition = m_sText.length();
+    this->iCaretPosition = this->sText.length();
     {
-        updateCaretX();
-        tickCaret();
+        this->updateCaretX();
+        this->tickCaret();
     }
-    m_fTextScrollAddX = 0;
+    this->fTextScrollAddX = 0;
 }
 
 void CBaseUITextbox::updateCaretX() {
-    UString text = getVisibleText().substr(0, m_iCaretPosition);
-    m_iCaretX = m_font->getStringWidth(text);
+    UString text = this->getVisibleText().substr(0, this->iCaretPosition);
+    this->iCaretX = this->font->getStringWidth(text);
 }
 
 void CBaseUITextbox::handleDeleteSelectedText() {
-    if(!hasSelectedText()) return;
+    if(!this->hasSelectedText()) return;
 
-    const int selectedTextLength =
-        (m_iSelectStart < m_iSelectEnd ? m_iSelectEnd - m_iSelectStart : m_iSelectStart - m_iSelectEnd);
-    m_sText.erase(m_iSelectStart < m_iSelectEnd ? m_iSelectStart : m_iSelectEnd, selectedTextLength);
+    const int selectedTextLength = (this->iSelectStart < this->iSelectEnd ? this->iSelectEnd - this->iSelectStart
+                                                                          : this->iSelectStart - this->iSelectEnd);
+    this->sText.erase(this->iSelectStart < this->iSelectEnd ? this->iSelectStart : this->iSelectEnd,
+                      selectedTextLength);
 
-    if(m_iSelectEnd > m_iSelectStart) m_iCaretPosition -= selectedTextLength;
+    if(this->iSelectEnd > this->iSelectStart) this->iCaretPosition -= selectedTextLength;
 
-    setText(m_sText);
+    this->setText(this->sText);
 
     // scroll back if empty white space
-    updateTextPos();
+    this->updateTextPos();
 
-    deselectText();
+    this->deselectText();
 
-    setText(m_sText);
+    this->setText(this->sText);
 }
 
 void CBaseUITextbox::insertTextFromClipboard() {
@@ -597,37 +606,38 @@ void CBaseUITextbox::insertTextFromClipboard() {
     */
 
     if(clipstring.length() > 0) {
-        handleDeleteSelectedText();
+        this->handleDeleteSelectedText();
         {
-            m_sText.insert(m_iCaretPosition, clipstring);
-            m_iCaretPosition = m_iCaretPosition + clipstring.length();
+            this->sText.insert(this->iCaretPosition, clipstring);
+            this->iCaretPosition = this->iCaretPosition + clipstring.length();
         }
-        setText(m_sText);
+        this->setText(this->sText);
     }
 }
 
 void CBaseUITextbox::updateTextPos() {
-    if(m_iTextJustification == 0) {
-        if((m_iTextAddX + m_fTextScrollAddX) > cv_ui_textbox_text_offset_x.getInt()) {
-            if(hasSelectedText() && m_iCaretPosition == 0) {
-                m_fTextScrollAddX = cv_ui_textbox_text_offset_x.getInt() - m_iTextAddX;
+    if(this->iTextJustification == 0) {
+        if((this->iTextAddX + this->fTextScrollAddX) > cv_ui_textbox_text_offset_x.getInt()) {
+            if(this->hasSelectedText() && this->iCaretPosition == 0) {
+                this->fTextScrollAddX = cv_ui_textbox_text_offset_x.getInt() - this->iTextAddX;
             } else
-                m_fTextScrollAddX = cv_ui_textbox_text_offset_x.getInt() - m_iTextAddX;
+                this->fTextScrollAddX = cv_ui_textbox_text_offset_x.getInt() - this->iTextAddX;
         }
     }
 }
 
 void CBaseUITextbox::deselectText() {
-    m_iSelectStart = 0;
-    m_iSelectEnd = 0;
+    this->iSelectStart = 0;
+    this->iSelectEnd = 0;
 }
 
 UString CBaseUITextbox::getSelectedText() {
-    const int selectedTextLength =
-        (m_iSelectStart < m_iSelectEnd ? m_iSelectEnd - m_iSelectStart : m_iSelectStart - m_iSelectEnd);
+    const int selectedTextLength = (this->iSelectStart < this->iSelectEnd ? this->iSelectEnd - this->iSelectStart
+                                                                          : this->iSelectStart - this->iSelectEnd);
 
     if(selectedTextLength > 0)
-        return m_sText.substr(m_iSelectStart < m_iSelectEnd ? m_iSelectStart : m_iSelectEnd, selectedTextLength);
+        return this->sText.substr(this->iSelectStart < this->iSelectEnd ? this->iSelectStart : this->iSelectEnd,
+                                  selectedTextLength);
     else
         return "";
 }
@@ -636,31 +646,31 @@ void CBaseUITextbox::onResized() {
     CBaseUIElement::onResized();
 
     // HACKHACK: brute force fix layout
-    setText(m_sText);
+    this->setText(this->sText);
 }
 
 void CBaseUITextbox::onMouseDownInside() {
     // force busy, can't drag scroll release (textbox requires full focus due to text selection)
-    m_bBusy = true;
+    this->bBusy = true;
 }
 
 void CBaseUITextbox::onMouseDownOutside() {
     CBaseUIElement::onMouseDownOutside();
 
-    m_bBusy = false;
-    m_bActive = false;
+    this->bBusy = false;
+    this->bActive = false;
 
-    deselectText();
+    this->deselectText();
 }
 
 void CBaseUITextbox::onMouseUpInside() {
     CBaseUIElement::onMouseUpInside();
 
-    m_bBusy = false;
+    this->bBusy = false;
 }
 
 void CBaseUITextbox::onMouseUpOutside() {
     CBaseUIElement::onMouseUpOutside();
 
-    m_bBusy = false;
+    this->bBusy = false;
 }

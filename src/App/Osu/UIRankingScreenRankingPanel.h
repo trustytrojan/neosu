@@ -19,14 +19,14 @@ class UIRankingScreenRankingPanel : public CBaseUIImage {
     void drawHitImage(Graphics *g, SkinImage *img, float scale, Vector2 pos);
     void drawNumHits(Graphics *g, int numHits, float scale, Vector2 pos);
 
-    unsigned long long m_iScore;
-    int m_iNum300s;
-    int m_iNum300gs;
-    int m_iNum100s;
-    int m_iNum100ks;
-    int m_iNum50s;
-    int m_iNumMisses;
-    int m_iCombo;
-    float m_fAccuracy;
-    bool m_bPerfect;
+    unsigned long long iScore;
+    int iNum300s;
+    int iNum300gs;
+    int iNum100s;
+    int iNum100ks;
+    int iNum50s;
+    int iNumMisses;
+    int iCombo;
+    float fAccuracy;
+    bool bPerfect;
 };

@@ -1,10 +1,4 @@
-//================ Copyright (c) 2013, PG, All rights reserved. =================//
-//
-// Purpose:		windows opengl interface
-//
-// $NoKeywords: $wingli
-//===============================================================================//
-
+#pragma once
 #ifdef _WIN32
 
 #include "WinGLLegacyInterface.h"
@@ -160,8 +154,8 @@ FAKE_CONTEXT WinGLLegacyInterface::createAndMakeCurrentWGLContext(HWND hwnd, PIX
     return context;
 }
 
-WinGLLegacyInterface::WinGLLegacyInterface(HWND hwnd) : OpenGLLegacyInterface() {
-    m_hwnd = hwnd;
+WinGLLegacyInterface::WinGLLegacyInterface(HWND new_hwnd) : OpenGLLegacyInterface() {
+    this->hwnd = new_hwnd;
 
     if(!checkGLHardwareAcceleration()) {
         engine->showMessageErrorFatal("Fatal Engine Error",
@@ -170,7 +164,7 @@ WinGLLegacyInterface::WinGLLegacyInterface(HWND hwnd) : OpenGLLegacyInterface() 
     }
 
     // get device context
-    m_hdc = GetDC(m_hwnd);
+    this->hdc = GetDC(this->hwnd);
 
     // get pixel format, use the MSAA one if it is supported
     PIXELFORMATDESCRIPTOR pfd = getPixelFormatDescriptor();
@@ -178,7 +172,7 @@ WinGLLegacyInterface::WinGLLegacyInterface(HWND hwnd) : OpenGLLegacyInterface() 
     if(g_bARBMultisampleSupported)
         pixelFormat = g_iARBMultisampleFormat;
     else
-        pixelFormat = ChoosePixelFormat(m_hdc, &pfd);
+        pixelFormat = ChoosePixelFormat(this->hdc, &pfd);
 
     debugLog("OpenGL: PixelFormat = %i\n", pixelFormat);
 
@@ -191,7 +185,7 @@ WinGLLegacyInterface::WinGLLegacyInterface(HWND hwnd) : OpenGLLegacyInterface() 
     }
 
     // set pixel format
-    BOOL result = SetPixelFormat(m_hdc, pixelFormat, &pfd);
+    BOOL result = SetPixelFormat(this->hdc, pixelFormat, &pfd);
     debugLog("OpenGL: SetPixelFormat() = %i\n", result);
 
     if(result == FALSE) {
@@ -203,24 +197,24 @@ WinGLLegacyInterface::WinGLLegacyInterface(HWND hwnd) : OpenGLLegacyInterface() 
     }
 
     // WINDOWS: HACKHACK: create temp context and make current
-    m_hglrc = wglCreateContext(m_hdc);
-    wglMakeCurrent(m_hdc, m_hglrc);
+    this->hglrc = wglCreateContext(this->hdc);
+    wglMakeCurrent(this->hdc, this->hglrc);
 
-    if(!m_hglrc) {
+    if(!this->hglrc) {
         engine->showMessageErrorFatal("OpenGL Error", "Couldn't wglCreateContext()!\nThe engine will quit now.");
         engine->shutdown();
     }
 }
 
 WinGLLegacyInterface::~WinGLLegacyInterface() {
-    if(m_hdc != NULL) wglMakeCurrent(m_hdc, NULL);  // deselect gl
-    if(m_hglrc != NULL) wglDeleteContext(m_hglrc);  // delete gl
-    if(m_hdc != NULL) DeleteDC(m_hdc);              // delete hdc
+    if(this->hdc != NULL) wglMakeCurrent(this->hdc, NULL);  // deselect gl
+    if(this->hglrc != NULL) wglDeleteContext(this->hglrc);  // delete gl
+    if(this->hdc != NULL) DeleteDC(this->hdc);              // delete hdc
 }
 
 void WinGLLegacyInterface::endScene() {
     OpenGLLegacyInterface::endScene();
-    SwapBuffers(m_hdc);
+    SwapBuffers(this->hdc);
 }
 
 void WinGLLegacyInterface::setVSync(bool vsync) {

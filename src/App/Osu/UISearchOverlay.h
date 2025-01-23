@@ -7,26 +7,26 @@ class UISearchOverlay : public CBaseUIElement {
 
     virtual void draw(Graphics *g);
 
-    void setDrawNumResults(bool drawNumResults) { m_bDrawNumResults = drawNumResults; }
-    void setOffsetRight(int offsetRight) { m_iOffsetRight = offsetRight; }
+    void setDrawNumResults(bool drawNumResults) { this->bDrawNumResults = drawNumResults; }
+    void setOffsetRight(int offsetRight) { this->iOffsetRight = offsetRight; }
 
     void setSearchString(UString searchString, UString hardcodedSearchString = "") {
-        m_sSearchString = searchString;
-        m_sHardcodedSearchString = hardcodedSearchString;
+        this->sSearchString = searchString;
+        this->sHardcodedSearchString = hardcodedSearchString;
     }
-    void setNumFoundResults(int numFoundResults) { m_iNumFoundResults = numFoundResults; }
+    void setNumFoundResults(int numFoundResults) { this->iNumFoundResults = numFoundResults; }
 
-    void setSearching(bool searching) { m_bSearching = searching; }
+    void setSearching(bool searching) { this->bSearching = searching; }
 
    private:
-    McFont *m_font;
+    McFont *font;
 
-    int m_iOffsetRight;
-    bool m_bDrawNumResults;
+    int iOffsetRight;
+    bool bDrawNumResults;
 
-    UString m_sSearchString;
-    UString m_sHardcodedSearchString;
-    int m_iNumFoundResults;
+    UString sSearchString;
+    UString sHardcodedSearchString;
+    int iNumFoundResults;
 
-    bool m_bSearching;
+    bool bSearching;
 };

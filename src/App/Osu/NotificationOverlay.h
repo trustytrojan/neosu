@@ -41,16 +41,16 @@ class NotificationOverlay : public OsuScreen {
 
     void addNotification(UString text, Color textColor = 0xffffffff, bool waitForKey = false, float duration = -1.0f);
     void setDisallowWaitForKeyLeftClick(bool disallowWaitForKeyLeftClick) {
-        m_bWaitForKeyDisallowsLeftClick = disallowWaitForKeyLeftClick;
+        this->bWaitForKeyDisallowsLeftClick = disallowWaitForKeyLeftClick;
     }
 
     void stopWaitingForKey(bool stillConsumeNextChar = false);
 
-    void addKeyListener(NotificationOverlayKeyListener *keyListener) { m_keyListener = keyListener; }
+    void addKeyListener(NotificationOverlayKeyListener *keyListener) { this->keyListener = keyListener; }
 
     virtual bool isVisible();
 
-    inline bool isWaitingForKey() { return m_bWaitForKey || m_bConsumeNextChar; }
+    inline bool isWaitingForKey() { return this->bWaitForKey || this->bConsumeNextChar; }
 
    private:
     struct NOTIFICATION {
@@ -68,11 +68,11 @@ class NotificationOverlay : public OsuScreen {
 
     std::vector<ToastElement *> toasts;
 
-    NOTIFICATION m_notification1;
-    NOTIFICATION m_notification2;
+    NOTIFICATION notification1;
+    NOTIFICATION notification2;
 
-    bool m_bWaitForKey;
-    bool m_bWaitForKeyDisallowsLeftClick;
-    bool m_bConsumeNextChar;
-    NotificationOverlayKeyListener *m_keyListener;
+    bool bWaitForKey;
+    bool bWaitForKeyDisallowsLeftClick;
+    bool bConsumeNextChar;
+    NotificationOverlayKeyListener *keyListener;
 };

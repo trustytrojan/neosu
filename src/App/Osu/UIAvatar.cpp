@@ -58,13 +58,13 @@ bool download_avatar(u32 user_id) {
 
 UIAvatar::UIAvatar(u32 player_id, float xPos, float yPos, float xSize, float ySize)
     : CBaseUIButton(xPos, yPos, xSize, ySize, "avatar", "") {
-    m_player_id = player_id;
+    this->player_id = player_id;
 
-    avatar_path = UString::format(MCENGINE_DATA_DIR "avatars/%s/%d", bancho.endpoint.toUtf8(), player_id);
-    setClickCallback(fastdelegate::MakeDelegate(this, &UIAvatar::onAvatarClicked));
+    this->avatar_path = UString::format(MCENGINE_DATA_DIR "avatars/%s/%d", bancho.endpoint.toUtf8(), player_id);
+    this->setClickCallback(fastdelegate::MakeDelegate(this, &UIAvatar::onAvatarClicked));
 
     struct stat attr;
-    bool exists = (stat(avatar_path.c_str(), &attr) == 0);
+    bool exists = (stat(this->avatar_path.c_str(), &attr) == 0);
     if(exists) {
         // File exists, but if it's more than 7 days old assume it's expired
         time_t now = time(NULL);
@@ -76,7 +76,7 @@ UIAvatar::UIAvatar(u32 player_id, float xPos, float yPos, float xSize, float ySi
     }
 
     if(exists) {
-        avatar = engine->getResourceManager()->loadImageAbs(avatar_path, avatar_path);
+        this->avatar = engine->getResourceManager()->loadImageAbs(this->avatar_path, this->avatar_path);
     }
 }
 
@@ -85,22 +85,22 @@ UIAvatar::~UIAvatar() {
 }
 
 void UIAvatar::draw_avatar(Graphics *g, float alpha) {
-    if(!on_screen) return;  // Comment when you need to debug on_screen logic
+    if(!this->on_screen) return;  // Comment when you need to debug on_screen logic
 
-    if(avatar == NULL) {
+    if(this->avatar == NULL) {
         // Don't download during gameplay to avoid lagspikes
         if(!osu->isInPlayMode()) {
-            if(download_avatar(m_player_id)) {
-                avatar = engine->getResourceManager()->loadImageAbs(avatar_path, avatar_path);
+            if(download_avatar(this->player_id)) {
+                this->avatar = engine->getResourceManager()->loadImageAbs(this->avatar_path, this->avatar_path);
             }
         }
     } else {
         g->pushTransform();
         g->setColor(0xffffffff);
         g->setAlpha(alpha);
-        g->scale(m_vSize.x / avatar->getWidth(), m_vSize.y / avatar->getHeight());
-        g->translate(m_vPos.x + m_vSize.x / 2.0f, m_vPos.y + m_vSize.y / 2.0f);
-        g->drawImage(avatar);
+        g->scale(this->vSize.x / this->avatar->getWidth(), this->vSize.y / this->avatar->getHeight());
+        g->translate(this->vPos.x + this->vSize.x / 2.0f, this->vPos.y + this->vSize.y / 2.0f);
+        g->drawImage(this->avatar);
         g->popTransform();
     }
 
@@ -108,12 +108,12 @@ void UIAvatar::draw_avatar(Graphics *g, float alpha) {
     // if(on_screen) {
     //     g->pushTransform();
     //     g->setColor(0xff00ff00);
-    //     g->drawQuad((int)m_vPos.x, (int)m_vPos.y, (int)m_vSize.x, (int)m_vSize.y);
+    //     g->drawQuad((int)this->vPos.x, (int)this->vPos.y, (int)this->vSize.x, (int)this->vSize.y);
     //     g->popTransform();
     // } else {
     //     g->pushTransform();
     //     g->setColor(0xffff0000);
-    //     g->drawQuad((int)m_vPos.x, (int)m_vPos.y, (int)m_vSize.x, (int)m_vSize.y);
+    //     g->drawQuad((int)this->vPos.x, (int)this->vPos.y, (int)this->vSize.x, (int)this->vSize.y);
     //     g->popTransform();
     // }
 }
@@ -124,5 +124,5 @@ void UIAvatar::onAvatarClicked(CBaseUIButton *btn) {
         return;
     }
 
-    osu->m_user_actions->open(m_player_id);
+    osu->user_actions->open(this->player_id);
 }

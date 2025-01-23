@@ -67,7 +67,7 @@ class OsuDifficultyHitObject {
 
     f32 getT(i32 pos, bool raw);
 
-    inline i32 getDuration() const { return endTime - time; }
+    inline i32 getDuration() const { return this->endTime - this->time; }
 
     // circles (base)
     TYPE type;
@@ -185,12 +185,12 @@ class DifficultyCalculator {
                    std::vector<DiffObject> &diff_objects, int prevObjectIdx);
 
         inline const DiffObject *get_previous(int backwardsIdx) const {
-            int foo = prevObjectIndex - backwardsIdx;
+            int foo = this->prevObjectIndex - backwardsIdx;
             if(foo < 0) foo = 0;  // msvc
-            return (objects.size() > 0 && prevObjectIndex - backwardsIdx < (int)objects.size() ? &objects[foo] : NULL);
+            return (this->objects.size() > 0 && this->prevObjectIndex - backwardsIdx < (int)this->objects.size() ? &this->objects[foo] : NULL);
         }
         inline f64 get_strain(Skills::Skill type) const {
-            return strains[Skills::skillToIndex(type)] * (type == Skills::Skill::SPEED ? rhythm : 1.0);
+            return this->strains[Skills::skillToIndex(type)] * (type == Skills::Skill::SPEED ? this->rhythm : 1.0);
         }
         inline static double applyDiminishingExp(double val) { return std::pow(val, 0.99); }
         inline static double strainDecay(Skills::Skill type, double ms) {
@@ -233,7 +233,7 @@ class DifficultyCalculator {
         i32 deltaCount;
 
         inline bool equals(RhythmIsland &other, f64 deltaDifferenceEpsilon) const {
-            return std::abs(delta - other.delta) < deltaDifferenceEpsilon && deltaCount == other.deltaCount;
+            return std::abs(this->delta - other.delta) < deltaDifferenceEpsilon && this->deltaCount == other.deltaCount;
         }
     };
 

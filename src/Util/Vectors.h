@@ -164,63 +164,63 @@ inline float invSqrt(float x)
 ///////////////////////////////////////////////////////////////////////////////
 // inline functions for Vector2
 ///////////////////////////////////////////////////////////////////////////////
-inline Vector2 Vector2::operator-() const { return Vector2(-x, -y); }
+inline Vector2 Vector2::operator-() const { return Vector2(-this->x, -this->y); }
 
-inline Vector2 Vector2::operator+(const Vector2& rhs) const { return Vector2(x + rhs.x, y + rhs.y); }
+inline Vector2 Vector2::operator+(const Vector2& rhs) const { return Vector2(this->x + rhs.x, this->y + rhs.y); }
 
-inline Vector2 Vector2::operator-(const Vector2& rhs) const { return Vector2(x - rhs.x, y - rhs.y); }
+inline Vector2 Vector2::operator-(const Vector2& rhs) const { return Vector2(this->x - rhs.x, this->y - rhs.y); }
 
 inline Vector2& Vector2::operator+=(const Vector2& rhs) {
-    x += rhs.x;
-    y += rhs.y;
+    this->x += rhs.x;
+    this->y += rhs.y;
     return *this;
 }
 
 inline Vector2& Vector2::operator-=(const Vector2& rhs) {
-    x -= rhs.x;
-    y -= rhs.y;
+    this->x -= rhs.x;
+    this->y -= rhs.y;
     return *this;
 }
 
-inline Vector2 Vector2::operator*(const float a) const { return Vector2(x * a, y * a); }
+inline Vector2 Vector2::operator*(const float a) const { return Vector2(this->x * a, this->y * a); }
 
-inline Vector2 Vector2::operator*(const Vector2& rhs) const { return Vector2(x * rhs.x, y * rhs.y); }
+inline Vector2 Vector2::operator*(const Vector2& rhs) const { return Vector2(this->x * rhs.x, this->y * rhs.y); }
 
 inline Vector2& Vector2::operator*=(const float a) {
-    x *= a;
-    y *= a;
+    this->x *= a;
+    this->y *= a;
     return *this;
 }
 
 inline Vector2& Vector2::operator*=(const Vector2& rhs) {
-    x *= rhs.x;
-    y *= rhs.y;
+    this->x *= rhs.x;
+    this->y *= rhs.y;
     return *this;
 }
 
-inline Vector2 Vector2::operator/(const float a) const { return Vector2(x / a, y / a); }
+inline Vector2 Vector2::operator/(const float a) const { return Vector2(this->x / a, this->y / a); }
 
 inline Vector2& Vector2::operator/=(const float a) {
-    x /= a;
-    y /= a;
+    this->x /= a;
+    this->y /= a;
     return *this;
 }
 
-inline bool Vector2::operator==(const Vector2& rhs) const { return (x == rhs.x) && (y == rhs.y); }
+inline bool Vector2::operator==(const Vector2& rhs) const { return (this->x == rhs.x) && (this->y == rhs.y); }
 
-inline bool Vector2::operator!=(const Vector2& rhs) const { return (x != rhs.x) || (y != rhs.y); }
+inline bool Vector2::operator!=(const Vector2& rhs) const { return (this->x != rhs.x) || (this->y != rhs.y); }
 
 inline bool Vector2::operator<(const Vector2& rhs) const {
-    if(x < rhs.x) return true;
-    if(x > rhs.x) return false;
-    if(y < rhs.y) return true;
-    if(y > rhs.y) return false;
+    if(this->x < rhs.x) return true;
+    if(this->x > rhs.x) return false;
+    if(this->y < rhs.y) return true;
+    if(this->y > rhs.y) return false;
     return false;
 }
 
-inline float Vector2::operator[](int index) const { return (&x)[index]; }
+inline float Vector2::operator[](int index) const { return (&this->x)[index]; }
 
-inline float& Vector2::operator[](int index) { return (&x)[index]; }
+inline float& Vector2::operator[](int index) { return (&this->x)[index]; }
 
 inline void Vector2::zero() {
     this->x = 0.0f;
@@ -232,27 +232,27 @@ inline void Vector2::set(float x, float y) {
     this->y = y;
 }
 
-inline float Vector2::length() const { return std::sqrt(x * x + y * y); }
+inline float Vector2::length() const { return std::sqrt(this->x * this->x + this->y * this->y); }
 
 inline float Vector2::distance(const Vector2& vec) const {
-    return std::sqrt((vec.x - x) * (vec.x - x) + (vec.y - y) * (vec.y - y));
+    return std::sqrt((vec.x - this->x) * (vec.x - this->x) + (vec.y - this->y) * (vec.y - this->y));
 }
 
 inline Vector2& Vector2::normalize() {
-    float xxyy = x * x + y * y;
+    float xxyy = this->x * this->x + this->y * this->y;
     if(xxyy < VECTOR_NORMALIZE_EPSILON) return *this;  // do nothing if it is ~zero vector
 
     /// float invLength = invSqrt(xxyy);
     float invLength = 1.0f / std::sqrt(xxyy);
-    x *= invLength;
-    y *= invLength;
+    this->x *= invLength;
+    this->y *= invLength;
     return *this;
 }
 
-inline float Vector2::dot(const Vector2& rhs) const { return (x * rhs.x + y * rhs.y); }
+inline float Vector2::dot(const Vector2& rhs) const { return (this->x * rhs.x + this->y * rhs.y); }
 
 inline bool Vector2::equal(const Vector2& rhs, float epsilon) const {
-    return fabs(x - rhs.x) < epsilon && fabs(y - rhs.y) < epsilon;
+    return fabs(this->x - rhs.x) < epsilon && fabs(this->y - rhs.y) < epsilon;
 }
 
 inline Vector2 operator*(const float a, const Vector2 vec) { return Vector2(a * vec.x, a * vec.y); }
@@ -266,70 +266,80 @@ inline std::ostream& operator<<(std::ostream& os, const Vector2& vec) {
 ///////////////////////////////////////////////////////////////////////////////
 // inline functions for Vector3
 ///////////////////////////////////////////////////////////////////////////////
-inline Vector3 Vector3::operator-() const { return Vector3(-x, -y, -z); }
+inline Vector3 Vector3::operator-() const { return Vector3(-this->x, -this->y, -this->z); }
 
-inline Vector3 Vector3::operator+(const Vector3& rhs) const { return Vector3(x + rhs.x, y + rhs.y, z + rhs.z); }
+inline Vector3 Vector3::operator+(const Vector3& rhs) const {
+    return Vector3(this->x + rhs.x, this->y + rhs.y, this->z + rhs.z);
+}
 
-inline Vector3 Vector3::operator-(const Vector3& rhs) const { return Vector3(x - rhs.x, y - rhs.y, z - rhs.z); }
+inline Vector3 Vector3::operator-(const Vector3& rhs) const {
+    return Vector3(this->x - rhs.x, this->y - rhs.y, this->z - rhs.z);
+}
 
 inline Vector3& Vector3::operator+=(const Vector3& rhs) {
-    x += rhs.x;
-    y += rhs.y;
-    z += rhs.z;
+    this->x += rhs.x;
+    this->y += rhs.y;
+    this->z += rhs.z;
     return *this;
 }
 
 inline Vector3& Vector3::operator-=(const Vector3& rhs) {
-    x -= rhs.x;
-    y -= rhs.y;
-    z -= rhs.z;
+    this->x -= rhs.x;
+    this->y -= rhs.y;
+    this->z -= rhs.z;
     return *this;
 }
 
-inline Vector3 Vector3::operator*(const float a) const { return Vector3(x * a, y * a, z * a); }
+inline Vector3 Vector3::operator*(const float a) const { return Vector3(this->x * a, this->y * a, this->z * a); }
 
-inline Vector3 Vector3::operator*(const Vector3& rhs) const { return Vector3(x * rhs.x, y * rhs.y, z * rhs.z); }
+inline Vector3 Vector3::operator*(const Vector3& rhs) const {
+    return Vector3(this->x * rhs.x, this->y * rhs.y, this->z * rhs.z);
+}
 
 inline Vector3& Vector3::operator*=(const float a) {
-    x *= a;
-    y *= a;
-    z *= a;
+    this->x *= a;
+    this->y *= a;
+    this->z *= a;
     return *this;
 }
 
 inline Vector3& Vector3::operator*=(const Vector3& rhs) {
-    x *= rhs.x;
-    y *= rhs.y;
-    z *= rhs.z;
+    this->x *= rhs.x;
+    this->y *= rhs.y;
+    this->z *= rhs.z;
     return *this;
 }
 
-inline Vector3 Vector3::operator/(const float a) const { return Vector3(x / a, y / a, z / a); }
+inline Vector3 Vector3::operator/(const float a) const { return Vector3(this->x / a, this->y / a, this->z / a); }
 
 inline Vector3& Vector3::operator/=(const float a) {
-    x /= a;
-    y /= a;
-    z /= a;
+    this->x /= a;
+    this->y /= a;
+    this->z /= a;
     return *this;
 }
 
-inline bool Vector3::operator==(const Vector3& rhs) const { return (x == rhs.x) && (y == rhs.y) && (z == rhs.z); }
+inline bool Vector3::operator==(const Vector3& rhs) const {
+    return (this->x == rhs.x) && (this->y == rhs.y) && (this->z == rhs.z);
+}
 
-inline bool Vector3::operator!=(const Vector3& rhs) const { return (x != rhs.x) || (y != rhs.y) || (z != rhs.z); }
+inline bool Vector3::operator!=(const Vector3& rhs) const {
+    return (this->x != rhs.x) || (this->y != rhs.y) || (this->z != rhs.z);
+}
 
 inline bool Vector3::operator<(const Vector3& rhs) const {
-    if(x < rhs.x) return true;
-    if(x > rhs.x) return false;
-    if(y < rhs.y) return true;
-    if(y > rhs.y) return false;
-    if(z < rhs.z) return true;
-    if(z > rhs.z) return false;
+    if(this->x < rhs.x) return true;
+    if(this->x > rhs.x) return false;
+    if(this->y < rhs.y) return true;
+    if(this->y > rhs.y) return false;
+    if(this->z < rhs.z) return true;
+    if(this->z > rhs.z) return false;
     return false;
 }
 
-inline float Vector3::operator[](int index) const { return (&x)[index]; }
+inline float Vector3::operator[](int index) const { return (&this->x)[index]; }
 
-inline float& Vector3::operator[](int index) { return (&x)[index]; }
+inline float& Vector3::operator[](int index) { return (&this->x)[index]; }
 
 inline void Vector3::zero() {
     this->x = 0.0f;
@@ -344,38 +354,40 @@ inline void Vector3::set(float x, float y, float z) {
 }
 
 inline void Vector3::setLength(float length) {
-    normalize();
-    x *= length;
-    y *= length;
-    z *= length;
+    this->normalize();
+    this->x *= length;
+    this->y *= length;
+    this->z *= length;
 }
 
-inline float Vector3::length() const { return std::sqrt(x * x + y * y + z * z); }
+inline float Vector3::length() const { return std::sqrt(this->x * this->x + this->y * this->y + this->z * this->z); }
 
 inline float Vector3::distance(const Vector3& vec) const {
-    return std::sqrt((vec.x - x) * (vec.x - x) + (vec.y - y) * (vec.y - y) + (vec.z - z) * (vec.z - z));
+    return std::sqrt((vec.x - this->x) * (vec.x - this->x) + (vec.y - this->y) * (vec.y - this->y) +
+                     (vec.z - this->z) * (vec.z - this->z));
 }
 
 inline Vector3& Vector3::normalize() {
-    float xxyyzz = x * x + y * y + z * z;
+    float xxyyzz = this->x * this->x + this->y * this->y + this->z * this->z;
     if(xxyyzz < VECTOR_NORMALIZE_EPSILON) return *this;  // do nothing if it is ~zero vector
 
     /// float invLength = invSqrt(xxyyzz);
     float invLength = 1.0f / std::sqrt(xxyyzz);
-    x *= invLength;
-    y *= invLength;
-    z *= invLength;
+    this->x *= invLength;
+    this->y *= invLength;
+    this->z *= invLength;
     return *this;
 }
 
-inline float Vector3::dot(const Vector3& rhs) const { return (x * rhs.x + y * rhs.y + z * rhs.z); }
+inline float Vector3::dot(const Vector3& rhs) const { return (this->x * rhs.x + this->y * rhs.y + this->z * rhs.z); }
 
 inline Vector3 Vector3::cross(const Vector3& rhs) const {
-    return Vector3(y * rhs.z - z * rhs.y, z * rhs.x - x * rhs.z, x * rhs.y - y * rhs.x);
+    return Vector3(this->y * rhs.z - this->z * rhs.y, this->z * rhs.x - this->x * rhs.z,
+                   this->x * rhs.y - this->y * rhs.x);
 }
 
 inline bool Vector3::equal(const Vector3& rhs, float epsilon) const {
-    return fabs(x - rhs.x) < epsilon && fabs(y - rhs.y) < epsilon && fabs(z - rhs.z) < epsilon;
+    return fabs(this->x - rhs.x) < epsilon && fabs(this->y - rhs.y) < epsilon && fabs(this->z - rhs.z) < epsilon;
 }
 
 inline Vector3 operator*(const float a, const Vector3 vec) { return Vector3(a * vec.x, a * vec.y, a * vec.z); }
@@ -389,87 +401,91 @@ inline std::ostream& operator<<(std::ostream& os, const Vector3& vec) {
 ///////////////////////////////////////////////////////////////////////////////
 // inline functions for Vector4
 ///////////////////////////////////////////////////////////////////////////////
-inline Vector4 Vector4::operator-() const { return Vector4(-x, -y, -z, -w); }
+inline Vector4 Vector4::operator-() const { return Vector4(-this->x, -this->y, -this->z, -this->w); }
 
 inline Vector4 Vector4::operator+(const Vector4& rhs) const {
-    return Vector4(x + rhs.x, y + rhs.y, z + rhs.z, w + rhs.w);
+    return Vector4(this->x + rhs.x, this->y + rhs.y, this->z + rhs.z, this->w + rhs.w);
 }
 
 inline Vector4 Vector4::operator-(const Vector4& rhs) const {
-    return Vector4(x - rhs.x, y - rhs.y, z - rhs.z, w - rhs.w);
+    return Vector4(this->x - rhs.x, this->y - rhs.y, this->z - rhs.z, this->w - rhs.w);
 }
 
 inline Vector4& Vector4::operator+=(const Vector4& rhs) {
-    x += rhs.x;
-    y += rhs.y;
-    z += rhs.z;
-    w += rhs.w;
+    this->x += rhs.x;
+    this->y += rhs.y;
+    this->z += rhs.z;
+    this->w += rhs.w;
     return *this;
 }
 
 inline Vector4& Vector4::operator-=(const Vector4& rhs) {
-    x -= rhs.x;
-    y -= rhs.y;
-    z -= rhs.z;
-    w -= rhs.w;
+    this->x -= rhs.x;
+    this->y -= rhs.y;
+    this->z -= rhs.z;
+    this->w -= rhs.w;
     return *this;
 }
 
-inline Vector4 Vector4::operator*(const float a) const { return Vector4(x * a, y * a, z * a, w * a); }
+inline Vector4 Vector4::operator*(const float a) const {
+    return Vector4(this->x * a, this->y * a, this->z * a, this->w * a);
+}
 
 inline Vector4 Vector4::operator*(const Vector4& rhs) const {
-    return Vector4(x * rhs.x, y * rhs.y, z * rhs.z, w * rhs.w);
+    return Vector4(this->x * rhs.x, this->y * rhs.y, this->z * rhs.z, this->w * rhs.w);
 }
 
 inline Vector4& Vector4::operator*=(const float a) {
-    x *= a;
-    y *= a;
-    z *= a;
-    w *= a;
+    this->x *= a;
+    this->y *= a;
+    this->z *= a;
+    this->w *= a;
     return *this;
 }
 
 inline Vector4& Vector4::operator*=(const Vector4& rhs) {
-    x *= rhs.x;
-    y *= rhs.y;
-    z *= rhs.z;
-    w *= rhs.w;
+    this->x *= rhs.x;
+    this->y *= rhs.y;
+    this->z *= rhs.z;
+    this->w *= rhs.w;
     return *this;
 }
 
-inline Vector4 Vector4::operator/(const float a) const { return Vector4(x / a, y / a, z / a, w / a); }
+inline Vector4 Vector4::operator/(const float a) const {
+    return Vector4(this->x / a, this->y / a, this->z / a, this->w / a);
+}
 
 inline Vector4& Vector4::operator/=(const float a) {
-    x /= a;
-    y /= a;
-    z /= a;
-    w /= a;
+    this->x /= a;
+    this->y /= a;
+    this->z /= a;
+    this->w /= a;
     return *this;
 }
 
 inline bool Vector4::operator==(const Vector4& rhs) const {
-    return (x == rhs.x) && (y == rhs.y) && (z == rhs.z) && (w == rhs.w);
+    return (this->x == rhs.x) && (this->y == rhs.y) && (this->z == rhs.z) && (this->w == rhs.w);
 }
 
 inline bool Vector4::operator!=(const Vector4& rhs) const {
-    return (x != rhs.x) || (y != rhs.y) || (z != rhs.z) || (w != rhs.w);
+    return (this->x != rhs.x) || (this->y != rhs.y) || (this->z != rhs.z) || (this->w != rhs.w);
 }
 
 inline bool Vector4::operator<(const Vector4& rhs) const {
-    if(x < rhs.x) return true;
-    if(x > rhs.x) return false;
-    if(y < rhs.y) return true;
-    if(y > rhs.y) return false;
-    if(z < rhs.z) return true;
-    if(z > rhs.z) return false;
-    if(w < rhs.w) return true;
-    if(w > rhs.w) return false;
+    if(this->x < rhs.x) return true;
+    if(this->x > rhs.x) return false;
+    if(this->y < rhs.y) return true;
+    if(this->y > rhs.y) return false;
+    if(this->z < rhs.z) return true;
+    if(this->z > rhs.z) return false;
+    if(this->w < rhs.w) return true;
+    if(this->w > rhs.w) return false;
     return false;
 }
 
-inline float Vector4::operator[](int index) const { return (&x)[index]; }
+inline float Vector4::operator[](int index) const { return (&this->x)[index]; }
 
-inline float& Vector4::operator[](int index) { return (&x)[index]; }
+inline float& Vector4::operator[](int index) { return (&this->x)[index]; }
 
 inline void Vector4::set(float x, float y, float z, float w) {
     this->x = x;
@@ -478,31 +494,35 @@ inline void Vector4::set(float x, float y, float z, float w) {
     this->w = w;
 }
 
-inline float Vector4::length() const { return std::sqrt(x * x + y * y + z * z + w * w); }
+inline float Vector4::length() const {
+    return std::sqrt(this->x * this->x + this->y * this->y + this->z * this->z + this->w * this->w);
+}
 
 inline float Vector4::distance(const Vector4& vec) const {
-    return std::sqrt((vec.x - x) * (vec.x - x) + (vec.y - y) * (vec.y - y) + (vec.z - z) * (vec.z - z) +
-                     (vec.w - w) * (vec.w - w));
+    return std::sqrt((vec.x - this->x) * (vec.x - this->x) + (vec.y - this->y) * (vec.y - this->y) +
+                     (vec.z - this->z) * (vec.z - this->z) + (vec.w - this->w) * (vec.w - this->w));
 }
 
 inline Vector4& Vector4::normalize() {
     // NOTE: leave w-component untouched
-    float xxyyzz = x * x + y * y + z * z;
+    float xxyyzz = this->x * this->x + this->y * this->y + this->z * this->z;
     if(xxyyzz < VECTOR_NORMALIZE_EPSILON) return *this;  // do nothing if it is zero vector
 
     /// float invLength = invSqrt(xxyyzz);
     float invLength = 1.0f / std::sqrt(xxyyzz);
-    x *= invLength;
-    y *= invLength;
-    z *= invLength;
+    this->x *= invLength;
+    this->y *= invLength;
+    this->z *= invLength;
     return *this;
 }
 
-inline float Vector4::dot(const Vector4& rhs) const { return (x * rhs.x + y * rhs.y + z * rhs.z + w * rhs.w); }
+inline float Vector4::dot(const Vector4& rhs) const {
+    return (this->x * rhs.x + this->y * rhs.y + this->z * rhs.z + this->w * rhs.w);
+}
 
 inline bool Vector4::equal(const Vector4& rhs, float epsilon) const {
-    return fabs(x - rhs.x) < epsilon && fabs(y - rhs.y) < epsilon && fabs(z - rhs.z) < epsilon &&
-           fabs(w - rhs.w) < epsilon;
+    return fabs(this->x - rhs.x) < epsilon && fabs(this->y - rhs.y) < epsilon && fabs(this->z - rhs.z) < epsilon &&
+           fabs(this->w - rhs.w) < epsilon;
 }
 
 inline Vector4 operator*(const float a, const Vector4 vec) {

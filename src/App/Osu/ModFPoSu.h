@@ -26,13 +26,13 @@ class ModFPoSu {
     void onKeyDown(KeyboardEvent &key);
     void onKeyUp(KeyboardEvent &key);
 
-    inline const Camera *getCamera() const { return m_camera; }
+    inline const Camera *getCamera() const { return this->camera; }
 
-    inline float getEdgeDistance() const { return m_fEdgeDistance; }
-    inline bool isCrosshairIntersectingScreen() const { return m_bCrosshairIntersectsScreen; }
+    inline float getEdgeDistance() const { return this->fEdgeDistance; }
+    inline bool isCrosshairIntersectingScreen() const { return this->bCrosshairIntersectsScreen; }
     float get3DPlayfieldScale() const;
 
-    inline Shader *getHitcircleShader() const { return m_hitcircleShader; }
+    inline Shader *getHitcircleShader() const { return this->hitcircleShader; }
 
    private:
     void handleZoomedChange();
@@ -65,28 +65,28 @@ class ModFPoSu {
     static Vector3 normalFromTriangle(Vector3 p1, Vector3 p2, Vector3 p3);
 
    private:
-    VertexArrayObject *m_vao;
-    VertexArrayObject *m_vaoCube;
+    VertexArrayObject *vao;
+    VertexArrayObject *vaoCube;
 
-    std::list<VertexPair> m_meshList;
-    float m_fCircumLength;
+    std::list<VertexPair> meshList;
+    float fCircumLength;
 
-    Matrix4 m_modelMatrix;
-    Camera *m_camera;
-    Vector3 m_vPrevNoclipCameraPos;
-    bool m_bKeyLeftDown;
-    bool m_bKeyUpDown;
-    bool m_bKeyRightDown;
-    bool m_bKeyDownDown;
-    bool m_bKeySpaceDown;
-    bool m_bKeySpaceUpDown;
-    Vector3 m_vVelocity;
-    bool m_bZoomKeyDown;
-    bool m_bZoomed;
-    float m_fZoomFOVAnimPercent;
+    Matrix4 modelMatrix;
+    Camera *camera;
+    Vector3 vPrevNoclipCameraPos;
+    bool bKeyLeftDown;
+    bool bKeyUpDown;
+    bool bKeyRightDown;
+    bool bKeyDownDown;
+    bool bKeySpaceDown;
+    bool bKeySpaceUpDown;
+    Vector3 vVelocity;
+    bool bZoomKeyDown;
+    bool bZoomed;
+    float fZoomFOVAnimPercent;
 
-    float m_fEdgeDistance;
-    bool m_bCrosshairIntersectsScreen;
+    float fEdgeDistance;
+    bool bCrosshairIntersectsScreen;
 
-    Shader *m_hitcircleShader;
+    Shader *hitcircleShader;
 };

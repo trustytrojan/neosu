@@ -21,7 +21,7 @@ struct RoomUIElement : CBaseUIScrollView {
 
     UIButton* join_btn;
     CBaseUIScrollView* ui;
-    Lobby* m_multi;
+    Lobby* multi;
     i32 room_id;
     bool has_password;
 
@@ -53,8 +53,8 @@ class Lobby : public OsuScreen {
     void on_room_join_failed();
 
     std::vector<Room*> rooms;
-    UIButton* m_create_room_btn;
-    CBaseUIScrollView* m_list;
+    UIButton* create_room_btn;
+    CBaseUIScrollView* list;
     i32 room_to_join;
     McFont* font;
 };

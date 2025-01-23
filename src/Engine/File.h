@@ -21,15 +21,15 @@ class File {
     size_t getFileSize() const;
 
    private:
-    std::string m_sFilePath;
+    std::string sFilePath;
 
-    bool m_bReady;
-    bool m_bRead;
+    bool bReady;
+    bool bRead;
 
-    std::ifstream m_ifstream;
-    std::ofstream m_ofstream;
-    size_t m_iFileSize;
+    std::ifstream ifstream;
+    std::ofstream ofstream;
+    size_t iFileSize;
 
     // full reader
-    std::vector<u8> m_fullBuffer;
+    std::vector<u8> fullBuffer;
 };

@@ -26,10 +26,10 @@ class VSTitleBar : public CBaseUIElement {
     virtual void draw(Graphics *g);
     virtual void mouse_update(bool *propagate_clicks);
 
-    void setSeekCallback(SeekCallback callback) { m_seekCallback = callback; }
+    void setSeekCallback(SeekCallback callback) { this->seekCallback = callback; }
     void setTitle(UString title, bool reverse = false);
 
-    inline bool isSeeking() const { return m_bIsSeeking; }
+    inline bool isSeeking() const { return this->bIsSeeking; }
 
    protected:
     virtual void onResized();
@@ -40,20 +40,20 @@ class VSTitleBar : public CBaseUIElement {
     void drawTitle1(Graphics *g);
     void drawTitle2(Graphics *g);
 
-    SeekCallback m_seekCallback;
+    SeekCallback seekCallback;
 
-    McFont *m_font;
+    McFont *font;
 
-    CBaseUIContainer *m_container;
+    CBaseUIContainer *container;
 
-    CBaseUIButton *m_title;
-    CBaseUIButton *m_title2;
+    CBaseUIButton *title;
+    CBaseUIButton *title2;
 
-    float m_fRot;
+    float fRot;
 
-    int m_iFlip;
+    int iFlip;
 
-    bool m_bIsSeeking;
+    bool bIsSeeking;
 };
 
 #endif

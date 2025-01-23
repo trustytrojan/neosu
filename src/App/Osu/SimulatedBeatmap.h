@@ -31,16 +31,16 @@ class SimulatedBeatmap : public BeatmapInterface {
     // cursor
     virtual Vector2 getCursorPos() const;
     Vector2 getFirstPersonCursorDelta() const;
-    inline Vector2 getContinueCursorPoint() const { return m_vContinueCursorPoint; }
+    inline Vector2 getContinueCursorPoint() const { return this->vContinueCursorPoint; }
 
     // playfield
-    inline Vector2 getPlayfieldSize() const { return m_vPlayfieldSize; }
-    inline Vector2 getPlayfieldCenter() const { return m_vPlayfieldCenter; }
-    inline float getPlayfieldRotation() const { return m_fPlayfieldRotation; }
+    inline Vector2 getPlayfieldSize() const { return this->vPlayfieldSize; }
+    inline Vector2 getPlayfieldCenter() const { return this->vPlayfieldCenter; }
+    inline float getPlayfieldRotation() const { return this->fPlayfieldRotation; }
 
     // hitobjects
     inline float getHitcircleXMultiplier() const {
-        return m_fXMultiplier;
+        return this->fXMultiplier;
     }  // multiply osu!pixels with this to get screen pixels
 
     void fail();
@@ -48,8 +48,8 @@ class SimulatedBeatmap : public BeatmapInterface {
     void resetScore();
 
     // live statistics
-    inline int getNPS() const { return m_iNPS; }
-    inline int getND() const { return m_iND; }
+    inline int getNPS() const { return this->iNPS; }
+    inline int getND() const { return this->iND; }
 
     // replay recording
     u8 current_keys = 0;
@@ -58,7 +58,7 @@ class SimulatedBeatmap : public BeatmapInterface {
     // replay replaying (prerecorded)
     // current_keys, last_keys also reused
     std::vector<LegacyReplay::Frame> spectated_replay;
-    Vector2 m_interpolatedMousePos;
+    Vector2 interpolatedMousePos;
     long current_frame_idx = 0;
 
     // generic state
@@ -69,10 +69,10 @@ class SimulatedBeatmap : public BeatmapInterface {
     virtual bool isContinueScheduled() const { return false; }
     virtual bool isPaused() const { return false; }
     virtual bool isPlaying() const { return true; }
-    virtual Replay::Mods getMods() const { return mods; }
-    virtual i32 getModsLegacy() const { return mods.to_legacy(); }
+    virtual Replay::Mods getMods() const { return this->mods; }
+    virtual i32 getModsLegacy() const { return this->mods.to_legacy(); }
     virtual u32 getScoreV1DifficultyMultiplier() const;
-    virtual f32 getSpeedMultiplier() const { return mods.speed; }
+    virtual f32 getSpeedMultiplier() const { return this->mods.speed; }
     virtual f32 getRawAR() const;
     virtual f32 getAR() const;
     virtual f32 getCS() const;
@@ -98,38 +98,38 @@ class SimulatedBeatmap : public BeatmapInterface {
 
    protected:
     // database
-    DatabaseBeatmap *m_selectedDifficulty2;
+    DatabaseBeatmap *selectedDifficulty2;
 
     // sound
-    i32 m_iCurMusicPos = 0;
+    i32 iCurMusicPos = 0;
 
     // health
-    bool m_bFailed = false;
-    f64 m_fHealth = 1.0;
-    f64 m_fDrainRate = 0.0;
+    bool bFailed = false;
+    f64 fHealth = 1.0;
+    f64 fDrainRate = 0.0;
 
     // breaks
-    std::vector<DatabaseBeatmap::BREAK> m_breaks;
-    bool m_bInBreak = false;
-    HitObject *m_currentHitObject = NULL;
-    i32 m_iNextHitObjectTime = 0;
-    i32 m_iPreviousHitObjectTime = 0;
+    std::vector<DatabaseBeatmap::BREAK> breaks;
+    bool bInBreak = false;
+    HitObject *currentHitObject = NULL;
+    i32 iNextHitObjectTime = 0;
+    i32 iPreviousHitObjectTime = 0;
 
     // player input
-    i32 m_iAllowAnyNextKeyForFullAlternateUntilHitObjectIndex = 0;
-    std::vector<Click> m_clicks;
+    i32 iAllowAnyNextKeyForFullAlternateUntilHitObjectIndex = 0;
+    std::vector<Click> clicks;
 
     // hitobjects
-    std::vector<HitObject *> m_hitobjects;
-    std::vector<HitObject *> m_hitobjectsSortedByEndTime;
+    std::vector<HitObject *> hitobjects;
+    std::vector<HitObject *> hitobjectsSortedByEndTime;
 
     // statistics
-    i32 m_iNPS;
-    i32 m_iND;
-    i32 m_iCurrentHitObjectIndex;
-    i32 m_iCurrentNumCircles;
-    i32 m_iCurrentNumSliders;
-    i32 m_iCurrentNumSpinners;
+    i32 iNPS;
+    i32 iND;
+    i32 iCurrentHitObjectIndex;
+    i32 iCurrentNumCircles;
+    i32 iCurrentNumSliders;
+    i32 iCurrentNumSpinners;
 
    private:
     static inline Vector2 mapNormalizedCoordsOntoUnitCircle(const Vector2 &in) {
@@ -156,17 +156,17 @@ class SimulatedBeatmap : public BeatmapInterface {
     void computeDrainRate();
 
     // beatmap
-    bool m_bIsSpinnerActive;
-    Vector2 m_vContinueCursorPoint;
+    bool bIsSpinnerActive;
+    Vector2 vContinueCursorPoint;
 
     // playfield
-    float m_fPlayfieldRotation;
-    Vector2 m_vPlayfieldCenter;
-    Vector2 m_vPlayfieldSize;
+    float fPlayfieldRotation;
+    Vector2 vPlayfieldCenter;
+    Vector2 vPlayfieldSize;
 
     // hitobject scaling
-    float m_fXMultiplier;
+    float fXMultiplier;
 
     // auto
-    Vector2 m_vAutoCursorPos;
+    Vector2 vAutoCursorPos;
 };

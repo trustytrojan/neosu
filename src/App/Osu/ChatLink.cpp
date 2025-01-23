@@ -15,23 +15,23 @@
 
 ChatLink::ChatLink(float xPos, float yPos, float xSize, float ySize, UString link, UString label)
     : CBaseUILabel(xPos, yPos, xSize, ySize, link, label) {
-    m_link = link;
-    setDrawFrame(false);
-    setDrawBackground(true);
-    setBackgroundColor(0xff2e3784);
+    this->link = link;
+    this->setDrawFrame(false);
+    this->setDrawBackground(true);
+    this->setBackgroundColor(0xff2e3784);
 }
 
 void ChatLink::mouse_update(bool *propagate_clicks) {
     CBaseUILabel::mouse_update(propagate_clicks);
 
-    if(isMouseInside()) {
+    if(this->isMouseInside()) {
         osu->getTooltipOverlay()->begin();
-        osu->getTooltipOverlay()->addLine(UString::format("link: %s", m_link.toUtf8()));
+        osu->getTooltipOverlay()->addLine(UString::format("link: %s", this->link.toUtf8()));
         osu->getTooltipOverlay()->end();
 
-        setBackgroundColor(0xff3d48ac);
+        this->setBackgroundColor(0xff3d48ac);
     } else {
-        setBackgroundColor(0xff2e3784);
+        this->setBackgroundColor(0xff2e3784);
     }
 }
 
@@ -44,12 +44,12 @@ void ChatLink::open_beatmap_link(i32 map_id, i32 set_id) {
         osu->getSongBrowser()->map_autodl = map_id;
         osu->getSongBrowser()->set_autodl = set_id;
     } else {
-        env->openURLInDefaultBrowser(m_link);
+        env->openURLInDefaultBrowser(this->link);
     }
 }
 
 void ChatLink::onMouseUpInside() {
-    std::string link_str = m_link.toUtf8();
+    std::string link_str = this->link.toUtf8();
     std::smatch match;
 
     // This lazy escaping is only good for endpoint URLs, not anything more serious
@@ -63,8 +63,8 @@ void ChatLink::onMouseUpInside() {
     }
 
     // Detect multiplayer invite links
-    if(m_link.startsWith("osump://")) {
-        if(osu->m_room->isVisible()) {
+    if(this->link.startsWith("osump://")) {
+        if(osu->room->isVisible()) {
             osu->getNotificationOverlay()->addNotification("You are already in a multiplayer room.");
             return;
         }
@@ -74,7 +74,7 @@ void ChatLink::onMouseUpInside() {
         std::regex_search(link_str, match, std::regex("osump://(\\d+)/(\\S*)"));
         u32 invite_id = strtoul(match.str(1).c_str(), NULL, 10);
         UString password = match.str(2).c_str();
-        osu->m_lobby->joinRoom(invite_id, password);
+        osu->lobby->joinRoom(invite_id, password);
         return;
     }
 
@@ -85,7 +85,7 @@ void ChatLink::onMouseUpInside() {
     user_pattern.append("/u(sers)?/(\\d+)");
     if(std::regex_search(link_str, match, std::regex(user_pattern.toUtf8()))) {
         i32 user_id = std::stoi(match.str(3));
-        osu->m_user_actions->open(user_id);
+        osu->user_actions->open(user_id);
         return;
     }
 
@@ -96,7 +96,7 @@ void ChatLink::onMouseUpInside() {
     map_pattern.append("|osu\\.ppy\\.sh)/b(eatmaps)?/(\\d+)");
     if(std::regex_search(link_str, match, std::regex(map_pattern.toUtf8()))) {
         i32 map_id = std::stoi(match.str(4));
-        open_beatmap_link(map_id, 0);
+        this->open_beatmap_link(map_id, 0);
         return;
     }
 
@@ -112,9 +112,9 @@ void ChatLink::onMouseUpInside() {
             map_id = std::stoi(match.str(5));
         }
 
-        open_beatmap_link(map_id, set_id);
+        this->open_beatmap_link(map_id, set_id);
         return;
     }
 
-    env->openURLInDefaultBrowser(m_link);
+    env->openURLInDefaultBrowser(this->link);
 }

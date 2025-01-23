@@ -31,73 +31,73 @@ class CBaseUIScrollView : public CBaseUIElement {
 
     // set
     CBaseUIScrollView *setDrawBackground(bool drawBackground) {
-        m_bDrawBackground = drawBackground;
+        this->bDrawBackground = drawBackground;
         return this;
     }
     CBaseUIScrollView *setDrawFrame(bool drawFrame) {
-        m_bDrawFrame = drawFrame;
+        this->bDrawFrame = drawFrame;
         return this;
     }
     CBaseUIScrollView *setDrawScrollbars(bool drawScrollbars) {
-        m_bDrawScrollbars = drawScrollbars;
+        this->bDrawScrollbars = drawScrollbars;
         return this;
     }
 
     CBaseUIScrollView *setBackgroundColor(Color backgroundColor) {
-        m_backgroundColor = backgroundColor;
+        this->backgroundColor = backgroundColor;
         return this;
     }
     CBaseUIScrollView *setFrameColor(Color frameColor) {
-        m_frameColor = frameColor;
+        this->frameColor = frameColor;
         return this;
     }
     CBaseUIScrollView *setFrameBrightColor(Color frameBrightColor) {
-        m_frameBrightColor = frameBrightColor;
+        this->frameBrightColor = frameBrightColor;
         return this;
     }
     CBaseUIScrollView *setFrameDarkColor(Color frameDarkColor) {
-        m_frameDarkColor = frameDarkColor;
+        this->frameDarkColor = frameDarkColor;
         return this;
     }
     CBaseUIScrollView *setScrollbarColor(Color scrollbarColor) {
-        m_scrollbarColor = scrollbarColor;
+        this->scrollbarColor = scrollbarColor;
         return this;
     }
 
     CBaseUIScrollView *setHorizontalScrolling(bool horizontalScrolling) {
-        m_bHorizontalScrolling = horizontalScrolling;
+        this->bHorizontalScrolling = horizontalScrolling;
         return this;
     }
     CBaseUIScrollView *setVerticalScrolling(bool verticalScrolling) {
-        m_bVerticalScrolling = verticalScrolling;
+        this->bVerticalScrolling = verticalScrolling;
         return this;
     }
     CBaseUIScrollView *setScrollSizeToContent(int border = 5);
     CBaseUIScrollView *setScrollResistance(int scrollResistanceInPixels) {
-        m_iScrollResistance = scrollResistanceInPixels;
+        this->iScrollResistance = scrollResistanceInPixels;
         return this;
     }
 
     CBaseUIScrollView *setBlockScrolling(bool block) {
-        m_bBlockScrolling = block;
+        this->bBlockScrolling = block;
         return this;
     }  // means: disable scrolling, not scrolling in 'blocks'
 
     void setScrollMouseWheelMultiplier(float scrollMouseWheelMultiplier) {
-        m_fScrollMouseWheelMultiplier = scrollMouseWheelMultiplier;
+        this->fScrollMouseWheelMultiplier = scrollMouseWheelMultiplier;
     }
     void setScrollbarSizeMultiplier(float scrollbarSizeMultiplier) {
-        m_fScrollbarSizeMultiplier = scrollbarSizeMultiplier;
+        this->fScrollbarSizeMultiplier = scrollbarSizeMultiplier;
     }
 
     // get
-    inline CBaseUIContainer *getContainer() const { return m_container; }
-    inline float getRelPosY() const { return m_vScrollPos.y; }
-    inline float getRelPosX() const { return m_vScrollPos.x; }
-    inline Vector2 getScrollSize() const { return m_vScrollSize; }
-    inline Vector2 getVelocity() const { return (m_vScrollPos - m_vVelocity); }
+    inline CBaseUIContainer *getContainer() const { return this->container; }
+    inline float getRelPosY() const { return this->vScrollPos.y; }
+    inline float getRelPosX() const { return this->vScrollPos.x; }
+    inline Vector2 getScrollSize() const { return this->vScrollSize; }
+    inline Vector2 getVelocity() const { return (this->vScrollPos - this->vVelocity); }
 
-    inline bool isScrolling() const { return m_bScrolling; }
+    inline bool isScrolling() const { return this->bScrolling; }
     bool isBusy();
 
     // events
@@ -116,8 +116,8 @@ class CBaseUIScrollView : public CBaseUIElement {
     // Useful in places where you're waiting on new content, like chat logs.
     bool sticky = false;
 
-    bool m_bHorizontalClipping = true;
-    bool m_bVerticalClipping = true;
+    bool bHorizontalClipping = true;
+    bool bVerticalClipping = true;
 
    protected:
     virtual void onMoved();
@@ -130,46 +130,46 @@ class CBaseUIScrollView : public CBaseUIElement {
     void scrollToXInt(int scrollPosX, bool animated = true, bool slow = true);
 
     // main container
-    CBaseUIContainer *m_container;
+    CBaseUIContainer *container;
 
     // vars
-    bool m_bDrawFrame;
-    bool m_bDrawBackground;
-    bool m_bDrawScrollbars;
+    bool bDrawFrame;
+    bool bDrawBackground;
+    bool bDrawScrollbars;
 
-    Color m_backgroundColor;
-    Color m_frameColor;
-    Color m_frameBrightColor;
-    Color m_frameDarkColor;
-    Color m_scrollbarColor;
+    Color backgroundColor;
+    Color frameColor;
+    Color frameBrightColor;
+    Color frameDarkColor;
+    Color scrollbarColor;
 
-    Vector2 m_vScrollPos;
-    Vector2 m_vScrollPosBackup;
-    Vector2 m_vMouseBackup;
+    Vector2 vScrollPos;
+    Vector2 vScrollPosBackup;
+    Vector2 vMouseBackup;
 
-    float m_fScrollMouseWheelMultiplier;
-    float m_fScrollbarSizeMultiplier;
-    McRect m_verticalScrollbar;
-    McRect m_horizontalScrollbar;
+    float fScrollMouseWheelMultiplier;
+    float fScrollbarSizeMultiplier;
+    McRect verticalScrollbar;
+    McRect horizontalScrollbar;
 
     // scroll logic
-    bool m_bScrolling;
-    bool m_bScrollbarScrolling;
-    bool m_bScrollbarIsVerticalScrolling;
-    bool m_bBlockScrolling;
-    bool m_bHorizontalScrolling;
-    bool m_bVerticalScrolling;
-    bool m_bFirstScrollSizeToContent = true;
-    Vector2 m_vScrollSize;
-    Vector2 m_vMouseBackup2;
-    Vector2 m_vMouseBackup3;
-    Vector2 m_vVelocity;
-    Vector2 m_vKineticAverage;
+    bool bScrolling;
+    bool bScrollbarScrolling;
+    bool bScrollbarIsVerticalScrolling;
+    bool bBlockScrolling;
+    bool bHorizontalScrolling;
+    bool bVerticalScrolling;
+    bool bFirstScrollSizeToContent = true;
+    Vector2 vScrollSize;
+    Vector2 vMouseBackup2;
+    Vector2 vMouseBackup3;
+    Vector2 vVelocity;
+    Vector2 vKineticAverage;
 
-    bool m_bAutoScrollingX;
-    bool m_bAutoScrollingY;
-    int m_iPrevScrollDeltaX;
+    bool bAutoScrollingX;
+    bool bAutoScrollingY;
+    int iPrevScrollDeltaX;
 
-    bool m_bScrollResistanceCheck;
-    int m_iScrollResistance;
+    bool bScrollResistanceCheck;
+    int iScrollResistance;
 };

@@ -27,8 +27,8 @@ class Console : public CBaseUIWindow {
     static std::vector<UString> g_commandQueue;
 
    private:
-    CBaseUIScrollView *m_log;
-    CBaseUITextbox *m_textbox;
+    CBaseUIScrollView *log_view;
+    CBaseUITextbox *textbox;
 
-    McFont *m_logFont;
+    McFont *logFont;
 };

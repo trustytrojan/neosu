@@ -234,7 +234,7 @@ bool LegacyReplay::load_from_disk(FinishedScore* score, bool update_db) {
     }
 
     if(update_db) {
-        std::lock_guard<std::mutex> lock(db->m_scores_mtx);
+        std::lock_guard<std::mutex> lock(db->scores_mtx);
         auto& map_scores = (*(db->getScores()))[score->beatmap_hash];
         for(auto& db_score : map_scores) {
             if(db_score.unixTimestamp != score->unixTimestamp) continue;
@@ -257,7 +257,7 @@ void LegacyReplay::load_and_watch(FinishedScore score) {
 
             if(strcmp(score.server.c_str(), bancho.endpoint.toUtf8()) != 0) {
                 auto msg = UString::format("Please connect to %s to view this replay!", score.server.c_str());
-                osu->m_notificationOverlay->addToast(msg);
+                osu->notificationOverlay->addToast(msg);
             }
 
             // Need to allocate with calloc since APIRequests free() the .extra
@@ -273,21 +273,21 @@ void LegacyReplay::load_and_watch(FinishedScore score) {
             request.extra = (u8*)score_cpy;
             send_api_request(request);
 
-            osu->m_notificationOverlay->addNotification("Downloading replay...");
+            osu->notificationOverlay->addNotification("Downloading replay...");
             return;
         }
     }
 
     // We tried loading from memory, we tried loading from file, we tried loading from server... RIP
     if(score.replay.empty()) {
-        osu->m_notificationOverlay->addToast("Failed to load replay");
+        osu->notificationOverlay->addToast("Failed to load replay");
         return;
     }
 
     auto diff = db->getBeatmapDifficulty(score.beatmap_hash);
     if(diff == NULL) {
         // XXX: Auto-download beatmap
-        osu->m_notificationOverlay->addToast("Missing beatmap for this replay");
+        osu->notificationOverlay->addToast("Missing beatmap for this replay");
     } else {
         osu->getSongBrowser()->onDifficultySelected(diff, false);
         osu->getSongBrowser()->selectSelectedBeatmapSongButton();

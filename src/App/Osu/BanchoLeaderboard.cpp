@@ -77,7 +77,7 @@ void fetch_online_scores(DatabaseBeatmap *beatmap) {
     curl_free(encoded_filename);
     curl_easy_cleanup(curl);
     path.append(UString::format("&m=0&i=%d&mods=%d&h=&a=0&us=%s&ha=%s", beatmap->getSetID(),
-                                osu->m_modSelector->getModFlags(), bancho.username.toUtf8(), bancho.pw_md5.toUtf8())
+                                osu->modSelector->getModFlags(), bancho.username.toUtf8(), bancho.pw_md5.toUtf8())
                     .toUtf8());
 
     APIRequest request;
@@ -162,6 +162,6 @@ void process_leaderboard_response(Packet response) {
     if(diff) {
         diff->setOnlineOffset(info.online_offset);
     }
-    db->m_online_scores[beatmap_hash] = std::move(scores);
+    db->online_scores[beatmap_hash] = std::move(scores);
     osu->getSongBrowser()->rebuildScoreButtons();
 }

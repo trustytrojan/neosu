@@ -22,82 +22,85 @@ CBaseUIWindow::CBaseUIWindow(float xPos, float yPos, float xSize, float ySize, U
     int titleBarButtonGap = 6 * dpiScale;
 
     // titlebar
-    m_bDrawTitleBarLine = true;
-    m_titleFont =
+    this->bDrawTitleBarLine = true;
+    this->titleFont =
         engine->getResourceManager()->loadFont("weblysleekuisb.ttf", "FONT_WINDOW_TITLE", 13.0f, true, env->getDPI());
-    m_iTitleBarHeight = m_titleFont->getHeight() + 12 * dpiScale;
-    if(m_iTitleBarHeight < titleBarButtonSize) m_iTitleBarHeight = titleBarButtonSize + 4 * dpiScale;
+    this->iTitleBarHeight = this->titleFont->getHeight() + 12 * dpiScale;
+    if(this->iTitleBarHeight < titleBarButtonSize) this->iTitleBarHeight = titleBarButtonSize + 4 * dpiScale;
 
-    m_titleBarContainer = new CBaseUIContainer(m_vPos.x, m_vPos.y, m_vSize.x, m_iTitleBarHeight, "titlebarcontainer");
+    this->titleBarContainer =
+        new CBaseUIContainer(this->vPos.x, this->vPos.y, this->vSize.x, this->iTitleBarHeight, "titlebarcontainer");
 
-    m_closeButton = new CBaseUIButton(m_vSize.x - titleBarButtonSize - (m_iTitleBarHeight - titleBarButtonSize) / 2.0f,
-                                      m_iTitleBarHeight / 2.0f - titleBarButtonSize / 2.0f, titleBarButtonSize,
-                                      titleBarButtonSize, "", "");
-    m_closeButton->setClickCallback(fastdelegate::MakeDelegate(this, &CBaseUIWindow::close));
-    m_closeButton->setDrawFrame(false);
+    this->closeButton = new CBaseUIButton(
+        this->vSize.x - titleBarButtonSize - (this->iTitleBarHeight - titleBarButtonSize) / 2.0f,
+        this->iTitleBarHeight / 2.0f - titleBarButtonSize / 2.0f, titleBarButtonSize, titleBarButtonSize, "", "");
+    this->closeButton->setClickCallback(fastdelegate::MakeDelegate(this, &CBaseUIWindow::close));
+    this->closeButton->setDrawFrame(false);
 
-    m_minimizeButton = new CBaseUIButton(
-        m_vSize.x - titleBarButtonSize * 2 - (m_iTitleBarHeight - titleBarButtonSize) / 2.0f - titleBarButtonGap,
-        m_iTitleBarHeight / 2.0f - titleBarButtonSize / 2.0f, titleBarButtonSize, titleBarButtonSize, "", "");
-    m_minimizeButton->setVisible(false);
-    m_minimizeButton->setDrawFrame(false);
-    m_minimizeButton->setClickCallback(fastdelegate::MakeDelegate(this, &CBaseUIWindow::minimize));
+    this->minimizeButton = new CBaseUIButton(
+        this->vSize.x - titleBarButtonSize * 2 - (this->iTitleBarHeight - titleBarButtonSize) / 2.0f -
+            titleBarButtonGap,
+        this->iTitleBarHeight / 2.0f - titleBarButtonSize / 2.0f, titleBarButtonSize, titleBarButtonSize, "", "");
+    this->minimizeButton->setVisible(false);
+    this->minimizeButton->setDrawFrame(false);
+    this->minimizeButton->setClickCallback(fastdelegate::MakeDelegate(this, &CBaseUIWindow::minimize));
 
-    m_titleBarContainer->addBaseUIElement(m_minimizeButton);
-    m_titleBarContainer->addBaseUIElement(m_closeButton);
+    this->titleBarContainer->addBaseUIElement(this->minimizeButton);
+    this->titleBarContainer->addBaseUIElement(this->closeButton);
 
     // main container
-    m_container = new CBaseUIContainer(m_vPos.x, m_vPos.y + m_titleBarContainer->getSize().y, m_vSize.x,
-                                       m_vSize.y - m_titleBarContainer->getSize().y, "maincontainer");
+    this->container =
+        new CBaseUIContainer(this->vPos.x, this->vPos.y + this->titleBarContainer->getSize().y, this->vSize.x,
+                             this->vSize.y - this->titleBarContainer->getSize().y, "maincontainer");
 
     // colors
-    m_frameColor = 0xffffffff;
-    m_backgroundColor = 0xff000000;
-    m_frameBrightColor = 0;
-    m_frameDarkColor = 0;
-    m_titleColor = 0xffffffff;
+    this->frameColor = 0xffffffff;
+    this->backgroundColor = 0xff000000;
+    this->frameBrightColor = 0;
+    this->frameDarkColor = 0;
+    this->titleColor = 0xffffffff;
 
     // events
-    m_vResizeLimit = Vector2(100, 90) * dpiScale;
-    m_bMoving = false;
-    m_bResizing = false;
-    m_iResizeType = 0;  // 1 == top left, 2 == left, 3 == bottom left, 4 == bottom, 5 = bottom right, 6 == right, 7 ==
-                        // top right, 8 == top
+    this->vResizeLimit = Vector2(100, 90) * dpiScale;
+    this->bMoving = false;
+    this->bResizing = false;
+    this->iResizeType = 0;  // 1 == top left, 2 == left, 3 == bottom left, 4 == bottom, 5 = bottom right, 6 == right,
+                            // 7 == top right, 8 == top
 
     // window properties
-    m_bIsOpen = false;
-    m_bAnimIn = false;
-    m_bResizeable = true;
-    m_bCoherenceMode = false;
-    m_fAnimation = 0.0f;
+    this->bIsOpen = false;
+    this->bAnimIn = false;
+    this->bResizeable = true;
+    this->bCoherenceMode = false;
+    this->fAnimation = 0.0f;
 
-    m_bDrawFrame = true;
-    m_bDrawBackground = true;
-    m_bRoundedRectangle = false;
+    this->bDrawFrame = true;
+    this->bDrawBackground = true;
+    this->bRoundedRectangle = false;
 
     // test features
-    // m_rt = engine->getResourceManager()->createRenderTarget(m_vPos.x, m_vPos.y, m_vSize.x+1, m_vSize.y+1);
-    // float shadowRadius = ui_window_shadow_radius.getInt();
-    /// m_shadow = new CBaseUIBoxShadow(0xff000000, shadowRadius, m_vPos.x-shadowRadius, m_vPos.y-shadowRadius,
-    /// m_vSize.x+shadowRadius*2, m_vSize.y+shadowRadius*2+4, "windowshadow");
+    // m_rt = engine->getResourceManager()->createRenderTarget(this->vPos.x, this->vPos.y, this->vSize.x+1,
+    // this->vSize.y+1); float shadowRadius = ui_window_shadow_radius.getInt();
+    /// m_shadow = new CBaseUIBoxShadow(0xff000000, shadowRadius, this->vPos.x-shadowRadius, this->vPos.y-shadowRadius,
+    /// m_vSize.x+shadowRadius*2, this->vSize.y+shadowRadius*2+4, "windowshadow");
 
-    setTitle(name);
-    setVisible(false);
+    this->setTitle(name);
+    this->setVisible(false);
 
     // for very small resolutions on engine start
-    if(m_vPos.y + m_vSize.y > engine->getScreenHeight()) {
-        setSizeY(engine->getScreenHeight() - 12 * dpiScale);
+    if(this->vPos.y + this->vSize.y > engine->getScreenHeight()) {
+        this->setSizeY(engine->getScreenHeight() - 12 * dpiScale);
     }
 }
 
 CBaseUIWindow::~CBaseUIWindow() {
-    /// SAFE_DELETE(m_shadow);
-    SAFE_DELETE(m_container);
-    SAFE_DELETE(m_titleBarContainer);
+    /// SAFE_DELETE(this->shadow);
+    SAFE_DELETE(this->container);
+    SAFE_DELETE(this->titleBarContainer);
 }
 
 void CBaseUIWindow::draw(Graphics *g) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
     // TODO: structure
     /*
@@ -105,13 +108,13 @@ void CBaseUIWindow::draw(Graphics *g) {
             m_shadow->draw(g);
     else
     {
-            m_shadow->setColor(COLOR((int)((m_fAnimation)*255.0f), 255, 255, 255));
+            m_shadow->setColor(COLOR((int)((this->fAnimation)*255.0f), 255, 255, 255));
 
             // HACKHACK: shadows can't render inside a 3DScene
             m_shadow->renderOffscreen(g);
 
-            g->push3DScene(McRect(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y));
-                    g->rotate3DScene(0, (m_bAnimIn ? -1 : 1) * (1-m_fAnimation)*10, 0);
+            g->push3DScene(McRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y));
+                    g->rotate3DScene(0, (this->bAnimIn ? -1 : 1) * (1-m_fAnimation)*10, 0);
                     g->translate3DScene(0, 0, -(1-m_fAnimation)*100);
                     m_shadow->draw(g);
             g->pop3DScene();
@@ -124,320 +127,340 @@ void CBaseUIWindow::draw(Graphics *g) {
 
     {
         // draw background
-        if(m_bDrawBackground) {
-            g->setColor(m_backgroundColor);
+        if(this->bDrawBackground) {
+            g->setColor(this->backgroundColor);
 
-            if(m_bRoundedRectangle) {
+            if(this->bRoundedRectangle) {
                 // int border = 0;
-                g->fillRoundedRect(m_vPos.x, m_vPos.y, m_vSize.x + 1, m_vSize.y + 1, 6);
+                g->fillRoundedRect(this->vPos.x, this->vPos.y, this->vSize.x + 1, this->vSize.y + 1, 6);
             } else
-                g->fillRect(m_vPos.x, m_vPos.y, m_vSize.x + 1, m_vSize.y + 1);
+                g->fillRect(this->vPos.x, this->vPos.y, this->vSize.x + 1, this->vSize.y + 1);
         }
 
         // draw frame
-        if(m_bDrawFrame) {
-            if(m_frameDarkColor != 0 || m_frameBrightColor != 0)
-                g->drawRect(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y, m_frameDarkColor, m_frameBrightColor,
-                            m_frameBrightColor, m_frameDarkColor);
+        if(this->bDrawFrame) {
+            if(this->frameDarkColor != 0 || this->frameBrightColor != 0)
+                g->drawRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y, this->frameDarkColor,
+                            this->frameBrightColor, this->frameBrightColor, this->frameDarkColor);
             else {
-                g->setColor(/*m_bEnabled ? 0xffffff00 : */ m_frameColor);
-                g->drawRect(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y);
+                g->setColor(/*m_bEnabled ? 0xffffff00 : */ this->frameColor);
+                g->drawRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
             }
         }
 
         // draw window contents
-        g->pushClipRect(McRect(m_vPos.x + 1, m_vPos.y + 2, m_vSize.x - 1, m_vSize.y - 1));
+        g->pushClipRect(McRect(this->vPos.x + 1, this->vPos.y + 2, this->vSize.x - 1, this->vSize.y - 1));
         {
             // draw main container
-            g->pushClipRect(McRect(m_vPos.x + 1, m_vPos.y + 2, m_vSize.x - 1, m_vSize.y - 1));
+            g->pushClipRect(McRect(this->vPos.x + 1, this->vPos.y + 2, this->vSize.x - 1, this->vSize.y - 1));
             {
-                m_container->draw(g);
-                drawCustomContent(g);
+                this->container->draw(g);
+                this->drawCustomContent(g);
             }
             g->popClipRect();
 
             // draw title bar background
-            if(m_bDrawBackground && !m_bRoundedRectangle) {
-                g->setColor(m_backgroundColor);
-                g->fillRect(m_vPos.x, m_vPos.y, m_vSize.x, m_iTitleBarHeight);
+            if(this->bDrawBackground && !this->bRoundedRectangle) {
+                g->setColor(this->backgroundColor);
+                g->fillRect(this->vPos.x, this->vPos.y, this->vSize.x, this->iTitleBarHeight);
             }
 
             // draw title bar line
-            if(m_bDrawTitleBarLine) {
-                g->setColor(m_frameColor);
-                g->drawLine(m_vPos.x, m_vPos.y + m_iTitleBarHeight, m_vPos.x + m_vSize.x, m_vPos.y + m_iTitleBarHeight);
+            if(this->bDrawTitleBarLine) {
+                g->setColor(this->frameColor);
+                g->drawLine(this->vPos.x, this->vPos.y + this->iTitleBarHeight, this->vPos.x + this->vSize.x,
+                            this->vPos.y + this->iTitleBarHeight);
             }
 
             // draw title
-            g->setColor(m_titleColor);
+            g->setColor(this->titleColor);
             g->pushTransform();
             {
-                g->translate((int)(m_vPos.x + m_vSize.x / 2.0f - m_fTitleFontWidth / 2.0f),
-                             (int)(m_vPos.y + m_fTitleFontHeight / 2.0f + m_iTitleBarHeight / 2.0f));
-                g->drawString(m_titleFont, m_sTitle);
+                g->translate((int)(this->vPos.x + this->vSize.x / 2.0f - this->fTitleFontWidth / 2.0f),
+                             (int)(this->vPos.y + this->fTitleFontHeight / 2.0f + this->iTitleBarHeight / 2.0f));
+                g->drawString(this->titleFont, this->sTitle);
             }
             g->popTransform();
 
             // draw title bar container
-            g->pushClipRect(McRect(m_vPos.x + 1, m_vPos.y + 2, m_vSize.x - 1, m_iTitleBarHeight));
-            { m_titleBarContainer->draw(g); }
+            g->pushClipRect(McRect(this->vPos.x + 1, this->vPos.y + 2, this->vSize.x - 1, this->iTitleBarHeight));
+            { this->titleBarContainer->draw(g); }
             g->popClipRect();
 
             // draw close button 'x'
-            g->setColor(m_closeButton->getFrameColor());
-            g->drawLine(m_closeButton->getPos().x + 1, m_closeButton->getPos().y + 1,
-                        m_closeButton->getPos().x + m_closeButton->getSize().x,
-                        m_closeButton->getPos().y + m_closeButton->getSize().y);
-            g->drawLine(m_closeButton->getPos().x + 1, m_closeButton->getPos().y + m_closeButton->getSize().y - 1,
-                        m_closeButton->getPos().x + m_closeButton->getSize().x, m_closeButton->getPos().y);
+            g->setColor(this->closeButton->getFrameColor());
+            g->drawLine(this->closeButton->getPos().x + 1, this->closeButton->getPos().y + 1,
+                        this->closeButton->getPos().x + this->closeButton->getSize().x,
+                        this->closeButton->getPos().y + this->closeButton->getSize().y);
+            g->drawLine(this->closeButton->getPos().x + 1,
+                        this->closeButton->getPos().y + this->closeButton->getSize().y - 1,
+                        this->closeButton->getPos().x + this->closeButton->getSize().x, this->closeButton->getPos().y);
 
             // draw minimize button '_'
-            if(m_minimizeButton->isVisible()) {
-                g->setColor(m_minimizeButton->getFrameColor());
-                g->drawLine(m_minimizeButton->getPos().x + 2,
-                            m_minimizeButton->getPos().y + m_minimizeButton->getSize().y - 2,
-                            m_minimizeButton->getPos().x + m_minimizeButton->getSize().x - 1,
-                            m_minimizeButton->getPos().y + m_minimizeButton->getSize().y - 2);
+            if(this->minimizeButton->isVisible()) {
+                g->setColor(this->minimizeButton->getFrameColor());
+                g->drawLine(this->minimizeButton->getPos().x + 2,
+                            this->minimizeButton->getPos().y + this->minimizeButton->getSize().y - 2,
+                            this->minimizeButton->getPos().x + this->minimizeButton->getSize().x - 1,
+                            this->minimizeButton->getPos().y + this->minimizeButton->getSize().y - 2);
             }
         }
         g->popClipRect();
     }
 
     // TODO: structure
-    if(anim->isAnimating(&m_fAnimation) && !m_bCoherenceMode) {
+    if(anim->isAnimating(&this->fAnimation) && !this->bCoherenceMode) {
         /*
         m_rt->disable();
 
 
-        m_rt->setColor(COLOR((int)(m_fAnimation*255.0f), 255, 255, 255));
+        m_rt->setColor(COLOR((int)(this->fAnimation*255.0f), 255, 255, 255));
 
-        g->push3DScene(McRect(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y));
-                g->rotate3DScene((m_bAnimIn ? -1 : 1) * (1-m_fAnimation)*10, 0, 0);
+        g->push3DScene(McRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y));
+                g->rotate3DScene((this->bAnimIn ? -1 : 1) * (1-m_fAnimation)*10, 0, 0);
                 g->translate3DScene(0, 0, -(1-m_fAnimation)*100);
-                m_rt->draw(g, m_vPos.x, m_vPos.y);
+                m_rt->draw(g, this->vPos.x, this->vPos.y);
         g->pop3DScene();
         */
     }
 }
 
 void CBaseUIWindow::mouse_update(bool *propagate_clicks) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
     CBaseUIElement::mouse_update(propagate_clicks);
 
     // after the close animation is finished, set invisible
-    if(m_fAnimation == 0.0f && m_bVisible) setVisible(false);
+    if(this->fAnimation == 0.0f && this->bVisible) this->setVisible(false);
 
     // window logic comes first
-    if(!m_titleBarContainer->isBusy() && !m_container->isBusy() && m_bMouseInside && m_bEnabled) updateWindowLogic();
+    if(!this->titleBarContainer->isBusy() && !this->container->isBusy() && this->bMouseInside && this->bEnabled)
+        this->updateWindowLogic();
 
     // the main two containers
-    m_titleBarContainer->mouse_update(propagate_clicks);
-    m_container->mouse_update(propagate_clicks);
+    this->titleBarContainer->mouse_update(propagate_clicks);
+    this->container->mouse_update(propagate_clicks);
 
     // moving
-    if(m_bMoving) setPos(m_vLastPos + (engine->getMouse()->getPos() - m_vMousePosBackup));
+    if(this->bMoving) this->setPos(this->vLastPos + (engine->getMouse()->getPos() - this->vMousePosBackup));
 
     // resizing
-    if(m_bResizing) {
-        switch(m_iResizeType) {
+    if(this->bResizing) {
+        switch(this->iResizeType) {
             case 1:
-                setPos(clamp<float>(m_vLastPos.x + (engine->getMouse()->getPos().x - m_vMousePosBackup.x), -m_vSize.x,
-                                    m_vLastPos.x + m_vLastSize.x - m_vResizeLimit.x),
-                       clamp<float>(m_vLastPos.y + (engine->getMouse()->getPos().y - m_vMousePosBackup.y), -m_vSize.y,
-                                    m_vLastPos.y + m_vLastSize.y - m_vResizeLimit.y));
-                setSize(clamp<float>(m_vLastSize.x + (m_vMousePosBackup.x - engine->getMouse()->getPos().x),
-                                     m_vResizeLimit.x, engine->getScreenWidth()),
-                        clamp<float>(m_vLastSize.y + (m_vMousePosBackup.y - engine->getMouse()->getPos().y),
-                                     m_vResizeLimit.y, engine->getScreenHeight()));
+                this->setPos(clamp<float>(this->vLastPos.x + (engine->getMouse()->getPos().x - this->vMousePosBackup.x),
+                                          -this->vSize.x, this->vLastPos.x + this->vLastSize.x - this->vResizeLimit.x),
+                             clamp<float>(this->vLastPos.y + (engine->getMouse()->getPos().y - this->vMousePosBackup.y),
+                                          -this->vSize.y, this->vLastPos.y + this->vLastSize.y - this->vResizeLimit.y));
+                this->setSize(
+                    clamp<float>(this->vLastSize.x + (this->vMousePosBackup.x - engine->getMouse()->getPos().x),
+                                 this->vResizeLimit.x, engine->getScreenWidth()),
+                    clamp<float>(this->vLastSize.y + (this->vMousePosBackup.y - engine->getMouse()->getPos().y),
+                                 this->vResizeLimit.y, engine->getScreenHeight()));
                 break;
 
             case 2:
-                setPosX(clamp<float>(m_vLastPos.x + (engine->getMouse()->getPos().x - m_vMousePosBackup.x), -m_vSize.x,
-                                     m_vLastPos.x + m_vLastSize.x - m_vResizeLimit.x));
-                setSizeX(clamp<float>(m_vLastSize.x + (m_vMousePosBackup.x - engine->getMouse()->getPos().x),
-                                      m_vResizeLimit.x, engine->getScreenWidth()));
+                this->setPosX(
+                    clamp<float>(this->vLastPos.x + (engine->getMouse()->getPos().x - this->vMousePosBackup.x),
+                                 -this->vSize.x, this->vLastPos.x + this->vLastSize.x - this->vResizeLimit.x));
+                this->setSizeX(
+                    clamp<float>(this->vLastSize.x + (this->vMousePosBackup.x - engine->getMouse()->getPos().x),
+                                 this->vResizeLimit.x, engine->getScreenWidth()));
                 break;
 
             case 3:
-                setPosX(clamp<float>(m_vLastPos.x + (engine->getMouse()->getPos().x - m_vMousePosBackup.x), -m_vSize.x,
-                                     m_vLastPos.x + m_vLastSize.x - m_vResizeLimit.x));
-                setSizeX(clamp<float>(m_vLastSize.x + (m_vMousePosBackup.x - engine->getMouse()->getPos().x),
-                                      m_vResizeLimit.x, engine->getScreenWidth()));
-                setSizeY(clamp<float>(m_vLastSize.y + (engine->getMouse()->getPos().y - m_vMousePosBackup.y),
-                                      m_vResizeLimit.y, engine->getScreenHeight()));
+                this->setPosX(
+                    clamp<float>(this->vLastPos.x + (engine->getMouse()->getPos().x - this->vMousePosBackup.x),
+                                 -this->vSize.x, this->vLastPos.x + this->vLastSize.x - this->vResizeLimit.x));
+                this->setSizeX(
+                    clamp<float>(this->vLastSize.x + (this->vMousePosBackup.x - engine->getMouse()->getPos().x),
+                                 this->vResizeLimit.x, engine->getScreenWidth()));
+                this->setSizeY(
+                    clamp<float>(this->vLastSize.y + (engine->getMouse()->getPos().y - this->vMousePosBackup.y),
+                                 this->vResizeLimit.y, engine->getScreenHeight()));
                 break;
 
             case 4:
-                setSizeY(clamp<float>(m_vLastSize.y + (engine->getMouse()->getPos().y - m_vMousePosBackup.y),
-                                      m_vResizeLimit.y, engine->getScreenHeight()));
+                this->setSizeY(
+                    clamp<float>(this->vLastSize.y + (engine->getMouse()->getPos().y - this->vMousePosBackup.y),
+                                 this->vResizeLimit.y, engine->getScreenHeight()));
                 break;
 
             case 5:
-                setSize(clamp<float>(m_vLastSize.x + (engine->getMouse()->getPos().x - m_vMousePosBackup.x),
-                                     m_vResizeLimit.x, engine->getScreenWidth()),
-                        clamp<float>(m_vLastSize.y + (engine->getMouse()->getPos().y - m_vMousePosBackup.y),
-                                     m_vResizeLimit.y, engine->getScreenHeight()));
+                this->setSize(
+                    clamp<float>(this->vLastSize.x + (engine->getMouse()->getPos().x - this->vMousePosBackup.x),
+                                 this->vResizeLimit.x, engine->getScreenWidth()),
+                    clamp<float>(this->vLastSize.y + (engine->getMouse()->getPos().y - this->vMousePosBackup.y),
+                                 this->vResizeLimit.y, engine->getScreenHeight()));
                 break;
 
             case 6:
-                setSizeX(clamp<float>(m_vLastSize.x + (engine->getMouse()->getPos().x - m_vMousePosBackup.x),
-                                      m_vResizeLimit.x, engine->getScreenWidth()));
+                this->setSizeX(
+                    clamp<float>(this->vLastSize.x + (engine->getMouse()->getPos().x - this->vMousePosBackup.x),
+                                 this->vResizeLimit.x, engine->getScreenWidth()));
                 break;
 
             case 7:
-                setPosY(clamp<float>(m_vLastPos.y + (engine->getMouse()->getPos().y - m_vMousePosBackup.y), -m_vSize.y,
-                                     m_vLastPos.y + m_vLastSize.y - m_vResizeLimit.y));
-                setSizeY(clamp<float>(m_vLastSize.y + (m_vMousePosBackup.y - engine->getMouse()->getPos().y),
-                                      m_vResizeLimit.y, engine->getScreenHeight()));
-                setSizeX(clamp<float>(m_vLastSize.x + (engine->getMouse()->getPos().x - m_vMousePosBackup.x),
-                                      m_vResizeLimit.x, engine->getScreenWidth()));
+                this->setPosY(
+                    clamp<float>(this->vLastPos.y + (engine->getMouse()->getPos().y - this->vMousePosBackup.y),
+                                 -this->vSize.y, this->vLastPos.y + this->vLastSize.y - this->vResizeLimit.y));
+                this->setSizeY(
+                    clamp<float>(this->vLastSize.y + (this->vMousePosBackup.y - engine->getMouse()->getPos().y),
+                                 this->vResizeLimit.y, engine->getScreenHeight()));
+                this->setSizeX(
+                    clamp<float>(this->vLastSize.x + (engine->getMouse()->getPos().x - this->vMousePosBackup.x),
+                                 this->vResizeLimit.x, engine->getScreenWidth()));
                 break;
 
             case 8:
-                setPosY(clamp<float>(m_vLastPos.y + (engine->getMouse()->getPos().y - m_vMousePosBackup.y), -m_vSize.y,
-                                     m_vLastPos.y + m_vLastSize.y - m_vResizeLimit.y));
-                setSizeY(clamp<float>(m_vLastSize.y + (m_vMousePosBackup.y - engine->getMouse()->getPos().y),
-                                      m_vResizeLimit.y, engine->getScreenHeight()));
+                this->setPosY(
+                    clamp<float>(this->vLastPos.y + (engine->getMouse()->getPos().y - this->vMousePosBackup.y),
+                                 -this->vSize.y, this->vLastPos.y + this->vLastSize.y - this->vResizeLimit.y));
+                this->setSizeY(
+                    clamp<float>(this->vLastSize.y + (this->vMousePosBackup.y - engine->getMouse()->getPos().y),
+                                 this->vResizeLimit.y, engine->getScreenHeight()));
                 break;
         }
     }
 }
 
 void CBaseUIWindow::onKeyDown(KeyboardEvent &e) {
-    if(!m_bVisible) return;
-    m_container->onKeyDown(e);
+    if(!this->bVisible) return;
+    this->container->onKeyDown(e);
 }
 
 void CBaseUIWindow::onKeyUp(KeyboardEvent &e) {
-    if(!m_bVisible) return;
-    m_container->onKeyUp(e);
+    if(!this->bVisible) return;
+    this->container->onKeyUp(e);
 }
 
 void CBaseUIWindow::onChar(KeyboardEvent &e) {
-    if(!m_bVisible) return;
-    m_container->onChar(e);
+    if(!this->bVisible) return;
+    this->container->onChar(e);
 }
 
 CBaseUIWindow *CBaseUIWindow::setTitle(UString text) {
-    m_sTitle = text;
-    updateTitleBarMetrics();
+    this->sTitle = text;
+    this->updateTitleBarMetrics();
     return this;
 }
 
 void CBaseUIWindow::updateWindowLogic() {
     if(!engine->getMouse()->isLeftDown()) {
-        m_bMoving = false;
-        m_bResizing = false;
+        this->bMoving = false;
+        this->bResizing = false;
     }
 
     // handle resize & move cursor
-    if(!m_titleBarContainer->isBusy() && !m_container->isBusy() && !m_bResizing && !m_bMoving) {
-        if(!engine->getMouse()->isLeftDown()) udpateResizeAndMoveLogic(false);
+    if(!this->titleBarContainer->isBusy() && !this->container->isBusy() && !this->bResizing && !this->bMoving) {
+        if(!engine->getMouse()->isLeftDown()) this->udpateResizeAndMoveLogic(false);
     }
 }
 
 void CBaseUIWindow::udpateResizeAndMoveLogic(bool captureMouse) {
-    if(m_bCoherenceMode) return;  // NOTE: resizing in coherence mode is handled in main_Windows.cpp
+    if(this->bCoherenceMode) return;  // NOTE: resizing in coherence mode is handled in main_Windows.cpp
 
     // backup
-    m_vLastSize = m_vSize;
-    m_vMousePosBackup = engine->getMouse()->getPos();
-    m_vLastPos = m_vPos;
+    this->vLastSize = this->vSize;
+    this->vMousePosBackup = engine->getMouse()->getPos();
+    this->vLastPos = this->vPos;
 
-    if(m_bResizeable) {
+    if(this->bResizeable) {
         // reset
-        m_iResizeType = 0;
+        this->iResizeType = 0;
 
         int resizeHandleSize = 5;
-        McRect resizeTopLeft = McRect(m_vPos.x, m_vPos.y, resizeHandleSize, resizeHandleSize);
-        McRect resizeLeft = McRect(m_vPos.x, m_vPos.y, resizeHandleSize, m_vSize.y);
+        McRect resizeTopLeft = McRect(this->vPos.x, this->vPos.y, resizeHandleSize, resizeHandleSize);
+        McRect resizeLeft = McRect(this->vPos.x, this->vPos.y, resizeHandleSize, this->vSize.y);
         McRect resizeBottomLeft =
-            McRect(m_vPos.x, m_vPos.y + m_vSize.y - resizeHandleSize, resizeHandleSize, resizeHandleSize);
-        McRect resizeBottom = McRect(m_vPos.x, m_vPos.y + m_vSize.y - resizeHandleSize, m_vSize.x, resizeHandleSize);
-        McRect resizeBottomRight = McRect(m_vPos.x + m_vSize.x - resizeHandleSize,
-                                          m_vPos.y + m_vSize.y - resizeHandleSize, resizeHandleSize, resizeHandleSize);
-        McRect resizeRight = McRect(m_vPos.x + m_vSize.x - resizeHandleSize, m_vPos.y, resizeHandleSize, m_vSize.y);
+            McRect(this->vPos.x, this->vPos.y + this->vSize.y - resizeHandleSize, resizeHandleSize, resizeHandleSize);
+        McRect resizeBottom =
+            McRect(this->vPos.x, this->vPos.y + this->vSize.y - resizeHandleSize, this->vSize.x, resizeHandleSize);
+        McRect resizeBottomRight =
+            McRect(this->vPos.x + this->vSize.x - resizeHandleSize, this->vPos.y + this->vSize.y - resizeHandleSize,
+                   resizeHandleSize, resizeHandleSize);
+        McRect resizeRight =
+            McRect(this->vPos.x + this->vSize.x - resizeHandleSize, this->vPos.y, resizeHandleSize, this->vSize.y);
         McRect resizeTopRight =
-            McRect(m_vPos.x + m_vSize.x - resizeHandleSize, m_vPos.y, resizeHandleSize, resizeHandleSize);
-        McRect resizeTop = McRect(m_vPos.x, m_vPos.y, m_vSize.x, resizeHandleSize);
+            McRect(this->vPos.x + this->vSize.x - resizeHandleSize, this->vPos.y, resizeHandleSize, resizeHandleSize);
+        McRect resizeTop = McRect(this->vPos.x, this->vPos.y, this->vSize.x, resizeHandleSize);
 
-        if(resizeTopLeft.contains(m_vMousePosBackup)) {
-            if(captureMouse) m_iResizeType = 1;
-
-            engine->getMouse()->setCursorType(CURSORTYPE::CURSOR_SIZE_VH);
-        } else if(resizeBottomLeft.contains(m_vMousePosBackup)) {
-            if(captureMouse) m_iResizeType = 3;
-
-            engine->getMouse()->setCursorType(CURSORTYPE::CURSOR_SIZE_HV);
-        } else if(resizeBottomRight.contains(m_vMousePosBackup)) {
-            if(captureMouse) m_iResizeType = 5;
+        if(resizeTopLeft.contains(this->vMousePosBackup)) {
+            if(captureMouse) this->iResizeType = 1;
 
             engine->getMouse()->setCursorType(CURSORTYPE::CURSOR_SIZE_VH);
-        } else if(resizeTopRight.contains(m_vMousePosBackup)) {
-            if(captureMouse) m_iResizeType = 7;
+        } else if(resizeBottomLeft.contains(this->vMousePosBackup)) {
+            if(captureMouse) this->iResizeType = 3;
 
             engine->getMouse()->setCursorType(CURSORTYPE::CURSOR_SIZE_HV);
-        } else if(resizeLeft.contains(m_vMousePosBackup)) {
-            if(captureMouse) m_iResizeType = 2;
+        } else if(resizeBottomRight.contains(this->vMousePosBackup)) {
+            if(captureMouse) this->iResizeType = 5;
+
+            engine->getMouse()->setCursorType(CURSORTYPE::CURSOR_SIZE_VH);
+        } else if(resizeTopRight.contains(this->vMousePosBackup)) {
+            if(captureMouse) this->iResizeType = 7;
+
+            engine->getMouse()->setCursorType(CURSORTYPE::CURSOR_SIZE_HV);
+        } else if(resizeLeft.contains(this->vMousePosBackup)) {
+            if(captureMouse) this->iResizeType = 2;
 
             engine->getMouse()->setCursorType(CURSORTYPE::CURSOR_SIZE_H);
-        } else if(resizeRight.contains(m_vMousePosBackup)) {
-            if(captureMouse) m_iResizeType = 6;
+        } else if(resizeRight.contains(this->vMousePosBackup)) {
+            if(captureMouse) this->iResizeType = 6;
 
             engine->getMouse()->setCursorType(CURSORTYPE::CURSOR_SIZE_H);
-        } else if(resizeBottom.contains(m_vMousePosBackup)) {
-            if(captureMouse) m_iResizeType = 4;
+        } else if(resizeBottom.contains(this->vMousePosBackup)) {
+            if(captureMouse) this->iResizeType = 4;
 
             engine->getMouse()->setCursorType(CURSORTYPE::CURSOR_SIZE_V);
-        } else if(resizeTop.contains(m_vMousePosBackup)) {
-            if(captureMouse) m_iResizeType = 8;
+        } else if(resizeTop.contains(this->vMousePosBackup)) {
+            if(captureMouse) this->iResizeType = 8;
 
             engine->getMouse()->setCursorType(CURSORTYPE::CURSOR_SIZE_V);
         }
     }
 
     // handle resizing
-    if(m_iResizeType > 0)
-        m_bResizing = true;
+    if(this->iResizeType > 0)
+        this->bResizing = true;
     else if(captureMouse) {
         // handle moving
-        McRect titleBarGrab = McRect(m_vPos.x, m_vPos.y, m_vSize.x, m_iTitleBarHeight);
-        if(titleBarGrab.contains(m_vMousePosBackup)) m_bMoving = true;
+        McRect titleBarGrab = McRect(this->vPos.x, this->vPos.y, this->vSize.x, this->iTitleBarHeight);
+        if(titleBarGrab.contains(this->vMousePosBackup)) this->bMoving = true;
     }
 
     // resizing and moving have priority over window contents
-    if(m_bResizing || m_bMoving) m_container->stealFocus();
+    if(this->bResizing || this->bMoving) this->container->stealFocus();
 }
 
 void CBaseUIWindow::close() {
-    if(anim->isAnimating(&m_fAnimation)) return;
+    if(anim->isAnimating(&this->fAnimation)) return;
 
-    m_bAnimIn = false;
-    m_fAnimation = 1.0f;
-    anim->moveQuadInOut(&m_fAnimation, 0.0f, cv_ui_window_animspeed.getFloat());
+    this->bAnimIn = false;
+    this->fAnimation = 1.0f;
+    anim->moveQuadInOut(&this->fAnimation, 0.0f, cv_ui_window_animspeed.getFloat());
 
-    onClosed();
+    this->onClosed();
 }
 
 void CBaseUIWindow::open() {
-    if(anim->isAnimating(&m_fAnimation) || m_bVisible) return;
+    if(anim->isAnimating(&this->fAnimation) || this->bVisible) return;
 
-    setVisible(true);
+    this->setVisible(true);
 
-    if(!m_bCoherenceMode) {
-        m_bAnimIn = true;
-        m_fAnimation = 0.001f;
-        anim->moveQuadOut(&m_fAnimation, 1.0f, cv_ui_window_animspeed.getFloat());
+    if(!this->bCoherenceMode) {
+        this->bAnimIn = true;
+        this->fAnimation = 0.001f;
+        anim->moveQuadOut(&this->fAnimation, 1.0f, cv_ui_window_animspeed.getFloat());
     } else
-        m_fAnimation = 1.0f;
+        this->fAnimation = 1.0f;
 }
 
 void CBaseUIWindow::minimize() {
-    if(m_bCoherenceMode) env->minimize();
+    if(this->bCoherenceMode) env->minimize();
 }
 
 CBaseUIWindow *CBaseUIWindow::setSizeToContent(int horizontalBorderSize, int verticalBorderSize) {
-    const std::vector<CBaseUIElement *> &elements = m_container->getElements();
+    const std::vector<CBaseUIElement *> &elements = this->container->getElements();
     if(elements.size() < 1) return this;
 
     Vector2 newSize = Vector2(horizontalBorderSize, verticalBorderSize);
@@ -450,98 +473,100 @@ CBaseUIWindow *CBaseUIWindow::setSizeToContent(int horizontalBorderSize, int ver
         if(xReach > newSize.x) newSize.x = xReach;
         if(yReach > newSize.y) newSize.y = yReach;
     }
-    newSize.y = newSize.y + m_titleBarContainer->getSize().y;
+    newSize.y = newSize.y + this->titleBarContainer->getSize().y;
 
-    setSize(newSize);
+    this->setSize(newSize);
 
     return this;
 }
 
 CBaseUIWindow *CBaseUIWindow::enableCoherenceMode() {
-    m_bCoherenceMode = true;
+    this->bCoherenceMode = true;
 
-    m_minimizeButton->setVisible(true);
-    setPos(0, 0);
-    setSize(engine->getScreenWidth() - 1, engine->getScreenHeight() - 1);
-    /// env->setWindowSize(m_vSize.x+1, m_vSize.y+1);
+    this->minimizeButton->setVisible(true);
+    this->setPos(0, 0);
+    this->setSize(engine->getScreenWidth() - 1, engine->getScreenHeight() - 1);
+    /// env->setWindowSize(this->vSize.x+1, this->vSize.y+1);
 
     return this;
 }
 
 void CBaseUIWindow::onMouseDownInside() {
-    m_bBusy = true;
+    this->bBusy = true;
     bool wtf = true;
-    m_titleBarContainer->mouse_update(&wtf);  // why is this called here lol?
-    if(!m_titleBarContainer->isBusy()) udpateResizeAndMoveLogic(true);
+    this->titleBarContainer->mouse_update(&wtf);  // why is this called here lol?
+    if(!this->titleBarContainer->isBusy()) this->udpateResizeAndMoveLogic(true);
 }
 
 void CBaseUIWindow::onMouseUpInside() {
-    m_bBusy = false;
-    m_bResizing = false;
-    m_bMoving = false;
+    this->bBusy = false;
+    this->bResizing = false;
+    this->bMoving = false;
 }
 
 void CBaseUIWindow::onMouseUpOutside() {
-    m_bBusy = false;
-    m_bResizing = false;
-    m_bMoving = false;
+    this->bBusy = false;
+    this->bResizing = false;
+    this->bMoving = false;
 }
 
 void CBaseUIWindow::updateTitleBarMetrics() {
-    m_closeButton->setRelPos(
-        m_vSize.x - m_closeButton->getSize().x - (m_iTitleBarHeight - m_closeButton->getSize().x) / 2.0f,
-        m_iTitleBarHeight / 2.0f - m_closeButton->getSize().y / 2.0f);
-    m_minimizeButton->setRelPos(
-        m_vSize.x - m_minimizeButton->getSize().x * 2 - (m_iTitleBarHeight - m_minimizeButton->getSize().x) / 2.0f - 6,
-        m_iTitleBarHeight / 2.0f - m_minimizeButton->getSize().y / 2.0f);
+    this->closeButton->setRelPos(this->vSize.x - this->closeButton->getSize().x -
+                                     (this->iTitleBarHeight - this->closeButton->getSize().x) / 2.0f,
+                                 this->iTitleBarHeight / 2.0f - this->closeButton->getSize().y / 2.0f);
+    this->minimizeButton->setRelPos(this->vSize.x - this->minimizeButton->getSize().x * 2 -
+                                        (this->iTitleBarHeight - this->minimizeButton->getSize().x) / 2.0f - 6,
+                                    this->iTitleBarHeight / 2.0f - this->minimizeButton->getSize().y / 2.0f);
 
-    m_fTitleFontWidth = m_titleFont->getStringWidth(m_sTitle);
-    m_fTitleFontHeight = m_titleFont->getHeight();
-    m_titleBarContainer->setSize(m_vSize.x, m_iTitleBarHeight);
+    this->fTitleFontWidth = this->titleFont->getStringWidth(this->sTitle);
+    this->fTitleFontHeight = this->titleFont->getHeight();
+    this->titleBarContainer->setSize(this->vSize.x, this->iTitleBarHeight);
 }
 
 void CBaseUIWindow::onMoved() {
-    m_titleBarContainer->setPos(m_vPos);
-    m_container->setPos(m_vPos.x, m_vPos.y + m_titleBarContainer->getSize().y);
+    this->titleBarContainer->setPos(this->vPos);
+    this->container->setPos(this->vPos.x, this->vPos.y + this->titleBarContainer->getSize().y);
 
-    updateTitleBarMetrics();
+    this->updateTitleBarMetrics();
 
     // if (!m_bCoherenceMode)
-    //	m_rt->setPos(m_vPos);
-    /// m_shadow->setPos(m_vPos.x-m_shadow->getRadius(), m_vPos.y-m_shadow->getRadius());
+    //	m_rt->setPos(this->vPos);
+    /// m_shadow->setPos(this->vPos.x-m_shadow->getRadius(), this->vPos.y-m_shadow->getRadius());
 }
 
 void CBaseUIWindow::onResized() {
-    updateTitleBarMetrics();
+    this->updateTitleBarMetrics();
 
-    m_container->setSize(m_vSize.x, m_vSize.y - m_titleBarContainer->getSize().y);
+    this->container->setSize(this->vSize.x, this->vSize.y - this->titleBarContainer->getSize().y);
 
     // if (!m_bCoherenceMode)
-    //	m_rt->rebuild(m_vPos.x, m_vPos.y, m_vSize.x+1, m_vSize.y+1);
-    /// m_shadow->setSize(m_vSize.x+m_shadow->getRadius()*2, m_vSize.y+m_shadow->getRadius()*2+4);
+    //	m_rt->rebuild(this->vPos.x, this->vPos.y, this->vSize.x+1, this->vSize.y+1);
+    /// m_shadow->setSize(this->vSize.x+m_shadow->getRadius()*2, this->vSize.y+m_shadow->getRadius()*2+4);
 }
 
 void CBaseUIWindow::onResolutionChange(Vector2 newResolution) {
-    if(m_bCoherenceMode) setSize(newResolution.x - 1, newResolution.y - 1);
+    if(this->bCoherenceMode) this->setSize(newResolution.x - 1, newResolution.y - 1);
 }
 
 void CBaseUIWindow::onEnabled() {
-    m_container->setEnabled(true);
-    m_titleBarContainer->setEnabled(true);
+    this->container->setEnabled(true);
+    this->titleBarContainer->setEnabled(true);
 }
 
 void CBaseUIWindow::onDisabled() {
-    m_bBusy = false;
-    m_container->setEnabled(false);
-    m_titleBarContainer->setEnabled(false);
+    this->bBusy = false;
+    this->container->setEnabled(false);
+    this->titleBarContainer->setEnabled(false);
 }
 
 void CBaseUIWindow::onClosed() {
-    if(m_bCoherenceMode) engine->shutdown();
+    if(this->bCoherenceMode) engine->shutdown();
 }
 
 bool CBaseUIWindow::isBusy() {
-    return (m_bBusy || m_titleBarContainer->isBusy() || m_container->isBusy()) && m_bVisible;
+    return (this->bBusy || this->titleBarContainer->isBusy() || this->container->isBusy()) && this->bVisible;
 }
 
-bool CBaseUIWindow::isActive() { return (m_titleBarContainer->isActive() || m_container->isActive()) && m_bVisible; }
+bool CBaseUIWindow::isActive() {
+    return (this->titleBarContainer->isActive() || this->container->isActive()) && this->bVisible;
+}

@@ -14,8 +14,8 @@ class TooltipOverlay : public OsuScreen {
     void end();
 
    private:
-    float m_fAnim;
-    std::vector<UString> m_lines;
+    float fAnim;
+    std::vector<UString> lines;
 
-    bool m_bDelayFadeout;
+    bool bDelayFadeout;
 };

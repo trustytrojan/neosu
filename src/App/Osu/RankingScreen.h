@@ -48,43 +48,43 @@ class RankingScreen : public ScreenBackable {
     UString getPPString();
     Vector2 getPPPosRaw();
 
-    CBaseUIScrollView *m_rankings;
+    CBaseUIScrollView *rankings;
 
-    UIRankingScreenInfoLabel *m_songInfo;
-    UIRankingScreenRankingPanel *m_rankingPanel;
-    CBaseUIImage *m_rankingTitle;
-    CBaseUIImage *m_rankingGrade;
-    RankingScreenIndexLabel *m_rankingIndex;
-    RankingScreenBottomElement *m_rankingBottom;
+    UIRankingScreenInfoLabel *songInfo;
+    UIRankingScreenRankingPanel *rankingPanel;
+    CBaseUIImage *rankingTitle;
+    CBaseUIImage *rankingGrade;
+    RankingScreenIndexLabel *rankingIndex;
+    RankingScreenBottomElement *rankingBottom;
 
-    UIButton *m_retry_btn;
-    UIButton *m_watch_btn;
+    UIButton *retry_btn;
+    UIButton *watch_btn;
 
-    FinishedScore::Grade m_grade;
-    float m_fUnstableRate;
-    float m_fHitErrorAvgMin;
-    float m_fHitErrorAvgMax;
+    FinishedScore::Grade grade;
+    float fUnstableRate;
+    float fHitErrorAvgMin;
+    float fHitErrorAvgMax;
 
-    UString m_sMods;
-    bool m_bModSS;
-    bool m_bModSD;
-    bool m_bModEZ;
-    bool m_bModHD;
-    bool m_bModHR;
-    bool m_bModNightmare;
-    bool m_bModScorev2;
-    bool m_bModTarget;
-    bool m_bModSpunout;
-    bool m_bModRelax;
-    bool m_bModNF;
-    bool m_bModAutopilot;
-    bool m_bModAuto;
-    bool m_bModTD;
+    UString sMods;
+    bool bModSS;
+    bool bModSD;
+    bool bModEZ;
+    bool bModHD;
+    bool bModHR;
+    bool bModNightmare;
+    bool bModScorev2;
+    bool bModTarget;
+    bool bModSpunout;
+    bool bModRelax;
+    bool bModNF;
+    bool bModAutopilot;
+    bool bModAuto;
+    bool bModTD;
 
-    std::vector<ConVar *> m_enabledExperimentalMods;
+    std::vector<ConVar *> enabledExperimentalMods;
 
     // custom
-    uwu::lazy_promise<std::function<pp_info()>, pp_info> m_ppv2_calc{pp_info{}};
-    FinishedScore m_score;
-    bool m_bIsUnranked;
+    uwu::lazy_promise<std::function<pp_info()>, pp_info> ppv2_calc{pp_info{}};
+    FinishedScore score;
+    bool bIsUnranked;
 };

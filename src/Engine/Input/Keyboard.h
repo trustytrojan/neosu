@@ -26,18 +26,18 @@ class Keyboard : public InputDevice {
     virtual void onKeyUp(KEYCODE keyCode);
     virtual void onChar(KEYCODE charCode);
 
-    inline bool isControlDown() const { return m_bControlDown; }
-    inline bool isAltDown() const { return m_bAltDown; }
-    inline bool isShiftDown() const { return m_bShiftDown; }
-    inline bool isSuperDown() const { return m_bSuperDown; }
+    inline bool isControlDown() const { return this->bControlDown; }
+    inline bool isAltDown() const { return this->bAltDown; }
+    inline bool isShiftDown() const { return this->bShiftDown; }
+    inline bool isSuperDown() const { return this->bSuperDown; }
 
    private:
-    bool m_bControlDown;
-    bool m_bAltDown;
-    bool m_bShiftDown;
-    bool m_bSuperDown;
+    bool bControlDown;
+    bool bAltDown;
+    bool bShiftDown;
+    bool bSuperDown;
 
-    std::vector<KeyboardListener *> m_listeners;
+    std::vector<KeyboardListener *> listeners;
 };
 
 #endif

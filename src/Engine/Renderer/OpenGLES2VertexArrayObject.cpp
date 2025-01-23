@@ -23,21 +23,22 @@ OpenGLES2VertexArrayObject::OpenGLES2VertexArrayObject(Graphics::PRIMITIVE primi
 }
 
 void OpenGLES2VertexArrayObject::init() {
-    if(m_vertices.size() < 2) return;
+    if(this->vertices.size() < 2) return;
 
     // populate a vertex buffer
     glGenBuffers(1, &m_iVertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, m_iVertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3) * m_vertices.size(), &(m_vertices[0]), usageToOpenGL(m_usage));
+    glBindBuffer(GL_ARRAY_BUFFER, this->iVertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3) * m_vertices.size(), &(this->vertices[0]),
+                 usageToOpenGL(this->usage));
 
     // populate texcoord buffer
-    if(m_texcoords.size() > 0 && m_texcoords[0].size() > 0) {
+    if(this->texcoords.size() > 0 && m_texcoords[0].size() > 0) {
         m_iNumTexcoords = m_texcoords[0].size();
 
         glGenBuffers(1, &m_iTexcoordBuffer);
-        glBindBuffer(GL_ARRAY_BUFFER, m_iTexcoordBuffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2) * m_texcoords[0].size(), &(m_texcoords[0][0]),
-                     usageToOpenGL(m_usage));
+        glBindBuffer(GL_ARRAY_BUFFER, this->iTexcoordBuffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2) * m_texcoords[0].size(), &(this->texcoords[0][0]),
+                     usageToOpenGL(this->usage));
     }
 
     // free memory
@@ -51,9 +52,9 @@ void OpenGLES2VertexArrayObject::initAsync() { m_bAsyncReady = true; }
 void OpenGLES2VertexArrayObject::destroy() {
     VertexArrayObject::destroy();
 
-    if(m_iVertexBuffer > 0) glDeleteBuffers(1, &m_iVertexBuffer);
+    if(this->iVertexBuffer > 0) glDeleteBuffers(1, &m_iVertexBuffer);
 
-    if(m_iTexcoordBuffer > 0) glDeleteBuffers(1, &m_iTexcoordBuffer);
+    if(this->iTexcoordBuffer > 0) glDeleteBuffers(1, &m_iTexcoordBuffer);
 
     m_iVertexBuffer = 0;
     m_iTexcoordBuffer = 0;
@@ -65,12 +66,14 @@ void OpenGLES2VertexArrayObject::draw() {
         return;
     }
 
-    const int start =
-        clamp<int>(nearestMultipleUp((int)(m_iNumVertices * m_fDrawPercentFromPercent), m_iDrawPercentNearestMultiple),
-                   0, m_iNumVertices);  // HACKHACK: osu sliders
-    const int end =
-        clamp<int>(nearestMultipleDown((int)(m_iNumVertices * m_fDrawPercentToPercent), m_iDrawPercentNearestMultiple),
-                   0, m_iNumVertices);  // HACKHACK: osu sliders
+    const int start = clamp<int>(
+        nearestMultipleUp((int)(this->iNumVertices * this->fDrawPercentFromPercent), this->iDrawPercentNearestMultiple),
+        0,
+        this->iNumVertices);  // HACKHACK: osu sliders
+    const int end = clamp<int>(
+        nearestMultipleDown((int)(this->iNumVertices * this->fDrawPercentToPercent), this->iDrawPercentNearestMultiple),
+        0,
+        this->iNumVertices);  // HACKHACK: osu sliders
 
     if(start > end || std::abs(end - start) == 0) return;
 
@@ -82,16 +85,16 @@ void OpenGLES2VertexArrayObject::draw() {
         // independently every time HACKHACK: these must match the default renderer exactly
         glDisableVertexAttribArray(g->getShaderGenericAttribCol());
 
-        glBindBuffer(GL_ARRAY_BUFFER, m_iVertexBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, this->iVertexBuffer);
         glVertexAttribPointer(g->getShaderGenericAttribPosition(), 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat),
                               (GLvoid *)0);
 
-        glBindBuffer(GL_ARRAY_BUFFER, m_iTexcoordBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, this->iTexcoordBuffer);
         glVertexAttribPointer(g->getShaderGenericAttribUV(), 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid *)0);
     }
 
     // draw
-    { glDrawArrays(primitiveToOpenGL(m_primitive), start, end - start); }
+    { glDrawArrays(primitiveToOpenGL(this->primitive), start, end - start); }
 
     // reset
     {

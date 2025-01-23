@@ -12,62 +12,62 @@ namespace uwu {
 template <typename Func, typename Ret>
 struct lazy_promise {
     lazy_promise(Ret default_ret) {
-        m_ret = default_ret;
-        m_thread = std::thread(&lazy_promise::run, this);
+        this->ret = default_ret;
+        this->thread = std::thread(&lazy_promise::run, this);
     }
 
     ~lazy_promise() {
-        keep_running = false;
-        m_cv.notify_one();
-        m_thread.join();
+        this->keep_running = false;
+        this->cv.notify_one();
+        this->thread.join();
     }
 
     void enqueue(Func func) {
-        m_funcs_mtx.lock();
-        m_funcs.push_back(func);
-        m_funcs_mtx.unlock();
-        m_cv.notify_one();
+        this->funcs_mtx.lock();
+        this->funcs.push_back(func);
+        this->funcs_mtx.unlock();
+        this->cv.notify_one();
     }
 
     Ret get() {
-        m_ret_mtx.lock();
-        Ret out = m_ret;
-        m_ret_mtx.unlock();
+        this->ret_mtx.lock();
+        Ret out = this->ret;
+        this->ret_mtx.unlock();
         return out;
     }
     void set(Ret ret) {
-        m_ret_mtx.lock();
-        m_ret = ret;
-        m_ret_mtx.unlock();
+        this->ret_mtx.lock();
+        this->ret = ret;
+        this->ret_mtx.unlock();
     }
 
    private:
     void run() {
         for(;;) {
-            std::unique_lock<std::mutex> lock(m_funcs_mtx);
-            m_cv.wait(lock, [this]() { return !m_funcs.empty() || !keep_running; });
-            if(!keep_running) break;
-            if(m_funcs.empty()) {
+            std::unique_lock<std::mutex> lock(this->funcs_mtx);
+            this->cv.wait(lock, [this]() { return !this->funcs.empty() || !this->keep_running; });
+            if(!this->keep_running) break;
+            if(this->funcs.empty()) {
                 lock.unlock();
                 continue;
             }
 
-            Func func = m_funcs[m_funcs.size() - 1];
-            m_funcs.clear();
+            Func func = this->funcs[this->funcs.size() - 1];
+            this->funcs.clear();
             lock.unlock();
 
-            set(func());
+            this->set(func());
         }
     }
 
     bool keep_running = true;
-    std::thread m_thread;
-    std::mutex m_funcs_mtx;
-    std::condition_variable m_cv;
-    std::vector<Func> m_funcs;
+    std::thread thread;
+    std::mutex funcs_mtx;
+    std::condition_variable cv;
+    std::vector<Func> funcs;
 
-    Ret m_ret;
-    std::mutex m_ret_mtx;
+    Ret ret;
+    std::mutex ret_mtx;
 };
 
 };  // namespace uwu

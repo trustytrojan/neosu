@@ -32,7 +32,7 @@ class CWindowManager : public KeyboardListener {
 
     void addWindow(CBaseUIWindow *window);
 
-    void setVisible(bool visible) { m_bVisible = visible; }
+    void setVisible(bool visible) { this->bVisible = visible; }
     void setEnabled(bool enabled);
     void setFocus(CBaseUIWindow *window);
 
@@ -40,18 +40,18 @@ class CWindowManager : public KeyboardListener {
     bool isVisible();
     bool isActive();
 
-    std::vector<CBaseUIWindow *> *getAllWindowsPointer() { return &m_windows; }
+    std::vector<CBaseUIWindow *> *getAllWindowsPointer() { return &this->windows; }
 
    private:
     int getTopMouseWindowIndex();
 
-    bool m_bVisible;
-    bool m_bEnabled;
+    bool bVisible;
+    bool bEnabled;
 
-    int m_iLastEnabledWindow;
-    int m_iCurrentEnabledWindow;
+    int iLastEnabledWindow;
+    int iCurrentEnabledWindow;
 
-    std::vector<CBaseUIWindow *> m_windows;
+    std::vector<CBaseUIWindow *> windows;
 };
 
 #endif

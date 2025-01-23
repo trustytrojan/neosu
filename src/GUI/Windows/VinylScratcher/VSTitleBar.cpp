@@ -19,14 +19,15 @@ class VSTitleBarButton : public CBaseUIButton {
     virtual ~VSTitleBarButton() { ; }
 
     virtual void draw(Graphics *g) {
-        if(!m_bVisible) return;
+        if(!this->bVisible) return;
 
         // default background gradient
         {
             const Color top = COLOR(255, 244, 244, 244);
             const Color bottom = COLOR(255, 221, 221, 221);
 
-            g->fillGradient(m_vPos.x + 1, m_vPos.y + 1, m_vSize.x - 1, m_vSize.y, top, top, bottom, bottom);
+            g->fillGradient(this->vPos.x + 1, this->vPos.y + 1, this->vSize.x - 1, this->vSize.y, top, top, bottom,
+                            bottom);
         }
 
         // blue seekbar overlay
@@ -37,183 +38,186 @@ class VSTitleBarButton : public CBaseUIButton {
                 const Color third = COLOR(255, 0, 113 - 50, 207 - 50);
                 const Color top = COLOR(255, 0, 196, 223);
 
-                const float sizeThird = m_vSize.y / 3.0f;
+                const float sizeThird = this->vSize.y / 3.0f;
 
-                g->fillGradient(m_vPos.x + 1, m_vPos.y + 1, (m_vSize.x - 2) * seekBarPercent, sizeThird, top, top,
-                                third, third);
-                g->fillGradient(m_vPos.x + 1, m_vPos.y + 1 + sizeThird, (m_vSize.x - 2) * seekBarPercent,
+                g->fillGradient(this->vPos.x + 1, this->vPos.y + 1, (this->vSize.x - 2) * seekBarPercent, sizeThird,
+                                top, top, third, third);
+                g->fillGradient(this->vPos.x + 1, this->vPos.y + 1 + sizeThird, (this->vSize.x - 2) * seekBarPercent,
                                 std::round(sizeThird / 2.0f) + 1, third, third, middle, middle);
-                g->fillGradient(m_vPos.x + 1, m_vPos.y + 1 + sizeThird + std::round(sizeThird / 2.0f),
-                                (m_vSize.x - 2) * seekBarPercent, std::round(sizeThird / 2.0f) + 1, middle, middle,
+                g->fillGradient(this->vPos.x + 1, this->vPos.y + 1 + sizeThird + std::round(sizeThird / 2.0f),
+                                (this->vSize.x - 2) * seekBarPercent, std::round(sizeThird / 2.0f) + 1, middle, middle,
                                 third, third);
-                g->fillGradient(m_vPos.x + 1, m_vPos.y + 1 + 2 * sizeThird, (m_vSize.x - 2) * seekBarPercent, sizeThird,
-                                third, third, top, top);
+                g->fillGradient(this->vPos.x + 1, this->vPos.y + 1 + 2 * sizeThird,
+                                (this->vSize.x - 2) * seekBarPercent, sizeThird, third, third, top, top);
             }
         }
 
         // bottom line
         {
             g->setColor(COLOR(255, 204, 204, 204));
-            g->drawLine(m_vPos.x, m_vPos.y + m_vSize.y, m_vPos.x + m_vSize.x, m_vPos.y + m_vSize.y);
+            g->drawLine(this->vPos.x, this->vPos.y + this->vSize.y, this->vPos.x + this->vSize.x,
+                        this->vPos.y + this->vSize.y);
         }
 
-        drawText(g);
+        this->drawText(g);
     }
 };
 
 VSTitleBar::VSTitleBar(int x, int y, int xSize, McFont *font)
     : CBaseUIElement(x, y, xSize, 44 * env->getDPIScale(), "") {
-    m_font = font;
+    this->font = font;
 
     const Color textColor = COLOR(215, 55, 55, 55);
 
-    m_container = new CBaseUIContainer(0, 0, m_vSize.x, m_vSize.y, "");
+    this->container = new CBaseUIContainer(0, 0, this->vSize.x, this->vSize.y, "");
 
-    m_title = new VSTitleBarButton(0, 0, xSize - 1, m_vSize.y, "", "");
-    m_title->setDrawBackground(false);
-    m_title->setDrawFrame(false);
-    m_title->setTextColor(textColor);
-    m_title->setFont(m_font);
-    m_container->addBaseUIElement(m_title);
+    this->title = new VSTitleBarButton(0, 0, xSize - 1, this->vSize.y, "", "");
+    this->title->setDrawBackground(false);
+    this->title->setDrawFrame(false);
+    this->title->setTextColor(textColor);
+    this->title->setFont(this->font);
+    this->container->addBaseUIElement(this->title);
 
-    m_title2 = new VSTitleBarButton(0, 0, xSize - 1, m_vSize.y, "", "Ready");
-    m_title2->setDrawBackground(true);
-    m_title2->setDrawFrame(false);
-    m_title2->setTextColor(textColor);
-    m_title2->setFont(m_font);
-    m_container->addBaseUIElement(m_title2);
+    this->title2 = new VSTitleBarButton(0, 0, xSize - 1, this->vSize.y, "", "Ready");
+    this->title2->setDrawBackground(true);
+    this->title2->setDrawFrame(false);
+    this->title2->setTextColor(textColor);
+    this->title2->setFont(this->font);
+    this->container->addBaseUIElement(this->title2);
 
     // vars
-    m_fRot = 0.0f;
-    m_iFlip = 0;
+    this->fRot = 0.0f;
+    this->iFlip = 0;
 
-    m_bIsSeeking = false;
+    this->bIsSeeking = false;
 }
 
-VSTitleBar::~VSTitleBar() { SAFE_DELETE(m_container); }
+VSTitleBar::~VSTitleBar() { SAFE_DELETE(this->container); }
 
 void VSTitleBar::draw(Graphics *g) {
-    if(m_iFlip != 0) {
+    if(this->iFlip != 0) {
         // 3d flip effect
-        if((m_fRot > -45.0f && m_iFlip == 1) || (m_iFlip == 2 && m_fRot < 45.0f)) {
-            g->push3DScene(McRect(m_vPos.x, m_vPos.y, m_title->getSize().x, m_title->getSize().y));
+        if((this->fRot > -45.0f && this->iFlip == 1) || (this->iFlip == 2 && this->fRot < 45.0f)) {
+            g->push3DScene(McRect(this->vPos.x, this->vPos.y, this->title->getSize().x, this->title->getSize().y));
             {
-                g->offset3DScene(0, 0, m_title->getSize().y / 2);
-                g->rotate3DScene(m_fRot + (m_iFlip == 1 ? 90 : -90), 0, 0);
-                drawTitle1(g);
+                g->offset3DScene(0, 0, this->title->getSize().y / 2);
+                g->rotate3DScene(this->fRot + (this->iFlip == 1 ? 90 : -90), 0, 0);
+                this->drawTitle1(g);
             }
             g->pop3DScene();
 
-            g->push3DScene(McRect(m_vPos.x, m_vPos.y, m_title2->getSize().x, m_title2->getSize().y));
+            g->push3DScene(McRect(this->vPos.x, this->vPos.y, this->title2->getSize().x, this->title2->getSize().y));
             {
-                g->offset3DScene(0, 0, m_title2->getSize().y / 2);
-                g->rotate3DScene(m_fRot, 0, 0);
-                drawTitle2(g);
+                g->offset3DScene(0, 0, this->title2->getSize().y / 2);
+                g->rotate3DScene(this->fRot, 0, 0);
+                this->drawTitle2(g);
             }
             g->pop3DScene();
         } else {
-            g->push3DScene(McRect(m_vPos.x, m_vPos.y, m_title2->getSize().x, m_title2->getSize().y));
+            g->push3DScene(McRect(this->vPos.x, this->vPos.y, this->title2->getSize().x, this->title2->getSize().y));
             {
-                g->offset3DScene(0, 0, m_title2->getSize().y / 2);
-                g->rotate3DScene(m_fRot, 0, 0);
+                g->offset3DScene(0, 0, this->title2->getSize().y / 2);
+                g->rotate3DScene(this->fRot, 0, 0);
 
-                drawTitle2(g);
+                this->drawTitle2(g);
             }
             g->pop3DScene();
 
-            g->push3DScene(McRect(m_vPos.x, m_vPos.y, m_title->getSize().x, m_title->getSize().y));
+            g->push3DScene(McRect(this->vPos.x, this->vPos.y, this->title->getSize().x, this->title->getSize().y));
             {
-                g->offset3DScene(0, 0, m_title->getSize().y / 2);
-                g->rotate3DScene(m_fRot + (m_iFlip == 1 ? 90 : -90), 0, 0);
+                g->offset3DScene(0, 0, this->title->getSize().y / 2);
+                g->rotate3DScene(this->fRot + (this->iFlip == 1 ? 90 : -90), 0, 0);
 
-                drawTitle1(g);
+                this->drawTitle1(g);
             }
             g->pop3DScene();
         }
     } else
-        drawTitle2(g);
+        this->drawTitle2(g);
 }
 
 void VSTitleBar::drawTitle1(Graphics *g) {
-    m_title->draw(g);
+    this->title->draw(g);
     if(cv_vs_percent.getFloat() > 0) {
-        m_title->setTextColor(0xffffffff);
-        g->pushClipRect(McRect(m_vPos.x, m_vPos.y, cv_vs_percent.getFloat() * m_vSize.x, m_title2->getSize().y));
-        { m_title->draw(g); }
+        this->title->setTextColor(0xffffffff);
+        g->pushClipRect(
+            McRect(this->vPos.x, this->vPos.y, cv_vs_percent.getFloat() * this->vSize.x, this->title2->getSize().y));
+        { this->title->draw(g); }
         g->popClipRect();
-        m_title->setTextColor(COLOR(255, 55, 55, 55));
+        this->title->setTextColor(COLOR(255, 55, 55, 55));
     }
 }
 
 void VSTitleBar::drawTitle2(Graphics *g) {
-    m_title2->draw(g);
+    this->title2->draw(g);
     if(cv_vs_percent.getFloat() > 0) {
-        m_title2->setTextColor(0xffffffff);
-        g->pushClipRect(McRect(m_vPos.x, m_vPos.y, cv_vs_percent.getFloat() * m_vSize.x, m_title2->getSize().y));
-        { m_title2->draw(g); }
+        this->title2->setTextColor(0xffffffff);
+        g->pushClipRect(
+            McRect(this->vPos.x, this->vPos.y, cv_vs_percent.getFloat() * this->vSize.x, this->title2->getSize().y));
+        { this->title2->draw(g); }
         g->popClipRect();
-        m_title2->setTextColor(COLOR(255, 55, 55, 55));
+        this->title2->setTextColor(COLOR(255, 55, 55, 55));
     }
 }
 
 void VSTitleBar::mouse_update(bool *propagate_clicks) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
     CBaseUIElement::mouse_update(propagate_clicks);
 
-    m_container->mouse_update(propagate_clicks);
+    this->container->mouse_update(propagate_clicks);
 
     // handle 3d flip logic
-    if(m_iFlip != 0) {
-        if(std::abs(m_fRot) == 90.0f) {
-            anim->deleteExistingAnimation(&m_fRot);
-            m_fRot = 0.0f;
-            m_iFlip = 0;
+    if(this->iFlip != 0) {
+        if(std::abs(this->fRot) == 90.0f) {
+            anim->deleteExistingAnimation(&this->fRot);
+            this->fRot = 0.0f;
+            this->iFlip = 0;
 
             // text switch
-            UString backupt = m_title2->getText();
-            { m_title2->setText(m_title->getText()); }
-            m_title->setText(backupt);
+            UString backupt = this->title2->getText();
+            { this->title2->setText(this->title->getText()); }
+            this->title->setText(backupt);
         }
     }
 
     // handle scrubbing
-    if(m_title2->isActive() && m_bActive) {
-        m_bIsSeeking = true;
+    if(this->title2->isActive() && this->bActive) {
+        this->bIsSeeking = true;
         const float percent =
-            clamp<float>((engine->getMouse()->getPos().x + 1 - m_vPos.x) / m_title->getSize().x, 0.0f, 1.0f);
+            clamp<float>((engine->getMouse()->getPos().x + 1 - this->vPos.x) / this->title->getSize().x, 0.0f, 1.0f);
         cv_vs_percent.setValue(percent);
     } else {
         // fire seek callback once scrubbing stops
-        if(m_bIsSeeking) {
-            m_bIsSeeking = false;
-            if(m_seekCallback != NULL && !engine->getMouse()->isRightDown()) m_seekCallback();
+        if(this->bIsSeeking) {
+            this->bIsSeeking = false;
+            if(this->seekCallback != NULL && !engine->getMouse()->isRightDown()) this->seekCallback();
         }
     }
 }
 
 void VSTitleBar::onResized() {
-    m_container->setSize(m_vSize);
+    this->container->setSize(this->vSize);
 
-    m_title->setSize(m_vSize.x - 1, m_vSize.y);
-    m_title2->setSize(m_vSize.x - 1, m_vSize.y);
+    this->title->setSize(this->vSize.x - 1, this->vSize.y);
+    this->title2->setSize(this->vSize.x - 1, this->vSize.y);
 }
 
 void VSTitleBar::onMoved() {
     // forward
-    m_container->setPos(m_vPos);
+    this->container->setPos(this->vPos);
 }
 
 void VSTitleBar::onFocusStolen() {
     // forward
-    m_container->onFocusStolen();
+    this->container->onFocusStolen();
 }
 
 void VSTitleBar::setTitle(UString title, bool reverse) {
-    m_title->setText(title);
-    if(anim->isAnimating(&m_fRot)) return;
+    this->title->setText(title);
+    if(anim->isAnimating(&this->fRot)) return;
 
-    m_iFlip = 1;
-    if(reverse) m_iFlip = 2;
+    this->iFlip = 1;
+    if(reverse) this->iFlip = 2;
 
-    anim->moveQuadInOut(&m_fRot, reverse == false ? -90.0f : 90.0f, 0.45f);
+    anim->moveQuadInOut(&this->fRot, reverse == false ? -90.0f : 90.0f, 0.45f);
 }

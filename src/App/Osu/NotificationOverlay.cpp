@@ -10,10 +10,10 @@
 #include "ResourceManager.h"
 
 NotificationOverlay::NotificationOverlay() : OsuScreen() {
-    m_bWaitForKey = false;
-    m_bWaitForKeyDisallowsLeftClick = false;
-    m_bConsumeNextChar = false;
-    m_keyListener = NULL;
+    this->bWaitForKey = false;
+    this->bWaitForKeyDisallowsLeftClick = false;
+    this->bConsumeNextChar = false;
+    this->keyListener = NULL;
 }
 
 static const f64 TOAST_WIDTH = 350.0;
@@ -24,23 +24,23 @@ static const f64 TOAST_SCREEN_BOTTOM_MARGIN = 20.0;
 static const f64 TOAST_SCREEN_RIGHT_MARGIN = 10.0;
 
 ToastElement::ToastElement(UString text, Color borderColor_arg) : CBaseUIButton(0, 0, 0, 0, "", "") {
-    grabs_clicks = true;
+    this->grabs_clicks = true;
 
     // TODO: animations
     // TODO: ui scaling
 
-    alpha = 0.9;  // TODO: fade in/out
-    borderColor = borderColor_arg;
-    creationTime = engine->getTime();
+    this->alpha = 0.9;  // TODO: fade in/out
+    this->borderColor = borderColor_arg;
+    this->creationTime = engine->getTime();
 
     const auto font = engine->getResourceManager()->getFont("FONT_DEFAULT");
-    lines = text.wrap(font, TOAST_WIDTH - TOAST_INNER_X_MARGIN * 2.0);
-    setSize(TOAST_WIDTH, (font->getHeight() * 1.5 * lines.size()) + (TOAST_INNER_Y_MARGIN * 2.0));
+    this->lines = text.wrap(font, TOAST_WIDTH - TOAST_INNER_X_MARGIN * 2.0);
+    this->setSize(TOAST_WIDTH, (font->getHeight() * 1.5 * this->lines.size()) + (TOAST_INNER_Y_MARGIN * 2.0));
 }
 
 void ToastElement::onClicked() {
     // Set creationTime to -10 so toast is deleted in NotificationOverlay::mouse_update
-    creationTime = -10.0;
+    this->creationTime = -10.0;
 
     CBaseUIButton::onClicked();
 }
@@ -49,23 +49,23 @@ void ToastElement::draw(Graphics *g) {
     const auto font = engine->getResourceManager()->getFont("FONT_DEFAULT");
 
     // background
-    g->setColor(isMouseInside() ? 0xff222222 : 0xff111111);
-    g->setAlpha(alpha);
-    g->fillRect(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y);
+    g->setColor(this->isMouseInside() ? 0xff222222 : 0xff111111);
+    g->setAlpha(this->alpha);
+    g->fillRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
 
     // border
-    g->setColor(isMouseInside() ? 0xffffffff : borderColor);
-    g->setAlpha(alpha);
-    g->drawRect(m_vPos.x, m_vPos.y, m_vSize.x, m_vSize.y);
+    g->setColor(this->isMouseInside() ? 0xffffffff : this->borderColor);
+    g->setAlpha(this->alpha);
+    g->drawRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
 
     // text
-    f64 y = m_vPos.y;
-    for(const auto &line : lines) {
+    f64 y = this->vPos.y;
+    for(const auto &line : this->lines) {
         y += (font->getHeight() * 1.5);
         g->setColor(0xffffffff);
-        g->setAlpha(alpha);
+        g->setAlpha(this->alpha);
         g->pushTransform();
-        g->translate(m_vPos.x + TOAST_INNER_X_MARGIN, y);
+        g->translate(this->vPos.x + TOAST_INNER_X_MARGIN, y);
         g->drawString(font, line);
         g->popTransform();
     }
@@ -76,7 +76,7 @@ void NotificationOverlay::mouse_update(bool *propagate_clicks) {
     bool a_toast_is_hovered = false;
     Vector2 screen = engine->getScreenSize();
     f64 bottom_y = screen.y - TOAST_SCREEN_BOTTOM_MARGIN;
-    for(auto t : toasts) {
+    for(auto t : this->toasts) {
         bottom_y -= TOAST_OUTER_Y_MARGIN + t->getSize().y;
         t->setPos(screen.x - (TOAST_SCREEN_RIGHT_MARGIN + TOAST_WIDTH), bottom_y);
         t->mouse_update(propagate_clicks);
@@ -84,17 +84,17 @@ void NotificationOverlay::mouse_update(bool *propagate_clicks) {
     }
 
     if(a_toast_is_hovered) {
-        for(auto t : toasts) {
+        for(auto t : this->toasts) {
             // Delay toast disappearance
             t->creationTime += engine->getFrameTime();
         }
     }
 
     f64 current_time = engine->getTime();
-    for(auto it = toasts.begin(); it != toasts.end(); it++) {
+    for(auto it = this->toasts.begin(); it != this->toasts.end(); it++) {
         auto toast = *it;
         if(toast->creationTime + 10.0 < current_time) {
-            toasts.erase(it);
+            this->toasts.erase(it);
             delete toast;
             return;
         }
@@ -102,22 +102,22 @@ void NotificationOverlay::mouse_update(bool *propagate_clicks) {
 }
 
 void NotificationOverlay::draw(Graphics *g) {
-    for(auto t : toasts) {
+    for(auto t : this->toasts) {
         t->draw(g);
     }
 
-    if(!isVisible()) return;
+    if(!this->isVisible()) return;
 
-    if(m_bWaitForKey) {
+    if(this->bWaitForKey) {
         g->setColor(0x22ffffff);
-        g->setAlpha((m_notification1.backgroundAnim / 0.5f) * 0.13f);
+        g->setAlpha((this->notification1.backgroundAnim / 0.5f) * 0.13f);
         g->fillRect(0, 0, osu->getScreenWidth(), osu->getScreenHeight());
     }
 
-    drawNotificationBackground(g, m_notification2);
-    drawNotificationBackground(g, m_notification1);
-    drawNotificationText(g, m_notification2);
-    drawNotificationText(g, m_notification1);
+    this->drawNotificationBackground(g, this->notification2);
+    this->drawNotificationBackground(g, this->notification1);
+    this->drawNotificationText(g, this->notification2);
+    this->drawNotificationText(g, this->notification1);
 }
 
 void NotificationOverlay::drawNotificationText(Graphics *g, NotificationOverlay::NOTIFICATION &n) {
@@ -151,107 +151,108 @@ void NotificationOverlay::drawNotificationBackground(Graphics *g, NotificationOv
 }
 
 void NotificationOverlay::onKeyDown(KeyboardEvent &e) {
-    if(!isVisible()) return;
+    if(!this->isVisible()) return;
 
     // escape always stops waiting for a key
     if(e.getKeyCode() == KEY_ESCAPE) {
-        if(m_bWaitForKey) e.consume();
+        if(this->bWaitForKey) e.consume();
 
-        stopWaitingForKey();
+        this->stopWaitingForKey();
     }
 
     // key binding logic
-    if(m_bWaitForKey) {
+    if(this->bWaitForKey) {
         // HACKHACK: prevent left mouse click bindings if relevant
-        if(env->getOS() == Environment::OS::WINDOWS && m_bWaitForKeyDisallowsLeftClick &&
+        if(env->getOS() == Environment::OS::WINDOWS && this->bWaitForKeyDisallowsLeftClick &&
            e.getKeyCode() == 0x01)  // 0x01 == VK_LBUTTON
-            stopWaitingForKey();
+            this->stopWaitingForKey();
         else {
-            stopWaitingForKey(true);
+            this->stopWaitingForKey(true);
 
             debugLog("keyCode = %lu\n", e.getKeyCode());
 
-            if(m_keyListener != NULL) m_keyListener->onKey(e);
+            if(this->keyListener != NULL) this->keyListener->onKey(e);
         }
 
         e.consume();
     }
 
-    if(m_bWaitForKey) e.consume();
+    if(this->bWaitForKey) e.consume();
 }
 
 void NotificationOverlay::onKeyUp(KeyboardEvent &e) {
-    if(!isVisible()) return;
+    if(!this->isVisible()) return;
 
-    if(m_bWaitForKey) e.consume();
+    if(this->bWaitForKey) e.consume();
 }
 
 void NotificationOverlay::onChar(KeyboardEvent &e) {
-    if(m_bWaitForKey || m_bConsumeNextChar) e.consume();
+    if(this->bWaitForKey || this->bConsumeNextChar) e.consume();
 
-    m_bConsumeNextChar = false;
+    this->bConsumeNextChar = false;
 }
 
 void NotificationOverlay::addNotification(UString text, Color textColor, bool waitForKey, float duration) {
     const float notificationDuration = (duration < 0.0f ? cv_notification_duration.getFloat() : duration);
 
     // swap effect
-    if(isVisible()) {
-        m_notification2.text = m_notification1.text;
-        m_notification2.textColor = 0xffffffff;
+    if(this->isVisible()) {
+        this->notification2.text = this->notification1.text;
+        this->notification2.textColor = 0xffffffff;
 
-        m_notification2.time = 0.0f;
-        m_notification2.alpha = 0.5f;
-        m_notification2.backgroundAnim = 1.0f;
-        m_notification2.fallAnim = 0.0f;
+        this->notification2.time = 0.0f;
+        this->notification2.alpha = 0.5f;
+        this->notification2.backgroundAnim = 1.0f;
+        this->notification2.fallAnim = 0.0f;
 
-        anim->deleteExistingAnimation(&m_notification1.alpha);
+        anim->deleteExistingAnimation(&this->notification1.alpha);
 
-        anim->moveQuadIn(&m_notification2.fallAnim, 1.0f, 0.2f, 0.0f, true);
-        anim->moveQuadIn(&m_notification2.alpha, 0.0f, 0.2f, 0.0f, true);
+        anim->moveQuadIn(&this->notification2.fallAnim, 1.0f, 0.2f, 0.0f, true);
+        anim->moveQuadIn(&this->notification2.alpha, 0.0f, 0.2f, 0.0f, true);
     }
 
     // build new notification
-    m_bWaitForKey = waitForKey;
-    m_bConsumeNextChar = m_bWaitForKey;
+    this->bWaitForKey = waitForKey;
+    this->bConsumeNextChar = this->bWaitForKey;
 
     float fadeOutTime = 0.4f;
 
-    m_notification1.text = text;
-    m_notification1.textColor = textColor;
+    this->notification1.text = text;
+    this->notification1.textColor = textColor;
 
     if(!waitForKey)
-        m_notification1.time = engine->getTime() + notificationDuration + fadeOutTime;
+        this->notification1.time = engine->getTime() + notificationDuration + fadeOutTime;
     else
-        m_notification1.time = 0.0f;
+        this->notification1.time = 0.0f;
 
-    m_notification1.alpha = 0.0f;
-    m_notification1.backgroundAnim = 0.5f;
-    m_notification1.fallAnim = 0.0f;
+    this->notification1.alpha = 0.0f;
+    this->notification1.backgroundAnim = 0.5f;
+    this->notification1.fallAnim = 0.0f;
 
     // animations
-    if(isVisible())
-        m_notification1.alpha = 1.0f;
+    if(this->isVisible())
+        this->notification1.alpha = 1.0f;
     else
-        anim->moveLinear(&m_notification1.alpha, 1.0f, 0.075f, true);
+        anim->moveLinear(&this->notification1.alpha, 1.0f, 0.075f, true);
 
-    if(!waitForKey) anim->moveQuadOut(&m_notification1.alpha, 0.0f, fadeOutTime, notificationDuration, false);
+    if(!waitForKey) anim->moveQuadOut(&this->notification1.alpha, 0.0f, fadeOutTime, notificationDuration, false);
 
-    anim->moveQuadOut(&m_notification1.backgroundAnim, 1.0f, 0.15f, 0.0f, true);
+    anim->moveQuadOut(&this->notification1.backgroundAnim, 1.0f, 0.15f, 0.0f, true);
 }
 
 void NotificationOverlay::addToast(UString text, Color borderColor, ToastClickCallback callback) {
     auto toast = new ToastElement(text, borderColor);
     toast->setClickCallback(callback);
-    toasts.push_back(toast);
+    this->toasts.push_back(toast);
 }
 
 void NotificationOverlay::stopWaitingForKey(bool stillConsumeNextChar) {
-    m_bWaitForKey = false;
-    m_bWaitForKeyDisallowsLeftClick = false;
-    m_bConsumeNextChar = stillConsumeNextChar;
+    this->bWaitForKey = false;
+    this->bWaitForKeyDisallowsLeftClick = false;
+    this->bConsumeNextChar = stillConsumeNextChar;
 }
 
 bool NotificationOverlay::isVisible() {
-    return engine->getTime() < m_notification1.time || engine->getTime() < m_notification2.time || m_bWaitForKey;
+    return engine->getTime() < this->notification1.time || engine->getTime() < this->notification2.time ||
+           this->bWaitForKey;
 }

@@ -57,9 +57,9 @@ class DatabaseBeatmap {
         int maxPossibleCombo;
 
         LOAD_DIFFOBJ_RESULT() {
-            errorCode = 0;
+            this->errorCode = 0;
 
-            maxPossibleCombo = 0;
+            this->maxPossibleCombo = 0;
         }
     };
 
@@ -70,7 +70,7 @@ class DatabaseBeatmap {
         std::vector<BREAK> breaks;
         std::vector<Color> combocolors;
 
-        LOAD_GAMEPLAY_RESULT() { errorCode = 0; }
+        LOAD_GAMEPLAY_RESULT() { this->errorCode = 0; }
     };
 
     struct TIMING_INFO {
@@ -174,26 +174,26 @@ class DatabaseBeatmap {
     void update_overrides();
 
     void setLocalOffset(long localOffset) {
-        m_iLocalOffset = localOffset;
-        update_overrides();
+        this->iLocalOffset = localOffset;
+        this->update_overrides();
     }
 
     void setOnlineOffset(long onlineOffset) {
-        m_iOnlineOffset = onlineOffset;
-        update_overrides();
+        this->iOnlineOffset = onlineOffset;
+        this->update_overrides();
     }
 
-    std::string m_sFolder;    // path to folder containing .osu file (e.g. "/path/to/beatmapfolder/")
-    std::string m_sFilePath;  // path to .osu file (e.g. "/path/to/beatmapfolder/beatmap.osu")
-    inline std::string getFolder() const { return m_sFolder; }
-    inline std::string getFilePath() const { return m_sFilePath; }
+    std::string sFolder;    // path to folder containing .osu file (e.g. "/path/to/beatmapfolder/")
+    std::string sFilePath;  // path to .osu file (e.g. "/path/to/beatmapfolder/beatmap.osu")
+    inline std::string getFolder() const { return this->sFolder; }
+    inline std::string getFilePath() const { return this->sFilePath; }
 
     inline const std::vector<DatabaseBeatmap *> &getDifficulties() const {
         static std::vector<DatabaseBeatmap *> empty;
-        return m_difficulties == NULL ? empty : *m_difficulties;
+        return this->difficulties == NULL ? empty : *this->difficulties;
     }
 
-    inline const MD5Hash &getMD5Hash() const { return m_sMD5Hash; }
+    inline const MD5Hash &getMD5Hash() const { return this->sMD5Hash; }
 
     TIMING_INFO getTimingInfoForTime(unsigned long positionMS);
     static TIMING_INFO getTimingInfoForTimeAndTimingPoints(unsigned long positionMS,
@@ -201,117 +201,117 @@ class DatabaseBeatmap {
 
     // raw metadata
 
-    inline int getVersion() const { return m_iVersion; }
-    inline int getGameMode() const { return m_iGameMode; }
-    inline int getID() const { return m_iID; }
-    inline int getSetID() const { return m_iSetID; }
+    inline int getVersion() const { return this->iVersion; }
+    inline int getGameMode() const { return this->iGameMode; }
+    inline int getID() const { return this->iID; }
+    inline int getSetID() const { return this->iSetID; }
 
-    inline const std::string &getTitle() const { return m_sTitle; }
-    inline const std::string &getArtist() const { return m_sArtist; }
-    inline const std::string &getCreator() const { return m_sCreator; }
-    inline const std::string &getDifficultyName() const { return m_sDifficultyName; }
-    inline const std::string &getSource() const { return m_sSource; }
-    inline const std::string &getTags() const { return m_sTags; }
-    inline const std::string &getBackgroundImageFileName() const { return m_sBackgroundImageFileName; }
-    inline const std::string &getAudioFileName() const { return m_sAudioFileName; }
+    inline const std::string &getTitle() const { return this->sTitle; }
+    inline const std::string &getArtist() const { return this->sArtist; }
+    inline const std::string &getCreator() const { return this->sCreator; }
+    inline const std::string &getDifficultyName() const { return this->sDifficultyName; }
+    inline const std::string &getSource() const { return this->sSource; }
+    inline const std::string &getTags() const { return this->sTags; }
+    inline const std::string &getBackgroundImageFileName() const { return this->sBackgroundImageFileName; }
+    inline const std::string &getAudioFileName() const { return this->sAudioFileName; }
 
-    inline unsigned long getLengthMS() const { return m_iLengthMS; }
-    inline int getPreviewTime() const { return m_iPreviewTime; }
+    inline unsigned long getLengthMS() const { return this->iLengthMS; }
+    inline int getPreviewTime() const { return this->iPreviewTime; }
 
-    inline float getAR() const { return m_fAR; }
-    inline float getCS() const { return m_fCS; }
-    inline float getHP() const { return m_fHP; }
-    inline float getOD() const { return m_fOD; }
+    inline float getAR() const { return this->fAR; }
+    inline float getCS() const { return this->fCS; }
+    inline float getHP() const { return this->fHP; }
+    inline float getOD() const { return this->fOD; }
 
-    inline float getStackLeniency() const { return m_fStackLeniency; }
-    inline float getSliderTickRate() const { return m_fSliderTickRate; }
-    inline float getSliderMultiplier() const { return m_fSliderMultiplier; }
+    inline float getStackLeniency() const { return this->fStackLeniency; }
+    inline float getSliderTickRate() const { return this->fSliderTickRate; }
+    inline float getSliderMultiplier() const { return this->fSliderMultiplier; }
 
-    inline const zarray<TIMINGPOINT> &getTimingpoints() const { return m_timingpoints; }
+    inline const zarray<TIMINGPOINT> &getTimingpoints() const { return this->timingpoints; }
 
     std::string getFullSoundFilePath();
 
     // redundant data
-    inline const std::string &getFullBackgroundImageFilePath() const { return m_sFullBackgroundImageFilePath; }
+    inline const std::string &getFullBackgroundImageFilePath() const { return this->sFullBackgroundImageFilePath; }
 
     // precomputed data
 
-    inline float getStarsNomod() const { return m_fStarsNomod; }
+    inline float getStarsNomod() const { return this->fStarsNomod; }
 
-    inline int getMinBPM() const { return m_iMinBPM; }
-    inline int getMaxBPM() const { return m_iMaxBPM; }
-    inline int getMostCommonBPM() const { return m_iMostCommonBPM; }
+    inline int getMinBPM() const { return this->iMinBPM; }
+    inline int getMaxBPM() const { return this->iMaxBPM; }
+    inline int getMostCommonBPM() const { return this->iMostCommonBPM; }
 
-    inline int getNumObjects() const { return m_iNumObjects; }
-    inline int getNumCircles() const { return m_iNumCircles; }
-    inline int getNumSliders() const { return m_iNumSliders; }
-    inline int getNumSpinners() const { return m_iNumSpinners; }
+    inline int getNumObjects() const { return this->iNumObjects; }
+    inline int getNumCircles() const { return this->iNumCircles; }
+    inline int getNumSliders() const { return this->iNumSliders; }
+    inline int getNumSpinners() const { return this->iNumSpinners; }
 
     // custom data
 
     i64 last_modification_time = 0;
 
-    inline long getLocalOffset() const { return m_iLocalOffset; }
-    inline long getOnlineOffset() const { return m_iOnlineOffset; }
+    inline long getLocalOffset() const { return this->iLocalOffset; }
+    inline long getOnlineOffset() const { return this->iOnlineOffset; }
 
     bool draw_background = true;
     bool do_not_store = false;
 
     // song select mod-adjusted pp/stars
-    pp_info m_pp_info;
+    pp_info pp;
 
     // raw metadata
 
-    int m_iVersion;   // e.g. "osu file format v12" -> 12
-    int m_iGameMode;  // 0 = osu!standard, 1 = Taiko, 2 = Catch the Beat, 3 = osu!mania
-    long m_iID;       // online ID, if uploaded
-    int m_iSetID;     // online set ID, if uploaded
+    int iVersion;   // e.g. "osu file format v12" -> 12
+    int iGameMode;  // 0 = osu!standard, 1 = Taiko, 2 = Catch the Beat, 3 = osu!mania
+    long iID;       // online ID, if uploaded
+    int iSetID;     // online set ID, if uploaded
 
-    std::string m_sTitle;
-    std::string m_sArtist;
-    std::string m_sCreator;
-    std::string m_sDifficultyName;  // difficulty name ("Version")
-    std::string m_sSource;          // only used by search
-    std::string m_sTags;            // only used by search
-    std::string m_sBackgroundImageFileName;
-    std::string m_sAudioFileName;
+    std::string sTitle;
+    std::string sArtist;
+    std::string sCreator;
+    std::string sDifficultyName;  // difficulty name ("Version")
+    std::string sSource;          // only used by search
+    std::string sTags;            // only used by search
+    std::string sBackgroundImageFileName;
+    std::string sAudioFileName;
 
-    unsigned long m_iLengthMS;
-    int m_iPreviewTime;
+    unsigned long iLengthMS;
+    int iPreviewTime;
 
-    float m_fAR;
-    float m_fCS;
-    float m_fHP;
-    float m_fOD;
+    float fAR;
+    float fCS;
+    float fHP;
+    float fOD;
 
-    float m_fStackLeniency;
-    float m_fSliderTickRate;
-    float m_fSliderMultiplier;
+    float fStackLeniency;
+    float fSliderTickRate;
+    float fSliderMultiplier;
 
-    zarray<TIMINGPOINT> m_timingpoints;  // necessary for main menu anim
+    zarray<TIMINGPOINT> timingpoints;  // necessary for main menu anim
 
     // redundant data (technically contained in metadata, but precomputed anyway)
 
-    std::string m_sFullSoundFilePath;
-    std::string m_sFullBackgroundImageFilePath;
+    std::string sFullSoundFilePath;
+    std::string sFullBackgroundImageFilePath;
 
     // precomputed data (can-run-without-but-nice-to-have data)
 
-    float m_fStarsNomod;
+    float fStarsNomod;
 
-    int m_iMinBPM = 0;
-    int m_iMaxBPM = 0;
-    int m_iMostCommonBPM = 0;
+    int iMinBPM = 0;
+    int iMaxBPM = 0;
+    int iMostCommonBPM = 0;
 
-    int m_iNumObjects;
-    int m_iNumCircles;
-    int m_iNumSliders;
-    int m_iNumSpinners;
+    int iNumObjects;
+    int iNumCircles;
+    int iNumSliders;
+    int iNumSpinners;
 
     // custom data (not necessary, not part of the beatmap file, and not precomputed)
 
-    long m_iLocalOffset;
-    long m_iOnlineOffset;
+    long iLocalOffset;
+    long iOnlineOffset;
     std::atomic<f32> loudness = 0.f;
 
     struct CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT {
@@ -334,10 +334,10 @@ class DatabaseBeatmap {
         int beatmapVersion, std::vector<SLIDER> &sliders, zarray<TIMINGPOINT> &timingpoints, float sliderMultiplier,
         float sliderTickRate, const std::atomic<bool> &dead);
 
-    std::vector<DatabaseBeatmap *> *m_difficulties = NULL;
-    BeatmapType m_type;
+    std::vector<DatabaseBeatmap *> *difficulties = NULL;
+    BeatmapType type;
 
-    MD5Hash m_sMD5Hash;
+    MD5Hash sMD5Hash;
 
     // helper functions
 
@@ -359,15 +359,15 @@ class DatabaseBeatmapBackgroundImagePathLoader : public Resource {
    public:
     DatabaseBeatmapBackgroundImagePathLoader(const std::string &filePath);
 
-    inline const std::string &getLoadedBackgroundImageFileName() const { return m_sLoadedBackgroundImageFileName; }
+    inline const std::string &getLoadedBackgroundImageFileName() const { return this->sLoadedBackgroundImageFileName; }
 
    private:
     virtual void init();
     virtual void initAsync();
     virtual void destroy() { ; }
 
-    std::string m_sFilePath;
-    std::string m_sLoadedBackgroundImageFileName;
+    std::string sFilePath;
+    std::string sLoadedBackgroundImageFileName;
 };
 
 struct BPMInfo {

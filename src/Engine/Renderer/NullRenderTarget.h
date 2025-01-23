@@ -16,7 +16,7 @@ class NullRenderTarget : public RenderTarget {
         : RenderTarget(x, y, width, height, multiSampleType) {
         ;
     }
-    virtual ~NullRenderTarget() { destroy(); }
+    virtual ~NullRenderTarget() { this->destroy(); }
 
     virtual void enable() { ; }
     virtual void disable() { ; }
@@ -25,8 +25,8 @@ class NullRenderTarget : public RenderTarget {
     virtual void unbind() { ; }
 
    private:
-    virtual void init() { m_bReady = true; }
-    virtual void initAsync() { m_bAsyncReady = true; }
+    virtual void init() { this->bReady = true; }
+    virtual void initAsync() { this->bAsyncReady = true; }
     virtual void destroy() { ; }
 };
 

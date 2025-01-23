@@ -108,7 +108,7 @@ SoundEngine::SoundEngine() {
     // if set to 1, increases sample playback latency by 10 ms
     BASS_SetConfig(BASS_CONFIG_VISTA_TRUEPOS, 0);
 
-    m_currentOutputDevice = {
+    this->currentOutputDevice = {
         .id = 0,
         .enabled = true,
         .isDefault = true,
@@ -119,18 +119,18 @@ SoundEngine::SoundEngine() {
 
 OUTPUT_DEVICE SoundEngine::getWantedDevice() {
     auto wanted_name = cv_snd_output_device.getString();
-    for(auto device : m_outputDevices) {
+    for(auto device : this->outputDevices) {
         if(device.enabled && device.name == wanted_name) {
             return device;
         }
     }
 
     debugLog("Could not find sound device '%s', initializing default one instead.\n", wanted_name.toUtf8());
-    return getDefaultDevice();
+    return this->getDefaultDevice();
 }
 
 OUTPUT_DEVICE SoundEngine::getDefaultDevice() {
-    for(auto device : m_outputDevices) {
+    for(auto device : this->outputDevices) {
         if(device.enabled && device.isDefault) {
             return device;
         }
@@ -147,7 +147,7 @@ OUTPUT_DEVICE SoundEngine::getDefaultDevice() {
 }
 
 void SoundEngine::updateOutputDevices(bool printInfo) {
-    m_outputDevices.clear();
+    this->outputDevices.clear();
 
     BASS_DEVICEINFO deviceInfo;
     for(int d = 0; (BASS_GetDeviceInfo(d, &deviceInfo) == true); d++) {
@@ -164,8 +164,8 @@ void SoundEngine::updateOutputDevices(bool printInfo) {
         int duplicateNameCounter = 2;
         while(true) {
             bool foundDuplicateName = false;
-            for(size_t i = 0; i < m_outputDevices.size(); i++) {
-                if(m_outputDevices[i].name == soundDevice.name) {
+            for(size_t i = 0; i < this->outputDevices.size(); i++) {
+                if(this->outputDevices[i].name == soundDevice.name) {
                     foundDuplicateName = true;
 
                     soundDevice.name = deviceInfo.name;
@@ -181,7 +181,7 @@ void SoundEngine::updateOutputDevices(bool printInfo) {
         }
 
         soundDevice.driver = OutputDriver::BASS;
-        m_outputDevices.push_back(soundDevice);
+        this->outputDevices.push_back(soundDevice);
 
         debugLog("DSOUND: Device %i = \"%s\", enabled = %i, default = %i\n", d, deviceInfo.name, (int)isEnabled,
                  (int)isDefault);
@@ -200,8 +200,8 @@ void SoundEngine::updateOutputDevices(bool printInfo) {
         int duplicateNameCounter = 2;
         while(true) {
             bool foundDuplicateName = false;
-            for(size_t i = 0; i < m_outputDevices.size(); i++) {
-                if(m_outputDevices[i].name == soundDevice.name) {
+            for(size_t i = 0; i < this->outputDevices.size(); i++) {
+                if(this->outputDevices[i].name == soundDevice.name) {
                     foundDuplicateName = true;
 
                     soundDevice.name = deviceInfo.name;
@@ -218,7 +218,7 @@ void SoundEngine::updateOutputDevices(bool printInfo) {
 
         soundDevice.driver = OutputDriver::BASS_ASIO;
         soundDevice.name.append(" [ASIO]");
-        m_outputDevices.push_back(soundDevice);
+        this->outputDevices.push_back(soundDevice);
 
         debugLog("ASIO: Device %i = \"%s\"\n", d, asioDeviceInfo.name);
     }
@@ -240,8 +240,8 @@ void SoundEngine::updateOutputDevices(bool printInfo) {
         int duplicateNameCounter = 2;
         while(true) {
             bool foundDuplicateName = false;
-            for(size_t i = 0; i < m_outputDevices.size(); i++) {
-                if(m_outputDevices[i].name == soundDevice.name) {
+            for(size_t i = 0; i < this->outputDevices.size(); i++) {
+                if(this->outputDevices[i].name == soundDevice.name) {
                     foundDuplicateName = true;
 
                     soundDevice.name = wasapiDeviceInfo.name;
@@ -258,7 +258,7 @@ void SoundEngine::updateOutputDevices(bool printInfo) {
 
         soundDevice.driver = OutputDriver::BASS_WASAPI;
         soundDevice.name.append(" [WASAPI]");
-        m_outputDevices.push_back(soundDevice);
+        this->outputDevices.push_back(soundDevice);
 
         debugLog("WASAPI: Device %i = \"%s\", enabled = %i, default = %i\n", d, wasapiDeviceInfo.name, (int)isEnabled,
                  (int)isDefault);
@@ -422,7 +422,7 @@ bool SoundEngine::init_bass_mixer(OUTPUT_DEVICE device) {
     if(!BASS_Init(0, freq, bass_flags | BASS_DEVICE_SOFTWARE, NULL, NULL)) {
         auto code = BASS_ErrorGetCode();
         if(code != BASS_ERROR_ALREADY) {
-            ready_since = -1.0;
+            this->ready_since = -1.0;
             debugLog("BASS_Init(0) failed.\n");
             display_bass_error();
             return false;
@@ -431,7 +431,7 @@ bool SoundEngine::init_bass_mixer(OUTPUT_DEVICE device) {
 
     if(device.driver == OutputDriver::BASS) {
         if(!BASS_Init(device.id, freq, bass_flags | BASS_DEVICE_SOFTWARE, NULL, NULL)) {
-            ready_since = -1.0;
+            this->ready_since = -1.0;
             debugLog("BASS_Init(%d) errored out.\n", device.id);
             display_bass_error();
             return false;
@@ -440,9 +440,9 @@ bool SoundEngine::init_bass_mixer(OUTPUT_DEVICE device) {
 
     auto mixer_flags = BASS_SAMPLE_FLOAT | BASS_MIXER_NONSTOP | BASS_MIXER_RESUME;
     if(device.driver != OutputDriver::BASS) mixer_flags |= BASS_STREAM_DECODE | BASS_MIXER_POSEX;
-    g_bassOutputMixer = BASS_Mixer_StreamCreate(freq, 2, mixer_flags);
-    if(g_bassOutputMixer == 0) {
-        ready_since = -1.0;
+    this->g_bassOutputMixer = BASS_Mixer_StreamCreate(freq, 2, mixer_flags);
+    if(this->g_bassOutputMixer == 0) {
+        this->ready_since = -1.0;
         debugLog("BASS_Mixer_StreamCreate() failed.\n");
         display_bass_error();
         return false;
@@ -450,7 +450,7 @@ bool SoundEngine::init_bass_mixer(OUTPUT_DEVICE device) {
 
     // Disable buffering to lower latency on regular BASS output
     // This has no effect on ASIO/WASAPI since for those the mixer is a decode stream
-    BASS_ChannelSetAttribute(g_bassOutputMixer, BASS_ATTRIB_BUFFER, 0.f);
+    BASS_ChannelSetAttribute(this->g_bassOutputMixer, BASS_ATTRIB_BUFFER, 0.f);
 
     // Switch to "No sound" device for all future sound processing
     // Only g_bassOutputMixer will be output to the actual device!
@@ -461,19 +461,19 @@ bool SoundEngine::init_bass_mixer(OUTPUT_DEVICE device) {
 bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
     debugLog("SoundEngine: initializeOutputDevice( %s ) ...\n", device.name.toUtf8());
 
-    shutdown();
+    this->shutdown();
 
     // We compensate for latency via BASS_ATTRIB_MIXER_LATENCY
     cv_universal_offset_hardcoded.setValue(0.f);
 
     if(device.driver == OutputDriver::NONE || (device.driver == OutputDriver::BASS && device.id == 0)) {
-        ready_since = -1.0;
-        m_currentOutputDevice = device;
-        cv_snd_output_device.setValue(m_currentOutputDevice.name);
-        debugLog("SoundEngine: Output Device = \"%s\"\n", m_currentOutputDevice.name.toUtf8());
+        this->ready_since = -1.0;
+        this->currentOutputDevice = device;
+        cv_snd_output_device.setValue(this->currentOutputDevice.name);
+        debugLog("SoundEngine: Output Device = \"%s\"\n", this->currentOutputDevice.name.toUtf8());
 
-        if(osu && osu->m_optionsMenu) {
-            osu->m_optionsMenu->updateLayout();
+        if(osu && osu->optionsMenu) {
+            osu->optionsMenu->updateLayout();
         }
 
         return true;
@@ -506,7 +506,7 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
     // When the driver is BASS, we can init the mixer immediately
     // On other drivers, we'd rather get the sound card's frequency first
     if(device.driver == OutputDriver::BASS) {
-        if(!init_bass_mixer(device)) {
+        if(!this->init_bass_mixer(device)) {
             return false;
         }
     }
@@ -536,8 +536,8 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
         auto bufsize = cv_asio_buffer_size.getInt();
         bufsize = ASIO_clamp(info, bufsize);
 
-        if(osu && osu->m_optionsMenu) {
-            auto slider = osu->m_optionsMenu->m_asioBufferSizeSlider;
+        if(osu && osu->optionsMenu) {
+            auto slider = osu->optionsMenu->asioBufferSizeSlider;
             slider->setBounds(info.bufmin, info.bufmax);
             slider->setKeyDelta(info.bufgran == -1 ? info.bufmin : info.bufgran);
         }
@@ -616,53 +616,53 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
     }
 #endif
 
-    ready_since = engine->getTime();
-    m_currentOutputDevice = device;
-    cv_snd_output_device.setValue(m_currentOutputDevice.name);
-    debugLog("SoundEngine: Output Device = \"%s\"\n", m_currentOutputDevice.name.toUtf8());
+    this->ready_since = engine->getTime();
+    this->currentOutputDevice = device;
+    cv_snd_output_device.setValue(this->currentOutputDevice.name);
+    debugLog("SoundEngine: Output Device = \"%s\"\n", this->currentOutputDevice.name.toUtf8());
 
-    if(osu && osu->m_optionsMenu) {
-        osu->m_optionsMenu->updateLayout();
+    if(osu && osu->optionsMenu) {
+        osu->optionsMenu->updateLayout();
     }
 
     return true;
 }
 
-void SoundEngine::restart() { setOutputDevice(m_currentOutputDevice); }
+void SoundEngine::restart() { this->setOutputDevice(this->currentOutputDevice); }
 
 void SoundEngine::shutdown() {
     loct_abort();
 
-    if(m_currentOutputDevice.driver == OutputDriver::BASS) {
-        BASS_SetDevice(m_currentOutputDevice.id);
+    if(this->currentOutputDevice.driver == OutputDriver::BASS) {
+        BASS_SetDevice(this->currentOutputDevice.id);
         BASS_Free();
         BASS_SetDevice(0);
     }
 
 #ifdef _WIN32
-    if(m_currentOutputDevice.driver == OutputDriver::BASS_ASIO) {
+    if(this->currentOutputDevice.driver == OutputDriver::BASS_ASIO) {
         BASS_ASIO_Free();
-    } else if(m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
+    } else if(this->currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
         BASS_WASAPI_Free();
     }
 #endif
 
-    ready_since = -1.0;
-    g_bassOutputMixer = 0;
+    this->ready_since = -1.0;
+    this->g_bassOutputMixer = 0;
     BASS_Free();  // free "No sound" device
 }
 
 void SoundEngine::update() {}
 
 bool SoundEngine::play(Sound *snd, float pan, float pitch) {
-    if(!isReady() || snd == NULL || !snd->isReady()) return false;
+    if(!this->isReady() || snd == NULL || !snd->isReady()) return false;
 
     if(!snd->isOverlayable() && snd->isPlaying()) {
         return false;
     }
 
     if(snd->isOverlayable() && cv_snd_restrict_play_frame.getBool()) {
-        if(engine->getTime() <= snd->m_fLastPlayTime) {
+        if(engine->getTime() <= snd->fLastPlayTime) {
             return false;
         }
     }
@@ -674,7 +674,7 @@ bool SoundEngine::play(Sound *snd, float pan, float pitch) {
     }
 
     pan = clamp<float>(pan, -1.0f, 1.0f);
-    BASS_ChannelSetAttribute(channel, BASS_ATTRIB_VOL, snd->m_fVolume);
+    BASS_ChannelSetAttribute(channel, BASS_ATTRIB_VOL, snd->fVolume);
     BASS_ChannelSetAttribute(channel, BASS_ATTRIB_PAN, pan);
     BASS_ChannelSetAttribute(channel, BASS_ATTRIB_NORAMP, snd->isStream() ? 0 : 1);
     if(pitch != 0.0f) {
@@ -688,28 +688,28 @@ bool SoundEngine::play(Sound *snd, float pan, float pitch) {
     if(BASS_Mixer_ChannelGetMixer(channel) != 0) return false;
 
     auto flags = BASS_MIXER_DOWNMIX | BASS_MIXER_NORAMPIN | BASS_STREAM_AUTOFREE;
-    if(!BASS_Mixer_StreamAddChannel(g_bassOutputMixer, channel, flags)) {
+    if(!BASS_Mixer_StreamAddChannel(this->g_bassOutputMixer, channel, flags)) {
         debugLog("BASS_Mixer_StreamAddChannel() failed (%i)!\n", BASS_ErrorGetCode());
         return false;
     }
 
     // Make sure the mixer is playing! Duh.
-    if(m_currentOutputDevice.driver == OutputDriver::BASS) {
-        if(BASS_ChannelIsActive(g_bassOutputMixer) != BASS_ACTIVE_PLAYING) {
-            if(!BASS_ChannelPlay(g_bassOutputMixer, true)) {
+    if(this->currentOutputDevice.driver == OutputDriver::BASS) {
+        if(BASS_ChannelIsActive(this->g_bassOutputMixer) != BASS_ACTIVE_PLAYING) {
+            if(!BASS_ChannelPlay(this->g_bassOutputMixer, true)) {
                 debugLog("SoundEngine::play() couldn't BASS_ChannelPlay(), errorcode %i\n", BASS_ErrorGetCode());
                 return false;
             }
         }
     }
 
-    snd->m_bStarted = true;
-    snd->m_fChannelCreationTime = engine->getTime();
-    if(snd->m_bPaused) {
-        snd->m_bPaused = false;
-        snd->m_fLastPlayTime = snd->m_fChannelCreationTime - (((f64)snd->m_paused_position_ms) / 1000.0);
+    snd->bStarted = true;
+    snd->fChannelCreationTime = engine->getTime();
+    if(snd->bPaused) {
+        snd->bPaused = false;
+        snd->fLastPlayTime = snd->fChannelCreationTime - (((f64)snd->paused_position_ms) / 1000.0);
     } else {
-        snd->m_fLastPlayTime = snd->m_fChannelCreationTime;
+        snd->fLastPlayTime = snd->fChannelCreationTime;
     }
 
     if(cv_debug.getBool()) {
@@ -720,7 +720,7 @@ bool SoundEngine::play(Sound *snd, float pan, float pitch) {
 }
 
 void SoundEngine::pause(Sound *snd) {
-    if(!isReady() || snd == NULL || !snd->isReady()) return;
+    if(!this->isReady() || snd == NULL || !snd->isReady()) return;
     if(!snd->isStream()) {
         engine->showMessageError("Programmer Error", "Called pause on a sample!");
         return;
@@ -740,23 +740,25 @@ void SoundEngine::pause(Sound *snd) {
     snd->setSpeed(speed);
     snd->setPan(pan);
     snd->setLoop(loop);
-    snd->m_bPaused = true;
-    snd->m_paused_position_ms = pos;
+    snd->bPaused = true;
+    snd->paused_position_ms = pos;
 }
 
 void SoundEngine::stop(Sound *snd) {
-    if(!isReady() || snd == NULL || !snd->isReady()) return;
+    if(!this->isReady() || snd == NULL || !snd->isReady()) return;
 
     // This will stop all samples, then re-init to be ready for a play()
     snd->reload();
 }
 
 bool SoundEngine::isReady() {
-    if(ready_since == -1.0) return false;
-    return ready_since + (double)cv_snd_ready_delay.getFloat() < engine->getTime();
+    if(this->ready_since == -1.0) return false;
+    return this->ready_since + (double)cv_snd_ready_delay.getFloat() < engine->getTime();
 }
 
-bool SoundEngine::hasExclusiveOutput() { return isASIO() || (isWASAPI() && cv_win_snd_wasapi_exclusive.getBool()); }
+bool SoundEngine::hasExclusiveOutput() {
+    return this->isASIO() || (this->isWASAPI() && cv_win_snd_wasapi_exclusive.getBool());
+}
 
 void SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
     bool was_playing = false;
@@ -767,11 +769,11 @@ void SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
     }
 
     // TODO: This is blocking main thread, can freeze for a long time on some sound cards
-    auto previous = m_currentOutputDevice;
-    if(!initializeOutputDevice(device)) {
-        if((device.id == previous.id && device.driver == previous.driver) || !initializeOutputDevice(previous)) {
+    auto previous = this->currentOutputDevice;
+    if(!this->initializeOutputDevice(device)) {
+        if((device.id == previous.id && device.driver == previous.driver) || !this->initializeOutputDevice(previous)) {
             // We failed to reinitialize the device, don't start an infinite loop, just give up
-            m_currentOutputDevice = {
+            this->currentOutputDevice = {
                 .id = 0,
                 .enabled = true,
                 .isDefault = true,
@@ -781,9 +783,9 @@ void SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
         }
     }
 
-    osu->m_optionsMenu->m_outputDeviceLabel->setText(getOutputDeviceName());
+    osu->optionsMenu->outputDeviceLabel->setText(this->getOutputDeviceName());
     osu->getSkin()->reloadSounds();
-    osu->m_optionsMenu->onOutputDeviceResetUpdate();
+    osu->optionsMenu->onOutputDeviceResetUpdate();
 
     // start playing music again after audio device changed
     if(osu->getSelectedBeatmap()->getMusic() != NULL) {
@@ -800,7 +802,7 @@ void SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
     }
 
     // resume loudness calc
-    loct_calc(db->m_loudness_to_calc);
+    loct_calc(db->loudness_to_calc);
 
     if(was_playing) {
         osu->music_unpause_scheduled = true;
@@ -808,44 +810,44 @@ void SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
 }
 
 void SoundEngine::setVolume(float volume) {
-    if(!isReady()) return;
+    if(!this->isReady()) return;
 
-    m_fVolume = clamp<float>(volume, 0.0f, 1.0f);
-    if(m_currentOutputDevice.driver == OutputDriver::BASS_ASIO) {
+    this->fVolume = clamp<float>(volume, 0.0f, 1.0f);
+    if(this->currentOutputDevice.driver == OutputDriver::BASS_ASIO) {
 #ifdef _WIN32
-        BASS_ASIO_ChannelSetVolume(false, 0, m_fVolume);
-        BASS_ASIO_ChannelSetVolume(false, 1, m_fVolume);
+        BASS_ASIO_ChannelSetVolume(false, 0, this->fVolume);
+        BASS_ASIO_ChannelSetVolume(false, 1, this->fVolume);
 #endif
-    } else if(m_currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
+    } else if(this->currentOutputDevice.driver == OutputDriver::BASS_WASAPI) {
 #ifdef _WIN32
         if(hasExclusiveOutput()) {
             // Device volume doesn't seem to work, so we'll use DSP instead
-            BASS_ChannelSetAttribute(g_bassOutputMixer, BASS_ATTRIB_VOLDSP, m_fVolume);
+            BASS_ChannelSetAttribute(g_bassOutputMixer, BASS_ATTRIB_VOLDSP, this->fVolume);
         } else {
-            BASS_WASAPI_SetVolume(BASS_WASAPI_CURVE_WINDOWS | BASS_WASAPI_VOL_SESSION, m_fVolume);
+            BASS_WASAPI_SetVolume(BASS_WASAPI_CURVE_WINDOWS | BASS_WASAPI_VOL_SESSION, this->fVolume);
         }
 #endif
     } else {
         // 0 (silent) - 10000 (full).
-        BASS_SetConfig(BASS_CONFIG_GVOL_SAMPLE, (DWORD)(m_fVolume * 10000));
-        BASS_SetConfig(BASS_CONFIG_GVOL_STREAM, (DWORD)(m_fVolume * 10000));
-        BASS_SetConfig(BASS_CONFIG_GVOL_MUSIC, (DWORD)(m_fVolume * 10000));
+        BASS_SetConfig(BASS_CONFIG_GVOL_SAMPLE, (DWORD)(this->fVolume * 10000));
+        BASS_SetConfig(BASS_CONFIG_GVOL_STREAM, (DWORD)(this->fVolume * 10000));
+        BASS_SetConfig(BASS_CONFIG_GVOL_MUSIC, (DWORD)(this->fVolume * 10000));
     }
 }
 
 void SoundEngine::onFreqChanged(UString oldValue, UString newValue) {
     (void)oldValue;
     (void)newValue;
-    if(!isReady()) return;
-    restart();
+    if(!this->isReady()) return;
+    this->restart();
 }
 
 std::vector<OUTPUT_DEVICE> SoundEngine::getOutputDevices() {
     std::vector<OUTPUT_DEVICE> outputDevices;
 
-    for(size_t i = 0; i < m_outputDevices.size(); i++) {
-        if(m_outputDevices[i].enabled) {
-            outputDevices.push_back(m_outputDevices[i]);
+    for(size_t i = 0; i < this->outputDevices.size(); i++) {
+        if(this->outputDevices[i].enabled) {
+            outputDevices.push_back(this->outputDevices[i]);
         }
     }
 

@@ -5,19 +5,19 @@
 #include "Engine.h"
 #include "ResourceManager.h"
 
-BackgroundImageHandler::BackgroundImageHandler() { m_bFrozen = false; }
+BackgroundImageHandler::BackgroundImageHandler() { this->bFrozen = false; }
 
 BackgroundImageHandler::~BackgroundImageHandler() {
-    for(size_t i = 0; i < m_cache.size(); i++) {
-        engine->getResourceManager()->destroyResource(m_cache[i].backgroundImagePathLoader);
-        engine->getResourceManager()->destroyResource(m_cache[i].image);
+    for(size_t i = 0; i < this->cache.size(); i++) {
+        engine->getResourceManager()->destroyResource(this->cache[i].backgroundImagePathLoader);
+        engine->getResourceManager()->destroyResource(this->cache[i].image);
     }
-    m_cache.clear();
+    this->cache.clear();
 }
 
 void BackgroundImageHandler::update(bool allowEviction) {
-    for(size_t i = 0; i < m_cache.size(); i++) {
-        ENTRY &entry = m_cache[i];
+    for(size_t i = 0; i < this->cache.size(); i++) {
+        ENTRY &entry = this->cache[i];
 
         // NOTE: avoid load/unload jitter if framerate is below eviction delay
         const bool wasUsedLastFrame = entry.wasUsedLastFrame;
@@ -27,14 +27,14 @@ void BackgroundImageHandler::update(bool allowEviction) {
         if(!wasUsedLastFrame &&
            (engine->getTime() >= entry.evictionTime && engine->getFrameCount() >= entry.evictionTimeFrameCount)) {
             if(allowEviction) {
-                if(!m_bFrozen && !engine->isMinimized()) {
+                if(!this->bFrozen && !engine->isMinimized()) {
                     if(entry.backgroundImagePathLoader != NULL) entry.backgroundImagePathLoader->interruptLoad();
                     if(entry.image != NULL) entry.image->interruptLoad();
 
                     engine->getResourceManager()->destroyResource(entry.backgroundImagePathLoader);
                     engine->getResourceManager()->destroyResource(entry.image);
 
-                    m_cache.erase(m_cache.begin() + i);
+                    this->cache.erase(this->cache.begin() + i);
                     i--;
                     continue;
                 }
@@ -53,11 +53,11 @@ void BackgroundImageHandler::update(bool allowEviction) {
                         // if the backgroundImageFileName is not loaded, then we have to create a full
                         // DatabaseBeatmapBackgroundImagePathLoader
                         entry.image = NULL;
-                        handleLoadPathForEntry(entry);
+                        this->handleLoadPathForEntry(entry);
                     } else {
                         // if backgroundImageFileName is already loaded/valid, then we can directly load the image
                         entry.backgroundImagePathLoader = NULL;
-                        handleLoadImageForEntry(entry);
+                        this->handleLoadImageForEntry(entry);
                     }
                 }
             } else {
@@ -68,7 +68,7 @@ void BackgroundImageHandler::update(bool allowEviction) {
                     if(entry.backgroundImagePathLoader->getLoadedBackgroundImageFileName().length() > 1) {
                         entry.backgroundImageFileName =
                             entry.backgroundImagePathLoader->getLoadedBackgroundImageFileName();
-                        handleLoadImageForEntry(entry);
+                        this->handleLoadImageForEntry(entry);
                     }
 
                     engine->getResourceManager()->destroyResource(entry.backgroundImagePathLoader);
@@ -79,10 +79,10 @@ void BackgroundImageHandler::update(bool allowEviction) {
     }
 
     // reset flags
-    m_bFrozen = false;
+    this->bFrozen = false;
 
     // DEBUG:
-    // debugLog("m_cache.size() = %i\n", (int)m_cache.size());
+    // debugLog("m_cache.size() = %i\n", (int)this->cache.size());
 }
 
 void BackgroundImageHandler::handleLoadPathForEntry(ENTRY &entry) {
@@ -116,8 +116,8 @@ Image *BackgroundImageHandler::getLoadBackgroundImage(const DatabaseBeatmap *bea
 
     // 1) if the path or image is already loaded, return image ref immediately (which may still be NULL) and keep track
     // of when it was last requested
-    for(size_t i = 0; i < m_cache.size(); i++) {
-        ENTRY &entry = m_cache[i];
+    for(size_t i = 0; i < this->cache.size(); i++) {
+        ENTRY &entry = this->cache[i];
 
         if(entry.osuFilePath == beatmap->getFilePath()) {
             entry.wasUsedLastFrame = true;
@@ -127,12 +127,13 @@ Image *BackgroundImageHandler::getLoadBackgroundImage(const DatabaseBeatmap *bea
             // HACKHACK: to improve future loading speed, if we have already loaded the backgroundImageFileName, force
             // update the database backgroundImageFileName and fullBackgroundImageFilePath this is similar to how it
             // worked before the rework, but 100% safe(r) since we are not async
-            if(m_cache[i].image != NULL && m_cache[i].backgroundImageFileName.length() > 1 &&
+            if(this->cache[i].image != NULL && this->cache[i].backgroundImageFileName.length() > 1 &&
                beatmap->getBackgroundImageFileName().length() < 2) {
-                const_cast<DatabaseBeatmap *>(beatmap)->m_sBackgroundImageFileName = m_cache[i].backgroundImageFileName;
-                const_cast<DatabaseBeatmap *>(beatmap)->m_sFullBackgroundImageFilePath = beatmap->getFolder();
-                const_cast<DatabaseBeatmap *>(beatmap)->m_sFullBackgroundImageFilePath.append(
-                    m_cache[i].backgroundImageFileName);
+                const_cast<DatabaseBeatmap *>(beatmap)->sBackgroundImageFileName =
+                    this->cache[i].backgroundImageFileName;
+                const_cast<DatabaseBeatmap *>(beatmap)->sFullBackgroundImageFilePath = beatmap->getFolder();
+                const_cast<DatabaseBeatmap *>(beatmap)->sFullBackgroundImageFilePath.append(
+                    this->cache[i].backgroundImageFileName);
             }
 
             return entry.image;
@@ -144,10 +145,10 @@ Image *BackgroundImageHandler::getLoadBackgroundImage(const DatabaseBeatmap *bea
         // try evicting stale not-yet-loaded-nor-started-loading entries on overflow
         const int maxCacheEntries = cv_background_image_cache_size.getInt();
         {
-            if(m_cache.size() >= maxCacheEntries) {
-                for(size_t i = 0; i < m_cache.size(); i++) {
-                    if(m_cache[i].isLoadScheduled && !m_cache[i].wasUsedLastFrame) {
-                        m_cache.erase(m_cache.begin() + i);
+            if(this->cache.size() >= maxCacheEntries) {
+                for(size_t i = 0; i < this->cache.size(); i++) {
+                    if(this->cache[i].isLoadScheduled && !this->cache[i].wasUsedLastFrame) {
+                        this->cache.erase(this->cache.begin() + i);
                         i--;
                         continue;
                     }
@@ -171,7 +172,7 @@ Image *BackgroundImageHandler::getLoadBackgroundImage(const DatabaseBeatmap *bea
             entry.backgroundImagePathLoader = NULL;
             entry.image = NULL;
         }
-        if(m_cache.size() < maxCacheEntries) m_cache.push_back(entry);
+        if(this->cache.size() < maxCacheEntries) this->cache.push_back(entry);
     }
 
     return NULL;

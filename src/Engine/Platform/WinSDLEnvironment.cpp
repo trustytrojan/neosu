@@ -32,7 +32,7 @@ void WinSDLEnvironment::sleep(unsigned int us) { Sleep(us / 1000); }
 void WinSDLEnvironment::openURLInDefaultBrowser(UString url) {
     SDL_SysWMinfo info;
     SDL_VERSION(&info.version);
-    if(SDL_GetWindowWMInfo(m_window, &info) == SDL_TRUE) {
+    if(SDL_GetWindowWMInfo(this->window, &info) == SDL_TRUE) {
         ShellExecuteW(info.info.win.window, L"open", url.wc_str(), NULL, NULL, SW_SHOW);
     }
 }

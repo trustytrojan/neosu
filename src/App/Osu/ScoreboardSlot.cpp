@@ -10,24 +10,24 @@
 #include "SkinImage.h"
 
 ScoreboardSlot::ScoreboardSlot(SCORE_ENTRY score, int index) {
-    m_avatar = new UIAvatar(score.player_id, 0, 0, 0, 0);
-    m_score = score;
-    m_index = index;
+    this->avatar = new UIAvatar(score.player_id, 0, 0, 0, 0);
+    this->score = score;
+    this->index = index;
 
     auto user = get_user_info(score.player_id);
-    is_friend = user->is_friend();
+    this->is_friend = user->is_friend();
 }
 
 ScoreboardSlot::~ScoreboardSlot() {
-    anim->deleteExistingAnimation(&m_fAlpha);
-    anim->deleteExistingAnimation(&m_fFlash);
-    anim->deleteExistingAnimation(&m_y);
+    anim->deleteExistingAnimation(&this->fAlpha);
+    anim->deleteExistingAnimation(&this->fFlash);
+    anim->deleteExistingAnimation(&this->y);
 
-    delete m_avatar;
+    delete this->avatar;
 }
 
 void ScoreboardSlot::draw(Graphics *g) {
-    if(m_fAlpha == 0.f) return;
+    if(this->fAlpha == 0.f) return;
     if(!cv_draw_scoreboard.getBool() && !bancho.is_playing_a_multi_map()) return;
     if(!cv_draw_scoreboard_mp.getBool() && bancho.is_playing_a_multi_map()) return;
 
@@ -42,26 +42,26 @@ void ScoreboardSlot::draw(Graphics *g) {
     const float padding = roundf(height * 0.05f);
 
     float start_y = osu->getScreenHeight() / 2.0f - (height * 2.5f);
-    start_y += m_y * height;
+    start_y += this->y * height;
     start_y = roundf(start_y);
 
-    if(m_fFlash > 0.f && !cv_avoid_flashes.getBool()) {
+    if(this->fFlash > 0.f && !cv_avoid_flashes.getBool()) {
         g->setColor(0xffffffff);
-        g->setAlpha(m_fFlash);
+        g->setAlpha(this->fFlash);
         g->fillRect(0, start_y, avatar_width + width, height);
     }
 
     // Draw background
-    if(m_score.dead) {
+    if(this->score.dead) {
         g->setColor(0xff660000);
-    } else if(m_score.highlight) {
+    } else if(this->score.highlight) {
         g->setColor(0xff777777);
-    } else if(m_index == 0) {
+    } else if(this->index == 0) {
         g->setColor(0xff1b6a8c);
     } else {
-        g->setColor(is_friend ? 0xff9C205C : 0xff114459);
+        g->setColor(this->is_friend ? 0xff9C205C : 0xff114459);
     }
-    g->setAlpha(0.3f * m_fAlpha);
+    g->setAlpha(0.3f * this->fAlpha);
 
     if(cv_hud_scoreboard_use_menubuttonbackground.getBool()) {
         // XXX: Doesn't work on resolutions more vertical than 4:3
@@ -78,17 +78,17 @@ void ScoreboardSlot::draw(Graphics *g) {
     }
 
     // Draw avatar
-    m_avatar->on_screen = true;
-    m_avatar->setPos(0, start_y);
-    m_avatar->setSize(avatar_width, avatar_height);
-    m_avatar->setVisible(true);
-    m_avatar->draw_avatar(g, 0.8f * m_fAlpha);
+    this->avatar->on_screen = true;
+    this->avatar->setPos(0, start_y);
+    this->avatar->setSize(avatar_width, avatar_height);
+    this->avatar->setVisible(true);
+    this->avatar->draw_avatar(g, 0.8f * this->fAlpha);
 
     // Draw index
     g->pushTransform();
     {
         McFont *indexFont = osu->getSongBrowserFontBold();
-        UString indexString = UString::format("%i", m_index + 1);
+        UString indexString = UString::format("%i", this->index + 1);
         const float scale = (avatar_height / indexFont->getHeight()) * 0.5f;
 
         g->scale(scale, scale);
@@ -99,12 +99,12 @@ void ScoreboardSlot::draw(Graphics *g) {
 
         g->translate(0.5f, 0.5f);
         g->setColor(0xff000000);
-        g->setAlpha(0.3f * m_fAlpha);
+        g->setAlpha(0.3f * this->fAlpha);
         g->drawString(indexFont, indexString);
 
         g->translate(-0.5f, -0.5f);
         g->setColor(0xffffffff);
-        g->setAlpha(0.7f * m_fAlpha);
+        g->setAlpha(0.7f * this->fAlpha);
         g->drawString(indexFont, indexString);
     }
     g->popTransform();
@@ -124,23 +124,23 @@ void ScoreboardSlot::draw(Graphics *g) {
         if(drawTextShadow) {
             g->translate(1, 1);
             g->setColor(textShadowColor);
-            g->setAlpha(m_fAlpha);
-            g->drawString(nameFont, m_score.name);
+            g->setAlpha(this->fAlpha);
+            g->drawString(nameFont, this->score.name);
             g->translate(-1, -1);
         }
 
-        if(m_score.dead) {
+        if(this->score.dead) {
             g->setColor(0xffee0000);
-        } else if(m_score.highlight) {
+        } else if(this->score.highlight) {
             g->setColor(0xffffffff);
-        } else if(m_index == 0) {
+        } else if(this->index == 0) {
             g->setColor(0xffeeeeee);
         } else {
             g->setColor(0xffaaaaaa);
         }
 
-        g->setAlpha(m_fAlpha);
-        g->drawString(nameFont, m_score.name);
+        g->setAlpha(this->fAlpha);
+        g->drawString(nameFont, this->score.name);
         g->popClipRect();
     }
     g->popTransform();
@@ -157,7 +157,7 @@ void ScoreboardSlot::draw(Graphics *g) {
     {
         const float scale = (height / comboFont->getHeight()) * comboScale;
 
-        UString comboString = UString::format("%ix", m_score.combo);
+        UString comboString = UString::format("%ix", this->score.combo);
         const float stringWidth = comboFont->getStringWidth(comboString);
 
         g->scale(scale, scale);
@@ -165,20 +165,20 @@ void ScoreboardSlot::draw(Graphics *g) {
         if(drawTextShadow) {
             g->translate(1, 1);
             g->setColor(textShadowColor);
-            g->setAlpha(m_fAlpha);
+            g->setAlpha(this->fAlpha);
             g->drawString(comboFont, comboString);
             g->translate(-1, -1);
         }
 
-        if(m_score.highlight) {
+        if(this->score.highlight) {
             g->setColor(comboAccuracyColorHighlight);
-        } else if(m_index == 0) {
+        } else if(this->index == 0) {
             g->setColor(comboAccuracyColorTop);
         } else {
             g->setColor(comboAccuracyColor);
         }
 
-        g->setAlpha(m_fAlpha);
+        g->setAlpha(this->fAlpha);
         g->drawString(scoreFont, comboString);
     }
     g->popTransform();
@@ -189,26 +189,26 @@ void ScoreboardSlot::draw(Graphics *g) {
         g->pushTransform();
         {
             const float scale = (height / accFont->getHeight()) * accScale;
-            UString accString = UString::format("%.2f%%", m_score.accuracy * 100.0f);
+            UString accString = UString::format("%.2f%%", this->score.accuracy * 100.0f);
             g->scale(scale, scale);
             g->translate(avatar_width + padding * 1.35f, start_y + height - 2 * padding);
             {
                 g->translate(1, 1);
                 g->setColor(textShadowColor);
-                g->setAlpha(m_fAlpha);
+                g->setAlpha(this->fAlpha);
                 g->drawString(accFont, accString);
                 g->translate(-1, -1);
             }
 
-            if(m_score.highlight) {
+            if(this->score.highlight) {
                 g->setColor(comboAccuracyColorHighlight);
-            } else if(m_index == 0) {
+            } else if(this->index == 0) {
                 g->setColor(comboAccuracyColorTop);
             } else {
                 g->setColor(comboAccuracyColor);
             }
 
-            g->setAlpha(m_fAlpha);
+            g->setAlpha(this->fAlpha);
             g->drawString(accFont, accString);
         }
 
@@ -220,29 +220,29 @@ void ScoreboardSlot::draw(Graphics *g) {
         {
             const float scale = (height / scoreFont->getHeight()) * scoreScale;
 
-            UString scoreString = UString::format("%llu", m_score.score);
+            UString scoreString = UString::format("%llu", this->score.score);
 
             g->scale(scale, scale);
             g->translate(avatar_width + padding * 1.35f, start_y + height - 2 * padding);
             if(drawTextShadow) {
                 g->translate(1, 1);
                 g->setColor(textShadowColor);
-                g->setAlpha(m_fAlpha);
+                g->setAlpha(this->fAlpha);
                 g->drawString(scoreFont, scoreString);
                 g->translate(-1, -1);
             }
 
-            if(m_score.dead) {
+            if(this->score.dead) {
                 g->setColor(0xffee0000);
-            } else if(m_score.highlight) {
+            } else if(this->score.highlight) {
                 g->setColor(0xffffffff);
-            } else if(m_index == 0) {
+            } else if(this->index == 0) {
                 g->setColor(0xffeeeeee);
             } else {
                 g->setColor(0xffaaaaaa);
             }
 
-            g->setAlpha(m_fAlpha);
+            g->setAlpha(this->fAlpha);
             g->drawString(scoreFont, scoreString);
         }
         g->popTransform();
@@ -254,12 +254,12 @@ void ScoreboardSlot::draw(Graphics *g) {
 }
 
 void ScoreboardSlot::updateIndex(int new_index, bool animate) {
-    bool is_player = osu->m_hud->player_slot == this;
-    int player_idx = osu->m_hud->player_slot->m_index;
+    bool is_player = osu->hud->player_slot == this;
+    int player_idx = osu->hud->player_slot->index;
     if(is_player) {
-        if(animate && new_index < m_index) {
-            m_fFlash = 1.f;
-            anim->moveQuartOut(&m_fFlash, 0.0f, 0.5f, 0.0f, true);
+        if(animate && new_index < this->index) {
+            this->fFlash = 1.f;
+            anim->moveQuartOut(&this->fFlash, 0.0f, 0.5f, 0.0f, true);
         }
 
         // Ensure the player is always visible
@@ -281,32 +281,32 @@ void ScoreboardSlot::updateIndex(int new_index, bool animate) {
         scoreboard_y = (new_index + 1) - min_visible_idx;
     }
 
-    if(was_visible && !is_visible) {
+    if(this->was_visible && !is_visible) {
         if(animate) {
-            anim->moveQuartOut(&m_y, scoreboard_y, 0.5f, 0.0f, true);
-            anim->moveQuartOut(&m_fAlpha, 0.0f, 0.5f, 0.0f, true);
+            anim->moveQuartOut(&this->y, scoreboard_y, 0.5f, 0.0f, true);
+            anim->moveQuartOut(&this->fAlpha, 0.0f, 0.5f, 0.0f, true);
         } else {
-            m_y = scoreboard_y;
-            m_fAlpha = 0.0f;
+            this->y = scoreboard_y;
+            this->fAlpha = 0.0f;
         }
-        was_visible = false;
-    } else if(!was_visible && is_visible) {
-        anim->deleteExistingAnimation(&m_y);
-        m_y = scoreboard_y;
+        this->was_visible = false;
+    } else if(!this->was_visible && is_visible) {
+        anim->deleteExistingAnimation(&this->y);
+        this->y = scoreboard_y;
         if(animate) {
-            m_fAlpha = 0.f;
-            anim->moveQuartOut(&m_fAlpha, 1.0f, 0.5f, 0.0f, true);
+            this->fAlpha = 0.f;
+            anim->moveQuartOut(&this->fAlpha, 1.0f, 0.5f, 0.0f, true);
         } else {
-            m_fAlpha = 1.0f;
+            this->fAlpha = 1.0f;
         }
-        was_visible = true;
-    } else if(was_visible || is_visible) {
+        this->was_visible = true;
+    } else if(this->was_visible || is_visible) {
         if(animate) {
-            anim->moveQuartOut(&m_y, scoreboard_y, 0.5f, 0.0f, true);
+            anim->moveQuartOut(&this->y, scoreboard_y, 0.5f, 0.0f, true);
         } else {
-            m_y = scoreboard_y;
+            this->y = scoreboard_y;
         }
     }
 
-    m_index = new_index;
+    this->index = new_index;
 }

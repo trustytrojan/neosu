@@ -17,7 +17,7 @@ SDLGLES2Interface::~SDLGLES2Interface() {}
 
 void SDLGLES2Interface::endScene() {
     OpenGLES2Interface::endScene();
-    SDL_GL_SwapWindow(m_window);
+    SDL_GL_SwapWindow(this->window);
 }
 
 void SDLGLES2Interface::setVSync(bool vsync) { SDL_GL_SetSwapInterval(vsync ? 1 : 0); }

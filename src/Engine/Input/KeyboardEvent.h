@@ -16,20 +16,20 @@ class KeyboardEvent {
 
     void consume();
 
-    inline bool isConsumed() const { return m_bConsumed; }
-    inline KEYCODE getKeyCode() const { return m_keyCode; }
-    inline KEYCODE getCharCode() const { return m_keyCode; }
+    inline bool isConsumed() const { return this->bConsumed; }
+    inline KEYCODE getKeyCode() const { return this->keyCode; }
+    inline KEYCODE getCharCode() const { return this->keyCode; }
 
     bool operator==(const KEYCODE &rhs) const;
     bool operator!=(const KEYCODE &rhs) const;
 
    private:
-    KEYCODE m_keyCode;
-    bool m_bConsumed;
+    KEYCODE keyCode;
+    bool bConsumed;
 };
 
-inline bool KeyboardEvent::operator==(const KEYCODE &rhs) const { return m_keyCode == rhs; }
+inline bool KeyboardEvent::operator==(const KEYCODE &rhs) const { return this->keyCode == rhs; }
 
-inline bool KeyboardEvent::operator!=(const KEYCODE &rhs) const { return m_keyCode != rhs; }
+inline bool KeyboardEvent::operator!=(const KEYCODE &rhs) const { return this->keyCode != rhs; }
 
 #endif

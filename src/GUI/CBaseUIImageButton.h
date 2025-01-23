@@ -13,31 +13,31 @@ class CBaseUIImageButton : public CBaseUIButton {
 
     CBaseUIImageButton *setImageResourceName(std::string imageResourceName);
     CBaseUIImageButton *setRotationDeg(float deg) {
-        m_fRot = deg;
+        this->fRot = deg;
         return this;
     }
     CBaseUIImageButton *setScale(float xScale, float yScale) {
-        m_vScale.x = xScale;
-        m_vScale.y = yScale;
+        this->vScale.x = xScale;
+        this->vScale.y = yScale;
         return this;
     }
     CBaseUIImageButton *setScaleToFit(bool scaleToFit) {
-        m_bScaleToFit = scaleToFit;
+        this->bScaleToFit = scaleToFit;
         return this;
     }
     CBaseUIImageButton *setKeepAspectRatio(bool keepAspectRatio) {
-        m_bKeepAspectRatio = keepAspectRatio;
+        this->bKeepAspectRatio = keepAspectRatio;
         return this;
     }
 
-    inline std::string getImageResourceName() const { return m_sImageResourceName; }
-    inline Vector2 getScale() const { return m_vScale; }
+    inline std::string getImageResourceName() const { return this->sImageResourceName; }
+    inline Vector2 getScale() const { return this->vScale; }
 
    protected:
-    std::string m_sImageResourceName;
+    std::string sImageResourceName;
 
-    float m_fRot;
-    Vector2 m_vScale;
-    bool m_bScaleToFit;
-    bool m_bKeepAspectRatio;
+    float fRot;
+    Vector2 vScale;
+    bool bScaleToFit;
+    bool bKeepAspectRatio;
 };

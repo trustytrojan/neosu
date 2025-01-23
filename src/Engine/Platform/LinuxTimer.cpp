@@ -22,37 +22,37 @@ static timespec diff(timespec start, timespec end) {
 }
 
 LinuxTimer::LinuxTimer() : BaseTimer() {
-    m_startTime.tv_sec = 0;
-    m_startTime.tv_nsec = 0;
-    m_currentTime.tv_sec = 0;
-    m_currentTime.tv_nsec = 0;
+    this->startTime.tv_sec = 0;
+    this->startTime.tv_nsec = 0;
+    this->currentTime.tv_sec = 0;
+    this->currentTime.tv_nsec = 0;
 
-    m_delta = 0.0;
-    m_elapsedTime = 0.0;
-    m_elapsedTimeMS = 0;
+    this->delta = 0.0;
+    this->elapsedTime = 0.0;
+    this->elapsedTimeMS = 0;
 }
 
 void LinuxTimer::start() {
-    clock_gettime(CLOCK_REALTIME, &m_startTime);
-    m_currentTime = m_startTime;
+    clock_gettime(CLOCK_REALTIME, &this->startTime);
+    this->currentTime = this->startTime;
 
-    m_delta = 0.0;
-    m_elapsedTime = 0.0;
-    m_elapsedTimeMS = 0;
+    this->delta = 0.0;
+    this->elapsedTime = 0.0;
+    this->elapsedTimeMS = 0;
 }
 
 void LinuxTimer::update() {
     timespec t;
     clock_gettime(CLOCK_REALTIME, &t);
 
-    const timespec delta = diff(m_currentTime, t);
-    m_delta = delta.tv_sec + (double)delta.tv_nsec / 1000000000.0;
+    const timespec delta = diff(this->currentTime, t);
+    this->delta = delta.tv_sec + (double)delta.tv_nsec / 1000000000.0;
 
-    const timespec elapsed = diff(m_startTime, t);
-    m_elapsedTime = elapsed.tv_sec + (double)elapsed.tv_nsec / 1000000000.0;
-    m_elapsedTimeMS = ((u64)elapsed.tv_sec * (u64)1000) + ((u64)elapsed.tv_nsec / (u64)1000000);
+    const timespec elapsed = diff(this->startTime, t);
+    this->elapsedTime = elapsed.tv_sec + (double)elapsed.tv_nsec / 1000000000.0;
+    this->elapsedTimeMS = ((u64)elapsed.tv_sec * (u64)1000) + ((u64)elapsed.tv_nsec / (u64)1000000);
 
-    m_currentTime = t;
+    this->currentTime = t;
 }
 
 #endif

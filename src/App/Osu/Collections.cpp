@@ -10,65 +10,65 @@ bool collections_loaded = false;
 std::vector<Collection*> collections;
 
 void Collection::delete_collection() {
-    for(auto map : maps) {
-        remove_map(map);
+    for(auto map : this->maps) {
+        this->remove_map(map);
     }
 }
 
 void Collection::add_map(MD5Hash map_hash) {
     {
-        auto it = std::find(deleted_maps.begin(), deleted_maps.end(), map_hash);
-        if(it != deleted_maps.end()) {
-            deleted_maps.erase(it);
+        auto it = std::find(this->deleted_maps.begin(), this->deleted_maps.end(), map_hash);
+        if(it != this->deleted_maps.end()) {
+            this->deleted_maps.erase(it);
         }
     }
 
     {
-        auto it = std::find(neosu_maps.begin(), neosu_maps.end(), map_hash);
-        if(it == neosu_maps.end()) {
-            neosu_maps.push_back(map_hash);
+        auto it = std::find(this->neosu_maps.begin(), this->neosu_maps.end(), map_hash);
+        if(it == this->neosu_maps.end()) {
+            this->neosu_maps.push_back(map_hash);
         }
     }
 
     {
-        auto it = std::find(maps.begin(), maps.end(), map_hash);
-        if(it == maps.end()) {
-            maps.push_back(map_hash);
+        auto it = std::find(this->maps.begin(), this->maps.end(), map_hash);
+        if(it == this->maps.end()) {
+            this->maps.push_back(map_hash);
         }
     }
 }
 
 void Collection::remove_map(MD5Hash map_hash) {
     {
-        auto it = std::find(maps.begin(), maps.end(), map_hash);
-        if(it != maps.end()) {
-            maps.erase(it);
+        auto it = std::find(this->maps.begin(), this->maps.end(), map_hash);
+        if(it != this->maps.end()) {
+            this->maps.erase(it);
         }
     }
 
     {
-        auto it = std::find(neosu_maps.begin(), neosu_maps.end(), map_hash);
-        if(it != neosu_maps.end()) {
-            neosu_maps.erase(it);
+        auto it = std::find(this->neosu_maps.begin(), this->neosu_maps.end(), map_hash);
+        if(it != this->neosu_maps.end()) {
+            this->neosu_maps.erase(it);
         }
     }
 
     {
-        auto it = std::find(peppy_maps.begin(), peppy_maps.end(), map_hash);
-        if(it != peppy_maps.end()) {
-            deleted_maps.push_back(map_hash);
+        auto it = std::find(this->peppy_maps.begin(), this->peppy_maps.end(), map_hash);
+        if(it != this->peppy_maps.end()) {
+            this->deleted_maps.push_back(map_hash);
         }
     }
 }
 
 void Collection::rename_to(std::string new_name) {
     if(new_name.length() < 1) new_name = "Untitled collection";
-    if(name == new_name) return;
+    if(this->name == new_name) return;
 
     auto new_collection = get_or_create_collection(new_name);
 
-    for(auto map : maps) {
-        remove_map(map);
+    for(auto map : this->maps) {
+        this->remove_map(map);
         new_collection->add_map(map);
     }
 }

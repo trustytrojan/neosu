@@ -17,7 +17,7 @@ class OpenGLVertexArrayObject : public VertexArrayObject {
     OpenGLVertexArrayObject(Graphics::PRIMITIVE primitive = Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES,
                             Graphics::USAGE_TYPE usage = Graphics::USAGE_TYPE::USAGE_STATIC,
                             bool keepInSystemMemory = false);
-    virtual ~OpenGLVertexArrayObject() { destroy(); }
+    virtual ~OpenGLVertexArrayObject() { this->destroy(); }
 
     void draw();
 
@@ -34,16 +34,16 @@ class OpenGLVertexArrayObject : public VertexArrayObject {
                ((color & 0x000000ff) << 16);
     }
 
-    unsigned int m_iVertexBuffer;
-    unsigned int m_iTexcoordBuffer;
-    unsigned int m_iColorBuffer;
-    unsigned int m_iNormalBuffer;
+    unsigned int iVertexBuffer;
+    unsigned int iTexcoordBuffer;
+    unsigned int iColorBuffer;
+    unsigned int iNormalBuffer;
 
-    unsigned int m_iNumTexcoords;
-    unsigned int m_iNumColors;
-    unsigned int m_iNumNormals;
+    unsigned int iNumTexcoords;
+    unsigned int iNumColors;
+    unsigned int iNumNormals;
 
-    unsigned int m_iVertexArray;
+    unsigned int iVertexArray;
 };
 
 #endif

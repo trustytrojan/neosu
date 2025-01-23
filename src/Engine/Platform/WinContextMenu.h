@@ -28,7 +28,7 @@ class WinContextMenu : public ContextMenu {
     int end();
 
    private:
-    HMENU m_menu;
+    HMENU menu;
 };
 
 #endif

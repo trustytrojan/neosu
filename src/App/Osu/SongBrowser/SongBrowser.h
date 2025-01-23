@@ -86,8 +86,8 @@ class SongBrowser : public ScreenBackable {
     void highlightScore(u64 unixTimestamp);
     void selectRandomBeatmap();
     void playNextRandomBeatmap() {
-        selectRandomBeatmap();
-        playSelectedDifficulty();
+        this->selectRandomBeatmap();
+        this->playSelectedDifficulty();
     }
     void recalculateStarsForSelectedBeatmap(bool force = false);
 
@@ -105,17 +105,17 @@ class SongBrowser : public ScreenBackable {
     void rebuildScoreButtons();
     void updateSongButtonLayout();
 
-    inline const std::vector<CollectionButton *> &getCollectionButtons() const { return m_collectionButtons; }
+    inline const std::vector<CollectionButton *> &getCollectionButtons() const { return this->collectionButtons; }
 
-    inline bool hasSelectedAndIsPlaying() const { return m_bHasSelectedAndIsPlaying; }
-    inline bool isInSearch() const { return m_bInSearch; }
-    inline bool isRightClickScrolling() const { return m_bSongBrowserRightClickScrolling; }
+    inline bool hasSelectedAndIsPlaying() const { return this->bHasSelectedAndIsPlaying; }
+    inline bool isInSearch() const { return this->bInSearch; }
+    inline bool isRightClickScrolling() const { return this->bSongBrowserRightClickScrolling; }
 
-    inline Beatmap *getSelectedBeatmap() const { return m_beatmap; }
+    inline Beatmap *getSelectedBeatmap() const { return this->beatmap; }
 
-    inline InfoLabel *getInfoLabel() { return m_songInfo; }
+    inline InfoLabel *getInfoLabel() { return this->songInfo; }
 
-    inline GROUP getGroupingMode() const { return m_group; }
+    inline GROUP getGroupingMode() const { return this->group; }
 
     enum class SORT {
         SORT_ARTIST,
@@ -203,115 +203,114 @@ class SongBrowser : public ScreenBackable {
     void selectPreviousRandomBeatmap();
     void playSelectedDifficulty();
 
-    GROUP m_group;
-    std::vector<GROUPING> m_groupings;
+    GROUP group;
+    std::vector<GROUPING> groupings;
 
-    SORTING_COMPARATOR m_sortingComparator;
-    SORT m_sortingMethod;
-    std::vector<SORTING_METHOD> m_sortingMethods;
+    SORTING_COMPARATOR sortingComparator;
+    SORT sortingMethod;
+    std::vector<SORTING_METHOD> sortingMethods;
 
     // top bar
-    float m_fSongSelectTopScale;
+    float fSongSelectTopScale;
 
     // top bar left
-    CBaseUIContainer *m_topbarLeft;
-    InfoLabel *m_songInfo;
-    std::vector<CBaseUIButton *> m_topbarLeftTabButtons;
-    std::vector<CBaseUIButton *> m_topbarLeftButtons;
-    CBaseUIButton *m_scoreSortButton;
-    CBaseUIButton *m_webButton;
+    CBaseUIContainer *topbarLeft;
+    InfoLabel *songInfo;
+    std::vector<CBaseUIButton *> topbarLeftTabButtons;
+    std::vector<CBaseUIButton *> topbarLeftButtons;
+    CBaseUIButton *scoreSortButton;
+    CBaseUIButton *webButton;
 
     // top bar right
-    CBaseUIContainer *m_topbarRight;
-    CBaseUILabel *m_groupLabel;
-    CBaseUIButton *m_groupButton;
-    CBaseUILabel *m_sortLabel;
-    CBaseUIButton *m_sortButton;
-    UIContextMenu *m_contextMenu;
+    CBaseUIContainer *topbarRight;
+    CBaseUILabel *groupLabel;
+    CBaseUIButton *groupButton;
+    CBaseUILabel *sortLabel;
+    CBaseUIButton *sortButton;
+    UIContextMenu *contextMenu;
 
-    CBaseUIButton *m_groupByCollectionBtn;
-    CBaseUIButton *m_groupByArtistBtn;
-    CBaseUIButton *m_groupByDifficultyBtn;
-    CBaseUIButton *m_groupByNothingBtn;
+    CBaseUIButton *groupByCollectionBtn;
+    CBaseUIButton *groupByArtistBtn;
+    CBaseUIButton *groupByDifficultyBtn;
+    CBaseUIButton *groupByNothingBtn;
 
     // bottom bar
-    CBaseUIContainer *m_bottombar;
-    std::vector<UISelectionButton *> m_bottombarNavButtons;
-    UserCard *m_userButton = NULL;
+    CBaseUIContainer *bottombar;
+    std::vector<UISelectionButton *> bottombarNavButtons;
+    UserCard *userButton = NULL;
 
     // score browser
-    std::vector<ScoreButton *> m_scoreButtonCache;
-    CBaseUIScrollView *m_scoreBrowser;
-    CBaseUIElement *m_scoreBrowserScoresStillLoadingElement;
-    CBaseUIElement *m_scoreBrowserNoRecordsYetElement;
-    CBaseUIContainer *m_localBestContainer;
-    CBaseUILabel *m_localBestLabel;
-    ScoreButton *m_localBestButton = NULL;
+    std::vector<ScoreButton *> scoreButtonCache;
+    CBaseUIScrollView *scoreBrowser;
+    CBaseUIElement *scoreBrowserScoresStillLoadingElement;
+    CBaseUIElement *scoreBrowserNoRecordsYetElement;
+    CBaseUIContainer *localBestContainer;
+    CBaseUILabel *localBestLabel;
+    ScoreButton *localBestButton = NULL;
     bool score_resort_scheduled = false;
 
     // song browser
-    CBaseUIScrollView *m_songBrowser;
-    Button *m_selectedButton = NULL;
-    bool m_bSongBrowserRightClickScrollCheck;
-    bool m_bSongBrowserRightClickScrolling;
-    bool m_bNextScrollToSongButtonJumpFixScheduled;
-    bool m_bNextScrollToSongButtonJumpFixUseScrollSizeDelta;
-    bool m_scheduled_scroll_to_selected_button = false;
-    float m_fNextScrollToSongButtonJumpFixOldRelPosY;
-    float m_fNextScrollToSongButtonJumpFixOldScrollSizeY;
+    CBaseUIScrollView *songBrowser;
+    Button *selectedButton = NULL;
+    bool bSongBrowserRightClickScrollCheck;
+    bool bSongBrowserRightClickScrolling;
+    bool bNextScrollToSongButtonJumpFixScheduled;
+    bool bNextScrollToSongButtonJumpFixUseScrollSizeDelta;
+    bool scheduled_scroll_to_selected_button = false;
+    float fNextScrollToSongButtonJumpFixOldRelPosY;
+    float fNextScrollToSongButtonJumpFixOldScrollSizeY;
 
     // song browser selection state logic
-    SongButton *m_selectionPreviousSongButton;
-    SongDifficultyButton *m_selectionPreviousSongDiffButton;
-    CollectionButton *m_selectionPreviousCollectionButton;
+    SongButton *selectionPreviousSongButton;
+    SongDifficultyButton *selectionPreviousSongDiffButton;
+    CollectionButton *selectionPreviousCollectionButton;
 
     // beatmap database
-    Database *m_db;
-    std::vector<DatabaseBeatmap *> m_beatmaps;
-    std::vector<SongButton *> m_songButtons;
-    std::vector<Button *> m_visibleSongButtons;
-    std::vector<CollectionButton *> m_collectionButtons;
-    std::vector<CollectionButton *> m_artistCollectionButtons;
-    std::vector<CollectionButton *> m_difficultyCollectionButtons;
-    std::vector<CollectionButton *> m_bpmCollectionButtons;
-    std::vector<CollectionButton *> m_creatorCollectionButtons;
-    std::vector<CollectionButton *> m_dateaddedCollectionButtons;
-    std::vector<CollectionButton *> m_lengthCollectionButtons;
-    std::vector<CollectionButton *> m_titleCollectionButtons;
+    std::vector<DatabaseBeatmap *> beatmaps;
+    std::vector<SongButton *> songButtons;
+    std::vector<Button *> visibleSongButtons;
+    std::vector<CollectionButton *> collectionButtons;
+    std::vector<CollectionButton *> artistCollectionButtons;
+    std::vector<CollectionButton *> difficultyCollectionButtons;
+    std::vector<CollectionButton *> bpmCollectionButtons;
+    std::vector<CollectionButton *> creatorCollectionButtons;
+    std::vector<CollectionButton *> dateaddedCollectionButtons;
+    std::vector<CollectionButton *> lengthCollectionButtons;
+    std::vector<CollectionButton *> titleCollectionButtons;
     std::unordered_map<MD5Hash, SongButton *> hashToSongButton;
-    bool m_bBeatmapRefreshScheduled;
-    UString m_sLastOsuFolder;
+    bool bBeatmapRefreshScheduled;
+    UString sLastOsuFolder;
     MD5Hash beatmap_to_reselect_after_db_load;
 
     // keys
-    bool m_bF1Pressed;
-    bool m_bF2Pressed;
-    bool m_bF3Pressed;
-    bool m_bShiftPressed;
-    bool m_bLeft;
-    bool m_bRight;
-    bool m_bRandomBeatmapScheduled;
-    bool m_bPreviousRandomBeatmapScheduled;
+    bool bF1Pressed;
+    bool bF2Pressed;
+    bool bF3Pressed;
+    bool bShiftPressed;
+    bool bLeft;
+    bool bRight;
+    bool bRandomBeatmapScheduled;
+    bool bPreviousRandomBeatmapScheduled;
 
     // behaviour
-    DatabaseBeatmap *m_lastSelectedBeatmap = NULL;
-    Beatmap *m_beatmap;
-    bool m_bHasSelectedAndIsPlaying;
-    float m_fPulseAnimation;
-    float m_fBackgroundFadeInTime;
-    std::vector<DatabaseBeatmap *> m_previousRandomBeatmaps;
+    DatabaseBeatmap *lastSelectedBeatmap = NULL;
+    Beatmap *beatmap;
+    bool bHasSelectedAndIsPlaying;
+    float fPulseAnimation;
+    float fBackgroundFadeInTime;
+    std::vector<DatabaseBeatmap *> previousRandomBeatmaps;
 
     // map auto-download
     i32 map_autodl = 0;
     i32 set_autodl = 0;
 
     // search
-    UISearchOverlay *m_search;
-    UString m_sSearchString;
-    UString m_sPrevSearchString;
-    UString m_sPrevHardcodedSearchString;
-    float m_fSearchWaitTime;
-    bool m_bInSearch;
-    GROUP m_searchPrevGroup;
-    SongBrowserBackgroundSearchMatcher *m_backgroundSearchMatcher;
+    UISearchOverlay *search;
+    UString sSearchString;
+    UString sPrevSearchString;
+    UString sPrevHardcodedSearchString;
+    float fSearchWaitTime;
+    bool bInSearch;
+    GROUP searchPrevGroup;
+    SongBrowserBackgroundSearchMatcher *backgroundSearchMatcher;
 };

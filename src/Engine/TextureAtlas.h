@@ -15,32 +15,32 @@ class Image;
 class TextureAtlas : public Resource {
    public:
     TextureAtlas(int width = 512, int height = 512);
-    virtual ~TextureAtlas() { destroy(); }
+    virtual ~TextureAtlas() { this->destroy(); }
 
-    Vector2 put(int width, int height, Color *pixels) { return put(width, height, false, false, pixels); }
+    Vector2 put(int width, int height, Color *pixels) { return this->put(width, height, false, false, pixels); }
     Vector2 put(int width, int height, bool flipHorizontal, bool flipVertical, Color *pixels);
 
-    void setPadding(int padding) { m_iPadding = padding; }
+    void setPadding(int padding) { this->iPadding = padding; }
 
-    inline int getWidth() const { return m_iWidth; }
-    inline int getHeight() const { return m_iHeight; }
-    inline Image *getAtlasImage() const { return m_atlasImage; }
+    inline int getWidth() const { return this->iWidth; }
+    inline int getHeight() const { return this->iHeight; }
+    inline Image *getAtlasImage() const { return this->atlasImage; }
 
    private:
     virtual void init();
     virtual void initAsync();
     virtual void destroy();
 
-    int m_iPadding;
+    int iPadding;
 
-    int m_iWidth;
-    int m_iHeight;
+    int iWidth;
+    int iHeight;
 
-    Image *m_atlasImage;
+    Image *atlasImage;
 
-    int m_iCurX;
-    int m_iCurY;
-    int m_iMaxHeight;
+    int iCurX;
+    int iCurY;
+    int iMaxHeight;
 };
 
 #endif

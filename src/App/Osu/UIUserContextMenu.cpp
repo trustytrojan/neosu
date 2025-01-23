@@ -12,26 +12,26 @@
 #include "UIContextMenu.h"
 
 UIUserContextMenuScreen::UIUserContextMenuScreen() : OsuScreen() {
-    m_bVisible = true;
-    menu = new UIContextMenu();
-    addBaseUIElement(menu);
+    this->bVisible = true;
+    this->menu = new UIContextMenu();
+    this->addBaseUIElement(this->menu);
 }
 
 void UIUserContextMenuScreen::onResolutionChange(Vector2 newResolution) {
-    setSize(newResolution);
+    this->setSize(newResolution);
     OsuScreen::onResolutionChange(newResolution);
 }
 
 void UIUserContextMenuScreen::stealFocus() {
     OsuScreen::stealFocus();
-    close();
+    this->close();
 }
 
 void UIUserContextMenuScreen::open(u32 user_id) {
     if(!bancho.is_online()) return;
 
-    close();
-    m_user_id = user_id;
+    this->close();
+    this->user_id = user_id;
 
     auto user_info = get_user_info(user_id);
     bool has_user_info = user_info->privileges != 0;
@@ -46,28 +46,28 @@ void UIUserContextMenuScreen::open(u32 user_id) {
         }
     }
 
-    menu->begin();
+    this->menu->begin();
 
-    menu->addButton("View profile", VIEW_PROFILE);
+    this->menu->addButton("View profile", VIEW_PROFILE);
 
     if(user_id != bancho.user_id) {
         if(bancho.room.is_host() && slot_number != -1) {
-            menu->addButton("Set as Host", UA_TRANSFER_HOST);
-            menu->addButton("Kick", KICK);
+            this->menu->addButton("Set as Host", UA_TRANSFER_HOST);
+            this->menu->addButton("Kick", KICK);
         }
 
         if(has_user_info) {
             // Without user info, we don't have the username
-            menu->addButton("Start Chat", START_CHAT);
+            this->menu->addButton("Start Chat", START_CHAT);
 
             // XXX: Not implemented
             // menu->addButton("Invite to game", INVITE_TO_GAME);
         }
 
         if(user_info->is_friend()) {
-            menu->addButton("Revoke friendship", UA_REMOVE_FRIEND);
+            this->menu->addButton("Revoke friendship", UA_REMOVE_FRIEND);
         } else {
-            menu->addButton("Add as friend", UA_ADD_FRIEND);
+            this->menu->addButton("Add as friend", UA_ADD_FRIEND);
         }
 
         // TODO: Disabled for now, since it's not finished
@@ -78,20 +78,20 @@ void UIUserContextMenuScreen::open(u32 user_id) {
         // }
     }
 
-    menu->end(false, false);
-    menu->setPos(engine->getMouse()->getPos());
-    menu->setClickCallback(fastdelegate::MakeDelegate(this, &UIUserContextMenuScreen::on_action));
-    menu->setVisible(true);
+    this->menu->end(false, false);
+    this->menu->setPos(engine->getMouse()->getPos());
+    this->menu->setClickCallback(fastdelegate::MakeDelegate(this, &UIUserContextMenuScreen::on_action));
+    this->menu->setVisible(true);
 }
 
-void UIUserContextMenuScreen::close() { menu->setVisible(false); }
+void UIUserContextMenuScreen::close() { this->menu->setVisible(false); }
 
 void UIUserContextMenuScreen::on_action(UString text, int user_action) {
-    auto user_info = get_user_info(m_user_id);
+    auto user_info = get_user_info(this->user_id);
     int slot_number = -1;
     if(bancho.is_in_a_multi_room()) {
         for(int i = 0; i < 16; i++) {
-            if(bancho.room.slots[i].player_id == m_user_id) {
+            if(bancho.room.slots[i].player_id == this->user_id) {
                 slot_number = i;
                 break;
             }
@@ -110,43 +110,43 @@ void UIUserContextMenuScreen::on_action(UString text, int user_action) {
         send_packet(packet);  // kick by locking the slot
         send_packet(packet);  // unlock the slot
     } else if(user_action == START_CHAT) {
-        osu->m_chat->addChannel(user_info->name, true);
+        osu->chat->addChannel(user_info->name, true);
     } else if(user_action == VIEW_PROFILE) {
-        auto url = UString::format("https://osu.%s/u/%d", bancho.endpoint.toUtf8(), m_user_id);
+        auto url = UString::format("https://osu.%s/u/%d", bancho.endpoint.toUtf8(), this->user_id);
         osu->getNotificationOverlay()->addNotification("Opening browser, please wait ...", 0xffffffff, false, 0.75f);
         env->openURLInDefaultBrowser(url.toUtf8());
     } else if(user_action == UA_ADD_FRIEND) {
         Packet packet;
         packet.id = FRIEND_ADD;
-        write<u32>(&packet, m_user_id);
+        write<u32>(&packet, this->user_id);
         send_packet(packet);
-        friends.push_back(m_user_id);
+        friends.push_back(this->user_id);
     } else if(user_action == UA_REMOVE_FRIEND) {
         Packet packet;
         packet.id = FRIEND_REMOVE;
-        write<u32>(&packet, m_user_id);
+        write<u32>(&packet, this->user_id);
         send_packet(packet);
 
-        auto it = std::find(friends.begin(), friends.end(), m_user_id);
+        auto it = std::find(friends.begin(), friends.end(), this->user_id);
         if(it != friends.end()) {
             friends.erase(it);
         }
     } else if(user_action == TOGGLE_SPECTATE) {
-        if(bancho.spectated_player_id == m_user_id) {
+        if(bancho.spectated_player_id == this->user_id) {
             stop_spectating();
         } else {
-            start_spectating(m_user_id);
+            start_spectating(this->user_id);
         }
     }
 
-    menu->setVisible(false);
+    this->menu->setVisible(false);
 }
 
 UIUserLabel::UIUserLabel(u32 user_id, UString username) : CBaseUILabel() {
-    m_user_id = user_id;
-    setText(username);
-    setDrawFrame(false);
-    setDrawBackground(false);
+    this->user_id = user_id;
+    this->setText(username);
+    this->setDrawFrame(false);
+    this->setDrawBackground(false);
 }
 
-void UIUserLabel::onMouseUpInside() { osu->m_user_actions->open(m_user_id); }
+void UIUserLabel::onMouseUpInside() { osu->user_actions->open(this->user_id); }

@@ -30,7 +30,7 @@ class ResourceManager {
         MobileAtomic(MobileAtomic const &other) : atomic(other.atomic.load()) {}
 
         MobileAtomic &operator=(MobileAtomic const &other) {
-            atomic.store(other.atomic.load());
+            this->atomic.store(other.atomic.load());
             return *this;
         }
     };
@@ -51,12 +51,12 @@ class ResourceManager {
     void update();
 
     void setNumResourceInitPerFrameLimit(size_t numResourceInitPerFrameLimit) {
-        m_iNumResourceInitPerFrameLimit = numResourceInitPerFrameLimit;
+        this->iNumResourceInitPerFrameLimit = numResourceInitPerFrameLimit;
     }
 
     void loadResource(Resource *rs) {
-        requestNextLoadUnmanaged();
-        loadResource(rs, true);
+        this->requestNextLoadUnmanaged();
+        this->loadResource(rs, true);
     }
     void destroyResource(Resource *rs);
     void destroyResources();
@@ -108,10 +108,10 @@ class ResourceManager {
     Sound *getSound(std::string resourceName) const;
     Shader *getShader(std::string resourceName) const;
 
-    inline const std::vector<Resource *> &getResources() const { return m_vResources; }
-    inline size_t getNumThreads() const { return m_threads.size(); }
-    inline size_t getNumLoadingWork() const { return m_loadingWork.size(); }
-    inline size_t getNumLoadingWorkAsyncDestroy() const { return m_loadingWorkAsyncDestroy.size(); }
+    inline const std::vector<Resource *> &getResources() const { return this->vResources; }
+    inline size_t getNumThreads() const { return this->threads.size(); }
+    inline size_t getNumLoadingWork() const { return this->loadingWork.size(); }
+    inline size_t getNumLoadingWorkAsyncDestroy() const { return this->loadingWorkAsyncDestroy.size(); }
 
     bool isLoading() const;
     bool isLoadingResource(Resource *rs) const;
@@ -124,15 +124,15 @@ class ResourceManager {
     void resetFlags();
 
     // content
-    std::vector<Resource *> m_vResources;
+    std::vector<Resource *> vResources;
 
     // flags
-    bool m_bNextLoadAsync;
-    std::stack<bool> m_nextLoadUnmanagedStack;
-    size_t m_iNumResourceInitPerFrameLimit;
+    bool bNextLoadAsync;
+    std::stack<bool> nextLoadUnmanagedStack;
+    size_t iNumResourceInitPerFrameLimit;
 
     // async
-    std::vector<ResourceManagerLoaderThread *> m_threads;
-    std::vector<LOADING_WORK> m_loadingWork;
-    std::vector<Resource *> m_loadingWorkAsyncDestroy;
+    std::vector<ResourceManagerLoaderThread *> threads;
+    std::vector<LOADING_WORK> loadingWork;
+    std::vector<Resource *> loadingWorkAsyncDestroy;
 };

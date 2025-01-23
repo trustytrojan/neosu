@@ -27,22 +27,22 @@ class SliderCurve {
     virtual Vector2 pointAt(float t) = 0;          // with stacking
     virtual Vector2 originalPointAt(float t) = 0;  // without stacking
 
-    inline float getStartAngle() const { return m_fStartAngle; }
-    inline float getEndAngle() const { return m_fEndAngle; }
+    inline float getStartAngle() const { return this->fStartAngle; }
+    inline float getEndAngle() const { return this->fEndAngle; }
 
-    inline const std::vector<Vector2> &getPoints() const { return m_curvePoints; }
-    inline const std::vector<std::vector<Vector2>> &getPointSegments() const { return m_curvePointSegments; }
+    inline const std::vector<Vector2> &getPoints() const { return this->curvePoints; }
+    inline const std::vector<std::vector<Vector2>> &getPointSegments() const { return this->curvePointSegments; }
 
-    float m_fPixelLength;
-    std::vector<Vector2> m_controlPoints;
+    float fPixelLength;
+    std::vector<Vector2> controlPoints;
 
     // these must be explicitly calculated/set in one of the subclasses
-    std::vector<std::vector<Vector2>> m_curvePointSegments;
-    std::vector<std::vector<Vector2>> m_originalCurvePointSegments;
-    std::vector<Vector2> m_curvePoints;
-    std::vector<Vector2> m_originalCurvePoints;
-    float m_fStartAngle;
-    float m_fEndAngle;
+    std::vector<std::vector<Vector2>> curvePointSegments;
+    std::vector<std::vector<Vector2>> originalCurvePointSegments;
+    std::vector<Vector2> curvePoints;
+    std::vector<Vector2> originalCurvePoints;
+    float fStartAngle;
+    float fEndAngle;
 };
 
 //******************************************//
@@ -56,10 +56,10 @@ class SliderCurveType {
 
     virtual Vector2 pointAt(float t) = 0;
 
-    inline const int getNumPoints() const { return m_points.size(); }
+    inline const int getNumPoints() const { return this->points.size(); }
 
-    inline const std::vector<Vector2> &getCurvePoints() const { return m_points; }
-    inline const std::vector<float> &getCurveDistances() const { return m_curveDistances; }
+    inline const std::vector<Vector2> &getCurvePoints() const { return this->points; }
+    inline const std::vector<float> &getCurveDistances() const { return this->curveDistances; }
 
    protected:
     // either one must be called from one of the subclasses
@@ -72,10 +72,10 @@ class SliderCurveType {
     void calculateIntermediaryPoints(float approxLength);
     void calculateCurveDistances();
 
-    std::vector<Vector2> m_points;
+    std::vector<Vector2> points;
 
-    float m_fTotalDistance;
-    std::vector<float> m_curveDistances;
+    float fTotalDistance;
+    std::vector<float> curveDistances;
 };
 
 class SliderCurveTypeBezier2 : public SliderCurveType {
@@ -94,8 +94,8 @@ class SliderCurveTypeCentripetalCatmullRom : public SliderCurveType {
     virtual Vector2 pointAt(float t);
 
    private:
-    float m_time[4];
-    std::vector<Vector2> m_points;
+    float time[4];
+    std::vector<Vector2> points;
 };
 
 //*******************//
@@ -114,7 +114,7 @@ class SliderCurveEqualDistanceMulti : public SliderCurve {
     virtual Vector2 originalPointAt(float t);
 
    private:
-    int m_iNCurve;
+    int iNCurve;
 };
 
 class SliderCurveLinearBezier : public SliderCurveEqualDistanceMulti {
@@ -146,11 +146,11 @@ class SliderCurveCircumscribedCircle : public SliderCurve {
 
     inline bool const isIn(float a, float b, float c) { return ((b > a && b < c) || (b < a && b > c)); }
 
-    Vector2 m_vCircleCenter;
-    Vector2 m_vOriginalCircleCenter;
-    float m_fRadius;
-    float m_fCalculationStartAngle;
-    float m_fCalculationEndAngle;
+    Vector2 vCircleCenter;
+    Vector2 vOriginalCircleCenter;
+    float fRadius;
+    float fCalculationStartAngle;
+    float fCalculationEndAngle;
 };
 
 //********************//
@@ -174,7 +174,7 @@ class SliderBezierApproximator {
     void subdivide(std::vector<Vector2> &controlPoints, std::vector<Vector2> &l, std::vector<Vector2> &r);
     void approximate(std::vector<Vector2> &controlPoints, std::vector<Vector2> &output);
 
-    int m_iCount;
-    std::vector<Vector2> m_subdivisionBuffer1;
-    std::vector<Vector2> m_subdivisionBuffer2;
+    int iCount;
+    std::vector<Vector2> subdivisionBuffer1;
+    std::vector<Vector2> subdivisionBuffer2;
 };

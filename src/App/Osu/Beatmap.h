@@ -66,30 +66,30 @@ class Beatmap : public BeatmapInterface {
     Vector2 getMousePos() const;
     Vector2 getCursorPos() const;
     Vector2 getFirstPersonCursorDelta() const;
-    inline Vector2 getContinueCursorPoint() const { return m_vContinueCursorPoint; }
+    inline Vector2 getContinueCursorPoint() const { return this->vContinueCursorPoint; }
 
     // playfield
-    inline Vector2 getPlayfieldSize() const { return m_vPlayfieldSize; }
-    inline Vector2 getPlayfieldCenter() const { return m_vPlayfieldCenter; }
-    inline f32 getPlayfieldRotation() const { return m_fPlayfieldRotation; }
+    inline Vector2 getPlayfieldSize() const { return this->vPlayfieldSize; }
+    inline Vector2 getPlayfieldCenter() const { return this->vPlayfieldCenter; }
+    inline f32 getPlayfieldRotation() const { return this->fPlayfieldRotation; }
 
     // hitobjects
     inline f32 getHitcircleXMultiplier() const {
-        return m_fXMultiplier;
+        return this->fXMultiplier;
     }  // multiply osu!pixels with this to get screen pixels
-    inline f32 getNumberScale() const { return m_fNumberScale; }
-    inline f32 getHitcircleOverlapScale() const { return m_fHitcircleOverlapScale; }
-    inline bool isInMafhamRenderChunk() const { return m_bInMafhamRenderChunk; }
+    inline f32 getNumberScale() const { return this->fNumberScale; }
+    inline f32 getHitcircleOverlapScale() const { return this->fHitcircleOverlapScale; }
+    inline bool isInMafhamRenderChunk() const { return this->bInMafhamRenderChunk; }
 
     // score
-    inline int getNumHitObjects() const { return m_hitobjects.size(); }
-    inline f32 getAimStars() const { return m_fAimStars; }
-    inline f32 getAimSliderFactor() const { return m_fAimSliderFactor; }
-    inline f32 getSpeedStars() const { return m_fSpeedStars; }
-    inline f32 getSpeedNotes() const { return m_fSpeedNotes; }
+    inline int getNumHitObjects() const { return this->hitobjects.size(); }
+    inline f32 getAimStars() const { return this->fAimStars; }
+    inline f32 getAimSliderFactor() const { return this->fAimSliderFactor; }
+    inline f32 getSpeedStars() const { return this->fSpeedStars; }
+    inline f32 getSpeedNotes() const { return this->fSpeedNotes; }
 
     // hud
-    inline bool isSpinnerActive() const { return m_bIsSpinnerActive; }
+    inline bool isSpinnerActive() const { return this->bIsSpinnerActive; }
 
     // callbacks called by the Osu class (osu!standard)
     void skipEmptySection();
@@ -126,7 +126,7 @@ class Beatmap : public BeatmapInterface {
     void seekPercent(f64 percent);
     void seekPercentPlayable(f64 percent);
 
-    inline Sound *getMusic() const { return m_music; }
+    inline Sound *getMusic() const { return this->music; }
     u32 getTime() const;
     u32 getStartTimePlayable() const;
     u32 getLength() const;
@@ -137,11 +137,11 @@ class Beatmap : public BeatmapInterface {
     // live statistics
     int getMostCommonBPM() const;
     f32 getSpeedMultiplier() const;
-    inline int getNPS() const { return m_iNPS; }
-    inline int getND() const { return m_iND; }
+    inline int getNPS() const { return this->iNPS; }
+    inline int getND() const { return this->iND; }
 
-    std::vector<f64> m_aimStrains;
-    std::vector<f64> m_speedStrains;
+    std::vector<f64> aimStrains;
+    std::vector<f64> speedStrains;
 
     // set to false when using non-vanilla mods (disables score submission)
     bool vanilla = true;
@@ -157,7 +157,7 @@ class Beatmap : public BeatmapInterface {
     // replay replaying (prerecorded)
     // current_keys, last_keys also reused
     std::vector<LegacyReplay::Frame> spectated_replay;
-    Vector2 m_interpolatedMousePos;
+    Vector2 interpolatedMousePos;
     bool is_watching = false;
     long current_frame_idx = 0;
     SimulatedBeatmap *sim = NULL;
@@ -177,8 +177,8 @@ class Beatmap : public BeatmapInterface {
     // used by HitObject children and ModSelector
     Skin *getSkin() const;  // maybe use this for beatmap skins, maybe
 
-    inline long getCurMusicPos() const { return m_iCurMusicPos; }
-    inline long getCurMusicPosWithOffsets() const { return m_iCurMusicPosWithOffsets; }
+    inline long getCurMusicPos() const { return this->iCurMusicPos; }
+    inline long getCurMusicPosWithOffsets() const { return this->iCurMusicPosWithOffsets; }
 
     u32 getScoreV1DifficultyMultiplier() const;
     f32 getRawAR() const;
@@ -191,23 +191,23 @@ class Beatmap : public BeatmapInterface {
     virtual f32 getRawApproachTime() const;
 
     // health
-    inline f64 getHealth() const { return m_fHealth; }
-    inline bool hasFailed() const { return m_bFailed; }
+    inline f64 getHealth() const { return this->fHealth; }
+    inline bool hasFailed() const { return this->bFailed; }
 
     // database (legacy)
-    inline DatabaseBeatmap *getSelectedDifficulty2() const { return m_selectedDifficulty2; }
+    inline DatabaseBeatmap *getSelectedDifficulty2() const { return this->selectedDifficulty2; }
 
     // generic state
-    inline bool isPlaying() const { return m_bIsPlaying; }
-    inline bool isPaused() const { return m_bIsPaused; }
-    inline bool isRestartScheduled() const { return m_bIsRestartScheduled; }
-    inline bool isContinueScheduled() const { return m_bContinueScheduled; }
-    inline bool isInSkippableSection() const { return m_bIsInSkippableSection; }
-    inline bool isInBreak() const { return m_bInBreak; }
-    inline bool shouldFlashWarningArrows() const { return m_bShouldFlashWarningArrows; }
-    inline f32 shouldFlashSectionPass() const { return m_fShouldFlashSectionPass; }
-    inline f32 shouldFlashSectionFail() const { return m_fShouldFlashSectionFail; }
-    virtual bool isWaiting() const { return m_bIsWaiting; }
+    inline bool isPlaying() const { return this->bIsPlaying; }
+    inline bool isPaused() const { return this->bIsPaused; }
+    inline bool isRestartScheduled() const { return this->bIsRestartScheduled; }
+    inline bool isContinueScheduled() const { return this->bContinueScheduled; }
+    inline bool isInSkippableSection() const { return this->bIsInSkippableSection; }
+    inline bool isInBreak() const { return this->bInBreak; }
+    inline bool shouldFlashWarningArrows() const { return this->bShouldFlashWarningArrows; }
+    inline f32 shouldFlashSectionPass() const { return this->fShouldFlashSectionPass; }
+    inline f32 shouldFlashSectionFail() const { return this->fShouldFlashSectionFail; }
+    virtual bool isWaiting() const { return this->bIsWaiting; }
     virtual bool isKey1Down() const;
     virtual bool isKey2Down() const;
     virtual bool isClickHeld() const;
@@ -217,7 +217,7 @@ class Beatmap : public BeatmapInterface {
     std::string getTitle() const;
     std::string getArtist() const;
 
-    inline const std::vector<DatabaseBeatmap::BREAK> &getBreaks() const { return m_breaks; }
+    inline const std::vector<DatabaseBeatmap::BREAK> &getBreaks() const { return this->breaks; }
     u32 getBreakDurationTotal() const;
     DatabaseBeatmap::BREAK getBreakForTimeRange(i64 startMS, i64 positionMS, i64 endMS) const;
 
@@ -231,19 +231,19 @@ class Beatmap : public BeatmapInterface {
     void updateTimingPoints(long curPos);
 
     // ILLEGAL:
-    inline const std::vector<HitObject *> &getHitObjectsPointer() const { return m_hitobjects; }
-    inline f32 getBreakBackgroundFadeAnim() const { return m_fBreakBackgroundFade; }
+    inline const std::vector<HitObject *> &getHitObjectsPointer() const { return this->hitobjects; }
+    inline f32 getBreakBackgroundFadeAnim() const { return this->fBreakBackgroundFade; }
 
-    Sound *m_music;
-    bool m_bForceStreamPlayback;
+    Sound *music;
+    bool bForceStreamPlayback;
 
     // live pp/stars
-    uwu::lazy_promise<std::function<pp_info()>, pp_info> m_ppv2_calc{pp_info{}};
+    uwu::lazy_promise<std::function<pp_info()>, pp_info> ppv2_calc{pp_info{}};
     i32 last_calculated_hitobject = -1;
-    int m_iCurrentHitObjectIndex;
-    int m_iCurrentNumCircles;
-    int m_iCurrentNumSliders;
-    int m_iCurrentNumSpinners;
+    int iCurrentHitObjectIndex;
+    int iCurrentNumCircles;
+    int iCurrentNumSliders;
+    int iCurrentNumSpinners;
 
    protected:
     // internal
@@ -262,71 +262,71 @@ class Beatmap : public BeatmapInterface {
     u32 getMusicPositionMSInterpolated();
 
     // beatmap state
-    bool m_bIsPlaying;
-    bool m_bIsPaused;
-    bool m_bIsWaiting;
-    bool m_bIsRestartScheduled;
-    bool m_bIsRestartScheduledQuick;
+    bool bIsPlaying;
+    bool bIsPaused;
+    bool bIsWaiting;
+    bool bIsRestartScheduled;
+    bool bIsRestartScheduledQuick;
 
-    bool m_bIsInSkippableSection;
-    bool m_bShouldFlashWarningArrows;
-    f32 m_fShouldFlashSectionPass;
-    f32 m_fShouldFlashSectionFail;
-    bool m_bContinueScheduled;
-    u32 m_iContinueMusicPos;
-    f32 m_fWaitTime;
+    bool bIsInSkippableSection;
+    bool bShouldFlashWarningArrows;
+    f32 fShouldFlashSectionPass;
+    f32 fShouldFlashSectionFail;
+    bool bContinueScheduled;
+    u32 iContinueMusicPos;
+    f32 fWaitTime;
 
     // database
-    DatabaseBeatmap *m_selectedDifficulty2;
+    DatabaseBeatmap *selectedDifficulty2;
 
     // sound
-    f32 m_fMusicFrequencyBackup;
-    long m_iCurMusicPos;
-    long m_iCurMusicPosWithOffsets;
-    bool m_bWasSeekFrame;
-    f64 m_fInterpolatedMusicPos;
-    f64 m_fLastAudioTimeAccurateSet;
-    f64 m_fLastRealTimeForInterpolationDelta;
-    int m_iResourceLoadUpdateDelayHack;
-    f32 m_fAfterMusicIsFinishedVirtualAudioTimeStart;
-    bool m_bIsFirstMissSound;
+    f32 fMusicFrequencyBackup;
+    long iCurMusicPos;
+    long iCurMusicPosWithOffsets;
+    bool bWasSeekFrame;
+    f64 fInterpolatedMusicPos;
+    f64 fLastAudioTimeAccurateSet;
+    f64 fLastRealTimeForInterpolationDelta;
+    int iResourceLoadUpdateDelayHack;
+    f32 fAfterMusicIsFinishedVirtualAudioTimeStart;
+    bool bIsFirstMissSound;
 
     // health
-    bool m_bFailed;
-    f32 m_fFailAnim;
-    f64 m_fHealth;
-    f32 m_fHealth2;
+    bool bFailed;
+    f32 fFailAnim;
+    f64 fHealth;
+    f32 fHealth2;
 
     // drain
-    f64 m_fDrainRate;
+    f64 fDrainRate;
 
     // breaks
-    std::vector<DatabaseBeatmap::BREAK> m_breaks;
-    f32 m_fBreakBackgroundFade;
-    bool m_bInBreak;
-    HitObject *m_currentHitObject;
-    long m_iNextHitObjectTime;
-    long m_iPreviousHitObjectTime;
-    long m_iPreviousSectionPassFailTime;
+    std::vector<DatabaseBeatmap::BREAK> breaks;
+    f32 fBreakBackgroundFade;
+    bool bInBreak;
+    HitObject *currentHitObject;
+    long iNextHitObjectTime;
+    long iPreviousHitObjectTime;
+    long iPreviousSectionPassFailTime;
 
     // player input
-    bool m_bClick1Held;
-    bool m_bClick2Held;
-    bool m_bClickedContinue;
-    int m_iAllowAnyNextKeyForFullAlternateUntilHitObjectIndex;
-    std::vector<Click> m_clicks;
+    bool bClick1Held;
+    bool bClick2Held;
+    bool bClickedContinue;
+    int iAllowAnyNextKeyForFullAlternateUntilHitObjectIndex;
+    std::vector<Click> clicks;
 
     // hitobjects
-    std::vector<HitObject *> m_hitobjects;
-    std::vector<HitObject *> m_hitobjectsSortedByEndTime;
-    std::vector<HitObject *> m_misaimObjects;
+    std::vector<HitObject *> hitobjects;
+    std::vector<HitObject *> hitobjectsSortedByEndTime;
+    std::vector<HitObject *> misaimObjects;
 
     // statistics
-    int m_iNPS;
-    int m_iND;
+    int iNPS;
+    int iND;
 
     // custom
-    int m_iPreviousFollowPointObjectIndex;  // TODO: this shouldn't be in this class
+    int iPreviousFollowPointObjectIndex;  // TODO: this shouldn't be in this class
 
    private:
     static inline Vector2 mapNormalizedCoordsOntoUnitCircle(const Vector2 &in) {
@@ -359,55 +359,55 @@ class Beatmap : public BeatmapInterface {
     void computeDrainRate();
 
     // beatmap
-    bool m_bIsSpinnerActive;
-    Vector2 m_vContinueCursorPoint;
+    bool bIsSpinnerActive;
+    Vector2 vContinueCursorPoint;
 
     // playfield
-    f32 m_fPlayfieldRotation;
-    f32 m_fScaleFactor;
-    Vector2 m_vPlayfieldCenter;
-    Vector2 m_vPlayfieldOffset;
-    Vector2 m_vPlayfieldSize;
+    f32 fPlayfieldRotation;
+    f32 fScaleFactor;
+    Vector2 vPlayfieldCenter;
+    Vector2 vPlayfieldOffset;
+    Vector2 vPlayfieldSize;
 
     // hitobject scaling
-    f32 m_fXMultiplier;
-    f32 m_fNumberScale;
-    f32 m_fHitcircleOverlapScale;
+    f32 fXMultiplier;
+    f32 fNumberScale;
+    f32 fHitcircleOverlapScale;
 
     // auto
-    Vector2 m_vAutoCursorPos;
-    int m_iAutoCursorDanceIndex;
+    Vector2 vAutoCursorPos;
+    int iAutoCursorDanceIndex;
 
     // live pp/stars
     void resetLiveStarsTasks();
 
     // pp calculation buffer (only needs to be recalculated in onModUpdate(), instead of on every hit)
-    f32 m_fAimStars;
-    f32 m_fAimSliderFactor;
-    f32 m_fSpeedStars;
-    f32 m_fSpeedNotes;
+    f32 fAimStars;
+    f32 fAimSliderFactor;
+    f32 fSpeedStars;
+    f32 fSpeedNotes;
 
     // dynamic slider vertex buffer and other recalculation checks (for live mod switching)
-    f32 m_fPrevHitCircleDiameter;
-    bool m_bWasHorizontalMirrorEnabled;
-    bool m_bWasVerticalMirrorEnabled;
-    bool m_bWasEZEnabled;
-    bool m_bWasMafhamEnabled;
-    f32 m_fPrevPlayfieldRotationFromConVar;
+    f32 fPrevHitCircleDiameter;
+    bool bWasHorizontalMirrorEnabled;
+    bool bWasVerticalMirrorEnabled;
+    bool bWasEZEnabled;
+    bool bWasMafhamEnabled;
+    f32 fPrevPlayfieldRotationFromConVar;
 
     // custom
-    bool m_bIsPreLoading;
-    int m_iPreLoadingIndex;
-    bool m_bWasHREnabled;  // dynamic stack recalculation
+    bool bIsPreLoading;
+    int iPreLoadingIndex;
+    bool bWasHREnabled;  // dynamic stack recalculation
 
-    RenderTarget *m_mafhamActiveRenderTarget;
-    RenderTarget *m_mafhamFinishedRenderTarget;
-    bool m_bMafhamRenderScheduled;
-    int m_iMafhamHitObjectRenderIndex;  // scene buffering for rendering entire beatmaps at once with an acceptable
+    RenderTarget *mafhamActiveRenderTarget;
+    RenderTarget *mafhamFinishedRenderTarget;
+    bool bMafhamRenderScheduled;
+    int iMafhamHitObjectRenderIndex;  // scene buffering for rendering entire beatmaps at once with an acceptable
                                         // framerate
-    int m_iMafhamPrevHitObjectIndex;
-    int m_iMafhamActiveRenderHitObjectIndex;
-    int m_iMafhamFinishedRenderHitObjectIndex;
-    bool m_bInMafhamRenderChunk;  // used by Slider to not animate the reverse arrow, and by Circle to not animate
+    int iMafhamPrevHitObjectIndex;
+    int iMafhamActiveRenderHitObjectIndex;
+    int iMafhamFinishedRenderHitObjectIndex;
+    bool bInMafhamRenderChunk;  // used by Slider to not animate the reverse arrow, and by Circle to not animate
                                   // note blocking shaking, while being rendered into the scene buffer
 };

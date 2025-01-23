@@ -7,102 +7,102 @@
 #include "UIButton.h"
 
 PromptScreen::PromptScreen() : OsuScreen() {
-    m_prompt_label = new CBaseUILabel(0, 0, 0, 0, "", "");
-    m_prompt_label->setDrawFrame(false);
-    m_prompt_label->setDrawBackground(false);
-    addBaseUIElement(m_prompt_label);
+    this->prompt_label = new CBaseUILabel(0, 0, 0, 0, "", "");
+    this->prompt_label->setDrawFrame(false);
+    this->prompt_label->setDrawBackground(false);
+    this->addBaseUIElement(this->prompt_label);
 
-    m_prompt_input = new CBaseUITextbox(0, 0, 400, 40, "");
-    addBaseUIElement(m_prompt_input);
+    this->prompt_input = new CBaseUITextbox(0, 0, 400, 40, "");
+    this->addBaseUIElement(this->prompt_input);
 
-    m_ok_btn = new UIButton(0, 0, 110, 35, "ok_btn", "OK");
-    m_ok_btn->setColor(0xff00ff00);
-    m_ok_btn->setUseDefaultSkin();
-    m_ok_btn->setClickCallback(fastdelegate::MakeDelegate(this, &PromptScreen::on_ok));
-    addBaseUIElement(m_ok_btn);
+    this->ok_btn = new UIButton(0, 0, 110, 35, "ok_btn", "OK");
+    this->ok_btn->setColor(0xff00ff00);
+    this->ok_btn->setUseDefaultSkin();
+    this->ok_btn->setClickCallback(fastdelegate::MakeDelegate(this, &PromptScreen::on_ok));
+    this->addBaseUIElement(this->ok_btn);
 
-    m_cancel_btn = new UIButton(0, 0, 110, 35, "cancel_btn", "Cancel");
-    m_cancel_btn->setColor(0xff0e94b5);
-    m_cancel_btn->setUseDefaultSkin();
-    m_cancel_btn->setClickCallback(fastdelegate::MakeDelegate(this, &PromptScreen::on_cancel));
-    addBaseUIElement(m_cancel_btn);
+    this->cancel_btn = new UIButton(0, 0, 110, 35, "cancel_btn", "Cancel");
+    this->cancel_btn->setColor(0xff0e94b5);
+    this->cancel_btn->setUseDefaultSkin();
+    this->cancel_btn->setClickCallback(fastdelegate::MakeDelegate(this, &PromptScreen::on_cancel));
+    this->addBaseUIElement(this->cancel_btn);
 }
 
 void PromptScreen::onResolutionChange(Vector2 newResolution) {
     const float xmiddle = newResolution.x / 2;
     const float ymiddle = newResolution.y / 2;
 
-    setSize(newResolution);
+    this->setSize(newResolution);
 
-    m_prompt_label->setSizeToContent();
-    m_prompt_label->setPos(xmiddle - 200, ymiddle - 30);
+    this->prompt_label->setSizeToContent();
+    this->prompt_label->setPos(xmiddle - 200, ymiddle - 30);
 
-    m_prompt_input->setPos(xmiddle - 200, ymiddle);
+    this->prompt_input->setPos(xmiddle - 200, ymiddle);
 
-    m_ok_btn->setPos(xmiddle - 120, ymiddle + 50);
-    m_cancel_btn->setPos(xmiddle + 10, ymiddle + 50);
+    this->ok_btn->setPos(xmiddle - 120, ymiddle + 50);
+    this->cancel_btn->setPos(xmiddle + 10, ymiddle + 50);
 }
 
 void PromptScreen::draw(Graphics *g) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
     g->setColor(COLOR(200, 0, 0, 0));
-    g->fillRect(0, 0, getSize().x, getSize().y);
+    g->fillRect(0, 0, this->getSize().x, this->getSize().y);
 
     OsuScreen::draw(g);
 }
 
 void PromptScreen::mouse_update(bool *propagate_clicks) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
     OsuScreen::mouse_update(propagate_clicks);
     *propagate_clicks = false;
 }
 
 void PromptScreen::onKeyDown(KeyboardEvent &e) {
-    if(!m_bVisible) return;
+    if(!this->bVisible) return;
 
     if(e == KEY_ENTER) {
-        on_ok();
+        this->on_ok();
         e.consume();
         return;
     }
 
     if(e == KEY_ESCAPE) {
-        on_cancel();
+        this->on_cancel();
         e.consume();
         return;
     }
 
-    m_prompt_input->onKeyDown(e);
+    this->prompt_input->onKeyDown(e);
     e.consume();
 }
 
 void PromptScreen::onKeyUp(KeyboardEvent &e) {
-    if(!m_bVisible) return;
-    m_prompt_input->onKeyUp(e);
+    if(!this->bVisible) return;
+    this->prompt_input->onKeyUp(e);
     e.consume();
 }
 
 void PromptScreen::onChar(KeyboardEvent &e) {
-    if(!m_bVisible) return;
-    m_prompt_input->onChar(e);
+    if(!this->bVisible) return;
+    this->prompt_input->onChar(e);
     e.consume();
 }
 
 void PromptScreen::prompt(UString msg, PromptResponseCallback callback) {
-    m_prompt_label->setText(msg);
-    m_prompt_input->setText("");
-    m_prompt_input->focus();
-    m_callback = callback;
-    m_bVisible = true;
+    this->prompt_label->setText(msg);
+    this->prompt_input->setText("");
+    this->prompt_input->focus();
+    this->callback = callback;
+    this->bVisible = true;
 
-    onResolutionChange(osu->getScreenSize());
+    this->onResolutionChange(osu->getScreenSize());
 }
 
 void PromptScreen::on_ok() {
-    m_bVisible = false;
-    m_callback(m_prompt_input->getText());
+    this->bVisible = false;
+    this->callback(this->prompt_input->getText());
 }
 
-void PromptScreen::on_cancel() { m_bVisible = false; }
+void PromptScreen::on_cancel() { this->bVisible = false; }
