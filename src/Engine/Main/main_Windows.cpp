@@ -276,6 +276,24 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             }
             return DefWindowProcW(hwnd, msg, wParam, lParam);
 
+        case WM_COPYDATA: {
+            PCOPYDATASTRUCT cds = (PCOPYDATASTRUCT)lParam;
+            if(cds->dwData != WM_NEOSU_PROTOCOL) return 0;
+
+            i32 argc = 0;
+            LPWSTR *argv = CommandLineToArgvW((wchar_t *)cds->lpData, &argc);
+            for(i32 i = 0; i < argc; i++) {
+                // Convert filepath to UTF-8
+                int size = WideCharToMultiByte(CP_UTF8, 0, argv[i], -1, NULL, 0, NULL, NULL);
+                std::string utf8filepath(size, 0);
+                WideCharToMultiByte(CP_UTF8, 0, argv[i], size, (LPSTR)utf8filepath.c_str(), size, NULL, NULL);
+
+                handle_cmdline_args(utf8filepath.c_str());
+            }
+
+            return 1;
+        }
+
         case WM_DROPFILES: {
             HDROP hDrop = (HDROP)wParam;
             UINT fileCount = DragQueryFileW(hDrop, 0xFFFFFFFF, NULL, 0);
@@ -772,7 +790,7 @@ HWND createWinWindow(HINSTANCE hInstance) {
 //	Main entry point  //
 //********************//
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
 #ifdef _MSC_VER
     // When building with MSVC, vprintf() is not returning the correct value unless we have a console allocated.
     FILE *dummy;
@@ -801,15 +819,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     if(existing_window) {
         COPYDATASTRUCT cds;
         cds.dwData = WM_NEOSU_PROTOCOL;
-        cds.cbData = strlen(lpCmdLine + 1);
-        cds.lpData = lpCmdLine;
+        cds.cbData = wcslen(pCmdLine + 1) * sizeof(wchar_t);
+        cds.lpData = pCmdLine;
         SendMessage(existing_window, WM_COPYDATA, (WPARAM)NULL, (LPARAM)&cds);
         SetForegroundWindow(existing_window);
         return 0;
     }
 
     // disable IME text input
-    if(strstr(lpCmdLine, "-noime") != NULL) {
+    if(wcsstr(pCmdLine, L"-noime") != NULL) {
         typedef BOOL(WINAPI * pfnImmDisableIME)(DWORD);
 
         HMODULE hImm32 = LoadLibrary("imm32.dll");
@@ -837,7 +855,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     // without this, on e.g. 150% scaling, the screen pixels of a 1080p monitor would be reported by
     // GetSystemMetrics(SM_CXSCREEN/SM_CYSCREEN) as only 720p! also on even newer systems (>= Windows 8.1) we can get
     // WM_DPICHANGED notified
-    if(strstr(lpCmdLine, "-nodpi") == NULL) {
+    if(wcsstr(pCmdLine, L"-nodpi") == NULL) {
         // Windows 8.1+
         // per-monitor dpi scaling
         {
@@ -976,9 +994,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     // make the window visible
     ShowWindow(hwnd, nCmdShow);
 
+    // Convert args to UTF-8
+    int utf8args_s = WideCharToMultiByte(CP_UTF8, 0, pCmdLine, -1, NULL, 0, NULL, NULL);
+    char *utf8args = new char[utf8args_s];
+    WideCharToMultiByte(CP_UTF8, 0, pCmdLine, -1, utf8args, utf8args_s, NULL, NULL);
+
     // initialize engine
     WinEnvironment *environment = new WinEnvironment(hwnd, hInstance);
-    g_engine = new Engine(environment, lpCmdLine);
+    g_engine = new Engine(environment, utf8args);
     g_engine->loadApp();
 
     g_bHasFocus = g_bHasFocus && (GetForegroundWindow() == hwnd);   // HACKHACK: workaround (1), see above
