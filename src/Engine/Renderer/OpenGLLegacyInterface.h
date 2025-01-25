@@ -48,7 +48,7 @@ class OpenGLLegacyInterface : public Graphics {
                           Color topLeftColor, Color topRightColor, Color bottomRightColor, Color bottomLeftColor);
 
     // 2d resource drawing
-    virtual void drawImage(Image *image);
+    virtual void drawImage(Image *image, AnchorPoint anchor = AnchorPoint::CENTER);
     virtual void drawString(McFont *font, UString text);
 
     // 3d type drawing

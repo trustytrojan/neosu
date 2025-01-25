@@ -19,9 +19,11 @@ class SkinImage {
 
     virtual void draw(Graphics *g, Vector2 pos,
                       float scale = 1.0f);  // for objects scaled automatically to the current resolution
-    virtual void drawRaw(Graphics *g, Vector2 pos,
-                         float scale);  // for objects which scale depending on external factors (e.g. hitobjects,
-                                        // depending on the diameter defined by the CS)
+
+    // for objects which scale depending on external factors
+    // (e.g. hitobjects, depending on the diameter defined by the CS)
+    virtual void drawRaw(Graphics *g, Vector2 pos, float scale, AnchorPoint anchor = AnchorPoint::CENTER);
+
     virtual void update(float speedMultiplier, bool useEngineTimeForAnimations = true, long curMusicPos = 0);
 
     void setAnimationFramerate(float fps) { this->fFrameDuration = 1.0f / std::clamp<float>(fps, 1.0f, 9999.0f); }
@@ -56,6 +58,8 @@ class SkinImage {
     inline bool isFromDefaultSkin() const { return this->bIsFromDefaultSkin; }
 
     inline std::vector<std::string> getFilepathsForExport() const { return this->filepathsForExport; }
+
+    bool is_2x;
 
    private:
     bool load(std::string skinElementName, std::string animationSeparator, bool ignoreDefaultSkin);

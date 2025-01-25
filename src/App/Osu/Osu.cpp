@@ -56,6 +56,7 @@
 #include "UIModSelectorModButton.h"
 #include "UIUserContextMenu.h"
 #include "UpdateHandler.h"
+#include "UserCard.h"
 #include "VolumeOverlay.h"
 #include "score.h"
 
@@ -197,6 +198,9 @@ Osu::Osu() {
     this->score = new LiveScore(false);
     this->updateHandler = new UpdateHandler();
 
+    // load main menu icon before skin
+    engine->getResourceManager()->loadImage("neosu.png", "NEOSU_LOGO");
+
     // exec the main config file (this must be right here!)
     Console::execConfigFile("underride");  // same as override, but for defaults
     Console::execConfigFile("osu");
@@ -309,6 +313,8 @@ Osu::Osu() {
     this->prompt = new PromptScreen();
     this->user_actions = new UIUserContextMenuScreen();
     this->spectatorScreen = new SpectatorScreen();
+
+    this->userButton = new UserCard(bancho.user_id);
 
     // the order in this vector will define in which order events are handled/consumed
     this->screens.push_back(this->volumeOverlay);
@@ -1966,6 +1972,12 @@ void Osu::onModFPoSu3DSpheresChange(UString oldValue, UString newValue) { this->
 void Osu::onModFPoSu3DSpheresAAChange(UString oldValue, UString newValue) { this->rebuildRenderTargets(); }
 
 void Osu::onLetterboxingOffsetChange(UString oldValue, UString newValue) { this->updateMouseSettings(); }
+
+void Osu::onUserCardChange(UString new_username) {
+    // NOTE: force update options textbox to avoid shutdown inconsistency
+    this->getOptionsMenu()->setUsername(new_username);
+    this->userButton->setID(bancho.user_id);
+}
 
 float Osu::getImageScaleToFitResolution(Vector2 size, Vector2 resolution) {
     return resolution.x / size.x > resolution.y / size.y ? resolution.y / size.y : resolution.x / size.x;

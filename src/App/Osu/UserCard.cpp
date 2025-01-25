@@ -37,11 +37,6 @@ void UserCard::draw(Graphics *g) {
     if(!this->bVisible) return;
 
     int yCounter = 0;
-
-    // draw background
-    g->setColor(COLORf(1.0f, 0.f, 0.f, 0.f));
-    g->fillRect(this->vPos.x + 1, this->vPos.y + 1, this->vSize.x - 1, this->vSize.y - 1);
-
     const float iconBorder = this->vSize.y * 0.03f;
     const float iconHeight = this->vSize.y - 2 * iconBorder;
     const float iconWidth = iconHeight;

@@ -270,6 +270,7 @@ copy $(SolutionDir)libraries\discord-sdk\$(Platform)\*.dll $(SolutionDir)build\$
     <ClCompile Include="src\app\osu\Slider.cpp" />
     <ClCompile Include="src\app\osu\SliderCurves.cpp" />
     <ClCompile Include="src\app\osu\SliderRenderer.cpp" />
+    <ClCompile Include="src\App\Osu\SongBrowser\BottomBar.cpp" />
     <ClCompile Include="src\app\osu\songbrowser\Button.cpp" />
     <ClCompile Include="src\app\osu\songbrowser\CollectionButton.cpp" />
     <ClCompile Include="src\app\osu\songbrowser\InfoLabel.cpp" />
@@ -294,7 +295,6 @@ copy $(SolutionDir)libraries\discord-sdk\$(Platform)\*.dll $(SolutionDir)build\$
     <ClCompile Include="src\app\osu\UIRankingScreenInfoLabel.cpp" />
     <ClCompile Include="src\app\osu\UIRankingScreenRankingPanel.cpp" />
     <ClCompile Include="src\app\osu\UISearchOverlay.cpp" />
-    <ClCompile Include="src\app\osu\UISelectionButton.cpp" />
     <ClCompile Include="src\app\osu\UISlider.cpp" />
     <ClCompile Include="src\app\osu\UIUserContextMenu.cpp" />
     <ClCompile Include="src\app\osu\UIVolumeSlider.cpp" />
@@ -725,6 +725,7 @@ copy $(SolutionDir)libraries\discord-sdk\$(Platform)\*.dll $(SolutionDir)build\$
     <ClInclude Include="src\app\osu\Slider.h" />
     <ClInclude Include="src\app\osu\SliderCurves.h" />
     <ClInclude Include="src\app\osu\SliderRenderer.h" />
+    <ClInclude Include="src\App\Osu\SongBrowser\BottomBar.h" />
     <ClInclude Include="src\app\osu\songbrowser\Button.h" />
     <ClInclude Include="src\app\osu\songbrowser\CollectionButton.h" />
     <ClInclude Include="src\app\osu\songbrowser\InfoLabel.h" />
@@ -745,7 +746,6 @@ copy $(SolutionDir)libraries\discord-sdk\$(Platform)\*.dll $(SolutionDir)build\$
     <ClInclude Include="src\app\osu\UIRankingScreenInfoLabel.h" />
     <ClInclude Include="src\app\osu\UIRankingScreenRankingPanel.h" />
     <ClInclude Include="src\app\osu\UISearchOverlay.h" />
-    <ClInclude Include="src\app\osu\UISelectionButton.h" />
     <ClInclude Include="src\app\osu\UISlider.h" />
     <ClInclude Include="src\app\osu\UIUserContextMenu.h" />
     <ClInclude Include="src\app\osu\UIVolumeSlider.h" />

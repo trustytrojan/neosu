@@ -1,13 +1,4 @@
-//================ Copyright (c) 2012, PG, All rights reserved. =================//
-//
-// Purpose:		image wrapper
-//
-// $NoKeywords: $img
-//===============================================================================//
-
-#ifndef IMAGE_H
-#define IMAGE_H
-
+#pragma once
 #include "Resource.h"
 
 class Image : public Resource {
@@ -62,5 +53,3 @@ class Image : public Resource {
 
     std::vector<unsigned char> rawImage;
 };
-
-#endif

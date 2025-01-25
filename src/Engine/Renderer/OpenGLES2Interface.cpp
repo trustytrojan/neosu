@@ -297,7 +297,7 @@ void OpenGLES2Interface::drawQuad(Vector2 topLeft, Vector2 topRight, Vector2 bot
     drawVAO(&vao);
 }
 
-void OpenGLES2Interface::drawImage(Image *image) {
+void OpenGLES2Interface::drawImage(Image *image, AnchorPoint anchor) {
     if(image == NULL) {
         debugLog("WARNING: Tried to draw image with NULL texture!\n");
         return;
@@ -309,8 +309,27 @@ void OpenGLES2Interface::drawImage(Image *image) {
     float width = image->getWidth();
     float height = image->getHeight();
 
-    float x = -width / 2;
-    float y = -height / 2;
+    f32 x, y;
+    switch(anchor) {
+        case AnchorPoint::CENTER:
+            x = -width / 2;
+            y = -height / 2;
+            break;
+        case AnchorPoint::TOP_LEFT:
+            x = 0;
+            y = 0;
+            break;
+        case AnchorPoint::TOP_RIGHT:
+            x = -width;
+            y = 0;
+            break;
+        case AnchorPoint::BOTTOM_LEFT:
+            x = 0;
+            y = -height;
+            break;
+        default:
+            abort();  // :-)
+    }
 
     VertexArrayObject vao(Graphics::PRIMITIVE::PRIMITIVE_QUADS);
     vao.addVertex(x, y);

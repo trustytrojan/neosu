@@ -1,13 +1,4 @@
-//================ Copyright (c) 2015, PG, All rights reserved. =================//
-//
-// Purpose:		mouse wrapper
-//
-// $NoKeywords: $mouse
-//===============================================================================//
-
-#ifndef MOUSE_H
-#define MOUSE_H
-
+#pragma once
 #include "Cursors.h"
 #include "InputDevice.h"
 #include "MouseListener.h"
@@ -103,5 +94,3 @@ class Mouse : public InputDevice {
     std::vector<FAKELAG_PACKET> fakelagBuffer;
     Vector2 vFakeLagPos;
 };
-
-#endif

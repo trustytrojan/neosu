@@ -11,7 +11,6 @@ class SkinImage;
 
 class UIContextMenu;
 class UISearchOverlay;
-class UISelectionButton;
 class InfoLabel;
 class UserCard;
 class ScoreButton;
@@ -152,8 +151,6 @@ class SongBrowser : public ScreenBackable {
 
     void checkHandleKillBackgroundSearchMatcher();
 
-    UISelectionButton *addBottombarNavButton(std::function<SkinImage *()> getImageFunc,
-                                             std::function<SkinImage *()> getImageOverFunc);
     CBaseUIButton *addTopBarLeftTabButton(UString text);
     CBaseUIButton *addTopBarLeftButton(UString text);
 
@@ -195,8 +192,6 @@ class SongBrowser : public ScreenBackable {
     void onModeChange(UString text);
     void onModeChange2(UString text, int id = -1);
 
-    void onUserCardChange(UString new_username);
-
     void onScoreClicked(CBaseUIButton *button);
 
     void selectSongButton(Button *songButton);
@@ -234,11 +229,6 @@ class SongBrowser : public ScreenBackable {
     CBaseUIButton *groupByDifficultyBtn;
     CBaseUIButton *groupByNothingBtn;
 
-    // bottom bar
-    CBaseUIContainer *bottombar;
-    std::vector<UISelectionButton *> bottombarNavButtons;
-    UserCard *userButton = NULL;
-
     // score browser
     std::vector<ScoreButton *> scoreButtonCache;
     CBaseUIScrollView *scoreBrowser;
@@ -249,8 +239,8 @@ class SongBrowser : public ScreenBackable {
     ScoreButton *localBestButton = NULL;
     bool score_resort_scheduled = false;
 
-    // song browser
-    CBaseUIScrollView *songBrowser;
+    // song carousel
+    CBaseUIScrollView *carousel;
     Button *selectedButton = NULL;
     bool bSongBrowserRightClickScrollCheck;
     bool bSongBrowserRightClickScrolling;

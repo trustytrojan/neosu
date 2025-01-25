@@ -760,6 +760,9 @@ void Skin::load() {
     this->selectionModTD = this->createSkinImage("selection-mod-touchdevice", Vector2(68, 66), 38);
     this->selectionModCinema = this->createSkinImage("selection-mod-cinema", Vector2(68, 66), 38);
 
+    this->mode_osu = this->createSkinImage("mode-osu", Vector2(32, 32), 32);
+    this->mode_osu_small = this->createSkinImage("mode-osu-small", Vector2(32, 32), 32);
+
     this->randomizeFilePath();
     this->checkLoadImage(&this->pauseContinue, "pause-continue", "OSU_SKIN_PAUSE_CONTINUE");
     this->checkLoadImage(&this->pauseReplay, "pause-replay", "OSU_SKIN_PAUSE_REPLAY");
@@ -780,10 +783,10 @@ void Skin::load() {
     this->randomizeFilePath();
     this->menuBackImg = this->createSkinImage("menu-back", Vector2(225, 87), 54);
     this->randomizeFilePath();
-    this->selectionMode =
-        this->createSkinImage("selection-mode", Vector2(90, 90),
-                              38);  // NOTE: should actually be Vector2(88, 90), but slightly overscale to
-                                    // make most skins fit better on the bottombar blue line
+
+    // NOTE: scaling is ignored when drawing this specific element
+    this->selectionMode = this->createSkinImage("selection-mode", Vector2(90, 90), 38);
+
     this->selectionModeOver = this->createSkinImage("selection-mode-over", Vector2(88, 90), 38);
     this->selectionMods = this->createSkinImage("selection-mods", Vector2(74, 90), 38);
     this->selectionModsOver = this->createSkinImage("selection-mods-over", Vector2(74, 90), 38);

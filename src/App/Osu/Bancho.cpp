@@ -215,7 +215,7 @@ void handle_packet(Packet *packet) {
                 env->createDirectory(replays_dir.toUtf8());
             }
 
-            osu->getSongBrowser()->onUserCardChange(bancho.username);
+            osu->onUserCardChange(bancho.username);
 
             // XXX: We should toggle between "offline" sorting options and "online" ones
             //      Online ones would be "Local scores", "Global", "Country", "Selected mods" etc
@@ -294,7 +294,7 @@ void handle_packet(Packet *packet) {
         user->pp = read<u16>(packet);
 
         if(stats_user_id == bancho.user_id) {
-            osu->songBrowser2->userButton->updateUserStats();
+            osu->userButton->updateUserStats();
         }
     } else if(packet->id == USER_LOGOUT) {
         i32 logged_out_id = read<u32>(packet);

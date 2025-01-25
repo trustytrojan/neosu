@@ -130,6 +130,7 @@ bool SkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin) {
                 if(existsFilepath2) this->filepathsForExport.push_back(filepath2);
             }
 
+            this->is_2x = true;
             return true;  // nothing more to do here
         }
     }
@@ -154,6 +155,7 @@ bool SkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin) {
             if(existsFilepath1) this->filepathsForExport.push_back(filepath1);
         }
 
+        this->is_2x = false;
         return true;  // nothing more to do here
     }
 
@@ -182,6 +184,7 @@ bool SkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin) {
                 if(existsDefaultFilePath2) this->filepathsForExport.push_back(defaultFilePath2);
             }
 
+            this->is_2x = true;
             return true;  // nothing more to do here
         }
     }
@@ -204,6 +207,7 @@ bool SkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin) {
             if(existsDefaultFilePath1) this->filepathsForExport.push_back(defaultFilePath1);
         }
 
+        this->is_2x = false;
         return true;  // nothing more to do here
     }
 
@@ -266,7 +270,7 @@ void SkinImage::draw(Graphics *g, Vector2 pos, float scale) {
     g->popTransform();
 }
 
-void SkinImage::drawRaw(Graphics *g, Vector2 pos, float scale) {
+void SkinImage::drawRaw(Graphics *g, Vector2 pos, float scale, AnchorPoint anchor) {
     if(this->images.size() < 1) return;
 
     g->pushTransform();
@@ -276,9 +280,10 @@ void SkinImage::drawRaw(Graphics *g, Vector2 pos, float scale) {
 
         Image *img = this->getImageForCurrentFrame().img;
 
-        if(this->fDrawClipWidthPercent == 1.0f)
-            g->drawImage(img);
-        else if(img->isReady()) {
+        if(this->fDrawClipWidthPercent == 1.0f) {
+            g->drawImage(img, anchor);
+        } else if(img->isReady()) {
+            // NOTE: Anchor point not handled here, but fDrawClipWidthPercent only used for health bar right now
             const float realWidth = img->getWidth();
             const float realHeight = img->getHeight();
 

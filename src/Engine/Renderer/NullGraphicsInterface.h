@@ -110,7 +110,7 @@ class NullGraphicsInterface : public Graphics {
     }
 
     // 2d resource drawing
-    virtual void drawImage(Image *image) { (void)image; }
+    virtual void drawImage(Image *image, AnchorPoint anchor = AnchorPoint::CENTER) { (void)image; }
     virtual void drawString(McFont *font, UString text);
 
     // 3d type drawing

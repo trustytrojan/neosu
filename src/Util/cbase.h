@@ -88,7 +88,7 @@ typedef unsigned char COLORPART;
         }               \
     }
 
-#define COLOR(a, r, g, b) ((Color)((((a)&0xff) << 24) | (((r)&0xff) << 16) | (((g)&0xff) << 8) | ((b)&0xff)))
+#define COLOR(a, r, g, b) ((Color)((((a) & 0xff) << 24) | (((r) & 0xff) << 16) | (((g) & 0xff) << 8) | ((b) & 0xff)))
 
 #define COLORf(a, r, g, b)                                                    \
     ((Color)(((((int)(clamp<float>(a, 0.0f, 1.0f) * 255.0f)) & 0xff) << 24) | \

@@ -1,10 +1,3 @@
-//================ Copyright (c) 2016, PG, All rights reserved. =================//
-//
-// Purpose:		raw legacy opengl graphics interface
-//
-// $NoKeywords: $lgli
-//===============================================================================//
-
 #include "OpenGLLegacyInterface.h"
 
 #ifdef MCENGINE_FEATURE_OPENGL
@@ -353,7 +346,7 @@ void OpenGLLegacyInterface::drawQuad(Vector2 topLeft, Vector2 topRight, Vector2 
     glEnd();
 }
 
-void OpenGLLegacyInterface::drawImage(Image *image) {
+void OpenGLLegacyInterface::drawImage(Image *image, AnchorPoint anchor) {
     if(image == NULL) {
         debugLog("WARNING: Tried to draw image with NULL texture!\n");
         return;
@@ -365,8 +358,27 @@ void OpenGLLegacyInterface::drawImage(Image *image) {
     const float width = image->getWidth();
     const float height = image->getHeight();
 
-    const float x = -width / 2;
-    const float y = -height / 2;
+    f32 x, y;
+    switch(anchor) {
+        case AnchorPoint::CENTER:
+            x = -width / 2;
+            y = -height / 2;
+            break;
+        case AnchorPoint::TOP_LEFT:
+            x = 0;
+            y = 0;
+            break;
+        case AnchorPoint::TOP_RIGHT:
+            x = -width;
+            y = 0;
+            break;
+        case AnchorPoint::BOTTOM_LEFT:
+            x = 0;
+            y = -height;
+            break;
+        default:
+            abort();  // :-)
+    }
 
     image->bind();
     {
@@ -390,7 +402,7 @@ void OpenGLLegacyInterface::drawImage(Image *image) {
 
     if(cv_r_debug_drawimage.getBool()) {
         this->setColor(0xbbff00ff);
-        this->drawRect(x, y, width, height);
+        this->drawRect(x, y, width - 1, height - 1);
     }
 }
 

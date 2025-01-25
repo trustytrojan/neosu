@@ -9,6 +9,7 @@
 class CWindowManager;
 
 class VolumeOverlay;
+class UserCard;
 class Chat;
 class Lobby;
 class RoomScreen;
@@ -206,6 +207,8 @@ class Osu : public App, public MouseListener {
 
     void onLetterboxingOffsetChange(UString oldValue, UString newValue);
 
+    void onUserCardChange(UString new_username);
+
     // interfaces
     VolumeOverlay *volumeOverlay = NULL;
     MainMenu *mainMenu = NULL;
@@ -229,6 +232,8 @@ class Osu : public App, public MouseListener {
     UpdateHandler *updateHandler = NULL;
     ModFPoSu *fposu = NULL;
     SpectatorScreen *spectatorScreen = NULL;
+
+    UserCard *userButton = NULL;
 
     std::vector<OsuScreen *> screens;
 

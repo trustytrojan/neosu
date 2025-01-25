@@ -186,17 +186,8 @@ class Skin {
     inline Image *getDefaultButtonMiddle() { return this->defaultButtonMiddle; }
     inline Image *getDefaultButtonRight() { return this->defaultButtonRight; }
     inline SkinImage *getMenuBack2() { return this->menuBackImg; }
-    inline SkinImage *getSelectionMode() { return this->selectionMode; }
-    inline SkinImage *getSelectionModeOver() { return this->selectionModeOver; }
-    inline SkinImage *getSelectionMods() { return this->selectionMods; }
-    inline SkinImage *getSelectionModsOver() { return this->selectionModsOver; }
-    inline SkinImage *getSelectionRandom() { return this->selectionRandom; }
-    inline SkinImage *getSelectionRandomOver() { return this->selectionRandomOver; }
-    inline SkinImage *getSelectionOptions() { return this->selectionOptions; }
-    inline SkinImage *getSelectionOptionsOver() { return this->selectionOptionsOver; }
 
     inline Image *getSongSelectTop() { return this->songSelectTop; }
-    inline Image *getSongSelectBottom() { return this->songSelectBottom; }
     inline Image *getMenuButtonBackground() { return this->menuButtonBackground; }
     inline SkinImage *getMenuButtonBackground2() { return this->menuButtonBackground2; }
     inline Image *getStar() { return this->star; }
@@ -483,6 +474,9 @@ class Skin {
     SkinImage *selectionModScorev2;
     SkinImage *selectionModTD;
     SkinImage *selectionModCinema;
+
+    SkinImage *mode_osu;
+    SkinImage *mode_osu_small;
 
     Image *pauseContinue;
     Image *pauseReplay;
