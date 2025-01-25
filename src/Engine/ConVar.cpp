@@ -1851,14 +1851,6 @@ ConVar cv_songbrowser_sortingtype("osu_songbrowser_sortingtype", "By Date Added"
 ConVar cv_songbrowser_thumbnail_delay("osu_songbrowser_thumbnail_delay", 0.1f, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_songbrowser_thumbnail_fade_in_duration("osu_songbrowser_thumbnail_fade_in_duration", 0.1f,
                                                  FCVAR_BANCHO_COMPATIBLE);
-ConVar cv_songbrowser_topbar_left_percent("osu_songbrowser_topbar_left_percent", 0.93f, FCVAR_BANCHO_COMPATIBLE);
-ConVar cv_songbrowser_topbar_left_width_percent("osu_songbrowser_topbar_left_width_percent", 0.265f,
-                                                FCVAR_BANCHO_COMPATIBLE);
-ConVar cv_songbrowser_topbar_middle_width_percent("osu_songbrowser_topbar_middle_width_percent", 0.15f,
-                                                  FCVAR_BANCHO_COMPATIBLE);
-ConVar cv_songbrowser_topbar_right_height_percent("osu_songbrowser_topbar_right_height_percent", 0.5f,
-                                                  FCVAR_BANCHO_COMPATIBLE);
-ConVar cv_songbrowser_topbar_right_percent("osu_songbrowser_topbar_right_percent", 0.378f, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_sort_skins_by_name("sort_skins_by_name", true, FCVAR_BANCHO_COMPATIBLE, "set to false to use old behavior");
 ConVar cv_sound_panning("osu_sound_panning", true, FCVAR_BANCHO_COMPATIBLE,
                         "positional hitsound audio depending on the playfield position");

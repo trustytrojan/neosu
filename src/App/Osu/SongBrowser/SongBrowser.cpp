@@ -341,8 +341,6 @@ SongBrowser::SongBrowser() : ScreenBackable() {
     this->bRandomBeatmapScheduled = false;
     this->bPreviousRandomBeatmapScheduled = false;
 
-    this->fSongSelectTopScale = 1.0f;
-
     // build topbar left
     this->topbarLeft = new CBaseUIContainer(0, 0, 0, 0, "");
     {
@@ -716,16 +714,10 @@ void SongBrowser::draw(Graphics *g) {
     g->setColor(0xffffffff);
     g->pushTransform();
     {
-        auto img_size = osu->getSkin()->getSongSelectTop()->getSize();
-        f32 scale = 1.f;
-        f32 xscale = img_size.x / engine->getScreenWidth();
-        f32 yscale = img_size.y / engine->getScreenHeight();
-        if(xscale > 1.f || yscale > 1.f) {
-            scale /= std::max(xscale, yscale);
-        }
-
+        Image *topbar = osu->getSkin()->songSelectTop;
+        f32 scale = (f32)engine->getScreenWidth() / (f32)topbar->getWidth();
         g->scale(scale, scale);
-        g->drawImage(osu->getSkin()->getSongSelectTop(), AnchorPoint::TOP_LEFT);
+        g->drawImage(topbar, AnchorPoint::TOP_LEFT);
     }
     g->popTransform();
 
@@ -2265,19 +2257,8 @@ void SongBrowser::updateLayout() {
 
     const int margin = 5 * dpiScale;
 
-    // top bar
-    this->fSongSelectTopScale =
-        Osu::getImageScaleToFitResolution(osu->getSkin()->getSongSelectTop(), osu->getScreenSize());
-
-    // topbar left (NOTE: the right side of the max() width is commented to keep the scorebrowser width consistent,
-    // and because it's not really needed anyway)
-    this->topbarLeft->setSize(max(osu->getSkin()->getSongSelectTop()->getWidth() * this->fSongSelectTopScale *
-                                          cv_songbrowser_topbar_left_width_percent.getFloat() +
-                                      margin,
-                                  /*m_songInfo->getMinimumWidth() + margin*/ 0.0f),
-                              max(osu->getSkin()->getSongSelectTop()->getHeight() * this->fSongSelectTopScale *
-                                      cv_songbrowser_topbar_left_percent.getFloat(),
-                                  this->songInfo->getMinimumHeight() + margin));
+    // topbar left
+    this->topbarLeft->setSize(724.f / 2.f, 290.f / 2.f);
     this->songInfo->setRelPos(margin, margin);
     this->songInfo->setSize(this->topbarLeft->getSize().x - margin,
                             max(this->topbarLeft->getSize().y * 0.75f, this->songInfo->getMinimumHeight() + margin));
@@ -2310,11 +2291,8 @@ void SongBrowser::updateLayout() {
     this->topbarLeft->update_pos();
 
     // topbar right
-    this->topbarRight->setPosX(osu->getSkin()->getSongSelectTop()->getWidth() * this->fSongSelectTopScale *
-                               cv_songbrowser_topbar_right_percent.getFloat());
-    this->topbarRight->setSize(osu->getScreenWidth() - this->topbarRight->getPos().x,
-                               osu->getSkin()->getSongSelectTop()->getHeight() * this->fSongSelectTopScale *
-                                   cv_songbrowser_topbar_right_height_percent.getFloat());
+    this->topbarRight->setPosX(engine->getScreenWidth() / 2);
+    this->topbarRight->setSize(osu->getScreenWidth() - this->topbarRight->getPos().x, 100.f);
 
     float btn_margin = 10.f * dpiScale;
     this->sortButton->setSize(200.f * dpiScale, 30.f * dpiScale);

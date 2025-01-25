@@ -205,9 +205,6 @@ class SongBrowser : public ScreenBackable {
     SORT sortingMethod;
     std::vector<SORTING_METHOD> sortingMethods;
 
-    // top bar
-    float fSongSelectTopScale;
-
     // top bar left
     CBaseUIContainer *topbarLeft;
     InfoLabel *songInfo;

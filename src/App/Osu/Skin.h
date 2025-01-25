@@ -187,7 +187,6 @@ class Skin {
     inline Image *getDefaultButtonRight() { return this->defaultButtonRight; }
     inline SkinImage *getMenuBack2() { return this->menuBackImg; }
 
-    inline Image *getSongSelectTop() { return this->songSelectTop; }
     inline Image *getMenuButtonBackground() { return this->menuButtonBackground; }
     inline SkinImage *getMenuButtonBackground2() { return this->menuButtonBackground2; }
     inline Image *getStar() { return this->star; }

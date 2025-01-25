@@ -224,5 +224,5 @@ void draw_bottombar(Graphics* g) {
 }
 
 // TODO @kiwec: draw mode-osu
-// TODO @kiwec: fix topbar height
 // TODO @kiwec: fix main menu button. lol
+// TODO @kiwec: fix animation (see boop skin, only working when out of focus)
