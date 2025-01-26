@@ -1467,7 +1467,6 @@ void Skin::checkLoadImage(Image **addressOfPointer, std::string skinElementName,
     // check if an @2x version of this image exists
     if(cv_skin_hd.getBool()) {
         // load default skin
-
         if(!ignoreDefaultSkin) {
             if(existsDefaultFilePath1) {
                 std::string defaultResourceName = resourceName;
@@ -1477,9 +1476,9 @@ void Skin::checkLoadImage(Image **addressOfPointer, std::string skinElementName,
 
                 *addressOfPointer = engine->getResourceManager()->loadImageAbs(
                     defaultFilePath1, defaultResourceName, cv_skin_mipmaps.getBool() || forceLoadMipmaps);
-                /// m_resources.push_back(*addressOfPointer); // DEBUG: also reload default skin
-            } else  // fallback to @1x
-            {
+                (*addressOfPointer)->is_2x = true;
+            } else {
+                // fallback to @1x
                 if(existsDefaultFilePath2) {
                     std::string defaultResourceName = resourceName;
                     defaultResourceName.append("_DEFAULT");  // so we don't load the default skin twice
@@ -1488,31 +1487,27 @@ void Skin::checkLoadImage(Image **addressOfPointer, std::string skinElementName,
 
                     *addressOfPointer = engine->getResourceManager()->loadImageAbs(
                         defaultFilePath2, defaultResourceName, cv_skin_mipmaps.getBool() || forceLoadMipmaps);
-                    /// m_resources.push_back(*addressOfPointer); // DEBUG: also reload default skin
+                    (*addressOfPointer)->is_2x = false;
                 }
             }
         }
 
         // load user skin
-
         if(existsFilepath1) {
             if(cv_skin_async.getBool()) engine->getResourceManager()->requestNextLoadAsync();
 
             *addressOfPointer = engine->getResourceManager()->loadImageAbs(
                 filepath1, "", cv_skin_mipmaps.getBool() || forceLoadMipmaps);
+            (*addressOfPointer)->is_2x = true;
             this->resources.push_back(*addressOfPointer);
 
             // export
-            {
-                if(existsFilepath1) this->filepathsForExport.push_back(filepath1);
+            if(existsFilepath1) this->filepathsForExport.push_back(filepath1);
+            if(existsFilepath2) this->filepathsForExport.push_back(filepath2);
 
-                if(existsFilepath2) this->filepathsForExport.push_back(filepath2);
-
-                if(!existsFilepath1 && !existsFilepath2) {
-                    if(existsDefaultFilePath1) this->filepathsForExport.push_back(defaultFilePath1);
-
-                    if(existsDefaultFilePath2) this->filepathsForExport.push_back(defaultFilePath2);
-                }
+            if(!existsFilepath1 && !existsFilepath2) {
+                if(existsDefaultFilePath1) this->filepathsForExport.push_back(defaultFilePath1);
+                if(existsDefaultFilePath2) this->filepathsForExport.push_back(defaultFilePath2);
             }
 
             return;  // nothing more to do here
@@ -1522,7 +1517,6 @@ void Skin::checkLoadImage(Image **addressOfPointer, std::string skinElementName,
     // else load normal @1x version
 
     // load default skin
-
     if(!ignoreDefaultSkin) {
         if(existsDefaultFilePath2) {
             std::string defaultResourceName = resourceName;
@@ -1532,31 +1526,27 @@ void Skin::checkLoadImage(Image **addressOfPointer, std::string skinElementName,
 
             *addressOfPointer = engine->getResourceManager()->loadImageAbs(
                 defaultFilePath2, defaultResourceName, cv_skin_mipmaps.getBool() || forceLoadMipmaps);
-            /// m_resources.push_back(*addressOfPointer); // DEBUG: also reload default skin
+            (*addressOfPointer)->is_2x = false;
         }
     }
 
     // load user skin
-
     if(existsFilepath2) {
         if(cv_skin_async.getBool()) engine->getResourceManager()->requestNextLoadAsync();
 
         *addressOfPointer =
             engine->getResourceManager()->loadImageAbs(filepath2, "", cv_skin_mipmaps.getBool() || forceLoadMipmaps);
+        (*addressOfPointer)->is_2x = false;
         this->resources.push_back(*addressOfPointer);
     }
 
     // export
-    {
-        if(existsFilepath1) this->filepathsForExport.push_back(filepath1);
+    if(existsFilepath1) this->filepathsForExport.push_back(filepath1);
+    if(existsFilepath2) this->filepathsForExport.push_back(filepath2);
 
-        if(existsFilepath2) this->filepathsForExport.push_back(filepath2);
-
-        if(!existsFilepath1 && !existsFilepath2) {
-            if(existsDefaultFilePath1) this->filepathsForExport.push_back(defaultFilePath1);
-
-            if(existsDefaultFilePath2) this->filepathsForExport.push_back(defaultFilePath2);
-        }
+    if(!existsFilepath1 && !existsFilepath2) {
+        if(existsDefaultFilePath1) this->filepathsForExport.push_back(defaultFilePath1);
+        if(existsDefaultFilePath2) this->filepathsForExport.push_back(defaultFilePath2);
     }
 }
 

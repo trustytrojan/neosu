@@ -62,23 +62,13 @@ void update_bottombar(bool* propagate_clicks) {
     mouse_was_down = engine->getMouse()->isLeftDown();
 
     auto screen = engine->getScreenSize();
-    bool is_widescreen =
-        ((int)(std::max(0, (int)((osu->getScreenWidth() - (osu->getScreenHeight() * 4.0f / 3.0f)) / 2.0f))) > 0);
+    bool is_widescreen = ((i32)(std::max(0, (i32)((screen.x - (screen.y * 4.f / 3.f)) / 2.f))) > 0);
+    global_scale = is_widescreen ? (screen.x / 1366.f) : 1.f;
 
-    // selection-mode has special logic: if the image exceeds screen width, we'll rescale
-    // the whole bottom bar to fit the screen.
     auto mode_img = osu->getSkin()->selectionModeOver;
     btns_x[MODE] = Osu::getUIScale((is_widescreen ? 140.0f : 120.0f));
-    {
-        auto img = osu->getSkin()->selectionMode;
-        f32 max_width = engine->getScreenWidth() - btns_x[MODE];
-        f32 img_width = img->getImageSizeForCurrentFrame().x * (img->is_2x ? 0.5f : 1.f);
-        f32 scale = max_width / img_width;
-        global_scale = std::min(1.f, scale);
-    }
     btn_widths[MODE] = global_scale * mode_img->getImageSizeForCurrentFrame().x * (mode_img->is_2x ? 0.5f : 1.f);
     btn_heights[MODE] = global_scale * mode_img->getImageSizeForCurrentFrame().y * (mode_img->is_2x ? 0.5f : 1.f);
-
     auto mods_img = osu->getSkin()->selectionModsOver;
     btns_x[MODS] = btns_x[MODE] + (i32)(92.5f * global_scale);
     btn_widths[MODS] = global_scale * mods_img->getImageSizeForCurrentFrame().x * (mods_img->is_2x ? 0.5f : 1.f);
@@ -140,10 +130,11 @@ void update_bottombar(bool* propagate_clicks) {
 void draw_bottombar(Graphics* g) {
     g->pushTransform();
     {
+        f32 bar_height = global_scale * 101.f;  // I think stable hardcodes this?
         Image* img = osu->getSkin()->songSelectBottom;
         g->setColor(0xffffffff);
-        g->scale((f32)engine->getScreenWidth() / (f32)img->getWidth(), get_bottombar_height() / (f32)img->getHeight());
-        g->translate(0, engine->getScreenHeight() - get_bottombar_height());
+        g->scale((f32)engine->getScreenWidth() / (f32)img->getWidth(), bar_height / (f32)img->getHeight());
+        g->translate(0, engine->getScreenHeight() - bar_height);
         g->drawImage(img, AnchorPoint::TOP_LEFT);
     }
     g->popTransform();
@@ -192,11 +183,13 @@ void draw_bottombar(Graphics* g) {
     auto mos_img = osu->getSkin()->mode_osu_small;
     if(mos_img != NULL) {
         f32 mos_scale = global_scale * (mos_img->is_2x ? 0.5f : 1.f);
+        g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ADDITIVE);
         g->setColor(0xffffffff);
         mos_img->drawRaw(g,
                          Vector2(btns_x[MODE] + (btns_x[MODS] - btns_x[MODE]) * 0.5f,
                                  engine->getScreenHeight() - (global_scale * 56.f)),
                          mos_scale, AnchorPoint::CENTER);
+        g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
     }
 
     // background task busy notification
@@ -232,6 +225,6 @@ void draw_bottombar(Graphics* g) {
     }
 }
 
+// TODO @kiwec: default icon for mode-osu-small
 // TODO @kiwec: draw mode-osu
 // TODO @kiwec: remake usercard so it matches stable more closely
-// TODO @kiwec: test multiple skins on multiple resolutions

@@ -716,10 +716,7 @@ void SongBrowser::draw(Graphics *g) {
     this->search->setSearching(!this->backgroundSearchMatcher->isDead());
     this->search->draw(g);
 
-    // draw bottom bar
-    draw_bottombar(g);
-
-    // draw top bar
+    // draw topbar background
     g->setColor(0xffffffff);
     g->pushTransform();
     {
@@ -730,6 +727,10 @@ void SongBrowser::draw(Graphics *g) {
     }
     g->popTransform();
 
+    // draw bottom bar
+    draw_bottombar(g);
+
+    // draw top bar
     this->topbarLeft->draw(g);
     if(cv_debug.getBool()) this->topbarLeft->draw_debug(g);
     this->topbarRight->draw(g);

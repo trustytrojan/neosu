@@ -32,6 +32,8 @@ class Image : public Resource {
 
     inline bool hasAlphaChannel() const { return this->bHasAlphaChannel; }
 
+    bool is_2x;
+
    protected:
     virtual void init() = 0;
     virtual void initAsync() = 0;
