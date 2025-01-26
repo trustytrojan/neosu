@@ -361,22 +361,26 @@ SongBrowser::SongBrowser() : ScreenBackable() {
         this->groupLabel->setSizeToContent(3);
         this->groupLabel->setDrawFrame(false);
         this->groupLabel->setDrawBackground(false);
+        this->groupLabel->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->groupLabel);
 
         this->groupButton = new CBaseUIButton(0, 0, 0, 0, "", "No Grouping");
         this->groupButton->setDrawBackground(false);
         this->groupButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onGroupClicked));
+        this->groupButton->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->groupButton);
 
         this->sortLabel = new CBaseUILabel(0, 0, 0, 0, "", "Sort:");
         this->sortLabel->setSizeToContent(3);
         this->sortLabel->setDrawFrame(false);
         this->sortLabel->setDrawBackground(false);
+        this->sortLabel->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->sortLabel);
 
         this->sortButton = new CBaseUIButton(0, 0, 0, 0, "", "By Date Added");
         this->sortButton->setDrawBackground(false);
         this->sortButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onSortClicked));
+        this->sortButton->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->sortButton);
 
         // "hardcoded" grouping tabs
@@ -384,19 +388,23 @@ SongBrowser::SongBrowser() : ScreenBackable() {
         this->groupByCollectionBtn->setDrawBackground(false);
         this->groupByCollectionBtn->setClickCallback(
             fastdelegate::MakeDelegate(this, &SongBrowser::onQuickGroupClicked));
+        this->groupByCollectionBtn->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->groupByCollectionBtn);
         this->groupByArtistBtn = new CBaseUIButton(0, 0, 0, 0, "", "By Artist");
         this->groupByArtistBtn->setDrawBackground(false);
         this->groupByArtistBtn->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onQuickGroupClicked));
+        this->groupByArtistBtn->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->groupByArtistBtn);
         this->groupByDifficultyBtn = new CBaseUIButton(0, 0, 0, 0, "", "By Difficulty");
         this->groupByDifficultyBtn->setDrawBackground(false);
         this->groupByDifficultyBtn->setClickCallback(
             fastdelegate::MakeDelegate(this, &SongBrowser::onQuickGroupClicked));
+        this->groupByDifficultyBtn->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->groupByDifficultyBtn);
         this->groupByNothingBtn = new CBaseUIButton(0, 0, 0, 0, "", "No Grouping");
         this->groupByNothingBtn->setDrawBackground(false);
         this->groupByNothingBtn->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onQuickGroupClicked));
+        this->groupByNothingBtn->grabs_clicks = true;
         this->topbarRight->addBaseUIElement(this->groupByNothingBtn);
     }
 
@@ -416,14 +424,14 @@ SongBrowser::SongBrowser() : ScreenBackable() {
     this->scoreBrowserNoRecordsYetElement = new NoRecordsSetElement("No records set!");
     this->scoreBrowser->getContainer()->addBaseUIElement(this->scoreBrowserNoRecordsYetElement);
 
+    // NOTE: we don't add localBestContainer to the screen; we draw and update it manually so that
+    //       it can be drawn under skins which overlay the scores list.
     this->localBestContainer = new CBaseUIContainer(0, 0, 0, 0, "");
     this->localBestContainer->setVisible(false);
-    this->addBaseUIElement(this->localBestContainer);
     this->localBestLabel = new CBaseUILabel(0, 0, 0, 0, "", "Personal Best (from local scores)");
     this->localBestLabel->setDrawBackground(false);
     this->localBestLabel->setDrawFrame(false);
     this->localBestLabel->setTextJustification(CBaseUILabel::TEXT_JUSTIFICATION::TEXT_JUSTIFICATION_CENTERED);
-    this->localBestLabel->setFont(osu->getSubTitleFont());
 
     // build songbrowser
     this->carousel = new CBaseUIScrollView(0, 0, 0, 0, "");
@@ -578,6 +586,7 @@ void SongBrowser::draw(Graphics *g) {
 
     // draw score browser
     this->scoreBrowser->draw(g);
+    this->localBestContainer->draw(g);
 
     // draw strain graph of currently selected beatmap
     if(cv_draw_songbrowser_strain_graph.getBool()) {
@@ -825,6 +834,7 @@ bool SongBrowser::selectBeatmapset(i32 set_id) {
 void SongBrowser::mouse_update(bool *propagate_clicks) {
     if(!this->bVisible) return;
 
+    this->localBestContainer->mouse_update(propagate_clicks);
     ScreenBackable::mouse_update(propagate_clicks);
 
     // NOTE: This is placed before update_bottombar(), otherwise the context menu would close
@@ -941,12 +951,12 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
     }
 
     // update and focus handling
+    this->topbarRight->mouse_update(propagate_clicks);
     this->carousel->mouse_update(propagate_clicks);
     this->carousel->getContainer()->update_pos();  // necessary due to constant animations
     if(this->localBestButton) this->localBestButton->mouse_update(propagate_clicks);
     this->scoreBrowser->mouse_update(propagate_clicks);
     this->topbarLeft->mouse_update(propagate_clicks);
-    this->topbarRight->mouse_update(propagate_clicks);
 
     // handle right click absolute scrolling
     {
@@ -2292,7 +2302,7 @@ void SongBrowser::updateLayout() {
 
     // topbar right
     this->topbarRight->setPosX(engine->getScreenWidth() / 2);
-    this->topbarRight->setSize(osu->getScreenWidth() - this->topbarRight->getPos().x, 100.f);
+    this->topbarRight->setSize(osu->getScreenWidth() - this->topbarRight->getPos().x, 80.f);
 
     float btn_margin = 10.f * dpiScale;
     this->sortButton->setSize(200.f * dpiScale, 30.f * dpiScale);
@@ -2342,8 +2352,8 @@ void SongBrowser::updateLayout() {
                             osu->getScreenHeight());
     this->updateSongButtonLayout();
 
-    this->search->setPos(this->carousel->getPos());
-    this->search->setSize(this->carousel->getSize());
+    this->search->setPos(engine->getScreenWidth() / 2, this->topbarRight->getSize().y + 8 * dpiScale);
+    this->search->setSize(engine->getScreenWidth() / 2, 20 * dpiScale);
 }
 
 void SongBrowser::onBack() { osu->toggleSongBrowser(); }
@@ -2358,9 +2368,13 @@ void SongBrowser::updateScoreBrowserLayout() {
 
     const int scoreBrowserExtraPaddingRight = 5 * dpiScale;  // duplication, see above
     const int scoreButtonWidthMax = this->topbarLeft->getSize().x + 2 * dpiScale;
-    const float browserHeight =
-        engine->getScreenHeight() -
-        (get_bottombar_height() + (this->topbarLeft->getPos().y + this->topbarLeft->getSize().y)) + 2 * dpiScale;
+
+    f32 back_btn_height = osu->getSkin()->getMenuBack2()->getSize().y;
+    f32 bottom_height = std::max(get_bottombar_height(), back_btn_height);
+
+    const f32 browserHeight = engine->getScreenHeight() -
+                              (bottom_height + (this->topbarLeft->getPos().y + this->topbarLeft->getSize().y)) +
+                              2 * dpiScale;
     this->scoreBrowser->setPos(this->topbarLeft->getPos().x - 2 * dpiScale,
                                this->topbarLeft->getPos().y + this->topbarLeft->getSize().y);
     this->scoreBrowser->setSize(scoreButtonWidthMax + scoreBrowserExtraPaddingRight, browserHeight);

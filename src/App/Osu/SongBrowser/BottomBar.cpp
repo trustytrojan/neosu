@@ -233,10 +233,8 @@ void draw_bottombar(Graphics* g) {
 }
 
 // TODO @kiwec: draw mode-osu
-// TODO @kiwec: fix main menu button. lol
-// TODO @kiwec: fix animation (see boop skin, only working when out of focus / sometimes no animation)
-// TODO @kiwec: fix score list being drawn on top of bottombar
-// TODO @kiwec: fix topright bar buttons not being clickable (due to carousel?)
-// TODO @kiwec: fix "personal best" (from local scores) text being cut off
-// TODO @kiwec: fix skin dropdown, annoying to scroll vs vanilla mcosu
 // TODO @kiwec: remake usercard so it matches stable more closely
+
+// TODO @kiwec: fix main menu button. lol
+// TODO @kiwec: fix skin dropdown, annoying to scroll vs vanilla mcosu
+// TODO @kiwec: test multiple skins on multiple resolutions
