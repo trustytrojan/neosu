@@ -33,30 +33,32 @@ class UIContextMenu : public CBaseUIScrollView {
 
     void end(bool invertAnimation, bool clampUnderflowAndOverflowAndEnableScrollingIfNecessary);
 
+    virtual CBaseUIElement *setVisible(bool visible) override {
+        // HACHACK: this->bVisible is always true, since we want to be able to put a context menu in a scrollview.
+        //          When scrolling, scrollviews call setVisible(false) to clip items, and that breaks the menu.
+        (void)visible;
+        return this;
+    }
     void setVisible2(bool visible2);
 
-    virtual bool isVisible() { return this->bVisible && this->bVisible2; }
+    virtual bool isVisible() override { return this->bVisible2; }
 
    private:
-    virtual void onResized();
-    virtual void onMoved();
     virtual void onMouseDownOutside();
 
     void onClick(CBaseUIButton *button);
     void onHitEnter(UIContextMenuTextbox *textbox);
 
-    CBaseUIScrollView *parent;
+    CBaseUIScrollView *parent = NULL;
+    UIContextMenuTextbox *containedTextbox = NULL;
+    ButtonClickCallback clickCallback = NULL;
 
-    UIContextMenuTextbox *containedTextbox;
+    i32 iYCounter = 0;
+    i32 iWidthCounter = 0;
 
-    ButtonClickCallback clickCallback;
-
-    int iYCounter;
-    int iWidthCounter;
-
-    bool bVisible2;
-    float fAnimation;
-    bool bInvertAnimation;
+    bool bVisible2 = false;
+    f32 fAnimation = 0.f;
+    bool bInvertAnimation = false;
 
     bool bBigStyle;
     bool bClampUnderflowAndOverflowAndEnableScrollingIfNecessary;

@@ -101,41 +101,41 @@ void CBaseUIScrollView::draw(Graphics *g) {
                    this->bVerticalClipping ? this->vSize.y - 1 : engine->getScreenHeight());
         g->pushClipRect(clip_rect);
     }
-    {
-        this->container->draw(g);
 
-        if(this->bDrawScrollbars) {
-            // vertical
-            if(this->bVerticalScrolling && this->vScrollSize.y > this->vSize.y) {
-                g->setColor(this->scrollbarColor);
-                if(((this->bScrollbarScrolling && this->bScrollbarIsVerticalScrolling) ||
-                    this->verticalScrollbar.contains(engine->getMouse()->getPos())) &&
-                   !this->bScrolling)
-                    g->setAlpha(1.0f);
+    this->container->draw(g);
 
-                g->fillRect(this->verticalScrollbar.getX(), this->verticalScrollbar.getY(),
-                            this->verticalScrollbar.getWidth(), this->verticalScrollbar.getHeight());
-                // g->fillRoundedRect(this->verticalScrollbar.getX(), this->verticalScrollbar.getY(),
-                // m_verticalScrollbar.getWidth(), this->verticalScrollbar.getHeight(),
-                // this->verticalScrollbar.getWidth()/2);
-            }
+    if(this->bDrawScrollbars) {
+        // vertical
+        if(this->bVerticalScrolling && this->vScrollSize.y > this->vSize.y) {
+            g->setColor(this->scrollbarColor);
+            if(((this->bScrollbarScrolling && this->bScrollbarIsVerticalScrolling) ||
+                this->verticalScrollbar.contains(engine->getMouse()->getPos())) &&
+               !this->bScrolling)
+                g->setAlpha(1.0f);
 
-            // horizontal
-            if(this->bHorizontalScrolling && this->vScrollSize.x > this->vSize.x) {
-                g->setColor(this->scrollbarColor);
-                if(((this->bScrollbarScrolling && !this->bScrollbarIsVerticalScrolling) ||
-                    this->horizontalScrollbar.contains(engine->getMouse()->getPos())) &&
-                   !this->bScrolling)
-                    g->setAlpha(1.0f);
+            g->fillRect(this->verticalScrollbar.getX(), this->verticalScrollbar.getY(),
+                        this->verticalScrollbar.getWidth(), this->verticalScrollbar.getHeight());
+            // g->fillRoundedRect(this->verticalScrollbar.getX(), this->verticalScrollbar.getY(),
+            // m_verticalScrollbar.getWidth(), this->verticalScrollbar.getHeight(),
+            // this->verticalScrollbar.getWidth()/2);
+        }
 
-                g->fillRect(this->horizontalScrollbar.getX(), this->horizontalScrollbar.getY(),
-                            this->horizontalScrollbar.getWidth(), this->horizontalScrollbar.getHeight());
-                // g->fillRoundedRect(this->horizontalScrollbar.getX(), this->horizontalScrollbar.getY(),
-                // m_horizontalScrollbar.getWidth(), this->horizontalScrollbar.getHeight(),
-                // m_horizontalScrollbar.getHeight()/2);
-            }
+        // horizontal
+        if(this->bHorizontalScrolling && this->vScrollSize.x > this->vSize.x) {
+            g->setColor(this->scrollbarColor);
+            if(((this->bScrollbarScrolling && !this->bScrollbarIsVerticalScrolling) ||
+                this->horizontalScrollbar.contains(engine->getMouse()->getPos())) &&
+               !this->bScrolling)
+                g->setAlpha(1.0f);
+
+            g->fillRect(this->horizontalScrollbar.getX(), this->horizontalScrollbar.getY(),
+                        this->horizontalScrollbar.getWidth(), this->horizontalScrollbar.getHeight());
+            // g->fillRoundedRect(this->horizontalScrollbar.getX(), this->horizontalScrollbar.getY(),
+            // m_horizontalScrollbar.getWidth(), this->horizontalScrollbar.getHeight(),
+            // m_horizontalScrollbar.getHeight()/2);
         }
     }
+
     if(this->bHorizontalClipping || this->bVerticalClipping) {
         g->popClipRect();
     }

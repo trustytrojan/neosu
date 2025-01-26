@@ -64,24 +64,16 @@ UIContextMenu::UIContextMenu(float xPos, float yPos, float xSize, float ySize, U
     this->setDrawFrame(false);
     this->setScrollbarSizeMultiplier(0.5f);
 
-    this->containedTextbox = NULL;
-
-    this->iYCounter = 0;
-    this->iWidthCounter = 0;
-
-    this->bVisible = false;
-    this->bVisible2 = false;
-    this->clickCallback = NULL;
-
-    this->fAnimation = 0.0f;
-    this->bInvertAnimation = false;
+    // HACHACK: this->bVisible is always true, since we want to be able to put a context menu in a scrollview.
+    //          When scrolling, scrollviews call setVisible(false) to clip items, and that breaks the menu.
+    this->bVisible = true;
 
     this->bBigStyle = false;
     this->bClampUnderflowAndOverflowAndEnableScrollingIfNecessary = false;
 }
 
 void UIContextMenu::draw(Graphics *g) {
-    if(!this->bVisible || !this->bVisible2) return;
+    if(!this->bVisible2) return;
 
     if(this->fAnimation > 0.0f && this->fAnimation < 1.0f) {
         g->push3DScene(McRect(this->vPos.x,
@@ -106,7 +98,7 @@ void UIContextMenu::draw(Graphics *g) {
 }
 
 void UIContextMenu::mouse_update(bool *propagate_clicks) {
-    if(!this->bVisible || !this->bVisible2) return;
+    if(!this->bVisible2) return;
     CBaseUIScrollView::mouse_update(propagate_clicks);
 
     if(this->containedTextbox != NULL) {
@@ -128,13 +120,13 @@ void UIContextMenu::mouse_update(bool *propagate_clicks) {
 }
 
 void UIContextMenu::onKeyUp(KeyboardEvent &e) {
-    if(!this->bVisible || !this->bVisible2) return;
+    if(!this->bVisible2) return;
 
     CBaseUIScrollView::onKeyUp(e);
 }
 
 void UIContextMenu::onKeyDown(KeyboardEvent &e) {
-    if(!this->bVisible || !this->bVisible2) return;
+    if(!this->bVisible2) return;
 
     CBaseUIScrollView::onKeyDown(e);
 
@@ -157,7 +149,7 @@ void UIContextMenu::onKeyDown(KeyboardEvent &e) {
 }
 
 void UIContextMenu::onChar(KeyboardEvent &e) {
-    if(!this->bVisible || !this->bVisible2) return;
+    if(!this->bVisible2) return;
 
     CBaseUIScrollView::onChar(e);
 }
@@ -293,13 +285,6 @@ void UIContextMenu::setVisible2(bool visible2) {
     if(!this->bVisible2) this->setSize(1, 1);  // reset size
 
     if(this->parent != NULL) this->parent->setScrollSizeToContent();  // and update parent scroll size
-}
-
-void UIContextMenu::onResized() { this->setSize(this->vSize); }
-
-void UIContextMenu::onMoved() {
-    this->setRelPos(this->vPos);
-    this->setPos(this->vPos);
 }
 
 void UIContextMenu::onMouseDownOutside() { this->setVisible2(false); }

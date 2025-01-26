@@ -2320,6 +2320,12 @@ void OptionsMenu::openCurrentSkinFolder() {
 void OptionsMenu::onSkinSelect() {
     // XXX: Instead of a dropdown, we should make a dedicated skin select screen with search bar
 
+    // Just close the skin selection menu if it's already open
+    if(this->contextMenu->isVisible()) {
+        this->contextMenu->setVisible2(false);
+        return;
+    }
+
     this->updateOsuFolder();
 
     if(osu->isSkinLoading()) return;
@@ -2363,11 +2369,10 @@ void OptionsMenu::onSkinSelect() {
     }
 
     if(skinFolders.size() > 0) {
-        this->contextMenu->setVisible2(false);
-
         if(this->bVisible) {
             this->contextMenu->setPos(this->skinSelectLocalButton->getPos());
             this->contextMenu->setRelPos(this->skinSelectLocalButton->getRelPos());
+            this->options->setScrollSizeToContent();
         } else {
             // Put it 50px from top, we'll move it later
             this->contextMenu->setPos(Vector2{0, 100});
@@ -2386,7 +2391,7 @@ void OptionsMenu::onSkinSelect() {
             auto skin = cv_skin.getString();
             if(skinFolders[i].compare(skin.toUtf8()) == 0) button->setTextBrightColor(0xff00ff00);
         }
-        this->contextMenu->end(false, true);
+        this->contextMenu->end(false, !this->bVisible);
         this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSkinSelect2));
 
         if(!this->bVisible) {
@@ -2395,7 +2400,6 @@ void OptionsMenu::onSkinSelect() {
                 osu->getScreenWidth() / 2.f - this->contextMenu->getSize().x / 2.f,
                 osu->getScreenHeight() / 2.f - this->contextMenu->getSize().y / 2.f,
             });
-            this->contextMenu->setVisible(true);
         }
     } else {
         osu->getNotificationOverlay()->addToast("Error: Couldn't find any skins", 0xffff0000);
@@ -2485,8 +2489,6 @@ void OptionsMenu::onResolutionSelect() {
     if(!containsNativeResolution) resolutions.push_back(nativeResolution);
 
     // build context menu
-    this->contextMenu->setPos(this->resolutionSelectButton->getPos());
-    this->contextMenu->setRelPos(this->resolutionSelectButton->getRelPos());
     this->contextMenu->begin();
     for(int i = 0; i < resolutions.size(); i++) {
         if(resolutions[i].x > nativeResolution.x || resolutions[i].y > nativeResolution.y) continue;
@@ -2503,6 +2505,16 @@ void OptionsMenu::onResolutionSelect() {
     }
     this->contextMenu->end(false, false);
     this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onResolutionSelect2));
+
+    // reposition context monu
+    f32 menu_width = this->contextMenu->getSize().x;
+    f32 btn_width = this->resolutionSelectButton->getSize().x;
+    f32 menu_offset = btn_width / 2.f - menu_width / 2.f;
+    this->contextMenu->setPos(this->resolutionSelectButton->getPos().x + menu_offset,
+                              this->resolutionSelectButton->getPos().y);
+    this->contextMenu->setRelPos(this->resolutionSelectButton->getRelPos().x + menu_offset,
+                                 this->resolutionSelectButton->getRelPos().y);
+    this->options->setScrollSizeToContent();
 }
 
 void OptionsMenu::onResolutionSelect2(UString resolution, int id) {
@@ -2513,7 +2525,12 @@ void OptionsMenu::onResolutionSelect2(UString resolution, int id) {
 }
 
 void OptionsMenu::onOutputDeviceSelect() {
-    // XXX: WHY IS THIS THE ONLY CONTEXT MENU BUTTON THAT NEEDS TO BE CLICKED TWICE? HELP
+    // Just close the device selection menu if it's already open
+    if(this->contextMenu->isVisible()) {
+        this->contextMenu->setVisible2(false);
+        return;
+    }
+
     std::vector<OUTPUT_DEVICE> outputDevices = engine->getSound()->getOutputDevices();
 
     // build context menu
@@ -2526,6 +2543,7 @@ void OptionsMenu::onOutputDeviceSelect() {
     }
     this->contextMenu->end(false, true);
     this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onOutputDeviceSelect2));
+    this->options->setScrollSizeToContent();
 }
 
 void OptionsMenu::onOutputDeviceSelect2(UString outputDeviceName, int id) {
@@ -2586,6 +2604,7 @@ void OptionsMenu::onNotelockSelect() {
     }
     this->contextMenu->end(false, false);
     this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onNotelockSelect2));
+    this->options->setScrollSizeToContent();
 }
 
 void OptionsMenu::onNotelockSelect2(UString notelockType, int id) {
