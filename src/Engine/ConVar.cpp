@@ -1807,7 +1807,6 @@ ConVar cv_snd_wav_file_min_size(
     "fail to load), this is a workaround for BASS crashes");
 ConVar cv_songbrowser_background_fade_in_duration("osu_songbrowser_background_fade_in_duration", 0.1f,
                                                   FCVAR_BANCHO_COMPATIBLE);
-ConVar cv_songbrowser_bottombar_percent("osu_songbrowser_bottombar_percent", 0.116f, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_songbrowser_button_active_color_a("osu_songbrowser_button_active_color_a", 220 + 10, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_songbrowser_button_active_color_b("osu_songbrowser_button_active_color_b", 255, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_songbrowser_button_active_color_g("osu_songbrowser_button_active_color_g", 255, FCVAR_BANCHO_COMPATIBLE);

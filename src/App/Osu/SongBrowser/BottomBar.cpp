@@ -14,9 +14,11 @@
 
 static enum { MODE = 0, MODS = 1, RANDOM = 2, OPTIONS = 3 };
 static i32 hovered_btn = -1;
+static f32 global_scale = 1.f;
 static f32 btns_x[4] = {0.f, 0.f, 0.f, 0.f};
 static f32 btn_hovers[4] = {0.f, 0.f, 0.f, 0.f};
-static f32 btn_heights[4] = {180.f, 180.f, 180.f, 180.f};
+static f32 btn_widths[4] = {0.f, 0.f, 0.f, 0.f};
+static f32 btn_heights[4] = {0.f, 0.f, 0.f, 0.f};
 
 void press_bottombar_button(i32 btn_index) {
     if(hovered_btn != btn_index) {
@@ -49,7 +51,7 @@ f32 get_bottombar_height() {
             max = btn_heights[i];
         }
     }
-    return max;
+    return max * global_scale;
 }
 
 void update_bottombar(bool* propagate_clicks) {
@@ -62,28 +64,39 @@ void update_bottombar(bool* propagate_clicks) {
     auto screen = engine->getScreenSize();
     bool is_widescreen =
         ((int)(std::max(0, (int)((osu->getScreenWidth() - (osu->getScreenHeight() * 4.0f / 3.0f)) / 2.0f))) > 0);
-    btns_x[MODE] = Osu::getUIScale((is_widescreen ? 140.0f : 120.0f));
-    btns_x[MODS] = btns_x[MODE] + (i32)(185.f * 0.5f);
-    btns_x[RANDOM] = btns_x[MODS] + (i32)(155.f * 0.5f);
-    btns_x[OPTIONS] = btns_x[RANDOM] + (i32)(155.f * 0.5f);
 
-    f32 btn_widths[4] = {185.f, 155.f, 155.f, 155.f};
+    // selection-mode has special logic: if the image exceeds screen width, we'll rescale
+    // the whole bottom bar to fit the screen.
     auto mode_img = osu->getSkin()->selectionModeOver;
-    btn_widths[MODE] = mode_img->getImageSizeForCurrentFrame().x * (mode_img->is_2x ? 0.5f : 1.f);
-    btn_heights[MODE] = mode_img->getImageSizeForCurrentFrame().y * (mode_img->is_2x ? 0.5f : 1.f);
+    btns_x[MODE] = Osu::getUIScale((is_widescreen ? 140.0f : 120.0f));
+    {
+        auto img = osu->getSkin()->selectionMode;
+        f32 max_width = engine->getScreenWidth() - btns_x[MODE];
+        f32 img_width = img->getImageSizeForCurrentFrame().x * (img->is_2x ? 0.5f : 1.f);
+        f32 scale = max_width / img_width;
+        global_scale = std::min(1.f, scale);
+    }
+    btn_widths[MODE] = global_scale * mode_img->getImageSizeForCurrentFrame().x * (mode_img->is_2x ? 0.5f : 1.f);
+    btn_heights[MODE] = global_scale * mode_img->getImageSizeForCurrentFrame().y * (mode_img->is_2x ? 0.5f : 1.f);
+
     auto mods_img = osu->getSkin()->selectionModsOver;
-    btn_widths[MODS] = mods_img->getImageSizeForCurrentFrame().x * (mods_img->is_2x ? 0.5f : 1.f);
-    btn_heights[MODS] = mods_img->getImageSizeForCurrentFrame().y * (mods_img->is_2x ? 0.5f : 1.f);
+    btns_x[MODS] = btns_x[MODE] + (i32)(92.5f * global_scale);
+    btn_widths[MODS] = global_scale * mods_img->getImageSizeForCurrentFrame().x * (mods_img->is_2x ? 0.5f : 1.f);
+    btn_heights[MODS] = global_scale * mods_img->getImageSizeForCurrentFrame().y * (mods_img->is_2x ? 0.5f : 1.f);
     auto random_img = osu->getSkin()->selectionRandomOver;
-    btn_widths[RANDOM] = random_img->getImageSizeForCurrentFrame().x * (random_img->is_2x ? 0.5f : 1.f);
-    btn_heights[RANDOM] = random_img->getImageSizeForCurrentFrame().y * (random_img->is_2x ? 0.5f : 1.f);
+    btns_x[RANDOM] = btns_x[MODS] + (i32)(77.5f * global_scale);
+    btn_widths[RANDOM] = global_scale * random_img->getImageSizeForCurrentFrame().x * (random_img->is_2x ? 0.5f : 1.f);
+    btn_heights[RANDOM] = global_scale * random_img->getImageSizeForCurrentFrame().y * (random_img->is_2x ? 0.5f : 1.f);
     auto options_img = osu->getSkin()->selectionOptionsOver;
-    btn_widths[OPTIONS] = options_img->getImageSizeForCurrentFrame().x * (options_img->is_2x ? 0.5f : 1.f);
-    btn_heights[OPTIONS] = options_img->getImageSizeForCurrentFrame().y * (options_img->is_2x ? 0.5f : 1.f);
+    btns_x[OPTIONS] = btns_x[RANDOM] + (i32)(77.5f * global_scale);
+    btn_widths[OPTIONS] =
+        global_scale * options_img->getImageSizeForCurrentFrame().x * (options_img->is_2x ? 0.5f : 1.f);
+    btn_heights[OPTIONS] =
+        global_scale * options_img->getImageSizeForCurrentFrame().y * (options_img->is_2x ? 0.5f : 1.f);
 
     // NOTE: Skin template shows 640:150px size, and 320px from options button origin, I cheated a bit
-    osu->userButton->setSize(640 * 0.5, 176 * 0.5);
-    osu->userButton->setPos(btns_x[OPTIONS] + (i32)(290.f * 0.5f),
+    osu->userButton->setSize(global_scale * 640 * 0.5, global_scale * 176 * 0.5);
+    osu->userButton->setPos(btns_x[OPTIONS] + (i32)(global_scale * 290.f * 0.5f),
                             engine->getScreenHeight() - osu->userButton->getSize().y);
     osu->userButton->mouse_update(propagate_clicks);
 
@@ -144,37 +157,32 @@ void draw_bottombar(Graphics* g) {
     for(i32 i = 0; i < 4; i++) {
         if(base_imgs[i] == NULL) continue;
 
-        // Clamp the image to screen
-        auto img_size = base_imgs[i]->getImageSizeForCurrentFrame();
-        f32 scale = base_imgs[i]->is_2x ? 0.5f : 1.f;
-        f32 xscale = scale * img_size.x / engine->getScreenWidth();
-        if(xscale > 1.f) scale /= xscale;
-
+        f32 scale = global_scale * (base_imgs[i]->is_2x ? 0.5f : 1.f);
         g->setColor(0xffffffff);
         base_imgs[i]->drawRaw(g, Vector2(btns_x[i], engine->getScreenHeight()), scale, AnchorPoint::BOTTOM_LEFT);
     }
 
     // Ok, and now for the hover images... which are drawn in a weird order, same as update_bottombar()
     auto random_img = osu->getSkin()->selectionRandomOver;
-    f32 random_scale = (random_img->is_2x ? 0.5f : 1.f);
+    f32 random_scale = global_scale * (random_img->is_2x ? 0.5f : 1.f);
     g->setColor(0xffffffff);
     g->setAlpha(btn_hovers[RANDOM]);
     random_img->drawRaw(g, Vector2(btns_x[RANDOM], engine->getScreenHeight()), random_scale, AnchorPoint::BOTTOM_LEFT);
 
     auto mods_img = osu->getSkin()->selectionModsOver;
-    f32 mods_scale = (mods_img->is_2x ? 0.5f : 1.f);
+    f32 mods_scale = global_scale * (mods_img->is_2x ? 0.5f : 1.f);
     g->setColor(0xffffffff);
     g->setAlpha(btn_hovers[MODS]);
     mods_img->drawRaw(g, Vector2(btns_x[MODS], engine->getScreenHeight()), mods_scale, AnchorPoint::BOTTOM_LEFT);
 
     auto mode_img = osu->getSkin()->selectionModeOver;
-    f32 mode_scale = (mode_img->is_2x ? 0.5f : 1.f);
+    f32 mode_scale = global_scale * (mode_img->is_2x ? 0.5f : 1.f);
     g->setColor(0xffffffff);
     g->setAlpha(btn_hovers[MODE]);
     mode_img->drawRaw(g, Vector2(btns_x[MODE], engine->getScreenHeight()), mode_scale, AnchorPoint::BOTTOM_LEFT);
 
     auto options_img = osu->getSkin()->selectionOptionsOver;
-    f32 options_scale = (options_img->is_2x ? 0.5f : 1.f);
+    f32 options_scale = global_scale * (options_img->is_2x ? 0.5f : 1.f);
     g->setColor(0xffffffff);
     g->setAlpha(btn_hovers[OPTIONS]);
     options_img->drawRaw(g, Vector2(btns_x[OPTIONS], engine->getScreenHeight()), options_scale,
@@ -183,10 +191,11 @@ void draw_bottombar(Graphics* g) {
     // mode-osu-small (often used as overlay)
     auto mos_img = osu->getSkin()->mode_osu_small;
     if(mos_img != NULL) {
-        f32 mos_scale = (mos_img->is_2x ? 0.5f : 1.f);
+        f32 mos_scale = global_scale * (mos_img->is_2x ? 0.5f : 1.f);
         g->setColor(0xffffffff);
         mos_img->drawRaw(g,
-                         Vector2(btns_x[MODE] + (btns_x[MODS] - btns_x[MODE]) * 0.5f, engine->getScreenHeight() - 56),
+                         Vector2(btns_x[MODE] + (btns_x[MODS] - btns_x[MODE]) * 0.5f,
+                                 engine->getScreenHeight() - (global_scale * 56.f)),
                          mos_scale, AnchorPoint::CENTER);
     }
 
@@ -225,4 +234,9 @@ void draw_bottombar(Graphics* g) {
 
 // TODO @kiwec: draw mode-osu
 // TODO @kiwec: fix main menu button. lol
-// TODO @kiwec: fix animation (see boop skin, only working when out of focus)
+// TODO @kiwec: fix animation (see boop skin, only working when out of focus / sometimes no animation)
+// TODO @kiwec: fix score list being drawn on top of bottombar
+// TODO @kiwec: fix topright bar buttons not being clickable (due to carousel?)
+// TODO @kiwec: fix "personal best" (from local scores) text being cut off
+// TODO @kiwec: fix skin dropdown, annoying to scroll vs vanilla mcosu
+// TODO @kiwec: remake usercard so it matches stable more closely

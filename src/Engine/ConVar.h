@@ -855,7 +855,6 @@ extern ConVar cv_snd_restrict_play_frame;
 extern ConVar cv_snd_updateperiod;
 extern ConVar cv_snd_wav_file_min_size;
 extern ConVar cv_songbrowser_background_fade_in_duration;
-extern ConVar cv_songbrowser_bottombar_percent;
 extern ConVar cv_songbrowser_button_active_color_a;
 extern ConVar cv_songbrowser_button_active_color_b;
 extern ConVar cv_songbrowser_button_active_color_g;
