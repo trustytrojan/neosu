@@ -80,7 +80,6 @@ class SkinImage {
     long iCurMusicPos;
     unsigned int iFrameCounter;
     unsigned long iFrameCounterUnclamped;
-    float fLastFrameTime;
     float fFrameDuration;
     long iBeatmapAnimationTimeStartOffset;
 

@@ -20,7 +20,6 @@ SkinImage::SkinImage(Skin *skin, std::string skinElementName, Vector2 baseSizeFo
     this->iCurMusicPos = 0;
     this->iFrameCounter = 0;
     this->iFrameCounterUnclamped = 0;
-    this->fLastFrameTime = 0.0f;
     this->iBeatmapAnimationTimeStartOffset = 0;
 
     this->bIsMissingTexture = false;
@@ -316,24 +315,22 @@ void SkinImage::drawRaw(Graphics *g, Vector2 pos, float scale, AnchorPoint ancho
 }
 
 void SkinImage::update(float speedMultiplier, bool useEngineTimeForAnimations, long curMusicPos) {
-    if(this->images.size() < 1) return;
+    if(this->images.size() < 1 || speedMultiplier == 0.f) return;
 
     this->iCurMusicPos = curMusicPos;
 
-    const float frameDurationInSeconds =
+    const f64 frameDurationInSeconds =
         (cv_skin_animation_fps_override.getFloat() > 0.0f ? (1.0f / cv_skin_animation_fps_override.getFloat())
                                                           : this->fFrameDuration) /
         speedMultiplier;
+    if(frameDurationInSeconds == 0.f) {
+        this->iFrameCounter = 0;
+        this->iFrameCounterUnclamped = 0;
+        return;
+    }
 
     if(useEngineTimeForAnimations) {
-        // as expected
-        if(engine->getTime() >= this->fLastFrameTime) {
-            this->fLastFrameTime = engine->getTime() + frameDurationInSeconds;
-
-            this->iFrameCounter++;
-            this->iFrameCounterUnclamped++;
-            this->iFrameCounter = this->iFrameCounter % this->images.size();
-        }
+        this->iFrameCounter = (i32)(engine->getTime() / frameDurationInSeconds) % this->images.size();
     } else {
         // when playing a beatmap, objects start the animation at frame 0 exactly when they first become visible (this
         // wouldn't work with the engine time method) therefore we need an offset parameter in the same time-space as
@@ -342,19 +339,11 @@ void SkinImage::update(float speedMultiplier, bool useEngineTimeForAnimations, l
         // their click_time-m_iObjectTime), since we don't have any animation state saved in the hitobjects!
 
         long frame_duration_ms = frameDurationInSeconds * 1000.0f;
-        if(frame_duration_ms == 0) {
-            this->iFrameCounter = 0;
-            this->iFrameCounterUnclamped = 0;
-        } else {
-            // freeze animation on frame 0 on negative offsets
-            this->iFrameCounter =
-                max((int)((curMusicPos - this->iBeatmapAnimationTimeStartOffset) / frame_duration_ms), 0);
 
-            this->iFrameCounterUnclamped = this->iFrameCounter;
-
-            // clamp and wrap around to the number of frames we have
-            this->iFrameCounter = this->iFrameCounter % this->images.size();
-        }
+        // freeze animation on frame 0 on negative offsets
+        this->iFrameCounter = max((i32)((curMusicPos - this->iBeatmapAnimationTimeStartOffset) / frame_duration_ms), 0);
+        this->iFrameCounterUnclamped = this->iFrameCounter;
+        this->iFrameCounter = this->iFrameCounter % this->images.size();
     }
 }
 

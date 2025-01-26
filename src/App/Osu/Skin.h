@@ -341,7 +341,7 @@ class Skin {
 
     bool bReady;
     bool bIsDefaultSkin;
-    float animationSpeedMultiplier;
+    f32 animationSpeedMultiplier = 1.f;
     std::string sName;
     std::string sFilePath;
     std::string sSkinIniFilePath;
