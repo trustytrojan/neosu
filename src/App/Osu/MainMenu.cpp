@@ -36,28 +36,24 @@ using namespace std;
 UString MainMenu::NEOSU_MAIN_BUTTON_TEXT = UString("neosu");
 UString MainMenu::NEOSU_MAIN_BUTTON_SUBTEXT = UString("Multiplayer Client");
 
+static MainMenu *g_main_menu = NULL;
+
 class MainMenuCubeButton : public CBaseUIButton {
    public:
-    MainMenuCubeButton(MainMenu *mainMenu, float xPos, float yPos, float xSize, float ySize, UString name,
-                       UString text);
+    MainMenuCubeButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text);
 
     virtual void draw(Graphics *g);
 
     void onMouseInside();
     void onMouseOutside();
-
-    MainMenu *mainMenu;
 };
 
 class MainMenuButton : public CBaseUIButton {
    public:
-    MainMenuButton(MainMenu *mainMenu, float xPos, float yPos, float xSize, float ySize, UString name, UString text);
+    MainMenuButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text);
 
     void onMouseDownInside();
     void onMouseInside();
-
-   private:
-    MainMenu *mainMenu;
 };
 
 void MainMenuPauseButton::draw(Graphics *g) {
@@ -127,6 +123,8 @@ void MainMenuPauseButton::draw(Graphics *g) {
 }
 
 MainMenu::MainMenu() : OsuScreen() {
+    g_main_menu = this;
+
     // engine settings
     engine->getMouse()->addListener(this);
 
@@ -162,10 +160,6 @@ MainMenu::MainMenu() : OsuScreen() {
     this->fUpdateButtonAnim = 0.0f;
     this->fUpdateButtonAnimTime = 0.0f;
     this->bHasClickedUpdate = false;
-
-    this->bStartupAnim = true;
-    this->fStartupAnim = 0.0f;
-    this->fStartupAnim2 = 0.0f;
 
     this->fBackgroundFadeInTime = 0.0f;
 
@@ -214,7 +208,7 @@ MainMenu::MainMenu() : OsuScreen() {
     this->setPos(-1, 0);
     this->setSize(osu->getScreenWidth(), osu->getScreenHeight());
 
-    this->cube = new MainMenuCubeButton(this, 0, 0, 1, 1, "", "");
+    this->cube = new MainMenuCubeButton(0, 0, 1, 1, "", "");
     this->cube->setClickCallback(fastdelegate::MakeDelegate(this, &MainMenu::onCubePressed));
     this->addBaseUIElement(this->cube);
 
@@ -248,7 +242,7 @@ MainMenu::MainMenu() : OsuScreen() {
 }
 
 MainMenu::~MainMenu() {
-    SAFE_DELETE(preloaded_beatmapset);
+    SAFE_DELETE(this->preloaded_beatmapset);
     SAFE_DELETE(this->updateAvailableButton);
 
     anim->deleteExistingAnimation(&this->fUpdateButtonAnim);
@@ -1021,7 +1015,7 @@ void MainMenu::selectRandomBeatmap() {
         if(nb_mapsets + nb_mapsets2 == 0) return;
 
         sb->getSelectedBeatmap()->deselect();
-        SAFE_DELETE(preloaded_beatmapset);
+        SAFE_DELETE(this->preloaded_beatmapset);
 
         for(int i = 0; i < 10; i++) {
             u32 lucky_number = rand() % (nb_mapsets + nb_mapsets2);
@@ -1129,10 +1123,9 @@ CBaseUIContainer *MainMenu::setVisible(bool visible) {
 
         if(this->bStartupAnim) {
             this->bStartupAnim = false;
-            anim->moveQuadOut(&this->fStartupAnim, 1.0f, cv_main_menu_startup_anim_duration.getFloat(),
-                              (float)engine->getTimeReal());
+            anim->moveQuadOut(&this->fStartupAnim, 1.0f, cv_main_menu_startup_anim_duration.getFloat());
             anim->moveQuartOut(&this->fStartupAnim2, 1.0f, cv_main_menu_startup_anim_duration.getFloat() * 6.0f,
-                               (float)engine->getTimeReal() + cv_main_menu_startup_anim_duration.getFloat() * 0.5f);
+                               cv_main_menu_startup_anim_duration.getFloat() * 0.5f);
         }
     } else {
         this->setMenuElementsVisible(false, false);
@@ -1299,7 +1292,7 @@ void MainMenu::writeVersionFile() {
 }
 
 MainMenuButton *MainMenu::addMainMenuButton(UString text) {
-    MainMenuButton *button = new MainMenuButton(this, this->vSize.x, 0, 1, 1, "", text);
+    MainMenuButton *button = new MainMenuButton(this->vSize.x, 0, 1, 1, "", text);
     button->setFont(osu->getSubTitleFont());
     button->setVisible(false);
 
@@ -1414,18 +1407,15 @@ void MainMenu::onVersionPressed() {
     osu->toggleChangelog();
 }
 
-MainMenuCubeButton::MainMenuCubeButton(MainMenu *mainMenu, float xPos, float yPos, float xSize, float ySize,
-                                       UString name, UString text)
-    : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {
-    this->mainMenu = mainMenu;
-}
+MainMenuCubeButton::MainMenuCubeButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
+    : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {}
 
 void MainMenuCubeButton::draw(Graphics *g) {
     // draw nothing
 }
 
 void MainMenuCubeButton::onMouseInside() {
-    anim->moveQuadInOut(&this->mainMenu->fSizeAddAnim, 0.12f, 0.15f, 0.0f, true);
+    anim->moveQuadInOut(&g_main_menu->fSizeAddAnim, 0.12f, 0.15f, 0.0f, true);
 
     CBaseUIButton::onMouseInside();
 
@@ -1436,24 +1426,21 @@ void MainMenuCubeButton::onMouseInside() {
 }
 
 void MainMenuCubeButton::onMouseOutside() {
-    anim->moveQuadInOut(&this->mainMenu->fSizeAddAnim, 0.0f, 0.15f, 0.0f, true);
+    anim->moveQuadInOut(&g_main_menu->fSizeAddAnim, 0.0f, 0.15f, 0.0f, true);
 
     CBaseUIButton::onMouseOutside();
 }
 
-MainMenuButton::MainMenuButton(MainMenu *mainMenu, float xPos, float yPos, float xSize, float ySize, UString name,
-                               UString text)
-    : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {
-    this->mainMenu = mainMenu;
-}
+MainMenuButton::MainMenuButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
+    : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {}
 
 void MainMenuButton::onMouseDownInside() {
-    if(this->mainMenu->cube->isMouseInside()) return;
+    if(g_main_menu->cube->isMouseInside()) return;
     CBaseUIButton::onMouseDownInside();
 }
 
 void MainMenuButton::onMouseInside() {
-    if(this->mainMenu->cube->isMouseInside()) return;
+    if(g_main_menu->cube->isMouseInside()) return;
     CBaseUIButton::onMouseInside();
 
     if(button_sound_cooldown + 0.05f < engine->getTime()) {

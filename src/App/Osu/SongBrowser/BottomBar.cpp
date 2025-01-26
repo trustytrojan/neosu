@@ -235,6 +235,5 @@ void draw_bottombar(Graphics* g) {
 // TODO @kiwec: draw mode-osu
 // TODO @kiwec: remake usercard so it matches stable more closely
 
-// TODO @kiwec: fix main menu button. lol
 // TODO @kiwec: fix skin dropdown, annoying to scroll vs vanilla mcosu
 // TODO @kiwec: test multiple skins on multiple resolutions

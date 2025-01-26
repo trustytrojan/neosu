@@ -67,11 +67,6 @@ class MainMenu : public OsuScreen, public MouseListener {
 
     virtual CBaseUIContainer *setVisible(bool visible);
 
-    void setStartupAnim(bool startupAnim) {
-        this->bStartupAnim = startupAnim;
-        this->fStartupAnim = this->fStartupAnim2 = (this->bStartupAnim ? 0.0f : 1.0f);
-    }
-
    private:
     void drawVersionInfo(Graphics *g);
     void updateLayout();
@@ -142,9 +137,9 @@ class MainMenu : public OsuScreen, public MouseListener {
     float fShutdownScheduledTime;
     bool bWasCleanShutdown;
 
-    bool bStartupAnim;
-    float fStartupAnim;
-    float fStartupAnim2;
+    bool bStartupAnim = true;
+    f32 fStartupAnim = 0.f;
+    f32 fStartupAnim2 = 0.f;
     float fPrevShuffleTime;
     float fBackgroundFadeInTime;
 
