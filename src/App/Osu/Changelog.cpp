@@ -26,6 +26,17 @@ Changelog::Changelog() : ScreenBackable() {
 
     std::vector<CHANGELOG> changelogs;
 
+    CHANGELOG v37_00;
+    v37_00.title = "37.00 (2025-01-26)";
+    v37_00.changes.push_back("- Added support for song browser skin elements");
+    v37_00.changes.push_back("- Added file handlers for .osk, .osr, and .osz formats");
+    v37_00.changes.push_back("- Fixed interface animations not playing at the correct speed");
+    v37_00.changes.push_back("- Fixed crash when starting beatmap with live pp/stars enabled");
+    v37_00.changes.push_back("- Fixed dropdowns in the options menu (such as skin select)");
+    v37_00.changes.push_back("- Updated osu! folder detection");
+    v37_00.changes.push_back("- Updated osu! version to b20250122.1");
+    changelogs.push_back(v37_00);
+
     CHANGELOG v36_06;
     v36_06.title = "36.06 (2025-01-08)";
     v36_06.changes.push_back("- Added support for new osu!.db format");

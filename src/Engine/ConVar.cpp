@@ -1916,7 +1916,7 @@ ConVar cv_user_draw_level_bar("osu_user_draw_level_bar", true, FCVAR_BANCHO_COMP
 ConVar cv_user_draw_pp("osu_user_draw_pp", true, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_user_include_relax_and_autopilot_for_stats("osu_user_include_relax_and_autopilot_for_stats", false,
                                                      FCVAR_BANCHO_COMPATIBLE);
-ConVar cv_version("osu_version", 36.06f, FCVAR_BANCHO_COMPATIBLE | FCVAR_HIDDEN);
+ConVar cv_version("osu_version", 37.00f, FCVAR_BANCHO_COMPATIBLE | FCVAR_HIDDEN);
 ConVar cv_volume("volume", 1.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE, _volume);
 ConVar cv_volume_change_interval("osu_volume_change_interval", 0.05f, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_volume_effects("osu_volume_effects", 1.0f, FCVAR_BANCHO_COMPATIBLE);
