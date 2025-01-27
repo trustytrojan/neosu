@@ -229,4 +229,3 @@ void draw_bottombar(Graphics* g) {
 
 // TODO @kiwec: default icon for mode-osu-small
 // TODO @kiwec: draw mode-osu
-// TODO @kiwec: make topleftbar text a bit smaller so it fits

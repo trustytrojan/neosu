@@ -343,16 +343,18 @@ SongBrowser::SongBrowser() : ScreenBackable() {
 
     // build topbar left
     this->topbarLeft = new CBaseUIContainer(0, 0, 0, 0, "");
-    {
-        this->songInfo = new InfoLabel(0, 0, 0, 0, "");
+    this->songInfo = new InfoLabel(0, 0, 0, 0, "");
+    this->topbarLeft->addBaseUIElement(this->songInfo);
 
-        this->topbarLeft->addBaseUIElement(this->songInfo);
-    }
-
-    this->scoreSortButton = this->addTopBarLeftTabButton("Sort by score");
+    this->scoreSortButton = new CBaseUIButton(0, 0, 0, 0, "", "Sort by score");
+    this->scoreSortButton->setDrawBackground(false);
     this->scoreSortButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onSortScoresClicked));
-    this->webButton = this->addTopBarLeftButton("Web");
+    this->topbarLeft->addBaseUIElement(this->scoreSortButton);
+
+    this->webButton = new CBaseUIButton(0, 0, 0, 0, "", "Web");
+    this->webButton->setDrawBackground(false);
     this->webButton->setClickCallback(fastdelegate::MakeDelegate(this, &SongBrowser::onWebClicked));
+    this->topbarLeft->addBaseUIElement(this->webButton);
 
     // build topbar right
     this->topbarRight = new CBaseUIContainer(0, 0, 0, 0, "");
@@ -720,8 +722,13 @@ void SongBrowser::draw(Graphics *g) {
     g->setColor(0xffffffff);
     g->pushTransform();
     {
+        auto screen = engine->getScreenSize();
+        bool is_widescreen = ((i32)(std::max(0, (i32)((screen.x - (screen.y * 4.f / 3.f)) / 2.f))) > 0);
+
         Image *topbar = osu->getSkin()->songSelectTop;
         f32 scale = (f32)engine->getScreenWidth() / (f32)topbar->getWidth();
+        if(!is_widescreen) scale /= 0.75;
+
         g->scale(scale, scale);
         g->drawImage(topbar, AnchorPoint::TOP_LEFT);
     }
@@ -2267,7 +2274,7 @@ void SongBrowser::updateLayout() {
 
     auto screen = engine->getScreenSize();
     bool is_widescreen = ((i32)(std::max(0, (i32)((screen.x - (screen.y * 4.f / 3.f)) / 2.f))) > 0);
-    f32 global_scale = is_widescreen ? (screen.x / 1366.f) : 1.f;
+    f32 global_scale = screen.x / (is_widescreen ? 1366.f : 1024.f);
 
     const float uiScale = cv_ui_scale.getFloat();
     const float dpiScale = Osu::getUIScale();
@@ -2275,8 +2282,12 @@ void SongBrowser::updateLayout() {
     const int margin = 5 * dpiScale;
 
     // topbar left
-    // NOTE: Since we don't scale text, we're setting a minimum scale for height
-    this->topbarLeft->setSize(global_scale * 724.f / 2.f, std::max(1.f, global_scale) * 300.f / 2.f);
+    // TODO @kiwec: move score sorting method to settings menu. instead make the dropdown
+    //              select between Local/Country/Friends/Global
+    // TODO @kiwec: have checkbox in settings to toggle displaying non-vanilla scores
+    // TODO @kiwec: have checkbox in settings to toggle only showing selected mods (?)
+
+    this->topbarLeft->setSize(global_scale * 724.f / 2.f, global_scale * 290.f / 2.f);
     this->songInfo->setRelPos(margin, margin);
     this->songInfo->setSize(this->topbarLeft->getSize().x - margin,
                             max(this->topbarLeft->getSize().y * 0.75f, this->songInfo->getMinimumHeight() + margin));
@@ -2284,27 +2295,17 @@ void SongBrowser::updateLayout() {
     const int topbarLeftButtonMargin = 5 * dpiScale;
     const int topbarLeftButtonHeight = 30 * dpiScale;
     const int topbarLeftButtonWidth = 55 * dpiScale;
-    for(int i = 0; i < this->topbarLeftButtons.size(); i++) {
-        this->topbarLeftButtons[i]->onResized();  // HACKHACK: framework bug (should update string metrics on setSize())
-        this->topbarLeftButtons[i]->setSize(topbarLeftButtonWidth, topbarLeftButtonHeight);
-        this->topbarLeftButtons[i]->setRelPos(
-            this->topbarLeft->getSize().x - (i + 1) * (topbarLeftButtonMargin + topbarLeftButtonWidth),
-            this->topbarLeft->getSize().y - this->topbarLeftButtons[i]->getSize().y);
-    }
+    this->webButton->onResized();  // HACKHACK: framework bug (should update string metrics on setSize())
+    this->webButton->setSize(topbarLeftButtonWidth, topbarLeftButtonHeight);
+    this->webButton->setRelPos(this->topbarLeft->getSize().x - (topbarLeftButtonMargin + topbarLeftButtonWidth),
+                               this->topbarLeft->getSize().y - this->webButton->getSize().y);
 
-    const int topbarLeftTabButtonMargin = topbarLeftButtonMargin;
-    const int topbarLeftTabButtonHeight = topbarLeftButtonHeight;
-    const int topbarLeftTabButtonWidth =
-        this->topbarLeft->getSize().x - 3 * topbarLeftTabButtonMargin -
-        this->topbarLeftButtons.size() * (topbarLeftButtonWidth + topbarLeftButtonMargin);
-    for(int i = 0; i < this->topbarLeftTabButtons.size(); i++) {
-        this->topbarLeftTabButtons[i]
-            ->onResized();  // HACKHACK: framework bug (should update string metrics on setSize())
-        this->topbarLeftTabButtons[i]->setSize(topbarLeftTabButtonWidth, topbarLeftTabButtonHeight);
-        this->topbarLeftTabButtons[i]->setRelPos(
-            (topbarLeftTabButtonMargin + i * topbarLeftTabButtonWidth),
-            this->topbarLeft->getSize().y - this->topbarLeftTabButtons[i]->getSize().y);
-    }
+    this->scoreSortButton->onResized();  // HACKHACK: framework bug (should update string metrics on setSize())
+    this->scoreSortButton->setSize(
+        this->topbarLeft->getSize().x - 3 * topbarLeftButtonMargin - (topbarLeftButtonWidth + topbarLeftButtonMargin),
+        topbarLeftButtonHeight);
+    this->scoreSortButton->setRelPos(topbarLeftButtonMargin,
+                                     this->topbarLeft->getSize().y - this->scoreSortButton->getSize().y);
 
     this->topbarLeft->update_pos();
 
@@ -2588,22 +2589,6 @@ void SongBrowser::checkHandleKillBackgroundSearchMatcher() {
             }
         }
     }
-}
-
-CBaseUIButton *SongBrowser::addTopBarLeftTabButton(UString text) {
-    CBaseUIButton *btn = new CBaseUIButton(0, 0, 0, 0, "", text);
-    btn->setDrawBackground(false);
-    this->topbarLeft->addBaseUIElement(btn);
-    this->topbarLeftTabButtons.push_back(btn);
-    return btn;
-}
-
-CBaseUIButton *SongBrowser::addTopBarLeftButton(UString text) {
-    CBaseUIButton *btn = new CBaseUIButton(0, 0, 0, 0, "", text);
-    btn->setDrawBackground(false);
-    this->topbarLeft->addBaseUIElement(btn);
-    this->topbarLeftButtons.push_back(btn);
-    return btn;
 }
 
 void SongBrowser::onDatabaseLoadingFinished() {

@@ -14,21 +14,21 @@
 #include "OptionsMenu.h"
 #include "Osu.h"
 #include "ResourceManager.h"
+#include "Skin.h"
 #include "TooltipOverlay.h"
 
 InfoLabel::InfoLabel(float xPos, float yPos, float xSize, float ySize, UString name)
     : CBaseUIButton(xPos, yPos, xSize, ySize, name, "") {
     this->font = osu->getSubTitleFont();
 
-    this->iMargin = 10;
+    this->iMargin = 8;
 
-    const float globalScaler = 1.3f;
-
-    this->fTitleScale = 0.77f * globalScaler;
-    this->fSubTitleScale = 0.6f * globalScaler;
-    this->fSongInfoScale = 0.7f * globalScaler;
-    this->fDiffInfoScale = 0.65f * globalScaler;
-    this->fOffsetInfoScale = 0.6f * globalScaler;
+    this->fGlobalScale = 1.f;
+    this->fTitleScale = 1.f * fGlobalScale;
+    this->fSubTitleScale = 0.65f * fGlobalScale;
+    this->fSongInfoScale = 0.8f * fGlobalScale;
+    this->fDiffInfoScale = 0.65f * fGlobalScale;
+    this->fOffsetInfoScale = 0.65f * fGlobalScale;
 
     this->sArtist = "Artist";
     this->sTitle = "Title";
@@ -108,7 +108,7 @@ void InfoLabel::draw(Graphics *g) {
     {
         const float scale = this->fSubTitleScale * globalScale;
 
-        yCounter += this->font->getHeight() * scale + this->iMargin * globalScale * 1.0f;
+        yCounter += this->font->getHeight() * scale + (this->iMargin / 2) * globalScale * 1.0f;
 
         g->scale(scale, scale);
         g->translate((int)(this->vPos.x), yCounter);
@@ -131,7 +131,7 @@ void InfoLabel::draw(Graphics *g) {
     {
         const float scale = this->fSongInfoScale * globalScale * 0.9f;
 
-        yCounter += this->font->getHeight() * scale + this->iMargin * globalScale * 1.0f;
+        yCounter += this->font->getHeight() * scale + (this->iMargin / 2) * globalScale * 1.0f;
 
         g->scale(scale, scale);
         g->translate((int)(this->vPos.x), yCounter);
@@ -189,6 +189,16 @@ void InfoLabel::draw(Graphics *g) {
 
 void InfoLabel::mouse_update(bool *propagate_clicks) {
     if(!this->bVisible) return;
+
+    auto screen = engine->getScreenSize();
+    bool is_widescreen = ((i32)(std::max(0, (i32)((screen.x - (screen.y * 4.f / 3.f)) / 2.f))) > 0);
+    this->fGlobalScale = screen.x / (is_widescreen ? 1366.f : 1024.f);
+    this->fTitleScale = 1.f * fGlobalScale;
+    this->fSubTitleScale = 0.65f * fGlobalScale;
+    this->fSongInfoScale = 0.8f * fGlobalScale;
+    this->fDiffInfoScale = 0.65f * fGlobalScale;
+    this->fOffsetInfoScale = 0.65f * fGlobalScale;
+
     CBaseUIButton::mouse_update(propagate_clicks);
 
     // detail info tooltip when hovering over diff info
@@ -353,13 +363,10 @@ float InfoLabel::getMinimumWidth() {
 }
 
 float InfoLabel::getMinimumHeight() {
-    float titleHeight = this->font->getHeight() * this->fTitleScale;
-    float subTitleHeight = this->font->getHeight() * this->fSubTitleScale;
-    float songInfoHeight = this->font->getHeight() * this->fSongInfoScale;
-    float diffInfoHeight = this->font->getHeight() * this->fDiffInfoScale;
-    /// float offsetInfoHeight = m_font->getHeight() * m_fOffsetInfoScale;
-
-    return titleHeight + subTitleHeight + songInfoHeight + diffInfoHeight /* + offsetInfoHeight*/ +
-           this->iMargin *
-               3;  // this is commented on purpose (also, it should be m_iMargin*4 but the 3 is also on purpose)
+    f32 titleHeight = this->font->getHeight() * this->fTitleScale;
+    f32 subTitleHeight = this->font->getHeight() * this->fSubTitleScale;
+    f32 songInfoHeight = this->font->getHeight() * this->fSongInfoScale;
+    f32 diffInfoHeight = this->font->getHeight() * this->fDiffInfoScale;
+    f32 offsetInfoHeight = this->font->getHeight() * this->fOffsetInfoScale;
+    return titleHeight + subTitleHeight + songInfoHeight + diffInfoHeight + offsetInfoHeight + this->iMargin * 6;
 }

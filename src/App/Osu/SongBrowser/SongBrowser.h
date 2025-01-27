@@ -148,11 +148,7 @@ class SongBrowser : public ScreenBackable {
     void updateScoreBrowserLayout();
 
     void scheduleSearchUpdate(bool immediately = false);
-
     void checkHandleKillBackgroundSearchMatcher();
-
-    CBaseUIButton *addTopBarLeftTabButton(UString text);
-    CBaseUIButton *addTopBarLeftButton(UString text);
 
     void onDatabaseLoadingFinished();
 
@@ -208,8 +204,6 @@ class SongBrowser : public ScreenBackable {
     // top bar left
     CBaseUIContainer *topbarLeft;
     InfoLabel *songInfo;
-    std::vector<CBaseUIButton *> topbarLeftTabButtons;
-    std::vector<CBaseUIButton *> topbarLeftButtons;
     CBaseUIButton *scoreSortButton;
     CBaseUIButton *webButton;
 

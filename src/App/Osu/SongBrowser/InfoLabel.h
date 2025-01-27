@@ -50,11 +50,12 @@ class InfoLabel : public CBaseUIButton {
     McFont *font;
 
     int iMargin;
-    float fTitleScale;
-    float fSubTitleScale;
-    float fSongInfoScale;
-    float fDiffInfoScale;
-    float fOffsetInfoScale;
+    f32 fGlobalScale;
+    f32 fTitleScale;
+    f32 fSubTitleScale;
+    f32 fSongInfoScale;
+    f32 fDiffInfoScale;
+    f32 fOffsetInfoScale;
 
     std::string sArtist;
     std::string sTitle;
