@@ -85,8 +85,8 @@ void update_bottombar(bool* propagate_clicks) {
         global_scale * options_img->getImageSizeForCurrentFrame().y * (options_img->is_2x ? 0.5f : 1.f);
 
     // NOTE: Skin template shows 640:150px size, and 320px from options button origin, I cheated a bit
-    osu->userButton->setSize(global_scale * 640 * 0.5, global_scale * 176 * 0.5);
-    osu->userButton->setPos(btns_x[OPTIONS] + (i32)(global_scale * 290.f * 0.5f),
+    osu->userButton->setSize(global_scale * 640 * 0.5, global_scale * 150 * 0.5);
+    osu->userButton->setPos(btns_x[OPTIONS] + (i32)(global_scale * 320.f * 0.5f),
                             engine->getScreenHeight() - osu->userButton->getSize().y);
     osu->userButton->mouse_update(propagate_clicks);
 
@@ -229,5 +229,4 @@ void draw_bottombar(Graphics* g) {
 
 // TODO @kiwec: default icon for mode-osu-small
 // TODO @kiwec: draw mode-osu
-// TODO @kiwec: remake usercard so it matches stable more closely
 // TODO @kiwec: make topleftbar text a bit smaller so it fits
