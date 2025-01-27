@@ -121,7 +121,7 @@ void ScoreButton::draw(Graphics *g) {
     g->popTransform();
 
     // grade
-    const float gradeHeightPercent = 0.7f;
+    const float gradeHeightPercent = 0.8f;
     SkinImage *grade = getGradeImage(this->scoreGrade);
     int gradeWidth = 0;
     g->pushTransform();
@@ -171,7 +171,7 @@ void ScoreButton::draw(Graphics *g) {
     // score | pp | weighted 95% (pp)
     const float scoreScale = 0.5f;
     McFont *scoreFont = (this->vSize.y < 50 ? engine->getResourceManager()->getFont("FONT_DEFAULT")
-                                              : usernameFont);  // HACKHACK: switch font for very low resolutions
+                                            : usernameFont);  // HACKHACK: switch font for very low resolutions
     g->pushTransform();
     {
         const float height = this->vSize.y * 0.5f;
@@ -187,14 +187,14 @@ void ScoreButton::draw(Graphics *g) {
         g->translate(0.75f, 0.75f);
         g->setColor(0xff000000);
         g->setAlpha(0.75f);
-        g->drawString(scoreFont, (cv_scores_sort_by_pp.getBool()
-                                      ? string
-                                      : (this->style == STYLE::TOP_RANKS ? string : this->sScoreScore)));
+        g->drawString(
+            scoreFont,
+            (cv_scores_sort_by_pp.getBool() ? string : (this->style == STYLE::TOP_RANKS ? string : this->sScoreScore)));
         g->translate(-0.75f, -0.75f);
         g->setColor((this->style == STYLE::TOP_RANKS ? 0xffdeff87 : 0xffffffff));
-        g->drawString(scoreFont, (cv_scores_sort_by_pp.getBool()
-                                      ? string
-                                      : (this->style == STYLE::TOP_RANKS ? string : this->sScoreScore)));
+        g->drawString(
+            scoreFont,
+            (cv_scores_sort_by_pp.getBool() ? string : (this->style == STYLE::TOP_RANKS ? string : this->sScoreScore)));
 
         if(this->style == STYLE::TOP_RANKS) {
             g->translate(scoreFont->getStringWidth(string) * scale, 0);
@@ -301,8 +301,8 @@ void ScoreButton::draw(Graphics *g) {
             const float scale = (height / weightFont->getHeight()) * weightScale;
 
             g->scale(scale, scale);
-            g->translate((int)(this->vPos.x + this->vSize.x -
-                               weightFont->getStringWidth(this->sScoreWeight) * scale - rightSidePaddingRight),
+            g->translate((int)(this->vPos.x + this->vSize.x - weightFont->getStringWidth(this->sScoreWeight) * scale -
+                               rightSidePaddingRight),
                          (int)(yPos + height * 2.5f + weightFont->getHeight() * scale / 2.0f - paddingBottom));
             g->translate(0.75f, 0.75f);
             g->setColor(0xff000000);
@@ -397,8 +397,8 @@ void ScoreButton::mouse_update(bool *propagate_clicks) {
         auto info = lct_get_pp(request);
         if(info.pp != -1.0) {
             // NOTE: Allows dropped sliderends. Should fix with @PPV3
-            const bool fullCombo = (this->score.maxPossibleCombo > 0 && this->score.numMisses == 0 &&
-                                    this->score.numSliderBreaks == 0);
+            const bool fullCombo =
+                (this->score.maxPossibleCombo > 0 && this->score.numMisses == 0 && this->score.numSliderBreaks == 0);
 
             this->score.ppv2_score = info.pp;
             this->score.ppv2_version = DifficultyCalculator::PP_ALGORITHM_VERSION;
@@ -451,8 +451,7 @@ void ScoreButton::mouse_update(bool *propagate_clicks) {
                 osu->getTooltipOverlay()->begin();
                 {
                     for(int i = 0; i < this->tooltipLines.size(); i++) {
-                        if(this->tooltipLines[i].length() > 0)
-                            osu->getTooltipOverlay()->addLine(this->tooltipLines[i]);
+                        if(this->tooltipLines[i].length() > 0) osu->getTooltipOverlay()->addLine(this->tooltipLines[i]);
                     }
                 }
                 osu->getTooltipOverlay()->end();
@@ -668,8 +667,7 @@ void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, i
         this->avatar = NULL;
     }
     if(score.player_id != 0) {
-        this->avatar =
-            new UIAvatar(score.player_id, this->vPos.x, this->vPos.y, this->vSize.y, this->vSize.y);
+        this->avatar = new UIAvatar(score.player_id, this->vPos.x, this->vPos.y, this->vSize.y, this->vSize.y);
 
         auto user = get_user_info(score.player_id);
         this->is_friend = user->is_friend();
@@ -757,9 +755,8 @@ void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, i
     this->tooltipLines.clear();
     this->tooltipLines.push_back(achievedOn);
 
-    this->tooltipLines.push_back(UString::format("300:%i 100:%i 50:%i Miss:%i SBreak:%i", score.num300s,
-                                                   score.num100s, score.num50s, score.numMisses,
-                                                   score.numSliderBreaks));
+    this->tooltipLines.push_back(UString::format("300:%i 100:%i 50:%i Miss:%i SBreak:%i", score.num300s, score.num100s,
+                                                 score.num50s, score.numMisses, score.numSliderBreaks));
 
     this->tooltipLines.push_back(UString::format("Accuracy: %.2f%%", accuracy));
 
@@ -806,7 +803,7 @@ void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, i
         this->sScoreWeight = UString::format("weighted %i%%", weightRounded);
 
         this->tooltipLines.push_back(UString::format("Stars: %.2f (%.2f aim, %.2f speed)", score.ppv2_total_stars,
-                                                       score.ppv2_aim_stars, score.ppv2_speed_stars));
+                                                     score.ppv2_aim_stars, score.ppv2_speed_stars));
         this->tooltipLines.push_back(UString::format("Speed: %.3gx", score.mods.speed));
         this->tooltipLines.push_back(UString::format("CS:%.4g AR:%.4g OD:%.4g HP:%.4g", CS, AR, OD, HP));
         this->tooltipLines.push_back(

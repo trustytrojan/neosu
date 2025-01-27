@@ -228,3 +228,5 @@ void draw_bottombar(Graphics* g) {
 // TODO @kiwec: default icon for mode-osu-small
 // TODO @kiwec: draw mode-osu
 // TODO @kiwec: remake usercard so it matches stable more closely
+// TODO @kiwec: remake back button
+// TODO @kiwec: make topleftbar text a bit smaller so it fits

@@ -820,14 +820,14 @@ void Skin::load() {
     this->checkLoadImage(&this->rankingX, "ranking-X", "OSU_SKIN_RANKING_X");
     this->checkLoadImage(&this->rankingXH, "ranking-XH", "OSU_SKIN_RANKING_XH");
 
-    this->rankingAsmall = this->createSkinImage("ranking-A-small", Vector2(34, 38), 128);
-    this->rankingBsmall = this->createSkinImage("ranking-B-small", Vector2(33, 38), 128);
-    this->rankingCsmall = this->createSkinImage("ranking-C-small", Vector2(30, 38), 128);
-    this->rankingDsmall = this->createSkinImage("ranking-D-small", Vector2(33, 38), 128);
-    this->rankingSsmall = this->createSkinImage("ranking-S-small", Vector2(31, 38), 128);
-    this->rankingSHsmall = this->createSkinImage("ranking-SH-small", Vector2(31, 38), 128);
+    this->rankingAsmall = this->createSkinImage("ranking-A-small", Vector2(34, 40), 128);
+    this->rankingBsmall = this->createSkinImage("ranking-B-small", Vector2(34, 40), 128);
+    this->rankingCsmall = this->createSkinImage("ranking-C-small", Vector2(34, 40), 128);
+    this->rankingDsmall = this->createSkinImage("ranking-D-small", Vector2(34, 40), 128);
+    this->rankingSsmall = this->createSkinImage("ranking-S-small", Vector2(34, 40), 128);
+    this->rankingSHsmall = this->createSkinImage("ranking-SH-small", Vector2(34, 40), 128);
     this->rankingXsmall = this->createSkinImage("ranking-X-small", Vector2(34, 40), 128);
-    this->rankingXHsmall = this->createSkinImage("ranking-XH-small", Vector2(34, 41), 128);
+    this->rankingXHsmall = this->createSkinImage("ranking-XH-small", Vector2(34, 40), 128);
 
     this->rankingPerfect = this->createSkinImage("ranking-perfect", Vector2(478, 150), 128);
 

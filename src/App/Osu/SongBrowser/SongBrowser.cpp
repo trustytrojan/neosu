@@ -2263,13 +2263,18 @@ bool SongBrowser::findSubstringInDifficulty(const DatabaseBeatmap *diff, const U
 void SongBrowser::updateLayout() {
     ScreenBackable::updateLayout();
 
+    auto screen = engine->getScreenSize();
+    bool is_widescreen = ((i32)(std::max(0, (i32)((screen.x - (screen.y * 4.f / 3.f)) / 2.f))) > 0);
+    f32 global_scale = is_widescreen ? (screen.x / 1366.f) : 1.f;
+
     const float uiScale = cv_ui_scale.getFloat();
     const float dpiScale = Osu::getUIScale();
 
     const int margin = 5 * dpiScale;
 
     // topbar left
-    this->topbarLeft->setSize(724.f / 2.f, 290.f / 2.f);
+    // NOTE: Since we don't scale text, we're setting a minimum scale for height
+    this->topbarLeft->setSize(global_scale * 724.f / 2.f, std::max(1.f, global_scale) * 300.f / 2.f);
     this->songInfo->setRelPos(margin, margin);
     this->songInfo->setSize(this->topbarLeft->getSize().x - margin,
                             max(this->topbarLeft->getSize().y * 0.75f, this->songInfo->getMinimumHeight() + margin));

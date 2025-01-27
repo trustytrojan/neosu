@@ -376,6 +376,10 @@ void OpenGLLegacyInterface::drawImage(Image *image, AnchorPoint anchor) {
             x = 0;
             y = -height;
             break;
+        case AnchorPoint::LEFT:
+            x = 0;
+            y = -height / 2;
+            break;
         default:
             abort();  // :-)
     }

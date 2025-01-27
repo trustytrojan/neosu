@@ -45,8 +45,8 @@ SongButton::SongButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UICont
 
         // and add them
         for(int i = 0; i < difficulties.size(); i++) {
-            SongButton *songButton = new SongDifficultyButton(this->songBrowser, this->view, this->contextMenu, 0,
-                                                              0, 0, 0, "", difficulties[i], this);
+            SongButton *songButton = new SongDifficultyButton(this->songBrowser, this->view, this->contextMenu, 0, 0, 0,
+                                                              0, "", difficulties[i], this);
 
             this->children.push_back(songButton);
         }
@@ -65,6 +65,9 @@ void SongButton::draw(Graphics *g) {
     if(!this->bVisible) return;
     if(this->vPos.y + this->vSize.y < 0) return;
     if(this->vPos.y > engine->getScreenHeight()) return;
+
+    // HACK: overkill to set this for every song button
+    SongButton::thumbnailYRatio = cv_draw_songbrowser_thumbnails.getBool() ? 1.333333f : 0.f;
 
     Button::draw(g);
 
@@ -102,9 +105,9 @@ void SongButton::drawBeatmapBackgroundThumbnail(Graphics *g, Image *image) {
         if(image == NULL || !image->isReady())
             this->fThumbnailFadeInTime = engine->getTime();
         else if(this->fThumbnailFadeInTime > 0.0f && engine->getTime() > this->fThumbnailFadeInTime) {
-            alpha = clamp<float>((engine->getTime() - this->fThumbnailFadeInTime) /
-                                     cv_songbrowser_thumbnail_fade_in_duration.getFloat(),
-                                 0.0f, 1.0f);
+            alpha = clamp<float>(
+                (engine->getTime() - this->fThumbnailFadeInTime) / cv_songbrowser_thumbnail_fade_in_duration.getFloat(),
+                0.0f, 1.0f);
             alpha = 1.0f - (1.0f - alpha) * (1.0f - alpha);
         }
     }
@@ -157,11 +160,8 @@ void SongButton::drawGrade(Graphics *g) {
     g->pushTransform();
     {
         const float scale = this->calculateGradeScale();
-
         g->setColor(0xffffffff);
-        grade->drawRaw(
-            g, Vector2(pos.x + this->fGradeOffset + grade->getSizeBaseRaw().x * scale / 2, pos.y + size.y / 2),
-            scale);
+        grade->drawRaw(g, Vector2(pos.x + this->fGradeOffset, pos.y + size.y / 2), scale, AnchorPoint::LEFT);
     }
     g->popTransform();
 }
@@ -173,7 +173,7 @@ void SongButton::drawTitle(Graphics *g, float deselectedAlpha, bool forceSelecte
 
     const float titleScale = (size.y * this->fTitleScale) / this->font->getHeight();
     g->setColor((this->bSelected || forceSelectedStyle) ? osu->getSkin()->getSongSelectActiveText()
-                                                          : osu->getSkin()->getSongSelectInactiveText());
+                                                        : osu->getSkin()->getSongSelectInactiveText());
     if(!(this->bSelected || forceSelectedStyle)) g->setAlpha(deselectedAlpha);
 
     g->pushTransform();
@@ -195,7 +195,7 @@ void SongButton::drawSubTitle(Graphics *g, float deselectedAlpha, bool forceSele
     const float titleScale = (size.y * this->fTitleScale) / this->font->getHeight();
     const float subTitleScale = (size.y * this->fSubTitleScale) / this->font->getHeight();
     g->setColor((this->bSelected || forceSelectedStyle) ? osu->getSkin()->getSongSelectActiveText()
-                                                          : osu->getSkin()->getSongSelectInactiveText());
+                                                        : osu->getSkin()->getSongSelectInactiveText());
     if(!(this->bSelected || forceSelectedStyle)) g->setAlpha(deselectedAlpha);
 
     g->pushTransform();
@@ -228,7 +228,6 @@ void SongButton::updateLayoutEx() {
 
     if(osu->getSkin()->getVersion() < 2.2f) {
         this->fTextOffset += size.x * 0.02f * 2.0f;
-        if(this->grade != FinishedScore::Grade::N) this->fGradeOffset += this->calculateGradeWidth() / 2;
     } else {
         this->fTextOffset += size.y * thumbnailYRatio + size.x * 0.02f;
         this->fGradeOffset += size.y * thumbnailYRatio + size.x * 0.0125f;
@@ -343,8 +342,7 @@ void SongButton::onContextMenu(UString text, int id) {
             }
         }
         this->contextMenu->end(false, true);
-        this->contextMenu->setClickCallback(
-            fastdelegate::MakeDelegate(this, &SongButton::onAddToCollectionConfirmed));
+        this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &SongButton::onAddToCollectionConfirmed));
         UIContextMenu::clampToRightScreenEdge(this->contextMenu);
         UIContextMenu::clampToBottomScreenEdge(this->contextMenu);
     } else if(id == 3 || id == 4) {
