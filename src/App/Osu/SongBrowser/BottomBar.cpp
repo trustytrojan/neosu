@@ -139,6 +139,8 @@ void draw_bottombar(Graphics* g) {
     }
     g->popTransform();
 
+    osu->getSongBrowser()->backButton->draw(g);
+
     // Draw the user card under selection elements, which can cover it for fancy effects
     // (we don't match stable perfectly, but close enough)
     osu->userButton->draw(g);
@@ -228,5 +230,4 @@ void draw_bottombar(Graphics* g) {
 // TODO @kiwec: default icon for mode-osu-small
 // TODO @kiwec: draw mode-osu
 // TODO @kiwec: remake usercard so it matches stable more closely
-// TODO @kiwec: remake back button
 // TODO @kiwec: make topleftbar text a bit smaller so it fits

@@ -736,7 +736,9 @@ void SongBrowser::draw(Graphics *g) {
     this->topbarRight->draw(g);
     if(cv_debug.getBool()) this->topbarRight->draw_debug(g);
 
-    ScreenBackable::draw(g);
+    // NOTE: Intentionally not calling ScreenBackable::draw() here, since we're already drawing
+    //       the back button in draw_bottombar().
+    OsuScreen::draw(g);
 
     // no beatmaps found (osu folder is probably invalid)
     if(this->beatmaps.size() == 0 && !this->bBeatmapRefreshScheduled) {

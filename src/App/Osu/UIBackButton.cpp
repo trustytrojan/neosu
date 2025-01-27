@@ -19,18 +19,12 @@ UIBackButton::UIBackButton(float xPos, float yPos, float xSize, float ySize, USt
 void UIBackButton::draw(Graphics *g) {
     if(!this->bVisible) return;
 
-    const float scaleAnimMultiplier = 0.01f;
-
     // draw button image
     g->pushTransform();
     {
-        g->translate(this->vSize.x / 2, -this->vSize.y / 2);
-        g->scale((1.0f + this->fAnimation * scaleAnimMultiplier), (1.0f + this->fAnimation * scaleAnimMultiplier));
-        g->translate(-this->vSize.x / 2, this->vSize.y / 2);
         g->setColor(0xffffffff);
         osu->getSkin()->getMenuBack2()->draw(
-            g, this->vPos + (osu->getSkin()->getMenuBack2()->getSize() / 2) * this->fImageScale,
-            this->fImageScale);
+            g, this->vPos + (osu->getSkin()->getMenuBack2()->getSize() / 2) * this->fImageScale, this->fImageScale);
     }
     g->popTransform();
 
@@ -40,9 +34,6 @@ void UIBackButton::draw(Graphics *g) {
         {
             g->setColor(0xffffffff);
             g->setAlpha(this->fAnimation * 0.15f);
-            g->translate(this->vSize.x / 2, -this->vSize.y / 2);
-            g->scale(1.0f + this->fAnimation * scaleAnimMultiplier, 1.0f + this->fAnimation * scaleAnimMultiplier);
-            g->translate(-this->vSize.x / 2, this->vSize.y / 2);
             g->translate(this->vPos.x + this->vSize.x / 2, this->vPos.y + this->vSize.y / 2);
             g->fillRect(-this->vSize.x / 2, -this->vSize.y / 2, this->vSize.x, this->vSize.y + 5);
         }

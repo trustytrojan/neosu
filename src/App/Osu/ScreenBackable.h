@@ -11,10 +11,7 @@ class ScreenBackable : public OsuScreen {
     virtual void mouse_update(bool *propagate_clicks);
     virtual void onKeyDown(KeyboardEvent &e);
     virtual void onResolutionChange(Vector2 newResolution);
-
-   protected:
     virtual void onBack() = 0;
-
     virtual void updateLayout();
 
     UIBackButton *backButton;
