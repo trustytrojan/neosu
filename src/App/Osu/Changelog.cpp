@@ -26,6 +26,15 @@ Changelog::Changelog() : ScreenBackable() {
 
     std::vector<CHANGELOG> changelogs;
 
+    CHANGELOG v37_01;
+    v37_01.title = "37.01 (2025-01-27)";
+    v37_01.changes.push_back("- Added support for back button skin hacks");
+    v37_01.changes.push_back("- Added windowed_resolution convar (window size will now be saved)");
+    v37_01.changes.push_back("- Changed user card to be compatible with more skins");
+    v37_01.changes.push_back("- Improved rendering of grade/ranking skin elements");
+    v37_01.changes.push_back("- Improved rendering of song info text/background");
+    changelogs.push_back(v37_01);
+
     CHANGELOG v37_00;
     v37_00.title = "37.00 (2025-01-26)";
     v37_00.changes.push_back("- Added support for song browser skin elements");
