@@ -494,10 +494,28 @@ void WinEnvironment::enableFullscreen() {
 void WinEnvironment::disableFullscreen() {
     if(!this->bFullScreen) return;
 
+    // Fetch window size from cvar string
+    f32 width = 1280.f;
+    f32 height = 720.f;
+    {
+        UString res = cv_windowed_resolution.getString();
+        if(res.length() >= 7) {
+            std::vector<UString> resolution = res.split("x");
+            if(resolution.size() == 2) {
+                int w = resolution[0].toFloat();
+                int h = resolution[1].toFloat();
+                if(w >= 300 && h >= 240) {
+                    width = (f32)w;
+                    height = (f32)h;
+                }
+            }
+        }
+    }
+
     // clamp prev window client size to monitor
     const McRect desktopRect = getDesktopRect();
-    this->vLastWindowSize.x = min(this->vLastWindowSize.x, desktopRect.getWidth());
-    this->vLastWindowSize.y = min(this->vLastWindowSize.y, desktopRect.getHeight());
+    this->vLastWindowSize.x = min(width, desktopRect.getWidth());
+    this->vLastWindowSize.y = min(height, desktopRect.getHeight());
 
     // request window size based on prev client size
     RECT rect;
@@ -844,7 +862,8 @@ bool WinEnvironment::setProcessAffinity(int affinity) {
 void WinEnvironment::disableWindowsKey() {
     if(this->hKeyboardHook != NULL) return;
 
-    this->hKeyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, WinEnvironment::lowLevelKeyboardProc, GetModuleHandle(NULL), 0);
+    this->hKeyboardHook =
+        SetWindowsHookEx(WH_KEYBOARD_LL, WinEnvironment::lowLevelKeyboardProc, GetModuleHandle(NULL), 0);
 }
 
 void WinEnvironment::enableWindowsKey() {
@@ -936,8 +955,7 @@ BOOL CALLBACK WinEnvironment::monitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor,
     if(cv_debug_env.getBool())
         debugLog("Monitor %i: (right = %ld, bottom = %ld, left = %ld, top = %ld), isPrimaryMonitor = %i\n",
                  WinEnvironment::vMonitors.size(), lprcMonitor->right, lprcMonitor->bottom, lprcMonitor->left,
-                 lprcMonitor->top,
-                 (int)isPrimaryMonitor);
+                 lprcMonitor->top, (int)isPrimaryMonitor);
 
     return TRUE;
 }

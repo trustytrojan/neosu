@@ -176,6 +176,7 @@ class Osu : public App, public MouseListener {
     void fireResolutionChanged();
 
     // callbacks
+    void onWindowedResolutionChanged(UString oldValue, UString args);
     void onInternalResolutionChanged(UString oldValue, UString args);
 
     void onSkinReload();

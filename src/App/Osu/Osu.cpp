@@ -127,6 +127,7 @@ Osu::Osu() {
     // convar callbacks
     cv_resolution.setValue(UString::format("%ix%i", engine->getScreenWidth(), engine->getScreenHeight()));
     cv_resolution.setCallback(fastdelegate::MakeDelegate(this, &Osu::onInternalResolutionChanged));
+    cv_windowed_resolution.setCallback(fastdelegate::MakeDelegate(this, &Osu::onWindowedResolutionChanged));
     cv_animation_speed_override.setCallback(fastdelegate::MakeDelegate(this, &Osu::onAnimationSpeedChange));
     cv_ui_scale.setCallback(fastdelegate::MakeDelegate(this, &Osu::onUIScaleChange));
     cv_ui_scale_to_dpi.setCallback(fastdelegate::MakeDelegate(this, &Osu::onUIScaleToDPIChange));
@@ -1666,44 +1667,66 @@ void Osu::updateWindowsKeyDisable() {
 
 void Osu::fireResolutionChanged() { this->onResolutionChanged(g_vInternalResolution); }
 
-void Osu::onInternalResolutionChanged(UString oldValue, UString args) {
+void Osu::onWindowedResolutionChanged(UString oldValue, UString args) {
+    if(env->isFullscreen()) return;
     if(args.length() < 7) return;
 
-    const float prevUIScale = getUIScale();
-
     std::vector<UString> resolution = args.split("x");
-    if(resolution.size() != 2)
+    if(resolution.size() != 2) {
         debugLog(
             "Error: Invalid parameter count for command 'osu_resolution'! (Usage: e.g. \"osu_resolution 1280x720\")");
-    else {
-        int width = resolution[0].toFloat();
-        int height = resolution[1].toFloat();
-
-        if(width < 300 || height < 240)
-            debugLog("Error: Invalid values for resolution for command 'osu_resolution'!");
-        else {
-            Vector2 newInternalResolution = Vector2(width, height);
-
-            // clamp requested internal resolution to current renderer resolution
-            // however, this could happen while we are transitioning into fullscreen. therefore only clamp when not in
-            // fullscreen or not in fullscreen transition
-            bool isTransitioningIntoFullscreenHack =
-                engine->getGraphics()->getResolution().x < env->getNativeScreenSize().x ||
-                engine->getGraphics()->getResolution().y < env->getNativeScreenSize().y;
-            if(!env->isFullscreen() || !isTransitioningIntoFullscreenHack) {
-                if(newInternalResolution.x > engine->getGraphics()->getResolution().x)
-                    newInternalResolution.x = engine->getGraphics()->getResolution().x;
-                if(newInternalResolution.y > engine->getGraphics()->getResolution().y)
-                    newInternalResolution.y = engine->getGraphics()->getResolution().y;
-            }
-
-            // enable and store, then force onResolutionChanged()
-            cv_resolution_enabled.setValue(1.0f);
-            g_vInternalResolution = newInternalResolution;
-            this->vInternalResolution = newInternalResolution;
-            this->fireResolutionChanged();
-        }
+        return;
     }
+
+    int width = resolution[0].toFloat();
+    int height = resolution[1].toFloat();
+    if(width < 300 || height < 240) {
+        debugLog("Error: Invalid values for resolution for command 'osu_resolution'!");
+        return;
+    }
+
+    env->setWindowSize(width, height);
+    env->center();
+}
+
+void Osu::onInternalResolutionChanged(UString oldValue, UString args) {
+    if(!env->isFullscreen()) return;
+    if(args.length() < 7) return;
+
+    std::vector<UString> resolution = args.split("x");
+    if(resolution.size() != 2) {
+        debugLog(
+            "Error: Invalid parameter count for command 'osu_resolution'! (Usage: e.g. \"osu_resolution 1280x720\")");
+        return;
+    }
+
+    int width = resolution[0].toFloat();
+    int height = resolution[1].toFloat();
+    if(width < 300 || height < 240) {
+        debugLog("Error: Invalid values for resolution for command 'osu_resolution'!");
+        return;
+    }
+
+    const float prevUIScale = getUIScale();
+    Vector2 newInternalResolution = Vector2(width, height);
+
+    // clamp requested internal resolution to current renderer resolution
+    // however, this could happen while we are transitioning into fullscreen. therefore only clamp when not in
+    // fullscreen or not in fullscreen transition
+    bool isTransitioningIntoFullscreenHack = engine->getGraphics()->getResolution().x < env->getNativeScreenSize().x ||
+                                             engine->getGraphics()->getResolution().y < env->getNativeScreenSize().y;
+    if(!env->isFullscreen() || !isTransitioningIntoFullscreenHack) {
+        if(newInternalResolution.x > engine->getGraphics()->getResolution().x)
+            newInternalResolution.x = engine->getGraphics()->getResolution().x;
+        if(newInternalResolution.y > engine->getGraphics()->getResolution().y)
+            newInternalResolution.y = engine->getGraphics()->getResolution().y;
+    }
+
+    // enable and store, then force onResolutionChanged()
+    cv_resolution_enabled.setValue(1.0f);
+    g_vInternalResolution = newInternalResolution;
+    this->vInternalResolution = newInternalResolution;
+    this->fireResolutionChanged();
 
     // a bit hacky, but detect resolution-specific-dpi-scaling changes and force a font and layout reload after a 1
     // frame delay (2/2)

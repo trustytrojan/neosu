@@ -181,7 +181,6 @@ void _restart(void);
 void _printsize(void);
 void _fullscreen(void);
 void _borderless(void);
-void _windowed(UString args);
 void _minimize(void);
 void _maximize(void);
 void _toggleresizable(void);

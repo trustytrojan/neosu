@@ -2518,10 +2518,11 @@ void OptionsMenu::onResolutionSelect() {
 }
 
 void OptionsMenu::onResolutionSelect2(UString resolution, int id) {
-    if(env->isFullscreen())
+    if(env->isFullscreen()) {
         cv_resolution.setValue(resolution);
-    else
-        cmd_windowed.execArgs(resolution);
+    } else {
+        cv_windowed_resolution.setValue(resolution);
+    }
 }
 
 void OptionsMenu::onOutputDeviceSelect() {

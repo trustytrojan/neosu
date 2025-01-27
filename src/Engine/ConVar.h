@@ -194,7 +194,6 @@ extern ConVar cmd_save;
 extern ConVar cmd_showconsolebox;
 extern ConVar cmd_shutdown;
 extern ConVar cmd_spectate;
-extern ConVar cmd_windowed;
 
 extern ConVar cv_BOSS_KEY;
 extern ConVar cv_DECREASE_LOCAL_OFFSET;
@@ -760,6 +759,7 @@ extern ConVar cv_rankingscreen_pp;
 extern ConVar cv_rankingscreen_topbar_height_percent;
 extern ConVar cv_relax_offset;
 extern ConVar cv_resolution;
+extern ConVar cv_windowed_resolution;
 extern ConVar cv_resolution_enabled;
 extern ConVar cv_resolution_keep_aspect_ratio;
 extern ConVar cv_restart_sound_engine_before_playing;

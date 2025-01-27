@@ -693,27 +693,6 @@ void _borderless(void) {
     }
 }
 
-void _windowed(UString args) {
-    env->disableFullscreen();
-
-    if(args.length() < 7) return;
-
-    std::vector<UString> resolution = args.split("x");
-    if(resolution.size() != 2)
-        debugLog("Error: Invalid parameter count for command 'windowed'! (Usage: e.g. \"windowed 1280x720\")");
-    else {
-        int width = resolution[0].toFloat();
-        int height = resolution[1].toFloat();
-
-        if(width < 300 || height < 240)
-            debugLog("Error: Invalid values for resolution for command 'windowed'!");
-        else {
-            env->setWindowSize(width, height);
-            env->center();
-        }
-    }
-}
-
 void _minimize(void) { env->minimize(); }
 
 void _maximize(void) { env->maximize(); }

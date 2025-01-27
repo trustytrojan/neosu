@@ -825,7 +825,6 @@ ConVar cmd_save("save", FCVAR_BANCHO_COMPATIBLE, _save);
 ConVar cmd_showconsolebox("showconsolebox");
 ConVar cmd_shutdown("shutdown", FCVAR_BANCHO_COMPATIBLE, _exit);
 ConVar cmd_spectate("spectate", FCVAR_HIDDEN, spectate_by_username);
-ConVar cmd_windowed("windowed", FCVAR_BANCHO_COMPATIBLE, _windowed);
 
 ConVar cv_BOSS_KEY("osu_key_boss", (int)KEY_INSERT, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_DECREASE_LOCAL_OFFSET("osu_key_decrease_local_offset", (int)KEY_SUBTRACT, FCVAR_BANCHO_COMPATIBLE);
@@ -1637,6 +1636,7 @@ ConVar cv_relax_offset(
     "osu_relax_offset", -12, FCVAR_BANCHO_COMPATIBLE | FCVAR_GAMEPLAY,
     "osu!relax always hits -12 ms too early, so set this to -12 (note the negative) if you want it to be the same");
 ConVar cv_resolution("osu_resolution", "1280x720", FCVAR_BANCHO_COMPATIBLE);
+ConVar cv_windowed_resolution("windowed_resolution", "1280x720", FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_resolution_enabled("osu_resolution_enabled", false, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_resolution_keep_aspect_ratio("osu_resolution_keep_aspect_ratio", false, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_restart_sound_engine_before_playing(
