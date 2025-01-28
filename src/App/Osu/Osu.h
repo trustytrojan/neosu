@@ -187,6 +187,7 @@ class Osu : public App, public MouseListener {
     void onSpeedChange(UString oldValue, UString newValue);
     void onDTPresetChange(UString oldValue, UString newValue);
     void onHTPresetChange(UString oldValue, UString newValue);
+    void onThumbnailsToggle(UString oldValue, UString newValue);
 
     void onPlayfieldChange(UString oldValue, UString newValue);
 

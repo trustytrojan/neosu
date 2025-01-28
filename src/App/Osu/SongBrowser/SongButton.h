@@ -54,7 +54,5 @@ class SongButton : public Button {
     float fGradeScale;
 
    private:
-    static float thumbnailYRatio;
-
     float fThumbnailFadeInTime;
 };

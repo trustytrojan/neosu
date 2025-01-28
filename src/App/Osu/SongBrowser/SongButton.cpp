@@ -19,8 +19,6 @@
 #include "SkinImage.h"
 #include "UIContextMenu.h"
 
-float SongButton::thumbnailYRatio = 1.333333f;
-
 SongButton::SongButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos,
                        float yPos, float xSize, float ySize, UString name, DatabaseBeatmap *databaseBeatmap)
     : Button(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, name) {
@@ -65,9 +63,6 @@ void SongButton::draw(Graphics *g) {
     if(!this->bVisible) return;
     if(this->vPos.y + this->vSize.y < 0) return;
     if(this->vPos.y > engine->getScreenHeight()) return;
-
-    // HACK: overkill to set this for every song button
-    SongButton::thumbnailYRatio = cv_draw_songbrowser_thumbnails.getBool() ? 1.333333f : 0.f;
 
     Button::draw(g);
 
@@ -118,7 +113,8 @@ void SongButton::drawBeatmapBackgroundThumbnail(Graphics *g, Image *image) {
     const Vector2 pos = this->getActualPos();
     const Vector2 size = this->getActualSize();
 
-    const float beatmapBackgroundScale =
+    const f32 thumbnailYRatio = osu->getSongBrowser()->thumbnailYRatio;
+    const f32 beatmapBackgroundScale =
         Osu::getImageScaleToFillResolution(image, Vector2(size.y * thumbnailYRatio, size.y)) * 1.05f;
 
     Vector2 centerOffset = Vector2(std::round((size.y * thumbnailYRatio) / 2.0f), std::round(size.y / 2.0f));
@@ -229,6 +225,7 @@ void SongButton::updateLayoutEx() {
     if(osu->getSkin()->getVersion() < 2.2f) {
         this->fTextOffset += size.x * 0.02f * 2.0f;
     } else {
+        const f32 thumbnailYRatio = osu->getSongBrowser()->thumbnailYRatio;
         this->fTextOffset += size.y * thumbnailYRatio + size.x * 0.02f;
         this->fGradeOffset += size.y * thumbnailYRatio + size.x * 0.0125f;
     }
@@ -399,14 +396,11 @@ void SongButton::onCreateNewCollectionConfirmed(UString text, int id) {
 
 float SongButton::calculateGradeScale() {
     const Vector2 size = this->getActualSize();
-
     SkinImage *grade = ScoreButton::getGradeImage(this->grade);
-
     return Osu::getImageScaleToFitResolution(grade->getSizeBaseRaw(), Vector2(size.x, size.y * this->fGradeScale));
 }
 
 float SongButton::calculateGradeWidth() {
     SkinImage *grade = ScoreButton::getGradeImage(this->grade);
-
     return grade->getSizeBaseRaw().x * this->calculateGradeScale();
 }

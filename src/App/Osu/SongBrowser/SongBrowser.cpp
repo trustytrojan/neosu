@@ -436,12 +436,13 @@ SongBrowser::SongBrowser() : ScreenBackable() {
     this->localBestLabel->setDrawFrame(false);
     this->localBestLabel->setTextJustification(CBaseUILabel::TEXT_JUSTIFICATION::TEXT_JUSTIFICATION_CENTERED);
 
-    // build songbrowser
+    // build carousel
     this->carousel = new CBaseUIScrollView(0, 0, 0, 0, "");
     this->carousel->setDrawBackground(false);
     this->carousel->setDrawFrame(false);
     this->carousel->setHorizontalScrolling(false);
     this->carousel->setScrollResistance(15);
+    this->thumbnailYRatio = cv_draw_songbrowser_thumbnails.getBool() ? 1.333333f : 0.f;
 
     // beatmap database
     db = new Database();

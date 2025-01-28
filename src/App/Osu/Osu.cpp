@@ -243,6 +243,7 @@ Osu::Osu() {
     cv_speed_override.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSpeedChange));
     cv_mod_doubletime_dummy.setCallback(fastdelegate::MakeDelegate(this, &Osu::onDTPresetChange));
     cv_mod_halftime_dummy.setCallback(fastdelegate::MakeDelegate(this, &Osu::onHTPresetChange));
+    cv_draw_songbrowser_thumbnails.setCallback(fastdelegate::MakeDelegate(this, &Osu::onThumbnailsToggle));
 
     // load global resources
     const int baseDPI = 96;
@@ -1855,6 +1856,10 @@ void Osu::onDTPresetChange(UString oldValue, UString newValue) {
 void Osu::onHTPresetChange(UString oldValue, UString newValue) {
     cv_speed_override.setValue(cv_mod_halftime_dummy.getBool() ? 0.75f : -1.f);
     osu->getModSelector()->speedSlider->setValue(cv_speed_override.getFloat(), false, false);
+}
+
+void Osu::onThumbnailsToggle(UString oldValue, UString newValue) {
+    osu->getSongBrowser()->thumbnailYRatio = cv_draw_songbrowser_thumbnails.getBool() ? 1.333333f : 0.f;
 }
 
 void Osu::onPlayfieldChange(UString oldValue, UString newValue) { this->getSelectedBeatmap()->onModUpdate(); }

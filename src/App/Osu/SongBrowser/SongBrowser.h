@@ -240,6 +240,7 @@ class SongBrowser : public ScreenBackable {
     bool scheduled_scroll_to_selected_button = false;
     float fNextScrollToSongButtonJumpFixOldRelPosY;
     float fNextScrollToSongButtonJumpFixOldScrollSizeY;
+    f32 thumbnailYRatio = 0.f;
 
     // song browser selection state logic
     SongButton *selectionPreviousSongButton;
