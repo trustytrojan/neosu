@@ -151,7 +151,6 @@ class CBaseUIElement : public KeyboardListener {
         this->onFocusStolen();
     }
 
-   protected:
     // events
     virtual void onResized() { ; }
     virtual void onMoved() { ; }

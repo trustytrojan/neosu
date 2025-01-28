@@ -13,10 +13,7 @@ class ScoreButton : public CBaseUIButton {
     static SkinImage *getGradeImage(FinishedScore::Grade grade);
     static UString getModsStringForDisplay(Replay::Mods mods);
 
-    enum class STYLE { SCORE_BROWSER, TOP_RANKS };
-
-    ScoreButton(UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize,
-                STYLE style = STYLE::SCORE_BROWSER);
+    ScoreButton(UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize);
     virtual ~ScoreButton();
 
     void draw(Graphics *g);
@@ -61,7 +58,6 @@ class ScoreButton : public CBaseUIButton {
     bool isContextMenuVisible();
 
     UIContextMenu *contextMenu;
-    STYLE style;
     float fIndexNumberAnim;
     bool bIsPulseAnim;
 
@@ -85,12 +81,6 @@ class ScoreButton : public CBaseUIButton {
     UString sScoreAccuracyFC;
     UString sScoreMods;
     UString sCustom;
-
-    // STYLE::TOP_RANKS
-    UString sScoreTitle;
-    UString sScoreScorePPWeightedPP;
-    UString sScoreScorePPWeightedWeight;
-    UString sScoreWeight;
 
     std::vector<UString> tooltipLines;
     UString sScoreDateTime;

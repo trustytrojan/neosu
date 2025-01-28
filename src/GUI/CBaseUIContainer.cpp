@@ -141,6 +141,20 @@ void CBaseUIContainer::draw_debug(Graphics *g) {
     g->drawLine(this->vPos.x, this->vPos.y, this->vPos.x, this->vPos.y + this->vSize.y);
     g->drawLine(this->vPos.x, this->vPos.y + this->vSize.y, this->vPos.x + this->vSize.x, this->vPos.y + this->vSize.y);
     g->drawLine(this->vPos.x + this->vSize.x, this->vPos.y, this->vPos.x + this->vSize.x, this->vPos.y + this->vSize.y);
+
+    g->setColor(0xff0000ff);
+    for(size_t i = 0; i < this->vElements.size(); i++) {
+        g->drawLine(this->vElements[i]->vPos.x, this->vElements[i]->vPos.y,
+                    this->vElements[i]->vPos.x + this->vElements[i]->vSize.x, this->vElements[i]->vPos.y);
+        g->drawLine(this->vElements[i]->vPos.x, this->vElements[i]->vPos.y, this->vElements[i]->vPos.x,
+                    this->vElements[i]->vPos.y + this->vElements[i]->vSize.y);
+        g->drawLine(this->vElements[i]->vPos.x, this->vElements[i]->vPos.y + this->vElements[i]->vSize.y,
+                    this->vElements[i]->vPos.x + this->vElements[i]->vSize.x,
+                    this->vElements[i]->vPos.y + this->vElements[i]->vSize.y);
+        g->drawLine(this->vElements[i]->vPos.x + this->vElements[i]->vSize.x, this->vElements[i]->vPos.y,
+                    this->vElements[i]->vPos.x + this->vElements[i]->vSize.x,
+                    this->vElements[i]->vPos.y + this->vElements[i]->vSize.y);
+    }
 }
 
 void CBaseUIContainer::mouse_update(bool *propagate_clicks) {

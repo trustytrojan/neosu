@@ -416,6 +416,7 @@ SongBrowser::SongBrowser() : ScreenBackable() {
 
     // build scorebrowser
     this->scoreBrowser = new CBaseUIScrollView(0, 0, 0, 0, "");
+    this->scoreBrowser->bScrollbarOnLeft = true;
     this->scoreBrowser->setDrawBackground(false);
     this->scoreBrowser->setDrawFrame(false);
     this->scoreBrowser->setHorizontalScrolling(false);
@@ -609,6 +610,10 @@ void SongBrowser::draw(Graphics *g) {
     // draw score browser
     this->scoreBrowser->draw(g);
     this->localBestContainer->draw(g);
+
+    if(cv_debug.getBool()) {
+        this->scoreBrowser->getContainer()->draw_debug(g);
+    }
 
     // draw strain graph of currently selected beatmap
     if(cv_draw_songbrowser_strain_graph.getBool()) {
@@ -2307,7 +2312,7 @@ void SongBrowser::updateLayout() {
     // TODO @kiwec: have checkbox in settings to toggle displaying non-vanilla scores
     // TODO @kiwec: have checkbox in settings to toggle only showing selected mods (?)
 
-    this->topbarLeft->setSize(global_scale * 724.f / 2.f, global_scale * 290.f / 2.f);
+    this->topbarLeft->setSize(global_scale * 390.f, global_scale * 145.f);
     this->songInfo->setRelPos(margin, margin);
     this->songInfo->setSize(this->topbarLeft->getSize().x - margin,
                             max(this->topbarLeft->getSize().y * 0.75f, this->songInfo->getMinimumHeight() + margin));
@@ -2370,14 +2375,11 @@ void SongBrowser::updateLayout() {
     this->topbarRight->update_pos();
 
     // score browser
-    const int scoreBrowserExtraPaddingRight = 5 * dpiScale;  // duplication, see below
     this->updateScoreBrowserLayout();
 
     // song browser
-    this->carousel->setPos(
-        this->topbarLeft->getPos().x + this->topbarLeft->getSize().x + 1 + scoreBrowserExtraPaddingRight, 0);
-    this->carousel->setSize(osu->getScreenWidth() - (this->topbarLeft->getPos().x + this->topbarLeft->getSize().x +
-                                                     scoreBrowserExtraPaddingRight),
+    this->carousel->setPos(this->topbarLeft->getPos().x + this->topbarLeft->getSize().x + 1, 0);
+    this->carousel->setSize(osu->getScreenWidth() - (this->topbarLeft->getPos().x + this->topbarLeft->getSize().x),
                             osu->getScreenHeight());
     this->updateSongButtonLayout();
 
@@ -2390,45 +2392,33 @@ void SongBrowser::onBack() { osu->toggleSongBrowser(); }
 void SongBrowser::updateScoreBrowserLayout() {
     const float dpiScale = Osu::getUIScale();
 
+    auto screen = engine->getScreenSize();
+    bool is_widescreen = ((i32)(std::max(0, (i32)((screen.x - (screen.y * 4.f / 3.f)) / 2.f))) > 0);
+    f32 global_scale = screen.x / (is_widescreen ? 1366.f : 1024.f);
+
     const bool shouldScoreBrowserBeVisible =
         (cv_scores_enabled.getBool() && cv_songbrowser_scorebrowser_enabled.getBool());
     if(shouldScoreBrowserBeVisible != this->scoreBrowser->isVisible())
         this->scoreBrowser->setVisible(shouldScoreBrowserBeVisible);
 
-    const int scoreBrowserExtraPaddingRight = 5 * dpiScale;  // duplication, see above
-    const int scoreButtonWidthMax = this->topbarLeft->getSize().x + 2 * dpiScale;
+    const int scoreButtonWidthMax = this->topbarLeft->getSize().x;
 
     f32 back_btn_height = osu->getSkin()->getMenuBack2()->getSize().y;
-    f32 bottom_height = std::max(get_bottombar_height(), back_btn_height);
+    f32 browserHeight = engine->getScreenHeight() -
+                        (get_bottombar_height() + (this->topbarLeft->getPos().y + this->topbarLeft->getSize().y)) +
+                        2 * dpiScale;
+    this->scoreBrowser->setPos(this->topbarLeft->getPos().x + 2 * dpiScale,
+                               this->topbarLeft->getPos().y + this->topbarLeft->getSize().y + 4 * dpiScale);
+    this->scoreBrowser->setSize(scoreButtonWidthMax, browserHeight);
+    const i32 scoreHeight = 53.f * global_scale;
 
-    const f32 browserHeight = engine->getScreenHeight() -
-                              (bottom_height + (this->topbarLeft->getPos().y + this->topbarLeft->getSize().y)) +
-                              2 * dpiScale;
-    this->scoreBrowser->setPos(this->topbarLeft->getPos().x - 2 * dpiScale,
-                               this->topbarLeft->getPos().y + this->topbarLeft->getSize().y);
-    this->scoreBrowser->setSize(scoreButtonWidthMax + scoreBrowserExtraPaddingRight, browserHeight);
-    int scoreHeight = 100;
-    {
-        Image *menuButtonBackground = osu->getSkin()->getMenuButtonBackground();
-        Vector2 minimumSize = Vector2(699.0f, 103.0f) * (osu->getSkin()->isMenuButtonBackground2x() ? 2.0f : 1.0f);
-        float minimumScale = Osu::getImageScaleToFitResolution(menuButtonBackground, minimumSize);
-        float scoreScale = Osu::getImageScale(menuButtonBackground->getSize() * minimumScale, 64.0f);
-        scoreScale *= 0.5f;
-        scoreHeight = (int)(menuButtonBackground->getHeight() * scoreScale);
-
-        float scale =
-            Osu::getImageScaleToFillResolution(menuButtonBackground, Vector2(scoreButtonWidthMax, scoreHeight));
-        scoreHeight = max(scoreHeight, (int)(menuButtonBackground->getHeight() * scale));
-
-        // limit to scrollview width (while keeping the aspect ratio)
-        const float ratio = minimumSize.x / minimumSize.y;
-        if(scoreHeight * ratio > scoreButtonWidthMax) scoreHeight = this->scoreBrowser->getSize().x / ratio;
-    }
+    // In stable, even when looking at local scores, there is space where the "local best" would be.
+    f32 local_best_size = scoreHeight + 61 * global_scale;
+    browserHeight -= local_best_size;
+    this->scoreBrowser->setSize(this->scoreBrowser->getSize().x, browserHeight);
+    this->scoreBrowser->setScrollSizeToContent();
 
     if(this->localBestContainer->isVisible()) {
-        float local_best_size = scoreHeight + 40;
-        this->scoreBrowser->setSize(this->scoreBrowser->getSize().x, browserHeight - local_best_size);
-        this->scoreBrowser->setScrollSizeToContent();
         this->localBestContainer->setPos(this->scoreBrowser->getPos().x,
                                          this->scoreBrowser->getPos().y + this->scoreBrowser->getSize().y);
         this->localBestContainer->setSize(this->scoreBrowser->getPos().x, local_best_size);
@@ -2444,7 +2434,7 @@ void SongBrowser::updateScoreBrowserLayout() {
     for(size_t i = 0; i < elements.size(); i++) {
         CBaseUIElement *scoreButton = elements[i];
         scoreButton->setSize(this->scoreBrowser->getSize().x, scoreHeight);
-        scoreButton->setRelPos(scoreBrowserExtraPaddingRight, i * scoreButton->getSize().y + 5 * dpiScale);
+        scoreButton->setRelPos(0, i * scoreButton->getSize().y);
     }
     this->scoreBrowserScoresStillLoadingElement->setSize(this->scoreBrowser->getSize().x * 0.9f, scoreHeight * 0.75f);
     this->scoreBrowserScoresStillLoadingElement->setRelPos(

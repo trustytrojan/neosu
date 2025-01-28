@@ -531,6 +531,10 @@ void CBaseUIScrollView::updateScrollbars() {
                    this->vPos.y + (verticalPercent * (this->vSize.y - (verticalBlockWidth * 2) - verticalBlockHeight) +
                                    verticalBlockWidth + 1),
                    (verticalBlockWidth * this->fScrollbarSizeMultiplier), verticalBlockHeight);
+        if(this->bScrollbarOnLeft) {
+            this->verticalScrollbar.setMinX(this->vPos.x);
+            this->verticalScrollbar.setMaxX(verticalBlockWidth * this->fScrollbarSizeMultiplier);
+        }
     }
 
     // update horizontal scrollbar

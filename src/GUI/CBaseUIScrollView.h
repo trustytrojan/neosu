@@ -118,6 +118,7 @@ class CBaseUIScrollView : public CBaseUIElement {
 
     bool bHorizontalClipping = true;
     bool bVerticalClipping = true;
+    bool bScrollbarOnLeft = false;
 
    protected:
     virtual void onMoved();
