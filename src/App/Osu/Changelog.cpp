@@ -26,6 +26,15 @@ Changelog::Changelog() : ScreenBackable() {
 
     std::vector<CHANGELOG> changelogs;
 
+    CHANGELOG v37_02;
+    v37_02.title = "37.02 (2025-01-28)";
+    v37_02.changes.push_back("- Added support for mode-osu skin element");
+    v37_02.changes.push_back("- Fixed \"Draw Background Thumbnails in SongBrowser\" setting");
+    v37_02.changes.push_back("- Fixed UR bar scaling setting being imported incorrectly");
+    v37_02.changes.push_back("- Improved rendering of scores list");
+    v37_02.changes.push_back("- Removed back button height limit");
+    changelogs.push_back(v37_02);
+
     CHANGELOG v37_01;
     v37_01.title = "37.01 (2025-01-27)";
     v37_01.changes.push_back("- Added support for back button skin hacks");
