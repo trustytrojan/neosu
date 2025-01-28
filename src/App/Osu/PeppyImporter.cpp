@@ -299,7 +299,7 @@ void import_settings_from_osu_stable() {
         } else if(sscanf(curLine.c_str(), " Offset = %i[^\n]", &num) == 1) {
             cv_universal_offset.setValue((f32)num);
         } else if(sscanf(curLine.c_str(), " ScoreMeterScale = %f[^\n]", &flt) == 1) {
-            cv_hud_score_scale.setValue(flt);
+            cv_hud_hiterrorbar_scale.setValue(flt);
         } else if(sscanf(curLine.c_str(), " NotifyFriends = %i[^\n]", &num) == 1) {
             cv_notify_friends.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " PopupDuringGameplay = %i[^\n]", &num) == 1) {
