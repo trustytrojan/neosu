@@ -586,6 +586,26 @@ void SongBrowser::draw(Graphics *g) {
         }
     }
 
+    {
+        auto screen = engine->getScreenSize();
+        bool is_widescreen = ((i32)(std::max(0, (i32)((screen.x - (screen.y * 4.f / 3.f)) / 2.f))) > 0);
+        f32 global_scale = screen.x / (is_widescreen ? 1366.f : 1024.f);
+        f32 mode_osu_scale = global_scale * (osu->getSkin()->mode_osu->is_2x ? 0.5f : 1.f);
+
+        g->setColor(0xffffffff);
+        if(cv_avoid_flashes.getBool()) {
+            g->setAlpha(0.1f);
+        } else {
+            // XXX: Flash based on song BPM
+            g->setAlpha(0.1f);
+        }
+
+        g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ADDITIVE);
+        osu->getSkin()->mode_osu->drawRaw(g, Vector2(engine->getScreenWidth() / 2, engine->getScreenHeight() / 2),
+                                          mode_osu_scale, AnchorPoint::CENTER);
+        g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
+    }
+
     // draw score browser
     this->scoreBrowser->draw(g);
     this->localBestContainer->draw(g);

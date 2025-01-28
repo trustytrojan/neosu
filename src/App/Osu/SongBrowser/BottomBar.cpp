@@ -228,4 +228,3 @@ void draw_bottombar(Graphics* g) {
 }
 
 // TODO @kiwec: default icon for mode-osu-small
-// TODO @kiwec: draw mode-osu
