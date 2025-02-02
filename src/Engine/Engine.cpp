@@ -30,14 +30,15 @@ Environment *env = NULL;
 Console *Engine::console = NULL;
 ConsoleBox *Engine::consoleBox = NULL;
 
-Engine::Engine(Environment *environment, const char *args) {
+Engine::Engine(Environment *environment, i32 argc, char **argv) {
     // XXX: run curl_global_cleanup() after waiting for network threads to terminate
     curl_global_init(CURL_GLOBAL_DEFAULT);
 
     engine = this;
     this->environment = environment;
     env = environment;
-    this->sArgs = UString(args);
+    this->iArgc = argc;
+    this->sArgv = argv;
 
     this->graphics = NULL;
     this->guiContainer = NULL;
@@ -50,7 +51,6 @@ Engine::Engine(Environment *environment, const char *args) {
 
     // print debug information
     debugLog("-= Engine Startup =-\n");
-    debugLog("Engine: args = %s\n", this->sArgs.toUtf8());
 
     // timing
     this->timer = new Timer();

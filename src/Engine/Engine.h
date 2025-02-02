@@ -28,7 +28,7 @@ class Engine {
     static void debugLog(Color color, const char *fmt, ...);
 
    public:
-    Engine(Environment *environment, const char *args = NULL);
+    Engine(Environment *environment, i32 argc, char **argv);
     ~Engine();
 
     // app
@@ -112,8 +112,6 @@ class Engine {
     inline double getFrameTime() const { return this->dFrameTime; }
     inline unsigned long getFrameCount() const { return this->iFrameCount; }
 
-    UString getArgs() const { return this->sArgs; }
-
     inline bool hasFocus() const { return this->bHasFocus; }
     inline bool isDrawing() const { return this->bDrawing; }
     inline bool isMinimized() const { return this->bIsMinimized; }
@@ -124,7 +122,6 @@ class Engine {
     inline Console *getConsole() const { return this->console; }
     inline CBaseUIContainer *getGUI() const { return this->guiContainer; }
 
-   private:
     // interfaces
     App *app;
     Graphics *graphics;
@@ -167,7 +164,8 @@ class Engine {
     static Console *console;
 
     // custom
-    UString sArgs;
+    i32 iArgc;
+    char **sArgv;
     bool bBlackout;
     bool bDrawing;
 };

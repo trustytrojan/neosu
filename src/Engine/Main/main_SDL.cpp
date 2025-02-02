@@ -154,7 +154,7 @@ int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
     else
         environment->setWindow(g_window);
 
-    g_engine = new Engine(environment, argc > 1 ? argv[1] : "");  // TODO: proper arg support
+    g_engine = new Engine(environment, argc, argv);
     g_engine->loadApp();
 
     frameTimer->update();

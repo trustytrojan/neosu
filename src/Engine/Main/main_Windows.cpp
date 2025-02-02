@@ -281,14 +281,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             if(cds->dwData != WM_NEOSU_PROTOCOL) return 0;
 
             i32 argc = 0;
-            LPWSTR *argv = CommandLineToArgvW((wchar_t *)cds->lpData, &argc);
+            char **argv = (char **)cds->lpData;
             for(i32 i = 0; i < argc; i++) {
-                // Convert filepath to UTF-8
-                int size = WideCharToMultiByte(CP_UTF8, 0, argv[i], -1, NULL, 0, NULL, NULL);
-                std::string utf8filepath(size, 0);
-                WideCharToMultiByte(CP_UTF8, 0, argv[i], size, (LPSTR)utf8filepath.c_str(), size, NULL, NULL);
-
-                handle_cmdline_args(utf8filepath.c_str());
+                handle_cmdline_args(argv[i]);
             }
 
             return 1;
@@ -811,18 +806,33 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     if(last_slash != NULL) *last_slash = L'\0';
     SetCurrentDirectoryW(exePath);
 
+    // Convert args to UTF-8
+    i32 argc = 0;
+    char **argv = NULL;
+    LPWSTR *wargv = CommandLineToArgvW(pCmdLine, &argc);
+    argv = new char *[argc];
+    for(i32 i = 0; i < argc; i++) {
+        int size = WideCharToMultiByte(CP_UTF8, 0, wargv[i], -1, NULL, 0, NULL, NULL);
+        argv[i] = new char[size + 1];
+        WideCharToMultiByte(CP_UTF8, 0, wargv[i], size, argv[i], size, NULL, NULL);
+    }
+
     // register .osk, .osr, .osz, and neosu:// protocol
     register_neosu_file_associations();
 
     // if a neosu instance is already running, send it a message then quit
     HWND existing_window = FindWindowW(L"neosu", NULL);
     if(existing_window) {
-        COPYDATASTRUCT cds;
-        cds.dwData = WM_NEOSU_PROTOCOL;
-        cds.cbData = wcslen(pCmdLine + 1) * sizeof(wchar_t);
-        cds.lpData = pCmdLine;
-        SendMessage(existing_window, WM_COPYDATA, (WPARAM)NULL, (LPARAM)&cds);
+        for(i32 i = 0; i < argc; i++) {
+            COPYDATASTRUCT cds;
+            cds.dwData = WM_NEOSU_PROTOCOL;
+            cds.cbData = strlen(argv[i]) + 1;
+            cds.lpData = argv[i];
+            SendMessage(existing_window, WM_COPYDATA, (WPARAM)NULL, (LPARAM)&cds);
+        }
+
         SetForegroundWindow(existing_window);
+
         return 0;
     }
 
@@ -994,14 +1004,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     // make the window visible
     ShowWindow(hwnd, nCmdShow);
 
-    // Convert args to UTF-8
-    int utf8args_s = WideCharToMultiByte(CP_UTF8, 0, pCmdLine, -1, NULL, 0, NULL, NULL);
-    char *utf8args = new char[utf8args_s];
-    WideCharToMultiByte(CP_UTF8, 0, pCmdLine, -1, utf8args, utf8args_s, NULL, NULL);
-
     // initialize engine
     WinEnvironment *environment = new WinEnvironment(hwnd, hInstance);
-    g_engine = new Engine(environment, utf8args);
+    g_engine = new Engine(environment, argc, argv);
     g_engine->loadApp();
 
     g_bHasFocus = g_bHasFocus && (GetForegroundWindow() == hwnd);   // HACKHACK: workaround (1), see above
