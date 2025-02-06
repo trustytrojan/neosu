@@ -1,5 +1,4 @@
 #include "BaseEnvironment.h"
-#include <random>
 
 #ifndef LZMA_API_STATIC
 #define LZMA_API_STATIC
@@ -13,6 +12,7 @@
 #include "DatabaseBeatmap.h"
 #include "Engine.h"
 #include "base64.h"
+#include "random.h"
 
 #include <chrono>
 namespace BANCHO::Net {
@@ -27,13 +27,7 @@ void submit_score(FinishedScore score) {
     strftime(score_time, sizeof(score_time), "%y%m%d%H%M%S", timeinfo);
 
     u8 iv[32];
-    auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-    std::mt19937_64 rng(seed);
-    std::uniform_int_distribution<unsigned int> dist(0, 255);
-
-    for(u8 &i : iv) {
-        i = static_cast<u8>(dist(rng));
-    }
+    get_random_bytes(iv, 32);
 
     APIRequest request;
     request.type = SUBMIT_SCORE;

@@ -31,6 +31,8 @@ struct Bancho {
     std::atomic<i32> user_id{0};
     UString username;
     MD5Hash pw_md5;
+    u8 oauth_challenge[32];
+    u8 oauth_verifier[32];
     Room room;
 
     std::atomic<bool> spectating{false};

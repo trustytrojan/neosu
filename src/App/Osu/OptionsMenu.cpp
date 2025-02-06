@@ -5,6 +5,9 @@
 #include <iostream>
 #include <utility>
 
+#include "base64.h"
+#include "random.h"
+#include "sha256.h"
 #include "AnimationHandler.h"
 #include "Bancho.h"
 #include "BanchoNetworking.h"
@@ -45,6 +48,12 @@
 #include "UIModSelectorModButton.h"
 #include "UISearchOverlay.h"
 #include "UISlider.h"
+
+// Addresses for which we should use OAuth login instead of username:password login
+const char *oauth_servers[] = {
+    "neosu.local",
+    "neosu.net",
+};
 
 class OptionsMenuSkinPreviewElement : public CBaseUIElement {
    public:
@@ -390,7 +399,9 @@ class OptionsMenuResetButton : public CBaseUIButton {
 
         if(this->isMouseInside()) {
             osu->getTooltipOverlay()->begin();
-            { osu->getTooltipOverlay()->addLine("Reset"); }
+            {
+                osu->getTooltipOverlay()->addLine("Reset");
+            }
             osu->getTooltipOverlay()->end();
         }
     }
@@ -522,7 +533,8 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addCheckbox("Show pp instead of score in scorebrowser", "Only neosu scores will show pp.",
                       &cv::scores_sort_by_pp);
     this->addCheckbox("Always enable touch device pp nerf mod",
-                      "Keep touch device pp nerf mod active even when resetting all mods.", &cv::mod_touchdevice_always);
+                      "Keep touch device pp nerf mod active even when resetting all mods.",
+                      &cv::mod_touchdevice_always);
 
     this->addSubSection("Songbrowser");
     this->addCheckbox("Draw Strain Graph in Songbrowser",
@@ -779,12 +791,15 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
         ((UIButton *)skinReload.elements[1])->setColor(0xff00566b);
     }
     this->addSpacer();
-    this->addCheckbox("Sort Skins Alphabetically", "Less like stable, but useful if you don't\nlike obnoxious skin names floating to the top.", &cv::sort_skins_cleaned);
+    this->addCheckbox("Sort Skins Alphabetically",
+                      "Less like stable, but useful if you don't\nlike obnoxious skin names floating to the top.",
+                      &cv::sort_skins_cleaned);
     CBaseUISlider *numberScaleSlider =
         this->addSlider("Number Scale:", 0.01f, 3.0f, &cv::number_scale_multiplier, 135.0f);
     numberScaleSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
     numberScaleSlider->setKeyDelta(0.01f);
-    CBaseUISlider *hitResultScaleSlider = this->addSlider("HitResult Scale:", 0.01f, 3.0f, &cv::hitresult_scale, 135.0f);
+    CBaseUISlider *hitResultScaleSlider =
+        this->addSlider("HitResult Scale:", 0.01f, 3.0f, &cv::hitresult_scale, 135.0f);
     hitResultScaleSlider->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
     hitResultScaleSlider->setKeyDelta(0.01f);
     this->addCheckbox("Draw Numbers", &cv::draw_numbers);
@@ -1053,7 +1068,8 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addCheckbox("Draw Stats: SliderBreaks", "Number of slider breaks.", &cv::draw_statistics_sliderbreaks);
     this->addCheckbox("Draw Stats: Max Possible Combo", &cv::draw_statistics_maxpossiblecombo);
     this->addCheckbox("Draw Stats: Stars*** (Until Now)",
-                      "Incrementally updates the star rating (aka \"realtime stars\").", &cv::draw_statistics_livestars);
+                      "Incrementally updates the star rating (aka \"realtime stars\").",
+                      &cv::draw_statistics_livestars);
     this->addCheckbox("Draw Stats: Stars* (Total)", "Total stars for active mods.", &cv::draw_statistics_totalstars);
     this->addCheckbox("Draw Stats: BPM", &cv::draw_statistics_bpm);
     this->addCheckbox("Draw Stats: AR", &cv::draw_statistics_ar);
@@ -1213,16 +1229,21 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
 
     this->addSubSection("Online server");
     this->addLabel("If the server admins don't explicitly allow neosu,")->setTextColor(0xff666666);
+    this->elements.back().render_condition = RenderCondition::SCORE_SUBMISSION_POLICY;
     this->addLabel("you might get banned!")->setTextColor(0xff666666);
+    this->elements.back().render_condition = RenderCondition::SCORE_SUBMISSION_POLICY;
     this->addLabel("");
     this->serverTextbox = this->addTextbox(cv::mp_server.getString().c_str(), &cv::mp_server);
     this->submitScoresCheckbox = this->addCheckbox("Submit scores", &cv::submit_scores);
     this->elements.back().render_condition = RenderCondition::SCORE_SUBMISSION_POLICY;
 
     this->addSubSection("Login details (username/password)");
+    this->elements.back().render_condition = RenderCondition::PASSWORD_AUTH;
     this->nameTextbox = this->addTextbox(cv::name.getString().c_str(), &cv::name);
+    this->elements.back().render_condition = RenderCondition::PASSWORD_AUTH;
     this->passwordTextbox = this->addTextbox(cv::mp_password.getString().c_str(), &cv::mp_password);
     this->passwordTextbox->is_password = true;
+    this->elements.back().render_condition = RenderCondition::PASSWORD_AUTH;
     this->logInButton = this->addButton("Log in");
     this->logInButton->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onLogInClicked));
     this->logInButton->setColor(0xff00ff00);
@@ -1503,9 +1524,22 @@ void OptionsMenu::mouse_update(bool *propagate_clicks) {
     // apply textbox changes on enter key
     if(this->osuFolderTextbox->hitEnter()) this->updateOsuFolder();
 
+    // Update login/disconnect button
+    {
+        if(bancho->is_online()) {
+            logInButton->setText("Disconnect");
+            logInButton->setColor(0xffff0000);
+            logInButton->is_loading = false;
+        } else {
+            bool oauth = this->should_use_oauth_login();
+            logInButton->setText(oauth ? "Log in with osu!" : "Log in");
+            logInButton->setColor(oauth ? 0xffff66ff : 0xff00ff00);
+            logInButton->is_loading = false;
+        }
+    }
+
     cv::name.setValue(this->nameTextbox->getText());
     cv::mp_password.setValue(this->passwordTextbox->getText());
-    cv::mp_server.setValue(this->serverTextbox->getText());
     if(this->nameTextbox->hitEnter()) {
         cv::name.setValue(this->nameTextbox->getText());
         this->nameTextbox->stealFocus();
@@ -1517,7 +1551,7 @@ void OptionsMenu::mouse_update(bool *propagate_clicks) {
     }
     if(this->serverTextbox->hitEnter()) {
         this->serverTextbox->stealFocus();
-        BANCHO::Net::reconnect();
+        logInButton->click();
     }
 
     if(this->dpiTextbox != NULL && this->dpiTextbox->hitEnter()) this->updateFposuDPI();
@@ -1701,6 +1735,8 @@ void OptionsMenu::updateLayout() {
     this->bSearchLayoutUpdateScheduled = false;
     this->updating_layout = true;
 
+    bool oauth = this->should_use_oauth_login();
+
     // set all elements to the current convar values, and update the reset button states
     for(int i = 0; i < this->elements.size(); i++) {
         switch(this->elements[i].type) {
@@ -1815,6 +1851,7 @@ void OptionsMenu::updateLayout() {
         if(this->elements[i].render_condition == RenderCondition::SCORE_SUBMISSION_POLICY &&
            bancho->score_submission_policy != ServerPolicy::NO_PREFERENCE)
             continue;
+        if(this->elements[i].render_condition == RenderCondition::PASSWORD_AUTH && oauth) continue;
 
         // searching logic happens here:
         // section
@@ -2404,7 +2441,7 @@ void OptionsMenu::onSkinSelect() {
     }
 }
 
-void OptionsMenu::onSkinSelect2(const UString &skinName, int  /*id*/) {
+void OptionsMenu::onSkinSelect2(const UString &skinName, int /*id*/) {
     cv::skin.setValue(skinName);
     this->updateSkinNameLabel();
 }
@@ -2513,7 +2550,7 @@ void OptionsMenu::onResolutionSelect() {
     this->options->setScrollSizeToContent();
 }
 
-void OptionsMenu::onResolutionSelect2(const UString &resolution, int  /*id*/) {
+void OptionsMenu::onResolutionSelect2(const UString &resolution, int /*id*/) {
     if(env->isFullscreen()) {
         cv::resolution.setValue(resolution);
     } else {
@@ -2532,7 +2569,7 @@ void OptionsMenu::onOutputDeviceSelect() {
     this->contextMenu->setPos(this->outputDeviceSelectButton->getPos());
     this->contextMenu->setRelPos(this->outputDeviceSelectButton->getRelPos());
     this->contextMenu->begin();
-    for(const auto& device : soundEngine->getOutputDevices()) {
+    for(const auto &device : soundEngine->getOutputDevices()) {
         CBaseUIButton *button = this->contextMenu->addButton(device.name);
         if(device.name == soundEngine->getOutputDeviceName()) button->setTextBrightColor(0xff00ff00);
     }
@@ -2541,13 +2578,13 @@ void OptionsMenu::onOutputDeviceSelect() {
     this->options->setScrollSizeToContent();
 }
 
-void OptionsMenu::onOutputDeviceSelect2(const UString &outputDeviceName, int  /*id*/) {
+void OptionsMenu::onOutputDeviceSelect2(const UString &outputDeviceName, int /*id*/) {
     if(outputDeviceName == soundEngine->getOutputDeviceName()) {
         debugLog("SoundEngine::setOutputDevice() \"%s\" already is the current device.\n", outputDeviceName.toUtf8());
         return;
     }
 
-    for(const auto& device : soundEngine->getOutputDevices()) {
+    for(const auto &device : soundEngine->getOutputDevices()) {
         if(device.name != outputDeviceName) continue;
 
         soundEngine->setOutputDevice(device);
@@ -2572,10 +2609,27 @@ void OptionsMenu::onLogInClicked() {
     if(this->logInButton->is_loading) return;
     soundEngine->play(osu->getSkin()->getMenuHit());
 
-    if(bancho->user_id > 0) {
+    if(bancho->is_online()) {
         BANCHO::Net::disconnect();
+
+        // Manually clicked disconnect button: clear oauth token
+        cv::mp_oauth_token.setValue("");
     } else {
-        BANCHO::Net::reconnect();
+        if(this->should_use_oauth_login()) {
+            bancho->endpoint = cv::mp_server.getString().c_str();
+
+            get_random_bytes(bancho->oauth_challenge, 32);
+            sha256_easy_hash(bancho->oauth_verifier, 32, bancho->oauth_challenge);
+
+            const char *challenge_b64 = (const char *)base64_encode(bancho->oauth_challenge, 32, NULL);
+            auto scheme = cv::use_https.getBool() ? "https://" : "http://";
+            auto url = UString::format("%s%s/connect?challenge=%s", scheme, bancho->endpoint.toUtf8(), challenge_b64);
+            delete[] challenge_b64;
+
+            env->openURLInDefaultBrowser(url);
+        } else {
+            BANCHO::Net::reconnect();
+        }
     }
 }
 
@@ -2964,7 +3018,7 @@ void OptionsMenu::onASIOBufferChange([[maybe_unused]] CBaseUISlider *slider) {
             if(this->elements[i].elements[e] == slider) {
                 if(this->elements[i].elements.size() == 3) {
                     auto *labelPointer = dynamic_cast<CBaseUILabel *>(this->elements[i].elements[2]);
-                    if (labelPointer) {
+                    if(labelPointer) {
                         UString text = UString::format("%.1f ms", latency);
                         labelPointer->setText(text);
                     }
@@ -2987,7 +3041,7 @@ void OptionsMenu::onWASAPIBufferChange(CBaseUISlider *slider) {
             if(this->elements[i].elements[e] == slider) {
                 if(this->elements[i].elements.size() == 3) {
                     auto *labelPointer = dynamic_cast<CBaseUILabel *>(this->elements[i].elements[2]);
-                    if (labelPointer) {
+                    if(labelPointer) {
                         UString text = UString::format("%i", (int)std::round(slider->getFloat() * 1000.0f));
                         text.append(" ms");
                         labelPointer->setText(text);
@@ -3010,8 +3064,7 @@ void OptionsMenu::onWASAPIPeriodChange(CBaseUISlider *slider) {
             if(this->elements[i].elements[e] == slider) {
                 if(this->elements[i].elements.size() == 3) {
                     auto *labelPointer = dynamic_cast<CBaseUILabel *>(this->elements[i].elements[2]);
-                    if (labelPointer)
-                    {
+                    if(labelPointer) {
                         UString text = UString::format("%i", (int)std::round(slider->getFloat() * 1000.0f));
                         text.append(" ms");
                         labelPointer->setText(text);
@@ -3598,4 +3651,19 @@ void OptionsMenu::openAndScrollToSkinSection() {
 
     if(!this->skinSelectLocalButton->isVisible() || !wasVisible)
         this->options->scrollToElement(this->skinSection, 0, 100 * Osu::getUIScale());
+}
+
+bool OptionsMenu::should_use_oauth_login() {
+    if(cv::force_oauth.getBool()) {
+        return true;
+    }
+
+    auto server_endpoint = this->serverTextbox->getText();
+    for(const char *server : oauth_servers) {
+        if(!strcmp(server_endpoint.toUtf8(), server)) {
+            return true;
+        }
+    }
+
+    return false;
 }

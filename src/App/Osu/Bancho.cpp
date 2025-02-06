@@ -170,7 +170,7 @@ UString get_disk_uuid() {
     return UString("error getting disk uuid");
 #endif
 }
-}
+}  // namespace
 
 std::unordered_map<std::string, Bancho::Channel *> Bancho::chat_channels;
 
@@ -192,12 +192,10 @@ MD5Hash Bancho::md5(u8 *msg, size_t msg_len) {
 void Bancho::handle_packet(Packet *packet) {
     // XXX: This is a bit of a mess, should at least group packets by type for readability
     if(packet->id == USER_ID) {
-        bancho->user_id.store(proto::read<i32>(packet));
-        if(bancho->user_id > 0) {
-            debugLog("Logged in as user #%d.\n", bancho->user_id.load());
-            osu->optionsMenu->logInButton->setText("Disconnect");
-            osu->optionsMenu->logInButton->setColor(0xffff0000);
-            osu->optionsMenu->logInButton->is_loading = false;
+        i32 new_user_id = proto::read<i32>(packet);
+        bancho->user_id.store(new_user_id);
+        if(new_user_id > 0) {
+            debugLog("Logged in as user #%d.\n", new_user_id);
             cv::mp_autologin.setValue(true);
             print_new_channels = true;
 
@@ -221,35 +219,31 @@ void Bancho::handle_packet(Packet *packet) {
             // If server sent a score submission policy, update options menu to hide the checkbox
             osu->optionsMenu->scheduleLayoutUpdate();
         } else {
-            using namespace BANCHO::Net;
             cv::mp_autologin.setValue(false);
-            osu->optionsMenu->logInButton->setText("Log in");
-            osu->optionsMenu->logInButton->setColor(0xff00ff00);
-            osu->optionsMenu->logInButton->is_loading = false;
 
             debugLog("Failed to log in, server returned code %d.\n", bancho->user_id.load());
-            UString errmsg =
-                UString::format("Failed to log in: %s (code %d)\n", cho_token.toUtf8(), bancho->user_id.load());
-            if(bancho->user_id == -2) {
+            UString errmsg = UString::format("Failed to log in: %s (code %d)\n", BANCHO::Net::cho_token.toUtf8(),
+                                             bancho->user_id.load());
+            if(new_user_id == -2) {
                 errmsg = "Client version is too old to connect to this server.";
-            } else if(bancho->user_id == -3 || bancho->user_id == -4) {
+            } else if(new_user_id == -3 || new_user_id == -4) {
                 errmsg = "You are banned from this server.";
-            } else if(bancho->user_id == -6) {
+            } else if(new_user_id == -6) {
                 errmsg = "You need to buy supporter to connect to this server.";
-            } else if(bancho->user_id == -7) {
+            } else if(new_user_id == -7) {
                 errmsg = "You need to reset your password to connect to this server.";
-            } else if(bancho->user_id == -8) {
+            } else if(new_user_id == -8) {
                 errmsg = "Open the verification link sent to your email, then log in again.";
             } else {
-                if(cho_token == UString("user-already-logged-in")) {
+                if(BANCHO::Net::cho_token == UString("user-already-logged-in")) {
                     errmsg = "Already logged in on another client.";
-                } else if(cho_token == UString("unknown-username")) {
+                } else if(BANCHO::Net::cho_token == UString("unknown-username")) {
                     errmsg = UString::format("No account by the username '%s' exists.", bancho->username.toUtf8());
-                } else if(cho_token == UString("incorrect-credentials")) {
+                } else if(BANCHO::Net::cho_token == UString("incorrect-credentials")) {
                     errmsg = "This username is not registered.";
-                } else if(cho_token == UString("incorrect-password")) {
+                } else if(BANCHO::Net::cho_token == UString("incorrect-password")) {
                     errmsg = "Incorrect password.";
-                } else if(cho_token == UString("contact-staff")) {
+                } else if(BANCHO::Net::cho_token == UString("contact-staff")) {
                     errmsg = "Please contact an administrator of the server.";
                 }
             }
@@ -291,7 +285,7 @@ void Bancho::handle_packet(Packet *packet) {
         user->global_rank = proto::read<u32>(packet);
         user->pp = proto::read<u16>(packet);
 
-        if(stats_user_id == bancho->user_id) {
+        if(stats_user_id == bancho->user_id.load()) {
             osu->userButton->updateUserStats();
         }
         if(stats_user_id == bancho->spectated_player_id) {
@@ -302,7 +296,7 @@ void Bancho::handle_packet(Packet *packet) {
     } else if(packet->id == USER_LOGOUT) {
         i32 logged_out_id = proto::read<u32>(packet);
         proto::read<u8>(packet);
-        if(logged_out_id == bancho->user_id) {
+        if(logged_out_id == bancho->user_id.load()) {
             debugLog("Logged out.\n");
             BANCHO::Net::disconnect();
         } else {

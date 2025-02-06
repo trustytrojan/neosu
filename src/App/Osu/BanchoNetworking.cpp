@@ -341,11 +341,7 @@ void disconnect() {
     bancho->score_submission_policy = ServerPolicy::NO_PREFERENCE;
     osu->optionsMenu->scheduleLayoutUpdate();
 
-    osu->optionsMenu->logInButton->setText("Log in");
-    osu->optionsMenu->logInButton->setColor(0xff00ff00);
-    osu->optionsMenu->logInButton->is_loading = false;
-
-    for(auto &pair : BANCHO::User::online_users) {
+    for(auto pair : BANCHO::User::online_users) {
         delete pair.second;
     }
     BANCHO::User::online_users.clear();

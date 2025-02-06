@@ -58,6 +58,7 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
         ASIO_ENABLED,
         WASAPI_ENABLED,
         SCORE_SUBMISSION_POLICY,
+        PASSWORD_AUTH,
     };
 
     struct OPTIONS_ELEMENT {
@@ -283,4 +284,6 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     std::vector<UString> notelockTypes;
 
     bool updating_layout = false;
+
+    bool should_use_oauth_login();
 };
