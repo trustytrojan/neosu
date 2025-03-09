@@ -12,7 +12,7 @@
 #include "SongBrowser.h"
 #include "UserCard.h"
 
-static enum { MODE = 0, MODS = 1, RANDOM = 2, OPTIONS = 3 };
+enum { MODE = 0, MODS = 1, RANDOM = 2, OPTIONS = 3 };
 static i32 hovered_btn = -1;
 static f32 global_scale = 1.f;
 static f32 btns_x[4] = {0.f, 0.f, 0.f, 0.f};

@@ -1,39 +1,95 @@
+# author: trustytrojan
+
 include(FetchContent)
 cmake_minimum_required(VERSION 3.16)
 project(neosu LANGUAGES CXX)
 
 if(LINUX)
-    function(find_or_fetch_bass lib path)
-        message(STATUS "Checking for bass${lib}")
+	# bass libs
+    function(find_or_fetch_bass lib path idir)
         find_library(bass${lib} bass${lib} PATHS /lib /usr/lib)
         if(NOT bass${lib})
             message(STATUS "bass${lib} not found... fetching it now")
-            if(NOT path)
-                set(path /files/bass${lib}24-linux.zip)
+
+			if(NOT path)
+				message(FATAL_ERROR "path on un4seen server not provided")
             endif()
+
             FetchContent_Declare(
                 bass${lib}
                 URL https://www.un4seen.com${path}
                 DOWNLOAD_EXTRACT_TIMESTAMP TRUE
             )
             FetchContent_MakeAvailable(bass${lib})
-            set(LDIR ${bass${lib}_SOURCE_DIR}/libs/${CMAKE_SYSTEM_PROCESSOR})
+
+			set(LDIR ${bass${lib}_SOURCE_DIR}/libs/${CMAKE_SYSTEM_PROCESSOR})
             message(STATUS "Adding link directory: ${LDIR}")
             link_directories(${LDIR})
+
+			if(idir)
+				set(FULL_IDIR ${bass${lib}_SOURCE_DIR}${idir})
+			else()
+				set(FULL_IDIR ${bass${lib}_SOURCE_DIR})
+			endif()
+
+			message(STATUS "Adding include directory: ${FULL_IDIR}")
+			include_directories(${FULL_IDIR})
         else()
             message(STATUS "bass${lib} found!")
         endif()
     endfunction()
 
-    find_or_fetch_bass("" "")
-    find_or_fetch_bass("_fx" /files/z/0/bass_fx24-linux.zip)
-    find_or_fetch_bass("mix" "")
-    find_or_fetch_bass("loud" "")
+    find_or_fetch_bass("" /files/bass24-linux.zip "")
+    find_or_fetch_bass("_fx" /files/z/0/bass_fx24-linux.zip /C)
+    find_or_fetch_bass("mix" /files/bassmix24-linux.zip "")
+    find_or_fetch_bass("loud" /files/bassloud24-linux.zip "")
 
+	# for some stupid reason un4seen doesnt give bassloud.h in the linux zip
+	find_or_fetch_bass("loudosx" /files/bassloud24-osx.zip "")
+
+	# discord sdk
+	find_library(discord_game_sdk discord_game_sdk PATHS /lib /usr/lib)
+	if(NOT discord_game_sdk)
+		FetchContent_Declare(
+			discord_game_sdk
+			URL https://dl-game-sdk.discordapp.net/3.2.1/discord_game_sdk.zip
+			DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+		)
+		FetchContent_MakeAvailable(discord_game_sdk)
+
+		set(LDIR ${discord_game_sdk_SOURCE_DIR}/lib/${CMAKE_SYSTEM_PROCESSOR})
+		message(STATUS "Adding link directory: ${LDIR}")
+		link_directories(${LDIR})
+
+		execute_process(
+			COMMAND ln -sf discord_game_sdk.so libdiscord_game_sdk.so
+			WORKING_DIRECTORY ${discord_game_sdk_SOURCE_DIR}/lib/${CMAKE_SYSTEM_PROCESSOR}
+			COMMAND_ERROR_IS_FATAL ANY
+		)
+
+		set(IDIR ${discord_game_sdk_SOURCE_DIR}/c)
+		message(STATUS "Adding include directory: ${IDIR}")
+		include_directories(${IDIR})
+	endif()
+
+	# everything from the makefile's pkgconf call
     include(FindPkgConfig)
     pkg_check_modules(PKGCONF REQUIRED blkid freetype2 glew libjpeg liblzma xi zlib)
     link_libraries(${PKGCONF_STATIC_LIBRARIES})
     include_directories(${PKGCONF_INCLUDE_DIRS})
+
+	# last thing to make it run properly: copy resources to binary dir
+	message(STATUS "Fetching old neosu repo for resources...")
+	FetchContent_Declare(
+		old-repo
+		URL https://git.kiwec.net/kiwec/McOsu/archive/master.zip
+		DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+	)
+	FetchContent_MakeAvailable(old-repo)
+	execute_process(
+		COMMAND sh -c "cp -nr ${old-repo_SOURCE_DIR}/resources/* ${CMAKE_BINARY_DIR}"
+		COMMAND_ERROR_IS_FATAL ANY
+	)
 elseif(WIN32)
     message(STATUS "CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
 
@@ -73,6 +129,7 @@ link_libraries(
     bassloud
     bass_fx
     curl
+	discord_game_sdk
 )
 
 include_directories(
@@ -87,7 +144,7 @@ include_directories(
     src/Engine/Main
     src/Engine/Renderer
     src/Util
-    libraries/bass/include
+	libraries/bass/include
     libraries/bassasio/include
     libraries/bassmix/include
     libraries/bassfx/include
@@ -100,7 +157,6 @@ include_directories(
 add_compile_options(
     -std=c++2a
     -fmessage-length=0
-    # -fno-exceptions
     -Wno-sign-compare
     -Wno-unused-local-typedefs
     -Wno-reorder
