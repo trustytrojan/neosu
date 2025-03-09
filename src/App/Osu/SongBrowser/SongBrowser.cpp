@@ -2337,7 +2337,7 @@ void SongBrowser::updateLayout() {
 
     // topbar right
     this->topbarRight->setPosX(engine->getScreenWidth() / 2);
-    this->topbarRight->setSize(osu->getScreenWidth() - this->topbarRight->getPos().x, 80.f);
+    this->topbarRight->setSize(osu->getScreenWidth() - this->topbarRight->getPos().x, 80.f * global_scale);
 
     float btn_margin = 10.f * dpiScale;
     this->sortButton->setSize(200.f * dpiScale, 30.f * dpiScale);
