@@ -14,8 +14,8 @@
 #define NEOSU_DOMAIN "neosu.net"
 
 // NOTE: Full version can be something like "b20200201.2cuttingedge"
-#define OSU_VERSION "b20250122.1"
-#define OSU_VERSION_DATEONLY 20250122
+#define OSU_VERSION "b20250309.2"
+#define OSU_VERSION_DATEONLY 20250309
 
 enum APIRequestType {
     GET_BEATMAPSET_INFO,
