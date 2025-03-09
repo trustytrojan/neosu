@@ -26,6 +26,13 @@ Changelog::Changelog() : ScreenBackable() {
 
     std::vector<CHANGELOG> changelogs;
 
+    CHANGELOG v37_03;
+    v37_03.title = "37.03 (2025-03-09)";
+    v37_03.changes.push_back("- Added missing mode-osu.png");
+    v37_03.changes.push_back("- Fixed search bar not being visible on some resolutions");
+    v37_03.changes.push_back("- Updated osu! version to b20250309.2");
+    changelogs.push_back(v37_03);
+
     CHANGELOG v37_02;
     v37_02.title = "37.02 (2025-01-28)";
     v37_02.changes.push_back("- Added support for mode-osu skin element");
