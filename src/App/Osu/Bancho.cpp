@@ -508,19 +508,6 @@ void handle_packet(Packet *packet) {
     } else if(packet->id == MATCH_PLAYER_SKIPPED) {
         i32 user_id = read<u32>(packet);
         osu->room->on_player_skip(user_id);
-
-        // I'm not sure the server ever sends MATCH_SKIP... So, double-checking here.
-        bool all_players_skipped = true;
-        for(int i = 0; i < 16; i++) {
-            if(bancho.room.slots[i].is_player_playing()) {
-                if(!bancho.room.slots[i].skipped) {
-                    all_players_skipped = false;
-                }
-            }
-        }
-        if(all_players_skipped) {
-            osu->room->on_all_players_skipped();
-        }
     } else if(packet->id == USER_PRESENCE) {
         i32 raw_id = read<i32>(packet);
         u32 presence_user_id = abs(raw_id);  // IRC clients are sent with negative IDs, hence the abs()
