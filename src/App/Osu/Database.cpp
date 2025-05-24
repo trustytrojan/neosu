@@ -1473,7 +1473,19 @@ u32 Database::importPeppyScores() {
 
     char client_str[15] = "peppy-YYYYMMDD";
     for(int b = 0; b < nb_beatmaps; b++) {
-        auto md5hash = db.read_hash();
+        std::string md5hash_str = db.read_string();
+        if(md5hash_str.length() < 32) {
+            debugLog("WARNING: Invalid score on beatmap %i with md5hash_str.length() = %i!\n", b, md5hash_str.length());
+            continue;
+        } else if(md5hash_str.length() > 32) {
+            debugLog("ERROR: Corrupt score database/entry detected, stopping.\n");
+            break;
+        }
+
+        MD5Hash md5hash;
+
+        memcpy(md5hash.hash, md5hash_str.c_str(), 32);
+        md5hash.hash[32] = '\0';
         u32 nb_scores = db.read<u32>();
 
         for(int s = 0; s < nb_scores; s++) {
