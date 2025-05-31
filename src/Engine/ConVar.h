@@ -328,7 +328,6 @@ extern ConVar cv_cursor_trail_smooth_length;
 extern ConVar cv_cursor_trail_spacing;
 extern ConVar cv_database_enabled;
 extern ConVar cv_database_ignore_version;
-extern ConVar cv_database_ignore_version_warnings;
 extern ConVar cv_database_version;
 extern ConVar cv_debug;
 extern ConVar cv_debug_anim;

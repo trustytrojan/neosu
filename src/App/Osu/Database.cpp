@@ -736,17 +736,6 @@ void Database::loadDB() {
         debugLog("Database: version = %i, folderCount = %i, playerName = %s, numDiffs = %i\n", this->iVersion,
                  this->iFolderCount, playerName.c_str(), this->iNumBeatmapsToLoad);
 
-        if(this->iVersion < 20170222) {
-            debugLog("Database: Version is quite old, below 20170222 ...\n");
-            osu->getNotificationOverlay()->addToast("osu!.db version too old, update osu! and try again!", 0xffff0000);
-            should_read_peppy_database = false;
-        } else if(!cv_database_ignore_version_warnings.getBool()) {
-            if(this->iVersion < 20190207) {  // xexxar angles star recalc
-                osu->getNotificationOverlay()->addToast("osu!.db version is old, let osu! update when convenient.",
-                                                        0xffffff00);
-            }
-        }
-
         // hard cap upper db version
         if(this->iVersion > cv_database_version.getInt() && !cv_database_ignore_version.getBool()) {
             osu->getNotificationOverlay()->addToast(
@@ -769,13 +758,13 @@ void Database::loadDB() {
             if(progress >= 1.f) progress = 0.99f;
             this->fLoadingProgress = progress;
 
-            if(this->iVersion < 20191107)  // see https://osu.ppy.sh/home/changelog/stable40/20191107.2
-            {
-                // also see https://github.com/ppy/osu-wiki/commit/b90f312e06b4f86e509b397565f1fe014bb15943
-                // no idea why peppy decided to change the wiki version from 20191107 to 20191106, because that's not
-                // what stable is doing. the correct version is still 20191107
-
-                /*unsigned int size = */ db.read<u32>();  // size in bytes of the beatmap entry
+            // NOTE: This is documented wrongly in many places.
+            //       This int was added in 20160408 and removed in 20191106
+            //       https://osu.ppy.sh/home/changelog/stable40/20160408.3
+            //       https://osu.ppy.sh/home/changelog/cuttingedge/20191106
+            if(this->iVersion >= 20160408 && this->iVersion < 20191106) {
+                // size in bytes of the beatmap entry
+                db.read<u32>();
             }
 
             std::string artistName = db.read_string();
@@ -800,70 +789,82 @@ void Database::loadDB() {
             unsigned short numSliders = db.read<u16>();
             unsigned short numSpinners = db.read<u16>();
             long long lastModificationTime = db.read<u64>();
-            float AR = db.read<f32>();
-            float CS = db.read<f32>();
-            float HP = db.read<f32>();
-            float OD = db.read<f32>();
+
+            f32 AR, CS, HP, OD;
+            if(this->iVersion < 20140609) {
+                AR = db.read<u8>();
+                CS = db.read<u8>();
+                HP = db.read<u8>();
+                OD = db.read<u8>();
+            } else {
+                AR = db.read<f32>();
+                CS = db.read<f32>();
+                HP = db.read<f32>();
+                OD = db.read<f32>();
+            }
+
             double sliderMultiplier = db.read<f64>();
 
-            unsigned int numOsuStandardStarRatings = db.read<u32>();
-            float numOsuStandardStars = 0.0f;
-            for(int s = 0; s < numOsuStandardStarRatings; s++) {
-                db.read<u8>();  // ObjType
-                unsigned int mods = db.read<u32>();
-                db.read<u8>();  // ObjType
+            f32 nomod_star_rating = 0.0f;
+            if(this->iVersion >= 20140609) {
+                unsigned int numOsuStandardStarRatings = db.read<u32>();
+                for(int s = 0; s < numOsuStandardStarRatings; s++) {
+                    db.read<u8>();  // 0x08
+                    unsigned int mods = db.read<u32>();
+                    db.read<u8>();  // 0x0c
 
-                f32 sr = 0.f;
+                    f32 sr = 0.f;
 
-                // https://osu.ppy.sh/home/changelog/stable40/20250108.3
-                if(this->iVersion >= 20250108) {
-                    sr = db.read<f32>();
-                } else {
-                    sr = db.read<f64>();
+                    // https://osu.ppy.sh/home/changelog/stable40/20250108.3
+                    if(this->iVersion >= 20250108) {
+                        sr = db.read<f32>();
+                    } else {
+                        sr = db.read<f64>();
+                    }
+
+                    if(mods == 0) nomod_star_rating = sr;
                 }
 
-                if(mods == 0) numOsuStandardStars = sr;
-            }
+                unsigned int numTaikoStarRatings = db.read<u32>();
+                for(int s = 0; s < numTaikoStarRatings; s++) {
+                    db.read<u8>();  // 0x08
+                    db.read<u32>();
+                    db.read<u8>();  // 0x0c
 
-            unsigned int numTaikoStarRatings = db.read<u32>();
-            for(int s = 0; s < numTaikoStarRatings; s++) {
-                db.read<u8>();  // ObjType
-                db.read<u32>();
-                db.read<u8>();  // ObjType
-
-                // https://osu.ppy.sh/home/changelog/stable40/20250108.3
-                if(this->iVersion >= 20250108) {
-                    db.read<f32>();
-                } else {
-                    db.read<f64>();
+                    // https://osu.ppy.sh/home/changelog/stable40/20250108.3
+                    if(this->iVersion >= 20250108) {
+                        db.read<f32>();
+                    } else {
+                        db.read<f64>();
+                    }
                 }
-            }
 
-            unsigned int numCtbStarRatings = db.read<u32>();
-            for(int s = 0; s < numCtbStarRatings; s++) {
-                db.read<u8>();  // ObjType
-                db.read<u32>();
-                db.read<u8>();  // ObjType
+                unsigned int numCtbStarRatings = db.read<u32>();
+                for(int s = 0; s < numCtbStarRatings; s++) {
+                    db.read<u8>();  // 0x08
+                    db.read<u32>();
+                    db.read<u8>();  // 0x0c
 
-                // https://osu.ppy.sh/home/changelog/stable40/20250108.3
-                if(this->iVersion >= 20250108) {
-                    db.read<f32>();
-                } else {
-                    db.read<f64>();
+                    // https://osu.ppy.sh/home/changelog/stable40/20250108.3
+                    if(this->iVersion >= 20250108) {
+                        db.read<f32>();
+                    } else {
+                        db.read<f64>();
+                    }
                 }
-            }
 
-            unsigned int numManiaStarRatings = db.read<u32>();
-            for(int s = 0; s < numManiaStarRatings; s++) {
-                db.read<u8>();  // ObjType
-                db.read<u32>();
-                db.read<u8>();  // ObjType
+                unsigned int numManiaStarRatings = db.read<u32>();
+                for(int s = 0; s < numManiaStarRatings; s++) {
+                    db.read<u8>();  // 0x08
+                    db.read<u32>();
+                    db.read<u8>();  // 0x0c
 
-                // https://osu.ppy.sh/home/changelog/stable40/20250108.3
-                if(this->iVersion >= 20250108) {
-                    db.read<f32>();
-                } else {
-                    db.read<f64>();
+                    // https://osu.ppy.sh/home/changelog/stable40/20250108.3
+                    if(this->iVersion >= 20250108) {
+                        db.read<f32>();
+                    } else {
+                        db.read<f64>();
+                    }
                 }
             }
 
@@ -922,6 +923,12 @@ void Database::loadDB() {
             /*bool disableStoryboard = */ db.read<u8>();
             /*bool disableVideo = */ db.read<u8>();
             /*bool visualOverride = */ db.read<u8>();
+
+            if(this->iVersion < 20140609) {
+                // https://github.com/ppy/osu/wiki/Legacy-database-file-structure defines it as "Unknown"
+                db.read<u16>();
+            }
+
             /*int lastEditTime = */ db.read<u32>();
             /*unsigned char maniaScrollSpeed = */ db.read<u8>();
 
@@ -1005,14 +1012,14 @@ void Database::loadDB() {
                         loudness_found = true;
                     }
                 } else {
-                    if(numOsuStandardStars <= 0.f) {
-                        numOsuStandardStars *= -1.f;
+                    if(nomod_star_rating <= 0.f) {
+                        nomod_star_rating *= -1.f;
                         this->maps_to_recalc.push_back(diff2);
                     }
 
                     diff2->iLocalOffset = localOffset;
                     diff2->iOnlineOffset = (long)onlineOffset;
-                    diff2->fStarsNomod = numOsuStandardStars;
+                    diff2->fStarsNomod = nomod_star_rating;
                     diff2->draw_background = 1;
                 }
 

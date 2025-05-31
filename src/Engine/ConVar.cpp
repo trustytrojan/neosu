@@ -1027,7 +1027,6 @@ ConVar cv_cursor_trail_spacing(
 ConVar cv_database_enabled("osu_database_enabled", true, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_database_ignore_version("osu_database_ignore_version", true, FCVAR_BANCHO_COMPATIBLE,
                                   "ignore upper version limit and force load the db file (may crash)");
-ConVar cv_database_ignore_version_warnings("osu_database_ignore_version_warnings", false, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_database_version("osu_database_version", OSU_VERSION_DATEONLY, FCVAR_BANCHO_COMPATIBLE,
                            "maximum supported osu!.db version, above this will use fallback loader");
 ConVar cv_debug("osu_debug", false, FCVAR_BANCHO_COMPATIBLE);
