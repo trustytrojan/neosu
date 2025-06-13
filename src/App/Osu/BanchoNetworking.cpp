@@ -67,6 +67,7 @@ void disconnect() {
         Packet packet;
         write<u16>(&packet, LOGOUT);
         write<u8>(&packet, 0);
+        write<u32>(&packet, 4);
         write<u32>(&packet, 0);
 
         CURL *curl = curl_easy_init();
