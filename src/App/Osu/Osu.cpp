@@ -528,6 +528,7 @@ void Osu::draw(Graphics *g) {
         this->pauseMenu->draw(g);
         this->modSelector->draw(g);
         this->chat->draw(g);
+        this->user_actions->draw(g);
         this->optionsMenu->draw(g);
 
         if(cv_draw_fps.getBool() && (!isFPoSu)) this->hud->drawFps(g);
@@ -588,7 +589,7 @@ void Osu::draw(Graphics *g) {
         Beatmap *beatmap = this->getSelectedBeatmap();
         Vector2 cursorPos = beatmap->getCursorPos();
         bool drawSecondTrail =
-            (cv_mod_autoplay.getBool() || cv_mod_autopilot.getBool() || beatmap->is_watching || beatmap->is_spectating);
+            (cv_mod_autoplay.getBool() || cv_mod_autopilot.getBool() || beatmap->is_watching || bancho.is_spectating);
         bool updateAndDrawTrail = true;
         if(cv_mod_fposu.getBool()) {
             cursorPos = this->getScreenSize() / 2.0f;
@@ -718,7 +719,7 @@ void Osu::update() {
         this->bSeeking = (this->bSeekKey || this->getSelectedBeatmap()->is_watching);
         this->bSeeking &= !this->getSelectedBeatmap()->isPaused() && !this->volumeOverlay->isBusy();
         this->bSeeking &= !bancho.is_playing_a_multi_map() && !this->bClickedSkipButton;
-        this->bSeeking &= !this->getSelectedBeatmap()->is_spectating;
+        this->bSeeking &= !bancho.is_spectating;
         if(this->bSeeking) {
             const float mousePosX = (int)engine->getMouse()->getPos().x;
             const float percent = clamp<float>(mousePosX / (float)this->getScreenWidth(), 0.0f, 1.0f);
@@ -826,18 +827,7 @@ void Osu::update() {
         this->mainMenu->setVisible(!this->mainMenu->isVisible());
     }
 
-    // handle cursor visibility if outside of internal resolution
-    // TODO: not a critical bug, but the real cursor gets visible way too early if sensitivity is > 1.0f, due to this
-    // using scaled/offset getMouse()->getPos()
-    if(cv_resolution_enabled.getBool()) {
-        McRect internalWindow = McRect(0, 0, g_vInternalResolution.x, g_vInternalResolution.y);
-        bool cursorVisible = env->isCursorVisible();
-        if(!internalWindow.contains(engine->getMouse()->getPos())) {
-            if(!cursorVisible) env->setCursorVisible(true);
-        } else {
-            if(cursorVisible != this->bShouldCursorBeVisible) env->setCursorVisible(this->bShouldCursorBeVisible);
-        }
-    }
+    this->updateCursorVisibility();
 
     // endless mod
     if(this->bScheduleEndlessModNextBeatmap) {
@@ -955,12 +945,6 @@ void Osu::updateMods() {
     }
 
     if(this->isInPlayMode()) {
-        // handle auto/pilot cursor visibility
-        this->bShouldCursorBeVisible = cv_mod_autoplay.getBool() || cv_mod_autopilot.getBool() ||
-                                       this->getSelectedBeatmap()->is_watching ||
-                                       this->getSelectedBeatmap()->is_spectating;
-        env->setCursorVisible(this->bShouldCursorBeVisible);
-
         // notify the possibly running beatmap of mod changes
         // e.g. recalculating stacks dynamically if HR is toggled
         this->getSelectedBeatmap()->onModUpdate();
@@ -1081,7 +1065,7 @@ void Osu::onKeyDown(KeyboardEvent &key) {
         // instant replay
         if((beatmap->isPaused() || beatmap->hasFailed())) {
             if(!key.isConsumed() && key == (KEYCODE)cv_INSTANT_REPLAY.getInt()) {
-                if(!beatmap->is_watching && !beatmap->is_spectating) {
+                if(!beatmap->is_watching && !bancho.is_spectating) {
                     FinishedScore score;
                     score.replay = beatmap->live_replay;
                     score.beatmap_hash = beatmap->getSelectedDifficulty2()->getMD5Hash();
@@ -1409,7 +1393,10 @@ void Osu::toggleModSelection(bool waitForF1KeyUp) {
     this->modSelector->setWaitForF1KeyUp(waitForF1KeyUp);
 }
 
-void Osu::toggleSongBrowser() { this->bToggleSongBrowserScheduled = true; }
+void Osu::toggleSongBrowser() {
+    if(bancho.is_spectating) return;
+    this->bToggleSongBrowserScheduled = true;
+}
 
 void Osu::toggleOptionsMenu() {
     this->bToggleOptionsMenuScheduled = true;
@@ -1455,9 +1442,6 @@ void Osu::onPlayEnd(FinishedScore score, bool quit, bool aborted) {
     this->modSelector->setVisible(false);
     this->pauseMenu->setVisible(false);
 
-    env->setCursorVisible(false);
-    this->bShouldCursorBeVisible = false;
-
     this->iMultiplayerClientNumEscPresses = 0;
 
     if(this->songBrowser2 != NULL) this->songBrowser2->onPlayEnd(quit);
@@ -1465,10 +1449,7 @@ void Osu::onPlayEnd(FinishedScore score, bool quit, bool aborted) {
     // When playing in multiplayer, screens are toggled in Room
     if(!bancho.is_playing_a_multi_map()) {
         if(quit) {
-            // When spectating, we don't want to enable the song browser after song ends
-            if(bancho.spectated_player_id == 0) {
-                this->toggleSongBrowser();
-            }
+            this->toggleSongBrowser();
         } else {
             this->rankingScreen->setVisible(true);
         }
@@ -1537,9 +1518,7 @@ float Osu::getAnimationSpeedMultiplier() {
     return animationSpeedMultiplier;
 }
 
-bool Osu::isInPlayMode() { return (this->songBrowser2 != NULL && this->songBrowser2->hasSelectedAndIsPlaying()); }
-
-bool Osu::isNotInPlayModeOrPaused() { return !this->isInPlayMode() || this->getSelectedBeatmap()->isPaused(); }
+bool Osu::isInPlayMode() { return (this->songBrowser2 != NULL && this->songBrowser2->bHasSelectedAndIsPlaying); }
 
 bool Osu::shouldFallBackToLegacySliderRenderer() {
     return cv_force_legacy_slider_renderer.getBool() || cv_mod_wobble.getBool() || cv_mod_wobble2.getBool() ||
@@ -1770,8 +1749,7 @@ void Osu::onFocusGained() {
 
 void Osu::onFocusLost() {
     if(this->isInPlayMode() && !this->getSelectedBeatmap()->isPaused() && cv_pause_on_focus_loss.getBool()) {
-        if(!bancho.is_playing_a_multi_map() && !this->getSelectedBeatmap()->is_watching &&
-           !this->getSelectedBeatmap()->is_spectating) {
+        if(!bancho.is_playing_a_multi_map() && !this->getSelectedBeatmap()->is_watching && !bancho.is_spectating) {
             this->getSelectedBeatmap()->pause(false);
             this->pauseMenu->setVisible(true);
             this->modSelector->setVisible(false);
@@ -1916,16 +1894,45 @@ void Osu::onLetterboxingChange(UString oldValue, UString newValue) {
     }
 }
 
+// Here, "cursor" is the Windows mouse cursor, not the game cursor
+void Osu::updateCursorVisibility() {
+    this->bShouldCursorBeVisible = false;
+
+    if(this->isInPlayMode()) {
+        if(cv_mod_autoplay.getBool() || cv_mod_autopilot.getBool() || bancho.is_spectating) {
+            this->bShouldCursorBeVisible = true;
+        }
+        if(this->getSelectedBeatmap()->is_watching) {
+            this->bShouldCursorBeVisible = true;
+        }
+    }
+
+    // handle cursor visibility if outside of internal resolution
+    // TODO: not a critical bug, but the real cursor gets visible way too early if sensitivity is > 1.0f, due to this
+    // using scaled/offset getMouse()->getPos()
+    if(cv_resolution_enabled.getBool()) {
+        McRect internalWindow = McRect(0, 0, g_vInternalResolution.x, g_vInternalResolution.y);
+        if(!internalWindow.contains(engine->getMouse()->getPos())) {
+            this->bShouldCursorBeVisible = true;
+        }
+    }
+
+    if(this->bShouldCursorBeVisible != env->isCursorVisible()) {
+        env->setCursorVisible(this->bShouldCursorBeVisible);
+    }
+}
+
 void Osu::updateConfineCursor() {
     if(cv_debug.getBool()) debugLog("Osu::updateConfineCursor()\n");
 
     if((cv_confine_cursor_fullscreen.getBool() && env->isFullscreen()) ||
        (cv_confine_cursor_windowed.getBool() && !env->isFullscreen()) ||
        (this->isInPlayMode() && !this->pauseMenu->isVisible() && !this->getModAuto() && !this->getModAutopilot() &&
-        !this->getSelectedBeatmap()->is_watching && !this->getSelectedBeatmap()->is_spectating))
+        !this->getSelectedBeatmap()->is_watching && !bancho.is_spectating)) {
         env->setCursorClip(true, McRect());
-    else
+    } else {
         env->setCursorClip(false, McRect());
+    }
 }
 
 void Osu::onConfineCursorWindowedChange(UString oldValue, UString newValue) { this->updateConfineCursor(); }

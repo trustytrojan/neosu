@@ -28,6 +28,7 @@
 #include "SongBrowser/ScoreButton.h"
 #include "SongBrowser/SongBrowser.h"
 #include "SoundEngine.h"
+#include "SpectatorScreen.h"
 #include "TooltipOverlay.h"
 #include "UIButton.h"
 #include "UIRankingScreenInfoLabel.h"

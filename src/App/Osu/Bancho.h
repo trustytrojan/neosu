@@ -21,6 +21,7 @@ struct Bancho {
     MD5Hash pw_md5;
     Room room;
 
+    bool is_spectating = false;
     i32 spectated_player_id = 0;
     std::vector<u32> spectators;
     std::vector<u32> fellow_spectators;

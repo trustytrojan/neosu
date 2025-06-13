@@ -568,7 +568,7 @@ void RoomScreen::on_room_joined(Room room) {
 
     // Close all screens and stop any activity the player is in
     stop_spectating();
-    if(osu->getSelectedBeatmap()->isPlaying()) {
+    if(osu->isInPlayMode()) {
         osu->getSelectedBeatmap()->stop(true);
     }
     osu->rankingScreen->setVisible(false);

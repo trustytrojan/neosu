@@ -4,6 +4,7 @@
 
 #include "AnimationHandler.h"
 #include "BackgroundImageHandler.h"
+#include "Bancho.h"
 #include "Beatmap.h"
 #include "Camera.h"
 #include "ConVar.h"
@@ -174,7 +175,8 @@ void ModFPoSu::update() {
     this->modelMatrix = Matrix4();
     {
         this->modelMatrix.scale(
-            1.0f, (osu->getPlayfieldBuffer()->getHeight() / osu->getPlayfieldBuffer()->getWidth()) * (this->fCircumLength),
+            1.0f,
+            (osu->getPlayfieldBuffer()->getHeight() / osu->getPlayfieldBuffer()->getWidth()) * (this->fCircumLength),
             1.0f);
 
         // rotate around center
@@ -188,10 +190,9 @@ void ModFPoSu::update() {
             this->modelMatrix.translate(0, 0, -cv_fposu_distance.getFloat());  // (restore)
         }
 
-		// NOTE: slightly move back by default to avoid aliasing with background cube
-        this->modelMatrix.translate(
-            cv_fposu_playfield_position_x.getFloat(), cv_fposu_playfield_position_y.getFloat(),
-            -0.0015f + cv_fposu_playfield_position_z.getFloat());
+        // NOTE: slightly move back by default to avoid aliasing with background cube
+        this->modelMatrix.translate(cv_fposu_playfield_position_x.getFloat(), cv_fposu_playfield_position_y.getFloat(),
+                                    -0.0015f + cv_fposu_playfield_position_z.getFloat());
 
         if(cv_fposu_mod_strafing.getBool()) {
             if(osu->isInPlayMode()) {
@@ -214,8 +215,8 @@ void ModFPoSu::update() {
         }
     }
 
-    const bool isAutoCursor = (osu->getModAuto() || osu->getModAutopilot() || osu->getSelectedBeatmap()->is_watching ||
-                               osu->getSelectedBeatmap()->is_spectating);
+    const bool isAutoCursor =
+        (osu->getModAuto() || osu->getModAutopilot() || osu->getSelectedBeatmap()->is_watching || bancho.is_spectating);
 
     this->bCrosshairIntersectsScreen = true;
     if(!cv_fposu_absolute_mode.getBool() && !isAutoCursor &&
@@ -238,11 +239,11 @@ void ModFPoSu::update() {
         if(this->bZoomed && cv_fposu_zoom_sensitivity_ratio.getFloat() > 0.0f)
             // see https://www.reddit.com/r/GlobalOffensive/comments/3vxkav/how_zoomed_sensitivity_works/
             rawDelta *=
-                (cv_fposu_zoom_fov.getFloat() / cv_fposu_fov.getFloat()) *
-                cv_fposu_zoom_sensitivity_ratio.getFloat();
+                (cv_fposu_zoom_fov.getFloat() / cv_fposu_fov.getFloat()) * cv_fposu_zoom_sensitivity_ratio.getFloat();
 
         // update camera
-        if(rawDelta.x != 0.0f) this->camera->rotateY(rawDelta.x * (cv_fposu_invert_horizontal.getBool() ? 1.0f : -1.0f));
+        if(rawDelta.x != 0.0f)
+            this->camera->rotateY(rawDelta.x * (cv_fposu_invert_horizontal.getBool() ? 1.0f : -1.0f));
         if(rawDelta.y != 0.0f) this->camera->rotateX(rawDelta.y * (cv_fposu_invert_vertical.getBool() ? 1.0f : -1.0f));
 
         // calculate ray-mesh intersection and set new mouse pos
@@ -285,8 +286,9 @@ void ModFPoSu::noclipMove() {
         wishdir -= (this->bKeyDownDown ? this->camera->getViewDirection() : Vector3());
         wishdir += (this->bKeyLeftDown ? this->camera->getViewRight() : Vector3());
         wishdir -= (this->bKeyRightDown ? this->camera->getViewRight() : Vector3());
-        wishdir += (this->bKeySpaceDown ? (this->bKeySpaceUpDown ? Vector3(0.0f, 1.0f, 0.0f) : Vector3(0.0f, -1.0f, 0.0f))
-                                    : Vector3());
+        wishdir +=
+            (this->bKeySpaceDown ? (this->bKeySpaceUpDown ? Vector3(0.0f, 1.0f, 0.0f) : Vector3(0.0f, -1.0f, 0.0f))
+                                 : Vector3());
     }
 
     // normalize
@@ -385,8 +387,8 @@ void ModFPoSu::handleZoomedChange() {
         anim->moveQuadOut(&this->fZoomFOVAnimPercent, 1.0f,
                           (1.0f - this->fZoomFOVAnimPercent) * cv_fposu_zoom_anim_duration.getFloat(), true);
     else
-        anim->moveQuadOut(&this->fZoomFOVAnimPercent, 0.0f, this->fZoomFOVAnimPercent * cv_fposu_zoom_anim_duration.getFloat(),
-                          true);
+        anim->moveQuadOut(&this->fZoomFOVAnimPercent, 0.0f,
+                          this->fZoomFOVAnimPercent * cv_fposu_zoom_anim_duration.getFloat(), true);
 }
 
 void ModFPoSu::setMousePosCompensated(Vector2 newMousePos) {

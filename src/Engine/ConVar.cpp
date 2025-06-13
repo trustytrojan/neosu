@@ -1092,6 +1092,7 @@ ConVar cv_draw_songbrowser_menu_background_image("osu_draw_songbrowser_menu_back
                                                  FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_draw_songbrowser_strain_graph("osu_draw_songbrowser_strain_graph", false, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_draw_songbrowser_thumbnails("osu_draw_songbrowser_thumbnails", true, FCVAR_BANCHO_COMPATIBLE);
+ConVar cv_draw_spectator_background_image("draw_spectator_background_image", true, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_draw_spectator_list("draw_spectator_list", true, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_draw_statistics_ar("osu_draw_statistics_ar", false, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_draw_statistics_bpm("osu_draw_statistics_bpm", false, FCVAR_BANCHO_COMPATIBLE);
@@ -1860,6 +1861,9 @@ ConVar cv_sound_panning_multiplier("osu_sound_panning_multiplier", 1.0f, FCVAR_B
 
 // Even though this is FCVAR_BANCHO_COMPATIBLE, only (0.75, 1.0, 1.5) are allowed on bancho servers.
 ConVar cv_speed_override("osu_speed_override", -1.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_GAMEPLAY);
+
+ConVar cv_spec_buffer("spec_buffer", 2500, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
+                      "size of spectator buffer in milliseconds");
 
 ConVar cv_spinner_fade_out_time_multiplier("osu_spinner_fade_out_time_multiplier", 0.7f, FCVAR_LOCKED);
 ConVar cv_spinner_use_ar_fadein(

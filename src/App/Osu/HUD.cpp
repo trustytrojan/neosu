@@ -208,7 +208,7 @@ void HUD::draw(Graphics *g) {
         (cv_skip_breaks_enabled.getBool() && beatmap->iCurrentHitObjectIndex > 0)))
         this->drawSkip(g);
 
-    u32 nb_spectators = bancho.spectated_player_id == 0 ? bancho.spectators.size() : bancho.fellow_spectators.size();
+    u32 nb_spectators = bancho.is_spectating ? bancho.fellow_spectators.size() : bancho.spectators.size();
     if(nb_spectators > 0 && cv_draw_spectator_list.getBool()) {
         // XXX: maybe draw player names? avatars?
         const UString str = UString::format("%d spectators", nb_spectators);
@@ -1312,7 +1312,7 @@ std::vector<SCORE_ENTRY> HUD::getCurrentScores() {
         SCORE_ENTRY playerScoreEntry;
         if(osu->getModAuto() || (osu->getModAutopilot() && osu->getModRelax())) {
             playerScoreEntry.name = "neosu";
-        } else if(beatmap->is_watching || beatmap->is_spectating) {
+        } else if(beatmap->is_watching || bancho.is_spectating) {
             playerScoreEntry.name = osu->watched_user_name;
             playerScoreEntry.player_id = osu->watched_user_id;
         } else {

@@ -150,7 +150,9 @@ bool SimulatedBeatmap::start() {
     return true;
 }
 
-void SimulatedBeatmap::fail() {
+void SimulatedBeatmap::fail(bool force_death) {
+    (void)force_death;
+
     debugLog("SimulatedBeatmap::fail called!\n");
     this->bFailed = true;
 }

@@ -1355,6 +1355,7 @@ void SongBrowser::onChar(KeyboardEvent &e) {
 void SongBrowser::onResolutionChange(Vector2 newResolution) { ScreenBackable::onResolutionChange(newResolution); }
 
 CBaseUIContainer *SongBrowser::setVisible(bool visible) {
+    if(bancho.is_spectating && visible) return this;  // don't allow song browser to be visible while spectating
     if(visible == this->bVisible) return this;
 
     this->bVisible = visible;

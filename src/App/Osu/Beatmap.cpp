@@ -327,7 +327,7 @@ void Beatmap::skipEmptySection() {
 }
 
 void Beatmap::keyPressed1(bool mouse) {
-    if(this->is_watching || this->is_spectating) return;
+    if(this->is_watching || bancho.is_spectating) return;
 
     if(this->bContinueScheduled) this->bClickedContinue = !osu->getModSelector()->isMouseInside();
 
@@ -362,7 +362,7 @@ void Beatmap::keyPressed1(bool mouse) {
 }
 
 void Beatmap::keyPressed2(bool mouse) {
-    if(this->is_watching || this->is_spectating) return;
+    if(this->is_watching || bancho.is_spectating) return;
 
     if(this->bContinueScheduled) this->bClickedContinue = !osu->getModSelector()->isMouseInside();
 
@@ -397,7 +397,7 @@ void Beatmap::keyPressed2(bool mouse) {
 }
 
 void Beatmap::keyReleased1(bool mouse) {
-    if(this->is_watching || this->is_spectating) return;
+    if(this->is_watching || bancho.is_spectating) return;
 
     // key overlay
     osu->getHUD()->animateInputoverlay(1, false);
@@ -409,7 +409,7 @@ void Beatmap::keyReleased1(bool mouse) {
 }
 
 void Beatmap::keyReleased2(bool mouse) {
-    if(this->is_watching || this->is_spectating) return;
+    if(this->is_watching || bancho.is_spectating) return;
 
     // key overlay
     osu->getHUD()->animateInputoverlay(2, false);
@@ -525,7 +525,6 @@ bool Beatmap::spectate() {
     auto user_info = get_user_info(bancho.spectated_player_id, true);
     osu->watched_user_id = bancho.spectated_player_id;
     osu->watched_user_name = user_info->name;
-    this->is_spectating = true;
 
     osu->previous_mods = Replay::Mods::from_cvars();
 
@@ -541,6 +540,7 @@ bool Beatmap::spectate() {
     }
 
     this->spectated_replay.clear();
+    this->score_frames.clear();
 
     osu->songBrowser2->bHasSelectedAndIsPlaying = true;
     osu->songBrowser2->setVisible(false);
@@ -701,6 +701,7 @@ bool Beatmap::start() {
     }
 
     this->music->setLoop(false);
+    this->spectate_pause = false;
     this->bIsPaused = false;
     this->bContinueScheduled = false;
 
@@ -720,11 +721,6 @@ bool Beatmap::start() {
     this->fWaitTime = engine->getTimeReal();
 
     cv_snd_change_check_interval.setValue(0.0f);
-
-    if(cv_mod_autoplay.getBool() || cv_mod_autopilot.getBool() || this->is_watching || this->is_spectating) {
-        osu->bShouldCursorBeVisible = true;
-        env->setCursorVisible(osu->bShouldCursorBeVisible);
-    }
 
     if(this->getSelectedDifficulty2()->getLocalOffset() != 0)
         osu->notificationOverlay->addNotification(
@@ -748,7 +744,7 @@ void Beatmap::restart(bool quick) {
     if(!this->bIsWaiting) {
         this->bIsRestartScheduled = true;
         this->bIsRestartScheduledQuick = quick;
-    } else if(this->bIsPaused) {
+    } else if(this->bIsPaused && !bancho.is_spectating) {
         this->pause(false);
     }
 }
@@ -795,13 +791,12 @@ void Beatmap::actualRestart() {
     this->iCurMusicPos = 0;
 
     this->bIsPlaying = true;
-    this->is_spectating = false;
     this->is_watching = false;
 }
 
 void Beatmap::pause(bool quitIfWaiting) {
     if(this->selectedDifficulty2 == NULL) return;
-    if(this->is_spectating) {
+    if(bancho.is_spectating) {
         stop_spectating();
         return;
     }
@@ -913,13 +908,13 @@ void Beatmap::stop(bool quit) {
         osu->bModAutoTemp = false;
     }
 
-    if(this->is_watching || this->is_spectating) {
+    if(this->is_watching || bancho.is_spectating) {
         Replay::Mods::use(osu->previous_mods);
     }
 
-    this->is_spectating = false;
     this->is_watching = false;
     this->spectated_replay.clear();
+    this->score_frames.clear();
     SAFE_DELETE(sim);
 
     this->unloadObjects();
@@ -941,9 +936,9 @@ void Beatmap::stop(bool quit) {
     osu->should_pause_background_threads = false;
 }
 
-void Beatmap::fail() {
+void Beatmap::fail(bool force_death) {
     if(this->bFailed) return;
-    if(this->is_watching) return;
+    if((this->is_watching || bancho.is_spectating) && !force_death) return;
 
     // Change behavior of relax mod when online
     if(bancho.is_online() && osu->getModRelax()) return;
@@ -951,10 +946,10 @@ void Beatmap::fail() {
     if(!bancho.is_playing_a_multi_map() && cv_drain_kill.getBool()) {
         engine->getSound()->play(this->getSkin()->getFailsound());
 
+        // trigger music slowdown and delayed menu, see update()
         this->bFailed = true;
         this->fFailAnim = 1.0f;
-        anim->moveLinear(&this->fFailAnim, 0.0f, cv_fail_time.getFloat(),
-                         true);  // trigger music slowdown and delayed menu, see update()
+        anim->moveLinear(&this->fFailAnim, 0.0f, cv_fail_time.getFloat(), true);
     } else if(!osu->getScore()->isDead()) {
         debugLog("Disabling score submission due to death\n");
         this->vanilla = false;
@@ -1008,9 +1003,7 @@ void Beatmap::setSpeed(f32 speed) {
 }
 
 void Beatmap::seekPercent(f64 percent) {
-    if(this->selectedDifficulty2 == NULL || (!this->bIsPlaying && !this->bIsPaused) || this->music == NULL ||
-       this->bFailed)
-        return;
+    if(this->selectedDifficulty2 == NULL || this->music == NULL || this->bFailed) return;
 
     this->bWasSeekFrame = true;
     this->fWaitTime = 0.0f;
@@ -1035,6 +1028,10 @@ void Beatmap::seekPercent(f64 percent) {
         this->onModUpdate(false, false);
     }
 
+    if(bancho.is_spectating) {
+        debugLog("After seeking, we are now %dms behind the player.\n", this->last_frame_ms - (i32)ms);
+    }
+
     if(this->is_watching) {
         // When seeking backwards, restart simulation from beginning
         if(ms < this->iCurMusicPos) {
@@ -1045,7 +1042,7 @@ void Beatmap::seekPercent(f64 percent) {
         }
     }
 
-    if(!this->is_watching && !this->is_spectating) {  // score submission already disabled when watching replay
+    if(!this->is_watching && !bancho.is_spectating) {  // score submission already disabled when watching replay
         debugLog("Disabling score submission due to seeking\n");
         this->vanilla = false;
     }
@@ -1240,7 +1237,7 @@ f32 Beatmap::getOD() const {
 }
 
 bool Beatmap::isKey1Down() const {
-    if(this->is_watching || this->is_spectating) {
+    if(this->is_watching || bancho.is_spectating) {
         return this->current_keys & (LegacyReplay::M1 | LegacyReplay::K1);
     } else {
         return this->bClick1Held;
@@ -1248,7 +1245,7 @@ bool Beatmap::isKey1Down() const {
 }
 
 bool Beatmap::isKey2Down() const {
-    if(this->is_watching || this->is_spectating) {
+    if(this->is_watching || bancho.is_spectating) {
         return this->current_keys & (LegacyReplay::M2 | LegacyReplay::K2);
     } else {
         return this->bClick2Held;
@@ -1591,7 +1588,7 @@ void Beatmap::resetScore() {
     });
 
     this->last_event_time = engine->getTimeReal();
-    this->last_event_ms = -1;
+    this->last_event_ms = 0;
     this->current_keys = 0;
     this->last_keys = 0;
     this->current_frame_idx = 0;
@@ -1699,18 +1696,23 @@ void Beatmap::draw(Graphics *g) {
     // draw loading circle
     if(this->isLoading()) {
         if(this->isBuffering()) {
-            f32 leeway = clamp<i32>(this->last_frame_ms - this->last_event_ms, 0, 2500);
-            f32 pct = leeway / 2500.f * 100.f;
+            f32 leeway = clamp<i32>(this->last_frame_ms - this->iCurMusicPos, 0, cv_spec_buffer.getInt());
+            f32 pct = leeway / (cv_spec_buffer.getFloat()) * 100.f;
             auto loadingMessage = UString::format("Buffering ... (%.2f%%)", pct);
             osu->getHUD()->drawLoadingSmall(g, loadingMessage);
+
+            // draw the rest of the playfield while buffering/paused
         } else if(bancho.is_playing_a_multi_map() && !bancho.room.all_players_loaded) {
             osu->getHUD()->drawLoadingSmall(g, "Waiting for players ...");
+
+            // only start drawing the rest of the playfield if everything has loaded
+            return;
         } else {
             osu->getHUD()->drawLoadingSmall(g, "Loading ...");
-        }
 
-        // only start drawing the rest of the playfield if everything has loaded
-        return;
+            // only start drawing the rest of the playfield if everything has loaded
+            return;
+        }
     }
 
     if(this->is_watching && cv_simulate_replays.getBool()) {
@@ -1744,6 +1746,13 @@ void Beatmap::draw(Graphics *g) {
 
     // draw all hitobjects in reverse
     if(cv_draw_hitobjects.getBool()) this->drawHitObjects(g);
+
+    // draw spectator pause message
+    if(this->spectate_pause) {
+        auto info = get_user_info(bancho.spectated_player_id);
+        auto pause_msg = UString::format("%s has paused", info->name.toUtf8());
+        osu->getHUD()->drawLoadingSmall(g, pause_msg);
+    }
 
     // debug stuff
     if(cv_debug_hiterrorbar_misaims.getBool()) {
@@ -2353,6 +2362,19 @@ void Beatmap::update2() {
         }
     }
 
+    if(bancho.is_spectating) {
+        if(this->spectate_pause && !this->bFailed && this->music->isPlaying()) {
+            engine->getSound()->pause(this->music);
+            this->bIsPlaying = false;
+            this->bIsPaused = true;
+        }
+        if(!this->spectate_pause && this->bIsPaused) {
+            engine->getSound()->play(this->music);
+            this->bIsPlaying = true;
+            this->bIsPaused = false;
+        }
+    }
+
     // only continue updating hitobjects etc. if we have loaded everything
     if(this->isLoading()) return;
 
@@ -2421,17 +2443,17 @@ void Beatmap::update2() {
     this->updateTimingPoints(this->iCurMusicPosWithOffsets);
 
     // Make sure we're not too far behind the liveplay
-    if(this->is_spectating) {
-        if(this->iCurMusicPos + 5000 < this->last_frame_ms) {
-            debugLog("Spectator is too far behind, seeking to catch up to player...\n");
-            i32 target = this->last_frame_ms - 2500;
+    if(bancho.is_spectating) {
+        if(this->iCurMusicPos + (2 * cv_spec_buffer.getInt()) < this->last_frame_ms) {
+            i32 target = this->last_frame_ms - cv_spec_buffer.getInt();
             f32 percent = (f32)target / (f32)this->getLength();
+            debugLog("We're %dms behind, seeking to catch up to player...\n", this->last_frame_ms - this->iCurMusicPos);
             this->seekPercent(percent);
             return;
         }
     }
 
-    if(this->is_watching || this->is_spectating) {
+    if((this->is_watching || bancho.is_spectating) && this->spectated_replay.size() >= 2) {
         LegacyReplay::Frame current_frame = this->spectated_replay[this->current_frame_idx];
         LegacyReplay::Frame next_frame = this->spectated_replay[this->current_frame_idx + 1];
 
@@ -3007,13 +3029,52 @@ void Beatmap::update2() {
                 engine->getSound()->pause(this->music);
                 this->bIsPaused = true;
 
-                osu->getPauseMenu()->setVisible(true);
-                osu->updateConfineCursor();
+                if(bancho.is_spectating) {
+                    osu->songBrowser2->bHasSelectedAndIsPlaying = false;
+                } else {
+                    osu->getPauseMenu()->setVisible(true);
+                    osu->updateConfineCursor();
+                }
             }
-        } else
+        } else {
             this->music->setFrequency(this->fMusicFrequencyBackup * this->fFailAnim > 100
                                           ? this->fMusicFrequencyBackup * this->fFailAnim
                                           : 100);
+        }
+    }
+
+    // spectator score correction
+    if(bancho.is_spectating && this->spectated_replay.size() >= 2) {
+        auto current_frame = this->spectated_replay[this->current_frame_idx];
+
+        i32 score_frame_idx = -1;
+        for(i32 i = 0; i < this->score_frames.size(); i++) {
+            if(this->score_frames[i].time == current_frame.cur_music_pos) {
+                score_frame_idx = i;
+                break;
+            }
+        }
+
+        if(score_frame_idx != -1) {
+            auto fixed_score = this->score_frames[score_frame_idx];
+            osu->score->iNum300s = fixed_score.num300;
+            osu->score->iNum100s = fixed_score.num100;
+            osu->score->iNum50s = fixed_score.num50;
+            osu->score->iNum300gs = fixed_score.num_geki;
+            osu->score->iNum100ks = fixed_score.num_katu;
+            osu->score->iNumMisses = fixed_score.num_miss;
+            osu->score->iScoreV1 = fixed_score.total_score;
+            osu->score->iScoreV2 = fixed_score.total_score;
+            osu->score->iComboMax = fixed_score.max_combo;
+            osu->score->iCombo = fixed_score.current_combo;
+
+            // XXX: instead naively of setting it, we should simulate time decay
+            this->fHealth = ((f32)fixed_score.current_hp) / 255.f;
+
+            // fixed_score.is_perfect is unused
+            // fixed_score.tag is unused (XXX: i think scorev2 uses this?)
+            // fixed_score.is_scorev2 is unused
+        }
     }
 }
 
@@ -3037,7 +3098,7 @@ void Beatmap::broadcast_spectator_frames() {
 }
 
 void Beatmap::write_frame() {
-    if(!this->bIsPlaying || this->bFailed || this->is_watching || this->is_spectating) return;
+    if(!this->bIsPlaying || this->bFailed || this->is_watching || bancho.is_spectating) return;
 
     long delta = this->iCurMusicPosWithOffsets - this->last_event_ms;
     if(delta < 0) return;
@@ -3146,21 +3207,37 @@ void Beatmap::resetLiveStarsTasks() {
 
 // HACK: Updates buffering state and pauses/unpauses the music!
 bool Beatmap::isBuffering() {
-    if(!this->is_spectating) return false;
+    if(!bancho.is_spectating) return false;
 
-    i32 leeway = this->last_frame_ms - this->last_event_ms;
+    i32 leeway = this->last_frame_ms - this->iCurMusicPos;
     if(this->is_buffering) {
-        if(leeway >= 2500) {
-            debugLog("PAUSING: leeway: %i, last_event: %d, last_frame: %d\n", leeway, last_event_ms, last_frame_ms);
+        // Make sure music is actually paused
+        if(this->music->isPlaying()) {
+            engine->getSound()->pause(this->music);
+            this->bIsPlaying = false;
+            this->bIsPaused = true;
+        }
+
+        if(leeway >= cv_spec_buffer.getInt()) {
+            debugLog("UNPAUSING: leeway: %i, last_event: %d, last_frame: %d\n", leeway, this->iCurMusicPos,
+                     this->last_frame_ms);
             engine->getSound()->play(this->music);
             this->bIsPlaying = true;
+            this->bIsPaused = false;
             this->is_buffering = false;
         }
     } else {
-        if(leeway < 1000) {
-            debugLog("UNPAUSING: leeway: %i, last_event: %d, last_frame: %d\n", leeway, last_event_ms, last_frame_ms);
+        HitObject *lastHitObject = this->hitobjectsSortedByEndTime.size() > 0
+                                       ? this->hitobjectsSortedByEndTime[this->hitobjectsSortedByEndTime.size() - 1]
+                                       : NULL;
+        bool is_finished = lastHitObject != NULL && lastHitObject->isFinished();
+
+        if(leeway < 0 && !is_finished) {
+            debugLog("PAUSING: leeway: %i, last_event: %d, last_frame: %d\n", leeway, this->iCurMusicPos,
+                     this->last_frame_ms);
             engine->getSound()->pause(this->music);
             this->bIsPlaying = false;
+            this->bIsPaused = true;
             this->is_buffering = true;
         }
     }
@@ -3320,7 +3397,7 @@ Vector2 Beatmap::osuCoords2LegacyPixels(Vector2 coords) const {
 }
 
 Vector2 Beatmap::getMousePos() const {
-    if((this->is_watching || this->is_spectating) && !this->bIsPaused) {
+    if((this->is_watching && !this->bIsPaused) || bancho.is_spectating) {
         return this->interpolatedMousePos;
     } else {
         return engine->getMouse()->getPos();
@@ -3329,21 +3406,23 @@ Vector2 Beatmap::getMousePos() const {
 
 Vector2 Beatmap::getCursorPos() const {
     if(cv_mod_fps.getBool() && !this->bIsPaused) {
-        if(osu->getModAuto() || osu->getModAutopilot())
+        if(osu->getModAuto() || osu->getModAutopilot()) {
             return this->vAutoCursorPos;
-        else
+        } else {
             return this->vPlayfieldCenter;
-    } else if(osu->getModAuto() || osu->getModAutopilot())
+        }
+    } else if(osu->getModAuto() || osu->getModAutopilot()) {
         return this->vAutoCursorPos;
-    else {
+    } else {
         Vector2 pos = this->getMousePos();
-        if(cv_mod_shirone.getBool() && osu->getScore()->getCombo() > 0)  // <3
+        if(cv_mod_shirone.getBool() && osu->getScore()->getCombo() > 0) {
             return pos + Vector2(std::sin((this->iCurMusicPos / 20.0f) * 1.15f) *
                                      ((f32)osu->getScore()->getCombo() / cv_mod_shirone_combo.getFloat()),
                                  std::cos((this->iCurMusicPos / 20.0f) * 1.3f) *
                                      ((f32)osu->getScore()->getCombo() / cv_mod_shirone_combo.getFloat()));
-        else
+        } else {
             return pos;
+        }
     }
 }
 
@@ -3414,7 +3493,7 @@ FinishedScore Beatmap::saveAndSubmitScore(bool quit) {
     bool isComplete = (num300s + num100s + num50s + numMisses >= numHitObjects);
     bool isZero = (osu->getScore()->getScore() < 1);
     bool isCheated = (osu->getModAuto() || (osu->getModAutopilot() && osu->getModRelax())) ||
-                     osu->getScore()->isUnranked() || this->is_watching || this->is_spectating;
+                     osu->getScore()->isUnranked() || this->is_watching || bancho.is_spectating;
 
     FinishedScore score;
     UString client_ver = "neosu-" OS_NAME "-" NEOSU_STREAM "-";

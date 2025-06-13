@@ -611,8 +611,8 @@ void ScoreButton::setScore(const FinishedScore &score, DatabaseBeatmap *diff2, i
     if(score.player_id != 0) {
         this->avatar = new UIAvatar(score.player_id, this->vPos.x, this->vPos.y, this->vSize.y, this->vSize.y);
 
-        auto user = get_user_info(score.player_id);
-        this->is_friend = user->is_friend();
+        auto user = try_get_user_info(score.player_id);
+        this->is_friend = user && user->is_friend();
     }
 
     // display

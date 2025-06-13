@@ -114,7 +114,7 @@ class Beatmap : public BeatmapInterface {
     void pausePreviewMusic(bool toggle = true);
     bool isPreviewMusicPlaying();
     void stop(bool quit = true);
-    void fail();
+    void fail(bool force_death = false);
     void cancelFailing();
     void resetScore();
 
@@ -150,7 +150,7 @@ class Beatmap : public BeatmapInterface {
     void write_frame();
     std::vector<LegacyReplay::Frame> live_replay;
     f64 last_event_time = 0.0;
-    long last_event_ms = 0;
+    i32 last_event_ms = 0;
     u8 current_keys = 0;
     u8 last_keys = 0;
 
@@ -170,9 +170,9 @@ class Beatmap : public BeatmapInterface {
 
     // spectating (live)
     std::vector<ScoreFrame> score_frames;
-    bool is_spectating = false;
     bool is_buffering = false;
     i32 last_frame_ms = 0;
+    bool spectate_pause = false;  // the player we're spectating has paused
 
     // used by HitObject children and ModSelector
     Skin *getSkin() const;  // maybe use this for beatmap skins, maybe
@@ -245,6 +245,13 @@ class Beatmap : public BeatmapInterface {
     int iCurrentNumSliders;
     int iCurrentNumSpinners;
 
+    // beatmap state
+    bool bIsPlaying;
+    bool bIsPaused;
+    bool bIsWaiting;
+    bool bIsRestartScheduled;
+    bool bIsRestartScheduledQuick;
+
    protected:
     // internal
     bool canDraw();
@@ -260,13 +267,6 @@ class Beatmap : public BeatmapInterface {
     void playMissSound();
 
     u32 getMusicPositionMSInterpolated();
-
-    // beatmap state
-    bool bIsPlaying;
-    bool bIsPaused;
-    bool bIsWaiting;
-    bool bIsRestartScheduled;
-    bool bIsRestartScheduledQuick;
 
     bool bIsInSkippableSection;
     bool bShouldFlashWarningArrows;
@@ -404,10 +404,10 @@ class Beatmap : public BeatmapInterface {
     RenderTarget *mafhamFinishedRenderTarget;
     bool bMafhamRenderScheduled;
     int iMafhamHitObjectRenderIndex;  // scene buffering for rendering entire beatmaps at once with an acceptable
-                                        // framerate
+                                      // framerate
     int iMafhamPrevHitObjectIndex;
     int iMafhamActiveRenderHitObjectIndex;
     int iMafhamFinishedRenderHitObjectIndex;
     bool bInMafhamRenderChunk;  // used by Slider to not animate the reverse arrow, and by Circle to not animate
-                                  // note blocking shaking, while being rendered into the scene buffer
+                                // note blocking shaking, while being rendered into the scene buffer
 };

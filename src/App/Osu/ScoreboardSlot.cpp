@@ -14,8 +14,8 @@ ScoreboardSlot::ScoreboardSlot(SCORE_ENTRY score, int index) {
     this->score = score;
     this->index = index;
 
-    auto user = get_user_info(score.player_id);
-    this->is_friend = user->is_friend();
+    auto user = try_get_user_info(score.player_id);
+    this->is_friend = user && user->is_friend();
 }
 
 ScoreboardSlot::~ScoreboardSlot() {

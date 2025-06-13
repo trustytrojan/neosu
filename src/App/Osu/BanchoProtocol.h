@@ -262,21 +262,21 @@ class Room {
 
 #pragma pack(push, 1)
 struct ScoreFrame {
-    i32 time;
-    u8 slot_id;
-    u16 num300;
-    u16 num100;
-    u16 num50;
-    u16 num_geki;
-    u16 num_katu;
-    u16 num_miss;
-    i32 total_score;
-    u16 max_combo;
-    u16 current_combo;
-    u8 is_perfect;
-    u8 current_hp;
-    u8 tag;
-    u8 is_scorev2;
+    i32 time = 0;
+    u8 slot_id = 0;
+    u16 num300 = 0;
+    u16 num100 = 0;
+    u16 num50 = 0;
+    u16 num_geki = 0;
+    u16 num_katu = 0;
+    u16 num_miss = 0;
+    i32 total_score = 0;
+    u16 max_combo = 0;
+    u16 current_combo = 0;
+    u8 is_perfect = 0;
+    u8 current_hp = 0;
+    u8 tag = 0;
+    u8 is_scorev2 = 0;
 
     static ScoreFrame get();
 };

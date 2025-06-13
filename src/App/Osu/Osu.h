@@ -147,7 +147,6 @@ class Osu : public App, public MouseListener {
     inline std::vector<ConVar *> getExperimentalMods() const { return this->experimentalMods; }
 
     bool isInPlayMode();
-    bool isNotInPlayModeOrPaused();
     inline bool isSkinLoading() const { return this->bSkinLoadScheduled; }
 
     inline bool isSkipScheduled() const { return this->bSkipScheduled; }
@@ -159,6 +158,7 @@ class Osu : public App, public MouseListener {
 
     void useMods(FinishedScore *score);
     void updateMods();
+    void updateCursorVisibility();
     void updateConfineCursor();
     void updateMouseSettings();
     void updateWindowsKeyDisable();

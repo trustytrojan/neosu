@@ -43,7 +43,7 @@ class SimulatedBeatmap : public BeatmapInterface {
         return this->fXMultiplier;
     }  // multiply osu!pixels with this to get screen pixels
 
-    void fail();
+    void fail(bool force_death = false);
     void cancelFailing();
     void resetScore();
 

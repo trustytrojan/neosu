@@ -33,9 +33,11 @@
 #include "NotificationOverlay.h"
 #include "OptionsMenu.h"
 #include "Osu.h"
+#include "RankingScreen.h"
 #include "RoomScreen.h"
 #include "SongBrowser/SongBrowser.h"
-#include "SpectatorScreen.h"  // TODO @kiwec: FOR DEBUGGING
+#include "SoundEngine.h"
+#include "SpectatorScreen.h"
 #include "UIAvatar.h"
 #include "UIButton.h"
 #include "UserCard.h"
@@ -224,9 +226,6 @@ void handle_packet(Packet *packet) {
 
             // If server sent a score submission policy, update options menu to hide the checkbox
             osu->optionsMenu->updateLayout();
-
-            // start_spectating(4);  // TODO @kiwec: FOR DEBUGGING
-            // clang-format on
         } else {
             cv_mp_autologin.setValue(false);
             osu->optionsMenu->logInButton->setText("Log in");
@@ -299,75 +298,119 @@ void handle_packet(Packet *packet) {
         if(stats_user_id == bancho.user_id) {
             osu->userButton->updateUserStats();
         }
+        if(stats_user_id == bancho.spectated_player_id) {
+            osu->spectatorScreen->userCard->updateUserStats();
+        }
+
+        osu->chat->updateUserList();
     } else if(packet->id == USER_LOGOUT) {
         i32 logged_out_id = read<u32>(packet);
         read<u8>(packet);
         if(logged_out_id == bancho.user_id) {
             debugLog("Logged out.\n");
             disconnect();
+        } else {
+            logout_user(logged_out_id);
         }
     } else if(packet->id == IN_SPECTATE_FRAMES) {
         i32 extra = read<i32>(packet);
         (void)extra;  // this is mania seed or something we can't use
 
-        if(bancho.spectated_player_id != 0) {
+        if(bancho.is_spectating) {
+            UserInfo *info = get_user_info(bancho.spectated_player_id, true);
+            auto beatmap = osu->getSelectedBeatmap();
+
             u16 nb_frames = read<u16>(packet);
             for(u16 i = 0; i < nb_frames; i++) {
                 auto frame = read<LiveReplayFrame>(packet);
-                osu->getSelectedBeatmap()->spectated_replay.push_back(LegacyReplay::Frame{
+
+                if(frame.mouse_x < 0 || frame.mouse_x > 512 || frame.mouse_y < 0 || frame.mouse_y > 384) {
+                    debugLog("WEIRD FRAME: time %d, x %f, y %f\n", frame.time, frame.mouse_x, frame.mouse_y);
+                }
+
+                beatmap->spectated_replay.push_back(LegacyReplay::Frame{
                     .cur_music_pos = frame.time,
-                    .milliseconds_since_last_frame = frame.time - osu->getSelectedBeatmap()->last_frame_ms,
+                    .milliseconds_since_last_frame = 0,  // fixed below
                     .x = frame.mouse_x,
                     .y = frame.mouse_y,
                     .key_flags = frame.key_flags,
                 });
-                osu->getSelectedBeatmap()->last_frame_ms = frame.time;
             }
 
-            // TODO @kiwec: handle actions
-            LiveReplayBundle::Action action = (LiveReplayBundle::Action)read<u8>(packet);
-            // NONE = 0
-            // NEW_SONG = 1
-            // SKIP = 2
-            // COMPLETION = 3
-            // FAIL = 4
-            // PAUSE = 5
-            // UNPAUSE = 6
-            // SONG_SELECT = 7
-            // WATCHING_OTHER = 8
+            // NOTE: Server can send frames in the wrong order. So we're correcting it here.
+            std::sort(beatmap->spectated_replay.begin(), beatmap->spectated_replay.end(),
+                      [](LegacyReplay::Frame a, LegacyReplay::Frame b) { return a.cur_music_pos < b.cur_music_pos; });
+            beatmap->last_frame_ms = 0;
+            for(auto &frame : beatmap->spectated_replay) {
+                frame.milliseconds_since_last_frame = frame.cur_music_pos - beatmap->last_frame_ms;
+                beatmap->last_frame_ms = frame.cur_music_pos;
+            }
 
-            // TODO @kiwec: handle score frames
+            LiveReplayBundle::Action action = (LiveReplayBundle::Action)read<u8>(packet);
+            info->spec_action = action;
+
+            if(osu->isInPlayMode()) {
+                if(action == LiveReplayBundle::Action::SONG_SELECT) {
+                    info->map_id = 0;
+                    info->map_md5 = MD5Hash();
+                    beatmap->stop(true);
+                    osu->songBrowser2->bHasSelectedAndIsPlaying = false;
+                }
+                if(action == LiveReplayBundle::Action::UNPAUSE) {
+                    beatmap->spectate_pause = false;
+                }
+                if(action == LiveReplayBundle::Action::PAUSE) {
+                    beatmap->spectate_pause = true;
+                }
+                if(action == LiveReplayBundle::Action::SKIP) {
+                    beatmap->skipEmptySection();
+                }
+                if(action == LiveReplayBundle::Action::FAIL) {
+                    beatmap->fail(true);
+                }
+                if(action == LiveReplayBundle::Action::NEW_SONG) {
+                    osu->rankingScreen->setVisible(false);
+                    beatmap->restart(true);
+                    beatmap->update();
+                }
+            }
+
             auto score_frame = read<ScoreFrame>(packet);
-            osu->getSelectedBeatmap()->score_frames.push_back(score_frame);
+            beatmap->score_frames.push_back(score_frame);
 
             auto sequence = read<u16>(packet);
             (void)sequence;  // don't know how to use this
         }
     } else if(packet->id == SPECTATOR_JOINED) {
         i32 spectator_id = read<u32>(packet);
-        bancho.spectators.push_back(spectator_id);
-        debugLog("Spectator joined: user id %d\n", spectator_id);
+        if(std::find(bancho.spectators.begin(), bancho.spectators.end(), spectator_id) == bancho.spectators.end()) {
+            debugLog("Spectator joined: user id %d\n", spectator_id);
+            bancho.spectators.push_back(spectator_id);
+        }
     } else if(packet->id == SPECTATOR_LEFT) {
         i32 spectator_id = read<u32>(packet);
         auto it = std::find(bancho.spectators.begin(), bancho.spectators.end(), spectator_id);
         if(it != bancho.spectators.end()) {
+            debugLog("Spectator left: user id %d\n", spectator_id);
             bancho.spectators.erase(it);
         }
-        debugLog("Spectator left: user id %d\n", spectator_id);
     } else if(packet->id == SPECTATOR_CANT_SPECTATE) {
         i32 spectator_id = read<u32>(packet);
         debugLog("Spectator can't spectate: user id %d\n", spectator_id);
     } else if(packet->id == FELLOW_SPECTATOR_JOINED) {
         i32 spectator_id = read<u32>(packet);
-        bancho.fellow_spectators.push_back(spectator_id);
-        debugLog("Fellow spectator joined: user id %d\n", spectator_id);
+        if(std::find(bancho.fellow_spectators.begin(), bancho.fellow_spectators.end(), spectator_id) ==
+           bancho.fellow_spectators.end()) {
+            debugLog("Fellow spectator joined: user id %d\n", spectator_id);
+            bancho.fellow_spectators.push_back(spectator_id);
+        }
     } else if(packet->id == FELLOW_SPECTATOR_LEFT) {
         i32 spectator_id = read<u32>(packet);
         auto it = std::find(bancho.fellow_spectators.begin(), bancho.fellow_spectators.end(), spectator_id);
         if(it != bancho.fellow_spectators.end()) {
+            debugLog("Fellow spectator left: user id %d\n", spectator_id);
             bancho.fellow_spectators.erase(it);
         }
-        debugLog("Fellow spectator left: user id %d\n", spectator_id);
     } else if(packet->id == GET_ATTENTION) {
         // (nothing to do)
     } else if(packet->id == NOTIFICATION) {
@@ -387,6 +430,15 @@ void handle_packet(Packet *packet) {
         i32 room_id = read<u32>(packet);
         osu->lobby->removeRoom(room_id);
     } else if(packet->id == ROOM_JOIN_SUCCESS) {
+        // Sanity, in case some trolley admins do funny business
+        if(bancho.is_spectating) {
+            stop_spectating();
+        }
+        if(osu->isInPlayMode()) {
+            osu->getSelectedBeatmap()->stop(true);
+            osu->songBrowser2->bHasSelectedAndIsPlaying = false;
+        }
+
         auto room = Room(packet);
         osu->room->on_room_joined(room);
     } else if(packet->id == ROOM_JOIN_FAIL) {

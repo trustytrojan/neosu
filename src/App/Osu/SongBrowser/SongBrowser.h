@@ -106,7 +106,6 @@ class SongBrowser : public ScreenBackable {
 
     inline const std::vector<CollectionButton *> &getCollectionButtons() const { return this->collectionButtons; }
 
-    inline bool hasSelectedAndIsPlaying() const { return this->bHasSelectedAndIsPlaying; }
     inline bool isInSearch() const { return this->bInSearch; }
     inline bool isRightClickScrolling() const { return this->bSongBrowserRightClickScrolling; }
 

@@ -99,6 +99,7 @@ void disconnect() {
     outgoing = Packet();
 
     bancho.user_id = 0;
+    bancho.is_spectating = false;
     bancho.spectated_player_id = 0;
     bancho.spectators.clear();
     bancho.fellow_spectators.clear();
@@ -360,7 +361,7 @@ static void *do_networking() {
         }
 
         if(osu && osu->lobby->isVisible()) seconds_between_pings = 1;
-        if(bancho.spectated_player_id != 0) seconds_between_pings = 1;
+        if(bancho.is_spectating) seconds_between_pings = 1;
         if(bancho.is_in_a_multi_room() && seconds_between_pings > 3) seconds_between_pings = 3;
         bool should_ping = difftime(time(NULL), last_packet_tms) > seconds_between_pings;
         if(bancho.user_id <= 0) should_ping = false;

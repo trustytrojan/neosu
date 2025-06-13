@@ -172,7 +172,6 @@ class LiveScore {
     Replay::Mods mods;
     bool simulating;
 
-   private:
     f32 getScoreMultiplier();
     void onScoreChange();
 

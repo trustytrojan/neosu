@@ -2,7 +2,9 @@
 
 #include "Bancho.h"
 #include "BanchoNetworking.h"
+#include "BanchoUsers.h"
 #include "Beatmap.h"
+#include "Chat.h"
 #include "ConVar.h"
 #include "Database.h"
 #include "DatabaseBeatmap.h"
@@ -116,7 +118,8 @@ void RichPresence::updateBanchoMods() {
 }
 
 void RichPresence::onMainMenu() {
-    setBanchoStatus("Main Menu", AFK);
+    bool force_not_afk = bancho.is_spectating || (osu->chat->isVisible() && osu->chat->user_list->isVisible());
+    setBanchoStatus("Main Menu", force_not_afk ? IDLE : AFK);
 
     // NOTE: As much as I would like to show "Listening to", the Discord SDK ignores the activity 'type'
     struct DiscordActivity activity;
@@ -183,6 +186,17 @@ void RichPresence::onPlayStart() {
         strcpy(activity.state, "Playing in a lobby");
         activity.party.size.current_size = bancho.room.nb_players;
         activity.party.size.max_size = bancho.room.nb_open_slots;
+    } else if(bancho.is_spectating) {
+        setBanchoStatus(activity.details, WATCHING);
+        activity.party.size.current_size = 0;
+        activity.party.size.max_size = 0;
+
+        auto user = get_user_info(bancho.spectated_player_id, true);
+        if(user->has_presence) {
+            snprintf(activity.state, 128, "Spectating %s", user->name.toUtf8());
+        } else {
+            strcpy(activity.state, "Spectating");
+        }
     } else {
         setBanchoStatus(activity.details, PLAYING);
 

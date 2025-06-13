@@ -176,14 +176,14 @@ void ChatChannel::add_message(ChatMessage msg) {
         text_idx = url_start + match_len;
         search_start = msg_text.cbegin() + text_idx;
     }
+    if(search_start != msg_text.cend()) {
+        auto text = msg.text.substr(text_idx);
+        text_fragments.push_back(new CBaseUILabel(0, 0, 0, 0, "", text));
+    }
     if(is_action) {
         // Only appending now to prevent this character from being included in a link
         msg.text.append(L"*");
         msg_text.append(L"*");
-    }
-    if(search_start != msg_text.cend()) {
-        auto text = msg.text.substr(text_idx);
-        text_fragments.push_back(new CBaseUILabel(0, 0, 0, 0, "", text));
     }
 
     // We're offsetting the first fragment to account for the username + timestamp
@@ -1098,7 +1098,7 @@ bool Chat::isSmallChat() {
 }
 
 bool Chat::isVisibilityForced() {
-    bool is_forced = (this->isSmallChat() || osu->spectatorScreen->isVisible());
+    bool is_forced = this->isSmallChat();
     if(is_forced != this->visibility_was_forced) {
         // Chat width changed: update the layout now
         this->visibility_was_forced = is_forced;
@@ -1111,7 +1111,7 @@ void Chat::updateVisibility() {
     auto selected_beatmap = osu->getSelectedBeatmap();
     bool can_skip = (selected_beatmap != NULL) && (selected_beatmap->isInSkippableSection());
     bool is_spectating = cv_mod_autoplay.getBool() || (cv_mod_autopilot.getBool() && cv_mod_relax.getBool()) ||
-                         (selected_beatmap != NULL && selected_beatmap->is_watching) || bancho.spectated_player_id != 0;
+                         (selected_beatmap != NULL && selected_beatmap->is_watching) || bancho.is_spectating;
     bool is_clicking_circles = osu->isInPlayMode() && !can_skip && !is_spectating && !osu->pauseMenu->isVisible();
     if(bancho.is_playing_a_multi_map() && !bancho.room.all_players_loaded) {
         is_clicking_circles = false;
