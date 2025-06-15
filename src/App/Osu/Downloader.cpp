@@ -334,10 +334,16 @@ void download_beatmapset(u32 set_id, float* progress) {
     }
 
     std::vector<u8> data;
-    auto mirror = cv_beatmap_mirror.getString();
-    mirror.append(UString::format("%d", set_id));
+
+    auto scheme = cv_use_https.getBool() ? "https://" : "http://";
+    auto download_url = UString::format("%sosu.%s/d/", scheme, bancho.endpoint.toUtf8());
+    if(cv_beatmap_mirror_override.getString().lengthUtf8() > 0) {
+        download_url = cv_beatmap_mirror_override.getString();
+    }
+    download_url.append(UString::format("%d", set_id));
+
     int response_code = 0;
-    download(mirror.toUtf8(), progress, data, &response_code);
+    download(download_url.toUtf8(), progress, data, &response_code);
     if(response_code != 200) return;
 
     // Download succeeded: save map to disk

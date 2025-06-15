@@ -932,13 +932,14 @@ ConVar cv_beatmap_max_num_slider_scoringtimes("osu_beatmap_max_num_slider_scorin
                                               "maximum number of slider score increase events allowed per slider "
                                               "(prevent crashing on deliberate game-breaking beatmaps)");
 
-// If catboy.best doesn't work for you, here are some alternatives:
+// Some examples:
+// - https://catboy.best/d/
 // - https://api.osu.direct/d/
 // - https://api.nerinyan.moe/d/
 // - https://osu.gatari.pw/d/
 // - https://osu.sayobot.cn/osu.php?s=
-ConVar cv_beatmap_mirror("beatmap_mirror", "https://catboy.best/d/", FCVAR_BANCHO_COMPATIBLE,
-                         "mirror from which beatmapsets will be downloaded");
+ConVar cv_beatmap_mirror_override("beatmap_mirror_override", "", FCVAR_BANCHO_COMPATIBLE,
+                                  "URL of custom beatmap download mirror");
 
 ConVar cv_beatmap_preview_mods_live(
     "osu_beatmap_preview_mods_live", false, FCVAR_BANCHO_COMPATIBLE,

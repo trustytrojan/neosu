@@ -272,7 +272,7 @@ extern ConVar cv_background_image_eviction_delay_seconds;
 extern ConVar cv_background_image_loading_delay;
 extern ConVar cv_beatmap_max_num_hitobjects;
 extern ConVar cv_beatmap_max_num_slider_scoringtimes;
-extern ConVar cv_beatmap_mirror;
+extern ConVar cv_beatmap_mirror_override;
 extern ConVar cv_beatmap_preview_mods_live;
 extern ConVar cv_beatmap_preview_music_loop;
 extern ConVar cv_beatmap_version;
