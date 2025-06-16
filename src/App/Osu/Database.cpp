@@ -197,9 +197,18 @@ void Database::save() {
     this->saveScores();
 }
 
-BeatmapSet *Database::addBeatmapSet(std::string beatmapFolderPath) {
+BeatmapSet *Database::addBeatmapSet(std::string beatmapFolderPath, i32 set_id_override) {
     BeatmapSet *beatmap = this->loadRawBeatmap(beatmapFolderPath);
     if(beatmap == NULL) return NULL;
+
+    // Some beatmaps don't provide beatmap/beatmapset IDs in the .osu files
+    // But we know the beatmapset ID because we just downloaded it!
+    if(set_id_override != -1) {
+        beatmap->iSetID = set_id_override;
+        for(auto &diff : beatmap->getDifficulties()) {
+            diff->iSetID = set_id_override;
+        }
+    }
 
     this->beatmapsets.push_back(beatmap);
     this->neosu_sets.push_back(beatmap);
@@ -690,7 +699,9 @@ void Database::loadDB() {
                 nb_neosu_maps++;
             }
 
-            if(diffs->empty()) {
+            // NOTE: Ignoring mapsets with ID -1, since we most likely saved them in the correct folder,
+            //       but mistakenly set their ID to -1 (because the ID was missing from the .osu file).
+            if(diffs->empty() || set_id == -1) {
                 delete diffs;
             } else {
                 auto set = new BeatmapSet(diffs, DatabaseBeatmap::BeatmapType::NEOSU_BEATMAPSET);

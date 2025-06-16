@@ -11,6 +11,7 @@
 #include "BanchoProtocol.h"
 #include "ConVar.h"
 #include "Database.h"
+#include "DatabaseBeatmap.h"
 #include "Engine.h"
 #include "Osu.h"
 #include "SongBrowser/SongBrowser.h"
@@ -403,7 +404,7 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* pr
     if(*progress != 1.f) return NULL;
 
     auto mapset_path = UString::format(MCENGINE_DATA_DIR "maps/%d/", set_id);
-    db->addBeatmapSet(mapset_path.toUtf8());
+    db->addBeatmapSet(mapset_path.toUtf8(), set_id);
     debugLog("Finished loading beatmapset %d.\n", set_id);
 
     beatmap = db->getBeatmapDifficulty(beatmap_md5);
@@ -412,6 +413,11 @@ DatabaseBeatmap* download_beatmap(i32 beatmap_id, MD5Hash beatmap_md5, float* pr
         *progress = -1.f;
         return NULL;
     }
+
+    // Some beatmaps don't provide beatmap/beatmapset IDs in the .osu files
+    // While we're clueless on the beatmap IDs of the other maps in the set,
+    // we can still make sure at least the one we wanted is correct.
+    beatmap->iID = beatmap_id;
 
     *progress = 1.f;
     return beatmap;

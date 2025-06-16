@@ -64,7 +64,7 @@ class Database {
     void cancel();
     void save();
 
-    BeatmapSet *addBeatmapSet(std::string beatmapFolderPath);
+    BeatmapSet *addBeatmapSet(std::string beatmapFolderPath, i32 set_id_override = -1);
 
     int addScore(FinishedScore score);
     void deleteScore(MD5Hash beatmapMD5Hash, u64 scoreUnixTimestamp);
