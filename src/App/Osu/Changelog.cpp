@@ -26,6 +26,17 @@ Changelog::Changelog() : ScreenBackable() {
 
     std::vector<CHANGELOG> changelogs;
 
+    CHANGELOG v38_00;
+    v38_00.title = "38.00 (2025-06-17)";
+    v38_00.changes.push_back("- Added user list interface (F9, aka. \"Extended Chat Console\")");
+    v38_00.changes.push_back("- Added support for older osu!.db versions (~2014)");
+    v38_00.changes.push_back("- Fixed beatmap downloads sometimes not getting saved correctly");
+    v38_00.changes.push_back("- Fixed LOGOUT packet triggering errors on some servers");
+    // TODO: Fix F9 screen bugs
+    // TODO: Check for performance regressions
+    // Spectating is not included in this release (feature cvar: cv_enable_spectating)
+    changelogs.push_back(v38_00);
+
     CHANGELOG v37_03;
     v37_03.title = "37.03 (2025-03-09)";
     v37_03.changes.push_back("- Added missing mode-osu.png");
