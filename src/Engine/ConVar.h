@@ -956,6 +956,9 @@ extern ConVar cv_win_snd_wasapi_buffer_size;
 extern ConVar cv_win_snd_wasapi_exclusive;
 extern ConVar cv_win_snd_wasapi_period_size;
 
+// Temporary
+extern ConVar cv_enable_spectating;
+
 // Convars below are UNUSED!
 extern ConVar cv_allow_mp_invites;
 extern ConVar cv_allow_stranger_dms;

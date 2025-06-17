@@ -68,10 +68,12 @@ void UIUserContextMenuScreen::open(u32 user_id) {
             this->menu->addButton("Add as friend", UA_ADD_FRIEND);
         }
 
-        if(bancho.spectated_player_id == user_id) {
-            menu->addButton("Stop spectating", TOGGLE_SPECTATE);
-        } else {
-            menu->addButton("Spectate", TOGGLE_SPECTATE);
+        if(cv_enable_spectating.getBool()) {
+            if(bancho.spectated_player_id == user_id) {
+                menu->addButton("Stop spectating", TOGGLE_SPECTATE);
+            } else {
+                menu->addButton("Spectate", TOGGLE_SPECTATE);
+            }
         }
     }
 

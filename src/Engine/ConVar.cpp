@@ -1971,6 +1971,9 @@ ConVar cv_win_snd_wasapi_period_size(
     "win_snd_wasapi_period_size", 0.0f, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
     "interval between OutputWasapiProc calls in seconds (e.g. 0.016 = 16 ms) (0 = use default)");
 
+// Temporary
+ConVar cv_enable_spectating("enable_spectating", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
+
 // Convars below are UNUSED!
 // TODO @kiwec: use them!
 ConVar cv_allow_mp_invites("allow_mp_invites", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
