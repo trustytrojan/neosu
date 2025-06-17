@@ -522,7 +522,7 @@ bool Beatmap::spectate() {
     this->bContinueScheduled = false;
     this->unloadObjects();
 
-    auto user_info = get_user_info(bancho.spectated_player_id);
+    auto user_info = get_user_info(bancho.spectated_player_id, true);
     osu->watched_user_id = bancho.spectated_player_id;
     osu->watched_user_name = user_info->name;
     this->is_spectating = true;

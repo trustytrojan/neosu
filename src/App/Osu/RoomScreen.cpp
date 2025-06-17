@@ -340,7 +340,7 @@ void RoomScreen::updateSettingsLayout(Vector2 newResolution) {
     if(!is_host) {
         UString host_str = "Host: None";
         if(bancho.room.host_id > 0) {
-            auto host = get_user_info(bancho.room.host_id);
+            auto host = get_user_info(bancho.room.host_id, true);
             host_str = UString::format("Host: %s", host->name.toUtf8());
         }
         this->host->setText(host_str);
@@ -444,7 +444,7 @@ void RoomScreen::updateLayout(Vector2 newResolution) {
     int y_total = 10;
     for(int i = 0; i < 16; i++) {
         if(bancho.room.slots[i].has_player()) {
-            auto user_info = get_user_info(bancho.room.slots[i].player_id);
+            auto user_info = get_user_info(bancho.room.slots[i].player_id, true);
             auto username = user_info->name;
             if(bancho.room.slots[i].is_player_playing()) {
                 username = UString::format("[playing] %s", user_info->name.toUtf8());
@@ -559,7 +559,7 @@ void RoomScreen::on_room_joined(Room room) {
     debugLog("Joined room #%d\nPlayers:\n", room.id);
     for(int i = 0; i < 16; i++) {
         if(room.slots[i].has_player()) {
-            auto user_info = get_user_info(room.slots[i].player_id);
+            auto user_info = get_user_info(room.slots[i].player_id, true);
             debugLog("- %s\n", user_info->name.toUtf8());
         }
     }

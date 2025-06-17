@@ -31,6 +31,7 @@
 #include "SpectatorScreen.h"
 #include "UIButton.h"
 #include "UIUserContextMenu.h"
+#include "UserCard2.h"
 
 ChatChannel::ChatChannel(Chat *chat, UString name_arg) {
     this->chat = chat;
@@ -275,6 +276,15 @@ Chat::Chat() : OsuScreen() {
     this->input_box->setBackgroundColor(0xdd000000);
     this->addBaseUIElement(this->input_box);
 
+    this->user_list = new CBaseUIScrollView(0, 0, 0, 0, "");
+    this->user_list->setDrawFrame(false);
+    this->user_list->setDrawBackground(true);
+    this->user_list->setBackgroundColor(0xcc000000);
+    this->user_list->setHorizontalScrolling(false);
+    this->user_list->setDrawScrollbars(true);
+    this->user_list->setVisible(false);
+    this->addBaseUIElement(this->user_list);
+
     this->updateLayout(osu->getScreenSize());
 }
 
@@ -290,29 +300,14 @@ void Chat::draw(Graphics *g) {
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_PREMUL_ALPHA);
     }
 
-    if(this->selected_channel == NULL) {
-        const float chat_h = round(this->getSize().y * 0.3f);
-        const float chat_y = this->getSize().y - chat_h;
-        float chat_w = this->getSize().x;
-        if(this->isSmallChat()) {
-            // In the lobby and in multi rooms, don't take the full horizontal width to allow for cleaner UI designs.
-            chat_w = round(chat_w * 0.6);
-        }
+    g->setColor(COLOR(100, 0, 10, 50));
+    g->fillRect(this->button_container->getPos().x, this->button_container->getPos().y,
+                this->button_container->getSize().x, this->button_container->getSize().y);
+    this->button_container->draw(g);
 
-        g->setColor(COLOR(100, 0, 10, 50));
-        g->fillRect(0, chat_y - (this->button_height + 2.f), chat_w, (this->button_height + 2.f));
-        g->setColor(COLOR(150, 0, 0, 0));
-        g->fillRect(0, chat_y, chat_w, chat_h);
-    } else {
-        g->setColor(COLOR(100, 0, 10, 50));
-        g->fillRect(this->button_container->getPos().x, this->button_container->getPos().y,
-                    this->button_container->getSize().x, this->button_container->getSize().y);
-        this->button_container->draw(g);
-
-        OsuScreen::draw(g);
-        if(this->selected_channel != NULL) {
-            this->selected_channel->ui->draw(g);
-        }
+    OsuScreen::draw(g);
+    if(this->selected_channel != NULL) {
+        this->selected_channel->ui->draw(g);
     }
 
     if(isAnimating) {
@@ -334,7 +329,24 @@ void Chat::draw(Graphics *g) {
 
 void Chat::mouse_update(bool *propagate_clicks) {
     if(!this->bVisible) return;
+
+    // Request stats for on-screen user cards
+    for(auto elm : this->user_list->getContainer()->getElements()) {
+        UserCard2 *card = (UserCard2 *)elm;
+        if(card->info->irc_user) continue;
+
+        bool is_above_bottom = card->getPos().y <= this->user_list->getPos().y + this->user_list->getSize().y;
+        bool is_below_top = card->getPos().y + card->getSize().y >= this->user_list->getPos().y;
+        if(is_above_bottom && is_below_top) {
+            if(std::find(stats_requests.begin(), stats_requests.end(), card->info->user_id) == stats_requests.end()) {
+                stats_requests.push_back(card->info->user_id);
+            }
+        }
+    }
+
     OsuScreen::mouse_update(propagate_clicks);
+
+    // XXX: don't let mouse click through the buttons area
     this->button_container->mouse_update(propagate_clicks);
     if(this->selected_channel) {
         this->selected_channel->ui->mouse_update(propagate_clicks);
@@ -927,6 +939,90 @@ void Chat::updateButtonLayout(Vector2 screen) {
     this->join_channel_btn->setPos(total_x, chat_y - button_container_height + total_y);
     this->button_container->setPos(0, chat_y - button_container_height);
     this->button_container->setSize(screen.x, button_container_height);
+
+    // Update user list here, since we'll size it based on chat console height (including buttons)
+    this->updateUserList();
+}
+
+void Chat::updateUserList() {
+    // We don't want to update while the chat is hidden, to avoid lagspikes during gameplay
+    if(!this->bVisible) {
+        this->layout_update_scheduled = true;
+        return;
+    }
+
+    auto screen = engine->getScreenSize();
+    bool is_widescreen = ((i32)(std::max(0, (i32)((screen.x - (screen.y * 4.f / 3.f)) / 2.f))) > 0);
+    auto global_scale = is_widescreen ? (screen.x / 1366.f) : 1.f;
+    auto card_size = Vector2{global_scale * 640 * 0.5f, global_scale * 150 * 0.5f};
+
+    auto size = this->getSize();
+    size.y = this->button_container->getPos().y;
+    this->user_list->setSize(size);
+
+    const f32 MARGIN = 10.f;
+    const f32 INITIAL_MARGIN = MARGIN * 1.5;
+    f32 total_x = INITIAL_MARGIN;
+    f32 total_y = INITIAL_MARGIN;
+
+    // XXX: Optimize so fps doesn't halve when F9 is open
+    // XXX: Fix scrollview 'jitter' on updateUserList()
+
+    std::vector<UserInfo *> sorted_users;
+    for(auto pair : online_users) {
+        if(pair.second->user_id > 0) {
+            sorted_users.push_back(pair.second);
+        }
+    }
+    std::sort(sorted_users.begin(), sorted_users.end(), [](UserInfo *ua, UserInfo *ub) {
+        auto a = ua->name;
+        auto b = ub->name;
+
+        int i = 0;
+        int j = 0;
+        while(i < a.lengthUtf8() && j < b.lengthUtf8()) {
+            if(!isalnum((u8)a[i])) {
+                i++;
+                continue;
+            }
+            if(!isalnum((u8)b[j])) {
+                j++;
+                continue;
+            }
+            char la = tolower(a[i]);
+            char lb = tolower(b[j]);
+            if(la != lb) return la < lb;
+
+            i++;
+            j++;
+        }
+
+        return false;
+    });
+
+    this->user_list->clear();
+    for(auto user : sorted_users) {
+        if(total_x + card_size.x + MARGIN > size.x) {
+            total_x = INITIAL_MARGIN;
+            total_y += card_size.y + MARGIN;
+        }
+
+        bool dummy = false;
+        auto card = new UserCard2(user->user_id);
+        card->setSize(card_size);
+        card->setPos(total_x, total_y);
+        card->setVisible(false);
+
+        this->user_list->getContainer()->addBaseUIElement(card);
+
+        // Only display the card if we have presence data
+        // (presence data is only fetched *after* UserCard2 is initialized)
+        if(user->has_presence) {
+            card->setVisible(true);
+            total_x += card_size.x + MARGIN * 1.5;  // idk why margin is bogged
+        }
+    }
+    this->user_list->setScrollSizeToContent();
 }
 
 void Chat::join(UString channel_name) {

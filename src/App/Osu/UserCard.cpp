@@ -19,7 +19,7 @@ using namespace std;
 
 // NOTE: selected username is stored in m_sText
 
-UserCard::UserCard(i32 user_id) : CBaseUIButton() {
+UserCard::UserCard(u32 user_id) : CBaseUIButton() {
     this->setID(user_id);
 
     this->fPP = 0.0f;
@@ -31,7 +31,10 @@ UserCard::UserCard(i32 user_id) : CBaseUIButton() {
     this->fPPDeltaAnim = 0.0f;
 }
 
-UserCard::~UserCard() { SAFE_DELETE(this->avatar); }
+UserCard::~UserCard() {
+    anim->deleteExistingAnimation(&this->fPPDeltaAnim);
+    SAFE_DELETE(this->avatar);
+}
 
 void UserCard::draw(Graphics *g) {
     if(!this->bVisible) return;
@@ -207,7 +210,7 @@ void UserCard::mouse_update(bool *propagate_clicks) {
     if(!this->bVisible) return;
 
     if(this->user_id > 0) {
-        UserInfo *my = get_user_info(this->user_id);
+        UserInfo *my = get_user_info(this->user_id, true);
         this->sText = my->name;
 
         static i64 total_score = 0;
@@ -226,10 +229,12 @@ void UserCard::mouse_update(bool *propagate_clicks) {
 }
 
 void UserCard::updateUserStats() {
-    Database::PlayerStats stats = db->calculatePlayerStats(this->sText);
+    Database::PlayerStats stats;
 
-    if(this->user_id > 0) {
-        UserInfo *my = get_user_info(this->user_id);
+    if(this->user_id == 0) {
+        stats = db->calculatePlayerStats(this->sText);
+    } else {
+        UserInfo *my = get_user_info(this->user_id, true);
 
         int level = Database::getLevelForScore(my->total_score);
         float percentToNextLevel = 1.f;
@@ -272,14 +277,15 @@ void UserCard::updateUserStats() {
     }
 }
 
-void UserCard::setID(i32 new_id) {
+void UserCard::setID(u32 new_id) {
     SAFE_DELETE(this->avatar);
 
     this->user_id = new_id;
     if(this->user_id > 0) {
+        UserInfo *my = get_user_info(this->user_id, true);
         this->avatar = new UIAvatar(this->user_id, 0.f, 0.f, 0.f, 0.f);
         this->avatar->on_screen = true;
-        this->sText = "Mysterious user";
+        this->sText = my->name;
     } else {
         this->sText = cv_name.getString();
     }

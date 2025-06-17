@@ -6,6 +6,10 @@
 
 struct UserInfo {
     u32 user_id = 0;
+    bool irc_user = false;
+
+    bool has_presence = false;
+    bool has_stats = false;
 
     // Presence (via USER_PRESENCE_REQUEST or USER_PRESENCE_REQUEST_ALL)
     UString name;
@@ -29,12 +33,20 @@ struct UserInfo {
     u16 pp = 0.f;
     float accuracy = 0.f;
 
+    // Received when spectating
+    LiveReplayBundle::Action spec_action = LiveReplayBundle::Action::NONE;
+
     bool is_friend();
 };
 
 extern std::unordered_map<u32, UserInfo*> online_users;
 extern std::vector<u32> friends;
+extern std::vector<u32> stats_requests;
 
+void logout_user(u32 user_id);
 UserInfo* find_user(UString username);
 UserInfo* find_user_starting_with(UString prefix, UString last_match);
-UserInfo* get_user_info(u32 user_id, bool fetch = false);
+UserInfo* try_get_user_info(u32 user_id, bool wants_presence = false);
+UserInfo* get_user_info(u32 user_id, bool wants_presence = false);
+
+void request_presence_batch();

@@ -1042,6 +1042,26 @@ void Osu::onKeyDown(KeyboardEvent &key) {
         }
     }
 
+    // F9 toggle extended chat
+    if(key == (KEYCODE)cv_TOGGLE_EXTENDED_CHAT.getInt()) {
+        // When options menu is open, instead of toggling chat, close options menu and open chat
+        if(bancho.is_online() && this->optionsMenu->isVisible()) {
+            this->optionsMenu->setVisible(false);
+            this->chat->user_wants_chat = true;
+            this->chat->user_list->setVisible(true);
+            this->chat->updateVisibility();
+        } else {
+            if(this->chat->user_wants_chat) {
+                this->chat->user_list->setVisible(!this->chat->user_list->isVisible());
+                this->chat->updateVisibility();
+            } else {
+                this->chat->user_wants_chat = true;
+                this->chat->user_list->setVisible(true);
+                this->chat->updateVisibility();
+            }
+        }
+    }
+
     // screenshots
     if(key == (KEYCODE)cv_SAVE_SCREENSHOT.getInt()) this->saveScreenshot();
 

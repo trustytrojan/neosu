@@ -300,6 +300,7 @@ copy $(SolutionDir)libraries\discord-sdk\$(Platform)\*.dll $(SolutionDir)build\$
     <ClCompile Include="src\app\osu\UIVolumeSlider.cpp" />
     <ClCompile Include="src\app\osu\UpdateHandler.cpp" />
     <ClCompile Include="src\app\osu\UserCard.cpp" />
+    <ClCompile Include="src\App\Osu\UserCard2.cpp" />
     <ClCompile Include="src\app\osu\VolumeOverlay.cpp" />
     <ClCompile Include="src\engine\AnimationHandler.cpp" />
     <ClCompile Include="src\engine\Camera.cpp" />
@@ -751,6 +752,7 @@ copy $(SolutionDir)libraries\discord-sdk\$(Platform)\*.dll $(SolutionDir)build\$
     <ClInclude Include="src\app\osu\UIVolumeSlider.h" />
     <ClInclude Include="src\app\osu\UpdateHandler.h" />
     <ClInclude Include="src\app\osu\UserCard.h" />
+    <ClInclude Include="src\App\Osu\UserCard2.h" />
     <ClInclude Include="src\app\osu\VolumeOverlay.h" />
     <ClInclude Include="src\engine\AnimationHandler.h" />
     <ClInclude Include="src\engine\Camera.h" />

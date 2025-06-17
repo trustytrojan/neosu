@@ -929,6 +929,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addKeyBindButton("Instant Replay", &cv_INSTANT_REPLAY);
     this->addSubSection("Keys - Universal", keyboardSectionTags);
     this->addKeyBindButton("Toggle chat", &cv_TOGGLE_CHAT);
+    this->addKeyBindButton("Toggle user list", &cv_TOGGLE_EXTENDED_CHAT);
     this->addKeyBindButton("Save Screenshot", &cv_SAVE_SCREENSHOT);
     this->addKeyBindButton("Increase Volume", &cv_INCREASE_VOLUME);
     this->addKeyBindButton("Decrease Volume", &cv_DECREASE_VOLUME);

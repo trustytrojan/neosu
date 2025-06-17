@@ -863,6 +863,7 @@ ConVar cv_SEEK_TIME_BACKWARD("osu_key_seek_time_backward", (int)KEY_LEFT, FCVAR_
 ConVar cv_SEEK_TIME_FORWARD("osu_key_seek_time_forward", (int)KEY_RIGHT, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_SKIP_CUTSCENE("osu_key_skip_cutscene", (int)KEY_SPACE, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_TOGGLE_CHAT("osu_key_toggle_chat", (int)KEY_F8, FCVAR_BANCHO_COMPATIBLE);
+ConVar cv_TOGGLE_EXTENDED_CHAT("key_toggle_extended_chat", (int)KEY_F9, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_TOGGLE_MAP_BACKGROUND("key_toggle_map_background", 0, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_TOGGLE_MODSELECT("osu_key_toggle_modselect", (int)KEY_F1, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_TOGGLE_SCOREBOARD("osu_key_toggle_scoreboard", (int)KEY_TAB, FCVAR_BANCHO_COMPATIBLE);
@@ -1993,4 +1994,3 @@ ConVar cv_draw_storyboard("draw_storyboard", true, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_draw_video("draw_video", true, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_prefer_cjk("prefer_cjk", false, FCVAR_BANCHO_COMPATIBLE, "prefer metadata in original language");
 ConVar cv_SMOKE("key_smoke", 0, FCVAR_BANCHO_COMPATIBLE);
-ConVar cv_TOGGLE_EXTENDED_CHAT("osu_key_toggle_extended_chat", (int)KEY_F9, FCVAR_BANCHO_COMPATIBLE);

@@ -276,10 +276,13 @@ void handle_packet(Packet *packet) {
     } else if(packet->id == PONG) {
         // (nothing to do)
     } else if(packet->id == USER_STATS) {
-        i32 stats_user_id = read<u32>(packet);
+        i32 raw_id = read<i32>(packet);
+        u32 stats_user_id = abs(raw_id);  // IRC clients are sent with negative IDs, hence the abs()
         u8 action = read<u8>(packet);
 
         UserInfo *user = get_user_info(stats_user_id);
+        user->irc_user = raw_id < 0;
+        user->has_stats = true;
         user->action = (Action)action;
         user->info_text = read_string(packet);
         user->map_md5 = read_hash(packet);
@@ -467,10 +470,13 @@ void handle_packet(Packet *packet) {
             osu->room->on_all_players_skipped();
         }
     } else if(packet->id == USER_PRESENCE) {
-        i32 presence_user_id = read<u32>(packet);
+        i32 raw_id = read<i32>(packet);
+        u32 presence_user_id = abs(raw_id);  // IRC clients are sent with negative IDs, hence the abs()
         UString presence_username = read_string(packet);
 
         UserInfo *user = get_user_info(presence_user_id);
+        user->irc_user = raw_id < 0;
+        user->has_presence = true;
         user->name = presence_username;
         user->utc_offset = read<u8>(packet);
         user->country = read<u8>(packet);
@@ -478,6 +484,15 @@ void handle_packet(Packet *packet) {
         user->longitude = read<f32>(packet);
         user->latitude = read<f32>(packet);
         user->global_rank = read<u32>(packet);
+
+        osu->chat->updateUserList();
+    } else if(packet->id == USER_PRESENCE_SINGLE) {
+        get_user_info(read<u32>(packet));  // add to online_users list
+    } else if(packet->id = USER_PRESENCE_BUNDLE) {
+        u16 nb_users = read<u16>(packet);
+        for(u16 i = 0; i < nb_users; i++) {
+            get_user_info(read<u32>(packet));  // add to online_users list
+        }
     } else if(packet->id == RESTART) {
         // XXX: wait 'ms' milliseconds before reconnecting
         i32 ms = read<u32>(packet);

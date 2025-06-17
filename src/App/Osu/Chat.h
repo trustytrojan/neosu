@@ -53,6 +53,7 @@ class Chat : public OsuScreen {
     void removeChannel(UString channel_name);
     void updateLayout(Vector2 newResolution);
     void updateButtonLayout(Vector2 screen);
+    void updateUserList();
 
     void join(UString channel_name);
     void leave(UString channel_name);
@@ -73,6 +74,7 @@ class Chat : public OsuScreen {
     std::vector<ChatChannel *> channels;
     CBaseUIContainer *button_container;
     CBaseUITextbox *input_box;
+    CBaseUIScrollView *user_list;
 
     McFont *font;
     float fAnimation = 0.f;

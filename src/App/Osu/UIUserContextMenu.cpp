@@ -33,9 +33,6 @@ void UIUserContextMenuScreen::open(u32 user_id) {
     this->close();
     this->user_id = user_id;
 
-    auto user_info = get_user_info(user_id);
-    bool has_user_info = user_info->privileges != 0;
-
     int slot_number = -1;
     if(bancho.is_in_a_multi_room()) {
         for(int i = 0; i < 16; i++) {
@@ -56,7 +53,8 @@ void UIUserContextMenuScreen::open(u32 user_id) {
             this->menu->addButton("Kick", KICK);
         }
 
-        if(has_user_info) {
+        auto user_info = get_user_info(user_id, true);
+        if(user_info->has_presence) {
             // Without user info, we don't have the username
             this->menu->addButton("Start Chat", START_CHAT);
 
