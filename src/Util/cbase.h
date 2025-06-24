@@ -1,5 +1,9 @@
 #pragma once
 
+// ENVIRONMENT
+
+#include "BaseEnvironment.h"
+
 #ifdef _WIN32
 // Windows build
 #ifdef _WIN64

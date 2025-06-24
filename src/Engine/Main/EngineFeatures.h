@@ -1,5 +1,7 @@
 #pragma once
 
+#include "config.h"
+
 #ifndef MCENGINE_DATA_DIR
 
 #ifdef _WIN32
