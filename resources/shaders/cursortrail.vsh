@@ -1,3 +1,15 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:16da466d76f72726aaf96643f006eba33ff9b3f4deff04c33d0362be48c4d421
-size 279
+#version 110
+
+uniform float time;
+
+varying vec2 tex_coord;
+varying float vtx_alpha;
+
+void main()
+{	
+	gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.x, gl_Vertex.y, 0.0, 1.0);
+	gl_FrontColor = gl_Color;
+	
+	tex_coord = gl_MultiTexCoord0.xy;
+	vtx_alpha = gl_Vertex.z;
+}
