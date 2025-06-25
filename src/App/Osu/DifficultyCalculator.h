@@ -55,9 +55,9 @@ class OsuDifficultyHitObject {
     ~OsuDifficultyHitObject();
 
     OsuDifficultyHitObject(const OsuDifficultyHitObject &) = delete;
-    OsuDifficultyHitObject(OsuDifficultyHitObject &&dobj);
+    OsuDifficultyHitObject(OsuDifficultyHitObject &&dobj) noexcept;
 
-    OsuDifficultyHitObject &operator=(OsuDifficultyHitObject &&dobj);
+    OsuDifficultyHitObject &operator=(OsuDifficultyHitObject &&dobj) noexcept;
 
     void updateStackPosition(f32 stackOffset);
     void updateCurveStackPosition(f32 stackOffset);

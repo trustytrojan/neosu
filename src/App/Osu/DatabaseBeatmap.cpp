@@ -2,6 +2,7 @@
 
 #include <assert.h>
 
+#include <algorithm>
 #include <iostream>
 #include <limits>
 #include <sstream>
@@ -210,11 +211,11 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                         i64 type, startTime, endTime;
                         if(sscanf(curLineChar, " %" PRId64 " , %" PRId64 " , %" PRId64 " \n", &type, &startTime, &endTime) == 3) {
                             if(type == 2) {
-                                BREAK b;
+                                BREAK b
                                 {
-                                    b.startTime = startTime;
-                                    b.endTime = endTime;
-                                }
+                                    .startTime = startTime,
+                                    .endTime = endTime
+                                };
                                 c.breaks.push_back(b);
                             }
                         }
@@ -238,7 +239,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                   &tpMeter, &tpSampleType, &tpSampleSet, &tpVolume, &tpTimingChange, &tpKiai) == 8 ||
                            sscanf(curLineChar, " %lf , %f , %i , %i , %i , %i , %i", &tpOffset, &tpMSPerBeat, &tpMeter,
                                   &tpSampleType, &tpSampleSet, &tpVolume, &tpTimingChange) == 7) {
-                            TIMINGPOINT t;
+                            TIMINGPOINT t{};
                             {
                                 t.offset = (long)std::round(tpOffset);
                                 t.msPerBeat = tpMSPerBeat;
@@ -252,7 +253,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                             }
                             c.timingpoints.push_back(t);
                         } else if(sscanf(curLineChar, " %lf , %f", &tpOffset, &tpMSPerBeat) == 2) {
-                            TIMINGPOINT t;
+                            TIMINGPOINT t{};
                             {
                                 t.offset = (long)std::round(tpOffset);
                                 t.msPerBeat = tpMSPerBeat;
@@ -325,7 +326,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
 
                             if(type & 0x1)  // circle
                             {
-                                HITCIRCLE h;
+                                HITCIRCLE h{};
                                 {
                                     h.x = x;
                                     h.y = y;
@@ -401,7 +402,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                 // https://osu.ppy.sh/beatmapsets/791900#osu/1676490
                                 if(sliderTokens.size() < 2 && points.size() > 0) points.push_back(points[0]);
 
-                                SLIDER s;
+                                SLIDER s{};
                                 {
                                     s.x = x;
                                     s.y = y;
@@ -439,7 +440,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                     // %s\n\ncurLine = %s", this->sFilePath.c_str(), curLine)); return false;
                                 }
 
-                                SPINNER s;
+                                SPINNER s{};
                                 {
                                     s.x = x;
                                     s.y = y;
@@ -723,13 +724,15 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
     }
 
     // sort hitobjects by time
-    struct DiffHitObjectSortComparator {
-        bool operator()(const OsuDifficultyHitObject &a, const OsuDifficultyHitObject &b) const {
-            if(a.time != b.time) return a.time < b.time;
-            return &a < &b;
-        }
-    };
-    std::sort(result.diffobjects.begin(), result.diffobjects.end(), DiffHitObjectSortComparator());
+	constexpr auto diffHitObjectSortComparator = [](const OsuDifficultyHitObject &a, const OsuDifficultyHitObject &b) -> bool
+	{
+		if (a.time == b.time)
+			return &a < &b;
+		else
+			return a.time < b.time;
+	};
+
+    std::ranges::sort(result.diffobjects, diffHitObjectSortComparator);
 
     // calculate stacks
     // see Beatmap.cpp

@@ -18,7 +18,7 @@ static void run_mct() {
     std::vector<f64> aimStrains;
     std::vector<f64> speedStrains;
 
-    for(auto diff2 : maps) {
+    for(const auto & diff2 : maps) {
         while(osu->should_pause_background_threads.load() && !dead.load()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }

@@ -71,7 +71,7 @@ OsuDifficultyHitObject::OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time,
 
 OsuDifficultyHitObject::~OsuDifficultyHitObject() { SAFE_DELETE(curve); }
 
-OsuDifficultyHitObject::OsuDifficultyHitObject(OsuDifficultyHitObject &&dobj) {
+OsuDifficultyHitObject::OsuDifficultyHitObject(OsuDifficultyHitObject &&dobj) noexcept {
     // move
     this->type = dobj.type;
     this->pos = dobj.pos;
@@ -96,7 +96,15 @@ OsuDifficultyHitObject::OsuDifficultyHitObject(OsuDifficultyHitObject &&dobj) {
     dobj.scheduledCurveAlloc = false;
 }
 
-OsuDifficultyHitObject &OsuDifficultyHitObject::operator=(OsuDifficultyHitObject &&dobj) {
+OsuDifficultyHitObject &OsuDifficultyHitObject::operator=(OsuDifficultyHitObject &&dobj) noexcept {
+    // self-assignment check
+    if(this == &dobj) {
+        return *this;
+    }
+
+    // clean up existing resources BEFORE taking new ones
+    SAFE_DELETE(this->curve);
+
     // move
     this->type = dobj.type;
     this->pos = dobj.pos;
@@ -333,7 +341,8 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(std::vector<DiffObje
             if(dead.load()) return 0.0;
 
             // this already initializes the angle to NaN
-            cachedDiffObjects.emplace_back(&params.sortedHitObjects[i], radius_scaling_factor, cachedDiffObjects, (i32)i - 1);
+            cachedDiffObjects.emplace_back(&params.sortedHitObjects[i], radius_scaling_factor, cachedDiffObjects,
+                                           (i32)i - 1);
         }
     }
 
@@ -1209,8 +1218,9 @@ double DifficultyCalculator::DiffObject::spacing_weight2(const Skills::Skill dif
                             : (calcAcuteAngleBonus(this->angle) * calcAcuteAngleBonus(prev.angle) *
                                std::min(angleBonus, 125.0 / this->strain_time) *
                                std::pow(std::sin(PI / 2.0 * std::min(1.0, (100.0 - this->strain_time) / 25.0)), 2.0) *
-                               std::pow(std::sin(PI / 2.0 * (clamp<double>(this->jumpDistance, 50.0, 100.0) - 50.0) / 50.0),
-                                        2.0));
+                               std::pow(
+                                   std::sin(PI / 2.0 * (clamp<double>(this->jumpDistance, 50.0, 100.0) - 50.0) / 50.0),
+                                   2.0));
 
                     wideAngleBonus *=
                         angleBonus * (1.0 - std::min(wideAngleBonus, std::pow(calcWideAngleBonus(prev.angle), 3.0)));
@@ -1227,11 +1237,12 @@ double DifficultyCalculator::DiffObject::spacing_weight2(const Skills::Skill dif
                 double distRatio = std::pow(
                     std::sin(PI / 2.0 * std::abs(prevVelocity - currVelocity) / std::max(prevVelocity, currVelocity)),
                     2.0);
-                double overlapVelocityBuff =
-                    std::min(125.0 / std::min(this->strain_time, prev.strain_time), std::abs(prevVelocity - currVelocity));
-                velocityChangeBonus =
-                    overlapVelocityBuff * distRatio *
-                    std::pow(std::min(this->strain_time, prev.strain_time) / std::max(this->strain_time, prev.strain_time), 2.0);
+                double overlapVelocityBuff = std::min(125.0 / std::min(this->strain_time, prev.strain_time),
+                                                      std::abs(prevVelocity - currVelocity));
+                velocityChangeBonus = overlapVelocityBuff * distRatio *
+                                      std::pow(std::min(this->strain_time, prev.strain_time) /
+                                                   std::max(this->strain_time, prev.strain_time),
+                                               2.0);
             }
 
             if(prev.ho->type == OsuDifficultyHitObject::TYPE::SLIDER)

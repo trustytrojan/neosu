@@ -21,7 +21,9 @@ struct BanchoFileReader {
         static u8 NULL_ARRAY[sizeof(T)] = {0};
 
         if(this->file == NULL) {
-            return *(T*)NULL_ARRAY;
+            T result;
+            memcpy(&result, NULL_ARRAY, sizeof(T));
+            return result;
         }
 
         // XXX: Use proper ring buffer instead of memmove
@@ -35,13 +37,19 @@ struct BanchoFileReader {
             this->pos = (this->pos + sizeof(T)) % READ_BUFFER_SIZE;
             this->avail = 0;
             this->total_pos = this->total_size;
-            return *(T*)NULL_ARRAY;
+            T result;
+            memcpy(&result, NULL_ARRAY, sizeof(T));
+            return result;
         } else {
             u8* out_ptr = this->buffer + this->pos;
             this->pos = (this->pos + sizeof(T)) % READ_BUFFER_SIZE;
             this->avail -= sizeof(T);
             this->total_pos += sizeof(T);
-            return *(T*)(out_ptr);
+
+            // use memcpy to avoid misaligned access
+            T result;
+            memcpy(&result, out_ptr, sizeof(T));
+            return result;
         }
     }
 

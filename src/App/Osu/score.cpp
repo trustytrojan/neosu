@@ -441,7 +441,7 @@ UString LiveScore::getModsStringForRichPresence() {
 unsigned long long LiveScore::getScore() { return this->mods.flags & Replay::ModFlags::ScoreV2 ? this->iScoreV2 : this->iScoreV1; }
 
 void LiveScore::onScoreChange() {
-    if(this->simulating) return;
+    if(this->simulating || !osu->room) return;
 
     osu->room->onClientScoreChange();
 

@@ -44,17 +44,11 @@ void LinuxGLLegacyInterface::endScene() {
 }
 
 void LinuxGLLegacyInterface::setVSync(bool vsync) {
-    typedef void (*PFNWGLSWAPINTERVALPROC)(Display *, GLXDrawable, int);
-    PFNWGLSWAPINTERVALPROC wglSwapIntervalEXT = 0;
-
-    const char *extensions = (char *)glXQueryExtensionsString(this->display, 0);
-    if(strstr(extensions, "GLX_EXT_swap_control") == 0) {
+    if(!glXSwapIntervalEXT) {
         debugLog("OpenGL: Can't set VSync, GLX_EXT_swap_control not supported!\n");
         return;
     } else {
-        const char *funcName = "glXSwapIntervalEXT";
-        wglSwapIntervalEXT = (PFNWGLSWAPINTERVALPROC)glXGetProcAddress((unsigned char *)funcName);
-        if(wglSwapIntervalEXT) wglSwapIntervalEXT(this->display, glXGetCurrentDrawable(), vsync ? 1 : 0);
+        glXSwapIntervalEXT(this->display, glXGetCurrentDrawable(), vsync ? 1 : 0);
     }
 }
 
