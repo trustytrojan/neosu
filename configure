@@ -6505,7 +6505,9 @@ fi
     if test -z "$LLVMMINGW" && test -n "$enable_clang"
 then :
 
-        LDFLAGS="$LDFLAGS -static-libasan" CFLAGS="$CFLAGS -static-libasan" CXXFLAGS="$CXXFLAGS -static-libasan"
+        LDFLAGS="$LDFLAGS -static-libasan"
+        CFLAGS="$CFLAGS -static-libasan -fsanitize-address-use-after-scope -fsanitize-address-use-after-return=always"
+        CXXFLAGS="$CXXFLAGS -static-libasan -fsanitize-address-use-after-scope -fsanitize-address-use-after-return=always"
 
 fi
     enable_debug="yes"
@@ -10654,7 +10656,7 @@ fi
 
 else case e in #(
   e)
-    EXTRA_WIN_LIBS="-lopengl32 -lwbemuuid -lcomctl32 -lxinput"
+    EXTRA_WIN_LIBS="-lopengl32 -lwbemuuid -lcomctl32 -lxinput9_1_0"
 
     have_blkid="not required"
     have_curl="no"

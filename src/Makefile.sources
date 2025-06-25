@@ -97,6 +97,7 @@ neosu_SOURCES = \
 	src/Engine/DiscordInterface.cpp \
 	src/Engine/Engine.cpp \
 	src/Engine/Environment.cpp \
+	src/Engine/File.cpp \
 	src/Engine/Font.cpp \
 	src/Engine/Graphics.cpp \
 	src/Engine/Image.cpp \
@@ -108,7 +109,6 @@ neosu_SOURCES = \
 	src/Engine/Main/main_SDL.cpp \
 	src/Engine/Main/main_Windows.cpp \
 	src/Engine/NetworkHandler.cpp \
-	src/Engine/Platform/File.cpp \
 	src/Engine/Platform/LinuxContextMenu.cpp \
 	src/Engine/Platform/LinuxEnvironment.cpp \
 	src/Engine/Platform/LinuxGLLegacyInterface.cpp \

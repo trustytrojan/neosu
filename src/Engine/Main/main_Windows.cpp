@@ -106,7 +106,7 @@ static void handle_osk(const char *osk_path) {
 
 static void handle_osz(const char *osz_path) {
     File osz(osz_path);
-    i32 set_id = extract_beatmapset_id(osz.readFile(), osz.getFileSize());
+    i32 set_id = extract_beatmapset_id(reinterpret_cast<const u8*>(osz.readFile()), osz.getFileSize());
     if(set_id < 0) {
         // special case: legacy fallback behavior for invalid beatmapSetID, try to parse the ID from the
         // path
@@ -128,7 +128,7 @@ static void handle_osz(const char *osz_path) {
     if(!env->directoryExists(mapset_dir)) {
         env->createDirectory(mapset_dir);
     }
-    if(!extract_beatmapset(osz.readFile(), osz.getFileSize(), mapset_dir)) {
+    if(!extract_beatmapset(reinterpret_cast<const u8*>(osz.readFile()), osz.getFileSize(), mapset_dir)) {
         osu->getNotificationOverlay()->addToast("Failed to extract beatmapset");
         return;
     }

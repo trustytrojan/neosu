@@ -163,7 +163,7 @@ void UpdateHandler::_installUpdate(std::string zipFilePath) {
         this->status = STATUS::STATUS_ERROR;
         return;
     }
-    const u8 *content = f.readFile();
+    const u8 *content = reinterpret_cast<const u8*>(f.readFile());
 
     // initialize zip
     mz_zip_archive zip_archive;

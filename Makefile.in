@@ -239,6 +239,7 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/Engine/neosu-DiscordInterface.$(OBJEXT) \
 	src/Engine/neosu-Engine.$(OBJEXT) \
 	src/Engine/neosu-Environment.$(OBJEXT) \
+	src/Engine/neosu-File.$(OBJEXT) \
 	src/Engine/neosu-Font.$(OBJEXT) \
 	src/Engine/neosu-Graphics.$(OBJEXT) \
 	src/Engine/neosu-Image.$(OBJEXT) \
@@ -250,7 +251,6 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/Engine/Main/neosu-main_SDL.$(OBJEXT) \
 	src/Engine/Main/neosu-main_Windows.$(OBJEXT) \
 	src/Engine/neosu-NetworkHandler.$(OBJEXT) \
-	src/Engine/Platform/neosu-File.$(OBJEXT) \
 	src/Engine/Platform/neosu-LinuxContextMenu.$(OBJEXT) \
 	src/Engine/Platform/neosu-LinuxEnvironment.$(OBJEXT) \
 	src/Engine/Platform/neosu-LinuxGLLegacyInterface.$(OBJEXT) \
@@ -432,6 +432,7 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/Engine/$(DEPDIR)/neosu-DiscordInterface.Po \
 	src/Engine/$(DEPDIR)/neosu-Engine.Po \
 	src/Engine/$(DEPDIR)/neosu-Environment.Po \
+	src/Engine/$(DEPDIR)/neosu-File.Po \
 	src/Engine/$(DEPDIR)/neosu-Font.Po \
 	src/Engine/$(DEPDIR)/neosu-Graphics.Po \
 	src/Engine/$(DEPDIR)/neosu-Image.Po \
@@ -449,7 +450,6 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/Engine/Main/$(DEPDIR)/neosu-main_Linux.Po \
 	src/Engine/Main/$(DEPDIR)/neosu-main_SDL.Po \
 	src/Engine/Main/$(DEPDIR)/neosu-main_Windows.Po \
-	src/Engine/Platform/$(DEPDIR)/neosu-File.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-LinuxContextMenu.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-LinuxEnvironment.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Po \
@@ -920,6 +920,7 @@ neosu_SOURCES = \
 	src/Engine/DiscordInterface.cpp \
 	src/Engine/Engine.cpp \
 	src/Engine/Environment.cpp \
+	src/Engine/File.cpp \
 	src/Engine/Font.cpp \
 	src/Engine/Graphics.cpp \
 	src/Engine/Image.cpp \
@@ -931,7 +932,6 @@ neosu_SOURCES = \
 	src/Engine/Main/main_SDL.cpp \
 	src/Engine/Main/main_Windows.cpp \
 	src/Engine/NetworkHandler.cpp \
-	src/Engine/Platform/File.cpp \
 	src/Engine/Platform/LinuxContextMenu.cpp \
 	src/Engine/Platform/LinuxEnvironment.cpp \
 	src/Engine/Platform/LinuxGLLegacyInterface.cpp \
@@ -1516,6 +1516,8 @@ src/Engine/neosu-Engine.$(OBJEXT): src/Engine/$(am__dirstamp) \
 	src/Engine/$(DEPDIR)/$(am__dirstamp)
 src/Engine/neosu-Environment.$(OBJEXT): src/Engine/$(am__dirstamp) \
 	src/Engine/$(DEPDIR)/$(am__dirstamp)
+src/Engine/neosu-File.$(OBJEXT): src/Engine/$(am__dirstamp) \
+	src/Engine/$(DEPDIR)/$(am__dirstamp)
 src/Engine/neosu-Font.$(OBJEXT): src/Engine/$(am__dirstamp) \
 	src/Engine/$(DEPDIR)/$(am__dirstamp)
 src/Engine/neosu-Graphics.$(OBJEXT): src/Engine/$(am__dirstamp) \
@@ -1563,9 +1565,6 @@ src/Engine/Platform/$(am__dirstamp):
 src/Engine/Platform/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/Engine/Platform/$(DEPDIR)
 	@: >>src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Platform/neosu-File.$(OBJEXT):  \
-	src/Engine/Platform/$(am__dirstamp) \
-	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
 src/Engine/Platform/neosu-LinuxContextMenu.$(OBJEXT):  \
 	src/Engine/Platform/$(am__dirstamp) \
 	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
@@ -1907,6 +1906,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-DiscordInterface.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-Engine.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-Environment.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-File.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-Font.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-Graphics.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-Image.Po@am__quote@ # am--include-marker
@@ -1924,7 +1924,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Main/$(DEPDIR)/neosu-main_Linux.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Main/$(DEPDIR)/neosu-main_SDL.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Main/$(DEPDIR)/neosu-main_Windows.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-File.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-LinuxContextMenu.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-LinuxEnvironment.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Po@am__quote@ # am--include-marker
@@ -3366,6 +3365,20 @@ src/Engine/neosu-Environment.obj: src/Engine/Environment.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-Environment.obj `if test -f 'src/Engine/Environment.cpp'; then $(CYGPATH_W) 'src/Engine/Environment.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Environment.cpp'; fi`
 
+src/Engine/neosu-File.o: src/Engine/File.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/neosu-File.o -MD -MP -MF src/Engine/$(DEPDIR)/neosu-File.Tpo -c -o src/Engine/neosu-File.o `test -f 'src/Engine/File.cpp' || echo '$(srcdir)/'`src/Engine/File.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/$(DEPDIR)/neosu-File.Tpo src/Engine/$(DEPDIR)/neosu-File.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/File.cpp' object='src/Engine/neosu-File.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-File.o `test -f 'src/Engine/File.cpp' || echo '$(srcdir)/'`src/Engine/File.cpp
+
+src/Engine/neosu-File.obj: src/Engine/File.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/neosu-File.obj -MD -MP -MF src/Engine/$(DEPDIR)/neosu-File.Tpo -c -o src/Engine/neosu-File.obj `if test -f 'src/Engine/File.cpp'; then $(CYGPATH_W) 'src/Engine/File.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/File.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/$(DEPDIR)/neosu-File.Tpo src/Engine/$(DEPDIR)/neosu-File.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/File.cpp' object='src/Engine/neosu-File.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-File.obj `if test -f 'src/Engine/File.cpp'; then $(CYGPATH_W) 'src/Engine/File.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/File.cpp'; fi`
+
 src/Engine/neosu-Font.o: src/Engine/Font.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/neosu-Font.o -MD -MP -MF src/Engine/$(DEPDIR)/neosu-Font.Tpo -c -o src/Engine/neosu-Font.o `test -f 'src/Engine/Font.cpp' || echo '$(srcdir)/'`src/Engine/Font.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/$(DEPDIR)/neosu-Font.Tpo src/Engine/$(DEPDIR)/neosu-Font.Po
@@ -3519,20 +3532,6 @@ src/Engine/neosu-NetworkHandler.obj: src/Engine/NetworkHandler.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/NetworkHandler.cpp' object='src/Engine/neosu-NetworkHandler.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-NetworkHandler.obj `if test -f 'src/Engine/NetworkHandler.cpp'; then $(CYGPATH_W) 'src/Engine/NetworkHandler.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/NetworkHandler.cpp'; fi`
-
-src/Engine/Platform/neosu-File.o: src/Engine/Platform/File.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-File.o -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-File.Tpo -c -o src/Engine/Platform/neosu-File.o `test -f 'src/Engine/Platform/File.cpp' || echo '$(srcdir)/'`src/Engine/Platform/File.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-File.Tpo src/Engine/Platform/$(DEPDIR)/neosu-File.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/File.cpp' object='src/Engine/Platform/neosu-File.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-File.o `test -f 'src/Engine/Platform/File.cpp' || echo '$(srcdir)/'`src/Engine/Platform/File.cpp
-
-src/Engine/Platform/neosu-File.obj: src/Engine/Platform/File.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-File.obj -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-File.Tpo -c -o src/Engine/Platform/neosu-File.obj `if test -f 'src/Engine/Platform/File.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/File.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/File.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-File.Tpo src/Engine/Platform/$(DEPDIR)/neosu-File.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/File.cpp' object='src/Engine/Platform/neosu-File.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-File.obj `if test -f 'src/Engine/Platform/File.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/File.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/File.cpp'; fi`
 
 src/Engine/Platform/neosu-LinuxContextMenu.o: src/Engine/Platform/LinuxContextMenu.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-LinuxContextMenu.o -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-LinuxContextMenu.Tpo -c -o src/Engine/Platform/neosu-LinuxContextMenu.o `test -f 'src/Engine/Platform/LinuxContextMenu.cpp' || echo '$(srcdir)/'`src/Engine/Platform/LinuxContextMenu.cpp
@@ -4877,6 +4876,7 @@ distclean: distclean-am
 	-rm -f src/Engine/$(DEPDIR)/neosu-DiscordInterface.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Engine.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Environment.Po
+	-rm -f src/Engine/$(DEPDIR)/neosu-File.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Font.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Graphics.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Image.Po
@@ -4894,7 +4894,6 @@ distclean: distclean-am
 	-rm -f src/Engine/Main/$(DEPDIR)/neosu-main_Linux.Po
 	-rm -f src/Engine/Main/$(DEPDIR)/neosu-main_SDL.Po
 	-rm -f src/Engine/Main/$(DEPDIR)/neosu-main_Windows.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-File.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-LinuxContextMenu.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-LinuxEnvironment.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Po
@@ -5100,6 +5099,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/Engine/$(DEPDIR)/neosu-DiscordInterface.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Engine.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Environment.Po
+	-rm -f src/Engine/$(DEPDIR)/neosu-File.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Font.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Graphics.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Image.Po
@@ -5117,7 +5117,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/Engine/Main/$(DEPDIR)/neosu-main_Linux.Po
 	-rm -f src/Engine/Main/$(DEPDIR)/neosu-main_SDL.Po
 	-rm -f src/Engine/Main/$(DEPDIR)/neosu-main_Windows.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-File.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-LinuxContextMenu.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-LinuxEnvironment.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Po

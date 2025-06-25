@@ -496,7 +496,7 @@ bool SoundEngine::initializeOutputDevice(OUTPUT_DEVICE device) {
             return false;
         }
 
-        BASS_ASIO_INFO info = {0};
+        BASS_ASIO_INFO info{};
         BASS_ASIO_GetInfo(&info);
         auto bufsize = cv_asio_buffer_size.getInt();
         bufsize = ASIO_clamp(info, bufsize);

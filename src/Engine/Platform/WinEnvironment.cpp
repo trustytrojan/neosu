@@ -41,6 +41,10 @@ WinEnvironment::WinEnvironment(HWND hwnd, HINSTANCE hinstance) : Environment() {
     this->iDPIOverride = -1;
     this->bIsRestartScheduled = false;
 
+    this->bIsCursorInsideWindow = false;
+    this->bHasCursorTypeChanged = false;
+    this->cursorType = CURSORTYPE::CURSOR_NORMAL;
+
     // init
     enumerateMonitors();
 
@@ -100,37 +104,38 @@ UString WinEnvironment::getUsername() {
 
 std::string WinEnvironment::getUserDataPath() {
 #ifdef _UNICODE
-    wchar_t path[PATH_MAX];
+    wchar_t path[PATH_MAX]{};
 #else
-    char path[PATH_MAX];
+    char path[PATH_MAX]{};
 #endif
     if(SUCCEEDED(SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path))) return UString{path}.toUtf8();
 
-    return std::string("");
+    return {""};
 }
 
 std::string WinEnvironment::getExecutablePath() {
 #ifdef _UNICODE
-    wchar_t path[PATH_MAX];
+    wchar_t path[PATH_MAX]{};
 #else
-    char path[PATH_MAX];
+    char path[PATH_MAX]{};
 #endif
-    if(GetModuleFileName(NULL, path, MAX_PATH)) return UString{path}.toUtf8();
+    if(GetModuleFileName(NULL, &path[0], MAX_PATH)) return UString{&path[0]}.toUtf8();
 
-    return std::string("");
+    return {""};
 }
 
 bool WinEnvironment::fileExists(std::string filename) {
+    auto temp = UString(filename);
 #ifdef _UNICODE
-    const wchar_t *winFilename = UString(filename).wc_str();
+    const wchar_t *winFilename = temp.wc_str();
 #else
-    const char *winFilename = filename.c_str();
+    const char *winFilename = temp.c_str();
 #endif
     WIN32_FIND_DATA FindFileData;
 
     HANDLE handle = FindFirstFile(winFilename, &FindFileData);
     if(handle == INVALID_HANDLE_VALUE)
-        return std::ifstream(std::filesystem::u8path(filename.c_str())).good();
+        return std::ifstream(std::filesystem::u8path(temp.toUtf8())).good();
     else {
         FindClose(handle);
         return true;
@@ -138,40 +143,45 @@ bool WinEnvironment::fileExists(std::string filename) {
 }
 
 bool WinEnvironment::directoryExists(std::string filename) {
+    auto temp = UString(filename);
 #ifdef _UNICODE
-    const wchar_t *winFilename = UString(filename).wc_str();
+    const wchar_t *winFilename = temp.wc_str();
 #else
-    const char *winFilename = filename.c_str();
+    const char *winFilename = tmep.c_str();
 #endif
     DWORD dwAttrib = GetFileAttributes(winFilename);
     return (dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
 bool WinEnvironment::createDirectory(std::string directoryName) {
+    auto temp = UString(directoryName);
 #ifdef _UNICODE
-    const wchar_t *winDirectoryName = UString(directoryName).wc_str();
+    const wchar_t *winDirectoryName = temp.wc_str();
 #else
-    const char *winDirectoryName = directoryName.c_str();
+    const char *winDirectoryName = temp.c_str();
 #endif
     return CreateDirectory(winDirectoryName, NULL);
 }
 
 bool WinEnvironment::renameFile(std::string oldFileName, std::string newFileName) {
+    auto temp1 = UString(oldFileName);
+    auto temp2 = UString(newFileName);
 #ifdef _UNICODE
-    const wchar_t *winNewFilename = UString(newFileName).wc_str();
-    const wchar_t *winOldFilename = UString(oldFileName).wc_str();
+    const wchar_t *winNewFilename = temp1.wc_str();
+    const wchar_t *winOldFilename = temp2.wc_str();
 #else
-    const char *winNewFilename = UString(newFileName).c_str();
-    const char *winOldFilename = UString(oldFileName).c_str();
+    const char *winNewFilename = temp1.c_str();
+    const char *winOldFilename = temp2.c_str();
 #endif
     return MoveFile(winNewFilename, winOldFilename);
 }
 
 bool WinEnvironment::deleteFile(std::string filePath) {
+    auto temp = UString(filePath);
 #ifdef _UNICODE
-    const wchar_t *winFilename = UString(filePath).wc_str();
+    const wchar_t *winFilename = temp.wc_str();
 #else
-    const char *winFilename = filePath.c_str();
+    const char *winFilename = temp.c_str();
 #endif
     return DeleteFile(winFilename);
 }
@@ -227,12 +237,13 @@ UString WinEnvironment::openFileWindow(const char *filetypefilters, UString titl
     OPENFILENAME fn;
     ZeroMemory(&fn, sizeof(fn));
 
+    auto temp = UString(filetypefilters);
 #ifdef _UNICODE
     wchar_t fileNameBuffer[255]{};
-    const wchar_t *winFiletypeFilters = UString(filetypefilters).wc_str();
+    const wchar_t *winFiletypeFilters = temp.wc_str();
 #else
     char fileNameBuffer[255]{};
-    const char *winFiletypeFilters = UString(filetypefilters).c_str();
+    const char *winFiletypeFilters = temp.c_str();
 #endif
 
     // fill it
@@ -408,9 +419,9 @@ std::vector<UString> WinEnvironment::getLogicalDrives() {
             driveNameForGetDriveFunction.append(":\\");
 
 #ifdef _UNICODE
-            const wchar_t *winDriveName = UString(driveNameForGetDriveFunction).wc_str();
+            const wchar_t *winDriveName = driveNameForGetDriveFunction.wc_str();
 #else
-            const char *winDriveName = driveNameForGetDriveFunction.c_str();
+            const char *winDriveName = driveNameForGetDriveFunction.toUtf8();
 #endif
 
             DWORD attributes = GetFileAttributes(winDriveName);
@@ -432,8 +443,9 @@ std::vector<UString> WinEnvironment::getLogicalDrives() {
 }
 
 std::string WinEnvironment::getFolderFromFilePath(std::string filepath) {
+    auto temp = UString(filepath);
 #ifdef _UNICODE
-    wchar_t *aString = const_cast<wchar_t *>(UString(filepath).wc_str());
+    wchar_t *aString = const_cast<wchar_t *>(UString(temp).wc_str());
 #else
     char *aString = (char *)filepath.c_str();
 #endif
@@ -446,7 +458,7 @@ std::string WinEnvironment::getFileExtensionFromFilePath(std::string filepath, b
     if(idx != -1)
         return filepath.substr(idx + 1);
     else
-        return std::string("");
+        return {""};
 }
 
 std::string WinEnvironment::getFileNameFromFilePath(std::string filePath) {

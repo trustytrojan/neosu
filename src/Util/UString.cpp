@@ -112,7 +112,7 @@ int UString::findChar(const UString &str, int start, bool respectEscapeChars) co
 
     for(int i = 0; i < strLen; i++) {
         wchar_t ch = str.m_unicode[i];
-        if(ch < 0x10000)
+        if(ch <= 0xFFFF)
             charMap[ch] = true;
         else
             extendedChars.push_back(ch);
@@ -126,7 +126,7 @@ int UString::findChar(const UString &str, int start, bool respectEscapeChars) co
             wchar_t ch = m_unicode[i];
             bool found = false;
 
-            if(ch < 0x10000)
+            if(ch <= 0xFFFF)
                 found = charMap[ch];
             else
                 found = std::ranges::find(extendedChars, ch) != extendedChars.end();

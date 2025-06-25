@@ -2958,7 +2958,7 @@ void OptionsMenu::onASIOBufferChange(CBaseUISlider *slider) {
 #ifdef _WIN32
     if(!this->updating_layout) this->bASIOBufferChangeScheduled = true;
 
-    BASS_ASIO_INFO info = {0};
+    BASS_ASIO_INFO info{};
     BASS_ASIO_GetInfo(&info);
     cv_asio_buffer_size.setDefaultFloat(info.bufpref);
     slider->setBounds(info.bufmin, info.bufmax);

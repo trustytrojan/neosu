@@ -40,7 +40,7 @@ void Skin::unpack(const char *filepath) {
     mz_zip_archive_file_stat file_stat;
     mz_uint num_files = 0;
 
-    if(!mz_zip_reader_init_mem(&zip, file.readFile(), file.getFileSize(), 0)) {
+    if(!mz_zip_reader_init_mem(&zip, reinterpret_cast<const u8*>(file.readFile()), file.getFileSize(), 0)) {
         debugLog("Failed to open .osk file\n");
         return;
     }

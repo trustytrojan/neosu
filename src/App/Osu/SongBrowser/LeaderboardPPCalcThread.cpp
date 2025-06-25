@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <mutex>
+#include <thread>
 
 #include "ConVar.h"
 #include "DatabaseBeatmap.h"

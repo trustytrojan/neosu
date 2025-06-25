@@ -118,7 +118,7 @@ bool Image::loadRawImage() {
         if(this->bInterrupted)  // cancellation point
             return false;
 
-        const u8 *data = file.readFile();
+        const u8 *data = reinterpret_cast<const u8*>(file.readFile());
         if(data == NULL) {
             printf("Image Error: Couldn't readFile() file %s\n", this->sFilePath.c_str());
             return false;

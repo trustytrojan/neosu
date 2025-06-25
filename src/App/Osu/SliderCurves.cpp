@@ -169,7 +169,7 @@ SliderCurveEqualDistanceMulti::SliderCurveEqualDistanceMulti(std::vector<Vector2
 
 void SliderCurveEqualDistanceMulti::init(const std::vector<SliderCurveType *> &curvesList) {
     if(curvesList.size() < 1) {
-        debugLog("SliderCurveEqualDistanceMulti::init() Error: curvesList.size() == 0!!!\n");
+        debugLog("SliderCurveEqualDistanceMulti::init: Error: curvesList.size() == 0!!!\n");
         return;
     }
 
@@ -182,7 +182,7 @@ void SliderCurveEqualDistanceMulti::init(const std::vector<SliderCurveType *> &c
     SliderCurveType *curCurve = curvesList[curCurveIndex];
     {
         if(curCurve->getCurvePoints().size() < 1) {
-            debugLog("SliderCurveEqualDistanceMulti::init() Error: curCurve->getCurvePoints().size() == 0!!!\n");
+            debugLog("SliderCurveEqualDistanceMulti::init: Error: curCurve->getCurvePoints().size() == 0!!!\n");
 
             // cleanup
             for(size_t i = 0; i < curvesList.size(); i++) {
@@ -199,7 +199,12 @@ void SliderCurveEqualDistanceMulti::init(const std::vector<SliderCurveType *> &c
     Vector2 lastCurvePointForNextSegmentStart;
     std::vector<Vector2> curCurvePoints;
     for(int i = 0; i < (this->iNCurve + 1); i++) {
-        const int prefDistance = (int)(((float)i * this->fPixelLength) / (float)this->iNCurve);
+        const float temp_dist = static_cast<float>((i * this->fPixelLength)) / static_cast<float>(this->iNCurve);
+        const int prefDistance =
+            (std::isfinite(temp_dist) && temp_dist >= static_cast<float>(std::numeric_limits<int>::min()) &&
+             temp_dist <= static_cast<float>(std::numeric_limits<int>::max()))
+                ? static_cast<int>(temp_dist)
+                : 0;
 
         while(distanceAt < prefDistance) {
             lastDistanceAt = distanceAt;
@@ -252,7 +257,7 @@ void SliderCurveEqualDistanceMulti::init(const std::vector<SliderCurveType *> &c
         if(distanceAt - lastDistanceAt > 1) {
             const float t = (prefDistance - lastDistanceAt) / (distanceAt - lastDistanceAt);
             this->curvePoints[i] =
-                Vector2(lerp<float>(lastCurve.x, thisCurve.x, t), lerp<float>(lastCurve.y, thisCurve.y, t));
+                Vector2(std::lerp(lastCurve.x, thisCurve.x, t), std::lerp(lastCurve.y, thisCurve.y, t));
         } else
             this->curvePoints[i] = thisCurve;
 
@@ -267,12 +272,13 @@ void SliderCurveEqualDistanceMulti::init(const std::vector<SliderCurveType *> &c
     if(curCurvePoints.size() > 0) this->curvePointSegments.push_back(curCurvePoints);
 
     // sanity check
+    // spec: FIXME: at least one of my maps triggers this (in upstream mcosu too), try to fix
     if(this->curvePoints.size() == 0) {
-        debugLog("SliderCurveEqualDistanceMulti::init() Error: m_curvePoints.size() == 0!!!\n");
+        debugLog("SliderCurveEqualDistanceMulti::init: Error: this->curvePoints.size() == 0!!!\n");
 
         // cleanup
-        for(size_t i = 0; i < curvesList.size(); i++) {
-            delete curvesList[i];
+        for(auto i : curvesList) {
+            delete i;
         }
 
         return;
@@ -281,10 +287,9 @@ void SliderCurveEqualDistanceMulti::init(const std::vector<SliderCurveType *> &c
     // make sure that the uninterpolated segment points are exactly as long as the pixelLength
     // this is necessary because we can't use the lerp'd points for the segments
     float segmentedLength = 0.0f;
-    for(int s = 0; s < this->curvePointSegments.size(); s++) {
-        for(int p = 0; p < this->curvePointSegments[s].size(); p++) {
-            segmentedLength +=
-                ((p == 0) ? 0 : (this->curvePointSegments[s][p] - this->curvePointSegments[s][p - 1]).length());
+    for(const auto &curvePointSegment : this->curvePointSegments) {
+        for(int p = 0; p < curvePointSegment.size(); p++) {
+            segmentedLength += ((p == 0) ? 0 : (curvePointSegment[p] - curvePointSegment[p - 1]).length());
         }
     }
 
@@ -341,8 +346,8 @@ void SliderCurveEqualDistanceMulti::init(const std::vector<SliderCurveType *> &c
     this->originalCurvePointSegments = std::vector<std::vector<Vector2>>(this->curvePointSegments);  // copy
 
     // cleanup
-    for(size_t i = 0; i < curvesList.size(); i++) {
-        delete curvesList[i];
+    for(auto i : curvesList) {
+        delete i;
     }
 }
 

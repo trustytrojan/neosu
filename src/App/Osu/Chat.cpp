@@ -1007,7 +1007,7 @@ void Chat::updateUserList() {
             total_y += card_size.y + MARGIN;
         }
 
-        bool dummy = false;
+        //bool dummy = false;
         auto card = new UserCard2(user->user_id);
         card->setSize(card_size);
         card->setPos(total_x, total_y);

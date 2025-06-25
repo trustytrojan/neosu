@@ -721,7 +721,7 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
 
     // sort hitobjects by time
     constexpr auto diffHitObjectSortComparator = [](const OsuDifficultyHitObject &a,
-                                                     const OsuDifficultyHitObject &b) -> bool {
+                                                    const OsuDifficultyHitObject &b) -> bool {
         if(a.time == b.time)
             return &a < &b;
         else
@@ -905,7 +905,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
     const u8 *beatmapFile = NULL;
     size_t beatmapFileSize = 0;
     if(file.canRead()) {
-        beatmapFile = file.readFile();
+        beatmapFile = reinterpret_cast<const u8 *>(file.readFile());
         beatmapFileSize = file.getFileSize();
     } else {
         debugLog("Osu Error: Couldn't read file %s\n", this->sFilePath.c_str());

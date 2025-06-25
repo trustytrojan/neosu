@@ -272,7 +272,9 @@ AS_IF([test "x$enable_asan" = "xyes" || test "x$enable_tsan" = "xyes"], [
     ])
 
     AS_IF([test -z "$LLVMMINGW" && test -n "$enable_clang"],[
-        LDFLAGS="$LDFLAGS -static-libasan" CFLAGS="$CFLAGS -static-libasan" CXXFLAGS="$CXXFLAGS -static-libasan"
+        LDFLAGS="$LDFLAGS -static-libasan"
+        CFLAGS="$CFLAGS -static-libasan -fsanitize-address-use-after-scope -fsanitize-address-use-after-return=always"
+        CXXFLAGS="$CXXFLAGS -static-libasan -fsanitize-address-use-after-scope -fsanitize-address-use-after-return=always"
     ])
     enable_debug="yes"
     ENABLE_ASAN=$enable_asan
@@ -702,7 +704,7 @@ AS_IF([test "$SYSNAME" = "linux"], [
     # this has too many transitive dependencies for me to bother building atm, so just download prebuilt for windows and require system for linux
     PKG_CHECK_AUTO([CURL], [libcurl >= $CURL_MIN_VERSION], [have_curl=yes], [AC_MSG_ERROR([Missing curl, required for linux builds.])])
 ], [
-    AC_SUBST([EXTRA_WIN_LIBS], [["-lopengl32 -lwbemuuid -lcomctl32 -lxinput"]])
+    AC_SUBST([EXTRA_WIN_LIBS], [["-lopengl32 -lwbemuuid -lcomctl32 -lxinput9_1_0"]])
     have_blkid="not required"
     have_curl="no"
 ])
