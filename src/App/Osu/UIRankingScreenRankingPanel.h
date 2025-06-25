@@ -10,7 +10,7 @@ class UIRankingScreenRankingPanel : public CBaseUIImage {
    public:
     UIRankingScreenRankingPanel();
 
-    virtual void draw(Graphics *g);
+    void draw(Graphics *g) override;
 
     void setScore(LiveScore *score);
     void setScore(FinishedScore score);

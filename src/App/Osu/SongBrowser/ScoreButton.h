@@ -14,10 +14,10 @@ class ScoreButton : public CBaseUIButton {
     static UString getModsStringForDisplay(Replay::Mods mods);
 
     ScoreButton(UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize);
-    virtual ~ScoreButton();
+    ~ScoreButton() override;
 
-    void draw(Graphics *g);
-    void mouse_update(bool *propagate_clicks);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
 
     void highlight();
     void resetHighlight();
@@ -42,12 +42,12 @@ class ScoreButton : public CBaseUIButton {
 
     void updateElapsedTimeString();
 
-    virtual void onClicked();
+    void onClicked() override;
 
-    virtual void onMouseInside();
-    virtual void onMouseOutside();
+    void onMouseInside() override;
+    void onMouseOutside() override;
 
-    virtual void onFocusStolen();
+    void onFocusStolen() override;
 
     void onRightMouseUpInside();
     void onContextMenu(UString text, int id = -1);

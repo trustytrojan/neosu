@@ -9,13 +9,13 @@ class VolumeOverlay : public OsuScreen {
     VolumeOverlay();
 
     void animate();
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
-    virtual void onResolutionChange(Vector2 newResolution);
-    virtual void onKeyDown(KeyboardEvent &key);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
+    void onResolutionChange(Vector2 newResolution) override;
+    void onKeyDown(KeyboardEvent &key) override;
     void updateLayout();
-    bool isBusy();
-    bool isVisible();
+    bool isBusy() override;
+    bool isVisible() override;
     bool canChangeVolume();
     void gainFocus();
     void loseFocus();

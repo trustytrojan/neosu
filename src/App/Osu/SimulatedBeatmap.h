@@ -6,7 +6,7 @@
 class SimulatedBeatmap : public BeatmapInterface {
    public:
     SimulatedBeatmap(DatabaseBeatmap *diff2, Replay::Mods mods_);
-    ~SimulatedBeatmap();
+    ~SimulatedBeatmap() override;
 
     Replay::Mods mods;
     LiveScore live_score;
@@ -19,17 +19,17 @@ class SimulatedBeatmap : public BeatmapInterface {
     // Potentially Visible Set gate time size, for optimizing draw() and update() when iterating over all hitobjects
     long getPVS();
 
-    Vector2 pixels2OsuCoords(Vector2 pixelCoords) const;  // only used for positional audio atm
+    Vector2 pixels2OsuCoords(Vector2 pixelCoords) const override;  // only used for positional audio atm
     Vector2 osuCoords2Pixels(
-        Vector2 coords) const;  // hitobjects should use this one (includes lots of special behaviour)
+        Vector2 coords) const override;  // hitobjects should use this one (includes lots of special behaviour)
     Vector2 osuCoords2RawPixels(
-        Vector2 coords) const;  // raw transform from osu!pixels to absolute screen pixels (without any mods whatsoever)
+        Vector2 coords) const override;  // raw transform from osu!pixels to absolute screen pixels (without any mods whatsoever)
     Vector2 osuCoords2LegacyPixels(
-        Vector2 coords) const;  // only applies vanilla osu mods and static mods to the coordinates (used for generating
+        Vector2 coords) const override;  // only applies vanilla osu mods and static mods to the coordinates (used for generating
                                 // the static slider mesh) centered at (0, 0, 0)
 
     // cursor
-    virtual Vector2 getCursorPos() const;
+    Vector2 getCursorPos() const override;
     Vector2 getFirstPersonCursorDelta() const;
     inline Vector2 getContinueCursorPoint() const { return this->vContinueCursorPoint; }
 
@@ -62,39 +62,39 @@ class SimulatedBeatmap : public BeatmapInterface {
     long current_frame_idx = 0;
 
     // generic state
-    virtual bool isKey1Down() const;
-    virtual bool isKey2Down() const;
-    virtual bool isClickHeld() const;
+    bool isKey1Down() const override;
+    bool isKey2Down() const override;
+    bool isClickHeld() const override;
 
-    virtual bool isContinueScheduled() const { return false; }
-    virtual bool isPaused() const { return false; }
-    virtual bool isPlaying() const { return true; }
-    virtual Replay::Mods getMods() const { return this->mods; }
-    virtual i32 getModsLegacy() const { return this->mods.to_legacy(); }
-    virtual u32 getScoreV1DifficultyMultiplier() const;
-    virtual f32 getSpeedMultiplier() const { return this->mods.speed; }
-    virtual f32 getRawAR() const;
-    virtual f32 getAR() const;
-    virtual f32 getCS() const;
-    virtual f32 getHP() const;
-    virtual f32 getRawOD() const;
-    virtual f32 getOD() const;
-    virtual f32 getRawApproachTime() const;
-    virtual f32 getApproachTime() const;
-    virtual u32 getLength() const;
-    virtual u32 getLengthPlayable() const;
-    virtual u32 getBreakDurationTotal() const;
+    bool isContinueScheduled() const override { return false; }
+    bool isPaused() const override { return false; }
+    bool isPlaying() const override { return true; }
+    Replay::Mods getMods() const override { return this->mods; }
+    i32 getModsLegacy() const override { return this->mods.to_legacy(); }
+    u32 getScoreV1DifficultyMultiplier() const override;
+    f32 getSpeedMultiplier() const override { return this->mods.speed; }
+    f32 getRawAR() const override;
+    f32 getAR() const override;
+    f32 getCS() const override;
+    f32 getHP() const override;
+    f32 getRawOD() const override;
+    f32 getOD() const override;
+    f32 getRawApproachTime() const override;
+    f32 getApproachTime() const override;
+    u32 getLength() const override;
+    u32 getLengthPlayable() const override;
+    u32 getBreakDurationTotal() const override;
     DatabaseBeatmap::BREAK getBreakForTimeRange(long startMS, long positionMS, long endMS) const;
 
     // HitObject and other helper functions
-    virtual LiveScore::HIT addHitResult(HitObject *hitObject, LiveScore::HIT hit, i32 delta, bool isEndOfCombo = false,
+    LiveScore::HIT addHitResult(HitObject *hitObject, LiveScore::HIT hit, i32 delta, bool isEndOfCombo = false,
                                         bool ignoreOnHitErrorBar = false, bool hitErrorBarOnly = false,
-                                        bool ignoreCombo = false, bool ignoreScore = false, bool ignoreHealth = false);
-    virtual void addSliderBreak();
+                                        bool ignoreCombo = false, bool ignoreScore = false, bool ignoreHealth = false) override;
+    void addSliderBreak() override;
     void addHealth(f64 percent, bool isFromHitResult);
 
-    virtual void addScorePoints(int points, bool isSpinner = false);
-    virtual bool isWaiting() const { return false; }
+    void addScorePoints(int points, bool isSpinner = false) override;
+    bool isWaiting() const override { return false; }
 
    protected:
     // database

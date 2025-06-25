@@ -22,7 +22,7 @@ CollectionButton::CollectionButton(SongBrowser *songBrowser, CBaseUIScrollView *
                                    float xPos, float yPos, float xSize, float ySize, UString name,
                                    UString collectionName, std::vector<SongButton *> children)
     : Button(songBrowser, view, contextMenu, xPos, yPos, xSize, ySize, name) {
-    this->sCollectionName = collectionName;
+    this->sCollectionName = collectionName.utf8View();
     this->children = children;
 
     this->fTitleScale = 0.35f;

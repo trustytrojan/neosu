@@ -15,7 +15,7 @@ class Image;
 class TextureAtlas : public Resource {
    public:
     TextureAtlas(int width = 512, int height = 512);
-    virtual ~TextureAtlas() { this->destroy(); }
+    ~TextureAtlas() override { this->destroy(); }
 
     Vector2 put(int width, int height, Color *pixels) { return this->put(width, height, false, false, pixels); }
     Vector2 put(int width, int height, bool flipHorizontal, bool flipVertical, Color *pixels);
@@ -27,9 +27,9 @@ class TextureAtlas : public Resource {
     inline Image *getAtlasImage() const { return this->atlasImage; }
 
    private:
-    virtual void init();
-    virtual void initAsync();
-    virtual void destroy();
+    void init() override;
+    void initAsync() override;
+    void destroy() override;
 
     int iPadding;
 

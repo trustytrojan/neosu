@@ -9,10 +9,10 @@ struct UserInfo;
 class UserCard2 : public CBaseUIButton {
    public:
     UserCard2(u32 user_id);
-    ~UserCard2();
+    ~UserCard2() override;
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
 
     void onClick(CBaseUIButton *btn);
 

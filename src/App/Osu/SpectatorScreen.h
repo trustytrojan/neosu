@@ -12,11 +12,11 @@ class SpectatorScreen : public OsuScreen {
    public:
     SpectatorScreen();
 
-    virtual void mouse_update(bool* propagate_clicks) override;
-    virtual void draw(Graphics* g) override;
-    virtual bool isVisible() override;
-    virtual CBaseUIElement* setVisible(bool visible) override;
-    virtual void onKeyDown(KeyboardEvent& e) override;
+    void mouse_update(bool* propagate_clicks) override;
+    void draw(Graphics* g) override;
+    bool isVisible() override;
+    CBaseUIElement* setVisible(bool visible) override;
+    void onKeyDown(KeyboardEvent& e) override;
     void onStopSpectatingClicked();
 
     UserCard* userCard = NULL;

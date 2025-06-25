@@ -1,41 +1,16 @@
 #pragma once
-#ifdef _WIN32
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
-#define GLEW_STATIC
-#include <gl/glew.h>
-
-#define WGL_WGLEXT_PROTOTYPES // only used for wglDX*() interop stuff atm
-#include <gl/wglew.h>
-
-#include <gl/glu.h>
-#include <gl/gl.h>
-
-#endif
-
+#ifndef __EMSCRIPTEN__
+#include "glad/glad.h"
 #ifdef __linux__
-
-#ifdef MCENGINE_USE_SYSTEM_GLEW
-#include <GL/glew.h>
-#include <GL/glxew.h>
+#include "glad_glx/glad_glx.h"
+#endif
+#ifdef _WIN32
+#include "glad_wgl/glad_wgl.h"
+#endif
 #else
-#define GLEW_STATIC
-#include <GL/glew.h>
-#include <GL/gl.h>
-#include <GL/glx.h>
-#include <GL/glu.h>
-#endif
-
-#endif
-
-#ifdef __APPLE__
-
-#define GLEW_STATIC
-#include <glew.h>
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#include <GLUT/glut.h>
-
+#include <GLES3/gl3.h>
+#include <GLES3/gl31.h>
+#include <GLES3/gl32.h>
+#include <GLES3/gl3platform.h>
 #endif

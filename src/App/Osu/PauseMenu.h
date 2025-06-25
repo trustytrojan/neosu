@@ -9,16 +9,16 @@ class PauseMenu : public OsuScreen {
    public:
     PauseMenu();
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
 
-    virtual void onKeyDown(KeyboardEvent &e);
-    virtual void onKeyUp(KeyboardEvent &e);
-    virtual void onChar(KeyboardEvent &e);
+    void onKeyDown(KeyboardEvent &e) override;
+    void onKeyUp(KeyboardEvent &e) override;
+    void onChar(KeyboardEvent &e) override;
 
-    virtual void onResolutionChange(Vector2 newResolution);
+    void onResolutionChange(Vector2 newResolution) override;
 
-    virtual CBaseUIContainer *setVisible(bool visible);
+    CBaseUIContainer *setVisible(bool visible) override;
 
     void setContinueEnabled(bool continueEnabled);
 

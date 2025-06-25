@@ -19,7 +19,7 @@ class UIUserContextMenuScreen : public OsuScreen {
    public:
     UIUserContextMenuScreen();
 
-    virtual void onResolutionChange(Vector2 newResolution);
+    void onResolutionChange(Vector2 newResolution) override;
     virtual void stealFocus();
 
     void open(u32 user_id);
@@ -34,7 +34,7 @@ class UIUserLabel : public CBaseUILabel {
    public:
     UIUserLabel(u32 user_id, UString username);
 
-    virtual void onMouseUpInside();
+    void onMouseUpInside() override;
 
     u32 user_id;
 };

@@ -9,23 +9,23 @@ class SongButton : public Button {
    public:
     SongButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos, float yPos,
                float xSize, float ySize, UString name, DatabaseBeatmap *databaseBeatmap);
-    virtual ~SongButton();
+    ~SongButton() override;
 
-    virtual void draw(Graphics *g);
+    void draw(Graphics *g) override;
 
     void triggerContextMenu(Vector2 pos);
 
     void sortChildren();
 
-    virtual void updateLayoutEx();
+    void updateLayoutEx() override;
     virtual void updateGrade() { ; }
 
-    virtual DatabaseBeatmap *getDatabaseBeatmap() const { return this->databaseBeatmap; }
+    DatabaseBeatmap *getDatabaseBeatmap() const override { return this->databaseBeatmap; }
     FinishedScore::Grade grade = FinishedScore::Grade::N;
 
    protected:
-    virtual void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected);
-    virtual void onRightMouseUpInside();
+    void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected) override;
+    void onRightMouseUpInside() override;
 
     void onContextMenu(UString text, int id = -1);
     void onAddToCollectionConfirmed(UString text, int id = -1);

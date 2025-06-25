@@ -16,18 +16,18 @@ class NullRenderTarget : public RenderTarget {
         : RenderTarget(x, y, width, height, multiSampleType) {
         ;
     }
-    virtual ~NullRenderTarget() { this->destroy(); }
+    ~NullRenderTarget() override { this->destroy(); }
 
-    virtual void enable() { ; }
-    virtual void disable() { ; }
+    void enable() override { ; }
+    void disable() override { ; }
 
-    virtual void bind(unsigned int textureUnit = 0) { ; }
-    virtual void unbind() { ; }
+    void bind(unsigned int textureUnit = 0) override { ; }
+    void unbind() override { ; }
 
    private:
-    virtual void init() { this->bReady = true; }
-    virtual void initAsync() { this->bAsyncReady = true; }
-    virtual void destroy() { ; }
+    void init() override { this->bReady = true; }
+    void initAsync() override { this->bAsyncReady = true; }
+    void destroy() override { ; }
 };
 
 #endif

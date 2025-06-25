@@ -14,15 +14,15 @@ class Console : public CBaseUIWindow {
 
    public:
     Console();
-    virtual ~Console();
+    ~Console() override;
 
-    virtual void mouse_update(bool *propagate_clicks);
+    void mouse_update(bool *propagate_clicks) override;
 
     void log(UString text, Color textColor = 0xffffffff);
     void clear();
 
     // events
-    void onResized();
+    void onResized() override;
 
     static std::vector<UString> g_commandQueue;
 

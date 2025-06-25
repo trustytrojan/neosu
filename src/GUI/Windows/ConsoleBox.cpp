@@ -24,7 +24,7 @@ class ConsoleBoxTextbox : public CBaseUITextbox {
     void setSuggestion(UString suggestion) { this->sSuggestion = suggestion; }
 
    protected:
-    virtual void drawText(Graphics *g) {
+    void drawText(Graphics *g) override {
         if(cv_consolebox_draw_preview.getBool()) {
             if(this->sSuggestion.length() > 0 && this->sSuggestion.find(this->sText) == 0) {
                 g->setColor(0xff444444);
@@ -55,7 +55,7 @@ class ConsoleBoxSuggestionButton : public CBaseUIButton {
     }
 
    protected:
-    virtual void drawText(Graphics *g) {
+    void drawText(Graphics *g) override {
         if(this->font == NULL || this->sText.length() < 1) return;
 
         if(cv_consolebox_draw_helptext.getBool()) {

@@ -10,15 +10,15 @@ class RenderTarget;
 class CBaseUIWindow : public CBaseUIElement {
    public:
     CBaseUIWindow(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "");
-    ~CBaseUIWindow();
+    ~CBaseUIWindow() override;
 
-    virtual void draw(Graphics *g);
+    void draw(Graphics *g) override;
     virtual void drawCustomContent(Graphics *g) { (void)g; }
-    virtual void mouse_update(bool *propagate_clicks);
+    void mouse_update(bool *propagate_clicks) override;
 
-    virtual void onKeyDown(KeyboardEvent &e);
-    virtual void onKeyUp(KeyboardEvent &e);
-    virtual void onChar(KeyboardEvent &e);
+    void onKeyDown(KeyboardEvent &e) override;
+    void onKeyUp(KeyboardEvent &e) override;
+    void onChar(KeyboardEvent &e) override;
 
     // actions
     void close();
@@ -89,8 +89,8 @@ class CBaseUIWindow : public CBaseUIElement {
     }
 
     // get
-    virtual bool isBusy();
-    virtual bool isActive();
+    bool isBusy() override;
+    bool isActive() override;
     inline bool isMoving() const { return this->bMoving; }
     inline bool isResizing() const { return this->bResizing; }
     inline CBaseUIContainer *getContainer() const { return this->container; }
@@ -98,17 +98,17 @@ class CBaseUIWindow : public CBaseUIElement {
     inline int getTitleBarHeight() { return this->iTitleBarHeight; }
 
     // events
-    virtual void onMouseDownInside();
-    virtual void onMouseUpInside();
-    virtual void onMouseUpOutside();
+    void onMouseDownInside() override;
+    void onMouseUpInside() override;
+    void onMouseUpOutside() override;
 
-    virtual void onMoved();
-    virtual void onResized();
+    void onMoved() override;
+    void onResized() override;
 
     virtual void onResolutionChange(Vector2 newResolution);
 
-    virtual void onEnabled();
-    virtual void onDisabled();
+    void onEnabled() override;
+    void onDisabled() override;
 
    protected:
     void updateTitleBarMetrics();

@@ -9,13 +9,13 @@ class UIButton;
 class PromptScreen : public OsuScreen {
    public:
     PromptScreen();
-    virtual void onResolutionChange(Vector2 newResolution);
+    void onResolutionChange(Vector2 newResolution) override;
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
-    virtual void onKeyDown(KeyboardEvent &e);
-    virtual void onKeyUp(KeyboardEvent &e);
-    virtual void onChar(KeyboardEvent &e);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
+    void onKeyDown(KeyboardEvent &e) override;
+    void onKeyUp(KeyboardEvent &e) override;
+    void onChar(KeyboardEvent &e) override;
 
     typedef fastdelegate::FastDelegate1<UString> PromptResponseCallback;
     void prompt(UString msg, PromptResponseCallback callback);

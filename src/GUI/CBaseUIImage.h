@@ -5,9 +5,9 @@ class CBaseUIImage : public CBaseUIElement {
    public:
     CBaseUIImage(std::string imageResourceName = "", float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0,
                  UString name = "");
-    virtual ~CBaseUIImage() { ; }
+    ~CBaseUIImage() override { ; }
 
-    virtual void draw(Graphics *g);
+    void draw(Graphics *g) override;
 
     void setImage(Image *img);
 

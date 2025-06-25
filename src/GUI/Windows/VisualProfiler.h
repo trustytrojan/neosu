@@ -20,10 +20,10 @@ class VertexArrayObject;
 class VisualProfiler : public CBaseUIElement {
    public:
     VisualProfiler();
-    virtual ~VisualProfiler();
+    ~VisualProfiler() override;
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
 
     void incrementInfoBladeDisplayMode();
     void decrementInfoBladeDisplayMode();
@@ -35,7 +35,7 @@ class VisualProfiler : public CBaseUIElement {
         this->bRequiresAltShiftKeysToFreeze = requiresAltShiftKeysToFreeze;
     }
 
-    virtual bool isEnabled();
+    bool isEnabled() override;
 
    private:
     enum INFO_BLADE_DISPLAY_MODE {

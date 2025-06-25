@@ -4,7 +4,7 @@
 class Shader : public Resource {
    public:
     Shader() : Resource() { ; }
-    virtual ~Shader() { ; }
+    ~Shader() override { ; }
 
     virtual void enable() = 0;
     virtual void disable() = 0;
@@ -21,7 +21,7 @@ class Shader : public Resource {
     virtual void setUniformMatrix4fv(UString name, float *v) = 0;
 
    protected:
-    virtual void init() = 0;
-    virtual void initAsync() = 0;
-    virtual void destroy() = 0;
+    void init() override = 0;
+    void initAsync() override = 0;
+    void destroy() override = 0;
 };

@@ -13,15 +13,15 @@
 class NullContextMenu : public ContextMenu {
    public:
     NullContextMenu() { ; }
-    virtual ~NullContextMenu() { ; }
+    ~NullContextMenu() override { ; }
 
-    void begin() { ; }
-    void addItem(UString text, int returnValue) {
+    void begin() override { ; }
+    void addItem(UString text, int returnValue) override {
         (void)text;
         (void)returnValue;
     }
-    void addSeparator() { ; }
-    int end() { return -1; }
+    void addSeparator() override { ; }
+    int end() override { return -1; }
 };
 
 #endif

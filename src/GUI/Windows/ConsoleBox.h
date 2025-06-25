@@ -13,14 +13,14 @@ class ConsoleBoxTextbox;
 class ConsoleBox : public CBaseUIElement {
    public:
     ConsoleBox();
-    virtual ~ConsoleBox();
+    ~ConsoleBox() override;
 
-    void draw(Graphics *g);
+    void draw(Graphics *g) override;
     void drawLogOverlay(Graphics *g);
-    void mouse_update(bool *propagate_clicks);
+    void mouse_update(bool *propagate_clicks) override;
 
-    void onKeyDown(KeyboardEvent &e);
-    void onChar(KeyboardEvent &e);
+    void onKeyDown(KeyboardEvent &e) override;
+    void onChar(KeyboardEvent &e) override;
 
     void onResolutionChange(Vector2 newResolution);
 
@@ -35,8 +35,8 @@ class ConsoleBox : public CBaseUIElement {
     }
 
     // get
-    bool isBusy();
-    bool isActive();
+    bool isBusy() override;
+    bool isActive() override;
 
     // ILLEGAL:
     inline ConsoleBoxTextbox *getTextbox() const { return this->textbox; }

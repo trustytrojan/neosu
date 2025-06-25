@@ -280,7 +280,7 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
     CURLcode res = curl_easy_perform(curl);
     CURLHcode hres;
     if(res != CURLE_OK) {
-        debugLog("Failed to send packet, cURL error %d: %s\n", res, curl_easy_strerror(res));
+        debugLog("Failed to send packet, cURL error %u: %s\n", static_cast<unsigned int>(res), curl_easy_strerror(res));
         if(auth_header.empty()) {
             // XXX: Not thread safe, playing with fire here
             auto errmsg = UString::format("Failed to log in: %s", curl_easy_strerror(res));
@@ -454,7 +454,7 @@ static void handle_api_response(Packet packet) {
 
         case SUBMIT_SCORE: {
             // TODO @kiwec: handle response
-            debugLog("Score submit result: %s\n", packet.memory);
+            debugLog("Score submit result: %s\n", reinterpret_cast<const char*>(packet.memory));
 
             // Reset leaderboards so new score will appear
             db->online_scores.clear();
@@ -514,7 +514,7 @@ void receive_bancho_packets() {
 
 void send_api_request(APIRequest request) {
     if(bancho.user_id <= 0) {
-        debugLog("Cannot send API request of type %d since we are not logged in.\n", request.type);
+        debugLog("Cannot send API request of type %u since we are not logged in.\n", static_cast<unsigned int>(request.type));
         return;
     }
 

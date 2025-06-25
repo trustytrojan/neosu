@@ -22,6 +22,7 @@
 #define BASS_CONFIG_MP3_OLDGAPS 68
 #endif
 
+#ifdef MCENGINE_PLATFORM_WINDOWS
 DWORD ASIO_clamp(BASS_ASIO_INFO info, DWORD buflen) {
     if(buflen == -1) return info.bufpref;
     if(buflen < info.bufmin) return info.bufmin;
@@ -49,53 +50,15 @@ DWORD ASIO_clamp(BASS_ASIO_INFO info, DWORD buflen) {
         return buflen;
     }
 }
+#endif
 
 SoundEngine::SoundEngine() {
-    auto bass_version = BASS_GetVersion();
-    debugLog("SoundEngine: BASS version = 0x%08x\n", bass_version);
-    if(HIWORD(bass_version) != BASSVERSION) {
-        engine->showMessageErrorFatal("Fatal Sound Error", "An incorrect version of the BASS library file was loaded!");
-        engine->shutdown();
-        return;
-    }
-
-    auto mixer_version = BASS_Mixer_GetVersion();
-    debugLog("SoundEngine: BASSMIX version = 0x%08x\n", mixer_version);
-    if(HIWORD(mixer_version) != BASSVERSION) {
-        engine->showMessageErrorFatal("Fatal Sound Error",
-                                      "An incorrect version of the BASSMIX library file was loaded!");
-        engine->shutdown();
-        return;
-    }
-
-    auto loud_version = BASS_Loudness_GetVersion();
-    debugLog("SoundEngine: BASSloud version = 0x%08x\n", loud_version);
-    if(HIWORD(loud_version) != BASSVERSION) {
-        engine->showMessageErrorFatal("Fatal Sound Error",
-                                      "An incorrect version of the BASSloud library file was loaded!");
-        engine->shutdown();
-        return;
-    }
-
-#ifdef _WIN32
-    auto asio_version = BASS_ASIO_GetVersion();
-    debugLog("SoundEngine: BASSASIO version = 0x%08x\n", asio_version);
-    if(HIWORD(asio_version) != BASSASIOVERSION) {
-        engine->showMessageErrorFatal("Fatal Sound Error",
-                                      "An incorrect version of the BASSASIO library file was loaded!");
-        engine->shutdown();
-        return;
-    }
-
-    auto wasapi_version = BASS_WASAPI_GetVersion();
-    debugLog("SoundEngine: BASSWASAPI version = 0x%08x\n", wasapi_version);
-    if(HIWORD(wasapi_version) != BASSVERSION) {
-        engine->showMessageErrorFatal("Fatal Sound Error",
-                                      "An incorrect version of the BASSWASAPI library file was loaded!");
-        engine->shutdown();
-        return;
-    }
-#endif
+	if (!BassManager::init()) // this checks the library versions as well
+	{
+		engine->showMessageErrorFatal("Fatal Sound Error", UString::fmt("Failed to load BASS feature: {:s} !", BassManager::getFailedLoad()));
+		engine->shutdown();
+		return;
+	}
 
     BASS_SetConfig(BASS_CONFIG_BUFFER, 100);
 
@@ -391,6 +354,7 @@ void display_bass_error() {
         case BASS_ERROR_DENIED:
             osu->getNotificationOverlay()->addToast("BASS error: Access Denied");
             break;
+#ifdef MCENGINE_PLATFORM_WINDOWS
         case BASS_ERROR_WASAPI:
             osu->getNotificationOverlay()->addToast("WASAPI error: No WASAPI");
             break;
@@ -403,6 +367,7 @@ void display_bass_error() {
         case BASS_ERROR_WASAPI_DENIED:
             osu->getNotificationOverlay()->addToast("WASAPI error: Access denied");
             break;
+#endif
         case BASS_ERROR_UNKNOWN:  // fallthrough
         default:
             auto errmsg = UString::format("Unknown BASS error (%i)!", code);

@@ -28,10 +28,10 @@ struct SCORE_ENTRY {
 class HUD : public OsuScreen {
    public:
     HUD();
-    virtual ~HUD();
+    ~HUD() override;
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
 
     void drawDummy(Graphics *g);
 

@@ -64,12 +64,12 @@ void VertexArrayObject::empty() {
 }
 
 void VertexArrayObject::addVertex(Vector2 v) {
-    this->vertices.push_back(Vector3(v.x, v.y, 0));
+    this->vertices.emplace_back(v.x, v.y, 0);
     this->iNumVertices = this->vertices.size();
 }
 
 void VertexArrayObject::addVertex(float x, float y, float z) {
-    this->vertices.push_back(Vector3(x, y, z));
+    this->vertices.emplace_back(x, y, z);
     this->iNumVertices = this->vertices.size();
 }
 
@@ -80,7 +80,7 @@ void VertexArrayObject::addVertex(Vector3 v) {
 
 void VertexArrayObject::addTexcoord(float u, float v, unsigned int textureUnit) {
     this->updateTexcoordArraySize(textureUnit);
-    this->texcoords[textureUnit].push_back(Vector2(u, v));
+    this->texcoords[textureUnit].emplace_back(u, v);
     this->bHasTexcoords = true;
 }
 
@@ -92,7 +92,7 @@ void VertexArrayObject::addTexcoord(Vector2 uv, unsigned int textureUnit) {
 
 void VertexArrayObject::addNormal(Vector3 normal) { this->normals.push_back(normal); }
 
-void VertexArrayObject::addNormal(float x, float y, float z) { this->normals.push_back(Vector3(x, y, z)); }
+void VertexArrayObject::addNormal(float x, float y, float z) { this->normals.emplace_back(x, y, z); }
 
 void VertexArrayObject::addColor(Color color) { this->colors.push_back(color); }
 

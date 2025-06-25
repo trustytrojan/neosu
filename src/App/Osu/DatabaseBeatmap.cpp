@@ -5,6 +5,7 @@
 #include <iostream>
 #include <limits>
 #include <sstream>
+#include <cinttypes>
 
 #include "Bancho.h"  // md5
 #include "Beatmap.h"
@@ -207,7 +208,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                     case 3:  // Events
                     {
                         i64 type, startTime, endTime;
-                        if(sscanf(curLineChar, " %lld , %lld , %lld \n", &type, &startTime, &endTime) == 3) {
+                        if(sscanf(curLineChar, " %" PRId64 " , %" PRId64 " , %" PRId64 " \n", &type, &startTime, &endTime) == 3) {
                             if(type == 2) {
                                 BREAK b;
                                 {
@@ -378,10 +379,10 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                         // %s\n\nIn beatmap: %s", curLine, this->sFilePath.c_str())); return false;
                                     }
 
-                                    points.push_back(Vector2(
+                                    points.emplace_back(
                                         (int)clamp<float>(sliderXY[0].toFloat(), -sliderSanityRange, sliderSanityRange),
                                         (int)clamp<float>(sliderXY[1].toFloat(), -sliderSanityRange,
-                                                          sliderSanityRange)));
+                                                          sliderSanityRange));
                                 }
 
                                 // special case: osu! logic for handling the hitobject point vs the controlpoints (since
@@ -682,9 +683,9 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
     result.diffobjects.reserve(c.hitcircles.size() + c.sliders.size() + c.spinners.size());
 
     for(int i = 0; i < c.hitcircles.size(); i++) {
-        result.diffobjects.push_back(OsuDifficultyHitObject(OsuDifficultyHitObject::TYPE::CIRCLE,
+        result.diffobjects.emplace_back(OsuDifficultyHitObject::TYPE::CIRCLE,
                                                             Vector2(c.hitcircles[i].x, c.hitcircles[i].y),
-                                                            (long)c.hitcircles[i].time));
+                                                            (long)c.hitcircles[i].time);
     }
 
     const bool calculateSliderCurveInConstructor =
@@ -696,13 +697,13 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
         }
 
         if(!calculateStarsInaccurately) {
-            result.diffobjects.push_back(OsuDifficultyHitObject(
+            result.diffobjects.emplace_back(
                 OsuDifficultyHitObject::TYPE::SLIDER, Vector2(c.sliders[i].x, c.sliders[i].y), c.sliders[i].time,
                 c.sliders[i].time + (long)c.sliders[i].sliderTime, c.sliders[i].sliderTimeWithoutRepeats,
                 c.sliders[i].type, c.sliders[i].points, c.sliders[i].pixelLength, c.sliders[i].scoringTimesForStarCalc,
-                c.sliders[i].repeat, calculateSliderCurveInConstructor));
+                c.sliders[i].repeat, calculateSliderCurveInConstructor);
         } else {
-            result.diffobjects.push_back(OsuDifficultyHitObject(
+            result.diffobjects.emplace_back(
                 OsuDifficultyHitObject::TYPE::SLIDER, Vector2(c.sliders[i].x, c.sliders[i].y), c.sliders[i].time,
                 c.sliders[i].time + (long)c.sliders[i].sliderTime, c.sliders[i].sliderTimeWithoutRepeats,
                 c.sliders[i].type,
@@ -711,14 +712,14 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
                 std::vector<OsuDifficultyHitObject::SLIDER_SCORING_TIME>(),  // NOTE: ignore curve when calculating
                                                                              // inaccurately
                 c.sliders[i].repeat,
-                false));  // NOTE: ignore curve when calculating inaccurately
+                false);  // NOTE: ignore curve when calculating inaccurately
         }
     }
 
     for(int i = 0; i < c.spinners.size(); i++) {
-        result.diffobjects.push_back(OsuDifficultyHitObject(OsuDifficultyHitObject::TYPE::SPINNER,
+        result.diffobjects.emplace_back(OsuDifficultyHitObject::TYPE::SPINNER,
                                                             Vector2(c.spinners[i].x, c.spinners[i].y),
-                                                            (long)c.spinners[i].time, (long)c.spinners[i].endTime));
+                                                            (long)c.spinners[i].time, (long)c.spinners[i].endTime);
     }
 
     // sort hitobjects by time
@@ -980,25 +981,25 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
             {
                 memset(stringBuffer, '\0', 1024);
                 if(sscanf(curLineChar, " Title :%1023[^\n]", stringBuffer) == 1) {
-                    this->sTitle = UString(stringBuffer);
+                    this->sTitle = stringBuffer;
                     trim(&this->sTitle);
                 }
 
                 memset(stringBuffer, '\0', 1024);
                 if(sscanf(curLineChar, " Artist :%1023[^\n]", stringBuffer) == 1) {
-                    this->sArtist = UString(stringBuffer);
+                    this->sArtist = stringBuffer;
                     trim(&this->sArtist);
                 }
 
                 memset(stringBuffer, '\0', 1024);
                 if(sscanf(curLineChar, " Creator :%1023[^\n]", stringBuffer) == 1) {
-                    this->sCreator = UString(stringBuffer);
+                    this->sCreator = stringBuffer;
                     trim(&this->sCreator);
                 }
 
                 memset(stringBuffer, '\0', 1024);
                 if(sscanf(curLineChar, " Version :%1023[^\n]", stringBuffer) == 1) {
-                    this->sDifficultyName = UString(stringBuffer);
+                    this->sDifficultyName = stringBuffer;
                     trim(&this->sDifficultyName);
                 }
 
@@ -1034,7 +1035,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
                 int type, startTime;
                 if(sscanf(curLineChar, " %i , %i , \"%1023[^\"]\"", &type, &startTime, stringBuffer) == 3) {
                     if(type == 0) {
-                        this->sBackgroundImageFileName = UString(stringBuffer);
+                        this->sBackgroundImageFileName = stringBuffer;
                         this->sFullBackgroundImageFilePath = this->sFolder;
                         this->sFullBackgroundImageFilePath.append(this->sBackgroundImageFileName);
                     }
@@ -1441,7 +1442,7 @@ void DatabaseBeatmapBackgroundImagePathLoader::initAsync() {
                     memset(stringBuffer, '\0', 1024);
                     int type, startTime;
                     if(sscanf(curLine.c_str(), " %i , %i , \"%1023[^\"]\"", &type, &startTime, stringBuffer) == 3) {
-                        if(type == 0) this->sLoadedBackgroundImageFileName = UString(stringBuffer);
+                        if(type == 0) this->sLoadedBackgroundImageFileName = stringBuffer;
                     }
                 } break;
             }

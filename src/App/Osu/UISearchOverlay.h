@@ -5,7 +5,7 @@ class UISearchOverlay : public CBaseUIElement {
    public:
     UISearchOverlay(float xPos, float yPos, float xSize, float ySize, UString name);
 
-    virtual void draw(Graphics *g);
+    void draw(Graphics *g) override;
 
     void setDrawNumResults(bool drawNumResults) { this->bDrawNumResults = drawNumResults; }
     void setOffsetRight(int offsetRight) { this->iOffsetRight = offsetRight; }

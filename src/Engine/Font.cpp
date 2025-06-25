@@ -341,3 +341,69 @@ static unsigned char *unpackMonoBitmap(FT_Bitmap bitmap) {
 
     return result;
 }
+
+std::vector<UString> McFont::wrap(const UString &text, f64 max_width) {
+    std::vector<UString> lines;
+    lines.emplace_back();
+
+    UString word = "";
+    u32 line = 0;
+    f64 line_width = 0.0;
+    f64 word_width = 0.0;
+    for(int i = 0; i < text.length(); i++) {
+        if(text[i] == '\n') {
+            lines[line].append(word);
+            lines.emplace_back();
+            line++;
+            line_width = 0.0;
+            word = "";
+            word_width = 0.0;
+            continue;
+        }
+
+        f32 char_width = getGlyphMetrics(text[i]).advance_x;
+
+        if(text[i] == ' ') {
+            lines[line].append(word);
+            line_width += word_width;
+            word = "";
+            word_width = 0.0;
+
+            if(line_width + char_width > max_width) {
+                // Ignore spaces at the end of a line
+                lines.emplace_back();
+                line++;
+                line_width = 0.0;
+            } else if(line_width > 0.0) {
+                lines[line].append(' ');
+                line_width += char_width;
+            }
+        } else {
+            if(word_width + char_width > max_width) {
+                // Split word onto new line
+                lines[line].append(word);
+                lines.emplace_back();
+                line++;
+                line_width = 0.0;
+                word = "";
+                word_width = 0.0;
+            } else if(line_width + word_width + char_width > max_width) {
+                // Wrap word on new line
+                lines.emplace_back();
+                line++;
+                line_width = 0.0;
+                word.append(text[i]);
+                word_width += char_width;
+            } else {
+                // Add character to word
+                word.append(text[i]);
+                word_width += char_width;
+            }
+        }
+    }
+
+    // Don't forget! ;)
+    lines[line].append(word);
+
+    return lines;
+}

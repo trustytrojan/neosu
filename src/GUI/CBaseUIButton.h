@@ -7,9 +7,9 @@ class CBaseUIButton : public CBaseUIElement {
    public:
     CBaseUIButton(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "",
                   UString text = "");
-    virtual ~CBaseUIButton() { ; }
+    ~CBaseUIButton() override { ; }
 
-    virtual void draw(Graphics *g);
+    void draw(Graphics *g) override;
 
     void click() { this->onClicked(); }
 
@@ -92,8 +92,8 @@ class CBaseUIButton : public CBaseUIElement {
     inline bool isTextLeft() const { return this->bTextLeft; }
 
     // events
-    virtual void onMouseUpInside();
-    virtual void onResized() { this->updateStringMetrics(); }
+    void onMouseUpInside() override;
+    void onResized() override { this->updateStringMetrics(); }
 
    protected:
     virtual void onClicked();

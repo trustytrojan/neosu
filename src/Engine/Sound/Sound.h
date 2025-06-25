@@ -2,15 +2,9 @@
 
 #include "cbase.h"
 
-#define NOBASSOVERLOADS
-#include <bass.h>
-#include <bass_fx.h>
-#include <bassasio.h>
-#include <bassloud.h>
-#include <bassmix.h>
-#include <basswasapi.h>
-
 #include "Resource.h"
+
+#include "BassManager.h"
 
 class SoundEngine;
 
@@ -22,7 +16,7 @@ class Sound : public Resource {
 
    public:
     Sound(std::string filepath, bool stream, bool overlayable, bool loop);
-    virtual ~Sound() { this->destroy(); }
+    ~Sound() override { this->destroy(); }
 
     std::vector<HCHANNEL> mixer_channels;
     std::vector<HCHANNEL> getActiveChannels();
@@ -55,9 +49,9 @@ class Sound : public Resource {
     void rebuild(std::string newFilePath);
 
    private:
-    virtual void init();
-    virtual void initAsync();
-    virtual void destroy();
+    void init() override;
+    void initAsync() override;
+    void destroy() override;
 
     SOUNDHANDLE stream = 0;
     SOUNDHANDLE sample = 0;

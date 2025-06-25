@@ -7,7 +7,7 @@ class RenderTarget : public Resource {
    public:
     RenderTarget(int x, int y, int width, int height,
                  Graphics::MULTISAMPLE_TYPE multiSampleType = Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X);
-    virtual ~RenderTarget() { ; }
+    ~RenderTarget() override { ; }
 
     virtual void draw(Graphics *g, int x, int y);
     virtual void draw(Graphics *g, int x, int y, int width, int height);
@@ -45,9 +45,9 @@ class RenderTarget : public Resource {
     inline bool isMultiSampled() const { return this->multiSampleType != Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X; }
 
    protected:
-    virtual void init() = 0;
-    virtual void initAsync() = 0;
-    virtual void destroy() = 0;
+    void init() override = 0;
+    void initAsync() override = 0;
+    void destroy() override = 0;
 
     bool bClearColorOnDraw;
     bool bClearDepthOnDraw;

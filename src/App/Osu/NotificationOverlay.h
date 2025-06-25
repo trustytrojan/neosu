@@ -6,10 +6,10 @@
 class ToastElement : public CBaseUIButton {
    public:
     ToastElement(UString text, Color borderColor_arg);
-    virtual ~ToastElement() { ; }
+    ~ToastElement() override { ; }
 
-    virtual void draw(Graphics *g);
-    virtual void onClicked() override;
+    void draw(Graphics *g) override;
+    void onClicked() override;
 
     std::vector<UString> lines;
     Color borderColor;
@@ -27,14 +27,14 @@ class NotificationOverlayKeyListener {
 class NotificationOverlay : public OsuScreen {
    public:
     NotificationOverlay();
-    virtual ~NotificationOverlay() { ; }
+    ~NotificationOverlay() override { ; }
 
-    virtual void mouse_update(bool *propagate_clicks);
-    virtual void draw(Graphics *g);
+    void mouse_update(bool *propagate_clicks) override;
+    void draw(Graphics *g) override;
 
-    virtual void onKeyDown(KeyboardEvent &e);
-    virtual void onKeyUp(KeyboardEvent &e);
-    virtual void onChar(KeyboardEvent &e);
+    void onKeyDown(KeyboardEvent &e) override;
+    void onKeyUp(KeyboardEvent &e) override;
+    void onChar(KeyboardEvent &e) override;
 
     typedef fastdelegate::FastDelegate0<> ToastClickCallback;
     void addToast(UString text, Color borderColor = 0xffdd0000, ToastClickCallback callback = NULL);
@@ -48,7 +48,7 @@ class NotificationOverlay : public OsuScreen {
 
     void addKeyListener(NotificationOverlayKeyListener *keyListener) { this->keyListener = keyListener; }
 
-    virtual bool isVisible();
+    bool isVisible() override;
 
     inline bool isWaitingForKey() { return this->bWaitForKey || this->bConsumeNextChar; }
 

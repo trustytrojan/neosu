@@ -21,10 +21,10 @@ class VSTitleBar : public CBaseUIElement {
 
    public:
     VSTitleBar(int x, int y, int xSize, McFont *font);
-    virtual ~VSTitleBar();
+    ~VSTitleBar() override;
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
 
     void setSeekCallback(SeekCallback callback) { this->seekCallback = callback; }
     void setTitle(UString title, bool reverse = false);
@@ -32,9 +32,9 @@ class VSTitleBar : public CBaseUIElement {
     inline bool isSeeking() const { return this->bIsSeeking; }
 
    protected:
-    virtual void onResized();
-    virtual void onMoved();
-    virtual void onFocusStolen();
+    void onResized() override;
+    void onMoved() override;
+    void onFocusStolen() override;
 
    private:
     void drawTitle1(Graphics *g);

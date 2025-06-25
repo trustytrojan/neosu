@@ -8,10 +8,10 @@ class UIPauseMenuButton : public CBaseUIButton {
     UIPauseMenuButton(std::function<Image *()> getImageFunc, float xPos, float yPos, float xSize, float ySize,
                       UString name);
 
-    virtual void draw(Graphics *g);
+    void draw(Graphics *g) override;
 
-    virtual void onMouseInside();
-    virtual void onMouseOutside();
+    void onMouseInside() override;
+    void onMouseOutside() override;
 
     void setBaseScale(float xScale, float yScale);
     void setAlpha(float alpha) { this->fAlpha = alpha; }

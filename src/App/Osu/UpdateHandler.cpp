@@ -202,9 +202,9 @@ void UpdateHandler::_installUpdate(std::string zipFilePath) {
         }
 
         if(mz_zip_reader_is_file_a_directory(&zip_archive, i))
-            dirs.push_back(file_stat.m_filename);
+            dirs.emplace_back(file_stat.m_filename);
         else
-            files.push_back(file_stat.m_filename);
+            files.emplace_back(file_stat.m_filename);
 
         debugLog("UpdateHandler: Filename: \"%s\", isDir: %i, uncompressed size: %u, compressed size: %u\n",
                  file_stat.m_filename, (int)mz_zip_reader_is_file_a_directory(&zip_archive, i),

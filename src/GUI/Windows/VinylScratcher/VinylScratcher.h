@@ -16,14 +16,14 @@ class VinylScratcher : public CBaseUIWindow {
 
    public:
     VinylScratcher();
-    virtual ~VinylScratcher() { ; }
+    ~VinylScratcher() override { ; }
 
-    virtual void mouse_update(bool *propagate_clicks);
+    void mouse_update(bool *propagate_clicks) override;
 
-    virtual void onKeyDown(KeyboardEvent &e);
+    void onKeyDown(KeyboardEvent &e) override;
 
    protected:
-    virtual void onResized();
+    void onResized() override;
 
    private:
     void onFinished();

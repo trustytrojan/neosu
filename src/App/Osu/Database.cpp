@@ -28,8 +28,8 @@
 Database *db = NULL;
 
 struct SortScoreByScore : public Database::SCORE_SORTING_COMPARATOR {
-    virtual ~SortScoreByScore() { ; }
-    bool operator()(FinishedScore const &a, FinishedScore const &b) const {
+    ~SortScoreByScore() override { ; }
+    bool operator()(FinishedScore const &a, FinishedScore const &b) const override {
         if(a.score != b.score) return a.score > b.score;
         if(a.unixTimestamp != b.unixTimestamp) return a.unixTimestamp > b.unixTimestamp;
         return &a > &b;
@@ -37,8 +37,8 @@ struct SortScoreByScore : public Database::SCORE_SORTING_COMPARATOR {
 };
 
 struct SortScoreByCombo : public Database::SCORE_SORTING_COMPARATOR {
-    virtual ~SortScoreByCombo() { ; }
-    bool operator()(FinishedScore const &a, FinishedScore const &b) const {
+    ~SortScoreByCombo() override { ; }
+    bool operator()(FinishedScore const &a, FinishedScore const &b) const override {
         if(a.comboMax != b.comboMax) return a.comboMax > b.comboMax;
         if(a.score != b.score) return a.score > b.score;
         if(a.unixTimestamp != b.unixTimestamp) return a.unixTimestamp > b.unixTimestamp;
@@ -47,16 +47,16 @@ struct SortScoreByCombo : public Database::SCORE_SORTING_COMPARATOR {
 };
 
 struct SortScoreByDate : public Database::SCORE_SORTING_COMPARATOR {
-    virtual ~SortScoreByDate() { ; }
-    bool operator()(FinishedScore const &a, FinishedScore const &b) const {
+    ~SortScoreByDate() override { ; }
+    bool operator()(FinishedScore const &a, FinishedScore const &b) const override {
         if(a.unixTimestamp != b.unixTimestamp) return a.unixTimestamp > b.unixTimestamp;
         return &a > &b;
     }
 };
 
 struct SortScoreByMisses : public Database::SCORE_SORTING_COMPARATOR {
-    virtual ~SortScoreByMisses() { ; }
-    bool operator()(FinishedScore const &a, FinishedScore const &b) const {
+    ~SortScoreByMisses() override { ; }
+    bool operator()(FinishedScore const &a, FinishedScore const &b) const override {
         if(a.numMisses != b.numMisses) return a.numMisses < b.numMisses;
         if(a.score != b.score) return a.score > b.score;
         if(a.unixTimestamp != b.unixTimestamp) return a.unixTimestamp > b.unixTimestamp;
@@ -65,8 +65,8 @@ struct SortScoreByMisses : public Database::SCORE_SORTING_COMPARATOR {
 };
 
 struct SortScoreByAccuracy : public Database::SCORE_SORTING_COMPARATOR {
-    virtual ~SortScoreByAccuracy() { ; }
-    bool operator()(FinishedScore const &a, FinishedScore const &b) const {
+    ~SortScoreByAccuracy() override { ; }
+    bool operator()(FinishedScore const &a, FinishedScore const &b) const override {
         auto a_acc = LiveScore::calculateAccuracy(a.num300s, a.num100s, a.num50s, a.numMisses);
         auto b_acc = LiveScore::calculateAccuracy(b.num300s, b.num100s, b.num50s, b.numMisses);
         if(a_acc != b_acc) return a_acc > b_acc;
@@ -77,8 +77,8 @@ struct SortScoreByAccuracy : public Database::SCORE_SORTING_COMPARATOR {
 };
 
 struct SortScoreByPP : public Database::SCORE_SORTING_COMPARATOR {
-    virtual ~SortScoreByPP() { ; }
-    bool operator()(FinishedScore const &a, FinishedScore const &b) const {
+    ~SortScoreByPP() override { ; }
+    bool operator()(FinishedScore const &a, FinishedScore const &b) const override {
         auto a_pp = max(a.get_pp() * 1000.0, 0.0);
         auto b_pp = max(b.get_pp() * 1000.0, 0.0);
         if(a_pp != b_pp) return a_pp > b_pp;
@@ -98,13 +98,13 @@ class DatabaseLoader : public Resource {
     };
 
    protected:
-    virtual void init() {
+    void init() override {
         this->bReady = true;
 
         delete this;  // commit sudoku
     }
 
-    virtual void initAsync() {
+    void initAsync() override {
         debugLog("DatabaseLoader::initAsync()\n");
 
         // load scores
@@ -121,7 +121,7 @@ class DatabaseLoader : public Resource {
         this->bAsyncReady = true;
     }
 
-    virtual void destroy() { ; }
+    void destroy() override { ; }
 
    private:
     Database *db;
@@ -344,7 +344,7 @@ std::vector<UString> Database::getPlayerNamesWithPPScores() {
     std::vector<UString> names;
     names.reserve(tempNames.size());
     for(auto k : tempNames) {
-        if(k.length() > 0) names.push_back(UString(k.c_str()));
+        if(k.length() > 0) names.emplace_back(k.c_str());
     }
 
     return names;
@@ -367,7 +367,7 @@ std::vector<UString> Database::getPlayerNamesWithScoresForUserSwitcher() {
     std::vector<UString> names;
     names.reserve(tempNames.size());
     for(auto k : tempNames) {
-        if(k.length() > 0) names.push_back(UString(k.c_str()));
+        if(k.length() > 0) names.emplace_back(k.c_str());
     }
 
     return names;

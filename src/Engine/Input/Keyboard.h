@@ -16,7 +16,7 @@
 class Keyboard : public InputDevice {
    public:
     Keyboard();
-    virtual ~Keyboard() { ; }
+    ~Keyboard() override { ; }
 
     void addListener(KeyboardListener *keyboardListener, bool insertOnTop = false);
     void removeListener(KeyboardListener *keyboardListener);

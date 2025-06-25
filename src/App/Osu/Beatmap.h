@@ -26,7 +26,7 @@ struct Click {
 class Beatmap : public BeatmapInterface {
    public:
     Beatmap();
-    ~Beatmap();
+    ~Beatmap() override;
 
     void draw(Graphics *g);
     void drawDebug(Graphics *g);
@@ -53,18 +53,18 @@ class Beatmap : public BeatmapInterface {
     // Returns true if the local player is loading
     bool isActuallyLoading();
 
-    Vector2 pixels2OsuCoords(Vector2 pixelCoords) const;  // only used for positional audio atm
+    Vector2 pixels2OsuCoords(Vector2 pixelCoords) const override;  // only used for positional audio atm
     Vector2 osuCoords2Pixels(
-        Vector2 coords) const;  // hitobjects should use this one (includes lots of special behaviour)
+        Vector2 coords) const override;  // hitobjects should use this one (includes lots of special behaviour)
     Vector2 osuCoords2RawPixels(
-        Vector2 coords) const;  // raw transform from osu!pixels to absolute screen pixels (without any mods whatsoever)
+        Vector2 coords) const override;  // raw transform from osu!pixels to absolute screen pixels (without any mods whatsoever)
     Vector2 osuCoords2LegacyPixels(
-        Vector2 coords) const;  // only applies vanilla osu mods and static mods to the coordinates (used for generating
+        Vector2 coords) const override;  // only applies vanilla osu mods and static mods to the coordinates (used for generating
                                 // the static slider mesh) centered at (0, 0, 0)
 
     // cursor
     Vector2 getMousePos() const;
-    Vector2 getCursorPos() const;
+    Vector2 getCursorPos() const override;
     Vector2 getFirstPersonCursorDelta() const;
     inline Vector2 getContinueCursorPoint() const { return this->vContinueCursorPoint; }
 
@@ -129,14 +129,14 @@ class Beatmap : public BeatmapInterface {
     inline Sound *getMusic() const { return this->music; }
     u32 getTime() const;
     u32 getStartTimePlayable() const;
-    u32 getLength() const;
-    u32 getLengthPlayable() const;
+    u32 getLength() const override;
+    u32 getLengthPlayable() const override;
     f32 getPercentFinished() const;
     f32 getPercentFinishedPlayable() const;
 
     // live statistics
     int getMostCommonBPM() const;
-    f32 getSpeedMultiplier() const;
+    f32 getSpeedMultiplier() const override;
     inline int getNPS() const { return this->iNPS; }
     inline int getND() const { return this->iND; }
 
@@ -180,15 +180,15 @@ class Beatmap : public BeatmapInterface {
     inline long getCurMusicPos() const { return this->iCurMusicPos; }
     inline long getCurMusicPosWithOffsets() const { return this->iCurMusicPosWithOffsets; }
 
-    u32 getScoreV1DifficultyMultiplier() const;
-    f32 getRawAR() const;
-    f32 getAR() const;
-    f32 getCS() const;
-    f32 getHP() const;
-    f32 getRawOD() const;
-    f32 getOD() const;
-    virtual f32 getApproachTime() const;
-    virtual f32 getRawApproachTime() const;
+    u32 getScoreV1DifficultyMultiplier() const override;
+    f32 getRawAR() const override;
+    f32 getAR() const override;
+    f32 getCS() const override;
+    f32 getHP() const override;
+    f32 getRawOD() const override;
+    f32 getOD() const override;
+    f32 getApproachTime() const override;
+    f32 getRawApproachTime() const override;
 
     // health
     inline f64 getHealth() const { return this->fHealth; }
@@ -198,35 +198,35 @@ class Beatmap : public BeatmapInterface {
     inline DatabaseBeatmap *getSelectedDifficulty2() const { return this->selectedDifficulty2; }
 
     // generic state
-    inline bool isPlaying() const { return this->bIsPlaying; }
-    inline bool isPaused() const { return this->bIsPaused; }
+    inline bool isPlaying() const override { return this->bIsPlaying; }
+    inline bool isPaused() const override { return this->bIsPaused; }
     inline bool isRestartScheduled() const { return this->bIsRestartScheduled; }
-    inline bool isContinueScheduled() const { return this->bContinueScheduled; }
+    inline bool isContinueScheduled() const override { return this->bContinueScheduled; }
     inline bool isInSkippableSection() const { return this->bIsInSkippableSection; }
     inline bool isInBreak() const { return this->bInBreak; }
     inline bool shouldFlashWarningArrows() const { return this->bShouldFlashWarningArrows; }
     inline f32 shouldFlashSectionPass() const { return this->fShouldFlashSectionPass; }
     inline f32 shouldFlashSectionFail() const { return this->fShouldFlashSectionFail; }
-    virtual bool isWaiting() const { return this->bIsWaiting; }
-    virtual bool isKey1Down() const;
-    virtual bool isKey2Down() const;
-    virtual bool isClickHeld() const;
-    virtual Replay::Mods getMods() const;
-    virtual i32 getModsLegacy() const;
+    bool isWaiting() const override { return this->bIsWaiting; }
+    bool isKey1Down() const override;
+    bool isKey2Down() const override;
+    bool isClickHeld() const override;
+    Replay::Mods getMods() const override;
+    i32 getModsLegacy() const override;
 
     std::string getTitle() const;
     std::string getArtist() const;
 
     inline const std::vector<DatabaseBeatmap::BREAK> &getBreaks() const { return this->breaks; }
-    u32 getBreakDurationTotal() const;
+    u32 getBreakDurationTotal() const override;
     DatabaseBeatmap::BREAK getBreakForTimeRange(i64 startMS, i64 positionMS, i64 endMS) const;
 
     // HitObject and other helper functions
-    virtual LiveScore::HIT addHitResult(HitObject *hitObject, LiveScore::HIT hit, i32 delta, bool isEndOfCombo = false,
+    LiveScore::HIT addHitResult(HitObject *hitObject, LiveScore::HIT hit, i32 delta, bool isEndOfCombo = false,
                                         bool ignoreOnHitErrorBar = false, bool hitErrorBarOnly = false,
-                                        bool ignoreCombo = false, bool ignoreScore = false, bool ignoreHealth = false);
-    virtual void addSliderBreak();
-    virtual void addScorePoints(int points, bool isSpinner = false);
+                                        bool ignoreCombo = false, bool ignoreScore = false, bool ignoreHealth = false) override;
+    void addSliderBreak() override;
+    void addScorePoints(int points, bool isSpinner = false) override;
     void addHealth(f64 percent, bool isFromHitResult);
     void updateTimingPoints(long curPos);
 

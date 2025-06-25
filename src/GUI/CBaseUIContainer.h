@@ -4,18 +4,18 @@
 class CBaseUIContainer : public CBaseUIElement {
    public:
     CBaseUIContainer(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "");
-    virtual ~CBaseUIContainer();
+    ~CBaseUIContainer() override;
 
     void clear();
     void empty();
 
     void draw_debug(Graphics *g);
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
 
-    void onKeyUp(KeyboardEvent &e);
-    void onKeyDown(KeyboardEvent &e);
-    void onChar(KeyboardEvent &e);
+    void onKeyUp(KeyboardEvent &e) override;
+    void onKeyDown(KeyboardEvent &e) override;
+    void onChar(KeyboardEvent &e) override;
 
     CBaseUIContainer *addBaseUIElement(CBaseUIElement *element, float xPos, float yPos);
     CBaseUIContainer *addBaseUIElement(CBaseUIElement *element);
@@ -32,17 +32,17 @@ class CBaseUIContainer : public CBaseUIElement {
 
     inline const std::vector<CBaseUIElement *> &getElements() const { return this->vElements; }
 
-    virtual void onMoved() { this->update_pos(); }
-    virtual void onResized() { this->update_pos(); }
+    void onMoved() override { this->update_pos(); }
+    void onResized() override { this->update_pos(); }
 
-    virtual bool isBusy();
-    virtual bool isActive();
+    bool isBusy() override;
+    bool isActive() override;
 
-    void onMouseDownOutside();
+    void onMouseDownOutside() override;
 
-    virtual void onFocusStolen();
-    virtual void onEnabled();
-    virtual void onDisabled();
+    void onFocusStolen() override;
+    void onEnabled() override;
+    void onDisabled() override;
 
     void update_pos();
 

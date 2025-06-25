@@ -36,14 +36,14 @@ struct ChatChannel {
 class Chat : public OsuScreen {
    public:
     Chat();
-    ~Chat();
+    ~Chat() override;
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
-    virtual void onKeyDown(KeyboardEvent &e);
-    virtual void onKeyUp(KeyboardEvent &e);
-    virtual void onChar(KeyboardEvent &e);
-    virtual void onResolutionChange(Vector2 newResolution);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
+    void onKeyDown(KeyboardEvent &e) override;
+    void onKeyUp(KeyboardEvent &e) override;
+    void onChar(KeyboardEvent &e) override;
+    void onResolutionChange(Vector2 newResolution) override;
 
     void mark_as_read(ChatChannel *chan);
     void switchToChannel(ChatChannel *chan);
@@ -61,7 +61,7 @@ class Chat : public OsuScreen {
     void send_message(UString msg);
     void onDisconnect();
 
-    virtual CBaseUIContainer *setVisible(bool visible);
+    CBaseUIContainer *setVisible(bool visible) override;
     bool isSmallChat();
     bool isVisibilityForced();
     void updateVisibility();

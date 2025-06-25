@@ -14,7 +14,7 @@
 
 #ifdef MCENGINE_FEATURE_OPENGL
 
-#include <Windows.h>
+#include <windows.h>
 
 class ConVar;
 

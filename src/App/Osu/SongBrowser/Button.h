@@ -12,15 +12,15 @@ class Button : public CBaseUIButton {
    public:
     Button(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos, float yPos,
            float xSize, float ySize, UString name);
-    virtual ~Button();
+    ~Button() override;
     void deleteAnimations();
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
 
     virtual void updateLayoutEx();
 
-    Button *setVisible(bool visible);
+    Button *setVisible(bool visible) override;
 
     void select(bool fireCallbacks = true, bool autoSelectBottomMostChild = true, bool wasParentSelected = true);
     void deselect();
@@ -70,9 +70,9 @@ class Button : public CBaseUIButton {
 
     enum class MOVE_AWAY_STATE { MOVE_CENTER, MOVE_UP, MOVE_DOWN };
 
-    virtual void onClicked();
-    virtual void onMouseInside();
-    virtual void onMouseOutside();
+    void onClicked() override;
+    void onMouseInside() override;
+    void onMouseOutside() override;
 
     void setMoveAwayState(MOVE_AWAY_STATE moveAwayState, bool animate = true);
 

@@ -2,9 +2,9 @@
 
 #include "WinEnvironment.h"
 
-#include <Commdlg.h>
-#include <Lmcons.h>
-#include <Shlobj.h>
+#include <commdlg.h>
+#include <lmcons.h>
+#include <shlobj.h>
 #include <shellapi.h>
 #include <tchar.h>
 
@@ -99,24 +99,36 @@ UString WinEnvironment::getUsername() {
 }
 
 std::string WinEnvironment::getUserDataPath() {
+#ifdef _UNICODE
+    wchar_t path[PATH_MAX];
+#else
     char path[PATH_MAX];
-
-    if(SUCCEEDED(SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path))) return std::string(path);
+#endif
+    if(SUCCEEDED(SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path))) return UString{path}.toUtf8();
 
     return std::string("");
 }
 
 std::string WinEnvironment::getExecutablePath() {
-    char path[MAX_PATH];
-
-    if(GetModuleFileName(NULL, path, MAX_PATH)) return std::string(path);
+#ifdef _UNICODE
+    wchar_t path[PATH_MAX];
+#else
+    char path[PATH_MAX];
+#endif
+    if(GetModuleFileName(NULL, path, MAX_PATH)) return UString{path}.toUtf8();
 
     return std::string("");
 }
 
 bool WinEnvironment::fileExists(std::string filename) {
+#ifdef _UNICODE
+    const wchar_t *winFilename = UString(filename).wc_str();
+#else
+    const char *winFilename = filename.c_str();
+#endif
     WIN32_FIND_DATA FindFileData;
-    HANDLE handle = FindFirstFile(filename.c_str(), &FindFileData);
+
+    HANDLE handle = FindFirstFile(winFilename, &FindFileData);
     if(handle == INVALID_HANDLE_VALUE)
         return std::ifstream(std::filesystem::u8path(filename.c_str())).good();
     else {
@@ -126,17 +138,43 @@ bool WinEnvironment::fileExists(std::string filename) {
 }
 
 bool WinEnvironment::directoryExists(std::string filename) {
-    DWORD dwAttrib = GetFileAttributes(filename.c_str());
+#ifdef _UNICODE
+    const wchar_t *winFilename = UString(filename).wc_str();
+#else
+    const char *winFilename = filename.c_str();
+#endif
+    DWORD dwAttrib = GetFileAttributes(winFilename);
     return (dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
-bool WinEnvironment::createDirectory(std::string directoryName) { return CreateDirectory(directoryName.c_str(), NULL); }
-
-bool WinEnvironment::renameFile(std::string oldFileName, std::string newFileName) {
-    return MoveFile(oldFileName.c_str(), newFileName.c_str());
+bool WinEnvironment::createDirectory(std::string directoryName) {
+#ifdef _UNICODE
+    const wchar_t *winDirectoryName = UString(directoryName).wc_str();
+#else
+    const char *winDirectoryName = directoryName.c_str();
+#endif
+    return CreateDirectory(winDirectoryName, NULL);
 }
 
-bool WinEnvironment::deleteFile(std::string filePath) { return DeleteFile(filePath.c_str()); }
+bool WinEnvironment::renameFile(std::string oldFileName, std::string newFileName) {
+#ifdef _UNICODE
+    const wchar_t *winNewFilename = UString(newFileName).wc_str();
+    const wchar_t *winOldFilename = UString(oldFileName).wc_str();
+#else
+    const char *winNewFilename = UString(newFileName).c_str();
+    const char *winOldFilename = UString(oldFileName).c_str();
+#endif
+    return MoveFile(winNewFilename, winOldFilename);
+}
+
+bool WinEnvironment::deleteFile(std::string filePath) {
+#ifdef _UNICODE
+    const wchar_t *winFilename = UString(filePath).wc_str();
+#else
+    const char *winFilename = filePath.c_str();
+#endif
+    return DeleteFile(winFilename);
+}
 
 UString WinEnvironment::getClipBoardText() {
     UString result = "";
@@ -189,7 +227,13 @@ UString WinEnvironment::openFileWindow(const char *filetypefilters, UString titl
     OPENFILENAME fn;
     ZeroMemory(&fn, sizeof(fn));
 
-    char fileNameBuffer[255];
+#ifdef _UNICODE
+    wchar_t fileNameBuffer[255]{};
+    const wchar_t *winFiletypeFilters = UString(filetypefilters).wc_str();
+#else
+    char fileNameBuffer[255]{};
+    const char *winFiletypeFilters = UString(filetypefilters).c_str();
+#endif
 
     // fill it
     fn.lStructSize = sizeof(fn);
@@ -197,12 +241,19 @@ UString WinEnvironment::openFileWindow(const char *filetypefilters, UString titl
     fn.lpstrFile = fileNameBuffer;
     fn.lpstrFile[0] = '\0';
     fn.nMaxFile = sizeof(fileNameBuffer);
-    fn.lpstrFilter = filetypefilters;
+    fn.lpstrFilter = winFiletypeFilters;
     fn.nFilterIndex = 1;
     fn.lpstrFileTitle = NULL;
     fn.nMaxFileTitle = 0;
-    fn.lpstrTitle = title.length() > 1 ? title.toUtf8() : NULL;
-    fn.lpstrInitialDir = initialpath.length() > 1 ? initialpath.toUtf8() : NULL;
+
+#ifdef _UNICODE
+    fn.lpstrTitle = title.length() > 1 ? title.wc_str() : NULL;
+    fn.lpstrInitialDir = initialpath.length() > 1 ? initialpath.wc_str() : NULL;
+#else
+    fn.lpstrTitle = title.lengthUtf8() > 1 ? title.toUtf8() : NULL;
+    fn.lpstrInitialDir = initialpath.lengthUtf8() > 1 ? initialpath.toUtf8() : NULL;
+#endif
+
     fn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR | OFN_ENABLESIZING;
 
     // open the dialog
@@ -217,7 +268,11 @@ UString WinEnvironment::openFolderWindow(UString title, UString initialpath) {
     OPENFILENAME fn;
     ZeroMemory(&fn, sizeof(fn));
 
-    char fileNameBuffer[255];
+#ifdef _UNICODE
+    wchar_t fileNameBuffer[255]{};
+#else
+    char fileNameBuffer[255]{};
+#endif
 
     fileNameBuffer[0] = 's';
     fileNameBuffer[1] = 'k';
@@ -237,8 +292,15 @@ UString WinEnvironment::openFolderWindow(UString title, UString initialpath) {
     fn.nMaxFile = sizeof(fileNameBuffer);
     fn.nFilterIndex = 1;
     fn.lpstrFileTitle = NULL;
-    fn.lpstrTitle = title.length() > 1 ? title.toUtf8() : NULL;
-    fn.lpstrInitialDir = initialpath.length() > 1 ? initialpath.toUtf8() : NULL;
+
+#ifdef _UNICODE
+    fn.lpstrTitle = title.length() > 1 ? title.wc_str() : NULL;
+    fn.lpstrInitialDir = initialpath.length() > 1 ? initialpath.wc_str() : NULL;
+#else
+    fn.lpstrTitle = title.lengthUtf8() > 1 ? title.toUtf8() : NULL;
+    fn.lpstrInitialDir = initialpath.lengthUtf8() > 1 ? initialpath.toUtf8() : NULL;
+#endif
+
     fn.Flags = OFN_PATHMUSTEXIST | OFN_ENABLESIZING;
 
     // open the dialog
@@ -345,13 +407,19 @@ std::vector<UString> WinEnvironment::getLogicalDrives() {
             UString driveNameForGetDriveFunction = driveName;
             driveNameForGetDriveFunction.append(":\\");
 
-            DWORD attributes = GetFileAttributes(driveNameForGetDriveFunction.toUtf8());
+#ifdef _UNICODE
+            const wchar_t *winDriveName = UString(driveNameForGetDriveFunction).wc_str();
+#else
+            const char *winDriveName = driveNameForGetDriveFunction.c_str();
+#endif
 
-            // debugLog("checking %s, type = %i, free clusters = %lu\n", driveNameForGetDriveFunction.toUtf8(),
-            // GetDriveType(driveNameForGetDriveFunction.toUtf8()), attributes);
+            DWORD attributes = GetFileAttributes(winDriveName);
+
+            // debugLog("checking %s, type = %i, free clusters = %lu\n", winDriveName,
+            // GetDriveType(winDriveName), attributes);
 
             // check if the drive is valid, and if there is media in it (e.g. ignore empty dvd drives)
-            if(GetDriveType(driveNameForGetDriveFunction.toUtf8()) > DRIVE_NO_ROOT_DIR &&
+            if(GetDriveType(winDriveName) > DRIVE_NO_ROOT_DIR &&
                attributes != INVALID_FILE_ATTRIBUTES) {
                 if(driveExecName.length() > 0) drives.push_back(driveExecName);
             }
@@ -364,9 +432,13 @@ std::vector<UString> WinEnvironment::getLogicalDrives() {
 }
 
 std::string WinEnvironment::getFolderFromFilePath(std::string filepath) {
+#ifdef _UNICODE
+    wchar_t *aString = const_cast<wchar_t *>(UString(filepath).wc_str());
+#else
     char *aString = (char *)filepath.c_str();
+#endif
     path_strip_filename(aString);
-    return aString;
+    return UString(aString).toUtf8();
 }
 
 std::string WinEnvironment::getFileExtensionFromFilePath(std::string filepath, bool includeDot) {
@@ -422,7 +494,12 @@ void WinEnvironment::showMessageError(UString title, UString message) {
 void WinEnvironment::showMessageErrorFatal(UString title, UString message) {
     bool wasFullscreen = this->bFullScreen;
     handleShowMessageFullscreen();
+#ifdef _UNICODE
+    MessageBox(this->hwnd, message.wc_str(), title.wc_str(), MB_ICONSTOP | MB_OK);
+#else
     MessageBox(this->hwnd, message.toUtf8(), title.toUtf8(), MB_ICONSTOP | MB_OK);
+#endif
+
     if(wasFullscreen) {
         maximize();
         enableFullscreen();
@@ -541,7 +618,13 @@ void WinEnvironment::disableFullscreen() {
     this->bFullScreen = false;
 }
 
-void WinEnvironment::setWindowTitle(UString title) { SetWindowText(this->hwnd, title.toUtf8()); }
+void WinEnvironment::setWindowTitle(UString title) {
+#ifdef _UNICODE
+    SetWindowText(this->hwnd, title.wc_str());
+#else
+    SetWindowText(this->hwnd, title.toUtf8());
+#endif
+}
 
 void WinEnvironment::setWindowPos(int x, int y) {
     SetWindowPos(this->hwnd, this->hwnd, x, y, 0, 0, SWP_NOZORDER | SWP_NOSIZE | SWP_NOOWNERZORDER | SWP_NOACTIVATE);

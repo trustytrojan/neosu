@@ -15,9 +15,9 @@ class VSControlBarButton : public CBaseUIButton {
         : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {
         ;
     }
-    virtual ~VSControlBarButton() { ; }
+    ~VSControlBarButton() override { ; }
 
-    virtual void draw(Graphics *g) {
+    void draw(Graphics *g) override {
         if(!this->bVisible) return;
 
         const Color top = COLOR(255, 244, 244, 244);
@@ -32,7 +32,7 @@ class VSControlBarButton : public CBaseUIButton {
     }
 
    protected:
-    virtual void drawText(Graphics *g) {
+    void drawText(Graphics *g) override {
         if(this->font != NULL && this->sText.length() > 0) {
             const int textPressedAdd = (this->bActive ? 1 : 0);
 
@@ -79,9 +79,9 @@ class VSControlBarSlider : public CBaseUISlider {
         : CBaseUISlider(xPos, yPos, xSize, ySize, name) {
         ;
     }
-    virtual ~VSControlBarSlider() { ; }
+    ~VSControlBarSlider() override { ; }
 
-    virtual void draw(Graphics *g) {
+    void draw(Graphics *g) override {
         CBaseUISlider::draw(g);
         if(!this->bVisible) return;
 
@@ -116,9 +116,9 @@ class VSControlBarCheckbox : public CBaseUICheckbox {
         : CBaseUICheckbox(xPos, yPos, xSize, ySize, name, text) {
         ;
     }
-    virtual ~VSControlBarCheckbox() { ; }
+    ~VSControlBarCheckbox() override { ; }
 
-    virtual void draw(Graphics *g) {
+    void draw(Graphics *g) override {
         if(!this->bVisible) return;
 
         const Color top = (this->bChecked ? COLOR(255, 178, 237, 171) : COLOR(255, 244, 244, 244));

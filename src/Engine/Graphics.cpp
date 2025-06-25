@@ -7,8 +7,8 @@
 Graphics::Graphics() {
     // init matrix stacks
     this->bTransformUpToDate = false;
-    this->worldTransformStack.push(Matrix4());
-    this->projectionTransformStack.push(Matrix4());
+    this->worldTransformStack.emplace();
+    this->projectionTransformStack.emplace();
 
     // init 3d gui scene stack
     this->bIs3dScene = false;
@@ -16,8 +16,8 @@ Graphics::Graphics() {
 }
 
 void Graphics::pushTransform() {
-    this->worldTransformStack.push(Matrix4(this->worldTransformStack.top()));
-    this->projectionTransformStack.push(Matrix4(this->projectionTransformStack.top()));
+    this->worldTransformStack.emplace(this->worldTransformStack.top());
+    this->projectionTransformStack.emplace(this->projectionTransformStack.top());
 }
 
 void Graphics::popTransform() {

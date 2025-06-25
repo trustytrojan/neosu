@@ -5,8 +5,8 @@ class UIButton : public CBaseUIButton {
    public:
     UIButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text);
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
 
     void setColor(Color color) {
         this->color = color;
@@ -17,8 +17,8 @@ class UIButton : public CBaseUIButton {
 
     void setTooltipText(UString text);
 
-    virtual void onMouseInside();
-    virtual void onMouseOutside();
+    void onMouseInside() override;
+    void onMouseOutside() override;
 
     void animateClickColor();
     bool is_loading = false;
@@ -27,8 +27,8 @@ class UIButton : public CBaseUIButton {
     bool bVisible2 = true;
 
    private:
-    virtual void onClicked();
-    virtual void onFocusStolen();
+    void onClicked() override;
+    void onFocusStolen() override;
 
     bool bDefaultSkin;
     Color color;

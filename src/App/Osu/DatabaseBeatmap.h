@@ -362,9 +362,9 @@ class DatabaseBeatmapBackgroundImagePathLoader : public Resource {
     inline const std::string &getLoadedBackgroundImageFileName() const { return this->sLoadedBackgroundImageFileName; }
 
    private:
-    virtual void init();
-    virtual void initAsync();
-    virtual void destroy() { ; }
+    void init() override;
+    void initAsync() override;
+    void destroy() override { ; }
 
     std::string sFilePath;
     std::string sLoadedBackgroundImageFileName;

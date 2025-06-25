@@ -433,7 +433,7 @@ AC_SUBST([CXX])
 AS_IF([test "$host_cpu" = "x86_64"], [COMMON_FLAGS="$COMMON_FLAGS -mcmodel=small"])
 
 COMMON_FLAGS="$COMMON_FLAGS -ffunction-sections -fdata-sections -fwrapv -fno-strict-aliasing -fno-semantic-interposition"
-CXXFLAGS="$CXXFLAGS $COMMON_FLAGS -fno-rtti -fno-exceptions"
+CXXFLAGS="$CXXFLAGS $COMMON_FLAGS -fno-exceptions -Wno-deprecated-declarations" # -fno-rtti
 CFLAGS="$CFLAGS $COMMON_FLAGS"
 AS_IF([test -z "$ubercompat" || test "x$enable_static" = "xyes"], [
     LDFLAGS="$LDFLAGS -static-libstdc++ -static-libgcc"
@@ -586,9 +586,7 @@ AC_SUBST([AUDIO_LIBS])
 
 # the source file is also added through autogen.sh to Makefile.sources
 BUNDLED_INCLUDES="-I\$(srcdir)/libraries"
-AS_IF([test "$renderer" != "dx11"], [
-    BUNDLED_INCLUDES="$BUNDLED_INCLUDES -I\$(srcdir)/libraries/glad"
-])
+BUNDLED_INCLUDES="$BUNDLED_INCLUDES -I\$(srcdir)/libraries/glad -I\$(srcdir)/libraries/glad_glx  -I\$(srcdir)/libraries/glad_wgl"
 AC_SUBST([BUNDLED_INCLUDES])
 
 AC_MSG_CHECKING([for shaders in $srcdir/$ASSETS_DIR/shaders])
@@ -627,15 +625,18 @@ AC_SUBST([BUILD_MISCDIR], ['${abs_top_srcdir}/build-aux/misc'])
 AC_SUBST([bindir], [$bindir-$host_cpu])
 
 AS_IF([test "$renderer" != "dx11"], [
-    PKG_CHECK_AUTO([GL], [gl], [have_gl=yes], [have_gl=no])
-    PKG_CHECK_AUTO([GLU], [glu], [have_glu=yes], [have_glu=no])
     AS_IF([test "$SYSNAME" = "linux"], [
-        PKG_CHECK_AUTO([X11], [x11], [have_x11=yes], [have_x11=no])
-        PKG_CHECK_AUTO([XI], [xi], [have_xi=yes], [have_xi=no])
-        PKG_CHECK_AUTO([EGL], [egl], [have_egl=yes], [have_egl=no])
+        PKG_CHECK_AUTO([GLU], [glu], [have_glu=yes], [AC_MSG_ERROR([Missing glu libs, required for OpenGL])])
+        PKG_CHECK_AUTO([GL], [gl], [have_gl=yes], [AC_MSG_ERROR([Missing gl libs, required for OpenGL])])
+        PKG_CHECK_AUTO([X11], [x11], [have_x11=yes], [AC_MSG_ERROR([Missing x11 libs, required for OpenGL on Linux])])
+        PKG_CHECK_AUTO([XI], [xi], [have_xi=yes], [AC_MSG_ERROR([Missing xi (xinput) libs, required for OpenGL on Linux])])
+        PKG_CHECK_AUTO([EGL], [egl], [have_egl=yes], [AC_MSG_ERROR([Missing egl libs, required for OpenGL on Linux])])
     ], [
-        AC_SUBST([EGL_CFLAGS], [""])
-        AC_SUBST([EGL_LIBS], [""])
+        have_glu="not required"
+        have_gl="not required"
+        have_x11="not required"
+        have_xi="not required"
+        have_egl="not required"
     ])
 ],[
     AS_IF([test "$SYSNAME" = "linux"], [
@@ -672,6 +673,10 @@ BZIP2_MIN_VERSION=1.0.8
 BZIP2_BUILD_VERSION=1.0.8
 FMT_MIN_VERSION=11.0.0
 FMT_BUILD_VERSION=11.2.0
+LZMA_MIN_VERSION=5.4.7
+LZMA_BUILD_VERSION=5.8.1
+CURL_MIN_VERSION=8.5.0
+CURL_BUILD_VERSION=8.14.1
 MPG123_MIN_VERSION=1.30.0
 MPG123_BUILD_VERSION=b9edc89540cb43f1d8c9881d9f67dde996cfb8ef # git mirror, latest as of June 16th, 2025 (next version after 1.33.0)
 
@@ -688,17 +693,30 @@ AC_SUBST([MIMALLOC_PREFIX],[$DEPS_PREFIX])
 
 AC_SUBST([FFMPEG_VERSION], [7.1]) # pre-built, used for soloud
 
+AC_SUBST([DISCORDSDK_VERSION], [2.5.6]) # pre-built
+
 AC_SUBST([BASS_VERSION], [20250611]) # just mark the date so we can invalidate the cache if necessary
+
+AS_IF([test "$SYSNAME" = "linux"], [
+    PKG_CHECK_AUTO([BLKID], [blkid], [have_blkid=yes], [AC_MSG_ERROR([Missing blkid, required for linux builds.])])
+    # this has too many transitive dependencies for me to bother building atm, so just download prebuilt for windows and require system for linux
+    PKG_CHECK_AUTO([CURL], [libcurl >= $CURL_MIN_VERSION], [have_curl=yes], [AC_MSG_ERROR([Missing curl, required for linux builds.])])
+], [
+    AC_SUBST([EXTRA_WIN_LIBS], [["-lopengl32 -lwbemuuid -lcomctl32 -lxinput"]])
+    have_blkid="not required"
+    have_curl="no"
+])
 
 # TODO: add all deps and transitive deps (fun!)
 AS_IF([test "x$enable_system_deps" != "xno"], [
     PKG_CHECK_AUTO([SDL3], [sdl3 >= $SDL3_MIN_VERSION], [have_sdl3=yes], [have_sdl3=no])
-    PKG_CHECK_AUTO([LIBJPEG], [libturbojpeg >= $LIBJPEG_MIN_VERSION], [have_libjpeg=yes], [have_libjpeg=no])
+    PKG_CHECK_AUTO([LIBJPEG], [libjpeg >= $LIBJPEG_MIN_VERSION], [have_libjpeg=yes], [have_libjpeg=no])
     PKG_CHECK_AUTO([LIBPNG], [libpng >= $LIBPNG_MIN_VERSION], [have_libpng=yes], [have_libpng=no])
     PKG_CHECK_AUTO([ZLIB], [zlib >= $ZLIB_MIN_VERSION], [have_zlib=yes], [have_zlib=no])
     PKG_CHECK_AUTO([BZIP2], [bzip2 >= $BZIP2_MIN_VERSION], [have_bzip2=yes], [have_bzip2=no])
     PKG_CHECK_AUTO([FREETYPE2], [freetype2 >= $FREETYPE2_MIN_VERSION], [have_freetype2=yes], [have_freetype2=no])
     PKG_CHECK_AUTO([FMT], [fmt >= $FMT_MIN_VERSION], [have_fmt=yes], [have_fmt=no])
+    PKG_CHECK_AUTO([LZMA], [liblzma >= $LZMA_MIN_VERSION], [have_liblzma=yes], [have_liblzma=no])
     AS_IF([test "$with_soloud" = "yes"], [
         PKG_CHECK_AUTO([MPG123], [libmpg123 >= $MPG123_MIN_VERSION], [have_mpg123=yes], [have_mpg123=no])
     ])
@@ -755,6 +773,18 @@ FMT_PREFIX="${DEPS_PREFIX}"
 AC_SUBST([FMT_VERSION])
 AC_SUBST([FMT_PREFIX])
 
+AS_IF([test "x$have_liblzma" != "xyes"], [have_liblzma="build from source"])
+LZMA_VERSION=$LZMA_BUILD_VERSION
+LZMA_PREFIX="${DEPS_PREFIX}"
+AC_SUBST([LZMA_VERSION])
+AC_SUBST([LZMA_PREFIX])
+
+AS_IF([test "x$have_curl" != "xyes"], [have_curl="download"])
+CURL_VERSION=$CURL_BUILD_VERSION
+CURL_PREFIX="${DEPS_PREFIX}"
+AC_SUBST([CURL_VERSION])
+AC_SUBST([CURL_PREFIX])
+
 AS_IF([test "$with_soloud" = "yes"], [
     AS_IF([test "x$have_mpg123" != "xyes"], [have_mpg123="build from source"])
 ], [
@@ -777,6 +807,8 @@ AM_CONDITIONAL([BUILD_BZIP2], [test "x$have_bzip2" != "xyes"])
 AM_CONDITIONAL([BUILD_ZLIB], [test "x$have_zlib" != "xyes"])
 AM_CONDITIONAL([BUILD_FREETYPE2], [test "x$have_freetype2" != "xyes"])
 AM_CONDITIONAL([BUILD_FMT], [test "x$have_fmt" != "xyes"])
+AM_CONDITIONAL([BUILD_LZMA], [test "x$have_liblzma" != "xyes"])
+AM_CONDITIONAL([NEED_CURL], [test "x$have_curl" != "xyes"])
 AM_CONDITIONAL([BUILD_MPG123], [test "$with_soloud" = "yes" && test "x$have_mpg123" != "xyes"])
 AM_CONDITIONAL([BUILD_GLM], [test "x$have_glm" != "xyes"])
 AM_CONDITIONAL([BUILD_MIMALLOC], [test "x$enable_debug" != "xyes" &&
@@ -807,6 +839,7 @@ AS_IF([test -n "$ubercompat"], [
 
     AC_SUBST([WINSHARED_DLLS])
 ])
+AC_SUBST([ubercompat])
 AM_CONDITIONAL([WINSHARED_DLLS_NEEDED], [test -n "$WINSHARED_DLLS"])
 
 AM_CONDITIONAL([AUDIO_SHORTCUTS], [test "$audiobackendcnt" > 1 && test -n "$WINE" && test "$SYSNAME" = "windows"])
@@ -850,6 +883,7 @@ Dependencies:
     libGL               ${have_gl-no}
     libGLU              ${have_glu-no}
     libEGL              ${have_egl-no}
+    blkid               ${have_blkid-no}
     sdl3:               ${have_sdl3-build from source}
     libjpeg:            ${have_libjpeg-build from source}
     libpng:             ${have_libpng-build from source}
@@ -857,6 +891,8 @@ Dependencies:
     zlib:               ${have_zlib-build from source}
     freetype2:          ${have_freetype2-build from source}
     fmt:                ${have_fmt-build from source}
+    curl:               ${have_curl-build from source}
+    liblzma:            ${have_liblzma-build from source}
     mpg123:             ${have_mpg123-build from source}
     glm (math)          ${have_glm-build from source}
 ])

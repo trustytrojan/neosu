@@ -42,18 +42,18 @@ class MainMenuCubeButton : public CBaseUIButton {
    public:
     MainMenuCubeButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text);
 
-    virtual void draw(Graphics *g);
+    void draw(Graphics *g) override;
 
-    void onMouseInside();
-    void onMouseOutside();
+    void onMouseInside() override;
+    void onMouseOutside() override;
 };
 
 class MainMenuButton : public CBaseUIButton {
    public:
     MainMenuButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text);
 
-    void onMouseDownInside();
-    void onMouseInside();
+    void onMouseDownInside() override;
+    void onMouseInside() override;
 };
 
 void MainMenuPauseButton::draw(Graphics *g) {

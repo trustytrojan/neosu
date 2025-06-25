@@ -15,8 +15,8 @@
 
 #define SDL_VIDEO_DRIVER_WINDOWS  // HACKHACK
 #undef SDL_VIDEO_DRIVER_COCOA     // HACKHACK
-#include <Lmcons.h>
-#include <Shlobj.h>
+#include <lmcons.h>
+#include <shlobj.h>
 #include <tchar.h>
 
 #include <string>

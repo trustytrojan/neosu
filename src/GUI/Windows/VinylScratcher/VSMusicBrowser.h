@@ -23,10 +23,10 @@ class VSMusicBrowser : public CBaseUIElement {
 
    public:
     VSMusicBrowser(int x, int y, int xSize, int ySize, McFont *font);
-    virtual ~VSMusicBrowser();
+    ~VSMusicBrowser() override;
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
 
     void fireNextSong(bool previous);
 
@@ -35,11 +35,11 @@ class VSMusicBrowser : public CBaseUIElement {
     void setFileClickedCallback(FileClickedCallback callback) { this->fileClickedCallback = callback; }
 
    protected:
-    virtual void onMoved();
-    virtual void onResized();
-    virtual void onDisabled();
-    virtual void onEnabled();
-    virtual void onFocusStolen();
+    void onMoved() override;
+    void onResized() override;
+    void onDisabled() override;
+    void onEnabled() override;
+    void onFocusStolen() override;
 
    private:
     struct COLUMN {

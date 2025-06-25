@@ -46,12 +46,11 @@ struct Bancho {
     bool is_playing_a_multi_map() { return this->match_started; }
 
     Slot last_scores[16];
-};
-
-struct Channel {
-    UString name;
-    UString topic;
-    u32 nb_members;
+    struct Channel {
+        UString name;
+        UString topic;
+        u32 nb_members;
+    };
 };
 
 MD5Hash md5(u8 *msg, size_t msg_len);
@@ -61,4 +60,4 @@ void handle_packet(Packet *packet);
 Packet build_login_packet();
 
 extern Bancho bancho;
-extern std::unordered_map<std::string, Channel *> chat_channels;
+extern std::unordered_map<std::string, Bancho::Channel *> chat_channels;

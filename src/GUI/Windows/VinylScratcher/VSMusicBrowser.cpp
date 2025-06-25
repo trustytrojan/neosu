@@ -153,9 +153,9 @@ class VSMusicBrowserButton : public CBaseUIButton {
         this->fSelectionAnim = 0.0f;
     }
 
-    virtual ~VSMusicBrowserButton() { anim->deleteExistingAnimation(&this->fSelectionAnim); }
+    ~VSMusicBrowserButton() override { anim->deleteExistingAnimation(&this->fSelectionAnim); }
 
-    virtual void draw(Graphics *g) {
+    void draw(Graphics *g) override {
         if(!this->bVisible) return;
 
         const bool isAnimatingSelectionAnim = anim->isAnimating(&this->fSelectionAnim);
@@ -263,9 +263,9 @@ class VSMusicBrowserColumnScrollView : public CBaseUIScrollView {
         anim->moveQuadInOut(&this->fAnim, 1.0f, cv_vs_browser_animspeed.getFloat(), 0.0f, true);
     }
 
-    virtual ~VSMusicBrowserColumnScrollView() { anim->deleteExistingAnimation(&this->fAnim); }
+    ~VSMusicBrowserColumnScrollView() override { anim->deleteExistingAnimation(&this->fAnim); }
 
-    virtual void draw(Graphics *g) {
+    void draw(Graphics *g) override {
         if(anim->isAnimating(&this->fAnim)) {
             g->push3DScene(McRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y));
             {
@@ -319,7 +319,7 @@ void VSMusicBrowser::onButtonClicked(CBaseUIButton *button) {
         btn->setSelected(true);
     else {
         this->previousActiveSong = this->activeSong;
-        this->activeSong = btn->getName();
+        this->activeSong = btn->getName().toUtf8();
 
         btn->setPlaying(true);
         btn->setTextDarkColor(this->playingTextDarkColor);
@@ -347,7 +347,7 @@ void VSMusicBrowser::onButtonClicked(CBaseUIButton *button) {
                         this->playlist.clear();
                         for(size_t p = 0; p < this->columns[i].buttons.size(); p++) {
                             if(!this->columns[i].buttons[p]->isDirectory())
-                                this->playlist.push_back(this->columns[i].buttons[p]->getName().toUtf8());
+                                this->playlist.emplace_back(this->columns[i].buttons[p]->getName().toUtf8());
                         }
                     }
 

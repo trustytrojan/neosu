@@ -59,7 +59,7 @@ std::string NetworkHandler::httpDownload(UString url, long timeout, long connect
         CURLcode res = curl_easy_perform(curl);
         if(res != CURLE_OK) {
             curlWriteBuffer = std::stringstream();
-            debugLog("NetworkHandler::httpDownload() error, code %i!\n", (int)res);
+            debugLog("NetworkHandler::httpDownload() error, code %u!\n", static_cast<unsigned int>(res));
         }
 
         curl_easy_cleanup(curl);

@@ -2418,7 +2418,7 @@ void *tdefl_write_image_to_png_file_in_memory(const void *pImage, int w, int h, 
     // write dummy header
     for(z = 41; z; --z) tdefl_output_buffer_putter(&z, 1, &out_buf);
     // compress image data
-    tdefl_init(pComp, tdefl_output_buffer_putter, &out_buf, TDEFL_DEFAULT_MAX_PROBES | TDEFL_WRITE_ZLIB_HEADER);
+    tdefl_init(pComp, tdefl_output_buffer_putter, &out_buf, static_cast<unsigned int>(TDEFL_DEFAULT_MAX_PROBES) | static_cast<unsigned int>(TDEFL_WRITE_ZLIB_HEADER));
     for(y = 0; y < h; ++y) {
         tdefl_compress_buffer(pComp, &z, 1, TDEFL_NO_FLUSH);
         tdefl_compress_buffer(pComp, (mz_uint8 *)pImage + y * bpl, bpl, TDEFL_NO_FLUSH);

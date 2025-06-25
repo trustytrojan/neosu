@@ -49,21 +49,21 @@ class Circle : public HitObject {
    public:
     Circle(int x, int y, long time, int sampleType, int comboNumber, bool isEndOfCombo, int colorCounter,
            int colorOffset, BeatmapInterface *beatmap);
-    virtual ~Circle();
+    ~Circle() override;
 
-    virtual void draw(Graphics *g);
-    virtual void draw2(Graphics *g);
-    virtual void update(long curPos, f64 frame_time);
+    void draw(Graphics *g) override;
+    void draw2(Graphics *g) override;
+    void update(long curPos, f64 frame_time) override;
 
-    void updateStackPosition(float stackOffset);
-    void miss(long curPos);
+    void updateStackPosition(float stackOffset) override;
+    void miss(long curPos) override;
 
-    Vector2 getRawPosAt(long pos) { return this->vRawPos; }
-    Vector2 getOriginalRawPosAt(long pos) { return this->vOriginalRawPos; }
-    Vector2 getAutoCursorPos(long curPos);
+    Vector2 getRawPosAt(long pos) override { return this->vRawPos; }
+    Vector2 getOriginalRawPosAt(long pos) override { return this->vOriginalRawPos; }
+    Vector2 getAutoCursorPos(long curPos) override;
 
-    virtual void onClickEvent(std::vector<Click> &clicks);
-    virtual void onReset(long curPos);
+    void onClickEvent(std::vector<Click> &clicks) override;
+    void onReset(long curPos) override;
 
    private:
     // necessary due to the static draw functions

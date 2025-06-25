@@ -17,12 +17,12 @@ class UIContextMenu : public CBaseUIScrollView {
     UIContextMenu(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "",
                   CBaseUIScrollView *parent = NULL);
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
 
-    virtual void onKeyUp(KeyboardEvent &e);
-    virtual void onKeyDown(KeyboardEvent &e);
-    virtual void onChar(KeyboardEvent &e);
+    void onKeyUp(KeyboardEvent &e) override;
+    void onKeyDown(KeyboardEvent &e) override;
+    void onChar(KeyboardEvent &e) override;
 
     typedef fastdelegate::FastDelegate2<UString, int> ButtonClickCallback;
     void setClickCallback(ButtonClickCallback clickCallback) { this->clickCallback = clickCallback; }
@@ -33,7 +33,7 @@ class UIContextMenu : public CBaseUIScrollView {
 
     void end(bool invertAnimation, bool clampUnderflowAndOverflowAndEnableScrollingIfNecessary);
 
-    virtual CBaseUIElement *setVisible(bool visible) override {
+    CBaseUIElement *setVisible(bool visible) override {
         // HACHACK: this->bVisible is always true, since we want to be able to put a context menu in a scrollview.
         //          When scrolling, scrollviews call setVisible(false) to clip items, and that breaks the menu.
         (void)visible;
@@ -41,10 +41,10 @@ class UIContextMenu : public CBaseUIScrollView {
     }
     void setVisible2(bool visible2);
 
-    virtual bool isVisible() override { return this->bVisible2; }
+    bool isVisible() override { return this->bVisible2; }
 
    private:
-    virtual void onMouseDownOutside();
+    void onMouseDownOutside() override;
 
     void onClick(CBaseUIButton *button);
     void onHitEnter(UIContextMenuTextbox *textbox);
@@ -69,12 +69,12 @@ class UIContextMenu : public CBaseUIScrollView {
 class UIContextMenuButton : public CBaseUIButton {
    public:
     UIContextMenuButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text, int id);
-    virtual ~UIContextMenuButton() { ; }
+    ~UIContextMenuButton() override { ; }
 
-    virtual void mouse_update(bool *propagate_clicks);
+    void mouse_update(bool *propagate_clicks) override;
 
-    virtual void onMouseInside();
-    virtual void onMouseDownInside();
+    void onMouseInside() override;
+    void onMouseDownInside() override;
 
     inline int getID() const { return this->iID; }
 
@@ -89,7 +89,7 @@ class UIContextMenuButton : public CBaseUIButton {
 class UIContextMenuTextbox : public CBaseUITextbox {
    public:
     UIContextMenuTextbox(float xPos, float yPos, float xSize, float ySize, UString name, int id);
-    virtual ~UIContextMenuTextbox() { ; }
+    ~UIContextMenuTextbox() override { ; }
 
     inline int getID() const { return this->iID; }
 

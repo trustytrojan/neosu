@@ -8,22 +8,22 @@
 class XInputGamepad : public Gamepad {
    public:
     XInputGamepad();
-    virtual ~XInputGamepad() { ; }
+    ~XInputGamepad() override { ; }
 
-    void update();
+    void update() override;
 
     void setVibration(float leftMotorSpeedPercent, float rightMotorSpeedPercent);
 
-    inline Vector2 getLeftStick() { return this->vLeftStick; }
-    inline Vector2 getRightStick() { return this->vRightStick; }
+    inline Vector2 getLeftStick() override { return this->vLeftStick; }
+    inline Vector2 getRightStick() override { return this->vRightStick; }
 
-    inline float getLeftTrigger() { return this->fLeftTrigger; }
-    inline float getRightTrigger() { return this->fRightTrigger; }
+    inline float getLeftTrigger() override { return this->fLeftTrigger; }
+    inline float getRightTrigger() override { return this->fRightTrigger; }
 
-    bool isButtonPressed(GAMEPADBUTTON button);
+    bool isButtonPressed(GAMEPADBUTTON button) override;
 
-    inline bool isConnected() { return this->iPort != -1; }
-    inline int getPort() { return this->iPort + 1; }
+    inline bool isConnected() override { return this->iPort != -1; }
+    inline int getPort() override { return this->iPort + 1; }
 
    private:
     void updateConnection();

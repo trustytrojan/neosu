@@ -20,10 +20,10 @@ class CBaseUISlider;
 class VSControlBar : public CBaseUIElement {
    public:
     VSControlBar(int x, int y, int xSize, int ySize, McFont *font);
-    virtual ~VSControlBar();
+    ~VSControlBar() override;
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
 
     inline CBaseUISlider *getVolumeSlider() const { return this->volume; }
     inline CBaseUIButton *getPlayButton() const { return this->play; }
@@ -32,11 +32,11 @@ class VSControlBar : public CBaseUIElement {
     inline CBaseUIButton *getInfoButton() const { return this->info; }
 
    protected:
-    virtual void onResized();
-    virtual void onMoved();
-    virtual void onFocusStolen();
-    virtual void onEnabled();
-    virtual void onDisabled();
+    void onResized() override;
+    void onMoved() override;
+    void onFocusStolen() override;
+    void onEnabled() override;
+    void onDisabled() override;
 
    private:
     void onRepeatCheckboxChanged(CBaseUICheckbox *box);

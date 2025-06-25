@@ -20,23 +20,23 @@ class Slider : public HitObject {
     Slider(char stype, int repeat, float pixelLength, std::vector<Vector2> points, std::vector<int> hitSounds,
            std::vector<float> ticks, float sliderTime, float sliderTimeWithoutRepeats, long time, int sampleType,
            int comboNumber, bool isEndOfCombo, int colorCounter, int colorOffset, BeatmapInterface *beatmap);
-    virtual ~Slider();
+    ~Slider() override;
 
-    virtual void draw(Graphics *g);
-    virtual void draw2(Graphics *g);
+    void draw(Graphics *g) override;
+    void draw2(Graphics *g) override;
     void draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCircle);
-    virtual void update(long curPos, f64 frame_time);
+    void update(long curPos, f64 frame_time) override;
 
-    virtual void updateStackPosition(float stackOffset);
-    virtual void miss(long curPos);
-    virtual int getCombo() { return 2 + max((this->iRepeat - 1), 0) + (max((this->iRepeat - 1), 0) + 1) * this->ticks.size(); }
+    void updateStackPosition(float stackOffset) override;
+    void miss(long curPos) override;
+    int getCombo() override { return 2 + max((this->iRepeat - 1), 0) + (max((this->iRepeat - 1), 0) + 1) * this->ticks.size(); }
 
-    Vector2 getRawPosAt(long pos);
-    Vector2 getOriginalRawPosAt(long pos);
-    inline Vector2 getAutoCursorPos(long curPos) { return this->vCurPoint; }
+    Vector2 getRawPosAt(long pos) override;
+    Vector2 getOriginalRawPosAt(long pos) override;
+    inline Vector2 getAutoCursorPos(long curPos) override { return this->vCurPoint; }
 
-    virtual void onClickEvent(std::vector<Click> &clicks);
-    virtual void onReset(long curPos);
+    void onClickEvent(std::vector<Click> &clicks) override;
+    void onReset(long curPos) override;
 
     void rebuildVertexBuffer(bool useRawCoords = false);
 

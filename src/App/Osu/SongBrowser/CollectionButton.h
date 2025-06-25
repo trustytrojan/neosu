@@ -7,18 +7,18 @@ class CollectionButton : public Button {
                      float yPos, float xSize, float ySize, UString name, UString collectionName,
                      std::vector<SongButton *> children);
 
-    virtual void draw(Graphics *g);
+    void draw(Graphics *g) override;
 
     void triggerContextMenu(Vector2 pos);
 
-    virtual Color getActiveBackgroundColor() const;
-    virtual Color getInactiveBackgroundColor() const;
+    Color getActiveBackgroundColor() const override;
+    Color getInactiveBackgroundColor() const override;
 
     const std::string &getCollectionName() const { return this->sCollectionName; }
 
    private:
-    virtual void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected);
-    virtual void onRightMouseUpInside();
+    void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected) override;
+    void onRightMouseUpInside() override;
 
     void onContextMenu(UString text, int id = -1);
     void onRenameCollectionConfirmed(UString text, int id = -1);

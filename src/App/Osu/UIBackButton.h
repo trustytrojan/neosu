@@ -5,12 +5,12 @@ class UIBackButton : public CBaseUIButton {
    public:
     UIBackButton(float xPos, float yPos, float xSize, float ySize, UString name);
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
 
-    virtual void onMouseDownInside();
-    virtual void onMouseInside();
-    virtual void onMouseOutside();
+    void onMouseDownInside() override;
+    void onMouseInside() override;
+    void onMouseOutside() override;
 
     virtual void updateLayout();
 

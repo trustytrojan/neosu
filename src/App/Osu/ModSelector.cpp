@@ -42,7 +42,7 @@ class ModSelectorOverrideSliderDescButton : public CBaseUIButton {
     ModSelectorOverrideSliderDescButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
         : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {}
 
-    virtual void mouse_update(bool *propagate_clicks) {
+    void mouse_update(bool *propagate_clicks) override {
         if(!this->bVisible) return;
         CBaseUIButton::mouse_update(propagate_clicks);
 
@@ -56,7 +56,7 @@ class ModSelectorOverrideSliderDescButton : public CBaseUIButton {
     void setTooltipText(UString tooltipText) { this->sTooltipText = tooltipText; }
 
    private:
-    virtual void drawText(Graphics *g) {
+    void drawText(Graphics *g) override {
         if(this->font != NULL && this->sText.length() > 0) {
             float xPosAdd = this->vSize.x / 2.0f - this->fStringWidth / 2.0f;
 
@@ -85,7 +85,7 @@ class ModSelectorOverrideSliderLockButton : public CBaseUICheckbox {
         this->fAnim = 1.0f;
     }
 
-    virtual void draw(Graphics *g) {
+    void draw(Graphics *g) override {
         if(!this->bVisible) return;
 
         const wchar_t icon = (this->bChecked ? Icons::LOCK : Icons::UNLOCK);
@@ -107,7 +107,7 @@ class ModSelectorOverrideSliderLockButton : public CBaseUICheckbox {
     }
 
    private:
-    virtual void onPressed() {
+    void onPressed() override {
         CBaseUICheckbox::onPressed();
         engine->getSound()->play(this->isChecked() ? osu->getSkin()->getCheckOn() : osu->getSkin()->getCheckOff());
 

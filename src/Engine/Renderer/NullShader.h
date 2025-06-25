@@ -13,65 +13,65 @@
 class NullShader : public Shader {
    public:
     NullShader(std::string vertexShader, std::string fragmentShader, bool source) : Shader() { ; }
-    virtual ~NullShader() { this->destroy(); }
+    ~NullShader() override { this->destroy(); }
 
-    virtual void enable() { ; }
-    virtual void disable() { ; }
+    void enable() override { ; }
+    void disable() override { ; }
 
-    virtual void setUniform1f(UString name, float value) {
+    void setUniform1f(UString name, float value) override {
         (void)name;
         (void)value;
     }
-    virtual void setUniform1fv(UString name, int count, float *values) {
+    void setUniform1fv(UString name, int count, float *values) override {
         (void)name;
         (void)count;
         (void)values;
     }
-    virtual void setUniform1i(UString name, int value) {
+    void setUniform1i(UString name, int value) override {
         (void)name;
         (void)value;
     }
-    virtual void setUniform2f(UString name, float x, float y) {
+    void setUniform2f(UString name, float x, float y) override {
         (void)name;
         (void)x;
         (void)y;
     }
-    virtual void setUniform2fv(UString name, int count, float *vectors) {
+    void setUniform2fv(UString name, int count, float *vectors) override {
         (void)name;
         (void)count;
         (void)vectors;
     }
-    virtual void setUniform3f(UString name, float x, float y, float z) {
+    void setUniform3f(UString name, float x, float y, float z) override {
         (void)name;
         (void)x;
         (void)y;
         (void)z;
     }
-    virtual void setUniform3fv(UString name, int count, float *vectors) {
+    void setUniform3fv(UString name, int count, float *vectors) override {
         (void)name;
         (void)count;
         (void)vectors;
     }
-    virtual void setUniform4f(UString name, float x, float y, float z, float w) {
+    void setUniform4f(UString name, float x, float y, float z, float w) override {
         (void)name;
         (void)x;
         (void)y;
         (void)z;
         (void)w;
     }
-    virtual void setUniformMatrix4fv(UString name, Matrix4 &matrix) {
+    void setUniformMatrix4fv(UString name, Matrix4 &matrix) override {
         (void)name;
         (void)matrix;
     }
-    virtual void setUniformMatrix4fv(UString name, float *v) {
+    void setUniformMatrix4fv(UString name, float *v) override {
         (void)name;
         (void)v;
     }
 
    private:
-    virtual void init() { this->bReady = true; }
-    virtual void initAsync() { this->bAsyncReady = true; }
-    virtual void destroy() { ; }
+    void init() override { this->bReady = true; }
+    void initAsync() override { this->bAsyncReady = true; }
+    void destroy() override { ; }
 };
 
 #endif

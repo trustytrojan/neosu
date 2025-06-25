@@ -6,11 +6,11 @@
 class Mouse : public InputDevice {
    public:
     Mouse();
-    virtual ~Mouse() { ; }
+    ~Mouse() override { ; }
 
-    virtual void draw(Graphics *g);
+    void draw(Graphics *g) override;
     void drawDebug(Graphics *g);
-    virtual void update();
+    void update() override;
 
     void addListener(MouseListener *mouseListener, bool insertOnTop = false);
     void removeListener(MouseListener *mouseListener);

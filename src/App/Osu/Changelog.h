@@ -9,15 +9,15 @@ class CBaseUILabel;
 class Changelog : public ScreenBackable {
    public:
     Changelog();
-    virtual ~Changelog();
+    ~Changelog() override;
 
-    virtual void mouse_update(bool *propagate_clicks);
+    void mouse_update(bool *propagate_clicks) override;
 
-    virtual CBaseUIContainer *setVisible(bool visible);
+    CBaseUIContainer *setVisible(bool visible) override;
 
    private:
-    virtual void updateLayout();
-    virtual void onBack();
+    void updateLayout() override;
+    void onBack() override;
 
     void onChangeClicked(CBaseUIButton *button);
 

@@ -23,22 +23,22 @@ class UIModList : public CBaseUIContainer {
 
     u32 *flags;
 
-    virtual void draw(Graphics *g) override;
-    virtual bool isVisible() override;
+    void draw(Graphics *g) override;
+    bool isVisible() override;
 };
 
 class RoomScreen : public OsuScreen {
    public:
     RoomScreen();
-    ~RoomScreen();
+    ~RoomScreen() override;
 
-    virtual void draw(Graphics *g) override;
-    virtual void mouse_update(bool *propagate_clicks) override;
-    virtual void onKeyDown(KeyboardEvent &e) override;
-    virtual void onKeyUp(KeyboardEvent &e) override;
-    virtual void onChar(KeyboardEvent &e) override;
-    virtual void onResolutionChange(Vector2 newResolution) override;
-    virtual CBaseUIContainer *setVisible(bool visible) override;  // does nothing
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
+    void onKeyDown(KeyboardEvent &e) override;
+    void onKeyUp(KeyboardEvent &e) override;
+    void onChar(KeyboardEvent &e) override;
+    void onResolutionChange(Vector2 newResolution) override;
+    CBaseUIContainer *setVisible(bool visible) override;  // does nothing
 
     void updateLayout(Vector2 newResolution);
     void updateSettingsLayout(Vector2 newResolution);

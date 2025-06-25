@@ -83,7 +83,7 @@ LinuxEnvironment::LinuxEnvironment(Display *display, Window window) : Environmen
         /// debugLog("WARNING: No monitors found! Adding default monitor ...\n");
 
         const Vector2 windowSize = this->getWindowSize();
-        LinuxEnvironment::vMonitors.push_back(McRect(0, 0, windowSize.x, windowSize.y));
+        LinuxEnvironment::vMonitors.emplace_back(0, 0, windowSize.x, windowSize.y);
     }
 }
 
@@ -253,7 +253,7 @@ std::vector<std::string> LinuxEnvironment::getFoldersInFolder(std::string folder
 
 std::vector<UString> LinuxEnvironment::getLogicalDrives() {
     std::vector<UString> drives;
-    drives.push_back(UString("/"));
+    drives.emplace_back("/");
     return drives;
 }
 

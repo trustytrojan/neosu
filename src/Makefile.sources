@@ -3,6 +3,8 @@ neosu_SOURCES = \
 	libraries/MD5.cpp \
 	libraries/cJSON.cpp \
 	libraries/glad/glad.cpp \
+	libraries/glad_glx/glad_glx.cpp \
+	libraries/glad_wgl/glad_wgl.cpp \
 	libraries/lodepng.cpp \
 	libraries/miniz.cpp \
 	src/App/Osu/BackgroundImageHandler.cpp \
@@ -144,8 +146,9 @@ neosu_SOURCES = \
 	src/Engine/Renderer/OpenGLVertexArrayObject.cpp \
 	src/Engine/Resource.cpp \
 	src/Engine/ResourceManager.cpp \
-	src/Engine/Sound.cpp \
-	src/Engine/SoundEngine.cpp \
+	src/Engine/Sound/BASS/BassManager.cpp \
+	src/Engine/Sound/Sound.cpp \
+	src/Engine/Sound/SoundEngine.cpp \
 	src/Engine/TextureAtlas.cpp \
 	src/Engine/VertexArrayObject.cpp \
 	src/GUI/CBaseUIBoxShadow.cpp \
@@ -170,6 +173,7 @@ neosu_SOURCES = \
 	src/GUI/Windows/VinylScratcher/VSTitleBar.cpp \
 	src/GUI/Windows/VinylScratcher/VinylScratcher.cpp \
 	src/GUI/Windows/VisualProfiler.cpp \
+	src/Util/MD5Hash.cpp \
 	src/Util/Matrices.cpp \
 	src/Util/Quaternion.cpp \
 	src/Util/Rect.cpp \

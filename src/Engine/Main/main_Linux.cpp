@@ -237,6 +237,17 @@ int main(int argc, char *argv[]) {
 
     root = DefaultRootWindow(dpy);
 
+    // resolve GLX functions
+    int screen = DefaultScreen(dpy);
+    if(!gladLoadGLX(dpy, screen)) {
+        printf("FATAL ERROR: Couldn't resolve GLX functions (gladLoadGLX() failed)!\n\n");
+        exit(1);
+    }
+
+    int major = 0, minor = 0;
+    glXQueryVersion(dpy, &major, &minor);
+    debugLogF("GLX Version: {}.{}\n", major, minor);
+
     XVisualInfo *vi = getVisualInfo(dpy);
     cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
 
@@ -398,6 +409,9 @@ int main(int argc, char *argv[]) {
     // destroy the window
     XDestroyWindow(dpy, win);
     XCloseDisplay(dpy);
+
+    // unload GLX
+    gladUnloadGLX();
 
     // handle potential restart
     if(isRestartScheduled) {

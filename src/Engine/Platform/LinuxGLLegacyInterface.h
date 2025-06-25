@@ -27,13 +27,13 @@ XVisualInfo *getVisualInfo(Display *display);
 class LinuxGLLegacyInterface : public OpenGLLegacyInterface {
    public:
     LinuxGLLegacyInterface(Display *display, Window window);
-    virtual ~LinuxGLLegacyInterface();
+    ~LinuxGLLegacyInterface() override;
 
     // scene
-    void endScene();
+    void endScene() override;
 
     // device settings
-    void setVSync(bool vsync);
+    void setVSync(bool vsync) override;
 
     // ILLEGAL:
     inline GLXContext getGLXContext() const { return this->glc; }

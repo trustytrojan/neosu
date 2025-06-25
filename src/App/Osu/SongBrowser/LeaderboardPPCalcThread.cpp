@@ -193,7 +193,7 @@ static void run_thread() {
                 rqt.num100s, rqt.num50s);
 
             cache_mtx.lock();
-            cache.push_back(std::pair(rqt, computed_info->info));
+            cache.emplace_back(rqt, computed_info->info);
             cache_mtx.unlock();
 
             work_mtx.lock();

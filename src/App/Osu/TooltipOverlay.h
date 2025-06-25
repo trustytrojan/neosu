@@ -4,10 +4,10 @@
 class TooltipOverlay : public OsuScreen {
    public:
     TooltipOverlay();
-    virtual ~TooltipOverlay();
+    ~TooltipOverlay() override;
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
 
     void begin();
     void addLine(UString text);

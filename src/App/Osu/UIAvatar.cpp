@@ -60,7 +60,7 @@ UIAvatar::UIAvatar(u32 player_id, float xPos, float yPos, float xSize, float ySi
     : CBaseUIButton(xPos, yPos, xSize, ySize, "avatar", "") {
     this->player_id = player_id;
 
-    this->avatar_path = UString::format(MCENGINE_DATA_DIR "avatars/%s/%d", bancho.endpoint.toUtf8(), player_id);
+    this->avatar_path = UString::format(MCENGINE_DATA_DIR "avatars/%s/%d", bancho.endpoint.toUtf8(), player_id).toUtf8();
     this->setClickCallback(fastdelegate::MakeDelegate(this, &UIAvatar::onAvatarClicked));
 
     struct stat attr;

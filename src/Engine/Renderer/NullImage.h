@@ -14,18 +14,18 @@ class NullImage : public Image {
    public:
     NullImage(std::string filePath, bool mipmapped = false) : Image(filePath, mipmapped) { ; }
     NullImage(int width, int height, bool mipmapped = false) : Image(width, height, mipmapped) { ; }
-    virtual ~NullImage() { this->destroy(); }
+    ~NullImage() override { this->destroy(); }
 
-    virtual void bind(unsigned int textureUnit = 0) { ; }
-    virtual void unbind() { ; }
+    void bind(unsigned int textureUnit = 0) override { ; }
+    void unbind() override { ; }
 
-    virtual void setFilterMode(Graphics::FILTER_MODE filterMode);
-    virtual void setWrapMode(Graphics::WRAP_MODE wrapMode);
+    void setFilterMode(Graphics::FILTER_MODE filterMode) override;
+    void setWrapMode(Graphics::WRAP_MODE wrapMode) override;
 
    private:
-    virtual void init() { this->bReady = true; }
-    virtual void initAsync() { this->bAsyncReady = true; }
-    virtual void destroy() { ; }
+    void init() override { this->bReady = true; }
+    void initAsync() override { this->bAsyncReady = true; }
+    void destroy() override { ; }
 };
 
 #endif

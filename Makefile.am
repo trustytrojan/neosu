@@ -72,6 +72,12 @@ $(DEPS_CACHE)/FREETYPE2-$(FREETYPE2_VERSION).source:
 	$(WGET) -qO $(DEPS_CACHE)/freetype-$(FREETYPE2_VERSION).tar.gz "https://download.savannah.gnu.org/releases/freetype/freetype-$(FREETYPE2_VERSION).tar.gz" && \
 	touch $@
 
+# always needed (if not on host)
+$(DEPS_CACHE)/liblzma-$(LZMA_VERSION).source:
+	$(MKDIR_P) $(DEPS_CACHE)
+	$(WGET) -qO $(DEPS_CACHE)/liblzma-$(LZMA_VERSION).tar.gz "https://github.com/tukaani-project/xz/releases/download/v$(LZMA_VERSION)/xz-$(LZMA_VERSION).tar.gz" && \
+	touch $@
+
 # --with-mimalloc
 $(DEPS_CACHE)/mimalloc-$(MIMALLOC_VERSION).source:
 	$(MKDIR_P) $(DEPS_CACHE)
@@ -215,6 +221,38 @@ $(DEPS_CACHE)/bass-$(BASS_VERSION).source: $(DEPS_CACHE)/bass-$(BASS_VERSION)/ba
 	$(MKDIR_P) bassasio/include/ && $(UNZIP) -qjo bassasio.zip bassasio.h -d bassasio/include/ && \
 	touch $@
 
+$(DEPS_CACHE)/discordsdk-$(DISCORDSDK_VERSION)/discordsdk.zip:
+	$(MKDIR_P) $(DEPS_CACHE)/discordsdk-$(DISCORDSDK_VERSION) && \
+	$(WGET) -qO $(DEPS_CACHE)/discordsdk-$(DISCORDSDK_VERSION)/discordsdk.zip "https://web.archive.org/web/20250505113314/https://dl-game-sdk.discordapp.net/$(DISCORDSDK_VERSION)/discord_game_sdk.zip"
+
+$(DEPS_CACHE)/discordsdk-$(DISCORDSDK_VERSION).source: $(DEPS_CACHE)/discordsdk-$(DISCORDSDK_VERSION)/discordsdk.zip
+	cd $(DEPS_CACHE)/discordsdk-$(DISCORDSDK_VERSION) && \
+	$(MKDIR_P) include/ && $(UNZIP) -qjo discordsdk.zip c/discord_game_sdk.h -d include/ && \
+	$(MKDIR_P) lib/windows/i686 && $(UNZIP) -qjo discordsdk.zip lib/x86/discord_game_sdk.dll -d lib/windows/i686/ && \
+	$(MKDIR_P) lib/windows/i686 && $(UNZIP) -qjo discordsdk.zip lib/x86/discord_game_sdk.dll.lib -d lib/windows/i686/ && \
+	$(MKDIR_P) lib/windows/x86_64 && $(UNZIP) -qjo discordsdk.zip lib/x86_64/discord_game_sdk.dll -d lib/windows/x86_64/ && \
+	$(MKDIR_P) lib/windows/x86_64 && $(UNZIP) -qjo discordsdk.zip lib/x86_64/discord_game_sdk.dll.lib -d lib/windows/x86_64/ && \
+	touch $@
+
+$(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsi686.zip:
+	$(MKDIR_P) $(DEPS_CACHE)/curl-$(CURL_VERSION) && \
+	$(WGET) -qO $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsi686.zip "https://curl.se/windows/dl-$(CURL_VERSION)_2/curl-$(CURL_VERSION)_2-win32-mingw.zip"
+
+$(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsx86_64.zip:
+	$(MKDIR_P) $(DEPS_CACHE)/curl-$(CURL_VERSION) && \
+	$(WGET) -qO $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsx86_64.zip "https://curl.se/windows/dl-$(CURL_VERSION)_2/curl-$(CURL_VERSION)_2-win64-mingw.zip"
+
+$(DEPS_CACHE)/curl-$(CURL_VERSION).source: $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsi686.zip $\
+											$(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsx86_64.zip
+	cd $(DEPS_CACHE)/curl-$(CURL_VERSION) && \
+	$(MKDIR_P) windowsi686/bin && $(UNZIP) -qjo curl-windowsi686.zip "*/bin/*.dll" -d windowsi686/bin && \
+	$(MKDIR_P) windowsi686/lib && $(UNZIP) -qjo curl-windowsi686.zip "*/lib/*.a" -d windowsi686/lib && \
+	$(MKDIR_P) windowsi686/include && $(UNZIP) -qo curl-windowsi686.zip "*/include/*" -d windowsi686/include && mv windowsi686/include/*/*/* windowsi686/include/ && \
+	$(MKDIR_P) windowsx86_64/bin && $(UNZIP) -qjo curl-windowsx86_64.zip "*/bin/*.dll" -d windowsx86_64/bin && \
+	$(MKDIR_P) windowsx86_64/lib && $(UNZIP) -qjo curl-windowsx86_64.zip "*/lib/*.a" -d windowsx86_64/lib && \
+	$(MKDIR_P) windowsx86_64/include && $(UNZIP) -qo curl-windowsx86_64.zip "*/include/*" -d windowsx86_64/include && mv windowsx86_64/include/*/*/* windowsx86_64/include/
+	touch $@
+
 #####################################################################################################################################################
 ## END EXTERNAL DEPENDENCY SOURCE SECTION
 #####################################################################################################################################################
@@ -222,6 +260,23 @@ $(DEPS_CACHE)/bass-$(BASS_VERSION).source: $(DEPS_CACHE)/bass-$(BASS_VERSION)/ba
 #####################################################################################################################################################
 ## BEGIN EXTERNAL DEPENDENCY BUILD/SETUP SECTION
 #####################################################################################################################################################
+
+CURL_INSTALL_LIBS =
+if WIN_PLATFORM
+if NEED_CURL
+CURL_INSTALL_LIBS += `find $(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/bin -type f -printf '%p '`
+CURL_CFLAGS += -I$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/include
+CURL_LIBS += -L$(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib `find $(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/lib -type f '(' -not '(' -name '*libz*' -o -name '*libcurl.a' ')' ')' -printf '%p ' | sed 's|\(^lib\)\(.*\)\(.a\)|-l\2|'`
+
+$(DEPS_PREFIX)/curl.built: $(DEPS_CACHE)/curl-$(CURL_VERSION).source
+	$(MKDIR_P) $(DEPS_PREFIX)
+	touch $@
+endif
+else
+$(DEPS_PREFIX)/curl.built:
+	$(MKDIR_P) $(DEPS_PREFIX)
+	touch $@
+endif
 
 if BUILD_MIMALLOC
 if WIN_PLATFORM
@@ -420,8 +475,23 @@ $(DEPS_PREFIX)/SoundTouch.built:
 	$(MKDIR_P) $(DEPS_PREFIX) && touch $@
 endif # USE_SOLOUD
 
+if WIN_PLATFORM
+DISCORDSDK_CFLAGS := -I$(DEPS_CACHE)/discordsdk-$(DISCORDSDK_VERSION)/include
+DISCORDSDK_LIBS := -L$(DEPS_CACHE)/discordsdk-$(DISCORDSDK_VERSION)/lib/$(SYSNAME)/$(host_cpu) -ldiscord_game_sdk
+DISCORDSDK_INSTALL_LIBS := $(DEPS_CACHE)/discordsdk-$(DISCORDSDK_VERSION)/lib/$(SYSNAME)/$(host_cpu)/discord_game_sdk$(DLLEXT)
+
+$(DEPS_PREFIX)/discordsdk.built: $(DEPS_CACHE)/discordsdk-$(DISCORDSDK_VERSION).source
+	$(MKDIR_P) $(DEPS_PREFIX)
+	touch $@
+else
+$(DEPS_PREFIX)/discordsdk.built:
+	$(MKDIR_P) $(DEPS_PREFIX)
+	touch $@
+endif
+
 if USE_BASS
-AUDIO_CFLAGS += -I$(DEPS_CACHE)/bass-$(BASS_VERSION)/bass/include -I$(DEPS_CACHE)/bass-$(BASS_VERSION)/bassfx/include -I$(DEPS_CACHE)/bass-$(BASS_VERSION)/bassmix/include
+AUDIO_CFLAGS += -I$(DEPS_CACHE)/bass-$(BASS_VERSION)/bass/include -I$(DEPS_CACHE)/bass-$(BASS_VERSION)/bassfx/include -I$(DEPS_CACHE)/bass-$(BASS_VERSION)/bassmix/include \
+				-I$(DEPS_CACHE)/bass-$(BASS_VERSION)/bassloud/include
 BASS_INSTALL_LIBS := $(DEPS_CACHE)/bass-$(BASS_VERSION)/bass/lib/$(SYSNAME)/$(host_cpu)/$(LIBPREFIX)bass$(DLLEXT) \
 					$(DEPS_CACHE)/bass-$(BASS_VERSION)/bassflac/lib/$(SYSNAME)/$(host_cpu)/$(LIBPREFIX)bassflac$(DLLEXT) \
 					$(DEPS_CACHE)/bass-$(BASS_VERSION)/bassfx/lib/$(SYSNAME)/$(host_cpu)/$(LIBPREFIX)bass_fx$(DLLEXT) \
@@ -442,8 +512,8 @@ $(DEPS_PREFIX)/bass-$(BASS_VERSION).built:
 endif # USE_BASS
 
 if BUILD_LIBJPEG
-LIBJPEG_CFLAGS += $(shell $(PKG_CONFIG) --cflags libturbojpeg)
-LIBJPEG_LIBS += $(shell $(PKG_CONFIG) --libs libturbojpeg)
+LIBJPEG_CFLAGS += $(shell $(PKG_CONFIG) --cflags libjpeg)
+LIBJPEG_LIBS += $(shell $(PKG_CONFIG) --libs libjpeg)
 $(DEPS_PREFIX)/libjpeg.built: $(DEPS_CACHE)/libjpeg-$(LIBJPEG_VERSION).source
 	rm -rf $(DEPS_PREFIX)/libjpeg
 	$(MKDIR_P) $(DEPS_PREFIX)/libjpeg/build $(DEPS_PREFIX)/lib/pkgconfig
@@ -465,7 +535,7 @@ $(DEPS_PREFIX)/libjpeg.built: $(DEPS_CACHE)/libjpeg-$(LIBJPEG_VERSION).source
 		$(if $(STATICBUILD),-DENABLE_STATIC=ON -DENABLE_SHARED=OFF,-DENABLE_STATIC=OFF -DENABLE_SHARED=ON) && \
 	$(CMAKE) --build build && \
 	$(CMAKE) --install build
-	$(PKG_CONFIG) --exists --print-errors libturbojpeg
+	$(PKG_CONFIG) --exists --print-errors libjpeg
 	touch $@
 else
 $(DEPS_PREFIX)/libjpeg.built:
@@ -634,6 +704,45 @@ $(DEPS_PREFIX)/FREETYPE2.built:
 	$(MKDIR_P) $(DEPS_PREFIX) && touch $@
 endif # BUILD_FREETYPE2
 
+if BUILD_LZMA
+LZMA_CFLAGS += $(shell $(PKG_CONFIG) --cflags liblzma)
+LZMA_LIBS += $(shell $(PKG_CONFIG) --libs liblzma)
+$(DEPS_PREFIX)/liblzma.built: $(DEPS_CACHE)/liblzma-$(LZMA_VERSION).source
+	rm -rf $(DEPS_PREFIX)/liblzma
+	$(MKDIR_P) $(DEPS_PREFIX)/liblzma/build $(DEPS_PREFIX)/lib/pkgconfig
+	$(TAR) xf $(DEPS_CACHE)/liblzma-$(LZMA_VERSION).tar.gz -C $(DEPS_PREFIX)/liblzma --strip-components=1 && \
+	cd $(DEPS_PREFIX)/liblzma && \
+	PKG_CONFIG="$(PKG_CONFIG)" LDFLAGS="$(LDFLAGS)" \
+	$(CMAKE) -S . -B build -G Ninja \
+		-D CMAKE_BUILD_TYPE="$(if $(ENABLE_DEBUG),Debug,Release)" \
+		-D CMAKE_INSTALL_PREFIX="$(DEPS_PREFIX)" \
+		-D CMAKE_SYSTEM_NAME="$(CMAKE_SYSTEM_NAME)" \
+		-D CMAKE_SYSTEM_PROCESSOR="$(host_cpu)" \
+		-D CMAKE_C_COMPILER="$(CC)" \
+		-D CMAKE_C_FLAGS="$(CFLAGS)" \
+		-D CMAKE_CXX_COMPILER="$(CXX)" \
+		-D CMAKE_CXX_FLAGS="$(CXXFLAGS)" \
+		-D BUILD_TESTING=OFF \
+		-D XZ_TOOL_LZMADEC=OFF \
+		-D XZ_TOOL_LZMAINFO=OFF \
+		-D XZ_TOOL_SCRIPTS=OFF \
+		-D XZ_TOOL_SYMLINKS=OFF \
+		-D XZ_TOOL_SYMLINKS_LZMA=OFF \
+		-D XZ_TOOL_XZ=OFF \
+		-D XZ_TOOL_XZDEC=OFF \
+		-D XZ_SANDBOX=no \
+		-D XZ_THREADS="$(if $(ubercompat),win95,yes)" \
+		$(CMAKERCOPT) \
+		-D BUILD_SHARED_LIBS="$(if $(STATICBUILD),OFF,ON)" && \
+	$(CMAKE) --build build && \
+	$(CMAKE) --install build
+	$(PKG_CONFIG) --exists --print-errors liblzma
+	touch $@
+else
+$(DEPS_PREFIX)/liblzma.built:
+	$(MKDIR_P) $(DEPS_PREFIX) && touch $@
+endif # BUILD_LZMA
+
 #####################################################################################################################################################
 ## END EXTERNAL DEPENDENCY BUILD/SETUP SECTION
 #####################################################################################################################################################
@@ -658,7 +767,10 @@ BUILT_SOURCES := \
 	$(DEPS_PREFIX)/glm.built \
 	$(DEPS_PREFIX)/SoLoud.built \
 	$(DEPS_PREFIX)/SoundTouch.built \
-	$(DEPS_PREFIX)/mpg123.built
+	$(DEPS_PREFIX)/mpg123.built \
+	$(DEPS_PREFIX)/discordsdk.built \
+	$(DEPS_PREFIX)/liblzma.built \
+	$(DEPS_PREFIX)/curl.built
 
 # making sure deps are built before main compile
 $(neosu_OBJECTS): src/config.h $(BUILT_SOURCES)
@@ -674,6 +786,7 @@ neosu_CXXFLAGS := \
 	$(NEOSU_CXXFLAGS) \
 	$(NEOSU_INCLUDE_FLAGS) \
 	$(BUNDLED_INCLUDES) \
+	$(CURL_CFLAGS) \
 	$(SDL3_CFLAGS) \
 	$(AUDIO_CFLAGS) \
 	$(X11_CFLAGS) \
@@ -690,13 +803,17 @@ neosu_CXXFLAGS := \
 	$(ZLIB_CFLAGS) \
 	$(DXGI_CFLAGS) \
 	$(D3D11_CFLAGS) \
-	$(VKD3D_CFLAGS)
+	$(VKD3D_CFLAGS) \
+	$(BLKID_CFLAGS) \
+	$(LZMA_CFLAGS) \
+	$(DISCORDSDK_CFLAGS)
 
 # Wl,--start-group with no --end-group is a stupid hack.
 neosu_LDFLAGS := \
 	$(MIMALLOC_LIBS) \
 	-Wl,-rpath='$$ORIGIN/lib',-rpath='$$ORIGIN' \
 	-Wl,--start-group \
+	$(CURL_LIBS) \
 	$(SDL3_LIBS) \
 	$(AUDIO_LIBS) \
 	$(X11_LIBS) \
@@ -712,7 +829,11 @@ neosu_LDFLAGS := \
 	$(ZLIB_LIBS) \
 	$(DXGI_LIBS) \
 	$(D3D11_LIBS) \
+	$(BLKID_LIBS) \
+	$(LZMA_LIBS) \
+	$(DISCORDSDK_LIBS) \
 	$(NEOSU_LDFLAGS) \
+	$(EXTRA_WIN_LIBS) \
 	$(LDFLAGS_EXTRA)
 
 compile_commands.json: mostlyclean-compile
@@ -771,6 +892,10 @@ install-libs:
 	find $(srcdir)/$(ASSETS_DIR)/materials -mindepth 1 -maxdepth 1 -type f -exec $(INSTALL) -Dm 644 '{''}' "$(DESTDIR)$(bindir)/materials" ';'
 	find $(srcdir)/$(ASSETS_DIR)/materials/default -mindepth 1 -maxdepth 1 -type f -exec $(INSTALL) -Dm 644 '{''}' "$(DESTDIR)$(bindir)/materials/default" ';'
 if WIN_PLATFORM
+	@cp -P $(DISCORDSDK_INSTALL_LIBS) "$(DESTDIR)$(bindir)/$(LIBDEST)"
+if NEED_CURL
+	@cp -P $(CURL_INSTALL_LIBS) "$(DESTDIR)$(bindir)/$(LIBDEST)"
+endif
 if BUILD_MIMALLOC
 	@cp -P "$(DEPS_PREFIX)/bin/mimalloc"{,-redirect$(if $(filter x86_64,$(host_cpu)),,32)}".dll" "$(DESTDIR)$(bindir)/$(LIBDEST)"
 endif
@@ -796,8 +921,7 @@ if BUILD_SDL3
 	$(if $(SDL3_STATIC),,@`find $(SDL3_PREFIX) '(' -iname '*SDL3*'$(DLLEXT) -o -iname '*SDL3*''.so.*' ')' -exec cp -P '{''}' "$(DESTDIR)$(bindir)/$(LIBDEST)" ';'`)
 endif
 if BUILD_LIBJPEG
-	$(if $(STATICBUILD),,@`find $(LIBJPEG_PREFIX) '(' -iname '*libjpeg-*'$(DLLEXT) -o -iname '*libjpeg*''.so.*' ')' -exec cp -P '{''}' "$(DESTDIR)$(bindir)/$(LIBDEST)" ';'`)
-	$(if $(STATICBUILD),,@`find $(LIBJPEG_PREFIX) '(' -iname '*libturbojpeg-*'$(DLLEXT) -o -iname '*libturbojpeg''.so.*' ')' -exec cp -P '{''}' "$(DESTDIR)$(bindir)/$(LIBDEST)" ';'`)
+	$(if $(SDL3_STATIC),,@`find $(LIBJPEG_PREFIX) '(' -iname '*libjpeg-*'$(DLLEXT) -o -iname '*libjpeg*''.so.*' ')' -exec cp -P '{''}' "$(DESTDIR)$(bindir)/$(LIBDEST)" ';'`)
 endif
 if BUILD_LIBPNG
 	$(if $(STATICBUILD),,@`find $(LIBPNG_PREFIX) '(' -iname '*libpng*'$(DLLEXT) -o -iname '*libpng*''.so.*' ')' -exec cp -P '{''}' "$(DESTDIR)$(bindir)/$(LIBDEST)" ';'`)
@@ -813,6 +937,9 @@ if BUILD_FREETYPE2
 endif
 if BUILD_FMT
 	$(if $(STATICBUILD),,@`find $(FMT_PREFIX) '(' -iname '*fmt*'$(DLLEXT) -o -iname '*fmt*''.so.*' ')' -exec cp -P '{''}' "$(DESTDIR)$(bindir)/$(LIBDEST)" ';'`)
+endif
+if BUILD_LZMA
+	$(if $(STATICBUILD),,@`find $(LZMA_PREFIX) '(' -iname '*lzma*'$(DLLEXT) -o -iname '*lzma*''.so.*' ')' -exec cp -P '{''}' "$(DESTDIR)$(bindir)/$(LIBDEST)" ';'`)
 endif
 if STRIPBINS
 	find "$(DESTDIR)$(bindir)" -name '*'$(DLLEXT)'*' -execdir $(STRIP) -s '{''}' '+'

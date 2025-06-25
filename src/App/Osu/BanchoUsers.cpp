@@ -81,8 +81,10 @@ UserInfo* find_user_starting_with(UString prefix, UString last_match) {
             }
             continue;
         }
-
-        if(user->name.startsWithIgnoreCase(prefix)) {
+        UString lowerName{user->name};
+        lowerName.lowerCase();
+        prefix.lowerCase();
+        if(lowerName.startsWith(prefix)) {
             return user;
         }
     }

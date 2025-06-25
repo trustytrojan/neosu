@@ -33,13 +33,13 @@ class Lobby : public OsuScreen {
    public:
     Lobby();
 
-    virtual void onKeyDown(KeyboardEvent& e);
-    virtual void onKeyUp(KeyboardEvent& e);
-    virtual void onChar(KeyboardEvent& e);
-    virtual void onResolutionChange(Vector2 newResolution);
+    void onKeyDown(KeyboardEvent& e) override;
+    void onKeyUp(KeyboardEvent& e) override;
+    void onChar(KeyboardEvent& e) override;
+    void onResolutionChange(Vector2 newResolution) override;
 
     // /!\ Side-effect: sends bancho packets when changing state
-    virtual CBaseUIContainer* setVisible(bool visible);
+    CBaseUIContainer* setVisible(bool visible) override;
 
     void addRoom(Room* room);
     void joinRoom(u32 id, UString password);

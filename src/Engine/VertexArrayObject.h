@@ -14,7 +14,7 @@ class VertexArrayObject : public Resource {
    public:
     VertexArrayObject(Graphics::PRIMITIVE primitive = Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES,
                       Graphics::USAGE_TYPE usage = Graphics::USAGE_TYPE::USAGE_STATIC, bool keepInSystemMemory = false);
-    virtual ~VertexArrayObject() { ; }
+    ~VertexArrayObject() override { ; }
 
     // TODO: fix the naming schema. clear = empty = just empty the containers, but not necessarily release memory
     void clear();
@@ -57,9 +57,9 @@ class VertexArrayObject : public Resource {
     static int nearestMultipleUp(int number, int multiple);
     static int nearestMultipleDown(int number, int multiple);
 
-    virtual void init();
-    virtual void initAsync();
-    virtual void destroy();
+    void init() override;
+    void initAsync() override;
+    void destroy() override;
 
     void updateTexcoordArraySize(unsigned int textureUnit);
 

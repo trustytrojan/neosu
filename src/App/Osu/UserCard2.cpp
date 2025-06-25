@@ -166,7 +166,7 @@ void UserCard2::draw(Graphics *g) {
     const f32 status_scale = this->vSize.y * 0.5f / font->getHeight() * 0.3f;
     yCounter += font->getHeight() * status_scale * 0.1f;
     auto line_width = this->vSize.x - (xCounter + AVATAR_MARGIN);
-    auto lines = status_text.wrap(font, line_width);
+    auto lines = font->wrap(status_text, line_width);
     for(auto &line : lines) {
         yCounter += (font->getHeight() * status_scale * 1.5);
 

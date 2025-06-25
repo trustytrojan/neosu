@@ -52,7 +52,7 @@ class OptionsMenuSkinPreviewElement : public CBaseUIElement {
         this->iMode = 0;
     }
 
-    virtual void draw(Graphics *g) {
+    void draw(Graphics *g) override {
         if(!this->bVisible) return;
 
         Skin *skin = osu->getSkin();
@@ -121,7 +121,7 @@ class OptionsMenuSkinPreviewElement : public CBaseUIElement {
         }
     }
 
-    virtual void onMouseUpInside() {
+    void onMouseUpInside() override {
         this->iMode++;
         this->iMode = this->iMode % 3;
     }
@@ -139,7 +139,7 @@ class OptionsMenuSliderPreviewElement : public CBaseUIElement {
         this->vao = NULL;
     }
 
-    virtual void draw(Graphics *g) {
+    void draw(Graphics *g) override {
         if(!this->bVisible) return;
 
         const float hitcircleDiameter = this->vSize.y * 0.5f;
@@ -175,10 +175,10 @@ class OptionsMenuSliderPreviewElement : public CBaseUIElement {
             temp *= temp;
             heightAddPercent = 1.0f - temp;
 
-            points.push_back(Vector2((useLegacyRenderer ? this->vPos.x : 0) + hitcircleDiameter / 2 + i * pointDist,
+            points.emplace_back((useLegacyRenderer ? this->vPos.x : 0) + hitcircleDiameter / 2 + i * pointDist,
                                      (useLegacyRenderer ? this->vPos.y : 0) + this->vSize.y / 2 -
                                          hitcircleDiameter / 3 +
-                                         heightAddPercent * (this->vSize.y / 2 - hitcircleDiameter / 2)));
+                                         heightAddPercent * (this->vSize.y / 2 - hitcircleDiameter / 2));
         }
 
         if(points.size() > 0) {
@@ -267,7 +267,7 @@ class OptionsMenuKeyBindLabel : public CBaseUILabel {
         this->textColorUnbound = 0xffbb0000;
     }
 
-    virtual void mouse_update(bool *propagate_clicks) {
+    void mouse_update(bool *propagate_clicks) override {
         if(!this->bVisible) return;
         CBaseUILabel::mouse_update(propagate_clicks);
 
@@ -292,7 +292,7 @@ class OptionsMenuKeyBindLabel : public CBaseUILabel {
     void setTextColorUnbound(Color textColorUnbound) { this->textColorUnbound = textColorUnbound; }
 
    private:
-    virtual void onMouseUpInside() {
+    void onMouseUpInside() override {
         CBaseUILabel::onMouseUpInside();
         this->bindButton->click();
     }
@@ -330,7 +330,7 @@ class OptionsMenuCategoryButton : public CBaseUIButton {
         this->bActiveCategory = false;
     }
 
-    virtual void drawText(Graphics *g) {
+    void drawText(Graphics *g) override {
         if(this->font != NULL && this->sText.length() > 0) {
             g->pushClipRect(McRect(this->vPos.x + 1, this->vPos.y + 1, this->vSize.x - 1, this->vSize.y - 1));
             {
@@ -364,9 +364,9 @@ class OptionsMenuResetButton : public CBaseUIButton {
         this->fAnim = 1.0f;
     }
 
-    virtual ~OptionsMenuResetButton() { anim->deleteExistingAnimation(&this->fAnim); }
+    ~OptionsMenuResetButton() override { anim->deleteExistingAnimation(&this->fAnim); }
 
-    virtual void draw(Graphics *g) {
+    void draw(Graphics *g) override {
         if(!this->bVisible || this->fAnim <= 0.0f) return;
 
         const int fullColorBlockSize = 4 * Osu::getUIScale();
@@ -379,7 +379,7 @@ class OptionsMenuResetButton : public CBaseUIButton {
         g->fillGradient(this->vPos.x, this->vPos.y, fullColorBlockSize, this->vSize.y, left, middle, left, middle);
     }
 
-    virtual void mouse_update(bool *propagate_clicks) {
+    void mouse_update(bool *propagate_clicks) override {
         if(!this->bVisible || !this->bEnabled) return;
         CBaseUIButton::mouse_update(propagate_clicks);
 
@@ -391,12 +391,12 @@ class OptionsMenuResetButton : public CBaseUIButton {
     }
 
    private:
-    virtual void onEnabled() {
+    void onEnabled() override {
         CBaseUIButton::onEnabled();
         anim->moveQuadOut(&this->fAnim, 1.0f, (1.0f - this->fAnim) * 0.15f, true);
     }
 
-    virtual void onDisabled() {
+    void onDisabled() override {
         CBaseUIButton::onDisabled();
         anim->moveQuadOut(&this->fAnim, 0.0f, this->fAnim * 0.15f, true);
     }
@@ -454,10 +454,10 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
 
     this->fSearchOnCharKeybindHackTime = 0.0f;
 
-    this->notelockTypes.push_back("None");
-    this->notelockTypes.push_back("McOsu");
-    this->notelockTypes.push_back("osu!stable (default)");
-    this->notelockTypes.push_back("osu!lazer 2020");
+    this->notelockTypes.emplace_back("None");
+    this->notelockTypes.emplace_back("McOsu");
+    this->notelockTypes.emplace_back("osu!stable (default)");
+    this->notelockTypes.emplace_back("osu!lazer 2020");
 
     this->setPos(-1, 0);
 
@@ -2430,36 +2430,36 @@ void OptionsMenu::onResolutionSelect() {
     std::vector<Vector2> resolutions;
 
     // 4:3
-    resolutions.push_back(Vector2(800, 600));
-    resolutions.push_back(Vector2(1024, 768));
-    resolutions.push_back(Vector2(1152, 864));
-    resolutions.push_back(Vector2(1280, 960));
-    resolutions.push_back(Vector2(1280, 1024));
-    resolutions.push_back(Vector2(1600, 1200));
-    resolutions.push_back(Vector2(1920, 1440));
-    resolutions.push_back(Vector2(2560, 1920));
+    resolutions.emplace_back(800, 600);
+    resolutions.emplace_back(1024, 768);
+    resolutions.emplace_back(1152, 864);
+    resolutions.emplace_back(1280, 960);
+    resolutions.emplace_back(1280, 1024);
+    resolutions.emplace_back(1600, 1200);
+    resolutions.emplace_back(1920, 1440);
+    resolutions.emplace_back(2560, 1920);
 
     // 16:9 and 16:10
-    resolutions.push_back(Vector2(1024, 600));
-    resolutions.push_back(Vector2(1280, 720));
-    resolutions.push_back(Vector2(1280, 768));
-    resolutions.push_back(Vector2(1280, 800));
-    resolutions.push_back(Vector2(1360, 768));
-    resolutions.push_back(Vector2(1366, 768));
-    resolutions.push_back(Vector2(1440, 900));
-    resolutions.push_back(Vector2(1600, 900));
-    resolutions.push_back(Vector2(1600, 1024));
-    resolutions.push_back(Vector2(1680, 1050));
-    resolutions.push_back(Vector2(1920, 1080));
-    resolutions.push_back(Vector2(1920, 1200));
-    resolutions.push_back(Vector2(2560, 1440));
-    resolutions.push_back(Vector2(2560, 1600));
-    resolutions.push_back(Vector2(3840, 2160));
-    resolutions.push_back(Vector2(5120, 2880));
-    resolutions.push_back(Vector2(7680, 4320));
+    resolutions.emplace_back(1024, 600);
+    resolutions.emplace_back(1280, 720);
+    resolutions.emplace_back(1280, 768);
+    resolutions.emplace_back(1280, 800);
+    resolutions.emplace_back(1360, 768);
+    resolutions.emplace_back(1366, 768);
+    resolutions.emplace_back(1440, 900);
+    resolutions.emplace_back(1600, 900);
+    resolutions.emplace_back(1600, 1024);
+    resolutions.emplace_back(1680, 1050);
+    resolutions.emplace_back(1920, 1080);
+    resolutions.emplace_back(1920, 1200);
+    resolutions.emplace_back(2560, 1440);
+    resolutions.emplace_back(2560, 1600);
+    resolutions.emplace_back(3840, 2160);
+    resolutions.emplace_back(5120, 2880);
+    resolutions.emplace_back(7680, 4320);
 
     // wtf
-    resolutions.push_back(Vector2(4096, 2160));
+    resolutions.emplace_back(4096, 2160);
 
     // get custom resolutions
     std::vector<Vector2> customResolutions;
@@ -2473,7 +2473,7 @@ void OptionsMenu::onResolutionSelect() {
             int height = 0;
             if(sscanf(curLineChar, "%ix%i\n", &width, &height) == 2) {
                 if(width > 319 && height > 239)  // 320x240 sanity check
-                    customResolutions.push_back(Vector2(width, height));
+                    customResolutions.emplace_back(width, height);
             }
         }
     }

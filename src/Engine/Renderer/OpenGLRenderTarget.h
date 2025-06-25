@@ -16,13 +16,13 @@ class OpenGLRenderTarget : public RenderTarget {
    public:
     OpenGLRenderTarget(int x, int y, int width, int height,
                        Graphics::MULTISAMPLE_TYPE multiSampleType = Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X);
-    virtual ~OpenGLRenderTarget() { this->destroy(); }
+    ~OpenGLRenderTarget() override { this->destroy(); }
 
-    virtual void enable();
-    virtual void disable();
+    void enable() override;
+    void disable() override;
 
-    virtual void bind(unsigned int textureUnit = 0);
-    virtual void unbind();
+    void bind(unsigned int textureUnit = 0) override;
+    void unbind() override;
 
     // ILLEGAL:
     void blitResolveFrameBufferIntoFrameBuffer(OpenGLRenderTarget *rt);
@@ -33,9 +33,9 @@ class OpenGLRenderTarget : public RenderTarget {
     inline unsigned int getResolveTexture() const { return this->iResolveTexture; }
 
    private:
-    virtual void init();
-    virtual void initAsync();
-    virtual void destroy();
+    void init() override;
+    void initAsync() override;
+    void destroy() override;
 
     unsigned int iFrameBuffer;
     unsigned int iRenderTexture;

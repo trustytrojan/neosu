@@ -8,22 +8,22 @@ class SongDifficultyButton : public SongButton {
     SongDifficultyButton(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos,
                          float yPos, float xSize, float ySize, UString name, DatabaseBeatmap *diff2,
                          SongButton *parentSongButton);
-    virtual ~SongDifficultyButton();
+    ~SongDifficultyButton() override;
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
-    virtual void onClicked();
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
+    void onClicked() override;
 
-    virtual void updateGrade();
+    void updateGrade() override;
 
-    virtual Color getInactiveBackgroundColor() const;
+    Color getInactiveBackgroundColor() const override;
 
     inline SongButton *getParentSongButton() const { return this->parentSongButton; }
 
     bool isIndependentDiffButton() const;
 
    private:
-    virtual void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected);
+    void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected) override;
 
     std::string sDiff;
 

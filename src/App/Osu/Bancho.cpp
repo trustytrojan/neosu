@@ -43,7 +43,7 @@
 #include "UserCard.h"
 
 Bancho bancho;
-std::unordered_map<std::string, Channel *> chat_channels;
+std::unordered_map<std::string, Bancho::Channel *> chat_channels;
 bool print_new_channels = true;
 
 bool Bancho::submit_scores() {
@@ -57,11 +57,11 @@ bool Bancho::submit_scores() {
 }
 
 void update_channel(UString name, UString topic, i32 nb_members) {
-    Channel *chan;
+    Bancho::Channel *chan;
     auto name_str = std::string(name.toUtf8());
     auto it = chat_channels.find(name_str);
     if(it == chat_channels.end()) {
-        chan = new Channel();
+        chan = new Bancho::Channel();
         chan->name = name;
         chat_channels[name_str] = chan;
 
@@ -527,7 +527,7 @@ void handle_packet(Packet *packet) {
         osu->chat->updateUserList();
     } else if(packet->id == USER_PRESENCE_SINGLE) {
         get_user_info(read<u32>(packet));  // add to online_users list
-    } else if(packet->id = USER_PRESENCE_BUNDLE) {
+    } else if(packet->id == USER_PRESENCE_BUNDLE) {
         u16 nb_users = read<u16>(packet);
         for(u16 i = 0; i < nb_users; i++) {
             get_user_info(read<u32>(packet));  // add to online_users list
@@ -627,12 +627,15 @@ Packet build_login_packet() {
     write<u8>(&packet, '0');
     write<u8>(&packet, '|');
 
-    char osu_path[PATH_MAX] = {0};
 #ifdef _WIN32
-    GetModuleFileName(NULL, osu_path, PATH_MAX);
+    wchar_t _osu_path[PATH_MAX]{};
+    GetModuleFileName(NULL, _osu_path, PATH_MAX);
 #else
-    readlink("/proc/self/exe", osu_path, PATH_MAX - 1);
+    char _osu_path[PATH_MAX]{};
+    readlink("/proc/self/exe", _osu_path, PATH_MAX - 1);
 #endif
+
+    const char *osu_path = UString(_osu_path).toUtf8();
 
     MD5Hash osu_path_md5 = md5((u8 *)osu_path, strlen(osu_path));
 

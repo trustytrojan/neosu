@@ -17,12 +17,12 @@
 class LinuxContextMenu : public ContextMenu {
    public:
     LinuxContextMenu();
-    virtual ~LinuxContextMenu();
+    ~LinuxContextMenu() override;
 
-    void begin() { ; }
-    void addItem(UString text, int returnValue) { ; }
-    void addSeparator() { ; }
-    int end() { return -1; }
+    void begin() override { ; }
+    void addItem(UString text, int returnValue) override { ; }
+    void addSeparator() override { ; }
+    int end() override { return -1; }
 
    private:
 };

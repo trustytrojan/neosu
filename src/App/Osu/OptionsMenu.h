@@ -26,19 +26,19 @@ class ConVar;
 class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener {
    public:
     OptionsMenu();
-    ~OptionsMenu();
+    ~OptionsMenu() override;
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
 
-    virtual void onKeyDown(KeyboardEvent &e);
-    virtual void onChar(KeyboardEvent &e);
+    void onKeyDown(KeyboardEvent &e) override;
+    void onChar(KeyboardEvent &e) override;
 
-    virtual void onResolutionChange(Vector2 newResolution);
+    void onResolutionChange(Vector2 newResolution) override;
 
-    virtual void onKey(KeyboardEvent &e);
+    void onKey(KeyboardEvent &e) override;
 
-    virtual CBaseUIContainer *setVisible(bool visible);
+    CBaseUIContainer *setVisible(bool visible) override;
 
     void save();
 
@@ -49,8 +49,8 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     void setUsername(UString username);
 
     inline bool isFullscreen() const { return this->bFullscreen; }
-    bool isMouseInside();
-    bool isBusy();
+    bool isMouseInside() override;
+    bool isBusy() override;
 
    public:
     enum class RenderCondition {
@@ -90,8 +90,8 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
         UString searchTags;
     };
 
-    virtual void updateLayout();
-    virtual void onBack();
+    void updateLayout() override;
+    void onBack() override;
 
     void setVisibleInt(bool visible, bool fromOnBack = false);
     void scheduleSearchUpdate();

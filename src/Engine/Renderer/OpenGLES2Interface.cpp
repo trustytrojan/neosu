@@ -54,9 +54,17 @@ OpenGLES2Interface::~OpenGLES2Interface() {
 }
 
 void OpenGLES2Interface::init() {
-    // check GL version
-    const GLubyte *version = glGetString(GL_VERSION);
-    debugLog("OpenGL: OpenGL Version %s\n", version);
+	// resolve GL functions
+#ifndef MCENGINE_PLATFORM_WASM
+	if (!gladLoadGL())
+	{
+		debugLog("gladLoadGL() error\n");
+		engine->showMessageErrorFatal("OpenGL Error", "Couldn't gladLoadGL()!\nThe engine will exit now.");
+		engine->shutdown();
+		return;
+	}
+#endif
+	debugLogF("OpenGL Version: {}\n", reinterpret_cast<const char *>(glGetString(GL_VERSION)));
 
     // enable
     glEnable(GL_BLEND);

@@ -5,12 +5,12 @@ class UICheckbox : public CBaseUICheckbox {
    public:
     UICheckbox(float xPos, float yPos, float xSize, float ySize, UString name, UString text);
 
-    virtual void mouse_update(bool *propagate_clicks);
+    void mouse_update(bool *propagate_clicks) override;
 
     void setTooltipText(UString text);
 
    private:
-    virtual void onFocusStolen();
+    void onFocusStolen() override;
 
     std::vector<UString> tooltipTextLines;
 

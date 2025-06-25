@@ -20,7 +20,7 @@ class CBaseUIElement : public KeyboardListener {
         this->vmSize.y = this->vSize.y;
         this->sName = name;
     }
-    virtual ~CBaseUIElement() { ; }
+    ~CBaseUIElement() override { ; }
 
     // main
     virtual void draw(Graphics *g) = 0;
@@ -28,9 +28,9 @@ class CBaseUIElement : public KeyboardListener {
     bool grabs_clicks = false;
 
     // keyboard input
-    virtual void onKeyUp(KeyboardEvent &e) { (void)e; }
-    virtual void onKeyDown(KeyboardEvent &e) { (void)e; }
-    virtual void onChar(KeyboardEvent &e) { (void)e; }
+    void onKeyUp(KeyboardEvent &e) override { (void)e; }
+    void onKeyDown(KeyboardEvent &e) override { (void)e; }
+    void onChar(KeyboardEvent &e) override { (void)e; }
 
     // getters
     inline const Vector2 &getPos() const { return this->vPos; }

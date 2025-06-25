@@ -41,7 +41,7 @@ class RankingScreenIndexLabel : public CBaseUILabel {
         this->bVisible2 = false;
     }
 
-    virtual void draw(Graphics *g) {
+    void draw(Graphics *g) override {
         if(!this->bVisible || !this->bVisible2) return;
 
         // draw background gradient
@@ -81,7 +81,7 @@ class RankingScreenBottomElement : public CBaseUILabel {
    public:
     RankingScreenBottomElement() : CBaseUILabel(-1, 0, 0, 0, "", "") { this->bVisible2 = false; }
 
-    virtual void draw(Graphics *g) {
+    void draw(Graphics *g) override {
         if(!this->bVisible || !this->bVisible2) return;
 
         // draw background gradient
@@ -106,7 +106,7 @@ class RankingScreenScrollDownInfoButton : public CBaseUIButton {
         this->fAlpha = 1.0f;
     }
 
-    virtual void draw(Graphics *g) {
+    void draw(Graphics *g) override {
         if(!this->bVisible || !this->bVisible2) return;
 
         const float textScale = 0.45f;

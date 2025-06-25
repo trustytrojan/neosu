@@ -21,7 +21,11 @@ WinContextMenu::~WinContextMenu() {}
 void WinContextMenu::begin() { this->menu = CreatePopupMenu(); }
 
 void WinContextMenu::addItem(UString text, int returnValue) {
+#ifdef _UNICODE
+    InsertMenu(this->menu, 0, MF_BYPOSITION | MF_STRING, returnValue, text.wc_str());
+#else
     InsertMenu(this->menu, 0, MF_BYPOSITION | MF_STRING, returnValue, text.toUtf8());
+#endif
 }
 
 void WinContextMenu::addSeparator() {

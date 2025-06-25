@@ -25,10 +25,10 @@ class RankingScreen : public ScreenBackable {
    public:
     RankingScreen();
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
 
-    virtual CBaseUIContainer *setVisible(bool visible);
+    CBaseUIContainer *setVisible(bool visible) override;
 
     void onRetryClicked();
     void onWatchClicked();
@@ -37,8 +37,8 @@ class RankingScreen : public ScreenBackable {
     void setBeatmapInfo(Beatmap *beatmap, DatabaseBeatmap *diff2);
 
    private:
-    virtual void updateLayout();
-    virtual void onBack();
+    void updateLayout() override;
+    void onBack() override;
 
     void drawModImage(Graphics *g, SkinImage *image, Vector2 &pos, Vector2 &max);
 

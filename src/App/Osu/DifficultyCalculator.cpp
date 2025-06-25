@@ -333,8 +333,7 @@ f64 DifficultyCalculator::calculateStarDiffForHitObjectsInt(std::vector<DiffObje
             if(dead.load()) return 0.0;
 
             // this already initializes the angle to NaN
-            cachedDiffObjects.push_back(
-                DiffObject(&params.sortedHitObjects[i], radius_scaling_factor, cachedDiffObjects, (i32)i - 1));
+            cachedDiffObjects.emplace_back(&params.sortedHitObjects[i], radius_scaling_factor, cachedDiffObjects, (i32)i - 1);
         }
     }
 

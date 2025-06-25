@@ -27,7 +27,7 @@ class MainMenuPauseButton : public CBaseUIButton {
         this->bIsPaused = true;
     }
 
-    virtual void draw(Graphics *g);
+    void draw(Graphics *g) override;
     void setPaused(bool paused) { this->bIsPaused = paused; }
 
    private:
@@ -45,27 +45,27 @@ class MainMenu : public OsuScreen, public MouseListener {
     void onCubePressed();
 
     MainMenu();
-    virtual ~MainMenu();
+    ~MainMenu() override;
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
 
     BeatmapDifficulty *preloaded_beatmap = NULL;
     BeatmapSet *preloaded_beatmapset = NULL;
     void selectRandomBeatmap();
 
-    virtual void onKeyDown(KeyboardEvent &e);
+    void onKeyDown(KeyboardEvent &e) override;
 
-    virtual void onLeftChange(bool down) { (void)down; }
-    virtual void onMiddleChange(bool down);
-    virtual void onRightChange(bool down) { (void)down; }
+    void onLeftChange(bool down) override { (void)down; }
+    void onMiddleChange(bool down) override;
+    void onRightChange(bool down) override { (void)down; }
 
-    virtual void onWheelVertical(int delta) { (void)delta; }
-    virtual void onWheelHorizontal(int delta) { (void)delta; }
+    void onWheelVertical(int delta) override { (void)delta; }
+    void onWheelHorizontal(int delta) override { (void)delta; }
 
-    virtual void onResolutionChange(Vector2 newResolution);
+    void onResolutionChange(Vector2 newResolution) override;
 
-    virtual CBaseUIContainer *setVisible(bool visible);
+    CBaseUIContainer *setVisible(bool visible) override;
 
    private:
     void drawVersionInfo(Graphics *g);

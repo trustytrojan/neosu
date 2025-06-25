@@ -470,7 +470,7 @@ void Slider::draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCi
                             ? (cv_slider_ball_tint_combo_color.getBool()
                                    ? skin->getComboColorForCounter(this->iColorCounter, this->iColorOffset)
                                    : skin->getSliderBallColor())
-                            : 0xffffffff);
+                            : rgb(255, 255, 255));
             g->pushTransform();
             {
                 g->rotate(ballAngle);

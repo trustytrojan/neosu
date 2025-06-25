@@ -4,8 +4,7 @@
 #include "Keyboard.h"
 
 void try_set_key(const char* str, ConVar* cvar) {
-    UString key = str;
-    key.trim();
+    UString key{UString(str).trim()};
 
     if(key == UString("None")) {
         cvar->setValue(0);
@@ -229,8 +228,7 @@ void import_settings_from_osu_stable() {
         num = 0;
 
         if(sscanf(curLine.c_str(), " BeatmapDirectory = %1023[^\n]", str) == 1) {
-            UString BeatmapDirectory = str;
-            BeatmapDirectory.trim();
+            UString BeatmapDirectory{UString(str).trim()};
             if(BeatmapDirectory.length() > 2) {
                 cv_songs_folder.setValue(BeatmapDirectory);
             }
@@ -265,8 +263,7 @@ void import_settings_from_osu_stable() {
         } else if(sscanf(curLine.c_str(), " CursorRipple = %i[^\n]", &num) == 1) {
             cv_draw_cursor_ripples.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " HighlightWords = %1023[^\n]", str) == 1) {
-            UString HighlightWords = str;
-            HighlightWords.trim();
+            UString HighlightWords{UString(str).trim()};
             cv_chat_highlight_words.setValue(HighlightWords);
         } else if(sscanf(curLine.c_str(), " HighResolution = %i[^\n]", &num) == 1) {
             if(num == 1) {
@@ -277,8 +274,7 @@ void import_settings_from_osu_stable() {
         } else if(sscanf(curLine.c_str(), " IgnoreBeatmapSkins = %i[^\n]", &num) == 1) {
             cv_ignore_beatmap_skins.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " IgnoreList = %1023[^\n]", str) == 1) {
-            UString IgnoreList = str;
-            IgnoreList.trim();
+            UString IgnoreList{UString(str).trim()};
             cv_chat_ignore_list.setValue(IgnoreList);
         } else if(sscanf(curLine.c_str(), " KeyOverlay = %i[^\n]", &num) == 1) {
             cv_draw_inputoverlay.setValue(num == 1);
@@ -314,8 +310,7 @@ void import_settings_from_osu_stable() {
         } else if(sscanf(curLine.c_str(), " ShowStoryboard = %i[^\n]", &num) == 1) {
             cv_draw_storyboard.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " Skin = %1023[^\n]", str) == 1) {
-            UString Skin = str;
-            Skin.trim();
+            UString Skin{UString(str).trim()};
             cv_skin.setValue(Skin);
         } else if(sscanf(curLine.c_str(), " SkinSamples = %i[^\n]", &num) == 1) {
             cv_skin_use_skin_hitsounds.setValue(num == 1);
@@ -343,8 +338,7 @@ void import_settings_from_osu_stable() {
         } else if(sscanf(curLine.c_str(), " ComboColourSliderBall = %i[^\n]", &num) == 1) {
             cv_slider_ball_tint_combo_color.setValue(num == 1);
         } else if(sscanf(curLine.c_str(), " Username = %1023[^\n]", str) == 1) {
-            UString Username = str;
-            Username.trim();
+            UString Username{UString(str).trim()};
             cv_name.setValue(Username);
         } else if(sscanf(curLine.c_str(), " Letterboxing = %i[^\n]", &num) == 1) {
             cv_letterboxing.setValue(num == 1);

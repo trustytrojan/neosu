@@ -8,10 +8,10 @@ class CBaseUILabel : public CBaseUIElement {
    public:
     CBaseUILabel(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "",
                  UString text = "");
-    virtual ~CBaseUILabel() { ; }
+    ~CBaseUILabel() override { ; }
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
 
     // cancer
     void setRelSizeX(float x) { this->vmSize.x = x; }
@@ -73,7 +73,7 @@ class CBaseUILabel : public CBaseUIElement {
     inline McFont *getFont() const { return this->font; }
     inline UString getText() const { return this->sText; }
 
-    virtual void onResized() { this->updateStringMetrics(); }
+    void onResized() override { this->updateStringMetrics(); }
 
    protected:
     virtual void drawText(Graphics *g);

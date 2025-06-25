@@ -6,16 +6,16 @@ class CBaseUIContainer;
 class CBaseUIScrollView : public CBaseUIElement {
    public:
     CBaseUIScrollView(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "");
-    virtual ~CBaseUIScrollView();
+    ~CBaseUIScrollView() override;
 
     void clear();
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
 
-    virtual void onKeyUp(KeyboardEvent &e);
-    virtual void onKeyDown(KeyboardEvent &e);
-    virtual void onChar(KeyboardEvent &e);
+    void onKeyUp(KeyboardEvent &e) override;
+    void onKeyDown(KeyboardEvent &e) override;
+    void onChar(KeyboardEvent &e) override;
 
     // scrolling
     void scrollY(int delta, bool animated = true);
@@ -98,18 +98,18 @@ class CBaseUIScrollView : public CBaseUIElement {
     inline Vector2 getVelocity() const { return (this->vScrollPos - this->vVelocity); }
 
     inline bool isScrolling() const { return this->bScrolling; }
-    bool isBusy();
+    bool isBusy() override;
 
     // events
-    void onResized();
-    void onMouseDownOutside();
-    void onMouseDownInside();
-    void onMouseUpInside();
-    void onMouseUpOutside();
+    void onResized() override;
+    void onMouseDownOutside() override;
+    void onMouseDownInside() override;
+    void onMouseUpInside() override;
+    void onMouseUpOutside() override;
 
-    void onFocusStolen();
-    void onEnabled();
-    void onDisabled();
+    void onFocusStolen() override;
+    void onEnabled() override;
+    void onDisabled() override;
 
     // When you scrolled to the bottom, and new content is added, setting this
     // to true makes it so you'll stay at the bottom.
@@ -121,7 +121,7 @@ class CBaseUIScrollView : public CBaseUIElement {
     bool bScrollbarOnLeft = false;
 
    protected:
-    virtual void onMoved();
+    void onMoved() override;
 
    private:
     void updateClipping();

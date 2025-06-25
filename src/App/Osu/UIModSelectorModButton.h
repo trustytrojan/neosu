@@ -8,9 +8,9 @@ class UIModSelectorModButton : public CBaseUIButton {
    public:
     UIModSelectorModButton(ModSelector *osuModSelector, float xPos, float yPos, float xSize, float ySize, UString name);
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
-    virtual void onClicked();
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
+    void onClicked() override;
 
     void resetState();
 
@@ -26,7 +26,7 @@ class UIModSelectorModButton : public CBaseUIButton {
     void setOn(bool on, bool silent = false);
 
    private:
-    virtual void onFocusStolen();
+    void onFocusStolen() override;
 
     ModSelector *osuModSelector;
 

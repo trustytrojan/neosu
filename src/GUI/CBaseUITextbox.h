@@ -6,14 +6,14 @@ class McFont;
 class CBaseUITextbox : public CBaseUIElement {
    public:
     CBaseUITextbox(float xPos = 0.0f, float yPos = 0.0f, float xSize = 0.0f, float ySize = 0.0f, UString name = "");
-    virtual ~CBaseUITextbox() { ; }
+    ~CBaseUITextbox() override { ; }
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
-    virtual void onFocusStolen();
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
+    void onFocusStolen() override;
 
-    virtual void onChar(KeyboardEvent &e);
-    virtual void onKeyDown(KeyboardEvent &e);
+    void onChar(KeyboardEvent &e) override;
+    void onKeyDown(KeyboardEvent &e) override;
 
     UString getVisibleText();
     inline const UString getText() const { return this->sText; }
@@ -89,11 +89,11 @@ class CBaseUITextbox : public CBaseUIElement {
     virtual void drawText(Graphics *g);
 
     // events
-    virtual void onMouseDownInside();
-    virtual void onMouseDownOutside();
-    virtual void onMouseUpInside();
-    virtual void onMouseUpOutside();
-    virtual void onResized();
+    void onMouseDownInside() override;
+    void onMouseDownOutside() override;
+    void onMouseUpInside() override;
+    void onMouseUpOutside() override;
+    void onResized() override;
 
     void handleCaretKeyboardMove();
     void handleCaretKeyboardDelete();

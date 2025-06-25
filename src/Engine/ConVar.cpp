@@ -704,7 +704,7 @@ static void _dumpcommands(void) {
         if(var->isFlagSet(FCVAR_PRIVATE)) continue;
 
         std::string cmd = "<h4>";
-        cmd.append(var->getName());
+        cmd.append(var->getName().toUtf8());
         cmd.append("</h4>\n");
         cmd.append(var->getHelpstring().toUtf8());
         cmd.append("<pre>{");

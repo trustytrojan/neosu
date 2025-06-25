@@ -22,17 +22,17 @@ class ConVar;
 class ModSelector : public OsuScreen {
    public:
     ModSelector();
-    virtual ~ModSelector();
+    ~ModSelector() override;
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
 
-    virtual void onKeyDown(KeyboardEvent &key);
-    virtual void onKeyUp(KeyboardEvent &key);
+    void onKeyDown(KeyboardEvent &key) override;
+    void onKeyUp(KeyboardEvent &key) override;
 
-    virtual void onResolutionChange(Vector2 newResolution);
+    void onResolutionChange(Vector2 newResolution) override;
 
-    virtual CBaseUIContainer *setVisible(bool visible);
+    CBaseUIContainer *setVisible(bool visible) override;
 
     void enableAuto();
     void toggleAuto();
@@ -46,7 +46,7 @@ class ModSelector : public OsuScreen {
     bool isInCompactMode();
     bool isCSOverrideSliderActive();
     bool isMouseInScrollView();
-    bool isMouseInside();
+    bool isMouseInside() override;
 
     void updateButtons(bool initial = false);
     void updateExperimentalButtons();

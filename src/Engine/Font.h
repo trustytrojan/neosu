@@ -36,7 +36,7 @@ class McFont : public Resource {
     McFont(std::string filepath, int fontSize = 16, bool antialiasing = true, int fontDPI = 96);
     McFont(std::string filepath, std::vector<wchar_t> characters, int fontSize = 16, bool antialiasing = true,
            int fontDPI = 96);
-    virtual ~McFont() { this->destroy(); }
+    ~McFont() override { this->destroy(); }
 
     void drawString(Graphics *g, UString text);
     void drawTextureAtlas(Graphics *g);
@@ -55,15 +55,17 @@ class McFont : public Resource {
     const GLYPH_METRICS &getGlyphMetrics(wchar_t ch) const;
     bool hasGlyph(wchar_t ch) const;
 
+    std::vector<UString> wrap(const UString &text, f64 max_width);
+
     // ILLEGAL:
     inline TextureAtlas *getTextureAtlas() const { return this->textureAtlas; }
 
    protected:
     void constructor(std::vector<wchar_t> characters, int fontSize, bool antialiasing, int fontDPI);
 
-    virtual void init();
-    virtual void initAsync();
-    virtual void destroy();
+    void init() override;
+    void initAsync() override;
+    void destroy() override;
 
     bool addGlyph(wchar_t ch);
 

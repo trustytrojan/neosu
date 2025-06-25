@@ -8,10 +8,10 @@ class UIAvatar;
 class UserCard : public CBaseUIButton {
    public:
     UserCard(u32 user_id);
-    ~UserCard();
+    ~UserCard() override;
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
 
     void updateUserStats();
     void setID(u32 new_id);

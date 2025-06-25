@@ -55,30 +55,30 @@ class Osu : public App, public MouseListener {
     static bool findIgnoreCase(const std::string &haystack, const std::string &needle);
 
     Osu();
-    virtual ~Osu();
+    ~Osu() override;
 
-    virtual void draw(Graphics *g);
-    virtual void update();
+    void draw(Graphics *g) override;
+    void update() override;
 
-    virtual void onKeyDown(KeyboardEvent &e);
-    virtual void onKeyUp(KeyboardEvent &e);
-    virtual void onChar(KeyboardEvent &e);
-    virtual void stealFocus();
+    void onKeyDown(KeyboardEvent &e) override;
+    void onKeyUp(KeyboardEvent &e) override;
+    void onChar(KeyboardEvent &e) override;
+    void stealFocus() override;
 
-    void onLeftChange(bool down);
-    void onMiddleChange(bool down) { (void)down; }
-    void onRightChange(bool down);
+    void onLeftChange(bool down) override;
+    void onMiddleChange(bool down) override { (void)down; }
+    void onRightChange(bool down) override;
 
-    void onWheelVertical(int delta) { (void)delta; }
-    void onWheelHorizontal(int delta) { (void)delta; }
+    void onWheelVertical(int delta) override { (void)delta; }
+    void onWheelHorizontal(int delta) override { (void)delta; }
 
-    virtual void onResolutionChanged(Vector2 newResolution);
-    virtual void onDPIChanged();
+    void onResolutionChanged(Vector2 newResolution) override;
+    void onDPIChanged() override;
 
-    virtual void onFocusGained();
-    virtual void onFocusLost();
-    virtual void onMinimized();
-    virtual bool onShutdown();
+    void onFocusGained() override;
+    void onFocusLost() override;
+    void onMinimized() override;
+    bool onShutdown() override;
 
     void onPlayEnd(FinishedScore score, bool quit = true, bool aborted = false);
 

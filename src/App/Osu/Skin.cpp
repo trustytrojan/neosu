@@ -87,7 +87,7 @@ void Skin::unpack(const char *filepath) {
 }
 
 Skin::Skin(UString name, std::string filepath, bool isDefaultSkin) {
-    this->sName = name;
+    this->sName = name.utf8View();
     this->sFilePath = filepath;
     this->bIsDefaultSkin = isDefaultSkin;
 
@@ -1137,7 +1137,7 @@ bool Skin::parseSkinINI(std::string filepath) {
 
                     memset(stringBuffer, '\0', 1024);
                     if(sscanf(curLine.c_str(), " Version : %1023[^\n]", stringBuffer) == 1) {
-                        UString versionString = UString(stringBuffer);
+                        UString versionString = stringBuffer;
                         if(versionString.find("latest") != -1 || versionString.find("User") != -1)
                             this->fVersion = 2.5f;  // default to latest version available
                         else
@@ -1196,7 +1196,7 @@ bool Skin::parseSkinINI(std::string filepath) {
 
                     memset(stringBuffer, '\0', 1024);
                     if(sscanf(curLine.c_str(), " ComboPrefix : %1023[^\n]", stringBuffer) == 1) {
-                        this->sComboPrefix = UString(stringBuffer);
+                        this->sComboPrefix = stringBuffer;
 
                         for(int i = 0; i < this->sComboPrefix.length(); i++) {
                             if(this->sComboPrefix[i] == '\\') {
@@ -1207,7 +1207,7 @@ bool Skin::parseSkinINI(std::string filepath) {
                     if(sscanf(curLine.c_str(), " ComboOverlap : %i \n", &val) == 1) this->iComboOverlap = val;
 
                     if(sscanf(curLine.c_str(), " ScorePrefix : %1023[^\n]", stringBuffer) == 1) {
-                        this->sScorePrefix = UString(stringBuffer);
+                        this->sScorePrefix = stringBuffer;
 
                         for(int i = 0; i < this->sScorePrefix.length(); i++) {
                             if(this->sScorePrefix[i] == '\\') {
@@ -1218,7 +1218,7 @@ bool Skin::parseSkinINI(std::string filepath) {
                     if(sscanf(curLine.c_str(), " ScoreOverlap : %i \n", &val) == 1) this->iScoreOverlap = val;
 
                     if(sscanf(curLine.c_str(), " HitCirclePrefix : %1023[^\n]", stringBuffer) == 1) {
-                        this->sHitCirclePrefix = UString(stringBuffer);
+                        this->sHitCirclePrefix = stringBuffer;
 
                         for(int i = 0; i < this->sHitCirclePrefix.length(); i++) {
                             if(this->sHitCirclePrefix[i] == '\\') {

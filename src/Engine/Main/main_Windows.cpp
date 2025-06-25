@@ -229,35 +229,35 @@ static void register_neosu_file_associations() {
 
     // Register neosu as .osk handler
     HKEY osk_key;
-    err = RegCreateKeyEx(HKEY_CURRENT_USER, "Software\\Classes\\.osk\\OpenWithProgids", 0, NULL,
+    err = RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\Classes\\.osk\\OpenWithProgids"), 0, NULL,
                          REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &osk_key, NULL);
     if(err != ERROR_SUCCESS) {
         debugLog("Failed to register neosu as .osk format handler. Error: %d\n", err);
         return;
     }
-    RegSetValueEx(osk_key, "neosu", 0, REG_SZ, (BYTE *)L"", 2);
+    RegSetValueEx(osk_key, TEXT("neosu"), 0, REG_SZ, (BYTE *)L"", 2);
     RegCloseKey(osk_key);
 
     // Register neosu as .osr handler
     HKEY osr_key;
-    err = RegCreateKeyEx(HKEY_CURRENT_USER, "Software\\Classes\\.osr\\OpenWithProgids", 0, NULL,
+    err = RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\Classes\\.osr\\OpenWithProgids"), 0, NULL,
                          REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &osr_key, NULL);
     if(err != ERROR_SUCCESS) {
         debugLog("Failed to register neosu as .osr format handler. Error: %d\n", err);
         return;
     }
-    RegSetValueEx(osr_key, "neosu", 0, REG_SZ, (BYTE *)L"", 2);
+    RegSetValueEx(osr_key, TEXT("neosu"), 0, REG_SZ, (BYTE *)L"", 2);
     RegCloseKey(osr_key);
 
     // Register neosu as .osz handler
     HKEY osz_key;
-    err = RegCreateKeyEx(HKEY_CURRENT_USER, "Software\\Classes\\.osz\\OpenWithProgids", 0, NULL,
+    err = RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\Classes\\.osz\\OpenWithProgids"), 0, NULL,
                          REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &osz_key, NULL);
     if(err != ERROR_SUCCESS) {
         debugLog("Failed to register neosu as .osz format handler. Error: %d\n", err);
         return;
     }
-    RegSetValueEx(osz_key, "neosu", 0, REG_SZ, (BYTE *)L"", 2);
+    RegSetValueEx(osz_key, TEXT("neosu"), 0, REG_SZ, (BYTE *)L"", 2);
     RegCloseKey(osz_key);
 }
 
@@ -769,7 +769,7 @@ HWND createWinWindow(HINSTANCE hInstance) {
     hwnd = CreateWindowExW(exStyle, WINDOW_TITLE, WINDOW_TITLE, style, xPos, yPos, width, height, NULL, NULL, hInstance,
                            NULL);
     if(hwnd == NULL) {
-        MessageBox(NULL, "Couldn't CreateWindowEx()!", "Fatal Error", MB_ICONEXCLAMATION | MB_OK);
+        MessageBox(NULL, TEXT("Couldn't CreateWindowEx()!"), TEXT("Fatal Error"), MB_ICONEXCLAMATION | MB_OK);
         return NULL;
     }
 
@@ -840,7 +840,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     if(wcsstr(pCmdLine, L"-noime") != NULL) {
         typedef BOOL(WINAPI * pfnImmDisableIME)(DWORD);
 
-        HMODULE hImm32 = LoadLibrary("imm32.dll");
+        HMODULE hImm32 = LoadLibrary(TEXT("imm32.dll"));
         if(hImm32 != NULL) {
             pfnImmDisableIME pImmDisableIME = (pfnImmDisableIME)GetProcAddress(hImm32, "ImmDisableIME");
             if(pImmDisableIME == NULL)
@@ -910,7 +910,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
     // register window class
     if(!RegisterClassExW(&wc)) {
-        MessageBox(NULL, "Couldn't RegisterClassEx()!", "Fatal Error", MB_ICONEXCLAMATION | MB_OK);
+        MessageBox(NULL, TEXT("Couldn't RegisterClassEx()!"), TEXT("Fatal Error"), MB_ICONEXCLAMATION | MB_OK);
         return -1;
     }
 
@@ -918,7 +918,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     HWND hwnd = createWinWindow(hInstance);
     if(hwnd == NULL) {
         printf("FATAL ERROR: hwnd == NULL!!!\n");
-        MessageBox(NULL, "Couldn't createWinWindow()!", "Fatal Error", MB_ICONEXCLAMATION | MB_OK);
+        MessageBox(NULL, TEXT("Couldn't createWinWindow()!"), TEXT("Fatal Error"), MB_ICONEXCLAMATION | MB_OK);
         return -1;
     }
 
@@ -947,7 +947,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
         Rid[0].hwndTarget = hwnd;
         if(RegisterRawInputDevices(Rid, 1, sizeof(Rid[0])) == FALSE) {
             printf("WARNING: Couldn't RegisterRawInputDevices(), GetLastError() = %i\n", (int)GetLastError());
-            MessageBox(NULL, "Couldn't RegisterRawInputDevices()!", "Warning", MB_ICONEXCLAMATION | MB_OK);
+            MessageBox(NULL, TEXT("Couldn't RegisterRawInputDevices()!"), TEXT("Warning"), MB_ICONEXCLAMATION | MB_OK);
         }
     }
 
@@ -1003,6 +1003,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
     // make the window visible
     ShowWindow(hwnd, nCmdShow);
+
+    
 
     // initialize engine
     WinEnvironment *environment = new WinEnvironment(hwnd, hInstance);

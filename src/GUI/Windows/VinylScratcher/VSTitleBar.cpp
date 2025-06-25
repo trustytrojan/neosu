@@ -16,9 +16,9 @@ class VSTitleBarButton : public CBaseUIButton {
         : CBaseUIButton(xPos, yPos, xSize, ySize, name, text) {
         ;
     }
-    virtual ~VSTitleBarButton() { ; }
+    ~VSTitleBarButton() override { ; }
 
-    virtual void draw(Graphics *g) {
+    void draw(Graphics *g) override {
         if(!this->bVisible) return;
 
         // default background gradient

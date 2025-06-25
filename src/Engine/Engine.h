@@ -1,5 +1,9 @@
 #pragma once
+#include <source_location>
+
 #include "cbase.h"
+#include "fmt/color.h"
+#include "fmt/printf.h"
 
 class App;
 class Timer;
@@ -20,13 +24,15 @@ class VisualProfiler;
 class ConsoleBox;
 class Console;
 
-class Engine {
-   public:
-    static void debugLog(const char *fmt, va_list args);
-    static void debugLog(Color color, const char *fmt, va_list args);
-    static void debugLog(const char *fmt, ...);
-    static void debugLog(Color color, const char *fmt, ...);
+#ifdef _DEBUG
+#define debugLogF(...) Engine::ContextLogger::log(std::source_location::current(), __FUNCTION__, __VA_ARGS__)
+#define debugLog(...) Engine::ContextLogger::logPrintf(__FUNCTION__, __VA_ARGS__)  // deprecated
+#else
+#define debugLogF(...) Engine::ContextLogger::log(__FUNCTION__, __VA_ARGS__)
+#define debugLog(...) Engine::ContextLogger::logPrintf(__FUNCTION__, __VA_ARGS__)  // deprecated
+#endif
 
+class Engine {
    public:
     Engine(Environment *environment, i32 argc, char **argv);
     ~Engine();
@@ -168,11 +174,126 @@ class Engine {
     char **sArgv;
     bool bBlackout;
     bool bDrawing;
+
+   public:
+    class ContextLogger {
+       public:
+        // debug build shows full source location
+        template <typename... Args>
+        static void log(const std::source_location &loc, const char *func, fmt::format_string<Args...> fmt,
+                        Args &&...args) {
+            // auto contextPrefix =
+            //     fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()), loc.line(),
+            //     loc.column(), func);
+
+            auto contextPrefix = fmt::format("[{}:{}:{}] [{}]: ", loc.file_name(), loc.line(), loc.column(), func);
+
+            auto message = fmt::format(fmt, std::forward<Args>(args)...);
+            Engine::logImpl(contextPrefix + message);
+        }
+
+        template <typename... Args>
+        static void log(const std::source_location &loc, const char *func, Color color, fmt::format_string<Args...> fmt,
+                        Args &&...args) {
+            // auto contextPrefix =
+            //     fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()), loc.line(),
+            //     loc.column(), func);
+
+            auto contextPrefix = fmt::format("[{}:{}:{}] [{}]: ", loc.file_name(), loc.line(), loc.column(), func);
+
+            auto message = fmt::format(fmt, std::forward<Args>(args)...);
+            Engine::logImpl(contextPrefix + message, color);
+        }
+
+        // release build only shows function name
+        template <typename... Args>
+        static void log(const char *func, fmt::format_string<Args...> fmt, Args &&...args) {
+            auto contextPrefix = fmt::format("[{}] ", func);
+            auto message = fmt::format(fmt, std::forward<Args>(args)...);
+            Engine::logImpl(contextPrefix + message);
+        }
+
+        template <typename... Args>
+        static void log(const char *func, Color color, fmt::format_string<Args...> fmt, Args &&...args) {
+            auto contextPrefix = fmt::format("[{}] ", func);
+            auto message = fmt::format(fmt, std::forward<Args>(args)...);
+            Engine::logImpl(contextPrefix + message, color);
+        }
+
+        // debug build shows full source location
+        template <typename... Args>
+        [[deprecated("use compile-time format string checked debugLogF instead")]]
+        static void logPrintf(const std::source_location &loc, const char *func, const std::string_view &fmt, Args &&...args) {
+            // auto contextPrefix =
+            //     fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()), loc.line(),
+            //     loc.column(), func);
+
+            auto contextPrefix = fmt::format("[{}:{}:{}] [{}]: ", loc.file_name(), loc.line(), loc.column(), func);
+
+            auto message = fmt::format(fmt, std::forward<Args>(args)...);
+            Engine::logImpl(contextPrefix + message);
+        }
+
+        template <typename... Args>
+        [[deprecated("use compile-time format string checked debugLogF instead")]]
+        static void logPrintf(const std::source_location &loc, const char *func, Color color, const std::string_view &fmt,
+                              Args &&...args) {
+            // auto contextPrefix =
+            //     fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()), loc.line(),
+            //     loc.column(), func);
+
+            auto contextPrefix = fmt::format("[{}:{}:{}] [{}]: ", loc.file_name(), loc.line(), loc.column(), func);
+
+            std::string message = fmt::sprintf(fmt, std::forward<Args>(args)...);
+            Engine::logImpl(contextPrefix + message, color);
+        }
+
+        // release build only shows function name
+        template <typename... Args>
+        [[deprecated("use compile-time format string checked debugLogF instead")]]
+        static void logPrintf(const char *func, const std::string_view &fmt, Args &&...args) {
+            auto contextPrefix = fmt::format("[{}] ", func);
+            std::string message = fmt::sprintf(fmt, std::forward<Args>(args)...);
+            Engine::logImpl(contextPrefix + message);
+        }
+
+        template <typename... Args>
+        [[deprecated("use compile-time format string checked debugLogF instead")]]
+        static void logPrintf(const char *func, Color color, const std::string_view &fmt, Args &&...args) {
+            auto contextPrefix = fmt::format("[{}] ", func);
+            std::string message = fmt::sprintf(fmt, std::forward<Args>(args)...);
+            Engine::logImpl(contextPrefix + message, color);
+        }
+    };
+    template <typename... Args>
+    static void logRaw(fmt::format_string<Args...> fmt, Args &&...args) {
+        auto message = fmt::format(fmt, std::forward<Args>(args)...);
+        Engine::logImpl(message);
+    }
+
+   private:
+    // logging stuff (implementation)
+    static void logToConsole(std::optional<Color> color, const UString &message);
+
+    static void logImpl(const std::string &message, Color color = rgb(255, 255, 255)) {
+        if constexpr(Env::cfg(OS::WINDOWS))  // hmm... odd bug with fmt::print (or mingw?), when the stdout isn't
+                                             // redirected to a file
+        {
+            if(color == rgb(255, 255, 255) || !Environment::isaTTY())
+                printf("%s", fmt::format("{}", message).c_str());
+            else
+                printf("%s", fmt::format(fmt::fg(fmt::rgb(color.R(), color.G(), color.B())), "{}", message).c_str());
+        } else {
+            if(color == rgb(255, 255, 255) || !Environment::isaTTY())
+                fmt::print("{}", message);
+            else
+                fmt::print(fmt::fg(fmt::rgb(color.R(), color.G(), color.B())), "{}", message);
+        }
+        logToConsole(color, UString(message));
+    }
 };
 
 extern Engine *engine;
-
-#define debugLog(format, ...) Engine::debugLog(format, ##__VA_ARGS__)
 
 void _exit(void);
 void _restart(void);

@@ -15,16 +15,15 @@
 #include "OpenGLHeaders.h"
 
 WinSDLGLES2Interface::WinSDLGLES2Interface(SDL_Window *window) : SDLGLES2Interface(window) {
-    // check GLEW
-    glewExperimental = GL_TRUE;  // TODO: upgrade to glew >= 2.0.0 to fix this (would cause crash in e.g.
-                                 // glGenVertexArrays() without it)
-    GLenum err = glewInit();
-    if(GLEW_OK != err) {
-        debugLog("glewInit() Error: %s\n", glewGetErrorString(err));
-        engine->showMessageErrorFatal("OpenGL Error", "Couldn't glewInit()!\nThe engine will exit now.");
-        engine->shutdown();
-        return;
-    }
+	// resolve GL functions
+	if (!gladLoadGL())
+	{
+		debugLog("gladLoadGL() error\n");
+		engine->showMessageErrorFatal("OpenGL Error", "Couldn't gladLoadGL()!\nThe engine will exit now.");
+		engine->shutdown();
+		return;
+	}
+	debugLogF("OpenGL Version: {}\n", reinterpret_cast<const char *>(glGetString(GL_VERSION)));
 }
 
 WinSDLGLES2Interface::~WinSDLGLES2Interface() {}

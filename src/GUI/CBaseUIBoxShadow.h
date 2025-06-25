@@ -10,9 +10,9 @@ class CBaseUIBoxShadow : public CBaseUIElement {
    public:
     CBaseUIBoxShadow(Color color = COLOR(0, 0, 0, 0), float radius = 0, float xPos = 0, float yPos = 0, float xSize = 0,
                      float ySize = 0, UString name = "");
-    virtual ~CBaseUIBoxShadow();
+    ~CBaseUIBoxShadow() override;
 
-    virtual void draw(Graphics *g);
+    void draw(Graphics *g) override;
     void renderOffscreen(Graphics *g);
 
     void forceRedraw() { this->bNeedsRedraw = true; }
@@ -23,7 +23,7 @@ class CBaseUIBoxShadow : public CBaseUIElement {
 
     inline float getRadius() const { return this->fRadius; }
 
-    virtual void onResized();
+    void onResized() override;
 
    private:
     void render(Graphics *g);

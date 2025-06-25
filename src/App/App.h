@@ -16,14 +16,14 @@ class Engine;
 class App : public KeyboardListener {
    public:
     App() { ; }
-    virtual ~App() { ; }
+    ~App() override { ; }
 
     virtual void draw(Graphics *g) { (void)g; }
     virtual void update() { ; }
 
-    virtual void onKeyDown(KeyboardEvent &e) { (void)e; }
-    virtual void onKeyUp(KeyboardEvent &e) { (void)e; }
-    virtual void onChar(KeyboardEvent &e) { (void)e; }
+    void onKeyDown(KeyboardEvent &e) override { (void)e; }
+    void onKeyUp(KeyboardEvent &e) override { (void)e; }
+    void onChar(KeyboardEvent &e) override { (void)e; }
     virtual void stealFocus() { ; }
 
     virtual void onResolutionChanged(Vector2 newResolution) { (void)newResolution; }

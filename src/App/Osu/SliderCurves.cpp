@@ -247,8 +247,8 @@ void SliderCurveEqualDistanceMulti::init(const std::vector<SliderCurveType *> &c
                  : Vector2(0, 0));
 
         // interpolate the point between the two closest distances
-        this->curvePoints.push_back(Vector2(0, 0));
-        curCurvePoints.push_back(Vector2(0, 0));
+        this->curvePoints.emplace_back(0, 0);
+        curCurvePoints.emplace_back(0, 0);
         if(distanceAt - lastDistanceAt > 1) {
             const float t = (prefDistance - lastDistanceAt) / (distanceAt - lastDistanceAt);
             this->curvePoints[i] =
@@ -579,7 +579,7 @@ SliderCurveCircumscribedCircle::SliderCurveCircumscribedCircle(std::vector<Vecto
     }
 
     // add the segment (no special logic here for SliderCurveCircumscribedCircle, just add the entire vector)
-    this->curvePointSegments.push_back(std::vector<Vector2>(this->curvePoints));  // copy
+    this->curvePointSegments.emplace_back(this->curvePoints);  // copy
 
     // backup (for dynamic updateStackPosition() recalculation)
     this->originalCurvePoints = std::vector<Vector2>(this->curvePoints);                             // copy
@@ -649,7 +649,7 @@ std::vector<Vector2> SliderBezierApproximator::createBezier(const std::vector<Ve
     std::stack<std::vector<Vector2>> toFlatten;
     std::stack<std::vector<Vector2>> freeBuffers;
 
-    toFlatten.push(std::vector<Vector2>(controlPoints));  // copy
+    toFlatten.emplace(controlPoints);  // copy
 
     std::vector<Vector2> &leftChild = this->subdivisionBuffer2;
 

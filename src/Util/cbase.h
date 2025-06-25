@@ -8,9 +8,9 @@
 // Windows build
 #ifdef _WIN64
 #define OS_NAME "win64"
-#define WINVER 0x0A00  // Windows 10, to enable the ifdefs in winuser.h for touch
-#define MCENGINE_WINDOWS_REALTIMESTYLUS_SUPPORT
-#define MCENGINE_WINDOWS_TOUCH_SUPPORT
+// #define WINVER 0x0A00  // Windows 10, to enable the ifdefs in winuser.h for touch
+// #define MCENGINE_WINDOWS_REALTIMESTYLUS_SUPPORT
+// #define MCENGINE_WINDOWS_TOUCH_SUPPORT
 #else
 #define OS_NAME "win32"
 #endif
@@ -27,8 +27,6 @@
 
 #ifdef _WIN32
 // clang-format off
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
 #include <winsock2.h>
 #include <windows.h>
 #include <shlwapi.h> // for StrStrIA
@@ -63,6 +61,7 @@
 #include "EngineFeatures.h"
 #include "Environment.h"
 #include "FastDelegate.h"
+#include "Color.h"
 #include "Graphics.h"
 #include "KeyboardEvent.h"
 #include "Matrices.h"
@@ -82,8 +81,6 @@
 #define PATH_MAX MAX_PATH
 #endif
 
-typedef unsigned char COLORPART;
-
 #define SAFE_DELETE(p)  \
     {                   \
         if(p) {         \
@@ -100,21 +97,21 @@ typedef unsigned char COLORPART;
              ((((int)(clamp<float>(g, 0.0f, 1.0f) * 255.0f)) & 0xff) << 8) |  \
              (((int)(clamp<float>(b, 0.0f, 1.0f) * 255.0f)) & 0xff)))
 
-#define COLOR_GET_Ri(color) (((COLORPART)(color >> 16)))
+#define COLOR_GET_Ri(color) (((Channel)(color >> 16)))
 
-#define COLOR_GET_Gi(color) (((COLORPART)(color >> 8)))
+#define COLOR_GET_Gi(color) (((Channel)(color >> 8)))
 
-#define COLOR_GET_Bi(color) (((COLORPART)(color >> 0)))
+#define COLOR_GET_Bi(color) (((Channel)(color >> 0)))
 
-#define COLOR_GET_Ai(color) (((COLORPART)(color >> 24)))
+#define COLOR_GET_Ai(color) (((Channel)(color >> 24)))
 
-#define COLOR_GET_Rf(color) (((COLORPART)(color >> 16)) / 255.0f)
+#define COLOR_GET_Rf(color) (((Channel)(color >> 16)) / 255.0f)
 
-#define COLOR_GET_Gf(color) (((COLORPART)(color >> 8)) / 255.0f)
+#define COLOR_GET_Gf(color) (((Channel)(color >> 8)) / 255.0f)
 
-#define COLOR_GET_Bf(color) (((COLORPART)(color >> 0)) / 255.0f)
+#define COLOR_GET_Bf(color) (((Channel)(color >> 0)) / 255.0f)
 
-#define COLOR_GET_Af(color) (((COLORPART)(color >> 24)) / 255.0f)
+#define COLOR_GET_Af(color) (((Channel)(color >> 24)) / 255.0f)
 
 #define COLOR_INVERT(color) \
     (COLOR(COLOR_GET_Ai(color), 255 - COLOR_GET_Ri(color), 255 - COLOR_GET_Gi(color), 255 - COLOR_GET_Bi(color)))

@@ -1,5 +1,9 @@
 #include "DiscordInterface.h"
 
+static bool initialized = false;
+
+#ifdef MCENGINE_PLATFORM_WINDOWS
+
 #include "Bancho.h"
 #include "Beatmap.h"
 #include "ConVar.h"
@@ -24,7 +28,6 @@ static struct Application app;
 static struct IDiscordActivityEvents activities_events;
 static struct IDiscordRelationshipEvents relationships_events;
 static struct IDiscordUserEvents users_events;
-static bool initialized = false;
 
 static void on_discord_log(void *cdata, enum EDiscordLogLevel level, const char *message) {
     (void)cdata;
@@ -34,6 +37,7 @@ static void on_discord_log(void *cdata, enum EDiscordLogLevel level, const char 
         debugLog("[Discord] %s\n", message);
     }
 }
+#endif
 
 void init_discord_sdk() {
 #ifdef _WIN32

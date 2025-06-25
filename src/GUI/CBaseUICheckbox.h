@@ -5,9 +5,9 @@ class CBaseUICheckbox : public CBaseUIButton {
    public:
     CBaseUICheckbox(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "",
                     UString text = "");
-    virtual ~CBaseUICheckbox() { ; }
+    ~CBaseUICheckbox() override { ; }
 
-    virtual void draw(Graphics *g);
+    void draw(Graphics *g) override;
 
     inline float getBlockSize() { return this->vSize.y / 2; }
     inline float getBlockBorder() { return this->vSize.y / 4; }

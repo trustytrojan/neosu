@@ -17,7 +17,7 @@ class OpenGL3VertexArrayObject : public VertexArrayObject {
     OpenGL3VertexArrayObject(Graphics::PRIMITIVE primitive = Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES,
                              Graphics::USAGE_TYPE usage = Graphics::USAGE_TYPE::USAGE_STATIC,
                              bool keepInSystemMemory = false);
-    virtual ~OpenGL3VertexArrayObject() { this->destroy(); }
+    ~OpenGL3VertexArrayObject() override { this->destroy(); }
 
     void draw();
 
@@ -27,9 +27,9 @@ class OpenGL3VertexArrayObject : public VertexArrayObject {
     static int primitiveToOpenGL(Graphics::PRIMITIVE primitive);
     static unsigned int usageToOpenGL(Graphics::USAGE_TYPE usage);
 
-    virtual void init();
-    virtual void initAsync();
-    virtual void destroy();
+    void init() override;
+    void initAsync() override;
+    void destroy() override;
 
     unsigned int iVAO;
     unsigned int iVertexBuffer;

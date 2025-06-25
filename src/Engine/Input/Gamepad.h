@@ -15,7 +15,7 @@
 class Gamepad : public InputDevice {
    public:
     Gamepad();
-    virtual ~Gamepad() { ; }
+    ~Gamepad() override { ; }
 
     void addListener(GamepadListener *gamepadListener, bool insertOnTop = false);
     void removeListener(GamepadListener *gamepadListener);

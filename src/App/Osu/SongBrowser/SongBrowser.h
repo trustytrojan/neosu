@@ -58,18 +58,18 @@ class SongBrowser : public ScreenBackable {
     friend class SongBrowserBackgroundSearchMatcher;
 
     SongBrowser();
-    virtual ~SongBrowser();
+    ~SongBrowser() override;
 
-    virtual void draw(Graphics *g);
-    virtual void mouse_update(bool *propagate_clicks);
+    void draw(Graphics *g) override;
+    void mouse_update(bool *propagate_clicks) override;
 
-    virtual void onKeyDown(KeyboardEvent &e);
-    virtual void onKeyUp(KeyboardEvent &e);
-    virtual void onChar(KeyboardEvent &e);
+    void onKeyDown(KeyboardEvent &e) override;
+    void onKeyUp(KeyboardEvent &e) override;
+    void onChar(KeyboardEvent &e) override;
 
-    virtual void onResolutionChange(Vector2 newResolution);
+    void onResolutionChange(Vector2 newResolution) override;
 
-    virtual CBaseUIContainer *setVisible(bool visible);
+    CBaseUIContainer *setVisible(bool visible) override;
 
     bool selectBeatmapset(i32 set_id);
     void selectSelectedBeatmapSongButton();
@@ -141,8 +141,8 @@ class SongBrowser : public ScreenBackable {
     static bool searchMatcher(const DatabaseBeatmap *databaseBeatmap, const std::vector<UString> &searchStringTokens);
     static bool findSubstringInDifficulty(const DatabaseBeatmap *diff, const UString &searchString);
 
-    virtual void updateLayout();
-    virtual void onBack();
+    void updateLayout() override;
+    void onBack() override;
 
     void updateScoreBrowserLayout();
 

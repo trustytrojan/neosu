@@ -6,6 +6,7 @@
 #include <stack>
 #include <vector>
 
+#include "Color.h"
 #include "Matrices.h"
 #include "Rect.h"
 #include "Vectors.h"
@@ -18,8 +19,6 @@ class McFont;
 class Shader;
 class RenderTarget;
 class VertexArrayObject;
-
-typedef u32 Color;
 
 class Graphics {
    public:

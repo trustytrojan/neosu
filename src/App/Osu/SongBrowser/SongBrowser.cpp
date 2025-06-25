@@ -85,9 +85,9 @@ class SongBrowserBackgroundSearchMatcher : public Resource {
     }
 
    protected:
-    virtual void init() { this->bReady = true; }
+    void init() override { this->bReady = true; }
 
-    virtual void initAsync() {
+    void initAsync() override {
         if(this->bDead.load()) {
             this->bAsyncReady = true;
             return;
@@ -113,7 +113,7 @@ class SongBrowserBackgroundSearchMatcher : public Resource {
         this->bAsyncReady = true;
     }
 
-    virtual void destroy() { ; }
+    void destroy() override { ; }
 
    private:
     std::atomic<bool> bDead;
@@ -129,7 +129,7 @@ class ScoresStillLoadingElement : public CBaseUILabel {
         this->sIconString.insert(0, Icons::GLOBE);
     }
 
-    virtual void drawText(Graphics *g) {
+    void drawText(Graphics *g) override {
         // draw icon
         const float iconScale = 0.6f;
         McFont *iconFont = osu->getFontIcons();
@@ -177,7 +177,7 @@ class NoRecordsSetElement : public CBaseUILabel {
         this->sIconString.insert(0, Icons::TROPHY);
     }
 
-    virtual void drawText(Graphics *g) {
+    void drawText(Graphics *g) override {
         // draw icon
         const float iconScale = 0.6f;
         McFont *iconFont = osu->getFontIcons();

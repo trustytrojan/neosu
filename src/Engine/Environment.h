@@ -6,6 +6,10 @@
 #include "Rect.h"
 #include "cbase.h"
 
+#ifdef MCENGINE_PLATFORM_WINDOWS // temp, for isatty
+#include <io.h>
+#endif
+
 class ContextMenu;
 
 class Environment {
@@ -47,6 +51,8 @@ class Environment {
     virtual std::string getFolderFromFilePath(std::string filepath) = 0;
     virtual std::string getFileExtensionFromFilePath(std::string filepath, bool includeDot = false) = 0;
     virtual std::string getFileNameFromFilePath(std::string filePath) = 0;
+
+    static inline bool isaTTY() { return ::isatty(fileno(stdout)) != 0; }
 
     // clipboard
     virtual UString getClipBoardText() = 0;

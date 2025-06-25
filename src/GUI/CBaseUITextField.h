@@ -5,9 +5,9 @@ class CBaseUITextField : public CBaseUIScrollView {
    public:
     CBaseUITextField(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "",
                      UString text = "");
-    virtual ~CBaseUITextField() { ; }
+    ~CBaseUITextField() override { ; }
 
-    virtual void draw(Graphics *g);
+    void draw(Graphics *g) override;
 
     CBaseUITextField *setFont(McFont *font) {
         this->textObject->setFont(font);
@@ -16,7 +16,7 @@ class CBaseUITextField : public CBaseUIScrollView {
 
     CBaseUITextField *append(UString text);
 
-    void onResized();
+    void onResized() override;
 
    protected:
     //********************************************************//
@@ -27,7 +27,7 @@ class CBaseUITextField : public CBaseUIScrollView {
        public:
         TextObject(float xPos, float yPos, float width, float height, UString text);
 
-        void draw(Graphics *g);
+        void draw(Graphics *g) override;
 
         CBaseUIElement *setText(UString text);
         CBaseUIElement *setFont(McFont *font) {
@@ -51,7 +51,7 @@ class CBaseUITextField : public CBaseUIScrollView {
         inline UString getText() const { return this->sText; }
         inline McFont *getFont() const { return this->font; }
 
-        void onResized();
+        void onResized() override;
 
        private:
         void updateStringMetrics();

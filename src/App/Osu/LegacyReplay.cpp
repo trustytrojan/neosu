@@ -52,7 +52,7 @@ std::vector<LegacyReplay::Frame> LegacyReplay::get_frames(u8* replay_data, i32 r
     lzma_stream strm = LZMA_STREAM_INIT;
     lzma_ret ret = lzma_alone_decoder(&strm, UINT64_MAX);
     if(ret != LZMA_OK) {
-        debugLog("Failed to init lzma library (%d).\n", ret);
+        debugLog("Failed to init lzma library (%u)\n", static_cast<unsigned int>(ret));
         return replay_frames;
     }
 
@@ -67,7 +67,7 @@ std::vector<LegacyReplay::Frame> LegacyReplay::get_frames(u8* replay_data, i32 r
 
         ret = lzma_code(&strm, LZMA_FINISH);
         if(ret != LZMA_OK && ret != LZMA_STREAM_END) {
-            debugLog("Decompression error (%d).\n", ret);
+            debugLog("Decompression error (%u)\n", static_cast<unsigned int>(ret));
             goto end;
         }
 
@@ -113,7 +113,7 @@ void LegacyReplay::compress_frames(const std::vector<LegacyReplay::Frame>& frame
     lzma_lzma_preset(&options, LZMA_PRESET_DEFAULT);
     lzma_ret ret = lzma_alone_encoder(&stream, &options);
     if(ret != LZMA_OK) {
-        debugLog("Failed to initialize lzma encoder: error %d\n", ret);
+        debugLog("Failed to initialize lzma encoder: error %u\n", static_cast<unsigned int>(ret));
         *compressed = NULL;
         *s_compressed = 0;
         return;
@@ -144,7 +144,7 @@ void LegacyReplay::compress_frames(const std::vector<LegacyReplay::Frame>& frame
             stream.avail_out = *s_compressed - stream.total_out;
             stream.next_out = *compressed + stream.total_out;
         } else if(ret != LZMA_STREAM_END) {
-            debugLog("Error while compressing replay: error %d\n", ret);
+            debugLog("Error while compressing replay: error %u\n", static_cast<unsigned int>(ret));
             *compressed = NULL;
             *s_compressed = 0;
             lzma_end(&stream);

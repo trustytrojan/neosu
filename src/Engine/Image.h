@@ -10,7 +10,7 @@ class Image : public Resource {
    public:
     Image(std::string filepath, bool mipmapped = false);
     Image(int width, int height, bool mipmapped = false);
-    virtual ~Image() { ; }
+    ~Image() override { ; }
 
     virtual void bind(unsigned int textureUnit = 0) = 0;
     virtual void unbind() = 0;
@@ -35,9 +35,9 @@ class Image : public Resource {
     bool is_2x;
 
    protected:
-    virtual void init() = 0;
-    virtual void initAsync() = 0;
-    virtual void destroy() = 0;
+    void init() override = 0;
+    void initAsync() override = 0;
+    void destroy() override = 0;
 
     bool loadRawImage();
 

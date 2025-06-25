@@ -172,11 +172,11 @@ void SpectatorScreen::mouse_update(bool *propagate_clicks) {
 
     this->spectating->setText(UString::format("Spectating %s", user_info->name.toUtf8()));
 
-    if(user_info->spec_action = LiveReplayBundle::Action::NONE) {
+    if(user_info->spec_action == LiveReplayBundle::Action::NONE) {
         this->status->setText(UString::format("%s is AFK", user_info->name.toUtf8()));
-    } else if(user_info->spec_action = LiveReplayBundle::Action::SONG_SELECT) {
+    } else if(user_info->spec_action == LiveReplayBundle::Action::SONG_SELECT) {
         this->status->setText(UString::format("%s is picking a map...", user_info->name.toUtf8()));
-    } else if(user_info->spec_action = LiveReplayBundle::Action::WATCHING_OTHER) {
+    } else if(user_info->spec_action == LiveReplayBundle::Action::WATCHING_OTHER) {
         this->status->setText(UString::format("%s is spectating someone else", user_info->name.toUtf8()));
     }
 

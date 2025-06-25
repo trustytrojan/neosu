@@ -13,21 +13,21 @@
 class NullGraphicsInterface : public Graphics {
    public:
     NullGraphicsInterface() : Graphics() { ; }
-    virtual ~NullGraphicsInterface() { ; }
+    ~NullGraphicsInterface() override { ; }
 
     // scene
-    virtual void beginScene() { ; }
-    virtual void endScene() { ; }
+    void beginScene() override { ; }
+    void endScene() override { ; }
 
     // depth buffer
-    virtual void clearDepthBuffer() { ; }
+    void clearDepthBuffer() override { ; }
 
     // color
-    virtual void setColor(Color color) { (void)color; }
-    virtual void setAlpha(float alpha) { (void)alpha; }
+    void setColor(Color color) override { (void)color; }
+    void setAlpha(float alpha) override { (void)alpha; }
 
     // 2d primitive drawing
-    virtual void drawPixels(int x, int y, int width, int height, Graphics::DRAWPIXELS_TYPE type, const void *pixels) {
+    void drawPixels(int x, int y, int width, int height, Graphics::DRAWPIXELS_TYPE type, const void *pixels) override {
         (void)x;
         (void)y;
         (void)width;
@@ -35,27 +35,27 @@ class NullGraphicsInterface : public Graphics {
         (void)type;
         (void)pixels;
     }
-    virtual void drawPixel(int x, int y) {
+    void drawPixel(int x, int y) override {
         (void)x;
         (void)y;
     }
-    virtual void drawLine(int x1, int y1, int x2, int y2) {
+    void drawLine(int x1, int y1, int x2, int y2) override {
         (void)x1;
         (void)y1;
         (void)x2;
         (void)y2;
     }
-    virtual void drawLine(Vector2 pos1, Vector2 pos2) {
+    void drawLine(Vector2 pos1, Vector2 pos2) override {
         (void)pos1;
         (void)pos2;
     }
-    virtual void drawRect(int x, int y, int width, int height) {
+    void drawRect(int x, int y, int width, int height) override {
         (void)x;
         (void)y;
         (void)width;
         (void)height;
     }
-    virtual void drawRect(int x, int y, int width, int height, Color top, Color right, Color bottom, Color left) {
+    void drawRect(int x, int y, int width, int height, Color top, Color right, Color bottom, Color left) override {
         (void)x;
         (void)y;
         (void)width;
@@ -66,21 +66,21 @@ class NullGraphicsInterface : public Graphics {
         (void)left;
     }
 
-    virtual void fillRect(int x, int y, int width, int height) {
+    void fillRect(int x, int y, int width, int height) override {
         (void)x;
         (void)y;
         (void)width;
         (void)height;
     }
-    virtual void fillRoundedRect(int x, int y, int width, int height, int radius) {
+    void fillRoundedRect(int x, int y, int width, int height, int radius) override {
         (void)x;
         (void)y;
         (void)width;
         (void)height;
         (void)radius;
     }
-    virtual void fillGradient(int x, int y, int width, int height, Color topLeftColor, Color topRightColor,
-                              Color bottomLeftColor, Color bottomRightColor) {
+    void fillGradient(int x, int y, int width, int height, Color topLeftColor, Color topRightColor,
+                              Color bottomLeftColor, Color bottomRightColor) override {
         (void)x;
         (void)y;
         (void)width;
@@ -91,14 +91,14 @@ class NullGraphicsInterface : public Graphics {
         (void)bottomRightColor;
     }
 
-    virtual void drawQuad(int x, int y, int width, int height) {
+    void drawQuad(int x, int y, int width, int height) override {
         (void)x;
         (void)y;
         (void)width;
         (void)height;
     }
-    virtual void drawQuad(Vector2 topLeft, Vector2 topRight, Vector2 bottomRight, Vector2 bottomLeft,
-                          Color topLeftColor, Color topRightColor, Color bottomRightColor, Color bottomLeftColor) {
+    void drawQuad(Vector2 topLeft, Vector2 topRight, Vector2 bottomRight, Vector2 bottomLeft,
+                          Color topLeftColor, Color topRightColor, Color bottomRightColor, Color bottomLeftColor) override {
         (void)topLeft;
         (void)topRight;
         (void)bottomRight;
@@ -110,65 +110,65 @@ class NullGraphicsInterface : public Graphics {
     }
 
     // 2d resource drawing
-    virtual void drawImage(Image *image, AnchorPoint anchor = AnchorPoint::CENTER) { (void)image; }
-    virtual void drawString(McFont *font, UString text);
+    void drawImage(Image *image, AnchorPoint anchor = AnchorPoint::CENTER) override { (void)image; }
+    void drawString(McFont *font, UString text) override;
 
     // 3d type drawing
-    virtual void drawVAO(VertexArrayObject *vao) { (void)vao; }
+    void drawVAO(VertexArrayObject *vao) override { (void)vao; }
 
     // DEPRECATED: 2d clipping
-    virtual void setClipRect(McRect clipRect) { (void)clipRect; }
-    virtual void pushClipRect(McRect clipRect) { (void)clipRect; }
-    virtual void popClipRect() { ; }
+    void setClipRect(McRect clipRect) override { (void)clipRect; }
+    void pushClipRect(McRect clipRect) override { (void)clipRect; }
+    void popClipRect() override { ; }
 
     // stencil
-    virtual void pushStencil() { ; }
-    virtual void fillStencil(bool inside) { (void)inside; }
-    virtual void popStencil() { ; }
+    void pushStencil() override { ; }
+    void fillStencil(bool inside) override { (void)inside; }
+    void popStencil() override { ; }
 
     // renderer settings
-    virtual void setClipping(bool enabled) { (void)enabled; }
-    virtual void setAlphaTesting(bool enabled) { (void)enabled; }
-    virtual void setAlphaTestFunc(COMPARE_FUNC alphaFunc, float ref) {
+    void setClipping(bool enabled) override { (void)enabled; }
+    void setAlphaTesting(bool enabled) override { (void)enabled; }
+    void setAlphaTestFunc(COMPARE_FUNC alphaFunc, float ref) override {
         (void)alphaFunc;
         (void)ref;
     }
-    virtual void setBlending(bool enabled) { (void)enabled; }
-    virtual void setBlendMode(BLEND_MODE blendMode) { (void)blendMode; }
-    virtual void setDepthBuffer(bool enabled) { (void)enabled; }
-    virtual void setCulling(bool culling) { (void)culling; }
-    virtual void setVSync(bool vsync) { (void)vsync; }
-    virtual void setAntialiasing(bool aa) { (void)aa; }
-    virtual void setWireframe(bool enabled) { (void)enabled; }
+    void setBlending(bool enabled) override { (void)enabled; }
+    void setBlendMode(BLEND_MODE blendMode) override { (void)blendMode; }
+    void setDepthBuffer(bool enabled) override { (void)enabled; }
+    void setCulling(bool culling) override { (void)culling; }
+    void setVSync(bool vsync) override { (void)vsync; }
+    void setAntialiasing(bool aa) override { (void)aa; }
+    void setWireframe(bool enabled) override { (void)enabled; }
 
     // renderer actions
-    virtual void flush() { ; }
-    virtual std::vector<unsigned char> getScreenshot() { return std::vector<unsigned char>(); }
+    void flush() override { ; }
+    std::vector<unsigned char> getScreenshot() override { return std::vector<unsigned char>(); }
 
     // renderer info
-    virtual Vector2 getResolution() const { return this->vResolution; }
-    virtual UString getVendor();
-    virtual UString getModel();
-    virtual UString getVersion();
-    virtual int getVRAMTotal() { return -1; }
-    virtual int getVRAMRemaining() { return -1; }
+    Vector2 getResolution() const override { return this->vResolution; }
+    UString getVendor() override;
+    UString getModel() override;
+    UString getVersion() override;
+    int getVRAMTotal() override { return -1; }
+    int getVRAMRemaining() override { return -1; }
 
     // callbacks
-    virtual void onResolutionChange(Vector2 newResolution) { this->vResolution = newResolution; }
+    void onResolutionChange(Vector2 newResolution) override { this->vResolution = newResolution; }
 
     // factory
-    virtual Image *createImage(std::string filePath, bool mipmapped);
-    virtual Image *createImage(int width, int height, bool mipmapped);
-    virtual RenderTarget *createRenderTarget(int x, int y, int width, int height,
-                                             Graphics::MULTISAMPLE_TYPE multiSampleType);
-    virtual Shader *createShaderFromFile(std::string vertexShaderFilePath, std::string fragmentShaderFilePath);
-    virtual Shader *createShaderFromSource(std::string vertexShader, std::string fragmentShader);
-    virtual VertexArrayObject *createVertexArrayObject(Graphics::PRIMITIVE primitive, Graphics::USAGE_TYPE usage,
-                                                       bool keepInSystemMemory);
+    Image *createImage(std::string filePath, bool mipmapped) override;
+    Image *createImage(int width, int height, bool mipmapped) override;
+    RenderTarget *createRenderTarget(int x, int y, int width, int height,
+                                             Graphics::MULTISAMPLE_TYPE multiSampleType) override;
+    Shader *createShaderFromFile(std::string vertexShaderFilePath, std::string fragmentShaderFilePath) override;
+    Shader *createShaderFromSource(std::string vertexShader, std::string fragmentShader) override;
+    VertexArrayObject *createVertexArrayObject(Graphics::PRIMITIVE primitive, Graphics::USAGE_TYPE usage,
+                                                       bool keepInSystemMemory) override;
 
    protected:
-    virtual void init() { ; }
-    virtual void onTransformUpdate(Matrix4 &projectionMatrix, Matrix4 &worldMatrix) {
+    void init() override { ; }
+    void onTransformUpdate(Matrix4 &projectionMatrix, Matrix4 &worldMatrix) override {
         (void)projectionMatrix;
         (void)worldMatrix;
     }

@@ -34,7 +34,7 @@ ToastElement::ToastElement(UString text, Color borderColor_arg) : CBaseUIButton(
     this->creationTime = engine->getTime();
 
     const auto font = engine->getResourceManager()->getFont("FONT_DEFAULT");
-    this->lines = text.wrap(font, TOAST_WIDTH - TOAST_INNER_X_MARGIN * 2.0);
+    this->lines = font->wrap(text, TOAST_WIDTH - TOAST_INNER_X_MARGIN * 2.0);
     this->setSize(TOAST_WIDTH, (font->getHeight() * 1.5 * this->lines.size()) + (TOAST_INNER_Y_MARGIN * 2.0));
 }
 
@@ -54,7 +54,7 @@ void ToastElement::draw(Graphics *g) {
     g->fillRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
 
     // border
-    g->setColor(this->isMouseInside() ? 0xffffffff : this->borderColor);
+    g->setColor(this->isMouseInside() ? rgb(255, 255, 255) : this->borderColor);
     g->setAlpha(this->alpha);
     g->drawRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
 

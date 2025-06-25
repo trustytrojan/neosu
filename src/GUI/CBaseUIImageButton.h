@@ -5,11 +5,11 @@ class CBaseUIImageButton : public CBaseUIButton {
    public:
     CBaseUIImageButton(std::string imageResourceName = "", float xPos = 0, float yPos = 0, float xSize = 0,
                        float ySize = 0, UString name = "");
-    virtual ~CBaseUIImageButton() { ; }
+    ~CBaseUIImageButton() override { ; }
 
-    virtual void draw(Graphics *g);
+    void draw(Graphics *g) override;
 
-    virtual void onResized();
+    void onResized() override;
 
     CBaseUIImageButton *setImageResourceName(std::string imageResourceName);
     CBaseUIImageButton *setRotationDeg(float deg) {

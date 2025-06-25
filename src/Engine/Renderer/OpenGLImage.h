@@ -16,18 +16,18 @@ class OpenGLImage : public Image {
    public:
     OpenGLImage(std::string filepath, bool mipmapped = false);
     OpenGLImage(int width, int height, bool mipmapped = false);
-    virtual ~OpenGLImage() { this->destroy(); }
+    ~OpenGLImage() override { this->destroy(); }
 
-    virtual void bind(unsigned int textureUnit = 0);
-    virtual void unbind();
+    void bind(unsigned int textureUnit = 0) override;
+    void unbind() override;
 
-    virtual void setFilterMode(Graphics::FILTER_MODE filterMode);
-    virtual void setWrapMode(Graphics::WRAP_MODE wrapMode);
+    void setFilterMode(Graphics::FILTER_MODE filterMode) override;
+    void setWrapMode(Graphics::WRAP_MODE wrapMode) override;
 
    private:
-    virtual void init();
-    virtual void initAsync();
-    virtual void destroy();
+    void init() override;
+    void initAsync() override;
+    void destroy() override;
 
     void handleGLErrors();
 

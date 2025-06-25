@@ -586,86 +586,23 @@ double Engine::getTimeReal() {
     return this->timer->getElapsedTime();
 }
 
-void Engine::debugLog(const char *fmt, va_list args) {
-    if(fmt == NULL) return;
+void Engine::logToConsole(std::optional<Color> color, const UString &msg)
+{
+	if (Engine::consoleBox != nullptr)
+	{
+		if (color.has_value())
+			Engine::consoleBox->log(msg, color.value());
+		else
+			Engine::consoleBox->log(msg);
+	}
 
-    va_list ap2;
-    va_copy(ap2, args);
-
-    // write to console
-    int numChars = vprintf(fmt, args);
-
-    if(numChars < 1 || numChars > 65534) goto cleanup;
-
-    // write to engine console
-    {
-        char *buffer = new char[numChars + 1];      // +1 for null termination later
-        vsnprintf(buffer, numChars + 1, fmt, ap2);  // "The generated string has a length of at most n-1, leaving space
-                                                    // for the additional terminating null character."
-        buffer[numChars] = '\0';                    // null terminate
-
-        UString actualBuffer = UString(buffer);
-        delete[] buffer;
-
-        // WARNING: these calls here are not threadsafe by default
-        if(Engine::consoleBox != NULL) Engine::consoleBox->log(actualBuffer);
-        if(Engine::console != NULL) Engine::console->log(actualBuffer);
-    }
-
-cleanup:
-    va_end(ap2);
-}
-
-void Engine::debugLog(Color color, const char *fmt, va_list args) {
-    if(fmt == NULL) return;
-
-    va_list ap2;
-    va_copy(ap2, args);
-
-    // write to console
-    int numChars = vprintf(fmt, args);
-
-    if(numChars < 1 || numChars > 65534) goto cleanup;
-
-    // write to engine console
-    {
-        char *buffer = new char[numChars + 1];      // +1 for null termination later
-        vsnprintf(buffer, numChars + 1, fmt, ap2);  // "The generated string has a length of at most n-1, leaving space
-                                                    // for the additional terminating null character."
-        buffer[numChars] = '\0';                    // null terminate
-
-        UString actualBuffer = UString(buffer);
-        delete[] buffer;
-
-        // WARNING: these calls here are not threadsafe by default
-        if(Engine::consoleBox != NULL) Engine::consoleBox->log(actualBuffer, color);
-        if(Engine::console != NULL) Engine::console->log(actualBuffer, color);
-    }
-
-cleanup:
-    va_end(ap2);
-}
-
-void Engine::debugLog(const char *fmt, ...) {
-    if(fmt == NULL) return;
-
-    va_list ap;
-    va_start(ap, fmt);
-
-    debugLog(fmt, ap);
-
-    va_end(ap);
-}
-
-void Engine::debugLog(Color color, const char *fmt, ...) {
-    if(fmt == NULL) return;
-
-    va_list ap;
-    va_start(ap, fmt);
-
-    debugLog(color, fmt, ap);
-
-    va_end(ap);
+	if (Engine::console != nullptr)
+	{
+		if (color.has_value())
+			Engine::console->log(msg, color.value());
+		else
+			Engine::console->log(msg);
+	}
 }
 
 //**********************//

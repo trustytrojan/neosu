@@ -10,7 +10,7 @@ class UIRankingScreenInfoLabel : public CBaseUIElement {
    public:
     UIRankingScreenInfoLabel(float xPos, float yPos, float xSize, float ySize, UString name);
 
-    void draw(Graphics *g);
+    void draw(Graphics *g) override;
 
     void setFromBeatmap(Beatmap *beatmap, DatabaseBeatmap *diff2);
 
