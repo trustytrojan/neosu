@@ -1,5 +1,6 @@
 #include "Downloader.h"
 
+#include "curl_blob.h"
 #include <curl/curl.h>
 
 #include <mutex>
@@ -97,8 +98,11 @@ void* do_downloads(void* arg) {
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
         curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 #ifdef _WIN32
-        // ABSOLUTELY RETARDED, FUCK WINDOWS
-        curl_easy_setopt(curl, CURLOPT_CAINFO, "curl-ca-bundle.crt");
+        struct curl_blob blob{};
+        blob.data = (void *)curl_ca_embed;
+        blob.len = sizeof(curl_ca_embed);
+        blob.flags = CURL_BLOB_NOCOPY;
+        curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
 #endif
         CURLcode res = curl_easy_perform(curl);
         int response_code;

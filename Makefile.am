@@ -240,6 +240,10 @@ $(DEPS_CACHE)/discordsdk-$(DISCORDSDK_VERSION).source: $(DEPS_CACHE)/discordsdk-
 	$(MKDIR_P) lib/windows/x86_64 && $(UNZIP) -qjo discordsdk.zip lib/x86_64/discord_game_sdk.dll.lib -d lib/windows/x86_64/ && \
 	touch $@
 
+$(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle/cacert.pem:
+	$(MKDIR_P) $(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle && \
+	$(WGET) -qO $(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle/cacert.pem "https://curl.se/ca/cacert.pem"
+
 $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsi686.zip:
 	$(MKDIR_P) $(DEPS_CACHE)/curl-$(CURL_VERSION) && \
 	$(WGET) -qO $(DEPS_CACHE)/curl-$(CURL_VERSION)/curl-windowsi686.zip "https://curl.se/windows/dl-$(CURL_VERSION)_2/curl-$(CURL_VERSION)_2-win32-mingw.zip"
@@ -268,6 +272,7 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION).source: $(DEPS_CACHE)/curl-$(CURL_VERSION)/cu
 #####################################################################################################################################################
 
 CURL_INSTALL_LIBS =
+CURL_CFLAGS += -DCURL_CERT_BUNDLE_PATH="\"$(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle/cacert.pem\""
 if WIN_PLATFORM
 if NEED_CURL
 CURL_INSTALL_LIBS += `find $(DEPS_CACHE)/curl-$(CURL_VERSION)/$(SYSNAME)$(host_cpu)/bin -type f -printf '%p '`
@@ -803,7 +808,8 @@ BUILT_SOURCES := \
 	$(DEPS_PREFIX)/discordsdk.built \
 	$(DEPS_PREFIX)/liblzma.built \
 	$(DEPS_PREFIX)/libarchive.built \
-	$(DEPS_PREFIX)/curl.built
+	$(DEPS_PREFIX)/curl.built \
+	$(DEPS_CACHE)/curl-$(CURL_VERSION)/certbundle/cacert.pem
 
 # making sure deps are built before main compile
 $(neosu_OBJECTS): src/config.h $(BUILT_SOURCES)

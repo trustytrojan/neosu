@@ -1,4 +1,5 @@
 #include "BanchoNetworking.h"
+#include "curl_blob.h"
 
 #include <time.h>
 
@@ -83,8 +84,11 @@ void disconnect() {
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curldummy);
 #ifdef _WIN32
-        // ABSOLUTELY RETARDED, FUCK WINDOWS
-        curl_easy_setopt(curl, CURLOPT_CAINFO, "curl-ca-bundle.crt");
+        struct curl_blob blob{};
+        blob.data = (void *)curl_ca_embed;
+        blob.len = sizeof(curl_ca_embed);
+        blob.flags = CURL_BLOB_NOCOPY;
+        curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
 #endif
         curl_easy_perform(curl);
         curl_slist_free_all(chunk);
@@ -232,8 +236,11 @@ static void send_api_request(CURL *curl, APIRequest api_out) {
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
 #ifdef _WIN32
-    // ABSOLUTELY RETARDED, FUCK WINDOWS
-    curl_easy_setopt(curl, CURLOPT_CAINFO, "curl-ca-bundle.crt");
+    struct curl_blob blob{};
+    blob.data = (void *)curl_ca_embed;
+    blob.len = sizeof(curl_ca_embed);
+    blob.flags = CURL_BLOB_NOCOPY;
+    curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
 #endif
 
     CURLcode res = curl_easy_perform(curl);
@@ -271,8 +278,11 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
 #ifdef _WIN32
-    // ABSOLUTELY RETARDED, FUCK WINDOWS
-    curl_easy_setopt(curl, CURLOPT_CAINFO, "curl-ca-bundle.crt");
+    struct curl_blob blob{};
+    blob.data = (void *)curl_ca_embed;
+    blob.len = sizeof(curl_ca_embed);
+    blob.flags = CURL_BLOB_NOCOPY;
+    curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
 #endif
 
     last_packet_tms = time(NULL);

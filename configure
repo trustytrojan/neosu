@@ -782,7 +782,6 @@ ENABLE_DEBUG
 RANLIB
 AR
 LD
-DISABLE_NATIVE
 CCACHE
 am__fastdepCXX_FALSE
 am__fastdepCXX_TRUE
@@ -809,6 +808,7 @@ LLVMMINGW
 NOIME
 STATICBUILD
 PKGTYPE
+DISABLE_NATIVE
 WINE
 BEAR
 CMAKE
@@ -1634,7 +1634,7 @@ Optional Features:
   --enable-silent-rules   less verbose build output (undo: "make V=1")
   --disable-silent-rules  verbose build output (undo: "make V=0")
   --enable-optimize       Optimize for speed (default: yes)
-  --enable-native         Compile for -march=native (default: yes)
+  --enable-native         Compile for -march=native (default: no)
   --enable-debug          Enable debug build (default: no)
   --enable-strip          Strip the final binary (default: no for debug, yes
                           otherwise)
@@ -6191,7 +6191,7 @@ if test ${enable_native+y}
 then :
   enableval=$enable_native;
 fi
-
+ # currently broken
 # Check whether --enable-debug was given.
 if test ${enable_debug+y}
 then :
@@ -6298,6 +6298,24 @@ else case e in #(
  ;;
 esac
 fi
+
+# compatibility, disable unless explicitly requested
+if test "x$enable_native" != "xyes"
+then :
+
+    enable_native=no
+    disable_native=yes
+
+    DISABLE_NATIVE=yes
+
+else case e in #(
+  e)
+    enable_native=yes
+    disable_native=no
+ ;;
+esac
+fi
+
 
 
 
@@ -6652,13 +6670,6 @@ fi
     if test "$host_cpu" = "i686"
 then :
    # uber compatibility configuration, works on winxp
-        if test "x$enable_native" != "xyes"
-then :
-   # compatibility, disable unless explicitly requested
-            enable_native=no
-            disable_native=yes
-
-fi
         d3dcompiler_lib="-ld3dcompiler_43"
         ubercompat=on
         with_mimalloc="no"
@@ -7927,9 +7938,6 @@ else case e in #(
      ;;
 esac
 fi
-
-    DISABLE_NATIVE=1
-
  ;;
 esac
 fi
@@ -14191,7 +14199,7 @@ neosu build configuration:
     Debug build:        ${enable_debug-no}
     ASan build:         ${enable_asan-no}
     TSan build:         ${enable_tsan-no}
-    Native build:       ${enable_native-yes}
+    Native build:       ${enable_native-no}
     System deps:        ${enable_system_deps-yes}
     Static linking:     ${enable_static-no}
     Stripped build:     ${enable_strip-yes}
@@ -14239,7 +14247,7 @@ neosu build configuration:
     Debug build:        ${enable_debug-no}
     ASan build:         ${enable_asan-no}
     TSan build:         ${enable_tsan-no}
-    Native build:       ${enable_native-yes}
+    Native build:       ${enable_native-no}
     System deps:        ${enable_system_deps-yes}
     Static linking:     ${enable_static-no}
     Stripped build:     ${enable_strip-yes}

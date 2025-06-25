@@ -65,7 +65,7 @@ For end-users (in-tree build):
 Some configure options:
   --prefix=/usr           Install to /usr instead of ./dist
   --enable-debug          Enable debug build
-  --disable-native        Disable native CPU optimizations
+  --enable-native         Enable native CPU optimizations (-march=native -mtune=native)
   --enable-system-deps    Prefer sharing system dependencies instead of building them from source
   --disable-static        Try to build/link libraries dynamically instead of statically
   --enable-lto            Enable link-time optimization (default: used if available)

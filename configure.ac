@@ -118,7 +118,7 @@ AC_SUBST([WINE])
 AC_ARG_ENABLE([optimize],
     AS_HELP_STRING([--enable-optimize], [Optimize for speed (default: yes)]))
 AC_ARG_ENABLE([native],
-    AS_HELP_STRING([--enable-native], [Compile for -march=native (default: yes)]))
+    AS_HELP_STRING([--enable-native], [Compile for -march=native (default: no)])) # currently broken
 AC_ARG_ENABLE([debug],
     AS_HELP_STRING([--enable-debug], [Enable debug build (default: no)]))
 AC_ARG_ENABLE([strip],
@@ -165,6 +165,18 @@ AS_IF([test "x$enable_static" != "xno"], [
     disable_shared=no
 ])
 
+# compatibility, disable unless explicitly requested
+AS_IF([test "x$enable_native" != "xyes"], [
+    enable_native=no
+    disable_native=yes
+
+    DISABLE_NATIVE=yes
+], [
+    enable_native=yes
+    disable_native=no
+])
+
+AC_SUBST([DISABLE_NATIVE])
 AC_SUBST([PKGTYPE])
 AC_SUBST([STATICBUILD])
 
@@ -372,10 +384,6 @@ __EOF__
     LIBPREFIX=""
 
     AS_IF([test "$host_cpu" = "i686"], [ # uber compatibility configuration, works on winxp
-        AS_IF([test "x$enable_native" != "xyes"], [ # compatibility, disable unless explicitly requested
-            enable_native=no
-            disable_native=yes
-        ])
         d3dcompiler_lib="-ld3dcompiler_43"
         ubercompat=on
         with_mimalloc="no"
@@ -453,8 +461,6 @@ AS_IF([test "x$enable_native" != "xno"], [
         CXXFLAGS="$CXXFLAGS -march=${host_cpu//_/-} -mtune=generic"
         CFLAGS="$CFLAGS -march=${host_cpu//_/-} -mtune=generic"
     ])
-
-    AC_SUBST([DISABLE_NATIVE],[1])
 ])
 # use c/c++23 because we can
 AX_CHECK_COMPILE_FLAG([-std=gnu++23], [
@@ -886,7 +892,7 @@ neosu build configuration:
     Debug build:        ${enable_debug-no}
     ASan build:         ${enable_asan-no}
     TSan build:         ${enable_tsan-no}
-    Native build:       ${enable_native-yes}
+    Native build:       ${enable_native-no}
     System deps:        ${enable_system_deps-yes}
     Static linking:     ${enable_static-no}
     Stripped build:     ${enable_strip-yes}
