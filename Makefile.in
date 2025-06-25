@@ -5771,6 +5771,7 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION).source: $(DEPS_CACHE)/curl-$(CURL_VERSION)/cu
 @BUILD_FREETYPE2_TRUE@	$(MKDIR_P) $(DEPS_PREFIX)/FREETYPE2/build $(DEPS_PREFIX)/lib/pkgconfig
 @BUILD_FREETYPE2_TRUE@	$(TAR) xf $(DEPS_CACHE)/freetype-$(FREETYPE2_VERSION).tar.gz -C $(DEPS_PREFIX)/FREETYPE2 --strip-components=1 && \
 @BUILD_FREETYPE2_TRUE@	cd $(DEPS_PREFIX)/FREETYPE2 && \
+@BUILD_FREETYPE2_TRUE@	$(SED) -i 's|TOP_DIR :=.*||' builds/unix/unix-def.in && \
 @BUILD_FREETYPE2_TRUE@	patch -Np1<$(BUILD_MISCDIR)/freetype-win.patch && \
 @BUILD_FREETYPE2_TRUE@	PKG_CONFIG="$(PKG_CONFIG)" \
 @BUILD_FREETYPE2_TRUE@		./configure lt_cv_prog_gnu_ld=yes --host=$(host) --prefix="$(DEPS_PREFIX)" \
