@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "types.h"
+#include "cbase.h"
 
 struct archive;
 struct archive_entry;
@@ -15,6 +15,11 @@ class Archive {
        public:
         Entry(struct archive* archive, struct archive_entry* entry);
         ~Entry() = default;
+
+        Entry &operator=(const Entry &) = default;
+        Entry &operator=(Entry &&) = default;
+        Entry(const Entry &) = default;
+        Entry(Entry &&) = default;
 
         // entry information
         [[nodiscard]] std::string getFilename() const;
@@ -28,12 +33,11 @@ class Archive {
         [[nodiscard]] bool extractToFile(const std::string& outputPath) const;
 
        private:
-        struct archive* m_archive;
-        struct archive_entry* m_entry;
         std::string m_filename;
         size_t m_uncompressedSize;
         size_t m_compressedSize;
         bool m_isDirectory;
+        std::vector<u8> m_data;  // store extracted data
     };
 
    public:

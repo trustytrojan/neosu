@@ -8,18 +8,42 @@
 #include <fstream>
 
 #include "Engine.h"
-#include "File.h"
 #include "UString.h"
 
 //------------------------------------------------------------------------------
 // Archive::Entry implementation
 //------------------------------------------------------------------------------
 
-Archive::Entry::Entry(struct archive* archive, struct archive_entry* entry) : m_archive(archive), m_entry(entry) {
+Archive::Entry::Entry(struct archive* archive, struct archive_entry* entry) {
+    if(!entry) {
+        // create empty entry
+        m_filename = "";
+        m_uncompressedSize = 0;
+        m_compressedSize = 0;
+        m_isDirectory = false;
+        return;
+    }
+
     m_filename = archive_entry_pathname(entry);
     m_uncompressedSize = archive_entry_size(entry);
     m_compressedSize = 0;  // libarchive doesn't always provide compressed size
     m_isDirectory = archive_entry_filetype(entry) == AE_IFDIR;
+
+    // extract data immediately while archive is positioned correctly
+    if(!m_isDirectory && archive) {
+        if(m_uncompressedSize > 0) {
+            m_data.reserve(m_uncompressedSize);
+        }
+
+        const void* buff;
+        size_t size;
+        la_int64_t offset;
+
+        while(archive_read_data_block(archive, &buff, &size, &offset) == ARCHIVE_OK) {
+            const u8* bytes = static_cast<const u8*>(buff);
+            m_data.insert(m_data.end(), bytes, bytes + size);
+        }
+    }
 }
 
 std::string Archive::Entry::getFilename() const { return m_filename; }
@@ -32,28 +56,10 @@ bool Archive::Entry::isDirectory() const { return m_isDirectory; }
 
 bool Archive::Entry::isFile() const { return !m_isDirectory; }
 
-std::vector<u8> Archive::Entry::extractToMemory() const {
-    if(!m_archive || m_isDirectory) return {};
-
-    std::vector<u8> data;
-    if(m_uncompressedSize > 0) {
-        data.reserve(m_uncompressedSize);
-    }
-
-    const void* buff;
-    size_t size;
-    la_int64_t offset;
-
-    while(archive_read_data_block(m_archive, &buff, &size, &offset) == ARCHIVE_OK) {
-        const u8* bytes = static_cast<const u8*>(buff);
-        data.insert(data.end(), bytes, bytes + size);
-    }
-
-    return data;
-}
+std::vector<u8> Archive::Entry::extractToMemory() const { return m_data; }
 
 bool Archive::Entry::extractToFile(const std::string& outputPath) const {
-    if(!m_archive || m_isDirectory) return false;
+    if(m_isDirectory) return false;
 
     std::ofstream file(outputPath, std::ios::binary);
     if(!file.good()) {
@@ -61,12 +67,8 @@ bool Archive::Entry::extractToFile(const std::string& outputPath) const {
         return false;
     }
 
-    const void* buff;
-    size_t size;
-    la_int64_t offset;
-
-    while(archive_read_data_block(m_archive, &buff, &size, &offset) == ARCHIVE_OK) {
-        file.write(static_cast<const char*>(buff), size);
+    if(!m_data.empty()) {
+        file.write(reinterpret_cast<const char*>(m_data.data()), static_cast<std::streamsize>(m_data.size()));
         if(file.bad()) {
             debugLog("Archive: failed to write to file %s\n", outputPath.c_str());
             return false;
@@ -165,7 +167,7 @@ std::vector<Archive::Entry> Archive::getAllEntries() {
         }
     }
 
-    struct archive_entry* entry{};
+    struct archive_entry* entry;
     while(archive_read_next_header(m_archive, &entry) == ARCHIVE_OK) {
         entries.emplace_back(m_archive, entry);
         // skip file data to move to next entry
@@ -180,7 +182,7 @@ bool Archive::hasNext() {
     if(!m_valid) return false;
 
     if(!m_iterationStarted) {
-        struct archive_entry* entry{};
+        struct archive_entry* entry;
         int r = archive_read_next_header(m_archive, &entry);
         if(r == ARCHIVE_OK) {
             m_currentEntry = std::make_unique<Entry>(m_archive, entry);
@@ -218,7 +220,7 @@ bool Archive::moveNext() {
         m_currentEntry.reset();
     }
 
-    struct archive_entry* entry{};
+    struct archive_entry* entry;
     int r = archive_read_next_header(m_archive, &entry);
     if(r == ARCHIVE_OK) {
         m_currentEntry = std::make_unique<Entry>(m_archive, entry);
