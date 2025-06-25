@@ -1,5 +1,8 @@
+#include "BaseEnvironment.h"
+
 #ifdef _WIN32
-#include "cbase.h"
+#include <minwinbase.h>
+#include <wincrypt.h>
 #else
 #include <sys/random.h>
 #endif

@@ -299,8 +299,14 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                             float fX, fY;
                             floatScan = (sscanf(curLineChar, " %f , %f , %d , %i , %i", &fX, &fY, &time, &type,
                                                 &hitSound) == 5);
-                            x = (int)fX;
-                            y = (int)fY;
+                            x = (std::isfinite(fX) && fX >= static_cast<float>(std::numeric_limits<int>::min()) &&
+                                 fX <= static_cast<float>(std::numeric_limits<int>::max()))
+                                    ? static_cast<int>(fX)
+                                    : 0;
+                            y = (std::isfinite(fY) && fY >= static_cast<float>(std::numeric_limits<int>::min()) &&
+                                 fY <= static_cast<float>(std::numeric_limits<int>::max()))
+                                    ? static_cast<int>(fY)
+                                    : 0;
                         }
 
                         if(intScan || floatScan) {
@@ -608,17 +614,16 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
 
         // 4) add slider end (potentially before last tick for bullshit sliders, but sorting takes care of that)
         // see https://github.com/ppy/osu/pull/4193#issuecomment-460127543
-        u32 time_a = (f32)s.time + s.sliderTime / 2.f;
-        u32 time_b = ((f32)s.time + s.sliderTime) - osuSliderEndInsideCheckOffset;
-        const f32 time = max(time_a, time_b);
+        const f32 time =
+            std::max(static_cast<f32>(s.time) + s.sliderTime / 2.0f,
+                     (static_cast<f32>(s.time) + s.sliderTime) - static_cast<f32>(osuSliderEndInsideCheckOffset));
         s.scoringTimesForStarCalc.push_back(OsuDifficultyHitObject::SLIDER_SCORING_TIME{
             .type = OsuDifficultyHitObject::SLIDER_SCORING_TIME::TYPE::END,
             .time = time,
         });
 
         // 5) sort scoringTimes from earliest to latest
-        std::sort(s.scoringTimesForStarCalc.begin(), s.scoringTimesForStarCalc.end(),
-                  OsuDifficultyHitObject::SliderScoringTimeComparator());
+        std::ranges::sort(s.scoringTimesForStarCalc, OsuDifficultyHitObject::SliderScoringTimeComparator());
     }
 
     return r;
@@ -720,15 +725,20 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
     }
 
     // sort hitobjects by time
-    constexpr auto diffHitObjectSortComparator = [](const OsuDifficultyHitObject &a,
-                                                    const OsuDifficultyHitObject &b) -> bool {
-        if(a.time == b.time)
+    const auto diffHitObjectSortComparator = [&dead](const OsuDifficultyHitObject &a,
+                                                     const OsuDifficultyHitObject &b) -> bool {
+        if(dead.load() || a.time == b.time)
             return &a < &b;
         else
             return a.time < b.time;
     };
 
     std::ranges::sort(result.diffobjects, diffHitObjectSortComparator);
+
+    if(dead.load()) {
+        result.errorCode = 6;
+        return result;
+    }
 
     // calculate stacks
     // see Beatmap.cpp
@@ -1058,7 +1068,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
                           &tpSampleType, &tpSampleSet, &tpVolume, &tpTimingChange, &tpKiai) == 8 ||
                    sscanf(curLineChar, " %lf , %f , %i , %i , %i , %i , %i", &tpOffset, &tpMSPerBeat, &tpMeter,
                           &tpSampleType, &tpSampleSet, &tpVolume, &tpTimingChange) == 7) {
-                    TIMINGPOINT t;
+                    TIMINGPOINT t{};
                     {
                         t.offset = (long)std::round(tpOffset);
                         t.msPerBeat = tpMSPerBeat;
@@ -1072,7 +1082,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
                     }
                     this->timingpoints.push_back(t);
                 } else if(sscanf(curLineChar, " %lf , %f", &tpOffset, &tpMSPerBeat) == 2) {
-                    TIMINGPOINT t;
+                    TIMINGPOINT t{};
                     {
                         t.offset = (long)std::round(tpOffset);
                         t.msPerBeat = tpMSPerBeat;
@@ -1106,7 +1116,7 @@ bool DatabaseBeatmap::loadMetadata(bool compute_md5) {
     // sort timingpoints and calculate BPM range
     if(this->timingpoints.size() > 0) {
         // sort timingpoints by time
-        std::sort(this->timingpoints.begin(), this->timingpoints.end(), TimingPointSortComparator());
+        std::ranges::sort(this->timingpoints, TimingPointSortComparator());
 
         if(this->iMostCommonBPM == 0) {
             if(cv_debug.getBool()) debugLog("DatabaseBeatmap::loadMetadata() : calculating BPM range ...\n");
@@ -1333,7 +1343,7 @@ DatabaseBeatmap::TIMING_INFO DatabaseBeatmap::getTimingInfoForTime(unsigned long
 
 DatabaseBeatmap::TIMING_INFO DatabaseBeatmap::getTimingInfoForTimeAndTimingPoints(
     unsigned long positionMS, const zarray<TIMINGPOINT> &timingpoints) {
-    TIMING_INFO ti;
+    TIMING_INFO ti{};
     ti.offset = 0;
     ti.beatLengthBase = 1;
     ti.beatLength = 1;

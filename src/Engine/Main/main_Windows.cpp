@@ -810,7 +810,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     i32 argc = 0;
     char **argv = NULL;
     LPWSTR *wargv = CommandLineToArgvW(pCmdLine, &argc);
-    argv = new char *[argc];
+    argv = new char *[argc > std::numeric_limits<char>::max() ? std::numeric_limits<char>::max() : argc];
     for(i32 i = 0; i < argc; i++) {
         int size = WideCharToMultiByte(CP_UTF8, 0, wargv[i], -1, NULL, 0, NULL, NULL);
         argv[i] = new char[size + 1];

@@ -1,10 +1,11 @@
+#include "BaseEnvironment.h"
+
 #ifdef _WIN32
-#include "cbase.h"
+#include <minwinbase.h>
+#include <wincrypt.h>
 #else
 #include <sys/random.h>
 #endif
-
-#include <string.h>
 
 #include "AnimationHandler.h"
 #include "BackgroundImageHandler.h"
@@ -884,6 +885,7 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
         // check if we are finished loading
         if(db->isFinished()) {
             this->bBeatmapRefreshScheduled = false;
+            Timing::sleep(100000); // wtf?
             this->onDatabaseLoadingFinished();
         }
         return;
@@ -1700,9 +1702,15 @@ void SongBrowser::addBeatmapSet(BeatmapSet *mapset) {
         // difficulty
         if(this->difficultyCollectionButtons.size() == 12) {
             for(SongButton *diff_btn : tempChildrenForGroups) {
-                const int index = clamp<int>((int)diff_btn->getDatabaseBeatmap()->getStarsNomod(), 0, 11);
+                const auto &stars_tmp = diff_btn->getDatabaseBeatmap()->getStarsNomod();
+                const int index = std::clamp<int>(
+                    (std::isfinite(stars_tmp) && stars_tmp >= static_cast<float>(std::numeric_limits<int>::min()) &&
+                     stars_tmp <= static_cast<float>(std::numeric_limits<int>::max()))
+                        ? static_cast<int>(stars_tmp)
+                        : 0,
+                    0, 11);
                 auto &children = this->difficultyCollectionButtons[index]->getChildren();
-                auto it = std::lower_bound(children.begin(), children.end(), diff_btn, sort_by_difficulty);
+                auto it = std::ranges::lower_bound(children, diff_btn, sort_by_difficulty);
                 children.insert(it, diff_btn);
             }
         }

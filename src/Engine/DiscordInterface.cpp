@@ -136,10 +136,10 @@ void set_discord_presence(struct DiscordActivity *activity) {
     // currently unused. should be lobby id, etc
 
     activity->application_id = DISCORD_CLIENT_ID;
-    strcpy(activity->name, "neosu");
-    strcpy(activity->assets.large_image, "neosu_icon");
+    strcpy(&activity->name[0], "neosu");
+    strcpy(&activity->assets.large_image[0], "neosu_icon");
     activity->assets.large_text[0] = '\0';
-    strcpy(activity->assets.small_image, "None");
+    strcpy(&activity->assets.small_image[0], "None");
     activity->assets.small_text[0] = '\0';
 
     auto diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();
@@ -149,13 +149,13 @@ void set_discord_presence(struct DiscordActivity *activity) {
     if(listening || playing) {
         auto url = UString::format("https://assets.ppy.sh/beatmaps/%d/covers/list@2x.jpg?%d", diff2->getSetID(),
                                    diff2->getID());
-        strncpy(activity->assets.large_image, url.toUtf8(), 128);
+        strncpy(&activity->assets.large_image[0], url.toUtf8(), 127);
 
         if(bancho.server_icon_url.length() > 0 && cv_main_menu_use_server_logo.getBool()) {
-            strncpy(activity->assets.small_image, bancho.server_icon_url.toUtf8(), 128);
-            strncpy(activity->assets.small_text, bancho.endpoint.toUtf8(), 128);
+            strncpy(&activity->assets.small_image[0], bancho.server_icon_url.toUtf8(), 127);
+            strncpy(&activity->assets.small_text[0], bancho.endpoint.toUtf8(), 127);
         } else {
-            strcpy(activity->assets.small_image, "neosu_icon");
+            strcpy(&activity->assets.small_image[0], "neosu_icon");
             activity->assets.small_text[0] = '\0';
         }
     }

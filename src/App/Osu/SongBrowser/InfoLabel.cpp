@@ -334,12 +334,17 @@ UString InfoLabel::buildDiffInfoString() {
 
     UString finalString;
     if(pp_available) {
+        const int clampedModPp = static_cast<int>(
+            std::round<int>((std::isfinite(modPp) && modPp >= static_cast<float>(std::numeric_limits<int>::min()) &&
+                             modPp <= static_cast<float>(std::numeric_limits<int>::max()))
+                                ? static_cast<int>(modPp)
+                                : 0));
         if(starsAndModStarsAreEqual) {
             finalString = UString::format("CS:%.3g AR:%.3g OD:%.3g HP:%.3g Stars:%.3g (%ipp)", CS, AR, OD, HP, stars,
-                                          (int)(std::round(modPp)));
+                                          clampedModPp);
         } else {
             finalString = UString::format("CS:%.3g AR:%.3g OD:%.3g HP:%.3g Stars:%.3g -> %.3g (%ipp)", CS, AR, OD, HP,
-                                          stars, modStars, (int)(std::round(modPp)));
+                                          stars, modStars, clampedModPp);
         }
     } else {
         finalString = UString::format("CS:%.3g AR:%.3g OD:%.3g HP:%.3g Stars:%.3g * (??? pp)", CS, AR, OD, HP, stars);

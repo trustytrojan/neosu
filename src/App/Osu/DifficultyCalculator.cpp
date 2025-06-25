@@ -101,9 +101,6 @@ OsuDifficultyHitObject &OsuDifficultyHitObject::operator=(OsuDifficultyHitObject
     if(this == &dobj)
         return *this;
 
-    // clean up existing resources BEFORE taking new ones
-    SAFE_DELETE(this->curve);
-
     // move
     this->type = dobj.type;
     this->pos = dobj.pos;

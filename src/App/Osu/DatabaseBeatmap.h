@@ -50,17 +50,13 @@ class DatabaseBeatmap {
     // custom structs
 
     struct LOAD_DIFFOBJ_RESULT {
-        int errorCode;
+        int errorCode{};
 
-        std::vector<OsuDifficultyHitObject> diffobjects;
+        std::vector<OsuDifficultyHitObject> diffobjects{};
 
-        int maxPossibleCombo;
+        int maxPossibleCombo{};
 
-        LOAD_DIFFOBJ_RESULT() {
-            this->errorCode = 0;
-
-            this->maxPossibleCombo = 0;
-        }
+        LOAD_DIFFOBJ_RESULT() : diffobjects(){}
     };
 
     struct LOAD_GAMEPLAY_RESULT {
@@ -212,7 +208,9 @@ class DatabaseBeatmap {
     [[nodiscard]] inline const std::string &getDifficultyName() const { return this->sDifficultyName; }
     [[nodiscard]] inline const std::string &getSource() const { return this->sSource; }
     [[nodiscard]] inline const std::string &getTags() const { return this->sTags; }
-    [[nodiscard]] inline const std::string &getBackgroundImageFileName() const { return this->sBackgroundImageFileName; }
+    [[nodiscard]] inline const std::string &getBackgroundImageFileName() const {
+        return this->sBackgroundImageFileName;
+    }
     [[nodiscard]] inline const std::string &getAudioFileName() const { return this->sAudioFileName; }
 
     [[nodiscard]] inline unsigned long getLengthMS() const { return this->iLengthMS; }
@@ -232,7 +230,9 @@ class DatabaseBeatmap {
     std::string getFullSoundFilePath();
 
     // redundant data
-    [[nodiscard]] inline const std::string &getFullBackgroundImageFilePath() const { return this->sFullBackgroundImageFilePath; }
+    [[nodiscard]] inline const std::string &getFullBackgroundImageFilePath() const {
+        return this->sFullBackgroundImageFilePath;
+    }
 
     // precomputed data
 
@@ -359,7 +359,9 @@ class DatabaseBeatmapBackgroundImagePathLoader : public Resource {
    public:
     DatabaseBeatmapBackgroundImagePathLoader(const std::string &filePath);
 
-    [[nodiscard]] inline const std::string &getLoadedBackgroundImageFileName() const { return this->sLoadedBackgroundImageFileName; }
+    [[nodiscard]] inline const std::string &getLoadedBackgroundImageFileName() const {
+        return this->sLoadedBackgroundImageFileName;
+    }
 
    private:
     void init() override;

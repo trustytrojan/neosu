@@ -27,10 +27,7 @@
 
 #ifdef _WIN32
 // clang-format off
-#include <windows.h>
-#include <winsock2.h>
-#include <shlwapi.h> // for StrStrIA
-#include <wincrypt.h> // for random number generation
+#include <shlwapi.h> // for StrStrIA TODO: dont
 // clang-format on
 #endif
 
