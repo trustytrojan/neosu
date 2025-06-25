@@ -255,20 +255,17 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/Engine/Platform/neosu-LinuxEnvironment.$(OBJEXT) \
 	src/Engine/Platform/neosu-LinuxGLLegacyInterface.$(OBJEXT) \
 	src/Engine/Platform/neosu-LinuxSDLEnvironment.$(OBJEXT) \
-	src/Engine/Platform/neosu-LinuxTimer.$(OBJEXT) \
 	src/Engine/Platform/neosu-NullContextMenu.$(OBJEXT) \
 	src/Engine/Platform/neosu-NullEnvironment.$(OBJEXT) \
 	src/Engine/Platform/neosu-SDLEnvironment.$(OBJEXT) \
 	src/Engine/Platform/neosu-SDLGLES2Interface.$(OBJEXT) \
 	src/Engine/Platform/neosu-SDLGLLegacyInterface.$(OBJEXT) \
-	src/Engine/Platform/neosu-Timer.$(OBJEXT) \
 	src/Engine/Platform/neosu-WinContextMenu.$(OBJEXT) \
 	src/Engine/Platform/neosu-WinEnvironment.$(OBJEXT) \
 	src/Engine/Platform/neosu-WinGL3Interface.$(OBJEXT) \
 	src/Engine/Platform/neosu-WinGLLegacyInterface.$(OBJEXT) \
 	src/Engine/Platform/neosu-WinSDLEnvironment.$(OBJEXT) \
 	src/Engine/Platform/neosu-WinSDLGLES2Interface.$(OBJEXT) \
-	src/Engine/Platform/neosu-WinTimer.$(OBJEXT) \
 	src/Engine/Platform/neosu-XInputGamepad.$(OBJEXT) \
 	src/Engine/neosu-Profiler.$(OBJEXT) \
 	src/Engine/neosu-RenderTarget.$(OBJEXT) \
@@ -457,20 +454,17 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-LinuxEnvironment.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-LinuxSDLEnvironment.Po \
-	src/Engine/Platform/$(DEPDIR)/neosu-LinuxTimer.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-NullContextMenu.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-NullEnvironment.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-SDLEnvironment.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-SDLGLES2Interface.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-SDLGLLegacyInterface.Po \
-	src/Engine/Platform/$(DEPDIR)/neosu-Timer.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-WinContextMenu.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-WinEnvironment.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-WinGL3Interface.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-WinGLLegacyInterface.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-WinSDLEnvironment.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-WinSDLGLES2Interface.Po \
-	src/Engine/Platform/$(DEPDIR)/neosu-WinTimer.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-XInputGamepad.Po \
 	src/Engine/Renderer/$(DEPDIR)/neosu-NullGraphicsInterface.Po \
 	src/Engine/Renderer/$(DEPDIR)/neosu-NullImage.Po \
@@ -942,20 +936,17 @@ neosu_SOURCES = \
 	src/Engine/Platform/LinuxEnvironment.cpp \
 	src/Engine/Platform/LinuxGLLegacyInterface.cpp \
 	src/Engine/Platform/LinuxSDLEnvironment.cpp \
-	src/Engine/Platform/LinuxTimer.cpp \
 	src/Engine/Platform/NullContextMenu.cpp \
 	src/Engine/Platform/NullEnvironment.cpp \
 	src/Engine/Platform/SDLEnvironment.cpp \
 	src/Engine/Platform/SDLGLES2Interface.cpp \
 	src/Engine/Platform/SDLGLLegacyInterface.cpp \
-	src/Engine/Platform/Timer.cpp \
 	src/Engine/Platform/WinContextMenu.cpp \
 	src/Engine/Platform/WinEnvironment.cpp \
 	src/Engine/Platform/WinGL3Interface.cpp \
 	src/Engine/Platform/WinGLLegacyInterface.cpp \
 	src/Engine/Platform/WinSDLEnvironment.cpp \
 	src/Engine/Platform/WinSDLGLES2Interface.cpp \
-	src/Engine/Platform/WinTimer.cpp \
 	src/Engine/Platform/XInputGamepad.cpp \
 	src/Engine/Profiler.cpp \
 	src/Engine/RenderTarget.cpp \
@@ -1587,9 +1578,6 @@ src/Engine/Platform/neosu-LinuxGLLegacyInterface.$(OBJEXT):  \
 src/Engine/Platform/neosu-LinuxSDLEnvironment.$(OBJEXT):  \
 	src/Engine/Platform/$(am__dirstamp) \
 	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Platform/neosu-LinuxTimer.$(OBJEXT):  \
-	src/Engine/Platform/$(am__dirstamp) \
-	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
 src/Engine/Platform/neosu-NullContextMenu.$(OBJEXT):  \
 	src/Engine/Platform/$(am__dirstamp) \
 	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
@@ -1603,9 +1591,6 @@ src/Engine/Platform/neosu-SDLGLES2Interface.$(OBJEXT):  \
 	src/Engine/Platform/$(am__dirstamp) \
 	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
 src/Engine/Platform/neosu-SDLGLLegacyInterface.$(OBJEXT):  \
-	src/Engine/Platform/$(am__dirstamp) \
-	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Platform/neosu-Timer.$(OBJEXT):  \
 	src/Engine/Platform/$(am__dirstamp) \
 	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
 src/Engine/Platform/neosu-WinContextMenu.$(OBJEXT):  \
@@ -1624,9 +1609,6 @@ src/Engine/Platform/neosu-WinSDLEnvironment.$(OBJEXT):  \
 	src/Engine/Platform/$(am__dirstamp) \
 	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
 src/Engine/Platform/neosu-WinSDLGLES2Interface.$(OBJEXT):  \
-	src/Engine/Platform/$(am__dirstamp) \
-	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Platform/neosu-WinTimer.$(OBJEXT):  \
 	src/Engine/Platform/$(am__dirstamp) \
 	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
 src/Engine/Platform/neosu-XInputGamepad.$(OBJEXT):  \
@@ -1947,20 +1929,17 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-LinuxEnvironment.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-LinuxSDLEnvironment.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-LinuxTimer.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-NullContextMenu.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-NullEnvironment.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-SDLEnvironment.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-SDLGLES2Interface.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-SDLGLLegacyInterface.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-Timer.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-WinContextMenu.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-WinEnvironment.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-WinGL3Interface.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-WinGLLegacyInterface.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-WinSDLEnvironment.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-WinSDLGLES2Interface.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-WinTimer.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-XInputGamepad.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-NullGraphicsInterface.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-NullImage.Po@am__quote@ # am--include-marker
@@ -3611,20 +3590,6 @@ src/Engine/Platform/neosu-LinuxSDLEnvironment.obj: src/Engine/Platform/LinuxSDLE
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-LinuxSDLEnvironment.obj `if test -f 'src/Engine/Platform/LinuxSDLEnvironment.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/LinuxSDLEnvironment.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/LinuxSDLEnvironment.cpp'; fi`
 
-src/Engine/Platform/neosu-LinuxTimer.o: src/Engine/Platform/LinuxTimer.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-LinuxTimer.o -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-LinuxTimer.Tpo -c -o src/Engine/Platform/neosu-LinuxTimer.o `test -f 'src/Engine/Platform/LinuxTimer.cpp' || echo '$(srcdir)/'`src/Engine/Platform/LinuxTimer.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-LinuxTimer.Tpo src/Engine/Platform/$(DEPDIR)/neosu-LinuxTimer.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/LinuxTimer.cpp' object='src/Engine/Platform/neosu-LinuxTimer.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-LinuxTimer.o `test -f 'src/Engine/Platform/LinuxTimer.cpp' || echo '$(srcdir)/'`src/Engine/Platform/LinuxTimer.cpp
-
-src/Engine/Platform/neosu-LinuxTimer.obj: src/Engine/Platform/LinuxTimer.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-LinuxTimer.obj -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-LinuxTimer.Tpo -c -o src/Engine/Platform/neosu-LinuxTimer.obj `if test -f 'src/Engine/Platform/LinuxTimer.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/LinuxTimer.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/LinuxTimer.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-LinuxTimer.Tpo src/Engine/Platform/$(DEPDIR)/neosu-LinuxTimer.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/LinuxTimer.cpp' object='src/Engine/Platform/neosu-LinuxTimer.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-LinuxTimer.obj `if test -f 'src/Engine/Platform/LinuxTimer.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/LinuxTimer.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/LinuxTimer.cpp'; fi`
-
 src/Engine/Platform/neosu-NullContextMenu.o: src/Engine/Platform/NullContextMenu.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-NullContextMenu.o -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-NullContextMenu.Tpo -c -o src/Engine/Platform/neosu-NullContextMenu.o `test -f 'src/Engine/Platform/NullContextMenu.cpp' || echo '$(srcdir)/'`src/Engine/Platform/NullContextMenu.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-NullContextMenu.Tpo src/Engine/Platform/$(DEPDIR)/neosu-NullContextMenu.Po
@@ -3694,20 +3659,6 @@ src/Engine/Platform/neosu-SDLGLLegacyInterface.obj: src/Engine/Platform/SDLGLLeg
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/SDLGLLegacyInterface.cpp' object='src/Engine/Platform/neosu-SDLGLLegacyInterface.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-SDLGLLegacyInterface.obj `if test -f 'src/Engine/Platform/SDLGLLegacyInterface.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/SDLGLLegacyInterface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/SDLGLLegacyInterface.cpp'; fi`
-
-src/Engine/Platform/neosu-Timer.o: src/Engine/Platform/Timer.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-Timer.o -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-Timer.Tpo -c -o src/Engine/Platform/neosu-Timer.o `test -f 'src/Engine/Platform/Timer.cpp' || echo '$(srcdir)/'`src/Engine/Platform/Timer.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-Timer.Tpo src/Engine/Platform/$(DEPDIR)/neosu-Timer.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/Timer.cpp' object='src/Engine/Platform/neosu-Timer.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-Timer.o `test -f 'src/Engine/Platform/Timer.cpp' || echo '$(srcdir)/'`src/Engine/Platform/Timer.cpp
-
-src/Engine/Platform/neosu-Timer.obj: src/Engine/Platform/Timer.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-Timer.obj -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-Timer.Tpo -c -o src/Engine/Platform/neosu-Timer.obj `if test -f 'src/Engine/Platform/Timer.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/Timer.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/Timer.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-Timer.Tpo src/Engine/Platform/$(DEPDIR)/neosu-Timer.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/Timer.cpp' object='src/Engine/Platform/neosu-Timer.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-Timer.obj `if test -f 'src/Engine/Platform/Timer.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/Timer.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/Timer.cpp'; fi`
 
 src/Engine/Platform/neosu-WinContextMenu.o: src/Engine/Platform/WinContextMenu.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-WinContextMenu.o -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-WinContextMenu.Tpo -c -o src/Engine/Platform/neosu-WinContextMenu.o `test -f 'src/Engine/Platform/WinContextMenu.cpp' || echo '$(srcdir)/'`src/Engine/Platform/WinContextMenu.cpp
@@ -3792,20 +3743,6 @@ src/Engine/Platform/neosu-WinSDLGLES2Interface.obj: src/Engine/Platform/WinSDLGL
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/WinSDLGLES2Interface.cpp' object='src/Engine/Platform/neosu-WinSDLGLES2Interface.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-WinSDLGLES2Interface.obj `if test -f 'src/Engine/Platform/WinSDLGLES2Interface.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/WinSDLGLES2Interface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/WinSDLGLES2Interface.cpp'; fi`
-
-src/Engine/Platform/neosu-WinTimer.o: src/Engine/Platform/WinTimer.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-WinTimer.o -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-WinTimer.Tpo -c -o src/Engine/Platform/neosu-WinTimer.o `test -f 'src/Engine/Platform/WinTimer.cpp' || echo '$(srcdir)/'`src/Engine/Platform/WinTimer.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-WinTimer.Tpo src/Engine/Platform/$(DEPDIR)/neosu-WinTimer.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/WinTimer.cpp' object='src/Engine/Platform/neosu-WinTimer.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-WinTimer.o `test -f 'src/Engine/Platform/WinTimer.cpp' || echo '$(srcdir)/'`src/Engine/Platform/WinTimer.cpp
-
-src/Engine/Platform/neosu-WinTimer.obj: src/Engine/Platform/WinTimer.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-WinTimer.obj -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-WinTimer.Tpo -c -o src/Engine/Platform/neosu-WinTimer.obj `if test -f 'src/Engine/Platform/WinTimer.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/WinTimer.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/WinTimer.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-WinTimer.Tpo src/Engine/Platform/$(DEPDIR)/neosu-WinTimer.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/WinTimer.cpp' object='src/Engine/Platform/neosu-WinTimer.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-WinTimer.obj `if test -f 'src/Engine/Platform/WinTimer.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/WinTimer.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/WinTimer.cpp'; fi`
 
 src/Engine/Platform/neosu-XInputGamepad.o: src/Engine/Platform/XInputGamepad.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-XInputGamepad.o -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-XInputGamepad.Tpo -c -o src/Engine/Platform/neosu-XInputGamepad.o `test -f 'src/Engine/Platform/XInputGamepad.cpp' || echo '$(srcdir)/'`src/Engine/Platform/XInputGamepad.cpp
@@ -4962,20 +4899,17 @@ distclean: distclean-am
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-LinuxEnvironment.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-LinuxSDLEnvironment.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-LinuxTimer.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-NullContextMenu.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-NullEnvironment.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-SDLEnvironment.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-SDLGLES2Interface.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-SDLGLLegacyInterface.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-Timer.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinContextMenu.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinEnvironment.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinGL3Interface.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinGLLegacyInterface.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinSDLEnvironment.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinSDLGLES2Interface.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinTimer.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-XInputGamepad.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullGraphicsInterface.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullImage.Po
@@ -5188,20 +5122,17 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-LinuxEnvironment.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-LinuxSDLEnvironment.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-LinuxTimer.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-NullContextMenu.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-NullEnvironment.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-SDLEnvironment.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-SDLGLES2Interface.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-SDLGLLegacyInterface.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-Timer.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinContextMenu.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinEnvironment.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinGL3Interface.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinGLLegacyInterface.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinSDLEnvironment.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinSDLGLES2Interface.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinTimer.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-XInputGamepad.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullGraphicsInterface.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullImage.Po

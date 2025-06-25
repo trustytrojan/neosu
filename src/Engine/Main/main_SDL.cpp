@@ -16,7 +16,7 @@
 #include "Profiler.h"
 #include "SDL.h"
 #include "SDLEnvironment.h"
-#include "Timer.h"
+#include "Timing.h"
 #include "WinSDLEnvironment.h"
 
 #define WINDOW_TITLE "McEngine"

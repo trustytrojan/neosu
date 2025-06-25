@@ -6,7 +6,7 @@
 #include "ConVar.h"
 #include "Engine.h"
 #include "Environment.h"
-#include "Timer.h"
+#include "Timing.h"
 
 using namespace std;
 

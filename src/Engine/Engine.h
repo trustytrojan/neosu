@@ -2,11 +2,11 @@
 #include <source_location>
 
 #include "cbase.h"
+#include "Timing.h"
 #include "fmt/color.h"
 #include "fmt/printf.h"
 
 class App;
-class Timer;
 class Mouse;
 class ConVar;
 class Gamepad;

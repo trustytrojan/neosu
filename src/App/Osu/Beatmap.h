@@ -5,7 +5,7 @@
 #include "DatabaseBeatmap.h"
 #include "DifficultyCalculator.h"
 #include "LegacyReplay.h"
-#include "Timer.h"
+#include "Timing.h"
 #include "UString.h"
 #include "cbase.h"
 #include "score.h"

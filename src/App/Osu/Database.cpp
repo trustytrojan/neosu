@@ -22,7 +22,7 @@
 #include "SongBrowser/MapCalcThread.h"
 #include "SongBrowser/ScoreConverterThread.h"
 #include "SongBrowser/SongBrowser.h"
-#include "Timer.h"
+#include "Timing.h"
 #include "score.h"
 
 Database *db = NULL;

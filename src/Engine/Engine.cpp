@@ -18,7 +18,7 @@
 #include "Profiler.h"
 #include "ResourceManager.h"
 #include "SoundEngine.h"
-#include "Timer.h"
+#include "Timing.h"
 #include "VisualProfiler.h"
 #include "XInputGamepad.h"
 

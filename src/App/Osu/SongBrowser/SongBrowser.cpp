@@ -51,7 +51,7 @@
 #include "SongButton.h"
 #include "SongDifficultyButton.h"
 #include "SoundEngine.h"
-#include "Timer.h"
+#include "Timing.h"
 #include "UIBackButton.h"
 #include "UIContextMenu.h"
 #include "UISearchOverlay.h"

@@ -8,7 +8,10 @@
 #include "cbase.h"
 #include "score.h"
 
-class Timer;
+namespace Timing
+{
+    class Timer;
+}
 class ConVar;
 
 class OsuFile;
@@ -123,7 +126,7 @@ class Database {
     void saveScores();
     bool addScoreRaw(const FinishedScore &score);
 
-    Timer *importTimer;
+    Timing::Timer *importTimer;
     bool bIsFirstLoad;   // only load differences after first raw load
     bool bFoundChanges;  // for total refresh detection of raw loading
 

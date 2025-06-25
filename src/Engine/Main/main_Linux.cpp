@@ -8,7 +8,7 @@
 #include "LinuxEnvironment.h"
 #include "LinuxGLLegacyInterface.h"
 #include "Profiler.h"
-#include "Timer.h"
+#include "Timing.h"
 #include "cbase.h"
 
 #define XLIB_ILLEGAL_ACCESS

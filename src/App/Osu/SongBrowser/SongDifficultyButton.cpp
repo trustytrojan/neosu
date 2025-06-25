@@ -16,7 +16,7 @@
 #include "ResourceManager.h"
 #include "Skin.h"
 #include "SoundEngine.h"
-#include "Timer.h"
+#include "Timing.h"
 
 using namespace std;
 

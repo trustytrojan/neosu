@@ -113,20 +113,17 @@ neosu_SOURCES = \
 	src/Engine/Platform/LinuxEnvironment.cpp \
 	src/Engine/Platform/LinuxGLLegacyInterface.cpp \
 	src/Engine/Platform/LinuxSDLEnvironment.cpp \
-	src/Engine/Platform/LinuxTimer.cpp \
 	src/Engine/Platform/NullContextMenu.cpp \
 	src/Engine/Platform/NullEnvironment.cpp \
 	src/Engine/Platform/SDLEnvironment.cpp \
 	src/Engine/Platform/SDLGLES2Interface.cpp \
 	src/Engine/Platform/SDLGLLegacyInterface.cpp \
-	src/Engine/Platform/Timer.cpp \
 	src/Engine/Platform/WinContextMenu.cpp \
 	src/Engine/Platform/WinEnvironment.cpp \
 	src/Engine/Platform/WinGL3Interface.cpp \
 	src/Engine/Platform/WinGLLegacyInterface.cpp \
 	src/Engine/Platform/WinSDLEnvironment.cpp \
 	src/Engine/Platform/WinSDLGLES2Interface.cpp \
-	src/Engine/Platform/WinTimer.cpp \
 	src/Engine/Platform/XInputGamepad.cpp \
 	src/Engine/Profiler.cpp \
 	src/Engine/RenderTarget.cpp \

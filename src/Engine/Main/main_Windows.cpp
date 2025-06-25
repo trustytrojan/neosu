@@ -47,7 +47,7 @@ PGPI g_GetPointerInfo = (PGPI)GetProcAddress(GetModuleHandle(TEXT("user32.dll"))
 #include "Engine.h"
 #include "Mouse.h"
 #include "Profiler.h"
-#include "Timer.h"
+#include "Timing.h"
 #include "WinEnvironment.h"
 #include "WinGLLegacyInterface.h"
 
