@@ -20,7 +20,7 @@ struct pp_info {
 
 class OsuDifficultyHitObject {
    public:
-    enum class TYPE : u8 {
+    enum class TYPE : i8 {
         INVALID = 0,
         CIRCLE,
         SPINNER,
@@ -48,7 +48,7 @@ class OsuDifficultyHitObject {
    public:
     OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time);               // circle
     OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time, i32 endTime);  // spinner
-    OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time, i32 endTime, f32 spanDuration, u8 osuSliderCurveType,
+    OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time, i32 endTime, f32 spanDuration, i8 osuSliderCurveType,
                            std::vector<Vector2> controlPoints, f32 pixelLength,
                            std::vector<SLIDER_SCORING_TIME> scoringTimes, i32 repeats,
                            bool calculateSliderCurveInConstructor);  // slider
@@ -79,7 +79,7 @@ class OsuDifficultyHitObject {
 
     // sliders
     f32 spanDuration;  // i.e. sliderTimeWithoutRepeats
-    u8 osuSliderCurveType;
+    i8 osuSliderCurveType;
     f32 pixelLength;
     std::vector<SLIDER_SCORING_TIME> scoringTimes;
     i32 repeats;

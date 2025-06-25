@@ -887,7 +887,6 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
         // check if we are finished loading
         if(db->isFinished()) {
             this->bBeatmapRefreshScheduled = false;
-            Timing::sleep(100000);  // wtf?
             this->onDatabaseLoadingFinished();
         }
         return;

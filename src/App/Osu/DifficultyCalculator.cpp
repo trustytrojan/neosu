@@ -18,7 +18,7 @@ OsuDifficultyHitObject::OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time,
                              std::vector<SLIDER_SCORING_TIME>(), 0, true) {}
 
 OsuDifficultyHitObject::OsuDifficultyHitObject(TYPE type, Vector2 pos, i32 time, i32 endTime, f32 spanDuration,
-                                               u8 osuSliderCurveType, std::vector<Vector2> controlPoints,
+                                               i8 osuSliderCurveType, std::vector<Vector2> controlPoints,
                                                f32 pixelLength, std::vector<SLIDER_SCORING_TIME> scoringTimes,
                                                i32 repeats, bool calculateSliderCurveInConstructor) {
     this->type = type;
@@ -98,8 +98,7 @@ OsuDifficultyHitObject::OsuDifficultyHitObject(OsuDifficultyHitObject &&dobj) no
 
 OsuDifficultyHitObject &OsuDifficultyHitObject::operator=(OsuDifficultyHitObject &&dobj) noexcept {
     // self-assignment check
-    if(this == &dobj)
-        return *this;
+    if(this == &dobj) return *this;
 
     // move
     this->type = dobj.type;
