@@ -285,8 +285,9 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/Engine/Renderer/neosu-OpenGLRenderTarget.$(OBJEXT) \
 	src/Engine/Renderer/neosu-OpenGLShader.$(OBJEXT) \
 	src/Engine/Renderer/neosu-OpenGLVertexArrayObject.$(OBJEXT) \
-	src/Engine/neosu-Resource.$(OBJEXT) \
-	src/Engine/neosu-ResourceManager.$(OBJEXT) \
+	src/Engine/Resources/neosu-AsyncResourceLoader.$(OBJEXT) \
+	src/Engine/Resources/neosu-Resource.$(OBJEXT) \
+	src/Engine/Resources/neosu-ResourceManager.$(OBJEXT) \
 	src/Engine/Sound/BASS/neosu-BassManager.$(OBJEXT) \
 	src/Engine/Sound/neosu-Sound.$(OBJEXT) \
 	src/Engine/Sound/neosu-SoundEngine.$(OBJEXT) \
@@ -441,8 +442,6 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/Engine/$(DEPDIR)/neosu-NetworkHandler.Po \
 	src/Engine/$(DEPDIR)/neosu-Profiler.Po \
 	src/Engine/$(DEPDIR)/neosu-RenderTarget.Po \
-	src/Engine/$(DEPDIR)/neosu-Resource.Po \
-	src/Engine/$(DEPDIR)/neosu-ResourceManager.Po \
 	src/Engine/$(DEPDIR)/neosu-TextureAtlas.Po \
 	src/Engine/$(DEPDIR)/neosu-VertexArrayObject.Po \
 	src/Engine/Input/$(DEPDIR)/neosu-Gamepad.Po \
@@ -482,6 +481,9 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLRenderTarget.Po \
 	src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLShader.Po \
 	src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Po \
+	src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Po \
+	src/Engine/Resources/$(DEPDIR)/neosu-Resource.Po \
+	src/Engine/Resources/$(DEPDIR)/neosu-ResourceManager.Po \
 	src/Engine/Sound/$(DEPDIR)/neosu-Sound.Po \
 	src/Engine/Sound/$(DEPDIR)/neosu-SoundEngine.Po \
 	src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassManager.Po \
@@ -972,8 +974,9 @@ neosu_SOURCES = \
 	src/Engine/Renderer/OpenGLRenderTarget.cpp \
 	src/Engine/Renderer/OpenGLShader.cpp \
 	src/Engine/Renderer/OpenGLVertexArrayObject.cpp \
-	src/Engine/Resource.cpp \
-	src/Engine/ResourceManager.cpp \
+	src/Engine/Resources/AsyncResourceLoader.cpp \
+	src/Engine/Resources/Resource.cpp \
+	src/Engine/Resources/ResourceManager.cpp \
 	src/Engine/Sound/BASS/BassManager.cpp \
 	src/Engine/Sound/Sound.cpp \
 	src/Engine/Sound/SoundEngine.cpp \
@@ -1677,11 +1680,21 @@ src/Engine/Renderer/neosu-OpenGLShader.$(OBJEXT):  \
 src/Engine/Renderer/neosu-OpenGLVertexArrayObject.$(OBJEXT):  \
 	src/Engine/Renderer/$(am__dirstamp) \
 	src/Engine/Renderer/$(DEPDIR)/$(am__dirstamp)
-src/Engine/neosu-Resource.$(OBJEXT): src/Engine/$(am__dirstamp) \
-	src/Engine/$(DEPDIR)/$(am__dirstamp)
-src/Engine/neosu-ResourceManager.$(OBJEXT):  \
-	src/Engine/$(am__dirstamp) \
-	src/Engine/$(DEPDIR)/$(am__dirstamp)
+src/Engine/Resources/$(am__dirstamp):
+	@$(MKDIR_P) src/Engine/Resources
+	@: >>src/Engine/Resources/$(am__dirstamp)
+src/Engine/Resources/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) src/Engine/Resources/$(DEPDIR)
+	@: >>src/Engine/Resources/$(DEPDIR)/$(am__dirstamp)
+src/Engine/Resources/neosu-AsyncResourceLoader.$(OBJEXT):  \
+	src/Engine/Resources/$(am__dirstamp) \
+	src/Engine/Resources/$(DEPDIR)/$(am__dirstamp)
+src/Engine/Resources/neosu-Resource.$(OBJEXT):  \
+	src/Engine/Resources/$(am__dirstamp) \
+	src/Engine/Resources/$(DEPDIR)/$(am__dirstamp)
+src/Engine/Resources/neosu-ResourceManager.$(OBJEXT):  \
+	src/Engine/Resources/$(am__dirstamp) \
+	src/Engine/Resources/$(DEPDIR)/$(am__dirstamp)
 src/Engine/Sound/BASS/$(am__dirstamp):
 	@$(MKDIR_P) src/Engine/Sound/BASS
 	@: >>src/Engine/Sound/BASS/$(am__dirstamp)
@@ -1811,6 +1824,7 @@ mostlyclean-compile:
 	-rm -f src/Engine/Main/*.$(OBJEXT)
 	-rm -f src/Engine/Platform/*.$(OBJEXT)
 	-rm -f src/Engine/Renderer/*.$(OBJEXT)
+	-rm -f src/Engine/Resources/*.$(OBJEXT)
 	-rm -f src/Engine/Sound/*.$(OBJEXT)
 	-rm -f src/Engine/Sound/BASS/*.$(OBJEXT)
 	-rm -f src/GUI/*.$(OBJEXT)
@@ -1925,8 +1939,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-NetworkHandler.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-Profiler.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-RenderTarget.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-Resource.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-ResourceManager.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-TextureAtlas.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-VertexArrayObject.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Input/$(DEPDIR)/neosu-Gamepad.Po@am__quote@ # am--include-marker
@@ -1966,6 +1978,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLRenderTarget.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLShader.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Resources/$(DEPDIR)/neosu-Resource.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Resources/$(DEPDIR)/neosu-ResourceManager.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Sound/$(DEPDIR)/neosu-Sound.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Sound/$(DEPDIR)/neosu-SoundEngine.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassManager.Po@am__quote@ # am--include-marker
@@ -3993,33 +4008,47 @@ src/Engine/Renderer/neosu-OpenGLVertexArrayObject.obj: src/Engine/Renderer/OpenG
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/neosu-OpenGLVertexArrayObject.obj `if test -f 'src/Engine/Renderer/OpenGLVertexArrayObject.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGLVertexArrayObject.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGLVertexArrayObject.cpp'; fi`
 
-src/Engine/neosu-Resource.o: src/Engine/Resource.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/neosu-Resource.o -MD -MP -MF src/Engine/$(DEPDIR)/neosu-Resource.Tpo -c -o src/Engine/neosu-Resource.o `test -f 'src/Engine/Resource.cpp' || echo '$(srcdir)/'`src/Engine/Resource.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/$(DEPDIR)/neosu-Resource.Tpo src/Engine/$(DEPDIR)/neosu-Resource.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Resource.cpp' object='src/Engine/neosu-Resource.o' libtool=no @AMDEPBACKSLASH@
+src/Engine/Resources/neosu-AsyncResourceLoader.o: src/Engine/Resources/AsyncResourceLoader.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Resources/neosu-AsyncResourceLoader.o -MD -MP -MF src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Tpo -c -o src/Engine/Resources/neosu-AsyncResourceLoader.o `test -f 'src/Engine/Resources/AsyncResourceLoader.cpp' || echo '$(srcdir)/'`src/Engine/Resources/AsyncResourceLoader.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Tpo src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Resources/AsyncResourceLoader.cpp' object='src/Engine/Resources/neosu-AsyncResourceLoader.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-Resource.o `test -f 'src/Engine/Resource.cpp' || echo '$(srcdir)/'`src/Engine/Resource.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Resources/neosu-AsyncResourceLoader.o `test -f 'src/Engine/Resources/AsyncResourceLoader.cpp' || echo '$(srcdir)/'`src/Engine/Resources/AsyncResourceLoader.cpp
 
-src/Engine/neosu-Resource.obj: src/Engine/Resource.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/neosu-Resource.obj -MD -MP -MF src/Engine/$(DEPDIR)/neosu-Resource.Tpo -c -o src/Engine/neosu-Resource.obj `if test -f 'src/Engine/Resource.cpp'; then $(CYGPATH_W) 'src/Engine/Resource.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Resource.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/$(DEPDIR)/neosu-Resource.Tpo src/Engine/$(DEPDIR)/neosu-Resource.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Resource.cpp' object='src/Engine/neosu-Resource.obj' libtool=no @AMDEPBACKSLASH@
+src/Engine/Resources/neosu-AsyncResourceLoader.obj: src/Engine/Resources/AsyncResourceLoader.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Resources/neosu-AsyncResourceLoader.obj -MD -MP -MF src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Tpo -c -o src/Engine/Resources/neosu-AsyncResourceLoader.obj `if test -f 'src/Engine/Resources/AsyncResourceLoader.cpp'; then $(CYGPATH_W) 'src/Engine/Resources/AsyncResourceLoader.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Resources/AsyncResourceLoader.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Tpo src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Resources/AsyncResourceLoader.cpp' object='src/Engine/Resources/neosu-AsyncResourceLoader.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-Resource.obj `if test -f 'src/Engine/Resource.cpp'; then $(CYGPATH_W) 'src/Engine/Resource.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Resource.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Resources/neosu-AsyncResourceLoader.obj `if test -f 'src/Engine/Resources/AsyncResourceLoader.cpp'; then $(CYGPATH_W) 'src/Engine/Resources/AsyncResourceLoader.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Resources/AsyncResourceLoader.cpp'; fi`
 
-src/Engine/neosu-ResourceManager.o: src/Engine/ResourceManager.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/neosu-ResourceManager.o -MD -MP -MF src/Engine/$(DEPDIR)/neosu-ResourceManager.Tpo -c -o src/Engine/neosu-ResourceManager.o `test -f 'src/Engine/ResourceManager.cpp' || echo '$(srcdir)/'`src/Engine/ResourceManager.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/$(DEPDIR)/neosu-ResourceManager.Tpo src/Engine/$(DEPDIR)/neosu-ResourceManager.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/ResourceManager.cpp' object='src/Engine/neosu-ResourceManager.o' libtool=no @AMDEPBACKSLASH@
+src/Engine/Resources/neosu-Resource.o: src/Engine/Resources/Resource.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Resources/neosu-Resource.o -MD -MP -MF src/Engine/Resources/$(DEPDIR)/neosu-Resource.Tpo -c -o src/Engine/Resources/neosu-Resource.o `test -f 'src/Engine/Resources/Resource.cpp' || echo '$(srcdir)/'`src/Engine/Resources/Resource.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Resources/$(DEPDIR)/neosu-Resource.Tpo src/Engine/Resources/$(DEPDIR)/neosu-Resource.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Resources/Resource.cpp' object='src/Engine/Resources/neosu-Resource.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-ResourceManager.o `test -f 'src/Engine/ResourceManager.cpp' || echo '$(srcdir)/'`src/Engine/ResourceManager.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Resources/neosu-Resource.o `test -f 'src/Engine/Resources/Resource.cpp' || echo '$(srcdir)/'`src/Engine/Resources/Resource.cpp
 
-src/Engine/neosu-ResourceManager.obj: src/Engine/ResourceManager.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/neosu-ResourceManager.obj -MD -MP -MF src/Engine/$(DEPDIR)/neosu-ResourceManager.Tpo -c -o src/Engine/neosu-ResourceManager.obj `if test -f 'src/Engine/ResourceManager.cpp'; then $(CYGPATH_W) 'src/Engine/ResourceManager.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/ResourceManager.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/$(DEPDIR)/neosu-ResourceManager.Tpo src/Engine/$(DEPDIR)/neosu-ResourceManager.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/ResourceManager.cpp' object='src/Engine/neosu-ResourceManager.obj' libtool=no @AMDEPBACKSLASH@
+src/Engine/Resources/neosu-Resource.obj: src/Engine/Resources/Resource.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Resources/neosu-Resource.obj -MD -MP -MF src/Engine/Resources/$(DEPDIR)/neosu-Resource.Tpo -c -o src/Engine/Resources/neosu-Resource.obj `if test -f 'src/Engine/Resources/Resource.cpp'; then $(CYGPATH_W) 'src/Engine/Resources/Resource.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Resources/Resource.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Resources/$(DEPDIR)/neosu-Resource.Tpo src/Engine/Resources/$(DEPDIR)/neosu-Resource.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Resources/Resource.cpp' object='src/Engine/Resources/neosu-Resource.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-ResourceManager.obj `if test -f 'src/Engine/ResourceManager.cpp'; then $(CYGPATH_W) 'src/Engine/ResourceManager.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/ResourceManager.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Resources/neosu-Resource.obj `if test -f 'src/Engine/Resources/Resource.cpp'; then $(CYGPATH_W) 'src/Engine/Resources/Resource.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Resources/Resource.cpp'; fi`
+
+src/Engine/Resources/neosu-ResourceManager.o: src/Engine/Resources/ResourceManager.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Resources/neosu-ResourceManager.o -MD -MP -MF src/Engine/Resources/$(DEPDIR)/neosu-ResourceManager.Tpo -c -o src/Engine/Resources/neosu-ResourceManager.o `test -f 'src/Engine/Resources/ResourceManager.cpp' || echo '$(srcdir)/'`src/Engine/Resources/ResourceManager.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Resources/$(DEPDIR)/neosu-ResourceManager.Tpo src/Engine/Resources/$(DEPDIR)/neosu-ResourceManager.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Resources/ResourceManager.cpp' object='src/Engine/Resources/neosu-ResourceManager.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Resources/neosu-ResourceManager.o `test -f 'src/Engine/Resources/ResourceManager.cpp' || echo '$(srcdir)/'`src/Engine/Resources/ResourceManager.cpp
+
+src/Engine/Resources/neosu-ResourceManager.obj: src/Engine/Resources/ResourceManager.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Resources/neosu-ResourceManager.obj -MD -MP -MF src/Engine/Resources/$(DEPDIR)/neosu-ResourceManager.Tpo -c -o src/Engine/Resources/neosu-ResourceManager.obj `if test -f 'src/Engine/Resources/ResourceManager.cpp'; then $(CYGPATH_W) 'src/Engine/Resources/ResourceManager.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Resources/ResourceManager.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Resources/$(DEPDIR)/neosu-ResourceManager.Tpo src/Engine/Resources/$(DEPDIR)/neosu-ResourceManager.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Resources/ResourceManager.cpp' object='src/Engine/Resources/neosu-ResourceManager.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Resources/neosu-ResourceManager.obj `if test -f 'src/Engine/Resources/ResourceManager.cpp'; then $(CYGPATH_W) 'src/Engine/Resources/ResourceManager.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Resources/ResourceManager.cpp'; fi`
 
 src/Engine/Sound/BASS/neosu-BassManager.o: src/Engine/Sound/BASS/BassManager.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Sound/BASS/neosu-BassManager.o -MD -MP -MF src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassManager.Tpo -c -o src/Engine/Sound/BASS/neosu-BassManager.o `test -f 'src/Engine/Sound/BASS/BassManager.cpp' || echo '$(srcdir)/'`src/Engine/Sound/BASS/BassManager.cpp
@@ -4767,6 +4796,8 @@ distclean-generic:
 	-$(am__rm_f) src/Engine/Platform/$(am__dirstamp)
 	-$(am__rm_f) src/Engine/Renderer/$(DEPDIR)/$(am__dirstamp)
 	-$(am__rm_f) src/Engine/Renderer/$(am__dirstamp)
+	-$(am__rm_f) src/Engine/Resources/$(DEPDIR)/$(am__dirstamp)
+	-$(am__rm_f) src/Engine/Resources/$(am__dirstamp)
 	-$(am__rm_f) src/Engine/Sound/$(DEPDIR)/$(am__dirstamp)
 	-$(am__rm_f) src/Engine/Sound/$(am__dirstamp)
 	-$(am__rm_f) src/Engine/Sound/BASS/$(DEPDIR)/$(am__dirstamp)
@@ -4895,8 +4926,6 @@ distclean: distclean-am
 	-rm -f src/Engine/$(DEPDIR)/neosu-NetworkHandler.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Profiler.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-RenderTarget.Po
-	-rm -f src/Engine/$(DEPDIR)/neosu-Resource.Po
-	-rm -f src/Engine/$(DEPDIR)/neosu-ResourceManager.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-TextureAtlas.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-VertexArrayObject.Po
 	-rm -f src/Engine/Input/$(DEPDIR)/neosu-Gamepad.Po
@@ -4936,6 +4965,9 @@ distclean: distclean-am
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLRenderTarget.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLShader.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Po
+	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Po
+	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-Resource.Po
+	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-ResourceManager.Po
 	-rm -f src/Engine/Sound/$(DEPDIR)/neosu-Sound.Po
 	-rm -f src/Engine/Sound/$(DEPDIR)/neosu-SoundEngine.Po
 	-rm -f src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassManager.Po
@@ -5118,8 +5150,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/Engine/$(DEPDIR)/neosu-NetworkHandler.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Profiler.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-RenderTarget.Po
-	-rm -f src/Engine/$(DEPDIR)/neosu-Resource.Po
-	-rm -f src/Engine/$(DEPDIR)/neosu-ResourceManager.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-TextureAtlas.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-VertexArrayObject.Po
 	-rm -f src/Engine/Input/$(DEPDIR)/neosu-Gamepad.Po
@@ -5159,6 +5189,9 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLRenderTarget.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLShader.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLVertexArrayObject.Po
+	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Po
+	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-Resource.Po
+	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-ResourceManager.Po
 	-rm -f src/Engine/Sound/$(DEPDIR)/neosu-Sound.Po
 	-rm -f src/Engine/Sound/$(DEPDIR)/neosu-SoundEngine.Po
 	-rm -f src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassManager.Po

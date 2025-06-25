@@ -10,7 +10,7 @@ class UserCard : public CBaseUIButton {
     UserCard(u32 user_id);
     ~UserCard() override;
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
     void updateUserStats();

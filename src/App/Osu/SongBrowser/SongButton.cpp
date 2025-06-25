@@ -59,12 +59,12 @@ SongButton::~SongButton() {
     }
 }
 
-void SongButton::draw(Graphics *g) {
+void SongButton::draw() {
     if(!this->bVisible) return;
     if(this->vPos.y + this->vSize.y < 0) return;
     if(this->vPos.y > engine->getScreenHeight()) return;
 
-    Button::draw(g);
+    Button::draw();
 
     // draw background image
     this->sortChildren();
@@ -80,19 +80,19 @@ void SongButton::draw(Graphics *g) {
                 this->sMapper = representative_beatmap->getCreator();
 
                 this->drawBeatmapBackgroundThumbnail(
-                    g, osu->getBackgroundImageHandler()->getLoadBackgroundImage(representative_beatmap));
+                    osu->getBackgroundImageHandler()->getLoadBackgroundImage(representative_beatmap));
 
                 break;
             }
         }
     }
 
-    if(this->grade != FinishedScore::Grade::N) this->drawGrade(g);
-    this->drawTitle(g);
-    this->drawSubTitle(g);
+    if(this->grade != FinishedScore::Grade::N) this->drawGrade();
+    this->drawTitle();
+    this->drawSubTitle();
 }
 
-void SongButton::drawBeatmapBackgroundThumbnail(Graphics *g, Image *image) {
+void SongButton::drawBeatmapBackgroundThumbnail(Image *image) {
     if(!cv_draw_songbrowser_thumbnails.getBool() || osu->getSkin()->getVersion() < 2.2f) return;
 
     float alpha = 1.0f;
@@ -147,7 +147,7 @@ void SongButton::drawBeatmapBackgroundThumbnail(Graphics *g, Image *image) {
     }
 }
 
-void SongButton::drawGrade(Graphics *g) {
+void SongButton::drawGrade() {
     // scaling
     const Vector2 pos = this->getActualPos();
     const Vector2 size = this->getActualSize();
@@ -157,12 +157,12 @@ void SongButton::drawGrade(Graphics *g) {
     {
         const float scale = this->calculateGradeScale();
         g->setColor(0xffffffff);
-        grade->drawRaw(g, Vector2(pos.x + this->fGradeOffset, pos.y + size.y / 2), scale, AnchorPoint::LEFT);
+        grade->drawRaw(Vector2(pos.x + this->fGradeOffset, pos.y + size.y / 2), scale, AnchorPoint::LEFT);
     }
     g->popTransform();
 }
 
-void SongButton::drawTitle(Graphics *g, float deselectedAlpha, bool forceSelectedStyle) {
+void SongButton::drawTitle(float deselectedAlpha, bool forceSelectedStyle) {
     // scaling
     const Vector2 pos = this->getActualPos();
     const Vector2 size = this->getActualSize();
@@ -183,7 +183,7 @@ void SongButton::drawTitle(Graphics *g, float deselectedAlpha, bool forceSelecte
     g->popTransform();
 }
 
-void SongButton::drawSubTitle(Graphics *g, float deselectedAlpha, bool forceSelectedStyle) {
+void SongButton::drawSubTitle(float deselectedAlpha, bool forceSelectedStyle) {
     // scaling
     const Vector2 pos = this->getActualPos();
     const Vector2 size = this->getActualSize();
@@ -259,7 +259,7 @@ void SongButton::onSelected(bool wasSelected, bool autoSelectBottomMostChild, bo
     }
 }
 
-void SongButton::onRightMouseUpInside() { this->triggerContextMenu(engine->getMouse()->getPos()); }
+void SongButton::onRightMouseUpInside() { this->triggerContextMenu(mouse->getPos()); }
 
 void SongButton::triggerContextMenu(Vector2 pos) {
     if(this->contextMenu != NULL) {

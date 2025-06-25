@@ -419,7 +419,7 @@ void OpenGL3Interface::drawString(McFont *font, UString text) {
 
     this->updateTransform();
 
-    font->drawString(this, text);
+    font->drawString(text.toUtf8());
 }
 
 void OpenGL3Interface::drawVAO(VertexArrayObject *vao) {
@@ -732,12 +732,12 @@ void OpenGL3Interface::onResolutionChange(Vector2 newResolution) {
     }
 }
 
-Image *OpenGL3Interface::createImage(std::string filePath, bool mipmapped) {
-    return new OpenGLImage(filePath, mipmapped);
+Image *OpenGL3Interface::createImage(std::string filePath, bool mipmapped, bool keepInSystemMemory) {
+    return new OpenGLImage(filePath, mipmapped, keepInSystemMemory);
 }
 
-Image *OpenGL3Interface::createImage(int width, int height, bool mipmapped) {
-    return new OpenGLImage(width, height, mipmapped);
+Image *OpenGL3Interface::createImage(int width, int height, bool mipmapped, bool keepInSystemMemory) {
+    return new OpenGLImage(width, height, mipmapped, keepInSystemMemory);
 }
 
 RenderTarget *OpenGL3Interface::createRenderTarget(int x, int y, int width, int height,

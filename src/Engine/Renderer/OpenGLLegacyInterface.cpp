@@ -412,7 +412,7 @@ void OpenGLLegacyInterface::drawString(McFont *font, UString text) {
         glFlush();
     }
 
-    font->drawString(this, text);
+    font->drawString(text.toUtf8());
 }
 
 void OpenGLLegacyInterface::drawVAO(VertexArrayObject *vao) {
@@ -669,12 +669,12 @@ void OpenGLLegacyInterface::onResolutionChange(Vector2 newResolution) {
     }
 }
 
-Image *OpenGLLegacyInterface::createImage(std::string filePath, bool mipmapped) {
-    return new OpenGLImage(filePath, mipmapped);
+Image *OpenGLLegacyInterface::createImage(std::string filePath, bool mipmapped, bool keepInSystemMemory) {
+    return new OpenGLImage(filePath, mipmapped, keepInSystemMemory);
 }
 
-Image *OpenGLLegacyInterface::createImage(int width, int height, bool mipmapped) {
-    return new OpenGLImage(width, height, mipmapped);
+Image *OpenGLLegacyInterface::createImage(int width, int height, bool mipmapped, bool keepInSystemMemory) {
+    return new OpenGLImage(width, height, mipmapped, keepInSystemMemory);
 }
 
 RenderTarget *OpenGLLegacyInterface::createRenderTarget(int x, int y, int width, int height,

@@ -8,7 +8,7 @@
 void CBaseUIElement::mouse_update(bool *propagate_clicks) {
     // check if mouse is inside element
     McRect temp = McRect(this->vPos.x + 1, this->vPos.y + 1, this->vSize.x - 1, this->vSize.y - 1);
-    if(temp.contains(engine->getMouse()->getPos())) {
+    if(temp.contains(mouse->getPos())) {
         if(!this->bMouseInside) {
             this->bMouseInside = true;
             if(this->bVisible && this->bEnabled) this->onMouseInside();
@@ -32,7 +32,7 @@ void CBaseUIElement::mouse_update(bool *propagate_clicks) {
         return;
     }
 
-    if(engine->getMouse()->isLeftDown() && *propagate_clicks) {
+    if(mouse->isLeftDown() && *propagate_clicks) {
         this->bMouseUpCheck = true;
         if(this->bMouseInside) {
             *propagate_clicks = !this->grabs_clicks;

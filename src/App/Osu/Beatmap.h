@@ -28,9 +28,9 @@ class Beatmap : public BeatmapInterface {
     Beatmap();
     ~Beatmap() override;
 
-    void draw(Graphics *g);
-    void drawDebug(Graphics *g);
-    void drawBackground(Graphics *g);
+    void draw();
+    void drawDebug();
+    void drawBackground();
 
     void update();
     void update2();  // Used to be Beatmap::update()
@@ -347,8 +347,8 @@ class Beatmap : public BeatmapInterface {
 
     FinishedScore saveAndSubmitScore(bool quit);
 
-    void drawFollowPoints(Graphics *g);
-    void drawHitObjects(Graphics *g);
+    void drawFollowPoints();
+    void drawHitObjects();
 
     void updateAutoCursorPos();
     void updatePlayfieldMetrics();

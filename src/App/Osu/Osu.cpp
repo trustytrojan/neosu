@@ -113,7 +113,7 @@ Osu::Osu() {
     env->setCursorVisible(false);
 
     engine->getConsoleBox()->setRequireShiftToActivate(true);
-    engine->getMouse()->addListener(this);
+    mouse->addListener(this);
 
     cv_vsync.setValue(0.0f);
     cv_fps_max.setValue(420.0f);
@@ -187,12 +187,12 @@ Osu::Osu() {
     g_vInternalResolution = engine->getScreenSize();
 
     this->backBuffer =
-        engine->getResourceManager()->createRenderTarget(0, 0, this->getScreenWidth(), this->getScreenHeight());
-    this->playfieldBuffer = engine->getResourceManager()->createRenderTarget(0, 0, 64, 64);
+        resourceManager->createRenderTarget(0, 0, this->getScreenWidth(), this->getScreenHeight());
+    this->playfieldBuffer = resourceManager->createRenderTarget(0, 0, 64, 64);
     this->sliderFrameBuffer =
-        engine->getResourceManager()->createRenderTarget(0, 0, this->getScreenWidth(), this->getScreenHeight());
-    this->frameBuffer = engine->getResourceManager()->createRenderTarget(0, 0, 64, 64);
-    this->frameBuffer2 = engine->getResourceManager()->createRenderTarget(0, 0, 64, 64);
+        resourceManager->createRenderTarget(0, 0, this->getScreenWidth(), this->getScreenHeight());
+    this->frameBuffer = resourceManager->createRenderTarget(0, 0, 64, 64);
+    this->frameBuffer2 = resourceManager->createRenderTarget(0, 0, 64, 64);
 
     // load a few select subsystems very early
     this->notificationOverlay = new NotificationOverlay();
@@ -200,7 +200,7 @@ Osu::Osu() {
     this->updateHandler = new UpdateHandler();
 
     // load main menu icon before skin
-    engine->getResourceManager()->loadImage("neosu.png", "NEOSU_LOGO");
+    resourceManager->loadImage("neosu.png", "NEOSU_LOGO");
 
     // exec the main config file (this must be right here!)
     Console::execConfigFile("underride");  // same as override, but for defaults
@@ -218,7 +218,7 @@ Osu::Osu() {
 
     // Initialize sound here so we can load the preferred device from config
     // Avoids initializing the sound device twice, which can take a while depending on the driver
-    auto sound_engine = engine->getSound();
+    auto sound_engine = soundEngine;
     sound_engine->updateOutputDevices(true);
     sound_engine->initializeOutputDevice(sound_engine->getWantedDevice());
     cv_snd_output_device.setValue(sound_engine->getOutputDeviceName());
@@ -250,16 +250,16 @@ Osu::Osu() {
     const int newDPI = Osu::getUIScale() * baseDPI;
 
     McFont *defaultFont =
-        engine->getResourceManager()->loadFont("weblysleekuisb.ttf", "FONT_DEFAULT", 15, true, newDPI);
+        resourceManager->loadFont("weblysleekuisb.ttf", "FONT_DEFAULT", 15, true, newDPI);
     this->titleFont =
-        engine->getResourceManager()->loadFont("SourceSansPro-Semibold.otf", "FONT_OSU_TITLE", 60, true, newDPI);
+        resourceManager->loadFont("SourceSansPro-Semibold.otf", "FONT_OSU_TITLE", 60, true, newDPI);
     this->subTitleFont =
-        engine->getResourceManager()->loadFont("SourceSansPro-Semibold.otf", "FONT_OSU_SUBTITLE", 21, true, newDPI);
+        resourceManager->loadFont("SourceSansPro-Semibold.otf", "FONT_OSU_SUBTITLE", 21, true, newDPI);
     this->songBrowserFont =
-        engine->getResourceManager()->loadFont("SourceSansPro-Regular.otf", "FONT_OSU_SONGBROWSER", 35, true, newDPI);
+        resourceManager->loadFont("SourceSansPro-Regular.otf", "FONT_OSU_SONGBROWSER", 35, true, newDPI);
     this->songBrowserFontBold =
-        engine->getResourceManager()->loadFont("SourceSansPro-Bold.otf", "FONT_OSU_SONGBROWSER_BOLD", 30, true, newDPI);
-    this->fontIcons = engine->getResourceManager()->loadFont("fontawesome-webfont.ttf", "FONT_OSU_ICONS", Icons::icons,
+        resourceManager->loadFont("SourceSansPro-Bold.otf", "FONT_OSU_SONGBROWSER_BOLD", 30, true, newDPI);
+    this->fontIcons = resourceManager->loadFont("fontawesome-webfont.ttf", "FONT_OSU_ICONS", Icons::icons,
                                                              26, true, newDPI);
     this->fonts.push_back(defaultFont);
     this->fonts.push_back(this->titleFont);
@@ -272,7 +272,7 @@ Osu::Osu() {
     for(int i = 0; i < Icons::icons.size(); i++) {
         UString iconString;
         iconString.insert(0, Icons::icons[i]);
-        const float height = this->fontIcons->getStringHeight(iconString);
+        const float height = this->fontIcons->getStringHeight(iconString.toUtf8());
         if(height > averageIconHeight) averageIconHeight = height;
     }
     this->fontIcons->setHeight(averageIconHeight);
@@ -357,7 +357,7 @@ Osu::Osu() {
 #endif
 
     // Not the type of shader you want players to tweak or delete, so loading from string
-    actual_flashlight_shader = engine->getGraphics()->createShaderFromSource(
+    actual_flashlight_shader = g->createShaderFromSource(
         "#version 110\n"
         "varying vec2 tex_coord;\n"
         "void main() {\n"
@@ -375,7 +375,7 @@ Osu::Osu() {
         "    opacity = 1.0 - min(opacity, max_opacity);\n"
         "    gl_FragColor = vec4(1.0, 1.0, 0.9, opacity);\n"
         "}");
-    flashlight_shader = engine->getGraphics()->createShaderFromSource(
+    flashlight_shader = g->createShaderFromSource(
         "#version 110\n"
         "varying vec2 tex_coord;\n"
         "void main() {\n"
@@ -393,8 +393,8 @@ Osu::Osu() {
         "    opacity = 1.0 - min(opacity, max_opacity);\n"
         "    gl_FragColor = vec4(0.0, 0.0, 0.0, opacity);\n"
         "}");
-    engine->getResourceManager()->loadResource(actual_flashlight_shader);
-    engine->getResourceManager()->loadResource(flashlight_shader);
+    resourceManager->loadResource(actual_flashlight_shader);
+    resourceManager->loadResource(flashlight_shader);
 }
 
 Osu::~Osu() {
@@ -425,7 +425,7 @@ Osu::~Osu() {
     osu = NULL;
 }
 
-void Osu::draw(Graphics *g) {
+void Osu::draw() {
     if(this->skin == NULL || flashlight_shader == NULL)  // sanity check
     {
         g->setColor(0xff000000);
@@ -447,7 +447,7 @@ void Osu::draw(Graphics *g) {
 
         if(isFPoSu) this->playfieldBuffer->enable();
 
-        this->getSelectedBeatmap()->draw(g);
+        this->getSelectedBeatmap()->draw();
 
         auto actual_flashlight_enabled = cv_mod_actual_flashlight.getBool();
         if(cv_mod_flashlight.getBool() || actual_flashlight_enabled) {
@@ -514,7 +514,7 @@ void Osu::draw(Graphics *g) {
             }
         }
 
-        if(!isFPoSu) this->hud->draw(g);
+        if(!isFPoSu) this->hud->draw();
 
         // quick retry fadeout overlay
         if(this->fQuickRetryTime != 0.0f && this->bQuickRetryDown) {
@@ -525,17 +525,17 @@ void Osu::draw(Graphics *g) {
             g->fillRect(0, 0, this->getScreenWidth(), this->getScreenHeight());
         }
 
-        this->pauseMenu->draw(g);
-        this->modSelector->draw(g);
-        this->chat->draw(g);
-        this->user_actions->draw(g);
-        this->optionsMenu->draw(g);
+        this->pauseMenu->draw();
+        this->modSelector->draw();
+        this->chat->draw();
+        this->user_actions->draw();
+        this->optionsMenu->draw();
 
-        if(cv_draw_fps.getBool() && (!isFPoSu)) this->hud->drawFps(g);
+        if(cv_draw_fps.getBool() && (!isFPoSu)) this->hud->drawFps();
 
-        this->windowManager->draw(g);
+        this->windowManager->draw();
 
-        if(isFPoSu && cv_draw_cursor_ripples.getBool()) this->hud->drawCursorRipples(g);
+        if(isFPoSu && cv_draw_cursor_ripples.getBool()) this->hud->drawCursorRipples();
 
         // draw FPoSu cursor trail
         fadingCursorAlpha =
@@ -544,44 +544,44 @@ void Osu::draw(Graphics *g) {
            !cv_mod_fadingcursor.getBool())
             fadingCursorAlpha = 1.0f;
         if(isFPoSu && cv_fposu_draw_cursor_trail.getBool())
-            this->hud->drawCursorTrail(g, beatmap->getCursorPos(), fadingCursorAlpha);
+            this->hud->drawCursorTrail(beatmap->getCursorPos(), fadingCursorAlpha);
 
         if(isFPoSu) {
             this->playfieldBuffer->disable();
-            this->fposu->draw(g);
-            this->hud->draw(g);
+            this->fposu->draw();
+            this->hud->draw();
 
-            if(cv_draw_fps.getBool()) this->hud->drawFps(g);
+            if(cv_draw_fps.getBool()) this->hud->drawFps();
         }
     } else {  // if we are not playing
-        this->spectatorScreen->draw(g);
+        this->spectatorScreen->draw();
 
-        this->lobby->draw(g);
-        this->room->draw(g);
+        this->lobby->draw();
+        this->room->draw();
 
-        if(this->songBrowser2 != NULL) this->songBrowser2->draw(g);
+        if(this->songBrowser2 != NULL) this->songBrowser2->draw();
 
-        this->mainMenu->draw(g);
-        this->changelog->draw(g);
-        this->rankingScreen->draw(g);
-        this->chat->draw(g);
-        this->user_actions->draw(g);
-        this->optionsMenu->draw(g);
-        this->modSelector->draw(g);
-        this->prompt->draw(g);
+        this->mainMenu->draw();
+        this->changelog->draw();
+        this->rankingScreen->draw();
+        this->chat->draw();
+        this->user_actions->draw();
+        this->optionsMenu->draw();
+        this->modSelector->draw();
+        this->prompt->draw();
 
-        if(cv_draw_fps.getBool()) this->hud->drawFps(g);
+        if(cv_draw_fps.getBool()) this->hud->drawFps();
 
-        this->windowManager->draw(g);
+        this->windowManager->draw();
     }
 
-    this->tooltipOverlay->draw(g);
-    this->notificationOverlay->draw(g);
-    this->volumeOverlay->draw(g);
+    this->tooltipOverlay->draw();
+    this->notificationOverlay->draw();
+    this->volumeOverlay->draw();
 
     // loading spinner for some async tasks
     if((this->bSkinLoadScheduled && this->skin != this->skinScheduledToLoad)) {
-        this->hud->drawLoadingSmall(g, "");
+        this->hud->drawLoadingSmall("");
     }
 
     // draw cursor
@@ -595,9 +595,9 @@ void Osu::draw(Graphics *g) {
             cursorPos = this->getScreenSize() / 2.0f;
             updateAndDrawTrail = false;
         }
-        this->hud->drawCursor(g, cursorPos, fadingCursorAlpha, drawSecondTrail, updateAndDrawTrail);
+        this->hud->drawCursor(cursorPos, fadingCursorAlpha, drawSecondTrail, updateAndDrawTrail);
     } else {
-        this->hud->drawCursor(g, engine->getMouse()->getPos());
+        this->hud->drawCursor(mouse->getPos());
     }
 
     // if we are not using the native window resolution
@@ -605,29 +605,28 @@ void Osu::draw(Graphics *g) {
         // draw a scaled version from the buffer to the screen
         this->backBuffer->disable();
 
-        Vector2 offset = Vector2(engine->getGraphics()->getResolution().x / 2 - g_vInternalResolution.x / 2,
-                                 engine->getGraphics()->getResolution().y / 2 - g_vInternalResolution.y / 2);
+        Vector2 offset = Vector2(g->getResolution().x / 2 - g_vInternalResolution.x / 2,
+                                 g->getResolution().y / 2 - g_vInternalResolution.y / 2);
         g->setBlending(false);
         if(cv_letterboxing.getBool()) {
-            this->backBuffer->draw(g, offset.x * (1.0f + cv_letterboxing_offset_x.getFloat()),
+            this->backBuffer->draw(offset.x * (1.0f + cv_letterboxing_offset_x.getFloat()),
                                    offset.y * (1.0f + cv_letterboxing_offset_y.getFloat()), g_vInternalResolution.x,
                                    g_vInternalResolution.y);
         } else {
             if(cv_resolution_keep_aspect_ratio.getBool()) {
                 const float scale =
-                    getImageScaleToFitResolution(this->backBuffer->getSize(), engine->getGraphics()->getResolution());
+                    getImageScaleToFitResolution(this->backBuffer->getSize(), g->getResolution());
                 const float scaledWidth = this->backBuffer->getWidth() * scale;
                 const float scaledHeight = this->backBuffer->getHeight() * scale;
                 this->backBuffer->draw(
-                    g,
-                    max(0.0f, engine->getGraphics()->getResolution().x / 2.0f - scaledWidth / 2.0f) *
+                    max(0.0f, g->getResolution().x / 2.0f - scaledWidth / 2.0f) *
                         (1.0f + cv_letterboxing_offset_x.getFloat()),
-                    max(0.0f, engine->getGraphics()->getResolution().y / 2.0f - scaledHeight / 2.0f) *
+                    max(0.0f, g->getResolution().y / 2.0f - scaledHeight / 2.0f) *
                         (1.0f + cv_letterboxing_offset_y.getFloat()),
                     scaledWidth, scaledHeight);
             } else {
-                this->backBuffer->draw(g, 0, 0, engine->getGraphics()->getResolution().x,
-                                       engine->getGraphics()->getResolution().y);
+                this->backBuffer->draw(0, 0, g->getResolution().x,
+                                       g->getResolution().y);
             }
         }
         g->setBlending(true);
@@ -644,9 +643,9 @@ void Osu::update() {
         this->screens[i]->mouse_update(&propagate_clicks);
     }
 
-    if(this->music_unpause_scheduled && engine->getSound()->isReady()) {
+    if(this->music_unpause_scheduled && soundEngine->isReady()) {
         if(this->getSelectedBeatmap()->getMusic() != NULL) {
-            engine->getSound()->play(this->getSelectedBeatmap()->getMusic());
+            soundEngine->play(this->getSelectedBeatmap()->getMusic());
         }
         this->music_unpause_scheduled = false;
     }
@@ -666,10 +665,10 @@ void Osu::update() {
             const bool isAnyOsuKeyDown =
                 (this->bKeyboardKey1Down || this->bKeyboardKey12Down || this->bKeyboardKey2Down ||
                  this->bKeyboardKey22Down || this->bMouseKey1Down || this->bMouseKey2Down);
-            const bool isAnyKeyDown = (isAnyOsuKeyDown || engine->getMouse()->isLeftDown());
+            const bool isAnyKeyDown = (isAnyOsuKeyDown || mouse->isLeftDown());
 
             if(isAnyKeyDown) {
-                if(this->hud->getSkipClickRect().contains(engine->getMouse()->getPos())) {
+                if(this->hud->getSkipClickRect().contains(mouse->getPos())) {
                     if(!this->bSkipScheduled) {
                         this->bSkipScheduled = true;
                         this->bClickedSkipButton = true;
@@ -710,7 +709,7 @@ void Osu::update() {
         // Reset m_bClickedSkipButton on mouse up
         // We only use m_bClickedSkipButton to prevent seeking when clicking the skip button
         if(this->bClickedSkipButton && !this->getSelectedBeatmap()->isInSkippableSection()) {
-            if(!engine->getMouse()->isLeftDown()) {
+            if(!mouse->isLeftDown()) {
                 this->bClickedSkipButton = false;
             }
         }
@@ -721,10 +720,10 @@ void Osu::update() {
         this->bSeeking &= !bancho.is_playing_a_multi_map() && !this->bClickedSkipButton;
         this->bSeeking &= !bancho.is_spectating;
         if(this->bSeeking) {
-            const float mousePosX = (int)engine->getMouse()->getPos().x;
+            const float mousePosX = (int)mouse->getPos().x;
             const float percent = clamp<float>(mousePosX / (float)this->getScreenWidth(), 0.0f, 1.0f);
 
-            if(engine->getMouse()->isLeftDown()) {
+            if(mouse->isLeftDown()) {
                 if(mousePosX != this->fPrevSeekMousePosX || !cv_scrubbing_smooth.getBool()) {
                     this->fPrevSeekMousePosX = mousePosX;
 
@@ -740,7 +739,7 @@ void Osu::update() {
                 this->fPrevSeekMousePosX = -1.0f;
             }
 
-            if(engine->getMouse()->isRightDown()) {
+            if(mouse->isRightDown()) {
                 this->fQuickSaveTime = clamp<float>((float)((this->getSelectedBeatmap()->getStartTimePlayable() +
                                                              this->getSelectedBeatmap()->getLengthPlayable()) *
                                                             percent) /
@@ -887,6 +886,11 @@ void Osu::update() {
     }
 }
 
+bool Osu::isInCriticalInteractiveSession() {
+    // is in play mode and not paused
+    return isInPlayMode() && !(getSelectedBeatmap() != NULL && getSelectedBeatmap()->isPaused());
+}
+
 void Osu::useMods(FinishedScore *score) { Replay::Mods::use(score->mods); }
 
 void Osu::updateMods() {
@@ -958,7 +962,7 @@ void Osu::onKeyDown(KeyboardEvent &key) {
     // global hotkeys
 
     // global hotkey
-    if(key == KEY_O && engine->getKeyboard()->isControlDown()) {
+    if(key == KEY_O && keyboard->isControlDown()) {
         this->toggleOptionsMenu();
         key.consume();
         return;
@@ -966,10 +970,10 @@ void Osu::onKeyDown(KeyboardEvent &key) {
 
     // special hotkeys
     // reload & recompile shaders
-    if(engine->getKeyboard()->isAltDown() && engine->getKeyboard()->isControlDown() && key == KEY_R) {
-        Shader *sliderShader = engine->getResourceManager()->getShader("slider");
-        Shader *cursorTrailShader = engine->getResourceManager()->getShader("cursortrail");
-        Shader *hitcircle3DShader = engine->getResourceManager()->getShader("hitcircle3D");
+    if(keyboard->isAltDown() && keyboard->isControlDown() && key == KEY_R) {
+        Shader *sliderShader = resourceManager->getShader("slider");
+        Shader *cursorTrailShader = resourceManager->getShader("cursortrail");
+        Shader *hitcircle3DShader = resourceManager->getShader("hitcircle3D");
 
         if(sliderShader != NULL) sliderShader->reload();
         if(cursorTrailShader != NULL) cursorTrailShader->reload();
@@ -979,7 +983,7 @@ void Osu::onKeyDown(KeyboardEvent &key) {
     }
 
     // reload skin (alt)
-    if(engine->getKeyboard()->isAltDown() && engine->getKeyboard()->isControlDown() && key == KEY_S) {
+    if(keyboard->isAltDown() && keyboard->isControlDown() && key == KEY_S) {
         this->onSkinReload();
         key.consume();
     }
@@ -1051,7 +1055,7 @@ void Osu::onKeyDown(KeyboardEvent &key) {
 
     // boss key (minimize + mute)
     if(key == (KEYCODE)cv_BOSS_KEY.getInt()) {
-        engine->getEnvironment()->minimize();
+        env->minimize();
         this->bWasBossKeyPaused = this->getSelectedBeatmap()->isPreviewMusicPlaying();
         this->getSelectedBeatmap()->pausePreviewMusic(false);
     }
@@ -1138,7 +1142,7 @@ void Osu::onKeyDown(KeyboardEvent &key) {
             if(!key.isConsumed() && key == (KEYCODE)cv_TOGGLE_SCOREBOARD.getInt() && !this->bScoreboardToggleCheck) {
                 this->bScoreboardToggleCheck = true;
 
-                if(engine->getKeyboard()->isShiftDown()) {
+                if(keyboard->isShiftDown()) {
                     if(!this->bUIToggleCheck) {
                         this->bUIToggleCheck = true;
                         cv_draw_hud.setValue(!cv_draw_hud.getBool());
@@ -1223,7 +1227,7 @@ void Osu::onKeyDown(KeyboardEvent &key) {
 
         // handle quick restart
         if(((key == (KEYCODE)cv_QUICK_RETRY.getInt() ||
-             (engine->getKeyboard()->isControlDown() && !engine->getKeyboard()->isAltDown() && key == KEY_R)) &&
+             (keyboard->isControlDown() && !keyboard->isAltDown() && key == KEY_R)) &&
             !this->bQuickRetryDown)) {
             this->bQuickRetryDown = true;
             this->fQuickRetryTime = engine->getTime() + cv_quick_retry_delay.getFloat();
@@ -1277,7 +1281,7 @@ void Osu::onKeyDown(KeyboardEvent &key) {
 
             // local offset
             if(key == (KEYCODE)cv_INCREASE_LOCAL_OFFSET.getInt()) {
-                long offsetAdd = engine->getKeyboard()->isAltDown() ? 1 : 5;
+                long offsetAdd = keyboard->isAltDown() ? 1 : 5;
                 this->getSelectedBeatmap()->getSelectedDifficulty2()->setLocalOffset(
                     this->getSelectedBeatmap()->getSelectedDifficulty2()->getLocalOffset() + offsetAdd);
                 this->notificationOverlay->addNotification(
@@ -1285,7 +1289,7 @@ void Osu::onKeyDown(KeyboardEvent &key) {
                                     this->getSelectedBeatmap()->getSelectedDifficulty2()->getLocalOffset()));
             }
             if(key == (KEYCODE)cv_DECREASE_LOCAL_OFFSET.getInt()) {
-                long offsetAdd = -(engine->getKeyboard()->isAltDown() ? 1 : 5);
+                long offsetAdd = -(keyboard->isAltDown() ? 1 : 5);
                 this->getSelectedBeatmap()->getSelectedDifficulty2()->setLocalOffset(
                     this->getSelectedBeatmap()->getSelectedDifficulty2()->getLocalOffset() + offsetAdd);
                 this->notificationOverlay->addNotification(
@@ -1408,7 +1412,7 @@ void Osu::toggleChangelog() { this->bToggleChangelogScheduled = true; }
 void Osu::toggleEditor() { this->bToggleEditorScheduled = true; }
 
 void Osu::saveScreenshot() {
-    engine->getSound()->play(this->skin->getShutter());
+    soundEngine->play(this->skin->getShutter());
     int screenshotNumber = 0;
     UString screenshot_path;
     do {
@@ -1416,8 +1420,8 @@ void Osu::saveScreenshot() {
         screenshotNumber++;
     } while(env->fileExists(screenshot_path.toUtf8()));
 
-    std::vector<unsigned char> pixels = engine->getGraphics()->getScreenshot();
-    Image::saveToImage(&pixels[0], engine->getGraphics()->getResolution().x, engine->getGraphics()->getResolution().y,
+    std::vector<unsigned char> pixels = g->getScreenshot();
+    Image::saveToImage(&pixels[0], g->getResolution().x, g->getResolution().y,
                        screenshot_path.toUtf8());
 }
 
@@ -1431,7 +1435,7 @@ void Osu::onPlayEnd(FinishedScore score, bool quit, bool aborted) {
             this->rankingScreen->setBeatmapInfo(this->getSelectedBeatmap(),
                                                 this->getSelectedBeatmap()->getSelectedDifficulty2());
 
-            engine->getSound()->play(this->skin->getApplause());
+            soundEngine->play(this->skin->getApplause());
         } else {
             this->bScheduleEndlessModNextBeatmap = true;
             return;  // nothing more to do here
@@ -1650,8 +1654,8 @@ void Osu::updateMouseSettings() {
         }
     }
 
-    engine->getMouse()->setOffset(offset);
-    engine->getMouse()->setScale(scale);
+    mouse->setOffset(offset);
+    mouse->setScale(scale);
 }
 
 void Osu::updateWindowsKeyDisable() {
@@ -1714,13 +1718,13 @@ void Osu::onInternalResolutionChanged(UString oldValue, UString args) {
     // clamp requested internal resolution to current renderer resolution
     // however, this could happen while we are transitioning into fullscreen. therefore only clamp when not in
     // fullscreen or not in fullscreen transition
-    bool isTransitioningIntoFullscreenHack = engine->getGraphics()->getResolution().x < env->getNativeScreenSize().x ||
-                                             engine->getGraphics()->getResolution().y < env->getNativeScreenSize().y;
+    bool isTransitioningIntoFullscreenHack = g->getResolution().x < env->getNativeScreenSize().x ||
+                                             g->getResolution().y < env->getNativeScreenSize().y;
     if(!env->isFullscreen() || !isTransitioningIntoFullscreenHack) {
-        if(newInternalResolution.x > engine->getGraphics()->getResolution().x)
-            newInternalResolution.x = engine->getGraphics()->getResolution().x;
-        if(newInternalResolution.y > engine->getGraphics()->getResolution().y)
-            newInternalResolution.y = engine->getGraphics()->getResolution().y;
+        if(newInternalResolution.x > g->getResolution().x)
+            newInternalResolution.x = g->getResolution().x;
+        if(newInternalResolution.y > g->getResolution().y)
+            newInternalResolution.y = g->getResolution().y;
     }
 
     // enable and store, then force onResolutionChanged()
@@ -1912,7 +1916,7 @@ void Osu::updateCursorVisibility() {
     // using scaled/offset getMouse()->getPos()
     if(cv_resolution_enabled.getBool()) {
         McRect internalWindow = McRect(0, 0, g_vInternalResolution.x, g_vInternalResolution.y);
-        if(!internalWindow.contains(engine->getMouse()->getPos())) {
+        if(!internalWindow.contains(mouse->getPos())) {
             this->bShouldCursorBeVisible = true;
         }
     }
@@ -1939,7 +1943,7 @@ void Osu::onConfineCursorWindowedChange(UString oldValue, UString newValue) { th
 
 void Osu::onConfineCursorFullscreenChange(UString oldValue, UString newValue) { this->updateConfineCursor(); }
 
-void Osu::onKey1Change(bool pressed, bool mouse) {
+void Osu::onKey1Change(bool pressed, bool isMouse) {
     int numKeys1Down = 0;
     if(this->bKeyboardKey1Down) numKeys1Down++;
     if(this->bKeyboardKey12Down) numKeys1Down++;
@@ -1954,31 +1958,31 @@ void Osu::onKey1Change(bool pressed, bool mouse) {
                                                                         // paused, to correctly not-continue immediately
                                                                         // due to pressed keys
     {
-        if(!(mouse && cv_disable_mousebuttons.getBool())) {
+        if(!(isMouse && cv_disable_mousebuttons.getBool())) {
             // quickfix
             if(cv_disable_mousebuttons.getBool()) this->bMouseKey1Down = false;
 
             if(pressed && isKeyPressed1Allowed && !this->getSelectedBeatmap()->isPaused())  // see above note
-                this->getSelectedBeatmap()->keyPressed1(mouse);
+                this->getSelectedBeatmap()->keyPressed1(isMouse);
             else if(!this->bKeyboardKey1Down && !this->bKeyboardKey12Down && !this->bMouseKey1Down)
-                this->getSelectedBeatmap()->keyReleased1(mouse);
+                this->getSelectedBeatmap()->keyReleased1(isMouse);
         }
     }
 
     // cursor anim + ripples
-    const bool doAnimate = !(this->isInPlayMode() && !this->getSelectedBeatmap()->isPaused() && mouse &&
+    const bool doAnimate = !(this->isInPlayMode() && !this->getSelectedBeatmap()->isPaused() && isMouse &&
                              cv_disable_mousebuttons.getBool());
     if(doAnimate) {
         if(pressed && isKeyPressed1Allowed) {
             this->hud->animateCursorExpand();
-            this->hud->addCursorRipple(engine->getMouse()->getPos());
+            this->hud->addCursorRipple(mouse->getPos());
         } else if(!this->bKeyboardKey1Down && !this->bKeyboardKey12Down && !this->bMouseKey1Down &&
                   !this->bKeyboardKey2Down && !this->bKeyboardKey22Down && !this->bMouseKey2Down)
             this->hud->animateCursorShrink();
     }
 }
 
-void Osu::onKey2Change(bool pressed, bool mouse) {
+void Osu::onKey2Change(bool pressed, bool isMouse) {
     int numKeys2Down = 0;
     if(this->bKeyboardKey2Down) numKeys2Down++;
     if(this->bKeyboardKey22Down) numKeys2Down++;
@@ -1993,24 +1997,24 @@ void Osu::onKey2Change(bool pressed, bool mouse) {
                                                                         // paused, to correctly not-continue immediately
                                                                         // due to pressed keys
     {
-        if(!(mouse && cv_disable_mousebuttons.getBool())) {
+        if(!(isMouse && cv_disable_mousebuttons.getBool())) {
             // quickfix
             if(cv_disable_mousebuttons.getBool()) this->bMouseKey2Down = false;
 
             if(pressed && isKeyPressed2Allowed && !this->getSelectedBeatmap()->isPaused())  // see above note
-                this->getSelectedBeatmap()->keyPressed2(mouse);
+                this->getSelectedBeatmap()->keyPressed2(isMouse);
             else if(!this->bKeyboardKey2Down && !this->bKeyboardKey22Down && !this->bMouseKey2Down)
-                this->getSelectedBeatmap()->keyReleased2(mouse);
+                this->getSelectedBeatmap()->keyReleased2(isMouse);
         }
     }
 
     // cursor anim + ripples
-    const bool doAnimate = !(this->isInPlayMode() && !this->getSelectedBeatmap()->isPaused() && mouse &&
+    const bool doAnimate = !(this->isInPlayMode() && !this->getSelectedBeatmap()->isPaused() && isMouse &&
                              cv_disable_mousebuttons.getBool());
     if(doAnimate) {
         if(pressed && isKeyPressed2Allowed) {
             this->hud->animateCursorExpand();
-            this->hud->addCursorRipple(engine->getMouse()->getPos());
+            this->hud->addCursorRipple(mouse->getPos());
         } else if(!this->bKeyboardKey2Down && !this->bKeyboardKey22Down && !this->bMouseKey2Down &&
                   !this->bKeyboardKey1Down && !this->bKeyboardKey12Down && !this->bMouseKey1Down)
             this->hud->animateCursorShrink();

@@ -16,7 +16,7 @@ class InputDevice {
     virtual ~InputDevice() { ; }
 
     virtual void update() { ; }
-    virtual void draw(Graphics *g) { (void)g; }
+    virtual void draw() { ; }
 };
 
 #endif

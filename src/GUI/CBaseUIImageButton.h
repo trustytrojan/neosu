@@ -7,7 +7,7 @@ class CBaseUIImageButton : public CBaseUIButton {
                        float ySize = 0, UString name = "");
     ~CBaseUIImageButton() override { ; }
 
-    void draw(Graphics *g) override;
+    void draw() override;
 
     void onResized() override;
 

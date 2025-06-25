@@ -368,7 +368,7 @@ void OpenGLES2Interface::drawString(McFont *font, UString text) {
 
     updateTransform();
 
-    font->drawString(this, text);
+    font->drawString(text.toUtf8());
 }
 
 void OpenGLES2Interface::drawVAO(VertexArrayObject *vao) {
@@ -652,12 +652,12 @@ void OpenGLES2Interface::onResolutionChange(Vector2 newResolution) {
     }
 }
 
-Image *OpenGLES2Interface::createImage(std::string filePath, bool mipmapped) {
-    return new OpenGLImage(filePath, mipmapped);
+Image *OpenGLES2Interface::createImage(std::string filePath, bool mipmapped, bool keepInSystemMemory) {
+    return new OpenGLImage(filePath, mipmapped, keepInSystemMemory);
 }
 
-Image *OpenGLES2Interface::createImage(int width, int height, bool mipmapped) {
-    return new OpenGLImage(width, height, mipmapped);
+Image *OpenGLES2Interface::createImage(int width, int height, bool mipmapped, bool keepInSystemMemory) {
+    return new OpenGLImage(width, height, mipmapped, keepInSystemMemory);
 }
 
 RenderTarget *OpenGLES2Interface::createRenderTarget(int x, int y, int width, int height,

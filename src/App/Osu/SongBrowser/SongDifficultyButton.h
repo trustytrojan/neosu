@@ -10,7 +10,7 @@ class SongDifficultyButton : public SongButton {
                          SongButton *parentSongButton);
     ~SongDifficultyButton() override;
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
     void onClicked() override;
 

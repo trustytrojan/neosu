@@ -20,7 +20,7 @@
 int Circle::rainbowNumber = 0;
 int Circle::rainbowColorCounter = 0;
 
-void Circle::drawApproachCircle(Graphics *g, Beatmap *beatmap, Vector2 rawPos, int number, int colorCounter,
+void Circle::drawApproachCircle(Beatmap *beatmap, Vector2 rawPos, int number, int colorCounter,
                                 int colorOffset, float colorRGBMultiplier, float approachScale, float alpha,
                                 bool overrideHDApproachCircle) {
     rainbowNumber = number;
@@ -32,19 +32,19 @@ void Circle::drawApproachCircle(Graphics *g, Beatmap *beatmap, Vector2 rawPos, i
               (int)(COLOR_GET_Gi(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()),
               (int)(COLOR_GET_Bi(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()));
 
-    drawApproachCircle(g, beatmap->getSkin(), beatmap->osuCoords2Pixels(rawPos), comboColor,
+    drawApproachCircle(beatmap->getSkin(), beatmap->osuCoords2Pixels(rawPos), comboColor,
                        beatmap->fHitcircleDiameter, approachScale, alpha, osu->getModHD(), overrideHDApproachCircle);
 }
 
-void Circle::drawCircle(Graphics *g, Beatmap *beatmap, Vector2 rawPos, int number, int colorCounter, int colorOffset,
+void Circle::drawCircle(Beatmap *beatmap, Vector2 rawPos, int number, int colorCounter, int colorOffset,
                         float colorRGBMultiplier, float approachScale, float alpha, float numberAlpha, bool drawNumber,
                         bool overrideHDApproachCircle) {
-    drawCircle(g, beatmap->getSkin(), beatmap->osuCoords2Pixels(rawPos), beatmap->fHitcircleDiameter,
+    drawCircle(beatmap->getSkin(), beatmap->osuCoords2Pixels(rawPos), beatmap->fHitcircleDiameter,
                beatmap->getNumberScale(), beatmap->getHitcircleOverlapScale(), number, colorCounter, colorOffset,
                colorRGBMultiplier, approachScale, alpha, numberAlpha, drawNumber, overrideHDApproachCircle);
 }
 
-void Circle::drawCircle(Graphics *g, Skin *skin, Vector2 pos, float hitcircleDiameter, float numberScale,
+void Circle::drawCircle(Skin *skin, Vector2 pos, float hitcircleDiameter, float numberScale,
                         float overlapScale, int number, int colorCounter, int colorOffset, float colorRGBMultiplier,
                         float approachScale, float alpha, float numberAlpha, bool drawNumber,
                         bool overrideHDApproachCircle) {
@@ -60,49 +60,49 @@ void Circle::drawCircle(Graphics *g, Skin *skin, Vector2 pos, float hitcircleDia
               (int)(COLOR_GET_Bi(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()));
 
     // approach circle
-    /// drawApproachCircle(g, skin, pos, comboColor, hitcircleDiameter, approachScale, alpha, modHD,
+    /// drawApproachCircle(skin, pos, comboColor, hitcircleDiameter, approachScale, alpha, modHD,
     /// overrideHDApproachCircle); // they are now drawn separately in draw2()
 
     // circle
     const float circleImageScale = hitcircleDiameter / (128.0f * (skin->isHitCircle2x() ? 2.0f : 1.0f));
-    drawHitCircle(g, skin->getHitCircle(), pos, comboColor, circleImageScale, alpha);
+    drawHitCircle(skin->getHitCircle(), pos, comboColor, circleImageScale, alpha);
 
     // overlay
     const float circleOverlayImageScale = hitcircleDiameter / skin->getHitCircleOverlay2()->getSizeBaseRaw().x;
     if(!skin->getHitCircleOverlayAboveNumber())
-        drawHitCircleOverlay(g, skin->getHitCircleOverlay2(), pos, circleOverlayImageScale, alpha, colorRGBMultiplier);
+        drawHitCircleOverlay(skin->getHitCircleOverlay2(), pos, circleOverlayImageScale, alpha, colorRGBMultiplier);
 
     // number
     if(drawNumber)
-        drawHitCircleNumber(g, skin, numberScale, overlapScale, pos, number, numberAlpha, colorRGBMultiplier);
+        drawHitCircleNumber(skin, numberScale, overlapScale, pos, number, numberAlpha, colorRGBMultiplier);
 
     // overlay
     if(skin->getHitCircleOverlayAboveNumber())
-        drawHitCircleOverlay(g, skin->getHitCircleOverlay2(), pos, circleOverlayImageScale, alpha, colorRGBMultiplier);
+        drawHitCircleOverlay(skin->getHitCircleOverlay2(), pos, circleOverlayImageScale, alpha, colorRGBMultiplier);
 }
 
-void Circle::drawCircle(Graphics *g, Skin *skin, Vector2 pos, float hitcircleDiameter, Color color, float alpha) {
+void Circle::drawCircle(Skin *skin, Vector2 pos, float hitcircleDiameter, Color color, float alpha) {
     // this function is only used by the target practice heatmap
 
     // circle
     const float circleImageScale = hitcircleDiameter / (128.0f * (skin->isHitCircle2x() ? 2.0f : 1.0f));
-    drawHitCircle(g, skin->getHitCircle(), pos, color, circleImageScale, alpha);
+    drawHitCircle(skin->getHitCircle(), pos, color, circleImageScale, alpha);
 
     // overlay
     const float circleOverlayImageScale = hitcircleDiameter / skin->getHitCircleOverlay2()->getSizeBaseRaw().x;
-    drawHitCircleOverlay(g, skin->getHitCircleOverlay2(), pos, circleOverlayImageScale, alpha, 1.0f);
+    drawHitCircleOverlay(skin->getHitCircleOverlay2(), pos, circleOverlayImageScale, alpha, 1.0f);
 }
 
-void Circle::drawSliderStartCircle(Graphics *g, Beatmap *beatmap, Vector2 rawPos, int number, int colorCounter,
+void Circle::drawSliderStartCircle(Beatmap *beatmap, Vector2 rawPos, int number, int colorCounter,
                                    int colorOffset, float colorRGBMultiplier, float approachScale, float alpha,
                                    float numberAlpha, bool drawNumber, bool overrideHDApproachCircle) {
-    drawSliderStartCircle(g, beatmap->getSkin(), beatmap->osuCoords2Pixels(rawPos), beatmap->fHitcircleDiameter,
+    drawSliderStartCircle(beatmap->getSkin(), beatmap->osuCoords2Pixels(rawPos), beatmap->fHitcircleDiameter,
                           beatmap->getNumberScale(), beatmap->getHitcircleOverlapScale(), number, colorCounter,
                           colorOffset, colorRGBMultiplier, approachScale, alpha, numberAlpha, drawNumber,
                           overrideHDApproachCircle);
 }
 
-void Circle::drawSliderStartCircle(Graphics *g, Skin *skin, Vector2 pos, float hitcircleDiameter, float numberScale,
+void Circle::drawSliderStartCircle(Skin *skin, Vector2 pos, float hitcircleDiameter, float numberScale,
                                    float hitcircleOverlapScale, int number, int colorCounter, int colorOffset,
                                    float colorRGBMultiplier, float approachScale, float alpha, float numberAlpha,
                                    bool drawNumber, bool overrideHDApproachCircle) {
@@ -110,7 +110,7 @@ void Circle::drawSliderStartCircle(Graphics *g, Skin *skin, Vector2 pos, float h
 
     // if no sliderstartcircle image is preset, fallback to default circle
     if(skin->getSliderStartCircle() == skin->getMissingTexture()) {
-        drawCircle(g, skin, pos, hitcircleDiameter, numberScale, hitcircleOverlapScale, number, colorCounter,
+        drawCircle(skin, pos, hitcircleDiameter, numberScale, hitcircleOverlapScale, number, colorCounter,
                    colorOffset, colorRGBMultiplier, approachScale, alpha, numberAlpha, drawNumber,
                    overrideHDApproachCircle);  // normal
         return;
@@ -127,38 +127,38 @@ void Circle::drawSliderStartCircle(Graphics *g, Skin *skin, Vector2 pos, float h
 
     // circle
     const float circleImageScale = hitcircleDiameter / (128.0f * (skin->isSliderStartCircle2x() ? 2.0f : 1.0f));
-    drawHitCircle(g, skin->getSliderStartCircle(), pos, comboColor, circleImageScale, alpha);
+    drawHitCircle(skin->getSliderStartCircle(), pos, comboColor, circleImageScale, alpha);
 
     // overlay
     const float circleOverlayImageScale = hitcircleDiameter / skin->getSliderStartCircleOverlay2()->getSizeBaseRaw().x;
     if(skin->getSliderStartCircleOverlay() != skin->getMissingTexture()) {
         if(!skin->getHitCircleOverlayAboveNumber())
-            drawHitCircleOverlay(g, skin->getSliderStartCircleOverlay2(), pos, circleOverlayImageScale, alpha,
+            drawHitCircleOverlay(skin->getSliderStartCircleOverlay2(), pos, circleOverlayImageScale, alpha,
                                  colorRGBMultiplier);
     }
 
     // number
     if(drawNumber)
-        drawHitCircleNumber(g, skin, numberScale, hitcircleOverlapScale, pos, number, numberAlpha, colorRGBMultiplier);
+        drawHitCircleNumber(skin, numberScale, hitcircleOverlapScale, pos, number, numberAlpha, colorRGBMultiplier);
 
     // overlay
     if(skin->getSliderStartCircleOverlay() != skin->getMissingTexture()) {
         if(skin->getHitCircleOverlayAboveNumber())
-            drawHitCircleOverlay(g, skin->getSliderStartCircleOverlay2(), pos, circleOverlayImageScale, alpha,
+            drawHitCircleOverlay(skin->getSliderStartCircleOverlay2(), pos, circleOverlayImageScale, alpha,
                                  colorRGBMultiplier);
     }
 }
 
-void Circle::drawSliderEndCircle(Graphics *g, Beatmap *beatmap, Vector2 rawPos, int number, int colorCounter,
+void Circle::drawSliderEndCircle(Beatmap *beatmap, Vector2 rawPos, int number, int colorCounter,
                                  int colorOffset, float colorRGBMultiplier, float approachScale, float alpha,
                                  float numberAlpha, bool drawNumber, bool overrideHDApproachCircle) {
-    drawSliderEndCircle(g, beatmap->getSkin(), beatmap->osuCoords2Pixels(rawPos), beatmap->fHitcircleDiameter,
+    drawSliderEndCircle(beatmap->getSkin(), beatmap->osuCoords2Pixels(rawPos), beatmap->fHitcircleDiameter,
                         beatmap->getNumberScale(), beatmap->getHitcircleOverlapScale(), number, colorCounter,
                         colorOffset, colorRGBMultiplier, approachScale, alpha, numberAlpha, drawNumber,
                         overrideHDApproachCircle);
 }
 
-void Circle::drawSliderEndCircle(Graphics *g, Skin *skin, Vector2 pos, float hitcircleDiameter, float numberScale,
+void Circle::drawSliderEndCircle(Skin *skin, Vector2 pos, float hitcircleDiameter, float numberScale,
                                  float overlapScale, int number, int colorCounter, int colorOffset,
                                  float colorRGBMultiplier, float approachScale, float alpha, float numberAlpha,
                                  bool drawNumber, bool overrideHDApproachCircle) {
@@ -166,7 +166,7 @@ void Circle::drawSliderEndCircle(Graphics *g, Skin *skin, Vector2 pos, float hit
 
     // if no sliderendcircle image is preset, fallback to default circle
     if(skin->getSliderEndCircle() == skin->getMissingTexture()) {
-        drawCircle(g, skin, pos, hitcircleDiameter, numberScale, overlapScale, number, colorCounter, colorOffset,
+        drawCircle(skin, pos, hitcircleDiameter, numberScale, overlapScale, number, colorCounter, colorOffset,
                    colorRGBMultiplier, approachScale, alpha, numberAlpha, drawNumber, overrideHDApproachCircle);
         return;
     }
@@ -182,18 +182,18 @@ void Circle::drawSliderEndCircle(Graphics *g, Skin *skin, Vector2 pos, float hit
 
     // circle
     const float circleImageScale = hitcircleDiameter / (128.0f * (skin->isSliderEndCircle2x() ? 2.0f : 1.0f));
-    drawHitCircle(g, skin->getSliderEndCircle(), pos, comboColor, circleImageScale, alpha);
+    drawHitCircle(skin->getSliderEndCircle(), pos, comboColor, circleImageScale, alpha);
 
     // overlay
     if(skin->getSliderEndCircleOverlay() != skin->getMissingTexture()) {
         const float circleOverlayImageScale =
             hitcircleDiameter / skin->getSliderEndCircleOverlay2()->getSizeBaseRaw().x;
-        drawHitCircleOverlay(g, skin->getSliderEndCircleOverlay2(), pos, circleOverlayImageScale, alpha,
+        drawHitCircleOverlay(skin->getSliderEndCircleOverlay2(), pos, circleOverlayImageScale, alpha,
                              colorRGBMultiplier);
     }
 }
 
-void Circle::drawApproachCircle(Graphics *g, Skin *skin, Vector2 pos, Color comboColor, float hitcircleDiameter,
+void Circle::drawApproachCircle(Skin *skin, Vector2 pos, Color comboColor, float hitcircleDiameter,
                                 float approachScale, float alpha, bool modHD, bool overrideHDApproachCircle) {
     if((!modHD || overrideHDApproachCircle) && cv_draw_approach_circles.getBool() && !cv_mod_mafham.getBool()) {
         if(approachScale > 1.0f) {
@@ -226,14 +226,14 @@ void Circle::drawApproachCircle(Graphics *g, Skin *skin, Vector2 pos, Color comb
     }
 }
 
-void Circle::drawHitCircleOverlay(Graphics *g, SkinImage *hitCircleOverlayImage, Vector2 pos,
+void Circle::drawHitCircleOverlay(SkinImage *hitCircleOverlayImage, Vector2 pos,
                                   float circleOverlayImageScale, float alpha, float colorRGBMultiplier) {
     g->setColor(COLORf(1.0f, colorRGBMultiplier, colorRGBMultiplier, colorRGBMultiplier));
     g->setAlpha(alpha);
-    hitCircleOverlayImage->drawRaw(g, pos, circleOverlayImageScale);
+    hitCircleOverlayImage->drawRaw(pos, circleOverlayImageScale);
 }
 
-void Circle::drawHitCircle(Graphics *g, Image *hitCircleImage, Vector2 pos, Color comboColor, float circleImageScale,
+void Circle::drawHitCircle(Image *hitCircleImage, Vector2 pos, Color comboColor, float circleImageScale,
                            float alpha) {
     g->setColor(comboColor);
 
@@ -259,7 +259,7 @@ void Circle::drawHitCircle(Graphics *g, Image *hitCircleImage, Vector2 pos, Colo
     g->popTransform();
 }
 
-void Circle::drawHitCircleNumber(Graphics *g, Skin *skin, float numberScale, float overlapScale, Vector2 pos,
+void Circle::drawHitCircleNumber(Skin *skin, float numberScale, float overlapScale, Vector2 pos,
                                  int number, float numberAlpha, float colorRGBMultiplier) {
     if(!cv_draw_numbers.getBool()) return;
 
@@ -402,8 +402,8 @@ Circle::Circle(int x, int y, long time, int sampleType, int comboNumber, bool is
 
 Circle::~Circle() { this->onReset(0); }
 
-void Circle::draw(Graphics *g) {
-    HitObject::draw(g);
+void Circle::draw() {
+    HitObject::draw();
     Skin *skin = osu->getSkin();
 
     // draw hit animation
@@ -423,7 +423,7 @@ void Circle::draw(Graphics *g) {
             skin->getHitCircleOverlay2()->setAnimationTimeOffset(
                 skin->getAnimationSpeed(), !this->bm->isInMafhamRenderChunk() ? this->click_time - this->iApproachTime
                                                                               : this->bm->getCurMusicPosWithOffsets());
-            drawCircle(g, this->bm, this->vRawPos, this->combo_number, this->iColorCounter, this->iColorOffset, 1.0f,
+            drawCircle(this->bm, this->vRawPos, this->combo_number, this->iColorCounter, this->iColorOffset, 1.0f,
                        1.0f, alpha, alpha, drawNumber);
         }
         g->popTransform();
@@ -453,14 +453,14 @@ void Circle::draw(Graphics *g) {
     skin->getHitCircleOverlay2()->setAnimationTimeOffset(
         skin->getAnimationSpeed(), !this->bm->isInMafhamRenderChunk() ? this->click_time - this->iApproachTime
                                                                       : this->bm->getCurMusicPosWithOffsets());
-    drawCircle(g, this->bm, shakeCorrectedPos, this->combo_number, this->iColorCounter, this->iColorOffset,
+    drawCircle(this->bm, shakeCorrectedPos, this->combo_number, this->iColorCounter, this->iColorOffset,
                this->fHittableDimRGBColorMultiplierPercent, this->bWaiting && !hd ? 1.0f : this->fApproachScale,
                this->bWaiting && !hd ? 1.0f : this->fAlpha, this->bWaiting && !hd ? 1.0f : this->fAlpha, true,
                this->bOverrideHDApproachCircle);
 }
 
-void Circle::draw2(Graphics *g) {
-    HitObject::draw2(g);
+void Circle::draw2() {
+    HitObject::draw2();
     if(this->bFinished || (!this->bVisible && !this->bWaiting))
         return;  // special case needed for when we are past this objects time, but still within not-miss range, because
                  // we still need to draw the object
@@ -477,7 +477,7 @@ void Circle::draw2(Graphics *g) {
                  approachCircleImageScale);
     }
 
-    drawApproachCircle(g, this->bm, this->vRawPos, this->combo_number, this->iColorCounter, this->iColorOffset,
+    drawApproachCircle(this->bm, this->vRawPos, this->combo_number, this->iColorCounter, this->iColorOffset,
                        this->fHittableDimRGBColorMultiplierPercent, this->bWaiting && !hd ? 1.0f : this->fApproachScale,
                        this->bWaiting && !hd ? 1.0f : this->fAlphaForApproachCircle, this->bOverrideHDApproachCircle);
 }

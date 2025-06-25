@@ -24,7 +24,7 @@ UIButton::UIButton(float xPos, float yPos, float xSize, float ySize, UString nam
     this->bFocusStolenDelay = false;
 }
 
-void UIButton::draw(Graphics *g) {
+void UIButton::draw() {
     if(!this->bVisible || !this->bVisible2) return;
 
     Image *buttonLeft = this->bDefaultSkin ? osu->getSkin()->getDefaultButtonLeft() : osu->getSkin()->getButtonLeft();
@@ -74,7 +74,7 @@ void UIButton::draw(Graphics *g) {
         g->drawImage(osu->getSkin()->getLoadingSpinner());
         g->popTransform();
     } else {
-        this->drawText(g);
+        this->drawText();
     }
 }
 
@@ -99,7 +99,7 @@ void UIButton::onMouseInside() {
     this->fBrightness = 1.0f;
 
     if(button_sound_cooldown + 0.05f < engine->getTime()) {
-        engine->getSound()->play(osu->getSkin()->hoverButton);
+        soundEngine->play(osu->getSkin()->hoverButton);
         button_sound_cooldown = engine->getTime();
     }
 }
@@ -113,7 +113,7 @@ void UIButton::onClicked() {
 
     this->animateClickColor();
 
-    engine->getSound()->play(osu->getSkin()->clickButton);
+    soundEngine->play(osu->getSkin()->clickButton);
 }
 
 void UIButton::onFocusStolen() {

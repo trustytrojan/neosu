@@ -24,7 +24,7 @@ class ModSelector : public OsuScreen {
     ModSelector();
     ~ModSelector() override;
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
     void onKeyDown(KeyboardEvent &key) override;

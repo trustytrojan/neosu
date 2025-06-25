@@ -53,7 +53,7 @@ ScoreButton::ScoreButton(UIContextMenu *contextMenu, float xPos, float yPos, flo
 
 ScoreButton::~ScoreButton() { anim->deleteExistingAnimation(&this->fIndexNumberAnim); }
 
-void ScoreButton::draw(Graphics *g) {
+void ScoreButton::draw() {
     if(!this->bVisible) return;
 
     // background
@@ -91,7 +91,7 @@ void ScoreButton::draw(Graphics *g) {
         bool is_below_top = this->avatar->getPos().y + this->avatar->getSize().y >= m_scoreBrowser->getPos().y;
         bool is_above_bottom = this->avatar->getPos().y <= m_scoreBrowser->getPos().y + m_scoreBrowser->getSize().y;
         this->avatar->on_screen = is_below_top && is_above_bottom;
-        this->avatar->draw_avatar(g, 1.f);
+        this->avatar->draw_avatar(1.f);
     }
     const float indexNumberScale = 0.35f;
     const float indexNumberWidthPercent = 0.15f;
@@ -128,8 +128,7 @@ void ScoreButton::draw(Graphics *g) {
         gradeWidth = grade->getSizeBaseRaw().x * scale;
 
         g->setColor(0xffffffff);
-        grade->drawRaw(g,
-                       Vector2((int)(this->vPos.x + this->vSize.x * indexNumberWidthPercent + gradeWidth / 2.0f),
+        grade->drawRaw(Vector2((int)(this->vPos.x + this->vSize.x * indexNumberWidthPercent + gradeWidth / 2.0f),
                                (int)(this->vPos.y + this->vSize.y / 2.0f)),
                        scale);
     }
@@ -166,7 +165,7 @@ void ScoreButton::draw(Graphics *g) {
 
     // score | pp | weighted 95% (pp)
     const float scoreScale = 0.5f;
-    McFont *scoreFont = (this->vSize.y < 50 ? engine->getResourceManager()->getFont("FONT_DEFAULT")
+    McFont *scoreFont = (this->vSize.y < 50 ? resourceManager->getFont("FONT_DEFAULT")
                                             : usernameFont);  // HACKHACK: switch font for very low resolutions
     g->pushTransform();
     {
@@ -379,7 +378,7 @@ void ScoreButton::mouse_update(bool *propagate_clicks) {
 
     // HACKHACK: this should really be part of the UI base
     // right click detection
-    if(engine->getMouse()->isRightDown()) {
+    if(mouse->isRightDown()) {
         if(!this->bRightClickCheck) {
             this->bRightClickCheck = true;
             this->bRightClick = this->isMouseInside();
@@ -472,7 +471,7 @@ void ScoreButton::updateElapsedTimeString() {
 }
 
 void ScoreButton::onClicked() {
-    engine->getSound()->play(osu->getSkin()->getMenuHit());
+    soundEngine->play(osu->getSkin()->getMenuHit());
     CBaseUIButton::onClicked();
 }
 
@@ -501,7 +500,7 @@ void ScoreButton::onFocusStolen() {
 }
 
 void ScoreButton::onRightMouseUpInside() {
-    const Vector2 pos = engine->getMouse()->getPos();
+    const Vector2 pos = mouse->getPos();
 
     if(this->contextMenu != NULL) {
         this->contextMenu->setPos(pos);
@@ -543,7 +542,7 @@ void ScoreButton::onContextMenu(UString text, int id) {
     }
 
     if(id == 3) {
-        if(engine->getKeyboard()->isShiftDown())
+        if(keyboard->isShiftDown())
             this->onDeleteScoreConfirmed(text, 1);
         else
             this->onDeleteScoreClicked();
@@ -554,7 +553,7 @@ void ScoreButton::onContextMenu(UString text, int id) {
 
 void ScoreButton::onUseModsClicked() {
     osu->useMods(&this->score);
-    engine->getSound()->play(osu->getSkin()->getCheckOn());
+    soundEngine->play(osu->getSkin()->getCheckOn());
 }
 
 void ScoreButton::onDeleteScoreClicked() {

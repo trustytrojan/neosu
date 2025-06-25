@@ -5,7 +5,7 @@ class UIButton : public CBaseUIButton {
    public:
     UIButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text);
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
     void setColor(Color color) {

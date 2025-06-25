@@ -41,7 +41,7 @@ bool sort_by_title(const SongButton *a, const SongButton *b);
 
 class SongBrowser : public ScreenBackable {
    public:
-    static void drawSelectedBeatmapBackgroundImage(Graphics *g, float alpha = 1.0f);
+    static void drawSelectedBeatmapBackgroundImage(float alpha = 1.0f);
 
     enum class GROUP {
         GROUP_NO_GROUPING,
@@ -60,7 +60,7 @@ class SongBrowser : public ScreenBackable {
     SongBrowser();
     ~SongBrowser() override;
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
     void onKeyDown(KeyboardEvent &e) override;

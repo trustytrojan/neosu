@@ -155,7 +155,7 @@ class VSMusicBrowserButton : public CBaseUIButton {
 
     ~VSMusicBrowserButton() override { anim->deleteExistingAnimation(&this->fSelectionAnim); }
 
-    void draw(Graphics *g) override {
+    void draw() override {
         if(!this->bVisible) return;
 
         const bool isAnimatingSelectionAnim = anim->isAnimating(&this->fSelectionAnim);
@@ -228,7 +228,7 @@ class VSMusicBrowserButton : public CBaseUIButton {
         // g->setColor(0xffff0000);
         // g->drawRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
 
-        this->drawText(g);
+        this->drawText();
     }
 
     void setSelected(bool selected) {
@@ -265,17 +265,17 @@ class VSMusicBrowserColumnScrollView : public CBaseUIScrollView {
 
     ~VSMusicBrowserColumnScrollView() override { anim->deleteExistingAnimation(&this->fAnim); }
 
-    void draw(Graphics *g) override {
+    void draw() override {
         if(anim->isAnimating(&this->fAnim)) {
             g->push3DScene(McRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y));
             {
                 g->offset3DScene(-this->vSize.x / 2, 0, 0);
                 g->rotate3DScene(0, 100 - this->fAnim * 100, 0);
-                CBaseUIScrollView::draw(g);
+                CBaseUIScrollView::draw();
             }
             g->pop3DScene();
         } else
-            CBaseUIScrollView::draw(g);
+            CBaseUIScrollView::draw();
     }
 
    private:
@@ -301,7 +301,7 @@ VSMusicBrowser::VSMusicBrowser(int x, int y, int xSize, int ySize, McFont *font)
 
 VSMusicBrowser::~VSMusicBrowser() { SAFE_DELETE(this->mainContainer); }
 
-void VSMusicBrowser::draw(Graphics *g) { this->mainContainer->draw(g); }
+void VSMusicBrowser::draw() { this->mainContainer->draw(); }
 
 void VSMusicBrowser::mouse_update(bool *propagate_clicks) {
     if(!this->bVisible) return;

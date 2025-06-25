@@ -31,8 +31,8 @@ CollectionButton::CollectionButton(SongBrowser *songBrowser, CBaseUIScrollView *
     this->setOffsetPercent(0.075f * 0.5f);
 }
 
-void CollectionButton::draw(Graphics *g) {
-    Button::draw(g);
+void CollectionButton::draw() {
+    Button::draw();
     if(!this->bVisible) return;
 
     Skin *skin = osu->getSkin();
@@ -76,7 +76,7 @@ void CollectionButton::onSelected(bool wasSelected, bool autoSelectBottomMostChi
     this->songBrowser->scrollToSongButton(this, true);
 }
 
-void CollectionButton::onRightMouseUpInside() { this->triggerContextMenu(engine->getMouse()->getPos()); }
+void CollectionButton::onRightMouseUpInside() { this->triggerContextMenu(mouse->getPos()); }
 
 void CollectionButton::triggerContextMenu(Vector2 pos) {
     if(osu->getSongBrowser()->getGroupingMode() != SongBrowser::GROUP::GROUP_COLLECTIONS) return;
@@ -136,7 +136,7 @@ void CollectionButton::onContextMenu(UString text, int id) {
         UIContextMenu::clampToRightScreenEdge(this->contextMenu);
         UIContextMenu::clampToBottomScreenEdge(this->contextMenu);
     } else if(id == 2) {
-        if(engine->getKeyboard()->isShiftDown())
+        if(keyboard->isShiftDown())
             this->onDeleteCollectionConfirmed(text, id);
         else {
             this->contextMenu->begin(0, true);

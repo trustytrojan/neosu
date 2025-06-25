@@ -38,7 +38,7 @@ CBaseUISlider::CBaseUISlider(float xPos, float yPos, float xSize, float ySize, U
     this->setOrientation(xSize > ySize);
 }
 
-void CBaseUISlider::draw(Graphics *g) {
+void CBaseUISlider::draw() {
     if(!this->bVisible) return;
 
     // draw background
@@ -60,10 +60,10 @@ void CBaseUISlider::draw(Graphics *g) {
                     this->vPos.x + this->vSize.x - (this->vBlockSize.x - 1) / 2,
                     this->vPos.y + this->vSize.y / 2.0f + 1);
 
-    this->drawBlock(g);
+    this->drawBlock();
 }
 
-void CBaseUISlider::drawBlock(Graphics *g) {
+void CBaseUISlider::drawBlock() {
     // draw block
     Vector2 center =
         this->vPos +
@@ -86,7 +86,7 @@ void CBaseUISlider::mouse_update(bool *propagate_clicks) {
     if(!this->bVisible) return;
     CBaseUIElement::mouse_update(propagate_clicks);
 
-    Vector2 mousepos = engine->getMouse()->getPos();
+    Vector2 mousepos = mouse->getPos();
 
     // handle moving
     if(this->bActive) {
@@ -134,7 +134,7 @@ void CBaseUISlider::mouse_update(bool *propagate_clicks) {
     } else {
         // handle mouse wheel
         if(this->bMouseInside && this->bAllowMouseWheel) {
-            int wheelDelta = engine->getMouse()->getWheelDeltaVertical();
+            int wheelDelta = mouse->getWheelDeltaVertical();
             if(wheelDelta != 0) {
                 const int multiplier = max(1, std::abs(wheelDelta) / 120);
 
@@ -233,7 +233,7 @@ CBaseUISlider *CBaseUISlider::setValue(float value, bool animate, bool call_call
 
         if(this->bHasChanged) {
             if(this->fLastSoundPlayTime + 0.05f < engine->getTime()) {
-                engine->getSound()->play(osu->getSkin()->sliderbar, 0.f, 1.f + 0.05f * percent);
+                soundEngine->play(osu->getSkin()->sliderbar, 0.f, 1.f + 0.05f * percent);
                 this->fLastSoundPlayTime = engine->getTime();
             }
         }
@@ -295,8 +295,8 @@ void CBaseUISlider::onMouseDownInside() {
 
     if(McRect(this->vPos.x + this->vBlockPos.x, this->vPos.y + this->vBlockPos.y, this->vBlockSize.x,
               this->vBlockSize.y)
-           .contains(engine->getMouse()->getPos()))
-        this->vGrabBackup = engine->getMouse()->getPos() - this->vBlockPos;
+           .contains(mouse->getPos()))
+        this->vGrabBackup = mouse->getPos() - this->vBlockPos;
     else
         this->vGrabBackup = this->vPos + this->vBlockSize / 2;
 

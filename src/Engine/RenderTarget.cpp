@@ -16,8 +16,8 @@ RenderTarget::RenderTarget(int x, int y, int width, int height, Graphics::MULTIS
     this->clearColor = 0x00000000;
 }
 
-void RenderTarget::draw(Graphics *g, int x, int y) {
-    if(!this->bReady) {
+void RenderTarget::draw(int x, int y) {
+    if(!m_bReady) {
         if(cv_debug_rt.getBool()) debugLog("WARNING: RenderTarget is not ready!\n");
         return;
     }
@@ -59,8 +59,8 @@ void RenderTarget::draw(Graphics *g, int x, int y) {
     this->unbind();
 }
 
-void RenderTarget::draw(Graphics *g, int x, int y, int width, int height) {
-    if(!this->bReady) {
+void RenderTarget::draw(int x, int y, int width, int height) {
+    if(!m_bReady) {
         if(cv_debug_rt.getBool()) debugLog("WARNING: RenderTarget is not ready!\n");
         return;
     }
@@ -94,8 +94,8 @@ void RenderTarget::draw(Graphics *g, int x, int y, int width, int height) {
     this->unbind();
 }
 
-void RenderTarget::drawRect(Graphics *g, int x, int y, int width, int height) {
-    if(!this->bReady) {
+void RenderTarget::drawRect(int x, int y, int width, int height) {
+    if(!m_bReady) {
         if(cv_debug_rt.getBool()) debugLog("WARNING: RenderTarget is not ready!\n");
         return;
     }

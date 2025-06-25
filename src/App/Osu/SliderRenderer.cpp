@@ -37,8 +37,8 @@ float SliderRenderer::fBoundingBoxMaxY = 0.0f;
 
 VertexArrayObject *SliderRenderer::generateVAO(const std::vector<Vector2> &points, float hitcircleDiameter,
                                                Vector3 translation, bool skipOOBPoints) {
-    engine->getResourceManager()->requestNextLoadUnmanaged();
-    VertexArrayObject *vao = engine->getResourceManager()->createVertexArrayObject();
+    resourceManager->requestNextLoadUnmanaged();
+    VertexArrayObject *vao = resourceManager->createVertexArrayObject();
 
     checkUpdateVars(hitcircleDiameter);
 
@@ -92,14 +92,14 @@ VertexArrayObject *SliderRenderer::generateVAO(const std::vector<Vector2> &point
     }
 
     if(vao->getNumVertices() > 0)
-        engine->getResourceManager()->loadResource(vao);
+        resourceManager->loadResource(vao);
     else
         debugLog("SliderRenderer::generateSliderVAO() ERROR: Zero triangles!\n");
 
     return vao;
 }
 
-void SliderRenderer::draw(Graphics *g, const std::vector<Vector2> &points, const std::vector<Vector2> &alwaysPoints,
+void SliderRenderer::draw(const std::vector<Vector2> &points, const std::vector<Vector2> &alwaysPoints,
                           float hitcircleDiameter, float from, float to, Color undimmedColor, float colorRGBMultiplier,
                           float alpha, long sliderTimeForRainbow) {
     if(cv_slider_alpha_multiplier.getFloat() <= 0.0f || alpha <= 0.0f) return;
@@ -219,11 +219,11 @@ void SliderRenderer::draw(Graphics *g, const std::vector<Vector2> &points, const
                 // draw curve mesh
                 {
                     drawFillSliderBodyPeppy(
-                        g, points, (cv_slider_legacy_use_baked_vao.getBool() ? UNIT_CIRCLE_VAO_BAKED : UNIT_CIRCLE_VAO),
+                        points, (cv_slider_legacy_use_baked_vao.getBool() ? UNIT_CIRCLE_VAO_BAKED : UNIT_CIRCLE_VAO),
                         hitcircleDiameter / 2.0f, drawFromIndex, drawUpToIndex, BLEND_SHADER);
 
                     if(alwaysPoints.size() > 0)
-                        drawFillSliderBodyPeppy(g, alwaysPoints, UNIT_CIRCLE_VAO_BAKED, hitcircleDiameter / 2.0f, 0,
+                        drawFillSliderBodyPeppy(alwaysPoints, UNIT_CIRCLE_VAO_BAKED, hitcircleDiameter / 2.0f, 0,
                                                 alwaysPoints.size(), BLEND_SHADER);
                 }
             }
@@ -243,12 +243,12 @@ void SliderRenderer::draw(Graphics *g, const std::vector<Vector2> &points, const
     SliderRenderer::fBoundingBoxMaxY += pixelFudge;
 
     osu->getSliderFrameBuffer()->setColor(COLORf(alpha * cv_slider_alpha_multiplier.getFloat(), 1.0f, 1.0f, 1.0f));
-    osu->getSliderFrameBuffer()->drawRect(g, SliderRenderer::fBoundingBoxMinX, SliderRenderer::fBoundingBoxMinY,
+    osu->getSliderFrameBuffer()->drawRect(SliderRenderer::fBoundingBoxMinX, SliderRenderer::fBoundingBoxMinY,
                                           SliderRenderer::fBoundingBoxMaxX - SliderRenderer::fBoundingBoxMinX,
                                           SliderRenderer::fBoundingBoxMaxY - SliderRenderer::fBoundingBoxMinY);
 }
 
-void SliderRenderer::draw(Graphics *g, VertexArrayObject *vao, const std::vector<Vector2> &alwaysPoints,
+void SliderRenderer::draw(VertexArrayObject *vao, const std::vector<Vector2> &alwaysPoints,
                           Vector2 translation, float scale, float hitcircleDiameter, float from, float to,
                           Color undimmedColor, float colorRGBMultiplier, float alpha, long sliderTimeForRainbow,
                           bool doEnableRenderTarget, bool doDisableRenderTarget, bool doDrawSliderFrameBufferToScreen) {
@@ -349,7 +349,7 @@ void SliderRenderer::draw(Graphics *g, VertexArrayObject *vao, const std::vector
 #ifdef MCENGINE_FEATURE_OPENGLES
 
                         if(!cv_slider_use_gradient_image.getBool()) {
-                            OpenGLES2Interface *gles2 = dynamic_cast<OpenGLES2Interface *>(g);
+                            OpenGLES2Interface *gles2 = dynamic_cast<OpenGLES2Interface *>();
                             if(gles2 != NULL) {
                                 gles2->forceUpdateTransform();
                                 Matrix4 mvp = gles2->getMVP();
@@ -364,7 +364,7 @@ void SliderRenderer::draw(Graphics *g, VertexArrayObject *vao, const std::vector
                     g->popTransform();
 
                     if(alwaysPoints.size() > 0)
-                        drawFillSliderBodyPeppy(g, alwaysPoints, UNIT_CIRCLE_VAO_BAKED, hitcircleDiameter / 2.0f, 0,
+                        drawFillSliderBodyPeppy(alwaysPoints, UNIT_CIRCLE_VAO_BAKED, hitcircleDiameter / 2.0f, 0,
                                                 alwaysPoints.size(), BLEND_SHADER);
                 }
             }
@@ -379,11 +379,11 @@ void SliderRenderer::draw(Graphics *g, VertexArrayObject *vao, const std::vector
 
     if(doDrawSliderFrameBufferToScreen) {
         osu->getSliderFrameBuffer()->setColor(COLORf(alpha * cv_slider_alpha_multiplier.getFloat(), 1.0f, 1.0f, 1.0f));
-        osu->getSliderFrameBuffer()->draw(g, 0, 0);
+        osu->getSliderFrameBuffer()->draw(0, 0);
     }
 }
 
-void SliderRenderer::drawMM(Graphics *g, const std::vector<Vector2> &points, float hitcircleDiameter, float from,
+void SliderRenderer::drawMM(const std::vector<Vector2> &points, float hitcircleDiameter, float from,
                             float to, Color undimmedColor, float colorRGBMultiplier, float alpha,
                             long sliderTimeForRainbow) {
     if(cv_slider_alpha_multiplier.getFloat() <= 0.0f || alpha <= 0.0f) return;
@@ -456,7 +456,7 @@ void SliderRenderer::drawMM(Graphics *g, const std::vector<Vector2> &points, flo
         osu->getSkin()->getSliderGradient()->bind();
 
         // draw curve mesh
-        { drawFillSliderBodyMM(g, points, hitcircleDiameter / 2.0f, drawFromIndex, drawUpToIndex); }
+        { drawFillSliderBodyMM(points, hitcircleDiameter / 2.0f, drawFromIndex, drawUpToIndex); }
 
         if(!cv_slider_use_gradient_image.getBool()) BLEND_SHADER->disable();
 
@@ -473,13 +473,13 @@ void SliderRenderer::drawMM(Graphics *g, const std::vector<Vector2> &points, flo
     SliderRenderer::fBoundingBoxMaxY += pixelFudge;
 
     osu->getSliderFrameBuffer()->setColor(COLORf(alpha * cv_slider_alpha_multiplier.getFloat(), 1.0f, 1.0f, 1.0f));
-    /// osu->getSliderFrameBuffer()->drawRect(g, SliderRenderer::fBoundingBoxMinX, SliderRenderer::fBoundingBoxMinY,
+    /// osu->getSliderFrameBuffer()->drawRect(SliderRenderer::fBoundingBoxMinX, SliderRenderer::fBoundingBoxMinY,
     /// SliderRenderer::fBoundingBoxMaxX
     /// - SliderRenderer::fBoundingBoxMinX, SliderRenderer::fBoundingBoxMaxY - SliderRenderer::fBoundingBoxMinY);
-    osu->getSliderFrameBuffer()->draw(g, 0, 0);
+    osu->getSliderFrameBuffer()->draw(0, 0);
 }
 
-void SliderRenderer::drawFillSliderBodyPeppy(Graphics *g, const std::vector<Vector2> &points,
+void SliderRenderer::drawFillSliderBodyPeppy(const std::vector<Vector2> &points,
                                              VertexArrayObject *circleMesh, float radius, int drawFromIndex,
                                              int drawUpToIndex, Shader *shader) {
     if(drawFromIndex < 0) drawFromIndex = 0;
@@ -487,7 +487,7 @@ void SliderRenderer::drawFillSliderBodyPeppy(Graphics *g, const std::vector<Vect
 
 #ifdef MCENGINE_FEATURE_OPENGLES
 
-    OpenGLES2Interface *gles2 = dynamic_cast<OpenGLES2Interface *>(g);
+    OpenGLES2Interface *gles2 = dynamic_cast<OpenGLES2Interface *>();
 
 #endif
 
@@ -531,7 +531,7 @@ void SliderRenderer::drawFillSliderBodyPeppy(Graphics *g, const std::vector<Vect
     g->popTransform();
 }
 
-void SliderRenderer::drawFillSliderBodyMM(Graphics *g, const std::vector<Vector2> &points, float radius,
+void SliderRenderer::drawFillSliderBodyMM(const std::vector<Vector2> &points, float radius,
                                           int drawFromIndex, int drawUpToIndex) {
     // modified version of
     // https://github.com/ppy/osu-framework/blob/master/osu.Framework/Graphics/Lines/Path_DrawNode.cs
@@ -681,7 +681,7 @@ void SliderRenderer::checkUpdateVars(float hitcircleDiameter) {
     if(BLEND_SHADER == NULL)  // only do this once
     {
         // build shaders
-        BLEND_SHADER = engine->getResourceManager()->loadShader("slider.vsh", "slider.fsh", "slider");
+        BLEND_SHADER = resourceManager->loadShader("slider.vsh", "slider.fsh", "slider");
     }
 
     const int subdivisions = cv_slider_body_unit_circle_subdivisions.getInt();
@@ -730,7 +730,7 @@ void SliderRenderer::checkUpdateVars(float hitcircleDiameter) {
     if(UNIT_CIRCLE_VAO == NULL) UNIT_CIRCLE_VAO = new VertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_TRIANGLE_FAN);
     if(UNIT_CIRCLE_VAO_BAKED == NULL)
         UNIT_CIRCLE_VAO_BAKED =
-            engine->getResourceManager()->createVertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_TRIANGLE_FAN);
+            resourceManager->createVertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_TRIANGLE_FAN);
     if(UNIT_CIRCLE_VAO_TRIANGLES == NULL)
         UNIT_CIRCLE_VAO_TRIANGLES = new VertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES);
 
@@ -757,7 +757,7 @@ void SliderRenderer::checkUpdateVars(float hitcircleDiameter) {
             UNIT_CIRCLE_VAO_BAKED->addTexcoord(vertexTexcoord);
         }
 
-        engine->getResourceManager()->loadResource(UNIT_CIRCLE_VAO_BAKED);
+        resourceManager->loadResource(UNIT_CIRCLE_VAO_BAKED);
 
         // pure triangles (needed for VertexArrayObject, because we can't merge multiple triangle fan meshes into one
         // VertexArrayObject)

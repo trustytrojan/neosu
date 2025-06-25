@@ -163,9 +163,9 @@ Beatmap::~Beatmap() {
     this->unloadObjects();
 }
 
-void Beatmap::drawDebug(Graphics *g) {
+void Beatmap::drawDebug() {
     if(cv_debug_draw_timingpoints.getBool()) {
-        McFont *debugFont = engine->getResourceManager()->getFont("FONT_DEFAULT");
+        McFont *debugFont = resourceManager->getFont("FONT_DEFAULT");
         g->setColor(0xffffffff);
         g->pushTransform();
         g->translate(5, debugFont->getHeight() + 5 - this->getMousePos().y);
@@ -180,7 +180,7 @@ void Beatmap::drawDebug(Graphics *g) {
     }
 }
 
-void Beatmap::drawBackground(Graphics *g) {
+void Beatmap::drawBackground() {
     if(!this->canDraw()) return;
 
     // draw beatmap background image
@@ -224,7 +224,7 @@ void Beatmap::drawBackground(Graphics *g) {
     if(cv_draw_hud.getBool() && cv_draw_scorebarbg.getBool() &&
        (!cv_mod_fposu.getBool() || (!cv_fposu_draw_scorebarbg_on_top.getBool())))  // NOTE: special case for FPoSu
         osu->getHUD()->drawScorebarBg(
-            g, cv_hud_scorebar_hide_during_breaks.getBool() ? (1.0f - this->fBreakBackgroundFade) : 1.0f,
+            cv_hud_scorebar_hide_during_breaks.getBool() ? (1.0f - this->fBreakBackgroundFade) : 1.0f,
             osu->getHUD()->getScoreBarBreakAnim());
 
     if(cv_debug.getBool()) {
@@ -273,7 +273,7 @@ void Beatmap::drawBackground(Graphics *g) {
 }
 
 void Beatmap::onKeyDown(KeyboardEvent &e) {
-    if(e == KEY_O && engine->getKeyboard()->isControlDown()) {
+    if(e == KEY_O && keyboard->isControlDown()) {
         osu->toggleOptionsMenu();
         e.consume();
     }
@@ -308,7 +308,7 @@ void Beatmap::skipEmptySection() {
         this->bWasSeekFrame = true;
     }
 
-    engine->getSound()->play(osu->getSkin()->getMenuHit());
+    soundEngine->play(osu->getSkin()->getMenuHit());
 
     if(!bancho.spectators.empty()) {
         // TODO @kiwec: how does skip work? does client jump to latest time or just skip beginning?
@@ -333,7 +333,7 @@ void Beatmap::keyPressed1(bool mouse) {
 
     if(cv_mod_fullalternate.getBool() && this->bPrevKeyWasKey1) {
         if(this->iCurrentHitObjectIndex > this->iAllowAnyNextKeyForFullAlternateUntilHitObjectIndex) {
-            engine->getSound()->play(this->getSkin()->getCombobreak());
+            soundEngine->play(this->getSkin()->getCombobreak());
             return;
         }
     }
@@ -368,7 +368,7 @@ void Beatmap::keyPressed2(bool mouse) {
 
     if(cv_mod_fullalternate.getBool() && !this->bPrevKeyWasKey1) {
         if(this->iCurrentHitObjectIndex > this->iAllowAnyNextKeyForFullAlternateUntilHitObjectIndex) {
-            engine->getSound()->play(this->getSkin()->getCombobreak());
+            soundEngine->play(this->getSkin()->getCombobreak());
             return;
         }
     }
@@ -558,7 +558,7 @@ bool Beatmap::start() {
 
     osu->should_pause_background_threads = true;
 
-    engine->getSound()->play(osu->skin->getMenuHit());
+    soundEngine->play(osu->skin->getMenuHit());
 
     osu->updateMods();
 
@@ -691,8 +691,8 @@ bool Beatmap::start() {
     if(cv_restart_sound_engine_before_playing.getBool()) {
         // HACKHACK: Reload sound engine before starting the song, as it starts lagging after a while
         //           (i haven't figured out the root cause yet)
-        engine->getSound()->pause(this->music);
-        engine->getSound()->restart();
+        soundEngine->pause(this->music);
+        soundEngine->restart();
 
         // Restarting sound engine already reloads the music
     } else {
@@ -732,14 +732,14 @@ bool Beatmap::start() {
     osu->updateConfineCursor();
     osu->updateWindowsKeyDisable();
 
-    engine->getSound()->play(osu->getSkin()->expand);
+    soundEngine->play(osu->getSkin()->expand);
 
     // NOTE: loading failures are handled dynamically in update(), so temporarily assume everything has worked in here
     return true;
 }
 
 void Beatmap::restart(bool quick) {
-    engine->getSound()->stop(this->getSkin()->getFailsound());
+    soundEngine->stop(this->getSkin()->getFailsound());
 
     if(!this->bIsWaiting) {
         this->bIsRestartScheduled = true;
@@ -767,7 +767,7 @@ void Beatmap::actualRestart() {
     }
 
     // pause temporarily if playing
-    if(this->music->isPlaying()) engine->getSound()->pause(this->music);
+    if(this->music->isPlaying()) soundEngine->pause(this->music);
 
     // reset/restore frequency (from potential fail before)
     this->music->setFrequency(0);
@@ -831,7 +831,7 @@ void Beatmap::pause(bool quitIfWaiting) {
                cv_end_skip.getBool()) {
                 this->stop(false);
             } else {
-                engine->getSound()->pause(this->music);
+                soundEngine->pause(this->music);
                 this->bIsPlaying = false;
                 this->bIsPaused = true;
             }
@@ -841,7 +841,7 @@ void Beatmap::pause(bool quitIfWaiting) {
         if(osu->getModAuto() || osu->getModAutopilot() || this->bIsInSkippableSection || this->is_watching) {
             if(!this->bIsWaiting) {
                 // only force play() if we were not early waiting
-                engine->getSound()->play(this->music);
+                soundEngine->play(this->music);
             }
 
             this->bIsPlaying = true;
@@ -877,9 +877,9 @@ void Beatmap::pause(bool quitIfWaiting) {
 void Beatmap::pausePreviewMusic(bool toggle) {
     if(this->music != NULL) {
         if(this->music->isPlaying())
-            engine->getSound()->pause(this->music);
+            soundEngine->pause(this->music);
         else if(toggle)
-            engine->getSound()->play(this->music);
+            soundEngine->play(this->music);
     }
 }
 
@@ -892,7 +892,7 @@ bool Beatmap::isPreviewMusicPlaying() {
 void Beatmap::stop(bool quit) {
     if(this->selectedDifficulty2 == NULL) return;
 
-    if(this->getSkin()->getFailsound()->isPlaying()) engine->getSound()->stop(this->getSkin()->getFailsound());
+    if(this->getSkin()->getFailsound()->isPlaying()) soundEngine->stop(this->getSkin()->getFailsound());
 
     this->bIsPlaying = false;
     this->bIsPaused = false;
@@ -944,7 +944,7 @@ void Beatmap::fail(bool force_death) {
     if(bancho.is_online() && osu->getModRelax()) return;
 
     if(!bancho.is_playing_a_multi_map() && cv_drain_kill.getBool()) {
-        engine->getSound()->play(this->getSkin()->getFailsound());
+        soundEngine->play(this->getSkin()->getFailsound());
 
         // trigger music slowdown and delayed menu, see update()
         this->bFailed = true;
@@ -978,7 +978,7 @@ void Beatmap::cancelFailing() {
 
     if(this->music != NULL) this->music->setFrequency(0.0f);
 
-    if(this->getSkin()->getFailsound()->isPlaying()) engine->getSound()->stop(this->getSkin()->getFailsound());
+    if(this->getSkin()->getFailsound()->isPlaying()) soundEngine->stop(this->getSkin()->getFailsound());
 }
 
 f32 Beatmap::getIdealVolume() {
@@ -1022,7 +1022,7 @@ void Beatmap::seekPercent(f64 percent) {
         this->bIsPlaying = true;
         this->bIsRestartScheduledQuick = false;
 
-        engine->getSound()->play(this->music);
+        soundEngine->play(this->music);
 
         // if there are calculations in there that need the hitobjects to be loaded, also applies speed/pitch
         this->onModUpdate(false, false);
@@ -1486,9 +1486,9 @@ void Beatmap::handlePreviewPlay() {
         // screen or the songbrowser after playing)
         if(this->music->getPosition() > 0.95f) this->iContinueMusicPos = 0;
 
-        engine->getSound()->stop(this->music);
+        soundEngine->stop(this->music);
 
-        if(engine->getSound()->play(this->music)) {
+        if(soundEngine->play(this->music)) {
             if(this->music->getFrequency() < this->fMusicFrequencyBackup)  // player has died, reset frequency
                 this->music->setFrequency(this->fMusicFrequencyBackup);
 
@@ -1532,9 +1532,9 @@ void Beatmap::loadMusic(bool stream) {
         this->unloadMusic();
 
         // if it's not a stream then we are loading the entire song into memory for playing
-        if(!stream) engine->getResourceManager()->requestNextLoadAsync();
+        if(!stream) resourceManager->requestNextLoadAsync();
 
-        this->music = engine->getResourceManager()->loadSoundAbs(this->selectedDifficulty2->getFullSoundFilePath(),
+        this->music = resourceManager->loadSoundAbs(this->selectedDifficulty2->getFullSoundFilePath(),
                                                                  "OSU_BEATMAP_MUSIC", stream, false, false);
         this->music->setVolume(this->getIdealVolume());
         this->fMusicFrequencyBackup = this->music->getFrequency();
@@ -1543,7 +1543,7 @@ void Beatmap::loadMusic(bool stream) {
 }
 
 void Beatmap::unloadMusic() {
-    engine->getResourceManager()->destroyResource(this->music);
+    resourceManager->destroyResource(this->music);
     this->music = NULL;
 }
 
@@ -1612,7 +1612,7 @@ void Beatmap::playMissSound() {
     if((this->bIsFirstMissSound && osu->getScore()->getCombo() > 0) ||
        osu->getScore()->getCombo() > cv_combobreak_sound_combo.getInt()) {
         this->bIsFirstMissSound = false;
-        engine->getSound()->play(this->getSkin()->getCombobreak());
+        soundEngine->play(this->getSkin()->getCombobreak());
     }
 }
 
@@ -1687,11 +1687,11 @@ u32 Beatmap::getMusicPositionMSInterpolated() {
     }
 }
 
-void Beatmap::draw(Graphics *g) {
+void Beatmap::draw() {
     if(!this->canDraw()) return;
 
     // draw background
-    this->drawBackground(g);
+    this->drawBackground();
 
     // draw loading circle
     if(this->isLoading()) {
@@ -1699,16 +1699,16 @@ void Beatmap::draw(Graphics *g) {
             f32 leeway = clamp<i32>(this->last_frame_ms - this->iCurMusicPos, 0, cv_spec_buffer.getInt());
             f32 pct = leeway / (cv_spec_buffer.getFloat()) * 100.f;
             auto loadingMessage = UString::format("Buffering ... (%.2f%%)", pct);
-            osu->getHUD()->drawLoadingSmall(g, loadingMessage);
+            osu->getHUD()->drawLoadingSmall(loadingMessage);
 
             // draw the rest of the playfield while buffering/paused
         } else if(bancho.is_playing_a_multi_map() && !bancho.room.all_players_loaded) {
-            osu->getHUD()->drawLoadingSmall(g, "Waiting for players ...");
+            osu->getHUD()->drawLoadingSmall("Waiting for players ...");
 
             // only start drawing the rest of the playfield if everything has loaded
             return;
         } else {
-            osu->getHUD()->drawLoadingSmall(g, "Loading ...");
+            osu->getHUD()->drawLoadingSmall("Loading ...");
 
             // only start drawing the rest of the playfield if everything has loaded
             return;
@@ -1725,11 +1725,11 @@ void Beatmap::draw(Graphics *g) {
 
     // draw playfield border
     if(cv_draw_playfield_border.getBool() && !cv_mod_fps.getBool()) {
-        osu->getHUD()->drawPlayfieldBorder(g, this->vPlayfieldCenter, this->vPlayfieldSize, this->fHitcircleDiameter);
+        osu->getHUD()->drawPlayfieldBorder(this->vPlayfieldCenter, this->vPlayfieldSize, this->fHitcircleDiameter);
     }
 
     // draw hiterrorbar
-    if(!cv_mod_fposu.getBool()) osu->getHUD()->drawHitErrorBar(g, this);
+    if(!cv_mod_fposu.getBool()) osu->getHUD()->drawHitErrorBar(this);
 
     // draw first person crosshair
     if(cv_mod_fps.getBool()) {
@@ -1742,16 +1742,16 @@ void Beatmap::draw(Graphics *g) {
     }
 
     // draw followpoints
-    if(cv_draw_followpoints.getBool() && !cv_mod_mafham.getBool()) this->drawFollowPoints(g);
+    if(cv_draw_followpoints.getBool() && !cv_mod_mafham.getBool()) this->drawFollowPoints();
 
     // draw all hitobjects in reverse
-    if(cv_draw_hitobjects.getBool()) this->drawHitObjects(g);
+    if(cv_draw_hitobjects.getBool()) this->drawHitObjects();
 
     // draw spectator pause message
     if(this->spectate_pause) {
         auto info = get_user_info(bancho.spectated_player_id);
         auto pause_msg = UString::format("%s has paused", info->name.toUtf8());
-        osu->getHUD()->drawLoadingSmall(g, pause_msg);
+        osu->getHUD()->drawLoadingSmall(pause_msg);
     }
 
     // debug stuff
@@ -1764,7 +1764,7 @@ void Beatmap::draw(Graphics *g) {
     }
 }
 
-void Beatmap::drawFollowPoints(Graphics *g) {
+void Beatmap::drawFollowPoints() {
     Skin *skin = osu->getSkin();
 
     const long curPos = this->iCurMusicPosWithOffsets;
@@ -1891,7 +1891,7 @@ void Beatmap::drawFollowPoints(Graphics *g) {
                         ((this->fHitcircleDiameter / 8.0f) / skin->getFollowPoint2()->getSizeBaseRaw().x) *
                         followPointScaleMultiplier;
 
-                    skin->getFollowPoint2()->drawRaw(g, followPos, followPointImageScale * scale);
+                    skin->getFollowPoint2()->drawRaw(followPos, followPointImageScale * scale);
                 }
                 g->popTransform();
             }
@@ -1905,7 +1905,7 @@ void Beatmap::drawFollowPoints(Graphics *g) {
     }
 }
 
-void Beatmap::drawHitObjects(Graphics *g) {
+void Beatmap::drawHitObjects() {
     const long curPos = this->iCurMusicPosWithOffsets;
     const long pvs = this->getPVS();
     const bool usePVS = cv_pvs.getBool();
@@ -1923,7 +1923,7 @@ void Beatmap::drawHitObjects(Graphics *g) {
                         continue;
                 }
 
-                this->hitobjectsSortedByEndTime[i]->draw(g);
+                this->hitobjectsSortedByEndTime[i]->draw();
             }
         } else {
             for(int i = 0; i < this->hitobjectsSortedByEndTime.size(); i++) {
@@ -1937,7 +1937,7 @@ void Beatmap::drawHitObjects(Graphics *g) {
                         break;
                 }
 
-                this->hitobjectsSortedByEndTime[i]->draw(g);
+                this->hitobjectsSortedByEndTime[i]->draw();
             }
         }
         for(int i = 0; i < this->hitobjectsSortedByEndTime.size(); i++) {
@@ -1952,7 +1952,7 @@ void Beatmap::drawHitObjects(Graphics *g) {
                     break;
             }
 
-            this->hitobjectsSortedByEndTime[i]->draw2(g);
+            this->hitobjectsSortedByEndTime[i]->draw2();
         }
     } else {
         const int mafhamRenderLiveSize = cv_mod_mafham_render_livesize.getInt();
@@ -2004,7 +2004,7 @@ void Beatmap::drawHitObjects(Graphics *g) {
                                 continue;
                         }
 
-                        this->hitobjectsSortedByEndTime[i]->draw(g);
+                        this->hitobjectsSortedByEndTime[i]->draw();
 
                         this->iMafhamActiveRenderHitObjectIndex = i;
                     }
@@ -2032,12 +2032,12 @@ void Beatmap::drawHitObjects(Graphics *g) {
         // draw scene buffer
         if(shouldDrawBuffer) {
             g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_PREMUL_COLOR);
-            { this->mafhamFinishedRenderTarget->draw(g, 0, 0); }
+            { this->mafhamFinishedRenderTarget->draw(0, 0); }
             g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
         }
 
         // draw followpoints
-        if(cv_draw_followpoints.getBool()) this->drawFollowPoints(g);
+        if(cv_draw_followpoints.getBool()) this->drawFollowPoints();
 
         // draw live hitobjects (also, code duplication yay)
         {
@@ -2056,7 +2056,7 @@ void Beatmap::drawHitObjects(Graphics *g) {
                    (i > this->iMafhamFinishedRenderHitObjectIndex - 1 && shouldDrawBuffer))  // skip non-live objects
                     continue;
 
-                this->hitobjectsSortedByEndTime[i]->draw(g);
+                this->hitobjectsSortedByEndTime[i]->draw();
             }
 
             for(int i = 0; i < this->hitobjectsSortedByEndTime.size(); i++) {
@@ -2074,7 +2074,7 @@ void Beatmap::drawHitObjects(Graphics *g) {
                    (i >= this->iMafhamFinishedRenderHitObjectIndex - 1 && shouldDrawBuffer))  // skip non-live objects
                     break;
 
-                this->hitobjectsSortedByEndTime[i]->draw2(g);
+                this->hitobjectsSortedByEndTime[i]->draw2();
             }
         }
     }
@@ -2261,7 +2261,7 @@ void Beatmap::update2() {
             this->bIsPaused = false;
 
             if(!isEarlyNoteContinue) {
-                engine->getSound()->play(this->music);
+                soundEngine->play(this->music);
             }
 
             this->bIsPlaying = true;  // usually this should be checked with the result of the above play() call, but
@@ -2319,7 +2319,7 @@ void Beatmap::update2() {
                     this->bIsWaiting = false;
                     this->bIsPlaying = true;
 
-                    engine->getSound()->play(this->music);
+                    soundEngine->play(this->music);
                     this->music->setLoop(false);
                     this->music->setPositionMS(0);
                     this->bWasSeekFrame = true;
@@ -2364,12 +2364,12 @@ void Beatmap::update2() {
 
     if(bancho.is_spectating) {
         if(this->spectate_pause && !this->bFailed && this->music->isPlaying()) {
-            engine->getSound()->pause(this->music);
+            soundEngine->pause(this->music);
             this->bIsPlaying = false;
             this->bIsPaused = true;
         }
         if(!this->spectate_pause && this->bIsPaused) {
-            engine->getSound()->play(this->music);
+            soundEngine->play(this->music);
             this->bIsPlaying = true;
             this->bIsPaused = false;
         }
@@ -2982,9 +2982,9 @@ void Beatmap::update2() {
 
                 if(!wasSeekFrame) {
                     if(passing)
-                        engine->getSound()->play(osu->getSkin()->getSectionPassSound());
+                        soundEngine->play(osu->getSkin()->getSectionPassSound());
                     else
-                        engine->getSound()->play(osu->getSkin()->getSectionFailSound());
+                        soundEngine->play(osu->getSkin()->getSectionFailSound());
                 }
             }
         }
@@ -3026,7 +3026,7 @@ void Beatmap::update2() {
     if(this->bFailed) {
         if(this->fFailAnim <= 0.0f) {
             if(this->music->isPlaying() || !osu->getPauseMenu()->isVisible()) {
-                engine->getSound()->pause(this->music);
+                soundEngine->pause(this->music);
                 this->bIsPaused = true;
 
                 if(bancho.is_spectating) {
@@ -3213,7 +3213,7 @@ bool Beatmap::isBuffering() {
     if(this->is_buffering) {
         // Make sure music is actually paused
         if(this->music->isPlaying()) {
-            engine->getSound()->pause(this->music);
+            soundEngine->pause(this->music);
             this->bIsPlaying = false;
             this->bIsPaused = true;
         }
@@ -3221,7 +3221,7 @@ bool Beatmap::isBuffering() {
         if(leeway >= cv_spec_buffer.getInt()) {
             debugLog("UNPAUSING: leeway: %i, last_event: %d, last_frame: %d\n", leeway, this->iCurMusicPos,
                      this->last_frame_ms);
-            engine->getSound()->play(this->music);
+            soundEngine->play(this->music);
             this->bIsPlaying = true;
             this->bIsPaused = false;
             this->is_buffering = false;
@@ -3235,7 +3235,7 @@ bool Beatmap::isBuffering() {
         if(leeway < 0 && !is_finished) {
             debugLog("PAUSING: leeway: %i, last_event: %d, last_frame: %d\n", leeway, this->iCurMusicPos,
                      this->last_frame_ms);
-            engine->getSound()->pause(this->music);
+            soundEngine->pause(this->music);
             this->bIsPlaying = false;
             this->bIsPaused = true;
             this->is_buffering = true;
@@ -3251,7 +3251,7 @@ bool Beatmap::isLoading() {
 }
 
 bool Beatmap::isActuallyLoading() {
-    return (!engine->getSound()->isReady() || !this->music->isAsyncReady() || this->bIsPreLoading);
+    return (!soundEngine->isReady() || !this->music->isAsyncReady() || this->bIsPreLoading);
 }
 
 Vector2 Beatmap::pixels2OsuCoords(Vector2 pixelCoords) const {
@@ -3400,7 +3400,7 @@ Vector2 Beatmap::getMousePos() const {
     if((this->is_watching && !this->bIsPaused) || bancho.is_spectating) {
         return this->interpolatedMousePos;
     } else {
-        return engine->getMouse()->getPos();
+        return mouse->getPos();
     }
 }
 

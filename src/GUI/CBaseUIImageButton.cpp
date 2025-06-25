@@ -21,11 +21,11 @@ CBaseUIImageButton::CBaseUIImageButton(std::string imageResourceName, float xPos
     this->bKeepAspectRatio = true;
 }
 
-void CBaseUIImageButton::draw(Graphics *g) {
+void CBaseUIImageButton::draw() {
     if(!this->bVisible) return;
 
     // draw image
-    Image *image = engine->getResourceManager()->getImage(this->sImageResourceName);
+    Image *image = resourceManager->getImage(this->sImageResourceName);
     if(image != NULL) {
         g->setColor(0xffffffff);
         g->pushTransform();
@@ -47,7 +47,7 @@ void CBaseUIImageButton::draw(Graphics *g) {
 CBaseUIImageButton *CBaseUIImageButton::setImageResourceName(std::string imageResourceName) {
     this->sImageResourceName = imageResourceName;
 
-    Image *image = engine->getResourceManager()->getImage(this->sImageResourceName);
+    Image *image = resourceManager->getImage(this->sImageResourceName);
     if(image != NULL) this->setSize(Vector2(image->getWidth(), image->getHeight()));
 
     return this;
@@ -56,7 +56,7 @@ CBaseUIImageButton *CBaseUIImageButton::setImageResourceName(std::string imageRe
 void CBaseUIImageButton::onResized() {
     CBaseUIButton::onResized();
 
-    Image *image = engine->getResourceManager()->getImage(this->sImageResourceName);
+    Image *image = resourceManager->getImage(this->sImageResourceName);
     if(this->bScaleToFit && image != NULL) {
         if(!this->bKeepAspectRatio) {
             this->vScale = Vector2(this->vSize.x / image->getWidth(), this->vSize.y / image->getHeight());

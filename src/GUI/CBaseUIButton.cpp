@@ -6,7 +6,7 @@
 
 CBaseUIButton::CBaseUIButton(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
     : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
-    this->font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    this->font = resourceManager->getFont("FONT_DEFAULT");
 
     // settings
     this->bDrawFrame = true;
@@ -22,7 +22,7 @@ CBaseUIButton::CBaseUIButton(float xPos, float yPos, float xSize, float ySize, U
     this->setText(text);
 }
 
-void CBaseUIButton::draw(Graphics *g) {
+void CBaseUIButton::draw() {
     if(!this->bVisible) return;
 
     // draw background
@@ -41,18 +41,18 @@ void CBaseUIButton::draw(Graphics *g) {
     const int hoverRectOffset = std::round(3.0f * ((float)this->font->getDPI() / 96.0f));  // NOTE: abusing font dpi
     g->setColor(this->frameColor);
     if(this->bMouseInside && this->bEnabled) {
-        if(!this->bActive && !engine->getMouse()->isLeftDown())
-            this->drawHoverRect(g, hoverRectOffset);
+        if(!this->bActive && !mouse->isLeftDown())
+            this->drawHoverRect(hoverRectOffset);
         else if(this->bActive)
-            this->drawHoverRect(g, hoverRectOffset);
+            this->drawHoverRect(hoverRectOffset);
     }
-    if(this->bActive && this->bEnabled) this->drawHoverRect(g, hoverRectOffset * 2);
+    if(this->bActive && this->bEnabled) this->drawHoverRect(hoverRectOffset * 2);
 
     // draw text
-    this->drawText(g);
+    this->drawText();
 }
 
-void CBaseUIButton::drawText(Graphics *g) {
+void CBaseUIButton::drawText() {
     if(this->font == NULL || this->sText.length() < 1) return;
 
     const int shadowOffset = std::round(1.0f * ((float)this->font->getDPI() / 96.0f));  // NOTE: abusing font dpi
@@ -90,7 +90,7 @@ void CBaseUIButton::drawText(Graphics *g) {
     g->popClipRect();
 }
 
-void CBaseUIButton::drawHoverRect(Graphics *g, int distance) {
+void CBaseUIButton::drawHoverRect(int distance) {
     g->drawLine(this->vPos.x, this->vPos.y - distance, this->vPos.x + this->vSize.x + 1, this->vPos.y - distance);
     g->drawLine(this->vPos.x, this->vPos.y + this->vSize.y + distance, this->vPos.x + this->vSize.x + 1,
                 this->vPos.y + this->vSize.y + distance);

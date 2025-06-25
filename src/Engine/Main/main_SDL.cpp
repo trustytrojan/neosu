@@ -312,17 +312,17 @@ int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
                         if(e.tfinger.fingerId == 0) {
                             mousePos = Vector2(e.tfinger.x, e.tfinger.y) * g_engine->getScreenSize();
                             environment->setMousePos(mousePos.x, mousePos.y);
-                            g_engine->getMouse()->onPosChange(mousePos);
+                            g_mouse->onPosChange(mousePos);
 
-                            if(g_engine->getMouse()->isLeftDown()) g_engine->onMouseLeftChange(false);
+                            if(g_mouse->isLeftDown()) g_engine->onMouseLeftChange(false);
 
                             g_engine->onMouseLeftChange(true);
                         } else if(e.tfinger.fingerId == 1) {
-                            if(g_engine->getMouse()->isLeftDown()) g_engine->onMouseLeftChange(false);
+                            if(g_mouse->isLeftDown()) g_engine->onMouseLeftChange(false);
 
                             g_engine->onMouseLeftChange(true);
                         } else if(e.tfinger.fingerId == 2) {
-                            if(g_engine->getMouse()->isLeftDown()) g_engine->onMouseLeftChange(false);
+                            if(g_mouse->isLeftDown()) g_engine->onMouseLeftChange(false);
 
                             g_engine->onMouseLeftChange(true);
                         }
@@ -340,7 +340,7 @@ int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
                         if(e.tfinger.fingerId == 0) {
                             mousePos = Vector2(e.tfinger.x, e.tfinger.y) * g_engine->getScreenSize();
                             environment->setMousePos(mousePos.x, mousePos.y);
-                            g_engine->getMouse()->onPosChange(mousePos);
+                            g_mouse->onPosChange(mousePos);
                         }
                         break;
 
@@ -540,7 +540,7 @@ int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
                     mousePos.y = clamp<float>(mousePos.y, 0.0f, g_engine->getScreenSize().y - 1);
 
                     environment->setMousePos(mousePos.x, mousePos.y);
-                    g_engine->getMouse()->onPosChange(mousePos);
+                    g_mouse->onPosChange(mousePos);
                 }
             }
 #endif

@@ -1,5 +1,7 @@
 #include "InfoLabel.h"
 
+#include <algorithm>
+
 #include "SongBrowser.h"
 // ---
 
@@ -53,7 +55,7 @@ InfoLabel::InfoLabel(float xPos, float yPos, float xSize, float ySize, UString n
     this->iBeatmapId = -1;
 }
 
-void InfoLabel::draw(Graphics *g) {
+void InfoLabel::draw() {
     // debug bounding box
     if(cv_debug.getBool()) {
         g->setColor(0xffff0000);
@@ -364,7 +366,7 @@ float InfoLabel::getMinimumWidth() {
     float diffInfoWidth = this->font->getStringWidth(this->buildDiffInfoString()) * this->fDiffInfoScale;
     float offsetInfoWidth = this->font->getStringWidth(this->buildOffsetInfoString()) * this->fOffsetInfoScale;
 
-    return max(max(max(max(titleWidth, subTitleWidth), songInfoWidth), diffInfoWidth), offsetInfoWidth);
+    return max({titleWidth, subTitleWidth, songInfoWidth, diffInfoWidth, offsetInfoWidth});
 }
 
 float InfoLabel::getMinimumHeight() {

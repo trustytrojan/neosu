@@ -202,10 +202,10 @@ void OpenGLRenderTarget::init() {
     // reset bound texture and framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    this->bReady = true;
+    m_bReady = true;
 }
 
-void OpenGLRenderTarget::initAsync() { this->bAsyncReady = true; }
+void OpenGLRenderTarget::initAsync() { m_bAsyncReady = true; }
 
 void OpenGLRenderTarget::destroy() {
     if(this->iResolveTexture != 0) glDeleteTextures(1, &this->iResolveTexture);
@@ -222,7 +222,7 @@ void OpenGLRenderTarget::destroy() {
 }
 
 void OpenGLRenderTarget::enable() {
-    if(!this->bReady) return;
+    if(!m_bReady) return;
 
     // bind framebuffer
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &this->iFrameBufferBackup);  // backup
@@ -230,8 +230,8 @@ void OpenGLRenderTarget::enable() {
 
     // set new viewport
     glGetIntegerv(GL_VIEWPORT, this->iViewportBackup);  // backup
-    glViewport(-this->vPos.x, (this->vPos.y - engine->getGraphics()->getResolution().y) + this->vSize.y,
-               engine->getGraphics()->getResolution().x, engine->getGraphics()->getResolution().y);
+    glViewport(-this->vPos.x, (this->vPos.y - g->getResolution().y) + this->vSize.y,
+               g->getResolution().x, g->getResolution().y);
 
     // clear
     if(cv_debug_rt.getBool())
@@ -246,14 +246,14 @@ void OpenGLRenderTarget::enable() {
 }
 
 void OpenGLRenderTarget::disable() {
-    if(!this->bReady) return;
+    if(!m_bReady) return;
 
         // if multisampled, blit content for multisampling into resolve texture
 #ifdef MCENGINE_FEATURE_OPENGL
 
     if(this->isMultiSampled()) {
         // HACKHACK: force disable antialiasing
-        engine->getGraphics()->setAntialiasing(false);
+        g->setAntialiasing(false);
 
         glBindFramebuffer(GL_READ_FRAMEBUFFER, this->iFrameBuffer);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, this->iResolveFrameBuffer);
@@ -277,7 +277,7 @@ void OpenGLRenderTarget::disable() {
 }
 
 void OpenGLRenderTarget::bind(unsigned int textureUnit) {
-    if(!this->bReady) return;
+    if(!m_bReady) return;
 
     this->iTextureUnitBackup = textureUnit;
 
@@ -294,7 +294,7 @@ void OpenGLRenderTarget::bind(unsigned int textureUnit) {
 }
 
 void OpenGLRenderTarget::unbind() {
-    if(!this->bReady) return;
+    if(!m_bReady) return;
 
     // restore texture unit (just in case) and set to no texture
     glActiveTexture(GL_TEXTURE0 + this->iTextureUnitBackup);
@@ -309,7 +309,7 @@ void OpenGLRenderTarget::blitResolveFrameBufferIntoFrameBuffer(OpenGLRenderTarge
 
     if(this->isMultiSampled()) {
         // HACKHACK: force disable antialiasing
-        engine->getGraphics()->setAntialiasing(false);
+        g->setAntialiasing(false);
 
         glBindFramebuffer(GL_READ_FRAMEBUFFER, this->iResolveFrameBuffer);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, rt->getFrameBuffer());
@@ -328,7 +328,7 @@ void OpenGLRenderTarget::blitFrameBufferIntoFrameBuffer(OpenGLRenderTarget *rt) 
 #ifdef MCENGINE_FEATURE_OPENGL
 
     // HACKHACK: force disable antialiasing
-    engine->getGraphics()->setAntialiasing(false);
+    g->setAntialiasing(false);
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, this->iFrameBuffer);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, rt->getFrameBuffer());

@@ -17,12 +17,12 @@ class SkinImage {
               std::string animationSeparator = "-", bool ignoreDefaultSkin = false);
     virtual ~SkinImage();
 
-    virtual void draw(Graphics *g, Vector2 pos,
+    virtual void draw(Vector2 pos,
                       float scale = 1.0f);  // for objects scaled automatically to the current resolution
 
     // for objects which scale depending on external factors
     // (e.g. hitobjects, depending on the diameter defined by the CS)
-    virtual void drawRaw(Graphics *g, Vector2 pos, float scale, AnchorPoint anchor = AnchorPoint::CENTER);
+    virtual void drawRaw(Vector2 pos, float scale, AnchorPoint anchor = AnchorPoint::CENTER);
 
     virtual void update(float speedMultiplier, bool useEngineTimeForAnimations = true, long curMusicPos = 0);
 

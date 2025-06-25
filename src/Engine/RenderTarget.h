@@ -9,9 +9,9 @@ class RenderTarget : public Resource {
                  Graphics::MULTISAMPLE_TYPE multiSampleType = Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X);
     ~RenderTarget() override { ; }
 
-    virtual void draw(Graphics *g, int x, int y);
-    virtual void draw(Graphics *g, int x, int y, int width, int height);
-    virtual void drawRect(Graphics *g, int x, int y, int width, int height);
+    virtual void draw(int x, int y);
+    virtual void draw(int x, int y, int width, int height);
+    virtual void drawRect(int x, int y, int width, int height);
 
     virtual void enable() = 0;
     virtual void disable() = 0;
@@ -42,7 +42,15 @@ class RenderTarget : public Resource {
     [[nodiscard]] inline Vector2 getPos() const { return this->vPos; }
     [[nodiscard]] inline Graphics::MULTISAMPLE_TYPE getMultiSampleType() const { return this->multiSampleType; }
 
-    [[nodiscard]] inline bool isMultiSampled() const { return this->multiSampleType != Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X; }
+    [[nodiscard]] inline bool isMultiSampled() const {
+        return this->multiSampleType != Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X;
+    }
+
+    // type inspection
+    [[nodiscard]] Type getResType() const final { return RENDERTARGET; }
+
+    RenderTarget *asRenderTarget() final { return this; }
+    [[nodiscard]] const RenderTarget *asRenderTarget() const final { return this; }
 
    protected:
     void init() override = 0;

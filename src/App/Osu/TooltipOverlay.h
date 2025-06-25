@@ -6,7 +6,7 @@ class TooltipOverlay : public OsuScreen {
     TooltipOverlay();
     ~TooltipOverlay() override;
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
     void begin();

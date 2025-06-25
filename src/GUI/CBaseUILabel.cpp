@@ -5,7 +5,7 @@
 
 CBaseUILabel::CBaseUILabel(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
     : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
-    this->font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    this->font = resourceManager->getFont("FONT_DEFAULT");
     this->setText(text);
 
     // colors
@@ -20,7 +20,7 @@ CBaseUILabel::CBaseUILabel(float xPos, float yPos, float xSize, float ySize, USt
     this->textJustification = TEXT_JUSTIFICATION::TEXT_JUSTIFICATION_LEFT;
 }
 
-void CBaseUILabel::draw(Graphics *g) {
+void CBaseUILabel::draw() {
     if(!this->bVisible) return;
 
     // draw background
@@ -36,10 +36,10 @@ void CBaseUILabel::draw(Graphics *g) {
     }
 
     // draw text
-    this->drawText(g);
+    this->drawText();
 }
 
-void CBaseUILabel::drawText(Graphics *g) {
+void CBaseUILabel::drawText() {
     if(this->font != NULL && this->sText.length() > 0) {
         float xPosAdd = 0;
         switch(this->textJustification) {

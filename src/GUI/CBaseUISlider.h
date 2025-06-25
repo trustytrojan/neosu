@@ -10,7 +10,7 @@ class CBaseUISlider : public CBaseUIElement {
     CBaseUISlider(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "");
     ~CBaseUISlider() override { ; }
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
     void onKeyDown(KeyboardEvent &e) override;
@@ -74,7 +74,7 @@ class CBaseUISlider : public CBaseUIElement {
     void onResized() override;
 
    protected:
-    virtual void drawBlock(Graphics *g);
+    virtual void drawBlock();
 
     void updateBlockPos();
 

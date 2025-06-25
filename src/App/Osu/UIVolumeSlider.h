@@ -20,7 +20,7 @@ class UIVolumeSlider : public CBaseUISlider {
     [[nodiscard]] inline bool isSelected() const { return this->bSelected; }
 
    private:
-    void drawBlock(Graphics *g) override;
+    void drawBlock() override;
 
     void onMouseInside() override;
 

@@ -7,7 +7,7 @@ class CollectionButton : public Button {
                      float yPos, float xSize, float ySize, UString name, UString collectionName,
                      std::vector<SongButton *> children);
 
-    void draw(Graphics *g) override;
+    void draw() override;
 
     void triggerContextMenu(Vector2 pos);
 

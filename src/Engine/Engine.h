@@ -1,8 +1,8 @@
 #pragma once
 #include <source_location>
 
-#include "cbase.h"
 #include "Timing.h"
+#include "cbase.h"
 #include "fmt/color.h"
 #include "fmt/printf.h"
 
@@ -17,7 +17,6 @@ class ContextMenu;
 class NetworkHandler;
 class ResourceManager;
 class AnimationHandler;
-class DiscordInterface;
 
 class CBaseUIContainer;
 class VisualProfiler;
@@ -89,17 +88,20 @@ class Engine {
     void removeGamepad(Gamepad *gamepad);
 
     // interfaces
-    [[nodiscard]] inline App *getApp() const { return this->app; }
-    [[nodiscard]] inline Graphics *getGraphics() const { return this->graphics; }
-    [[nodiscard]] inline SoundEngine *getSound() const { return this->sound; }
-    [[nodiscard]] inline ResourceManager *getResourceManager() const { return this->resourceManager; }
-    [[nodiscard]] inline Environment *getEnvironment() const { return this->environment; }
-    [[nodiscard]] inline NetworkHandler *getNetworkHandler() const { return this->networkHandler; }
+   private:
+    // singleton interface/instance decls
+    static std::unique_ptr<Mouse> s_mouseInstance;
+    static std::unique_ptr<Keyboard> s_keyboardInstance;
+    static std::unique_ptr<Gamepad> s_gamepadInstance;
+    static std::unique_ptr<App> s_appInstance;
+    static std::unique_ptr<Graphics> s_graphicsInstance;
+    static std::unique_ptr<SoundEngine> s_soundEngineInstance;
+    static std::unique_ptr<ResourceManager> s_resourceManagerInstance;
+    static std::unique_ptr<NetworkHandler> s_networkHandlerInstance;
+    static std::unique_ptr<AnimationHandler> s_animationHandlerInstance;
+    static std::unique_ptr<ContextMenu> s_contextMenuInstance;
 
-    // input devices
-    [[nodiscard]] inline Mouse *getMouse() const { return this->mouse; }
-    [[nodiscard]] inline Keyboard *getKeyboard() const { return this->keyboard; }
-    [[nodiscard]] inline Gamepad *getGamepad() const { return this->gamepad; }
+   public:
     [[nodiscard]] inline const std::vector<Mouse *> &getMice() const { return this->mice; }
     [[nodiscard]] inline const std::vector<Keyboard *> &getKeyboards() const { return this->keyboards; }
     [[nodiscard]] inline const std::vector<Gamepad *> &getGamepads() const { return this->gamepads; }
@@ -128,20 +130,7 @@ class Engine {
     [[nodiscard]] inline Console *getConsole() const { return this->console; }
     [[nodiscard]] inline CBaseUIContainer *getGUI() const { return this->guiContainer; }
 
-    // interfaces
-    App *app;
-    Graphics *graphics;
-    SoundEngine *sound;
-    ContextMenu *contextMenu;
-    Environment *environment;
-    NetworkHandler *networkHandler;
-    ResourceManager *resourceManager;
-    AnimationHandler *animationHandler;
-
     // input devices
-    Mouse *mouse;
-    Keyboard *keyboard;
-    Gamepad *gamepad;
     std::vector<Mouse *> mice;
     std::vector<Keyboard *> keyboards;
     std::vector<Gamepad *> gamepads;
@@ -223,7 +212,8 @@ class Engine {
         // debug build shows full source location
         template <typename... Args>
         [[deprecated("use compile-time format string checked debugLogF instead")]]
-        static void logPrintf(const std::source_location &loc, const char *func, const std::string_view &fmt, Args &&...args) {
+        static void logPrintf(const std::source_location &loc, const char *func, const std::string_view &fmt,
+                              Args &&...args) {
             // auto contextPrefix =
             //     fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()), loc.line(),
             //     loc.column(), func);
@@ -236,8 +226,8 @@ class Engine {
 
         template <typename... Args>
         [[deprecated("use compile-time format string checked debugLogF instead")]]
-        static void logPrintf(const std::source_location &loc, const char *func, Color color, const std::string_view &fmt,
-                              Args &&...args) {
+        static void logPrintf(const std::source_location &loc, const char *func, Color color,
+                              const std::string_view &fmt, Args &&...args) {
             // auto contextPrefix =
             //     fmt::format("[{}:{}:{}] [{}]: ", Environment::getFileNameFromFilePath(loc.file_name()), loc.line(),
             //     loc.column(), func);
@@ -292,6 +282,17 @@ class Engine {
         logToConsole(color, UString(message));
     }
 };
+
+extern Mouse *mouse;
+extern Keyboard *keyboard;
+extern Gamepad *gamepad;
+extern App *app;
+extern Graphics *g;
+extern SoundEngine *soundEngine;
+extern ResourceManager *resourceManager;
+extern NetworkHandler *networkHandler;
+extern AnimationHandler *animationHandler;
+extern ContextMenu *contextMenu;
 
 extern Engine *engine;
 

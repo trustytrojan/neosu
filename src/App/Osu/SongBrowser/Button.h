@@ -15,7 +15,7 @@ class Button : public CBaseUIButton {
     ~Button() override;
     void deleteAnimations();
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
     virtual void updateLayoutEx();
@@ -47,7 +47,7 @@ class Button : public CBaseUIButton {
     [[nodiscard]] inline bool isSearchMatch() const { return this->bIsSearchMatch.load(); }
 
    protected:
-    void drawMenuButtonBackground(Graphics *g);
+    void drawMenuButtonBackground();
 
     virtual void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected) { ; }
     virtual void onRightMouseUpInside() { ; }

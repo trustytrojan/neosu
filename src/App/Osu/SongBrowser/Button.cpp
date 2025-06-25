@@ -60,10 +60,10 @@ void Button::deleteAnimations() {
     anim->deleteExistingAnimation(&this->fHoverMoveAwayAnimation);
 }
 
-void Button::draw(Graphics *g) {
+void Button::draw() {
     if(!this->bVisible) return;
 
-    this->drawMenuButtonBackground(g);
+    this->drawMenuButtonBackground();
 
     // debug inner bounding box
     if(cv_debug.getBool()) {
@@ -90,7 +90,7 @@ void Button::draw(Graphics *g) {
     }
 }
 
-void Button::drawMenuButtonBackground(Graphics *g) {
+void Button::drawMenuButtonBackground() {
     g->setColor(this->bSelected ? this->getActiveBackgroundColor() : this->getInactiveBackgroundColor());
     g->pushTransform();
     {
@@ -123,7 +123,7 @@ void Button::mouse_update(bool *propagate_clicks) {
 
     // HACKHACK: this should really be part of the UI base
     // right click detection
-    if(engine->getMouse()->isRightDown()) {
+    if(mouse->isRightDown()) {
         if(!this->bRightClickCheck) {
             this->bRightClickCheck = true;
             this->bRightClick = this->isMouseInside();
@@ -244,7 +244,7 @@ void Button::deselect() { this->bSelected = false; }
 void Button::resetAnimations() { this->setMoveAwayState(MOVE_AWAY_STATE::MOVE_CENTER, false); }
 
 void Button::onClicked() {
-    engine->getSound()->play(osu->getSkin()->selectDifficulty);
+    soundEngine->play(osu->getSkin()->selectDifficulty);
 
     CBaseUIButton::onClicked();
 
@@ -257,7 +257,7 @@ void Button::onMouseInside() {
     // hover sound
     if(engine->getTime() > lastHoverSoundTime + 0.05f)  // to avoid earraep
     {
-        if(engine->hasFocus()) engine->getSound()->play(osu->getSkin()->getMenuHover());
+        if(engine->hasFocus()) soundEngine->play(osu->getSkin()->getMenuHover());
 
         lastHoverSoundTime = engine->getTime();
     }

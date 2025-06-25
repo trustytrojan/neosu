@@ -134,7 +134,7 @@ Slider::~Slider() {
     SAFE_DELETE(this->vao);
 }
 
-void Slider::draw(Graphics *g) {
+void Slider::draw() {
     if(this->points.size() <= 0) return;
 
     const float foscale = cv_circle_fade_out_scale.getFloat();
@@ -157,7 +157,7 @@ void Slider::draw(Graphics *g) {
         }
 
         // draw slider body
-        if(alpha > 0.0f && cv_slider_draw_body.getBool()) this->drawBody(g, alpha, sliderSnakeStart, sliderSnake);
+        if(alpha > 0.0f && cv_slider_draw_body.getBool()) this->drawBody(alpha, sliderSnakeStart, sliderSnake);
 
         // draw slider ticks
         Color tickColor = 0xffffffff;
@@ -208,7 +208,7 @@ void Slider::draw(Graphics *g) {
                (!sliderRepeatEndCircleFinished &&
                 (ifStrictTrackingModShouldDrawEndCircle || (this->iRepeat > 1 && endCircleIsAtActualSliderEnd) ||
                  (this->iRepeat > 1 && std::abs(this->iRepeat - this->iCurRepeat) > 2))))
-                this->drawEndCircle(g, alpha, sliderSnake);
+                this->drawEndCircle(alpha, sliderSnake);
 
             // start circle
             if(!this->bStartFinished ||
@@ -216,7 +216,7 @@ void Slider::draw(Graphics *g) {
                 (ifStrictTrackingModShouldDrawEndCircle || (this->iRepeat > 1 && !endCircleIsAtActualSliderEnd) ||
                  (this->iRepeat > 1 && std::abs(this->iRepeat - this->iCurRepeat) > 2))) ||
                (!this->bEndFinished && this->iRepeat % 2 == 0 && ifStrictTrackingModShouldDrawEndCircle))
-                this->drawStartCircle(g, alpha);
+                this->drawStartCircle(alpha);
 
             // reverse arrows
             if(this->fReverseArrowAlpha > 0.0f) {
@@ -308,9 +308,9 @@ void Slider::draw(Graphics *g) {
         std::vector<Vector2> alwaysPoints;
         alwaysPoints.push_back(this->bm->osuCoords2Pixels(this->curve->pointAt(this->fSlidePercent)));
         if(!cv_slider_shrink.getBool())
-            this->drawBody(g, 1.0f - this->fEndSliderBodyFadeAnimation, 0, 1);
+            this->drawBody(1.0f - this->fEndSliderBodyFadeAnimation, 0, 1);
         else if(cv_slider_body_lazer_fadeout_style.getBool())
-            SliderRenderer::draw(g, emptyVector, alwaysPoints, this->bm->fHitcircleDiameter, 0.0f, 0.0f,
+            SliderRenderer::draw(emptyVector, alwaysPoints, this->bm->fHitcircleDiameter, 0.0f, 0.0f,
                                  this->bm->getSkin()->getComboColorForCounter(this->iColorCounter, this->iColorOffset),
                                  1.0f, 1.0f - this->fEndSliderBodyFadeAnimation, this->click_time);
     }
@@ -337,7 +337,7 @@ void Slider::draw(Graphics *g) {
                                                    ? this->click_time - this->iApproachTime
                                                    : this->bm->getCurMusicPosWithOffsets());
 
-                Circle::drawSliderStartCircle(g, this->bm, this->curve->pointAt(0.0f), this->combo_number,
+                Circle::drawSliderStartCircle(this->bm, this->curve->pointAt(0.0f), this->combo_number,
                                               this->iColorCounter, this->iColorOffset, 1.0f, 1.0f, alpha, alpha,
                                               drawNumber);
             } else {
@@ -348,7 +348,7 @@ void Slider::draw(Graphics *g) {
                     skin->getAnimationSpeed(),
                     !this->bm->isInMafhamRenderChunk() ? this->click_time : this->bm->getCurMusicPosWithOffsets());
 
-                Circle::drawSliderEndCircle(g, this->bm, this->curve->pointAt(0.0f), this->combo_number,
+                Circle::drawSliderEndCircle(this->bm, this->curve->pointAt(0.0f), this->combo_number,
                                             this->iColorCounter, this->iColorOffset, 1.0f, 1.0f, alpha, alpha,
                                             drawNumber);
             }
@@ -376,20 +376,20 @@ void Slider::draw(Graphics *g) {
                                                                                ? this->click_time - this->iFadeInTime
                                                                                : this->bm->getCurMusicPosWithOffsets());
 
-                Circle::drawSliderEndCircle(g, this->bm, this->curve->pointAt(1.0f), this->combo_number,
+                Circle::drawSliderEndCircle(this->bm, this->curve->pointAt(1.0f), this->combo_number,
                                             this->iColorCounter, this->iColorOffset, 1.0f, 1.0f, alpha, 0.0f, false);
             }
         }
         g->popTransform();
     }
 
-    HitObject::draw(g);
+    HitObject::draw();
 }
 
-void Slider::draw2(Graphics *g) { this->draw2(g, true, false); }
+void Slider::draw2() { this->draw2(true, false); }
 
-void Slider::draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCircle) {
-    HitObject::draw2(g);
+void Slider::draw2(bool drawApproachCircle, bool drawOnlyApproachCircle) {
+    HitObject::draw2();
 
     Skin *skin = this->bm->getSkin();
 
@@ -410,7 +410,7 @@ void Slider::draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCi
             // start circle
             if(!this->bStartFinished || !sliderRepeatStartCircleFinished ||
                (!this->bEndFinished && this->iRepeat % 2 == 0)) {
-                Circle::drawApproachCircle(g, this->bm, this->curve->pointAt(0.0f), this->combo_number,
+                Circle::drawApproachCircle(this->bm, this->curve->pointAt(0.0f), this->combo_number,
                                            this->iColorCounter, this->iColorOffset,
                                            this->fHittableDimRGBColorMultiplierPercent, this->fApproachScale,
                                            this->fAlphaForApproachCircle, this->bOverrideHDApproachCircle);
@@ -443,7 +443,7 @@ void Slider::draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCi
         g->setAlpha(this->fFollowCircleAnimationAlpha);
         skin->getSliderFollowCircle2()->setAnimationTimeOffset(skin->getAnimationSpeed(), this->click_time);
         skin->getSliderFollowCircle2()->drawRaw(
-            g, point,
+            point,
             (this->bm->fSliderFollowCircleDiameter / skin->getSliderFollowCircle2()->getSizeBaseRaw().x) *
                 tickAnimationScale * this->fFollowCircleAnimationScale *
                 0.85f);  // this is a bit strange, but seems to work perfectly with 0.85
@@ -475,7 +475,7 @@ void Slider::draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCi
             {
                 g->rotate(ballAngle);
                 skin->getSliderb()->setAnimationTimeOffset(skin->getAnimationSpeed(), this->click_time);
-                skin->getSliderb()->drawRaw(g, point,
+                skin->getSliderb()->drawRaw(point,
                                             this->bm->fHitcircleDiameter / skin->getSliderb()->getSizeBaseRaw().x);
             }
             g->popTransform();
@@ -483,7 +483,7 @@ void Slider::draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCi
     }
 }
 
-void Slider::drawStartCircle(Graphics *g, float alpha) {
+void Slider::drawStartCircle(float alpha) {
     Skin *skin = this->bm->getSkin();
 
     if(this->bStartFinished) {
@@ -494,7 +494,7 @@ void Slider::drawStartCircle(Graphics *g, float alpha) {
             skin->getAnimationSpeed(),
             !this->bm->isInMafhamRenderChunk() ? this->click_time : this->bm->getCurMusicPosWithOffsets());
 
-        Circle::drawSliderEndCircle(g, this->bm, this->curve->pointAt(0.0f), this->combo_number, this->iColorCounter,
+        Circle::drawSliderEndCircle(this->bm, this->curve->pointAt(0.0f), this->combo_number, this->iColorCounter,
                                     this->iColorOffset, this->fHittableDimRGBColorMultiplierPercent, 1.0f, this->fAlpha,
                                     0.0f, false, false);
     } else {
@@ -505,14 +505,14 @@ void Slider::drawStartCircle(Graphics *g, float alpha) {
             skin->getAnimationSpeed(), !this->bm->isInMafhamRenderChunk() ? this->click_time - this->iApproachTime
                                                                           : this->bm->getCurMusicPosWithOffsets());
 
-        Circle::drawSliderStartCircle(g, this->bm, this->curve->pointAt(0.0f), this->combo_number, this->iColorCounter,
+        Circle::drawSliderStartCircle(this->bm, this->curve->pointAt(0.0f), this->combo_number, this->iColorCounter,
                                       this->iColorOffset, this->fHittableDimRGBColorMultiplierPercent,
                                       this->fApproachScale, this->fAlpha, this->fAlpha,
                                       !this->bHideNumberAfterFirstRepeatHit, this->bOverrideHDApproachCircle);
     }
 }
 
-void Slider::drawEndCircle(Graphics *g, float alpha, float sliderSnake) {
+void Slider::drawEndCircle(float alpha, float sliderSnake) {
     Skin *skin = this->bm->getSkin();
 
     skin->getHitCircleOverlay2()->setAnimationTimeOffset(
@@ -522,12 +522,12 @@ void Slider::drawEndCircle(Graphics *g, float alpha, float sliderSnake) {
         skin->getAnimationSpeed(), !this->bm->isInMafhamRenderChunk() ? this->click_time - this->iFadeInTime
                                                                       : this->bm->getCurMusicPosWithOffsets());
 
-    Circle::drawSliderEndCircle(g, this->bm, this->curve->pointAt(sliderSnake), this->combo_number, this->iColorCounter,
+    Circle::drawSliderEndCircle(this->bm, this->curve->pointAt(sliderSnake), this->combo_number, this->iColorCounter,
                                 this->iColorOffset, this->fHittableDimRGBColorMultiplierPercent, 1.0f, this->fAlpha,
                                 0.0f, false, false);
 }
 
-void Slider::drawBody(Graphics *g, float alpha, float from, float to) {
+void Slider::drawBody(float alpha, float from, float to) {
     // smooth begin/end while snaking/shrinking
     std::vector<Vector2> alwaysPoints;
     if(cv_slider_body_smoothsnake.getBool()) {
@@ -552,7 +552,7 @@ void Slider::drawBody(Graphics *g, float alpha, float from, float to) {
         }
 
         // peppy sliders
-        SliderRenderer::draw(g, screenPoints, alwaysPoints, this->bm->fHitcircleDiameter, from, to, undimmedComboColor,
+        SliderRenderer::draw(screenPoints, alwaysPoints, this->bm->fHitcircleDiameter, from, to, undimmedComboColor,
                              this->fHittableDimRGBColorMultiplierPercent, alpha, this->click_time);
     } else {
         // vertex buffered sliders
@@ -567,7 +567,7 @@ void Slider::drawBody(Graphics *g, float alpha, float from, float to) {
 
         if(cv_mod_fps.getBool()) translation += this->bm->getFirstPersonCursorDelta();
 
-        SliderRenderer::draw(g, this->vao, alwaysPoints, translation, scale, this->bm->fHitcircleDiameter, from, to,
+        SliderRenderer::draw(this->vao, alwaysPoints, translation, scale, this->bm->fHitcircleDiameter, from, to,
                              undimmedComboColor, this->fHittableDimRGBColorMultiplierPercent, alpha, this->click_time);
     }
 }

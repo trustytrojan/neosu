@@ -29,9 +29,9 @@ CBaseUIBoxShadow::CBaseUIBoxShadow(Color color, float radius, float xPos, float 
 
 CBaseUIBoxShadow::~CBaseUIBoxShadow() { SAFE_DELETE(this->blur); }
 
-void CBaseUIBoxShadow::draw(Graphics *g) {
+void CBaseUIBoxShadow::draw() {
     if(this->bNeedsRedraw) {
-        this->render(g);
+        this->render();
         this->bNeedsRedraw = false;
     }
 
@@ -50,7 +50,7 @@ void CBaseUIBoxShadow::draw(Graphics *g) {
     */
 
     g->setColor(this->color);
-    this->blur->draw(g, this->vPos.x - this->fRadius, this->vPos.y - this->fRadius);
+    this->blur->draw(this->vPos.x - this->fRadius, this->vPos.y - this->fRadius);
 
     /*
     if (this->bColoredContent)
@@ -58,7 +58,7 @@ void CBaseUIBoxShadow::draw(Graphics *g) {
     */
 }
 
-void CBaseUIBoxShadow::render(Graphics *g) {
+void CBaseUIBoxShadow::render() {
     /*
     // HACKHACK: switching blend funcs
     if (this->bColoredContent)
@@ -70,7 +70,7 @@ void CBaseUIBoxShadow::render(Graphics *g) {
     g->setColor(this->shadowColor);
     g->fillRect(this->fRadius + 2, this->blur->getSize().y / 2.0f - this->vSize.y / 2.0f, this->vSize.x - 4,
                 this->vSize.y);
-    this->blur->disable(g);
+    this->blur->disable();
     g->setClipping(true);
 
     /*
@@ -79,9 +79,9 @@ void CBaseUIBoxShadow::render(Graphics *g) {
     */
 }
 
-void CBaseUIBoxShadow::renderOffscreen(Graphics *g) {
+void CBaseUIBoxShadow::renderOffscreen() {
     if(this->bNeedsRedraw) {
-        this->render(g);
+        this->render();
         this->bNeedsRedraw = false;
     }
 }
@@ -131,21 +131,21 @@ GaussianBlur::GaussianBlur(int x, int y, int width, int height, int kernelSize, 
     this->fRadius = radius;
 
     this->kernel = new GaussianBlurKernel(kernelSize, radius, width, height);
-    this->rt = engine->getResourceManager()->createRenderTarget(x, y, width, height);
-    this->rt2 = engine->getResourceManager()->createRenderTarget(x, y, width, height);
-    this->blurShader = engine->getResourceManager()->loadShader("blur.vsh", "blur.fsh", "gblur");
+    this->rt = resourceManager->createRenderTarget(x, y, width, height);
+    this->rt2 = resourceManager->createRenderTarget(x, y, width, height);
+    this->blurShader = resourceManager->loadShader("blur.vsh", "blur.fsh", "gblur");
 }
 
 GaussianBlur::~GaussianBlur() {
-    engine->getResourceManager()->destroyResource(this->rt);
+    resourceManager->destroyResource(this->rt);
     this->rt = NULL;
-    engine->getResourceManager()->destroyResource(this->rt2);
+    resourceManager->destroyResource(this->rt2);
     this->rt2 = NULL;
     SAFE_DELETE(this->kernel);
 }
 
-void GaussianBlur::draw(Graphics *g, int x, int y) {
-    this->rt->draw(g, x, y);
+void GaussianBlur::draw(int x, int y) {
+    this->rt->draw(x, y);
 
     // g->setColor(0xffff0000);
     // g->fillRect(x,y,m_vSize.x, this->vSize.y);
@@ -153,7 +153,7 @@ void GaussianBlur::draw(Graphics *g, int x, int y) {
 
 void GaussianBlur::enable() { this->rt->enable(); }
 
-void GaussianBlur::disable(Graphics *g) {
+void GaussianBlur::disable() {
     this->rt->disable();
 
     Shader *blur = this->blurShader;
@@ -164,7 +164,7 @@ void GaussianBlur::disable(Graphics *g) {
     blur->setUniform1fv("weights", this->kernel->getKernelSize(), this->kernel->getKernel());
     blur->setUniform1fv("offsets", this->kernel->getKernelSize(), this->kernel->getOffsetsVertical());
     blur->setUniform1i("orientation", 1);
-    this->rt->draw(g, 0, 0);
+    this->rt->draw(0, 0);
     blur->disable();
     this->rt2->disable();
 
@@ -174,7 +174,7 @@ void GaussianBlur::disable(Graphics *g) {
     blur->setUniform1fv("weights", this->kernel->getKernelSize(), this->kernel->getKernel());
     blur->setUniform1fv("offsets", this->kernel->getKernelSize(), this->kernel->getOffsetsHorizontal());
     blur->setUniform1i("orientation", 0);
-    this->rt2->draw(g, this->vPos.x, this->vPos.y);
+    this->rt2->draw(this->vPos.x, this->vPos.y);
     blur->disable();
     this->rt->disable();
 }

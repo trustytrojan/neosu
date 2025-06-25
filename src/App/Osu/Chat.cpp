@@ -58,7 +58,7 @@ ChatChannel::~ChatChannel() {
 }
 
 void ChatChannel::onChannelButtonClick(CBaseUIButton *btn) {
-    engine->getSound()->play(osu->getSkin()->clickButton);
+    soundEngine->play(osu->getSkin()->clickButton);
     this->chat->switchToChannel(this);
 }
 
@@ -259,7 +259,7 @@ void ChatChannel::updateLayout(Vector2 pos, Vector2 size) {
 }
 
 Chat::Chat() : OsuScreen() {
-    this->font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    this->font = resourceManager->getFont("FONT_DEFAULT");
 
     this->button_container = new CBaseUIContainer(0, 0, 0, 0, "");
 
@@ -290,7 +290,7 @@ Chat::Chat() : OsuScreen() {
 
 Chat::~Chat() { delete this->button_container; }
 
-void Chat::draw(Graphics *g) {
+void Chat::draw() {
     const bool isAnimating = anim->isAnimating(&this->fAnimation);
     if(!this->bVisible && !isAnimating) return;
 
@@ -303,11 +303,11 @@ void Chat::draw(Graphics *g) {
     g->setColor(COLOR(100, 0, 10, 50));
     g->fillRect(this->button_container->getPos().x, this->button_container->getPos().y,
                 this->button_container->getSize().x, this->button_container->getSize().y);
-    this->button_container->draw(g);
+    this->button_container->draw();
 
-    OsuScreen::draw(g);
+    OsuScreen::draw();
     if(this->selected_channel != NULL) {
-        this->selected_channel->ui->draw(g);
+        this->selected_channel->ui->draw();
     }
 
     if(isAnimating) {
@@ -321,7 +321,7 @@ void Chat::draw(Graphics *g) {
                                 -(1.0f - this->fAnimation) * 700);
 
             osu->getSliderFrameBuffer()->setColor(COLORf(this->fAnimation, 1.0f, 1.0f, 1.0f));
-            osu->getSliderFrameBuffer()->draw(g, 0, 0);
+            osu->getSliderFrameBuffer()->draw(0, 0);
         }
         g->pop3DScene();
     }
@@ -532,7 +532,7 @@ void Chat::handle_command(UString msg) {
 void Chat::onKeyDown(KeyboardEvent &key) {
     if(!this->bVisible) return;
 
-    if(engine->getKeyboard()->isAltDown()) {
+    if(keyboard->isAltDown()) {
         i32 tab_select = -1;
         if(key.getKeyCode() == KEY_1) tab_select = 0;
         if(key.getKeyCode() == KEY_2) tab_select = 1;
@@ -593,7 +593,7 @@ void Chat::onKeyDown(KeyboardEvent &key) {
                 this->send_message(this->input_box->getText());
             }
 
-            engine->getSound()->play(osu->getSkin()->messageSent);
+            soundEngine->play(osu->getSkin()->messageSent);
             this->input_box->clear();
         }
         this->tab_completion_prefix = "";
@@ -602,7 +602,7 @@ void Chat::onKeyDown(KeyboardEvent &key) {
     }
 
     // Ctrl+W: Close current channel
-    if(engine->getKeyboard()->isControlDown() && key.getKeyCode() == KEY_W) {
+    if(keyboard->isControlDown() && key.getKeyCode() == KEY_W) {
         key.consume();
         if(this->selected_channel != NULL) {
             this->leave(this->selected_channel->name);
@@ -612,7 +612,7 @@ void Chat::onKeyDown(KeyboardEvent &key) {
 
     // Ctrl+Tab: Switch channels
     // KEY_TAB doesn't work on Linux
-    if(engine->getKeyboard()->isControlDown() && (key.getKeyCode() == 65056 || key.getKeyCode() == KEY_TAB)) {
+    if(keyboard->isControlDown() && (key.getKeyCode() == 65056 || key.getKeyCode() == KEY_TAB)) {
         key.consume();
         if(this->selected_channel == NULL) return;
         int chan_index = this->channels.size();
@@ -623,7 +623,7 @@ void Chat::onKeyDown(KeyboardEvent &key) {
             chan_index++;
         }
 
-        if(engine->getKeyboard()->isShiftDown()) {
+        if(keyboard->isShiftDown()) {
             // Ctrl+Shift+Tab: Go to previous channel
             auto new_chan = this->channels[(chan_index - 1) % this->channels.size()];
             this->switchToChannel(new_chan);
@@ -633,7 +633,7 @@ void Chat::onKeyDown(KeyboardEvent &key) {
             this->switchToChannel(new_chan);
         }
 
-        engine->getSound()->play(osu->getSkin()->clickButton);
+        soundEngine->play(osu->getSkin()->clickButton);
 
         return;
     }
@@ -670,14 +670,14 @@ void Chat::onKeyDown(KeyboardEvent &key) {
 
             Sound *sounds[] = {osu->getSkin()->typing1, osu->getSkin()->typing2, osu->getSkin()->typing3,
                                osu->getSkin()->typing4};
-            engine->getSound()->play(sounds[rand() % 4]);
+            soundEngine->play(sounds[rand() % 4]);
         }
 
         return;
     }
 
     // Typing in chat: capture keypresses
-    if(!engine->getKeyboard()->isAltDown()) {
+    if(!keyboard->isAltDown()) {
         this->tab_completion_prefix = "";
         this->tab_completion_match = "";
         this->input_box->onKeyDown(key);
@@ -764,7 +764,7 @@ void Chat::addChannel(UString channel_name, bool switch_to) {
     this->updateLayout(osu->getScreenSize());
 
     if(this->isVisible()) {
-        engine->getSound()->play(osu->getSkin()->expand);
+        soundEngine->play(osu->getSkin()->expand);
     }
 }
 
@@ -1049,7 +1049,7 @@ void Chat::leave(UString channel_name) {
 
     this->removeChannel(channel_name);
 
-    engine->getSound()->play(osu->getSkin()->closeChatTab);
+    soundEngine->play(osu->getSkin()->closeChatTab);
 }
 
 void Chat::send_message(UString msg) {
@@ -1131,7 +1131,7 @@ void Chat::updateVisibility() {
 CBaseUIContainer *Chat::setVisible(bool visible) {
     if(visible == this->bVisible) return this;
 
-    engine->getSound()->play(osu->getSkin()->clickButton);
+    soundEngine->play(osu->getSkin()->clickButton);
 
     if(visible && bancho.user_id <= 0) {
         osu->optionsMenu->askForLoginDetails();

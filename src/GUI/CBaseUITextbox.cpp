@@ -25,7 +25,7 @@ CBaseUITextbox::CBaseUITextbox(float xPos, float yPos, float xSize, float ySize,
 
     this->grabs_clicks = true;
 
-    this->font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    this->font = resourceManager->getFont("FONT_DEFAULT");
 
     this->textColor = this->frameColor = this->caretColor = 0xffffffff;
     this->backgroundColor = 0xff000000;
@@ -69,7 +69,7 @@ UString CBaseUITextbox::getVisibleText() {
     }
 }
 
-void CBaseUITextbox::draw(Graphics *g) {
+void CBaseUITextbox::draw() {
     if(!this->bVisible) return;
 
     const float dpiScale = ((float)this->font->getDPI() / 96.0f);  // NOTE: abusing font dpi
@@ -109,7 +109,7 @@ void CBaseUITextbox::draw(Graphics *g) {
                 g->fillRect(xpos1, this->vPos.y + 1, xpos2 - xpos1, this->vSize.y - 1);
         }
 
-        this->drawText(g);
+        this->drawText();
 
         // draw caret
         if(this->bActive && this->bLine) {
@@ -125,7 +125,7 @@ void CBaseUITextbox::draw(Graphics *g) {
     g->popClipRect();
 }
 
-void CBaseUITextbox::drawText(Graphics *g) {
+void CBaseUITextbox::drawText() {
     g->setColor(this->textColor);
     g->pushTransform();
     {
@@ -143,13 +143,13 @@ void CBaseUITextbox::mouse_update(bool *propagate_clicks) {
 
     // Steal focus from all other Textboxes
     if(!was_active && this->bActive) {
-        engine->getApp()->stealFocus();
+        app->stealFocus();
         this->bActive = true;
     }
 
-    const Vector2 mousepos = engine->getMouse()->getPos();
-    const bool mleft = engine->getMouse()->isLeftDown();
-    const bool mright = engine->getMouse()->isRightDown();
+    const Vector2 mousepos = mouse->getPos();
+    const bool mleft = mouse->isLeftDown();
+    const bool mright = mouse->isRightDown();
 
     // HACKHACK: should do this with the proper events! this will only work properly though if we can event.consume()
     // charDown's
@@ -157,7 +157,7 @@ void CBaseUITextbox::mouse_update(bool *propagate_clicks) {
 
     if((this->bMouseInside || (this->bBusy && (mleft || mright))) && (this->bActive || (!mleft && !mright)) &&
        this->bEnabled)
-        engine->getMouse()->setCursorType(CURSORTYPE::CURSOR_TEXT);
+        mouse->setCursorType(CURSORTYPE::CURSOR_TEXT);
 
     // update caret blinking
     {
@@ -282,7 +282,7 @@ void CBaseUITextbox::onKeyDown(KeyboardEvent &e) {
 
     switch(e.getKeyCode()) {
         case KEY_DELETE:
-            engine->getSound()->play(osu->getSkin()->deletingText);
+            soundEngine->play(osu->getSkin()->deletingText);
             if(this->sText.length() > 0) {
                 if(this->hasSelectedText())
                     this->handleDeleteSelectedText();
@@ -305,12 +305,12 @@ void CBaseUITextbox::onKeyDown(KeyboardEvent &e) {
             break;
 
         case KEY_BACKSPACE:
-            engine->getSound()->play(osu->getSkin()->deletingText);
+            soundEngine->play(osu->getSkin()->deletingText);
             if(this->sText.length() > 0) {
                 if(this->hasSelectedText())
                     this->handleDeleteSelectedText();
                 else if(this->iCaretPosition - 1 >= 0) {
-                    if(engine->getKeyboard()->isControlDown()) {
+                    if(keyboard->isControlDown()) {
                         if(this->is_password) {
                             this->setText("");
                         }
@@ -355,7 +355,7 @@ void CBaseUITextbox::onKeyDown(KeyboardEvent &e) {
             this->handleCaretKeyboardMove();
             this->updateCaretX();
 
-            engine->getSound()->play(osu->getSkin()->movingTextCursor);
+            soundEngine->play(osu->getSkin()->movingTextCursor);
         } break;
 
         case KEY_RIGHT: {
@@ -373,19 +373,19 @@ void CBaseUITextbox::onKeyDown(KeyboardEvent &e) {
             this->handleCaretKeyboardMove();
             this->updateCaretX();
 
-            engine->getSound()->play(osu->getSkin()->movingTextCursor);
+            soundEngine->play(osu->getSkin()->movingTextCursor);
         } break;
 
         case KEY_C:
-            if(engine->getKeyboard()->isControlDown()) env->setClipBoardText(this->getSelectedText());
+            if(keyboard->isControlDown()) env->setClipBoardText(this->getSelectedText());
             break;
 
         case KEY_V:
-            if(engine->getKeyboard()->isControlDown()) this->insertTextFromClipboard();
+            if(keyboard->isControlDown()) this->insertTextFromClipboard();
             break;
 
         case KEY_A:
-            if(engine->getKeyboard()->isControlDown()) {
+            if(keyboard->isControlDown()) {
                 // HACKHACK: make proper setSelectedText() function
                 this->iSelectStart = 0;
                 this->iSelectEnd = this->sText.length();
@@ -400,8 +400,8 @@ void CBaseUITextbox::onKeyDown(KeyboardEvent &e) {
             break;
 
         case KEY_X:
-            if(engine->getKeyboard()->isControlDown() && this->hasSelectedText()) {
-                engine->getSound()->play(osu->getSkin()->deletingText);
+            if(keyboard->isControlDown() && this->hasSelectedText()) {
+                soundEngine->play(osu->getSkin()->deletingText);
                 env->setClipBoardText(this->getSelectedText());
                 this->handleDeleteSelectedText();
             }
@@ -414,7 +414,7 @@ void CBaseUITextbox::onKeyDown(KeyboardEvent &e) {
             this->handleCaretKeyboardMove();
             this->updateCaretX();
 
-            engine->getSound()->play(osu->getSkin()->movingTextCursor);
+            soundEngine->play(osu->getSkin()->movingTextCursor);
             break;
 
         case KEY_END:
@@ -424,7 +424,7 @@ void CBaseUITextbox::onKeyDown(KeyboardEvent &e) {
             this->handleCaretKeyboardMove();
             this->updateCaretX();
 
-            engine->getSound()->play(osu->getSkin()->movingTextCursor);
+            soundEngine->play(osu->getSkin()->movingTextCursor);
             break;
     }
 }
@@ -437,7 +437,7 @@ void CBaseUITextbox::onChar(KeyboardEvent &e) {
     // ignore any control characters, we only want text
     // funny story: Windows 10 still has this bug even today, where when editing the name of any shortcut/folder on the
     // desktop, hitting CTRL + BACKSPACE will insert an invalid character
-    if(e.getCharCode() < 32 || (engine->getKeyboard()->isControlDown() && !engine->getKeyboard()->isAltDown())) return;
+    if(e.getCharCode() < 32 || (keyboard->isControlDown() && !keyboard->isAltDown())) return;
 
     // Linux inserts a weird character when pressing the delete key
     if(e.getCharCode() == 127) return;
@@ -459,7 +459,7 @@ void CBaseUITextbox::onChar(KeyboardEvent &e) {
 
     Sound *sounds[] = {osu->getSkin()->typing1, osu->getSkin()->typing2, osu->getSkin()->typing3,
                        osu->getSkin()->typing4};
-    engine->getSound()->play(sounds[rand() % 4]);
+    soundEngine->play(sounds[rand() % 4]);
 }
 
 void CBaseUITextbox::handleCaretKeyboardMove() {

@@ -17,7 +17,7 @@ class VSControlBarButton : public CBaseUIButton {
     }
     ~VSControlBarButton() override { ; }
 
-    void draw(Graphics *g) override {
+    void draw() override {
         if(!this->bVisible) return;
 
         const Color top = COLOR(255, 244, 244, 244);
@@ -28,11 +28,11 @@ class VSControlBarButton : public CBaseUIButton {
         g->setColor(COLOR(255, 204, 204, 204));
         g->drawRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
 
-        this->drawText(g);
+        this->drawText();
     }
 
    protected:
-    void drawText(Graphics *g) override {
+    void drawText() override {
         if(this->font != NULL && this->sText.length() > 0) {
             const int textPressedAdd = (this->bActive ? 1 : 0);
 
@@ -81,8 +81,8 @@ class VSControlBarSlider : public CBaseUISlider {
     }
     ~VSControlBarSlider() override { ; }
 
-    void draw(Graphics *g) override {
-        CBaseUISlider::draw(g);
+    void draw() override {
+        CBaseUISlider::draw();
         if(!this->bVisible) return;
 
         g->drawQuad(
@@ -118,7 +118,7 @@ class VSControlBarCheckbox : public CBaseUICheckbox {
     }
     ~VSControlBarCheckbox() override { ; }
 
-    void draw(Graphics *g) override {
+    void draw() override {
         if(!this->bVisible) return;
 
         const Color top = (this->bChecked ? COLOR(255, 178, 237, 171) : COLOR(255, 244, 244, 244));
@@ -129,7 +129,7 @@ class VSControlBarCheckbox : public CBaseUICheckbox {
         g->setColor(COLOR(255, 204, 204, 204));
         g->drawRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
 
-        this->drawText(g);
+        this->drawText();
     }
 };
 
@@ -202,7 +202,7 @@ VSControlBar::VSControlBar(int x, int y, int xSize, int ySize, McFont *font) : C
 
 VSControlBar::~VSControlBar() { SAFE_DELETE(this->container); }
 
-void VSControlBar::draw(Graphics *g) {
+void VSControlBar::draw() {
     if(!this->bVisible) return;
 
     // draw background gradient
@@ -213,7 +213,7 @@ void VSControlBar::draw(Graphics *g) {
         g->fillGradient(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y, top, top, bottom, bottom);
     }
 
-    this->container->draw(g);
+    this->container->draw();
 }
 
 void VSControlBar::mouse_update(bool *propagate_clicks) {

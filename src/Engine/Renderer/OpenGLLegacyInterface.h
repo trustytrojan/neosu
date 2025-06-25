@@ -91,8 +91,8 @@ class OpenGLLegacyInterface : public Graphics {
     void onResolutionChange(Vector2 newResolution) override;
 
     // factory
-    Image *createImage(std::string filePath, bool mipmapped) override;
-    Image *createImage(int width, int height, bool mipmapped) override;
+    Image *createImage(std::string filePath, bool mipmapped, bool keepInSystemMemory) override;
+    Image *createImage(int width, int height, bool mipmapped, bool keepInSystemMemory) override;
     RenderTarget *createRenderTarget(int x, int y, int width, int height,
                                              Graphics::MULTISAMPLE_TYPE multiSampleType) override;
     Shader *createShaderFromFile(std::string vertexShaderFilePath, std::string fragmentShaderFilePath) override;

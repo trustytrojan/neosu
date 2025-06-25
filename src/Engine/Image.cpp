@@ -264,7 +264,7 @@ Image::Image(int width, int height, bool mipmapped, bool keepInSystemMemory) : R
     }
 
     // special case: filled rawimage is always already async ready
-    this->bAsyncReady = true;
+    m_bAsyncReady = true;
 }
 
 bool Image::loadRawImage() {
@@ -275,35 +275,35 @@ bool Image::loadRawImage() {
         if(alreadyLoaded)  // has already been loaded (or loading it again after setPixel(s))
             return true;
 
-        if(!env->fileExists(this->sFilePath)) {
-            debugLogF("Image Error: Couldn't find file {:s}\n", this->sFilePath);
+        if(!env->fileExists(m_sFilePath)) {
+            debugLogF("Image Error: Couldn't find file {:s}\n", m_sFilePath);
             return false;
         }
 
-        if(this->bInterrupted)  // cancellation point
+        if(m_bInterrupted)  // cancellation point
             return false;
 
         // load entire file
-        File file(this->sFilePath);
+        File file(m_sFilePath);
         if(!file.canRead()) {
-            debugLogF("Image Error: Couldn't canRead() file {:s}\n", this->sFilePath);
+            debugLogF("Image Error: Couldn't canRead() file {:s}\n", m_sFilePath);
             return false;
         }
         if(file.getFileSize() < 4) {
-            debugLogF("Image Error: FileSize is < 4 in file {:s}\n", this->sFilePath);
+            debugLogF("Image Error: FileSize is < 4 in file {:s}\n", m_sFilePath);
             return false;
         }
 
-        if(this->bInterrupted)  // cancellation point
+        if(m_bInterrupted)  // cancellation point
             return false;
 
         const char *data = file.readFile();
         if(data == NULL) {
-            debugLogF("Image Error: Couldn't readFile() file {:s}\n", this->sFilePath);
+            debugLogF("Image Error: Couldn't readFile() file {:s}\n", m_sFilePath);
             return false;
         }
 
-        if(this->bInterrupted)  // cancellation point
+        if(m_bInterrupted)  // cancellation point
             return false;
 
         // determine file type by magic number (png/jpg)
@@ -331,18 +331,18 @@ bool Image::loadRawImage() {
             // decode jpeg
             tjhandle tjInstance = tj3Init(TJINIT_DECOMPRESS);
             if(!tjInstance) {
-                debugLogF("Image Error: tj3Init failed in file {:s}\n", this->sFilePath);
+                debugLogF("Image Error: tj3Init failed in file {:s}\n", m_sFilePath);
                 return false;
             }
 
             if(tj3DecompressHeader(tjInstance, (unsigned char *)data, file.getFileSize()) < 0) {
                 debugLogF("Image Error: tj3DecompressHeader failed: {:s} in file {:s}\n", tj3GetErrorStr(tjInstance),
-                         this->sFilePath);
+                         m_sFilePath);
                 tj3Destroy(tjInstance);
                 return false;
             }
 
-            if(this->bInterrupted)  // cancellation point
+            if(m_bInterrupted)  // cancellation point
             {
                 tj3Destroy(tjInstance);
                 return false;
@@ -355,12 +355,12 @@ bool Image::loadRawImage() {
 
             if(iWidth > 8192 || iHeight > 8192) {
                 debugLogF("Image Error: JPEG image size is too big ({} x {}) in file {:s}\n", iWidth, iHeight,
-                         this->sFilePath);
+                         m_sFilePath);
                 tj3Destroy(tjInstance);
                 return false;
             }
 
-            if(this->bInterrupted)  // cancellation point
+            if(m_bInterrupted)  // cancellation point
             {
                 tj3Destroy(tjInstance);
                 return false;
@@ -373,7 +373,7 @@ bool Image::loadRawImage() {
             if(tj3Decompress8(tjInstance, (unsigned char *)data, file.getFileSize(), &rawImage[0], 0, TJPF_RGBA) <
                0) {
                 debugLogF("Image Error: tj3Decompress8 failed: {:s} in file {:s}\n", tj3GetErrorStr(tjInstance),
-                         this->sFilePath);
+                         m_sFilePath);
                 tj3Destroy(tjInstance);
                 return false;
             }
@@ -385,18 +385,18 @@ bool Image::loadRawImage() {
             // decode png using libpng
             if(!decodePNGFromMemory((const unsigned char *)data, file.getFileSize(), rawImage, iWidth, iHeight,
                                     iNumChannels)) {
-                debugLogF("Image Error: PNG decoding failed in file {:s}\n", this->sFilePath);
+                debugLogF("Image Error: PNG decoding failed in file {:s}\n", m_sFilePath);
                 return false;
             }
 
             bHasAlphaChannel = true;
         } else {
-            debugLogF("Image Error: Neither PNG nor JPEG in file {:s}\n", this->sFilePath);
+            debugLogF("Image Error: Neither PNG nor JPEG in file {:s}\n", m_sFilePath);
             return false;
         }
     }
 
-    if(this->bInterrupted)  // cancellation point
+    if(m_bInterrupted)  // cancellation point
         return false;
 
     // error checking
@@ -404,24 +404,24 @@ bool Image::loadRawImage() {
     // size sanity check
     if(rawImage.size() < static_cast<long>(iWidth * iHeight * iNumChannels)) {
         debugLogF("Image Error: Loaded image has only {}/{} bytes in file {:s}\n", (unsigned long)rawImage.size(),
-                 iWidth * iHeight * iNumChannels, this->sFilePath);
+                 iWidth * iHeight * iNumChannels, m_sFilePath);
         // engine->showMessageError("Image Error", UString::format("Loaded image has only %i/%i bytes in file %s",
-        // rawImage.size(), iWidth*iHeight*iNumChannels, this->sFilePath));
+        // rawImage.size(), iWidth*iHeight*iNumChannels, m_sFilePath));
         return false;
     }
 
     // supported channels sanity check
     if(iNumChannels != 4 && iNumChannels != 3 && iNumChannels != 1) {
-        debugLogF("Image Error: Unsupported number of color channels ({}) in file {:s}\n", iNumChannels, this->sFilePath);
+        debugLogF("Image Error: Unsupported number of color channels ({}) in file {:s}\n", iNumChannels, m_sFilePath);
         // engine->showMessageError("Image Error", UString::format("Unsupported number of color channels (%i) in file
-        // %s", iNumChannels, this->sFilePath));
+        // %s", iNumChannels, m_sFilePath));
         return false;
     }
 
     // optimization: ignore completely transparent images (don't render) (only PNGs can have them, obviously)
     if(!alreadyLoaded && (type == Image::TYPE::TYPE_PNG) &&
        canHaveTransparency(rawImage.data(), rawImage.size()) && isCompletelyTransparent()) {
-        if(!this->bInterrupted) debugLogF("Image: Ignoring empty transparent image {:s}\n", this->sFilePath);
+        if(!m_bInterrupted) debugLogF("Image: Ignoring empty transparent image {:s}\n", m_sFilePath);
         return false;
     }
 
@@ -523,7 +523,7 @@ bool Image::isCompletelyTransparent() const {
     const size_t totalPixels = iWidth * iHeight;
 
     for(size_t i = 0; i < totalPixels; ++i) {
-        if(this->bInterrupted)  // cancellation point
+        if(m_bInterrupted)  // cancellation point
             return false;
 
         // check alpha channel directly

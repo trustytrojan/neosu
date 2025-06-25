@@ -22,7 +22,7 @@ class VisualProfiler : public CBaseUIElement {
     VisualProfiler();
     ~VisualProfiler() override;
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
     void incrementInfoBladeDisplayMode();
@@ -81,7 +81,7 @@ class VisualProfiler : public CBaseUIElement {
 
     static void addTextLine(const UString &text, McFont *font, std::vector<TEXT_LINE> &textLines);
 
-    static void drawStringWithShadow(Graphics *g, McFont *font, const UString &string, Color color);
+    static void drawStringWithShadow(McFont *font, const UString &string, Color color);
 
     int iPrevVaoWidth;
     int iPrevVaoHeight;

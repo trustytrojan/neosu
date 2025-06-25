@@ -22,9 +22,9 @@ Console::Console() : CBaseUIWindow(350, 100, 620, 550, "Console") {
     cmd_clear.setCallback(fastdelegate::MakeDelegate(this, &Console::clear));
 
     // resources
-    this->logFont = engine->getResourceManager()->getFont("FONT_CONSOLE");
-    McFont *textboxFont = engine->getResourceManager()->loadFont("tahoma.ttf", "FONT_CONSOLE_TEXTBOX", 9.0f, false);
-    McFont *titleFont = engine->getResourceManager()->loadFont("tahoma.ttf", "FONT_CONSOLE_TITLE", 10.0f, false);
+    this->logFont = resourceManager->getFont("FONT_CONSOLE");
+    McFont *textboxFont = resourceManager->loadFont("tahoma.ttf", "FONT_CONSOLE_TEXTBOX", 9.0f, false);
+    McFont *titleFont = resourceManager->loadFont("tahoma.ttf", "FONT_CONSOLE_TITLE", 10.0f, false);
 
     // colors
     // Color frameColor = 0xff9a9a9a;

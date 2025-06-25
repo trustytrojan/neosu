@@ -93,13 +93,15 @@ class DatabaseLoader : public Resource {
     DatabaseLoader(Database *db) : Resource() {
         this->db = db;
 
-        this->bAsyncReady = false;
-        this->bReady = false;
+        m_bAsyncReady = false;
+        m_bReady = false;
     };
+
+    [[nodiscard]] Type getResType() const override { return APPDEFINED; } // TODO: handle this better?
 
    protected:
     void init() override {
-        this->bReady = true;
+        m_bReady = true;
 
         delete this;  // commit sudoku
     }
@@ -118,7 +120,7 @@ class DatabaseLoader : public Resource {
         this->db->beatmapsets.clear();  // TODO @kiwec: this just leaks memory?
         this->db->loadDB();
 
-        this->bAsyncReady = true;
+        m_bAsyncReady = true;
     }
 
     void destroy() override { ; }
@@ -181,8 +183,8 @@ void Database::load() {
 
     DatabaseLoader *loader = new DatabaseLoader(this);  // (deletes itself after finishing)
 
-    engine->getResourceManager()->requestNextLoadAsync();
-    engine->getResourceManager()->loadResource(loader);
+    resourceManager->requestNextLoadAsync();
+    resourceManager->loadResource(loader);
 }
 
 void Database::cancel() {

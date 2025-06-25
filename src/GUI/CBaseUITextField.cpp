@@ -21,8 +21,8 @@ CBaseUITextField::CBaseUITextField(float xPos, float yPos, float xSize, float yS
     this->setScrollSizeToContent(0);
 }
 
-void CBaseUITextField::draw(Graphics *g) {
-    CBaseUIScrollView::draw(g);
+void CBaseUITextField::draw() {
+    CBaseUIScrollView::draw();
     if(!this->bVisible) return;
 
     // printf("scrollsize.y = %f, size.y = %f\n", getScrollSize().y, getSize().y);
@@ -51,7 +51,7 @@ CBaseUITextField *CBaseUITextField::append(UString text) {
 
 CBaseUITextField::TextObject::TextObject(float xPos, float yPos, float xSize, float ySize, UString text)
     : CBaseUIElement(xPos, yPos, xSize, ySize, "") {
-    this->font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    this->font = resourceManager->getFont("FONT_DEFAULT");
 
     // colors
     this->textColor = 0xffffffff;
@@ -59,7 +59,7 @@ CBaseUITextField::TextObject::TextObject(float xPos, float yPos, float xSize, fl
     this->setText(text);
 }
 
-void CBaseUITextField::TextObject::draw(Graphics *g) {
+void CBaseUITextField::TextObject::draw() {
     if(this->font == NULL || this->sText.length() == 0) return;
 
     // g->setColor(0xffffffff);

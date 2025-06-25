@@ -40,7 +40,7 @@
 #include "UIContextMenu.h"
 #include "UIUserContextMenu.h"
 
-void UIModList::draw(Graphics *g) {
+void UIModList::draw() {
     std::vector<SkinImage *> mods;
 
     if(*this->flags & LegacyFlags::Perfect)
@@ -70,7 +70,7 @@ void UIModList::draw(Graphics *g) {
         Vector2 fixed_pos = modPos;
         fixed_pos.x += (target_width / 2);
         fixed_pos.y += (target_height / 2);
-        mod->draw(g, fixed_pos, scaling_factor);
+        mod->draw(fixed_pos, scaling_factor);
 
         // Overlap mods a bit, just like peppy's client does
         modPos.x += target_width * 0.6;
@@ -102,7 +102,7 @@ bool UIModList::isVisible() { return *this->flags != 0; }
     } while(0)
 
 RoomScreen::RoomScreen() : OsuScreen() {
-    this->font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    this->font = resourceManager->getFont("FONT_DEFAULT");
     this->lfont = osu->getSubTitleFont();
 
     this->pauseButton = new MainMenuPauseButton(0, 0, 0, 0, "pause_btn", "");
@@ -206,7 +206,7 @@ RoomScreen::~RoomScreen() {
     SAFE_DELETE(this->ready_btn);
 }
 
-void RoomScreen::draw(Graphics *g) {
+void RoomScreen::draw() {
     if(!this->bVisible) return;
 
     static i32 current_map_id = -1;
@@ -234,8 +234,8 @@ void RoomScreen::draw(Graphics *g) {
     }
 
     // XXX: Add convar for toggling room backgrounds
-    SongBrowser::drawSelectedBeatmapBackgroundImage(g, 1.0);
-    OsuScreen::draw(g);
+    SongBrowser::drawSelectedBeatmapBackgroundImage(1.0);
+    OsuScreen::draw();
 
     // Update avatar visibility status
     for(auto elm : this->slotlist->getContainer()->getElements()) {
@@ -314,7 +314,7 @@ CBaseUIContainer *RoomScreen::setVisible(bool visible) {
     this->bVisible = visible;
 
     if(visible) {
-        engine->getSound()->play(osu->getSkin()->menuBack);
+        soundEngine->play(osu->getSkin()->menuBack);
     }
 
     return this;
@@ -500,7 +500,7 @@ void RoomScreen::ragequit(bool play_sound) {
     Replay::Mods::use(osu->previous_mods);
 
     if(play_sound) {
-        engine->getSound()->play(osu->getSkin()->menuBack);
+        soundEngine->play(osu->getSkin()->menuBack);
     }
 }
 
@@ -595,17 +595,17 @@ void RoomScreen::on_room_updated(Room room) {
     if(bancho.is_playing_a_multi_map() || !bancho.is_in_a_multi_room()) return;
 
     if(bancho.room.nb_players < room.nb_players) {
-        engine->getSound()->play(osu->getSkin()->roomJoined);
+        soundEngine->play(osu->getSkin()->roomJoined);
     } else if(bancho.room.nb_players > room.nb_players) {
-        engine->getSound()->play(osu->getSkin()->roomQuit);
+        soundEngine->play(osu->getSkin()->roomQuit);
     }
     if(bancho.room.nb_ready() < room.nb_ready()) {
-        engine->getSound()->play(osu->getSkin()->roomReady);
+        soundEngine->play(osu->getSkin()->roomReady);
     } else if(bancho.room.nb_ready() > room.nb_ready()) {
-        engine->getSound()->play(osu->getSkin()->roomNotReady);
+        soundEngine->play(osu->getSkin()->roomNotReady);
     }
     if(!bancho.room.all_players_ready() && room.all_players_ready()) {
-        engine->getSound()->play(osu->getSkin()->matchConfirm);
+        soundEngine->play(osu->getSkin()->matchConfirm);
     }
 
     bool was_host = bancho.room.is_host();
@@ -660,7 +660,7 @@ void RoomScreen::on_match_started(Room room) {
         osu->songBrowser2->bHasSelectedAndIsPlaying = true;
         osu->chat->updateVisibility();
 
-        engine->getSound()->play(osu->getSkin()->matchStart);
+        soundEngine->play(osu->getSkin()->matchStart);
     } else {
         this->ragequit();  // map failed to load
     }
@@ -786,7 +786,7 @@ void RoomScreen::onClientScoreChange(bool force) {
 
 void RoomScreen::onReadyButtonClick() {
     if(this->ready_btn->is_loading) return;
-    engine->getSound()->play(osu->getSkin()->getMenuHit());
+    soundEngine->play(osu->getSkin()->getMenuHit());
 
     int nb_ready = 0;
     bool is_ready = false;
@@ -810,7 +810,7 @@ void RoomScreen::onReadyButtonClick() {
 }
 
 void RoomScreen::onSelectModsClicked() {
-    engine->getSound()->play(osu->getSkin()->getMenuHit());
+    soundEngine->play(osu->getSkin()->getMenuHit());
     osu->modSelector->setVisible(true);
     this->bVisible = false;
 }
@@ -818,7 +818,7 @@ void RoomScreen::onSelectModsClicked() {
 void RoomScreen::onSelectMapClicked() {
     if(!bancho.room.is_host()) return;
 
-    engine->getSound()->play(osu->getSkin()->getMenuHit());
+    soundEngine->play(osu->getSkin()->getMenuHit());
 
     Packet packet;
     packet.id = MATCH_CHANGE_SETTINGS;
@@ -843,7 +843,7 @@ void RoomScreen::onChangeWinConditionClicked() {
     this->contextMenu->addButton("Accuracy", ACCURACY);
     this->contextMenu->addButton("Combo", COMBO);
     this->contextMenu->end(false, false);
-    this->contextMenu->setPos(engine->getMouse()->getPos());
+    this->contextMenu->setPos(mouse->getPos());
     this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &RoomScreen::onWinConditionSelected));
     this->contextMenu->setVisible(true);
 }

@@ -7,7 +7,7 @@ class CBaseUITextField : public CBaseUIScrollView {
                      UString text = "");
     ~CBaseUITextField() override { ; }
 
-    void draw(Graphics *g) override;
+    void draw() override;
 
     CBaseUITextField *setFont(McFont *font) {
         this->textObject->setFont(font);
@@ -27,7 +27,7 @@ class CBaseUITextField : public CBaseUIScrollView {
        public:
         TextObject(float xPos, float yPos, float width, float height, UString text);
 
-        void draw(Graphics *g) override;
+        void draw() override;
 
         CBaseUIElement *setText(UString text);
         CBaseUIElement *setFont(McFont *font) {

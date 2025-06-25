@@ -27,7 +27,7 @@ UserCard2::UserCard2(u32 user_id) : CBaseUIButton() {
 
 UserCard2::~UserCard2() { SAFE_DELETE(this->avatar); }
 
-void UserCard2::draw(Graphics *g) {
+void UserCard2::draw() {
     if(!this->bVisible) return;
 
     g->pushClipRect(McRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y));
@@ -136,7 +136,7 @@ void UserCard2::draw(Graphics *g) {
     g->setColor(0xff1a1a1a);
     g->fillRect(this->vPos.x + AVATAR_MARGIN, this->vPos.y + AVATAR_MARGIN, this->avatar->getSize().x,
                 this->avatar->getSize().y);
-    this->avatar->draw_avatar(g, 1.f);
+    this->avatar->draw_avatar(1.f);
 
     // draw username
     f32 xCounter = 0;
@@ -162,7 +162,7 @@ void UserCard2::draw(Graphics *g) {
     g->popTransform();
 
     // draw status
-    const auto font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    const auto font = resourceManager->getFont("FONT_DEFAULT");
     const f32 status_scale = this->vSize.y * 0.5f / font->getHeight() * 0.3f;
     yCounter += font->getHeight() * status_scale * 0.1f;
     auto line_width = this->vSize.x - (xCounter + AVATAR_MARGIN);

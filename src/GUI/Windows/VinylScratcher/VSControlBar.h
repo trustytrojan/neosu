@@ -22,7 +22,7 @@ class VSControlBar : public CBaseUIElement {
     VSControlBar(int x, int y, int xSize, int ySize, McFont *font);
     ~VSControlBar() override;
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
     [[nodiscard]] inline CBaseUISlider *getVolumeSlider() const { return this->volume; }

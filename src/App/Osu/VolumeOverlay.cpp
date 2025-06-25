@@ -55,7 +55,7 @@ VolumeOverlay::VolumeOverlay() : OsuScreen() {
     this->volumeMusic->setAnimated(false);
     this->volumeSliderOverlayContainer->addBaseUIElement(this->volumeMusic);
 
-    engine->getSound()->setVolume(cv_volume_master.getFloat());
+    soundEngine->setVolume(cv_volume_master.getFloat());
     this->updateLayout();
 }
 
@@ -73,7 +73,7 @@ void VolumeOverlay::animate() {
     anim->moveQuadOut(&this->fLastVolume, cv_volume_master.getFloat(), 0.15f, 0.0f, true);
 }
 
-void VolumeOverlay::draw(Graphics *g) {
+void VolumeOverlay::draw() {
     if(!this->isVisible()) return;
 
     const float dpiScale = Osu::getUIScale();
@@ -92,7 +92,7 @@ void VolumeOverlay::draw(Graphics *g) {
     this->volumeEffects->setPos(this->volumeMaster->getPos() - Vector2(0, this->volumeEffects->getSize().y + 20 * sizeMultiplier));
     this->volumeMusic->setPos(this->volumeEffects->getPos() - Vector2(0, this->volumeMusic->getSize().y + 20 * sizeMultiplier));
 
-    this->volumeSliderOverlayContainer->draw(g);
+    this->volumeSliderOverlayContainer->draw();
 
     if(this->fVolumeChangeFade != 1.0f) g->pop3DScene();
 }
@@ -148,7 +148,7 @@ void VolumeOverlay::mouse_update(bool *propagate_clicks) {
 
     // volume inactive to active animation
     if(this->bVolumeInactiveToActiveScheduled && this->fVolumeInactiveToActiveAnim > 0.0f) {
-        engine->getSound()->setVolume(lerp<float>(cv_volume_master_inactive.getFloat() * cv_volume_master.getFloat(),
+        soundEngine->setVolume(lerp<float>(cv_volume_master_inactive.getFloat() * cv_volume_master.getFloat(),
                                                   cv_volume_master.getFloat(), this->fVolumeInactiveToActiveAnim));
 
         // check if we're done
@@ -156,7 +156,7 @@ void VolumeOverlay::mouse_update(bool *propagate_clicks) {
     }
 
     // scroll wheel events (should be separate from mouse_update events, but... oh well...)
-    const int wheelDelta = engine->getMouse()->getWheelDeltaVertical() / 120;
+    const int wheelDelta = mouse->getWheelDeltaVertical() / 120;
     if(this->canChangeVolume() && wheelDelta != 0) {
         if(wheelDelta > 0) {
             this->volumeUp(wheelDelta);
@@ -244,25 +244,25 @@ bool VolumeOverlay::canChangeVolume() {
     if(osu->isInPlayMode() && cv_disable_mousewheel.getBool() && !osu->pauseMenu->isVisible()) can_scroll = false;
 
     if(this->isBusy()) can_scroll = true;
-    if(engine->getKeyboard()->isAltDown()) can_scroll = true;
+    if(keyboard->isAltDown()) can_scroll = true;
 
     return can_scroll;
 }
 
 void VolumeOverlay::gainFocus() {
-    if(engine->getSound()->hasExclusiveOutput()) return;
+    if(soundEngine->hasExclusiveOutput()) return;
 
     this->fVolumeInactiveToActiveAnim = 0.0f;
     anim->moveLinear(&this->fVolumeInactiveToActiveAnim, 1.0f, 0.3f, 0.1f, true);
 }
 
 void VolumeOverlay::loseFocus() {
-    if(engine->getSound()->hasExclusiveOutput()) return;
+    if(soundEngine->hasExclusiveOutput()) return;
 
     this->bVolumeInactiveToActiveScheduled = true;
     anim->deleteExistingAnimation(&this->fVolumeInactiveToActiveAnim);
     this->fVolumeInactiveToActiveAnim = 0.0f;
-    engine->getSound()->setVolume(cv_volume_master_inactive.getFloat() * cv_volume_master.getFloat());
+    soundEngine->setVolume(cv_volume_master_inactive.getFloat() * cv_volume_master.getFloat());
 }
 
 void VolumeOverlay::onVolumeChange(int multiplier) {
@@ -289,7 +289,7 @@ void VolumeOverlay::onMasterVolumeChange(UString oldValue, UString newValue) {
     if(this->bVolumeInactiveToActiveScheduled) return;  // not very clean, but w/e
 
     float newVolume = newValue.toFloat();
-    engine->getSound()->setVolume(newVolume);
+    soundEngine->setVolume(newVolume);
 }
 
 void VolumeOverlay::onEffectVolumeChange() {

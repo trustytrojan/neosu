@@ -25,7 +25,7 @@ UIRankingScreenInfoLabel::UIRankingScreenInfoLabel(float xPos, float yPos, float
     this->sDate = "?";
 }
 
-void UIRankingScreenInfoLabel::draw(Graphics *g) {
+void UIRankingScreenInfoLabel::draw() {
     // build strings
     UString titleText = this->sArtist.c_str();
     titleText.append(" - ");

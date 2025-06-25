@@ -13,12 +13,12 @@
 #include "NullShader.h"
 #include "VertexArrayObject.h"
 
-Image *NullGraphicsInterface::createImage(std::string filePath, bool mipmapped) {
-    return new NullImage(filePath, mipmapped);
+Image *NullGraphicsInterface::createImage(std::string filePath, bool mipmapped, bool keepInSystemMemory) {
+    return new NullImage(filePath, mipmapped, keepInSystemMemory);
 }
 
-Image *NullGraphicsInterface::createImage(int width, int height, bool mipmapped) {
-    return new NullImage(width, height, mipmapped);
+Image *NullGraphicsInterface::createImage(int width, int height, bool mipmapped, bool keepInSystemMemory) {
+    return new NullImage(width, height, mipmapped, keepInSystemMemory);
 }
 
 RenderTarget *NullGraphicsInterface::createRenderTarget(int x, int y, int width, int height,

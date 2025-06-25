@@ -61,8 +61,8 @@ Spinner::~Spinner() {
     this->storedDeltaAngles = NULL;
 }
 
-void Spinner::draw(Graphics *g) {
-    HitObject::draw(g);
+void Spinner::draw() {
+    HitObject::draw();
     const float fadeOutMultiplier = cv_spinner_fade_out_time_multiplier.getFloat();
     const long fadeOutTimeMS = (long)(GameRules::getFadeOutTime(this->bm) * 1000.0f * fadeOutMultiplier);
     const long deltaEnd = this->iDelta + this->duration;
@@ -244,7 +244,7 @@ void Spinner::draw(Graphics *g) {
 
     // draw RPM
     if(this->iDelta < 0) {
-        McFont *rpmFont = engine->getResourceManager()->getFont("FONT_DEFAULT");
+        McFont *rpmFont = resourceManager->getFont("FONT_DEFAULT");
         const float stringWidth = rpmFont->getStringWidth("RPM: 477");
         g->setColor(0xffffffff);
         g->setAlpha(this->fAlphaWithoutHidden * this->fAlphaWithoutHidden * this->fAlphaWithoutHidden *

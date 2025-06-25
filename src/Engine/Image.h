@@ -43,11 +43,11 @@ class Image : public Resource {
 
     std::atomic<bool> is_2x{false};
 
-    // // type inspection
-    // [[nodiscard]] Type getResType() const final { return IMAGE; }
+    // type inspection
+    [[nodiscard]] Type getResType() const final { return IMAGE; }
 
-    // Image *asImage() final { return this; }
-    // [[nodiscard]] const Image *asImage() const final { return this; }
+    Image *asImage() final { return this; }
+    [[nodiscard]] const Image *asImage() const final { return this; }
 
    protected:
     void init() override = 0;

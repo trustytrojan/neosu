@@ -18,7 +18,7 @@ class VSTitleBarButton : public CBaseUIButton {
     }
     ~VSTitleBarButton() override { ; }
 
-    void draw(Graphics *g) override {
+    void draw() override {
         if(!this->bVisible) return;
 
         // default background gradient
@@ -59,7 +59,7 @@ class VSTitleBarButton : public CBaseUIButton {
                         this->vPos.y + this->vSize.y);
         }
 
-        this->drawText(g);
+        this->drawText();
     }
 };
 
@@ -94,7 +94,7 @@ VSTitleBar::VSTitleBar(int x, int y, int xSize, McFont *font)
 
 VSTitleBar::~VSTitleBar() { SAFE_DELETE(this->container); }
 
-void VSTitleBar::draw(Graphics *g) {
+void VSTitleBar::draw() {
     if(this->iFlip != 0) {
         // 3d flip effect
         if((this->fRot > -45.0f && this->iFlip == 1) || (this->iFlip == 2 && this->fRot < 45.0f)) {
@@ -102,7 +102,7 @@ void VSTitleBar::draw(Graphics *g) {
             {
                 g->offset3DScene(0, 0, this->title->getSize().y / 2);
                 g->rotate3DScene(this->fRot + (this->iFlip == 1 ? 90 : -90), 0, 0);
-                this->drawTitle1(g);
+                this->drawTitle1();
             }
             g->pop3DScene();
 
@@ -110,7 +110,7 @@ void VSTitleBar::draw(Graphics *g) {
             {
                 g->offset3DScene(0, 0, this->title2->getSize().y / 2);
                 g->rotate3DScene(this->fRot, 0, 0);
-                this->drawTitle2(g);
+                this->drawTitle2();
             }
             g->pop3DScene();
         } else {
@@ -119,7 +119,7 @@ void VSTitleBar::draw(Graphics *g) {
                 g->offset3DScene(0, 0, this->title2->getSize().y / 2);
                 g->rotate3DScene(this->fRot, 0, 0);
 
-                this->drawTitle2(g);
+                this->drawTitle2();
             }
             g->pop3DScene();
 
@@ -128,33 +128,33 @@ void VSTitleBar::draw(Graphics *g) {
                 g->offset3DScene(0, 0, this->title->getSize().y / 2);
                 g->rotate3DScene(this->fRot + (this->iFlip == 1 ? 90 : -90), 0, 0);
 
-                this->drawTitle1(g);
+                this->drawTitle1();
             }
             g->pop3DScene();
         }
     } else
-        this->drawTitle2(g);
+        this->drawTitle2();
 }
 
-void VSTitleBar::drawTitle1(Graphics *g) {
-    this->title->draw(g);
+void VSTitleBar::drawTitle1() {
+    this->title->draw();
     if(cv_vs_percent.getFloat() > 0) {
         this->title->setTextColor(0xffffffff);
         g->pushClipRect(
             McRect(this->vPos.x, this->vPos.y, cv_vs_percent.getFloat() * this->vSize.x, this->title2->getSize().y));
-        { this->title->draw(g); }
+        { this->title->draw(); }
         g->popClipRect();
         this->title->setTextColor(COLOR(255, 55, 55, 55));
     }
 }
 
-void VSTitleBar::drawTitle2(Graphics *g) {
-    this->title2->draw(g);
+void VSTitleBar::drawTitle2() {
+    this->title2->draw();
     if(cv_vs_percent.getFloat() > 0) {
         this->title2->setTextColor(0xffffffff);
         g->pushClipRect(
             McRect(this->vPos.x, this->vPos.y, cv_vs_percent.getFloat() * this->vSize.x, this->title2->getSize().y));
-        { this->title2->draw(g); }
+        { this->title2->draw(); }
         g->popClipRect();
         this->title2->setTextColor(COLOR(255, 55, 55, 55));
     }
@@ -184,13 +184,13 @@ void VSTitleBar::mouse_update(bool *propagate_clicks) {
     if(this->title2->isActive() && this->bActive) {
         this->bIsSeeking = true;
         const float percent =
-            clamp<float>((engine->getMouse()->getPos().x + 1 - this->vPos.x) / this->title->getSize().x, 0.0f, 1.0f);
+            clamp<float>((mouse->getPos().x + 1 - this->vPos.x) / this->title->getSize().x, 0.0f, 1.0f);
         cv_vs_percent.setValue(percent);
     } else {
         // fire seek callback once scrubbing stops
         if(this->bIsSeeking) {
             this->bIsSeeking = false;
-            if(this->seekCallback != NULL && !engine->getMouse()->isRightDown()) this->seekCallback();
+            if(this->seekCallback != NULL && !mouse->isRightDown()) this->seekCallback();
         }
     }
 }

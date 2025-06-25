@@ -511,7 +511,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             */
 
             // avoid cursor flicker when using non-normal cursor set by engine
-            if(g_engine != NULL && g_engine->getEnvironment()->getCursor() != CURSORTYPE::CURSOR_NORMAL) return TRUE;
+            if(g_engine != NULL && env->getCursor() != CURSORTYPE::CURSOR_NORMAL) return TRUE;
 
             break;
 
@@ -532,10 +532,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                         // bit of a hack, but it should work fine
                         // convert to fake raw tablet coordinates (0 to 65536)
                         int rawAbsoluteX = ((float)pointerInfo.ptPixelLocation.x /
-                                            (float)g_engine->getEnvironment()->getNativeScreenSize().x) *
+                                            (float)env->getNativeScreenSize().x) *
                                            65536;
                         int rawAbsoluteY = ((float)pointerInfo.ptPixelLocation.y /
-                                            (float)g_engine->getEnvironment()->getNativeScreenSize().y) *
+                                            (float)env->getNativeScreenSize().y) *
                                            65536;
                         g_engine->onMouseRawMove(rawAbsoluteX, rawAbsoluteY, true, true);
                     }
@@ -653,7 +653,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         // different scaling)
         case WM_DPICHANGED:
             if(g_engine != NULL) {
-                WinEnvironment *winEnv = dynamic_cast<WinEnvironment *>(g_engine->getEnvironment());
+                WinEnvironment *winEnv = dynamic_cast<WinEnvironment *>(env);
                 if(winEnv != NULL) {
                     winEnv->setDPIOverride(HIWORD(wParam));
                     g_engine->onDPIChange();

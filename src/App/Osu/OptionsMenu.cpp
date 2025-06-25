@@ -52,7 +52,7 @@ class OptionsMenuSkinPreviewElement : public CBaseUIElement {
         this->iMode = 0;
     }
 
-    void draw(Graphics *g) override {
+    void draw() override {
         if(!this->bVisible) return;
 
         Skin *skin = osu->getSkin();
@@ -77,31 +77,31 @@ class OptionsMenuSkinPreviewElement : public CBaseUIElement {
             const float colorRGBMultiplier = 1.0f;
 
             Circle::drawCircle(
-                g, osu->getSkin(),
+                osu->getSkin(),
                 this->vPos + Vector2(0, this->vSize.y / 2) + Vector2(this->vSize.x * (1.0f / 5.0f), 0.0f),
                 hitcircleDiameter, numberScale, overlapScale, number, colorCounter, colorOffset, colorRGBMultiplier,
                 approachScale, approachAlpha, approachAlpha, true, false);
             Circle::drawHitResult(
-                g, osu->getSkin(), hitcircleDiameter, hitcircleDiameter,
+                osu->getSkin(), hitcircleDiameter, hitcircleDiameter,
                 this->vPos + Vector2(0, this->vSize.y / 2) + Vector2(this->vSize.x * (2.0f / 5.0f), 0.0f),
                 LiveScore::HIT::HIT_100, 0.45f, 0.33f);
             Circle::drawHitResult(
-                g, osu->getSkin(), hitcircleDiameter, hitcircleDiameter,
+                osu->getSkin(), hitcircleDiameter, hitcircleDiameter,
                 this->vPos + Vector2(0, this->vSize.y / 2) + Vector2(this->vSize.x * (3.0f / 5.0f), 0.0f),
                 LiveScore::HIT::HIT_50, 0.45f, 0.66f);
             Circle::drawHitResult(
-                g, osu->getSkin(), hitcircleDiameter, hitcircleDiameter,
+                osu->getSkin(), hitcircleDiameter, hitcircleDiameter,
                 this->vPos + Vector2(0, this->vSize.y / 2) + Vector2(this->vSize.x * (4.0f / 5.0f), 0.0f),
                 LiveScore::HIT::HIT_MISS, 0.45f, 1.0f);
             Circle::drawApproachCircle(
-                g, osu->getSkin(),
+                osu->getSkin(),
                 this->vPos + Vector2(0, this->vSize.y / 2) + Vector2(this->vSize.x * (1.0f / 5.0f), 0.0f),
                 osu->getSkin()->getComboColorForCounter(colorCounter, colorOffset), hitcircleDiameter, approachScale,
                 approachCircleAlpha, false, false);
         } else if(this->iMode == 1) {
             const int numNumbers = 6;
             for(int i = 1; i < numNumbers + 1; i++) {
-                Circle::drawHitCircleNumber(g, skin, numberScale, overlapScale,
+                Circle::drawHitCircleNumber(skin, numberScale, overlapScale,
                                             this->vPos + Vector2(0, this->vSize.y / 2) +
                                                 Vector2(this->vSize.x * ((float)i / (numNumbers + 1.0f)), 0.0f),
                                             i - 1, 1.0f, 1.0f);
@@ -115,7 +115,7 @@ class OptionsMenuSkinPreviewElement : public CBaseUIElement {
                 g->pushTransform();
                 g->scale(scoreScale, scoreScale);
                 g->translate(pos.x - skin->getScore0()->getWidth() * scoreScale, pos.y);
-                osu->getHUD()->drawScoreNumber(g, i - 1, 1.0f);
+                osu->getHUD()->drawScoreNumber(i - 1, 1.0f);
                 g->popTransform();
             }
         }
@@ -139,7 +139,7 @@ class OptionsMenuSliderPreviewElement : public CBaseUIElement {
         this->vao = NULL;
     }
 
-    void draw(Graphics *g) override {
+    void draw() override {
         if(!this->bVisible) return;
 
         const float hitcircleDiameter = this->vSize.y * 0.5f;
@@ -189,11 +189,11 @@ class OptionsMenuSliderPreviewElement : public CBaseUIElement {
                 const int colorOffset = 0;
                 const float colorRGBMultiplier = 1.0f;
 
-                Circle::drawCircle(g, osu->getSkin(),
+                Circle::drawCircle(osu->getSkin(),
                                    points[numPoints / 2] + (!useLegacyRenderer ? this->vPos : Vector2(0, 0)),
                                    hitcircleDiameter, numberScale, overlapScale, number, colorCounter, colorOffset,
                                    colorRGBMultiplier, approachScale, approachAlpha, approachAlpha, true, false);
-                Circle::drawApproachCircle(g, osu->getSkin(),
+                Circle::drawApproachCircle(osu->getSkin(),
                                            points[numPoints / 2] + (!useLegacyRenderer ? this->vPos : Vector2(0, 0)),
                                            osu->getSkin()->getComboColorForCounter(420, 0), hitcircleDiameter,
                                            approachScale, approachCircleAlpha, false, false);
@@ -205,7 +205,7 @@ class OptionsMenuSliderPreviewElement : public CBaseUIElement {
                 // the options menu is animating
                 if(this->bDrawSliderHack) {
                     if(useLegacyRenderer)
-                        SliderRenderer::draw(g, points, emptyVector, hitcircleDiameter, 0, 1,
+                        SliderRenderer::draw(points, emptyVector, hitcircleDiameter, 0, 1,
                                              osu->getSkin()->getComboColorForCounter(420, 0));
                     else {
                         // (lazy generate vao)
@@ -215,7 +215,7 @@ class OptionsMenuSliderPreviewElement : public CBaseUIElement {
                             debugLog("Regenerating options menu slider preview vao ...\n");
 
                             if(this->vao != NULL) {
-                                engine->getResourceManager()->destroyResource(this->vao);
+                                resourceManager->destroyResource(this->vao);
                                 this->vao = NULL;
                             }
 
@@ -223,7 +223,7 @@ class OptionsMenuSliderPreviewElement : public CBaseUIElement {
                                 this->vao =
                                     SliderRenderer::generateVAO(points, hitcircleDiameter, Vector3(0, 0, 0), false);
                         }
-                        SliderRenderer::draw(g, this->vao, emptyVector, this->vPos, 1, hitcircleDiameter, 0, 1,
+                        SliderRenderer::draw(this->vao, emptyVector, this->vPos, 1, hitcircleDiameter, 0, 1,
                                              osu->getSkin()->getComboColorForCounter(420, 0));
                     }
                 }
@@ -237,10 +237,10 @@ class OptionsMenuSliderPreviewElement : public CBaseUIElement {
                 const float colorRGBMultiplier = 1.0f;
 
                 Circle::drawSliderStartCircle(
-                    g, osu->getSkin(), points[0] + (!useLegacyRenderer ? this->vPos : Vector2(0, 0)), hitcircleDiameter,
+                    osu->getSkin(), points[0] + (!useLegacyRenderer ? this->vPos : Vector2(0, 0)), hitcircleDiameter,
                     numberScale, overlapScale, number, colorCounter, colorOffset, colorRGBMultiplier);
                 Circle::drawSliderEndCircle(
-                    g, osu->getSkin(), points[points.size() - 1] + (!useLegacyRenderer ? this->vPos : Vector2(0, 0)),
+                    osu->getSkin(), points[points.size() - 1] + (!useLegacyRenderer ? this->vPos : Vector2(0, 0)),
                     hitcircleDiameter, numberScale, overlapScale, number, colorCounter, colorOffset, colorRGBMultiplier,
                     1.0f, 1.0f, 0.0f, false, false);
             }
@@ -330,7 +330,7 @@ class OptionsMenuCategoryButton : public CBaseUIButton {
         this->bActiveCategory = false;
     }
 
-    void drawText(Graphics *g) override {
+    void drawText() override {
         if(this->font != NULL && this->sText.length() > 0) {
             g->pushClipRect(McRect(this->vPos.x + 1, this->vPos.y + 1, this->vSize.x - 1, this->vSize.y - 1));
             {
@@ -366,7 +366,7 @@ class OptionsMenuResetButton : public CBaseUIButton {
 
     ~OptionsMenuResetButton() override { anim->deleteExistingAnimation(&this->fAnim); }
 
-    void draw(Graphics *g) override {
+    void draw() override {
         if(!this->bVisible || this->fAnim <= 0.0f) return;
 
         const int fullColorBlockSize = 4 * Osu::getUIScale();
@@ -1303,10 +1303,10 @@ OptionsMenu::~OptionsMenu() {
     }
 }
 
-void OptionsMenu::draw(Graphics *g) {
+void OptionsMenu::draw() {
     const bool isAnimating = anim->isAnimating(&this->fAnimation);
     if(!this->bVisible && !isAnimating) {
-        this->contextMenu->draw(g);
+        this->contextMenu->draw();
         return;
     }
 
@@ -1343,7 +1343,7 @@ void OptionsMenu::draw(Graphics *g) {
         }
     }
 
-    ScreenBackable::draw(g);
+    ScreenBackable::draw();
 
     if(this->hudSizeSlider->isActive() || this->hudComboScaleSlider->isActive() ||
        this->hudScoreScaleSlider->isActive() || this->hudAccuracyScaleSlider->isActive() ||
@@ -1352,22 +1352,22 @@ void OptionsMenu::draw(Graphics *g) {
        this->hudScoreBoardScaleSlider->isActive() || this->hudInputoverlayScaleSlider->isActive() ||
        this->statisticsOverlayScaleSlider->isActive() || this->statisticsOverlayXOffsetSlider->isActive() ||
        this->statisticsOverlayYOffsetSlider->isActive()) {
-        if(!isPlayingBeatmap) osu->getHUD()->drawDummy(g);
+        if(!isPlayingBeatmap) osu->getHUD()->drawDummy();
     } else if(this->playfieldBorderSizeSlider->isActive()) {
-        osu->getHUD()->drawPlayfieldBorder(g, GameRules::getPlayfieldCenter(), GameRules::getPlayfieldSize(), 100);
+        osu->getHUD()->drawPlayfieldBorder(GameRules::getPlayfieldCenter(), GameRules::getPlayfieldSize(), 100);
     } else {
-        ScreenBackable::draw(g);
+        ScreenBackable::draw();
     }
 
     // Re-drawing context menu to make sure it's drawn on top of the back button
     // Context menu input still gets processed first, so this is fine
-    this->contextMenu->draw(g);
+    this->contextMenu->draw();
 
-    if(this->cursorSizeSlider->getFloat() < 0.15f) engine->getMouse()->drawDebug(g);
+    if(this->cursorSizeSlider->getFloat() < 0.15f) mouse->drawDebug();
 
     if(isAnimating) {
         // HACKHACK:
-        if(!this->bVisible) this->backButton->draw(g);
+        if(!this->bVisible) this->backButton->draw();
 
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
 
@@ -1380,7 +1380,7 @@ void OptionsMenu::draw(Graphics *g) {
                                 -(1.0f - this->fAnimation) * 700);
 
             osu->getSliderFrameBuffer()->setColor(COLORf(this->fAnimation, 1.0f, 1.0f, 1.0f));
-            osu->getSliderFrameBuffer()->draw(g, 0, 0);
+            osu->getSliderFrameBuffer()->draw(0, 0);
         }
         g->pop3DScene();
     }
@@ -1551,7 +1551,7 @@ void OptionsMenu::onKeyDown(KeyboardEvent &e) {
             case KEY_DELETE:
             case KEY_BACKSPACE:
                 if(this->sSearchString.length() > 0) {
-                    if(engine->getKeyboard()->isControlDown()) {
+                    if(keyboard->isControlDown()) {
                         // delete everything from the current caret position to the left, until after the first
                         // non-space character (but including it)
                         bool foundNonSpaceChar = false;
@@ -1587,7 +1587,7 @@ void OptionsMenu::onKeyDown(KeyboardEvent &e) {
     ScreenBackable::onKeyDown(e);
 
     // paste clipboard support
-    if(!e.isConsumed() && engine->getKeyboard()->isControlDown() && e == KEY_V) {
+    if(!e.isConsumed() && keyboard->isControlDown() && e == KEY_V) {
         const UString clipstring = env->getClipBoardText();
         if(clipstring.length() > 0) {
             this->sSearchString.append(clipstring);
@@ -1609,7 +1609,7 @@ void OptionsMenu::onChar(KeyboardEvent &e) {
 
     // handle searching
     if(e.getCharCode() < 32 || !this->bVisible ||
-       (engine->getKeyboard()->isControlDown() && !engine->getKeyboard()->isAltDown()) ||
+       (keyboard->isControlDown() && !keyboard->isAltDown()) ||
        this->fSearchOnCharKeybindHackTime > engine->getTime())
         return;
 
@@ -1753,7 +1753,7 @@ void OptionsMenu::updateLayout() {
     this->updateSkinNameLabel();
     this->updateNotelockSelectLabel();
 
-    if(this->outputDeviceLabel != NULL) this->outputDeviceLabel->setText(engine->getSound()->getOutputDeviceName());
+    if(this->outputDeviceLabel != NULL) this->outputDeviceLabel->setText(soundEngine->getOutputDeviceName());
 
     this->onOutputDeviceResetUpdate();
     this->onNotelockSelectResetUpdate();
@@ -1808,9 +1808,9 @@ void OptionsMenu::updateLayout() {
     bool subSectionTitleMatch = false;
     const std::string search = this->sSearchString.length() > 0 ? this->sSearchString.toUtf8() : "";
     for(int i = 0; i < this->elements.size(); i++) {
-        if(this->elements[i].render_condition == RenderCondition::ASIO_ENABLED && !engine->getSound()->isASIO())
+        if(this->elements[i].render_condition == RenderCondition::ASIO_ENABLED && !soundEngine->isASIO())
             continue;
-        if(this->elements[i].render_condition == RenderCondition::WASAPI_ENABLED && !engine->getSound()->isWASAPI())
+        if(this->elements[i].render_condition == RenderCondition::WASAPI_ENABLED && !soundEngine->isWASAPI())
             continue;
         if(this->elements[i].render_condition == RenderCondition::SCORE_SUBMISSION_POLICY &&
            bancho.score_submission_policy != ServerPolicy::NO_PREFERENCE)
@@ -2533,7 +2533,7 @@ void OptionsMenu::onOutputDeviceSelect() {
         return;
     }
 
-    std::vector<OUTPUT_DEVICE> outputDevices = engine->getSound()->getOutputDevices();
+    std::vector<OUTPUT_DEVICE> outputDevices = soundEngine->getOutputDevices();
 
     // build context menu
     this->contextMenu->setPos(this->outputDeviceSelectButton->getPos());
@@ -2541,7 +2541,7 @@ void OptionsMenu::onOutputDeviceSelect() {
     this->contextMenu->begin();
     for(auto device : outputDevices) {
         CBaseUIButton *button = this->contextMenu->addButton(device.name);
-        if(device.name == engine->getSound()->getOutputDeviceName()) button->setTextBrightColor(0xff00ff00);
+        if(device.name == soundEngine->getOutputDeviceName()) button->setTextBrightColor(0xff00ff00);
     }
     this->contextMenu->end(false, true);
     this->contextMenu->setClickCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onOutputDeviceSelect2));
@@ -2549,15 +2549,15 @@ void OptionsMenu::onOutputDeviceSelect() {
 }
 
 void OptionsMenu::onOutputDeviceSelect2(UString outputDeviceName, int id) {
-    if(outputDeviceName == engine->getSound()->getOutputDeviceName()) {
+    if(outputDeviceName == soundEngine->getOutputDeviceName()) {
         debugLog("SoundEngine::setOutputDevice() \"%s\" already is the current device.\n", outputDeviceName.toUtf8());
         return;
     }
 
-    for(auto device : engine->getSound()->getOutputDevices()) {
+    for(auto device : soundEngine->getOutputDevices()) {
         if(device.name != outputDeviceName) continue;
 
-        engine->getSound()->setOutputDevice(device);
+        soundEngine->setOutputDevice(device);
         return;
     }
 
@@ -2565,21 +2565,21 @@ void OptionsMenu::onOutputDeviceSelect2(UString outputDeviceName, int id) {
 }
 
 void OptionsMenu::onOutputDeviceResetClicked() {
-    engine->getSound()->setOutputDevice(engine->getSound()->getDefaultDevice());
+    soundEngine->setOutputDevice(soundEngine->getDefaultDevice());
 }
 
 void OptionsMenu::onOutputDeviceResetUpdate() {
     if(this->outputDeviceResetButton != NULL) {
-        this->outputDeviceResetButton->setEnabled(engine->getSound()->getOutputDeviceName() !=
-                                                  engine->getSound()->getDefaultDevice().name);
+        this->outputDeviceResetButton->setEnabled(soundEngine->getOutputDeviceName() !=
+                                                  soundEngine->getDefaultDevice().name);
     }
 }
 
-void OptionsMenu::onOutputDeviceRestart() { engine->getSound()->restart(); }
+void OptionsMenu::onOutputDeviceRestart() { soundEngine->restart(); }
 
 void OptionsMenu::onLogInClicked() {
     if(this->logInButton->is_loading) return;
-    engine->getSound()->play(osu->getSkin()->getMenuHit());
+    soundEngine->play(osu->getSkin()->getMenuHit());
 
     if(bancho.user_id > 0) {
         disconnect();
@@ -2835,7 +2835,7 @@ void OptionsMenu::onKeyBindingButtonPressed(CBaseUIButton *button) {
 }
 
 void OptionsMenu::onKeyUnbindButtonPressed(CBaseUIButton *button) {
-    engine->getSound()->play(osu->getSkin()->getCheckOff());
+    soundEngine->play(osu->getSkin()->getCheckOff());
 
     for(int i = 0; i < this->elements.size(); i++) {
         for(int e = 0; e < this->elements[i].elements.size(); e++) {

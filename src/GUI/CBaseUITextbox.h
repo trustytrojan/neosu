@@ -8,7 +8,7 @@ class CBaseUITextbox : public CBaseUIElement {
     CBaseUITextbox(float xPos = 0.0f, float yPos = 0.0f, float xSize = 0.0f, float ySize = 0.0f, UString name = "");
     ~CBaseUITextbox() override { ; }
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
     void onFocusStolen() override;
 
@@ -86,7 +86,7 @@ class CBaseUITextbox : public CBaseUIElement {
     void updateTextPos();
 
    protected:
-    virtual void drawText(Graphics *g);
+    virtual void drawText();
 
     // events
     void onMouseDownInside() override;

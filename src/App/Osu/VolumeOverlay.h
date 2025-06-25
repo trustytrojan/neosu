@@ -9,7 +9,7 @@ class VolumeOverlay : public OsuScreen {
     VolumeOverlay();
 
     void animate();
-    void draw(Graphics *g) override;
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
     void onResolutionChange(Vector2 newResolution) override;
     void onKeyDown(KeyboardEvent &key) override;

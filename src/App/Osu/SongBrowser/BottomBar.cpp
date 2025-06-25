@@ -57,9 +57,9 @@ f32 get_bottombar_height() {
 void update_bottombar(bool* propagate_clicks) {
     static bool mouse_was_down = false;
 
-    auto mouse = engine->getMouse()->getPos();
-    bool clicked = !mouse_was_down && engine->getMouse()->isLeftDown();
-    mouse_was_down = engine->getMouse()->isLeftDown();
+    auto mousePos = mouse->getPos();
+    bool clicked = !mouse_was_down && mouse->isLeftDown();
+    mouse_was_down = mouse->isLeftDown();
 
     auto screen = engine->getScreenSize();
     bool is_widescreen = ((i32)(std::max(0, (i32)((screen.x - (screen.y * 4.f / 3.f)) / 2.f))) > 0);
@@ -92,17 +92,17 @@ void update_bottombar(bool* propagate_clicks) {
 
     // Yes, the order looks whack. That's the correct order.
     i32 new_hover = -1;
-    if(mouse.x > btns_x[OPTIONS] && mouse.x < btns_x[OPTIONS] + btn_widths[OPTIONS] &&
-       mouse.y > screen.y - btn_heights[OPTIONS]) {
+    if(mousePos.x > btns_x[OPTIONS] && mousePos.x < btns_x[OPTIONS] + btn_widths[OPTIONS] &&
+       mousePos.y > screen.y - btn_heights[OPTIONS]) {
         new_hover = OPTIONS;
-    } else if(mouse.x > btns_x[MODE] && mouse.x < btns_x[MODE] + btn_widths[MODE] &&
-              mouse.y > screen.y - btn_heights[MODE]) {
+    } else if(mousePos.x > btns_x[MODE] && mousePos.x < btns_x[MODE] + btn_widths[MODE] &&
+              mousePos.y > screen.y - btn_heights[MODE]) {
         new_hover = MODE;
-    } else if(mouse.x > btns_x[MODS] && mouse.x < btns_x[MODS] + btn_widths[MODS] &&
-              mouse.y > screen.y - btn_heights[MODS]) {
+    } else if(mousePos.x > btns_x[MODS] && mousePos.x < btns_x[MODS] + btn_widths[MODS] &&
+              mousePos.y > screen.y - btn_heights[MODS]) {
         new_hover = MODS;
-    } else if(mouse.x > btns_x[RANDOM] && mouse.x < btns_x[RANDOM] + btn_widths[RANDOM] &&
-              mouse.y > screen.y - btn_heights[RANDOM]) {
+    } else if(mousePos.x > btns_x[RANDOM] && mousePos.x < btns_x[RANDOM] + btn_widths[RANDOM] &&
+              mousePos.y > screen.y - btn_heights[RANDOM]) {
         new_hover = RANDOM;
     } else {
         clicked = false;
@@ -127,7 +127,7 @@ void update_bottombar(bool* propagate_clicks) {
     // TODO @kiwec: do hovers make sound?
 }
 
-void draw_bottombar(Graphics* g) {
+void draw_bottombar() {
     g->pushTransform();
     {
         f32 bar_height = global_scale * 101.f;  // I think stable hardcodes this?
@@ -139,11 +139,11 @@ void draw_bottombar(Graphics* g) {
     }
     g->popTransform();
 
-    osu->getSongBrowser()->backButton->draw(g);
+    osu->getSongBrowser()->backButton->draw();
 
     // Draw the user card under selection elements, which can cover it for fancy effects
     // (we don't match stable perfectly, but close enough)
-    osu->userButton->draw(g);
+    osu->userButton->draw();
 
     SkinImage* base_imgs[4] = {osu->getSkin()->selectionMode, osu->getSkin()->selectionMods,
                                osu->getSkin()->selectionRandom, osu->getSkin()->selectionOptions};
@@ -152,7 +152,7 @@ void draw_bottombar(Graphics* g) {
 
         f32 scale = global_scale * (base_imgs[i]->is_2x ? 0.5f : 1.f);
         g->setColor(0xffffffff);
-        base_imgs[i]->drawRaw(g, Vector2(btns_x[i], engine->getScreenHeight()), scale, AnchorPoint::BOTTOM_LEFT);
+        base_imgs[i]->drawRaw(Vector2(btns_x[i], engine->getScreenHeight()), scale, AnchorPoint::BOTTOM_LEFT);
     }
 
     // Ok, and now for the hover images... which are drawn in a weird order, same as update_bottombar()
@@ -160,26 +160,25 @@ void draw_bottombar(Graphics* g) {
     f32 random_scale = global_scale * (random_img->is_2x ? 0.5f : 1.f);
     g->setColor(0xffffffff);
     g->setAlpha(btn_hovers[RANDOM]);
-    random_img->drawRaw(g, Vector2(btns_x[RANDOM], engine->getScreenHeight()), random_scale, AnchorPoint::BOTTOM_LEFT);
+    random_img->drawRaw(Vector2(btns_x[RANDOM], engine->getScreenHeight()), random_scale, AnchorPoint::BOTTOM_LEFT);
 
     auto mods_img = osu->getSkin()->selectionModsOver;
     f32 mods_scale = global_scale * (mods_img->is_2x ? 0.5f : 1.f);
     g->setColor(0xffffffff);
     g->setAlpha(btn_hovers[MODS]);
-    mods_img->drawRaw(g, Vector2(btns_x[MODS], engine->getScreenHeight()), mods_scale, AnchorPoint::BOTTOM_LEFT);
+    mods_img->drawRaw(Vector2(btns_x[MODS], engine->getScreenHeight()), mods_scale, AnchorPoint::BOTTOM_LEFT);
 
     auto mode_img = osu->getSkin()->selectionModeOver;
     f32 mode_scale = global_scale * (mode_img->is_2x ? 0.5f : 1.f);
     g->setColor(0xffffffff);
     g->setAlpha(btn_hovers[MODE]);
-    mode_img->drawRaw(g, Vector2(btns_x[MODE], engine->getScreenHeight()), mode_scale, AnchorPoint::BOTTOM_LEFT);
+    mode_img->drawRaw(Vector2(btns_x[MODE], engine->getScreenHeight()), mode_scale, AnchorPoint::BOTTOM_LEFT);
 
     auto options_img = osu->getSkin()->selectionOptionsOver;
     f32 options_scale = global_scale * (options_img->is_2x ? 0.5f : 1.f);
     g->setColor(0xffffffff);
     g->setAlpha(btn_hovers[OPTIONS]);
-    options_img->drawRaw(g, Vector2(btns_x[OPTIONS], engine->getScreenHeight()), options_scale,
-                         AnchorPoint::BOTTOM_LEFT);
+    options_img->drawRaw(Vector2(btns_x[OPTIONS], engine->getScreenHeight()), options_scale, AnchorPoint::BOTTOM_LEFT);
 
     // mode-osu-small (often used as overlay)
     auto mos_img = osu->getSkin()->mode_osu_small;
@@ -187,15 +186,14 @@ void draw_bottombar(Graphics* g) {
         f32 mos_scale = global_scale * (mos_img->is_2x ? 0.5f : 1.f);
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ADDITIVE);
         g->setColor(0xffffffff);
-        mos_img->drawRaw(g,
-                         Vector2(btns_x[MODE] + (btns_x[MODS] - btns_x[MODE]) * 0.5f,
+        mos_img->drawRaw(Vector2(btns_x[MODE] + (btns_x[MODS] - btns_x[MODE]) * 0.5f,
                                  engine->getScreenHeight() - (global_scale * 56.f)),
                          mos_scale, AnchorPoint::CENTER);
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
     }
 
     // background task busy notification
-    McFont* font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    McFont* font = resourceManager->getFont("FONT_DEFAULT");
     i32 calcx = osu->userButton->getPos().x + osu->userButton->getSize().x + 20;
     i32 calcy = osu->userButton->getPos().y + 30;
     if(mct_total.load() > 0) {

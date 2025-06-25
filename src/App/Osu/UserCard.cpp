@@ -36,7 +36,7 @@ UserCard::~UserCard() {
     SAFE_DELETE(this->avatar);
 }
 
-void UserCard::draw(Graphics *g) {
+void UserCard::draw() {
     if(!this->bVisible) return;
 
     int yCounter = 0;
@@ -51,7 +51,7 @@ void UserCard::draw(Graphics *g) {
     if(this->avatar) {
         this->avatar->setPos(this->vPos.x + 1, this->vPos.y + 1);
         this->avatar->setSize(iconWidth, iconHeight);
-        this->avatar->draw_avatar(g, 1.f);
+        this->avatar->draw_avatar(1.f);
     } else {
         g->setColor(0xffffffff);
         g->pushClipRect(McRect(this->vPos.x + 1, this->vPos.y + 2, iconWidth, iconHeight));

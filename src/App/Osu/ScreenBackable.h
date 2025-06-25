@@ -7,7 +7,7 @@ class ScreenBackable : public OsuScreen {
     ScreenBackable();
     ~ScreenBackable() override;
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
     void onKeyDown(KeyboardEvent &e) override;
     void onResolutionChange(Vector2 newResolution) override;

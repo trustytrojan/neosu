@@ -6,7 +6,7 @@
 
 UISearchOverlay::UISearchOverlay(float xPos, float yPos, float xSize, float ySize, UString name)
     : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
-    this->font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    this->font = resourceManager->getFont("FONT_DEFAULT");
 
     this->iOffsetRight = 0;
     this->bDrawNumResults = true;
@@ -16,7 +16,7 @@ UISearchOverlay::UISearchOverlay(float xPos, float yPos, float xSize, float ySiz
     this->bSearching = false;
 }
 
-void UISearchOverlay::draw(Graphics *g) {
+void UISearchOverlay::draw() {
     /*
     g->setColor(0xaaaaaaaa);
     g->fillRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);

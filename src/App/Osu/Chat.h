@@ -38,7 +38,7 @@ class Chat : public OsuScreen {
     Chat();
     ~Chat() override;
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
     void onKeyDown(KeyboardEvent &e) override;
     void onKeyUp(KeyboardEvent &e) override;

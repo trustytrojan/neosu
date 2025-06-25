@@ -37,12 +37,12 @@ void UIContextMenuButton::mouse_update(bool *propagate_clicks) {
 
 void UIContextMenuButton::onMouseInside() {
     if(button_sound_cooldown + 0.05f < engine->getTime()) {
-        engine->getSound()->play(osu->getSkin()->hoverButton);
+        soundEngine->play(osu->getSkin()->hoverButton);
         button_sound_cooldown = engine->getTime();
     }
 }
 
-void UIContextMenuButton::onMouseDownInside() { engine->getSound()->play(osu->getSkin()->clickButton); }
+void UIContextMenuButton::onMouseDownInside() { soundEngine->play(osu->getSkin()->clickButton); }
 
 void UIContextMenuButton::setTooltipText(UString text) { this->tooltipTextLines = text.split("\n"); }
 
@@ -72,7 +72,7 @@ UIContextMenu::UIContextMenu(float xPos, float yPos, float xSize, float ySize, U
     this->bClampUnderflowAndOverflowAndEnableScrollingIfNecessary = false;
 }
 
-void UIContextMenu::draw(Graphics *g) {
+void UIContextMenu::draw() {
     if(!this->bVisible2) return;
 
     if(this->fAnimation > 0.0f && this->fAnimation < 1.0f) {
@@ -92,7 +92,7 @@ void UIContextMenu::draw(Graphics *g) {
     g->setAlpha(this->fAnimation * this->fAnimation);
     g->drawRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
 
-    CBaseUIScrollView::draw(g);
+    CBaseUIScrollView::draw();
 
     if(this->fAnimation > 0.0f && this->fAnimation < 1.0f) g->pop3DScene();
 }
@@ -107,7 +107,7 @@ void UIContextMenu::mouse_update(bool *propagate_clicks) {
 
     // HACKHACK: mouse wheel handling order
     if(this->bClampUnderflowAndOverflowAndEnableScrollingIfNecessary) {
-        if(this->isMouseInside()) engine->getMouse()->resetWheelDelta();
+        if(this->isMouseInside()) mouse->resetWheelDelta();
     }
 
     if(this->selfDeletionCrashWorkaroundScheduledElementDeleteHack.size() > 0) {
@@ -276,7 +276,7 @@ void UIContextMenu::end(bool invertAnimation, bool clampUnderflowAndOverflowAndE
     this->fAnimation = 0.001f;
     anim->moveQuartOut(&this->fAnimation, 1.0f, 0.15f, true);
 
-    engine->getSound()->play(osu->getSkin()->expand);
+    soundEngine->play(osu->getSkin()->expand);
 }
 
 void UIContextMenu::setVisible2(bool visible2) {

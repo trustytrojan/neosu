@@ -12,8 +12,8 @@ class CBaseUIBoxShadow : public CBaseUIElement {
                      float ySize = 0, UString name = "");
     ~CBaseUIBoxShadow() override;
 
-    void draw(Graphics *g) override;
-    void renderOffscreen(Graphics *g);
+    void draw() override;
+    void renderOffscreen();
 
     void forceRedraw() { this->bNeedsRedraw = true; }
 
@@ -26,7 +26,7 @@ class CBaseUIBoxShadow : public CBaseUIElement {
     void onResized() override;
 
    private:
-    void render(Graphics *g);
+    void render();
 
     bool bNeedsRedraw;
     bool bColoredContent;
@@ -44,11 +44,11 @@ class GaussianBlur {
     GaussianBlur(int x, int y, int width, int height, int kernelSize, float radius);
     ~GaussianBlur();
 
-    void draw(Graphics *g, int x, int y);
+    void draw(int x, int y);
     void setColor(Color color);
 
     void enable();
-    void disable(Graphics *g);
+    void disable();
 
     void setSize(Vector2 size);
 

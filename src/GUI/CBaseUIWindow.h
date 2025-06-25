@@ -12,8 +12,8 @@ class CBaseUIWindow : public CBaseUIElement {
     CBaseUIWindow(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "");
     ~CBaseUIWindow() override;
 
-    void draw(Graphics *g) override;
-    virtual void drawCustomContent(Graphics *g) { (void)g; }
+    void draw() override;
+    virtual void drawCustomContent() { ; }
     void mouse_update(bool *propagate_clicks) override;
 
     void onKeyDown(KeyboardEvent &e) override;

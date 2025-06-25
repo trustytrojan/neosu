@@ -34,7 +34,7 @@ UIModSelectorModButton::UIModSelectorModButton(ModSelector *osuModSelector, floa
     this->bFocusStolenDelay = false;
 }
 
-void UIModSelectorModButton::draw(Graphics *g) {
+void UIModSelectorModButton::draw() {
     if(!this->bVisible) return;
 
     if(this->getActiveImageFunc != NULL && this->getActiveImageFunc()) {
@@ -54,7 +54,7 @@ void UIModSelectorModButton::draw(Graphics *g) {
                 glLogicOp(GL_COPY_INVERTED);
             }
 
-            this->getActiveImageFunc()->draw(g, this->vPos + this->vSize / 2);
+            this->getActiveImageFunc()->draw(this->vPos + this->vSize / 2);
 
             if(draw_inverted_colors) {
                 glDisable(GL_COLOR_LOGIC_OP);
@@ -220,7 +220,7 @@ void UIModSelectorModButton::setOn(bool on, bool silent) {
         }
 
         if(!silent) {
-            engine->getSound()->play(osu->getSkin()->getCheckOn());
+            soundEngine->play(osu->getSkin()->getCheckOn());
         }
     } else {
         anim->moveLinear(&this->fRot, 0.0f, animationDuration, true);
@@ -229,7 +229,7 @@ void UIModSelectorModButton::setOn(bool on, bool silent) {
 
         if(prevState && !this->bOn && !silent) {
             // only play sound on specific change
-            engine->getSound()->play(osu->getSkin()->getCheckOff());
+            soundEngine->play(osu->getSkin()->getCheckOff());
         }
     }
 }

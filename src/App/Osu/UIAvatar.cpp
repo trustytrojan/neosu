@@ -76,7 +76,7 @@ UIAvatar::UIAvatar(u32 player_id, float xPos, float yPos, float xSize, float ySi
     }
 
     if(exists) {
-        this->avatar = engine->getResourceManager()->loadImageAbs(this->avatar_path, this->avatar_path);
+        this->avatar = resourceManager->loadImageAbs(this->avatar_path, this->avatar_path);
     }
 }
 
@@ -84,14 +84,14 @@ UIAvatar::~UIAvatar() {
     // XXX: leaking avatar Resource here, because we don't know in how many places it will be reused
 }
 
-void UIAvatar::draw_avatar(Graphics *g, float alpha) {
+void UIAvatar::draw_avatar(float alpha) {
     if(!this->on_screen) return;  // Comment when you need to debug on_screen logic
 
     if(this->avatar == NULL) {
         // Don't download during gameplay to avoid lagspikes
         if(!osu->isInPlayMode()) {
             if(download_avatar(this->player_id)) {
-                this->avatar = engine->getResourceManager()->loadImageAbs(this->avatar_path, this->avatar_path);
+                this->avatar = resourceManager->loadImageAbs(this->avatar_path, this->avatar_path);
             }
         }
     } else {

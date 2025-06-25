@@ -21,7 +21,7 @@ OpenGL3VertexArrayObject::OpenGL3VertexArrayObject(Graphics::PRIMITIVE primitive
 void OpenGL3VertexArrayObject::init() {
     if(this->vertices.size() < 2) return;
 
-    OpenGL3Interface *g = (OpenGL3Interface *)engine->getGraphics();
+    OpenGL3Interface *gl3 = (OpenGL3Interface *)g;
 
     // backup vao
     int vaoBackup = 0;
@@ -38,8 +38,8 @@ void OpenGL3VertexArrayObject::init() {
                      usageToOpenGL(this->usage));
 
         // identify the components in the vertex buffer
-        glEnableVertexAttribArray(g->getShaderGenericAttribPosition());
-        glVertexAttribPointer(g->getShaderGenericAttribPosition(), 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), (GLvoid *)0);
+        glEnableVertexAttribArray(gl3->getShaderGenericAttribPosition());
+        glVertexAttribPointer(gl3->getShaderGenericAttribPosition(), 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), (GLvoid *)0);
 
         // populate texcoord buffer
         if(this->texcoords.size() > 0 && this->texcoords[0].size() > 0) {
@@ -51,8 +51,8 @@ void OpenGL3VertexArrayObject::init() {
                          usageToOpenGL(this->usage));
 
             // identify the components in the texcoord buffer
-            glEnableVertexAttribArray(g->getShaderGenericAttribUV());
-            glVertexAttribPointer(g->getShaderGenericAttribUV(), 2, GL_FLOAT, GL_FALSE, 0, (GLvoid *)0);
+            glEnableVertexAttribArray(gl3->getShaderGenericAttribUV());
+            glVertexAttribPointer(gl3->getShaderGenericAttribUV(), 2, GL_FLOAT, GL_FALSE, 0, (GLvoid *)0);
         }
     }
     glBindVertexArray(vaoBackup);  // restore vao
@@ -60,10 +60,10 @@ void OpenGL3VertexArrayObject::init() {
     // free memory
     if(!this->bKeepInSystemMemory) this->clear();
 
-    this->bReady = true;
+    m_bReady = true;
 }
 
-void OpenGL3VertexArrayObject::initAsync() { this->bAsyncReady = true; }
+void OpenGL3VertexArrayObject::initAsync() { m_bAsyncReady = true; }
 
 void OpenGL3VertexArrayObject::destroy() {
     VertexArrayObject::destroy();
@@ -80,7 +80,7 @@ void OpenGL3VertexArrayObject::destroy() {
 }
 
 void OpenGL3VertexArrayObject::draw() {
-    if(!this->bReady) {
+    if(!m_bReady) {
         debugLog("WARNING: OpenGL3VertexArrayObject::draw() called, but was not ready!\n");
         return;
     }

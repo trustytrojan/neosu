@@ -16,7 +16,7 @@ UIBackButton::UIBackButton(float xPos, float yPos, float xSize, float ySize, USt
     this->fImageScale = 1.0f;
 }
 
-void UIBackButton::draw(Graphics *g) {
+void UIBackButton::draw() {
     if(!this->bVisible) return;
 
     // draw button image
@@ -24,7 +24,7 @@ void UIBackButton::draw(Graphics *g) {
     {
         g->setColor(0xffffffff);
         osu->getSkin()->getMenuBack2()->draw(
-            g, this->vPos + (osu->getSkin()->getMenuBack2()->getSize() / 2) * this->fImageScale, this->fImageScale);
+            this->vPos + (osu->getSkin()->getMenuBack2()->getSize() / 2) * this->fImageScale, this->fImageScale);
     }
     g->popTransform();
 
@@ -49,14 +49,14 @@ void UIBackButton::mouse_update(bool *propagate_clicks) {
 void UIBackButton::onMouseDownInside() {
     CBaseUIButton::onMouseDownInside();
 
-    engine->getSound()->play(osu->getSkin()->backButtonClick);
+    soundEngine->play(osu->getSkin()->backButtonClick);
 }
 
 void UIBackButton::onMouseInside() {
     CBaseUIButton::onMouseInside();
 
     anim->moveQuadOut(&this->fAnimation, 1.0f, 0.1f, 0.0f, true);
-    engine->getSound()->play(osu->getSkin()->backButtonHover);
+    soundEngine->play(osu->getSkin()->backButtonHover);
 }
 
 void UIBackButton::onMouseOutside() {

@@ -41,7 +41,7 @@ class RankingScreenIndexLabel : public CBaseUILabel {
         this->bVisible2 = false;
     }
 
-    void draw(Graphics *g) override {
+    void draw() override {
         if(!this->bVisible || !this->bVisible2) return;
 
         // draw background gradient
@@ -81,7 +81,7 @@ class RankingScreenBottomElement : public CBaseUILabel {
    public:
     RankingScreenBottomElement() : CBaseUILabel(-1, 0, 0, 0, "", "") { this->bVisible2 = false; }
 
-    void draw(Graphics *g) override {
+    void draw() override {
         if(!this->bVisible || !this->bVisible2) return;
 
         // draw background gradient
@@ -106,7 +106,7 @@ class RankingScreenScrollDownInfoButton : public CBaseUIButton {
         this->fAlpha = 1.0f;
     }
 
-    void draw(Graphics *g) override {
+    void draw() override {
         if(!this->bVisible || !this->bVisible2) return;
 
         const float textScale = 0.45f;
@@ -214,12 +214,12 @@ RankingScreen::RankingScreen() : ScreenBackable() {
     this->bIsUnranked = false;
 }
 
-void RankingScreen::draw(Graphics *g) {
+void RankingScreen::draw() {
     if(!this->bVisible) return;
 
     // draw background image
     if(cv_draw_rankingscreen_background_image.getBool()) {
-        SongBrowser::drawSelectedBeatmapBackgroundImage(g);
+        SongBrowser::drawSelectedBeatmapBackgroundImage();
 
         // draw top black bar
         g->setColor(0xff000000);
@@ -227,29 +227,29 @@ void RankingScreen::draw(Graphics *g) {
                     this->rankingTitle->getSize().y * cv_rankingscreen_topbar_height_percent.getFloat());
     }
 
-    ScreenBackable::draw(g);
+    ScreenBackable::draw();
 
     // draw active mods
     const Vector2 modPosStart =
         Vector2(this->rankings->getSize().x - osu->getUIScale(20), this->rankings->getRelPosY() + osu->getUIScale(260));
     Vector2 modPos = modPosStart;
     Vector2 modPosMax;
-    if(this->bModTD) this->drawModImage(g, osu->getSkin()->getSelectionModTD(), modPos, modPosMax);
+    if(this->bModTD) this->drawModImage(osu->getSkin()->getSelectionModTD(), modPos, modPosMax);
     if(this->bModSS)
-        this->drawModImage(g, osu->getSkin()->getSelectionModPerfect(), modPos, modPosMax);
+        this->drawModImage(osu->getSkin()->getSelectionModPerfect(), modPos, modPosMax);
     else if(this->bModSD)
-        this->drawModImage(g, osu->getSkin()->getSelectionModSuddenDeath(), modPos, modPosMax);
-    if(this->bModEZ) this->drawModImage(g, osu->getSkin()->getSelectionModEasy(), modPos, modPosMax);
-    if(this->bModHD) this->drawModImage(g, osu->getSkin()->getSelectionModHidden(), modPos, modPosMax);
-    if(this->bModHR) this->drawModImage(g, osu->getSkin()->getSelectionModHardRock(), modPos, modPosMax);
-    if(this->bModNightmare) this->drawModImage(g, osu->getSkin()->getSelectionModNightmare(), modPos, modPosMax);
-    if(this->bModScorev2) this->drawModImage(g, osu->getSkin()->getSelectionModScorev2(), modPos, modPosMax);
-    if(this->bModTarget) this->drawModImage(g, osu->getSkin()->getSelectionModTarget(), modPos, modPosMax);
-    if(this->bModSpunout) this->drawModImage(g, osu->getSkin()->getSelectionModSpunOut(), modPos, modPosMax);
-    if(this->bModRelax) this->drawModImage(g, osu->getSkin()->getSelectionModRelax(), modPos, modPosMax);
-    if(this->bModNF) this->drawModImage(g, osu->getSkin()->getSelectionModNoFail(), modPos, modPosMax);
-    if(this->bModAutopilot) this->drawModImage(g, osu->getSkin()->getSelectionModAutopilot(), modPos, modPosMax);
-    if(this->bModAuto) this->drawModImage(g, osu->getSkin()->getSelectionModAutoplay(), modPos, modPosMax);
+        this->drawModImage(osu->getSkin()->getSelectionModSuddenDeath(), modPos, modPosMax);
+    if(this->bModEZ) this->drawModImage(osu->getSkin()->getSelectionModEasy(), modPos, modPosMax);
+    if(this->bModHD) this->drawModImage(osu->getSkin()->getSelectionModHidden(), modPos, modPosMax);
+    if(this->bModHR) this->drawModImage(osu->getSkin()->getSelectionModHardRock(), modPos, modPosMax);
+    if(this->bModNightmare) this->drawModImage(osu->getSkin()->getSelectionModNightmare(), modPos, modPosMax);
+    if(this->bModScorev2) this->drawModImage(osu->getSkin()->getSelectionModScorev2(), modPos, modPosMax);
+    if(this->bModTarget) this->drawModImage(osu->getSkin()->getSelectionModTarget(), modPos, modPosMax);
+    if(this->bModSpunout) this->drawModImage(osu->getSkin()->getSelectionModSpunOut(), modPos, modPosMax);
+    if(this->bModRelax) this->drawModImage(osu->getSkin()->getSelectionModRelax(), modPos, modPosMax);
+    if(this->bModNF) this->drawModImage(osu->getSkin()->getSelectionModNoFail(), modPos, modPosMax);
+    if(this->bModAutopilot) this->drawModImage(osu->getSkin()->getSelectionModAutopilot(), modPos, modPosMax);
+    if(this->bModAuto) this->drawModImage(osu->getSkin()->getSelectionModAutoplay(), modPos, modPosMax);
 
     // draw experimental mods
     if(this->enabledExperimentalMods.size() > 0) {
@@ -316,9 +316,9 @@ void RankingScreen::draw(Graphics *g) {
     }
 }
 
-void RankingScreen::drawModImage(Graphics *g, SkinImage *image, Vector2 &pos, Vector2 &max) {
+void RankingScreen::drawModImage(SkinImage *image, Vector2 &pos, Vector2 &max) {
     g->setColor(0xffffffff);
-    image->draw(g, Vector2(pos.x - image->getSize().x / 2.0f, pos.y));
+    image->draw(Vector2(pos.x - image->getSize().x / 2.0f, pos.y));
 
     pos.x -= osu->getUIScale(20);
 
@@ -356,7 +356,7 @@ void RankingScreen::mouse_update(bool *propagate_clicks) {
     }
 
     // tooltip (pp + accuracy + unstable rate)
-    if(!osu->getOptionsMenu()->isMouseInside() && engine->getMouse()->getPos().x < osu->getScreenWidth() * 0.5f) {
+    if(!osu->getOptionsMenu()->isMouseInside() && mouse->getPos().x < osu->getScreenWidth() * 0.5f) {
         osu->getTooltipOverlay()->begin();
         {
             osu->getTooltipOverlay()->addLine(UString::format("%.2fpp", this->score.get_pp()));
@@ -406,7 +406,7 @@ CBaseUIContainer *RankingScreen::setVisible(bool visible) {
     } else {
         // Stop applause sound
         if(osu->getSkin()->getApplause() != NULL && osu->getSkin()->getApplause()->isPlaying()) {
-            engine->getSound()->stop(osu->getSkin()->getApplause());
+            soundEngine->stop(osu->getSkin()->getApplause());
         }
 
         if(bancho.is_in_a_multi_room()) {

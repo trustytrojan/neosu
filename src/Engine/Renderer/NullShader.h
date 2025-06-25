@@ -69,8 +69,8 @@ class NullShader : public Shader {
     }
 
    private:
-    void init() override { this->bReady = true; }
-    void initAsync() override { this->bAsyncReady = true; }
+    void init() override { m_bReady = true; }
+    void initAsync() override { m_bAsyncReady = true; }
     void destroy() override { ; }
 };
 

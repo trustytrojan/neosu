@@ -56,7 +56,7 @@ class ModSelectorOverrideSliderDescButton : public CBaseUIButton {
     void setTooltipText(UString tooltipText) { this->sTooltipText = tooltipText; }
 
    private:
-    void drawText(Graphics *g) override {
+    void drawText() override {
         if(this->font != NULL && this->sText.length() > 0) {
             float xPosAdd = this->vSize.x / 2.0f - this->fStringWidth / 2.0f;
 
@@ -85,7 +85,7 @@ class ModSelectorOverrideSliderLockButton : public CBaseUICheckbox {
         this->fAnim = 1.0f;
     }
 
-    void draw(Graphics *g) override {
+    void draw() override {
         if(!this->bVisible) return;
 
         const wchar_t icon = (this->bChecked ? Icons::LOCK : Icons::UNLOCK);
@@ -109,7 +109,7 @@ class ModSelectorOverrideSliderLockButton : public CBaseUICheckbox {
    private:
     void onPressed() override {
         CBaseUICheckbox::onPressed();
-        engine->getSound()->play(this->isChecked() ? osu->getSkin()->getCheckOn() : osu->getSkin()->getCheckOff());
+        soundEngine->play(this->isChecked() ? osu->getSkin()->getCheckOn() : osu->getSkin()->getCheckOff());
 
         if(this->isChecked()) {
             // anim->moveQuadOut(&m_fAnim, 1.5f, 0.060f, true);
@@ -408,7 +408,7 @@ ModSelector::~ModSelector() {
     SAFE_DELETE(this->experimentalContainer);
 }
 
-void ModSelector::draw(Graphics *g) {
+void ModSelector::draw() {
     if(!this->bVisible && !this->bScheduledHide) return;
 
     // for compact mode (and experimental mods)
@@ -441,7 +441,7 @@ void ModSelector::draw(Graphics *g) {
             g->setColor(backgroundColor);
             g->fillRect(modGridButtonsStart.x - margin, modGridButtonsStart.y - margin,
                         modGridButtonsSize.x + 2 * margin, modGridButtonsSize.y + 2 * margin);
-            OsuScreen::draw(g);
+            OsuScreen::draw();
         }
         g->popTransform();
     } else if(this->isInCompactMode()) {
@@ -485,7 +485,7 @@ void ModSelector::draw(Graphics *g) {
             g->setColor(backgroundColor);
             g->fillRect(modGridButtonsStart.x - margin, modGridButtonsStart.y - margin,
                         modGridButtonsSize.x + 2 * margin, modGridButtonsSize.y + 2 * margin);
-            OsuScreen::draw(g);
+            OsuScreen::draw();
         }
         g->popTransform();
 
@@ -496,7 +496,7 @@ void ModSelector::draw(Graphics *g) {
             g->setColor(backgroundColor);
             g->fillRect(overrideSlidersStart.x - margin, 0, overrideSlidersSize.x + 2 * margin,
                         overrideSlidersSize.y + margin);
-            this->overrideSliderContainer->draw(g);
+            this->overrideSliderContainer->draw();
         }
         g->popTransform();
     } else  // normal mode, just draw everything
@@ -539,8 +539,8 @@ void ModSelector::draw(Graphics *g) {
             g->popTransform();
         }
 
-        OsuScreen::draw(g);
-        this->overrideSliderContainer->draw(g);
+        OsuScreen::draw();
+        this->overrideSliderContainer->draw();
     }
 
     // draw experimental mods
@@ -553,7 +553,7 @@ void ModSelector::draw(Graphics *g) {
                         this->experimentalContainer->getPos().y - margin,
                         this->experimentalContainer->getSize().x + 2 * margin * this->fExperimentalAnimation,
                         this->experimentalContainer->getSize().y + 2 * margin);
-            this->experimentalContainer->draw(g);
+            this->experimentalContainer->draw();
         }
         g->popTransform();
     }
@@ -594,7 +594,7 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
                     { osu->getTooltipOverlay()->addLine("Hold [ALT] to slide in 0.01 increments."); }
                     osu->getTooltipOverlay()->end();
 
-                    if(engine->getKeyboard()->isAltDown()) this->bShowOverrideSliderALTHint = false;
+                    if(keyboard->isAltDown()) this->bShowOverrideSliderALTHint = false;
                 }
             }
         }
@@ -612,7 +612,7 @@ void ModSelector::mouse_update(bool *propagate_clicks) {
         McRect experimentalTrigger = McRect(
             0, 0, this->bExperimentalVisible ? this->experimentalContainer->getSize().x : osu->getScreenWidth() * 0.05f,
             osu->getScreenHeight());
-        if(experimentalTrigger.contains(engine->getMouse()->getPos())) {
+        if(experimentalTrigger.contains(mouse->getPos())) {
             if(!this->bExperimentalVisible) {
                 this->bExperimentalVisible = true;
                 anim->moveQuadOut(&this->fExperimentalAnimation, 1.0f, (1.0f - this->fExperimentalAnimation) * 0.11f,
@@ -1119,7 +1119,7 @@ UICheckbox *ModSelector::addExperimentalCheckbox(UString text, UString tooltipTe
 void ModSelector::resetModsUserInitiated() {
     this->resetMods();
 
-    engine->getSound()->play(osu->getSkin()->getCheckOff());
+    soundEngine->play(osu->getSkin()->getCheckOff());
     this->resetModsButton->animateClickColor();
 
     if(bancho.is_online()) {
@@ -1228,7 +1228,7 @@ void ModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
             const float rawSliderValue = slider->getFloat();
 
             // alt key allows rounding to only 1 decimal digit
-            if(!engine->getKeyboard()->isAltDown())
+            if(!keyboard->isAltDown())
                 sliderValue = std::round(sliderValue * 10.0f) / 10.0f;
             else
                 sliderValue = std::round(sliderValue * 100.0f) / 100.0f;
@@ -1396,7 +1396,7 @@ UString ModSelector::getOverrideSliderLabelText(ModSelector::OVERRIDE_SLIDER s, 
 
             // compensate and round
             convarValue = osu->getSelectedBeatmap()->getApproachRateForSpeedMultiplier();
-            if(!engine->getKeyboard()->isAltDown() && !forceDisplayTwoDecimalDigits)
+            if(!keyboard->isAltDown() && !forceDisplayTwoDecimalDigits)
                 convarValue = std::round(convarValue * 10.0f) / 10.0f;
             else
                 convarValue = std::round(convarValue * 100.0f) / 100.0f;
@@ -1406,7 +1406,7 @@ UString ModSelector::getOverrideSliderLabelText(ModSelector::OVERRIDE_SLIDER s, 
 
             // compensate and round
             convarValue = osu->getSelectedBeatmap()->getOverallDifficultyForSpeedMultiplier();
-            if(!engine->getKeyboard()->isAltDown() && !forceDisplayTwoDecimalDigits)
+            if(!keyboard->isAltDown() && !forceDisplayTwoDecimalDigits)
                 convarValue = std::round(convarValue * 10.0f) / 10.0f;
             else
                 convarValue = std::round(convarValue * 100.0f) / 100.0f;

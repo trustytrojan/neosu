@@ -22,9 +22,9 @@ VinylScratcher::VinylScratcher() : CBaseUIWindow(220, 90, 1000, 700, "Vinyl Scra
     const int baseDPI = 96;
     const int newDPI = dpiScale * baseDPI;
 
-    McFont *font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    McFont *font = resourceManager->getFont("FONT_DEFAULT");
     McFont *windowTitleFont =
-        engine->getResourceManager()->loadFont("ubuntu.ttf", "FONT_VS_WINDOW_TITLE", 10.0f, true, newDPI);
+        resourceManager->loadFont("ubuntu.ttf", "FONT_VS_WINDOW_TITLE", 10.0f, true, newDPI);
     McFont *controlBarFont = font;
     McFont *musicBrowserFont = font;
 
@@ -52,8 +52,8 @@ VinylScratcher::VinylScratcher() : CBaseUIWindow(220, 90, 1000, 700, "Vinyl Scra
         fastdelegate::MakeDelegate(this, &VinylScratcher::onVolumeChanged));
 
     // vars
-    this->stream = engine->getResourceManager()->loadSoundAbs("", "SND_VS_STREAM", true);
-    VinylScratcher::stream2 = engine->getResourceManager()->loadSoundAbs("", "SND_VS_STREAM2", true);
+    this->stream = resourceManager->loadSoundAbs("", "SND_VS_STREAM", true);
+    VinylScratcher::stream2 = resourceManager->loadSoundAbs("", "SND_VS_STREAM2", true);
     this->fReverseMessageTimer = 0.0f;
 
     // window colors
@@ -118,11 +118,11 @@ void VinylScratcher::onKeyDown(KeyboardEvent &e) {
 
 void VinylScratcher::onFinished() {
     if(cv_vs_repeat.getBool())
-        engine->getSound()->play(this->stream);
+        soundEngine->play(this->stream);
     else {
         // reset and stop (since we can't know yet if there even is a next song)
         this->stream->setPosition(0);
-        engine->getSound()->pause(this->stream);
+        soundEngine->pause(this->stream);
         this->controlBar->getPlayButton()->setText(">");
 
         // play the next song
@@ -136,12 +136,12 @@ void VinylScratcher::onFinished() {
 void VinylScratcher::onFileClicked(std::string filepath, bool reverse) {
     // check if the file is valid and can be played, if it's valid then play it
     if(tryPlayFile(filepath)) {
-        engine->getSound()->stop(this->stream);
+        soundEngine->stop(this->stream);
 
         this->stream->rebuild(filepath);
         this->stream->setVolume(this->controlBar->getVolumeSlider()->getFloat());
 
-        if(engine->getSound()->play(this->stream)) {
+        if(soundEngine->play(this->stream)) {
             this->controlBar->getPlayButton()->setText("II");
             auto title = UString(env->getFileNameFromFilePath(filepath).c_str());
             this->titleBar->setTitle(title, reverse);
@@ -163,10 +163,10 @@ void VinylScratcher::onSeek() { this->stream->setPosition(cv_vs_percent.getFloat
 
 void VinylScratcher::onPlayClicked() {
     if(this->stream->isPlaying()) {
-        engine->getSound()->pause(this->stream);
+        soundEngine->pause(this->stream);
         this->controlBar->getPlayButton()->setText(">");
     } else {
-        if(engine->getSound()->play(this->stream)) this->controlBar->getPlayButton()->setText("II");
+        if(soundEngine->play(this->stream)) this->controlBar->getPlayButton()->setText("II");
     }
 }
 
@@ -189,8 +189,8 @@ void VinylScratcher::onResized() {
 bool VinylScratcher::tryPlayFile(std::string filepath) {
     VinylScratcher::stream2->rebuild(filepath);
 
-    if(engine->getSound()->play(VinylScratcher::stream2)) {
-        engine->getSound()->stop(VinylScratcher::stream2);
+    if(soundEngine->play(VinylScratcher::stream2)) {
+        soundEngine->stop(VinylScratcher::stream2);
         return true;
     }
 

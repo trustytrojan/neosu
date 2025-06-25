@@ -56,7 +56,7 @@ HCHANNEL Sound::getChannel() {
 }
 
 void Sound::init() {
-    if(this->sFilePath.length() < 2 || !this->bAsyncReady) return;
+    if(m_sFilePath.length() < 2 || !m_bAsyncReady) return;
 
     // HACKHACK: re-set some values to their defaults (only necessary because of the existence of rebuild())
     this->fSpeed = 1.0f;
@@ -64,31 +64,31 @@ void Sound::init() {
     // error checking
     if(this->sample == 0 && this->stream == 0) {
         UString msg = "Couldn't load sound \"";
-        msg.append(this->sFilePath.c_str());
+        msg.append(m_sFilePath.c_str());
         msg.append(UString::format("\", stream = %i, errorcode = %i", (int)this->bStream, BASS_ErrorGetCode()));
         msg.append(", file = ");
-        msg.append(this->sFilePath.c_str());
+        msg.append(m_sFilePath.c_str());
         msg.append("\n");
         debugLog(0xffdd3333, "%s", msg.toUtf8());
     } else {
-        this->bReady = true;
+        m_bReady = true;
     }
 }
 
 void Sound::initAsync() {
-    if(cv_debug_rm.getBool()) debugLog("Resource Manager: Loading %s\n", this->sFilePath.c_str());
+    if(cv_debug_rm.getBool()) debugLog("Resource Manager: Loading %s\n", m_sFilePath.c_str());
 
     // HACKHACK: workaround for BASS crashes on malformed WAV files
     {
         const int minWavFileSize = cv_snd_wav_file_min_size.getInt();
         if(minWavFileSize > 0) {
-            auto fileExtensionLowerCase = UString(env->getFileExtensionFromFilePath(this->sFilePath).c_str());
+            auto fileExtensionLowerCase = UString(env->getFileExtensionFromFilePath(m_sFilePath).c_str());
             fileExtensionLowerCase.lowerCase();
             if(fileExtensionLowerCase == UString("wav")) {
-                File wavFile(this->sFilePath);
+                File wavFile(m_sFilePath);
                 if(wavFile.getFileSize() < (size_t)minWavFileSize) {
                     printf("Sound: Ignoring malformed/corrupt WAV file (%i) %s\n", (int)wavFile.getFileSize(),
-                           this->sFilePath.c_str());
+                           m_sFilePath.c_str());
                     return;
                 }
             }
@@ -97,12 +97,12 @@ void Sound::initAsync() {
 
 #ifdef _WIN32
     // On Windows, we need to convert the UTF-8 path to UTF-16, or paths with unicode characters will fail to open
-    int size = MultiByteToWideChar(CP_UTF8, 0, this->sFilePath.c_str(), this->sFilePath.length(), NULL, 0);
+    int size = MultiByteToWideChar(CP_UTF8, 0, m_sFilePath.c_str(), m_sFilePath.length(), NULL, 0);
     std::wstring file_path(size, 0);
-    MultiByteToWideChar(CP_UTF8, 0, this->sFilePath.c_str(), this->sFilePath.length(), (LPWSTR)file_path.c_str(),
+    MultiByteToWideChar(CP_UTF8, 0, m_sFilePath.c_str(), m_sFilePath.length(), (LPWSTR)file_path.c_str(),
                         file_path.length());
 #else
-    std::string file_path = this->sFilePath;
+    std::string file_path = m_sFilePath;
 #endif
 
     if(this->bStream) {
@@ -113,14 +113,14 @@ void Sound::initAsync() {
         this->stream = BASS_StreamCreateFile(false, file_path.c_str(), 0, 0, flags);
         if(!this->stream) {
             debugLog("BASS_StreamCreateFile() returned error %d on file %s\n", BASS_ErrorGetCode(),
-                     this->sFilePath.c_str());
+                     m_sFilePath.c_str());
             return;
         }
 
         this->stream = BASS_FX_TempoCreate(this->stream, BASS_FX_FREESOURCE | BASS_STREAM_DECODE);
         if(!this->stream) {
             debugLog("BASS_FX_TempoCreate() returned error %d on file %s\n", BASS_ErrorGetCode(),
-                     this->sFilePath.c_str());
+                     m_sFilePath.c_str());
             return;
         }
 
@@ -137,10 +137,10 @@ void Sound::initAsync() {
         if(!this->sample) {
             auto code = BASS_ErrorGetCode();
             if(code == BASS_ERROR_EMPTY) {
-                debugLog("Sound: Ignoring empty file %s\n", this->sFilePath.c_str());
+                debugLog("Sound: Ignoring empty file %s\n", m_sFilePath.c_str());
                 return;
             } else {
-                debugLog("BASS_SampleLoad() returned error %d on file %s\n", code, this->sFilePath.c_str());
+                debugLog("BASS_SampleLoad() returned error %d on file %s\n", code, m_sFilePath.c_str());
                 return;
             }
         }
@@ -152,15 +152,15 @@ void Sound::initAsync() {
         this->length = (u32)lengthInMilliSeconds;
     }
 
-    this->bAsyncReady = true;
+    m_bAsyncReady = true;
 }
 
 void Sound::destroy() {
-    if(!this->bReady) return;
+    if(!m_bReady) return;
 
     this->bStarted = false;
-    this->bReady = false;
-    this->bAsyncReady = false;
+    m_bReady = false;
+    m_bAsyncReady = false;
     this->fLastPlayTime = 0.0;
     this->fChannelCreationTime = 0.0;
     this->bPaused = false;
@@ -192,7 +192,7 @@ u32 Sound::setPosition(f64 percent) {
 }
 
 void Sound::setPositionMS(unsigned long ms) {
-    if(!this->bReady || ms > this->getLengthMS()) return;
+    if(!m_bReady || ms > this->getLengthMS()) return;
     if(!this->bStream) {
         engine->showMessageError("Programmer Error", "Called setPositionMS on a sample!");
         return;
@@ -222,7 +222,7 @@ void Sound::setPositionMS(unsigned long ms) {
                                               BASS_POS_BYTE | BASS_POS_DECODETO | BASS_POS_MIXER_RESET)) {
                 if(cv_debug.getBool()) {
                     debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
-                             BASS_ErrorGetCode(), this->sFilePath.c_str());
+                             BASS_ErrorGetCode(), m_sFilePath.c_str());
                 }
             }
 
@@ -231,7 +231,7 @@ void Sound::setPositionMS(unsigned long ms) {
             if(!BASS_ChannelSetPosition(this->stream, target_pos, BASS_POS_BYTE | BASS_POS_DECODETO | BASS_POS_FLUSH)) {
                 if(cv_debug.getBool()) {
                     debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
-                             BASS_ErrorGetCode(), this->sFilePath.c_str());
+                             BASS_ErrorGetCode(), m_sFilePath.c_str());
                 }
             }
         }
@@ -252,7 +252,7 @@ void Sound::setPositionMS(unsigned long ms) {
         if(!BASS_ChannelSetPosition(this->stream, target_pos, BASS_POS_BYTE | BASS_POS_DECODETO | BASS_POS_FLUSH)) {
             if(cv_debug.getBool()) {
                 debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
-                         BASS_ErrorGetCode(), this->sFilePath.c_str());
+                         BASS_ErrorGetCode(), m_sFilePath.c_str());
             }
         }
 
@@ -264,7 +264,7 @@ void Sound::setPositionMS(unsigned long ms) {
 
 // Inaccurate but fast seeking, to use at song select
 void Sound::setPositionMS_fast(u32 ms) {
-    if(!this->bReady || ms > this->getLengthMS()) return;
+    if(!m_bReady || ms > this->getLengthMS()) return;
     if(!this->bStream) {
         engine->showMessageError("Programmer Error", "Called setPositionMS_fast on a sample!");
         return;
@@ -280,7 +280,7 @@ void Sound::setPositionMS_fast(u32 ms) {
         if(!BASS_Mixer_ChannelSetPosition(this->stream, target_pos, BASS_POS_BYTE | BASS_POS_MIXER_RESET)) {
             if(cv_debug.getBool()) {
                 debugLog("Sound::setPositionMS_fast( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
-                         BASS_ErrorGetCode(), this->sFilePath.c_str());
+                         BASS_ErrorGetCode(), m_sFilePath.c_str());
             }
         }
 
@@ -289,14 +289,14 @@ void Sound::setPositionMS_fast(u32 ms) {
         if(!BASS_ChannelSetPosition(this->stream, target_pos, BASS_POS_BYTE | BASS_POS_FLUSH)) {
             if(cv_debug.getBool()) {
                 debugLog("Sound::setPositionMS( %lu ) BASS_ChannelSetPosition() error %i on file %s\n", ms,
-                         BASS_ErrorGetCode(), this->sFilePath.c_str());
+                         BASS_ErrorGetCode(), m_sFilePath.c_str());
             }
         }
     }
 }
 
 void Sound::setVolume(float volume) {
-    if(!this->bReady) return;
+    if(!m_bReady) return;
 
     this->fVolume = clamp<float>(volume, 0.0f, 2.0f);
 
@@ -306,7 +306,7 @@ void Sound::setVolume(float volume) {
 }
 
 void Sound::setSpeed(float speed) {
-    if(!this->bReady) return;
+    if(!m_bReady) return;
     if(!this->bStream) {
         engine->showMessageError("Programmer Error", "Called setSpeed on a sample!");
         return;
@@ -330,7 +330,7 @@ void Sound::setSpeed(float speed) {
 }
 
 void Sound::setFrequency(float frequency) {
-    if(!this->bReady) return;
+    if(!m_bReady) return;
 
     frequency = (frequency > 99.0f ? clamp<float>(frequency, 100.0f, 100000.0f) : 0.0f);
 
@@ -340,7 +340,7 @@ void Sound::setFrequency(float frequency) {
 }
 
 void Sound::setPan(float pan) {
-    if(!this->bReady) return;
+    if(!m_bReady) return;
 
     this->fPan = clamp<float>(pan, -1.0f, 1.0f);
 
@@ -350,7 +350,7 @@ void Sound::setPan(float pan) {
 }
 
 void Sound::setLoop(bool loop) {
-    if(!this->bReady) return;
+    if(!m_bReady) return;
     if(!this->bStream) {
         engine->showMessageError("Programmer Error", "Called setLoop on a sample!");
         return;
@@ -361,7 +361,7 @@ void Sound::setLoop(bool loop) {
 }
 
 float Sound::getPosition() {
-    if(!this->bReady) return 0.f;
+    if(!m_bReady) return 0.f;
     if(!this->bStream) {
         engine->showMessageError("Programmer Error", "Called getPosition on a sample!");
         return 0.f;
@@ -388,7 +388,7 @@ float Sound::getPosition() {
 }
 
 u32 Sound::getPositionMS() {
-    if(!this->bReady) return 0;
+    if(!m_bReady) return 0;
     if(!this->bStream) {
         engine->showMessageError("Programmer Error", "Called getPositionMS on a sample!");
         return 0;
@@ -436,7 +436,7 @@ u32 Sound::getPositionMS() {
 }
 
 u32 Sound::getLengthMS() {
-    if(!this->bReady) return 0;
+    if(!m_bReady) return 0;
     return this->length;
 }
 
@@ -444,7 +444,7 @@ float Sound::getSpeed() { return this->fSpeed; }
 
 float Sound::getFrequency() {
     auto default_freq = cv_snd_freq.getFloat();
-    if(!this->bReady) return default_freq;
+    if(!m_bReady) return default_freq;
     if(!this->bStream) {
         engine->showMessageError("Programmer Error", "Called getFrequency on a sample!");
         return default_freq;
@@ -456,12 +456,12 @@ float Sound::getFrequency() {
 }
 
 bool Sound::isPlaying() {
-    return this->bReady && this->bStarted && !this->bPaused && !this->getActiveChannels().empty();
+    return m_bReady && this->bStarted && !this->bPaused && !this->getActiveChannels().empty();
 }
 
-bool Sound::isFinished() { return this->bReady && this->bStarted && !this->isPlaying(); }
+bool Sound::isFinished() { return m_bReady && this->bStarted && !this->isPlaying(); }
 
 void Sound::rebuild(std::string newFilePath) {
-    this->sFilePath = newFilePath;
+    m_sFilePath = newFilePath;
     this->reload();
 }

@@ -14,11 +14,12 @@
 
 #if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && defined(__ORDER_BIG_ENDIAN__)
 #define IS_LITTLE_ENDIAN (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
-#elif defined(__LITTLE_ENDIAN__) || defined(__ARMEL__) || defined(__THUMBEL__) || defined(__AARCH64EL__) || defined(_MIPSEL) || defined(__MIPSEL) || \
-    defined(__MIPSEL__) || defined(__i386) || defined(__i386__) || defined(__x86_64) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64) || \
-    defined(_M_AMD64)
+#elif defined(__LITTLE_ENDIAN__) || defined(__ARMEL__) || defined(__THUMBEL__) || defined(__AARCH64EL__) || \
+    defined(_MIPSEL) || defined(__MIPSEL) || defined(__MIPSEL__) || defined(__i386) || defined(__i386__) || \
+    defined(__x86_64) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64) || defined(_M_AMD64)
 #define IS_LITTLE_ENDIAN 1
-#elif defined(__BIG_ENDIAN__) || defined(__ARMEB__) || defined(__THUMBEB__) || defined(__AARCH64EB__) || defined(_MIPSEB) || defined(__MIPSEB) || defined(__MIPSEB__)
+#elif defined(__BIG_ENDIAN__) || defined(__ARMEB__) || defined(__THUMBEB__) || defined(__AARCH64EB__) || \
+    defined(_MIPSEB) || defined(__MIPSEB) || defined(__MIPSEB__)
 #define IS_LITTLE_ENDIAN 0
 #else
 #error "impossible"
@@ -28,18 +29,17 @@ using Channel = std::uint8_t;
 
 // argb colors
 struct Color {
-	std::uint32_t v;
+    std::uint32_t v;
 
-	Color() : v(0) {}
-	Color(std::uint32_t val) : v(val) {}
+    Color() : v(0) {}
+    Color(std::uint32_t val) : v(val) {}
 
-	constexpr Color(Channel alpha, Channel red, Channel green, Channel blue)
-	{
-		v = (static_cast<std::uint32_t>(alpha) << 24) | (static_cast<std::uint32_t>(red) << 16) | (static_cast<std::uint32_t>(green) << 8) |
-		    static_cast<std::uint32_t>(blue);
-	}
+    constexpr Color(Channel alpha, Channel red, Channel green, Channel blue) {
+        v = (static_cast<std::uint32_t>(alpha) << 24) | (static_cast<std::uint32_t>(red) << 16) |
+            (static_cast<std::uint32_t>(green) << 8) | static_cast<std::uint32_t>(blue);
+    }
 
-	// clang-format off
+    // clang-format off
 	// channel accessors (couldn't make the union work, unfortunate)
 	[[nodiscard]] constexpr Channel A() const { return static_cast<Channel>((v >> 24) & 0xFF); }
 	[[nodiscard]] constexpr Channel R() const { return static_cast<Channel>((v >> 16) & 0xFF); }

@@ -25,7 +25,7 @@ class RankingScreen : public ScreenBackable {
    public:
     RankingScreen();
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
     CBaseUIContainer *setVisible(bool visible) override;
@@ -40,7 +40,7 @@ class RankingScreen : public ScreenBackable {
     void updateLayout() override;
     void onBack() override;
 
-    void drawModImage(Graphics *g, SkinImage *image, Vector2 &pos, Vector2 &max);
+    void drawModImage(SkinImage *image, Vector2 &pos, Vector2 &max);
 
     void setGrade(FinishedScore::Grade grade);
     void setIndex(int index);

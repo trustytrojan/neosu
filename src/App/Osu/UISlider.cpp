@@ -10,12 +10,12 @@ UISlider::UISlider(float xPos, float yPos, float xSize, float ySize, UString nam
     this->setBlockSize(20, 20);
 }
 
-void UISlider::draw(Graphics *g) {
+void UISlider::draw() {
     if(!this->bVisible) return;
 
     Image *img = osu->getSkin()->getCircleEmpty();
     if(img == NULL) {
-        CBaseUISlider::draw(g);
+        CBaseUISlider::draw();
         return;
     }
 

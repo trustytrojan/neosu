@@ -8,8 +8,8 @@ class Mouse : public InputDevice {
     Mouse();
     ~Mouse() override { ; }
 
-    void draw(Graphics *g) override;
-    void drawDebug(Graphics *g);
+    void draw() override;
+    void drawDebug();
     void update() override;
 
     void addListener(MouseListener *mouseListener, bool insertOnTop = false);

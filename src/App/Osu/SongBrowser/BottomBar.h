@@ -7,6 +7,6 @@ class Graphics;
 // Standard input handling logic won't work, as buttons can overlap.
 
 void update_bottombar(bool* propagate_clicks);
-void draw_bottombar(Graphics* g);
+void draw_bottombar();
 void press_bottombar_button(i32 btn_index);
 f32 get_bottombar_height();

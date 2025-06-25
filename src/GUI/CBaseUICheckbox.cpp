@@ -7,6 +7,7 @@
 
 #include "CBaseUICheckbox.h"
 
+#include "Engine.h"
 #include "Font.h"
 
 CBaseUICheckbox::CBaseUICheckbox(float xPos, float yPos, float xSize, float ySize, UString name, UString text)
@@ -17,7 +18,7 @@ CBaseUICheckbox::CBaseUICheckbox(float xPos, float yPos, float xSize, float ySiz
     CBaseUIButton::setClickCallback(fastdelegate::MakeDelegate(this, &CBaseUICheckbox::onPressed));
 }
 
-void CBaseUICheckbox::draw(Graphics *g) {
+void CBaseUICheckbox::draw() {
     if(!this->bVisible) return;
 
     const float dpiScale = ((float)this->font->getDPI() / 96.0f);  // NOTE: abusing font dpi
@@ -37,8 +38,8 @@ void CBaseUICheckbox::draw(Graphics *g) {
     // draw hover rects
     const int hoverRectOffset = std::round(3.0f * dpiScale);
     g->setColor(this->frameColor);
-    if(this->bMouseInside && this->bEnabled) this->drawHoverRect(g, hoverRectOffset);
-    if(this->bActive) this->drawHoverRect(g, hoverRectOffset * 2);
+    if(this->bMouseInside && this->bEnabled) this->drawHoverRect(hoverRectOffset);
+    if(this->bActive) this->drawHoverRect(hoverRectOffset * 2);
 
     // draw block
     const int innerBlockPosOffset = std::round(2.0f * dpiScale);

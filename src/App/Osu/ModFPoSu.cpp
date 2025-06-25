@@ -44,8 +44,8 @@ ModFPoSu::ModFPoSu() {
     this->bCrosshairIntersectsScreen = false;
 
     // load resources
-    this->vao = engine->getResourceManager()->createVertexArrayObject();
-    this->vaoCube = engine->getResourceManager()->createVertexArrayObject();
+    this->vao = resourceManager->createVertexArrayObject();
+    this->vaoCube = resourceManager->createVertexArrayObject();
 
     this->hitcircleShader = NULL;
 
@@ -61,7 +61,7 @@ ModFPoSu::ModFPoSu() {
 
 ModFPoSu::~ModFPoSu() { anim->deleteExistingAnimation(&this->fZoomFOVAnimPercent); }
 
-void ModFPoSu::draw(Graphics *g) {
+void ModFPoSu::draw() {
     if(!cv_mod_fposu.getBool()) return;
 
     const float fov = lerp<float>(cv_fposu_fov.getFloat(), cv_fposu_zoom_fov.getFloat(), this->fZoomFOVAnimPercent);
@@ -163,7 +163,7 @@ void ModFPoSu::draw(Graphics *g) {
 
     // finally, draw that to the screen
     g->setBlending(false);
-    { osu->getSliderFrameBuffer()->draw(g, 0, 0); }
+    { osu->getSliderFrameBuffer()->draw(0, 0); }
     g->setBlending(true);
 }
 
@@ -225,7 +225,7 @@ void ModFPoSu::update() {
         // regular mouse position mode
 
         // calculate mouse delta
-        Vector2 rawDelta = engine->getMouse()->getRawDelta() /
+        Vector2 rawDelta = mouse->getRawDelta() /
                            cv_mouse_sensitivity.getFloat();  // HACKHACK: undo engine mouse sensitivity multiplier
 
         // apply fposu mouse sensitivity multiplier
@@ -262,7 +262,7 @@ void ModFPoSu::update() {
         }
     } else {
         // absolute mouse position mode (or auto)
-        Vector2 mousePos = engine->getMouse()->getPos();
+        Vector2 mousePos = mouse->getPos();
         auto beatmap = osu->getSelectedBeatmap();
         if(isAutoCursor && !beatmap->isPaused()) {
             mousePos = beatmap->getCursorPos();
@@ -274,8 +274,8 @@ void ModFPoSu::update() {
 }
 
 void ModFPoSu::noclipMove() {
-    const float noclipSpeed = cv_fposu_noclipspeed.getFloat() * (engine->getKeyboard()->isShiftDown() ? 3.0f : 1.0f) *
-                              (engine->getKeyboard()->isControlDown() ? 0.2f : 1);
+    const float noclipSpeed = cv_fposu_noclipspeed.getFloat() * (keyboard->isShiftDown() ? 3.0f : 1.0f) *
+                              (keyboard->isControlDown() ? 0.2f : 1);
     const float noclipAccelerate = cv_fposu_noclipaccelerate.getFloat();
     const float friction = cv_fposu_noclipfriction.getFloat();
 
@@ -394,9 +394,9 @@ void ModFPoSu::handleZoomedChange() {
 void ModFPoSu::setMousePosCompensated(Vector2 newMousePos) {
     // NOTE: letterboxing uses Mouse::setOffset() to offset the virtual engine cursor coordinate system, so we have to
     // respect that when setting a new (absolute) position
-    newMousePos -= engine->getMouse()->getOffset();
+    newMousePos -= mouse->getOffset();
 
-    engine->getMouse()->onPosChange(newMousePos);
+    mouse->onPosChange(newMousePos);
     env->setMousePos(newMousePos.x, newMousePos.y);
 }
 

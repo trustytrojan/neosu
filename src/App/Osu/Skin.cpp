@@ -93,7 +93,7 @@ Skin::Skin(UString name, std::string filepath, bool isDefaultSkin) {
 
     this->bReady = false;
 
-    if(m_missingTexture == NULL) m_missingTexture = engine->getResourceManager()->getImage("MISSING_TEXTURE");
+    if(m_missingTexture == NULL) m_missingTexture = resourceManager->getImage("MISSING_TEXTURE");
 
     // vars
     this->hitCircle = m_missingTexture;
@@ -334,7 +334,7 @@ Skin::Skin(UString name, std::string filepath, bool isDefaultSkin) {
 Skin::~Skin() {
     for(int i = 0; i < this->resources.size(); i++) {
         if(this->resources[i] != (Resource *)m_missingTexture)
-            engine->getResourceManager()->destroyResource(this->resources[i]);
+            resourceManager->destroyResource(this->resources[i]);
     }
     this->resources.clear();
 
@@ -371,7 +371,7 @@ bool Skin::isReady() {
     if(this->bReady) return true;
 
     for(int i = 0; i < this->resources.size(); i++) {
-        if(engine->getResourceManager()->isLoadingResource(this->resources[i])) return false;
+        if(resourceManager->isLoadingResource(this->resources[i])) return false;
     }
 
     for(int i = 0; i < this->images.size(); i++) {
@@ -438,7 +438,7 @@ void Skin::load() {
         this->checkLoadImage(&this->cursorRipple, "cursor-ripple", "OSU_SKIN_CURSORRIPPLE");
 
         // special case: if fallback to default cursor, do load cursorMiddle
-        if(this->cursor == engine->getResourceManager()->getImage("OSU_SKIN_CURSOR_DEFAULT"))
+        if(this->cursor == resourceManager->getImage("OSU_SKIN_CURSOR_DEFAULT"))
             this->checkLoadImage(&this->cursorMiddle, "cursormiddle", "OSU_SKIN_CURSORMIDDLE");
     }
 
@@ -1051,28 +1051,28 @@ void Skin::load() {
     // HACKHACK: all of the <>2 loads are temporary fixes until I fix the checkLoadImage() function logic
 
     // custom
-    Image *defaultCursor = engine->getResourceManager()->getImage("OSU_SKIN_CURSOR_DEFAULT");
+    Image *defaultCursor = resourceManager->getImage("OSU_SKIN_CURSOR_DEFAULT");
     Image *defaultCursor2 = this->cursor;
     if(defaultCursor != NULL)
         this->defaultCursor = defaultCursor;
     else if(defaultCursor2 != NULL)
         this->defaultCursor = defaultCursor2;
 
-    Image *defaultButtonLeft = engine->getResourceManager()->getImage("OSU_SKIN_BUTTON_LEFT_DEFAULT");
+    Image *defaultButtonLeft = resourceManager->getImage("OSU_SKIN_BUTTON_LEFT_DEFAULT");
     Image *defaultButtonLeft2 = this->buttonLeft;
     if(defaultButtonLeft != NULL)
         this->defaultButtonLeft = defaultButtonLeft;
     else if(defaultButtonLeft2 != NULL)
         this->defaultButtonLeft = defaultButtonLeft2;
 
-    Image *defaultButtonMiddle = engine->getResourceManager()->getImage("OSU_SKIN_BUTTON_MIDDLE_DEFAULT");
+    Image *defaultButtonMiddle = resourceManager->getImage("OSU_SKIN_BUTTON_MIDDLE_DEFAULT");
     Image *defaultButtonMiddle2 = this->buttonMiddle;
     if(defaultButtonMiddle != NULL)
         this->defaultButtonMiddle = defaultButtonMiddle;
     else if(defaultButtonMiddle2 != NULL)
         this->defaultButtonMiddle = defaultButtonMiddle2;
 
-    Image *defaultButtonRight = engine->getResourceManager()->getImage("OSU_SKIN_BUTTON_RIGHT_DEFAULT");
+    Image *defaultButtonRight = resourceManager->getImage("OSU_SKIN_BUTTON_RIGHT_DEFAULT");
     Image *defaultButtonRight2 = this->buttonRight;
     if(defaultButtonRight != NULL)
         this->defaultButtonRight = defaultButtonRight;
@@ -1092,8 +1092,8 @@ void Skin::load() {
     // TODO: is this crashing some users?
     // HACKHACK: speed up initial game startup time by async loading the skin (if osu_skin_async 1 in underride)
     if(osu->getSkin() == NULL && cv_skin_async.getBool()) {
-        while(engine->getResourceManager()->isLoading()) {
-            engine->getResourceManager()->update();
+        while(resourceManager->isLoading()) {
+            resourceManager->update();
             env->sleep(0);
         }
     }
@@ -1306,25 +1306,25 @@ void Skin::playHitCircleSound(int sampleType, float pan, long delta) {
 
     switch(actualSampleSet) {
         case 3:
-            engine->getSound()->play(this->drumHitNormal, pan, pitch);
+            soundEngine->play(this->drumHitNormal, pan, pitch);
 
-            if(sampleType & OSU_BITMASK_HITWHISTLE) engine->getSound()->play(this->drumHitWhistle, pan, pitch);
-            if(sampleType & OSU_BITMASK_HITFINISH) engine->getSound()->play(this->drumHitFinish, pan, pitch);
-            if(sampleType & OSU_BITMASK_HITCLAP) engine->getSound()->play(this->drumHitClap, pan, pitch);
+            if(sampleType & OSU_BITMASK_HITWHISTLE) soundEngine->play(this->drumHitWhistle, pan, pitch);
+            if(sampleType & OSU_BITMASK_HITFINISH) soundEngine->play(this->drumHitFinish, pan, pitch);
+            if(sampleType & OSU_BITMASK_HITCLAP) soundEngine->play(this->drumHitClap, pan, pitch);
             break;
         case 2:
-            engine->getSound()->play(this->softHitNormal, pan, pitch);
+            soundEngine->play(this->softHitNormal, pan, pitch);
 
-            if(sampleType & OSU_BITMASK_HITWHISTLE) engine->getSound()->play(this->softHitWhistle, pan, pitch);
-            if(sampleType & OSU_BITMASK_HITFINISH) engine->getSound()->play(this->softHitFinish, pan, pitch);
-            if(sampleType & OSU_BITMASK_HITCLAP) engine->getSound()->play(this->softHitClap, pan, pitch);
+            if(sampleType & OSU_BITMASK_HITWHISTLE) soundEngine->play(this->softHitWhistle, pan, pitch);
+            if(sampleType & OSU_BITMASK_HITFINISH) soundEngine->play(this->softHitFinish, pan, pitch);
+            if(sampleType & OSU_BITMASK_HITCLAP) soundEngine->play(this->softHitClap, pan, pitch);
             break;
         default:
-            engine->getSound()->play(this->normalHitNormal, pan, pitch);
+            soundEngine->play(this->normalHitNormal, pan, pitch);
 
-            if(sampleType & OSU_BITMASK_HITWHISTLE) engine->getSound()->play(this->normalHitWhistle, pan, pitch);
-            if(sampleType & OSU_BITMASK_HITFINISH) engine->getSound()->play(this->normalHitFinish, pan, pitch);
-            if(sampleType & OSU_BITMASK_HITCLAP) engine->getSound()->play(this->normalHitClap, pan, pitch);
+            if(sampleType & OSU_BITMASK_HITWHISTLE) soundEngine->play(this->normalHitWhistle, pan, pitch);
+            if(sampleType & OSU_BITMASK_HITFINISH) soundEngine->play(this->normalHitFinish, pan, pitch);
+            if(sampleType & OSU_BITMASK_HITCLAP) soundEngine->play(this->normalHitClap, pan, pitch);
             break;
     }
 }
@@ -1341,13 +1341,13 @@ void Skin::playSliderTickSound(float pan) {
 
     switch(this->iSampleSet) {
         case 3:
-            engine->getSound()->play(this->drumSliderTick, pan);
+            soundEngine->play(this->drumSliderTick, pan);
             break;
         case 2:
-            engine->getSound()->play(this->softSliderTick, pan);
+            soundEngine->play(this->softSliderTick, pan);
             break;
         default:
-            engine->getSound()->play(this->normalSliderTick, pan);
+            soundEngine->play(this->normalSliderTick, pan);
             break;
     }
 }
@@ -1362,29 +1362,29 @@ void Skin::playSliderSlideSound(float pan) {
 
     switch(this->iSampleSet) {
         case 3:
-            if(this->softSliderSlide->isPlaying()) engine->getSound()->stop(this->softSliderSlide);
-            if(this->normalSliderSlide->isPlaying()) engine->getSound()->stop(this->normalSliderSlide);
+            if(this->softSliderSlide->isPlaying()) soundEngine->stop(this->softSliderSlide);
+            if(this->normalSliderSlide->isPlaying()) soundEngine->stop(this->normalSliderSlide);
 
             if(!this->drumSliderSlide->isPlaying())
-                engine->getSound()->play(this->drumSliderSlide, pan);
+                soundEngine->play(this->drumSliderSlide, pan);
             else
                 this->drumSliderSlide->setPan(pan);
             break;
         case 2:
-            if(this->drumSliderSlide->isPlaying()) engine->getSound()->stop(this->drumSliderSlide);
-            if(this->normalSliderSlide->isPlaying()) engine->getSound()->stop(this->normalSliderSlide);
+            if(this->drumSliderSlide->isPlaying()) soundEngine->stop(this->drumSliderSlide);
+            if(this->normalSliderSlide->isPlaying()) soundEngine->stop(this->normalSliderSlide);
 
             if(!this->softSliderSlide->isPlaying())
-                engine->getSound()->play(this->softSliderSlide, pan);
+                soundEngine->play(this->softSliderSlide, pan);
             else
                 this->softSliderSlide->setPan(pan);
             break;
         default:
-            if(this->softSliderSlide->isPlaying()) engine->getSound()->stop(this->softSliderSlide);
-            if(this->drumSliderSlide->isPlaying()) engine->getSound()->stop(this->drumSliderSlide);
+            if(this->softSliderSlide->isPlaying()) soundEngine->stop(this->softSliderSlide);
+            if(this->drumSliderSlide->isPlaying()) soundEngine->stop(this->drumSliderSlide);
 
             if(!this->normalSliderSlide->isPlaying())
-                engine->getSound()->play(this->normalSliderSlide, pan);
+                soundEngine->play(this->normalSliderSlide, pan);
             else
                 this->normalSliderSlide->setPan(pan);
             break;
@@ -1393,27 +1393,27 @@ void Skin::playSliderSlideSound(float pan) {
 
 void Skin::playSpinnerSpinSound() {
     if(!this->spinnerSpinSound->isPlaying()) {
-        engine->getSound()->play(this->spinnerSpinSound);
+        soundEngine->play(this->spinnerSpinSound);
     }
 }
 
 void Skin::playSpinnerBonusSound() {
     if(this->iSampleVolume > 0) {
-        engine->getSound()->play(this->spinnerBonus);
+        soundEngine->play(this->spinnerBonus);
     }
 }
 
 void Skin::stopSliderSlideSound(int sampleSet) {
     if((sampleSet == -2 || sampleSet == 3) && this->drumSliderSlide->isPlaying())
-        engine->getSound()->stop(this->drumSliderSlide);
+        soundEngine->stop(this->drumSliderSlide);
     if((sampleSet == -2 || sampleSet == 2) && this->softSliderSlide->isPlaying())
-        engine->getSound()->stop(this->softSliderSlide);
+        soundEngine->stop(this->softSliderSlide);
     if((sampleSet == -2 || sampleSet == 1 || sampleSet == 0) && this->normalSliderSlide->isPlaying())
-        engine->getSound()->stop(this->normalSliderSlide);
+        soundEngine->stop(this->normalSliderSlide);
 }
 
 void Skin::stopSpinnerSpinSound() {
-    if(this->spinnerSpinSound->isPlaying()) engine->getSound()->stop(this->spinnerSpinSound);
+    if(this->spinnerSpinSound->isPlaying()) soundEngine->stop(this->spinnerSpinSound);
 }
 
 void Skin::randomizeFilePath() {
@@ -1474,9 +1474,9 @@ void Skin::checkLoadImage(Image **addressOfPointer, std::string skinElementName,
                 std::string defaultResourceName = resourceName;
                 defaultResourceName.append("_DEFAULT");  // so we don't load the default skin twice
 
-                if(cv_skin_async.getBool()) engine->getResourceManager()->requestNextLoadAsync();
+                if(cv_skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
-                *addressOfPointer = engine->getResourceManager()->loadImageAbs(
+                *addressOfPointer = resourceManager->loadImageAbs(
                     defaultFilePath1, defaultResourceName, cv_skin_mipmaps.getBool() || forceLoadMipmaps);
                 (*addressOfPointer)->is_2x = true;
             } else {
@@ -1485,9 +1485,9 @@ void Skin::checkLoadImage(Image **addressOfPointer, std::string skinElementName,
                     std::string defaultResourceName = resourceName;
                     defaultResourceName.append("_DEFAULT");  // so we don't load the default skin twice
 
-                    if(cv_skin_async.getBool()) engine->getResourceManager()->requestNextLoadAsync();
+                    if(cv_skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
-                    *addressOfPointer = engine->getResourceManager()->loadImageAbs(
+                    *addressOfPointer = resourceManager->loadImageAbs(
                         defaultFilePath2, defaultResourceName, cv_skin_mipmaps.getBool() || forceLoadMipmaps);
                     (*addressOfPointer)->is_2x = false;
                 }
@@ -1496,9 +1496,9 @@ void Skin::checkLoadImage(Image **addressOfPointer, std::string skinElementName,
 
         // load user skin
         if(existsFilepath1) {
-            if(cv_skin_async.getBool()) engine->getResourceManager()->requestNextLoadAsync();
+            if(cv_skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
-            *addressOfPointer = engine->getResourceManager()->loadImageAbs(
+            *addressOfPointer = resourceManager->loadImageAbs(
                 filepath1, "", cv_skin_mipmaps.getBool() || forceLoadMipmaps);
             (*addressOfPointer)->is_2x = true;
             this->resources.push_back(*addressOfPointer);
@@ -1524,9 +1524,9 @@ void Skin::checkLoadImage(Image **addressOfPointer, std::string skinElementName,
             std::string defaultResourceName = resourceName;
             defaultResourceName.append("_DEFAULT");  // so we don't load the default skin twice
 
-            if(cv_skin_async.getBool()) engine->getResourceManager()->requestNextLoadAsync();
+            if(cv_skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
-            *addressOfPointer = engine->getResourceManager()->loadImageAbs(
+            *addressOfPointer = resourceManager->loadImageAbs(
                 defaultFilePath2, defaultResourceName, cv_skin_mipmaps.getBool() || forceLoadMipmaps);
             (*addressOfPointer)->is_2x = false;
         }
@@ -1534,10 +1534,10 @@ void Skin::checkLoadImage(Image **addressOfPointer, std::string skinElementName,
 
     // load user skin
     if(existsFilepath2) {
-        if(cv_skin_async.getBool()) engine->getResourceManager()->requestNextLoadAsync();
+        if(cv_skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
         *addressOfPointer =
-            engine->getResourceManager()->loadImageAbs(filepath2, "", cv_skin_mipmaps.getBool() || forceLoadMipmaps);
+            resourceManager->loadImageAbs(filepath2, "", cv_skin_mipmaps.getBool() || forceLoadMipmaps);
         (*addressOfPointer)->is_2x = false;
         this->resources.push_back(*addressOfPointer);
     }
@@ -1575,9 +1575,9 @@ void Skin::checkLoadSound(Sound **addressOfPointer, std::string skinElementName,
 
             if(env->fileExists(path)) {
                 if(cv_skin_async.getBool()) {
-                    engine->getResourceManager()->requestNextLoadAsync();
+                    resourceManager->requestNextLoadAsync();
                 }
-                return engine->getResourceManager()->loadSoundAbs(path, resource_name, !isSample, isOverlayable, loop);
+                return resourceManager->loadSoundAbs(path, resource_name, !isSample, isOverlayable, loop);
             }
         }
 

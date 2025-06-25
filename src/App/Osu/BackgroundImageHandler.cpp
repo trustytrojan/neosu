@@ -9,8 +9,8 @@ BackgroundImageHandler::BackgroundImageHandler() { this->bFrozen = false; }
 
 BackgroundImageHandler::~BackgroundImageHandler() {
     for(size_t i = 0; i < this->cache.size(); i++) {
-        engine->getResourceManager()->destroyResource(this->cache[i].backgroundImagePathLoader);
-        engine->getResourceManager()->destroyResource(this->cache[i].image);
+        resourceManager->destroyResource(this->cache[i].backgroundImagePathLoader);
+        resourceManager->destroyResource(this->cache[i].image);
     }
     this->cache.clear();
 }
@@ -31,8 +31,8 @@ void BackgroundImageHandler::update(bool allowEviction) {
                     if(entry.backgroundImagePathLoader != NULL) entry.backgroundImagePathLoader->interruptLoad();
                     if(entry.image != NULL) entry.image->interruptLoad();
 
-                    engine->getResourceManager()->destroyResource(entry.backgroundImagePathLoader);
-                    engine->getResourceManager()->destroyResource(entry.image);
+                    resourceManager->destroyResource(entry.backgroundImagePathLoader);
+                    resourceManager->destroyResource(entry.image);
 
                     this->cache.erase(this->cache.begin() + i);
                     i--;
@@ -71,7 +71,7 @@ void BackgroundImageHandler::update(bool allowEviction) {
                         this->handleLoadImageForEntry(entry);
                     }
 
-                    engine->getResourceManager()->destroyResource(entry.backgroundImagePathLoader);
+                    resourceManager->destroyResource(entry.backgroundImagePathLoader);
                     entry.backgroundImagePathLoader = NULL;
                 }
             }
@@ -89,8 +89,8 @@ void BackgroundImageHandler::handleLoadPathForEntry(ENTRY &entry) {
     entry.backgroundImagePathLoader = new DatabaseBeatmapBackgroundImagePathLoader(entry.osuFilePath);
 
     // start path load
-    engine->getResourceManager()->requestNextLoadAsync();
-    engine->getResourceManager()->loadResource(entry.backgroundImagePathLoader);
+    resourceManager->requestNextLoadAsync();
+    resourceManager->loadResource(entry.backgroundImagePathLoader);
 }
 
 void BackgroundImageHandler::handleLoadImageForEntry(ENTRY &entry) {
@@ -98,9 +98,9 @@ void BackgroundImageHandler::handleLoadImageForEntry(ENTRY &entry) {
     fullBackgroundImageFilePath.append(entry.backgroundImageFileName);
 
     // start image load
-    engine->getResourceManager()->requestNextLoadAsync();
-    engine->getResourceManager()->requestNextLoadUnmanaged();
-    entry.image = engine->getResourceManager()->loadImageAbsUnnamed(fullBackgroundImageFilePath);
+    resourceManager->requestNextLoadAsync();
+    resourceManager->requestNextLoadUnmanaged();
+    entry.image = resourceManager->loadImageAbsUnnamed(fullBackgroundImageFilePath);
 }
 
 Image *BackgroundImageHandler::getLoadBackgroundImage(const DatabaseBeatmap *beatmap) {

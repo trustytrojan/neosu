@@ -13,14 +13,14 @@
 
 using namespace std;
 
-void HitObject::drawHitResult(Graphics *g, Beatmap *beatmap, Vector2 rawPos, LiveScore::HIT result,
-                              float animPercentInv, float hitDeltaRangePercent) {
-    drawHitResult(g, beatmap->getSkin(), beatmap->fHitcircleDiameter, beatmap->fRawHitcircleDiameter, rawPos,
-                  result, animPercentInv, hitDeltaRangePercent);
+void HitObject::drawHitResult(Beatmap *beatmap, Vector2 rawPos, LiveScore::HIT result, float animPercentInv,
+                              float hitDeltaRangePercent) {
+    drawHitResult(beatmap->getSkin(), beatmap->fHitcircleDiameter, beatmap->fRawHitcircleDiameter, rawPos, result,
+                  animPercentInv, hitDeltaRangePercent);
 }
 
-void HitObject::drawHitResult(Graphics *g, Skin *skin, float hitcircleDiameter, float rawHitcircleDiameter,
-                              Vector2 rawPos, LiveScore::HIT result, float animPercentInv, float hitDeltaRangePercent) {
+void HitObject::drawHitResult(Skin *skin, float hitcircleDiameter, float rawHitcircleDiameter, Vector2 rawPos,
+                              LiveScore::HIT result, float animPercentInv, float hitDeltaRangePercent) {
     if(animPercentInv <= 0.0f) return;
 
     const float animPercent = 1.0f - animPercentInv;
@@ -170,47 +170,43 @@ void HitObject::drawHitResult(Graphics *g, Skin *skin, float hitcircleDiameter, 
                 // TODO: rotation anim (only for all non-animated skins), rot = rng(-0.15f, 0.15f), anim1 = 120 ms to
                 // rot, anim2 = rest to rot*2, all ease in
 
-                skin->getHit0()->drawRaw(
-                    g, rawPos + downAnim,
-                    (doScaleOrRotateAnim ? missScale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
+                skin->getHit0()->drawRaw(rawPos + downAnim, (doScaleOrRotateAnim ? missScale : 1.0f) * hitImageScale *
+                                                                cv_hitresult_scale.getFloat());
             } break;
 
             case LiveScore::HIT::HIT_50:
                 skin->getHit50()->drawRaw(
-                    g, rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
+                    rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
                 break;
 
             case LiveScore::HIT::HIT_100:
                 skin->getHit100()->drawRaw(
-                    g, rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
+                    rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
                 break;
 
             case LiveScore::HIT::HIT_300:
                 if(cv_hitresult_draw_300s.getBool()) {
                     skin->getHit300()->drawRaw(
-                        g, rawPos,
-                        (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
+                        rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
                 }
                 break;
 
             case LiveScore::HIT::HIT_100K:
                 skin->getHit100k()->drawRaw(
-                    g, rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
+                    rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
                 break;
 
             case LiveScore::HIT::HIT_300K:
                 if(cv_hitresult_draw_300s.getBool()) {
                     skin->getHit300k()->drawRaw(
-                        g, rawPos,
-                        (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
+                        rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
                 }
                 break;
 
             case LiveScore::HIT::HIT_300G:
                 if(cv_hitresult_draw_300s.getBool()) {
                     skin->getHit300g()->drawRaw(
-                        g, rawPos,
-                        (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
+                        rawPos, (doScaleOrRotateAnim ? scale : 1.0f) * hitImageScale * cv_hitresult_scale.getFloat());
                 }
                 break;
 
@@ -258,12 +254,12 @@ HitObject::HitObject(long time, int sampleType, int comboNumber, bool isEndOfCom
     this->bm = dynamic_cast<Beatmap *>(beatmap);  // should be NULL if SimulatedBeatmap
 }
 
-void HitObject::draw2(Graphics *g) {
-    this->drawHitResultAnim(g, this->hitresultanim1);
-    this->drawHitResultAnim(g, this->hitresultanim2);
+void HitObject::draw2() {
+    this->drawHitResultAnim(this->hitresultanim1);
+    this->drawHitResultAnim(this->hitresultanim2);
 }
 
-void HitObject::drawHitResultAnim(Graphics *g, const HITRESULTANIM &hitresultanim) {
+void HitObject::drawHitResultAnim(const HITRESULTANIM &hitresultanim) {
     if((hitresultanim.time - cv_hitresult_duration.getFloat()) <
            engine->getTime()  // NOTE: this is written like that on purpose, don't change it ("future" results can be
                               // scheduled with it, e.g. for slider end)
@@ -272,7 +268,8 @@ void HitObject::drawHitResultAnim(Graphics *g, const HITRESULTANIM &hitresultani
         Skin *skin = this->bm->getSkin();
         {
             const long skinAnimationTimeStartOffset =
-                this->click_time + (hitresultanim.addObjectDurationToSkinAnimationTimeStartOffset ? this->duration : 0) +
+                this->click_time +
+                (hitresultanim.addObjectDurationToSkinAnimationTimeStartOffset ? this->duration : 0) +
                 hitresultanim.delta;
 
             skin->getHit0()->setAnimationTimeOffset(skin->getAnimationSpeed(), skinAnimationTimeStartOffset);
@@ -294,7 +291,8 @@ void HitObject::drawHitResultAnim(Graphics *g, const HITRESULTANIM &hitresultani
                 1.0f - (((engine->getTime() - hitresultanim.time) * osu->getAnimationSpeedMultiplier()) /
                         cv_hitresult_duration.getFloat());
 
-            drawHitResult(g, this->bm, this->bm->osuCoords2Pixels(hitresultanim.rawPos), hitresultanim.result, animPercentInv,
+            drawHitResult(this->bm, this->bm->osuCoords2Pixels(hitresultanim.rawPos), hitresultanim.result,
+                          animPercentInv,
                           clamp<float>((float)hitresultanim.delta / this->bi->getHitWindow50(), -1.0f, 1.0f));
         }
     }
@@ -308,7 +306,7 @@ void HitObject::update(long curPos, f64 frame_time) {
 
     double animationSpeedMultipler = mods.speed / osu->getAnimationSpeedMultiplier();
     this->iApproachTime = (this->bUseFadeInTimeAsApproachTime ? (GameRules::getFadeInTime() * animationSpeedMultipler)
-                                                      : (long)this->bi->getApproachTime());
+                                                              : (long)this->bi->getApproachTime());
     this->iFadeInTime = GameRules::getFadeInTime() * animationSpeedMultipler;
 
     this->iDelta = this->click_time - curPos;
@@ -369,16 +367,18 @@ void HitObject::update(long curPos, f64 frame_time) {
                 // NOTE: some of the easing functions will overflow/underflow, don't clamp and instead allow it on
                 // purpose
             }
-            this->fApproachScale = 1 + lerp<float>(cv_mod_approach_different_initial_size.getFloat() - 1.0f, 0.0f, time);
+            this->fApproachScale =
+                1 + lerp<float>(cv_mod_approach_different_initial_size.getFloat() - 1.0f, 0.0f, time);
         }
 
         // hitobject body fadein
         const long fadeInStart = this->click_time - this->iApproachTime;
-        const long fadeInEnd = min(
-            this->click_time,
-            this->click_time - this->iApproachTime + this->iFadeInTime);  // min() ensures that the fade always finishes at click_time
+        const long fadeInEnd = min(this->click_time,
+                                   this->click_time - this->iApproachTime +
+                                       this->iFadeInTime);  // min() ensures that the fade always finishes at click_time
                                                             // (even if the fadeintime is longer than the approachtime)
-        this->fAlpha = clamp<float>(1.0f - ((float)(fadeInEnd - curPos) / (float)(fadeInEnd - fadeInStart)), 0.0f, 1.0f);
+        this->fAlpha =
+            clamp<float>(1.0f - ((float)(fadeInEnd - curPos) / (float)(fadeInEnd - fadeInStart)), 0.0f, 1.0f);
         this->fAlphaWithoutHidden = this->fAlpha;
 
         if(mods.flags & Replay::ModFlags::Hidden) {
@@ -402,10 +402,10 @@ void HitObject::update(long curPos, f64 frame_time) {
 
         // approach circle fadein (doubled fadeintime)
         const long approachCircleFadeStart = this->click_time - this->iApproachTime;
-        const long approachCircleFadeEnd =
-            min(this->click_time, this->click_time - this->iApproachTime +
-                                2 * this->iFadeInTime);  // min() ensures that the fade always finishes at click_time (even
-                                                     // if the fadeintime is longer than the approachtime)
+        const long approachCircleFadeEnd = min(
+            this->click_time, this->click_time - this->iApproachTime +
+                                  2 * this->iFadeInTime);  // min() ensures that the fade always finishes at click_time
+                                                           // (even if the fadeintime is longer than the approachtime)
         this->fAlphaForApproachCircle = clamp<float>(
             1.0f - ((float)(approachCircleFadeEnd - curPos) / (float)(approachCircleFadeEnd - approachCircleFadeStart)),
             0.0f, 1.0f);
@@ -452,8 +452,8 @@ void HitObject::addHitResult(LiveScore::HIT result, long delta, bool isEndOfComb
         osu->getHUD()->addTarget(targetDelta, targetAngle);
     }
 
-    const LiveScore::HIT returnedHit = this->bi->addHitResult(this, result, delta, isEndOfCombo, ignoreOnHitErrorBar, false,
-                                                        ignoreCombo, false, ignoreHealth);
+    const LiveScore::HIT returnedHit = this->bi->addHitResult(this, result, delta, isEndOfCombo, ignoreOnHitErrorBar,
+                                                              false, ignoreCombo, false, ignoreHealth);
     if(this->bm == NULL) return;
 
     HITRESULTANIM hitresultanim;

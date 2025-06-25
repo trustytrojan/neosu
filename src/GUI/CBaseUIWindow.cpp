@@ -24,7 +24,7 @@ CBaseUIWindow::CBaseUIWindow(float xPos, float yPos, float xSize, float ySize, U
     // titlebar
     this->bDrawTitleBarLine = true;
     this->titleFont =
-        engine->getResourceManager()->loadFont("weblysleekuisb.ttf", "FONT_WINDOW_TITLE", 13.0f, true, env->getDPI());
+        resourceManager->loadFont("weblysleekuisb.ttf", "FONT_WINDOW_TITLE", 13.0f, true, env->getDPI());
     this->iTitleBarHeight = this->titleFont->getHeight() + 12 * dpiScale;
     if(this->iTitleBarHeight < titleBarButtonSize) this->iTitleBarHeight = titleBarButtonSize + 4 * dpiScale;
 
@@ -79,7 +79,7 @@ CBaseUIWindow::CBaseUIWindow(float xPos, float yPos, float xSize, float ySize, U
     this->bRoundedRectangle = false;
 
     // test features
-    // m_rt = engine->getResourceManager()->createRenderTarget(this->vPos.x, this->vPos.y, this->vSize.x+1,
+    // m_rt = resourceManager->createRenderTarget(this->vPos.x, this->vPos.y, this->vSize.x+1,
     // this->vSize.y+1); float shadowRadius = ui_window_shadow_radius.getInt();
     /// m_shadow = new CBaseUIBoxShadow(0xff000000, shadowRadius, this->vPos.x-shadowRadius, this->vPos.y-shadowRadius,
     /// m_vSize.x+shadowRadius*2, this->vSize.y+shadowRadius*2+4, "windowshadow");
@@ -99,24 +99,24 @@ CBaseUIWindow::~CBaseUIWindow() {
     SAFE_DELETE(this->titleBarContainer);
 }
 
-void CBaseUIWindow::draw(Graphics *g) {
+void CBaseUIWindow::draw() {
     if(!this->bVisible) return;
 
     // TODO: structure
     /*
     if (!anim->isAnimating(&m_fAnimation))
-            m_shadow->draw(g);
+            m_shadow->draw();
     else
     {
             m_shadow->setColor(COLOR((int)((this->fAnimation)*255.0f), 255, 255, 255));
 
             // HACKHACK: shadows can't render inside a 3DScene
-            m_shadow->renderOffscreen(g);
+            m_shadow->renderOffscreen();
 
             g->push3DScene(McRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y));
                     g->rotate3DScene(0, (this->bAnimIn ? -1 : 1) * (1-m_fAnimation)*10, 0);
                     g->translate3DScene(0, 0, -(1-m_fAnimation)*100);
-                    m_shadow->draw(g);
+                    m_shadow->draw();
             g->pop3DScene();
     }
     */
@@ -154,8 +154,8 @@ void CBaseUIWindow::draw(Graphics *g) {
             // draw main container
             g->pushClipRect(McRect(this->vPos.x + 1, this->vPos.y + 2, this->vSize.x - 1, this->vSize.y - 1));
             {
-                this->container->draw(g);
-                this->drawCustomContent(g);
+                this->container->draw();
+                this->drawCustomContent();
             }
             g->popClipRect();
 
@@ -184,7 +184,7 @@ void CBaseUIWindow::draw(Graphics *g) {
 
             // draw title bar container
             g->pushClipRect(McRect(this->vPos.x + 1, this->vPos.y + 2, this->vSize.x - 1, this->iTitleBarHeight));
-            { this->titleBarContainer->draw(g); }
+            { this->titleBarContainer->draw(); }
             g->popClipRect();
 
             // draw close button 'x'
@@ -219,7 +219,7 @@ void CBaseUIWindow::draw(Graphics *g) {
         g->push3DScene(McRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y));
                 g->rotate3DScene((this->bAnimIn ? -1 : 1) * (1-m_fAnimation)*10, 0, 0);
                 g->translate3DScene(0, 0, -(1-m_fAnimation)*100);
-                m_rt->draw(g, this->vPos.x, this->vPos.y);
+                m_rt->draw(this->vPos.x, this->vPos.y);
         g->pop3DScene();
         */
     }
@@ -241,82 +241,82 @@ void CBaseUIWindow::mouse_update(bool *propagate_clicks) {
     this->container->mouse_update(propagate_clicks);
 
     // moving
-    if(this->bMoving) this->setPos(this->vLastPos + (engine->getMouse()->getPos() - this->vMousePosBackup));
+    if(this->bMoving) this->setPos(this->vLastPos + (mouse->getPos() - this->vMousePosBackup));
 
     // resizing
     if(this->bResizing) {
         switch(this->iResizeType) {
             case 1:
-                this->setPos(clamp<float>(this->vLastPos.x + (engine->getMouse()->getPos().x - this->vMousePosBackup.x),
+                this->setPos(clamp<float>(this->vLastPos.x + (mouse->getPos().x - this->vMousePosBackup.x),
                                           -this->vSize.x, this->vLastPos.x + this->vLastSize.x - this->vResizeLimit.x),
-                             clamp<float>(this->vLastPos.y + (engine->getMouse()->getPos().y - this->vMousePosBackup.y),
+                             clamp<float>(this->vLastPos.y + (mouse->getPos().y - this->vMousePosBackup.y),
                                           -this->vSize.y, this->vLastPos.y + this->vLastSize.y - this->vResizeLimit.y));
                 this->setSize(
-                    clamp<float>(this->vLastSize.x + (this->vMousePosBackup.x - engine->getMouse()->getPos().x),
+                    clamp<float>(this->vLastSize.x + (this->vMousePosBackup.x - mouse->getPos().x),
                                  this->vResizeLimit.x, engine->getScreenWidth()),
-                    clamp<float>(this->vLastSize.y + (this->vMousePosBackup.y - engine->getMouse()->getPos().y),
+                    clamp<float>(this->vLastSize.y + (this->vMousePosBackup.y - mouse->getPos().y),
                                  this->vResizeLimit.y, engine->getScreenHeight()));
                 break;
 
             case 2:
                 this->setPosX(
-                    clamp<float>(this->vLastPos.x + (engine->getMouse()->getPos().x - this->vMousePosBackup.x),
+                    clamp<float>(this->vLastPos.x + (mouse->getPos().x - this->vMousePosBackup.x),
                                  -this->vSize.x, this->vLastPos.x + this->vLastSize.x - this->vResizeLimit.x));
                 this->setSizeX(
-                    clamp<float>(this->vLastSize.x + (this->vMousePosBackup.x - engine->getMouse()->getPos().x),
+                    clamp<float>(this->vLastSize.x + (this->vMousePosBackup.x - mouse->getPos().x),
                                  this->vResizeLimit.x, engine->getScreenWidth()));
                 break;
 
             case 3:
                 this->setPosX(
-                    clamp<float>(this->vLastPos.x + (engine->getMouse()->getPos().x - this->vMousePosBackup.x),
+                    clamp<float>(this->vLastPos.x + (mouse->getPos().x - this->vMousePosBackup.x),
                                  -this->vSize.x, this->vLastPos.x + this->vLastSize.x - this->vResizeLimit.x));
                 this->setSizeX(
-                    clamp<float>(this->vLastSize.x + (this->vMousePosBackup.x - engine->getMouse()->getPos().x),
+                    clamp<float>(this->vLastSize.x + (this->vMousePosBackup.x - mouse->getPos().x),
                                  this->vResizeLimit.x, engine->getScreenWidth()));
                 this->setSizeY(
-                    clamp<float>(this->vLastSize.y + (engine->getMouse()->getPos().y - this->vMousePosBackup.y),
+                    clamp<float>(this->vLastSize.y + (mouse->getPos().y - this->vMousePosBackup.y),
                                  this->vResizeLimit.y, engine->getScreenHeight()));
                 break;
 
             case 4:
                 this->setSizeY(
-                    clamp<float>(this->vLastSize.y + (engine->getMouse()->getPos().y - this->vMousePosBackup.y),
+                    clamp<float>(this->vLastSize.y + (mouse->getPos().y - this->vMousePosBackup.y),
                                  this->vResizeLimit.y, engine->getScreenHeight()));
                 break;
 
             case 5:
                 this->setSize(
-                    clamp<float>(this->vLastSize.x + (engine->getMouse()->getPos().x - this->vMousePosBackup.x),
+                    clamp<float>(this->vLastSize.x + (mouse->getPos().x - this->vMousePosBackup.x),
                                  this->vResizeLimit.x, engine->getScreenWidth()),
-                    clamp<float>(this->vLastSize.y + (engine->getMouse()->getPos().y - this->vMousePosBackup.y),
+                    clamp<float>(this->vLastSize.y + (mouse->getPos().y - this->vMousePosBackup.y),
                                  this->vResizeLimit.y, engine->getScreenHeight()));
                 break;
 
             case 6:
                 this->setSizeX(
-                    clamp<float>(this->vLastSize.x + (engine->getMouse()->getPos().x - this->vMousePosBackup.x),
+                    clamp<float>(this->vLastSize.x + (mouse->getPos().x - this->vMousePosBackup.x),
                                  this->vResizeLimit.x, engine->getScreenWidth()));
                 break;
 
             case 7:
                 this->setPosY(
-                    clamp<float>(this->vLastPos.y + (engine->getMouse()->getPos().y - this->vMousePosBackup.y),
+                    clamp<float>(this->vLastPos.y + (mouse->getPos().y - this->vMousePosBackup.y),
                                  -this->vSize.y, this->vLastPos.y + this->vLastSize.y - this->vResizeLimit.y));
                 this->setSizeY(
-                    clamp<float>(this->vLastSize.y + (this->vMousePosBackup.y - engine->getMouse()->getPos().y),
+                    clamp<float>(this->vLastSize.y + (this->vMousePosBackup.y - mouse->getPos().y),
                                  this->vResizeLimit.y, engine->getScreenHeight()));
                 this->setSizeX(
-                    clamp<float>(this->vLastSize.x + (engine->getMouse()->getPos().x - this->vMousePosBackup.x),
+                    clamp<float>(this->vLastSize.x + (mouse->getPos().x - this->vMousePosBackup.x),
                                  this->vResizeLimit.x, engine->getScreenWidth()));
                 break;
 
             case 8:
                 this->setPosY(
-                    clamp<float>(this->vLastPos.y + (engine->getMouse()->getPos().y - this->vMousePosBackup.y),
+                    clamp<float>(this->vLastPos.y + (mouse->getPos().y - this->vMousePosBackup.y),
                                  -this->vSize.y, this->vLastPos.y + this->vLastSize.y - this->vResizeLimit.y));
                 this->setSizeY(
-                    clamp<float>(this->vLastSize.y + (this->vMousePosBackup.y - engine->getMouse()->getPos().y),
+                    clamp<float>(this->vLastSize.y + (this->vMousePosBackup.y - mouse->getPos().y),
                                  this->vResizeLimit.y, engine->getScreenHeight()));
                 break;
         }
@@ -345,14 +345,14 @@ CBaseUIWindow *CBaseUIWindow::setTitle(UString text) {
 }
 
 void CBaseUIWindow::updateWindowLogic() {
-    if(!engine->getMouse()->isLeftDown()) {
+    if(!mouse->isLeftDown()) {
         this->bMoving = false;
         this->bResizing = false;
     }
 
     // handle resize & move cursor
     if(!this->titleBarContainer->isBusy() && !this->container->isBusy() && !this->bResizing && !this->bMoving) {
-        if(!engine->getMouse()->isLeftDown()) this->udpateResizeAndMoveLogic(false);
+        if(!mouse->isLeftDown()) this->udpateResizeAndMoveLogic(false);
     }
 }
 
@@ -361,7 +361,7 @@ void CBaseUIWindow::udpateResizeAndMoveLogic(bool captureMouse) {
 
     // backup
     this->vLastSize = this->vSize;
-    this->vMousePosBackup = engine->getMouse()->getPos();
+    this->vMousePosBackup = mouse->getPos();
     this->vLastPos = this->vPos;
 
     if(this->bResizeable) {
@@ -387,35 +387,35 @@ void CBaseUIWindow::udpateResizeAndMoveLogic(bool captureMouse) {
         if(resizeTopLeft.contains(this->vMousePosBackup)) {
             if(captureMouse) this->iResizeType = 1;
 
-            engine->getMouse()->setCursorType(CURSORTYPE::CURSOR_SIZE_VH);
+            mouse->setCursorType(CURSORTYPE::CURSOR_SIZE_VH);
         } else if(resizeBottomLeft.contains(this->vMousePosBackup)) {
             if(captureMouse) this->iResizeType = 3;
 
-            engine->getMouse()->setCursorType(CURSORTYPE::CURSOR_SIZE_HV);
+            mouse->setCursorType(CURSORTYPE::CURSOR_SIZE_HV);
         } else if(resizeBottomRight.contains(this->vMousePosBackup)) {
             if(captureMouse) this->iResizeType = 5;
 
-            engine->getMouse()->setCursorType(CURSORTYPE::CURSOR_SIZE_VH);
+            mouse->setCursorType(CURSORTYPE::CURSOR_SIZE_VH);
         } else if(resizeTopRight.contains(this->vMousePosBackup)) {
             if(captureMouse) this->iResizeType = 7;
 
-            engine->getMouse()->setCursorType(CURSORTYPE::CURSOR_SIZE_HV);
+            mouse->setCursorType(CURSORTYPE::CURSOR_SIZE_HV);
         } else if(resizeLeft.contains(this->vMousePosBackup)) {
             if(captureMouse) this->iResizeType = 2;
 
-            engine->getMouse()->setCursorType(CURSORTYPE::CURSOR_SIZE_H);
+            mouse->setCursorType(CURSORTYPE::CURSOR_SIZE_H);
         } else if(resizeRight.contains(this->vMousePosBackup)) {
             if(captureMouse) this->iResizeType = 6;
 
-            engine->getMouse()->setCursorType(CURSORTYPE::CURSOR_SIZE_H);
+            mouse->setCursorType(CURSORTYPE::CURSOR_SIZE_H);
         } else if(resizeBottom.contains(this->vMousePosBackup)) {
             if(captureMouse) this->iResizeType = 4;
 
-            engine->getMouse()->setCursorType(CURSORTYPE::CURSOR_SIZE_V);
+            mouse->setCursorType(CURSORTYPE::CURSOR_SIZE_V);
         } else if(resizeTop.contains(this->vMousePosBackup)) {
             if(captureMouse) this->iResizeType = 8;
 
-            engine->getMouse()->setCursorType(CURSORTYPE::CURSOR_SIZE_V);
+            mouse->setCursorType(CURSORTYPE::CURSOR_SIZE_V);
         }
     }
 

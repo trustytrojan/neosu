@@ -109,7 +109,7 @@ void disconnect() {
     bancho.fellow_spectators.clear();
     bancho.server_icon_url = "";
     if(bancho.server_icon != NULL) {
-        engine->getResourceManager()->destroyResource(bancho.server_icon);
+        resourceManager->destroyResource(bancho.server_icon);
         bancho.server_icon = NULL;
     }
 

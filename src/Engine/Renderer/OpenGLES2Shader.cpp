@@ -152,7 +152,7 @@ int OpenGLES2Shader::getAttribLocation(UString name) {
 bool OpenGLES2Shader::isActive() {
     int currentProgram = 0;
     glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
-    return (this->bReady && currentProgram == m_iProgram);
+    return (m_bReady && currentProgram == m_iProgram);
 }
 
 bool OpenGLES2Shader::compile(std::string vertexShader, std::string fragmentShader, bool source) {

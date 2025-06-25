@@ -33,7 +33,7 @@ ToastElement::ToastElement(UString text, Color borderColor_arg) : CBaseUIButton(
     this->borderColor = borderColor_arg;
     this->creationTime = engine->getTime();
 
-    const auto font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    const auto font = resourceManager->getFont("FONT_DEFAULT");
     this->lines = font->wrap(text, TOAST_WIDTH - TOAST_INNER_X_MARGIN * 2.0);
     this->setSize(TOAST_WIDTH, (font->getHeight() * 1.5 * this->lines.size()) + (TOAST_INNER_Y_MARGIN * 2.0));
 }
@@ -45,8 +45,8 @@ void ToastElement::onClicked() {
     CBaseUIButton::onClicked();
 }
 
-void ToastElement::draw(Graphics *g) {
-    const auto font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+void ToastElement::draw() {
+    const auto font = resourceManager->getFont("FONT_DEFAULT");
 
     // background
     g->setColor(this->isMouseInside() ? 0xff222222 : 0xff111111);
@@ -101,9 +101,9 @@ void NotificationOverlay::mouse_update(bool *propagate_clicks) {
     }
 }
 
-void NotificationOverlay::draw(Graphics *g) {
+void NotificationOverlay::draw() {
     for(auto t : this->toasts) {
-        t->draw(g);
+        t->draw();
     }
 
     if(!this->isVisible()) return;
@@ -114,13 +114,13 @@ void NotificationOverlay::draw(Graphics *g) {
         g->fillRect(0, 0, osu->getScreenWidth(), osu->getScreenHeight());
     }
 
-    this->drawNotificationBackground(g, this->notification2);
-    this->drawNotificationBackground(g, this->notification1);
-    this->drawNotificationText(g, this->notification2);
-    this->drawNotificationText(g, this->notification1);
+    this->drawNotificationBackground(this->notification2);
+    this->drawNotificationBackground(this->notification1);
+    this->drawNotificationText(this->notification2);
+    this->drawNotificationText(this->notification1);
 }
 
-void NotificationOverlay::drawNotificationText(Graphics *g, NotificationOverlay::NOTIFICATION &n) {
+void NotificationOverlay::drawNotificationText(NotificationOverlay::NOTIFICATION &n) {
     McFont *font = osu->getSubTitleFont();
     int height = font->getHeight() * 2;
     int stringWidth = font->getStringWidth(n.text);
@@ -141,7 +141,7 @@ void NotificationOverlay::drawNotificationText(Graphics *g, NotificationOverlay:
     g->popTransform();
 }
 
-void NotificationOverlay::drawNotificationBackground(Graphics *g, NotificationOverlay::NOTIFICATION &n) {
+void NotificationOverlay::drawNotificationBackground(NotificationOverlay::NOTIFICATION &n) {
     McFont *font = osu->getSubTitleFont();
     int height = font->getHeight() * 2 * n.backgroundAnim;
 

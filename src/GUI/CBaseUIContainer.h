@@ -9,8 +9,8 @@ class CBaseUIContainer : public CBaseUIElement {
     void clear();
     void empty();
 
-    void draw_debug(Graphics *g);
-    void draw(Graphics *g) override;
+    void draw_debug();
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
     void onKeyUp(KeyboardEvent &e) override;

@@ -404,7 +404,7 @@ Changelog::Changelog() : ScreenBackable() {
                public:
                 CustomCBaseUILabel(UString text) : CBaseUIButton(0, 0, 0, 0, "", text) { ; }
 
-                void draw(Graphics *g) override {
+                void draw() override {
                     if(this->bVisible && this->isMouseInside()) {
                         g->setColor(0x3fffffff);
 

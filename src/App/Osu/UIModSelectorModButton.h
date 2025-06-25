@@ -8,7 +8,7 @@ class UIModSelectorModButton : public CBaseUIButton {
    public:
     UIModSelectorModButton(ModSelector *osuModSelector, float xPos, float yPos, float xSize, float ySize, UString name);
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
     void onClicked() override;
 

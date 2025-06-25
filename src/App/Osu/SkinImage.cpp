@@ -115,9 +115,9 @@ bool SkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin) {
         if(existsFilepath1) {
             IMAGE image;
 
-            if(cv_skin_async.getBool()) engine->getResourceManager()->requestNextLoadAsync();
+            if(cv_skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
-            image.img = engine->getResourceManager()->loadImageAbsUnnamed(filepath1, cv_skin_mipmaps.getBool());
+            image.img = resourceManager->loadImageAbsUnnamed(filepath1, cv_skin_mipmaps.getBool());
             image.scale = 2.0f;
 
             this->images.push_back(image);
@@ -140,9 +140,9 @@ bool SkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin) {
     if(existsFilepath2) {
         IMAGE image;
 
-        if(cv_skin_async.getBool()) engine->getResourceManager()->requestNextLoadAsync();
+        if(cv_skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
-        image.img = engine->getResourceManager()->loadImageAbsUnnamed(filepath2, cv_skin_mipmaps.getBool());
+        image.img = resourceManager->loadImageAbsUnnamed(filepath2, cv_skin_mipmaps.getBool());
         image.scale = 1.0f;
 
         this->images.push_back(image);
@@ -169,9 +169,9 @@ bool SkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin) {
         if(existsDefaultFilePath1) {
             IMAGE image;
 
-            if(cv_skin_async.getBool()) engine->getResourceManager()->requestNextLoadAsync();
+            if(cv_skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
-            image.img = engine->getResourceManager()->loadImageAbsUnnamed(defaultFilePath1, cv_skin_mipmaps.getBool());
+            image.img = resourceManager->loadImageAbsUnnamed(defaultFilePath1, cv_skin_mipmaps.getBool());
             image.scale = 2.0f;
 
             this->images.push_back(image);
@@ -192,9 +192,9 @@ bool SkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin) {
     if(existsDefaultFilePath2) {
         IMAGE image;
 
-        if(cv_skin_async.getBool()) engine->getResourceManager()->requestNextLoadAsync();
+        if(cv_skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
-        image.img = engine->getResourceManager()->loadImageAbsUnnamed(defaultFilePath2, cv_skin_mipmaps.getBool());
+        image.img = resourceManager->loadImageAbsUnnamed(defaultFilePath2, cv_skin_mipmaps.getBool());
         image.scale = 1.0f;
 
         this->images.push_back(image);
@@ -216,14 +216,14 @@ bool SkinImage::loadImage(std::string skinElementName, bool ignoreDefaultSkin) {
 SkinImage::~SkinImage() {
     for(int i = 0; i < this->images.size(); i++) {
         if(this->images[i].img != this->skin->getMissingTexture())
-            engine->getResourceManager()->destroyResource(this->images[i].img);
+            resourceManager->destroyResource(this->images[i].img);
     }
     this->images.clear();
 
     this->filepathsForExport.clear();
 }
 
-void SkinImage::draw(Graphics *g, Vector2 pos, float scale) {
+void SkinImage::draw(Vector2 pos, float scale) {
     if(this->images.size() < 1) return;
 
     scale *= this->getScale();  // auto scale to current resolution
@@ -269,7 +269,7 @@ void SkinImage::draw(Graphics *g, Vector2 pos, float scale) {
     g->popTransform();
 }
 
-void SkinImage::drawRaw(Graphics *g, Vector2 pos, float scale, AnchorPoint anchor) {
+void SkinImage::drawRaw(Vector2 pos, float scale, AnchorPoint anchor) {
     if(this->images.size() < 1) return;
 
     g->pushTransform();
@@ -391,7 +391,7 @@ bool SkinImage::isReady() {
     if(this->bReady) return true;
 
     for(int i = 0; i < this->images.size(); i++) {
-        if(engine->getResourceManager()->isLoadingResource(this->images[i].img)) return false;
+        if(resourceManager->isLoadingResource(this->images[i].img)) return false;
     }
 
     this->bReady = true;

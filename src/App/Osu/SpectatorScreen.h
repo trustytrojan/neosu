@@ -13,7 +13,7 @@ class SpectatorScreen : public OsuScreen {
     SpectatorScreen();
 
     void mouse_update(bool* propagate_clicks) override;
-    void draw(Graphics* g) override;
+    void draw() override;
     bool isVisible() override;
     CBaseUIElement* setVisible(bool visible) override;
     void onKeyDown(KeyboardEvent& e) override;

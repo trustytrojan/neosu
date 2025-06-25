@@ -38,9 +38,9 @@ VisualProfiler::VisualProfiler() : CBaseUIElement(0, 0, 0, 0, "") {
 
     this->setProfile(&g_profCurrentProfile);  // by default we look at the standard full engine-wide profile
 
-    this->font = engine->getResourceManager()->getFont("FONT_DEFAULT");
-    this->fontConsole = engine->getResourceManager()->getFont("FONT_CONSOLE");
-    this->lineVao = engine->getResourceManager()->createVertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_LINES,
+    this->font = resourceManager->getFont("FONT_DEFAULT");
+    this->fontConsole = resourceManager->getFont("FONT_CONSOLE");
+    this->lineVao = resourceManager->createVertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_LINES,
                                                                           Graphics::USAGE_TYPE::USAGE_DYNAMIC, true);
 
     this->bScheduledForceRebuildLineVao = false;
@@ -49,7 +49,7 @@ VisualProfiler::VisualProfiler() : CBaseUIElement(0, 0, 0, 0, "") {
 
 VisualProfiler::~VisualProfiler() { vprof = NULL; }
 
-void VisualProfiler::draw(Graphics *g) {
+void VisualProfiler::draw() {
     VPROF_BUDGET("VisualProfiler::draw", VPROF_BUDGETGROUP_DRAW);
     if(!cv_vprof.getBool() || !this->bVisible) return;
 
@@ -85,7 +85,7 @@ void VisualProfiler::draw(Graphics *g) {
                                 textFont, this->textLines);
                     addTextLine(UString::format("Env DPI Scale: %f", env->getDPIScale()), textFont, this->textLines);
                     addTextLine(UString::format("Env DPI: %i", (int)env->getDPI()), textFont, this->textLines);
-                    // addTextLine(UString::format("Renderer: %s", typeid(g).name()), textFont, this->textLines); //
+                    // addTextLine(UString::format("Renderer: %s", typeid().name()), textFont, this->textLines); //
                     // TODO: add g->getName() or something
                     addTextLine(UString::format("VRAM: %i MB / %i MB", vramRemainingMB, vramTotalMB), textFont,
                                 this->textLines);
@@ -106,20 +106,20 @@ void VisualProfiler::draw(Graphics *g) {
                                 textFont, this->textLines);
                     addTextLine(UString::format("Env Mouse Pos: %i x %i", (int)envMousePos.x, (int)envMousePos.y),
                                 textFont, this->textLines);
-                    addTextLine(UString::format("Sound Device: %s", engine->getSound()->getOutputDeviceName().toUtf8()),
+                    addTextLine(UString::format("Sound Device: %s", soundEngine->getOutputDeviceName().toUtf8()),
                                 textFont, this->textLines);
-                    addTextLine(UString::format("Sound Volume: %f", engine->getSound()->getVolume()), textFont,
+                    addTextLine(UString::format("Sound Volume: %f", soundEngine->getVolume()), textFont,
                                 this->textLines);
-                    addTextLine(UString::format("RM Threads: %zu", engine->getResourceManager()->getNumThreads()),
+                    addTextLine(UString::format("RM Threads: %zu", resourceManager->getNumActiveThreads()),
                                 textFont, this->textLines);
                     addTextLine(
-                        UString::format("RM LoadingWork: %zu", engine->getResourceManager()->getNumLoadingWork()),
+                        UString::format("RM LoadingWork: %zu", resourceManager->getNumLoadingWork()),
                         textFont, this->textLines);
                     addTextLine(UString::format("RM LoadingWorkAD: %zu",
-                                                engine->getResourceManager()->getNumLoadingWorkAsyncDestroy()),
+                                                resourceManager->getNumLoadingWorkAsyncDestroy()),
                                 textFont, this->textLines);
                     addTextLine(
-                        UString::format("RM Named Resources: %zu", engine->getResourceManager()->getResources().size()),
+                        UString::format("RM Named Resources: %zu", resourceManager->getResources().size()),
                         textFont, this->textLines);
                     addTextLine(UString::format("Animations: %zu", anim->getNumActiveAnimations()), textFont,
                                 this->textLines);
@@ -177,7 +177,7 @@ void VisualProfiler::draw(Graphics *g) {
                     g->pushTransform();
                     {
                         g->translate(engine->getScreenWidth() - this->textLines[i].width * textScale, 0);
-                        drawStringWithShadow(g, textFont, this->textLines[i].text, textColor);
+                        drawStringWithShadow(textFont, this->textLines[i].text, textColor);
                     }
                     g->popTransform();
                 }
@@ -277,7 +277,7 @@ void VisualProfiler::draw(Graphics *g) {
         const int xPos = engine->getScreenWidth() - width - margin;
         const int yPos =
             engine->getScreenHeight() - height - margin +
-            (engine->getMouse()->isMiddleDown() ? engine->getMouse()->getPos().y - engine->getScreenHeight() : 0);
+            (mouse->isMiddleDown() ? mouse->getPos().y - engine->getScreenHeight() : 0);
 
         // draw background
         g->setColor(0xaa000000);
@@ -304,18 +304,18 @@ void VisualProfiler::draw(Graphics *g) {
         g->popTransform();
 
         // draw labels
-        if(engine->getKeyboard()->isControlDown()) {
+        if(keyboard->isControlDown()) {
             const int margin = 3 * env->getDPIScale();
 
             // y-axis range
             g->pushTransform();
             {
                 g->translate((int)(xPos + margin), (int)(yPos + this->font->getHeight() + margin));
-                drawStringWithShadow(g, this->font, UString::format("%g ms", cv_vprof_graph_range_max.getFloat()),
+                drawStringWithShadow(this->font, UString::format("%g ms", cv_vprof_graph_range_max.getFloat()),
                                      0xffffffff);
 
                 g->translate(0, (int)(height - this->font->getHeight() - 2 * margin));
-                drawStringWithShadow(g, this->font, "0 ms", 0xffffffff);
+                drawStringWithShadow(this->font, "0 ms", 0xffffffff);
             }
             g->popTransform();
 
@@ -329,7 +329,7 @@ void VisualProfiler::draw(Graphics *g) {
                 for(size_t i = 1; i < this->groups.size(); i++) {
                     const int stringWidth = (int)(this->font->getStringWidth(this->groups[i].name));
                     g->translate(-stringWidth, 0);
-                    drawStringWithShadow(g, this->font, this->groups[i].name, this->groups[i].color);
+                    drawStringWithShadow(this->font, this->groups[i].name, this->groups[i].color);
                     g->translate(stringWidth, (int)(-this->font->getHeight() - padding));
                 }
             }
@@ -346,7 +346,7 @@ void VisualProfiler::draw(Graphics *g) {
                     g->pushTransform();
                     {
                         g->translate((int)(xPos + margin), (int)(yPos - 2 * margin));
-                        /// drawStringWithShadow(g, UString::format("[%s] = %g ms", this->spike.node.node->getName(),
+                        /// drawStringWithShadow(UString::format("[%s] = %g ms", this->spike.node.node->getName(),
                         /// m_spike.timeLastFrame * 1000.0), this->groups[m_spike.node.node->getGroupID()].color);
                         g->drawString(this->font, UString::format("Spike = %g ms", this->spike.timeLastFrame * 1000.0));
                     }
@@ -357,7 +357,7 @@ void VisualProfiler::draw(Graphics *g) {
     }
 }
 
-void VisualProfiler::drawStringWithShadow(Graphics *g, McFont *font, const UString &string, Color color) {
+void VisualProfiler::drawStringWithShadow(McFont *font, const UString &string, Color color) {
     if(font == NULL) return;
 
     const int shadowOffset = 1 * env->getDPIScale();
@@ -379,8 +379,8 @@ void VisualProfiler::mouse_update(bool *propagate_clicks) {
     CBaseUIElement::mouse_update(propagate_clicks);
     if(!cv_vprof.getBool() || !this->bVisible) return;
 
-    const bool isFrozen = (engine->getKeyboard()->isShiftDown() &&
-                           (!this->bRequiresAltShiftKeysToFreeze || engine->getKeyboard()->isAltDown()));
+    const bool isFrozen = (keyboard->isShiftDown() &&
+                           (!this->bRequiresAltShiftKeysToFreeze || keyboard->isAltDown()));
 
     if(cv_debug_vprof.getBool() || cv_vprof_spike.getBool()) {
         if(!isFrozen) {
@@ -509,7 +509,7 @@ void VisualProfiler::mouse_update(bool *propagate_clicks) {
             }
 
             // and bake
-            engine->getResourceManager()->loadResource(this->lineVao);
+            resourceManager->loadResource(this->lineVao);
         }
 
         // regular line update
@@ -557,7 +557,7 @@ void VisualProfiler::mouse_update(bool *propagate_clicks) {
                 }
 
                 // re-bake
-                engine->getResourceManager()->loadResource(this->lineVao);
+                resourceManager->loadResource(this->lineVao);
 
                 this->iCurLinePos++;
             }

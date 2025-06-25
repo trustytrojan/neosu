@@ -40,11 +40,11 @@ class TextureAtlas final : public Resource {
     [[nodiscard]] inline int getPadding() const { return m_iPadding; }
     [[nodiscard]] inline Image *getAtlasImage() const { return m_atlasImage; }
 
-    // // type inspection
-    // [[nodiscard]] Type getResType() const final { return TEXTUREATLAS; }
+    // type inspection
+    [[nodiscard]] Type getResType() const final { return TEXTUREATLAS; }
 
-    // TextureAtlas *asTextureAtlas() final { return this; }
-    // [[nodiscard]] const TextureAtlas *asTextureAtlas() const final { return this; }
+    TextureAtlas *asTextureAtlas() final { return this; }
+    [[nodiscard]] const TextureAtlas *asTextureAtlas() const final { return this; }
 
    private:
     struct Skyline {

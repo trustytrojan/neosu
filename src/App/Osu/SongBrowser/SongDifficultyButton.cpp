@@ -48,8 +48,8 @@ SongDifficultyButton::SongDifficultyButton(SongBrowser *songBrowser, CBaseUIScro
 
 SongDifficultyButton::~SongDifficultyButton() { anim->deleteExistingAnimation(&this->fOffsetPercentAnim); }
 
-void SongDifficultyButton::draw(Graphics *g) {
-    Button::draw(g);
+void SongDifficultyButton::draw() {
+    Button::draw();
     if(!this->bVisible) return;
 
     const bool isIndependentDiff = this->isIndependentDiffButton();
@@ -62,11 +62,11 @@ void SongDifficultyButton::draw(Graphics *g) {
 
     // draw background image
     this->drawBeatmapBackgroundThumbnail(
-        g, osu->getBackgroundImageHandler()->getLoadBackgroundImage(this->databaseBeatmap));
+        osu->getBackgroundImageHandler()->getLoadBackgroundImage(this->databaseBeatmap));
 
-    if(this->grade != FinishedScore::Grade::N) this->drawGrade(g);
-    this->drawTitle(g, !isIndependentDiff ? 0.2f : 1.0f);
-    this->drawSubTitle(g, !isIndependentDiff ? 0.2f : 1.0f);
+    if(this->grade != FinishedScore::Grade::N) this->drawGrade();
+    this->drawTitle(!isIndependentDiff ? 0.2f : 1.0f);
+    this->drawSubTitle(!isIndependentDiff ? 0.2f : 1.0f);
 
     // draw diff name
     const float titleScale = (size.y * this->fTitleScale) / this->font->getHeight();
@@ -161,7 +161,7 @@ void SongDifficultyButton::mouse_update(bool *propagate_clicks) {
 }
 
 void SongDifficultyButton::onClicked() {
-    engine->getSound()->play(osu->getSkin()->selectDifficulty);
+    soundEngine->play(osu->getSkin()->selectDifficulty);
 
     // NOTE: Intentionally not calling Button::onClicked(), since that one plays another sound
     CBaseUIButton::onClicked();

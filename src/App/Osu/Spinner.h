@@ -6,7 +6,7 @@ class Spinner : public HitObject {
     Spinner(int x, int y, long time, int sampleType, bool isEndOfCombo, long endTime, BeatmapInterface *beatmap);
     ~Spinner() override;
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void update(long curPos, f64 frame_time) override;
 
     void updateStackPosition(float stackOffset) override { ; }

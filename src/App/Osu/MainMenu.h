@@ -27,7 +27,7 @@ class MainMenuPauseButton : public CBaseUIButton {
         this->bIsPaused = true;
     }
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void setPaused(bool paused) { this->bIsPaused = paused; }
 
    private:
@@ -47,7 +47,7 @@ class MainMenu : public OsuScreen, public MouseListener {
     MainMenu();
     ~MainMenu() override;
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
     BeatmapDifficulty *preloaded_beatmap = NULL;
@@ -68,7 +68,7 @@ class MainMenu : public OsuScreen, public MouseListener {
     CBaseUIContainer *setVisible(bool visible) override;
 
    private:
-    void drawVersionInfo(Graphics *g);
+    void drawVersionInfo();
     void updateLayout();
 
     void animMainButton();

@@ -53,6 +53,12 @@ class VertexArrayObject : public Resource {
     [[nodiscard]] inline unsigned int getNumVertices() const { return this->iNumVertices; }
     [[nodiscard]] inline bool hasTexcoords() const { return this->bHasTexcoords; }
 
+    // type inspection
+    [[nodiscard]] Type getResType() const final { return VAO; }
+
+    VertexArrayObject *asVAO() final { return this; }
+    [[nodiscard]] const VertexArrayObject *asVAO() const final { return this; }
+
    protected:
     static int nearestMultipleUp(int number, int multiple);
     static int nearestMultipleDown(int number, int multiple);

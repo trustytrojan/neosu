@@ -7,7 +7,7 @@ struct ScoreboardSlot {
     ScoreboardSlot(SCORE_ENTRY score, int index);
     ~ScoreboardSlot();
 
-    void draw(Graphics *g);
+    void draw();
     void updateIndex(int new_index, bool animate);
 
     UIAvatar *avatar = NULL;

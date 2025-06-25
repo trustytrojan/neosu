@@ -57,8 +57,9 @@ class Osu : public App, public MouseListener {
     Osu();
     ~Osu() override;
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void update() override;
+	bool isInCriticalInteractiveSession() override;
 
     void onKeyDown(KeyboardEvent &e) override;
     void onKeyUp(KeyboardEvent &e) override;

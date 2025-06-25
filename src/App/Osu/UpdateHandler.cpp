@@ -92,7 +92,7 @@ void UpdateHandler::_requestUpdate() {
     this->status = STATUS::STATUS_CHECKING_FOR_UPDATE;
 
     UString latestVersion =
-        engine->getNetworkHandler()->httpGet("https://" NEOSU_DOMAIN "/update/" OS_NAME "/latest-version.txt");
+        networkHandler->httpGet("https://" NEOSU_DOMAIN "/update/" OS_NAME "/latest-version.txt");
     float fLatestVersion = strtof(latestVersion.toUtf8(), NULL);
     if(fLatestVersion == 0.f) {
         this->status = STATUS::STATUS_UP_TO_DATE;
@@ -121,7 +121,7 @@ bool UpdateHandler::_downloadUpdate() {
     // setting the status in every error check return is retarded
 
     // download
-    std::string data = engine->getNetworkHandler()->httpDownload(url);
+    std::string data = networkHandler->httpDownload(url);
     if(data.length() < 2) {
         debugLog("UpdateHandler::downloadUpdate() error, downloaded file is too small (%i)!\n", data.length());
         this->status = STATUS::STATUS_ERROR;

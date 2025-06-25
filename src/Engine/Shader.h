@@ -20,6 +20,12 @@ class Shader : public Resource {
     virtual void setUniformMatrix4fv(UString name, Matrix4 &matrix) = 0;
     virtual void setUniformMatrix4fv(UString name, float *v) = 0;
 
+    // type inspection
+    [[nodiscard]] Type getResType() const final { return SHADER; }
+
+    Shader *asShader() final { return this; }
+    [[nodiscard]] const Shader *asShader() const final { return this; }
+
    protected:
     void init() override = 0;
     void initAsync() override = 0;

@@ -14,22 +14,22 @@ class SliderRenderer {
     static VertexArrayObject *generateVAO(const std::vector<Vector2> &points, float hitcircleDiameter,
                                           Vector3 translation = Vector3(0, 0, 0), bool skipOOBPoints = true);
 
-    static void draw(Graphics *g, const std::vector<Vector2> &points, const std::vector<Vector2> &alwaysPoints,
+    static void draw(const std::vector<Vector2> &points, const std::vector<Vector2> &alwaysPoints,
                      float hitcircleDiameter, float from = 0.0f, float to = 1.0f, Color undimmedColor = 0xffffffff,
                      float colorRGBMultiplier = 1.0f, float alpha = 1.0f, long sliderTimeForRainbow = 0);
-    static void draw(Graphics *g, VertexArrayObject *vao, const std::vector<Vector2> &alwaysPoints, Vector2 translation,
+    static void draw(VertexArrayObject *vao, const std::vector<Vector2> &alwaysPoints, Vector2 translation,
                      float scale, float hitcircleDiameter, float from = 0.0f, float to = 1.0f,
                      Color undimmedColor = 0xffffffff, float colorRGBMultiplier = 1.0f, float alpha = 1.0f,
                      long sliderTimeForRainbow = 0, bool doEnableRenderTarget = true, bool doDisableRenderTarget = true,
                      bool doDrawSliderFrameBufferToScreen = true);
-    static void drawMM(Graphics *g, const std::vector<Vector2> &points, float hitcircleDiameter, float from = 0.0f,
+    static void drawMM(const std::vector<Vector2> &points, float hitcircleDiameter, float from = 0.0f,
                        float to = 1.0f, Color undimmedColor = 0xffffffff, float colorRGBMultiplier = 1.0f,
                        float alpha = 1.0f, long sliderTimeForRainbow = 0);
 
    private:
-    static void drawFillSliderBodyPeppy(Graphics *g, const std::vector<Vector2> &points, VertexArrayObject *circleMesh,
+    static void drawFillSliderBodyPeppy(const std::vector<Vector2> &points, VertexArrayObject *circleMesh,
                                         float radius, int drawFromIndex, int drawUpToIndex, Shader *shader = NULL);
-    static void drawFillSliderBodyMM(Graphics *g, const std::vector<Vector2> &points, float radius, int drawFromIndex,
+    static void drawFillSliderBodyMM(const std::vector<Vector2> &points, float radius, int drawFromIndex,
                                      int drawUpToIndex);
 
     static void checkUpdateVars(float hitcircleDiameter);

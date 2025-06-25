@@ -25,7 +25,7 @@ class VSMusicBrowser : public CBaseUIElement {
     VSMusicBrowser(int x, int y, int xSize, int ySize, McFont *font);
     ~VSMusicBrowser() override;
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
     void fireNextSong(bool previous);

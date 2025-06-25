@@ -24,8 +24,31 @@
 
 using namespace std;
 
-Engine *engine = NULL;
 Environment *env = NULL;
+
+std::unique_ptr<Mouse> Engine::s_mouseInstance = nullptr;
+std::unique_ptr<Keyboard> Engine::s_keyboardInstance = nullptr;
+std::unique_ptr<Gamepad> Engine::s_gamepadInstance = nullptr;
+std::unique_ptr<App> Engine::s_appInstance = nullptr;
+std::unique_ptr<Graphics> Engine::s_graphicsInstance = nullptr;
+std::unique_ptr<SoundEngine> Engine::s_soundEngineInstance = nullptr;
+std::unique_ptr<ResourceManager> Engine::s_resourceManagerInstance = nullptr;
+std::unique_ptr<NetworkHandler> Engine::s_networkHandlerInstance = nullptr;
+std::unique_ptr<AnimationHandler> Engine::s_animationHandlerInstance = nullptr;
+std::unique_ptr<ContextMenu> Engine::s_contextMenuInstance = nullptr;
+
+Mouse *mouse = nullptr;
+Keyboard *keyboard = nullptr;
+Gamepad *gamepad;
+App *app = nullptr;
+Graphics *g = nullptr;
+SoundEngine *soundEngine = nullptr;
+ResourceManager *resourceManager = nullptr;
+NetworkHandler *networkHandler = nullptr;
+AnimationHandler *animationHandler = nullptr;
+ContextMenu *contextMenu = nullptr;
+
+Engine *engine = NULL;
 
 Console *Engine::console = NULL;
 ConsoleBox *Engine::consoleBox = NULL;
@@ -35,15 +58,12 @@ Engine::Engine(Environment *environment, i32 argc, char **argv) {
     curl_global_init(CURL_GLOBAL_DEFAULT);
 
     engine = this;
-    this->environment = environment;
     env = environment;
     this->iArgc = argc;
     this->sArgv = argv;
 
-    this->graphics = NULL;
     this->guiContainer = NULL;
     this->visualProfiler = NULL;
-    this->app = NULL;
 
     // disable output buffering (else we get multithreading issues due to blocking)
     setvbuf(stdout, NULL, _IONBF, 0);
@@ -66,7 +86,7 @@ Engine::Engine(Environment *environment, i32 argc, char **argv) {
 
     // screen
     this->bResolutionChange = false;
-    this->vScreenSize = this->environment->getWindowSize();
+    this->vScreenSize = env->getWindowSize();
     this->vNewScreenSize = this->vScreenSize;
 
     debugLog("Engine: OsuScreenSize = (%ix%i)\n", (int)this->vScreenSize.x, (int)this->vScreenSize.y);
@@ -78,34 +98,55 @@ Engine::Engine(Environment *environment, i32 argc, char **argv) {
     debugLog("\nEngine: Initializing subsystems ...\n");
     {
         // input devices
-        this->mouse = new Mouse();
-        this->inputDevices.push_back(this->mouse);
-        this->mice.push_back(this->mouse);
+        s_mouseInstance = std::make_unique<Mouse>();
+        mouse = s_mouseInstance.get();
+        runtime_assert(mouse, "Mouse failed to initialize!");
+        inputDevices.push_back(mouse);
+        mice.push_back(mouse);
 
-        this->keyboard = new Keyboard();
-        this->inputDevices.push_back(this->keyboard);
-        this->keyboards.push_back(this->keyboard);
+        s_keyboardInstance = std::make_unique<Keyboard>();
+        keyboard = s_keyboardInstance.get();
+        runtime_assert(keyboard, "Keyboard failed to initialize!");
+        inputDevices.push_back(keyboard);
+        keyboards.push_back(keyboard);
 
-        this->gamepad = new XInputGamepad();
-        this->inputDevices.push_back(this->gamepad);
-        this->gamepads.push_back(this->gamepad);
+        s_gamepadInstance = std::make_unique<XInputGamepad>();
+        gamepad = s_gamepadInstance.get();
+        runtime_assert(gamepad, "Gamepad failed to initialize!");
+        inputDevices.push_back(gamepad);
+        gamepads.push_back(gamepad);
 
-        // init platform specific interfaces
-        this->graphics = this->environment->createRenderer();
-        {
-            this->graphics->init();  // needs init() separation due to potential engine->getGraphics() access
-        }
-        this->contextMenu = this->environment->createContextMenu();
+        // create graphics through environment
+        s_graphicsInstance.reset(env->createRenderer());
+        g = s_graphicsInstance.get();
+        runtime_assert(g, "Graphics failed to initialize!");
+        g->init();  // needs init() separation due to potential graphics access
 
-        // and the rest
-        this->resourceManager = new ResourceManager();
-        this->sound = new SoundEngine();
-        this->animationHandler = new AnimationHandler();
-        this->networkHandler = new NetworkHandler();
+        s_contextMenuInstance.reset(env->createContextMenu());
+        contextMenu = s_contextMenuInstance.get();
+        runtime_assert(contextMenu, "ContextMenu failed to initialize!");
+
+        // make unique_ptrs for the rest
+        s_resourceManagerInstance = std::make_unique<ResourceManager>();
+        resourceManager = s_resourceManagerInstance.get();
+        runtime_assert(resourceManager, "Resource manager menu failed to initialize!");
+
+        s_soundEngineInstance = std::make_unique<SoundEngine>();
+        soundEngine = s_soundEngineInstance.get();
+        runtime_assert(soundEngine, "Sound engine failed to initialize!");
+
+        s_animationHandlerInstance = std::make_unique<AnimationHandler>();
+        animationHandler = s_animationHandlerInstance.get();
+        runtime_assert(animationHandler, "Animation handler failed to initialize!");
+
+        s_networkHandlerInstance = std::make_unique<NetworkHandler>();
+        networkHandler = s_networkHandlerInstance.get();
+        runtime_assert(networkHandler, "Network handler failed to initialize!");
+
         init_discord_sdk();
 
         // default launch overrides
-        this->graphics->setVSync(false);
+        g->setVSync(false);
 
         // engine time starts now
         this->timer->start();
@@ -116,51 +157,65 @@ Engine::Engine(Environment *environment, i32 argc, char **argv) {
 Engine::~Engine() {
     debugLog("\n-= Engine Shutdown =-\n");
 
+    // reset() all static unique_ptrs
     debugLog("Engine: Freeing app...\n");
-    SAFE_DELETE(this->app);
+    s_appInstance.reset();
 
-    if(this->console != NULL) this->showMessageErrorFatal("Engine Error", "console not set to NULL before shutdown!");
+    if(this->console != NULL) showMessageErrorFatal("Engine Error", "this->console not set to NULL before shutdown!");
 
     debugLog("Engine: Freeing engine GUI...\n");
-    Engine::console = NULL;
-    Engine::consoleBox = NULL;
+    {
+        this->console = NULL;
+        this->consoleBox = NULL;
+    }
     SAFE_DELETE(this->guiContainer);
 
     debugLog("Engine: Freeing resource manager...\n");
-    SAFE_DELETE(this->resourceManager);
+    s_resourceManagerInstance.reset();
 
     debugLog("Engine: Freeing Sound...\n");
-    SAFE_DELETE(this->sound);
+    s_soundEngineInstance.reset();
 
     debugLog("Engine: Freeing context menu...\n");
-    SAFE_DELETE(this->contextMenu);
+    s_contextMenuInstance.reset();
 
     debugLog("Engine: Freeing animation handler...\n");
-    SAFE_DELETE(this->animationHandler);
+    s_animationHandlerInstance.reset();
+
+    destroy_discord_sdk();
 
     debugLog("Engine: Freeing network handler...\n");
-    SAFE_DELETE(this->networkHandler);
+    s_networkHandlerInstance.reset();
 
     debugLog("Engine: Freeing input devices...\n");
-    for(size_t i = 0; i < this->inputDevices.size(); i++) {
-        delete this->inputDevices[i];
+    // first remove the mouse and keyboard from the input devices
+    std::erase_if(this->inputDevices,
+                  [](InputDevice *device) { return device == mouse || device == keyboard || device == gamepad; });
+
+    // delete remaining input devices (if any)
+    for(auto *device : this->inputDevices) {
+        delete device;
     }
     this->inputDevices.clear();
+    this->mice.clear();
+    this->keyboards.clear();
+    this->gamepads.clear();
+
+    // reset the static unique_ptrs
+    s_mouseInstance.reset();
+    s_keyboardInstance.reset();
+    s_gamepadInstance.reset();
 
     debugLog("Engine: Freeing timer...\n");
     SAFE_DELETE(this->timer);
 
     debugLog("Engine: Freeing graphics...\n");
-    SAFE_DELETE(this->graphics);
+    s_graphicsInstance.reset();
 
-	debugLog("Engine: Freeing fonts...\n");
-	McFont::cleanupSharedResources();
+    debugLog("Engine: Freeing fonts...\n");
+    McFont::cleanupSharedResources();
 
-    debugLog("Engine: Freeing environment...\n");
-    SAFE_DELETE(this->environment);
-    destroy_discord_sdk();
-
-    debugLog("Engine: Goodbye.");
+    debugLog("Engine: Goodbye.\n");
 
     engine = NULL;
 }
@@ -188,19 +243,19 @@ void Engine::loadApp() {
 
     // load core default resources
     debugLog("Engine: Loading default resources ...\n");
-    engine->getResourceManager()->loadFont("weblysleekuisb.ttf", "FONT_DEFAULT", 15, true, this->environment->getDPI());
-    engine->getResourceManager()->loadFont("tahoma.ttf", "FONT_CONSOLE", 8, false, 96);
+    resourceManager->loadFont("weblysleekuisb.ttf", "FONT_DEFAULT", 15, true, env->getDPI());
+    resourceManager->loadFont("tahoma.ttf", "FONT_CONSOLE", 8, false, 96);
     debugLog("Engine: Loading default resources done.\n");
 
     // load other default resources and things which are not strictly necessary
     {
-        Image *missingTexture = engine->getResourceManager()->createImage(512, 512);
-        missingTexture->setName("MISSING_TEXTURE");
+        Image *missingTexture = resourceManager->createImage(512, 512);
+        resourceManager->setResourceName(missingTexture, "MISSING_TEXTURE");
         for(int x = 0; x < 512; x++) {
             for(int y = 0; y < 512; y++) {
                 int rowCounter = (x / 64);
                 int columnCounter = (y / 64);
-                Color color = (((rowCounter + columnCounter) % 2 == 0) ? COLOR(255, 255, 0, 221) : COLOR(255, 0, 0, 0));
+                Color color = (((rowCounter + columnCounter) % 2 == 0) ? rgb(255, 0, 221) : rgb(0, 0, 0));
                 missingTexture->setPixel(x, y, color);
             }
         }
@@ -214,7 +269,7 @@ void Engine::loadApp() {
         this->guiContainer->addBaseUIElement(this->visualProfiler);
 
         // (engine gui comes first)
-        this->keyboard->addListener(this->guiContainer, true);
+        keyboard->addListener(this->guiContainer, true);
     }
 
     debugLog("\nEngine: Loading app ...\n");
@@ -223,10 +278,10 @@ void Engine::loadApp() {
         //	Load App here  //
         //*****************//
         osu = new Osu();
-        this->app = osu;
+        app = osu;
 
         // start listening to the default keyboard input
-        if(this->app != NULL) this->keyboard->addListener(this->app);
+        if(app != NULL) keyboard->addListener(app);
     }
     debugLog("Engine: Loading app done.\n\n");
 }
@@ -240,28 +295,28 @@ void Engine::onPaint() {
         // begin
         {
             VPROF_BUDGET("Graphics::beginScene", VPROF_BUDGETGROUP_DRAW);
-            this->graphics->beginScene();
+            g->beginScene();
         }
 
         // middle
         {
-            if(this->app != NULL) {
+            if(app != NULL) {
                 VPROF_BUDGET("App::draw", VPROF_BUDGETGROUP_DRAW);
-                this->app->draw(this->graphics);
+                app->draw();
             }
 
-            if(this->guiContainer != NULL) this->guiContainer->draw(this->graphics);
+            if(this->guiContainer != NULL) this->guiContainer->draw();
 
             // debug input devices
             for(size_t i = 0; i < this->inputDevices.size(); i++) {
-                this->inputDevices[i]->draw(this->graphics);
+                this->inputDevices[i]->draw();
             }
         }
 
         // end
         {
             VPROF_BUDGET("Graphics::endScene", VPROF_BUDGETGROUP_DRAW_SWAPBUFFERS);
-            this->graphics->endScene();
+            g->endScene();
         }
     }
     this->bDrawing = false;
@@ -300,17 +355,17 @@ void Engine::onUpdate() {
 
         {
             VPROF_BUDGET("AnimationHandler::update", VPROF_BUDGETGROUP_UPDATE);
-            this->animationHandler->update();
+            animationHandler->update();
         }
 
         {
             VPROF_BUDGET("SoundEngine::update", VPROF_BUDGETGROUP_UPDATE);
-            this->sound->update();
+            soundEngine->update();
         }
 
         {
             VPROF_BUDGET("ResourceManager::update", VPROF_BUDGETGROUP_UPDATE);
-            this->resourceManager->update();
+            resourceManager->update();
         }
 
         // update gui
@@ -328,9 +383,9 @@ void Engine::onUpdate() {
     }
 
     // update app
-    if(this->app != NULL) {
+    if(app != NULL) {
         VPROF_BUDGET("App::update", VPROF_BUDGETGROUP_UPDATE);
-        this->app->update();
+        app->update();
     }
 
     // update discord presence
@@ -339,7 +394,7 @@ void Engine::onUpdate() {
     // update environment (after app, at the end here)
     {
         VPROF_BUDGET("Environment::update", VPROF_BUDGETGROUP_UPDATE);
-        this->environment->update();
+        env->update();
     }
 }
 
@@ -348,7 +403,7 @@ void Engine::onFocusGained() {
 
     if(cv_debug_engine.getBool()) debugLog("Engine: got focus\n");
 
-    if(this->app != NULL) this->app->onFocusGained();
+    if(app != NULL) app->onFocusGained();
 }
 
 void Engine::onFocusLost() {
@@ -360,15 +415,14 @@ void Engine::onFocusLost() {
         this->keyboards[i]->reset();
     }
 
-    if(this->app != NULL) this->app->onFocusLost();
+    if(app != NULL) app->onFocusLost();
 
     // auto minimize on certain conditions
-    if(this->environment->isFullscreen() || this->environment->isFullscreenWindowedBorderless()) {
-        if((!this->environment->isFullscreenWindowedBorderless() &&
-            cv_minimize_on_focus_lost_if_fullscreen.getBool()) ||
-           (this->environment->isFullscreenWindowedBorderless() &&
+    if(env->isFullscreen() || env->isFullscreenWindowedBorderless()) {
+        if((!env->isFullscreenWindowedBorderless() && cv_minimize_on_focus_lost_if_fullscreen.getBool()) ||
+           (env->isFullscreenWindowedBorderless() &&
             cv_minimize_on_focus_lost_if_borderless_windowed_fullscreen.getBool())) {
-            this->environment->minimize();
+            env->minimize();
         }
     }
 }
@@ -379,7 +433,7 @@ void Engine::onMinimized() {
 
     if(cv_debug_engine.getBool()) debugLog("Engine: window minimized\n");
 
-    if(this->app != NULL) this->app->onMinimized();
+    if(app != NULL) app->onMinimized();
 }
 
 void Engine::onMaximized() {
@@ -393,7 +447,7 @@ void Engine::onRestored() {
 
     if(cv_debug_engine.getBool()) debugLog("Engine: window restored\n");
 
-    if(this->app != NULL) this->app->onRestored();
+    if(app != NULL) app->onRestored();
 }
 
 void Engine::onResolutionChange(Vector2 newResolution) {
@@ -415,31 +469,31 @@ void Engine::onResolutionChange(Vector2 newResolution) {
 
     // update everything
     this->vScreenSize = newResolution;
-    if(this->graphics != NULL) this->graphics->onResolutionChange(newResolution);
-    if(this->app != NULL) this->app->onResolutionChanged(newResolution);
+    if(g != NULL) g->onResolutionChange(newResolution);
+    if(app != NULL) app->onResolutionChanged(newResolution);
 }
 
 void Engine::onDPIChange() {
-    debugLog(0xff00ff00, "Engine: DPI changed to %i\n", this->environment->getDPI());
+    debugLog(0xff00ff00, "Engine: DPI changed to %i\n", env->getDPI());
 
-    if(this->app != NULL) this->app->onDPIChanged();
+    if(app != NULL) app->onDPIChanged();
 }
 
 void Engine::onShutdown() {
-    if(this->bBlackout || (this->app != NULL && !this->app->onShutdown())) return;
+    if(this->bBlackout || (app != NULL && !app->onShutdown())) return;
 
     this->bBlackout = true;
-    this->sound->shutdown();
-    this->environment->shutdown();
+    soundEngine->shutdown();
+    env->shutdown();
 }
 
 void Engine::onMouseRawMove(int xDelta, int yDelta, bool absolute, bool virtualDesktop) {
-    this->mouse->onRawMove(xDelta, yDelta, absolute, virtualDesktop);
+    mouse->onRawMove(xDelta, yDelta, absolute, virtualDesktop);
 }
 
-void Engine::onMouseWheelVertical(int delta) { this->mouse->onWheelVertical(delta); }
+void Engine::onMouseWheelVertical(int delta) { mouse->onWheelVertical(delta); }
 
-void Engine::onMouseWheelHorizontal(int delta) { this->mouse->onWheelHorizontal(delta); }
+void Engine::onMouseWheelHorizontal(int delta) { mouse->onWheelHorizontal(delta); }
 
 std::mutex g_engineMouseLeftClickMutex;
 
@@ -447,47 +501,47 @@ void Engine::onMouseLeftChange(bool mouseLeftDown) {
     // async calls from WinRealTimeStylus must be protected
     std::lock_guard<std::mutex> lk(g_engineMouseLeftClickMutex);
 
-    if(this->mouse->isLeftDown() !=
+    if(mouse->isLeftDown() !=
        mouseLeftDown)  // necessary due to WinRealTimeStylus and Touch, would cause double clicks otherwise
-        this->mouse->onLeftChange(mouseLeftDown);
+        mouse->onLeftChange(mouseLeftDown);
 }
 
-void Engine::onMouseMiddleChange(bool mouseMiddleDown) { this->mouse->onMiddleChange(mouseMiddleDown); }
+void Engine::onMouseMiddleChange(bool mouseMiddleDown) { mouse->onMiddleChange(mouseMiddleDown); }
 
 void Engine::onMouseRightChange(bool mouseRightDown) {
-    if(this->mouse->isRightDown() != mouseRightDown)  // necessary due to Touch, would cause double clicks otherwise
-        this->mouse->onRightChange(mouseRightDown);
+    if(mouse->isRightDown() != mouseRightDown)  // necessary due to Touch, would cause double clicks otherwise
+        mouse->onRightChange(mouseRightDown);
 }
 
-void Engine::onMouseButton4Change(bool mouse4down) { this->mouse->onButton4Change(mouse4down); }
+void Engine::onMouseButton4Change(bool mouse4down) { mouse->onButton4Change(mouse4down); }
 
-void Engine::onMouseButton5Change(bool mouse5down) { this->mouse->onButton5Change(mouse5down); }
+void Engine::onMouseButton5Change(bool mouse5down) { mouse->onButton5Change(mouse5down); }
 
 void Engine::onKeyboardKeyDown(KEYCODE keyCode) {
     // hardcoded engine hotkeys
     {
         // handle ALT+F4 quit
-        if(this->keyboard->isAltDown() && keyCode == KEY_F4) {
+        if(keyboard->isAltDown() && keyCode == KEY_F4) {
             this->shutdown();
             return;
         }
 
         // handle ALT+ENTER fullscreen toggle
-        if(this->keyboard->isAltDown() && keyCode == KEY_ENTER) {
+        if(keyboard->isAltDown() && keyCode == KEY_ENTER) {
             this->toggleFullscreen();
             return;
         }
 
         // handle CTRL+F11 profiler toggle
-        if(this->keyboard->isControlDown() && keyCode == KEY_F11) {
+        if(keyboard->isControlDown() && keyCode == KEY_F11) {
             cv_vprof.setValue(cv_vprof.getBool() ? 0.0f : 1.0f);
             return;
         }
 
         // handle profiler display mode change
-        if(this->keyboard->isControlDown() && keyCode == KEY_TAB) {
+        if(keyboard->isControlDown() && keyCode == KEY_TAB) {
             if(cv_vprof.getBool()) {
-                if(this->keyboard->isShiftDown())
+                if(keyboard->isShiftDown())
                     this->visualProfiler->decrementInfoBladeDisplayMode();
                 else
                     this->visualProfiler->incrementInfoBladeDisplayMode();
@@ -496,53 +550,53 @@ void Engine::onKeyboardKeyDown(KEYCODE keyCode) {
         }
     }
 
-    this->keyboard->onKeyDown(keyCode);
+    keyboard->onKeyDown(keyCode);
 }
 
-void Engine::onKeyboardKeyUp(KEYCODE keyCode) { this->keyboard->onKeyUp(keyCode); }
+void Engine::onKeyboardKeyUp(KEYCODE keyCode) { keyboard->onKeyUp(keyCode); }
 
-void Engine::onKeyboardChar(KEYCODE charCode) { this->keyboard->onChar(charCode); }
+void Engine::onKeyboardChar(KEYCODE charCode) { keyboard->onChar(charCode); }
 
 void Engine::shutdown() { this->onShutdown(); }
 
 void Engine::restart() {
     this->onShutdown();
-    this->environment->restart();
+    env->restart();
 }
 
-void Engine::sleep(unsigned int us) { this->environment->sleep(us); }
+void Engine::sleep(unsigned int us) { env->sleep(us); }
 
-void Engine::focus() { this->environment->focus(); }
+void Engine::focus() { env->focus(); }
 
-void Engine::center() { this->environment->center(); }
+void Engine::center() { env->center(); }
 
 void Engine::toggleFullscreen() {
-    if(this->environment->isFullscreen())
-        this->environment->disableFullscreen();
+    if(env->isFullscreen())
+        env->disableFullscreen();
     else
-        this->environment->enableFullscreen();
+        env->enableFullscreen();
 }
 
-void Engine::disableFullscreen() { this->environment->disableFullscreen(); }
+void Engine::disableFullscreen() { env->disableFullscreen(); }
 
 void Engine::showMessageInfo(UString title, UString message) {
     debugLog("INFO: [%s] | %s\n", title.toUtf8(), message.toUtf8());
-    this->environment->showMessageInfo(title, message);
+    env->showMessageInfo(title, message);
 }
 
 void Engine::showMessageWarning(UString title, UString message) {
     debugLog("WARNING: [%s] | %s\n", title.toUtf8(), message.toUtf8());
-    this->environment->showMessageWarning(title, message);
+    env->showMessageWarning(title, message);
 }
 
 void Engine::showMessageError(UString title, UString message) {
     debugLog("ERROR: [%s] | %s\n", title.toUtf8(), message.toUtf8());
-    this->environment->showMessageError(title, message);
+    env->showMessageError(title, message);
 }
 
 void Engine::showMessageErrorFatal(UString title, UString message) {
     debugLog("FATAL ERROR: [%s] | %s\n", title.toUtf8(), message.toUtf8());
-    this->environment->showMessageErrorFatal(title, message);
+    env->showMessageErrorFatal(title, message);
 }
 
 void Engine::addGamepad(Gamepad *gamepad) {
@@ -589,23 +643,20 @@ double Engine::getTimeReal() {
     return this->timer->getElapsedTime();
 }
 
-void Engine::logToConsole(std::optional<Color> color, const UString &msg)
-{
-	if (Engine::consoleBox != nullptr)
-	{
-		if (color.has_value())
-			Engine::consoleBox->log(msg, color.value());
-		else
-			Engine::consoleBox->log(msg);
-	}
+void Engine::logToConsole(std::optional<Color> color, const UString &msg) {
+    if(Engine::consoleBox != nullptr) {
+        if(color.has_value())
+            Engine::consoleBox->log(msg, color.value());
+        else
+            Engine::consoleBox->log(msg);
+    }
 
-	if (Engine::console != nullptr)
-	{
-		if (color.has_value())
-			Engine::console->log(msg, color.value());
-		else
-			Engine::console->log(msg);
-	}
+    if(Engine::console != nullptr) {
+        if(color.has_value())
+            Engine::console->log(msg, color.value());
+        else
+            Engine::console->log(msg);
+    }
 }
 
 //**********************//

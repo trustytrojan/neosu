@@ -17,7 +17,7 @@ class UIContextMenu : public CBaseUIScrollView {
     UIContextMenu(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "",
                   CBaseUIScrollView *parent = NULL);
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
     void onKeyUp(KeyboardEvent &e) override;

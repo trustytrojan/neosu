@@ -11,7 +11,7 @@ class UserCard2 : public CBaseUIButton {
     UserCard2(u32 user_id);
     ~UserCard2() override;
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
     void onClick(CBaseUIButton *btn);

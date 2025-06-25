@@ -14,7 +14,7 @@ CBaseUIImage::CBaseUIImage(std::string imageResourceName, float xPos, float yPos
                            UString name)
     : CBaseUIElement(xPos, yPos, xSize, ySize, name) {
     this->bScaleToFit = true;  // must be up here because it's used in setImage()
-    this->setImage(engine->getResourceManager()->getImage(imageResourceName));
+    this->setImage(resourceManager->getImage(imageResourceName));
 
     this->fRot = 0.0f;
     this->vScale.x = 1.0f;
@@ -34,7 +34,7 @@ CBaseUIImage::CBaseUIImage(std::string imageResourceName, float xPos, float yPos
     this->bDrawBackground = false;
 }
 
-void CBaseUIImage::draw(Graphics *g) {
+void CBaseUIImage::draw() {
     if(!this->bVisible) return;
 
     // draw background

@@ -82,8 +82,8 @@ class OpenGLES2Interface : public NullGraphicsInterface {
     virtual void onResolutionChange(Vector2 newResolution);
 
     // factory
-    virtual Image *createImage(std::string filePath, bool mipmapped);
-    virtual Image *createImage(int width, int height, bool mipmapped);
+    virtual Image *createImage(std::string filePath, bool mipmapped, bool keepInSystemMemory);
+    virtual Image *createImage(int width, int height, bool mipmapped, bool keepInSystemMemory);
     virtual RenderTarget *createRenderTarget(int x, int y, int width, int height,
                                              Graphics::MULTISAMPLE_TYPE multiSampleType);
     virtual Shader *createShaderFromFile(std::string vertexShaderFilePath, std::string fragmentShaderFilePath);

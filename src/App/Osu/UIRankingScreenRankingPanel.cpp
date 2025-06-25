@@ -25,8 +25,8 @@ UIRankingScreenRankingPanel::UIRankingScreenRankingPanel() : CBaseUIImage("", 0,
     this->bPerfect = false;
 }
 
-void UIRankingScreenRankingPanel::draw(Graphics *g) {
-    CBaseUIImage::draw(g);
+void UIRankingScreenRankingPanel::draw() {
+    CBaseUIImage::draw();
     if(!this->bVisible) return;
 
     const float uiScale = /*cv_ui_scale.getFloat()*/ 1.0f;  // NOTE: commented for now, doesn't really work due to
@@ -46,7 +46,7 @@ void UIRankingScreenRankingPanel::draw(Graphics *g) {
         g->translate(this->vPos.x + osu->getUIScale(111.0f) * uiScale,
                      this->vPos.y + (osu->getSkin()->getScore0()->getHeight() / 2) * scale +
                          (osu->getUIScale(11.0f) + globalYOffset) * uiScale);
-        osu->getHUD()->drawScoreNumber(g, this->iScore, scale);
+        osu->getHUD()->drawScoreNumber(this->iScore, scale);
     }
     g->popTransform();
 
@@ -55,24 +55,24 @@ void UIRankingScreenRankingPanel::draw(Graphics *g) {
     const Vector2 hitGridOffsetX = Vector2(200, 0);
     const Vector2 hitGridOffsetY = Vector2(0, 60);
 
-    this->drawHitImage(g, osu->getSkin()->getHit300(), scale, hitImageStartPos);
-    this->drawHitImage(g, osu->getSkin()->getHit100(), scale, hitImageStartPos + hitGridOffsetY);
-    this->drawHitImage(g, osu->getSkin()->getHit50(), scale, hitImageStartPos + hitGridOffsetY * 2);
-    this->drawHitImage(g, osu->getSkin()->getHit300g(), scale, hitImageStartPos + hitGridOffsetX);
-    this->drawHitImage(g, osu->getSkin()->getHit100k(), scale, hitImageStartPos + hitGridOffsetX + hitGridOffsetY);
-    this->drawHitImage(g, osu->getSkin()->getHit0(), scale, hitImageStartPos + hitGridOffsetX + hitGridOffsetY * 2);
+    this->drawHitImage(osu->getSkin()->getHit300(), scale, hitImageStartPos);
+    this->drawHitImage(osu->getSkin()->getHit100(), scale, hitImageStartPos + hitGridOffsetY);
+    this->drawHitImage(osu->getSkin()->getHit50(), scale, hitImageStartPos + hitGridOffsetY * 2);
+    this->drawHitImage(osu->getSkin()->getHit300g(), scale, hitImageStartPos + hitGridOffsetX);
+    this->drawHitImage(osu->getSkin()->getHit100k(), scale, hitImageStartPos + hitGridOffsetX + hitGridOffsetY);
+    this->drawHitImage(osu->getSkin()->getHit0(), scale, hitImageStartPos + hitGridOffsetX + hitGridOffsetY * 2);
 
     // draw numHits
     const Vector2 numHitStartPos = hitImageStartPos + Vector2(40, osu->getSkin()->getVersion() > 1.0f ? -16 : -25);
     scale = osu->getImageScale(osu->getSkin()->getScore0(), 17.0f) * globalScoreScale;
 
-    this->drawNumHits(g, this->iNum300s, scale, numHitStartPos);
-    this->drawNumHits(g, this->iNum100s, scale, numHitStartPos + hitGridOffsetY);
-    this->drawNumHits(g, this->iNum50s, scale, numHitStartPos + hitGridOffsetY * 2);
+    this->drawNumHits(this->iNum300s, scale, numHitStartPos);
+    this->drawNumHits(this->iNum100s, scale, numHitStartPos + hitGridOffsetY);
+    this->drawNumHits(this->iNum50s, scale, numHitStartPos + hitGridOffsetY * 2);
 
-    this->drawNumHits(g, this->iNum300gs, scale, numHitStartPos + hitGridOffsetX);
-    this->drawNumHits(g, this->iNum100ks, scale, numHitStartPos + hitGridOffsetX + hitGridOffsetY);
-    this->drawNumHits(g, this->iNumMisses, scale, numHitStartPos + hitGridOffsetX + hitGridOffsetY * 2);
+    this->drawNumHits(this->iNum300gs, scale, numHitStartPos + hitGridOffsetX);
+    this->drawNumHits(this->iNum100ks, scale, numHitStartPos + hitGridOffsetX + hitGridOffsetY);
+    this->drawNumHits(this->iNumMisses, scale, numHitStartPos + hitGridOffsetX + hitGridOffsetY * 2);
 
     const int row4 = 260;
     const int row4ImageOffset = (osu->getSkin()->getVersion() > 1.0f ? 20 : 8) - 20;
@@ -85,7 +85,7 @@ void UIRankingScreenRankingPanel::draw(Graphics *g) {
         g->translate(this->vPos.x + osu->getUIScale(15.0f) * uiScale,
                      this->vPos.y + (osu->getSkin()->getScore0()->getHeight() / 2) * scale +
                          (osu->getUIScale(row4 + 10) + globalYOffset) * uiScale);
-        osu->getHUD()->drawComboSimple(g, this->iCombo, scale);
+        osu->getHUD()->drawComboSimple(this->iCombo, scale);
     }
     g->popTransform();
 
@@ -111,7 +111,7 @@ void UIRankingScreenRankingPanel::draw(Graphics *g) {
         g->translate(this->vPos.x + osu->getUIScale(195.0f) * uiScale,
                      this->vPos.y + (osu->getSkin()->getScore0()->getHeight() / 2) * scale +
                          (osu->getUIScale(row4 + 10) + globalYOffset) * uiScale);
-        osu->getHUD()->drawAccuracySimple(g, this->fAccuracy * 100.0f, scale);
+        osu->getHUD()->drawAccuracySimple(this->fAccuracy * 100.0f, scale);
     }
     g->popTransform();
 
@@ -133,7 +133,6 @@ void UIRankingScreenRankingPanel::draw(Graphics *g) {
     if(this->bPerfect) {
         scale = osu->getImageScale(osu->getSkin()->getRankingPerfect()->getSizeBaseRaw(), 94.0f) * uiScale;
         osu->getSkin()->getRankingPerfect()->drawRaw(
-            g,
             this->vPos +
                 Vector2(osu->getUIScale(osu->getSkin()->getVersion() > 1.0f ? 260 : 200),
                         osu->getUIScale(430.0f) + globalYOffset) *
@@ -143,18 +142,17 @@ void UIRankingScreenRankingPanel::draw(Graphics *g) {
     }
 }
 
-void UIRankingScreenRankingPanel::drawHitImage(Graphics *g, SkinImage *img, float scale, Vector2 pos) {
+void UIRankingScreenRankingPanel::drawHitImage(SkinImage *img, float scale, Vector2 pos) {
     const float uiScale = /*cv_ui_scale.getFloat()*/ 1.0f;  // NOTE: commented for now, doesn't really work due to
                                                             // legacy layout expectations
 
     /// img->setAnimationFrameForce(0);
     img->draw(
-        g,
         Vector2(this->vPos.x + osu->getUIScale(pos.x) * uiScale, this->vPos.y + osu->getUIScale(pos.y) * uiScale),
         uiScale);
 }
 
-void UIRankingScreenRankingPanel::drawNumHits(Graphics *g, int numHits, float scale, Vector2 pos) {
+void UIRankingScreenRankingPanel::drawNumHits(int numHits, float scale, Vector2 pos) {
     const float uiScale = /*cv_ui_scale.getFloat()*/ 1.0f;  // NOTE: commented for now, doesn't really work due to
                                                             // legacy layout expectations
 
@@ -164,7 +162,7 @@ void UIRankingScreenRankingPanel::drawNumHits(Graphics *g, int numHits, float sc
         g->translate(
             this->vPos.x + osu->getUIScale(pos.x) * uiScale,
             this->vPos.y + (osu->getSkin()->getScore0()->getHeight() / 2) * scale + osu->getUIScale(pos.y) * uiScale);
-        osu->getHUD()->drawComboSimple(g, numHits, scale);
+        osu->getHUD()->drawComboSimple(numHits, scale);
     }
     g->popTransform();
 }

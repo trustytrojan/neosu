@@ -9,7 +9,7 @@ class CBaseUIButton : public CBaseUIElement {
                   UString text = "");
     ~CBaseUIButton() override { ; }
 
-    void draw(Graphics *g) override;
+    void draw() override;
 
     void click() { this->onClicked(); }
 
@@ -98,9 +98,9 @@ class CBaseUIButton : public CBaseUIElement {
    protected:
     virtual void onClicked();
 
-    virtual void drawText(Graphics *g);
+    virtual void drawText();
 
-    void drawHoverRect(Graphics *g, int distance);
+    void drawHoverRect(int distance);
 
     void updateStringMetrics();
 

@@ -14,11 +14,11 @@ TooltipOverlay::TooltipOverlay() : OsuScreen() {
 
 TooltipOverlay::~TooltipOverlay() {}
 
-void TooltipOverlay::draw(Graphics *g) {
+void TooltipOverlay::draw() {
     if(this->fAnim > 0.0f) {
         const float dpiScale = Osu::getUIScale();
 
-        McFont *font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+        McFont *font = resourceManager->getFont("FONT_DEFAULT");
 
         const Vector2 offset = Vector2(10, 10) * dpiScale;
         const int margin = 5 * dpiScale;
@@ -32,7 +32,7 @@ void TooltipOverlay::draw(Graphics *g) {
         }
         const int height = font->getHeight() * this->lines.size() + lineSpacing * (this->lines.size() - 1) + 3 * dpiScale;
 
-        Vector2 cursorPos = engine->getMouse()->getPos();
+        Vector2 cursorPos = mouse->getPos();
 
         // clamp to right edge
         if(cursorPos.x + width + offset.x + 2 * margin > osu->getScreenWidth())

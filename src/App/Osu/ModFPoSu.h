@@ -20,7 +20,7 @@ class ModFPoSu {
     ModFPoSu();
     ~ModFPoSu();
 
-    void draw(Graphics *g);
+    void draw();
     void update();
 
     void onKeyDown(KeyboardEvent &key);

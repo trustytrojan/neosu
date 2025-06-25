@@ -14,9 +14,9 @@ enum class HitObjectType {
 
 class HitObject {
    public:
-    static void drawHitResult(Graphics *g, Beatmap *beatmap, Vector2 rawPos, LiveScore::HIT result,
+    static void drawHitResult(Beatmap *beatmap, Vector2 rawPos, LiveScore::HIT result,
                               float animPercentInv, float hitDeltaRangePercent);
-    static void drawHitResult(Graphics *g, Skin *skin, float hitcircleDiameter, float rawHitcircleDiameter,
+    static void drawHitResult(Skin *skin, float hitcircleDiameter, float rawHitcircleDiameter,
                               Vector2 rawPos, LiveScore::HIT result, float animPercentInv, float hitDeltaRangePercent);
 
    public:
@@ -24,8 +24,8 @@ class HitObject {
               BeatmapInterface *beatmap);
     virtual ~HitObject() { ; }
 
-    virtual void draw(Graphics *g) { ; }
-    virtual void draw2(Graphics *g);
+    virtual void draw() { ; }
+    virtual void draw2();
     virtual void update(long curPos, f64 frame_time);
 
     virtual void updateStackPosition(float stackOffset) = 0;
@@ -111,7 +111,7 @@ class HitObject {
         bool addObjectDurationToSkinAnimationTimeStartOffset;
     };
 
-    void drawHitResultAnim(Graphics *g, const HITRESULTANIM &hitresultanim);
+    void drawHitResultAnim(const HITRESULTANIM &hitresultanim);
 
     HITRESULTANIM hitresultanim1;
     HITRESULTANIM hitresultanim2;

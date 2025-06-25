@@ -2,7 +2,8 @@
 
 #include "CBaseUILabel.h"
 #include "CBaseUITextbox.h"
-#include "Keyboard.h"
+#include "KeyboardKeys.h"
+#include "Engine.h"
 #include "Osu.h"
 #include "UIButton.h"
 
@@ -43,13 +44,13 @@ void PromptScreen::onResolutionChange(Vector2 newResolution) {
     this->cancel_btn->setPos(xmiddle + 10, ymiddle + 50);
 }
 
-void PromptScreen::draw(Graphics *g) {
+void PromptScreen::draw() {
     if(!this->bVisible) return;
 
     g->setColor(COLOR(200, 0, 0, 0));
     g->fillRect(0, 0, this->getSize().x, this->getSize().y);
 
-    OsuScreen::draw(g);
+    OsuScreen::draw();
 }
 
 void PromptScreen::mouse_update(bool *propagate_clicks) {

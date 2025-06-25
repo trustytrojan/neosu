@@ -141,8 +141,9 @@ neosu_SOURCES = \
 	src/Engine/Renderer/OpenGLRenderTarget.cpp \
 	src/Engine/Renderer/OpenGLShader.cpp \
 	src/Engine/Renderer/OpenGLVertexArrayObject.cpp \
-	src/Engine/Resource.cpp \
-	src/Engine/ResourceManager.cpp \
+	src/Engine/Resources/AsyncResourceLoader.cpp \
+	src/Engine/Resources/Resource.cpp \
+	src/Engine/Resources/ResourceManager.cpp \
 	src/Engine/Sound/BASS/BassManager.cpp \
 	src/Engine/Sound/Sound.cpp \
 	src/Engine/Sound/SoundEngine.cpp \

@@ -77,7 +77,7 @@ void start_spectating(i32 user_id) {
     osu->mainMenu->setVisible(false);
     if(osu->room->isVisible()) osu->room->ragequit(false);
 
-    engine->getSound()->play(osu->getSkin()->menuHit);
+    soundEngine->play(osu->getSkin()->menuHit);
 }
 
 void stop_spectating() {
@@ -101,11 +101,11 @@ void stop_spectating() {
     send_packet(packet);
 
     osu->mainMenu->setVisible(true);
-    engine->getSound()->play(osu->getSkin()->menuBack);
+    soundEngine->play(osu->getSkin()->menuBack);
 }
 
 SpectatorScreen::SpectatorScreen() {
-    this->font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    this->font = resourceManager->getFont("FONT_DEFAULT");
     this->lfont = osu->getSubTitleFont();
 
     this->pauseButton = new MainMenuPauseButton(0, 0, 0, 0, "pause_btn", "");
@@ -246,14 +246,14 @@ void SpectatorScreen::mouse_update(bool *propagate_clicks) {
     }
 }
 
-void SpectatorScreen::draw(Graphics *g) {
+void SpectatorScreen::draw() {
     if(!this->isVisible()) return;
 
     if(cv_draw_spectator_background_image.getBool()) {
-        SongBrowser::drawSelectedBeatmapBackgroundImage(g, 1.0);
+        SongBrowser::drawSelectedBeatmapBackgroundImage(1.0);
     }
 
-    OsuScreen::draw(g);
+    OsuScreen::draw();
 }
 
 bool SpectatorScreen::isVisible() { return bancho.is_spectating && !osu->isInPlayMode(); }

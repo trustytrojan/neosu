@@ -28,10 +28,10 @@ Mouse::Mouse() : InputDevice() {
     this->desktopRect = env->getDesktopRect();
 }
 
-void Mouse::draw(Graphics *g) {
+void Mouse::draw() {
     if(!cv_debug_mouse.getBool()) return;
 
-    this->drawDebug(g);
+    this->drawDebug();
 
     // green rect = virtual cursor pos
     g->setColor(0xff00ff00);
@@ -56,7 +56,7 @@ void Mouse::draw(Graphics *g) {
     g->drawRect(-scaledOffset.x, -scaledOffset.y, scaledEngineScreenSize.x, scaledEngineScreenSize.y);
 }
 
-void Mouse::drawDebug(Graphics *g) {
+void Mouse::drawDebug() {
     Vector2 pos = this->getPos();
 
     g->setColor(0xff000000);
@@ -81,7 +81,7 @@ void Mouse::drawDebug(Graphics *g) {
     g->setColor(0xffffffff);
     g->drawRect(pos.x - rectSize.x / 2.0f, pos.y - rectSize.y / 2.0f, rectSize.x, rectSize.y);
 
-    McFont *posFont = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    McFont *posFont = resourceManager->getFont("FONT_DEFAULT");
     UString posString = UString::format("[%i, %i]", (int)pos.x, (int)pos.y);
     float stringWidth = posFont->getStringWidth(posString);
     float stringHeight = posFont->getHeight();
@@ -221,7 +221,7 @@ void Mouse::update() {
 
     // set new os cursor position, but only if the osMousePos is still within the window and the sensitivity is not 1;
     // raw input ALWAYS needs env->setPos()
-    // first person games which call engine->getMouse()->setPos() every frame to manually re-center the cursor NEVER
+    // first person games which call mouse->setPos() every frame to manually re-center the cursor NEVER
     // need env->setPos() absolute input NEVER needs env->setPos() also update prevOsMousePos
     if(windowRect.contains(osMousePos) && (sensitivityAdjustmentNeeded || cv_mouse_raw_input.getBool()) &&
        !this->bSetPosWasCalledLastFrame && !this->bAbsolute && env->getOS() != Environment::OS::LINUX)  // HACKHACK: linux hack

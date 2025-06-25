@@ -68,7 +68,7 @@ void RoomUIElement::onRoomJoinButtonClick(CBaseUIButton* btn) {
 }
 
 Lobby::Lobby() : OsuScreen() {
-    this->font = engine->getResourceManager()->getFont("FONT_DEFAULT");
+    this->font = resourceManager->getFont("FONT_DEFAULT");
 
     auto heading = new CBaseUILabel(50, 30, 300, 40, "", "Multiplayer rooms");
     heading->setFont(osu->getTitleFont());
@@ -100,7 +100,7 @@ void Lobby::onKeyDown(KeyboardEvent& key) {
         key.consume();
         this->setVisible(false);
         osu->mainMenu->setVisible(true);
-        engine->getSound()->play(osu->getSkin()->menuBack);
+        soundEngine->play(osu->getSkin()->menuBack);
         return;
     }
 

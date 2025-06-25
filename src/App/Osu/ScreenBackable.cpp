@@ -18,10 +18,10 @@ ScreenBackable::ScreenBackable() : OsuScreen() {
 
 ScreenBackable::~ScreenBackable() { SAFE_DELETE(this->backButton); }
 
-void ScreenBackable::draw(Graphics *g) {
+void ScreenBackable::draw() {
     if(!this->bVisible) return;
-    OsuScreen::draw(g);
-    this->backButton->draw(g);
+    OsuScreen::draw();
+    this->backButton->draw();
 }
 
 void ScreenBackable::mouse_update(bool *propagate_clicks) {
@@ -36,7 +36,7 @@ void ScreenBackable::onKeyDown(KeyboardEvent &e) {
     if(!this->bVisible || e.isConsumed()) return;
 
     if(e == KEY_ESCAPE || e == (KEYCODE)cv_GAME_PAUSE.getInt()) {
-        engine->getSound()->play(osu->getSkin()->menuBack);
+        soundEngine->play(osu->getSkin()->menuBack);
         this->onBack();
         e.consume();
         return;

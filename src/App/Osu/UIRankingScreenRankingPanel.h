@@ -10,14 +10,14 @@ class UIRankingScreenRankingPanel : public CBaseUIImage {
    public:
     UIRankingScreenRankingPanel();
 
-    void draw(Graphics *g) override;
+    void draw() override;
 
     void setScore(LiveScore *score);
     void setScore(FinishedScore score);
 
    private:
-    void drawHitImage(Graphics *g, SkinImage *img, float scale, Vector2 pos);
-    void drawNumHits(Graphics *g, int numHits, float scale, Vector2 pos);
+    void drawHitImage(SkinImage *img, float scale, Vector2 pos);
+    void drawNumHits(int numHits, float scale, Vector2 pos);
 
     unsigned long long iScore;
     int iNum300s;

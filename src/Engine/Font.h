@@ -21,8 +21,8 @@ class VertexArrayObject;
 
 class McFont final : public Resource {
    public:
-    McFont(const UString &filepath, int fontSize = 16, bool antialiasing = true, int fontDPI = 96);
-    McFont(const UString &filepath, const std::vector<wchar_t> &characters, int fontSize = 16, bool antialiasing = true,
+    McFont(const std::string &filepath, int fontSize = 16, bool antialiasing = true, int fontDPI = 96);
+    McFont(const std::string &filepath, const std::vector<wchar_t> &characters, int fontSize = 16, bool antialiasing = true,
            int fontDPI = 96);
     ~McFont() override { destroy(); }
 
@@ -35,10 +35,10 @@ class McFont final : public Resource {
     // called on engine shutdown to clean up freetype/shared fallback fonts
     static void cleanupSharedResources();
 
-    void drawString(Graphics *g, const UString &text);
+    void drawString(const std::string &text);
     void beginBatch();
-    void addToBatch(const UString &text, const Vector3 &pos, Color color = 0xffffffff);
-    void flushBatch(Graphics *g);
+    void addToBatch(const std::string &text, const Vector3 &pos, Color color = 0xffffffff);
+    void flushBatch();
 
     void setSize(int fontSize) { m_iFontSize = fontSize; }
     void setDPI(int dpi) { m_iFontDPI = dpi; }
@@ -50,7 +50,6 @@ class McFont final : public Resource {
 
     float getStringWidth(const UString &text) const;
     float getStringHeight(const UString &text) const;
-
     std::vector<UString> wrap(const UString &text, f64 max_width) const;
 
    public:
@@ -65,11 +64,11 @@ class McFont final : public Resource {
     // McKay would say: ILLEGAL
     const GLYPH_METRICS &getGlyphMetrics(wchar_t ch) const;
 
-    // // type inspection
-    // [[nodiscard]] Type getResType() const override { return FONT; }
+    // type inspection
+    [[nodiscard]] Type getResType() const override { return FONT; }
 
-    // McFont *asFont() override { return this; }
-    // [[nodiscard]] const McFont *asFont() const override { return this; }
+    McFont *asFont() override { return this; }
+    [[nodiscard]] const McFont *asFont() const override { return this; }
 
    protected:
     void constructor(const std::vector<wchar_t> &characters, int fontSize, bool antialiasing, int fontDPI);
@@ -79,13 +78,13 @@ class McFont final : public Resource {
 
    private:
     struct FallbackFont {
-        UString fontPath;
+        std::string fontPath;
         FT_Face face;
         bool isSystemFont;
     };
 
     struct BatchEntry {
-        UString text;
+        std::string text;
         Vector3 pos;
         Color color;
     };
@@ -114,7 +113,7 @@ class McFont final : public Resource {
     bool loadGlyphFromFace(wchar_t ch, FT_Face face, int fontIndex);
 
     void buildGlyphGeometry(const GLYPH_METRICS &gm, const Vector3 &basePos, float advanceX, size_t &vertexCount);
-    void buildStringGeometry(const UString &text, size_t &vertexCount);
+    void buildStringGeometry(const std::string &text, size_t &vertexCount);
 
     Channel *unpackMonoBitmap(const FT_Bitmap &bitmap);
 
@@ -128,7 +127,7 @@ class McFont final : public Resource {
     static bool initializeSharedFreeType();
     static bool initializeSharedFallbackFonts();
     static void discoverSystemFallbacks();
-    static bool loadFallbackFont(const UString &fontPath, bool isSystemFont = false);
+    static bool loadFallbackFont(const std::string &fontPath, bool isSystemFont = false);
 
     // helper to set font size on any face for this font instance
     void setFaceSize(FT_Face face) const;

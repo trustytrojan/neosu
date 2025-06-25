@@ -736,14 +736,14 @@ void _echo(UString args) {
 
 void _volume(UString oldValue, UString newValue) {
     (void)oldValue;
-    engine->getSound()->setVolume(newValue.toFloat());
+    soundEngine->setVolume(newValue.toFloat());
 }
 
 void _RESTART_SOUND_ENGINE_ON_CHANGE(UString oldValue, UString newValue) {
     const int oldValueMS = std::round(oldValue.toFloat() * 1000.0f);
     const int newValueMS = std::round(newValue.toFloat() * 1000.0f);
 
-    if(oldValueMS != newValueMS) engine->getSound()->restart();
+    if(oldValueMS != newValueMS) soundEngine->restart();
 }
 
 void _vprof(UString oldValue, UString newValue) {
@@ -778,7 +778,7 @@ void _vsync(UString oldValue, UString newValue) {
         debugLog("Usage: 'vsync 1' to turn vsync on, 'vsync 0' to turn vsync off\n");
     else {
         bool vsync = newValue.toFloat() > 0.0f;
-        engine->getGraphics()->setVSync(vsync);
+        g->setVSync(vsync);
     }
 }
 

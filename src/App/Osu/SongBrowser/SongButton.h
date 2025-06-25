@@ -11,7 +11,7 @@ class SongButton : public Button {
                float xSize, float ySize, UString name, DatabaseBeatmap *databaseBeatmap);
     ~SongButton() override;
 
-    void draw(Graphics *g) override;
+    void draw() override;
 
     void triggerContextMenu(Vector2 pos);
 
@@ -31,10 +31,10 @@ class SongButton : public Button {
     void onAddToCollectionConfirmed(UString text, int id = -1);
     void onCreateNewCollectionConfirmed(UString text, int id = -1);
 
-    void drawBeatmapBackgroundThumbnail(Graphics *g, Image *image);
-    void drawGrade(Graphics *g);
-    void drawTitle(Graphics *g, float deselectedAlpha = 1.0f, bool forceSelectedStyle = false);
-    void drawSubTitle(Graphics *g, float deselectedAlpha = 1.0f, bool forceSelectedStyle = false);
+    void drawBeatmapBackgroundThumbnail(Image *image);
+    void drawGrade();
+    void drawTitle(float deselectedAlpha = 1.0f, bool forceSelectedStyle = false);
+    void drawSubTitle(float deselectedAlpha = 1.0f, bool forceSelectedStyle = false);
 
     float calculateGradeScale();
     float calculateGradeWidth();

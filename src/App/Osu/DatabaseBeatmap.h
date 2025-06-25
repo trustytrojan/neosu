@@ -362,7 +362,7 @@ class DatabaseBeatmapBackgroundImagePathLoader : public Resource {
     [[nodiscard]] inline const std::string &getLoadedBackgroundImageFileName() const {
         return this->sLoadedBackgroundImageFileName;
     }
-
+	[[nodiscard]] Type getResType() const override { return APPDEFINED; } // TODO: handle this better?
    private:
     void init() override;
     void initAsync() override;

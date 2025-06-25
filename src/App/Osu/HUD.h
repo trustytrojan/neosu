@@ -30,38 +30,37 @@ class HUD : public OsuScreen {
     HUD();
     ~HUD() override;
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
-    void drawDummy(Graphics *g);
+    void drawDummy();
 
-    void drawCursor(Graphics *g, Vector2 pos, float alphaMultiplier = 1.0f, bool secondTrail = false,
+    void drawCursor(Vector2 pos, float alphaMultiplier = 1.0f, bool secondTrail = false,
                     bool updateAndDrawTrail = true);
     void drawCursorTrail(
-        Graphics *g, Vector2 pos, float alphaMultiplier = 1.0f,
+        Vector2 pos, float alphaMultiplier = 1.0f,
         bool secondTrail = false);  // NOTE: only use if drawCursor() with updateAndDrawTrail = false (FPoSu)
-    void drawCursorRipples(Graphics *g);
-    void drawFps(Graphics *g) { this->drawFps(g, this->tempFont, this->fCurFps); }
-    void drawHitErrorBar(Graphics *g, Beatmap *beatmap);
-    void drawPlayfieldBorder(Graphics *g, Vector2 playfieldCenter, Vector2 playfieldSize, float hitcircleDiameter);
-    void drawPlayfieldBorder(Graphics *g, Vector2 playfieldCenter, Vector2 playfieldSize, float hitcircleDiameter,
-                             float borderSize);
-    void drawLoadingSmall(Graphics *g, UString text);
-    void drawBeatmapImportSpinner(Graphics *g);
-    void drawScoreNumber(Graphics *g, unsigned long long number, float scale = 1.0f, bool drawLeadingZeroes = false);
-    void drawComboNumber(Graphics *g, unsigned long long number, float scale = 1.0f, bool drawLeadingZeroes = false);
-    void drawComboSimple(Graphics *g, int combo, float scale = 1.0f);          // used by RankingScreen
-    void drawAccuracySimple(Graphics *g, float accuracy, float scale = 1.0f);  // used by RankingScreen
-    void drawWarningArrow(Graphics *g, Vector2 pos, bool flipVertically, bool originLeft = true);
+    void drawCursorRipples();
+    void drawFps() { this->drawFps(this->tempFont, this->fCurFps); }
+    void drawHitErrorBar(Beatmap *beatmap);
+    void drawPlayfieldBorder(Vector2 playfieldCenter, Vector2 playfieldSize, float hitcircleDiameter);
+    void drawPlayfieldBorder(Vector2 playfieldCenter, Vector2 playfieldSize, float hitcircleDiameter, float borderSize);
+    void drawLoadingSmall(UString text);
+    void drawBeatmapImportSpinner();
+    void drawScoreNumber(unsigned long long number, float scale = 1.0f, bool drawLeadingZeroes = false);
+    void drawComboNumber(unsigned long long number, float scale = 1.0f, bool drawLeadingZeroes = false);
+    void drawComboSimple(int combo, float scale = 1.0f);          // used by RankingScreen
+    void drawAccuracySimple(float accuracy, float scale = 1.0f);  // used by RankingScreen
+    void drawWarningArrow(Vector2 pos, bool flipVertically, bool originLeft = true);
 
     std::vector<SCORE_ENTRY> getCurrentScores();
     void resetScoreboard();
     void updateScoreboard(bool animate);
-    void drawFancyScoreboard(Graphics *g);
+    void drawFancyScoreboard();
 
-    void drawScorebarBg(Graphics *g, float alpha, float breakAnim);
-    void drawSectionPass(Graphics *g, float alpha);
-    void drawSectionFail(Graphics *g, float alpha);
+    void drawScorebarBg(float alpha, float breakAnim);
+    void drawSectionPass(float alpha);
+    void drawSectionFail(float alpha);
 
     void animateCombo();
     void addHitError(long delta, bool miss = false, bool misaim = false);
@@ -78,7 +77,7 @@ class HUD : public OsuScreen {
 
     McRect getSkipClickRect();
 
-    void drawSkip(Graphics *g);
+    void drawSkip();
 
     // ILLEGAL:
     [[nodiscard]] inline float getScoreBarBreakAnim() const { return this->fScoreBarBreakAnim; }
@@ -123,36 +122,34 @@ class HUD : public OsuScreen {
 
     void addCursorTrailPosition(std::vector<CURSORTRAIL> &trail, Vector2 pos, bool empty = false);
 
-    void drawCursorInt(Graphics *g, Shader *trailShader, std::vector<CURSORTRAIL> &trail, Matrix4 &mvp, Vector2 pos,
+    void drawCursorInt(Shader *trailShader, std::vector<CURSORTRAIL> &trail, Matrix4 &mvp, Vector2 pos,
                        float alphaMultiplier = 1.0f, bool emptyTrailFrame = false, bool updateAndDrawTrail = true);
-    void drawCursorRaw(Graphics *g, Vector2 pos, float alphaMultiplier = 1.0f);
-    void drawCursorTrailInt(Graphics *g, Shader *trailShader, std::vector<CURSORTRAIL> &trail, Matrix4 &mvp,
-                            Vector2 pos, float alphaMultiplier = 1.0f, bool emptyTrailFrame = false);
-    void drawCursorTrailRaw(Graphics *g, float alpha, Vector2 pos);
-    void drawFps(Graphics *g, McFont *font, float fps);
-    void drawAccuracy(Graphics *g, float accuracy);
-    void drawCombo(Graphics *g, int combo);
-    void drawScore(Graphics *g, unsigned long long score);
-    void drawHPBar(Graphics *g, double health, float alpha, float breakAnim);
+    void drawCursorRaw(Vector2 pos, float alphaMultiplier = 1.0f);
+    void drawCursorTrailInt(Shader *trailShader, std::vector<CURSORTRAIL> &trail, Matrix4 &mvp, Vector2 pos,
+                            float alphaMultiplier = 1.0f, bool emptyTrailFrame = false);
+    void drawCursorTrailRaw(float alpha, Vector2 pos);
+    void drawFps(McFont *font, float fps);
+    void drawAccuracy(float accuracy);
+    void drawCombo(int combo);
+    void drawScore(unsigned long long score);
+    void drawHPBar(double health, float alpha, float breakAnim);
 
-    void drawWarningArrows(Graphics *g, float hitcircleDiameter = 0.0f);
-    void drawContinue(Graphics *g, Vector2 cursor, float hitcircleDiameter = 0.0f);
-    void drawHitErrorBar(Graphics *g, float hitWindow300, float hitWindow100, float hitWindow50, float hitWindowMiss,
-                         int ur);
-    void drawHitErrorBarInt(Graphics *g, float hitWindow300, float hitWindow100, float hitWindow50,
-                            float hitWindowMiss);
-    void drawHitErrorBarInt2(Graphics *g, Vector2 center, int ur);
-    void drawProgressBar(Graphics *g, float percent, bool waiting);
-    void drawStatistics(Graphics *g, int misses, int sliderbreaks, int maxPossibleCombo, float liveStars,
-                        float totalStars, int bpm, float ar, float cs, float od, float hp, int nps, int nd, int ur,
-                        float pp, float ppfc, float hitWindow300, int hitdeltaMin, int hitdeltaMax);
-    void drawTargetHeatmap(Graphics *g, float hitcircleDiameter);
-    void drawScrubbingTimeline(Graphics *g, unsigned long beatmapTime, unsigned long beatmapLength,
+    void drawWarningArrows(float hitcircleDiameter = 0.0f);
+    void drawContinue(Vector2 cursor, float hitcircleDiameter = 0.0f);
+    void drawHitErrorBar(float hitWindow300, float hitWindow100, float hitWindow50, float hitWindowMiss, int ur);
+    void drawHitErrorBarInt(float hitWindow300, float hitWindow100, float hitWindow50, float hitWindowMiss);
+    void drawHitErrorBarInt2(Vector2 center, int ur);
+    void drawProgressBar(float percent, bool waiting);
+    void drawStatistics(int misses, int sliderbreaks, int maxPossibleCombo, float liveStars, float totalStars, int bpm,
+                        float ar, float cs, float od, float hp, int nps, int nd, int ur, float pp, float ppfc,
+                        float hitWindow300, int hitdeltaMin, int hitdeltaMax);
+    void drawTargetHeatmap(float hitcircleDiameter);
+    void drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmapLength,
                                unsigned long beatmapLengthPlayable, unsigned long beatmapStartTimePlayable,
                                float beatmapPercentFinishedPlayable, const std::vector<BREAK> &breaks);
-    void drawInputOverlay(Graphics *g, int numK1, int numK2, int numM1, int numM2);
+    void drawInputOverlay(int numK1, int numK2, int numM1, int numM2);
 
-    void drawStatisticText(Graphics *g, const UString text);
+    void drawStatisticText(const UString text);
 
     float getCursorScaleFactor();
     float getCursorTrailScaleFactor();

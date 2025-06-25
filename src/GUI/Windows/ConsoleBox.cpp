@@ -24,7 +24,7 @@ class ConsoleBoxTextbox : public CBaseUITextbox {
     void setSuggestion(UString suggestion) { this->sSuggestion = suggestion; }
 
    protected:
-    void drawText(Graphics *g) override {
+    void drawText() override {
         if(cv_consolebox_draw_preview.getBool()) {
             if(this->sSuggestion.length() > 0 && this->sSuggestion.find(this->sText) == 0) {
                 g->setColor(0xff444444);
@@ -38,7 +38,7 @@ class ConsoleBoxTextbox : public CBaseUITextbox {
             }
         }
 
-        CBaseUITextbox::drawText(g);
+        CBaseUITextbox::drawText();
     }
 
    private:
@@ -55,7 +55,7 @@ class ConsoleBoxSuggestionButton : public CBaseUIButton {
     }
 
    protected:
-    void drawText(Graphics *g) override {
+    void drawText() override {
         if(this->font == NULL || this->sText.length() < 1) return;
 
         if(cv_consolebox_draw_helptext.getBool()) {
@@ -87,7 +87,7 @@ class ConsoleBoxSuggestionButton : public CBaseUIButton {
             }
         }
 
-        CBaseUIButton::drawText(g);
+        CBaseUIButton::drawText();
     }
 
    private:
@@ -98,8 +98,8 @@ class ConsoleBoxSuggestionButton : public CBaseUIButton {
 ConsoleBox::ConsoleBox() : CBaseUIElement(0, 0, 0, 0, "") {
     const float dpiScale = env->getDPIScale();
 
-    McFont *font = engine->getResourceManager()->getFont("FONT_DEFAULT");
-    this->logFont = engine->getResourceManager()->getFont("FONT_CONSOLE");
+    McFont *font = resourceManager->getFont("FONT_DEFAULT");
+    this->logFont = resourceManager->getFont("FONT_CONSOLE");
 
     this->textbox = new ConsoleBoxTextbox(5 * dpiScale, engine->getScreenHeight(),
                                           engine->getScreenWidth() - 10 * dpiScale, 26, "consoleboxtextbox");
@@ -153,16 +153,16 @@ ConsoleBox::~ConsoleBox() {
     anim->deleteExistingAnimation(&this->fLogYPos);
 }
 
-void ConsoleBox::draw(Graphics *g) {
+void ConsoleBox::draw() {
     // HACKHACK: legacy OpenGL fix
     g->setAntialiasing(false);
 
     g->pushTransform();
     {
-        if(engine->getMouse()->isMiddleDown())
-            g->translate(0, engine->getMouse()->getPos().y - engine->getScreenHeight());
+        if(mouse->isMiddleDown())
+            g->translate(0, mouse->getPos().y - engine->getScreenHeight());
 
-        if(cv_console_overlay.getBool() || this->textbox->isVisible()) this->drawLogOverlay(g);
+        if(cv_console_overlay.getBool() || this->textbox->isVisible()) this->drawLogOverlay();
 
         if(anim->isAnimating(&this->fConsoleAnimation)) {
             g->push3DScene(McRect(this->textbox->getPos().x, this->textbox->getPos().y, this->textbox->getSize().x,
@@ -170,19 +170,19 @@ void ConsoleBox::draw(Graphics *g) {
             {
                 g->rotate3DScene(((this->fConsoleAnimation / this->getAnimTargetY()) * 130 - 130), 0, 0);
                 g->translate3DScene(0, 0, ((this->fConsoleAnimation / this->getAnimTargetY()) * 500 - 500));
-                this->textbox->draw(g);
-                this->suggestion->draw(g);
+                this->textbox->draw();
+                this->suggestion->draw();
             }
             g->pop3DScene();
         } else {
-            this->suggestion->draw(g);
-            this->textbox->draw(g);
+            this->suggestion->draw();
+            this->textbox->draw();
         }
     }
     g->popTransform();
 }
 
-void ConsoleBox::drawLogOverlay(Graphics *g) {
+void ConsoleBox::drawLogOverlay() {
     std::lock_guard<std::mutex> logGuard(this->logMutex);
 
     const float dpiScale = this->getDPIScale();
@@ -227,7 +227,7 @@ void ConsoleBox::drawLogOverlay(Graphics *g) {
 void ConsoleBox::mouse_update(bool *propagate_clicks) {
     CBaseUIElement::mouse_update(propagate_clicks);
 
-    const bool mleft = engine->getMouse()->isLeftDown();
+    const bool mleft = mouse->isLeftDown();
 
     if(mleft && this->textbox->isMouseInside() && this->textbox->isVisible()) this->textbox->setActive(true);
 
@@ -333,7 +333,7 @@ void ConsoleBox::onKeyDown(KeyboardEvent &e) {
     // toggle visibility
     if((e == KEY_F1 && (this->textbox->isActive() && this->textbox->isVisible() && !this->bConsoleAnimateOut
                             ? true
-                            : engine->getKeyboard()->isShiftDown())) ||
+                            : keyboard->isShiftDown())) ||
        (this->textbox->isActive() && this->textbox->isVisible() && !this->bConsoleAnimateOut && e == KEY_ESCAPE))
         this->toggle(e);
 
@@ -346,7 +346,7 @@ void ConsoleBox::onKeyDown(KeyboardEvent &e) {
     if(this->iSuggestionCount > 0 && this->textbox->isActive() && this->textbox->isVisible()) {
         // handle suggestion up/down buttons
 
-        if(e == KEY_DOWN || (e == KEY_TAB && !engine->getKeyboard()->isShiftDown())) {
+        if(e == KEY_DOWN || (e == KEY_TAB && !keyboard->isShiftDown())) {
             if(this->iSelectedSuggestion < 1)
                 this->iSelectedSuggestion = this->iSuggestionCount - 1;
             else
@@ -373,7 +373,7 @@ void ConsoleBox::onKeyDown(KeyboardEvent &e) {
             }
 
             e.consume();
-        } else if(e == KEY_UP || (e == KEY_TAB && engine->getKeyboard()->isShiftDown())) {
+        } else if(e == KEY_UP || (e == KEY_TAB && keyboard->isShiftDown())) {
             if(this->iSelectedSuggestion > this->iSuggestionCount - 2)
                 this->iSelectedSuggestion = 0;
             else

@@ -24,7 +24,7 @@ struct Application {
     DiscordUserId user_id;
 };
 
-static struct Application app;
+static struct Application dapp;
 static struct IDiscordActivityEvents activities_events;
 static struct IDiscordRelationshipEvents relationships_events;
 static struct IDiscordUserEvents users_events;
@@ -57,26 +57,26 @@ void init_discord_sdk() {
     params.relationship_events = &relationships_events;
     params.user_events = &users_events;
 
-    int res = DiscordCreate(DISCORD_VERSION, &params, &app.core);
+    int res = DiscordCreate(DISCORD_VERSION, &params, &dapp.core);
     if(res != DiscordResult_Ok) {
         debugLog("Failed to initialize Discord SDK! (error %d)\n", res);
         return;
     }
 
 #ifdef _WIN64
-    app.core->set_log_hook(app.core, DiscordLogLevel_Warn, NULL, on_discord_log);
+    dapp.core->set_log_hook(dapp.core, DiscordLogLevel_Warn, NULL, on_discord_log);
 #endif
-    app.activities = app.core->get_activity_manager(app.core);
+    dapp.activities = dapp.core->get_activity_manager(dapp.core);
 
-    app.activities->register_command(app.activities, "neosu://run");
+    dapp.activities->register_command(dapp.activities, "neosu://run");
 
-    // app.users = app.core->get_user_manager(app.core);
-    // app.achievements = app.core->get_achievement_manager(app.core);
-    // app.application = app.core->get_application_manager(app.core);
-    // app.lobbies = app.core->get_lobby_manager(app.core);
-    // app.lobbies->connect_lobby_with_activity_secret(app.lobbies, "invalid_secret", &app, OnLobbyConnect);
-    // app.application->get_oauth2_token(app.application, &app, OnOAuth2Token);
-    // app.relationships = app.core->get_relationship_manager(app.core);
+    // dapp.users = dapp.core->get_user_manager(dapp.core);
+    // dapp.achievements = dapp.core->get_achievement_manager(dapp.core);
+    // dapp.application = dapp.core->get_application_manager(dapp.core);
+    // dapp.lobbies = dapp.core->get_lobby_manager(dapp.core);
+    // dapp.lobbies->connect_lobby_with_activity_secret(dapp.lobbies, "invalid_secret", &app, OnLobbyConnect);
+    // dapp.application->get_oauth2_token(dapp.application, &app, OnOAuth2Token);
+    // dapp.relationships = dapp.core->get_relationship_manager(dapp.core);
 
     initialized = true;
 #else
@@ -88,7 +88,7 @@ void tick_discord_sdk() {
     if(!initialized) return;
 
 #ifdef _WIN32
-    app.core->run_callbacks(app.core);
+    dapp.core->run_callbacks(dapp.core);
 #else
         // not enabled on linux cuz the sdk is broken there
 #endif
@@ -105,7 +105,7 @@ void clear_discord_presence() {
     // TODO @kiwec: test if this works
     struct DiscordActivity activity;
     memset(&activity, 0, sizeof(activity));
-    app.activities->update_activity(app.activities, &activity, NULL, NULL);
+    dapp.activities->update_activity(dapp.activities, &activity, NULL, NULL);
 #else
         // not enabled on linux cuz the sdk is broken there
 #endif
@@ -160,7 +160,7 @@ void set_discord_presence(struct DiscordActivity *activity) {
         }
     }
 
-    app.activities->update_activity(app.activities, activity, NULL, NULL);
+    dapp.activities->update_activity(dapp.activities, activity, NULL, NULL);
 #else
         // not enabled on linux cuz the sdk is broken there
 #endif

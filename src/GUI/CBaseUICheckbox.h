@@ -7,7 +7,7 @@ class CBaseUICheckbox : public CBaseUIButton {
                     UString text = "");
     ~CBaseUICheckbox() override { ; }
 
-    void draw(Graphics *g) override;
+    void draw() override;
 
     inline float getBlockSize() { return this->vSize.y / 2; }
     inline float getBlockBorder() { return this->vSize.y / 4; }

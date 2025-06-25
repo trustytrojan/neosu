@@ -43,8 +43,8 @@ bool McFont::s_sharedFtLibraryInitialized = false;
 std::vector<McFont::FallbackFont> McFont::s_sharedFallbackFonts;
 bool McFont::s_sharedFallbacksInitialized = false;
 
-McFont::McFont(const UString &filepath, int fontSize, bool antialiasing, int fontDPI)
-    : Resource(filepath.toUtf8()),
+McFont::McFont(const std::string &filepath, int fontSize, bool antialiasing, int fontDPI)
+    : Resource(filepath),
       m_vao((Env::cfg(REND::GLES2 | REND::GLES32) ? Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES
                                                   : Graphics::PRIMITIVE::PRIMITIVE_QUADS),
             Graphics::USAGE_TYPE::USAGE_DYNAMIC) {
@@ -56,9 +56,9 @@ McFont::McFont(const UString &filepath, int fontSize, bool antialiasing, int fon
     constructor(characters, fontSize, antialiasing, fontDPI);
 }
 
-McFont::McFont(const UString &filepath, const std::vector<wchar_t> &characters, int fontSize, bool antialiasing,
+McFont::McFont(const std::string &filepath, const std::vector<wchar_t> &characters, int fontSize, bool antialiasing,
                int fontDPI)
-    : Resource(filepath.toUtf8()),
+    : Resource(filepath),
       m_vao((Env::cfg(REND::GLES2 | REND::GLES32) ? Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES
                                                   : Graphics::PRIMITIVE::PRIMITIVE_QUADS),
             Graphics::USAGE_TYPE::USAGE_DYNAMIC) {
@@ -101,7 +101,7 @@ void McFont::constructor(const std::vector<wchar_t> &characters, int fontSize, b
 }
 
 void McFont::init() {
-    debugLogF("Resource Manager: Loading {:s}\n", this->sFilePath);
+    debugLogF("Resource Manager: Loading {:s}\n", m_sFilePath);
 
     if(!initializeFreeType()) return;
 
@@ -123,7 +123,7 @@ void McFont::init() {
         m_fHeight = std::max(m_fHeight, static_cast<float>(curHeight));
     }
 
-    this->bReady = true;
+    m_bReady = true;
 }
 
 bool McFont::loadGlyphDynamic(wchar_t ch) {
@@ -266,7 +266,7 @@ bool McFont::initializeSharedFallbackFonts() {
     std::vector<std::string> bundledFallbacks = env->getFilesInFolder(ResourceManager::PATH_DEFAULT_FONTS);
 
     for(const auto &fontName : bundledFallbacks) {
-        if(loadFallbackFont(UString{fontName}, false)) {
+        if(loadFallbackFont(std::string{fontName}, false)) {
             if(cv_r_debug_font_unicode.getBool()) debugLogF("Font Info: Loaded bundled fallback font: {:s}\n", fontName);
         }
     }
@@ -283,45 +283,46 @@ void McFont::discoverSystemFallbacks() {
     wchar_t windir[MAX_PATH];
     if(GetWindowsDirectoryW(windir, MAX_PATH) <= 0) return;
 
-    std::vector<UString> systemFonts = {
-        UString(windir) + "\\Fonts\\arial.ttf",
-        UString(windir) + "\\Fonts\\msyh.ttc",      // Microsoft YaHei (Chinese)
-        UString(windir) + "\\Fonts\\malgun.ttf",    // Malgun Gothic (Korean)
-        UString(windir) + "\\Fonts\\meiryo.ttc",    // Meiryo (Japanese)
-        UString(windir) + "\\Fonts\\seguiemj.ttf",  // Segoe UI Emoji
-        UString(windir) + "\\Fonts\\seguisym.ttf"   // Segoe UI Symbol
+    // lol
+    std::vector<std::string> systemFonts = {
+        std::string(UString{UString{windir} + "\\Fonts\\arial.ttf"}.toUtf8()),
+        std::string(UString{UString{windir} + "\\Fonts\\msyh.ttc"}.toUtf8()),      // Microsoft YaHei (Chinese)
+        std::string(UString{UString{windir} + "\\Fonts\\malgun.ttf"}.toUtf8()),    // Malgun Gothic (Korean)
+        std::string(UString{UString{windir} + "\\Fonts\\meiryo.ttc"}.toUtf8()),    // Meiryo (Japanese)
+        std::string(UString{UString{windir} + "\\Fonts\\seguiemj.ttf"}.toUtf8()),  // Segoe UI Emoji
+        std::string(UString{UString{windir} + "\\Fonts\\seguisym.ttf"}.toUtf8())   // Segoe UI Symbol
     };
 #elif defined(MCENGINE_PLATFORM_LINUX)
     // linux system fonts (common locations)
-    std::vector<UString> systemFonts = {"/usr/share/fonts/TTF/dejavu/DejaVuSans.ttf",
+    std::vector<std::string> systemFonts = {"/usr/share/fonts/TTF/dejavu/DejaVuSans.ttf",
                                         "/usr/share/fonts/TTF/liberation/LiberationSans-Regular.ttf",
                                         "/usr/share/fonts/liberation/LiberationSans-Regular.ttf",
                                         "/usr/share/fonts/noto/NotoSans-Regular.ttf",
                                         "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
                                         "/usr/share/fonts/TTF/noto/NotoColorEmoji.ttf"};
 #else  // TODO: loading WOFF fonts in wasm? idk
-    std::vector<UString> systemFonts;
+    std::vector<std::string> systemFonts;
     return;
 #endif
 
     for(const auto &fontPath : systemFonts) {
-        if(env->fileExists(fontPath.toUtf8())) {
+        if(env->fileExists(fontPath)) {
             loadFallbackFont(fontPath, true);
         }
     }
 }
 
-bool McFont::loadFallbackFont(const UString &fontPath, bool isSystemFont) {
+bool McFont::loadFallbackFont(const std::string &fontPath, bool isSystemFont) {
     FT_Face face{};
-    if(FT_New_Face(s_sharedFtLibrary, fontPath.toUtf8(), 0, &face)) {
+    if(FT_New_Face(s_sharedFtLibrary, fontPath.c_str(), 0, &face)) {
         if(cv_r_debug_font_unicode.getBool())
-            debugLogF("Font Warning: Failed to load fallback font: {:s}\n", fontPath.toUtf8());
+            debugLogF("Font Warning: Failed to load fallback font: {:s}\n", fontPath);
         return false;
     }
 
     if(FT_Select_Charmap(face, ft_encoding_unicode)) {
         if(cv_r_debug_font_unicode.getBool())
-            debugLogF("Font Warning: Failed to select unicode charmap for fallback font: {:s}\n", fontPath.toUtf8());
+            debugLogF("Font Warning: Failed to select unicode charmap for fallback font: {:s}\n", fontPath);
         FT_Done_Face(face);
         return false;
     }
@@ -379,7 +380,7 @@ bool McFont::initializeFreeType() {
     if(!initializeSharedFreeType()) return false;
 
     // load this font's primary face
-    if(FT_New_Face(s_sharedFtLibrary, this->sFilePath.c_str(), 0, &m_ftFace)) {
+    if(FT_New_Face(s_sharedFtLibrary, m_sFilePath.c_str(), 0, &m_ftFace)) {
         engine->showMessageError("Font Error", "Couldn't load font file!");
         return false;
     }
@@ -490,8 +491,8 @@ bool McFont::createAndPackAtlas(const std::vector<wchar_t> &glyphs) {
     const size_t atlasSize =
         TextureAtlas::calculateOptimalSize(packRects, ATLAS_OCCUPANCY_TARGET, padding, MIN_ATLAS_SIZE, MAX_ATLAS_SIZE);
 
-    engine->getResourceManager()->requestNextLoadUnmanaged();
-    m_textureAtlas = engine->getResourceManager()->createTextureAtlas(atlasSize, atlasSize);
+    resourceManager->requestNextLoadUnmanaged();
+    m_textureAtlas = resourceManager->createTextureAtlas(atlasSize, atlasSize);
     m_textureAtlas->setPadding(padding);
 
     // pack glyphs into atlas
@@ -512,7 +513,7 @@ bool McFont::createAndPackAtlas(const std::vector<wchar_t> &glyphs) {
     }
 
     // finalize atlas texture
-    engine->getResourceManager()->loadResource(m_textureAtlas);
+    resourceManager->loadResource(m_textureAtlas);
     m_textureAtlas->getAtlasImage()->setFilterMode(m_bAntialiasing ? Graphics::FILTER_MODE::FILTER_MODE_LINEAR
                                                                    : Graphics::FILTER_MODE::FILTER_MODE_NONE);
 
@@ -580,14 +581,14 @@ void McFont::buildGlyphGeometry(const GLYPH_METRICS &gm, const Vector3 &basePos,
     vertexCount += VERTS_PER_VAO;
 }
 
-void McFont::buildStringGeometry(const UString &text, size_t &vertexCount) {
-    if(!this->bReady || text.length() == 0 || text.length() > cv_r_drawstring_max_string_length.getInt()) return;
+void McFont::buildStringGeometry(const std::string &text, size_t &vertexCount) {
+    if(!m_bReady || text.length() == 0 || text.length() > cv_r_drawstring_max_string_length.getInt()) return;
 
     // check if atlas needs rebuilding before geometry generation
     if(m_bAtlasNeedsRebuild) rebuildAtlas();
 
     float advanceX = 0.0f;
-    const size_t maxGlyphs = std::min(text.length(), (int)(m_vertices.size() - vertexCount) / VERTS_PER_VAO);
+    const size_t maxGlyphs = std::min(text.length(), (m_vertices.size() - vertexCount) / VERTS_PER_VAO);
 
     for(size_t i = 0; i < maxGlyphs; i++) {
         const GLYPH_METRICS &gm = getGlyphMetrics(text[i]);
@@ -596,8 +597,8 @@ void McFont::buildStringGeometry(const UString &text, size_t &vertexCount) {
     }
 }
 
-void McFont::drawString(Graphics *g, const UString &text) {
-    if(!this->bReady) return;
+void McFont::drawString(const std::string &text) {
+    if(!m_bReady) return;
 
     const int maxNumGlyphs = cv_r_drawstring_max_string_length.getInt();
     if(text.length() == 0 || text.length() > maxNumGlyphs) return;
@@ -628,7 +629,7 @@ void McFont::beginBatch() {
     m_batchQueue.usedEntries = 0;  // don't clear/reallocate, reuse the entries instead
 }
 
-void McFont::addToBatch(const UString &text, const Vector3 &pos, Color color) {
+void McFont::addToBatch(const std::string &text, const Vector3 &pos, Color color) {
     size_t verts{};
     if(!m_batchActive || (verts = text.length() * VERTS_PER_VAO) == 0) return;
     m_batchQueue.totalVerts += verts;
@@ -646,7 +647,7 @@ void McFont::addToBatch(const UString &text, const Vector3 &pos, Color color) {
     m_batchQueue.usedEntries++;
 }
 
-void McFont::flushBatch(Graphics *g) {
+void McFont::flushBatch() {
     if(!m_batchActive || !m_batchQueue.totalVerts) {
         m_batchActive = false;
         return;
@@ -680,7 +681,7 @@ void McFont::flushBatch(Graphics *g) {
 }
 
 float McFont::getStringWidth(const UString &text) const {
-    if(!this->bReady) return 1.0f;
+    if(!m_bReady) return 1.0f;
 
     float width = 0.0f;
     for(int i = 0; i < text.length(); i++) {
@@ -690,7 +691,7 @@ float McFont::getStringWidth(const UString &text) const {
 }
 
 float McFont::getStringHeight(const UString &text) const {
-    if(!this->bReady) return 1.0f;
+    if(!m_bReady) return 1.0f;
 
     float height = 0.0f;
     for(int i = 0; i < text.length(); i++) {
@@ -783,7 +784,7 @@ const McFont::GLYPH_METRICS &McFont::getGlyphMetrics(wchar_t ch) const {
     return m_errorGlyph;
 }
 
-void McFont::initAsync() { this->bAsyncReady = true; }
+void McFont::initAsync() { m_bAsyncReady = true; }
 
 void McFont::destroy() {
     // only clean up per-instance resources (primary font face and atlas)

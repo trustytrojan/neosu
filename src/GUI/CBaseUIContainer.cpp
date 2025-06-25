@@ -127,15 +127,15 @@ CBaseUIElement *CBaseUIContainer::getBaseUIElement(UString name) {
     return NULL;
 }
 
-void CBaseUIContainer::draw(Graphics *g) {
+void CBaseUIContainer::draw() {
     if(!this->bVisible) return;
 
     for(size_t i = 0; i < this->vElements.size(); i++) {
-        this->vElements[i]->draw(g);
+        this->vElements[i]->draw();
     }
 }
 
-void CBaseUIContainer::draw_debug(Graphics *g) {
+void CBaseUIContainer::draw_debug() {
     g->setColor(0xffffffff);
     g->drawLine(this->vPos.x, this->vPos.y, this->vPos.x + this->vSize.x, this->vPos.y);
     g->drawLine(this->vPos.x, this->vPos.y, this->vPos.x, this->vPos.y + this->vSize.y);

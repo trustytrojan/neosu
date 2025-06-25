@@ -22,9 +22,9 @@ class Slider : public HitObject {
            int comboNumber, bool isEndOfCombo, int colorCounter, int colorOffset, BeatmapInterface *beatmap);
     ~Slider() override;
 
-    void draw(Graphics *g) override;
-    void draw2(Graphics *g) override;
-    void draw2(Graphics *g, bool drawApproachCircle, bool drawOnlyApproachCircle);
+    void draw() override;
+    void draw2() override;
+    void draw2(bool drawApproachCircle, bool drawOnlyApproachCircle);
     void update(long curPos, f64 frame_time) override;
 
     void updateStackPosition(float stackOffset) override;
@@ -51,9 +51,9 @@ class Slider : public HitObject {
     [[nodiscard]] inline SliderCurve *getCurve() const { return this->curve; }
 
    private:
-    void drawStartCircle(Graphics *g, float alpha);
-    void drawEndCircle(Graphics *g, float alpha, float sliderSnake);
-    void drawBody(Graphics *g, float alpha, float from, float to);
+    void drawStartCircle(float alpha);
+    void drawEndCircle(float alpha, float sliderSnake);
+    void drawBody(float alpha, float from, float to);
 
     void updateAnimations(long curPos);
 

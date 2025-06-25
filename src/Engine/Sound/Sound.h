@@ -1,10 +1,8 @@
 #pragma once
 
-#include "cbase.h"
-
-#include "Resource.h"
-
 #include "BassManager.h"
+#include "Resource.h"
+#include "cbase.h"
 
 class SoundEngine;
 
@@ -47,6 +45,12 @@ class Sound : public Resource {
     [[nodiscard]] inline bool isOverlayable() const { return this->bIsOverlayable; }
 
     void rebuild(std::string newFilePath);
+
+    // type inspection
+    [[nodiscard]] Type getResType() const final { return SOUND; }
+
+    Sound *asSound() final { return this; }
+    [[nodiscard]] const Sound *asSound() const final { return this; }
 
    private:
     void init() override;

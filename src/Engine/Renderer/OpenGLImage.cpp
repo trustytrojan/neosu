@@ -16,18 +16,18 @@
 #include "OpenGLHeaders.h"
 #include "ResourceManager.h"
 
-OpenGLImage::OpenGLImage(std::string filepath, bool mipmapped) : Image(filepath, mipmapped) {
+OpenGLImage::OpenGLImage(std::string filepath, bool mipmapped, bool keepInSystemMemory) : Image(filepath, mipmapped) {
     this->GLTexture = 0;
     this->iTextureUnitBackup = 0;
 }
 
-OpenGLImage::OpenGLImage(int width, int height, bool mipmapped) : Image(width, height, mipmapped) {
+OpenGLImage::OpenGLImage(int width, int height, bool mipmapped, bool keepInSystemMemory) : Image(width, height, mipmapped) {
     this->GLTexture = 0;
     this->iTextureUnitBackup = 0;
 }
 
 void OpenGLImage::init() {
-    if(this->GLTexture != 0 || !this->bAsyncReady) return;  // only load if we are not already loaded
+    if(this->GLTexture != 0 || !m_bAsyncReady) return;  // only load if we are not already loaded
 
     // create texture object
     if(this->GLTexture == 0) {
@@ -106,11 +106,11 @@ void OpenGLImage::init() {
     GLerror = (GLerror == 0 ? glGetError() : GLerror);
     if(GLerror != 0) {
         this->GLTexture = 0;
-        debugLog("OpenGL Image Error: %i on file %s!\n", GLerror, this->sFilePath.c_str());
+        debugLog("OpenGL Image Error: %i on file %s!\n", GLerror, m_sFilePath.c_str());
         return;
     }
 
-    this->bReady = true;
+    m_bReady = true;
 
     if(this->filterMode != Graphics::FILTER_MODE::FILTER_MODE_LINEAR) this->setFilterMode(this->filterMode);
 
@@ -121,9 +121,9 @@ void OpenGLImage::initAsync() {
     if(this->GLTexture != 0) return;  // only load if we are not already loaded
 
     if(!this->bCreatedImage) {
-        if(cv_debug_rm.getBool()) debugLog("Resource Manager: Loading %s\n", this->sFilePath.c_str());
+        if(cv_debug_rm.getBool()) debugLog("Resource Manager: Loading %s\n", m_sFilePath.c_str());
 
-        this->bAsyncReady = this->loadRawImage();
+        m_bAsyncReady = this->loadRawImage();
     }
 }
 
@@ -137,7 +137,7 @@ void OpenGLImage::destroy() {
 }
 
 void OpenGLImage::bind(unsigned int textureUnit) {
-    if(!this->bReady) return;
+    if(!m_bReady) return;
 
     this->iTextureUnitBackup = textureUnit;
 
@@ -154,7 +154,7 @@ void OpenGLImage::bind(unsigned int textureUnit) {
 }
 
 void OpenGLImage::unbind() {
-    if(!this->bReady) return;
+    if(!m_bReady) return;
 
     // restore texture unit (just in case) and set to no texture
     glActiveTexture(GL_TEXTURE0 + this->iTextureUnitBackup);
@@ -166,7 +166,7 @@ void OpenGLImage::unbind() {
 
 void OpenGLImage::setFilterMode(Graphics::FILTER_MODE filterMode) {
     Image::setFilterMode(filterMode);
-    if(!this->bReady) return;
+    if(!m_bReady) return;
 
     this->bind();
     {
@@ -190,7 +190,7 @@ void OpenGLImage::setFilterMode(Graphics::FILTER_MODE filterMode) {
 
 void OpenGLImage::setWrapMode(Graphics::WRAP_MODE wrapMode) {
     Image::setWrapMode(wrapMode);
-    if(!this->bReady) return;
+    if(!m_bReady) return;
 
     this->bind();
     {
@@ -211,7 +211,7 @@ void OpenGLImage::setWrapMode(Graphics::WRAP_MODE wrapMode) {
 
 void OpenGLImage::handleGLErrors() {
     int GLerror = glGetError();
-    if(GLerror != 0) debugLog("OpenGL Image Error: %i on file %s!\n", GLerror, this->sFilePath.c_str());
+    if(GLerror != 0) debugLog("OpenGL Image Error: %i on file %s!\n", GLerror, m_sFilePath.c_str());
 }
 
 #endif

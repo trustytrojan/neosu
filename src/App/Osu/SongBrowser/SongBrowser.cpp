@@ -85,12 +85,14 @@ class SongBrowserBackgroundSearchMatcher : public Resource {
         this->sHardcodedSearchString = hardcodedSearchString;
     }
 
+    [[nodiscard]] Type getResType() const override { return APPDEFINED; } // TODO: handle this better?
+
    protected:
-    void init() override { this->bReady = true; }
+    void init() override { m_bReady = true; }
 
     void initAsync() override {
         if(this->bDead.load()) {
-            this->bAsyncReady = true;
+            m_bAsyncReady = true;
             return;
         }
 
@@ -111,7 +113,7 @@ class SongBrowserBackgroundSearchMatcher : public Resource {
             if(this->bDead.load()) break;
         }
 
-        this->bAsyncReady = true;
+        m_bAsyncReady = true;
     }
 
     void destroy() override { ; }
@@ -130,7 +132,7 @@ class ScoresStillLoadingElement : public CBaseUILabel {
         this->sIconString.insert(0, Icons::GLOBE);
     }
 
-    void drawText(Graphics *g) override {
+    void drawText() override {
         // draw icon
         const float iconScale = 0.6f;
         McFont *iconFont = osu->getFontIcons();
@@ -178,7 +180,7 @@ class NoRecordsSetElement : public CBaseUILabel {
         this->sIconString.insert(0, Icons::TROPHY);
     }
 
-    void drawText(Graphics *g) override {
+    void drawText() override {
         // draw icon
         const float iconScale = 0.6f;
         McFont *iconFont = osu->getFontIcons();
@@ -473,7 +475,7 @@ SongBrowser::~SongBrowser() {
     mct_abort();
     this->checkHandleKillBackgroundSearchMatcher();
 
-    engine->getResourceManager()->destroyResource(this->backgroundSearchMatcher);
+    resourceManager->destroyResource(this->backgroundSearchMatcher);
 
     this->carousel->getContainer()->empty();
 
@@ -524,7 +526,7 @@ SongBrowser::~SongBrowser() {
     this->empty();
 }
 
-void SongBrowser::draw(Graphics *g) {
+void SongBrowser::draw() {
     if(!this->bVisible) return;
 
     // draw background
@@ -544,7 +546,7 @@ void SongBrowser::draw(Graphics *g) {
         }
         g->popTransform();
 
-        osu->getHUD()->drawBeatmapImportSpinner(g);
+        osu->getHUD()->drawBeatmapImportSpinner();
         return;
     }
 
@@ -570,7 +572,7 @@ void SongBrowser::draw(Graphics *g) {
             }
         }
 
-        drawSelectedBeatmapBackgroundImage(g, alpha);
+        drawSelectedBeatmapBackgroundImage(alpha);
     } else if(cv_draw_songbrowser_menu_background_image.getBool()) {
         // menu-background
         Image *backgroundImage = osu->getSkin()->getMenuBackground();
@@ -604,17 +606,17 @@ void SongBrowser::draw(Graphics *g) {
         }
 
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ADDITIVE);
-        osu->getSkin()->mode_osu->drawRaw(g, Vector2(engine->getScreenWidth() / 2, engine->getScreenHeight() / 2),
+        osu->getSkin()->mode_osu->drawRaw(Vector2(engine->getScreenWidth() / 2, engine->getScreenHeight() / 2),
                                           mode_osu_scale, AnchorPoint::CENTER);
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
     }
 
     // draw score browser
-    this->scoreBrowser->draw(g);
-    this->localBestContainer->draw(g);
+    this->scoreBrowser->draw();
+    this->localBestContainer->draw();
 
     if(cv_debug.getBool()) {
-        this->scoreBrowser->getContainer()->draw_debug(g);
+        this->scoreBrowser->getContainer()->draw_debug();
     }
 
     // draw strain graph of currently selected beatmap
@@ -659,7 +661,7 @@ void SongBrowser::draw(Graphics *g) {
                 McRect graphRect(0, engine->getScreenHeight() - (get_bottombar_height() + strainHeightMultiplier),
                                  graphWidth, strainHeightMultiplier);
 
-                const float alpha = (graphRect.contains(engine->getMouse()->getPos())
+                const float alpha = (graphRect.contains(mouse->getPos())
                                          ? 1.0f
                                          : cv_hud_scrubbing_timeline_strains_alpha.getFloat());
 
@@ -682,20 +684,20 @@ void SongBrowser::draw(Graphics *g) {
                     const double speedStrainHeight = speedStrain * strainHeightMultiplier;
                     // const double strainHeight = strain * strainHeightMultiplier;
 
-                    if(!engine->getKeyboard()->isShiftDown()) {
+                    if(!keyboard->isShiftDown()) {
                         g->setColor(aimStrainColor);
                         g->fillRect(i * strainWidth,
                                     engine->getScreenHeight() - (get_bottombar_height() + aimStrainHeight),
                                     max(1.0f, std::round(strainWidth + 0.5f)), aimStrainHeight);
                     }
 
-                    if(!engine->getKeyboard()->isControlDown()) {
+                    if(!keyboard->isControlDown()) {
                         g->setColor(speedStrainColor);
                         g->fillRect(
                             i * strainWidth,
                             engine->getScreenHeight() -
                                 (get_bottombar_height() +
-                                 ((engine->getKeyboard()->isShiftDown() ? 0 : aimStrainHeight) - speedStrainHeight)),
+                                 ((keyboard->isShiftDown() ? 0 : aimStrainHeight) - speedStrainHeight)),
                             max(1.0f, std::round(strainWidth + 0.5f)), speedStrainHeight + 1);
                     }
                 }
@@ -736,14 +738,14 @@ void SongBrowser::draw(Graphics *g) {
     }
 
     // draw song browser
-    this->carousel->draw(g);
+    this->carousel->draw();
 
     // draw search
     this->search->setSearchString(this->sSearchString, cv_songbrowser_search_hardcoded_filter.getString());
     this->search->setDrawNumResults(this->bInSearch);
     this->search->setNumFoundResults(this->visibleSongButtons.size());
     this->search->setSearching(!this->backgroundSearchMatcher->isDead());
-    this->search->draw(g);
+    this->search->draw();
 
     // draw topbar background
     g->setColor(0xffffffff);
@@ -762,17 +764,17 @@ void SongBrowser::draw(Graphics *g) {
     g->popTransform();
 
     // draw bottom bar
-    draw_bottombar(g);
+    draw_bottombar();
 
     // draw top bar
-    this->topbarLeft->draw(g);
-    if(cv_debug.getBool()) this->topbarLeft->draw_debug(g);
-    this->topbarRight->draw(g);
-    if(cv_debug.getBool()) this->topbarRight->draw_debug(g);
+    this->topbarLeft->draw();
+    if(cv_debug.getBool()) this->topbarLeft->draw_debug();
+    this->topbarRight->draw();
+    if(cv_debug.getBool()) this->topbarRight->draw_debug();
 
     // NOTE: Intentionally not calling ScreenBackable::draw() here, since we're already drawing
     //       the back button in draw_bottombar().
-    OsuScreen::draw(g);
+    OsuScreen::draw();
 
     // no beatmaps found (osu folder is probably invalid)
     if(this->beatmaps.size() == 0 && !this->bBeatmapRefreshScheduled) {
@@ -800,7 +802,7 @@ void SongBrowser::draw(Graphics *g) {
     }
 
     // context menu
-    this->contextMenu->draw(g);
+    this->contextMenu->draw();
 
     // click pulse animation overlay
     if(this->fPulseAnimation > 0.0f) {
@@ -812,7 +814,7 @@ void SongBrowser::draw(Graphics *g) {
     }
 }
 
-void SongBrowser::drawSelectedBeatmapBackgroundImage(Graphics *g, float alpha) {
+void SongBrowser::drawSelectedBeatmapBackgroundImage(float alpha) {
     if(osu->getSelectedBeatmap()->getSelectedDifficulty2() != NULL) {
         Image *backgroundImage = osu->getBackgroundImageHandler()->getLoadBackgroundImage(
             osu->getSelectedBeatmap()->getSelectedDifficulty2());
@@ -998,7 +1000,7 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
 
     // handle right click absolute scrolling
     {
-        if(engine->getMouse()->isRightDown() && !this->contextMenu->isMouseInside()) {
+        if(mouse->isRightDown() && !this->contextMenu->isMouseInside()) {
             if(!this->bSongBrowserRightClickScrollCheck) {
                 this->bSongBrowserRightClickScrollCheck = true;
 
@@ -1026,7 +1028,7 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
 
         if(this->bSongBrowserRightClickScrolling) {
             this->carousel->scrollToY(
-                -((engine->getMouse()->getPos().y - 2 - this->carousel->getPos().y) / this->carousel->getSize().y) *
+                -((mouse->getPos().y - 2 - this->carousel->getPos().y) / this->carousel->getSize().y) *
                 this->carousel->getScrollSize().y);
         }
     }
@@ -1044,7 +1046,7 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
     // if cursor is to the left edge of the screen, force center currently selected beatmap/diff
     // but only if the context menu is currently not visible (since we don't want move things while e.g. managing
     // collections etc.)
-    if(engine->getMouse()->getPos().x < osu->getScreenWidth() * 0.1f && !this->contextMenu->isVisible()) {
+    if(mouse->getPos().x < osu->getScreenWidth() * 0.1f && !this->contextMenu->isVisible()) {
         this->scheduled_scroll_to_selected_button = true;
     }
 
@@ -1094,7 +1096,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
             case KEY_BACKSPACE:
                 key.consume();
                 if(this->sSearchString.length() > 0) {
-                    if(engine->getKeyboard()->isControlDown()) {
+                    if(keyboard->isControlDown()) {
                         // delete everything from the current caret position to the left, until after the first
                         // non-space character (but including it)
                         bool foundNonSpaceChar = false;
@@ -1127,7 +1129,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
 
     // paste clipboard support
     if(key == KEY_V) {
-        if(engine->getKeyboard()->isControlDown()) {
+        if(keyboard->isControlDown()) {
             const UString clipstring = env->getClipBoardText();
             if(clipstring.length() > 0) {
                 this->sSearchString.append(clipstring);
@@ -1155,7 +1157,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
     if(key == KEY_F5) this->refreshBeatmaps();
 
     // selection move
-    if(!engine->getKeyboard()->isAltDown() && key == KEY_DOWN) {
+    if(!keyboard->isAltDown() && key == KEY_DOWN) {
         const std::vector<CBaseUIElement *> &elements = this->carousel->getContainer()->getElements();
 
         // get bottom selection
@@ -1182,7 +1184,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
         }
     }
 
-    if(!engine->getKeyboard()->isAltDown() && key == KEY_UP) {
+    if(!keyboard->isAltDown() && key == KEY_UP) {
         const std::vector<CBaseUIElement *> &elements = this->carousel->getContainer()->getElements();
 
         // get bottom selection
@@ -1221,7 +1223,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
     if(key == KEY_LEFT && !this->bLeft) {
         this->bLeft = true;
 
-        const bool jumpToNextGroup = engine->getKeyboard()->isShiftDown();
+        const bool jumpToNextGroup = keyboard->isShiftDown();
 
         const std::vector<CBaseUIElement *> &elements = this->carousel->getContainer()->getElements();
 
@@ -1262,7 +1264,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
     if(key == KEY_RIGHT && !this->bRight) {
         this->bRight = true;
 
-        const bool jumpToNextGroup = engine->getKeyboard()->isShiftDown();
+        const bool jumpToNextGroup = keyboard->isShiftDown();
 
         const std::vector<CBaseUIElement *> &elements = this->carousel->getContainer()->getElements();
 
@@ -1296,7 +1298,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
 
     // group open/close
     // NOTE: only closing works atm (no "focus" state on buttons yet)
-    if(key == KEY_ENTER && engine->getKeyboard()->isShiftDown()) {
+    if(key == KEY_ENTER && keyboard->isShiftDown()) {
         const std::vector<CBaseUIElement *> &elements = this->carousel->getContainer()->getElements();
 
         for(int i = 0; i < elements.size(); i++) {
@@ -1313,10 +1315,10 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
     }
 
     // selection select
-    if(key == KEY_ENTER && !engine->getKeyboard()->isShiftDown()) this->playSelectedDifficulty();
+    if(key == KEY_ENTER && !keyboard->isShiftDown()) this->playSelectedDifficulty();
 
     // toggle auto
-    if(key == KEY_A && engine->getKeyboard()->isControlDown()) osu->getModSelector()->toggleAuto();
+    if(key == KEY_A && keyboard->isControlDown()) osu->getModSelector()->toggleAuto();
 
     key.consume();
 }
@@ -1341,7 +1343,7 @@ void SongBrowser::onChar(KeyboardEvent &e) {
     if(e.isConsumed()) return;
 
     if(e.getCharCode() < 32 || !this->bVisible || this->bBeatmapRefreshScheduled ||
-       (engine->getKeyboard()->isControlDown() && !engine->getKeyboard()->isAltDown()))
+       (keyboard->isControlDown() && !keyboard->isAltDown()))
         return;
     if(this->bF1Pressed || this->bF2Pressed || this->bF3Pressed) return;
 
@@ -1364,7 +1366,7 @@ CBaseUIContainer *SongBrowser::setVisible(bool visible) {
     this->bShiftPressed = false;  // seems to get stuck sometimes otherwise
 
     if(this->bVisible) {
-        engine->getSound()->play(osu->getSkin()->expand);
+        soundEngine->play(osu->getSkin()->expand);
         RichPresence::onSongBrowser();
 
         this->updateLayout();
@@ -1385,8 +1387,8 @@ CBaseUIContainer *SongBrowser::setVisible(bool visible) {
         // HACKHACK: workaround for BaseUI framework deficiency (missing mouse events. if a mouse button is being held,
         // and then suddenly a BaseUIElement gets put under it and set visible, and then the mouse button is released,
         // that "incorrectly" fires onMouseUpInside/onClicked/etc.)
-        engine->getMouse()->onLeftChange(false);
-        engine->getMouse()->onRightChange(false);
+        mouse->onLeftChange(false);
+        mouse->onRightChange(false);
 
         if(this->beatmap != NULL) {
             // For multiplayer: if the host exits song selection without selecting a song, we want to be able to revert
@@ -1548,7 +1550,7 @@ void SongBrowser::onDifficultySelected(DatabaseBeatmap *diff2, bool play) {
             this->setVisible(false);
         } else {
             // CTRL + click = auto
-            if(engine->getKeyboard()->isControlDown()) {
+            if(keyboard->isControlDown()) {
                 osu->bModAutoTemp = true;
                 osu->getModSelector()->enableAuto();
             }
@@ -2821,8 +2823,8 @@ void SongBrowser::onSearchUpdate() {
             this->backgroundSearchMatcher->setSongButtonsAndSearchString(
                 this->songButtons, this->sSearchString, cv_songbrowser_search_hardcoded_filter.getString());
 
-            engine->getResourceManager()->requestNextLoadAsync();
-            engine->getResourceManager()->loadResource(this->backgroundSearchMatcher);
+            resourceManager->requestNextLoadAsync();
+            resourceManager->loadResource(this->backgroundSearchMatcher);
         } else
             this->rebuildSongButtonsAndVisibleSongButtonsWithSearchMatchSupport(true);
 
@@ -3310,12 +3312,12 @@ void SongBrowser::onSelectionMode() {
 }
 
 void SongBrowser::onSelectionMods() {
-    engine->getSound()->play(osu->getSkin()->expand);
+    soundEngine->play(osu->getSkin()->expand);
     osu->toggleModSelection(this->bF1Pressed);
 }
 
 void SongBrowser::onSelectionRandom() {
-    engine->getSound()->play(osu->getSkin()->clickButton);
+    soundEngine->play(osu->getSkin()->clickButton);
     if(this->bShiftPressed)
         this->bPreviousRandomBeatmapScheduled = true;
     else
@@ -3323,7 +3325,7 @@ void SongBrowser::onSelectionRandom() {
 }
 
 void SongBrowser::onSelectionOptions() {
-    engine->getSound()->play(osu->getSkin()->clickButton);
+    soundEngine->play(osu->getSkin()->clickButton);
 
     if(this->selectedButton != NULL) {
         this->scrollToSongButton(this->selectedButton);
@@ -3355,7 +3357,7 @@ void SongBrowser::onScoreClicked(CBaseUIButton *button) {
     osu->getSongBrowser()->setVisible(false);
     osu->getRankingScreen()->setVisible(true);
 
-    engine->getSound()->play(osu->getSkin()->menuHit);
+    soundEngine->play(osu->getSkin()->menuHit);
 }
 
 void SongBrowser::onScoreContextMenu(ScoreButton *scoreButton, int id) {

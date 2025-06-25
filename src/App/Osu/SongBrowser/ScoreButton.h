@@ -16,7 +16,7 @@ class ScoreButton : public CBaseUIButton {
     ScoreButton(UIContextMenu *contextMenu, float xPos, float yPos, float xSize, float ySize);
     ~ScoreButton() override;
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
     void highlight();

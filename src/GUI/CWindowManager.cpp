@@ -24,11 +24,11 @@ CWindowManager::~CWindowManager() {
     }
 }
 
-void CWindowManager::draw(Graphics *g) {
+void CWindowManager::draw() {
     if(!this->bVisible) return;
 
     for(int i = this->windows.size() - 1; i >= 0; i--) {
-        this->windows[i]->draw(g);
+        this->windows[i]->draw();
     }
 
     /*
@@ -38,13 +38,13 @@ void CWindowManager::draw(Graphics *g) {
             text.append(this->windows[i]->getName());
             g->pushTransform();
                     g->translate(20, i*40+350);
-                    g->drawString(engine->getResourceManager()->getFont("FONT_DEFAULT"), text);
+                    g->drawString(resourceManager->getFont("FONT_DEFAULT"), text);
             g->popTransform();
     }
 
     g->pushTransform();
     g->translate(20, 500);
-    g->drawString(engine->getResourceManager()->getFont("FONT_DEFAULT"), UString::format("currentEnabled = %i,
+    g->drawString(resourceManager->getFont("FONT_DEFAULT"), UString::format("currentEnabled = %i,
     lastEnabled = %i, topIndex = %i", this->iCurrentEnabledWindow, this->iLastEnabledWindow, getTopMouseWindowIndex()));
     g->popTransform();
     */

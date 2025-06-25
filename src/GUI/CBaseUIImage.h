@@ -7,7 +7,7 @@ class CBaseUIImage : public CBaseUIElement {
                  UString name = "");
     ~CBaseUIImage() override { ; }
 
-    void draw(Graphics *g) override;
+    void draw() override;
 
     void setImage(Image *img);
 

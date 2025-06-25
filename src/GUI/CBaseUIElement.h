@@ -23,7 +23,7 @@ class CBaseUIElement : public KeyboardListener {
     ~CBaseUIElement() override { ; }
 
     // main
-    virtual void draw(Graphics *g) = 0;
+    virtual void draw() = 0;
     virtual void mouse_update(bool *propagate_clicks);
     bool grabs_clicks = false;
 

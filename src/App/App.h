@@ -18,8 +18,9 @@ class App : public KeyboardListener {
     App() { ; }
     ~App() override { ; }
 
-    virtual void draw(Graphics *g) { (void)g; }
+    virtual void draw() { ; }
     virtual void update() { ; }
+    virtual bool isInCriticalInteractiveSession() { return false; }
 
     void onKeyDown(KeyboardEvent &e) override { (void)e; }
     void onKeyUp(KeyboardEvent &e) override { (void)e; }

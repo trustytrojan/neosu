@@ -26,7 +26,7 @@ ScoreboardSlot::~ScoreboardSlot() {
     delete this->avatar;
 }
 
-void ScoreboardSlot::draw(Graphics *g) {
+void ScoreboardSlot::draw() {
     if(this->fAlpha == 0.f) return;
     if(!cv_draw_scoreboard.getBool() && !bancho.is_playing_a_multi_map()) return;
     if(!cv_draw_scoreboard_mp.getBool() && bancho.is_playing_a_multi_map()) return;
@@ -69,8 +69,7 @@ void ScoreboardSlot::draw(Graphics *g) {
         auto bg_img = osu->getSkin()->getMenuButtonBackground2();
         float oScale = bg_img->getResolutionScale() * 0.99f;
         g->fillRect(0, start_y, avatar_width, height);
-        bg_img->draw(g,
-                     Vector2(avatar_width + (bg_img->getSizeBase().x / 2) * bg_scale - (470 * oScale) * bg_scale,
+        bg_img->draw(Vector2(avatar_width + (bg_img->getSizeBase().x / 2) * bg_scale - (470 * oScale) * bg_scale,
                              start_y + height / 2),
                      bg_scale);
     } else {
@@ -82,7 +81,7 @@ void ScoreboardSlot::draw(Graphics *g) {
     this->avatar->setPos(0, start_y);
     this->avatar->setSize(avatar_width, avatar_height);
     this->avatar->setVisible(true);
-    this->avatar->draw_avatar(g, 0.8f * this->fAlpha);
+    this->avatar->draw_avatar(0.8f * this->fAlpha);
 
     // Draw index
     g->pushTransform();

@@ -12,8 +12,8 @@
 
 class NullImage : public Image {
    public:
-    NullImage(std::string filePath, bool mipmapped = false) : Image(filePath, mipmapped) { ; }
-    NullImage(int width, int height, bool mipmapped = false) : Image(width, height, mipmapped) { ; }
+    NullImage(std::string filePath, bool mipmapped = false, bool keepInSystemMemory = false) : Image(filePath, mipmapped, keepInSystemMemory) { ; }
+    NullImage(int width, int height, bool mipmapped = false, bool keepInSystemMemory = false) : Image(width, height, mipmapped, keepInSystemMemory) { ; }
     ~NullImage() override { this->destroy(); }
 
     void bind(unsigned int textureUnit = 0) override { ; }
@@ -23,8 +23,8 @@ class NullImage : public Image {
     void setWrapMode(Graphics::WRAP_MODE wrapMode) override;
 
    private:
-    void init() override { this->bReady = true; }
-    void initAsync() override { this->bAsyncReady = true; }
+    void init() override { m_bReady = true; }
+    void initAsync() override { m_bAsyncReady = true; }
     void destroy() override { ; }
 };
 

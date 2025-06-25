@@ -8,7 +8,7 @@ class ToastElement : public CBaseUIButton {
     ToastElement(UString text, Color borderColor_arg);
     ~ToastElement() override { ; }
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void onClicked() override;
 
     std::vector<UString> lines;
@@ -30,7 +30,7 @@ class NotificationOverlay : public OsuScreen {
     ~NotificationOverlay() override { ; }
 
     void mouse_update(bool *propagate_clicks) override;
-    void draw(Graphics *g) override;
+    void draw() override;
 
     void onKeyDown(KeyboardEvent &e) override;
     void onKeyUp(KeyboardEvent &e) override;
@@ -63,8 +63,8 @@ class NotificationOverlay : public OsuScreen {
         float fallAnim = 0.f;
     };
 
-    void drawNotificationText(Graphics *g, NOTIFICATION &n);
-    void drawNotificationBackground(Graphics *g, NOTIFICATION &n);
+    void drawNotificationText(NOTIFICATION &n);
+    void drawNotificationBackground(NOTIFICATION &n);
 
     std::vector<ToastElement *> toasts;
 

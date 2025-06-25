@@ -10,7 +10,7 @@ class CBaseUILabel : public CBaseUIElement {
                  UString text = "");
     ~CBaseUILabel() override { ; }
 
-    void draw(Graphics *g) override;
+    void draw() override;
     void mouse_update(bool *propagate_clicks) override;
 
     // cancer
@@ -76,7 +76,7 @@ class CBaseUILabel : public CBaseUIElement {
     void onResized() override { this->updateStringMetrics(); }
 
    protected:
-    virtual void drawText(Graphics *g);
+    virtual void drawText();
 
     void updateStringMetrics();
 

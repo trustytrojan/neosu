@@ -53,7 +53,7 @@ PauseMenu::PauseMenu() : OsuScreen() {
     this->updateLayout();
 }
 
-void PauseMenu::draw(Graphics *g) {
+void PauseMenu::draw() {
     const bool isAnimating = anim->isAnimating(&this->fDimAnim);
     if(!this->bVisible && !isAnimating) return;
 
@@ -90,7 +90,7 @@ void PauseMenu::draw(Graphics *g) {
     for(int i = 0; i < this->buttons.size(); i++) {
         this->buttons[i]->setAlpha(1.0f - (1.0f - this->fDimAnim) * (1.0f - this->fDimAnim) * (1.0f - this->fDimAnim));
     }
-    OsuScreen::draw(g);
+    OsuScreen::draw();
 
     // draw selection arrows
     if(this->selectedButton != NULL) {
@@ -103,12 +103,10 @@ void PauseMenu::draw(Graphics *g) {
 
         g->setColor(arrowColor);
         g->setAlpha(this->fWarningArrowsAnimAlpha * this->fDimAnim);
-        osu->getHUD()->drawWarningArrow(g,
-                                        Vector2(this->fWarningArrowsAnimX, this->fWarningArrowsAnimY) +
+        osu->getHUD()->drawWarningArrow(Vector2(this->fWarningArrowsAnimX, this->fWarningArrowsAnimY) +
                                             Vector2(0, this->selectedButton->getSize().y / 2) - Vector2(offset, 0),
                                         false, false);
         osu->getHUD()->drawWarningArrow(
-            g,
             Vector2(osu->getScreenWidth() - this->fWarningArrowsAnimX, this->fWarningArrowsAnimY) +
                 Vector2(0, this->selectedButton->getSize().y / 2) + Vector2(offset, 0),
             true, false);
@@ -133,7 +131,7 @@ void PauseMenu::onContinueClicked() {
     if(!this->bContinueEnabled) return;
     if(anim->isAnimating(&this->fDimAnim)) return;
 
-    engine->getSound()->play(osu->getSkin()->clickPauseContinue);
+    soundEngine->play(osu->getSkin()->clickPauseContinue);
     osu->getSelectedBeatmap()->pause();
 
     this->scheduleVisibilityChange(false);
@@ -142,7 +140,7 @@ void PauseMenu::onContinueClicked() {
 void PauseMenu::onRetryClicked() {
     if(anim->isAnimating(&this->fDimAnim)) return;
 
-    engine->getSound()->play(osu->getSkin()->clickPauseRetry);
+    soundEngine->play(osu->getSkin()->clickPauseRetry);
     osu->getSelectedBeatmap()->restart();
 
     this->scheduleVisibilityChange(false);
@@ -151,7 +149,7 @@ void PauseMenu::onRetryClicked() {
 void PauseMenu::onBackClicked() {
     if(anim->isAnimating(&this->fDimAnim)) return;
 
-    engine->getSound()->play(osu->getSkin()->clickPauseBack);
+    soundEngine->play(osu->getSkin()->clickPauseBack);
     osu->getSelectedBeatmap()->stop();
 
     this->scheduleVisibilityChange(false);
@@ -201,7 +199,7 @@ void PauseMenu::onKeyDown(KeyboardEvent &e) {
 
     // handle arrow keys selection
     if(this->buttons.size() > 0) {
-        if(!engine->getKeyboard()->isAltDown() && e == KEY_DOWN) {
+        if(!keyboard->isAltDown() && e == KEY_DOWN) {
             UIPauseMenuButton *nextSelectedButton = this->buttons[0];
 
             // get first visible button
@@ -227,7 +225,7 @@ void PauseMenu::onKeyDown(KeyboardEvent &e) {
             this->onSelectionChange();
         }
 
-        if(!engine->getKeyboard()->isAltDown() && e == KEY_UP) {
+        if(!keyboard->isAltDown() && e == KEY_UP) {
             UIPauseMenuButton *nextSelectedButton = this->buttons[this->buttons.size() - 1];
 
             // get first visible button
@@ -336,7 +334,7 @@ CBaseUIContainer *PauseMenu::setVisible(bool visible) {
     }
 
     if(visible) {
-        engine->getSound()->play(osu->getSkin()->pauseLoop);
+        soundEngine->play(osu->getSkin()->pauseLoop);
 
         if(this->bContinueEnabled) {
             RichPresence::setBanchoStatus("Taking a break", PAUSED);
@@ -355,7 +353,7 @@ CBaseUIContainer *PauseMenu::setVisible(bool visible) {
             RichPresence::setBanchoStatus("Failed", SUBMITTING);
         }
     } else {
-        engine->getSound()->stop(osu->getSkin()->pauseLoop);
+        soundEngine->stop(osu->getSkin()->pauseLoop);
 
         RichPresence::onPlayStart();
 
