@@ -153,6 +153,9 @@ Engine::~Engine() {
     debugLog("Engine: Freeing graphics...\n");
     SAFE_DELETE(this->graphics);
 
+	debugLog("Engine: Freeing fonts...\n");
+	McFont::cleanupSharedResources();
+
     debugLog("Engine: Freeing environment...\n");
     SAFE_DELETE(this->environment);
     destroy_discord_sdk();

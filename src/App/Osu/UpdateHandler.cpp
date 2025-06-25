@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #endif
 
+#include "Archival.h"
 #include "BanchoNetworking.h"
 #include "ConVar.h"
 #include "Engine.h"
@@ -11,7 +12,6 @@
 #include "Osu.h"
 #include "ResourceManager.h"
 #include "UpdateHandler.h"
-#include "miniz.h"
 
 const char *UpdateHandler::TEMP_UPDATE_DOWNLOAD_FILEPATH = "update.zip";
 
@@ -148,77 +148,58 @@ void UpdateHandler::_installUpdate(std::string zipFilePath) {
     debugLog("UpdateHandler::installUpdate( %s )\n", zipFilePath.c_str());
     this->status = STATUS::STATUS_INSTALLING_UPDATE;
 
-    // setting the status in every error check return is retarded
-
     if(!env->fileExists(zipFilePath)) {
         debugLog("UpdateHandler::installUpdate() error, \"%s\" does not exist!\n", zipFilePath.c_str());
         this->status = STATUS::STATUS_ERROR;
         return;
     }
 
-    // load entire file
-    File f(zipFilePath);
-    if(!f.canRead()) {
-        debugLog("UpdateHandler::installUpdate() error, can't read file!\n");
-        this->status = STATUS::STATUS_ERROR;
-        return;
-    }
-    const u8 *content = reinterpret_cast<const u8*>(f.readFile());
-
-    // initialize zip
-    mz_zip_archive zip_archive;
-    memset(&zip_archive, 0, sizeof(zip_archive));
-    if(!mz_zip_reader_init_mem(&zip_archive, content, f.getFileSize(), 0)) {
-        debugLog("UpdateHandler::installUpdate() error, couldn't mz_zip_reader_init_mem()!\n");
+    Archive archive(zipFilePath);
+    if(!archive.isValid()) {
+        debugLog("UpdateHandler::installUpdate() error, couldn't open archive!\n");
         this->status = STATUS::STATUS_ERROR;
         return;
     }
 
-    mz_uint numFiles = mz_zip_reader_get_num_files(&zip_archive);
-    if(numFiles <= 0) {
-        debugLog("UpdateHandler::installUpdate() error, %u files!\n", numFiles);
-        this->status = STATUS::STATUS_ERROR;
-        return;
-    }
-    if(!mz_zip_reader_is_file_a_directory(&zip_archive, 0)) {
-        debugLog("UpdateHandler::installUpdate() error, first index is not the main directory!\n");
+    auto entries = archive.getAllEntries();
+    if(entries.empty()) {
+        debugLog("UpdateHandler::installUpdate() error, archive is empty!\n");
         this->status = STATUS::STATUS_ERROR;
         return;
     }
 
-    // get main dir name (assuming that the first file is the main subdirectory)
-    mz_zip_archive_file_stat file_stat;
-    mz_zip_reader_file_stat(&zip_archive, 0, &file_stat);
-    std::string mainDirectory = file_stat.m_filename;
+    // find main directory (assuming first entry is the main subdirectory)
+    std::string mainDirectory;
+    if(!entries.empty() && entries[0].isDirectory()) {
+        mainDirectory = entries[0].getFilename();
+    } else {
+        debugLog("UpdateHandler::installUpdate() error, first entry is not the main directory!\n");
+        this->status = STATUS::STATUS_ERROR;
+        return;
+    }
 
-    // split raw dirs and files
-    std::vector<std::string> files;
-    std::vector<std::string> dirs;
-    for(int i = 1; i < mz_zip_reader_get_num_files(&zip_archive); i++) {
-        mz_zip_archive_file_stat file_stat;
-        if(!mz_zip_reader_file_stat(&zip_archive, i, &file_stat)) {
-            debugLog("UpdateHandler::installUpdate() warning, couldn't mz_zip_reader_file_stat() index %i!\n", i);
-            continue;
+    // separate raw dirs and files
+    std::vector<Archive::Entry> files, dirs;
+    for(const auto &entry : entries) {
+        if(entry.isDirectory()) {
+            dirs.push_back(entry);
+        } else {
+            files.push_back(entry);
         }
 
-        if(mz_zip_reader_is_file_a_directory(&zip_archive, i))
-            dirs.emplace_back(file_stat.m_filename);
-        else
-            files.emplace_back(file_stat.m_filename);
-
-        debugLog("UpdateHandler: Filename: \"%s\", isDir: %i, uncompressed size: %u, compressed size: %u\n",
-                 file_stat.m_filename, (int)mz_zip_reader_is_file_a_directory(&zip_archive, i),
-                 (unsigned int)file_stat.m_uncomp_size, (unsigned int)file_stat.m_comp_size);
+        debugLog("UpdateHandler: Filename: \"%s\", isDir: %i, uncompressed size: %u\n", entry.getFilename().c_str(),
+                 (int)entry.isDirectory(), (unsigned int)entry.getUncompressedSize());
     }
 
     // repair/create missing/new dirs
     std::string cfgDir = MCENGINE_DATA_DIR "cfg/";
     bool cfgDirExists = env->directoryExists(cfgDir);
-    for(int i = 0; i < dirs.size(); i++) {
-        int mainDirectoryOffset = dirs[i].find(mainDirectory);
-        if(mainDirectoryOffset == 0 && dirs[i].length() - mainDirectoryOffset > 0 &&
-           mainDirectoryOffset + mainDirectory.length() < dirs[i].length()) {
-            std::string newDir = dirs[i].substr(mainDirectoryOffset + mainDirectory.length());
+    for(const auto &dir : dirs) {
+        std::string dirName = dir.getFilename();
+        int mainDirectoryOffset = dirName.find(mainDirectory);
+        if(mainDirectoryOffset == 0 && dirName.length() - mainDirectoryOffset > 0 &&
+           mainDirectoryOffset + mainDirectory.length() < dirName.length()) {
+            std::string newDir = dirName.substr(mainDirectoryOffset + mainDirectory.length());
 
             if(!env->directoryExists(newDir)) {
                 debugLog("UpdateHandler: Creating directory %s\n", newDir.c_str());
@@ -228,17 +209,19 @@ void UpdateHandler::_installUpdate(std::string zipFilePath) {
     }
 
     // extract and overwrite almost everything
-    for(int i = 0; i < files.size(); i++) {
+    for(const auto &file : files) {
+        std::string fileName = file.getFilename();
+
         // ignore cfg directory (don't want to overwrite user settings), except if it doesn't exist
-        if(files[i].find(cfgDir) != -1 && cfgDirExists) {
-            debugLog("UpdateHandler: Ignoring file \"%s\"\n", files[i].c_str());
+        if(fileName.find(cfgDir) != std::string::npos && cfgDirExists) {
+            debugLog("UpdateHandler: Ignoring file \"%s\"\n", fileName.c_str());
             continue;
         }
 
-        int mainDirectoryOffset = files[i].find(mainDirectory);
-        if(mainDirectoryOffset == 0 && files[i].length() - mainDirectoryOffset > 0 &&
-           mainDirectoryOffset + mainDirectory.length() < files[i].length()) {
-            std::string outFilePath = files[i].substr(mainDirectoryOffset + mainDirectory.length());
+        int mainDirectoryOffset = fileName.find(mainDirectory);
+        if(mainDirectoryOffset == 0 && fileName.length() - mainDirectoryOffset > 0 &&
+           mainDirectoryOffset + mainDirectory.length() < fileName.length()) {
+            std::string outFilePath = fileName.substr(mainDirectoryOffset + mainDirectory.length());
 
             // .exe and .dll can't be directly overwritten on windows
             if(outFilePath.length() > 4) {
@@ -252,14 +235,14 @@ void UpdateHandler::_installUpdate(std::string zipFilePath) {
             }
 
             debugLog("UpdateHandler: Writing %s\n", outFilePath.c_str());
-            mz_zip_reader_extract_file_to_file(&zip_archive, files[i].c_str(), outFilePath.c_str(), 0);
+            if(!file.extractToFile(outFilePath)) {
+                debugLog("UpdateHandler: Failed to extract file %s\n", outFilePath.c_str());
+            }
         } else if(mainDirectoryOffset != 0) {
             debugLog("UpdateHandler::installUpdate() warning, ignoring file \"%s\" because it's not in the main dir!\n",
-                     files[i].c_str());
+                     fileName.c_str());
         }
     }
-
-    mz_zip_reader_end(&zip_archive);
 
     this->status = STATUS::STATUS_SUCCESS_INSTALLATION;
     env->deleteFile(zipFilePath);

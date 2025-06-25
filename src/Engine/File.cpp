@@ -251,7 +251,7 @@ bool File::openForReading() {
     if(fileType != File::FILETYPE::FILE) {
         if(cv_debug_file.getBool())
             debugLogF("File Error: Path {:s} {:s}\n", m_filePath,
-                     fileType == File::FILETYPE::NONE ? "doesn't exist" : "is not a file");
+                      fileType == File::FILETYPE::NONE ? "doesn't exist" : "is not a file");
         return false;
     }
 
@@ -299,7 +299,7 @@ bool File::openForWriting() {
         fs::create_directories(path.parent_path(), ec);
         if(ec) {
             debugLogF("File Error: Couldn't create parent directories for {:s} (error: {:s})\n", m_filePath,
-                     ec.message());
+                      ec.message());
             // continue anyway, the file open might still succeed if the directory exists
         }
     }

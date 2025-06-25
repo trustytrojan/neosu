@@ -10,6 +10,7 @@
 #if defined(MCENGINE_FEATURE_BASS)
 
 #include "Engine.h"
+#include "File.h"
 
 namespace BassManager
 {
@@ -123,7 +124,7 @@ namespace
 		// handle bassflac plugin separately
 		UString tryPath{LNAMESTR(pluginname)};
 		if (!env->fileExists(tryPath.toUtf8()))
-			tryPath = UString::fmt("lib{}{}", Env::cfg(OS::WINDOWS) ? "\\" : "/", LNAMESTR(pluginname));
+			tryPath = UString::fmt("lib{}{}", File::PREF_PATHSEP, LNAMESTR(pluginname));
 
 		// make it a fully qualified path
 		// TODO (PORT): need getFolderFromFilePath to give a fully qualified path for this to work

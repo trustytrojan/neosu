@@ -78,6 +78,12 @@ $(DEPS_CACHE)/liblzma-$(LZMA_VERSION).source:
 	$(WGET) -qO $(DEPS_CACHE)/liblzma-$(LZMA_VERSION).tar.gz "https://github.com/tukaani-project/xz/releases/download/v$(LZMA_VERSION)/xz-$(LZMA_VERSION).tar.gz" && \
 	touch $@
 
+# always needed (if not on host)
+$(DEPS_CACHE)/libarchive-$(LIBARCHIVE_VERSION).source:
+	$(MKDIR_P) $(DEPS_CACHE)
+	$(WGET) -qO $(DEPS_CACHE)/libarchive-$(LIBARCHIVE_VERSION).tar.gz "https://github.com/libarchive/libarchive/releases/download/v$(LIBARCHIVE_VERSION)/libarchive-$(LIBARCHIVE_VERSION).tar.gz" && \
+	touch $@
+
 # --with-mimalloc
 $(DEPS_CACHE)/mimalloc-$(MIMALLOC_VERSION).source:
 	$(MKDIR_P) $(DEPS_CACHE)
@@ -744,6 +750,31 @@ $(DEPS_PREFIX)/liblzma.built:
 	$(MKDIR_P) $(DEPS_PREFIX) && touch $@
 endif # BUILD_LZMA
 
+if BUILD_LIBARCHIVE
+LIBARCHIVE_CFLAGS += $(shell $(PKG_CONFIG) --cflags libarchive)
+LIBARCHIVE_LIBS += $(shell $(PKG_CONFIG) --libs libarchive)
+$(DEPS_PREFIX)/libarchive.built: $(DEPS_CACHE)/libarchive-$(LIBARCHIVE_VERSION).source $(DEPS_PREFIX)/liblzma.built $(DEPS_PREFIX)/bzip2.built $(DEPS_PREFIX)/zlib.built
+	rm -rf $(DEPS_PREFIX)/libarchive
+	$(MKDIR_P) $(DEPS_PREFIX)/libarchive/build $(DEPS_PREFIX)/lib/pkgconfig
+	$(TAR) xf $(DEPS_CACHE)/libarchive-$(LIBARCHIVE_VERSION).tar.gz -C $(DEPS_PREFIX)/libarchive --strip-components=1 && \
+	cd $(DEPS_PREFIX)/libarchive/build && PKG_CONFIG="$(PKG_CONFIG)" \
+	../configure lt_cv_prog_gnu_ld=yes --host=$(host) --build=$(build) --prefix="$(DEPS_PREFIX)" \
+		$(if $(STATICBUILD),--enable-static --disable-shared,--enable-shared --disable-static) \
+		--disable-tools --disable-tests --with-gnu-ld --disable-bsdtar --disable-bsdcat --disable-bsdcpio \
+		--disable-bsdunzip --without-xml2 --without-expat --without-openssl \
+		--without-nettle --without-mbedtls --without-lzo2 --without-lz4 --without-libiconv-prefix \
+		--without-iconv --without-libb2 \
+		CC="$(CC)" RANLIB="$(RANLIB)" AR="$(AR)" CXX="$(CXX)" LD="$(LD)" \
+		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS)" && \
+	$(MAKE) && \
+	$(MAKE) install
+	$(PKG_CONFIG) --exists --print-errors libarchive
+	touch $@
+else
+$(DEPS_PREFIX)/libarchive.built:
+	$(MKDIR_P) $(DEPS_PREFIX) && touch $@
+endif # BUILD_LIBARCHIVE
+
 #####################################################################################################################################################
 ## END EXTERNAL DEPENDENCY BUILD/SETUP SECTION
 #####################################################################################################################################################
@@ -771,6 +802,7 @@ BUILT_SOURCES := \
 	$(DEPS_PREFIX)/mpg123.built \
 	$(DEPS_PREFIX)/discordsdk.built \
 	$(DEPS_PREFIX)/liblzma.built \
+	$(DEPS_PREFIX)/libarchive.built \
 	$(DEPS_PREFIX)/curl.built
 
 # making sure deps are built before main compile
@@ -797,6 +829,7 @@ neosu_CXXFLAGS := \
 	$(EGL_CFLAGS) \
 	$(FREETYPE2_CFLAGS) \
 	$(FMT_CFLAGS) \
+	$(LIBARCHIVE_CFLAGS) \
 	$(LIBPNG_CFLAGS) \
 	$(BZIP2_CFLAGS) \
 	$(LIBJPEG_CFLAGS) \
@@ -825,6 +858,7 @@ neosu_LDFLAGS := \
 	$(FREETYPE2_LIBS) \
 	$(FMT_LIBS) \
 	$(LIBPNG_LIBS) \
+	$(LIBARCHIVE_LIBS) \
 	$(BZIP2_LIBS) \
 	$(LIBJPEG_LIBS) \
 	$(ZLIB_LIBS) \
@@ -941,6 +975,9 @@ if BUILD_FMT
 endif
 if BUILD_LZMA
 	$(if $(STATICBUILD),,@`find $(LZMA_PREFIX) '(' -iname '*lzma*'$(DLLEXT) -o -iname '*lzma*''.so.*' ')' -exec cp -P '{''}' "$(DESTDIR)$(bindir)/$(LIBDEST)" ';'`)
+endif
+if BUILD_LIBARCHIVE
+	$(if $(STATICBUILD),,@`find $(LIBARCHIVE_PREFIX) '(' -iname '*archive*'$(DLLEXT) -o -iname '*archive*''.so.*' ')' -exec cp -P '{''}' "$(DESTDIR)$(bindir)/$(LIBDEST)" ';'`)
 endif
 if STRIPBINS
 	find "$(DESTDIR)$(bindir)" -name '*'$(DLLEXT)'*' -execdir $(STRIP) -s '{''}' '+'

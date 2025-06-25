@@ -492,7 +492,9 @@ AS_IF([test "x$enable_debug" = "xyes"], [
     ])
     ENABLE_DEBUG=$enable_debug
     NEOSU_CPPFLAGS="$NEOSU_CPPFLAGS -D_DEBUG"
-    #NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -Wcast-align=strict -Wpacked-not-aligned"
+    AS_IF([test -z "$CLANG"], [
+        NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -Wcast-align=strict -Wpacked-not-aligned"
+    ])
     AS_IF([test "$SYSNAME" = "windows"], [
         AS_IF([test "x$enable_clang" = "xyes"], [
             LDFLAGS="$LDFLAGS -Xlinker /subsystem:console"
@@ -677,6 +679,8 @@ FMT_MIN_VERSION=11.0.0
 FMT_BUILD_VERSION=11.2.0
 LZMA_MIN_VERSION=5.4.7
 LZMA_BUILD_VERSION=5.8.1
+LIBARCHIVE_MIN_VERSION=3.6.2
+LIBARCHIVE_BUILD_VERSION=3.8.1
 CURL_MIN_VERSION=8.5.0
 CURL_BUILD_VERSION=8.14.1
 MPG123_MIN_VERSION=1.30.0
@@ -719,6 +723,7 @@ AS_IF([test "x$enable_system_deps" != "xno"], [
     PKG_CHECK_AUTO([FREETYPE2], [freetype2 >= $FREETYPE2_MIN_VERSION], [have_freetype2=yes], [have_freetype2=no])
     PKG_CHECK_AUTO([FMT], [fmt >= $FMT_MIN_VERSION], [have_fmt=yes], [have_fmt=no])
     PKG_CHECK_AUTO([LZMA], [liblzma >= $LZMA_MIN_VERSION], [have_liblzma=yes], [have_liblzma=no])
+    PKG_CHECK_AUTO([LIBARCHIVE], [libarchive >= $LIBARCHIVE_MIN_VERSION], [have_libarchive=yes], [have_libarchive=no])
     AS_IF([test "$with_soloud" = "yes"], [
         PKG_CHECK_AUTO([MPG123], [libmpg123 >= $MPG123_MIN_VERSION], [have_mpg123=yes], [have_mpg123=no])
     ])
@@ -781,6 +786,12 @@ LZMA_PREFIX="${DEPS_PREFIX}"
 AC_SUBST([LZMA_VERSION])
 AC_SUBST([LZMA_PREFIX])
 
+AS_IF([test "x$have_libarchive" != "xyes"], [have_libarchive="build from source"])
+LIBARCHIVE_VERSION=$LIBARCHIVE_BUILD_VERSION
+LIBARCHIVE_PREFIX="${DEPS_PREFIX}"
+AC_SUBST([LIBARCHIVE_VERSION])
+AC_SUBST([LIBARCHIVE_PREFIX])
+
 AS_IF([test "x$have_curl" != "xyes"], [have_curl="download"])
 CURL_VERSION=$CURL_BUILD_VERSION
 CURL_PREFIX="${DEPS_PREFIX}"
@@ -810,6 +821,7 @@ AM_CONDITIONAL([BUILD_ZLIB], [test "x$have_zlib" != "xyes"])
 AM_CONDITIONAL([BUILD_FREETYPE2], [test "x$have_freetype2" != "xyes"])
 AM_CONDITIONAL([BUILD_FMT], [test "x$have_fmt" != "xyes"])
 AM_CONDITIONAL([BUILD_LZMA], [test "x$have_liblzma" != "xyes"])
+AM_CONDITIONAL([BUILD_LIBARCHIVE], [test "x$have_libarchive" != "xyes"])
 AM_CONDITIONAL([NEED_CURL], [test "x$have_curl" != "xyes"])
 AM_CONDITIONAL([BUILD_MPG123], [test "$with_soloud" = "yes" && test "x$have_mpg123" != "xyes"])
 AM_CONDITIONAL([BUILD_GLM], [test "x$have_glm" != "xyes"])
@@ -895,6 +907,7 @@ Dependencies:
     fmt:                ${have_fmt-build from source}
     curl:               ${have_curl-build from source}
     liblzma:            ${have_liblzma-build from source}
+    libarchive:         ${have_libarchive-build from source}
     mpg123:             ${have_mpg123-build from source}
     glm (math)          ${have_glm-build from source}
 ])

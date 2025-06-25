@@ -6,6 +6,7 @@
 #include <sstream>
 #include <thread>
 
+#include "Archival.h"
 #include "Bancho.h"
 #include "BanchoNetworking.h"
 #include "BanchoProtocol.h"
@@ -15,7 +16,6 @@
 #include "Engine.h"
 #include "Osu.h"
 #include "SongBrowser/SongBrowser.h"
-#include "miniz.h"
 
 struct DownloadResult {
     std::string url;
@@ -240,73 +240,69 @@ i32 get_beatmapset_id_from_osu_file(const u8* osu_data, size_t s_osu_data) {
 }
 
 i32 extract_beatmapset_id(const u8* data, size_t data_s) {
-    i32 set_id = -1;
-
-    mz_zip_archive zip = {0};
-    mz_zip_archive_file_stat file_stat;
-    mz_uint num_files = 0;
-
     debugLog("Reading beatmapset (%d bytes)\n", data_s);
-    if(!mz_zip_reader_init_mem(&zip, data, data_s, 0)) {
+
+    Archive archive(data, data_s);
+    if(!archive.isValid()) {
         debugLog("Failed to open .osz file\n");
         return -1;
     }
 
-    num_files = mz_zip_reader_get_num_files(&zip);
-    if(num_files <= 0) {
+    auto entries = archive.getAllEntries();
+    if(entries.empty()) {
         debugLog(".osz file is empty!\n");
-        mz_zip_reader_end(&zip);
         return -1;
     }
-    for(mz_uint i = 0; i < num_files; i++) {
-        if(!mz_zip_reader_file_stat(&zip, i, &file_stat)) continue;
-        if(mz_zip_reader_is_file_a_directory(&zip, i)) continue;
-        if(env->getFileExtensionFromFilePath(file_stat.m_filename).compare("osu") != 0) continue;
 
-        size_t s_osu_data = 0;
-        u8* osu_data = (u8*)mz_zip_reader_extract_to_heap(&zip, i, &s_osu_data, 0);
-        set_id = get_beatmapset_id_from_osu_file(osu_data, s_osu_data);
-        mz_free(osu_data);
-        if(set_id != -1) break;
+    for(const auto& entry : entries) {
+        if(entry.isDirectory()) continue;
+
+        std::string filename = entry.getFilename();
+        if(env->getFileExtensionFromFilePath(filename).compare("osu") != 0) continue;
+
+        auto osu_data = entry.extractToMemory();
+        if(osu_data.empty()) continue;
+
+        i32 set_id = get_beatmapset_id_from_osu_file(osu_data.data(), osu_data.size());
+        if(set_id != -1) return set_id;
     }
 
-    mz_zip_reader_end(&zip);
-    return set_id;
+    return -1;
 }
 
 bool extract_beatmapset(const u8* data, size_t data_s, std::string map_dir) {
-    mz_zip_archive zip = {0};
-    mz_zip_archive_file_stat file_stat;
-    mz_uint num_files = 0;
-
     debugLog("Extracting beatmapset (%d bytes)\n", data_s);
-    if(!mz_zip_reader_init_mem(&zip, data, data_s, 0)) {
+
+    Archive archive(data, data_s);
+    if(!archive.isValid()) {
         debugLog("Failed to open .osz file\n");
         return false;
     }
 
-    num_files = mz_zip_reader_get_num_files(&zip);
-    if(num_files <= 0) {
+    auto entries = archive.getAllEntries();
+    if(entries.empty()) {
         debugLog(".osz file is empty!\n");
-        mz_zip_reader_end(&zip);
         return false;
     }
+
     if(!env->directoryExists(map_dir)) {
         env->createDirectory(map_dir);
     }
-    for(mz_uint i = 0; i < num_files; i++) {
-        if(!mz_zip_reader_file_stat(&zip, i, &file_stat)) continue;
-        if(mz_zip_reader_is_file_a_directory(&zip, i)) continue;
 
-        auto folders = UString(file_stat.m_filename).split("/");
+    for(const auto& entry : entries) {
+        if(entry.isDirectory()) continue;
+
+        std::string filename = entry.getFilename();
+        auto folders = UString(filename).split("/");
         std::string file_path = map_dir;
-        for(auto folder : folders) {
+
+        for(const auto& folder : folders) {
             if(!env->directoryExists(file_path)) {
                 env->createDirectory(file_path);
             }
 
             if(folder == UString("..")) {
-                // Bro...
+                // security check: skip files with path traversal attempts
                 goto skip_file;
             } else {
                 file_path.append("/");
@@ -314,15 +310,15 @@ bool extract_beatmapset(const u8* data, size_t data_s, std::string map_dir) {
             }
         }
 
-        mz_zip_reader_extract_to_file(&zip, i, file_path.c_str(), 0);
+        if(!entry.extractToFile(file_path)) {
+            debugLog("Failed to extract file %s\n", filename.c_str());
+        }
 
     skip_file:;
-        // When a file can't be extracted we just ignore it (as long as the archive is valid).
-        // We'll check for errors when loading the beatmap.
+        // when a file can't be extracted we just ignore it (as long as the archive is valid)
+        // we'll check for errors when loading the beatmap
     }
 
-    // Success
-    mz_zip_reader_end(&zip);
     return true;
 }
 

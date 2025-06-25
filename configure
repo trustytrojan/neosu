@@ -670,6 +670,8 @@ BUILD_MPG123_FALSE
 BUILD_MPG123_TRUE
 NEED_CURL_FALSE
 NEED_CURL_TRUE
+BUILD_LIBARCHIVE_FALSE
+BUILD_LIBARCHIVE_TRUE
 BUILD_LZMA_FALSE
 BUILD_LZMA_TRUE
 BUILD_FMT_FALSE
@@ -693,6 +695,8 @@ MPG123_PREFIX
 MPG123_VERSION
 CURL_PREFIX
 CURL_VERSION
+LIBARCHIVE_PREFIX
+LIBARCHIVE_VERSION
 LZMA_PREFIX
 LZMA_VERSION
 FMT_PREFIX
@@ -713,6 +717,8 @@ SDL3_PREFIX
 SDL3_VERSION
 MPG123_LIBS
 MPG123_CFLAGS
+LIBARCHIVE_LIBS
+LIBARCHIVE_CFLAGS
 LZMA_LIBS
 LZMA_CFLAGS
 FMT_LIBS
@@ -989,6 +995,8 @@ FMT_CFLAGS
 FMT_LIBS
 LZMA_CFLAGS
 LZMA_LIBS
+LIBARCHIVE_CFLAGS
+LIBARCHIVE_LIBS
 MPG123_CFLAGS
 MPG123_LIBS'
 
@@ -1719,6 +1727,10 @@ Some influential environment variables:
   FMT_LIBS    linker flags for FMT, overriding pkg-config
   LZMA_CFLAGS C compiler flags for LZMA, overriding pkg-config
   LZMA_LIBS   linker flags for LZMA, overriding pkg-config
+  LIBARCHIVE_CFLAGS
+              C compiler flags for LIBARCHIVE, overriding pkg-config
+  LIBARCHIVE_LIBS
+              linker flags for LIBARCHIVE, overriding pkg-config
   MPG123_CFLAGS
               C compiler flags for MPG123, overriding pkg-config
   MPG123_LIBS linker flags for MPG123, overriding pkg-config
@@ -8470,7 +8482,12 @@ esac
 fi
     ENABLE_DEBUG=$enable_debug
     NEOSU_CPPFLAGS="$NEOSU_CPPFLAGS -D_DEBUG"
-    #NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -Wcast-align=strict -Wpacked-not-aligned"
+    if test -z "$CLANG"
+then :
+
+        NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -Wcast-align=strict -Wpacked-not-aligned"
+
+fi
     if test "$SYSNAME" = "windows"
 then :
 
@@ -10312,6 +10329,8 @@ FMT_MIN_VERSION=11.0.0
 FMT_BUILD_VERSION=11.2.0
 LZMA_MIN_VERSION=5.4.7
 LZMA_BUILD_VERSION=5.8.1
+LIBARCHIVE_MIN_VERSION=3.6.2
+LIBARCHIVE_BUILD_VERSION=3.8.1
 CURL_MIN_VERSION=8.5.0
 CURL_BUILD_VERSION=8.14.1
 MPG123_MIN_VERSION=1.30.0
@@ -11884,6 +11903,158 @@ fi ;;
 esac
 fi
 
+
+    if test "x$enable_static" = "xyes"
+then :
+  _save_PKG_CONFIG=$PKG_CONFIG
+PKG_CONFIG="$PKG_CONFIG --static"
+
+pkg_failed=no
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for libarchive >= $LIBARCHIVE_MIN_VERSION" >&5
+printf %s "checking for libarchive >= $LIBARCHIVE_MIN_VERSION... " >&6; }
+
+if test -n "$LIBARCHIVE_CFLAGS"; then
+    pkg_cv_LIBARCHIVE_CFLAGS="$LIBARCHIVE_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libarchive >= \$LIBARCHIVE_MIN_VERSION\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libarchive >= $LIBARCHIVE_MIN_VERSION") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBARCHIVE_CFLAGS=`$PKG_CONFIG --cflags "libarchive >= $LIBARCHIVE_MIN_VERSION" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$LIBARCHIVE_LIBS"; then
+    pkg_cv_LIBARCHIVE_LIBS="$LIBARCHIVE_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libarchive >= \$LIBARCHIVE_MIN_VERSION\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libarchive >= $LIBARCHIVE_MIN_VERSION") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBARCHIVE_LIBS=`$PKG_CONFIG --libs "libarchive >= $LIBARCHIVE_MIN_VERSION" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+                LIBARCHIVE_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libarchive >= $LIBARCHIVE_MIN_VERSION" 2>&1`
+        else
+                LIBARCHIVE_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libarchive >= $LIBARCHIVE_MIN_VERSION" 2>&1`
+        fi
+        # Put the nasty error message in config.log where it belongs
+        echo "$LIBARCHIVE_PKG_ERRORS" >&5
+
+        have_libarchive=no
+elif test $pkg_failed = untried; then
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+        have_libarchive=no
+else
+        LIBARCHIVE_CFLAGS=$pkg_cv_LIBARCHIVE_CFLAGS
+        LIBARCHIVE_LIBS=$pkg_cv_LIBARCHIVE_LIBS
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+printf "%s\n" "yes" >&6; }
+        have_libarchive=yes
+fi
+PKG_CONFIG=$_save_PKG_CONFIG
+else case e in #(
+  e)
+pkg_failed=no
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for libarchive >= $LIBARCHIVE_MIN_VERSION" >&5
+printf %s "checking for libarchive >= $LIBARCHIVE_MIN_VERSION... " >&6; }
+
+if test -n "$LIBARCHIVE_CFLAGS"; then
+    pkg_cv_LIBARCHIVE_CFLAGS="$LIBARCHIVE_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libarchive >= \$LIBARCHIVE_MIN_VERSION\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libarchive >= $LIBARCHIVE_MIN_VERSION") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBARCHIVE_CFLAGS=`$PKG_CONFIG --cflags "libarchive >= $LIBARCHIVE_MIN_VERSION" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$LIBARCHIVE_LIBS"; then
+    pkg_cv_LIBARCHIVE_LIBS="$LIBARCHIVE_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libarchive >= \$LIBARCHIVE_MIN_VERSION\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libarchive >= $LIBARCHIVE_MIN_VERSION") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBARCHIVE_LIBS=`$PKG_CONFIG --libs "libarchive >= $LIBARCHIVE_MIN_VERSION" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+                LIBARCHIVE_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libarchive >= $LIBARCHIVE_MIN_VERSION" 2>&1`
+        else
+                LIBARCHIVE_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libarchive >= $LIBARCHIVE_MIN_VERSION" 2>&1`
+        fi
+        # Put the nasty error message in config.log where it belongs
+        echo "$LIBARCHIVE_PKG_ERRORS" >&5
+
+        have_libarchive=no
+elif test $pkg_failed = untried; then
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+        have_libarchive=no
+else
+        LIBARCHIVE_CFLAGS=$pkg_cv_LIBARCHIVE_CFLAGS
+        LIBARCHIVE_LIBS=$pkg_cv_LIBARCHIVE_LIBS
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+printf "%s\n" "yes" >&6; }
+        have_libarchive=yes
+fi ;;
+esac
+fi
+
     if test "$with_soloud" = "yes"
 then :
 
@@ -12187,6 +12358,15 @@ LZMA_PREFIX="${DEPS_PREFIX}"
 
 
 
+if test "x$have_libarchive" != "xyes"
+then :
+  have_libarchive="build from source"
+fi
+LIBARCHIVE_VERSION=$LIBARCHIVE_BUILD_VERSION
+LIBARCHIVE_PREFIX="${DEPS_PREFIX}"
+
+
+
 if test "x$have_curl" != "xyes"
 then :
   have_curl="download"
@@ -12288,6 +12468,14 @@ fi
 else
   BUILD_LZMA_TRUE='#'
   BUILD_LZMA_FALSE=
+fi
+
+ if test "x$have_libarchive" != "xyes"; then
+  BUILD_LIBARCHIVE_TRUE=
+  BUILD_LIBARCHIVE_FALSE='#'
+else
+  BUILD_LIBARCHIVE_TRUE='#'
+  BUILD_LIBARCHIVE_FALSE=
 fi
 
  if test "x$have_curl" != "xyes"; then
@@ -12602,6 +12790,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_LZMA_TRUE}" && test -z "${BUILD_LZMA_FALSE}"; then
   as_fn_error $? "conditional \"BUILD_LZMA\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_LIBARCHIVE_TRUE}" && test -z "${BUILD_LIBARCHIVE_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_LIBARCHIVE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${NEED_CURL_TRUE}" && test -z "${NEED_CURL_FALSE}"; then
@@ -14020,6 +14212,7 @@ Dependencies:
     fmt:                ${have_fmt-build from source}
     curl:               ${have_curl-build from source}
     liblzma:            ${have_liblzma-build from source}
+    libarchive:         ${have_libarchive-build from source}
     mpg123:             ${have_mpg123-build from source}
     glm (math)          ${have_glm-build from source}
 " >&5
@@ -14067,6 +14260,7 @@ Dependencies:
     fmt:                ${have_fmt-build from source}
     curl:               ${have_curl-build from source}
     liblzma:            ${have_liblzma-build from source}
+    libarchive:         ${have_libarchive-build from source}
     mpg123:             ${have_mpg123-build from source}
     glm (math)          ${have_glm-build from source}
 " >&6;}

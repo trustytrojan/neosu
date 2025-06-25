@@ -11,7 +11,7 @@
 
 std::vector<wchar_t> Icons::icons;
 
-wchar_t Icons::Z_UNKNOWN_CHAR = Icons::addIcon(McFont::UNKNOWN_CHAR);
+wchar_t Icons::Z_UNKNOWN_CHAR = Icons::addIcon('?');
 wchar_t Icons::Z_SPACE = Icons::addIcon(0x20);
 
 wchar_t Icons::GEAR = Icons::addIcon(0xf013);

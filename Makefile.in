@@ -125,7 +125,9 @@ bin_PROGRAMS = neosu$(EXEEXT)
 @BUILD_FREETYPE2_TRUE@am__append_27 = $(shell $(PKG_CONFIG) --libs freetype2)
 @BUILD_LZMA_TRUE@am__append_28 = $(shell $(PKG_CONFIG) --cflags liblzma)
 @BUILD_LZMA_TRUE@am__append_29 = $(shell $(PKG_CONFIG) --libs liblzma)
-@WIN_PLATFORM_FALSE@am__append_30 = lib/
+@BUILD_LIBARCHIVE_TRUE@am__append_30 = $(shell $(PKG_CONFIG) --cflags libarchive)
+@BUILD_LIBARCHIVE_TRUE@am__append_31 = $(shell $(PKG_CONFIG) --libs libarchive)
+@WIN_PLATFORM_FALSE@am__append_32 = lib/
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -148,7 +150,6 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	libraries/glad_glx/neosu-glad_glx.$(OBJEXT) \
 	libraries/glad_wgl/neosu-glad_wgl.$(OBJEXT) \
 	libraries/neosu-lodepng.$(OBJEXT) \
-	libraries/neosu-miniz.$(OBJEXT) \
 	src/App/Osu/neosu-BackgroundImageHandler.$(OBJEXT) \
 	src/App/Osu/neosu-Bancho.$(OBJEXT) \
 	src/App/Osu/neosu-BanchoAes.$(OBJEXT) \
@@ -233,6 +234,7 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/App/Osu/neosu-base64.$(OBJEXT) \
 	src/App/Osu/neosu-score.$(OBJEXT) \
 	src/Engine/neosu-AnimationHandler.$(OBJEXT) \
+	src/Engine/neosu-Archival.$(OBJEXT) \
 	src/Engine/neosu-Camera.$(OBJEXT) \
 	src/Engine/neosu-ConVar.$(OBJEXT) \
 	src/Engine/neosu-ContextMenu.$(OBJEXT) \
@@ -338,7 +340,6 @@ am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	libraries/$(DEPDIR)/neosu-cJSON.Po \
 	libraries/$(DEPDIR)/neosu-lodepng.Po \
-	libraries/$(DEPDIR)/neosu-miniz.Po \
 	libraries/glad/$(DEPDIR)/neosu-glad.Po \
 	libraries/glad_glx/$(DEPDIR)/neosu-glad_glx.Po \
 	libraries/glad_wgl/$(DEPDIR)/neosu-glad_wgl.Po \
@@ -426,6 +427,7 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongButton.Po \
 	src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongDifficultyButton.Po \
 	src/Engine/$(DEPDIR)/neosu-AnimationHandler.Po \
+	src/Engine/$(DEPDIR)/neosu-Archival.Po \
 	src/Engine/$(DEPDIR)/neosu-Camera.Po \
 	src/Engine/$(DEPDIR)/neosu-ConVar.Po \
 	src/Engine/$(DEPDIR)/neosu-ContextMenu.Po \
@@ -674,6 +676,10 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LIBARCHIVE_CFLAGS = @LIBARCHIVE_CFLAGS@ $(am__append_30)
+LIBARCHIVE_LIBS = @LIBARCHIVE_LIBS@ $(am__append_31)
+LIBARCHIVE_PREFIX = @LIBARCHIVE_PREFIX@
+LIBARCHIVE_VERSION = @LIBARCHIVE_VERSION@
 LIBJPEG_CFLAGS = @LIBJPEG_CFLAGS@ $(am__append_15)
 LIBJPEG_LIBS = @LIBJPEG_LIBS@ $(am__append_16)
 LIBJPEG_PREFIX = @LIBJPEG_PREFIX@
@@ -829,7 +835,6 @@ neosu_SOURCES = \
 	libraries/glad_glx/glad_glx.cpp \
 	libraries/glad_wgl/glad_wgl.cpp \
 	libraries/lodepng.cpp \
-	libraries/miniz.cpp \
 	src/App/Osu/BackgroundImageHandler.cpp \
 	src/App/Osu/Bancho.cpp \
 	src/App/Osu/BanchoAes.cpp \
@@ -914,6 +919,7 @@ neosu_SOURCES = \
 	src/App/Osu/base64.cpp \
 	src/App/Osu/score.cpp \
 	src/Engine/AnimationHandler.cpp \
+	src/Engine/Archival.cpp \
 	src/Engine/Camera.cpp \
 	src/Engine/ConVar.cpp \
 	src/Engine/ContextMenu.cpp \
@@ -1065,6 +1071,7 @@ BUILT_SOURCES := \
 	$(DEPS_PREFIX)/mpg123.built \
 	$(DEPS_PREFIX)/discordsdk.built \
 	$(DEPS_PREFIX)/liblzma.built \
+	$(DEPS_PREFIX)/libarchive.built \
 	$(DEPS_PREFIX)/curl.built
 
 
@@ -1087,6 +1094,7 @@ neosu_CXXFLAGS := \
 	$(EGL_CFLAGS) \
 	$(FREETYPE2_CFLAGS) \
 	$(FMT_CFLAGS) \
+	$(LIBARCHIVE_CFLAGS) \
 	$(LIBPNG_CFLAGS) \
 	$(BZIP2_CFLAGS) \
 	$(LIBJPEG_CFLAGS) \
@@ -1116,6 +1124,7 @@ neosu_LDFLAGS := \
 	$(FREETYPE2_LIBS) \
 	$(FMT_LIBS) \
 	$(LIBPNG_LIBS) \
+	$(LIBARCHIVE_LIBS) \
 	$(BZIP2_LIBS) \
 	$(LIBJPEG_LIBS) \
 	$(ZLIB_LIBS) \
@@ -1131,7 +1140,7 @@ neosu_LDFLAGS := \
 
 # windows' loader has no concept of rpaths (so keep all built/required libs in the same level as the main exe)
 # otherwise we can tuck them away neatly in lib/ (besides ffmpeg, for self-inflicted reasons (dlopen in SoLoud, which won't find stuff in rpath))
-LIBDEST := $(am__append_30)
+LIBDEST := $(am__append_32)
 
 # TODO: distribution package files
 EXTRA_DIST := \
@@ -1274,8 +1283,6 @@ libraries/glad_wgl/neosu-glad_wgl.$(OBJEXT):  \
 	libraries/glad_wgl/$(am__dirstamp) \
 	libraries/glad_wgl/$(DEPDIR)/$(am__dirstamp)
 libraries/neosu-lodepng.$(OBJEXT): libraries/$(am__dirstamp) \
-	libraries/$(DEPDIR)/$(am__dirstamp)
-libraries/neosu-miniz.$(OBJEXT): libraries/$(am__dirstamp) \
 	libraries/$(DEPDIR)/$(am__dirstamp)
 src/App/Osu/$(am__dirstamp):
 	@$(MKDIR_P) src/App/Osu
@@ -1502,6 +1509,8 @@ src/Engine/$(DEPDIR)/$(am__dirstamp):
 	@: >>src/Engine/$(DEPDIR)/$(am__dirstamp)
 src/Engine/neosu-AnimationHandler.$(OBJEXT):  \
 	src/Engine/$(am__dirstamp) \
+	src/Engine/$(DEPDIR)/$(am__dirstamp)
+src/Engine/neosu-Archival.$(OBJEXT): src/Engine/$(am__dirstamp) \
 	src/Engine/$(DEPDIR)/$(am__dirstamp)
 src/Engine/neosu-Camera.$(OBJEXT): src/Engine/$(am__dirstamp) \
 	src/Engine/$(DEPDIR)/$(am__dirstamp)
@@ -1812,7 +1821,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@libraries/$(DEPDIR)/neosu-MD5.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libraries/$(DEPDIR)/neosu-cJSON.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libraries/$(DEPDIR)/neosu-lodepng.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@libraries/$(DEPDIR)/neosu-miniz.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libraries/glad/$(DEPDIR)/neosu-glad.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libraries/glad_glx/$(DEPDIR)/neosu-glad_glx.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libraries/glad_wgl/$(DEPDIR)/neosu-glad_wgl.Po@am__quote@ # am--include-marker
@@ -1900,6 +1908,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongButton.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongDifficultyButton.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-AnimationHandler.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-Archival.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-Camera.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-ConVar.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-ContextMenu.Po@am__quote@ # am--include-marker
@@ -2090,20 +2099,6 @@ libraries/neosu-lodepng.obj: libraries/lodepng.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='libraries/lodepng.cpp' object='libraries/neosu-lodepng.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o libraries/neosu-lodepng.obj `if test -f 'libraries/lodepng.cpp'; then $(CYGPATH_W) 'libraries/lodepng.cpp'; else $(CYGPATH_W) '$(srcdir)/libraries/lodepng.cpp'; fi`
-
-libraries/neosu-miniz.o: libraries/miniz.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT libraries/neosu-miniz.o -MD -MP -MF libraries/$(DEPDIR)/neosu-miniz.Tpo -c -o libraries/neosu-miniz.o `test -f 'libraries/miniz.cpp' || echo '$(srcdir)/'`libraries/miniz.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) libraries/$(DEPDIR)/neosu-miniz.Tpo libraries/$(DEPDIR)/neosu-miniz.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='libraries/miniz.cpp' object='libraries/neosu-miniz.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o libraries/neosu-miniz.o `test -f 'libraries/miniz.cpp' || echo '$(srcdir)/'`libraries/miniz.cpp
-
-libraries/neosu-miniz.obj: libraries/miniz.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT libraries/neosu-miniz.obj -MD -MP -MF libraries/$(DEPDIR)/neosu-miniz.Tpo -c -o libraries/neosu-miniz.obj `if test -f 'libraries/miniz.cpp'; then $(CYGPATH_W) 'libraries/miniz.cpp'; else $(CYGPATH_W) '$(srcdir)/libraries/miniz.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) libraries/$(DEPDIR)/neosu-miniz.Tpo libraries/$(DEPDIR)/neosu-miniz.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='libraries/miniz.cpp' object='libraries/neosu-miniz.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o libraries/neosu-miniz.obj `if test -f 'libraries/miniz.cpp'; then $(CYGPATH_W) 'libraries/miniz.cpp'; else $(CYGPATH_W) '$(srcdir)/libraries/miniz.cpp'; fi`
 
 src/App/Osu/neosu-BackgroundImageHandler.o: src/App/Osu/BackgroundImageHandler.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/App/Osu/neosu-BackgroundImageHandler.o -MD -MP -MF src/App/Osu/$(DEPDIR)/neosu-BackgroundImageHandler.Tpo -c -o src/App/Osu/neosu-BackgroundImageHandler.o `test -f 'src/App/Osu/BackgroundImageHandler.cpp' || echo '$(srcdir)/'`src/App/Osu/BackgroundImageHandler.cpp
@@ -3280,6 +3275,20 @@ src/Engine/neosu-AnimationHandler.obj: src/Engine/AnimationHandler.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/AnimationHandler.cpp' object='src/Engine/neosu-AnimationHandler.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-AnimationHandler.obj `if test -f 'src/Engine/AnimationHandler.cpp'; then $(CYGPATH_W) 'src/Engine/AnimationHandler.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/AnimationHandler.cpp'; fi`
+
+src/Engine/neosu-Archival.o: src/Engine/Archival.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/neosu-Archival.o -MD -MP -MF src/Engine/$(DEPDIR)/neosu-Archival.Tpo -c -o src/Engine/neosu-Archival.o `test -f 'src/Engine/Archival.cpp' || echo '$(srcdir)/'`src/Engine/Archival.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/$(DEPDIR)/neosu-Archival.Tpo src/Engine/$(DEPDIR)/neosu-Archival.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Archival.cpp' object='src/Engine/neosu-Archival.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-Archival.o `test -f 'src/Engine/Archival.cpp' || echo '$(srcdir)/'`src/Engine/Archival.cpp
+
+src/Engine/neosu-Archival.obj: src/Engine/Archival.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/neosu-Archival.obj -MD -MP -MF src/Engine/$(DEPDIR)/neosu-Archival.Tpo -c -o src/Engine/neosu-Archival.obj `if test -f 'src/Engine/Archival.cpp'; then $(CYGPATH_W) 'src/Engine/Archival.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Archival.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/$(DEPDIR)/neosu-Archival.Tpo src/Engine/$(DEPDIR)/neosu-Archival.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Archival.cpp' object='src/Engine/neosu-Archival.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-Archival.obj `if test -f 'src/Engine/Archival.cpp'; then $(CYGPATH_W) 'src/Engine/Archival.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Archival.cpp'; fi`
 
 src/Engine/neosu-Camera.o: src/Engine/Camera.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/neosu-Camera.o -MD -MP -MF src/Engine/$(DEPDIR)/neosu-Camera.Tpo -c -o src/Engine/neosu-Camera.o `test -f 'src/Engine/Camera.cpp' || echo '$(srcdir)/'`src/Engine/Camera.cpp
@@ -4782,7 +4791,6 @@ distclean: distclean-am
 	-rm -f libraries/$(DEPDIR)/neosu-MD5.Po
 	-rm -f libraries/$(DEPDIR)/neosu-cJSON.Po
 	-rm -f libraries/$(DEPDIR)/neosu-lodepng.Po
-	-rm -f libraries/$(DEPDIR)/neosu-miniz.Po
 	-rm -f libraries/glad/$(DEPDIR)/neosu-glad.Po
 	-rm -f libraries/glad_glx/$(DEPDIR)/neosu-glad_glx.Po
 	-rm -f libraries/glad_wgl/$(DEPDIR)/neosu-glad_wgl.Po
@@ -4870,6 +4878,7 @@ distclean: distclean-am
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongButton.Po
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongDifficultyButton.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-AnimationHandler.Po
+	-rm -f src/Engine/$(DEPDIR)/neosu-Archival.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Camera.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-ConVar.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-ContextMenu.Po
@@ -5005,7 +5014,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f libraries/$(DEPDIR)/neosu-MD5.Po
 	-rm -f libraries/$(DEPDIR)/neosu-cJSON.Po
 	-rm -f libraries/$(DEPDIR)/neosu-lodepng.Po
-	-rm -f libraries/$(DEPDIR)/neosu-miniz.Po
 	-rm -f libraries/glad/$(DEPDIR)/neosu-glad.Po
 	-rm -f libraries/glad_glx/$(DEPDIR)/neosu-glad_glx.Po
 	-rm -f libraries/glad_wgl/$(DEPDIR)/neosu-glad_wgl.Po
@@ -5093,6 +5101,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongButton.Po
 	-rm -f src/App/Osu/SongBrowser/$(DEPDIR)/neosu-SongDifficultyButton.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-AnimationHandler.Po
+	-rm -f src/Engine/$(DEPDIR)/neosu-Archival.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Camera.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-ConVar.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-ContextMenu.Po
@@ -5277,6 +5286,12 @@ $(DEPS_CACHE)/FREETYPE2-$(FREETYPE2_VERSION).source:
 $(DEPS_CACHE)/liblzma-$(LZMA_VERSION).source:
 	$(MKDIR_P) $(DEPS_CACHE)
 	$(WGET) -qO $(DEPS_CACHE)/liblzma-$(LZMA_VERSION).tar.gz "https://github.com/tukaani-project/xz/releases/download/v$(LZMA_VERSION)/xz-$(LZMA_VERSION).tar.gz" && \
+	touch $@
+
+# always needed (if not on host)
+$(DEPS_CACHE)/libarchive-$(LIBARCHIVE_VERSION).source:
+	$(MKDIR_P) $(DEPS_CACHE)
+	$(WGET) -qO $(DEPS_CACHE)/libarchive-$(LIBARCHIVE_VERSION).tar.gz "https://github.com/libarchive/libarchive/releases/download/v$(LIBARCHIVE_VERSION)/libarchive-$(LIBARCHIVE_VERSION).tar.gz" && \
 	touch $@
 
 # --with-mimalloc
@@ -5817,6 +5832,25 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION).source: $(DEPS_CACHE)/curl-$(CURL_VERSION)/cu
 @BUILD_LZMA_TRUE@	touch $@
 @BUILD_LZMA_FALSE@$(DEPS_PREFIX)/liblzma.built:
 @BUILD_LZMA_FALSE@	$(MKDIR_P) $(DEPS_PREFIX) && touch $@
+@BUILD_LIBARCHIVE_TRUE@$(DEPS_PREFIX)/libarchive.built: $(DEPS_CACHE)/libarchive-$(LIBARCHIVE_VERSION).source $(DEPS_PREFIX)/liblzma.built $(DEPS_PREFIX)/bzip2.built $(DEPS_PREFIX)/zlib.built
+@BUILD_LIBARCHIVE_TRUE@	rm -rf $(DEPS_PREFIX)/libarchive
+@BUILD_LIBARCHIVE_TRUE@	$(MKDIR_P) $(DEPS_PREFIX)/libarchive/build $(DEPS_PREFIX)/lib/pkgconfig
+@BUILD_LIBARCHIVE_TRUE@	$(TAR) xf $(DEPS_CACHE)/libarchive-$(LIBARCHIVE_VERSION).tar.gz -C $(DEPS_PREFIX)/libarchive --strip-components=1 && \
+@BUILD_LIBARCHIVE_TRUE@	cd $(DEPS_PREFIX)/libarchive/build && PKG_CONFIG="$(PKG_CONFIG)" \
+@BUILD_LIBARCHIVE_TRUE@	../configure lt_cv_prog_gnu_ld=yes --host=$(host) --build=$(build) --prefix="$(DEPS_PREFIX)" \
+@BUILD_LIBARCHIVE_TRUE@		$(if $(STATICBUILD),--enable-static --disable-shared,--enable-shared --disable-static) \
+@BUILD_LIBARCHIVE_TRUE@		--disable-tools --disable-tests --with-gnu-ld --disable-bsdtar --disable-bsdcat --disable-bsdcpio \
+@BUILD_LIBARCHIVE_TRUE@		--disable-bsdunzip --without-xml2 --without-expat --without-openssl \
+@BUILD_LIBARCHIVE_TRUE@		--without-nettle --without-mbedtls --without-lzo2 --without-lz4 --without-libiconv-prefix \
+@BUILD_LIBARCHIVE_TRUE@		--without-iconv --without-libb2 \
+@BUILD_LIBARCHIVE_TRUE@		CC="$(CC)" RANLIB="$(RANLIB)" AR="$(AR)" CXX="$(CXX)" LD="$(LD)" \
+@BUILD_LIBARCHIVE_TRUE@		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS)" && \
+@BUILD_LIBARCHIVE_TRUE@	$(MAKE) && \
+@BUILD_LIBARCHIVE_TRUE@	$(MAKE) install
+@BUILD_LIBARCHIVE_TRUE@	$(PKG_CONFIG) --exists --print-errors libarchive
+@BUILD_LIBARCHIVE_TRUE@	touch $@
+@BUILD_LIBARCHIVE_FALSE@$(DEPS_PREFIX)/libarchive.built:
+@BUILD_LIBARCHIVE_FALSE@	$(MKDIR_P) $(DEPS_PREFIX) && touch $@
 
 # making sure deps are built before main compile
 $(neosu_OBJECTS): src/config.h $(BUILT_SOURCES)
@@ -5887,6 +5921,7 @@ install-libs:
 @BUILD_FREETYPE2_TRUE@	$(if $(STATICBUILD),,@`find $(FREETYPE2_PREFIX) '(' -iname '*freetype*'$(DLLEXT) -o -iname '*freetype*''.so.*' ')' -exec cp -P '{''}' "$(DESTDIR)$(bindir)/$(LIBDEST)" ';'`)
 @BUILD_FMT_TRUE@	$(if $(STATICBUILD),,@`find $(FMT_PREFIX) '(' -iname '*fmt*'$(DLLEXT) -o -iname '*fmt*''.so.*' ')' -exec cp -P '{''}' "$(DESTDIR)$(bindir)/$(LIBDEST)" ';'`)
 @BUILD_LZMA_TRUE@	$(if $(STATICBUILD),,@`find $(LZMA_PREFIX) '(' -iname '*lzma*'$(DLLEXT) -o -iname '*lzma*''.so.*' ')' -exec cp -P '{''}' "$(DESTDIR)$(bindir)/$(LIBDEST)" ';'`)
+@BUILD_LIBARCHIVE_TRUE@	$(if $(STATICBUILD),,@`find $(LIBARCHIVE_PREFIX) '(' -iname '*archive*'$(DLLEXT) -o -iname '*archive*''.so.*' ')' -exec cp -P '{''}' "$(DESTDIR)$(bindir)/$(LIBDEST)" ';'`)
 @STRIPBINS_TRUE@	find "$(DESTDIR)$(bindir)" -name '*'$(DLLEXT)'*' -execdir $(STRIP) -s '{''}' '+'
 @WIN_PLATFORM_FALSE@	find "$(DESTDIR)$(bindir)/lib" -maxdepth 1 -name '*'.so'*' -execdir $(PATCHELF) --set-rpath '$$ORIGIN:$$ORIGIN/../' '{''}' ';'
 @WIN_PLATFORM_FALSE@	find "$(DESTDIR)$(bindir)" -maxdepth 1 -name '*'.so'*' -execdir $(PATCHELF) --set-rpath '$$ORIGIN:$$ORIGIN/lib' '{''}' ';'

@@ -1,91 +1,162 @@
+//========== Copyright (c) 2015, PG & 2025, WH, All rights reserved. ============//
+//
+// Purpose:		freetype font wrapper with unicode support
+//
+// $NoKeywords: $fnt
+//===============================================================================//
+
 #pragma once
-#include <freetype/freetype.h>
-#include <freetype/ftbitmap.h>
-#include <freetype/ftglyph.h>
-#include <freetype/ftoutln.h>
-#include <freetype/fttrigon.h>
-#include <ft2build.h>
+#ifndef FONT_H
+#define FONT_H
 
 #include "Resource.h"
+#include "VertexArrayObject.h"
 
-class Image;
+typedef struct FT_Bitmap_ FT_Bitmap;
+typedef struct FT_FaceRec_ *FT_Face;
+typedef struct FT_LibraryRec_ *FT_Library;
+
 class TextureAtlas;
 class VertexArrayObject;
 
-class McFont : public Resource {
+class McFont final : public Resource {
    public:
-    static const wchar_t UNKNOWN_CHAR = 63;  // ascii '?'
+    McFont(const UString &filepath, int fontSize = 16, bool antialiasing = true, int fontDPI = 96);
+    McFont(const UString &filepath, const std::vector<wchar_t> &characters, int fontSize = 16, bool antialiasing = true,
+           int fontDPI = 96);
+    ~McFont() override { destroy(); }
 
+    McFont &operator=(const McFont &) = delete;
+    McFont &operator=(McFont &&) = delete;
+
+    McFont(const McFont &) = delete;
+    McFont(McFont &&) = delete;
+
+    // called on engine shutdown to clean up freetype/shared fallback fonts
+    static void cleanupSharedResources();
+
+    void drawString(Graphics *g, const UString &text);
+    void beginBatch();
+    void addToBatch(const UString &text, const Vector3 &pos, Color color = 0xffffffff);
+    void flushBatch(Graphics *g);
+
+    void setSize(int fontSize) { m_iFontSize = fontSize; }
+    void setDPI(int dpi) { m_iFontDPI = dpi; }
+    void setHeight(float height) { m_fHeight = height; }
+
+    inline int getSize() const { return m_iFontSize; }
+    inline int getDPI() const { return m_iFontDPI; }
+    inline float getHeight() const { return m_fHeight; }  // precomputed average height (fast)
+
+    float getStringWidth(const UString &text) const;
+    float getStringHeight(const UString &text) const;
+
+    std::vector<UString> wrap(const UString &text, f64 max_width) const;
+
+   public:
     struct GLYPH_METRICS {
         wchar_t character;
-
-        unsigned int uvPixelsX;
-        unsigned int uvPixelsY;
-        unsigned int sizePixelsX;
-        unsigned int sizePixelsY;
-
-        int left;
-        int top;
-        int width;
-        int rows;
-
+        unsigned int uvPixelsX, uvPixelsY;
+        unsigned int sizePixelsX, sizePixelsY;
+        int left, top, width, rows;
         float advance_x;
+        int fontIndex;  // which font this glyph came from (0 = primary, >0 = fallback)
     };
-
-   public:
-    McFont(std::string filepath, int fontSize = 16, bool antialiasing = true, int fontDPI = 96);
-    McFont(std::string filepath, std::vector<wchar_t> characters, int fontSize = 16, bool antialiasing = true,
-           int fontDPI = 96);
-    ~McFont() override { this->destroy(); }
-
-    void drawString(Graphics *g, UString text);
-    void drawTextureAtlas(Graphics *g);
-
-    void setSize(int fontSize) { this->iFontSize = fontSize; }
-    void setDPI(int dpi) { this->iFontDPI = dpi; }
-    void setHeight(float height) { this->fHeight = height; }
-
-    inline int getSize() const { return this->iFontSize; }
-    inline int getDPI() const { return this->iFontDPI; }
-    inline float getHeight() const { return this->fHeight; }  // precomputed average height (fast)
-
-    float getStringWidth(UString text) const;
-    float getStringHeight(UString text) const;
-
+    // McKay would say: ILLEGAL
     const GLYPH_METRICS &getGlyphMetrics(wchar_t ch) const;
-    bool hasGlyph(wchar_t ch) const;
 
-    std::vector<UString> wrap(const UString &text, f64 max_width);
+    // // type inspection
+    // [[nodiscard]] Type getResType() const override { return FONT; }
 
-    // ILLEGAL:
-    inline TextureAtlas *getTextureAtlas() const { return this->textureAtlas; }
+    // McFont *asFont() override { return this; }
+    // [[nodiscard]] const McFont *asFont() const override { return this; }
 
    protected:
-    void constructor(std::vector<wchar_t> characters, int fontSize, bool antialiasing, int fontDPI);
-
+    void constructor(const std::vector<wchar_t> &characters, int fontSize, bool antialiasing, int fontDPI);
     void init() override;
     void initAsync() override;
     void destroy() override;
 
+   private:
+    struct FallbackFont {
+        UString fontPath;
+        FT_Face face;
+        bool isSystemFont;
+    };
+
+    struct BatchEntry {
+        UString text;
+        Vector3 pos;
+        Color color;
+    };
+
+    struct TextBatch {
+        size_t totalVerts;
+        size_t usedEntries;
+        std::vector<BatchEntry> entryList;
+    };
+
+    forceinline bool hasGlyph(wchar_t ch) const { return m_vGlyphMetrics.find(ch) != m_vGlyphMetrics.end(); };
     bool addGlyph(wchar_t ch);
+    bool loadGlyphDynamic(wchar_t ch);
+    bool ensureAtlasSpace(int requiredWidth, int requiredHeight);
+    void rebuildAtlas();
 
-    void addAtlasGlyphToVao(Graphics *g, wchar_t ch, float &advanceX, VertexArrayObject *vao);
-    void renderFTGlyphToTextureAtlas(FT_Library library, FT_Face face, wchar_t ch, TextureAtlas *textureAtlas,
-                                     bool antialiasing,
-                                     std::unordered_map<wchar_t, McFont::GLYPH_METRICS> *glyphMetrics);
+    // consolidated glyph processing methods
+    bool initializeFreeType();
+    bool loadGlyphMetrics(wchar_t ch);
+    std::unique_ptr<Color[]> createExpandedBitmapData(const FT_Bitmap &bitmap);
+    void renderGlyphToAtlas(wchar_t ch, int x, int y, FT_Face face = nullptr);
+    bool createAndPackAtlas(const std::vector<wchar_t> &glyphs);
 
-    int iFontSize;
-    bool bAntialiasing;
-    int iFontDPI;
+    // fallback font management
+    FT_Face getFontFaceForGlyph(wchar_t ch, int &fontIndex);
+    bool loadGlyphFromFace(wchar_t ch, FT_Face face, int fontIndex);
 
-    // glyphs
-    TextureAtlas *textureAtlas;
+    void buildGlyphGeometry(const GLYPH_METRICS &gm, const Vector3 &basePos, float advanceX, size_t &vertexCount);
+    void buildStringGeometry(const UString &text, size_t &vertexCount);
 
-    std::vector<wchar_t> vGlyphs;
-    std::unordered_map<wchar_t, bool> vGlyphExistence;
-    std::unordered_map<wchar_t, GLYPH_METRICS> vGlyphMetrics;
+    Channel *unpackMonoBitmap(const FT_Bitmap &bitmap);
 
-    float fHeight;
+    // shared freetype resources
+    static FT_Library s_sharedFtLibrary;
+    static bool s_sharedFtLibraryInitialized;
+    static std::vector<FallbackFont> s_sharedFallbackFonts;
+    static bool s_sharedFallbacksInitialized;
 
-    GLYPH_METRICS errorGlyph;
+    // shared resource initialization
+    static bool initializeSharedFreeType();
+    static bool initializeSharedFallbackFonts();
+    static void discoverSystemFallbacks();
+    static bool loadFallbackFont(const UString &fontPath, bool isSystemFont = false);
+
+    // helper to set font size on any face for this font instance
+    void setFaceSize(FT_Face face) const;
+
+    int m_iFontSize;
+    bool m_bAntialiasing;
+    int m_iFontDPI;
+    float m_fHeight;
+    TextureAtlas *m_textureAtlas;
+    GLYPH_METRICS m_errorGlyph;
+
+    // per-instance freetype resources (only primary font face)
+    FT_Face m_ftFace;  // primary font face
+    bool m_bFreeTypeInitialized;
+
+    std::vector<wchar_t> m_vGlyphs;
+    std::unordered_map<wchar_t, bool> m_vGlyphExistence;
+    std::unordered_map<wchar_t, GLYPH_METRICS> m_vGlyphMetrics;
+
+    VertexArrayObject m_vao;
+    TextBatch m_batchQueue;
+    std::vector<Vector3> m_vertices;
+    std::vector<Vector2> m_texcoords;
+    bool m_batchActive;
+
+    // atlas management
+    mutable bool m_bAtlasNeedsRebuild;
+    std::vector<wchar_t> m_vPendingGlyphs;
 };
+
+#endif

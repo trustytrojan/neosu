@@ -4,9 +4,9 @@
 #include "cbase.h"
 
 #ifdef MCENGINE_PLATFORM_WINDOWS
-#pragma pack(push, 8)
+//#pragma pack(push, 8)
 #include "discord_game_sdk.h"
-#pragma pack(pop)
+//#pragma pack(pop)
 #else
 enum DiscordActivityType { DiscordActivityType_Listening, DiscordActivityType_Playing };
 struct DiscordActivity {

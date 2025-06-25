@@ -6,7 +6,6 @@ neosu_SOURCES = \
 	libraries/glad_glx/glad_glx.cpp \
 	libraries/glad_wgl/glad_wgl.cpp \
 	libraries/lodepng.cpp \
-	libraries/miniz.cpp \
 	src/App/Osu/BackgroundImageHandler.cpp \
 	src/App/Osu/Bancho.cpp \
 	src/App/Osu/BanchoAes.cpp \
@@ -91,6 +90,7 @@ neosu_SOURCES = \
 	src/App/Osu/base64.cpp \
 	src/App/Osu/score.cpp \
 	src/Engine/AnimationHandler.cpp \
+	src/Engine/Archival.cpp \
 	src/Engine/Camera.cpp \
 	src/Engine/ConVar.cpp \
 	src/Engine/ContextMenu.cpp \

@@ -9,6 +9,8 @@
 #ifndef FILE_H
 #define FILE_H
 
+#include "BaseEnvironment.h"
+
 #include <filesystem>
 #include <fstream>
 #include <memory>
@@ -19,6 +21,8 @@ class DirectoryCache;
 
 class File {
    public:
+    static constexpr std::string_view PREF_PATHSEP = Env::cfg(OS::WINDOWS) ? "\\" : "/";
+
     enum class TYPE : uint8_t { READ, WRITE };
 
     enum class FILETYPE : uint8_t { NONE, FILE, FOLDER, MAYBE_INSENSITIVE, OTHER };

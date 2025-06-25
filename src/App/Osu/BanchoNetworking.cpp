@@ -28,7 +28,6 @@
 #include "SongBrowser/SongBrowser.h"
 #include "UIAvatar.h"
 #include "UIButton.h"
-#include "miniz.h"
 
 // Bancho protocol
 std::mutex outgoing_mutex;

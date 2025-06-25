@@ -1620,10 +1620,16 @@ ConVar cv_r_3dscene_zn("r_3dscene_zn", 5.0f, FCVAR_LOCKED);
 ConVar cv_r_debug_disable_3dscene("r_debug_disable_3dscene", false, FCVAR_LOCKED);
 ConVar cv_r_debug_disable_cliprect("r_debug_disable_cliprect", false, FCVAR_LOCKED);
 ConVar cv_r_debug_drawimage("r_debug_drawimage", false, FCVAR_LOCKED);
-ConVar cv_r_debug_drawstring_unbind("r_debug_drawstring_unbind", false, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_r_debug_flush_drawstring("r_debug_flush_drawstring", false, FCVAR_BANCHO_COMPATIBLE);
 ConVar cv_r_drawstring_max_string_length("r_drawstring_max_string_length", 65536, FCVAR_LOCKED,
-                                         "maximum number of characters per call, sanity/memory buffer limit");
+                                      "maximum number of characters per call, sanity/memory buffer limit");
+ConVar cv_r_debug_drawstring_unbind("r_debug_drawstring_unbind", false, FCVAR_BANCHO_COMPATIBLE);
+ConVar cv_r_debug_font_atlas_padding("r_debug_font_atlas_padding", 1, FCVAR_BANCHO_COMPATIBLE,
+                                  "padding between glyphs in the atlas to prevent bleeding");
+ConVar cv_r_debug_font_unicode("r_debug_font_unicode", false, FCVAR_BANCHO_COMPATIBLE,
+                            "debug messages for unicode/fallback font related stuff");
+ConVar cv_font_load_system("font_load_system", true, FCVAR_LOCKED,
+                        "try to load a similar system font if a glyph is missing in the bundled fonts");
 ConVar cv_r_globaloffset_x("r_globaloffset_x", 0.0f, FCVAR_LOCKED);
 ConVar cv_r_globaloffset_y("r_globaloffset_y", 0.0f, FCVAR_LOCKED);
 ConVar cv_r_image_unbind_after_drawimage("r_image_unbind_after_drawimage", true, FCVAR_BANCHO_COMPATIBLE);

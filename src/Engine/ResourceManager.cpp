@@ -284,7 +284,7 @@ McFont *ResourceManager::loadFont(std::string filepath, std::string resourceName
 
     // create instance and load it
     filepath.insert(0, PATH_DEFAULT_FONTS);
-    McFont *fnt = new McFont(filepath, fontSize, antialiasing, fontDPI);
+    McFont *fnt = new McFont(UString{filepath}, fontSize, antialiasing, fontDPI);
     fnt->setName(resourceName);
 
     this->loadResource(fnt, true);
@@ -302,7 +302,7 @@ McFont *ResourceManager::loadFont(std::string filepath, std::string resourceName
 
     // create instance and load it
     filepath.insert(0, PATH_DEFAULT_FONTS);
-    McFont *fnt = new McFont(filepath, characters, fontSize, antialiasing, fontDPI);
+    McFont *fnt = new McFont(UString{filepath}, characters, fontSize, antialiasing, fontDPI);
     fnt->setName(resourceName);
 
     this->loadResource(fnt, true);

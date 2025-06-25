@@ -2,6 +2,7 @@
 
 #include <string.h>
 
+#include "Archival.h"
 #include "Beatmap.h"
 #include "ConVar.h"
 #include "Engine.h"
@@ -15,7 +16,6 @@
 #include "SkinImage.h"
 #include "SoundEngine.h"
 #include "VolumeOverlay.h"
-#include "miniz.h"
 
 using namespace std;
 
@@ -35,20 +35,20 @@ void Skin::unpack(const char *filepath) {
     skin_root.append("/");
 
     File file(filepath);
+    if(!file.canRead()) {
+        debugLog("Failed to read skin file %s\n", filepath);
+        return;
+    }
 
-    mz_zip_archive zip = {0};
-    mz_zip_archive_file_stat file_stat;
-    mz_uint num_files = 0;
-
-    if(!mz_zip_reader_init_mem(&zip, reinterpret_cast<const u8*>(file.readFile()), file.getFileSize(), 0)) {
+    Archive archive(reinterpret_cast<const u8 *>(file.readFile()), file.getFileSize());
+    if(!archive.isValid()) {
         debugLog("Failed to open .osk file\n");
         return;
     }
 
-    num_files = mz_zip_reader_get_num_files(&zip);
-    if(num_files <= 0) {
+    auto entries = archive.getAllEntries();
+    if(entries.empty()) {
         debugLog(".osk file is empty!\n");
-        mz_zip_reader_end(&zip);
         return;
     }
 
@@ -56,19 +56,20 @@ void Skin::unpack(const char *filepath) {
         env->createDirectory(skin_root);
     }
 
-    for(mz_uint i = 0; i < num_files; i++) {
-        if(!mz_zip_reader_file_stat(&zip, i, &file_stat)) continue;
-        if(mz_zip_reader_is_file_a_directory(&zip, i)) continue;
+    for(const auto &entry : entries) {
+        if(entry.isDirectory()) continue;
 
-        auto folders = UString(file_stat.m_filename).split("/");
+        std::string filename = entry.getFilename();
+        auto folders = UString(filename).split("/");
         std::string file_path = skin_root;
-        for(auto folder : folders) {
+
+        for(const auto &folder : folders) {
             if(!env->directoryExists(file_path)) {
                 env->createDirectory(file_path);
             }
 
             if(folder == UString("..")) {
-                // Bro...
+                // security check: skip files with path traversal attempts
                 goto skip_file;
             } else {
                 file_path.append("/");
@@ -76,14 +77,13 @@ void Skin::unpack(const char *filepath) {
             }
         }
 
-        mz_zip_reader_extract_to_file(&zip, i, file_path.c_str(), 0);
+        if(!entry.extractToFile(file_path)) {
+            debugLog("Failed to extract skin file %s\n", filename.c_str());
+        }
 
     skip_file:;
-        // When a file can't be extracted we just ignore it (as long as the archive is valid).
+        // when a file can't be extracted we just ignore it (as long as the archive is valid)
     }
-
-    // Success
-    mz_zip_reader_end(&zip);
 }
 
 Skin::Skin(UString name, std::string filepath, bool isDefaultSkin) {
@@ -425,7 +425,9 @@ void Skin::load() {
 
     // spinner loading has top priority in async
     this->randomizeFilePath();
-    { this->checkLoadImage(&this->loadingSpinner, "loading-spinner", "OSU_SKIN_LOADING_SPINNER"); }
+    {
+        this->checkLoadImage(&this->loadingSpinner, "loading-spinner", "OSU_SKIN_LOADING_SPINNER");
+    }
 
     // and the cursor comes right after that
     this->randomizeFilePath();
