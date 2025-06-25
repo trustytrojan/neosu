@@ -32,15 +32,15 @@ public:
 	    noexcept
 #endif
 	{
-		m_bReady = false;
-		m_bUsesStopToken = false;
+		this->bReady = false;
+		this->bUsesStopToken = false;
 #ifdef __EXCEPTIONS
 		try
 		{
 #endif
 			// wrap the legacy function for jthreads
-			m_thread = std::jthread([start_routine, arg](std::stop_token) -> void { start_routine(arg); });
-			m_bReady = true;
+			this->thread = std::jthread([start_routine, arg](std::stop_token) -> void { start_routine(arg); });
+			this->bReady = true;
 #ifdef __EXCEPTIONS
 		}
 		catch (const std::system_error &e)
@@ -56,14 +56,14 @@ public:
 	    noexcept
 #endif
 	{
-		m_bReady = false;
-		m_bUsesStopToken = true;
+		this->bReady = false;
+		this->bUsesStopToken = true;
 #ifdef __EXCEPTIONS
 		try
 		{
 #endif
-			m_thread = std::jthread([start_routine, arg](std::stop_token token) -> void { start_routine(arg, token); });
-			m_bReady = true;
+			this->thread = std::jthread([start_routine, arg](std::stop_token token) -> void { start_routine(arg, token); });
+			this->bReady = true;
 #ifdef __EXCEPTIONS
 		}
 		catch (const std::system_error &e)
@@ -79,14 +79,14 @@ public:
 	    noexcept
 #endif
 	{
-		m_bReady = false;
-		m_bUsesStopToken = true;
+		this->bReady = false;
+		this->bUsesStopToken = true;
 #ifdef __EXCEPTIONS
 		try
 		{
 #endif
-			m_thread = std::jthread(std::move(func));
-			m_bReady = true;
+			this->thread = std::jthread(std::move(func));
+			this->bReady = true;
 #ifdef __EXCEPTIONS
 		}
 		catch (const std::system_error &e)
@@ -98,36 +98,36 @@ public:
 
 	~McThread()
 	{
-		if (!m_bReady)
+		if (!this->bReady)
 			return;
 
-		m_bReady = false;
+		this->bReady = false;
 
 		// jthread automatically requests stop and joins in destructor
 		// but we can be explicit about it
-		if (m_thread.joinable())
+		if (this->thread.joinable())
 		{
-			m_thread.request_stop();
-			m_thread.join();
+			this->thread.request_stop();
+			this->thread.join();
 		}
 	}
 
-	[[nodiscard]] inline bool isReady() const { return m_bReady; }
-	[[nodiscard]] inline bool isStopRequested() const { return m_bReady && m_thread.get_stop_token().stop_requested(); }
+	[[nodiscard]] inline bool isReady() const { return this->bReady; }
+	[[nodiscard]] inline bool isStopRequested() const { return this->bReady && this->thread.get_stop_token().stop_requested(); }
 
 	inline void requestStop()
 	{
-		if (m_bReady)
-			m_thread.request_stop();
+		if (this->bReady)
+			this->thread.request_stop();
 	}
 
-	[[nodiscard]] inline std::stop_token getStopToken() const { return m_thread.get_stop_token(); }
-	[[nodiscard]] inline bool usesStopToken() const { return m_bUsesStopToken; }
+	[[nodiscard]] inline std::stop_token getStopToken() const { return this->thread.get_stop_token(); }
+	[[nodiscard]] inline bool usesStopToken() const { return this->bUsesStopToken; }
 
 private:
-	std::jthread m_thread;
-	bool m_bReady;
-	bool m_bUsesStopToken;
+	std::jthread thread;
+	bool bReady;
+	bool bUsesStopToken;
 };
 
 #endif

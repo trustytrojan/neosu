@@ -21,10 +21,10 @@ VertexArrayObject::VertexArrayObject(Graphics::PRIMITIVE primitive, Graphics::US
 }
 
 void VertexArrayObject::init() {
-    // m_bReady may only be set in inheriting classes, if baking was successful
+    // this->bReady may only be set in inheriting classes, if baking was successful
 }
 
-void VertexArrayObject::initAsync() { m_bAsyncReady = true; }
+void VertexArrayObject::initAsync() { this->bAsyncReady = true; }
 
 void VertexArrayObject::destroy() {
     this->clear();

@@ -24,8 +24,8 @@ class Image : public Resource {
     virtual void bind(unsigned int textureUnit = 0) = 0;
     virtual void unbind() = 0;
 
-    virtual void setFilterMode(Graphics::FILTER_MODE filterMode);
-    virtual void setWrapMode(Graphics::WRAP_MODE wrapMode);
+    virtual inline void setFilterMode(Graphics::FILTER_MODE filterMode) { this->filterMode = filterMode; };
+    virtual inline void setWrapMode(Graphics::WRAP_MODE wrapMode) { this->wrapMode = wrapMode; };
 
     void setPixel(int x, int y, Color color);
     void setPixels(const char *data, size_t size, TYPE type);
@@ -33,13 +33,15 @@ class Image : public Resource {
 
     [[nodiscard]] Color getPixel(int x, int y) const;
 
-    [[nodiscard]] inline Image::TYPE getType() const { return type; }
-    [[nodiscard]] inline int getNumChannels() const { return iNumChannels; }
-    [[nodiscard]] inline int getWidth() const { return iWidth; }
-    [[nodiscard]] inline int getHeight() const { return iHeight; }
-    [[nodiscard]] inline Vector2 getSize() const { return Vector2{static_cast<float>(iWidth), static_cast<float>(iHeight)}; }
+    [[nodiscard]] inline Image::TYPE getType() const { return this->type; }
+    [[nodiscard]] inline int getNumChannels() const { return this->iNumChannels; }
+    [[nodiscard]] inline int getWidth() const { return this->iWidth; }
+    [[nodiscard]] inline int getHeight() const { return this->iHeight; }
+    [[nodiscard]] inline Vector2 getSize() const {
+        return Vector2{static_cast<float>(this->iWidth), static_cast<float>(this->iHeight)};
+    }
 
-    [[nodiscard]] inline bool hasAlphaChannel() const { return bHasAlphaChannel; }
+    [[nodiscard]] inline bool hasAlphaChannel() const { return this->bHasAlphaChannel; }
 
     std::atomic<bool> is_2x{false};
 

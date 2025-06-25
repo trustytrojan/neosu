@@ -88,11 +88,11 @@ class SongBrowserBackgroundSearchMatcher : public Resource {
     [[nodiscard]] Type getResType() const override { return APPDEFINED; } // TODO: handle this better?
 
    protected:
-    void init() override { m_bReady = true; }
+    void init() override { this->bReady = true; }
 
     void initAsync() override {
         if(this->bDead.load()) {
-            m_bAsyncReady = true;
+            this->bAsyncReady = true;
             return;
         }
 
@@ -113,7 +113,7 @@ class SongBrowserBackgroundSearchMatcher : public Resource {
             if(this->bDead.load()) break;
         }
 
-        m_bAsyncReady = true;
+        this->bAsyncReady = true;
     }
 
     void destroy() override { ; }

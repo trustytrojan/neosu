@@ -226,84 +226,84 @@ void Image::saveToImage(unsigned char *data, unsigned int width, unsigned int he
 }
 
 Image::Image(std::string filepath, bool mipmapped, bool keepInSystemMemory) : Resource(filepath) {
-    bMipmapped = mipmapped;
-    bKeepInSystemMemory = keepInSystemMemory;
+    this->bMipmapped = mipmapped;
+    this->bKeepInSystemMemory = keepInSystemMemory;
 
-    type = Image::TYPE::TYPE_PNG;
-    filterMode = Graphics::FILTER_MODE::FILTER_MODE_LINEAR;
-    wrapMode = Graphics::WRAP_MODE::WRAP_MODE_CLAMP;
-    iNumChannels = 4;
-    iWidth = 1;
-    iHeight = 1;
+    this->type = Image::TYPE::TYPE_PNG;
+    this->filterMode = Graphics::FILTER_MODE::FILTER_MODE_LINEAR;
+    this->wrapMode = Graphics::WRAP_MODE::WRAP_MODE_CLAMP;
+    this->iNumChannels = 4;
+    this->iWidth = 1;
+    this->iHeight = 1;
 
-    bHasAlphaChannel = true;
-    bCreatedImage = false;
+    this->bHasAlphaChannel = true;
+    this->bCreatedImage = false;
 }
 
 Image::Image(int width, int height, bool mipmapped, bool keepInSystemMemory) : Resource() {
-    bMipmapped = mipmapped;
-    bKeepInSystemMemory = keepInSystemMemory;
+    this->bMipmapped = mipmapped;
+    this->bKeepInSystemMemory = keepInSystemMemory;
 
-    type = Image::TYPE::TYPE_RGBA;
-    filterMode = Graphics::FILTER_MODE::FILTER_MODE_LINEAR;
-    wrapMode = Graphics::WRAP_MODE::WRAP_MODE_CLAMP;
-    iNumChannels = 4;
-    iWidth = width;
-    iHeight = height;
+    this->type = Image::TYPE::TYPE_RGBA;
+    this->filterMode = Graphics::FILTER_MODE::FILTER_MODE_LINEAR;
+    this->wrapMode = Graphics::WRAP_MODE::WRAP_MODE_CLAMP;
+    this->iNumChannels = 4;
+    this->iWidth = width;
+    this->iHeight = height;
 
-    bHasAlphaChannel = true;
-    bCreatedImage = true;
+    this->bHasAlphaChannel = true;
+    this->bCreatedImage = true;
 
     // reserve and fill with pink pixels
-    rawImage.resize(static_cast<long>(iWidth * iHeight * iNumChannels));
-    for(int i = 0; i < iWidth * iHeight; i++) {
-        rawImage.push_back(255);
-        rawImage.push_back(0);
-        rawImage.push_back(255);
-        rawImage.push_back(255);
+    this->rawImage.resize(static_cast<long>(this->iWidth * this->iHeight * this->iNumChannels));
+    for(int i = 0; i < this->iWidth * this->iHeight; i++) {
+        this->rawImage.push_back(255);
+        this->rawImage.push_back(0);
+        this->rawImage.push_back(255);
+        this->rawImage.push_back(255);
     }
 
     // special case: filled rawimage is always already async ready
-    m_bAsyncReady = true;
+    this->bAsyncReady = true;
 }
 
 bool Image::loadRawImage() {
-    bool alreadyLoaded = rawImage.size() > 0;
+    bool alreadyLoaded = this->rawImage.size() > 0;
 
     // if it isn't a created image (created within the engine), load it from the corresponding file
-    if(!bCreatedImage) {
+    if(!this->bCreatedImage) {
         if(alreadyLoaded)  // has already been loaded (or loading it again after setPixel(s))
             return true;
 
-        if(!env->fileExists(m_sFilePath)) {
-            debugLogF("Image Error: Couldn't find file {:s}\n", m_sFilePath);
+        if(!env->fileExists(this->sFilePath)) {
+            debugLogF("Image Error: Couldn't find file {:s}\n", this->sFilePath);
             return false;
         }
 
-        if(m_bInterrupted)  // cancellation point
+        if(this->bInterrupted)  // cancellation point
             return false;
 
         // load entire file
-        File file(m_sFilePath);
+        File file(this->sFilePath);
         if(!file.canRead()) {
-            debugLogF("Image Error: Couldn't canRead() file {:s}\n", m_sFilePath);
+            debugLogF("Image Error: Couldn't canRead() file {:s}\n", this->sFilePath);
             return false;
         }
         if(file.getFileSize() < 4) {
-            debugLogF("Image Error: FileSize is < 4 in file {:s}\n", m_sFilePath);
+            debugLogF("Image Error: FileSize is < 4 in file {:s}\n", this->sFilePath);
             return false;
         }
 
-        if(m_bInterrupted)  // cancellation point
+        if(this->bInterrupted)  // cancellation point
             return false;
 
         const char *data = file.readFile();
         if(data == NULL) {
-            debugLogF("Image Error: Couldn't readFile() file {:s}\n", m_sFilePath);
+            debugLogF("Image Error: Couldn't readFile() file {:s}\n", this->sFilePath);
             return false;
         }
 
-        if(m_bInterrupted)  // cancellation point
+        if(this->bInterrupted)  // cancellation point
             return false;
 
         // determine file type by magic number (png/jpg)
@@ -331,125 +331,123 @@ bool Image::loadRawImage() {
             // decode jpeg
             tjhandle tjInstance = tj3Init(TJINIT_DECOMPRESS);
             if(!tjInstance) {
-                debugLogF("Image Error: tj3Init failed in file {:s}\n", m_sFilePath);
+                debugLogF("Image Error: tj3Init failed in file {:s}\n", this->sFilePath);
                 return false;
             }
 
             if(tj3DecompressHeader(tjInstance, (unsigned char *)data, file.getFileSize()) < 0) {
                 debugLogF("Image Error: tj3DecompressHeader failed: {:s} in file {:s}\n", tj3GetErrorStr(tjInstance),
-                         m_sFilePath);
+                          this->sFilePath);
                 tj3Destroy(tjInstance);
                 return false;
             }
 
-            if(m_bInterrupted)  // cancellation point
+            if(this->bInterrupted)  // cancellation point
             {
                 tj3Destroy(tjInstance);
                 return false;
             }
 
-            iWidth = tj3Get(tjInstance, TJPARAM_JPEGWIDTH);
-            iHeight = tj3Get(tjInstance, TJPARAM_JPEGHEIGHT);
-            iNumChannels = 4;  // always convert to RGBA for consistency with PNG
-            bHasAlphaChannel = true;
+            this->iWidth = tj3Get(tjInstance, TJPARAM_JPEGWIDTH);
+            this->iHeight = tj3Get(tjInstance, TJPARAM_JPEGHEIGHT);
+            this->iNumChannels = 4;  // always convert to RGBA for consistency with PNG
+            this->bHasAlphaChannel = true;
 
-            if(iWidth > 8192 || iHeight > 8192) {
-                debugLogF("Image Error: JPEG image size is too big ({} x {}) in file {:s}\n", iWidth, iHeight,
-                         m_sFilePath);
+            if(this->iWidth > 8192 || this->iHeight > 8192) {
+                debugLogF("Image Error: JPEG image size is too big ({} x {}) in file {:s}\n", this->iWidth,
+                          this->iHeight, this->sFilePath);
                 tj3Destroy(tjInstance);
                 return false;
             }
 
-            if(m_bInterrupted)  // cancellation point
+            if(this->bInterrupted)  // cancellation point
             {
                 tj3Destroy(tjInstance);
                 return false;
             }
 
             // preallocate
-            rawImage.resize(static_cast<long>(iWidth * iHeight * iNumChannels));
+            this->rawImage.resize(static_cast<long>(this->iWidth * this->iHeight * this->iNumChannels));
 
             // decompress directly to RGBA
-            if(tj3Decompress8(tjInstance, (unsigned char *)data, file.getFileSize(), &rawImage[0], 0, TJPF_RGBA) <
+            if(tj3Decompress8(tjInstance, (unsigned char *)data, file.getFileSize(), &this->rawImage[0], 0, TJPF_RGBA) <
                0) {
                 debugLogF("Image Error: tj3Decompress8 failed: {:s} in file {:s}\n", tj3GetErrorStr(tjInstance),
-                         m_sFilePath);
+                          this->sFilePath);
                 tj3Destroy(tjInstance);
                 return false;
             }
 
             tj3Destroy(tjInstance);
         } else if(isPNG) {
-            type = Image::TYPE::TYPE_PNG;
+            this->type = Image::TYPE::TYPE_PNG;
 
             // decode png using libpng
-            if(!decodePNGFromMemory((const unsigned char *)data, file.getFileSize(), rawImage, iWidth, iHeight,
-                                    iNumChannels)) {
-                debugLogF("Image Error: PNG decoding failed in file {:s}\n", m_sFilePath);
+            if(!decodePNGFromMemory((const unsigned char *)data, file.getFileSize(), this->rawImage, this->iWidth,
+                                    this->iHeight, this->iNumChannels)) {
+                debugLogF("Image Error: PNG decoding failed in file {:s}\n", this->sFilePath);
                 return false;
             }
 
-            bHasAlphaChannel = true;
+            this->bHasAlphaChannel = true;
         } else {
-            debugLogF("Image Error: Neither PNG nor JPEG in file {:s}\n", m_sFilePath);
+            debugLogF("Image Error: Neither PNG nor JPEG in file {:s}\n", this->sFilePath);
             return false;
         }
     }
 
-    if(m_bInterrupted)  // cancellation point
+    if(this->bInterrupted)  // cancellation point
         return false;
 
     // error checking
 
     // size sanity check
-    if(rawImage.size() < static_cast<long>(iWidth * iHeight * iNumChannels)) {
-        debugLogF("Image Error: Loaded image has only {}/{} bytes in file {:s}\n", (unsigned long)rawImage.size(),
-                 iWidth * iHeight * iNumChannels, m_sFilePath);
+    if(this->rawImage.size() < static_cast<long>(this->iWidth * this->iHeight * this->iNumChannels)) {
+        debugLogF("Image Error: Loaded image has only {}/{} bytes in file {:s}\n", (unsigned long)this->rawImage.size(),
+                  this->iWidth * this->iHeight * this->iNumChannels, this->sFilePath);
         // engine->showMessageError("Image Error", UString::format("Loaded image has only %i/%i bytes in file %s",
-        // rawImage.size(), iWidth*iHeight*iNumChannels, m_sFilePath));
+        // rawImage.size(), iWidth*iHeight*iNumChannels, this->sFilePath));
         return false;
     }
 
     // supported channels sanity check
-    if(iNumChannels != 4 && iNumChannels != 3 && iNumChannels != 1) {
-        debugLogF("Image Error: Unsupported number of color channels ({}) in file {:s}\n", iNumChannels, m_sFilePath);
+    if(this->iNumChannels != 4 && this->iNumChannels != 3 && this->iNumChannels != 1) {
+        debugLogF("Image Error: Unsupported number of color channels ({}) in file {:s}\n", this->iNumChannels,
+                  this->sFilePath);
         // engine->showMessageError("Image Error", UString::format("Unsupported number of color channels (%i) in file
-        // %s", iNumChannels, m_sFilePath));
+        // %s", iNumChannels, this->sFilePath));
         return false;
     }
 
     // optimization: ignore completely transparent images (don't render) (only PNGs can have them, obviously)
     if(!alreadyLoaded && (type == Image::TYPE::TYPE_PNG) &&
-       canHaveTransparency(rawImage.data(), rawImage.size()) && isCompletelyTransparent()) {
-        if(!m_bInterrupted) debugLogF("Image: Ignoring empty transparent image {:s}\n", m_sFilePath);
+       canHaveTransparency(this->rawImage.data(), this->rawImage.size()) && isCompletelyTransparent()) {
+        if(!this->bInterrupted) debugLogF("Image: Ignoring empty transparent image {:s}\n", this->sFilePath);
         return false;
     }
 
     return true;
 }
 
-void Image::setFilterMode(Graphics::FILTER_MODE filterMode) { filterMode = filterMode; }
-
-void Image::setWrapMode(Graphics::WRAP_MODE wrapMode) { wrapMode = wrapMode; }
-
 Color Image::getPixel(int x, int y) const {
-    const int indexBegin = iNumChannels * y * iWidth + iNumChannels * x;
-    const int indexEnd = iNumChannels * y * iWidth + iNumChannels * x + iNumChannels;
+    const int indexBegin = this->iNumChannels * y * this->iWidth + this->iNumChannels * x;
+    const int indexEnd = this->iNumChannels * y * this->iWidth + this->iNumChannels * x + this->iNumChannels;
 
-    if(rawImage.size() < 1 || x < 0 || y < 0 || indexEnd < 0 || indexEnd > rawImage.size()) return 0xffffff00;
+    if(this->rawImage.size() < 1 || x < 0 || y < 0 || indexEnd < 0 || indexEnd > this->rawImage.size())
+        return 0xffffff00;
 
     unsigned char r = 255;
     unsigned char g = 255;
     unsigned char b = 0;
     unsigned char a = 255;
 
-    r = rawImage[indexBegin + 0];
-    if(iNumChannels > 1) {
-        g = rawImage[indexBegin + 1];
-        b = rawImage[indexBegin + 2];
+    r = this->rawImage[indexBegin + 0];
+    if(this->iNumChannels > 1) {
+        g = this->rawImage[indexBegin + 1];
+        b = this->rawImage[indexBegin + 2];
 
-        if(iNumChannels > 3)
-            a = rawImage[indexBegin + 3];
+        if(this->iNumChannels > 3)
+            a = this->rawImage[indexBegin + 3];
         else
             a = 255;
     } else {
@@ -462,15 +460,15 @@ Color Image::getPixel(int x, int y) const {
 }
 
 void Image::setPixel(int x, int y, Color color) {
-    const int indexBegin = iNumChannels * y * iWidth + iNumChannels * x;
-    const int indexEnd = iNumChannels * y * iWidth + iNumChannels * x + iNumChannels;
+    const int indexBegin = this->iNumChannels * y * this->iWidth + this->iNumChannels * x;
+    const int indexEnd = this->iNumChannels * y * this->iWidth + this->iNumChannels * x + this->iNumChannels;
 
-    if(rawImage.size() < 1 || x < 0 || y < 0 || indexEnd < 0 || indexEnd > rawImage.size()) return;
+    if(this->rawImage.size() < 1 || x < 0 || y < 0 || indexEnd < 0 || indexEnd > this->rawImage.size()) return;
 
-    rawImage[indexBegin + 0] = color.R();
-    if(iNumChannels > 1) rawImage[indexBegin + 1] = color.G();
-    if(iNumChannels > 2) rawImage[indexBegin + 2] = color.B();
-    if(iNumChannels > 3) rawImage[indexBegin + 3] = color.A();
+    this->rawImage[indexBegin + 0] = color.R();
+    if(this->iNumChannels > 1) this->rawImage[indexBegin + 1] = color.G();
+    if(this->iNumChannels > 2) this->rawImage[indexBegin + 2] = color.B();
+    if(this->iNumChannels > 3) this->rawImage[indexBegin + 3] = color.A();
 }
 
 void Image::setPixels(const char *data, size_t size, TYPE type) {
@@ -479,8 +477,8 @@ void Image::setPixels(const char *data, size_t size, TYPE type) {
     // TODO: implement remaining types
     switch(type) {
         case TYPE::TYPE_PNG: {
-            if(!decodePNGFromMemory((const unsigned char *)data, size, rawImage, iWidth, iHeight,
-                                    iNumChannels)) {
+            if(!decodePNGFromMemory((const unsigned char *)data, size, this->rawImage, this->iWidth, this->iHeight,
+                                    this->iNumChannels)) {
                 debugLogF("Image Error: PNG decoding failed in setPixels\n");
             }
         } break;
@@ -492,7 +490,7 @@ void Image::setPixels(const char *data, size_t size, TYPE type) {
 }
 
 void Image::setPixels(const std::vector<unsigned char> &pixels) {
-    if(pixels.size() < static_cast<long>(iWidth * iHeight * iNumChannels)) {
+    if(pixels.size() < static_cast<long>(this->iWidth * this->iHeight * this->iNumChannels)) {
         debugLogF("Image Error: setPixels() supplied array is too small!\n");
         return;
     }
@@ -516,18 +514,18 @@ bool Image::canHaveTransparency(const unsigned char *data, size_t size) {
 }
 
 bool Image::isCompletelyTransparent() const {
-    if(rawImage.empty() || iNumChannels < 4 || !bHasAlphaChannel) return false;
+    if(rawImage.empty() || this->iNumChannels < 4 || !this->bHasAlphaChannel) return false;
 
     const size_t alphaOffset = 3;
-    const size_t stride = iNumChannels;
-    const size_t totalPixels = iWidth * iHeight;
+    const size_t stride = this->iNumChannels;
+    const size_t totalPixels = this->iWidth * this->iHeight;
 
     for(size_t i = 0; i < totalPixels; ++i) {
-        if(m_bInterrupted)  // cancellation point
+        if(this->bInterrupted)  // cancellation point
             return false;
 
         // check alpha channel directly
-        if(rawImage[i * stride + alphaOffset] > 0) return false;  // non-transparent pixel
+        if(this->rawImage[i * stride + alphaOffset] > 0) return false;  // non-transparent pixel
     }
 
     return true;  // all pixels are transparent

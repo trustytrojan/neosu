@@ -21,9 +21,9 @@ class VertexArrayObject;
 
 class McFont final : public Resource {
    public:
-    McFont(const std::string &filepath, int fontSize = 16, bool antialiasing = true, int fontDPI = 96);
-    McFont(const std::string &filepath, const std::vector<wchar_t> &characters, int fontSize = 16, bool antialiasing = true,
-           int fontDPI = 96);
+    McFont(const UString &filepath, int fontSize = 16, bool antialiasing = true, int fontDPI = 96);
+    McFont(const UString &filepath, const std::vector<wchar_t> &characters, int fontSize = 16,
+           bool antialiasing = true, int fontDPI = 96);
     ~McFont() override { destroy(); }
 
     McFont &operator=(const McFont &) = delete;
@@ -35,18 +35,18 @@ class McFont final : public Resource {
     // called on engine shutdown to clean up freetype/shared fallback fonts
     static void cleanupSharedResources();
 
-    void drawString(const std::string &text);
+    void drawString(const UString &text);
     void beginBatch();
-    void addToBatch(const std::string &text, const Vector3 &pos, Color color = 0xffffffff);
+    void addToBatch(const UString &text, const Vector3 &pos, Color color = 0xffffffff);
     void flushBatch();
 
-    void setSize(int fontSize) { m_iFontSize = fontSize; }
-    void setDPI(int dpi) { m_iFontDPI = dpi; }
-    void setHeight(float height) { m_fHeight = height; }
+    void setSize(int fontSize) { this->iFontSize = fontSize; }
+    void setDPI(int dpi) { this->iFontDPI = dpi; }
+    void setHeight(float height) { this->fHeight = height; }
 
-    inline int getSize() const { return m_iFontSize; }
-    inline int getDPI() const { return m_iFontDPI; }
-    inline float getHeight() const { return m_fHeight; }  // precomputed average height (fast)
+    inline int getSize() const { return this->iFontSize; }
+    inline int getDPI() const { return this->iFontDPI; }
+    inline float getHeight() const { return this->fHeight; }  // precomputed average height (fast)
 
     float getStringWidth(const UString &text) const;
     float getStringHeight(const UString &text) const;
@@ -78,13 +78,13 @@ class McFont final : public Resource {
 
    private:
     struct FallbackFont {
-        std::string fontPath;
+        UString fontPath;
         FT_Face face;
         bool isSystemFont;
     };
 
     struct BatchEntry {
-        std::string text;
+        UString text;
         Vector3 pos;
         Color color;
     };
@@ -95,7 +95,7 @@ class McFont final : public Resource {
         std::vector<BatchEntry> entryList;
     };
 
-    forceinline bool hasGlyph(wchar_t ch) const { return m_vGlyphMetrics.find(ch) != m_vGlyphMetrics.end(); };
+    forceinline bool hasGlyph(wchar_t ch) const { return this->vGlyphMetrics.find(ch) != this->vGlyphMetrics.end(); };
     bool addGlyph(wchar_t ch);
     bool loadGlyphDynamic(wchar_t ch);
     bool ensureAtlasSpace(int requiredWidth, int requiredHeight);
@@ -113,7 +113,7 @@ class McFont final : public Resource {
     bool loadGlyphFromFace(wchar_t ch, FT_Face face, int fontIndex);
 
     void buildGlyphGeometry(const GLYPH_METRICS &gm, const Vector3 &basePos, float advanceX, size_t &vertexCount);
-    void buildStringGeometry(const std::string &text, size_t &vertexCount);
+    void buildStringGeometry(const UString &text, size_t &vertexCount);
 
     Channel *unpackMonoBitmap(const FT_Bitmap &bitmap);
 
@@ -127,35 +127,35 @@ class McFont final : public Resource {
     static bool initializeSharedFreeType();
     static bool initializeSharedFallbackFonts();
     static void discoverSystemFallbacks();
-    static bool loadFallbackFont(const std::string &fontPath, bool isSystemFont = false);
+    static bool loadFallbackFont(const UString &fontPath, bool isSystemFont = false);
 
     // helper to set font size on any face for this font instance
     void setFaceSize(FT_Face face) const;
 
-    int m_iFontSize;
-    bool m_bAntialiasing;
-    int m_iFontDPI;
-    float m_fHeight;
-    TextureAtlas *m_textureAtlas;
-    GLYPH_METRICS m_errorGlyph;
+    int iFontSize;
+    bool bAntialiasing;
+    int iFontDPI;
+    float fHeight;
+    TextureAtlas *textureAtlas;
+    GLYPH_METRICS errorGlyph;
 
     // per-instance freetype resources (only primary font face)
-    FT_Face m_ftFace;  // primary font face
-    bool m_bFreeTypeInitialized;
+    FT_Face ftFace;  // primary font face
+    bool bFreeTypeInitialized;
 
-    std::vector<wchar_t> m_vGlyphs;
-    std::unordered_map<wchar_t, bool> m_vGlyphExistence;
-    std::unordered_map<wchar_t, GLYPH_METRICS> m_vGlyphMetrics;
+    std::vector<wchar_t> vGlyphs;
+    std::unordered_map<wchar_t, bool> vGlyphExistence;
+    std::unordered_map<wchar_t, GLYPH_METRICS> vGlyphMetrics;
 
-    VertexArrayObject m_vao;
-    TextBatch m_batchQueue;
-    std::vector<Vector3> m_vertices;
-    std::vector<Vector2> m_texcoords;
-    bool m_batchActive;
+    VertexArrayObject vao;
+    TextBatch batchQueue;
+    std::vector<Vector3> vertices;
+    std::vector<Vector2> texcoords;
+    bool batchActive;
 
     // atlas management
-    mutable bool m_bAtlasNeedsRebuild;
-    std::vector<wchar_t> m_vPendingGlyphs;
+    mutable bool bAtlasNeedsRebuild;
+    std::vector<wchar_t> vPendingGlyphs;
 };
 
 #endif

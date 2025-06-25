@@ -63,50 +63,50 @@ class UString {
     void clear() noexcept;
 
     // getters
-    [[nodiscard]] constexpr int length() const noexcept { return m_length & LENGTH_MASK; }
-    [[nodiscard]] constexpr int lengthUtf8() const noexcept { return m_lengthUtf8; }
-    [[nodiscard]] constexpr std::string_view utf8View() const noexcept { return m_utf8; }
-    [[nodiscard]] constexpr const char *toUtf8() const noexcept { return m_utf8.c_str(); }
-    [[nodiscard]] constexpr std::wstring_view unicodeView() const noexcept { return m_unicode; }
-    [[nodiscard]] constexpr const wchar_t *wc_str() const noexcept { return m_unicode.c_str(); }
+    [[nodiscard]] constexpr int length() const noexcept { return this->iLengthUnicode & LENGTH_MASK; }
+    [[nodiscard]] constexpr int lengthUtf8() const noexcept { return this->iLengthUtf8; }
+    [[nodiscard]] constexpr std::string_view utf8View() const noexcept { return this->sUtf8; }
+    [[nodiscard]] constexpr const char *toUtf8() const noexcept { return this->sUtf8.c_str(); }
+    [[nodiscard]] constexpr std::wstring_view unicodeView() const noexcept { return this->sUnicode; }
+    [[nodiscard]] constexpr const wchar_t *wc_str() const noexcept { return this->sUnicode.c_str(); }
 
     // basically just for autodetecting windows' wchar_t preference (paths)
     [[nodiscard]] constexpr auto plat_str() const noexcept {
         if constexpr(Env::cfg(OS::WINDOWS))
-            return m_unicode.c_str();
+            return this->sUnicode.c_str();
         else
-            return m_utf8.c_str();
+            return this->sUtf8.c_str();
     }
     [[nodiscard]] constexpr auto plat_view() const noexcept {
         if constexpr(Env::cfg(OS::WINDOWS))
-            return m_unicode;
+            return this->sUnicode;
         else
-            return m_utf8;
+            return this->sUtf8;
     }
     // state queries
-    [[nodiscard]] constexpr bool isAsciiOnly() const noexcept { return (m_length & ASCII_FLAG) != 0; }
+    [[nodiscard]] constexpr bool isAsciiOnly() const noexcept { return (this->iLengthUnicode & ASCII_FLAG) != 0; }
     [[nodiscard]] bool isWhitespaceOnly() const noexcept;
-    [[nodiscard]] constexpr bool isEmpty() const noexcept { return m_unicode.empty(); }
+    [[nodiscard]] constexpr bool isEmpty() const noexcept { return this->sUnicode.empty(); }
 
     // string tests
-    [[nodiscard]] constexpr bool endsWith(char ch) const noexcept { return !m_utf8.empty() && m_utf8.back() == ch; }
+    [[nodiscard]] constexpr bool endsWith(char ch) const noexcept { return !this->sUtf8.empty() && this->sUtf8.back() == ch; }
     [[nodiscard]] constexpr bool endsWith(wchar_t ch) const noexcept {
-        return !m_unicode.empty() && m_unicode.back() == ch;
+        return !this->sUnicode.empty() && this->sUnicode.back() == ch;
     }
     [[nodiscard]] constexpr bool endsWith(const UString &suffix) const noexcept {
         int suffixLen = suffix.length();
         int thisLen = length();
         return suffixLen <= thisLen &&
-               std::equal(suffix.m_unicode.begin(), suffix.m_unicode.end(), m_unicode.end() - suffixLen);
+               std::equal(suffix.sUnicode.begin(), suffix.sUnicode.end(), this->sUnicode.end() - suffixLen);
     }
-    [[nodiscard]] constexpr bool startsWith(char ch) const noexcept { return !m_utf8.empty() && m_utf8.front() == ch; }
+    [[nodiscard]] constexpr bool startsWith(char ch) const noexcept { return !this->sUtf8.empty() && this->sUtf8.front() == ch; }
     [[nodiscard]] constexpr bool startsWith(wchar_t ch) const noexcept {
-        return !m_unicode.empty() && m_unicode.front() == ch;
+        return !this->sUnicode.empty() && this->sUnicode.front() == ch;
     }
     [[nodiscard]] constexpr bool startsWith(const UString &suffix) const noexcept {
         int suffixLen = suffix.length();
         int thisLen = length();
-        return suffixLen <= thisLen && std::equal(suffix.m_unicode.begin(), suffix.m_unicode.end(), m_unicode.begin());
+        return suffixLen <= thisLen && std::equal(suffix.sUnicode.begin(), suffix.sUnicode.end(), this->sUnicode.begin());
     }
 
     // search functions
@@ -120,12 +120,12 @@ class UString {
     [[nodiscard]] int findIgnoreCase(const UString &str, int start, int end) const;
 
     // iterators for range-based for loops
-    [[nodiscard]] constexpr auto begin() noexcept { return m_unicode.begin(); }
-    [[nodiscard]] constexpr auto end() noexcept { return m_unicode.end(); }
-    [[nodiscard]] constexpr auto begin() const noexcept { return m_unicode.begin(); }
-    [[nodiscard]] constexpr auto end() const noexcept { return m_unicode.end(); }
-    [[nodiscard]] constexpr auto cbegin() const noexcept { return m_unicode.cbegin(); }
-    [[nodiscard]] constexpr auto cend() const noexcept { return m_unicode.cend(); }
+    [[nodiscard]] constexpr auto begin() noexcept { return this->sUnicode.begin(); }
+    [[nodiscard]] constexpr auto end() noexcept { return this->sUnicode.end(); }
+    [[nodiscard]] constexpr auto begin() const noexcept { return this->sUnicode.begin(); }
+    [[nodiscard]] constexpr auto end() const noexcept { return this->sUnicode.end(); }
+    [[nodiscard]] constexpr auto cbegin() const noexcept { return this->sUnicode.cbegin(); }
+    [[nodiscard]] constexpr auto cend() const noexcept { return this->sUnicode.cend(); }
 
     // modifiers
     void collapseEscapes();
@@ -145,8 +145,8 @@ class UString {
         charCount = std::clamp<int>(charCount, 0, len - offset);
 
         UString result;
-        result.m_unicode = m_unicode.substr(offset, charCount);
-        result.setLength(static_cast<int>(result.m_unicode.length()));
+        result.sUnicode = this->sUnicode.substr(offset, charCount);
+        result.setLength(static_cast<int>(result.sUnicode.length()));
         result.updateUtf8();
 
         if constexpr(std::is_same_v<T, UString>)
@@ -180,38 +180,38 @@ class UString {
     // type conversions
     template <typename T>
     [[nodiscard]] constexpr T to() const noexcept {
-        if(m_utf8.empty()) return T{};
+        if(this->sUtf8.empty()) return T{};
 
         if constexpr(std::is_same_v<T, UString>)
             return *this;
         else if constexpr(std::is_same_v<T, std::string>)
-            return std::string{m_utf8};
+            return std::string{this->sUtf8};
         else if constexpr(std::is_same_v<T, std::string_view>)
-            return std::string_view{m_utf8};
+            return std::string_view{this->sUtf8};
         else if constexpr(std::is_same_v<T, std::wstring>)
-            return std::wstring{m_unicode};
+            return std::wstring{this->sUnicode};
         else if constexpr(std::is_same_v<T, std::wstring_view>)
-            return std::wstring_view{m_unicode};
+            return std::wstring_view{this->sUnicode};
         else if constexpr(std::is_same_v<T, float>)
-            return std::strtof(m_utf8.c_str(), nullptr);
+            return std::strtof(this->sUtf8.c_str(), nullptr);
         else if constexpr(std::is_same_v<T, double>)
-            return std::strtod(m_utf8.c_str(), nullptr);
+            return std::strtod(this->sUtf8.c_str(), nullptr);
         else if constexpr(std::is_same_v<T, long double>)
-            return std::strtold(m_utf8.c_str(), nullptr);
+            return std::strtold(this->sUtf8.c_str(), nullptr);
         else if constexpr(std::is_same_v<T, int>)
-            return static_cast<int>(std::strtol(m_utf8.c_str(), nullptr, 0));
+            return static_cast<int>(std::strtol(this->sUtf8.c_str(), nullptr, 0));
         else if constexpr(std::is_same_v<T, bool>)
-            return !!static_cast<int>(std::strtol(m_utf8.c_str(), nullptr, 0));
+            return !!static_cast<int>(std::strtol(this->sUtf8.c_str(), nullptr, 0));
         else if constexpr(std::is_same_v<T, long>)
-            return std::strtol(m_utf8.c_str(), nullptr, 0);
+            return std::strtol(this->sUtf8.c_str(), nullptr, 0);
         else if constexpr(std::is_same_v<T, long long>)
-            return std::strtoll(m_utf8.c_str(), nullptr, 0);
+            return std::strtoll(this->sUtf8.c_str(), nullptr, 0);
         else if constexpr(std::is_same_v<T, unsigned int>)
-            return static_cast<unsigned int>(std::strtoul(m_utf8.c_str(), nullptr, 0));
+            return static_cast<unsigned int>(std::strtoul(this->sUtf8.c_str(), nullptr, 0));
         else if constexpr(std::is_same_v<T, unsigned long>)
-            return std::strtoul(m_utf8.c_str(), nullptr, 0);
+            return std::strtoul(this->sUtf8.c_str(), nullptr, 0);
         else if constexpr(std::is_same_v<T, unsigned long long>)
-            return std::strtoull(m_utf8.c_str(), nullptr, 0);
+            return std::strtoull(this->sUtf8.c_str(), nullptr, 0);
         else
             static_assert(Env::always_false_v<T>, "unsupported type");
     }
@@ -235,13 +235,13 @@ class UString {
     // operators
     [[nodiscard]] constexpr const wchar_t &operator[](int index) const {
         int len = length();
-        return m_unicode[std::clamp(index, 0, len - 1)];
+        return this->sUnicode[std::clamp(index, 0, len - 1)];
     }
 
     // operators
     [[nodiscard]] constexpr wchar_t &operator[](int index) {
         int len = length();
-        return m_unicode[std::clamp(index, 0, len - 1)];
+        return this->sUnicode[std::clamp(index, 0, len - 1)];
     }
 
     bool operator==(const UString &ustr) const = default;
@@ -281,30 +281,30 @@ class UString {
     friend struct std::hash<UString>;
 
    private:
-    // pack ascii flag into the high bit of m_length so we don't need an extra field just to store that information,
+    // pack ascii flag into the high bit of this->iLengthUnicode so we don't need an extra field just to store that information,
     // which adds 8 bytes due to padding
     static constexpr int ASCII_FLAG = 0x40000000;
     static constexpr int LENGTH_MASK = 0x3FFFFFFF;
 
-    void setLength(int len) noexcept { m_length = (m_length & ASCII_FLAG) | (len & LENGTH_MASK); }
+    void setLength(int len) noexcept { this->iLengthUnicode = (this->iLengthUnicode & ASCII_FLAG) | (len & LENGTH_MASK); }
     void setAsciiFlag(bool isAscii) noexcept {
-        m_length = isAscii ? (m_length | ASCII_FLAG) : (m_length & LENGTH_MASK);
+        this->iLengthUnicode = isAscii ? (this->iLengthUnicode | ASCII_FLAG) : (this->iLengthUnicode & LENGTH_MASK);
     }
 
     int fromUtf8(const char *utf8, int length = -1);
     void updateUtf8();
 
-    std::wstring m_unicode;
-    std::string m_utf8;
+    std::wstring sUnicode;
+    std::string sUtf8;
 
-    int m_length = ASCII_FLAG;  // start with ascii flag set
-    int m_lengthUtf8 = 0;
+    int iLengthUnicode = ASCII_FLAG;  // start with ascii flag set
+    int iLengthUtf8 = 0;
 };
 
 namespace std {
 template <>
 struct hash<UString> {
-    size_t operator()(const UString &str) const noexcept { return hash<std::wstring>()(str.m_unicode); }
+    size_t operator()(const UString &str) const noexcept { return hash<std::wstring>()(str.sUnicode); }
 };
 }  // namespace std
 

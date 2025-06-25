@@ -58,21 +58,21 @@ class DirectoryCache final {
 
     // look up a file with case-insensitive matching
     std::pair<std::string, File::FILETYPE> lookup(const fs::path &dirPath, const std::string &filename) {
-        std::lock_guard<std::mutex> lock(m_mutex);
+        std::lock_guard<std::mutex> lock(this->mutex);
 
         std::string dirKey(dirPath.string());
-        auto it = m_cache.find(dirKey);
+        auto it = this->cache.find(dirKey);
 
         DirectoryEntry *entry = nullptr;
 
         // check if cache exists and is still valid
-        if(it != m_cache.end()) {
+        if(it != this->cache.end()) {
             // check if directory has been modified
             std::error_code ec;
             auto currentModTime = fs::last_write_time(dirPath, ec);
 
             if(!ec && currentModTime != it->second.lastModified)
-                m_cache.erase(it);  // cache is stale, remove it
+                this->cache.erase(it);  // cache is stale, remove it
             else
                 entry = &it->second;
         }
@@ -80,7 +80,7 @@ class DirectoryCache final {
         // create new entry if needed
         if(!entry) {
             // evict old entries if we're at capacity
-            if(m_cache.size() >= DIR_CACHE_MAX_ENTRIES) evictOldEntries();
+            if(this->cache.size() >= DIR_CACHE_MAX_ENTRIES) evictOldEntries();
 
             // build new cache entry
             DirectoryEntry newEntry;
@@ -106,7 +106,7 @@ class DirectoryCache final {
             }
 
             // insert into cache
-            auto [insertIt, inserted] = m_cache.emplace(dirKey, std::move(newEntry));
+            auto [insertIt, inserted] = this->cache.emplace(dirKey, std::move(newEntry));
             entry = inserted ? &insertIt->second : nullptr;
         }
 
@@ -128,31 +128,32 @@ class DirectoryCache final {
 
     // evict least recently used entries when cache is full
     void evictOldEntries() {
-        const size_t entriesToRemove = std::min(DIR_CACHE_EVICT_COUNT, m_cache.size());
+        const size_t entriesToRemove = std::min(DIR_CACHE_EVICT_COUNT, this->cache.size());
 
-        if(entriesToRemove == m_cache.size()) {
-            m_cache.clear();
+        if(entriesToRemove == this->cache.size()) {
+            this->cache.clear();
             return;
         }
 
         // collect entries with their access times
-        std::vector<std::pair<std::chrono::steady_clock::time_point, decltype(m_cache)::iterator>> entries;
-        entries.reserve(m_cache.size());
+        std::vector<std::pair<std::chrono::steady_clock::time_point, decltype(this->cache)::iterator>> entries;
+        entries.reserve(this->cache.size());
 
-        for(auto it = m_cache.begin(); it != m_cache.end(); ++it) entries.emplace_back(it->second.lastAccess, it);
+        for(auto it = this->cache.begin(); it != this->cache.end(); ++it)
+            entries.emplace_back(it->second.lastAccess, it);
 
         // sort by access time (oldest first)
         std::ranges::sort(entries, [](const auto &a, const auto &b) { return a.first < b.first; });
 
         // remove the oldest entries
-        for(size_t i = 0; i < entriesToRemove; ++i) m_cache.erase(entries[i].second);
+        for(size_t i = 0; i < entriesToRemove; ++i) this->cache.erase(entries[i].second);
     }
 
     // cache storage
-    std::unordered_map<std::string, DirectoryEntry> m_cache;
+    std::unordered_map<std::string, DirectoryEntry> cache;
 
     // thread safety
-    std::mutex m_mutex;
+    std::mutex mutex;
 };
 
 // init static directory cache
@@ -231,7 +232,7 @@ File::FILETYPE File::exists(const std::string &filePath, const fs::path &path) {
 //------------------------------------------------------------------------------
 // File implementation
 //------------------------------------------------------------------------------
-File::File(std::string filePath, TYPE type) : m_filePath(filePath), m_type(type), m_ready(false), m_fileSize(0) {
+File::File(std::string filePath, TYPE type) : sFilePath(filePath), fileType(type), bReady(false), iFileSize(0) {
     if(type == TYPE::READ) {
         if(!openForReading()) return;
     } else if(type == TYPE::WRITE) {
@@ -240,49 +241,49 @@ File::File(std::string filePath, TYPE type) : m_filePath(filePath), m_type(type)
 
     if(cv_debug_file.getBool()) debugLogF("File: Opening {:s}\n", filePath);
 
-    m_ready = true;
+    this->bReady = true;
 }
 
 bool File::openForReading() {
     // resolve the file path (handles case-insensitive matching)
-    fs::path path(UString(m_filePath).plat_str());
-    auto fileType = existsCaseInsensitive(m_filePath, path);
+    fs::path path(UString(this->sFilePath).plat_str());
+    auto fileType = existsCaseInsensitive(this->sFilePath, path);
 
     if(fileType != File::FILETYPE::FILE) {
         if(cv_debug_file.getBool())
-            debugLogF("File Error: Path {:s} {:s}\n", m_filePath,
+            debugLogF("File Error: Path {:s} {:s}\n", this->sFilePath,
                       fileType == File::FILETYPE::NONE ? "doesn't exist" : "is not a file");
         return false;
     }
 
     // create and open input file stream
-    m_ifstream = std::make_unique<std::ifstream>();
-    m_ifstream->open(path, std::ios::in | std::ios::binary);
+    this->ifstream = std::make_unique<std::ifstream>();
+    this->ifstream->open(path, std::ios::in | std::ios::binary);
 
     // check if file opened successfully
-    if(!m_ifstream || !m_ifstream->good()) {
-        debugLogF("File Error: Couldn't open file {:s}\n", m_filePath);
+    if(!this->ifstream || !this->ifstream->good()) {
+        debugLogF("File Error: Couldn't open file {:s}\n", this->sFilePath);
         return false;
     }
 
     // get file size
     std::error_code ec;
-    m_fileSize = fs::file_size(path, ec);
+    this->iFileSize = fs::file_size(path, ec);
 
     if(ec) {
-        debugLogF("File Error: Couldn't get file size for {:s}\n", m_filePath);
+        debugLogF("File Error: Couldn't get file size for {:s}\n", this->sFilePath);
         return false;
     }
 
     // validate file size
-    if(m_fileSize == 0)  // empty file is valid
+    if(this->iFileSize == 0)  // empty file is valid
         return true;
-    else if(m_fileSize < 0) {
+    else if(this->iFileSize < 0) {
         debugLogF("File Error: FileSize is < 0\n");
         return false;
-    } else if(std::cmp_greater(m_fileSize, 1024 * 1024 * cv_file_size_max.getInt()))  // size sanity check
+    } else if(std::cmp_greater(this->iFileSize, 1024 * 1024 * cv_file_size_max.getInt()))  // size sanity check
     {
-        debugLogF("File Error: FileSize of {:s} is > {} MB!!!\n", m_filePath, cv_file_size_max.getInt());
+        debugLogF("File Error: FileSize of {:s} is > {} MB!!!\n", this->sFilePath, cv_file_size_max.getInt());
         return false;
     }
 
@@ -291,26 +292,26 @@ bool File::openForReading() {
 
 bool File::openForWriting() {
     // get filesystem path
-    fs::path path(UString(m_filePath).plat_str());
+    fs::path path(UString(this->sFilePath).plat_str());
 
     // create parent directories if needed
     if(!path.parent_path().empty()) {
         std::error_code ec;
         fs::create_directories(path.parent_path(), ec);
         if(ec) {
-            debugLogF("File Error: Couldn't create parent directories for {:s} (error: {:s})\n", m_filePath,
+            debugLogF("File Error: Couldn't create parent directories for {:s} (error: {:s})\n", this->sFilePath,
                       ec.message());
             // continue anyway, the file open might still succeed if the directory exists
         }
     }
 
     // create and open output file stream
-    m_ofstream = std::make_unique<std::ofstream>();
-    m_ofstream->open(path, std::ios::out | std::ios::trunc | std::ios::binary);
+    this->ofstream = std::make_unique<std::ofstream>();
+    this->ofstream->open(path, std::ios::out | std::ios::trunc | std::ios::binary);
 
     // check if file opened successfully
-    if(!m_ofstream->good()) {
-        debugLogF("File Error: Couldn't open file {:s} for writing\n", m_filePath);
+    if(!this->ofstream->good()) {
+        debugLogF("File Error: Couldn't open file {:s} for writing\n", this->sFilePath);
         return false;
     }
 
@@ -320,7 +321,7 @@ bool File::openForWriting() {
 void File::write(const char *buffer, size_t size) {
     if(!canWrite()) return;
 
-    m_ofstream->write(buffer, static_cast<std::streamsize>(size));
+    this->ofstream->write(buffer, static_cast<std::streamsize>(size));
 }
 
 bool File::writeLine(const std::string &line, bool insertNewline) {
@@ -328,15 +329,15 @@ bool File::writeLine(const std::string &line, bool insertNewline) {
 
     std::string writeLine{line};
     if(insertNewline) writeLine = writeLine + "\n";
-    m_ofstream->write(writeLine.c_str(), static_cast<std::streamsize>(writeLine.length()));
-    return !m_ofstream->bad();
+    this->ofstream->write(writeLine.c_str(), static_cast<std::streamsize>(writeLine.length()));
+    return !this->ofstream->bad();
 }
 
 std::string File::readLine() {
     if(!canRead()) return "";
 
     std::string line;
-    if(std::getline(*m_ifstream, line)) {
+    if(std::getline(*this->ifstream, line)) {
         // handle CRLF line endings
         if(!line.empty() && line.back() == '\r') line.pop_back();
 
@@ -354,19 +355,20 @@ std::string File::readString() {
 }
 
 const char *File::readFile() {
-    if(cv_debug_file.getBool()) debugLogF("File::readFile() on {:s}\n", m_filePath);
+    if(cv_debug_file.getBool()) debugLogF("File::readFile() on {:s}\n", this->sFilePath);
 
     // return cached buffer if already read
-    if(!m_fullBuffer.empty()) return m_fullBuffer.data();
+    if(!this->vFullBuffer.empty()) return this->vFullBuffer.data();
 
-    if(!m_ready || !canRead()) return nullptr;
+    if(!this->bReady || !canRead()) return nullptr;
 
     // allocate buffer for file contents
-    m_fullBuffer.resize(m_fileSize);
+    this->vFullBuffer.resize(this->iFileSize);
 
     // read entire file
-    m_ifstream->seekg(0, std::ios::beg);
-    if(m_ifstream->read(m_fullBuffer.data(), static_cast<std::streamsize>(m_fileSize))) return m_fullBuffer.data();
+    this->ifstream->seekg(0, std::ios::beg);
+    if(this->ifstream->read(this->vFullBuffer.data(), static_cast<std::streamsize>(this->iFileSize)))
+        return this->vFullBuffer.data();
 
     return nullptr;
 }

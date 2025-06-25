@@ -101,20 +101,20 @@ Engine::Engine(Environment *environment, i32 argc, char **argv) {
         s_mouseInstance = std::make_unique<Mouse>();
         mouse = s_mouseInstance.get();
         runtime_assert(mouse, "Mouse failed to initialize!");
-        inputDevices.push_back(mouse);
-        mice.push_back(mouse);
+        this->inputDevices.push_back(mouse);
+        this->mice.push_back(mouse);
 
         s_keyboardInstance = std::make_unique<Keyboard>();
         keyboard = s_keyboardInstance.get();
         runtime_assert(keyboard, "Keyboard failed to initialize!");
-        inputDevices.push_back(keyboard);
-        keyboards.push_back(keyboard);
+        this->inputDevices.push_back(keyboard);
+        this->keyboards.push_back(keyboard);
 
         s_gamepadInstance = std::make_unique<XInputGamepad>();
         gamepad = s_gamepadInstance.get();
         runtime_assert(gamepad, "Gamepad failed to initialize!");
-        inputDevices.push_back(gamepad);
-        gamepads.push_back(gamepad);
+        this->inputDevices.push_back(gamepad);
+        this->gamepads.push_back(gamepad);
 
         // create graphics through environment
         s_graphicsInstance.reset(env->createRenderer());
@@ -277,11 +277,12 @@ void Engine::loadApp() {
         //*****************//
         //	Load App here  //
         //*****************//
-        osu = new Osu();
-        app = osu;
 
+        s_appInstance = std::make_unique<Osu>();
+        app = s_appInstance.get();
+        runtime_assert(app, "App failed to initialize!");
         // start listening to the default keyboard input
-        if(app != NULL) keyboard->addListener(app);
+        keyboard->addListener(app);
     }
     debugLog("Engine: Loading app done.\n\n");
 }

@@ -164,10 +164,6 @@ inline bool isInt(float f) { return (f == static_cast<float>(static_cast<int>(f)
 
 // ANSI/IEEE 754-1985
 
-inline unsigned long &floatBits(float &f) { return *reinterpret_cast<unsigned long *>(&f); }
-
-inline bool isFinite(float f) { return ((floatBits(f) & 0x7F800000) != 0x7F800000); }
-
 char *strtok_x(char d, char **str);
 
 // zero-initialized dynamic array, similar to std::vector but way faster when you don't need constructors

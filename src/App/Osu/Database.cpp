@@ -93,15 +93,15 @@ class DatabaseLoader : public Resource {
     DatabaseLoader(Database *db) : Resource() {
         this->db = db;
 
-        m_bAsyncReady = false;
-        m_bReady = false;
+        this->bAsyncReady = false;
+        this->bReady = false;
     };
 
     [[nodiscard]] Type getResType() const override { return APPDEFINED; } // TODO: handle this better?
 
    protected:
     void init() override {
-        m_bReady = true;
+        this->bReady = true;
 
         delete this;  // commit sudoku
     }
@@ -120,7 +120,7 @@ class DatabaseLoader : public Resource {
         this->db->beatmapsets.clear();  // TODO @kiwec: this just leaks memory?
         this->db->loadDB();
 
-        m_bAsyncReady = true;
+        this->bAsyncReady = true;
     }
 
     void destroy() override { ; }

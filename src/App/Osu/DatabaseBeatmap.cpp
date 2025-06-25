@@ -1410,7 +1410,7 @@ DatabaseBeatmapBackgroundImagePathLoader::DatabaseBeatmapBackgroundImagePathLoad
 
 void DatabaseBeatmapBackgroundImagePathLoader::init() {
     // (nothing)
-    m_bReady = true;
+    this->bReady = true;
 }
 
 void DatabaseBeatmapBackgroundImagePathLoader::initAsync() {
@@ -1448,8 +1448,8 @@ void DatabaseBeatmapBackgroundImagePathLoader::initAsync() {
         }
     }
 
-    m_bAsyncReady = true;
-    m_bReady = true;  // NOTE: on purpose. there is nothing to do in init(), so finish 1 frame early
+    this->bAsyncReady = true;
+    this->bReady = true;  // NOTE: on purpose. there is nothing to do in init(), so finish 1 frame early
 }
 
 std::string DatabaseBeatmap::getFullSoundFilePath() {

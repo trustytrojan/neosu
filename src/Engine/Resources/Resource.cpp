@@ -9,31 +9,31 @@
 
 #include <utility>
 #include "Engine.h"
-#include "Environment.h"
+#include "File.h"
 
 Resource::Resource(std::string filepath)
 {
-	m_sFilePath = std::move(filepath);
-	m_bFileFound = true;
-	if (!env->fileExists(m_sFilePath)) // modifies the input string if found
+	this->sFilePath = std::move(filepath);
+	this->bFileFound = true;
+	if (File::existsCaseInsensitive(this->sFilePath) != File::FILETYPE::FILE) // modifies the input string if found
 	{
-		debugLog("Resource Warning: File {:s} does not exist!\n", m_sFilePath);
-		m_bFileFound = false;
+		debugLog("Resource Warning: File {:s} does not exist!\n", this->sFilePath);
+		this->bFileFound = false;
 	}
 
-	m_bReady = false;
-	m_bAsyncReady = false;
-	m_bInterrupted = false;
+	this->bReady = false;
+	this->bAsyncReady = false;
+	this->bInterrupted = false;
 	// give it a dummy name for unnamed resources, mainly for debugging purposes
-	m_sName = fmt::format("{:p}:postinit=n:found={}:{:s}", static_cast<const void*>(this), m_bFileFound, m_sFilePath);
+	this->sName = fmt::format("{:p}:postinit=n:found={}:{:s}", static_cast<const void*>(this), this->bFileFound, this->sFilePath);
 }
 
 Resource::Resource()
 {
-	m_bReady = false;
-	m_bAsyncReady = false;
-	m_bInterrupted = false;
-	m_bFileFound = true;
+	this->bReady = false;
+	this->bAsyncReady = false;
+	this->bInterrupted = false;
+	this->bFileFound = true;
 }
 
 void Resource::load()
@@ -58,11 +58,11 @@ void Resource::release()
 	destroy();
 
 	// NOTE: these are set afterwards on purpose
-	m_bReady = false;
-	m_bAsyncReady = false;
+	this->bReady = false;
+	this->bAsyncReady = false;
 }
 
 void Resource::interruptLoad()
 {
-	m_bInterrupted = true;
+	this->bInterrupted = true;
 }

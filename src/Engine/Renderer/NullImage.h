@@ -23,8 +23,8 @@ class NullImage : public Image {
     void setWrapMode(Graphics::WRAP_MODE wrapMode) override;
 
    private:
-    void init() override { m_bReady = true; }
-    void initAsync() override { m_bAsyncReady = true; }
+    void init() override { this->bReady = true; }
+    void initAsync() override { this->bAsyncReady = true; }
     void destroy() override { ; }
 };
 

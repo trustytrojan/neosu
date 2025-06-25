@@ -24,11 +24,11 @@ OpenGLVertexArrayObject::OpenGLVertexArrayObject(Graphics::PRIMITIVE primitive, 
 }
 
 void OpenGLVertexArrayObject::init() {
-    if(!m_bAsyncReady || this->vertices.size() < 2) return;
+    if(!this->bAsyncReady || this->vertices.size() < 2) return;
 
     // handle partial reloads
 
-    if(m_bReady) {
+    if(this->bReady) {
         // update vertex buffer
         if(this->partialUpdateVertexIndices.size() > 0) {
             glBindBuffer(GL_ARRAY_BUFFER, this->iVertexBuffer);
@@ -79,7 +79,7 @@ void OpenGLVertexArrayObject::init() {
         }
     }
 
-    if(this->iVertexBuffer != 0 && (!this->bKeepInSystemMemory || m_bReady))
+    if(this->iVertexBuffer != 0 && (!this->bKeepInSystemMemory || this->bReady))
         return;  // only fully load if we are not already loaded
 
     // handle full loads
@@ -173,10 +173,10 @@ void OpenGLVertexArrayObject::init() {
     // free memory
     if(!this->bKeepInSystemMemory) this->clear();
 
-    m_bReady = true;
+    this->bReady = true;
 }
 
-void OpenGLVertexArrayObject::initAsync() { m_bAsyncReady = true; }
+void OpenGLVertexArrayObject::initAsync() { this->bAsyncReady = true; }
 
 void OpenGLVertexArrayObject::destroy() {
     VertexArrayObject::destroy();
@@ -200,7 +200,7 @@ void OpenGLVertexArrayObject::destroy() {
 }
 
 void OpenGLVertexArrayObject::draw() {
-    if(!m_bReady) {
+    if(!this->bReady) {
         debugLog("WARNING: OpenGLVertexArrayObject::draw() called, but was not ready!\n");
         return;
     }

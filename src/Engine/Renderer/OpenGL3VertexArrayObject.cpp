@@ -60,10 +60,10 @@ void OpenGL3VertexArrayObject::init() {
     // free memory
     if(!this->bKeepInSystemMemory) this->clear();
 
-    m_bReady = true;
+    this->bReady = true;
 }
 
-void OpenGL3VertexArrayObject::initAsync() { m_bAsyncReady = true; }
+void OpenGL3VertexArrayObject::initAsync() { this->bAsyncReady = true; }
 
 void OpenGL3VertexArrayObject::destroy() {
     VertexArrayObject::destroy();
@@ -80,7 +80,7 @@ void OpenGL3VertexArrayObject::destroy() {
 }
 
 void OpenGL3VertexArrayObject::draw() {
-    if(!m_bReady) {
+    if(!this->bReady) {
         debugLog("WARNING: OpenGL3VertexArrayObject::draw() called, but was not ready!\n");
         return;
     }

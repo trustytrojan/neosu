@@ -28,26 +28,26 @@ void OpenGLES2VertexArrayObject::init() {
     // populate a vertex buffer
     glGenBuffers(1, &m_iVertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, this->iVertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3) * m_vertices.size(), &(this->vertices[0]),
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3) * this->vertices.size(), &(this->vertices[0]),
                  usageToOpenGL(this->usage));
 
     // populate texcoord buffer
-    if(this->texcoords.size() > 0 && m_texcoords[0].size() > 0) {
-        m_iNumTexcoords = m_texcoords[0].size();
+    if(this->texcoords.size() > 0 && this->texcoords[0].size() > 0) {
+        m_iNumTexcoords = this->texcoords[0].size();
 
         glGenBuffers(1, &m_iTexcoordBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, this->iTexcoordBuffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2) * m_texcoords[0].size(), &(this->texcoords[0][0]),
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2) * this->texcoords[0].size(), &(this->texcoords[0][0]),
                      usageToOpenGL(this->usage));
     }
 
     // free memory
     if(!m_bKeepInSystemMemory) clear();
 
-    m_bReady = true;
+    this->bReady = true;
 }
 
-void OpenGLES2VertexArrayObject::initAsync() { m_bAsyncReady = true; }
+void OpenGLES2VertexArrayObject::initAsync() { this->bAsyncReady = true; }
 
 void OpenGLES2VertexArrayObject::destroy() {
     VertexArrayObject::destroy();
@@ -61,7 +61,7 @@ void OpenGLES2VertexArrayObject::destroy() {
 }
 
 void OpenGLES2VertexArrayObject::draw() {
-    if(!m_bReady) {
+    if(!this->bReady) {
         debugLog("WARNING: OpenGLES2VertexArrayObject::draw() called, but was not ready!\n");
         return;
     }

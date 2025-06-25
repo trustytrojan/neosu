@@ -33,11 +33,11 @@ class Archive {
         [[nodiscard]] bool extractToFile(const std::string& outputPath) const;
 
        private:
-        std::string m_filename;
-        size_t m_uncompressedSize;
-        size_t m_compressedSize;
-        bool m_isDirectory;
-        std::vector<u8> m_data;  // store extracted data
+        std::string sFilename;
+        size_t iUncompressedSize;
+        size_t iCompressedSize;
+        bool bIsDirectory;
+        std::vector<u8> data;  // store extracted data
     };
 
    public:
@@ -56,7 +56,7 @@ class Archive {
     Archive& operator=(Archive&&) = delete;
 
     // check if archive was opened successfully
-    [[nodiscard]] bool isValid() const { return m_valid; }
+    [[nodiscard]] bool isValid() const { return this->bValid; }
 
     // get all entries at once (useful for separating files/dirs)
     std::vector<Entry> getAllEntries();
@@ -78,9 +78,9 @@ class Archive {
     bool createDirectoryRecursive(const std::string& path);
     bool isPathSafe(const std::string& path);
 
-    struct archive* m_archive;
-    std::vector<u8> m_memoryBuffer;  // keep buffer alive for memory-based archives
-    bool m_valid;
-    bool m_iterationStarted;
-    std::unique_ptr<Entry> m_currentEntry;
+    struct archive* archive;
+    std::vector<u8> vMemoryBuffer;  // keep buffer alive for memory-based archives
+    bool bValid;
+    bool bIterationStarted;
+    std::unique_ptr<Entry> currentEntry;
 };

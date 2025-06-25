@@ -17,7 +17,7 @@ RenderTarget::RenderTarget(int x, int y, int width, int height, Graphics::MULTIS
 }
 
 void RenderTarget::draw(int x, int y) {
-    if(!m_bReady) {
+    if(!this->bReady) {
         if(cv_debug_rt.getBool()) debugLog("WARNING: RenderTarget is not ready!\n");
         return;
     }
@@ -60,7 +60,7 @@ void RenderTarget::draw(int x, int y) {
 }
 
 void RenderTarget::draw(int x, int y, int width, int height) {
-    if(!m_bReady) {
+    if(!this->bReady) {
         if(cv_debug_rt.getBool()) debugLog("WARNING: RenderTarget is not ready!\n");
         return;
     }
@@ -95,7 +95,7 @@ void RenderTarget::draw(int x, int y, int width, int height) {
 }
 
 void RenderTarget::drawRect(int x, int y, int width, int height) {
-    if(!m_bReady) {
+    if(!this->bReady) {
         if(cv_debug_rt.getBool()) debugLog("WARNING: RenderTarget is not ready!\n");
         return;
     }

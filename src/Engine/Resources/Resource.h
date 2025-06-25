@@ -49,23 +49,23 @@ public:
 
 	void interruptLoad();
 
-	[[nodiscard]] inline std::string getName() const { return m_sName; }
-	[[nodiscard]] inline std::string getFilePath() const { return m_sFilePath; }
+	[[nodiscard]] inline std::string getName() const { return this->sName; }
+	[[nodiscard]] inline std::string getFilePath() const { return this->sFilePath; }
 
-	[[nodiscard]] inline bool isReady() const { return m_bReady.load(); }
-	[[nodiscard]] inline bool isAsyncReady() const { return m_bAsyncReady.load(); }
+	[[nodiscard]] inline bool isReady() const { return this->bReady.load(); }
+	[[nodiscard]] inline bool isAsyncReady() const { return this->bAsyncReady.load(); }
 
 protected:
 	virtual void init() = 0;
 	virtual void initAsync() = 0;
 	virtual void destroy() = 0;
 
-	std::string m_sFilePath;
-	std::string m_sName;
+	std::string sFilePath;
+	std::string sName;
 
-	std::atomic<bool> m_bReady;
-	std::atomic<bool> m_bAsyncReady;
-	std::atomic<bool> m_bInterrupted;
+	std::atomic<bool> bReady;
+	std::atomic<bool> bAsyncReady;
+	std::atomic<bool> bInterrupted;
 
 public:
 	// type inspection
@@ -125,8 +125,8 @@ public:
 	[[nodiscard]] const virtual VertexArrayObject *asVAO() const { return nullptr; }
 	[[nodiscard]] const virtual Sound *asSound() const { return nullptr; }
 private:
-	inline void setName(const std::string &name) { m_sName = name; }
-	bool m_bFileFound;
+	inline void setName(const std::string &name) { this->sName = name; }
+	bool bFileFound;
 };
 
 #endif

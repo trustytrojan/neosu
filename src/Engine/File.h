@@ -37,10 +37,10 @@ class File {
     File(File &&) = delete;
 
     [[nodiscard]] constexpr bool canRead() const {
-        return m_ready && m_ifstream && m_ifstream->good() && m_type == TYPE::READ;
+        return this->bReady && this->ifstream && this->ifstream->good() && this->fileType == TYPE::READ;
     }
     [[nodiscard]] constexpr bool canWrite() const {
-        return m_ready && m_ofstream && m_ofstream->good() && m_type == TYPE::WRITE;
+        return this->bReady && this->ofstream && this->ofstream->good() && this->fileType == TYPE::WRITE;
     }
 
     void write(const char *buffer, size_t size);
@@ -51,8 +51,8 @@ class File {
     // WARNING: this is NOT a null-terminated string! DO NOT USE THIS with UString/std::string!
     const char *readFile();
 
-    [[nodiscard]] constexpr size_t getFileSize() const { return m_fileSize; }
-    [[nodiscard]] inline std::string getPath() const { return m_filePath; }
+    [[nodiscard]] constexpr size_t getFileSize() const { return this->iFileSize; }
+    [[nodiscard]] inline std::string getPath() const { return this->sFilePath; }
 
     // public path resolution methods
     // modifies the input path with the actual found path
@@ -60,17 +60,17 @@ class File {
     [[nodiscard]] static File::FILETYPE exists(const std::string &filePath);
 
    private:
-    std::string m_filePath;
-    TYPE m_type;
-    bool m_ready;
-    size_t m_fileSize;
+    std::string sFilePath;
+    TYPE fileType;
+    bool bReady;
+    size_t iFileSize;
 
     // file streams
-    std::unique_ptr<std::ifstream> m_ifstream;
-    std::unique_ptr<std::ofstream> m_ofstream;
+    std::unique_ptr<std::ifstream> ifstream;
+    std::unique_ptr<std::ofstream> ofstream;
 
     // buffer for full file reading
-    std::vector<char> m_fullBuffer;
+    std::vector<char> vFullBuffer;
 
     // private implementation helpers
     bool openForReading();

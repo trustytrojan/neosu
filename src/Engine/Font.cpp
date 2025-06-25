@@ -19,6 +19,7 @@
 
 #include "ConVar.h"
 #include "Engine.h"
+#include "File.h"
 #include "FontTypeMap.h"
 #include "ResourceManager.h"
 #include "TextureAtlas.h"
@@ -43,11 +44,11 @@ bool McFont::s_sharedFtLibraryInitialized = false;
 std::vector<McFont::FallbackFont> McFont::s_sharedFallbackFonts;
 bool McFont::s_sharedFallbacksInitialized = false;
 
-McFont::McFont(const std::string &filepath, int fontSize, bool antialiasing, int fontDPI)
-    : Resource(filepath),
-      m_vao((Env::cfg(REND::GLES2 | REND::GLES32) ? Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES
-                                                  : Graphics::PRIMITIVE::PRIMITIVE_QUADS),
-            Graphics::USAGE_TYPE::USAGE_DYNAMIC) {
+McFont::McFont(const UString &filepath, int fontSize, bool antialiasing, int fontDPI)
+    : Resource(filepath.toUtf8()),
+      vao((Env::cfg(REND::GLES2 | REND::GLES32) ? Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES
+                                                : Graphics::PRIMITIVE::PRIMITIVE_QUADS),
+          Graphics::USAGE_TYPE::USAGE_DYNAMIC) {
     std::vector<wchar_t> characters;
     characters.reserve(96);  // reserve space for basic ASCII, load the rest as needed
     for(int i = 32; i < 128; i++) {
@@ -56,52 +57,52 @@ McFont::McFont(const std::string &filepath, int fontSize, bool antialiasing, int
     constructor(characters, fontSize, antialiasing, fontDPI);
 }
 
-McFont::McFont(const std::string &filepath, const std::vector<wchar_t> &characters, int fontSize, bool antialiasing,
+McFont::McFont(const UString &filepath, const std::vector<wchar_t> &characters, int fontSize, bool antialiasing,
                int fontDPI)
-    : Resource(filepath),
-      m_vao((Env::cfg(REND::GLES2 | REND::GLES32) ? Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES
-                                                  : Graphics::PRIMITIVE::PRIMITIVE_QUADS),
-            Graphics::USAGE_TYPE::USAGE_DYNAMIC) {
+    : Resource(filepath.toUtf8()),
+      vao((Env::cfg(REND::GLES2 | REND::GLES32) ? Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES
+                                                : Graphics::PRIMITIVE::PRIMITIVE_QUADS),
+          Graphics::USAGE_TYPE::USAGE_DYNAMIC) {
     constructor(characters, fontSize, antialiasing, fontDPI);
 }
 
 void McFont::constructor(const std::vector<wchar_t> &characters, int fontSize, bool antialiasing, int fontDPI) {
-    m_iFontSize = fontSize;
-    m_bAntialiasing = antialiasing;
-    m_iFontDPI = fontDPI;
-    m_textureAtlas = nullptr;
-    m_fHeight = 1.0f;
-    m_batchActive = false;
-    m_batchQueue.totalVerts = 0;
-    m_batchQueue.usedEntries = 0;
+    this->iFontSize = fontSize;
+    this->bAntialiasing = antialiasing;
+    this->iFontDPI = fontDPI;
+    this->textureAtlas = nullptr;
+    this->fHeight = 1.0f;
+    this->batchActive = false;
+    this->batchQueue.totalVerts = 0;
+    this->batchQueue.usedEntries = 0;
 
     // per-instance freetype initialization state
-    m_ftFace = nullptr;
-    m_bFreeTypeInitialized = false;
-    m_bAtlasNeedsRebuild = false;
+    this->ftFace = nullptr;
+    this->bFreeTypeInitialized = false;
+    this->bAtlasNeedsRebuild = false;
 
     // setup error glyph
-    m_errorGlyph = {.character = UNKNOWN_CHAR,
-                    .uvPixelsX = 10,
-                    .uvPixelsY = 1,
-                    .sizePixelsX = 1,
-                    .sizePixelsY = 0,
-                    .left = 0,
-                    .top = 10,
-                    .width = 10,
-                    .rows = 1,
-                    .advance_x = 0,
-                    .fontIndex = 0};
+    this->errorGlyph = {.character = UNKNOWN_CHAR,
+                        .uvPixelsX = 10,
+                        .uvPixelsY = 1,
+                        .sizePixelsX = 1,
+                        .sizePixelsY = 0,
+                        .left = 0,
+                        .top = 10,
+                        .width = 10,
+                        .rows = 1,
+                        .advance_x = 0,
+                        .fontIndex = 0};
 
     // pre-allocate space for initial glyphs
-    m_vGlyphs.reserve(characters.size());
+    this->vGlyphs.reserve(characters.size());
     for(wchar_t ch : characters) {
         addGlyph(ch);
     }
 }
 
 void McFont::init() {
-    debugLogF("Resource Manager: Loading {:s}\n", m_sFilePath);
+    debugLogF("Resource Manager: Loading {:s}\n", this->sFilePath);
 
     if(!initializeFreeType()) return;
 
@@ -109,25 +110,25 @@ void McFont::init() {
     initializeSharedFallbackFonts();
 
     // load metrics for all initial glyphs
-    for(wchar_t ch : m_vGlyphs) {
+    for(wchar_t ch : this->vGlyphs) {
         loadGlyphMetrics(ch);
     }
 
     // create atlas and render all glyphs
-    if(!createAndPackAtlas(m_vGlyphs)) return;
+    if(!createAndPackAtlas(this->vGlyphs)) return;
 
     // precalculate average/max ASCII glyph height
-    m_fHeight = 0.0f;
+    this->fHeight = 0.0f;
     for(int i = 32; i < 128; i++) {
         const int curHeight = getGlyphMetrics(static_cast<wchar_t>(i)).top;
-        m_fHeight = std::max(m_fHeight, static_cast<float>(curHeight));
+        this->fHeight = std::max(this->fHeight, static_cast<float>(curHeight));
     }
 
-    m_bReady = true;
+    this->bReady = true;
 }
 
 bool McFont::loadGlyphDynamic(wchar_t ch) {
-    if(!m_bFreeTypeInitialized || hasGlyph(ch)) return hasGlyph(ch);
+    if(!this->bFreeTypeInitialized || hasGlyph(ch)) return hasGlyph(ch);
 
     int fontIndex = 0;
     FT_Face targetFace = getFontFaceForGlyph(ch, fontIndex);
@@ -138,7 +139,7 @@ bool McFont::loadGlyphDynamic(wchar_t ch) {
             const char *charRange = FontTypeMap::getCharacterRangeName(ch);
             if(charRange)
                 debugLogF("Font Warning: Character U+{:04X} ({:s}) not supported by any font\n", (unsigned int)ch,
-                         charRange);
+                          charRange);
             else
                 debugLogF("Font Warning: Character U+{:04X} not supported by any font\n", (unsigned int)ch);
         }
@@ -151,7 +152,7 @@ bool McFont::loadGlyphDynamic(wchar_t ch) {
     // load glyph from the selected font face
     if(!loadGlyphFromFace(ch, targetFace, fontIndex)) return false;
 
-    const auto &metrics = m_vGlyphMetrics[ch];
+    const auto &metrics = this->vGlyphMetrics[ch];
 
     // check if we need atlas space for non-empty glyphs
     if(metrics.sizePixelsX > 0 && metrics.sizePixelsY > 0) {
@@ -161,23 +162,26 @@ bool McFont::loadGlyphDynamic(wchar_t ch) {
 
         if(!ensureAtlasSpace(requiredWidth, requiredHeight)) {
             // atlas is full, queue for rebuild
-            m_vPendingGlyphs.push_back(ch);
-            m_bAtlasNeedsRebuild = true;
+            this->vPendingGlyphs.push_back(ch);
+            this->bAtlasNeedsRebuild = true;
             addGlyph(ch);
             return true;  // glyph metrics are stored, will be packed later
         }
 
         // try to pack into current atlas
-        std::vector<TextureAtlas::PackRect> singleRect = {
-            {0, 0, static_cast<int>(metrics.sizePixelsX), static_cast<int>(metrics.sizePixelsY), 0}};
+        std::vector<TextureAtlas::PackRect> singleRect = {{.x = 0,
+                                                           .y = 0,
+                                                           .width = static_cast<int>(metrics.sizePixelsX),
+                                                           .height = static_cast<int>(metrics.sizePixelsY),
+                                                           .id = 0}};
 
-        if(m_textureAtlas->packRects(singleRect)) {
+        if(this->textureAtlas->packRects(singleRect)) {
             // successfully packed, render to atlas using the correct font face
             renderGlyphToAtlas(ch, singleRect[0].x, singleRect[0].y, targetFace);
         } else {
             // couldn't pack into current atlas, queue for rebuild
-            m_vPendingGlyphs.push_back(ch);
-            m_bAtlasNeedsRebuild = true;
+            this->vPendingGlyphs.push_back(ch);
+            this->bAtlasNeedsRebuild = true;
         }
     }
 
@@ -188,8 +192,8 @@ bool McFont::loadGlyphDynamic(wchar_t ch) {
 FT_Face McFont::getFontFaceForGlyph(wchar_t ch, int &fontIndex) {
     // check primary font first
     fontIndex = 0;
-    FT_UInt glyphIndex = FT_Get_Char_Index(m_ftFace, ch);
-    if(glyphIndex != 0) return m_ftFace;
+    FT_UInt glyphIndex = FT_Get_Char_Index(this->ftFace, ch);
+    if(glyphIndex != 0) return this->ftFace;
 
     // search through shared fallback fonts if initialized
     if(s_sharedFallbacksInitialized) {
@@ -209,7 +213,7 @@ FT_Face McFont::getFontFaceForGlyph(wchar_t ch, int &fontIndex) {
 
 bool McFont::loadGlyphFromFace(wchar_t ch, FT_Face face, int fontIndex) {
     if(FT_Load_Glyph(face, FT_Get_Char_Index(face, ch),
-                     m_bAntialiasing ? FT_LOAD_TARGET_NORMAL : FT_LOAD_TARGET_MONO)) {
+                     this->bAntialiasing ? FT_LOAD_TARGET_NORMAL : FT_LOAD_TARGET_MONO)) {
         debugLogF("Font Error: Failed to load glyph for character {:d} from font index {:d}\n", (int)ch, fontIndex);
         return false;
     }
@@ -220,12 +224,12 @@ bool McFont::loadGlyphFromFace(wchar_t ch, FT_Face face, int fontIndex) {
         return false;
     }
 
-    FT_Glyph_To_Bitmap(&glyph, m_bAntialiasing ? FT_RENDER_MODE_NORMAL : FT_RENDER_MODE_MONO, nullptr, 1);
+    FT_Glyph_To_Bitmap(&glyph, this->bAntialiasing ? FT_RENDER_MODE_NORMAL : FT_RENDER_MODE_MONO, nullptr, 1);
 
     auto bitmapGlyph = reinterpret_cast<FT_BitmapGlyph>(glyph);
 
     // store metrics for the character
-    GLYPH_METRICS &metrics = m_vGlyphMetrics[ch];
+    GLYPH_METRICS &metrics = this->vGlyphMetrics[ch];
     metrics.character = ch;
     metrics.left = bitmapGlyph->left;
     metrics.top = bitmapGlyph->top;
@@ -266,8 +270,9 @@ bool McFont::initializeSharedFallbackFonts() {
     std::vector<std::string> bundledFallbacks = env->getFilesInFolder(ResourceManager::PATH_DEFAULT_FONTS);
 
     for(const auto &fontName : bundledFallbacks) {
-        if(loadFallbackFont(std::string{fontName}, false)) {
-            if(cv_r_debug_font_unicode.getBool()) debugLogF("Font Info: Loaded bundled fallback font: {:s}\n", fontName);
+        if(loadFallbackFont(UString{fontName}, false)) {
+            if(cv_r_debug_font_unicode.getBool())
+                debugLogF("Font Info: Loaded bundled fallback font: {:s}\n", fontName);
         }
     }
 
@@ -283,40 +288,37 @@ void McFont::discoverSystemFallbacks() {
     wchar_t windir[MAX_PATH];
     if(GetWindowsDirectoryW(windir, MAX_PATH) <= 0) return;
 
-    // lol
-    std::vector<std::string> systemFonts = {
-        std::string(UString{UString{windir} + "\\Fonts\\arial.ttf"}.toUtf8()),
-        std::string(UString{UString{windir} + "\\Fonts\\msyh.ttc"}.toUtf8()),      // Microsoft YaHei (Chinese)
-        std::string(UString{UString{windir} + "\\Fonts\\malgun.ttf"}.toUtf8()),    // Malgun Gothic (Korean)
-        std::string(UString{UString{windir} + "\\Fonts\\meiryo.ttc"}.toUtf8()),    // Meiryo (Japanese)
-        std::string(UString{UString{windir} + "\\Fonts\\seguiemj.ttf"}.toUtf8()),  // Segoe UI Emoji
-        std::string(UString{UString{windir} + "\\Fonts\\seguisym.ttf"}.toUtf8())   // Segoe UI Symbol
+    std::vector<UString> systemFonts = {
+        UString{windir} + "\\Fonts\\arial.ttf",    UString{windir} + "\\Fonts\\msyh.ttc",  // Microsoft YaHei (Chinese)
+        UString{windir} + "\\Fonts\\malgun.ttf",                                           // Malgun Gothic (Korean)
+        UString{windir} + "\\Fonts\\meiryo.ttc",                                           // Meiryo (Japanese)
+        UString{windir} + "\\Fonts\\seguiemj.ttf",                                         // Segoe UI Emoji
+        UString{windir} + "\\Fonts\\seguisym.ttf"                                          // Segoe UI Symbol
     };
 #elif defined(MCENGINE_PLATFORM_LINUX)
     // linux system fonts (common locations)
-    std::vector<std::string> systemFonts = {"/usr/share/fonts/TTF/dejavu/DejaVuSans.ttf",
+    std::vector<UString> systemFonts = {"/usr/share/fonts/TTF/dejavu/DejaVuSans.ttf",
                                         "/usr/share/fonts/TTF/liberation/LiberationSans-Regular.ttf",
                                         "/usr/share/fonts/liberation/LiberationSans-Regular.ttf",
                                         "/usr/share/fonts/noto/NotoSans-Regular.ttf",
                                         "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
                                         "/usr/share/fonts/TTF/noto/NotoColorEmoji.ttf"};
 #else  // TODO: loading WOFF fonts in wasm? idk
-    std::vector<std::string> systemFonts;
+    std::vector<UString> systemFonts;
     return;
 #endif
 
     for(const auto &fontPath : systemFonts) {
-        if(env->fileExists(fontPath)) {
+        if(File::exists(fontPath.toUtf8()) == File::FILETYPE::FILE) {
             loadFallbackFont(fontPath, true);
         }
     }
 }
 
-bool McFont::loadFallbackFont(const std::string &fontPath, bool isSystemFont) {
+bool McFont::loadFallbackFont(const UString &fontPath, bool isSystemFont) {
     FT_Face face{};
-    if(FT_New_Face(s_sharedFtLibrary, fontPath.c_str(), 0, &face)) {
-        if(cv_r_debug_font_unicode.getBool())
-            debugLogF("Font Warning: Failed to load fallback font: {:s}\n", fontPath);
+    if(FT_New_Face(s_sharedFtLibrary, fontPath.toUtf8(), 0, &face)) {
+        if(cv_r_debug_font_unicode.getBool()) debugLogF("Font Warning: Failed to load fallback font: {:s}\n", fontPath);
         return false;
     }
 
@@ -333,37 +335,37 @@ bool McFont::loadFallbackFont(const std::string &fontPath, bool isSystemFont) {
 }
 
 void McFont::setFaceSize(FT_Face face) const {
-    FT_Set_Char_Size(face, m_iFontSize * 64, m_iFontSize * 64, m_iFontDPI, m_iFontDPI);
+    FT_Set_Char_Size(face, this->iFontSize * 64, this->iFontSize * 64, this->iFontDPI, this->iFontDPI);
 }
 
 bool McFont::ensureAtlasSpace(int requiredWidth, int requiredHeight) {
-    if(!m_textureAtlas) return false;
+    if(!this->textureAtlas) return false;
 
     // simple heuristic: check if there's roughly enough space left
     // this is not perfect but avoids complex packing simulation
-    const int atlasWidth = m_textureAtlas->getWidth();
-    const int atlasHeight = m_textureAtlas->getHeight();
-    const float occupiedRatio = static_cast<float>(m_vGlyphMetrics.size()) / 100.0f;  // rough estimation
+    const int atlasWidth = this->textureAtlas->getWidth();
+    const int atlasHeight = this->textureAtlas->getHeight();
+    const float occupiedRatio = static_cast<float>(this->vGlyphMetrics.size()) / 100.0f;  // rough estimation
 
     return (requiredWidth < atlasWidth / 4 && requiredHeight < atlasHeight / 4 && occupiedRatio < 0.8f);
 }
 
 void McFont::rebuildAtlas() {
-    if(!m_bAtlasNeedsRebuild || m_vPendingGlyphs.empty()) return;
+    if(!this->bAtlasNeedsRebuild || this->vPendingGlyphs.empty()) return;
 
     // collect all glyphs that need to be in the atlas
     std::vector<wchar_t> allGlyphs;
-    allGlyphs.reserve(m_vGlyphMetrics.size());
+    allGlyphs.reserve(this->vGlyphMetrics.size());
 
     // add existing glyphs with non-empty size
-    for(const auto &[ch, metrics] : m_vGlyphMetrics) {
+    for(const auto &[ch, metrics] : this->vGlyphMetrics) {
         if(metrics.sizePixelsX > 0 && metrics.sizePixelsY > 0) {
             allGlyphs.push_back(ch);
         }
     }
 
     // destroy old atlas
-    SAFE_DELETE(m_textureAtlas);
+    SAFE_DELETE(this->textureAtlas);
 
     // create new atlas and render all glyphs
     if(!createAndPackAtlas(allGlyphs)) {
@@ -371,8 +373,8 @@ void McFont::rebuildAtlas() {
         return;
     }
 
-    m_vPendingGlyphs.clear();
-    m_bAtlasNeedsRebuild = false;
+    this->vPendingGlyphs.clear();
+    this->bAtlasNeedsRebuild = false;
 }
 
 bool McFont::initializeFreeType() {
@@ -380,26 +382,26 @@ bool McFont::initializeFreeType() {
     if(!initializeSharedFreeType()) return false;
 
     // load this font's primary face
-    if(FT_New_Face(s_sharedFtLibrary, m_sFilePath.c_str(), 0, &m_ftFace)) {
+    if(FT_New_Face(s_sharedFtLibrary, this->sFilePath.c_str(), 0, &this->ftFace)) {
         engine->showMessageError("Font Error", "Couldn't load font file!");
         return false;
     }
 
-    if(FT_Select_Charmap(m_ftFace, ft_encoding_unicode)) {
+    if(FT_Select_Charmap(this->ftFace, ft_encoding_unicode)) {
         engine->showMessageError("Font Error", "FT_Select_Charmap() failed!");
-        FT_Done_Face(m_ftFace);
+        FT_Done_Face(this->ftFace);
         return false;
     }
 
     // set font size for this instance's primary face
-    setFaceSize(m_ftFace);
+    setFaceSize(this->ftFace);
 
-    m_bFreeTypeInitialized = true;
+    this->bFreeTypeInitialized = true;
     return true;
 }
 
 bool McFont::loadGlyphMetrics(wchar_t ch) {
-    if(!m_bFreeTypeInitialized) return false;
+    if(!this->bFreeTypeInitialized) return false;
 
     int fontIndex = 0;
     FT_Face face = getFontFaceForGlyph(ch, fontIndex);
@@ -413,13 +415,13 @@ std::unique_ptr<Color[]> McFont::createExpandedBitmapData(const FT_Bitmap &bitma
     std::unique_ptr<Color[]> expandedData(new Color[bitmap.width * bitmap.rows]);
 
     std::unique_ptr<Channel[]> monoBitmapUnpacked;
-    if(!m_bAntialiasing) monoBitmapUnpacked.reset(unpackMonoBitmap(bitmap));
+    if(!this->bAntialiasing) monoBitmapUnpacked.reset(unpackMonoBitmap(bitmap));
 
     for(unsigned int j = 0; j < bitmap.rows; j++) {
         for(unsigned int k = 0; k < bitmap.width; k++) {
             const size_t expandedIdx = (k + (bitmap.rows - j - 1) * bitmap.width);
 
-            Channel alpha = m_bAntialiasing                                ? bitmap.buffer[k + bitmap.width * j]
+            Channel alpha = this->bAntialiasing                            ? bitmap.buffer[k + bitmap.width * j]
                             : monoBitmapUnpacked[k + bitmap.width * j] > 0 ? 255
                                                                            : 0;
             expandedData[expandedIdx] = Color(alpha, 0xff, 0xff, 0xff);  // ARGB
@@ -435,28 +437,29 @@ void McFont::renderGlyphToAtlas(wchar_t ch, int x, int y, FT_Face face) {
         int fontIndex = 0;
         face = getFontFaceForGlyph(ch, fontIndex);
         if(!face) return;
-    } else if(face != m_ftFace) {
+    } else if(face != this->ftFace) {
         // make sure fallback face has the correct size for this font instance
         setFaceSize(face);
     }
 
-    if(FT_Load_Glyph(face, FT_Get_Char_Index(face, ch), m_bAntialiasing ? FT_LOAD_TARGET_NORMAL : FT_LOAD_TARGET_MONO))
+    if(FT_Load_Glyph(face, FT_Get_Char_Index(face, ch),
+                     this->bAntialiasing ? FT_LOAD_TARGET_NORMAL : FT_LOAD_TARGET_MONO))
         return;
 
     FT_Glyph glyph{};
     if(FT_Get_Glyph(face->glyph, &glyph)) return;
 
-    FT_Glyph_To_Bitmap(&glyph, m_bAntialiasing ? FT_RENDER_MODE_NORMAL : FT_RENDER_MODE_MONO, nullptr, 1);
+    FT_Glyph_To_Bitmap(&glyph, this->bAntialiasing ? FT_RENDER_MODE_NORMAL : FT_RENDER_MODE_MONO, nullptr, 1);
 
     auto bitmapGlyph = reinterpret_cast<FT_BitmapGlyph>(glyph);
     auto &bitmap = bitmapGlyph->bitmap;
 
     if(bitmap.width > 0 && bitmap.rows > 0) {
         auto expandedData = createExpandedBitmapData(bitmap);
-        m_textureAtlas->putAt(x, y, bitmap.width, bitmap.rows, false, true, expandedData.get());
+        this->textureAtlas->putAt(x, y, bitmap.width, bitmap.rows, false, true, expandedData.get());
 
         // update metrics with atlas coordinates
-        GLYPH_METRICS &metrics = m_vGlyphMetrics[ch];
+        GLYPH_METRICS &metrics = this->vGlyphMetrics[ch];
         metrics.uvPixelsX = static_cast<unsigned int>(x);
         metrics.uvPixelsY = static_cast<unsigned int>(y);
     }
@@ -475,7 +478,7 @@ bool McFont::createAndPackAtlas(const std::vector<wchar_t> &glyphs) {
 
     size_t rectIndex = 0;
     for(wchar_t ch : glyphs) {
-        const auto &metrics = m_vGlyphMetrics[ch];
+        const auto &metrics = this->vGlyphMetrics[ch];
         if(metrics.sizePixelsX > 0 && metrics.sizePixelsY > 0) {
             packRects.push_back({0, 0, static_cast<int>(metrics.sizePixelsX), static_cast<int>(metrics.sizePixelsY),
                                  static_cast<int>(rectIndex)});
@@ -492,11 +495,11 @@ bool McFont::createAndPackAtlas(const std::vector<wchar_t> &glyphs) {
         TextureAtlas::calculateOptimalSize(packRects, ATLAS_OCCUPANCY_TARGET, padding, MIN_ATLAS_SIZE, MAX_ATLAS_SIZE);
 
     resourceManager->requestNextLoadUnmanaged();
-    m_textureAtlas = resourceManager->createTextureAtlas(atlasSize, atlasSize);
-    m_textureAtlas->setPadding(padding);
+    this->textureAtlas = resourceManager->createTextureAtlas(atlasSize, atlasSize);
+    this->textureAtlas->setPadding(padding);
 
     // pack glyphs into atlas
-    if(!m_textureAtlas->packRects(packRects)) {
+    if(!this->textureAtlas->packRects(packRects)) {
         engine->showMessageError("Font Error", "Failed to pack glyphs into atlas!");
         return false;
     }
@@ -513,16 +516,16 @@ bool McFont::createAndPackAtlas(const std::vector<wchar_t> &glyphs) {
     }
 
     // finalize atlas texture
-    resourceManager->loadResource(m_textureAtlas);
-    m_textureAtlas->getAtlasImage()->setFilterMode(m_bAntialiasing ? Graphics::FILTER_MODE::FILTER_MODE_LINEAR
-                                                                   : Graphics::FILTER_MODE::FILTER_MODE_NONE);
+    resourceManager->loadResource(this->textureAtlas);
+    this->textureAtlas->getAtlasImage()->setFilterMode(this->bAntialiasing ? Graphics::FILTER_MODE::FILTER_MODE_LINEAR
+                                                                           : Graphics::FILTER_MODE::FILTER_MODE_NONE);
 
     return true;
 }
 
 void McFont::buildGlyphGeometry(const GLYPH_METRICS &gm, const Vector3 &basePos, float advanceX, size_t &vertexCount) {
-    const float atlasWidth = static_cast<float>(m_textureAtlas->getAtlasImage()->getWidth());
-    const float atlasHeight = static_cast<float>(m_textureAtlas->getAtlasImage()->getHeight());
+    const float atlasWidth = static_cast<float>(this->textureAtlas->getAtlasImage()->getWidth());
+    const float atlasHeight = static_cast<float>(this->textureAtlas->getAtlasImage()->getHeight());
 
     const float x = basePos.x + gm.left + advanceX;
     const float y = basePos.y - (gm.top - gm.rows);
@@ -551,44 +554,44 @@ void McFont::buildGlyphGeometry(const GLYPH_METRICS &gm, const Vector3 &basePos,
 
     if constexpr(Env::cfg(REND::GLES2 | REND::GLES32)) {
         // first triangle (bottom-left, top-left, top-right)
-        m_vertices[idx] = bottomLeft;
-        m_vertices[idx + 1] = topLeft;
-        m_vertices[idx + 2] = topRight;
+        this->vertices[idx] = bottomLeft;
+        this->vertices[idx + 1] = topLeft;
+        this->vertices[idx + 2] = topRight;
 
-        m_texcoords[idx] = texBottomLeft;
-        m_texcoords[idx + 1] = texTopLeft;
-        m_texcoords[idx + 2] = texTopRight;
+        this->texcoords[idx] = texBottomLeft;
+        this->texcoords[idx + 1] = texTopLeft;
+        this->texcoords[idx + 2] = texTopRight;
 
         // second triangle (bottom-left, top-right, bottom-right)
-        m_vertices[idx + 3] = bottomLeft;
-        m_vertices[idx + 4] = topRight;
-        m_vertices[idx + 5] = bottomRight;
+        this->vertices[idx + 3] = bottomLeft;
+        this->vertices[idx + 4] = topRight;
+        this->vertices[idx + 5] = bottomRight;
 
-        m_texcoords[idx + 3] = texBottomLeft;
-        m_texcoords[idx + 4] = texTopRight;
-        m_texcoords[idx + 5] = texBottomRight;
+        this->texcoords[idx + 3] = texBottomLeft;
+        this->texcoords[idx + 4] = texTopRight;
+        this->texcoords[idx + 5] = texBottomRight;
     } else {
-        m_vertices[idx] = bottomLeft;       // bottom-left
-        m_vertices[idx + 1] = topLeft;      // top-left
-        m_vertices[idx + 2] = topRight;     // top-right
-        m_vertices[idx + 3] = bottomRight;  // bottom-right
+        this->vertices[idx] = bottomLeft;       // bottom-left
+        this->vertices[idx + 1] = topLeft;      // top-left
+        this->vertices[idx + 2] = topRight;     // top-right
+        this->vertices[idx + 3] = bottomRight;  // bottom-right
 
-        m_texcoords[idx] = texBottomLeft;
-        m_texcoords[idx + 1] = texTopLeft;
-        m_texcoords[idx + 2] = texTopRight;
-        m_texcoords[idx + 3] = texBottomRight;
+        this->texcoords[idx] = texBottomLeft;
+        this->texcoords[idx + 1] = texTopLeft;
+        this->texcoords[idx + 2] = texTopRight;
+        this->texcoords[idx + 3] = texBottomRight;
     }
     vertexCount += VERTS_PER_VAO;
 }
 
-void McFont::buildStringGeometry(const std::string &text, size_t &vertexCount) {
-    if(!m_bReady || text.length() == 0 || text.length() > cv_r_drawstring_max_string_length.getInt()) return;
+void McFont::buildStringGeometry(const UString &text, size_t &vertexCount) {
+    if(!this->bReady || text.length() == 0 || text.length() > cv_r_drawstring_max_string_length.getInt()) return;
 
     // check if atlas needs rebuilding before geometry generation
-    if(m_bAtlasNeedsRebuild) rebuildAtlas();
+    if(this->bAtlasNeedsRebuild) rebuildAtlas();
 
     float advanceX = 0.0f;
-    const size_t maxGlyphs = std::min(text.length(), (m_vertices.size() - vertexCount) / VERTS_PER_VAO);
+    const size_t maxGlyphs = std::min(text.length(), (int)(this->vertices.size() - vertexCount) / VERTS_PER_VAO);
 
     for(size_t i = 0; i < maxGlyphs; i++) {
         const GLYPH_METRICS &gm = getGlyphMetrics(text[i]);
@@ -597,91 +600,91 @@ void McFont::buildStringGeometry(const std::string &text, size_t &vertexCount) {
     }
 }
 
-void McFont::drawString(const std::string &text) {
-    if(!m_bReady) return;
+void McFont::drawString(const UString &text) {
+    if(!this->bReady) return;
 
     const int maxNumGlyphs = cv_r_drawstring_max_string_length.getInt();
     if(text.length() == 0 || text.length() > maxNumGlyphs) return;
 
-    m_vao.empty();
+    this->vao.empty();
 
     const size_t totalVerts = text.length() * VERTS_PER_VAO;
-    m_vertices.resize(totalVerts);
-    m_texcoords.resize(totalVerts);
+    this->vertices.resize(totalVerts);
+    this->texcoords.resize(totalVerts);
 
     size_t vertexCount = 0;
     buildStringGeometry(text, vertexCount);
 
     for(size_t i = 0; i < vertexCount; i++) {
-        m_vao.addVertex(m_vertices[i]);
-        m_vao.addTexcoord(m_texcoords[i]);
+        this->vao.addVertex(this->vertices[i]);
+        this->vao.addTexcoord(this->texcoords[i]);
     }
 
-    m_textureAtlas->getAtlasImage()->bind();
-    g->drawVAO(&m_vao);
+    this->textureAtlas->getAtlasImage()->bind();
+    g->drawVAO(&this->vao);
 
-    if(cv_r_debug_drawstring_unbind.getBool()) m_textureAtlas->getAtlasImage()->unbind();
+    if(cv_r_debug_drawstring_unbind.getBool()) this->textureAtlas->getAtlasImage()->unbind();
 }
 
 void McFont::beginBatch() {
-    m_batchActive = true;
-    m_batchQueue.totalVerts = 0;
-    m_batchQueue.usedEntries = 0;  // don't clear/reallocate, reuse the entries instead
+    this->batchActive = true;
+    this->batchQueue.totalVerts = 0;
+    this->batchQueue.usedEntries = 0;  // don't clear/reallocate, reuse the entries instead
 }
 
-void McFont::addToBatch(const std::string &text, const Vector3 &pos, Color color) {
+void McFont::addToBatch(const UString &text, const Vector3 &pos, Color color) {
     size_t verts{};
-    if(!m_batchActive || (verts = text.length() * VERTS_PER_VAO) == 0) return;
-    m_batchQueue.totalVerts += verts;
+    if(!this->batchActive || (verts = text.length() * VERTS_PER_VAO) == 0) return;
+    this->batchQueue.totalVerts += verts;
 
-    if(m_batchQueue.usedEntries < m_batchQueue.entryList.size()) {
+    if(this->batchQueue.usedEntries < this->batchQueue.entryList.size()) {
         // reuse existing entry
-        BatchEntry &entry = m_batchQueue.entryList[m_batchQueue.usedEntries];
+        BatchEntry &entry = this->batchQueue.entryList[this->batchQueue.usedEntries];
         entry.text = text;
         entry.pos = pos;
         entry.color = color;
     } else {
         // need to add new entry
-        m_batchQueue.entryList.push_back({text, pos, color});
+        this->batchQueue.entryList.push_back({text, pos, color});
     }
-    m_batchQueue.usedEntries++;
+    this->batchQueue.usedEntries++;
 }
 
 void McFont::flushBatch() {
-    if(!m_batchActive || !m_batchQueue.totalVerts) {
-        m_batchActive = false;
+    if(!this->batchActive || !this->batchQueue.totalVerts) {
+        this->batchActive = false;
         return;
     }
 
-    m_vertices.resize(m_batchQueue.totalVerts);
-    m_texcoords.resize(m_batchQueue.totalVerts);
-    m_vao.empty();
+    this->vertices.resize(this->batchQueue.totalVerts);
+    this->texcoords.resize(this->batchQueue.totalVerts);
+    this->vao.empty();
 
     size_t currentVertex = 0;
-    for(size_t i = 0; i < m_batchQueue.usedEntries; i++) {
-        const auto &entry = m_batchQueue.entryList[i];
+    for(size_t i = 0; i < this->batchQueue.usedEntries; i++) {
+        const auto &entry = this->batchQueue.entryList[i];
         const size_t stringStart = currentVertex;
         buildStringGeometry(entry.text, currentVertex);
 
         for(size_t j = stringStart; j < currentVertex; j++) {
-            m_vertices[j] += entry.pos;
-            m_vao.addVertex(m_vertices[j]);
-            m_vao.addTexcoord(m_texcoords[j]);
-            m_vao.addColor(entry.color);
+            this->vertices[j] += entry.pos;
+            this->vao.addVertex(this->vertices[j]);
+            this->vao.addTexcoord(this->texcoords[j]);
+            this->vao.addColor(entry.color);
         }
     }
 
-    m_textureAtlas->getAtlasImage()->bind();
+    this->textureAtlas->getAtlasImage()->bind();
 
-    g->drawVAO(&m_vao);
+    g->drawVAO(&this->vao);
 
-    if(cv_r_debug_drawstring_unbind.getBool()) m_textureAtlas->getAtlasImage()->unbind();
+    if(cv_r_debug_drawstring_unbind.getBool()) this->textureAtlas->getAtlasImage()->unbind();
 
-    m_batchActive = false;
+    this->batchActive = false;
 }
 
 float McFont::getStringWidth(const UString &text) const {
-    if(!m_bReady) return 1.0f;
+    if(!this->bReady) return 1.0f;
 
     float width = 0.0f;
     for(int i = 0; i < text.length(); i++) {
@@ -691,7 +694,7 @@ float McFont::getStringWidth(const UString &text) const {
 }
 
 float McFont::getStringHeight(const UString &text) const {
-    if(!m_bReady) return 1.0f;
+    if(!this->bReady) return 1.0f;
 
     float height = 0.0f;
     for(int i = 0; i < text.length(); i++) {
@@ -767,42 +770,42 @@ std::vector<UString> McFont::wrap(const UString &text, f64 max_width) const {
 }
 
 const McFont::GLYPH_METRICS &McFont::getGlyphMetrics(wchar_t ch) const {
-    auto it = m_vGlyphMetrics.find(ch);
-    if(it != m_vGlyphMetrics.end()) return it->second;
+    auto it = this->vGlyphMetrics.find(ch);
+    if(it != this->vGlyphMetrics.end()) return it->second;
 
     // attempt dynamic loading for unicode characters
     if(const_cast<McFont *>(this)->loadGlyphDynamic(ch)) {
-        it = m_vGlyphMetrics.find(ch);
-        if(it != m_vGlyphMetrics.end()) return it->second;
+        it = this->vGlyphMetrics.find(ch);
+        if(it != this->vGlyphMetrics.end()) return it->second;
     }
 
     // fallback to unknown character glyph
-    it = m_vGlyphMetrics.find(UNKNOWN_CHAR);
-    if(it != m_vGlyphMetrics.end()) return it->second;
+    it = this->vGlyphMetrics.find(UNKNOWN_CHAR);
+    if(it != this->vGlyphMetrics.end()) return it->second;
 
     debugLogF("Font Error: Missing default backup glyph (UNKNOWN_CHAR)?\n");
-    return m_errorGlyph;
+    return this->errorGlyph;
 }
 
-void McFont::initAsync() { m_bAsyncReady = true; }
+void McFont::initAsync() { this->bAsyncReady = true; }
 
 void McFont::destroy() {
     // only clean up per-instance resources (primary font face and atlas)
     // shared resources are cleaned up separately via cleanupSharedResources()
 
-    if(m_bFreeTypeInitialized) {
-        if(m_ftFace) {
-            FT_Done_Face(m_ftFace);
-            m_ftFace = nullptr;
+    if(this->bFreeTypeInitialized) {
+        if(this->ftFace) {
+            FT_Done_Face(this->ftFace);
+            this->ftFace = nullptr;
         }
-        m_bFreeTypeInitialized = false;
+        this->bFreeTypeInitialized = false;
     }
 
-    SAFE_DELETE(m_textureAtlas);
-    m_vGlyphMetrics.clear();
-    m_vPendingGlyphs.clear();
-    m_fHeight = 1.0f;
-    m_bAtlasNeedsRebuild = false;
+    SAFE_DELETE(this->textureAtlas);
+    this->vGlyphMetrics.clear();
+    this->vPendingGlyphs.clear();
+    this->fHeight = 1.0f;
+    this->bAtlasNeedsRebuild = false;
 }
 
 void McFont::cleanupSharedResources() {
@@ -824,10 +827,10 @@ void McFont::cleanupSharedResources() {
 }
 
 bool McFont::addGlyph(wchar_t ch) {
-    if(m_vGlyphExistence.find(ch) != m_vGlyphExistence.end() || ch < 32) return false;
+    if(this->vGlyphExistence.find(ch) != this->vGlyphExistence.end() || ch < 32) return false;
 
-    m_vGlyphs.push_back(ch);
-    m_vGlyphExistence[ch] = true;
+    this->vGlyphs.push_back(ch);
+    this->vGlyphExistence[ch] = true;
     return true;
 }
 

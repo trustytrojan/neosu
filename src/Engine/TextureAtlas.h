@@ -33,12 +33,12 @@ class TextureAtlas final : public Resource {
     static size_t calculateOptimalSize(const std::vector<PackRect> &rects, float targetOccupancy = 0.75f,
                                        int padding = 1, size_t minSize = 256, size_t maxSize = 4096);
 
-    void setPadding(int padding) { m_iPadding = padding; }
+    void setPadding(int padding) { iPadding = padding; }
 
-    [[nodiscard]] inline int getWidth() const { return m_iWidth; }
-    [[nodiscard]] inline int getHeight() const { return m_iHeight; }
-    [[nodiscard]] inline int getPadding() const { return m_iPadding; }
-    [[nodiscard]] inline Image *getAtlasImage() const { return m_atlasImage; }
+    [[nodiscard]] inline int getWidth() const { return this->iWidth; }
+    [[nodiscard]] inline int getHeight() const { return this->iHeight; }
+    [[nodiscard]] inline int getPadding() const { return this->iPadding; }
+    [[nodiscard]] inline Image *getAtlasImage() const { return this->atlasImage; }
 
     // type inspection
     [[nodiscard]] Type getResType() const final { return TEXTUREATLAS; }
@@ -55,17 +55,17 @@ class TextureAtlas final : public Resource {
     void initAsync() override;
     void destroy() override;
 
-    int m_iPadding;
+    int iPadding;
 
-    int m_iWidth;
-    int m_iHeight;
+    int iWidth;
+    int iHeight;
 
-    Image *m_atlasImage;
+    Image *atlasImage;
 
     // legacy packing state
-    int m_iCurX;
-    int m_iCurY;
-    int m_iMaxHeight;
+    int iCurX;
+    int iCurY;
+    int iMaxHeight;
 };
 
 #endif

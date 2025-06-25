@@ -105,17 +105,19 @@ class ResourceManager final {
     Shader *getShader(std::string resourceName) const { return tryGet<Shader>(resourceName); }
 
     // methods for getting all resources of a type
-    [[nodiscard]] constexpr const std::vector<Image *> &getImages() const { return m_vImages; }
-    [[nodiscard]] constexpr const std::vector<McFont *> &getFonts() const { return m_vFonts; }
-    [[nodiscard]] constexpr const std::vector<Sound *> &getSounds() const { return m_vSounds; }
-    [[nodiscard]] constexpr const std::vector<Shader *> &getShaders() const { return m_vShaders; }
-    [[nodiscard]] constexpr const std::vector<RenderTarget *> &getRenderTargets() const { return m_vRenderTargets; }
-    [[nodiscard]] constexpr const std::vector<TextureAtlas *> &getTextureAtlases() const { return m_vTextureAtlases; }
+    [[nodiscard]] constexpr const std::vector<Image *> &getImages() const { return this->vImages; }
+    [[nodiscard]] constexpr const std::vector<McFont *> &getFonts() const { return this->vFonts; }
+    [[nodiscard]] constexpr const std::vector<Sound *> &getSounds() const { return this->vSounds; }
+    [[nodiscard]] constexpr const std::vector<Shader *> &getShaders() const { return this->vShaders; }
+    [[nodiscard]] constexpr const std::vector<RenderTarget *> &getRenderTargets() const { return this->vRenderTargets; }
+    [[nodiscard]] constexpr const std::vector<TextureAtlas *> &getTextureAtlases() const {
+        return this->vTextureAtlases;
+    }
     [[nodiscard]] constexpr const std::vector<VertexArrayObject *> &getVertexArrayObjects() const {
-        return m_vVertexArrayObjects;
+        return this->vVertexArrayObjects;
     }
 
-    [[nodiscard]] constexpr const std::vector<Resource *> &getResources() const { return m_vResources; }
+    [[nodiscard]] constexpr const std::vector<Resource *> &getResources() const { return this->vResources; }
 
     [[nodiscard]] bool isLoading() const;
     bool isLoadingResource(Resource *rs) const;
@@ -127,8 +129,8 @@ class ResourceManager final {
     template <typename T>
     [[nodiscard]] T *tryGet(std::string &resourceName) const {
         if(resourceName.empty()) return nullptr;
-        auto it = m_nameToResourceMap.find(resourceName);
-        if(it != m_nameToResourceMap.end()) return it->second->as<T>();
+        auto it = this->mNameToResourceMap.find(resourceName);
+        if(it != this->mNameToResourceMap.end()) return it->second->as<T>();
         if(cv_debug_rm.getBool())
             debugLogF(R"(ResourceManager WARNING: Resource "{:s}" does not exist!)"
                       "\n",
@@ -138,8 +140,8 @@ class ResourceManager final {
     template <typename T>
     [[nodiscard]] T *checkIfExistsAndHandle(std::string &resourceName) {
         if(resourceName.empty()) return nullptr;
-        auto it = m_nameToResourceMap.find(resourceName);
-        if(it == m_nameToResourceMap.end()) return nullptr;
+        auto it = this->mNameToResourceMap.find(resourceName);
+        if(it == this->mNameToResourceMap.end()) return nullptr;
         if(cv_debug_rm.getBool())
             debugLogF(R"(ResourceManager NOTICE: Resource "{:s}" already loaded.)"
                       "\n",
@@ -160,26 +162,26 @@ class ResourceManager final {
     void removeResourceFromTypedVector(Resource *res);
 
     // async loading system
-    AsyncResourceLoader *m_asyncLoader;
+    AsyncResourceLoader *asyncLoader;
 
     // flags
-    bool m_bNextLoadAsync;
-    std::stack<bool> m_nextLoadUnmanagedStack;
+    bool bNextLoadAsync;
+    std::stack<bool> nextLoadUnmanagedStack;
 
     // content
-    std::vector<Resource *> m_vResources;
+    std::vector<Resource *> vResources;
 
     // fast name lookup
-    std::unordered_map<std::string, Resource *> m_nameToResourceMap;
+    std::unordered_map<std::string, Resource *> mNameToResourceMap;
 
     // typed resource vectors for fast type-specific access
-    std::vector<Image *> m_vImages;
-    std::vector<McFont *> m_vFonts;
-    std::vector<Sound *> m_vSounds;
-    std::vector<Shader *> m_vShaders;
-    std::vector<RenderTarget *> m_vRenderTargets;
-    std::vector<TextureAtlas *> m_vTextureAtlases;
-    std::vector<VertexArrayObject *> m_vVertexArrayObjects;
+    std::vector<Image *> vImages;
+    std::vector<McFont *> vFonts;
+    std::vector<Sound *> vSounds;
+    std::vector<Shader *> vShaders;
+    std::vector<RenderTarget *> vRenderTargets;
+    std::vector<TextureAtlas *> vTextureAtlases;
+    std::vector<VertexArrayObject *> vVertexArrayObjects;
 };
 
 #endif

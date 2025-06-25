@@ -13,35 +13,35 @@
 #include "ResourceManager.h"
 
 TextureAtlas::TextureAtlas(int width, int height) : Resource() {
-    m_iWidth = width;
-    m_iHeight = height;
+    this->iWidth = width;
+    this->iHeight = height;
 
-    m_iPadding = 1;
+    this->iPadding = 1;
 
     resourceManager->requestNextLoadUnmanaged();
-    m_atlasImage = resourceManager->createImage(m_iWidth, m_iHeight);
+    this->atlasImage = resourceManager->createImage(this->iWidth, this->iHeight);
 
-    m_iCurX = m_iPadding;
-    m_iCurY = m_iPadding;
-    m_iMaxHeight = 0;
+    this->iCurX = this->iPadding;
+    this->iCurY = this->iPadding;
+    this->iMaxHeight = 0;
 }
 
 void TextureAtlas::init() {
-    resourceManager->loadResource(m_atlasImage);
+    resourceManager->loadResource(this->atlasImage);
 
-    m_bReady = true;
+    this->bReady = true;
 }
 
-void TextureAtlas::initAsync() { m_bAsyncReady = true; }
+void TextureAtlas::initAsync() { this->bAsyncReady = true; }
 
-void TextureAtlas::destroy() { SAFE_DELETE(m_atlasImage); }
+void TextureAtlas::destroy() { SAFE_DELETE(this->atlasImage); }
 
 void TextureAtlas::putAt(int x, int y, int width, int height, bool flipHorizontal, bool flipVertical, Color *pixels) {
-    if(width < 1 || height < 1 || pixels == nullptr || m_atlasImage == nullptr) return;
+    if(width < 1 || height < 1 || pixels == nullptr || this->atlasImage == nullptr) return;
 
-    if(x + width > m_iWidth || y + height > m_iHeight || x < 0 || y < 0) {
+    if(x + width > this->iWidth || y + height > this->iHeight || x < 0 || y < 0) {
         debugLogF("TextureAtlas::putAt( {}, {}, {}, {} ) WARNING: Out of bounds! Atlas size: {}x{}\n", x, y, width,
-                 height, m_iWidth, m_iHeight);
+                  height, this->iWidth, this->iHeight);
         return;
     }
 
@@ -56,26 +56,26 @@ void TextureAtlas::putAt(int x, int y, int width, int height, bool flipHorizonta
             const int sourceIdx = actualY * width + actualX;
 
             // bounds checking with debug info
-            if(atlasX >= m_iWidth || atlasY >= m_iHeight) {
-                debugLogF("WARNING: Pixel placement out of bounds: atlas=({},{}) in {}x{}\n", atlasX, atlasY, m_iWidth,
-                         m_iHeight);
+            if(atlasX >= this->iWidth || atlasY >= this->iHeight) {
+                debugLogF("WARNING: Pixel placement out of bounds: atlas=({},{}) in {}x{}\n", atlasX, atlasY,
+                          this->iWidth, this->iHeight);
                 continue;
             }
 
-            m_atlasImage->setPixel(atlasX, atlasY, pixels[sourceIdx]);
+            this->atlasImage->setPixel(atlasX, atlasY, pixels[sourceIdx]);
         }
     }
 
     // mirror border pixels for padding > 1
-    if(m_iPadding > 1) {
+    if(this->iPadding > 1) {
         // left border
         for(int j = -1; j < height + 1; j++) {
             const int i = 0;
             int actualX = (flipHorizontal ? width - i - 1 : i);
             int actualY = std::clamp<int>((flipVertical ? height - j - 1 : j), 0, height - 1);
 
-            if(x + i - 1 >= 0 && y + j >= 0 && y + j < m_iHeight)
-                m_atlasImage->setPixel(x + i - 1, y + j, pixels[actualY * width + actualX]);
+            if(x + i - 1 >= 0 && y + j >= 0 && y + j < this->iHeight)
+                this->atlasImage->setPixel(x + i - 1, y + j, pixels[actualY * width + actualX]);
         }
         // right border
         for(int j = -1; j < height + 1; j++) {
@@ -83,8 +83,8 @@ void TextureAtlas::putAt(int x, int y, int width, int height, bool flipHorizonta
             int actualX = (flipHorizontal ? width - i - 1 : i);
             int actualY = std::clamp<int>((flipVertical ? height - j - 1 : j), 0, height - 1);
 
-            if(x + i + 1 < m_iWidth && y + j >= 0 && y + j < m_iHeight)
-                m_atlasImage->setPixel(x + i + 1, y + j, pixels[actualY * width + actualX]);
+            if(x + i + 1 < this->iWidth && y + j >= 0 && y + j < this->iHeight)
+                this->atlasImage->setPixel(x + i + 1, y + j, pixels[actualY * width + actualX]);
         }
         // top border
         for(int i = -1; i < width + 1; i++) {
@@ -92,8 +92,8 @@ void TextureAtlas::putAt(int x, int y, int width, int height, bool flipHorizonta
             int actualX = std::clamp<int>((flipHorizontal ? width - i - 1 : i), 0, width - 1);
             int actualY = (flipVertical ? height - j - 1 : j);
 
-            if(x + i >= 0 && x + i < m_iWidth && y + j - 1 >= 0)
-                m_atlasImage->setPixel(x + i, y + j - 1, pixels[actualY * width + actualX]);
+            if(x + i >= 0 && x + i < this->iWidth && y + j - 1 >= 0)
+                this->atlasImage->setPixel(x + i, y + j - 1, pixels[actualY * width + actualX]);
         }
         // bottom border
         for(int i = -1; i < width + 1; i++) {
@@ -101,8 +101,8 @@ void TextureAtlas::putAt(int x, int y, int width, int height, bool flipHorizonta
             int actualX = std::clamp<int>((flipHorizontal ? width - i - 1 : i), 0, width - 1);
             int actualY = (flipVertical ? height - j - 1 : j);
 
-            if(x + i >= 0 && x + i < m_iWidth && y + j + 1 < m_iHeight)
-                m_atlasImage->setPixel(x + i, y + j + 1, pixels[actualY * width + actualX]);
+            if(x + i >= 0 && x + i < this->iWidth && y + j + 1 < this->iHeight)
+                this->atlasImage->setPixel(x + i, y + j + 1, pixels[actualY * width + actualX]);
         }
     }
 }
@@ -114,20 +114,20 @@ bool TextureAtlas::packRects(std::vector<PackRect> &rects) {
     std::ranges::sort(rects, [](const PackRect &a, const PackRect &b) { return a.height > b.height; });
 
     // initialize skyline - start with single segment covering entire width
-    std::vector<Skyline> skylines = {{0, m_iPadding, m_iWidth}};
+    std::vector<Skyline> skylines = {{.x = 0, .y = this->iPadding, .width = this->iWidth}};
 
     for(auto &rect : rects) {
-        const int rectWidth = rect.width + m_iPadding;
-        const int rectHeight = rect.height + m_iPadding;
+        const int rectWidth = rect.width + this->iPadding;
+        const int rectHeight = rect.height + this->iPadding;
 
-        int bestHeight = m_iHeight;
+        int bestHeight = this->iHeight;
         int bestIndex = -1;
-        int bestX = m_iWidth;  // initialize to rightmost position for leftmost preference
+        int bestX = this->iWidth;  // initialize to rightmost position for leftmost preference
 
         // find best position along skyline
         for(size_t i = 0; i < skylines.size(); ++i) {
             // check if rectangle fits horizontally at this skyline segment
-            if(skylines[i].x + rectWidth > m_iWidth) continue;
+            if(skylines[i].x + rectWidth > this->iWidth) continue;
 
             // find maximum height across all skyline segments this rect would span
             int maxY = skylines[i].y;
@@ -146,14 +146,14 @@ bool TextureAtlas::packRects(std::vector<PackRect> &rects) {
             }
         }
 
-        if(bestIndex == -1 || bestHeight > m_iHeight) {
+        if(bestIndex == -1 || bestHeight > this->iHeight) {
             debugLogF("ERROR: Packing failed for rect id={}: bestIndex={}, bestHeight={}, atlasHeight={}\n", rect.id,
-                     bestIndex, bestHeight, m_iHeight);
+                      bestIndex, bestHeight, this->iHeight);
             return false;
         }
 
         // place the rectangle
-        rect.x = bestX + m_iPadding;
+        rect.x = bestX + this->iPadding;
         rect.y = bestHeight - rectHeight;
 
         // update skyline - remove segments covered by this rectangle and add new segment

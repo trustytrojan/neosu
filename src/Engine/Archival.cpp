@@ -17,22 +17,22 @@
 Archive::Entry::Entry(struct archive* archive, struct archive_entry* entry) {
     if(!entry) {
         // create empty entry
-        m_filename = "";
-        m_uncompressedSize = 0;
-        m_compressedSize = 0;
-        m_isDirectory = false;
+        this->sFilename = "";
+        this->iUncompressedSize = 0;
+        this->iCompressedSize = 0;
+        this->bIsDirectory = false;
         return;
     }
 
-    m_filename = archive_entry_pathname(entry);
-    m_uncompressedSize = archive_entry_size(entry);
-    m_compressedSize = 0;  // libarchive doesn't always provide compressed size
-    m_isDirectory = archive_entry_filetype(entry) == AE_IFDIR;
+    this->sFilename = archive_entry_pathname(entry);
+    this->iUncompressedSize = archive_entry_size(entry);
+    this->iCompressedSize = 0;  // libarchive doesn't always provide compressed size
+    this->bIsDirectory = archive_entry_filetype(entry) == AE_IFDIR;
 
     // extract data immediately while archive is positioned correctly
-    if(!m_isDirectory && archive) {
-        if(m_uncompressedSize > 0) {
-            m_data.reserve(m_uncompressedSize);
+    if(!this->bIsDirectory && archive) {
+        if(this->iUncompressedSize > 0) {
+            this->data.reserve(this->iUncompressedSize);
         }
 
         const void* buff;
@@ -41,25 +41,25 @@ Archive::Entry::Entry(struct archive* archive, struct archive_entry* entry) {
 
         while(archive_read_data_block(archive, &buff, &size, &offset) == ARCHIVE_OK) {
             const u8* bytes = static_cast<const u8*>(buff);
-            m_data.insert(m_data.end(), bytes, bytes + size);
+            this->data.insert(this->data.end(), bytes, bytes + size);
         }
     }
 }
 
-std::string Archive::Entry::getFilename() const { return m_filename; }
+std::string Archive::Entry::getFilename() const { return this->sFilename; }
 
-size_t Archive::Entry::getUncompressedSize() const { return m_uncompressedSize; }
+size_t Archive::Entry::getUncompressedSize() const { return this->iUncompressedSize; }
 
-size_t Archive::Entry::getCompressedSize() const { return m_compressedSize; }
+size_t Archive::Entry::getCompressedSize() const { return this->iCompressedSize; }
 
-bool Archive::Entry::isDirectory() const { return m_isDirectory; }
+bool Archive::Entry::isDirectory() const { return this->bIsDirectory; }
 
-bool Archive::Entry::isFile() const { return !m_isDirectory; }
+bool Archive::Entry::isFile() const { return !this->bIsDirectory; }
 
-std::vector<u8> Archive::Entry::extractToMemory() const { return m_data; }
+std::vector<u8> Archive::Entry::extractToMemory() const { return this->data; }
 
 bool Archive::Entry::extractToFile(const std::string& outputPath) const {
-    if(m_isDirectory) return false;
+    if(this->bIsDirectory) return false;
 
     std::ofstream file(outputPath, std::ios::binary);
     if(!file.good()) {
@@ -67,8 +67,8 @@ bool Archive::Entry::extractToFile(const std::string& outputPath) const {
         return false;
     }
 
-    if(!m_data.empty()) {
-        file.write(reinterpret_cast<const char*>(m_data.data()), static_cast<std::streamsize>(m_data.size()));
+    if(!this->data.empty()) {
+        file.write(reinterpret_cast<const char*>(this->data.data()), static_cast<std::streamsize>(this->data.size()));
         if(file.bad()) {
             debugLog("Archive: failed to write to file %s\n", outputPath.c_str());
             return false;
@@ -82,35 +82,35 @@ bool Archive::Entry::extractToFile(const std::string& outputPath) const {
 // Archive implementation
 //------------------------------------------------------------------------------
 
-Archive::Archive(const std::string& filePath) : m_archive(nullptr), m_valid(false), m_iterationStarted(false) {
+Archive::Archive(const std::string& filePath) : archive(nullptr), bValid(false), bIterationStarted(false) {
     initFromFile(filePath);
 }
 
-Archive::Archive(const u8* data, size_t size) : m_archive(nullptr), m_valid(false), m_iterationStarted(false) {
+Archive::Archive(const u8* data, size_t size) : archive(nullptr), bValid(false), bIterationStarted(false) {
     initFromMemory(data, size);
 }
 
 Archive::~Archive() { cleanup(); }
 
 void Archive::initFromFile(const std::string& filePath) {
-    m_archive = archive_read_new();
-    if(!m_archive) {
+    this->archive = archive_read_new();
+    if(!this->archive) {
         debugLog("Archive: failed to create archive reader\n");
         return;
     }
 
     // enable all supported formats and filters
-    archive_read_support_format_all(m_archive);
-    archive_read_support_filter_all(m_archive);
+    archive_read_support_format_all(this->archive);
+    archive_read_support_filter_all(this->archive);
 
-    int r = archive_read_open_filename(m_archive, filePath.c_str(), 10240);
+    int r = archive_read_open_filename(this->archive, filePath.c_str(), 10240);
     if(r != ARCHIVE_OK) {
-        debugLog("Archive: failed to open file %s: %s\n", filePath.c_str(), archive_error_string(m_archive));
+        debugLog("Archive: failed to open file %s: %s\n", filePath.c_str(), archive_error_string(this->archive));
         cleanup();
         return;
     }
 
-    m_valid = true;
+    this->bValid = true;
 }
 
 void Archive::initFromMemory(const u8* data, size_t size) {
@@ -120,47 +120,47 @@ void Archive::initFromMemory(const u8* data, size_t size) {
     }
 
     // copy data to our own buffer to ensure it stays alive
-    m_memoryBuffer.assign(data, data + size);
+    this->vMemoryBuffer.assign(data, data + size);
 
-    m_archive = archive_read_new();
-    if(!m_archive) {
+    this->archive = archive_read_new();
+    if(!this->archive) {
         debugLog("Archive: failed to create archive reader\n");
         return;
     }
 
     // enable all supported formats and filters
-    archive_read_support_format_all(m_archive);
-    archive_read_support_filter_all(m_archive);
+    archive_read_support_format_all(this->archive);
+    archive_read_support_filter_all(this->archive);
 
-    int r = archive_read_open_memory(m_archive, m_memoryBuffer.data(), m_memoryBuffer.size());
+    int r = archive_read_open_memory(this->archive, this->vMemoryBuffer.data(), this->vMemoryBuffer.size());
     if(r != ARCHIVE_OK) {
-        debugLog("Archive: failed to open memory buffer: %s\n", archive_error_string(m_archive));
+        debugLog("Archive: failed to open memory buffer: %s\n", archive_error_string(this->archive));
         cleanup();
         return;
     }
 
-    m_valid = true;
+    this->bValid = true;
 }
 
 void Archive::cleanup() {
-    m_currentEntry.reset();
-    if(m_archive) {
-        archive_read_free(m_archive);
-        m_archive = nullptr;
+    this->currentEntry.reset();
+    if(this->archive) {
+        archive_read_free(this->archive);
+        this->archive = nullptr;
     }
-    m_valid = false;
-    m_iterationStarted = false;
+    this->bValid = false;
+    this->bIterationStarted = false;
 }
 
 std::vector<Archive::Entry> Archive::getAllEntries() {
     std::vector<Entry> entries;
-    if(!m_valid) return entries;
+    if(!this->bValid) return entries;
 
     // restart iteration if needed
-    if(m_iterationStarted) {
+    if(this->bIterationStarted) {
         cleanup();
-        if(!m_memoryBuffer.empty()) {
-            initFromMemory(m_memoryBuffer.data(), m_memoryBuffer.size());
+        if(!this->vMemoryBuffer.empty()) {
+            initFromMemory(this->vMemoryBuffer.data(), this->vMemoryBuffer.size());
         } else {
             debugLog("Archive: cannot restart iteration on file-based archive\n");
             return entries;
@@ -168,35 +168,35 @@ std::vector<Archive::Entry> Archive::getAllEntries() {
     }
 
     struct archive_entry* entry;
-    while(archive_read_next_header(m_archive, &entry) == ARCHIVE_OK) {
-        entries.emplace_back(m_archive, entry);
+    while(archive_read_next_header(this->archive, &entry) == ARCHIVE_OK) {
+        entries.emplace_back(this->archive, entry);
         // skip file data to move to next entry
-        archive_read_data_skip(m_archive);
+        archive_read_data_skip(this->archive);
     }
 
-    m_iterationStarted = true;
+    this->bIterationStarted = true;
     return entries;
 }
 
 bool Archive::hasNext() {
-    if(!m_valid) return false;
+    if(!this->bValid) return false;
 
-    if(!m_iterationStarted) {
+    if(!this->bIterationStarted) {
         struct archive_entry* entry;
-        int r = archive_read_next_header(m_archive, &entry);
+        int r = archive_read_next_header(this->archive, &entry);
         if(r == ARCHIVE_OK) {
-            m_currentEntry = std::make_unique<Entry>(m_archive, entry);
-            m_iterationStarted = true;
+            this->currentEntry = std::make_unique<Entry>(this->archive, entry);
+            this->bIterationStarted = true;
             return true;
         } else if(r == ARCHIVE_EOF) {
             return false;
         } else {
-            debugLog("Archive: error reading next header: %s\n", archive_error_string(m_archive));
+            debugLog("Archive: error reading next header: %s\n", archive_error_string(this->archive));
             return false;
         }
     }
 
-    return m_currentEntry != nullptr;
+    return this->currentEntry != nullptr;
 }
 
 Archive::Entry Archive::getCurrentEntry() {
@@ -208,27 +208,27 @@ Archive::Entry Archive::getCurrentEntry() {
         return empty;
     }
 
-    return *m_currentEntry;
+    return *this->currentEntry;
 }
 
 bool Archive::moveNext() {
-    if(!m_valid) return false;
+    if(!this->bValid) return false;
 
     // skip current entry data
-    if(m_currentEntry) {
-        archive_read_data_skip(m_archive);
-        m_currentEntry.reset();
+    if(this->currentEntry) {
+        archive_read_data_skip(this->archive);
+        this->currentEntry.reset();
     }
 
     struct archive_entry* entry;
-    int r = archive_read_next_header(m_archive, &entry);
+    int r = archive_read_next_header(this->archive, &entry);
     if(r == ARCHIVE_OK) {
-        m_currentEntry = std::make_unique<Entry>(m_archive, entry);
+        this->currentEntry = std::make_unique<Entry>(this->archive, entry);
         return true;
     } else if(r == ARCHIVE_EOF) {
         return false;
     } else {
-        debugLog("Archive: error reading next header: %s\n", archive_error_string(m_archive));
+        debugLog("Archive: error reading next header: %s\n", archive_error_string(this->archive));
         return false;
     }
 }
@@ -252,7 +252,7 @@ Archive::Entry* Archive::findEntry(const std::string& filename) {
 
 bool Archive::extractAll(const std::string& outputDir, const std::vector<std::string>& ignorePaths,
                          bool skipDirectories) {
-    if(!m_valid) return false;
+    if(!this->bValid) return false;
 
     auto entries = getAllEntries();
     if(entries.empty()) return false;

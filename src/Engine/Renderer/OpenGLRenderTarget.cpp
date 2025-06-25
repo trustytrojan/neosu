@@ -202,10 +202,10 @@ void OpenGLRenderTarget::init() {
     // reset bound texture and framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    m_bReady = true;
+    this->bReady = true;
 }
 
-void OpenGLRenderTarget::initAsync() { m_bAsyncReady = true; }
+void OpenGLRenderTarget::initAsync() { this->bAsyncReady = true; }
 
 void OpenGLRenderTarget::destroy() {
     if(this->iResolveTexture != 0) glDeleteTextures(1, &this->iResolveTexture);
@@ -222,7 +222,7 @@ void OpenGLRenderTarget::destroy() {
 }
 
 void OpenGLRenderTarget::enable() {
-    if(!m_bReady) return;
+    if(!this->bReady) return;
 
     // bind framebuffer
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &this->iFrameBufferBackup);  // backup
@@ -246,7 +246,7 @@ void OpenGLRenderTarget::enable() {
 }
 
 void OpenGLRenderTarget::disable() {
-    if(!m_bReady) return;
+    if(!this->bReady) return;
 
         // if multisampled, blit content for multisampling into resolve texture
 #ifdef MCENGINE_FEATURE_OPENGL
@@ -277,7 +277,7 @@ void OpenGLRenderTarget::disable() {
 }
 
 void OpenGLRenderTarget::bind(unsigned int textureUnit) {
-    if(!m_bReady) return;
+    if(!this->bReady) return;
 
     this->iTextureUnitBackup = textureUnit;
 
@@ -294,7 +294,7 @@ void OpenGLRenderTarget::bind(unsigned int textureUnit) {
 }
 
 void OpenGLRenderTarget::unbind() {
-    if(!m_bReady) return;
+    if(!this->bReady) return;
 
     // restore texture unit (just in case) and set to no texture
     glActiveTexture(GL_TEXTURE0 + this->iTextureUnitBackup);
