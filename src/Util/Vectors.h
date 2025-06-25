@@ -32,11 +32,11 @@ struct Vector2 {
     // utils functions
     void zero();
     void set(float x, float y);
-    float length() const;                           //
-    float distance(const Vector2& vec) const;       // distance between two vectors
+    [[nodiscard]] float length() const;                           //
+    [[nodiscard]] float distance(const Vector2& vec) const;       // distance between two vectors
     Vector2& normalize();                           //
-    float dot(const Vector2& vec) const;            // dot product
-    bool equal(const Vector2& vec, float e) const;  // compare with epsilon
+    [[nodiscard]] float dot(const Vector2& vec) const;            // dot product
+    [[nodiscard]] bool equal(const Vector2& vec, float e) const;  // compare with epsilon
 
     // operators
     Vector2 operator-() const;                    // unary operator (negate)
@@ -76,12 +76,12 @@ struct Vector3 {
     void zero();
     void set(float x, float y, float z);
     void setLength(float length);
-    float length() const;                           //
-    float distance(const Vector3& vec) const;       // distance between two vectors
+    [[nodiscard]] float length() const;                           //
+    [[nodiscard]] float distance(const Vector3& vec) const;       // distance between two vectors
     Vector3& normalize();                           //
-    float dot(const Vector3& vec) const;            // dot product
-    Vector3 cross(const Vector3& vec) const;        // cross product
-    bool equal(const Vector3& vec, float e) const;  // compare with epsilon
+    [[nodiscard]] float dot(const Vector3& vec) const;            // dot product
+    [[nodiscard]] Vector3 cross(const Vector3& vec) const;        // cross product
+    [[nodiscard]] bool equal(const Vector3& vec, float e) const;  // compare with epsilon
 
     // operators
     Vector3 operator-() const;                    // unary operator (negate)
@@ -120,11 +120,11 @@ struct Vector4 {
 
     // utils functions
     void set(float x, float y, float z, float w);
-    float length() const;                           //
-    float distance(const Vector4& vec) const;       // distance between two vectors
+    [[nodiscard]] float length() const;                           //
+    [[nodiscard]] float distance(const Vector4& vec) const;       // distance between two vectors
     Vector4& normalize();                           //
-    float dot(const Vector4& vec) const;            // dot product
-    bool equal(const Vector4& vec, float e) const;  // compare with epsilon
+    [[nodiscard]] float dot(const Vector4& vec) const;            // dot product
+    [[nodiscard]] bool equal(const Vector4& vec, float e) const;  // compare with epsilon
 
     // operators
     Vector4 operator-() const;                    // unary operator (negate)

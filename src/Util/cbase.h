@@ -226,9 +226,9 @@ struct zarray {
     void clear() { this->nb = 0; }
     T *begin() const { return this->memory; }
     T *data() { return this->memory; }
-    bool empty() const { return this->nb == 0; }
+    [[nodiscard]] bool empty() const { return this->nb == 0; }
     T *end() const { return &this->memory[this->nb]; }
-    size_t size() const { return this->nb; }
+    [[nodiscard]] size_t size() const { return this->nb; }
 
    private:
     size_t max = 0;

@@ -25,11 +25,11 @@ class Resource {
 
     void setName(std::string name) { this->sName = name; }
 
-    inline std::string getName() const { return this->sName; }
-    inline std::string getFilePath() const { return this->sFilePath; }
+    [[nodiscard]] inline std::string getName() const { return this->sName; }
+    [[nodiscard]] inline std::string getFilePath() const { return this->sFilePath; }
 
-    inline bool isReady() const { return this->bReady.load(); }
-    inline bool isAsyncReady() const { return this->bAsyncReady.load(); }
+    [[nodiscard]] inline bool isReady() const { return this->bReady.load(); }
+    [[nodiscard]] inline bool isAsyncReady() const { return this->bAsyncReady.load(); }
 
    protected:
     virtual void init() = 0;

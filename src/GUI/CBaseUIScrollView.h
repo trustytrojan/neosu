@@ -91,13 +91,13 @@ class CBaseUIScrollView : public CBaseUIElement {
     }
 
     // get
-    inline CBaseUIContainer *getContainer() const { return this->container; }
-    inline float getRelPosY() const { return this->vScrollPos.y; }
-    inline float getRelPosX() const { return this->vScrollPos.x; }
-    inline Vector2 getScrollSize() const { return this->vScrollSize; }
-    inline Vector2 getVelocity() const { return (this->vScrollPos - this->vVelocity); }
+    [[nodiscard]] inline CBaseUIContainer *getContainer() const { return this->container; }
+    [[nodiscard]] inline float getRelPosY() const { return this->vScrollPos.y; }
+    [[nodiscard]] inline float getRelPosX() const { return this->vScrollPos.x; }
+    [[nodiscard]] inline Vector2 getScrollSize() const { return this->vScrollSize; }
+    [[nodiscard]] inline Vector2 getVelocity() const { return (this->vScrollPos - this->vVelocity); }
 
-    inline bool isScrolling() const { return this->bScrolling; }
+    [[nodiscard]] inline bool isScrolling() const { return this->bScrolling; }
     bool isBusy() override;
 
     // events

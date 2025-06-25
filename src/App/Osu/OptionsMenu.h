@@ -48,7 +48,7 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
 
     void setUsername(UString username);
 
-    inline bool isFullscreen() const { return this->bFullscreen; }
+    [[nodiscard]] inline bool isFullscreen() const { return this->bFullscreen; }
     bool isMouseInside() override;
     bool isBusy() override;
 

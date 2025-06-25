@@ -10,7 +10,7 @@ struct MD5Hash {
     MD5Hash(const char *str);
     MD5Hash() { this->hash[0] = 0; }
 
-    inline const char *toUtf8() const { return this->hash; }
+    [[nodiscard]] inline const char *toUtf8() const { return this->hash; }
     bool operator==(const MD5Hash &other) const;
     bool operator==(const UString &other) const;
 };

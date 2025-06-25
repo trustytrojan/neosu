@@ -53,43 +53,43 @@ class Beatmap : public BeatmapInterface {
     // Returns true if the local player is loading
     bool isActuallyLoading();
 
-    Vector2 pixels2OsuCoords(Vector2 pixelCoords) const override;  // only used for positional audio atm
-    Vector2 osuCoords2Pixels(
+    [[nodiscard]] Vector2 pixels2OsuCoords(Vector2 pixelCoords) const override;  // only used for positional audio atm
+    [[nodiscard]] Vector2 osuCoords2Pixels(
         Vector2 coords) const override;  // hitobjects should use this one (includes lots of special behaviour)
-    Vector2 osuCoords2RawPixels(
+    [[nodiscard]] Vector2 osuCoords2RawPixels(
         Vector2 coords) const override;  // raw transform from osu!pixels to absolute screen pixels (without any mods whatsoever)
-    Vector2 osuCoords2LegacyPixels(
+    [[nodiscard]] Vector2 osuCoords2LegacyPixels(
         Vector2 coords) const override;  // only applies vanilla osu mods and static mods to the coordinates (used for generating
                                 // the static slider mesh) centered at (0, 0, 0)
 
     // cursor
-    Vector2 getMousePos() const;
-    Vector2 getCursorPos() const override;
-    Vector2 getFirstPersonCursorDelta() const;
-    inline Vector2 getContinueCursorPoint() const { return this->vContinueCursorPoint; }
+    [[nodiscard]] Vector2 getMousePos() const;
+    [[nodiscard]] Vector2 getCursorPos() const override;
+    [[nodiscard]] Vector2 getFirstPersonCursorDelta() const;
+    [[nodiscard]] inline Vector2 getContinueCursorPoint() const { return this->vContinueCursorPoint; }
 
     // playfield
-    inline Vector2 getPlayfieldSize() const { return this->vPlayfieldSize; }
-    inline Vector2 getPlayfieldCenter() const { return this->vPlayfieldCenter; }
-    inline f32 getPlayfieldRotation() const { return this->fPlayfieldRotation; }
+    [[nodiscard]] inline Vector2 getPlayfieldSize() const { return this->vPlayfieldSize; }
+    [[nodiscard]] inline Vector2 getPlayfieldCenter() const { return this->vPlayfieldCenter; }
+    [[nodiscard]] inline f32 getPlayfieldRotation() const { return this->fPlayfieldRotation; }
 
     // hitobjects
-    inline f32 getHitcircleXMultiplier() const {
+    [[nodiscard]] inline f32 getHitcircleXMultiplier() const {
         return this->fXMultiplier;
     }  // multiply osu!pixels with this to get screen pixels
-    inline f32 getNumberScale() const { return this->fNumberScale; }
-    inline f32 getHitcircleOverlapScale() const { return this->fHitcircleOverlapScale; }
-    inline bool isInMafhamRenderChunk() const { return this->bInMafhamRenderChunk; }
+    [[nodiscard]] inline f32 getNumberScale() const { return this->fNumberScale; }
+    [[nodiscard]] inline f32 getHitcircleOverlapScale() const { return this->fHitcircleOverlapScale; }
+    [[nodiscard]] inline bool isInMafhamRenderChunk() const { return this->bInMafhamRenderChunk; }
 
     // score
-    inline int getNumHitObjects() const { return this->hitobjects.size(); }
-    inline f32 getAimStars() const { return this->fAimStars; }
-    inline f32 getAimSliderFactor() const { return this->fAimSliderFactor; }
-    inline f32 getSpeedStars() const { return this->fSpeedStars; }
-    inline f32 getSpeedNotes() const { return this->fSpeedNotes; }
+    [[nodiscard]] inline int getNumHitObjects() const { return this->hitobjects.size(); }
+    [[nodiscard]] inline f32 getAimStars() const { return this->fAimStars; }
+    [[nodiscard]] inline f32 getAimSliderFactor() const { return this->fAimSliderFactor; }
+    [[nodiscard]] inline f32 getSpeedStars() const { return this->fSpeedStars; }
+    [[nodiscard]] inline f32 getSpeedNotes() const { return this->fSpeedNotes; }
 
     // hud
-    inline bool isSpinnerActive() const { return this->bIsSpinnerActive; }
+    [[nodiscard]] inline bool isSpinnerActive() const { return this->bIsSpinnerActive; }
 
     // callbacks called by the Osu class (osu!standard)
     void skipEmptySection();
@@ -126,19 +126,19 @@ class Beatmap : public BeatmapInterface {
     void seekPercent(f64 percent);
     void seekPercentPlayable(f64 percent);
 
-    inline Sound *getMusic() const { return this->music; }
-    u32 getTime() const;
-    u32 getStartTimePlayable() const;
-    u32 getLength() const override;
-    u32 getLengthPlayable() const override;
-    f32 getPercentFinished() const;
-    f32 getPercentFinishedPlayable() const;
+    [[nodiscard]] inline Sound *getMusic() const { return this->music; }
+    [[nodiscard]] u32 getTime() const;
+    [[nodiscard]] u32 getStartTimePlayable() const;
+    [[nodiscard]] u32 getLength() const override;
+    [[nodiscard]] u32 getLengthPlayable() const override;
+    [[nodiscard]] f32 getPercentFinished() const;
+    [[nodiscard]] f32 getPercentFinishedPlayable() const;
 
     // live statistics
-    int getMostCommonBPM() const;
-    f32 getSpeedMultiplier() const override;
-    inline int getNPS() const { return this->iNPS; }
-    inline int getND() const { return this->iND; }
+    [[nodiscard]] int getMostCommonBPM() const;
+    [[nodiscard]] f32 getSpeedMultiplier() const override;
+    [[nodiscard]] inline int getNPS() const { return this->iNPS; }
+    [[nodiscard]] inline int getND() const { return this->iND; }
 
     std::vector<f64> aimStrains;
     std::vector<f64> speedStrains;
@@ -175,51 +175,51 @@ class Beatmap : public BeatmapInterface {
     bool spectate_pause = false;  // the player we're spectating has paused
 
     // used by HitObject children and ModSelector
-    Skin *getSkin() const;  // maybe use this for beatmap skins, maybe
+    [[nodiscard]] Skin *getSkin() const;  // maybe use this for beatmap skins, maybe
 
-    inline long getCurMusicPos() const { return this->iCurMusicPos; }
-    inline long getCurMusicPosWithOffsets() const { return this->iCurMusicPosWithOffsets; }
+    [[nodiscard]] inline long getCurMusicPos() const { return this->iCurMusicPos; }
+    [[nodiscard]] inline long getCurMusicPosWithOffsets() const { return this->iCurMusicPosWithOffsets; }
 
-    u32 getScoreV1DifficultyMultiplier() const override;
-    f32 getRawAR() const override;
-    f32 getAR() const override;
-    f32 getCS() const override;
-    f32 getHP() const override;
-    f32 getRawOD() const override;
-    f32 getOD() const override;
-    f32 getApproachTime() const override;
-    f32 getRawApproachTime() const override;
+    [[nodiscard]] u32 getScoreV1DifficultyMultiplier() const override;
+    [[nodiscard]] f32 getRawAR() const override;
+    [[nodiscard]] f32 getAR() const override;
+    [[nodiscard]] f32 getCS() const override;
+    [[nodiscard]] f32 getHP() const override;
+    [[nodiscard]] f32 getRawOD() const override;
+    [[nodiscard]] f32 getOD() const override;
+    [[nodiscard]] f32 getApproachTime() const override;
+    [[nodiscard]] f32 getRawApproachTime() const override;
 
     // health
-    inline f64 getHealth() const { return this->fHealth; }
-    inline bool hasFailed() const { return this->bFailed; }
+    [[nodiscard]] inline f64 getHealth() const { return this->fHealth; }
+    [[nodiscard]] inline bool hasFailed() const { return this->bFailed; }
 
     // database (legacy)
-    inline DatabaseBeatmap *getSelectedDifficulty2() const { return this->selectedDifficulty2; }
+    [[nodiscard]] inline DatabaseBeatmap *getSelectedDifficulty2() const { return this->selectedDifficulty2; }
 
     // generic state
-    inline bool isPlaying() const override { return this->bIsPlaying; }
-    inline bool isPaused() const override { return this->bIsPaused; }
-    inline bool isRestartScheduled() const { return this->bIsRestartScheduled; }
-    inline bool isContinueScheduled() const override { return this->bContinueScheduled; }
-    inline bool isInSkippableSection() const { return this->bIsInSkippableSection; }
-    inline bool isInBreak() const { return this->bInBreak; }
-    inline bool shouldFlashWarningArrows() const { return this->bShouldFlashWarningArrows; }
-    inline f32 shouldFlashSectionPass() const { return this->fShouldFlashSectionPass; }
-    inline f32 shouldFlashSectionFail() const { return this->fShouldFlashSectionFail; }
-    bool isWaiting() const override { return this->bIsWaiting; }
-    bool isKey1Down() const override;
-    bool isKey2Down() const override;
-    bool isClickHeld() const override;
-    Replay::Mods getMods() const override;
-    i32 getModsLegacy() const override;
+    [[nodiscard]] inline bool isPlaying() const override { return this->bIsPlaying; }
+    [[nodiscard]] inline bool isPaused() const override { return this->bIsPaused; }
+    [[nodiscard]] inline bool isRestartScheduled() const { return this->bIsRestartScheduled; }
+    [[nodiscard]] inline bool isContinueScheduled() const override { return this->bContinueScheduled; }
+    [[nodiscard]] inline bool isInSkippableSection() const { return this->bIsInSkippableSection; }
+    [[nodiscard]] inline bool isInBreak() const { return this->bInBreak; }
+    [[nodiscard]] inline bool shouldFlashWarningArrows() const { return this->bShouldFlashWarningArrows; }
+    [[nodiscard]] inline f32 shouldFlashSectionPass() const { return this->fShouldFlashSectionPass; }
+    [[nodiscard]] inline f32 shouldFlashSectionFail() const { return this->fShouldFlashSectionFail; }
+    [[nodiscard]] bool isWaiting() const override { return this->bIsWaiting; }
+    [[nodiscard]] bool isKey1Down() const override;
+    [[nodiscard]] bool isKey2Down() const override;
+    [[nodiscard]] bool isClickHeld() const override;
+    [[nodiscard]] Replay::Mods getMods() const override;
+    [[nodiscard]] i32 getModsLegacy() const override;
 
-    std::string getTitle() const;
-    std::string getArtist() const;
+    [[nodiscard]] std::string getTitle() const;
+    [[nodiscard]] std::string getArtist() const;
 
-    inline const std::vector<DatabaseBeatmap::BREAK> &getBreaks() const { return this->breaks; }
-    u32 getBreakDurationTotal() const override;
-    DatabaseBeatmap::BREAK getBreakForTimeRange(i64 startMS, i64 positionMS, i64 endMS) const;
+    [[nodiscard]] inline const std::vector<DatabaseBeatmap::BREAK> &getBreaks() const { return this->breaks; }
+    [[nodiscard]] u32 getBreakDurationTotal() const override;
+    [[nodiscard]] DatabaseBeatmap::BREAK getBreakForTimeRange(i64 startMS, i64 positionMS, i64 endMS) const;
 
     // HitObject and other helper functions
     LiveScore::HIT addHitResult(HitObject *hitObject, LiveScore::HIT hit, i32 delta, bool isEndOfCombo = false,
@@ -231,8 +231,8 @@ class Beatmap : public BeatmapInterface {
     void updateTimingPoints(long curPos);
 
     // ILLEGAL:
-    inline const std::vector<HitObject *> &getHitObjectsPointer() const { return this->hitobjects; }
-    inline f32 getBreakBackgroundFadeAnim() const { return this->fBreakBackgroundFade; }
+    [[nodiscard]] inline const std::vector<HitObject *> &getHitObjectsPointer() const { return this->hitobjects; }
+    [[nodiscard]] inline f32 getBreakBackgroundFadeAnim() const { return this->fBreakBackgroundFade; }
 
     Sound *music;
     bool bForceStreamPlayback;

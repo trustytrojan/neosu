@@ -98,9 +98,8 @@ OsuDifficultyHitObject::OsuDifficultyHitObject(OsuDifficultyHitObject &&dobj) no
 
 OsuDifficultyHitObject &OsuDifficultyHitObject::operator=(OsuDifficultyHitObject &&dobj) noexcept {
     // self-assignment check
-    if(this == &dobj) {
+    if(this == &dobj)
         return *this;
-    }
 
     // clean up existing resources BEFORE taking new ones
     SAFE_DELETE(this->curve);

@@ -46,10 +46,10 @@ class CBaseUITextField : public CBaseUIScrollView {
             return this;
         }
 
-        inline Color getTextColor() const { return this->textColor; }
+        [[nodiscard]] inline Color getTextColor() const { return this->textColor; }
 
-        inline UString getText() const { return this->sText; }
-        inline McFont *getFont() const { return this->font; }
+        [[nodiscard]] inline UString getText() const { return this->sText; }
+        [[nodiscard]] inline McFont *getFont() const { return this->font; }
 
         void onResized() override;
 

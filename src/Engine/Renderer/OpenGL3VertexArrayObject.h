@@ -21,7 +21,7 @@ class OpenGL3VertexArrayObject : public VertexArrayObject {
 
     void draw();
 
-    inline unsigned int const getNumTexcoords0() const { return this->iNumTexcoords; }
+    [[nodiscard]] inline unsigned int const getNumTexcoords0() const { return this->iNumTexcoords; }
 
    private:
     static int primitiveToOpenGL(Graphics::PRIMITIVE primitive);

@@ -11,7 +11,7 @@ class CBaseUICheckbox : public CBaseUIButton {
 
     inline float getBlockSize() { return this->vSize.y / 2; }
     inline float getBlockBorder() { return this->vSize.y / 4; }
-    inline bool isChecked() const { return this->bChecked; }
+    [[nodiscard]] inline bool isChecked() const { return this->bChecked; }
 
     CBaseUICheckbox *setChecked(bool checked, bool fireChangeEvent = true);
     CBaseUICheckbox *setSizeToContent(int horizontalBorderSize = 1, int verticalBorderSize = 1);

@@ -71,7 +71,7 @@ class RankingScreenIndexLabel : public CBaseUILabel {
 
     void setVisible2(bool visible2) { this->bVisible2 = visible2; }
 
-    inline bool isVisible2() const { return this->bVisible2; }
+    [[nodiscard]] inline bool isVisible2() const { return this->bVisible2; }
 
    private:
     bool bVisible2;
@@ -93,7 +93,7 @@ class RankingScreenBottomElement : public CBaseUILabel {
 
     void setVisible2(bool visible2) { this->bVisible2 = visible2; }
 
-    inline bool isVisible2() const { return this->bVisible2; }
+    [[nodiscard]] inline bool isVisible2() const { return this->bVisible2; }
 
    private:
     bool bVisible2;
@@ -139,7 +139,7 @@ class RankingScreenScrollDownInfoButton : public CBaseUIButton {
 
     void setVisible2(bool visible2) { this->bVisible2 = visible2; }
 
-    inline bool isVisible2() const { return this->bVisible2; }
+    [[nodiscard]] inline bool isVisible2() const { return this->bVisible2; }
 
     bool bVisible2;
     float fAlpha;

@@ -91,10 +91,10 @@ class CBaseUIWindow : public CBaseUIElement {
     // get
     bool isBusy() override;
     bool isActive() override;
-    inline bool isMoving() const { return this->bMoving; }
-    inline bool isResizing() const { return this->bResizing; }
-    inline CBaseUIContainer *getContainer() const { return this->container; }
-    inline CBaseUIContainer *getTitleBarContainer() const { return this->titleBarContainer; }
+    [[nodiscard]] inline bool isMoving() const { return this->bMoving; }
+    [[nodiscard]] inline bool isResizing() const { return this->bResizing; }
+    [[nodiscard]] inline CBaseUIContainer *getContainer() const { return this->container; }
+    [[nodiscard]] inline CBaseUIContainer *getTitleBarContainer() const { return this->titleBarContainer; }
     inline int getTitleBarHeight() { return this->iTitleBarHeight; }
 
     // events

@@ -56,18 +56,18 @@ class HitObject {
     virtual Vector2 getOriginalRawPosAt(long pos) = 0;  // without stack calculations
     virtual Vector2 getAutoCursorPos(long curPos) = 0;
 
-    inline int getStack() const { return this->iStack; }
-    inline int getColorCounter() const { return this->iColorCounter; }
-    inline int getColorOffset() const { return this->iColorOffset; }
-    inline float getApproachScale() const { return this->fApproachScale; }
-    inline long getDelta() const { return this->iDelta; }
-    inline long getApproachTime() const { return this->iApproachTime; }
-    inline long getAutopilotDelta() const { return this->iAutopilotDelta; }
+    [[nodiscard]] inline int getStack() const { return this->iStack; }
+    [[nodiscard]] inline int getColorCounter() const { return this->iColorCounter; }
+    [[nodiscard]] inline int getColorOffset() const { return this->iColorOffset; }
+    [[nodiscard]] inline float getApproachScale() const { return this->fApproachScale; }
+    [[nodiscard]] inline long getDelta() const { return this->iDelta; }
+    [[nodiscard]] inline long getApproachTime() const { return this->iApproachTime; }
+    [[nodiscard]] inline long getAutopilotDelta() const { return this->iAutopilotDelta; }
 
-    inline bool isVisible() const { return this->bVisible; }
-    inline bool isFinished() const { return this->bFinished; }
-    inline bool isBlocked() const { return this->bBlocked; }
-    inline bool hasMisAimed() const { return this->bMisAim; }
+    [[nodiscard]] inline bool isVisible() const { return this->bVisible; }
+    [[nodiscard]] inline bool isFinished() const { return this->bFinished; }
+    [[nodiscard]] inline bool isBlocked() const { return this->bBlocked; }
+    [[nodiscard]] inline bool hasMisAimed() const { return this->bMisAim; }
 
     virtual void onClickEvent(std::vector<Click> &clicks) { ; }
     virtual void onReset(long curPos);

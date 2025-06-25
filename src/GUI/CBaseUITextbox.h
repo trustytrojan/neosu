@@ -16,9 +16,9 @@ class CBaseUITextbox : public CBaseUIElement {
     void onKeyDown(KeyboardEvent &e) override;
 
     UString getVisibleText();
-    inline const UString getText() const { return this->sText; }
+    [[nodiscard]] inline const UString getText() const { return this->sText; }
     inline UString &getTextRef() { return this->sText; }  // DEPRECATED
-    inline McFont *getFont() const { return this->font; }
+    [[nodiscard]] inline McFont *getFont() const { return this->font; }
 
     CBaseUITextbox *setDrawFrame(bool drawFrame) {
         this->bDrawFrame = drawFrame;
@@ -74,7 +74,7 @@ class CBaseUITextbox : public CBaseUIElement {
     void setCursorPosRight();
 
     bool hitEnter();
-    bool hasSelectedText() const;
+    [[nodiscard]] bool hasSelectedText() const;
     void clear();
     void focus(bool move_caret = true);
 

@@ -122,8 +122,8 @@ void RichPresence::onMainMenu() {
     setBanchoStatus("Main Menu", force_not_afk ? IDLE : AFK);
 
     // NOTE: As much as I would like to show "Listening to", the Discord SDK ignores the activity 'type'
-    struct DiscordActivity activity;
-    memset(&activity, 0, sizeof(activity));
+    struct DiscordActivity activity{};
+
     activity.type = DiscordActivityType_Listening;
 
     auto diff2 = osu->getSelectedBeatmap()->getSelectedDifficulty2();
@@ -138,8 +138,8 @@ void RichPresence::onMainMenu() {
 }
 
 void RichPresence::onSongBrowser() {
-    struct DiscordActivity activity;
-    memset(&activity, 0, sizeof(activity));
+    struct DiscordActivity activity{};
+
     activity.type = DiscordActivityType_Playing;
     strcpy(activity.details, "Picking a map");
 
@@ -172,8 +172,8 @@ void RichPresence::onPlayStart() {
                   .count();
     }
 
-    struct DiscordActivity activity;
-    memset(&activity, 0, sizeof(activity));
+    struct DiscordActivity activity{};
+
     activity.type = DiscordActivityType_Playing;
     activity.timestamps.start = tms;
     activity.timestamps.end = 0;
@@ -240,8 +240,8 @@ void RichPresence::onPlayEnd(bool quit) {
 }
 
 void RichPresence::onMultiplayerLobby() {
-    struct DiscordActivity activity;
-    memset(&activity, 0, sizeof(activity));
+    struct DiscordActivity activity{};
+
     activity.type = DiscordActivityType_Playing;
 
     crop_to(bancho.endpoint.toUtf8(), activity.state, 128);

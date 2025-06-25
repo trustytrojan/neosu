@@ -22,9 +22,9 @@ class TextureAtlas : public Resource {
 
     void setPadding(int padding) { this->iPadding = padding; }
 
-    inline int getWidth() const { return this->iWidth; }
-    inline int getHeight() const { return this->iHeight; }
-    inline Image *getAtlasImage() const { return this->atlasImage; }
+    [[nodiscard]] inline int getWidth() const { return this->iWidth; }
+    [[nodiscard]] inline int getHeight() const { return this->iHeight; }
+    [[nodiscard]] inline Image *getAtlasImage() const { return this->atlasImage; }
 
    private:
     void init() override;

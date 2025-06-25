@@ -89,44 +89,44 @@ class Engine {
     void removeGamepad(Gamepad *gamepad);
 
     // interfaces
-    inline App *getApp() const { return this->app; }
-    inline Graphics *getGraphics() const { return this->graphics; }
-    inline SoundEngine *getSound() const { return this->sound; }
-    inline ResourceManager *getResourceManager() const { return this->resourceManager; }
-    inline Environment *getEnvironment() const { return this->environment; }
-    inline NetworkHandler *getNetworkHandler() const { return this->networkHandler; }
+    [[nodiscard]] inline App *getApp() const { return this->app; }
+    [[nodiscard]] inline Graphics *getGraphics() const { return this->graphics; }
+    [[nodiscard]] inline SoundEngine *getSound() const { return this->sound; }
+    [[nodiscard]] inline ResourceManager *getResourceManager() const { return this->resourceManager; }
+    [[nodiscard]] inline Environment *getEnvironment() const { return this->environment; }
+    [[nodiscard]] inline NetworkHandler *getNetworkHandler() const { return this->networkHandler; }
 
     // input devices
-    inline Mouse *getMouse() const { return this->mouse; }
-    inline Keyboard *getKeyboard() const { return this->keyboard; }
-    inline Gamepad *getGamepad() const { return this->gamepad; }
-    inline const std::vector<Mouse *> &getMice() const { return this->mice; }
-    inline const std::vector<Keyboard *> &getKeyboards() const { return this->keyboards; }
-    inline const std::vector<Gamepad *> &getGamepads() const { return this->gamepads; }
+    [[nodiscard]] inline Mouse *getMouse() const { return this->mouse; }
+    [[nodiscard]] inline Keyboard *getKeyboard() const { return this->keyboard; }
+    [[nodiscard]] inline Gamepad *getGamepad() const { return this->gamepad; }
+    [[nodiscard]] inline const std::vector<Mouse *> &getMice() const { return this->mice; }
+    [[nodiscard]] inline const std::vector<Keyboard *> &getKeyboards() const { return this->keyboards; }
+    [[nodiscard]] inline const std::vector<Gamepad *> &getGamepads() const { return this->gamepads; }
 
     // screen
     void requestResolutionChange(Vector2 newResolution);
-    inline Vector2 getScreenSize() const { return this->vScreenSize; }
-    inline int getScreenWidth() const { return (int)this->vScreenSize.x; }
-    inline int getScreenHeight() const { return (int)this->vScreenSize.y; }
+    [[nodiscard]] inline Vector2 getScreenSize() const { return this->vScreenSize; }
+    [[nodiscard]] inline int getScreenWidth() const { return (int)this->vScreenSize.x; }
+    [[nodiscard]] inline int getScreenHeight() const { return (int)this->vScreenSize.y; }
 
     // vars
     void setFrameTime(double delta);
-    inline double getTime() const { return this->dTime; }
+    [[nodiscard]] inline double getTime() const { return this->dTime; }
     double getTimeReal();
-    inline double getTimeRunning() const { return this->dRunTime; }
-    inline double getFrameTime() const { return this->dFrameTime; }
-    inline unsigned long getFrameCount() const { return this->iFrameCount; }
+    [[nodiscard]] inline double getTimeRunning() const { return this->dRunTime; }
+    [[nodiscard]] inline double getFrameTime() const { return this->dFrameTime; }
+    [[nodiscard]] inline unsigned long getFrameCount() const { return this->iFrameCount; }
 
-    inline bool hasFocus() const { return this->bHasFocus; }
-    inline bool isDrawing() const { return this->bDrawing; }
-    inline bool isMinimized() const { return this->bIsMinimized; }
+    [[nodiscard]] inline bool hasFocus() const { return this->bHasFocus; }
+    [[nodiscard]] inline bool isDrawing() const { return this->bDrawing; }
+    [[nodiscard]] inline bool isMinimized() const { return this->bIsMinimized; }
 
     // debugging/console
     void setConsole(Console *console) { this->console = console; }
-    inline ConsoleBox *getConsoleBox() const { return this->consoleBox; }
-    inline Console *getConsole() const { return this->console; }
-    inline CBaseUIContainer *getGUI() const { return this->guiContainer; }
+    [[nodiscard]] inline ConsoleBox *getConsoleBox() const { return this->consoleBox; }
+    [[nodiscard]] inline Console *getConsole() const { return this->console; }
+    [[nodiscard]] inline CBaseUIContainer *getGUI() const { return this->guiContainer; }
 
     // interfaces
     App *app;

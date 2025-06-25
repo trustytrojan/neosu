@@ -36,7 +36,7 @@ class LinuxGLLegacyInterface : public OpenGLLegacyInterface {
     void setVSync(bool vsync) override;
 
     // ILLEGAL:
-    inline GLXContext getGLXContext() const { return this->glc; }
+    [[nodiscard]] inline GLXContext getGLXContext() const { return this->glc; }
 
    private:
     Display *display;

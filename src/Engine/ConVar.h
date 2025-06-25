@@ -95,26 +95,26 @@ class ConVar {
     void setHelpString(UString helpString);
 
     // get
-    inline float getDefaultFloat() const { return this->fDefaultValue.load(); }
-    inline const UString &getDefaultString() const { return this->sDefaultValue; }
+    [[nodiscard]] inline float getDefaultFloat() const { return this->fDefaultValue.load(); }
+    [[nodiscard]] inline const UString &getDefaultString() const { return this->sDefaultValue; }
 
-    bool isUnlocked() const;
+    [[nodiscard]] bool isUnlocked() const;
     std::string getFancyDefaultValue();
 
-    bool getBool() const;
-    float getFloat() const;
+    [[nodiscard]] bool getBool() const;
+    [[nodiscard]] float getFloat() const;
     int getInt();
     const UString &getString();
 
-    inline const UString &getHelpstring() const { return this->sHelpString; }
-    inline const UString &getName() const { return this->sName; }
-    inline CONVAR_TYPE getType() const { return this->type; }
-    inline int getFlags() const { return this->iFlags; }
+    [[nodiscard]] inline const UString &getHelpstring() const { return this->sHelpString; }
+    [[nodiscard]] inline const UString &getName() const { return this->sName; }
+    [[nodiscard]] inline CONVAR_TYPE getType() const { return this->type; }
+    [[nodiscard]] inline int getFlags() const { return this->iFlags; }
     inline void setFlags(int new_flags) { this->iFlags = new_flags; }
 
-    inline bool hasValue() const { return this->bHasValue; }
-    inline bool hasCallbackArgs() const { return (this->callbackfuncargs || this->changecallback); }
-    inline bool isFlagSet(int flag) const { return (bool)(this->iFlags & flag); }
+    [[nodiscard]] inline bool hasValue() const { return this->bHasValue; }
+    [[nodiscard]] inline bool hasCallbackArgs() const { return (this->callbackfuncargs || this->changecallback); }
+    [[nodiscard]] inline bool isFlagSet(int flag) const { return (bool)(this->iFlags & flag); }
 
    private:
     void init(int flags);
@@ -160,11 +160,11 @@ class ConVarHandler {
     ConVarHandler();
     ~ConVarHandler();
 
-    const std::vector<ConVar *> &getConVarArray() const;
-    int getNumConVars() const;
+    [[nodiscard]] const std::vector<ConVar *> &getConVarArray() const;
+    [[nodiscard]] int getNumConVars() const;
 
-    ConVar *getConVarByName(UString name, bool warnIfNotFound = true) const;
-    std::vector<ConVar *> getConVarByLetter(UString letters) const;
+    [[nodiscard]] ConVar *getConVarByName(UString name, bool warnIfNotFound = true) const;
+    [[nodiscard]] std::vector<ConVar *> getConVarByLetter(UString letters) const;
 
     bool isVanilla();
 };

@@ -44,8 +44,8 @@ class SoundEngine {
     OUTPUT_DEVICE getWantedDevice();
     std::vector<OUTPUT_DEVICE> getOutputDevices();
 
-    inline const UString &getOutputDeviceName() const { return this->currentOutputDevice.name; }
-    inline float getVolume() const { return this->fVolume; }
+    [[nodiscard]] inline const UString &getOutputDeviceName() const { return this->currentOutputDevice.name; }
+    [[nodiscard]] inline float getVolume() const { return this->fVolume; }
 
     void updateOutputDevices(bool printInfo);
     bool initializeOutputDevice(OUTPUT_DEVICE device);

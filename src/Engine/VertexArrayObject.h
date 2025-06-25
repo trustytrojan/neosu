@@ -42,16 +42,16 @@ class VertexArrayObject : public Resource {
     void setDrawRange(int fromIndex, int toIndex);
     void setDrawPercent(float fromPercent = 0.0f, float toPercent = 1.0f, int nearestMultiple = 0);  // DEPRECATED
 
-    inline Graphics::PRIMITIVE getPrimitive() const { return this->primitive; }
-    inline Graphics::USAGE_TYPE getUsage() const { return this->usage; }
+    [[nodiscard]] inline Graphics::PRIMITIVE getPrimitive() const { return this->primitive; }
+    [[nodiscard]] inline Graphics::USAGE_TYPE getUsage() const { return this->usage; }
 
-    const std::vector<Vector3> &getVertices() const { return this->vertices; }
-    const std::vector<std::vector<Vector2>> &getTexcoords() const { return this->texcoords; }
-    const std::vector<Vector3> &getNormals() const { return this->normals; }
-    const std::vector<Color> &getColors() const { return this->colors; }
+    [[nodiscard]] const std::vector<Vector3> &getVertices() const { return this->vertices; }
+    [[nodiscard]] const std::vector<std::vector<Vector2>> &getTexcoords() const { return this->texcoords; }
+    [[nodiscard]] const std::vector<Vector3> &getNormals() const { return this->normals; }
+    [[nodiscard]] const std::vector<Color> &getColors() const { return this->colors; }
 
-    inline unsigned int getNumVertices() const { return this->iNumVertices; }
-    inline bool hasTexcoords() const { return this->bHasTexcoords; }
+    [[nodiscard]] inline unsigned int getNumVertices() const { return this->iNumVertices; }
+    [[nodiscard]] inline bool hasTexcoords() const { return this->bHasTexcoords; }
 
    protected:
     static int nearestMultipleUp(int number, int multiple);

@@ -74,8 +74,8 @@ struct FinishedScore {
     std::vector<LegacyReplay::Frame> replay;  // not always loaded
 
     bool is_peppy_imported() { return this->bancho_score_id != 0 || this->peppy_replay_tms != 0; }
-    f64 get_pp() const;
-    Grade calculate_grade() const;
+    [[nodiscard]] f64 get_pp() const;
+    [[nodiscard]] Grade calculate_grade() const;
 };
 
 class LiveScore {
@@ -128,38 +128,38 @@ class LiveScore {
 
     void setNumEZRetries(int numEZRetries) { this->iNumEZRetries = numEZRetries; }
 
-    inline float getStarsTomTotal() const { return this->fStarsTomTotal; }
-    inline float getStarsTomAim() const { return this->fStarsTomAim; }
-    inline float getStarsTomSpeed() const { return this->fStarsTomSpeed; }
-    inline float getPPv2() const { return this->fPPv2; }
-    inline int getIndex() const { return this->iIndex; }
+    [[nodiscard]] inline float getStarsTomTotal() const { return this->fStarsTomTotal; }
+    [[nodiscard]] inline float getStarsTomAim() const { return this->fStarsTomAim; }
+    [[nodiscard]] inline float getStarsTomSpeed() const { return this->fStarsTomSpeed; }
+    [[nodiscard]] inline float getPPv2() const { return this->fPPv2; }
+    [[nodiscard]] inline int getIndex() const { return this->iIndex; }
 
     unsigned long long getScore();
-    inline FinishedScore::Grade getGrade() const { return this->grade; }
-    inline int getCombo() const { return this->iCombo; }
-    inline int getComboMax() const { return this->iComboMax; }
-    inline int getComboFull() const { return this->iComboFull; }
-    inline int getComboEndBitmask() const { return this->iComboEndBitmask; }
-    inline float getAccuracy() const { return this->fAccuracy; }
-    inline float getUnstableRate() const { return this->fUnstableRate; }
-    inline float getHitErrorAvgMin() const { return this->fHitErrorAvgMin; }
-    inline float getHitErrorAvgMax() const { return this->fHitErrorAvgMax; }
-    inline float getHitErrorAvgCustomMin() const { return this->fHitErrorAvgCustomMin; }
-    inline float getHitErrorAvgCustomMax() const { return this->fHitErrorAvgCustomMax; }
-    inline int getNumMisses() const { return this->iNumMisses; }
-    inline int getNumSliderBreaks() const { return this->iNumSliderBreaks; }
-    inline int getNum50s() const { return this->iNum50s; }
-    inline int getNum100s() const { return this->iNum100s; }
-    inline int getNum100ks() const { return this->iNum100ks; }
-    inline int getNum300s() const { return this->iNum300s; }
-    inline int getNum300gs() const { return this->iNum300gs; }
+    [[nodiscard]] inline FinishedScore::Grade getGrade() const { return this->grade; }
+    [[nodiscard]] inline int getCombo() const { return this->iCombo; }
+    [[nodiscard]] inline int getComboMax() const { return this->iComboMax; }
+    [[nodiscard]] inline int getComboFull() const { return this->iComboFull; }
+    [[nodiscard]] inline int getComboEndBitmask() const { return this->iComboEndBitmask; }
+    [[nodiscard]] inline float getAccuracy() const { return this->fAccuracy; }
+    [[nodiscard]] inline float getUnstableRate() const { return this->fUnstableRate; }
+    [[nodiscard]] inline float getHitErrorAvgMin() const { return this->fHitErrorAvgMin; }
+    [[nodiscard]] inline float getHitErrorAvgMax() const { return this->fHitErrorAvgMax; }
+    [[nodiscard]] inline float getHitErrorAvgCustomMin() const { return this->fHitErrorAvgCustomMin; }
+    [[nodiscard]] inline float getHitErrorAvgCustomMax() const { return this->fHitErrorAvgCustomMax; }
+    [[nodiscard]] inline int getNumMisses() const { return this->iNumMisses; }
+    [[nodiscard]] inline int getNumSliderBreaks() const { return this->iNumSliderBreaks; }
+    [[nodiscard]] inline int getNum50s() const { return this->iNum50s; }
+    [[nodiscard]] inline int getNum100s() const { return this->iNum100s; }
+    [[nodiscard]] inline int getNum100ks() const { return this->iNum100ks; }
+    [[nodiscard]] inline int getNum300s() const { return this->iNum300s; }
+    [[nodiscard]] inline int getNum300gs() const { return this->iNum300gs; }
 
-    inline int getNumEZRetries() const { return this->iNumEZRetries; }
+    [[nodiscard]] inline int getNumEZRetries() const { return this->iNumEZRetries; }
 
-    inline bool isDead() const { return this->bDead; }
-    inline bool hasDied() const { return this->bDied; }
+    [[nodiscard]] inline bool isDead() const { return this->bDead; }
+    [[nodiscard]] inline bool hasDied() const { return this->bDied; }
 
-    inline bool isUnranked() const { return this->bIsUnranked; }
+    [[nodiscard]] inline bool isUnranked() const { return this->bIsUnranked; }
     void setCheated() { this->bIsUnranked = true; }
 
     static double getHealthIncrease(BeatmapInterface *beatmap, LiveScore::HIT hit);

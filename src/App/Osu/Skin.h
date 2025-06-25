@@ -310,9 +310,9 @@ class Skin {
     inline int getHitCircleOverlap() { return this->iHitCircleOverlap; }
 
     // custom
-    inline bool useSmoothCursorTrail() const { return this->cursorMiddle != m_missingTexture; }
-    inline bool isDefaultSkin() const { return this->bIsDefaultSkin; }
-    inline int getSampleSet() const { return this->iSampleSet; }
+    [[nodiscard]] inline bool useSmoothCursorTrail() const { return this->cursorMiddle != m_missingTexture; }
+    [[nodiscard]] inline bool isDefaultSkin() const { return this->bIsDefaultSkin; }
+    [[nodiscard]] inline int getSampleSet() const { return this->iSampleSet; }
 
     static Image *m_missingTexture;
 

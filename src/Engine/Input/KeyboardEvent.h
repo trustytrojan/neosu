@@ -16,9 +16,9 @@ class KeyboardEvent {
 
     void consume();
 
-    inline bool isConsumed() const { return this->bConsumed; }
-    inline KEYCODE getKeyCode() const { return this->keyCode; }
-    inline KEYCODE getCharCode() const { return this->keyCode; }
+    [[nodiscard]] inline bool isConsumed() const { return this->bConsumed; }
+    [[nodiscard]] inline KEYCODE getKeyCode() const { return this->keyCode; }
+    [[nodiscard]] inline KEYCODE getCharCode() const { return this->keyCode; }
 
     bool operator==(const KEYCODE &rhs) const;
     bool operator!=(const KEYCODE &rhs) const;

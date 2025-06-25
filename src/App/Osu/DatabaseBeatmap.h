@@ -185,15 +185,15 @@ class DatabaseBeatmap {
 
     std::string sFolder;    // path to folder containing .osu file (e.g. "/path/to/beatmapfolder/")
     std::string sFilePath;  // path to .osu file (e.g. "/path/to/beatmapfolder/beatmap.osu")
-    inline std::string getFolder() const { return this->sFolder; }
-    inline std::string getFilePath() const { return this->sFilePath; }
+    [[nodiscard]] inline std::string getFolder() const { return this->sFolder; }
+    [[nodiscard]] inline std::string getFilePath() const { return this->sFilePath; }
 
-    inline const std::vector<DatabaseBeatmap *> &getDifficulties() const {
+    [[nodiscard]] inline const std::vector<DatabaseBeatmap *> &getDifficulties() const {
         static std::vector<DatabaseBeatmap *> empty;
         return this->difficulties == NULL ? empty : *this->difficulties;
     }
 
-    inline const MD5Hash &getMD5Hash() const { return this->sMD5Hash; }
+    [[nodiscard]] inline const MD5Hash &getMD5Hash() const { return this->sMD5Hash; }
 
     TIMING_INFO getTimingInfoForTime(unsigned long positionMS);
     static TIMING_INFO getTimingInfoForTimeAndTimingPoints(unsigned long positionMS,
@@ -201,58 +201,58 @@ class DatabaseBeatmap {
 
     // raw metadata
 
-    inline int getVersion() const { return this->iVersion; }
-    inline int getGameMode() const { return this->iGameMode; }
-    inline int getID() const { return this->iID; }
-    inline int getSetID() const { return this->iSetID; }
+    [[nodiscard]] inline int getVersion() const { return this->iVersion; }
+    [[nodiscard]] inline int getGameMode() const { return this->iGameMode; }
+    [[nodiscard]] inline int getID() const { return this->iID; }
+    [[nodiscard]] inline int getSetID() const { return this->iSetID; }
 
-    inline const std::string &getTitle() const { return this->sTitle; }
-    inline const std::string &getArtist() const { return this->sArtist; }
-    inline const std::string &getCreator() const { return this->sCreator; }
-    inline const std::string &getDifficultyName() const { return this->sDifficultyName; }
-    inline const std::string &getSource() const { return this->sSource; }
-    inline const std::string &getTags() const { return this->sTags; }
-    inline const std::string &getBackgroundImageFileName() const { return this->sBackgroundImageFileName; }
-    inline const std::string &getAudioFileName() const { return this->sAudioFileName; }
+    [[nodiscard]] inline const std::string &getTitle() const { return this->sTitle; }
+    [[nodiscard]] inline const std::string &getArtist() const { return this->sArtist; }
+    [[nodiscard]] inline const std::string &getCreator() const { return this->sCreator; }
+    [[nodiscard]] inline const std::string &getDifficultyName() const { return this->sDifficultyName; }
+    [[nodiscard]] inline const std::string &getSource() const { return this->sSource; }
+    [[nodiscard]] inline const std::string &getTags() const { return this->sTags; }
+    [[nodiscard]] inline const std::string &getBackgroundImageFileName() const { return this->sBackgroundImageFileName; }
+    [[nodiscard]] inline const std::string &getAudioFileName() const { return this->sAudioFileName; }
 
-    inline unsigned long getLengthMS() const { return this->iLengthMS; }
-    inline int getPreviewTime() const { return this->iPreviewTime; }
+    [[nodiscard]] inline unsigned long getLengthMS() const { return this->iLengthMS; }
+    [[nodiscard]] inline int getPreviewTime() const { return this->iPreviewTime; }
 
-    inline float getAR() const { return this->fAR; }
-    inline float getCS() const { return this->fCS; }
-    inline float getHP() const { return this->fHP; }
-    inline float getOD() const { return this->fOD; }
+    [[nodiscard]] inline float getAR() const { return this->fAR; }
+    [[nodiscard]] inline float getCS() const { return this->fCS; }
+    [[nodiscard]] inline float getHP() const { return this->fHP; }
+    [[nodiscard]] inline float getOD() const { return this->fOD; }
 
-    inline float getStackLeniency() const { return this->fStackLeniency; }
-    inline float getSliderTickRate() const { return this->fSliderTickRate; }
-    inline float getSliderMultiplier() const { return this->fSliderMultiplier; }
+    [[nodiscard]] inline float getStackLeniency() const { return this->fStackLeniency; }
+    [[nodiscard]] inline float getSliderTickRate() const { return this->fSliderTickRate; }
+    [[nodiscard]] inline float getSliderMultiplier() const { return this->fSliderMultiplier; }
 
-    inline const zarray<TIMINGPOINT> &getTimingpoints() const { return this->timingpoints; }
+    [[nodiscard]] inline const zarray<TIMINGPOINT> &getTimingpoints() const { return this->timingpoints; }
 
     std::string getFullSoundFilePath();
 
     // redundant data
-    inline const std::string &getFullBackgroundImageFilePath() const { return this->sFullBackgroundImageFilePath; }
+    [[nodiscard]] inline const std::string &getFullBackgroundImageFilePath() const { return this->sFullBackgroundImageFilePath; }
 
     // precomputed data
 
-    inline float getStarsNomod() const { return this->fStarsNomod; }
+    [[nodiscard]] inline float getStarsNomod() const { return this->fStarsNomod; }
 
-    inline int getMinBPM() const { return this->iMinBPM; }
-    inline int getMaxBPM() const { return this->iMaxBPM; }
-    inline int getMostCommonBPM() const { return this->iMostCommonBPM; }
+    [[nodiscard]] inline int getMinBPM() const { return this->iMinBPM; }
+    [[nodiscard]] inline int getMaxBPM() const { return this->iMaxBPM; }
+    [[nodiscard]] inline int getMostCommonBPM() const { return this->iMostCommonBPM; }
 
-    inline int getNumObjects() const { return this->iNumObjects; }
-    inline int getNumCircles() const { return this->iNumCircles; }
-    inline int getNumSliders() const { return this->iNumSliders; }
-    inline int getNumSpinners() const { return this->iNumSpinners; }
+    [[nodiscard]] inline int getNumObjects() const { return this->iNumObjects; }
+    [[nodiscard]] inline int getNumCircles() const { return this->iNumCircles; }
+    [[nodiscard]] inline int getNumSliders() const { return this->iNumSliders; }
+    [[nodiscard]] inline int getNumSpinners() const { return this->iNumSpinners; }
 
     // custom data
 
     i64 last_modification_time = 0;
 
-    inline long getLocalOffset() const { return this->iLocalOffset; }
-    inline long getOnlineOffset() const { return this->iOnlineOffset; }
+    [[nodiscard]] inline long getLocalOffset() const { return this->iLocalOffset; }
+    [[nodiscard]] inline long getOnlineOffset() const { return this->iOnlineOffset; }
 
     bool draw_background = true;
     bool do_not_store = false;
@@ -359,7 +359,7 @@ class DatabaseBeatmapBackgroundImagePathLoader : public Resource {
    public:
     DatabaseBeatmapBackgroundImagePathLoader(const std::string &filePath);
 
-    inline const std::string &getLoadedBackgroundImageFileName() const { return this->sLoadedBackgroundImageFileName; }
+    [[nodiscard]] inline const std::string &getLoadedBackgroundImageFileName() const { return this->sLoadedBackgroundImageFileName; }
 
    private:
     void init() override;

@@ -26,12 +26,12 @@ class ScoreButton : public CBaseUIButton {
                   float weight = 1.0f);
     void setIndex(int index) { this->iScoreIndexNumber = index; }
 
-    inline FinishedScore getScore() const { return this->score; }
-    inline u64 getScoreUnixTimestamp() const { return this->score.unixTimestamp; }
-    inline unsigned long long getScoreScore() const { return this->score.score; }
+    [[nodiscard]] inline FinishedScore getScore() const { return this->score; }
+    [[nodiscard]] inline u64 getScoreUnixTimestamp() const { return this->score.unixTimestamp; }
+    [[nodiscard]] inline unsigned long long getScoreScore() const { return this->score.score; }
 
-    inline UString getDateTime() const { return this->sScoreDateTime; }
-    inline int getIndex() const { return this->iScoreIndexNumber; }
+    [[nodiscard]] inline UString getDateTime() const { return this->sScoreDateTime; }
+    [[nodiscard]] inline int getIndex() const { return this->iScoreIndexNumber; }
 
     bool is_friend = false;
     UIAvatar *avatar = NULL;

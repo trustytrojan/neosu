@@ -27,11 +27,11 @@ class SliderCurve {
     virtual Vector2 pointAt(float t) = 0;          // with stacking
     virtual Vector2 originalPointAt(float t) = 0;  // without stacking
 
-    inline float getStartAngle() const { return this->fStartAngle; }
-    inline float getEndAngle() const { return this->fEndAngle; }
+    [[nodiscard]] inline float getStartAngle() const { return this->fStartAngle; }
+    [[nodiscard]] inline float getEndAngle() const { return this->fEndAngle; }
 
-    inline const std::vector<Vector2> &getPoints() const { return this->curvePoints; }
-    inline const std::vector<std::vector<Vector2>> &getPointSegments() const { return this->curvePointSegments; }
+    [[nodiscard]] inline const std::vector<Vector2> &getPoints() const { return this->curvePoints; }
+    [[nodiscard]] inline const std::vector<std::vector<Vector2>> &getPointSegments() const { return this->curvePointSegments; }
 
     float fPixelLength;
     std::vector<Vector2> controlPoints;
@@ -56,10 +56,10 @@ class SliderCurveType {
 
     virtual Vector2 pointAt(float t) = 0;
 
-    inline const int getNumPoints() const { return this->points.size(); }
+    [[nodiscard]] inline const int getNumPoints() const { return this->points.size(); }
 
-    inline const std::vector<Vector2> &getCurvePoints() const { return this->points; }
-    inline const std::vector<float> &getCurveDistances() const { return this->curveDistances; }
+    [[nodiscard]] inline const std::vector<Vector2> &getCurvePoints() const { return this->points; }
+    [[nodiscard]] inline const std::vector<float> &getCurveDistances() const { return this->curveDistances; }
 
    protected:
     // either one must be called from one of the subclasses

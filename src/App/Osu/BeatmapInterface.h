@@ -13,40 +13,40 @@ class BeatmapInterface {
                                         bool ignoreCombo = false, bool ignoreScore = false,
                                         bool ignoreHealth = false) = 0;
 
-    virtual u32 getBreakDurationTotal() const = 0;
-    virtual u32 getLength() const = 0;
-    virtual u32 getLengthPlayable() const = 0;
-    virtual bool isContinueScheduled() const = 0;
-    virtual bool isPaused() const = 0;
-    virtual bool isPlaying() const = 0;
-    virtual bool isWaiting() const = 0;
-    virtual bool isClickHeld() const = 0;
-    virtual bool isKey1Down() const = 0;
-    virtual bool isKey2Down() const = 0;
+    [[nodiscard]] virtual u32 getBreakDurationTotal() const = 0;
+    [[nodiscard]] virtual u32 getLength() const = 0;
+    [[nodiscard]] virtual u32 getLengthPlayable() const = 0;
+    [[nodiscard]] virtual bool isContinueScheduled() const = 0;
+    [[nodiscard]] virtual bool isPaused() const = 0;
+    [[nodiscard]] virtual bool isPlaying() const = 0;
+    [[nodiscard]] virtual bool isWaiting() const = 0;
+    [[nodiscard]] virtual bool isClickHeld() const = 0;
+    [[nodiscard]] virtual bool isKey1Down() const = 0;
+    [[nodiscard]] virtual bool isKey2Down() const = 0;
 
     virtual void addScorePoints(int points, bool isSpinner = false) = 0;
     virtual void addSliderBreak() = 0;
-    virtual u32 getScoreV1DifficultyMultiplier() const = 0;
+    [[nodiscard]] virtual u32 getScoreV1DifficultyMultiplier() const = 0;
 
-    virtual Replay::Mods getMods() const = 0;
-    virtual i32 getModsLegacy() const = 0;
-    virtual f32 getSpeedMultiplier() const = 0;
-    virtual f32 getRawAR() const = 0;
-    virtual f32 getRawOD() const = 0;
-    virtual f32 getAR() const = 0;
-    virtual f32 getCS() const = 0;
-    virtual f32 getHP() const = 0;
-    virtual f32 getOD() const = 0;
+    [[nodiscard]] virtual Replay::Mods getMods() const = 0;
+    [[nodiscard]] virtual i32 getModsLegacy() const = 0;
+    [[nodiscard]] virtual f32 getSpeedMultiplier() const = 0;
+    [[nodiscard]] virtual f32 getRawAR() const = 0;
+    [[nodiscard]] virtual f32 getRawOD() const = 0;
+    [[nodiscard]] virtual f32 getAR() const = 0;
+    [[nodiscard]] virtual f32 getCS() const = 0;
+    [[nodiscard]] virtual f32 getHP() const = 0;
+    [[nodiscard]] virtual f32 getOD() const = 0;
 
-    virtual f32 getApproachTime() const = 0;
-    virtual f32 getRawApproachTime() const = 0;
+    [[nodiscard]] virtual f32 getApproachTime() const = 0;
+    [[nodiscard]] virtual f32 getRawApproachTime() const = 0;
 
-    virtual Vector2 getCursorPos() const = 0;
+    [[nodiscard]] virtual Vector2 getCursorPos() const = 0;
 
-    virtual Vector2 pixels2OsuCoords(Vector2 pixelCoords) const = 0;
-    virtual Vector2 osuCoords2Pixels(Vector2 coords) const = 0;
-    virtual Vector2 osuCoords2RawPixels(Vector2 coords) const = 0;
-    virtual Vector2 osuCoords2LegacyPixels(Vector2 coords) const = 0;
+    [[nodiscard]] virtual Vector2 pixels2OsuCoords(Vector2 pixelCoords) const = 0;
+    [[nodiscard]] virtual Vector2 osuCoords2Pixels(Vector2 coords) const = 0;
+    [[nodiscard]] virtual Vector2 osuCoords2RawPixels(Vector2 coords) const = 0;
+    [[nodiscard]] virtual Vector2 osuCoords2LegacyPixels(Vector2 coords) const = 0;
 
     f64 fHpMultiplierComboEnd = 1.0;
     f64 fHpMultiplierNormal = 1.0;

@@ -95,9 +95,9 @@ class LinuxEnvironment : public Environment {
     UString keyCodeToString(KEYCODE keyCode) override;
 
     // ILLEGAL:
-    inline Display *getDisplay() const { return this->display; }
-    inline Window getWindow() const { return this->window; }
-    inline bool isRestartScheduled() const { return this->bIsRestartScheduled; }
+    [[nodiscard]] inline Display *getDisplay() const { return this->display; }
+    [[nodiscard]] inline Window getWindow() const { return this->window; }
+    [[nodiscard]] inline bool isRestartScheduled() const { return this->bIsRestartScheduled; }
 
     void handleSelectionRequest(XSelectionRequestEvent &evt);
 

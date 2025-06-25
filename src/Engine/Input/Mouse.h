@@ -36,21 +36,21 @@ class Mouse : public InputDevice {
     void setOffset(Vector2 offset) { this->vOffset = offset; }
     void setScale(Vector2 scale) { this->vScale = scale; }
 
-    inline Vector2 getPos() const { return this->vPos; }
-    inline Vector2 getDelta() const { return this->vDelta; }
-    inline Vector2 getRawDelta() const { return this->vRawDelta; }
-    inline Vector2 getOffset() const { return this->vOffset; }
+    [[nodiscard]] inline Vector2 getPos() const { return this->vPos; }
+    [[nodiscard]] inline Vector2 getDelta() const { return this->vDelta; }
+    [[nodiscard]] inline Vector2 getRawDelta() const { return this->vRawDelta; }
+    [[nodiscard]] inline Vector2 getOffset() const { return this->vOffset; }
 
-    inline bool isLeftDown() const { return this->bMouseLeftDown; }
-    inline bool isMiddleDown() const { return this->bMouseMiddleDown; }
-    inline bool isRightDown() const { return this->bMouseRightDown; }
-    inline bool isButton4Down() const { return this->bMouse4Down; }
-    inline bool isButton5Down() const { return this->bMouse5Down; }
+    [[nodiscard]] inline bool isLeftDown() const { return this->bMouseLeftDown; }
+    [[nodiscard]] inline bool isMiddleDown() const { return this->bMouseMiddleDown; }
+    [[nodiscard]] inline bool isRightDown() const { return this->bMouseRightDown; }
+    [[nodiscard]] inline bool isButton4Down() const { return this->bMouse4Down; }
+    [[nodiscard]] inline bool isButton5Down() const { return this->bMouse5Down; }
 
     bool isCursorVisible();
 
-    inline int getWheelDeltaVertical() const { return this->iWheelDeltaVertical; }
-    inline int getWheelDeltaHorizontal() const { return this->iWheelDeltaHorizontal; }
+    [[nodiscard]] inline int getWheelDeltaVertical() const { return this->iWheelDeltaVertical; }
+    [[nodiscard]] inline int getWheelDeltaHorizontal() const { return this->iWheelDeltaHorizontal; }
 
    private:
     void setPosXY(float x, float y);  // shit hack

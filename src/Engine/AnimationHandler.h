@@ -61,7 +61,7 @@ class AnimationHandler {
     float getRemainingDuration(float *base) const;
     bool isAnimating(float *base) const;
 
-    inline size_t getNumActiveAnimations() const { return this->vAnimations.size(); }
+    [[nodiscard]] inline size_t getNumActiveAnimations() const { return this->vAnimations.size(); }
 
    private:
     enum class ANIMATION_TYPE {

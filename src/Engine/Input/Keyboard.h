@@ -26,10 +26,10 @@ class Keyboard : public InputDevice {
     virtual void onKeyUp(KEYCODE keyCode);
     virtual void onChar(KEYCODE charCode);
 
-    inline bool isControlDown() const { return this->bControlDown; }
-    inline bool isAltDown() const { return this->bAltDown; }
-    inline bool isShiftDown() const { return this->bShiftDown; }
-    inline bool isSuperDown() const { return this->bSuperDown; }
+    [[nodiscard]] inline bool isControlDown() const { return this->bControlDown; }
+    [[nodiscard]] inline bool isAltDown() const { return this->bAltDown; }
+    [[nodiscard]] inline bool isShiftDown() const { return this->bShiftDown; }
+    [[nodiscard]] inline bool isSuperDown() const { return this->bSuperDown; }
 
    private:
     bool bControlDown;

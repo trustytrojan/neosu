@@ -25,7 +25,7 @@ class UpdateHandler {
 
     void checkForUpdates();
 
-    inline STATUS getStatus() const { return this->status; }
+    [[nodiscard]] inline STATUS getStatus() const { return this->status; }
     UString update_url;
 
    private:

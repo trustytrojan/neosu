@@ -30,6 +30,9 @@ class ResourceManager {
         MobileAtomic(MobileAtomic const &other) : atomic(other.atomic.load()) {}
 
         MobileAtomic &operator=(MobileAtomic const &other) {
+            if(this == &other)
+                return *this;
+
             this->atomic.store(other.atomic.load());
             return *this;
         }
@@ -103,17 +106,17 @@ class ResourceManager {
                                                bool keepInSystemMemory = false);
 
     // resource access by name
-    Image *getImage(std::string resourceName) const;
-    McFont *getFont(std::string resourceName) const;
-    Sound *getSound(std::string resourceName) const;
-    Shader *getShader(std::string resourceName) const;
+    [[nodiscard]] Image *getImage(std::string resourceName) const;
+    [[nodiscard]] McFont *getFont(std::string resourceName) const;
+    [[nodiscard]] Sound *getSound(std::string resourceName) const;
+    [[nodiscard]] Shader *getShader(std::string resourceName) const;
 
-    inline const std::vector<Resource *> &getResources() const { return this->vResources; }
-    inline size_t getNumThreads() const { return this->threads.size(); }
-    inline size_t getNumLoadingWork() const { return this->loadingWork.size(); }
-    inline size_t getNumLoadingWorkAsyncDestroy() const { return this->loadingWorkAsyncDestroy.size(); }
+    [[nodiscard]] inline const std::vector<Resource *> &getResources() const { return this->vResources; }
+    [[nodiscard]] inline size_t getNumThreads() const { return this->threads.size(); }
+    [[nodiscard]] inline size_t getNumLoadingWork() const { return this->loadingWork.size(); }
+    [[nodiscard]] inline size_t getNumLoadingWorkAsyncDestroy() const { return this->loadingWorkAsyncDestroy.size(); }
 
-    bool isLoading() const;
+    [[nodiscard]] bool isLoading() const;
     bool isLoadingResource(Resource *rs) const;
 
    private:

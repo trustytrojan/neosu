@@ -315,7 +315,7 @@ class OptionsMenuKeyBindButton : public UIButton {
         this->bDisallowLeftMouseClickBinding = disallowLeftMouseClickBinding;
     }
 
-    inline bool isLeftMouseClickBindingAllowed() const { return !this->bDisallowLeftMouseClickBinding; }
+    [[nodiscard]] inline bool isLeftMouseClickBindingAllowed() const { return !this->bDisallowLeftMouseClickBinding; }
 
    private:
     bool bDisallowLeftMouseClickBinding;
@@ -349,8 +349,8 @@ class OptionsMenuCategoryButton : public CBaseUIButton {
 
     void setActiveCategory(bool activeCategory) { this->bActiveCategory = activeCategory; }
 
-    inline CBaseUIElement *getSection() const { return this->section; }
-    inline bool isActiveCategory() const { return this->bActiveCategory; }
+    [[nodiscard]] inline CBaseUIElement *getSection() const { return this->section; }
+    [[nodiscard]] inline bool isActiveCategory() const { return this->bActiveCategory; }
 
    private:
     CBaseUIElement *section;

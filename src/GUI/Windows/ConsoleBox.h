@@ -39,7 +39,7 @@ class ConsoleBox : public CBaseUIElement {
     bool isActive() override;
 
     // ILLEGAL:
-    inline ConsoleBoxTextbox *getTextbox() const { return this->textbox; }
+    [[nodiscard]] inline ConsoleBoxTextbox *getTextbox() const { return this->textbox; }
 
    private:
     struct LOG_ENTRY {

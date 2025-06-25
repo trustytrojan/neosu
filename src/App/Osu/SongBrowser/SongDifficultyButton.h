@@ -16,11 +16,11 @@ class SongDifficultyButton : public SongButton {
 
     void updateGrade() override;
 
-    Color getInactiveBackgroundColor() const override;
+    [[nodiscard]] Color getInactiveBackgroundColor() const override;
 
-    inline SongButton *getParentSongButton() const { return this->parentSongButton; }
+    [[nodiscard]] inline SongButton *getParentSongButton() const { return this->parentSongButton; }
 
-    bool isIndependentDiffButton() const;
+    [[nodiscard]] bool isIndependentDiffButton() const;
 
    private:
     void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected) override;

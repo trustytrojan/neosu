@@ -61,35 +61,35 @@ class Camera {
     }
 
     // get
-    inline CAMERA_TYPE getType() const { return this->camType; }
-    inline Vector3 getPos() const { return this->vPos; }
-    Vector3 getNextPosition(Vector3 velocity) const;
+    [[nodiscard]] inline CAMERA_TYPE getType() const { return this->camType; }
+    [[nodiscard]] inline Vector3 getPos() const { return this->vPos; }
+    [[nodiscard]] Vector3 getNextPosition(Vector3 velocity) const;
 
-    inline float getFov() const { return rad2deg(this->fFov); }
-    inline float getFovRad() const { return this->fFov; }
-    inline float getOrbitDistance() const { return this->fOrbitDistance; }
+    [[nodiscard]] inline float getFov() const { return rad2deg(this->fFov); }
+    [[nodiscard]] inline float getFovRad() const { return this->fFov; }
+    [[nodiscard]] inline float getOrbitDistance() const { return this->fOrbitDistance; }
 
-    inline Vector3 getWorldXAxis() const { return this->worldRotation * this->vXAxis; }
-    inline Vector3 getWorldYAxis() const { return this->worldRotation * this->vYAxis; }
-    inline Vector3 getWorldZAxis() const { return this->worldRotation * this->vZAxis; }
+    [[nodiscard]] inline Vector3 getWorldXAxis() const { return this->worldRotation * this->vXAxis; }
+    [[nodiscard]] inline Vector3 getWorldYAxis() const { return this->worldRotation * this->vYAxis; }
+    [[nodiscard]] inline Vector3 getWorldZAxis() const { return this->worldRotation * this->vZAxis; }
 
-    inline Vector3 getViewDirection() const { return this->vViewDir; }
-    inline Vector3 getViewUp() const { return this->vViewUp; }
-    inline Vector3 getViewRight() const { return this->vViewRight; }
+    [[nodiscard]] inline Vector3 getViewDirection() const { return this->vViewDir; }
+    [[nodiscard]] inline Vector3 getViewUp() const { return this->vViewUp; }
+    [[nodiscard]] inline Vector3 getViewRight() const { return this->vViewRight; }
 
-    inline float getPitch() const { return this->fPitch; }
-    inline float getYaw() const { return this->fYaw; }
-    inline float getRoll() const { return this->fRoll; }
+    [[nodiscard]] inline float getPitch() const { return this->fPitch; }
+    [[nodiscard]] inline float getYaw() const { return this->fYaw; }
+    [[nodiscard]] inline float getRoll() const { return this->fRoll; }
 
-    inline Quaternion getRotation() const { return this->rotation; }
+    [[nodiscard]] inline Quaternion getRotation() const { return this->rotation; }
 
-    Vector3 getProjectedVector(Vector3 point, float screenWidth, float screenHeight, float zn = 0.1f,
+    [[nodiscard]] Vector3 getProjectedVector(Vector3 point, float screenWidth, float screenHeight, float zn = 0.1f,
                                float zf = 1.0f) const;
-    Vector3 getUnProjectedVector(Vector2 point, float screenWidth, float screenHeight, float zn = 0.1f,
+    [[nodiscard]] Vector3 getUnProjectedVector(Vector2 point, float screenWidth, float screenHeight, float zn = 0.1f,
                                  float zf = 1.0f) const;
 
-    bool isPointVisibleFrustum(Vector3 point) const;  // within our viewing frustum
-    bool isPointVisiblePlane(Vector3 point) const;    // just in front of the camera plane
+    [[nodiscard]] bool isPointVisibleFrustum(Vector3 point) const;  // within our viewing frustum
+    [[nodiscard]] bool isPointVisiblePlane(Vector3 point) const;    // just in front of the camera plane
 
    private:
     struct CAM_PLANE {

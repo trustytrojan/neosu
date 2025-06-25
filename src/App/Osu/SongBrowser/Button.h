@@ -33,18 +33,18 @@ class Button : public CBaseUIButton {
     void setHideIfSelected(bool hideIfSelected) { this->bHideIfSelected = hideIfSelected; }
     void setIsSearchMatch(bool isSearchMatch) { this->bIsSearchMatch = isSearchMatch; }
 
-    Vector2 getActualOffset() const;
-    inline Vector2 getActualSize() const { return this->vSize - 2 * this->getActualOffset(); }
-    inline Vector2 getActualPos() const { return this->vPos + this->getActualOffset(); }
+    [[nodiscard]] Vector2 getActualOffset() const;
+    [[nodiscard]] inline Vector2 getActualSize() const { return this->vSize - 2 * this->getActualOffset(); }
+    [[nodiscard]] inline Vector2 getActualPos() const { return this->vPos + this->getActualOffset(); }
     inline std::vector<SongButton *> &getChildren() { return this->children; }
 
-    virtual DatabaseBeatmap *getDatabaseBeatmap() const { return NULL; }
-    virtual Color getActiveBackgroundColor() const;
-    virtual Color getInactiveBackgroundColor() const;
+    [[nodiscard]] virtual DatabaseBeatmap *getDatabaseBeatmap() const { return NULL; }
+    [[nodiscard]] virtual Color getActiveBackgroundColor() const;
+    [[nodiscard]] virtual Color getInactiveBackgroundColor() const;
 
-    inline bool isSelected() const { return this->bSelected; }
-    inline bool isHiddenIfSelected() const { return this->bHideIfSelected; }
-    inline bool isSearchMatch() const { return this->bIsSearchMatch.load(); }
+    [[nodiscard]] inline bool isSelected() const { return this->bSelected; }
+    [[nodiscard]] inline bool isHiddenIfSelected() const { return this->bHideIfSelected; }
+    [[nodiscard]] inline bool isSearchMatch() const { return this->bIsSearchMatch.load(); }
 
    protected:
     void drawMenuButtonBackground(Graphics *g);

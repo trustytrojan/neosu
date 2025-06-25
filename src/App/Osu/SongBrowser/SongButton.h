@@ -20,7 +20,7 @@ class SongButton : public Button {
     void updateLayoutEx() override;
     virtual void updateGrade() { ; }
 
-    DatabaseBeatmap *getDatabaseBeatmap() const override { return this->databaseBeatmap; }
+    [[nodiscard]] DatabaseBeatmap *getDatabaseBeatmap() const override { return this->databaseBeatmap; }
     FinishedScore::Grade grade = FinishedScore::Grade::N;
 
    protected:

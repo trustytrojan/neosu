@@ -243,7 +243,7 @@ class VSMusicBrowserButton : public CBaseUIButton {
     void setDirectory(bool directory) { this->bIsDirectory = directory; }
     void setPlaying(bool playing) { this->bPlaying = playing; }
 
-    inline bool isDirectory() const { return this->bIsDirectory; }
+    [[nodiscard]] inline bool isDirectory() const { return this->bIsDirectory; }
 
    private:
     bool bSelected;

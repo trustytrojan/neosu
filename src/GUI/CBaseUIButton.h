@@ -83,13 +83,13 @@ class CBaseUIButton : public CBaseUIElement {
     }
 
     // get
-    inline Color getFrameColor() const { return this->frameColor; }
-    inline Color getBackgroundColor() const { return this->backgroundColor; }
-    inline Color getTextColor() const { return this->textColor; }
-    inline UString getText() const { return this->sText; }
-    inline McFont *getFont() const { return this->font; }
-    inline ButtonClickCallback getClickCallback() const { return this->clickCallback; }
-    inline bool isTextLeft() const { return this->bTextLeft; }
+    [[nodiscard]] inline Color getFrameColor() const { return this->frameColor; }
+    [[nodiscard]] inline Color getBackgroundColor() const { return this->backgroundColor; }
+    [[nodiscard]] inline Color getTextColor() const { return this->textColor; }
+    [[nodiscard]] inline UString getText() const { return this->sText; }
+    [[nodiscard]] inline McFont *getFont() const { return this->font; }
+    [[nodiscard]] inline ButtonClickCallback getClickCallback() const { return this->clickCallback; }
+    [[nodiscard]] inline bool isTextLeft() const { return this->bTextLeft; }
 
     // events
     void onMouseUpInside() override;

@@ -17,7 +17,7 @@ class UIVolumeSlider : public CBaseUISlider {
 
     float getMinimumExtraTextWidth();
 
-    inline bool isSelected() const { return this->bSelected; }
+    [[nodiscard]] inline bool isSelected() const { return this->bSelected; }
 
    private:
     void drawBlock(Graphics *g) override;

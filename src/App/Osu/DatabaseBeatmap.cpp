@@ -3,10 +3,10 @@
 #include <assert.h>
 
 #include <algorithm>
+#include <cinttypes>
 #include <iostream>
 #include <limits>
 #include <sstream>
-#include <cinttypes>
 
 #include "Bancho.h"  // md5
 #include "Beatmap.h"
@@ -209,13 +209,10 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                     case 3:  // Events
                     {
                         i64 type, startTime, endTime;
-                        if(sscanf(curLineChar, " %" PRId64 " , %" PRId64 " , %" PRId64 " \n", &type, &startTime, &endTime) == 3) {
+                        if(sscanf(curLineChar, " %" PRId64 " , %" PRId64 " , %" PRId64 " \n", &type, &startTime,
+                                  &endTime) == 3) {
                             if(type == 2) {
-                                BREAK b
-                                {
-                                    .startTime = startTime,
-                                    .endTime = endTime
-                                };
+                                BREAK b{.startTime = startTime, .endTime = endTime};
                                 c.breaks.push_back(b);
                             }
                         }
@@ -422,8 +419,8 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                     // new beatmaps: slider hitsounds
                                     if(tokens.size() > 8) {
                                         std::vector<UString> hitSoundTokens = tokens[8].split("|");
-                                        for(int i = 0; i < hitSoundTokens.size(); i++) {
-                                            s.hitSounds.push_back(hitSoundTokens[i].toInt());
+                                        for(const auto &hitSoundToken : hitSoundTokens) {
+                                            s.hitSounds.push_back(hitSoundToken.toInt());
                                         }
                                     }
                                 }
@@ -486,7 +483,9 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
     int beatmapVersion, std::vector<SLIDER> &sliders, zarray<TIMINGPOINT> &timingpoints, float sliderMultiplier,
     float sliderTickRate, const std::atomic<bool> &dead) {
     CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT r;
-    { r.errorCode = 0; }
+    {
+        r.errorCode = 0;
+    }
 
     if(timingpoints.size() < 1) {
         r.errorCode = 3;
@@ -525,13 +524,11 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
         }
     };
 
-    for(int i = 0; i < sliders.size(); i++) {
+    for(auto &s : sliders) {
         if(dead.load()) {
             r.errorCode = 6;
             return r;
         }
-
-        SLIDER &s = sliders[i];
 
         // sanity reset
         s.ticks.clear();
@@ -670,9 +667,7 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
     // now we can calculate the max possible combo (because that needs ticks/clicks to be filled, mostly convenience)
     {
         result.maxPossibleCombo += c.hitcircles.size();
-        for(int i = 0; i < c.sliders.size(); i++) {
-            const SLIDER &s = c.sliders[i];
-
+        for(const auto &s : c.sliders) {
             const int repeats = max((s.repeat - 1), 0);
             result.maxPossibleCombo +=
                 2 + repeats + (repeats + 1) * s.ticks.size();  // start/end + repeat arrow + ticks
@@ -683,15 +678,14 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
     // and generate the difficultyhitobjects
     result.diffobjects.reserve(c.hitcircles.size() + c.sliders.size() + c.spinners.size());
 
-    for(int i = 0; i < c.hitcircles.size(); i++) {
-        result.diffobjects.emplace_back(OsuDifficultyHitObject::TYPE::CIRCLE,
-                                                            Vector2(c.hitcircles[i].x, c.hitcircles[i].y),
-                                                            (long)c.hitcircles[i].time);
+    for(auto &hitcircle : c.hitcircles) {
+        result.diffobjects.emplace_back(OsuDifficultyHitObject::TYPE::CIRCLE, Vector2(hitcircle.x, hitcircle.y),
+                                        (long)hitcircle.time);
     }
 
     const bool calculateSliderCurveInConstructor =
         (c.sliders.size() < 5000);  // NOTE: for explanation see OsuDifficultyHitObject constructor
-    for(int i = 0; i < c.sliders.size(); i++) {
+    for(auto &slider : c.sliders) {
         if(dead.load()) {
             result.errorCode = 6;
             return result;
@@ -699,38 +693,40 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
 
         if(!calculateStarsInaccurately) {
             result.diffobjects.emplace_back(
-                OsuDifficultyHitObject::TYPE::SLIDER, Vector2(c.sliders[i].x, c.sliders[i].y), c.sliders[i].time,
-                c.sliders[i].time + (long)c.sliders[i].sliderTime, c.sliders[i].sliderTimeWithoutRepeats,
-                c.sliders[i].type, c.sliders[i].points, c.sliders[i].pixelLength, c.sliders[i].scoringTimesForStarCalc,
-                c.sliders[i].repeat, calculateSliderCurveInConstructor);
+                OsuDifficultyHitObject::TYPE::SLIDER, Vector2(slider.x, slider.y), slider.time,
+                slider.time + (long)slider.sliderTime, slider.sliderTimeWithoutRepeats, slider.type, slider.points,
+                slider.pixelLength, slider.scoringTimesForStarCalc, slider.repeat, calculateSliderCurveInConstructor);
         } else {
             result.diffobjects.emplace_back(
-                OsuDifficultyHitObject::TYPE::SLIDER, Vector2(c.sliders[i].x, c.sliders[i].y), c.sliders[i].time,
-                c.sliders[i].time + (long)c.sliders[i].sliderTime, c.sliders[i].sliderTimeWithoutRepeats,
-                c.sliders[i].type,
+                OsuDifficultyHitObject::TYPE::SLIDER, Vector2(slider.x, slider.y), slider.time,
+                slider.time + (long)slider.sliderTime, slider.sliderTimeWithoutRepeats, slider.type,
                 std::vector<Vector2>(),  // NOTE: ignore curve when calculating inaccurately
-                c.sliders[i].pixelLength,
+                slider.pixelLength,
                 std::vector<OsuDifficultyHitObject::SLIDER_SCORING_TIME>(),  // NOTE: ignore curve when calculating
                                                                              // inaccurately
-                c.sliders[i].repeat,
+                slider.repeat,
                 false);  // NOTE: ignore curve when calculating inaccurately
         }
     }
 
-    for(int i = 0; i < c.spinners.size(); i++) {
-        result.diffobjects.emplace_back(OsuDifficultyHitObject::TYPE::SPINNER,
-                                                            Vector2(c.spinners[i].x, c.spinners[i].y),
-                                                            (long)c.spinners[i].time, (long)c.spinners[i].endTime);
+    for(auto &spinner : c.spinners) {
+        result.diffobjects.emplace_back(OsuDifficultyHitObject::TYPE::SPINNER, Vector2(spinner.x, spinner.y),
+                                        (long)spinner.time, (long)spinner.endTime);
+    }
+
+    if(dead.load()) {
+        result.errorCode = 6;
+        return result;
     }
 
     // sort hitobjects by time
-	constexpr auto diffHitObjectSortComparator = [](const OsuDifficultyHitObject &a, const OsuDifficultyHitObject &b) -> bool
-	{
-		if (a.time == b.time)
-			return &a < &b;
-		else
-			return a.time < b.time;
-	};
+    constexpr auto diffHitObjectSortComparator = [](const OsuDifficultyHitObject &a,
+                                                     const OsuDifficultyHitObject &b) -> bool {
+        if(a.time == b.time)
+            return &a < &b;
+        else
+            return a.time < b.time;
+    };
 
     std::ranges::sort(result.diffobjects, diffHitObjectSortComparator);
 
@@ -887,9 +883,8 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
             if(!calculateStarsInaccurately)  // NOTE: ignore slider curves when calculating inaccurately
             {
                 result.diffobjects[i].spanDuration = (double)result.diffobjects[i].spanDuration * invSpeedMultiplier;
-                for(int s = 0; s < result.diffobjects[i].scoringTimes.size(); s++) {
-                    result.diffobjects[i].scoringTimes[s].time =
-                        ((f64)result.diffobjects[i].scoringTimes[s].time * invSpeedMultiplier);
+                for(auto &scoringTime : result.diffobjects[i].scoringTimes) {
+                    scoringTime.time = ((f64)scoringTime.time * invSpeedMultiplier);
                 }
             }
         }
@@ -1189,17 +1184,13 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
         // also calculate max possible combo
         int maxPossibleCombo = 0;
 
-        for(size_t i = 0; i < c.hitcircles.size(); i++) {
-            HITCIRCLE &h = c.hitcircles[i];
-
+        for(auto &h : c.hitcircles) {
             result.hitobjects.push_back(
                 new Circle(h.x, h.y, h.time, h.sampleType, h.number, false, h.colorCounter, h.colorOffset, beatmap));
         }
         maxPossibleCombo += c.hitcircles.size();
 
-        for(size_t i = 0; i < c.sliders.size(); i++) {
-            SLIDER &s = c.sliders[i];
-
+        for(auto &s : c.sliders) {
             if(cv_mod_strict_tracking.getBool() && cv_mod_strict_tracking_remove_slider_ticks.getBool())
                 s.ticks.clear();
 
@@ -1213,8 +1204,7 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
             maxPossibleCombo += 2 + repeats + (repeats + 1) * s.ticks.size();  // start/end + repeat arrow + ticks
         }
 
-        for(size_t i = 0; i < c.spinners.size(); i++) {
-            SPINNER &s = c.spinners[i];
+        for(auto &s : c.spinners) {
             result.hitobjects.push_back(new Spinner(s.x, s.y, s.time, s.sampleType, false, s.endTime, beatmap));
         }
         maxPossibleCombo += c.spinners.size();
@@ -1285,9 +1275,7 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
         if(cv_ignore_beatmap_combo_numbers.getBool()) {
             // NOTE: spinners don't increment the combo number
             int comboNumber = 1;
-            for(size_t i = 0; i < result.hitobjects.size(); i++) {
-                HitObject *currentHitObject = result.hitobjects[i];
-
+            for(auto currentHitObject : result.hitobjects) {
                 const Spinner *spinnerPointer = dynamic_cast<Spinner *>(currentHitObject);
 
                 if(spinnerPointer == NULL) {
@@ -1299,9 +1287,7 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
 
         const int numberMax = cv_number_max.getInt();
         if(numberMax > 0) {
-            for(size_t i = 0; i < result.hitobjects.size(); i++) {
-                HitObject *currentHitObject = result.hitobjects[i];
-
+            for(auto currentHitObject : result.hitobjects) {
                 const int currentComboNumber = currentHitObject->combo_number;
                 const int newComboNumber = (currentComboNumber % numberMax);
 

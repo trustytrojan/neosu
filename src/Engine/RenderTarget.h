@@ -36,13 +36,13 @@ class RenderTarget : public Resource {
     void setClearDepthOnDraw(bool clearDepthOnDraw) { this->bClearDepthOnDraw = clearDepthOnDraw; }
 
     // get
-    float getWidth() const { return this->vSize.x; }
-    float getHeight() const { return this->vSize.y; }
-    inline Vector2 getSize() const { return this->vSize; }
-    inline Vector2 getPos() const { return this->vPos; }
-    inline Graphics::MULTISAMPLE_TYPE getMultiSampleType() const { return this->multiSampleType; }
+    [[nodiscard]] float getWidth() const { return this->vSize.x; }
+    [[nodiscard]] float getHeight() const { return this->vSize.y; }
+    [[nodiscard]] inline Vector2 getSize() const { return this->vSize; }
+    [[nodiscard]] inline Vector2 getPos() const { return this->vPos; }
+    [[nodiscard]] inline Graphics::MULTISAMPLE_TYPE getMultiSampleType() const { return this->multiSampleType; }
 
-    inline bool isMultiSampled() const { return this->multiSampleType != Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X; }
+    [[nodiscard]] inline bool isMultiSampled() const { return this->multiSampleType != Graphics::MULTISAMPLE_TYPE::MULTISAMPLE_0X; }
 
    protected:
     void init() override = 0;

@@ -25,11 +25,11 @@ class VSControlBar : public CBaseUIElement {
     void draw(Graphics *g) override;
     void mouse_update(bool *propagate_clicks) override;
 
-    inline CBaseUISlider *getVolumeSlider() const { return this->volume; }
-    inline CBaseUIButton *getPlayButton() const { return this->play; }
-    inline CBaseUIButton *getPrevButton() const { return this->prev; }
-    inline CBaseUIButton *getNextButton() const { return this->next; }
-    inline CBaseUIButton *getInfoButton() const { return this->info; }
+    [[nodiscard]] inline CBaseUISlider *getVolumeSlider() const { return this->volume; }
+    [[nodiscard]] inline CBaseUIButton *getPlayButton() const { return this->play; }
+    [[nodiscard]] inline CBaseUIButton *getPrevButton() const { return this->prev; }
+    [[nodiscard]] inline CBaseUIButton *getNextButton() const { return this->next; }
+    [[nodiscard]] inline CBaseUIButton *getInfoButton() const { return this->info; }
 
    protected:
     void onResized() override;

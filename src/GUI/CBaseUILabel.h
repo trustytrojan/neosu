@@ -67,11 +67,11 @@ class CBaseUILabel : public CBaseUIElement {
     void setCenterText(bool centerText) { this->bCenterText = centerText; }
 
     // get
-    inline Color getFrameColor() const { return this->frameColor; }
-    inline Color getBackgroundColor() const { return this->backgroundColor; }
-    inline Color getTextColor() const { return this->textColor; }
-    inline McFont *getFont() const { return this->font; }
-    inline UString getText() const { return this->sText; }
+    [[nodiscard]] inline Color getFrameColor() const { return this->frameColor; }
+    [[nodiscard]] inline Color getBackgroundColor() const { return this->backgroundColor; }
+    [[nodiscard]] inline Color getTextColor() const { return this->textColor; }
+    [[nodiscard]] inline McFont *getFont() const { return this->font; }
+    [[nodiscard]] inline UString getText() const { return this->sText; }
 
     void onResized() override { this->updateStringMetrics(); }
 

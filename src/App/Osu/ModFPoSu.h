@@ -26,13 +26,13 @@ class ModFPoSu {
     void onKeyDown(KeyboardEvent &key);
     void onKeyUp(KeyboardEvent &key);
 
-    inline const Camera *getCamera() const { return this->camera; }
+    [[nodiscard]] inline const Camera *getCamera() const { return this->camera; }
 
-    inline float getEdgeDistance() const { return this->fEdgeDistance; }
-    inline bool isCrosshairIntersectingScreen() const { return this->bCrosshairIntersectsScreen; }
-    float get3DPlayfieldScale() const;
+    [[nodiscard]] inline float getEdgeDistance() const { return this->fEdgeDistance; }
+    [[nodiscard]] inline bool isCrosshairIntersectingScreen() const { return this->bCrosshairIntersectsScreen; }
+    [[nodiscard]] float get3DPlayfieldScale() const;
 
-    inline Shader *getHitcircleShader() const { return this->hitcircleShader; }
+    [[nodiscard]] inline Shader *getHitcircleShader() const { return this->hitcircleShader; }
 
    private:
     void handleZoomedChange();

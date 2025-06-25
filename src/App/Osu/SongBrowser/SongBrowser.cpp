@@ -67,7 +67,7 @@ class SongBrowserBackgroundSearchMatcher : public Resource {
         this->bDead = true;  // NOTE: start dead! need to revive() before use
     }
 
-    bool isDead() const { return this->bDead.load(); }
+    [[nodiscard]] bool isDead() const { return this->bDead.load(); }
     void kill() { this->bDead = true; }
     void revive() { this->bDead = false; }
 
@@ -2908,6 +2908,8 @@ void SongBrowser::rebuildSongButtonsAndVisibleSongButtonsWithSearchMatchSupport(
                         break;
                     case GROUP::GROUP_COLLECTIONS:
                         groupButtons = &this->collectionButtons;
+                        break;
+                    default:
                         break;
                 }
             }

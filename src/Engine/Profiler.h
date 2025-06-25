@@ -38,17 +38,17 @@ class ProfilerNode {
     void enterScope();
     bool exitScope();
 
-    inline const char *getName() const { return this->name; }
-    inline int getGroupID() const { return this->iGroupID; }
+    [[nodiscard]] inline const char *getName() const { return this->name; }
+    [[nodiscard]] inline int getGroupID() const { return this->iGroupID; }
 
-    inline ProfilerNode *getParent() const { return this->parent; }
-    inline ProfilerNode *getChild() const { return this->child; }
-    inline ProfilerNode *getSibling() const { return this->sibling; }
+    [[nodiscard]] inline ProfilerNode *getParent() const { return this->parent; }
+    [[nodiscard]] inline ProfilerNode *getChild() const { return this->child; }
+    [[nodiscard]] inline ProfilerNode *getSibling() const { return this->sibling; }
 
-    inline double getTimeCurrentFrame() const {
+    [[nodiscard]] inline double getTimeCurrentFrame() const {
         return this->fTimeCurrentFrame;
     }  // NOTE: this is incomplete if retrieved within engine update(), use getTimeLastFrame() instead
-    inline double getTimeLastFrame() const { return this->fTimeLastFrame; }
+    [[nodiscard]] inline double getTimeLastFrame() const { return this->fTimeLastFrame; }
 
    private:
     inline void constructor(const char *name, const char *group, ProfilerNode *parent);
@@ -126,13 +126,13 @@ class ProfilerProfile {
         }
     }
 
-    inline bool isEnabled() const { return (this->iEnabled != 0 || this->bEnableScheduled); }
-    inline bool isAtRoot() const { return this->bAtRoot; }
+    [[nodiscard]] inline bool isEnabled() const { return (this->iEnabled != 0 || this->bEnableScheduled); }
+    [[nodiscard]] inline bool isAtRoot() const { return this->bAtRoot; }
 
-    inline int getNumGroups() const { return this->iNumGroups; }
-    inline int getNumNodes() const { return this->iNumNodes; }
+    [[nodiscard]] inline int getNumGroups() const { return this->iNumGroups; }
+    [[nodiscard]] inline int getNumNodes() const { return this->iNumNodes; }
 
-    inline const ProfilerNode *getRoot() const { return &this->root; }
+    [[nodiscard]] inline const ProfilerNode *getRoot() const { return &this->root; }
 
     inline const char *getGroupName(int groupID) {
         return this->groups[groupID < 0 ? 0 : (groupID > this->iNumGroups - 1 ? this->iNumGroups - 1 : groupID)].name;

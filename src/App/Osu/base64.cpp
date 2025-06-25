@@ -116,7 +116,7 @@ unsigned char *base64_decode(const unsigned char *src, size_t len, size_t *out_l
                     pos -= 2;
                 else {
                     /* Invalid padding */
-                    delete out;
+                    delete[] out;
                     return NULL;
                 }
                 break;

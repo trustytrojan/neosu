@@ -92,66 +92,66 @@ class Osu : public App, public MouseListener {
 
     void reloadSkin() { this->onSkinReload(); }
 
-    inline Vector2 getScreenSize() const { return g_vInternalResolution; }
-    inline int getScreenWidth() const { return (int)g_vInternalResolution.x; }
-    inline int getScreenHeight() const { return (int)g_vInternalResolution.y; }
+    [[nodiscard]] inline Vector2 getScreenSize() const { return g_vInternalResolution; }
+    [[nodiscard]] inline int getScreenWidth() const { return (int)g_vInternalResolution.x; }
+    [[nodiscard]] inline int getScreenHeight() const { return (int)g_vInternalResolution.y; }
 
     Beatmap *getSelectedBeatmap();
 
-    inline OptionsMenu *getOptionsMenu() const { return this->optionsMenu; }
-    inline SongBrowser *getSongBrowser() const { return this->songBrowser2; }
-    inline BackgroundImageHandler *getBackgroundImageHandler() const { return this->backgroundImageHandler; }
-    inline Skin *getSkin() const { return this->skin; }
-    inline HUD *getHUD() const { return this->hud; }
-    inline NotificationOverlay *getNotificationOverlay() const { return this->notificationOverlay; }
-    inline TooltipOverlay *getTooltipOverlay() const { return this->tooltipOverlay; }
-    inline ModSelector *getModSelector() const { return this->modSelector; }
-    inline ModFPoSu *getFPoSu() const { return this->fposu; }
-    inline PauseMenu *getPauseMenu() const { return this->pauseMenu; }
-    inline MainMenu *getMainMenu() const { return this->mainMenu; }
-    inline RankingScreen *getRankingScreen() const { return this->rankingScreen; }
-    inline LiveScore *getScore() const { return this->score; }
-    inline UpdateHandler *getUpdateHandler() const { return this->updateHandler; }
+    [[nodiscard]] inline OptionsMenu *getOptionsMenu() const { return this->optionsMenu; }
+    [[nodiscard]] inline SongBrowser *getSongBrowser() const { return this->songBrowser2; }
+    [[nodiscard]] inline BackgroundImageHandler *getBackgroundImageHandler() const { return this->backgroundImageHandler; }
+    [[nodiscard]] inline Skin *getSkin() const { return this->skin; }
+    [[nodiscard]] inline HUD *getHUD() const { return this->hud; }
+    [[nodiscard]] inline NotificationOverlay *getNotificationOverlay() const { return this->notificationOverlay; }
+    [[nodiscard]] inline TooltipOverlay *getTooltipOverlay() const { return this->tooltipOverlay; }
+    [[nodiscard]] inline ModSelector *getModSelector() const { return this->modSelector; }
+    [[nodiscard]] inline ModFPoSu *getFPoSu() const { return this->fposu; }
+    [[nodiscard]] inline PauseMenu *getPauseMenu() const { return this->pauseMenu; }
+    [[nodiscard]] inline MainMenu *getMainMenu() const { return this->mainMenu; }
+    [[nodiscard]] inline RankingScreen *getRankingScreen() const { return this->rankingScreen; }
+    [[nodiscard]] inline LiveScore *getScore() const { return this->score; }
+    [[nodiscard]] inline UpdateHandler *getUpdateHandler() const { return this->updateHandler; }
 
-    inline RenderTarget *getPlayfieldBuffer() const { return this->playfieldBuffer; }
-    inline RenderTarget *getSliderFrameBuffer() const { return this->sliderFrameBuffer; }
-    inline RenderTarget *getFrameBuffer() const { return this->frameBuffer; }
-    inline RenderTarget *getFrameBuffer2() const { return this->frameBuffer2; }
-    inline McFont *getTitleFont() const { return this->titleFont; }
-    inline McFont *getSubTitleFont() const { return this->subTitleFont; }
-    inline McFont *getSongBrowserFont() const { return this->songBrowserFont; }
-    inline McFont *getSongBrowserFontBold() const { return this->songBrowserFontBold; }
-    inline McFont *getFontIcons() const { return this->fontIcons; }
+    [[nodiscard]] inline RenderTarget *getPlayfieldBuffer() const { return this->playfieldBuffer; }
+    [[nodiscard]] inline RenderTarget *getSliderFrameBuffer() const { return this->sliderFrameBuffer; }
+    [[nodiscard]] inline RenderTarget *getFrameBuffer() const { return this->frameBuffer; }
+    [[nodiscard]] inline RenderTarget *getFrameBuffer2() const { return this->frameBuffer2; }
+    [[nodiscard]] inline McFont *getTitleFont() const { return this->titleFont; }
+    [[nodiscard]] inline McFont *getSubTitleFont() const { return this->subTitleFont; }
+    [[nodiscard]] inline McFont *getSongBrowserFont() const { return this->songBrowserFont; }
+    [[nodiscard]] inline McFont *getSongBrowserFontBold() const { return this->songBrowserFontBold; }
+    [[nodiscard]] inline McFont *getFontIcons() const { return this->fontIcons; }
 
     float getDifficultyMultiplier();
     float getCSDifficultyMultiplier();
     float getScoreMultiplier();
     float getAnimationSpeedMultiplier();
 
-    inline bool getModAuto() const { return cv_mod_autoplay.getBool(); }
-    inline bool getModAutopilot() const { return cv_mod_autopilot.getBool(); }
-    inline bool getModRelax() const { return cv_mod_relax.getBool(); }
-    inline bool getModSpunout() const { return cv_mod_spunout.getBool(); }
-    inline bool getModTarget() const { return cv_mod_target.getBool(); }
-    inline bool getModScorev2() const { return cv_mod_scorev2.getBool(); }
-    inline bool getModFlashlight() const { return cv_mod_flashlight.getBool(); }
-    inline bool getModNF() const { return cv_mod_nofail.getBool(); }
-    inline bool getModHD() const { return cv_mod_hidden.getBool(); }
-    inline bool getModHR() const { return cv_mod_hardrock.getBool(); }
-    inline bool getModEZ() const { return cv_mod_easy.getBool(); }
-    inline bool getModSD() const { return cv_mod_suddendeath.getBool(); }
-    inline bool getModSS() const { return cv_mod_perfect.getBool(); }
-    inline bool getModNightmare() const { return cv_mod_nightmare.getBool(); }
-    inline bool getModTD() const { return cv_mod_touchdevice.getBool() || cv_mod_touchdevice_always.getBool(); }
+    [[nodiscard]] inline bool getModAuto() const { return cv_mod_autoplay.getBool(); }
+    [[nodiscard]] inline bool getModAutopilot() const { return cv_mod_autopilot.getBool(); }
+    [[nodiscard]] inline bool getModRelax() const { return cv_mod_relax.getBool(); }
+    [[nodiscard]] inline bool getModSpunout() const { return cv_mod_spunout.getBool(); }
+    [[nodiscard]] inline bool getModTarget() const { return cv_mod_target.getBool(); }
+    [[nodiscard]] inline bool getModScorev2() const { return cv_mod_scorev2.getBool(); }
+    [[nodiscard]] inline bool getModFlashlight() const { return cv_mod_flashlight.getBool(); }
+    [[nodiscard]] inline bool getModNF() const { return cv_mod_nofail.getBool(); }
+    [[nodiscard]] inline bool getModHD() const { return cv_mod_hidden.getBool(); }
+    [[nodiscard]] inline bool getModHR() const { return cv_mod_hardrock.getBool(); }
+    [[nodiscard]] inline bool getModEZ() const { return cv_mod_easy.getBool(); }
+    [[nodiscard]] inline bool getModSD() const { return cv_mod_suddendeath.getBool(); }
+    [[nodiscard]] inline bool getModSS() const { return cv_mod_perfect.getBool(); }
+    [[nodiscard]] inline bool getModNightmare() const { return cv_mod_nightmare.getBool(); }
+    [[nodiscard]] inline bool getModTD() const { return cv_mod_touchdevice.getBool() || cv_mod_touchdevice_always.getBool(); }
 
-    inline std::vector<ConVar *> getExperimentalMods() const { return this->experimentalMods; }
+    [[nodiscard]] inline std::vector<ConVar *> getExperimentalMods() const { return this->experimentalMods; }
 
     bool isInPlayMode();
-    inline bool isSkinLoading() const { return this->bSkinLoadScheduled; }
+    [[nodiscard]] inline bool isSkinLoading() const { return this->bSkinLoadScheduled; }
 
-    inline bool isSkipScheduled() const { return this->bSkipScheduled; }
-    inline bool isSeeking() const { return this->bSeeking; }
-    inline float getQuickSaveTime() const { return this->fQuickSaveTime; }
+    [[nodiscard]] inline bool isSkipScheduled() const { return this->bSkipScheduled; }
+    [[nodiscard]] inline bool isSeeking() const { return this->bSeeking; }
+    [[nodiscard]] inline float getQuickSaveTime() const { return this->fQuickSaveTime; }
 
     bool shouldFallBackToLegacySliderRenderer();  // certain mods or actions require Sliders to render dynamically
                                                   // (e.g. wobble or the CS override slider)

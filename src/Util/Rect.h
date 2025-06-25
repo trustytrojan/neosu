@@ -8,25 +8,25 @@ class McRect {
 
     void set(float x, float y, float width, float height, bool isCentered = false);
 
-    inline bool contains(const Vector2 &point) const {
+    [[nodiscard]] inline bool contains(const Vector2 &point) const {
         return (point.x >= this->fMinX && point.x <= this->fMaxX && point.y >= this->fMinY && point.y <= this->fMaxY);
     }
-    McRect intersect(const McRect &rect) const;
-    bool intersects(const McRect &rect) const;
-    McRect Union(const McRect &rect) const;
+    [[nodiscard]] McRect intersect(const McRect &rect) const;
+    [[nodiscard]] bool intersects(const McRect &rect) const;
+    [[nodiscard]] McRect Union(const McRect &rect) const;
 
-    inline Vector2 getPos() const { return Vector2(this->fMinX, this->fMinY); }
-    inline Vector2 getSize() const { return Vector2(this->fMaxX - this->fMinX, this->fMaxY - this->fMinY); }
+    [[nodiscard]] inline Vector2 getPos() const { return Vector2(this->fMinX, this->fMinY); }
+    [[nodiscard]] inline Vector2 getSize() const { return Vector2(this->fMaxX - this->fMinX, this->fMaxY - this->fMinY); }
 
-    inline float getX() const { return this->fMinX; }
-    inline float getY() const { return this->fMinY; }
-    inline float getWidth() const { return (this->fMaxX - this->fMinX); }
-    inline float getHeight() const { return (this->fMaxY - this->fMinY); }
+    [[nodiscard]] inline float getX() const { return this->fMinX; }
+    [[nodiscard]] inline float getY() const { return this->fMinY; }
+    [[nodiscard]] inline float getWidth() const { return (this->fMaxX - this->fMinX); }
+    [[nodiscard]] inline float getHeight() const { return (this->fMaxY - this->fMinY); }
 
-    inline float getMinX() const { return this->fMinX; }
-    inline float getMinY() const { return this->fMinY; }
-    inline float getMaxX() const { return this->fMaxX; }
-    inline float getMaxY() const { return this->fMaxY; }
+    [[nodiscard]] inline float getMinX() const { return this->fMinX; }
+    [[nodiscard]] inline float getMinY() const { return this->fMinY; }
+    [[nodiscard]] inline float getMaxX() const { return this->fMaxX; }
+    [[nodiscard]] inline float getMaxY() const { return this->fMaxY; }
 
     inline void setMaxX(float maxx) { this->fMaxX = maxx; }
     inline void setMaxY(float maxy) { this->fMaxY = maxy; }

@@ -86,7 +86,7 @@ struct Mods {
     f32 jigsaw_followcircle_radius_factor = 0.f;
     f32 shirone_combo = 20.f;
 
-    i32 to_legacy() const;
+    [[nodiscard]] i32 to_legacy() const;
 
     // Get AR/OD, ignoring mods which change it over time
     // Used for ppv2 calculations.

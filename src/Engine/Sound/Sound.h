@@ -42,9 +42,9 @@ class Sound : public Resource {
     bool isPlaying();
     bool isFinished();
 
-    inline bool isStream() const { return this->bStream; }
-    inline bool isLooped() const { return this->bIsLooped; }
-    inline bool isOverlayable() const { return this->bIsOverlayable; }
+    [[nodiscard]] inline bool isStream() const { return this->bStream; }
+    [[nodiscard]] inline bool isLooped() const { return this->bIsLooped; }
+    [[nodiscard]] inline bool isOverlayable() const { return this->bIsOverlayable; }
 
     void rebuild(std::string newFilePath);
 

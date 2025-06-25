@@ -21,7 +21,7 @@ class CBaseUIBoxShadow : public CBaseUIElement {
     CBaseUIBoxShadow *setColor(Color color);
     CBaseUIBoxShadow *setShadowColor(Color color);
 
-    inline float getRadius() const { return this->fRadius; }
+    [[nodiscard]] inline float getRadius() const { return this->fRadius; }
 
     void onResized() override;
 
@@ -52,8 +52,8 @@ class GaussianBlur {
 
     void setSize(Vector2 size);
 
-    inline const Vector2 getPos() const { return this->vPos; }
-    inline const Vector2 getSize() const { return this->vSize; }
+    [[nodiscard]] inline const Vector2 getPos() const { return this->vPos; }
+    [[nodiscard]] inline const Vector2 getSize() const { return this->vSize; }
 
    private:
     Vector2 vPos;

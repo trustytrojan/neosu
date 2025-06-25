@@ -33,11 +33,11 @@ class CBaseUIElement : public KeyboardListener {
     void onChar(KeyboardEvent &e) override { (void)e; }
 
     // getters
-    inline const Vector2 &getPos() const { return this->vPos; }
-    inline const Vector2 &getSize() const { return this->vSize; }
-    inline UString getName() const { return this->sName; }
-    inline const Vector2 &getRelPos() const { return this->vmPos; }
-    inline const Vector2 &getRelSize() const { return this->vmSize; }
+    [[nodiscard]] inline const Vector2 &getPos() const { return this->vPos; }
+    [[nodiscard]] inline const Vector2 &getSize() const { return this->vSize; }
+    [[nodiscard]] inline UString getName() const { return this->sName; }
+    [[nodiscard]] inline const Vector2 &getRelPos() const { return this->vmPos; }
+    [[nodiscard]] inline const Vector2 &getRelSize() const { return this->vmSize; }
 
     virtual bool isActive() { return this->bActive || this->isBusy(); }
     virtual bool isVisible() { return this->bVisible; }

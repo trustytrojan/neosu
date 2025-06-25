@@ -80,7 +80,7 @@ class OpenGL3Interface : public Graphics {
     std::vector<unsigned char> getScreenshot() override;
 
     // renderer info
-    Vector2 getResolution() const override { return this->vResolution; }
+    [[nodiscard]] Vector2 getResolution() const override { return this->vResolution; }
     UString getVendor() override;
     UString getModel() override;
     UString getVersion() override;
@@ -101,8 +101,8 @@ class OpenGL3Interface : public Graphics {
                                                        bool keepInSystemMemory) override;
 
     // ILLEGAL:
-    inline const int getShaderGenericAttribPosition() const { return this->iShaderTexturedGenericAttribPosition; }
-    inline const int getShaderGenericAttribUV() const { return this->iShaderTexturedGenericAttribUV; }
+    [[nodiscard]] inline const int getShaderGenericAttribPosition() const { return this->iShaderTexturedGenericAttribPosition; }
+    [[nodiscard]] inline const int getShaderGenericAttribUV() const { return this->iShaderTexturedGenericAttribUV; }
 
    protected:
     void init() override;

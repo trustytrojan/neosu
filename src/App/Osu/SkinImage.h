@@ -42,7 +42,7 @@ class SkinImage {
                             // is used for all scaling calculations (to allow skins to overscale or underscale objects)
     Vector2 getSizeBaseRaw();  // default assumed size UNSCALED. that means that e.g. hitcircles will return either
                                // 128x128 or 256x256 depending on the @2x flag in the filename
-    inline Vector2 getSizeBaseRawForScaling2x() const { return this->vBaseSizeForScaling2x; }
+    [[nodiscard]] inline Vector2 getSizeBaseRawForScaling2x() const { return this->vBaseSizeForScaling2x; }
 
     Vector2 getImageSizeForCurrentFrame();  // width/height of the actual image texture as loaded from disk
     IMAGE getImageForCurrentFrame();
@@ -51,13 +51,13 @@ class SkinImage {
 
     bool isReady();
 
-    inline int getNumImages() const { return this->images.size(); }
-    inline float getFrameDuration() const { return this->fFrameDuration; }
-    inline unsigned int getFrameNumber() const { return this->iFrameCounter; }
-    inline bool isMissingTexture() const { return this->bIsMissingTexture; }
-    inline bool isFromDefaultSkin() const { return this->bIsFromDefaultSkin; }
+    [[nodiscard]] inline int getNumImages() const { return this->images.size(); }
+    [[nodiscard]] inline float getFrameDuration() const { return this->fFrameDuration; }
+    [[nodiscard]] inline unsigned int getFrameNumber() const { return this->iFrameCounter; }
+    [[nodiscard]] inline bool isMissingTexture() const { return this->bIsMissingTexture; }
+    [[nodiscard]] inline bool isFromDefaultSkin() const { return this->bIsFromDefaultSkin; }
 
-    inline std::vector<std::string> getFilepathsForExport() const { return this->filepathsForExport; }
+    [[nodiscard]] inline std::vector<std::string> getFilepathsForExport() const { return this->filepathsForExport; }
 
     bool is_2x;
 

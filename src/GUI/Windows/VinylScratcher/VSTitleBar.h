@@ -29,7 +29,7 @@ class VSTitleBar : public CBaseUIElement {
     void setSeekCallback(SeekCallback callback) { this->seekCallback = callback; }
     void setTitle(UString title, bool reverse = false);
 
-    inline bool isSeeking() const { return this->bIsSeeking; }
+    [[nodiscard]] inline bool isSeeking() const { return this->bIsSeeking; }
 
    protected:
     void onResized() override;

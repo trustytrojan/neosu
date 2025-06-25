@@ -32,19 +32,19 @@ class Quaternion {
     void fromAxis(const Vector3 &axis, float angleDeg);
     void fromEuler(float yawDeg, float pitchDeg, float rollDeg);
 
-    inline float getYaw() const {
+    [[nodiscard]] inline float getYaw() const {
         return rad2deg(std::atan2(2.0f * (this->y * this->z + this->w * this->x),
                                   this->w * this->w - this->x * this->x - this->y * this->y + this->z * this->z));
     }
-    inline float getPitch() const { return rad2deg(std::asin(-2.0f * (this->x * this->z - this->w * this->y))); }
-    inline float getRoll() const {
+    [[nodiscard]] inline float getPitch() const { return rad2deg(std::asin(-2.0f * (this->x * this->z - this->w * this->y))); }
+    [[nodiscard]] inline float getRoll() const {
         return rad2deg(std::atan2(2.0f * (this->x * this->y + this->w * this->z),
                                   this->w * this->w + this->x * this->x - this->y * this->y - this->z * this->z));
     }
 
-    inline Quaternion getConjugate() const { return Quaternion(-this->x, -this->y, -this->z, this->w); }
-    Matrix4 getMatrix() const;
-    Matrix3 getMatrix3() const;
+    [[nodiscard]] inline Quaternion getConjugate() const { return Quaternion(-this->x, -this->y, -this->z, this->w); }
+    [[nodiscard]] Matrix4 getMatrix() const;
+    [[nodiscard]] Matrix3 getMatrix3() const;
 
     Quaternion operator*(const Quaternion &quat) const;
     Vector3 operator*(const Vector3 &vec) const;

@@ -19,27 +19,27 @@ class SimulatedBeatmap : public BeatmapInterface {
     // Potentially Visible Set gate time size, for optimizing draw() and update() when iterating over all hitobjects
     long getPVS();
 
-    Vector2 pixels2OsuCoords(Vector2 pixelCoords) const override;  // only used for positional audio atm
-    Vector2 osuCoords2Pixels(
+    [[nodiscard]] Vector2 pixels2OsuCoords(Vector2 pixelCoords) const override;  // only used for positional audio atm
+    [[nodiscard]] Vector2 osuCoords2Pixels(
         Vector2 coords) const override;  // hitobjects should use this one (includes lots of special behaviour)
-    Vector2 osuCoords2RawPixels(
+    [[nodiscard]] Vector2 osuCoords2RawPixels(
         Vector2 coords) const override;  // raw transform from osu!pixels to absolute screen pixels (without any mods whatsoever)
-    Vector2 osuCoords2LegacyPixels(
+    [[nodiscard]] Vector2 osuCoords2LegacyPixels(
         Vector2 coords) const override;  // only applies vanilla osu mods and static mods to the coordinates (used for generating
                                 // the static slider mesh) centered at (0, 0, 0)
 
     // cursor
-    Vector2 getCursorPos() const override;
-    Vector2 getFirstPersonCursorDelta() const;
-    inline Vector2 getContinueCursorPoint() const { return this->vContinueCursorPoint; }
+    [[nodiscard]] Vector2 getCursorPos() const override;
+    [[nodiscard]] Vector2 getFirstPersonCursorDelta() const;
+    [[nodiscard]] inline Vector2 getContinueCursorPoint() const { return this->vContinueCursorPoint; }
 
     // playfield
-    inline Vector2 getPlayfieldSize() const { return this->vPlayfieldSize; }
-    inline Vector2 getPlayfieldCenter() const { return this->vPlayfieldCenter; }
-    inline float getPlayfieldRotation() const { return this->fPlayfieldRotation; }
+    [[nodiscard]] inline Vector2 getPlayfieldSize() const { return this->vPlayfieldSize; }
+    [[nodiscard]] inline Vector2 getPlayfieldCenter() const { return this->vPlayfieldCenter; }
+    [[nodiscard]] inline float getPlayfieldRotation() const { return this->fPlayfieldRotation; }
 
     // hitobjects
-    inline float getHitcircleXMultiplier() const {
+    [[nodiscard]] inline float getHitcircleXMultiplier() const {
         return this->fXMultiplier;
     }  // multiply osu!pixels with this to get screen pixels
 
@@ -48,8 +48,8 @@ class SimulatedBeatmap : public BeatmapInterface {
     void resetScore();
 
     // live statistics
-    inline int getNPS() const { return this->iNPS; }
-    inline int getND() const { return this->iND; }
+    [[nodiscard]] inline int getNPS() const { return this->iNPS; }
+    [[nodiscard]] inline int getND() const { return this->iND; }
 
     // replay recording
     u8 current_keys = 0;
@@ -62,29 +62,29 @@ class SimulatedBeatmap : public BeatmapInterface {
     long current_frame_idx = 0;
 
     // generic state
-    bool isKey1Down() const override;
-    bool isKey2Down() const override;
-    bool isClickHeld() const override;
+    [[nodiscard]] bool isKey1Down() const override;
+    [[nodiscard]] bool isKey2Down() const override;
+    [[nodiscard]] bool isClickHeld() const override;
 
-    bool isContinueScheduled() const override { return false; }
-    bool isPaused() const override { return false; }
-    bool isPlaying() const override { return true; }
-    Replay::Mods getMods() const override { return this->mods; }
-    i32 getModsLegacy() const override { return this->mods.to_legacy(); }
-    u32 getScoreV1DifficultyMultiplier() const override;
-    f32 getSpeedMultiplier() const override { return this->mods.speed; }
-    f32 getRawAR() const override;
-    f32 getAR() const override;
-    f32 getCS() const override;
-    f32 getHP() const override;
-    f32 getRawOD() const override;
-    f32 getOD() const override;
-    f32 getRawApproachTime() const override;
-    f32 getApproachTime() const override;
-    u32 getLength() const override;
-    u32 getLengthPlayable() const override;
-    u32 getBreakDurationTotal() const override;
-    DatabaseBeatmap::BREAK getBreakForTimeRange(long startMS, long positionMS, long endMS) const;
+    [[nodiscard]] bool isContinueScheduled() const override { return false; }
+    [[nodiscard]] bool isPaused() const override { return false; }
+    [[nodiscard]] bool isPlaying() const override { return true; }
+    [[nodiscard]] Replay::Mods getMods() const override { return this->mods; }
+    [[nodiscard]] i32 getModsLegacy() const override { return this->mods.to_legacy(); }
+    [[nodiscard]] u32 getScoreV1DifficultyMultiplier() const override;
+    [[nodiscard]] f32 getSpeedMultiplier() const override { return this->mods.speed; }
+    [[nodiscard]] f32 getRawAR() const override;
+    [[nodiscard]] f32 getAR() const override;
+    [[nodiscard]] f32 getCS() const override;
+    [[nodiscard]] f32 getHP() const override;
+    [[nodiscard]] f32 getRawOD() const override;
+    [[nodiscard]] f32 getOD() const override;
+    [[nodiscard]] f32 getRawApproachTime() const override;
+    [[nodiscard]] f32 getApproachTime() const override;
+    [[nodiscard]] u32 getLength() const override;
+    [[nodiscard]] u32 getLengthPlayable() const override;
+    [[nodiscard]] u32 getBreakDurationTotal() const override;
+    [[nodiscard]] DatabaseBeatmap::BREAK getBreakForTimeRange(long startMS, long positionMS, long endMS) const;
 
     // HitObject and other helper functions
     LiveScore::HIT addHitResult(HitObject *hitObject, LiveScore::HIT hit, i32 delta, bool isEndOfCombo = false,
@@ -94,7 +94,7 @@ class SimulatedBeatmap : public BeatmapInterface {
     void addHealth(f64 percent, bool isFromHitResult);
 
     void addScorePoints(int points, bool isSpinner = false) override;
-    bool isWaiting() const override { return false; }
+    [[nodiscard]] bool isWaiting() const override { return false; }
 
    protected:
     // database

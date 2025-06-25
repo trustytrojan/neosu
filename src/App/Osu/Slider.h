@@ -40,15 +40,15 @@ class Slider : public HitObject {
 
     void rebuildVertexBuffer(bool useRawCoords = false);
 
-    inline bool isStartCircleFinished() const { return this->bStartFinished; }
-    inline int getRepeat() const { return this->iRepeat; }
-    inline std::vector<Vector2> getRawPoints() const { return this->points; }
-    inline float getPixelLength() const { return this->fPixelLength; }
-    inline const std::vector<SLIDERCLICK> &getClicks() const { return this->clicks; }
+    [[nodiscard]] inline bool isStartCircleFinished() const { return this->bStartFinished; }
+    [[nodiscard]] inline int getRepeat() const { return this->iRepeat; }
+    [[nodiscard]] inline std::vector<Vector2> getRawPoints() const { return this->points; }
+    [[nodiscard]] inline float getPixelLength() const { return this->fPixelLength; }
+    [[nodiscard]] inline const std::vector<SLIDERCLICK> &getClicks() const { return this->clicks; }
 
     // ILLEGAL:
-    inline VertexArrayObject *getVAO() const { return this->vao; }
-    inline SliderCurve *getCurve() const { return this->curve; }
+    [[nodiscard]] inline VertexArrayObject *getVAO() const { return this->vao; }
+    [[nodiscard]] inline SliderCurve *getCurve() const { return this->curve; }
 
    private:
     void drawStartCircle(Graphics *g, float alpha);

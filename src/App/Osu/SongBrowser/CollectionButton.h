@@ -11,10 +11,10 @@ class CollectionButton : public Button {
 
     void triggerContextMenu(Vector2 pos);
 
-    Color getActiveBackgroundColor() const override;
-    Color getInactiveBackgroundColor() const override;
+    [[nodiscard]] Color getActiveBackgroundColor() const override;
+    [[nodiscard]] Color getInactiveBackgroundColor() const override;
 
-    const std::string &getCollectionName() const { return this->sCollectionName; }
+    [[nodiscard]] const std::string &getCollectionName() const { return this->sCollectionName; }
 
    private:
     void onSelected(bool wasSelected, bool autoSelectBottomMostChild, bool wasParentSelected) override;

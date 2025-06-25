@@ -41,7 +41,7 @@ class Matrix2 {
     void setColumn(int index, const float col[2]);
     void setColumn(int index, const Vector2& v);
 
-    const float* get() const;
+    [[nodiscard]] const float* get() const;
     float getDeterminant();
 
     Matrix2& identity();
@@ -92,7 +92,7 @@ class Matrix3 {
     void setColumn(int index, const float col[3]);
     void setColumn(int index, const Vector3& v);
 
-    const float* get() const;
+    [[nodiscard]] const float* get() const;
     float getDeterminant();
 
     Matrix3& identity();
@@ -147,7 +147,7 @@ class Matrix4 {
     void setColumn(int index, const Vector4& v);
     void setColumn(int index, const Vector3& v);
 
-    const float* get() const;
+    [[nodiscard]] const float* get() const;
     const float* getTranspose();  // return transposed matrix
     float getDeterminant();
 

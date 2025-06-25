@@ -40,7 +40,7 @@ class InfoLabel : public CBaseUIButton {
     float getMinimumWidth();
     float getMinimumHeight();
 
-    long getBeatmapID() const { return this->iBeatmapId; }
+    [[nodiscard]] long getBeatmapID() const { return this->iBeatmapId; }
 
    private:
     UString buildSongInfoString();

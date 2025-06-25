@@ -57,9 +57,9 @@ class CBaseUIImage : public CBaseUIElement {
         return this;
     }
 
-    inline float getRotationDeg() const { return this->fRot; }
-    inline Vector2 getScale() const { return this->vScale; }
-    inline Image *getImage() const { return this->image; }
+    [[nodiscard]] inline float getRotationDeg() const { return this->fRot; }
+    [[nodiscard]] inline Vector2 getScale() const { return this->vScale; }
+    [[nodiscard]] inline Image *getImage() const { return this->image; }
 
    private:
     Image *image;

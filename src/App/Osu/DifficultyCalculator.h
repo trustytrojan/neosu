@@ -67,7 +67,7 @@ class OsuDifficultyHitObject {
 
     f32 getT(i32 pos, bool raw);
 
-    inline i32 getDuration() const { return this->endTime - this->time; }
+    [[nodiscard]] inline i32 getDuration() const { return this->endTime - this->time; }
 
     // circles (base)
     TYPE type;
@@ -184,12 +184,12 @@ class DifficultyCalculator {
         DiffObject(OsuDifficultyHitObject *base_object, float radius_scaling_factor,
                    std::vector<DiffObject> &diff_objects, int prevObjectIdx);
 
-        inline const DiffObject *get_previous(int backwardsIdx) const {
+        [[nodiscard]] inline const DiffObject *get_previous(int backwardsIdx) const {
             int foo = this->prevObjectIndex - backwardsIdx;
             if(foo < 0) foo = 0;  // msvc
             return (this->objects.size() > 0 && this->prevObjectIndex - backwardsIdx < (int)this->objects.size() ? &this->objects[foo] : NULL);
         }
-        inline f64 get_strain(Skills::Skill type) const {
+        [[nodiscard]] inline f64 get_strain(Skills::Skill type) const {
             return this->strains[Skills::skillToIndex(type)] * (type == Skills::Skill::SPEED ? this->rhythm : 1.0);
         }
         inline static double applyDiminishingExp(double val) { return std::pow(val, 0.99); }

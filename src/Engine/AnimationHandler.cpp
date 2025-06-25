@@ -88,6 +88,8 @@ void AnimationHandler::update() {
                 percent = percent - 1.0f;
                 percent = 1.0f - percent * percent * percent * percent;
                 break;
+            default:
+                break;
         }
 
         // set new value

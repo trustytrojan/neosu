@@ -30,7 +30,7 @@ class CBaseUIContainer : public CBaseUIElement {
 
     CBaseUIElement *getBaseUIElement(UString name);
 
-    inline const std::vector<CBaseUIElement *> &getElements() const { return this->vElements; }
+    [[nodiscard]] inline const std::vector<CBaseUIElement *> &getElements() const { return this->vElements; }
 
     void onMoved() override { this->update_pos(); }
     void onResized() override { this->update_pos(); }

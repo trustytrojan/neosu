@@ -22,15 +22,15 @@ class Image : public Resource {
     void setPixels(const char *data, size_t size, TYPE type);
     void setPixels(const std::vector<unsigned char> &pixels);
 
-    Color getPixel(int x, int y) const;
+    [[nodiscard]] Color getPixel(int x, int y) const;
 
-    inline Image::TYPE getType() const { return this->type; }
-    inline int getNumChannels() const { return this->iNumChannels; }
-    inline int getWidth() const { return this->iWidth; }
-    inline int getHeight() const { return this->iHeight; }
-    inline Vector2 getSize() const { return Vector2(this->iWidth, this->iHeight); }
+    [[nodiscard]] inline Image::TYPE getType() const { return this->type; }
+    [[nodiscard]] inline int getNumChannels() const { return this->iNumChannels; }
+    [[nodiscard]] inline int getWidth() const { return this->iWidth; }
+    [[nodiscard]] inline int getHeight() const { return this->iHeight; }
+    [[nodiscard]] inline Vector2 getSize() const { return Vector2(this->iWidth, this->iHeight); }
 
-    inline bool hasAlphaChannel() const { return this->bHasAlphaChannel; }
+    [[nodiscard]] inline bool hasAlphaChannel() const { return this->bHasAlphaChannel; }
 
     bool is_2x;
 

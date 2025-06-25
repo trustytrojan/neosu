@@ -81,7 +81,7 @@ class HUD : public OsuScreen {
     void drawSkip(Graphics *g);
 
     // ILLEGAL:
-    inline float getScoreBarBreakAnim() const { return this->fScoreBarBreakAnim; }
+    [[nodiscard]] inline float getScoreBarBreakAnim() const { return this->fScoreBarBreakAnim; }
 
     ScoreboardSlot *player_slot = NULL;
     std::vector<ScoreboardSlot *> slots;

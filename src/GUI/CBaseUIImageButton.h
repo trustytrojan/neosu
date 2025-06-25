@@ -30,8 +30,8 @@ class CBaseUIImageButton : public CBaseUIButton {
         return this;
     }
 
-    inline std::string getImageResourceName() const { return this->sImageResourceName; }
-    inline Vector2 getScale() const { return this->vScale; }
+    [[nodiscard]] inline std::string getImageResourceName() const { return this->sImageResourceName; }
+    [[nodiscard]] inline Vector2 getScale() const { return this->vScale; }
 
    protected:
     std::string sImageResourceName;

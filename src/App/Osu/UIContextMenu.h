@@ -76,7 +76,7 @@ class UIContextMenuButton : public CBaseUIButton {
     void onMouseInside() override;
     void onMouseDownInside() override;
 
-    inline int getID() const { return this->iID; }
+    [[nodiscard]] inline int getID() const { return this->iID; }
 
     void setTooltipText(UString text);
 
@@ -91,7 +91,7 @@ class UIContextMenuTextbox : public CBaseUITextbox {
     UIContextMenuTextbox(float xPos, float yPos, float xSize, float ySize, UString name, int id);
     ~UIContextMenuTextbox() override { ; }
 
-    inline int getID() const { return this->iID; }
+    [[nodiscard]] inline int getID() const { return this->iID; }
 
    private:
     int iID;

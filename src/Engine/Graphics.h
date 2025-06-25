@@ -129,7 +129,7 @@ class Graphics {
     virtual std::vector<unsigned char> getScreenshot() = 0;
 
     // renderer info
-    virtual Vector2 getResolution() const = 0;
+    [[nodiscard]] virtual Vector2 getResolution() const = 0;
     virtual UString getVendor() = 0;
     virtual UString getModel() = 0;
     virtual UString getVersion() = 0;

@@ -146,7 +146,7 @@ class NullGraphicsInterface : public Graphics {
     std::vector<unsigned char> getScreenshot() override { return std::vector<unsigned char>(); }
 
     // renderer info
-    Vector2 getResolution() const override { return this->vResolution; }
+    [[nodiscard]] Vector2 getResolution() const override { return this->vResolution; }
     UString getVendor() override;
     UString getModel() override;
     UString getVersion() override;

@@ -27,10 +27,10 @@ class OpenGLRenderTarget : public RenderTarget {
     // ILLEGAL:
     void blitResolveFrameBufferIntoFrameBuffer(OpenGLRenderTarget *rt);
     void blitFrameBufferIntoFrameBuffer(OpenGLRenderTarget *rt);
-    inline unsigned int getFrameBuffer() const { return this->iFrameBuffer; }
-    inline unsigned int getRenderTexture() const { return this->iRenderTexture; }
-    inline unsigned int getResolveFrameBuffer() const { return this->iResolveFrameBuffer; }
-    inline unsigned int getResolveTexture() const { return this->iResolveTexture; }
+    [[nodiscard]] inline unsigned int getFrameBuffer() const { return this->iFrameBuffer; }
+    [[nodiscard]] inline unsigned int getRenderTexture() const { return this->iRenderTexture; }
+    [[nodiscard]] inline unsigned int getResolveFrameBuffer() const { return this->iResolveFrameBuffer; }
+    [[nodiscard]] inline unsigned int getResolveTexture() const { return this->iResolveTexture; }
 
    private:
     void init() override;
