@@ -328,13 +328,15 @@ template <typename T>
 T read(Packet *packet) {
     static_assert(sizeof(T) <= sizeof(NULL_ARRAY), "Please make NULL_ARRAY_SIZE bigger");
 
+    T result;
     if(packet->pos + sizeof(T) > packet->size) {
         packet->pos = packet->size + 1;
-        return *(T *)NULL_ARRAY;
+        memcpy(&result, NULL_ARRAY, sizeof(T));
+        return result;
     } else {
-        T out = *(T *)(packet->memory + packet->pos);
+        memcpy(&result, packet->memory + packet->pos, sizeof(T));
         packet->pos += sizeof(T);
-        return out;
+        return result;
     }
 }
 

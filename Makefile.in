@@ -110,8 +110,8 @@ bin_PROGRAMS = neosu$(EXEEXT)
 @USE_BASS_TRUE@@WIN_PLATFORM_TRUE@am__append_14 = $(DEPS_CACHE)/bass-$(BASS_VERSION)/bassasio/lib/$(SYSNAME)/$(host_cpu)/$(LIBPREFIX)bassasio$(DLLEXT) \
 @USE_BASS_TRUE@@WIN_PLATFORM_TRUE@					$(DEPS_CACHE)/bass-$(BASS_VERSION)/basswasapi/lib/$(SYSNAME)/$(host_cpu)/$(LIBPREFIX)basswasapi$(DLLEXT)
 
-@BUILD_LIBJPEG_TRUE@am__append_15 = $(shell $(PKG_CONFIG) --cflags libjpeg)
-@BUILD_LIBJPEG_TRUE@am__append_16 = $(shell $(PKG_CONFIG) --libs libjpeg)
+@BUILD_LIBJPEG_TRUE@am__append_15 = $(shell $(PKG_CONFIG) --cflags libturbojpeg)
+@BUILD_LIBJPEG_TRUE@am__append_16 = $(shell $(PKG_CONFIG) --libs libturbojpeg)
 @BUILD_GLM_TRUE@am__append_17 = -I$(DEPS_PREFIX)/include
 @BUILD_LIBPNG_TRUE@am__append_18 = $(shell $(PKG_CONFIG) --cflags libpng)
 @BUILD_LIBPNG_TRUE@am__append_19 = $(shell $(PKG_CONFIG) --libs libpng)
@@ -5674,7 +5674,7 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION).source: $(DEPS_CACHE)/curl-$(CURL_VERSION)/cu
 @BUILD_LIBJPEG_TRUE@		$(if $(STATICBUILD),-DENABLE_STATIC=ON -DENABLE_SHARED=OFF,-DENABLE_STATIC=OFF -DENABLE_SHARED=ON) && \
 @BUILD_LIBJPEG_TRUE@	$(CMAKE) --build build && \
 @BUILD_LIBJPEG_TRUE@	$(CMAKE) --install build
-@BUILD_LIBJPEG_TRUE@	$(PKG_CONFIG) --exists --print-errors libjpeg
+@BUILD_LIBJPEG_TRUE@	$(PKG_CONFIG) --exists --print-errors libturbojpeg
 @BUILD_LIBJPEG_TRUE@	touch $@
 @BUILD_LIBJPEG_FALSE@$(DEPS_PREFIX)/libjpeg.built:
 @BUILD_LIBJPEG_FALSE@	$(MKDIR_P) $(DEPS_PREFIX) && touch $@
@@ -5921,7 +5921,8 @@ install-libs:
 @USE_SOLOUD_TRUE@	@cp -P -t "$(DESTDIR)$(bindir)/" $(FFMPEG_INSTALL_LIBS) || true
 @BUILD_MPG123_TRUE@@USE_SOLOUD_TRUE@	$(if $(STATICBUILD),,@`find $(MPG123_PREFIX) '(' -iname '*mpg*'$(DLLEXT) -o -iname '*mpg*''.so.*' ')' -exec cp -P '{''}' "$(DESTDIR)$(bindir)/$(LIBDEST)" ';'`)
 @BUILD_SDL3_TRUE@	$(if $(SDL3_STATIC),,@`find $(SDL3_PREFIX) '(' -iname '*SDL3*'$(DLLEXT) -o -iname '*SDL3*''.so.*' ')' -exec cp -P '{''}' "$(DESTDIR)$(bindir)/$(LIBDEST)" ';'`)
-@BUILD_LIBJPEG_TRUE@	$(if $(SDL3_STATIC),,@`find $(LIBJPEG_PREFIX) '(' -iname '*libjpeg-*'$(DLLEXT) -o -iname '*libjpeg*''.so.*' ')' -exec cp -P '{''}' "$(DESTDIR)$(bindir)/$(LIBDEST)" ';'`)
+@BUILD_LIBJPEG_TRUE@	$(if $(STATICBUILD),,@`find $(LIBJPEG_PREFIX) '(' -iname '*libjpeg-*'$(DLLEXT) -o -iname '*libjpeg*''.so.*' ')' -exec cp -P '{''}' "$(DESTDIR)$(bindir)/$(LIBDEST)" ';'`)
+@BUILD_LIBJPEG_TRUE@	$(if $(STATICBUILD),,@`find $(LIBJPEG_PREFIX) '(' -iname '*libturbojpeg-*'$(DLLEXT) -o -iname '*libturbojpeg''.so.*' ')' -exec cp -P '{''}' "$(DESTDIR)$(bindir)/$(LIBDEST)" ';'`)
 @BUILD_LIBPNG_TRUE@	$(if $(STATICBUILD),,@`find $(LIBPNG_PREFIX) '(' -iname '*libpng*'$(DLLEXT) -o -iname '*libpng*''.so.*' ')' -exec cp -P '{''}' "$(DESTDIR)$(bindir)/$(LIBDEST)" ';'`)
 @BUILD_BZIP2_TRUE@	$(if $(STATICBUILD),,@`find $(BZIP2_PREFIX) '(' -iname '*bz2*'$(DLLEXT) -o -iname '*bz2*''.so.*' ')' -exec cp -P '{''}' "$(DESTDIR)$(bindir)/$(LIBDEST)" ';'`)
 @BUILD_ZLIB_TRUE@	$(if $(STATICBUILD),,@`find $(ZLIB_PREFIX) '(' -iname '*libz-*'$(DLLEXT) -o -iname '*libz*''.so.*' ')' -exec cp -P '{''}' "$(DESTDIR)$(bindir)/$(LIBDEST)" ';'`)

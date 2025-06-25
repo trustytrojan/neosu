@@ -1,10 +1,11 @@
 #include "BanchoNetworking.h"
-#include "curl_blob.h"
 
 #include <time.h>
 
 #include <mutex>
 #include <thread>
+
+#include "curl_blob.h"
 
 #ifndef _MSC_VER
 #include <unistd.h>
@@ -83,13 +84,13 @@ void disconnect() {
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curldummy);
-#ifdef _WIN32
+
         struct curl_blob blob{};
         blob.data = (void *)curl_ca_embed;
         blob.len = sizeof(curl_ca_embed);
         blob.flags = CURL_BLOB_NOCOPY;
         curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
-#endif
+
         curl_easy_perform(curl);
         curl_slist_free_all(chunk);
         curl_easy_cleanup(curl);
@@ -235,13 +236,12 @@ static void send_api_request(CURL *curl, APIRequest api_out) {
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
-#ifdef _WIN32
+
     struct curl_blob blob{};
     blob.data = (void *)curl_ca_embed;
     blob.len = sizeof(curl_ca_embed);
     blob.flags = CURL_BLOB_NOCOPY;
     curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
-#endif
 
     CURLcode res = curl_easy_perform(curl);
     if(res == CURLE_OK) {
@@ -277,13 +277,12 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
-#ifdef _WIN32
+
     struct curl_blob blob{};
     blob.data = (void *)curl_ca_embed;
     blob.len = sizeof(curl_ca_embed);
     blob.flags = CURL_BLOB_NOCOPY;
     curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
-#endif
 
     last_packet_tms = time(NULL);
     CURLcode res = curl_easy_perform(curl);
@@ -463,7 +462,7 @@ static void handle_api_response(Packet packet) {
 
         case SUBMIT_SCORE: {
             // TODO @kiwec: handle response
-            debugLog("Score submit result: %s\n", reinterpret_cast<const char*>(packet.memory));
+            debugLog("Score submit result: %s\n", reinterpret_cast<const char *>(packet.memory));
 
             // Reset leaderboards so new score will appear
             db->online_scores.clear();
@@ -523,7 +522,8 @@ void receive_bancho_packets() {
 
 void send_api_request(APIRequest request) {
     if(bancho.user_id <= 0) {
-        debugLog("Cannot send API request of type %u since we are not logged in.\n", static_cast<unsigned int>(request.type));
+        debugLog("Cannot send API request of type %u since we are not logged in.\n",
+                 static_cast<unsigned int>(request.type));
         return;
     }
 

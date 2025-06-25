@@ -106,7 +106,7 @@ static void handle_osk(const char *osk_path) {
 
 static void handle_osz(const char *osz_path) {
     File osz(osz_path);
-    i32 set_id = extract_beatmapset_id(reinterpret_cast<const u8*>(osz.readFile()), osz.getFileSize());
+    i32 set_id = extract_beatmapset_id(reinterpret_cast<const u8 *>(osz.readFile()), osz.getFileSize());
     if(set_id < 0) {
         // special case: legacy fallback behavior for invalid beatmapSetID, try to parse the ID from the
         // path
@@ -128,7 +128,7 @@ static void handle_osz(const char *osz_path) {
     if(!env->directoryExists(mapset_dir)) {
         env->createDirectory(mapset_dir);
     }
-    if(!extract_beatmapset(reinterpret_cast<const u8*>(osz.readFile()), osz.getFileSize(), mapset_dir)) {
+    if(!extract_beatmapset(reinterpret_cast<const u8 *>(osz.readFile()), osz.getFileSize(), mapset_dir)) {
         osu->getNotificationOverlay()->addToast("Failed to extract beatmapset");
         return;
     }
@@ -669,7 +669,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         // resize limit
         case WM_GETMINMAXINFO: {
             WINDOWPLACEMENT wPos;
-            { wPos.length = sizeof(WINDOWPLACEMENT); }
+            {
+                wPos.length = sizeof(WINDOWPLACEMENT);
+            }
             GetWindowPlacement(hwnd, &wPos);
 
             // min
@@ -1004,8 +1006,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     // make the window visible
     ShowWindow(hwnd, nCmdShow);
 
-    
-
     // initialize engine
     WinEnvironment *environment = new WinEnvironment(hwnd, hInstance);
     g_engine = new Engine(environment, argc, argv);
@@ -1026,7 +1026,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     msg.message = WM_NULL;
     unsigned long tickCounter = 0;
     UINT currentRawInputBufferNumBytes = 0;
-    unsigned char *currentRawInputBuffer = NULL;
+    RAWINPUT *currentRawInputBuffer = NULL;
     while(g_bRunning) {
         VPROF_MAIN();
 
@@ -1046,25 +1046,23 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
                     if(currentRawInputBuffer == NULL || currentRawInputBufferNumBytes < rawInputBufferNumBytes) {
                         currentRawInputBufferNumBytes = rawInputBufferNumBytes;
                         {
-                            if(currentRawInputBuffer != NULL) delete[] currentRawInputBuffer;
+                            if(currentRawInputBuffer != NULL) _aligned_free(currentRawInputBuffer);
                         }
-                        currentRawInputBuffer = new unsigned char[currentRawInputBufferNumBytes];
+                        currentRawInputBuffer =
+                            static_cast<RAWINPUT *>(_aligned_malloc(currentRawInputBufferNumBytes, alignof(RAWINPUT)));
                     }
 
                     // grab and go through all buffered RAWINPUT events
-                    hr = GetRawInputBuffer((RAWINPUT *)currentRawInputBuffer, &currentRawInputBufferNumBytes,
+                    hr = GetRawInputBuffer(currentRawInputBuffer, &currentRawInputBufferNumBytes,
                                            sizeof(RAWINPUTHEADER));
                     if(hr != (UINT)-1) {
-                        RAWINPUT *currentRawInput = (RAWINPUT *)currentRawInputBuffer;
+                        RAWINPUT *currentRawInput = currentRawInputBuffer;
                         for(; hr > 0; hr--)  // (hr = number of rawInputs)
                         {
                             if(currentRawInput->header.dwType == RIM_TYPEMOUSE) {
-                                const LONG lastX =
-                                    ((RAWINPUT *)(&((BYTE *)currentRawInput)[numAlignmentBytes]))->data.mouse.lLastX;
-                                const LONG lastY =
-                                    ((RAWINPUT *)(&((BYTE *)currentRawInput)[numAlignmentBytes]))->data.mouse.lLastY;
-                                const USHORT usFlags =
-                                    ((RAWINPUT *)(&((BYTE *)currentRawInput)[numAlignmentBytes]))->data.mouse.usFlags;
+                                const LONG lastX = currentRawInput->data.mouse.lLastX;
+                                const LONG lastY = currentRawInput->data.mouse.lLastY;
+                                const USHORT usFlags = currentRawInput->data.mouse.usFlags;
 
                                 g_engine->onMouseRawMove(lastX, lastY, (usFlags & MOUSE_MOVE_ABSOLUTE),
                                                          (usFlags & MOUSE_VIRTUAL_DESKTOP));
@@ -1159,7 +1157,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
         }
     }
 
-    // uninitialize RealTimeStylus (COM)
+// uninitialize RealTimeStylus (COM)
 #ifdef MCENGINE_WINDOWS_REALTIMESTYLUS_SUPPORT
     UninitRealTimeStylus();
     CoUninitialize();
