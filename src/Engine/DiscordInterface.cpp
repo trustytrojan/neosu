@@ -13,6 +13,8 @@ static bool initialized = false;
 
 #define DISCORD_CLIENT_ID 1288141291686989846
 
+namespace  // static
+{
 struct Application {
     struct IDiscordCore *core;
     struct IDiscordUserManager *users;
@@ -22,26 +24,26 @@ struct Application {
     struct IDiscordApplicationManager *application;
     struct IDiscordLobbyManager *lobbies;
     DiscordUserId user_id;
-};
+} dapp{};
 
-static struct Application dapp;
-static struct IDiscordActivityEvents activities_events;
-static struct IDiscordRelationshipEvents relationships_events;
-static struct IDiscordUserEvents users_events;
+struct IDiscordActivityEvents activities_events{};
+struct IDiscordRelationshipEvents relationships_events{};
+struct IDiscordUserEvents users_events{};
 
-static void on_discord_log(void *cdata, enum EDiscordLogLevel level, const char *message) {
-    (void)cdata;
+void on_discord_log(void * /*cdata*/, enum EDiscordLogLevel level, const char *message) {
+    //(void)cdata;
     if(level == DiscordLogLevel_Error) {
         debugLog("[Discord] ERROR: %s\n", message);
     } else {
         debugLog("[Discord] %s\n", message);
     }
 }
+}  // namespace
 #endif
 
 void init_discord_sdk() {
 #ifdef _WIN32
-    memset(&app, 0, sizeof(app));
+    memset(&dapp, 0, sizeof(dapp));
     memset(&activities_events, 0, sizeof(activities_events));
     memset(&relationships_events, 0, sizeof(relationships_events));
     memset(&users_events, 0, sizeof(users_events));
@@ -49,10 +51,10 @@ void init_discord_sdk() {
     // users_events.on_current_user_update = OnUserUpdated;
     // relationships_events.on_refresh = OnRelationshipsRefresh;
 
-    struct DiscordCreateParams params;
+    struct DiscordCreateParams params{};
     params.client_id = DISCORD_CLIENT_ID;
     params.flags = DiscordCreateFlags_NoRequireDiscord;
-    params.event_data = &app;
+    params.event_data = &dapp;
     params.activity_events = &activities_events;
     params.relationship_events = &relationships_events;
     params.user_events = &users_events;
@@ -90,7 +92,7 @@ void tick_discord_sdk() {
 #ifdef _WIN32
     dapp.core->run_callbacks(dapp.core);
 #else
-        // not enabled on linux cuz the sdk is broken there
+    // not enabled on linux cuz the sdk is broken there
 #endif
 }
 
@@ -103,11 +105,11 @@ void clear_discord_presence() {
 
 #ifdef _WIN32
     // TODO @kiwec: test if this works
-    struct DiscordActivity activity;
+    struct DiscordActivity activity{};
     memset(&activity, 0, sizeof(activity));
     dapp.activities->update_activity(dapp.activities, &activity, NULL, NULL);
 #else
-        // not enabled on linux cuz the sdk is broken there
+    // not enabled on linux cuz the sdk is broken there
 #endif
 }
 
@@ -162,7 +164,7 @@ void set_discord_presence(struct DiscordActivity *activity) {
 
     dapp.activities->update_activity(dapp.activities, activity, NULL, NULL);
 #else
-        // not enabled on linux cuz the sdk is broken there
+    // not enabled on linux cuz the sdk is broken there
 #endif
 }
 
