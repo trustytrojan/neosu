@@ -76,7 +76,7 @@ inline T getTimeReal() noexcept {
 
 class Timer {
    public:
-    explicit Timer(bool startOnCtor = true) noexcept {
+    explicit Timer(bool startOnCtor = false) noexcept {
         if(startOnCtor) start();
     }
 

@@ -138,7 +138,7 @@ namespace
 
 		if (ret)
 		{
-			//if (cv::debug_snd.getBool())
+			if (cv_debug.getBool())
 				debugLogF("loaded {:s} version {:#x}\n", pluginname.c_str(), BASS_PluginGetInfo(ret)->version);
 			BASS_PluginEnable(ret, true);
 		}
