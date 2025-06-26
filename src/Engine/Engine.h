@@ -25,7 +25,7 @@ class Console;
 
 #ifdef _DEBUG
 #define debugLogF(...) Engine::ContextLogger::log(std::source_location::current(), __FUNCTION__, __VA_ARGS__)
-#define debugLog(...) Engine::ContextLogger::logPrintf(__FUNCTION__, __VA_ARGS__)  // deprecated
+#define debugLog(...) Engine::ContextLogger::logPrintf(std::source_location::current(), __FUNCTION__, __VA_ARGS__)  // deprecated
 #else
 #define debugLogF(...) Engine::ContextLogger::log(__FUNCTION__, __VA_ARGS__)
 #define debugLog(...) Engine::ContextLogger::logPrintf(__FUNCTION__, __VA_ARGS__)  // deprecated
@@ -220,7 +220,7 @@ class Engine {
 
             auto contextPrefix = fmt::format("[{}:{}:{}] [{}]: ", loc.file_name(), loc.line(), loc.column(), func);
 
-            auto message = fmt::format(fmt, std::forward<Args>(args)...);
+            std::string message = fmt::sprintf(fmt, std::forward<Args>(args)...);
             Engine::logImpl(contextPrefix + message);
         }
 

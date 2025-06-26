@@ -312,7 +312,7 @@ $(DEPS_PREFIX)/mimalloc.built: $(DEPS_CACHE)/mimalloc-$(MIMALLOC_VERSION).source
 		$(CMAKERCOPT) \
 		-D CMAKE_INSTALL_PREFIX="$(DEPS_PREFIX)" \
 		-D MI_OPT_ARCH=$(if $(DISABLE_NATIVE),OFF,ON) \
-		-D MI_OPT_SIMD=ON \
+		-D MI_OPT_SIMD=$(if $(DISABLE_NATIVE),OFF,ON) \
 		-D MI_USE_CXX=ON \
 		-D MI_BUILD_SHARED=$(if $(findstring linux,$(host_os)),OFF,ON) \
 		-D MI_BUILD_TESTS=OFF \

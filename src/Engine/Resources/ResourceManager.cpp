@@ -12,7 +12,6 @@
 #include "App.h"
 #include "AsyncResourceLoader.h"
 #include "ConVar.h"
-#include "Environment.h"
 #include "Resource.h"
 
 ResourceManager::ResourceManager() {
@@ -62,11 +61,11 @@ void ResourceManager::destroyResources() {
 
 void ResourceManager::destroyResource(Resource *rs) {
     if(rs == nullptr) {
-        if(cv_debug_rm.getBool()) debugLog("ResourceManager Warning: destroyResource(NULL)!\n");
+        if(cv_debug_rm.getBool()) debugLogF("ResourceManager Warning: destroyResource(NULL)!\n");
         return;
     }
 
-    if(cv_debug_rm.getBool()) debugLog("ResourceManager: Destroying {:s}\n", rs->getName());
+    if(cv_debug_rm.getBool()) debugLogF("ResourceManager: Destroying {:s}\n", rs->getName());
 
     bool isManagedResource = false;
     int managedResourceIndex = -1;
@@ -80,7 +79,7 @@ void ResourceManager::destroyResource(Resource *rs) {
 
     // check if it's being loaded and schedule async destroy if so
     if(this->asyncLoader->isLoadingResource(rs)) {
-        if(cv_debug_rm.getBool()) debugLog("Resource Manager: Scheduled async destroy of {:s}\n", rs->getName());
+        if(cv_debug_rm.getBool()) debugLogF("Resource Manager: Scheduled async destroy of {:s}\n", rs->getName());
 
         if(cv_rm_interrupt_on_destroy.getBool()) rs->interruptLoad();
 
@@ -143,7 +142,7 @@ void ResourceManager::requestNextLoadUnmanaged() { this->nextLoadUnmanagedStack.
 
 void ResourceManager::reloadResource(Resource *rs, bool async) {
     if(rs == nullptr) {
-        if(cv_debug_rm.getBool()) debugLog("ResourceManager Warning: reloadResource(NULL)!\n");
+        if(cv_debug_rm.getBool()) debugLogF("ResourceManager Warning: reloadResource(NULL)!\n");
         return;
     }
 
@@ -154,7 +153,7 @@ void ResourceManager::reloadResource(Resource *rs, bool async) {
 void ResourceManager::reloadResources(const std::vector<Resource *> &resources, bool async) {
     if(resources.empty()) {
         if(cv_debug_rm.getBool())
-            debugLog("ResourceManager Warning: reloadResources with an empty resources vector!\n");
+            debugLogF("ResourceManager Warning: reloadResources with an empty resources vector!\n");
         return;
     }
 
@@ -172,7 +171,7 @@ void ResourceManager::reloadResources(const std::vector<Resource *> &resources, 
 
 void ResourceManager::setResourceName(Resource *res, std::string name) {
     if(!res) {
-        if(cv_debug_rm.getBool()) debugLog("ResourceManager: attempted to set name {:s} on NULL resource!\n", name);
+        if(cv_debug_rm.getBool()) debugLogF("ResourceManager: attempted to set name {:s} on NULL resource!\n", name);
         return;
     }
 

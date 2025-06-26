@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "cbase.h"
+#include "types.h"
 
 struct archive;
 struct archive_entry;
