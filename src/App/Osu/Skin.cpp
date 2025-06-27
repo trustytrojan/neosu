@@ -1088,15 +1088,6 @@ void Skin::load() {
         osu->getNotificationOverlay()->addNotification("Error: Couldn't load skin.ini!", 0xffff0000);
     else if(!parseSkinIni2Status)
         osu->getNotificationOverlay()->addNotification("Error: Couldn't load DEFAULT skin.ini!!!", 0xffff0000);
-
-    // TODO: is this crashing some users?
-    // HACKHACK: speed up initial game startup time by async loading the skin (if osu_skin_async 1 in underride)
-    if(osu->getSkin() == NULL && cv_skin_async.getBool()) {
-        while(resourceManager->isLoading()) {
-            resourceManager->update();
-            env->sleep(0);
-        }
-    }
 }
 
 void Skin::loadBeatmapOverride(std::string filepath) {
@@ -1105,9 +1096,15 @@ void Skin::loadBeatmapOverride(std::string filepath) {
 }
 
 void Skin::reloadSounds() {
-    for(int i = 0; i < this->sounds.size(); i++) {
-        this->sounds[i]->reload();
-    }
+	std::vector<Resource*> soundResources;
+	soundResources.reserve(this->sounds.size());
+
+	for (auto & sound : this->sounds)
+	{
+		soundResources.push_back(sound);
+	}
+
+	resourceManager->reloadResources(soundResources, cv_skin_async.getBool());
 }
 
 bool Skin::parseSkinINI(std::string filepath) {
