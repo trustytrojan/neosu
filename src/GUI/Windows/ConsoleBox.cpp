@@ -140,6 +140,11 @@ ConsoleBox::ConsoleBox() : CBaseUIElement(0, 0, 0, 0, "") {
 
     this->fLogYPos = 0.0f;
 
+    // initialize thread-safe log animation state
+    this->bLogAnimationResetPending.store(false);
+    this->fPendingLogTime.store(0.0f);
+    this->bForceLogVisible.store(false);
+
     this->clearSuggestions();
 
     // convar callbacks
@@ -159,8 +164,7 @@ void ConsoleBox::draw() {
 
     g->pushTransform();
     {
-        if(mouse->isMiddleDown())
-            g->translate(0, mouse->getPos().y - engine->getScreenHeight());
+        if(mouse->isMiddleDown()) g->translate(0, mouse->getPos().y - engine->getScreenHeight());
 
         if(cv_console_overlay.getBool() || this->textbox->isVisible()) this->drawLogOverlay();
 
@@ -224,8 +228,23 @@ void ConsoleBox::drawLogOverlay() {
     g->popTransform();
 }
 
+void ConsoleBox::processPendingLogAnimations()
+{
+	// check if we have pending animation reset from logging thread
+	if (this->bLogAnimationResetPending.exchange(false))
+	{
+		// execute animation operations on main thread only
+		anim->deleteExistingAnimation(&this->fLogYPos);
+		this->fLogYPos = 0;
+		this->fLogTime = this->fPendingLogTime.load();
+	}
+}
+
 void ConsoleBox::mouse_update(bool *propagate_clicks) {
     CBaseUIElement::mouse_update(propagate_clicks);
+
+    // handle pending animation operations from logging threads
+    processPendingLogAnimations();
 
     const bool mleft = mouse->isLeftDown();
 
@@ -307,13 +326,17 @@ void ConsoleBox::mouse_update(bool *propagate_clicks) {
         this->suggestion->setVisible(true);
 
     // handle overlay animation and timeout
-    if(engine->getTime() > this->fLogTime) {
+    // theres probably a better way to do it than yet another atomic boolean, but eh
+    bool forceVisible = this->bForceLogVisible.exchange(false);
+    if(!forceVisible && engine->getTime() > this->fLogTime) {
         if(!anim->isAnimating(&this->fLogYPos) && this->fLogYPos == 0.0f)
             anim->moveQuadInOut(&this->fLogYPos, this->logFont->getHeight() * (cv_console_overlay_lines.getFloat() + 1),
                                 0.5f);
 
-        if(this->fLogYPos == this->logFont->getHeight() * (cv_console_overlay_lines.getInt() + 1))
+        if(this->fLogYPos == this->logFont->getHeight() * (cv_console_overlay_lines.getInt() + 1)) {
+            std::lock_guard<std::mutex> logGuard(this->logMutex);
             this->log_entries.clear();
+        }
     }
 }
 
@@ -628,10 +651,11 @@ void ConsoleBox::log(UString text, Color textColor) {
         this->log_entries.erase(this->log_entries.begin());
     }
 
-    anim->deleteExistingAnimation(&this->fLogYPos);
-    this->fLogYPos = 0;
-
-    this->fLogTime = engine->getTime() + 8.0f;
+    // defer animation operations to main thread to avoid data races
+    // use force visibility flag to prevent immediate timeout on same frame (this is so dumb)
+    this->fPendingLogTime.store(Timing::getTimeReal<float>() + 8.0f);
+    this->bForceLogVisible.store(true);
+    this->bLogAnimationResetPending.store(true);
 }
 
 float ConsoleBox::getAnimTargetY() { return 32.0f * this->getDPIScale(); }

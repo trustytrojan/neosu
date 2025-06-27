@@ -4,6 +4,7 @@
 #include <thread>
 
 #include "DatabaseBeatmap.h"
+#include "Timing.h"
 
 static std::thread thr;
 static std::atomic<bool> dead = true;
@@ -12,20 +13,23 @@ std::atomic<u32> mct_computed = 0;
 std::atomic<u32> mct_total = 0;
 std::vector<mct_result> mct_results;
 
-static std::vector<BeatmapDifficulty*> maps;
+static const std::vector<BeatmapDifficulty *> *maps = nullptr;
 
 static void run_mct() {
     std::vector<f64> aimStrains;
     std::vector<f64> speedStrains;
 
-    for(const auto & diff2 : maps) {
+    for(int i = 0; maps && i < maps->size(); i++) {
         while(osu->should_pause_background_threads.load() && !dead.load()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
+        //Timing::sleepMS(10000); // FIXME: somehow reduces the likelihood of crashing when first entering song select?
 
-        if(dead.load()) return;
+        if(dead.load() || !maps) return;
         aimStrains.clear();
         speedStrains.clear();
+
+        const auto &diff2 = maps->begin()[i];
 
         mct_result result;
         result.diff2 = diff2;
@@ -68,14 +72,14 @@ static void run_mct() {
     mct_computed++;
 }
 
-void mct_calc(std::vector<BeatmapDifficulty*> maps_to_calc) {
+void mct_calc(const std::vector<BeatmapDifficulty *> &maps_to_calc) {
     mct_abort();
     if(maps_to_calc.empty()) return;
 
     dead = false;
-    maps = maps_to_calc;
+    maps = &maps_to_calc;
     mct_computed = 0;
-    mct_total = maps.size() + 1;
+    mct_total = maps->size() + 1;
     mct_results.clear();
     thr = std::thread(run_mct);
 }

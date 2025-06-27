@@ -887,7 +887,7 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
         // check if we are finished loading
         if(db->isFinished()) {
             this->bBeatmapRefreshScheduled = false;
-            Timing::sleepMS(1000); // FIXME: somehow reduces the likelihood of crashing when first entering song select
+            //Timing::sleepMS(1000); // FIXME: somehow reduces the likelihood of crashing when first entering song select
             this->onDatabaseLoadingFinished();
         }
         return;

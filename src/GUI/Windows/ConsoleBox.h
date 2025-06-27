@@ -60,6 +60,8 @@ class ConsoleBox : public CBaseUIElement {
 
     float getDPIScale();
 
+    void processPendingLogAnimations();
+
     int iSuggestionCount;
     int iSelectedSuggestion;  // for up/down buttons
 
@@ -88,4 +90,10 @@ class ConsoleBox : public CBaseUIElement {
     int iSelectedHistory;
 
     std::mutex logMutex;
+
+    // thread-safe log animation state
+    std::atomic<bool> bLogAnimationResetPending;
+    std::atomic<float> fPendingLogTime;
+    std::atomic<bool> bForceLogVisible;  // needed as an "ohshit" when a ton of lines are added in a single frame after
+                                         // the log has been hidden already
 };

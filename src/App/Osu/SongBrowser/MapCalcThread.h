@@ -23,5 +23,5 @@ extern std::atomic<u32> mct_total;
 extern std::mutex mct_results_mtx;
 extern std::vector<mct_result> mct_results;
 
-void mct_calc(std::vector<BeatmapDifficulty*> maps_to_calc);
+void mct_calc(const std::vector<BeatmapDifficulty*> &maps_to_calc);
 void mct_abort();
