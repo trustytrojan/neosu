@@ -17,7 +17,10 @@ struct lazy_promise {
     }
 
     ~lazy_promise() {
-        this->keep_running = false;
+        {
+            std::lock_guard<std::mutex> lock(this->funcs_mtx);
+            this->keep_running = false;
+        }
         this->cv.notify_one();
         this->thread.join();
     }
