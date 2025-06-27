@@ -72,8 +72,6 @@ void SDLEnvironment::restart() {
     shutdown();
 }
 
-void SDLEnvironment::sleep(unsigned int us) { SDL_Delay(us / 1000); }
-
 UString SDLEnvironment::getExecutablePath() {
     const char *path = SDL_GetBasePath();
     if(path != NULL) {

@@ -26,7 +26,6 @@ class WinEnvironment : public Environment {
     OS getOS();
     void shutdown();
     void restart();
-    void sleep(unsigned int us);
     std::string getExecutablePath();
     void openURLInDefaultBrowser(UString url);
     void openDirectory(std::string path);

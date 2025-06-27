@@ -22,7 +22,6 @@ class LinuxEnvironment : public Environment {
     OS getOS() override;
     void shutdown() override;
     void restart() override;
-    void sleep(unsigned int us) override;
     std::string getExecutablePath() override;
     void openURLInDefaultBrowser(UString url) override;
     void openDirectory(std::string path) override;

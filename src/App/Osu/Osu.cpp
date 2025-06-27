@@ -1627,7 +1627,7 @@ void Osu::reloadFonts() {
     for(McFont *font : this->fonts) {
         if(font->getDPI() != newDPI) {
             font->setDPI(newDPI);
-            font->reload();
+            resourceManager->reloadResource(font);
         }
     }
 }

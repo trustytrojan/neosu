@@ -1606,7 +1606,7 @@ void Skin::checkLoadSound(Sound **addressOfPointer, std::string skinElementName,
 
     // force reload default skin sound anyway if the custom skin does not include it (e.g. audio device change)
     if(skin_sound == NULL) {
-        sound->reload();
+        resourceManager->reloadResource(sound, cv_skin_async.getBool());
     } else {
         this->resources.push_back(sound);
     }

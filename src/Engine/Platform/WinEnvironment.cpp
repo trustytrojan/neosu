@@ -90,8 +90,6 @@ void WinEnvironment::restart() {
     shutdown();
 }
 
-void WinEnvironment::sleep(unsigned int us) { Sleep(us / 1000); }
-
 UString WinEnvironment::getUsername() {
     const DWORD idiot_msvc_len = UNLEN + 1;
     DWORD username_len = idiot_msvc_len;

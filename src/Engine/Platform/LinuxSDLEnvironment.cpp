@@ -21,8 +21,6 @@ LinuxSDLEnvironment::LinuxSDLEnvironment() : SDLEnvironment(NULL) {}
 
 Environment::OS LinuxSDLEnvironment::getOS() { return Environment::OS::LINUX; }
 
-void LinuxSDLEnvironment::sleep(unsigned int us) { usleep(us); }
-
 void LinuxSDLEnvironment::openURLInDefaultBrowser(UString url) {
     if(fork() == 0) exit(execl("/usr/bin/xdg-open", "xdg-open", url.toUtf8(), (char *)0));
 }

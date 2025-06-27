@@ -68,7 +68,7 @@ void* do_downloads(void* arg) {
     }
 
     while(thread->running) {
-        env->sleep(100000);  // wait 100ms between every download
+        Timing::sleep(100000);  // wait 100ms between every download
 
         DownloadResult* result = NULL;
         std::string url;
@@ -128,7 +128,7 @@ void* do_downloads(void* arg) {
 
             if(response_code == 429) {
                 // Try again 5s later
-                env->sleep(5000000);
+                Timing::sleep(5000000);
             }
         }
     }

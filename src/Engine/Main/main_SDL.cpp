@@ -571,9 +571,9 @@ int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
                 while(delayTime > 0.0) {
                     if(inBackground)  // real waiting (very inaccurate, but very good for little background cpu
                                       // utilization)
-                        env->sleep((int)((1.0f / fps_max_background.getFloat()) * 1000.0f * 1000.0f));
+                        Timing::sleep(1000ULL * (unsigned int)((1.f / cv_fps_max_background.getFloat()) * 1000.0f));
                     else  // more or less "busy" waiting, but giving away the rest of the timeslice at least
-                        env->sleep(0);  // yes, there is a zero in there
+                        Timing::sleep(0);
 
                     // decrease the delayTime by the time we spent in this loop
                     // if the loop is executed more than once, note how delayStart now gets the value of the previous
@@ -584,9 +584,9 @@ int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
                     delayTime -= (frameTimer->getElapsedTime() - delayStart);
                 }
 
-                if(!didSleep && fps_max_yield.getBool()) env->sleep(0);  // yes, there is a zero in there
+                if(!didSleep && fps_max_yield.getBool()) Timing::sleep(0);  // yes, there is a zero in there
             } else if(fps_unlimited_yield.getBool())
-                env->sleep(0);  // yes, there is a zero in there
+                Timing::sleep(0);  // yes, there is a zero in there
         }
     }
 

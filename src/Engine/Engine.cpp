@@ -565,8 +565,6 @@ void Engine::restart() {
     env->restart();
 }
 
-void Engine::sleep(unsigned int us) { env->sleep(us); }
-
 void Engine::focus() { env->focus(); }
 
 void Engine::center() { env->center(); }

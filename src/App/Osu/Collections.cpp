@@ -90,7 +90,7 @@ Collection* get_or_create_collection(std::string name) {
 }
 
 bool load_collections() {
-    const double startTime = engine->getTimeReal();
+    const double startTime = Timing::getTimeReal();
 
     unload_collections();
 
@@ -188,7 +188,7 @@ bool load_collections() {
     }
 
     debugLog("peppy+neosu collections: loading took %f seconds (%d peppy, %d neosu, %d maps total)\n",
-             (engine->getTimeReal() - startTime), nb_peppy, nb_neosu, nb_total);
+             (Timing::getTimeReal() - startTime), nb_peppy, nb_neosu, nb_total);
     collections_loaded = true;
     return true;
 }
@@ -209,7 +209,7 @@ bool save_collections() {
         return false;
     }
 
-    const double startTime = engine->getTimeReal();
+    const double startTime = Timing::getTimeReal();
 
     BanchoFileWriter db("collections.db");
     db.write<u32>(COLLECTIONS_DB_VERSION);
@@ -233,6 +233,6 @@ bool save_collections() {
         }
     }
 
-    debugLog("collections.db: saving took %f seconds\n", (engine->getTimeReal() - startTime));
+    debugLog("collections.db: saving took %f seconds\n", (Timing::getTimeReal() - startTime));
     return true;
 }

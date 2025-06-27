@@ -531,12 +531,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                     if(pointerInfo.pointerFlags & POINTER_FLAG_PRIMARY) {
                         // bit of a hack, but it should work fine
                         // convert to fake raw tablet coordinates (0 to 65536)
-                        int rawAbsoluteX = ((float)pointerInfo.ptPixelLocation.x /
-                                            (float)env->getNativeScreenSize().x) *
-                                           65536;
-                        int rawAbsoluteY = ((float)pointerInfo.ptPixelLocation.y /
-                                            (float)env->getNativeScreenSize().y) *
-                                           65536;
+                        int rawAbsoluteX =
+                            ((float)pointerInfo.ptPixelLocation.x / (float)env->getNativeScreenSize().x) * 65536;
+                        int rawAbsoluteY =
+                            ((float)pointerInfo.ptPixelLocation.y / (float)env->getNativeScreenSize().y) * 65536;
                         g_engine->onMouseRawMove(rawAbsoluteX, rawAbsoluteY, true, true);
                     }
 
@@ -1138,9 +1136,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
                 while(delayTime > 0.0) {
                     if(inBackground)  // real waiting (very inaccurate, but very good for little background cpu
                                       // utilization)
-                        Sleep((int)((1.0f / cv_fps_max_background.getFloat()) * 1000.0f));
-                    else           // more or less "busy" waiting, but giving away the rest of the timeslice at least
-                        Sleep(0);  // yes, there is a zero in there
+                        Timing::sleep(1000ULL * (unsigned int)((1.f / cv_fps_max_background.getFloat()) * 1000.0f));
+                    else  // more or less "busy" waiting, but giving away the rest of the timeslice at least
+                        Timing::sleep(0);
 
                     // decrease the delayTime by the time we spent in this loop
                     // if the loop is executed more than once, note how delayStart now gets the value of the previous
@@ -1151,9 +1149,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
                     delayTime -= (frameTimer->getElapsedTime() - delayStart);
                 }
 
-                if(!didSleep && cv_fps_max_yield.getBool()) Sleep(0);  // yes, there is a zero in there
+                if(!didSleep && cv_fps_max_yield.getBool()) Timing::sleep(0);  // yes, there is a zero in there
             } else if(cv_fps_unlimited_yield.getBool())
-                Sleep(0);  // yes, there is a zero in there
+                Timing::sleep(0);  // yes, there is a zero in there
         }
     }
 

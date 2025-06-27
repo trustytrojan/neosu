@@ -23,7 +23,6 @@ class NullEnvironment : public Environment {
     OS getOS() override { return Environment::OS::NONE; }
     void shutdown() override;
     void restart() override;
-    void sleep(unsigned int us) override { (void)us; }
     std::string getExecutablePath() override { return ""; }
     void openURLInDefaultBrowser(UString url) override { (void)url; }
 

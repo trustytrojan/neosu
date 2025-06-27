@@ -128,8 +128,6 @@ void LinuxEnvironment::restart() {
     this->shutdown();
 }
 
-void LinuxEnvironment::sleep(unsigned int us) { usleep(us); }
-
 std::string LinuxEnvironment::getExecutablePath() {
     char buf[4096];
     memset(buf, '\0', 4096);
@@ -768,7 +766,7 @@ bool LinuxEnvironment::requestSelectionContent(UString &selection_content, Atom 
 
         // not very elegant.. we could do a select() or something like that... however clipboard content requesting
         // is inherently slow on x11, it often takes 50ms or more so...
-        usleep(4000);
+        Timing::sleep(4000);
         timeoutMs -= 4;
     } while(timeoutMs > 0);
 

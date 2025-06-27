@@ -241,7 +241,7 @@ void Sound::setPositionMS(unsigned long ms) {
         auto loop = this->isLooped();
         auto speed = this->getSpeed();
 
-        this->reload();
+        resourceManager->reloadResource(this);
 
         this->setSpeed(speed);
         this->setPan(pan);
@@ -463,5 +463,5 @@ bool Sound::isFinished() { return this->bReady && this->bStarted && !this->isPla
 
 void Sound::rebuild(std::string newFilePath) {
     this->sFilePath = newFilePath;
-    this->reload();
+    resourceManager->reloadResource(this);
 }

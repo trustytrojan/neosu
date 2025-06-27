@@ -30,7 +30,6 @@ class SDLEnvironment : public Environment {
     virtual OS getOS();
     virtual void shutdown();
     virtual void restart();
-    virtual void sleep(unsigned int us);  // NOTE: inaccurate
     virtual std::string getExecutablePath();
     virtual void openURLInDefaultBrowser(UString url);  // NOTE: non-SDL
 

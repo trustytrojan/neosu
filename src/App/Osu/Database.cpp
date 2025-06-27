@@ -1564,7 +1564,7 @@ void Database::saveScores() {
         return;
     }
 
-    const double startTime = engine->getTimeReal();
+    const double startTime = Timing::getTimeReal();
 
     std::lock_guard<std::mutex> lock(this->scores_mtx);
     BanchoFileWriter db("neosu_scores.db");
@@ -1663,7 +1663,7 @@ void Database::saveScores() {
         }
     }
 
-    debugLog("Saved %d scores in %f seconds.\n", nb_scores, (engine->getTimeReal() - startTime));
+    debugLog("Saved %d scores in %f seconds.\n", nb_scores, (Timing::getTimeReal() - startTime));
 }
 
 BeatmapSet *Database::loadRawBeatmap(std::string beatmapPath) {

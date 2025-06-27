@@ -386,9 +386,9 @@ int main(int argc, char *argv[]) {
 
             while(delayTime > 0.0) {
                 if(inBackground)  // real waiting (very inaccurate, but very good for little background cpu utilization)
-                    usleep(1000 * (unsigned int)((1.f / cv_fps_max_background.getFloat()) * 1000.0f));
+                    Timing::sleep(1000ULL * (unsigned int)((1.f / cv_fps_max_background.getFloat()) * 1000.0f));
                 else  // more or less "busy" waiting, but giving away the rest of the timeslice at least
-                    usleep(0);
+                    Timing::sleep(0);
 
                 // decrease the delayTime by the time we spent in this loop
                 // if the loop is executed more than once, note how delayStart now gets the value of the previous

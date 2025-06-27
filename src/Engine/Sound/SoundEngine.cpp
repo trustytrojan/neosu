@@ -11,6 +11,7 @@
 #include "OptionsMenu.h"
 #include "Osu.h"
 #include "PauseMenu.h"
+#include "ResourceManager.h"
 #include "Skin.h"
 #include "SongBrowser/LoudnessCalcThread.h"
 #include "SongBrowser/SongBrowser.h"
@@ -53,12 +54,13 @@ DWORD ASIO_clamp(BASS_ASIO_INFO info, DWORD buflen) {
 #endif
 
 SoundEngine::SoundEngine() {
-	if (!BassManager::init()) // this checks the library versions as well
-	{
-		engine->showMessageErrorFatal("Fatal Sound Error", UString::fmt("Failed to load BASS feature: {:s} !", BassManager::getFailedLoad()));
-		engine->shutdown();
-		return;
-	}
+    if(!BassManager::init())  // this checks the library versions as well
+    {
+        engine->showMessageErrorFatal(
+            "Fatal Sound Error", UString::fmt("Failed to load BASS feature: {:s} !", BassManager::getFailedLoad()));
+        engine->shutdown();
+        return;
+    }
 
     BASS_SetConfig(BASS_CONFIG_BUFFER, 100);
 
@@ -699,7 +701,7 @@ void SoundEngine::pause(Sound *snd) {
 
     // Calling BASS_Mixer_ChannelRemove automatically frees the stream due
     // to BASS_STREAM_AUTOFREE. We need to reinitialize it.
-    snd->reload();
+    resourceManager->reloadResource(snd);
 
     snd->setPositionMS(pos);
     snd->setSpeed(speed);
@@ -713,7 +715,7 @@ void SoundEngine::stop(Sound *snd) {
     if(!this->isReady() || snd == NULL || !snd->isReady()) return;
 
     // This will stop all samples, then re-init to be ready for a play()
-    snd->reload();
+    resourceManager->reloadResource(snd);
 }
 
 bool SoundEngine::isReady() {
