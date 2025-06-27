@@ -84,7 +84,7 @@ class RankingScreen : public ScreenBackable {
     std::vector<ConVar *> enabledExperimentalMods;
 
     // custom
-    uwu::lazy_promise<std::function<pp_info()>, pp_info> ppv2_calc{pp_info{}};
+    //uwu::lazy_promise<std::function<pp_info()>, pp_info> ppv2_calc{pp_info{}};
     FinishedScore score;
     bool bIsUnranked;
 };

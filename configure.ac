@@ -315,6 +315,13 @@ AS_IF([test "x$enable_clang" = "xyes"], [
     NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -fimplicit-constexpr"
 ])
 
+AS_IF([test "$host_cpu" = "x86_64" && test -z "$CLANG"], [
+    # this is only possible on x86_64, and not clang
+    # faster tls access
+    CFLAGS="$CFLAGS -mtls-dialect=gnu2"
+    CXXFLAGS="$CXXFLAGS -mtls-dialect=gnu2"
+])
+
 AS_IF([[case "$host_cpu" in
   i[[3456789]]86*) host_cpu=i686 ;;
 esac]])
@@ -442,7 +449,7 @@ AC_SUBST([CXX])
 
 AS_IF([test "$host_cpu" = "x86_64"], [COMMON_FLAGS="$COMMON_FLAGS -mcmodel=small"])
 
-COMMON_FLAGS="$COMMON_FLAGS -ffunction-sections -fdata-sections -fwrapv -fno-strict-aliasing -fno-semantic-interposition"
+COMMON_FLAGS="$COMMON_FLAGS -ffunction-sections -fdata-sections -fwrapv -fno-strict-aliasing -fno-semantic-interposition -ftls-model=initial-exec"
 CXXFLAGS="$CXXFLAGS $COMMON_FLAGS -fno-exceptions -Wno-deprecated-declarations" # -fno-rtti
 CFLAGS="$CFLAGS $COMMON_FLAGS"
 AS_IF([test -z "$ubercompat" || test "x$enable_static" = "xyes"], [
@@ -488,7 +495,7 @@ AS_IF([test "$host_os" = "linux-gnu"],[
 ])
 
 AS_IF([test "x$enable_debug" = "xyes"], [
-    with_mimalloc="no"
+    AS_IF([test "x$with_mimalloc" != "xyes"], [with_mimalloc=no])
     AS_IF([test "$host_os" = "mingw32"],[
         CXXFLAGS="$CXXFLAGS -g -Og"
         CFLAGS="$CFLAGS -g -Og"
@@ -700,7 +707,7 @@ AC_SUBST([SOUNDTOUCH_VERSION], [2.4.0])
 AC_SUBST([SOUNDTOUCH_PREFIX],[$DEPS_PREFIX])
 AC_SUBST([SDL3_MIXER_VERSION], [b8017938de8b31c1962c2c8044a127519c2c1cdf])
 AC_SUBST([SDL3_MIXER_PREFIX],[$DEPS_PREFIX])
-AC_SUBST([MIMALLOC_VERSION], [v3.1.5])
+AC_SUBST([MIMALLOC_VERSION], [639b73ecf9608d9c3078cb9dee5b7c2f46639828])
 AC_SUBST([MIMALLOC_PREFIX],[$DEPS_PREFIX])
 
 AC_SUBST([FFMPEG_VERSION], [7.1]) # pre-built, used for soloud
@@ -831,7 +838,7 @@ AM_CONDITIONAL([BUILD_LIBARCHIVE], [test "x$have_libarchive" != "xyes"])
 AM_CONDITIONAL([NEED_CURL], [test "x$have_curl" != "xyes"])
 AM_CONDITIONAL([BUILD_MPG123], [test "$with_soloud" = "yes" && test "x$have_mpg123" != "xyes"])
 AM_CONDITIONAL([BUILD_GLM], [test "x$have_glm" != "xyes"])
-AM_CONDITIONAL([BUILD_MIMALLOC], [test "x$enable_debug" != "xyes" &&
+AM_CONDITIONAL([BUILD_MIMALLOC], [{ test "x$enable_debug" != "xyes" || test "x$with_mimalloc" = "xyes"; } &&
                                 { { test "$SYSNAME" = "windows" && test "$host_cpu" = "i686" && test "x$with_mimalloc" = "xyes" ; } ||
                                   { test "x$with_mimalloc" != "xno" ; };
                                 }]) # default off for windows 32bit for compatibility

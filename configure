@@ -6574,6 +6574,16 @@ else case e in #(
 esac
 fi
 
+if test "$host_cpu" = "x86_64" && test -z "$CLANG"
+then :
+
+    # this is only possible on x86_64, and not clang
+    # faster tls access
+    CFLAGS="$CFLAGS -mtls-dialect=gnu2"
+    CXXFLAGS="$CXXFLAGS -mtls-dialect=gnu2"
+
+fi
+
 if case "$host_cpu" in
   i[[3456789]]86*) host_cpu=i686 ;;
 esac
@@ -7901,7 +7911,7 @@ then :
   COMMON_FLAGS="$COMMON_FLAGS -mcmodel=small"
 fi
 
-COMMON_FLAGS="$COMMON_FLAGS -ffunction-sections -fdata-sections -fwrapv -fno-strict-aliasing -fno-semantic-interposition"
+COMMON_FLAGS="$COMMON_FLAGS -ffunction-sections -fdata-sections -fwrapv -fno-strict-aliasing -fno-semantic-interposition -ftls-model=initial-exec"
 CXXFLAGS="$CXXFLAGS $COMMON_FLAGS -fno-exceptions -Wno-deprecated-declarations" # -fno-rtti
 CFLAGS="$CFLAGS $COMMON_FLAGS"
 if test -z "$ubercompat" || test "x$enable_static" = "xyes"
@@ -8474,7 +8484,10 @@ fi
 if test "x$enable_debug" = "xyes"
 then :
 
-    with_mimalloc="no"
+    if test "x$with_mimalloc" != "xyes"
+then :
+  with_mimalloc=no
+fi
     if test "$host_os" = "mingw32"
 then :
 
@@ -10358,7 +10371,7 @@ SDL3_MIXER_VERSION=b8017938de8b31c1962c2c8044a127519c2c1cdf
 
 SDL3_MIXER_PREFIX=$DEPS_PREFIX
 
-MIMALLOC_VERSION=v3.1.5
+MIMALLOC_VERSION=639b73ecf9608d9c3078cb9dee5b7c2f46639828
 
 MIMALLOC_PREFIX=$DEPS_PREFIX
 
@@ -12510,7 +12523,7 @@ else
   BUILD_GLM_FALSE=
 fi
 
- if test "x$enable_debug" != "xyes" &&
+ if { test "x$enable_debug" != "xyes" || test "x$with_mimalloc" = "xyes"; } &&
                                 { { test "$SYSNAME" = "windows" && test "$host_cpu" = "i686" && test "x$with_mimalloc" = "xyes" ; } ||
                                   { test "x$with_mimalloc" != "xno" ; };
                                 }; then

@@ -768,7 +768,7 @@ $(DEPS_PREFIX)/libarchive.built: $(DEPS_CACHE)/libarchive-$(LIBARCHIVE_VERSION).
 		--disable-tools --disable-tests --with-gnu-ld --disable-bsdtar --disable-bsdcat --disable-bsdcpio \
 		--disable-bsdunzip --without-xml2 --without-expat --without-openssl \
 		--without-nettle --without-mbedtls --without-lzo2 --without-lz4 --without-libiconv-prefix \
-		--without-iconv --without-libb2 \
+		--without-iconv --without-libb2 --without-zstd --with-lzma --with-zlib --with-bz2lib \
 		CC="$(CC)" RANLIB="$(RANLIB)" AR="$(AR)" CXX="$(CXX)" LD="$(LD)" \
 		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS)" && \
 	$(MAKE) && \

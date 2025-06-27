@@ -5882,7 +5882,7 @@ $(DEPS_CACHE)/curl-$(CURL_VERSION).source: $(DEPS_CACHE)/curl-$(CURL_VERSION)/cu
 @BUILD_LIBARCHIVE_TRUE@		--disable-tools --disable-tests --with-gnu-ld --disable-bsdtar --disable-bsdcat --disable-bsdcpio \
 @BUILD_LIBARCHIVE_TRUE@		--disable-bsdunzip --without-xml2 --without-expat --without-openssl \
 @BUILD_LIBARCHIVE_TRUE@		--without-nettle --without-mbedtls --without-lzo2 --without-lz4 --without-libiconv-prefix \
-@BUILD_LIBARCHIVE_TRUE@		--without-iconv --without-libb2 \
+@BUILD_LIBARCHIVE_TRUE@		--without-iconv --without-libb2 --without-zstd --with-lzma --with-zlib --with-bz2lib \
 @BUILD_LIBARCHIVE_TRUE@		CC="$(CC)" RANLIB="$(RANLIB)" AR="$(AR)" CXX="$(CXX)" LD="$(LD)" \
 @BUILD_LIBARCHIVE_TRUE@		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS)" && \
 @BUILD_LIBARCHIVE_TRUE@	$(MAKE) && \
