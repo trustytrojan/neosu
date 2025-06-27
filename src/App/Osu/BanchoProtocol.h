@@ -319,19 +319,12 @@ std::string read_stdstring(Packet *packet);
 void skip_string(Packet *packet);
 MD5Hash read_hash(Packet *packet);
 
-// Null array for returning empty structures when trying to read more data out of a Packet than expected.
-// See the read<> template below.
-#define NULL_ARRAY_SIZE 128
-extern u8 NULL_ARRAY[NULL_ARRAY_SIZE];
-
 template <typename T>
 T read(Packet *packet) {
-    static_assert(sizeof(T) <= sizeof(NULL_ARRAY), "Please make NULL_ARRAY_SIZE bigger");
-
     T result;
     if(packet->pos + sizeof(T) > packet->size) {
         packet->pos = packet->size + 1;
-        memcpy(&result, NULL_ARRAY, sizeof(T));
+        memset(&result, 0, sizeof(T));
         return result;
     } else {
         memcpy(&result, packet->memory + packet->pos, sizeof(T));

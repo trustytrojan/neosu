@@ -7,9 +7,6 @@
 #include "Beatmap.h"
 #include "Osu.h"
 
-// Null array for returning empty structures when trying to read more data out of a Packet than expected.
-u8 NULL_ARRAY[NULL_ARRAY_SIZE] = {0};
-
 Room::Room() {
     // 0-initialized room means we're not in multiplayer at the moment
 }

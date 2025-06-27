@@ -18,11 +18,10 @@ struct BanchoFileReader {
     template <typename T>
     T read() {
         static_assert(sizeof(T) < READ_BUFFER_SIZE);
-        static u8 NULL_ARRAY[sizeof(T)] = {0};
 
         if(this->file == NULL) {
             T result;
-            memcpy(&result, NULL_ARRAY, sizeof(T));
+            memset(&result, 0, sizeof(T));
             return result;
         }
 
@@ -37,8 +36,9 @@ struct BanchoFileReader {
             this->pos = (this->pos + sizeof(T)) % READ_BUFFER_SIZE;
             this->avail = 0;
             this->total_pos = this->total_size;
+
             T result;
-            memcpy(&result, NULL_ARRAY, sizeof(T));
+            memset(&result, 0, sizeof(T));
             return result;
         } else {
             u8* out_ptr = this->buffer + this->pos;
