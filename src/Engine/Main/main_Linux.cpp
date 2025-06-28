@@ -213,6 +213,29 @@ void WndProc(int type, int xcookieType, int xcookieExtension) {
 //********************//
 
 int main(int argc, char *argv[]) {
+    // Fix path in case user is running it from the wrong folder.
+    // We only do this if MCENGINE_DATA_DIR is set to its default value, since if it's changed,
+    // the packager clearly wants the executable in a different location.
+    if(!strcmp(MCENGINE_DATA_DIR, "./")) {
+        char exe_path[PATH_MAX];
+        ssize_t exe_path_s = readlink("/proc/self/exe", exe_path, sizeof(exe_path) - 1);
+        if(exe_path_s == -1) {
+            perror("readlink");
+            exit(1);
+        }
+        exe_path[exe_path_s] = '\0';
+
+        char *last_slash = strrchr(exe_path, '/');
+        if(last_slash != NULL) {
+            *last_slash = '\0';
+        }
+
+        if(chdir(exe_path) != 0) {
+            perror("chdir");
+            exit(1);
+        }
+    }
+
     dpy = XOpenDisplay(NULL);
     if(dpy == NULL) {
         printf("FATAL ERROR: XOpenDisplay() can't connect to X server!\n\n");
