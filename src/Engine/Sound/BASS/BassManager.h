@@ -13,9 +13,9 @@
 
 #if defined(MCENGINE_FEATURE_BASS)
 
-#include <SDL3/SDL_loadso.h>
-
+#include <cstdint> // need to include before bass headers because namespace things
 #include <string>
+
 class UString;
 
 // can't be namespaced

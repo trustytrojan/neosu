@@ -9,6 +9,8 @@
 
 #if defined(MCENGINE_FEATURE_BASS)
 
+#include <SDL3/SDL_loadso.h>
+
 #include "Engine.h"
 #include "File.h"
 
@@ -188,254 +190,165 @@ void cleanup() {
 
 std::string getFailedLoad() { return failedLoad; }
 
-std::string printBassError(const std::string &context, int code) {
-    std::string errstr = fmt::format("Unknown BASS error ({:d})!", code);
+static std::string getBassErrorStringFromCode(int code) {
+    std::string errstr = fmt::format("Unknown (code {:d})", code);
+
     switch(code) {
         case BASS_OK:
-            errstr = "No error.\n";
+            errstr = "No error.";
             break;
         case BASS_ERROR_MEM:
-            errstr = "Memory error\n";
+            errstr = "Memory error";
             break;
         case BASS_ERROR_FILEOPEN:
-            errstr = "Can't open the file\n";
+            errstr = "Can't open the file";
             break;
         case BASS_ERROR_DRIVER:
-            errstr = "Can't find an available driver\n";
+            errstr = "Can't find an available driver";
             break;
         case BASS_ERROR_BUFLOST:
-            errstr = "The sample buffer was lost\n";
+            errstr = "The sample buffer was lost";
             break;
         case BASS_ERROR_HANDLE:
-            errstr = "Invalid handle\n";
+            errstr = "Invalid handle";
             break;
         case BASS_ERROR_FORMAT:
-            errstr = "Unsupported sample format\n";
+            errstr = "Unsupported sample format";
             break;
         case BASS_ERROR_POSITION:
-            errstr = "Invalid position\n";
+            errstr = "Invalid position";
             break;
         case BASS_ERROR_INIT:
-            errstr = "BASS_Init has not been successfully called\n";
+            errstr = "BASS_Init has not been successfully called";
             break;
         case BASS_ERROR_START:
-            errstr = "BASS_Start has not been successfully called\n";
+            errstr = "BASS_Start has not been successfully called";
             break;
         case BASS_ERROR_SSL:
-            errstr = "SSL/HTTPS support isn't available\n";
+            errstr = "SSL/HTTPS support isn't available";
             break;
         case BASS_ERROR_REINIT:
-            errstr = "Device needs to be reinitialized\n";
+            errstr = "Device needs to be reinitialized";
             break;
         case BASS_ERROR_ALREADY:
-            errstr = "Already initialized\n";
+            errstr = "Already initialized";
             break;
         case BASS_ERROR_NOTAUDIO:
-            errstr = "File does not contain audio\n";
+            errstr = "File does not contain audio";
             break;
         case BASS_ERROR_NOCHAN:
-            errstr = "Can't get a free channel\n";
+            errstr = "Can't get a free channel";
             break;
         case BASS_ERROR_ILLTYPE:
-            errstr = "An illegal type was specified\n";
+            errstr = "An illegal type was specified";
             break;
         case BASS_ERROR_ILLPARAM:
-            errstr = "An illegal parameter was specified\n";
+            errstr = "An illegal parameter was specified";
             break;
         case BASS_ERROR_NO3D:
-            errstr = "No 3D support\n";
+            errstr = "No 3D support";
             break;
         case BASS_ERROR_NOEAX:
-            errstr = "No EAX support\n";
+            errstr = "No EAX support";
             break;
         case BASS_ERROR_DEVICE:
-            errstr = "Illegal device number\n";
+            errstr = "Illegal device number";
             break;
         case BASS_ERROR_NOPLAY:
-            errstr = "Not playing\n";
+            errstr = "Not playing";
             break;
         case BASS_ERROR_FREQ:
-            errstr = "Illegal sample rate\n";
+            errstr = "Illegal sample rate";
             break;
         case BASS_ERROR_NOTFILE:
-            errstr = "The stream is not a file stream\n";
+            errstr = "The stream is not a file stream";
             break;
         case BASS_ERROR_NOHW:
-            errstr = "No hardware voices available\n";
+            errstr = "No hardware voices available";
             break;
         case BASS_ERROR_EMPTY:
-            errstr = "The file has no sample data\n";
+            errstr = "The file has no sample data";
             break;
         case BASS_ERROR_NONET:
-            errstr = "No internet connection could be opened\n";
+            errstr = "No internet connection could be opened";
             break;
         case BASS_ERROR_CREATE:
-            errstr = "Couldn't create the file\n";
+            errstr = "Couldn't create the file";
             break;
         case BASS_ERROR_NOFX:
-            errstr = "Effects are not available\n";
+            errstr = "Effects are not available";
             break;
         case BASS_ERROR_NOTAVAIL:
-            errstr = "Requested data/action is not available\n";
+            errstr = "Requested data/action is not available";
             break;
         case BASS_ERROR_DECODE:
-            errstr = "The channel is/isn't a decoding channel\n";
+            errstr = "The channel is/isn't a decoding channel";
             break;
         case BASS_ERROR_DX:
-            errstr = "A sufficient DirectX version is not installed\n";
+            errstr = "A sufficient DirectX version is not installed";
             break;
         case BASS_ERROR_TIMEOUT:
-            errstr = "Connection timeout\n";
+            errstr = "Connection timeout";
             break;
         case BASS_ERROR_FILEFORM:
-            errstr = "Unsupported file format\n";
+            errstr = "Unsupported file format";
             break;
         case BASS_ERROR_SPEAKER:
-            errstr = "Unavailable speaker\n";
+            errstr = "Unavailable speaker";
             break;
         case BASS_ERROR_VERSION:
-            errstr = "Invalid BASS version\n";
+            errstr = "Invalid BASS version";
             break;
         case BASS_ERROR_CODEC:
-            errstr = "Codec is not available/supported\n";
+            errstr = "Codec is not available/supported";
             break;
         case BASS_ERROR_ENDED:
-            errstr = "The channel/file has ended\n";
+            errstr = "The channel/file has ended";
             break;
         case BASS_ERROR_BUSY:
-            errstr = "The device is busy\n";
+            errstr = "The device is busy";
             break;
         case BASS_ERROR_UNSTREAMABLE:
-            errstr = "Unstreamable file\n";
+            errstr = "Unstreamable file";
             break;
         case BASS_ERROR_PROTOCOL:
-            errstr = "Unsupported protocol\n";
+            errstr = "Unsupported protocol";
             break;
         case BASS_ERROR_DENIED:
-            errstr = "Access Denied\n";
+            errstr = "Access Denied";
             break;
 #ifdef MCENGINE_FEATURE_WINDOWS
         case BASS_ERROR_WASAPI:
-            errstr = "No WASAPI\n";
+            errstr = "No WASAPI";
             break;
         case BASS_ERROR_WASAPI_BUFFER:
-            errstr = "Invalid buffer size\n";
+            errstr = "Invalid buffer size";
             break;
         case BASS_ERROR_WASAPI_CATEGORY:
-            errstr = "Can't set category\n";
+            errstr = "Can't set category";
             break;
         case BASS_ERROR_WASAPI_DENIED:
-            errstr = "Access denied\n";
+            errstr = "Access denied";
             break;
 #endif
         case BASS_ERROR_UNKNOWN:  // fallthrough
         default:
             break;
     }
-    debugLogF("{:s} error: {:s}", context, errstr);
+    return errstr;
+}
+
+std::string printBassError(const std::string &context, int code) {
+    std::string errstr{getBassErrorStringFromCode(code)};
+
+    debugLogF("{:s} error: {:s}\n", context, errstr);
     return fmt::format("{:s} error: {:s}", context, errstr);  // also return it
 }
 
-// XXX: redundant with printBassError, clean this up
-UString BassManager::getErrorUString() {
+UString getErrorUString() {
     auto code = BASS_ErrorGetCode();
-    switch(code) {
-        case BASS_OK:
-            return "No error";
-        case BASS_ERROR_MEM:
-            return "BASS error: Memory error";
-        case BASS_ERROR_FILEOPEN:
-            return "BASS error: Can't open the file";
-        case BASS_ERROR_DRIVER:
-            return "BASS error: Can't find an available driver";
-        case BASS_ERROR_BUFLOST:
-            return "BASS error: The sample buffer was lost";
-        case BASS_ERROR_HANDLE:
-            return "BASS error: Invalid handle";
-        case BASS_ERROR_FORMAT:
-            return "BASS error: Unsupported sample format";
-        case BASS_ERROR_POSITION:
-            return "BASS error: Invalid position";
-        case BASS_ERROR_INIT:
-            return "BASS error: BASS_Init has not been successfully called";
-        case BASS_ERROR_START:
-            return "BASS error: BASS_Start has not been successfully called";
-        case BASS_ERROR_SSL:
-            return "BASS error: SSL/HTTPS support isn't available";
-        case BASS_ERROR_REINIT:
-            return "BASS error: Device needs to be reinitialized";
-        case BASS_ERROR_ALREADY:
-            return "BASS error: Already initialized";
-        case BASS_ERROR_NOTAUDIO:
-            return "BASS error: File does not contain audio";
-        case BASS_ERROR_NOCHAN:
-            return "BASS error: Can't get a free channel";
-        case BASS_ERROR_ILLTYPE:
-            return "BASS error: An illegal type was specified";
-        case BASS_ERROR_ILLPARAM:
-            return "BASS error: An illegal parameter was specified";
-        case BASS_ERROR_NO3D:
-            return "BASS error: No 3D support";
-        case BASS_ERROR_NOEAX:
-            return "BASS error: No EAX support";
-        case BASS_ERROR_DEVICE:
-            return "BASS error: Illegal device number";
-        case BASS_ERROR_NOPLAY:
-            return "BASS error: Not playing";
-        case BASS_ERROR_FREQ:
-            return "BASS error: Illegal sample rate";
-        case BASS_ERROR_NOTFILE:
-            return "BASS error: The stream is not a file stream";
-        case BASS_ERROR_NOHW:
-            return "BASS error: No hardware voices available";
-        case BASS_ERROR_EMPTY:
-            return "BASS error: The file has no sample data";
-        case BASS_ERROR_NONET:
-            return "BASS error: No internet connection could be opened";
-        case BASS_ERROR_CREATE:
-            return "BASS error: Couldn't create the file";
-        case BASS_ERROR_NOFX:
-            return "BASS error: Effects are not available";
-        case BASS_ERROR_NOTAVAIL:
-            return "BASS error: Requested data/action is not available";
-        case BASS_ERROR_DECODE:
-            return "BASS error: The channel is/isn't a decoding channel";
-        case BASS_ERROR_DX:
-            return "BASS error: A sufficient DirectX version is not installed";
-        case BASS_ERROR_TIMEOUT:
-            return "BASS error: Connection timeout";
-        case BASS_ERROR_FILEFORM:
-            return "BASS error: Unsupported file format";
-        case BASS_ERROR_SPEAKER:
-            return "BASS error: Unavailable speaker";
-        case BASS_ERROR_VERSION:
-            return "BASS error: Invalid BASS version";
-        case BASS_ERROR_CODEC:
-            return "BASS error: Codec is not available/supported";
-        case BASS_ERROR_ENDED:
-            return "BASS error: The channel/file has ended";
-        case BASS_ERROR_BUSY:
-            return "BASS error: The device is busy";
-        case BASS_ERROR_UNSTREAMABLE:
-            return "BASS error: Unstreamable file";
-        case BASS_ERROR_PROTOCOL:
-            return "BASS error: Unsupported protocol";
-        case BASS_ERROR_DENIED:
-            return "BASS error: Access Denied";
-#ifdef MCENGINE_PLATFORM_WINDOWS
-        case BASS_ERROR_WASAPI:
-            return "WASAPI error: No WASAPI";
-        case BASS_ERROR_WASAPI_BUFFER:
-            return "WASAPI error: Invalid buffer size";
-        case BASS_ERROR_WASAPI_CATEGORY:
-            return "WASAPI error: Can't set category";
-        case BASS_ERROR_WASAPI_DENIED:
-            return "WASAPI error: Access denied";
-#endif
-        case BASS_ERROR_UNKNOWN:  // fallthrough
-        default:
-            return UString::format("Unknown BASS error (%i)!", code);
-    }
+
+    return UString{"BASS error: "} + UString{getBassErrorStringFromCode(code)};
 }
 
 }  // namespace BassManager
