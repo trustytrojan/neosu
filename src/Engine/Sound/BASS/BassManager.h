@@ -16,6 +16,7 @@
 #include <SDL3/SDL_loadso.h>
 
 #include <string>
+class UString;
 
 // can't be namespaced
 #ifdef MCENGINE_PLATFORM_WINDOWS
@@ -59,7 +60,7 @@ extern "C" {
 #define BASSMIXVERSION_REAL 0x2040c04
 #endif
 
-#define BASSLOUDVERSION_REAL 0x00000000 // TODO: lazy
+#define BASSLOUDVERSION_REAL 0x00000000  // TODO: lazy
 
 namespace BassManager {
 namespace BassFuncs {
@@ -162,10 +163,10 @@ using WASAPIPROC = bass_EXTERN::WASAPIPROC;
     X(BASS_Mixer_StreamCreate)       \
     X(BASS_Mixer_StreamAddChannel)
 
-#define BASS_LOUD_FUNCTIONS(X) \
-    X(BASS_Loudness_GetVersion)    \
-    X(BASS_Loudness_Start)         \
-    X(BASS_Loudness_GetLevel)      \
+#define BASS_LOUD_FUNCTIONS(X)  \
+    X(BASS_Loudness_GetVersion) \
+    X(BASS_Loudness_Start)      \
+    X(BASS_Loudness_GetLevel)   \
     X(BASS_Loudness_Stop)
 
 #ifdef MCENGINE_PLATFORM_WINDOWS
@@ -196,7 +197,8 @@ using WASAPIPROC = bass_EXTERN::WASAPIPROC;
 #endif
 
 #define ALL_BASS_FUNCTIONS(X) \
-    BASS_CORE_FUNCTIONS(X) BASS_FX_FUNCTIONS(X) BASS_MIX_FUNCTIONS(X) BASS_LOUD_FUNCTIONS(X) BASS_ASIO_FUNCTIONS(X) BASS_WASAPI_FUNCTIONS(X)
+    BASS_CORE_FUNCTIONS(X)    \
+    BASS_FX_FUNCTIONS(X) BASS_MIX_FUNCTIONS(X) BASS_LOUD_FUNCTIONS(X) BASS_ASIO_FUNCTIONS(X) BASS_WASAPI_FUNCTIONS(X)
 
 // generate the type definitions and declarations
 #define DECLARE_BASS_FUNCTION(name)                \
@@ -214,6 +216,7 @@ using WASAPIPROC = bass_EXTERN::WASAPIPROC;
 	std::string getFailedLoad();
 
 	std::string printBassError(const std::string &context, int code);
+    UString getErrorUString();
 //clang-format on
 }; // namespace BassManager
 

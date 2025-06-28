@@ -68,4 +68,3 @@ DWORD ASIO_clamp(BASS_ASIO_INFO info, DWORD buflen);
 #endif
 
 void _RESTART_SOUND_ENGINE_ON_CHANGE(UString oldValue, UString newValue);
-void display_bass_error();

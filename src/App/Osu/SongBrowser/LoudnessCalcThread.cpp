@@ -54,14 +54,16 @@ struct LoudnessCalcThread {
 
             auto decoder = BASS_StreamCreateFile(false, song.c_str(), 0, 0, BASS_STREAM_DECODE | BASS_SAMPLE_MONO);
             if(!decoder) {
-                debugLog("BASS_StreamCreateFile() returned error %d on file %s\n", BASS_ErrorGetCode(), song.c_str());
+                auto err_str = BassManager::getErrorUString();
+                debugLog("BASS_StreamCreateFile(%s): %s\n", song.c_str(), err_str.toUtf8());
                 this->nb_computed++;
                 continue;
             }
 
             auto loudness = BASS_Loudness_Start(decoder, BASS_LOUDNESS_INTEGRATED, 0);
             if(!loudness) {
-                debugLog("BASS_Loudness_Start() returned error %d\n", BASS_ErrorGetCode());
+                auto err_str = BassManager::getErrorUString();
+                debugLog("BASS_Loudness_Start(): %s\n", err_str.toUtf8());
                 BASS_ChannelFree(decoder);
                 this->nb_computed++;
                 continue;
