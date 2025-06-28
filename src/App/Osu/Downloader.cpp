@@ -1,6 +1,5 @@
 #include "Downloader.h"
 
-#include "curl_blob.h"
 #include <curl/curl.h>
 
 #include <mutex>
@@ -17,6 +16,7 @@
 #include "Engine.h"
 #include "Osu.h"
 #include "SongBrowser/SongBrowser.h"
+#include "curl_blob.h"
 
 struct DownloadResult {
     std::string url;
@@ -68,7 +68,7 @@ void* do_downloads(void* arg) {
     }
 
     while(thread->running) {
-        Timing::sleep(100000);  // wait 100ms between every download
+        Timing::sleepMS(100);  // wait 100ms between every download
 
         DownloadResult* result = NULL;
         std::string url;
@@ -99,7 +99,7 @@ void* do_downloads(void* arg) {
         curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
         struct curl_blob blob{};
-        blob.data = (void *)curl_ca_embed;
+        blob.data = (void*)curl_ca_embed;
         blob.len = sizeof(curl_ca_embed);
         blob.flags = CURL_BLOB_NOCOPY;
         curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
@@ -128,7 +128,7 @@ void* do_downloads(void* arg) {
 
             if(response_code == 429) {
                 // Try again 5s later
-                Timing::sleep(5000000);
+                Timing::sleepMS(5000);
             }
         }
     }

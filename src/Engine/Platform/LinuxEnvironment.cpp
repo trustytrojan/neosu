@@ -766,7 +766,7 @@ bool LinuxEnvironment::requestSelectionContent(UString &selection_content, Atom 
 
         // not very elegant.. we could do a select() or something like that... however clipboard content requesting
         // is inherently slow on x11, it often takes 50ms or more so...
-        Timing::sleep(4000);
+        Timing::sleepMS(4);
         timeoutMs -= 4;
     } while(timeoutMs > 0);
 

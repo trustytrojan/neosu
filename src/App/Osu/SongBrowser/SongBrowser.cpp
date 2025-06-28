@@ -85,7 +85,7 @@ class SongBrowserBackgroundSearchMatcher : public Resource {
         this->sHardcodedSearchString = hardcodedSearchString;
     }
 
-    [[nodiscard]] Type getResType() const override { return APPDEFINED; } // TODO: handle this better?
+    [[nodiscard]] Type getResType() const override { return APPDEFINED; }  // TODO: handle this better?
 
    protected:
     void init() override { this->bReady = true; }
@@ -661,9 +661,8 @@ void SongBrowser::draw() {
                 McRect graphRect(0, engine->getScreenHeight() - (get_bottombar_height() + strainHeightMultiplier),
                                  graphWidth, strainHeightMultiplier);
 
-                const float alpha = (graphRect.contains(mouse->getPos())
-                                         ? 1.0f
-                                         : cv_hud_scrubbing_timeline_strains_alpha.getFloat());
+                const float alpha =
+                    (graphRect.contains(mouse->getPos()) ? 1.0f : cv_hud_scrubbing_timeline_strains_alpha.getFloat());
 
                 const Color aimStrainColor =
                     COLORf(alpha, cv_hud_scrubbing_timeline_strains_aim_color_r.getInt() / 255.0f,
@@ -693,12 +692,11 @@ void SongBrowser::draw() {
 
                     if(!keyboard->isControlDown()) {
                         g->setColor(speedStrainColor);
-                        g->fillRect(
-                            i * strainWidth,
-                            engine->getScreenHeight() -
-                                (get_bottombar_height() +
-                                 ((keyboard->isShiftDown() ? 0 : aimStrainHeight) - speedStrainHeight)),
-                            max(1.0f, std::round(strainWidth + 0.5f)), speedStrainHeight + 1);
+                        g->fillRect(i * strainWidth,
+                                    engine->getScreenHeight() -
+                                        (get_bottombar_height() +
+                                         ((keyboard->isShiftDown() ? 0 : aimStrainHeight) - speedStrainHeight)),
+                                    max(1.0f, std::round(strainWidth + 0.5f)), speedStrainHeight + 1);
                     }
                 }
                 g->setDepthBuffer(false);
@@ -887,7 +885,6 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
         // check if we are finished loading
         if(db->isFinished()) {
             this->bBeatmapRefreshScheduled = false;
-            //Timing::sleepMS(1000); // FIXME: somehow reduces the likelihood of crashing when first entering song select
             this->onDatabaseLoadingFinished();
         }
         return;

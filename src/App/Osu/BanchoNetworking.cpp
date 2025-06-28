@@ -411,7 +411,7 @@ static void *do_networking() {
             outgoing_mutex.unlock();
         }
 
-        Timing::sleep(1000);  // wait 1ms
+        Timing::sleepMS(1);
     }
 
     curl_easy_cleanup(curl);

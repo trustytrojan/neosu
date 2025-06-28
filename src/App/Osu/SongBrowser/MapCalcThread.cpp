@@ -19,8 +19,6 @@ static void run_mct() {
     std::vector<f64> aimStrains;
     std::vector<f64> speedStrains;
 
-    Timing::sleepMS(10000); // FIXME: somehow reduces the likelihood of crashing when first entering song select?
-
     for(int i = 0; maps && i < maps->size(); i++) {
         while(osu->should_pause_background_threads.load() && !dead.load()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));

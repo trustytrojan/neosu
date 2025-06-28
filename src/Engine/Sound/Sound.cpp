@@ -55,25 +55,7 @@ HCHANNEL Sound::getChannel() {
     }
 }
 
-void Sound::init() {
-    if(this->sFilePath.length() < 2 || !this->bAsyncReady) return;
-
-    // HACKHACK: re-set some values to their defaults (only necessary because of the existence of rebuild())
-    this->fSpeed = 1.0f;
-
-    // error checking
-    if(this->sample == 0 && this->stream == 0) {
-        UString msg = "Couldn't load sound \"";
-        msg.append(this->sFilePath.c_str());
-        msg.append(UString::format("\", stream = %i, errorcode = %i", (int)this->bStream, BASS_ErrorGetCode()));
-        msg.append(", file = ");
-        msg.append(this->sFilePath.c_str());
-        msg.append("\n");
-        debugLog(0xffdd3333, "%s", msg.toUtf8());
-    } else {
-        this->bReady = true;
-    }
-}
+void Sound::init() { this->bReady = this->bAsyncReady.load(); }
 
 void Sound::initAsync() {
     if(cv_debug_rm.getBool()) debugLog("Resource Manager: Loading %s\n", this->sFilePath.c_str());
@@ -110,6 +92,7 @@ void Sound::initAsync() {
         if(cv_snd_async_buffer.getInt() > 0) flags |= BASS_ASYNCFILE;
         if(env->getOS() == Environment::OS::WINDOWS) flags |= BASS_UNICODE;
 
+        if(this->bInterrupted.load()) return;
         this->stream = BASS_StreamCreateFile(false, file_path.c_str(), 0, 0, flags);
         if(!this->stream) {
             debugLog("BASS_StreamCreateFile() returned error %d on file %s\n", BASS_ErrorGetCode(),
@@ -117,6 +100,7 @@ void Sound::initAsync() {
             return;
         }
 
+        if(this->bInterrupted.load()) return;
         this->stream = BASS_FX_TempoCreate(this->stream, BASS_FX_FREESOURCE | BASS_STREAM_DECODE);
         if(!this->stream) {
             debugLog("BASS_FX_TempoCreate() returned error %d on file %s\n", BASS_ErrorGetCode(),
@@ -125,6 +109,7 @@ void Sound::initAsync() {
         }
 
         // Only compute the length once
+        if(this->bInterrupted.load()) return;
         i64 length = BASS_ChannelGetLength(this->stream, BASS_POS_BYTE);
         f64 lengthInSeconds = BASS_ChannelBytes2Seconds(this->stream, length);
         f64 lengthInMilliSeconds = lengthInSeconds * 1000.0;
@@ -133,6 +118,7 @@ void Sound::initAsync() {
         auto flags = BASS_SAMPLE_FLOAT;
         if(env->getOS() == Environment::OS::WINDOWS) flags |= BASS_UNICODE;
 
+        if(this->bInterrupted.load()) return;
         this->sample = BASS_SampleLoad(false, file_path.c_str(), 0, 0, 1, flags);
         if(!this->sample) {
             auto code = BASS_ErrorGetCode();
@@ -146,17 +132,41 @@ void Sound::initAsync() {
         }
 
         // Only compute the length once
+        if(this->bInterrupted.load()) return;
         i64 length = BASS_ChannelGetLength(this->sample, BASS_POS_BYTE);
         f64 lengthInSeconds = BASS_ChannelBytes2Seconds(this->sample, length);
         f64 lengthInMilliSeconds = lengthInSeconds * 1000.0;
         this->length = (u32)lengthInMilliSeconds;
     }
 
+    this->fSpeed = 1.0f;
     this->bAsyncReady = true;
 }
 
 void Sound::destroy() {
-    if(!this->bReady) return;
+    if(!this->bAsyncReady) {
+        this->interruptLoad();
+    }
+
+    if(this->sample != 0) {
+        BASS_SampleStop(this->sample);
+        BASS_SampleFree(this->sample);
+        this->sample = 0;
+    }
+
+    if(this->stream != 0) {
+        BASS_Mixer_ChannelRemove(this->stream);
+        BASS_ChannelStop(this->stream);
+        BASS_StreamFree(this->stream);
+        this->stream = 0;
+    }
+
+    for(auto chan : this->mixer_channels) {
+        BASS_Mixer_ChannelRemove(chan);
+        BASS_ChannelStop(chan);
+        BASS_ChannelFree(chan);
+    }
+    this->mixer_channels.clear();
 
     this->bStarted = false;
     this->bReady = false;
@@ -165,24 +175,6 @@ void Sound::destroy() {
     this->fChannelCreationTime = 0.0;
     this->bPaused = false;
     this->paused_position_ms = 0;
-
-    if(this->bStream) {
-        BASS_Mixer_ChannelRemove(this->stream);
-        BASS_ChannelStop(this->stream);
-        BASS_StreamFree(this->stream);
-        this->stream = 0;
-    } else {
-        for(auto chan : this->mixer_channels) {
-            BASS_Mixer_ChannelRemove(chan);
-            BASS_ChannelStop(chan);
-            BASS_ChannelFree(chan);
-        }
-        this->mixer_channels.clear();
-
-        BASS_SampleStop(this->sample);
-        BASS_SampleFree(this->sample);
-        this->sample = 0;
-    }
 }
 
 u32 Sound::setPosition(f64 percent) {

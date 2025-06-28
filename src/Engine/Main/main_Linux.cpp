@@ -409,7 +409,7 @@ int main(int argc, char *argv[]) {
 
             while(delayTime > 0.0) {
                 if(inBackground)  // real waiting (very inaccurate, but very good for little background cpu utilization)
-                    Timing::sleep(1000ULL * (unsigned int)((1.f / cv_fps_max_background.getFloat()) * 1000.0f));
+                    Timing::sleepMS((1.f / cv_fps_max_background.getFloat()) * 1000.0f);
                 else  // more or less "busy" waiting, but giving away the rest of the timeslice at least
                     Timing::sleep(0);
 
