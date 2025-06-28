@@ -11,11 +11,8 @@ class DatabaseBeatmap;
 
 class MapCalcThread {
    public:
-    MapCalcThread();
-    ~MapCalcThread();
-
-    // singleton access
-    static MapCalcThread& get_instance();
+    MapCalcThread() = default;
+    ~MapCalcThread() { abort(); }
 
     // non-copyable, non-movable
     MapCalcThread(const MapCalcThread&) = delete;
@@ -34,10 +31,8 @@ class MapCalcThread {
         u32 avg_bpm{};
     };
 
-    void start_calc_instance(const std::vector<BeatmapDifficulty*>& maps_to_calc);
-    void abort_instance();
-
-    static inline void start_calc(const std::vector<BeatmapDifficulty*>& maps_to_calc) {
+    // FIXME: maps_to_calc copied due to mysterious lifetime issues (?)
+    static inline void start_calc(std::vector<BeatmapDifficulty*> maps_to_calc) {
         get_instance().start_calc_instance(maps_to_calc);
     }
     static inline void abort() { get_instance().abort_instance(); }
@@ -58,6 +53,12 @@ class MapCalcThread {
 
    private:
     void run();
+
+    void start_calc_instance(const std::vector<BeatmapDifficulty*>& maps_to_calc);
+    void abort_instance();
+
+    // singleton access
+    static MapCalcThread& get_instance();
 
     std::thread worker_thread;
     std::atomic<bool> should_stop{true};

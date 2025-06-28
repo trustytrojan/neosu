@@ -97,11 +97,15 @@ class DatabaseLoader : public Resource {
         this->bReady = false;
     };
 
-    [[nodiscard]] Type getResType() const override { return APPDEFINED; } // TODO: handle this better?
+    [[nodiscard]] Type getResType() const override { return APPDEFINED; }  // TODO: handle this better?
 
    protected:
     void init() override {
         this->bReady = true;
+        MapCalcThread::start_calc(this->db->maps_to_recalc);
+        loct_calc(this->db->loudness_to_calc);
+
+        sct_calc(this->db->scores_to_convert);
 
         delete this;  // commit sudoku
     }
@@ -1124,10 +1128,6 @@ void Database::loadDB() {
              this->importTimer->getElapsedTime(), nb_peppy_maps, nb_neosu_maps, nb_peppy_maps + nb_neosu_maps);
     debugLog("Found %d overrides; %d maps need star recalc, %d maps need loudness recalc\n", nb_overrides,
              this->maps_to_recalc.size(), this->loudness_to_calc.size());
-    MapCalcThread::start_calc(this->maps_to_recalc);
-    loct_calc(this->loudness_to_calc);
-
-    sct_calc(this->scores_to_convert);
     // @PPV3: save neosu_scores.db once all scores are converted
 
     load_collections();

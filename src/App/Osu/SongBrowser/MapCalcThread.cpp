@@ -12,10 +12,6 @@
 std::unique_ptr<MapCalcThread> MapCalcThread::instance = nullptr;
 std::once_flag MapCalcThread::instance_flag;
 
-MapCalcThread::MapCalcThread() = default;
-
-MapCalcThread::~MapCalcThread() { abort(); }
-
 void MapCalcThread::start_calc_instance(const std::vector<BeatmapDifficulty*>& maps_to_calc) {
     abort();
 
