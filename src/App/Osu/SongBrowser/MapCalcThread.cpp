@@ -2,44 +2,81 @@
 
 #include <chrono>
 #include <thread>
+#include <utility>
 
 #include "DatabaseBeatmap.h"
-#include "Timing.h"
+#include "DifficultyCalculator.h"
+#include "Osu.h"
 
-static std::thread thr;
-static std::atomic<bool> dead = true;
+// static member definitions
+std::unique_ptr<MapCalcThread> MapCalcThread::instance = nullptr;
+std::once_flag MapCalcThread::instance_flag;
 
-std::atomic<u32> mct_computed = 0;
-std::atomic<u32> mct_total = 0;
-std::vector<mct_result> mct_results;
+MapCalcThread::MapCalcThread() = default;
 
-static const std::vector<BeatmapDifficulty *> *maps = nullptr;
+MapCalcThread::~MapCalcThread() { abort(); }
 
-static void run_mct() {
+void MapCalcThread::start_calc_instance(const std::vector<BeatmapDifficulty*>& maps_to_calc) {
+    abort();
+
+    if(maps_to_calc.empty()) {
+        return;
+    }
+
+    this->should_stop = false;
+    MapCalcThread::maps_to_process = &maps_to_calc;
+    this->computed_count = 0;
+    this->total_count = static_cast<u32>(maps_to_calc.size()) + 1;
+    this->results.clear();
+
+    this->worker_thread = std::thread(&MapCalcThread::run, this);
+}
+
+void MapCalcThread::abort_instance() {
+    if(this->should_stop.load()) {
+        return;
+    }
+
+    this->should_stop = true;
+
+    if(this->worker_thread.joinable()) {
+        this->worker_thread.join();
+    }
+
+    this->total_count = 0;
+    this->computed_count = 0;
+}
+
+void MapCalcThread::run() {
     std::vector<f64> aimStrains;
     std::vector<f64> speedStrains;
 
-    for(int i = 0; maps && i < maps->size(); i++) {
-        while(osu->should_pause_background_threads.load() && !dead.load()) {
+    for(int i = 0; MapCalcThread::maps_to_process && std::cmp_less(i, MapCalcThread::maps_to_process->size()); i++) {
+        // pause handling
+        while(osu->should_pause_background_threads.load() && !this->should_stop.load()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
 
-        if(dead.load() || !maps) return;
+        if(this->should_stop.load() || !MapCalcThread::maps_to_process) {
+            return;
+        }
+
         aimStrains.clear();
         speedStrains.clear();
 
-        const auto &diff2 = maps->begin()[i];
+        const auto& diff2 = (*MapCalcThread::maps_to_process)[i];
 
         mct_result result;
         result.diff2 = diff2;
 
-        auto c = DatabaseBeatmap::loadPrimitiveObjects(diff2->sFilePath, dead);
+        auto c = DatabaseBeatmap::loadPrimitiveObjects(diff2->sFilePath, this->should_stop);
         result.nb_circles = c.numCircles;
         result.nb_sliders = c.numSliders;
         result.nb_spinners = c.numSpinners;
 
         pp_info info;
-        auto diffres = DatabaseBeatmap::loadDifficultyHitObjects(c, diff2->getAR(), diff2->getCS(), 1.f, false, dead);
+        auto diffres =
+            DatabaseBeatmap::loadDifficultyHitObjects(c, diff2->getAR(), diff2->getCS(), 1.f, false, this->should_stop);
 
         DifficultyCalculator::StarCalcParams params;
         params.sortedHitObjects.swap(diffres.diffobjects);
@@ -57,38 +94,22 @@ static void run_mct() {
         params.upToObjectIndex = -1;
         params.outAimStrains = &aimStrains;
         params.outSpeedStrains = &speedStrains;
-        result.star_rating = DifficultyCalculator::calculateStarDiffForHitObjects(params, dead);
+        result.star_rating =
+            static_cast<f32>(DifficultyCalculator::calculateStarDiffForHitObjects(params, this->should_stop));
 
         BPMInfo bpm = getBPM(c.timingpoints);
-        result.min_bpm = bpm.min;
-        result.max_bpm = bpm.max;
-        result.avg_bpm = bpm.most_common;
+        result.min_bpm = static_cast<u32>(bpm.min);
+        result.max_bpm = static_cast<u32>(bpm.max);
+        result.avg_bpm = static_cast<u32>(bpm.most_common);
 
-        mct_results.push_back(result);
-        mct_computed++;
+        this->results.push_back(result);
+        this->computed_count++;
     }
 
-    mct_computed++;
+    this->computed_count++;
 }
 
-void mct_calc(const std::vector<BeatmapDifficulty *> &maps_to_calc) {
-    mct_abort();
-    if(maps_to_calc.empty()) return;
-
-    dead = false;
-    maps = &maps_to_calc;
-    mct_computed = 0;
-    mct_total = maps->size() + 1;
-    mct_results.clear();
-    thr = std::thread(run_mct);
-}
-
-void mct_abort() {
-    if(dead.load()) return;
-
-    dead = true;
-    thr.join();
-
-    mct_total = 0;
-    mct_computed = 0;
+MapCalcThread& MapCalcThread::get_instance() {
+    std::call_once(instance_flag, []() { instance = std::make_unique<MapCalcThread>(); });
+    return *instance;
 }

@@ -196,8 +196,8 @@ void draw_bottombar() {
     McFont* font = resourceManager->getFont("FONT_DEFAULT");
     i32 calcx = osu->userButton->getPos().x + osu->userButton->getSize().x + 20;
     i32 calcy = osu->userButton->getPos().y + 30;
-    if(mct_total.load() > 0) {
-        UString msg = UString::format("Calculating stars (%i/%i) ...", mct_computed.load(), mct_total.load());
+    if(MapCalcThread::get_total() > 0) {
+        UString msg = UString::format("Calculating stars (%i/%i) ...", MapCalcThread::get_computed(), MapCalcThread::get_total());
         g->setColor(0xff333333);
         g->pushTransform();
         g->translate(calcx, calcy);

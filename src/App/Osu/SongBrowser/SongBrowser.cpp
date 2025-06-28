@@ -472,7 +472,7 @@ SongBrowser::~SongBrowser() {
     sct_abort();
     lct_set_map(NULL);
     loct_abort();
-    mct_abort();
+    MapCalcThread::abort();
     this->checkHandleKillBackgroundSearchMatcher();
 
     resourceManager->destroyResource(this->backgroundSearchMatcher);
@@ -891,15 +891,17 @@ void SongBrowser::mouse_update(bool *propagate_clicks) {
     }
 
     // map star/bpm/other calc
-    if(mct_total.load() > 0 && (mct_computed.load() == mct_total.load())) {
-        mct_abort();  // join thread
+    if(MapCalcThread::is_finished()) {
+        MapCalcThread::abort();  // join thread
 
         auto &maps = db->maps_to_recalc;
 
+        const auto &results = MapCalcThread::get_results();
+
         db->peppy_overrides_mtx.lock();
-        for(int i = 0; i < mct_results.size(); i++) {
+        for(int i = 0; i < results.size(); i++) {
             auto diff = maps[i];
-            auto res = mct_results[i];
+            auto res = results[i];
             diff->iNumCircles = res.nb_circles;
             diff->iNumSliders = res.nb_sliders;
             diff->iNumSpinners = res.nb_spinners;

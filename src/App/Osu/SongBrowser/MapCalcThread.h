@@ -1,27 +1,71 @@
 #pragma once
 #include <atomic>
+#include <memory>
 #include <mutex>
+#include <thread>
+#include <vector>
 
 #include "Database.h"
 
 class DatabaseBeatmap;
 
-struct mct_result {
-    DatabaseBeatmap* diff2 = NULL;
-    u32 nb_circles = 0;
-    u32 nb_sliders = 0;
-    u32 nb_spinners = 0;
-    f32 star_rating = 0.f;
-    u32 min_bpm = 0;
-    u32 max_bpm = 0;
-    u32 avg_bpm = 0;
+class MapCalcThread {
+   public:
+    MapCalcThread();
+    ~MapCalcThread();
+
+    // singleton access
+    static MapCalcThread& get_instance();
+
+    // non-copyable, non-movable
+    MapCalcThread(const MapCalcThread&) = delete;
+    MapCalcThread& operator=(const MapCalcThread&) = delete;
+    MapCalcThread(MapCalcThread&&) = delete;
+    MapCalcThread& operator=(MapCalcThread&&) = delete;
+
+    struct mct_result {
+        DatabaseBeatmap* diff2{};
+        u32 nb_circles{};
+        u32 nb_sliders{};
+        u32 nb_spinners{};
+        f32 star_rating{};
+        u32 min_bpm{};
+        u32 max_bpm{};
+        u32 avg_bpm{};
+    };
+
+    void start_calc_instance(const std::vector<BeatmapDifficulty*>& maps_to_calc);
+    void abort_instance();
+
+    static inline void start_calc(const std::vector<BeatmapDifficulty*>& maps_to_calc) {
+        get_instance().start_calc_instance(maps_to_calc);
+    }
+    static inline void abort() { get_instance().abort_instance(); }
+
+    // progress tracking
+    static inline bool get_computed() { return get_instance().computed_count.load(); }
+    static inline bool get_total() { return get_instance().total_count.load(); }
+
+    static inline bool is_finished() {
+        const auto& instance = get_instance();
+        const u32 computed = instance.computed_count.load();
+        const u32 total = instance.total_count.load();
+        return total > 0 && computed >= total;
+    }
+
+    // results access
+    static inline std::vector<mct_result>& get_results() { return get_instance().results; }
+
+   private:
+    void run();
+
+    std::thread worker_thread;
+    std::atomic<bool> should_stop{true};
+    std::atomic<u32> computed_count{0};
+    std::atomic<u32> total_count{0};
+    std::vector<mct_result> results;
+    const std::vector<BeatmapDifficulty*>* maps_to_process{nullptr};
+
+    static std::unique_ptr<MapCalcThread> instance;
+    static std::once_flag instance_flag;
 };
-
-extern std::atomic<u32> mct_computed;
-extern std::atomic<u32> mct_total;
-
-extern std::mutex mct_results_mtx;
-extern std::vector<mct_result> mct_results;
-
-void mct_calc(const std::vector<BeatmapDifficulty*> &maps_to_calc);
-void mct_abort();

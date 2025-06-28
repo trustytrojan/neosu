@@ -116,7 +116,7 @@ class DatabaseLoader : public Resource {
         // load database
         lct_set_map(NULL);
         loct_abort();
-        mct_abort();
+        MapCalcThread::abort();
         this->db->beatmapsets.clear();  // TODO @kiwec: this just leaks memory?
         this->db->loadDB();
 
@@ -165,7 +165,7 @@ Database::~Database() {
     sct_abort();
     lct_set_map(NULL);
     loct_abort();
-    mct_abort();
+    MapCalcThread::abort();
     for(int i = 0; i < this->beatmapsets.size(); i++) {
         delete this->beatmapsets[i];
     }
@@ -1124,7 +1124,7 @@ void Database::loadDB() {
              this->importTimer->getElapsedTime(), nb_peppy_maps, nb_neosu_maps, nb_peppy_maps + nb_neosu_maps);
     debugLog("Found %d overrides; %d maps need star recalc, %d maps need loudness recalc\n", nb_overrides,
              this->maps_to_recalc.size(), this->loudness_to_calc.size());
-    mct_calc(this->maps_to_recalc);
+    MapCalcThread::start_calc(this->maps_to_recalc);
     loct_calc(this->loudness_to_calc);
 
     sct_calc(this->scores_to_convert);
