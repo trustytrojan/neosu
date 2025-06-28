@@ -321,10 +321,9 @@ MD5Hash read_hash(Packet *packet);
 
 template <typename T>
 T read(Packet *packet) {
-    T result;
+    T result{};
     if(packet->pos + sizeof(T) > packet->size) {
         packet->pos = packet->size + 1;
-        memset(&result, 0, sizeof(T));
         return result;
     } else {
         memcpy(&result, packet->memory + packet->pos, sizeof(T));
