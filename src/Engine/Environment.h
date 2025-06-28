@@ -8,6 +8,8 @@
 
 #ifdef MCENGINE_PLATFORM_WINDOWS // temp, for isatty
 #include <io.h>
+#else
+#include <unistd.h> // isatty libc++
 #endif
 
 class ContextMenu;
@@ -51,7 +53,7 @@ class Environment {
     virtual std::string getFileExtensionFromFilePath(std::string filepath, bool includeDot = false) = 0;
     virtual std::string getFileNameFromFilePath(std::string filePath) = 0;
 
-    static inline bool isaTTY() { return ::isatty(fileno(stdout)) != 0; }
+    static inline bool isaTTY() { return isatty(fileno(stdout)) != 0; }
 
     // clipboard
     virtual UString getClipBoardText() = 0;
