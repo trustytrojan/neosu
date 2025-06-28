@@ -285,32 +285,33 @@ bool McFont::initializeSharedFallbackFonts() {
 
 void McFont::discoverSystemFallbacks() {
 #ifdef MCENGINE_PLATFORM_WINDOWS
-    wchar_t windir[MAX_PATH];
-    if(GetWindowsDirectoryW(windir, MAX_PATH) <= 0) return;
+    std::array<char, MAX_PATH> windir{};
+    if(GetWindowsDirectoryA(windir.data(), MAX_PATH) <= 0) return;
 
-    std::vector<UString> systemFonts = {
-        UString{windir} + "\\Fonts\\arial.ttf",    UString{windir} + "\\Fonts\\msyh.ttc",  // Microsoft YaHei (Chinese)
-        UString{windir} + "\\Fonts\\malgun.ttf",                                           // Malgun Gothic (Korean)
-        UString{windir} + "\\Fonts\\meiryo.ttc",                                           // Meiryo (Japanese)
-        UString{windir} + "\\Fonts\\seguiemj.ttf",                                         // Segoe UI Emoji
-        UString{windir} + "\\Fonts\\seguisym.ttf"                                          // Segoe UI Symbol
+    std::vector<std::string> systemFonts = {
+        std::string{windir.data()} + "\\Fonts\\arial.ttf",
+        std::string{windir.data()} + "\\Fonts\\msyh.ttc",      // Microsoft YaHei (Chinese)
+        std::string{windir.data()} + "\\Fonts\\malgun.ttf",    // Malgun Gothic (Korean)
+        std::string{windir.data()} + "\\Fonts\\meiryo.ttc",    // Meiryo (Japanese)
+        std::string{windir.data()} + "\\Fonts\\seguiemj.ttf",  // Segoe UI Emoji
+        std::string{windir.data()} + "\\Fonts\\seguisym.ttf"   // Segoe UI Symbol
     };
 #elif defined(MCENGINE_PLATFORM_LINUX)
     // linux system fonts (common locations)
-    std::vector<UString> systemFonts = {"/usr/share/fonts/TTF/dejavu/DejaVuSans.ttf",
-                                        "/usr/share/fonts/TTF/liberation/LiberationSans-Regular.ttf",
-                                        "/usr/share/fonts/liberation/LiberationSans-Regular.ttf",
-                                        "/usr/share/fonts/noto/NotoSans-Regular.ttf",
-                                        "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
-                                        "/usr/share/fonts/TTF/noto/NotoColorEmoji.ttf"};
+    std::vector<std::string> systemFonts = {"/usr/share/fonts/TTF/dejavu/DejaVuSans.ttf",
+                                            "/usr/share/fonts/TTF/liberation/LiberationSans-Regular.ttf",
+                                            "/usr/share/fonts/liberation/LiberationSans-Regular.ttf",
+                                            "/usr/share/fonts/noto/NotoSans-Regular.ttf",
+                                            "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
+                                            "/usr/share/fonts/TTF/noto/NotoColorEmoji.ttf"};
 #else  // TODO: loading WOFF fonts in wasm? idk
-    std::vector<UString> systemFonts;
+    std::vector<std::string> systemFonts;
     return;
 #endif
 
-    for(const auto &fontPath : systemFonts) {
-        if(File::exists(fontPath.toUtf8()) == File::FILETYPE::FILE) {
-            loadFallbackFont(fontPath, true);
+    for(auto &fontPath : systemFonts) {
+        if(File::existsCaseInsensitive(fontPath) == File::FILETYPE::FILE) {
+            loadFallbackFont(fontPath.c_str(), true);
         }
     }
 }
