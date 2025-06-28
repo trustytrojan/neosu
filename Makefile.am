@@ -317,7 +317,6 @@ $(DEPS_PREFIX)/mimalloc.built: $(DEPS_CACHE)/mimalloc-$(MIMALLOC_VERSION).source
 		-D MI_USE_CXX=ON \
 		-D MI_BUILD_SHARED=$(if $(findstring linux,$(host_os)),OFF,ON) \
 		-D MI_BUILD_TESTS=OFF \
-		-D MI_NO_THP=ON \
 		$(if $(findstring linux,$(host_os)),,-DMI_WIN_USE_FIXED_TLS=ON) \
 		$(if $(ENABLE_ASAN),-DMI_LOCAL_DYNAMIC_TLS=ON -DMI_TRACK_ASAN=ON -DMI_DEBUG_UBSAN=ON,) \
 		-D MI_INSTALL_TOPLEVEL=ON \
