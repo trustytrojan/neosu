@@ -25,10 +25,12 @@ void submit_score(FinishedScore score) {
     strftime(score_time, sizeof(score_time), "%y%m%d%H%M%S", timeinfo);
 
     u8 iv[32];
-    std::random_device rd;
-    auto *iv_words = reinterpret_cast<uint32_t *>(iv);
-    for(int i = 0; i < 8; ++i) {
-        iv_words[i] = rd();
+    auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    std::mt19937_64 rng(seed);
+    std::uniform_int_distribution<u8> dist(0, 255);
+
+    for(u8 &i : iv) {
+        i = dist(rng);
     }
 
     APIRequest request;

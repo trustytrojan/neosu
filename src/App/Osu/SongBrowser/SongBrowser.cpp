@@ -294,7 +294,8 @@ bool sort_by_grade(SongButton const *a, SongButton const *b) {
 
 SongBrowser::SongBrowser() : ScreenBackable() {
     // random selection algorithm init
-    this->rngalg = std::mt19937(std::random_device{}());
+    auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    this->rngalg = std::mt19937(static_cast<std::mt19937::result_type>(seed));
 
     // sorting/grouping + methods
     this->group = GROUP::GROUP_NO_GROUPING;
