@@ -248,12 +248,11 @@ AS_VAR_SET_IF([with_audio],
         do
             case $aud in
             soloud*) with_soloud=yes ;;
-            sdl*) with_sdlmixer=yes ;;
             bass*) with_bass=yes ;;
             esac
         done])
 
-AS_IF([test "$with_bass" = "yes" || { test "$with_bass" = "unset" && ! { test "$with_soloud" = "yes" || test "$with_sdlmixer" = "yes"; } ; } ], [
+AS_IF([test "$with_bass" = "yes" || { test "$with_bass" = "unset" && ! { test "$with_soloud" = "yes"; } ; } ], [
     ((audiobackendcnt++))
     AUDBACKENDLIST="${AUDBACKENDLIST} BASS"
     with_bass=yes
@@ -265,11 +264,6 @@ AS_IF([test "$with_soloud" = "yes"], [
     ((audiobackendcnt++))
     AUDBACKENDLIST="${AUDBACKENDLIST} SoLoud"
     AC_DEFINE([MCENGINE_FEATURE_SOLOUD], [1], [Define if the SoLoud audio backend is desired.])
-])
-AS_IF([test "$with_sdlmixer" = "yes"], [
-    ((audiobackendcnt++))
-    AUDBACKENDLIST="${AUDBACKENDLIST} SDL"
-    AC_DEFINE([MCENGINE_FEATURE_SDL_MIXER], [1], [Define if the SDL_mixer audio backend is desired.])
 ])
 
 AC_SUBST([AUDBACKENDLIST])
@@ -844,7 +838,6 @@ AM_CONDITIONAL([BUILD_MIMALLOC], [{ test "x$enable_debug" != "xyes" || test "x$w
                                 }]) # default off for windows 32bit for compatibility
 
 AM_CONDITIONAL([USE_BASS], [test "$with_bass" = "yes"])
-AM_CONDITIONAL([USE_SDLMIXER], [test "$with_sdlmixer" = "yes"])
 AM_CONDITIONAL([USE_SOLOUD], [test "$with_soloud" = "yes"])
 AM_CONDITIONAL([WIN_PLATFORM], [test "$SYSNAME" = "windows"])
 AM_CONDITIONAL([WIN32_PLATFORM], [test "$SYSNAME" = "windows" && test "$host_cpu" = "i686"])
@@ -891,7 +884,6 @@ neosu build configuration:
     Linker flags:       ${LDFLAGS}
     mimalloc:           ${with_mimalloc-yes}
     BASS:               ${with_bass-no}
-    SDL_mixer:          ${with_sdlmixer-no}
     SoLoud:             ${with_soloud-no}
     IME enabled:        ${enable_ime-yes}
     LTO:                ${enable_lto-auto}

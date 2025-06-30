@@ -90,15 +90,6 @@ $(DEPS_CACHE)/mimalloc-$(MIMALLOC_VERSION).source:
 	$(WGET) -qO $(DEPS_CACHE)/mimalloc-$(MIMALLOC_VERSION).tar.gz "https://github.com/microsoft/mimalloc/archive/$(MIMALLOC_VERSION).tar.gz" && \
 	touch $@
 
-# --with-audio=sdl
-$(DEPS_CACHE)/SDL3_mixer-$(SDL3_MIXER_VERSION).source:
-	rm -rf $(DEPS_CACHE)/SDL3_mixer && \
-	$(MKDIR_P) $(DEPS_CACHE)/SDL3_mixer
-	$(WGET) -qO $(DEPS_CACHE)/SDL3_mixer-$(SDL3_MIXER_VERSION).tar.gz "https://github.com/libsdl-org/SDL_mixer/archive/$(SDL3_MIXER_VERSION).tar.gz" && \
-	$(TAR) xf $(DEPS_CACHE)/SDL3_mixer-$(SDL3_MIXER_VERSION).tar.gz -C $(DEPS_CACHE)/SDL3_mixer --strip-components=1 && \
-	cd $(DEPS_CACHE)/SDL3_mixer/external && ./download.sh # cache vendored dependencies
-	touch $@
-
 # --with-audio=soloud
 $(DEPS_CACHE)/SoLoud-$(SOLOUD_VERSION).source:
 	$(MKDIR_P) $(DEPS_CACHE)
@@ -366,43 +357,6 @@ else
 $(DEPS_PREFIX)/SDL3.built:
 	$(MKDIR_P) $(DEPS_PREFIX) && touch $@
 endif # BUILD_SDL3
-
-if USE_SDLMIXER
-AUDIO_CFLAGS += $(shell $(PKG_CONFIG) --cflags sdl3-mixer)
-AUDIO_LIBS += $(shell $(PKG_CONFIG) --libs sdl3-mixer)
-$(DEPS_PREFIX)/SDL3_mixer.built: $(DEPS_PREFIX)/SDL3.built $(DEPS_CACHE)/SDL3_mixer-$(SDL3_MIXER_VERSION).source
-	rm -rf $(DEPS_PREFIX)/SDL3_mixer
-	$(MKDIR_P) $(DEPS_PREFIX) $(DEPS_PREFIX)/lib/pkgconfig
-	cp -r $(DEPS_CACHE)/SDL3_mixer $(DEPS_PREFIX)/SDL3_mixer && \
-	$(MKDIR_P) $(DEPS_PREFIX)/SDL3_mixer/build
-	cd $(DEPS_PREFIX)/SDL3_mixer && \
-	PKG_CONFIG="$(PKG_CONFIG)" LDFLAGS="$(LDFLAGS)" \
-	$(CMAKE) -S . -B build -G Ninja \
-		-D CMAKE_BUILD_TYPE="$(if $(ENABLE_DEBUG),Debug,Release)" \
-		-D CMAKE_INSTALL_PREFIX="$(DEPS_PREFIX)" \
-		-D CMAKE_SYSTEM_NAME="$(CMAKE_SYSTEM_NAME)" \
-		-D CMAKE_SYSTEM_PROCESSOR="$(host_cpu)" \
-		-D CMAKE_C_COMPILER="$(CC)" \
-		-D CMAKE_C_FLAGS="$(CFLAGS) -Wno-error=incompatible-pointer-types" \
-		$(CMAKERCOPT) \
-		-D SDLMIXER_GME=OFF \
-		-D SDLMIXER_MIDI=OFF \
-		-D SDLMIXER_STRICT=ON \
-		-D SDLMIXER_VENDORED=ON \
-		-D SDLMIXER_MP3=ON \
-		-D SDLMIXER_MP3_MPG123=ON \
-		-D BUILD_SHARED_LIBS="$(if $(STATICBUILD),OFF,ON)" \
-		-D SDLMIXER_DEPS_SHARED="$(if $(STATICBUILD),OFF,ON)" && \
-	$(CMAKE) --build build && \
-	$(CMAKE) --install build
-	$(SED) -i 's|Libs\.private.*|Libs.private: -lmpg123 -logg -lopus -lwavpack -lopusfile -lxmp|' $(DEPS_PREFIX)/lib/pkgconfig/sdl3-mixer.pc # wtf is this weird $(CMAKE) issue?
-	rm -rf $(DEPS_PREFIX)/lib/*SDL3_mixer$(if $(STATICBUILD),$(DLLEXT),.a)*
-	$(PKG_CONFIG) --exists --print-errors sdl3-mixer
-	touch $@
-else
-$(DEPS_PREFIX)/SDL3_mixer.built:
-	$(MKDIR_P) $(DEPS_PREFIX) && touch $@
-endif # USE_SDLMIXER
 
 if BUILD_MPG123
 MPG123_CFLAGS += $(shell $(PKG_CONFIG) --cflags libmpg123)
@@ -795,7 +749,6 @@ BUILT_SOURCES := \
 	$(DEPS_PREFIX)/mimalloc.built \
 	$(DEPS_PREFIX)/SDL3.built \
 	$(DEPS_PREFIX)/bass-$(BASS_VERSION).built \
-	$(DEPS_PREFIX)/SDL3_mixer.built \
 	$(DEPS_PREFIX)/libjpeg.built \
 	$(DEPS_PREFIX)/FMT.built \
 	$(DEPS_PREFIX)/libpng.built \
@@ -947,9 +900,6 @@ endif
 endif
 if USE_BASS
 	@cp -P $(BASS_INSTALL_LIBS) "$(DESTDIR)$(bindir)/$(LIBDEST)"
-endif
-if USE_SDLMIXER
-	$(if $(STATICBUILD),,@cp -P "$(SDL3_MIXER_PREFIX)/lib"/{*$(LIBPREFIX)SDL3_mixer*$(DLLEXT)*,*$(LIBPREFIX)mpg123*$(DLLEXT)*,*$(LIBPREFIX)xmp*$(DLLEXT)*,*$(LIBPREFIX)wavpack*$(DLLEXT)*,*$(LIBPREFIX)opus*$(DLLEXT)*,*$(LIBPREFIX)ogg*$(DLLEXT)*} "$(DESTDIR)$(bindir)/$(LIBDEST)")
 endif
 if USE_SOLOUD
 	$(if $(STATICBUILD),,@cp -P "$(SOLOUD_PREFIX)/lib"/*$(LIBPREFIX)soloud*$(DLLEXT)* "$(DESTDIR)$(bindir)/$(LIBDEST)")

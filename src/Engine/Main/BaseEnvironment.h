@@ -94,9 +94,6 @@ consteval AUD getAudioBackend() {
 #ifdef MCENGINE_FEATURE_BASS_WASAPI
         AUD::WASAPI |
 #endif
-#ifdef MCENGINE_FEATURE_SDL_MIXER
-        AUD::SDL |
-#endif
 #ifdef MCENGINE_FEATURE_SOLOUD
         AUD::SOLOUD |
 #endif

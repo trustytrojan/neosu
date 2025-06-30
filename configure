@@ -658,8 +658,6 @@ WIN_PLATFORM_FALSE
 WIN_PLATFORM_TRUE
 USE_SOLOUD_FALSE
 USE_SOLOUD_TRUE
-USE_SDLMIXER_FALSE
-USE_SDLMIXER_TRUE
 USE_BASS_FALSE
 USE_BASS_TRUE
 BUILD_MIMALLOC_FALSE
@@ -6470,13 +6468,12 @@ then :
         do
             case $aud in
             soloud*) with_soloud=yes ;;
-            sdl*) with_sdlmixer=yes ;;
             bass*) with_bass=yes ;;
             esac
         done
 fi
 
-if test "$with_bass" = "yes" || { test "$with_bass" = "unset" && ! { test "$with_soloud" = "yes" || test "$with_sdlmixer" = "yes"; } ; }
+if test "$with_bass" = "yes" || { test "$with_bass" = "unset" && ! { test "$with_soloud" = "yes"; } ; }
 then :
 
     ((audiobackendcnt++))
@@ -6499,16 +6496,6 @@ then :
     AUDBACKENDLIST="${AUDBACKENDLIST} SoLoud"
 
 printf "%s\n" "#define MCENGINE_FEATURE_SOLOUD 1" >>confdefs.h
-
-
-fi
-if test "$with_sdlmixer" = "yes"
-then :
-
-    ((audiobackendcnt++))
-    AUDBACKENDLIST="${AUDBACKENDLIST} SDL"
-
-printf "%s\n" "#define MCENGINE_FEATURE_SDL_MIXER 1" >>confdefs.h
 
 
 fi
@@ -12543,14 +12530,6 @@ else
   USE_BASS_FALSE=
 fi
 
- if test "$with_sdlmixer" = "yes"; then
-  USE_SDLMIXER_TRUE=
-  USE_SDLMIXER_FALSE='#'
-else
-  USE_SDLMIXER_TRUE='#'
-  USE_SDLMIXER_FALSE=
-fi
-
  if test "$with_soloud" = "yes"; then
   USE_SOLOUD_TRUE=
   USE_SOLOUD_FALSE='#'
@@ -12835,10 +12814,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_BASS_TRUE}" && test -z "${USE_BASS_FALSE}"; then
   as_fn_error $? "conditional \"USE_BASS\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${USE_SDLMIXER_TRUE}" && test -z "${USE_SDLMIXER_FALSE}"; then
-  as_fn_error $? "conditional \"USE_SDLMIXER\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_SOLOUD_TRUE}" && test -z "${USE_SOLOUD_FALSE}"; then
@@ -14204,7 +14179,6 @@ neosu build configuration:
     Linker flags:       ${LDFLAGS}
     mimalloc:           ${with_mimalloc-yes}
     BASS:               ${with_bass-no}
-    SDL_mixer:          ${with_sdlmixer-no}
     SoLoud:             ${with_soloud-no}
     IME enabled:        ${enable_ime-yes}
     LTO:                ${enable_lto-auto}
@@ -14252,7 +14226,6 @@ neosu build configuration:
     Linker flags:       ${LDFLAGS}
     mimalloc:           ${with_mimalloc-yes}
     BASS:               ${with_bass-no}
-    SDL_mixer:          ${with_sdlmixer-no}
     SoLoud:             ${with_soloud-no}
     IME enabled:        ${enable_ime-yes}
     LTO:                ${enable_lto-auto}
