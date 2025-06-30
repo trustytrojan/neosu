@@ -33,12 +33,12 @@ class Quaternion {
     void fromEuler(float yawDeg, float pitchDeg, float rollDeg);
 
     [[nodiscard]] inline float getYaw() const {
-        return rad2deg(std::atan2(2.0f * (this->y * this->z + this->w * this->x),
+        return glm::degrees(std::atan2(2.0f * (this->y * this->z + this->w * this->x),
                                   this->w * this->w - this->x * this->x - this->y * this->y + this->z * this->z));
     }
-    [[nodiscard]] inline float getPitch() const { return rad2deg(std::asin(-2.0f * (this->x * this->z - this->w * this->y))); }
+    [[nodiscard]] inline float getPitch() const { return glm::degrees(std::asin(-2.0f * (this->x * this->z - this->w * this->y))); }
     [[nodiscard]] inline float getRoll() const {
-        return rad2deg(std::atan2(2.0f * (this->x * this->y + this->w * this->z),
+        return glm::degrees(std::atan2(2.0f * (this->x * this->y + this->w * this->z),
                                   this->w * this->w + this->x * this->x - this->y * this->y - this->z * this->z));
     }
 

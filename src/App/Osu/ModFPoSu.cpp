@@ -68,9 +68,9 @@ void ModFPoSu::draw() {
     Matrix4 projectionMatrix =
         cv_fposu_vertical_fov.getBool()
             ? Camera::buildMatrixPerspectiveFovVertical(
-                  deg2rad(fov), ((float)osu->getScreenWidth() / (float)osu->getScreenHeight()), 0.05f, 1000.0f)
+                  glm::radians(fov), ((float)osu->getScreenWidth() / (float)osu->getScreenHeight()), 0.05f, 1000.0f)
             : Camera::buildMatrixPerspectiveFovHorizontal(
-                  deg2rad(fov), ((float)osu->getScreenHeight() / (float)osu->getScreenWidth()), 0.05f, 1000.0f);
+                  glm::radians(fov), ((float)osu->getScreenHeight() / (float)osu->getScreenWidth()), 0.05f, 1000.0f);
     Matrix4 viewMatrix = Camera::buildMatrixLookAt(
         this->camera->getPos(), this->camera->getPos() + this->camera->getViewDirection(), this->camera->getViewUp());
 

@@ -172,7 +172,6 @@ neosu_SOURCES = \
 	src/GUI/Windows/VinylScratcher/VinylScratcher.cpp \
 	src/GUI/Windows/VisualProfiler.cpp \
 	src/Util/MD5Hash.cpp \
-	src/Util/Matrices.cpp \
 	src/Util/Quaternion.cpp \
 	src/Util/Rect.cpp \
 	src/Util/UString.cpp \

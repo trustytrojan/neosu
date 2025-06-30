@@ -316,7 +316,6 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/GUI/Windows/VinylScratcher/neosu-VinylScratcher.$(OBJEXT) \
 	src/GUI/Windows/neosu-VisualProfiler.$(OBJEXT) \
 	src/Util/neosu-MD5Hash.$(OBJEXT) \
-	src/Util/neosu-Matrices.$(OBJEXT) \
 	src/Util/neosu-Quaternion.$(OBJEXT) \
 	src/Util/neosu-Rect.$(OBJEXT) src/Util/neosu-UString.$(OBJEXT)
 neosu_OBJECTS = $(am_neosu_OBJECTS)
@@ -510,7 +509,6 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSTitleBar.Po \
 	src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VinylScratcher.Po \
 	src/Util/$(DEPDIR)/neosu-MD5Hash.Po \
-	src/Util/$(DEPDIR)/neosu-Matrices.Po \
 	src/Util/$(DEPDIR)/neosu-Quaternion.Po \
 	src/Util/$(DEPDIR)/neosu-Rect.Po \
 	src/Util/$(DEPDIR)/neosu-UString.Po
@@ -1005,7 +1003,6 @@ neosu_SOURCES = \
 	src/GUI/Windows/VinylScratcher/VinylScratcher.cpp \
 	src/GUI/Windows/VisualProfiler.cpp \
 	src/Util/MD5Hash.cpp \
-	src/Util/Matrices.cpp \
 	src/Util/Quaternion.cpp \
 	src/Util/Rect.cpp \
 	src/Util/UString.cpp \
@@ -1798,8 +1795,6 @@ src/Util/$(DEPDIR)/$(am__dirstamp):
 	@: >>src/Util/$(DEPDIR)/$(am__dirstamp)
 src/Util/neosu-MD5Hash.$(OBJEXT): src/Util/$(am__dirstamp) \
 	src/Util/$(DEPDIR)/$(am__dirstamp)
-src/Util/neosu-Matrices.$(OBJEXT): src/Util/$(am__dirstamp) \
-	src/Util/$(DEPDIR)/$(am__dirstamp)
 src/Util/neosu-Quaternion.$(OBJEXT): src/Util/$(am__dirstamp) \
 	src/Util/$(DEPDIR)/$(am__dirstamp)
 src/Util/neosu-Rect.$(OBJEXT): src/Util/$(am__dirstamp) \
@@ -2007,7 +2002,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSTitleBar.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VinylScratcher.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-MD5Hash.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-Matrices.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-Quaternion.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-Rect.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Util/$(DEPDIR)/neosu-UString.Po@am__quote@ # am--include-marker
@@ -4442,20 +4436,6 @@ src/Util/neosu-MD5Hash.obj: src/Util/MD5Hash.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Util/neosu-MD5Hash.obj `if test -f 'src/Util/MD5Hash.cpp'; then $(CYGPATH_W) 'src/Util/MD5Hash.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Util/MD5Hash.cpp'; fi`
 
-src/Util/neosu-Matrices.o: src/Util/Matrices.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Util/neosu-Matrices.o -MD -MP -MF src/Util/$(DEPDIR)/neosu-Matrices.Tpo -c -o src/Util/neosu-Matrices.o `test -f 'src/Util/Matrices.cpp' || echo '$(srcdir)/'`src/Util/Matrices.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Util/$(DEPDIR)/neosu-Matrices.Tpo src/Util/$(DEPDIR)/neosu-Matrices.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Util/Matrices.cpp' object='src/Util/neosu-Matrices.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Util/neosu-Matrices.o `test -f 'src/Util/Matrices.cpp' || echo '$(srcdir)/'`src/Util/Matrices.cpp
-
-src/Util/neosu-Matrices.obj: src/Util/Matrices.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Util/neosu-Matrices.obj -MD -MP -MF src/Util/$(DEPDIR)/neosu-Matrices.Tpo -c -o src/Util/neosu-Matrices.obj `if test -f 'src/Util/Matrices.cpp'; then $(CYGPATH_W) 'src/Util/Matrices.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Util/Matrices.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Util/$(DEPDIR)/neosu-Matrices.Tpo src/Util/$(DEPDIR)/neosu-Matrices.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Util/Matrices.cpp' object='src/Util/neosu-Matrices.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Util/neosu-Matrices.obj `if test -f 'src/Util/Matrices.cpp'; then $(CYGPATH_W) 'src/Util/Matrices.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Util/Matrices.cpp'; fi`
-
 src/Util/neosu-Quaternion.o: src/Util/Quaternion.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Util/neosu-Quaternion.o -MD -MP -MF src/Util/$(DEPDIR)/neosu-Quaternion.Tpo -c -o src/Util/neosu-Quaternion.o `test -f 'src/Util/Quaternion.cpp' || echo '$(srcdir)/'`src/Util/Quaternion.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Util/$(DEPDIR)/neosu-Quaternion.Tpo src/Util/$(DEPDIR)/neosu-Quaternion.Po
@@ -4994,7 +4974,6 @@ distclean: distclean-am
 	-rm -f src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSTitleBar.Po
 	-rm -f src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VinylScratcher.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-MD5Hash.Po
-	-rm -f src/Util/$(DEPDIR)/neosu-Matrices.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-Quaternion.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-Rect.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-UString.Po
@@ -5218,7 +5197,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VSTitleBar.Po
 	-rm -f src/GUI/Windows/VinylScratcher/$(DEPDIR)/neosu-VinylScratcher.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-MD5Hash.Po
-	-rm -f src/Util/$(DEPDIR)/neosu-Matrices.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-Quaternion.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-Rect.Po
 	-rm -f src/Util/$(DEPDIR)/neosu-UString.Po

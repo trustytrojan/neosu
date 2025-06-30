@@ -102,7 +102,7 @@ void SimulatedBeatmap::simulate_to(i32 music_pos) {
             if(!this->bInBreak) this->live_score.addKeyCount(4);
         }
 
-        this->interpolatedMousePos = {current_frame.x, current_frame.y};
+        this->interpolatedMousePos = Vector2{current_frame.x, current_frame.y};
         this->iCurMusicPos = current_frame.cur_music_pos;
 
         this->update(frame_time);

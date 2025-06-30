@@ -428,10 +428,10 @@ void Spinner::onHit() {
 }
 
 void Spinner::rotate(float rad) {
-    this->fDrawRot += rad2deg(rad);
+    this->fDrawRot += glm::degrees(rad);
 
     rad = std::abs(rad);
-    const float newRotations = this->fRotations + rad2deg(rad);
+    const float newRotations = this->fRotations + glm::degrees(rad);
 
     // added one whole rotation
     if(std::floor(newRotations / 360.0f) > this->fRotations / 360.0f) {

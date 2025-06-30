@@ -552,7 +552,7 @@ void SliderRenderer::drawFillSliderBodyMM(const std::vector<Vector2> &points, fl
         static void addLineCap(Vector2 origin, float theta, float thetaDiff, float radius, VertexArrayObject &vao) {
             const float step = PI / 32.0f;  // MAX_RES
 
-            const float dir = sign<float>(thetaDiff);
+            const float dir = std::signbit(thetaDiff) ? -1.0f : 1.0f;
             thetaDiff = dir * thetaDiff;
 
             const int amountPoints = (int)std::ceil(thetaDiff / step);

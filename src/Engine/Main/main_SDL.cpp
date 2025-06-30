@@ -512,14 +512,14 @@ int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
                     if(joystick0DeadzoneX > 0.0f && joystick0DeadzoneX < 1.0f) {
                         const float deltaAbs = (std::abs(this->fJoystick0XPercent) - joystick0DeadzoneX);
                         joystick0XPercent = (deltaAbs > 0.0f ? (deltaAbs / (1.0f - joystick0DeadzoneX)) *
-                                                                   (float)sign<float>(this->fJoystick0XPercent)
+                                                                   (std::signbit(this->fJoystick0XPercent) ? -1.0f : 1.0f)
                                                              : 0.0f);
                     }
 
                     if(joystick0DeadzoneY > 0.0f && joystick0DeadzoneY < 1.0f) {
                         const float deltaAbs = (std::abs(this->fJoystick0YPercent) - joystick0DeadzoneY);
                         joystick0YPercent = (deltaAbs > 0.0f ? (deltaAbs / (1.0f - joystick0DeadzoneY)) *
-                                                                   (float)sign<float>(this->fJoystick0YPercent)
+                                                                   (std::signbit(this->fJoystick0YPercent) ? -1.0f : 1.0f)
                                                              : 0.0f);
                     }
                 }

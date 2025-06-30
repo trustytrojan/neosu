@@ -39,6 +39,10 @@
 #include "UString.h"
 #include "Vectors.h"
 
+// EXTERNAL INCLUDES
+
+#include <glm/trigonometric.hpp> // for glm::radians/glm::degrees
+
 // DEFS
 
 #ifndef PATH_MAX
@@ -68,21 +72,21 @@ constexpr void runtime_assert(bool cond, const char *reason)
              ((((int)(std::clamp<float>(g, 0.0f, 1.0f) * 255.0f)) & 0xff) << 8) |  \
              (((int)(std::clamp<float>(b, 0.0f, 1.0f) * 255.0f)) & 0xff)))
 
-#define COLOR_GET_Ri(color) (((Channel)(color >> 16)))
+#define COLOR_GET_Ri(color) (((Channel)((color) >> 16)))
 
-#define COLOR_GET_Gi(color) (((Channel)(color >> 8)))
+#define COLOR_GET_Gi(color) (((Channel)((color) >> 8)))
 
-#define COLOR_GET_Bi(color) (((Channel)(color >> 0)))
+#define COLOR_GET_Bi(color) (((Channel)((color) >> 0)))
 
-#define COLOR_GET_Ai(color) (((Channel)(color >> 24)))
+#define COLOR_GET_Ai(color) (((Channel)((color) >> 24)))
 
-#define COLOR_GET_Rf(color) (((Channel)(color >> 16)) / 255.0f)
+#define COLOR_GET_Rf(color) (((Channel)((color) >> 16)) / 255.0f)
 
-#define COLOR_GET_Gf(color) (((Channel)(color >> 8)) / 255.0f)
+#define COLOR_GET_Gf(color) (((Channel)((color) >> 8)) / 255.0f)
 
-#define COLOR_GET_Bf(color) (((Channel)(color >> 0)) / 255.0f)
+#define COLOR_GET_Bf(color) (((Channel)((color) >> 0)) / 255.0f)
 
-#define COLOR_GET_Af(color) (((Channel)(color >> 24)) / 255.0f)
+#define COLOR_GET_Af(color) (((Channel)((color) >> 24)) / 255.0f)
 
 #define COLOR_INVERT(color) \
     (COLOR(COLOR_GET_Ai(color), 255 - COLOR_GET_Ri(color), 255 - COLOR_GET_Gi(color), 255 - COLOR_GET_Bi(color)))
@@ -101,20 +105,10 @@ constexpr void runtime_assert(bool cond, const char *reason)
             std::clamp<float>(COLOR_GET_Gf(color1) - COLOR_GET_Gf(color2), 0.0f, 1.0f),       \
             std::clamp<float>(COLOR_GET_Bf(color1) - COLOR_GET_Bf(color2), 0.0f, 1.0f)))
 
-#define PI 3.1415926535897932384626433832795
-
-#define PIOVER180 0.01745329251994329576923690768489
+constexpr const auto PI = std::numbers::pi;
+constexpr const auto PIOVER180 = (PI/180.0f);
 
 // UTIL
-
-template <class T>
-inline int sign(T val) {
-    return val > 0 ? 1 : (val == 0 ? 0 : -1);
-}
-
-inline float deg2rad(float deg) { return deg * (f32)PI / 180.0f; }
-
-inline float rad2deg(float rad) { return rad * 180.0f / (f32)PI; }
 
 inline bool isInt(float f) { return (f == static_cast<float>(static_cast<int>(f))); }
 

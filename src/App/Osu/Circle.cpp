@@ -508,7 +508,7 @@ void Circle::update(long curPos, f64 frame_time) {
                 if(result != LiveScore::HIT::HIT_NULL) {
                     const float targetDelta = cursorDelta / (this->bi->fHitcircleDiameter / 2.0f);
                     const float targetAngle =
-                        rad2deg(atan2(this->bi->getCursorPos().y - pos.y, this->bi->getCursorPos().x - pos.x));
+                        glm::degrees(std::atan2(this->bi->getCursorPos().y - pos.y, this->bi->getCursorPos().x - pos.x));
 
                     this->onHit(result, delta, targetDelta, targetAngle);
                 }
@@ -562,7 +562,7 @@ void Circle::onClickEvent(std::vector<Click> &clicks) {
         LiveScore::HIT result = this->bi->getHitResult(delta);
         if(result != LiveScore::HIT::HIT_NULL) {
             const float targetDelta = cursorDelta / (this->bi->fHitcircleDiameter / 2.0f);
-            const float targetAngle = rad2deg(atan2(cursorPos.y - pos.y, cursorPos.x - pos.x));
+            const float targetAngle = glm::degrees(std::atan2(cursorPos.y - pos.y, cursorPos.x - pos.x));
 
             clicks.erase(clicks.begin());
             this->onHit(result, delta, targetDelta, targetAngle);

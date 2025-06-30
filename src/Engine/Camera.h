@@ -46,7 +46,7 @@ class Camera {
     // set
     void setType(CAMERA_TYPE camType);
     void setPos(Vector3 pos);
-    void setFov(float fovDeg) { this->fFov = deg2rad(fovDeg); }
+    void setFov(float fovDeg) { this->fFov = glm::radians(fovDeg); }
     void setFovRad(float fovRad) { this->fFov = fovRad; }
     void setOrbitDistance(float orbitDistance);
     void setOrbitYAxis(bool orbitYAxis) { this->bOrbitYAxis = orbitYAxis; }
@@ -65,7 +65,7 @@ class Camera {
     [[nodiscard]] inline Vector3 getPos() const { return this->vPos; }
     [[nodiscard]] Vector3 getNextPosition(Vector3 velocity) const;
 
-    [[nodiscard]] inline float getFov() const { return rad2deg(this->fFov); }
+    [[nodiscard]] inline float getFov() const { return glm::degrees(this->fFov); }
     [[nodiscard]] inline float getFovRad() const { return this->fFov; }
     [[nodiscard]] inline float getOrbitDistance() const { return this->fOrbitDistance; }
 

@@ -109,7 +109,7 @@ void Graphics::push3DScene(McRect region) {
 
     // calculate height to fit viewport angle
     float angle = (180.0f - fov) / 2.0f;
-    float b = (engine->getScreenHeight() / std::sin(deg2rad(fov))) * std::sin(deg2rad(angle));
+    float b = (engine->getScreenHeight() / std::sin(glm::radians(fov))) * std::sin(glm::radians(angle));
     float hc = std::sqrt(pow(b, 2.0f) - pow((engine->getScreenHeight() / 2.0f), 2.0f));
 
     // set projection matrix
@@ -120,7 +120,7 @@ void Graphics::push3DScene(McRect region) {
                                          0);
     Matrix4 projectionMatrix =
         trans2 * Camera::buildMatrixPerspectiveFov(
-                     deg2rad(fov), ((float)engine->getScreenWidth()) / ((float)engine->getScreenHeight()),
+                     glm::radians(fov), ((float)engine->getScreenWidth()) / ((float)engine->getScreenHeight()),
                      cv_r_3dscene_zn.getFloat(), cv_r_3dscene_zf.getFloat());
     this->scene_projection_matrix = projectionMatrix;
 

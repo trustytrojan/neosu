@@ -463,7 +463,7 @@ void Slider::draw2(bool drawApproachCircle, bool drawOnlyApproachCircle) {
                 this->fSlidePercent + 0.01f <= 1.0f ? this->fSlidePercent : this->fSlidePercent - 0.01f));
             Vector2 c2 = this->bm->osuCoords2Pixels(this->curve->pointAt(
                 this->fSlidePercent + 0.01f <= 1.0f ? this->fSlidePercent + 0.01f : this->fSlidePercent));
-            float ballAngle = rad2deg(atan2(c2.y - c1.y, c2.x - c1.x));
+            float ballAngle = glm::degrees(std::atan2(c2.y - c1.y, c2.x - c1.x));
             if(skin->getSliderBallFlip()) ballAngle += (this->iCurRepeat % 2 == 0) ? 0 : 180;
 
             g->setColor(skin->getAllowSliderBallTint()
@@ -702,7 +702,7 @@ void Slider::update(long curPos, f64 frame_time) {
                         if(result != LiveScore::HIT::HIT_NULL) {
                             const float targetDelta = cursorDelta / (this->bi->fHitcircleDiameter / 2.0f);
                             const float targetAngle =
-                                rad2deg(atan2(this->bi->getCursorPos().y - pos.y, this->bi->getCursorPos().x - pos.x));
+                                glm::degrees(std::atan2(this->bi->getCursorPos().y - pos.y, this->bi->getCursorPos().x - pos.x));
 
                             this->startResult = result;
                             this->onHit(this->startResult, delta, false, targetDelta, targetAngle);
@@ -1049,7 +1049,7 @@ void Slider::onClickEvent(std::vector<Click> &clicks) {
             LiveScore::HIT result = this->bi->getHitResult(delta);
             if(result != LiveScore::HIT::HIT_NULL) {
                 const float targetDelta = cursorDelta / (this->bi->fHitcircleDiameter / 2.0f);
-                const float targetAngle = rad2deg(atan2(cursorPos.y - pos.y, cursorPos.x - pos.x));
+                const float targetAngle = glm::degrees(std::atan2(cursorPos.y - pos.y, cursorPos.x - pos.x));
 
                 clicks.erase(clicks.begin());
                 this->startResult = result;

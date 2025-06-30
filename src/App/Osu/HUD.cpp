@@ -1961,7 +1961,7 @@ void HUD::drawTargetHeatmap(float hitcircleDiameter) {
         g->setColor(color);
         g->setAlpha(std::clamp<float>((this->targets[i].time - engine->getTime()) / 3.5f, 0.0f, 1.0f));
 
-        const float theta = deg2rad(this->targets[i].angle);
+        const float theta = glm::radians(this->targets[i].angle);
         const float cs = std::cos(theta);
         const float sn = std::sin(theta);
 

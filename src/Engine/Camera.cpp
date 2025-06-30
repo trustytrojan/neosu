@@ -123,7 +123,7 @@ static Vector3 Vector3TransformCoord(const Vector3 &in, const Matrix4 &mat) {
 Camera::Camera(Vector3 pos, Vector3 viewDir, float fovDeg, CAMERA_TYPE camType) {
     this->vPos = pos;
     this->vViewDir = viewDir;
-    this->fFov = deg2rad(fovDeg);
+    this->fFov = glm::radians(fovDeg);
     this->camType = camType;
 
     this->fOrbitDistance = 5.0f;
@@ -271,10 +271,10 @@ void Camera::lookAt(Vector3 eye, Vector3 target) {
 
     float yaw = std::atan2(-lookAtMatrix[8], lookAtMatrix[0]);
     float pitch = std::asin(-lookAtMatrix[6]);
-    /// float roll = atan2(lookAtMatrix[4], lookAtMatrix[5]);
+    /// float roll = std::atan2(lookAtMatrix[4], lookAtMatrix[5]);
 
-    this->fYaw = 180.0f + rad2deg(yaw);
-    this->fPitch = rad2deg(pitch);
+    this->fYaw = 180.0f + glm::degrees(yaw);
+    this->fPitch = glm::degrees(pitch);
 
     this->updateVectors();
 }
