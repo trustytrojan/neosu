@@ -2,7 +2,6 @@
 
 #include <chrono>
 #include <thread>
-#include <utility>
 
 #include "DatabaseBeatmap.h"
 #include "DifficultyCalculator.h"
@@ -12,7 +11,7 @@
 std::unique_ptr<MapCalcThread> MapCalcThread::instance = nullptr;
 std::once_flag MapCalcThread::instance_flag;
 
-void MapCalcThread::start_calc_instance(const std::vector<BeatmapDifficulty*>& maps_to_calc) {
+void MapCalcThread::start_calc_instance(const std::vector<DatabaseBeatmap*>& maps_to_calc) {
     abort();
 
     if(maps_to_calc.empty()) {
@@ -20,7 +19,7 @@ void MapCalcThread::start_calc_instance(const std::vector<BeatmapDifficulty*>& m
     }
 
     this->should_stop = false;
-    MapCalcThread::maps_to_process = &maps_to_calc;
+    this->maps_to_process = &maps_to_calc;
     this->computed_count = 0;
     this->total_count = static_cast<u32>(maps_to_calc.size()) + 1;
     this->results.clear();
@@ -47,20 +46,20 @@ void MapCalcThread::run() {
     std::vector<f64> aimStrains;
     std::vector<f64> speedStrains;
 
-    for(int i = 0; MapCalcThread::maps_to_process && std::cmp_less(i, MapCalcThread::maps_to_process->size()); i++) {
+    for(size_t i = 0; this->maps_to_process && i < this->maps_to_process->size(); i++) {
         // pause handling
         while(osu->should_pause_background_threads.load() && !this->should_stop.load()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
 
-        if(this->should_stop.load() || !MapCalcThread::maps_to_process) {
+        if(this->should_stop.load() || !this->maps_to_process) {
             return;
         }
 
         aimStrains.clear();
         speedStrains.clear();
 
-        const auto& diff2 = (*MapCalcThread::maps_to_process)[i];
+        const auto& diff2 = (*this->maps_to_process)[i];
 
         mct_result result;
         result.diff2 = diff2;
@@ -94,9 +93,9 @@ void MapCalcThread::run() {
             static_cast<f32>(DifficultyCalculator::calculateStarDiffForHitObjects(params, this->should_stop));
 
         BPMInfo bpm = getBPM(c.timingpoints);
-        result.min_bpm = static_cast<u32>(bpm.min);
-        result.max_bpm = static_cast<u32>(bpm.max);
-        result.avg_bpm = static_cast<u32>(bpm.most_common);
+        result.min_bpm = bpm.min;
+        result.max_bpm = bpm.max;
+        result.avg_bpm = bpm.most_common;
 
         this->results.push_back(result);
         this->computed_count++;
