@@ -337,11 +337,11 @@ class Beatmap : public BeatmapInterface {
         if(percent >= 0.5f) {
             percent = (percent - 0.5f) / 0.5f;
             percent *= percent;
-            return lerp<f32>(center, right, percent);
+            return std::lerp<f32>(center, right, percent);
         } else {
             percent = percent / 0.5f;
             percent = 1.0f - (1.0f - percent) * (1.0f - percent);
-            return lerp<f32>(left, center, percent);
+            return std::lerp<f32>(left, center, percent);
         }
     }
 

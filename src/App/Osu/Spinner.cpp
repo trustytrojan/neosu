@@ -27,7 +27,7 @@ Spinner::Spinner(int x, int y, long time, int sampleType, bool isEndOfCombo, lon
     int maxVel = 48;
     int minTime = 2000;
     int maxTime = 5000;
-    this->iMaxStoredDeltaAngles = clamp<int>(
+    this->iMaxStoredDeltaAngles = std::clamp<int>(
         (int)((endTime - time - minTime) * (maxVel - minVel) / (maxTime - minTime) + minVel), minVel, maxVel);
     this->storedDeltaAngles = new float[this->iMaxStoredDeltaAngles];
     for(int i = 0; i < this->iMaxStoredDeltaAngles; i++) {
@@ -72,14 +72,14 @@ void Spinner::draw() {
     Vector2 center = this->bm->osuCoords2Pixels(this->vRawPos);
 
     const float alphaMultiplier =
-        clamp<float>((deltaEnd < 0 ? 1.0f - ((float)std::abs(deltaEnd) / (float)fadeOutTimeMS) : 1.0f), 0.0f,
+        std::clamp<float>((deltaEnd < 0 ? 1.0f - ((float)std::abs(deltaEnd) / (float)fadeOutTimeMS) : 1.0f), 0.0f,
                      1.0f);  // only used for fade out anim atm
 
     const float globalScale = 1.0f;        // adjustments
     const float globalBaseSkinSize = 667;  // the width of spinner-bottom.png in the default skin
     const float globalBaseSize = this->bm->getPlayfieldSize().y;
 
-    const float clampedRatio = clamp<float>(this->fRatio, 0.0f, 1.0f);
+    const float clampedRatio = std::clamp<float>(this->fRatio, 0.0f, 1.0f);
     float finishScaleRatio = clampedRatio;
     finishScaleRatio = -finishScaleRatio * (finishScaleRatio - 2);
     const float finishScale =
@@ -291,7 +291,7 @@ void Spinner::update(long curPos, f64 frame_time) {
 
         // scale percent calculation
         long delta = (long)this->click_time - (long)curPos;
-        this->fPercent = 1.0f - clamp<float>((float)delta / -(float)(this->duration), 0.0f, 1.0f);
+        this->fPercent = 1.0f - std::clamp<float>((float)delta / -(float)(this->duration), 0.0f, 1.0f);
 
         // handle auto, mouse spinning movement
         float angleDiff = 0;
@@ -331,7 +331,7 @@ void Spinner::update(long curPos, f64 frame_time) {
                 if(isSpinning) {
                     deltaAngle = this->fDeltaAngleOverflow * DELTA_UPDATE_TIME / this->fDeltaOverflow;
                     this->fDeltaAngleOverflow -= deltaAngle;
-                    // deltaAngle = clamp<float>(deltaAngle, -MAX_ANG_DIFF, MAX_ANG_DIFF);
+                    // deltaAngle = std::clamp<float>(deltaAngle, -MAX_ANG_DIFF, MAX_ANG_DIFF);
                 }
 
                 this->fDeltaOverflow -= DELTA_UPDATE_TIME;
@@ -346,7 +346,7 @@ void Spinner::update(long curPos, f64 frame_time) {
 
                 f32 decay = pow(0.01f, (f32)frame_time);
                 this->fRPM = this->fRPM * decay + (1.0 - decay) * std::abs(rotationPerSec) * 60;
-                this->fRPM = min(this->fRPM, 477.0f);
+                this->fRPM = std::min(this->fRPM, 477.0f);
 
                 if(std::abs(rotationAngle) > 0.0001f) this->rotate(rotationAngle);
             }
@@ -459,7 +459,7 @@ void Spinner::rotate(float rad) {
     if(this->bm != NULL) {
         this->bm->getSkin()->playSpinnerSpinSound();
 
-        const float frequency = 20000.0f + (int)(clamp<float>(this->fRatio, 0.0f, 2.5f) * 40000.0f);
+        const float frequency = 20000.0f + (int)(std::clamp<float>(this->fRatio, 0.0f, 2.5f) * 40000.0f);
         this->bm->getSkin()->getSpinnerSpinSound()->setFrequency(frequency);
     }
 

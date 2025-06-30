@@ -210,7 +210,7 @@ void CBaseUITextbox::mouse_update(bool *propagate_clicks) {
 
                     // TODO: animations which don't suck for usability
                     this->fTextScrollAddX =
-                        clamp<int>(this->fTextScrollAddX + scrollspeed, 0,
+                        std::clamp<int>(this->fTextScrollAddX + scrollspeed, 0,
                                    this->fTextWidth - this->vSize.x + cv_ui_textbox_text_offset_x.getInt() * 2);
                     /// animation->moveSmoothEnd(&m_fTextScrollAddX, clampi(this->fTextScrollAddX+scrollspeed, 0,
                     /// m_fTextWidth-m_vSize.x+cv_ui_textbox_text_offset_x.getInt()*2), 1);
@@ -221,7 +221,7 @@ void CBaseUITextbox::mouse_update(bool *propagate_clicks) {
 
                     // TODO: animations which don't suck for usability
                     this->fTextScrollAddX =
-                        clamp<int>(this->fTextScrollAddX - scrollspeed, 0,
+                        std::clamp<int>(this->fTextScrollAddX - scrollspeed, 0,
                                    this->fTextWidth - this->vSize.x + cv_ui_textbox_text_offset_x.getInt() * 2);
                     /// animation->moveSmoothEnd(&m_fTextScrollAddX, clampi(this->fTextScrollAddX-scrollspeed, 0,
                     /// m_fTextWidth-m_vSize.x+cv_ui_textbox_text_offset_x.getInt()*2), 1);
@@ -342,14 +342,14 @@ void CBaseUITextbox::onKeyDown(KeyboardEvent &e) {
 
         case KEY_LEFT: {
             const bool hadSelectedText = this->hasSelectedText();
-            const int prevSelectPos = min(this->iSelectStart, this->iSelectEnd);
+            const int prevSelectPos = std::min(this->iSelectStart, this->iSelectEnd);
 
             this->deselectText();
 
             if(!hadSelectedText)
-                this->iCaretPosition = clamp<int>(this->iCaretPosition - 1, 0, this->sText.length());
+                this->iCaretPosition = std::clamp<int>(this->iCaretPosition - 1, 0, this->sText.length());
             else
-                this->iCaretPosition = clamp<int>(prevSelectPos, 0, this->sText.length());
+                this->iCaretPosition = std::clamp<int>(prevSelectPos, 0, this->sText.length());
 
             this->tickCaret();
             this->handleCaretKeyboardMove();
@@ -360,14 +360,14 @@ void CBaseUITextbox::onKeyDown(KeyboardEvent &e) {
 
         case KEY_RIGHT: {
             const bool hadSelectedText = this->hasSelectedText();
-            const int prevSelectPos = max(this->iSelectStart, this->iSelectEnd);
+            const int prevSelectPos = std::max(this->iSelectStart, this->iSelectEnd);
 
             this->deselectText();
 
             if(!hadSelectedText)
-                this->iCaretPosition = clamp<int>(this->iCaretPosition + 1, 0, this->sText.length());
+                this->iCaretPosition = std::clamp<int>(this->iCaretPosition + 1, 0, this->sText.length());
             else
-                this->iCaretPosition = clamp<int>(prevSelectPos, 0, this->sText.length());
+                this->iCaretPosition = std::clamp<int>(prevSelectPos, 0, this->sText.length());
 
             this->tickCaret();
             this->handleCaretKeyboardMove();
@@ -521,7 +521,7 @@ CBaseUITextbox *CBaseUITextbox::setFont(McFont *font) {
 
 CBaseUITextbox *CBaseUITextbox::setText(UString text) {
     this->sText = text;
-    this->iCaretPosition = clamp<int>(this->iCaretPosition, 0, text.length());
+    this->iCaretPosition = std::clamp<int>(this->iCaretPosition, 0, text.length());
 
     // handle text justification
     this->fTextWidth = this->font->getStringWidth(this->getVisibleText());

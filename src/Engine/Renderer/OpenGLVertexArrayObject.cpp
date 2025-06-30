@@ -205,12 +205,12 @@ void OpenGLVertexArrayObject::draw() {
         return;
     }
 
-    const int start = clamp<int>(this->iDrawRangeFromIndex > -1
+    const int start = std::clamp<int>(this->iDrawRangeFromIndex > -1
                                      ? this->iDrawRangeFromIndex
                                      : nearestMultipleUp((int)(this->iNumVertices * this->fDrawPercentFromPercent),
                                                          this->iDrawPercentNearestMultiple),
                                  0, this->iNumVertices);
-    const int end = clamp<int>(this->iDrawRangeToIndex > -1
+    const int end = std::clamp<int>(this->iDrawRangeToIndex > -1
                                    ? this->iDrawRangeToIndex
                                    : nearestMultipleDown((int)(this->iNumVertices * this->fDrawPercentToPercent),
                                                          this->iDrawPercentNearestMultiple),

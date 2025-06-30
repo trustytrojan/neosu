@@ -1,12 +1,5 @@
 #include "BaseEnvironment.h"
 
-#ifdef _WIN32
-#include <minwinbase.h>
-#include <wincrypt.h>
-#else
-#include <sys/random.h>
-#endif
-
 #include "AnimationHandler.h"
 #include "BackgroundImageHandler.h"
 #include "Bancho.h"
@@ -225,9 +218,10 @@ class NoRecordsSetElement : public CBaseUILabel {
 bool sort_by_artist(SongButton const *a, SongButton const *b) {
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a < b;
 
-    int res = strcasecmp(a->getDatabaseBeatmap()->getArtist().c_str(), b->getDatabaseBeatmap()->getArtist().c_str());
-    if(res == 0) return a < b;
-    return res < 0;
+    UString artistA{a->getDatabaseBeatmap()->getCreator()};
+    UString artistB{b->getDatabaseBeatmap()->getCreator()};
+
+    return artistA.lessThanIgnoreCaseStrict(artistB);
 }
 
 bool sort_by_bpm(SongButton const *a, SongButton const *b) {
@@ -242,9 +236,10 @@ bool sort_by_bpm(SongButton const *a, SongButton const *b) {
 bool sort_by_creator(SongButton const *a, SongButton const *b) {
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a < b;
 
-    int res = strcasecmp(a->getDatabaseBeatmap()->getCreator().c_str(), b->getDatabaseBeatmap()->getCreator().c_str());
-    if(res == 0) return a < b;
-    return res < 0;
+    UString creatorA{a->getDatabaseBeatmap()->getCreator()};
+    UString creatorB{b->getDatabaseBeatmap()->getCreator()};
+
+    return creatorA.lessThanIgnoreCaseStrict(creatorB);
 }
 
 bool sort_by_date_added(SongButton const *a, SongButton const *b) {
@@ -265,10 +260,10 @@ bool sort_by_difficulty(SongButton const *a, SongButton const *b) {
 
     float diff1 = (a->getDatabaseBeatmap()->getAR() + 1) * (a->getDatabaseBeatmap()->getCS() + 1) *
                   (a->getDatabaseBeatmap()->getHP() + 1) * (a->getDatabaseBeatmap()->getOD() + 1) *
-                  (max(a->getDatabaseBeatmap()->getMostCommonBPM(), 1));
+                  (std::max(a->getDatabaseBeatmap()->getMostCommonBPM(), 1));
     float diff2 = (b->getDatabaseBeatmap()->getAR() + 1) * (b->getDatabaseBeatmap()->getCS() + 1) *
                   (b->getDatabaseBeatmap()->getHP() + 1) * (b->getDatabaseBeatmap()->getOD() + 1) *
-                  (max(b->getDatabaseBeatmap()->getMostCommonBPM(), 1));
+                  (std::max(b->getDatabaseBeatmap()->getMostCommonBPM(), 1));
     if(diff1 != diff2) return diff1 < diff2;
 
     return a < b;
@@ -286,9 +281,10 @@ bool sort_by_length(SongButton const *a, SongButton const *b) {
 bool sort_by_title(SongButton const *a, SongButton const *b) {
     if(a->getDatabaseBeatmap() == NULL || b->getDatabaseBeatmap() == NULL) return a < b;
 
-    int res = strcasecmp(a->getDatabaseBeatmap()->getTitle().c_str(), b->getDatabaseBeatmap()->getTitle().c_str());
-    if(res == 0) return a < b;
-    return res < 0;
+    UString titleA{a->getDatabaseBeatmap()->getCreator()};
+    UString titleB{b->getDatabaseBeatmap()->getCreator()};
+
+    return titleA.lessThanIgnoreCaseStrict(titleB);
 }
 
 bool sort_by_grade(SongButton const *a, SongButton const *b) {
@@ -297,6 +293,9 @@ bool sort_by_grade(SongButton const *a, SongButton const *b) {
 }
 
 SongBrowser::SongBrowser() : ScreenBackable() {
+    // random selection algorithm init
+    this->rngalg = std::mt19937(std::random_device{}());
+
     // sorting/grouping + methods
     this->group = GROUP::GROUP_NO_GROUPING;
     {
@@ -565,9 +564,9 @@ void SongBrowser::draw() {
             if(!ready)
                 this->fBackgroundFadeInTime = engine->getTime();
             else if(this->fBackgroundFadeInTime > 0.0f && engine->getTime() > this->fBackgroundFadeInTime) {
-                alpha = clamp<float>((engine->getTime() - this->fBackgroundFadeInTime) /
-                                         cv_songbrowser_background_fade_in_duration.getFloat(),
-                                     0.0f, 1.0f);
+                alpha = std::clamp<float>((engine->getTime() - this->fBackgroundFadeInTime) /
+                                              cv_songbrowser_background_fade_in_duration.getFloat(),
+                                          0.0f, 1.0f);
                 alpha = 1.0f - (1.0f - alpha) * (1.0f - alpha);
             }
         }
@@ -687,7 +686,7 @@ void SongBrowser::draw() {
                         g->setColor(aimStrainColor);
                         g->fillRect(i * strainWidth,
                                     engine->getScreenHeight() - (get_bottombar_height() + aimStrainHeight),
-                                    max(1.0f, std::round(strainWidth + 0.5f)), aimStrainHeight);
+                                    std::max(1.0f, std::round(strainWidth + 0.5f)), aimStrainHeight);
                     }
 
                     if(!keyboard->isControlDown()) {
@@ -696,7 +695,7 @@ void SongBrowser::draw() {
                                     engine->getScreenHeight() -
                                         (get_bottombar_height() +
                                          ((keyboard->isShiftDown() ? 0 : aimStrainHeight) - speedStrainHeight)),
-                                    max(1.0f, std::round(strainWidth + 0.5f)), speedStrainHeight + 1);
+                                    std::max(1.0f, std::round(strainWidth + 0.5f)), speedStrainHeight + 1);
                     }
                 }
                 g->setDepthBuffer(false);
@@ -2268,38 +2267,36 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
 }
 
 bool SongBrowser::findSubstringInDifficulty(const DatabaseBeatmap *diff, const UString &searchString) {
-    if(diff->getTitle().length() > 0) {
-        if(strcasestr(diff->getTitle().c_str(), searchString.toUtf8()) != NULL) return true;
+    if(!diff->getTitle().empty()) {
+        if(UString{diff->getTitle()}.findIgnoreCase(searchString) != -1) return true;
     }
 
-    if(diff->getArtist().length() > 0) {
-        if(strcasestr(diff->getArtist().c_str(), searchString.toUtf8()) != NULL) return true;
+    if(!diff->getArtist().empty()) {
+        if(UString{diff->getArtist()}.findIgnoreCase(searchString) != -1) return true;
     }
 
-    if(diff->getCreator().length() > 0) {
-        if(strcasestr(diff->getCreator().c_str(), searchString.toUtf8()) != NULL) return true;
+    if(!diff->getCreator().empty()) {
+        if(UString{diff->getCreator()}.findIgnoreCase(searchString) != -1) return true;
     }
 
-    if(diff->getDifficultyName().length() > 0) {
-        if(strcasestr(diff->getDifficultyName().c_str(), searchString.toUtf8()) != NULL) return true;
+    if(!diff->getDifficultyName().empty()) {
+        if(UString{diff->getDifficultyName()}.findIgnoreCase(searchString) != -1) return true;
     }
 
-    if(diff->getSource().length() > 0) {
-        if(strcasestr(diff->getSource().c_str(), searchString.toUtf8()) != NULL) return true;
+    if(!diff->getSource().empty()) {
+        if(UString{diff->getSource()}.findIgnoreCase(searchString) != -1) return true;
     }
 
-    if(diff->getTags().length() > 0) {
-        if(strcasestr(diff->getTags().c_str(), searchString.toUtf8()) != NULL) return true;
+    if(!diff->getTags().empty()) {
+        if(UString{diff->getTags()}.findIgnoreCase(searchString) != -1) return true;
     }
 
     if(diff->getID() > 0) {
-        auto id = std::to_string(diff->getID());
-        if(strcasestr(id.c_str(), searchString.toUtf8()) != NULL) return true;
+        if(UString::fmt("{:d}", diff->getID()).findIgnoreCase(searchString) != -1) return true;
     }
 
     if(diff->getSetID() > 0) {
-        auto set_id = std::to_string(diff->getSetID());
-        if(strcasestr(set_id.c_str(), searchString.toUtf8()) != NULL) return true;
+        if(UString::fmt("{:d}", diff->getSetID()).findIgnoreCase(searchString) != -1) return true;
     }
 
     return false;
@@ -2325,8 +2322,9 @@ void SongBrowser::updateLayout() {
 
     this->topbarLeft->setSize(global_scale * 390.f, global_scale * 145.f);
     this->songInfo->setRelPos(margin, margin);
-    this->songInfo->setSize(this->topbarLeft->getSize().x - margin,
-                            max(this->topbarLeft->getSize().y * 0.75f, this->songInfo->getMinimumHeight() + margin));
+    this->songInfo->setSize(
+        this->topbarLeft->getSize().x - margin,
+        std::max(this->topbarLeft->getSize().y * 0.75f, this->songInfo->getMinimumHeight() + margin));
 
     const int topbarLeftButtonMargin = 5 * dpiScale;
     const int topbarLeftButtonHeight = 30 * dpiScale;
@@ -2369,7 +2367,8 @@ void SongBrowser::updateLayout() {
                                 (this->groupLabel->getSize().y + btn_margin) / 2.f);
 
     // "hardcoded" group buttons
-    const i32 group_btn_width = clamp<i32>((this->topbarRight->getSize().x - 2 * btn_margin) / 4, 0, 200 * dpiScale);
+    const i32 group_btn_width =
+        std::clamp<i32>((this->topbarRight->getSize().x - 2 * btn_margin) / 4, 0, 200 * dpiScale);
     this->groupByCollectionBtn->setSize(group_btn_width, 30 * dpiScale);
     this->groupByCollectionBtn->setRelPos(this->topbarRight->getSize().x - (btn_margin + (4 * group_btn_width)),
                                           this->topbarRight->getSize().y - 30 * dpiScale);
@@ -3122,12 +3121,8 @@ void SongBrowser::onSortChangeInt(UString text, bool autoScroll) {
 
     // resort Collection buttons (one button for each collection)
     // these are always sorted alphabetically by name
-    std::sort(this->collectionButtons.begin(), this->collectionButtons.end(),
-              [](CollectionButton *a, CollectionButton *b) {
-                  int res = strcasecmp(a->getCollectionName().c_str(), b->getCollectionName().c_str());
-                  if(res == 0) return a < b;
-                  return res < 0;
-              });
+    std::ranges::sort(this->collectionButtons, UString::ncasecomp{},
+                      [](const CollectionButton *btn) { return UString{btn->getCollectionName()}; });
 
     // resort Collection button array (each group of songbuttons inside each Collection)
     for(size_t i = 0; i < this->collectionButtons.size(); i++) {
@@ -3575,21 +3570,14 @@ void SongBrowser::selectRandomBeatmap() {
 
     // remember previous
     if(this->previousRandomBeatmaps.size() == 0 && this->beatmap != NULL &&
-       this->beatmap->getSelectedDifficulty2() != NULL)
+       this->beatmap->getSelectedDifficulty2() != NULL) {
         this->previousRandomBeatmaps.push_back(this->beatmap->getSelectedDifficulty2());
+    }
 
-    size_t rng;
-#ifdef _WIN32
-    HCRYPTPROV hCryptProv;
-    CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
-    CryptGenRandom(hCryptProv, sizeof(rng), (BYTE *)&rng);
-    CryptReleaseContext(hCryptProv, 0);
-#else
-    getrandom(&rng, sizeof(rng), 0);
-#endif
-    size_t randomindex = rng % songButtons.size();
+    std::uniform_int_distribution<size_t> rng(0, songButtons.size() - 1);
+    size_t randomIndex = rng(this->rngalg);
 
-    SongButton *songButton = dynamic_cast<SongButton *>(songButtons[randomindex]);
+    SongButton *songButton = dynamic_cast<SongButton *>(songButtons[randomIndex]);
     this->selectSongButton(songButton);
 }
 

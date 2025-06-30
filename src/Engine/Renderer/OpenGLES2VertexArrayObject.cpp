@@ -66,11 +66,11 @@ void OpenGLES2VertexArrayObject::draw() {
         return;
     }
 
-    const int start = clamp<int>(
+    const int start = std::clamp<int>(
         nearestMultipleUp((int)(this->iNumVertices * this->fDrawPercentFromPercent), this->iDrawPercentNearestMultiple),
         0,
         this->iNumVertices);  // HACKHACK: osu sliders
-    const int end = clamp<int>(
+    const int end = std::clamp<int>(
         nearestMultipleDown((int)(this->iNumVertices * this->fDrawPercentToPercent), this->iDrawPercentNearestMultiple),
         0,
         this->iNumVertices);  // HACKHACK: osu sliders

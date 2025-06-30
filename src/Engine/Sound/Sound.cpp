@@ -178,7 +178,7 @@ void Sound::destroy() {
 }
 
 u32 Sound::setPosition(f64 percent) {
-    u32 ms = clamp<f64>(percent, 0.0, 1.0) * this->length;
+    u32 ms = std::clamp<f64>(percent, 0.0, 1.0) * this->length;
     this->setPositionMS(ms);
     return ms;
 }
@@ -290,7 +290,7 @@ void Sound::setPositionMS_fast(u32 ms) {
 void Sound::setVolume(float volume) {
     if(!this->bReady) return;
 
-    this->fVolume = clamp<float>(volume, 0.0f, 2.0f);
+    this->fVolume = std::clamp<float>(volume, 0.0f, 2.0f);
 
     for(auto channel : this->getActiveChannels()) {
         BASS_ChannelSetAttribute(channel, BASS_ATTRIB_VOL, this->fVolume);
@@ -304,7 +304,7 @@ void Sound::setSpeed(float speed) {
         return;
     }
 
-    speed = clamp<float>(speed, 0.05f, 50.0f);
+    speed = std::clamp<float>(speed, 0.05f, 50.0f);
 
     float freq = cv_snd_freq.getFloat();
     BASS_ChannelGetAttribute(this->stream, BASS_ATTRIB_FREQ, &freq);
@@ -324,7 +324,7 @@ void Sound::setSpeed(float speed) {
 void Sound::setFrequency(float frequency) {
     if(!this->bReady) return;
 
-    frequency = (frequency > 99.0f ? clamp<float>(frequency, 100.0f, 100000.0f) : 0.0f);
+    frequency = (frequency > 99.0f ? std::clamp<float>(frequency, 100.0f, 100000.0f) : 0.0f);
 
     for(auto channel : this->getActiveChannels()) {
         BASS_ChannelSetAttribute(channel, BASS_ATTRIB_FREQ, frequency);
@@ -334,7 +334,7 @@ void Sound::setFrequency(float frequency) {
 void Sound::setPan(float pan) {
     if(!this->bReady) return;
 
-    this->fPan = clamp<float>(pan, -1.0f, 1.0f);
+    this->fPan = std::clamp<float>(pan, -1.0f, 1.0f);
 
     for(auto channel : this->getActiveChannels()) {
         BASS_ChannelSetAttribute(channel, BASS_ATTRIB_PAN, this->fPan);
@@ -420,8 +420,8 @@ u32 Sound::getPositionMS() {
     f64 interp_ratio = cv_snd_play_interp_ratio.getFloat();
     if(delta < interpDuration) {
         delta = (engine->getTime() - this->fLastPlayTime) * speedMultiplier;
-        f64 lerpPercent = clamp<f64>(((delta / interpDuration) - interp_ratio) / (1.0 - interp_ratio), 0.0, 1.0);
-        positionMS = (u32)lerp<f64>(delta * 1000.0, (f64)positionMS, lerpPercent);
+        f64 lerpPercent = std::clamp<f64>(((delta / interpDuration) - interp_ratio) / (1.0 - interp_ratio), 0.0, 1.0);
+        positionMS = (u32)std::lerp<f64>(delta * 1000.0, (f64)positionMS, lerpPercent);
     }
 
     return positionMS;

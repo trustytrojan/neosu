@@ -2,6 +2,8 @@
 
 #include "WinEnvironment.h"
 
+#include <winuser.h>
+#include <wingdi.h>
 #include <commdlg.h>
 #include <lmcons.h>
 #include <shlobj.h>
@@ -466,7 +468,7 @@ std::string WinEnvironment::getFileNameFromFilePath(std::string filePath) {
     const size_t lastBackSlashIndex = filePath.find_last_of('\\');
     size_t idx = 0;
     if(lastSlashIndex != std::string::npos) idx = lastSlashIndex + 1;
-    if(lastBackSlashIndex != std::string::npos) idx = max(idx, lastBackSlashIndex + 1);
+    if(lastBackSlashIndex != std::string::npos) idx = std::max(idx, lastBackSlashIndex + 1);
 
     return filePath.substr(idx);
 }
@@ -601,8 +603,8 @@ void WinEnvironment::disableFullscreen() {
 
     // clamp prev window client size to monitor
     const McRect desktopRect = getDesktopRect();
-    this->vLastWindowSize.x = min(width, desktopRect.getWidth());
-    this->vLastWindowSize.y = min(height, desktopRect.getHeight());
+    this->vLastWindowSize.x = std::min(width, desktopRect.getWidth());
+    this->vLastWindowSize.y = std::min(height, desktopRect.getHeight());
 
     // request window size based on prev client size
     RECT rect;
@@ -673,7 +675,7 @@ void WinEnvironment::setWindowResizable(bool resizable) {
 }
 
 void WinEnvironment::setMonitor(int monitor) {
-    monitor = clamp<int>(monitor, 0, this->vMonitors.size() - 1);
+    monitor = std::clamp<int>(monitor, 0, this->vMonitors.size() - 1);
     if(monitor == getMonitor()) return;
 
     const McRect desktopRect = this->vMonitors[monitor];
@@ -686,8 +688,8 @@ void WinEnvironment::setMonitor(int monitor) {
     GetWindowRect(this->hwnd, &windowRect);
     const Vector2 windowSize = Vector2(std::abs((int)(windowRect.right - windowRect.left)),
                                        std::abs((int)(windowRect.bottom - windowRect.top)));
-    const int width = min((int)windowSize.x, (int)desktopRect.getWidth());
-    const int height = min((int)windowSize.y, (int)desktopRect.getHeight());
+    const int width = std::min((int)windowSize.x, (int)desktopRect.getWidth());
+    const int height = std::min((int)windowSize.y, (int)desktopRect.getHeight());
 
     // move and resize, force center
     MoveWindow(this->hwnd, desktopRect.getX(), desktopRect.getY(), width, height, FALSE);  // non-client width/height!
@@ -755,7 +757,7 @@ int WinEnvironment::getDPI() {
     if(hdc != NULL) {
         const int dpi = GetDeviceCaps(hdc, LOGPIXELSX);
         ReleaseDC(this->hwnd, hdc);
-        return clamp<int>(dpi, 96, 96 * 4);  // sanity clamp
+        return std::clamp<int>(dpi, 96, 96 * 4);  // sanity clamp
     } else
         return 96;
 }

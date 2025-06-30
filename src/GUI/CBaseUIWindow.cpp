@@ -247,76 +247,76 @@ void CBaseUIWindow::mouse_update(bool *propagate_clicks) {
     if(this->bResizing) {
         switch(this->iResizeType) {
             case 1:
-                this->setPos(clamp<float>(this->vLastPos.x + (mouse->getPos().x - this->vMousePosBackup.x),
+                this->setPos(std::clamp<float>(this->vLastPos.x + (mouse->getPos().x - this->vMousePosBackup.x),
                                           -this->vSize.x, this->vLastPos.x + this->vLastSize.x - this->vResizeLimit.x),
-                             clamp<float>(this->vLastPos.y + (mouse->getPos().y - this->vMousePosBackup.y),
+                             std::clamp<float>(this->vLastPos.y + (mouse->getPos().y - this->vMousePosBackup.y),
                                           -this->vSize.y, this->vLastPos.y + this->vLastSize.y - this->vResizeLimit.y));
                 this->setSize(
-                    clamp<float>(this->vLastSize.x + (this->vMousePosBackup.x - mouse->getPos().x),
+                    std::clamp<float>(this->vLastSize.x + (this->vMousePosBackup.x - mouse->getPos().x),
                                  this->vResizeLimit.x, engine->getScreenWidth()),
-                    clamp<float>(this->vLastSize.y + (this->vMousePosBackup.y - mouse->getPos().y),
+                    std::clamp<float>(this->vLastSize.y + (this->vMousePosBackup.y - mouse->getPos().y),
                                  this->vResizeLimit.y, engine->getScreenHeight()));
                 break;
 
             case 2:
                 this->setPosX(
-                    clamp<float>(this->vLastPos.x + (mouse->getPos().x - this->vMousePosBackup.x),
+                    std::clamp<float>(this->vLastPos.x + (mouse->getPos().x - this->vMousePosBackup.x),
                                  -this->vSize.x, this->vLastPos.x + this->vLastSize.x - this->vResizeLimit.x));
                 this->setSizeX(
-                    clamp<float>(this->vLastSize.x + (this->vMousePosBackup.x - mouse->getPos().x),
+                    std::clamp<float>(this->vLastSize.x + (this->vMousePosBackup.x - mouse->getPos().x),
                                  this->vResizeLimit.x, engine->getScreenWidth()));
                 break;
 
             case 3:
                 this->setPosX(
-                    clamp<float>(this->vLastPos.x + (mouse->getPos().x - this->vMousePosBackup.x),
+                    std::clamp<float>(this->vLastPos.x + (mouse->getPos().x - this->vMousePosBackup.x),
                                  -this->vSize.x, this->vLastPos.x + this->vLastSize.x - this->vResizeLimit.x));
                 this->setSizeX(
-                    clamp<float>(this->vLastSize.x + (this->vMousePosBackup.x - mouse->getPos().x),
+                    std::clamp<float>(this->vLastSize.x + (this->vMousePosBackup.x - mouse->getPos().x),
                                  this->vResizeLimit.x, engine->getScreenWidth()));
                 this->setSizeY(
-                    clamp<float>(this->vLastSize.y + (mouse->getPos().y - this->vMousePosBackup.y),
+                    std::clamp<float>(this->vLastSize.y + (mouse->getPos().y - this->vMousePosBackup.y),
                                  this->vResizeLimit.y, engine->getScreenHeight()));
                 break;
 
             case 4:
                 this->setSizeY(
-                    clamp<float>(this->vLastSize.y + (mouse->getPos().y - this->vMousePosBackup.y),
+                    std::clamp<float>(this->vLastSize.y + (mouse->getPos().y - this->vMousePosBackup.y),
                                  this->vResizeLimit.y, engine->getScreenHeight()));
                 break;
 
             case 5:
                 this->setSize(
-                    clamp<float>(this->vLastSize.x + (mouse->getPos().x - this->vMousePosBackup.x),
+                    std::clamp<float>(this->vLastSize.x + (mouse->getPos().x - this->vMousePosBackup.x),
                                  this->vResizeLimit.x, engine->getScreenWidth()),
-                    clamp<float>(this->vLastSize.y + (mouse->getPos().y - this->vMousePosBackup.y),
+                    std::clamp<float>(this->vLastSize.y + (mouse->getPos().y - this->vMousePosBackup.y),
                                  this->vResizeLimit.y, engine->getScreenHeight()));
                 break;
 
             case 6:
                 this->setSizeX(
-                    clamp<float>(this->vLastSize.x + (mouse->getPos().x - this->vMousePosBackup.x),
+                    std::clamp<float>(this->vLastSize.x + (mouse->getPos().x - this->vMousePosBackup.x),
                                  this->vResizeLimit.x, engine->getScreenWidth()));
                 break;
 
             case 7:
                 this->setPosY(
-                    clamp<float>(this->vLastPos.y + (mouse->getPos().y - this->vMousePosBackup.y),
+                    std::clamp<float>(this->vLastPos.y + (mouse->getPos().y - this->vMousePosBackup.y),
                                  -this->vSize.y, this->vLastPos.y + this->vLastSize.y - this->vResizeLimit.y));
                 this->setSizeY(
-                    clamp<float>(this->vLastSize.y + (this->vMousePosBackup.y - mouse->getPos().y),
+                    std::clamp<float>(this->vLastSize.y + (this->vMousePosBackup.y - mouse->getPos().y),
                                  this->vResizeLimit.y, engine->getScreenHeight()));
                 this->setSizeX(
-                    clamp<float>(this->vLastSize.x + (mouse->getPos().x - this->vMousePosBackup.x),
+                    std::clamp<float>(this->vLastSize.x + (mouse->getPos().x - this->vMousePosBackup.x),
                                  this->vResizeLimit.x, engine->getScreenWidth()));
                 break;
 
             case 8:
                 this->setPosY(
-                    clamp<float>(this->vLastPos.y + (mouse->getPos().y - this->vMousePosBackup.y),
+                    std::clamp<float>(this->vLastPos.y + (mouse->getPos().y - this->vMousePosBackup.y),
                                  -this->vSize.y, this->vLastPos.y + this->vLastSize.y - this->vResizeLimit.y));
                 this->setSizeY(
-                    clamp<float>(this->vLastSize.y + (this->vMousePosBackup.y - mouse->getPos().y),
+                    std::clamp<float>(this->vLastSize.y + (this->vMousePosBackup.y - mouse->getPos().y),
                                  this->vResizeLimit.y, engine->getScreenHeight()));
                 break;
         }

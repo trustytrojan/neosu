@@ -85,10 +85,10 @@ void OpenGL3VertexArrayObject::draw() {
         return;
     }
 
-    int start = clamp<int>(nearestMultipleUp((int)(this->iNumVertices * this->fDrawPercentFromPercent),
+    int start = std::clamp<int>(nearestMultipleUp((int)(this->iNumVertices * this->fDrawPercentFromPercent),
                                              this->iDrawPercentNearestMultiple),
                            0, this->iNumVertices);  // HACKHACK: osu sliders
-    int end = clamp<int>(nearestMultipleDown((int)(this->iNumVertices * this->fDrawPercentToPercent),
+    int end = std::clamp<int>(nearestMultipleDown((int)(this->iNumVertices * this->fDrawPercentToPercent),
                                              this->iDrawPercentNearestMultiple),
                          0, this->iNumVertices);  // HACKHACK: osu sliders
 

@@ -80,7 +80,7 @@ void InfoLabel::draw() {
     const UString diffInfoText = this->buildDiffInfoString();
     const UString offsetInfoText = this->buildOffsetInfoString();
 
-    const float globalScale = max((this->vSize.y / this->getMinimumHeight()) * 0.91f, 1.0f);
+    const float globalScale = std::max((this->vSize.y / this->getMinimumHeight()) * 0.91f, 1.0f);
 
     const int shadowOffset = std::round(1.0f * ((float)this->font->getDPI() / 96.0f));  // NOTE: abusing font dpi
 
@@ -246,7 +246,7 @@ void InfoLabel::mouse_update(bool *propagate_clicks) {
 
                     osu->getTooltipOverlay()->addLine(UString::format("Circles: %i, Sliders: %i, Spinners: %i",
                                                                       numCircles, numSliders,
-                                                                      max(0, numObjects - numCircles - numSliders)));
+                                                                      std::max(0, numObjects - numCircles - numSliders)));
                     osu->getTooltipOverlay()->addLine(
                         UString::format("OPM: %i, CPM: %i, SPM: %i", (int)opm, (int)cpm, (int)spm));
                     osu->getTooltipOverlay()->addLine(UString::format("ID: %i, SetID: %i",
@@ -366,7 +366,7 @@ float InfoLabel::getMinimumWidth() {
     float diffInfoWidth = this->font->getStringWidth(this->buildDiffInfoString()) * this->fDiffInfoScale;
     float offsetInfoWidth = this->font->getStringWidth(this->buildOffsetInfoString()) * this->fOffsetInfoScale;
 
-    return max({titleWidth, subTitleWidth, songInfoWidth, diffInfoWidth, offsetInfoWidth});
+    return std::max({titleWidth, subTitleWidth, songInfoWidth, diffInfoWidth, offsetInfoWidth});
 }
 
 float InfoLabel::getMinimumHeight() {

@@ -758,7 +758,7 @@ void _vprof(UString oldValue, UString newValue) {
 }
 
 void _osuOptionsSliderQualityWrapper(UString oldValue, UString newValue) {
-    float value = lerp<float>(1.0f, 2.5f, 1.0f - newValue.toFloat());
+    float value = std::lerp<float>(1.0f, 2.5f, 1.0f - newValue.toFloat());
     cv_slider_curve_points_separation.setValue(value);
 };
 

@@ -491,9 +491,9 @@ void OpenGL3Interface::drawVAO(VertexArrayObject *vao) {
                 }
 
                 if(colors.size() > 0) {
-                    finalColors.push_back(colors[clamp<int>(i + 0, 0, maxColorIndex)]);
-                    finalColors.push_back(colors[clamp<int>(i + 1, 0, maxColorIndex)]);
-                    finalColors.push_back(colors[clamp<int>(i + 2, 0, maxColorIndex)]);
+                    finalColors.push_back(colors[std::clamp<int>(i + 0, 0, maxColorIndex)]);
+                    finalColors.push_back(colors[std::clamp<int>(i + 1, 0, maxColorIndex)]);
+                    finalColors.push_back(colors[std::clamp<int>(i + 2, 0, maxColorIndex)]);
                 }
 
                 finalVertices.push_back(vertices[i + 0]);
@@ -507,9 +507,9 @@ void OpenGL3Interface::drawVAO(VertexArrayObject *vao) {
                 }
 
                 if(colors.size() > 0) {
-                    finalColors.push_back(colors[clamp<int>(i + 0, 0, maxColorIndex)]);
-                    finalColors.push_back(colors[clamp<int>(i + 2, 0, maxColorIndex)]);
-                    finalColors.push_back(colors[clamp<int>(i + 3, 0, maxColorIndex)]);
+                    finalColors.push_back(colors[std::clamp<int>(i + 0, 0, maxColorIndex)]);
+                    finalColors.push_back(colors[std::clamp<int>(i + 2, 0, maxColorIndex)]);
+                    finalColors.push_back(colors[std::clamp<int>(i + 3, 0, maxColorIndex)]);
                 }
             }
         }

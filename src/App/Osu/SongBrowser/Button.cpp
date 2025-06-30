@@ -155,14 +155,14 @@ void Button::updateLayoutEx() {
     if(this->bVisible)  // lag prevention (animationHandler overflow)
     {
         const float centerOffsetAnimationTarget =
-            1.0f - clamp<float>(std::abs((this->vPos.y + (this->vSize.y / 2) - this->view->getPos().y -
+            1.0f - std::clamp<float>(std::abs((this->vPos.y + (this->vSize.y / 2) - this->view->getPos().y -
                                           this->view->getSize().y / 2) /
                                          (this->view->getSize().y / 2)),
                                 0.0f, 1.0f);
         anim->moveQuadOut(&this->fCenterOffsetAnimation, centerOffsetAnimationTarget, 0.5f, true);
 
         float centerOffsetVelocityAnimationTarget =
-            clamp<float>((std::abs(this->view->getVelocity().y)) / 3500.0f, 0.0f, 1.0f);
+            std::clamp<float>((std::abs(this->view->getVelocity().y)) / 3500.0f, 0.0f, 1.0f);
 
         if(this->songBrowser->isRightClickScrolling()) centerOffsetVelocityAnimationTarget = 0.0f;
 
@@ -188,7 +188,7 @@ void Button::updateLayoutEx() {
         // visible even if all animations are fully active the 0.85f here heuristically pushes the buttons a bit further
         // to the right than would be necessary, to make animations work better on lower resolutions (would otherwise
         // hit the left edge too early)
-        const float buttonWidthCompensation = max(this->view->getSize().x - this->getActualSize().x * 0.85f, 0.0f);
+        const float buttonWidthCompensation = std::max(this->view->getSize().x - this->getActualSize().x * 0.85f, 0.0f);
         minOffset += buttonWidthCompensation;
     }
 
@@ -198,7 +198,7 @@ void Button::updateLayoutEx() {
                                      percentHoverOffsetAnimation * this->fHoverOffsetAnimation -
                                      percentVelocityOffsetAnimation * this->fCenterOffsetVelocityAnimation +
                                      this->fOffsetPercent);
-    offsetX = clamp<float>(
+    offsetX = std::clamp<float>(
         offsetX, 0.0f,
         this->view->getSize().x -
             this->getActualSize().x * 0.15f);  // WARNING: hardcoded to match 0.85f above for buttonWidthCompensation
@@ -218,7 +218,7 @@ Button *Button::setVisible(bool visible) {
         this->fHoverOffsetAnimation = 0.0f;
 
         float centerOffsetVelocityAnimationTarget =
-            clamp<float>((std::abs(this->view->getVelocity().y)) / 3500.0f, 0.0f, 1.0f);
+            std::clamp<float>((std::abs(this->view->getVelocity().y)) / 3500.0f, 0.0f, 1.0f);
 
         if(this->songBrowser->isRightClickScrolling()) centerOffsetVelocityAnimationTarget = 0.0f;
 
@@ -347,15 +347,15 @@ void Button::setMoveAwayState(Button::MOVE_AWAY_STATE moveAwayState, bool animat
 }
 
 Color Button::getActiveBackgroundColor() const {
-    return COLOR(clamp<int>(cv_songbrowser_button_active_color_a.getInt(), 0, 255),
-                 clamp<int>(cv_songbrowser_button_active_color_r.getInt(), 0, 255),
-                 clamp<int>(cv_songbrowser_button_active_color_g.getInt(), 0, 255),
-                 clamp<int>(cv_songbrowser_button_active_color_b.getInt(), 0, 255));
+    return COLOR(std::clamp<int>(cv_songbrowser_button_active_color_a.getInt(), 0, 255),
+                 std::clamp<int>(cv_songbrowser_button_active_color_r.getInt(), 0, 255),
+                 std::clamp<int>(cv_songbrowser_button_active_color_g.getInt(), 0, 255),
+                 std::clamp<int>(cv_songbrowser_button_active_color_b.getInt(), 0, 255));
 }
 
 Color Button::getInactiveBackgroundColor() const {
-    return COLOR(clamp<int>(cv_songbrowser_button_inactive_color_a.getInt(), 0, 255),
-                 clamp<int>(cv_songbrowser_button_inactive_color_r.getInt(), 0, 255),
-                 clamp<int>(cv_songbrowser_button_inactive_color_g.getInt(), 0, 255),
-                 clamp<int>(cv_songbrowser_button_inactive_color_b.getInt(), 0, 255));
+    return COLOR(std::clamp<int>(cv_songbrowser_button_inactive_color_a.getInt(), 0, 255),
+                 std::clamp<int>(cv_songbrowser_button_inactive_color_r.getInt(), 0, 255),
+                 std::clamp<int>(cv_songbrowser_button_inactive_color_g.getInt(), 0, 255),
+                 std::clamp<int>(cv_songbrowser_button_inactive_color_b.getInt(), 0, 255));
 }

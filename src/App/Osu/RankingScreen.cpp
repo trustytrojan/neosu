@@ -268,7 +268,7 @@ void RankingScreen::draw() {
         const float heightMultiplier = 1.25f;
         const int experimentalModHeight = (experimentalModFont->getHeight() * heightMultiplier);
         const Vector2 experimentalModPos = Vector2(modPosStart.x - maxStringWidth - backgroundMargin,
-                                                   max(modPosStart.y, modPosMax.y) + osu->getUIScale(10) +
+                                                   std::max(modPosStart.y, modPosMax.y) + osu->getUIScale(10) +
                                                        experimentalModFont->getHeight() * heightMultiplier);
         const int backgroundWidth = maxStringWidth + 2 * backgroundMargin;
         const int backgroundHeight =
@@ -546,7 +546,7 @@ void RankingScreen::updateLayout() {
     this->rankingTitle->setRelPos(this->getSize().x - this->rankingTitle->getSize().x - osu->getUIScale(20.0f), 0);
 
     this->songInfo->setSize(osu->getScreenWidth(),
-                            max(this->songInfo->getMinimumHeight(),
+                            std::max(this->songInfo->getMinimumHeight(),
                                 this->rankingTitle->getSize().y * cv_rankingscreen_topbar_height_percent.getFloat()));
 
     this->rankings->setSize(osu->getScreenSize().x + 2, osu->getScreenSize().y - this->songInfo->getSize().y + 3);
@@ -569,9 +569,9 @@ void RankingScreen::updateLayout() {
     this->rankingPanel->setImage(osu->getSkin()->getRankingPanel());
     this->rankingPanel->setScale(Osu::getImageScale(hardcodedOsuRankingPanelImageSize, 317.0f),
                                  Osu::getImageScale(hardcodedOsuRankingPanelImageSize, 317.0f));
-    this->rankingPanel->setSize(max(hardcodedOsuRankingPanelImageSize.x * this->rankingPanel->getScale().x,
+    this->rankingPanel->setSize(std::max(hardcodedOsuRankingPanelImageSize.x * this->rankingPanel->getScale().x,
                                     this->rankingPanel->getImage()->getWidth() * this->rankingPanel->getScale().x),
-                                max(hardcodedOsuRankingPanelImageSize.y * this->rankingPanel->getScale().y,
+                                std::max(hardcodedOsuRankingPanelImageSize.y * this->rankingPanel->getScale().y,
                                     this->rankingPanel->getImage()->getHeight() * this->rankingPanel->getScale().y));
 
     this->rankingIndex->setSize(this->rankings->getSize().x + 2, osu->getScreenHeight() * 0.07f * uiScale);

@@ -5,11 +5,22 @@
 
 #ifdef MCENGINE_FEATURE_SDL
 
-#ifndef NOMINMAX
-#define NOMINMAX 1
+#ifdef NOMINMAX
+#undef NOMINMAX
 #endif
+
+#define NOMINMAX
+#define NOWINRES
+#define NOSERVICE
+#define NOMCX
+#define NOIME
+#define NOCRYPT
+#define NOMETAFILE
+#define MMNOSOUND
+
 #define VC_EXTRALEAN
 #define WIN32_LEAN_AND_MEAN
+
 #include <windows.h>
 
 class WinSDLEnvironment : public SDLEnvironment {

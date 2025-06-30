@@ -318,7 +318,7 @@ void MainMenu::draw() {
         if(!ready)
             this->fBackgroundFadeInTime = engine->getTime();
         else if(this->fBackgroundFadeInTime > 0.0f && engine->getTime() > this->fBackgroundFadeInTime) {
-            alpha = clamp<float>((engine->getTime() - this->fBackgroundFadeInTime) /
+            alpha = std::clamp<float>((engine->getTime() - this->fBackgroundFadeInTime) /
                                      cv_songbrowser_background_fade_in_duration.getFloat(),
                                  0.0f, 1.0f);
             alpha = 1.0f - (1.0f - alpha) * (1.0f - alpha);
@@ -355,11 +355,11 @@ void MainMenu::draw() {
             t.beatLengthBase = 1.0f;
 
         this->iMainMenuAnimBeatCounter =
-            (curMusicPos - t.offset - (long)(max((long)t.beatLengthBase, (long)1) * 0.5f)) /
-            max((long)t.beatLengthBase, (long)1);
-        pulse = (float)((curMusicPos - t.offset) % max((long)t.beatLengthBase, (long)1)) /
+            (curMusicPos - t.offset - (long)(std::max((long)t.beatLengthBase, (long)1) * 0.5f)) /
+            std::max((long)t.beatLengthBase, (long)1);
+        pulse = (float)((curMusicPos - t.offset) % std::max((long)t.beatLengthBase, (long)1)) /
                 t.beatLengthBase;  // modulo must be >= 1
-        pulse = clamp<float>(pulse, -1.0f, 1.0f);
+        pulse = std::clamp<float>(pulse, -1.0f, 1.0f);
         if(pulse < 0.0f) pulse = 1.0f - std::abs(pulse);
     } else
         pulse = (div - fmod(engine->getTime(), div)) / div;
@@ -450,7 +450,7 @@ void MainMenu::draw() {
 
             customPulse = 1.0f - customPulse;
 
-            const float anim = lerp<float>((1.0f - customPulse) * (1.0f - customPulse), (1.0f - customPulse), 0.25f);
+            const float anim = std::lerp<float>((1.0f - customPulse) * (1.0f - customPulse), (1.0f - customPulse), 0.25f);
             const float anim2 = anim * (this->iMainMenuAnimBeatCounter % 2 == 1 ? 1.0f : -1.0f);
             const float anim3 = anim;
 
@@ -468,12 +468,12 @@ void MainMenu::draw() {
                          this->fMainMenuAnim3 * 360.0f + friendRotation);
     }
 
-    const Color cubeColor = COLORf(1.0f, lerp<float>(0.0f, 0.5f, this->fMainMenuAnimFriendPercent),
-                                   lerp<float>(0.0f, 0.768f, this->fMainMenuAnimFriendPercent),
-                                   lerp<float>(0.0f, 0.965f, this->fMainMenuAnimFriendPercent));
-    const Color cubeBorderColor = COLORf(1.0f, lerp<float>(1.0f, 0.5f, this->fMainMenuAnimFriendPercent),
-                                         lerp<float>(1.0f, 0.768f, this->fMainMenuAnimFriendPercent),
-                                         lerp<float>(1.0f, 0.965f, this->fMainMenuAnimFriendPercent));
+    const Color cubeColor = COLORf(1.0f, std::lerp<float>(0.0f, 0.5f, this->fMainMenuAnimFriendPercent),
+                                   std::lerp<float>(0.0f, 0.768f, this->fMainMenuAnimFriendPercent),
+                                   std::lerp<float>(0.0f, 0.965f, this->fMainMenuAnimFriendPercent));
+    const Color cubeBorderColor = COLORf(1.0f, std::lerp<float>(1.0f, 0.5f, this->fMainMenuAnimFriendPercent),
+                                         std::lerp<float>(1.0f, 0.768f, this->fMainMenuAnimFriendPercent),
+                                         std::lerp<float>(1.0f, 0.965f, this->fMainMenuAnimFriendPercent));
 
     // front side
     g->pushTransform();
@@ -687,7 +687,7 @@ void MainMenu::draw() {
             const float animRightMultiplier = (this->iMainMenuAnimBeatCounter % 2 == 1 ? 1.0f : 0.1f);
 
             const float animMoveUp =
-                lerp<float>((1.0f - customPulse) * (1.0f - customPulse), (1.0f - customPulse), 0.35f) *
+                std::lerp<float>((1.0f - customPulse) * (1.0f - customPulse), (1.0f - customPulse), 0.35f) *
                 this->fMainMenuAnimFriendPercent;
 
             const float animLeftMoveUp = animMoveUp * animLeftMultiplier;
@@ -740,7 +740,7 @@ void MainMenu::draw() {
 
         float xscale = mainButtonRect.getWidth() / logo->getWidth();
         float yscale = mainButtonRect.getHeight() / logo->getHeight();
-        float scale = min(xscale, yscale) * 0.8f;
+        float scale = std::min(xscale, yscale) * 0.8f;
 
         g->pushTransform();
         g->setColor(0xffffffff);
@@ -884,12 +884,12 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
 
     if(this->bInMainMenuRandomAnim && this->iMainMenuRandomAnimType == 1 && anim->isAnimating(&this->fMainMenuAnim)) {
         Vector2 mouseDelta = (this->cube->getPos() + this->cube->getSize() / 2) - mouse->getPos();
-        mouseDelta.x = clamp<float>(mouseDelta.x, -engine->getScreenSize().x / 2, engine->getScreenSize().x / 2);
-        mouseDelta.y = clamp<float>(mouseDelta.y, -engine->getScreenSize().y / 2, engine->getScreenSize().y / 2);
+        mouseDelta.x = std::clamp<float>(mouseDelta.x, -engine->getScreenSize().x / 2, engine->getScreenSize().x / 2);
+        mouseDelta.y = std::clamp<float>(mouseDelta.y, -engine->getScreenSize().y / 2, engine->getScreenSize().y / 2);
         mouseDelta.x /= engine->getScreenSize().x;
         mouseDelta.y /= engine->getScreenSize().y;
 
-        const float decay = clamp<float>((1.0f - this->fMainMenuAnim - 0.075f) / 0.025f, 0.0f, 1.0f);
+        const float decay = std::clamp<float>((1.0f - this->fMainMenuAnim - 0.075f) / 0.025f, 0.0f, 1.0f);
 
         const Vector2 pushAngle = Vector2(mouseDelta.y, -mouseDelta.x) * Vector2(0.15f, 0.15f) * decay;
 
@@ -902,17 +902,17 @@ void MainMenu::mouse_update(bool *propagate_clicks) {
 
     {
         this->fMainMenuAnimFriendPercent =
-            1.0f - clamp<float>((this->fMainMenuAnimDuration > 0.0f
+            1.0f - std::clamp<float>((this->fMainMenuAnimDuration > 0.0f
                                      ? (this->fMainMenuAnimTime - engine->getTime()) / this->fMainMenuAnimDuration
                                      : 0.0f),
                                 0.0f, 1.0f);
-        this->fMainMenuAnimFriendPercent = clamp<float>((this->fMainMenuAnimFriendPercent - 0.5f) / 0.5f, 0.0f, 1.0f);
+        this->fMainMenuAnimFriendPercent = std::clamp<float>((this->fMainMenuAnimFriendPercent - 0.5f) / 0.5f, 0.0f, 1.0f);
         if(this->bMainMenuAnimFriend) this->fMainMenuAnimFriendPercent = 1.0f;
         if(!this->bMainMenuAnimFriendScheduled) this->fMainMenuAnimFriendPercent = 0.0f;
 
         Vector2 mouseDelta = (this->cube->getPos() + this->cube->getSize() / 2) - mouse->getPos();
-        mouseDelta.x = clamp<float>(mouseDelta.x, -engine->getScreenSize().x / 2, engine->getScreenSize().x / 2);
-        mouseDelta.y = clamp<float>(mouseDelta.y, -engine->getScreenSize().y / 2, engine->getScreenSize().y / 2);
+        mouseDelta.x = std::clamp<float>(mouseDelta.x, -engine->getScreenSize().x / 2, engine->getScreenSize().x / 2);
+        mouseDelta.y = std::clamp<float>(mouseDelta.y, -engine->getScreenSize().y / 2, engine->getScreenSize().y / 2);
         mouseDelta.x /= engine->getScreenSize().x;
         mouseDelta.y /= engine->getScreenSize().y;
 
@@ -1208,7 +1208,7 @@ void MainMenu::animMainButton() {
         const float randomDuration3 = (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * 3.5f;
 
         anim->moveQuadOut(&this->fMainMenuAnim, 1.0f,
-                          1.5f + max(randomDuration1, max(randomDuration2, randomDuration3)));
+                          1.5f + std::max(randomDuration1, std::max(randomDuration2, randomDuration3)));
         anim->moveQuadOut(&this->fMainMenuAnim1, this->fMainMenuAnim1Target, 1.5f + randomDuration1);
         anim->moveQuadOut(&this->fMainMenuAnim2, this->fMainMenuAnim2Target, 1.5f + randomDuration2);
         anim->moveQuadOut(&this->fMainMenuAnim3, this->fMainMenuAnim3Target, 1.5f + randomDuration3);
@@ -1313,8 +1313,8 @@ void MainMenu::onCubePressed() {
         this->bInMainMenuRandomAnim = false;
 
         Vector2 mouseDelta = (this->cube->getPos() + this->cube->getSize() / 2) - mouse->getPos();
-        mouseDelta.x = clamp<float>(mouseDelta.x, -this->cube->getSize().x / 2, this->cube->getSize().x / 2);
-        mouseDelta.y = clamp<float>(mouseDelta.y, -this->cube->getSize().y / 2, this->cube->getSize().y / 2);
+        mouseDelta.x = std::clamp<float>(mouseDelta.x, -this->cube->getSize().x / 2, this->cube->getSize().x / 2);
+        mouseDelta.y = std::clamp<float>(mouseDelta.y, -this->cube->getSize().y / 2, this->cube->getSize().y / 2);
         mouseDelta.x /= this->cube->getSize().x;
         mouseDelta.y /= this->cube->getSize().y;
 

@@ -65,7 +65,7 @@ CBaseUIContainer *CBaseUIContainer::insertBaseUIElement(CBaseUIElement *element,
     element->setPos(this->vPos + element->getRelPos());
     for(size_t i = 0; i < this->vElements.size(); i++) {
         if(this->vElements[i] == index) {
-            this->vElements.insert(this->vElements.begin() + clamp<int>(i, 0, this->vElements.size()), element);
+            this->vElements.insert(this->vElements.begin() + std::clamp<int>(i, 0, this->vElements.size()), element);
             return this;
         }
     }
@@ -82,7 +82,7 @@ CBaseUIContainer *CBaseUIContainer::insertBaseUIElementBack(CBaseUIElement *elem
     element->setPos(this->vPos + element->getRelPos());
     for(size_t i = 0; i < this->vElements.size(); i++) {
         if(this->vElements[i] == index) {
-            this->vElements.insert(this->vElements.begin() + clamp<int>(i + 1, 0, this->vElements.size()), element);
+            this->vElements.insert(this->vElements.begin() + std::clamp<int>(i + 1, 0, this->vElements.size()), element);
             return this;
         }
     }

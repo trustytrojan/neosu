@@ -106,8 +106,8 @@ void SliderRenderer::draw(const std::vector<Vector2> &points, const std::vector<
 
     checkUpdateVars(hitcircleDiameter);
 
-    const int drawFromIndex = clamp<int>((int)std::round(points.size() * from), 0, points.size());
-    const int drawUpToIndex = clamp<int>((int)std::round(points.size() * to), 0, points.size());
+    const int drawFromIndex = std::clamp<int>((int)std::round(points.size() * from), 0, points.size());
+    const int drawUpToIndex = std::clamp<int>((int)std::round(points.size() * to), 0, points.size());
 
     // debug sliders
     if(cv_slider_debug_draw.getBool()) {
@@ -398,8 +398,8 @@ void SliderRenderer::drawMM(const std::vector<Vector2> &points, float hitcircleD
     ///	numPointsTotal += points[i].size();
     /// }
 
-    const int drawFromIndex = clamp<int>((int)std::round(numPointsTotal * from), 0, numPointsTotal);
-    const int drawUpToIndex = clamp<int>((int)std::round(numPointsTotal * to), 0, numPointsTotal);
+    const int drawFromIndex = std::clamp<int>((int)std::round(numPointsTotal * from), 0, numPointsTotal);
+    const int drawUpToIndex = std::clamp<int>((int)std::round(numPointsTotal * to), 0, numPointsTotal);
 
     // reset
     resetRenderTargetBoundingBox();
@@ -571,7 +571,7 @@ void SliderRenderer::drawFillSliderBodyMM(const std::vector<Vector2> &points, fl
                     vao.addTexcoord(0, 0);
                     vao.addVertex(current.x, current.y);
 
-                    const float angularOffset = min(p * step, thetaDiff);
+                    const float angularOffset = std::min(p * step, thetaDiff);
                     current = origin + pointOnCircle(theta + dir * angularOffset) * radius;
 
                     // second outer point

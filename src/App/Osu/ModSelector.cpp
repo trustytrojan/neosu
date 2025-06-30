@@ -520,7 +520,7 @@ void ModSelector::draw() {
                 g->rotate(90);
                 g->translate(
                     (int)(experimentalTextHeight / 3.0f +
-                          max(0.0f, experimentalModsAnimationTranslation + this->experimentalContainer->getSize().x)),
+                          std::max(0.0f, experimentalModsAnimationTranslation + this->experimentalContainer->getSize().x)),
                     (int)(osu->getScreenHeight() / 2 - experimentalTextWidth / 2));
                 g->setColor(0xff777777);
                 g->setAlpha(1.0f - this->fExperimentalAnimation * this->fExperimentalAnimation);
@@ -531,7 +531,7 @@ void ModSelector::draw() {
             g->pushTransform();
             {
                 g->rotate(90);
-                g->translate((int)(rectHeight + max(0.0f, experimentalModsAnimationTranslation +
+                g->translate((int)(rectHeight + std::max(0.0f, experimentalModsAnimationTranslation +
                                                               this->experimentalContainer->getSize().x)),
                              (int)(osu->getScreenHeight() / 2 - rectWidth / 2));
                 g->drawRect(0, 0, rectWidth, rectHeight);
@@ -1264,7 +1264,7 @@ void ModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
                         // HACKHACK: force BPM slider to have a min value of 0.05 instead of 0 (because that's the
                         // minimum for BASS) note that the BPM slider is just a 'fake' slider, it directly controls the
                         // speed slider to do its thing (thus it needs the same limits)
-                        sliderValue = max(sliderValue, 0.05f);
+                        sliderValue = std::max(sliderValue, 0.05f);
 
                         // speed slider may not be used in conjunction
                         this->speedSlider->setValue(0.0f, false);
@@ -1284,7 +1284,7 @@ void ModSelector::onOverrideSliderChange(CBaseUISlider *slider) {
 
                 // HACKHACK: force speed slider to have a min value of 0.05 instead of 0 (because that's the minimum for
                 // BASS)
-                if(this->overrideSliders[i].desc->getText().find("Speed") != -1) sliderValue = max(sliderValue, 0.05f);
+                if(this->overrideSliders[i].desc->getText().find("Speed") != -1) sliderValue = std::max(sliderValue, 0.05f);
             }
 
             // update convar with final value (e.g. osu_ar_override, osu_speed_override, etc.)
@@ -1386,7 +1386,7 @@ UString ModSelector::getOverrideSliderLabelText(ModSelector::OVERRIDE_SLIDER s, 
         bool wasSpeedSlider = false;
         float beatmapValue = 1.0f;
         if(s.label->getName().find("CS") != -1) {
-            beatmapValue = clamp<float>(
+            beatmapValue = std::clamp<float>(
                 osu->getSelectedBeatmap()->getSelectedDifficulty2()->getCS() * osu->getCSDifficultyMultiplier(), 0.0f,
                 10.0f);
             convarValue = osu->getSelectedBeatmap()->getCS();
@@ -1411,7 +1411,7 @@ UString ModSelector::getOverrideSliderLabelText(ModSelector::OVERRIDE_SLIDER s, 
             else
                 convarValue = std::round(convarValue * 100.0f) / 100.0f;
         } else if(s.label->getName().find("HP") != -1) {
-            beatmapValue = clamp<float>(
+            beatmapValue = std::clamp<float>(
                 osu->getSelectedBeatmap()->getSelectedDifficulty2()->getHP() * osu->getDifficultyMultiplier(), 0.0f,
                 10.0f);
             convarValue = osu->getSelectedBeatmap()->getHP();

@@ -95,39 +95,39 @@ void CBaseUISlider::mouse_update(bool *propagate_clicks) {
             if(this->bAnimated) {
                 anim->moveQuadOut(
                     &this->vBlockPos.y,
-                    clamp<float>(mousepos.y - this->vGrabBackup.y, 0.0f, this->vSize.y - this->vBlockSize.y), 0.10f, 0,
+                    std::clamp<float>(mousepos.y - this->vGrabBackup.y, 0.0f, this->vSize.y - this->vBlockSize.y), 0.10f, 0,
                     true);
             } else {
                 this->vBlockPos.y =
-                    clamp<float>(mousepos.y - this->vGrabBackup.y, 0.0f, this->vSize.y - this->vBlockSize.y);
+                    std::clamp<float>(mousepos.y - this->vGrabBackup.y, 0.0f, this->vSize.y - this->vBlockSize.y);
             }
 
             this->fCurPercent =
-                clamp<float>(1.0f - (std::round(this->vBlockPos.y) / (this->vSize.y - this->vBlockSize.y)), 0.0f, 1.0f);
+                std::clamp<float>(1.0f - (std::round(this->vBlockPos.y) / (this->vSize.y - this->vBlockSize.y)), 0.0f, 1.0f);
         } else {
             if(this->bAnimated) {
                 anim->moveQuadOut(
                     &this->vBlockPos.x,
-                    clamp<float>(mousepos.x - this->vGrabBackup.x, 0.0f, this->vSize.x - this->vBlockSize.x), 0.10f, 0,
+                    std::clamp<float>(mousepos.x - this->vGrabBackup.x, 0.0f, this->vSize.x - this->vBlockSize.x), 0.10f, 0,
                     true);
             } else {
                 this->vBlockPos.x =
-                    clamp<float>(mousepos.x - this->vGrabBackup.x, 0.0f, this->vSize.x - this->vBlockSize.x);
+                    std::clamp<float>(mousepos.x - this->vGrabBackup.x, 0.0f, this->vSize.x - this->vBlockSize.x);
             }
 
             this->fCurPercent =
-                clamp<float>(std::round(this->vBlockPos.x) / (this->vSize.x - this->vBlockSize.x), 0.0f, 1.0f);
+                std::clamp<float>(std::round(this->vBlockPos.x) / (this->vSize.x - this->vBlockSize.x), 0.0f, 1.0f);
         }
 
         // set new value
         if(this->bAnimated) {
             if(this->bLiveUpdate) {
-                this->setValue(lerp<float>(this->fMinValue, this->fMaxValue, this->fCurPercent), false);
+                this->setValue(std::lerp<float>(this->fMinValue, this->fMaxValue, this->fCurPercent), false);
             } else {
-                this->fCurValue = lerp<float>(this->fMinValue, this->fMaxValue, this->fCurPercent);
+                this->fCurValue = std::lerp<float>(this->fMinValue, this->fMaxValue, this->fCurPercent);
             }
         } else {
-            this->setValue(lerp<float>(this->fMinValue, this->fMaxValue, this->fCurPercent), false);
+            this->setValue(std::lerp<float>(this->fMinValue, this->fMaxValue, this->fCurPercent), false);
         }
 
         this->bHasChanged = true;
@@ -136,7 +136,7 @@ void CBaseUISlider::mouse_update(bool *propagate_clicks) {
         if(this->bMouseInside && this->bAllowMouseWheel) {
             int wheelDelta = mouse->getWheelDeltaVertical();
             if(wheelDelta != 0) {
-                const int multiplier = max(1, std::abs(wheelDelta) / 120);
+                const int multiplier = std::max(1, std::abs(wheelDelta) / 120);
 
                 if(wheelDelta > 0) {
                     this->setValue(this->fCurValue + this->fKeyDelta * multiplier, this->bAnimated);
@@ -151,22 +151,22 @@ void CBaseUISlider::mouse_update(bool *propagate_clicks) {
     if(!this->bActive) {
         if(anim->isAnimating(&this->vBlockPos.x)) {
             this->fCurPercent =
-                clamp<float>(std::round(this->vBlockPos.x) / (this->vSize.x - this->vBlockSize.x), 0.0f, 1.0f);
+                std::clamp<float>(std::round(this->vBlockPos.x) / (this->vSize.x - this->vBlockSize.x), 0.0f, 1.0f);
 
             if(this->bLiveUpdate)
-                this->setValue(lerp<float>(this->fMinValue, this->fMaxValue, this->fCurPercent), false);
+                this->setValue(std::lerp<float>(this->fMinValue, this->fMaxValue, this->fCurPercent), false);
             else
-                this->fCurValue = lerp<float>(this->fMinValue, this->fMaxValue, this->fCurPercent);
+                this->fCurValue = std::lerp<float>(this->fMinValue, this->fMaxValue, this->fCurPercent);
         }
 
         if(anim->isAnimating(&this->vBlockPos.y)) {
             this->fCurPercent =
-                clamp<float>(1.0f - (std::round(this->vBlockPos.y) / (this->vSize.y - this->vBlockSize.y)), 0.0f, 1.0f);
+                std::clamp<float>(1.0f - (std::round(this->vBlockPos.y) / (this->vSize.y - this->vBlockSize.y)), 0.0f, 1.0f);
 
             if(this->bLiveUpdate)
-                this->setValue(lerp<float>(this->fMinValue, this->fMaxValue, this->fCurPercent), false);
+                this->setValue(std::lerp<float>(this->fMinValue, this->fMaxValue, this->fCurPercent), false);
             else
-                this->fCurValue = lerp<float>(this->fMinValue, this->fMaxValue, this->fCurPercent);
+                this->fCurValue = std::lerp<float>(this->fMinValue, this->fMaxValue, this->fCurPercent);
         }
     }
 }
@@ -212,7 +212,7 @@ CBaseUISlider *CBaseUISlider::setValue(float value, bool animate, bool call_call
         this->bHasChanged = true;
     }
 
-    this->fCurValue = clamp<float>(value, this->fMinValue, this->fMaxValue);
+    this->fCurValue = std::clamp<float>(value, this->fMinValue, this->fMaxValue);
     float percent = this->getPercent();
 
     if(!this->bHorizontal) {
@@ -245,7 +245,7 @@ CBaseUISlider *CBaseUISlider::setValue(float value, bool animate, bool call_call
 }
 
 CBaseUISlider *CBaseUISlider::setInitialValue(float value) {
-    this->fCurValue = clamp<float>(value, this->fMinValue, this->fMaxValue);
+    this->fCurValue = std::clamp<float>(value, this->fMinValue, this->fMaxValue);
     float percent = this->getPercent();
 
     if(this->fCurValue == this->fMaxValue) percent = 1.0f;
@@ -263,7 +263,7 @@ CBaseUISlider *CBaseUISlider::setInitialValue(float value) {
 void CBaseUISlider::setBlockSize(float xSize, float ySize) { this->vBlockSize = Vector2(xSize, ySize); }
 
 float CBaseUISlider::getPercent() {
-    return clamp<float>((this->fCurValue - this->fMinValue) / (std::abs(this->fMaxValue - this->fMinValue)), 0.0f,
+    return std::clamp<float>((this->fCurValue - this->fMinValue) / (std::abs(this->fMaxValue - this->fMinValue)), 0.0f,
                         1.0f);
 }
 

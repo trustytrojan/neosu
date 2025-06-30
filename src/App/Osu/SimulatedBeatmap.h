@@ -140,11 +140,11 @@ class SimulatedBeatmap : public BeatmapInterface {
         if(percent >= 0.5f) {
             percent = (percent - 0.5f) / 0.5f;
             percent *= percent;
-            return lerp<float>(center, right, percent);
+            return std::lerp<float>(center, right, percent);
         } else {
             percent = percent / 0.5f;
             percent = 1.0f - (1.0f - percent) * (1.0f - percent);
-            return lerp<float>(left, center, percent);
+            return std::lerp<float>(left, center, percent);
         }
     }
 

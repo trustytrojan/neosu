@@ -123,7 +123,7 @@ void loct_calc(std::vector<BeatmapDifficulty*> maps_to_calc) {
 
     i32 nb_threads = cv_loudness_calc_threads.getInt();
     if(nb_threads <= 0) {
-        nb_threads = env->get_nb_cpu_cores() / 2;
+        nb_threads = std::max(std::thread::hardware_concurrency() / 2, 1u);
     }
     if(maps_to_calc.size() < nb_threads) nb_threads = maps_to_calc.size();
     int chunk_size = maps_to_calc.size() / nb_threads;

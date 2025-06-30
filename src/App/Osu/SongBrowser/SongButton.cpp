@@ -100,7 +100,7 @@ void SongButton::drawBeatmapBackgroundThumbnail(Image *image) {
         if(image == NULL || !image->isReady())
             this->fThumbnailFadeInTime = engine->getTime();
         else if(this->fThumbnailFadeInTime > 0.0f && engine->getTime() > this->fThumbnailFadeInTime) {
-            alpha = clamp<float>(
+            alpha = std::clamp<float>(
                 (engine->getTime() - this->fThumbnailFadeInTime) / cv_songbrowser_thumbnail_fade_in_duration.getFloat(),
                 0.0f, 1.0f);
             alpha = 1.0f - (1.0f - alpha) * (1.0f - alpha);

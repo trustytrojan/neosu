@@ -534,7 +534,7 @@ void VisualProfiler::mouse_update(bool *propagate_clicks) {
                             sumGroupTimes += this->profile->sumTimes(this->groups[i].id);
                         }
                     }
-                    profilingOverheadTime = max(0.0, this->profile->sumTimes(rootGroupID) - sumGroupTimes);
+                    profilingOverheadTime = std::max(0.0, this->profile->sumTimes(rootGroupID) - sumGroupTimes);
                 }
 
                 // go through every group and build the new multi-line

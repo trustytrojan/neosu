@@ -634,7 +634,7 @@ void Engine::setFrameTime(double delta) {
     if(this->iFrameCount < 3)
         this->dFrameTime = delta;
     else
-        this->dFrameTime = clamp<double>(delta, 0.0001, 1.0);
+        this->dFrameTime = std::clamp<double>(delta, 0.0001, 1.0);
 }
 
 double Engine::getTimeReal() {

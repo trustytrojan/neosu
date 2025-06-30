@@ -106,8 +106,6 @@ class Environment {
     virtual UString keyCodeToString(KEYCODE keyCode) = 0;
 
    public:
-    // built-in convenience
-    i32 get_nb_cpu_cores();
 
     // window
     virtual void setFullscreenWindowedBorderless(bool fullscreenWindowedBorderless);

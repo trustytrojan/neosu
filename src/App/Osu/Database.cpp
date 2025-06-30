@@ -79,8 +79,8 @@ struct SortScoreByAccuracy : public Database::SCORE_SORTING_COMPARATOR {
 struct SortScoreByPP : public Database::SCORE_SORTING_COMPARATOR {
     ~SortScoreByPP() override { ; }
     bool operator()(FinishedScore const &a, FinishedScore const &b) const override {
-        auto a_pp = max(a.get_pp() * 1000.0, 0.0);
-        auto b_pp = max(b.get_pp() * 1000.0, 0.0);
+        auto a_pp = std::max(a.get_pp() * 1000.0, 0.0);
+        auto b_pp = std::max(b.get_pp() * 1000.0, 0.0);
         if(a_pp != b_pp) return a_pp > b_pp;
         if(a.score != b.score) return a.score > b.score;
         if(a.unixTimestamp != b.unixTimestamp) return a.unixTimestamp > b.unixTimestamp;
@@ -499,7 +499,7 @@ Database::PlayerStats Database::calculatePlayerStats(UString playerName) {
 float Database::getWeightForIndex(int i) { return pow(0.95, (double)i); }
 
 float Database::getBonusPPForNumScores(size_t numScores) {
-    return (417.0 - 1.0 / 3.0) * (1.0 - pow(0.995, min(1000.0, (f64)numScores)));
+    return (417.0 - 1.0 / 3.0) * (1.0 - pow(0.995, std::min(1000.0, (f64)numScores)));
 }
 
 unsigned long long Database::getRequiredScoreForLevel(int level) {

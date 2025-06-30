@@ -19,7 +19,7 @@ class GameRules {
     static float getFadeOutTime(Beatmap *beatmap) {
         const float fade_out_time = cv_hitobject_fade_out_time.getFloat();
         const float multiplier_min = cv_hitobject_fade_out_time_speed_multiplier_min.getFloat();
-        return fade_out_time * (1.0f / max(osu->getAnimationSpeedMultiplier(), multiplier_min));
+        return fade_out_time * (1.0f / std::max(osu->getAnimationSpeedMultiplier(), multiplier_min));
     }
 
     static inline long getFadeInTime() { return (long)cv_hitobject_fade_in_time.getInt(); }
@@ -137,7 +137,7 @@ class GameRules {
                                                        float speedMultiplier) {
         /// return (int)((float)spinnerDuration / 1000.0f * getSpinnerSpinsPerSecond(beatmap)); // actual
         return (int)((((float)spinnerDuration / 1000.0f * getSpinnerSpinsPerSecond(beatmap)) * 0.5f) *
-                     (min(1.0f / speedMultiplier, 1.0f)));  // Mc
+                     (std::min(1.0f / speedMultiplier, 1.0f)));  // Mc
     }
 
     // spinner length compensated rotations
@@ -156,7 +156,7 @@ class GameRules {
     static constexpr const float broken_gamefield_rounding_allowance = 1.00041f;
 
     static f32 getRawHitCircleScale(f32 CS) {
-        return max(0.0f, ((1.0f - 0.7f * (CS - 5.0f) / 5.0f) / 2.0f) * broken_gamefield_rounding_allowance);
+        return std::max(0.0f, ((1.0f - 0.7f * (CS - 5.0f) / 5.0f) / 2.0f) * broken_gamefield_rounding_allowance);
     }
 
     static f32 getRawHitCircleDiameter(f32 CS) {

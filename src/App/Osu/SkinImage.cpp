@@ -341,7 +341,7 @@ void SkinImage::update(float speedMultiplier, bool useEngineTimeForAnimations, l
         long frame_duration_ms = frameDurationInSeconds * 1000.0f;
 
         // freeze animation on frame 0 on negative offsets
-        this->iFrameCounter = max((i32)((curMusicPos - this->iBeatmapAnimationTimeStartOffset) / frame_duration_ms), 0);
+        this->iFrameCounter = std::max((i32)((curMusicPos - this->iBeatmapAnimationTimeStartOffset) / frame_duration_ms), 0);
         this->iFrameCounterUnclamped = this->iFrameCounter;
         this->iFrameCounter = this->iFrameCounter % this->images.size();
     }

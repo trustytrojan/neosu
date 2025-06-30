@@ -184,7 +184,7 @@ void VSTitleBar::mouse_update(bool *propagate_clicks) {
     if(this->title2->isActive() && this->bActive) {
         this->bIsSeeking = true;
         const float percent =
-            clamp<float>((mouse->getPos().x + 1 - this->vPos.x) / this->title->getSize().x, 0.0f, 1.0f);
+            std::clamp<float>((mouse->getPos().x + 1 - this->vPos.x) / this->title->getSize().x, 0.0f, 1.0f);
         cv_vs_percent.setValue(percent);
     } else {
         // fire seek callback once scrubbing stops

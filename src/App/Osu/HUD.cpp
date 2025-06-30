@@ -240,9 +240,9 @@ void HUD::mouse_update(bool *propagate_clicks) {
         const double frameAimTime = 1000.0 / 60.0;
         const double frameRatio = elapsedMS / frameAimTime;
         if(this->fHealth < currentHealth)
-            this->fHealth = min(1.0, this->fHealth + std::abs(currentHealth - this->fHealth) / 4.0 * frameRatio);
+            this->fHealth = std::min(1.0, this->fHealth + std::abs(currentHealth - this->fHealth) / 4.0 * frameRatio);
         else if(this->fHealth > currentHealth)
-            this->fHealth = max(0.0, this->fHealth - std::abs(this->fHealth - currentHealth) / 6.0 * frameRatio);
+            this->fHealth = std::max(0.0, this->fHealth - std::abs(this->fHealth - currentHealth) / 6.0 * frameRatio);
 
         if(cv_hud_scorebar_hide_during_breaks.getBool()) {
             if(!anim->isAnimating(&this->fScoreBarBreakAnim) && !beatmap->isWaiting()) {
@@ -375,7 +375,7 @@ void HUD::drawCursorTrailInt(Shader *trailShader, std::vector<CURSORTRAIL> &trai
         int i = trail.size() - 1;
         while(i >= 0) {
             trail[i].alpha =
-                clamp<float>(((trail[i].time - engine->getTime()) / trailLength) * alphaMultiplier, 0.0f, 1.0f) *
+                std::clamp<float>(((trail[i].time - engine->getTime()) / trailLength) * alphaMultiplier, 0.0f, 1.0f) *
                 cv_cursor_trail_alpha.getFloat();
 
             if(smoothCursorTrail) {
@@ -522,26 +522,26 @@ void HUD::drawCursorRipples() {
     const float normalizedWidth = osu->getSkin()->getCursorRipple()->getWidth() * normalized2xScale * imageScale;
     const float normalizedHeight = osu->getSkin()->getCursorRipple()->getHeight() * normalized2xScale * imageScale;
 
-    const float duration = max(cv_cursor_ripple_duration.getFloat(), 0.0001f);
+    const float duration = std::max(cv_cursor_ripple_duration.getFloat(), 0.0001f);
     const float fadeDuration =
-        max(cv_cursor_ripple_duration.getFloat() - cv_cursor_ripple_anim_start_fadeout_delay.getFloat(), 0.0001f);
+        std::max(cv_cursor_ripple_duration.getFloat() - cv_cursor_ripple_anim_start_fadeout_delay.getFloat(), 0.0001f);
 
     if(cv_cursor_ripple_additive.getBool()) g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ADDITIVE);
 
-    g->setColor(COLOR(255, clamp<int>(cv_cursor_ripple_tint_r.getInt(), 0, 255),
-                      clamp<int>(cv_cursor_ripple_tint_g.getInt(), 0, 255),
-                      clamp<int>(cv_cursor_ripple_tint_b.getInt(), 0, 255)));
+    g->setColor(COLOR(255, std::clamp<int>(cv_cursor_ripple_tint_r.getInt(), 0, 255),
+                      std::clamp<int>(cv_cursor_ripple_tint_g.getInt(), 0, 255),
+                      std::clamp<int>(cv_cursor_ripple_tint_b.getInt(), 0, 255)));
     osu->getSkin()->getCursorRipple()->bind();
     {
         for(int i = 0; i < this->cursorRipples.size(); i++) {
             const Vector2 &pos = this->cursorRipples[i].pos;
             const float &time = this->cursorRipples[i].time;
 
-            const float animPercent = 1.0f - clamp<float>((time - engine->getTime()) / duration, 0.0f, 1.0f);
-            const float fadePercent = 1.0f - clamp<float>((time - engine->getTime()) / fadeDuration, 0.0f, 1.0f);
+            const float animPercent = 1.0f - std::clamp<float>((time - engine->getTime()) / duration, 0.0f, 1.0f);
+            const float fadePercent = 1.0f - std::clamp<float>((time - engine->getTime()) / fadeDuration, 0.0f, 1.0f);
 
             const float scale =
-                lerp<float>(cv_cursor_ripple_anim_start_scale.getFloat(), cv_cursor_ripple_anim_end_scale.getFloat(),
+                std::lerp<float>(cv_cursor_ripple_anim_start_scale.getFloat(), cv_cursor_ripple_anim_end_scale.getFloat(),
                             1.0f - (1.0f - animPercent) * (1.0f - animPercent));  // quad out
 
             g->setAlpha(cv_cursor_ripple_alpha.getFloat() * (1.0f - fadePercent));
@@ -559,7 +559,7 @@ void HUD::drawFps(McFont *font, float fps) {
     static double new_worst_frametime = 0.0;
     static double current_second = 0.0;
     if(current_second + 1.0 > engine->getTime()) {
-        new_worst_frametime = max(new_worst_frametime, engine->getFrameTime());
+        new_worst_frametime = std::max(new_worst_frametime, engine->getFrameTime());
     } else {
         old_worst_frametime = new_worst_frametime;
         new_worst_frametime = 0.f;
@@ -1045,12 +1045,12 @@ void HUD::drawHPBar(double health, float alpha, float breakAnim) {
     // lerp color depending on health
     if(useNewDefault) {
         if(health < 0.2) {
-            const float factor = max(0.0, (0.2 - health) / 0.2);
-            const float value = lerp<float>(0.0f, 1.0f, factor);
+            const float factor = std::max(0.0, (0.2 - health) / 0.2);
+            const float value = std::lerp<float>(0.0f, 1.0f, factor);
             g->setColor(COLORf(1.0f, value, 0.0f, 0.0f));
         } else if(health < 0.5) {
-            const float factor = max(0.0, (0.5 - health) / 0.5);
-            const float value = lerp<float>(1.0f, 0.0f, factor);
+            const float factor = std::max(0.0, (0.5 - health) / 0.5);
+            const float value = std::lerp<float>(1.0f, 0.0f, factor);
             g->setColor(COLORf(1.0f, value, value, value));
         } else
             g->setColor(0xffffffff);
@@ -1094,7 +1094,7 @@ void HUD::drawHPBar(double health, float alpha, float breakAnim) {
 void HUD::drawAccuracySimple(float accuracy, float scale) {
     // get integer & fractional parts of the number
     const int accuracyInt = (int)accuracy;
-    const int accuracyFrac = clamp<int>(((int)(std::round((accuracy - accuracyInt) * 100.0f))), 0, 99);  // round up
+    const int accuracyFrac = std::clamp<int>(((int)(std::round((accuracy - accuracyInt) * 100.0f))), 0, 99);  // round up
 
     // draw it
     g->pushTransform();
@@ -1127,7 +1127,7 @@ void HUD::drawAccuracy(float accuracy) {
 
     // get integer & fractional parts of the number
     const int accuracyInt = (int)accuracy;
-    const int accuracyFrac = clamp<int>(((int)(std::round((accuracy - accuracyInt) * 100.0f))), 0, 99);  // round up
+    const int accuracyFrac = std::clamp<int>(((int)(std::round((accuracy - accuracyInt) * 100.0f))), 0, 99);  // round up
 
     // draw it
     const int offset = 5;
@@ -1431,7 +1431,7 @@ void HUD::drawContinue(Vector2 cursor, float hitcircleDiameter) {
     g->popTransform();
 
     // pulse animation
-    const float cursorAnimPulsePercent = clamp<float>(fmod(engine->getTime(), 1.35f), 0.0f, 1.0f);
+    const float cursorAnimPulsePercent = std::clamp<float>(fmod(engine->getTime(), 1.35f), 0.0f, 1.0f);
     g->setColor(COLOR((short)(255.0f * (1.0f - cursorAnimPulsePercent)), 255, 153, 51));
     g->pushTransform();
     {
@@ -1537,21 +1537,21 @@ void HUD::drawHitErrorBarInt(float hitWindow300, float hitWindow100, float hitWi
 
     const float alphaEntry = alpha * cv_hud_hiterrorbar_entry_alpha.getFloat();
     const int alphaCenterlineInt =
-        clamp<int>((int)(alpha * cv_hud_hiterrorbar_centerline_alpha.getFloat() * 255.0f), 0, 255);
-    const int alphaBarInt = clamp<int>((int)(alpha * cv_hud_hiterrorbar_bar_alpha.getFloat() * 255.0f), 0, 255);
+        std::clamp<int>((int)(alpha * cv_hud_hiterrorbar_centerline_alpha.getFloat() * 255.0f), 0, 255);
+    const int alphaBarInt = std::clamp<int>((int)(alpha * cv_hud_hiterrorbar_bar_alpha.getFloat() * 255.0f), 0, 255);
 
-    const Color color300 = COLOR(alphaBarInt, clamp<int>(cv_hud_hiterrorbar_entry_300_r.getInt(), 0, 255),
-                                 clamp<int>(cv_hud_hiterrorbar_entry_300_g.getInt(), 0, 255),
-                                 clamp<int>(cv_hud_hiterrorbar_entry_300_b.getInt(), 0, 255));
-    const Color color100 = COLOR(alphaBarInt, clamp<int>(cv_hud_hiterrorbar_entry_100_r.getInt(), 0, 255),
-                                 clamp<int>(cv_hud_hiterrorbar_entry_100_g.getInt(), 0, 255),
-                                 clamp<int>(cv_hud_hiterrorbar_entry_100_b.getInt(), 0, 255));
-    const Color color50 = COLOR(alphaBarInt, clamp<int>(cv_hud_hiterrorbar_entry_50_r.getInt(), 0, 255),
-                                clamp<int>(cv_hud_hiterrorbar_entry_50_g.getInt(), 0, 255),
-                                clamp<int>(cv_hud_hiterrorbar_entry_50_b.getInt(), 0, 255));
-    const Color colorMiss = COLOR(alphaBarInt, clamp<int>(cv_hud_hiterrorbar_entry_miss_r.getInt(), 0, 255),
-                                  clamp<int>(cv_hud_hiterrorbar_entry_miss_g.getInt(), 0, 255),
-                                  clamp<int>(cv_hud_hiterrorbar_entry_miss_b.getInt(), 0, 255));
+    const Color color300 = COLOR(alphaBarInt, std::clamp<int>(cv_hud_hiterrorbar_entry_300_r.getInt(), 0, 255),
+                                 std::clamp<int>(cv_hud_hiterrorbar_entry_300_g.getInt(), 0, 255),
+                                 std::clamp<int>(cv_hud_hiterrorbar_entry_300_b.getInt(), 0, 255));
+    const Color color100 = COLOR(alphaBarInt, std::clamp<int>(cv_hud_hiterrorbar_entry_100_r.getInt(), 0, 255),
+                                 std::clamp<int>(cv_hud_hiterrorbar_entry_100_g.getInt(), 0, 255),
+                                 std::clamp<int>(cv_hud_hiterrorbar_entry_100_b.getInt(), 0, 255));
+    const Color color50 = COLOR(alphaBarInt, std::clamp<int>(cv_hud_hiterrorbar_entry_50_r.getInt(), 0, 255),
+                                std::clamp<int>(cv_hud_hiterrorbar_entry_50_g.getInt(), 0, 255),
+                                std::clamp<int>(cv_hud_hiterrorbar_entry_50_b.getInt(), 0, 255));
+    const Color colorMiss = COLOR(alphaBarInt, std::clamp<int>(cv_hud_hiterrorbar_entry_miss_r.getInt(), 0, 255),
+                                  std::clamp<int>(cv_hud_hiterrorbar_entry_miss_g.getInt(), 0, 255),
+                                  std::clamp<int>(cv_hud_hiterrorbar_entry_miss_b.getInt(), 0, 255));
 
     Vector2 size = Vector2(osu->getScreenWidth() * cv_hud_hiterrorbar_width_percent.getFloat(),
                            osu->getScreenHeight() * cv_hud_hiterrorbar_height_percent.getFloat()) *
@@ -1609,8 +1609,8 @@ void HUD::drawHitErrorBarInt(float hitWindow300, float hitWindow100, float hitWi
         const float missFadeDuration = cv_hud_hiterrorbar_entry_miss_fade_time.getFloat();
         for(int i = this->hiterrors.size() - 1; i >= 0; i--) {
             const float percent =
-                clamp<float>((float)this->hiterrors[i].delta / (float)totalHitWindowLength, -5.0f, 5.0f);
-            float fade = clamp<float>(
+                std::clamp<float>((float)this->hiterrors[i].delta / (float)totalHitWindowLength, -5.0f, 5.0f);
+            float fade = std::clamp<float>(
                 (this->hiterrors[i].time - engine->getTime()) /
                     (this->hiterrors[i].miss || this->hiterrors[i].misaim ? missFadeDuration : hitFadeDuration),
                 0.0f, 1.0f);
@@ -1643,9 +1643,9 @@ void HUD::drawHitErrorBarInt(float hitWindow300, float hitWindow100, float hitWi
 
     // white center line
     if(alphaCenterlineInt > 0) {
-        g->setColor(COLOR(alphaCenterlineInt, clamp<int>(cv_hud_hiterrorbar_centerline_r.getInt(), 0, 255),
-                          clamp<int>(cv_hud_hiterrorbar_centerline_g.getInt(), 0, 255),
-                          clamp<int>(cv_hud_hiterrorbar_centerline_b.getInt(), 0, 255)));
+        g->setColor(COLOR(alphaCenterlineInt, std::clamp<int>(cv_hud_hiterrorbar_centerline_r.getInt(), 0, 255),
+                          std::clamp<int>(cv_hud_hiterrorbar_centerline_g.getInt(), 0, 255),
+                          std::clamp<int>(cv_hud_hiterrorbar_centerline_b.getInt(), 0, 255)));
         g->fillRect(center.x - entryWidth / 2.0f / 2.0f, center.y - entryHeight / 2.0f, entryWidth / 2.0f, entryHeight);
     }
 }
@@ -1959,7 +1959,7 @@ void HUD::drawTargetHeatmap(float hitcircleDiameter) {
             color = colorMiss;
 
         g->setColor(color);
-        g->setAlpha(clamp<float>((this->targets[i].time - engine->getTime()) / 3.5f, 0.0f, 1.0f));
+        g->setAlpha(std::clamp<float>((this->targets[i].time - engine->getTime()) / 3.5f, 0.0f, 1.0f));
 
         const float theta = deg2rad(this->targets[i].angle);
         const float cs = std::cos(theta);
@@ -2089,11 +2089,11 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
 
                     g->setColor(aimStrainColor);
                     g->fillRect(i * strainWidth + offsetX, cursorPos.y - aimStrainHeight,
-                                max(1.0f, std::round(strainWidth + 0.5f)), aimStrainHeight);
+                                std::max(1.0f, std::round(strainWidth + 0.5f)), aimStrainHeight);
 
                     g->setColor(speedStrainColor);
                     g->fillRect(i * strainWidth + offsetX, cursorPos.y - aimStrainHeight - speedStrainHeight,
-                                max(1.0f, std::round(strainWidth + 0.5f)), speedStrainHeight + 1);
+                                std::max(1.0f, std::round(strainWidth + 0.5f)), speedStrainHeight + 1);
                 }
                 g->setDepthBuffer(false);
 
@@ -2126,8 +2126,8 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
     g->setColor(greyTransparent);
     g->setAlpha(galpha);
     for(int i = 0; i < breaks.size(); i++) {
-        const int width = max(
-            (int)(osu->getScreenWidth() * clamp<float>(breaks[i].endPercent - breaks[i].startPercent, 0.0f, 1.0f)), 2);
+        const int width = std::max(
+            (int)(osu->getScreenWidth() * std::clamp<float>(breaks[i].endPercent - breaks[i].startPercent, 0.0f, 1.0f)), 2);
         g->fillRect(osu->getScreenWidth() * breaks[i].startPercent, cursorPos.y + 1, width, breakHeight);
     }
 
@@ -2158,7 +2158,7 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
     UString currentTimeText = UString::format("%i:%02i", (currentTimeMS / 1000) / 60, (currentTimeMS / 1000) % 60);
     g->pushTransform();
     {
-        g->translate(clamp<float>(triangleTip.x - timeFont->getStringWidth(currentTimeText) / 2.0f,
+        g->translate(std::clamp<float>(triangleTip.x - timeFont->getStringWidth(currentTimeText) / 2.0f,
                                   currentTimeLeftRightTextOffset,
                                   osu->getScreenWidth() - timeFont->getStringWidth(currentTimeText) -
                                       currentTimeLeftRightTextOffset) +
@@ -2210,7 +2210,7 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
     // quicksave time triangle & text
     if(osu->getQuickSaveTime() != 0.0f) {
         const float quickSaveTimeToPlayablePercent =
-            clamp<float>(((lengthFullMS * osu->getQuickSaveTime())) / (float)endTimeMS, 0.0f, 1.0f);
+            std::clamp<float>(((lengthFullMS * osu->getQuickSaveTime())) / (float)endTimeMS, 0.0f, 1.0f);
         triangleTip = Vector2(osu->getScreenWidth() * quickSaveTimeToPlayablePercent, cursorPos.y);
         g->pushTransform();
         {
@@ -2232,13 +2232,13 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
         g->pushTransform();
         {
             g->translate(
-                (int)(clamp<float>(triangleTip.x - timeFont->getStringWidth(currentTimeText) / 2.0f,
+                (int)(std::clamp<float>(triangleTip.x - timeFont->getStringWidth(currentTimeText) / 2.0f,
                                    currentTimeLeftRightTextOffset,
                                    osu->getScreenWidth() - timeFont->getStringWidth(currentTimeText) -
                                        currentTimeLeftRightTextOffset) +
                       1),
                 (int)(triangleTip.y + startAndEndTimeTextOffset + timeFont->getHeight() * 2.2f + 1 +
-                      currentTimeTopTextOffset * max(1.0f, this->getCursorScaleFactor() * cv_cursor_scale.getFloat()) *
+                      currentTimeTopTextOffset * std::max(1.0f, this->getCursorScaleFactor() * cv_cursor_scale.getFloat()) *
                           cv_hud_scrubbing_timeline_hover_tooltip_offset_multiplier.getFloat()));
             g->setColor(0xff000000);
             g->setAlpha(galpha);
@@ -2253,19 +2253,19 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
 
     // current time hover text
     const unsigned long hoverTimeMS =
-        clamp<float>((cursorPos.x / (float)osu->getScreenWidth()), 0.0f, 1.0f) * endTimeMS;
+        std::clamp<float>((cursorPos.x / (float)osu->getScreenWidth()), 0.0f, 1.0f) * endTimeMS;
     UString hoverTimeText = UString::format("%i:%02i", (hoverTimeMS / 1000) / 60, (hoverTimeMS / 1000) % 60);
     triangleTip = Vector2(cursorPos.x, cursorPos.y);
     g->pushTransform();
     {
         g->translate(
-            (int)clamp<float>(triangleTip.x - timeFont->getStringWidth(currentTimeText) / 2.0f,
+            (int)std::clamp<float>(triangleTip.x - timeFont->getStringWidth(currentTimeText) / 2.0f,
                               currentTimeLeftRightTextOffset,
                               osu->getScreenWidth() - timeFont->getStringWidth(currentTimeText) -
                                   currentTimeLeftRightTextOffset) +
                 1,
             (int)(triangleTip.y - osu->getSkin()->getSeekTriangle()->getHeight() - timeFont->getHeight() * 1.2f -
-                  currentTimeTopTextOffset * max(1.0f, this->getCursorScaleFactor() * cv_cursor_scale.getFloat()) *
+                  currentTimeTopTextOffset * std::max(1.0f, this->getCursorScaleFactor() * cv_cursor_scale.getFloat()) *
                       cv_hud_scrubbing_timeline_hover_tooltip_offset_multiplier.getFloat() * 2.0f -
                   1));
         g->setColor(0xff000000);
@@ -2491,7 +2491,7 @@ void HUD::animateInputoverlay(int key, bool down) {
         const float remainingDuration = anim->getRemainingDuration(animScale);
         anim->moveQuadOut(animScale, 1.0f,
                           cv_hud_inputoverlay_anim_scale_duration.getFloat() -
-                              min(remainingDuration * 1.4f, cv_hud_inputoverlay_anim_scale_duration.getFloat()),
+                              std::min(remainingDuration * 1.4f, cv_hud_inputoverlay_anim_scale_duration.getFloat()),
                           remainingDuration);
 
         // color
@@ -2566,7 +2566,7 @@ void HUD::addCursorTrailPosition(std::vector<CURSORTRAIL> &trail, Vector2 pos, b
                 const Vector2 step = delta.normalize() * (trailWidth / cv_cursor_trail_smooth_div.getFloat());
                 const float timeStep = (ct.time - prevTime) / (float)(numMidPoints);
                 const float scaleStep = (ct.scale - prevScale) / (float)(numMidPoints);
-                for(int i = clamp<int>(numMidPoints - cv_cursor_trail_max_size.getInt() / 2, 0,
+                for(int i = std::clamp<int>(numMidPoints - cv_cursor_trail_max_size.getInt() / 2, 0,
                                        cv_cursor_trail_max_size.getInt());
                     i < numMidPoints; i++)  // limit to half the maximum new mid points per frame
                 {

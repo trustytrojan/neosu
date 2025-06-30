@@ -41,7 +41,7 @@ void BackgroundImageHandler::update(bool allowEviction) {
             } else {
                 entry.evictionTime = engine->getTime() + cv_background_image_eviction_delay_seconds.getFloat();
                 entry.evictionTimeFrameCount =
-                    engine->getFrameCount() + (unsigned long)max(0, cv_background_image_eviction_delay_frames.getInt());
+                    engine->getFrameCount() + (unsigned long)std::max(0, cv_background_image_eviction_delay_frames.getInt());
             }
         } else if(wasUsedLastFrame) {
             // check and handle scheduled loads
@@ -112,7 +112,7 @@ Image *BackgroundImageHandler::getLoadBackgroundImage(const DatabaseBeatmap *bea
     const float newLoadingTime = engine->getTime() + cv_background_image_loading_delay.getFloat();
     const float newEvictionTime = engine->getTime() + cv_background_image_eviction_delay_seconds.getFloat();
     const unsigned long newEvictionTimeFrameCount =
-        engine->getFrameCount() + (unsigned long)max(0, cv_background_image_eviction_delay_frames.getInt());
+        engine->getFrameCount() + (unsigned long)std::max(0, cv_background_image_eviction_delay_frames.getInt());
 
     // 1) if the path or image is already loaded, return image ref immediately (which may still be NULL) and keep track
     // of when it was last requested

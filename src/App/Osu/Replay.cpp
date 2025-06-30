@@ -44,7 +44,7 @@ f32 Replay::Mods::get_naive_ar(DatabaseBeatmap *diff2) const {
     if((this->flags & Replay::ModFlags::HardRock)) ARdifficultyMultiplier = 1.4f;
     if((this->flags & Replay::ModFlags::Easy)) ARdifficultyMultiplier = 0.5f;
 
-    f32 AR = clamp<f32>(diff2->getAR() * ARdifficultyMultiplier, 0.0f, 10.0f);
+    f32 AR = std::clamp<f32>(diff2->getAR() * ARdifficultyMultiplier, 0.0f, 10.0f);
     if(this->ar_override >= 0.0f) AR = this->ar_override;
     if(this->ar_overridenegative < 0.0f) AR = this->ar_overridenegative;
 
@@ -60,7 +60,7 @@ f32 Replay::Mods::get_naive_od(DatabaseBeatmap *diff2) const {
     if((this->flags & Replay::ModFlags::HardRock)) ODdifficultyMultiplier = 1.4f;
     if((this->flags & Replay::ModFlags::Easy)) ODdifficultyMultiplier = 0.5f;
 
-    f32 OD = clamp<f32>(diff2->getOD() * ODdifficultyMultiplier, 0.0f, 10.0f);
+    f32 OD = std::clamp<f32>(diff2->getOD() * ODdifficultyMultiplier, 0.0f, 10.0f);
     if(this->od_override >= 0.0f) OD = this->od_override;
 
     if(this->flags & Replay::ModFlags::ODOverrideLock) {

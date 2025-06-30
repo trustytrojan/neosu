@@ -91,15 +91,15 @@ void SongDifficultyButton::draw() {
         const float starOffsetY = (size.y * 0.85);
         const float starWidth = (size.y * 0.2);
         const float starScale = starWidth / skin->getStar()->getHeight();
-        const int numFullStars = clamp<int>((int)stars, 0, 25);
-        const float partialStarScale = max(0.5f, clamp<float>(stars - numFullStars, 0.0f, 1.0f));  // at least 0.5x
+        const int numFullStars = std::clamp<int>((int)stars, 0, 25);
+        const float partialStarScale = std::max(0.5f, std::clamp<float>(stars - numFullStars, 0.0f, 1.0f));  // at least 0.5x
 
         g->setColor(this->bSelected ? skin->getSongSelectActiveText() : skin->getSongSelectInactiveText());
 
         // full stars
         for(int i = 0; i < numFullStars; i++) {
             const float scale =
-                min(starScale * 1.175f, starScale + i * 0.015f);  // more stars = getting bigger, up to a limit
+                std::min(starScale * 1.175f, starScale + i * 0.015f);  // more stars = getting bigger, up to a limit
 
             g->pushTransform();
             {
@@ -152,7 +152,7 @@ void SongDifficultyButton::mouse_update(bool *propagate_clicks) {
         anim->moveQuadOut(&this->fOffsetPercentAnim, newOffsetPercentSelectionState ? 1.0f : 0.0f,
                           0.25f * (1.0f - this->fOffsetPercentAnim), true);
     }
-    this->setOffsetPercent(lerp<float>(0.0f, 0.075f, this->fOffsetPercentAnim));
+    this->setOffsetPercent(std::lerp<float>(0.0f, 0.075f, this->fOffsetPercentAnim));
 
     if(this->bUpdateGradeScheduled) {
         this->bUpdateGradeScheduled = false;
@@ -209,8 +209,8 @@ Color SongDifficultyButton::getInactiveBackgroundColor() const {
     if(this->isIndependentDiffButton())
         return SongButton::getInactiveBackgroundColor();
     else
-        return COLOR(clamp<int>(cv_songbrowser_button_difficulty_inactive_color_a.getInt(), 0, 255),
-                     clamp<int>(cv_songbrowser_button_difficulty_inactive_color_r.getInt(), 0, 255),
-                     clamp<int>(cv_songbrowser_button_difficulty_inactive_color_g.getInt(), 0, 255),
-                     clamp<int>(cv_songbrowser_button_difficulty_inactive_color_b.getInt(), 0, 255));
+        return COLOR(std::clamp<int>(cv_songbrowser_button_difficulty_inactive_color_a.getInt(), 0, 255),
+                     std::clamp<int>(cv_songbrowser_button_difficulty_inactive_color_r.getInt(), 0, 255),
+                     std::clamp<int>(cv_songbrowser_button_difficulty_inactive_color_g.getInt(), 0, 255),
+                     std::clamp<int>(cv_songbrowser_button_difficulty_inactive_color_b.getInt(), 0, 255));
 }

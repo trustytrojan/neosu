@@ -415,7 +415,7 @@ void Skin::load() {
             }
 
             if(this->bIsRandom && this->filepathsForRandomSkin.size() > 0) {
-                const int randomIndex = std::rand() % min(this->filepathsForRandomSkin.size(), skinNames.size());
+                const int randomIndex = std::rand() % std::min(this->filepathsForRandomSkin.size(), skinNames.size());
 
                 this->sName = skinNames[randomIndex];
                 this->sFilePath = this->filepathsForRandomSkin[randomIndex];
@@ -1244,7 +1244,7 @@ void Skin::setSampleSet(int sampleSet) {
 }
 
 void Skin::resetSampleVolume() {
-    this->setSampleVolume(clamp<float>((float)this->iSampleVolume / 100.0f, 0.0f, 1.0f), true);
+    this->setSampleVolume(std::clamp<float>((float)this->iSampleVolume / 100.0f, 0.0f, 1.0f), true);
 }
 
 void Skin::setSampleVolume(float volume, bool force) {
@@ -1265,7 +1265,7 @@ void Skin::setSampleVolume(float volume, bool force) {
 
 Color Skin::getComboColorForCounter(int i, int offset) {
     i += cv_skin_color_index_add.getInt();
-    i = max(i, 0);
+    i = std::max(i, 0);
 
     if(this->beatmapComboColors.size() > 0 && !cv_ignore_beatmap_combo_colors.getBool())
         return this->beatmapComboColors[(i + offset) % this->beatmapComboColors.size()];

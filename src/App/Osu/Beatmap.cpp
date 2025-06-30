@@ -192,8 +192,8 @@ void Beatmap::drawBackground() {
             const Vector2 centerTrans = (osu->getScreenSize() / 2);
 
             const f32 backgroundFadeDimMultiplier =
-                clamp<f32>(1.0f - (cv_background_dim.getFloat() - 0.3f), 0.0f, 1.0f);
-            const short dim = clamp<f32>((1.0f - cv_background_dim.getFloat()) +
+                std::clamp<f32>(1.0f - (cv_background_dim.getFloat() - 0.3f), 0.0f, 1.0f);
+            const short dim = std::clamp<f32>((1.0f - cv_background_dim.getFloat()) +
                                              this->fBreakBackgroundFade * backgroundFadeDimMultiplier,
                                          0.0f, 1.0f) *
                               255.0f;
@@ -212,10 +212,10 @@ void Beatmap::drawBackground() {
     // draw background
     if(cv_background_brightness.getFloat() > 0.0f) {
         const f32 brightness = cv_background_brightness.getFloat();
-        const short red = clamp<f32>(brightness * cv_background_color_r.getFloat(), 0.0f, 255.0f);
-        const short green = clamp<f32>(brightness * cv_background_color_g.getFloat(), 0.0f, 255.0f);
-        const short blue = clamp<f32>(brightness * cv_background_color_b.getFloat(), 0.0f, 255.0f);
-        const short alpha = clamp<f32>(1.0f - this->fBreakBackgroundFade, 0.0f, 1.0f) * 255.0f;
+        const short red = std::clamp<f32>(brightness * cv_background_color_r.getFloat(), 0.0f, 255.0f);
+        const short green = std::clamp<f32>(brightness * cv_background_color_g.getFloat(), 0.0f, 255.0f);
+        const short blue = std::clamp<f32>(brightness * cv_background_color_b.getFloat(), 0.0f, 255.0f);
+        const short alpha = std::clamp<f32>(1.0f - this->fBreakBackgroundFade, 0.0f, 1.0f) * 255.0f;
         g->setColor(COLOR(alpha, red, green, blue));
         g->fillRect(0, 0, osu->getScreenWidth(), osu->getScreenHeight());
     }
@@ -301,10 +301,10 @@ void Beatmap::skipEmptySection() {
     const long nextHitObjectDelta = this->iNextHitObjectTime - (long)this->iCurMusicPosWithOffsets;
 
     if(!cv_end_skip.getBool() && nextHitObjectDelta < 0) {
-        this->music->setPositionMS(max(this->music->getLengthMS(), (u32)1) - 1);
+        this->music->setPositionMS(std::max(this->music->getLengthMS(), (u32)1) - 1);
         this->bWasSeekFrame = true;
     } else {
-        this->music->setPositionMS(max(this->iNextHitObjectTime - (long)(offset * offsetMultiplier), (long)0));
+        this->music->setPositionMS(std::max(this->iNextHitObjectTime - (long)(offset * offsetMultiplier), (long)0));
         this->bWasSeekFrame = true;
     }
 
@@ -1128,7 +1128,7 @@ int Beatmap::getMostCommonBPM() const {
 
 f32 Beatmap::getSpeedMultiplier() const {
     if(cv_speed_override.getFloat() >= 0.0f) {
-        return max(cv_speed_override.getFloat(), 0.05f);
+        return std::max(cv_speed_override.getFloat(), 0.05f);
     } else {
         return 1.f;
     }
@@ -1140,17 +1140,17 @@ u32 Beatmap::getScoreV1DifficultyMultiplier() const {
     // NOTE: We intentionally get CS/HP/OD from beatmap data, not "real" CS/HP/OD
     //       Since this multiplier is only used for ScoreV1
     u32 breakTimeMS = this->getBreakDurationTotal();
-    f32 drainLength = max(this->getLengthPlayable() - min(breakTimeMS, this->getLengthPlayable()), (u32)1000) / 1000;
+    f32 drainLength = std::max(this->getLengthPlayable() - std::min(breakTimeMS, this->getLengthPlayable()), (u32)1000) / 1000;
     return std::round((this->selectedDifficulty2->getCS() + this->selectedDifficulty2->getHP() +
                        this->selectedDifficulty2->getOD() +
-                       clamp<f32>((f32)this->selectedDifficulty2->getNumObjects() / drainLength * 8.0f, 0.0f, 16.0f)) /
+                       std::clamp<f32>((f32)this->selectedDifficulty2->getNumObjects() / drainLength * 8.0f, 0.0f, 16.0f)) /
                       38.0f * 5.0f);
 }
 
 f32 Beatmap::getRawAR() const {
     if(this->selectedDifficulty2 == NULL) return 5.0f;
 
-    return clamp<f32>(this->selectedDifficulty2->getAR() * osu->getDifficultyMultiplier(), 0.0f, 10.0f);
+    return std::clamp<f32>(this->selectedDifficulty2->getAR() * osu->getDifficultyMultiplier(), 0.0f, 10.0f);
 }
 
 f32 Beatmap::getAR() const {
@@ -1186,7 +1186,7 @@ f32 Beatmap::getAR() const {
 f32 Beatmap::getCS() const {
     if(this->selectedDifficulty2 == NULL) return 5.0f;
 
-    f32 CS = clamp<f32>(this->selectedDifficulty2->getCS() * osu->getCSDifficultyMultiplier(), 0.0f, 10.0f);
+    f32 CS = std::clamp<f32>(this->selectedDifficulty2->getCS() * osu->getCSDifficultyMultiplier(), 0.0f, 10.0f);
 
     if(cv_cs_override.getFloat() >= 0.0f) CS = cv_cs_override.getFloat();
 
@@ -1203,7 +1203,7 @@ f32 Beatmap::getCS() const {
         }
     }
 
-    if(cv_cs_cap_sanity.getBool()) CS = min(CS, 12.1429f);
+    if(cv_cs_cap_sanity.getBool()) CS = std::min(CS, 12.1429f);
 
     return CS;
 }
@@ -1211,7 +1211,7 @@ f32 Beatmap::getCS() const {
 f32 Beatmap::getHP() const {
     if(this->selectedDifficulty2 == NULL) return 5.0f;
 
-    f32 HP = clamp<f32>(this->selectedDifficulty2->getHP() * osu->getDifficultyMultiplier(), 0.0f, 10.0f);
+    f32 HP = std::clamp<f32>(this->selectedDifficulty2->getHP() * osu->getDifficultyMultiplier(), 0.0f, 10.0f);
     if(cv_hp_override.getFloat() >= 0.0f) HP = cv_hp_override.getFloat();
 
     return HP;
@@ -1220,7 +1220,7 @@ f32 Beatmap::getHP() const {
 f32 Beatmap::getRawOD() const {
     if(this->selectedDifficulty2 == NULL) return 5.0f;
 
-    return clamp<f32>(this->selectedDifficulty2->getOD() * osu->getDifficultyMultiplier(), 0.0f, 10.0f);
+    return std::clamp<f32>(this->selectedDifficulty2->getOD() * osu->getDifficultyMultiplier(), 0.0f, 10.0f);
 }
 
 f32 Beatmap::getOD() const {
@@ -1427,7 +1427,7 @@ void Beatmap::addHealth(f64 percent, bool isFromHitResult) {
         if(this->fHealth > 0.9) osu->getHUD()->animateKiExplode();
     }
 
-    this->fHealth = clamp<f64>(this->fHealth + percent, 0.0, 1.0);
+    this->fHealth = std::clamp<f64>(this->fHealth + percent, 0.0, 1.0);
 
     // handle generic fail state (2)
     const bool isDead = this->fHealth < 0.001;
@@ -1457,7 +1457,7 @@ void Beatmap::updateTimingPoints(long curPos) {
         this->selectedDifficulty2->getTimingInfoForTime(curPos + (long)cv_timingpoints_offset.getInt());
     osu->getSkin()->setSampleSet(
         t.sampleType);  // normal/soft/drum is stored in the sample type! the sample set number is for custom sets
-    osu->getSkin()->setSampleVolume(clamp<f32>(t.volume / 100.0f, 0.0f, 1.0f));
+    osu->getSkin()->setSampleVolume(std::clamp<f32>(t.volume / 100.0f, 0.0f, 1.0f));
 }
 
 long Beatmap::getPVS() {
@@ -1696,7 +1696,7 @@ void Beatmap::draw() {
     // draw loading circle
     if(this->isLoading()) {
         if(this->isBuffering()) {
-            f32 leeway = clamp<i32>(this->last_frame_ms - this->iCurMusicPos, 0, cv_spec_buffer.getInt());
+            f32 leeway = std::clamp<i32>(this->last_frame_ms - this->iCurMusicPos, 0, cv_spec_buffer.getInt());
             f32 pct = leeway / (cv_spec_buffer.getFloat()) * 100.f;
             auto loadingMessage = UString::format("Buffering ... (%.2f%%)", pct);
             osu->getHUD()->drawLoadingSmall(loadingMessage);
@@ -1778,11 +1778,11 @@ void Beatmap::drawFollowPoints() {
     const f64 animationMutiplier = this->getSpeedMultiplier() / osu->getAnimationSpeedMultiplier();
     const long followPointApproachTime =
         animationMutiplier * (cv_followpoints_clamp.getBool()
-                                  ? min((long)this->getApproachTime(), (long)cv_followpoints_approachtime.getFloat())
+                                  ? std::min((long)this->getApproachTime(), (long)cv_followpoints_approachtime.getFloat())
                                   : (long)cv_followpoints_approachtime.getFloat());
     const bool followPointsConnectCombos = cv_followpoints_connect_combos.getBool();
     const bool followPointsConnectSpinners = cv_followpoints_connect_spinners.getBool();
-    const f32 followPointSeparationMultiplier = max(cv_followpoints_separation_multiplier.getFloat(), 0.1f);
+    const f32 followPointSeparationMultiplier = std::max(cv_followpoints_separation_multiplier.getFloat(), 0.1f);
     const f32 followPointPrevFadeTime = animationMutiplier * cv_followpoints_prevfadetime.getFloat();
     const f32 followPointScaleMultiplier = cv_followpoints_scale_multiplier.getFloat();
 
@@ -1846,7 +1846,7 @@ void Beatmap::drawFollowPoints() {
                 // draw
                 f32 alpha = 1.0f;
                 f32 followAnimPercent =
-                    clamp<f32>((f32)(curPos - fadeInTime) / (f32)followPointPrevFadeTime, 0.0f, 1.0f);
+                    std::clamp<f32>((f32)(curPos - fadeInTime) / (f32)followPointPrevFadeTime, 0.0f, 1.0f);
                 followAnimPercent = -followAnimPercent * (followAnimPercent - 2.0f);  // quad out
 
                 // NOTE: only internal osu default skin uses scale + move transforms here, it is impossible to achieve
@@ -2292,7 +2292,7 @@ void Beatmap::update2() {
                 ((f64)(this->iCurMusicPos - this->hitobjects[0]->click_time) /
                  (f64)(this->hitobjects[this->hitobjects.size() - 1]->click_time +
                        this->hitobjects[this->hitobjects.size() - 1]->duration - this->hitobjects[0]->click_time));
-            f32 warp_multiplier = max(cv_mod_timewarp_multiplier.getFloat(), 1.f);
+            f32 warp_multiplier = std::max(cv_mod_timewarp_multiplier.getFloat(), 1.f);
             const f32 speed =
                 this->getSpeedMultiplier() + percentFinished * this->getSpeedMultiplier() * (warp_multiplier - 1.0f);
             this->music->setSpeed(speed);
@@ -2333,7 +2333,7 @@ void Beatmap::update2() {
                         this->hitobjects.size() > 0 && this->hitobjects[0]->click_time > cv_quick_retry_time.getInt();
                     if(quick_restarting) {
                         this->music->setPositionMS(
-                            max((i64)0, this->hitobjects[0]->click_time - cv_quick_retry_time.getInt()));
+                            std::max((i64)0, this->hitobjects[0]->click_time - cv_quick_retry_time.getInt()));
                     }
                     this->bWasSeekFrame = true;
 
@@ -2530,7 +2530,7 @@ void Beatmap::update2() {
         }
 
         this->interpolatedMousePos =
-            Vector2{lerp(current_frame.x, next_frame.x, percent), lerp(current_frame.y, next_frame.y, percent)};
+            Vector2{std::lerp<float>(current_frame.x, next_frame.x, percent), std::lerp<float>(current_frame.y, next_frame.y, percent)};
 
         if(cv_playfield_mirror_horizontal.getBool())
             this->interpolatedMousePos.y = GameRules::OSU_COORD_HEIGHT - this->interpolatedMousePos.y;
@@ -2577,7 +2577,7 @@ void Beatmap::update2() {
         const long pvs = !cv_mod_mafham.getBool()
                              ? this->getPVS()
                              : (this->hitobjects.size() > 0
-                                    ? (this->hitobjects[clamp<int>(this->iCurrentHitObjectIndex +
+                                    ? (this->hitobjects[std::clamp<int>(this->iCurrentHitObjectIndex +
                                                                        cv_mod_mafham_render_livesize.getInt() + 1,
                                                                    0, this->hitobjects.size() - 1)]
                                            ->click_time -
@@ -3320,8 +3320,8 @@ Vector2 Beatmap::osuCoords2Pixels(Vector2 coords) const {
 
     // if wobble, clamp coordinates
     if(cv_mod_wobble.getBool() || cv_mod_wobble2.getBool()) {
-        coords.x = clamp<f32>(coords.x, 0.0f, GameRules::OSU_COORD_WIDTH);
-        coords.y = clamp<f32>(coords.y, 0.0f, GameRules::OSU_COORD_HEIGHT);
+        coords.x = std::clamp<f32>(coords.x, 0.0f, GameRules::OSU_COORD_WIDTH);
+        coords.y = std::clamp<f32>(coords.y, 0.0f, GameRules::OSU_COORD_HEIGHT);
     }
 
     if(this->bFailed) {
@@ -3740,13 +3740,13 @@ void Beatmap::updateAutoCursorPos() {
         else
             percent = (f32)((long)curMusicPos - prevTime) / (f32)(nextTime - prevTime);
 
-        percent = clamp<f32>(percent, 0.0f, 1.0f);
+        percent = std::clamp<f32>(percent, 0.0f, 1.0f);
 
         // scaled distance (not osucoords)
         f32 distance = (nextPos - prevPos).length();
         if(distance > this->fHitcircleDiameter * 1.05f)  // snap only if not in a stream (heuristic)
         {
-            int numIterations = clamp<int>(
+            int numIterations = std::clamp<int>(
                 osu->getModAutopilot() ? cv_autopilot_snapping_strength.getInt() : cv_auto_snapping_strength.getInt(),
                 0, 42);
             for(int i = 0; i < numIterations; i++) {
@@ -4069,7 +4069,7 @@ void Beatmap::computeDrainRate() {
 
                 if(testPlayer.health > lowestHpEver) {
                     const f64 longObjectDrop = testDrop * (f64)h->duration;
-                    const f64 maxLongObjectDrop = max(0.0, longObjectDrop - testPlayer.health);
+                    const f64 maxLongObjectDrop = std::max(0.0, longObjectDrop - testPlayer.health);
 
                     testPlayer.decreaseHealth(longObjectDrop);
 

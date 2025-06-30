@@ -1,5 +1,6 @@
 #include "UIRankingScreenInfoLabel.h"
 
+#include <algorithm>
 #include <chrono>
 
 #include "Beatmap.h"
@@ -37,7 +38,7 @@ void UIRankingScreenInfoLabel::draw() {
     subTitleText.append(this->sMapper.c_str());
     const UString playerText = this->buildPlayerString();
 
-    const float globalScale = max((this->vSize.y / this->getMinimumHeight()) * 0.741f, 1.0f);
+    const float globalScale = std::max((this->vSize.y / this->getMinimumHeight()) * 0.741f, 1.0f);
 
     // draw title
     g->setColor(0xffffffff);
@@ -111,7 +112,7 @@ float UIRankingScreenInfoLabel::getMinimumWidth() {
     float subTitleWidth = 0;
     float playerWidth = this->font->getStringWidth(this->buildPlayerString()) * this->fSubTitleScale;
 
-    return max(max(titleWidth, subTitleWidth), playerWidth);
+    return std::max({titleWidth, subTitleWidth, playerWidth});
 }
 
 float UIRankingScreenInfoLabel::getMinimumHeight() {

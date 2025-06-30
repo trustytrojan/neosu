@@ -64,8 +64,8 @@ class OptionsMenuSkinPreviewElement : public CBaseUIElement {
         float scoreScale = 0.5f;
 
         if(this->iMode == 0) {
-            float approachScale = clamp<float>(1.0f + 1.5f - fmod(engine->getTime() * 3, 3.0f), 0.0f, 2.5f);
-            float approachAlpha = clamp<float>(fmod(engine->getTime() * 3, 3.0f) / 1.5f, 0.0f, 1.0f);
+            float approachScale = std::clamp<float>(1.0f + 1.5f - fmod(engine->getTime() * 3, 3.0f), 0.0f, 2.5f);
+            float approachAlpha = std::clamp<float>(fmod(engine->getTime() * 3, 3.0f) / 1.5f, 0.0f, 1.0f);
             approachAlpha = -approachAlpha * (approachAlpha - 2.0f);
             approachAlpha = -approachAlpha * (approachAlpha - 2.0f);
             float approachCircleAlpha = approachAlpha;
@@ -147,8 +147,8 @@ class OptionsMenuSliderPreviewElement : public CBaseUIElement {
                                   cv_number_scale_multiplier.getFloat();
         const float overlapScale = (hitcircleDiameter / (160.0f)) * 1 * cv_number_scale_multiplier.getFloat();
 
-        const float approachScale = clamp<float>(1.0f + 1.5f - fmod(engine->getTime() * 3, 3.0f), 0.0f, 2.5f);
-        float approachAlpha = clamp<float>(fmod(engine->getTime() * 3, 3.0f) / 1.5f, 0.0f, 1.0f);
+        const float approachScale = std::clamp<float>(1.0f + 1.5f - fmod(engine->getTime() * 3, 3.0f), 0.0f, 2.5f);
+        float approachAlpha = std::clamp<float>(fmod(engine->getTime() * 3, 3.0f) / 1.5f, 0.0f, 1.0f);
 
         approachAlpha = -approachAlpha * (approachAlpha - 2.0f);
         approachAlpha = -approachAlpha * (approachAlpha - 2.0f);
@@ -1324,10 +1324,10 @@ void OptionsMenu::draw() {
 
     if(this->backgroundBrightnessSlider->isActive()) {
         if(!isPlayingBeatmap) {
-            const float brightness = clamp<float>(this->backgroundBrightnessSlider->getFloat(), 0.0f, 1.0f);
-            const short red = clamp<float>(brightness * cv_background_color_r.getFloat(), 0.0f, 255.0f);
-            const short green = clamp<float>(brightness * cv_background_color_g.getFloat(), 0.0f, 255.0f);
-            const short blue = clamp<float>(brightness * cv_background_color_b.getFloat(), 0.0f, 255.0f);
+            const float brightness = std::clamp<float>(this->backgroundBrightnessSlider->getFloat(), 0.0f, 1.0f);
+            const short red = std::clamp<float>(brightness * cv_background_color_r.getFloat(), 0.0f, 255.0f);
+            const short green = std::clamp<float>(brightness * cv_background_color_g.getFloat(), 0.0f, 255.0f);
+            const short blue = std::clamp<float>(brightness * cv_background_color_b.getFloat(), 0.0f, 255.0f);
             if(brightness > 0.0f) {
                 g->setColor(COLOR(255, red, green, blue));
                 g->fillRect(0, 0, osu->getScreenWidth(), osu->getScreenHeight());
@@ -1337,7 +1337,7 @@ void OptionsMenu::draw() {
 
     if(this->backgroundDimSlider->isActive()) {
         if(!isPlayingBeatmap) {
-            const short dim = clamp<float>(this->backgroundDimSlider->getFloat(), 0.0f, 1.0f) * 255.0f;
+            const short dim = std::clamp<float>(this->backgroundDimSlider->getFloat(), 0.0f, 1.0f) * 255.0f;
             g->setColor(COLOR(dim, 0, 0, 0));
             g->fillRect(0, 0, osu->getScreenWidth(), osu->getScreenHeight());
         }
@@ -1774,7 +1774,7 @@ void OptionsMenu::updateLayout() {
 
     int optionsWidth = (int)(osu->getScreenWidth() * optionsScreenWidthPercent);
     if(!this->bFullscreen)
-        optionsWidth = min((int)(725.0f * (1.0f - categoriesOptionsPercent)), optionsWidth) * dpiScale;
+        optionsWidth = std::min((int)(725.0f * (1.0f - categoriesOptionsPercent)), optionsWidth) * dpiScale;
 
     const int categoriesWidth = optionsWidth * categoriesOptionsPercent;
 
@@ -2220,7 +2220,7 @@ void OptionsMenu::updateNotelockSelectLabel() {
     if(this->notelockSelectLabel == NULL) return;
 
     this->notelockSelectLabel->setText(
-        this->notelockTypes[clamp<int>(cv_notelock_type.getInt(), 0, this->notelockTypes.size() - 1)]);
+        this->notelockTypes[std::clamp<int>(cv_notelock_type.getInt(), 0, this->notelockTypes.size() - 1)]);
 }
 
 void OptionsMenu::onFullscreenChange(CBaseUICheckbox *checkbox) {
@@ -2966,7 +2966,7 @@ void OptionsMenu::onASIOBufferChange(CBaseUISlider *slider) {
 
     auto bufsize = slider->getInt();
     bufsize = ASIO_clamp(info, bufsize);
-    double latency = 1000.0 * (double)bufsize / max(BASS_ASIO_GetRate(), 44100.0);
+    double latency = 1000.0 * (double)bufsize / std::max(BASS_ASIO_GetRate(), 44100.0);
 
     for(int i = 0; i < this->elements.size(); i++) {
         for(int e = 0; e < this->elements[i].elements.size(); e++) {

@@ -581,7 +581,7 @@ McRect LinuxEnvironment::getDesktopRect() {
 }
 
 int LinuxEnvironment::getDPI() {
-    return clamp<int>(this->iDPI, 96, 96 * 2);  // sanity clamp
+    return std::clamp<int>(this->iDPI, 96, 96 * 2);  // sanity clamp
 }
 
 bool LinuxEnvironment::isCursorInWindow() { return this->bIsCursorInsideWindow; }

@@ -411,16 +411,16 @@ int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
                         //  left stick
                         if(e.jaxis.axis == 1 || e.jaxis.axis == 0) {
                             if(e.jaxis.axis == 0)
-                                m_fJoystick0XPercent = clamp<float>((float)e.jaxis.value / 32767.0f, -1.0f, 1.0f);
+                                m_fJoystick0XPercent = std::clamp<float>((float)e.jaxis.value / 32767.0f, -1.0f, 1.0f);
                             else
-                                m_fJoystick0YPercent = clamp<float>((float)e.jaxis.value / 32767.0f, -1.0f, 1.0f);
+                                m_fJoystick0YPercent = std::clamp<float>((float)e.jaxis.value / 32767.0f, -1.0f, 1.0f);
                         }
                         {
                             // ZL/ZR
                             if(e.jaxis.axis == 2 || e.jaxis.axis == 5) {
                                 if(e.jaxis.axis == 2) {
                                     const float threshold = sdl_joystick_zl_threshold.getFloat();
-                                    const float percent = clamp<float>((float)e.jaxis.value / 32767.0f, -1.0f, 1.0f);
+                                    const float percent = std::clamp<float>((float)e.jaxis.value / 32767.0f, -1.0f, 1.0f);
                                     const bool wasZlDown = zlDown;
                                     zlDown = !(threshold <= 0.0f ? percent <= threshold : percent >= threshold);
                                     if(zlDown != wasZlDown) {
@@ -431,7 +431,7 @@ int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
                                     }
                                 } else {
                                     const float threshold = sdl_joystick_zr_threshold.getFloat();
-                                    const float percent = clamp<float>((float)e.jaxis.value / 32767.0f, -1.0f, 1.0f);
+                                    const float percent = std::clamp<float>((float)e.jaxis.value / 32767.0f, -1.0f, 1.0f);
                                     const bool wasZrDown = zrDown;
                                     zrDown = !(threshold <= 0.0f ? percent <= threshold : percent >= threshold);
                                     if(zrDown != wasZrDown) {
@@ -536,8 +536,8 @@ int mainSDL(int argc, char *argv[], SDLEnvironment *customSDLEnvironment) {
                                          : g_engine->getScreenSize().x / hardcodedResolution.x;  // normalize
 
                     mousePos += joystickDelta;
-                    mousePos.x = clamp<float>(mousePos.x, 0.0f, g_engine->getScreenSize().x - 1);
-                    mousePos.y = clamp<float>(mousePos.y, 0.0f, g_engine->getScreenSize().y - 1);
+                    mousePos.x = std::clamp<float>(mousePos.x, 0.0f, g_engine->getScreenSize().x - 1);
+                    mousePos.y = std::clamp<float>(mousePos.y, 0.0f, g_engine->getScreenSize().y - 1);
 
                     environment->setMousePos(mousePos.x, mousePos.y);
                     g_mouse->onPosChange(mousePos);

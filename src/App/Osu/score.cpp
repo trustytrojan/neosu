@@ -106,7 +106,7 @@ float LiveScore::getScoreMultiplier() {
 void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, HIT hit, long delta,
                              bool ignoreOnHitErrorBar, bool hitErrorBarOnly, bool ignoreCombo, bool ignoreScore) {
     // current combo, excluding the current hitobject which caused the addHitResult() call
-    const int scoreComboMultiplier = max(this->iCombo - 1, 0);
+    const int scoreComboMultiplier = std::max(this->iCombo - 1, 0);
 
     if(hit == LiveScore::HIT::HIT_MISS) {
         this->iCombo = 0;
@@ -229,7 +229,7 @@ void LiveScore::addHitResult(BeatmapInterface *beatmap, HitObject *hitObject, HI
 
         int customStartIndex = -1;
         if(cv_hud_statistics_hitdelta_chunksize.getInt() >= 0) {
-            customStartIndex += max(0, (int)this->hitdeltas.size() - cv_hud_statistics_hitdelta_chunksize.getInt());
+            customStartIndex += std::max(0, (int)this->hitdeltas.size() - cv_hud_statistics_hitdelta_chunksize.getInt());
         }
 
         for(int i = 0; i < this->hitdeltas.size(); i++) {

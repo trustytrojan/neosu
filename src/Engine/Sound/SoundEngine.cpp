@@ -493,7 +493,7 @@ bool SoundEngine::play(Sound *snd, float pan, float pitch) {
         return false;
     }
 
-    pan = clamp<float>(pan, -1.0f, 1.0f);
+    pan = std::clamp<float>(pan, -1.0f, 1.0f);
     BASS_ChannelSetAttribute(channel, BASS_ATTRIB_VOL, snd->fVolume);
     BASS_ChannelSetAttribute(channel, BASS_ATTRIB_PAN, pan);
     BASS_ChannelSetAttribute(channel, BASS_ATTRIB_NORAMP, snd->isStream() ? 0 : 1);
@@ -632,7 +632,7 @@ void SoundEngine::setOutputDevice(OUTPUT_DEVICE device) {
 void SoundEngine::setVolume(float volume) {
     if(!this->isReady()) return;
 
-    this->fVolume = clamp<float>(volume, 0.0f, 1.0f);
+    this->fVolume = std::clamp<float>(volume, 0.0f, 1.0f);
     if(this->currentOutputDevice.driver == OutputDriver::BASS_ASIO) {
 #ifdef _WIN32
         BASS_ASIO_ChannelSetVolume(false, 0, this->fVolume);

@@ -163,10 +163,10 @@ u32 SimulatedBeatmap::getScoreV1DifficultyMultiplier() const {
     // NOTE: We intentionally get CS/HP/OD from beatmap data, not "real" CS/HP/OD
     //       Since this multiplier is only used for ScoreV1
     u32 breakTimeMS = this->getBreakDurationTotal();
-    f32 drainLength = max(this->getLengthPlayable() - min(breakTimeMS, this->getLengthPlayable()), (u32)1000) / 1000;
+    f32 drainLength = std::max(this->getLengthPlayable() - std::min(breakTimeMS, this->getLengthPlayable()), (u32)1000) / 1000;
     return std::round((this->selectedDifficulty2->getCS() + this->selectedDifficulty2->getHP() +
                        this->selectedDifficulty2->getOD() +
-                       clamp<f32>((f32)this->selectedDifficulty2->getNumObjects() / drainLength * 8.0f, 0.0f, 16.0f)) /
+                       std::clamp<f32>((f32)this->selectedDifficulty2->getNumObjects() / drainLength * 8.0f, 0.0f, 16.0f)) /
                       38.0f * 5.0f);
 }
 
@@ -175,7 +175,7 @@ f32 SimulatedBeatmap::getCS() const {
     if((this->mods.flags & Replay::ModFlags::HardRock)) CSdifficultyMultiplier = 1.3f;
     if((this->mods.flags & Replay::ModFlags::Easy)) CSdifficultyMultiplier = 0.5f;
 
-    f32 CS = clamp<f32>(this->selectedDifficulty2->getCS() * CSdifficultyMultiplier, 0.0f, 10.0f);
+    f32 CS = std::clamp<f32>(this->selectedDifficulty2->getCS() * CSdifficultyMultiplier, 0.0f, 10.0f);
 
     if(this->mods.cs_override >= 0.0f) CS = this->mods.cs_override;
     if(this->mods.cs_overridenegative < 0.0f) CS = this->mods.cs_overridenegative;
@@ -189,7 +189,7 @@ f32 SimulatedBeatmap::getCS() const {
         CS *= percent;
     }
 
-    CS = min(CS, 12.1429f);
+    CS = std::min(CS, 12.1429f);
 
     return CS;
 }
@@ -199,7 +199,7 @@ f32 SimulatedBeatmap::getHP() const {
     if((this->mods.flags & Replay::ModFlags::HardRock)) HPdifficultyMultiplier = 1.4f;
     if((this->mods.flags & Replay::ModFlags::Easy)) HPdifficultyMultiplier = 0.5f;
 
-    f32 HP = clamp<f32>(this->selectedDifficulty2->getHP() * HPdifficultyMultiplier, 0.0f, 10.0f);
+    f32 HP = std::clamp<f32>(this->selectedDifficulty2->getHP() * HPdifficultyMultiplier, 0.0f, 10.0f);
     if(this->mods.hp_override >= 0.0f) HP = this->mods.hp_override;
 
     return HP;
@@ -210,7 +210,7 @@ f32 SimulatedBeatmap::getRawAR() const {
     if((this->mods.flags & Replay::ModFlags::HardRock)) ARdifficultyMultiplier = 1.4f;
     if((this->mods.flags & Replay::ModFlags::Easy)) ARdifficultyMultiplier = 0.5f;
 
-    return clamp<f32>(this->selectedDifficulty2->getAR() * ARdifficultyMultiplier, 0.0f, 10.0f);
+    return std::clamp<f32>(this->selectedDifficulty2->getAR() * ARdifficultyMultiplier, 0.0f, 10.0f);
 }
 
 f32 SimulatedBeatmap::getAR() const {
@@ -244,7 +244,7 @@ f32 SimulatedBeatmap::getRawOD() const {
     if((this->mods.flags & Replay::ModFlags::HardRock)) ODdifficultyMultiplier = 1.4f;
     if((this->mods.flags & Replay::ModFlags::Easy)) ODdifficultyMultiplier = 0.5f;
 
-    return clamp<f32>(this->selectedDifficulty2->getOD() * ODdifficultyMultiplier, 0.0f, 10.0f);
+    return std::clamp<f32>(this->selectedDifficulty2->getOD() * ODdifficultyMultiplier, 0.0f, 10.0f);
 }
 
 f32 SimulatedBeatmap::getOD() const {
@@ -383,7 +383,7 @@ void SimulatedBeatmap::addHealth(f64 percent, bool isFromHitResult) {
         return;
     }
 
-    this->fHealth = clamp<f64>(this->fHealth + percent, 0.0, 1.0);
+    this->fHealth = std::clamp<f64>(this->fHealth + percent, 0.0, 1.0);
 
     // handle generic fail state (2)
     const bool isDead = this->fHealth < 0.001;
@@ -771,8 +771,8 @@ Vector2 SimulatedBeatmap::osuCoords2Pixels(Vector2 coords) const {
 
     // if wobble, clamp coordinates
     if(this->mods.flags & (Replay::ModFlags::Wobble1 | Replay::ModFlags::Wobble2)) {
-        coords.x = clamp<f32>(coords.x, 0.0f, GameRules::OSU_COORD_WIDTH);
-        coords.y = clamp<f32>(coords.y, 0.0f, GameRules::OSU_COORD_HEIGHT);
+        coords.x = std::clamp<f32>(coords.x, 0.0f, GameRules::OSU_COORD_WIDTH);
+        coords.y = std::clamp<f32>(coords.y, 0.0f, GameRules::OSU_COORD_HEIGHT);
     }
 
     return coords;
@@ -858,7 +858,7 @@ void SimulatedBeatmap::updateAutoCursorPos() {
         else
             percent = (f32)((long)this->iCurMusicPos - prevTime) / (f32)(nextTime - prevTime);
 
-        percent = clamp<f32>(percent, 0.0f, 1.0f);
+        percent = std::clamp<f32>(percent, 0.0f, 1.0f);
 
         // scaled distance (not osucoords)
         f32 distance = (nextPos - prevPos).length();
@@ -1142,7 +1142,7 @@ void SimulatedBeatmap::computeDrainRate() {
 
                 if(testPlayer.health > lowestHpEver) {
                     const f64 longObjectDrop = testDrop * (f64)h->duration;
-                    const f64 maxLongObjectDrop = max(0.0, longObjectDrop - testPlayer.health);
+                    const f64 maxLongObjectDrop = std::max(0.0, longObjectDrop - testPlayer.health);
 
                     testPlayer.decreaseHealth(longObjectDrop);
 

@@ -141,8 +141,8 @@ void VertexArrayObject::setDrawRange(int fromIndex, int toIndex) {
 }
 
 void VertexArrayObject::setDrawPercent(float fromPercent, float toPercent, int nearestMultiple) {
-    this->fDrawPercentFromPercent = clamp<float>(fromPercent, 0.0f, 1.0f);
-    this->fDrawPercentToPercent = clamp<float>(toPercent, 0.0f, 1.0f);
+    this->fDrawPercentFromPercent = std::clamp<float>(fromPercent, 0.0f, 1.0f);
+    this->fDrawPercentToPercent = std::clamp<float>(toPercent, 0.0f, 1.0f);
     this->iDrawPercentNearestMultiple = nearestMultiple;
 }
 

@@ -63,13 +63,13 @@ class ConsoleBoxSuggestionButton : public CBaseUIButton {
                 const UString helpTextSeparator = "-";
                 const int helpTextOffset = std::round(2.0f * this->font->getStringWidth(helpTextSeparator) *
                                                       ((float)this->font->getDPI() / 96.0f));  // NOTE: abusing font dpi
-                const int helpTextSeparatorStringWidth = max(1, (int)this->font->getStringWidth(helpTextSeparator));
-                const int helpTextStringWidth = max(1, (int)this->font->getStringWidth(this->sHelpText));
+                const int helpTextSeparatorStringWidth = std::max(1, (int)this->font->getStringWidth(helpTextSeparator));
+                const int helpTextStringWidth = std::max(1, (int)this->font->getStringWidth(this->sHelpText));
 
                 g->pushTransform();
                 {
                     const float scale =
-                        min(1.0f, (max(1.0f, this->consoleBox->getTextbox()->getSize().x - this->fStringWidth -
+                        std::min(1.0f, (std::max(1.0f, this->consoleBox->getTextbox()->getSize().x - this->fStringWidth -
                                                  helpTextOffset * 1.5f - helpTextSeparatorStringWidth * 1.5f)) /
                                       (float)helpTextStringWidth);
 
@@ -567,7 +567,7 @@ void ConsoleBox::addSuggestion(const UString &text, const UString &helpText, con
 
     // update suggestion size
     const int gap = 10 * dpiScale;
-    this->fSuggestionY = clamp<float>(buttonheight * vsize, 0, buttonheight * 4) +
+    this->fSuggestionY = std::clamp<float>(buttonheight * vsize, 0, buttonheight * 4) +
                          (engine->getScreenHeight() - this->textbox->getPos().y) + gap;
 
     if(buttonheight * vsize > buttonheight * 4) {
@@ -661,5 +661,5 @@ void ConsoleBox::log(UString text, Color textColor) {
 float ConsoleBox::getAnimTargetY() { return 32.0f * this->getDPIScale(); }
 
 float ConsoleBox::getDPIScale() {
-    return ((float)max(env->getDPI(), this->textbox->getFont()->getDPI()) / 96.0f);  // NOTE: abusing font dpi
+    return ((float)std::max(env->getDPI(), this->textbox->getFont()->getDPI()) / 96.0f);  // NOTE: abusing font dpi
 }

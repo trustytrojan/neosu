@@ -458,7 +458,7 @@ void Osu::draw() {
 
             // Update flashlight position
             double follow_delay = cv_flashlight_follow_delay.getFloat();
-            double frame_time = min(engine->getFrameTime(), follow_delay);
+            double frame_time = std::min(engine->getFrameTime(), follow_delay);
             double t = frame_time / follow_delay;
             t = t * (2.f - t);
             this->flashlight_position += t * (mouse_position - this->flashlight_position);
@@ -539,7 +539,7 @@ void Osu::draw() {
 
         // draw FPoSu cursor trail
         fadingCursorAlpha =
-            1.0f - clamp<float>((float)this->score->getCombo() / cv_mod_fadingcursor_combo.getFloat(), 0.0f, 1.0f);
+            1.0f - std::clamp<float>((float)this->score->getCombo() / cv_mod_fadingcursor_combo.getFloat(), 0.0f, 1.0f);
         if(this->pauseMenu->isVisible() || this->getSelectedBeatmap()->isContinueScheduled() ||
            !cv_mod_fadingcursor.getBool())
             fadingCursorAlpha = 1.0f;
@@ -619,9 +619,9 @@ void Osu::draw() {
                 const float scaledWidth = this->backBuffer->getWidth() * scale;
                 const float scaledHeight = this->backBuffer->getHeight() * scale;
                 this->backBuffer->draw(
-                    max(0.0f, g->getResolution().x / 2.0f - scaledWidth / 2.0f) *
+                    std::max(0.0f, g->getResolution().x / 2.0f - scaledWidth / 2.0f) *
                         (1.0f + cv_letterboxing_offset_x.getFloat()),
-                    max(0.0f, g->getResolution().y / 2.0f - scaledHeight / 2.0f) *
+                    std::max(0.0f, g->getResolution().y / 2.0f - scaledHeight / 2.0f) *
                         (1.0f + cv_letterboxing_offset_y.getFloat()),
                     scaledWidth, scaledHeight);
             } else {
@@ -721,7 +721,7 @@ void Osu::update() {
         this->bSeeking &= !bancho.is_spectating;
         if(this->bSeeking) {
             const float mousePosX = (int)mouse->getPos().x;
-            const float percent = clamp<float>(mousePosX / (float)this->getScreenWidth(), 0.0f, 1.0f);
+            const float percent = std::clamp<float>(mousePosX / (float)this->getScreenWidth(), 0.0f, 1.0f);
 
             if(mouse->isLeftDown()) {
                 if(mousePosX != this->fPrevSeekMousePosX || !cv_scrubbing_smooth.getBool()) {
@@ -740,7 +740,7 @@ void Osu::update() {
             }
 
             if(mouse->isRightDown()) {
-                this->fQuickSaveTime = clamp<float>((float)((this->getSelectedBeatmap()->getStartTimePlayable() +
+                this->fQuickSaveTime = std::clamp<float>((float)((this->getSelectedBeatmap()->getStartTimePlayable() +
                                                              this->getSelectedBeatmap()->getLengthPlayable()) *
                                                             percent) /
                                                         (float)this->getSelectedBeatmap()->getLength(),
@@ -1517,7 +1517,7 @@ float Osu::getScoreMultiplier() {
 float Osu::getAnimationSpeedMultiplier() {
     float animationSpeedMultiplier = this->getSelectedBeatmap()->getSpeedMultiplier();
 
-    if(cv_animation_speed_override.getFloat() >= 0.0f) return max(cv_animation_speed_override.getFloat(), 0.05f);
+    if(cv_animation_speed_override.getFloat() >= 0.0f) return std::max(cv_animation_speed_override.getFloat(), 0.05f);
 
     return animationSpeedMultiplier;
 }

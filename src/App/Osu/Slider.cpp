@@ -435,7 +435,7 @@ void Slider::draw2(bool drawApproachCircle, bool drawOnlyApproachCircle) {
                                                           : (1.0f - this->fFollowCircleTickAnimationScale) / 0.9f);
         if(this->fFollowCircleTickAnimationScale < 0.1f) {
             tickAnimation = -tickAnimation * (tickAnimation - 2.0f);
-            tickAnimation = clamp<float>(tickAnimation / 0.02f, 0.0f, 1.0f);
+            tickAnimation = std::clamp<float>(tickAnimation / 0.02f, 0.0f, 1.0f);
         }
         float tickAnimationScale = 1.0f + tickAnimation * cv_slider_followcircle_tick_pulse_scale.getFloat();
 
@@ -591,20 +591,20 @@ void Slider::update(long curPos, f64 frame_time) {
     // slider slide percent
     this->fSlidePercent = 0.0f;
     if(curPos > this->click_time)
-        this->fSlidePercent = clamp<float>(
-            clamp<long>((curPos - (this->click_time)), 0, (long)this->fSliderTime) / this->fSliderTime, 0.0f, 1.0f);
+        this->fSlidePercent = std::clamp<float>(
+            std::clamp<long>((curPos - (this->click_time)), 0, (long)this->fSliderTime) / this->fSliderTime, 0.0f, 1.0f);
 
     this->fActualSlidePercent = this->fSlidePercent;
 
     const float sliderSnakeDuration =
         (1.0f / 3.0f) * this->iApproachTime * cv_slider_snake_duration_multiplier.getFloat();
-    this->fSliderSnakePercent = min(1.0f, (curPos - (this->click_time - this->iApproachTime)) / (sliderSnakeDuration));
+    this->fSliderSnakePercent = std::min(1.0f, (curPos - (this->click_time - this->iApproachTime)) / (sliderSnakeDuration));
 
     const long reverseArrowFadeInStart =
         this->click_time -
         (cv_snaking_sliders.getBool() ? (this->iApproachTime - sliderSnakeDuration) : this->iApproachTime);
     const long reverseArrowFadeInEnd = reverseArrowFadeInStart + cv_slider_reverse_arrow_fadein_duration.getInt();
-    this->fReverseArrowAlpha = 1.0f - clamp<float>(((float)(reverseArrowFadeInEnd - curPos) /
+    this->fReverseArrowAlpha = 1.0f - std::clamp<float>(((float)(reverseArrowFadeInEnd - curPos) /
                                                     (float)(reverseArrowFadeInEnd - reverseArrowFadeInStart)),
                                                    0.0f, 1.0f);
     this->fReverseArrowAlpha *= cv_slider_reverse_arrow_alpha_multiplier.getFloat();
@@ -616,14 +616,14 @@ void Slider::update(long curPos, f64 frame_time) {
 
         // fade out over the duration of the slider, starting exactly when the default fadein finishes
         const long hiddenSliderBodyFadeOutStart =
-            min(this->click_time,
+            std::min(this->click_time,
                 this->click_time - this->iApproachTime +
-                    this->iFadeInTime);  // min() ensures that the fade always starts at click_time
+                    this->iFadeInTime);  // std::min() ensures that the fade always starts at click_time
                                          // (even if the fadeintime is longer than the approachtime)
         const float fade_percent = cv_mod_hd_slider_fade_percent.getFloat();
         const long hiddenSliderBodyFadeOutEnd = this->click_time + (long)(fade_percent * this->fSliderTime);
         if(curPos >= hiddenSliderBodyFadeOutStart) {
-            this->fBodyAlpha = clamp<float>(((float)(hiddenSliderBodyFadeOutEnd - curPos) /
+            this->fBodyAlpha = std::clamp<float>(((float)(hiddenSliderBodyFadeOutEnd - curPos) /
                                              (float)(hiddenSliderBodyFadeOutEnd - hiddenSliderBodyFadeOutStart)),
                                             0.0f, 1.0f);
             this->fBodyAlpha *= this->fBodyAlpha;  // quad in body fadeout
@@ -740,7 +740,7 @@ void Slider::update(long curPos, f64 frame_time) {
         // because fuck you
         const long offset = (long)cv_slider_end_inside_check_offset.getInt();
         const long lenienceHackEndTime =
-            max(this->click_time + this->duration / 2, (this->click_time + this->duration) - offset);
+            std::max(this->click_time + this->duration / 2, (this->click_time + this->duration) - offset);
         const bool isTrackingCorrectly =
             (this->isClickHeldSlider() || (this->bi->getModsLegacy() & LegacyFlags::Relax)) && this->bCursorInside;
         if(isTrackingCorrectly) {
@@ -917,22 +917,22 @@ void Slider::updateAnimations(long curPos) {
     float fadeout_scale_time = cv_slider_followcircle_fadeout_scale_time.getFloat() * animation_multiplier;
 
     // handle followcircle animations
-    this->fFollowCircleAnimationAlpha = clamp<float>(
-        (float)((curPos - this->click_time)) / 1000.0f / clamp<float>(fadein_fade_time, 0.0f, this->duration / 1000.0f),
+    this->fFollowCircleAnimationAlpha = std::clamp<float>(
+        (float)((curPos - this->click_time)) / 1000.0f / std::clamp<float>(fadein_fade_time, 0.0f, this->duration / 1000.0f),
         0.0f, 1.0f);
     if(this->bFinished) {
         this->fFollowCircleAnimationAlpha =
-            1.0f - clamp<float>((float)((curPos - (this->click_time + this->duration))) / 1000.0f / fadeout_fade_time,
+            1.0f - std::clamp<float>((float)((curPos - (this->click_time + this->duration))) / 1000.0f / fadeout_fade_time,
                                 0.0f, 1.0f);
         this->fFollowCircleAnimationAlpha *= this->fFollowCircleAnimationAlpha;  // quad in
     }
 
     this->fFollowCircleAnimationScale =
-        clamp<float>((float)((curPos - this->click_time)) / 1000.0f /
-                         clamp<float>(fadein_scale_time, 0.0f, this->duration / 1000.0f),
+        std::clamp<float>((float)((curPos - this->click_time)) / 1000.0f /
+                         std::clamp<float>(fadein_scale_time, 0.0f, this->duration / 1000.0f),
                      0.0f, 1.0f);
     if(this->bFinished) {
-        this->fFollowCircleAnimationScale = clamp<float>(
+        this->fFollowCircleAnimationScale = std::clamp<float>(
             (float)((curPos - (this->click_time + this->duration))) / 1000.0f / fadeout_scale_time, 0.0f, 1.0f);
     }
     this->fFollowCircleAnimationScale =

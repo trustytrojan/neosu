@@ -1,11 +1,5 @@
 #include "BaseEnvironment.h"
-
-#ifdef _WIN32
-#include <minwinbase.h>
-#include <wincrypt.h>
-#else
-#include <sys/random.h>
-#endif
+#include <random>
 
 #ifndef LZMA_API_STATIC
 #define LZMA_API_STATIC
@@ -31,14 +25,11 @@ void submit_score(FinishedScore score) {
     strftime(score_time, sizeof(score_time), "%y%m%d%H%M%S", timeinfo);
 
     u8 iv[32];
-#ifdef _WIN32
-    HCRYPTPROV hCryptProv;
-    CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
-    CryptGenRandom(hCryptProv, sizeof(iv), iv);
-    CryptReleaseContext(hCryptProv, 0);
-#else
-    getrandom(iv, sizeof(iv), 0);
-#endif
+    std::random_device rd;
+    auto *iv_words = reinterpret_cast<uint32_t *>(iv);
+    for(int i = 0; i < 8; ++i) {
+        iv_words[i] = rd();
+    }
 
     APIRequest request;
     request.type = SUBMIT_SCORE;

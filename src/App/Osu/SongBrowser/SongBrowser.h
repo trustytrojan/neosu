@@ -2,6 +2,8 @@
 #include "MouseListener.h"
 #include "ScreenBackable.h"
 
+#include <random>
+
 class Beatmap;
 class Database;
 class DatabaseBeatmap;
@@ -192,6 +194,8 @@ class SongBrowser : public ScreenBackable {
     void selectSongButton(Button *songButton);
     void selectPreviousRandomBeatmap();
     void playSelectedDifficulty();
+
+    std::mt19937 rngalg;
 
     GROUP group;
     std::vector<GROUPING> groupings;

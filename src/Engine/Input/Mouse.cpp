@@ -195,8 +195,8 @@ void Mouse::update() {
         nextPos = this->vPosWithoutOffset + this->vDelta;
 
         // special case: relative input is ALWAYS clipped/confined to the window
-        nextPos.x = clamp<float>(nextPos.x, windowRect.getMinX(), windowRect.getMaxX());
-        nextPos.y = clamp<float>(nextPos.y, windowRect.getMinY(), windowRect.getMaxY());
+        nextPos.x = std::clamp<float>(nextPos.x, windowRect.getMinX(), windowRect.getMaxX());
+        nextPos.y = std::clamp<float>(nextPos.y, windowRect.getMinY(), windowRect.getMaxY());
     }
 
     // clip/confine cursor
@@ -211,8 +211,8 @@ void Mouse::update() {
         const float maxY = minY + cursorClip.getHeight() * this->vScale.y;
 
         if(maxX > 0 && maxY > 0) {
-            nextPos.x = clamp<float>(nextPos.x, minX + 1, maxX - 1);
-            nextPos.y = clamp<float>(nextPos.y, minY + 1, maxY - 1);
+            nextPos.x = std::clamp<float>(nextPos.x, minX + 1, maxX - 1);
+            nextPos.y = std::clamp<float>(nextPos.y, minY + 1, maxY - 1);
         }
     }
 

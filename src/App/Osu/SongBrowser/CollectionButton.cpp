@@ -179,15 +179,15 @@ void CollectionButton::onDeleteCollectionConfirmed(UString text, int id) {
 }
 
 Color CollectionButton::getActiveBackgroundColor() const {
-    return COLOR(clamp<int>(cv_songbrowser_button_collection_active_color_a.getInt(), 0, 255),
-                 clamp<int>(cv_songbrowser_button_collection_active_color_r.getInt(), 0, 255),
-                 clamp<int>(cv_songbrowser_button_collection_active_color_g.getInt(), 0, 255),
-                 clamp<int>(cv_songbrowser_button_collection_active_color_b.getInt(), 0, 255));
+    return COLOR(std::clamp<int>(cv_songbrowser_button_collection_active_color_a.getInt(), 0, 255),
+                 std::clamp<int>(cv_songbrowser_button_collection_active_color_r.getInt(), 0, 255),
+                 std::clamp<int>(cv_songbrowser_button_collection_active_color_g.getInt(), 0, 255),
+                 std::clamp<int>(cv_songbrowser_button_collection_active_color_b.getInt(), 0, 255));
 }
 
 Color CollectionButton::getInactiveBackgroundColor() const {
-    return COLOR(clamp<int>(cv_songbrowser_button_collection_inactive_color_a.getInt(), 0, 255),
-                 clamp<int>(cv_songbrowser_button_collection_inactive_color_r.getInt(), 0, 255),
-                 clamp<int>(cv_songbrowser_button_collection_inactive_color_g.getInt(), 0, 255),
-                 clamp<int>(cv_songbrowser_button_collection_inactive_color_b.getInt(), 0, 255));
+    return COLOR(std::clamp<int>(cv_songbrowser_button_collection_inactive_color_a.getInt(), 0, 255),
+                 std::clamp<int>(cv_songbrowser_button_collection_inactive_color_r.getInt(), 0, 255),
+                 std::clamp<int>(cv_songbrowser_button_collection_inactive_color_g.getInt(), 0, 255),
+                 std::clamp<int>(cv_songbrowser_button_collection_inactive_color_b.getInt(), 0, 255));
 }

@@ -384,8 +384,8 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                     }
 
                                     points.emplace_back(
-                                        (int)clamp<float>(sliderXY[0].toFloat(), -sliderSanityRange, sliderSanityRange),
-                                        (int)clamp<float>(sliderXY[1].toFloat(), -sliderSanityRange,
+                                        (int)std::clamp<float>(sliderXY[0].toFloat(), -sliderSanityRange, sliderSanityRange),
+                                        (int)std::clamp<float>(sliderXY[1].toFloat(), -sliderSanityRange,
                                                           sliderSanityRange));
                                 }
 
@@ -393,8 +393,8 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                 // sliders have both, and older beatmaps store the start point inside the control
                                 // points)
                                 {
-                                    const Vector2 xy = Vector2(clamp<float>(x, -sliderSanityRange, sliderSanityRange),
-                                                               clamp<float>(y, -sliderSanityRange, sliderSanityRange));
+                                    const Vector2 xy = Vector2(std::clamp<float>(x, -sliderSanityRange, sliderSanityRange),
+                                                               std::clamp<float>(y, -sliderSanityRange, sliderSanityRange));
                                     if(points.size() > 0) {
                                         if(points[0] != xy) points.insert(points.begin(), xy);
                                     } else
@@ -410,11 +410,11 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                                     s.x = x;
                                     s.y = y;
                                     s.type = sliderTokens[0][0];
-                                    s.repeat = clamp<int>((int)tokens[6].toFloat(), -sliderMaxRepeatRange,
+                                    s.repeat = std::clamp<int>((int)tokens[6].toFloat(), -sliderMaxRepeatRange,
                                                           sliderMaxRepeatRange);
                                     s.repeat = s.repeat >= 0 ? s.repeat : 0;  // sanity check
                                     s.pixelLength =
-                                        clamp<float>(tokens[7].toFloat(), -sliderSanityRange, sliderSanityRange);
+                                        std::clamp<float>(tokens[7].toFloat(), -sliderSanityRange, sliderSanityRange);
                                     s.time = time;
                                     s.sampleType = hitSound;
                                     s.number = comboNumber++;
@@ -556,7 +556,7 @@ DatabaseBeatmap::CALCULATE_SLIDER_TIMES_CLICKS_TICKS_RESULT DatabaseBeatmap::cal
             const float tickDurationPercentOfSliderLength =
                 tickPixelLength / (s.pixelLength == 0.0f ? 1.0f : s.pixelLength);
             const int max_ticks = cv_slider_max_ticks.getInt();
-            const int tickCount = min((int)std::ceil(s.pixelLength / tickPixelLength) - 1,
+            const int tickCount = std::min((int)std::ceil(s.pixelLength / tickPixelLength) - 1,
                                       max_ticks);  // NOTE: hard sanity limit number of ticks per slider
 
             if(tickCount > 0 && !timingInfo.isNaN && !std::isnan(s.pixelLength) &&
@@ -673,7 +673,7 @@ DatabaseBeatmap::LOAD_DIFFOBJ_RESULT DatabaseBeatmap::loadDifficultyHitObjects(P
     {
         result.maxPossibleCombo += c.hitcircles.size();
         for(const auto &s : c.sliders) {
-            const int repeats = max((s.repeat - 1), 0);
+            const int repeats = std::max((s.repeat - 1), 0);
             result.maxPossibleCombo +=
                 2 + repeats + (repeats + 1) * s.ticks.size();  // start/end + repeat arrow + ticks
         }
@@ -1210,7 +1210,7 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
                                                    s.sliderTime, s.sliderTimeWithoutRepeats, s.time, s.sampleType,
                                                    s.number, false, s.colorCounter, s.colorOffset, beatmap));
 
-            const int repeats = max((s.repeat - 1), 0);
+            const int repeats = std::max((s.repeat - 1), 0);
             maxPossibleCombo += 2 + repeats + (repeats + 1) * s.ticks.size();  // start/end + repeat arrow + ticks
         }
 
@@ -1254,14 +1254,14 @@ DatabaseBeatmap::LOAD_GAMEPLAY_RESULT DatabaseBeatmap::loadGameplay(DatabaseBeat
             const Slider *sliderPointer = dynamic_cast<Slider *>(currentHitObject);
             const Spinner *spinnerPointer = dynamic_cast<Spinner *>(currentHitObject);
 
-            int scoreComboMultiplier = max(combo - 1, 0);
+            int scoreComboMultiplier = std::max(combo - 1, 0);
 
             if(circlePointer != NULL || spinnerPointer != NULL) {
                 scoreV2ComboPortionMaximum += (unsigned long long)(300.0 * (1.0 + (double)scoreComboMultiplier / 10.0));
                 combo++;
             } else if(sliderPointer != NULL) {
                 combo += 1 + sliderPointer->getClicks().size();
-                scoreComboMultiplier = max(combo - 1, 0);
+                scoreComboMultiplier = std::max(combo - 1, 0);
                 scoreV2ComboPortionMaximum += (unsigned long long)(300.0 * (1.0 + (double)scoreComboMultiplier / 10.0));
                 combo++;
             }
@@ -1386,7 +1386,7 @@ DatabaseBeatmap::TIMING_INFO DatabaseBeatmap::getTimingInfoForTimeAndTimingPoint
             if(timingpoints[samplePoint].msPerBeat >= 0)
                 mult = 1;
             else
-                mult = clamp<float>((float)-timingpoints[samplePoint].msPerBeat, 10.0f, 1000.0f) / 100.0f;
+                mult = std::clamp<float>((float)-timingpoints[samplePoint].msPerBeat, 10.0f, 1000.0f) / 100.0f;
         }
 
         ti.beatLengthBase = timingpoints[point].msPerBeat;

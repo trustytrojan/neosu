@@ -157,7 +157,7 @@ void UserCard::draw() {
             g->setColor(0xffbf962a);
             g->fillRect(this->vPos.x + this->vSize.x - barWidth - barBorder - 1,
                         this->vPos.y + this->vSize.y - barHeight - barBorder,
-                        barWidth * clamp<float>(this->fPercentToNextLevel, 0.0f, 1.0f), barHeight);
+                        barWidth * std::clamp<float>(this->fPercentToNextLevel, 0.0f, 1.0f), barHeight);
         }
 
         // draw pp increase/decrease delta

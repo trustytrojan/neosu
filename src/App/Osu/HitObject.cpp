@@ -41,7 +41,7 @@ void HitObject::drawHitResult(Skin *skin, float hitcircleDiameter, float rawHitc
             // OD brackets which are nonlinear of course)
             if(hitDeltaRangePercent != 0.0f) {
                 hitDeltaRangePercent =
-                    clamp<float>(hitDeltaRangePercent * cv_hitresult_delta_colorize_multiplier.getFloat(), -1.0f, 1.0f);
+                    std::clamp<float>(hitDeltaRangePercent * cv_hitresult_delta_colorize_multiplier.getFloat(), -1.0f, 1.0f);
 
                 const float rf = lerp3f(cv_hitresult_delta_colorize_early_r.getFloat() / 255.0f, 1.0f,
                                         cv_hitresult_delta_colorize_late_r.getFloat() / 255.0f,
@@ -67,7 +67,7 @@ void HitObject::drawHitResult(Skin *skin, float hitcircleDiameter, float rawHitc
         const float fadeOutDurationPercent =
             cv_hitresult_fadeout_duration.getFloat() / cv_hitresult_duration.getFloat();
 
-        g->setAlpha(clamp<float>(animPercent < fadeInEndPercent
+        g->setAlpha(std::clamp<float>(animPercent < fadeInEndPercent
                                      ? animPercent / fadeInEndPercent
                                      : 1.0f - ((animPercent - fadeOutStartPercent) / fadeOutDurationPercent),
                                  0.0f, 1.0f));
@@ -136,19 +136,19 @@ void HitObject::drawHitResult(Skin *skin, float hitcircleDiameter, float rawHitc
         if(doScaleOrRotateAnim && cv_hitresult_animated.getBool()) {
             if(!hasParticle) {
                 if(animPercent < fadeInEndPercent * 0.8f)
-                    scale = lerp<float>(0.6f, 1.1f, clamp<float>(animPercent / (fadeInEndPercent * 0.8f), 0.0f, 1.0f));
+                    scale = std::lerp<float>(0.6f, 1.1f, std::clamp<float>(animPercent / (fadeInEndPercent * 0.8f), 0.0f, 1.0f));
                 else if(animPercent < fadeInEndPercent * 1.2f)
-                    scale = lerp<float>(1.1f, 0.9f,
-                                        clamp<float>((animPercent - fadeInEndPercent * 0.8f) /
+                    scale = std::lerp<float>(1.1f, 0.9f,
+                                        std::clamp<float>((animPercent - fadeInEndPercent * 0.8f) /
                                                          (fadeInEndPercent * 1.2f - fadeInEndPercent * 0.8f),
                                                      0.0f, 1.0f));
                 else if(animPercent < fadeInEndPercent * 1.4f)
-                    scale = lerp<float>(0.9f, 1.0f,
-                                        clamp<float>((animPercent - fadeInEndPercent * 1.2f) /
+                    scale = std::lerp<float>(0.9f, 1.0f,
+                                        std::clamp<float>((animPercent - fadeInEndPercent * 1.2f) /
                                                          (fadeInEndPercent * 1.4f - fadeInEndPercent * 1.2f),
                                                      0.0f, 1.0f));
             } else
-                scale = lerp<float>(0.9f, 1.05f, clamp<float>(animPercent, 0.0f, 1.0f));
+                scale = std::lerp<float>(0.9f, 1.05f, std::clamp<float>(animPercent, 0.0f, 1.0f));
 
             // TODO: osu draws an additive copy of the hitresult on top (?) with 0.5 alpha anim and negative timing, if
             // the skin hasParticle. in this case only the copy does the wobble anim, while the main result just scales
@@ -160,10 +160,10 @@ void HitObject::drawHitResult(Skin *skin, float hitcircleDiameter, float rawHitc
                 Vector2 downAnim;
                 if(skin->getHit0()->getNumImages() < 2 && skin->getVersion() > 1.0f)
                     downAnim.y =
-                        lerp<float>(-5.0f, 40.0f, clamp<float>(animPercent * animPercent * animPercent, 0.0f, 1.0f)) *
+                        std::lerp<float>(-5.0f, 40.0f, std::clamp<float>(animPercent * animPercent * animPercent, 0.0f, 1.0f)) *
                         osuCoordScaleMultiplier;
 
-                float missScale = 1.0f + clamp<float>((1.0f - (animPercent / fadeInEndPercent)), 0.0f, 1.0f) *
+                float missScale = 1.0f + std::clamp<float>((1.0f - (animPercent / fadeInEndPercent)), 0.0f, 1.0f) *
                                              (cv_hitresult_miss_fadein_scale.getFloat() - 1.0f);
                 if(!cv_hitresult_animated.getBool()) missScale = 1.0f;
 
@@ -293,7 +293,7 @@ void HitObject::drawHitResultAnim(const HITRESULTANIM &hitresultanim) {
 
             drawHitResult(this->bm, this->bm->osuCoords2Pixels(hitresultanim.rawPos), hitresultanim.result,
                           animPercentInv,
-                          clamp<float>((float)hitresultanim.delta / this->bi->getHitWindow50(), -1.0f, 1.0f));
+                          std::clamp<float>((float)hitresultanim.delta / this->bi->getHitWindow50(), -1.0f, 1.0f));
         }
     }
 }
@@ -314,7 +314,7 @@ void HitObject::update(long curPos, f64 frame_time) {
     // 1 ms fudge by using >=, shouldn't really be a problem
     if(curPos >= (this->click_time - this->iApproachTime) && curPos < (this->click_time + this->duration)) {
         // approach circle scale
-        const float scale = clamp<float>((float)this->iDelta / (float)this->iApproachTime, 0.0f, 1.0f);
+        const float scale = std::clamp<float>((float)this->iDelta / (float)this->iApproachTime, 0.0f, 1.0f);
         this->fApproachScale = 1 + (scale * cv_approach_scale_multiplier.getFloat());
         if(cv_mod_approach_different.getBool()) {
             const float back_const = 1.70158;
@@ -368,17 +368,17 @@ void HitObject::update(long curPos, f64 frame_time) {
                 // purpose
             }
             this->fApproachScale =
-                1 + lerp<float>(cv_mod_approach_different_initial_size.getFloat() - 1.0f, 0.0f, time);
+                1 + std::lerp<float>(cv_mod_approach_different_initial_size.getFloat() - 1.0f, 0.0f, time);
         }
 
         // hitobject body fadein
         const long fadeInStart = this->click_time - this->iApproachTime;
-        const long fadeInEnd = min(this->click_time,
+        const long fadeInEnd = std::min(this->click_time,
                                    this->click_time - this->iApproachTime +
-                                       this->iFadeInTime);  // min() ensures that the fade always finishes at click_time
+                                       this->iFadeInTime);  // std::min() ensures that the fade always finishes at click_time
                                                             // (even if the fadeintime is longer than the approachtime)
         this->fAlpha =
-            clamp<float>(1.0f - ((float)(fadeInEnd - curPos) / (float)(fadeInEnd - fadeInStart)), 0.0f, 1.0f);
+            std::clamp<float>(1.0f - ((float)(fadeInEnd - curPos) / (float)(fadeInEnd - fadeInStart)), 0.0f, 1.0f);
         this->fAlphaWithoutHidden = this->fAlpha;
 
         if(mods.flags & Replay::ModFlags::Hidden) {
@@ -389,24 +389,24 @@ void HitObject::update(long curPos, f64 frame_time) {
             const float fout_end_percent = cv_mod_hd_circle_fadeout_end_percent.getFloat();
             const long hiddenFadeInStart = this->click_time - (long)(this->iApproachTime * fin_start_percent);
             const long hiddenFadeInEnd = this->click_time - (long)(this->iApproachTime * fin_end_percent);
-            this->fAlpha = clamp<float>(
+            this->fAlpha = std::clamp<float>(
                 1.0f - ((float)(hiddenFadeInEnd - curPos) / (float)(hiddenFadeInEnd - hiddenFadeInStart)), 0.0f, 1.0f);
 
             // hidden hitobject body fadeout
             const long hiddenFadeOutStart = this->click_time - (long)(this->iApproachTime * fout_start_percent);
             const long hiddenFadeOutEnd = this->click_time - (long)(this->iApproachTime * fout_end_percent);
             if(curPos >= hiddenFadeOutStart)
-                this->fAlpha = clamp<float>(
+                this->fAlpha = std::clamp<float>(
                     ((float)(hiddenFadeOutEnd - curPos) / (float)(hiddenFadeOutEnd - hiddenFadeOutStart)), 0.0f, 1.0f);
         }
 
         // approach circle fadein (doubled fadeintime)
         const long approachCircleFadeStart = this->click_time - this->iApproachTime;
-        const long approachCircleFadeEnd = min(
+        const long approachCircleFadeEnd = std::min(
             this->click_time, this->click_time - this->iApproachTime +
-                                  2 * this->iFadeInTime);  // min() ensures that the fade always finishes at click_time
+                                  2 * this->iFadeInTime);  // std::min() ensures that the fade always finishes at click_time
                                                            // (even if the fadeintime is longer than the approachtime)
-        this->fAlphaForApproachCircle = clamp<float>(
+        this->fAlphaForApproachCircle = std::clamp<float>(
             1.0f - ((float)(approachCircleFadeEnd - curPos) / (float)(approachCircleFadeEnd - approachCircleFadeStart)),
             0.0f, 1.0f);
 
@@ -419,8 +419,8 @@ void HitObject::update(long curPos, f64 frame_time) {
             const long hittableDimFadeEnd = hittableDimFadeStart + (long)cv_hitobject_hittable_dim_duration.getInt();
 
             this->fHittableDimRGBColorMultiplierPercent =
-                lerp<float>(cv_hitobject_hittable_dim_start_percent.getFloat(), 1.0f,
-                            clamp<float>(1.0f - (float)(hittableDimFadeEnd - curPos) /
+                std::lerp<float>(cv_hitobject_hittable_dim_start_percent.getFloat(), 1.0f,
+                            std::clamp<float>(1.0f - (float)(hittableDimFadeEnd - curPos) /
                                                     (float)(hittableDimFadeEnd - hittableDimFadeStart),
                                          0.0f, 1.0f));
         }
@@ -483,7 +483,7 @@ void HitObject::onReset(long curPos) {
 
 float HitObject::lerp3f(float a, float b, float c, float percent) {
     if(percent <= 0.5f)
-        return lerp<float>(a, b, percent * 2.0f);
+        return std::lerp<float>(a, b, percent * 2.0f);
     else
-        return lerp<float>(b, c, (percent - 0.5f) * 2.0f);
+        return std::lerp<float>(b, c, (percent - 0.5f) * 2.0f);
 }

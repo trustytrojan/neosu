@@ -7,12 +7,12 @@
 
 #include "ResourceManager.h"
 
-#include <algorithm>
-
 #include "App.h"
 #include "AsyncResourceLoader.h"
 #include "ConVar.h"
 #include "Resource.h"
+
+#include <algorithm>
 
 ResourceManager::ResourceManager() {
     this->bNextLoadAsync = false;

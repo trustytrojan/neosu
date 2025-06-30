@@ -29,7 +29,7 @@ class Slider : public HitObject {
 
     void updateStackPosition(float stackOffset) override;
     void miss(long curPos) override;
-    int getCombo() override { return 2 + max((this->iRepeat - 1), 0) + (max((this->iRepeat - 1), 0) + 1) * this->ticks.size(); }
+    int getCombo() override { return 2 + std::max((this->iRepeat - 1), 0) + (std::max((this->iRepeat - 1), 0) + 1) * this->ticks.size(); }
 
     Vector2 getRawPosAt(long pos) override;
     Vector2 getOriginalRawPosAt(long pos) override;

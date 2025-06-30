@@ -4,33 +4,6 @@
 
 #include "BaseEnvironment.h"
 
-#ifdef _WIN32
-// Windows build
-#ifdef _WIN64
-#define OS_NAME "win64"
-// #define WINVER 0x0A00  // Windows 10, to enable the ifdefs in winuser.h for touch
-// #define MCENGINE_WINDOWS_REALTIMESTYLUS_SUPPORT
-// #define MCENGINE_WINDOWS_TOUCH_SUPPORT
-#else
-#define OS_NAME "win32"
-#endif
-// End of Windows build
-#else
-// Linux build
-#ifdef __x86_64
-#define OS_NAME "linux-x64"
-#else
-#define OS_NAME "linux-i686"
-#endif
-// End of Linux build
-#endif
-
-#ifdef _WIN32
-// clang-format off
-#include <shlwapi.h> // for StrStrIA TODO: dont
-// clang-format on
-#endif
-
 // STD INCLUDES
 
 #include <math.h>
@@ -68,12 +41,6 @@
 
 // DEFS
 
-#ifdef _WIN32
-#define reallocarray(ptr, a, b) realloc(ptr, a *b)
-#define strcasestr(a, b) StrStrIA(a, b)
-#define strcasecmp(a, b) _stricmp(a, b)
-#endif
-
 #ifndef PATH_MAX
 #define PATH_MAX MAX_PATH
 #endif
@@ -96,10 +63,10 @@ constexpr void runtime_assert(bool cond, const char *reason)
 #define COLOR(a, r, g, b) ((Color)((((a) & 0xff) << 24) | (((r) & 0xff) << 16) | (((g) & 0xff) << 8) | ((b) & 0xff)))
 
 #define COLORf(a, r, g, b)                                                    \
-    ((Color)(((((int)(clamp<float>(a, 0.0f, 1.0f) * 255.0f)) & 0xff) << 24) | \
-             ((((int)(clamp<float>(r, 0.0f, 1.0f) * 255.0f)) & 0xff) << 16) | \
-             ((((int)(clamp<float>(g, 0.0f, 1.0f) * 255.0f)) & 0xff) << 8) |  \
-             (((int)(clamp<float>(b, 0.0f, 1.0f) * 255.0f)) & 0xff)))
+    ((Color)(((((int)(std::clamp<float>(a, 0.0f, 1.0f) * 255.0f)) & 0xff) << 24) | \
+             ((((int)(std::clamp<float>(r, 0.0f, 1.0f) * 255.0f)) & 0xff) << 16) | \
+             ((((int)(std::clamp<float>(g, 0.0f, 1.0f) * 255.0f)) & 0xff) << 8) |  \
+             (((int)(std::clamp<float>(b, 0.0f, 1.0f) * 255.0f)) & 0xff)))
 
 #define COLOR_GET_Ri(color) (((Channel)(color >> 16)))
 
@@ -125,31 +92,20 @@ constexpr void runtime_assert(bool cond, const char *reason)
             COLOR_GET_Bf(color1) * COLOR_GET_Bf(color2)))
 
 #define COLOR_ADD(color1, color2)                                                        \
-    (COLORf(1.0f, clamp<float>(COLOR_GET_Rf(color1) + COLOR_GET_Rf(color2), 0.0f, 1.0f), \
-            clamp<float>(COLOR_GET_Gf(color1) + COLOR_GET_Gf(color2), 0.0f, 1.0f),       \
-            clamp<float>(COLOR_GET_Bf(color1) + COLOR_GET_Bf(color2), 0.0f, 1.0f)))
+    (COLORf(1.0f, std::clamp<float>(COLOR_GET_Rf(color1) + COLOR_GET_Rf(color2), 0.0f, 1.0f), \
+            std::clamp<float>(COLOR_GET_Gf(color1) + COLOR_GET_Gf(color2), 0.0f, 1.0f),       \
+            std::clamp<float>(COLOR_GET_Bf(color1) + COLOR_GET_Bf(color2), 0.0f, 1.0f)))
 
 #define COLOR_SUBTRACT(color1, color2)                                                   \
-    (COLORf(1.0f, clamp<float>(COLOR_GET_Rf(color1) - COLOR_GET_Rf(color2), 0.0f, 1.0f), \
-            clamp<float>(COLOR_GET_Gf(color1) - COLOR_GET_Gf(color2), 0.0f, 1.0f),       \
-            clamp<float>(COLOR_GET_Bf(color1) - COLOR_GET_Bf(color2), 0.0f, 1.0f)))
+    (COLORf(1.0f, std::clamp<float>(COLOR_GET_Rf(color1) - COLOR_GET_Rf(color2), 0.0f, 1.0f), \
+            std::clamp<float>(COLOR_GET_Gf(color1) - COLOR_GET_Gf(color2), 0.0f, 1.0f),       \
+            std::clamp<float>(COLOR_GET_Bf(color1) - COLOR_GET_Bf(color2), 0.0f, 1.0f)))
 
 #define PI 3.1415926535897932384626433832795
 
 #define PIOVER180 0.01745329251994329576923690768489
 
 // UTIL
-
-// "bad" because a can be lower than b
-template <class T>
-inline T bad_clamp(T x, T a, T b) {
-    return x < a ? a : (x > b ? b : x);
-}
-
-template <class T>
-inline T lerp(T x1, T x2, T percent) {
-    return x1 * (1 - percent) + x2 * percent;
-}
 
 template <class T>
 inline int sign(T val) {
@@ -191,7 +147,7 @@ struct zarray {
         if(this->max == 0) {
             this->memory = (T *)calloc(new_max, sizeof(T));
         } else {
-            this->memory = (T *)reallocarray(this->memory, new_max, sizeof(T));
+            this->memory = (T *)realloc(this->memory, new_max * sizeof(T));
             memset(&this->memory[this->max], 0, (new_max - this->max) * sizeof(T));
         }
 
