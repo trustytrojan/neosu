@@ -135,7 +135,7 @@ bool WinEnvironment::fileExists(std::string filename) {
 
     HANDLE handle = FindFirstFile(winFilename, &FindFileData);
     if(handle == INVALID_HANDLE_VALUE)
-        return std::ifstream(std::filesystem::path((const char8_t*)&*temp.toUtf8())).good();
+        return std::ifstream(std::filesystem::path(temp.unicodeView())).good();
     else {
         FindClose(handle);
         return true;
