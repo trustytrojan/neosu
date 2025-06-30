@@ -457,10 +457,10 @@ void Skin::load() {
 
     // default values, if none were loaded
     if(this->comboColors.size() == 0) {
-        this->comboColors.push_back(COLOR(255, 255, 192, 0));
-        this->comboColors.push_back(COLOR(255, 0, 202, 0));
-        this->comboColors.push_back(COLOR(255, 18, 124, 255));
-        this->comboColors.push_back(COLOR(255, 242, 24, 57));
+        this->comboColors.push_back(argb(255, 255, 192, 0));
+        this->comboColors.push_back(argb(255, 0, 202, 0));
+        this->comboColors.push_back(argb(255, 18, 124, 255));
+        this->comboColors.push_back(argb(255, 242, 24, 57));
     }
 
     // images
@@ -1170,23 +1170,23 @@ bool Skin::parseSkinINI(std::string filepath) {
                     int r, g, b;
 
                     if(sscanf(curLine.c_str(), " Combo %i : %i , %i , %i \n", &comboNum, &r, &g, &b) == 4)
-                        this->comboColors.push_back(COLOR(255, r, g, b));
+                        this->comboColors.push_back(argb(255, r, g, b));
                     if(sscanf(curLine.c_str(), " SpinnerApproachCircle : %i , %i , %i \n", &r, &g, &b) == 3)
-                        this->spinnerApproachCircleColor = COLOR(255, r, g, b);
+                        this->spinnerApproachCircleColor = argb(255, r, g, b);
                     if(sscanf(curLine.c_str(), " SliderBorder: %i , %i , %i \n", &r, &g, &b) == 3)
-                        this->sliderBorderColor = COLOR(255, r, g, b);
+                        this->sliderBorderColor = argb(255, r, g, b);
                     if(sscanf(curLine.c_str(), " SliderTrackOverride : %i , %i , %i \n", &r, &g, &b) == 3) {
-                        this->sliderTrackOverride = COLOR(255, r, g, b);
+                        this->sliderTrackOverride = argb(255, r, g, b);
                         this->bSliderTrackOverride = true;
                     }
                     if(sscanf(curLine.c_str(), " SliderBall : %i , %i , %i \n", &r, &g, &b) == 3)
-                        this->sliderBallColor = COLOR(255, r, g, b);
+                        this->sliderBallColor = argb(255, r, g, b);
                     if(sscanf(curLine.c_str(), " SongSelectActiveText : %i , %i , %i \n", &r, &g, &b) == 3)
-                        this->songSelectActiveText = COLOR(255, r, g, b);
+                        this->songSelectActiveText = argb(255, r, g, b);
                     if(sscanf(curLine.c_str(), " SongSelectInactiveText : %i , %i , %i \n", &r, &g, &b) == 3)
-                        this->songSelectInactiveText = COLOR(255, r, g, b);
+                        this->songSelectInactiveText = argb(255, r, g, b);
                     if(sscanf(curLine.c_str(), " InputOverlayText : %i , %i , %i \n", &r, &g, &b) == 3)
-                        this->inputOverlayText = COLOR(255, r, g, b);
+                        this->inputOverlayText = argb(255, r, g, b);
                 } break;
                 case 2:  // Fonts
                 {
@@ -1272,7 +1272,7 @@ Color Skin::getComboColorForCounter(int i, int offset) {
     else if(this->comboColors.size() > 0)
         return this->comboColors[i % this->comboColors.size()];
     else
-        return COLOR(255, 0, 255, 0);
+        return argb(255, 0, 255, 0);
 }
 
 void Skin::setBeatmapComboColors(std::vector<Color> colors) { this->beatmapComboColors = colors; }

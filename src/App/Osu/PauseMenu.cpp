@@ -59,7 +59,7 @@ void PauseMenu::draw() {
 
     // draw dim
     if(cv_pause_dim_background.getBool()) {
-        g->setColor(COLORf(this->fDimAnim * cv_pause_dim_alpha.getFloat(), 0.078f, 0.078f, 0.078f));
+        g->setColor(argb(this->fDimAnim * cv_pause_dim_alpha.getFloat(), 0.078f, 0.078f, 0.078f));
         g->fillRect(0, 0, osu->getScreenWidth(), osu->getScreenHeight());
     }
 
@@ -75,7 +75,7 @@ void PauseMenu::draw() {
             const float scale = Osu::getImageScaleToFillResolution(image, osu->getScreenSize());
             const Vector2 centerTrans = (osu->getScreenSize() / 2);
 
-            g->setColor(COLORf(this->fDimAnim, 1.0f, 1.0f, 1.0f));
+            g->setColor(argb(this->fDimAnim, 1.0f, 1.0f, 1.0f));
             g->pushTransform();
             {
                 g->scale(scale, scale);
@@ -94,7 +94,7 @@ void PauseMenu::draw() {
 
     // draw selection arrows
     if(this->selectedButton != NULL) {
-        const Color arrowColor = COLOR(255, 0, 114, 255);
+        const Color arrowColor = argb(255, 0, 114, 255);
         float animation = fmod((float)(engine->getTime() - this->fWarningArrowsAnimStartTime) * 3.2f, 2.0f);
         if(animation > 1.0f) animation = 2.0f - animation;
 

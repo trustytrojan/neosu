@@ -123,8 +123,8 @@ ConsoleBox::ConsoleBox() : CBaseUIElement(0, 0, 0, 0, "") {
                               90 * dpiScale, "consoleboxsuggestion");
     {
         this->suggestion->setDrawBackground(true);
-        this->suggestion->setBackgroundColor(COLOR(255, 0, 0, 0));
-        this->suggestion->setFrameColor(COLOR(255, 255, 255, 255));
+        this->suggestion->setBackgroundColor(argb(255, 0, 0, 0));
+        this->suggestion->setFrameColor(argb(255, 255, 255, 255));
         this->suggestion->setHorizontalScrolling(false);
         this->suggestion->setVerticalScrolling(true);
         this->suggestion->setVisible(false);

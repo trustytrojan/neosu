@@ -468,10 +468,10 @@ void MainMenu::draw() {
                          this->fMainMenuAnim3 * 360.0f + friendRotation);
     }
 
-    const Color cubeColor = COLORf(1.0f, std::lerp<float>(0.0f, 0.5f, this->fMainMenuAnimFriendPercent),
+    const Color cubeColor = argb(1.0f, std::lerp<float>(0.0f, 0.5f, this->fMainMenuAnimFriendPercent),
                                    std::lerp<float>(0.0f, 0.768f, this->fMainMenuAnimFriendPercent),
                                    std::lerp<float>(0.0f, 0.965f, this->fMainMenuAnimFriendPercent));
-    const Color cubeBorderColor = COLORf(1.0f, std::lerp<float>(1.0f, 0.5f, this->fMainMenuAnimFriendPercent),
+    const Color cubeBorderColor = argb(1.0f, std::lerp<float>(1.0f, 0.5f, this->fMainMenuAnimFriendPercent),
                                          std::lerp<float>(1.0f, 0.768f, this->fMainMenuAnimFriendPercent),
                                          std::lerp<float>(1.0f, 0.965f, this->fMainMenuAnimFriendPercent));
 
@@ -1174,10 +1174,10 @@ void MainMenu::updateLayout() {
                                            2.0f * menuElementExtraWidth * (1.0f - offsetPercent),
                                        menuElementHeight);
         this->menuElements[i]->setTextColor(
-            COLORf(offsetPercent * offsetPercent * offsetPercent * offsetPercent, 1.0f, 1.0f, 1.0f));
-        this->menuElements[i]->setFrameColor(COLORf(offsetPercent, 1.0f, 1.0f, 1.0f));
+            argb(offsetPercent * offsetPercent * offsetPercent * offsetPercent, 1.0f, 1.0f, 1.0f));
+        this->menuElements[i]->setFrameColor(argb(offsetPercent, 1.0f, 1.0f, 1.0f));
         this->menuElements[i]->setBackgroundColor(
-            COLORf(offsetPercent * cv_main_menu_alpha.getFloat(), 0.0f, 0.0f, 0.0f));
+            argb(offsetPercent * cv_main_menu_alpha.getFloat(), 0.0f, 0.0f, 0.0f));
     }
 
     this->setSize(osu->getScreenSize() + Vector2(1, 1));

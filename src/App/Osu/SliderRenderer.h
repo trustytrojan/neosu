@@ -22,9 +22,6 @@ class SliderRenderer {
                      Color undimmedColor = 0xffffffff, float colorRGBMultiplier = 1.0f, float alpha = 1.0f,
                      long sliderTimeForRainbow = 0, bool doEnableRenderTarget = true, bool doDisableRenderTarget = true,
                      bool doDrawSliderFrameBufferToScreen = true);
-    static void drawMM(const std::vector<Vector2> &points, float hitcircleDiameter, float from = 0.0f,
-                       float to = 1.0f, Color undimmedColor = 0xffffffff, float colorRGBMultiplier = 1.0f,
-                       float alpha = 1.0f, long sliderTimeForRainbow = 0);
 
    private:
     static void drawFillSliderBodyPeppy(const std::vector<Vector2> &points, VertexArrayObject *circleMesh,

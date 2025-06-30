@@ -41,15 +41,14 @@ OpenGL3Interface::~OpenGL3Interface() {
 }
 
 void OpenGL3Interface::init() {
-	// resolve GL functions
-	if (!gladLoadGL())
-	{
-		debugLog("gladLoadGL() error\n");
-		engine->showMessageErrorFatal("OpenGL Error", "Couldn't gladLoadGL()!\nThe engine will exit now.");
-		engine->shutdown();
-		return;
-	}
-	debugLogF("OpenGL Version: {}\n", reinterpret_cast<const char *>(glGetString(GL_VERSION)));
+    // resolve GL functions
+    if(!gladLoadGL()) {
+        debugLog("gladLoadGL() error\n");
+        engine->showMessageErrorFatal("OpenGL Error", "Couldn't gladLoadGL()!\nThe engine will exit now.");
+        engine->shutdown();
+        return;
+    }
+    debugLogF("OpenGL Version: {}\n", reinterpret_cast<const char *>(glGetString(GL_VERSION)));
 
     // enable
     glEnable(GL_BLEND);
@@ -462,8 +461,7 @@ void OpenGL3Interface::drawVAO(VertexArrayObject *vao) {
     std::vector<Vector4> finalColors;
 
     for(size_t i = 0; i < vcolors.size(); i++) {
-        Vector4 color = Vector4(COLOR_GET_Rf(vcolors[i]), COLOR_GET_Gf(vcolors[i]), COLOR_GET_Bf(vcolors[i]),
-                                COLOR_GET_Af(vcolors[i]));
+        Vector4 color = Vector4(vcolors[i].Rf(), vcolors[i].Gf(), vcolors[i].Bf(), vcolors[i].Af());
         colors.push_back(color);
         finalColors.push_back(color);
     }

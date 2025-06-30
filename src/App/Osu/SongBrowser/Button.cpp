@@ -20,7 +20,7 @@ int Button::marginPixelsX = 9;
 int Button::marginPixelsY = 9;
 float Button::lastHoverSoundTime = 0;
 
-// Color Button::inactiveDifficultyBackgroundColor = COLOR(255, 0, 150, 236); // blue
+// Color Button::inactiveDifficultyBackgroundColor = argb(255, 0, 150, 236); // blue
 
 Button::Button(SongBrowser *songBrowser, CBaseUIScrollView *view, UIContextMenu *contextMenu, float xPos, float yPos,
                float xSize, float ySize, UString name)
@@ -347,14 +347,14 @@ void Button::setMoveAwayState(Button::MOVE_AWAY_STATE moveAwayState, bool animat
 }
 
 Color Button::getActiveBackgroundColor() const {
-    return COLOR(std::clamp<int>(cv_songbrowser_button_active_color_a.getInt(), 0, 255),
+    return argb(std::clamp<int>(cv_songbrowser_button_active_color_a.getInt(), 0, 255),
                  std::clamp<int>(cv_songbrowser_button_active_color_r.getInt(), 0, 255),
                  std::clamp<int>(cv_songbrowser_button_active_color_g.getInt(), 0, 255),
                  std::clamp<int>(cv_songbrowser_button_active_color_b.getInt(), 0, 255));
 }
 
 Color Button::getInactiveBackgroundColor() const {
-    return COLOR(std::clamp<int>(cv_songbrowser_button_inactive_color_a.getInt(), 0, 255),
+    return argb(std::clamp<int>(cv_songbrowser_button_inactive_color_a.getInt(), 0, 255),
                  std::clamp<int>(cv_songbrowser_button_inactive_color_r.getInt(), 0, 255),
                  std::clamp<int>(cv_songbrowser_button_inactive_color_g.getInt(), 0, 255),
                  std::clamp<int>(cv_songbrowser_button_inactive_color_b.getInt(), 0, 255));

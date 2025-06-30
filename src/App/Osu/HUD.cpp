@@ -528,9 +528,9 @@ void HUD::drawCursorRipples() {
 
     if(cv_cursor_ripple_additive.getBool()) g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ADDITIVE);
 
-    g->setColor(COLOR(255, std::clamp<int>(cv_cursor_ripple_tint_r.getInt(), 0, 255),
-                      std::clamp<int>(cv_cursor_ripple_tint_g.getInt(), 0, 255),
-                      std::clamp<int>(cv_cursor_ripple_tint_b.getInt(), 0, 255)));
+    g->setColor(argb(255, std::clamp<int>(cv_cursor_ripple_tint_r.getInt(), 0, 255),
+                     std::clamp<int>(cv_cursor_ripple_tint_g.getInt(), 0, 255),
+                     std::clamp<int>(cv_cursor_ripple_tint_b.getInt(), 0, 255)));
     osu->getSkin()->getCursorRipple()->bind();
     {
         for(int i = 0; i < this->cursorRipples.size(); i++) {
@@ -540,9 +540,9 @@ void HUD::drawCursorRipples() {
             const float animPercent = 1.0f - std::clamp<float>((time - engine->getTime()) / duration, 0.0f, 1.0f);
             const float fadePercent = 1.0f - std::clamp<float>((time - engine->getTime()) / fadeDuration, 0.0f, 1.0f);
 
-            const float scale =
-                std::lerp<float>(cv_cursor_ripple_anim_start_scale.getFloat(), cv_cursor_ripple_anim_end_scale.getFloat(),
-                            1.0f - (1.0f - animPercent) * (1.0f - animPercent));  // quad out
+            const float scale = std::lerp<float>(cv_cursor_ripple_anim_start_scale.getFloat(),
+                                                 cv_cursor_ripple_anim_end_scale.getFloat(),
+                                                 1.0f - (1.0f - animPercent) * (1.0f - animPercent));  // quad out
 
             g->setAlpha(cv_cursor_ripple_alpha.getFloat() * (1.0f - fadePercent));
             g->drawQuad(pos.x - normalizedWidth * scale / 2, pos.y - normalizedHeight * scale / 2,
@@ -602,7 +602,7 @@ void HUD::drawFps(McFont *font, float fps) {
             g->setColor(0xffdddd00);
         else {
             const float pulse = std::abs(std::sin(engine->getTime() * 4));
-            g->setColor(COLORf(1.0f, 1.0f, 0.26f * pulse, 0.26f * pulse));
+            g->setColor(argb(1.0f, 1.0f, 0.26f * pulse, 0.26f * pulse));
         }
 
         g->translate(osu->getScreenWidth() - font->getStringWidth(fpsString) - margin,
@@ -618,11 +618,10 @@ void HUD::drawFps(McFont *font, float fps) {
             g->setColor(0xffdddd00);
         } else {
             const float pulse = std::abs(std::sin(engine->getTime() * 4));
-            g->setColor(COLORf(1.0f, 1.0f, 0.26f * pulse, 0.26f * pulse));
+            g->setColor(argb(1.0f, 1.0f, 0.26f * pulse, 0.26f * pulse));
         }
 
-        g->translate(osu->getScreenWidth() - font->getStringWidth(msString) - margin,
-                     osu->getScreenHeight() - margin);
+        g->translate(osu->getScreenWidth() - font->getStringWidth(msString) - margin, osu->getScreenHeight() - margin);
         g->drawString(font, msString);
     }
     g->popTransform();
@@ -1047,11 +1046,11 @@ void HUD::drawHPBar(double health, float alpha, float breakAnim) {
         if(health < 0.2) {
             const float factor = std::max(0.0, (0.2 - health) / 0.2);
             const float value = std::lerp<float>(0.0f, 1.0f, factor);
-            g->setColor(COLORf(1.0f, value, 0.0f, 0.0f));
+            g->setColor(argb(1.0f, value, 0.0f, 0.0f));
         } else if(health < 0.5) {
             const float factor = std::max(0.0, (0.5 - health) / 0.5);
             const float value = std::lerp<float>(1.0f, 0.0f, factor);
-            g->setColor(COLORf(1.0f, value, value, value));
+            g->setColor(argb(1.0f, value, value, value));
         } else
             g->setColor(0xffffffff);
     } else
@@ -1094,7 +1093,8 @@ void HUD::drawHPBar(double health, float alpha, float breakAnim) {
 void HUD::drawAccuracySimple(float accuracy, float scale) {
     // get integer & fractional parts of the number
     const int accuracyInt = (int)accuracy;
-    const int accuracyFrac = std::clamp<int>(((int)(std::round((accuracy - accuracyInt) * 100.0f))), 0, 99);  // round up
+    const int accuracyFrac =
+        std::clamp<int>(((int)(std::round((accuracy - accuracyInt) * 100.0f))), 0, 99);  // round up
 
     // draw it
     g->pushTransform();
@@ -1127,7 +1127,8 @@ void HUD::drawAccuracy(float accuracy) {
 
     // get integer & fractional parts of the number
     const int accuracyInt = (int)accuracy;
-    const int accuracyFrac = std::clamp<int>(((int)(std::round((accuracy - accuracyInt) * 100.0f))), 0, 99);  // round up
+    const int accuracyFrac =
+        std::clamp<int>(((int)(std::round((accuracy - accuracyInt) * 100.0f))), 0, 99);  // round up
 
     // draw it
     const int offset = 5;
@@ -1421,7 +1422,7 @@ void HUD::drawContinue(Vector2 cursor, float hitcircleDiameter) {
         cursor = osu->getScreenSize() / 2;
 
     // base
-    g->setColor(COLOR(255, 255, 153, 51));
+    g->setColor(argb(255, 255, 153, 51));
     g->pushTransform();
     {
         g->scale(cursorScale, cursorScale);
@@ -1432,7 +1433,7 @@ void HUD::drawContinue(Vector2 cursor, float hitcircleDiameter) {
 
     // pulse animation
     const float cursorAnimPulsePercent = std::clamp<float>(fmod(engine->getTime(), 1.35f), 0.0f, 1.0f);
-    g->setColor(COLOR((short)(255.0f * (1.0f - cursorAnimPulsePercent)), 255, 153, 51));
+    g->setColor(argb((short)(255.0f * (1.0f - cursorAnimPulsePercent)), 255, 153, 51));
     g->pushTransform();
     {
         g->scale(cursorScale * (1.0f + cursorAnimPulsePercent), cursorScale * (1.0f + cursorAnimPulsePercent));
@@ -1540,18 +1541,18 @@ void HUD::drawHitErrorBarInt(float hitWindow300, float hitWindow100, float hitWi
         std::clamp<int>((int)(alpha * cv_hud_hiterrorbar_centerline_alpha.getFloat() * 255.0f), 0, 255);
     const int alphaBarInt = std::clamp<int>((int)(alpha * cv_hud_hiterrorbar_bar_alpha.getFloat() * 255.0f), 0, 255);
 
-    const Color color300 = COLOR(alphaBarInt, std::clamp<int>(cv_hud_hiterrorbar_entry_300_r.getInt(), 0, 255),
-                                 std::clamp<int>(cv_hud_hiterrorbar_entry_300_g.getInt(), 0, 255),
-                                 std::clamp<int>(cv_hud_hiterrorbar_entry_300_b.getInt(), 0, 255));
-    const Color color100 = COLOR(alphaBarInt, std::clamp<int>(cv_hud_hiterrorbar_entry_100_r.getInt(), 0, 255),
-                                 std::clamp<int>(cv_hud_hiterrorbar_entry_100_g.getInt(), 0, 255),
-                                 std::clamp<int>(cv_hud_hiterrorbar_entry_100_b.getInt(), 0, 255));
-    const Color color50 = COLOR(alphaBarInt, std::clamp<int>(cv_hud_hiterrorbar_entry_50_r.getInt(), 0, 255),
-                                std::clamp<int>(cv_hud_hiterrorbar_entry_50_g.getInt(), 0, 255),
-                                std::clamp<int>(cv_hud_hiterrorbar_entry_50_b.getInt(), 0, 255));
-    const Color colorMiss = COLOR(alphaBarInt, std::clamp<int>(cv_hud_hiterrorbar_entry_miss_r.getInt(), 0, 255),
-                                  std::clamp<int>(cv_hud_hiterrorbar_entry_miss_g.getInt(), 0, 255),
-                                  std::clamp<int>(cv_hud_hiterrorbar_entry_miss_b.getInt(), 0, 255));
+    const Color color300 = argb(alphaBarInt, std::clamp<int>(cv_hud_hiterrorbar_entry_300_r.getInt(), 0, 255),
+                                std::clamp<int>(cv_hud_hiterrorbar_entry_300_g.getInt(), 0, 255),
+                                std::clamp<int>(cv_hud_hiterrorbar_entry_300_b.getInt(), 0, 255));
+    const Color color100 = argb(alphaBarInt, std::clamp<int>(cv_hud_hiterrorbar_entry_100_r.getInt(), 0, 255),
+                                std::clamp<int>(cv_hud_hiterrorbar_entry_100_g.getInt(), 0, 255),
+                                std::clamp<int>(cv_hud_hiterrorbar_entry_100_b.getInt(), 0, 255));
+    const Color color50 = argb(alphaBarInt, std::clamp<int>(cv_hud_hiterrorbar_entry_50_r.getInt(), 0, 255),
+                               std::clamp<int>(cv_hud_hiterrorbar_entry_50_g.getInt(), 0, 255),
+                               std::clamp<int>(cv_hud_hiterrorbar_entry_50_b.getInt(), 0, 255));
+    const Color colorMiss = argb(alphaBarInt, std::clamp<int>(cv_hud_hiterrorbar_entry_miss_r.getInt(), 0, 255),
+                                 std::clamp<int>(cv_hud_hiterrorbar_entry_miss_g.getInt(), 0, 255),
+                                 std::clamp<int>(cv_hud_hiterrorbar_entry_miss_b.getInt(), 0, 255));
 
     Vector2 size = Vector2(osu->getScreenWidth() * cv_hud_hiterrorbar_width_percent.getFloat(),
                            osu->getScreenHeight() * cv_hud_hiterrorbar_height_percent.getFloat()) *
@@ -1643,9 +1644,9 @@ void HUD::drawHitErrorBarInt(float hitWindow300, float hitWindow100, float hitWi
 
     // white center line
     if(alphaCenterlineInt > 0) {
-        g->setColor(COLOR(alphaCenterlineInt, std::clamp<int>(cv_hud_hiterrorbar_centerline_r.getInt(), 0, 255),
-                          std::clamp<int>(cv_hud_hiterrorbar_centerline_g.getInt(), 0, 255),
-                          std::clamp<int>(cv_hud_hiterrorbar_centerline_b.getInt(), 0, 255)));
+        g->setColor(argb(alphaCenterlineInt, std::clamp<int>(cv_hud_hiterrorbar_centerline_r.getInt(), 0, 255),
+                         std::clamp<int>(cv_hud_hiterrorbar_centerline_g.getInt(), 0, 255),
+                         std::clamp<int>(cv_hud_hiterrorbar_centerline_b.getInt(), 0, 255)));
         g->fillRect(center.x - entryWidth / 2.0f / 2.0f, center.y - entryHeight / 2.0f, entryWidth / 2.0f, entryHeight);
     }
 }
@@ -1920,48 +1921,45 @@ void HUD::drawStatisticText(const UString text) {
 void HUD::drawTargetHeatmap(float hitcircleDiameter) {
     const Vector2 center = Vector2((int)(hitcircleDiameter / 2.0f + 5.0f), (int)(hitcircleDiameter / 2.0f + 5.0f));
 
-    const int brightnessSub = 0;
-    const Color color300 = COLOR(255, 0, 255 - brightnessSub, 255 - brightnessSub);
-    const Color color100 = COLOR(255, 0, 255 - brightnessSub, 0);
-    const Color color50 = COLOR(255, 255 - brightnessSub, 165 - brightnessSub, 0);
-    const Color colorMiss = COLOR(255, 255 - brightnessSub, 0, 0);
+    // constexpr const COLORPART brightnessSub = 0;
+    static constexpr Color color300 = rgb(0, 255, 255);
+    static constexpr Color color100 = rgb(0, 255, 0);
+    static constexpr Color color50 = rgb(255, 165, 0);
+    static constexpr Color colorMiss = rgb(255, 0, 0);
 
-    Circle::drawCircle(osu->getSkin(), center, hitcircleDiameter, COLOR(255, 50, 50, 50));
+    Circle::drawCircle(osu->getSkin(), center, hitcircleDiameter, rgb(50, 50, 50));
 
     const int size = hitcircleDiameter * 0.075f;
-    for(int i = 0; i < this->targets.size(); i++) {
-        const float delta = this->targets[i].delta;
-        const float p300 = cv_mod_target_300_percent.getFloat();
-        const float p100 = cv_mod_target_100_percent.getFloat();
-        const float p50 = cv_mod_target_50_percent.getFloat();
-        const float overlap = 0.15f;
+    for(auto &target : this->targets) {
+        const float delta = target.delta;
 
+        const float overlap = 0.15f;
         Color color;
-        if(delta < p300 - overlap)
+        if(delta < cv_mod_target_300_percent.getFloat() - overlap)
             color = color300;
-        else if(delta < p300 + overlap) {
-            const float factor300 = (p300 + overlap - delta) / (2.0f * overlap);
+        else if(delta < cv_mod_target_300_percent.getFloat() + overlap) {
+            const float factor300 = (cv_mod_target_300_percent.getFloat() + overlap - delta) / (2.0f * overlap);
             const float factor100 = 1.0f - factor300;
-            color = COLORf(1.0f, COLOR_GET_Rf(color300) * factor300 + COLOR_GET_Rf(color100) * factor100,
-                           COLOR_GET_Gf(color300) * factor300 + COLOR_GET_Gf(color100) * factor100,
-                           COLOR_GET_Bf(color300) * factor300 + COLOR_GET_Bf(color100) * factor100);
-        } else if(delta < p100 - overlap)
+            color = argb(1.0f, color300.Rf() * factor300 + color100.Rf() * factor100,
+                         color300.Gf() * factor300 + color100.Gf() * factor100,
+                         color300.Bf() * factor300 + color100.Bf() * factor100);
+        } else if(delta < cv_mod_target_100_percent.getFloat() - overlap)
             color = color100;
-        else if(delta < p100 + overlap) {
-            const float factor100 = (p100 + overlap - delta) / (2.0f * overlap);
+        else if(delta < cv_mod_target_100_percent.getFloat() + overlap) {
+            const float factor100 = (cv_mod_target_100_percent.getFloat() + overlap - delta) / (2.0f * overlap);
             const float factor50 = 1.0f - factor100;
-            color = COLORf(1.0f, COLOR_GET_Rf(color100) * factor100 + COLOR_GET_Rf(color50) * factor50,
-                           COLOR_GET_Gf(color100) * factor100 + COLOR_GET_Gf(color50) * factor50,
-                           COLOR_GET_Bf(color100) * factor100 + COLOR_GET_Bf(color50) * factor50);
-        } else if(delta < p50)
+            color = argb(1.0f, color100.Rf() * factor100 + color50.Rf() * factor50,
+                         color100.Gf() * factor100 + color50.Gf() * factor50,
+                         color100.Bf() * factor100 + color50.Bf() * factor50);
+        } else if(delta < cv_mod_target_50_percent.getFloat())
             color = color50;
         else
             color = colorMiss;
 
         g->setColor(color);
-        g->setAlpha(std::clamp<float>((this->targets[i].time - engine->getTime()) / 3.5f, 0.0f, 1.0f));
+        g->setAlpha(std::clamp<float>((target.time - engine->getTime()) / 3.5f, 0.0f, 1.0f));
 
-        const float theta = glm::radians(this->targets[i].angle);
+        const float theta = glm::radians(target.angle);
         const float cs = std::cos(theta);
         const float sn = std::sin(theta);
 
@@ -2069,13 +2067,13 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
 
                 const float alpha = cv_hud_scrubbing_timeline_strains_alpha.getFloat() * galpha;
                 const Color aimStrainColor =
-                    COLORf(alpha, cv_hud_scrubbing_timeline_strains_aim_color_r.getInt() / 255.0f,
-                           cv_hud_scrubbing_timeline_strains_aim_color_g.getInt() / 255.0f,
-                           cv_hud_scrubbing_timeline_strains_aim_color_b.getInt() / 255.0f);
+                    argb(alpha, cv_hud_scrubbing_timeline_strains_aim_color_r.getInt() / 255.0f,
+                         cv_hud_scrubbing_timeline_strains_aim_color_g.getInt() / 255.0f,
+                         cv_hud_scrubbing_timeline_strains_aim_color_b.getInt() / 255.0f);
                 const Color speedStrainColor =
-                    COLORf(alpha, cv_hud_scrubbing_timeline_strains_speed_color_r.getInt() / 255.0f,
-                           cv_hud_scrubbing_timeline_strains_speed_color_g.getInt() / 255.0f,
-                           cv_hud_scrubbing_timeline_strains_speed_color_b.getInt() / 255.0f);
+                    argb(alpha, cv_hud_scrubbing_timeline_strains_speed_color_r.getInt() / 255.0f,
+                         cv_hud_scrubbing_timeline_strains_speed_color_g.getInt() / 255.0f,
+                         cv_hud_scrubbing_timeline_strains_speed_color_b.getInt() / 255.0f);
 
                 g->setDepthBuffer(true);
                 for(int i = 0; i < aimStrains.size(); i++) {
@@ -2127,7 +2125,8 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
     g->setAlpha(galpha);
     for(int i = 0; i < breaks.size(); i++) {
         const int width = std::max(
-            (int)(osu->getScreenWidth() * std::clamp<float>(breaks[i].endPercent - breaks[i].startPercent, 0.0f, 1.0f)), 2);
+            (int)(osu->getScreenWidth() * std::clamp<float>(breaks[i].endPercent - breaks[i].startPercent, 0.0f, 1.0f)),
+            2);
         g->fillRect(osu->getScreenWidth() * breaks[i].startPercent, cursorPos.y + 1, width, breakHeight);
     }
 
@@ -2158,12 +2157,12 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
     UString currentTimeText = UString::format("%i:%02i", (currentTimeMS / 1000) / 60, (currentTimeMS / 1000) % 60);
     g->pushTransform();
     {
-        g->translate(std::clamp<float>(triangleTip.x - timeFont->getStringWidth(currentTimeText) / 2.0f,
-                                  currentTimeLeftRightTextOffset,
-                                  osu->getScreenWidth() - timeFont->getStringWidth(currentTimeText) -
-                                      currentTimeLeftRightTextOffset) +
-                         1,
-                     triangleTip.y - osu->getSkin()->getSeekTriangle()->getHeight() - currentTimeTopTextOffset + 1);
+        g->translate(
+            std::clamp<float>(
+                triangleTip.x - timeFont->getStringWidth(currentTimeText) / 2.0f, currentTimeLeftRightTextOffset,
+                osu->getScreenWidth() - timeFont->getStringWidth(currentTimeText) - currentTimeLeftRightTextOffset) +
+                1,
+            triangleTip.y - osu->getSkin()->getSeekTriangle()->getHeight() - currentTimeTopTextOffset + 1);
         g->setColor(0xff000000);
         g->setAlpha(galpha);
         g->drawString(timeFont, currentTimeText);
@@ -2194,9 +2193,9 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
     UString endTimeText = UString::format("%i:%02i", (endTimeMS / 1000) / 60, (endTimeMS / 1000) % 60);
     g->pushTransform();
     {
-        g->translate((int)(osu->getScreenWidth() - timeFont->getStringWidth(endTimeText) -
-                           startAndEndTimeTextOffset + 1),
-                     (int)(triangleTip.y + startAndEndTimeTextOffset + timeFont->getHeight() + 1));
+        g->translate(
+            (int)(osu->getScreenWidth() - timeFont->getStringWidth(endTimeText) - startAndEndTimeTextOffset + 1),
+            (int)(triangleTip.y + startAndEndTimeTextOffset + timeFont->getHeight() + 1));
         g->setColor(0xff000000);
         g->setAlpha(galpha);
         g->drawString(timeFont, endTimeText);
@@ -2231,15 +2230,15 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
         UString endTimeText = UString::format("%i:%02i", (quickSaveTimeMS / 1000) / 60, (quickSaveTimeMS / 1000) % 60);
         g->pushTransform();
         {
-            g->translate(
-                (int)(std::clamp<float>(triangleTip.x - timeFont->getStringWidth(currentTimeText) / 2.0f,
-                                   currentTimeLeftRightTextOffset,
-                                   osu->getScreenWidth() - timeFont->getStringWidth(currentTimeText) -
-                                       currentTimeLeftRightTextOffset) +
-                      1),
-                (int)(triangleTip.y + startAndEndTimeTextOffset + timeFont->getHeight() * 2.2f + 1 +
-                      currentTimeTopTextOffset * std::max(1.0f, this->getCursorScaleFactor() * cv_cursor_scale.getFloat()) *
-                          cv_hud_scrubbing_timeline_hover_tooltip_offset_multiplier.getFloat()));
+            g->translate((int)(std::clamp<float>(triangleTip.x - timeFont->getStringWidth(currentTimeText) / 2.0f,
+                                                 currentTimeLeftRightTextOffset,
+                                                 osu->getScreenWidth() - timeFont->getStringWidth(currentTimeText) -
+                                                     currentTimeLeftRightTextOffset) +
+                               1),
+                         (int)(triangleTip.y + startAndEndTimeTextOffset + timeFont->getHeight() * 2.2f + 1 +
+                               currentTimeTopTextOffset *
+                                   std::max(1.0f, this->getCursorScaleFactor() * cv_cursor_scale.getFloat()) *
+                                   cv_hud_scrubbing_timeline_hover_tooltip_offset_multiplier.getFloat()));
             g->setColor(0xff000000);
             g->setAlpha(galpha);
             g->drawString(timeFont, endTimeText);
@@ -2259,10 +2258,9 @@ void HUD::drawScrubbingTimeline(unsigned long beatmapTime, unsigned long beatmap
     g->pushTransform();
     {
         g->translate(
-            (int)std::clamp<float>(triangleTip.x - timeFont->getStringWidth(currentTimeText) / 2.0f,
-                              currentTimeLeftRightTextOffset,
-                              osu->getScreenWidth() - timeFont->getStringWidth(currentTimeText) -
-                                  currentTimeLeftRightTextOffset) +
+            (int)std::clamp<float>(
+                triangleTip.x - timeFont->getStringWidth(currentTimeText) / 2.0f, currentTimeLeftRightTextOffset,
+                osu->getScreenWidth() - timeFont->getStringWidth(currentTimeText) - currentTimeLeftRightTextOffset) +
                 1,
             (int)(triangleTip.y - osu->getSkin()->getSeekTriangle()->getHeight() - timeFont->getHeight() * 1.2f -
                   currentTimeTopTextOffset * std::max(1.0f, this->getCursorScaleFactor() * cv_cursor_scale.getFloat()) *
@@ -2316,9 +2314,9 @@ void HUD::drawInputOverlay(int numK1, int numK2, int numM1, int numM2) {
     // keys
     {
         const float textFontHeightPercent = 0.3f;
-        const Color colorIdle = COLOR(255, 255, 255, 255);
-        const Color colorKeyboard = COLOR(255, 255, 222, 0);
-        const Color colorMouse = COLOR(255, 248, 0, 158);
+        const Color colorIdle = argb(255, 255, 255, 255);
+        const Color colorKeyboard = argb(255, 255, 222, 0);
+        const Color colorMouse = argb(255, 248, 0, 158);
 
         McFont *textFont = osu->getSongBrowserFont();
         McFont *textFontBold = osu->getSongBrowserFontBold();
@@ -2364,9 +2362,9 @@ void HUD::drawInputOverlay(int numK1, int numK2, int numM1, int numM2) {
             // key
             const Vector2 pos =
                 Vector2(xStart - (15.0f * oScale) * scale + 1, yStart + (19.0f * oScale + i * 29.5f * oScale) * scale);
-            g->setColor(COLORf(1.0f, (1.0f - animColor) * COLOR_GET_Rf(colorIdle) + animColor * COLOR_GET_Rf(color),
-                               (1.0f - animColor) * COLOR_GET_Gf(colorIdle) + animColor * COLOR_GET_Gf(color),
-                               (1.0f - animColor) * COLOR_GET_Bf(colorIdle) + animColor * COLOR_GET_Bf(color)));
+            g->setColor(argb(1.0f, (1.0f - animColor) * colorIdle.Rf() + animColor * color.Rf(),
+                             (1.0f - animColor) * colorIdle.Gf() + animColor * color.Gf(),
+                             (1.0f - animColor) * colorIdle.Bf() + animColor * color.Bf()));
             inputoverlayKey->draw(pos, scale * animScale);
 
             // text
@@ -2567,7 +2565,7 @@ void HUD::addCursorTrailPosition(std::vector<CURSORTRAIL> &trail, Vector2 pos, b
                 const float timeStep = (ct.time - prevTime) / (float)(numMidPoints);
                 const float scaleStep = (ct.scale - prevScale) / (float)(numMidPoints);
                 for(int i = std::clamp<int>(numMidPoints - cv_cursor_trail_max_size.getInt() / 2, 0,
-                                       cv_cursor_trail_max_size.getInt());
+                                            cv_cursor_trail_max_size.getInt());
                     i < numMidPoints; i++)  // limit to half the maximum new mid points per frame
                 {
                     CURSORTRAIL mid;

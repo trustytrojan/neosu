@@ -23,8 +23,8 @@ class VSTitleBarButton : public CBaseUIButton {
 
         // default background gradient
         {
-            const Color top = COLOR(255, 244, 244, 244);
-            const Color bottom = COLOR(255, 221, 221, 221);
+            const Color top = argb(255, 244, 244, 244);
+            const Color bottom = argb(255, 221, 221, 221);
 
             g->fillGradient(this->vPos.x + 1, this->vPos.y + 1, this->vSize.x - 1, this->vSize.y, top, top, bottom,
                             bottom);
@@ -34,9 +34,9 @@ class VSTitleBarButton : public CBaseUIButton {
         {
             const float seekBarPercent = cv_vs_percent.getFloat();
             if(seekBarPercent > 0.0f) {
-                const Color middle = COLOR(255, 0, 50, 119);
-                const Color third = COLOR(255, 0, 113 - 50, 207 - 50);
-                const Color top = COLOR(255, 0, 196, 223);
+                const Color middle = argb(255, 0, 50, 119);
+                const Color third = argb(255, 0, 113 - 50, 207 - 50);
+                const Color top = argb(255, 0, 196, 223);
 
                 const float sizeThird = this->vSize.y / 3.0f;
 
@@ -54,7 +54,7 @@ class VSTitleBarButton : public CBaseUIButton {
 
         // bottom line
         {
-            g->setColor(COLOR(255, 204, 204, 204));
+            g->setColor(argb(255, 204, 204, 204));
             g->drawLine(this->vPos.x, this->vPos.y + this->vSize.y, this->vPos.x + this->vSize.x,
                         this->vPos.y + this->vSize.y);
         }
@@ -67,7 +67,7 @@ VSTitleBar::VSTitleBar(int x, int y, int xSize, McFont *font)
     : CBaseUIElement(x, y, xSize, 44 * env->getDPIScale(), "") {
     this->font = font;
 
-    const Color textColor = COLOR(215, 55, 55, 55);
+    const Color textColor = argb(215, 55, 55, 55);
 
     this->container = new CBaseUIContainer(0, 0, this->vSize.x, this->vSize.y, "");
 
@@ -144,7 +144,7 @@ void VSTitleBar::drawTitle1() {
             McRect(this->vPos.x, this->vPos.y, cv_vs_percent.getFloat() * this->vSize.x, this->title2->getSize().y));
         { this->title->draw(); }
         g->popClipRect();
-        this->title->setTextColor(COLOR(255, 55, 55, 55));
+        this->title->setTextColor(argb(255, 55, 55, 55));
     }
 }
 
@@ -156,7 +156,7 @@ void VSTitleBar::drawTitle2() {
             McRect(this->vPos.x, this->vPos.y, cv_vs_percent.getFloat() * this->vSize.x, this->title2->getSize().y));
         { this->title2->draw(); }
         g->popClipRect();
-        this->title2->setTextColor(COLOR(255, 55, 55, 55));
+        this->title2->setTextColor(argb(255, 55, 55, 55));
     }
 }
 

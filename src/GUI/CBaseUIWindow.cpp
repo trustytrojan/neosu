@@ -108,7 +108,7 @@ void CBaseUIWindow::draw() {
             m_shadow->draw();
     else
     {
-            m_shadow->setColor(COLOR((int)((this->fAnimation)*255.0f), 255, 255, 255));
+            m_shadow->setColor(argb((int)((this->fAnimation)*255.0f), 255, 255, 255));
 
             // HACKHACK: shadows can't render inside a 3DScene
             m_shadow->renderOffscreen();
@@ -214,7 +214,7 @@ void CBaseUIWindow::draw() {
         m_rt->disable();
 
 
-        m_rt->setColor(COLOR((int)(this->fAnimation*255.0f), 255, 255, 255));
+        m_rt->setColor(argb((int)(this->fAnimation*255.0f), 255, 255, 255));
 
         g->push3DScene(McRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y));
                 g->rotate3DScene((this->bAnimIn ? -1 : 1) * (1-m_fAnimation)*10, 0, 0);

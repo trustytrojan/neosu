@@ -26,8 +26,8 @@ CBaseUIImage::CBaseUIImage(std::string imageResourceName, float xPos, float yPos
         this->vSize.y = ySize;
     }
 
-    this->frameColor = COLOR(255, 255, 255, 255);
-    this->backgroundColor = COLOR(255, 0, 0, 0);
+    this->frameColor = argb(255, 255, 255, 255);
+    this->backgroundColor = argb(255, 0, 0, 0);
     this->color = 0xffffffff;
 
     this->bDrawFrame = false;

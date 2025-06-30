@@ -181,7 +181,7 @@ void Spinner::draw() {
             const float spinnerMiddleImageScale =
                 globalBaseSize / (globalBaseSkinSize * (skin->isSpinnerMiddle2x() ? 2.0f : 1.0f));
 
-            g->setColor(COLOR(255, 255, (int)(255 * this->fPercent), (int)(255 * this->fPercent)));
+            g->setColor(argb(255, 255, (int)(255 * this->fPercent), (int)(255 * this->fPercent)));
             g->setAlpha(this->fAlphaWithoutHidden * alphaMultiplier);
             g->pushTransform();
             {

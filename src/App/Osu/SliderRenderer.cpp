@@ -125,9 +125,7 @@ void SliderRenderer::draw(const std::vector<Vector2> &points, const std::vector<
         {
             g->scale(circleImageScale, circleImageScale);
 
-            const Color dimmedColor = COLOR(255, (int)(COLOR_GET_Ri(undimmedColor) * colorRGBMultiplier),
-                                            (int)(COLOR_GET_Gi(undimmedColor) * colorRGBMultiplier),
-                                            (int)(COLOR_GET_Bi(undimmedColor) * colorRGBMultiplier));
+            const Color dimmedColor = Colors::scale(undimmedColor, colorRGBMultiplier);
 
             g->setColor(dimmedColor);
             g->setAlpha(alpha * cv_slider_alpha_multiplier.getFloat());
@@ -175,27 +173,26 @@ void SliderRenderer::draw(const std::vector<Vector2> &points, const std::vector<
             const Color undimmedBodyColor =
                 osu->getSkin()->isSliderTrackOverridden() ? osu->getSkin()->getSliderTrackOverride() : undimmedColor;
 
-            Color dimmedBorderColor = COLOR(255, (int)(COLOR_GET_Ri(undimmedBorderColor) * colorRGBMultiplier),
-                                            (int)(COLOR_GET_Gi(undimmedBorderColor) * colorRGBMultiplier),
-                                            (int)(COLOR_GET_Bi(undimmedBorderColor) * colorRGBMultiplier));
-            Color dimmedBodyColor = COLOR(255, (int)(COLOR_GET_Ri(undimmedBodyColor) * colorRGBMultiplier),
-                                          (int)(COLOR_GET_Gi(undimmedBodyColor) * colorRGBMultiplier),
-                                          (int)(COLOR_GET_Bi(undimmedBodyColor) * colorRGBMultiplier));
+            Color dimmedBorderColor;
+            Color dimmedBodyColor;
 
             if(cv_slider_rainbow.getBool()) {
                 float frequency = 0.3f;
                 float time = engine->getTime() * 20;
 
-                char red1 = std::sin(frequency * time + 0 + sliderTimeForRainbow) * 127 + 128;
-                char green1 = std::sin(frequency * time + 2 + sliderTimeForRainbow) * 127 + 128;
-                char blue1 = std::sin(frequency * time + 4 + sliderTimeForRainbow) * 127 + 128;
+                const Channel red1 = std::sin(frequency * time + 0 + sliderTimeForRainbow) * 127 + 128;
+                const Channel green1 = std::sin(frequency * time + 2 + sliderTimeForRainbow) * 127 + 128;
+                const Channel blue1 = std::sin(frequency * time + 4 + sliderTimeForRainbow) * 127 + 128;
 
-                char red2 = std::sin(frequency * time * 1.5f + 0 + sliderTimeForRainbow) * 127 + 128;
-                char green2 = std::sin(frequency * time * 1.5f + 2 + sliderTimeForRainbow) * 127 + 128;
-                char blue2 = std::sin(frequency * time * 1.5f + 4 + sliderTimeForRainbow) * 127 + 128;
+                const Channel red2 = std::sin(frequency * time * 1.5f + 0 + sliderTimeForRainbow) * 127 + 128;
+                const Channel green2 = std::sin(frequency * time * 1.5f + 2 + sliderTimeForRainbow) * 127 + 128;
+                const Channel blue2 = std::sin(frequency * time * 1.5f + 4 + sliderTimeForRainbow) * 127 + 128;
 
-                dimmedBorderColor = COLOR(255, red1, green1, blue1);
-                dimmedBodyColor = COLOR(255, red2, green2, blue2);
+                dimmedBorderColor = rgb(red1, green1, blue1);
+                dimmedBodyColor = rgb(red2, green2, blue2);
+            } else {
+                dimmedBorderColor = Colors::scale(undimmedBorderColor, colorRGBMultiplier);
+                dimmedBodyColor = Colors::scale(undimmedBodyColor, colorRGBMultiplier);
             }
 
             if(!cv_slider_use_gradient_image.getBool()) {
@@ -205,15 +202,14 @@ void SliderRenderer::draw(const std::vector<Vector2> &points, const std::vector<
                 BLEND_SHADER->setUniform1f("bodyColorSaturation", cv_slider_body_color_saturation.getFloat());
                 BLEND_SHADER->setUniform1f("borderSizeMultiplier", cv_slider_border_size_multiplier.getFloat());
                 BLEND_SHADER->setUniform1f("borderFeather", cv_slider_border_feather.getFloat());
-                BLEND_SHADER->setUniform3f("colBorder", COLOR_GET_Rf(dimmedBorderColor),
-                                           COLOR_GET_Gf(dimmedBorderColor), COLOR_GET_Bf(dimmedBorderColor));
-                BLEND_SHADER->setUniform3f("colBody", COLOR_GET_Rf(dimmedBodyColor), COLOR_GET_Gf(dimmedBodyColor),
-                                           COLOR_GET_Bf(dimmedBodyColor));
+                BLEND_SHADER->setUniform3f("colBorder", dimmedBorderColor.Rf(), dimmedBorderColor.Gf(),
+                                           dimmedBorderColor.Bf());
+                BLEND_SHADER->setUniform3f("colBody", dimmedBodyColor.Rf(), dimmedBodyColor.Gf(), dimmedBodyColor.Bf());
             }
 
-            g->setColor(COLORf(1.0f, colorRGBMultiplier, colorRGBMultiplier,
-                               colorRGBMultiplier));  // this only affects the gradient image if used (meaning shaders
-                                                      // either don't work or are disabled on purpose)
+            g->setColor(argb(1.0f, colorRGBMultiplier, colorRGBMultiplier,
+                             colorRGBMultiplier));  // this only affects the gradient image if used (meaning shaders
+                                                    // either don't work or are disabled on purpose)
             osu->getSkin()->getSliderGradient()->bind();
             {
                 // draw curve mesh
@@ -242,16 +238,16 @@ void SliderRenderer::draw(const std::vector<Vector2> &points, const std::vector<
     SliderRenderer::fBoundingBoxMinY -= pixelFudge;
     SliderRenderer::fBoundingBoxMaxY += pixelFudge;
 
-    osu->getSliderFrameBuffer()->setColor(COLORf(alpha * cv_slider_alpha_multiplier.getFloat(), 1.0f, 1.0f, 1.0f));
+    osu->getSliderFrameBuffer()->setColor(argb(alpha * cv_slider_alpha_multiplier.getFloat(), 1.0f, 1.0f, 1.0f));
     osu->getSliderFrameBuffer()->drawRect(SliderRenderer::fBoundingBoxMinX, SliderRenderer::fBoundingBoxMinY,
                                           SliderRenderer::fBoundingBoxMaxX - SliderRenderer::fBoundingBoxMinX,
                                           SliderRenderer::fBoundingBoxMaxY - SliderRenderer::fBoundingBoxMinY);
 }
 
-void SliderRenderer::draw(VertexArrayObject *vao, const std::vector<Vector2> &alwaysPoints,
-                          Vector2 translation, float scale, float hitcircleDiameter, float from, float to,
-                          Color undimmedColor, float colorRGBMultiplier, float alpha, long sliderTimeForRainbow,
-                          bool doEnableRenderTarget, bool doDisableRenderTarget, bool doDrawSliderFrameBufferToScreen) {
+void SliderRenderer::draw(VertexArrayObject *vao, const std::vector<Vector2> &alwaysPoints, Vector2 translation,
+                          float scale, float hitcircleDiameter, float from, float to, Color undimmedColor,
+                          float colorRGBMultiplier, float alpha, long sliderTimeForRainbow, bool doEnableRenderTarget,
+                          bool doDisableRenderTarget, bool doDrawSliderFrameBufferToScreen) {
     if((cv_slider_alpha_multiplier.getFloat() <= 0.0f && doDrawSliderFrameBufferToScreen) ||
        (alpha <= 0.0f && doDrawSliderFrameBufferToScreen) || vao == NULL)
         return;
@@ -259,9 +255,7 @@ void SliderRenderer::draw(VertexArrayObject *vao, const std::vector<Vector2> &al
     checkUpdateVars(hitcircleDiameter);
 
     if(cv_slider_debug_draw_square_vao.getBool()) {
-        const Color dimmedColor = COLOR(255, (int)(COLOR_GET_Ri(undimmedColor) * colorRGBMultiplier),
-                                        (int)(COLOR_GET_Gi(undimmedColor) * colorRGBMultiplier),
-                                        (int)(COLOR_GET_Bi(undimmedColor) * colorRGBMultiplier));
+        const Color dimmedColor = Colors::scale(undimmedColor, colorRGBMultiplier);
 
         g->setColor(dimmedColor);
         g->setAlpha(alpha * cv_slider_alpha_multiplier.getFloat());
@@ -295,27 +289,26 @@ void SliderRenderer::draw(VertexArrayObject *vao, const std::vector<Vector2> &al
             const Color undimmedBodyColor =
                 osu->getSkin()->isSliderTrackOverridden() ? osu->getSkin()->getSliderTrackOverride() : undimmedColor;
 
-            Color dimmedBorderColor = COLOR(255, (int)(COLOR_GET_Ri(undimmedBorderColor) * colorRGBMultiplier),
-                                            (int)(COLOR_GET_Gi(undimmedBorderColor) * colorRGBMultiplier),
-                                            (int)(COLOR_GET_Bi(undimmedBorderColor) * colorRGBMultiplier));
-            Color dimmedBodyColor = COLOR(255, (int)(COLOR_GET_Ri(undimmedBodyColor) * colorRGBMultiplier),
-                                          (int)(COLOR_GET_Gi(undimmedBodyColor) * colorRGBMultiplier),
-                                          (int)(COLOR_GET_Bi(undimmedBodyColor) * colorRGBMultiplier));
+            Color dimmedBorderColor;
+            Color dimmedBodyColor;
 
             if(cv_slider_rainbow.getBool()) {
                 float frequency = 0.3f;
                 float time = engine->getTime() * 20;
 
-                char red1 = std::sin(frequency * time + 0 + sliderTimeForRainbow) * 127 + 128;
-                char green1 = std::sin(frequency * time + 2 + sliderTimeForRainbow) * 127 + 128;
-                char blue1 = std::sin(frequency * time + 4 + sliderTimeForRainbow) * 127 + 128;
+                const Channel red1 = std::sin(frequency * time + 0 + sliderTimeForRainbow) * 127 + 128;
+                const Channel green1 = std::sin(frequency * time + 2 + sliderTimeForRainbow) * 127 + 128;
+                const Channel blue1 = std::sin(frequency * time + 4 + sliderTimeForRainbow) * 127 + 128;
 
-                char red2 = std::sin(frequency * time * 1.5f + 0 + sliderTimeForRainbow) * 127 + 128;
-                char green2 = std::sin(frequency * time * 1.5f + 2 + sliderTimeForRainbow) * 127 + 128;
-                char blue2 = std::sin(frequency * time * 1.5f + 4 + sliderTimeForRainbow) * 127 + 128;
+                const Channel red2 = std::sin(frequency * time * 1.5f + 0 + sliderTimeForRainbow) * 127 + 128;
+                const Channel green2 = std::sin(frequency * time * 1.5f + 2 + sliderTimeForRainbow) * 127 + 128;
+                const Channel blue2 = std::sin(frequency * time * 1.5f + 4 + sliderTimeForRainbow) * 127 + 128;
 
-                dimmedBorderColor = COLOR(255, red1, green1, blue1);
-                dimmedBodyColor = COLOR(255, red2, green2, blue2);
+                dimmedBorderColor = rgb(red1, green1, blue1);
+                dimmedBodyColor = rgb(red2, green2, blue2);
+            } else {
+                dimmedBorderColor = Colors::scale(undimmedBorderColor, colorRGBMultiplier);
+                dimmedBodyColor = Colors::scale(undimmedBodyColor, colorRGBMultiplier);
             }
 
             if(!cv_slider_use_gradient_image.getBool()) {
@@ -325,15 +318,14 @@ void SliderRenderer::draw(VertexArrayObject *vao, const std::vector<Vector2> &al
                 BLEND_SHADER->setUniform1f("bodyColorSaturation", cv_slider_body_color_saturation.getFloat());
                 BLEND_SHADER->setUniform1f("borderSizeMultiplier", cv_slider_border_size_multiplier.getFloat());
                 BLEND_SHADER->setUniform1f("borderFeather", cv_slider_border_feather.getFloat());
-                BLEND_SHADER->setUniform3f("colBorder", COLOR_GET_Rf(dimmedBorderColor),
-                                           COLOR_GET_Gf(dimmedBorderColor), COLOR_GET_Bf(dimmedBorderColor));
-                BLEND_SHADER->setUniform3f("colBody", COLOR_GET_Rf(dimmedBodyColor), COLOR_GET_Gf(dimmedBodyColor),
-                                           COLOR_GET_Bf(dimmedBodyColor));
+                BLEND_SHADER->setUniform3f("colBorder", dimmedBorderColor.Rf(), dimmedBorderColor.Gf(),
+                                           dimmedBorderColor.Bf());
+                BLEND_SHADER->setUniform3f("colBody", dimmedBodyColor.Rf(), dimmedBodyColor.Gf(), dimmedBodyColor.Bf());
             }
 
-            g->setColor(COLORf(1.0f, colorRGBMultiplier, colorRGBMultiplier,
-                               colorRGBMultiplier));  // this only affects the gradient image if used (meaning shaders
-                                                      // either don't work or are disabled on purpose)
+            g->setColor(argb(1.0f, colorRGBMultiplier, colorRGBMultiplier,
+                             colorRGBMultiplier));  // this only affects the gradient image if used (meaning shaders
+                                                    // either don't work or are disabled on purpose)
             osu->getSkin()->getSliderGradient()->bind();
             {
                 // draw curve mesh
@@ -378,110 +370,13 @@ void SliderRenderer::draw(VertexArrayObject *vao, const std::vector<Vector2> &al
     g->setDepthBuffer(false);
 
     if(doDrawSliderFrameBufferToScreen) {
-        osu->getSliderFrameBuffer()->setColor(COLORf(alpha * cv_slider_alpha_multiplier.getFloat(), 1.0f, 1.0f, 1.0f));
+        osu->getSliderFrameBuffer()->setColor(argb(alpha * cv_slider_alpha_multiplier.getFloat(), 1.0f, 1.0f, 1.0f));
         osu->getSliderFrameBuffer()->draw(0, 0);
     }
 }
 
-void SliderRenderer::drawMM(const std::vector<Vector2> &points, float hitcircleDiameter, float from,
-                            float to, Color undimmedColor, float colorRGBMultiplier, float alpha,
-                            long sliderTimeForRainbow) {
-    if(cv_slider_alpha_multiplier.getFloat() <= 0.0f || alpha <= 0.0f) return;
-
-    checkUpdateVars(hitcircleDiameter);
-
-    // TODO: shit
-    int numPointsTotal = points.size();
-    /// int numPointsTotal = 0;
-    /// for (int i=0; i<points.size(); i++)
-    ///{
-    ///	numPointsTotal += points[i].size();
-    /// }
-
-    const int drawFromIndex = std::clamp<int>((int)std::round(numPointsTotal * from), 0, numPointsTotal);
-    const int drawUpToIndex = std::clamp<int>((int)std::round(numPointsTotal * to), 0, numPointsTotal);
-
-    // reset
-    resetRenderTargetBoundingBox();
-
-    g->setDepthBuffer(true);
-    g->setBlending(false);
-    {
-        osu->getSliderFrameBuffer()->enable();
-
-        const Color undimmedBorderColor =
-            cv_slider_border_tint_combo_color.getBool() ? undimmedColor : osu->getSkin()->getSliderBorderColor();
-        const Color undimmedBodyColor =
-            osu->getSkin()->isSliderTrackOverridden() ? osu->getSkin()->getSliderTrackOverride() : undimmedColor;
-
-        Color dimmedBorderColor = COLOR(255, (int)(COLOR_GET_Ri(undimmedBorderColor) * colorRGBMultiplier),
-                                        (int)(COLOR_GET_Gi(undimmedBorderColor) * colorRGBMultiplier),
-                                        (int)(COLOR_GET_Bi(undimmedBorderColor) * colorRGBMultiplier));
-        Color dimmedBodyColor = COLOR(255, (int)(COLOR_GET_Ri(undimmedBodyColor) * colorRGBMultiplier),
-                                      (int)(COLOR_GET_Gi(undimmedBodyColor) * colorRGBMultiplier),
-                                      (int)(COLOR_GET_Bi(undimmedBodyColor) * colorRGBMultiplier));
-
-        if(cv_slider_rainbow.getBool()) {
-            float frequency = 0.3f;
-            float time = engine->getTime() * 20;
-
-            char red1 = std::sin(frequency * time + 0 + sliderTimeForRainbow) * 127 + 128;
-            char green1 = std::sin(frequency * time + 2 + sliderTimeForRainbow) * 127 + 128;
-            char blue1 = std::sin(frequency * time + 4 + sliderTimeForRainbow) * 127 + 128;
-
-            char red2 = std::sin(frequency * time * 1.5f + 0 + sliderTimeForRainbow) * 127 + 128;
-            char green2 = std::sin(frequency * time * 1.5f + 2 + sliderTimeForRainbow) * 127 + 128;
-            char blue2 = std::sin(frequency * time * 1.5f + 4 + sliderTimeForRainbow) * 127 + 128;
-
-            dimmedBorderColor = COLOR(255, red1, green1, blue1);
-            dimmedBodyColor = COLOR(255, red2, green2, blue2);
-        }
-
-        if(!cv_slider_use_gradient_image.getBool()) {
-            BLEND_SHADER->enable();
-            BLEND_SHADER->setUniform1i("style", cv_slider_osu_next_style.getBool() ? 1 : 0);
-            BLEND_SHADER->setUniform1f("bodyAlphaMultiplier", cv_slider_body_alpha_multiplier.getFloat());
-            BLEND_SHADER->setUniform1f("bodyColorSaturation", cv_slider_body_color_saturation.getFloat());
-            BLEND_SHADER->setUniform1f("borderSizeMultiplier", cv_slider_border_size_multiplier.getFloat());
-            BLEND_SHADER->setUniform1f("borderFeather", cv_slider_border_feather.getFloat());
-            BLEND_SHADER->setUniform3f("colBorder", COLOR_GET_Rf(dimmedBorderColor), COLOR_GET_Gf(dimmedBorderColor),
-                                       COLOR_GET_Bf(dimmedBorderColor));
-            BLEND_SHADER->setUniform3f("colBody", COLOR_GET_Rf(dimmedBodyColor), COLOR_GET_Gf(dimmedBodyColor),
-                                       COLOR_GET_Bf(dimmedBodyColor));
-        }
-
-        g->setColor(COLORf(1.0f, colorRGBMultiplier, colorRGBMultiplier,
-                           colorRGBMultiplier));  // this only affects the gradient image if used (meaning shaders
-                                                  // either don't work or are disabled on purpose)
-        osu->getSkin()->getSliderGradient()->bind();
-
-        // draw curve mesh
-        { drawFillSliderBodyMM(points, hitcircleDiameter / 2.0f, drawFromIndex, drawUpToIndex); }
-
-        if(!cv_slider_use_gradient_image.getBool()) BLEND_SHADER->disable();
-
-        osu->getSliderFrameBuffer()->disable();
-    }
-    g->setBlending(true);
-    g->setDepthBuffer(false);
-
-    // now draw the slider to the screen (with alpha blending enabled again)
-    int pixelFudge = 2;
-    SliderRenderer::fBoundingBoxMinX -= pixelFudge;
-    SliderRenderer::fBoundingBoxMaxX += pixelFudge;
-    SliderRenderer::fBoundingBoxMinY -= pixelFudge;
-    SliderRenderer::fBoundingBoxMaxY += pixelFudge;
-
-    osu->getSliderFrameBuffer()->setColor(COLORf(alpha * cv_slider_alpha_multiplier.getFloat(), 1.0f, 1.0f, 1.0f));
-    /// osu->getSliderFrameBuffer()->drawRect(SliderRenderer::fBoundingBoxMinX, SliderRenderer::fBoundingBoxMinY,
-    /// SliderRenderer::fBoundingBoxMaxX
-    /// - SliderRenderer::fBoundingBoxMinX, SliderRenderer::fBoundingBoxMaxY - SliderRenderer::fBoundingBoxMinY);
-    osu->getSliderFrameBuffer()->draw(0, 0);
-}
-
-void SliderRenderer::drawFillSliderBodyPeppy(const std::vector<Vector2> &points,
-                                             VertexArrayObject *circleMesh, float radius, int drawFromIndex,
-                                             int drawUpToIndex, Shader *shader) {
+void SliderRenderer::drawFillSliderBodyPeppy(const std::vector<Vector2> &points, VertexArrayObject *circleMesh,
+                                             float radius, int drawFromIndex, int drawUpToIndex, Shader *shader) {
     if(drawFromIndex < 0) drawFromIndex = 0;
     if(drawUpToIndex < 0) drawUpToIndex = points.size();
 
@@ -531,8 +426,8 @@ void SliderRenderer::drawFillSliderBodyPeppy(const std::vector<Vector2> &points,
     g->popTransform();
 }
 
-void SliderRenderer::drawFillSliderBodyMM(const std::vector<Vector2> &points, float radius,
-                                          int drawFromIndex, int drawUpToIndex) {
+void SliderRenderer::drawFillSliderBodyMM(const std::vector<Vector2> &points, float radius, int drawFromIndex,
+                                          int drawUpToIndex) {
     // modified version of
     // https://github.com/ppy/osu-framework/blob/master/osu.Framework/Graphics/Lines/Path_DrawNode.cs
 
@@ -729,8 +624,7 @@ void SliderRenderer::checkUpdateVars(float hitcircleDiameter) {
     // build vaos
     if(UNIT_CIRCLE_VAO == NULL) UNIT_CIRCLE_VAO = new VertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_TRIANGLE_FAN);
     if(UNIT_CIRCLE_VAO_BAKED == NULL)
-        UNIT_CIRCLE_VAO_BAKED =
-            resourceManager->createVertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_TRIANGLE_FAN);
+        UNIT_CIRCLE_VAO_BAKED = resourceManager->createVertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_TRIANGLE_FAN);
     if(UNIT_CIRCLE_VAO_TRIANGLES == NULL)
         UNIT_CIRCLE_VAO_TRIANGLES = new VertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_TRIANGLES);
 

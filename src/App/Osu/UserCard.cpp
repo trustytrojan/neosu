@@ -44,7 +44,7 @@ void UserCard::draw() {
     const float iconWidth = iconHeight;
 
     // draw user icon background
-    g->setColor(COLORf(1.0f, 0.1f, 0.1f, 0.1f));
+    g->setColor(argb(1.0f, 0.1f, 0.1f, 0.1f));
     g->fillRect(this->vPos.x + 1, this->vPos.y + 1, iconWidth, iconHeight);
 
     // draw user icon
@@ -181,7 +181,7 @@ void UserCard::draw() {
             const Vector2 textPos = Vector2(pos.x, pos.y + deltaFont->getHeight() * scale);
 
             // background (to ensure readability even with stupid long usernames)
-            g->setColor(COLORf(1.0f, 0.f, 0.f, 0.f));
+            g->setColor(argb(1.0f, 0.f, 0.f, 0.f));
             g->setAlpha(1.0f - (1.0f - this->fPPDeltaAnim) * (1.0f - this->fPPDeltaAnim));
             g->fillRect(pos.x, pos.y, backgroundSize.x, backgroundSize.y);
 

@@ -209,7 +209,7 @@ Color SongDifficultyButton::getInactiveBackgroundColor() const {
     if(this->isIndependentDiffButton())
         return SongButton::getInactiveBackgroundColor();
     else
-        return COLOR(std::clamp<int>(cv_songbrowser_button_difficulty_inactive_color_a.getInt(), 0, 255),
+        return argb(std::clamp<int>(cv_songbrowser_button_difficulty_inactive_color_a.getInt(), 0, 255),
                      std::clamp<int>(cv_songbrowser_button_difficulty_inactive_color_r.getInt(), 0, 255),
                      std::clamp<int>(cv_songbrowser_button_difficulty_inactive_color_g.getInt(), 0, 255),
                      std::clamp<int>(cv_songbrowser_button_difficulty_inactive_color_b.getInt(), 0, 255));

@@ -52,8 +52,8 @@
 #include "UserCard.h"
 #include "VertexArrayObject.h"
 
-const Color highlightColor = COLOR(255, 0, 255, 0);
-const Color defaultColor = COLOR(255, 255, 255, 255);
+const Color highlightColor = argb(255, 0, 255, 0);
+const Color defaultColor = argb(255, 255, 255, 255);
 
 class SongBrowserBackgroundSearchMatcher : public Resource {
    public:
@@ -664,11 +664,11 @@ void SongBrowser::draw() {
                     (graphRect.contains(mouse->getPos()) ? 1.0f : cv_hud_scrubbing_timeline_strains_alpha.getFloat());
 
                 const Color aimStrainColor =
-                    COLORf(alpha, cv_hud_scrubbing_timeline_strains_aim_color_r.getInt() / 255.0f,
+                    argb(alpha, cv_hud_scrubbing_timeline_strains_aim_color_r.getInt() / 255.0f,
                            cv_hud_scrubbing_timeline_strains_aim_color_g.getInt() / 255.0f,
                            cv_hud_scrubbing_timeline_strains_aim_color_b.getInt() / 255.0f);
                 const Color speedStrainColor =
-                    COLORf(alpha, cv_hud_scrubbing_timeline_strains_speed_color_r.getInt() / 255.0f,
+                    argb(alpha, cv_hud_scrubbing_timeline_strains_speed_color_r.getInt() / 255.0f,
                            cv_hud_scrubbing_timeline_strains_speed_color_g.getInt() / 255.0f,
                            cv_hud_scrubbing_timeline_strains_speed_color_b.getInt() / 255.0f);
 
@@ -804,7 +804,7 @@ void SongBrowser::draw() {
     // click pulse animation overlay
     if(this->fPulseAnimation > 0.0f) {
         Color topColor = 0x00ffffff;
-        Color bottomColor = COLOR((int)(25 * this->fPulseAnimation), 255, 255, 255);
+        Color bottomColor = argb((int)(25 * this->fPulseAnimation), 255, 255, 255);
 
         g->fillGradient(0, 0, osu->getScreenWidth(), osu->getScreenHeight(), topColor, topColor, bottomColor,
                         bottomColor);

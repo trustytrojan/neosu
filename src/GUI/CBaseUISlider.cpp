@@ -22,8 +22,8 @@ CBaseUISlider::CBaseUISlider(float xPos, float yPos, float xSize, float ySize, U
     this->bLiveUpdate = false;
     this->bAllowMouseWheel = true;
 
-    this->backgroundColor = COLOR(255, 0, 0, 0);
-    this->frameColor = COLOR(255, 255, 255, 255);
+    this->backgroundColor = argb(255, 0, 0, 0);
+    this->frameColor = argb(255, 255, 255, 255);
 
     this->fCurValue = 0.0f;
     this->fCurPercent = 0.0f;
@@ -75,11 +75,11 @@ void CBaseUISlider::drawBlock() {
     Vector2 bottomLeft = center + Vector2(-this->vBlockSize.x / 2, this->vBlockSize.y / 2 + 1);
     Vector2 bottomRight = center + Vector2(this->vBlockSize.x / 2 + 1, this->vBlockSize.y / 2 + 1);
 
-    g->drawQuad(topLeft, topRight, halfRight + Vector2(0, 1), halfLeft + Vector2(0, 1), COLOR(255, 255, 255, 255),
-                COLOR(255, 255, 255, 255), COLOR(255, 241, 241, 241), COLOR(255, 241, 241, 241));
+    g->drawQuad(topLeft, topRight, halfRight + Vector2(0, 1), halfLeft + Vector2(0, 1), argb(255, 255, 255, 255),
+                argb(255, 255, 255, 255), argb(255, 241, 241, 241), argb(255, 241, 241, 241));
 
-    g->drawQuad(halfLeft, halfRight, bottomRight, bottomLeft, COLOR(255, 225, 225, 225), COLOR(255, 225, 225, 225),
-                COLOR(255, 255, 255, 255), COLOR(255, 255, 255, 255));
+    g->drawQuad(halfLeft, halfRight, bottomRight, bottomLeft, argb(255, 225, 225, 225), argb(255, 225, 225, 225),
+                argb(255, 255, 255, 255), argb(255, 255, 255, 255));
 }
 
 void CBaseUISlider::mouse_update(bool *propagate_clicks) {

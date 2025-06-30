@@ -70,7 +70,7 @@ void UISearchOverlay::draw() {
         const float height = lineHeight * numLines;
         const int offsetTextWidthWithOverflow = offsetTextWidthWithoutOverflow + textOverflowXOffset;
 
-        g->setColor(COLOR(this->sSearchString.length() > 0 ? 100 : 30, 0, 0, 0));
+        g->setColor(argb(this->sSearchString.length() > 0 ? 100 : 30, 0, 0, 0));
         g->fillRect(this->vPos.x + this->vSize.x - offsetTextWidthWithOverflow, this->vPos.y,
                     offsetTextWidthWithOverflow, height);
     }

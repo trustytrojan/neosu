@@ -41,7 +41,7 @@ VisualProfiler::VisualProfiler() : CBaseUIElement(0, 0, 0, 0, "") {
     this->font = resourceManager->getFont("FONT_DEFAULT");
     this->fontConsole = resourceManager->getFont("FONT_CONSOLE");
     this->lineVao = resourceManager->createVertexArrayObject(Graphics::PRIMITIVE::PRIMITIVE_LINES,
-                                                                          Graphics::USAGE_TYPE::USAGE_DYNAMIC, true);
+                                                             Graphics::USAGE_TYPE::USAGE_DYNAMIC, true);
 
     this->bScheduledForceRebuildLineVao = false;
     this->bRequiresAltShiftKeysToFreeze = false;
@@ -110,17 +110,15 @@ void VisualProfiler::draw() {
                                 textFont, this->textLines);
                     addTextLine(UString::format("Sound Volume: %f", soundEngine->getVolume()), textFont,
                                 this->textLines);
-                    addTextLine(UString::format("RM Threads: %zu", resourceManager->getNumActiveThreads()),
-                                textFont, this->textLines);
+                    addTextLine(UString::format("RM Threads: %zu", resourceManager->getNumActiveThreads()), textFont,
+                                this->textLines);
+                    addTextLine(UString::format("RM LoadingWork: %zu", resourceManager->getNumLoadingWork()), textFont,
+                                this->textLines);
                     addTextLine(
-                        UString::format("RM LoadingWork: %zu", resourceManager->getNumLoadingWork()),
+                        UString::format("RM LoadingWorkAD: %zu", resourceManager->getNumLoadingWorkAsyncDestroy()),
                         textFont, this->textLines);
-                    addTextLine(UString::format("RM LoadingWorkAD: %zu",
-                                                resourceManager->getNumLoadingWorkAsyncDestroy()),
+                    addTextLine(UString::format("RM Named Resources: %zu", resourceManager->getResources().size()),
                                 textFont, this->textLines);
-                    addTextLine(
-                        UString::format("RM Named Resources: %zu", resourceManager->getResources().size()),
-                        textFont, this->textLines);
                     addTextLine(UString::format("Animations: %zu", anim->getNumActiveAnimations()), textFont,
                                 this->textLines);
                     addTextLine(UString::format("Frame: %lu", engine->getFrameCount()), textFont, this->textLines);
@@ -275,9 +273,8 @@ void VisualProfiler::draw() {
         const int margin = cv_vprof_graph_margin.getFloat() * env->getDPIScale();
 
         const int xPos = engine->getScreenWidth() - width - margin;
-        const int yPos =
-            engine->getScreenHeight() - height - margin +
-            (mouse->isMiddleDown() ? mouse->getPos().y - engine->getScreenHeight() : 0);
+        const int yPos = engine->getScreenHeight() - height - margin +
+                         (mouse->isMiddleDown() ? mouse->getPos().y - engine->getScreenHeight() : 0);
 
         // draw background
         g->setColor(0xaa000000);
@@ -379,8 +376,7 @@ void VisualProfiler::mouse_update(bool *propagate_clicks) {
     CBaseUIElement::mouse_update(propagate_clicks);
     if(!cv_vprof.getBool() || !this->bVisible) return;
 
-    const bool isFrozen = (keyboard->isShiftDown() &&
-                           (!this->bRequiresAltShiftKeysToFreeze || keyboard->isAltDown()));
+    const bool isFrozen = (keyboard->isShiftDown() && (!this->bRequiresAltShiftKeysToFreeze || keyboard->isAltDown()));
 
     if(cv_debug_vprof.getBool() || cv_vprof_spike.getBool()) {
         if(!isFrozen) {
@@ -494,15 +490,14 @@ void VisualProfiler::mouse_update(bool *propagate_clicks) {
             // preallocate 2 vertices per line
             for(int x = 0; x < graphWidth; x++) {
                 for(int g = 0; g < numGroups; g++) {
-                    const Color color =
-                        COLOR((unsigned char)(this->fPrevVaoAlpha * 255.0f), COLOR_GET_Ri(this->groups[g].color),
-                              COLOR_GET_Gi(this->groups[g].color), COLOR_GET_Bi(this->groups[g].color));
+                    const Color color = argb(this->fPrevVaoAlpha, this->groups[g].color.Rf(),
+                                             this->groups[g].color.Gf(), this->groups[g].color.Bf());
 
-                    // m_lineVao->addVertex(x, -(((float)graphHeight)/(float)numGroups)*g, 0);
+                    // this->lineVao->addVertex(x, -(((float)graphHeight)/(float)numGroups)*g, 0);
                     this->lineVao->addVertex(x, 0, 0);
                     this->lineVao->addColor(color);
 
-                    // m_lineVao->addVertex(x, -(((float)graphHeight)/(float)numGroups)*(g + 1), 0);
+                    // this->lineVao->addVertex(x, -(((float)graphHeight)/(float)numGroups)*(g + 1), 0);
                     this->lineVao->addVertex(x, 0, 0);
                     this->lineVao->addColor(color);
                 }

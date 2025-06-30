@@ -450,7 +450,7 @@ AC_SUBST([CXX])
 AS_IF([test "$host_cpu" = "x86_64"], [COMMON_FLAGS="$COMMON_FLAGS -mcmodel=small"])
 
 COMMON_FLAGS="$COMMON_FLAGS -ffunction-sections -fdata-sections -fwrapv -fno-strict-aliasing -fno-semantic-interposition -ftls-model=initial-exec"
-CXXFLAGS="$CXXFLAGS $COMMON_FLAGS -fno-exceptions -Wno-deprecated-declarations" # -fno-rtti
+CXXFLAGS="$CXXFLAGS $COMMON_FLAGS -fno-exceptions" # -fno-rtti
 CFLAGS="$CFLAGS $COMMON_FLAGS"
 AS_IF([test -z "$ubercompat" || test "x$enable_static" = "xyes"], [
     LDFLAGS="$LDFLAGS -static-libstdc++ -static-libgcc"
@@ -577,7 +577,7 @@ AS_IF([test "x$enable_lto" != "xno"], [
 ])
 
 NEOSU_CPPFLAGS="$NEOSU_CPPFLAGS -DGLM_ENABLE_EXPERIMENTAL"
-NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -Wall -Wno-sign-compare -Wdeprecated-declarations -pthread"
+NEOSU_CXXFLAGS="$NEOSU_CXXFLAGS -Wall -Wno-sign-compare -Wdeprecated-declarations -Wno-error=deprecated-declarations -pthread"
 NEOSU_LDFLAGS="$NEOSU_LDFLAGS -pthread"
 AC_SUBST([NEOSU_CPPFLAGS])
 AC_SUBST([NEOSU_CXXFLAGS])

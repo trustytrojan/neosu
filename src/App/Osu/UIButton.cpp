@@ -42,19 +42,26 @@ void UIButton::draw() {
     float middleWidth = this->vSize.x - leftWidth - rightWidth;
 
     auto color = this->is_loading ? Color(0xff333333) : this->color;
-    char red = std::max((unsigned int)(COLOR_GET_Ri(color) * this->fBrightness), (unsigned int)(this->fAnim * 255.0f));
-    char green = std::max((unsigned int)(COLOR_GET_Gi(color) * this->fBrightness), (unsigned int)(this->fAnim * 255.0f));
-    char blue = std::max((unsigned int)(COLOR_GET_Bi(color) * this->fBrightness), (unsigned int)(this->fAnim * 255.0f));
+    const auto red =
+        static_cast<Channel>(std::max(static_cast<float>(color.R()) * this->fBrightness, this->fAnim * 255.0f));
+    const auto green =
+        static_cast<Channel>(std::max(static_cast<float>(color.G()) * this->fBrightness, this->fAnim * 255.0f));
+    const auto blue =
+        static_cast<Channel>(std::max(static_cast<float>(color.B()) * this->fBrightness, this->fAnim * 255.0f));
     g->setColor(
-        COLOR(std::clamp<int>(COLOR_GET_Ai(color) + (isMouseInside() ? (int)(this->fAlphaAddOnHover * 255.0f) : 0), 0, 255),
-              red, green, blue));
+        argb(std::clamp<int>(color.A() + (isMouseInside() ? (int)(this->fAlphaAddOnHover * 255.0f) : 0), 0, 255), red,
+             green, blue));
 
     buttonLeft->bind();
-    { g->drawQuad((int)this->vPos.x, (int)this->vPos.y, (int)leftWidth, (int)this->vSize.y); }
+    {
+        g->drawQuad((int)this->vPos.x, (int)this->vPos.y, (int)leftWidth, (int)this->vSize.y);
+    }
     buttonLeft->unbind();
 
     buttonMiddle->bind();
-    { g->drawQuad((int)this->vPos.x + (int)leftWidth, (int)this->vPos.y, (int)middleWidth, (int)this->vSize.y); }
+    {
+        g->drawQuad((int)this->vPos.x + (int)leftWidth, (int)this->vPos.y, (int)middleWidth, (int)this->vSize.y);
+    }
     buttonMiddle->unbind();
 
     buttonRight->bind();

@@ -210,7 +210,7 @@ class Engine {
 
         // debug build shows full source location
         template <typename... Args>
-        [[deprecated("use compile-time format string checked debugLogF instead")]]
+        //[[deprecated("use compile-time format string checked debugLogF instead")]]
         static void logPrintf(const std::source_location &loc, const char *func, const std::string_view &fmt,
                               Args &&...args) {
             // auto contextPrefix =
@@ -224,7 +224,7 @@ class Engine {
         }
 
         template <typename... Args>
-        [[deprecated("use compile-time format string checked debugLogF instead")]]
+        //[[deprecated("use compile-time format string checked debugLogF instead")]]
         static void logPrintf(const std::source_location &loc, const char *func, Color color,
                               const std::string_view &fmt, Args &&...args) {
             // auto contextPrefix =
@@ -239,7 +239,7 @@ class Engine {
 
         // release build only shows function name
         template <typename... Args>
-        [[deprecated("use compile-time format string checked debugLogF instead")]]
+        //[[deprecated("use compile-time format string checked debugLogF instead")]]
         static void logPrintf(const char *func, const std::string_view &fmt, Args &&...args) {
             auto contextPrefix = fmt::format("[{}] ", func);
             std::string message = fmt::sprintf(fmt, std::forward<Args>(args)...);
@@ -247,7 +247,7 @@ class Engine {
         }
 
         template <typename... Args>
-        [[deprecated("use compile-time format string checked debugLogF instead")]]
+        //[[deprecated("use compile-time format string checked debugLogF instead")]]
         static void logPrintf(const char *func, Color color, const std::string_view &fmt, Args &&...args) {
             auto contextPrefix = fmt::format("[{}] ", func);
             std::string message = fmt::sprintf(fmt, std::forward<Args>(args)...);

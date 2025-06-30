@@ -128,7 +128,7 @@ void ModFPoSu::draw() {
                         if(cv_fposu_cube.getBool()) {
                             osu->getSkin()->getBackgroundCube()->bind();
                             {
-                                g->setColor(COLOR(255, std::clamp<int>(cv_fposu_cube_tint_r.getInt(), 0, 255),
+                                g->setColor(argb(255, std::clamp<int>(cv_fposu_cube_tint_r.getInt(), 0, 255),
                                                   std::clamp<int>(cv_fposu_cube_tint_g.getInt(), 0, 255),
                                                   std::clamp<int>(cv_fposu_cube_tint_b.getInt(), 0, 255)));
                                 g->drawVAO(this->vaoCube);

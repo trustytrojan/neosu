@@ -59,7 +59,7 @@ void HitObject::drawHitResult(Skin *skin, float hitcircleDiameter, float rawHitc
                                             ? hitDeltaRangePercent / 2.0f + 0.5f
                                             : (hitDeltaRangePercent < 0.0f ? -1.0f : 1.0f));
 
-                g->setColor(COLORf(1.0f, rf, gf, bf));
+                g->setColor(argb(1.0f, rf, gf, bf));
             }
         }
 

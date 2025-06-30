@@ -489,7 +489,7 @@ void Osu::draw() {
                 flashlight_shader->setUniform2f("flashlight_center", flashlightPos.x,
                                                 this->getScreenSize().y - flashlightPos.y);
 
-                g->setColor(COLOR(255, 0, 0, 0));
+                g->setColor(argb(255, 0, 0, 0));
                 g->fillRect(0, 0, this->getScreenWidth(), this->getScreenHeight());
 
                 flashlight_shader->disable();
@@ -507,7 +507,7 @@ void Osu::draw() {
                 actual_flashlight_shader->setUniform2f("flashlight_center", flashlightPos.x,
                                                        this->getScreenSize().y - flashlightPos.y);
 
-                g->setColor(COLOR(255, 0, 0, 0));
+                g->setColor(argb(255, 0, 0, 0));
                 g->fillRect(0, 0, this->getScreenWidth(), this->getScreenHeight());
 
                 actual_flashlight_shader->disable();
@@ -521,7 +521,7 @@ void Osu::draw() {
             float alphaPercent = 1.0f - (this->fQuickRetryTime - engine->getTime()) / cv_quick_retry_delay.getFloat();
             if(engine->getTime() > this->fQuickRetryTime) alphaPercent = 1.0f;
 
-            g->setColor(COLOR((int)(255 * alphaPercent), 0, 0, 0));
+            g->setColor(argb((int)(255 * alphaPercent), 0, 0, 0));
             g->fillRect(0, 0, this->getScreenWidth(), this->getScreenHeight());
         }
 

@@ -20,20 +20,17 @@
 int Circle::rainbowNumber = 0;
 int Circle::rainbowColorCounter = 0;
 
-void Circle::drawApproachCircle(Beatmap *beatmap, Vector2 rawPos, int number, int colorCounter,
-                                int colorOffset, float colorRGBMultiplier, float approachScale, float alpha,
+void Circle::drawApproachCircle(Beatmap *beatmap, Vector2 rawPos, int number, int colorCounter, int colorOffset,
+                                float colorRGBMultiplier, float approachScale, float alpha,
                                 bool overrideHDApproachCircle) {
     rainbowNumber = number;
     rainbowColorCounter = colorCounter;
 
-    Color comboColor = beatmap->getSkin()->getComboColorForCounter(colorCounter, colorOffset);
-    comboColor =
-        COLOR(255, (int)(COLOR_GET_Ri(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()),
-              (int)(COLOR_GET_Gi(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()),
-              (int)(COLOR_GET_Bi(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()));
+    Color comboColor = Colors::scale(beatmap->getSkin()->getComboColorForCounter(colorCounter, colorOffset),
+                                     colorRGBMultiplier * cv_circle_color_saturation.getFloat());
 
-    drawApproachCircle(beatmap->getSkin(), beatmap->osuCoords2Pixels(rawPos), comboColor,
-                       beatmap->fHitcircleDiameter, approachScale, alpha, osu->getModHD(), overrideHDApproachCircle);
+    drawApproachCircle(beatmap->getSkin(), beatmap->osuCoords2Pixels(rawPos), comboColor, beatmap->fHitcircleDiameter,
+                       approachScale, alpha, osu->getModHD(), overrideHDApproachCircle);
 }
 
 void Circle::drawCircle(Beatmap *beatmap, Vector2 rawPos, int number, int colorCounter, int colorOffset,
@@ -44,20 +41,16 @@ void Circle::drawCircle(Beatmap *beatmap, Vector2 rawPos, int number, int colorC
                colorRGBMultiplier, approachScale, alpha, numberAlpha, drawNumber, overrideHDApproachCircle);
 }
 
-void Circle::drawCircle(Skin *skin, Vector2 pos, float hitcircleDiameter, float numberScale,
-                        float overlapScale, int number, int colorCounter, int colorOffset, float colorRGBMultiplier,
-                        float approachScale, float alpha, float numberAlpha, bool drawNumber,
-                        bool overrideHDApproachCircle) {
+void Circle::drawCircle(Skin *skin, Vector2 pos, float hitcircleDiameter, float numberScale, float overlapScale,
+                        int number, int colorCounter, int colorOffset, float colorRGBMultiplier, float approachScale,
+                        float alpha, float numberAlpha, bool drawNumber, bool overrideHDApproachCircle) {
     if(alpha <= 0.0f || !cv_draw_circles.getBool()) return;
 
     rainbowNumber = number;
     rainbowColorCounter = colorCounter;
 
-    Color comboColor = skin->getComboColorForCounter(colorCounter, colorOffset);
-    comboColor =
-        COLOR(255, (int)(COLOR_GET_Ri(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()),
-              (int)(COLOR_GET_Gi(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()),
-              (int)(COLOR_GET_Bi(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()));
+    Color comboColor = Colors::scale(skin->getComboColorForCounter(colorCounter, colorOffset),
+                                     colorRGBMultiplier * cv_circle_color_saturation.getFloat());
 
     // approach circle
     /// drawApproachCircle(skin, pos, comboColor, hitcircleDiameter, approachScale, alpha, modHD,
@@ -73,8 +66,7 @@ void Circle::drawCircle(Skin *skin, Vector2 pos, float hitcircleDiameter, float 
         drawHitCircleOverlay(skin->getHitCircleOverlay2(), pos, circleOverlayImageScale, alpha, colorRGBMultiplier);
 
     // number
-    if(drawNumber)
-        drawHitCircleNumber(skin, numberScale, overlapScale, pos, number, numberAlpha, colorRGBMultiplier);
+    if(drawNumber) drawHitCircleNumber(skin, numberScale, overlapScale, pos, number, numberAlpha, colorRGBMultiplier);
 
     // overlay
     if(skin->getHitCircleOverlayAboveNumber())
@@ -93,9 +85,9 @@ void Circle::drawCircle(Skin *skin, Vector2 pos, float hitcircleDiameter, Color 
     drawHitCircleOverlay(skin->getHitCircleOverlay2(), pos, circleOverlayImageScale, alpha, 1.0f);
 }
 
-void Circle::drawSliderStartCircle(Beatmap *beatmap, Vector2 rawPos, int number, int colorCounter,
-                                   int colorOffset, float colorRGBMultiplier, float approachScale, float alpha,
-                                   float numberAlpha, bool drawNumber, bool overrideHDApproachCircle) {
+void Circle::drawSliderStartCircle(Beatmap *beatmap, Vector2 rawPos, int number, int colorCounter, int colorOffset,
+                                   float colorRGBMultiplier, float approachScale, float alpha, float numberAlpha,
+                                   bool drawNumber, bool overrideHDApproachCircle) {
     drawSliderStartCircle(beatmap->getSkin(), beatmap->osuCoords2Pixels(rawPos), beatmap->fHitcircleDiameter,
                           beatmap->getNumberScale(), beatmap->getHitcircleOverlapScale(), number, colorCounter,
                           colorOffset, colorRGBMultiplier, approachScale, alpha, numberAlpha, drawNumber,
@@ -110,8 +102,8 @@ void Circle::drawSliderStartCircle(Skin *skin, Vector2 pos, float hitcircleDiame
 
     // if no sliderstartcircle image is preset, fallback to default circle
     if(skin->getSliderStartCircle() == skin->getMissingTexture()) {
-        drawCircle(skin, pos, hitcircleDiameter, numberScale, hitcircleOverlapScale, number, colorCounter,
-                   colorOffset, colorRGBMultiplier, approachScale, alpha, numberAlpha, drawNumber,
+        drawCircle(skin, pos, hitcircleDiameter, numberScale, hitcircleOverlapScale, number, colorCounter, colorOffset,
+                   colorRGBMultiplier, approachScale, alpha, numberAlpha, drawNumber,
                    overrideHDApproachCircle);  // normal
         return;
     }
@@ -119,11 +111,8 @@ void Circle::drawSliderStartCircle(Skin *skin, Vector2 pos, float hitcircleDiame
     rainbowNumber = number;
     rainbowColorCounter = colorCounter;
 
-    Color comboColor = skin->getComboColorForCounter(colorCounter, colorOffset);
-    comboColor =
-        COLOR(255, (int)(COLOR_GET_Ri(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()),
-              (int)(COLOR_GET_Gi(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()),
-              (int)(COLOR_GET_Bi(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()));
+    Color comboColor = Colors::scale(skin->getComboColorForCounter(colorCounter, colorOffset),
+                                     colorRGBMultiplier * cv_circle_color_saturation.getFloat());
 
     // circle
     const float circleImageScale = hitcircleDiameter / (128.0f * (skin->isSliderStartCircle2x() ? 2.0f : 1.0f));
@@ -149,9 +138,9 @@ void Circle::drawSliderStartCircle(Skin *skin, Vector2 pos, float hitcircleDiame
     }
 }
 
-void Circle::drawSliderEndCircle(Beatmap *beatmap, Vector2 rawPos, int number, int colorCounter,
-                                 int colorOffset, float colorRGBMultiplier, float approachScale, float alpha,
-                                 float numberAlpha, bool drawNumber, bool overrideHDApproachCircle) {
+void Circle::drawSliderEndCircle(Beatmap *beatmap, Vector2 rawPos, int number, int colorCounter, int colorOffset,
+                                 float colorRGBMultiplier, float approachScale, float alpha, float numberAlpha,
+                                 bool drawNumber, bool overrideHDApproachCircle) {
     drawSliderEndCircle(beatmap->getSkin(), beatmap->osuCoords2Pixels(rawPos), beatmap->fHitcircleDiameter,
                         beatmap->getNumberScale(), beatmap->getHitcircleOverlapScale(), number, colorCounter,
                         colorOffset, colorRGBMultiplier, approachScale, alpha, numberAlpha, drawNumber,
@@ -174,11 +163,8 @@ void Circle::drawSliderEndCircle(Skin *skin, Vector2 pos, float hitcircleDiamete
     rainbowNumber = number;
     rainbowColorCounter = colorCounter;
 
-    Color comboColor = skin->getComboColorForCounter(colorCounter, colorOffset);
-    comboColor =
-        COLOR(255, (int)(COLOR_GET_Ri(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()),
-              (int)(COLOR_GET_Gi(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()),
-              (int)(COLOR_GET_Bi(comboColor) * colorRGBMultiplier * cv_circle_color_saturation.getFloat()));
+    Color comboColor = Colors::scale(skin->getComboColorForCounter(colorCounter, colorOffset),
+                                     colorRGBMultiplier * cv_circle_color_saturation.getFloat());
 
     // circle
     const float circleImageScale = hitcircleDiameter / (128.0f * (skin->isSliderEndCircle2x() ? 2.0f : 1.0f));
@@ -193,8 +179,8 @@ void Circle::drawSliderEndCircle(Skin *skin, Vector2 pos, float hitcircleDiamete
     }
 }
 
-void Circle::drawApproachCircle(Skin *skin, Vector2 pos, Color comboColor, float hitcircleDiameter,
-                                float approachScale, float alpha, bool modHD, bool overrideHDApproachCircle) {
+void Circle::drawApproachCircle(Skin *skin, Vector2 pos, Color comboColor, float hitcircleDiameter, float approachScale,
+                                float alpha, bool modHD, bool overrideHDApproachCircle) {
     if((!modHD || overrideHDApproachCircle) && cv_draw_approach_circles.getBool() && !cv_mod_mafham.getBool()) {
         if(approachScale > 1.0f) {
             const float approachCircleImageScale =
@@ -210,7 +196,7 @@ void Circle::drawApproachCircle(Skin *skin, Vector2 pos, Color comboColor, float
                 char green1 = std::sin(frequency * time + 2 + rainbowNumber * rainbowColorCounter) * 127 + 128;
                 char blue1 = std::sin(frequency * time + 4 + rainbowNumber * rainbowColorCounter) * 127 + 128;
 
-                g->setColor(COLOR(255, red1, green1, blue1));
+                g->setColor(argb(255, red1, green1, blue1));
             }
 
             g->setAlpha(alpha * cv_approach_circle_alpha_multiplier.getFloat());
@@ -226,15 +212,14 @@ void Circle::drawApproachCircle(Skin *skin, Vector2 pos, Color comboColor, float
     }
 }
 
-void Circle::drawHitCircleOverlay(SkinImage *hitCircleOverlayImage, Vector2 pos,
-                                  float circleOverlayImageScale, float alpha, float colorRGBMultiplier) {
-    g->setColor(COLORf(1.0f, colorRGBMultiplier, colorRGBMultiplier, colorRGBMultiplier));
+void Circle::drawHitCircleOverlay(SkinImage *hitCircleOverlayImage, Vector2 pos, float circleOverlayImageScale,
+                                  float alpha, float colorRGBMultiplier) {
+    g->setColor(argb(1.0f, colorRGBMultiplier, colorRGBMultiplier, colorRGBMultiplier));
     g->setAlpha(alpha);
     hitCircleOverlayImage->drawRaw(pos, circleOverlayImageScale);
 }
 
-void Circle::drawHitCircle(Image *hitCircleImage, Vector2 pos, Color comboColor, float circleImageScale,
-                           float alpha) {
+void Circle::drawHitCircle(Image *hitCircleImage, Vector2 pos, Color comboColor, float circleImageScale, float alpha) {
     g->setColor(comboColor);
 
     if(cv_circle_rainbow.getBool()) {
@@ -245,7 +230,7 @@ void Circle::drawHitCircle(Image *hitCircleImage, Vector2 pos, Color comboColor,
         char green1 = std::sin(frequency * time + 2 + rainbowNumber * rainbowNumber * rainbowColorCounter) * 127 + 128;
         char blue1 = std::sin(frequency * time + 4 + rainbowNumber * rainbowNumber * rainbowColorCounter) * 127 + 128;
 
-        g->setColor(COLOR(255, red1, green1, blue1));
+        g->setColor(argb(255, red1, green1, blue1));
     }
 
     g->setAlpha(alpha);
@@ -259,8 +244,8 @@ void Circle::drawHitCircle(Image *hitCircleImage, Vector2 pos, Color comboColor,
     g->popTransform();
 }
 
-void Circle::drawHitCircleNumber(Skin *skin, float numberScale, float overlapScale, Vector2 pos,
-                                 int number, float numberAlpha, float colorRGBMultiplier) {
+void Circle::drawHitCircleNumber(Skin *skin, float numberScale, float overlapScale, Vector2 pos, int number,
+                                 float numberAlpha, float colorRGBMultiplier) {
     if(!cv_draw_numbers.getBool()) return;
 
     class DigitWidth {
@@ -302,7 +287,7 @@ void Circle::drawHitCircleNumber(Skin *skin, float numberScale, float overlapSca
     digits.push_back(number);
 
     // set color
-    // g->setColor(COLORf(1.0f, colorRGBMultiplier, colorRGBMultiplier, colorRGBMultiplier)); // see
+    // g->setColor(argb(1.0f, colorRGBMultiplier, colorRGBMultiplier, colorRGBMultiplier)); // see
     // https://github.com/ppy/osu/issues/24506
     g->setColor(0xffffffff);
     if(cv_circle_number_rainbow.getBool()) {
@@ -319,7 +304,7 @@ void Circle::drawHitCircleNumber(Skin *skin, float numberScale, float overlapSca
             std::sin(frequency * time + 4 + rainbowNumber * rainbowNumber * rainbowNumber * rainbowColorCounter) * 127 +
             128;
 
-        g->setColor(COLOR(255, red1, green1, blue1));
+        g->setColor(argb(255, red1, green1, blue1));
     }
     g->setAlpha(numberAlpha);
 
@@ -423,8 +408,8 @@ void Circle::draw() {
             skin->getHitCircleOverlay2()->setAnimationTimeOffset(
                 skin->getAnimationSpeed(), !this->bm->isInMafhamRenderChunk() ? this->click_time - this->iApproachTime
                                                                               : this->bm->getCurMusicPosWithOffsets());
-            drawCircle(this->bm, this->vRawPos, this->combo_number, this->iColorCounter, this->iColorOffset, 1.0f,
-                       1.0f, alpha, alpha, drawNumber);
+            drawCircle(this->bm, this->vRawPos, this->combo_number, this->iColorCounter, this->iColorOffset, 1.0f, 1.0f,
+                       alpha, alpha, drawNumber);
         }
         g->popTransform();
     }
@@ -507,8 +492,8 @@ void Circle::update(long curPos, f64 frame_time) {
 
                 if(result != LiveScore::HIT::HIT_NULL) {
                     const float targetDelta = cursorDelta / (this->bi->fHitcircleDiameter / 2.0f);
-                    const float targetAngle =
-                        glm::degrees(std::atan2(this->bi->getCursorPos().y - pos.y, this->bi->getCursorPos().x - pos.x));
+                    const float targetAngle = glm::degrees(
+                        std::atan2(this->bi->getCursorPos().y - pos.y, this->bi->getCursorPos().x - pos.x));
 
                     this->onHit(result, delta, targetDelta, targetAngle);
                 }

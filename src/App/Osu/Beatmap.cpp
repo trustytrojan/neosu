@@ -198,7 +198,7 @@ void Beatmap::drawBackground() {
                                          0.0f, 1.0f) *
                               255.0f;
 
-            g->setColor(COLOR(255, dim, dim, dim));
+            g->setColor(argb(255, dim, dim, dim));
             g->pushTransform();
             {
                 g->scale(scale, scale);
@@ -216,7 +216,7 @@ void Beatmap::drawBackground() {
         const short green = std::clamp<f32>(brightness * cv_background_color_g.getFloat(), 0.0f, 255.0f);
         const short blue = std::clamp<f32>(brightness * cv_background_color_b.getFloat(), 0.0f, 255.0f);
         const short alpha = std::clamp<f32>(1.0f - this->fBreakBackgroundFade, 0.0f, 1.0f) * 255.0f;
-        g->setColor(COLOR(alpha, red, green, blue));
+        g->setColor(argb(alpha, red, green, blue));
         g->fillRect(0, 0, osu->getScreenWidth(), osu->getScreenHeight());
     }
 

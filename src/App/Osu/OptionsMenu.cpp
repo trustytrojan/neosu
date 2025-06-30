@@ -371,8 +371,8 @@ class OptionsMenuResetButton : public CBaseUIButton {
 
         const int fullColorBlockSize = 4 * Osu::getUIScale();
 
-        Color left = COLOR((int)(255 * this->fAnim), 255, 233, 50);
-        Color middle = COLOR((int)(255 * this->fAnim), 255, 211, 50);
+        Color left = argb((int)(255 * this->fAnim), 255, 233, 50);
+        Color middle = argb((int)(255 * this->fAnim), 255, 211, 50);
         Color right = 0x00000000;
 
         g->fillGradient(this->vPos.x, this->vPos.y, this->vSize.x * 1.25f, this->vSize.y, middle, right, middle, right);
@@ -1329,7 +1329,7 @@ void OptionsMenu::draw() {
             const short green = std::clamp<float>(brightness * cv_background_color_g.getFloat(), 0.0f, 255.0f);
             const short blue = std::clamp<float>(brightness * cv_background_color_b.getFloat(), 0.0f, 255.0f);
             if(brightness > 0.0f) {
-                g->setColor(COLOR(255, red, green, blue));
+                g->setColor(argb(255, red, green, blue));
                 g->fillRect(0, 0, osu->getScreenWidth(), osu->getScreenHeight());
             }
         }
@@ -1338,7 +1338,7 @@ void OptionsMenu::draw() {
     if(this->backgroundDimSlider->isActive()) {
         if(!isPlayingBeatmap) {
             const short dim = std::clamp<float>(this->backgroundDimSlider->getFloat(), 0.0f, 1.0f) * 255.0f;
-            g->setColor(COLOR(dim, 0, 0, 0));
+            g->setColor(argb(dim, 0, 0, 0));
             g->fillRect(0, 0, osu->getScreenWidth(), osu->getScreenHeight());
         }
     }
@@ -1379,7 +1379,7 @@ void OptionsMenu::draw() {
             g->translate3DScene(-(1.0f - this->fAnimation) * this->options->getSize().x * 1.25f, 0,
                                 -(1.0f - this->fAnimation) * 700);
 
-            osu->getSliderFrameBuffer()->setColor(COLORf(this->fAnimation, 1.0f, 1.0f, 1.0f));
+            osu->getSliderFrameBuffer()->setColor(argb(this->fAnimation, 1.0f, 1.0f, 1.0f));
             osu->getSliderFrameBuffer()->draw(0, 0);
         }
         g->pop3DScene();
@@ -1404,7 +1404,7 @@ void OptionsMenu::mouse_update(bool *propagate_clicks) {
     // flash osu!folder textbox red if incorrect
     if(this->fOsuFolderTextboxInvalidAnim > engine->getTime()) {
         char redness = std::abs(std::sin((this->fOsuFolderTextboxInvalidAnim - engine->getTime()) * 3)) * 128;
-        this->osuFolderTextbox->setBackgroundColor(COLOR(255, redness, 0, 0));
+        this->osuFolderTextbox->setBackgroundColor(argb(255, redness, 0, 0));
     } else
         this->osuFolderTextbox->setBackgroundColor(0xff000000);
 

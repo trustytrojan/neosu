@@ -55,7 +55,7 @@ class NotificationOverlay : public OsuScreen {
    private:
     struct NOTIFICATION {
         UString text = "";
-        Color textColor = COLOR(255, 255, 255, 255);
+        Color textColor = argb(255, 255, 255, 255);
 
         float time = 0.f;
         float alpha = 0.f;

@@ -300,7 +300,7 @@ void Chat::draw() {
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_PREMUL_ALPHA);
     }
 
-    g->setColor(COLOR(100, 0, 10, 50));
+    g->setColor(argb(100, 0, 10, 50));
     g->fillRect(this->button_container->getPos().x, this->button_container->getPos().y,
                 this->button_container->getSize().x, this->button_container->getSize().y);
     this->button_container->draw();
@@ -320,7 +320,7 @@ void Chat::draw() {
             g->translate3DScene(0, -(1.0f - this->fAnimation) * this->getSize().y * 1.25f,
                                 -(1.0f - this->fAnimation) * 700);
 
-            osu->getSliderFrameBuffer()->setColor(COLORf(this->fAnimation, 1.0f, 1.0f, 1.0f));
+            osu->getSliderFrameBuffer()->setColor(argb(this->fAnimation, 1.0f, 1.0f, 1.0f));
             osu->getSliderFrameBuffer()->draw(0, 0);
         }
         g->pop3DScene();

@@ -20,12 +20,12 @@ class VSControlBarButton : public CBaseUIButton {
     void draw() override {
         if(!this->bVisible) return;
 
-        const Color top = COLOR(255, 244, 244, 244);
-        const Color bottom = COLOR(255, 221, 221, 221);
+        const Color top = argb(255, 244, 244, 244);
+        const Color bottom = argb(255, 221, 221, 221);
 
         g->fillGradient(this->vPos.x + 1, this->vPos.y + 1, this->vSize.x - 1, this->vSize.y, top, top, bottom, bottom);
 
-        g->setColor(COLOR(255, 204, 204, 204));
+        g->setColor(argb(255, 204, 204, 204));
         g->drawRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
 
         this->drawText();
@@ -48,7 +48,7 @@ class VSControlBarButton : public CBaseUIButton {
                     if(this->textDarkColor != 0)
                         g->setColor(this->textDarkColor);
                     else
-                        g->setColor(COLOR_INVERT(this->textColor));
+                        g->setColor(Colors::invert(this->textColor));
 
                     g->drawString(this->font, this->sText);
                 }
@@ -93,7 +93,7 @@ class VSControlBarSlider : public CBaseUISlider {
                     this->vPos.y + std::round(this->vBlockPos.y) + 1 + this->vBlockSize.y / 2),
             Vector2(this->vPos.x + std::round(this->vBlockPos.x) + 1,
                     this->vPos.y + std::round(this->vBlockPos.y) + 1 + this->vBlockSize.y / 2),
-            COLOR(255, 205, 218, 243), COLOR(255, 205, 218, 243), COLOR(255, 141, 188, 238), COLOR(255, 141, 188, 238));
+            argb(255, 205, 218, 243), argb(255, 205, 218, 243), argb(255, 141, 188, 238), argb(255, 141, 188, 238));
 
         g->drawQuad(Vector2(this->vPos.x + std::round(this->vBlockPos.x) + 1,
                             this->vPos.y + std::round(this->vBlockPos.y) + 1 + std::round(this->vBlockSize.y / 2.0f)),
@@ -105,8 +105,8 @@ class VSControlBarSlider : public CBaseUISlider {
                     Vector2(this->vPos.x + std::round(this->vBlockPos.x) + 1,
                             this->vPos.y + std::round(this->vBlockPos.y) + 1 + std::round(this->vBlockSize.y / 2.0f) +
                                 this->vBlockSize.y - (std::round(this->vBlockSize.y / 2.0f))),
-                    COLOR(255, 105, 173, 243), COLOR(255, 105, 173, 243), COLOR(255, 185, 253, 254),
-                    COLOR(255, 185, 253, 254));
+                    argb(255, 105, 173, 243), argb(255, 105, 173, 243), argb(255, 185, 253, 254),
+                    argb(255, 185, 253, 254));
     }
 };
 
@@ -121,12 +121,12 @@ class VSControlBarCheckbox : public CBaseUICheckbox {
     void draw() override {
         if(!this->bVisible) return;
 
-        const Color top = (this->bChecked ? COLOR(255, 178, 237, 171) : COLOR(255, 244, 244, 244));
-        const Color bottom = (this->bChecked ? COLOR(255, 117, 211, 114) : COLOR(255, 221, 221, 221));
+        const Color top = (this->bChecked ? argb(255, 178, 237, 171) : argb(255, 244, 244, 244));
+        const Color bottom = (this->bChecked ? argb(255, 117, 211, 114) : argb(255, 221, 221, 221));
 
         g->fillGradient(this->vPos.x + 1, this->vPos.y + 1, this->vSize.x - 1, this->vSize.y, top, top, bottom, bottom);
 
-        g->setColor(COLOR(255, 204, 204, 204));
+        g->setColor(argb(255, 204, 204, 204));
         g->drawRect(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y);
 
         this->drawText();
@@ -138,7 +138,7 @@ VSControlBar::VSControlBar(int x, int y, int xSize, int ySize, McFont *font) : C
 
     const float dpiScale = env->getDPIScale();
     const int height = 22 * dpiScale;
-    const Color textColor = COLOR(215, 55, 55, 55);
+    const Color textColor = argb(215, 55, 55, 55);
 
     this->container = new CBaseUIContainer(0, 0, engine->getScreenWidth(), engine->getScreenHeight(), "");
 
@@ -162,7 +162,7 @@ VSControlBar::VSControlBar(int x, int y, int xSize, int ySize, McFont *font) : C
     this->volume = new VSControlBarSlider(0, 0, this->prev->getRelPos().x, height * 2, "");
     this->volume->setOrientation(true);
     this->volume->setDrawBackground(false);
-    this->volume->setFrameColor(COLOR(255, 204, 204, 204));
+    this->volume->setFrameColor(argb(255, 204, 204, 204));
     this->volume->setBackgroundColor(0xffffffff);
     this->volume->setBounds(0.0f, 1.0f);
     this->volume->setInitialValue(cv_vs_volume.getFloat());
@@ -207,8 +207,8 @@ void VSControlBar::draw() {
 
     // draw background gradient
     {
-        const Color top = COLOR(255, 244, 244, 244);
-        const Color bottom = COLOR(255, 221, 221, 221);
+        const Color top = argb(255, 244, 244, 244);
+        const Color bottom = argb(255, 221, 221, 221);
 
         g->fillGradient(this->vPos.x, this->vPos.y, this->vSize.x, this->vSize.y, top, top, bottom, bottom);
     }

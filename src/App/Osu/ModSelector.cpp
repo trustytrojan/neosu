@@ -382,11 +382,11 @@ void ModSelector::updateScoreMultiplierLabelText() {
 
     const int alpha = 200;
     if(scoreMultiplier > 1.0f)
-        this->scoreMultiplierLabel->setTextColor(COLOR(alpha, 173, 255, 47));
+        this->scoreMultiplierLabel->setTextColor(argb(alpha, 173, 255, 47));
     else if(scoreMultiplier == 1.0f)
-        this->scoreMultiplierLabel->setTextColor(COLOR(alpha, 255, 255, 255));
+        this->scoreMultiplierLabel->setTextColor(argb(alpha, 255, 255, 255));
     else
-        this->scoreMultiplierLabel->setTextColor(COLOR(alpha, 255, 69, 00));
+        this->scoreMultiplierLabel->setTextColor(argb(alpha, 255, 69, 00));
 
     this->scoreMultiplierLabel->setText(UString::format("Score Multiplier: %.2fX", scoreMultiplier));
 }

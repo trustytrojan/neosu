@@ -271,7 +271,7 @@ DatabaseBeatmap::PRIMITIVE_CONTAINER DatabaseBeatmap::loadPrimitiveObjects(const
                         int comboNum;
                         int r, g, b;
                         if(sscanf(curLineChar, " Combo %i : %i , %i , %i \n", &comboNum, &r, &g, &b) == 4)
-                            c.combocolors.push_back(COLOR(255, r, g, b));
+                            c.combocolors.push_back(argb(255, r, g, b));
                     } break;
 
                     case 6:  // HitObjects

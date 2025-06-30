@@ -47,7 +47,7 @@ void PromptScreen::onResolutionChange(Vector2 newResolution) {
 void PromptScreen::draw() {
     if(!this->bVisible) return;
 
-    g->setColor(COLOR(200, 0, 0, 0));
+    g->setColor(argb(200, 0, 0, 0));
     g->fillRect(0, 0, this->getSize().x, this->getSize().y);
 
     OsuScreen::draw();
