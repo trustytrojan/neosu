@@ -951,7 +951,7 @@ void Database::loadDB() {
 
             // HACKHACK: workaround for linux and macos: it can happen that nested beatmaps are stored in the database,
             // and that osu! stores that filepath with a backslash (because windows)
-            if(env->getOS() == Environment::OS::LINUX || env->getOS() == Environment::OS::MACOS) {
+            if constexpr(!Env::cfg(OS::WINDOWS)) {
                 for(int c = 0; c < path.length(); c++) {
                     if(path[c] == '\\') {
                         path[c] = '/';

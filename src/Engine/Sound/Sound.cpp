@@ -88,9 +88,9 @@ void Sound::initAsync() {
 #endif
 
     if(this->bStream) {
-        auto flags = BASS_STREAM_DECODE | BASS_SAMPLE_FLOAT | BASS_STREAM_PRESCAN;
+        u32 flags = BASS_STREAM_DECODE | BASS_SAMPLE_FLOAT | BASS_STREAM_PRESCAN;
         if(cv_snd_async_buffer.getInt() > 0) flags |= BASS_ASYNCFILE;
-        if(env->getOS() == Environment::OS::WINDOWS) flags |= BASS_UNICODE;
+        if constexpr(Env::cfg(OS::WINDOWS)) flags |= BASS_UNICODE;
 
         if(this->bInterrupted.load()) return;
         this->stream = BASS_StreamCreateFile(false, file_path.c_str(), 0, 0, flags);
@@ -110,13 +110,13 @@ void Sound::initAsync() {
 
         // Only compute the length once
         if(this->bInterrupted.load()) return;
-        i64 length = BASS_ChannelGetLength(this->stream, BASS_POS_BYTE);
+        u64 length = BASS_ChannelGetLength(this->stream, BASS_POS_BYTE);
         f64 lengthInSeconds = BASS_ChannelBytes2Seconds(this->stream, length);
         f64 lengthInMilliSeconds = lengthInSeconds * 1000.0;
         this->length = (u32)lengthInMilliSeconds;
     } else {
-        auto flags = BASS_SAMPLE_FLOAT;
-        if(env->getOS() == Environment::OS::WINDOWS) flags |= BASS_UNICODE;
+        u32 flags = BASS_SAMPLE_FLOAT;
+        if constexpr(Env::cfg(OS::WINDOWS)) flags |= BASS_UNICODE;
 
         if(this->bInterrupted.load()) return;
         this->sample = BASS_SampleLoad(false, file_path.c_str(), 0, 0, 1, flags);
@@ -133,7 +133,7 @@ void Sound::initAsync() {
 
         // Only compute the length once
         if(this->bInterrupted.load()) return;
-        i64 length = BASS_ChannelGetLength(this->sample, BASS_POS_BYTE);
+        u64 length = BASS_ChannelGetLength(this->sample, BASS_POS_BYTE);
         f64 lengthInSeconds = BASS_ChannelBytes2Seconds(this->sample, length);
         f64 lengthInMilliSeconds = lengthInSeconds * 1000.0;
         this->length = (u32)lengthInMilliSeconds;
@@ -190,7 +190,7 @@ void Sound::setPositionMS(unsigned long ms) {
         return;
     }
 
-    i64 target_pos = BASS_ChannelSeconds2Bytes(this->stream, ms / 1000.0);
+    u64 target_pos = BASS_ChannelSeconds2Bytes(this->stream, ms / 1000.0);
     if(target_pos < 0) {
         debugLog("setPositionMS: error %d while calling BASS_ChannelSeconds2Bytes\n", BASS_ErrorGetCode());
         return;
@@ -262,7 +262,7 @@ void Sound::setPositionMS_fast(u32 ms) {
         return;
     }
 
-    i64 target_pos = BASS_ChannelSeconds2Bytes(this->stream, ms / 1000.0);
+    u64 target_pos = BASS_ChannelSeconds2Bytes(this->stream, ms / 1000.0);
     if(target_pos < 0) {
         debugLog("setPositionMS_fast: error %d while calling BASS_ChannelSeconds2Bytes\n", BASS_ErrorGetCode());
         return;
@@ -362,13 +362,13 @@ float Sound::getPosition() {
         return (f64)this->paused_position_ms / (f64)this->length;
     }
 
-    i64 lengthBytes = BASS_ChannelGetLength(this->stream, BASS_POS_BYTE);
+    u64 lengthBytes = BASS_ChannelGetLength(this->stream, BASS_POS_BYTE);
     if(lengthBytes < 0) {
         // The stream ended and got freed by BASS_STREAM_AUTOFREE -> invalid handle!
         return 1.f;
     }
 
-    i64 positionBytes = 0;
+    u64 positionBytes = 0;
     if(this->isPlaying()) {
         positionBytes = BASS_Mixer_ChannelGetPosition(this->stream, BASS_POS_BYTE);
     } else {
@@ -389,7 +389,7 @@ u32 Sound::getPositionMS() {
         return this->paused_position_ms;
     }
 
-    i64 positionBytes = 0;
+    u64 positionBytes = 0;
     if(this->isPlaying()) {
         positionBytes = BASS_Mixer_ChannelGetPosition(this->stream, BASS_POS_BYTE);
     } else {

@@ -1552,7 +1552,7 @@ void Osu::onResolutionChanged(Vector2 newResolution) {
 
         // disable internal resolution on specific conditions
         bool windowsBorderlessHackCondition =
-            (env->getOS() == Environment::OS::WINDOWS && env->isFullscreen() && env->isFullscreenWindowedBorderless() &&
+            (Env::cfg(OS::WINDOWS) && env->isFullscreen() && env->isFullscreenWindowedBorderless() &&
              (int)g_vInternalResolution.y == (int)env->getNativeScreenSize().y);  // HACKHACK
         if(((int)g_vInternalResolution.x == engine->getScreenWidth() &&
             (int)g_vInternalResolution.y == engine->getScreenHeight()) ||

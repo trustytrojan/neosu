@@ -218,7 +218,8 @@ MainMenu::MainMenu() : OsuScreen() {
     this->pauseButton->setClickCallback(fastdelegate::MakeDelegate(this, &MainMenu::onPausePressed));
     this->addBaseUIElement(this->pauseButton);
 
-    if(env->getOS() == Environment::OS::WINDOWS) {
+    // TODO @spec: shouldn't this be portable-ish already?
+    if constexpr(Env::cfg(OS::WINDOWS)) {
         this->updateAvailableButton = new UIButton(0, 0, 0, 0, "", "Checking for updates ...");
         this->updateAvailableButton->setUseDefaultSkin();
         this->updateAvailableButton->setClickCallback(fastdelegate::MakeDelegate(this, &MainMenu::onUpdatePressed));
@@ -1189,7 +1190,7 @@ void MainMenu::animMainButton() {
 
     this->iMainMenuRandomAnimType = (rand() % 4) == 1 ? 1 : 0;
     if(!this->bMainMenuAnimFadeToFriendForNextAnim && cv_main_menu_friend.getBool() &&
-       env->getOS() == Environment::OS::WINDOWS)  // NOTE: z buffer bullshit on other platforms >:(
+       Env::cfg(OS::WINDOWS))  // NOTE: z buffer bullshit on other platforms >:(
         this->bMainMenuAnimFadeToFriendForNextAnim = (rand() % 24) == 1;
 
     this->fMainMenuAnim = 0.0f;

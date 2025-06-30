@@ -20,7 +20,6 @@ class NullEnvironment : public Environment {
     ContextMenu *createContextMenu() override;
 
     // system
-    OS getOS() override { return Environment::OS::NONE; }
     void shutdown() override;
     void restart() override;
     std::string getExecutablePath() override { return ""; }

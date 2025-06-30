@@ -25,8 +25,6 @@
 
 WinSDLEnvironment::WinSDLEnvironment() : SDLEnvironment(NULL) {}
 
-Environment::OS WinSDLEnvironment::getOS() { return Environment::OS::WINDOWS; }
-
 void WinSDLEnvironment::openURLInDefaultBrowser(UString url) {
     SDL_SysWMinfo info;
     SDL_VERSION(&info.version);

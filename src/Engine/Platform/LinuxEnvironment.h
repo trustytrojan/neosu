@@ -19,7 +19,6 @@ class LinuxEnvironment : public Environment {
     ContextMenu *createContextMenu() override;
 
     // system
-    OS getOS() override;
     void shutdown() override;
     void restart() override;
     std::string getExecutablePath() override;

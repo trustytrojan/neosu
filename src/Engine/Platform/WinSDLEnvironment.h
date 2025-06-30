@@ -29,7 +29,6 @@ class WinSDLEnvironment : public SDLEnvironment {
     virtual ~WinSDLEnvironment() { ; }
 
     // system
-    virtual OS getOS();
     virtual void openURLInDefaultBrowser(UString url);
 
     // user

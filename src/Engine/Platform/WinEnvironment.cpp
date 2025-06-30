@@ -83,8 +83,6 @@ Graphics *WinEnvironment::createRenderer() {
 
 ContextMenu *WinEnvironment::createContextMenu() { return new WinContextMenu(); }
 
-Environment::OS WinEnvironment::getOS() { return Environment::OS::WINDOWS; }
-
 void WinEnvironment::shutdown() { SendMessage(this->hwnd, WM_CLOSE, 0, 0); }
 
 void WinEnvironment::restart() {

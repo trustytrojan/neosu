@@ -122,7 +122,7 @@ void Mouse::update() {
     Vector2 nextPos = osMousePos;
 
     if(osCursorVisible || (!sensitivityAdjustmentNeeded && !cv_mouse_raw_input.getBool()) || this->bAbsolute ||
-       env->getOS() == Environment::OS::LINUX)  // HACKHACK: linux hack
+       Env::cfg(OS::LINUX))  // HACKHACK: linux hack
     {
         // this block handles visible/active OS cursor movement without sensitivity adjustments, and absolute input
         // device movement
@@ -200,7 +200,7 @@ void Mouse::update() {
     }
 
     // clip/confine cursor
-    if(env->isCursorClipped() && env->getOS() != Environment::OS::LINUX)  // HACKHACK: linux hack
+    if(env->isCursorClipped() && !Env::cfg(OS::LINUX))  // HACKHACK: linux hack
     {
         const McRect cursorClip = env->getCursorClip();
 
@@ -224,7 +224,7 @@ void Mouse::update() {
     // first person games which call mouse->setPos() every frame to manually re-center the cursor NEVER
     // need env->setPos() absolute input NEVER needs env->setPos() also update prevOsMousePos
     if(windowRect.contains(osMousePos) && (sensitivityAdjustmentNeeded || cv_mouse_raw_input.getBool()) &&
-       !this->bSetPosWasCalledLastFrame && !this->bAbsolute && env->getOS() != Environment::OS::LINUX)  // HACKHACK: linux hack
+       !this->bSetPosWasCalledLastFrame && !this->bAbsolute && Env::cfg(OS::LINUX))  // HACKHACK: linux hack
     {
         const Vector2 newOsMousePos = this->vPosWithoutOffset;
 

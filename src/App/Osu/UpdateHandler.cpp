@@ -79,7 +79,7 @@ void UpdateHandler::checkForUpdates() {
     if(!cv_auto_update.getBool() || cv_debug.getBool() ||
        (this->updateThread != NULL && this->updateThread->joinable()))
         return;
-    if(env->getOS() != Environment::OS::WINDOWS) return;  // only windows gets releases right now
+    if constexpr(Env::cfg(OS::WINDOWS)) return;  // only windows gets releases right now
 
     this->updateThread = new std::thread(UpdateHandler::run, (void *)this);
     this->updateThread->detach();

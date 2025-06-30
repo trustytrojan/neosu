@@ -20,7 +20,6 @@ class LinuxSDLEnvironment : public SDLEnvironment {
     virtual ~LinuxSDLEnvironment() { ; }
 
     // system
-    virtual OS getOS();
     virtual void openURLInDefaultBrowser(UString url);
 
     // user

@@ -16,9 +16,6 @@ class ContextMenu;
 
 class Environment {
    public:
-    enum class OS { NONE, WINDOWS, LINUX, MACOS };
-
-   public:
     Environment();
     virtual ~Environment() { ; }
 
@@ -29,7 +26,6 @@ class Environment {
     virtual ContextMenu *createContextMenu() = 0;
 
     // system
-    virtual OS getOS() = 0;
     virtual void shutdown() = 0;
     virtual void restart() = 0;
     virtual std::string getExecutablePath() = 0;

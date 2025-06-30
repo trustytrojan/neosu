@@ -23,7 +23,6 @@ class WinEnvironment : public Environment {
     ContextMenu *createContextMenu();
 
     // system
-    OS getOS();
     void shutdown();
     void restart();
     std::string getExecutablePath();

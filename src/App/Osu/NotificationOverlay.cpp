@@ -163,7 +163,7 @@ void NotificationOverlay::onKeyDown(KeyboardEvent &e) {
     // key binding logic
     if(this->bWaitForKey) {
         // HACKHACK: prevent left mouse click bindings if relevant
-        if(env->getOS() == Environment::OS::WINDOWS && this->bWaitForKeyDisallowsLeftClick &&
+        if(Env::cfg(OS::WINDOWS) && this->bWaitForKeyDisallowsLeftClick &&
            e.getKeyCode() == 0x01)  // 0x01 == VK_LBUTTON
             this->stopWaitingForKey();
         else {

@@ -176,9 +176,8 @@ class OptionsMenuSliderPreviewElement : public CBaseUIElement {
             heightAddPercent = 1.0f - temp;
 
             points.emplace_back((useLegacyRenderer ? this->vPos.x : 0) + hitcircleDiameter / 2 + i * pointDist,
-                                     (useLegacyRenderer ? this->vPos.y : 0) + this->vSize.y / 2 -
-                                         hitcircleDiameter / 3 +
-                                         heightAddPercent * (this->vSize.y / 2 - hitcircleDiameter / 2));
+                                (useLegacyRenderer ? this->vPos.y : 0) + this->vSize.y / 2 - hitcircleDiameter / 3 +
+                                    heightAddPercent * (this->vSize.y / 2 - hitcircleDiameter / 2));
         }
 
         if(points.size() > 0) {
@@ -385,7 +384,9 @@ class OptionsMenuResetButton : public CBaseUIButton {
 
         if(this->isMouseInside()) {
             osu->getTooltipOverlay()->begin();
-            { osu->getTooltipOverlay()->addLine("Reset"); }
+            {
+                osu->getTooltipOverlay()->addLine("Reset");
+            }
             osu->getTooltipOverlay()->end();
         }
     }
@@ -538,7 +539,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addSubSection("Renderer");
     this->addCheckbox("VSync", "If enabled: plz enjoy input lag.", &cv_vsync);
 
-    if(env->getOS() == Environment::OS::WINDOWS)
+    if constexpr(Env::cfg(OS::WINDOWS))
         this->addCheckbox("High Priority", "Sets the game process priority to high", &cv_win_processpriority);
 
     this->addCheckbox("Show FPS Counter", &cv_draw_fps);
@@ -834,16 +835,16 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     CBaseUIElement *sectionInput = this->addSection("Input");
 
     this->addSubSection("Mouse", "scroll");
-    if(env->getOS() == Environment::OS::WINDOWS || env->getOS() == Environment::OS::MACOS) {
+    if constexpr(Env::cfg(OS::WINDOWS | OS::MAC)) {
         this->addSlider("Sensitivity:", 0.1f, 6.0f, &cv_mouse_sensitivity)->setKeyDelta(0.01f);
 
-        if(env->getOS() == Environment::OS::MACOS) {
+        if constexpr(Env::cfg(OS::MAC)) {
             this->addLabel("");
             this->addLabel("WARNING: Set Sensitivity to 1 for tablets!")->setTextColor(0xffff0000);
             this->addLabel("");
         }
     }
-    if(env->getOS() == Environment::OS::WINDOWS) {
+    if constexpr(Env::cfg(OS::WINDOWS)) {
         this->addCheckbox("Raw Input", &cv_mouse_raw_input);
         this->addCheckbox("[Beta] RawInputBuffer",
                           "Improves performance problems caused by insane mouse usb polling rates above 1000 "
@@ -853,7 +854,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
         this->addCheckbox("Map Absolute Raw Input to Window", &cv_mouse_raw_input_absolute_to_window)
             ->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onRawInputToAbsoluteWindowChange));
     }
-    if(env->getOS() == Environment::OS::LINUX) {
+    if constexpr(Env::cfg(OS::LINUX)) {
         this->addLabel("Use system settings to change the mouse sensitivity.")->setTextColor(0xff555555);
         this->addLabel("");
         this->addLabel("Use xinput or xsetwacom to change the tablet area.")->setTextColor(0xff555555);
@@ -865,7 +866,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addCheckbox("Disable Mouse Buttons in Play Mode", &cv_disable_mousebuttons);
     this->addCheckbox("Cursor ripples", "The cursor will ripple outwards on clicking.", &cv_draw_cursor_ripples);
 
-    if(env->getOS() == Environment::OS::WINDOWS) {
+    if constexpr(Env::cfg(OS::WINDOWS)) {
 #ifndef MCENGINE_FEATURE_SDL
 
         this->addSubSection("Tablet");
@@ -1161,7 +1162,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addSubSection("FPoSu - General");
     this->addCheckbox(
         "FPoSu",
-        (env->getOS() == Environment::OS::WINDOWS
+        (Env::cfg(OS::WINDOWS)
              ? "The real 3D FPS mod.\nPlay from a first person shooter perspective in a 3D environment.\nThis "
                "is only intended for mouse! (Enable \"Tablet/Absolute Mode\" for tablets.)"
              : "The real 3D FPS mod.\nPlay from a first person shooter perspective in a 3D environment.\nThis "
@@ -1190,7 +1191,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     this->addCheckbox("Background cube", &cv_fposu_cube);
     this->addCheckbox("Skybox", "NOTE: Overrides \"Background cube\".\nSee skybox_example.png for cubemap layout.",
                       &cv_fposu_skybox);
-    if(env->getOS() == Environment::OS::WINDOWS) {
+    if constexpr(Env::cfg(OS::WINDOWS)) {
         this->addSubSection("FPoSu - Mouse");
         UIButton *cm360CalculatorLinkButton = this->addButton("https://www.mouse-sensitivity.com/");
         cm360CalculatorLinkButton->setClickCallback(
@@ -1608,8 +1609,7 @@ void OptionsMenu::onChar(KeyboardEvent &e) {
     if(e.isConsumed()) return;
 
     // handle searching
-    if(e.getCharCode() < 32 || !this->bVisible ||
-       (keyboard->isControlDown() && !keyboard->isAltDown()) ||
+    if(e.getCharCode() < 32 || !this->bVisible || (keyboard->isControlDown() && !keyboard->isAltDown()) ||
        this->fSearchOnCharKeybindHackTime > engine->getTime())
         return;
 
@@ -1627,9 +1627,11 @@ void OptionsMenu::onResolutionChange(Vector2 newResolution) {
     ScreenBackable::onResolutionChange(newResolution);
 
     // HACKHACK: magic
-    if((env->getOS() == Environment::OS::WINDOWS && env->isFullscreen() && env->isFullscreenWindowedBorderless() &&
-        (int)newResolution.y == (int)env->getNativeScreenSize().y + 1))
-        newResolution.y--;
+    if constexpr(Env::cfg(OS::WINDOWS)) {
+        if((env->isFullscreen() && env->isFullscreenWindowedBorderless() &&
+            (int)newResolution.y == (int)env->getNativeScreenSize().y + 1))
+            newResolution.y--;
+    }
 
     if(this->resolutionLabel != NULL)
         this->resolutionLabel->setText(UString::format("%ix%i", (int)newResolution.x, (int)newResolution.y));
@@ -1808,10 +1810,8 @@ void OptionsMenu::updateLayout() {
     bool subSectionTitleMatch = false;
     const std::string search = this->sSearchString.length() > 0 ? this->sSearchString.toUtf8() : "";
     for(int i = 0; i < this->elements.size(); i++) {
-        if(this->elements[i].render_condition == RenderCondition::ASIO_ENABLED && !soundEngine->isASIO())
-            continue;
-        if(this->elements[i].render_condition == RenderCondition::WASAPI_ENABLED && !soundEngine->isWASAPI())
-            continue;
+        if(this->elements[i].render_condition == RenderCondition::ASIO_ENABLED && !soundEngine->isASIO()) continue;
+        if(this->elements[i].render_condition == RenderCondition::WASAPI_ENABLED && !soundEngine->isWASAPI()) continue;
         if(this->elements[i].render_condition == RenderCondition::SCORE_SUBMISSION_POLICY &&
            bancho.score_submission_policy != ServerPolicy::NO_PREFERENCE)
             continue;
@@ -2564,9 +2564,7 @@ void OptionsMenu::onOutputDeviceSelect2(UString outputDeviceName, int id) {
     debugLog("SoundEngine::setOutputDevice() couldn't find output device \"%s\"!\n", outputDeviceName.toUtf8());
 }
 
-void OptionsMenu::onOutputDeviceResetClicked() {
-    soundEngine->setOutputDevice(soundEngine->getDefaultDevice());
-}
+void OptionsMenu::onOutputDeviceResetClicked() { soundEngine->setOutputDevice(soundEngine->getDefaultDevice()); }
 
 void OptionsMenu::onOutputDeviceResetUpdate() {
     if(this->outputDeviceResetButton != NULL) {

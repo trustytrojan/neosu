@@ -1453,50 +1453,11 @@ void DatabaseBeatmapBackgroundImagePathLoader::initAsync() {
 }
 
 std::string DatabaseBeatmap::getFullSoundFilePath() {
-    // On linux, paths are case sensitive, so we retry different variations
-    if(env->getOS() != Environment::OS::LINUX || env->fileExists(this->sFullSoundFilePath)) {
+    // this modifies this->sFullSoundFilePath inplace
+    if(File::existsCaseInsensitive(this->sFullSoundFilePath) == File::FILETYPE::FILE) {
         return this->sFullSoundFilePath;
     }
 
-    // try uppercasing file extension
-    for(int s = this->sFullSoundFilePath.size(); s >= 0; s--) {
-        if(this->sFullSoundFilePath[s] == '.') {
-            for(int i = s + 1; i < this->sFullSoundFilePath.size(); i++) {
-                this->sFullSoundFilePath[i] = std::toupper(this->sFullSoundFilePath[i]);
-            }
-            break;
-        }
-    }
-    if(env->fileExists(this->sFullSoundFilePath)) {
-        return this->sFullSoundFilePath;
-    }
-
-    // try lowercasing filename, uppercasing file extension
-    bool foundFilenameStart = false;
-    for(int s = this->sFullSoundFilePath.size(); s >= 0; s--) {
-        if(foundFilenameStart) {
-            if(this->sFullSoundFilePath[s] == '/') break;
-            this->sFullSoundFilePath[s] = std::tolower(this->sFullSoundFilePath[s]);
-        }
-        if(this->sFullSoundFilePath[s] == '.') {
-            foundFilenameStart = true;
-        }
-    }
-    if(env->fileExists(this->sFullSoundFilePath)) {
-        return this->sFullSoundFilePath;
-    }
-
-    // try lowercasing everything
-    for(int s = this->sFullSoundFilePath.size(); s >= 0; s--) {
-        if(this->sFullSoundFilePath[s] == '/') {
-            break;
-        }
-        this->sFullSoundFilePath[s] = std::tolower(this->sFullSoundFilePath[s]);
-    }
-    if(env->fileExists(this->sFullSoundFilePath)) {
-        return this->sFullSoundFilePath;
-    }
-
-    // give up
+    // wasn't found but return what we have anyways
     return this->sFullSoundFilePath;
 }

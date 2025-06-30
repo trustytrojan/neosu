@@ -57,6 +57,7 @@ void _volume(UString, UString);
 
 // defined and included at the end of ConVar.cpp
 #if defined(DEFINE_CONVARS)
+#undef CONVAR
 #define CONVAR(name, ...) ConVar _CV(name)(__VA_ARGS__)
 #else
 #define CONVAR(name, ...) extern ConVar _CV(name)

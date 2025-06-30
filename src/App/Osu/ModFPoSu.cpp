@@ -220,7 +220,7 @@ void ModFPoSu::update() {
 
     this->bCrosshairIntersectsScreen = true;
     if(!cv_fposu_absolute_mode.getBool() && !isAutoCursor &&
-       env->getOS() == Environment::OS::WINDOWS)  // HACKHACK: windows only for now (raw input support)
+       Env::cfg(OS::WINDOWS))  // HACKHACK: windows only for now (raw input support)
     {
         // regular mouse position mode
 

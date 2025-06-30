@@ -22,6 +22,7 @@ enum class OS : uint32_t {
     WINDOWS = 1 << 0,
     LINUX = 1 << 1,
     WASM = 1 << 2,
+    MAC = 1 << 3,
     NONE = 0,
 };
 enum class FEAT : uint32_t {
@@ -64,9 +65,11 @@ consteval OS getOS() {
 #if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__CYGWIN__) || defined(__CYGWIN32__) || \
     defined(__TOS_WIN__) || defined(__WINDOWS__)
     return OS::WINDOWS;
-#elif defined __linux__
+#elif defined(__linux__)
     return OS::LINUX;
-#elif defined __EMSCRIPTEN__
+#elif defined(__APPLE__)
+    return OS::MAC;
+#elif defined(__EMSCRIPTEN__)
     return OS::WASM;
 #else
 #error "Compiling for an unknown target!"

@@ -27,7 +27,6 @@ class SDLEnvironment : public Environment {
     virtual ContextMenu *createContextMenu();
 
     // system
-    virtual OS getOS();
     virtual void shutdown();
     virtual void restart();
     virtual std::string getExecutablePath();

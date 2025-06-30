@@ -106,8 +106,6 @@ Graphics *LinuxEnvironment::createRenderer() { return new LinuxGLLegacyInterface
 
 ContextMenu *LinuxEnvironment::createContextMenu() { return new LinuxContextMenu(); }
 
-Environment::OS LinuxEnvironment::getOS() { return Environment::OS::LINUX; }
-
 void LinuxEnvironment::shutdown() {
     XEvent ev;
     memset(&ev, 0, sizeof(ev));
