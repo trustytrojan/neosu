@@ -79,15 +79,7 @@ void Sound::initAsync() {
         }
     }
 
-#ifdef _WIN32
-    // On Windows, we need to convert the UTF-8 path to UTF-16, or paths with unicode characters will fail to open
-    int size = MultiByteToWideChar(CP_UTF8, 0, this->sFilePath.c_str(), this->sFilePath.length(), NULL, 0);
-    std::wstring file_path(size, 0);
-    MultiByteToWideChar(CP_UTF8, 0, this->sFilePath.c_str(), this->sFilePath.length(), (LPWSTR)file_path.c_str(),
-                        file_path.length());
-#else
-    std::string file_path = this->sFilePath;
-#endif
+    UString file_path{this->sFilePath};
 
     if(this->bStream) {
         u32 flags = BASS_STREAM_DECODE | BASS_SAMPLE_FLOAT | BASS_STREAM_PRESCAN;
@@ -95,7 +87,7 @@ void Sound::initAsync() {
         if constexpr(Env::cfg(OS::WINDOWS)) flags |= BASS_UNICODE;
 
         if(this->bInterrupted.load()) return;
-        this->stream = BASS_StreamCreateFile(false, file_path.c_str(), 0, 0, flags);
+        this->stream = BASS_StreamCreateFile(false, file_path.plat_str(), 0, 0, flags);
         if(!this->stream) {
             debugLog("BASS_StreamCreateFile() returned error %d on file %s\n", BASS_ErrorGetCode(),
                      this->sFilePath.c_str());
@@ -121,7 +113,7 @@ void Sound::initAsync() {
         if constexpr(Env::cfg(OS::WINDOWS)) flags |= BASS_UNICODE;
 
         if(this->bInterrupted.load()) return;
-        this->sample = BASS_SampleLoad(false, file_path.c_str(), 0, 0, 1, flags);
+        this->sample = BASS_SampleLoad(false, file_path.plat_str(), 0, 0, 1, flags);
         if(!this->sample) {
             auto code = BASS_ErrorGetCode();
             if(code == BASS_ERROR_EMPTY) {

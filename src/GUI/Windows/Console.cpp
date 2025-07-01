@@ -10,6 +10,7 @@
 #include "CBaseUITextbox.h"
 #include "ConVar.h"
 #include "Engine.h"
+#include "File.h"
 #include "ResourceManager.h"
 
 #define CONSOLE_BORDER 6
@@ -163,32 +164,33 @@ void Console::execConfigFile(std::string filename) {
     filename.insert(0, MCENGINE_DATA_DIR "cfg/");
     if(filename.find(".cfg", (filename.length() - 4), filename.length()) == -1) filename.append(".cfg");
 
-    // open it
-    std::ifstream inFile(filename.c_str());
-    if(!inFile.good()) {
-        debugLog("Console::execConfigFile() error, file \"%s\" not found!\n", filename.c_str());
+    File configFile(filename, File::TYPE::READ);
+    if(!configFile.canRead()) {
+        debugLogF("error, file \"{:s}\" not found!\n", filename);
         return;
     }
 
-    // go through every line
-    std::string line;
+    // collect commands first
     std::vector<UString> cmds;
-    while(std::getline(inFile, line)) {
-        if(line.size() > 0) {
-            // handle comments
-            UString cmd = UString(line.c_str());
-            const int commentIndex = cmd.find("//", 0, cmd.length());
-            if(commentIndex != -1) cmd.erase(commentIndex, cmd.length() - commentIndex);
+    while(true) {
+        UString line = configFile.readLine();
 
-            // add command
-            cmds.push_back(cmd);
+        // if canRead() is false after readLine(), we hit EOF
+        if(!configFile.canRead()) break;
+
+        // only process non-empty lines
+        if(!line.isEmpty()) {
+            // handle comments - find "//" and remove everything after
+            const int commentIndex = line.find("//");
+            if(commentIndex != -1) line.erase(commentIndex, line.length() - commentIndex);
+
+            // add command (original adds all processed lines, even if they become empty after comment removal)
+            cmds.push_back(line);
         }
     }
 
     // process the collected commands
-    for(size_t i = 0; i < cmds.size(); i++) {
-        processCommand(cmds[i]);
-    }
+    for(const auto &cmd : cmds) processCommand(cmd);
 }
 
 void Console::mouse_update(bool *propagate_clicks) {

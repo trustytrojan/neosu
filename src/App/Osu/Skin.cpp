@@ -333,8 +333,7 @@ Skin::Skin(UString name, std::string filepath, bool isDefaultSkin) {
 
 Skin::~Skin() {
     for(int i = 0; i < this->resources.size(); i++) {
-        if(this->resources[i] != (Resource *)m_missingTexture)
-            resourceManager->destroyResource(this->resources[i]);
+        if(this->resources[i] != (Resource *)m_missingTexture) resourceManager->destroyResource(this->resources[i]);
     }
     this->resources.clear();
 
@@ -1096,140 +1095,210 @@ void Skin::loadBeatmapOverride(std::string filepath) {
 }
 
 void Skin::reloadSounds() {
-	std::vector<Resource*> soundResources;
-	soundResources.reserve(this->sounds.size());
+    std::vector<Resource *> soundResources;
+    soundResources.reserve(this->sounds.size());
 
-	for (auto & sound : this->sounds)
-	{
-		soundResources.push_back(sound);
-	}
+    for(auto &sound : this->sounds) {
+        soundResources.push_back(sound);
+    }
 
-	resourceManager->reloadResources(soundResources, cv_skin_async.getBool());
+    resourceManager->reloadResources(soundResources, cv_skin_async.getBool());
 }
 
 bool Skin::parseSkinINI(std::string filepath) {
     File file(filepath);
     if(!file.canRead()) {
-        debugLog("Skin Error: Couldn't load %s\n", filepath.c_str());
+        debugLogF("OsuSkin Error: Couldn't load {:s}\n", filepath);
         return false;
     }
 
-    int curBlock = 0;  // NOTE: was -1, but osu incorrectly defaults to [General] and loads properties even before the
-                       // actual section start (just for this first section though)
-    while(file.canRead()) {
-        std::string curLine = file.readLine();
-        if(curLine.find("//") > 2)  // ignore comments // TODO: this is incorrect, but it works well enough
-        {
-            if(curLine.find("[General]") != std::string::npos)
-                curBlock = 0;
-            else if(curLine.find("[Colours]") != std::string::npos || curLine.find("[Colors]") != std::string::npos)
-                curBlock = 1;
-            else if(curLine.find("[Fonts]") != std::string::npos)
-                curBlock = 2;
+    UString fileContent;
+    const char *rawData = file.readFile();
+    size_t fileSize = file.getFileSize();
 
-            switch(curBlock) {
-                case 0:  // General
-                {
-                    int val;
-                    float floatVal;
-                    char stringBuffer[1024];
+    if(!rawData || fileSize == 0) {
+        debugLogF("OsuSkin Error: Empty or unreadable file {:s}\n", filepath);
+        return false;
+    }
 
-                    memset(stringBuffer, '\0', 1024);
-                    if(sscanf(curLine.c_str(), " Version : %1023[^\n]", stringBuffer) == 1) {
-                        UString versionString = stringBuffer;
-                        if(versionString.find("latest") != -1 || versionString.find("User") != -1)
-                            this->fVersion = 2.5f;  // default to latest version available
-                        else
-                            this->fVersion = versionString.toFloat();
-                    }
+    // check for UTF-16 LE BOM and convert if needed
+    if(fileSize >= 2 && static_cast<unsigned char>(rawData[0]) == 0xFF &&
+       static_cast<unsigned char>(rawData[1]) == 0xFE) {
+        // convert UTF-16 LE to UTF-8
+        std::string utf8Result;
+        utf8Result.reserve(fileSize);
 
-                    if(sscanf(curLine.c_str(), " CursorRotate : %i \n", &val) == 1)
-                        this->bCursorRotate = val > 0 ? true : false;
-                    if(sscanf(curLine.c_str(), " CursorCentre : %i \n", &val) == 1)
-                        this->bCursorCenter = val > 0 ? true : false;
-                    if(sscanf(curLine.c_str(), " CursorExpand : %i \n", &val) == 1)
-                        this->bCursorExpand = val > 0 ? true : false;
-                    if(sscanf(curLine.c_str(), " SliderBallFlip : %i \n", &val) == 1)
-                        this->bSliderBallFlip = val > 0 ? true : false;
-                    if(sscanf(curLine.c_str(), " AllowSliderBallTint : %i \n", &val) == 1)
-                        this->bAllowSliderBallTint = val > 0 ? true : false;
-                    if(sscanf(curLine.c_str(), " HitCircleOverlayAboveNumber : %i \n", &val) == 1)
-                        this->bHitCircleOverlayAboveNumber = val > 0 ? true : false;
-                    if(sscanf(curLine.c_str(), " HitCircleOverlayAboveNumer : %i \n", &val) == 1)
-                        this->bHitCircleOverlayAboveNumber = val > 0 ? true : false;
-                    if(sscanf(curLine.c_str(), " SliderStyle : %i \n", &val) == 1) {
-                        this->iSliderStyle = val;
-                        if(this->iSliderStyle != 1 && this->iSliderStyle != 2) this->iSliderStyle = 2;
-                    }
-                    if(sscanf(curLine.c_str(), " AnimationFramerate : %f \n", &floatVal) == 1)
-                        this->fAnimationFramerate = floatVal < 0 ? 0.0f : floatVal;
-                } break;
-                case 1:  // Colors
-                {
-                    int comboNum;
-                    int r, g, b;
+        size_t utf16Size = fileSize - 2;  // skip BOM
+        const char *utf16Data = rawData + 2;
 
-                    if(sscanf(curLine.c_str(), " Combo %i : %i , %i , %i \n", &comboNum, &r, &g, &b) == 4)
-                        this->comboColors.push_back(argb(255, r, g, b));
-                    if(sscanf(curLine.c_str(), " SpinnerApproachCircle : %i , %i , %i \n", &r, &g, &b) == 3)
-                        this->spinnerApproachCircleColor = argb(255, r, g, b);
-                    if(sscanf(curLine.c_str(), " SliderBorder: %i , %i , %i \n", &r, &g, &b) == 3)
-                        this->sliderBorderColor = argb(255, r, g, b);
-                    if(sscanf(curLine.c_str(), " SliderTrackOverride : %i , %i , %i \n", &r, &g, &b) == 3) {
-                        this->sliderTrackOverride = argb(255, r, g, b);
-                        this->bSliderTrackOverride = true;
-                    }
-                    if(sscanf(curLine.c_str(), " SliderBall : %i , %i , %i \n", &r, &g, &b) == 3)
-                        this->sliderBallColor = argb(255, r, g, b);
-                    if(sscanf(curLine.c_str(), " SongSelectActiveText : %i , %i , %i \n", &r, &g, &b) == 3)
-                        this->songSelectActiveText = argb(255, r, g, b);
-                    if(sscanf(curLine.c_str(), " SongSelectInactiveText : %i , %i , %i \n", &r, &g, &b) == 3)
-                        this->songSelectInactiveText = argb(255, r, g, b);
-                    if(sscanf(curLine.c_str(), " InputOverlayText : %i , %i , %i \n", &r, &g, &b) == 3)
-                        this->inputOverlayText = argb(255, r, g, b);
-                } break;
-                case 2:  // Fonts
-                {
-                    int val;
-                    char stringBuffer[1024];
+        for(size_t i = 0; i < utf16Size - 1; i += 2) {
+            uint16_t utf16Char =
+                static_cast<unsigned char>(utf16Data[i]) | (static_cast<unsigned char>(utf16Data[i + 1]) << 8);
 
-                    memset(stringBuffer, '\0', 1024);
-                    if(sscanf(curLine.c_str(), " ComboPrefix : %1023[^\n]", stringBuffer) == 1) {
-                        this->sComboPrefix = stringBuffer;
-
-                        for(int i = 0; i < this->sComboPrefix.length(); i++) {
-                            if(this->sComboPrefix[i] == '\\') {
-                                this->sComboPrefix[i] = '/';
-                            }
-                        }
-                    }
-                    if(sscanf(curLine.c_str(), " ComboOverlap : %i \n", &val) == 1) this->iComboOverlap = val;
-
-                    if(sscanf(curLine.c_str(), " ScorePrefix : %1023[^\n]", stringBuffer) == 1) {
-                        this->sScorePrefix = stringBuffer;
-
-                        for(int i = 0; i < this->sScorePrefix.length(); i++) {
-                            if(this->sScorePrefix[i] == '\\') {
-                                this->sScorePrefix[i] = '/';
-                            }
-                        }
-                    }
-                    if(sscanf(curLine.c_str(), " ScoreOverlap : %i \n", &val) == 1) this->iScoreOverlap = val;
-
-                    if(sscanf(curLine.c_str(), " HitCirclePrefix : %1023[^\n]", stringBuffer) == 1) {
-                        this->sHitCirclePrefix = stringBuffer;
-
-                        for(int i = 0; i < this->sHitCirclePrefix.length(); i++) {
-                            if(this->sHitCirclePrefix[i] == '\\') {
-                                this->sHitCirclePrefix[i] = '/';
-                            }
-                        }
-                    }
-                    if(sscanf(curLine.c_str(), " HitCircleOverlap : %i \n", &val) == 1) this->iHitCircleOverlap = val;
-                } break;
+            if(utf16Char < 0x80)
+                utf8Result += static_cast<char>(utf16Char);
+            else if(utf16Char < 0x800) {
+                utf8Result += static_cast<char>(0xC0 | (utf16Char >> 6));
+                utf8Result += static_cast<char>(0x80 | (utf16Char & 0x3F));
+            } else {
+                utf8Result += static_cast<char>(0xE0 | (utf16Char >> 12));
+                utf8Result += static_cast<char>(0x80 | ((utf16Char >> 6) & 0x3F));
+                utf8Result += static_cast<char>(0x80 | (utf16Char & 0x3F));
             }
         }
+
+        fileContent = UString(utf8Result.c_str());
+    } else {
+        // assume UTF-8/ASCII
+        fileContent = UString(rawData, static_cast<int>(fileSize));
     }
+
+    // process content line by line, handling different line endings
+    int nonEmptyLineCounter = 0;
+    int curBlock = 0;  // NOTE: was -1, but osu incorrectly defaults to [General] and loads properties even before the
+                       // actual section start (just for this first section though)
+
+    UString currentLine;
+    for(int i = 0; i < fileContent.length(); i++) {
+        wchar_t ch = fileContent[i];
+
+        if(ch == L'\r' || ch == L'\n') {
+            // handle CRLF, CR, or LF
+            if(ch == L'\r' && i + 1 < fileContent.length() && fileContent[i + 1] == L'\n') i++;  // skip LF in CRLF
+
+            // process line if not empty
+            if(!currentLine.isEmpty()) {
+                const char *curLineChar = currentLine.toUtf8();
+                std::string curLine(curLineChar);
+                nonEmptyLineCounter++;
+
+                if(curLine.find("//") > 2)  // ignore comments // TODO: this is incorrect, but it works well enough
+                {
+                    if(curLine.find("[General]") != std::string::npos)
+                        curBlock = 0;
+                    else if(curLine.find("[Colours]") != std::string::npos ||
+                            curLine.find("[Colors]") != std::string::npos)
+                        curBlock = 1;
+                    else if(curLine.find("[Fonts]") != std::string::npos)
+                        curBlock = 2;
+
+                    switch(curBlock) {
+                        case 0:  // General
+                        {
+                            int val;
+                            float floatVal;
+                            char stringBuffer[1024];
+
+                            memset(stringBuffer, '\0', 1024);
+                            if(sscanf(curLineChar, " Version : %1023[^\n]", stringBuffer) == 1) {
+                                UString versionString = UString(stringBuffer);
+                                if(versionString.find("latest") != -1 || versionString.find("User") != -1)
+                                    this->fVersion = 2.5f;  // default to latest version available
+                                else
+                                    this->fVersion = versionString.toFloat();
+                            }
+
+                            if(sscanf(curLineChar, " CursorRotate : %i \n", &val) == 1)
+                                this->bCursorRotate = val > 0 ? true : false;
+                            if(sscanf(curLineChar, " CursorCentre : %i \n", &val) == 1)
+                                this->bCursorCenter = val > 0 ? true : false;
+                            if(sscanf(curLineChar, " CursorExpand : %i \n", &val) == 1)
+                                this->bCursorExpand = val > 0 ? true : false;
+                            if(sscanf(curLineChar, " SliderBallFlip : %i \n", &val) == 1)
+                                this->bSliderBallFlip = val > 0 ? true : false;
+                            if(sscanf(curLineChar, " AllowSliderBallTint : %i \n", &val) == 1)
+                                this->bAllowSliderBallTint = val > 0 ? true : false;
+                            if(sscanf(curLineChar, " HitCircleOverlayAboveNumber : %i \n", &val) == 1)
+                                this->bHitCircleOverlayAboveNumber = val > 0 ? true : false;
+                            if(sscanf(curLineChar, " HitCircleOverlayAboveNumer : %i \n", &val) == 1)
+                                this->bHitCircleOverlayAboveNumber = val > 0 ? true : false;
+                            if(sscanf(curLineChar, " SliderStyle : %i \n", &val) == 1) {
+                                this->iSliderStyle = val;
+                                if(this->iSliderStyle != 1 && this->iSliderStyle != 2) this->iSliderStyle = 2;
+                            }
+                            if(sscanf(curLineChar, " AnimationFramerate : %f \n", &floatVal) == 1)
+                                this->fAnimationFramerate = floatVal < 0 ? 0.0f : floatVal;
+                        } break;
+                        case 1:  // Colors
+                        {
+                            int comboNum;
+                            int r, g, b;
+
+                            if(sscanf(curLineChar, " Combo %i : %i , %i , %i \n", &comboNum, &r, &g, &b) == 4)
+                                this->comboColors.push_back(rgb(r, g, b));
+                            if(sscanf(curLineChar, " SpinnerApproachCircle : %i , %i , %i \n", &r, &g, &b) == 3)
+                                this->spinnerApproachCircleColor = rgb(r, g, b);
+                            if(sscanf(curLineChar, " SliderBorder: %i , %i , %i \n", &r, &g, &b) == 3)
+                                this->sliderBorderColor = rgb(r, g, b);
+                            if(sscanf(curLineChar, " SliderTrackOverride : %i , %i , %i \n", &r, &g, &b) == 3) {
+                                this->sliderTrackOverride = rgb(r, g, b);
+                                this->bSliderTrackOverride = true;
+                            }
+                            if(sscanf(curLineChar, " SliderBall : %i , %i , %i \n", &r, &g, &b) == 3)
+                                this->sliderBallColor = rgb(r, g, b);
+                            if(sscanf(curLineChar, " SongSelectActiveText : %i , %i , %i \n", &r, &g, &b) == 3)
+                                this->songSelectActiveText = rgb(r, g, b);
+                            if(sscanf(curLineChar, " SongSelectInactiveText : %i , %i , %i \n", &r, &g, &b) == 3)
+                                this->songSelectInactiveText = rgb(r, g, b);
+                            if(sscanf(curLineChar, " InputOverlayText : %i , %i , %i \n", &r, &g, &b) == 3)
+                                this->inputOverlayText = rgb(r, g, b);
+                        } break;
+                        case 2:  // Fonts
+                        {
+                            int val;
+                            char stringBuffer[1024];
+
+                            memset(stringBuffer, '\0', 1024);
+                            if(sscanf(curLineChar, " ComboPrefix : %1023[^\n]", stringBuffer) == 1) {
+                                this->sComboPrefix = stringBuffer;
+
+                                for(int i = 0; i < this->sComboPrefix.length(); i++) {
+                                    if(this->sComboPrefix[i] == '\\') {
+                                        this->sComboPrefix.erase(i, 1);
+                                        this->sComboPrefix.insert(i, "/");
+                                    }
+                                }
+                            }
+                            if(sscanf(curLineChar, " ComboOverlap : %i \n", &val) == 1) this->iComboOverlap = val;
+
+                            if(sscanf(curLineChar, " ScorePrefix : %1023[^\n]", stringBuffer) == 1) {
+                                this->sScorePrefix = stringBuffer;
+
+                                for(int i = 0; i < this->sScorePrefix.length(); i++) {
+                                    if(this->sScorePrefix[i] == '\\') {
+                                        this->sScorePrefix.erase(i, 1);
+                                        this->sScorePrefix.insert(i, "/");
+                                    }
+                                }
+                            }
+                            if(sscanf(curLineChar, " ScoreOverlap : %i \n", &val) == 1) this->iScoreOverlap = val;
+
+                            if(sscanf(curLineChar, " HitCirclePrefix : %1023[^\n]", stringBuffer) == 1) {
+                                this->sHitCirclePrefix = stringBuffer;
+
+                                for(int i = 0; i < this->sHitCirclePrefix.length(); i++) {
+                                    if(this->sHitCirclePrefix[i] == '\\') {
+                                        this->sHitCirclePrefix.erase(i, 1);
+                                        this->sHitCirclePrefix.insert(i, "/");
+                                    }
+                                }
+                            }
+                            if(sscanf(curLineChar, " HitCircleOverlap : %i \n", &val) == 1)
+                                this->iHitCircleOverlap = val;
+                        } break;
+                    }
+                }
+            }
+            currentLine.clear();
+        } else {
+            currentLine += ch;
+        }
+    }
+
+    // process the last line if it doesn't end with a line terminator
+    if(!currentLine.isEmpty()) nonEmptyLineCounter++;
+
+    if(nonEmptyLineCounter < 1) return false;
 
     return true;
 }
@@ -1473,8 +1542,8 @@ void Skin::checkLoadImage(Image **addressOfPointer, std::string skinElementName,
 
                 if(cv_skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
-                *addressOfPointer = resourceManager->loadImageAbs(
-                    defaultFilePath1, defaultResourceName, cv_skin_mipmaps.getBool() || forceLoadMipmaps);
+                *addressOfPointer = resourceManager->loadImageAbs(defaultFilePath1, defaultResourceName,
+                                                                  cv_skin_mipmaps.getBool() || forceLoadMipmaps);
                 (*addressOfPointer)->is_2x = true;
             } else {
                 // fallback to @1x
@@ -1484,8 +1553,8 @@ void Skin::checkLoadImage(Image **addressOfPointer, std::string skinElementName,
 
                     if(cv_skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
-                    *addressOfPointer = resourceManager->loadImageAbs(
-                        defaultFilePath2, defaultResourceName, cv_skin_mipmaps.getBool() || forceLoadMipmaps);
+                    *addressOfPointer = resourceManager->loadImageAbs(defaultFilePath2, defaultResourceName,
+                                                                      cv_skin_mipmaps.getBool() || forceLoadMipmaps);
                     (*addressOfPointer)->is_2x = false;
                 }
             }
@@ -1495,8 +1564,8 @@ void Skin::checkLoadImage(Image **addressOfPointer, std::string skinElementName,
         if(existsFilepath1) {
             if(cv_skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
-            *addressOfPointer = resourceManager->loadImageAbs(
-                filepath1, "", cv_skin_mipmaps.getBool() || forceLoadMipmaps);
+            *addressOfPointer =
+                resourceManager->loadImageAbs(filepath1, "", cv_skin_mipmaps.getBool() || forceLoadMipmaps);
             (*addressOfPointer)->is_2x = true;
             this->resources.push_back(*addressOfPointer);
 
@@ -1523,8 +1592,8 @@ void Skin::checkLoadImage(Image **addressOfPointer, std::string skinElementName,
 
             if(cv_skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
-            *addressOfPointer = resourceManager->loadImageAbs(
-                defaultFilePath2, defaultResourceName, cv_skin_mipmaps.getBool() || forceLoadMipmaps);
+            *addressOfPointer = resourceManager->loadImageAbs(defaultFilePath2, defaultResourceName,
+                                                              cv_skin_mipmaps.getBool() || forceLoadMipmaps);
             (*addressOfPointer)->is_2x = false;
         }
     }
@@ -1533,8 +1602,7 @@ void Skin::checkLoadImage(Image **addressOfPointer, std::string skinElementName,
     if(existsFilepath2) {
         if(cv_skin_async.getBool()) resourceManager->requestNextLoadAsync();
 
-        *addressOfPointer =
-            resourceManager->loadImageAbs(filepath2, "", cv_skin_mipmaps.getBool() || forceLoadMipmaps);
+        *addressOfPointer = resourceManager->loadImageAbs(filepath2, "", cv_skin_mipmaps.getBool() || forceLoadMipmaps);
         (*addressOfPointer)->is_2x = false;
         this->resources.push_back(*addressOfPointer);
     }
