@@ -182,23 +182,76 @@ bool LinuxEnvironment::renameFile(std::string oldFileName, std::string newFileNa
 
 bool LinuxEnvironment::deleteFile(std::string filePath) { return remove(filePath.c_str()) == 0; }
 
+int LinuxEnvironment::winExplorerIshEntryComparator(const struct dirent **a, const struct dirent **b) {
+    if(!a || !&(*a) || !b || !&(*b)) return 0;
+    const char *aStr = &(*a)->d_name[0];
+    const char *bStr = &(*b)->d_name[0];
+
+    while(*aStr && *bStr)  // skip to the first difference
+    {
+        bool aIsDigit = std::isdigit(static_cast<unsigned char>(*aStr));
+        bool bIsDigit = std::isdigit(static_cast<unsigned char>(*bStr));
+
+        if(aIsDigit != bIsDigit)       // different types
+            return aIsDigit ? -1 : 1;  // digits come before non-digits
+
+        if(aIsDigit)  // collect and compare the complete numbers if both are digits
+        {
+            const char *aNumStart = aStr;
+            const char *bNumStart = bStr;
+            while(*aStr == '0' && std::isdigit(static_cast<unsigned char>(*(aStr + 1))))  // skip leading zeros
+                ++aStr;
+            while(*bStr == '0' && std::isdigit(static_cast<unsigned char>(*(bStr + 1)))) ++bStr;
+            const char *aPtr = aStr;
+            const char *bPtr = bStr;
+            while(std::isdigit(static_cast<unsigned char>(*aPtr)))  // count digits
+                ++aPtr;
+            while(std::isdigit(static_cast<unsigned char>(*bPtr))) ++bPtr;
+            size_t aDigits = aPtr - aStr;
+            size_t bDigits = bPtr - bStr;
+            if(aDigits != bDigits)  // different digit counts
+                return (aDigits < bDigits) ? -1 : 1;
+            while(aStr < aPtr)  // same number of digits, compare them
+            {
+                if(*aStr != *bStr) return (*aStr < *bStr) ? -1 : 1;
+                ++aStr;
+                ++bStr;
+            }
+            // numbers are equal, check if the originals had different lengths due to leading zeros
+            size_t aFullLen = aPtr - aNumStart;
+            size_t bFullLen = bPtr - bNumStart;
+            if(aFullLen != bFullLen) return (aFullLen < bFullLen) ? -1 : 1;
+        } else {
+            // simple case-insensitive compare if neither are digits
+            char aLower = std::tolower(static_cast<unsigned char>(*aStr));
+            char bLower = std::tolower(static_cast<unsigned char>(*bStr));
+            if(aLower != bLower) return (aLower < bLower) ? -1 : 1;
+            ++aStr;
+            ++bStr;
+        }
+    }
+    // handle case where one string is a prefix of the other
+    if(*aStr == 0 && *bStr == 0) return 0;  // equal
+    return (*aStr == 0) ? -1 : 1;           // shorter string comes first
+}
+
 std::vector<std::string> LinuxEnvironment::getFilesInFolder(std::string folder) {
     std::vector<std::string> files;
 
-    struct dirent **namelist;
+    struct dirent **namelist{};
     int n = scandir(folder.c_str(), &namelist, getFilesInFolderFilter, alphasort);
     if(n < 0) {
         /// debugLog("LinuxEnvironment::getFilesInFolder() error, scandir() returned %i!\n", n);
         return files;
     }
 
-    while(n--) {
-        std::string uName = namelist[n]->d_name;
+    for(int i = 0; i < n; i++) {
+        std::string uName = &(namelist[i]->d_name)[0];
         std::string fullName = folder;
         fullName.append(uName);
-        free(namelist[n]);
+        free(namelist[i]);
 
-        struct stat stDirInfo;
+        struct stat stDirInfo{};
         int lstatret = lstat(fullName.c_str(), &stDirInfo);
         if(lstatret < 0) {
             // perror (name);
@@ -208,7 +261,7 @@ std::vector<std::string> LinuxEnvironment::getFilesInFolder(std::string folder) 
 
         if(!S_ISDIR(stDirInfo.st_mode)) files.push_back(uName);
     }
-    free(namelist);
+    free(static_cast<void *>(namelist));
 
     return files;
 }
@@ -216,20 +269,20 @@ std::vector<std::string> LinuxEnvironment::getFilesInFolder(std::string folder) 
 std::vector<std::string> LinuxEnvironment::getFoldersInFolder(std::string folder) {
     std::vector<std::string> folders;
 
-    struct dirent **namelist;
-    int n = scandir(folder.c_str(), &namelist, getFoldersInFolderFilter, alphasort);
+    struct dirent **namelist{};
+    int n = scandir(folder.c_str(), &namelist, getFoldersInFolderFilter, winExplorerIshEntryComparator);
     if(n < 0) {
         /// debugLog("LinuxEnvironment::getFilesInFolder() error, scandir() returned %i!\n", n);
         return folders;
     }
 
-    while(n--) {
-        std::string uName = namelist[n]->d_name;
+    for(int i = 0; i < n; i++) {
+        std::string uName = &(namelist[i]->d_name)[0];
         std::string fullName = folder;
         fullName.append(uName);
-        free(namelist[n]);
+        free(namelist[i]);
 
-        struct stat stDirInfo;
+        struct stat stDirInfo{};
         int lstatret = lstat(fullName.c_str(), &stDirInfo);
         if(lstatret < 0) {
             /// perror (name);
@@ -239,7 +292,7 @@ std::vector<std::string> LinuxEnvironment::getFoldersInFolder(std::string folder
 
         if(S_ISDIR(stDirInfo.st_mode)) folders.push_back(uName);
     }
-    free(namelist);
+    free(static_cast<void *>(namelist));
 
     return folders;
 }

@@ -1121,7 +1121,7 @@ CONVAR(cv_songbrowser_sortingtype, "osu_songbrowser_sortingtype", "By Date Added
 CONVAR(cv_songbrowser_thumbnail_delay, "osu_songbrowser_thumbnail_delay", 0.1f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(cv_songbrowser_thumbnail_fade_in_duration, "osu_songbrowser_thumbnail_fade_in_duration", 0.1f,
                                                  FCVAR_BANCHO_COMPATIBLE);
-CONVAR(cv_sort_skins_by_name, "sort_skins_by_name", true, FCVAR_BANCHO_COMPATIBLE, "set to false to use old behavior");
+CONVAR(cv_sort_skins_by_name, "sort_skins_by_name", false, FCVAR_BANCHO_COMPATIBLE, "set to true to sort skins alphabetically");
 CONVAR(cv_sound_panning, "osu_sound_panning", true, FCVAR_BANCHO_COMPATIBLE,
                         "positional hitsound audio depending on the playfield position");
 CONVAR(cv_sound_panning_multiplier, "osu_sound_panning_multiplier", 1.0f, FCVAR_BANCHO_COMPATIBLE,
