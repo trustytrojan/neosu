@@ -829,41 +829,19 @@ void LinuxEnvironment::setClipBoardTextInt(UString clipText) {
 UString LinuxEnvironment::getClipboardTextInt() {
     UString content;
 
-    // clipboard code is modified from https://forum.juce.com/t/clipboard-support-in-linux/3894
-    // thanks to jpo!
+    // only work with the "CLIPBOARD" selection (ctrl-C/ctrl-V clipboard)
+    // ignore PRIMARY selection (select-to-copy/middle-click-paste)
 
-    /*
-     1) try to read from the "CLIPBOARD" selection first (the "high
-     level" clipboard that is supposed to be filled by ctrl-C
-     etc). When a clipboard manager is running, the content of this
-     selection is preserved even when the original selection owner
-     exits.
-
-     2) and then try to read from "PRIMARY" selection (the "legacy" selection
-     filled by good old x11 apps such as xterm)
-
-     3) a third fallback could be CUT_BUFFER0 but they are obsolete since X10 !
-     ( http://www.jwz.org/doc/x-cut-and-paste.html )
-
-     There is not content negotiation here -- we just try to retrieve the selection first
-     as utf8 and then as a locale-dependent string
-    */
-
-    Atom selection = XA_PRIMARY;
-    Window selection_owner = None;
-    if((selection_owner = XGetSelectionOwner(this->display, selection)) == None) {
-        selection = this->atom_CLIPBOARD;
-        selection_owner = XGetSelectionOwner(this->display, selection);
-    }
+    Window selection_owner = XGetSelectionOwner(this->display, this->atom_CLIPBOARD);
 
     if(selection_owner != None) {
         if(selection_owner == this->window)          // ourself
             content = this->sLocalClipboardContent;  // just return the local clipboard
         else {
             // first try: we want an utf8 string
-            bool ok = this->requestSelectionContent(content, selection, this->atom_UTF8_STRING);
+            bool ok = this->requestSelectionContent(content, this->atom_CLIPBOARD, this->atom_UTF8_STRING);
             if(!ok)  // second chance, ask for a good old locale-dependent string
-                ok = this->requestSelectionContent(content, selection, XA_STRING);
+                ok = this->requestSelectionContent(content, this->atom_CLIPBOARD, XA_STRING);
         }
     }
 
