@@ -11,37 +11,48 @@ namespace uwu {
 // Promise for queuing work, but only the latest function will be run.
 template <typename Func, typename Ret>
 struct lazy_promise {
-    lazy_promise(Ret default_ret) {
-        this->ret = default_ret;
-        this->thread = std::thread(&lazy_promise::run, this);
+    lazy_promise(Ret default_ret) : ret(default_ret), keep_running(true), thread_started(false) {
+        // don't start thread during construction to avoid races
+        // thread will be started lazily on first enqueue
     }
 
     ~lazy_promise() {
+        // signal thread to stop
         {
             std::lock_guard<std::mutex> lock(this->funcs_mtx);
             this->keep_running = false;
         }
         this->cv.notify_one();
-        this->thread.join();
+
+        // wait for thread to finish, but only if it was started
+        if(this->thread_started && this->thread.joinable()) {
+            this->thread.join();
+        }
     }
 
     void enqueue(Func func) {
-        this->funcs_mtx.lock();
-        this->funcs.push_back(func);
-        this->funcs_mtx.unlock();
+        {
+            std::lock_guard<std::mutex> lock(this->funcs_mtx);
+
+            // start thread lazily on first enqueue to avoid construction races
+            if(!this->thread_started) {
+                this->thread = std::thread(&lazy_promise::run, this);
+                this->thread_started = true;
+            }
+
+            this->funcs.push_back(func);
+        }
         this->cv.notify_one();
     }
 
     Ret get() {
-        this->ret_mtx.lock();
-        Ret out = this->ret;
-        this->ret_mtx.unlock();
-        return out;
+        std::lock_guard<std::mutex> lock(this->ret_mtx);
+        return this->ret;
     }
+
     void set(Ret ret) {
-        this->ret_mtx.lock();
+        std::lock_guard<std::mutex> lock(this->ret_mtx);
         this->ret = ret;
-        this->ret_mtx.unlock();
     }
 
    private:
@@ -51,8 +62,7 @@ struct lazy_promise {
             this->cv.wait(lock, [this]() { return !this->funcs.empty() || !this->keep_running; });
             if(!this->keep_running) break;
             if(this->funcs.empty()) {
-                lock.unlock();
-                continue;
+                continue;  // spurious wakeup
             }
 
             Func func = this->funcs[this->funcs.size() - 1];
@@ -63,14 +73,17 @@ struct lazy_promise {
         }
     }
 
-    bool keep_running = true;
-    std::thread thread;
+    std::atomic<bool> keep_running;
+    std::atomic<bool> thread_started;
     std::mutex funcs_mtx;
     std::condition_variable cv;
     std::vector<Func> funcs;
 
     Ret ret;
     std::mutex ret_mtx;
+
+    // only initialized when needed
+    std::thread thread;
 };
 
 };  // namespace uwu

@@ -455,7 +455,6 @@ SongBrowser::SongBrowser() : ScreenBackable() {
 
     // behaviour
     this->bHasSelectedAndIsPlaying = false;
-    this->beatmap = new Beatmap();
     this->fPulseAnimation = 0.0f;
     this->fBackgroundFadeInTime = 0.0f;
 
@@ -466,6 +465,8 @@ SongBrowser::SongBrowser() : ScreenBackable() {
     this->bInSearch = (cv_songbrowser_search_hardcoded_filter.getString().length() > 0);
     this->searchPrevGroup = GROUP::GROUP_NO_GROUPING;
     this->backgroundSearchMatcher = new SongBrowserBackgroundSearchMatcher();
+
+    this->beatmap = new Beatmap();
 
     this->updateLayout();
 }

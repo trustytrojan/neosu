@@ -186,8 +186,7 @@ Osu::Osu() {
     // renderer
     g_vInternalResolution = engine->getScreenSize();
 
-    this->backBuffer =
-        resourceManager->createRenderTarget(0, 0, this->getScreenWidth(), this->getScreenHeight());
+    this->backBuffer = resourceManager->createRenderTarget(0, 0, this->getScreenWidth(), this->getScreenHeight());
     this->playfieldBuffer = resourceManager->createRenderTarget(0, 0, 64, 64);
     this->sliderFrameBuffer =
         resourceManager->createRenderTarget(0, 0, this->getScreenWidth(), this->getScreenHeight());
@@ -249,18 +248,15 @@ Osu::Osu() {
     const int baseDPI = 96;
     const int newDPI = Osu::getUIScale() * baseDPI;
 
-    McFont *defaultFont =
-        resourceManager->loadFont("weblysleekuisb.ttf", "FONT_DEFAULT", 15, true, newDPI);
-    this->titleFont =
-        resourceManager->loadFont("SourceSansPro-Semibold.otf", "FONT_OSU_TITLE", 60, true, newDPI);
-    this->subTitleFont =
-        resourceManager->loadFont("SourceSansPro-Semibold.otf", "FONT_OSU_SUBTITLE", 21, true, newDPI);
+    McFont *defaultFont = resourceManager->loadFont("weblysleekuisb.ttf", "FONT_DEFAULT", 15, true, newDPI);
+    this->titleFont = resourceManager->loadFont("SourceSansPro-Semibold.otf", "FONT_OSU_TITLE", 60, true, newDPI);
+    this->subTitleFont = resourceManager->loadFont("SourceSansPro-Semibold.otf", "FONT_OSU_SUBTITLE", 21, true, newDPI);
     this->songBrowserFont =
         resourceManager->loadFont("SourceSansPro-Regular.otf", "FONT_OSU_SONGBROWSER", 35, true, newDPI);
     this->songBrowserFontBold =
         resourceManager->loadFont("SourceSansPro-Bold.otf", "FONT_OSU_SONGBROWSER_BOLD", 30, true, newDPI);
-    this->fontIcons = resourceManager->loadFont("fontawesome-webfont.ttf", "FONT_OSU_ICONS", Icons::icons,
-                                                             26, true, newDPI);
+    this->fontIcons =
+        resourceManager->loadFont("fontawesome-webfont.ttf", "FONT_OSU_ICONS", Icons::icons, 26, true, newDPI);
     this->fonts.push_back(defaultFont);
     this->fonts.push_back(this->titleFont);
     this->fonts.push_back(this->subTitleFont);
@@ -614,19 +610,16 @@ void Osu::draw() {
                                    g_vInternalResolution.y);
         } else {
             if(cv_resolution_keep_aspect_ratio.getBool()) {
-                const float scale =
-                    getImageScaleToFitResolution(this->backBuffer->getSize(), g->getResolution());
+                const float scale = getImageScaleToFitResolution(this->backBuffer->getSize(), g->getResolution());
                 const float scaledWidth = this->backBuffer->getWidth() * scale;
                 const float scaledHeight = this->backBuffer->getHeight() * scale;
-                this->backBuffer->draw(
-                    std::max(0.0f, g->getResolution().x / 2.0f - scaledWidth / 2.0f) *
-                        (1.0f + cv_letterboxing_offset_x.getFloat()),
-                    std::max(0.0f, g->getResolution().y / 2.0f - scaledHeight / 2.0f) *
-                        (1.0f + cv_letterboxing_offset_y.getFloat()),
-                    scaledWidth, scaledHeight);
+                this->backBuffer->draw(std::max(0.0f, g->getResolution().x / 2.0f - scaledWidth / 2.0f) *
+                                           (1.0f + cv_letterboxing_offset_x.getFloat()),
+                                       std::max(0.0f, g->getResolution().y / 2.0f - scaledHeight / 2.0f) *
+                                           (1.0f + cv_letterboxing_offset_y.getFloat()),
+                                       scaledWidth, scaledHeight);
             } else {
-                this->backBuffer->draw(0, 0, g->getResolution().x,
-                                       g->getResolution().y);
+                this->backBuffer->draw(0, 0, g->getResolution().x, g->getResolution().y);
             }
         }
         g->setBlending(true);
@@ -741,10 +734,10 @@ void Osu::update() {
 
             if(mouse->isRightDown()) {
                 this->fQuickSaveTime = std::clamp<float>((float)((this->getSelectedBeatmap()->getStartTimePlayable() +
-                                                             this->getSelectedBeatmap()->getLengthPlayable()) *
-                                                            percent) /
-                                                        (float)this->getSelectedBeatmap()->getLength(),
-                                                    0.0f, 1.0f);
+                                                                  this->getSelectedBeatmap()->getLengthPlayable()) *
+                                                                 percent) /
+                                                             (float)this->getSelectedBeatmap()->getLength(),
+                                                         0.0f, 1.0f);
             }
         }
 
@@ -1136,7 +1129,8 @@ void Osu::onKeyDown(KeyboardEvent &key) {
             }
 
             // handle skipping
-            if(key == KEY_ENTER || key == KEY_NUMPAD_ENTER || key == (KEYCODE)cv_SKIP_CUTSCENE.getInt()) this->bSkipScheduled = true;
+            if(key == KEY_ENTER || key == KEY_NUMPAD_ENTER || key == (KEYCODE)cv_SKIP_CUTSCENE.getInt())
+                this->bSkipScheduled = true;
 
             // toggle ui
             if(!key.isConsumed() && key == (KEYCODE)cv_TOGGLE_SCOREBOARD.getInt() && !this->bScoreboardToggleCheck) {
@@ -1421,8 +1415,7 @@ void Osu::saveScreenshot() {
     } while(env->fileExists(screenshot_path.toUtf8()));
 
     std::vector<unsigned char> pixels = g->getScreenshot();
-    Image::saveToImage(&pixels[0], g->getResolution().x, g->getResolution().y,
-                       screenshot_path.toUtf8());
+    Image::saveToImage(&pixels[0], g->getResolution().x, g->getResolution().y, screenshot_path.toUtf8());
 }
 
 void Osu::onPlayEnd(FinishedScore score, bool quit, bool aborted) {
@@ -1718,13 +1711,11 @@ void Osu::onInternalResolutionChanged(UString oldValue, UString args) {
     // clamp requested internal resolution to current renderer resolution
     // however, this could happen while we are transitioning into fullscreen. therefore only clamp when not in
     // fullscreen or not in fullscreen transition
-    bool isTransitioningIntoFullscreenHack = g->getResolution().x < env->getNativeScreenSize().x ||
-                                             g->getResolution().y < env->getNativeScreenSize().y;
+    bool isTransitioningIntoFullscreenHack =
+        g->getResolution().x < env->getNativeScreenSize().x || g->getResolution().y < env->getNativeScreenSize().y;
     if(!env->isFullscreen() || !isTransitioningIntoFullscreenHack) {
-        if(newInternalResolution.x > g->getResolution().x)
-            newInternalResolution.x = g->getResolution().x;
-        if(newInternalResolution.y > g->getResolution().y)
-            newInternalResolution.y = g->getResolution().y;
+        if(newInternalResolution.x > g->getResolution().x) newInternalResolution.x = g->getResolution().x;
+        if(newInternalResolution.y > g->getResolution().y) newInternalResolution.y = g->getResolution().y;
     }
 
     // enable and store, then force onResolutionChanged()
@@ -1744,7 +1735,12 @@ void Osu::onFocusGained() {
 
     if(this->bWasBossKeyPaused) {
         this->bWasBossKeyPaused = false;
-        this->getSelectedBeatmap()->pausePreviewMusic();
+
+        // make sure beatmap is fully constructed before accessing it
+        Beatmap *selectedBeatmap = this->getSelectedBeatmap();
+        if(selectedBeatmap != nullptr) {
+            selectedBeatmap->pausePreviewMusic();
+        }
     }
 
     this->updateWindowsKeyDisable();
