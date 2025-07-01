@@ -63,8 +63,13 @@ constexpr void runtime_assert(bool cond, const char *reason)
         }               \
     }
 
+#ifndef _MSC_VER
 constexpr const auto PI = std::numbers::pi;
 constexpr const auto PIOVER180 = (PI/180.0f);
+#else
+#define PI 3.1415926535897932384626433832795
+#define PIOVER180 0.01745329251994329576923690768489
+#endif
 
 // UTIL
 

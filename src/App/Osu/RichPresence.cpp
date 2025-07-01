@@ -18,6 +18,8 @@
 #include "Sound.h"
 #include "score.h"
 
+#include <chrono>
+
 const UString RichPresence::KEY_DISCORD_STATUS = "state";
 const UString RichPresence::KEY_DISCORD_DETAILS = "details";
 

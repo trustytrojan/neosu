@@ -52,6 +52,8 @@
 #include "UserCard.h"
 #include "VertexArrayObject.h"
 
+#include <chrono>
+
 const Color highlightColor = argb(255, 0, 255, 0);
 const Color defaultColor = argb(255, 255, 255, 255);
 

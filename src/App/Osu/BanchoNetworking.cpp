@@ -85,11 +85,7 @@ void disconnect() {
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curldummy);
 
-        struct curl_blob blob{};
-        blob.data = (void *)curl_ca_embed;
-        blob.len = sizeof(curl_ca_embed);
-        blob.flags = CURL_BLOB_NOCOPY;
-        curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
+        curl_easy_setopt_CAINFO_BLOB_embedded(curl);
 
         curl_easy_perform(curl);
         curl_slist_free_all(chunk);
@@ -237,11 +233,7 @@ static void send_api_request(CURL *curl, APIRequest api_out) {
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
 
-    struct curl_blob blob{};
-    blob.data = (void *)curl_ca_embed;
-    blob.len = sizeof(curl_ca_embed);
-    blob.flags = CURL_BLOB_NOCOPY;
-    curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
+    curl_easy_setopt_CAINFO_BLOB_embedded(curl);
 
     CURLcode res = curl_easy_perform(curl);
     if(res == CURLE_OK) {
@@ -278,11 +270,7 @@ static void send_bancho_packet(CURL *curl, Packet outgoing) {
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "osu!");
 
-    struct curl_blob blob{};
-    blob.data = (void *)curl_ca_embed;
-    blob.len = sizeof(curl_ca_embed);
-    blob.flags = CURL_BLOB_NOCOPY;
-    curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
+    curl_easy_setopt_CAINFO_BLOB_embedded(curl);
 
     last_packet_tms = time(NULL);
     CURLcode res = curl_easy_perform(curl);

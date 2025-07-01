@@ -38,8 +38,8 @@ class MapCalcThread {
     static inline void abort() { get_instance().abort_instance(); }
 
     // progress tracking
-    static inline bool get_computed() { return get_instance().computed_count.load(); }
-    static inline bool get_total() { return get_instance().total_count.load(); }
+    static inline u32 get_computed() { return get_instance().computed_count.load(); }
+    static inline u32 get_total() { return get_instance().total_count.load(); }
 
     static inline bool is_finished() {
         const auto& instance = get_instance();

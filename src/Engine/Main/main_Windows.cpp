@@ -785,7 +785,13 @@ HWND createWinWindow(HINSTANCE hInstance) {
 //	Main entry point  //
 //********************//
 
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
+#if defined(_MSC_VER) && defined(_DEBUG)
+#define MAINFUNC wmain
+#else
+#define MAINFUNC wWinMain
+#endif
+
+int WINAPI MAINFUNC(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
 #ifdef _MSC_VER
     // When building with MSVC, vprintf() is not returning the correct value unless we have a console allocated.
     FILE *dummy;

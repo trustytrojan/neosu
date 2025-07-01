@@ -14,6 +14,8 @@
 #include "Engine.h"
 #include "base64.h"
 
+#include <chrono>
+
 void submit_score(FinishedScore score) {
     debugLog("Submitting score...\n");
     const char *GRADES[] = {"XH", "SH", "X", "S", "A", "B", "C", "D", "F", "N"};
@@ -27,10 +29,10 @@ void submit_score(FinishedScore score) {
     u8 iv[32];
     auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
     std::mt19937_64 rng(seed);
-    std::uniform_int_distribution<u8> dist(0, 255);
+    std::uniform_int_distribution<unsigned int> dist(0, 255);
 
     for(u8 &i : iv) {
-        i = dist(rng);
+        i = static_cast<u8>(dist(rng));
     }
 
     APIRequest request;

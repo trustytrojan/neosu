@@ -15,7 +15,11 @@
 
 typedef void* HWND;
 
+#define MCENGINE_DATA_DIR "./"
+
 #else  // Windows build
+
+#define MCENGINE_DATA_DIR ".\\"
 
 // #define WINVER 0x0A00  // Windows 10, to enable the ifdefs in winuser.h for touch
 // #define MCENGINE_WINDOWS_REALTIMESTYLUS_SUPPORT
@@ -27,7 +31,6 @@ typedef void* HWND;
 #elif defined(_WIN32)
 #define _X86_
 #endif
-typedef SSIZE_T ssize_t;
 #endif
 
 #include "WinDebloatDefs.h"

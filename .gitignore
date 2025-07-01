@@ -32,6 +32,11 @@ debug*/
 release/
 /test-*/
 
+/cmake-win/depcache/
+/cmake-win/build*/
+/cmake-win/dist*/
+/cmake-win/\.*
+
 Makefile
 McOsu-ng
 /src/config.h

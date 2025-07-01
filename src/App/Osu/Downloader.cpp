@@ -98,11 +98,7 @@ void* do_downloads(void* arg) {
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
         curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
-        struct curl_blob blob{};
-        blob.data = (void*)curl_ca_embed;
-        blob.len = sizeof(curl_ca_embed);
-        blob.flags = CURL_BLOB_NOCOPY;
-        curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
+        curl_easy_setopt_CAINFO_BLOB_embedded(curl);
 
         CURLcode res = curl_easy_perform(curl);
         int response_code;

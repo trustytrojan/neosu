@@ -1,5 +1,5 @@
 AC_PREREQ([2.69])
-AC_INIT([neosu], [34.00], [], [], [https://github.com/kiwec/neosu]) # don't report bugs to McKay :)
+AC_INIT([neosu], [38.00], [], [], [https://github.com/kiwec/neosu]) # don't report bugs to McKay :)
 AC_CONFIG_SRCDIR([src/Engine/Engine.cpp])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_HEADERS([src/config.h])
@@ -358,7 +358,6 @@ __EOF__
     LIBPREFIX="lib"
 
     AC_DEFINE([MCENGINE_PLATFORM_LINUX], [1], [Define if compiling for Linux.])
-    platform_data_dir='"./"'
 ],[
     # TODO: don't hardcode mingw paths here
     AS_IF([test "$build_os" = "linux-gnu"], [
@@ -406,10 +405,7 @@ __EOF__
     ])
 
     AC_DEFINE([MCENGINE_PLATFORM_WINDOWS], [1], [Define if compiling for Windows.])
-    platform_data_dir='".\\"'
 ])
-
-AC_DEFINE_UNQUOTED([MCENGINE_DATA_DIR], [$platform_data_dir], [Defined to the (platform-dependent) base path for the engine data directory.])
 
 PKG_CONFIG="$PWD/build/pkg-config"
 AC_SUBST([PKG_CONFIG])
@@ -675,7 +671,7 @@ AS_IF([test "$renderer" != "dx11"], [
 ])
 
 SDL3_MIN_VERSION=3.4.0 # needs SDL_SetRelativeMouseTransform, not in any current (3.2.x) releases
-SDL3_BUILD_VERSION=89eef1bd3414f696252ac1357780bb90149c012b # git
+SDL3_BUILD_VERSION=e9535fa0265901cda2cd3da47df18c45507b4066 # git
 FREETYPE2_MIN_VERSION=2.10.0
 FREETYPE2_BUILD_VERSION=2.13.3
 LIBJPEG_MIN_VERSION=3.0.0

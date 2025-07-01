@@ -1,0 +1,83 @@
+# Dependencies configuration for neosu
+# This file contains version information, URLs, and hashes for all external dependencies
+
+set(SDL3_VERSION "e9535fa0265901cda2cd3da47df18c45507b4066")
+set(SDL3_URL "https://github.com/libsdl-org/SDL/archive/${SDL3_VERSION}.tar.gz")
+set(SDL3_HASH "SHA512=2eb99da0a59bb18d54b9ddfc4161e40364f8b7fb5818f812ea3eb1f1ee5783d17c818a62cd458994b4ffa3470684161e0f6767e7e067d4c7fcc5d6d430d05505")
+
+set(FREETYPE2_VERSION "2.13.3")
+string(REPLACE "." "-" _freetype_ver_temp "${FREETYPE2_VERSION}")
+set(FREETYPE2_URL "https://github.com/freetype/freetype/archive/refs/tags/VER-${_freetype_ver_temp}.tar.gz")
+set(FREETYPE2_HASH "SHA512=fccfaa15eb79a105981bf634df34ac9ddf1c53550ec0b334903a1b21f9f8bf5eb2b3f9476e554afa112a0fca58ec85ab212d674dfd853670efec876bacbe8a53")
+unset(_freetype_ver_temp)
+
+set(LIBJPEG_VERSION "3.1.0")
+set(LIBJPEG_URL "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/${LIBJPEG_VERSION}/libjpeg-turbo-${LIBJPEG_VERSION}.tar.gz")
+set(LIBJPEG_HASH "SHA512=63231854529f59a95814cf2414fe384360a4ed96c572764fabc535c3770c559d26943e129c905a63d5949088fa79138b1ffdb175b817f2f4d36329a3cbb23ea7")
+
+set(LIBPNG_VERSION "1.6.48")
+set(LIBPNG_URL "https://github.com/pnggroup/libpng/archive/refs/tags/v${LIBPNG_VERSION}.tar.gz")
+set(LIBPNG_HASH "SHA512=3a0006256abc6f23f5be1d67b201303ceaaa58ffa901f4659ad95f025b08f5e1c30d374cc251196a2ff1ee3ef4b37bd4d61c7779eabd86922d3bdd047264d9c1")
+
+set(ZLIB_VERSION "2.2.4")
+set(ZLIB_URL "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/${ZLIB_VERSION}.tar.gz")
+set(ZLIB_HASH "SHA512=f49a89497988db55a2f2375f79443e7e2c57470dbd94b35ae38a39d988eb42f8ecc295a1bd68845fc273b59ea508d0e74b142585d85b7e869dd3c01cc6923d8d")
+
+set(BZIP2_VERSION "1ea1ac188ad4b9cb662e3f8314673c63df95a589")
+set(BZIP2_URL "https://github.com/libarchive/bzip2/archive/${BZIP2_VERSION}.tar.gz")
+set(BZIP2_HASH "SHA512=a1aae1e884f85a225e2a1ddf610f11dda672bc242d4e8d0cda3534efb438b3a0306ec1d130eec378d46abb48f6875687d6b20dcc18a6037a4455f531c22d50f6")
+
+set(FMT_VERSION "11.2.0")
+set(FMT_URL "https://github.com/fmtlib/fmt/archive/refs/tags/${FMT_VERSION}.tar.gz")
+set(FMT_HASH "SHA512=46974efd36e613477351aa357c451cee434da797c2a505f9f86d73e394dcb35dc2dc0cda66abb98c023e8f24deac9d8e3ee6f9f6c0971cc4c00e37c34aa7f15f")
+
+set(GLM_VERSION "1.0.1")
+set(GLM_URL "https://github.com/g-truc/glm/archive/refs/tags/${GLM_VERSION}.tar.gz")
+set(GLM_HASH "SHA512=c6c6fa1ea7a7e97820e36ee042a78be248ae828c99c1b1111080d9bf334a5160c9993a70312351c92a867cd49907c95f9f357c8dfe2bc29946da6e83e27ba20c")
+
+set(LZMA_VERSION "5.8.1")
+set(LZMA_URL "https://github.com/tukaani-project/xz/releases/download/v${LZMA_VERSION}/xz-${LZMA_VERSION}.tar.gz")
+set(LZMA_HASH "SHA512=151b2a47fdf00274c4fd71ceada8fb6c892bdac44070847ebf3259e602b97c95ee5ee88974e03d7aa821ab4f16d5c38e50dfb2baf660cf39c199878a666e19ad")
+
+set(LIBARCHIVE_VERSION "3.8.1")
+set(LIBARCHIVE_URL "https://github.com/libarchive/libarchive/releases/download/v${LIBARCHIVE_VERSION}/libarchive-${LIBARCHIVE_VERSION}.tar.gz")
+set(LIBARCHIVE_HASH "SHA512=0eed931378e998590ec97b191322e5c48019cce447d9dbbbcbadd3008e26fdf000a11c45cbeefa0567bd101422afc0da10248220afa280dea1a9b4f91d8ee653")
+
+set(CURL_VERSION "8.14.1")
+string(REPLACE "." "_" _curl_ver_temp "${CURL_VERSION}")
+set(CURL_URL "https://github.com/curl/curl/releases/download/curl-${_curl_ver_temp}/curl-${CURL_VERSION}.tar.gz")
+set(CURL_HASH "SHA512=22307bd41d5ded22e7e53e2412b3218763db9b7c32b1254df26172e6cf00d1650c66874dfc03037da89a5bd72ffbca1eeb83784be62a38d5779484376f3a53c7")
+unset(_curl_ver_temp)
+
+# BINARY DEPENDENCIES
+
+set(DISCORDSDK_VERSION "2.5.6")
+set(DISCORDSDK_URL "https://web.archive.org/web/20250505113314/https://dl-game-sdk.discordapp.net/${DISCORDSDK_VERSION}/discord_game_sdk.zip")
+set(DISCORDSDK_HASH "SHA512=4c8f72c7bdf92bc969fb86b96ea0d835e01b9bab1a2cc27ae00bdac1b9733a1303ceadfe138c24a7609b76d61d49999a335dd596cf3f335d894702e2aa23406f")
+
+# BASS BINARIES
+set(BASS_VERSION "20250611")
+
+set(BASS_URL "https://web.archive.org/web/20250603164509/https://www.un4seen.com/stuff/bass.zip")
+set(BASS_HASH "SHA512=d0fa29a34fa55e704a24162b23979d9ab8b75b89c11fe63d2bb71302786f8127df8017202c868e5e8b7efc8472c5144ab3a7b0591fe4b4dbc495224a7c5c9071")
+
+set(BASSFX_URL "https://web.archive.org/web/20250603164652/https://www.un4seen.com/stuff/bass_fx.zip")
+set(BASSFX_HASH "SHA512=0826a0fe9e35e86e7e9d6883441e6e9e604914ab0a46c04dfb209b055bc9f0806dbff468d27481c5b5fcd573b62af2abad4c286549d165d324d17ef306aa6921")
+
+set(BASSMIX_URL "https://web.archive.org/web/20250603164713/https://www.un4seen.com/stuff/bassmix.zip")
+set(BASSMIX_HASH "SHA512=e7139b71f53b30bd27f2991006781f69a5e0e415996fcd41a7122908b0245cc6e1efb82b66409b80dc4d7cb4eb0d6d445cf3eaff52fe6f7c43bbd9872ea7949b")
+
+set(BASSWASAPI_URL "https://web.archive.org/web/20250603164749/https://www.un4seen.com/stuff/basswasapi.zip")
+set(BASSWASAPI_HASH "SHA512=f5c68062936ccf60383c5dbea3dc4b9bcf52884fb745d0564bd6592e88a7336e16e5d9a63ea28177385641790d53eaa5d9edfe112e768dcfb68b82af65affddc")
+
+set(BASSWASAPI_HEADER_URL "https://web.archive.org/web/20240501180448/http://www.un4seen.com/files/basswasapi24.zip")
+set(BASSWASAPI_HEADER_HASH "SHA512=de54b3961491ea832a0069af75dc1d57209b7805699d955b384bf9671a4da3615ba3ea217c596fa41616d2df4a8b2ea0f8f9d9c4e2453221541aacb0cc30dc6c")
+
+set(BASSASIO_URL "https://web.archive.org/web/20250603164955/https://www.un4seen.com/stuff/bassasio.zip")
+set(BASSASIO_HASH "SHA512=9542469b352d6a6bfd3a3292a09642639c0583963b714a780699ab0e5fa7cbf36e3c9ae8081195d6fef7daad88133cf10d0a568724edca5e8374473128da738a")
+
+set(BASSLOUD_URL "https://web.archive.org/web/20250102132034/https://www.un4seen.com/files/bassloud24.zip")
+set(BASSLOUD_HASH "SHA512=8607d5d9fd07f6886ab4984cf68f6e9463b027a5766ae572e6d99f9298fafd08cc8ac4ece0c4ca4e47a532a76448d75443c9fa7ea7f1d7b84579487022cec493")
+
+set(BASSFLAC_URL "https://web.archive.org/web/20250102150048/https://www.un4seen.com/files/bassflac24.zip")
+set(BASSFLAC_HASH "SHA512=1d912dcd342cf0ef873e743a305b5fc5f06a60c7446ff6f6e7e5f313124475526bb01c69718c401158b9803fb9935d2dd4d7f7ac1b2646f7ba4e769ef0455b29")

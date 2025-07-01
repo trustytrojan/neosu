@@ -22,11 +22,7 @@ UString NetworkHandler::httpGet(UString url, long timeout, long connectTimeout) 
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlStringWriteCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &curlReadBuffer);
 
-        struct curl_blob blob{};
-        blob.data = (void *)curl_ca_embed;
-        blob.len = sizeof(curl_ca_embed);
-        blob.flags = CURL_BLOB_NOCOPY;
-        curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
+        curl_easy_setopt_CAINFO_BLOB_embedded(curl);
 
         CURLcode res = curl_easy_perform(curl);
         if(res != CURLE_OK) {
@@ -55,11 +51,7 @@ std::string NetworkHandler::httpDownload(UString url, long timeout, long connect
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlStringStreamWriteCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &curlWriteBuffer);
 
-        struct curl_blob blob{};
-        blob.data = (void *)curl_ca_embed;
-        blob.len = sizeof(curl_ca_embed);
-        blob.flags = CURL_BLOB_NOCOPY;
-        curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
+        curl_easy_setopt_CAINFO_BLOB_embedded(curl);
 
         CURLcode res = curl_easy_perform(curl);
         if(res != CURLE_OK) {

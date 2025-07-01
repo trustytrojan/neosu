@@ -9,6 +9,14 @@
 #ifndef THREAD_H
 #define THREAD_H
 
+#if defined(_HAS_EXCEPTIONS)
+#if _HAS_EXCEPTIONS == 0
+#undef __EXCEPTIONS
+#else
+#define __EXCEPTIONS
+#endif
+#endif
+
 #ifdef __EXCEPTIONS
 #include "Engine.h" // for debugLog
 #endif

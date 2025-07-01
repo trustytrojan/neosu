@@ -523,7 +523,7 @@ void CBaseUIScrollView::updateScrollbars() {
         const float verticalHeightPercent = (this->vSize.y - (verticalBlockWidth * 2)) / this->vScrollSize.y;
         const float verticalBlockHeight =
             std::clamp<float>(std::max(verticalHeightPercent * this->vSize.y, verticalBlockWidth) * overscroll,
-                              verticalBlockWidth, this->vSize.y);
+                              verticalBlockWidth, std::max(this->vSize.y, verticalBlockWidth));
 
         this->verticalScrollbar =
             McRect(this->vPos.x + this->vSize.x - (verticalBlockWidth * this->fScrollbarSizeMultiplier),
