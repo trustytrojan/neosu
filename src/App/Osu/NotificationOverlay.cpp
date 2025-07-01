@@ -74,7 +74,7 @@ void ToastElement::draw() {
 void NotificationOverlay::mouse_update(bool *propagate_clicks) {
     // HACKHACK: should put all toasts in a container instead
     bool a_toast_is_hovered = false;
-    Vector2 screen = engine->getScreenSize();
+    Vector2 screen{Osu::g_vInternalResolution};
     f64 bottom_y = screen.y - TOAST_SCREEN_BOTTOM_MARGIN;
     for(auto t : this->toasts) {
         bottom_y -= TOAST_OUTER_Y_MARGIN + t->getSize().y;
