@@ -483,7 +483,7 @@ ExternalProject_Add(neosu_main
         -DCMAKE_COLOR_DIAGNOSTICS=ON
         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
     BUILD_COMMAND cmake --build <BINARY_DIR> --config ${CMAKE_BUILD_TYPE} --parallel ${CPU_COUNT}
-    INSTALL_COMMAND cmake --install <BINARY_DIR> --config ${CMAKE_BUILD_TYPE}
+    # INSTALL_COMMAND cmake --install <BINARY_DIR> --config ${CMAKE_BUILD_TYPE}
 )
 
 # Build summary

@@ -26,8 +26,6 @@
 
 using namespace fmt::literals;
 
-class McFont;
-
 class UString {
    public:
     template <typename... Args>

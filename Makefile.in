@@ -268,6 +268,7 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/Engine/Resources/neosu-Resource.$(OBJEXT) \
 	src/Engine/Resources/neosu-ResourceManager.$(OBJEXT) \
 	src/Engine/Sound/BASS/neosu-BassManager.$(OBJEXT) \
+	src/Engine/Sound/neosu-PlaybackInterpolator.$(OBJEXT) \
 	src/Engine/Sound/neosu-Sound.$(OBJEXT) \
 	src/Engine/Sound/neosu-SoundEngine.$(OBJEXT) \
 	src/Engine/neosu-TextureAtlas.$(OBJEXT) \
@@ -443,6 +444,7 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Po \
 	src/Engine/Resources/$(DEPDIR)/neosu-Resource.Po \
 	src/Engine/Resources/$(DEPDIR)/neosu-ResourceManager.Po \
+	src/Engine/Sound/$(DEPDIR)/neosu-PlaybackInterpolator.Po \
 	src/Engine/Sound/$(DEPDIR)/neosu-Sound.Po \
 	src/Engine/Sound/$(DEPDIR)/neosu-SoundEngine.Po \
 	src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassManager.Po \
@@ -917,6 +919,7 @@ neosu_SOURCES = \
 	src/Engine/Resources/Resource.cpp \
 	src/Engine/Resources/ResourceManager.cpp \
 	src/Engine/Sound/BASS/BassManager.cpp \
+	src/Engine/Sound/PlaybackInterpolator.cpp \
 	src/Engine/Sound/Sound.cpp \
 	src/Engine/Sound/SoundEngine.cpp \
 	src/Engine/TextureAtlas.cpp \
@@ -1591,6 +1594,9 @@ src/Engine/Sound/$(am__dirstamp):
 src/Engine/Sound/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/Engine/Sound/$(DEPDIR)
 	@: >>src/Engine/Sound/$(DEPDIR)/$(am__dirstamp)
+src/Engine/Sound/neosu-PlaybackInterpolator.$(OBJEXT):  \
+	src/Engine/Sound/$(am__dirstamp) \
+	src/Engine/Sound/$(DEPDIR)/$(am__dirstamp)
 src/Engine/Sound/neosu-Sound.$(OBJEXT):  \
 	src/Engine/Sound/$(am__dirstamp) \
 	src/Engine/Sound/$(DEPDIR)/$(am__dirstamp)
@@ -1841,6 +1847,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Resources/$(DEPDIR)/neosu-Resource.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Resources/$(DEPDIR)/neosu-ResourceManager.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Sound/$(DEPDIR)/neosu-PlaybackInterpolator.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Sound/$(DEPDIR)/neosu-Sound.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Sound/$(DEPDIR)/neosu-SoundEngine.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassManager.Po@am__quote@ # am--include-marker
@@ -3657,6 +3664,20 @@ src/Engine/Sound/BASS/neosu-BassManager.obj: src/Engine/Sound/BASS/BassManager.c
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Sound/BASS/neosu-BassManager.obj `if test -f 'src/Engine/Sound/BASS/BassManager.cpp'; then $(CYGPATH_W) 'src/Engine/Sound/BASS/BassManager.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Sound/BASS/BassManager.cpp'; fi`
 
+src/Engine/Sound/neosu-PlaybackInterpolator.o: src/Engine/Sound/PlaybackInterpolator.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Sound/neosu-PlaybackInterpolator.o -MD -MP -MF src/Engine/Sound/$(DEPDIR)/neosu-PlaybackInterpolator.Tpo -c -o src/Engine/Sound/neosu-PlaybackInterpolator.o `test -f 'src/Engine/Sound/PlaybackInterpolator.cpp' || echo '$(srcdir)/'`src/Engine/Sound/PlaybackInterpolator.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Sound/$(DEPDIR)/neosu-PlaybackInterpolator.Tpo src/Engine/Sound/$(DEPDIR)/neosu-PlaybackInterpolator.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Sound/PlaybackInterpolator.cpp' object='src/Engine/Sound/neosu-PlaybackInterpolator.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Sound/neosu-PlaybackInterpolator.o `test -f 'src/Engine/Sound/PlaybackInterpolator.cpp' || echo '$(srcdir)/'`src/Engine/Sound/PlaybackInterpolator.cpp
+
+src/Engine/Sound/neosu-PlaybackInterpolator.obj: src/Engine/Sound/PlaybackInterpolator.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Sound/neosu-PlaybackInterpolator.obj -MD -MP -MF src/Engine/Sound/$(DEPDIR)/neosu-PlaybackInterpolator.Tpo -c -o src/Engine/Sound/neosu-PlaybackInterpolator.obj `if test -f 'src/Engine/Sound/PlaybackInterpolator.cpp'; then $(CYGPATH_W) 'src/Engine/Sound/PlaybackInterpolator.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Sound/PlaybackInterpolator.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Sound/$(DEPDIR)/neosu-PlaybackInterpolator.Tpo src/Engine/Sound/$(DEPDIR)/neosu-PlaybackInterpolator.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Sound/PlaybackInterpolator.cpp' object='src/Engine/Sound/neosu-PlaybackInterpolator.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Sound/neosu-PlaybackInterpolator.obj `if test -f 'src/Engine/Sound/PlaybackInterpolator.cpp'; then $(CYGPATH_W) 'src/Engine/Sound/PlaybackInterpolator.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Sound/PlaybackInterpolator.cpp'; fi`
+
 src/Engine/Sound/neosu-Sound.o: src/Engine/Sound/Sound.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Sound/neosu-Sound.o -MD -MP -MF src/Engine/Sound/$(DEPDIR)/neosu-Sound.Tpo -c -o src/Engine/Sound/neosu-Sound.o `test -f 'src/Engine/Sound/Sound.cpp' || echo '$(srcdir)/'`src/Engine/Sound/Sound.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Sound/$(DEPDIR)/neosu-Sound.Tpo src/Engine/Sound/$(DEPDIR)/neosu-Sound.Po
@@ -4528,6 +4549,7 @@ distclean: distclean-am
 	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Po
 	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-Resource.Po
 	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-ResourceManager.Po
+	-rm -f src/Engine/Sound/$(DEPDIR)/neosu-PlaybackInterpolator.Po
 	-rm -f src/Engine/Sound/$(DEPDIR)/neosu-Sound.Po
 	-rm -f src/Engine/Sound/$(DEPDIR)/neosu-SoundEngine.Po
 	-rm -f src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassManager.Po
@@ -4732,6 +4754,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-AsyncResourceLoader.Po
 	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-Resource.Po
 	-rm -f src/Engine/Resources/$(DEPDIR)/neosu-ResourceManager.Po
+	-rm -f src/Engine/Sound/$(DEPDIR)/neosu-PlaybackInterpolator.Po
 	-rm -f src/Engine/Sound/$(DEPDIR)/neosu-Sound.Po
 	-rm -f src/Engine/Sound/$(DEPDIR)/neosu-SoundEngine.Po
 	-rm -f src/Engine/Sound/BASS/$(DEPDIR)/neosu-BassManager.Po

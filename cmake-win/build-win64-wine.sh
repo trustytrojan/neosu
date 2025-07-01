@@ -50,10 +50,10 @@ doit() {
 			-DCMAKE_HOST_SYSTEM_PROCESSOR=AMD64 -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" &&
 
 		# Build the superbuild (dependencies + initial project configuration)
-		cmake --build "$BUILD_DIR" --config "$BUILD_TYPE" --parallel "$(nproc)" &&
-
+		cmake --build "$BUILD_DIR" --config "$BUILD_TYPE" --parallel "$(nproc)"
+		# ignore errors, the above might break if source files were changed (they aren't dependency tracked)
 		# Now build the main project directly to ensure source changes are detected
-		cmake --build "$BUILD_DIR/neosu" --config "$BUILD_TYPE" --parallel "$(nproc)"
+		cmake --build "$BUILD_DIR/neosu" --config "$BUILD_TYPE" --parallel "$(nproc)" &&
 		# and install it
 		cmake --install "$BUILD_DIR/neosu" --config "$BUILD_TYPE"
 }

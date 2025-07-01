@@ -18,6 +18,8 @@ Sound::Sound(std::string filepath, bool stream, bool overlayable, bool loop) : R
     this->bStream = stream;
     this->bIsLooped = loop;
     this->bIsOverlayable = overlayable;
+    this->fLastPlayTime = 0.0;
+    this->fChannelCreationTime = 0.0;
     this->fSpeed = 1.0f;
     this->fVolume = 1.0f;
 }
@@ -217,7 +219,6 @@ void Sound::setPositionMS(unsigned long ms) {
                              BASS_ErrorGetCode(), this->sFilePath.c_str());
                 }
             }
-
             this->fLastPlayTime = this->fChannelCreationTime - ((f64)ms / 1000.0);
         } else {
             if(!BASS_ChannelSetPosition(this->stream, target_pos, BASS_POS_BYTE | BASS_POS_DECODETO | BASS_POS_FLUSH)) {
@@ -252,6 +253,9 @@ void Sound::setPositionMS(unsigned long ms) {
             osu->music_unpause_scheduled = true;
         }
     }
+
+    // reset interpolation state after seeking
+    this->interpolator.reset(static_cast<f64>(ms), engine->getTime(), this->getSpeed());
 }
 
 // Inaccurate but fast seeking, to use at song select
@@ -275,7 +279,6 @@ void Sound::setPositionMS_fast(u32 ms) {
                          BASS_ErrorGetCode(), this->sFilePath.c_str());
             }
         }
-
         this->fLastPlayTime = this->fChannelCreationTime - ((f64)ms / 1000.0);
     } else {
         if(!BASS_ChannelSetPosition(this->stream, target_pos, BASS_POS_BYTE | BASS_POS_FLUSH)) {
@@ -285,6 +288,9 @@ void Sound::setPositionMS_fast(u32 ms) {
             }
         }
     }
+
+    // reset interpolation state after seeking
+    this->interpolator.reset(static_cast<f64>(ms), engine->getTime(), this->getSpeed());
 }
 
 void Sound::setVolume(float volume) {
@@ -401,30 +407,14 @@ u32 Sound::getPositionMS() {
     }
 
     f64 positionInSeconds = BASS_ChannelBytes2Seconds(this->stream, positionBytes);
-    f64 positionInMilliSeconds = positionInSeconds * 1000.0;
-    u32 positionMS = (u32)positionInMilliSeconds;
-    if(!this->isPlaying()) {
-        return positionMS;
-    }
+    f64 rawPositionMS = positionInSeconds * 1000.0;
 
-    // special case: a freshly started channel position jitters, lerp with engine time over a set duration to smooth
-    // things over
-    f64 interpDuration = cv_snd_play_interp_duration.getFloat();
-    if(interpDuration <= 0.0) return positionMS;
+    // get interpolated position
+    u32 interpolatedPositionMS =
+        this->interpolator.update(rawPositionMS, engine->getTime(), this->getSpeed(), this->isLooped(),
+                                  static_cast<u64>(this->length), this->isPlaying());
 
-    f64 channel_age = engine->getTime() - this->fChannelCreationTime;
-    if(channel_age >= interpDuration) return positionMS;
-
-    f64 speedMultiplier = this->getSpeed();
-    f64 delta = channel_age * speedMultiplier;
-    f64 interp_ratio = cv_snd_play_interp_ratio.getFloat();
-    if(delta < interpDuration) {
-        delta = (engine->getTime() - this->fLastPlayTime) * speedMultiplier;
-        f64 lerpPercent = std::clamp<f64>(((delta / interpDuration) - interp_ratio) / (1.0 - interp_ratio), 0.0, 1.0);
-        positionMS = (u32)std::lerp<f64>(delta * 1000.0, (f64)positionMS, lerpPercent);
-    }
-
-    return positionMS;
+    return interpolatedPositionMS;
 }
 
 u32 Sound::getLengthMS() {

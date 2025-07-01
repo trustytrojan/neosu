@@ -3,6 +3,7 @@
 #include "BassManager.h"
 #include "Resource.h"
 #include "cbase.h"
+#include "PlaybackInterpolator.h"
 
 class SoundEngine;
 
@@ -73,4 +74,6 @@ class Sound : public Resource {
     f64 fChannelCreationTime = 0.0;
     u32 paused_position_ms = 0;
     u32 length = 0;
+
+    PlaybackInterpolator interpolator;
 };
