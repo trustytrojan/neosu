@@ -23,7 +23,7 @@ CBaseUIButton::CBaseUIButton(float xPos, float yPos, float xSize, float ySize, U
 }
 
 void CBaseUIButton::draw() {
-    if(!this->bVisible) return;
+    if(!this->bVisible || !isVisibleOnScreen()) return;
 
     // draw background
     if(this->bDrawBackground) {
@@ -53,7 +53,7 @@ void CBaseUIButton::draw() {
 }
 
 void CBaseUIButton::drawText() {
-    if(this->font == NULL || this->sText.length() < 1) return;
+    if(this->font == NULL || !isVisibleOnScreen() || this->sText.length() < 1) return;
 
     const int shadowOffset = std::round(1.0f * ((float)this->font->getDPI() / 96.0f));  // NOTE: abusing font dpi
 

@@ -41,6 +41,7 @@ class CBaseUIElement : public KeyboardListener {
 
     virtual bool isActive() { return this->bActive || this->isBusy(); }
     virtual bool isVisible() { return this->bVisible; }
+	bool isVisibleOnScreen(); // x,y within engine rectangle
     virtual bool isEnabled() { return this->bEnabled; }
     virtual bool isBusy() { return this->bBusy && this->isVisible(); }
     virtual bool isMouseInside() { return this->bMouseInside && this->isVisible(); }

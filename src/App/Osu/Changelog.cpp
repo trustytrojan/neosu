@@ -27,7 +27,7 @@ Changelog::Changelog() : ScreenBackable() {
     std::vector<CHANGELOG> changelogs;
 
     CHANGELOG v38_00;
-    v38_00.title = "38.00 (2025-06-17)";
+    v38_00.title = PACKAGE_VERSION " (2025-06-17)";
     v38_00.changes.emplace_back("- Added user list interface (F9, aka. \"Extended Chat Console\")");
     v38_00.changes.emplace_back("- Added support for older osu!.db versions (~2014)");
     v38_00.changes.emplace_back("- Fixed beatmap downloads sometimes not getting saved correctly");

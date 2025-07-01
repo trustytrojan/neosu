@@ -5,6 +5,14 @@
 #include "Osu.h"
 #include "TooltipOverlay.h"
 
+bool CBaseUIElement::isVisibleOnScreen() {
+    if(!isVisible()) return false;
+    const McRect visrect{{0, 0}, engine->getScreenSize()};
+    const Vector2 visrectCenter{visrect.getCenter()};
+    const Vector2 elemPosNudgedIn{Vector2{this->vPos.x, this->vPos.y}.nudge(visrectCenter, -5.0f)};
+    return visrect.contains(elemPosNudgedIn);
+}
+
 void CBaseUIElement::mouse_update(bool *propagate_clicks) {
     // check if mouse is inside element
     McRect temp = McRect(this->vPos.x + 1, this->vPos.y + 1, this->vSize.x - 1, this->vSize.y - 1);

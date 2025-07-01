@@ -16,7 +16,12 @@ class McRect {
     [[nodiscard]] McRect Union(const McRect &rect) const;
 
     [[nodiscard]] inline Vector2 getPos() const { return Vector2(this->fMinX, this->fMinY); }
-    [[nodiscard]] inline Vector2 getSize() const { return Vector2(this->fMaxX - this->fMinX, this->fMaxY - this->fMinY); }
+    [[nodiscard]] inline Vector2 getSize() const {
+        return Vector2(this->fMaxX - this->fMinX, this->fMaxY - this->fMinY);
+    }
+    [[nodiscard]] inline Vector2 getCenter() const {
+        return {((this->fMaxX - this->fMinX) / 2) + this->fMinX, ((this->fMaxY - this->fMinY) / 2) + this->fMinY};
+    }
 
     [[nodiscard]] inline float getX() const { return this->fMinX; }
     [[nodiscard]] inline float getY() const { return this->fMinY; }
