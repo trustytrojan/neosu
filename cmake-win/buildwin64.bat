@@ -134,6 +134,13 @@ if %ERRORLEVEL% neq 0 (
     exit /b 1
 )
 
+echo Installing main project...
+cmake --install "%BUILD_DIR%\neosu" --config %BUILD_TYPE%
+if %ERRORLEVEL% neq 0 (
+    echo Main project install failed
+    exit /b 1
+)
+
 echo.
 echo Build completed successfully!
 echo Executable: %INSTALL_PREFIX%\bin\neosu.exe

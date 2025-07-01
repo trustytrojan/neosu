@@ -102,9 +102,9 @@ void UIRankingScreenInfoLabel::setFromBeatmap(Beatmap *beatmap, DatabaseBeatmap 
 
 UString UIRankingScreenInfoLabel::buildPlayerString() {
     UString playerString{"Played by "};
-    playerString.append({this->sPlayer});
+    playerString.append(UString{this->sPlayer});
     playerString.append({" on "});
-    playerString.append({this->sDate});
+    playerString.append(UString{this->sDate});
 
     return playerString.trim();
 }

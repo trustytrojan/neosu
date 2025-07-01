@@ -54,8 +54,28 @@ UString::UString(const wchar_t *str, int length) {
     }
 }
 
+UString::UString(const std::string &utf8) : iLengthUtf8(static_cast<int>(utf8.length())) {
+    if(!utf8.empty()) fromUtf8(utf8.data(), static_cast<int>(utf8.length()));
+}
+
+UString::UString(const std::wstring &str) {
+    if(!str.empty()) {
+        this->sUnicode = str;
+        setLength(static_cast<int>(this->sUnicode.length()));
+        updateUtf8();
+    }
+}
+
 UString::UString(std::string_view utf8) : iLengthUtf8(static_cast<int>(utf8.length())) {
     if(!utf8.empty()) fromUtf8(utf8.data(), static_cast<int>(utf8.length()));
+}
+
+UString::UString(std::wstring_view str) {
+    if(!str.empty()) {
+        this->sUnicode.assign(str.data(), str.length());
+        setLength(static_cast<int>(this->sUnicode.length()));
+        updateUtf8();
+    }
 }
 
 void UString::clear() noexcept {

@@ -20,7 +20,6 @@
 
 #include "BaseEnvironment.h"  // for Env::cfg (consteval)
 #include "MD5Hash.h"          // convenience
-#include "types.h"
 #include "fmt/compile.h"
 #include "fmt/format.h"
 #include "fmt/printf.h"
@@ -46,11 +45,35 @@ class UString {
    public:
     // constructors
     constexpr UString() noexcept = default;
-    UString(const wchar_t *str);
+
+    // explicit constructors for sized arrays to prevent accidental conversions
+    explicit UString(const char *utf8, int length);
+    explicit UString(const wchar_t *str, int length);
+
+    // implicit constructors for string literals
+    template <size_t N>
+    UString(const char (&str)[N]) {
+        if(N > 1) fromUtf8(str, static_cast<int>(N - 1));  // N-1 to exclude null terminator
+    }
+
+    template <size_t N>
+    UString(const wchar_t (&str)[N]) {
+        if(N > 1) {
+            this->sUnicode.assign(str, N - 1);
+            setLength(static_cast<int>(this->sUnicode.length()));
+            updateUtf8();
+        }
+    }
+
+    // implicit constructors for const char*/const wchar_t*
     UString(const char *utf8);
-    UString(const char *utf8, int length);
-    UString(const wchar_t *str, int length);
+    UString(const wchar_t *str);
+
+    // implicit constructors for standard string types
+    UString(const std::string &utf8);
+    UString(const std::wstring &str);
     UString(std::string_view utf8);
+    UString(std::wstring_view str);
 
     // member functions
     UString(const UString &ustr) = default;
@@ -89,7 +112,9 @@ class UString {
     [[nodiscard]] constexpr bool isEmpty() const noexcept { return this->sUnicode.empty(); }
 
     // string tests
-    [[nodiscard]] constexpr bool endsWith(char ch) const noexcept { return !this->sUtf8.empty() && this->sUtf8.back() == ch; }
+    [[nodiscard]] constexpr bool endsWith(char ch) const noexcept {
+        return !this->sUtf8.empty() && this->sUtf8.back() == ch;
+    }
     [[nodiscard]] constexpr bool endsWith(wchar_t ch) const noexcept {
         return !this->sUnicode.empty() && this->sUnicode.back() == ch;
     }
@@ -99,14 +124,17 @@ class UString {
         return suffixLen <= thisLen &&
                std::equal(suffix.sUnicode.begin(), suffix.sUnicode.end(), this->sUnicode.end() - suffixLen);
     }
-    [[nodiscard]] constexpr bool startsWith(char ch) const noexcept { return !this->sUtf8.empty() && this->sUtf8.front() == ch; }
+    [[nodiscard]] constexpr bool startsWith(char ch) const noexcept {
+        return !this->sUtf8.empty() && this->sUtf8.front() == ch;
+    }
     [[nodiscard]] constexpr bool startsWith(wchar_t ch) const noexcept {
         return !this->sUnicode.empty() && this->sUnicode.front() == ch;
     }
     [[nodiscard]] constexpr bool startsWith(const UString &suffix) const noexcept {
         int suffixLen = suffix.length();
         int thisLen = length();
-        return suffixLen <= thisLen && std::equal(suffix.sUnicode.begin(), suffix.sUnicode.end(), this->sUnicode.begin());
+        return suffixLen <= thisLen &&
+               std::equal(suffix.sUnicode.begin(), suffix.sUnicode.end(), this->sUnicode.begin());
     }
 
     // search functions
@@ -175,7 +203,6 @@ class UString {
     }
 
     [[nodiscard]] UString trim() const;
-    std::vector<UString> wrap(McFont *font, f64 max_width);
 
     // type conversions
     template <typename T>
@@ -281,12 +308,14 @@ class UString {
     friend struct std::hash<UString>;
 
    private:
-    // pack ascii flag into the high bit of this->iLengthUnicode so we don't need an extra field just to store that information,
-    // which adds 8 bytes due to padding
+    // pack ascii flag into the high bit of this->iLengthUnicode so we don't need an extra field just to store that
+    // information, which adds 8 bytes due to padding
     static constexpr int ASCII_FLAG = 0x40000000;
     static constexpr int LENGTH_MASK = 0x3FFFFFFF;
 
-    void setLength(int len) noexcept { this->iLengthUnicode = (this->iLengthUnicode & ASCII_FLAG) | (len & LENGTH_MASK); }
+    void setLength(int len) noexcept {
+        this->iLengthUnicode = (this->iLengthUnicode & ASCII_FLAG) | (len & LENGTH_MASK);
+    }
     void setAsciiFlag(bool isAscii) noexcept {
         this->iLengthUnicode = isAscii ? (this->iLengthUnicode | ASCII_FLAG) : (this->iLengthUnicode & LENGTH_MASK);
     }
