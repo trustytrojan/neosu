@@ -28,15 +28,17 @@ UIRankingScreenInfoLabel::UIRankingScreenInfoLabel(float xPos, float yPos, float
 
 void UIRankingScreenInfoLabel::draw() {
     // build strings
-    UString titleText = this->sArtist.c_str();
-    titleText.append(" - ");
-    titleText.append(this->sTitle.c_str());
-    titleText.append(" [");
-    titleText.append(this->sDiff.c_str());
-    titleText.append("]");
-    UString subTitleText = "Beatmap by ";
-    subTitleText.append(this->sMapper.c_str());
-    const UString playerText = this->buildPlayerString();
+    UString titleText{this->sArtist};
+    titleText.append({" - "});
+    titleText.append({this->sTitle});
+    titleText.append({" ["});
+    titleText.append({this->sDiff});
+    titleText.append({"]"});
+    titleText = titleText.trim();
+    UString subTitleText{"Beatmap by "};
+    subTitleText.append({this->sMapper});
+    subTitleText = subTitleText.trim();
+    const UString playerText{this->buildPlayerString()};
 
     const float globalScale = std::max((this->vSize.y / this->getMinimumHeight()) * 0.741f, 1.0f);
 
@@ -99,12 +101,12 @@ void UIRankingScreenInfoLabel::setFromBeatmap(Beatmap *beatmap, DatabaseBeatmap 
 }
 
 UString UIRankingScreenInfoLabel::buildPlayerString() {
-    UString playerString = "Played by ";
-    playerString.append(this->sPlayer.c_str());
-    playerString.append(" on ");
-    playerString.append(this->sDate.c_str());
+    UString playerString{"Played by "};
+    playerString.append({this->sPlayer});
+    playerString.append({" on "});
+    playerString.append({this->sDate});
 
-    return playerString;
+    return playerString.trim();
 }
 
 float UIRankingScreenInfoLabel::getMinimumWidth() {
