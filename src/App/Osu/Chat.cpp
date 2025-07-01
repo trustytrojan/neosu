@@ -951,7 +951,7 @@ void Chat::updateUserList() {
         return;
     }
 
-    auto screen = engine->getScreenSize();
+    auto screen = osu->getScreenSize();
     bool is_widescreen = ((i32)(std::max(0, (i32)((screen.x - (screen.y * 4.f / 3.f)) / 2.f))) > 0);
     auto global_scale = is_widescreen ? (screen.x / 1366.f) : 1.f;
     auto card_size = Vector2{global_scale * 640 * 0.5f, global_scale * 150 * 0.5f};

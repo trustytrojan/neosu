@@ -61,7 +61,7 @@ void update_bottombar(bool* propagate_clicks) {
     bool clicked = !mouse_was_down && mouse->isLeftDown();
     mouse_was_down = mouse->isLeftDown();
 
-    auto screen = engine->getScreenSize();
+    auto screen = osu->getScreenSize();
     bool is_widescreen = ((i32)(std::max(0, (i32)((screen.x - (screen.y * 4.f / 3.f)) / 2.f))) > 0);
     global_scale = is_widescreen ? (screen.x / 1366.f) : 1.f;
 
@@ -87,7 +87,7 @@ void update_bottombar(bool* propagate_clicks) {
     // NOTE: Skin template shows 640:150px size, and 320px from options button origin, I cheated a bit
     osu->userButton->setSize(global_scale * 640 * 0.5, global_scale * 150 * 0.5);
     osu->userButton->setPos(btns_x[OPTIONS] + (i32)(global_scale * 320.f * 0.5f),
-                            engine->getScreenHeight() - osu->userButton->getSize().y);
+                            osu->getScreenHeight() - osu->userButton->getSize().y);
     osu->userButton->mouse_update(propagate_clicks);
 
     // Yes, the order looks whack. That's the correct order.
@@ -133,8 +133,8 @@ void draw_bottombar() {
         f32 bar_height = global_scale * 101.f;  // I think stable hardcodes this?
         Image* img = osu->getSkin()->songSelectBottom;
         g->setColor(0xffffffff);
-        g->scale((f32)engine->getScreenWidth() / (f32)img->getWidth(), bar_height / (f32)img->getHeight());
-        g->translate(0, engine->getScreenHeight() - bar_height);
+        g->scale((f32)osu->getScreenWidth() / (f32)img->getWidth(), bar_height / (f32)img->getHeight());
+        g->translate(0, osu->getScreenHeight() - bar_height);
         g->drawImage(img, AnchorPoint::TOP_LEFT);
     }
     g->popTransform();
@@ -152,7 +152,7 @@ void draw_bottombar() {
 
         f32 scale = global_scale * (base_imgs[i]->is_2x ? 0.5f : 1.f);
         g->setColor(0xffffffff);
-        base_imgs[i]->drawRaw(Vector2(btns_x[i], engine->getScreenHeight()), scale, AnchorPoint::BOTTOM_LEFT);
+        base_imgs[i]->drawRaw(Vector2(btns_x[i], osu->getScreenHeight()), scale, AnchorPoint::BOTTOM_LEFT);
     }
 
     // Ok, and now for the hover images... which are drawn in a weird order, same as update_bottombar()
@@ -160,25 +160,25 @@ void draw_bottombar() {
     f32 random_scale = global_scale * (random_img->is_2x ? 0.5f : 1.f);
     g->setColor(0xffffffff);
     g->setAlpha(btn_hovers[RANDOM]);
-    random_img->drawRaw(Vector2(btns_x[RANDOM], engine->getScreenHeight()), random_scale, AnchorPoint::BOTTOM_LEFT);
+    random_img->drawRaw(Vector2(btns_x[RANDOM], osu->getScreenHeight()), random_scale, AnchorPoint::BOTTOM_LEFT);
 
     auto mods_img = osu->getSkin()->selectionModsOver;
     f32 mods_scale = global_scale * (mods_img->is_2x ? 0.5f : 1.f);
     g->setColor(0xffffffff);
     g->setAlpha(btn_hovers[MODS]);
-    mods_img->drawRaw(Vector2(btns_x[MODS], engine->getScreenHeight()), mods_scale, AnchorPoint::BOTTOM_LEFT);
+    mods_img->drawRaw(Vector2(btns_x[MODS], osu->getScreenHeight()), mods_scale, AnchorPoint::BOTTOM_LEFT);
 
     auto mode_img = osu->getSkin()->selectionModeOver;
     f32 mode_scale = global_scale * (mode_img->is_2x ? 0.5f : 1.f);
     g->setColor(0xffffffff);
     g->setAlpha(btn_hovers[MODE]);
-    mode_img->drawRaw(Vector2(btns_x[MODE], engine->getScreenHeight()), mode_scale, AnchorPoint::BOTTOM_LEFT);
+    mode_img->drawRaw(Vector2(btns_x[MODE], osu->getScreenHeight()), mode_scale, AnchorPoint::BOTTOM_LEFT);
 
     auto options_img = osu->getSkin()->selectionOptionsOver;
     f32 options_scale = global_scale * (options_img->is_2x ? 0.5f : 1.f);
     g->setColor(0xffffffff);
     g->setAlpha(btn_hovers[OPTIONS]);
-    options_img->drawRaw(Vector2(btns_x[OPTIONS], engine->getScreenHeight()), options_scale, AnchorPoint::BOTTOM_LEFT);
+    options_img->drawRaw(Vector2(btns_x[OPTIONS], osu->getScreenHeight()), options_scale, AnchorPoint::BOTTOM_LEFT);
 
     // mode-osu-small (often used as overlay)
     auto mos_img = osu->getSkin()->mode_osu_small;
@@ -187,7 +187,7 @@ void draw_bottombar() {
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ADDITIVE);
         g->setColor(0xffffffff);
         mos_img->drawRaw(Vector2(btns_x[MODE] + (btns_x[MODS] - btns_x[MODE]) * 0.5f,
-                                 engine->getScreenHeight() - (global_scale * 56.f)),
+                                 osu->getScreenHeight() - (global_scale * 56.f)),
                          mos_scale, AnchorPoint::CENTER);
         g->setBlendMode(Graphics::BLEND_MODE::BLEND_MODE_ALPHA);
     }

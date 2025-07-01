@@ -62,7 +62,7 @@ SongButton::~SongButton() {
 void SongButton::draw() {
     if(!this->bVisible) return;
     if(this->vPos.y + this->vSize.y < 0) return;
-    if(this->vPos.y > engine->getScreenHeight()) return;
+    if(this->vPos.y > osu->getScreenHeight()) return;
 
     Button::draw();
 

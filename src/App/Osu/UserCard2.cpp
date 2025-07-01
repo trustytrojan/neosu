@@ -184,7 +184,7 @@ void UserCard2::draw() {
 void UserCard2::mouse_update(bool *propagate_clicks) {
     if(!this->bVisible) return;
 
-    auto screen = engine->getScreenSize();
+    auto screen = osu->getScreenSize();
     bool is_widescreen = ((i32)(std::max(0, (i32)((screen.x - (screen.y * 4.f / 3.f)) / 2.f))) > 0);
     f32 global_scale = screen.x / (is_widescreen ? 1366.f : 1024.f);
     auto card_size = Vector2{global_scale * 325, global_scale * 78};
