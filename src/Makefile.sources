@@ -101,7 +101,6 @@ neosu_SOURCES = \
 	src/Engine/Font.cpp \
 	src/Engine/Graphics.cpp \
 	src/Engine/Image.cpp \
-	src/Engine/Input/Gamepad.cpp \
 	src/Engine/Input/Keyboard.cpp \
 	src/Engine/Input/KeyboardEvent.cpp \
 	src/Engine/Input/Mouse.cpp \
@@ -124,7 +123,6 @@ neosu_SOURCES = \
 	src/Engine/Platform/WinGLLegacyInterface.cpp \
 	src/Engine/Platform/WinSDLEnvironment.cpp \
 	src/Engine/Platform/WinSDLGLES2Interface.cpp \
-	src/Engine/Platform/XInputGamepad.cpp \
 	src/Engine/Profiler.cpp \
 	src/Engine/RenderTarget.cpp \
 	src/Engine/Renderer/NullGraphicsInterface.cpp \

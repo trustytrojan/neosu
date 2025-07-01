@@ -890,16 +890,6 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
 #endif
     }
 
-#ifdef MCENGINE_FEATURE_SDL
-
-    addSubSection("Gamepad");
-    addSlider("Stick Sens.:", 0.1f, 6.0f, &cv_sdl_joystick_mouse_sensitivity)->setKeyDelta(0.01f);
-    addSlider("Stick Deadzone:", 0.0f, 0.95f, &cv_sdl_joystick0_deadzone)
-        ->setKeyDelta(0.01f)
-        ->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onSliderChangePercent));
-
-#endif
-
     this->addSpacer();
     const UString keyboardSectionTags = "keyboard keys key bindings binds keybinds keybindings";
     CBaseUIElement *subSectionKeyboard = this->addSubSection("Keyboard", keyboardSectionTags);

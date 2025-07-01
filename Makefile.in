@@ -243,7 +243,6 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/Engine/neosu-Font.$(OBJEXT) \
 	src/Engine/neosu-Graphics.$(OBJEXT) \
 	src/Engine/neosu-Image.$(OBJEXT) \
-	src/Engine/Input/neosu-Gamepad.$(OBJEXT) \
 	src/Engine/Input/neosu-Keyboard.$(OBJEXT) \
 	src/Engine/Input/neosu-KeyboardEvent.$(OBJEXT) \
 	src/Engine/Input/neosu-Mouse.$(OBJEXT) \
@@ -266,7 +265,6 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/Engine/Platform/neosu-WinGLLegacyInterface.$(OBJEXT) \
 	src/Engine/Platform/neosu-WinSDLEnvironment.$(OBJEXT) \
 	src/Engine/Platform/neosu-WinSDLGLES2Interface.$(OBJEXT) \
-	src/Engine/Platform/neosu-XInputGamepad.$(OBJEXT) \
 	src/Engine/neosu-Profiler.$(OBJEXT) \
 	src/Engine/neosu-RenderTarget.$(OBJEXT) \
 	src/Engine/Renderer/neosu-NullGraphicsInterface.$(OBJEXT) \
@@ -441,7 +439,6 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/Engine/$(DEPDIR)/neosu-RenderTarget.Po \
 	src/Engine/$(DEPDIR)/neosu-TextureAtlas.Po \
 	src/Engine/$(DEPDIR)/neosu-VertexArrayObject.Po \
-	src/Engine/Input/$(DEPDIR)/neosu-Gamepad.Po \
 	src/Engine/Input/$(DEPDIR)/neosu-Keyboard.Po \
 	src/Engine/Input/$(DEPDIR)/neosu-KeyboardEvent.Po \
 	src/Engine/Input/$(DEPDIR)/neosu-Mouse.Po \
@@ -463,7 +460,6 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-WinGLLegacyInterface.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-WinSDLEnvironment.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-WinSDLGLES2Interface.Po \
-	src/Engine/Platform/$(DEPDIR)/neosu-XInputGamepad.Po \
 	src/Engine/Renderer/$(DEPDIR)/neosu-NullGraphicsInterface.Po \
 	src/Engine/Renderer/$(DEPDIR)/neosu-NullImage.Po \
 	src/Engine/Renderer/$(DEPDIR)/neosu-NullRenderTarget.Po \
@@ -930,7 +926,6 @@ neosu_SOURCES = \
 	src/Engine/Font.cpp \
 	src/Engine/Graphics.cpp \
 	src/Engine/Image.cpp \
-	src/Engine/Input/Gamepad.cpp \
 	src/Engine/Input/Keyboard.cpp \
 	src/Engine/Input/KeyboardEvent.cpp \
 	src/Engine/Input/Mouse.cpp \
@@ -953,7 +948,6 @@ neosu_SOURCES = \
 	src/Engine/Platform/WinGLLegacyInterface.cpp \
 	src/Engine/Platform/WinSDLEnvironment.cpp \
 	src/Engine/Platform/WinSDLGLES2Interface.cpp \
-	src/Engine/Platform/XInputGamepad.cpp \
 	src/Engine/Profiler.cpp \
 	src/Engine/RenderTarget.cpp \
 	src/Engine/Renderer/NullGraphicsInterface.cpp \
@@ -1539,9 +1533,6 @@ src/Engine/Input/$(am__dirstamp):
 src/Engine/Input/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/Engine/Input/$(DEPDIR)
 	@: >>src/Engine/Input/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Input/neosu-Gamepad.$(OBJEXT):  \
-	src/Engine/Input/$(am__dirstamp) \
-	src/Engine/Input/$(DEPDIR)/$(am__dirstamp)
 src/Engine/Input/neosu-Keyboard.$(OBJEXT):  \
 	src/Engine/Input/$(am__dirstamp) \
 	src/Engine/Input/$(DEPDIR)/$(am__dirstamp)
@@ -1617,9 +1608,6 @@ src/Engine/Platform/neosu-WinSDLEnvironment.$(OBJEXT):  \
 	src/Engine/Platform/$(am__dirstamp) \
 	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
 src/Engine/Platform/neosu-WinSDLGLES2Interface.$(OBJEXT):  \
-	src/Engine/Platform/$(am__dirstamp) \
-	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Platform/neosu-XInputGamepad.$(OBJEXT):  \
 	src/Engine/Platform/$(am__dirstamp) \
 	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
 src/Engine/neosu-Profiler.$(OBJEXT): src/Engine/$(am__dirstamp) \
@@ -1933,7 +1921,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-RenderTarget.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-TextureAtlas.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-VertexArrayObject.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Input/$(DEPDIR)/neosu-Gamepad.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Input/$(DEPDIR)/neosu-Keyboard.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Input/$(DEPDIR)/neosu-KeyboardEvent.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Input/$(DEPDIR)/neosu-Mouse.Po@am__quote@ # am--include-marker
@@ -1955,7 +1942,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-WinGLLegacyInterface.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-WinSDLEnvironment.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-WinSDLGLES2Interface.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-XInputGamepad.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-NullGraphicsInterface.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-NullImage.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-NullRenderTarget.Po@am__quote@ # am--include-marker
@@ -3439,20 +3425,6 @@ src/Engine/neosu-Image.obj: src/Engine/Image.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-Image.obj `if test -f 'src/Engine/Image.cpp'; then $(CYGPATH_W) 'src/Engine/Image.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Image.cpp'; fi`
 
-src/Engine/Input/neosu-Gamepad.o: src/Engine/Input/Gamepad.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Input/neosu-Gamepad.o -MD -MP -MF src/Engine/Input/$(DEPDIR)/neosu-Gamepad.Tpo -c -o src/Engine/Input/neosu-Gamepad.o `test -f 'src/Engine/Input/Gamepad.cpp' || echo '$(srcdir)/'`src/Engine/Input/Gamepad.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Input/$(DEPDIR)/neosu-Gamepad.Tpo src/Engine/Input/$(DEPDIR)/neosu-Gamepad.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Input/Gamepad.cpp' object='src/Engine/Input/neosu-Gamepad.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Input/neosu-Gamepad.o `test -f 'src/Engine/Input/Gamepad.cpp' || echo '$(srcdir)/'`src/Engine/Input/Gamepad.cpp
-
-src/Engine/Input/neosu-Gamepad.obj: src/Engine/Input/Gamepad.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Input/neosu-Gamepad.obj -MD -MP -MF src/Engine/Input/$(DEPDIR)/neosu-Gamepad.Tpo -c -o src/Engine/Input/neosu-Gamepad.obj `if test -f 'src/Engine/Input/Gamepad.cpp'; then $(CYGPATH_W) 'src/Engine/Input/Gamepad.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Input/Gamepad.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Input/$(DEPDIR)/neosu-Gamepad.Tpo src/Engine/Input/$(DEPDIR)/neosu-Gamepad.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Input/Gamepad.cpp' object='src/Engine/Input/neosu-Gamepad.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Input/neosu-Gamepad.obj `if test -f 'src/Engine/Input/Gamepad.cpp'; then $(CYGPATH_W) 'src/Engine/Input/Gamepad.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Input/Gamepad.cpp'; fi`
-
 src/Engine/Input/neosu-Keyboard.o: src/Engine/Input/Keyboard.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Input/neosu-Keyboard.o -MD -MP -MF src/Engine/Input/$(DEPDIR)/neosu-Keyboard.Tpo -c -o src/Engine/Input/neosu-Keyboard.o `test -f 'src/Engine/Input/Keyboard.cpp' || echo '$(srcdir)/'`src/Engine/Input/Keyboard.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Input/$(DEPDIR)/neosu-Keyboard.Tpo src/Engine/Input/$(DEPDIR)/neosu-Keyboard.Po
@@ -3760,20 +3732,6 @@ src/Engine/Platform/neosu-WinSDLGLES2Interface.obj: src/Engine/Platform/WinSDLGL
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/WinSDLGLES2Interface.cpp' object='src/Engine/Platform/neosu-WinSDLGLES2Interface.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-WinSDLGLES2Interface.obj `if test -f 'src/Engine/Platform/WinSDLGLES2Interface.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/WinSDLGLES2Interface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/WinSDLGLES2Interface.cpp'; fi`
-
-src/Engine/Platform/neosu-XInputGamepad.o: src/Engine/Platform/XInputGamepad.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-XInputGamepad.o -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-XInputGamepad.Tpo -c -o src/Engine/Platform/neosu-XInputGamepad.o `test -f 'src/Engine/Platform/XInputGamepad.cpp' || echo '$(srcdir)/'`src/Engine/Platform/XInputGamepad.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-XInputGamepad.Tpo src/Engine/Platform/$(DEPDIR)/neosu-XInputGamepad.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/XInputGamepad.cpp' object='src/Engine/Platform/neosu-XInputGamepad.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-XInputGamepad.o `test -f 'src/Engine/Platform/XInputGamepad.cpp' || echo '$(srcdir)/'`src/Engine/Platform/XInputGamepad.cpp
-
-src/Engine/Platform/neosu-XInputGamepad.obj: src/Engine/Platform/XInputGamepad.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-XInputGamepad.obj -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-XInputGamepad.Tpo -c -o src/Engine/Platform/neosu-XInputGamepad.obj `if test -f 'src/Engine/Platform/XInputGamepad.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/XInputGamepad.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/XInputGamepad.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-XInputGamepad.Tpo src/Engine/Platform/$(DEPDIR)/neosu-XInputGamepad.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/XInputGamepad.cpp' object='src/Engine/Platform/neosu-XInputGamepad.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-XInputGamepad.obj `if test -f 'src/Engine/Platform/XInputGamepad.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/XInputGamepad.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/XInputGamepad.cpp'; fi`
 
 src/Engine/neosu-Profiler.o: src/Engine/Profiler.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/neosu-Profiler.o -MD -MP -MF src/Engine/$(DEPDIR)/neosu-Profiler.Tpo -c -o src/Engine/neosu-Profiler.o `test -f 'src/Engine/Profiler.cpp' || echo '$(srcdir)/'`src/Engine/Profiler.cpp
@@ -4905,7 +4863,6 @@ distclean: distclean-am
 	-rm -f src/Engine/$(DEPDIR)/neosu-RenderTarget.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-TextureAtlas.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-VertexArrayObject.Po
-	-rm -f src/Engine/Input/$(DEPDIR)/neosu-Gamepad.Po
 	-rm -f src/Engine/Input/$(DEPDIR)/neosu-Keyboard.Po
 	-rm -f src/Engine/Input/$(DEPDIR)/neosu-KeyboardEvent.Po
 	-rm -f src/Engine/Input/$(DEPDIR)/neosu-Mouse.Po
@@ -4927,7 +4884,6 @@ distclean: distclean-am
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinGLLegacyInterface.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinSDLEnvironment.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinSDLGLES2Interface.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-XInputGamepad.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullGraphicsInterface.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullImage.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullRenderTarget.Po
@@ -5128,7 +5084,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/Engine/$(DEPDIR)/neosu-RenderTarget.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-TextureAtlas.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-VertexArrayObject.Po
-	-rm -f src/Engine/Input/$(DEPDIR)/neosu-Gamepad.Po
 	-rm -f src/Engine/Input/$(DEPDIR)/neosu-Keyboard.Po
 	-rm -f src/Engine/Input/$(DEPDIR)/neosu-KeyboardEvent.Po
 	-rm -f src/Engine/Input/$(DEPDIR)/neosu-Mouse.Po
@@ -5150,7 +5105,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinGLLegacyInterface.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinSDLEnvironment.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinSDLGLES2Interface.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-XInputGamepad.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullGraphicsInterface.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullImage.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullRenderTarget.Po

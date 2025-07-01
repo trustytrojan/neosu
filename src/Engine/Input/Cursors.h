@@ -8,6 +8,8 @@
 #ifndef CURSORS_H
 #define CURSORS_H
 
+#include <cstdint>
+
 enum class CURSORTYPE : uint8_t {
     CURSOR_NORMAL,
     CURSOR_WAIT,

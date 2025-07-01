@@ -9,7 +9,6 @@
 class App;
 class Mouse;
 class ConVar;
-class Gamepad;
 class Keyboard;
 class InputDevice;
 class SoundEngine;
@@ -83,15 +82,12 @@ class Engine {
 
     // engine specifics
     void blackout() { this->bBlackout = true; }
-    void addGamepad(Gamepad *gamepad);
-    void removeGamepad(Gamepad *gamepad);
 
     // interfaces
    private:
     // singleton interface/instance decls
     static std::unique_ptr<Mouse> s_mouseInstance;
     static std::unique_ptr<Keyboard> s_keyboardInstance;
-    static std::unique_ptr<Gamepad> s_gamepadInstance;
     static std::unique_ptr<App> s_appInstance;
     static std::unique_ptr<Graphics> s_graphicsInstance;
     static std::unique_ptr<SoundEngine> s_soundEngineInstance;
@@ -103,7 +99,6 @@ class Engine {
    public:
     [[nodiscard]] inline const std::vector<Mouse *> &getMice() const { return this->mice; }
     [[nodiscard]] inline const std::vector<Keyboard *> &getKeyboards() const { return this->keyboards; }
-    [[nodiscard]] inline const std::vector<Gamepad *> &getGamepads() const { return this->gamepads; }
 
     // screen
     void requestResolutionChange(Vector2 newResolution);
@@ -132,7 +127,6 @@ class Engine {
     // input devices
     std::vector<Mouse *> mice;
     std::vector<Keyboard *> keyboards;
-    std::vector<Gamepad *> gamepads;
     std::vector<InputDevice *> inputDevices;
 
     // timing
@@ -284,7 +278,6 @@ class Engine {
 
 extern Mouse *mouse;
 extern Keyboard *keyboard;
-extern Gamepad *gamepad;
 extern App *app;
 extern Graphics *g;
 extern SoundEngine *soundEngine;

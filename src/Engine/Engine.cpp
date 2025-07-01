@@ -20,7 +20,6 @@
 #include "SoundEngine.h"
 #include "Timing.h"
 #include "VisualProfiler.h"
-#include "XInputGamepad.h"
 
 using namespace std;
 
@@ -28,7 +27,6 @@ Environment *env = NULL;
 
 std::unique_ptr<Mouse> Engine::s_mouseInstance = nullptr;
 std::unique_ptr<Keyboard> Engine::s_keyboardInstance = nullptr;
-std::unique_ptr<Gamepad> Engine::s_gamepadInstance = nullptr;
 std::unique_ptr<App> Engine::s_appInstance = nullptr;
 std::unique_ptr<Graphics> Engine::s_graphicsInstance = nullptr;
 std::unique_ptr<SoundEngine> Engine::s_soundEngineInstance = nullptr;
@@ -39,7 +37,6 @@ std::unique_ptr<ContextMenu> Engine::s_contextMenuInstance = nullptr;
 
 Mouse *mouse = nullptr;
 Keyboard *keyboard = nullptr;
-Gamepad *gamepad;
 App *app = nullptr;
 Graphics *g = nullptr;
 SoundEngine *soundEngine = nullptr;
@@ -109,12 +106,6 @@ Engine::Engine(Environment *environment, i32 argc, char **argv) {
         runtime_assert(keyboard, "Keyboard failed to initialize!");
         this->inputDevices.push_back(keyboard);
         this->keyboards.push_back(keyboard);
-
-        s_gamepadInstance = std::make_unique<XInputGamepad>();
-        gamepad = s_gamepadInstance.get();
-        runtime_assert(gamepad, "Gamepad failed to initialize!");
-        this->inputDevices.push_back(gamepad);
-        this->gamepads.push_back(gamepad);
 
         // create graphics through environment
         s_graphicsInstance.reset(env->createRenderer());
@@ -190,7 +181,7 @@ Engine::~Engine() {
     debugLog("Engine: Freeing input devices...\n");
     // first remove the mouse and keyboard from the input devices
     std::erase_if(this->inputDevices,
-                  [](InputDevice *device) { return device == mouse || device == keyboard || device == gamepad; });
+                  [](InputDevice *device) { return device == mouse || device == keyboard; });
 
     // delete remaining input devices (if any)
     for(auto *device : this->inputDevices) {
@@ -199,12 +190,10 @@ Engine::~Engine() {
     this->inputDevices.clear();
     this->mice.clear();
     this->keyboards.clear();
-    this->gamepads.clear();
 
     // reset the static unique_ptrs
     s_mouseInstance.reset();
     s_keyboardInstance.reset();
-    s_gamepadInstance.reset();
 
     debugLog("Engine: Freeing timer...\n");
     SAFE_DELETE(this->timer);
@@ -596,29 +585,6 @@ void Engine::showMessageError(UString title, UString message) {
 void Engine::showMessageErrorFatal(UString title, UString message) {
     debugLog("FATAL ERROR: [%s] | %s\n", title.toUtf8(), message.toUtf8());
     env->showMessageErrorFatal(title, message);
-}
-
-void Engine::addGamepad(Gamepad *gamepad) {
-    if(gamepad == NULL) {
-        this->showMessageError("Engine Error", "addGamepad(NULL)!");
-        return;
-    }
-
-    this->gamepads.push_back(gamepad);
-}
-
-void Engine::removeGamepad(Gamepad *gamepad) {
-    if(gamepad == NULL) {
-        this->showMessageError("Engine Error", "removeGamepad(NULL)!");
-        return;
-    }
-
-    for(size_t i = 0; i < this->gamepads.size(); i++) {
-        if(this->gamepads[i] == gamepad) {
-            this->gamepads.erase(this->gamepads.begin() + i);
-            break;
-        }
-    }
 }
 
 void Engine::requestResolutionChange(Vector2 newResolution) {
