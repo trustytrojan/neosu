@@ -17,7 +17,6 @@ class NullEnvironment : public Environment {
 
     // engine/factory
     Graphics *createRenderer() override;
-    ContextMenu *createContextMenu() override;
 
     // system
     void shutdown() override;

@@ -16,7 +16,6 @@
 #include "Lobby.h"
 #include "ModFPoSu.h"
 #include "Mouse.h"
-#include "OpenGLES2Interface.h"
 #include "Osu.h"
 #include "RankingScreen.h"
 #include "ResourceManager.h"
@@ -414,17 +413,6 @@ void HUD::drawCursorTrailInt(Shader *trailShader, std::vector<CURSORTRAIL> &trai
             trailShader->enable();
             {
                 trailShader->setUniform1f("time", engine->getTime());
-
-#ifdef MCENGINE_FEATURE_OPENGLES
-                {
-                    OpenGLES2Interface *gles2 = dynamic_cast<OpenGLES2Interface *>();
-                    if(gles2 != NULL) {
-                        gles2->forceUpdateTransform();
-                        Matrix4 mvp = gles2->getMVP();
-                        trailShader->setUniformMatrix4fv("mvp", mvp);
-                    }
-                }
-#endif
 
                 trailImage->bind();
                 {

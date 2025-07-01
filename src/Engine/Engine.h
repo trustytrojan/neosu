@@ -12,7 +12,6 @@ class ConVar;
 class Keyboard;
 class InputDevice;
 class SoundEngine;
-class ContextMenu;
 class NetworkHandler;
 class ResourceManager;
 class AnimationHandler;
@@ -94,7 +93,6 @@ class Engine {
     static std::unique_ptr<ResourceManager> s_resourceManagerInstance;
     static std::unique_ptr<NetworkHandler> s_networkHandlerInstance;
     static std::unique_ptr<AnimationHandler> s_animationHandlerInstance;
-    static std::unique_ptr<ContextMenu> s_contextMenuInstance;
 
    public:
     [[nodiscard]] inline const std::vector<Mouse *> &getMice() const { return this->mice; }
@@ -284,7 +282,6 @@ extern SoundEngine *soundEngine;
 extern ResourceManager *resourceManager;
 extern NetworkHandler *networkHandler;
 extern AnimationHandler *animationHandler;
-extern ContextMenu *contextMenu;
 
 extern Engine *engine;
 

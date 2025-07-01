@@ -20,7 +20,6 @@ class WinEnvironment : public Environment {
 
     // engine/factory
     Graphics *createRenderer();
-    ContextMenu *createContextMenu();
 
     // system
     void shutdown();

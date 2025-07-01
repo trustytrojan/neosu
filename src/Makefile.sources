@@ -93,7 +93,6 @@ neosu_SOURCES = \
 	src/Engine/Archival.cpp \
 	src/Engine/Camera.cpp \
 	src/Engine/ConVar.cpp \
-	src/Engine/ContextMenu.cpp \
 	src/Engine/DiscordInterface.cpp \
 	src/Engine/Engine.cpp \
 	src/Engine/Environment.cpp \
@@ -105,35 +104,19 @@ neosu_SOURCES = \
 	src/Engine/Input/KeyboardEvent.cpp \
 	src/Engine/Input/Mouse.cpp \
 	src/Engine/Main/main_Linux.cpp \
-	src/Engine/Main/main_SDL.cpp \
 	src/Engine/Main/main_Windows.cpp \
 	src/Engine/NetworkHandler.cpp \
-	src/Engine/Platform/LinuxContextMenu.cpp \
 	src/Engine/Platform/LinuxEnvironment.cpp \
 	src/Engine/Platform/LinuxGLLegacyInterface.cpp \
-	src/Engine/Platform/LinuxSDLEnvironment.cpp \
-	src/Engine/Platform/NullContextMenu.cpp \
 	src/Engine/Platform/NullEnvironment.cpp \
-	src/Engine/Platform/SDLEnvironment.cpp \
-	src/Engine/Platform/SDLGLES2Interface.cpp \
-	src/Engine/Platform/SDLGLLegacyInterface.cpp \
-	src/Engine/Platform/WinContextMenu.cpp \
 	src/Engine/Platform/WinEnvironment.cpp \
-	src/Engine/Platform/WinGL3Interface.cpp \
 	src/Engine/Platform/WinGLLegacyInterface.cpp \
-	src/Engine/Platform/WinSDLEnvironment.cpp \
-	src/Engine/Platform/WinSDLGLES2Interface.cpp \
 	src/Engine/Profiler.cpp \
 	src/Engine/RenderTarget.cpp \
 	src/Engine/Renderer/NullGraphicsInterface.cpp \
 	src/Engine/Renderer/NullImage.cpp \
 	src/Engine/Renderer/NullRenderTarget.cpp \
 	src/Engine/Renderer/NullShader.cpp \
-	src/Engine/Renderer/OpenGL3Interface.cpp \
-	src/Engine/Renderer/OpenGL3VertexArrayObject.cpp \
-	src/Engine/Renderer/OpenGLES2Interface.cpp \
-	src/Engine/Renderer/OpenGLES2Shader.cpp \
-	src/Engine/Renderer/OpenGLES2VertexArrayObject.cpp \
 	src/Engine/Renderer/OpenGLImage.cpp \
 	src/Engine/Renderer/OpenGLLegacyInterface.cpp \
 	src/Engine/Renderer/OpenGLRenderTarget.cpp \

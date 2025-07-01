@@ -235,7 +235,6 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/Engine/neosu-Archival.$(OBJEXT) \
 	src/Engine/neosu-Camera.$(OBJEXT) \
 	src/Engine/neosu-ConVar.$(OBJEXT) \
-	src/Engine/neosu-ContextMenu.$(OBJEXT) \
 	src/Engine/neosu-DiscordInterface.$(OBJEXT) \
 	src/Engine/neosu-Engine.$(OBJEXT) \
 	src/Engine/neosu-Environment.$(OBJEXT) \
@@ -247,35 +246,19 @@ am_neosu_OBJECTS = libraries/neosu-MD5.$(OBJEXT) \
 	src/Engine/Input/neosu-KeyboardEvent.$(OBJEXT) \
 	src/Engine/Input/neosu-Mouse.$(OBJEXT) \
 	src/Engine/Main/neosu-main_Linux.$(OBJEXT) \
-	src/Engine/Main/neosu-main_SDL.$(OBJEXT) \
 	src/Engine/Main/neosu-main_Windows.$(OBJEXT) \
 	src/Engine/neosu-NetworkHandler.$(OBJEXT) \
-	src/Engine/Platform/neosu-LinuxContextMenu.$(OBJEXT) \
 	src/Engine/Platform/neosu-LinuxEnvironment.$(OBJEXT) \
 	src/Engine/Platform/neosu-LinuxGLLegacyInterface.$(OBJEXT) \
-	src/Engine/Platform/neosu-LinuxSDLEnvironment.$(OBJEXT) \
-	src/Engine/Platform/neosu-NullContextMenu.$(OBJEXT) \
 	src/Engine/Platform/neosu-NullEnvironment.$(OBJEXT) \
-	src/Engine/Platform/neosu-SDLEnvironment.$(OBJEXT) \
-	src/Engine/Platform/neosu-SDLGLES2Interface.$(OBJEXT) \
-	src/Engine/Platform/neosu-SDLGLLegacyInterface.$(OBJEXT) \
-	src/Engine/Platform/neosu-WinContextMenu.$(OBJEXT) \
 	src/Engine/Platform/neosu-WinEnvironment.$(OBJEXT) \
-	src/Engine/Platform/neosu-WinGL3Interface.$(OBJEXT) \
 	src/Engine/Platform/neosu-WinGLLegacyInterface.$(OBJEXT) \
-	src/Engine/Platform/neosu-WinSDLEnvironment.$(OBJEXT) \
-	src/Engine/Platform/neosu-WinSDLGLES2Interface.$(OBJEXT) \
 	src/Engine/neosu-Profiler.$(OBJEXT) \
 	src/Engine/neosu-RenderTarget.$(OBJEXT) \
 	src/Engine/Renderer/neosu-NullGraphicsInterface.$(OBJEXT) \
 	src/Engine/Renderer/neosu-NullImage.$(OBJEXT) \
 	src/Engine/Renderer/neosu-NullRenderTarget.$(OBJEXT) \
 	src/Engine/Renderer/neosu-NullShader.$(OBJEXT) \
-	src/Engine/Renderer/neosu-OpenGL3Interface.$(OBJEXT) \
-	src/Engine/Renderer/neosu-OpenGL3VertexArrayObject.$(OBJEXT) \
-	src/Engine/Renderer/neosu-OpenGLES2Interface.$(OBJEXT) \
-	src/Engine/Renderer/neosu-OpenGLES2Shader.$(OBJEXT) \
-	src/Engine/Renderer/neosu-OpenGLES2VertexArrayObject.$(OBJEXT) \
 	src/Engine/Renderer/neosu-OpenGLImage.$(OBJEXT) \
 	src/Engine/Renderer/neosu-OpenGLLegacyInterface.$(OBJEXT) \
 	src/Engine/Renderer/neosu-OpenGLRenderTarget.$(OBJEXT) \
@@ -426,7 +409,6 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/Engine/$(DEPDIR)/neosu-Archival.Po \
 	src/Engine/$(DEPDIR)/neosu-Camera.Po \
 	src/Engine/$(DEPDIR)/neosu-ConVar.Po \
-	src/Engine/$(DEPDIR)/neosu-ContextMenu.Po \
 	src/Engine/$(DEPDIR)/neosu-DiscordInterface.Po \
 	src/Engine/$(DEPDIR)/neosu-Engine.Po \
 	src/Engine/$(DEPDIR)/neosu-Environment.Po \
@@ -443,32 +425,16 @@ am__depfiles_remade = libraries/$(DEPDIR)/neosu-MD5.Po \
 	src/Engine/Input/$(DEPDIR)/neosu-KeyboardEvent.Po \
 	src/Engine/Input/$(DEPDIR)/neosu-Mouse.Po \
 	src/Engine/Main/$(DEPDIR)/neosu-main_Linux.Po \
-	src/Engine/Main/$(DEPDIR)/neosu-main_SDL.Po \
 	src/Engine/Main/$(DEPDIR)/neosu-main_Windows.Po \
-	src/Engine/Platform/$(DEPDIR)/neosu-LinuxContextMenu.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-LinuxEnvironment.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Po \
-	src/Engine/Platform/$(DEPDIR)/neosu-LinuxSDLEnvironment.Po \
-	src/Engine/Platform/$(DEPDIR)/neosu-NullContextMenu.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-NullEnvironment.Po \
-	src/Engine/Platform/$(DEPDIR)/neosu-SDLEnvironment.Po \
-	src/Engine/Platform/$(DEPDIR)/neosu-SDLGLES2Interface.Po \
-	src/Engine/Platform/$(DEPDIR)/neosu-SDLGLLegacyInterface.Po \
-	src/Engine/Platform/$(DEPDIR)/neosu-WinContextMenu.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-WinEnvironment.Po \
-	src/Engine/Platform/$(DEPDIR)/neosu-WinGL3Interface.Po \
 	src/Engine/Platform/$(DEPDIR)/neosu-WinGLLegacyInterface.Po \
-	src/Engine/Platform/$(DEPDIR)/neosu-WinSDLEnvironment.Po \
-	src/Engine/Platform/$(DEPDIR)/neosu-WinSDLGLES2Interface.Po \
 	src/Engine/Renderer/$(DEPDIR)/neosu-NullGraphicsInterface.Po \
 	src/Engine/Renderer/$(DEPDIR)/neosu-NullImage.Po \
 	src/Engine/Renderer/$(DEPDIR)/neosu-NullRenderTarget.Po \
 	src/Engine/Renderer/$(DEPDIR)/neosu-NullShader.Po \
-	src/Engine/Renderer/$(DEPDIR)/neosu-OpenGL3Interface.Po \
-	src/Engine/Renderer/$(DEPDIR)/neosu-OpenGL3VertexArrayObject.Po \
-	src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2Interface.Po \
-	src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2Shader.Po \
-	src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2VertexArrayObject.Po \
 	src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLImage.Po \
 	src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLLegacyInterface.Po \
 	src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLRenderTarget.Po \
@@ -918,7 +884,6 @@ neosu_SOURCES = \
 	src/Engine/Archival.cpp \
 	src/Engine/Camera.cpp \
 	src/Engine/ConVar.cpp \
-	src/Engine/ContextMenu.cpp \
 	src/Engine/DiscordInterface.cpp \
 	src/Engine/Engine.cpp \
 	src/Engine/Environment.cpp \
@@ -930,35 +895,19 @@ neosu_SOURCES = \
 	src/Engine/Input/KeyboardEvent.cpp \
 	src/Engine/Input/Mouse.cpp \
 	src/Engine/Main/main_Linux.cpp \
-	src/Engine/Main/main_SDL.cpp \
 	src/Engine/Main/main_Windows.cpp \
 	src/Engine/NetworkHandler.cpp \
-	src/Engine/Platform/LinuxContextMenu.cpp \
 	src/Engine/Platform/LinuxEnvironment.cpp \
 	src/Engine/Platform/LinuxGLLegacyInterface.cpp \
-	src/Engine/Platform/LinuxSDLEnvironment.cpp \
-	src/Engine/Platform/NullContextMenu.cpp \
 	src/Engine/Platform/NullEnvironment.cpp \
-	src/Engine/Platform/SDLEnvironment.cpp \
-	src/Engine/Platform/SDLGLES2Interface.cpp \
-	src/Engine/Platform/SDLGLLegacyInterface.cpp \
-	src/Engine/Platform/WinContextMenu.cpp \
 	src/Engine/Platform/WinEnvironment.cpp \
-	src/Engine/Platform/WinGL3Interface.cpp \
 	src/Engine/Platform/WinGLLegacyInterface.cpp \
-	src/Engine/Platform/WinSDLEnvironment.cpp \
-	src/Engine/Platform/WinSDLGLES2Interface.cpp \
 	src/Engine/Profiler.cpp \
 	src/Engine/RenderTarget.cpp \
 	src/Engine/Renderer/NullGraphicsInterface.cpp \
 	src/Engine/Renderer/NullImage.cpp \
 	src/Engine/Renderer/NullRenderTarget.cpp \
 	src/Engine/Renderer/NullShader.cpp \
-	src/Engine/Renderer/OpenGL3Interface.cpp \
-	src/Engine/Renderer/OpenGL3VertexArrayObject.cpp \
-	src/Engine/Renderer/OpenGLES2Interface.cpp \
-	src/Engine/Renderer/OpenGLES2Shader.cpp \
-	src/Engine/Renderer/OpenGLES2VertexArrayObject.cpp \
 	src/Engine/Renderer/OpenGLImage.cpp \
 	src/Engine/Renderer/OpenGLLegacyInterface.cpp \
 	src/Engine/Renderer/OpenGLRenderTarget.cpp \
@@ -1510,8 +1459,6 @@ src/Engine/neosu-Camera.$(OBJEXT): src/Engine/$(am__dirstamp) \
 	src/Engine/$(DEPDIR)/$(am__dirstamp)
 src/Engine/neosu-ConVar.$(OBJEXT): src/Engine/$(am__dirstamp) \
 	src/Engine/$(DEPDIR)/$(am__dirstamp)
-src/Engine/neosu-ContextMenu.$(OBJEXT): src/Engine/$(am__dirstamp) \
-	src/Engine/$(DEPDIR)/$(am__dirstamp)
 src/Engine/neosu-DiscordInterface.$(OBJEXT):  \
 	src/Engine/$(am__dirstamp) \
 	src/Engine/$(DEPDIR)/$(am__dirstamp)
@@ -1551,9 +1498,6 @@ src/Engine/Main/$(DEPDIR)/$(am__dirstamp):
 src/Engine/Main/neosu-main_Linux.$(OBJEXT):  \
 	src/Engine/Main/$(am__dirstamp) \
 	src/Engine/Main/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Main/neosu-main_SDL.$(OBJEXT):  \
-	src/Engine/Main/$(am__dirstamp) \
-	src/Engine/Main/$(DEPDIR)/$(am__dirstamp)
 src/Engine/Main/neosu-main_Windows.$(OBJEXT):  \
 	src/Engine/Main/$(am__dirstamp) \
 	src/Engine/Main/$(DEPDIR)/$(am__dirstamp)
@@ -1565,49 +1509,19 @@ src/Engine/Platform/$(am__dirstamp):
 src/Engine/Platform/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/Engine/Platform/$(DEPDIR)
 	@: >>src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Platform/neosu-LinuxContextMenu.$(OBJEXT):  \
-	src/Engine/Platform/$(am__dirstamp) \
-	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
 src/Engine/Platform/neosu-LinuxEnvironment.$(OBJEXT):  \
 	src/Engine/Platform/$(am__dirstamp) \
 	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
 src/Engine/Platform/neosu-LinuxGLLegacyInterface.$(OBJEXT):  \
 	src/Engine/Platform/$(am__dirstamp) \
 	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Platform/neosu-LinuxSDLEnvironment.$(OBJEXT):  \
-	src/Engine/Platform/$(am__dirstamp) \
-	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Platform/neosu-NullContextMenu.$(OBJEXT):  \
-	src/Engine/Platform/$(am__dirstamp) \
-	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
 src/Engine/Platform/neosu-NullEnvironment.$(OBJEXT):  \
-	src/Engine/Platform/$(am__dirstamp) \
-	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Platform/neosu-SDLEnvironment.$(OBJEXT):  \
-	src/Engine/Platform/$(am__dirstamp) \
-	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Platform/neosu-SDLGLES2Interface.$(OBJEXT):  \
-	src/Engine/Platform/$(am__dirstamp) \
-	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Platform/neosu-SDLGLLegacyInterface.$(OBJEXT):  \
-	src/Engine/Platform/$(am__dirstamp) \
-	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Platform/neosu-WinContextMenu.$(OBJEXT):  \
 	src/Engine/Platform/$(am__dirstamp) \
 	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
 src/Engine/Platform/neosu-WinEnvironment.$(OBJEXT):  \
 	src/Engine/Platform/$(am__dirstamp) \
 	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Platform/neosu-WinGL3Interface.$(OBJEXT):  \
-	src/Engine/Platform/$(am__dirstamp) \
-	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
 src/Engine/Platform/neosu-WinGLLegacyInterface.$(OBJEXT):  \
-	src/Engine/Platform/$(am__dirstamp) \
-	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Platform/neosu-WinSDLEnvironment.$(OBJEXT):  \
-	src/Engine/Platform/$(am__dirstamp) \
-	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Platform/neosu-WinSDLGLES2Interface.$(OBJEXT):  \
 	src/Engine/Platform/$(am__dirstamp) \
 	src/Engine/Platform/$(DEPDIR)/$(am__dirstamp)
 src/Engine/neosu-Profiler.$(OBJEXT): src/Engine/$(am__dirstamp) \
@@ -1630,21 +1544,6 @@ src/Engine/Renderer/neosu-NullRenderTarget.$(OBJEXT):  \
 	src/Engine/Renderer/$(am__dirstamp) \
 	src/Engine/Renderer/$(DEPDIR)/$(am__dirstamp)
 src/Engine/Renderer/neosu-NullShader.$(OBJEXT):  \
-	src/Engine/Renderer/$(am__dirstamp) \
-	src/Engine/Renderer/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Renderer/neosu-OpenGL3Interface.$(OBJEXT):  \
-	src/Engine/Renderer/$(am__dirstamp) \
-	src/Engine/Renderer/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Renderer/neosu-OpenGL3VertexArrayObject.$(OBJEXT):  \
-	src/Engine/Renderer/$(am__dirstamp) \
-	src/Engine/Renderer/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Renderer/neosu-OpenGLES2Interface.$(OBJEXT):  \
-	src/Engine/Renderer/$(am__dirstamp) \
-	src/Engine/Renderer/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Renderer/neosu-OpenGLES2Shader.$(OBJEXT):  \
-	src/Engine/Renderer/$(am__dirstamp) \
-	src/Engine/Renderer/$(DEPDIR)/$(am__dirstamp)
-src/Engine/Renderer/neosu-OpenGLES2VertexArrayObject.$(OBJEXT):  \
 	src/Engine/Renderer/$(am__dirstamp) \
 	src/Engine/Renderer/$(DEPDIR)/$(am__dirstamp)
 src/Engine/Renderer/neosu-OpenGLImage.$(OBJEXT):  \
@@ -1908,7 +1807,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-Archival.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-Camera.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-ConVar.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-ContextMenu.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-DiscordInterface.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-Engine.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/$(DEPDIR)/neosu-Environment.Po@am__quote@ # am--include-marker
@@ -1925,32 +1823,16 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Input/$(DEPDIR)/neosu-KeyboardEvent.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Input/$(DEPDIR)/neosu-Mouse.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Main/$(DEPDIR)/neosu-main_Linux.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Main/$(DEPDIR)/neosu-main_SDL.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Main/$(DEPDIR)/neosu-main_Windows.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-LinuxContextMenu.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-LinuxEnvironment.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-LinuxSDLEnvironment.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-NullContextMenu.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-NullEnvironment.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-SDLEnvironment.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-SDLGLES2Interface.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-SDLGLLegacyInterface.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-WinContextMenu.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-WinEnvironment.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-WinGL3Interface.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-WinGLLegacyInterface.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-WinSDLEnvironment.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Platform/$(DEPDIR)/neosu-WinSDLGLES2Interface.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-NullGraphicsInterface.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-NullImage.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-NullRenderTarget.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-NullShader.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-OpenGL3Interface.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-OpenGL3VertexArrayObject.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2Interface.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2Shader.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2VertexArrayObject.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLImage.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLLegacyInterface.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLRenderTarget.Po@am__quote@ # am--include-marker
@@ -3313,20 +3195,6 @@ src/Engine/neosu-ConVar.obj: src/Engine/ConVar.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-ConVar.obj `if test -f 'src/Engine/ConVar.cpp'; then $(CYGPATH_W) 'src/Engine/ConVar.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/ConVar.cpp'; fi`
 
-src/Engine/neosu-ContextMenu.o: src/Engine/ContextMenu.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/neosu-ContextMenu.o -MD -MP -MF src/Engine/$(DEPDIR)/neosu-ContextMenu.Tpo -c -o src/Engine/neosu-ContextMenu.o `test -f 'src/Engine/ContextMenu.cpp' || echo '$(srcdir)/'`src/Engine/ContextMenu.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/$(DEPDIR)/neosu-ContextMenu.Tpo src/Engine/$(DEPDIR)/neosu-ContextMenu.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/ContextMenu.cpp' object='src/Engine/neosu-ContextMenu.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-ContextMenu.o `test -f 'src/Engine/ContextMenu.cpp' || echo '$(srcdir)/'`src/Engine/ContextMenu.cpp
-
-src/Engine/neosu-ContextMenu.obj: src/Engine/ContextMenu.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/neosu-ContextMenu.obj -MD -MP -MF src/Engine/$(DEPDIR)/neosu-ContextMenu.Tpo -c -o src/Engine/neosu-ContextMenu.obj `if test -f 'src/Engine/ContextMenu.cpp'; then $(CYGPATH_W) 'src/Engine/ContextMenu.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/ContextMenu.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/$(DEPDIR)/neosu-ContextMenu.Tpo src/Engine/$(DEPDIR)/neosu-ContextMenu.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/ContextMenu.cpp' object='src/Engine/neosu-ContextMenu.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-ContextMenu.obj `if test -f 'src/Engine/ContextMenu.cpp'; then $(CYGPATH_W) 'src/Engine/ContextMenu.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/ContextMenu.cpp'; fi`
-
 src/Engine/neosu-DiscordInterface.o: src/Engine/DiscordInterface.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/neosu-DiscordInterface.o -MD -MP -MF src/Engine/$(DEPDIR)/neosu-DiscordInterface.Tpo -c -o src/Engine/neosu-DiscordInterface.o `test -f 'src/Engine/DiscordInterface.cpp' || echo '$(srcdir)/'`src/Engine/DiscordInterface.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/$(DEPDIR)/neosu-DiscordInterface.Tpo src/Engine/$(DEPDIR)/neosu-DiscordInterface.Po
@@ -3481,20 +3349,6 @@ src/Engine/Main/neosu-main_Linux.obj: src/Engine/Main/main_Linux.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Main/neosu-main_Linux.obj `if test -f 'src/Engine/Main/main_Linux.cpp'; then $(CYGPATH_W) 'src/Engine/Main/main_Linux.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Main/main_Linux.cpp'; fi`
 
-src/Engine/Main/neosu-main_SDL.o: src/Engine/Main/main_SDL.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Main/neosu-main_SDL.o -MD -MP -MF src/Engine/Main/$(DEPDIR)/neosu-main_SDL.Tpo -c -o src/Engine/Main/neosu-main_SDL.o `test -f 'src/Engine/Main/main_SDL.cpp' || echo '$(srcdir)/'`src/Engine/Main/main_SDL.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Main/$(DEPDIR)/neosu-main_SDL.Tpo src/Engine/Main/$(DEPDIR)/neosu-main_SDL.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Main/main_SDL.cpp' object='src/Engine/Main/neosu-main_SDL.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Main/neosu-main_SDL.o `test -f 'src/Engine/Main/main_SDL.cpp' || echo '$(srcdir)/'`src/Engine/Main/main_SDL.cpp
-
-src/Engine/Main/neosu-main_SDL.obj: src/Engine/Main/main_SDL.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Main/neosu-main_SDL.obj -MD -MP -MF src/Engine/Main/$(DEPDIR)/neosu-main_SDL.Tpo -c -o src/Engine/Main/neosu-main_SDL.obj `if test -f 'src/Engine/Main/main_SDL.cpp'; then $(CYGPATH_W) 'src/Engine/Main/main_SDL.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Main/main_SDL.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Main/$(DEPDIR)/neosu-main_SDL.Tpo src/Engine/Main/$(DEPDIR)/neosu-main_SDL.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Main/main_SDL.cpp' object='src/Engine/Main/neosu-main_SDL.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Main/neosu-main_SDL.obj `if test -f 'src/Engine/Main/main_SDL.cpp'; then $(CYGPATH_W) 'src/Engine/Main/main_SDL.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Main/main_SDL.cpp'; fi`
-
 src/Engine/Main/neosu-main_Windows.o: src/Engine/Main/main_Windows.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Main/neosu-main_Windows.o -MD -MP -MF src/Engine/Main/$(DEPDIR)/neosu-main_Windows.Tpo -c -o src/Engine/Main/neosu-main_Windows.o `test -f 'src/Engine/Main/main_Windows.cpp' || echo '$(srcdir)/'`src/Engine/Main/main_Windows.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Main/$(DEPDIR)/neosu-main_Windows.Tpo src/Engine/Main/$(DEPDIR)/neosu-main_Windows.Po
@@ -3522,20 +3376,6 @@ src/Engine/neosu-NetworkHandler.obj: src/Engine/NetworkHandler.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/NetworkHandler.cpp' object='src/Engine/neosu-NetworkHandler.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/neosu-NetworkHandler.obj `if test -f 'src/Engine/NetworkHandler.cpp'; then $(CYGPATH_W) 'src/Engine/NetworkHandler.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/NetworkHandler.cpp'; fi`
-
-src/Engine/Platform/neosu-LinuxContextMenu.o: src/Engine/Platform/LinuxContextMenu.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-LinuxContextMenu.o -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-LinuxContextMenu.Tpo -c -o src/Engine/Platform/neosu-LinuxContextMenu.o `test -f 'src/Engine/Platform/LinuxContextMenu.cpp' || echo '$(srcdir)/'`src/Engine/Platform/LinuxContextMenu.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-LinuxContextMenu.Tpo src/Engine/Platform/$(DEPDIR)/neosu-LinuxContextMenu.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/LinuxContextMenu.cpp' object='src/Engine/Platform/neosu-LinuxContextMenu.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-LinuxContextMenu.o `test -f 'src/Engine/Platform/LinuxContextMenu.cpp' || echo '$(srcdir)/'`src/Engine/Platform/LinuxContextMenu.cpp
-
-src/Engine/Platform/neosu-LinuxContextMenu.obj: src/Engine/Platform/LinuxContextMenu.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-LinuxContextMenu.obj -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-LinuxContextMenu.Tpo -c -o src/Engine/Platform/neosu-LinuxContextMenu.obj `if test -f 'src/Engine/Platform/LinuxContextMenu.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/LinuxContextMenu.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/LinuxContextMenu.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-LinuxContextMenu.Tpo src/Engine/Platform/$(DEPDIR)/neosu-LinuxContextMenu.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/LinuxContextMenu.cpp' object='src/Engine/Platform/neosu-LinuxContextMenu.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-LinuxContextMenu.obj `if test -f 'src/Engine/Platform/LinuxContextMenu.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/LinuxContextMenu.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/LinuxContextMenu.cpp'; fi`
 
 src/Engine/Platform/neosu-LinuxEnvironment.o: src/Engine/Platform/LinuxEnvironment.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-LinuxEnvironment.o -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-LinuxEnvironment.Tpo -c -o src/Engine/Platform/neosu-LinuxEnvironment.o `test -f 'src/Engine/Platform/LinuxEnvironment.cpp' || echo '$(srcdir)/'`src/Engine/Platform/LinuxEnvironment.cpp
@@ -3565,34 +3405,6 @@ src/Engine/Platform/neosu-LinuxGLLegacyInterface.obj: src/Engine/Platform/LinuxG
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-LinuxGLLegacyInterface.obj `if test -f 'src/Engine/Platform/LinuxGLLegacyInterface.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/LinuxGLLegacyInterface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/LinuxGLLegacyInterface.cpp'; fi`
 
-src/Engine/Platform/neosu-LinuxSDLEnvironment.o: src/Engine/Platform/LinuxSDLEnvironment.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-LinuxSDLEnvironment.o -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-LinuxSDLEnvironment.Tpo -c -o src/Engine/Platform/neosu-LinuxSDLEnvironment.o `test -f 'src/Engine/Platform/LinuxSDLEnvironment.cpp' || echo '$(srcdir)/'`src/Engine/Platform/LinuxSDLEnvironment.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-LinuxSDLEnvironment.Tpo src/Engine/Platform/$(DEPDIR)/neosu-LinuxSDLEnvironment.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/LinuxSDLEnvironment.cpp' object='src/Engine/Platform/neosu-LinuxSDLEnvironment.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-LinuxSDLEnvironment.o `test -f 'src/Engine/Platform/LinuxSDLEnvironment.cpp' || echo '$(srcdir)/'`src/Engine/Platform/LinuxSDLEnvironment.cpp
-
-src/Engine/Platform/neosu-LinuxSDLEnvironment.obj: src/Engine/Platform/LinuxSDLEnvironment.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-LinuxSDLEnvironment.obj -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-LinuxSDLEnvironment.Tpo -c -o src/Engine/Platform/neosu-LinuxSDLEnvironment.obj `if test -f 'src/Engine/Platform/LinuxSDLEnvironment.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/LinuxSDLEnvironment.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/LinuxSDLEnvironment.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-LinuxSDLEnvironment.Tpo src/Engine/Platform/$(DEPDIR)/neosu-LinuxSDLEnvironment.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/LinuxSDLEnvironment.cpp' object='src/Engine/Platform/neosu-LinuxSDLEnvironment.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-LinuxSDLEnvironment.obj `if test -f 'src/Engine/Platform/LinuxSDLEnvironment.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/LinuxSDLEnvironment.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/LinuxSDLEnvironment.cpp'; fi`
-
-src/Engine/Platform/neosu-NullContextMenu.o: src/Engine/Platform/NullContextMenu.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-NullContextMenu.o -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-NullContextMenu.Tpo -c -o src/Engine/Platform/neosu-NullContextMenu.o `test -f 'src/Engine/Platform/NullContextMenu.cpp' || echo '$(srcdir)/'`src/Engine/Platform/NullContextMenu.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-NullContextMenu.Tpo src/Engine/Platform/$(DEPDIR)/neosu-NullContextMenu.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/NullContextMenu.cpp' object='src/Engine/Platform/neosu-NullContextMenu.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-NullContextMenu.o `test -f 'src/Engine/Platform/NullContextMenu.cpp' || echo '$(srcdir)/'`src/Engine/Platform/NullContextMenu.cpp
-
-src/Engine/Platform/neosu-NullContextMenu.obj: src/Engine/Platform/NullContextMenu.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-NullContextMenu.obj -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-NullContextMenu.Tpo -c -o src/Engine/Platform/neosu-NullContextMenu.obj `if test -f 'src/Engine/Platform/NullContextMenu.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/NullContextMenu.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/NullContextMenu.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-NullContextMenu.Tpo src/Engine/Platform/$(DEPDIR)/neosu-NullContextMenu.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/NullContextMenu.cpp' object='src/Engine/Platform/neosu-NullContextMenu.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-NullContextMenu.obj `if test -f 'src/Engine/Platform/NullContextMenu.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/NullContextMenu.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/NullContextMenu.cpp'; fi`
-
 src/Engine/Platform/neosu-NullEnvironment.o: src/Engine/Platform/NullEnvironment.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-NullEnvironment.o -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-NullEnvironment.Tpo -c -o src/Engine/Platform/neosu-NullEnvironment.o `test -f 'src/Engine/Platform/NullEnvironment.cpp' || echo '$(srcdir)/'`src/Engine/Platform/NullEnvironment.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-NullEnvironment.Tpo src/Engine/Platform/$(DEPDIR)/neosu-NullEnvironment.Po
@@ -3606,62 +3418,6 @@ src/Engine/Platform/neosu-NullEnvironment.obj: src/Engine/Platform/NullEnvironme
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/NullEnvironment.cpp' object='src/Engine/Platform/neosu-NullEnvironment.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-NullEnvironment.obj `if test -f 'src/Engine/Platform/NullEnvironment.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/NullEnvironment.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/NullEnvironment.cpp'; fi`
-
-src/Engine/Platform/neosu-SDLEnvironment.o: src/Engine/Platform/SDLEnvironment.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-SDLEnvironment.o -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-SDLEnvironment.Tpo -c -o src/Engine/Platform/neosu-SDLEnvironment.o `test -f 'src/Engine/Platform/SDLEnvironment.cpp' || echo '$(srcdir)/'`src/Engine/Platform/SDLEnvironment.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-SDLEnvironment.Tpo src/Engine/Platform/$(DEPDIR)/neosu-SDLEnvironment.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/SDLEnvironment.cpp' object='src/Engine/Platform/neosu-SDLEnvironment.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-SDLEnvironment.o `test -f 'src/Engine/Platform/SDLEnvironment.cpp' || echo '$(srcdir)/'`src/Engine/Platform/SDLEnvironment.cpp
-
-src/Engine/Platform/neosu-SDLEnvironment.obj: src/Engine/Platform/SDLEnvironment.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-SDLEnvironment.obj -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-SDLEnvironment.Tpo -c -o src/Engine/Platform/neosu-SDLEnvironment.obj `if test -f 'src/Engine/Platform/SDLEnvironment.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/SDLEnvironment.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/SDLEnvironment.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-SDLEnvironment.Tpo src/Engine/Platform/$(DEPDIR)/neosu-SDLEnvironment.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/SDLEnvironment.cpp' object='src/Engine/Platform/neosu-SDLEnvironment.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-SDLEnvironment.obj `if test -f 'src/Engine/Platform/SDLEnvironment.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/SDLEnvironment.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/SDLEnvironment.cpp'; fi`
-
-src/Engine/Platform/neosu-SDLGLES2Interface.o: src/Engine/Platform/SDLGLES2Interface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-SDLGLES2Interface.o -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-SDLGLES2Interface.Tpo -c -o src/Engine/Platform/neosu-SDLGLES2Interface.o `test -f 'src/Engine/Platform/SDLGLES2Interface.cpp' || echo '$(srcdir)/'`src/Engine/Platform/SDLGLES2Interface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-SDLGLES2Interface.Tpo src/Engine/Platform/$(DEPDIR)/neosu-SDLGLES2Interface.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/SDLGLES2Interface.cpp' object='src/Engine/Platform/neosu-SDLGLES2Interface.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-SDLGLES2Interface.o `test -f 'src/Engine/Platform/SDLGLES2Interface.cpp' || echo '$(srcdir)/'`src/Engine/Platform/SDLGLES2Interface.cpp
-
-src/Engine/Platform/neosu-SDLGLES2Interface.obj: src/Engine/Platform/SDLGLES2Interface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-SDLGLES2Interface.obj -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-SDLGLES2Interface.Tpo -c -o src/Engine/Platform/neosu-SDLGLES2Interface.obj `if test -f 'src/Engine/Platform/SDLGLES2Interface.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/SDLGLES2Interface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/SDLGLES2Interface.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-SDLGLES2Interface.Tpo src/Engine/Platform/$(DEPDIR)/neosu-SDLGLES2Interface.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/SDLGLES2Interface.cpp' object='src/Engine/Platform/neosu-SDLGLES2Interface.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-SDLGLES2Interface.obj `if test -f 'src/Engine/Platform/SDLGLES2Interface.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/SDLGLES2Interface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/SDLGLES2Interface.cpp'; fi`
-
-src/Engine/Platform/neosu-SDLGLLegacyInterface.o: src/Engine/Platform/SDLGLLegacyInterface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-SDLGLLegacyInterface.o -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-SDLGLLegacyInterface.Tpo -c -o src/Engine/Platform/neosu-SDLGLLegacyInterface.o `test -f 'src/Engine/Platform/SDLGLLegacyInterface.cpp' || echo '$(srcdir)/'`src/Engine/Platform/SDLGLLegacyInterface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-SDLGLLegacyInterface.Tpo src/Engine/Platform/$(DEPDIR)/neosu-SDLGLLegacyInterface.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/SDLGLLegacyInterface.cpp' object='src/Engine/Platform/neosu-SDLGLLegacyInterface.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-SDLGLLegacyInterface.o `test -f 'src/Engine/Platform/SDLGLLegacyInterface.cpp' || echo '$(srcdir)/'`src/Engine/Platform/SDLGLLegacyInterface.cpp
-
-src/Engine/Platform/neosu-SDLGLLegacyInterface.obj: src/Engine/Platform/SDLGLLegacyInterface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-SDLGLLegacyInterface.obj -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-SDLGLLegacyInterface.Tpo -c -o src/Engine/Platform/neosu-SDLGLLegacyInterface.obj `if test -f 'src/Engine/Platform/SDLGLLegacyInterface.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/SDLGLLegacyInterface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/SDLGLLegacyInterface.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-SDLGLLegacyInterface.Tpo src/Engine/Platform/$(DEPDIR)/neosu-SDLGLLegacyInterface.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/SDLGLLegacyInterface.cpp' object='src/Engine/Platform/neosu-SDLGLLegacyInterface.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-SDLGLLegacyInterface.obj `if test -f 'src/Engine/Platform/SDLGLLegacyInterface.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/SDLGLLegacyInterface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/SDLGLLegacyInterface.cpp'; fi`
-
-src/Engine/Platform/neosu-WinContextMenu.o: src/Engine/Platform/WinContextMenu.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-WinContextMenu.o -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-WinContextMenu.Tpo -c -o src/Engine/Platform/neosu-WinContextMenu.o `test -f 'src/Engine/Platform/WinContextMenu.cpp' || echo '$(srcdir)/'`src/Engine/Platform/WinContextMenu.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-WinContextMenu.Tpo src/Engine/Platform/$(DEPDIR)/neosu-WinContextMenu.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/WinContextMenu.cpp' object='src/Engine/Platform/neosu-WinContextMenu.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-WinContextMenu.o `test -f 'src/Engine/Platform/WinContextMenu.cpp' || echo '$(srcdir)/'`src/Engine/Platform/WinContextMenu.cpp
-
-src/Engine/Platform/neosu-WinContextMenu.obj: src/Engine/Platform/WinContextMenu.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-WinContextMenu.obj -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-WinContextMenu.Tpo -c -o src/Engine/Platform/neosu-WinContextMenu.obj `if test -f 'src/Engine/Platform/WinContextMenu.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/WinContextMenu.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/WinContextMenu.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-WinContextMenu.Tpo src/Engine/Platform/$(DEPDIR)/neosu-WinContextMenu.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/WinContextMenu.cpp' object='src/Engine/Platform/neosu-WinContextMenu.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-WinContextMenu.obj `if test -f 'src/Engine/Platform/WinContextMenu.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/WinContextMenu.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/WinContextMenu.cpp'; fi`
 
 src/Engine/Platform/neosu-WinEnvironment.o: src/Engine/Platform/WinEnvironment.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-WinEnvironment.o -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-WinEnvironment.Tpo -c -o src/Engine/Platform/neosu-WinEnvironment.o `test -f 'src/Engine/Platform/WinEnvironment.cpp' || echo '$(srcdir)/'`src/Engine/Platform/WinEnvironment.cpp
@@ -3677,20 +3433,6 @@ src/Engine/Platform/neosu-WinEnvironment.obj: src/Engine/Platform/WinEnvironment
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-WinEnvironment.obj `if test -f 'src/Engine/Platform/WinEnvironment.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/WinEnvironment.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/WinEnvironment.cpp'; fi`
 
-src/Engine/Platform/neosu-WinGL3Interface.o: src/Engine/Platform/WinGL3Interface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-WinGL3Interface.o -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-WinGL3Interface.Tpo -c -o src/Engine/Platform/neosu-WinGL3Interface.o `test -f 'src/Engine/Platform/WinGL3Interface.cpp' || echo '$(srcdir)/'`src/Engine/Platform/WinGL3Interface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-WinGL3Interface.Tpo src/Engine/Platform/$(DEPDIR)/neosu-WinGL3Interface.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/WinGL3Interface.cpp' object='src/Engine/Platform/neosu-WinGL3Interface.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-WinGL3Interface.o `test -f 'src/Engine/Platform/WinGL3Interface.cpp' || echo '$(srcdir)/'`src/Engine/Platform/WinGL3Interface.cpp
-
-src/Engine/Platform/neosu-WinGL3Interface.obj: src/Engine/Platform/WinGL3Interface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-WinGL3Interface.obj -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-WinGL3Interface.Tpo -c -o src/Engine/Platform/neosu-WinGL3Interface.obj `if test -f 'src/Engine/Platform/WinGL3Interface.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/WinGL3Interface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/WinGL3Interface.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-WinGL3Interface.Tpo src/Engine/Platform/$(DEPDIR)/neosu-WinGL3Interface.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/WinGL3Interface.cpp' object='src/Engine/Platform/neosu-WinGL3Interface.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-WinGL3Interface.obj `if test -f 'src/Engine/Platform/WinGL3Interface.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/WinGL3Interface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/WinGL3Interface.cpp'; fi`
-
 src/Engine/Platform/neosu-WinGLLegacyInterface.o: src/Engine/Platform/WinGLLegacyInterface.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-WinGLLegacyInterface.o -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-WinGLLegacyInterface.Tpo -c -o src/Engine/Platform/neosu-WinGLLegacyInterface.o `test -f 'src/Engine/Platform/WinGLLegacyInterface.cpp' || echo '$(srcdir)/'`src/Engine/Platform/WinGLLegacyInterface.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-WinGLLegacyInterface.Tpo src/Engine/Platform/$(DEPDIR)/neosu-WinGLLegacyInterface.Po
@@ -3704,34 +3446,6 @@ src/Engine/Platform/neosu-WinGLLegacyInterface.obj: src/Engine/Platform/WinGLLeg
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/WinGLLegacyInterface.cpp' object='src/Engine/Platform/neosu-WinGLLegacyInterface.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-WinGLLegacyInterface.obj `if test -f 'src/Engine/Platform/WinGLLegacyInterface.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/WinGLLegacyInterface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/WinGLLegacyInterface.cpp'; fi`
-
-src/Engine/Platform/neosu-WinSDLEnvironment.o: src/Engine/Platform/WinSDLEnvironment.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-WinSDLEnvironment.o -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-WinSDLEnvironment.Tpo -c -o src/Engine/Platform/neosu-WinSDLEnvironment.o `test -f 'src/Engine/Platform/WinSDLEnvironment.cpp' || echo '$(srcdir)/'`src/Engine/Platform/WinSDLEnvironment.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-WinSDLEnvironment.Tpo src/Engine/Platform/$(DEPDIR)/neosu-WinSDLEnvironment.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/WinSDLEnvironment.cpp' object='src/Engine/Platform/neosu-WinSDLEnvironment.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-WinSDLEnvironment.o `test -f 'src/Engine/Platform/WinSDLEnvironment.cpp' || echo '$(srcdir)/'`src/Engine/Platform/WinSDLEnvironment.cpp
-
-src/Engine/Platform/neosu-WinSDLEnvironment.obj: src/Engine/Platform/WinSDLEnvironment.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-WinSDLEnvironment.obj -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-WinSDLEnvironment.Tpo -c -o src/Engine/Platform/neosu-WinSDLEnvironment.obj `if test -f 'src/Engine/Platform/WinSDLEnvironment.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/WinSDLEnvironment.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/WinSDLEnvironment.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-WinSDLEnvironment.Tpo src/Engine/Platform/$(DEPDIR)/neosu-WinSDLEnvironment.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/WinSDLEnvironment.cpp' object='src/Engine/Platform/neosu-WinSDLEnvironment.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-WinSDLEnvironment.obj `if test -f 'src/Engine/Platform/WinSDLEnvironment.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/WinSDLEnvironment.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/WinSDLEnvironment.cpp'; fi`
-
-src/Engine/Platform/neosu-WinSDLGLES2Interface.o: src/Engine/Platform/WinSDLGLES2Interface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-WinSDLGLES2Interface.o -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-WinSDLGLES2Interface.Tpo -c -o src/Engine/Platform/neosu-WinSDLGLES2Interface.o `test -f 'src/Engine/Platform/WinSDLGLES2Interface.cpp' || echo '$(srcdir)/'`src/Engine/Platform/WinSDLGLES2Interface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-WinSDLGLES2Interface.Tpo src/Engine/Platform/$(DEPDIR)/neosu-WinSDLGLES2Interface.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/WinSDLGLES2Interface.cpp' object='src/Engine/Platform/neosu-WinSDLGLES2Interface.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-WinSDLGLES2Interface.o `test -f 'src/Engine/Platform/WinSDLGLES2Interface.cpp' || echo '$(srcdir)/'`src/Engine/Platform/WinSDLGLES2Interface.cpp
-
-src/Engine/Platform/neosu-WinSDLGLES2Interface.obj: src/Engine/Platform/WinSDLGLES2Interface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Platform/neosu-WinSDLGLES2Interface.obj -MD -MP -MF src/Engine/Platform/$(DEPDIR)/neosu-WinSDLGLES2Interface.Tpo -c -o src/Engine/Platform/neosu-WinSDLGLES2Interface.obj `if test -f 'src/Engine/Platform/WinSDLGLES2Interface.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/WinSDLGLES2Interface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/WinSDLGLES2Interface.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Platform/$(DEPDIR)/neosu-WinSDLGLES2Interface.Tpo src/Engine/Platform/$(DEPDIR)/neosu-WinSDLGLES2Interface.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Platform/WinSDLGLES2Interface.cpp' object='src/Engine/Platform/neosu-WinSDLGLES2Interface.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Platform/neosu-WinSDLGLES2Interface.obj `if test -f 'src/Engine/Platform/WinSDLGLES2Interface.cpp'; then $(CYGPATH_W) 'src/Engine/Platform/WinSDLGLES2Interface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Platform/WinSDLGLES2Interface.cpp'; fi`
 
 src/Engine/neosu-Profiler.o: src/Engine/Profiler.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/neosu-Profiler.o -MD -MP -MF src/Engine/$(DEPDIR)/neosu-Profiler.Tpo -c -o src/Engine/neosu-Profiler.o `test -f 'src/Engine/Profiler.cpp' || echo '$(srcdir)/'`src/Engine/Profiler.cpp
@@ -3816,76 +3530,6 @@ src/Engine/Renderer/neosu-NullShader.obj: src/Engine/Renderer/NullShader.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/NullShader.cpp' object='src/Engine/Renderer/neosu-NullShader.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/neosu-NullShader.obj `if test -f 'src/Engine/Renderer/NullShader.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/NullShader.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/NullShader.cpp'; fi`
-
-src/Engine/Renderer/neosu-OpenGL3Interface.o: src/Engine/Renderer/OpenGL3Interface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/neosu-OpenGL3Interface.o -MD -MP -MF src/Engine/Renderer/$(DEPDIR)/neosu-OpenGL3Interface.Tpo -c -o src/Engine/Renderer/neosu-OpenGL3Interface.o `test -f 'src/Engine/Renderer/OpenGL3Interface.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGL3Interface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/$(DEPDIR)/neosu-OpenGL3Interface.Tpo src/Engine/Renderer/$(DEPDIR)/neosu-OpenGL3Interface.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGL3Interface.cpp' object='src/Engine/Renderer/neosu-OpenGL3Interface.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/neosu-OpenGL3Interface.o `test -f 'src/Engine/Renderer/OpenGL3Interface.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGL3Interface.cpp
-
-src/Engine/Renderer/neosu-OpenGL3Interface.obj: src/Engine/Renderer/OpenGL3Interface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/neosu-OpenGL3Interface.obj -MD -MP -MF src/Engine/Renderer/$(DEPDIR)/neosu-OpenGL3Interface.Tpo -c -o src/Engine/Renderer/neosu-OpenGL3Interface.obj `if test -f 'src/Engine/Renderer/OpenGL3Interface.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGL3Interface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGL3Interface.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/$(DEPDIR)/neosu-OpenGL3Interface.Tpo src/Engine/Renderer/$(DEPDIR)/neosu-OpenGL3Interface.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGL3Interface.cpp' object='src/Engine/Renderer/neosu-OpenGL3Interface.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/neosu-OpenGL3Interface.obj `if test -f 'src/Engine/Renderer/OpenGL3Interface.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGL3Interface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGL3Interface.cpp'; fi`
-
-src/Engine/Renderer/neosu-OpenGL3VertexArrayObject.o: src/Engine/Renderer/OpenGL3VertexArrayObject.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/neosu-OpenGL3VertexArrayObject.o -MD -MP -MF src/Engine/Renderer/$(DEPDIR)/neosu-OpenGL3VertexArrayObject.Tpo -c -o src/Engine/Renderer/neosu-OpenGL3VertexArrayObject.o `test -f 'src/Engine/Renderer/OpenGL3VertexArrayObject.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGL3VertexArrayObject.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/$(DEPDIR)/neosu-OpenGL3VertexArrayObject.Tpo src/Engine/Renderer/$(DEPDIR)/neosu-OpenGL3VertexArrayObject.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGL3VertexArrayObject.cpp' object='src/Engine/Renderer/neosu-OpenGL3VertexArrayObject.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/neosu-OpenGL3VertexArrayObject.o `test -f 'src/Engine/Renderer/OpenGL3VertexArrayObject.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGL3VertexArrayObject.cpp
-
-src/Engine/Renderer/neosu-OpenGL3VertexArrayObject.obj: src/Engine/Renderer/OpenGL3VertexArrayObject.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/neosu-OpenGL3VertexArrayObject.obj -MD -MP -MF src/Engine/Renderer/$(DEPDIR)/neosu-OpenGL3VertexArrayObject.Tpo -c -o src/Engine/Renderer/neosu-OpenGL3VertexArrayObject.obj `if test -f 'src/Engine/Renderer/OpenGL3VertexArrayObject.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGL3VertexArrayObject.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGL3VertexArrayObject.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/$(DEPDIR)/neosu-OpenGL3VertexArrayObject.Tpo src/Engine/Renderer/$(DEPDIR)/neosu-OpenGL3VertexArrayObject.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGL3VertexArrayObject.cpp' object='src/Engine/Renderer/neosu-OpenGL3VertexArrayObject.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/neosu-OpenGL3VertexArrayObject.obj `if test -f 'src/Engine/Renderer/OpenGL3VertexArrayObject.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGL3VertexArrayObject.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGL3VertexArrayObject.cpp'; fi`
-
-src/Engine/Renderer/neosu-OpenGLES2Interface.o: src/Engine/Renderer/OpenGLES2Interface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/neosu-OpenGLES2Interface.o -MD -MP -MF src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2Interface.Tpo -c -o src/Engine/Renderer/neosu-OpenGLES2Interface.o `test -f 'src/Engine/Renderer/OpenGLES2Interface.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGLES2Interface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2Interface.Tpo src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2Interface.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGLES2Interface.cpp' object='src/Engine/Renderer/neosu-OpenGLES2Interface.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/neosu-OpenGLES2Interface.o `test -f 'src/Engine/Renderer/OpenGLES2Interface.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGLES2Interface.cpp
-
-src/Engine/Renderer/neosu-OpenGLES2Interface.obj: src/Engine/Renderer/OpenGLES2Interface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/neosu-OpenGLES2Interface.obj -MD -MP -MF src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2Interface.Tpo -c -o src/Engine/Renderer/neosu-OpenGLES2Interface.obj `if test -f 'src/Engine/Renderer/OpenGLES2Interface.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGLES2Interface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGLES2Interface.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2Interface.Tpo src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2Interface.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGLES2Interface.cpp' object='src/Engine/Renderer/neosu-OpenGLES2Interface.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/neosu-OpenGLES2Interface.obj `if test -f 'src/Engine/Renderer/OpenGLES2Interface.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGLES2Interface.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGLES2Interface.cpp'; fi`
-
-src/Engine/Renderer/neosu-OpenGLES2Shader.o: src/Engine/Renderer/OpenGLES2Shader.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/neosu-OpenGLES2Shader.o -MD -MP -MF src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2Shader.Tpo -c -o src/Engine/Renderer/neosu-OpenGLES2Shader.o `test -f 'src/Engine/Renderer/OpenGLES2Shader.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGLES2Shader.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2Shader.Tpo src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2Shader.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGLES2Shader.cpp' object='src/Engine/Renderer/neosu-OpenGLES2Shader.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/neosu-OpenGLES2Shader.o `test -f 'src/Engine/Renderer/OpenGLES2Shader.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGLES2Shader.cpp
-
-src/Engine/Renderer/neosu-OpenGLES2Shader.obj: src/Engine/Renderer/OpenGLES2Shader.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/neosu-OpenGLES2Shader.obj -MD -MP -MF src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2Shader.Tpo -c -o src/Engine/Renderer/neosu-OpenGLES2Shader.obj `if test -f 'src/Engine/Renderer/OpenGLES2Shader.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGLES2Shader.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGLES2Shader.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2Shader.Tpo src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2Shader.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGLES2Shader.cpp' object='src/Engine/Renderer/neosu-OpenGLES2Shader.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/neosu-OpenGLES2Shader.obj `if test -f 'src/Engine/Renderer/OpenGLES2Shader.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGLES2Shader.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGLES2Shader.cpp'; fi`
-
-src/Engine/Renderer/neosu-OpenGLES2VertexArrayObject.o: src/Engine/Renderer/OpenGLES2VertexArrayObject.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/neosu-OpenGLES2VertexArrayObject.o -MD -MP -MF src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2VertexArrayObject.Tpo -c -o src/Engine/Renderer/neosu-OpenGLES2VertexArrayObject.o `test -f 'src/Engine/Renderer/OpenGLES2VertexArrayObject.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGLES2VertexArrayObject.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2VertexArrayObject.Tpo src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2VertexArrayObject.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGLES2VertexArrayObject.cpp' object='src/Engine/Renderer/neosu-OpenGLES2VertexArrayObject.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/neosu-OpenGLES2VertexArrayObject.o `test -f 'src/Engine/Renderer/OpenGLES2VertexArrayObject.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGLES2VertexArrayObject.cpp
-
-src/Engine/Renderer/neosu-OpenGLES2VertexArrayObject.obj: src/Engine/Renderer/OpenGLES2VertexArrayObject.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/neosu-OpenGLES2VertexArrayObject.obj -MD -MP -MF src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2VertexArrayObject.Tpo -c -o src/Engine/Renderer/neosu-OpenGLES2VertexArrayObject.obj `if test -f 'src/Engine/Renderer/OpenGLES2VertexArrayObject.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGLES2VertexArrayObject.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGLES2VertexArrayObject.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2VertexArrayObject.Tpo src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2VertexArrayObject.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Engine/Renderer/OpenGLES2VertexArrayObject.cpp' object='src/Engine/Renderer/neosu-OpenGLES2VertexArrayObject.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -c -o src/Engine/Renderer/neosu-OpenGLES2VertexArrayObject.obj `if test -f 'src/Engine/Renderer/OpenGLES2VertexArrayObject.cpp'; then $(CYGPATH_W) 'src/Engine/Renderer/OpenGLES2VertexArrayObject.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Engine/Renderer/OpenGLES2VertexArrayObject.cpp'; fi`
 
 src/Engine/Renderer/neosu-OpenGLImage.o: src/Engine/Renderer/OpenGLImage.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(neosu_CPPFLAGS) $(CPPFLAGS) $(neosu_CXXFLAGS) $(CXXFLAGS) -MT src/Engine/Renderer/neosu-OpenGLImage.o -MD -MP -MF src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLImage.Tpo -c -o src/Engine/Renderer/neosu-OpenGLImage.o `test -f 'src/Engine/Renderer/OpenGLImage.cpp' || echo '$(srcdir)/'`src/Engine/Renderer/OpenGLImage.cpp
@@ -4850,7 +4494,6 @@ distclean: distclean-am
 	-rm -f src/Engine/$(DEPDIR)/neosu-Archival.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Camera.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-ConVar.Po
-	-rm -f src/Engine/$(DEPDIR)/neosu-ContextMenu.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-DiscordInterface.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Engine.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Environment.Po
@@ -4867,32 +4510,16 @@ distclean: distclean-am
 	-rm -f src/Engine/Input/$(DEPDIR)/neosu-KeyboardEvent.Po
 	-rm -f src/Engine/Input/$(DEPDIR)/neosu-Mouse.Po
 	-rm -f src/Engine/Main/$(DEPDIR)/neosu-main_Linux.Po
-	-rm -f src/Engine/Main/$(DEPDIR)/neosu-main_SDL.Po
 	-rm -f src/Engine/Main/$(DEPDIR)/neosu-main_Windows.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-LinuxContextMenu.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-LinuxEnvironment.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-LinuxSDLEnvironment.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-NullContextMenu.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-NullEnvironment.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-SDLEnvironment.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-SDLGLES2Interface.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-SDLGLLegacyInterface.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinContextMenu.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinEnvironment.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinGL3Interface.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinGLLegacyInterface.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinSDLEnvironment.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinSDLGLES2Interface.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullGraphicsInterface.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullImage.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullRenderTarget.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullShader.Po
-	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGL3Interface.Po
-	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGL3VertexArrayObject.Po
-	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2Interface.Po
-	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2Shader.Po
-	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2VertexArrayObject.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLImage.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLLegacyInterface.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLRenderTarget.Po
@@ -5071,7 +4698,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/Engine/$(DEPDIR)/neosu-Archival.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Camera.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-ConVar.Po
-	-rm -f src/Engine/$(DEPDIR)/neosu-ContextMenu.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-DiscordInterface.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Engine.Po
 	-rm -f src/Engine/$(DEPDIR)/neosu-Environment.Po
@@ -5088,32 +4714,16 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/Engine/Input/$(DEPDIR)/neosu-KeyboardEvent.Po
 	-rm -f src/Engine/Input/$(DEPDIR)/neosu-Mouse.Po
 	-rm -f src/Engine/Main/$(DEPDIR)/neosu-main_Linux.Po
-	-rm -f src/Engine/Main/$(DEPDIR)/neosu-main_SDL.Po
 	-rm -f src/Engine/Main/$(DEPDIR)/neosu-main_Windows.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-LinuxContextMenu.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-LinuxEnvironment.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-LinuxGLLegacyInterface.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-LinuxSDLEnvironment.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-NullContextMenu.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-NullEnvironment.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-SDLEnvironment.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-SDLGLES2Interface.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-SDLGLLegacyInterface.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinContextMenu.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinEnvironment.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinGL3Interface.Po
 	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinGLLegacyInterface.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinSDLEnvironment.Po
-	-rm -f src/Engine/Platform/$(DEPDIR)/neosu-WinSDLGLES2Interface.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullGraphicsInterface.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullImage.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullRenderTarget.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-NullShader.Po
-	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGL3Interface.Po
-	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGL3VertexArrayObject.Po
-	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2Interface.Po
-	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2Shader.Po
-	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLES2VertexArrayObject.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLImage.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLLegacyInterface.Po
 	-rm -f src/Engine/Renderer/$(DEPDIR)/neosu-OpenGLRenderTarget.Po

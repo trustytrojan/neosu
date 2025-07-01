@@ -358,6 +358,7 @@ __EOF__
     LIBPREFIX="lib"
 
     AC_DEFINE([MCENGINE_PLATFORM_LINUX], [1], [Define if compiling for Linux.])
+    platform_data_dir='"./"'
 ],[
     # TODO: don't hardcode mingw paths here
     AS_IF([test "$build_os" = "linux-gnu"], [
@@ -405,7 +406,10 @@ __EOF__
     ])
 
     AC_DEFINE([MCENGINE_PLATFORM_WINDOWS], [1], [Define if compiling for Windows.])
+    platform_data_dir='".\\"'
 ])
+
+AC_DEFINE_UNQUOTED([MCENGINE_DATA_DIR], [$platform_data_dir], [Defined to the (platform-dependent) base path for the engine data directory.])
 
 PKG_CONFIG="$PWD/build/pkg-config"
 AC_SUBST([PKG_CONFIG])

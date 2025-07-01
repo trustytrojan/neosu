@@ -10,7 +10,6 @@
 #define BASEENVIRONMENT_H
 
 #include "config.h"
-#include "EngineFeatures.h"
 
 #include "OS.h"
 
@@ -40,10 +39,8 @@ enum class AUD : uint32_t {
 };
 enum class REND : uint32_t {
     GL = 1 << 0,
-    GLES2 = 1 << 1,
-    GLES32 = 1 << 2,
-    GL3 = 1 << 3,
-    DX11 = 1 << 4,
+    GLES32 = 1 << 1,
+    DX11 = 1 << 2,
     NONE = 0,
 };
 
@@ -83,6 +80,9 @@ consteval FEAT getFeatures() {
 #ifdef MCENGINE_FEATURE_STEAMWORKS
         FEAT::STEAM |
 #endif
+#if defined(MCENGINE_PLATFORM_WINDOWS) || defined(MCENGINE_FEATURE_DISCORD) // TODO: this define is never set, only windows supports discord rpc atm
+        FEAT::DISCORD |
+#endif
 #if defined(MCENGINE_PLATFORM_WASM) || defined(MCENGINE_FEATURE_MAINCALLBACKS)
         FEAT::MAINCB |
 #endif
@@ -109,21 +109,15 @@ consteval REND getRenderers() {
 #ifdef MCENGINE_FEATURE_OPENGL
         REND::GL |
 #endif
-#ifdef MCENGINE_FEATURE_GLES2
-        REND::GLES2 |
-#endif
 #ifdef MCENGINE_FEATURE_GLES32
         REND::GLES32 |
-#endif
-#ifdef MCENGINE_FEATURE_GL3
-        REND::GL3 |
 #endif
 #ifdef MCENGINE_FEATURE_DIRECTX11
         REND::DX11 |
 #endif
-#if !(defined(MCENGINE_FEATURE_OPENGL) || defined(MCENGINE_FEATURE_GLES2) || defined(MCENGINE_FEATURE_GLES32) || \
-      defined(MCENGINE_FEATURE_GL3) || defined(MCENGINE_FEATURE_DIRECTX11))
-#error "No renderer is defined! Check \"EngineFeatures.h\"."
+#if !(defined(MCENGINE_FEATURE_OPENGL) || defined(MCENGINE_FEATURE_GLES32) || \
+      defined(MCENGINE_FEATURE_DIRECTX11))
+#error "No renderer is defined! Check the build configuration, or \"config.h\"."
 #endif
         REND::NONE;
 }

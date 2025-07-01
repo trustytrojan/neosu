@@ -14,8 +14,6 @@
 #include "Keyboard.h"
 #include "ModSelector.h"
 #include "Mouse.h"
-#include "OpenGL3Interface.h"
-#include "OpenGLES2Interface.h"
 #include "OpenGLHeaders.h"
 #include "OpenGLLegacyInterface.h"
 #include "OptionsMenu.h"

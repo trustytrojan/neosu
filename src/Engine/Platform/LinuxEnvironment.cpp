@@ -16,7 +16,6 @@
 #include <unistd.h>
 
 #include "Engine.h"
-#include "LinuxContextMenu.h"
 #include "LinuxGLLegacyInterface.h"
 
 using namespace std;
@@ -103,8 +102,6 @@ void LinuxEnvironment::update() {
 }
 
 Graphics *LinuxEnvironment::createRenderer() { return new LinuxGLLegacyInterface(this->display, this->window); }
-
-ContextMenu *LinuxEnvironment::createContextMenu() { return new LinuxContextMenu(); }
 
 void LinuxEnvironment::shutdown() {
     XEvent ev;

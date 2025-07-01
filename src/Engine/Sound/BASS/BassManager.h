@@ -9,7 +9,7 @@
 #ifndef BASS_MANAGER_H
 #define BASS_MANAGER_H
 
-#include "EngineFeatures.h"
+#include "config.h"
 
 #if defined(MCENGINE_FEATURE_BASS)
 
@@ -21,21 +21,7 @@ class UString;
 // can't be namespaced
 #ifdef MCENGINE_PLATFORM_WINDOWS
 
-#ifdef NOMINMAX
-#undef NOMINMAX
-#endif
-
-#define NOMINMAX
-#define NOWINRES
-#define NOSERVICE
-#define NOMCX
-#define NOIME
-#define NOCRYPT
-#define NOMETAFILE
-#define MMNOSOUND
-
-#define VC_EXTRALEAN
-#define WIN32_LEAN_AND_MEAN
+#include "WinDebloatDefs.h"
 
 #ifdef WINAPI_FAMILY
 #include <winapifamily.h>

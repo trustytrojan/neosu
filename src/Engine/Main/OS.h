@@ -27,23 +27,10 @@ typedef void* HWND;
 #elif defined(_WIN32)
 #define _X86_
 #endif
+typedef SSIZE_T ssize_t;
 #endif
 
-#ifdef NOMINMAX
-#undef NOMINMAX
-#endif
-
-#define NOMINMAX
-#define NOWINRES
-#define NOSERVICE
-#define NOMCX
-#define NOIME
-#define NOCRYPT
-#define NOMETAFILE
-#define MMNOSOUND
-
-#define VC_EXTRALEAN
-#define WIN32_LEAN_AND_MEAN
+#include "WinDebloatDefs.h"
 
 #include <basetsd.h>
 #include <windef.h>

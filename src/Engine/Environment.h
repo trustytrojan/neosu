@@ -12,8 +12,6 @@
 #include <unistd.h> // isatty libc++
 #endif
 
-class ContextMenu;
-
 class Environment {
    public:
     Environment();
@@ -23,7 +21,6 @@ class Environment {
 
     // engine/factory
     virtual Graphics *createRenderer() = 0;
-    virtual ContextMenu *createContextMenu() = 0;
 
     // system
     virtual void shutdown() = 0;

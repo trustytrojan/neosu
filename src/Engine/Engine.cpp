@@ -9,7 +9,6 @@
 #include "ConVar.h"
 #include "Console.h"
 #include "ConsoleBox.h"
-#include "ContextMenu.h"
 #include "DiscordInterface.h"
 #include "Keyboard.h"
 #include "Mouse.h"
@@ -33,7 +32,6 @@ std::unique_ptr<SoundEngine> Engine::s_soundEngineInstance = nullptr;
 std::unique_ptr<ResourceManager> Engine::s_resourceManagerInstance = nullptr;
 std::unique_ptr<NetworkHandler> Engine::s_networkHandlerInstance = nullptr;
 std::unique_ptr<AnimationHandler> Engine::s_animationHandlerInstance = nullptr;
-std::unique_ptr<ContextMenu> Engine::s_contextMenuInstance = nullptr;
 
 Mouse *mouse = nullptr;
 Keyboard *keyboard = nullptr;
@@ -43,7 +41,6 @@ SoundEngine *soundEngine = nullptr;
 ResourceManager *resourceManager = nullptr;
 NetworkHandler *networkHandler = nullptr;
 AnimationHandler *animationHandler = nullptr;
-ContextMenu *contextMenu = nullptr;
 
 Engine *engine = NULL;
 
@@ -113,10 +110,6 @@ Engine::Engine(Environment *environment, i32 argc, char **argv) {
         runtime_assert(g, "Graphics failed to initialize!");
         g->init();  // needs init() separation due to potential graphics access
 
-        s_contextMenuInstance.reset(env->createContextMenu());
-        contextMenu = s_contextMenuInstance.get();
-        runtime_assert(contextMenu, "ContextMenu failed to initialize!");
-
         // make unique_ptrs for the rest
         s_resourceManagerInstance = std::make_unique<ResourceManager>();
         resourceManager = s_resourceManagerInstance.get();
@@ -166,9 +159,6 @@ Engine::~Engine() {
 
     debugLog("Engine: Freeing Sound...\n");
     s_soundEngineInstance.reset();
-
-    debugLog("Engine: Freeing context menu...\n");
-    s_contextMenuInstance.reset();
 
     debugLog("Engine: Freeing animation handler...\n");
     s_animationHandlerInstance.reset();

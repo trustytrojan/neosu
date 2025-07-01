@@ -7,8 +7,6 @@
 #include "Engine.h"
 #include "GameRules.h"
 #include "ModFPoSu.h"
-#include "OpenGL3Interface.h"
-#include "OpenGLES2Interface.h"
 #include "OpenGLHeaders.h"
 #include "OpenGLLegacyInterface.h"
 #include "Osu.h"

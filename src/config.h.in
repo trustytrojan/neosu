@@ -45,6 +45,10 @@
 /* Define to 1 if you have the <X11/Xlib.h> header file. */
 #undef HAVE_X11_XLIB_H
 
+/* Defined to the (platform-dependent) base path for the engine data
+   directory. */
+#undef MCENGINE_DATA_DIR
+
 /* Define if the BASS audio backend is desired. */
 #undef MCENGINE_FEATURE_BASS
 

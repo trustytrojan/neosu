@@ -17,8 +17,6 @@
 #include "Engine.h"
 #include "Mouse.h"
 #include "NullGraphicsInterface.h"
-#include "WinContextMenu.h"
-#include "WinGL3Interface.h"
 #include "WinGLLegacyInterface.h"
 #include "cbase.h"
 
@@ -78,10 +76,7 @@ void WinEnvironment::update() {
 
 Graphics *WinEnvironment::createRenderer() {
     return new WinGLLegacyInterface(this->hwnd);
-    // return new WinGL3Interface(this->hwnd);
 }
-
-ContextMenu *WinEnvironment::createContextMenu() { return new WinContextMenu(); }
 
 void WinEnvironment::shutdown() { SendMessage(this->hwnd, WM_CLOSE, 0, 0); }
 

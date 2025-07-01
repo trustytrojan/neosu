@@ -6,8 +6,6 @@
 #include "Engine.h"
 #include "Environment.h"
 #include "GameRules.h"
-#include "OpenGL3Interface.h"
-#include "OpenGLES2Interface.h"
 #include "OpenGLHeaders.h"
 #include "OpenGLLegacyInterface.h"
 #include "Osu.h"
@@ -338,19 +336,6 @@ void SliderRenderer::draw(VertexArrayObject *vao, const std::vector<Vector2> &al
                         /// g->scale(scaleToApplyAfterTranslationX, scaleToApplyAfterTranslationY); // aspire slider
                         /// distortions
 
-#ifdef MCENGINE_FEATURE_OPENGLES
-
-                        if(!cv_slider_use_gradient_image.getBool()) {
-                            OpenGLES2Interface *gles2 = dynamic_cast<OpenGLES2Interface *>();
-                            if(gles2 != NULL) {
-                                gles2->forceUpdateTransform();
-                                Matrix4 mvp = gles2->getMVP();
-                                BLEND_SHADER->setUniformMatrix4fv("mvp", mvp);
-                            }
-                        }
-
-#endif
-
                         g->drawVAO(vao);
                     }
                     g->popTransform();
@@ -380,12 +365,6 @@ void SliderRenderer::drawFillSliderBodyPeppy(const std::vector<Vector2> &points,
     if(drawFromIndex < 0) drawFromIndex = 0;
     if(drawUpToIndex < 0) drawUpToIndex = points.size();
 
-#ifdef MCENGINE_FEATURE_OPENGLES
-
-    OpenGLES2Interface *gles2 = dynamic_cast<OpenGLES2Interface *>();
-
-#endif
-
     g->pushTransform();
     {
         // now, translate and draw the master vao for every curve point
@@ -401,16 +380,6 @@ void SliderRenderer::drawFillSliderBodyPeppy(const std::vector<Vector2> &points,
                 continue;
 
             g->translate(x - startX, y - startY, 0);
-
-#ifdef MCENGINE_FEATURE_OPENGLES
-
-            if(shader != NULL && gles2 != NULL) {
-                gles2->forceUpdateTransform();
-                Matrix4 mvp = gles2->getMVP();
-                shader->setUniformMatrix4fv("mvp", mvp);
-            }
-
-#endif
 
             g->drawVAO(circleMesh);
 

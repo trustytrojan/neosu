@@ -6628,6 +6628,7 @@ __EOF__
 
 printf "%s\n" "#define MCENGINE_PLATFORM_LINUX 1" >>confdefs.h
 
+    platform_data_dir='"./"'
 
 else case e in #(
   e)
@@ -6695,9 +6696,14 @@ fi
 
 printf "%s\n" "#define MCENGINE_PLATFORM_WINDOWS 1" >>confdefs.h
 
+    platform_data_dir='".\\"'
  ;;
 esac
 fi
+
+
+printf "%s\n" "#define MCENGINE_DATA_DIR $platform_data_dir" >>confdefs.h
+
 
 PKG_CONFIG="$PWD/build/pkg-config"
 
