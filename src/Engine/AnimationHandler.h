@@ -64,7 +64,7 @@ class AnimationHandler {
     [[nodiscard]] inline size_t getNumActiveAnimations() const { return this->vAnimations.size(); }
 
    private:
-    enum class ANIMATION_TYPE {
+    enum class ANIMATION_TYPE : uint8_t {
         MOVE_LINEAR,
         MOVE_SMOOTH_END,
         MOVE_QUAD_INOUT,

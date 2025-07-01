@@ -1,8 +1,8 @@
 #pragma once
 #include "cbase.h"
 
-#define READ_BUFFER_SIZE (512 * 4096)
-#define WRITE_BUFFER_SIZE (512 * 4096)
+#define READ_BUFFER_SIZE (512ULL * 4096)
+#define WRITE_BUFFER_SIZE (512ULL * 4096)
 
 struct BanchoFileReader {
     BanchoFileReader(const char* path);

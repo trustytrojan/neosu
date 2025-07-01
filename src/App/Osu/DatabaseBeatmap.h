@@ -80,7 +80,7 @@ class DatabaseBeatmap {
         bool isNaN;
     };
 
-    enum class BeatmapType {
+    enum class BeatmapType : uint8_t {
         NEOSU_BEATMAPSET,
         PEPPY_BEATMAPSET,
         NEOSU_DIFFICULTY,

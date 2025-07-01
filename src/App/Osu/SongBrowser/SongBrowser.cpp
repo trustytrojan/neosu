@@ -2014,7 +2014,7 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
     // all strings which are not expressions get appended with spaces between, then checked with one call to
     // findSubstringInDifficulty() the rest is interpreted NOTE: this code is quite shitty. the order of the operators
     // array does matter, because find() is used to detect their presence (and '=' would then break '<=' etc.)
-    enum operatorId { EQ, LT, GT, LE, GE, NE };
+    enum operatorId : uint8_t { EQ, LT, GT, LE, GE, NE };
     static const std::vector<std::pair<UString, operatorId>> operators = {
         std::pair<UString, operatorId>("<=", LE), std::pair<UString, operatorId>(">=", GE),
         std::pair<UString, operatorId>("<", LT),  std::pair<UString, operatorId>(">", GT),
@@ -2022,7 +2022,7 @@ bool SongBrowser::searchMatcher(const DatabaseBeatmap *databaseBeatmap,
         std::pair<UString, operatorId>("=", EQ),
     };
 
-    enum keywordId {
+    enum keywordId : uint8_t {
         AR,
         CS,
         OD,

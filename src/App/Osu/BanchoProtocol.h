@@ -2,7 +2,7 @@
 #include "UString.h"
 #include "types.h"
 
-enum Action {
+enum Action : uint8_t {
     IDLE = 0,
     AFK = 1,
     PLAYING = 2,
@@ -19,21 +19,21 @@ enum Action {
     OSU_DIRECT = 13,
 };
 
-enum WinCondition {
+enum WinCondition : uint8_t {
     SCOREV1 = 0,
     ACCURACY = 1,
     COMBO = 2,
     SCOREV2 = 3,
 };
 
-enum GameMode {
+enum GameMode : uint8_t {
     STANDARD = 0,
     TAIKO = 1,
     CATCH = 2,
     MANIA = 3,
 };
 
-enum IncomingPackets {
+enum IncomingPackets : uint8_t {
     USER_ID = 5,
     RECV_MESSAGE = 7,
     PONG = 8,
@@ -86,7 +86,7 @@ enum IncomingPackets {
     MATCH_ABORT = 106,
 };
 
-enum OutgoingPackets {
+enum OutgoingPackets : uint8_t {
     CHANGE_ACTION = 0,
     SEND_PUBLIC_MESSAGE = 1,
     LOGOUT = 2,
@@ -293,7 +293,7 @@ struct LiveReplayFrame {
 #pragma pack(pop)
 
 struct LiveReplayBundle {
-    enum Action {
+    enum Action : uint8_t {
         NONE = 0,
         NEW_SONG = 1,
         SKIP = 2,

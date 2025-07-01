@@ -6,7 +6,7 @@
 
 class Image;
 
-enum class ServerPolicy {
+enum class ServerPolicy : uint8_t {
     NO,
     YES,
     NO_PREFERENCE,

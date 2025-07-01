@@ -8,7 +8,7 @@
 #include "discord_game_sdk.h"
 #pragma pack(pop)
 #else
-enum DiscordActivityType { DiscordActivityType_Listening, DiscordActivityType_Playing };
+enum DiscordActivityType : uint8_t { DiscordActivityType_Listening, DiscordActivityType_Playing };
 struct DiscordActivity {
     struct {
         struct {

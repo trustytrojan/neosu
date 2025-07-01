@@ -8,7 +8,7 @@
 #ifndef CURSORS_H
 #define CURSORS_H
 
-enum class CURSORTYPE {
+enum class CURSORTYPE : uint8_t {
     CURSOR_NORMAL,
     CURSOR_WAIT,
     CURSOR_SIZE_H,

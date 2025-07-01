@@ -6,7 +6,7 @@ class ConVar;
 class ModFPoSu;
 class Beatmap;
 
-enum class HitObjectType {
+enum class HitObjectType : uint8_t {
     CIRCLE,
     SLIDER,
     SPINNER,

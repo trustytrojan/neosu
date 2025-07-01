@@ -7,7 +7,7 @@
 
 class SliderCurve {
    public:
-    enum OSUSLIDERCURVETYPE {
+    enum OSUSLIDERCURVETYPE : uint8_t {
         OSUSLIDERCURVETYPE_CATMULL = 'C',
         OSUSLIDERCURVETYPE_BEZIER = 'B',
         OSUSLIDERCURVETYPE_LINEAR = 'L',

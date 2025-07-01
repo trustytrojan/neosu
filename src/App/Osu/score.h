@@ -18,7 +18,7 @@ struct FinishedScore {
     DatabaseBeatmap *diff2 = NULL;
     u64 play_time_ms = 0;
 
-    enum class Grade {
+    enum class Grade : uint8_t {
         XH,
         SH,
         X,
@@ -80,7 +80,7 @@ struct FinishedScore {
 
 class LiveScore {
    public:
-    enum class HIT {
+    enum class HIT : uint8_t {
         // score
         HIT_NULL,
         HIT_MISS,

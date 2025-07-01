@@ -33,7 +33,7 @@ class Camera {
                                                            float zf);
 
    public:
-    enum CAMERA_TYPE { CAMERA_TYPE_FIRST_PERSON, CAMERA_TYPE_ORBIT };
+    enum CAMERA_TYPE : uint8_t { CAMERA_TYPE_FIRST_PERSON, CAMERA_TYPE_ORBIT };
 
     Camera(Vector3 pos = Vector3(0, 0, 0), Vector3 viewDir = Vector3(0, 0, 1), float fovDeg = 90.0f,
            CAMERA_TYPE camType = CAMERA_TYPE_FIRST_PERSON);

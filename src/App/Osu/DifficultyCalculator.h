@@ -28,7 +28,7 @@ class OsuDifficultyHitObject {
     };
 
     struct SLIDER_SCORING_TIME {
-        enum class TYPE {
+        enum class TYPE : uint8_t {
             TICK,
             REPEAT,
             END,
@@ -103,7 +103,7 @@ class DifficultyCalculator {
         static constexpr const int NUM_SKILLS = 3;
 
        public:
-        enum class Skill {
+        enum class Skill : uint8_t {
             SPEED,
             AIM_SLIDERS,
             AIM_NO_SLIDERS,

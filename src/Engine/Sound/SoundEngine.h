@@ -4,7 +4,7 @@
 // ^ needs to be before Sound.h on windows
 #include "Sound.h"
 
-enum class OutputDriver {
+enum class OutputDriver : uint8_t {
     NONE,
     BASS,         // directsound/wasapi non-exclusive mode/alsa
     BASS_WASAPI,  // exclusive mode

@@ -3,7 +3,7 @@
 
 class CBaseUILabel : public CBaseUIElement {
    public:
-    enum TEXT_JUSTIFICATION { TEXT_JUSTIFICATION_LEFT, TEXT_JUSTIFICATION_CENTERED, TEXT_JUSTIFICATION_RIGHT };
+    enum TEXT_JUSTIFICATION : uint8_t { TEXT_JUSTIFICATION_LEFT, TEXT_JUSTIFICATION_CENTERED, TEXT_JUSTIFICATION_RIGHT };
 
    public:
     CBaseUILabel(float xPos = 0, float yPos = 0, float xSize = 0, float ySize = 0, UString name = "",

@@ -17,7 +17,7 @@
 #define OSU_VERSION "b20250309.2"
 #define OSU_VERSION_DATEONLY 20250309
 
-enum APIRequestType {
+enum APIRequestType : uint8_t {
     GET_BEATMAPSET_INFO,
     GET_MAP_LEADERBOARD,
     GET_REPLAY,

@@ -10,7 +10,7 @@
 #include "ConVarDefs.h"
 #endif
 
-enum FCVAR_FLAGS {
+enum FCVAR_FLAGS : uint8_t {
     // No flags: cvar is only allowed offline.
     FCVAR_LOCKED = 0,
 
@@ -35,7 +35,7 @@ enum FCVAR_FLAGS {
 
 class ConVar {
    public:
-    enum class CONVAR_TYPE { CONVAR_TYPE_BOOL, CONVAR_TYPE_INT, CONVAR_TYPE_FLOAT, CONVAR_TYPE_STRING };
+    enum class CONVAR_TYPE : uint8_t { CONVAR_TYPE_BOOL, CONVAR_TYPE_INT, CONVAR_TYPE_FLOAT, CONVAR_TYPE_STRING };
 
     // raw callbacks
     typedef void (*ConVarCallback)(void);

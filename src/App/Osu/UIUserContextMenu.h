@@ -4,7 +4,7 @@
 
 class UIContextMenu;
 
-enum UserActions {
+enum UserActions : uint8_t {
     UA_TRANSFER_HOST,
     KICK,
     VIEW_PROFILE,

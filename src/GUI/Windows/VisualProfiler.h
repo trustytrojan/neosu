@@ -38,7 +38,7 @@ class VisualProfiler : public CBaseUIElement {
     bool isEnabled() override;
 
    private:
-    enum INFO_BLADE_DISPLAY_MODE {
+    enum INFO_BLADE_DISPLAY_MODE : uint8_t {
         INFO_BLADE_DISPLAY_MODE_DEFAULT = 0,
 
         INFO_BLADE_DISPLAY_MODE_GPU_INFO = 1,

@@ -41,7 +41,7 @@ class McRect {
 };
 
 // TODO: move this somewhere else (lol)
-enum class AnchorPoint {
+enum class AnchorPoint : uint8_t {
     CENTER,        // Default - image centered on x,y
     TOP_LEFT,      // x,y at top left corner
     TOP_RIGHT,     // x,y at top right corner

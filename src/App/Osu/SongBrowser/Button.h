@@ -68,7 +68,7 @@ class Button : public CBaseUIButton {
     static int marginPixelsY;
     static float lastHoverSoundTime;
 
-    enum class MOVE_AWAY_STATE { MOVE_CENTER, MOVE_UP, MOVE_DOWN };
+    enum class MOVE_AWAY_STATE : uint8_t { MOVE_CENTER, MOVE_UP, MOVE_DOWN };
 
     void onClicked() override;
     void onMouseInside() override;

@@ -45,7 +45,7 @@ class SongBrowser : public ScreenBackable {
    public:
     static void drawSelectedBeatmapBackgroundImage(float alpha = 1.0f);
 
-    enum class GROUP {
+    enum class GROUP : uint8_t {
         GROUP_NO_GROUPING,
         GROUP_ARTIST,
         GROUP_BPM,
@@ -117,7 +117,7 @@ class SongBrowser : public ScreenBackable {
 
     inline GROUP getGroupingMode() const { return this->group; }
 
-    enum class SORT {
+    enum class SORT : uint8_t {
         SORT_ARTIST,
         SORT_BPM,
         SORT_CREATOR,

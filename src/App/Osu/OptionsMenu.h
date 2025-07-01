@@ -53,7 +53,7 @@ class OptionsMenu : public ScreenBackable, public NotificationOverlayKeyListener
     bool isBusy() override;
 
    public:
-    enum class RenderCondition {
+    enum class RenderCondition : uint8_t {
         NONE,
         ASIO_ENABLED,
         WASAPI_ENABLED,

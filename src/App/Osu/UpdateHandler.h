@@ -6,7 +6,7 @@
 
 class UpdateHandler {
    public:
-    enum class STATUS {
+    enum class STATUS : uint8_t {
         STATUS_UP_TO_DATE,
         STATUS_CHECKING_FOR_UPDATE,
         STATUS_DOWNLOADING_UPDATE,
