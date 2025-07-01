@@ -1139,7 +1139,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
         }
     }
 
-    if(key == KEY_SHIFT) this->bShiftPressed = true;
+    if(key == KEY_LSHIFT || key == KEY_RSHIFT) this->bShiftPressed = true;
 
     // function hotkeys
     if((key == KEY_F1 || key == (KEYCODE)cv_TOGGLE_MODSELECT.getInt()) && !this->bF1Pressed) {
@@ -1299,7 +1299,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
 
     // group open/close
     // NOTE: only closing works atm (no "focus" state on buttons yet)
-    if(key == KEY_ENTER && keyboard->isShiftDown()) {
+    if((key == KEY_ENTER || key == KEY_NUMPAD_ENTER) && keyboard->isShiftDown()) {
         const std::vector<CBaseUIElement *> &elements = this->carousel->getContainer()->getElements();
 
         for(int i = 0; i < elements.size(); i++) {
@@ -1316,7 +1316,7 @@ void SongBrowser::onKeyDown(KeyboardEvent &key) {
     }
 
     // selection select
-    if(key == KEY_ENTER && !keyboard->isShiftDown()) this->playSelectedDifficulty();
+    if((key == KEY_ENTER || key == KEY_NUMPAD_ENTER) && !keyboard->isShiftDown()) this->playSelectedDifficulty();
 
     // toggle auto
     if(key == KEY_A && keyboard->isControlDown()) osu->getModSelector()->toggleAuto();
@@ -1329,7 +1329,7 @@ void SongBrowser::onKeyUp(KeyboardEvent &key) {
     this->contextMenu->onKeyUp(key);
     if(key.isConsumed()) return;
 
-    if(key == KEY_SHIFT) this->bShiftPressed = false;
+    if(key == KEY_LSHIFT || key == KEY_RSHIFT) this->bShiftPressed = false;
     if(key == KEY_LEFT) this->bLeft = false;
     if(key == KEY_RIGHT) this->bRight = false;
 

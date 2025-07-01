@@ -63,7 +63,7 @@ void PromptScreen::mouse_update(bool *propagate_clicks) {
 void PromptScreen::onKeyDown(KeyboardEvent &e) {
     if(!this->bVisible) return;
 
-    if(e == KEY_ENTER) {
+    if(e == KEY_ENTER || e == KEY_NUMPAD_ENTER) {
         this->on_ok();
         e.consume();
         return;

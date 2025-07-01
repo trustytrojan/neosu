@@ -251,7 +251,7 @@ void PauseMenu::onKeyDown(KeyboardEvent &e) {
             this->onSelectionChange();
         }
 
-        if(this->selectedButton != NULL && e == KEY_ENTER) this->selectedButton->click();
+        if(this->selectedButton != NULL && (e == KEY_ENTER || e == KEY_NUMPAD_ENTER)) this->selectedButton->click();
     }
 
     // consume ALL events, except for a few special binds which are allowed through (e.g. for unpause or changing the

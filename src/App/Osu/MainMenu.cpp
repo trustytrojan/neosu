@@ -1062,9 +1062,9 @@ void MainMenu::onKeyDown(KeyboardEvent &e) {
     if(e == KEY_C || e == KEY_F4) this->onPausePressed();
 
     if(!this->bMenuElementsVisible) {
-        if(e == KEY_P || e == KEY_ENTER) this->cube->click();
+        if(e == KEY_P || e == KEY_ENTER || e == KEY_NUMPAD_ENTER) this->cube->click();
     } else {
-        if(e == KEY_P || e == KEY_ENTER) this->onPlayButtonPressed();
+        if(e == KEY_P || e == KEY_ENTER || e == KEY_NUMPAD_ENTER) this->onPlayButtonPressed();
         if(e == KEY_O) this->onOptionsButtonPressed();
         if(e == KEY_E || e == KEY_X) this->onExitButtonPressed();
 

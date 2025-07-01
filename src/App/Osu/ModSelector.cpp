@@ -676,7 +676,7 @@ void ModSelector::onKeyDown(KeyboardEvent &key) {
     if(key == KEY_1) this->resetModsUserInitiated();
 
     if(((key == KEY_F1 || key == (KEYCODE)cv_TOGGLE_MODSELECT.getInt()) && !this->bWaitForF1KeyUp) || key == KEY_2 ||
-       key == (KEYCODE)cv_GAME_PAUSE.getInt() || key == KEY_ESCAPE || key == KEY_ENTER)
+       key == (KEYCODE)cv_GAME_PAUSE.getInt() || key == KEY_ESCAPE || key == KEY_ENTER || key == KEY_NUMPAD_ENTER)
         this->close();
 
     // mod hotkeys

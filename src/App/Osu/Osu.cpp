@@ -1136,7 +1136,7 @@ void Osu::onKeyDown(KeyboardEvent &key) {
             }
 
             // handle skipping
-            if(key == KEY_ENTER || key == (KEYCODE)cv_SKIP_CUTSCENE.getInt()) this->bSkipScheduled = true;
+            if(key == KEY_ENTER || key == KEY_NUMPAD_ENTER || key == (KEYCODE)cv_SKIP_CUTSCENE.getInt()) this->bSkipScheduled = true;
 
             // toggle ui
             if(!key.isConsumed() && key == (KEYCODE)cv_TOGGLE_SCOREBOARD.getInt() && !this->bScoreboardToggleCheck) {
@@ -1342,7 +1342,7 @@ void Osu::onKeyUp(KeyboardEvent &key) {
     // misc hotkeys release
     if(key == KEY_F1 || key == (KEYCODE)cv_TOGGLE_MODSELECT.getInt()) this->bF1 = false;
     if(key == (KEYCODE)cv_GAME_PAUSE.getInt() || key == KEY_ESCAPE) this->bEscape = false;
-    if(key == KEY_SHIFT) this->bUIToggleCheck = false;
+    if(key == KEY_LSHIFT || key == KEY_RSHIFT) this->bUIToggleCheck = false;
     if(key == (KEYCODE)cv_TOGGLE_SCOREBOARD.getInt()) {
         this->bScoreboardToggleCheck = false;
         this->bUIToggleCheck = false;

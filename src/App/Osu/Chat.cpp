@@ -584,7 +584,7 @@ void Chat::onKeyDown(KeyboardEvent &key) {
     }
 
     // Return: send message
-    if(key.getKeyCode() == KEY_ENTER) {
+    if(key.getKeyCode() == KEY_ENTER || key.getKeyCode() == KEY_NUMPAD_ENTER) {
         key.consume();
         if(this->selected_channel != NULL && this->input_box->getText().length() > 0) {
             if(this->input_box->getText()[0] == L'/') {

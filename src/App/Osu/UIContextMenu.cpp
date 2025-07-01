@@ -133,7 +133,7 @@ void UIContextMenu::onKeyDown(KeyboardEvent &e) {
     // also force ENTER event if context menu textbox has lost focus (but context menu is still visible, e.g. if the
     // user clicks inside the context menu but outside the textbox)
     if(this->containedTextbox != NULL) {
-        if(e == KEY_ENTER) {
+        if(e == KEY_ENTER || e == KEY_NUMPAD_ENTER) {
             e.consume();
             this->onHitEnter(this->containedTextbox);
         }

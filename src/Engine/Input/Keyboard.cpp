@@ -46,17 +46,22 @@ void Keyboard::reset() {
 
 void Keyboard::onKeyDown(KEYCODE keyCode) {
     switch(keyCode) {
-        case KEY_CONTROL:
+        case KEY_LCONTROL:
+        case KEY_RCONTROL:
             this->bControlDown = true;
             break;
-        case 65511:  // linux
-        case KEY_ALT:
+        case 0xffe7:  // linux (XK_Meta_L)
+        case KEY_LALT:
+        case KEY_RALT:
             this->bAltDown = true;
             break;
-        case KEY_SHIFT:
+
+        case KEY_LSHIFT:
+        case KEY_RSHIFT:
             this->bShiftDown = true;
             break;
-        case KEY_SUPER:
+        case KEY_LSUPER:
+        case KEY_RSUPER:
             this->bSuperDown = true;
             break;
     }
@@ -71,17 +76,22 @@ void Keyboard::onKeyDown(KEYCODE keyCode) {
 
 void Keyboard::onKeyUp(KEYCODE keyCode) {
     switch(keyCode) {
-        case KEY_CONTROL:
+        case KEY_LCONTROL:
+        case KEY_RCONTROL:
             this->bControlDown = false;
             break;
-        case 65511:  // linux
-        case KEY_ALT:
+        case 0xffe7:  // linux (XK_Meta_L)
+        case KEY_LALT:
+        case KEY_RALT:
             this->bAltDown = false;
             break;
-        case KEY_SHIFT:
+
+        case KEY_LSHIFT:
+        case KEY_RSHIFT:
             this->bShiftDown = false;
             break;
-        case KEY_SUPER:
+        case KEY_LSUPER:
+        case KEY_RSUPER:
             this->bSuperDown = false;
             break;
     }

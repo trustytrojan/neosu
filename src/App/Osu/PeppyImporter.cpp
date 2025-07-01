@@ -114,18 +114,16 @@ void try_set_key(const char* str, ConVar* cvar) {
         cvar->setValue((int)KEY_DOWN);
     } else if(key == UString("Tab")) {
         cvar->setValue((int)KEY_TAB);
-    } else if(key == UString("Return")) {
-        cvar->setValue((int)KEY_RETURN);
-    } else if(key == UString("Enter")) {
+    } else if(key == UString("Return") || key == UString("Enter")) {
         cvar->setValue((int)KEY_ENTER);
     } else if(key == UString("Shift")) {
-        cvar->setValue((int)KEY_SHIFT);
+        cvar->setValue((int)KEY_LSHIFT);
     } else if(key == UString("Control")) {
-        cvar->setValue((int)KEY_CONTROL);
+        cvar->setValue((int)KEY_LCONTROL);
     } else if(key == UString("LeftAlt")) {
-        cvar->setValue((int)KEY_ALT);
+        cvar->setValue((int)KEY_LALT);
     } else if(key == UString("RightAlt")) {
-        cvar->setValue((int)KEY_ALT);
+        cvar->setValue((int)KEY_RALT);
     } else if(key == UString("Escape")) {
         cvar->setValue((int)KEY_ESCAPE);
     } else if(key == UString("Space")) {

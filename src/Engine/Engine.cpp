@@ -507,7 +507,7 @@ void Engine::onKeyboardKeyDown(KEYCODE keyCode) {
         }
 
         // handle ALT+ENTER fullscreen toggle
-        if(keyboard->isAltDown() && keyCode == KEY_ENTER) {
+        if(keyboard->isAltDown() && (keyCode == KEY_ENTER || keyCode == KEY_NUMPAD_ENTER)) {
             this->toggleFullscreen();
             return;
         }

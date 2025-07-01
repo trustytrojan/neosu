@@ -121,7 +121,7 @@ CONVAR(cv_RANDOM_BEATMAP, "osu_key_random_beatmap", (int)KEY_F2, FCVAR_BANCHO_CO
 CONVAR(cv_RIGHT_CLICK, "osu_key_right_click", (int)KEY_X, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(cv_RIGHT_CLICK_2, "osu_key_right_click_2", 0, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(cv_SAVE_SCREENSHOT, "osu_key_save_screenshot", (int)KEY_F12, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(cv_SEEK_TIME, "osu_key_seek_time", (int)KEY_SHIFT, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(cv_SEEK_TIME, "osu_key_seek_time", (int)KEY_LSHIFT, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(cv_SEEK_TIME_BACKWARD, "osu_key_seek_time_backward", (int)KEY_LEFT, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(cv_SEEK_TIME_FORWARD, "osu_key_seek_time_forward", (int)KEY_RIGHT, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(cv_SKIP_CUTSCENE, "osu_key_skip_cutscene", (int)KEY_SPACE, FCVAR_BANCHO_COMPATIBLE);
