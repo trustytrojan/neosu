@@ -824,10 +824,10 @@ void WinEnvironment::setCursorVisible(bool visible) {
     }
 }
 
-void WinEnvironment::setMousePos(int x, int y) {
+void WinEnvironment::setMousePos(float x, float y) {
     POINT temp;
-    temp.x = (LONG)x;
-    temp.y = (LONG)y;
+    temp.x = (LONG)std::round(x);
+    temp.y = (LONG)std::round(y);
     ClientToScreen(this->hwnd, &temp);
     SetCursorPos((int)temp.x, (int)temp.y);
 }

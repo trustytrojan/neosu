@@ -5,8 +5,12 @@
 #include <X11/Xatom.h>
 #include <X11/Xresource.h>
 #include <X11/cursorfont.h>
+#include <X11/extensions/XI2.h>
+#include <X11/extensions/XInput2.h>
 #include <dirent.h>
 #include <libgen.h>
+#include <math.h>
+#include <math.h>
 #include <pwd.h>
 #include <stdio.h>
 #include <string.h>
@@ -43,6 +47,9 @@ LinuxEnvironment::LinuxEnvironment(Display *display, Window window) : Environmen
     this->mouseCursor = XCreateFontCursor(this->display, XC_left_ptr);
     this->invisibleCursor = this->makeBlankCursor();
     this->cursorType = CURSORTYPE::CURSOR_NORMAL;
+
+    this->vCachedMousePos = Vector2(0, 0);
+    this->bMousePosValid = false;
 
     this->atom_UTF8_STRING = XInternAtom(this->display, "UTF8_STRING", False);
     this->atom_CLIPBOARD = XInternAtom(this->display, "CLIPBOARD", False);
@@ -84,6 +91,8 @@ LinuxEnvironment::LinuxEnvironment(Display *display, Window window) : Environmen
         const Vector2 windowSize = this->getWindowSize();
         LinuxEnvironment::vMonitors.emplace_back(0, 0, windowSize.x, windowSize.y);
     }
+
+    XIGetClientPointer(this->display, None, &this->iPointerDevID);
 }
 
 LinuxEnvironment::~LinuxEnvironment() { XFreeCursor(this->display, this->invisibleCursor); }
@@ -639,15 +648,31 @@ bool LinuxEnvironment::isCursorVisible() { return this->bCursorVisible; }
 bool LinuxEnvironment::isCursorClipped() { return this->bCursorClipped; }
 
 Vector2 LinuxEnvironment::getMousePos() {
-    Window rootRet, childRet;
-    unsigned int mask;
-    int childX, childY;
-    int rootX = 0;
-    int rootY = 0;
+    if(!this->bMousePosValid) {
+        // fallback to XIQueryPointer on first call or after focus events
+        Window rootRet = 0, childRet = 0;
+        double childX = 0.0, childY = 0.0;
+        double rootX = 0.0, rootY = 0.0;
+        XIButtonState buttons;
+        XIModifierState modifiers;
+        XIGroupState group;
+        Bool result = XIQueryPointer(this->display, this->iPointerDevID, this->window, &rootRet, &childRet, &rootX,
+                                     &rootY, &childX, &childY, &buttons, &modifiers, &group);
+        if(result) {
+            this->vCachedMousePos = Vector2(childX, childY);
+        } else {
+            // pointer not on same screen as window, return cached position or (0,0)
+            // this can happen during window switching or multi-monitor setups
+            this->vCachedMousePos = Vector2(0, 0);
+        }
+        // free the dynamically allocated mask in buttons
+        if(buttons.mask) {
+            XFree(buttons.mask);
+        }
+        this->bMousePosValid = true;
+    }
 
-    XQueryPointer(this->display, this->window, &rootRet, &childRet, &rootX, &rootY, &childX, &childY, &mask);
-
-    return Vector2(childX, childY);
+    return this->vCachedMousePos;
 }
 
 McRect LinuxEnvironment::getCursorClip() { return this->cursorClip; }
@@ -697,9 +722,14 @@ void LinuxEnvironment::setCursorVisible(bool visible) {
     this->setCursorInt(visible ? this->mouseCursor : this->invisibleCursor);
 }
 
-void LinuxEnvironment::setMousePos(int x, int y) {
-    XWarpPointer(this->display, None, this->window, 0, 0, 0, 0, x, y);
-    XSync(this->display, False);
+void LinuxEnvironment::setMousePos(float x, float y) {
+    XIWarpPointer(this->display, this->iPointerDevID, None, this->window, 0, 0, 0, 0, x, y);
+    // XFlush is usually sufficient, XSync forces unnecessary round-trip
+    XFlush(this->display);
+
+    // update cached position immediately
+    this->vCachedMousePos = Vector2(x, y);
+    this->bMousePosValid = true;
 }
 
 void LinuxEnvironment::setCursorClip(bool clip, McRect rect) {

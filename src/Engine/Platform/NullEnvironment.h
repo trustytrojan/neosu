@@ -144,7 +144,7 @@ class NullEnvironment : public Environment {
     CURSORTYPE getCursor() override { return CURSORTYPE::CURSOR_NORMAL; }
     void setCursor(CURSORTYPE cur) override { (void)cur; }
     void setCursorVisible(bool visible) override { (void)visible; }
-    void setMousePos(int x, int y) override {
+    void setMousePos(float x, float y) override {
         (void)x;
         (void)y;
     }

@@ -85,7 +85,7 @@ class LinuxEnvironment : public Environment {
     CURSORTYPE getCursor() override;
     void setCursor(CURSORTYPE cur) override;
     void setCursorVisible(bool visible) override;
-    void setMousePos(int x, int y) override;
+    void setMousePos(float x, float y) override;
     void setCursorClip(bool clip, McRect rect) override;
 
     // keyboard
@@ -95,6 +95,12 @@ class LinuxEnvironment : public Environment {
     [[nodiscard]] inline Display *getDisplay() const { return this->display; }
     [[nodiscard]] inline Window getWindow() const { return this->window; }
     [[nodiscard]] inline bool isRestartScheduled() const { return this->bIsRestartScheduled; }
+
+    inline void updateMousePos(float x, float y) {
+        this->vCachedMousePos = Vector2(x, y);
+        this->bMousePosValid = true;
+    }
+    inline void invalidateMousePos() { this->bMousePosValid = false; }
 
     void handleSelectionRequest(XSelectionRequestEvent &evt);
 
@@ -138,6 +144,10 @@ class LinuxEnvironment : public Environment {
     Cursor mouseCursor;
     Cursor invisibleCursor;
     CURSORTYPE cursorType;
+    Vector2 vCachedMousePos;
+    bool bMousePosValid;
+
+    int iPointerDevID;
 
     // clipboard
     UString sLocalClipboardContent;

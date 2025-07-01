@@ -217,8 +217,7 @@ void ModFPoSu::update() {
         (osu->getModAuto() || osu->getModAutopilot() || osu->getSelectedBeatmap()->is_watching || bancho.is_spectating);
 
     this->bCrosshairIntersectsScreen = true;
-    if(!cv_fposu_absolute_mode.getBool() && !isAutoCursor &&
-       Env::cfg(OS::WINDOWS))  // HACKHACK: windows only for now (raw input support)
+    if(!cv_fposu_absolute_mode.getBool() && !isAutoCursor)
     {
         // regular mouse position mode
 

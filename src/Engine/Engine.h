@@ -52,7 +52,7 @@ class Engine {
     void onShutdown();
 
     // primary mouse messages
-    void onMouseRawMove(int xDelta, int yDelta, bool absolute = false, bool virtualDesktop = false);
+    void onMouseRawMove(float xDelta, float yDelta, bool absolute = false, bool virtualDesktop = false);
     void onMouseWheelVertical(int delta);
     void onMouseWheelHorizontal(int delta);
     void onMouseLeftChange(bool mouseLeftDown);

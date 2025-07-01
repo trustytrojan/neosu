@@ -39,14 +39,16 @@ bool g_bDraw = true;
 
 bool g_bHasFocus = false;  // for fps_max_background
 
+namespace {  // static
+
 Display *dpy;
 Window root;
 // GLint                   att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
 Colormap cmap;
 XSetWindowAttributes swa;
 Window win;
-GLXContext glc;
-XWindowAttributes gwa;
+// GLXContext glc;
+// XWindowAttributes gwa;
 XEvent xev;
 
 // input
@@ -58,11 +60,55 @@ int xi2opcode;
 //	Message loop  //
 //****************//
 
-void WndProc(int type, int xcookieType, int xcookieExtension) {
-    (void)xcookieType;
-    (void)xcookieExtension;
-
+void WndProc(int type) {
     switch(type) {
+        case GenericEvent:
+            //debugLogF("Got GenericEvent, extension={:d}, xi2opcode={:d}\n", xev.xcookie.extension, xi2opcode);
+            if(xev.xcookie.extension == xi2opcode) {
+                XGetEventData(dpy, &xev.xcookie);
+
+                // get the XI2 event type directly from the cookie
+                int xi2EventType = xev.xcookie.evtype;
+                //debugLogF("XI2 event type: {:d} (XI_RawMotion={:d})\n", xi2EventType, XI_RawMotion);
+
+                switch(xi2EventType) {
+                    case XI_RawMotion: {
+                        auto *rawEvent = (XIRawEvent *)xev.xcookie.data;
+                        if(g_engine != NULL) {
+                            // extract relative movement from valuators
+                            double dx = 0, dy = 0;
+                            double *values = rawEvent->raw_values;
+                            int valueIndex = 0;
+
+                            if(rawEvent->valuators.mask_len > 0) {
+                                for(int i = 0; i < rawEvent->valuators.mask_len * 8; i++) {
+                                    if(XIMaskIsSet(rawEvent->valuators.mask, i)) {
+                                        if(i == 0)
+                                            dx = values[valueIndex];  // x axis
+                                        else if(i == 1)
+                                            dy = values[valueIndex];  // y axis
+                                        valueIndex++;
+                                    }
+                                }
+                            }
+                            //debugLogF("{:.4f}x{:.4f}\n", dx, dy);
+                            // XI2 raw motion is always relative movement
+                            g_engine->onMouseRawMove((float)dx, (float)dy, false, false);
+                        }
+                        break;
+                    }
+                }
+                XFreeEventData(dpy, &xev.xcookie);
+            }
+            break;
+
+        case MotionNotify:
+            // update cached absolute position from regular motion events
+            if(g_environment != NULL) {
+                g_environment->updateMousePos(xev.xmotion.x, xev.xmotion.y);
+            }
+            break;
+
         case ConfigureNotify:
             if(g_engine != NULL)
                 g_engine->requestResolutionChange(Vector2(xev.xconfigure.width, xev.xconfigure.height));
@@ -74,6 +120,9 @@ void WndProc(int type, int xcookieType, int xcookieExtension) {
 
         case FocusIn:
             g_bHasFocus = true;
+            if(g_environment != NULL) {
+                g_environment->invalidateMousePos();  // force refresh on focus
+            }
             if(g_bRunning && g_engine != NULL) {
                 g_engine->onFocusGained();
             }
@@ -81,6 +130,9 @@ void WndProc(int type, int xcookieType, int xcookieExtension) {
 
         case FocusOut:
             g_bHasFocus = false;
+            if(g_environment != NULL) {
+                g_environment->invalidateMousePos();  // force refresh on unfocus
+            }
             if(g_bRunning && g_engine != NULL) {
                 g_engine->onFocusLost();
             }
@@ -207,16 +259,18 @@ void WndProc(int type, int xcookieType, int xcookieExtension) {
             break;
     }
 }
+}  // namespace
 
 //********************//
 //	Main entry point  //
 //********************//
 
 int main(int argc, char *argv[]) {
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
     // Fix path in case user is running it from the wrong folder.
     // We only do this if MCENGINE_DATA_DIR is set to its default value, since if it's changed,
     // the packager clearly wants the executable in a different location.
-    if(!strcmp(MCENGINE_DATA_DIR, "./")) {
+    if constexpr(ARRAY_SIZE(MCENGINE_DATA_DIR) == 3 && MCENGINE_DATA_DIR[0] == '.' && MCENGINE_DATA_DIR[1] == '/') {
         char exe_path[PATH_MAX];
         ssize_t exe_path_s = readlink("/proc/self/exe", exe_path, sizeof(exe_path) - 1);
         if(exe_path_s == -1) {
@@ -258,6 +312,8 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
+    //debugLogF("XI2 version: {:d}.{:d}, opcode: {:d}, XI_RawMotion: {:d}\n", ximajor, ximinor, xi2opcode, XI_RawMotion);
+
     root = DefaultRootWindow(dpy);
 
     // resolve GLX functions
@@ -277,7 +333,7 @@ int main(int argc, char *argv[]) {
     // set window attributes
     swa.colormap = cmap;
     swa.event_mask = ExposureMask | FocusChangeMask | KeyPressMask | KeyReleaseMask | ButtonPressMask |
-                     ButtonReleaseMask | StructureNotifyMask | KeymapStateMask;
+                     ButtonReleaseMask | PointerMotionMask | StructureNotifyMask | KeymapStateMask;
 
     Screen *defaultScreen = DefaultScreenOfDisplay(dpy);
     win = XCreateWindow(dpy, root, defaultScreen->width / 2 - WINDOW_WIDTH / 2,
@@ -352,16 +408,16 @@ int main(int argc, char *argv[]) {
     XSetICFocus(ic);
 
     // create timers
-    Timer *frameTimer = new Timer();
+    auto *frameTimer = new Timer();
     frameTimer->start();
     frameTimer->update();
 
-    Timer *deltaTimer = new Timer();
+    auto *deltaTimer = new Timer();
     deltaTimer->start();
     deltaTimer->update();
 
     // initialize engine
-    LinuxEnvironment *environment = new LinuxEnvironment(dpy, win);
+    auto *environment = new LinuxEnvironment(dpy, win);
     g_environment = environment;
     g_engine = new Engine(environment, argc, argv);
     g_engine->loadApp();
@@ -380,7 +436,7 @@ int main(int argc, char *argv[]) {
             if(XFilterEvent(&xev, win))  // for keyboard chars
                 continue;
 
-            WndProc(xev.type, xev.xcookie.type, xev.xcookie.extension);
+            WndProc(xev.type);
         }
 
         // update

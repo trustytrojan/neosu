@@ -89,7 +89,7 @@ class WinEnvironment : public Environment {
     CURSORTYPE getCursor();
     void setCursor(CURSORTYPE cur);
     void setCursorVisible(bool visible);
-    void setMousePos(int x, int y);
+    void setMousePos(float x, float y);
     void setCursorClip(bool clip, McRect rect);
 
     // keyboard

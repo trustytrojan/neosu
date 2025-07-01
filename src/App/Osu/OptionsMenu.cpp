@@ -835,7 +835,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     CBaseUIElement *sectionInput = this->addSection("Input");
 
     this->addSubSection("Mouse", "scroll");
-    if constexpr(Env::cfg(OS::WINDOWS | OS::MAC)) {
+    if constexpr(Env::cfg(OS::WINDOWS | OS::MAC | OS::LINUX)) {
         this->addSlider("Sensitivity:", 0.1f, 6.0f, &cv_mouse_sensitivity)->setKeyDelta(0.01f);
 
         if constexpr(Env::cfg(OS::MAC)) {
@@ -844,22 +844,24 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
             this->addLabel("");
         }
     }
-    if constexpr(Env::cfg(OS::WINDOWS)) {
+    if constexpr(Env::cfg(OS::WINDOWS | OS::LINUX)) {
         this->addCheckbox("Raw Input", &cv_mouse_raw_input);
-        this->addCheckbox("[Beta] RawInputBuffer",
-                          "Improves performance problems caused by insane mouse usb polling rates above 1000 "
-                          "Hz.\nOnly relevant if \"Raw Input\" is enabled, or if in FPoSu mode (with disabled "
-                          "\"Tablet/Absolute Mode\").",
-                          &cv_win_mouse_raw_input_buffer);
-        this->addCheckbox("Map Absolute Raw Input to Window", &cv_mouse_raw_input_absolute_to_window)
-            ->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onRawInputToAbsoluteWindowChange));
+        if constexpr(Env::cfg(OS::LINUX)) {
+            this->addCheckbox("[Beta] RawInputBuffer",
+                              "Improves performance problems caused by insane mouse usb polling rates above 1000 "
+                              "Hz.\nOnly relevant if \"Raw Input\" is enabled, or if in FPoSu mode (with disabled "
+                              "\"Tablet/Absolute Mode\").",
+                              &cv_win_mouse_raw_input_buffer);
+            this->addCheckbox("Map Absolute Raw Input to Window", &cv_mouse_raw_input_absolute_to_window)
+                ->setChangeCallback(fastdelegate::MakeDelegate(this, &OptionsMenu::onRawInputToAbsoluteWindowChange));
+        }
     }
-    if constexpr(Env::cfg(OS::LINUX)) {
-        this->addLabel("Use system settings to change the mouse sensitivity.")->setTextColor(0xff555555);
-        this->addLabel("");
-        this->addLabel("Use xinput or xsetwacom to change the tablet area.")->setTextColor(0xff555555);
-        this->addLabel("");
-    }
+    // if constexpr(Env::cfg(OS::LINUX)) {
+    //     this->addLabel("Use system settings to change the mouse sensitivity.")->setTextColor(0xff555555);
+    //     this->addLabel("");
+    //     this->addLabel("Use xinput or xsetwacom to change the tablet area.")->setTextColor(0xff555555);
+    //     this->addLabel("");
+    // }
     this->addCheckbox("Confine Cursor (Windowed)", &cv_confine_cursor_windowed);
     this->addCheckbox("Confine Cursor (Fullscreen)", &cv_confine_cursor_fullscreen);
     this->addCheckbox("Disable Mouse Wheel in Play Mode", &cv_disable_mousewheel);
@@ -880,14 +882,15 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
             "Enable this if your tablet cursor is stuck in a tiny area on the top left of the screen.\nIf this "
             "doesn't fix it, use \"Ignore Sensitivity & Raw Input\" below.",
             &cv_win_ink_workaround);
+#endif
+    }
+    if constexpr(Env::cfg(OS::WINDOWS | OS::LINUX)) {
         this->addCheckbox(
             "Ignore Sensitivity & Raw Input",
             "Only use this if nothing else works.\nIf this is enabled, then the in-game sensitivity slider "
             "will no longer work for tablets!\n(You can then instead use your tablet configuration software to "
             "change the tablet area.)",
             &cv_tablet_sensitivity_ignore);
-
-#endif
     }
 
     this->addSpacer();

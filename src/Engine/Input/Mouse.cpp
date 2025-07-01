@@ -121,8 +121,7 @@ void Mouse::update() {
 
     Vector2 nextPos = osMousePos;
 
-    if(osCursorVisible || (!sensitivityAdjustmentNeeded && !cv_mouse_raw_input.getBool()) || this->bAbsolute ||
-       Env::cfg(OS::LINUX))  // HACKHACK: linux hack
+    if(osCursorVisible || (!sensitivityAdjustmentNeeded && !cv_mouse_raw_input.getBool()) || this->bAbsolute)
     {
         // this block handles visible/active OS cursor movement without sensitivity adjustments, and absolute input
         // device movement
@@ -187,8 +186,8 @@ void Mouse::update() {
             this->vDelta = this->vRawDelta;  // this is already scaled to the sensitivity
         else {
             // non-raw input is always in pixels, sub-pixel movement is handled/buffered by the operating system
-            if((int)osMousePos.x != (int)this->vPrevOsMousePos.x ||
-               (int)osMousePos.y != (int)this->vPrevOsMousePos.y)  // without this check some people would get mouse drift
+            if((int)std::round(osMousePos.x) != (int)std::round(this->vPrevOsMousePos.x) ||
+               (int)std::round(osMousePos.y) != (int)std::round(this->vPrevOsMousePos.y))  // without this check some people would get mouse drift
                 this->vDelta = (osMousePos - this->vPrevOsMousePos) * cv_mouse_sensitivity.getFloat();
         }
 
@@ -224,14 +223,13 @@ void Mouse::update() {
     // first person games which call mouse->setPos() every frame to manually re-center the cursor NEVER
     // need env->setPos() absolute input NEVER needs env->setPos() also update prevOsMousePos
     if(windowRect.contains(osMousePos) && (sensitivityAdjustmentNeeded || cv_mouse_raw_input.getBool()) &&
-       !this->bSetPosWasCalledLastFrame && !this->bAbsolute && Env::cfg(OS::LINUX))  // HACKHACK: linux hack
+       !this->bSetPosWasCalledLastFrame && !this->bAbsolute)
     {
         const Vector2 newOsMousePos = this->vPosWithoutOffset;
 
         env->setMousePos(newOsMousePos.x, newOsMousePos.y);
 
         // assume that the operating system has set the cursor to nextPos quickly enough for the next frame
-        // also, force clamp to pixels, as this happens there too (to avoid drifting in the non-raw delta calculation)
         this->vPrevOsMousePos = newOsMousePos;
         this->vPrevOsMousePos.x = (int)this->vPrevOsMousePos.x;
         this->vPrevOsMousePos.y = (int)this->vPrevOsMousePos.y;
@@ -317,7 +315,7 @@ void Mouse::setPosXY(float x, float y) {
     }
 }
 
-void Mouse::onRawMove(int xDelta, int yDelta, bool absolute, bool virtualDesktop) {
+void Mouse::onRawMove(float xDelta, float yDelta, bool absolute, bool virtualDesktop) {
     this->bAbsolute = absolute;
     this->bVirtualDesktop = virtualDesktop;
 
@@ -390,11 +388,11 @@ void Mouse::setPos(Vector2 newPos) {
     this->bSetPosWasCalledLastFrame = true;
 
     this->setPosXY(newPos.x, newPos.y);
-    env->setMousePos((int)this->vPos.x, (int)this->vPos.y);
+    env->setMousePos(this->vPos.x, this->vPos.y);
 
     this->vPrevOsMousePos = this->vPos;
-    this->vPrevOsMousePos.x = (int)this->vPrevOsMousePos.x;
-    this->vPrevOsMousePos.y = (int)this->vPrevOsMousePos.y;
+    this->vPrevOsMousePos.x = this->vPrevOsMousePos.x;
+    this->vPrevOsMousePos.y = this->vPrevOsMousePos.y;
 }
 
 void Mouse::setCursorType(CURSORTYPE cursorType) { env->setCursor(cursorType); }
