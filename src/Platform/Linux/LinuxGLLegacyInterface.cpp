@@ -25,11 +25,18 @@ LinuxGLLegacyInterface::LinuxGLLegacyInterface(Display *display, Window window) 
     this->window = window;
 
     // create opengl context and make current
-    this->glc = glXCreateContext(this->display, getVisualInfo(this->display), NULL, GL_TRUE);
+    auto *vi = getVisualInfo(this->display);
+    if(vi == NULL) {
+        engine->showMessageError("OpenGL Error", "Couldn't glXChooseVisual()!\nThe engine will quit now.");
+        return;
+    }
+    this->glc = glXCreateContext(this->display, vi, NULL, GL_TRUE);
     if(this->glc == NULL) {
         engine->showMessageError("OpenGL Error", "Couldn't glXCreateContext()!\nThe engine will quit now.");
         return;
     }
+    XFree(vi);
+
     glXMakeCurrent(this->display, this->window, this->glc);
 }
 

@@ -7,6 +7,8 @@
 #include <shellapi.h>
 // clang-format on
 
+#include "Mouse.h"
+
 #include "Database.h"
 #include "DatabaseBeatmap.h"
 #include "Downloader.h"  // for extract_beatmapset
@@ -261,6 +263,28 @@ static void register_neosu_file_associations() {
     RegCloseKey(osz_key);
 }
 
+// this is retarded
+// https://stackoverflow.com/a/77281559
+static WPARAM mapLeftRightKeys(WPARAM wParam, LPARAM lParam) {
+    WORD vkCode = LOWORD(wParam);
+    WORD keyFlags = HIWORD(lParam);
+
+    WORD scanCode = LOBYTE(keyFlags);
+    BOOL isExtendedKey = (keyFlags & KF_EXTENDED) == KF_EXTENDED;
+
+    if(isExtendedKey) scanCode = MAKEWORD(scanCode, 0xE0);
+
+    switch(vkCode) {
+        case VK_SHIFT:
+        case VK_CONTROL:
+        case VK_MENU:
+            vkCode = LOWORD(MapVirtualKey(scanCode, MAPVK_VSC_TO_VK_EX));
+            break;
+    }
+
+    return vkCode;
+}
+
 //****************//
 //	Message loop  //
 //****************//
@@ -373,7 +397,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         case WM_SYSKEYDOWN:
         case WM_KEYDOWN:
             if(g_engine != NULL) {
-                g_engine->onKeyboardKeyDown(wParam);
+                g_engine->onKeyboardKeyDown(mapLeftRightKeys(wParam, lParam));
                 return 0;
             }
             break;
@@ -382,7 +406,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         case WM_SYSKEYUP:
         case WM_KEYUP:
             if(g_engine != NULL) {
-                g_engine->onKeyboardKeyUp(wParam);
+                g_engine->onKeyboardKeyUp(mapLeftRightKeys(wParam, lParam));
                 return 0;
             }
             break;
@@ -397,18 +421,19 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
         // left mouse button, inject as keyboard key as well
         case WM_LBUTTONDOWN:
-            if(g_engine != NULL && (!cv_win_realtimestylus.getBool() ||
-                                    !IsPenEvent(GetMessageExtraInfo())))  // if realtimestylus support is enabled, all
-                                                                          // clicks are handled by it and not here
+            if(g_engine != NULL && mouse != NULL &&
+               (!cv_win_realtimestylus.getBool() ||
+                !IsPenEvent(GetMessageExtraInfo())))  // if realtimestylus support is enabled, all
+                                                      // clicks are handled by it and not here
             {
-                g_engine->onMouseLeftChange(true);
+                mouse->onLeftChange(true);
                 g_engine->onKeyboardKeyDown(VK_LBUTTON);
             }
             SetCapture(hwnd);
             break;
         case WM_LBUTTONUP:
-            if(g_engine != NULL) {
-                g_engine->onMouseLeftChange(false);
+            if(g_engine != NULL && mouse != NULL) {
+                mouse->onLeftChange(false);
                 g_engine->onKeyboardKeyUp(VK_LBUTTON);
             }
             ReleaseCapture();
@@ -416,15 +441,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
         // middle mouse button, inject as keyboard key as well
         case WM_MBUTTONDOWN:
-            if(g_engine != NULL) {
-                g_engine->onMouseMiddleChange(true);
+            if(g_engine != NULL && mouse != NULL) {
+                mouse->onMiddleChange(true);
                 g_engine->onKeyboardKeyDown(VK_MBUTTON);
             }
             SetCapture(hwnd);
             break;
         case WM_MBUTTONUP:
-            if(g_engine != NULL) {
-                g_engine->onMouseMiddleChange(false);
+            if(g_engine != NULL && mouse != NULL) {
+                mouse->onMiddleChange(false);
                 g_engine->onKeyboardKeyUp(VK_MBUTTON);
             }
             ReleaseCapture();
@@ -432,18 +457,19 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
         // right mouse button, inject as keyboard key as well
         case WM_RBUTTONDOWN:
-            if(g_engine != NULL && (!cv_win_realtimestylus.getBool() ||
-                                    !IsPenEvent(GetMessageExtraInfo())))  // if realtimestylus support is enabled, all
-                                                                          // pen clicks are handled by it and not here
+            if(g_engine != NULL && mouse != NULL &&
+               (!cv_win_realtimestylus.getBool() ||
+                !IsPenEvent(GetMessageExtraInfo())))  // if realtimestylus support is enabled, all
+                                                      // pen clicks are handled by it and not here
             {
-                g_engine->onMouseRightChange(true);
+                mouse->onRightChange(true);
                 g_engine->onKeyboardKeyDown(VK_RBUTTON);
             }
             SetCapture(hwnd);
             break;
         case WM_RBUTTONUP:
-            if(g_engine != NULL) {
-                g_engine->onMouseRightChange(false);
+            if(g_engine != NULL && mouse != NULL) {
+                mouse->onRightChange(false);
                 g_engine->onKeyboardKeyUp(VK_RBUTTON);
             }
             ReleaseCapture();
@@ -451,25 +477,25 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
         // mouse sidebuttons (4 and 5), inject them as keyboard keys as well
         case WM_XBUTTONDOWN:
-            if(g_engine != NULL) {
+            if(g_engine != NULL && mouse != NULL) {
                 const DWORD fwButton = GET_XBUTTON_WPARAM(wParam);
                 if(fwButton == XBUTTON1) {
-                    g_engine->onMouseButton4Change(true);
+                    mouse->onButton4Change(true);
                     g_engine->onKeyboardKeyDown(VK_XBUTTON1);
                 } else if(fwButton == XBUTTON2) {
-                    g_engine->onMouseButton5Change(true);
+                    mouse->onButton5Change(true);
                     g_engine->onKeyboardKeyDown(VK_XBUTTON2);
                 }
             }
             return TRUE;
         case WM_XBUTTONUP:
-            if(g_engine != NULL) {
+            if(g_engine != NULL && mouse != NULL) {
                 const DWORD fwButton = GET_XBUTTON_WPARAM(wParam);
                 if(fwButton == XBUTTON1) {
-                    g_engine->onMouseButton4Change(false);
+                    mouse->onButton4Change(false);
                     g_engine->onKeyboardKeyUp(VK_XBUTTON1);
                 } else if(fwButton == XBUTTON2) {
-                    g_engine->onMouseButton5Change(false);
+                    mouse->onButton5Change(false);
                     g_engine->onKeyboardKeyUp(VK_XBUTTON2);
                 }
             }
@@ -524,7 +550,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         case WM_POINTERCAPTURECHANGED:
         case WM_POINTERWHEEL:
         case WM_POINTERHWHEEL:
-            if(g_engine != NULL && g_GetPointerInfo != NULL) {
+            if(g_engine != NULL && g_GetPointerInfo != NULL && mouse != NULL) {
                 POINTER_INFO pointerInfo;
                 unsigned long id = LOWORD(wParam);
                 if(g_GetPointerInfo(LOWORD(wParam), &pointerInfo)) {
@@ -535,7 +561,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                             ((float)pointerInfo.ptPixelLocation.x / (float)env->getNativeScreenSize().x) * 65536;
                         int rawAbsoluteY =
                             ((float)pointerInfo.ptPixelLocation.y / (float)env->getNativeScreenSize().y) * 65536;
-                        g_engine->onMouseRawMove(rawAbsoluteX, rawAbsoluteY, true, true);
+                        mouse->onRawMove(rawAbsoluteX, rawAbsoluteY, true, true);
                     }
 
                     if(pointerInfo.pointerFlags & POINTER_FLAG_DOWN) {
@@ -552,9 +578,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                             g_vTouches.push_back(id);
 
                             if(already)
-                                g_engine->onMouseRightChange(true);
+                                mouse->onRightChange(true);
                             else
-                                g_engine->onMouseLeftChange(true);
+                                mouse->onLeftChange(true);
                         }
                     } else if(pointerInfo.pointerFlags & POINTER_FLAG_UP) {
                         for(size_t i = 0; i < g_vTouches.size(); i++) {
@@ -566,10 +592,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
                         bool still = g_vTouches.size() > 0;
 
-                        if(still) g_engine->onMouseRightChange(false);
+                        if(still) mouse->onRightChange(false);
                         // WTF: this is already called by WM_LBUTTONUP, fuck touch
                         // else
-                        //	g_engine->onMouseLeftChange(false);
+                        //	mouse->onLeftChange(false);
                     }
                 }
             }
@@ -584,22 +610,22 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             GetRawInputData((HRAWINPUT)lParam, RID_INPUT, &raw, &dwSize, sizeof(RAWINPUTHEADER));
 
             if(raw.header.dwType == RIM_TYPEMOUSE) {
-                if(g_engine != NULL) {
-                    g_engine->onMouseRawMove(raw.data.mouse.lLastX, raw.data.mouse.lLastY,
-                                             (raw.data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE),
-                                             (raw.data.mouse.usFlags & MOUSE_VIRTUAL_DESKTOP));
+                if(g_engine != NULL && mouse != NULL) {
+                    mouse->onRawMove(raw.data.mouse.lLastX, raw.data.mouse.lLastY,
+                                     (raw.data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE),
+                                     (raw.data.mouse.usFlags & MOUSE_VIRTUAL_DESKTOP));
                 }
             }
         } break;
 
         // vertical mouse wheel
         case WM_MOUSEWHEEL:
-            if(g_engine != NULL) g_engine->onMouseWheelVertical(GET_WHEEL_DELTA_WPARAM(wParam));
+            if(g_engine != NULL && mouse != NULL) mouse->onWheelVertical(GET_WHEEL_DELTA_WPARAM(wParam));
             break;
 
         // horizontal mouse wheel
         case WM_MOUSEHWHEEL:
-            if(g_engine != NULL) g_engine->onMouseWheelHorizontal(GET_WHEEL_DELTA_WPARAM(wParam));
+            if(g_engine != NULL && mouse != NULL) mouse->onWheelHorizontal(GET_WHEEL_DELTA_WPARAM(wParam));
             break;
 
         // minimizing/maximizing
@@ -1038,7 +1064,7 @@ int WINAPI MAINFUNC(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
         {
             VPROF_BUDGET("Windows", VPROF_BUDGETGROUP_WNDPROC);
 
-            if(cv_win_mouse_raw_input_buffer.getBool()) {
+            if(cv_win_mouse_raw_input_buffer.getBool() && mouse != NULL) {
                 UINT minRawInputBufferNumBytes = 0;
                 UINT hr = GetRawInputBuffer(NULL, &minRawInputBufferNumBytes, sizeof(RAWINPUTHEADER));
                 if(hr != (UINT)-1 && minRawInputBufferNumBytes > 0) {
@@ -1068,8 +1094,8 @@ int WINAPI MAINFUNC(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
                                 const LONG lastY = currentRawInput->data.mouse.lLastY;
                                 const USHORT usFlags = currentRawInput->data.mouse.usFlags;
 
-                                g_engine->onMouseRawMove(lastX, lastY, (usFlags & MOUSE_MOVE_ABSOLUTE),
-                                                         (usFlags & MOUSE_VIRTUAL_DESKTOP));
+                                mouse->onRawMove(lastX, lastY, (usFlags & MOUSE_MOVE_ABSOLUTE),
+                                                 (usFlags & MOUSE_VIRTUAL_DESKTOP));
                             }
 
                             currentRawInput = NEXTRAWINPUTBLOCK(currentRawInput);

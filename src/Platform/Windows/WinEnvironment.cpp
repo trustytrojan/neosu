@@ -20,8 +20,6 @@
 #include "WinGLLegacyInterface.h"
 #include "cbase.h"
 
-
-
 bool g_bCursorVisible = true;
 
 bool WinEnvironment::bResizable = true;
@@ -74,9 +72,7 @@ void WinEnvironment::update() {
     this->bHasCursorTypeChanged = false;
 }
 
-Graphics *WinEnvironment::createRenderer() {
-    return new WinGLLegacyInterface(this->hwnd);
-}
+Graphics *WinEnvironment::createRenderer() { return new WinGLLegacyInterface(this->hwnd); }
 
 void WinEnvironment::shutdown() { SendMessage(this->hwnd, WM_CLOSE, 0, 0); }
 
@@ -423,8 +419,7 @@ std::vector<UString> WinEnvironment::getLogicalDrives() {
             // GetDriveType(winDriveName), attributes);
 
             // check if the drive is valid, and if there is media in it (e.g. ignore empty dvd drives)
-            if(GetDriveType(winDriveName) > DRIVE_NO_ROOT_DIR &&
-               attributes != INVALID_FILE_ATTRIBUTES) {
+            if(GetDriveType(winDriveName) > DRIVE_NO_ROOT_DIR && attributes != INVALID_FILE_ATTRIBUTES) {
                 if(driveExecName.length() > 0) drives.push_back(driveExecName);
             }
         }
@@ -761,11 +756,11 @@ bool WinEnvironment::isCursorClipped() { return this->bCursorClipped; }
 
 bool WinEnvironment::isCursorVisible() { return g_bCursorVisible; }
 
-Vector2 WinEnvironment::getMousePos() {
+Vector2d WinEnvironment::getMousePos() {
     POINT mpos;
     GetCursorPos(&mpos);
     ScreenToClient(this->hwnd, &mpos);
-    return Vector2(mpos.x, mpos.y);
+    return Vector2d(mpos.x, mpos.y);
 }
 
 McRect WinEnvironment::getCursorClip() { return this->cursorClip; }
@@ -824,7 +819,7 @@ void WinEnvironment::setCursorVisible(bool visible) {
     }
 }
 
-void WinEnvironment::setMousePos(float x, float y) {
+void WinEnvironment::setMousePos(double x, double y) {
     POINT temp;
     temp.x = (LONG)std::round(x);
     temp.y = (LONG)std::round(y);
@@ -839,29 +834,24 @@ void WinEnvironment::setCursorClip(bool clip, McRect rect) {
     if(clip) {
         RECT windowRect;
 
-        if(rect.getWidth() == 0 && rect.getHeight() == 0) {
-            RECT clientRect;
-            GetClientRect(this->hwnd, &clientRect);
+        RECT clientRect;
+        GetClientRect(this->hwnd, &clientRect);
 
-            POINT topLeft;
-            topLeft.x = 0;
-            topLeft.y = 0;
-            ClientToScreen(this->hwnd, &topLeft);
+        POINT topLeft;
+        topLeft.x = clientRect.left + rect.getMinX();
+        topLeft.y = clientRect.top + rect.getMinY();
+        ClientToScreen(this->hwnd, &topLeft);
 
-            POINT bottomRight;
-            bottomRight.x = clientRect.right;
-            bottomRight.y = clientRect.bottom;
-            ClientToScreen(this->hwnd, &bottomRight);
+        POINT bottomRight;
+        bottomRight.x = clientRect.right - (clientRect.right - rect.getMaxX());
+        bottomRight.y = clientRect.bottom - (clientRect.bottom - rect.getMaxY());
 
-            windowRect.left = topLeft.x;
-            windowRect.top = topLeft.y;
-            windowRect.right = bottomRight.x;
-            windowRect.bottom = bottomRight.y;
+        ClientToScreen(this->hwnd, &bottomRight);
 
-            this->cursorClip = McRect(0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top);
-        }
-
-        // TODO: custom rect (only fullscreen works atm)
+        windowRect.left = topLeft.x;
+        windowRect.top = topLeft.y;
+        windowRect.right = bottomRight.x;
+        windowRect.bottom = bottomRight.y;
 
         ClipCursor(&windowRect);
     } else

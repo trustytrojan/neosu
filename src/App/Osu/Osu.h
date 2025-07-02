@@ -179,6 +179,8 @@ class Osu : public App, public MouseListener {
     // callbacks
     void onWindowedResolutionChanged(UString oldValue, UString args);
     void onInternalResolutionChanged(UString oldValue, UString args);
+    void onSensitivityChange(UString oldValue, UString newValue);
+    void onRawInputChange(UString oldValue, UString newValue);
 
     void onSkinReload();
     void onSkinChange(UString oldValue, UString newValue);
@@ -195,9 +197,6 @@ class Osu : public App, public MouseListener {
     void onUIScaleChange(UString oldValue, UString newValue);
     void onUIScaleToDPIChange(UString oldValue, UString newValue);
     void onLetterboxingChange(UString oldValue, UString newValue);
-
-    void onConfineCursorWindowedChange(UString oldValue, UString newValue);
-    void onConfineCursorFullscreenChange(UString oldValue, UString newValue);
 
     void onKey1Change(bool pressed, bool mouse);
     void onKey2Change(bool pressed, bool mouse);

@@ -101,16 +101,8 @@ neosu_SOURCES = \
 	src/Engine/Graphics.cpp \
 	src/Engine/Image.cpp \
 	src/Engine/Input/Keyboard.cpp \
-	src/Engine/Input/KeyboardEvent.cpp \
 	src/Engine/Input/Mouse.cpp \
-	src/Engine/Main/main_Linux.cpp \
-	src/Engine/Main/main_Windows.cpp \
 	src/Engine/NetworkHandler.cpp \
-	src/Engine/Platform/LinuxEnvironment.cpp \
-	src/Engine/Platform/LinuxGLLegacyInterface.cpp \
-	src/Engine/Platform/NullEnvironment.cpp \
-	src/Engine/Platform/WinEnvironment.cpp \
-	src/Engine/Platform/WinGLLegacyInterface.cpp \
 	src/Engine/Profiler.cpp \
 	src/Engine/RenderTarget.cpp \
 	src/Engine/Renderer/NullGraphicsInterface.cpp \
@@ -153,6 +145,13 @@ neosu_SOURCES = \
 	src/GUI/Windows/VinylScratcher/VSTitleBar.cpp \
 	src/GUI/Windows/VinylScratcher/VinylScratcher.cpp \
 	src/GUI/Windows/VisualProfiler.cpp \
+	src/Platform/Linux/LinuxEnvironment.cpp \
+	src/Platform/Linux/LinuxGLLegacyInterface.cpp \
+	src/Platform/Linux/XI2Handler.cpp \
+	src/Platform/Windows/WinEnvironment.cpp \
+	src/Platform/Windows/WinGLLegacyInterface.cpp \
+	src/Platform/main_Linux.cpp \
+	src/Platform/main_Windows.cpp \
 	src/Util/MD5Hash.cpp \
 	src/Util/Quaternion.cpp \
 	src/Util/Rect.cpp \

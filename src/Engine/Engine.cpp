@@ -467,36 +467,6 @@ void Engine::onShutdown() {
     env->shutdown();
 }
 
-void Engine::onMouseRawMove(float xDelta, float yDelta, bool absolute, bool virtualDesktop) {
-    mouse->onRawMove(xDelta, yDelta, absolute, virtualDesktop);
-}
-
-void Engine::onMouseWheelVertical(int delta) { mouse->onWheelVertical(delta); }
-
-void Engine::onMouseWheelHorizontal(int delta) { mouse->onWheelHorizontal(delta); }
-
-std::mutex g_engineMouseLeftClickMutex;
-
-void Engine::onMouseLeftChange(bool mouseLeftDown) {
-    // async calls from WinRealTimeStylus must be protected
-    std::lock_guard<std::mutex> lk(g_engineMouseLeftClickMutex);
-
-    if(mouse->isLeftDown() !=
-       mouseLeftDown)  // necessary due to WinRealTimeStylus and Touch, would cause double clicks otherwise
-        mouse->onLeftChange(mouseLeftDown);
-}
-
-void Engine::onMouseMiddleChange(bool mouseMiddleDown) { mouse->onMiddleChange(mouseMiddleDown); }
-
-void Engine::onMouseRightChange(bool mouseRightDown) {
-    if(mouse->isRightDown() != mouseRightDown)  // necessary due to Touch, would cause double clicks otherwise
-        mouse->onRightChange(mouseRightDown);
-}
-
-void Engine::onMouseButton4Change(bool mouse4down) { mouse->onButton4Change(mouse4down); }
-
-void Engine::onMouseButton5Change(bool mouse5down) { mouse->onButton5Change(mouse5down); }
-
 void Engine::onKeyboardKeyDown(KEYCODE keyCode) {
     // hardcoded engine hotkeys
     {

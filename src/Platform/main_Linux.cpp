@@ -1,15 +1,18 @@
 #ifdef __linux__
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 #include "ConVar.h"
 #include "Engine.h"
 #include "LinuxEnvironment.h"
 #include "LinuxGLLegacyInterface.h"
+#include "XI2Handler.h"
 #include "Profiler.h"
 #include "Timing.h"
 #include "cbase.h"
+
+#include "Mouse.h"
 
 #define XLIB_ILLEGAL_ACCESS
 #include <X11/X.h>
@@ -30,6 +33,8 @@
 #define WINDOW_WIDTH_MIN 100
 #define WINDOW_HEIGHT_MIN 100
 
+namespace {  // static
+
 Engine *g_engine = NULL;
 LinuxEnvironment *g_environment = NULL;
 
@@ -38,8 +43,6 @@ bool g_bUpdate = true;
 bool g_bDraw = true;
 
 bool g_bHasFocus = false;  // for fps_max_background
-
-namespace {  // static
 
 Display *dpy;
 Window root;
@@ -60,58 +63,26 @@ int xi2opcode;
 //	Message loop  //
 //****************//
 
-void WndProc(int type) {
-    switch(type) {
+inline void WndProc() {
+    switch(xev.type) {
         case GenericEvent:
-            //debugLogF("Got GenericEvent, extension={:d}, xi2opcode={:d}\n", xev.xcookie.extension, xi2opcode);
-            if(xev.xcookie.extension == xi2opcode) {
-                XGetEventData(dpy, &xev.xcookie);
-
-                // get the XI2 event type directly from the cookie
-                int xi2EventType = xev.xcookie.evtype;
-                //debugLogF("XI2 event type: {:d} (XI_RawMotion={:d})\n", xi2EventType, XI_RawMotion);
-
-                switch(xi2EventType) {
-                    case XI_RawMotion: {
-                        auto *rawEvent = (XIRawEvent *)xev.xcookie.data;
-                        if(g_engine != NULL) {
-                            // extract relative movement from valuators
-                            double dx = 0, dy = 0;
-                            double *values = rawEvent->raw_values;
-                            int valueIndex = 0;
-
-                            if(rawEvent->valuators.mask_len > 0) {
-                                for(int i = 0; i < rawEvent->valuators.mask_len * 8; i++) {
-                                    if(XIMaskIsSet(rawEvent->valuators.mask, i)) {
-                                        if(i == 0)
-                                            dx = values[valueIndex];  // x axis
-                                        else if(i == 1)
-                                            dy = values[valueIndex];  // y axis
-                                        valueIndex++;
-                                    }
-                                }
-                            }
-                            //debugLogF("{:.4f}x{:.4f}\n", dx, dy);
-                            // XI2 raw motion is always relative movement
-                            g_engine->onMouseRawMove((float)dx, (float)dy, false, false);
-                        }
-                        break;
-                    }
-                }
-                XFreeEventData(dpy, &xev.xcookie);
+            if(g_environment && mouse && xev.xcookie.extension == xi2opcode) {
+                XI2Handler::handleGenericEvent(dpy, xev);
             }
             break;
-
         case MotionNotify:
             // update cached absolute position from regular motion events
             if(g_environment != NULL) {
-                g_environment->updateMousePos(xev.xmotion.x, xev.xmotion.y);
+                g_environment->updateMousePos(static_cast<float>(xev.xmotion.x), static_cast<float>(xev.xmotion.y));
             }
             break;
 
         case ConfigureNotify:
-            if(g_engine != NULL)
+            if(g_engine != NULL) {
                 g_engine->requestResolutionChange(Vector2(xev.xconfigure.width, xev.xconfigure.height));
+                // update scaling factors for absolute devices when window size changes
+                XI2Handler::updatePointerCache(dpy);
+            }
             break;
 
         case KeymapNotify:
@@ -146,7 +117,7 @@ void WndProc(int type) {
         // keyboard
         case KeyPress: {
             XKeyEvent *ke = &xev.xkey;
-            int key = XLookupKeysym(
+            unsigned long key = XLookupKeysym(
                 ke, /*(ke->state&ShiftMask) ? 1 : 0*/ 1);  // WARNING: these two must be the same (see below)
             // printf("X: keyPress = %i\n", key);
 
@@ -154,11 +125,11 @@ void WndProc(int type) {
                 g_engine->onKeyboardKeyDown(key);
             }
 
-            const int buffSize = 20;
-            char buf[buffSize];
+            constexpr int buffSize = 20;
+            std::array<char, buffSize> buf{};
             Status status = 0;
             KeySym keysym = 0;
-            int length = Xutf8LookupString(ic, (XKeyPressedEvent *)&xev.xkey, buf, buffSize, &keysym, &status);
+            int length = Xutf8LookupString(ic, (XKeyPressedEvent *)&xev.xkey, buf.data(), buffSize, &keysym, &status);
 
             if(length > 0) {
                 buf[buffSize - 1] = 0;
@@ -169,7 +140,7 @@ void WndProc(int type) {
 
         case KeyRelease: {
             XKeyEvent *ke = &xev.xkey;
-            int key = XLookupKeysym(
+            unsigned long key = XLookupKeysym(
                 ke, /*(ke->state & ShiftMask) ? 1 : 0*/ 1);  // WARNING: these two must be the same (see above)
             // printf("X: keyRelease = %i\n", key);
 
@@ -189,30 +160,30 @@ void WndProc(int type) {
 
         // mouse, also inject mouse 4 + 5 as keyboard keys
         case ButtonPress:
-            if(g_engine != NULL) {
+            if(g_engine != NULL && mouse != NULL) {
                 switch(xev.xbutton.button) {
                     case Button1:
-                        g_engine->onMouseLeftChange(true);
+                        mouse->onLeftChange(true);
                         break;
                     case Button2:
-                        g_engine->onMouseMiddleChange(true);
+                        mouse->onMiddleChange(true);
                         break;
                     case Button3:
-                        g_engine->onMouseRightChange(true);
+                        mouse->onRightChange(true);
                         break;
 
                     case Button4:  // = mouse wheel up
-                        g_engine->onMouseWheelVertical(120);
+                        mouse->onWheelVertical(120);
                         break;
                     case Button5:  // = mouse wheel down
-                        g_engine->onMouseWheelVertical(-120);
+                        mouse->onWheelVertical(-120);
                         break;
 
                     case 6:  // = mouse wheel left
-                        g_engine->onMouseWheelHorizontal(-120);
+                        mouse->onWheelHorizontal(-120);
                         break;
                     case 7:  // = mouse wheel right
-                        g_engine->onMouseWheelHorizontal(120);
+                        mouse->onWheelHorizontal(120);
                         break;
 
                     case 8:                                               // mouse 4 (backwards)
@@ -223,21 +194,23 @@ void WndProc(int type) {
                         g_engine->onKeyboardKeyDown(XK_Pointer_Button5);  // NOTE: abusing "dead vowels for universal
                                                                           // syllable entry", no idea what this key does
                         break;
+                    default:
+                        break;
                 }
             }
             break;
 
         case ButtonRelease:
-            if(g_engine != NULL) {
+            if(g_engine != NULL && mouse != NULL) {
                 switch(xev.xbutton.button) {
                     case Button1:
-                        g_engine->onMouseLeftChange(false);
+                        mouse->onLeftChange(false);
                         break;
                     case Button2:
-                        g_engine->onMouseMiddleChange(false);
+                        mouse->onMiddleChange(false);
                         break;
                     case Button3:
-                        g_engine->onMouseRightChange(false);
+                        mouse->onRightChange(false);
                         break;
 
                     case 8:                                             // mouse 4 (backwards)
@@ -248,6 +221,8 @@ void WndProc(int type) {
                         g_engine->onKeyboardKeyUp(XK_Pointer_Button5);  // NOTE: abusing "dead vowels for universal
                                                                         // syllable entry", no idea what this key does
                         break;
+                    default:
+                        break;
                 }
             }
             break;
@@ -256,6 +231,8 @@ void WndProc(int type) {
         case ClientMessage:
             if(g_engine != NULL) g_engine->onShutdown();
             g_bRunning = false;
+            break;
+        default:
             break;
     }
 }
@@ -271,20 +248,20 @@ int main(int argc, char *argv[]) {
     // We only do this if MCENGINE_DATA_DIR is set to its default value, since if it's changed,
     // the packager clearly wants the executable in a different location.
     if constexpr(ARRAY_SIZE(MCENGINE_DATA_DIR) == 3 && MCENGINE_DATA_DIR[0] == '.' && MCENGINE_DATA_DIR[1] == '/') {
-        char exe_path[PATH_MAX];
-        ssize_t exe_path_s = readlink("/proc/self/exe", exe_path, sizeof(exe_path) - 1);
+        std::array<char, PATH_MAX> exe_path{};
+        ssize_t exe_path_s = readlink("/proc/self/exe", exe_path.data(), exe_path.size() - 1);
         if(exe_path_s == -1) {
             perror("readlink");
             exit(1);
         }
         exe_path[exe_path_s] = '\0';
 
-        char *last_slash = strrchr(exe_path, '/');
+        char *last_slash = strrchr(exe_path.data(), '/');
         if(last_slash != NULL) {
             *last_slash = '\0';
         }
 
-        if(chdir(exe_path) != 0) {
+        if(chdir(exe_path.data()) != 0) {
             perror("chdir");
             exit(1);
         }
@@ -298,7 +275,7 @@ int main(int argc, char *argv[]) {
 
     // before we do anything, check if XInput is available (for raw mouse input, smooth horizontal & vertical mouse
     // wheel etc.)
-    int xi2firstEvent, xi2error;
+    int xi2firstEvent = -1, xi2error = -1;
     if(!XQueryExtension(dpy, "XInputExtension", &xi2opcode, &xi2firstEvent, &xi2error)) {
         printf("FATAL ERROR: XQueryExtension() XInput extension not available!\n\n");
         exit(1);
@@ -312,7 +289,8 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    //debugLogF("XI2 version: {:d}.{:d}, opcode: {:d}, XI_RawMotion: {:d}\n", ximajor, ximinor, xi2opcode, XI_RawMotion);
+    // debugLogF("XI2 version: {:d}.{:d}, opcode: {:d}, XI_RawMotion: {:d}\n", ximajor, ximinor, xi2opcode,
+    // XI_RawMotion);
 
     root = DefaultRootWindow(dpy);
 
@@ -328,6 +306,11 @@ int main(int argc, char *argv[]) {
     debugLogF("GLX Version: {}.{}\n", major, minor);
 
     XVisualInfo *vi = getVisualInfo(dpy);
+    if(!vi) {
+        printf("FATAL ERROR: Couldn't glXChooseVisual!\n\n");
+        exit(1);
+    }
+
     cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
 
     // set window attributes
@@ -339,6 +322,8 @@ int main(int argc, char *argv[]) {
     win = XCreateWindow(dpy, root, defaultScreen->width / 2 - WINDOW_WIDTH / 2,
                         defaultScreen->height / 2 - WINDOW_HEIGHT / 2, WINDOW_WIDTH, WINDOW_HEIGHT, 0, vi->depth,
                         InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
+
+    XFree(vi);
 
     // window resize limit
     XSizeHints *winSizeHints = XAllocSizeHints();
@@ -357,10 +342,9 @@ int main(int argc, char *argv[]) {
     XSetWMProtocols(dpy, win, &wm_delete_window, 1);
 
     // hint that compositing should be disabled (disable forced vsync)
-    const unsigned long shouldBypassCompositor = 1;
+    constexpr const unsigned char shouldBypassCompositor = 1;
     Atom _net_wm_bypass_compositor = XInternAtom(dpy, "_NET_WM_BYPASS_COMPOSITOR", false);
-    XChangeProperty(dpy, win, _net_wm_bypass_compositor, XA_CARDINAL, 32, PropModeReplace,
-                    (unsigned char *)&shouldBypassCompositor, 1);
+    XChangeProperty(dpy, win, _net_wm_bypass_compositor, XA_CARDINAL, 32, PropModeReplace, &shouldBypassCompositor, 1);
 
     // make window visible & set title
     XMapWindow(dpy, win);
@@ -384,28 +368,33 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
+    XSync(dpy, False);
+
+    // discover and cache pointer device information
+    XI2Handler::updatePointerCache(dpy);
+
     // set XInput event masks
-    XIEventMask masks[1];
-    unsigned char mask[(XI_LASTEVENT + 7) / 8];
-    memset(mask, 0, sizeof(mask));
+    XIEventMask mask;
+    std::array<unsigned char, XIMaskLen(XI_LASTEVENT)> mask_bits{};
 
-    XISetMask(mask, XI_RawMotion);
+    XISetMask(mask_bits.data(), XI_DeviceChanged);
+    XISetMask(mask_bits.data(), XI_RawMotion);
 
-    // use client pointer for raw input, instead of XIAllMasterDevices.
-    // otherwise, the implicit grab on clicks will not give any more events as long as the button is being pressed
-    int pointerDevId;
-    XIGetClientPointer(dpy, None, &pointerDevId);
+    // listen to all master devices to get proper source device information
+    // this allows us to distinguish between different input devices (mouse vs tablet)
+    XIGetClientPointer(dpy, None, &XI2Handler::clientPointerDevID);
 
-    masks[0].mask_len = sizeof(mask);
-    masks[0].mask = mask;
-    masks[0].deviceid = /*XIAllMasterDevices*/ pointerDevId;
+    mask.mask_len = mask_bits.size();
+    mask.mask = mask_bits.data();
+    mask.deviceid = XIAllMasterDevices;
 
     // and select it on the window
-    XISelectEvents(dpy, DefaultRootWindow(dpy), masks, 1);
-    XFlush(dpy);
+    XISelectEvents(dpy, DefaultRootWindow(dpy), &mask, 1);
 
     // get keyboard focus
     XSetICFocus(ic);
+
+    XSync(dpy, False);
 
     // create timers
     auto *frameTimer = new Timer();
@@ -436,7 +425,7 @@ int main(int argc, char *argv[]) {
             if(XFilterEvent(&xev, win))  // for keyboard chars
                 continue;
 
-            WndProc(xev.type);
+            WndProc();
         }
 
         // update
@@ -457,7 +446,7 @@ int main(int argc, char *argv[]) {
         const bool inBackground = /*g_bMinimized ||*/ !g_bHasFocus;
         if((!cv_fps_unlimited.getBool() && cv_fps_max.getInt() > 0) || inBackground) {
             double delayStart = frameTimer->getElapsedTime();
-            double delayTime;
+            double delayTime = 0;
             if(inBackground)
                 delayTime = (1.f / cv_fps_max_background.getFloat()) - frameTimer->getDelta();
             else
@@ -480,8 +469,6 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    bool isRestartScheduled = environment->isRestartScheduled();
-
     // release the engine
     SAFE_DELETE(g_engine);
 
@@ -491,21 +478,6 @@ int main(int argc, char *argv[]) {
 
     // unload GLX
     gladUnloadGLX();
-
-    // handle potential restart
-    if(isRestartScheduled) {
-        char buf[4096];
-        memset(buf, '\0', 4096);
-        if(readlink("/proc/self/exe", buf, 4095) != -1) {
-            if(fork() == 0) {
-                char *argv[] = {buf, 0};
-                char *envp[] = {0};
-                execve(buf, (char *const *)argv, (char *const *)envp);
-
-                // TODO: not finished yet, not working
-            }
-        }
-    }
 
     return 0;
 }

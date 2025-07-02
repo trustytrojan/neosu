@@ -21,8 +21,7 @@
 
 #include "Engine.h"
 #include "LinuxGLLegacyInterface.h"
-
-
+#include "XI2Handler.h"
 
 typedef struct {
     unsigned long flags;
@@ -91,8 +90,6 @@ LinuxEnvironment::LinuxEnvironment(Display *display, Window window) : Environmen
         const Vector2 windowSize = this->getWindowSize();
         LinuxEnvironment::vMonitors.emplace_back(0, 0, windowSize.x, windowSize.y);
     }
-
-    XIGetClientPointer(this->display, None, &this->iPointerDevID);
 }
 
 LinuxEnvironment::~LinuxEnvironment() { XFreeCursor(this->display, this->invisibleCursor); }
@@ -121,7 +118,7 @@ void LinuxEnvironment::shutdown() {
     ev.xclient.window = this->window;
     ev.xclient.message_type = XInternAtom(this->display, "WM_PROTOCOLS", True);
     ev.xclient.format = 32;
-    ev.xclient.data.l[0] = XInternAtom(this->display, "WM_DELETE_WINDOW", False);
+    ev.xclient.data.l[0] = static_cast<long>(XInternAtom(this->display, "WM_DELETE_WINDOW", False));
     ev.xclient.data.l[1] = CurrentTime;
 
     XSendEvent(this->display, this->window, false, NoEventMask, &ev);
@@ -250,7 +247,7 @@ std::vector<std::string> LinuxEnvironment::getFilesInFolder(std::string folder) 
     struct dirent **namelist{};
     int n = scandir(folder.c_str(), &namelist, getFilesInFolderFilter, alphasort);
     if(n < 0) {
-        /// debugLog("LinuxEnvironment::getFilesInFolder() error, scandir() returned %i!\n", n);
+        /// debugLog("error, scandir() returned %i!\n", n);
         return files;
     }
 
@@ -264,7 +261,7 @@ std::vector<std::string> LinuxEnvironment::getFilesInFolder(std::string folder) 
         int lstatret = lstat(fullName.c_str(), &stDirInfo);
         if(lstatret < 0) {
             // perror (name);
-            // debugLog("LinuxEnvironment::getFilesInFolder() error, lstat() returned %i!\n", lstatret);
+            // debugLog("error, lstat() returned %i!\n", lstatret);
             continue;
         }
 
@@ -281,7 +278,7 @@ std::vector<std::string> LinuxEnvironment::getFoldersInFolder(std::string folder
     struct dirent **namelist{};
     int n = scandir(folder.c_str(), &namelist, getFoldersInFolderFilter, winExplorerIshEntryComparator);
     if(n < 0) {
-        /// debugLog("LinuxEnvironment::getFilesInFolder() error, scandir() returned %i!\n", n);
+        /// debugLog("error, scandir() returned %i!\n", n);
         return folders;
     }
 
@@ -295,7 +292,7 @@ std::vector<std::string> LinuxEnvironment::getFoldersInFolder(std::string folder
         int lstatret = lstat(fullName.c_str(), &stDirInfo);
         if(lstatret < 0) {
             /// perror (name);
-            /// debugLog("LinuxEnvironment::getFilesInFolder() error, lstat() returned %i!\n", lstatret);
+            /// debugLog("error, lstat() returned %i!\n", lstatret);
             continue;
         }
 
@@ -647,7 +644,7 @@ bool LinuxEnvironment::isCursorVisible() { return this->bCursorVisible; }
 
 bool LinuxEnvironment::isCursorClipped() { return this->bCursorClipped; }
 
-Vector2 LinuxEnvironment::getMousePos() {
+Vector2d LinuxEnvironment::getMousePos() {
     if(!this->bMousePosValid) {
         // fallback to XIQueryPointer on first call or after focus events
         Window rootRet = 0, childRet = 0;
@@ -656,14 +653,14 @@ Vector2 LinuxEnvironment::getMousePos() {
         XIButtonState buttons;
         XIModifierState modifiers;
         XIGroupState group;
-        Bool result = XIQueryPointer(this->display, this->iPointerDevID, this->window, &rootRet, &childRet, &rootX,
-                                     &rootY, &childX, &childY, &buttons, &modifiers, &group);
+        Bool result = XIQueryPointer(this->display, XI2Handler::clientPointerDevID, this->window, &rootRet, &childRet,
+                                     &rootX, &rootY, &childX, &childY, &buttons, &modifiers, &group);
         if(result) {
-            this->vCachedMousePos = Vector2(childX, childY);
+            this->vCachedMousePos = Vector2d(childX, childY);
         } else {
             // pointer not on same screen as window, return cached position or (0,0)
             // this can happen during window switching or multi-monitor setups
-            this->vCachedMousePos = Vector2(0, 0);
+            this->vCachedMousePos = Vector2d(0, 0);
         }
         // free the dynamically allocated mask in buttons
         if(buttons.mask) {
@@ -722,8 +719,8 @@ void LinuxEnvironment::setCursorVisible(bool visible) {
     this->setCursorInt(visible ? this->mouseCursor : this->invisibleCursor);
 }
 
-void LinuxEnvironment::setMousePos(float x, float y) {
-    XIWarpPointer(this->display, this->iPointerDevID, None, this->window, 0, 0, 0, 0, x, y);
+void LinuxEnvironment::setMousePos(double x, double y) {
+    XIWarpPointer(this->display, XI2Handler::clientPointerDevID, None, this->window, 0, 0, 0, 0, x, y);
     // XFlush is usually sufficient, XSync forces unnecessary round-trip
     XFlush(this->display);
 
@@ -737,18 +734,14 @@ void LinuxEnvironment::setCursorClip(bool clip, McRect rect) {
         const unsigned int eventMask = ButtonPressMask | ButtonReleaseMask | PointerMotionMask | FocusChangeMask;
         this->bCursorClipped = (XGrabPointer(this->display, this->window, True, eventMask, GrabModeAsync, GrabModeAsync,
                                              this->window, None, CurrentTime) == GrabSuccess);
-
-        if(rect.getWidth() == 0 && rect.getHeight() == 0) {
-            this->cursorClip = McRect(0, 0, engine->getScreenWidth(), engine->getScreenHeight());
-        }
-
-        // TODO: custom rect (only fullscreen works atm)
+        // TODO: custom X11 clip rect
     } else {
         this->bCursorClipped = false;
 
         XUngrabPointer(this->display, CurrentTime);
         XSync(this->display, False);
     }
+    if (this->bCursorClipped) this->cursorClip = rect;
 }
 
 UString LinuxEnvironment::keyCodeToString(KEYCODE keyCode) {
@@ -773,7 +766,7 @@ Cursor LinuxEnvironment::makeBlankCursor() {
 
     blank = XCreateBitmapFromData(this->display, this->window, data, 1, 1);
     if(blank == None) {
-        debugLog("LinuxEnvironment::makeBlankCursor() fatal error, XCreateBitmapFromData() out of memory!\n");
+        debugLog("fatal error, XCreateBitmapFromData() out of memory!\n");
         return 0;
     }
     cursor = XCreatePixmapCursor(this->display, blank, blank, &dummy, &dummy, 0, 0);
@@ -848,7 +841,7 @@ bool LinuxEnvironment::requestSelectionContent(UString &selection_content, Atom 
         timeoutMs -= 4;
     } while(timeoutMs > 0);
 
-    debugLog("LinuxEnvironment::requestSelectionContent() : Timeout!\n");
+    debugLog(": Timeout!\n");
     return false;
 }
 
@@ -886,7 +879,7 @@ void LinuxEnvironment::handleSelectionRequest(XSelectionRequestEvent &evt) {
             ((Atom *)data)[1] = XA_STRING;
         }
     } else
-        debugLog("LinuxEnvironment::handleSelectionRequest() : Requested unsupported clipboard!\n");
+        debugLog(": Requested unsupported clipboard!\n");
 
     if(data) {
         const size_t MAX_REASONABLE_SELECTION_SIZE = 1000000;

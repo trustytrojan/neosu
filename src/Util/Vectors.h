@@ -113,6 +113,99 @@ inline std::ostream &operator<<(std::ostream &os, const Vector2 &vec) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// 2D vector (double)
+///////////////////////////////////////////////////////////////////////////////
+struct Vector2d : public glm::dvec2 {
+    using glm::dvec2::dvec2;
+    using glm::dvec2::operator=;
+    using glm::dvec2::operator[];
+
+    // ctors
+    Vector2d() : glm::dvec2(0.0, 0.0) {}
+    Vector2d(double x, double y) : glm::dvec2(x, y) {}
+    Vector2d(const glm::dvec2 &other) : glm::dvec2(other) {}
+
+    // utils functions
+    void zero() { *this = glm::dvec2(0.0); }
+    void set(double x, double y) { *this = glm::dvec2(x, y); }
+    [[nodiscard]] double length() const { return glm::length(static_cast<const glm::dvec2 &>(*this)); }
+    [[nodiscard]] double distance(const Vector2d &vec) const {
+        return glm::distance(static_cast<const glm::dvec2 &>(*this), static_cast<const glm::dvec2 &>(vec));
+    }
+    Vector2d &normalize() {
+        if(glm::length(static_cast<const glm::dvec2 &>(*this)) < VECTOR_NORMALIZE_EPSILON) return *this;
+        *this = glm::normalize(static_cast<const glm::dvec2 &>(*this));
+        return *this;
+    }
+    [[nodiscard]] double dot(const Vector2d &vec) const {
+        return glm::dot(static_cast<const glm::dvec2 &>(*this), static_cast<const glm::dvec2 &>(vec));
+    }
+    [[nodiscard]] bool equal(const Vector2d &vec, double e) const {
+        return glm::all(glm::lessThan(
+            glm::abs(static_cast<const glm::dvec2 &>(*this) - static_cast<const glm::dvec2 &>(vec)), glm::dvec2(e)));
+    }
+    Vector2d &nudge(const Vector2d &vec, double amount) {
+        glm::dvec2 dir = static_cast<const glm::dvec2 &>(*this) - static_cast<const glm::dvec2 &>(vec);
+        if(glm::length(dir) > VECTOR_NORMALIZE_EPSILON) {
+            dir = glm::normalize(dir);
+            *this += dir * amount;
+        }
+        return *this;
+    }
+
+    // operator overrides to avoid glm templating mess
+    Vector2d operator-() const { return {-x, -y}; }
+    Vector2d operator+(const Vector2d &rhs) const { return {x + rhs.x, y + rhs.y}; }
+    Vector2d operator-(const Vector2d &rhs) const { return {x - rhs.x, y - rhs.y}; }
+    Vector2d &operator+=(const Vector2d &rhs) {
+        x += rhs.x;
+        y += rhs.y;
+        return *this;
+    }
+    Vector2d &operator-=(const Vector2d &rhs) {
+        x -= rhs.x;
+        y -= rhs.y;
+        return *this;
+    }
+    Vector2d operator*(const double scale) const { return {x * scale, y * scale}; }
+    Vector2d operator*(const Vector2d &rhs) const { return {x * rhs.x, y * rhs.y}; }
+    Vector2d &operator*=(const double scale) {
+        x *= scale;
+        y *= scale;
+        return *this;
+    }
+    Vector2d &operator*=(const Vector2d &rhs) {
+        x *= rhs.x;
+        y *= rhs.y;
+        return *this;
+    }
+    Vector2d operator/(const double scale) const { return {x / scale, y / scale}; }
+    Vector2d &operator/=(const double scale) {
+        x /= scale;
+        y /= scale;
+        return *this;
+    }
+    bool operator==(const Vector2d &rhs) const { return (x == rhs.x) && (y == rhs.y); }
+    bool operator!=(const Vector2d &rhs) const { return (x != rhs.x) || (y != rhs.y); }
+
+    bool operator<(const Vector2d &rhs) const {
+        if(x < rhs.x) return true;
+        if(x > rhs.x) return false;
+        return y < rhs.y;
+    }
+
+    friend Vector2d operator*(const float a, const Vector2d vec);
+    friend std::ostream &operator<<(std::ostream &os, const Vector2d &vec);
+};
+
+inline Vector2d operator*(const float a, const Vector2d vec) { return {a * vec.x, a * vec.y}; }
+
+inline std::ostream &operator<<(std::ostream &os, const Vector2d &vec) {
+    os << "(" << vec.x << ", " << vec.y << ")";
+    return os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // 3D vector
 ///////////////////////////////////////////////////////////////////////////////
 struct Vector3 : public glm::vec3 {

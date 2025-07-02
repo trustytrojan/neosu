@@ -64,8 +64,6 @@
 #include "WinEnvironment.h"
 #endif
 
-
-
 Osu *osu = NULL;
 
 Vector2 Osu::g_vInternalResolution;
@@ -134,8 +132,13 @@ Osu::Osu() {
     cv_letterboxing.setCallback(fastdelegate::MakeDelegate(this, &Osu::onLetterboxingChange));
     cv_letterboxing_offset_x.setCallback(fastdelegate::MakeDelegate(this, &Osu::onLetterboxingOffsetChange));
     cv_letterboxing_offset_y.setCallback(fastdelegate::MakeDelegate(this, &Osu::onLetterboxingOffsetChange));
-    cv_confine_cursor_windowed.setCallback(fastdelegate::MakeDelegate(this, &Osu::onConfineCursorWindowedChange));
-    cv_confine_cursor_fullscreen.setCallback(fastdelegate::MakeDelegate(this, &Osu::onConfineCursorFullscreenChange));
+    cv_confine_cursor_windowed.setCallback(fastdelegate::MakeDelegate(this, &Osu::updateConfineCursor));
+    cv_confine_cursor_fullscreen.setCallback(fastdelegate::MakeDelegate(this, &Osu::updateConfineCursor));
+    cv_confine_cursor_never.setCallback(fastdelegate::MakeDelegate(this, &Osu::updateConfineCursor));
+    if constexpr(Env::cfg(OS::LINUX)) {
+        cv_mouse_raw_input.setCallback(fastdelegate::MakeDelegate(this, &Osu::onRawInputChange));
+        cv_mouse_sensitivity.setCallback(fastdelegate::MakeDelegate(this, &Osu::onSensitivityChange));
+    }
 
     // vars
     this->skin = NULL;
@@ -1633,7 +1636,7 @@ void Osu::updateMouseSettings() {
         if(cv_letterboxing.getBool()) {
             // special case for osu: since letterboxed raw input absolute to window should mean the 'game' window, and
             // not the 'engine' window, no offset scaling is necessary
-            if(cv_mouse_raw_input_absolute_to_window.getBool())
+            if(!Env::cfg(OS::LINUX) && cv_mouse_raw_input_absolute_to_window.getBool())
                 offset = -Vector2((engine->getScreenWidth() / 2 - g_vInternalResolution.x / 2),
                                   (engine->getScreenHeight() / 2 - g_vInternalResolution.y / 2));
             else
@@ -1922,22 +1925,43 @@ void Osu::updateCursorVisibility() {
     }
 }
 
+void Osu::onRawInputChange(UString /*old*/, UString newValue) {
+    bool newBool = newValue.toBool();
+    float sens = cv_mouse_sensitivity.getFloat();
+    if(!newBool && (sens < 0.999 || sens > 1.001)) {
+        cv_mouse_sensitivity.setValue(1.f, false);
+        if(this->notificationOverlay) this->notificationOverlay->addToast("Forced sensitivity to 1 for non-raw input.");
+    }
+}
+
+void Osu::onSensitivityChange(UString /*old*/, UString newValue) {
+    float newFloat = newValue.toFloat();
+    if(!cv_mouse_raw_input.getBool() && (newFloat < 0.999 || newFloat > 1.001)) {
+        cv_mouse_raw_input.setValue(true, false);
+        if(this->notificationOverlay)
+            this->notificationOverlay->addToast("Raw input is forced on for sensitivities != 1 on Linux.");
+    }
+}
+
 void Osu::updateConfineCursor() {
     if(cv_debug.getBool()) debugLog("Osu::updateConfineCursor()\n");
 
-    if((cv_confine_cursor_fullscreen.getBool() && env->isFullscreen()) ||
-       (cv_confine_cursor_windowed.getBool() && !env->isFullscreen()) ||
-       (this->isInPlayMode() && !this->pauseMenu->isVisible() && !this->getModAuto() && !this->getModAutopilot() &&
-        !this->getSelectedBeatmap()->is_watching && !bancho.is_spectating)) {
-        env->setCursorClip(true, McRect());
+    if(!cv_confine_cursor_never.getBool() &&
+       ((cv_confine_cursor_fullscreen.getBool() && env->isFullscreen()) ||
+        (cv_confine_cursor_windowed.getBool() && !env->isFullscreen()) ||
+        (this->isInPlayMode() && !this->pauseMenu->isVisible() && !this->getModAuto() && !this->getModAutopilot() &&
+         !this->getSelectedBeatmap()->is_watching && !bancho.is_spectating))) {
+        McRect clipWindow =
+            (cv_resolution_enabled.getBool() && cv_letterboxing.getBool())
+                ? McRect{static_cast<float>(-mouse->getOffset().x), static_cast<float>(-mouse->getOffset().y),
+                         g_vInternalResolution.x, g_vInternalResolution.y}
+                : McRect{0, 0, static_cast<float>(engine->getScreenWidth()),
+                         static_cast<float>(engine->getScreenHeight())};
+        env->setCursorClip(true, clipWindow);
     } else {
         env->setCursorClip(false, McRect());
     }
 }
-
-void Osu::onConfineCursorWindowedChange(UString oldValue, UString newValue) { this->updateConfineCursor(); }
-
-void Osu::onConfineCursorFullscreenChange(UString oldValue, UString newValue) { this->updateConfineCursor(); }
 
 void Osu::onKey1Change(bool pressed, bool isMouse) {
     int numKeys1Down = 0;

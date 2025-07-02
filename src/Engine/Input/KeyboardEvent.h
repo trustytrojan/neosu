@@ -8,28 +8,27 @@
 #ifndef KEYBOARDEVENT_H
 #define KEYBOARDEVENT_H
 
-typedef unsigned long KEYCODE;
+#include <cstdint>
+using KEYCODE = uint_fast16_t;
 
 class KeyboardEvent {
    public:
-    KeyboardEvent(KEYCODE keyCode);
+    KeyboardEvent(KEYCODE keyCode) : keyCode(keyCode) {}
 
-    void consume();
+    constexpr void consume() { this->bConsumed = true; }
 
     [[nodiscard]] inline bool isConsumed() const { return this->bConsumed; }
     [[nodiscard]] inline KEYCODE getKeyCode() const { return this->keyCode; }
     [[nodiscard]] inline KEYCODE getCharCode() const { return this->keyCode; }
 
-    bool operator==(const KEYCODE &rhs) const;
-    bool operator!=(const KEYCODE &rhs) const;
+    inline bool operator==(const KEYCODE &rhs) const { return this->keyCode == rhs; }
+    inline bool operator!=(const KEYCODE &rhs) const { return this->keyCode != rhs; }
+
+    explicit operator KEYCODE() const { return this->keyCode; }
 
    private:
     KEYCODE keyCode;
-    bool bConsumed;
+    bool bConsumed{false};
 };
-
-inline bool KeyboardEvent::operator==(const KEYCODE &rhs) const { return this->keyCode == rhs; }
-
-inline bool KeyboardEvent::operator!=(const KEYCODE &rhs) const { return this->keyCode != rhs; }
 
 #endif

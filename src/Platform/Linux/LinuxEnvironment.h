@@ -4,6 +4,9 @@
 
 #include <X11/X.h>
 #include <X11/Xlib.h>
+#include <X11/extensions/XInput2.h>
+
+#include <unordered_map>
 
 #include "Environment.h"
 
@@ -80,12 +83,12 @@ class LinuxEnvironment : public Environment {
     bool isCursorInWindow() override;
     bool isCursorVisible() override;
     bool isCursorClipped() override;
-    Vector2 getMousePos() override;
+    Vector2d getMousePos() override;
     McRect getCursorClip() override;
     CURSORTYPE getCursor() override;
     void setCursor(CURSORTYPE cur) override;
     void setCursorVisible(bool visible) override;
-    void setMousePos(float x, float y) override;
+    void setMousePos(double x, double y) override;
     void setCursorClip(bool clip, McRect rect) override;
 
     // keyboard
@@ -96,8 +99,8 @@ class LinuxEnvironment : public Environment {
     [[nodiscard]] inline Window getWindow() const { return this->window; }
     [[nodiscard]] inline bool isRestartScheduled() const { return this->bIsRestartScheduled; }
 
-    inline void updateMousePos(float x, float y) {
-        this->vCachedMousePos = Vector2(x, y);
+    inline void updateMousePos(double x, double y) {
+        this->vCachedMousePos = Vector2d(x, y);
         this->bMousePosValid = true;
     }
     inline void invalidateMousePos() { this->bMousePosValid = false; }
@@ -144,10 +147,8 @@ class LinuxEnvironment : public Environment {
     Cursor mouseCursor;
     Cursor invisibleCursor;
     CURSORTYPE cursorType;
-    Vector2 vCachedMousePos;
+    Vector2d vCachedMousePos;
     bool bMousePosValid;
-
-    int iPointerDevID;
 
     // clipboard
     UString sLocalClipboardContent;

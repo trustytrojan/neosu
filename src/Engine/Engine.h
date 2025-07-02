@@ -51,16 +51,6 @@ class Engine {
     void onDPIChange();
     void onShutdown();
 
-    // primary mouse messages
-    void onMouseRawMove(float xDelta, float yDelta, bool absolute = false, bool virtualDesktop = false);
-    void onMouseWheelVertical(int delta);
-    void onMouseWheelHorizontal(int delta);
-    void onMouseLeftChange(bool mouseLeftDown);
-    void onMouseMiddleChange(bool mouseMiddleDown);
-    void onMouseRightChange(bool mouseRightDown);
-    void onMouseButton4Change(bool mouse4down);
-    void onMouseButton5Change(bool mouse5down);
-
     // primary keyboard messages
     void onKeyboardKeyDown(KEYCODE keyCode);
     void onKeyboardKeyUp(KEYCODE keyCode);
@@ -100,27 +90,27 @@ class Engine {
 
     // screen
     void requestResolutionChange(Vector2 newResolution);
-    [[nodiscard]] inline Vector2 getScreenSize() const { return this->vScreenSize; }
-    [[nodiscard]] inline int getScreenWidth() const { return (int)this->vScreenSize.x; }
-    [[nodiscard]] inline int getScreenHeight() const { return (int)this->vScreenSize.y; }
+    [[nodiscard]] constexpr Vector2 getScreenSize() const { return this->vScreenSize; }
+    [[nodiscard]] constexpr int getScreenWidth() const { return (int)this->vScreenSize.x; }
+    [[nodiscard]] constexpr int getScreenHeight() const { return (int)this->vScreenSize.y; }
 
     // vars
     void setFrameTime(double delta);
-    [[nodiscard]] inline double getTime() const { return this->dTime; }
+    [[nodiscard]] constexpr double getTime() const { return this->dTime; }
     double getTimeReal();
-    [[nodiscard]] inline double getTimeRunning() const { return this->dRunTime; }
-    [[nodiscard]] inline double getFrameTime() const { return this->dFrameTime; }
-    [[nodiscard]] inline unsigned long getFrameCount() const { return this->iFrameCount; }
+    [[nodiscard]] constexpr double getTimeRunning() const { return this->dRunTime; }
+    [[nodiscard]] constexpr double getFrameTime() const { return this->dFrameTime; }
+    [[nodiscard]] constexpr unsigned long getFrameCount() const { return this->iFrameCount; }
 
-    [[nodiscard]] inline bool hasFocus() const { return this->bHasFocus; }
-    [[nodiscard]] inline bool isDrawing() const { return this->bDrawing; }
-    [[nodiscard]] inline bool isMinimized() const { return this->bIsMinimized; }
+    [[nodiscard]] constexpr bool hasFocus() const { return this->bHasFocus; }
+    [[nodiscard]] constexpr bool isDrawing() const { return this->bDrawing; }
+    [[nodiscard]] constexpr bool isMinimized() const { return this->bIsMinimized; }
 
     // debugging/console
     void setConsole(Console *console) { this->console = console; }
-    [[nodiscard]] inline ConsoleBox *getConsoleBox() const { return this->consoleBox; }
-    [[nodiscard]] inline Console *getConsole() const { return this->console; }
-    [[nodiscard]] inline CBaseUIContainer *getGUI() const { return this->guiContainer; }
+    [[nodiscard]] constexpr ConsoleBox *getConsoleBox() const { return this->consoleBox; }
+    [[nodiscard]] constexpr Console *getConsole() const { return this->console; }
+    [[nodiscard]] constexpr CBaseUIContainer *getGUI() const { return this->guiContainer; }
 
     // input devices
     std::vector<Mouse *> mice;

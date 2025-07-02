@@ -43,8 +43,6 @@
 #include "UISearchOverlay.h"
 #include "UISlider.h"
 
-
-
 class OptionsMenuSkinPreviewElement : public CBaseUIElement {
    public:
     OptionsMenuSkinPreviewElement(float xPos, float yPos, float xSize, float ySize, UString name)
@@ -846,7 +844,7 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     }
     if constexpr(Env::cfg(OS::WINDOWS | OS::LINUX)) {
         this->addCheckbox("Raw Input", &cv_mouse_raw_input);
-        if constexpr(Env::cfg(OS::LINUX)) {
+        if constexpr(Env::cfg(OS::WINDOWS)) {
             this->addCheckbox("[Beta] RawInputBuffer",
                               "Improves performance problems caused by insane mouse usb polling rates above 1000 "
                               "Hz.\nOnly relevant if \"Raw Input\" is enabled, or if in FPoSu mode (with disabled "
@@ -864,29 +862,29 @@ OptionsMenu::OptionsMenu() : ScreenBackable() {
     // }
     this->addCheckbox("Confine Cursor (Windowed)", &cv_confine_cursor_windowed);
     this->addCheckbox("Confine Cursor (Fullscreen)", &cv_confine_cursor_fullscreen);
+    this->addCheckbox("Confine Cursor (NEVER)", "Overrides automatic cursor clipping during gameplay.",
+                      &cv_confine_cursor_never);
     this->addCheckbox("Disable Mouse Wheel in Play Mode", &cv_disable_mousewheel);
     this->addCheckbox("Disable Mouse Buttons in Play Mode", &cv_disable_mousebuttons);
     this->addCheckbox("Cursor ripples", "The cursor will ripple outwards on clicking.", &cv_draw_cursor_ripples);
 
     if constexpr(Env::cfg(OS::WINDOWS)) {
+        this->addSubSection("Tablet");
 #ifndef MCENGINE_FEATURE_SDL
 
-        this->addSubSection("Tablet");
-        this->addCheckbox(
-            "OS TabletPC Support (!)",
-            "WARNING: Windows 10 may break raw mouse input if this is enabled!\nWARNING: Do not enable this with a "
-            "mouse (will break right click)!\nEnable this if your tablet clicks aren't handled correctly.",
-            &cv_win_realtimestylus);
-        this->addCheckbox(
-            "Windows Ink Workaround",
-            "Enable this if your tablet cursor is stuck in a tiny area on the top left of the screen.\nIf this "
-            "doesn't fix it, use \"Ignore Sensitivity & Raw Input\" below.",
-            &cv_win_ink_workaround);
+            this->addCheckbox(
+                "OS TabletPC Support (!)",
+                "WARNING: Windows 10 may break raw mouse input if this is enabled!\nWARNING: Do not enable this with a "
+                "mouse (will break right click)!\nEnable this if your tablet clicks aren't handled correctly.",
+                &cv_win_realtimestylus);
+            this->addCheckbox(
+                "Windows Ink Workaround",
+                "Enable this if your tablet cursor is stuck in a tiny area on the top left of the screen.\nIf this "
+                "doesn't fix it, use \"Ignore Raw Input/Sensitivity\" below.",
+                &cv_win_ink_workaround);
 #endif
-    }
-    if constexpr(Env::cfg(OS::WINDOWS | OS::LINUX)) {
         this->addCheckbox(
-            "Ignore Sensitivity & Raw Input",
+            "Ignore Raw Input/Sensitivity",
             "Only use this if nothing else works.\nIf this is enabled, then the in-game sensitivity slider "
             "will no longer work for tablets!\n(You can then instead use your tablet configuration software to "
             "change the tablet area.)",

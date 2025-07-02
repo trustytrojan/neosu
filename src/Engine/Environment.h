@@ -87,12 +87,12 @@ class Environment {
     virtual bool isCursorInWindow() = 0;
     virtual bool isCursorVisible() = 0;
     virtual bool isCursorClipped() = 0;
-    virtual Vector2 getMousePos() = 0;
+    virtual Vector2d getMousePos() = 0;
     virtual McRect getCursorClip() = 0;
     virtual CURSORTYPE getCursor() = 0;
     virtual void setCursor(CURSORTYPE cur) = 0;
     virtual void setCursorVisible(bool visible) = 0;
-    virtual void setMousePos(float x, float y) = 0;
+    virtual void setMousePos(double x, double y) = 0;
     virtual void setCursorClip(bool clip, McRect rect) = 0;
 
     // keyboard

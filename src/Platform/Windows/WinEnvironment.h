@@ -84,12 +84,12 @@ class WinEnvironment : public Environment {
     bool isCursorInWindow();
     bool isCursorVisible();
     bool isCursorClipped();
-    Vector2 getMousePos();
+    Vector2d getMousePos();
     McRect getCursorClip();
     CURSORTYPE getCursor();
     void setCursor(CURSORTYPE cur);
     void setCursorVisible(bool visible);
-    void setMousePos(float x, float y);
+    void setMousePos(double x, double y);
     void setCursorClip(bool clip, McRect rect);
 
     // keyboard

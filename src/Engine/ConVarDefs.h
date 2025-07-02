@@ -237,6 +237,7 @@ CONVAR(cv_compensate_music_speed,
     "compensates speeds slower than 1x a little bit, by adding an offset depending on the slowness");
 CONVAR(cv_confine_cursor_fullscreen, "osu_confine_cursor_fullscreen", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(cv_confine_cursor_windowed, "osu_confine_cursor_windowed", false, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(cv_confine_cursor_never, "osu_confine_cursor_never", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(cv_console_logging, "console_logging", true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(cv_console_overlay, "console_overlay", false, FCVAR_BANCHO_COMPATIBLE,
                           "should the log overlay always be visible (or only if the console is out)");
@@ -825,7 +826,7 @@ CONVAR(cv_monitor, "monitor", 0, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE,
                   "monitor/display device to switch to, 0 = primary monitor", _monitor);
 CONVAR(cv_mouse_fakelag, "mouse_fakelag", 0.000f, FCVAR_BANCHO_COMPATIBLE,
                         "delay all mouse movement by this many seconds (e.g. 0.1 = 100 ms delay)");
-CONVAR(cv_mouse_raw_input, "mouse_raw_input", false, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(cv_mouse_raw_input, "mouse_raw_input", Env::cfg(OS::WINDOWS) ? false : true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(cv_mouse_raw_input_absolute_to_window, "mouse_raw_input_absolute_to_window", false, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(cv_mouse_sensitivity, "mouse_sensitivity", 1.0f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(cv_mp_autologin, "mp_autologin", false, FCVAR_BANCHO_COMPATIBLE | FCVAR_PRIVATE);
@@ -1121,7 +1122,7 @@ CONVAR(cv_songbrowser_sortingtype, "osu_songbrowser_sortingtype", "By Date Added
 CONVAR(cv_songbrowser_thumbnail_delay, "osu_songbrowser_thumbnail_delay", 0.1f, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(cv_songbrowser_thumbnail_fade_in_duration, "osu_songbrowser_thumbnail_fade_in_duration", 0.1f,
                                                  FCVAR_BANCHO_COMPATIBLE);
-CONVAR(cv_sort_skins_by_name, "sort_skins_by_name", false, FCVAR_BANCHO_COMPATIBLE, "set to true to sort skins alphabetically");
+CONVAR(cv_sort_skins_by_name, "sort_skins_by_name", Env::cfg(OS::LINUX) ? false : true, FCVAR_BANCHO_COMPATIBLE, "set to true to sort skins alphabetically");
 CONVAR(cv_sound_panning, "osu_sound_panning", true, FCVAR_BANCHO_COMPATIBLE,
                         "positional hitsound audio depending on the playfield position");
 CONVAR(cv_sound_panning_multiplier, "osu_sound_panning_multiplier", 1.0f, FCVAR_BANCHO_COMPATIBLE,
@@ -1149,7 +1150,7 @@ CONVAR(cv_start_first_main_menu_song_at_preview_point, "start_first_main_menu_so
                                                       FCVAR_BANCHO_COMPATIBLE);
 CONVAR(cv_submit_after_pause, "submit_after_pause", true, FCVAR_BANCHO_COMPATIBLE | FCVAR_GAMEPLAY);
 CONVAR(cv_submit_scores, "submit_scores", false, FCVAR_BANCHO_COMPATIBLE);
-CONVAR(cv_tablet_sensitivity_ignore, "tablet_sensitivity_ignore", false, FCVAR_BANCHO_COMPATIBLE);
+CONVAR(cv_tablet_sensitivity_ignore, "tablet_sensitivity_ignore", Env::cfg(OS::WINDOWS) ? false : true, FCVAR_BANCHO_COMPATIBLE);
 CONVAR(cv_timingpoints_force, "osu_timingpoints_force", true, FCVAR_BANCHO_COMPATIBLE,
                              "Forces the correct sample type and volume to be used, by getting the active timingpoint "
                              "through iteration EVERY TIME a hitsound is played (performance!)");
